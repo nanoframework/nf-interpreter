@@ -88,35 +88,36 @@ int Library_corlib_native_System_Number::DoPrintfOnDataType(char *buffer, char *
     switch (dataType)
     {
         case DATATYPE_I1:
-            ret = snprintf(buffer, FORMAT_RESULT_BUFFER_SIZE, formatStr, value->NumericByRef().s1);
+            ret = (int)snprintf(buffer, FORMAT_RESULT_BUFFER_SIZE, formatStr, value->NumericByRef().s1);
             break;
         case DATATYPE_U1:
-            ret = snprintf(buffer, FORMAT_RESULT_BUFFER_SIZE, formatStr, value->NumericByRef().u1);
+            ret = (int)snprintf(buffer, FORMAT_RESULT_BUFFER_SIZE, formatStr, value->NumericByRef().u1);
             break;
         case DATATYPE_I2:
-            ret = snprintf(buffer, FORMAT_RESULT_BUFFER_SIZE, formatStr, value->NumericByRef().s2);
+            ret = (int)snprintf(buffer, FORMAT_RESULT_BUFFER_SIZE, formatStr, value->NumericByRef().s2);
             break;
         case DATATYPE_U2:
-            ret = snprintf(buffer, FORMAT_RESULT_BUFFER_SIZE, formatStr, value->NumericByRef().u2);
+            ret = (int)snprintf(buffer, FORMAT_RESULT_BUFFER_SIZE, formatStr, value->NumericByRef().u2);
             break;
         case DATATYPE_I4:
-            ret = snprintf(buffer, FORMAT_RESULT_BUFFER_SIZE, formatStr, value->NumericByRef().s4);
+            ret = (int)snprintf(buffer, FORMAT_RESULT_BUFFER_SIZE, formatStr, value->NumericByRef().s4);
             break;
         case DATATYPE_U4:
-            ret = snprintf(buffer, FORMAT_RESULT_BUFFER_SIZE, formatStr, value->NumericByRef().u4);
+            ret = (int)snprintf(buffer, FORMAT_RESULT_BUFFER_SIZE, formatStr, value->NumericByRef().u4);
             break;
         case DATATYPE_I8:
-            ret = snprintf(buffer, FORMAT_RESULT_BUFFER_SIZE, formatStr, (CLR_INT64_TEMP_CAST)value->NumericByRef().s8);
+            ret = (int)(int)
+                snprintf(buffer, FORMAT_RESULT_BUFFER_SIZE, formatStr, (CLR_INT64_TEMP_CAST)value->NumericByRef().s8);
             break;
         case DATATYPE_U8:
-            ret =
+            ret = (int)
                 snprintf(buffer, FORMAT_RESULT_BUFFER_SIZE, formatStr, (CLR_UINT64_TEMP_CAST)value->NumericByRef().u8);
             break;
         case DATATYPE_R4:
-            ret = snprintf(buffer, FORMAT_RESULT_BUFFER_SIZE, formatStr, value->NumericByRef().r4);
+            ret = (int)snprintf(buffer, FORMAT_RESULT_BUFFER_SIZE, formatStr, value->NumericByRef().r4);
             break;
         case DATATYPE_R8:
-            ret =
+            ret = (int)
                 snprintf(buffer, FORMAT_RESULT_BUFFER_SIZE, formatStr, (CLR_DOUBLE_TEMP_CAST)value->NumericByRef().r8);
             break;
         default:
@@ -125,7 +126,9 @@ int Library_corlib_native_System_Number::DoPrintfOnDataType(char *buffer, char *
 
     // assure string valid even in cases when nothing was written
     if (ret >= 0)
+    {
         buffer[ret] = 0;
+    }
 
     return ret;
 }
@@ -550,11 +553,11 @@ int Library_corlib_native_System_Number::Format_G(
 
                     if (formatChar == 'g')
                     {
-                        ret += snprintf(&buffer[ret], FORMAT_RESULT_BUFFER_SIZE - ret, "e%+.2d", exponent);
+                        ret += (int)snprintf(&buffer[ret], FORMAT_RESULT_BUFFER_SIZE - ret, "e%+.2d", exponent);
                     }
                     else
                     {
-                        ret += snprintf(&buffer[ret], FORMAT_RESULT_BUFFER_SIZE - ret, "E%+.2d", exponent);
+                        ret += (int)snprintf(&buffer[ret], FORMAT_RESULT_BUFFER_SIZE - ret, "E%+.2d", exponent);
                     }
                 }
             }
@@ -845,7 +848,7 @@ int Library_corlib_native_System_Number::Format_E(char *buffer, CLR_RT_HeapBlock
 
     snprintf(formatStr, FORMAT_FMTSTR_BUFFER_SIZE, "%%.%d%c", precision, formatChar);
 
-    ret = snprintf(buffer, FORMAT_RESULT_BUFFER_SIZE, formatStr, copyValue);
+    ret = (int)snprintf(buffer, FORMAT_RESULT_BUFFER_SIZE, formatStr, copyValue);
 
     if (ret > 0)
     {
@@ -938,8 +941,6 @@ HRESULT Library_corlib_native_System_Number::
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
 
-    char *ret;
-
     CLR_RT_HeapBlock *value;
     bool isInteger;
     char *format;
@@ -971,34 +972,33 @@ HRESULT Library_corlib_native_System_Number::
 
     if (!GetFormatSpec(format, isInteger, &formatChar, &precision))
     {
-        ret = format;
+        NANOCLR_SET_AND_LEAVE(stack.SetResult_String(format));
     }
     else
     {
-        char result[FORMAT_RESULT_BUFFER_SIZE];
-
+        char resultType[FORMAT_RESULT_BUFFER_SIZE];
         int resultLength;
         switch (formatChar)
         {
             case 'g':
             case 'G':
-                resultLength = Format_G(result, value, formatChar, precision, negativeSign, numberDecimalSeparator);
+                resultLength = Format_G(resultType, value, formatChar, precision, negativeSign, numberDecimalSeparator);
                 break;
 
             case 'x':
             case 'X':
-                resultLength = Format_X(result, value, formatChar, precision);
+                resultLength = Format_X(resultType, value, formatChar, precision);
                 break;
 
             case 'f':
             case 'F':
-                resultLength = Format_F(result, value, precision, negativeSign, numberDecimalSeparator);
+                resultLength = Format_F(resultType, value, precision, negativeSign, numberDecimalSeparator);
                 break;
 
             case 'n':
             case 'N':
                 resultLength = Format_N(
-                    result,
+                    resultType,
                     value,
                     precision,
                     negativeSign,
@@ -1009,12 +1009,12 @@ HRESULT Library_corlib_native_System_Number::
 
             case 'd':
             case 'D':
-                resultLength = Format_D(result, value, precision, negativeSign, numberDecimalSeparator);
+                resultLength = Format_D(resultType, value, precision, negativeSign, numberDecimalSeparator);
                 break;
 
             case 'e':
             case 'E':
-                resultLength = Format_E(result, value, precision, formatChar);
+                resultLength = Format_E(resultType, value, precision, formatChar);
                 break;
 
             default:
@@ -1023,7 +1023,7 @@ HRESULT Library_corlib_native_System_Number::
 
         if (resultLength > 0)
         {
-            ret = result;
+            NANOCLR_SET_AND_LEAVE(stack.SetResult_String(resultType));
         }
         else
         {
@@ -1031,6 +1031,5 @@ HRESULT Library_corlib_native_System_Number::
         }
     }
 
-    NANOCLR_SET_AND_LEAVE(stack.SetResult_String(ret));
     NANOCLR_NOCLEANUP();
 }

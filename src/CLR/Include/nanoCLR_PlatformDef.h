@@ -34,10 +34,10 @@
 #if defined(DEBUG) || defined(_DEBUG)
 #define NANOCLR_TRACE_STACK // enables rich eval stack tracing
 #endif
-//#define TINYCLR_TRACE_INSTRUCTIONS 1    // enables tracing of instructions execution
-//#define NANOCLR_TRACE_HRESULT        // enable tracing of HRESULTS from interop libraries
-// enable tracing of type resolution
-// #define NANOCLR_TRACE_TYPE_RESOLUTION 1
+// #define TINYCLR_TRACE_INSTRUCTIONS 1    // enables tracing of instructions execution
+// #define NANOCLR_TRACE_HRESULT        // enable tracing of HRESULTS from interop libraries
+// #define NANOCLR_TRACE_PROFILER_MESSAGES  // enable tracing of profiler messages
+// #define NANOCLR_FORCE_PROFILER_EXECUTION // force Profiler execution
 
 //-o-//-o-//-o-//-o-//-o-//-o-//
 // PLATFORMS
@@ -73,11 +73,11 @@
 #define NANOCLR_PROFILE_NEW_ALLOCATIONS
 #if defined(DEBUG) || defined(_DEBUG)
 #define NANOCLR_VALIDATE_HEAP NANOCLR_VALIDATE_HEAP_2_DblLinkedList
-//#define NANOCLR_TRACE_MALLOC
+// #define NANOCLR_TRACE_MALLOC
 #define NANOCLR_FILL_MEMORY_WITH_DIRTY_PATTERN
 #define NANOCLR_TRACE_EARLYCOLLECTION
 #define NANOCLR_DELEGATE_PRESERVE_STACK
-//#define NANOCLR_VALIDATE_APPDOMAIN_ISOLATION
+// #define NANOCLR_VALIDATE_APPDOMAIN_ISOLATION
 #define NANOCLR_TRACE_HRESULT // enable tracing of HRESULTS from interop libraries
 #else                         // RELEASE
 #define NANOCLR_VALIDATE_HEAP NANOCLR_VALIDATE_HEAP_0_None
@@ -137,6 +137,10 @@
 
 #if defined(NANOCLR_PROFILE_NEW_ALLOCATIONS) && !defined(NANOCLR_PROFILE_NEW)
 #define NANOCLR_PROFILE_NEW
+#endif
+
+#if defined(NANOCLR_FORCE_PROFILER_EXECUTION) && !defined(NANOCLR_PROFILE_NEW)
+#undef NANOCLR_FORCE_PROFILER_EXECUTION
 #endif
 
 //-o-//-o-//-o-//-o-//-o-//-o-//
@@ -202,8 +206,6 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // INCLUDES
 #if defined(_WIN32)
-
-#define _WIN32_WINNT 0x0501
 
 // Unsafe string functions be avoided, but there isn't a safe crt for the arm, so
 // a bunch of macros, cleanup code needs to be done first

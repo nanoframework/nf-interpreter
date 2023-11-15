@@ -116,48 +116,48 @@ reporting.
 
 class CLR_PRF_CMDS
 {
-    public:
-    static const CLR_UINT32 c_Profiling_Timestamp            = 0x01;
-    static const CLR_UINT32 c_Profiling_Memory_Layout        = 0x02;
+  public:
+    static const CLR_UINT32 c_Profiling_Timestamp = 0x01;
+    static const CLR_UINT32 c_Profiling_Memory_Layout = 0x02;
 
-    static const CLR_UINT32 c_Profiling_HeapDump_Start       = 0x03;
-    static const CLR_UINT32 c_Profiling_HeapDump_Root        = 0x04;
-    static const CLR_UINT32 c_Profiling_HeapDump_Object      = 0x05;
-    static const CLR_UINT32 c_Profiling_HeapDump_Stop        = 0x06;
+    static const CLR_UINT32 c_Profiling_HeapDump_Start = 0x03;
+    static const CLR_UINT32 c_Profiling_HeapDump_Root = 0x04;
+    static const CLR_UINT32 c_Profiling_HeapDump_Object = 0x05;
+    static const CLR_UINT32 c_Profiling_HeapDump_Stop = 0x06;
 
-    static const CLR_UINT32 c_Profiling_Calls_Call           = 0x07;
-    static const CLR_UINT32 c_Profiling_Calls_Return         = 0x08;
-    static const CLR_UINT32 c_Profiling_Calls_CtxSwitch      = 0x09;
+    static const CLR_UINT32 c_Profiling_Calls_Call = 0x07;
+    static const CLR_UINT32 c_Profiling_Calls_Return = 0x08;
+    static const CLR_UINT32 c_Profiling_Calls_CtxSwitch = 0x09;
 
-    static const CLR_UINT32 c_Profiling_Allocs_Alloc         = 0x0a;
-    static const CLR_UINT32 c_Profiling_Allocs_Relloc        = 0x0b;
-    static const CLR_UINT32 c_Profiling_Allocs_Delete        = 0x0c;
+    static const CLR_UINT32 c_Profiling_Allocs_Alloc = 0x0a;
+    static const CLR_UINT32 c_Profiling_Allocs_Relloc = 0x0b;
+    static const CLR_UINT32 c_Profiling_Allocs_Delete = 0x0c;
 
     static const CLR_UINT32 c_Profiling_GarbageCollect_Begin = 0x0d;
-    static const CLR_UINT32 c_Profiling_GarbageCollect_End   = 0x0e;
+    static const CLR_UINT32 c_Profiling_GarbageCollect_End = 0x0e;
 
-    static const CLR_UINT32 c_Profiling_HeapCompact_Begin    = 0x0f;
-    static const CLR_UINT32 c_Profiling_HeapCompact_End      = 0x10;
+    static const CLR_UINT32 c_Profiling_HeapCompact_Begin = 0x0f;
+    static const CLR_UINT32 c_Profiling_HeapCompact_End = 0x10;
 
     class Bits
     {
-    public:
-        static const CLR_UINT32 CommandHeader       = 8;
-        static const CLR_UINT32 DataType            = 8;
-        static const CLR_UINT32 NibbleCount         = 3;
-        static const CLR_UINT32 RootTypes           = 3;
-        static const CLR_UINT32 TimestampShift      = 8;
-        static const CLR_UINT32 CallTimingShift     = 4;
+      public:
+        static const CLR_UINT32 CommandHeader = 8;
+        static const CLR_UINT32 DataType = 8;
+        static const CLR_UINT32 NibbleCount = 3;
+        static const CLR_UINT32 RootTypes = 3;
+        static const CLR_UINT32 TimestampShift = 8;
+        static const CLR_UINT32 CallTimingShift = 4;
     };
 
     class RootTypes
     {
-        public:
+      public:
         static const CLR_UINT32 Root_Finalizer = 0x01;
         static const CLR_UINT32 Root_AppDomain = 0x02;
-        static const CLR_UINT32 Root_Assembly  = 0x03;
-        static const CLR_UINT32 Root_Thread    = 0x04;
-        static const CLR_UINT32 Root_Stack     = 0x05;
+        static const CLR_UINT32 Root_Assembly = 0x03;
+        static const CLR_UINT32 Root_Thread = 0x04;
+        static const CLR_UINT32 Root_Stack = 0x05;
     };
 };
 
@@ -214,12 +214,12 @@ struct CLR_PRF_Profiler
     CLR_UINT32 m_lastTimestamp;
     CLR_INDEX m_currentAssembly;
     int m_currentThreadPID;
+    bool m_initialized;
 };
 
 extern CLR_PRF_Profiler g_CLR_PRF_Profiler;
 
+#endif // defined(NANOCLR_PROFILE_NEW)
 // clang-format on
 
-#endif //defined(NANOCLR_PROFILE_NEW)
 #endif // NANOCLR_PROFILING_H
-

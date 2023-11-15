@@ -404,7 +404,7 @@ void ClrStartup(CLR_SETTINGS params)
                 CLR_Debug::Printf("Ready.\r\n");
 #endif
 
-                (void)g_CLR_RT_ExecutionEngine.Execute(nullptr, params.MaxContextSwitches);
+                hr = g_CLR_RT_ExecutionEngine.Execute(NULL, params.MaxContextSwitches);
 
 #if !defined(BUILD_RTM)
                 CLR_Debug::Printf("Done.\r\n");
@@ -435,17 +435,18 @@ void ClrStartup(CLR_SETTINGS params)
                     // no proprietary bootloader available, launch nanoBooter
 
 #if (TARGET_HAS_NANOBOOTER == TRUE)
-                    RequestToLaunchNanoBooter();
+
+                    RequestToLaunchNanoBooter(hr);
                     CPU_Reset();
 #endif // TARGET_HAS_NANOBOOTER
                 }
             }
-#else
+#endif
+
             if (params.EnterDebuggerLoopAfterExit)
             {
                 CLR_DBG_Debugger::Debugger_WaitForCommands();
             }
-#endif
         }
 
         // DO NOT USE 'ELSE IF' here because the state can change in Debugger_WaitForCommands() call

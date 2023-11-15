@@ -18,13 +18,7 @@ void CLR_RT_HeapCluster::HeapCluster_Initialize(CLR_UINT32 size, CLR_UINT32 bloc
     m_payloadStart = (CLR_RT_HeapBlock_Node *)&this[1]; // CLR_RT_HeapBlock_Node*  m_payloadStart;
     m_payloadEnd = &m_payloadStart[size];               // CLR_RT_HeapBlock_Node*  m_payloadEnd;
 
-    //
-    // Scan memory looking for possible objects to salvage.  This method returns false if HeapPersistence is stubbed
-    // which requires us to set up the free list.
-    //
-    // used to be CLR_RT_HeapBlock_WeakReference::PrepareForRecovery( CLR_RT_HeapBlock_Node* ptr, CLR_RT_HeapBlock_Node*
-    // end, CLR_UINT32 blockSize )
-
+    // Scan memory looking for possible objects to salvage
     CLR_RT_HeapBlock_Node *ptr = m_payloadStart;
     CLR_RT_HeapBlock_Node *end = m_payloadEnd;
 
@@ -77,17 +71,6 @@ void CLR_RT_HeapCluster::HeapCluster_Initialize(CLR_UINT32 size, CLR_UINT32 bloc
         ptr += blockSize;
     }
 
-    while (ptr < m_payloadEnd)
-    {
-        if ((unsigned int)(ptr + blockSize) > (unsigned int)m_payloadEnd)
-        {
-            blockSize = (CLR_UINT32)(m_payloadEnd - ptr);
-        }
-
-        ptr->SetDataId(CLR_RT_HEAPBLOCK_RAW_ID(DATATYPE_FREEBLOCK, 0, blockSize));
-        ptr += blockSize;
-    }
-
     RecoverFromGC();
 
     m_freeList.ValidateList();
@@ -124,6 +107,10 @@ CLR_RT_HeapBlock *CLR_RT_HeapCluster::ExtractBlocks(CLR_UINT32 dataType, CLR_UIN
             if (available >= length)
             {
                 res = ptr;
+
+                _ASSERTE((void *)res >= (void *)s_CLR_RT_Heap.location);
+                _ASSERTE((void *)res < (void *)(s_CLR_RT_Heap.location + s_CLR_RT_Heap.size));
+
                 break;
             }
         }
@@ -137,6 +124,11 @@ CLR_RT_HeapBlock *CLR_RT_HeapCluster::ExtractBlocks(CLR_UINT32 dataType, CLR_UIN
 
         available -= length;
 
+        _ASSERTE((void *)next >= (void *)s_CLR_RT_Heap.location);
+        _ASSERTE((void *)next < (void *)(s_CLR_RT_Heap.location + s_CLR_RT_Heap.size));
+        _ASSERTE((void *)prev >= (void *)s_CLR_RT_Heap.location);
+        _ASSERTE((void *)prev < (void *)(s_CLR_RT_Heap.location + s_CLR_RT_Heap.size));
+
         if (available != 0)
         {
             if (flags & CLR_RT_HeapBlock::HB_Event)
@@ -144,10 +136,16 @@ CLR_RT_HeapBlock *CLR_RT_HeapCluster::ExtractBlocks(CLR_UINT32 dataType, CLR_UIN
                 res->SetDataId(CLR_RT_HEAPBLOCK_RAW_ID(DATATYPE_FREEBLOCK, CLR_RT_HeapBlock::HB_Pinned, available));
 
                 res += available;
+
+                _ASSERTE((void *)res >= (void *)s_CLR_RT_Heap.location);
+                _ASSERTE((void *)res < (void *)(s_CLR_RT_Heap.location + s_CLR_RT_Heap.size));
             }
             else
             {
                 CLR_RT_HeapBlock_Node *ptr = &res[length];
+
+                _ASSERTE((void *)ptr >= (void *)s_CLR_RT_Heap.location);
+                _ASSERTE((void *)ptr < (void *)(s_CLR_RT_Heap.location + s_CLR_RT_Heap.size));
 
                 //
                 // Relink to the new free block.
@@ -216,10 +214,6 @@ void CLR_RT_HeapCluster::RecoverFromGC()
             {
                 ValidateBlock(next);
 
-#if defined(NANOCLR_PROFILE_NEW_ALLOCATIONS)
-                g_CLR_PRF_Profiler.TrackObjectDeletion(next);
-#endif
-
                 NANOCLR_CHECK_EARLY_COLLECTION(next);
 
                 int len = next->DataSize();
@@ -232,6 +226,9 @@ void CLR_RT_HeapCluster::RecoverFromGC()
 
             } while (next < end && next->IsAlive() == false);
 
+#if defined(NANOCLR_PROFILE_NEW_ALLOCATIONS)
+            g_CLR_PRF_Profiler.TrackObjectDeletion(ptr);
+#endif
             ptr->SetDataId(CLR_RT_HEAPBLOCK_RAW_ID(DATATYPE_FREEBLOCK, CLR_RT_HeapBlock::HB_Pinned, lenTot));
 
             //
@@ -248,9 +245,16 @@ void CLR_RT_HeapCluster::RecoverFromGC()
         else
         {
             if (ptr->IsEvent() == false)
+            {
                 ptr->MarkDead();
+            }
 
-            ptr += ptr->DataSize();
+            int len = ptr->DataSize();
+
+            // length of the block can not be 0, so something very wrong happened
+            _ASSERTE(len > 0);
+
+            ptr += len;
         }
     }
 

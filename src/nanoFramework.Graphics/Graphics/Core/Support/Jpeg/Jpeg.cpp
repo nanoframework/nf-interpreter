@@ -18,39 +18,35 @@ extern "C"
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-
 // JPEG Error handling struct / routine
 struct JPEGErrorManager
 {
     jpeg_error_mgr pub;
-    int         setjmpBuffer[32];
+    jmp_buf setjmpBuffer;
 };
-
-
-
 
 void JPEGErrorHandler(j_common_ptr cinfo)
 {
-    JPEGErrorManager* errorManager = (JPEGErrorManager*)cinfo->err;
+    JPEGErrorManager *errorManager = (JPEGErrorManager *)cinfo->err;
     longjmp(errorManager->setjmpBuffer, 1);
 }
 
 struct CreateInstanceJpegHelperParam
 {
-    CLR_UINT8* curBuffer;
-    int        index;
+    CLR_UINT8 *curBuffer;
+    int index;
     JSAMPARRAY buffer;
-    jpeg_decompress_struct* cinfo;
+    jpeg_decompress_struct *cinfo;
 };
 
-HRESULT CLR_GFX_Bitmap::CreateInstanceJpeg(CLR_RT_HeapBlock& ref, const CLR_UINT8* data, const CLR_UINT32 size)
+HRESULT CLR_GFX_Bitmap::CreateInstanceJpeg(CLR_RT_HeapBlock &ref, const CLR_UINT8 *data, const CLR_UINT32 size)
 {
     NANOCLR_HEADER();
 
-    jpeg_decompress_struct        cinfo;
-    CLR_GFX_Bitmap* bitmap = NULL;
+    jpeg_decompress_struct cinfo;
+    CLR_GFX_Bitmap *bitmap = NULL;
     CreateInstanceJpegHelperParam param;
-    GFX_Rect                      rect;
+    GFX_Rect rect;
 
     param.curBuffer = NULL;
 
@@ -73,7 +69,7 @@ HRESULT CLR_GFX_Bitmap::CreateInstanceJpeg(CLR_RT_HeapBlock& ref, const CLR_UINT
 
     // Create the decompression engine
     jpeg_create_decompress(&cinfo);
-    jpeg_byte_array_src(&cinfo, (CLR_UINT8*)data, size);
+    jpeg_byte_array_src(&cinfo, (CLR_UINT8 *)data, size);
     jpeg_read_header(&cinfo, TRUE);
 
     // Set output to 16bit 5-6-5 RGB format
@@ -85,7 +81,10 @@ HRESULT CLR_GFX_Bitmap::CreateInstanceJpeg(CLR_RT_HeapBlock& ref, const CLR_UINT
 
     // At this point cinfo would have all the correct output dimension info
     CLR_GFX_BitmapDescription bm;
-    if (bm.BitmapDescription_Initialize(cinfo.output_width, cinfo.output_height, CLR_GFX_BitmapDescription::c_NativeBpp) == false)
+    if (bm.BitmapDescription_Initialize(
+            cinfo.output_width,
+            cinfo.output_height,
+            CLR_GFX_BitmapDescription::c_NativeBpp) == false)
     {
         // if the resulting bitmap doesn't match our constraints, stop the decompression
         NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
@@ -94,7 +93,7 @@ HRESULT CLR_GFX_Bitmap::CreateInstanceJpeg(CLR_RT_HeapBlock& ref, const CLR_UINT
     // Allocate the memory that the decompressed bitmap would need
     NANOCLR_CHECK_HRESULT(CLR_GFX_Bitmap::CreateInstance(ref, bm));
 
-    NANOCLR_CHECK_HRESULT(CLR_GFX_Bitmap::GetInstanceFromGraphicsHeapBlock(ref, bitmap));
+    NANOCLR_CHECK_HRESULT(CLR_GFX_Bitmap::GetInstanceFromManagedCSharpReference(ref, bitmap));
 
     // Do the actual decompression
     rect.left = 0;
@@ -102,24 +101,30 @@ HRESULT CLR_GFX_Bitmap::CreateInstanceJpeg(CLR_RT_HeapBlock& ref, const CLR_UINT
     rect.right = cinfo.output_width - 1;
     rect.bottom = cinfo.output_height - 1;
 
-    param.curBuffer = (CLR_UINT8*)CLR_RT_Memory::Allocate(cinfo.output_width * 3);  CHECK_ALLOCATION(param.curBuffer);
+    param.curBuffer = (CLR_UINT8 *)CLR_RT_Memory::Allocate(cinfo.output_width * 3);
+    CHECK_ALLOCATION(param.curBuffer);
     param.buffer = (JSAMPARRAY) & (param.curBuffer);
     param.cinfo = &cinfo;
 
-    bitmap->SetPixelsHelper(rect, PAL_GFX_Bitmap::c_SetPixelsConfig_NoClip | PAL_GFX_Bitmap::c_SetPixelsConfig_NoClipChecks, &CreateInstanceJpegHelper, &param);
+    bitmap->SetPixelsHelper(
+        rect,
+        PAL_GFX_Bitmap::c_SetPixelsConfig_NoClip | PAL_GFX_Bitmap::c_SetPixelsConfig_NoClipChecks,
+        &CreateInstanceJpegHelper,
+        &param);
 
     NANOCLR_CLEANUP();
 
-    if (param.curBuffer) CLR_RT_Memory::Release(param.curBuffer);
+    if (param.curBuffer)
+        CLR_RT_Memory::Release(param.curBuffer);
     jpeg_destroy_decompress(&cinfo);
 
     NANOCLR_CLEANUP_END();
 }
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-parameter"
-CLR_UINT32 CLR_GFX_Bitmap::CreateInstanceJpegHelper(int x, int y, CLR_UINT32 flags, CLR_UINT16& opacity, void* param)
+CLR_UINT32 CLR_GFX_Bitmap::CreateInstanceJpegHelper(int x, int y, CLR_UINT32 flags, CLR_UINT16 &opacity, void *param)
 {
-    CreateInstanceJpegHelperParam* myParam = (CreateInstanceJpegHelperParam*)param;
+    CreateInstanceJpegHelperParam *myParam = (CreateInstanceJpegHelperParam *)param;
 
     if (flags & PAL_GFX_Bitmap::c_SetPixels_NewRow)
     {
@@ -136,6 +141,6 @@ CLR_UINT32 CLR_GFX_Bitmap::CreateInstanceJpegHelper(int x, int y, CLR_UINT32 fla
 
     myParam->index += 3;
 
-    return r | (g << 8) | (b << 16);
+    return (r << 16) | (g << 8) | b;
 }
 #pragma GCC diagnostic pop

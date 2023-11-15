@@ -2869,7 +2869,7 @@ struct CLR_RT_GarbageCollector
         CLR_UINT8 *m_start;
         CLR_UINT8 *m_end;
         CLR_UINT8 *m_destination;
-        CLR_UINT32 m_offset;
+        CLR_INT32 m_offset;
     };
 
     //--//
@@ -2958,6 +2958,12 @@ struct CLR_RT_GarbageCollector
 
     void ValidatePointers()
     {
+#if defined(NANOCLR_TRACE_MEMORY_STATS)
+        if (s_CLR_RT_fTrace_MemoryStats >= c_CLR_RT_Trace_Verbose)
+        {
+            CLR_Debug::Printf("\r\nGC: ValidatePointers\r\n");
+        }
+#endif
         Heap_Relocate_Pass(Relocation_JustCheck);
     }
 
@@ -3430,12 +3436,12 @@ struct CLR_RT_Thread : public CLR_RT_ObjectToEvent_Destination // EVENT HEAP - N
 
 ////////////////////////////////////////////////////////////////////////////////
 
-extern size_t LinkArraySize();
-extern size_t LinkMRUArraySize();
-extern size_t PayloadArraySize();
-extern size_t InterruptRecords();
+extern uint32_t LinkArraySize();
+extern uint32_t LinkMRUArraySize();
+extern uint32_t PayloadArraySize();
+extern uint32_t InterruptRecords();
 #ifndef NANOCLR_NO_IL_INLINE
-extern size_t InlineBufferCount();
+extern uint32_t InlineBufferCount();
 #endif
 
 extern CLR_UINT32 g_scratchVirtualMethodTableLink[];
@@ -3657,6 +3663,7 @@ CT_ASSERT(sizeof(CLR_RT_EventCache::Payload) == 12)
 
 #include <nanoCLR_Debugging.h>
 #include <nanoCLR_Profiling.h>
+#include <nanoCLR_Application.h>
 // #include <nanoCLR_Messaging.h>
 
 //--//
@@ -3934,7 +3941,11 @@ struct CLR_RT_ExecutionEngine
 
     //--//
 
+#if defined(VIRTUAL_DEVICE)
+    static HRESULT CreateInstance(CLR_SETTINGS params);
+#else
     static HRESULT CreateInstance();
+#endif
 
     HRESULT ExecutionEngine_Initialize();
 
@@ -4183,10 +4194,18 @@ CT_ASSERT(sizeof(CLR_RT_HeapBlock_Raw) == sizeof(CLR_RT_HeapBlock))
 #if defined(__GNUC__) // Gcc compiler uses 8 bytes for a function pointer
 CT_ASSERT(sizeof(CLR_RT_DataTypeLookup) == 20 + NANOCLR_TRACE_MEMORY_STATS_EXTRA_SIZE)
 
-#elif defined(PLATFORM_WINDOWS_EMULATOR) || defined(NANOCLR_TRACE_MEMORY_STATS)
+#elif defined(VIRTUAL_DEVICE) && defined(NANOCLR_TRACE_MEMORY_STATS)
 
 #ifdef _WIN64
 CT_ASSERT(sizeof(CLR_RT_DataTypeLookup) == 24 + NANOCLR_TRACE_MEMORY_STATS_EXTRA_SIZE)
+#else
+CT_ASSERT(sizeof(CLR_RT_DataTypeLookup) == 16 + NANOCLR_TRACE_MEMORY_STATS_EXTRA_SIZE)
+#endif // _WIN64
+
+#elif defined(VIRTUAL_DEVICE) && !defined(NANOCLR_TRACE_MEMORY_STATS)
+
+#ifdef _WIN64
+CT_ASSERT(sizeof(CLR_RT_DataTypeLookup) == 32 + NANOCLR_TRACE_MEMORY_STATS_EXTRA_SIZE)
 #else
 CT_ASSERT(sizeof(CLR_RT_DataTypeLookup) == 16 + NANOCLR_TRACE_MEMORY_STATS_EXTRA_SIZE)
 #endif // _WIN64

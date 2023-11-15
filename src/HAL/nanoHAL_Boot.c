@@ -61,14 +61,15 @@ inline bool IsToRemainInBooter()
 #endif
 }
 
-// Request to launch nanoBooter
+// Request to launch nanoBooter and report error code
 // Returns false in case it's not supported (which is considered the default).
-inline bool RequestToLaunchNanoBooter()
+inline bool RequestToLaunchNanoBooter(int32_t errorCode)
 {
 #if (TARGET_HAS_NANOBOOTER == TRUE)
     if (Target_HasNanoBooter())
     {
         g_BootClipboard.BootRequest = BootRequest_NanoBooter;
+        g_BootClipboard.ErrorCode = errorCode;
         return true;
     }
 #endif

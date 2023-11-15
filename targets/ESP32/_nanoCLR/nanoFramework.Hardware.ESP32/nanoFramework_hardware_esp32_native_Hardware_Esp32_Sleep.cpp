@@ -233,6 +233,28 @@ HRESULT Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32
 }
 
 HRESULT Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32_Sleep::
+    NativeEnableWakeupByUart___STATIC__nanoFrameworkHardwareEsp32EspNativeError__nanoFrameworkHardwareEsp32SleepWakeUpPort__I4(
+        CLR_RT_StackFrame &stack)
+{
+    NANOCLR_HEADER();
+    {
+        esp_err_t err;
+        int uartNum;
+        int threshold;
+
+        // Static arguments starts at 0
+        uartNum = stack.Arg0().NumericByRef().s4;
+        threshold = stack.Arg1().NumericByRef().s4;
+        uart_set_wakeup_threshold(uartNum, threshold);
+        err = esp_sleep_enable_uart_wakeup(uartNum);
+
+        // Return err to the managed application
+        stack.SetResult_I4((int)err);
+    }
+    NANOCLR_NOCLEANUP_NOLABEL();
+}
+
+HRESULT Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32_Sleep::
     NativeStartLightSleep___STATIC__nanoFrameworkHardwareEsp32EspNativeError(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();

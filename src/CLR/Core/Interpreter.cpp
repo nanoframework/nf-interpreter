@@ -869,8 +869,12 @@ HRESULT CLR_RT_Thread::Execute_Inner()
 
                 if (hr == CLR_E_OUT_OF_MEMORY && (stack->m_flags & CLR_RT_StackFrame::c_CompactAndRestartOnOutOfMemory))
                 {
+                    // if we have an out of memory exception, perform a compaction and restart
                     stack->m_flags &= ~CLR_RT_StackFrame::c_CompactAndRestartOnOutOfMemory;
 
+#if defined(NANOCLR_GC_VERBOSE)
+                    CLR_Debug::Printf("\r\nGoing for heap compaction and restart.\r\n\r\n");
+#endif
                     g_CLR_RT_ExecutionEngine.PerformHeapCompaction();
                 }
                 else
@@ -2830,6 +2834,11 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                         // if we have an out of memory exception, perform a compaction and try again.
                         if (hr == CLR_E_OUT_OF_MEMORY && pass == 0)
                         {
+#if defined(NANOCLR_GC_VERBOSE)
+                            CLR_Debug::Printf(
+                                "\r\nGoing for heap compaction and trying to create array again.\r\n\r\n");
+#endif
+
                             WRITEBACK(stack, evalPos, ip, fDirty);
                             g_CLR_RT_ExecutionEngine.PerformHeapCompaction();
                             READCACHE(stack, evalPos, ip, fDirty);

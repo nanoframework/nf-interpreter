@@ -27,7 +27,7 @@ void CLR_Debug::SaveMessage(std::string str)
     NATIVE_PROFILE_CLR_DIAGNOSTICS();
 
     // clear LR & CR
-    int pos;
+    size_t pos;
     if ((pos = str.find('\n')) != std::string::npos)
     {
         str.erase(pos);

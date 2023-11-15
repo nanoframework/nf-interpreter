@@ -28,6 +28,9 @@ HRESULT CLR_PRF_Profiler::CreateInstance()
 HRESULT CLR_PRF_Profiler::DeleteInstance()
 {
     NATIVE_PROFILE_CLR_DIAGNOSTICS();
+
+    g_CLR_PRF_Profiler.m_initialized = false;
+
     return g_CLR_PRF_Profiler.Profiler_Cleanup();
 }
 
@@ -41,10 +44,12 @@ HRESULT CLR_PRF_Profiler::Profiler_Cleanup()
 void CLR_PRF_Profiler::SendMemoryLayout()
 {
     NATIVE_PROFILE_CLR_DIAGNOSTICS();
+
     // Send Memory Layout
     m_stream->WriteBits(CLR_PRF_CMDS::c_Profiling_Memory_Layout, CLR_PRF_CMDS::Bits::CommandHeader);
-    PackAndWriteBits(0);
+    PackAndWriteBits((CLR_UINT32)s_CLR_RT_Heap.location);
     PackAndWriteBits(s_CLR_RT_Heap.size);
+
     Stream_Send();
 }
 
@@ -178,11 +183,19 @@ void CLR_PRF_Profiler::DumpRoot(
     CLR_RT_MethodDef_Index *source)
 {
     NATIVE_PROFILE_CLR_DIAGNOSTICS();
+
+#if defined(BUILD_RTM)
+    (void)flags;
+#endif
+
     m_stream->WriteBits(CLR_PRF_CMDS::c_Profiling_HeapDump_Root, CLR_PRF_CMDS::Bits::CommandHeader);
+
     DumpPointer(root);
+
     m_stream->WriteBits(type, CLR_PRF_CMDS::Bits::RootTypes);
 
     _ASSERTE(!flags);
+
     if (type == CLR_PRF_CMDS::RootTypes::Root_Stack)
     {
         PackAndWriteBits(*source);
@@ -462,8 +475,11 @@ CLR_RT_HeapBlock *CLR_PRF_Profiler::FindReferencedObject(CLR_RT_HeapBlock *ref)
                 ref = ref->TransparentProxyDereference();
                 break;
 #endif
+
             case DATATYPE_ARRAY_BYREF:
                 ref = ref->Array();
+                return ref;
+
             default:
                 return ref;
         }
@@ -542,7 +558,11 @@ HRESULT CLR_PRF_Profiler::RecordContextSwitch(CLR_RT_Thread *nextThread)
 
     CLR_PROF_HANDLER_CALLCHAIN_VOID(perf);
 
+#ifdef NANOCLR_FORCE_PROFILER_EXECUTION
+    if (g_CLR_PRF_Profiler.m_initialized)
+#else
     if (CLR_EE_PRF_IS(Calls))
+#endif
     {
         Timestamp();
         m_stream->WriteBits(CLR_PRF_CMDS::c_Profiling_Calls_CtxSwitch, CLR_PRF_CMDS::Bits::CommandHeader);
@@ -560,7 +580,11 @@ HRESULT CLR_PRF_Profiler::RecordFunctionCall(CLR_RT_Thread *th, CLR_RT_MethodDef
     NANOCLR_HEADER();
     _ASSERTE(th);
 
+#ifdef NANOCLR_FORCE_PROFILER_EXECUTION
+    if (g_CLR_PRF_Profiler.m_initialized)
+#else
     if (CLR_EE_PRF_IS(Calls))
+#endif
     {
         CLR_PROF_HANDLER_CALLCHAIN_VOID(perf);
 
@@ -600,7 +624,11 @@ HRESULT CLR_PRF_Profiler::RecordFunctionReturn(CLR_RT_Thread *th, CLR_PROF_Count
     NANOCLR_HEADER();
     _ASSERTE(th);
 
+#ifdef NANOCLR_FORCE_PROFILER_EXECUTION
+    if (g_CLR_PRF_Profiler.m_initialized)
+#else
     if (CLR_EE_PRF_IS(Calls))
+#endif
     {
         CLR_PROF_HANDLER_CALLCHAIN_VOID(perf);
 
@@ -632,28 +660,109 @@ void CLR_PRF_Profiler::TrackObjectCreation(CLR_RT_HeapBlock *ptr)
 {
     NATIVE_PROFILE_CLR_DIAGNOSTICS();
     _ASSERTE(ptr);
+
+#ifdef NANOCLR_FORCE_PROFILER_EXECUTION
+    if (g_CLR_PRF_Profiler.m_initialized)
+#else
     if (CLR_EE_PRF_IS(Allocations))
+#endif
     {
         CLR_PROF_HANDLER_CALLCHAIN_VOID(perf);
 
         CLR_UINT8 dt = ptr->DataType();
+
         if (dt != DATATYPE_STACK_FRAME && dt != DATATYPE_BINARY_BLOB_HEAD)
         {
             Timestamp();
+
             m_stream->WriteBits(CLR_PRF_CMDS::c_Profiling_Allocs_Alloc, CLR_PRF_CMDS::Bits::CommandHeader);
+
             DumpPointer(ptr);
-            PackAndWriteBits(ptr->DataSize());
+
+            CLR_UINT16 dataSize = ptr->DataSize();
+            PackAndWriteBits(dataSize);
+
             m_stream->WriteBits((CLR_UINT32)dt, CLR_PRF_CMDS::Bits::DataType);
+
             if (dt == DATATYPE_CLASS || dt == DATATYPE_VALUETYPE)
             {
-                PackAndWriteBits(ptr->ObjectCls());
+                CLR_RT_TypeDef_Index idx = ptr->ObjectCls();
+                PackAndWriteBits(idx);
+
+#ifdef NANOCLR_TRACE_PROFILER_MESSAGES
+
+#ifdef _WIN64
+                CLR_Debug::Printf(
+                    "\r\n    Profiler info: ! (0x0x%I64X | %d) DT: %d %d bytes idx: %08x\r\n",
+                    (size_t)((CLR_UINT8 *)ptr),
+                    (CLR_UINT32)((size_t *)ptr - s_CLR_RT_Heap.m_location),
+                    (CLR_UINT32)dt,
+                    (dataSize * sizeof(CLR_RT_HeapBlock)),
+                    idx.m_data);
+
+#else
+                CLR_Debug::Printf(
+                    "\r\n    Profiler info: ! (0x%08X | %d) DT: %d %d bytes idx: %08x\r\n",
+                    (CLR_UINT32)((CLR_UINT8 *)ptr),
+                    (CLR_UINT32)((CLR_UINT8 *)ptr - s_CLR_RT_Heap.m_location),
+                    (CLR_UINT32)dt,
+                    (dataSize * sizeof(CLR_RT_HeapBlock)),
+                    idx.m_data);
+#endif
+
+#endif // NANOCLR_TRACE_PROFILER_MESSAGES
             }
             else if (dt == DATATYPE_SZARRAY)
             {
-                auto *array = (CLR_RT_HeapBlock_Array *)ptr;
+                CLR_RT_HeapBlock_Array *array = (CLR_RT_HeapBlock_Array *)ptr;
+                CLR_RT_TypeDef_Index elementIdx = array->ReflectionDataConst().data.type;
                 PackAndWriteBits(array->ReflectionDataConst().data.type);
                 PackAndWriteBits(array->ReflectionDataConst().levels);
+
+#ifdef NANOCLR_TRACE_PROFILER_MESSAGES
+
+#ifdef _WIN64
+                CLR_Debug::Printf(
+                    "\r\n    Profiler info: ! (0x0x%I64X | %d) DT: %d [%08x] %d bytes\r\n",
+                    (size_t)((CLR_UINT8 *)ptr),
+                    (CLR_UINT32)((size_t *)ptr - s_CLR_RT_Heap.m_location),
+                    (CLR_UINT32)dt,
+                    elementIdx.m_data,
+                    (dataSize * sizeof(CLR_RT_HeapBlock)));
+
+#else
+                CLR_Debug::Printf(
+                    "\r\n    Profiler info: ! (0x%08X | %d) DT: %d [%08x] %d bytes\r\n",
+                    (CLR_UINT32)((CLR_UINT8 *)ptr),
+                    (CLR_UINT32)((CLR_UINT8 *)ptr - s_CLR_RT_Heap.m_location),
+                    (CLR_UINT32)dt,
+                    elementIdx.m_data,
+                    (dataSize * sizeof(CLR_RT_HeapBlock)));
+#endif
+#endif // NANOCLR_TRACE_PROFILER_MESSAGES
             }
+#ifdef NANOCLR_TRACE_PROFILER_MESSAGES
+            else
+            {
+#ifdef _WIN64
+                CLR_Debug::Printf(
+                    "\r\n    Profiler info: ! (0x0x%I64X | %d) DT: %d %d bytes\r\n",
+                    (size_t)((CLR_UINT8 *)ptr),
+                    (CLR_UINT32)((size_t *)ptr - s_CLR_RT_Heap.m_location),
+                    (CLR_UINT32)dt,
+                    (dataSize * sizeof(CLR_RT_HeapBlock)));
+
+#else
+                CLR_Debug::Printf(
+                    "\r\n    Profiler info: ! (0x%08X | %d) DT: %d %d bytes\r\n",
+                    (CLR_UINT32)((CLR_UINT8 *)ptr),
+                    (CLR_UINT32)((CLR_UINT8 *)ptr - s_CLR_RT_Heap.m_location),
+                    (CLR_UINT32)dt,
+                    (dataSize * sizeof(CLR_RT_HeapBlock)));
+#endif
+            }
+#endif // NANOCLR_TRACE_PROFILER_MESSAGES
+
             Stream_Send();
         }
     }
@@ -664,7 +773,11 @@ void CLR_PRF_Profiler::TrackObjectDeletion(CLR_RT_HeapBlock *ptr)
     NATIVE_PROFILE_CLR_DIAGNOSTICS();
     _ASSERTE(ptr);
 
+#ifdef NANOCLR_FORCE_PROFILER_EXECUTION
+    if (g_CLR_PRF_Profiler.m_initialized)
+#else
     if (CLR_EE_PRF_IS(Allocations))
+#endif
     {
         CLR_PROF_HANDLER_CALLCHAIN_VOID(perf);
 
@@ -676,13 +789,38 @@ void CLR_PRF_Profiler::TrackObjectDeletion(CLR_RT_HeapBlock *ptr)
             DumpPointer(ptr);
             Stream_Send();
         }
+
+#ifdef NANOCLR_TRACE_PROFILER_MESSAGES
+        CLR_UINT16 dataSize = ptr->DataSize();
+
+#ifdef _WIN64
+        CLR_Debug::Printf(
+            "\r\n    Profiler info: * (0x0x%I64X | %d) %d bytes\r\n",
+            (size_t)((CLR_UINT8 *)ptr),
+            (CLR_UINT32)((size_t *)ptr - s_CLR_RT_Heap.m_location),
+            (dataSize * sizeof(CLR_RT_HeapBlock)));
+
+#else
+        CLR_Debug::Printf(
+            "\r\n    Profiler info: * (0x%08X | %d) %d bytes\r\n",
+            (CLR_UINT32)((CLR_UINT8 *)ptr),
+            (CLR_UINT32)((CLR_UINT8 *)ptr - s_CLR_RT_Heap.m_location),
+            (dataSize * sizeof(CLR_RT_HeapBlock)));
+#endif
+
+#endif // NANOCLR_TRACE_PROFILER_MESSAGES
     }
 }
 
 void CLR_PRF_Profiler::TrackObjectRelocation()
 {
     NATIVE_PROFILE_CLR_DIAGNOSTICS();
+
+#ifdef NANOCLR_FORCE_PROFILER_EXECUTION
+    if (g_CLR_PRF_Profiler.m_initialized)
+#else
     if (CLR_EE_PRF_IS(Allocations))
+#endif
     {
         CLR_PROF_HANDLER_CALLCHAIN_VOID(perf);
 
@@ -698,6 +836,25 @@ void CLR_PRF_Profiler::TrackObjectRelocation()
             DumpPointer(relocBlocks[i].m_start);
             DumpPointer(relocBlocks[i].m_end);
             PackAndWriteBits(relocBlocks[i].m_offset);
+
+#ifdef NANOCLR_TRACE_PROFILER_MESSAGES
+
+#ifdef _WIN64
+            CLR_Debug::Printf(
+                "\r\n    Profiler msg: u 0x%I64X 0x%I64X %d\r\n",
+                relocBlocks[i].m_start,
+                relocBlocks[i].m_start + relocBlocks[i].m_offset,
+                relocBlocks[i].m_end - relocBlocks[i].m_offset);
+
+#else
+            CLR_Debug::Printf(
+                "\r\n    Profiler msg: u 0x%08x 0x%08x %d\r\n",
+                relocBlocks[i].m_start,
+                relocBlocks[i].m_start + relocBlocks[i].m_offset,
+                relocBlocks[i].m_end - relocBlocks[i].m_offset);
+#endif
+
+#endif //  NANOCLR_TRACE_PROFILER_MESSAGES
         }
     }
 }
@@ -705,7 +862,12 @@ void CLR_PRF_Profiler::TrackObjectRelocation()
 void CLR_PRF_Profiler::RecordGarbageCollectionBegin()
 {
     NATIVE_PROFILE_CLR_DIAGNOSTICS();
+
+#ifdef NANOCLR_FORCE_PROFILER_EXECUTION
+    if (g_CLR_PRF_Profiler.m_initialized)
+#else
     if (CLR_EE_PRF_IS(Allocations))
+#endif
     {
         CLR_PROF_HANDLER_CALLCHAIN_VOID(perf);
 
@@ -713,13 +875,37 @@ void CLR_PRF_Profiler::RecordGarbageCollectionBegin()
         m_stream->WriteBits(CLR_PRF_CMDS::c_Profiling_GarbageCollect_Begin, CLR_PRF_CMDS::Bits::CommandHeader);
         PackAndWriteBits(g_CLR_RT_GarbageCollector.m_freeBytes);
         Stream_Send();
+
+#ifdef NANOCLR_TRACE_PROFILER_MESSAGES
+
+#ifdef _WIN64
+        CLR_Debug::Printf(
+            "\r\n    Profiler msg: b 1 0 0 0x%I64X 0x%I64X %d 0\r\n",
+            (CLR_UINT32)s_CLR_RT_Heap.m_location,
+            s_CLR_RT_Heap.m_size,
+            g_CLR_RT_GarbageCollector.m_totalBytes);
+
+#else
+        CLR_Debug::Printf(
+            "\r\n    Profiler msg: b 1 0 0 0x%08x 0x%08x %d 0\r\n",
+            (CLR_UINT32)s_CLR_RT_Heap.m_location,
+            s_CLR_RT_Heap.m_size,
+            g_CLR_RT_GarbageCollector.m_totalBytes);
+#endif
+
+#endif //  NANOCLR_TRACE_PROFILER_MESSAGES
     }
 }
 
 void CLR_PRF_Profiler::RecordGarbageCollectionEnd()
 {
     NATIVE_PROFILE_CLR_DIAGNOSTICS();
+
+#ifdef NANOCLR_FORCE_PROFILER_EXECUTION
+    if (g_CLR_PRF_Profiler.m_initialized)
+#else
     if (CLR_EE_PRF_IS(Allocations))
+#endif
     {
         CLR_PROF_HANDLER_CALLCHAIN_VOID(perf);
 
@@ -727,13 +913,49 @@ void CLR_PRF_Profiler::RecordGarbageCollectionEnd()
         m_stream->WriteBits(CLR_PRF_CMDS::c_Profiling_GarbageCollect_End, CLR_PRF_CMDS::Bits::CommandHeader);
         PackAndWriteBits(g_CLR_RT_GarbageCollector.m_freeBytes);
         Stream_Send();
+
+#ifdef NANOCLR_TRACE_PROFILER_MESSAGES
+
+#ifdef _WIN64
+        NANOCLR_FOREACH_NODE(CLR_RT_HeapCluster, hc, g_CLR_RT_ExecutionEngine.m_heap)
+        {
+            CLR_Debug::Printf("\r\n    Profiler msg: v 0x%I64X 0\r\n", (CLR_UINT32)hc->m_payloadStart);
+        }
+        NANOCLR_FOREACH_NODE_END();
+
+        CLR_Debug::Printf(
+            "\r\n    Profiler msg: b 0 0 0 0x%I64X 0x%I64X %d 0\r\n",
+            (CLR_UINT32)s_CLR_RT_Heap.m_location,
+            s_CLR_RT_Heap.m_size,
+            g_CLR_RT_GarbageCollector.m_totalBytes);
+
+#else
+        NANOCLR_FOREACH_NODE(CLR_RT_HeapCluster, hc, g_CLR_RT_ExecutionEngine.m_heap)
+        {
+            CLR_Debug::Printf("\r\n    Profiler msg: v 0x%08x 0\r\n", (CLR_UINT32)hc->m_payloadStart);
+        }
+        NANOCLR_FOREACH_NODE_END();
+
+        CLR_Debug::Printf(
+            "\r\n    Profiler msg: b 0 0 0 0x%08x 0x%08x %d 0\r\n",
+            (CLR_UINT32)s_CLR_RT_Heap.m_location,
+            s_CLR_RT_Heap.m_size,
+            g_CLR_RT_GarbageCollector.m_totalBytes);
+#endif
+
+#endif //  NANOCLR_TRACE_PROFILER_MESSAGES
     }
 }
 
 void CLR_PRF_Profiler::RecordHeapCompactionBegin()
 {
     NATIVE_PROFILE_CLR_DIAGNOSTICS();
+
+#ifdef NANOCLR_FORCE_PROFILER_EXECUTION
+    if (g_CLR_PRF_Profiler.m_initialized)
+#else
     if (CLR_EE_PRF_IS(Allocations))
+#endif
     {
         CLR_PROF_HANDLER_CALLCHAIN_VOID(perf);
 
@@ -741,13 +963,37 @@ void CLR_PRF_Profiler::RecordHeapCompactionBegin()
         m_stream->WriteBits(CLR_PRF_CMDS::c_Profiling_HeapCompact_Begin, CLR_PRF_CMDS::Bits::CommandHeader);
         PackAndWriteBits(g_CLR_RT_GarbageCollector.m_freeBytes);
         Stream_Send();
+
+#ifdef NANOCLR_TRACE_PROFILER_MESSAGES
+
+#ifdef _WIN64
+        CLR_Debug::Printf(
+            "\r\n    Profiler msg: b 1 0 0 0x%I64X 0x%I64X %d 0\r\n",
+            (CLR_UINT32)s_CLR_RT_Heap.m_location,
+            s_CLR_RT_Heap.m_size,
+            g_CLR_RT_GarbageCollector.m_totalBytes);
+
+#else
+        CLR_Debug::Printf(
+            "\r\n    Profiler msg: b 1 0 0 0x%08x 0x%08x %d 0\r\n",
+            (CLR_UINT32)s_CLR_RT_Heap.m_location,
+            s_CLR_RT_Heap.m_size,
+            g_CLR_RT_GarbageCollector.m_totalBytes);
+#endif
+
+#endif //  NANOCLR_TRACE_PROFILER_MESSAGES
     }
 }
 
 void CLR_PRF_Profiler::RecordHeapCompactionEnd()
 {
     NATIVE_PROFILE_CLR_DIAGNOSTICS();
+
+#ifdef NANOCLR_FORCE_PROFILER_EXECUTION
+    if (g_CLR_PRF_Profiler.m_initialized)
+#else
     if (CLR_EE_PRF_IS(Allocations))
+#endif
     {
         CLR_PROF_HANDLER_CALLCHAIN_VOID(perf);
 
@@ -755,6 +1001,25 @@ void CLR_PRF_Profiler::RecordHeapCompactionEnd()
         m_stream->WriteBits(CLR_PRF_CMDS::c_Profiling_HeapCompact_End, CLR_PRF_CMDS::Bits::CommandHeader);
         PackAndWriteBits(g_CLR_RT_GarbageCollector.m_freeBytes);
         Stream_Send();
+
+#ifdef NANOCLR_TRACE_PROFILER_MESSAGES
+
+#ifdef _WIN64
+        CLR_Debug::Printf(
+            "\r\n    Profiler msg: b 0 0 0 0x%I64X 0x%I64X %d 0\r\n",
+            (CLR_UINT32)s_CLR_RT_Heap.m_location,
+            s_CLR_RT_Heap.m_size,
+            g_CLR_RT_GarbageCollector.m_totalBytes);
+
+#else
+        CLR_Debug::Printf(
+            "\r\n    Profiler msg: b 0 0 0 0x%08x 0x%08x %d 0\r\n",
+            (CLR_UINT32)s_CLR_RT_Heap.m_location,
+            s_CLR_RT_Heap.m_size,
+            g_CLR_RT_GarbageCollector.m_totalBytes);
+#endif
+
+#endif //  NANOCLR_TRACE_PROFILER_MESSAGES
     }
 }
 

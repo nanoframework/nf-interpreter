@@ -1,4 +1,4 @@
-FROM ghcr.io/linuxcontainers/debian-slim:latest AS downloader
+FROM ubuntu:latest AS downloader
 RUN apt-get update \
     && apt-get -y install --no-install-recommends apt-utils \
     && apt-get install -y \
@@ -7,14 +7,14 @@ RUN apt-get update \
     unzip \
     wget 
 
-ARG GCC_URI=https://armkeil.blob.core.windows.net/developer/Files/downloads/gnu/12.2.rel1/binrel/arm-gnu-toolchain-12.2.rel1-x86_64-arm-none-eabi.tar.xz
+ARG GCC_URI=https://armkeil.blob.core.windows.net/developer/Files/downloads/gnu/13.2.rel1/binrel/arm-gnu-toolchain-13.2.rel1-x86_64-arm-none-eabi.tar.xz
 RUN mkdir -p /tmp/dc-downloads /tmp/dc-extracted/gcc \
     && curl -o /tmp/dc-downloads/gcc-arm.tar.xz  $GCC_URI \
     && xz -d /tmp/dc-downloads/gcc-arm.tar.xz \
     && tar -xvf /tmp/dc-downloads/gcc-arm.tar -C /tmp/dc-extracted/gcc --strip-components 1 \
     && rm -rf /tmp/dc-extracted/gcc/share/doc/ /tmp/dc-extracted/gcc/share/gcc-arm-none-eabi/samples/
 
-ARG CMAKE_SCRIPT=https://cmake.org/files/v3.24/cmake-3.24.0-linux-x86_64.sh
+ARG CMAKE_SCRIPT=https://github.com/Kitware/CMake/releases/download/v3.27.6/cmake-3.27.6-linux-x86_64.sh
 RUN wget $CMAKE_SCRIPT \
       -q -O /tmp/cmake-install.sh \
       && chmod u+x /tmp/cmake-install.sh \
@@ -22,7 +22,7 @@ RUN wget $CMAKE_SCRIPT \
       && /tmp/cmake-install.sh --skip-license --prefix=/tmp/dc-extracted/cmake \
       && rm /tmp/cmake-install.sh
 
-FROM ghcr.io/linuxcontainers/debian-slim:latest AS devcontainer
+FROM ubuntu:latest AS devcontainer
 
 # Avoid warnings by switching to noninteractive
 ENV DEBIAN_FRONTEND=noninteractive
@@ -45,21 +45,26 @@ RUN apt-get update \
     srecord
 
 # Create needed directories
-RUN mkdir -p /usr/local/bin/gcc \
-    && mkdir -p /usr/local/bin/xtensa \
-    && mkdir -p /usr/local/bin/titools
+RUN mkdir -p /usr/local/bin/GCC_URI
 
-# Clone repos for STM32 including AzureRTOS
+
+# Clone ChibiOS repo
+RUN git svn clone http://svn.code.sf.net/p/chibios/code/branches/stable_21.11.x -rHEAD ./sources/ChibiOs
+# Alternative source for those having issues with git svn downloads:
+# RUN git clone --branch stable_21.11.x https://github.com/ArduPilot/ChibiOS.svn.git --depth 1 ./sources/ChibiOs
+
+# Clone support repos for STM32 including AzureRTOS
 RUN git clone --branch nf-build https://github.com/nanoframework/STM32CubeL4.git --depth 1 ./sources/STM32CubeL4 \
     && git clone --branch nf-build https://github.com/nanoframework/STM32CubeF7.git --depth 1 ./sources/STM32CubeF7 \
     && git clone --branch nf-build https://github.com/nanoframework/STM32CubeF4.git --depth 1 ./sources/STM32CubeF4 \
     && git clone --branch nf-build https://github.com/nanoframework/STM32CubeH7.git --depth 1 ./sources/STM32CubeH7 \    
-    && git svn clone http://svn.code.sf.net/p/chibios/code/branches/stable_21.11.x -rHEAD ./sources/ChibiOs \
     && git clone --branch nanoframework https://github.com/nanoframework/ChibiOS-Contrib.git --depth 1 ./sources/ChibiOs-Contrib
-# Clone mbedtls and fatfs
-RUN git clone --branch mbedtls-2.28.2 https://github.com/ARMmbed/mbedtls.git --depth 1 ./sources/mbedtls \
-    && git clone --branch R0.14b https://github.com/abbrev/fatfs.git --depth 1 ./sources/fatfs \
-    && git clone --branch nf-build https://github.com/nanoframework/spiffs.git --depth 1 ./sources/spiffs
+
+# Clone libs including mbedtls and fatfs
+RUN git clone --branch mbedtls-2.28.5 https://github.com/ARMmbed/mbedtls.git --depth 1 ./sources/mbedtls \
+    && git clone --branch R0.15 https://github.com/abbrev/fatfs.git --depth 1 ./sources/fatfs \
+    && git clone --branch nf-build https://github.com/nanoframework/spiffs.git --depth 1 ./sources/spiffs \
+    && git clone --branch STABLE-2_1_3_RELEASE https://github.com/lwip-tcpip/lwip.git --depth 1 ./sources/lwip
 
 # set gcc location
 ENV ARM_GCC_PATH=/usr/local/bin/gcc
@@ -74,7 +79,7 @@ ENV PATH=/usr/bin/cmake/bin:${PATH}
 # Putting hex2dfu in the container
 ENV HEX2DFU_PATH=/usr/local/bin/hex2dfu
 
-ARG HEX2DFU=https://github.com/nanoframework/hex2dfu/releases/download/v2.0.9/hex2dfu
+ARG HEX2DFU=https://github.com/nanoframework/hex2dfu/releases/download/v3.0.2/hex2dfu
 RUN mkdir -p  $HEX2DFU_PATH \
     && curl -o  $HEX2DFU_PATH/hex2dfu $HEX2DFU -L \
     && chmod +x  $HEX2DFU_PATH/hex2dfu

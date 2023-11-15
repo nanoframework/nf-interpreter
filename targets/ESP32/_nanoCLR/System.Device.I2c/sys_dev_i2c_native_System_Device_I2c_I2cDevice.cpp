@@ -15,27 +15,6 @@ typedef Library_sys_dev_i2c_native_System_Device_I2c_I2cConnectionSettings I2cCo
 typedef Library_sys_dev_i2c_native_System_Device_I2c_I2cTransferResult I2cTransferResult;
 typedef Library_corlib_native_System_SpanByte SpanByte;
 
-static char Esp_I2C_Initialised_Flag[I2C_NUM_MAX] = {
-    0
-#if I2C_NUM_MAX > 1
-    ,
-    0
-#endif
-};
-
-void Esp32_I2c_UnitializeAll()
-{
-    for (int c = 0; c < I2C_NUM_MAX; c++)
-    {
-        if (Esp_I2C_Initialised_Flag[c])
-        {
-            // Delete bus driver
-            i2c_driver_delete((i2c_port_t)c);
-            Esp_I2C_Initialised_Flag[c] = 0;
-        }
-    }
-}
-
 bool SetConfig(i2c_port_t bus, CLR_RT_HeapBlock *config)
 {
     int busSpeed = config[I2cConnectionSettings::FIELD___busSpeed].NumericByRef().s4;

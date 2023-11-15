@@ -587,7 +587,7 @@ bool CLR_DBG_Debugger::Monitor_TargetInfo(WP_Message *msg)
 {
     Monitor_TargetInfo_Reply cmdReply;
 
-    bool fOK = nanoBooter_GetTargetInfo(&cmdReply.m_TargetInfo) == true;
+    bool fOK = (bool)nanoBooter_GetTargetInfo(&cmdReply.m_TargetInfo) == true;
 
     WP_ReplyToCommand(msg, fOK, false, &cmdReply, sizeof(Monitor_TargetInfo_Reply));
 
@@ -1066,7 +1066,7 @@ bool CLR_DBG_Debugger::Monitor_Reboot(WP_Message *msg)
     if (CLR_DBG_Commands::Monitor_Reboot::c_EnterNanoBooter ==
         (cmd->m_flags & CLR_DBG_Commands::Monitor_Reboot::c_EnterNanoBooter))
     {
-        success = RequestToLaunchNanoBooter();
+        success = RequestToLaunchNanoBooter(0);
     }
     else if (
         CLR_DBG_Commands::Monitor_Reboot::c_EnterProprietaryBooter ==
@@ -1781,7 +1781,7 @@ static bool FillValues(
 
     if (pTD != nullptr)
     {
-        dst->m_td = *pTD;
+        dst->m_td.data = pTD->data;
     }
     else if (SUCCEEDED(desc.InitializeFromObject(*ptr)))
     {
@@ -3170,6 +3170,8 @@ bool CLR_DBG_Debugger::Profiling_Command(WP_Message *msg)
         default:
             return false;
     }
+
+    return true;
 }
 
 bool CLR_DBG_Debugger::Profiling_ChangeConditions(WP_Message *msg)
@@ -3645,7 +3647,7 @@ bool CLR_DBG_Debugger::Debugging_Resolve_Method(WP_Message *msg)
             char *szBuffer = cmdReply->m_method;
             size_t iBuffer = MAXSTRLEN(cmdReply->m_method);
 
-            cmdReply->m_td = instOwner;
+            cmdReply->m_td.data = instOwner.data;
 
             CLR_SafeSprintf(szBuffer, iBuffer, "%s", inst.assembly->GetString(inst.target->name));
 

@@ -20,7 +20,7 @@
 #include <lwip/tcpip.h>
 #include <netif/etharp.h>
 #include <lwip/netifapi.h>
-#include <apps/sntp.h>
+#include <lwip/apps/sntp.h>
 
 #if LWIP_DHCP
 #include <lwip/dhcp.h>

@@ -122,6 +122,24 @@ void HAL_COMPLETION::EnqueueTicks(uint64_t eventTimeTicks)
     GLOBAL_UNLOCK();
 }
 
+void HAL_COMPLETION::EnqueueDelta64(uint64_t uSecFromNow)
+{
+    NATIVE_PROFILE_PAL_ASYNC_PROC_CALL();
+
+    // grab time first to be closest to now as possible from when this function was called
+    uint64_t now = HAL_Time_CurrentSysTicks();
+    uint64_t eventTimeTicks = CPU_MillisecondsToTicks(uSecFromNow * 1000);
+
+    EnqueueTicks(now + eventTimeTicks);
+}
+
+void HAL_COMPLETION::EnqueueDelta(uint32_t uSecFromNow)
+{
+    NATIVE_PROFILE_PAL_ASYNC_PROC_CALL();
+
+    EnqueueDelta64((uint64_t)uSecFromNow);
+}
+
 //--//
 
 void HAL_COMPLETION::Abort()

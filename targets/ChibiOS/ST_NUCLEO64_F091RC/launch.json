@@ -5,6 +5,8 @@
             "name": "ST_NUCLEO64_F091RC nanoBooter",
             "type": "cppdbg",
             "request": "launch",
+            "targetArchitecture": "arm",
+            "MIMode": "gdb",
             "miDebuggerPath": "<absolute-path-to-the-toolchain-folder-mind-the-forward-slashes>/bin/arm-none-eabi-gdb.exe",
             "program": "${workspaceRoot}/build/nanoBooter.elf",
             "setupCommands": [
@@ -59,6 +61,8 @@
             "name": "ST_NUCLEO64_F091RC nanoCLR",
             "type": "cppdbg",
             "request": "launch",
+            "targetArchitecture": "arm",
+            "MIMode": "gdb",
             "miDebuggerPath": "<absolute-path-to-the-toolchain-folder-mind-the-forward-slashes>/bin/arm-none-eabi-gdb.exe",
             "program": "${workspaceRoot}/build/nanoCLR.elf",
             "setupCommands": [

@@ -411,7 +411,7 @@ HRESULT GifDecoder::ReadColorTable()
     for (int i = 0; i < colorTableSize; i++)
     {
         colorTable[i] =
-            ((CLR_UINT32)curEntry->red) | (((CLR_UINT32)curEntry->green) << 8) | (((CLR_UINT32)curEntry->blue) << 16);
+            ((CLR_UINT32)curEntry->red) << 16 | ((CLR_UINT32)curEntry->green) << 8 | ((CLR_UINT32)curEntry->blue);
         if (colorTable[i] == transparentColor)
         {
             isTransparentColorUnique = false;

@@ -60,7 +60,7 @@ endif()
 # WHEN CHANGING THIS MAKE SURE TO UPDATE:
 # 1. the dev containers
 # 2. ref in AZDO pipeline yaml in Community Targets repo
-set(ESP32_IDF_TAG "4.4.4" CACHE INTERNAL "ESP32 IDF tag")
+set(ESP32_IDF_TAG "4.4.6" CACHE INTERNAL "ESP32 IDF tag")
 
 if(NO_ESP32_IDF_PATH)
     # no ESP32 IDF source specified, download it from official repo

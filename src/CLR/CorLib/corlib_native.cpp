@@ -597,10 +597,10 @@ static const CLR_RT_MethodHandler method_lookup[] =
     nullptr,
     nullptr,
     Library_corlib_native_System_MathInternal::Abs___STATIC__I4__I4,
-    Library_corlib_native_System_MathInternal::Min___STATIC__I4__I4__I4,
-    Library_corlib_native_System_MathInternal::Max___STATIC__I4__I4__I4,
-    nullptr,
-    nullptr,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
     Library_corlib_native_System_MulticastDelegate::op_Equality___STATIC__BOOLEAN__SystemMulticastDelegate__SystemMulticastDelegate,
     Library_corlib_native_System_MulticastDelegate::op_Inequality___STATIC__BOOLEAN__SystemMulticastDelegate__SystemMulticastDelegate,
     nullptr,
@@ -1320,10 +1320,10 @@ static const CLR_RT_MethodHandler method_lookup[] =
     nullptr,
     nullptr,
     Library_corlib_native_System_MathInternal::Abs___STATIC__I4__I4,
-    Library_corlib_native_System_MathInternal::Min___STATIC__I4__I4__I4,
-    Library_corlib_native_System_MathInternal::Max___STATIC__I4__I4__I4,
-    nullptr,
-    nullptr,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
     Library_corlib_native_System_MulticastDelegate::op_Equality___STATIC__BOOLEAN__SystemMulticastDelegate__SystemMulticastDelegate,
     Library_corlib_native_System_MulticastDelegate::op_Inequality___STATIC__BOOLEAN__SystemMulticastDelegate__SystemMulticastDelegate,
     nullptr,
@@ -1483,18 +1483,18 @@ const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_mscorlib =
 
 #if (NANOCLR_REFLECTION == TRUE)
 
-    0x454A3634,
+    0x445C7AF9,
 
 #elif (NANOCLR_REFLECTION == FALSE)
 
-    0x1D98C525,
+    0xE3A4B52F,
 
 #else
 #error "NANOCLR_REFLECTION has to be define either TRUE or FALSE. Check the build options."
 #endif
 
     method_lookup,
-    { 100, 5, 0, 18 }
+    { 100, 5, 0, 19 }
 };
 
 // clang-format on

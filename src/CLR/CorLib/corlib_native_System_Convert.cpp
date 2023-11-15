@@ -524,7 +524,6 @@ HRESULT Library_corlib_native_System_Convert::NativeToDateTime___STATIC__SystemD
 {
     NANOCLR_HEADER();
 
-    CLR_RT_TypeDescriptor dtType;
     CLR_INT64 *pRes;
 
     char *str = (char *)stack.Arg0().RecoverString();
@@ -540,13 +539,8 @@ HRESULT Library_corlib_native_System_Convert::NativeToDateTime___STATIC__SystemD
     // check string parameter for null
     FAULT_ON_NULL_ARG(str);
 
-    // initialize <DateTime> type descriptor
-    NANOCLR_CHECK_HRESULT(dtType.InitializeFromType(g_CLR_RT_WellKnownTypes.DateTime));
-
-    // create an instance of <DateTime>
-    NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObject(ref, dtType.m_handlerCls));
-
-    pRes = Library_corlib_native_System_DateTime::GetValuePtr(ref);
+    pRes = Library_corlib_native_System_DateTime::NewObject(ref);
+    FAULT_ON_NULL(pRes);
 
     // try 'u' Universal time with sortable format (yyyy-MM-dd' 'HH:mm:ss)
     conversionResult = Nano_strptime(str, "%Y-%m-%d %H:%M:%SZ", &ticks);
@@ -732,14 +726,14 @@ HRESULT Library_corlib_native_System_Convert::FromBase64String___STATIC__SZARRAY
     char *outArray = nullptr;
     CLR_UINT8 *returnArray;
     uint16_t result;
-    size_t length;
+    uint32_t length;
 
     inString = stack.Arg0().DereferenceString();
     FAULT_ON_NULL(inString);
 
     FAULT_ON_NULL_ARG(inString->StringText());
 
-    length = (size_t)hal_strlen_s(inString->StringText());
+    length = hal_strlen_s(inString->StringText());
 
     // estimate output length
     outputLength = length / 4 * 3;
@@ -756,8 +750,8 @@ HRESULT Library_corlib_native_System_Convert::FromBase64String___STATIC__SZARRAY
     // need to tweak the parameter with the output length because it includes room for the terminator
     result = mbedtls_base64_decode(
         (unsigned char *)outArray,
-        (outputLength + 1),
-        &outputLength,
+        (size_t)(outputLength + 1),
+        (size_t *)&outputLength,
         (const unsigned char *)inString->StringText(),
         length);
 

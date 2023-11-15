@@ -2443,10 +2443,8 @@ void CLR_RT_HeapBlock::Relocate__HeapBlock()
 void CLR_RT_HeapBlock::Relocate_String()
 {
     NATIVE_PROFILE_CLR_CORE();
-    CLR_RT_GarbageCollector::Heap_Relocate((void **)&m_data.string.m_text);
-#if !defined(NANOCLR_NO_ASSEMBLY_STRINGS)
-    CLR_RT_GarbageCollector::Heap_Relocate((void **)&m_data.string.m_assm);
-#endif
+
+    CLR_RT_GarbageCollector::Heap_Relocate((void **)&m_data);
 }
 
 void CLR_RT_HeapBlock::Relocate_Obj()

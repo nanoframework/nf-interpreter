@@ -16,11 +16,17 @@ namespace nanoFramework.nanoCLR.Host
 
         public bool EnterDebuggerLoopAfterExit { get; set; }
 
+        public bool PerformGarbageCollection { get; set; }
+
+        public bool PerformHeapCompaction { get; set; }
+
         public static nanoCLRSettings Default = new()
         {
             MaxContextSwitches = 50,
             WaitForDebugger = false,
             EnterDebuggerLoopAfterExit = false,
+            PerformGarbageCollection = false,
+            PerformHeapCompaction = false,
         };
     }
 }

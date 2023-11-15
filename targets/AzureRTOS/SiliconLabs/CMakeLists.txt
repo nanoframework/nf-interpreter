@@ -10,6 +10,7 @@ set(SILABS_GECKO_SDK_REQUIRED TRUE PARENT_SCOPE)
 
 option(GECKO_FEATURE_USBD_HID "option to use Gecko SDK HID class")
 option(GECKO_FEATURE_USBD_WINUSB "option to use Gecko SDK USB vendor class for WinUSB")
+option(GECKO_DEVICE_CLASS_VENDOR_DESCRIPTION_LENGTH "option to override Device Class Vendor description")
 
 #################################################################
 # Options for Wire Protocol channel
@@ -70,7 +71,7 @@ endif()
 if(GECKO_SDK_VERSION_EMPTY)
     # no Gecko SDK version actualy specified, must be empty which is fine, we'll default to a known good version
     # WHEN CHANGING THIS MAKE SURE TO UPDATE THE DEV CONTAINERS
-    set(GECKO_SDK_VERSION "v4.3.0")
+    set(GECKO_SDK_VERSION "v4.3.2")
 endif()
 
 if(NO_GECKO_SDK_SOURCE)

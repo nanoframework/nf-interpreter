@@ -319,17 +319,6 @@ HRESULT SetI2sConfig(i2s_port_t bus, CLR_RT_HeapBlock *config)
 #endif
     }
 
-// apply low-level workaround for bug in some ESP-IDF versions that swap
-// the left and right channels
-// https://github.com/espressif/esp-idf/issues/6625
-#if CONFIG_IDF_TARGET_ESP32S3
-    REG_SET_BIT(I2S_TX_CONF_REG(bus), I2S_TX_MSB_SHIFT);
-    REG_SET_BIT(I2S_TX_CONF_REG(bus), I2S_RX_MSB_SHIFT);
-#else
-    REG_SET_BIT(I2S_CONF_REG(bus), I2S_TX_MSB_RIGHT);
-    REG_SET_BIT(I2S_CONF_REG(bus), I2S_RX_MSB_RIGHT);
-#endif
-
 #if (ESP_IDF_VERSION_MAJOR == 4) && (ESP_IDF_VERSION_MINOR >= 4)
     pin_config.mck_io_num = I2S_PIN_NO_CHANGE;
 #endif

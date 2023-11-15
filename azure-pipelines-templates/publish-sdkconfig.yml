@@ -2,10 +2,10 @@
 # See LICENSE file in the project root for full license information.
 
 steps:
-  - task: PublishBuildArtifacts@1
+  - task: PublishPipelineArtifact@1
     condition: succeeded()
     displayName: Publish SDKCONFIG artifact
     inputs:
-      PathtoPublish: '$(Build.ArtifactStagingDirectory)\$(TargetPublishName)_sdkconfig'
-      ArtifactName: $(TargetPublishName)_sdkconfig
-      ArtifactType: Container
+      targetPath: '$(Build.ArtifactStagingDirectory)\$(TargetPublishName)_sdkconfig'
+      artifactName: $(TargetPublishName)_sdkconfig
+      artifactType: pipeline

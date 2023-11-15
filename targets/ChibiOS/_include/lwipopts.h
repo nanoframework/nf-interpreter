@@ -203,7 +203,9 @@
 // /**
 //  * LWIP_IPV6==1: Enable IPv6
 //  */
-// #define LWIP_IPV6 0
+#ifndef LWIP_IPV6
+#define LWIP_IPV6 0
+#endif
 
 /*
    ------------------------------------------------
@@ -1034,7 +1036,7 @@
 
 // enable full duplex comms on multiple threads
 // this requires adding an extra field in ChibiOS thread_t (see comment on platform_sys_arch.c)
-//#define LWIP_NETCONN_FULLDUPLEX         1
+// #define LWIP_NETCONN_FULLDUPLEX         1
 
 #ifndef LWIP_RAND
 #define LWIP_RAND() ((u32_t)rand())

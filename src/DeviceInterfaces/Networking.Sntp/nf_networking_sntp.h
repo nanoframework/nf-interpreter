@@ -22,9 +22,9 @@ extern "C"
 #include <nxd_sntp_client.h>
 #elif defined(AZURE_RTOS_THREADX)
 // TODO
-//#include <nxd_sntp_client.h>
+// #include <nxd_sntp_client.h>
 #else
-#include <apps/sntp.h>
+#include <lwip/apps/sntp.h>
 #endif
 }
 

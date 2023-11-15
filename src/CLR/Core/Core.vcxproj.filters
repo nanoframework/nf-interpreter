@@ -138,6 +138,9 @@
     <ClCompile Include="nanoSupport_CRC32.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="GarbageCollector_Info.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="CLR_RT_HeapBlock_GenericInstance.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
