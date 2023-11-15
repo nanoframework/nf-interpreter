@@ -30,9 +30,10 @@
 /*! @brief The ENET PHY address. */
 #define BOARD_ENET0_PHY_ADDRESS (0x02U) /* Phy address of enet port 0. */
 
-static struct netif thisif = { 0 };
+static struct netif thisif = {0};
 
-struct netif * nf_getNetif() {
+struct netif *nf_getNetif()
+{
     return &thisif;
 }
 
@@ -54,11 +55,9 @@ static void delay(void)
 static void stack_init(const lwipthread_opts_t *opts)
 {
     ip4_addr_t fsl_netif0_ipaddr, fsl_netif0_netmask, fsl_netif0_gw;
-    ethernetif_config_t fsl_enet_config0 = {
-        .phyAddress = BOARD_ENET0_PHY_ADDRESS, .clockName = kCLOCK_CoreSysClk
-    };
+    ethernetif_config_t fsl_enet_config0 = {.phyAddress = BOARD_ENET0_PHY_ADDRESS, .clockName = kCLOCK_CoreSysClk};
 
-    memcpy(fsl_enet_config0.macAddress,opts->macaddress,NETIF_MAX_HWADDR_LEN);
+    memcpy(fsl_enet_config0.macAddress, opts->macaddress, NETIF_MAX_HWADDR_LEN);
 
     tcpip_init(NULL, NULL);
 
@@ -69,14 +68,20 @@ static void stack_init(const lwipthread_opts_t *opts)
     // IP4_ADDR(&fsl_netif0_netmask, configNET_MASK0, configNET_MASK1, configNET_MASK2, configNET_MASK3);
     // IP4_ADDR(&fsl_netif0_gw, configGW_ADDR0, configGW_ADDR1, configGW_ADDR2, configGW_ADDR3);
 
-    netifapi_netif_add(&thisif, &fsl_netif0_ipaddr, &fsl_netif0_netmask, &fsl_netif0_gw, &fsl_enet_config0,
-                       ethernetif0_init, tcpip_input);
+    netifapi_netif_add(
+        &thisif,
+        &fsl_netif0_ipaddr,
+        &fsl_netif0_netmask,
+        &fsl_netif0_gw,
+        &fsl_enet_config0,
+        ethernetif0_init,
+        tcpip_input);
     netifapi_netif_set_default(&thisif);
     netifapi_netif_set_up(&thisif);
 
-    //mdns_resp_init();
-    //mdns_resp_add_netif(&thisif, opts->ourHostName, 60);
-    // mdns_resp_add_service(&thisif, MDNS_HOSTNAME, "_http", DNSSD_PROTO_TCP, 80, 300, http_srv_txt, NULL);
+    // mdns_resp_init();
+    // mdns_resp_add_netif(&thisif, opts->ourHostName, 60);
+    //  mdns_resp_add_service(&thisif, MDNS_HOSTNAME, "_http", DNSSD_PROTO_TCP, 80, 300, http_srv_txt, NULL);
 
     // LWIP_PLATFORM_DIAG(("\r\n************************************************"));
     // LWIP_PLATFORM_DIAG((" HTTP Server example"));
@@ -93,7 +98,8 @@ static void stack_init(const lwipthread_opts_t *opts)
     // LWIP_PLATFORM_DIAG(("************************************************"));
 }
 
-void lwipInit(const lwipthread_opts_t *opts) {
+void lwipInit(const lwipthread_opts_t *opts)
+{
 
     gpio_pin_config_t gpio_config = {kGPIO_DigitalOutput, 0, kGPIO_NoIntmode};
 
@@ -110,5 +116,4 @@ void lwipInit(const lwipthread_opts_t *opts) {
     GPIO_WritePinOutput(GPIO1, 9, 1);
 
     stack_init(opts);
-
 }

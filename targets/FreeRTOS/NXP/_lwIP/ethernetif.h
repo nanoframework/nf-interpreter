@@ -6,7 +6,6 @@
 // See LICENSE file in the project root for full license information.
 //
 
-
 /*
  * from the original source code file
  *
@@ -38,7 +37,6 @@
  *
  */
 
-
 #ifndef ETHERNETIF_H
 #define ETHERNETIF_H
 
@@ -49,48 +47,48 @@
  * Definitions
  ******************************************************************************/
 #ifndef ENET_RXBD_NUM
-    #define ENET_RXBD_NUM (5)
+#define ENET_RXBD_NUM (5)
 #endif
 #ifndef ENET_TXBD_NUM
 #if defined(FSL_FEATURE_SOC_LPC_ENET_COUNT) && (FSL_FEATURE_SOC_LPC_ENET_COUNT > 0)
-    #define ENET_TXBD_NUM (5)
+#define ENET_TXBD_NUM (5)
 #else
-    #define ENET_TXBD_NUM (3)
+#define ENET_TXBD_NUM (3)
 #endif
 #endif
 #ifndef ENET_RXBUFF_SIZE
-    #define ENET_RXBUFF_SIZE (ENET_FRAME_MAX_FRAMELEN)
+#define ENET_RXBUFF_SIZE (ENET_FRAME_MAX_FRAMELEN)
 #endif
 #ifndef ENET_TXBUFF_SIZE
-    #define ENET_TXBUFF_SIZE (ENET_FRAME_MAX_FRAMELEN)
+#define ENET_TXBUFF_SIZE (ENET_FRAME_MAX_FRAMELEN)
 #endif
 
-#define ENET_OK             (0U)
-#define ENET_ERROR          (0xFFU)
-#define ENET_TIMEOUT        (0xFFFU)
+#define ENET_OK      (0U)
+#define ENET_ERROR   (0xFFU)
+#define ENET_TIMEOUT (0xFFFU)
 
 /* ENET IRQ priority. Used in FreeRTOS. */
 /* Interrupt priorities. */
 #ifdef __CA7_REV
 #ifndef ENET_PRIORITY
-    #define ENET_PRIORITY       (21U)
+#define ENET_PRIORITY (21U)
 #endif
 #ifndef ENET_1588_PRIORITY
-    #define ENET_1588_PRIORITY  (20U)
+#define ENET_1588_PRIORITY (20U)
 #endif
 #else
 #ifndef ENET_PRIORITY
-    #define ENET_PRIORITY       (6U)
+#define ENET_PRIORITY (6U)
 #endif
 #ifndef ENET_1588_PRIORITY
-    #define ENET_1588_PRIORITY  (5U)
+#define ENET_1588_PRIORITY (5U)
 #endif
 #endif
 
-/*  Defines Ethernet Autonegotiation Timeout during initialization. 
- *  Set it to 0 to disable the waiting. */ 
+/*  Defines Ethernet Autonegotiation Timeout during initialization.
+ *  Set it to 0 to disable the waiting. */
 #ifndef ENET_ATONEGOTIATION_TIMEOUT
-    #define ENET_ATONEGOTIATION_TIMEOUT     (0xFFFU)
+#define ENET_ATONEGOTIATION_TIMEOUT (0xFFFU)
 #endif
 
 /**
@@ -104,32 +102,33 @@ typedef struct ethernetif_config
 } ethernetif_config_t;
 
 #if defined(__cplusplus)
-extern "C" {
+extern "C"
+{
 #endif /* __cplusplus */
 
-/**
- * This function should be passed as a parameter to netif_add()
- * if you initialize the first ENET interface.
- */
-err_t ethernetif0_init(struct netif *netif);
+    /**
+     * This function should be passed as a parameter to netif_add()
+     * if you initialize the first ENET interface.
+     */
+    err_t ethernetif0_init(struct netif *netif);
 
-#if (defined(FSL_FEATURE_SOC_ENET_COUNT) && (FSL_FEATURE_SOC_ENET_COUNT > 1)) \
- || (defined(FSL_FEATURE_SOC_LPC_ENET_COUNT) && (FSL_FEATURE_SOC_LPC_ENET_COUNT > 1))
-/**
- * This function should be passed as a parameter to netif_add()
- * if you initialize the second ENET interface.
- */
-err_t ethernetif1_init(struct netif *netif);
+#if (defined(FSL_FEATURE_SOC_ENET_COUNT) && (FSL_FEATURE_SOC_ENET_COUNT > 1)) ||                                       \
+    (defined(FSL_FEATURE_SOC_LPC_ENET_COUNT) && (FSL_FEATURE_SOC_LPC_ENET_COUNT > 1))
+    /**
+     * This function should be passed as a parameter to netif_add()
+     * if you initialize the second ENET interface.
+     */
+    err_t ethernetif1_init(struct netif *netif);
 #endif /* FSL_FEATURE_SOC_*_ENET_COUNT */
 
-/**
- * This function should be called when a packet is ready to be read
- * from the interface. 
- * It is used by bare-metal applications.
- *
- * @param netif the lwip network interface structure for this ethernetif
- */
-void ethernetif_input( struct netif *netif);
+    /**
+     * This function should be called when a packet is ready to be read
+     * from the interface.
+     * It is used by bare-metal applications.
+     *
+     * @param netif the lwip network interface structure for this ethernetif
+     */
+    void ethernetif_input(struct netif *netif);
 
 #if defined(__cplusplus)
 }
