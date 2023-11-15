@@ -37,9 +37,18 @@
 #include <nanoHAL_Network.h>
 #include "lwip/opt.h"
 
+#ifdef __GNUC__
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-variable"
+#endif
+
 #if LWIP_SOCKET /* don't build if not configured for use in lwipopts.h */
 
 #include "lwip/sockets.h"
+// [NF_CHANGE]
+// can't include this because we have to tweak
+//#include "lwip/priv/sockets_priv.h"
+// [END_NF_CHANGE]
 #include "lwip/api.h"
 #include "lwip/sys.h"
 #include "lwip/igmp.h"
@@ -1971,9 +1980,9 @@ lwip_getsockopt_impl(int s, int level, int optname, void *optval, socklen_t *opt
       LWIP_SOCKOPT_CHECK_OPTLEN(*optlen, int);
       /* only overwrite ERR_OK or temporary errors */
       if (((sock->err == 0) || (sock->err == EINPROGRESS)) && (sock->conn != NULL)) {
-        sock_set_errno(sock, err_to_errno(sock->conn->last_err));
+        sock_set_errno(sock, err_to_errno(netconn_err(sock->conn)));
       }
-      *(int *)optval = (sock->err == 0xFF ? (int)-1 : (int)sock->err);
+      *(int *)optval = err_to_errno(netconn_err(sock->conn));
       sock->err = 0;
       LWIP_DEBUGF(SOCKETS_DEBUG, ("lwip_getsockopt(%d, SOL_SOCKET, SO_ERROR) = %d\n",
                   s, *(int *)optval));

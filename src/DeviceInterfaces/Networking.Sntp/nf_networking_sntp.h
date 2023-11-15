@@ -24,7 +24,7 @@ extern "C"
 // TODO
 //#include <nxd_sntp_client.h>
 #else
-#include <apps/sntp.h>
+#include <lwip/apps/sntp.h>
 #endif
 }
 

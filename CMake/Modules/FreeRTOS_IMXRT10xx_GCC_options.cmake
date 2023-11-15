@@ -53,7 +53,7 @@ macro(nf_set_link_options)
     endif()
 
     # request specs from newlib nano
-    set_property(TARGET ${NFSLO_TARGET} APPEND_STRING PROPERTY LINK_FLAGS " --specs=nano.specs --specs=nosys.specs -Wl,--start-group -Xlinker --gc-sections -Xlinker --sort-section=alignment -Xlinker -print-memory-usage")
+    set_property(TARGET ${NFSLO_TARGET} APPEND_STRING PROPERTY LINK_FLAGS " --specs=nano.specs --specs=nosys.specs -Wl,--start-group -Xlinker --gc-sections -Wl,--end-group -Xlinker --sort-section=alignment -Xlinker -print-memory-usage")
       
     # include libraries in build
     nf_include_libraries_in_build(${NFSLO_TARGET})
