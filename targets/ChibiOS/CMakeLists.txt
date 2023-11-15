@@ -209,6 +209,14 @@ if(NF_FEATURE_HAS_SDCARD OR NF_FEATURE_HAS_USB_MSD)
 
 endif()
 
+# if networking is enabled add lwIP to the build
+if(USE_NETWORKING_OPTION)
+
+    nf_add_lwip_library()
+
+endif()
+
+
 # if Mbed TLS is enabled add it to the build
 if(USE_SECURITY_MBEDTLS_OPTION OR NF_REQUIRES_MBEDTLS)
 

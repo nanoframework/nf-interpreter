@@ -46,17 +46,17 @@
 
 // Typedefs for the types used by lwip
 #ifdef LWIP_NO_STDINT_H
-typedef unsigned char  u8_t;
-typedef signed   char  s8_t;
+typedef unsigned char u8_t;
+typedef signed char s8_t;
 typedef unsigned short u16_t;
-typedef signed   short s16_t;
-typedef unsigned int   u32_t;
-typedef signed   int   s32_t;
-typedef u32_t          mem_ptr_t;
+typedef signed short s16_t;
+typedef unsigned int u32_t;
+typedef signed int s32_t;
+typedef u32_t mem_ptr_t;
 #endif
 
 // Compiler hints for packing lwip's structures
-//FSL: very important at high optimization level
+// FSL: very important at high optimization level
 
 #if __GNUC__
 #define PACK_STRUCT_BEGIN
@@ -69,7 +69,7 @@ typedef u32_t          mem_ptr_t;
 #endif
 
 #if __GNUC__
-#define PACK_STRUCT_STRUCT __attribute__ ((__packed__))
+#define PACK_STRUCT_STRUCT __attribute__((__packed__))
 #elif defined(__IAR_SYSTEMS_ICC__)
 #define PACK_STRUCT_STRUCT
 #elif defined(__arm__) && defined(__ARMCC_VERSION)
@@ -90,20 +90,22 @@ typedef u32_t          mem_ptr_t;
 
 #define PACK_STRUCT_FIELD(x) x
 
-
-
 // non-fatal, print a message.
-#define LWIP_PLATFORM_DIAG(x)                     do {PRINTF x;PRINTF("\r\n");} while(0)
+#define LWIP_PLATFORM_DIAG(x)                                                                                          \
+    do                                                                                                                 \
+    {                                                                                                                  \
+        PRINTF x;                                                                                                      \
+        PRINTF("\r\n");                                                                                                \
+    } while (0)
 
 /**
  * @brief   Halt the system on lwIP assert failure by default.
  */
 #if !defined(LWIP_PLATFORM_ASSERT)
-#define LWIP_PLATFORM_ASSERT(x)     __asm volatile("BKPT #0\n");
+#define LWIP_PLATFORM_ASSERT(x) __asm volatile("BKPT #0\n");
 #endif
 
 // Platform specific diagnostic output
-#include "sys_arch.h"//FSL
-
+#include "sys_arch.h" //FSL
 
 #endif // CC_H
