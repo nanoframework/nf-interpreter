@@ -160,10 +160,13 @@ struct Library_sys_net_native_System_Net_IPAddress
 {
     static const int FIELD_STATIC__Any = 8;
     static const int FIELD_STATIC__Loopback = 9;
+    static const int FIELD_STATIC__Broadcast = 10;
+    static const int FIELD_STATIC__None = 11;
 
     static const int FIELD__Address = 1;
     static const int FIELD___family = 2;
     static const int FIELD___numbers = 3;
+    static const int FIELD___hashCode = 4;
 
     NANOCLR_NATIVE_DECLARE(IPv4ToString___STATIC__STRING__U4);
 
@@ -210,9 +213,9 @@ struct Library_sys_net_native_System_Net_NetworkInformation_NetworkAvailabilityE
 
 struct Library_sys_net_native_System_Net_NetworkInformation_NetworkChange
 {
-    static const int FIELD_STATIC__NetworkAddressChanged = 10;
-    static const int FIELD_STATIC__NetworkAvailabilityChanged = 11;
-    static const int FIELD_STATIC__NetworkAPStationChanged = 12;
+    static const int FIELD_STATIC__NetworkAddressChanged = 12;
+    static const int FIELD_STATIC__NetworkAvailabilityChanged = 13;
+    static const int FIELD_STATIC__NetworkAPStationChanged = 14;
 
     //--//
 };
@@ -240,8 +243,7 @@ struct Library_sys_net_native_System_Net_NetworkInformation_Wireless80211Configu
     static const int FIELD___options = 8;
 
     NANOCLR_NATIVE_DECLARE(GetWireless82011ConfigurationCount___STATIC__I4);
-    NANOCLR_NATIVE_DECLARE(
-        GetWireless82011Configuration___STATIC__SystemNetNetworkInformationWireless80211Configuration__I4);
+    NANOCLR_NATIVE_DECLARE(GetWireless82011Configuration___STATIC__SystemNetNetworkInformationWireless80211Configuration__I4);
     NANOCLR_NATIVE_DECLARE(UpdateConfiguration___STATIC__VOID);
 
     //--//
@@ -272,8 +274,7 @@ struct Library_sys_net_native_System_Net_NetworkInformation_WirelessAPConfigurat
     NANOCLR_NATIVE_DECLARE(GetWirelessAPConfigurationCount___STATIC__I4);
     NANOCLR_NATIVE_DECLARE(GetWirelessAPConfiguration___STATIC__SystemNetNetworkInformationWirelessAPConfiguration__I4);
     NANOCLR_NATIVE_DECLARE(UpdateConfiguration___STATIC__VOID);
-    NANOCLR_NATIVE_DECLARE(
-        NativeGetConnectedClients___STATIC__SZARRAY_SystemNetNetworkInformationWirelessAPStation__I4);
+    NANOCLR_NATIVE_DECLARE(NativeGetConnectedClients___STATIC__SZARRAY_SystemNetNetworkInformationWirelessAPStation__I4);
     NANOCLR_NATIVE_DECLARE(NativeDeauthStation___STATIC__STRING__I4);
 
     //--//
@@ -288,10 +289,8 @@ struct Library_sys_net_native_System_Net_Security_CertificateManager
 
 struct Library_sys_net_native_System_Net_Security_SslNative
 {
-    NANOCLR_NATIVE_DECLARE(
-        SecureServerInit___STATIC__I4__I4__I4__SystemSecurityCryptographyX509CertificatesX509Certificate__SystemSecurityCryptographyX509CertificatesX509Certificate__BOOLEAN);
-    NANOCLR_NATIVE_DECLARE(
-        SecureClientInit___STATIC__I4__I4__I4__SystemSecurityCryptographyX509CertificatesX509Certificate__SystemSecurityCryptographyX509CertificatesX509Certificate__BOOLEAN);
+    NANOCLR_NATIVE_DECLARE(SecureServerInit___STATIC__I4__I4__I4__SystemSecurityCryptographyX509CertificatesX509Certificate__SystemSecurityCryptographyX509CertificatesX509Certificate__BOOLEAN);
+    NANOCLR_NATIVE_DECLARE(SecureClientInit___STATIC__I4__I4__I4__SystemSecurityCryptographyX509CertificatesX509Certificate__SystemSecurityCryptographyX509CertificatesX509Certificate__BOOLEAN);
     NANOCLR_NATIVE_DECLARE(SecureAccept___STATIC__VOID__I4__OBJECT);
     NANOCLR_NATIVE_DECLARE(SecureConnect___STATIC__VOID__I4__STRING__OBJECT);
     NANOCLR_NATIVE_DECLARE(SecureRead___STATIC__I4__OBJECT__SZARRAY_U1__I4__I4__I4);
@@ -333,18 +332,17 @@ struct Library_sys_net_native_System_Security_Cryptography_X509Certificates_X509
     static const int FIELD___handle = 6;
     static const int FIELD___sessionHandle = 7;
 
-    NANOCLR_NATIVE_DECLARE(
-        ParseCertificate___STATIC__VOID__SZARRAY_U1__BYREF_STRING__BYREF_STRING__BYREF_SystemDateTime__BYREF_SystemDateTime);
+    NANOCLR_NATIVE_DECLARE(ParseCertificate___STATIC__VOID__SZARRAY_U1__BYREF_STRING__BYREF_STRING__BYREF_SystemDateTime__BYREF_SystemDateTime);
 
     //--//
 };
 
 struct Library_sys_net_native_System_Net_Security_SslStream
 {
-    static const int FIELD___sslVerification = 7;
-    static const int FIELD___useStoredDeviceCertificate = 8;
-    static const int FIELD___sslContext = 9;
-    static const int FIELD___isServer = 10;
+    static const int FIELD___sslVerification = 6;
+    static const int FIELD___useStoredDeviceCertificate = 7;
+    static const int FIELD___sslContext = 8;
+    static const int FIELD___isServer = 9;
 
     //--//
 };
@@ -407,11 +405,11 @@ struct Library_sys_net_native_System_Net_Sockets_NativeSocket
 
 struct Library_sys_net_native_System_Net_Sockets_NetworkStream
 {
-    static const int FIELD___socket = 2;
-    static const int FIELD___socketType = 3;
-    static const int FIELD___remoteEndPoint = 4;
-    static const int FIELD___ownsSocket = 5;
-    static const int FIELD___disposed = 6;
+    static const int FIELD___socket = 1;
+    static const int FIELD___socketType = 2;
+    static const int FIELD___remoteEndPoint = 3;
+    static const int FIELD___ownsSocket = 4;
+    static const int FIELD___disposed = 5;
 
     //--//
 };

@@ -84,6 +84,9 @@ static const CLR_RT_MethodHandler method_lookup[] =
     NULL,
     NULL,
     NULL,
+    NULL,
+    NULL,
+    NULL,
     Library_sys_net_native_System_Net_IPAddress::IPv4ToString___STATIC__STRING__U4,
     NULL,
     NULL,
@@ -333,9 +336,9 @@ static const CLR_RT_MethodHandler method_lookup[] =
 const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_System_Net =
 {
     "System.Net",
-    0x5BAB8CB3,
+    0x35DEC0B7,
     method_lookup,
-    { 100, 1, 5, 0 }
+    { 100, 1, 5, 1 }
 };
 
 // clang-format on
