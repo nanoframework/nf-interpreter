@@ -243,7 +243,8 @@ struct Library_sys_net_native_System_Net_NetworkInformation_Wireless80211Configu
     static const int FIELD___options = 8;
 
     NANOCLR_NATIVE_DECLARE(GetWireless82011ConfigurationCount___STATIC__I4);
-    NANOCLR_NATIVE_DECLARE(GetWireless82011Configuration___STATIC__SystemNetNetworkInformationWireless80211Configuration__I4);
+    NANOCLR_NATIVE_DECLARE(
+        GetWireless82011Configuration___STATIC__SystemNetNetworkInformationWireless80211Configuration__I4);
     NANOCLR_NATIVE_DECLARE(UpdateConfiguration___STATIC__VOID);
 
     //--//
@@ -274,7 +275,8 @@ struct Library_sys_net_native_System_Net_NetworkInformation_WirelessAPConfigurat
     NANOCLR_NATIVE_DECLARE(GetWirelessAPConfigurationCount___STATIC__I4);
     NANOCLR_NATIVE_DECLARE(GetWirelessAPConfiguration___STATIC__SystemNetNetworkInformationWirelessAPConfiguration__I4);
     NANOCLR_NATIVE_DECLARE(UpdateConfiguration___STATIC__VOID);
-    NANOCLR_NATIVE_DECLARE(NativeGetConnectedClients___STATIC__SZARRAY_SystemNetNetworkInformationWirelessAPStation__I4);
+    NANOCLR_NATIVE_DECLARE(
+        NativeGetConnectedClients___STATIC__SZARRAY_SystemNetNetworkInformationWirelessAPStation__I4);
     NANOCLR_NATIVE_DECLARE(NativeDeauthStation___STATIC__STRING__I4);
 
     //--//
@@ -289,8 +291,10 @@ struct Library_sys_net_native_System_Net_Security_CertificateManager
 
 struct Library_sys_net_native_System_Net_Security_SslNative
 {
-    NANOCLR_NATIVE_DECLARE(SecureServerInit___STATIC__I4__I4__I4__SystemSecurityCryptographyX509CertificatesX509Certificate__SystemSecurityCryptographyX509CertificatesX509Certificate__BOOLEAN);
-    NANOCLR_NATIVE_DECLARE(SecureClientInit___STATIC__I4__I4__I4__SystemSecurityCryptographyX509CertificatesX509Certificate__SystemSecurityCryptographyX509CertificatesX509Certificate__BOOLEAN);
+    NANOCLR_NATIVE_DECLARE(
+        SecureServerInit___STATIC__I4__I4__I4__SystemSecurityCryptographyX509CertificatesX509Certificate__SystemSecurityCryptographyX509CertificatesX509Certificate__BOOLEAN);
+    NANOCLR_NATIVE_DECLARE(
+        SecureClientInit___STATIC__I4__I4__I4__SystemSecurityCryptographyX509CertificatesX509Certificate__SystemSecurityCryptographyX509CertificatesX509Certificate__BOOLEAN);
     NANOCLR_NATIVE_DECLARE(SecureAccept___STATIC__VOID__I4__OBJECT);
     NANOCLR_NATIVE_DECLARE(SecureConnect___STATIC__VOID__I4__STRING__OBJECT);
     NANOCLR_NATIVE_DECLARE(SecureRead___STATIC__I4__OBJECT__SZARRAY_U1__I4__I4__I4);
@@ -332,7 +336,8 @@ struct Library_sys_net_native_System_Security_Cryptography_X509Certificates_X509
     static const int FIELD___handle = 6;
     static const int FIELD___sessionHandle = 7;
 
-    NANOCLR_NATIVE_DECLARE(ParseCertificate___STATIC__VOID__SZARRAY_U1__BYREF_STRING__BYREF_STRING__BYREF_SystemDateTime__BYREF_SystemDateTime);
+    NANOCLR_NATIVE_DECLARE(
+        ParseCertificate___STATIC__VOID__SZARRAY_U1__BYREF_STRING__BYREF_STRING__BYREF_SystemDateTime__BYREF_SystemDateTime);
 
     //--//
 };
