@@ -73,21 +73,21 @@
 #define IFNAME1 'n'
 
 #if defined(FSL_SDK_ENABLE_DRIVER_CACHE_CONTROL) && FSL_SDK_ENABLE_DRIVER_CACHE_CONTROL
-    #if defined(FSL_FEATURE_L2CACHE_LINESIZE_BYTE) \
-        && ((!defined(FSL_SDK_DISBLE_L2CACHE_PRESENT)) || (FSL_SDK_DISBLE_L2CACHE_PRESENT == 0))
-        #if defined(FSL_FEATURE_L1DCACHE_LINESIZE_BYTE)
-            #define FSL_CACHE_LINESIZE_MAX MAX(FSL_FEATURE_L1DCACHE_LINESIZE_BYTE, FSL_FEATURE_L2CACHE_LINESIZE_BYTE)
-            #define FSL_ENET_BUFF_ALIGNMENT MAX(ENET_BUFF_ALIGNMENT, FSL_CACHE_LINESIZE_MAX)
-        #else
-            #define FSL_ENET_BUFF_ALIGNMENT MAX(ENET_BUFF_ALIGNMENT, FSL_FEATURE_L2CACHE_LINESIZE_BYTE)
-        #endif
-    #elif defined(FSL_FEATURE_L1DCACHE_LINESIZE_BYTE)
-        #define FSL_ENET_BUFF_ALIGNMENT MAX(ENET_BUFF_ALIGNMENT, FSL_FEATURE_L1DCACHE_LINESIZE_BYTE)
-    #else
-        #define FSL_ENET_BUFF_ALIGNMENT ENET_BUFF_ALIGNMENT
-    #endif
+#if defined(FSL_FEATURE_L2CACHE_LINESIZE_BYTE) &&                                                                      \
+    ((!defined(FSL_SDK_DISBLE_L2CACHE_PRESENT)) || (FSL_SDK_DISBLE_L2CACHE_PRESENT == 0))
+#if defined(FSL_FEATURE_L1DCACHE_LINESIZE_BYTE)
+#define FSL_CACHE_LINESIZE_MAX  MAX(FSL_FEATURE_L1DCACHE_LINESIZE_BYTE, FSL_FEATURE_L2CACHE_LINESIZE_BYTE)
+#define FSL_ENET_BUFF_ALIGNMENT MAX(ENET_BUFF_ALIGNMENT, FSL_CACHE_LINESIZE_MAX)
 #else
-    #define FSL_ENET_BUFF_ALIGNMENT ENET_BUFF_ALIGNMENT
+#define FSL_ENET_BUFF_ALIGNMENT MAX(ENET_BUFF_ALIGNMENT, FSL_FEATURE_L2CACHE_LINESIZE_BYTE)
+#endif
+#elif defined(FSL_FEATURE_L1DCACHE_LINESIZE_BYTE)
+#define FSL_ENET_BUFF_ALIGNMENT MAX(ENET_BUFF_ALIGNMENT, FSL_FEATURE_L1DCACHE_LINESIZE_BYTE)
+#else
+#define FSL_ENET_BUFF_ALIGNMENT ENET_BUFF_ALIGNMENT
+#endif
+#else
+#define FSL_ENET_BUFF_ALIGNMENT ENET_BUFF_ALIGNMENT
 #endif
 
 #if defined(FSL_FEATURE_SOC_LPC_ENET_COUNT) && (FSL_FEATURE_SOC_LPC_ENET_COUNT > 0)
@@ -116,9 +116,7 @@ struct ethernetif
     rx_buffer_t *RxDataBuff;
     tx_buffer_t *TxDataBuff;
     uint8_t txIdx;
-
 };
-
 
 /*******************************************************************************
  * Code
@@ -138,7 +136,6 @@ static void ethernet_callback(ENET_Type *base, enet_handle_t *handle, enet_event
     struct netif *netif = (struct netif *)param;
     struct ethernetif *ethernetif = netif->state;
     BaseType_t xResult;
-    
 
     switch (event)
     {
@@ -153,9 +150,10 @@ static void ethernet_callback(ENET_Type *base, enet_handle_t *handle, enet_event
             if (SystemGetIRQNestingLevel())
 #else
             if (__get_IPSR())
-#endif 
+#endif
             {
-                xResult = xEventGroupSetBitsFromISR(ethernetif->enetTransmitAccessEvent, ethernetif->txFlag, &taskToWake);
+                xResult =
+                    xEventGroupSetBitsFromISR(ethernetif->enetTransmitAccessEvent, ethernetif->txFlag, &taskToWake);
                 if ((pdPASS == xResult) && (pdTRUE == taskToWake))
                 {
                     portYIELD_FROM_ISR(taskToWake);
@@ -172,9 +170,11 @@ static void ethernet_callback(ENET_Type *base, enet_handle_t *handle, enet_event
     }
 }
 
-
 #if LWIP_IPV4 && LWIP_IGMP
-static err_t ethernetif_igmp_mac_filter(struct netif *netif, const ip4_addr_t *group, enum netif_mac_filter_action action)
+static err_t ethernetif_igmp_mac_filter(
+    struct netif *netif,
+    const ip4_addr_t *group,
+    enum netif_mac_filter_action action)
 #if defined(FSL_FEATURE_SOC_LPC_ENET_COUNT) && (FSL_FEATURE_SOC_LPC_ENET_COUNT > 0)
 {
     struct ethernetif *ethernetif = netif->state;
@@ -244,7 +244,10 @@ static err_t ethernetif_igmp_mac_filter(struct netif *netif, const ip4_addr_t *g
 #endif
 
 #if LWIP_IPV6 && LWIP_IPV6_MLD
-static err_t ethernetif_mld_mac_filter(struct netif *netif, const ip6_addr_t *group, enum netif_mac_filter_action action)
+static err_t ethernetif_mld_mac_filter(
+    struct netif *netif,
+    const ip6_addr_t *group,
+    enum netif_mac_filter_action action)
 #if defined(FSL_FEATURE_SOC_LPC_ENET_COUNT) && (FSL_FEATURE_SOC_LPC_ENET_COUNT > 0)
 {
     struct ethernetif *ethernetif = netif->state;
@@ -325,9 +328,10 @@ static inline enet_tx_bd_struct_t *get_tx_desc(struct ethernetif *ethernetif, ui
 }
 #endif
 
-static void ethernetif_phy_init(struct ethernetif *ethernetif,
-                                const ethernetif_config_t *ethernetifConfig,
-                                enet_config_t *config)
+static void ethernetif_phy_init(
+    struct ethernetif *ethernetif,
+    const ethernetif_config_t *ethernetifConfig,
+    enet_config_t *config)
 {
     uint32_t sysClock;
     status_t status;
@@ -338,7 +342,7 @@ static void ethernetif_phy_init(struct ethernetif *ethernetif,
 
     sysClock = CLOCK_GetFreq(ethernetifConfig->clockName);
 
-    //Initializing PHY...
+    // Initializing PHY...
 
     while ((count < ENET_ATONEGOTIATION_TIMEOUT) && (!link))
     {
@@ -350,7 +354,7 @@ static void ethernetif_phy_init(struct ethernetif *ethernetif,
         }
         else if (kStatus_PHY_AutoNegotiateFail == status)
         {
-            //PHY Auto-negotiation failed. Please check the ENET cable connection and link partner setting.
+            // PHY Auto-negotiation failed. Please check the ENET cable connection and link partner setting.
         }
         else
         {
@@ -368,7 +372,7 @@ static void ethernetif_phy_init(struct ethernetif *ethernetif,
         config->miiSpeed = (enet_mii_speed_t)speed;
         config->miiDuplex = (enet_mii_duplex_t)duplex;
     }
-#if 0 /* Disable assert. If initial auto-negation is timeout, \ \
+#if 0 /* Disable assert. If initial auto-negation is timeout, \                                                        \
          the ENET is set to default (100Mbs and full-duplex). */
     else
     {
@@ -380,20 +384,21 @@ static void ethernetif_phy_init(struct ethernetif *ethernetif,
 /**
  * Initializes ENET driver.
  */
-static void enet_init(struct netif *netif, struct ethernetif *ethernetif,
-                      const ethernetif_config_t *ethernetifConfig)
+static void enet_init(struct netif *netif, struct ethernetif *ethernetif, const ethernetif_config_t *ethernetifConfig)
 {
     enet_config_t config;
     uint32_t sysClock;
     enet_buffer_config_t buffCfg[ENET_RING_NUM];
 
     /* prepare the buffer configuration. */
-    buffCfg[0].rxBdNumber = ENET_RXBD_NUM;                      /* Receive buffer descriptor number. */
-    buffCfg[0].txBdNumber = ENET_TXBD_NUM;                      /* Transmit buffer descriptor number. */
-    buffCfg[0].rxBuffSizeAlign = sizeof(rx_buffer_t);           /* Aligned receive data buffer size. */
-    buffCfg[0].txBuffSizeAlign = sizeof(tx_buffer_t);           /* Aligned transmit data buffer size. */
-    buffCfg[0].rxBdStartAddrAlign = &(ethernetif->RxBuffDescrip[0]); /* Aligned receive buffer descriptor start address. */
-    buffCfg[0].txBdStartAddrAlign = &(ethernetif->TxBuffDescrip[0]); /* Aligned transmit buffer descriptor start address. */
+    buffCfg[0].rxBdNumber = ENET_RXBD_NUM;            /* Receive buffer descriptor number. */
+    buffCfg[0].txBdNumber = ENET_TXBD_NUM;            /* Transmit buffer descriptor number. */
+    buffCfg[0].rxBuffSizeAlign = sizeof(rx_buffer_t); /* Aligned receive data buffer size. */
+    buffCfg[0].txBuffSizeAlign = sizeof(tx_buffer_t); /* Aligned transmit data buffer size. */
+    buffCfg[0].rxBdStartAddrAlign =
+        &(ethernetif->RxBuffDescrip[0]); /* Aligned receive buffer descriptor start address. */
+    buffCfg[0].txBdStartAddrAlign =
+        &(ethernetif->TxBuffDescrip[0]);                        /* Aligned transmit buffer descriptor start address. */
     buffCfg[0].rxBufferAlign = &(ethernetif->RxDataBuff[0][0]); /* Receive data buffer start address. */
     buffCfg[0].txBufferAlign = &(ethernetif->TxDataBuff[0][0]); /* Transmit data buffer start address. */
 
@@ -443,7 +448,6 @@ static void enet_init(struct netif *netif, struct ethernetif *ethernetif,
 
     LWIP_ASSERT("Input Ethernet base error!", (instance != ARRAY_SIZE(enetBases)));
 
-
     /* Initialize the ENET module.*/
     ENET_Init(ethernetif->base, &ethernetif->handle, &config, &buffCfg[0], netif->hwaddr, sysClock);
 
@@ -452,7 +456,6 @@ static void enet_init(struct netif *netif, struct ethernetif *ethernetif,
     ENET_ActiveRead(ethernetif->base);
 }
 
-
 /**
  * In this function, the hardware should be initialized.
  * Called from ethernetif_init().
@@ -460,8 +463,7 @@ static void enet_init(struct netif *netif, struct ethernetif *ethernetif,
  * @param netif the already initialized lwip network interface structure
  *        for this ethernetif
  */
-static void low_level_init(struct netif *netif, const uint8_t enetIdx,
-                           const ethernetif_config_t *ethernetifConfig)
+static void low_level_init(struct netif *netif, const uint8_t enetIdx, const ethernetif_config_t *ethernetifConfig)
 {
     LWIP_UNUSED_ARG(enetIdx);
     struct ethernetif *ethernetif = netif->state;
@@ -521,8 +523,12 @@ static err_t enet_send_frame(struct ethernetif *ethernetif, unsigned char *data,
 
         if (result == kStatus_ENET_TxFrameBusy)
         {
-            xEventGroupWaitBits(ethernetif->enetTransmitAccessEvent, ethernetif->txFlag, pdTRUE, (BaseType_t) false,
-                                portMAX_DELAY);
+            xEventGroupWaitBits(
+                ethernetif->enetTransmitAccessEvent,
+                ethernetif->txFlag,
+                pdTRUE,
+                (BaseType_t) false,
+                portMAX_DELAY);
         }
 
     } while (result == kStatus_ENET_TxFrameBusy);
@@ -561,7 +567,7 @@ static err_t low_level_output(struct netif *netif, struct pbuf *p)
         return ERR_BUF;
     }
 
-/* Initiate transfer. */
+    /* Initiate transfer. */
 
 #if ETH_PAD_SIZE
     pbuf_header(p, -ETH_PAD_SIZE); /* drop the padding word */
@@ -609,7 +615,7 @@ static err_t low_level_output(struct netif *netif, struct pbuf *p)
         /* unicast packet */
         MIB2_STATS_NETIF_INC(netif, ifoutucastpkts);
     }
-/* increase ifoutdiscards or ifouterrors on error */
+    /* increase ifoutdiscards or ifouterrors on error */
 
 #if ETH_PAD_SIZE
     pbuf_header(p, ETH_PAD_SIZE); /* reclaim the padding word */
@@ -633,7 +639,7 @@ static status_t enet_get_rx_frame_size(struct ethernetif *ethernetif, uint32_t *
  */
 static void enet_read_frame(struct ethernetif *ethernetif, uint8_t *data, uint32_t length)
 {
-        ENET_ReadFrame(ethernetif->base, &ethernetif->handle, data, length);
+    ENET_ReadFrame(ethernetif->base, &ethernetif->handle, data, length);
 }
 
 /**
@@ -677,7 +683,7 @@ static struct pbuf *low_level_input(struct netif *netif)
                 {
                     enet_read_frame(ethernetif, p->payload, p->len);
                 }
-                else    /* Multi-chain buffer.*/
+                else /* Multi-chain buffer.*/
                 {
                     uint8_t data_tmp[ENET_FRAME_MAX_FRAMELEN];
                     uint32_t data_tmp_len = 0;
@@ -685,13 +691,13 @@ static struct pbuf *low_level_input(struct netif *netif)
                     enet_read_frame(ethernetif, data_tmp, p->tot_len);
 
                     /* We iterate over the pbuf chain until we have read the entire
-                    * packet into the pbuf. */
+                     * packet into the pbuf. */
                     for (q = p; (q != NULL) && ((data_tmp_len + q->len) <= sizeof(data_tmp)); q = q->next)
                     {
                         /* Read enough bytes to fill this pbuf in the chain. The
-                        * available data in the pbuf is given by the q->len
-                        * variable. */
-                        memcpy(q->payload,  &data_tmp[data_tmp_len], q->len);
+                         * available data in the pbuf is given by the q->len
+                         * variable. */
+                        memcpy(q->payload, &data_tmp[data_tmp_len], q->len);
                         data_tmp_len += q->len;
                     }
                 }
@@ -779,14 +785,14 @@ void ethernetif_input(struct netif *netif)
 
 static ENET_Type *get_enet_base(const uint8_t enetIdx)
 {
-    ENET_Type* enets[] = ENET_BASE_PTRS;
+    ENET_Type *enets[] = ENET_BASE_PTRS;
     unsigned int arrayIdx;
     int enetCount;
 
     for (arrayIdx = 0, enetCount = 0; arrayIdx < ARRAY_SIZE(enets); arrayIdx++)
     {
-        if (enets[arrayIdx] != 0U)    /* process only defined positions */
-        {                             /* (some SOC headers count ENETs from 1 instead of 0) */
+        if (enets[arrayIdx] != 0U) /* process only defined positions */
+        {                          /* (some SOC headers count ENETs from 1 instead of 0) */
             if (enetCount == enetIdx)
             {
                 return enets[arrayIdx];
@@ -798,9 +804,11 @@ static ENET_Type *get_enet_base(const uint8_t enetIdx)
     return NULL;
 }
 
-static err_t ethernetif_init(struct netif *netif, struct ethernetif *ethernetif,
-                             const uint8_t enetIdx,
-                             const ethernetif_config_t *ethernetifConfig)
+static err_t ethernetif_init(
+    struct netif *netif,
+    struct ethernetif *ethernetif,
+    const uint8_t enetIdx,
+    const ethernetif_config_t *ethernetifConfig)
 {
     LWIP_ASSERT("netif != NULL", (netif != NULL));
     LWIP_ASSERT("ethernetifConfig != NULL", (ethernetifConfig != NULL));
@@ -879,8 +887,8 @@ err_t ethernetif0_init(struct netif *netif)
     return ethernetif_init(netif, &ethernetif_0, 0U, (ethernetif_config_t *)netif->state);
 }
 
-#if (defined(FSL_FEATURE_SOC_ENET_COUNT) && (FSL_FEATURE_SOC_ENET_COUNT > 1)) \
- || (defined(FSL_FEATURE_SOC_LPC_ENET_COUNT) && (FSL_FEATURE_SOC_LPC_ENET_COUNT > 1))
+#if (defined(FSL_FEATURE_SOC_ENET_COUNT) && (FSL_FEATURE_SOC_ENET_COUNT > 1)) ||                                       \
+    (defined(FSL_FEATURE_SOC_LPC_ENET_COUNT) && (FSL_FEATURE_SOC_LPC_ENET_COUNT > 1))
 /**
  * Should be called at the beginning of the program to set up the
  * second network interface. It calls the function low_level_init() to do the

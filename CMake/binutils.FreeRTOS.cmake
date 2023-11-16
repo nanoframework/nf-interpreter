@@ -69,7 +69,7 @@ macro(nf_add_platform_packages)
         if(USE_NETWORKING_OPTION)
 
             find_package(NF_Network REQUIRED QUIET)
-            find_package(LWIP REQUIRED QUIET)
+            find_package(lwIP REQUIRED QUIET)
 
         endif()
 
@@ -133,7 +133,7 @@ macro(nf_add_platform_dependencies target)
             EXTRA_INCLUDES
                 ${CMSIS_INCLUDE_DIRS}
                 ${FreeRTOS_INCLUDE_DIRS}
-                ${LWIP_INCLUDE_DIRS}
+                ${lWIP_INCLUDE_DIRS}
                 ${TARGET_NXP_COMMON_INCLUDE_DIRS}
                 ${TARGET_NXP_NANOCLR_INCLUDE_DIRS}
                 ${TARGET_FREERTOS_COMMON_INCLUDE_DIRS}
@@ -153,12 +153,12 @@ macro(nf_add_platform_dependencies target)
                 BUILD_TARGET
                     ${target}
                 EXTRA_SOURCES 
-                    ${LWIP_SOURCES}
+                    ${lWIP_SOURCES}
                 EXTRA_INCLUDES 
                     ${FreeRTOS_INCLUDE_DIRS}
                     ${TARGET_NXP_COMMON_INCLUDE_DIRS}
                     ${TARGET_FREERTOS_COMMON_INCLUDE_DIRS}
-                    ${LWIP_INCLUDE_DIRS}
+                    ${lWIP_INCLUDE_DIRS}
                     ${CMSIS_INCLUDE_DIRS})
 
             add_dependencies(${target}.elf nano::NF_Network)
@@ -178,6 +178,7 @@ macro(nf_add_platform_include_directories target)
         ${TARGET_FREERTOS_COMMON_INCLUDE_DIRS}
         ${TARGET_NXP_COMMON_INCLUDE_DIRS}
         ${FreeRTOS_INCLUDE_DIRS}
+        ${lWIP_INCLUDE_DIRS}
         ${CMSIS_INCLUDE_DIRS}
     )
     
@@ -201,7 +202,7 @@ macro(nf_add_platform_include_directories target)
             ${NANOCLR_PROJECT_INCLUDE_DIRS}
             ${TARGET_FREERTOS_COMMON_INCLUDE_DIRS}
             ${TARGET_FREERTOS_NANOCLR_INCLUDE_DIRS}
-            ${LWIP_INCLUDE_DIRS}
+            ${lWIP_INCLUDE_DIRS}
             ${CMAKE_CURRENT_BINARY_DIR}
 
         )
