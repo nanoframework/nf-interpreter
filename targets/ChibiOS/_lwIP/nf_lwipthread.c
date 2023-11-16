@@ -236,6 +236,21 @@ struct netif *nf_getNetif()
     return &thisif;
 }
 
+static void initialize_sntp()
+{
+    sntp_stop();
+    sntp_setoperatingmode(SNTP_OPMODE_POLL);
+#if SNTP_GET_SERVERS_FROM_DHCP
+    // try to get the ntp server from dhcp
+    sntp_servermode_dhcp(1);
+#endif
+#if SNTP_SERVER_DNS
+    sntp_setservername(0, SNTP_SERVER0_DEFAULT_ADDRESS);
+    sntp_setservername(1, SNTP_SERVER1_DEFAULT_ADDRESS);
+#endif
+    sntp_init();
+}
+
 void lwipDefaultLinkUpCB(void *p)
 {
     struct netif *ifc = (struct netif *)p;
@@ -537,21 +552,6 @@ static void do_reconfigure(void *p)
     }
 
     chSemSignal(&reconf->completion);
-}
-
-void initialize_sntp()
-{
-    sntp_stop();
-    sntp_setoperatingmode(SNTP_OPMODE_POLL);
-#if SNTP_GET_SERVERS_FROM_DHCP
-    // try to get the ntp server from dhcp
-    sntp_servermode_dhcp(1);
-#endif
-#if SNTP_SERVER_DNS
-    sntp_setservername(0, SNTP_SERVER0_DEFAULT_ADDRESS);
-    sntp_setservername(1, SNTP_SERVER1_DEFAULT_ADDRESS);
-#endif
-    sntp_init();
 }
 
 void lwipReconfigure(const lwipreconf_opts_t *opts)
