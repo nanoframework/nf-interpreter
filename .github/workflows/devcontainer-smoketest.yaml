@@ -25,8 +25,8 @@ jobs:
           { target: M5Core2,                 build-type: Debug, container: All },
           # { target: NXP_MIMXRT1060_EVK,      build-type: Debug, container: FreeRTOS }, # No FreeRTOS container yet.
           { target: NXP_MIMXRT1060_EVK,      build-type: Debug, container: All },
-          # { target: TI_CC1352R1_LAUNCHXL,    build-type: Debug, container: TI, radio-freq: 915 } # Currently broken.
-          # { target: TI_CC1352R1_LAUNCHXL,    build-type: Debug, container: All, radio-freq: 915 } # Currently broken.
+          { target: TI_CC1352R1_LAUNCHXL,    build-type: Debug, container: TI, radio-freq: 915 } # Currently broken.
+          { target: TI_CC1352R1_LAUNCHXL,    build-type: Debug, container: All, radio-freq: 915 } # Currently broken.
         ]
 
     runs-on: ubuntu-latest
