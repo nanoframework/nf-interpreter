@@ -539,7 +539,7 @@ static void do_reconfigure(void *p)
     chSemSignal(&reconf->completion);
 }
 
-static void initialize_sntp()
+void initialize_sntp()
 {
     sntp_stop();
     sntp_setoperatingmode(SNTP_OPMODE_POLL);

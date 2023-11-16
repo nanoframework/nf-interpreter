@@ -248,7 +248,7 @@ extern "C"
     void lwipDefaultLinkDownCB(void *p);
     void lwipInit(const lwipthread_opts_t *opts);
     void lwipReconfigure(const lwipreconf_opts_t *opts);
-    static void initialize_sntp(void);
+    void initialize_sntp(void);
 #ifdef __cplusplus
 }
 #endif
