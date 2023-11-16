@@ -34,6 +34,14 @@
   <ItemGroup>
     <ClInclude Include="sys_net_native.h" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\targets\netcore\lwIP\lwIP.vcxproj">
+      <Project>{2cc276fa-b226-49c9-8f82-7fcd5a228e28}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\targets\netcore\lwIP\lwIP_pcapif.vcxproj">
+      <Project>{6f44e49e-9f21-4144-91ec-53b92aef62ce}</Project>
+    </ProjectReference>
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{87b3b6fb-ae1f-4777-abbf-3e42e0deb336}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
