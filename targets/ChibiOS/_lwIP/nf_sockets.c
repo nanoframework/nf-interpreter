@@ -18,7 +18,7 @@
 #include "lwip/sockets.h"
 // [NF_CHANGE]
 // can't include this because we have to tweak
-//#include "lwip/priv/sockets_priv.h"
+// #include "lwip/priv/sockets_priv.h"
 // [END_NF_CHANGE]
 #include "lwip/api.h"
 #include "lwip/igmp.h"
@@ -1743,8 +1743,8 @@ ssize_t lwip_send(int s, const void *data, size_t size, int flags)
 #endif /* (LWIP_UDP || LWIP_RAW) */
     }
 
-    write_flags =
-        (u8_t)(NETCONN_COPY | ((flags & MSG_MORE) ? NETCONN_MORE : 0) | ((flags & MSG_DONTWAIT) ? NETCONN_DONTBLOCK : 0));
+    write_flags = (u8_t)(NETCONN_COPY | ((flags & MSG_MORE) ? NETCONN_MORE : 0) |
+                         ((flags & MSG_DONTWAIT) ? NETCONN_DONTBLOCK : 0));
     written = 0;
     err = netconn_write_partly(sock->conn, data, size, write_flags, &written);
 
@@ -1793,8 +1793,8 @@ ssize_t lwip_sendmsg(int s, const struct msghdr *msg, int flags)
     if (NETCONNTYPE_GROUP(netconn_type(sock->conn)) == NETCONN_TCP)
     {
 #if LWIP_TCP
-        write_flags =
-            (u8_t)(NETCONN_COPY | ((flags & MSG_MORE) ? NETCONN_MORE : 0) | ((flags & MSG_DONTWAIT) ? NETCONN_DONTBLOCK : 0));
+        write_flags = (u8_t)(NETCONN_COPY | ((flags & MSG_MORE) ? NETCONN_MORE : 0) |
+                             ((flags & MSG_DONTWAIT) ? NETCONN_DONTBLOCK : 0));
 
         written = 0;
         err = netconn_write_vectors_partly(
