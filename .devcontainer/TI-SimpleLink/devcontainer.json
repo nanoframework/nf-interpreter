@@ -2,7 +2,7 @@
 	"name": "nanoFramework-TI-SimpleLink",
 	// Adjust this file to choose use of cached containers
 	// or the source docker file.
-	"image": "ghcr.io/nanoframework/dev-container-ti:latest",
+	"image": "ghcr.io/nanoframework/dev-container-ti",
 	// "dockerFile": "Dockerfile.TI.SRC",
 	// "context": ".",
 	"mounts": [
