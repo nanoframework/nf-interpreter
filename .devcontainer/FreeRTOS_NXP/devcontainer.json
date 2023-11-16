@@ -2,7 +2,7 @@
 	"name": "nanoFramework-FreeRTOS-NXP",
 	// Adjust this file to choose use of cached containers
 	// or the source docker file.
-	// "image": "ghcr.io/nanoframework/dev-container-freertos-nxp:latest",
+	// "image": "ghcr.io/nanoframework/dev-container-freertos-nxp",
 	"dockerFile": "Dockerfile.NXP.SRC",
 	"context": ".",
 	"mounts": [
