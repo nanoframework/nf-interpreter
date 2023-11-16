@@ -754,3 +754,56 @@ function(nf_add_mbedtls_library)
     add_subdirectory(${mbedtls_SOURCE_DIR} mbedtls_build)
 
 endfunction()
+
+# PLATFORM_INCLUDES with platform and target include paths to be added to lwIP
+function(nf_add_lwip_library)
+
+    # parse arguments
+    cmake_parse_arguments(NFLWIP "" "" "PLATFORM_INCLUDES" ${ARGN})
+
+    message(STATUS "NFLWIP_PLATFORM_INCLUDES ${NFLWIP_PLATFORM_INCLUDES}")
+    
+    # check if LWIP_SOURCE was specified or if it's empty (default is empty)
+    set(NO_LWIP_SOURCE TRUE)
+
+    if(LWIP_SOURCE)
+        if(NOT ${LWIP_SOURCE} STREQUAL "")
+            set(NO_LWIP_SOURCE FALSE)
+        endif()
+    endif()
+
+    # set tag for currently supported version
+    # WHEN CHANGING THIS MAKE SURE TO UPDATE THE DEV CONTAINERS
+    set(LWIP_GIT_TAG "STABLE-2_1_3_RELEASE")
+
+    if(NO_LWIP_SOURCE)
+        # no lwIP source specified, download it from it's repo
+        message(STATUS "LWIP ${LWIP_GIT_TAG} from Git repo")
+
+        FetchContent_Declare(
+            lwip
+            GIT_REPOSITORY https://github.com/lwip-tcpip/lwip.git
+            GIT_TAG ${LWIP_GIT_TAG}
+        )
+
+    else()
+        # lwIP source was specified
+
+        message(STATUS "LWIP ${LWIP_GIT_TAG} (source from: ${LWIP_SOURCE})")
+            
+        FetchContent_Declare(
+            lwip
+            SOURCE_DIR ${LWIP_SOURCE}
+        )
+
+    endif()
+
+    # Check if population has already been performed
+    FetchContent_GetProperties(lwip)
+
+    if(NOT lwip_POPULATED)
+        # Fetch the content using previously declared details
+        FetchContent_Populate(lwip)
+    endif()
+
+endfunction()
