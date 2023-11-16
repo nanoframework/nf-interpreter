@@ -86,10 +86,7 @@ RUN git clone --branch mbedtls-2.28.5 https://github.com/ARMmbed/mbedtls.git --d
 RUN git clone --branch V10.4.1-kernel-only https://github.com/FreeRTOS/FreeRTOS-Kernel.git --depth 1 ./sources/FreeRTOS \
     && git clone --branch 5.5.1 https://github.com/ARM-software/CMSIS_5.git --depth 1 ./sources/CMSIS_5
 
-# For NXP targets, an old version of lwIP is currently required.
-# Clone lwIP for NXP
-RUN git clone --branch STABLE-2_0_3_RELEASE https://github.com/lwip-tcpip/lwip.git --depth 1 ./sources/lwip-2_0_3
-# Clone lwIP for STM32
+# Clone lwIP for STM32 and NXP
 RUN git clone --branch STABLE-2_1_3_RELEASE https://github.com/lwip-tcpip/lwip.git --depth 1 ./sources/lwip
 
 # Clone ESP-IDF
