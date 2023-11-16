@@ -2,7 +2,7 @@
 	"name": "nanoFramework-ChibiOS",
 	// Adjust this file to choose use of cached containers
 	// or the source docker file.
-	"image": "ghcr.io/nanoframework/dev-container-chibios:latest",
+	"image": "ghcr.io/nanoframework/dev-container-chibios",
 	// "dockerFile": "Dockerfile.ChibiOS.SRC",
 	// "context": ".",
 	"mounts": [
