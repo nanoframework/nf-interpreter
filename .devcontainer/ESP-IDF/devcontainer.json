@@ -2,7 +2,7 @@
 	"name": "nanoFramework-ESP-IDF",
 	// Adjust this file to choose use of cached containers
 	// or the source docker file.
-	"image": "ghcr.io/nanoframework/dev-container-esp32:latest",
+	"image": "ghcr.io/nanoframework/dev-container-esp32",
 	// "dockerFile": "Dockerfile.ESP32.SRC",
 	// "context": ".",
 	"mounts": [
