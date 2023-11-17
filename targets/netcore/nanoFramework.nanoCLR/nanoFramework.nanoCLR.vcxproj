@@ -103,7 +103,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>NANOCLRNATIVE_EXPORTS;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\..\src\CLR\Core;..\..\..\src\CLR\CorLib;..\..\..\src\CLR\Helpers\Base64;.;..\..\win32\Include;..\..\..\src\CLR\Include;..\..\..\src\HAL\Include;..\..\..\src\PAL\Include;..\..\..\src\nanoFramework.Runtime.Events</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(CHIBIOS_PATH)\os\license;$(CHIBIOS_PATH)\os\rt\include;..\ChibiOS\port;$(CHIBIOS_PATH)\os\oslib\include;$(CHIBIOS_PATH)\os\common\ports\SIMIA32;$(CHIBIOS_PATH)\os\hal\ports\simulator;$(CHIBIOS_PATH)\os\hal\ports\simulator\win32;$(CHIBIOS_PATH)\os\hal\include;$(CHIBIOS_PATH)\community\os\hal\include;..\..\..\src\CLR\Core;..\..\..\src\CLR\CorLib;..\..\..\src\CLR\Helpers\Base64;.;..\..\win32\Include;..\..\..\src\CLR\Include;..\..\..\src\HAL\Include;..\..\..\src\PAL\Include;..\..\..\src\nanoFramework.Runtime.Events</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -117,7 +117,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>NANOCLRNATIVE_EXPORTS;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\..\src\CLR\Core;..\..\..\src\CLR\CorLib;..\..\..\src\CLR\Helpers\Base64;.;..\..\win32\Include;..\..\..\src\CLR\Include;..\..\..\src\HAL\Include;..\..\..\src\PAL\Include;..\..\..\src\nanoFramework.Runtime.Events</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(CHIBIOS_PATH)\os\license;$(CHIBIOS_PATH)\os\rt\include;..\ChibiOS\port;$(CHIBIOS_PATH)\os\oslib\include;$(CHIBIOS_PATH)\os\common\ports\SIMIA32;$(CHIBIOS_PATH)\os\hal\ports\simulator;$(CHIBIOS_PATH)\os\hal\ports\simulator\win32;$(CHIBIOS_PATH)\os\hal\include;$(CHIBIOS_PATH)\community\os\hal\include;ChibiOS;..\..\..\src\CLR\Core;..\..\..\src\CLR\CorLib;..\..\..\src\CLR\Helpers\Base64;.;..\..\win32\Include;..\..\..\src\CLR\Include;..\..\..\src\HAL\Include;..\..\..\src\PAL\Include;..\..\..\src\nanoFramework.Runtime.Events</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -132,7 +132,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>NANOCLRNATIVE_EXPORTS;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\..\src\CLR\Core;..\..\..\src\CLR\CorLib;..\..\..\src\CLR\Helpers\Base64;.;..\..\win32\Include;..\..\..\src\CLR\Include;..\..\..\src\HAL\Include;..\..\..\src\PAL\Include;..\..\..\src\nanoFramework.Runtime.Events</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(CHIBIOS_PATH)\os\license;$(CHIBIOS_PATH)\os\rt\include;..\ChibiOS\port;$(CHIBIOS_PATH)\os\oslib\include;$(CHIBIOS_PATH)\os\common\ports\SIMIA32;$(CHIBIOS_PATH)\os\hal\ports\simulator;$(CHIBIOS_PATH)\os\hal\ports\simulator\win32;$(CHIBIOS_PATH)\os\hal\include;$(CHIBIOS_PATH)\community\os\hal\include;..\..\..\src\CLR\Core;..\..\..\src\CLR\CorLib;..\..\..\src\CLR\Helpers\Base64;.;..\..\win32\Include;..\..\..\src\CLR\Include;..\..\..\src\HAL\Include;..\..\..\src\PAL\Include;..\..\..\src\nanoFramework.Runtime.Events</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -149,7 +149,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>NANOCLRNATIVE_EXPORTS;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\..\src\CLR\Core;..\..\..\src\CLR\CorLib;..\..\..\src\CLR\Helpers\Base64;.;..\..\win32\Include;..\..\..\src\CLR\Include;..\..\..\src\HAL\Include;..\..\..\src\PAL\Include;..\..\..\src\nanoFramework.Runtime.Events</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(CHIBIOS_PATH)\os\license;$(CHIBIOS_PATH)\os\rt\include;..\ChibiOS\port;$(CHIBIOS_PATH)\os\oslib\include;$(CHIBIOS_PATH)\os\common\ports\SIMIA32;$(CHIBIOS_PATH)\os\hal\ports\simulator;$(CHIBIOS_PATH)\os\hal\ports\simulator\win32;$(CHIBIOS_PATH)\os\hal\include;$(CHIBIOS_PATH)\community\os\hal\include;..\..\..\src\CLR\Core;..\..\..\src\CLR\CorLib;..\..\..\src\CLR\Helpers\Base64;.;..\..\win32\Include;..\..\..\src\CLR\Include;..\..\..\src\HAL\Include;..\..\..\src\PAL\Include;..\..\..\src\nanoFramework.Runtime.Events</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -159,6 +159,9 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="board.h" />
+    <ClInclude Include="chconf.h" />
+    <ClInclude Include="halconf.h" />
     <ClInclude Include="..\Include\targetHAL_Time.h" />
     <ClInclude Include="..\Include\targetPAL_time.h" />
     <ClInclude Include="..\Include\target_platform.h" />
@@ -312,6 +315,9 @@
     </ProjectReference>
     <ProjectReference Include="..\..\..\src\Windows.Storage\Windows.Storage.vcxproj">
       <Project>{3cae286f-0ef8-45e4-8111-afa0aa9282b4}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\ChibiOS\ChibiOS.vcxproj">
+      <Project>{4b8910ab-17cb-41db-9dae-d3081e04d288}</Project>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

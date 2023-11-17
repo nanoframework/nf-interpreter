@@ -155,5 +155,14 @@
     <ClInclude Include="platform_selector.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="board.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="chconf.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="halconf.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
