@@ -20,6 +20,7 @@
 #endif
 
 
+#include "mbedtls/version.h"
 #include <mbedtls/platform.h>
 #include <mbedtls/md.h>
 #if MBEDTLS_VERSION_MAJOR == 2
