@@ -22,6 +22,7 @@ extern "C"
 {
 #endif
 
+#include "mbedtls/version.h"
 #include "mbedtls/platform.h"
 #include "mbedtls/net_sockets.h"
 #include "mbedtls/ssl.h"
