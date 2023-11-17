@@ -233,7 +233,7 @@ typedef int SOCK_SOCKET;
 
 #define SOCK_FD_SETSIZE    256
 
-#if LWIP_IPV6
+#if defined(LWIP_IPV6) && LWIP_IPV6
 #define SOCK_MAX_ADDR_SIZE 26
 #else
 #define SOCK_MAX_ADDR_SIZE 14
@@ -280,7 +280,7 @@ typedef struct GNU_PACKED SOCK_sockaddr_in
 
 CT_ASSERT_UNIQUE_NAME(sizeof(SOCK_sockaddr_in) == 16, SOCK_SOCKADDR_IN)
 
-#if LWIP_IPV6
+#if defined(LWIP_IPV6) && LWIP_IPV6
 typedef struct GNU_PACKED SOCK_in_addr6
 {
     union {
@@ -664,7 +664,7 @@ HRESULT SOCK_CONFIGURATION_LoadConfiguration(HAL_Configuration_NetworkInterface 
 HRESULT SOCK_CONFIGURATION_LinkStatus(uint32_t interfaceIndex, bool *status);
 HRESULT SOCK_IPV4AddressFromString(const char *ipString, uint64_t *address);
 const char *SOCK_IPV4AddressToString(uint32_t address);
-#if LWIP_IPV6
+#if defined(LWIP_IPV6) && LWIP_IPV6
 const char *SOCK_IPV6AddressToString(uint16_t * address);
 HRESULT SOCK_IPV6AddressFromString(const char *ipString, uint16_t *address);
 #endif
@@ -762,7 +762,7 @@ HRESULT HAL_SOCK_CONFIGURATION_UpdateAdapterConfiguration(
 HRESULT HAL_SOCK_CONFIGURATION_Link_status(uint32_t interfaceIndex, bool *status);
 HRESULT HAL_SOCK_IPV4AddressFromString(const char *ipString, uint64_t *address);
 const char *HAL_SOCK_IPV4AddressToString(uint32_t address);
-#if LWIP_IPV6
+#if defined(LWIP_IPV6) && LWIP_IPV6
 HRESULT HAL_SOCK_IPV6AddressFromString(const char *ipString, uint16_t *address);
 const char *HAL_SOCK_IPV6AddressToString(uint16_t * address);
 #endif
