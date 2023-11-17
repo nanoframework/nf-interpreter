@@ -1,0 +1,202 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <VCProjectVersion>16.0</VCProjectVersion>
+    <Keyword>Win32Proj</Keyword>
+    <ProjectGuid>{4B8910AB-17CB-41DB-9DAE-D3081E04D288}</ProjectGuid>
+    <RootNamespace>nanoCLRNative</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+    <ProjectName>ChibiOS</ProjectName>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+    <Import Project="$(VCTargetsPath)\BuildCustomizations\masm.props" />
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="..\..\..\nf.props" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="..\..\..\nf.props" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="..\..\..\nf.props" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="..\..\..\nf.props" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <LinkIncremental>true</LinkIncremental>
+    <OutDir>$(BinDir)</OutDir>
+    <IntDir>$(IntDir)</IntDir>
+    <TargetName>nanoFramework.nanoCLR</TargetName>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <LinkIncremental>true</LinkIncremental>
+    <OutDir>$(BinDir)</OutDir>
+    <IntDir>$(IntDir)</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <LinkIncremental>false</LinkIncremental>
+    <OutDir>$(BinDir)</OutDir>
+    <IntDir>$(IntDir)</IntDir>
+    <TargetName>nanoFramework.nanoCLR</TargetName>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <LinkIncremental>false</LinkIncremental>
+    <OutDir>$(BinDir)</OutDir>
+    <IntDir>$(IntDir)</IntDir>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>NANOCLRNATIVE_EXPORTS;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\nanoFramework.nanoCLR;$(CHIBIOS_PATH)\os\oslib\include;$(CHIBIOS_PATH)\os\license;$(CHIBIOS_PATH)\os\rt\include;$(CHIBIOS_PATH)\os\rt\include;$(CHIBIOS_PATH)\os\common\ports\SIMIA32\compilers\GCC;$(CHIBIOS_PATH)\os\hal\osal\rt-nil;$(CHIBIOS_PATH)\os\hal\ports\simulator;$(CHIBIOS_PATH)\os\hal\ports\simulator\win32;$(CHIBIOS_PATH)\os\hal\include;$(CHIBIOS_PATH)\community\os\hal\include;..\..\..\src\CLR\Core;..\..\..\src\CLR\CorLib;..\..\..\src\CLR\Helpers\Base64;.;..\..\win32\Include;..\..\..\src\CLR\Include;..\..\..\src\HAL\Include;..\..\..\src\PAL\Include;..\..\..\src\nanoFramework.Runtime.Events</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <AdditionalLibraryDirectories>$(BinDir)</AdditionalLibraryDirectories>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\nanoFramework.nanoCLR;$(CHIBIOS_PATH)\os\oslib\include;$(CHIBIOS_PATH)\os\license;$(CHIBIOS_PATH)\os\rt\include;$(CHIBIOS_PATH)\os\common\ports\SIMIA32\compilers\GCC;$(MSBuildProjectDirectory)\port;$(CHIBIOS_PATH)\os\hal\osal\rt-nil;$(CHIBIOS_PATH)\os\hal\ports\simulator;$(CHIBIOS_PATH)\os\hal\ports\simulator\win32;$(CHIBIOS_PATH)\os\hal\include;$(CHIBIOS_PATH)\community\os\hal\include;ChibiOS;..\..\..\src\CLR\Core;..\..\..\src\CLR\CorLib;..\..\..\src\CLR\Helpers\Base64;.;..\..\win32\Include;..\..\..\src\CLR\Include;..\..\..\src\HAL\Include;..\..\..\src\PAL\Include;..\..\..\src\nanoFramework.Runtime.Events</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <AdditionalLibraryDirectories>$(BinDir)</AdditionalLibraryDirectories>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>NANOCLRNATIVE_EXPORTS;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\nanoFramework.nanoCLR;$(CHIBIOS_PATH)\os\oslib\include;$(CHIBIOS_PATH)\os\license;$(CHIBIOS_PATH)\os\rt\include;$(CHIBIOS_PATH)\os\common\ports\SIMIA32\compilers\GCC;$(MSBuildProjectDirectory)\port;$(CHIBIOS_PATH)\os\hal\osal\rt-nil;$(CHIBIOS_PATH)\os\hal\ports\simulator;$(CHIBIOS_PATH)\os\hal\ports\simulator\win32;$(CHIBIOS_PATH)\os\hal\include;$(CHIBIOS_PATH)\community\os\hal\include;..\..\..\src\CLR\Core;..\..\..\src\CLR\CorLib;..\..\..\src\CLR\Helpers\Base64;.;..\..\win32\Include;..\..\..\src\CLR\Include;..\..\..\src\HAL\Include;..\..\..\src\PAL\Include;..\..\..\src\nanoFramework.Runtime.Events</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalLibraryDirectories>$(BinDir)</AdditionalLibraryDirectories>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\nanoFramework.nanoCLR;$(CHIBIOS_PATH)\os\oslib\include;$(CHIBIOS_PATH)\os\license;$(CHIBIOS_PATH)\os\rt\include;$(CHIBIOS_PATH)\os\common\ports\SIMIA32\compilers\GCC;$(MSBuildProjectDirectory)\port;$(CHIBIOS_PATH)\os\hal\osal\rt-nil;$(CHIBIOS_PATH)\os\hal\ports\simulator;$(CHIBIOS_PATH)\os\hal\ports\simulator\win32;$(CHIBIOS_PATH)\os\hal\include;$(CHIBIOS_PATH)\community\os\hal\include;..\..\..\src\CLR\Core;..\..\..\src\CLR\CorLib;..\..\..\src\CLR\Helpers\Base64;.;..\..\win32\Include;..\..\..\src\CLR\Include;..\..\..\src\HAL\Include;..\..\..\src\PAL\Include;..\..\..\src\nanoFramework.Runtime.Events</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalLibraryDirectories>$(BinDir)</AdditionalLibraryDirectories>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="$(CHIBIOS_PATH)\os\oslib\src\chdelegates.c" />
+    <ClCompile Include="$(CHIBIOS_PATH)\os\oslib\src\chfactory.c" />
+    <ClCompile Include="$(CHIBIOS_PATH)\os\oslib\src\chmboxes.c" />
+    <ClCompile Include="$(CHIBIOS_PATH)\os\oslib\src\chmemcore.c" />
+    <ClCompile Include="$(CHIBIOS_PATH)\os\oslib\src\chmemheaps.c" />
+    <ClCompile Include="$(CHIBIOS_PATH)\os\oslib\src\chmempools.c" />
+    <ClCompile Include="$(CHIBIOS_PATH)\os\oslib\src\chobjcaches.c" />
+    <ClCompile Include="$(CHIBIOS_PATH)\os\oslib\src\chpipes.c" />
+    <ClCompile Include="$(CHIBIOS_PATH)\os\rt\src\chcond.c" />
+    <ClCompile Include="$(CHIBIOS_PATH)\os\rt\src\chdebug.c" />
+    <ClCompile Include="$(CHIBIOS_PATH)\os\rt\src\chdynamic.c" />
+    <ClCompile Include="$(CHIBIOS_PATH)\os\rt\src\chevents.c" />
+    <ClCompile Include="$(CHIBIOS_PATH)\os\rt\src\chinstances.c" />
+    <ClCompile Include="$(CHIBIOS_PATH)\os\rt\src\chmsg.c" />
+    <ClCompile Include="$(CHIBIOS_PATH)\os\rt\src\chmtx.c" />
+    <ClCompile Include="$(CHIBIOS_PATH)\os\rt\src\chregistry.c" />
+    <ClCompile Include="$(CHIBIOS_PATH)\os\rt\src\chrfcu.c" />
+    <ClCompile Include="$(CHIBIOS_PATH)\os\rt\src\chschd.c" />
+    <ClCompile Include="$(CHIBIOS_PATH)\os\rt\src\chsem.c" />
+    <ClCompile Include="$(CHIBIOS_PATH)\os\rt\src\chstats.c" />
+    <ClCompile Include="$(CHIBIOS_PATH)\os\rt\src\chsys.c" />
+    <ClCompile Include="$(CHIBIOS_PATH)\os\rt\src\chthreads.c" />
+    <ClCompile Include="$(CHIBIOS_PATH)\os\rt\src\chtm.c" />
+    <ClCompile Include="$(CHIBIOS_PATH)\os\rt\src\chtrace.c" />
+    <ClCompile Include="$(CHIBIOS_PATH)\os\rt\src\chvt.c" />
+    <ClCompile Include="port\chcore.c" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="port\ccportab.h" />
+    <ClInclude Include="port\chcore.h" />
+    <ClInclude Include="port\chtypes.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <MASM Include="port\chcpre_asm.asm" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+    <Import Project="$(VCTargetsPath)\BuildCustomizations\masm.targets" />
+  </ImportGroup>
+</Project>

@@ -1,0 +1,119 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Source Files\rt">
+      <UniqueIdentifier>{1a95a829-5b64-4095-b0c8-de0ae2551e7f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\port">
+      <UniqueIdentifier>{ce59083e-96da-41cf-8983-af31aa8db831}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="$(CHIBIOS_PATH)\os\rt\src\chcond.c">
+      <Filter>Source Files\rt</Filter>
+    </ClCompile>
+    <ClCompile Include="$(CHIBIOS_PATH)\os\rt\src\chdebug.c">
+      <Filter>Source Files\rt</Filter>
+    </ClCompile>
+    <ClCompile Include="$(CHIBIOS_PATH)\os\rt\src\chdynamic.c">
+      <Filter>Source Files\rt</Filter>
+    </ClCompile>
+    <ClCompile Include="$(CHIBIOS_PATH)\os\rt\src\chevents.c">
+      <Filter>Source Files\rt</Filter>
+    </ClCompile>
+    <ClCompile Include="$(CHIBIOS_PATH)\os\rt\src\chinstances.c">
+      <Filter>Source Files\rt</Filter>
+    </ClCompile>
+    <ClCompile Include="$(CHIBIOS_PATH)\os\rt\src\chmsg.c">
+      <Filter>Source Files\rt</Filter>
+    </ClCompile>
+    <ClCompile Include="$(CHIBIOS_PATH)\os\rt\src\chmtx.c">
+      <Filter>Source Files\rt</Filter>
+    </ClCompile>
+    <ClCompile Include="$(CHIBIOS_PATH)\os\rt\src\chregistry.c">
+      <Filter>Source Files\rt</Filter>
+    </ClCompile>
+    <ClCompile Include="$(CHIBIOS_PATH)\os\rt\src\chrfcu.c">
+      <Filter>Source Files\rt</Filter>
+    </ClCompile>
+    <ClCompile Include="$(CHIBIOS_PATH)\os\rt\src\chschd.c">
+      <Filter>Source Files\rt</Filter>
+    </ClCompile>
+    <ClCompile Include="$(CHIBIOS_PATH)\os\rt\src\chsem.c">
+      <Filter>Source Files\rt</Filter>
+    </ClCompile>
+    <ClCompile Include="$(CHIBIOS_PATH)\os\rt\src\chstats.c">
+      <Filter>Source Files\rt</Filter>
+    </ClCompile>
+    <ClCompile Include="$(CHIBIOS_PATH)\os\rt\src\chsys.c">
+      <Filter>Source Files\rt</Filter>
+    </ClCompile>
+    <ClCompile Include="$(CHIBIOS_PATH)\os\rt\src\chthreads.c">
+      <Filter>Source Files\rt</Filter>
+    </ClCompile>
+    <ClCompile Include="$(CHIBIOS_PATH)\os\rt\src\chtm.c">
+      <Filter>Source Files\rt</Filter>
+    </ClCompile>
+    <ClCompile Include="$(CHIBIOS_PATH)\os\rt\src\chtrace.c">
+      <Filter>Source Files\rt</Filter>
+    </ClCompile>
+    <ClCompile Include="$(CHIBIOS_PATH)\os\rt\src\chvt.c">
+      <Filter>Source Files\rt</Filter>
+    </ClCompile>
+    <ClCompile Include="$(CHIBIOS_PATH)\os\oslib\src\chdelegates.c">
+      <Filter>Source Files\rt</Filter>
+    </ClCompile>
+    <ClCompile Include="$(CHIBIOS_PATH)\os\oslib\src\chfactory.c">
+      <Filter>Source Files\rt</Filter>
+    </ClCompile>
+    <ClCompile Include="$(CHIBIOS_PATH)\os\oslib\src\chmboxes.c">
+      <Filter>Source Files\rt</Filter>
+    </ClCompile>
+    <ClCompile Include="$(CHIBIOS_PATH)\os\oslib\src\chmemcore.c">
+      <Filter>Source Files\rt</Filter>
+    </ClCompile>
+    <ClCompile Include="$(CHIBIOS_PATH)\os\oslib\src\chmemheaps.c">
+      <Filter>Source Files\rt</Filter>
+    </ClCompile>
+    <ClCompile Include="$(CHIBIOS_PATH)\os\oslib\src\chmempools.c">
+      <Filter>Source Files\rt</Filter>
+    </ClCompile>
+    <ClCompile Include="$(CHIBIOS_PATH)\os\oslib\src\chobjcaches.c">
+      <Filter>Source Files\rt</Filter>
+    </ClCompile>
+    <ClCompile Include="$(CHIBIOS_PATH)\os\oslib\src\chpipes.c">
+      <Filter>Source Files\rt</Filter>
+    </ClCompile>
+    <ClCompile Include="port\chcore.c">
+      <Filter>Source Files\port</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <MASM Include="port\chcpre_asm.asm">
+      <Filter>Source Files</Filter>
+    </MASM>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="port\ccportab.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="port\chcore.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="port\chtypes.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>

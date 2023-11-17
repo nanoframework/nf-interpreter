@@ -6,6 +6,8 @@
 #include "stdafx.h"
 #include "nanoCLR_native.h"
 
+#include <ch.h>
+
 #if defined(VIRTUAL_DEVICE)
 
 #endif
@@ -560,6 +562,33 @@ void nanoCLR_SetConfigureCallback(ConfigureRuntimeCallback configureRuntimeCallb
 }
 
 #endif
+
+
+static THD_WORKING_AREA(clrThreadWorkingArea, 2048);
+
+__declspec(noreturn) static THD_FUNCTION(CLRStartupThread, arg)
+//__declspec(noreturn) void CLRStartupThread(void const *argument)
+{
+    CLR_SETTINGS *clrSettings = (CLR_SETTINGS *)arg;
+
+    // initialize nanoHAL
+    //nanoHAL_Initialize_C();
+
+    ClrStartup(*clrSettings);
+
+    // loop until thread receives a request to terminate
+    while (1)
+    {
+        chThdSleepMilliseconds(500);
+    }
+
+    // this function never returns
+}
+
+void StartClrStartupThread(CLR_SETTINGS *clrSettings)
+{
+	chThdCreateStatic(clrThreadWorkingArea, sizeof(clrThreadWorkingArea), NORMALPRIO, CLRStartupThread, clrSettings);
+}
 
 void ClrStartup(CLR_SETTINGS params)
 {
