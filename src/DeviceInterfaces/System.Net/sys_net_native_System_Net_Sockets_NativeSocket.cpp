@@ -576,7 +576,7 @@ HRESULT Library_sys_net_native_System_Net_Sockets_NativeSocket::MarshalSockAddre
 
     {
         // get a reference to the managed fields and set them
-#if LWIP_IPV6
+#if defined(LWIP_IPV6) && LWIP_IPV6
         if (addrSrc->sa_family == SOCK_AF_INET6)
         {
             // IPV6 (SOCK_sockaddr_in6)
@@ -655,7 +655,7 @@ HRESULT Library_sys_net_native_System_Net_Sockets_NativeSocket::MarshalSockAddre
     CLR_RT_HeapBlock *remoteEndPointAddress;
     int64_t address;
     int32_t port;
-#if LWIP_IPV6
+#if defined(LWIP_IPV6) && LWIP_IPV6
     int32_t  family;
 #endif
 
@@ -670,14 +670,14 @@ HRESULT Library_sys_net_native_System_Net_Sockets_NativeSocket::MarshalSockAddre
         endPointAddress[Library_sys_net_native_System_Net_IPEndPoint::FIELD___address].Dereference();
     FAULT_ON_NULL(remoteEndPointAddress);
 
-#if LWIP_IPV6
+#if defined(LWIP_IPV6) && LWIP_IPV6
     family = remoteEndPointAddress[Library_sys_net_native_System_Net_IPAddress::FIELD___family].NumericByRef().s1;
 #endif
 
     // get value of m_Port field (type int)
     port = endPointAddress[Library_sys_net_native_System_Net_IPEndPoint::FIELD___port].NumericByRef().s4;
 
-#if LWIP_IPV6
+#if defined(LWIP_IPV6) && LWIP_IPV6
     if (family == SOCK_AF_INET6)
     {
         SOCK_sockaddr_in6 *dst = (SOCK_sockaddr_in6 *)addrDst;

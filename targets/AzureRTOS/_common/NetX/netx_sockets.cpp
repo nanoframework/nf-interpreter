@@ -76,7 +76,7 @@ HRESULT NETX_SOCKETS_Driver::Link_status(uint32_t interfaceIndex, bool *status)
     return S_OK;
 }
 
-HRESULT NETX_SOCKETS_Driver::IPAddressFromString(const char *ipString, uint64_t *address)
+HRESULT NETX_SOCKETS_Driver::IPV4AddressFromString(const char *ipString, uint64_t *address)
 {
     struct in_addr ipv4_addr;
 
@@ -92,7 +92,7 @@ HRESULT NETX_SOCKETS_Driver::IPAddressFromString(const char *ipString, uint64_t 
     return S_OK;
 }
 
-const char *NETX_SOCKETS_Driver::IPAddressToString(uint32_t address)
+const char *NETX_SOCKETS_Driver::IPV4AddressToString(uint32_t address)
 {
     // get IP v4 address in numeric format
     // FIXME IPV6

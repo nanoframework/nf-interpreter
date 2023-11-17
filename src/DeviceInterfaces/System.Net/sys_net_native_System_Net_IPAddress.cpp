@@ -19,7 +19,7 @@ HRESULT Library_sys_net_native_System_Net_IPAddress::IPv6ToString___STATIC__STRI
 {
     NANOCLR_HEADER();
 
-#if LWIP_IPV6
+#if defined(LWIP_IPV6) && LWIP_IPV6
     // Get address of ushort array with ipv6 address
     CLR_UINT16 *addr = (CLR_UINT16 *)stack.Arg0().DereferenceArray()->GetFirstElement();
 

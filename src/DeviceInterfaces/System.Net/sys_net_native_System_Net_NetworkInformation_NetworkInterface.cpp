@@ -315,7 +315,7 @@ HRESULT Library_sys_net_native_System_Net_NetworkInformation_NetworkInterface::
 {
     NANOCLR_HEADER();
 
-#if LWIP_IPV6
+#if defined(LWIP_IPV6) && LWIP_IPV6
     LPCSTR ipString = stack.Arg0().RecoverString();
     uint16_t address[8];
 
