@@ -186,12 +186,13 @@ struct Library_nf_sys_io_filesystem_System_IO_File
 struct Library_nf_sys_io_filesystem_System_IO_Path
 {
     static const int FIELD_STATIC__DirectorySeparatorChar = 3;
-    static const int FIELD_STATIC__InvalidPathChars = 4;
-    static const int FIELD_STATIC__m_illegalCharacters = 5;
+    static const int FIELD_STATIC__AltDirectorySeparatorChar = 4;
+    static const int FIELD_STATIC__VolumeSeparatorChar = 5;
+    static const int FIELD_STATIC__PathSeparator = 6;
 
     //--//
 };
 
 extern const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_System_IO_FileSystem;
 
-#endif //_NF_SYS_IO_FILESYSTEM_H_
+#endif // NF_SYS_IO_FILESYSTEM_H
