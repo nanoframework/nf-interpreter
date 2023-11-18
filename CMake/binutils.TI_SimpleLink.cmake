@@ -302,8 +302,8 @@ macro(nf_add_platform_sysconfig_steps ti_device ti_device_family)
         set(TI_RTOS_CONFIG_FILE ti-rtos-release.cfg)
     endif()
 
-    # get parent directory of the toochain path (remove /bin)
-    cmake_path(GET ARM_TOOLCHAIN_PATH PARENT_PATH ARM_TOOLCHAIN_PATH_WITHOUT_BIN)
+    # remove bin suffix from the ARM path
+    string(REPLACE "/bin" "" ARM_TOOLCHAIN_PATH_WITHOUT_BIN ${ARM_TOOLCHAIN_PATH})
 
     # need to use a specific target because target dependency PRE_BUILT doesn't work on NINJA build files
 
