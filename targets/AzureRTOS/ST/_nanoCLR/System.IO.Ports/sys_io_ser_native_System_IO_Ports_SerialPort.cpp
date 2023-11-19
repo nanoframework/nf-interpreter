@@ -982,13 +982,13 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeConfig___VOI
     // data bits @ CR1:M1&M0
     switch ((uint16_t)pThis[FIELD___dataBits].NumericByRef().s4)
     {
-        // case 5:
-        //     // palUart->Uart_cfg.cr1 |= UART_DATA_5_BITS;
-        //     break;
+            // case 5:
+            //     // palUart->Uart_cfg.cr1 |= UART_DATA_5_BITS;
+            //     break;
 
-        // case 6:
-        //     // palUart->Uart_cfg.cr1 |= UART_DATA_6_BITS;
-        //     break;
+            // case 6:
+            //     // palUart->Uart_cfg.cr1 |= UART_DATA_6_BITS;
+            //     break;
 
         case 7:
             // FIXME
