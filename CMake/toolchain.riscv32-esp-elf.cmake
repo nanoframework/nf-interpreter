@@ -10,11 +10,14 @@ set(CMAKE_SYSTEM_NAME Generic)
 
 # macro to setup compilers
 macro(nf_set_compiler_var var name)
+   message(STATUS 'find_program_name=${name},CMAKE_FIND_ROOT_PATH_BOTH=${CMAKE_FIND_ROOT_PATH_BOTH}')
    find_program(
       CMAKE_${var}
       riscv32-esp-elf-${name}
       CMAKE_FIND_ROOT_PATH_BOTH
       REQUIRED)
+      message(STATUS 'nf_set_compiler_var_result=${CMAKE_${var}}')
+
 endmacro()
 
 # safer to have these here as a check if the toolchain are accessible in the PATH
