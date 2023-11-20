@@ -1014,7 +1014,7 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeConfig___VOI
                 palUart->Uart_cfg.cr1 |= USART_CR1_M0 | USART_CR1_PCE;
             }
             else
-            {     
+            {
                 palUart->Uart_cfg.cr1 |= USART_CR1_M | USART_CR1_PCE;
             }
             palUart->Uart_cfg.cr1 &= ~USART_CR1_PS;
@@ -1025,7 +1025,7 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeConfig___VOI
                 palUart->Uart_cfg.cr1 |= USART_CR1_M0 | USART_CR1_PCE;
             }
             else
-            {     
+            {
                 palUart->Uart_cfg.cr1 |= USART_CR1_M | USART_CR1_PCE;
             }
             palUart->Uart_cfg.cr1 |= USART_CR1_PS;
