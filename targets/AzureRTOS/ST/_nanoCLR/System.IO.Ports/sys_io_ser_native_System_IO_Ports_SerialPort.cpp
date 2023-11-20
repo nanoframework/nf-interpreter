@@ -1051,10 +1051,14 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeConfig___VOI
             break;
 
         case SerialMode_RS485:
-            palUart->Uart_cfg.cr3 |= USART_CR3_DEM;  // Set Driver Enable Mode
-            palUart->Uart_cfg.cr3 |= USART_CR3_DEP;  // Set Driver Enable Polarity
+#ifdef USART_CR3_DEM
+            palUart->Uart_cfg.cr3 |= USART_CR3_DEM; // Set Driver Enable Mode
+            palUart->Uart_cfg.cr3 |= USART_CR3_DEP; // Set Driver Enable Polarity
             palUart->Uart_cfg.cr1 |= USART_CR1_DEDT; // Auto-RTS delay - set to maximum
             palUart->Uart_cfg.cr1 |= USART_CR1_DEAT; // Auto-RTS delay - set to maximum
+#else
+            NANOCLR_SET_AND_LEAVE(CLR_E_NOT_SUPPORTED);
+#endif
             break;
 
         default:
