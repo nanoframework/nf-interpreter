@@ -977,57 +977,54 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeConfig___VOI
         NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
     }
 
-    // setup configuration
+    // Setup configuration.
+    uint32_t dataBits = (uint16_t)pThis[FIELD___dataBits].NumericByRef().s4;
 
-    // data bits @ CR1:M1&M0
-    switch ((uint16_t)pThis[FIELD___dataBits].NumericByRef().s4)
+    // Check dataBits validity.
+    switch (dataBits)
     {
-            // case 5:
-            //     // palUart->Uart_cfg.cr1 |= UART_DATA_5_BITS;
-            //     break;
-
-            // case 6:
-            //     // palUart->Uart_cfg.cr1 |= UART_DATA_6_BITS;
-            //     break;
-
         case 7:
-            // FIXME
-            // palUart->Uart_cfg.cr1 |= USART_CR1_DATA7;
+            // We handle this along with parity.
             break;
 
         case 8:
-            // FIXME
-            // palUart->Uart_cfg.cr1 |= USART_CR1_DATA8;
+            // We handle this along with parity.
             break;
 
         default:
             NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
     }
 
-    // parity
+    // parity + data bits @ CR1:M1&M0 registers
     switch ((Parity)pThis[FIELD___parity].NumericByRef().s4)
     {
         case Parity_None:
             palUart->Uart_cfg.cr1 &= ~(USART_CR1_PCE | USART_CR1_PS | USART_CR1_M);
+            if (dataBits == 7)
+            {
+                palUart->Uart_cfg.cr1 |= USART_CR1_M1;
+            }
             break;
         case Parity_Even:
-#ifdef USART_CR1_M0
-            // cope with F3 and F7 where there are 2 bits in CR1_M
-            palUart->Uart_cfg.cr1 |= USART_CR1_M0 | USART_CR1_PCE;
-#else
-            palUart->Uart_cfg.cr1 |= USART_CR1_M | USART_CR1_PCE;
-#endif
+            if (dataBits == 8)
+            {
+                palUart->Uart_cfg.cr1 |= USART_CR1_M0 | USART_CR1_PCE;
+            }
+            else
+            {     
+                palUart->Uart_cfg.cr1 |= USART_CR1_M | USART_CR1_PCE;
+            }
             palUart->Uart_cfg.cr1 &= ~USART_CR1_PS;
             break;
         case Parity_Odd:
-            // setting USART_CR1_M ensures extra bit is used as parity
-            // not last bit of data
-#ifdef USART_CR1_M0
-            // cope with F3 and F7 where there are 2 bits in CR1_M
-            palUart->Uart_cfg.cr1 |= USART_CR1_M0 | USART_CR1_PCE;
-#else
-            palUart->Uart_cfg.cr1 |= USART_CR1_M | USART_CR1_PCE;
-#endif
+            if (dataBits == 8)
+            {
+                palUart->Uart_cfg.cr1 |= USART_CR1_M0 | USART_CR1_PCE;
+            }
+            else
+            {     
+                palUart->Uart_cfg.cr1 |= USART_CR1_M | USART_CR1_PCE;
+            }
             palUart->Uart_cfg.cr1 |= USART_CR1_PS;
             break;
         default:
