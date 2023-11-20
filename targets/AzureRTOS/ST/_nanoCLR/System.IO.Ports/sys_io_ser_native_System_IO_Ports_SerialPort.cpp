@@ -1044,10 +1044,22 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeConfig___VOI
             NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
     }
 
-    // Check RS485 mode is not selected as currently not supported
-    if ((SerialMode)pThis[FIELD___mode].NumericByRef().s4 != SerialMode_Normal)
+    // Set the serial mode
+    switch ((SerialMode)pThis[FIELD___mode].NumericByRef().s4)
     {
-        NANOCLR_SET_AND_LEAVE(CLR_E_NOTIMPL);
+        case: SerialMode_Normal:
+            break;
+
+        case: SerialMode_RS485:
+            palUart->Uart_cfg.cr3 |= USART_CR3_DEM; // Set Driver Enable Mode
+            palUart->Uart_cfg.cr3 |= USART_CR3_DEP; // Set Driver Enable Polarity
+            palUart->Uart_cfg.cr1 |= USART_CR1_DEDT; // Auto-RTS delay - set to maximum
+            palUart->Uart_cfg.cr1 |= USART_CR1_DEAT; // Auto-RTS delay - set to maximum
+            break;
+
+        default:
+            NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+
     }
 
     // stop bits @ CR2:STOP1&STOP0
