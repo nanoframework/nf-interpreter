@@ -1065,7 +1065,6 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeConfig___VOI
 
         default:
             NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
-
     }
 
     // stop bits @ CR2:STOP1&STOP0
