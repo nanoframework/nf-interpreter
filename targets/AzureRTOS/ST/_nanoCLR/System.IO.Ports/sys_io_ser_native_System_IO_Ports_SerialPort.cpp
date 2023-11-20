@@ -992,7 +992,7 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeConfig___VOI
             break;
 
         default:
-            NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+            NANOCLR_SET_AND_LEAVE(CLR_E_NOT_SUPPORTED);
     }
 
     // parity + data bits @ CR1:M1&M0 registers
@@ -1002,13 +1002,22 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeConfig___VOI
             palUart->Uart_cfg.cr1 &= ~(USART_CR1_PCE | USART_CR1_PS | USART_CR1_M);
             if ((uint16_t)pThis[FIELD___dataBits].NumericByRef().s4 == 7)
             {
+#ifdef USART_CR1_M1
                 palUart->Uart_cfg.cr1 |= USART_CR1_M1;
+#else
+                NANOCLR_SET_AND_LEAVE(CLR_E_NOT_SUPPORTED);
+#endif
             }
             break;
         case Parity_Even:
+
             if ((uint16_t)pThis[FIELD___dataBits].NumericByRef().s4 == 8)
             {
+#ifdef USART_CR1_M0
                 palUart->Uart_cfg.cr1 |= USART_CR1_M0 | USART_CR1_PCE;
+#else
+                NANOCLR_SET_AND_LEAVE(CLR_E_NOT_SUPPORTED);
+#endif
             }
             else
             {
@@ -1019,7 +1028,11 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeConfig___VOI
         case Parity_Odd:
             if ((uint16_t)pThis[FIELD___dataBits].NumericByRef().s4 == 8)
             {
+#ifdef USART_CR1_M0
                 palUart->Uart_cfg.cr1 |= USART_CR1_M0 | USART_CR1_PCE;
+#else
+                NANOCLR_SET_AND_LEAVE(CLR_E_NOT_SUPPORTED);
+#endif
             }
             else
             {
