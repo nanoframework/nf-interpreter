@@ -981,10 +981,10 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeConfig___VOI
     }
 
     // Setup configuration.
-    uint32_t dataBits = (uint16_t)pThis[FIELD___dataBits].NumericByRef().s4;
+    uint32_t data_bits = (uint16_t)pThis[FIELD___dataBits].NumericByRef().s4;
 
     // Check dataBits validity.
-    switch (dataBits)
+    switch (data_bits)
     {
         case 7:
             // We handle this along with parity.
@@ -1003,13 +1003,13 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeConfig___VOI
     {
         case Parity_None:
             palUart->Uart_cfg.cr1 &= ~(USART_CR1_PCE | USART_CR1_PS | USART_CR1_M);
-            if (dataBits == 7)
+            if (data_bits == 7)
             {
                 palUart->Uart_cfg.cr1 |= USART_CR1_M1;
             }
             break;
         case Parity_Even:
-            if (dataBits == 8)
+            if (data_bits == 8)
             {
                 palUart->Uart_cfg.cr1 |= USART_CR1_M0 | USART_CR1_PCE;
             }
@@ -1020,7 +1020,7 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeConfig___VOI
             palUart->Uart_cfg.cr1 &= ~USART_CR1_PS;
             break;
         case Parity_Odd:
-            if (dataBits == 8)
+            if (data_bits == 8)
             {
                 palUart->Uart_cfg.cr1 |= USART_CR1_M0 | USART_CR1_PCE;
             }
