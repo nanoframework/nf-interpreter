@@ -1049,10 +1049,10 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeConfig___VOI
     // Set the serial mode
     switch ((SerialMode)pThis[FIELD___mode].NumericByRef().s4)
     {
-        case: SerialMode_Normal:
+        case SerialMode_Normal:
             break;
 
-        case: SerialMode_RS485:
+        case SerialMode_RS485:
             palUart->Uart_cfg.cr3 |= USART_CR3_DEM; // Set Driver Enable Mode
             palUart->Uart_cfg.cr3 |= USART_CR3_DEP; // Set Driver Enable Polarity
             palUart->Uart_cfg.cr1 |= USART_CR1_DEDT; // Auto-RTS delay - set to maximum
