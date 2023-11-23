@@ -20,8 +20,13 @@
 
 static const char *TAG = "Memory";
 
+#if HAL_USE_BLE && ESP32_RESERVED_RAM_FOR_IDF_ALLOCATION == 0
+// Reduce Managed heap if using BLE without spiram and no allocation specified
+#define INTERNAL_RAM_LEAVE_FREE_FOR_ALLOCATION (30 * 1024)
+#else
 // Space to leave free in internal RAM for allocation by IDF malloc
 #define INTERNAL_RAM_LEAVE_FREE_FOR_ALLOCATION (ESP32_RESERVED_RAM_FOR_IDF_ALLOCATION * 1024)
+#endif
 
 // Saved memory allocation for when heap is reset so we can return same value.
 unsigned char *managedHeap = NULL;
