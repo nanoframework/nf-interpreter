@@ -51,7 +51,7 @@
                 "API_System.Device.I2c": "OFF",
                 "API_Com.SkyworksInc.NanoFramework.Devices.I2c": "ON",
                 "API_System.Device.UsbStream": "ON",
-                "API_System.IO.Hashing": "ON"
+                "API_nanoFramework.System.IO.Hashing": "ON"
             }
         },
         {
