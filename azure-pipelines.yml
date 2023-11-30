@@ -722,13 +722,13 @@ jobs:
 
   strategy:
     matrix:
-      ST_B_L475E_IOT01A:
-        TargetBoard: ST_B_L475E_IOT01A
-        TargetSeries: 'stm32l4xx'
-        BuildOptions: 
-        NeedsDFU: true
-        NeedsSRECORD: false
-        CMakePreset: ST_B_L475E_IOT01A
+      # ST_B_L475E_IOT01A:
+      #   TargetBoard: ST_B_L475E_IOT01A
+      #   TargetSeries: 'stm32l4xx'
+      #   BuildOptions: 
+      #   NeedsDFU: true
+      #   NeedsSRECORD: false
+      #   CMakePreset: ST_B_L475E_IOT01A
 
       # ORGPAL_PALTHREE:
       #   TargetBoard: ORGPAL_PALTHREE

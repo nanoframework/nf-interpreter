@@ -1204,6 +1204,7 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeWriteString_
 
     bool isNewAllocation = false;
     char *buffer = NULL;
+    const char *bufferPointer = NULL;
     uint32_t bufferLength;
     int32_t length = 0;
 
@@ -1242,7 +1243,12 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeWriteString_
         // Try to send buffer to fifo first.
         // if not all data written then use long running operation to complete.
         palUart->IsLongRunning = false;
+
+        // store pointer because it will be changed after this call
+        bufferPointer = buffer;
+
         int txCount = uart_tx_chars(uart_num, (const char *)buffer, bufferLength);
+
         if (txCount < (int)bufferLength)
         {
             palUart->IsLongRunning = true;
@@ -1250,7 +1256,7 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeWriteString_
             {
                 // Any written then update ptr / count
                 bufferLength -= txCount;
-                buffer += txCount;
+                bufferPointer += txCount;
             }
         }
 
@@ -1262,13 +1268,20 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeWriteString_
             NANOCLR_CHECK_HRESULT(stack.SetupTimeoutFromTicks(hbTimeout, timeoutTicks));
 
             // store pointer
-            palUart->TxBuffer = (uint8_t *)buffer;
+            palUart->TxBuffer = (uint8_t *)bufferPointer;
 
             // set TX count
             palUart->TxOngoingCount = bufferLength;
 
             // push onto the eval stack how many bytes are being pushed to the UART
             stack.PushValueI4(bufferLength);
+
+            // push onto the eval stack if the buffer was allocated
+            stack.PushValueI4(isNewAllocation ? 1 : 0);
+
+            // push buffer pointer to eval stack
+            // need this to release the buffer later, because the pointer is changed
+            stack.PushValueU4((CLR_UINT32)&bufferPointer);
 
             // Create a task to handle UART event from ISR
             char task_name[16];
@@ -1300,6 +1313,13 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeWriteString_
         if (eventResult)
         {
             // event occurred
+
+            // pop "buffer pointer" from the eval stack
+            buffer = (char *)stack.m_evalStack[3].NumericByRef().u4;
+
+            // pop "isNewAllocation" from the eval stack
+            isNewAllocation = stack.m_evalStack[2].NumericByRef().s4 == 1 ? true : false;
+
             // get from the eval stack how many bytes were buffered to TX
             length = stack.m_evalStack[1].NumericByRef().s4;
 
@@ -1320,6 +1340,12 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeWriteString_
         // pop "length" heap block from stack
         stack.PopValue();
 
+        // pop "isNewAllocation" heap block from stack
+        stack.PopValue();
+
+        // pop "buffer" heap block from stack
+        stack.PopValue();
+
         // pop "hbTimeout" heap block from stack
         stack.PopValue();
     }
@@ -1327,7 +1353,7 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeWriteString_
     stack.SetResult_U4(length);
 
     // free memory, if it was allocated
-    if (isNewAllocation && buffer)
+    if (isNewAllocation && buffer != NULL)
     {
         platform_free(buffer);
     }
