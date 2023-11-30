@@ -1281,7 +1281,7 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeWriteString_
 
             // push buffer pointer to eval stack
             // need this to release the buffer later, because the pointer is changed
-            stack.PushValueU4(buffer);
+            stack.PushValueU4((CLR_UINT32)&bufferPointer);
 
             // Create a task to handle UART event from ISR
             char task_name[16];
@@ -1315,7 +1315,7 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeWriteString_
             // event occurred
 
             // pop "buffer pointer" from the eval stack
-            buffer = (char *)stack.m_evalStack[3].NumericByRef().s4.u4;
+            buffer = (char *)stack.m_evalStack[3].NumericByRef().u4;
 
             // pop "isNewAllocation" from the eval stack
             isNewAllocation = stack.m_evalStack[2].NumericByRef().s4 == 1 ? true : false;
