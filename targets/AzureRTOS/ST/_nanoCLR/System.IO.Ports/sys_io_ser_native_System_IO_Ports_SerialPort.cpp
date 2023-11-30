@@ -978,15 +978,12 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeConfig___VOI
         NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
     }
 
-    // Setup configuration.
+    // Setup configuration
 
-    // Check dataBits validity.
+    // Check dataBits validity
     switch ((uint16_t)pThis[FIELD___dataBits].NumericByRef().s4)
     {
         case 7:
-            // We handle this along with parity.
-            break;
-
         case 8:
             // We handle this along with parity.
             break;
@@ -1000,6 +997,7 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeConfig___VOI
     {
         case Parity_None:
             palUart->Uart_cfg.cr1 &= ~(USART_CR1_PCE | USART_CR1_PS | USART_CR1_M);
+
             if ((uint16_t)pThis[FIELD___dataBits].NumericByRef().s4 == 7)
             {
 #ifdef USART_CR1_M1
@@ -1009,6 +1007,7 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeConfig___VOI
 #endif
             }
             break;
+
         case Parity_Even:
 
             if ((uint16_t)pThis[FIELD___dataBits].NumericByRef().s4 == 8)
@@ -1023,9 +1022,12 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeConfig___VOI
             {
                 palUart->Uart_cfg.cr1 |= USART_CR1_M | USART_CR1_PCE;
             }
+
             palUart->Uart_cfg.cr1 &= ~USART_CR1_PS;
             break;
+
         case Parity_Odd:
+
             if ((uint16_t)pThis[FIELD___dataBits].NumericByRef().s4 == 8)
             {
 #ifdef USART_CR1_M0
@@ -1038,8 +1040,10 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeConfig___VOI
             {
                 palUart->Uart_cfg.cr1 |= USART_CR1_M | USART_CR1_PCE;
             }
+
             palUart->Uart_cfg.cr1 |= USART_CR1_PS;
             break;
+
         default:
             NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
     }
@@ -1052,10 +1056,14 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeConfig___VOI
 
         case SerialMode_RS485:
 #ifdef USART_CR3_DEM
-            palUart->Uart_cfg.cr3 |= USART_CR3_DEM;  // Set Driver Enable Mode
-            palUart->Uart_cfg.cr3 |= USART_CR3_DEP;  // Set Driver Enable Polarity
-            palUart->Uart_cfg.cr1 |= USART_CR1_DEDT; // Auto-RTS delay - set to maximum
-            palUart->Uart_cfg.cr1 |= USART_CR1_DEAT; // Auto-RTS delay - set to maximum
+            // Set Driver Enable Mode
+            palUart->Uart_cfg.cr3 |= USART_CR3_DEM;
+            // Set Driver Enable Polarity
+            palUart->Uart_cfg.cr3 |= USART_CR3_DEP;
+            // Auto-RTS delay - set to maximum
+            palUart->Uart_cfg.cr1 |= USART_CR1_DEDT;
+            // Auto-RTS delay - set to maximum
+            palUart->Uart_cfg.cr1 |= USART_CR1_DEAT;
 #else
             NANOCLR_SET_AND_LEAVE(CLR_E_NOT_SUPPORTED);
 #endif
@@ -1074,9 +1082,11 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeConfig___VOI
         case StopBits_One:
             // already set with the above
             break;
+
         case StopBits_OnePointFive:
             palUart->Uart_cfg.cr2 |= USART_CR2_STOP_1 + USART_CR2_STOP_0;
             break;
+
         case StopBits_Two:
             palUart->Uart_cfg.cr2 |= USART_CR2_STOP_1;
             break;
