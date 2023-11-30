@@ -1279,11 +1279,10 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeWriteString_
             // event occurred
 
             // pop "isNewAllocation" from the eval stack
-            isNewAllocation = stack.m_evalStack[2].NumericByRef().s4 == 1
-                ? true
+            isNewAllocation = stack.m_evalStack[2].NumericByRef().s4 == 1 ? true : false;
 
-                  // get from the eval stack how many bytes were buffered to Tx
-                  length = stack.m_evalStack[1].NumericByRef().s4;
+            // get from the eval stack how many bytes were buffered to Tx
+            length = stack.m_evalStack[1].NumericByRef().s4;
 
             // done here
             break;
