@@ -1242,6 +1242,9 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeWriteString_
         // push onto the eval stack how many bytes are being pushed to the UART
         stack.PushValueI4(bufferLength);
 
+        // push onto the eval stack if the buffer was allocated
+        stack.PushValueI4(isNewAllocation ? 1 : 0);
+
         // flush DMA buffer to ensure cache coherency
         // (only required for Cortex-M7)
         cacheBufferFlush(buffer, bufferLength);
@@ -1274,6 +1277,10 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeWriteString_
         if (eventResult)
         {
             // event occurred
+
+            // pop "isNewAllocation" from the eval stack
+            isNewAllocation = stack.m_evalStack[2].NumericByRef().s4 == 1 ? true : false;
+
             // get from the eval stack how many bytes were buffered to Tx
             length = stack.m_evalStack[1].NumericByRef().s4;
 
@@ -1289,15 +1296,18 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeWriteString_
     // pop "length" heap block from stack
     stack.PopValue();
 
+    // pop "isNewAllocation" heap block from stack
+    stack.PopValue();
+
     // pop "hbTimeout" heap block from stack
     stack.PopValue();
 
     stack.SetResult_U4(length);
 
     // free memory, if it was allocated
-    if (isNewAllocation && buffer)
+    if (isNewAllocation)
     {
-        platform_free(buffer);
+        platform_free(palUart->TxBuffer);
     }
 
     // null pointers and vars
