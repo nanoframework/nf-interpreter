@@ -1013,7 +1013,7 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeWriteString_
 
     // pop "length" heap block from stack
     stack.PopValue();
-    
+
     // pop "isNewAllocation" heap block from stack
     stack.PopValue();
 
