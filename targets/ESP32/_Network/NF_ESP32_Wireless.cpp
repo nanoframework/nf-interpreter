@@ -159,12 +159,12 @@ esp_err_t NF_ESP32_InitaliseWifi()
         wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
 
 #if CONFIG_SPIRAM_IGNORE_NOTFOUND
-        //The comment out function below is only avaliable in ESP IDF 5.1x
-        //if (!esp_psram_is_initialized()){ 
+        // The comment out function below is only avaliable in ESP IDF 5.1x
+        // if (!esp_psram_is_initialized()){
         if (heap_caps_get_total_size(MALLOC_CAP_SPIRAM) == 0)
         {
-          cfg.cache_tx_buf_num = 0;
-          cfg.feature_caps &= ~CONFIG_FEATURE_CACHE_TX_BUF_BIT;
+            cfg.cache_tx_buf_num = 0;
+            cfg.feature_caps &= ~CONFIG_FEATURE_CACHE_TX_BUF_BIT;
         }
 #endif
 
