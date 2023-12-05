@@ -1389,6 +1389,7 @@ bool CLR_RT_HeapBlock::ObjectsEqual(
                 if (leftClassTotFields > 0 && rightClassTotFields > 0 && leftClassTotFields == rightClassTotFields)
                 {
                     int equalFieldsCount = 0;
+                    int totalFieldsCount = leftClassTotFields;
 
                     // loop through the fields and compare them
                     do
@@ -1404,7 +1405,7 @@ bool CLR_RT_HeapBlock::ObjectsEqual(
                     } while (--leftClassTotFields > 0);
 
                     // check if all fields are equal
-                    return equalFieldsCount == leftClassTotFields;
+                    return equalFieldsCount == totalFieldsCount;
                 }
             }
         }
