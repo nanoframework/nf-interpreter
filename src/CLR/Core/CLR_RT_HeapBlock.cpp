@@ -1315,6 +1315,19 @@ bool CLR_RT_HeapBlock::ObjectsEqual(
             break;
 
         case DATATYPE_STRING:
+        case DATATYPE_CLASS:
+        case DATATYPE_BOOLEAN:
+        case DATATYPE_CHAR:
+        case DATATYPE_I1:
+        case DATATYPE_U1:
+        case DATATYPE_I2:
+        case DATATYPE_U2:
+        case DATATYPE_I4:
+        case DATATYPE_U4:
+        case DATATYPE_I8:
+        case DATATYPE_U8:
+        case DATATYPE_DATETIME:
+        case DATATYPE_TIMESPAN:
             return Compare_Values(pArgLeft, pArgRight, false) == 0;
             break;
 
@@ -1363,53 +1376,6 @@ bool CLR_RT_HeapBlock::ObjectsEqual(
                 }
             }
             break;
-
-        case DATATYPE_CLASS:
-        {
-            const CLR_RT_HeapBlock *objLeft = &pArgLeft;
-            const CLR_RT_HeapBlock *objRight = &pArgRight;
-
-            CLR_RT_TypeDef_Instance classLeftObj;
-            classLeftObj.InitializeFromIndex(objLeft->ObjectCls());
-            CLR_RT_TypeDef_Instance classRightObj;
-            classRightObj.InitializeFromIndex(objRight->ObjectCls());
-
-            if (classLeftObj.m_data == classRightObj.m_data)
-            {
-                // this has been already checked above, still adding it here for completeness
-                if (&pArgLeft == &pArgRight)
-                {
-                    return true;
-                }
-
-                // check if the objects have the same number of fields
-                int leftClassTotFields = classLeftObj.CrossReference().m_totalFields;
-                int rightClassTotFields = classRightObj.CrossReference().m_totalFields;
-
-                if (leftClassTotFields > 0 && rightClassTotFields > 0 && leftClassTotFields == rightClassTotFields)
-                {
-                    int equalFieldsCount = 0;
-                    int totalFieldsCount = leftClassTotFields;
-
-                    // loop through the fields and compare them
-                    do
-                    {
-                        if (ObjectsEqual(
-                                objLeft[leftClassTotFields + CLR_RT_HeapBlock::HB_Object_Fields_Offset],
-                                objRight[rightClassTotFields + CLR_RT_HeapBlock::HB_Object_Fields_Offset],
-                                false))
-                        {
-                            // fields are equal
-                            equalFieldsCount++;
-                        }
-                    } while (--leftClassTotFields > 0);
-
-                    // check if all fields are equal
-                    return equalFieldsCount == totalFieldsCount;
-                }
-            }
-        }
-        break;
 
         default:
 
@@ -1686,7 +1652,7 @@ CLR_INT32 CLR_RT_HeapBlock::Compare_Values(const CLR_RT_HeapBlock &left, const C
                 // deal with special cases:
                 // return 0 if the numbers are unordered (either or both are NaN)
                 // this is post processed in interpreter so '1' will turn into '0'
-                if (__isnand(left.NumericByRefConst().r4) || __isnand(right.NumericByRefConst().r4))
+                if (__isnand(left.NumericByRefConst().r4) && __isnand(right.NumericByRefConst().r4))
                 {
                     return 1;
                 }
