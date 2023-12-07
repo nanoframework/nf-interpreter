@@ -1,16 +1,16 @@
-/*
- * SPDX-FileCopyrightText: 2001-2003 Swedish Institute of Computer Science
- *
- * SPDX-License-Identifier: BSD-3-Clause
- *
- * SPDX-FileContributor: 2015-2022 Espressif Systems (Shanghai) CO LTD
- */
+//
+// Copyright (c) .NET Foundation and Contributors
+// Copyright (c) 2001-2003 Swedish Institute of Computer Science, All Rights Reserved
+// Portions Copyright (c) Espressif
+// See LICENSE file in the project root for full license information.
+//
+
 #ifndef LWIP_HDR_ESP_LWIPOPTS_H
 #define LWIP_HDR_ESP_LWIPOPTS_H
 
 #include "sdkconfig.h"
-#include <string.h>     // For memcpy
-#include <stdlib.h>     // For malloc/free
+#include <string.h>
+#include <stdlib.h>
 #include <unistd.h>
 #include <sys/fcntl.h>
 #include <sys/ioctl.h>
