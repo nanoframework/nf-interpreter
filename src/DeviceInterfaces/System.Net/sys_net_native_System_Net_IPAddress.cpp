@@ -32,7 +32,6 @@ HRESULT Library_sys_net_native_System_Net_IPAddress::IPv6ToString___STATIC__STRI
     NANOCLR_NOCLEANUP();
 }
 
-
 HRESULT Library_sys_net_native_System_Net_IPAddress::IPv6ToString___STATIC__STRING__SZARRAY_U2( CLR_RT_StackFrame &stack )
 {
     NANOCLR_HEADER();
