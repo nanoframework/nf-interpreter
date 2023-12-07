@@ -98,7 +98,7 @@ if(${TARGET_SERIES_SHORT} STREQUAL "esp32s2" OR ${TARGET_SERIES_SHORT} STREQUAL 
     list(APPEND ESP32_IDF_INCLUDE_DIRS ${esp32_idf_SOURCE_DIR}/components/freertos/FreeRTOS-Kernel/include/freertos)
 endif()
 
-# includes specific to ESP32C6 and ESP32H2 - Thread 
+# includes specific to Thread (only for ESP32C6 and ESP32H2)
 if(HAL_USE_THREAD_OPTION)
     list(APPEND ESP32_IDF_INCLUDE_DIRS ${esp32_idf_SOURCE_DIR}/components/openthread/include)
     list(APPEND ESP32_IDF_INCLUDE_DIRS ${esp32_idf_SOURCE_DIR}/components/openthread/openthread/include)
@@ -111,7 +111,7 @@ include(${TARGET_SERIES}_GCC_options)
 
 ############
 # freertos #
-############FreeRTOSConfig.h
+############
 
 list(APPEND ESP32_IDF_INCLUDE_DIRS ${esp32_idf_SOURCE_DIR}/components/freertos/FreeRTOS-Kernel/include)
 list(APPEND ESP32_IDF_INCLUDE_DIRS ${esp32_idf_SOURCE_DIR}/components/freertos/include/esp_additions)
