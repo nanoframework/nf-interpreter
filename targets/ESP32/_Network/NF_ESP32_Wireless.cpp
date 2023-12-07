@@ -143,7 +143,7 @@ esp_err_t NF_ESP32_InitaliseWifi()
 
     if (!IsWifiInitialised)
     {
-        // create Wi-Fi STA 
+        // create Wi-Fi STA (ignoring return)
         esp_netif_create_default_wifi_sta();
 
         // We need to start the WIFI stack before the station can Connect
