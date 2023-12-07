@@ -117,9 +117,14 @@ HRESULT Library_sys_net_native_System_Net_NetworkInformation_WirelessAPConfigura
     // make sure the terminators are there
     hbPassword = pConfig[FIELD___apPassword].DereferenceString();
     FAULT_ON_NULL(hbPassword);
+    
     passwordLength = hal_strlen_s(hbPassword->StringText());
+
     if (passwordLength >= sizeof(config.Password))
+    {
         NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+    }
+
     hal_strncpy_s(
         (char *)config.Password,
         WIRELESS82011_CONFIG_MAX_PASSWORD_LEN,
@@ -128,9 +133,14 @@ HRESULT Library_sys_net_native_System_Net_NetworkInformation_WirelessAPConfigura
 
     hbSsid = pConfig[FIELD___apSsid].DereferenceString();
     FAULT_ON_NULL(hbSsid);
+
     ssidLength = hal_strlen_s(hbSsid->StringText());
+    
     if (ssidLength >= sizeof(config.Ssid))
+    {
         NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+    }
+
     hal_strncpy_s((char *)config.Ssid, WIRELESS82011_CONFIG_MAX_SSID_LEN, hbSsid->StringText(), ssidLength);
 
     // store configuration
@@ -181,7 +191,9 @@ HRESULT Library_sys_net_native_System_Net_NetworkInformation_WirelessAPConfigura
     for (int x = 0; x < Network_Interface_Max_Stations(); x++)
     {
         if (index != 0 && x != index)
+        {
             continue;
+        }
 
         if (Network_Interface_Get_Station(x, mac, &rssi, &phyModes))
         {
@@ -201,7 +213,9 @@ HRESULT Library_sys_net_native_System_Net_NetworkInformation_WirelessAPConfigura
         for (int x = 0; x < Network_Interface_Max_Stations(); x++)
         {
             if (index != 0 && x != index)
+            {
                 continue;
+            }
 
             if (Network_Interface_Get_Station(x, mac, &rssi, &phyModes))
             {
