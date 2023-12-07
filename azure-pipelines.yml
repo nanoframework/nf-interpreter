@@ -794,9 +794,12 @@ jobs:
     vmImage: 'windows-latest'
 
   variables:
-    DOTNET_NOLOGO: true
+    - group: sign-client-credentials
+    - name: DOTNET_NOLOGO
+      value: true
     # creates a counter and assigns it to the revision variable
-    REVISION: $[counter('WIN32_1_9_0_versioncounter', 0)]
+    - name: REVISION
+      value: $[counter('WIN32_1_9_0_versioncounter', 0)]
 
   steps:
   - template: azure-pipelines-templates/nb-gitversioning.yml
@@ -852,16 +855,19 @@ jobs:
       arguments: install --tool-path . SignClient
 
   - pwsh: |
-      .\SignClient "Sign" `
-      --baseDirectory "$(Build.Repository.LocalPath)\build\bin\Release" `
-      --input "**/nanoFramework.nanoCLR.*" `
-      --config "$(Build.Repository.LocalPath)\config\SignClient.json" `
-      --filelist "$(Build.Repository.LocalPath)\config\filelist.txt" `
-      --user "$(SignClientUser)" `
-      --secret '$(SignClientSecret)' `
-      --name "nanoFramework.nanoCLR" `
+      .\sign code azure-key-vault `
+      "**/nanoFramework.nanoCLR.*" `
+      --base-directory "$(Build.Repository.LocalPath)\build\bin\Release" `
+      --file-list "$(Build.Repository.LocalPath)\config\filelist.txt" `
+      --publisher-name ".NET nanoFramework" `
       --description "nanoFramework.nanoCLR" `
-      --descriptionUrl "https://github.com/$env:Build_Repository_Name"
+      --description-url "https://github.com/$env:Build_Repository_Name"
+      --azure-key-vault-tenant-id "$(SignTenantId)"
+      --azure-key-vault-client-id "$(SignClientId)"
+      --azure-key-vault-client-secret "$(SignClientSecret)"
+      --azure-key-vault-certificate "$(SignKeyVaultCertificate)"
+      --azure-key-vault-url "$(SignKeyVaultUrl)"
+      --timestamp-url http://timestamp.digicert.com
     displayName: Sign nanoCLR assemblies
     continueOnError: true
     condition: >-
@@ -911,16 +917,19 @@ jobs:
       ignoreMakeDirErrors: true
 
   - pwsh: |
-      .\SignClient "Sign" `
-      --baseDirectory "$(Build.ArtifactStagingDirectory)" `
-      --input "**/*.nupkg" `
-      --config "$(Build.Repository.LocalPath)\config\SignClient.json" `
-      --filelist "$(Build.Repository.LocalPath)\config\filelist.txt" `
-      --user "$(SignClientUser)" `
-      --secret '$(SignClientSecret)' `
-      --name "nanoFramework.nanoCLR NuGets" `
+      .\sign code azure-key-vault `
+      "**/*.nupkg" `
+      --base-directory "$(Build.Repository.LocalPath)\build\bin\Release" `
+      --file-list "$(Build.Repository.LocalPath)\config\filelist.txt" `
+      --publisher-name ".NET nanoFramework" `
       --description "nanoFramework.nanoCLR NuGets" `
-      --descriptionUrl "https://github.com/$env:Build_Repository_Name"
+      --description-url "https://github.com/$env:Build_Repository_Name"
+      --azure-key-vault-tenant-id "$(SignTenantId)"
+      --azure-key-vault-client-id "$(SignClientId)"
+      --azure-key-vault-client-secret "$(SignClientSecret)"
+      --azure-key-vault-certificate "$(SignKeyVaultCertificate)"
+      --azure-key-vault-url "$(SignKeyVaultUrl)"
+      --timestamp-url http://timestamp.digicert.com
     displayName: Sign packages
     continueOnError: true
     condition: >-
@@ -1010,8 +1019,10 @@ jobs:
     vmImage: 'windows-latest'
 
   variables:
-    DOTNET_NOLOGO: true
-
+    - group: sign-client-credentials
+    - name: DOTNET_NOLOGO
+      value: true
+  
   steps:
   - template: azure-pipelines-templates/nb-gitversioning.yml
 
@@ -1046,19 +1057,22 @@ jobs:
     inputs:
       command: custom
       custom: tool
-      arguments: install --tool-path . SignClient
+      arguments: install --tool-path . sign --version 0.9.1-beta.23530.1
 
   - pwsh: |
-      .\SignClient "Sign" `
-      --baseDirectory "$(Build.Repository.LocalPath)\build\bin\Release" `
-      --input "**/nanoFramework.nanoCLR.*" `
-      --config "$(Build.Repository.LocalPath)\config\SignClient.json" `
-      --filelist "$(Build.Repository.LocalPath)\config\filelist.txt" `
-      --user "$(SignClientUser)" `
-      --secret '$(SignClientSecret)' `
-      --name "nanoFramework.nanoCLR.CLI" `
+      .\sign code azure-key-vault `
+      "**/nanoFramework.nanoCLR.*" `
+      --base-directory "$(Build.Repository.LocalPath)\build\bin\Release" `
+      --file-list "$(Build.Repository.LocalPath)\config\filelist.txt" `
+      --publisher-name ".NET nanoFramework" `
       --description "nanoFramework.nanoCLR.CLI" `
-      --descriptionUrl "https://github.com/$env:Build_Repository_Name"
+      --description-url "https://github.com/$env:Build_Repository_Name"
+      --azure-key-vault-tenant-id "$(SignTenantId)"
+      --azure-key-vault-client-id "$(SignClientId)"
+      --azure-key-vault-client-secret "$(SignClientSecret)"
+      --azure-key-vault-certificate "$(SignKeyVaultCertificate)"
+      --azure-key-vault-url "$(SignKeyVaultUrl)"
+      --timestamp-url http://timestamp.digicert.com
     displayName: Sign nanoCLR assemblies
     continueOnError: true
     condition: >-
@@ -1078,16 +1092,19 @@ jobs:
       maximumCpuCount: true
 
   - pwsh: |
-      .\SignClient "Sign" `
-      --baseDirectory "$(Build.ArtifactStagingDirectory)" `
-      --input "**/*.nupkg" `
-      --config "$(Build.Repository.LocalPath)\config\SignClient.json" `
-      --filelist "$(Build.Repository.LocalPath)\config\filelist.txt" `
-      --user "$(SignClientUser)" `
-      --secret '$(SignClientSecret)' `
-      --name "nanoFramework.nanoCLR.CLI NuGet" `
+      .\sign code azure-key-vault `
+      "**/*.nupkg" `
+      --base-directory "$(Build.Repository.LocalPath)\build\bin\Release" `
+      --file-list "$(Build.Repository.LocalPath)\config\filelist.txt" `
+      --publisher-name ".NET nanoFramework" `
       --description "nanoFramework.nanoCLR.CLI NuGet" `
-      --descriptionUrl "https://github.com/$env:Build_Repository_Name"
+      --description-url "https://github.com/$env:Build_Repository_Name"
+      --azure-key-vault-tenant-id "$(SignTenantId)"
+      --azure-key-vault-client-id "$(SignClientId)"
+      --azure-key-vault-client-secret "$(SignClientSecret)"
+      --azure-key-vault-certificate "$(SignKeyVaultCertificate)"
+      --azure-key-vault-url "$(SignKeyVaultUrl)"
+      --timestamp-url http://timestamp.digicert.com
     displayName: Sign packages
     continueOnError: true
     condition: >-
