@@ -843,7 +843,7 @@ jobs:
       configuration: 'Release'
 
   - task: DotNetCoreCLI@2
-    displayName: Install SignTool tool
+    displayName: Install Sign Client CLI
     condition: >-
       and(
         succeeded(),
@@ -852,7 +852,7 @@ jobs:
     inputs:
       command: custom
       custom: tool
-      arguments: install --tool-path . SignClient
+      arguments: install --tool-path . sign --version 0.9.1-beta.23530.1
 
   - pwsh: |
       .\sign code azure-key-vault `
@@ -861,12 +861,12 @@ jobs:
       --file-list "$(Build.Repository.LocalPath)\config\filelist.txt" `
       --publisher-name ".NET nanoFramework" `
       --description "nanoFramework.nanoCLR" `
-      --description-url "https://github.com/$env:Build_Repository_Name"
-      --azure-key-vault-tenant-id "$(SignTenantId)"
-      --azure-key-vault-client-id "$(SignClientId)"
-      --azure-key-vault-client-secret "$(SignClientSecret)"
-      --azure-key-vault-certificate "$(SignKeyVaultCertificate)"
-      --azure-key-vault-url "$(SignKeyVaultUrl)"
+      --description-url "https://github.com/$env:Build_Repository_Name" `
+      --azure-key-vault-tenant-id "$(SignTenantId)" `
+      --azure-key-vault-client-id "$(SignClientId)" `
+      --azure-key-vault-client-secret "$(SignClientSecret)" `
+      --azure-key-vault-certificate "$(SignKeyVaultCertificate)" `
+      --azure-key-vault-url "$(SignKeyVaultUrl)" `
       --timestamp-url http://timestamp.digicert.com
     displayName: Sign nanoCLR assemblies
     continueOnError: true
@@ -919,16 +919,16 @@ jobs:
   - pwsh: |
       .\sign code azure-key-vault `
       "**/*.nupkg" `
-      --base-directory "$(Build.Repository.LocalPath)\build\bin\Release" `
+      --base-directory "$(Build.ArtifactStagingDirectory)" `
       --file-list "$(Build.Repository.LocalPath)\config\filelist.txt" `
       --publisher-name ".NET nanoFramework" `
       --description "nanoFramework.nanoCLR NuGets" `
-      --description-url "https://github.com/$env:Build_Repository_Name"
-      --azure-key-vault-tenant-id "$(SignTenantId)"
-      --azure-key-vault-client-id "$(SignClientId)"
-      --azure-key-vault-client-secret "$(SignClientSecret)"
-      --azure-key-vault-certificate "$(SignKeyVaultCertificate)"
-      --azure-key-vault-url "$(SignKeyVaultUrl)"
+      --description-url "https://github.com/$env:Build_Repository_Name" `
+      --azure-key-vault-tenant-id "$(SignTenantId)" `
+      --azure-key-vault-client-id "$(SignClientId)" `
+      --azure-key-vault-client-secret "$(SignClientSecret)" `
+      --azure-key-vault-certificate "$(SignKeyVaultCertificate)" `
+      --azure-key-vault-url "$(SignKeyVaultUrl)" `
       --timestamp-url http://timestamp.digicert.com
     displayName: Sign packages
     continueOnError: true
@@ -1048,7 +1048,7 @@ jobs:
       configuration: 'Release'
 
   - task: DotNetCoreCLI@2
-    displayName: Install SignTool tool
+    displayName: Install Sign Client CLI
     condition: >-
       and(
         succeeded(),
@@ -1066,12 +1066,12 @@ jobs:
       --file-list "$(Build.Repository.LocalPath)\config\filelist.txt" `
       --publisher-name ".NET nanoFramework" `
       --description "nanoFramework.nanoCLR.CLI" `
-      --description-url "https://github.com/$env:Build_Repository_Name"
-      --azure-key-vault-tenant-id "$(SignTenantId)"
-      --azure-key-vault-client-id "$(SignClientId)"
-      --azure-key-vault-client-secret "$(SignClientSecret)"
-      --azure-key-vault-certificate "$(SignKeyVaultCertificate)"
-      --azure-key-vault-url "$(SignKeyVaultUrl)"
+      --description-url "https://github.com/$env:Build_Repository_Name" `
+      --azure-key-vault-tenant-id "$(SignTenantId)" `
+      --azure-key-vault-client-id "$(SignClientId)" `
+      --azure-key-vault-client-secret "$(SignClientSecret)" `
+      --azure-key-vault-certificate "$(SignKeyVaultCertificate)" `
+      --azure-key-vault-url "$(SignKeyVaultUrl)" `
       --timestamp-url http://timestamp.digicert.com
     displayName: Sign nanoCLR assemblies
     continueOnError: true
@@ -1094,16 +1094,16 @@ jobs:
   - pwsh: |
       .\sign code azure-key-vault `
       "**/*.nupkg" `
-      --base-directory "$(Build.Repository.LocalPath)\build\bin\Release" `
+      --base-directory "$(Build.ArtifactStagingDirectory)" `
       --file-list "$(Build.Repository.LocalPath)\config\filelist.txt" `
       --publisher-name ".NET nanoFramework" `
       --description "nanoFramework.nanoCLR.CLI NuGet" `
-      --description-url "https://github.com/$env:Build_Repository_Name"
-      --azure-key-vault-tenant-id "$(SignTenantId)"
-      --azure-key-vault-client-id "$(SignClientId)"
-      --azure-key-vault-client-secret "$(SignClientSecret)"
-      --azure-key-vault-certificate "$(SignKeyVaultCertificate)"
-      --azure-key-vault-url "$(SignKeyVaultUrl)"
+      --description-url "https://github.com/$env:Build_Repository_Name" `
+      --azure-key-vault-tenant-id "$(SignTenantId)" `
+      --azure-key-vault-client-id "$(SignClientId)" `
+      --azure-key-vault-client-secret "$(SignClientSecret)" `
+      --azure-key-vault-certificate "$(SignKeyVaultCertificate)" `
+      --azure-key-vault-url "$(SignKeyVaultUrl)" `
       --timestamp-url http://timestamp.digicert.com
     displayName: Sign packages
     continueOnError: true
