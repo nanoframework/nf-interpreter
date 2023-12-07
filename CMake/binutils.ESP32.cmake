@@ -672,8 +672,8 @@ macro(nf_add_idf_as_library)
         message(DEBUG "Reading SDK config from '${SDKCONFIG_DEFAULTS_FILE}' for Thread options")
 
         file(READ
-        "${SDKCONFIG_DEFAULTS_FILE}"
-        SDKCONFIG_DEFAULT_CONTENTS)
+            "${SDKCONFIG_DEFAULTS_FILE}"
+            SDKCONFIG_DEFAULT_CONTENTS)
 
         # Append config based on options
         string(APPEND SDKCONFIG_DEFAULT_CONTENTS "\nCONFIG_OPENTHREAD_ENABLED=y\n")
@@ -752,6 +752,7 @@ macro(nf_add_idf_as_library)
         # need to read the supplied SDK CONFIG file(s) and replace the appropriate options
 
         message(DEBUG "Reading SDK config from '${SDKCONFIG_DEFAULTS_FILE}'")
+
         file(READ
             "${SDKCONFIG_DEFAULTS_FILE}"
             SDKCONFIG_DEFAULT_CONTENTS)
@@ -806,10 +807,10 @@ macro(nf_add_idf_as_library)
     if(USE_NETWORKING_OPTION)
 
         FetchContent_GetProperties(esp32_idf)
-        
+
         # get list of source files for lwIP
         get_target_property(IDF_LWIP_SOURCES __idf_lwip SOURCES)
-        
+
         # remove the ones we'll be replacing
         list(REMOVE_ITEM 
             IDF_LWIP_SOURCES
@@ -854,8 +855,8 @@ macro(nf_add_idf_as_library)
         # add nanoCLR compile definitions to lwIP
         list(APPEND 
             IDF_LWIP_COMPILE_DEFINITIONS 
-            PLATFORM_ESP32
-            ESP_LWIP_COMPONENT_BUILD
+                PLATFORM_ESP32
+                ESP_LWIP_COMPONENT_BUILD
             )
 
         # add the compile definitions
