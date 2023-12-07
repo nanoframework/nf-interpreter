@@ -7,7 +7,7 @@
 #include "nanoFramework_hardware_esp32_native.h"
 #include <Core.h>
 
-// PCNT device not available of the ESP32-C3 
+// PCNT device not available of the ESP32-C3
 #if !defined(CONFIG_IDF_TARGET_ESP32C3)
 
 #include "driver/pulse_cnt.h"
