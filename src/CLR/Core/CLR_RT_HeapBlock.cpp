@@ -1150,8 +1150,9 @@ CLR_UINT32 CLR_RT_HeapBlock::GetHashCode(CLR_RT_HeapBlock *ptr, bool fRecurse, C
                     {
                         do
                         {
-                            crc = GetHashCode(&ptr[totFields + CLR_RT_HeapBlock::HB_Object_Fields_Offset], false, crc);
-                        } while (--totFields > 0);
+                            crc ^=
+                                GetHashCode(&ptr[--totFields + CLR_RT_HeapBlock::HB_Object_Fields_Offset], true, crc);
+                        } while (totFields > 0);
                     }
                 }
             }
