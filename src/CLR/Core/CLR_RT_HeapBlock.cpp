@@ -1055,13 +1055,13 @@ CLR_UINT32 CLR_RT_HeapBlock::GetHashCode(CLR_RT_HeapBlock *ptr, bool fRecurse, C
     switch (ptr->DataType())
     {
         case DATATYPE_OBJECT:
-            crc = GetHashCode(ptr->Dereference(), fRecurse, crc);
+            crc ^= GetHashCode(ptr->Dereference(), fRecurse, crc);
             break;
 
         case DATATYPE_STRING:
         {
             const char *src = ptr->StringText();
-            crc = SUPPORT_ComputeCRC(src, (int)hal_strlen_s(src), crc);
+            crc ^= SUPPORT_ComputeCRC(src, (int)hal_strlen_s(src), crc);
         }
         break;
 
@@ -1135,12 +1135,12 @@ CLR_UINT32 CLR_RT_HeapBlock::GetHashCode(CLR_RT_HeapBlock *ptr, bool fRecurse, C
             if (fRecurse && cls.m_target->dataType <= DATATYPE_R8)
             {
                 // pass the 1st field which is the one holding the actual value
-                crc = GetHashCode(&ptr[CLR_RT_HeapBlock::HB_Object_Fields_Offset], false, crc);
+                crc ^= GetHashCode(&ptr[CLR_RT_HeapBlock::HB_Object_Fields_Offset], false, crc);
             }
             else
             {
                 // always starts with the pointer to the object to fully disambiguate
-                crc = SUPPORT_ComputeCRC(&ptr, sizeof(ptr), crc);
+                crc ^= SUPPORT_ComputeCRC(&ptr, sizeof(ptr), crc);
 
                 if (fRecurse)
                 {
@@ -1164,9 +1164,9 @@ CLR_UINT32 CLR_RT_HeapBlock::GetHashCode(CLR_RT_HeapBlock *ptr, bool fRecurse, C
             CLR_RT_HeapBlock_Delegate *dlg = (CLR_RT_HeapBlock_Delegate *)ptr;
             const CLR_RT_MethodDef_Index &ftn = dlg->DelegateFtn();
 
-            crc = GetHashCode(&dlg->m_object, false, crc);
+            crc ^= GetHashCode(&dlg->m_object, false, crc);
 
-            crc = SUPPORT_ComputeCRC(&ftn, sizeof(ftn), crc);
+            crc ^= SUPPORT_ComputeCRC(&ftn, sizeof(ftn), crc);
         }
         break;
 
@@ -1174,13 +1174,13 @@ CLR_UINT32 CLR_RT_HeapBlock::GetHashCode(CLR_RT_HeapBlock *ptr, bool fRecurse, C
         {
             CLR_RT_ObjectToEvent_Source *evtSrc = (CLR_RT_ObjectToEvent_Source *)ptr;
 
-            crc = GetHashCode(evtSrc->m_eventPtr, false, crc);
-            crc = GetHashCode(evtSrc->m_objectPtr, false, crc);
+            crc ^= GetHashCode(evtSrc->m_eventPtr, false, crc);
+            crc ^= GetHashCode(evtSrc->m_objectPtr, false, crc);
         }
         break;
 
         default:
-            crc = SUPPORT_ComputeCRC((const void *)&ptr->DataByRefConst(), ptr->GetAtomicDataUsedBytes(), crc);
+            crc ^= SUPPORT_ComputeCRC((const void *)&ptr->DataByRefConst(), ptr->GetAtomicDataUsedBytes(), crc);
 
             break;
     }
