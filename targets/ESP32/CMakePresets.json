@@ -284,7 +284,7 @@
                 "API_nanoFramework.Device.OneWire": "OFF",
                 "API_nanoFramework.Device.Bluetooth": "ON",
                 "ESP32_RESERVED_RAM_FOR_IDF_ALLOCATION": "150",
-                "API_nanoFramework.Networking.Thread": "ON",
+                "API_nanoFramework.Networking.Thread": "OFF",
                 "THREAD_NODE_ROLE": "FTD",
                 "THREAD_DATASETTLVS": "0e080000000000000000000300001435060004001fffe00208473b6d471ac9b62d0708fd881c8e81b2f28c0510b933f687d1537c252ee7e680d41e1483030d6e616e6f6672616d65776f726b010256190410fd62447741af00be7f8139d6489127ef0c0402a0f7f8"
             }
@@ -310,7 +310,7 @@
                 "API_nanoFramework.Device.OneWire": "OFF",
                 "API_nanoFramework.Device.Bluetooth": "ON",
                 "ESP32_RESERVED_RAM_FOR_IDF_ALLOCATION": "70",
-                "API_nanoFramework.Networking.Thread": "ON",
+                "API_nanoFramework.Networking.Thread": "OFF",
                 "THREAD_NODE_ROLE": "MED",
                 "THREAD_DATASETTLVS": "0e080000000000000000000300001435060004001fffe00208473b6d471ac9b62d0708fd881c8e81b2f28c0510b933f687d1537c252ee7e680d41e1483030d6e616e6f6672616d65776f726b010256190410fd62447741af00be7f8139d6489127ef0c0402a0f7f8"
             }
