@@ -16,8 +16,8 @@ steps:
   - task: Cache@2
     displayName: Cache pip packages
     inputs:
-      key: 'python | "$(Agent.OS)" | $(Agent.BuildDirectory)\s\esp-idf\tools\requirements.json'
-      restoreKeys: python | "$(Agent.OS)" | $(Agent.BuildDirectory)\s\esp-idf\tools\requirements.json
+      key: 'python | "$(Agent.OS)" | $(Agent.BuildDirectory)\s\esp-idf\tools\requirements\requirements.core.txt'
+      restoreKeys: python | "$(Agent.OS)" | $(Agent.BuildDirectory)\s\esp-idf\tools\requirements\requirements.core.txt
       path: $(PIP_CACHE_DIR)
       cacheHitVar: PIP_PACKAGES_RESTORED
 
@@ -42,7 +42,7 @@ steps:
       targetType: 'inline'
       workingDirectory: $(Agent.BuildDirectory)\s\esp-idf\tools\requirements
       script: |
-        python -m pip install -r requirements.json
+        python -m pip install -r requirements.core.txt
 
   - task: PowerShell@2
     displayName: Install IDF (step 3)
