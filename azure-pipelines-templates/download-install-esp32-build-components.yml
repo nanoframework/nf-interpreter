@@ -16,8 +16,8 @@ steps:
   - task: Cache@2
     displayName: Cache pip packages
     inputs:
-      key: 'python | "$(Agent.OS)" | esp-idf\tools\requirements\requirements.json'
-      restoreKeys: python | "$(Agent.OS)" | esp-idf\tools\requirements\requirements.json
+      key: 'python | "$(Agent.OS)" | $(Agent.BuildDirectory)\s\esp-idf\tools\requirements.json'
+      restoreKeys: python | "$(Agent.OS)" | $(Agent.BuildDirectory)\s\esp-idf\tools\requirements.json
       path: $(PIP_CACHE_DIR)
       cacheHitVar: PIP_PACKAGES_RESTORED
 
