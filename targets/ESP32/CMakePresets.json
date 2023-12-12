@@ -307,6 +307,7 @@
                 "HAL_WP_USE_USB_CDC": "ON",
                 "API_System.IO.FileSystem": "ON",
                 "API_Windows.Storage": "ON",
+                "API_System.Device.Adc": "OFF",
                 "API_nanoFramework.Device.OneWire": "OFF",
                 "API_nanoFramework.Device.Bluetooth": "ON",
                 "ESP32_RESERVED_RAM_FOR_IDF_ALLOCATION": "70",
