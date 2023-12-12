@@ -37,7 +37,12 @@ steps:
     condition: >-
       and(
         succeeded(),
-        ne(variables['TargetSeries'], 'esp32c3')
+        or(
+          eq(variables['TargetSeries'], 'esp32'),
+          eq(variables['TargetSeries'], 'esp32c6'),
+          eq(variables['TargetSeries'], 'esp32s2'),
+          eq(variables['TargetSeries'], 'esp32s3')       
+        )
       )
     displayName: Generate ESP32 Partition tables for 16MB flash
     inputs:
