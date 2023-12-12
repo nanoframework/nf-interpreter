@@ -290,7 +290,7 @@
             }
         },
         {
-            "name": "ESP32_H2_Thread",
+            "name": "ESP32_H2_THREAD",
             "inherits": [
                 "xtensa-esp32h2-preset",
                 "user-tools-repos",
@@ -877,6 +877,18 @@
             "displayName": "ESP32_C3_REV3",
             "configurePreset": "ESP32_C3_REV3"
         },
+        {
+            "inherits": "base-user",
+            "name": "ESP32_C6_THREAD",
+            "displayName": "ESP32_C6_THREAD",
+            "configurePreset": "ESP32_C6_THREAD"
+        },
+        {
+            "inherits": "base-user",
+            "name": "ESP32_H2_THREAD",
+            "displayName": "ESP32_H2_THREAD",
+            "configurePreset": "ESP32_H2_THREAD"
+        },        
         {
             "inherits": "base-user",
             "name": "ESP32_S3",
