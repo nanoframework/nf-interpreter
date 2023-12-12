@@ -36,7 +36,7 @@ steps:
       script: |
         $filecontent = Get-Content('install.ps1')
         attrib $file -r
-        $filecontent -replace '--features=' , ' ' | Out-File 'install.ps1' -Encoding utf8
+        $filecontent -replace '--features=${FEATURES}' , ' ' | Out-File 'install.ps1' -Encoding utf8
           
   # run IDF installers
   - task: PowerShell@2
