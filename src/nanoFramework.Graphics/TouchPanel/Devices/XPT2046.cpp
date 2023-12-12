@@ -15,7 +15,6 @@ extern TouchInterface g_TouchInterface;
 
 bool TouchDevice::Initialize()
 {
-    g_TouchDevice.Initialize();
     ReadsToIgnore = 1;
     ReadsPerSample = 1;
     MaxFilterDistance = 1; // This is actually squared value of the max distance allowed between two points.
