@@ -111,10 +111,6 @@ void nanoCLR_Run(NANO_CLR_SETTINGS nanoClrSettings)
     BlockStorage_AddDevices();
     BlockStorageList_InitializeDevices();
 
-    //halInit();
-    //  Startup ChibiOS/RT.
-    //chSysInit();
-
     CLR_SETTINGS clrSettings;
     ZeroMemory(&clrSettings, sizeof(clrSettings));
 
@@ -125,6 +121,9 @@ void nanoCLR_Run(NANO_CLR_SETTINGS nanoClrSettings)
     clrSettings.PerformHeapCompaction = nanoClrSettings.PerformHeapCompaction;
 
    StartClrStartupThread(&clrSettings);
+
+    // Start the scheduler.
+    vTaskStartScheduler();
 
    while (true)
    {
