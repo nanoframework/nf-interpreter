@@ -6,7 +6,8 @@
 #include "stdafx.h"
 #include "nanoCLR_native.h"
 
-#include <ch.h>
+#include <FreeRTOS.h>
+#include <task.h>
 
 #if defined(VIRTUAL_DEVICE)
 
@@ -564,12 +565,13 @@ void nanoCLR_SetConfigureCallback(ConfigureRuntimeCallback configureRuntimeCallb
 #endif
 
 
-static THD_WORKING_AREA(clrThreadWorkingArea, 2048);
+// static THD_WORKING_AREA(clrThreadWorkingArea, 2048);
 
-__declspec(noreturn) static THD_FUNCTION(CLRStartupThread, arg)
+//__declspec(noreturn) static THD_FUNCTION(CLRStartupThread, arg) 
+void CLRStartupTask(void *pvParameters)
 //__declspec(noreturn) void CLRStartupThread(void const *argument)
 {
-    CLR_SETTINGS *clrSettings = (CLR_SETTINGS *)arg;
+    CLR_SETTINGS *clrSettings = (CLR_SETTINGS *)pvParameters;
 
     // initialize nanoHAL
     //nanoHAL_Initialize_C();
@@ -579,7 +581,7 @@ __declspec(noreturn) static THD_FUNCTION(CLRStartupThread, arg)
     // loop until thread receives a request to terminate
     while (1)
     {
-        chThdSleepMilliseconds(500);
+        vTaskDelay(500/portTICK_PERIOD_MS);
     }
 
     // this function never returns
@@ -587,7 +589,7 @@ __declspec(noreturn) static THD_FUNCTION(CLRStartupThread, arg)
 
 void StartClrStartupThread(CLR_SETTINGS *clrSettings)
 {
-	chThdCreateStatic(clrThreadWorkingArea, sizeof(clrThreadWorkingArea), NORMALPRIO, CLRStartupThread, clrSettings);
+    xTaskCreate(CLRStartupTask, "CLR", configMINIMAL_STACK_SIZE, NULL, configMINIMAL_STACK_SIZE, NULL);
 }
 
 void ClrStartup(CLR_SETTINGS params)

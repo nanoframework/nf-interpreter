@@ -46,6 +46,11 @@ resources:
       name: espressif/esp-idf
       endpoint: nanoframework
       ref: refs/tags/v4.4.6
+    - repository: freertos
+      type: github
+      name: FreeRTOS/FreeRTOS
+      endpoint: nanoframework
+      ref: refs/tags/V10.6.2
     - repository: mscorlib
       type: github
       name: nanoframework/CoreLibrary
@@ -1022,8 +1027,14 @@ jobs:
     - group: sign-client-credentials
     - name: DOTNET_NOLOGO
       value: true
-  
+    - name: FREERTOS_PATH
+      value: 'D:/a/1/s/FreeRTOS'
+    
   steps:
+  - checkout: self
+  - checkout: freertos
+    fetchDepth: 1
+
   - template: azure-pipelines-templates/nb-gitversioning.yml
 
   - template: azure-pipelines-templates/install-nuget.yml@templates

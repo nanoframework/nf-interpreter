@@ -11,7 +11,8 @@
 #include <iostream>
 #include <format>
 
-#include <ch.h>
+#include <FreeRTOS.h>
+#include <task.h>
 
 //
 // UNDONE: Feature configuration
@@ -112,7 +113,7 @@ void nanoCLR_Run(NANO_CLR_SETTINGS nanoClrSettings)
 
     //halInit();
     //  Startup ChibiOS/RT.
-    chSysInit();
+    //chSysInit();
 
     CLR_SETTINGS clrSettings;
     ZeroMemory(&clrSettings, sizeof(clrSettings));
@@ -127,7 +128,7 @@ void nanoCLR_Run(NANO_CLR_SETTINGS nanoClrSettings)
 
    while (true)
    {
-       chThdSleepMilliseconds(500);
+       vTaskDelay(500 / portTICK_PERIOD_MS);
    }
 
 #if !defined(BUILD_RTM)

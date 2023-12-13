@@ -24,7 +24,7 @@
     <ProjectGuid>{4B8910AB-17CB-41DB-9DAE-D3081E04D288}</ProjectGuid>
     <RootNamespace>nanoCLRNative</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
-    <ProjectName>ChibiOS</ProjectName>
+    <ProjectName>FreeRTOS</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -104,7 +104,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>NANOCLRNATIVE_EXPORTS;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\nanoFramework.nanoCLR;$(CHIBIOS_PATH)\os\oslib\include;$(CHIBIOS_PATH)\os\license;$(CHIBIOS_PATH)\os\rt\include;$(CHIBIOS_PATH)\os\rt\include;$(CHIBIOS_PATH)\os\common\ports\SIMIA32\compilers\GCC;$(CHIBIOS_PATH)\os\hal\osal\rt-nil;$(CHIBIOS_PATH)\os\hal\ports\simulator;$(CHIBIOS_PATH)\os\hal\ports\simulator\win32;$(CHIBIOS_PATH)\os\hal\include;$(CHIBIOS_PATH)\community\os\hal\include;..\..\..\src\CLR\Core;..\..\..\src\CLR\CorLib;..\..\..\src\CLR\Helpers\Base64;.;..\..\win32\Include;..\..\..\src\CLR\Include;..\..\..\src\HAL\Include;..\..\..\src\PAL\Include;..\..\..\src\nanoFramework.Runtime.Events</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\nanoFramework.nanoCLR;$(FREERTOS_PATH)\FreeRTOS\Source\include;$(FREERTOS_PATH)\FreeRTOS\Source\portable\MSVC-MingW;..\..\..\src\CLR\Core;..\..\..\src\CLR\CorLib;..\..\..\src\CLR\Helpers\Base64;.;..\..\win32\Include;..\..\..\src\CLR\Include;..\..\..\src\HAL\Include;..\..\..\src\PAL\Include;..\..\..\src\nanoFramework.Runtime.Events</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -118,7 +118,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\nanoFramework.nanoCLR;$(CHIBIOS_PATH)\os\oslib\include;$(CHIBIOS_PATH)\os\license;$(CHIBIOS_PATH)\os\rt\include;$(CHIBIOS_PATH)\os\common\ports\SIMIA32\compilers\GCC;$(MSBuildProjectDirectory)\port;$(CHIBIOS_PATH)\os\hal\osal\rt-nil;$(CHIBIOS_PATH)\os\hal\ports\simulator;$(CHIBIOS_PATH)\os\hal\ports\simulator\win32;$(CHIBIOS_PATH)\os\hal\include;$(CHIBIOS_PATH)\community\os\hal\include;ChibiOS;..\..\..\src\CLR\Core;..\..\..\src\CLR\CorLib;..\..\..\src\CLR\Helpers\Base64;.;..\..\win32\Include;..\..\..\src\CLR\Include;..\..\..\src\HAL\Include;..\..\..\src\PAL\Include;..\..\..\src\nanoFramework.Runtime.Events</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\nanoFramework.nanoCLR;$(FREERTOS_PATH)\FreeRTOS\Source\include;$(FREERTOS_PATH)\FreeRTOS\Source\portable\MSVC-MingW;..\..\..\src\CLR\Core;..\..\..\src\CLR\CorLib;..\..\..\src\CLR\Helpers\Base64;.;..\..\win32\Include;..\..\..\src\CLR\Include;..\..\..\src\HAL\Include;..\..\..\src\PAL\Include;..\..\..\src\nanoFramework.Runtime.Events</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -133,7 +133,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>NANOCLRNATIVE_EXPORTS;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\nanoFramework.nanoCLR;$(CHIBIOS_PATH)\os\oslib\include;$(CHIBIOS_PATH)\os\license;$(CHIBIOS_PATH)\os\rt\include;$(CHIBIOS_PATH)\os\common\ports\SIMIA32\compilers\GCC;$(MSBuildProjectDirectory)\port;$(CHIBIOS_PATH)\os\hal\osal\rt-nil;$(CHIBIOS_PATH)\os\hal\ports\simulator;$(CHIBIOS_PATH)\os\hal\ports\simulator\win32;$(CHIBIOS_PATH)\os\hal\include;$(CHIBIOS_PATH)\community\os\hal\include;..\..\..\src\CLR\Core;..\..\..\src\CLR\CorLib;..\..\..\src\CLR\Helpers\Base64;.;..\..\win32\Include;..\..\..\src\CLR\Include;..\..\..\src\HAL\Include;..\..\..\src\PAL\Include;..\..\..\src\nanoFramework.Runtime.Events</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\nanoFramework.nanoCLR;$(FREERTOS_PATH)\FreeRTOS\Source\include;$(FREERTOS_PATH)\FreeRTOS\Source\portable\MSVC-MingW;..\..\..\src\CLR\Core;..\..\..\src\CLR\CorLib;..\..\..\src\CLR\Helpers\Base64;.;..\..\win32\Include;..\..\..\src\CLR\Include;..\..\..\src\HAL\Include;..\..\..\src\PAL\Include;..\..\..\src\nanoFramework.Runtime.Events</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -150,7 +150,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\nanoFramework.nanoCLR;$(CHIBIOS_PATH)\os\oslib\include;$(CHIBIOS_PATH)\os\license;$(CHIBIOS_PATH)\os\rt\include;$(CHIBIOS_PATH)\os\common\ports\SIMIA32\compilers\GCC;$(MSBuildProjectDirectory)\port;$(CHIBIOS_PATH)\os\hal\osal\rt-nil;$(CHIBIOS_PATH)\os\hal\ports\simulator;$(CHIBIOS_PATH)\os\hal\ports\simulator\win32;$(CHIBIOS_PATH)\os\hal\include;$(CHIBIOS_PATH)\community\os\hal\include;..\..\..\src\CLR\Core;..\..\..\src\CLR\CorLib;..\..\..\src\CLR\Helpers\Base64;.;..\..\win32\Include;..\..\..\src\CLR\Include;..\..\..\src\HAL\Include;..\..\..\src\PAL\Include;..\..\..\src\nanoFramework.Runtime.Events</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\nanoFramework.nanoCLR;$(FREERTOS_PATH)\FreeRTOS\Source\include;$(FREERTOS_PATH)\FreeRTOS\Source\portable\MSVC-MingW;..\..\..\src\CLR\Core;..\..\..\src\CLR\CorLib;..\..\..\src\CLR\Helpers\Base64;.;..\..\win32\Include;..\..\..\src\CLR\Include;..\..\..\src\HAL\Include;..\..\..\src\PAL\Include;..\..\..\src\nanoFramework.Runtime.Events</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -160,40 +160,19 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="$(CHIBIOS_PATH)\os\oslib\src\chdelegates.c" />
-    <ClCompile Include="$(CHIBIOS_PATH)\os\oslib\src\chfactory.c" />
-    <ClCompile Include="$(CHIBIOS_PATH)\os\oslib\src\chmboxes.c" />
-    <ClCompile Include="$(CHIBIOS_PATH)\os\oslib\src\chmemcore.c" />
-    <ClCompile Include="$(CHIBIOS_PATH)\os\oslib\src\chmemheaps.c" />
-    <ClCompile Include="$(CHIBIOS_PATH)\os\oslib\src\chmempools.c" />
-    <ClCompile Include="$(CHIBIOS_PATH)\os\oslib\src\chobjcaches.c" />
-    <ClCompile Include="$(CHIBIOS_PATH)\os\oslib\src\chpipes.c" />
-    <ClCompile Include="$(CHIBIOS_PATH)\os\rt\src\chcond.c" />
-    <ClCompile Include="$(CHIBIOS_PATH)\os\rt\src\chdebug.c" />
-    <ClCompile Include="$(CHIBIOS_PATH)\os\rt\src\chdynamic.c" />
-    <ClCompile Include="$(CHIBIOS_PATH)\os\rt\src\chevents.c" />
-    <ClCompile Include="$(CHIBIOS_PATH)\os\rt\src\chinstances.c" />
-    <ClCompile Include="$(CHIBIOS_PATH)\os\rt\src\chmsg.c" />
-    <ClCompile Include="$(CHIBIOS_PATH)\os\rt\src\chmtx.c" />
-    <ClCompile Include="$(CHIBIOS_PATH)\os\rt\src\chregistry.c" />
-    <ClCompile Include="$(CHIBIOS_PATH)\os\rt\src\chrfcu.c" />
-    <ClCompile Include="$(CHIBIOS_PATH)\os\rt\src\chschd.c" />
-    <ClCompile Include="$(CHIBIOS_PATH)\os\rt\src\chsem.c" />
-    <ClCompile Include="$(CHIBIOS_PATH)\os\rt\src\chstats.c" />
-    <ClCompile Include="$(CHIBIOS_PATH)\os\rt\src\chsys.c" />
-    <ClCompile Include="$(CHIBIOS_PATH)\os\rt\src\chthreads.c" />
-    <ClCompile Include="$(CHIBIOS_PATH)\os\rt\src\chtm.c" />
-    <ClCompile Include="$(CHIBIOS_PATH)\os\rt\src\chtrace.c" />
-    <ClCompile Include="$(CHIBIOS_PATH)\os\rt\src\chvt.c" />
-    <ClCompile Include="port\chcore.c" />
+    <ClInclude Include="FreeRTOSConfig.h" />
+    <ClInclude Include="$(FREERTOS_PATH)\FreeRTOS\Source\portable\MSVC-MingW\portmacro.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="port\ccportab.h" />
-    <ClInclude Include="port\chcore.h" />
-    <ClInclude Include="port\chtypes.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <MASM Include="port\chcpre_asm.asm" />
+    <ClCompile Include="$(FREERTOS_PATH)\FreeRTOS\Source\croutine.c" />
+    <ClCompile Include="$(FREERTOS_PATH)\FreeRTOS\Source\event_groups.c" />
+    <ClCompile Include="$(FREERTOS_PATH)\FreeRTOS\Source\list.c" />
+    <ClCompile Include="$(FREERTOS_PATH)\FreeRTOS\Source\queue.c" />
+    <ClCompile Include="$(FREERTOS_PATH)\FreeRTOS\Source\portable\MemMang\heap_5.c" />
+    <ClCompile Include="$(FREERTOS_PATH)\FreeRTOS\Source\stream_buffer.c" />
+    <ClCompile Include="$(FREERTOS_PATH)\FreeRTOS\Source\timers.c" />
+    <ClCompile Include="$(FREERTOS_PATH)\FreeRTOS\Source\tasks.c" />
+    <ClCompile Include="$(FREERTOS_PATH)\FreeRTOS\Source\portable\MSVC-MingW\port.c" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
