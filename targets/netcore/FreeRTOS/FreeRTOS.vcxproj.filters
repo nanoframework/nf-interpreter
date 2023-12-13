@@ -19,6 +19,9 @@
     <Filter Include="Source Files\Portable">
       <UniqueIdentifier>{65b75b38-5896-421b-9ec8-bd712087f03b}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Utils">
+      <UniqueIdentifier>{848d7c33-4e9b-4321-a597-02c32e095aa7}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="FreeRTOSConfig.h">
@@ -41,7 +44,7 @@
     <ClCompile Include="$(FREERTOS_PATH)\FreeRTOS\Source\timers.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="$(FREERTOS_PATH)\FreeRTOS\Source\portable\MemMang\heap_5.c">
+    <ClCompile Include="$(FREERTOS_PATH)\FreeRTOS\Source\portable\MemMang\heap_4.c">
       <Filter>Source Files\Portable</Filter>
     </ClCompile>
     <ClCompile Include="$(FREERTOS_PATH)\FreeRTOS\Source\portable\MSVC-MingW\port.c">
@@ -54,6 +57,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="$(FREERTOS_PATH)\FreeRTOS\Source\tasks.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Run-time-stats-utils.c">
+      <Filter>Source Files\Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="freertos_utils.c">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

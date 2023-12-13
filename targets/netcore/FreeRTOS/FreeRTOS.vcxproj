@@ -168,11 +168,13 @@
     <ClCompile Include="$(FREERTOS_PATH)\FreeRTOS\Source\event_groups.c" />
     <ClCompile Include="$(FREERTOS_PATH)\FreeRTOS\Source\list.c" />
     <ClCompile Include="$(FREERTOS_PATH)\FreeRTOS\Source\queue.c" />
-    <ClCompile Include="$(FREERTOS_PATH)\FreeRTOS\Source\portable\MemMang\heap_5.c" />
+    <ClCompile Include="$(FREERTOS_PATH)\FreeRTOS\Source\portable\MemMang\heap_4.c" />
     <ClCompile Include="$(FREERTOS_PATH)\FreeRTOS\Source\stream_buffer.c" />
     <ClCompile Include="$(FREERTOS_PATH)\FreeRTOS\Source\timers.c" />
     <ClCompile Include="$(FREERTOS_PATH)\FreeRTOS\Source\tasks.c" />
     <ClCompile Include="$(FREERTOS_PATH)\FreeRTOS\Source\portable\MSVC-MingW\port.c" />
+    <ClCompile Include="freertos_utils.c" />
+    <ClCompile Include="Run-time-stats-utils.c" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
