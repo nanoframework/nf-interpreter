@@ -60,9 +60,9 @@ int8_t Esp32_LED_DevicePinMap[6] = {
 // Mapped to ESP32 controllers
 // ESP32 ADC1 channels 0 - 4
 //  "    ADC2 channels 5, 6 internal voltage vdd33
-int8_t Esp32_ADC_DevicePinMap[12] = {
- // 0  1  2  3  4  5  6  7 
-    0, 1, 2, 3, 4, 5, 6, 7};
+int8_t Esp32_ADC_DevicePinMap[TARGET_ADC_NUM_PINS] = {
+ // 0  1  2  3  4  5  
+    0, 1, 2, 3, 4, 5};
 
 //  I2S
 //  1 device I2S1
