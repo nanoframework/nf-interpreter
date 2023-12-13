@@ -589,7 +589,7 @@ void CLRStartupTask(void *pvParameters)
 
 void StartClrStartupThread(CLR_SETTINGS *clrSettings)
 {
-    xTaskCreate(CLRStartupTask, "CLR", configMINIMAL_STACK_SIZE, NULL, configMINIMAL_STACK_SIZE, NULL);
+    xTaskCreate(CLRStartupTask, "CLR", configMINIMAL_STACK_SIZE, clrSettings, 5, NULL);
 }
 
 void ClrStartup(CLR_SETTINGS params)
