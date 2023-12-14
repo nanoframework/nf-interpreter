@@ -6,6 +6,7 @@
 
 #include <hal.h>
 #include <hal_spiffs.h>
+#include <cache.h>
 
 #ifdef SPIFFS_SPI1
 
@@ -739,6 +740,9 @@ uint8_t target_spiffs_init()
 
     // sanity check: read device ID and unique ID
     writeBuffer[0] = READ_ID_CMD2;
+
+    // flush DMA buffer to ensure cache coherency
+    cacheBufferFlush(writeBuffer, 1);
 
     CS_SELECT;
     spiExchange(&SPID1, 4, writeBuffer, readBuffer);
