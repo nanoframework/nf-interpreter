@@ -191,7 +191,7 @@ if(API_nanoFramework.Hardware.Esp32.Rmt)
     PerformSettingsForApiEntry("nanoFramework.Hardware.Esp32.Rmt")
 endif()
 
-# nanoFramework.Hardware.Esp32.Rmt
+# nanoFramework.Networking.Thread
 if(API_nanoFramework.Networking.Thread)
     ##### API name here (doted name)
     PerformSettingsForApiEntry("nanoFramework.Networking.Thread")
