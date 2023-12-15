@@ -77,7 +77,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>..\..\..\build\_deps\lwip-src\src\include;..\..\..\build\_deps\lwip-src\src\include\ipv4;..\..\..\build\_deps\lwip-src\src\include\ipv6;..\include;..\..\..\examples\example_app;.\;$(PCAP_DIR)\Include;..\..\..\..\..\winpcap\WpdPack\Include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(LWIP_PATH)\src\include;$(LWIP_PATH)\src\include\ipv4;$(LWIP_PATH)\src\include\ipv6;..\include;..\..\..\examples\example_app;.\;$(PCAP_DIR)\Include;..\..\..\..\..\winpcap\WpdPack\Include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_LIB;WIN32;_DEBUG;LWIP_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
@@ -99,7 +99,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>..\..\..\build\_deps\lwip-src\src\include;..\..\..\build\_deps\lwip-src\src\include\ipv4;..\..\..\build\_deps\lwip-src\src\include\ipv6;..\include;..\..\..\examples\example_app;.\;$(PCAP_DIR)\Include;..\..\..\..\..\winpcap\WpdPack\Include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(LWIP_PATH)\src\include;$(LWIP_PATH)\src\include\ipv4;$(LWIP_PATH)\src\include\ipv6;..\include;..\..\..\examples\example_app;.\;$(PCAP_DIR)\Include;..\..\..\..\..\winpcap\WpdPack\Include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_LIB;WIN32;_DEBUG;LWIP_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
@@ -122,7 +122,7 @@
     <ClCompile>
       <Optimization>MaxSpeed</Optimization>
       <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
-      <AdditionalIncludeDirectories>..\..\..\build\_deps\lwip-src\src\include;..\..\..\build\_deps\lwip-src\src\include\ipv4;..\..\..\build\_deps\lwip-src\src\include\ipv6;..\include;..\..\..\examples\example_app;.\;$(PCAP_DIR)\Include;..\..\..\..\..\winpcap\WpdPack\Include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(LWIP_PATH)\src\include;$(LWIP_PATH)\src\include\ipv4;$(LWIP_PATH)\src\include\ipv6;..\include;..\..\..\examples\example_app;.\;$(PCAP_DIR)\Include;..\..\..\..\..\winpcap\WpdPack\Include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
@@ -148,7 +148,7 @@
     <ClCompile>
       <Optimization>MaxSpeed</Optimization>
       <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
-      <AdditionalIncludeDirectories>..\..\..\build\_deps\lwip-src\src\include;..\..\..\build\_deps\lwip-src\src\include\ipv4;..\..\..\build\_deps\lwip-src\src\include\ipv6;..\include;..\..\..\examples\example_app;.\;$(PCAP_DIR)\Include;..\..\..\..\..\winpcap\WpdPack\Include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(LWIP_PATH)\src\include;$(LWIP_PATH)\src\include\ipv4;$(LWIP_PATH)\src\include\ipv6;..\include;..\..\..\examples\example_app;.\;$(PCAP_DIR)\Include;..\..\..\..\..\winpcap\WpdPack\Include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>

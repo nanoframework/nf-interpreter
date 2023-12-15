@@ -222,7 +222,7 @@
     <ClCompile>
       <Optimization>MaxSpeed</Optimization>
       <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
-      <AdditionalIncludeDirectories>..\..\..\build\_deps\lwip-src\src\include;..\..\..\build\_deps\lwip-src\src\include\ipv4;..\..\..\build\_deps\lwip-src\src\include\ipv6;..\include;..\..\..\examples\example_app;..\..\..\apps\snmp_private_mib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(LWIP_PATH)\src\include;$(LWIP_PATH)\src\include\ipv4;$(LWIP_PATH)\src\include\ipv6;..\include;..\..\..\examples\example_app;..\..\..\apps\snmp_private_mib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
@@ -246,7 +246,7 @@
     <ClCompile>
       <Optimization>MaxSpeed</Optimization>
       <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
-      <AdditionalIncludeDirectories>..\..\..\build\_deps\lwip-src\src\include;..\..\..\build\_deps\lwip-src\src\include\ipv4;..\..\..\build\_deps\lwip-src\src\include\ipv6;..\include;..\..\..\examples\example_app;..\..\..\apps\snmp_private_mib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(LWIP_PATH)\src\include;$(LWIP_PATH)\src\include\ipv4;$(LWIP_PATH)\src\include\ipv6;..\include;..\..\..\examples\example_app;..\..\..\apps\snmp_private_mib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
@@ -269,7 +269,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>..\..\..\build\_deps\lwip-src\src\include;..\..\..\build\_deps\lwip-src\src\include\ipv4;..\..\..\build\_deps\lwip-src\src\include\ipv6;..\include;..\..\..\examples\example_app;..\..\..\apps\snmp_private_mib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(LWIP_PATH)\src\include;$(LWIP_PATH)\src\include\ipv4;$(LWIP_PATH)\src\include\ipv6;..\include;..\..\..\examples\example_app;..\..\..\apps\snmp_private_mib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_LIB;WIN32;_DEBUG;LWIP_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
@@ -293,7 +293,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>$(MSBuildProjectDirectory);..\..\..\build\_deps\lwip-src\src\include;..\..\..\build\_deps\lwip-src\src\include\ipv4;..\..\..\build\_deps\lwip-src\src\include\ipv6;..\include;..\..\..\examples\example_app;..\..\..\apps\snmp_private_mib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(MSBuildProjectDirectory);$(LWIP_PATH)\src\include;$(LWIP_PATH)\src\include\ipv4;$(LWIP_PATH)\src\include\ipv6;..\include;..\..\..\examples\example_app;..\..\..\apps\snmp_private_mib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_LIB;WIN32;_DEBUG;LWIP_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
@@ -317,7 +317,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug unittests|Win32'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>..\..\..\..\test\unit;..\..\..\build\_deps\lwip-src\src\include;..\..\..\build\_deps\lwip-src\src\include\ipv4;..\..\..\build\_deps\lwip-src\src\include\ipv6;..\include;..\..\..\examples\example_app;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\..\..\test\unit;$(LWIP_PATH)\src\include;$(LWIP_PATH)\src\include\ipv4;$(LWIP_PATH)\src\include\ipv6;..\include;..\..\..\examples\example_app;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_LIB;WIN32;_DEBUG;LWIP_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
@@ -341,7 +341,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug unittests|x64'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>..\..\..\..\test\unit;..\..\..\build\_deps\lwip-src\src\include;..\..\..\build\_deps\lwip-src\src\include\ipv4;..\..\..\build\_deps\lwip-src\src\include\ipv6;..\include;..\..\..\examples\example_app;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\..\..\test\unit;$(LWIP_PATH)\src\include;$(LWIP_PATH)\src\include\ipv4;$(LWIP_PATH)\src\include\ipv6;..\include;..\..\..\examples\example_app;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_LIB;WIN32;_DEBUG;LWIP_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
@@ -365,7 +365,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug fuzz|Win32'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>..\..\..\..\test\fuzz;..\..\..\build\_deps\lwip-src\src\include;..\..\..\build\_deps\lwip-src\src\include\ipv4;..\..\..\build\_deps\lwip-src\src\include\ipv6;..\include;..\..\..\examples\example_app;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\..\..\test\fuzz;$(LWIP_PATH)\src\include;$(LWIP_PATH)\src\include\ipv4;$(LWIP_PATH)\src\include\ipv6;..\include;..\..\..\examples\example_app;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_LIB;WIN32;_DEBUG;LWIP_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
@@ -389,7 +389,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug fuzz|x64'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>..\..\..\..\test\fuzz;..\..\..\build\_deps\lwip-src\src\include;..\..\..\build\_deps\lwip-src\src\include\ipv4;..\..\..\build\_deps\lwip-src\src\include\ipv6;..\include;..\..\..\examples\example_app;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\..\..\test\fuzz;$(LWIP_PATH)\src\include;$(LWIP_PATH)\src\include\ipv4;$(LWIP_PATH)\src\include\ipv6;..\include;..\..\..\examples\example_app;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_LIB;WIN32;_DEBUG;LWIP_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
@@ -414,7 +414,7 @@
     <ClCompile>
       <Optimization>MaxSpeed</Optimization>
       <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
-      <AdditionalIncludeDirectories>..\..\..\..\test\unit;..\..\..\build\_deps\lwip-src\src\include;..\..\..\build\_deps\lwip-src\src\include\ipv4;..\..\..\build\_deps\lwip-src\src\include\ipv6;..\include;..\..\..\examples\example_app;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\..\..\test\unit;$(LWIP_PATH)\src\include;$(LWIP_PATH)\src\include\ipv4;$(LWIP_PATH)\src\include\ipv6;..\include;..\..\..\examples\example_app;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
@@ -438,7 +438,7 @@
     <ClCompile>
       <Optimization>MaxSpeed</Optimization>
       <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
-      <AdditionalIncludeDirectories>..\..\..\..\test\unit;..\..\..\build\_deps\lwip-src\src\include;..\..\..\build\_deps\lwip-src\src\include\ipv4;..\..\..\build\_deps\lwip-src\src\include\ipv6;..\include;..\..\..\examples\example_app;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\..\..\test\unit;$(LWIP_PATH)\src\include;$(LWIP_PATH)\src\include\ipv4;$(LWIP_PATH)\src\include\ipv6;..\include;..\..\..\examples\example_app;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
@@ -462,7 +462,7 @@
     <ClCompile>
       <Optimization>MaxSpeed</Optimization>
       <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
-      <AdditionalIncludeDirectories>..\..\..\..\test\fuzz;..\..\..\build\_deps\lwip-src\src\include;..\..\..\build\_deps\lwip-src\src\include\ipv4;..\..\..\build\_deps\lwip-src\src\include\ipv6;..\include;..\..\..\examples\example_app;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\..\..\test\fuzz;$(LWIP_PATH)\src\include;$(LWIP_PATH)\src\include\ipv4;$(LWIP_PATH)\src\include\ipv6;..\include;..\..\..\examples\example_app;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
@@ -486,7 +486,7 @@
     <ClCompile>
       <Optimization>MaxSpeed</Optimization>
       <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
-      <AdditionalIncludeDirectories>..\..\..\..\test\fuzz;..\..\..\build\_deps\lwip-src\src\include;..\..\..\build\_deps\lwip-src\src\include\ipv4;..\..\..\build\_deps\lwip-src\src\include\ipv6;..\include;..\..\..\examples\example_app;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\..\..\test\fuzz;$(LWIP_PATH)\src\include;$(LWIP_PATH)\src\include\ipv4;$(LWIP_PATH)\src\include\ipv6;..\include;..\..\..\examples\example_app;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
@@ -592,7 +592,7 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </CustomBuildStep>
-    <CustomBuildStep Include="..\..\..\build\_deps\lwip-src\src\core\ipv6\README">
+    <CustomBuildStep Include="$(LWIP_PATH)\src\core\ipv6\README">
       <FileType>Document</FileType>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug unittests|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug unittests|x64'">true</ExcludedFromBuild>
@@ -607,7 +607,7 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </CustomBuildStep>
-    <CustomBuildStep Include="..\..\..\build\_deps\lwip-src\src\netif\FILES">
+    <CustomBuildStep Include="$(LWIP_PATH)\src\netif\FILES">
       <FileType>Document</FileType>
     </CustomBuildStep>
     <CustomBuildStep Include="..\lwipcfg_msvc.h.example">
@@ -627,121 +627,121 @@
     </CustomBuildStep>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\..\build\_deps\lwip-src\src\api\api_lib.c" />
-    <ClCompile Include="..\..\..\build\_deps\lwip-src\src\api\api_msg.c" />
-    <ClCompile Include="..\..\..\build\_deps\lwip-src\src\api\err.c" />
-    <ClCompile Include="..\..\..\build\_deps\lwip-src\src\api\if_api.c" />
-    <ClCompile Include="..\..\..\build\_deps\lwip-src\src\api\netbuf.c" />
-    <ClCompile Include="..\..\..\build\_deps\lwip-src\src\api\netdb.c" />
-    <ClCompile Include="..\..\..\build\_deps\lwip-src\src\api\netifapi.c" />
-    <ClCompile Include="..\..\..\build\_deps\lwip-src\src\api\sockets.c" />
-    <ClCompile Include="..\..\..\build\_deps\lwip-src\src\api\tcpip.c" />
-    <ClCompile Include="..\..\..\build\_deps\lwip-src\src\apps\altcp_tls\altcp_tls_mbedtls.c">
-      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">..\..\..\..\..\mbedtls\include;..\..\..\build\_deps\lwip-src\src\include;..\..\..\build\_deps\lwip-src\src\include\ipv4;..\..\..\build\_deps\lwip-src\src\include\ipv6;..\include;..;..\..\..\apps\snmp_private_mib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">..\..\..\..\..\mbedtls\include;..\..\..\build\_deps\lwip-src\src\include;..\..\..\build\_deps\lwip-src\src\include\ipv4;..\..\..\build\_deps\lwip-src\src\include\ipv6;..\include;..;..\..\..\apps\snmp_private_mib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">..\..\..\..\..\mbedtls\include;..\..\..\build\_deps\lwip-src\src\include;..\..\..\build\_deps\lwip-src\src\include\ipv4;..\..\..\build\_deps\lwip-src\src\include\ipv6;..\include;..;..\..\..\apps\snmp_private_mib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Release|x64'">..\..\..\..\..\mbedtls\include;..\..\..\build\_deps\lwip-src\src\include;..\..\..\build\_deps\lwip-src\src\include\ipv4;..\..\..\build\_deps\lwip-src\src\include\ipv6;..\include;..;..\..\..\apps\snmp_private_mib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Debug unittests|Win32'">..\..\..\..\..\mbedtls\include;..\..\..\..\test\unit;..\..\..\build\_deps\lwip-src\src\include;..\..\..\build\_deps\lwip-src\src\include\ipv4;..\..\..\build\_deps\lwip-src\src\include\ipv6;..\include;..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Debug unittests|x64'">..\..\..\..\..\mbedtls\include;..\..\..\..\test\unit;..\..\..\build\_deps\lwip-src\src\include;..\..\..\build\_deps\lwip-src\src\include\ipv4;..\..\..\build\_deps\lwip-src\src\include\ipv6;..\include;..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Debug fuzz|Win32'">..\..\..\..\..\mbedtls\include;..\..\..\..\test\unit;..\..\..\build\_deps\lwip-src\src\include;..\..\..\build\_deps\lwip-src\src\include\ipv4;..\..\..\build\_deps\lwip-src\src\include\ipv6;..\include;..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Debug fuzz|x64'">..\..\..\..\..\mbedtls\include;..\..\..\..\test\unit;..\..\..\build\_deps\lwip-src\src\include;..\..\..\build\_deps\lwip-src\src\include\ipv4;..\..\..\build\_deps\lwip-src\src\include\ipv6;..\include;..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Release unittests|Win32'">..\..\..\..\..\mbedtls\include;..\..\..\..\test\unit;..\..\..\build\_deps\lwip-src\src\include;..\..\..\build\_deps\lwip-src\src\include\ipv4;..\..\..\build\_deps\lwip-src\src\include\ipv6;..\include;..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Release unittests|x64'">..\..\..\..\..\mbedtls\include;..\..\..\..\test\unit;..\..\..\build\_deps\lwip-src\src\include;..\..\..\build\_deps\lwip-src\src\include\ipv4;..\..\..\build\_deps\lwip-src\src\include\ipv6;..\include;..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Release fuzz|Win32'">..\..\..\..\..\mbedtls\include;..\..\..\..\test\unit;..\..\..\build\_deps\lwip-src\src\include;..\..\..\build\_deps\lwip-src\src\include\ipv4;..\..\..\build\_deps\lwip-src\src\include\ipv6;..\include;..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Release fuzz|x64'">..\..\..\..\..\mbedtls\include;..\..\..\..\test\unit;..\..\..\build\_deps\lwip-src\src\include;..\..\..\build\_deps\lwip-src\src\include\ipv4;..\..\..\build\_deps\lwip-src\src\include\ipv6;..\include;..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    <ClCompile Include="$(LWIP_PATH)\src\api\api_lib.c" />
+    <ClCompile Include="$(LWIP_PATH)\src\api\api_msg.c" />
+    <ClCompile Include="$(LWIP_PATH)\src\api\err.c" />
+    <ClCompile Include="$(LWIP_PATH)\src\api\if_api.c" />
+    <ClCompile Include="$(LWIP_PATH)\src\api\netbuf.c" />
+    <ClCompile Include="$(LWIP_PATH)\src\api\netdb.c" />
+    <ClCompile Include="$(LWIP_PATH)\src\api\netifapi.c" />
+    <ClCompile Include="$(LWIP_PATH)\src\api\sockets.c" />
+    <ClCompile Include="$(LWIP_PATH)\src\api\tcpip.c" />
+    <ClCompile Include="$(LWIP_PATH)\src\apps\altcp_tls\altcp_tls_mbedtls.c">
+      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">..\..\..\..\..\mbedtls\include;$(LWIP_PATH)\src\include;$(LWIP_PATH)\src\include\ipv4;$(LWIP_PATH)\src\include\ipv6;..\include;..;..\..\..\apps\snmp_private_mib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">..\..\..\..\..\mbedtls\include;$(LWIP_PATH)\src\include;$(LWIP_PATH)\src\include\ipv4;$(LWIP_PATH)\src\include\ipv6;..\include;..;..\..\..\apps\snmp_private_mib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">..\..\..\..\..\mbedtls\include;$(LWIP_PATH)\src\include;$(LWIP_PATH)\src\include\ipv4;$(LWIP_PATH)\src\include\ipv6;..\include;..;..\..\..\apps\snmp_private_mib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Release|x64'">..\..\..\..\..\mbedtls\include;$(LWIP_PATH)\src\include;$(LWIP_PATH)\src\include\ipv4;$(LWIP_PATH)\src\include\ipv6;..\include;..;..\..\..\apps\snmp_private_mib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Debug unittests|Win32'">..\..\..\..\..\mbedtls\include;..\..\..\..\test\unit;$(LWIP_PATH)\src\include;$(LWIP_PATH)\src\include\ipv4;$(LWIP_PATH)\src\include\ipv6;..\include;..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Debug unittests|x64'">..\..\..\..\..\mbedtls\include;..\..\..\..\test\unit;$(LWIP_PATH)\src\include;$(LWIP_PATH)\src\include\ipv4;$(LWIP_PATH)\src\include\ipv6;..\include;..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Debug fuzz|Win32'">..\..\..\..\..\mbedtls\include;..\..\..\..\test\unit;$(LWIP_PATH)\src\include;$(LWIP_PATH)\src\include\ipv4;$(LWIP_PATH)\src\include\ipv6;..\include;..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Debug fuzz|x64'">..\..\..\..\..\mbedtls\include;..\..\..\..\test\unit;$(LWIP_PATH)\src\include;$(LWIP_PATH)\src\include\ipv4;$(LWIP_PATH)\src\include\ipv6;..\include;..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Release unittests|Win32'">..\..\..\..\..\mbedtls\include;..\..\..\..\test\unit;$(LWIP_PATH)\src\include;$(LWIP_PATH)\src\include\ipv4;$(LWIP_PATH)\src\include\ipv6;..\include;..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Release unittests|x64'">..\..\..\..\..\mbedtls\include;..\..\..\..\test\unit;$(LWIP_PATH)\src\include;$(LWIP_PATH)\src\include\ipv4;$(LWIP_PATH)\src\include\ipv6;..\include;..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Release fuzz|Win32'">..\..\..\..\..\mbedtls\include;..\..\..\..\test\unit;$(LWIP_PATH)\src\include;$(LWIP_PATH)\src\include\ipv4;$(LWIP_PATH)\src\include\ipv6;..\include;..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Release fuzz|x64'">..\..\..\..\..\mbedtls\include;..\..\..\..\test\unit;$(LWIP_PATH)\src\include;$(LWIP_PATH)\src\include\ipv4;$(LWIP_PATH)\src\include\ipv6;..\include;..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
-    <ClCompile Include="..\..\..\build\_deps\lwip-src\src\apps\altcp_tls\altcp_tls_mbedtls_mem.c">
-      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">..\..\..\..\..\mbedtls\include;..\..\..\build\_deps\lwip-src\src\include;..\..\..\build\_deps\lwip-src\src\include\ipv4;..\..\..\build\_deps\lwip-src\src\include\ipv6;..\include;..;..\..\..\apps\snmp_private_mib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">..\..\..\..\..\mbedtls\include;..\..\..\build\_deps\lwip-src\src\include;..\..\..\build\_deps\lwip-src\src\include\ipv4;..\..\..\build\_deps\lwip-src\src\include\ipv6;..\include;..;..\..\..\apps\snmp_private_mib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">..\..\..\..\..\mbedtls\include;..\..\..\build\_deps\lwip-src\src\include;..\..\..\build\_deps\lwip-src\src\include\ipv4;..\..\..\build\_deps\lwip-src\src\include\ipv6;..\include;..;..\..\..\apps\snmp_private_mib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Release|x64'">..\..\..\..\..\mbedtls\include;..\..\..\build\_deps\lwip-src\src\include;..\..\..\build\_deps\lwip-src\src\include\ipv4;..\..\..\build\_deps\lwip-src\src\include\ipv6;..\include;..;..\..\..\apps\snmp_private_mib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Debug unittests|Win32'">..\..\..\..\..\mbedtls\include;..\..\..\..\test\unit;..\..\..\build\_deps\lwip-src\src\include;..\..\..\build\_deps\lwip-src\src\include\ipv4;..\..\..\build\_deps\lwip-src\src\include\ipv6;..\include;..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Debug unittests|x64'">..\..\..\..\..\mbedtls\include;..\..\..\..\test\unit;..\..\..\build\_deps\lwip-src\src\include;..\..\..\build\_deps\lwip-src\src\include\ipv4;..\..\..\build\_deps\lwip-src\src\include\ipv6;..\include;..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Debug fuzz|Win32'">..\..\..\..\..\mbedtls\include;..\..\..\..\test\unit;..\..\..\build\_deps\lwip-src\src\include;..\..\..\build\_deps\lwip-src\src\include\ipv4;..\..\..\build\_deps\lwip-src\src\include\ipv6;..\include;..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Debug fuzz|x64'">..\..\..\..\..\mbedtls\include;..\..\..\..\test\unit;..\..\..\build\_deps\lwip-src\src\include;..\..\..\build\_deps\lwip-src\src\include\ipv4;..\..\..\build\_deps\lwip-src\src\include\ipv6;..\include;..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Release unittests|Win32'">..\..\..\..\..\mbedtls\include;..\..\..\..\test\unit;..\..\..\build\_deps\lwip-src\src\include;..\..\..\build\_deps\lwip-src\src\include\ipv4;..\..\..\build\_deps\lwip-src\src\include\ipv6;..\include;..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Release unittests|x64'">..\..\..\..\..\mbedtls\include;..\..\..\..\test\unit;..\..\..\build\_deps\lwip-src\src\include;..\..\..\build\_deps\lwip-src\src\include\ipv4;..\..\..\build\_deps\lwip-src\src\include\ipv6;..\include;..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Release fuzz|Win32'">..\..\..\..\..\mbedtls\include;..\..\..\..\test\unit;..\..\..\build\_deps\lwip-src\src\include;..\..\..\build\_deps\lwip-src\src\include\ipv4;..\..\..\build\_deps\lwip-src\src\include\ipv6;..\include;..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Release fuzz|x64'">..\..\..\..\..\mbedtls\include;..\..\..\..\test\unit;..\..\..\build\_deps\lwip-src\src\include;..\..\..\build\_deps\lwip-src\src\include\ipv4;..\..\..\build\_deps\lwip-src\src\include\ipv6;..\include;..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    <ClCompile Include="$(LWIP_PATH)\src\apps\altcp_tls\altcp_tls_mbedtls_mem.c">
+      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">..\..\..\..\..\mbedtls\include;$(LWIP_PATH)\src\include;$(LWIP_PATH)\src\include\ipv4;$(LWIP_PATH)\src\include\ipv6;..\include;..;..\..\..\apps\snmp_private_mib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">..\..\..\..\..\mbedtls\include;$(LWIP_PATH)\src\include;$(LWIP_PATH)\src\include\ipv4;$(LWIP_PATH)\src\include\ipv6;..\include;..;..\..\..\apps\snmp_private_mib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">..\..\..\..\..\mbedtls\include;$(LWIP_PATH)\src\include;$(LWIP_PATH)\src\include\ipv4;$(LWIP_PATH)\src\include\ipv6;..\include;..;..\..\..\apps\snmp_private_mib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Release|x64'">..\..\..\..\..\mbedtls\include;$(LWIP_PATH)\src\include;$(LWIP_PATH)\src\include\ipv4;$(LWIP_PATH)\src\include\ipv6;..\include;..;..\..\..\apps\snmp_private_mib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Debug unittests|Win32'">..\..\..\..\..\mbedtls\include;..\..\..\..\test\unit;$(LWIP_PATH)\src\include;$(LWIP_PATH)\src\include\ipv4;$(LWIP_PATH)\src\include\ipv6;..\include;..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Debug unittests|x64'">..\..\..\..\..\mbedtls\include;..\..\..\..\test\unit;$(LWIP_PATH)\src\include;$(LWIP_PATH)\src\include\ipv4;$(LWIP_PATH)\src\include\ipv6;..\include;..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Debug fuzz|Win32'">..\..\..\..\..\mbedtls\include;..\..\..\..\test\unit;$(LWIP_PATH)\src\include;$(LWIP_PATH)\src\include\ipv4;$(LWIP_PATH)\src\include\ipv6;..\include;..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Debug fuzz|x64'">..\..\..\..\..\mbedtls\include;..\..\..\..\test\unit;$(LWIP_PATH)\src\include;$(LWIP_PATH)\src\include\ipv4;$(LWIP_PATH)\src\include\ipv6;..\include;..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Release unittests|Win32'">..\..\..\..\..\mbedtls\include;..\..\..\..\test\unit;$(LWIP_PATH)\src\include;$(LWIP_PATH)\src\include\ipv4;$(LWIP_PATH)\src\include\ipv6;..\include;..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Release unittests|x64'">..\..\..\..\..\mbedtls\include;..\..\..\..\test\unit;$(LWIP_PATH)\src\include;$(LWIP_PATH)\src\include\ipv4;$(LWIP_PATH)\src\include\ipv6;..\include;..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Release fuzz|Win32'">..\..\..\..\..\mbedtls\include;..\..\..\..\test\unit;$(LWIP_PATH)\src\include;$(LWIP_PATH)\src\include\ipv4;$(LWIP_PATH)\src\include\ipv6;..\include;..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Release fuzz|x64'">..\..\..\..\..\mbedtls\include;..\..\..\..\test\unit;$(LWIP_PATH)\src\include;$(LWIP_PATH)\src\include\ipv4;$(LWIP_PATH)\src\include\ipv6;..\include;..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
-    <ClCompile Include="..\..\..\build\_deps\lwip-src\src\apps\lwiperf\lwiperf.c" />
-    <ClCompile Include="..\..\..\build\_deps\lwip-src\src\apps\netbiosns\netbiosns.c" />
-    <ClCompile Include="..\..\..\build\_deps\lwip-src\src\apps\sntp\sntp.c" />
-    <ClCompile Include="..\..\..\build\_deps\lwip-src\src\core\altcp_alloc.c" />
-    <ClCompile Include="..\..\..\build\_deps\lwip-src\src\core\altcp_tcp.c" />
-    <ClCompile Include="..\..\..\build\_deps\lwip-src\src\core\def.c" />
-    <ClCompile Include="..\..\..\build\_deps\lwip-src\src\core\dns.c" />
-    <ClCompile Include="..\..\..\build\_deps\lwip-src\src\core\inet_chksum.c" />
-    <ClCompile Include="..\..\..\build\_deps\lwip-src\src\core\init.c" />
-    <ClCompile Include="..\..\..\build\_deps\lwip-src\src\core\mem.c" />
-    <ClCompile Include="..\..\..\build\_deps\lwip-src\src\core\memp.c" />
-    <ClCompile Include="..\..\..\build\_deps\lwip-src\src\core\netif.c" />
-    <ClCompile Include="..\..\..\build\_deps\lwip-src\src\core\pbuf.c" />
-    <ClCompile Include="..\..\..\build\_deps\lwip-src\src\core\raw.c" />
-    <ClCompile Include="..\..\..\build\_deps\lwip-src\src\core\stats.c" />
-    <ClCompile Include="..\..\..\build\_deps\lwip-src\src\core\sys.c" />
-    <ClCompile Include="..\..\..\build\_deps\lwip-src\src\core\tcp.c" />
-    <ClCompile Include="..\..\..\build\_deps\lwip-src\src\core\tcp_in.c" />
-    <ClCompile Include="..\..\..\build\_deps\lwip-src\src\core\tcp_out.c" />
-    <ClCompile Include="..\..\..\build\_deps\lwip-src\src\core\udp.c" />
-    <ClCompile Include="..\..\..\build\_deps\lwip-src\src\core\ipv4\autoip.c" />
-    <ClCompile Include="..\..\..\build\_deps\lwip-src\src\core\ipv4\dhcp.c" />
-    <ClCompile Include="..\..\..\build\_deps\lwip-src\src\core\ipv4\etharp.c" />
-    <ClCompile Include="..\..\..\build\_deps\lwip-src\src\core\ipv4\icmp.c" />
-    <ClCompile Include="..\..\..\build\_deps\lwip-src\src\core\ipv4\igmp.c" />
-    <ClCompile Include="..\..\..\build\_deps\lwip-src\src\core\ipv4\ip4.c" />
-    <ClCompile Include="..\..\..\build\_deps\lwip-src\src\core\ipv4\ip4_addr.c" />
-    <ClCompile Include="..\..\..\build\_deps\lwip-src\src\core\ipv6\dhcp6.c" />
-    <ClCompile Include="..\..\..\build\_deps\lwip-src\src\core\ipv6\ethip6.c" />
-    <ClCompile Include="..\..\..\build\_deps\lwip-src\src\core\ipv6\icmp6.c" />
-    <ClCompile Include="..\..\..\build\_deps\lwip-src\src\core\ipv6\inet6.c" />
-    <ClCompile Include="..\..\..\build\_deps\lwip-src\src\core\ipv6\ip6.c" />
-    <ClCompile Include="..\..\..\build\_deps\lwip-src\src\core\ipv6\ip6_addr.c" />
-    <ClCompile Include="..\..\..\build\_deps\lwip-src\src\core\ipv6\ip6_frag.c" />
-    <ClCompile Include="..\..\..\build\_deps\lwip-src\src\core\ipv6\mld6.c" />
-    <ClCompile Include="..\..\..\build\_deps\lwip-src\src\core\ipv6\nd6.c" />
-    <ClCompile Include="..\..\..\build\_deps\lwip-src\src\netif\bridgeif.c" />
-    <ClCompile Include="..\..\..\build\_deps\lwip-src\src\netif\bridgeif_fdb.c" />
-    <ClCompile Include="..\..\..\build\_deps\lwip-src\src\netif\ethernet.c" />
-    <ClCompile Include="..\..\..\build\_deps\lwip-src\src\netif\lowpan6.c" />
-    <ClCompile Include="..\..\..\build\_deps\lwip-src\src\netif\lowpan6_ble.c" />
-    <ClCompile Include="..\..\..\build\_deps\lwip-src\src\netif\lowpan6_common.c" />
-    <ClCompile Include="..\..\..\build\_deps\lwip-src\src\netif\slipif.c" />
-    <ClCompile Include="..\..\..\build\_deps\lwip-src\src\netif\ppp\auth.c" />
-    <ClCompile Include="..\..\..\build\_deps\lwip-src\src\netif\ppp\ccp.c" />
-    <ClCompile Include="..\..\..\build\_deps\lwip-src\src\netif\ppp\chap-md5.c" />
-    <ClCompile Include="..\..\..\build\_deps\lwip-src\src\netif\ppp\chap-new.c" />
-    <ClCompile Include="..\..\..\build\_deps\lwip-src\src\netif\ppp\chap_ms.c" />
-    <ClCompile Include="..\..\..\build\_deps\lwip-src\src\netif\ppp\demand.c" />
-    <ClCompile Include="..\..\..\build\_deps\lwip-src\src\netif\ppp\eap.c" />
-    <ClCompile Include="..\..\..\build\_deps\lwip-src\src\netif\ppp\ecp.c" />
-    <ClCompile Include="..\..\..\build\_deps\lwip-src\src\netif\ppp\eui64.c" />
-    <ClCompile Include="..\..\..\build\_deps\lwip-src\src\netif\ppp\fsm.c" />
-    <ClCompile Include="..\..\..\build\_deps\lwip-src\src\netif\ppp\ipcp.c" />
-    <ClCompile Include="..\..\..\build\_deps\lwip-src\src\netif\ppp\ipv6cp.c" />
-    <ClCompile Include="..\..\..\build\_deps\lwip-src\src\netif\ppp\lcp.c" />
-    <ClCompile Include="..\..\..\build\_deps\lwip-src\src\netif\ppp\magic.c" />
-    <ClCompile Include="..\..\..\build\_deps\lwip-src\src\netif\ppp\mppe.c" />
-    <ClCompile Include="..\..\..\build\_deps\lwip-src\src\netif\ppp\multilink.c" />
-    <ClCompile Include="..\..\..\build\_deps\lwip-src\src\netif\ppp\ppp.c" />
-    <ClCompile Include="..\..\..\build\_deps\lwip-src\src\netif\ppp\pppcrypt.c" />
-    <ClCompile Include="..\..\..\build\_deps\lwip-src\src\netif\ppp\pppoe.c" />
-    <ClCompile Include="..\..\..\build\_deps\lwip-src\src\netif\ppp\pppol2tp.c" />
-    <ClCompile Include="..\..\..\build\_deps\lwip-src\src\netif\ppp\pppos.c" />
-    <ClCompile Include="..\..\..\build\_deps\lwip-src\src\netif\ppp\upap.c" />
-    <ClCompile Include="..\..\..\build\_deps\lwip-src\src\netif\ppp\utils.c" />
-    <ClCompile Include="..\..\..\build\_deps\lwip-src\src\netif\ppp\vj.c" />
-    <ClCompile Include="..\..\..\build\_deps\lwip-src\src\netif\ppp\polarssl\arc4.c" />
-    <ClCompile Include="..\..\..\build\_deps\lwip-src\src\netif\ppp\polarssl\des.c" />
-    <ClCompile Include="..\..\..\build\_deps\lwip-src\src\netif\ppp\polarssl\md4.c" />
-    <ClCompile Include="..\..\..\build\_deps\lwip-src\src\netif\ppp\polarssl\md5.c" />
-    <ClCompile Include="..\..\..\build\_deps\lwip-src\src\netif\ppp\polarssl\sha1.c" />
-    <ClCompile Include="..\..\..\build\_deps\lwip-src\src\core\ip.c" />
-    <ClCompile Include="..\..\..\build\_deps\lwip-src\src\netif\ppp\pppapi.c" />
-    <ClCompile Include="..\..\..\build\_deps\lwip-src\src\core\ipv4\ip4_frag.c" />
-    <ClCompile Include="..\..\..\build\_deps\lwip-src\src\core\timeouts.c" />
-    <ClCompile Include="..\..\..\build\_deps\lwip-src\src\netif\zepif.c" />
-    <ClCompile Include="..\..\..\build\_deps\lwip-src\src\core\altcp.c" />
+    <ClCompile Include="$(LWIP_PATH)\src\apps\lwiperf\lwiperf.c" />
+    <ClCompile Include="$(LWIP_PATH)\src\apps\netbiosns\netbiosns.c" />
+    <ClCompile Include="$(LWIP_PATH)\src\apps\sntp\sntp.c" />
+    <ClCompile Include="$(LWIP_PATH)\src\core\altcp_alloc.c" />
+    <ClCompile Include="$(LWIP_PATH)\src\core\altcp_tcp.c" />
+    <ClCompile Include="$(LWIP_PATH)\src\core\def.c" />
+    <ClCompile Include="$(LWIP_PATH)\src\core\dns.c" />
+    <ClCompile Include="$(LWIP_PATH)\src\core\inet_chksum.c" />
+    <ClCompile Include="$(LWIP_PATH)\src\core\init.c" />
+    <ClCompile Include="$(LWIP_PATH)\src\core\mem.c" />
+    <ClCompile Include="$(LWIP_PATH)\src\core\memp.c" />
+    <ClCompile Include="$(LWIP_PATH)\src\core\netif.c" />
+    <ClCompile Include="$(LWIP_PATH)\src\core\pbuf.c" />
+    <ClCompile Include="$(LWIP_PATH)\src\core\raw.c" />
+    <ClCompile Include="$(LWIP_PATH)\src\core\stats.c" />
+    <ClCompile Include="$(LWIP_PATH)\src\core\sys.c" />
+    <ClCompile Include="$(LWIP_PATH)\src\core\tcp.c" />
+    <ClCompile Include="$(LWIP_PATH)\src\core\tcp_in.c" />
+    <ClCompile Include="$(LWIP_PATH)\src\core\tcp_out.c" />
+    <ClCompile Include="$(LWIP_PATH)\src\core\udp.c" />
+    <ClCompile Include="$(LWIP_PATH)\src\core\ipv4\autoip.c" />
+    <ClCompile Include="$(LWIP_PATH)\src\core\ipv4\dhcp.c" />
+    <ClCompile Include="$(LWIP_PATH)\src\core\ipv4\etharp.c" />
+    <ClCompile Include="$(LWIP_PATH)\src\core\ipv4\icmp.c" />
+    <ClCompile Include="$(LWIP_PATH)\src\core\ipv4\igmp.c" />
+    <ClCompile Include="$(LWIP_PATH)\src\core\ipv4\ip4.c" />
+    <ClCompile Include="$(LWIP_PATH)\src\core\ipv4\ip4_addr.c" />
+    <ClCompile Include="$(LWIP_PATH)\src\core\ipv6\dhcp6.c" />
+    <ClCompile Include="$(LWIP_PATH)\src\core\ipv6\ethip6.c" />
+    <ClCompile Include="$(LWIP_PATH)\src\core\ipv6\icmp6.c" />
+    <ClCompile Include="$(LWIP_PATH)\src\core\ipv6\inet6.c" />
+    <ClCompile Include="$(LWIP_PATH)\src\core\ipv6\ip6.c" />
+    <ClCompile Include="$(LWIP_PATH)\src\core\ipv6\ip6_addr.c" />
+    <ClCompile Include="$(LWIP_PATH)\src\core\ipv6\ip6_frag.c" />
+    <ClCompile Include="$(LWIP_PATH)\src\core\ipv6\mld6.c" />
+    <ClCompile Include="$(LWIP_PATH)\src\core\ipv6\nd6.c" />
+    <ClCompile Include="$(LWIP_PATH)\src\netif\bridgeif.c" />
+    <ClCompile Include="$(LWIP_PATH)\src\netif\bridgeif_fdb.c" />
+    <ClCompile Include="$(LWIP_PATH)\src\netif\ethernet.c" />
+    <ClCompile Include="$(LWIP_PATH)\src\netif\lowpan6.c" />
+    <ClCompile Include="$(LWIP_PATH)\src\netif\lowpan6_ble.c" />
+    <ClCompile Include="$(LWIP_PATH)\src\netif\lowpan6_common.c" />
+    <ClCompile Include="$(LWIP_PATH)\src\netif\slipif.c" />
+    <ClCompile Include="$(LWIP_PATH)\src\netif\ppp\auth.c" />
+    <ClCompile Include="$(LWIP_PATH)\src\netif\ppp\ccp.c" />
+    <ClCompile Include="$(LWIP_PATH)\src\netif\ppp\chap-md5.c" />
+    <ClCompile Include="$(LWIP_PATH)\src\netif\ppp\chap-new.c" />
+    <ClCompile Include="$(LWIP_PATH)\src\netif\ppp\chap_ms.c" />
+    <ClCompile Include="$(LWIP_PATH)\src\netif\ppp\demand.c" />
+    <ClCompile Include="$(LWIP_PATH)\src\netif\ppp\eap.c" />
+    <ClCompile Include="$(LWIP_PATH)\src\netif\ppp\ecp.c" />
+    <ClCompile Include="$(LWIP_PATH)\src\netif\ppp\eui64.c" />
+    <ClCompile Include="$(LWIP_PATH)\src\netif\ppp\fsm.c" />
+    <ClCompile Include="$(LWIP_PATH)\src\netif\ppp\ipcp.c" />
+    <ClCompile Include="$(LWIP_PATH)\src\netif\ppp\ipv6cp.c" />
+    <ClCompile Include="$(LWIP_PATH)\src\netif\ppp\lcp.c" />
+    <ClCompile Include="$(LWIP_PATH)\src\netif\ppp\magic.c" />
+    <ClCompile Include="$(LWIP_PATH)\src\netif\ppp\mppe.c" />
+    <ClCompile Include="$(LWIP_PATH)\src\netif\ppp\multilink.c" />
+    <ClCompile Include="$(LWIP_PATH)\src\netif\ppp\ppp.c" />
+    <ClCompile Include="$(LWIP_PATH)\src\netif\ppp\pppcrypt.c" />
+    <ClCompile Include="$(LWIP_PATH)\src\netif\ppp\pppoe.c" />
+    <ClCompile Include="$(LWIP_PATH)\src\netif\ppp\pppol2tp.c" />
+    <ClCompile Include="$(LWIP_PATH)\src\netif\ppp\pppos.c" />
+    <ClCompile Include="$(LWIP_PATH)\src\netif\ppp\upap.c" />
+    <ClCompile Include="$(LWIP_PATH)\src\netif\ppp\utils.c" />
+    <ClCompile Include="$(LWIP_PATH)\src\netif\ppp\vj.c" />
+    <ClCompile Include="$(LWIP_PATH)\src\netif\ppp\polarssl\arc4.c" />
+    <ClCompile Include="$(LWIP_PATH)\src\netif\ppp\polarssl\des.c" />
+    <ClCompile Include="$(LWIP_PATH)\src\netif\ppp\polarssl\md4.c" />
+    <ClCompile Include="$(LWIP_PATH)\src\netif\ppp\polarssl\md5.c" />
+    <ClCompile Include="$(LWIP_PATH)\src\netif\ppp\polarssl\sha1.c" />
+    <ClCompile Include="$(LWIP_PATH)\src\core\ip.c" />
+    <ClCompile Include="$(LWIP_PATH)\src\netif\ppp\pppapi.c" />
+    <ClCompile Include="$(LWIP_PATH)\src\core\ipv4\ip4_frag.c" />
+    <ClCompile Include="$(LWIP_PATH)\src\core\timeouts.c" />
+    <ClCompile Include="$(LWIP_PATH)\src\netif\zepif.c" />
+    <ClCompile Include="$(LWIP_PATH)\src\core\altcp.c" />
     <ClCompile Include="sio.c" />
     <ClCompile Include="sys_arch.c">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug unittests|Win32'">true</ExcludedFromBuild>
@@ -751,169 +751,169 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\..\build\_deps\lwip-src\src\apps\altcp_tls\altcp_tls_mbedtls_mem.h" />
-    <ClInclude Include="..\..\..\build\_deps\lwip-src\src\apps\altcp_tls\altcp_tls_mbedtls_structs.h" />
-    <ClInclude Include="..\..\..\build\_deps\lwip-src\src\include\compat\stdc\errno.h" />
-    <ClInclude Include="..\..\..\build\_deps\lwip-src\src\include\compat\posix\arpa\inet.h" />
-    <ClInclude Include="..\..\..\build\_deps\lwip-src\src\include\compat\posix\netdb.h" />
-    <ClInclude Include="..\..\..\build\_deps\lwip-src\src\include\compat\posix\net\if.h" />
-    <ClInclude Include="..\..\..\build\_deps\lwip-src\src\include\compat\posix\sys\socket.h" />
-    <ClInclude Include="..\..\..\build\_deps\lwip-src\src\include\lwip\altcp.h" />
-    <ClInclude Include="..\..\..\build\_deps\lwip-src\src\include\lwip\altcp_tcp.h" />
-    <ClInclude Include="..\..\..\build\_deps\lwip-src\src\include\lwip\altcp_tls.h" />
-    <ClInclude Include="..\..\..\build\_deps\lwip-src\src\include\lwip\apps\altcp_proxyconnect.h" />
-    <ClInclude Include="..\..\..\build\_deps\lwip-src\src\include\lwip\apps\altcp_tls_mbedtls_opts.h" />
-    <ClInclude Include="..\..\..\build\_deps\lwip-src\src\include\lwip\apps\http_client.h" />
-    <ClInclude Include="..\..\..\build\_deps\lwip-src\src\include\lwip\apps\lwiperf.h" />
-    <ClInclude Include="..\..\..\build\_deps\lwip-src\src\include\lwip\apps\mdns_domain.h" />
-    <ClInclude Include="..\..\..\build\_deps\lwip-src\src\include\lwip\apps\mdns_out.h" />
-    <ClInclude Include="..\..\..\build\_deps\lwip-src\src\include\lwip\apps\mdns_priv.h" />
-    <ClInclude Include="..\..\..\build\_deps\lwip-src\src\include\lwip\apps\mqtt.h" />
-    <ClInclude Include="..\..\..\build\_deps\lwip-src\src\include\lwip\apps\mqtt_opts.h" />
-    <ClInclude Include="..\..\..\build\_deps\lwip-src\src\include\lwip\apps\mqtt_priv.h" />
-    <ClInclude Include="..\..\..\build\_deps\lwip-src\src\include\lwip\apps\netbiosns.h" />
-    <ClInclude Include="..\..\..\build\_deps\lwip-src\src\include\lwip\apps\netbiosns_opts.h" />
-    <ClInclude Include="..\..\..\build\_deps\lwip-src\src\include\lwip\apps\smtp.h" />
-    <ClInclude Include="..\..\..\build\_deps\lwip-src\src\include\lwip\apps\smtp_opts.h" />
-    <ClInclude Include="..\..\..\build\_deps\lwip-src\src\include\lwip\apps\snmp.h" />
-    <ClInclude Include="..\..\..\build\_deps\lwip-src\src\include\lwip\apps\snmp_opts.h" />
-    <ClInclude Include="..\..\..\build\_deps\lwip-src\src\include\lwip\apps\snmp_snmpv2_framework.h" />
-    <ClInclude Include="..\..\..\build\_deps\lwip-src\src\include\lwip\apps\snmp_snmpv2_usm.h" />
-    <ClInclude Include="..\..\..\build\_deps\lwip-src\src\include\lwip\apps\sntp.h" />
-    <ClInclude Include="..\..\..\build\_deps\lwip-src\src\include\lwip\apps\sntp_opts.h" />
-    <ClInclude Include="..\..\..\build\_deps\lwip-src\src\include\lwip\apps\tftp_client.h" />
-    <ClInclude Include="..\..\..\build\_deps\lwip-src\src\include\lwip\apps\tftp_common.h" />
-    <ClInclude Include="..\..\..\build\_deps\lwip-src\src\include\lwip\apps\tftp_opts.h" />
-    <ClInclude Include="..\..\..\build\_deps\lwip-src\src\include\lwip\apps\tftp_server.h" />
-    <ClInclude Include="..\..\..\build\_deps\lwip-src\src\include\lwip\errno.h" />
-    <ClInclude Include="..\..\..\build\_deps\lwip-src\src\include\lwip\if_api.h" />
-    <ClInclude Include="..\..\..\build\_deps\lwip-src\src\include\lwip\ip6_zone.h" />
-    <ClInclude Include="..\..\..\build\_deps\lwip-src\src\include\lwip\priv\altcp_priv.h" />
-    <ClInclude Include="..\..\..\build\_deps\lwip-src\src\include\lwip\priv\api_msg.h" />
-    <ClInclude Include="..\..\..\build\_deps\lwip-src\src\include\lwip\priv\memp_priv.h" />
-    <ClInclude Include="..\..\..\build\_deps\lwip-src\src\include\lwip\priv\memp_std.h" />
-    <ClInclude Include="..\..\..\build\_deps\lwip-src\src\include\lwip\priv\mem_priv.h" />
-    <ClInclude Include="..\..\..\build\_deps\lwip-src\src\include\lwip\priv\nd6_priv.h" />
-    <ClInclude Include="..\..\..\build\_deps\lwip-src\src\include\lwip\priv\raw_priv.h" />
-    <ClInclude Include="..\..\..\build\_deps\lwip-src\src\include\lwip\priv\sockets_priv.h" />
-    <ClInclude Include="..\..\..\build\_deps\lwip-src\src\include\lwip\priv\tcpip_priv.h" />
-    <ClInclude Include="..\..\..\build\_deps\lwip-src\src\include\lwip\priv\tcp_priv.h" />
-    <ClInclude Include="..\..\..\build\_deps\lwip-src\src\include\lwip\acd.h" />
-    <ClInclude Include="..\..\..\build\_deps\lwip-src\src\include\lwip\api.h" />
-    <ClInclude Include="..\..\..\build\_deps\lwip-src\src\include\lwip\arch.h" />
-    <ClInclude Include="..\..\..\build\_deps\lwip-src\src\include\lwip\autoip.h" />
-    <ClInclude Include="..\..\..\build\_deps\lwip-src\src\include\lwip\debug.h" />
-    <ClInclude Include="..\..\..\build\_deps\lwip-src\src\include\lwip\def.h" />
-    <ClInclude Include="..\..\..\build\_deps\lwip-src\src\include\lwip\dhcp.h" />
-    <ClInclude Include="..\..\..\build\_deps\lwip-src\src\include\lwip\dhcp6.h" />
-    <ClInclude Include="..\..\..\build\_deps\lwip-src\src\include\lwip\dns.h" />
-    <ClInclude Include="..\..\..\build\_deps\lwip-src\src\include\lwip\err.h" />
-    <ClInclude Include="..\..\..\build\_deps\lwip-src\src\include\lwip\ethip6.h" />
-    <ClInclude Include="..\..\..\build\_deps\lwip-src\src\include\lwip\icmp.h" />
-    <ClInclude Include="..\..\..\build\_deps\lwip-src\src\include\lwip\icmp6.h" />
-    <ClInclude Include="..\..\..\build\_deps\lwip-src\src\include\lwip\igmp.h" />
-    <ClInclude Include="..\..\..\build\_deps\lwip-src\src\include\lwip\inet.h" />
-    <ClInclude Include="..\..\..\build\_deps\lwip-src\src\include\lwip\inet_chksum.h" />
-    <ClInclude Include="..\..\..\build\_deps\lwip-src\src\include\lwip\init.h" />
-    <ClInclude Include="..\..\..\build\_deps\lwip-src\src\include\lwip\ip.h" />
-    <ClInclude Include="..\..\..\build\_deps\lwip-src\src\include\lwip\ip4.h" />
-    <ClInclude Include="..\..\..\build\_deps\lwip-src\src\include\lwip\ip4_addr.h" />
-    <ClInclude Include="..\..\..\build\_deps\lwip-src\src\include\lwip\ip6.h" />
-    <ClInclude Include="..\..\..\build\_deps\lwip-src\src\include\lwip\ip6_addr.h" />
-    <ClInclude Include="..\..\..\build\_deps\lwip-src\src\include\lwip\ip6_frag.h" />
-    <ClInclude Include="..\..\..\build\_deps\lwip-src\src\include\lwip\ip_addr.h" />
-    <ClInclude Include="..\..\..\build\_deps\lwip-src\src\include\lwip\mem.h" />
-    <ClInclude Include="..\..\..\build\_deps\lwip-src\src\include\lwip\memp.h" />
-    <ClInclude Include="..\..\..\build\_deps\lwip-src\src\include\lwip\mld6.h" />
-    <ClInclude Include="..\..\..\build\_deps\lwip-src\src\include\lwip\nd6.h" />
-    <ClInclude Include="..\..\..\build\_deps\lwip-src\src\include\lwip\netbuf.h" />
-    <ClInclude Include="..\..\..\build\_deps\lwip-src\src\include\lwip\netdb.h" />
-    <ClInclude Include="..\..\..\build\_deps\lwip-src\src\include\lwip\netif.h" />
-    <ClInclude Include="..\..\..\build\_deps\lwip-src\src\include\lwip\netifapi.h" />
-    <ClInclude Include="..\..\..\build\_deps\lwip-src\src\include\lwip\opt.h" />
-    <ClInclude Include="..\..\..\build\_deps\lwip-src\src\include\lwip\pbuf.h" />
-    <ClInclude Include="..\..\..\build\_deps\lwip-src\src\include\lwip\prot\dhcp6.h" />
-    <ClInclude Include="..\..\..\build\_deps\lwip-src\src\include\lwip\prot\etharp.h" />
-    <ClInclude Include="..\..\..\build\_deps\lwip-src\src\include\lwip\prot\iana.h" />
-    <ClInclude Include="..\..\..\build\_deps\lwip-src\src\include\lwip\prot\ieee.h" />
-    <ClInclude Include="..\..\..\build\_deps\lwip-src\src\include\lwip\prot\igmp.h" />
-    <ClInclude Include="..\..\..\build\_deps\lwip-src\src\include\lwip\raw.h" />
-    <ClInclude Include="..\..\..\build\_deps\lwip-src\src\include\lwip\sio.h" />
-    <ClInclude Include="..\..\..\build\_deps\lwip-src\src\include\lwip\snmp.h" />
-    <ClInclude Include="..\..\..\build\_deps\lwip-src\src\include\lwip\sockets.h" />
-    <ClInclude Include="..\..\..\build\_deps\lwip-src\src\include\lwip\stats.h" />
-    <ClInclude Include="..\..\..\build\_deps\lwip-src\src\include\lwip\sys.h" />
-    <ClInclude Include="..\..\..\build\_deps\lwip-src\src\include\lwip\tcp.h" />
-    <ClInclude Include="..\..\..\build\_deps\lwip-src\src\include\lwip\tcpip.h" />
-    <ClInclude Include="..\..\..\build\_deps\lwip-src\src\include\lwip\udp.h" />
-    <ClInclude Include="..\..\..\build\_deps\lwip-src\src\include\netif\bridgeif.h" />
-    <ClInclude Include="..\..\..\build\_deps\lwip-src\src\include\netif\bridgeif_opts.h" />
-    <ClInclude Include="..\..\..\build\_deps\lwip-src\src\include\netif\etharp.h" />
-    <ClInclude Include="..\..\..\build\_deps\lwip-src\src\include\netif\ethernet.h" />
-    <ClInclude Include="..\..\..\build\_deps\lwip-src\src\include\netif\ieee802154.h" />
-    <ClInclude Include="..\..\..\build\_deps\lwip-src\src\include\netif\lowpan6.h" />
-    <ClInclude Include="..\..\..\build\_deps\lwip-src\src\include\netif\lowpan6_ble.h" />
-    <ClInclude Include="..\..\..\build\_deps\lwip-src\src\include\netif\lowpan6_common.h" />
-    <ClInclude Include="..\..\..\build\_deps\lwip-src\src\include\netif\lowpan6_opts.h" />
-    <ClInclude Include="..\..\..\build\_deps\lwip-src\src\include\netif\slipif.h" />
-    <ClInclude Include="..\..\..\build\_deps\lwip-src\src\include\netif\ppp\ccp.h" />
-    <ClInclude Include="..\..\..\build\_deps\lwip-src\src\include\netif\ppp\chap-md5.h" />
-    <ClInclude Include="..\..\..\build\_deps\lwip-src\src\include\netif\ppp\chap-new.h" />
-    <ClInclude Include="..\..\..\build\_deps\lwip-src\src\include\netif\ppp\chap_ms.h" />
-    <ClInclude Include="..\..\..\build\_deps\lwip-src\src\include\netif\ppp\eap.h" />
-    <ClInclude Include="..\..\..\build\_deps\lwip-src\src\include\netif\ppp\ecp.h" />
-    <ClInclude Include="..\..\..\build\_deps\lwip-src\src\include\netif\ppp\eui64.h" />
-    <ClInclude Include="..\..\..\build\_deps\lwip-src\src\include\netif\ppp\fsm.h" />
-    <ClInclude Include="..\..\..\build\_deps\lwip-src\src\include\netif\ppp\ipcp.h" />
-    <ClInclude Include="..\..\..\build\_deps\lwip-src\src\include\netif\ppp\ipv6cp.h" />
-    <ClInclude Include="..\..\..\build\_deps\lwip-src\src\include\netif\ppp\lcp.h" />
-    <ClInclude Include="..\..\..\build\_deps\lwip-src\src\include\netif\ppp\magic.h" />
-    <ClInclude Include="..\..\..\build\_deps\lwip-src\src\include\netif\ppp\mppe.h" />
-    <ClInclude Include="..\..\..\build\_deps\lwip-src\src\include\netif\ppp\ppp.h" />
-    <ClInclude Include="..\..\..\build\_deps\lwip-src\src\include\netif\ppp\ppp_impl.h" />
-    <ClInclude Include="..\..\..\build\_deps\lwip-src\src\include\netif\ppp\ppp_opts.h" />
-    <ClInclude Include="..\..\..\build\_deps\lwip-src\src\include\netif\ppp\pppcrypt.h" />
-    <ClInclude Include="..\..\..\build\_deps\lwip-src\src\include\netif\ppp\pppdebug.h" />
-    <ClInclude Include="..\..\..\build\_deps\lwip-src\src\include\netif\ppp\pppoe.h" />
-    <ClInclude Include="..\..\..\build\_deps\lwip-src\src\include\netif\ppp\pppol2tp.h" />
-    <ClInclude Include="..\..\..\build\_deps\lwip-src\src\include\netif\ppp\pppos.h" />
-    <ClInclude Include="..\..\..\build\_deps\lwip-src\src\include\netif\ppp\upap.h" />
-    <ClInclude Include="..\..\..\build\_deps\lwip-src\src\include\netif\ppp\vj.h" />
-    <ClInclude Include="..\..\..\build\_deps\lwip-src\src\include\netif\ppp\polarssl\arc4.h" />
-    <ClInclude Include="..\..\..\build\_deps\lwip-src\src\include\netif\ppp\polarssl\des.h" />
-    <ClInclude Include="..\..\..\build\_deps\lwip-src\src\include\netif\ppp\polarssl\md4.h" />
-    <ClInclude Include="..\..\..\build\_deps\lwip-src\src\include\netif\ppp\polarssl\md5.h" />
-    <ClInclude Include="..\..\..\build\_deps\lwip-src\src\include\netif\ppp\polarssl\sha1.h" />
-    <ClInclude Include="..\..\..\build\_deps\lwip-src\src\include\lwip\apps\snmp_core.h" />
-    <ClInclude Include="..\..\..\build\_deps\lwip-src\src\include\lwip\apps\snmp_mib2.h" />
-    <ClInclude Include="..\..\..\build\_deps\lwip-src\src\include\lwip\apps\snmp_scalar.h" />
-    <ClInclude Include="..\..\..\build\_deps\lwip-src\src\include\lwip\apps\snmp_table.h" />
-    <ClInclude Include="..\..\..\build\_deps\lwip-src\src\include\lwip\apps\snmp_threadsync.h" />
-    <ClInclude Include="..\..\..\build\_deps\lwip-src\src\include\netif\ppp\pppapi.h" />
-    <ClInclude Include="..\..\..\build\_deps\lwip-src\src\include\lwip\apps\fs.h" />
-    <ClInclude Include="..\..\..\build\_deps\lwip-src\src\include\lwip\apps\httpd.h" />
-    <ClInclude Include="..\..\..\build\_deps\lwip-src\src\include\lwip\apps\httpd_opts.h" />
-    <ClInclude Include="..\..\..\build\_deps\lwip-src\src\include\lwip\apps\snmpv3.h" />
-    <ClInclude Include="..\..\..\build\_deps\lwip-src\src\include\lwip\etharp.h" />
-    <ClInclude Include="..\..\..\build\_deps\lwip-src\src\include\lwip\ip4_frag.h" />
-    <ClInclude Include="..\..\..\build\_deps\lwip-src\src\include\lwip\timeouts.h" />
-    <ClInclude Include="..\..\..\build\_deps\lwip-src\src\include\lwip\apps\mdns.h" />
-    <ClInclude Include="..\..\..\build\_deps\lwip-src\src\include\lwip\apps\mdns_opts.h" />
-    <ClInclude Include="..\..\..\build\_deps\lwip-src\src\include\lwip\prot\acd.h" />
-    <ClInclude Include="..\..\..\build\_deps\lwip-src\src\include\lwip\prot\autoip.h" />
-    <ClInclude Include="..\..\..\build\_deps\lwip-src\src\include\lwip\prot\dhcp.h" />
-    <ClInclude Include="..\..\..\build\_deps\lwip-src\src\include\lwip\prot\dns.h" />
-    <ClInclude Include="..\..\..\build\_deps\lwip-src\src\include\lwip\prot\ip.h" />
-    <ClInclude Include="..\..\..\build\_deps\lwip-src\src\include\lwip\prot\ip4.h" />
-    <ClInclude Include="..\..\..\build\_deps\lwip-src\src\include\lwip\prot\ethernet.h" />
-    <ClInclude Include="..\..\..\build\_deps\lwip-src\src\include\lwip\prot\icmp.h" />
-    <ClInclude Include="..\..\..\build\_deps\lwip-src\src\include\lwip\prot\icmp6.h" />
-    <ClInclude Include="..\..\..\build\_deps\lwip-src\src\include\lwip\prot\ip6.h" />
-    <ClInclude Include="..\..\..\build\_deps\lwip-src\src\include\lwip\prot\mld6.h" />
-    <ClInclude Include="..\..\..\build\_deps\lwip-src\src\include\lwip\prot\nd6.h" />
-    <ClInclude Include="..\..\..\build\_deps\lwip-src\src\include\lwip\prot\tcp.h" />
-    <ClInclude Include="..\..\..\build\_deps\lwip-src\src\include\lwip\prot\udp.h" />
-    <ClInclude Include="..\..\..\build\_deps\lwip-src\src\include\netif\zepif.h" />
+    <ClInclude Include="$(LWIP_PATH)\src\apps\altcp_tls\altcp_tls_mbedtls_mem.h" />
+    <ClInclude Include="$(LWIP_PATH)\src\apps\altcp_tls\altcp_tls_mbedtls_structs.h" />
+    <ClInclude Include="$(LWIP_PATH)\src\include\compat\stdc\errno.h" />
+    <ClInclude Include="$(LWIP_PATH)\src\include\compat\posix\arpa\inet.h" />
+    <ClInclude Include="$(LWIP_PATH)\src\include\compat\posix\netdb.h" />
+    <ClInclude Include="$(LWIP_PATH)\src\include\compat\posix\net\if.h" />
+    <ClInclude Include="$(LWIP_PATH)\src\include\compat\posix\sys\socket.h" />
+    <ClInclude Include="$(LWIP_PATH)\src\include\lwip\altcp.h" />
+    <ClInclude Include="$(LWIP_PATH)\src\include\lwip\altcp_tcp.h" />
+    <ClInclude Include="$(LWIP_PATH)\src\include\lwip\altcp_tls.h" />
+    <ClInclude Include="$(LWIP_PATH)\src\include\lwip\apps\altcp_proxyconnect.h" />
+    <ClInclude Include="$(LWIP_PATH)\src\include\lwip\apps\altcp_tls_mbedtls_opts.h" />
+    <ClInclude Include="$(LWIP_PATH)\src\include\lwip\apps\http_client.h" />
+    <ClInclude Include="$(LWIP_PATH)\src\include\lwip\apps\lwiperf.h" />
+    <ClInclude Include="$(LWIP_PATH)\src\include\lwip\apps\mdns_domain.h" />
+    <ClInclude Include="$(LWIP_PATH)\src\include\lwip\apps\mdns_out.h" />
+    <ClInclude Include="$(LWIP_PATH)\src\include\lwip\apps\mdns_priv.h" />
+    <ClInclude Include="$(LWIP_PATH)\src\include\lwip\apps\mqtt.h" />
+    <ClInclude Include="$(LWIP_PATH)\src\include\lwip\apps\mqtt_opts.h" />
+    <ClInclude Include="$(LWIP_PATH)\src\include\lwip\apps\mqtt_priv.h" />
+    <ClInclude Include="$(LWIP_PATH)\src\include\lwip\apps\netbiosns.h" />
+    <ClInclude Include="$(LWIP_PATH)\src\include\lwip\apps\netbiosns_opts.h" />
+    <ClInclude Include="$(LWIP_PATH)\src\include\lwip\apps\smtp.h" />
+    <ClInclude Include="$(LWIP_PATH)\src\include\lwip\apps\smtp_opts.h" />
+    <ClInclude Include="$(LWIP_PATH)\src\include\lwip\apps\snmp.h" />
+    <ClInclude Include="$(LWIP_PATH)\src\include\lwip\apps\snmp_opts.h" />
+    <ClInclude Include="$(LWIP_PATH)\src\include\lwip\apps\snmp_snmpv2_framework.h" />
+    <ClInclude Include="$(LWIP_PATH)\src\include\lwip\apps\snmp_snmpv2_usm.h" />
+    <ClInclude Include="$(LWIP_PATH)\src\include\lwip\apps\sntp.h" />
+    <ClInclude Include="$(LWIP_PATH)\src\include\lwip\apps\sntp_opts.h" />
+    <ClInclude Include="$(LWIP_PATH)\src\include\lwip\apps\tftp_client.h" />
+    <ClInclude Include="$(LWIP_PATH)\src\include\lwip\apps\tftp_common.h" />
+    <ClInclude Include="$(LWIP_PATH)\src\include\lwip\apps\tftp_opts.h" />
+    <ClInclude Include="$(LWIP_PATH)\src\include\lwip\apps\tftp_server.h" />
+    <ClInclude Include="$(LWIP_PATH)\src\include\lwip\errno.h" />
+    <ClInclude Include="$(LWIP_PATH)\src\include\lwip\if_api.h" />
+    <ClInclude Include="$(LWIP_PATH)\src\include\lwip\ip6_zone.h" />
+    <ClInclude Include="$(LWIP_PATH)\src\include\lwip\priv\altcp_priv.h" />
+    <ClInclude Include="$(LWIP_PATH)\src\include\lwip\priv\api_msg.h" />
+    <ClInclude Include="$(LWIP_PATH)\src\include\lwip\priv\memp_priv.h" />
+    <ClInclude Include="$(LWIP_PATH)\src\include\lwip\priv\memp_std.h" />
+    <ClInclude Include="$(LWIP_PATH)\src\include\lwip\priv\mem_priv.h" />
+    <ClInclude Include="$(LWIP_PATH)\src\include\lwip\priv\nd6_priv.h" />
+    <ClInclude Include="$(LWIP_PATH)\src\include\lwip\priv\raw_priv.h" />
+    <ClInclude Include="$(LWIP_PATH)\src\include\lwip\priv\sockets_priv.h" />
+    <ClInclude Include="$(LWIP_PATH)\src\include\lwip\priv\tcpip_priv.h" />
+    <ClInclude Include="$(LWIP_PATH)\src\include\lwip\priv\tcp_priv.h" />
+    <ClInclude Include="$(LWIP_PATH)\src\include\lwip\acd.h" />
+    <ClInclude Include="$(LWIP_PATH)\src\include\lwip\api.h" />
+    <ClInclude Include="$(LWIP_PATH)\src\include\lwip\arch.h" />
+    <ClInclude Include="$(LWIP_PATH)\src\include\lwip\autoip.h" />
+    <ClInclude Include="$(LWIP_PATH)\src\include\lwip\debug.h" />
+    <ClInclude Include="$(LWIP_PATH)\src\include\lwip\def.h" />
+    <ClInclude Include="$(LWIP_PATH)\src\include\lwip\dhcp.h" />
+    <ClInclude Include="$(LWIP_PATH)\src\include\lwip\dhcp6.h" />
+    <ClInclude Include="$(LWIP_PATH)\src\include\lwip\dns.h" />
+    <ClInclude Include="$(LWIP_PATH)\src\include\lwip\err.h" />
+    <ClInclude Include="$(LWIP_PATH)\src\include\lwip\ethip6.h" />
+    <ClInclude Include="$(LWIP_PATH)\src\include\lwip\icmp.h" />
+    <ClInclude Include="$(LWIP_PATH)\src\include\lwip\icmp6.h" />
+    <ClInclude Include="$(LWIP_PATH)\src\include\lwip\igmp.h" />
+    <ClInclude Include="$(LWIP_PATH)\src\include\lwip\inet.h" />
+    <ClInclude Include="$(LWIP_PATH)\src\include\lwip\inet_chksum.h" />
+    <ClInclude Include="$(LWIP_PATH)\src\include\lwip\init.h" />
+    <ClInclude Include="$(LWIP_PATH)\src\include\lwip\ip.h" />
+    <ClInclude Include="$(LWIP_PATH)\src\include\lwip\ip4.h" />
+    <ClInclude Include="$(LWIP_PATH)\src\include\lwip\ip4_addr.h" />
+    <ClInclude Include="$(LWIP_PATH)\src\include\lwip\ip6.h" />
+    <ClInclude Include="$(LWIP_PATH)\src\include\lwip\ip6_addr.h" />
+    <ClInclude Include="$(LWIP_PATH)\src\include\lwip\ip6_frag.h" />
+    <ClInclude Include="$(LWIP_PATH)\src\include\lwip\ip_addr.h" />
+    <ClInclude Include="$(LWIP_PATH)\src\include\lwip\mem.h" />
+    <ClInclude Include="$(LWIP_PATH)\src\include\lwip\memp.h" />
+    <ClInclude Include="$(LWIP_PATH)\src\include\lwip\mld6.h" />
+    <ClInclude Include="$(LWIP_PATH)\src\include\lwip\nd6.h" />
+    <ClInclude Include="$(LWIP_PATH)\src\include\lwip\netbuf.h" />
+    <ClInclude Include="$(LWIP_PATH)\src\include\lwip\netdb.h" />
+    <ClInclude Include="$(LWIP_PATH)\src\include\lwip\netif.h" />
+    <ClInclude Include="$(LWIP_PATH)\src\include\lwip\netifapi.h" />
+    <ClInclude Include="$(LWIP_PATH)\src\include\lwip\opt.h" />
+    <ClInclude Include="$(LWIP_PATH)\src\include\lwip\pbuf.h" />
+    <ClInclude Include="$(LWIP_PATH)\src\include\lwip\prot\dhcp6.h" />
+    <ClInclude Include="$(LWIP_PATH)\src\include\lwip\prot\etharp.h" />
+    <ClInclude Include="$(LWIP_PATH)\src\include\lwip\prot\iana.h" />
+    <ClInclude Include="$(LWIP_PATH)\src\include\lwip\prot\ieee.h" />
+    <ClInclude Include="$(LWIP_PATH)\src\include\lwip\prot\igmp.h" />
+    <ClInclude Include="$(LWIP_PATH)\src\include\lwip\raw.h" />
+    <ClInclude Include="$(LWIP_PATH)\src\include\lwip\sio.h" />
+    <ClInclude Include="$(LWIP_PATH)\src\include\lwip\snmp.h" />
+    <ClInclude Include="$(LWIP_PATH)\src\include\lwip\sockets.h" />
+    <ClInclude Include="$(LWIP_PATH)\src\include\lwip\stats.h" />
+    <ClInclude Include="$(LWIP_PATH)\src\include\lwip\sys.h" />
+    <ClInclude Include="$(LWIP_PATH)\src\include\lwip\tcp.h" />
+    <ClInclude Include="$(LWIP_PATH)\src\include\lwip\tcpip.h" />
+    <ClInclude Include="$(LWIP_PATH)\src\include\lwip\udp.h" />
+    <ClInclude Include="$(LWIP_PATH)\src\include\netif\bridgeif.h" />
+    <ClInclude Include="$(LWIP_PATH)\src\include\netif\bridgeif_opts.h" />
+    <ClInclude Include="$(LWIP_PATH)\src\include\netif\etharp.h" />
+    <ClInclude Include="$(LWIP_PATH)\src\include\netif\ethernet.h" />
+    <ClInclude Include="$(LWIP_PATH)\src\include\netif\ieee802154.h" />
+    <ClInclude Include="$(LWIP_PATH)\src\include\netif\lowpan6.h" />
+    <ClInclude Include="$(LWIP_PATH)\src\include\netif\lowpan6_ble.h" />
+    <ClInclude Include="$(LWIP_PATH)\src\include\netif\lowpan6_common.h" />
+    <ClInclude Include="$(LWIP_PATH)\src\include\netif\lowpan6_opts.h" />
+    <ClInclude Include="$(LWIP_PATH)\src\include\netif\slipif.h" />
+    <ClInclude Include="$(LWIP_PATH)\src\include\netif\ppp\ccp.h" />
+    <ClInclude Include="$(LWIP_PATH)\src\include\netif\ppp\chap-md5.h" />
+    <ClInclude Include="$(LWIP_PATH)\src\include\netif\ppp\chap-new.h" />
+    <ClInclude Include="$(LWIP_PATH)\src\include\netif\ppp\chap_ms.h" />
+    <ClInclude Include="$(LWIP_PATH)\src\include\netif\ppp\eap.h" />
+    <ClInclude Include="$(LWIP_PATH)\src\include\netif\ppp\ecp.h" />
+    <ClInclude Include="$(LWIP_PATH)\src\include\netif\ppp\eui64.h" />
+    <ClInclude Include="$(LWIP_PATH)\src\include\netif\ppp\fsm.h" />
+    <ClInclude Include="$(LWIP_PATH)\src\include\netif\ppp\ipcp.h" />
+    <ClInclude Include="$(LWIP_PATH)\src\include\netif\ppp\ipv6cp.h" />
+    <ClInclude Include="$(LWIP_PATH)\src\include\netif\ppp\lcp.h" />
+    <ClInclude Include="$(LWIP_PATH)\src\include\netif\ppp\magic.h" />
+    <ClInclude Include="$(LWIP_PATH)\src\include\netif\ppp\mppe.h" />
+    <ClInclude Include="$(LWIP_PATH)\src\include\netif\ppp\ppp.h" />
+    <ClInclude Include="$(LWIP_PATH)\src\include\netif\ppp\ppp_impl.h" />
+    <ClInclude Include="$(LWIP_PATH)\src\include\netif\ppp\ppp_opts.h" />
+    <ClInclude Include="$(LWIP_PATH)\src\include\netif\ppp\pppcrypt.h" />
+    <ClInclude Include="$(LWIP_PATH)\src\include\netif\ppp\pppdebug.h" />
+    <ClInclude Include="$(LWIP_PATH)\src\include\netif\ppp\pppoe.h" />
+    <ClInclude Include="$(LWIP_PATH)\src\include\netif\ppp\pppol2tp.h" />
+    <ClInclude Include="$(LWIP_PATH)\src\include\netif\ppp\pppos.h" />
+    <ClInclude Include="$(LWIP_PATH)\src\include\netif\ppp\upap.h" />
+    <ClInclude Include="$(LWIP_PATH)\src\include\netif\ppp\vj.h" />
+    <ClInclude Include="$(LWIP_PATH)\src\include\netif\ppp\polarssl\arc4.h" />
+    <ClInclude Include="$(LWIP_PATH)\src\include\netif\ppp\polarssl\des.h" />
+    <ClInclude Include="$(LWIP_PATH)\src\include\netif\ppp\polarssl\md4.h" />
+    <ClInclude Include="$(LWIP_PATH)\src\include\netif\ppp\polarssl\md5.h" />
+    <ClInclude Include="$(LWIP_PATH)\src\include\netif\ppp\polarssl\sha1.h" />
+    <ClInclude Include="$(LWIP_PATH)\src\include\lwip\apps\snmp_core.h" />
+    <ClInclude Include="$(LWIP_PATH)\src\include\lwip\apps\snmp_mib2.h" />
+    <ClInclude Include="$(LWIP_PATH)\src\include\lwip\apps\snmp_scalar.h" />
+    <ClInclude Include="$(LWIP_PATH)\src\include\lwip\apps\snmp_table.h" />
+    <ClInclude Include="$(LWIP_PATH)\src\include\lwip\apps\snmp_threadsync.h" />
+    <ClInclude Include="$(LWIP_PATH)\src\include\netif\ppp\pppapi.h" />
+    <ClInclude Include="$(LWIP_PATH)\src\include\lwip\apps\fs.h" />
+    <ClInclude Include="$(LWIP_PATH)\src\include\lwip\apps\httpd.h" />
+    <ClInclude Include="$(LWIP_PATH)\src\include\lwip\apps\httpd_opts.h" />
+    <ClInclude Include="$(LWIP_PATH)\src\include\lwip\apps\snmpv3.h" />
+    <ClInclude Include="$(LWIP_PATH)\src\include\lwip\etharp.h" />
+    <ClInclude Include="$(LWIP_PATH)\src\include\lwip\ip4_frag.h" />
+    <ClInclude Include="$(LWIP_PATH)\src\include\lwip\timeouts.h" />
+    <ClInclude Include="$(LWIP_PATH)\src\include\lwip\apps\mdns.h" />
+    <ClInclude Include="$(LWIP_PATH)\src\include\lwip\apps\mdns_opts.h" />
+    <ClInclude Include="$(LWIP_PATH)\src\include\lwip\prot\acd.h" />
+    <ClInclude Include="$(LWIP_PATH)\src\include\lwip\prot\autoip.h" />
+    <ClInclude Include="$(LWIP_PATH)\src\include\lwip\prot\dhcp.h" />
+    <ClInclude Include="$(LWIP_PATH)\src\include\lwip\prot\dns.h" />
+    <ClInclude Include="$(LWIP_PATH)\src\include\lwip\prot\ip.h" />
+    <ClInclude Include="$(LWIP_PATH)\src\include\lwip\prot\ip4.h" />
+    <ClInclude Include="$(LWIP_PATH)\src\include\lwip\prot\ethernet.h" />
+    <ClInclude Include="$(LWIP_PATH)\src\include\lwip\prot\icmp.h" />
+    <ClInclude Include="$(LWIP_PATH)\src\include\lwip\prot\icmp6.h" />
+    <ClInclude Include="$(LWIP_PATH)\src\include\lwip\prot\ip6.h" />
+    <ClInclude Include="$(LWIP_PATH)\src\include\lwip\prot\mld6.h" />
+    <ClInclude Include="$(LWIP_PATH)\src\include\lwip\prot\nd6.h" />
+    <ClInclude Include="$(LWIP_PATH)\src\include\lwip\prot\tcp.h" />
+    <ClInclude Include="$(LWIP_PATH)\src\include\lwip\prot\udp.h" />
+    <ClInclude Include="$(LWIP_PATH)\src\include\netif\zepif.h" />
     <ClInclude Include="default_netif.h" />
     <ClInclude Include="lwipcfg.h" />
     <ClInclude Include="arch\bpstruct.h" />
