@@ -16,3 +16,8 @@ bool Network_Initialize()
 
     return true;
 }
+
+uint64_t CPU_MillisecondsToTicks(uint64_t ticks)
+{
+    return ticks * 10 * 1000;
+}

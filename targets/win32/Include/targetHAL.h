@@ -95,14 +95,9 @@ inline uint32_t CPU_TicksPerSecond()
     return 100000000;
 }
 
-inline uint64_t CPU_MicrosecondsToTicks(UINT64 uSec)
+inline uint64_t CPU_MicrosecondsToTicks(uint64_t ticks)
 {
-    return uSec * 10;
-}
-
-inline uint64_t CPU_MillisecondsToTicks(UINT64 uSec)
-{
-    return uSec * 10 * 1000;
+    return ticks * 10;
 }
 
 #endif // TARGET_HAL_H

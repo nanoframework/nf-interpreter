@@ -457,3 +457,8 @@ void WP_Message_PrepareReception_Platform()
 void RtosYield()
 {
 }
+
+uint64_t CPU_MillisecondsToTicks(uint64_t ticks)
+{
+    return ticks * 10 * 1000;
+}
