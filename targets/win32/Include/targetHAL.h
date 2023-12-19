@@ -22,10 +22,7 @@
 
 inline void __cdecl HARD_Breakpoint()
 {
-    if (::IsDebuggerPresent())
-    {
-        ::DebugBreak();
-    }
+    __debugbreak();
 }
 
 #define HARD_BREAKPOINT() HARD_Breakpoint()
