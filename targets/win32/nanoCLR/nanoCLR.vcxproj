@@ -286,7 +286,7 @@
     <ProjectReference Include="..\..\..\src\DeviceInterfaces\Networking.Sntp\Networking.Sntp.vcxproj">
       <Project>{84c62efc-dba2-4d47-bb81-322e8902c6d6}</Project>
     </ProjectReference>
-    <ProjectReference Include="..\..\..\src\DeviceInterfaces\System.Net\System.Net.vcxproj">
+    <ProjectReference Include="..\..\..\src\DeviceInterfaces\System.Net\System.Net_stub.vcxproj">
       <Project>{87b3b6fb-ae1f-4777-abbf-3e42e0deb336}</Project>
     </ProjectReference>
     <ProjectReference Include="..\..\..\src\nanoFramework.ResourceManager\nanoFramework.ResourceManager.vcxproj">
