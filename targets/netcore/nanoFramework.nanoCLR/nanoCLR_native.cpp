@@ -89,7 +89,6 @@ extern void StartClrStartupThread(CLR_SETTINGS *clrSettings);
 
 void nanoCLR_Run(NANO_CLR_SETTINGS nanoClrSettings)
 {
-
 #if _DEBUG
     // only show this in debug build
     DWORD pid = GetCurrentProcessId();
@@ -109,6 +108,10 @@ void nanoCLR_Run(NANO_CLR_SETTINGS nanoClrSettings)
     // initialize network
     if (nanoClrSettings.EnableNetwork)
 	{
+        //pxWinPcap_FillInterfaceDescriptor(0, &(xInterfaces[0]));
+
+        // Initialise Network Stack
+        Network_Initialize();
 	}
 
     // take care of block storage here as we are RAM based
@@ -126,7 +129,7 @@ void nanoCLR_Run(NANO_CLR_SETTINGS nanoClrSettings)
     clrSettings.PerformHeapCompaction = nanoClrSettings.PerformHeapCompaction;
     clrSettings.EnableNetwork = nanoClrSettings.EnableNetwork;
 
-   StartClrStartupThread(&clrSettings);
+    StartClrStartupThread(&clrSettings);
 
     // Start the scheduler.
     vTaskStartScheduler();

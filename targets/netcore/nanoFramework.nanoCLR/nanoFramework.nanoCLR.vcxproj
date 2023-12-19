@@ -103,7 +103,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>NANOCLRNATIVE_EXPORTS;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(FREERTOS_PATH)\FreeRTOS\Source\include;..\FreeRTOS;$(FREERTOS_PATH)\FreeRTOS\Source\portable\MSVC-MingW;..\..\..\src\CLR\Core;..\..\..\src\CLR\CorLib;..\..\..\src\CLR\Helpers\Base64;.;..\..\win32\Include;..\..\..\src\CLR\Include;..\..\..\src\HAL\Include;..\..\..\src\PAL\Include;..\..\..\src\nanoFramework.Runtime.Events</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\lwIP;$(LWIP_PATH)\src\include;$(FREERTOS_PATH)\FreeRTOS\Source\include;..\FreeRTOS;$(FREERTOS_PATH)\FreeRTOS\Source\portable\MSVC-MingW;..\..\..\src\CLR\Core;..\..\..\src\CLR\CorLib;..\..\..\src\CLR\Helpers\Base64;.;..\..\win32\Include;..\..\..\src\CLR\Include;..\..\..\src\HAL\Include;..\..\..\src\PAL\Include;..\..\..\src\nanoFramework.Runtime.Events</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -117,7 +117,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>NANOCLRNATIVE_EXPORTS;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(FREERTOS_PATH)\FreeRTOS\Source\include;..\FreeRTOS;$(FREERTOS_PATH)\FreeRTOS\Source\portable\MSVC-MingW;..\..\..\src\CLR\Core;..\..\..\src\CLR\CorLib;..\..\..\src\CLR\Helpers\Base64;.;..\..\win32\Include;..\..\..\src\CLR\Include;..\..\..\src\HAL\Include;..\..\..\src\PAL\Include;..\..\..\src\nanoFramework.Runtime.Events</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\lwIP;$(LWIP_PATH)\src\include;$(FREERTOS_PATH)\FreeRTOS\Source\include;..\FreeRTOS;$(FREERTOS_PATH)\FreeRTOS\Source\portable\MSVC-MingW;..\..\..\src\CLR\Core;..\..\..\src\CLR\CorLib;..\..\..\src\CLR\Helpers\Base64;.;..\..\win32\Include;..\..\..\src\CLR\Include;..\..\..\src\HAL\Include;..\..\..\src\PAL\Include;..\..\..\src\nanoFramework.Runtime.Events</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -132,7 +132,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>NANOCLRNATIVE_EXPORTS;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(FREERTOS_PATH)\FreeRTOS\Source\include;..\FreeRTOS;$(FREERTOS_PATH)\FreeRTOS\Source\portable\MSVC-MingW;..\..\..\src\CLR\Core;..\..\..\src\CLR\CorLib;..\..\..\src\CLR\Helpers\Base64;.;..\..\win32\Include;..\..\..\src\CLR\Include;..\..\..\src\HAL\Include;..\..\..\src\PAL\Include;..\..\..\src\nanoFramework.Runtime.Events</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\lwIP;$(LWIP_PATH)\src\include;$(FREERTOS_PATH)\FreeRTOS\Source\include;..\FreeRTOS;$(FREERTOS_PATH)\FreeRTOS\Source\portable\MSVC-MingW;..\..\..\src\CLR\Core;..\..\..\src\CLR\CorLib;..\..\..\src\CLR\Helpers\Base64;.;..\..\win32\Include;..\..\..\src\CLR\Include;..\..\..\src\HAL\Include;..\..\..\src\PAL\Include;..\..\..\src\nanoFramework.Runtime.Events</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -149,7 +149,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>NANOCLRNATIVE_EXPORTS;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(FREERTOS_PATH)\FreeRTOS\Source\include;..\FreeRTOS;$(FREERTOS_PATH)\FreeRTOS\Source\portable\MSVC-MingW;..\..\..\src\CLR\Core;..\..\..\src\CLR\CorLib;..\..\..\src\CLR\Helpers\Base64;.;..\..\win32\Include;..\..\..\src\CLR\Include;..\..\..\src\HAL\Include;..\..\..\src\PAL\Include;..\..\..\src\nanoFramework.Runtime.Events</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\lwIP;$(LWIP_PATH)\src\include;$(FREERTOS_PATH)\FreeRTOS\Source\include;..\FreeRTOS;$(FREERTOS_PATH)\FreeRTOS\Source\portable\MSVC-MingW;..\..\..\src\CLR\Core;..\..\..\src\CLR\CorLib;..\..\..\src\CLR\Helpers\Base64;.;..\..\win32\Include;..\..\..\src\CLR\Include;..\..\..\src\HAL\Include;..\..\..\src\PAL\Include;..\..\..\src\nanoFramework.Runtime.Events</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -208,6 +208,7 @@
     <ClCompile Include="Target_BlockStorage_TransientFlashDriver.cpp" />
     <ClCompile Include="Target_HAL.cpp" />
     <ClCompile Include="..\..\win32\nanoCLR\WatchDog.cpp" />
+    <ClCompile Include="Various__.cpp" />
     <ClCompile Include="WireProtocol_HAL_Interface.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -315,6 +316,9 @@
     </ProjectReference>
     <ProjectReference Include="..\FreeRTOS\FreeRTOS.vcxproj">
       <Project>{4b8910ab-17cb-41db-9dae-d3081e04d288}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\lwIP\lwIP.vcxproj">
+      <Project>{2cc276fa-b226-49c9-8f82-7fcd5a228e28}</Project>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
