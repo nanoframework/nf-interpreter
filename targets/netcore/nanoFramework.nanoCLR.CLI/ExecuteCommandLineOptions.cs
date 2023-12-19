@@ -115,6 +115,13 @@ namespace nanoFramework.nanoCLR.CLI
             HelpText = "Path to a local instance of the nanoCLR.")]
         public string LocalInstance { get; set; }
 
+        [Option(
+            "enablenetwork",
+            Required = false,
+            Default = false,
+            HelpText = "Option to enable network layer.")]
+        public bool EnableNetwork { get; set; }
+
         /// <summary>
         /// Allowed values:
         /// q[uiet]

@@ -32,6 +32,9 @@ typedef struct NANO_CLR_SETTINGS
     // set this to TRUE if execution engine is to performa heap compaction after each GC run
     BOOL PerformHeapCompaction;
 
+    // set this to TRUE if network layer should be initialized
+    BOOL EnableNetwork;
+
 } NANO_CLR_SETTINGS;
 
 typedef HRESULT(__stdcall *ConfigureRuntimeCallback)();

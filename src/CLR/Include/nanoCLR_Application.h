@@ -32,6 +32,7 @@ typedef struct CLR_SETTINGS
 #if defined(VIRTUAL_DEVICE)
     bool PerformGarbageCollection;
     bool PerformHeapCompaction;
+    bool EnableNetwork;
     CLR_RT_StringVector StartArgs;
 #endif
 

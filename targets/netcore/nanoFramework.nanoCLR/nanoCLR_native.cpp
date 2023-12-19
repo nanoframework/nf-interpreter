@@ -106,6 +106,11 @@ void nanoCLR_Run(NANO_CLR_SETTINGS nanoClrSettings)
     // initialize nanoHAL
     nanoHAL_Initialize();
 
+    // initialize network
+    if (nanoClrSettings.EnableNetwork)
+	{
+	}
+
     // take care of block storage here as we are RAM based
     BlockStorageList_Initialize();
     BlockStorage_AddDevices();
@@ -119,6 +124,7 @@ void nanoCLR_Run(NANO_CLR_SETTINGS nanoClrSettings)
     clrSettings.EnterDebuggerLoopAfterExit = nanoClrSettings.EnterDebuggerLoopAfterExit;
     clrSettings.PerformGarbageCollection = nanoClrSettings.PerformGarbageCollection;
     clrSettings.PerformHeapCompaction = nanoClrSettings.PerformHeapCompaction;
+    clrSettings.EnableNetwork = nanoClrSettings.EnableNetwork;
 
    StartClrStartupThread(&clrSettings);
 

@@ -19,6 +19,8 @@ namespace nanoFramework.nanoCLR.Host
         public bool PerformGarbageCollection { get; set; }
 
         public bool PerformHeapCompaction { get; set; }
+        
+        public bool EnableNetwork { get; set; }
 
         public static nanoCLRSettings Default = new()
         {
@@ -27,6 +29,7 @@ namespace nanoFramework.nanoCLR.Host
             EnterDebuggerLoopAfterExit = false,
             PerformGarbageCollection = false,
             PerformHeapCompaction = false,
+            EnableNetwork = false
         };
     }
 }

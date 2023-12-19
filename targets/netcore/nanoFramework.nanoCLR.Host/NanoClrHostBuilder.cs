@@ -29,6 +29,7 @@ namespace nanoFramework.nanoCLR.Host
         public bool PerformGarbageCollection { get; set; } = false;
 
         public bool PerformHeapCompaction { get; set; } = false;
+        public bool EnableNetwork { get; set; }
 
         public nanoCLRHostBuilder()
         {
@@ -124,7 +125,8 @@ namespace nanoFramework.nanoCLR.Host
                 WaitForDebugger = WaitForDebugger,
                 EnterDebuggerLoopAfterExit = EnterDebuggerLoopAfterExit,
                 PerformGarbageCollection = PerformGarbageCollection,
-                PerformHeapCompaction = PerformHeapCompaction
+                PerformHeapCompaction = PerformHeapCompaction,
+                EnableNetwork = EnableNetwork
             };
 
             return s_nanoClrHost;
