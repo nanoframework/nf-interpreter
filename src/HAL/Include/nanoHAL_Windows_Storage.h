@@ -9,22 +9,34 @@
 
 // FatFs define for size of file name members
 // ANSI/OEM at DBCS
+#ifndef FF_LFN_BUF
 #define FF_LFN_BUF 255
+#endif
 
 // driver letters and paths
-// drive letter for SD Card
-#define INDEX0_DRIVE_LETTER "D:"
-#define INDEX0_DRIVE_PATH   INDEX0_DRIVE_LETTER "\\"
-// drive letter for USB mass storage device
-#define INDEX1_DRIVE_LETTER "E:"
-#define INDEX1_DRIVE_PATH   INDEX1_DRIVE_LETTER "\\"
-// spare drive letter
-#define INDEX2_DRIVE_LETTER "F:"
-#define INDEX2_DRIVE_PATH   INDEX2_DRIVE_LETTER "\\"
-// drive letter for internal drive (SPIFFS)
+
+// SD Card
+// #define SDCARD_DRIVE_NAME "SD:"
+#define SDCARD_DRIVE_LETTER "D:"
+#define SDCARD_DRIVE_PATH   SDCARD_DRIVE_LETTER "\\"
+
+// USB mass storage device
+// #define USB_DRIVE_NAME "USB"
+#define USB_DRIVE_LETTER "E:"
+#define USB_DRIVE_PATH   USB_DRIVE_LETTER "\\"
+
+// USB mass storage device 2
+// #define USB2_DRIVE_NAME "USB2"
+#define USB2_DRIVE_LETTER "F:"
+#define USB2_DRIVE_PATH   USB2_DRIVE_LETTER "\\"
+
+// Internal drive 0 (SPIFFS)
+// #define INTERNAL_DRIVE0_NAME "SPI"
 #define INTERNAL_DRIVE0_LETTER "I:"
 #define INTERNAL_DRIVE0_PATH   INTERNAL_DRIVE0_LETTER "\\"
-// drive letter for second internal drive (SPIFFS)
+
+// Internal drive 1 (SPIFFS)
+// #define INTERNAL_DRIVE1_NAME "SPI2"
 #define INTERNAL_DRIVE1_LETTER "J:"
 #define INTERNAL_DRIVE1_PATH   INTERNAL_DRIVE1_LETTER "\\"
 
@@ -47,8 +59,8 @@ typedef enum StorageEventType
 
 // constants to be used throughout the code
 #define SUPPORTED_DRIVES_COUNT (2)
-#define DRIVE_LETTER_LENGTH    sizeof(INDEX0_DRIVE_LETTER)
-#define DRIVE_PATH_LENGTH      sizeof(INDEX0_DRIVE_PATH)
+#define DRIVE_LETTER_LENGTH    sizeof(SDCARD_DRIVE_LETTER)
+#define DRIVE_PATH_LENGTH      sizeof(SDCARD_DRIVE_PATH)
 
 /////////////////////////////////////////////////////////////////////////////////////////
 // !!! KEEP IN SYNC WITH Windows.Storage.CreationCollisionOption (in managed code) !!! //

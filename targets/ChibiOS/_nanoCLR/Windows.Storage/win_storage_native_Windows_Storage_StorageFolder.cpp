@@ -143,7 +143,7 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::
                 // is the SD card file system ready?
                 if (sdCardFileSystemReady)
                 {
-                    memcpy(workingDrive, INDEX0_DRIVE_PATH, DRIVE_PATH_LENGTH);
+                    memcpy(workingDrive, SDCARD_DRIVE_PATH, DRIVE_PATH_LENGTH);
                 }
                 else
                 {
@@ -160,7 +160,7 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::
                 // is the USB mass storage device file system ready?
                 if (usbMsdFileSystemReady)
                 {
-                    memcpy(workingDrive, INDEX1_DRIVE_PATH, DRIVE_PATH_LENGTH);
+                    memcpy(workingDrive, USB_DRIVE_PATH, DRIVE_PATH_LENGTH);
                 }
                 else
                 {
