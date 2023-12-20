@@ -16,29 +16,29 @@
 // driver letters and paths
 
 // SD Card
-// #define SDCARD_DRIVE_NAME "SD:"
-#define SDCARD_DRIVE_LETTER "D:"
-#define SDCARD_DRIVE_PATH   SDCARD_DRIVE_LETTER "\\"
+// #define SDCARD_DRIVE_NAME "SD"
+#define SDCARD_DRIVE_LETTER "D"
+#define SDCARD_DRIVE_PATH   SDCARD_DRIVE_LETTER ":\\"
 
 // USB mass storage device
 // #define USB_DRIVE_NAME "USB"
-#define USB_DRIVE_LETTER "E:"
-#define USB_DRIVE_PATH   USB_DRIVE_LETTER "\\"
+#define USB_DRIVE_LETTER "E"
+#define USB_DRIVE_PATH   USB_DRIVE_LETTER ":\\"
 
 // USB mass storage device 2
 // #define USB2_DRIVE_NAME "USB2"
-#define USB2_DRIVE_LETTER "F:"
-#define USB2_DRIVE_PATH   USB2_DRIVE_LETTER "\\"
+#define USB2_DRIVE_LETTER "F"
+#define USB2_DRIVE_PATH   USB2_DRIVE_LETTER ":\\"
 
 // Internal drive 0 (SPIFFS)
 // #define INTERNAL_DRIVE0_NAME "SPI"
-#define INTERNAL_DRIVE0_LETTER "I:"
-#define INTERNAL_DRIVE0_PATH   INTERNAL_DRIVE0_LETTER "\\"
+#define INTERNAL_DRIVE0_LETTER "I"
+#define INTERNAL_DRIVE0_PATH   INTERNAL_DRIVE0_LETTER ":\\"
 
 // Internal drive 1 (SPIFFS)
 // #define INTERNAL_DRIVE1_NAME "SPI2"
-#define INTERNAL_DRIVE1_LETTER "J:"
-#define INTERNAL_DRIVE1_PATH   INTERNAL_DRIVE1_LETTER "\\"
+#define INTERNAL_DRIVE1_LETTER "J"
+#define INTERNAL_DRIVE1_PATH   INTERNAL_DRIVE1_LETTER ":\\"
 
 //////////////////////////////////////////////////////////////////////////
 // Keep in sync with StorageEventManager.StorageEventType in managed code

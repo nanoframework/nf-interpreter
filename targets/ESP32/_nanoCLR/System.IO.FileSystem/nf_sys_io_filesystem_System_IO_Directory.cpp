@@ -389,8 +389,8 @@ static HRESULT EnumerateDrives(CLR_RT_HeapBlock *array, int &count)
     {
         CLR_RT_HeapBlock *storageFolder = NULL;
         DIR *currentDirectory;
-        char outputDrive[] = SDCARD_DRIVE_PATH;
-        char workingDrive[] = SDCARD_DRIVE_PATH;
+        char outputDrive[] = SDCARD_DRIVE_LETTER;
+        char workingDrive[] = SDCARD_DRIVE_LETTER;
 
         if (array)
         {
