@@ -2,8 +2,8 @@
 // Copyright (c) .NET Foundation and Contributors
 // See LICENSE file in the project root for full license information.
 //
-#ifndef NANOHAL_WINDOWS_STORAGE_H
-#define NANOHAL_WINDOWS_STORAGE_H
+#ifndef NANOHAL_PERSISTENT_STORAGE_H
+#define NANOHAL_PERSISTENT_STORAGE_H
 
 #include <Target_Windows_Storage.h>
 
@@ -85,4 +85,4 @@ extern "C"
 }
 #endif
 
-#endif // NANOHAL_WINDOWS_STORAGE_H
+#endif // NANOHAL_PERSISTENT_STORAGE_H

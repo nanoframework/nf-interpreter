@@ -7,7 +7,7 @@
 #include <cmsis_os.h>
 #include <ff.h>
 #include <target_windows_storage_config.h>
-#include <nanoHAL_Windows_Storage.h>
+#include <nanoHAL_Persistent_Storage.h>
 #include <Target_Windows_Storage.h>
 #include <nanoHAL_v2.h>
 

@@ -10,7 +10,7 @@
 #include <ff.h>
 #include <corlib_native.h>
 #include "win_storage_native.h"
-#include <nanoHAL_Windows_Storage.h>
+#include <nanoHAL_Persistent_Storage.h>
 #include <Target_Windows_Storage.h>
 
 #endif // WIN_STORAGE_NATIVE_TARGET_H
