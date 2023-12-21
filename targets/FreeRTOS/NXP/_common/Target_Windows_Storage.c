@@ -14,13 +14,11 @@
 
 #include "fsl_sd.h"
 
-
 // need to declare this here as extern
 extern void PostManagedEvent(uint8_t category, uint8_t subCategory, uint16_t data1, uint32_t data2);
 
-#define SD_CARD_DRIVE_INDEX             "0"
-#define SD_CARD_DRIVE_INDEX_NUMERIC     (0)
-
+#define SD_CARD_DRIVE_INDEX         "0"
+#define SD_CARD_DRIVE_INDEX_NUMERIC (0)
 
 ///////////////////////////////////////////
 // code specific to SD Card
@@ -31,12 +29,12 @@ bool sdCardFileSystemReady;
 static FATFS sdCard_FS;
 
 /*!
-* call back function for SD card detect.
-*
-* @param isInserted  true,  indicate the card is insert.
-*                    false, indicate the card is remove.
-* @param userData
-*/
+ * call back function for SD card detect.
+ *
+ * @param isInserted  true,  indicate the card is insert.
+ *                    false, indicate the card is remove.
+ * @param userData
+ */
 static void SDCARD_DetectCallBack(bool isInserted, void *userData);
 
 /*! Card descriptor. */
@@ -83,18 +81,19 @@ static void CardDetectTask(void *pvParameters)
         vTaskDelay(100 / portTICK_PERIOD_MS);
         if (s_cardInserted)
         {
-            //Card inserted.
+            // Card inserted.
             /* power on the card */
             SD_PowerOnCard(g_sd.host.base, g_sd.usrParam.pwr);
             /* Init card. */
             if (SD_CardInit(&g_sd))
             {
-                //SD card init failed.
+                // SD card init failed.
                 continue;
             }
 
             FRESULT err = f_mount(&sdCard_FS, "0", 1U);
-            if (err != FR_OK) {
+            if (err != FR_OK)
+            {
                 vTaskDelay(1000 / portTICK_PERIOD_MS);
                 SD_CardDeinit(&g_sd);
                 continue;
@@ -102,25 +101,25 @@ static void CardDetectTask(void *pvParameters)
             sdCardFileSystemReady = true;
 
             // post event to managed app
-            PostManagedEvent( EVENT_STORAGE, 0, StorageEventType_RemovableDeviceInsertion, SD_CARD_DRIVE_INDEX_NUMERIC );
+            PostManagedEvent(EVENT_STORAGE, 0, StorageEventType_RemovableDeviceInsertion, SD_CARD_DRIVE_INDEX_NUMERIC);
         }
         else
         {
             SD_CardDeinit(&g_sd);
 
-            //Card removed
+            // Card removed
             sdCardFileSystemReady = false;
 
             // post event to managed app
-            PostManagedEvent( EVENT_STORAGE, 0, StorageEventType_RemovableDeviceRemoval, SD_CARD_DRIVE_INDEX_NUMERIC );
+            PostManagedEvent(EVENT_STORAGE, 0, StorageEventType_RemovableDeviceRemoval, SD_CARD_DRIVE_INDEX_NUMERIC);
         }
     }
 }
 
-void SdCardThread(void * argument)
+void SdCardThread(void *argument)
 {
     (void)argument;
-    
+
     s_CardDetectSemaphore = xSemaphoreCreateBinary();
 
     sdCardFileSystemReady = false;
@@ -134,7 +133,7 @@ void SdCardThread(void * argument)
     /* SD host init function */
     if (SD_HostInit(&g_sd) != kStatus_Success)
     {
-        //SD host init fail
+        // SD host init fail
         vTaskDelete(NULL);
         return;
     }
@@ -144,6 +143,4 @@ void SdCardThread(void * argument)
     vTaskDelete(NULL);
 }
 
-
 ///////////////////////////////////////////
-
