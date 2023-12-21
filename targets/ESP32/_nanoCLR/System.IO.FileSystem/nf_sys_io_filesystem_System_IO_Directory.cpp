@@ -389,8 +389,8 @@ static HRESULT EnumerateDrives(CLR_RT_HeapBlock *array, int &count)
     {
         CLR_RT_HeapBlock *storageFolder = NULL;
         DIR *currentDirectory;
-        char outputDrive[] = SDCARD_DRIVE_LETTER;
-        char workingDrive[] = SDCARD_DRIVE_LETTER;
+        char outputDrive[] = SDCARD_DRIVE_PATH;
+        char workingDrive[] = "/D/";
 
         if (array)
         {
@@ -401,7 +401,7 @@ static HRESULT EnumerateDrives(CLR_RT_HeapBlock *array, int &count)
         count = 0;
         for (char drive = SDCARD_DRIVE_LETTER[0]; drive <= INTERNAL_DRIVE1_LETTER[0]; drive++)
         {
-            workingDrive[0] = drive;
+            workingDrive[1] = drive;
             currentDirectory = opendir(workingDrive);
             if (currentDirectory != NULL)
             {
