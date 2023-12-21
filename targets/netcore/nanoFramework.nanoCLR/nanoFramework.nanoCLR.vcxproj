@@ -176,9 +176,6 @@
     <ClCompile Include="..\..\..\src\CLR\Core\NativeEventDispatcher\NativeEventDispatcher.cpp" />
     <ClCompile Include="..\..\..\src\HAL\nanoHAL_Time.cpp" />
     <ClCompile Include="..\..\..\src\nanoFramework.Runtime.Events\nf_rt_events_native.cpp" />
-    <ClCompile Include="..\..\..\src\nanoFramework.Runtime.Events\nf_rt_events_native_nanoFramework_Runtime_Events_EventSink.cpp" />
-    <ClCompile Include="..\..\..\src\nanoFramework.Runtime.Events\nf_rt_events_native_nanoFramework_Runtime_Events_NativeEventDispatcher.cpp" />
-    <ClCompile Include="..\..\..\src\nanoFramework.Runtime.Events\nf_rt_events_native_nanoFramework_Runtime_Events_WeakDelegate.cpp" />
     <ClCompile Include="..\..\..\src\PAL\AsyncProcCall\AsyncCompletions.cpp" />
     <ClCompile Include="..\..\..\src\PAL\AsyncProcCall\AsyncContinuations.cpp" />
     <ClCompile Include="..\..\..\src\PAL\Double\nanoPAL_NativeDouble.cpp" />
@@ -292,6 +289,9 @@
     </ProjectReference>
     <ProjectReference Include="..\..\..\src\nanoFramework.ResourceManager\nanoFramework.ResourceManager.vcxproj">
       <Project>{4f6dd35b-a0c8-47ee-880a-1224fade9276}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\src\nanoFramework.Runtime.Events\nanoFramework.Runtime.Events.vcxproj">
+      <Project>{1396642e-0801-4341-9ad9-4fe2edd0b7d5}</Project>
     </ProjectReference>
     <ProjectReference Include="..\..\..\src\nanoFramework.Runtime.Native\Runtime.Native.vcxproj">
       <Project>{b829e436-91ea-46b3-949b-3273211c8f56}</Project>
