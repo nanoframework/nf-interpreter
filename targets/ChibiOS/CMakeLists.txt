@@ -115,8 +115,8 @@ if(CHIBIOS_CONTRIB_REQUIRED)
 
         FetchContent_Declare(
             chibios-contrib
-            GIT_REPOSITORY https://github.com/nanoframework/ChibiOS-Contrib
-            GIT_TAG nanoframework
+            GIT_REPOSITORY https://github.com/ChibiOS/ChibiOS-Contrib.git
+            GIT_TAG chibios-21.11.x
         )
 
         message(STATUS "ChibiOS-Contrib from GitHub repo")
