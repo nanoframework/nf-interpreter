@@ -4,17 +4,15 @@
 name: Push devcontainer Docker image [FreeRTOS-NXP]
 
 env:
-  CONTAINER_REPO: ghcr.io
-  CONTAINER_NAME: dev-container-freertos-nxp
-  CONTAINER_SRC_FILE: .devcontainer/FreeRTOS-NXP/Dockerfile.FreeRTOS-NXP.SRC
+  CONTAINER_SOURCE_FILE: .devcontainer/FreeRTOS-NXP/Dockerfile.FreeRTOS-NXP.SRC
   CONTAINER_VERSION_FILE: .devcontainer/FreeRTOS-NXP/Dockerfile.FreeRTOS-NXP
 
 on:
   push:
-    # branches:
-    #   - main
+    branches:
+      - main
     paths:
-      - '**Dockerfile.FreeRTOS-NXP'
+      - '**Dockerfile.FreeRTOS-NXP' # We only care if the version has changed!
 
   workflow_dispatch:
 
@@ -27,7 +25,6 @@ jobs:
       packages: write
 
     steps:
-
     - name: Checkout Repository
       uses: actions/checkout@v4
 
@@ -48,8 +45,7 @@ jobs:
     - name: Build and Push Docker Image
       uses: docker/build-push-action@v5
       with:
-        file: ${{ env.CONTAINER_SRC_FILE }}
+        file: ${{ env.CONTAINER_SOURCE_FILE }}
         push: ${{ github.event_name != 'pull_request' }}
-        tags: |
-          ${{ steps.meta.outputs.tags }}
+        tags: ${{ steps.meta.outputs.tags }}
         labels: ${{ steps.meta.outputs.labels }}
