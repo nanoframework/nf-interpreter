@@ -7,13 +7,14 @@ env:
   CONTAINER_REPO: ghcr.io
   CONTAINER_NAME: dev-container-freertos-nxp
   CONTAINER_SRC_FILE: .devcontainer/FreeRTOS-NXP/Dockerfile.FreeRTOS-NXP.SRC
+  CONTAINER_VERSION_FILE: .devcontainer/FreeRTOS-NXP/Dockerfile.FreeRTOS-NXP
 
 on:
   push:
     # branches:
     #   - main
     paths:
-      - '**Dockerfile.FreeRTOS.NXP-SRC'
+      - '**Dockerfile.FreeRTOS-NXP'
 
   workflow_dispatch:
 
@@ -34,7 +35,7 @@ jobs:
       id: meta
       uses: docker/metadata-action@v5
       with:
-        images: ${{ env.CONTAINER_REPO }}/${{ github.repository_owner }}/${{ env.CONTAINER_NAME }}
+        images: ${{env.CONTAINER_VERSION_FILE}}
 
     - name: Login to GitHub Container Registry
       if: ${{ github.event_name != 'pull_request' }}
