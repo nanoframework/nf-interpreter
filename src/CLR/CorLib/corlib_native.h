@@ -467,7 +467,7 @@ struct Library_corlib_native_System_TimeSpan
 
     //--//
 
-    static CLR_INT64 *NewObject(CLR_RT_StackFrame &stack);
+    static CLR_INT64 *NewObject(CLR_RT_HeapBlock &ref);
     static CLR_INT64 *GetValuePtr(CLR_RT_StackFrame &stack);
     static CLR_INT64 *GetValuePtr(CLR_RT_HeapBlock &ref);
 
@@ -496,6 +496,7 @@ struct Library_corlib_native_System_DateTime
 
     //--//
 
+    static CLR_INT64 *NewObject(CLR_RT_HeapBlock &ref);
     static CLR_INT64 *GetValuePtr(CLR_RT_StackFrame &stack);
     static CLR_INT64 *GetValuePtr(CLR_RT_HeapBlock &ref);
 
@@ -652,8 +653,6 @@ struct Library_corlib_native_System_Guid
 struct Library_corlib_native_System_MathInternal
 {
     NANOCLR_NATIVE_DECLARE(Abs___STATIC__I4__I4);
-    NANOCLR_NATIVE_DECLARE(Min___STATIC__I4__I4__I4);
-    NANOCLR_NATIVE_DECLARE(Max___STATIC__I4__I4__I4);
 
     //--//
 };
@@ -714,6 +713,7 @@ struct Library_corlib_native_System_Number
         char *decimalSeparator,
         char *numberGroupSeparator,
         CLR_RT_HeapBlock_Array *numberGroupSizes);
+    static int Format_E(char *buffer, CLR_RT_HeapBlock *value, int precision, char formatChar);
 };
 
 struct Library_corlib_native_System_Random

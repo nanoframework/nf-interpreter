@@ -26,7 +26,7 @@ HRESULT Library_nf_system_runtime_serialization_System_Runtime_Serialization_For
 
     NANOCLR_CLEANUP();
 
-    if (hr == CLR_E_WRONG_TYPE && hash != 0)
+    if (hr != S_OK)
     {
         CLR_RT_HeapBlock &res = stack.m_owningThread->m_currentException;
 
@@ -38,20 +38,25 @@ HRESULT Library_nf_system_runtime_serialization_System_Runtime_Serialization_For
             "System.Runtime.Serialization",
             serializationExceptionTypeDef);
 
-        if ((Library_corlib_native_System_Exception::CreateInstance(
-                res,
-                serializationExceptionTypeDef,
-                CLR_E_UNKNOWN_TYPE,
-                &stack)) == S_OK)
+        if ((Library_corlib_native_System_Exception::CreateInstance(res, serializationExceptionTypeDef, hr, &stack)) ==
+            S_OK)
         {
-            CLR_RT_ReflectionDef_Index idx;
+            if (hash != 0)
+            {
+                // if there is a hash, set the Type field ONLY IF the type is found
+                CLR_RT_ReflectionDef_Index idx;
+                CLR_RT_TypeDef_Instance inst;
 
-            idx.InitializeFromHash(hash);
+                idx.InitializeFromHash(hash);
 
-            res.Dereference()
-                [Library_nf_system_runtime_serialization_System_Runtime_Serialization_SerializationException::
-                     FIELD__Type]
-                    .SetReflection(idx);
+                if (inst.InitializeFromReflection(idx, NULL))
+                {
+                    res.Dereference()
+                        [Library_nf_system_runtime_serialization_System_Runtime_Serialization_SerializationException::
+                             FIELD__Type]
+                            .SetReflection(idx);
+                }
+            }
         }
 
         hr = CLR_E_PROCESS_EXCEPTION;

@@ -9,6 +9,23 @@ include(binutils.ESP32)
 # Set target series in lower case
 nf_set_esp32_target_series()
 
+# Options for Wire Protocol channel
+option(HAL_WP_USE_SERIAL "option to use serial port (UART) to route Wire Protocol")
+option(HAL_WP_USE_USB_CDC "option to use USB CDC to route Wire Protocol")
+
+if(HAL_WP_USE_SERIAL)
+    message(STATUS "Wire Protocol will use serial port (UART).")
+    set(HAL_WP_USE_SERIAL_OPTION TRUE CACHE INTERNAL "set HAL_WP_USE_SERIAL")
+    set(HAL_WP_USE_USB_CDC_OPTION FALSE CACHE INTERNAL "set HAL_WP_USE_USB_CDC")
+elseif(HAL_WP_USE_USB_CDC)
+    message(STATUS "Wire Protocol will use USB CDC.")
+    set(HAL_WP_USE_SERIAL_OPTION FALSE CACHE INTERNAL "set HAL_WP_USE_SERIAL")
+    set(HAL_WP_USE_USB_CDC_OPTION TRUE CACHE INTERNAL "set HAL_WP_USE_USB_CDC")
+else()
+    set(HAL_WP_USE_SERIAL_OPTION FALSE CACHE INTERNAL "set HAL_WP_USE_SERIAL")
+    set(HAL_WP_USE_USB_CDC_OPTION FALSE CACHE INTERNAL "set HAL_WP_USE_USB_CDC")
+endif()
+
 # option to reserve RAM for IDF allocator
 option(ESP32_RESERVED_RAM_FOR_IDF_ALLOCATION "Reserved RAM for IDF allocation (in kBytes)")
 
@@ -43,7 +60,7 @@ endif()
 # WHEN CHANGING THIS MAKE SURE TO UPDATE:
 # 1. the dev containers
 # 2. ref in AZDO pipeline yaml in Community Targets repo
-set(ESP32_IDF_TAG "4.4.4" CACHE INTERNAL "ESP32 IDF tag")
+set(ESP32_IDF_TAG "4.4.6" CACHE INTERNAL "ESP32 IDF tag")
 
 if(NO_ESP32_IDF_PATH)
     # no ESP32 IDF source specified, download it from official repo

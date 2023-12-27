@@ -14,7 +14,7 @@ resources:
       type: github
       name: espressif/esp-idf
       endpoint: nanoframework
-      ref: refs/tags/v4.4.4
+      ref: refs/tags/v4.4.6
     
 # scheduled build
 # the schedule is defined at the AZDO web interface because of inconsistencies with time zones
@@ -281,7 +281,6 @@ jobs:
     # creates a counter and assigns it to the revision variable
     REVISION: $[counter('STM32_1_8_1_versioncounter', 0)]
     HelperPackageVersion: $[counter('HelperPackageVersioncounter', 0)]
-    GccArm_Version: ''
     TargetPlatform: 'stm32'
 
   steps:
@@ -434,6 +433,16 @@ jobs:
         PackageName: M5Core2
         CMakePreset: M5Core2
 
+      AtomS3:
+        TargetBoard: ESP32_S3
+        TargetPlatform: 'esp32'
+        TargetSeries: 'esp32s3'
+        BuildOptions: 
+        IDF_Target: esp32s3
+        TargetName: AtomS3
+        PackageName: AtomS3
+        CMakePreset: AtomS3
+
       ESP32_C3_REV3:
         TargetBoard: ESP32_C3
         TargetSeries: 'esp32c3'
@@ -462,6 +471,24 @@ jobs:
         TargetName: ESP32_PSRAM_BLE_GenericGraphic_REV3
         PackageName: ESP32_PSRAM_BLE_GenericGraphic_REV3
         CMakePreset: ESP32_PSRAM_BLE_GenericGraphic_REV3
+
+      XIAO_ESP32C3:
+        TargetBoard: ESP32_C3
+        TargetSeries: 'esp32c3'
+        BuildOptions: 
+        IDF_Target: esp32c3
+        TargetName: XIAO_ESP32C3
+        PackageName: XIAO_ESP32C3
+        CMakePreset: XIAO_ESP32C3
+
+      ESP32_S3_BLE:
+        TargetBoard: ESP32_S3
+        TargetSeries: 'esp32s3'
+        BuildOptions: 
+        IDF_Target: esp32s3
+        TargetName: ESP32_S3_BLE
+        PackageName: ESP32_S3_BLE
+        CMakePreset: ESP32_S3_BLE
 
   variables:
     DOTNET_NOLOGO: true
@@ -537,7 +564,6 @@ jobs:
         TargetSeries: 'CC13X2'
         BuildOptions: >-
           -DRADIO_FREQUENCY=868
-        GccArm_Version:
         CMakePreset: TI_CC1352R1_LAUNCHXL
 
   variables:
@@ -587,7 +613,6 @@ jobs:
         TargetBoard: SL_STK3701A_REVB
         TargetSeries: 'efm32gg11'
         BuildOptions:
-        GccArm_Version: 
         NeedsDFU: false
         NeedsSRECORD: false
         TargetName: SL_STK3701A_REVB

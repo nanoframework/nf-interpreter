@@ -102,7 +102,7 @@ macro(nf_add_platform_packages)
         if(USE_NETWORKING_OPTION)
 
             find_package(NF_Network REQUIRED QUIET)
-            find_package(CHIBIOS_LWIP REQUIRED QUIET)
+            find_package(lwIP REQUIRED QUIET)
 
         endif()
 
@@ -151,7 +151,7 @@ macro(nf_add_platform_dependencies target)
                     ${CHIBIOS_HAL_INCLUDE_DIRS}
                     ${ChibiOSnfOverlay_INCLUDE_DIRS}
                     ${CHIBIOS_CONTRIB_INCLUDE_DIRS}
-                    ${CHIBIOS_LWIP_INCLUDE_DIRS}
+                    ${lWIP_INCLUDE_DIRS}
                     ${TARGET_CHIBIOS_COMMON_INCLUDE_DIRS}
                     ${TARGET_CHIBIOS_NANOCLR_INCLUDE_DIRS}
                     ${chibios_SOURCE_DIR}/os/hal/boards/${TARGET_BOARD})
@@ -160,6 +160,10 @@ macro(nf_add_platform_dependencies target)
 
         endif()
 
+        if(API_nanoFramework.System.Security.Cryptography)
+            FetchContent_GetProperties(mbedtls)
+        endif()
+    
         nf_add_lib_native_assemblies(
             EXTRA_INCLUDES
                 ${CHIBIOS_INCLUDE_DIRS}
@@ -167,11 +171,13 @@ macro(nf_add_platform_dependencies target)
                 ${${TARGET_STM32_CUBE_PACKAGE}_CubePackage_INCLUDE_DIRS}
                 ${ChibiOSnfOverlay_INCLUDE_DIRS}
                 ${CHIBIOS_CONTRIB_INCLUDE_DIRS}
-                ${CHIBIOS_LWIP_INCLUDE_DIRS}
+                ${lWIP_INCLUDE_DIRS}
                 ${SPIFFS_INCLUDE_DIRS}
                 ${TARGET_CHIBIOS_COMMON_INCLUDE_DIRS}
                 ${TARGET_CHIBIOS_NANOCLR_INCLUDE_DIRS}
-                ${chibios_SOURCE_DIR}/os/hal/boards/${TARGET_BOARD})
+                ${chibios_SOURCE_DIR}/os/hal/boards/${TARGET_BOARD}
+                ${mbedtls_SOURCE_DIR}/include
+                ${CMAKE_SOURCE_DIR}/src/PAL/COM/sockets/ssl/MbedTLS)
         
         add_dependencies(${target}.elf nano::NF_NativeAssemblies)
         
@@ -181,15 +187,14 @@ macro(nf_add_platform_dependencies target)
             nf_add_lib_network(
                 BUILD_TARGET
                     ${target}
-                EXTRA_SOURCES 
-                    ${TARGET_LWIP_SOURCES}
-                    ${CHIBIOS_LWIP_SOURCES}
+                EXTRA_SOURCES
+                    ${lWIP_SOURCES}
                 EXTRA_INCLUDES 
                     ${CHIBIOS_INCLUDE_DIRS}
                     ${CHIBIOS_HAL_INCLUDE_DIRS}
                     ${TARGET_CHIBIOS_COMMON_INCLUDE_DIRS}
                     ${TARGET_CHIBIOS_NANOCLR_INCLUDE_DIRS}
-                    ${CHIBIOS_LWIP_INCLUDE_DIRS}
+                    ${lWIP_INCLUDE_DIRS}
                     ${ChibiOSnfOverlay_INCLUDE_DIRS}
                     ${CHIBIOS_CONTRIB_INCLUDE_DIRS}
                     ${${TARGET_STM32_CUBE_PACKAGE}_CubePackage_INCLUDE_DIRS}
@@ -221,7 +226,7 @@ macro(nf_add_platform_include_directories target)
         ${${TARGET_STM32_CUBE_PACKAGE}_CubePackage_INCLUDE_DIRS}
         ${TARGET_CMSIS_COMMON_INCLUDE_DIRS}
         ${TARGET_CHIBIOS_COMMON_INCLUDE_DIRS}
-        ${CHIBIOS_LWIP_INCLUDE_DIRS}
+        ${lWIP_INCLUDE_DIRS}
         ${SPIFFS_INCLUDE_DIRS}
     )
     
@@ -257,7 +262,7 @@ macro(nf_add_platform_include_directories target)
                 ${CHIBIOS_CONTRIB_INCLUDE_DIRS}
                 ${${TARGET_STM32_CUBE_PACKAGE}_CubePackage_INCLUDE_DIRS}
                 ${TARGET_CHIBIOS_COMMON_INCLUDE_DIRS}
-                ${CHIBIOS_LWIP_INCLUDE_DIRS}
+                ${lWIP_INCLUDE_DIRS}
             )
 
         endif()

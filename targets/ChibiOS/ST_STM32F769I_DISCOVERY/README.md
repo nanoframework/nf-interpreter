@@ -11,7 +11,7 @@ In _halconf.g_ (in both nanoBooter and nanoCLR folders), when compared with a de
 In _mcuconf.h_ (in both nanoBooter and nanoCLR folders), when compared with a default file available from (https://github.com/ChibiOS/ChibiOS/tree/master/demos/STM32/RT-STM32F769I-DISCOVERY):
 - STM32_SERIAL_USE_USART1 to TRUE
 
-NOTE: this configuration was successfully tested in an ST_STM32F769I_DISCOVERY board using the Serial port through the onboard 7ST Link USB connection.
+NOTE: this configuration was successfully tested in an ST_STM32F769I_DISCOVERY board using the Serial port through the onboard ST Link USB connection.
 
 ## ADC configurations
 

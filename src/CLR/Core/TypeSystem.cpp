@@ -32,11 +32,11 @@ int s_CLR_RT_fTrace_Exceptions = NANOCLR_TRACE_DEFAULT(c_CLR_RT_Trace_Info, c_CL
 #endif
 
 #if defined(NANOCLR_TRACE_INSTRUCTIONS)
-int s_CLR_RT_fTrace_Instructions = NANOCLR_TRACE_DEFAULT(c_CLR_RT_Trace_None, c_CLR_RT_Trace_None);
+int s_CLR_RT_fTrace_Instructions = NANOCLR_TRACE_DEFAULT(c_CLR_RT_Trace_Info, c_CLR_RT_Trace_None);
 #endif
 
 #if defined(NANOCLR_GC_VERBOSE)
-int s_CLR_RT_fTrace_Memory = NANOCLR_TRACE_DEFAULT(c_CLR_RT_Trace_None, c_CLR_RT_Trace_None);
+int s_CLR_RT_fTrace_Memory = NANOCLR_TRACE_DEFAULT(c_CLR_RT_Trace_Info, c_CLR_RT_Trace_None);
 #endif
 
 #if defined(NANOCLR_TRACE_MEMORY_STATS)
@@ -44,7 +44,7 @@ int s_CLR_RT_fTrace_MemoryStats = NANOCLR_TRACE_DEFAULT(c_CLR_RT_Trace_Info, c_C
 #endif
 
 #if defined(NANOCLR_GC_VERBOSE)
-int s_CLR_RT_fTrace_GC = NANOCLR_TRACE_DEFAULT(c_CLR_RT_Trace_None, c_CLR_RT_Trace_None);
+int s_CLR_RT_fTrace_GC = NANOCLR_TRACE_DEFAULT(c_CLR_RT_Trace_Info, c_CLR_RT_Trace_None);
 #endif
 
 #if defined(VIRTUAL_DEVICE)
@@ -1799,6 +1799,10 @@ HRESULT CLR_RT_Assembly::CreateInstance(
 
 bool CLR_RT_Assembly::Resolve_AssemblyRef(bool fOutput)
 {
+#ifdef BUILD_RTM
+    (void)fOutput;
+#endif
+
     NATIVE_PROFILE_CLR_CORE();
     bool fGot = true;
     int i;
@@ -2027,10 +2031,10 @@ HRESULT CLR_RT_Assembly::Resolve_MethodRef()
         {
             inst.InitializeFromIndex(m_pCrossReference_TypeRef[src->container].m_target);
 
+#if !defined(BUILD_RTM)
             const CLR_RECORD_TYPEDEF *qTD = inst.m_target;
             CLR_RT_Assembly *qASSM = inst.m_assm;
 
-#if !defined(BUILD_RTM)
             CLR_Debug::Printf(
                 "Resolve: unknown method: %s.%s.%s\r\n",
                 qASSM->GetString(qTD->nameSpace),

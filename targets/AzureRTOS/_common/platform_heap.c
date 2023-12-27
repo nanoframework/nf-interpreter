@@ -13,21 +13,23 @@ void *platform_malloc(size_t size)
 {
     uint8_t *pointer = TX_NULL;
 
+#ifdef BUILD_RTM
+    tx_byte_allocate(&byte_pool_0, (VOID **)&pointer, size, TX_NO_WAIT);
+#else
     uint32_t allocStatus = tx_byte_allocate(&byte_pool_0, (VOID **)&pointer, size, TX_NO_WAIT);
     ASSERT(allocStatus == TX_SUCCESS);
+#endif
 
     return pointer;
 }
 
 void platform_free(void *ptr)
 {
+
+#ifdef BUILD_RTM
+    tx_byte_release(ptr);
+#else
     uint32_t freeStatus = tx_byte_release(ptr);
     ASSERT(freeStatus == TX_SUCCESS);
-}
-
-void *platform_realloc(void *ptr, size_t size)
-{
-    (void)size;
-
-    return ptr;
+#endif
 }

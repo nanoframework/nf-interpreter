@@ -77,7 +77,7 @@ endif()
 if(RTOS_VERSION_EMPTY)
     # no AzureRTOS version actualy specified, must be empty which is fine, we'll default to a known good version
     # WHEN CHANGING THIS MAKE SURE TO UPDATE THE DEV CONTAINERS
-    set(RTOS_VERSION "v6.2.0_rel")
+    set(RTOS_VERSION "v6.3.0_rel")
 endif()
 
 if(NO_AZURERTOS_SOURCE_FOLDER)
@@ -100,7 +100,7 @@ else()
 
         FetchContent_Declare(
             azure_rtos
-            SOURCE_DIR $(AZURERTOS_SOURCE_FOLDER)
+            SOURCE_DIR ${AZURERTOS_SOURCE_FOLDER}
         )
 
     else()
@@ -159,7 +159,7 @@ if(AZURERTOS_USBX_REQUIRED)
 
             FetchContent_Declare(
                 azure_rtos_usbx
-                SOURCE_DIR $(USBX_SOURCE_FOLDER)
+                SOURCE_DIR ${USBX_SOURCE_FOLDER}
             )
 
         else()
@@ -220,7 +220,7 @@ if(AZURERTOS_FILEX_REQUIRED)
 
             FetchContent_Declare(
                 azure_rtos_filex
-                SOURCE_DIR $(FILEX_SOURCE_FOLDER)
+                SOURCE_DIR ${FILEX_SOURCE_FOLDER}
             )
 
         else()
@@ -281,7 +281,7 @@ if(AZURERTOS_NETXDUO_REQUIRED)
 
             FetchContent_Declare(
                 azure_rtos_netxduo
-                SOURCE_DIR $(NETXDUO_SOURCE_FOLDER)
+                SOURCE_DIR ${NETXDUO_SOURCE_FOLDER}
             )
 
         else()

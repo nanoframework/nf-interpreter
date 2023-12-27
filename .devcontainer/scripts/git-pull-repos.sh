@@ -13,17 +13,17 @@ cd /
 rm -rf /sources/ChibiOs
 git svn clone http://svn.code.sf.net/p/chibios/code/branches/stable_21.11.x -rHEAD /sources/ChibiOs
 cd /sources/ChibiOs-Contrib
-git pull origin nanoframework
+git pull origin chibios-21.11.x
 cd /sources/mbedtls
-git pull origin mbedtls-2.28.2
+git pull origin mbedtls-2.28.5
 cd /sources/fatfs
-git pull origin R0.14b
+git pull origin R0.15
 cd /sources/FreeRTOS
 git pull origin V10.4.1-kernel-only
 cd /sources/CMSIS_5
 git pull origin 5.5.1
 cd /sources/lwip
-git pull origin STABLE-2_0_3_RELEASE
+git pull origin STABLE-2_1_3_RELEASE
 cd /sources/spiffs
 git pull origin nf-build
 cd /sources/SimpleLinkCC32

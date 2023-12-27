@@ -110,6 +110,10 @@ message(STATUS "Build  directory is '${CMAKE_BINARY_DIR}'.")
 message(STATUS "")
 #######################
 
+#####################################
+# include CLR Profiler build options
+include(ClrProfilerOptions)
+#####################################
 
 #################################################################
 # ouput RTM build option
@@ -759,9 +763,15 @@ endif()
 option(NF_FEATURE_WATCHDOG "option to use hardware watchdog" ON)
 
 if(NF_FEATURE_WATCHDOG)
+
+    message(STATUS "Support for watchdog enabled")
     set(HAL_USE_WDG_OPTION TRUE CACHE INTERNAL "NF feature watchdog")
-else()    
+
+else()
+
+    message(STATUS "Support for watchdog ** DISABLED **")
     set(HAL_USE_WDG_OPTION FALSE CACHE INTERNAL "NF feature watchdog")
+
 endif()
 
 #################################################################

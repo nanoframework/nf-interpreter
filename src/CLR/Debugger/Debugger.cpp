@@ -587,7 +587,7 @@ bool CLR_DBG_Debugger::Monitor_TargetInfo(WP_Message *msg)
 {
     Monitor_TargetInfo_Reply cmdReply;
 
-    bool fOK = nanoBooter_GetTargetInfo(&cmdReply.m_TargetInfo) == true;
+    bool fOK = (bool)nanoBooter_GetTargetInfo(&cmdReply.m_TargetInfo) == true;
 
     WP_ReplyToCommand(msg, fOK, false, &cmdReply, sizeof(Monitor_TargetInfo_Reply));
 
@@ -612,10 +612,6 @@ bool CLR_DBG_Debugger::CheckPermission(ByteAddress address, int mode)
             hasPermission = true;
             break;
         case AccessMemory_Read:
-#if defined(BUILD_RTM)
-            if (!DebuggerPort_IsUsingSsl(HalSystemConfig.DebuggerPort))
-                break;
-#endif
             switch (range.RangeType)
             {
                 // fall through
@@ -634,10 +630,6 @@ bool CLR_DBG_Debugger::CheckPermission(ByteAddress address, int mode)
             }
             break;
         case AccessMemory_Write:
-#if defined(BUILD_RTM)
-            if (!DebuggerPort_IsUsingSsl(HalSystemConfig.DebuggerPort))
-                break;
-#endif
             if (BlockRange_IsDeployment(range) || BlockRange_IsConfig(range))
             {
                 hasPermission = true;
@@ -648,10 +640,6 @@ bool CLR_DBG_Debugger::CheckPermission(ByteAddress address, int mode)
             }
             break;
         case AccessMemory_Erase:
-#if defined(BUILD_RTM)
-            if (!DebuggerPort_IsUsingSsl(HalSystemConfig.DebuggerPort))
-                break;
-#endif
             switch (range.RangeType)
             {
                 case BlockRange_BLOCKTYPE_DEPLOYMENT:
@@ -690,6 +678,7 @@ void CLR_DBG_Debugger::AccessMemory(
 
     //--//
     unsigned int iRegion, iRange;
+    uint32_t crc32 = 0;
 
     if (BlockStorageDevice_FindRegionFromAddress(m_deploymentStorageDevice, location, &iRegion, &iRange))
     {
@@ -759,8 +748,8 @@ void CLR_DBG_Debugger::AccessMemory(
                             if (mode == AccessMemory_Check)
                             {
                                 // compute CRC32 of the memory segment
-                                *(CLR_DBG_Commands_Monitor_CheckMemory_Reply *)buf =
-                                    SUPPORT_ComputeCRC((const void *)accessAddress, NumOfBytes, 0);
+                                crc32 = SUPPORT_ComputeCRC((const void *)accessAddress, NumOfBytes, crc32);
+                                *(CLR_DBG_Commands_Monitor_CheckMemory_Reply *)buf = crc32;
                             }
                             else
                             {
@@ -827,8 +816,8 @@ void CLR_DBG_Debugger::AccessMemory(
                             }
 
                             // compute CRC32 of the memory segment
-                            *(CLR_DBG_Commands_Monitor_CheckMemory_Reply *)buf =
-                                SUPPORT_ComputeCRC(bufPtr, NumOfBytes, 0);
+                            crc32 = SUPPORT_ComputeCRC((const void *)bufPtr, NumOfBytes, crc32);
+                            *(CLR_DBG_Commands_Monitor_CheckMemory_Reply *)buf = crc32;
 
                             // free buffer if allocated
                             if (!isMemoryMapped)
@@ -1077,7 +1066,7 @@ bool CLR_DBG_Debugger::Monitor_Reboot(WP_Message *msg)
     if (CLR_DBG_Commands::Monitor_Reboot::c_EnterNanoBooter ==
         (cmd->m_flags & CLR_DBG_Commands::Monitor_Reboot::c_EnterNanoBooter))
     {
-        success = RequestToLaunchNanoBooter();
+        success = RequestToLaunchNanoBooter(0);
     }
     else if (
         CLR_DBG_Commands::Monitor_Reboot::c_EnterProprietaryBooter ==
@@ -1783,14 +1772,14 @@ static bool FillValues(
 
     memset(dst, 0, sizeof(*dst));
 
-    dst->m_referenceID = (reference != NULL) ? reference : ptr;
+    dst->m_referenceID = (CLR_UINT32)((reference != NULL) ? reference : ptr);
     dst->m_dt = ptr->DataType();
     dst->m_flags = ptr->DataFlags();
     dst->m_size = ptr->DataSize();
 
     if (pTD != NULL)
     {
-        dst->m_td = *pTD;
+        dst->m_td.m_data = pTD->m_data;
     }
     else if (SUCCEEDED(desc.InitializeFromObject(*ptr)))
     {
@@ -1829,7 +1818,7 @@ static bool FillValues(
 
             if (text != NULL)
             {
-                dst->m_charsInString = text;
+                dst->m_charsInString = (CLR_UINT32)text;
                 dst->m_bytesInString = (CLR_UINT32)hal_strlen_s(text);
 
                 hal_strncpy_s(
@@ -1840,7 +1829,8 @@ static bool FillValues(
             }
             else
             {
-                dst->m_charsInString = NULL;
+                // equivalent to a null string
+                dst->m_charsInString = 0;
                 dst->m_bytesInString = 0;
                 dst->m_builtinValue[0] = 0;
             }
@@ -1872,7 +1862,7 @@ static bool FillValues(
             break;
 
         case DATATYPE_ARRAY_BYREF:
-            dst->m_arrayref_referenceID = ptr->Array();
+            dst->m_arrayref_referenceID = (CLR_UINT32)ptr->Array();
             dst->m_arrayref_index = ptr->ArrayIndex();
 
             break;
@@ -3118,6 +3108,8 @@ bool CLR_DBG_Debugger::Profiling_Command(WP_Message *msg)
         default:
             return false;
     }
+
+    return true;
 }
 
 bool CLR_DBG_Debugger::Profiling_ChangeConditions(WP_Message *msg)
@@ -3551,7 +3543,7 @@ bool CLR_DBG_Debugger::Debugging_Resolve_Field(WP_Message *msg)
                 CLR_RT_TypeDef_Instance instClass;
                 instClass.InitializeFromField(inst);
 
-                cmdReply->m_td = instClass;
+                cmdReply->m_td.m_data = instClass.m_data;
                 cmdReply->m_index = inst.CrossReference().m_offset;
 
                 WP_ReplyToCommand(msg, true, false, cmdReply, sizeof(CLR_DBG_Commands::Debugging_Resolve_Field::Reply));
@@ -3597,7 +3589,7 @@ bool CLR_DBG_Debugger::Debugging_Resolve_Method(WP_Message *msg)
             char *szBuffer = cmdReply->m_method;
             size_t iBuffer = MAXSTRLEN(cmdReply->m_method);
 
-            cmdReply->m_td = instOwner;
+            cmdReply->m_td.m_data = instOwner.m_data;
 
             CLR_SafeSprintf(szBuffer, iBuffer, "%s", inst.m_assm->GetString(inst.m_target->name));
 

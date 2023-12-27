@@ -877,7 +877,7 @@ struct CLR_RT_MethodDef_DebuggingInfo
     }
 };
 
-#endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
+#endif // #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -1133,7 +1133,7 @@ struct CLR_RT_Assembly : public CLR_RT_HeapBlock_Node // EVENT HEAP - NO RELOCAT
 
 #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
         size_t iDebuggingInfoMethods;
-#endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
+#endif // #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
     };
 
     //--//
@@ -1188,7 +1188,7 @@ struct CLR_RT_Assembly : public CLR_RT_HeapBlock_Node // EVENT HEAP - NO RELOCAT
 #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
     CLR_RT_MethodDef_DebuggingInfo
         *m_pDebuggingInfo_MethodDef; // EVENT HEAP - NO RELOCATION - (but the data they point to has to be relocated)
-#endif                               //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
+#endif                               // #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
 
 #if defined(NANOCLR_TRACE_STACK_HEAVY) && defined(VIRTUAL_DEVICE)
     int m_maxOpcodes;
@@ -1965,7 +1965,7 @@ struct CLR_RT_MethodDef_Instance : public CLR_RT_MethodDef_Index
     {
         return m_assm->m_pDebuggingInfo_MethodDef[Method()];
     }
-#endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
+#endif // #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -2242,7 +2242,7 @@ struct CLR_RT_StackFrame : public CLR_RT_HeapBlock_Node // EVENT HEAP - NO RELOC
 
 #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
     CLR_UINT32 m_depth;
-#endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
+#endif // #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
 
 #if defined(NANOCLR_PROFILE_NEW_CALLS)
     CLR_PROF_CounterCallChain m_callchain;
@@ -2600,7 +2600,7 @@ struct CLR_RT_GarbageCollector
         CLR_UINT8 *m_start;
         CLR_UINT8 *m_end;
         CLR_UINT8 *m_destination;
-        CLR_UINT32 m_offset;
+        CLR_INT32 m_offset;
     };
 
     //--//
@@ -2689,6 +2689,12 @@ struct CLR_RT_GarbageCollector
 
     void ValidatePointers()
     {
+#if defined(NANOCLR_TRACE_MEMORY_STATS)
+        if (s_CLR_RT_fTrace_MemoryStats >= c_CLR_RT_Trace_Verbose)
+        {
+            CLR_Debug::Printf("\r\nGC: ValidatePointers\r\n");
+        }
+#endif
         Heap_Relocate_Pass(Relocation_JustCheck);
     }
 
@@ -3017,7 +3023,7 @@ struct CLR_RT_Thread : public CLR_RT_ObjectToEvent_Destination // EVENT HEAP - N
                                  // However, if this thread was spawned on behalf of the debugger to evaluate
                                  // a property or function call, it points to the object coresponding to the
                                  // thread that is currently selected in the debugger.
-#endif                           //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
+#endif                           // #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
 
 #if defined(ENABLE_NATIVE_PROFILER)
     bool m_fNativeProfiled;
@@ -3161,12 +3167,12 @@ struct CLR_RT_Thread : public CLR_RT_ObjectToEvent_Destination // EVENT HEAP - N
 
 ////////////////////////////////////////////////////////////////////////////////
 
-extern size_t LinkArraySize();
-extern size_t LinkMRUArraySize();
-extern size_t PayloadArraySize();
-extern size_t InterruptRecords();
+extern uint32_t LinkArraySize();
+extern uint32_t LinkMRUArraySize();
+extern uint32_t PayloadArraySize();
+extern uint32_t InterruptRecords();
 #ifndef NANOCLR_NO_IL_INLINE
-extern size_t InlineBufferCount();
+extern uint32_t InlineBufferCount();
 #endif
 
 extern CLR_UINT32 g_scratchVirtualMethodTableLink[];
@@ -3388,7 +3394,8 @@ CT_ASSERT(sizeof(CLR_RT_EventCache::Payload) == 12)
 
 #include <nanoCLR_Debugging.h>
 #include <nanoCLR_Profiling.h>
-//#include <nanoCLR_Messaging.h>
+#include <nanoCLR_Application.h>
+// #include <nanoCLR_Messaging.h>
 
 //--//
 
@@ -3441,10 +3448,9 @@ struct CLR_RT_ExecutionEngine
     static const int c_HeapState_Normal = 0x00000000;
     static const int c_HeapState_UnderGC = 0x00000001;
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    // NEED TO KEEP THESE IN SYNC WITH Enum 'Commands.Debugging_Execution_ChangeConditions...' on debugger library code
-    // //
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    // NEED TO KEEP THESE IN SYNC WITH Enum Commands.Debugging_Execution_ChangeConditions.. on debugger library code //
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     static const int c_fDebugger_StateInitialize = 0x00000000;
     static const int c_fDebugger_StateResolutionFailed = 0x00000001;
@@ -3454,13 +3460,16 @@ struct CLR_RT_ExecutionEngine
         c_fDebugger_StateProgramRunning + c_fDebugger_StateProgramExited + c_fDebugger_StateResolutionFailed;
     //
     static const int c_fDebugger_BreakpointsDisabled = 0x00001000;
-    //
-    static const int c_fDebugger_Quiet = 0x00010000; // Do not spew debug text to the debugger
+    // Do not spew debug text to the debugger
+    static const int c_fDebugger_Quiet = 0x00010000;
     static const int c_fDebugger_ExitPending = 0x00020000;
-    //
-    static const int c_fDebugger_PauseTimers =
-        0x04000000; // Threads associated with timers are created in "suspended" mode.
-    static const int c_fDebugger_NoCompaction = 0x08000000; // Don't perform compaction during execution.
+
+    // Execution engine won't process stack trace when an exception occurs.
+    static const int c_fDebugger_NoStackTraceInExceptions = 0x02000000;
+    // Threads associated with timers are created in "suspended" mode.
+    static const int c_fDebugger_PauseTimers = 0x04000000;
+    // Don't perform compaction during execution.
+    static const int c_fDebugger_NoCompaction = 0x08000000;
     //
     static const int c_fDebugger_SourceLevelDebugging = 0x10000000;
     static const int c_fDebugger_RebootPending = 0x20000000;
@@ -3506,7 +3515,7 @@ struct CLR_RT_ExecutionEngine
     CLR_DBG_Commands::Debugging_Execution_BreakpointDef *m_breakpoints;
     CLR_DBG_Commands::Debugging_Execution_BreakpointDef m_breakpointsActive[c_MaxBreakpointsActive];
     size_t m_breakpointsActiveNum;
-#endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
+#endif // #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
 
 #if !defined(BUILD_RTM) || defined(VIRTUAL_DEVICE)
     bool m_fPerformGarbageCollection; // Should the EE do a GC every context switch
@@ -3664,7 +3673,11 @@ struct CLR_RT_ExecutionEngine
 
     //--//
 
+#if defined(VIRTUAL_DEVICE)
+    static HRESULT CreateInstance(CLR_SETTINGS params);
+#else
     static HRESULT CreateInstance();
+#endif
 
     HRESULT ExecutionEngine_Initialize();
 
@@ -3800,7 +3813,7 @@ struct CLR_RT_ExecutionEngine
     void Breakpoint_Exception(CLR_RT_StackFrame *stack, CLR_UINT32 reason, CLR_PMETADATA ip);
     void Breakpoint_Exception_Intercepted(CLR_RT_StackFrame *stack);
     void Breakpoint_Exception_Uncaught(CLR_RT_Thread *th);
-#endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
+#endif // #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
 
     //--//
 
@@ -3902,10 +3915,18 @@ CT_ASSERT(sizeof(CLR_RT_HeapBlock_Raw) == sizeof(CLR_RT_HeapBlock))
 #if defined(__GNUC__) // Gcc compiler uses 8 bytes for a function pointer
 CT_ASSERT(sizeof(CLR_RT_DataTypeLookup) == 20 + NANOCLR_TRACE_MEMORY_STATS_EXTRA_SIZE)
 
-#elif defined(PLATFORM_WINDOWS_EMULATOR) || defined(NANOCLR_TRACE_MEMORY_STATS)
+#elif defined(VIRTUAL_DEVICE) && defined(NANOCLR_TRACE_MEMORY_STATS)
 
 #ifdef _WIN64
 CT_ASSERT(sizeof(CLR_RT_DataTypeLookup) == 24 + NANOCLR_TRACE_MEMORY_STATS_EXTRA_SIZE)
+#else
+CT_ASSERT(sizeof(CLR_RT_DataTypeLookup) == 16 + NANOCLR_TRACE_MEMORY_STATS_EXTRA_SIZE)
+#endif // _WIN64
+
+#elif defined(VIRTUAL_DEVICE) && !defined(NANOCLR_TRACE_MEMORY_STATS)
+
+#ifdef _WIN64
+CT_ASSERT(sizeof(CLR_RT_DataTypeLookup) == 32 + NANOCLR_TRACE_MEMORY_STATS_EXTRA_SIZE)
 #else
 CT_ASSERT(sizeof(CLR_RT_DataTypeLookup) == 16 + NANOCLR_TRACE_MEMORY_STATS_EXTRA_SIZE)
 #endif // _WIN64

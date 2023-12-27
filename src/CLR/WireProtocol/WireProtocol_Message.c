@@ -193,6 +193,12 @@ uint8_t WP_Message_VerifyHeader(WP_Message *message)
 
 #endif
 
+    // check for reception buffer overflow
+    if (message->m_header.m_size > WP_PACKET_SIZE)
+    {
+        return false;
+    }
+
     return true;
 }
 
@@ -267,7 +273,15 @@ void WP_Message_Process()
                 //          of the statemachine to avoid flooding the trace.
                 TRACE0_LIMIT(TRACE_VERBOSE, 100, "RxState==WaitForHeader\n");
 
+                len = _size;
+
                 WP_ReceiveBytes(&_pos, &_size);
+
+                if (_size == len)
+                {
+                    // no new bytes received, bail out
+                    break;
+                }
 
                 // Synch to the start of a message by looking for a valid MARKER
                 while (true)
@@ -279,7 +293,7 @@ void WP_Message_Process()
                         break;
                     }
 
-                    size_t lenCmp = min(len, sizeof(_inboundMessage.m_header.m_signature));
+                    size_t lenCmp = min(len, sizeof(((WP_Packet *)0)->m_signature));
 
                     if (memcmp(&_inboundMessage.m_header, MARKER_DEBUGGER_V1, lenCmp) == 0)
                     {
@@ -290,14 +304,19 @@ void WP_Message_Process()
                         break;
                     }
 
-                    // move buffer 1 position down
+                    // move buffer one position to the left
                     memmove(
                         (uint8_t *)&(_inboundMessage.m_header),
                         ((uint8_t *)&(_inboundMessage.m_header) + 1),
                         len - 1);
 
+                    // update pointer and expected size
                     _pos--;
                     _size++;
+
+                    // sanity checks
+                    _ASSERTE(_size <= sizeof(_inboundMessage.m_header));
+                    _ASSERTE(_pos >= (uint8_t *)&(_inboundMessage.m_header));
                 }
 
                 if (len >= sizeof(_inboundMessage.m_header.m_signature))
@@ -458,12 +477,14 @@ void WP_PrepareAndSendProtocolMessage(uint32_t cmd, uint32_t payloadSize, uint8_
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // weak implementations of the functions (to be replaced with _strong_ implementations if and when required) //
 
+#if !defined(BUILD_RTM)
 __nfweak void debug_printf(const char *format, ...)
 {
     (void)format;
 
     return;
 }
+#endif
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 

@@ -28,6 +28,19 @@ struct DisplayInterfaceConfig
             CLR_INT8 address;
             CLR_INT8 fastMode;
         } I2c;
+        struct
+        {
+            CLR_INT16 enable;
+            CLR_INT16 control;
+            CLR_INT16 backlight;
+            CLR_INT16 Horizontal_synchronization;
+            CLR_INT16 Horizontal_back_porch;
+            CLR_INT16 Horizontal_front_porch;
+            CLR_INT16 Vertical_synchronization;
+            CLR_INT16 Vertical_back_porch;
+            CLR_INT16 Vertical_front_porch;
+            CLR_INT16 Frequency_Divider;
+        } VideoDisplay;
     };
     struct
     {

@@ -27,7 +27,7 @@ foreach(SRC_FILE ${FATFS_SRCS})
 
     find_file(FATFS_SRC_FILE ${SRC_FILE}
         PATHS 
-            ${chibios_SOURCE_DIR}/os/various/fatfs_bindings
+            ${CMAKE_SOURCE_DIR}/targets/ChibiOS/_FatFS/
             ${fatfs_SOURCE_DIR}/source
 
         CMAKE_FIND_ROOT_PATH_BOTH

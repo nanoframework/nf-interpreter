@@ -90,6 +90,7 @@ set(gecko_sdk_srcs
     em_timer.c
     em_usart.c
     em_vdac.c 
+    em_wdog.c
 
     # emdrv
     dmactrl.c
@@ -108,6 +109,8 @@ set(gecko_sdk_srcs
     sl_sleeptimer.c
     sl_sleeptimer_hal_rtc.c
     sl_sleeptimer_hal_rtcc.c
+
+    sl_sleeptimer_.c
 
     sl_slist.c
     sl_system_init.c
@@ -150,7 +153,7 @@ if("${TARGET_SERIES}" STREQUAL "EFM32GG11")
         list(APPEND gecko_sdk_srcs sl_usbd_class_hid.c)
         list(APPEND gecko_sdk_srcs sl_usbd_core_ep.c)
         list(APPEND gecko_sdk_srcs sl_usbd_core_azuretos.c)
-        list(APPEND gecko_sdk_srcs sl_usbd_core.c)
+        list(APPEND gecko_sdk_srcs nano_sl_usbd_core.c)
         list(APPEND gecko_sdk_srcs sl_usbd_driver_dwc_otg_fs.c)
         list(APPEND gecko_sdk_srcs sl_usbd_class_hid_instances.c)
         list(APPEND gecko_sdk_srcs sl_usbd_configuration_instances.c)
@@ -178,7 +181,7 @@ if("${TARGET_SERIES}" STREQUAL "EFM32GG11")
         list(APPEND gecko_sdk_srcs sl_usbd_class_cdc.c)
         list(APPEND gecko_sdk_srcs sl_usbd_core_ep.c)
         list(APPEND gecko_sdk_srcs sl_usbd_core_azuretos.c)
-        list(APPEND gecko_sdk_srcs sl_usbd_core.c)
+        list(APPEND gecko_sdk_srcs nano_sl_usbd_core.c)
         list(APPEND gecko_sdk_srcs sl_usbd_configuration_instances.c)
         list(APPEND gecko_sdk_srcs sl_usbd_init.c)
         list(APPEND gecko_sdk_srcs sl_malloc.c)
@@ -190,15 +193,14 @@ if("${TARGET_SERIES}" STREQUAL "EFM32GG11")
         list(APPEND gecko_sdk_srcs sl_usbd_class_vendor_instances.c)
         list(APPEND gecko_sdk_srcs sl_usbd_configuration_instances.c)
         list(APPEND gecko_sdk_srcs sl_usbd_driver_dwc_otg_fs.c)
+        list(APPEND gecko_sdk_srcs nano_sl_usbd_core.c)
         list(APPEND gecko_sdk_srcs sl_usbd_core_ep.c)
         list(APPEND gecko_sdk_srcs sl_usbd_core_azuretos.c)
-        list(APPEND gecko_sdk_srcs sl_usbd_core.c)
-        list(APPEND gecko_sdk_srcs sl_usbd_configuration_instances.c) 
-        # this one is our own implementation
         list(APPEND gecko_sdk_srcs nano_sl_usbd_class_vendor.c)
+        list(APPEND gecko_sdk_srcs sl_usbd_configuration_instances.c) 
         list(APPEND gecko_sdk_srcs sl_usbd_init.c)
         list(APPEND gecko_sdk_srcs sl_malloc.c)
-
+        
     endif()
 
     foreach(src_file ${gecko_sdk_srcs})
@@ -255,16 +257,9 @@ if("${TARGET_SERIES}" STREQUAL "EFM32GG11")
     endforeach()
 
     # unset this warning as error required for this source file
-    SET_SOURCE_FILES_PROPERTIES(${gecko_sdk_SOURCE_DIR}/protocol/usb/src/sl_usbd_core.c PROPERTIES COMPILE_FLAGS -Wno-undef)
-    SET_SOURCE_FILES_PROPERTIES(${gecko_sdk_SOURCE_DIR}/protocol/usb/src/sl_usbd_core_ep.c PROPERTIES COMPILE_FLAGS -Wno-undef)
-    SET_SOURCE_FILES_PROPERTIES(${gecko_sdk_SOURCE_DIR}/protocol/usb/src/sl_usbd_class_cdc.c PROPERTIES COMPILE_FLAGS -Wno-undef)
-    SET_SOURCE_FILES_PROPERTIES(${gecko_sdk_SOURCE_DIR}/protocol/usb/src/sl_usbd_class_cdc_acm.c PROPERTIES COMPILE_FLAGS -Wno-undef)
-    SET_SOURCE_FILES_PROPERTIES(${gecko_sdk_SOURCE_DIR}/protocol/usb/src/sl_usbd_class_hid.c PROPERTIES COMPILE_FLAGS -Wno-undef)
-    SET_SOURCE_FILES_PROPERTIES(${gecko_sdk_SOURCE_DIR}/protocol/usb/src/sl_usbd_class_hid_report.c PROPERTIES COMPILE_FLAGS -Wno-undef)
-    SET_SOURCE_FILES_PROPERTIES(${CMAKE_SOURCE_DIR}/targets/AzureRTOS/SiliconLabs/_common/nano_sl_usbd_class_vendor.c PROPERTIES COMPILE_FLAGS -Wno-undef)
-    SET_SOURCE_FILES_PROPERTIES(${gecko_sdk_SOURCE_DIR}/protocol/usb/src/sl_usbd_driver_dwc_otg_fs.c PROPERTIES COMPILE_FLAGS -Wno-undef)
-    SET_SOURCE_FILES_PROPERTIES(${CMAKE_SOURCE_DIR}/targets/AzureRTOS/SiliconLabs/_common/sl_usbd_init.c PROPERTIES COMPILE_FLAGS -Wno-undef)
-    set_source_files_properties(${gecko_sdk_SOURCE_DIR}/platform/service/iostream/src/sl_iostream_uart.c PROPERTIES COMPILE_OPTIONS "-Wno-maybe-uninitialized")
+    set_source_files_properties(${gecko_sdk_SOURCE_DIR}/protocol/usb/src/sl_usbd_driver_dwc_otg_fs.c PROPERTIES COMPILE_FLAGS -Wno-undef)
+    # this is required until a declaration is fixed in Gecko SDK (reported https://community.silabs.com/s/question/0D58Y0000AUTvt2SQD)
+    set_source_files_properties(${gecko_sdk_SOURCE_DIR}/platform/service/power_manager/src/sl_power_manager.c PROPERTIES COMPILE_FLAGS -Wno-implicit-function-declaration)
 
     list(REMOVE_DUPLICATES Gecko_SDK_INCLUDE_DIRS)
 

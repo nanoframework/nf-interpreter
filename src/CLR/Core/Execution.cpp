@@ -17,6 +17,26 @@ CLR_RT_ExecutionEngine::ExecutionConstraintCompensation CLR_RT_ExecutionEngine::
 
 //--//
 
+#if defined(VIRTUAL_DEVICE)
+
+HRESULT CLR_RT_ExecutionEngine::CreateInstance(CLR_SETTINGS params)
+{
+    NATIVE_PROFILE_CLR_CORE();
+    NANOCLR_HEADER();
+
+    NANOCLR_CLEAR(g_CLR_RT_ExecutionEngine);
+
+    // config from CLR settings
+    g_CLR_RT_ExecutionEngine.m_fPerformGarbageCollection = params.PerformGarbageCollection;
+    g_CLR_RT_ExecutionEngine.m_fPerformHeapCompaction = params.PerformHeapCompaction;
+
+    NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.ExecutionEngine_Initialize());
+
+    NANOCLR_NOCLEANUP();
+}
+
+#else
+
 HRESULT CLR_RT_ExecutionEngine::CreateInstance()
 {
     NATIVE_PROFILE_CLR_CORE();
@@ -28,6 +48,8 @@ HRESULT CLR_RT_ExecutionEngine::CreateInstance()
 
     NANOCLR_NOCLEANUP();
 }
+
+#endif
 
 //--//
 
@@ -77,7 +99,7 @@ HRESULT CLR_RT_ExecutionEngine::ExecutionEngine_Initialize()
 
 #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
     m_scratchPadArray = NULL; // CLR_RT_HeapBlock_Array*             m_scratchPadArray;
-#endif                        //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
+#endif                        // #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
 
 #if defined(NANOCLR_APPDOMAINS)
     m_appDomains.DblLinkedList_Initialize(); // CLR_RT_DblLinkedList                m_appDomains;
@@ -153,9 +175,16 @@ HRESULT CLR_RT_ExecutionEngine::AllocateHeaps()
 #if NANOCLR_VALIDATE_HEAP >= NANOCLR_VALIDATE_HEAP_1_HeapBlocksAndUnlink
 
         CLR_Debug::Printf("Heap Cluster information\r\n");
+
+#ifdef _WIN64
+        CLR_Debug::Printf("Start:       0x%I64X\r\n", (size_t)heapFirstFree);
+        CLR_Debug::Printf("Free:        0x%I64X\r\n", (size_t)heapFree);
+        CLR_Debug::Printf("Block size:  %d\r\n", sizeof(CLR_RT_HeapBlock));
+#else
         CLR_Debug::Printf("Start:       %08x\r\n", (size_t)heapFirstFree);
         CLR_Debug::Printf("Free:        %08x\r\n", (size_t)heapFree);
         CLR_Debug::Printf("Block size:  %d\r\n", sizeof(CLR_RT_HeapBlock));
+#endif
 
 #endif
         ///
@@ -218,7 +247,7 @@ void CLR_RT_ExecutionEngine::ExecutionEngine_Cleanup()
     m_breakpointsNum = 0;
 
     CLR_DBG_Debugger::DeleteInstance();
-#endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
+#endif // #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
 
 #if defined(NANOCLR_PROFILE_NEW)
     CLR_PRF_Profiler::DeleteInstance();
@@ -369,7 +398,9 @@ CLR_UINT32 CLR_RT_ExecutionEngine::PerformGarbageCollection()
 
 #if !defined(BUILD_RTM) || defined(VIRTUAL_DEVICE)
     if (m_fPerformHeapCompaction)
+    {
         CLR_EE_SET(Compaction_Pending);
+    }
 #endif
 
     g_CLR_RT_ExecutionEngine.SpawnFinalizer();
@@ -393,9 +424,17 @@ void CLR_RT_ExecutionEngine::PerformHeapCompaction()
 void CLR_RT_ExecutionEngine::Relocate()
 {
     NATIVE_PROFILE_CLR_CORE();
+
+#if defined(NANOCLR_TRACE_MEMORY_STATS)
+    if (s_CLR_RT_fTrace_MemoryStats >= c_CLR_RT_Trace_Verbose)
+    {
+        CLR_Debug::Printf("\r\nGC: performing EE relocation\r\n");
+    }
+#endif
+
 #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
     CLR_RT_GarbageCollector::Heap_Relocate((void **)&m_scratchPadArray);
-#endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
+#endif // #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
 
 #if !defined(NANOCLR_APPDOMAINS)
     CLR_RT_GarbageCollector::Heap_Relocate((void **)&m_globalLock);
@@ -490,7 +529,7 @@ bool CLR_RT_ExecutionEngine::TryToUnloadAppDomains()
         SignalEvents(Event_AppDomain);
 #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
         Breakpoint_Assemblies_Loaded();
-#endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
+#endif // #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
     }
 
     return fAnyAppDomainsUnloaded;
@@ -589,7 +628,7 @@ HRESULT CLR_RT_ExecutionEngine::Execute(wchar_t *entryPointArgs, int maxContextS
 
 #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
     CLR_EE_DBG_SET_MASK(StateProgramRunning, StateMask);
-#endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
+#endif // #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
 
     NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Delegate::CreateInstance(ref, g_CLR_RT_TypeSystem.m_entryPoint, NULL));
 
@@ -648,7 +687,7 @@ HRESULT CLR_RT_ExecutionEngine::Execute(wchar_t *entryPointArgs, int maxContextS
 
             CLR_RT_ExecutionEngine::ExecutionConstraint_Resume();
         }
-#endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
+#endif // #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
 
         if (CLR_EE_IS(Compaction_Pending))
         {
@@ -1125,7 +1164,7 @@ HRESULT CLR_RT_ExecutionEngine::ScheduleThreads(int maxContextSwitch)
         {
             NANOCLR_SET_AND_LEAVE(CLR_S_NO_READY_THREADS);
         }
-#endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
+#endif // #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
 
         CLR_RT_Thread *th = NULL;
 
@@ -1168,7 +1207,7 @@ HRESULT CLR_RT_ExecutionEngine::ScheduleThreads(int maxContextSwitch)
             {
                 NANOCLR_SET_AND_LEAVE(CLR_S_NO_READY_THREADS);
             }
-#endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
+#endif // #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
         }
 
         // If there is ready thread - decrease m_executionCounter for this (th) thread.
@@ -1577,6 +1616,16 @@ CLR_RT_HeapBlock *CLR_RT_ExecutionEngine::ExtractHeapBlocks(
         g_CLR_RT_EventCache.EventCache_Cleanup();
         PerformGarbageCollection();
     }
+#else
+
+#if !defined(BUILD_RTM) || defined(VIRTUAL_DEVICE)
+    if (g_CLR_RT_ExecutionEngine.m_fPerformGarbageCollection)
+    {
+        g_CLR_RT_EventCache.EventCache_Cleanup();
+        PerformGarbageCollection();
+    }
+#endif
+
 #endif
 
     for (int phase = 0;; phase++)
@@ -1617,7 +1666,7 @@ CLR_RT_HeapBlock *CLR_RT_ExecutionEngine::ExtractHeapBlocks(
                         {
                             if (phase != 0)
                             {
-                                CLR_Debug::Printf("ExtractHeapBlocks succeeded at phase %d\r\n", phase);
+                                CLR_Debug::Printf("\r\n\r\nExtractHeapBlocks succeeded at phase %d\r\n", phase);
                             }
                         }
 #endif
@@ -1638,12 +1687,14 @@ CLR_RT_HeapBlock *CLR_RT_ExecutionEngine::ExtractHeapBlocks(
 
         switch (phase)
         {
+            // perform garbage collection to try to free up some memory
             case 0:
+
 #if defined(NANOCLR_GC_VERBOSE)
                 if (s_CLR_RT_fTrace_Memory >= c_CLR_RT_Trace_Info)
                 {
                     CLR_Debug::Printf(
-                        "    Memory: ExtractHeapBlocks: %d bytes needed.\r\n",
+                        "\r\n\r\n    Memory: ExtractHeapBlocks: %d bytes needed.\r\n",
                         length * sizeof(CLR_RT_HeapBlock));
                 }
 #endif
@@ -1652,22 +1703,35 @@ CLR_RT_HeapBlock *CLR_RT_ExecutionEngine::ExtractHeapBlocks(
 
                 break;
 
-            default: // Total failure...
-#if !defined(BUILD_RTM)
-                CLR_Debug::Printf(
-                    "Failed allocation for %d blocks, %d bytes\r\n\r\n",
-                    length,
-                    length * sizeof(CLR_RT_HeapBlock));
-#endif
+            // total failure on reclaiming enough memory
+            default:
+
                 if (g_CLR_RT_GarbageCollector.m_freeBytes >= (length * sizeof(CLR_RT_HeapBlock)))
                 {
-
                     // A compaction probably would have saved this OOM
                     // Compaction will occur for Bitmaps, Arrays, etc. if this function returns NULL, so lets not
                     // through an assert here
 
                     // Throw the OOM, and schedule a compaction at a safe point
                     CLR_EE_SET(Compaction_Pending);
+
+#if !defined(BUILD_RTM)
+                    CLR_Debug::Printf(
+                        "\r\n\r\nFailed allocation for %d blocks, %d bytes.\r\nThere's enough free memory, heap "
+                        "compaction scheduled.\r\n\r\n",
+                        length,
+                        length * sizeof(CLR_RT_HeapBlock));
+#endif
+                }
+                else
+                {
+
+#if !defined(BUILD_RTM)
+                    CLR_Debug::Printf(
+                        "\r\n\r\nFailed allocation for %d blocks, %d bytes\r\n\r\n",
+                        length,
+                        length * sizeof(CLR_RT_HeapBlock));
+#endif
                 }
 
                 return NULL;
@@ -2406,6 +2470,7 @@ void CLR_RT_ExecutionEngine::ProcessHardware()
 {
     NATIVE_PROFILE_CLR_CORE();
     Watchdog_Reset();
+    RtosYield();
 
     g_CLR_HW_Hardware.ProcessActivity();
 }
@@ -2578,7 +2643,7 @@ void CLR_RT_ExecutionEngine::CheckThreads(CLR_INT64 &timeoutMin, CLR_RT_DblLinke
         {
             continue;
         }
-#endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
+#endif // #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
 
         //
         // Check events.
@@ -3591,7 +3656,7 @@ void CLR_RT_ExecutionEngine::Breakpoint_Exception_Intercepted(CLR_RT_StackFrame 
     Breakpoint_System_Event(hit, event, NULL, stack, NULL);
 }
 
-#endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
+#endif // #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 

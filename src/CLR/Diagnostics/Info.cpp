@@ -27,7 +27,7 @@ void CLR_Debug::SaveMessage(std::string str)
     NATIVE_PROFILE_CLR_DIAGNOSTICS();
 
     // clear LR & CR
-    int pos;
+    size_t pos;
     if ((pos = str.find('\n')) != std::string::npos)
     {
         str.erase(pos);
@@ -86,40 +86,6 @@ HRESULT NANOCLR_DEBUG_PROCESS_EXCEPTION(HRESULT hr, const char *szFunc, const ch
 #endif
 
 #endif
-
-//--//
-
-bool CLR_SafeSprintfV(char *&szBuffer, size_t &iBuffer, const char *format, va_list arg)
-{
-    NATIVE_PROFILE_CLR_DIAGNOSTICS();
-
-    int chars = vsnprintf(szBuffer, iBuffer, format, arg);
-    bool fRes = (chars >= 0);
-
-    if (fRes == false)
-        chars = (int)iBuffer;
-
-    szBuffer += chars;
-    szBuffer[0] = 0;
-    iBuffer -= chars;
-
-    return fRes;
-}
-
-bool CLR_SafeSprintf(char *&szBuffer, size_t &iBuffer, const char *format, ...)
-{
-    NATIVE_PROFILE_CLR_DIAGNOSTICS();
-    va_list arg;
-    bool fRes;
-
-    va_start(arg, format);
-
-    fRes = CLR_SafeSprintfV(szBuffer, iBuffer, format, arg);
-
-    va_end(arg);
-
-    return fRes;
-}
 
 //--//
 
@@ -272,7 +238,10 @@ int CLR_Debug::PrintfV(const char *format, va_list arg)
     int16_t bufferSize = c_BufferSize;
 #endif
 
-    bool fRes = CLR_SafeSprintfV(szBuffer, iBuffer, format, arg);
+#if !defined(BUILD_RTM)
+    bool fRes =
+#endif
+        CLR_SafeSprintfV(szBuffer, iBuffer, format, arg);
 
     _ASSERTE(fRes);
 

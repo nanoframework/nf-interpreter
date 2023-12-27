@@ -13,11 +13,11 @@
 #include <stdlib.h>
 
 // defines to prevent use of malloc, free and realloc
-// the platform implementations: platform_malloc(), platform_free and platform_realloc
-// are the preferred calls to use as they ensure thread safety and RTOS integration
-#define malloc  YOU_SHALL_NOT_USE_malloc
-#define free    YOU_SHALL_NOT_USE_free
-#define realloc YOU_SHALL_NOT_USE_realloc
+// the platform implementations: platform_malloc(), platform_free() should be used instead.
+// realloc should never be used.
+// as these the preferred calls to use as they ensure thread safety and RTOS integration.
+#define malloc YOU_SHALL_NOT_USE_malloc
+#define free   YOU_SHALL_NOT_USE_free
 
 #endif
 
@@ -224,6 +224,7 @@ extern "C"
     void CPU_SetPowerModePlatform(PowerLevel_type powerLevel);
     // target specific handler for power mode changes (may be empty)
     void CPU_SetPowerModeTarget(PowerLevel_type powerLevel);
+    bool DebuggerIsConnected();
 
 #ifdef __cplusplus
 }
@@ -241,7 +242,6 @@ extern "C"
 
     void *platform_malloc(size_t size);
     void platform_free(void *ptr);
-    void *platform_realloc(void *ptr, size_t size);
 
 #ifdef __cplusplus
 }
@@ -333,7 +333,7 @@ extern "C"
 #endif
 
 #ifndef _SIDE_ASSERTE
-#define _SIDE_ASSERTE(expr) (expr)
+#define _SIDE_ASSERTE(expr) (void)(expr)
 #endif
 
 #ifdef STATIC_ASSERT_SUPPORTED
@@ -373,6 +373,7 @@ extern "C"
 
 __inline void debug_printf(const char *format, ...)
 {
+    (void)format;
 }
 
 #endif // !defined(BUILD_RTM)
@@ -408,6 +409,7 @@ extern "C"
 
 // Watchdog driver
 #include <nanoHAL_Watchdog.h>
+#include <nanoHAL_Rtos.h>
 
 #include <nanoHAL_Windows_Storage.h>
 

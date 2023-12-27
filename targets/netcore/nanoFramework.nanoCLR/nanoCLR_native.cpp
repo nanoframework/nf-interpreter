@@ -84,6 +84,13 @@ bool Target_GetReleaseInfo(NFReleaseInfo &releaseInfo)
 
 void nanoCLR_Run(NANO_CLR_SETTINGS nanoClrSettings)
 {
+
+#if _DEBUG
+    // only show this in debug build
+    DWORD pid = GetCurrentProcessId();
+    CLR_Debug::Printf("Process ID: %d\r\n", pid);
+#endif
+
     CLR_Debug::Printf(
         "\r\nLoading nanoCLR v%d.%d.%d.%d\r\n...",
         VERSION_MAJOR,
@@ -105,6 +112,8 @@ void nanoCLR_Run(NANO_CLR_SETTINGS nanoClrSettings)
     clrSettings.MaxContextSwitches = nanoClrSettings.MaxContextSwitches;
     clrSettings.WaitForDebugger = nanoClrSettings.WaitForDebugger;
     clrSettings.EnterDebuggerLoopAfterExit = nanoClrSettings.EnterDebuggerLoopAfterExit;
+    clrSettings.PerformGarbageCollection = nanoClrSettings.PerformGarbageCollection;
+    clrSettings.PerformHeapCompaction = nanoClrSettings.PerformHeapCompaction;
 
     ClrStartup(clrSettings);
 
@@ -171,7 +180,7 @@ const char *nanoCLR_GetVersion()
         const std::string_view str{buffer, result.out};
 
         std::memcpy(pszVersion, buffer, result.size);
-
-        return pszVersion;
     }
+
+    return pszVersion;
 }

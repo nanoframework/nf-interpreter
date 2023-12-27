@@ -192,7 +192,7 @@ HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::Clear___VOID(CLR
 }
 
 HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::
-    DrawTextInRect___BOOLEAN__BYREF_STRING__BYREF_I4__BYREF_I4__I4__I4__I4__I4__U4__nanoFrameworkPresentationMediaColor__nanoFrameworkUIFont(
+    DrawTextInRect___BOOLEAN__BYREF_STRING__BYREF_I4__BYREF_I4__I4__I4__I4__I4__U4__U4__nanoFrameworkUIFont(
         CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
@@ -263,8 +263,8 @@ HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::
-    DrawChar___VOID__U2__I4__I4__nanoFrameworkPresentationMediaColor__nanoFrameworkUIFont(CLR_RT_StackFrame &stack)
+HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::DrawChar___VOID__U2__I4__I4__U4__nanoFrameworkUIFont(
+    CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
@@ -337,8 +337,7 @@ HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::get_Height___I4(
 }
 
 HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::
-    DrawEllipse___VOID__nanoFrameworkPresentationMediaColor__I4__I4__I4__I4__I4__nanoFrameworkPresentationMediaColor__I4__I4__nanoFrameworkPresentationMediaColor__I4__I4__U2(
-        CLR_RT_StackFrame &stack)
+    DrawEllipse___VOID__U4__I4__I4__I4__I4__I4__U4__I4__I4__U4__I4__I4__U2(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
@@ -456,19 +455,15 @@ HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::
-    MakeTransparent___VOID__nanoFrameworkPresentationMediaColor(CLR_RT_StackFrame &stack)
+HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::MakeTransparent___VOID__U4(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
     CLR_GFX_Bitmap *bitmap;
-    CLR_UINT32 color;
 
     NANOCLR_CHECK_HRESULT(GetBitmap(stack, true, bitmap));
-
-    color = stack.Arg1().NumericByRef().u4;
-
-    bitmap->m_palBitmap.transparentColor = (color & 0xFF000000) ? PAL_GFX_Bitmap::c_InvalidColor : color;
+    bitmap->m_palBitmap.transparentColor = stack.Arg1().NumericByRef().u4;
+    bitmap->m_palBitmap.transparentColorSet = PAL_GFX_Bitmap::c_TransparentColorSet;
 
     NANOCLR_NOCLEANUP();
 }
@@ -510,8 +505,8 @@ HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::
-    DrawLine___VOID__nanoFrameworkPresentationMediaColor__I4__I4__I4__I4__I4(CLR_RT_StackFrame &stack)
+HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::DrawLine___VOID__U4__I4__I4__I4__I4__I4(
+    CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
     CLR_GFX_Bitmap *bitmap;
@@ -534,8 +529,8 @@ HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::
-    DrawRectangle___VOID__I4__I4__I4__I4__I4__nanoFrameworkPresentationMediaColor(CLR_RT_StackFrame &stack)
+HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::DrawRectangle___VOID__I4__I4__I4__I4__I4__U4(
+    CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
@@ -566,7 +561,7 @@ HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::
 }
 
 HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::
-    DrawRoundRectangle___VOID__I4__I4__I4__I4__I4__I4__I4__nanoFrameworkPresentationMediaColor(CLR_RT_StackFrame &stack)
+    DrawRoundRectangle___VOID__I4__I4__I4__I4__I4__I4__I4__U4(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
@@ -601,8 +596,8 @@ HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::
-    FillRectangle___VOID__I4__I4__I4__I4__nanoFrameworkPresentationMediaColor__U2(CLR_RT_StackFrame &stack)
+HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::FillRectangle___VOID__I4__I4__I4__I4__U4__U2(
+    CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
@@ -634,7 +629,7 @@ HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::
 }
 
 HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::
-    FillRoundRectangle___VOID__I4__I4__I4__I4__I4__I4__nanoFrameworkPresentationMediaColor__U2(CLR_RT_StackFrame &stack)
+    FillRoundRectangle___VOID__I4__I4__I4__I4__I4__I4__U4__U2(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
@@ -671,8 +666,7 @@ HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::
 }
 
 HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::
-    FillGradientRectangle___VOID__I4__I4__I4__I4__nanoFrameworkPresentationMediaColor__I4__I4__nanoFrameworkPresentationMediaColor__I4__I4__U2(
-        CLR_RT_StackFrame &stack)
+    FillGradientRectangle___VOID__I4__I4__I4__I4__U4__I4__I4__U4__I4__I4__U2(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
@@ -708,8 +702,7 @@ HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::
 }
 
 HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::
-    DrawRectangle___VOID__nanoFrameworkPresentationMediaColor__I4__I4__I4__I4__I4__I4__I4__nanoFrameworkPresentationMediaColor__I4__I4__nanoFrameworkPresentationMediaColor__I4__I4__U2(
-        CLR_RT_StackFrame &stack)
+    DrawRectangle___VOID__U4__I4__I4__I4__I4__I4__I4__I4__U4__I4__I4__U4__I4__I4__U2(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
     CLR_RT_HeapBlock *pArgs;
@@ -764,7 +757,7 @@ HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::
 }
 
 HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::
-    DrawText___VOID__STRING__nanoFrameworkUIFont__nanoFrameworkPresentationMediaColor__I4__I4(CLR_RT_StackFrame &stack)
+    DrawText___VOID__STRING__nanoFrameworkUIFont__U4__I4__I4(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
     CLR_RT_HeapBlock *pArgs;
@@ -785,8 +778,7 @@ HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::
-    SetPixel___VOID__I4__I4__nanoFrameworkPresentationMediaColor(CLR_RT_StackFrame &stack)
+HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::SetPixel___VOID__I4__I4__U4(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
     CLR_GFX_Bitmap *bitmap;
@@ -798,8 +790,7 @@ HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::GetPixel___nanoFrameworkPresentationMediaColor__I4__I4(
-    CLR_RT_StackFrame &stack)
+HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::GetPixelInt___U4__I4__I4(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
     CLR_GFX_Bitmap *bitmap;
@@ -1183,7 +1174,7 @@ HRESULT GetBitmap(CLR_RT_HeapBlock *pThis, bool fForWrite, CLR_GFX_Bitmap *&bitm
     FAULT_ON_NULL(pThis);
 
     NANOCLR_CHECK_HRESULT(
-        CLR_GFX_Bitmap::GetInstanceFromGraphicsHeapBlock(pThis[CLR_GFX_Bitmap::FIELD__m_bitmap], bitmap));
+        CLR_GFX_Bitmap::GetInstanceFromManagedCSharpReference(pThis[CLR_GFX_Bitmap::FIELD__m_bitmap], bitmap));
 
     if ((bitmap->m_bm.m_flags & CLR_GFX_BitmapDescription::c_ReadOnly) && fForWrite)
         NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);

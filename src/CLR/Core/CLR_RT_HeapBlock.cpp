@@ -307,6 +307,7 @@ HRESULT CLR_RT_HeapBlock::SetObjectCls(const CLR_RT_TypeDef_Index &cls)
     }
 
     m_data.objectHeader.cls = cls;
+
     m_data.objectHeader.lock = NULL;
 
     NANOCLR_NOCLEANUP();
@@ -1054,13 +1055,13 @@ CLR_UINT32 CLR_RT_HeapBlock::GetHashCode(CLR_RT_HeapBlock *ptr, bool fRecurse, C
     switch (ptr->DataType())
     {
         case DATATYPE_OBJECT:
-            crc = GetHashCode(ptr->Dereference(), fRecurse, crc);
+            crc ^= GetHashCode(ptr->Dereference(), fRecurse, crc);
             break;
 
         case DATATYPE_STRING:
         {
             const char *src = ptr->StringText();
-            crc = SUPPORT_ComputeCRC(src, (int)hal_strlen_s(src), crc);
+            crc ^= SUPPORT_ComputeCRC(src, (int)hal_strlen_s(src), crc);
         }
         break;
 
@@ -1134,12 +1135,12 @@ CLR_UINT32 CLR_RT_HeapBlock::GetHashCode(CLR_RT_HeapBlock *ptr, bool fRecurse, C
             if (fRecurse && cls.m_target->dataType <= DATATYPE_R8)
             {
                 // pass the 1st field which is the one holding the actual value
-                crc = GetHashCode(&ptr[CLR_RT_HeapBlock::HB_Object_Fields_Offset], false, crc);
+                crc ^= GetHashCode(&ptr[CLR_RT_HeapBlock::HB_Object_Fields_Offset], false, crc);
             }
             else
             {
                 // always starts with the pointer to the object to fully disambiguate
-                crc = SUPPORT_ComputeCRC(&ptr, sizeof(ptr), crc);
+                crc ^= SUPPORT_ComputeCRC(&ptr, sizeof(ptr), crc);
 
                 if (fRecurse)
                 {
@@ -1149,8 +1150,9 @@ CLR_UINT32 CLR_RT_HeapBlock::GetHashCode(CLR_RT_HeapBlock *ptr, bool fRecurse, C
                     {
                         do
                         {
-                            crc = GetHashCode(&ptr[totFields + CLR_RT_HeapBlock::HB_Object_Fields_Offset], false, crc);
-                        } while (--totFields > 0);
+                            crc ^=
+                                GetHashCode(&ptr[--totFields + CLR_RT_HeapBlock::HB_Object_Fields_Offset], true, crc);
+                        } while (totFields > 0);
                     }
                 }
             }
@@ -1162,9 +1164,9 @@ CLR_UINT32 CLR_RT_HeapBlock::GetHashCode(CLR_RT_HeapBlock *ptr, bool fRecurse, C
             CLR_RT_HeapBlock_Delegate *dlg = (CLR_RT_HeapBlock_Delegate *)ptr;
             const CLR_RT_MethodDef_Index &ftn = dlg->DelegateFtn();
 
-            crc = GetHashCode(&dlg->m_object, false, crc);
+            crc ^= GetHashCode(&dlg->m_object, false, crc);
 
-            crc = SUPPORT_ComputeCRC(&ftn, sizeof(ftn), crc);
+            crc ^= SUPPORT_ComputeCRC(&ftn, sizeof(ftn), crc);
         }
         break;
 
@@ -1172,13 +1174,13 @@ CLR_UINT32 CLR_RT_HeapBlock::GetHashCode(CLR_RT_HeapBlock *ptr, bool fRecurse, C
         {
             CLR_RT_ObjectToEvent_Source *evtSrc = (CLR_RT_ObjectToEvent_Source *)ptr;
 
-            crc = GetHashCode(evtSrc->m_eventPtr, false, crc);
-            crc = GetHashCode(evtSrc->m_objectPtr, false, crc);
+            crc ^= GetHashCode(evtSrc->m_eventPtr, false, crc);
+            crc ^= GetHashCode(evtSrc->m_objectPtr, false, crc);
         }
         break;
 
         default:
-            crc = SUPPORT_ComputeCRC((const void *)&ptr->DataByRefConst(), ptr->GetAtomicDataUsedBytes(), crc);
+            crc ^= SUPPORT_ComputeCRC((const void *)&ptr->DataByRefConst(), ptr->GetAtomicDataUsedBytes(), crc);
 
             break;
     }
@@ -1238,154 +1240,165 @@ bool CLR_RT_HeapBlock::ObjectsEqual(
     CLR_DataType leftDataType = pArgLeft.DataType();
     CLR_DataType rightDataType = pArgRight.DataType();
 
-    if (leftDataType == rightDataType)
+    switch (leftDataType)
     {
-        switch (leftDataType)
-        {
-            case DATATYPE_VALUETYPE:
-                if (pArgLeft.ObjectCls().m_data == pArgRight.ObjectCls().m_data)
-                {
-                    const CLR_RT_HeapBlock *objLeft = &pArgLeft;
-                    const CLR_RT_HeapBlock *objRight = &pArgRight;
-                    CLR_UINT32 num = pArgLeft.DataSize();
-
-                    while (--num)
-                    {
-                        if (ObjectsEqual(*++objLeft, *++objRight, false) == false)
-                            return false;
-                    }
-
-                    return true;
-                }
-                break;
-
-#if defined(NANOCLR_APPDOMAINS)
-            case DATATYPE_TRANSPARENT_PROXY:
-#endif
-            case DATATYPE_OBJECT:
+        case DATATYPE_VALUETYPE:
+            if (pArgLeft.ObjectCls().m_data == pArgRight.ObjectCls().m_data)
             {
-                CLR_RT_HeapBlock *objLeft = pArgLeft.Dereference();
-                CLR_RT_HeapBlock *objRight = pArgRight.Dereference();
+                const CLR_RT_HeapBlock *objLeft = &pArgLeft;
+                const CLR_RT_HeapBlock *objRight = &pArgRight;
+                CLR_UINT32 num = pArgLeft.DataSize();
 
-                if (objLeft == objRight)
+                while (--num)
                 {
-                    return true;
+                    if (ObjectsEqual(*++objLeft, *++objRight, false) == false)
+                        return false;
                 }
 
-                if (objLeft && objRight)
-                {
-                    if (!fSameReference || (objLeft->DataType() == DATATYPE_REFLECTION))
-                    {
-                        return ObjectsEqual(*objLeft, *objRight, false);
-                    }
-                }
+                return true;
             }
             break;
 
-            case DATATYPE_SZARRAY:
-                if (fSameReference == false)
+#if defined(NANOCLR_APPDOMAINS)
+        case DATATYPE_TRANSPARENT_PROXY:
+#endif
+        case DATATYPE_OBJECT:
+        {
+            CLR_RT_HeapBlock *objLeft = pArgLeft.Dereference();
+            CLR_RT_HeapBlock *objRight = pArgRight.Dereference();
+
+            if (objLeft == objRight)
+            {
+                return true;
+            }
+
+            if (objLeft && objRight)
+            {
+                if (!fSameReference || (objLeft->DataType() == DATATYPE_REFLECTION))
                 {
-                    _ASSERTE(false); // can this code path ever be executed?
-
-                    CLR_RT_HeapBlock_Array *objLeft = (CLR_RT_HeapBlock_Array *)&pArgLeft;
-                    CLR_RT_HeapBlock_Array *objRight = (CLR_RT_HeapBlock_Array *)&pArgRight;
-
-                    if (objLeft->m_numOfElements == objRight->m_numOfElements &&
-                        objLeft->m_sizeOfElement == objRight->m_sizeOfElement &&
-                        objLeft->m_typeOfElement == objRight->m_typeOfElement)
-                    {
-                        if (!objLeft->m_fReference)
-                        {
-                            if (memcmp(
-                                    objLeft->GetFirstElement(),
-                                    objRight->GetFirstElement(),
-                                    objLeft->m_numOfElements * objLeft->m_sizeOfElement) == 0)
-                            {
-                                return true;
-                            }
-                        }
-                    }
+                    return ObjectsEqual(*objLeft, *objRight, false);
                 }
-                break;
+            }
+        }
+        break;
 
-            case DATATYPE_REFLECTION:
-                if (pArgLeft.SameHeader(pArgRight))
+        case DATATYPE_SZARRAY:
+            if (fSameReference == false)
+            {
+                _ASSERTE(false); // can this code path ever be executed?
+
+                CLR_RT_HeapBlock_Array *objLeft = (CLR_RT_HeapBlock_Array *)&pArgLeft;
+                CLR_RT_HeapBlock_Array *objRight = (CLR_RT_HeapBlock_Array *)&pArgRight;
+
+                if (objLeft->m_numOfElements == objRight->m_numOfElements &&
+                    objLeft->m_sizeOfElement == objRight->m_sizeOfElement &&
+                    objLeft->m_typeOfElement == objRight->m_typeOfElement)
                 {
-                    return true;
-                }
-                break;
-
-            case DATATYPE_STRING:
-                return Compare_Values(pArgLeft, pArgRight, false) == 0;
-                break;
-
-            default:
-                if (fSameReference == false)
-                {
-                    const CLR_RT_DataTypeLookup &dtl = c_CLR_RT_DataTypeLookup[pArgLeft.DataType()];
-
-                    if ((dtl.m_flags & CLR_RT_DataTypeLookup::c_Reference) == 0)
+                    if (!objLeft->m_fReference)
                     {
-                        CLR_UINT32 size = (dtl.m_sizeInBits + 7) / 8;
-
-                        if (memcmp(&pArgLeft.DataByRefConst(), &pArgRight.DataByRefConst(), size) == 0)
+                        if (memcmp(
+                                objLeft->GetFirstElement(),
+                                objRight->GetFirstElement(),
+                                objLeft->m_numOfElements * objLeft->m_sizeOfElement) == 0)
                         {
                             return true;
                         }
                     }
                 }
-                break;
-        }
-    }
-    else
-    {
-        if ((leftDataType == DATATYPE_BYREF && rightDataType == DATATYPE_OBJECT))
-        {
-            // this is to handle the special case for calls to callvirt with constrained type
-            // namely with Objects, ValueType and Enum.
-            // https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.constrained?view=net-6.0
+            }
+            break;
 
-            CLR_RT_HeapBlock *leftObj = pArgLeft.Dereference();
-            CLR_RT_HeapBlock *rightObj = pArgRight.Dereference();
-
-            if (rightObj->DataType() == DATATYPE_VALUETYPE)
+        case DATATYPE_REFLECTION:
+            if (pArgLeft.SameHeader(pArgRight))
             {
-                CLR_RT_TypeDef_Instance inst;
-                CLR_RT_HeapBlock *obj = NULL;
+                return true;
+            }
+            break;
 
-                if (!inst.InitializeFromIndex(rightObj->ObjectCls()))
-                {
-                }
+        case DATATYPE_STRING:
+        case DATATYPE_CLASS:
+        case DATATYPE_BOOLEAN:
+        case DATATYPE_CHAR:
+        case DATATYPE_I1:
+        case DATATYPE_U1:
+        case DATATYPE_I2:
+        case DATATYPE_U2:
+        case DATATYPE_I4:
+        case DATATYPE_U4:
+        case DATATYPE_I8:
+        case DATATYPE_U8:
+        case DATATYPE_DATETIME:
+        case DATATYPE_TIMESPAN:
+            return Compare_Values(pArgLeft, pArgRight, false) == 0;
+            break;
 
-                if (inst.m_target->dataType != DATATYPE_VALUETYPE)
+        case DATATYPE_BYREF:
+            if (rightDataType == DATATYPE_OBJECT)
+            {
+                // this is to handle the special case for calls to callvirt with constrained type
+                // namely with Objects, ValueType and Enum.
+                // https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.constrained?view=net-6.0
+
+                CLR_RT_HeapBlock *leftObj = pArgLeft.Dereference();
+                CLR_RT_HeapBlock *rightObj = pArgRight.Dereference();
+
+                if (rightObj->DataType() == DATATYPE_VALUETYPE)
                 {
-                    // boxed primitive or enum type
-                    obj = &rightObj[1];
+                    CLR_RT_TypeDef_Instance inst;
+                    CLR_RT_HeapBlock *obj = NULL;
+
+                    if (!inst.InitializeFromIndex(rightObj->ObjectCls()))
+                    {
+                    }
+
+                    if (inst.m_target->dataType != DATATYPE_VALUETYPE)
+                    {
+                        // boxed primitive or enum type
+                        obj = &rightObj[1];
+                    }
+                    else
+                    {
+                        // boxed value type
+                        obj = rightObj;
+                    }
+
+                    return ObjectsEqual(*leftObj, *obj, false);
                 }
                 else
                 {
-                    // boxed value type
-                    obj = rightObj;
+                    if (rightObj == NULL)
+                    {
+                        return false;
+                    }
+                    else
+                    {
+                        return ObjectsEqual(*leftObj, *rightObj, false);
+                    }
                 }
+            }
+            break;
 
-                return ObjectsEqual(*leftObj, *obj, false);
+        default:
+
+            if ((leftDataType == rightDataType) && fSameReference == false)
+            {
+                const CLR_RT_DataTypeLookup &dtl = c_CLR_RT_DataTypeLookup[pArgLeft.DataType()];
+
+                if ((dtl.m_flags & CLR_RT_DataTypeLookup::c_Reference) == 0)
+                {
+                    CLR_UINT32 size = (dtl.m_sizeInBits + 7) / 8;
+
+                    if (memcmp(&pArgLeft.DataByRefConst(), &pArgRight.DataByRefConst(), size) == 0)
+                    {
+                        return true;
+                    }
+                }
             }
             else
             {
-                if (rightObj == NULL)
-                {
-                    return false;
-                }
-                else
-                {
-                    return ObjectsEqual(*leftObj, *rightObj, false);
-                }
+                _ASSERTE(false);
             }
-        }
-        else
-        {
-            _ASSERTE(false);
-        }
+            break;
     }
 
     return false;
@@ -1640,7 +1653,7 @@ CLR_INT32 CLR_RT_HeapBlock::Compare_Values(const CLR_RT_HeapBlock &left, const C
                 // deal with special cases:
                 // return 0 if the numbers are unordered (either or both are NaN)
                 // this is post processed in interpreter so '1' will turn into '0'
-                if (__isnand(left.NumericByRefConst().r4) || __isnand(right.NumericByRefConst().r4))
+                if (__isnand(left.NumericByRefConst().r4) && __isnand(right.NumericByRefConst().r4))
                 {
                     return 1;
                 }
@@ -1770,10 +1783,12 @@ CLR_INT32 CLR_RT_HeapBlock::Compare_Values(const CLR_RT_HeapBlock &left, const C
             }
             else
             {
+#if !defined(BUILD_RTM)
                 CLR_Debug::Printf(
                     "\r\n\r\nRUNTIME ERROR: comparing two values of different size: %d vs. %d!!!\r\n\r\n\r\n",
                     leftDataType,
                     rightDataType);
+#endif // BUILD_RTM
 #if defined(NANOCLR_PROFILE_NEW)
                 g_CLR_PRF_Profiler.DumpHeap();
 #endif
@@ -2398,10 +2413,8 @@ void CLR_RT_HeapBlock::Relocate__HeapBlock()
 void CLR_RT_HeapBlock::Relocate_String()
 {
     NATIVE_PROFILE_CLR_CORE();
-    CLR_RT_GarbageCollector::Heap_Relocate((void **)&m_data.string.m_text);
-#if !defined(NANOCLR_NO_ASSEMBLY_STRINGS)
-    CLR_RT_GarbageCollector::Heap_Relocate((void **)&m_data.string.m_assm);
-#endif
+
+    CLR_RT_GarbageCollector::Heap_Relocate((void **)&m_data);
 }
 
 void CLR_RT_HeapBlock::Relocate_Obj()

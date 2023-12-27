@@ -4,6 +4,7 @@
         "../../CMake/xtensa-esp32.json",
         "../../CMake/xtensa-esp32c3.json",
         "../../CMake/xtensa-esp32s2.json",
+        "../../CMake/xtensa-esp32s3.json",
         "../../config/user-tools-repos.json",
         "../../config/user-prefs.json"
     ],
@@ -142,6 +143,7 @@
                 "NF_FEATURE_RTC": "ON",
                 "NF_FEATURE_HAS_SDCARD": "ON",
                 "API_System.IO.FileSystem": "ON",
+                "API_System.Device.I2c.Slave": "OFF",
                 "API_nanoFramework.Device.OneWire": "ON",
                 "API_nanoFramework.Device.Bluetooth": "ON"
             }
@@ -162,6 +164,7 @@
                 "NF_FEATURE_RTC": "ON",
                 "NF_FEATURE_HAS_SDCARD": "ON",
                 "API_System.IO.FileSystem": "ON",
+                "API_System.Device.I2c.Slave": "OFF",
                 "API_nanoFramework.Device.OneWire": "ON",
                 "API_nanoFramework.Device.Bluetooth": "ON"
             }
@@ -186,7 +189,8 @@
                 "NF_FEATURE_HAS_SDCARD": "OFF",
                 "API_System.IO.FileSystem": "ON",
                 "API_Windows.Storage": "ON",
-                "API_System.Device.I2s": "OFF"
+                "API_System.Device.I2s": "OFF",
+                "API_System.Device.I2c.Slave": "OFF"
             }
         },
         {
@@ -255,6 +259,69 @@
                 "API_Windows.Storage": "ON",
                 "API_nanoFramework.Device.OneWire": "OFF",
                 "API_nanoFramework.Hardware.Esp32.Rmt": "ON",
+                "ESP32_RESERVED_RAM_FOR_IDF_ALLOCATION": "100"
+            }
+        },
+        {
+            "name": "ESP32_S3",
+            "inherits": [
+                "xtensa-esp32s3-preset",
+                "user-tools-repos",
+                "user-prefs"
+            ],
+            "hidden": false,
+            "cacheVariables": {
+                "TARGET_NAME": "${presetName}",
+                "SDK_CONFIG_FILE": "sdkconfig.default.esp32s3",
+                "NF_BUILD_RTM": "OFF",
+                "NF_FEATURE_DEBUGGER": "ON",
+                "NF_FEATURE_RTC": "ON",
+                "NF_FEATURE_HAS_SDCARD": "ON",
+                "ESP32_USB_CDC": "ON",
+                "ESP32_RESERVED_RAM_FOR_IDF_ALLOCATION": "150"
+            }
+        },
+        {
+            "name": "ESP32_S3_BLE",
+            "inherits": [
+                "xtensa-esp32s3-preset",
+                "user-tools-repos",
+                "user-prefs"
+            ],
+            "hidden": false,
+            "cacheVariables": {
+                "TARGET_NAME": "${presetName}",
+                "SDK_CONFIG_FILE": "sdkconfig.default_ble.esp32s3",
+                "NF_BUILD_RTM": "OFF",
+                "NF_FEATURE_DEBUGGER": "ON",
+                "NF_FEATURE_RTC": "ON",
+                "NF_FEATURE_HAS_SDCARD": "ON",
+                "ESP32_USB_CDC": "ON",
+                "API_nanoFramework.Device.Bluetooth": "ON",
+                "API_System.Device.I2c.Slave": "ON",
+                "ESP32_RESERVED_RAM_FOR_IDF_ALLOCATION": "180"
+            }
+        },
+        {
+            "name": "XIAO_ESP32C3",
+            "inherits": [
+                "xtensa-esp32c3-preset",
+                "user-tools-repos",
+                "user-prefs"
+            ],
+            "hidden": false,
+            "cacheVariables": {
+                "TARGET_NAME": "${presetName}",
+                "SDK_CONFIG_FILE": "sdkconfig.default_rev3_noconsole.esp32c3",
+                "NF_BUILD_RTM": "OFF",
+                "NF_FEATURE_DEBUGGER": "ON",
+                "NF_FEATURE_RTC": "ON",
+                "NF_FEATURE_HAS_SDCARD": "OFF",
+                "HAL_WP_USE_SERIAL": "OFF",
+                "HAL_WP_USE_USB_CDC": "ON",
+                "API_System.IO.FileSystem": "ON",
+                "API_Windows.Storage": "ON",
+                "API_nanoFramework.Device.OneWire": "OFF",
                 "ESP32_RESERVED_RAM_FOR_IDF_ALLOCATION": "100"
             }
         },
@@ -339,6 +406,30 @@
             }
         },
         {
+            "name": "AtomS3",
+            "inherits": [
+                "xtensa-esp32s3-preset",
+                "user-tools-repos",
+                "user-prefs"
+            ],
+            "hidden": false,
+            "cacheVariables": {
+                "TARGET_NAME": "${presetName}",
+                "SDK_CONFIG_FILE": "sdkconfig.default.esp32s3",
+                "NF_BUILD_RTM": "OFF",
+                "NF_FEATURE_DEBUGGER": "ON",
+                "NF_FEATURE_RTC": "ON",
+                "NF_FEATURE_HAS_SDCARD": "OFF",
+                "ESP32_USB_CDC": "ON",
+                "API_System.IO.FileSystem": "ON",
+                "API_Windows.Storage": "ON",
+                "API_nanoFramework.Device.OneWire": "OFF",
+                "API_nanoFramework.Device.Bluetooth": "OFF",
+                "API_nanoFramework.Graphics": "OFF",
+                "API_System.Device.I2c.Slave": "OFF"
+            }
+        },
+        {
             "name": "ESP32_GenericDisplay_REV0",
             "inherits": [
                 "xtensa-esp32-preset",
@@ -411,6 +502,7 @@
                 "ETH_PHY_RST_GPIO": "5",
                 "ETH_RMII_CLK_OUT_GPIO": "17",
                 "API_System.IO.FileSystem": "ON",
+                "API_System.Device.I2c.Slave": "OFF",
                 "API_nanoFramework.Device.OneWire": "ON"
             }
         },
@@ -434,7 +526,8 @@
                 "ETH_PHY_RST_GPIO": "12",
                 "ETH_RMII_CLK_OUT_GPIO": "17",
                 "API_System.IO.FileSystem": "ON",
-                "API_nanoFramework.Device.OneWire": "ON"
+                "API_nanoFramework.Device.OneWire": "ON",
+                "API_System.Device.I2c.Slave": "OFF"
             }
         },
         {
@@ -454,6 +547,7 @@
                 "API_System.IO.FileSystem": "ON",
                 "API_nanoFramework.Device.OneWire": "ON",
                 "API_nanoFramework.Graphics": "ON",
+                "API_System.Device.I2c.Slave": "OFF",
                 "GRAPHICS_DISPLAY": "ST7789V_240x320_SPI.cpp",
                 "TOUCHPANEL_DEVICE": "XPT2046.cpp",
                 "GRAPHICS_DISPLAY_INTERFACE": "Spi_To_Display.cpp",
@@ -477,6 +571,7 @@
                 "NF_FEATURE_RTC": "OFF",
                 "NF_FEATURE_HAS_SDCARD": "OFF",
                 "API_System.IO.FileSystem": "OFF",
+                "API_System.Device.I2c.Slave": "OFF",
                 "API_nanoFramework.Graphics": "ON",
                 "API_nanoFramework.Device.OneWire": "OFF",
                 "API_nanoFramework.Device.Bluetooth": "ON",
@@ -509,7 +604,8 @@
                 "ETH_PHY_ADDR": "1",
                 "API_System.IO.FileSystem": "ON",
                 "API_nanoFramework.Device.OneWire": "ON",
-                "API_nanoFramework.Device.Bluetooth": "ON"
+                "API_nanoFramework.Device.Bluetooth": "ON",
+                "API_System.Device.I2c.Slave": "OFF"
             }
         },
         {
@@ -532,7 +628,8 @@
                 "ETH_PHY_ADDR": "1",
                 "ETH_PHY_RST_GPIO": "16",
                 "API_System.IO.FileSystem": "ON",
-                "API_nanoFramework.Device.OneWire": "ON"
+                "API_nanoFramework.Device.OneWire": "ON",
+                "API_System.Device.I2c.Slave": "OFF"
             }
         },
         {
@@ -580,6 +677,7 @@
                 "API_System.IO.FileSystem": "ON",
                 "API_nanoFramework.Device.OneWire": "ON",
                 "API_nanoFramework.Graphics": "ON",
+                "API_System.Device.I2c.Slave": "OFF",
                 "GRAPHICS_DISPLAY": "ST7735S_SPI.cpp",
                 "TOUCHPANEL_DEVICE": "XPT2046.cpp",
                 "GRAPHICS_DISPLAY_INTERFACE": "Spi_To_Display.cpp",
@@ -604,6 +702,7 @@
                 "NF_FEATURE_RTC": "ON",
                 "API_System.IO.FileSystem": "ON",
                 "API_nanoFramework.Device.OneWire": "ON",
+                "API_System.Device.I2c.Slave": "OFF",
                 "API_nanoFramework.Graphics": "ON",
                 "GRAPHICS_DISPLAY": "ST7789V_240x320_SPI.cpp",
                 "TOUCHPANEL_DEVICE": "XPT2046.cpp",
@@ -726,6 +825,24 @@
         },
         {
             "inherits": "base-user",
+            "name": "ESP32_S3",
+            "displayName": "ESP32_S3",
+            "configurePreset": "ESP32_S3"
+        },
+        {
+            "inherits": "base-user",
+            "name": "ESP32_S3_BLE",
+            "displayName": "ESP32_S3_BLE",
+            "configurePreset": "ESP32_S3_BLE"
+        },
+        {
+            "inherits": "base-user",
+            "name": "XIAO_ESP32C3",
+            "displayName": "XIAO_ESP32C3",
+            "configurePreset": "XIAO_ESP32C3"
+        },
+        {
+            "inherits": "base-user",
             "name": "M5Stack",
             "displayName": "M5Stack",
             "configurePreset": "M5Stack"
@@ -741,6 +858,12 @@
             "name": "M5Core2",
             "displayName": "M5Core2",
             "configurePreset": "M5Core2"
+        },
+        {
+            "inherits": "base-user",
+            "name": "AtomS3",
+            "displayName": "AtomS3",
+            "configurePreset": "AtomS3"
         },
         {
             "inherits": "base-user",

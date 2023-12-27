@@ -216,8 +216,8 @@ static void RxChar(UARTDriver *uartp, uint16_t c)
 
     // store this into the UART Rx buffer
 
-    // push char to ring buffer
-    // don't care about the success of the operation, if it's full we are droping the char anyway
+    // push char to the ring buffer
+    // ignore the success of the operation, if it's full we are dropping the char anyway.
     palUart->RxRingBuffer.Push((uint8_t)c);
 
     // is there a read operation going on?
@@ -245,11 +245,12 @@ static void RxChar(UARTDriver *uartp, uint16_t c)
         // no read operation ongoing, so fire an event, if the available bytes are above the threshold
         if (palUart->RxRingBuffer.Length() >= palUart->ReceivedBytesThreshold)
         {
-            // post a managed event with the port index and event code (check if this is the watch char or just another
-            // another)
-            // TODO: check if callbacks are registered so this is called only if there is anyone listening otherwise
-            // don't bother for that to happen ChibiOS callback has to accept arg which we would passing the GpioPin
-            // CLR_RT_HeapBlock (see Gpio handler) check http://www.chibios.com/forum/viewtopic.php?f=36&t=4798
+            // Post a managed event with the port index and event code (check if there is a watch
+            // char in the buffer or just any char)
+            // FIXME: check if callbacks are registered so this is called only if there is anyone listening otherwise
+            // don't bother.
+            // TODO: For that to happen ChibiOS callback has to accept arg which we would passing the GpioPin
+            // Notes: CLR_RT_HeapBlock (Gpio handler) See: http://www.chibios.com/forum/viewtopic.php?f=36&t=4798
             PostManagedEvent(
                 EVENT_SERIAL,
                 0,
@@ -979,18 +980,99 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeConfig___VOI
         NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
     }
 
-    // setup configuration
+    // Setup configuration
 
-    // data bits @ CR1:M1&M0
-    // TODO
-
-    // parity @ CR1:PS
-    // TODO
-
-    // Check RS485 mode is not selected as currently not supported
-    if ((SerialMode)pThis[FIELD___mode].NumericByRef().s4 != SerialMode_Normal)
+    // Check dataBits validity
+    switch ((uint16_t)pThis[FIELD___dataBits].NumericByRef().s4)
     {
-        NANOCLR_SET_AND_LEAVE(CLR_E_NOTIMPL);
+        case 7:
+        case 8:
+            // We handle this along with parity.
+            break;
+
+        default:
+            NANOCLR_SET_AND_LEAVE(CLR_E_NOT_SUPPORTED);
+    }
+
+    // parity + data bits @ CR1:M1&M0 registers
+    switch ((Parity)pThis[FIELD___parity].NumericByRef().s4)
+    {
+        case Parity_None:
+            palUart->Uart_cfg.cr1 &= ~(USART_CR1_PCE | USART_CR1_PS | USART_CR1_M);
+
+            if ((uint16_t)pThis[FIELD___dataBits].NumericByRef().s4 == 7)
+            {
+#ifdef USART_CR1_M1
+                palUart->Uart_cfg.cr1 |= USART_CR1_M1;
+#else
+                NANOCLR_SET_AND_LEAVE(CLR_E_NOT_SUPPORTED);
+#endif
+            }
+            break;
+
+        case Parity_Even:
+
+            if ((uint16_t)pThis[FIELD___dataBits].NumericByRef().s4 == 8)
+            {
+#ifdef USART_CR1_M0
+                palUart->Uart_cfg.cr1 |= USART_CR1_M0 | USART_CR1_PCE;
+#else
+                NANOCLR_SET_AND_LEAVE(CLR_E_NOT_SUPPORTED);
+#endif
+            }
+            else
+            {
+                palUart->Uart_cfg.cr1 |= USART_CR1_M | USART_CR1_PCE;
+            }
+
+            palUart->Uart_cfg.cr1 &= ~USART_CR1_PS;
+            break;
+
+        case Parity_Odd:
+
+            if ((uint16_t)pThis[FIELD___dataBits].NumericByRef().s4 == 8)
+            {
+#ifdef USART_CR1_M0
+                palUart->Uart_cfg.cr1 |= USART_CR1_M0 | USART_CR1_PCE;
+#else
+                NANOCLR_SET_AND_LEAVE(CLR_E_NOT_SUPPORTED);
+#endif
+            }
+            else
+            {
+                palUart->Uart_cfg.cr1 |= USART_CR1_M | USART_CR1_PCE;
+            }
+
+            palUart->Uart_cfg.cr1 |= USART_CR1_PS;
+            break;
+
+        default:
+            NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+    }
+
+    // Set the serial mode
+    switch ((SerialMode)pThis[FIELD___mode].NumericByRef().s4)
+    {
+        case SerialMode_Normal:
+            break;
+
+        case SerialMode_RS485:
+#ifdef USART_CR3_DEM
+            // Set Driver Enable Mode
+            palUart->Uart_cfg.cr3 |= USART_CR3_DEM;
+            // Set Driver Enable Polarity
+            palUart->Uart_cfg.cr3 |= USART_CR3_DEP;
+            // Auto-RTS delay - set to maximum
+            palUart->Uart_cfg.cr1 |= USART_CR1_DEDT;
+            // Auto-RTS delay - set to maximum
+            palUart->Uart_cfg.cr1 |= USART_CR1_DEAT;
+#else
+            NANOCLR_SET_AND_LEAVE(CLR_E_NOT_SUPPORTED);
+#endif
+            break;
+
+        default:
+            NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
     }
 
     // stop bits @ CR2:STOP1&STOP0
@@ -1002,9 +1084,11 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeConfig___VOI
         case StopBits_One:
             // already set with the above
             break;
+
         case StopBits_OnePointFive:
             palUart->Uart_cfg.cr2 |= USART_CR2_STOP_1 + USART_CR2_STOP_0;
             break;
+
         case StopBits_Two:
             palUart->Uart_cfg.cr2 |= USART_CR2_STOP_1;
             break;
@@ -1121,7 +1205,7 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeWriteString_
 
     bool isNewAllocation = false;
     char *buffer = NULL;
-    uint32_t bufferLength;
+    uint32_t bufferLength = 0;
     int32_t length = 0;
 
     // get a pointer to the managed object instance and check that it's not NULL
@@ -1160,6 +1244,9 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeWriteString_
         // push onto the eval stack how many bytes are being pushed to the UART
         stack.PushValueI4(bufferLength);
 
+        // push onto the eval stack if the buffer was allocated
+        stack.PushValueI4(isNewAllocation ? 1 : 0);
+
         // flush DMA buffer to ensure cache coherency
         // (only required for Cortex-M7)
         cacheBufferFlush(buffer, bufferLength);
@@ -1192,6 +1279,10 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeWriteString_
         if (eventResult)
         {
             // event occurred
+
+            // pop "isNewAllocation" from the eval stack
+            isNewAllocation = stack.m_evalStack[2].NumericByRef().s4 == 1 ? true : false;
+
             // get from the eval stack how many bytes were buffered to Tx
             length = stack.m_evalStack[1].NumericByRef().s4;
 
@@ -1207,15 +1298,18 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeWriteString_
     // pop "length" heap block from stack
     stack.PopValue();
 
+    // pop "isNewAllocation" heap block from stack
+    stack.PopValue();
+
     // pop "hbTimeout" heap block from stack
     stack.PopValue();
 
     stack.SetResult_U4(length);
 
     // free memory, if it was allocated
-    if (isNewAllocation && buffer)
+    if (isNewAllocation)
     {
-        platform_free(buffer);
+        platform_free(palUart->TxBuffer);
     }
 
     // null pointers and vars
