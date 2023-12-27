@@ -5,10 +5,10 @@ on:
     paths:
       - '.devcontainer/**/*'
       - '.github/workflows/*'
-  # push:
-  #   paths:
-  #     - '.devcontainer/sources/*'
-  #     - '.github/workflows/*'
+  push:
+    paths:
+      - '.devcontainer/**/*'
+      - '.github/workflows/*'
 
 jobs:
   build-target:
@@ -72,11 +72,9 @@ jobs:
       - name: Build ${{ matrix.target }} ${{ matrix.build-type }} Firmware
         uses: devcontainers/ci@v0.3
         with:
+          configFile: ./.devcontainer/${{ matrix.container }}/devcontainer.json
           push: never
           runCmd: |
-            pushd .devcontainer/${{ matrix.container }}
             # Build target:
             cmake --preset=${{ matrix.target }} -DCMAKE_BUILD_TYPE=${{ matrix.build-type }}
             cmake --build build
-            popd
-
