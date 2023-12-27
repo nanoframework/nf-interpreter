@@ -5,14 +5,14 @@ name: Build Dev Container for TI
 
 env:
   GCR_IMAGE: ghcr.io/nanoframework/dev-container-ti
-  GCR_FILE: .devcontainer/sources/Dockerfile.TI
+  GCR_FILE: .devcontainer/TI/Dockerfile.TI.SRC
 
 on:
   push:
     branches:
       - main
     paths:
-      - '**Dockerfile.TI'
+      - '**Dockerfile.TI.SRC'
     
   workflow_dispatch:
 
@@ -23,11 +23,11 @@ jobs:
     steps:
 
     - name: Checkout Repository
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
 
     - name: Get container version
       run: |
-        $dockerfileContent = Get-Content(".devcontainer/Dockerfile.TI")
+        $dockerfileContent = Get-Content(".devcontainer/TI/Dockerfile.TI")
         $dockerfileContent -match '(?<=\:)(?:[v]\d+.\d+)'
         $containerVersion = $Matches[0].ToString()
         echo "GCR_VERSION=$containerVersion" | Out-File -FilePath $Env:GITHUB_ENV -Encoding utf-8 -Append

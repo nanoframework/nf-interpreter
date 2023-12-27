@@ -5,7 +5,7 @@ name: Build Dev Container for Azure RTOS
 
 env:
   GCR_IMAGE: ghcr.io/nanoframework/dev-container-azure-rtos
-  GCR_FILE: .devcontainer/sources/Dockerfile.AzureRTOS
+  GCR_FILE: .devcontainer/AzureRTOS/Dockerfile.AzureRTOS.SRC
 
 on:
   push:
@@ -23,11 +23,11 @@ jobs:
     steps:
 
     - name: Checkout Repository
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
 
     - name: Get container version
       run: |
-        $dockerfileContent = Get-Content(".devcontainer/Dockerfile.AzureRTOS")
+        $dockerfileContent = Get-Content(".devcontainer/AzureRTOS/Dockerfile.AzureRTOS")
         $dockerfileContent -match '(?<=\:)(?:[v]\d+.\d+)'
         $containerVersion = $Matches[0].ToString()
         echo "GCR_VERSION=$containerVersion" | Out-File -FilePath $Env:GITHUB_ENV -Encoding utf-8 -Append
