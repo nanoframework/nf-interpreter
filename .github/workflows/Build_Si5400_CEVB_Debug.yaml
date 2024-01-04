@@ -1,0 +1,11 @@
+name: Build Si5400_CEVB_Debug
+
+on:
+  workflow_dispatch
+
+jobs:
+  build_Si5400_CEVB_Debug:
+    name: Build Si5400_CEVB_Debug
+    uses: ./.github/workflows/skyworks_evb_build.yaml
+    with:
+      targetName: 'Si5400_CEVB_Debug'
