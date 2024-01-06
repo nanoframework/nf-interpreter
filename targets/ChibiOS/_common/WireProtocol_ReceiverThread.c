@@ -37,7 +37,7 @@ __attribute__((noreturn)) void ReceiverThread(void const *argument)
 
 #if (HAL_USE_SERIAL_USB == TRUE)
             // pass control to the OS
-            osThreadYield();
+            osDelay(1);
         }
         else
         {
@@ -46,7 +46,7 @@ __attribute__((noreturn)) void ReceiverThread(void const *argument)
 
 #elif (HAL_USE_SERIAL == TRUE)
         // delay here to give other threads a chance to run
-        osThreadYield();
+        osDelay(1);
 #endif
     }
 
