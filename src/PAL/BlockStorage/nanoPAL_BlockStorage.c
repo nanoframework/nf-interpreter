@@ -754,7 +754,17 @@ bool BlockStorageList_InitializeDevices()
 // walk through list of devices and calls UnInit() function
 bool BlockStorageList_UnInitializeDevices()
 {
-    // TODO FIXME
+// For ESP32 devices, may also be relevant to other devices
+#if defined(ESP_PLATFORM) 
+    for(int i = 0; i < TARGET_BLOCKSTORAGE_COUNT; i++)
+    {
+        if(g_BlockStorage.DeviceList[i] != NULL)
+        {
+            BlockStorageDevice_UninitializeDevice(g_BlockStorage.DeviceList[i]);
+            g_BlockStorage.DeviceList[i] = NULL;
+        }
+    }
+#endif
     return true;
 }
 
