@@ -71,7 +71,7 @@ RUN git clone --branch nf-build https://github.com/nanoframework/STM32CubeL4.git
     && git clone --branch nf-build https://github.com/nanoframework/STM32CubeF7.git --depth 1 ./sources/STM32CubeF7 \
     && git clone --branch nf-build https://github.com/nanoframework/STM32CubeF4.git --depth 1 ./sources/STM32CubeF4 \
     && git clone --branch nf-build https://github.com/nanoframework/STM32CubeH7.git --depth 1 ./sources/STM32CubeH7 \
-    && git clone --branch nanoframework https://github.com/nanoframework/ChibiOS-Contrib.git --depth 1 ./sources/ChibiOs-Contrib
+    && git clone --branch chibios-21.11.x https://github.com/ChibiOS/ChibiOS-Contrib.git --depth 1 ./sources/ChibiOs-Contrib
 
 # Clone repos for AzureRTOS
 RUN git clone --branch v6.3.0_rel --recursive https://github.com/azure-rtos/threadx.git --depth 1 ./sources/AzureRTOS \

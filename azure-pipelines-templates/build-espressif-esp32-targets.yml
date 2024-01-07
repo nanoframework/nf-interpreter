@@ -87,3 +87,14 @@ steps:
       scriptSource: 'filePath'
       scriptPath: '$(IDF_PATH)\components\partition_table\gen_esp32part.py'
       arguments: '--verify ${{ parameters.partitionsDirectory }}\partitions_nanoclr_2mb.csv ${{ parameters.repoDirectory }}\build\partitions_2mb.bin'
+
+  - task: CopyFiles@2
+    condition: succeeded()
+    displayName: Copy CSV partition files
+    inputs:
+      sourceFolder: ${{ parameters.partitionsDirectory }}
+      Contents: |
+        *.csv
+      TargetFolder: ${{ parameters.repoDirectory }}\build
+      flattenFolders: false
+      ignoreMakeDirErrors: true
