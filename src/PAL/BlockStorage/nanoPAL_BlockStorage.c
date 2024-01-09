@@ -809,14 +809,31 @@ void BlockStorageList_Initialize()
 // walk through list of devices and calls Init() function
 bool BlockStorageList_InitializeDevices()
 {
-    // TODO FIXME
+    for (int i = 0; i < TARGET_BLOCKSTORAGE_COUNT; i++)
+    {
+        if (g_BlockStorage.DeviceList[i] != NULL)
+        {
+            BlockStorageDevice_InitializeDevice(g_BlockStorage.DeviceList[i]);
+        }
+    }
+
     return true;
 }
 
 // walk through list of devices and calls UnInit() function
 bool BlockStorageList_UnInitializeDevices()
 {
-    // TODO FIXME
+    for (int i = 0; i < TARGET_BLOCKSTORAGE_COUNT; i++)
+    {
+        if (g_BlockStorage.DeviceList[i] != NULL)
+        {
+            BlockStorageDevice_UninitializeDevice(g_BlockStorage.DeviceList[i]);
+            g_BlockStorage.DeviceList[i] = NULL;
+
+            g_BlockStorage.DeviceCount--;
+        }
+    }
+
     return true;
 }
 
