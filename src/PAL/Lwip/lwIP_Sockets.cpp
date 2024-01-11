@@ -50,6 +50,8 @@ static HAL_CONTINUATION PostAvailabilityOnContinuation;
 static HAL_CONTINUATION PostAvailabilityOffContinuation;
 #endif
 
+static netif_ext_callback_t netif_callback = {.callback_fn = NULL, .next = NULL};
+
 void LWIP_SOCKETS_Driver::PostAddressChanged(void *arg)
 {
     (void)arg;
@@ -193,6 +195,36 @@ void LWIP_SOCKETS_Driver::Status_callback(struct netif *netif)
 }
 #endif
 
+#if LWIP_NETIF_STATUS_CALLBACK == 1
+void LWIP_SOCKETS_Driver::ExtendedStatus_callback(
+    struct netif *netif,
+    netif_nsc_reason_t reason,
+    const netif_ext_callback_args_t *args)
+{
+    (void)netif;
+    (void)args;
+
+#if LWIP_IPV4
+    if (reason & LWIP_NSC_IPV4_ADDRESS_CHANGED)
+    {
+        if (!PostAddressChangedContinuation.IsLinked())
+        {
+            PostAddressChangedContinuation.Enqueue();
+        }
+    }
+#endif
+#if LWIP_IPV6
+    if ((reason & LWIP_NSC_IPV6_ADDR_STATE_CHANGED))
+    {
+        if (!PostAddressChangedContinuation.IsLinked())
+        {
+            PostAddressChangedContinuation.Enqueue();
+        }
+    }
+#endif
+}
+#endif
+
 bool LWIP_SOCKETS_Driver::Initialize()
 {
     NATIVE_PROFILE_PAL_NETWORK();
@@ -200,6 +232,7 @@ bool LWIP_SOCKETS_Driver::Initialize()
     struct netif *networkInterface;
     HAL_Configuration_NetworkInterface networkConfiguration;
     int interfaceNumber;
+    uint8_t statusCallbackHandled = 0;
 
 #if LWIP_NETIF_STATUS_CALLBACK == 1
     PostAddressChangedContinuation.InitializeCallback(PostAddressChanged, NULL);
@@ -264,6 +297,20 @@ bool LWIP_SOCKETS_Driver::Initialize()
             if (netif_is_up(networkInterface))
             {
                 Status_callback(networkInterface);
+
+                // set flag
+                statusCallbackHandled = 1;
+            }
+#endif
+#if LWIP_NETIF_EXT_STATUS_CALLBACK == 1
+            netif_add_ext_callback(&netif_callback, ExtendedStatus_callback);
+
+            if (netif_is_up(networkInterface))
+            {
+                if(statusCallbackHandled == 0)
+                {
+                    Status_callback(networkInterface);
+                }
             }
 #endif
 

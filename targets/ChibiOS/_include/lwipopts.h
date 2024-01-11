@@ -549,7 +549,7 @@
  * @see netif_ext_status_callback
  */
 #if !defined LWIP_NETIF_EXT_STATUS_CALLBACK
-#define LWIP_NETIF_EXT_STATUS_CALLBACK 0
+#define LWIP_NETIF_EXT_STATUS_CALLBACK 1
 #endif
 
 /**

@@ -449,6 +449,22 @@
  */
 #define LWIP_NETIF_TX_SINGLE_PBUF             1
 
+/**
+ * LWIP_NETIF_API==1: Enable usage of standard POSIX APIs in LWIP.
+ */
+#define LWIP_NETIF_API                      CONFIG_LWIP_NETIF_API
+
+#define LWIP_NETIF_STATUS_CALLBACK      CONFIG_LWIP_NETIF_STATUS_CALLBACK
+
+/**
+ * LWIP_NETIF_EXT_STATUS_CALLBACK==1: Support an extended callback function
+ * for several netif related event that supports multiple subscribers.
+ * @see netif_ext_status_callback
+ */
+#if !defined LWIP_NETIF_EXT_STATUS_CALLBACK
+#define LWIP_NETIF_EXT_STATUS_CALLBACK 1
+#endif
+
 /*
    ------------------------------------
    ---------- LOOPIF options ----------
