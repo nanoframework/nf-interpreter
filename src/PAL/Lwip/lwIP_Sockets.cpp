@@ -138,7 +138,7 @@ void LWIP_SOCKETS_Driver::Link_callback(struct netif *netif)
         if (!PostAvailabilityOffContinuation.IsLinked())
             PostAvailabilityOffContinuation.Enqueue();
     }
-    Events_Set(SYSTEM_EVENT_FLAG_SOCKET);
+    //Events_Set(SYSTEM_EVENT_FLAG_SOCKET);
     Events_Set(SYSTEM_EVENT_FLAG_NETWORK);
 }
 #endif
@@ -151,22 +151,24 @@ void LWIP_SOCKETS_Driver::Status_callback(struct netif *netif)
 #endif
 
     if (!PostAddressChangedContinuation.IsLinked())
+    {
         PostAddressChangedContinuation.Enqueue();
+    }
 
 #if !defined(BUILD_RTM)
-        // lcd_printf("\f\n\n\n\n\n\nLink Update: %s\n", (netif_is_up(netif) ? "UP  " : "DOWN"));
-        // lcd_printf("         IP: %d.%d.%d.%d\n", (netif->ip_addr.addr >> 0) & 0xFF,
-        // 	(netif->ip_addr.addr >> 8) & 0xFF,
-        // 	(netif->ip_addr.addr >> 16) & 0xFF,
-        // 	(netif->ip_addr.addr >> 24) & 0xFF);
-        // lcd_printf("         SM: %d.%d.%d.%d\n", (netif->netmask.addr >> 0) & 0xFF,
-        // 	(netif->netmask.addr >> 8) & 0xFF,
-        // 	(netif->netmask.addr >> 16) & 0xFF,
-        // 	(netif->netmask.addr >> 24) & 0xFF);
-        // lcd_printf("         GW: %d.%d.%d.%d\n", (netif->gw.addr >> 0) & 0xFF,
-        // 	(netif->gw.addr >> 8) & 0xFF,
-        // 	(netif->gw.addr >> 16) & 0xFF,
-        // 	(netif->gw.addr >> 24) & 0xFF);
+    // lcd_printf("\f\n\n\n\n\n\nLink Update: %s\n", (netif_is_up(netif) ? "UP  " : "DOWN"));
+    // lcd_printf("         IP: %d.%d.%d.%d\n", (netif->ip_addr.addr >> 0) & 0xFF,
+    // 	(netif->ip_addr.addr >> 8) & 0xFF,
+    // 	(netif->ip_addr.addr >> 16) & 0xFF,
+    // 	(netif->ip_addr.addr >> 24) & 0xFF);
+    // lcd_printf("         SM: %d.%d.%d.%d\n", (netif->netmask.addr >> 0) & 0xFF,
+    // 	(netif->netmask.addr >> 8) & 0xFF,
+    // 	(netif->netmask.addr >> 16) & 0xFF,
+    // 	(netif->netmask.addr >> 24) & 0xFF);
+    // lcd_printf("         GW: %d.%d.%d.%d\n", (netif->gw.addr >> 0) & 0xFF,
+    // 	(netif->gw.addr >> 8) & 0xFF,
+    // 	(netif->gw.addr >> 16) & 0xFF,
+    // 	(netif->gw.addr >> 24) & 0xFF);
 
 // FIXME debug_printf("IP Address: %d.%d.%d.%d\n", (netif->ip_addr.u_addr.ip4.addr >> 0) & 0xFF,
 // 	(netif->ip_addr.u_addr.ip4.addr >> 8) & 0xFF,
@@ -190,12 +192,12 @@ void LWIP_SOCKETS_Driver::Status_callback(struct netif *netif)
     }
 #endif
 #endif
-    Events_Set(SYSTEM_EVENT_FLAG_SOCKET);
+    //Events_Set(SYSTEM_EVENT_FLAG_SOCKET);
     Events_Set(SYSTEM_EVENT_FLAG_NETWORK);
 }
 #endif
 
-#if LWIP_NETIF_STATUS_CALLBACK == 1
+#if LWIP_NETIF_EXT_STATUS_CALLBACK == 1
 void LWIP_SOCKETS_Driver::ExtendedStatus_callback(
     struct netif *netif,
     netif_nsc_reason_t reason,
@@ -222,6 +224,9 @@ void LWIP_SOCKETS_Driver::ExtendedStatus_callback(
         }
     }
 #endif
+
+    //Events_Set(SYSTEM_EVENT_FLAG_SOCKET);
+    Events_Set(SYSTEM_EVENT_FLAG_NETWORK);
 }
 #endif
 
@@ -232,7 +237,6 @@ bool LWIP_SOCKETS_Driver::Initialize()
     struct netif *networkInterface;
     HAL_Configuration_NetworkInterface networkConfiguration;
     int interfaceNumber;
-    uint8_t statusCallbackHandled = 0;
 
 #if LWIP_NETIF_STATUS_CALLBACK == 1
     PostAddressChangedContinuation.InitializeCallback(PostAddressChanged, NULL);
@@ -283,6 +287,7 @@ bool LWIP_SOCKETS_Driver::Initialize()
 
         if (networkInterface)
         {
+
 #if LWIP_NETIF_LINK_CALLBACK == 1
             netif_set_link_callback(networkInterface, Link_callback);
 
@@ -291,27 +296,18 @@ bool LWIP_SOCKETS_Driver::Initialize()
                 Link_callback(networkInterface);
             }
 #endif
+
 #if LWIP_NETIF_STATUS_CALLBACK == 1
             netif_set_status_callback(networkInterface, Status_callback);
 
             if (netif_is_up(networkInterface))
             {
                 Status_callback(networkInterface);
-
-                // set flag
-                statusCallbackHandled = 1;
             }
 #endif
+
 #if LWIP_NETIF_EXT_STATUS_CALLBACK == 1
             netif_add_ext_callback(&netif_callback, ExtendedStatus_callback);
-
-            if (netif_is_up(networkInterface))
-            {
-                if (statusCallbackHandled == 0)
-                {
-                    Status_callback(networkInterface);
-                }
-            }
 #endif
 
             // default debugger interface
