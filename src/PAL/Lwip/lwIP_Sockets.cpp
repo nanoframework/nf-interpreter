@@ -307,7 +307,7 @@ bool LWIP_SOCKETS_Driver::Initialize()
 
             if (netif_is_up(networkInterface))
             {
-                if(statusCallbackHandled == 0)
+                if (statusCallbackHandled == 0)
                 {
                     Status_callback(networkInterface);
                 }

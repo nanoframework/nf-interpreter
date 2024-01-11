@@ -119,7 +119,10 @@ struct LWIP_SOCKETS_Driver
   private:
     static void Status_callback(struct netif *netif);
 
-    static void ExtendedStatus_callback(struct netif* netif, netif_nsc_reason_t reason, const netif_ext_callback_args_t* args);
+    static void ExtendedStatus_callback(
+        struct netif *netif,
+        netif_nsc_reason_t reason,
+        const netif_ext_callback_args_t *args);
 
     static void Link_callback(struct netif *netif);
 
