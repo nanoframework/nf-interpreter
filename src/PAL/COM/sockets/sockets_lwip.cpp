@@ -227,9 +227,9 @@ HRESULT SOCK_IPV6AddressFromString(const char *ipString, uint16_t *address)
 
 const char *SOCK_IPV6AddressToString(uint16_t *address)
 {
-     NATIVE_PROFILE_PAL_COM();
+    NATIVE_PROFILE_PAL_COM();
 
-    return HAL_SOCK_IPV6AddressToString(address);   
+    return HAL_SOCK_IPV6AddressToString(address);
 }
 #endif
 

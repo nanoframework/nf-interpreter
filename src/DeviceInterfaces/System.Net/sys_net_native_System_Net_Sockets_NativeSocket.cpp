@@ -582,23 +582,22 @@ HRESULT Library_sys_net_native_System_Net_Sockets_NativeSocket::MarshalSockAddre
             // IPV6 (SOCK_sockaddr_in6)
             SOCK_sockaddr_in6 *src6 = (SOCK_sockaddr_in6 *)addrSrc;
 
-            CLR_RT_HeapBlock &numbersFieldRef = ipAddressHbObj[Library_sys_net_native_System_Net_IPAddress::FIELD___numbers];
+            CLR_RT_HeapBlock &numbersFieldRef =
+                ipAddressHbObj[Library_sys_net_native_System_Net_IPAddress::FIELD___numbers];
 
-            NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance(
-                numbersFieldRef,
-                8,
-                g_CLR_RT_WellKnownTypes.m_UInt16));
-          
+            NANOCLR_CHECK_HRESULT(
+                CLR_RT_HeapBlock_Array::CreateInstance(numbersFieldRef, 8, g_CLR_RT_WellKnownTypes.m_UInt16));
 
-            CLR_UINT16 * addrNumbers = (CLR_UINT16 *)numbersFieldRef.DereferenceArray()->GetFirstElement();
+            CLR_UINT16 *addrNumbers = (CLR_UINT16 *)numbersFieldRef.DereferenceArray()->GetFirstElement();
 
             // Copy address numbers
-            for(int i=0; i<8; i++)
+            for (int i = 0; i < 8; i++)
             {
                 addrNumbers[i] = SOCK_ntohs(src6->sin_addr.un.u16_addr[i]);
             }
 
-            ipAddressHbObj[Library_sys_net_native_System_Net_IPAddress::FIELD___scopeid].NumericByRef().s4 = src6->scopeId;
+            ipAddressHbObj[Library_sys_net_native_System_Net_IPAddress::FIELD___scopeid].NumericByRef().s4 =
+                src6->scopeId;
 
             family = src6->sin_family;
             port = src6->sin_port;
@@ -611,7 +610,8 @@ HRESULT Library_sys_net_native_System_Net_Sockets_NativeSocket::MarshalSockAddre
 
             // IPAddress _address field
             // CLR_INT64 fields need to be accessed by pointer
-            CLR_RT_HeapBlock &addressFieldRef = ipAddressHbObj[Library_sys_net_native_System_Net_IPAddress::FIELD__Address];
+            CLR_RT_HeapBlock &addressFieldRef =
+                ipAddressHbObj[Library_sys_net_native_System_Net_IPAddress::FIELD__Address];
             CLR_INT64 *pRes = (CLR_INT64 *)&addressFieldRef.NumericByRef().s8;
             *pRes = src->sin_addr.S_un.S_addr;
 
@@ -624,7 +624,7 @@ HRESULT Library_sys_net_native_System_Net_Sockets_NativeSocket::MarshalSockAddre
 
         // IPEndPoint _port field
         // take care of endianess swapping
-        ipEndPointHbObj[Library_sys_net_native_System_Net_IPEndPoint::FIELD___port].NumericByRef().s4 = 
+        ipEndPointHbObj[Library_sys_net_native_System_Net_IPEndPoint::FIELD___port].NumericByRef().s4 =
             SOCK_ntohs(port);
 
         // set IPEndPoint address with IPAddress heap block object
@@ -656,7 +656,7 @@ HRESULT Library_sys_net_native_System_Net_Sockets_NativeSocket::MarshalSockAddre
     int64_t address;
     int32_t port;
 #if defined(LWIP_IPV6) && LWIP_IPV6
-    int32_t  family;
+    int32_t family;
 #endif
 
     endPointAddress = blkEndPointAddress.Dereference();
@@ -681,23 +681,25 @@ HRESULT Library_sys_net_native_System_Net_Sockets_NativeSocket::MarshalSockAddre
     if (family == SOCK_AF_INET6)
     {
         SOCK_sockaddr_in6 *dst = (SOCK_sockaddr_in6 *)addrDst;
-        CLR_RT_HeapBlock_Array * numbersArray;
-        CLR_UINT16 * addrNumbers;
+        CLR_RT_HeapBlock_Array *numbersArray;
+        CLR_UINT16 *addrNumbers;
 
         dst->sin_family = SOCK_AF_INET6;
         // need to convert port number to network order
         dst->sin_port = SOCK_htons(port);
 
-        numbersArray = remoteEndPointAddress[Library_sys_net_native_System_Net_IPAddress::FIELD___numbers].DereferenceArray();
+        numbersArray =
+            remoteEndPointAddress[Library_sys_net_native_System_Net_IPAddress::FIELD___numbers].DereferenceArray();
         FAULT_ON_NULL(numbersArray);
 
         addrNumbers = (CLR_UINT16 *)numbersArray->GetFirstElement();
-        for(int i=0; i<8; i++)
+        for (int i = 0; i < 8; i++)
         {
             dst->sin_addr.un.u16_addr[i] = SOCK_ntohs(addrNumbers[i]);
         }
 
-        dst->scopeId = remoteEndPointAddress[Library_sys_net_native_System_Net_IPAddress::FIELD___scopeid].NumericByRef().u4;
+        dst->scopeId =
+            remoteEndPointAddress[Library_sys_net_native_System_Net_IPAddress::FIELD___scopeid].NumericByRef().u4;
         addrLenDst = sizeof(SOCK_sockaddr_in6);
     }
     else
@@ -706,8 +708,9 @@ HRESULT Library_sys_net_native_System_Net_Sockets_NativeSocket::MarshalSockAddre
         SOCK_sockaddr_in *dst = (SOCK_sockaddr_in *)addrDst;
 
         // get value of m_Address field (type long)
-        address =
-            (CLR_INT64)remoteEndPointAddress[Library_sys_net_native_System_Net_IPAddress::FIELD__Address].NumericByRef().s8;
+        address = (CLR_INT64)remoteEndPointAddress[Library_sys_net_native_System_Net_IPAddress::FIELD__Address]
+                      .NumericByRef()
+                      .s8;
 
         dst->sin_family = SOCK_AF_INET;
         // need to convert port number to network order
@@ -716,7 +719,7 @@ HRESULT Library_sys_net_native_System_Net_Sockets_NativeSocket::MarshalSockAddre
         // address already in network byte order
         memcpy((int8_t *)&dst->sin_addr.S_un.S_addr, (int8_t *)&address, sizeof(address));
 
-        addrLenDst = sizeof(SOCK_sockaddr_in);  
+        addrLenDst = sizeof(SOCK_sockaddr_in);
     }
 
     NANOCLR_NOCLEANUP();
