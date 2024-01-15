@@ -18,11 +18,11 @@
 
 int32_t GetInternalDriveIndex(char *drive)
 {
-    if (memcmp(drive, INDEX3_DRIVE_LETTER, sizeof(INDEX3_DRIVE_LETTER)) == 0)
+    if (memcmp(drive, INDEX3_DRIVE_LETTER, sizeof(INDEX3_DRIVE_LETTER) - 1) == 0)
     {
         return 0;
     }
-    if (memcmp(drive, INDEX4_DRIVE_LETTER, sizeof(INDEX4_DRIVE_LETTER)) == 0)
+    if (memcmp(drive, INDEX4_DRIVE_LETTER, sizeof(INDEX4_DRIVE_LETTER) - 1) == 0)
     {
         return 1;
     }
