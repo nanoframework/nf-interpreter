@@ -398,7 +398,9 @@ HRESULT EnumerateDrives(CLR_RT_HeapBlock *array, int &count)
         }
 
         count = 0;
-        for (char drive = INDEX0_DRIVE_LETTER[0]; drive <= INDEX4_DRIVE_LETTER[0]; drive++)
+        // SPIFFS cannot handle directory structures, so only check the valid drives.
+        // FIXME: return warning if the drive type cannot handle directories.
+        for (char drive = INDEX0_DRIVE_LETTER[0]; drive <= INDEX2_DRIVE_LETTER[0]; drive++)
         {
             workingDrive[0] = drive;
 
