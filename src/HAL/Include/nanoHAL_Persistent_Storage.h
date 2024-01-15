@@ -15,14 +15,16 @@
 
 // driver letters and paths
 
-typedef enum {
+typedef enum
+{
     SD,
     USB,
     SPI,
     __STORAGE_TYPE_COUNT
 } storage_type_t;
 
-typedef struct {
+typedef struct
+{
     char drive_letter[1];
     uint8_t drive_index;
     storage_type_t drive_type;
