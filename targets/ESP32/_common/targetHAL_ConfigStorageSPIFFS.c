@@ -8,7 +8,7 @@
 #include "targetHAL_ConfigStorage.h"
 #include <esp_vfs.h>
 
-// this one is following the the same "drive letter" as the HAL Windows Storage INTERNAL_DRIVE0_LETTER
+// this one is following the the same "drive letter" as the HAL Windows Storage INDEX3_DRIVE_LETTER
 #define NANO_SPIFFS_BASE_PATH   "/I"
 #define NANO_SPIFFS_CONFIG_NAME "con_"
 

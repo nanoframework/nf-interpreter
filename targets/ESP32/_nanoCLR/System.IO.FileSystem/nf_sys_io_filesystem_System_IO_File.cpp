@@ -13,7 +13,7 @@ extern char *ConvertToVfsPath(const char *filepath);
 
 bool IsInternalFilePath(const char *filePath)
 {
-    if (filePath[0] == INTERNAL_DRIVE0_LETTER[0])
+    if (filePath[0] == INDEX3_DRIVE_LETTER[0])
     {
         return true;
     }

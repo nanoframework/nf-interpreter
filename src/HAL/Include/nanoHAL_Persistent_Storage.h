@@ -32,13 +32,13 @@
 
 // Internal drive 0 (SPIFFS)
 // #define INTERNAL_DRIVE0_NAME "SPI"
-#define INTERNAL_DRIVE0_LETTER "I"
-#define INTERNAL_DRIVE0_PATH   INTERNAL_DRIVE0_LETTER ":\\"
+#define INDEX3_DRIVE_LETTER "I"
+#define INDEX3_DRIVE_PATH   INDEX3_DRIVE_LETTER ":\\"
 
 // Internal drive 1 (SPIFFS)
 // #define INTERNAL_DRIVE1_NAME "SPI2"
-#define INTERNAL_DRIVE1_LETTER "J"
-#define INTERNAL_DRIVE1_PATH   INTERNAL_DRIVE1_LETTER ":\\"
+#define INDEX4_DRIVE_LETTER "J"
+#define INDEX4_DRIVE_PATH   INDEX4_DRIVE_LETTER ":\\"
 
 //////////////////////////////////////////////////////////////////////////
 // Keep in sync with StorageEventManager.StorageEventType in managed code

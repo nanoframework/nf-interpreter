@@ -302,7 +302,7 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::
             // dereference the object in order to reach its fields
             hbObj = storageFolder->Dereference();
 
-            memcpy(workingDrive, INTERNAL_DRIVE0_PATH, DRIVE_PATH_LENGTH);
+            memcpy(workingDrive, INDEX3_DRIVE_PATH, DRIVE_PATH_LENGTH);
 
             // set the managed fields
             NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_String::CreateInstance(
