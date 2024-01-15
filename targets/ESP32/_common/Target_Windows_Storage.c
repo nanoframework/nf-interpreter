@@ -80,7 +80,7 @@ bool LogMountResult(esp_err_t errCode)
 bool Storage_MountMMC(bool bit1Mode, int driveIndex)
 {
     esp_err_t errCode;
-    char mountPoint[] = SDCARD_DRIVE_LETTER;
+    char mountPoint[] = INDEX0_DRIVE_LETTER;
 
     // Change fatfs drive letter to mount point  D: -> /D for ESP32 VFS
     mountPoint[1] = mountPoint[0] + driveIndex;
@@ -146,7 +146,7 @@ bool Storage_MountMMC(bool bit1Mode, int driveIndex)
 bool Storage_MountSpi(int spiBus, uint32_t csPin, int driveIndex)
 {
     esp_err_t errCode;
-    char mountPoint[] = SDCARD_DRIVE_LETTER;
+    char mountPoint[] = INDEX0_DRIVE_LETTER;
 
     // Change fatfs drive letter to mount point  D: -> /D for ESP32 VFS
     mountPoint[1] = mountPoint[0] + driveIndex;

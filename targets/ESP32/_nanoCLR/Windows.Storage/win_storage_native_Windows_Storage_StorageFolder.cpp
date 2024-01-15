@@ -202,7 +202,7 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::
             // fill the folder name and path
             if (driveIterator == 0 && sdCardDrivePresent == true)
             {
-                memcpy(workingDrive, SDCARD_DRIVE_PATH, DRIVE_PATH_LENGTH);
+                memcpy(workingDrive, INDEX0_DRIVE_PATH, DRIVE_PATH_LENGTH);
             }
             else
             {

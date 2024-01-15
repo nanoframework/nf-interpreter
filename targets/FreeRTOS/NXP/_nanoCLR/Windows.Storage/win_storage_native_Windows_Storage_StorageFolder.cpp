@@ -99,11 +99,11 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::
             switch (driveIterator)
             {
                 case 0:
-                    memcpy(workingDrive, SDCARD_DRIVE_PATH, DRIVE_PATH_LENGTH);
+                    memcpy(workingDrive, INDEX0_DRIVE_PATH, DRIVE_PATH_LENGTH);
                     break;
 
                 case 1:
-                    memcpy(workingDrive, USB_DRIVE_PATH, DRIVE_PATH_LENGTH);
+                    memcpy(workingDrive, INDEX1_DRIVE_PATH, DRIVE_PATH_LENGTH);
                     break;
 
                 default:
