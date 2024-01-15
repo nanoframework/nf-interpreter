@@ -129,13 +129,18 @@ void LWIP_SOCKETS_Driver::Link_callback(struct netif *netif)
     if (netif_is_link_up(netif))
     {
         if (!PostAvailabilityOnContinuation.IsLinked())
+        {
             PostAvailabilityOnContinuation.Enqueue();
+        }
     }
     else
     {
         if (!PostAvailabilityOffContinuation.IsLinked())
+        {
             PostAvailabilityOffContinuation.Enqueue();
+        }
     }
+
     Events_Set(SYSTEM_EVENT_FLAG_SOCKET);
     Events_Set(SYSTEM_EVENT_FLAG_NETWORK);
 }
@@ -149,22 +154,24 @@ void LWIP_SOCKETS_Driver::Status_callback(struct netif *netif)
 #endif
 
     if (!PostAddressChangedContinuation.IsLinked())
+    {
         PostAddressChangedContinuation.Enqueue();
+    }
 
 #if !defined(BUILD_RTM)
-        // lcd_printf("\f\n\n\n\n\n\nLink Update: %s\n", (netif_is_up(netif) ? "UP  " : "DOWN"));
-        // lcd_printf("         IP: %d.%d.%d.%d\n", (netif->ip_addr.addr >> 0) & 0xFF,
-        // 	(netif->ip_addr.addr >> 8) & 0xFF,
-        // 	(netif->ip_addr.addr >> 16) & 0xFF,
-        // 	(netif->ip_addr.addr >> 24) & 0xFF);
-        // lcd_printf("         SM: %d.%d.%d.%d\n", (netif->netmask.addr >> 0) & 0xFF,
-        // 	(netif->netmask.addr >> 8) & 0xFF,
-        // 	(netif->netmask.addr >> 16) & 0xFF,
-        // 	(netif->netmask.addr >> 24) & 0xFF);
-        // lcd_printf("         GW: %d.%d.%d.%d\n", (netif->gw.addr >> 0) & 0xFF,
-        // 	(netif->gw.addr >> 8) & 0xFF,
-        // 	(netif->gw.addr >> 16) & 0xFF,
-        // 	(netif->gw.addr >> 24) & 0xFF);
+    // lcd_printf("\f\n\n\n\n\n\nLink Update: %s\n", (netif_is_up(netif) ? "UP  " : "DOWN"));
+    // lcd_printf("         IP: %d.%d.%d.%d\n", (netif->ip_addr.addr >> 0) & 0xFF,
+    // 	(netif->ip_addr.addr >> 8) & 0xFF,
+    // 	(netif->ip_addr.addr >> 16) & 0xFF,
+    // 	(netif->ip_addr.addr >> 24) & 0xFF);
+    // lcd_printf("         SM: %d.%d.%d.%d\n", (netif->netmask.addr >> 0) & 0xFF,
+    // 	(netif->netmask.addr >> 8) & 0xFF,
+    // 	(netif->netmask.addr >> 16) & 0xFF,
+    // 	(netif->netmask.addr >> 24) & 0xFF);
+    // lcd_printf("         GW: %d.%d.%d.%d\n", (netif->gw.addr >> 0) & 0xFF,
+    // 	(netif->gw.addr >> 8) & 0xFF,
+    // 	(netif->gw.addr >> 16) & 0xFF,
+    // 	(netif->gw.addr >> 24) & 0xFF);
 
 // FIXME debug_printf("IP Address: %d.%d.%d.%d\n", (netif->ip_addr.u_addr.ip4.addr >> 0) & 0xFF,
 // 	(netif->ip_addr.u_addr.ip4.addr >> 8) & 0xFF,
@@ -188,6 +195,7 @@ void LWIP_SOCKETS_Driver::Status_callback(struct netif *netif)
     }
 #endif
 #endif
+
     Events_Set(SYSTEM_EVENT_FLAG_SOCKET);
     Events_Set(SYSTEM_EVENT_FLAG_NETWORK);
 }
@@ -214,7 +222,8 @@ bool LWIP_SOCKETS_Driver::Initialize()
     g_LWIP_SOCKETS_Driver.m_interfaces =
         (LWIP_DRIVER_INTERFACE_DATA *)platform_malloc(interfaceCount * sizeof(LWIP_DRIVER_INTERFACE_DATA));
 
-    /* Initialize the target board lwIP stack */
+    // Initialize the target board lwIP stack
+    // Developer note: this call can only return AFTER the stack has been initialized
     nanoHAL_Network_Initialize();
 
     for (int i = 0; i < g_TargetConfiguration.NetworkInterfaceConfigs->Count; i++)
@@ -232,7 +241,7 @@ bool LWIP_SOCKETS_Driver::Initialize()
         }
         _ASSERTE(networkConfiguration.StartupAddressMode > 0);
 
-        /* Bind and Open the Ethernet driver */
+        // Bind and Open the Ethernet driver
         Network_Interface_Bind(i);
         interfaceNumber = Network_Interface_Open(i);
 
@@ -260,11 +269,6 @@ bool LWIP_SOCKETS_Driver::Initialize()
 #endif
 #if LWIP_NETIF_STATUS_CALLBACK == 1
             netif_set_status_callback(networkInterface, Status_callback);
-
-            if (netif_is_up(networkInterface))
-            {
-                Status_callback(networkInterface);
-            }
 #endif
 
             // default debugger interface
