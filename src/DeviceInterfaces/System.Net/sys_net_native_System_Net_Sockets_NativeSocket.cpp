@@ -528,6 +528,9 @@ CLR_INT32 Library_sys_net_native_System_Net_Sockets_NativeSocket::Helper__Select
     return res;
 }
 
+//
+// Marshal 'SOCK_sockaddr' to 'IPEndPoint' object
+//
 HRESULT Library_sys_net_native_System_Net_Sockets_NativeSocket::MarshalSockAddress(
     CLR_RT_HeapBlock &blkDst,
     const struct SOCK_sockaddr *addrSrc,
@@ -538,8 +541,6 @@ HRESULT Library_sys_net_native_System_Net_Sockets_NativeSocket::MarshalSockAddre
     NANOCLR_HEADER();
 
     (void)addrLenSrc;
-
-    SOCK_sockaddr_in *src = (SOCK_sockaddr_in *)addrSrc;
 
     CLR_RT_TypeDef_Index ipAddressTypeDef;
     CLR_RT_TypeDef_Index ipEndPointTypeDef;
@@ -553,6 +554,9 @@ HRESULT Library_sys_net_native_System_Net_Sockets_NativeSocket::MarshalSockAddre
     CLR_RT_HeapBlock ipEndPoint;
     ipEndPoint.SetObjectReference(NULL);
     CLR_RT_ProtectFromGC gc2(ipEndPoint);
+
+    CLR_INT32 port;
+    CLR_INT32 family;
 
     // find <IPAddress> type definition, don't bother checking the result as it exists for sure
     g_CLR_RT_TypeSystem.FindTypeDef("IPAddress", "System.Net", ipAddressTypeDef);
@@ -572,20 +576,56 @@ HRESULT Library_sys_net_native_System_Net_Sockets_NativeSocket::MarshalSockAddre
 
     {
         // get a reference to the managed fields and set them
+#if defined(LWIP_IPV6) && LWIP_IPV6
+        if (addrSrc->sa_family == SOCK_AF_INET6)
+        {
+            // IPV6 (SOCK_sockaddr_in6)
+            SOCK_sockaddr_in6 *src6 = (SOCK_sockaddr_in6 *)addrSrc;
 
-        // IPAddress _address field
-        // CLR_INT64 fields need to be accessed by pointer
-        CLR_RT_HeapBlock &addressFieldRef = ipAddressHbObj[Library_sys_net_native_System_Net_IPAddress::FIELD__Address];
-        CLR_INT64 *pRes = (CLR_INT64 *)&addressFieldRef.NumericByRef().s8;
-        *pRes = src->sin_addr.S_un.S_addr;
+            CLR_RT_HeapBlock &numbersFieldRef =
+                ipAddressHbObj[Library_sys_net_native_System_Net_IPAddress::FIELD___numbers];
+
+            NANOCLR_CHECK_HRESULT(
+                CLR_RT_HeapBlock_Array::CreateInstance(numbersFieldRef, 8, g_CLR_RT_WellKnownTypes.m_UInt16));
+
+            CLR_UINT16 *addrNumbers = (CLR_UINT16 *)numbersFieldRef.DereferenceArray()->GetFirstElement();
+
+            // Copy address numbers
+            for (int i = 0; i < 8; i++)
+            {
+                addrNumbers[i] = SOCK_ntohs(src6->sin_addr.un.u16_addr[i]);
+            }
+
+            ipAddressHbObj[Library_sys_net_native_System_Net_IPAddress::FIELD___scopeid].NumericByRef().s4 =
+                src6->scopeId;
+
+            family = src6->sin_family;
+            port = src6->sin_port;
+        }
+        else
+#endif
+        {
+            // IPV4 (SOCK_sockaddr_in)
+            SOCK_sockaddr_in *src = (SOCK_sockaddr_in *)addrSrc;
+
+            // IPAddress _address field
+            // CLR_INT64 fields need to be accessed by pointer
+            CLR_RT_HeapBlock &addressFieldRef =
+                ipAddressHbObj[Library_sys_net_native_System_Net_IPAddress::FIELD__Address];
+            CLR_INT64 *pRes = (CLR_INT64 *)&addressFieldRef.NumericByRef().s8;
+            *pRes = src->sin_addr.S_un.S_addr;
+
+            family = src->sin_family;
+            port = src->sin_port;
+        }
 
         // IPAddress _family field
-        ipAddressHbObj[Library_sys_net_native_System_Net_IPAddress::FIELD___family].NumericByRef().s4 = src->sin_family;
+        ipAddressHbObj[Library_sys_net_native_System_Net_IPAddress::FIELD___family].NumericByRef().s4 = family;
 
         // IPEndPoint _port field
         // take care of endianess swapping
         ipEndPointHbObj[Library_sys_net_native_System_Net_IPEndPoint::FIELD___port].NumericByRef().s4 =
-            SOCK_ntohs(src->sin_port);
+            SOCK_ntohs(port);
 
         // set IPEndPoint address with IPAddress heap block object
         ipEndPointHbObj[Library_sys_net_native_System_Net_IPEndPoint::FIELD___address].SetObjectReference(
@@ -600,6 +640,9 @@ HRESULT Library_sys_net_native_System_Net_Sockets_NativeSocket::MarshalSockAddre
     NANOCLR_NOCLEANUP();
 }
 
+//
+// Marshal 'IPEndPoint' object to 'SOCK_sockaddr'
+//
 HRESULT Library_sys_net_native_System_Net_Sockets_NativeSocket::MarshalSockAddress(
     struct SOCK_sockaddr *addrDst,
     CLR_UINT32 &addrLenDst,
@@ -608,39 +651,76 @@ HRESULT Library_sys_net_native_System_Net_Sockets_NativeSocket::MarshalSockAddre
     NATIVE_PROFILE_CLR_NETWORK();
     NANOCLR_HEADER();
 
-    SOCK_sockaddr_in *dst = (SOCK_sockaddr_in *)addrDst;
-
     CLR_RT_HeapBlock *endPointAddress;
     CLR_RT_HeapBlock *remoteEndPointAddress;
     int64_t address;
     int32_t port;
+#if defined(LWIP_IPV6) && LWIP_IPV6
+    int32_t family;
+#endif
 
     endPointAddress = blkEndPointAddress.Dereference();
     FAULT_ON_NULL(endPointAddress);
+
+    // clear struct
+    memset(addrDst, 0, sizeof(SOCK_sockaddr));
 
     // get a pointer to the managed field object instance for m_Address
     remoteEndPointAddress =
         endPointAddress[Library_sys_net_native_System_Net_IPEndPoint::FIELD___address].Dereference();
     FAULT_ON_NULL(remoteEndPointAddress);
 
-    // get value of m_Address field (type long)
-    address =
-        (CLR_INT64)remoteEndPointAddress[Library_sys_net_native_System_Net_IPAddress::FIELD__Address].NumericByRef().s8;
+#if defined(LWIP_IPV6) && LWIP_IPV6
+    family = remoteEndPointAddress[Library_sys_net_native_System_Net_IPAddress::FIELD___family].NumericByRef().s1;
+#endif
 
     // get value of m_Port field (type int)
     port = endPointAddress[Library_sys_net_native_System_Net_IPEndPoint::FIELD___port].NumericByRef().s4;
 
-    // clear struct
-    memset(dst, 0, sizeof(SOCK_sockaddr));
+#if defined(LWIP_IPV6) && LWIP_IPV6
+    if (family == SOCK_AF_INET6)
+    {
+        SOCK_sockaddr_in6 *dst = (SOCK_sockaddr_in6 *)addrDst;
+        CLR_RT_HeapBlock_Array *numbersArray;
+        CLR_UINT16 *addrNumbers;
 
-    dst->sin_family = SOCK_AF_INET;
-    // need to convert port number to network order
-    dst->sin_port = SOCK_htons(port);
+        dst->sin_family = SOCK_AF_INET6;
+        // need to convert port number to network order
+        dst->sin_port = SOCK_htons(port);
 
-    // address already in network byte order
-    memcpy((int8_t *)&dst->sin_addr.S_un.S_addr, (int8_t *)&address, sizeof(address));
+        numbersArray =
+            remoteEndPointAddress[Library_sys_net_native_System_Net_IPAddress::FIELD___numbers].DereferenceArray();
+        FAULT_ON_NULL(numbersArray);
 
-    addrLenDst = sizeof(address);
+        addrNumbers = (CLR_UINT16 *)numbersArray->GetFirstElement();
+        for (int i = 0; i < 8; i++)
+        {
+            dst->sin_addr.un.u16_addr[i] = SOCK_ntohs(addrNumbers[i]);
+        }
+
+        dst->scopeId =
+            remoteEndPointAddress[Library_sys_net_native_System_Net_IPAddress::FIELD___scopeid].NumericByRef().u4;
+        addrLenDst = sizeof(SOCK_sockaddr_in6);
+    }
+    else
+#endif
+    {
+        SOCK_sockaddr_in *dst = (SOCK_sockaddr_in *)addrDst;
+
+        // get value of m_Address field (type long)
+        address = (CLR_INT64)remoteEndPointAddress[Library_sys_net_native_System_Net_IPAddress::FIELD__Address]
+                      .NumericByRef()
+                      .s8;
+
+        dst->sin_family = SOCK_AF_INET;
+        // need to convert port number to network order
+        dst->sin_port = SOCK_htons(port);
+
+        // address already in network byte order
+        memcpy((int8_t *)&dst->sin_addr.S_un.S_addr, (int8_t *)&address, sizeof(address));
+
+        addrLenDst = sizeof(SOCK_sockaddr_in);
+    }
 
     NANOCLR_NOCLEANUP();
 }
