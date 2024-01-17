@@ -1,0 +1,3 @@
+FROM ghcr.io/nanoframework/dev-container-freertos-nxp:v1.01
+LABEL org.website="https://nanoframework.net/"
+LABEL description="This is dockerfile image for NXP targets"
