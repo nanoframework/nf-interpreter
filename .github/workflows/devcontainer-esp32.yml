@@ -4,8 +4,9 @@
 name: Build Dev Container for ESP32
 
 env:
-  GCR_IMAGE: ghcr.io/nanoframework/dev-container-esp32
-  GCR_FILE: .devcontainer/sources/Dockerfile.ESP32
+  CONTAINER_REPO: ghcr.io
+  CONTAINER_NAME: dev-container-esp32
+  CONTAINER_SRC_FILE: .devcontainer/ESP32/Dockerfile.ESP32.SRC
 
 on:
   push:
@@ -27,7 +28,7 @@ jobs:
 
     - name: Get container version
       run: |
-        $dockerfileContent = Get-Content(".devcontainer/Dockerfile.ESP32")
+        $dockerfileContent = Get-Content(".devcontainer/ESP32/Dockerfile.ESP32")
         $dockerfileContent -match '(?<=\:)(?:[v]\d+.\d+)'
         $containerVersion = $Matches[0].ToString()
         echo "GCR_VERSION=$containerVersion" | Out-File -FilePath $Env:GITHUB_ENV -Encoding utf-8 -Append
@@ -46,8 +47,8 @@ jobs:
     - name: Build and Push Docker Image
       uses: docker/build-push-action@v5
       with:
-        file: ${{ env.GCR_FILE }}
+        file: ${{ env.CONTAINER_SRC_FILE }}
         push: true # Will only build if this is not here
         tags: |
-          ${{ env.GCR_IMAGE }}:${{ env.GCR_VERSION }}
-          ${{ env.GCR_IMAGE }}:latest
+          ${{ env.CONTAINER_REPO }}/${{ github.repository_owner }}/${{ env.CONTAINER_NAME }}:${{ env.GCR_VERSION }}
+          ${{ env.CONTAINER_REPO }}/${{ github.repository_owner }}/${{ env.CONTAINER_NAME }}:latest
