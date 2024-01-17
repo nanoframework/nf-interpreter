@@ -156,6 +156,15 @@ static void event_handler(void *arg, esp_event_base_t event_base, int32_t event_
 #ifdef PRINT_NET_EVENT
                 ets_printf("WIFI_EVENT_STA_CONNECTED\n");
 #endif
+#if LWIP_IPV6
+                {
+                    // Note: Did use esp_netif_create_ip6_linklocal originally but this failed because
+                    // it tests for Netif to be up and didn't seem to be. Calling netif_create_ip6_linklocal_address
+                    // directly seems to work fine.
+                    struct netif *netif = esp_netif_get_handle_from_ifkey("WIFI_STA_DEF")->lwip_netif;
+                    netif_create_ip6_linklocal_address(netif, 1);
+                }
+#endif
                 if (NF_ESP32_ConnectInProgress)
                 {
                     PostConnectResult(0);
@@ -304,6 +313,18 @@ static void event_handler(void *arg, esp_event_base_t event_base, int32_t event_
                 PostAddressChanged(IDF_ETH_DEF);
                 initialize_sntp();
                 break;
+#if LWIP_IPV6
+            case IP_EVENT_GOT_IP6:
+#ifdef PRINT_NET_EVENT
+                ip_event_got_ip6_t *event = (ip_event_got_ip6_t *)event_data;
+                esp_ip6_addr_type_t ipv6_type = esp_netif_ip6_get_addr_type(&event->ip6_info.ip);
+                ets_printf(
+                    "IP_EVENT_ETH_GOT_IP6 type %d Adr %X:%X:%X:%X:%X:%X:%X:%X\n",
+                    ipv6_type,
+                    IPV62STR(event->ip6_info.ip));
+#endif
+                break;
+#endif
         }
     }
     else if (event_base == ETH_EVENT)
