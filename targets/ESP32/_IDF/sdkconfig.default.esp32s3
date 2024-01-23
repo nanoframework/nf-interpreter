@@ -1,6 +1,6 @@
 #
 # Automatically generated file. DO NOT EDIT.
-# Espressif IoT Development Framework (ESP-IDF) 5.1.1 Project Configuration
+# Espressif IoT Development Framework (ESP-IDF) 5.1.2 Project Configuration
 #
 CONFIG_IDF_CMAKE=y
 CONFIG_IDF_TARGET_ARCH_XTENSA=y
