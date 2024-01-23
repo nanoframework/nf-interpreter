@@ -12,7 +12,7 @@
 
 #include "TargetHAL_Spi.h"
 
-// Note - I2S_NUM_MAX renamed/changed as of IDF 5.1.1 and I2S_PIN_NO_CHANGE missing
+// Note - I2S_NUM_MAX renamed/changed as of IDF 5.1.2 and I2S_PIN_NO_CHANGE missing
 #define I2S_NUM_MAX I2S_NUM_AUTO
 #define I2S_PIN_NO_CHANGE (-1)
 
