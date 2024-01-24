@@ -117,7 +117,7 @@ HRESULT Library_sys_net_native_System_Net_NetworkInformation_WirelessAPConfigura
     // make sure the terminators are there
     hbPassword = pConfig[FIELD___apPassword].DereferenceString();
     FAULT_ON_NULL(hbPassword);
-    
+
     passwordLength = hal_strlen_s(hbPassword->StringText());
     if (passwordLength >= sizeof(config.Password))
     {
@@ -134,7 +134,7 @@ HRESULT Library_sys_net_native_System_Net_NetworkInformation_WirelessAPConfigura
     FAULT_ON_NULL(hbSsid);
 
     ssidLength = hal_strlen_s(hbSsid->StringText());
-    
+
     if (ssidLength >= sizeof(config.Ssid))
     {
         NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
