@@ -51,7 +51,7 @@ void app_main()
 
     ESP_ERROR_CHECK(nvs_flash_init());
 
-    vTaskPrioritySet( NULL, taskPriority);
+    vTaskPrioritySet(NULL, taskPriority);
 
     // start receiver task
     xTaskCreate(&receiver_task, "ReceiverThread", 3072, NULL, taskPriority, &ReceiverTask);
