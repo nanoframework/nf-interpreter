@@ -74,13 +74,3 @@ HRESULT Library_sys_net_native_System_Net_NetworkInformation_NetworkInterface::
 
     NANOCLR_NOCLEANUP();
 }
-
-HRESULT Library_sys_net_native_System_Net_NetworkInformation_NetworkInterface::
-    IPV6AddressFromString___STATIC__SZARRAY_U2__STRING(CLR_RT_StackFrame &stack)
-{
-    NANOCLR_HEADER();
-
-    NANOCLR_SET_AND_LEAVE(stack.NotImplementedStub());
-
-    NANOCLR_NOCLEANUP();
-}
