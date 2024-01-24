@@ -3,11 +3,11 @@ name: Smoketest Dockerfile builds for selected targets
 on:
   pull_request:
     paths:
-      - '.devcontainer/sources/*'
+      - '.devcontainer/**/*'
       - '.github/workflows/*'
   # push:
   #   paths:
-  #     - '.devcontainer/sources/*'
+  #     - '.devcontainer/**/*'
   #     - '.github/workflows/*'
 
 jobs:
@@ -23,7 +23,7 @@ jobs:
           { target: ST_STM32F769I_DISCOVERY, build-type: Debug, container: All },
           { target: M5Core2,                 build-type: Debug, container: ESP32 },
           { target: M5Core2,                 build-type: Debug, container: All },
-          # { target: NXP_MIMXRT1060_EVK,      build-type: Debug, container: FreeRTOS }, # No FreeRTOS container yet.
+          { target: NXP_MIMXRT1060_EVK,      build-type: Debug, container: FreeRTOS-NXP },
           { target: NXP_MIMXRT1060_EVK,      build-type: Debug, container: All },
           { target: TI_CC1352R1_LAUNCHXL,    build-type: Debug, container: TI, radio-freq: 915 },
           { target: TI_CC1352R1_LAUNCHXL,    build-type: Debug, container: All, radio-freq: 915 },
@@ -61,10 +61,10 @@ jobs:
       - name: Adjust devcontainer.json for ${{ matrix.container }} source
         run: |
           # Move into the .devcontainer directory
-          pushd .devcontainer
+          pushd .devcontainer/${{ matrix.container }}
 
           # Target the dockerfile source.
-          sed -i -- 's|"dockerFile": "Dockerfile.All"|"dockerFile": "sources/Dockerfile.${{ matrix.container }}"|g' devcontainer.json
+          sed -i -- 's|"dockerFile": "Dockerfile.${{ matrix.container }}"|"dockerFile": "Dockerfile.${{ matrix.container }}.SRC"|g' devcontainer.json
 
           # Move out of the .devcontainer directory
           popd
@@ -72,9 +72,9 @@ jobs:
       - name: Build ${{ matrix.target }} ${{ matrix.build-type }} Firmware
         uses: devcontainers/ci@v0.3
         with:
+          configFile: ./.devcontainer/${{ matrix.container }}/devcontainer.json
           push: never
           runCmd: |
             # Build target:
             cmake --preset=${{ matrix.target }} -DCMAKE_BUILD_TYPE=${{ matrix.build-type }}
             cmake --build build
-
