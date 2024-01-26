@@ -345,8 +345,8 @@ static const CLR_RT_MethodHandler method_lookup[] =
 const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_System_Net =
 {
     "System.Net",
-    0xA6875261,
+    0xD82C1452,
     method_lookup,
-    { 100, 2, 0, 0 }
+    { 100, 2, 0, 1 }
 };
 // clang-format on
