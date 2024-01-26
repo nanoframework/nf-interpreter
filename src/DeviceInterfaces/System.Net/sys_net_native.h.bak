@@ -161,10 +161,8 @@ struct Library_sys_net_native_System_Net_IPAddress
 {
     static const int FIELD_STATIC__Any = 8;
     static const int FIELD_STATIC__Loopback = 9;
-    static const int FIELD_STATIC__Broadcast = 10;
-    static const int FIELD_STATIC__None = 11;
-    static const int FIELD_STATIC__IPv6Any = 12;
-    static const int FIELD_STATIC__IPv6Loopback = 13;
+    static const int FIELD_STATIC__IPv6Any = 10;
+    static const int FIELD_STATIC__IPv6Loopback = 11;
 
     static const int FIELD__Address = 1;
     static const int FIELD___family = 2;
