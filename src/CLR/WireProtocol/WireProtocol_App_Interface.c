@@ -17,12 +17,6 @@ uint32_t WireProtocolLastPacketSequence = 0x00FEFFFF;
 
 uint8_t WP_App_ProcessHeader(WP_Message *message)
 {
-    // check for reception buffer overflow
-    if (message->m_header.m_size > WP_PACKET_SIZE)
-    {
-        return false;
-    }
-
     message->m_payload = receptionBuffer;
 
     return true;

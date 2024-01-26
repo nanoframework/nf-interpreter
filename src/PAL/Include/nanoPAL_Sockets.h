@@ -113,9 +113,12 @@ typedef unsigned long u_long;
 typedef unsigned __int64 u_int64;
 //
 //
-#define SOCK_AF_UNSPEC 0 /* unspecified */
-#define SOCK_AF_INET   2 /* internetwork: UDP, TCP, etc. */
-#define SOCK_AF_INET6  28
+// unspecified
+#define SOCK_AF_UNSPEC 0
+// internetwork (IPV4): UDP, TCP, etc.
+#define SOCK_AF_INET 2
+// Ipv6
+#define SOCK_AF_INET6 23
 
 typedef int SOCK_SOCKET;
 
@@ -231,8 +234,13 @@ typedef int SOCK_SOCKET;
 #define SOCK_FIOASYNC SOCK__IOW('f', 125, u_long) /* set/clear async i/o */
 //
 
-#define SOCK_FD_SETSIZE    256
+#define SOCK_FD_SETSIZE 256
+
+#if defined(LWIP_IPV6) && LWIP_IPV6
+#define SOCK_MAX_ADDR_SIZE 26
+#else
 #define SOCK_MAX_ADDR_SIZE 14
+#endif
 
 typedef struct SOCK_fd_set
 {
@@ -246,7 +254,7 @@ typedef struct SOCK_sockaddr
     char sa_data[SOCK_MAX_ADDR_SIZE]; /* up to SOCK_MAX_ADDR_SIZE bytes of direct address */
 } SOCK_sockaddr;
 
-CT_ASSERT_UNIQUE_NAME(sizeof(SOCK_sockaddr) == (16), SOCK_SOCKADDR)
+CT_ASSERT_UNIQUE_NAME(sizeof(SOCK_sockaddr) == (SOCK_MAX_ADDR_SIZE + 2), SOCK_SOCKADDR)
 
 typedef struct GNU_PACKED SOCK_in_addr
 {
@@ -274,6 +282,28 @@ typedef struct GNU_PACKED SOCK_sockaddr_in
 } SOCK_sockaddr_in;
 
 CT_ASSERT_UNIQUE_NAME(sizeof(SOCK_sockaddr_in) == 16, SOCK_SOCKADDR_IN)
+
+#if defined(LWIP_IPV6) && LWIP_IPV6
+typedef struct GNU_PACKED SOCK_in_addr6
+{
+    union {
+        u32_t u32_addr[4];
+        u16_t u16_addr[8];
+        u8_t u8_addr[16];
+    } un;
+} SOCK_in_addr6;
+
+typedef struct GNU_PACKED SOCK_sockaddr_in6
+{
+    short sin_family;
+    u_short sin_port;
+    SOCK_in_addr6 sin_addr;
+    u32_t scopeId;
+} SOCK_sockaddr_in6;
+
+CT_ASSERT_UNIQUE_NAME(sizeof(SOCK_sockaddr_in6) == 24, SOCK_SOCKADDR_IN6)
+
+#endif
 
 typedef struct SOCK_addrinfo
 {
@@ -635,8 +665,12 @@ HRESULT SOCK_CONFIGURATION_UpdateAdapterConfiguration(
     uint32_t updateFlags);
 HRESULT SOCK_CONFIGURATION_LoadConfiguration(HAL_Configuration_NetworkInterface *config, uint32_t interfaceIndex);
 HRESULT SOCK_CONFIGURATION_LinkStatus(uint32_t interfaceIndex, bool *status);
-HRESULT SOCK_IPAddressFromString(const char *ipString, uint64_t *address);
-const char *SOCK_IPAddressToString(uint32_t address);
+HRESULT SOCK_IPV4AddressFromString(const char *ipString, uint64_t *address);
+const char *SOCK_IPV4AddressToString(uint32_t address);
+#if defined(LWIP_IPV6) && LWIP_IPV6
+const char *SOCK_IPV6AddressToString(uint16_t *address);
+HRESULT SOCK_IPV6AddressFromString(const char *ipString, uint16_t *address);
+#endif
 
 //--// SSL
 
@@ -729,9 +763,12 @@ HRESULT HAL_SOCK_CONFIGURATION_UpdateAdapterConfiguration(
     uint32_t interfaceIndex,
     uint32_t updateFlags);
 HRESULT HAL_SOCK_CONFIGURATION_Link_status(uint32_t interfaceIndex, bool *status);
-HRESULT HAL_SOCK_IPAddressFromString(const char *ipString, uint64_t *address);
-const char *HAL_SOCK_IPAddressToString(uint32_t address);
-
+HRESULT HAL_SOCK_IPV4AddressFromString(const char *ipString, uint64_t *address);
+const char *HAL_SOCK_IPV4AddressToString(uint32_t address);
+#if defined(LWIP_IPV6) && LWIP_IPV6
+HRESULT HAL_SOCK_IPV6AddressFromString(const char *ipString, uint16_t *address);
+const char *HAL_SOCK_IPV6AddressToString(uint16_t *address);
+#endif
 void *HAL_SOCK_GlobalLockContext();
 void HAL_SOCK_EventsSet(uint32_t events);
 

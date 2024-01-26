@@ -14,6 +14,9 @@ if(HAL_USE_WDG_OPTION)
     list(APPEND TARGET_AZURERTOS_NANOCLR_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/targetHAL_Watchdog.c)
 endif()
 
+# for the moment, assume all Gecko MCUs we support have a TRNG
+list(APPEND TARGET_AZURERTOS_NANOCLR_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/targetRandom.cpp)  
+
 # make var global
 set(TARGET_AZURERTOS_NANOCLR_SOURCES ${TARGET_AZURERTOS_NANOCLR_SOURCES} CACHE INTERNAL "make global")
 
