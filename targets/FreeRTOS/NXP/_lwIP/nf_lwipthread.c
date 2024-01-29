@@ -52,6 +52,12 @@ static void delay(void)
     }
 }
 
+static void tcpIpInitDone(void *arg)
+{
+    sys_sem_t *initDone = arg;
+    sys_sem_signal(initDone);
+}
+
 static void stack_init(const lwipthread_opts_t *opts)
 {
     ip4_addr_t fsl_netif0_ipaddr, fsl_netif0_netmask, fsl_netif0_gw;
@@ -59,7 +65,16 @@ static void stack_init(const lwipthread_opts_t *opts)
 
     memcpy(fsl_enet_config0.macAddress, opts->macaddress, NETIF_MAX_HWADDR_LEN);
 
-    tcpip_init(NULL, NULL);
+    // creates the semaphore to wait for the initialization to complete
+    sys_sem_t initDone;
+    sys_sem_new(&initDone, 0);
+
+    // initializes TCP/IP stack
+    tcpip_init(tcpIpInitDone, &initDone);
+
+    // waits for the TCP/IP stack initialization to complete
+    sys_sem_wait(&initDone);
+    sys_sem_free(&initDone);
 
     fsl_netif0_ipaddr.addr = opts->address;
     fsl_netif0_netmask.addr = opts->netmask;
@@ -98,7 +113,7 @@ static void stack_init(const lwipthread_opts_t *opts)
     // LWIP_PLATFORM_DIAG(("************************************************"));
 }
 
-void lwipInit(const lwipthread_opts_t *opts)
+void lwIPInit(const lwipthread_opts_t *opts)
 {
 
     gpio_pin_config_t gpio_config = {kGPIO_DigitalOutput, 0, kGPIO_NoIntmode};
