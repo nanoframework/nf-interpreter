@@ -349,4 +349,6 @@ const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_System_Net =
     method_lookup,
     { 100, 2, 0, 1 }
 };
+
 // clang-format on
+
