@@ -46,8 +46,10 @@ namespace sys_dev_pwm_native_System_Device_Pwm_PwmChannelHelpers
 uint32_t PwmController_Timer_resolution[8];
 
 int GetChannel(int pin, int timerId, bool create);
-uint32_t CalculateDuty(int timerId, uint32_t dutyCycle, PwmPulsePolarity polarity);
+uint32_t CalculateDuty(int timerId, uint32_t dutyCycle);
 HRESULT ConfigureAndStart(CLR_RT_HeapBlock *pThis, bool create, bool noStart);
+int32_t GetOptimumResolution(int32_t desiredFrequency);
+esp_err_t SetDutyCycle(ledc_mode_t speed_mode, ledc_channel_t channel, uint32_t dutyCycle);
 } // namespace sys_dev_pwm_native_System_Device_Pwm_PwmChannelHelpers
 
 using namespace sys_dev_pwm_native_System_Device_Pwm_PwmChannelHelpers;
@@ -94,20 +96,13 @@ int sys_dev_pwm_native_System_Device_Pwm_PwmChannelHelpers::GetChannel(int pin, 
 //
 // Work out the duty Cycle for the current duty resolution and polarity
 //
-uint32_t sys_dev_pwm_native_System_Device_Pwm_PwmChannelHelpers::CalculateDuty(
-    int timerId,
-    uint32_t dutyCycle,
-    PwmPulsePolarity polarity)
+uint32_t sys_dev_pwm_native_System_Device_Pwm_PwmChannelHelpers::CalculateDuty(int timerId, uint32_t dutyCycle)
 {
-    // if polarity Active low then reverse duty cycle
-    if (polarity == PwmPulsePolarity::PwmPulsePolarity_ActiveLow)
+    uint32_t calculatedDuty = 0;
+    if (PwmController_Timer_resolution[timerId] > 0)
     {
-        dutyCycle = 10000 - dutyCycle;
+        calculatedDuty = PwmController_Timer_resolution[timerId] * dutyCycle / 10000;
     }
-
-    // Return a duty cycle in the range of the current timer duty resolution
-    uint32_t calculatedDuty = PwmController_Timer_resolution[timerId] * dutyCycle / 10000;
-
     return calculatedDuty;
 }
 
@@ -126,6 +121,11 @@ HRESULT sys_dev_pwm_native_System_Device_Pwm_PwmChannelHelpers::ConfigureAndStar
     ledc_channel_t channel;
     ledc_timer_t timer_sel;
     ledc_channel_config_t ledc_conf;
+    ledc_timer_config_t timer_conf;
+    esp_err_t result;
+    int32_t desiredFrequency;
+    int32_t optimumDutyResolution;
+    ledc_timer_bit_t duty_res;
 
     NANOCLR_HEADER();
 
@@ -136,6 +136,8 @@ HRESULT sys_dev_pwm_native_System_Device_Pwm_PwmChannelHelpers::ConfigureAndStar
     polarity = (PwmPulsePolarity)(pThis[Library_sys_dev_pwm_native_System_Device_Pwm_PwmChannel::FIELD___polarity]
                                       .NumericByRef()
                                       .u4);
+    desiredFrequency =
+        pThis[Library_sys_dev_pwm_native_System_Device_Pwm_PwmChannel::FIELD___frequency].NumericByRef().u4;
 
     // Configure channel
     mode = GetSpeedMode(timerId);
@@ -149,10 +151,26 @@ HRESULT sys_dev_pwm_native_System_Device_Pwm_PwmChannelHelpers::ConfigureAndStar
 
     timer_sel = (ledc_timer_t)(timerId & 0x03);
 
-    // Work out the duty Cycle for the current duty resolution
-    dutyCycle = CalculateDuty(timerId, dutyCycle, polarity);
+    optimumDutyResolution = GetOptimumResolution(desiredFrequency);
 
-    ledc_conf = {pinNumber, mode, channel, LEDC_INTR_DISABLE, timer_sel, dutyCycle, 0, 0};
+    // Save resolution for working out values for percent duty cycle
+    PwmController_Timer_resolution[timerId] = (0x1 << optimumDutyResolution);
+
+    duty_res = (ledc_timer_bit_t)optimumDutyResolution;
+
+    timer_conf = {mode, duty_res, timer_sel, (uint32_t)desiredFrequency, LEDC_AUTO_CLK};
+
+    result = ledc_timer_config(&timer_conf);
+
+    if (result != ESP_OK)
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+    }
+
+    // Work out the duty Cycle for the current duty resolution
+    dutyCycle = CalculateDuty(timerId, dutyCycle);
+
+    ledc_conf = {pinNumber, mode, channel, LEDC_INTR_DISABLE, timer_sel, dutyCycle, 0, (unsigned int)polarity};
 
     // Configure Channel which will also start it
     IDF_ERROR(ledc_channel_config(&ledc_conf));
@@ -166,71 +184,12 @@ HRESULT sys_dev_pwm_native_System_Device_Pwm_PwmChannelHelpers::ConfigureAndStar
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_sys_dev_pwm_native_System_Device_Pwm_PwmChannel::NativeInit___VOID(CLR_RT_StackFrame &stack)
+int32_t sys_dev_pwm_native_System_Device_Pwm_PwmChannelHelpers::GetOptimumResolution(int32_t desiredFrequency)
 {
-    int32_t pinNumber;
-
-    NANOCLR_HEADER();
-
-    // get a pointer to the managed object instance and check that it's not NULL
-    CLR_RT_HeapBlock *pThis = stack.This();
-    FAULT_ON_NULL(pThis);
-
-    // Check pin number is a valid for output
-    pinNumber = pThis[FIELD___pinNumber].NumericByRef().s4;
-
-    if (!GPIO_IS_VALID_OUTPUT_GPIO(pinNumber))
-    {
-        NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
-    }
-
-    // Create a new entry in channel table and configure channel which will also start channel
-    NANOCLR_CHECK_HRESULT(ConfigureAndStart(pThis, true, true));
-
-    NANOCLR_NOCLEANUP();
-}
-
-HRESULT Library_sys_dev_pwm_native_System_Device_Pwm_PwmChannel::NativeSetDesiredFrequency___VOID__I4(
-    CLR_RT_StackFrame &stack)
-{
-    int32_t timerId;
-    int32_t desiredFrequency;
+    uint64_t divParam;
     int32_t optimumDutyResolution;
     uint32_t precision;
-    uint64_t divParam;
-    esp_err_t result;
 
-    ledc_timer_t timer;
-    ledc_mode_t mode;
-    ledc_timer_bit_t duty_res;
-    ledc_timer_config_t timer_conf;
-
-    NANOCLR_HEADER();
-
-    // get a pointer to the managed object instance and check that it's not NULL
-    CLR_RT_HeapBlock *pThis = stack.This();
-    FAULT_ON_NULL(pThis);
-
-    // Retrieves the needed parameters from private class properties ( 0 - 7 )
-    timerId = pThis[FIELD___pwmTimer].NumericByRef().s4;
-    desiredFrequency = stack.Arg1().NumericByRef().s4;
-
-    // parameter check
-    if (desiredFrequency < 0)
-    {
-        NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
-    }
-
-    timer = (ledc_timer_t)(timerId & 0x03);
-
-#if SOC_LEDC_SUPPORT_HS_MODE
-    mode = (timerId <= 4) ? LEDC_HIGH_SPEED_MODE : LEDC_LOW_SPEED_MODE;
-#else
-    mode = LEDC_LOW_SPEED_MODE;
-#endif
-
-    // Work out the optimal duty resolution based on current frequency, default to 1 if not found
-    // Working from 15 bit duty resolution down until we have a valid divisor
     optimumDutyResolution = 1;
 
     for (int dutyResolution = SOC_LEDC_TIMER_BIT_WIDE_NUM - 1; dutyResolution > 0; dutyResolution--)
@@ -246,19 +205,134 @@ HRESULT Library_sys_dev_pwm_native_System_Device_Pwm_PwmChannel::NativeSetDesire
         }
     }
 
-    duty_res = (ledc_timer_bit_t)optimumDutyResolution;
+    return optimumDutyResolution;
+}
 
-    // Save resolution for working out values for percent duty cycle
-    PwmController_Timer_resolution[timerId] = (0x1 << optimumDutyResolution);
+esp_err_t sys_dev_pwm_native_System_Device_Pwm_PwmChannelHelpers::SetDutyCycle(
+    ledc_mode_t speed_mode,
+    ledc_channel_t channel,
+    uint32_t dutyCycle)
+{
+    esp_err_t err;
+
+    err = ledc_set_duty(speed_mode, channel, dutyCycle);
+    if (err != ESP_OK)
+    {
+        return err;
+    }
+    // Activate duty on channel
+    err = ledc_update_duty(speed_mode, channel);
+
+    return err;
+}
+
+HRESULT Library_sys_dev_pwm_native_System_Device_Pwm_PwmChannel::NativeInit___VOID(CLR_RT_StackFrame &stack)
+{
+    int32_t pinNumber;
+    int32_t timerId;
+    ledc_channel_t channel;
+
+    NANOCLR_HEADER();
+
+    // get a pointer to the managed object instance and check that it's not NULL
+    CLR_RT_HeapBlock *pThis = stack.This();
+    FAULT_ON_NULL(pThis);
+
+    // Check pin number is a valid for output
+    pinNumber = pThis[FIELD___pinNumber].NumericByRef().s4;
+    timerId = pThis[FIELD___pwmTimer].NumericByRef().s4;
+
+    if (!GPIO_IS_VALID_OUTPUT_GPIO(pinNumber))
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+    }
+
+    channel = (ledc_channel_t)GetChannel(pinNumber, timerId, true);
+    if (channel == -1)
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+    }
+
+    NANOCLR_NOCLEANUP();
+}
+
+HRESULT Library_sys_dev_pwm_native_System_Device_Pwm_PwmChannel::NativeSetDesiredFrequency___VOID__I4(
+    CLR_RT_StackFrame &stack)
+{
+    int32_t timerId;
+    int32_t desiredFrequency;
+    int32_t optimumDutyResolution;
+    esp_err_t result;
+
+    ledc_timer_t timer;
+    ledc_mode_t mode;
+    ledc_timer_bit_t duty_res;
+    ledc_timer_config_t timer_conf;
+    int32_t pinNumber;
+    ledc_channel_t channel;
+    uint32_t dutyCycle;
+
+    NANOCLR_HEADER();
+
+    // get a pointer to the managed object instance and check that it's not NULL
+    CLR_RT_HeapBlock *pThis = stack.This();
+    FAULT_ON_NULL(pThis);
+
+    // Retrieves the needed parameters from private class properties ( 0 - 7 )
+    timerId = pThis[FIELD___pwmTimer].NumericByRef().s4;
+    desiredFrequency = stack.Arg1().NumericByRef().s4;
+    pinNumber = pThis[FIELD___pinNumber].NumericByRef().s4;
+    mode = GetSpeedMode(timerId);
+    channel = (ledc_channel_t)GetChannel(pinNumber, timerId, false);
+    dutyCycle = pThis[FIELD___dutyCycle].NumericByRef().u4;
+
+    // Set the backing frequency field when it is zero and return
+    // We need this as this native function is called before Init
+    if (channel == -1)
+    {
+        pThis[FIELD___frequency].NumericByRef().s4 = desiredFrequency;
+        NANOCLR_SET_AND_LEAVE(S_OK);
+    }
+
+    // parameter check
+    if (desiredFrequency < 0)
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+    }
+
+    timer = (ledc_timer_t)(timerId & 0x03);
+
+#if SOC_LEDC_SUPPORT_HS_MODE
+    mode = (timerId <= 4) ? LEDC_HIGH_SPEED_MODE : LEDC_LOW_SPEED_MODE;
+#else
+    mode = LEDC_LOW_SPEED_MODE;
+#endif
+
+    optimumDutyResolution = GetOptimumResolution(desiredFrequency);
+
+    duty_res = (ledc_timer_bit_t)optimumDutyResolution;
 
     timer_conf = {mode, duty_res, timer, (uint32_t)desiredFrequency, LEDC_AUTO_CLK};
 
     result = ledc_timer_config(&timer_conf);
+
     if (result != ESP_OK)
     {
         NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
     }
 
+    // Save resolution for working out values for percent duty cycle
+    if (PwmController_Timer_resolution[timerId] != (uint32_t)(0x1 << optimumDutyResolution))
+    {
+        PwmController_Timer_resolution[timerId] = (0x1 << optimumDutyResolution);
+        dutyCycle = CalculateDuty(timerId, dutyCycle); //, polarity);
+
+        // Set Duty Cycle;
+        if (SetDutyCycle(mode, channel, dutyCycle) != ESP_OK)
+        {
+            NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+        }
+    }
     // store the frequency
     pThis[FIELD___frequency].NumericByRef().s4 = desiredFrequency;
 
@@ -274,8 +348,11 @@ HRESULT Library_sys_dev_pwm_native_System_Device_Pwm_PwmChannel::NativeSetActive
 
     ledc_channel_t channel;
 
-    PwmPulsePolarity polarity;
     ledc_mode_t speed_mode;
+    int32_t desiredFrequency;
+    int32_t optimumDutyResolution;
+    int32_t privateDutyCycle;
+    uint32_t calDutyCycle;
 
     NANOCLR_HEADER();
 
@@ -286,7 +363,8 @@ HRESULT Library_sys_dev_pwm_native_System_Device_Pwm_PwmChannel::NativeSetActive
     // Retrieves the needed parameters from private class properties or method parameters
     timerId = pThis[FIELD___pwmTimer].NumericByRef().s4;
     pinNumber = pThis[FIELD___pinNumber].NumericByRef().s4;
-    polarity = (PwmPulsePolarity)(pThis[FIELD___polarity].NumericByRef().u4);
+    privateDutyCycle = pThis[FIELD___dutyCycle].NumericByRef().u4;
+    desiredFrequency = pThis[FIELD___frequency].NumericByRef().s4;
 
     // parameter check
     if (stack.Arg1().NumericByRef().r8 < 0 || stack.Arg1().NumericByRef().r8 > 1.0)
@@ -294,26 +372,33 @@ HRESULT Library_sys_dev_pwm_native_System_Device_Pwm_PwmChannel::NativeSetActive
         NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
     }
 
-    // retrieve percentage as 0 to 10000 (0% to 100%)
+    channel = (ledc_channel_t)GetChannel(pinNumber, timerId, false);
+
     dutyCycle = (uint32_t)(stack.Arg1().NumericByRef().r8 * CONST_DutyCycleFactor);
 
-    // Get channel number used for this pinNumber
-    // FIXME check result
-    channel = (ledc_channel_t)GetChannel(pinNumber, timerId, false);
+    // Set the backing duty cycle field when it is zero and return
+    // We need this as this native function is called before Init
+    if (privateDutyCycle == 0)
+    {
+        pThis[FIELD___dutyCycle].NumericByRef().u4 = dutyCycle;
+        NANOCLR_SET_AND_LEAVE(S_OK);
+    }
 
     // Get speed mode based on Timer used
     speed_mode = GetSpeedMode(timerId);
 
+    optimumDutyResolution = GetOptimumResolution(desiredFrequency);
+
+    PwmController_Timer_resolution[timerId] = (0x1 << optimumDutyResolution);
+
     // Work out the duty Cycle for the current duty resolution
-    dutyCycle = CalculateDuty(timerId, dutyCycle, polarity);
+    calDutyCycle = CalculateDuty(timerId, dutyCycle); //, polarity);
 
-    // Update duty on channel
-    IDF_ERROR(ledc_set_duty(speed_mode, channel, dutyCycle));
+    if (SetDutyCycle(speed_mode, channel, calDutyCycle) != ESP_OK)
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+    }
 
-    // Activate duty on channel
-    IDF_ERROR(ledc_update_duty(speed_mode, channel));
-
-    // store the new duty cycle
     pThis[FIELD___dutyCycle].NumericByRef().u4 = dutyCycle;
 
     NANOCLR_NOCLEANUP();
@@ -322,13 +407,11 @@ HRESULT Library_sys_dev_pwm_native_System_Device_Pwm_PwmChannel::NativeSetActive
 HRESULT Library_sys_dev_pwm_native_System_Device_Pwm_PwmChannel::NativeStart___VOID(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
-
-    // get a pointer to the managed object instance and check that it's not NULL
     CLR_RT_HeapBlock *pThis = stack.This();
     FAULT_ON_NULL(pThis);
 
     // Call configure to start PWM channel
-    NANOCLR_CHECK_HRESULT(ConfigureAndStart(pThis, false, false));
+    NANOCLR_CHECK_HRESULT(ConfigureAndStart(pThis, true, false));
 
     NANOCLR_NOCLEANUP();
 }
