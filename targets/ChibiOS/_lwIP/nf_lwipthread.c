@@ -312,9 +312,6 @@ static THD_FUNCTION(lwip_thread, p)
 
     chRegSetThreadName(LWIP_THREAD_NAME);
 
-    /* Initializes the thing.*/
-    tcpip_init(NULL, NULL);
-
     /* TCP/IP parameters, runtime or compile time.*/
     if (p)
     {
@@ -460,6 +457,12 @@ static THD_FUNCTION(lwip_thread, p)
     }
 }
 
+static void tcpIpInitDone(void *arg)
+{
+    semaphore_t *initDone = arg;
+    chSemSignal(initDone);
+}
+
 /**
  * @brief   Initializes the lwIP subsystem.
  * @note    The function exits after the initialization is finished.
@@ -467,18 +470,26 @@ static THD_FUNCTION(lwip_thread, p)
  * @param[in] opts      pointer to the configuration structure, if @p NULL
  *                      then the static configuration is used.
  */
-void lwipInit(const lwipthread_opts_t *opts)
+void lwIPInit(const lwipthread_opts_t *opts)
 {
-
-    /* Creating the lwIP thread (it changes priority internally).*/
+    // creates the lwIP thread (it changes priority internally)
     chThdCreateStatic(wa_lwip_thread, sizeof(wa_lwip_thread), chThdGetPriorityX() - 1, lwip_thread, (void *)opts);
 
-    /* Waiting for the lwIP thread complete initialization. Note,
-       this thread reaches the thread reference object first because
-       the relative priorities.*/
+    // creates the semaphore to wait for the initialization to complete
+    semaphore_t initDone;
+    chSemObjectInit(&initDone, 0);
+
+    // initializes TCP/IP stack
+    tcpip_init(tcpIpInitDone, &initDone);
+
+    // Waiting for the lwIP thread complete initialization.
+    // Note this thread reaches the thread reference object first because the relative priorities.
     chSysLock();
     chThdSuspendS(&lwip_trp);
     chSysUnlock();
+
+    // waits for the TCP/IP stack initialization to complete
+    chSemWait(&initDone);
 }
 
 typedef struct lwip_reconf_params

@@ -75,6 +75,7 @@ void nanoHAL_Initialize()
     // initialize block storage devices
     BlockStorage_AddDevices();
 
+    // required to setup flash partitions memory mapping
     BlockStorageList_InitializeDevices();
 
     // allocate & clear managed heap region
@@ -138,6 +139,7 @@ void nanoHAL_Uninitialize(bool isPoweringDown)
     // Network_Uninitialize();
 #endif
 
+    // required to remove flash partitions memory mapping
     BlockStorageList_UnInitializeDevices();
 
 #if (HAL_USE_SPI == TRUE)
