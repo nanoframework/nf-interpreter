@@ -246,10 +246,10 @@ extern "C"
 #endif
     void lwipDefaultLinkUpCB(void *p);
     void lwipDefaultLinkDownCB(void *p);
-    void lwipInit(const lwipthread_opts_t *opts);
+    void lwIPInit(const lwipthread_opts_t *opts);
     void lwipReconfigure(const lwipreconf_opts_t *opts);
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* LWIPTHREAD_H */
+#endif // LWIPTHREAD_H
