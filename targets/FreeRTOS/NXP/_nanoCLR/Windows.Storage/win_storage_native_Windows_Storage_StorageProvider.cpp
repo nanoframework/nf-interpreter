@@ -5,7 +5,8 @@
 
 #include "win_storage_native_target.h"
 
-HRESULT Library_win_storage_native_Windows_Storage_StorageProvider::FormatVolume___VOID__WindowsStorageKnownFolderId( CLR_RT_StackFrame &stack )
+HRESULT Library_win_storage_native_Windows_Storage_StorageProvider::FormatVolume___VOID__WindowsStorageKnownFolderId(
+    CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
