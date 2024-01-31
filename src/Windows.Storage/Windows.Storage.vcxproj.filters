@@ -30,6 +30,9 @@
     <ClCompile Include="win_storage_native_Windows_Storage_StorageFolder_stubs.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="win_storage_native_Windows_Storage_StorageProvider_stubs.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="win_storage_native.h">
