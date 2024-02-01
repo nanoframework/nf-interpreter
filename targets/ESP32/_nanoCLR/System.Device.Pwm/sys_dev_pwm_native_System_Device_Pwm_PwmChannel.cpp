@@ -182,7 +182,7 @@ HRESULT sys_dev_pwm_native_System_Device_Pwm_PwmChannelHelpers::ConfigureAndStar
     {
         ledc_stop(mode, channel, polarity);
     }
-    
+
     isStarted = true;
 
     NANOCLR_NOCLEANUP();
