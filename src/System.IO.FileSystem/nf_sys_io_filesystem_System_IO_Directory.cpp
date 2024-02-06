@@ -17,9 +17,10 @@ extern SYSTEMTIME GetDateTime(uint16_t date, uint16_t time);
 #endif
 
 // We will use this to extract the file extension
-const char *get_filename_ext(const char *filename) {
+const char *get_filename_ext(const char *filename)
+{
     char *dot = strrchr(filename, '.');
-    if (!dot || dot == filename) 
+    if (!dot || dot == filename)
     {
         return "";
     }
@@ -183,7 +184,8 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_Directory::GetFilesNative___STATI
                 // but skip if:
                 // - has system attribute set
                 // - has hidden attribute set
-                if ((fileInfo.fattrib & AM_ARC) && !(fileInfo.fattrib & AM_SYS) && !(fileInfo.fattrib & AM_HID) && strcmp(get_filename_ext(fileInfo->d_name), "sys"))
+                if ((fileInfo.fattrib & AM_ARC) && !(fileInfo.fattrib & AM_SYS) && !(fileInfo.fattrib & AM_HID) &&
+                    strcmp(get_filename_ext(fileInfo->d_name), "sys"))
                 {
                     fileCount++;
                 }
@@ -228,7 +230,8 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_Directory::GetFilesNative___STATI
                 // but skip if:
                 // - has system attribute set
                 // - has hidden attribute set
-                if ((fileInfo.fattrib & AM_ARC) && !(fileInfo.fattrib & AM_SYS) && !(fileInfo.fattrib & AM_HID) && strcmp(get_filename_ext(fileInfo->d_name), "sys"))
+                if ((fileInfo.fattrib & AM_ARC) && !(fileInfo.fattrib & AM_SYS) && !(fileInfo.fattrib & AM_HID) &&
+                    strcmp(get_filename_ext(fileInfo->d_name), "sys"))
                 {
                     // clear working buffer
                     memset(workingBuffer, 0, 2 * FF_LFN_BUF + 1);
