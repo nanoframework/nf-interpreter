@@ -11,6 +11,18 @@ extern void CombinePathAndName(char *outpath, const char *path1, const char *pat
 extern char *ConvertToVfsPath(const char *filepath);
 extern SYSTEMTIME GetDateTimeFromStat(time_t *time);
 
+// We will use this to extract the file extension
+const char *get_filename_ext(const char *filename)
+{
+    char *dot = strrchr(filename, '.');
+    if (!dot || dot == filename)
+    {
+        return NULL;
+    }
+
+    return dot + 1;
+}
+
 HRESULT Library_nf_sys_io_filesystem_System_IO_Directory::ExistsNative___STATIC__BOOLEAN__STRING(
     CLR_RT_StackFrame &stack)
 {
@@ -197,7 +209,7 @@ int CountEntries(const char *folderPath, int type)
             }
 
             // check if this is correct type
-            if ((fileInfo->d_type & type))
+            if ((fileInfo->d_type & type) && (strcmp(get_filename_ext(fileInfo->d_name), "sys")))
             {
                 count++;
             }
@@ -255,7 +267,7 @@ HRESULT BuildPathsArray(const char *vfsFolderPath, const char *folderPath, CLR_R
             }
 
             // check if this is correct type
-            if ((fileInfo->d_type & entryType))
+            if ((fileInfo->d_type & entryType) && (strcmp(get_filename_ext(fileInfo->d_name), "sys")))
             {
                 // clear working buffer
                 memset(workingBuffer, 0, 2 * FF_LFN_BUF + 1);
