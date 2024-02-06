@@ -12,9 +12,10 @@ extern char *ConvertToVfsPath(const char *filepath);
 extern SYSTEMTIME GetDateTimeFromStat(time_t *time);
 
 // We will use this to extract the file extension
-const char *get_filename_ext(const char *filename) {
+const char *get_filename_ext(const char *filename)
+{
     char *dot = strrchr(filename, '.');
-    if (!dot || dot == filename) 
+    if (!dot || dot == filename)
     {
         return "";
     }
