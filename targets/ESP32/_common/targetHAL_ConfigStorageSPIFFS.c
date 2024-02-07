@@ -126,6 +126,9 @@ void ConfigStorage_GetConfigFileName(
 
     // add configuration INDEX
     strcat(configName, configIndexAsString);
+
+    // add ".sys" extension
+    strcat(configName, ".sys");
 }
 
 //
