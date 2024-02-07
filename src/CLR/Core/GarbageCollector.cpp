@@ -237,7 +237,7 @@ CLR_UINT32 CLR_RT_GarbageCollector::ExecuteGarbageCollection()
                     "Type %02X (%-20s): %8d bytes\r\n",
                     dt,
                     c_CLR_RT_DataTypeLookup[dt].m_name,
-                    countBlocks[dt] * sizeof(CLR_RT_HeapBlock));
+                    countBlocks[dt] * sizeof(struct CLR_RT_HeapBlock));
 
                 if (dt == DATATYPE_SZARRAY)
                 {
@@ -249,7 +249,7 @@ CLR_UINT32 CLR_RT_GarbageCollector::ExecuteGarbageCollection()
                                 "   Type %02X (%-17s): %8d bytes\r\n",
                                 dt2,
                                 c_CLR_RT_DataTypeLookup[dt2].m_name,
-                                countArryBlocks[dt2] * sizeof(CLR_RT_HeapBlock));
+                                countArryBlocks[dt2] * sizeof(struct CLR_RT_HeapBlock));
                         }
                     }
                 }
@@ -850,7 +850,7 @@ CLR_UINT32 CLR_RT_GarbageCollector::Heap_ComputeAliveVsDeadRatio()
     NANOCLR_FOREACH_NODE_END();
 
     m_totalBytes = totalBytes;
-    m_freeBytes = freeBlocks * sizeof(CLR_RT_HeapBlock);
+    m_freeBytes = freeBlocks * sizeof(struct CLR_RT_HeapBlock);
 
     return m_freeBytes;
 }

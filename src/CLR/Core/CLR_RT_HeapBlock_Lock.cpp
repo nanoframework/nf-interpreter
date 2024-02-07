@@ -25,6 +25,7 @@ HRESULT CLR_RT_HeapBlock_Lock::CreateInstance(
 
     lock->m_owningThread = th;                   // CLR_RT_Thread*          m_owningThread;
                                                  //
+    memset(&lock->m_resource, 0, sizeof(struct CLR_RT_HeapBlock)); 
     lock->m_resource.Assign(resource);           // CLR_RT_HeapBlock        m_resource;
                                                  //
     lock->m_owners.DblLinkedList_Initialize();   // CLR_RT_DblLinkedList    m_owners;

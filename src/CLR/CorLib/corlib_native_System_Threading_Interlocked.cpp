@@ -9,18 +9,24 @@ HRESULT Library_corlib_native_System_Threading_Interlocked::Increment___STATIC__
 {
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
-    {
-        CLR_RT_HeapBlock heapLocation;
-        NANOCLR_CHECK_HRESULT(heapLocation.LoadFromReference(stack.Arg0()));
-        signed int &location = heapLocation.NumericByRef().s4;
 
-        // Increment the value passed by reference
-        location++;
+    CLR_RT_HeapBlock heapLocation;
 
-        SetResult_INT32(stack, location);
+    signed int locationValue = 0;
+    signed int &location = locationValue;
 
-        NANOCLR_CHECK_HRESULT(heapLocation.StoreToReference(stack.Arg0(), 0));
-    }
+    memset(&heapLocation, 0, sizeof(struct CLR_RT_HeapBlock));
+
+    NANOCLR_CHECK_HRESULT(heapLocation.LoadFromReference(stack.Arg0()));
+    location = heapLocation.NumericByRef().s4;
+
+    // Increment the value passed by reference
+    location++;
+
+    SetResult_INT32(stack, location);
+
+    NANOCLR_CHECK_HRESULT(heapLocation.StoreToReference(stack.Arg0(), 0));
+
     NANOCLR_NOCLEANUP();
 }
 
@@ -28,18 +34,24 @@ HRESULT Library_corlib_native_System_Threading_Interlocked::Decrement___STATIC__
 {
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
-    {
-        CLR_RT_HeapBlock heapLocation;
-        NANOCLR_CHECK_HRESULT(heapLocation.LoadFromReference(stack.Arg0()));
-        signed int &location = heapLocation.NumericByRef().s4;
 
-        // Decrement the value passed by reference
-        location--;
+    CLR_RT_HeapBlock heapLocation;
 
-        SetResult_INT32(stack, location);
+    signed int locationValue = 0;
+    signed int &location = locationValue;
 
-        NANOCLR_CHECK_HRESULT(heapLocation.StoreToReference(stack.Arg0(), 0));
-    }
+    memset(&heapLocation, 0, sizeof(struct CLR_RT_HeapBlock));
+
+    NANOCLR_CHECK_HRESULT(heapLocation.LoadFromReference(stack.Arg0()));
+    location = heapLocation.NumericByRef().s4;
+
+    // Decrement the value passed by reference
+    location--;
+
+    SetResult_INT32(stack, location);
+
+    NANOCLR_CHECK_HRESULT(heapLocation.StoreToReference(stack.Arg0(), 0));
+
     NANOCLR_NOCLEANUP();
 }
 
@@ -48,20 +60,28 @@ HRESULT Library_corlib_native_System_Threading_Interlocked::Exchange___STATIC__I
 {
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
-    {
-        CLR_RT_HeapBlock heapLocation;
-        NANOCLR_CHECK_HRESULT(heapLocation.LoadFromReference(stack.Arg0()));
-        signed int &location = heapLocation.NumericByRef().s4;
 
-        // Always return value of first parameter
-        signed int retVal = location;
-        // Move second parameter into the first.
-        location = stack.Arg1().NumericByRef().s4;
+    CLR_RT_HeapBlock heapLocation;
 
-        SetResult_INT32(stack, retVal);
+    signed int retVal;
+    signed int locationValue = 0;
+    signed int &location = locationValue;
 
-        NANOCLR_CHECK_HRESULT(heapLocation.StoreToReference(stack.Arg0(), 0));
-    }
+    memset(&heapLocation, 0, sizeof(struct CLR_RT_HeapBlock));
+
+    NANOCLR_CHECK_HRESULT(heapLocation.LoadFromReference(stack.Arg0()));
+    location = heapLocation.NumericByRef().s4;
+
+    // Always return value of first parameter
+    retVal = location;
+
+    // Move second parameter into the first.
+    location = stack.Arg1().NumericByRef().s4;
+
+    SetResult_INT32(stack, retVal);
+
+    NANOCLR_CHECK_HRESULT(heapLocation.StoreToReference(stack.Arg0(), 0));
+
     NANOCLR_NOCLEANUP();
 }
 
@@ -70,22 +90,30 @@ HRESULT Library_corlib_native_System_Threading_Interlocked::CompareExchange___ST
 {
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
+
+    CLR_RT_HeapBlock heapLocation;
+
+    signed int retVal;
+    signed int locationValue = 0;
+    signed int &location = locationValue;
+
+    memset(&heapLocation, 0, sizeof(struct CLR_RT_HeapBlock));
+
+    NANOCLR_CHECK_HRESULT(heapLocation.LoadFromReference(stack.Arg0()));
+    location = heapLocation.NumericByRef().s4;
+
+    // Always return value of first parameter
+    retVal = location;
+
+    // Exchange value if first and third parameters has equal value.
+    if (stack.Arg2().NumericByRef().s4 == location)
     {
-        CLR_RT_HeapBlock heapLocation;
-        NANOCLR_CHECK_HRESULT(heapLocation.LoadFromReference(stack.Arg0()));
-        signed int &location = heapLocation.NumericByRef().s4;
-
-        // Always return value of first parameter
-        signed int retVal = location;
-        // Exchange value if first and third parameters has equal value.
-        if (stack.Arg2().NumericByRef().s4 == location)
-        {
-            location = stack.Arg1().NumericByRef().s4;
-        }
-
-        SetResult_INT32(stack, retVal);
-
-        NANOCLR_CHECK_HRESULT(heapLocation.StoreToReference(stack.Arg0(), 0));
+        location = stack.Arg1().NumericByRef().s4;
     }
+
+    SetResult_INT32(stack, retVal);
+
+    NANOCLR_CHECK_HRESULT(heapLocation.StoreToReference(stack.Arg0(), 0));
+
     NANOCLR_NOCLEANUP();
 }

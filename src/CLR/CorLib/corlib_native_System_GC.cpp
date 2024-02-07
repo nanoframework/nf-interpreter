@@ -36,7 +36,7 @@ HRESULT Library_corlib_native_System_GC::ReRegisterForFinalize___STATIC__VOID__O
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
 
-    CLR_RT_TypeDescriptor desc;
+    CLR_RT_TypeDescriptor desc{};
     CLR_RT_HeapBlock *pObj = stack.Arg0().Dereference();
     FAULT_ON_NULL(pObj);
 
