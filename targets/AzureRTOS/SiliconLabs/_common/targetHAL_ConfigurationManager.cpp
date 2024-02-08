@@ -715,7 +715,8 @@ __nfweak void InitialiseWirelessDefaultConfig(HAL_Configuration_Wireless80211 *c
     config->Id = configurationIndex;
 
     config->Options =
-        (Wireless80211Configuration_ConfigurationOptions)(Wireless80211Configuration_ConfigurationOptions_AutoConnect | Wireless80211Configuration_ConfigurationOptions_Enable);
+        (Wireless80211Configuration_ConfigurationOptions)(Wireless80211Configuration_ConfigurationOptions_AutoConnect |
+                                                          Wireless80211Configuration_ConfigurationOptions_Enable);
 }
 
 //  Default initialisation for Network interface config blocks

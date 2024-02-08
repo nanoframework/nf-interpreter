@@ -297,7 +297,9 @@ void InitialiseWirelessDefaultConfig(HAL_Configuration_Wireless80211 *config, ui
     else
     {
         config->Options =
-            (Wireless80211Configuration_ConfigurationOptions)(Wireless80211Configuration_ConfigurationOptions_AutoConnect | Wireless80211Configuration_ConfigurationOptions_Enable | Wireless80211Configuration_ConfigurationOptions_SmartConfig);
+            (Wireless80211Configuration_ConfigurationOptions)(Wireless80211Configuration_ConfigurationOptions_AutoConnect |
+                                                              Wireless80211Configuration_ConfigurationOptions_Enable |
+                                                              Wireless80211Configuration_ConfigurationOptions_SmartConfig);
     }
 }
 
