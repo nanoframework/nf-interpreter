@@ -694,7 +694,7 @@ bool ConfigurationManager_StoreConfigurationBlock(
 }
 
 // Updates a configuration block in the configuration storage
-bool ConfigurationManager_UpdateConfigurationBlock(
+UpdateConfigurationResult ConfigurationManager_UpdateConfigurationBlock(
     void *configurationBlock,
     DeviceConfigurationOption configuration,
     uint32_t configurationIndex)
@@ -728,16 +728,23 @@ bool ConfigurationManager_UpdateConfigurationBlock(
 
         default:
             // shouldn't ever reach here
-            return false;
+            return UpdateConfigurationResult_Failed;
     }
 
-    return ConfigurationManager_StoreConfigurationBlock(
-        configurationBlock,
-        configuration,
-        configurationIndex,
-        blockSize,
-        0,
-        false);
+    if (ConfigurationManager_StoreConfigurationBlock(
+            configurationBlock,
+            configuration,
+            configurationIndex,
+            blockSize,
+            0,
+            false))
+    {
+        return UpdateConfigurationResult_Success;
+    }
+    else
+    {
+        return UpdateConfigurationResult_Failed;
+    }
 }
 
 HAL_Configuration_Wireless80211 *ConfigurationManager_GetWirelessConfigurationFromId(uint32_t configurationId)
