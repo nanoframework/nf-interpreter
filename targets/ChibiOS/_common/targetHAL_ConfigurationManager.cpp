@@ -434,7 +434,7 @@ __nfweak bool ConfigurationManager_StoreConfigurationBlock(
 // The flash sector has to be erased before writing the updated block
 // it's implemented with 'weak' attribute so it can be replaced at target level if a different persistance mechanism is
 // used
-__nfweak bool ConfigurationManager_UpdateConfigurationBlock(
+__nfweak UpdateConfigurationResult ConfigurationManager_UpdateConfigurationBlock(
     void *configurationBlock,
     DeviceConfigurationOption configuration,
     uint32_t configurationIndex)
@@ -443,7 +443,7 @@ __nfweak bool ConfigurationManager_UpdateConfigurationBlock(
     uint32_t blockOffset;
     uint8_t *blockAddressInCopy;
     uint32_t blockSize;
-    bool success = FALSE;
+    UpdateConfigurationResult success = UpdateConfigurationResult_Failed;
 
     // config sector size
     int sizeOfConfigSector = (uint32_t)&__nanoConfig_end__ - (uint32_t)&__nanoConfig_start__;
@@ -477,7 +477,7 @@ __nfweak bool ConfigurationManager_UpdateConfigurationBlock(
                 platform_free(configSectorCopy);
 
                 // operation is successfull (nothing to update)
-                return TRUE;
+                return UpdateConfigurationResult_NoChanges;
             }
 
             // get storage address from block address
@@ -508,7 +508,7 @@ __nfweak bool ConfigurationManager_UpdateConfigurationBlock(
                 platform_free(configSectorCopy);
 
                 // operation is successfull (nothing to update)
-                return TRUE;
+                return UpdateConfigurationResult_NoChanges;
             }
 
             // storage address from block address
@@ -537,7 +537,7 @@ __nfweak bool ConfigurationManager_UpdateConfigurationBlock(
                 platform_free(configSectorCopy);
 
                 // operation is successfull (nothing to update)
-                return TRUE;
+                return UpdateConfigurationResult_NoChanges;
             }
 
             // storage address from block address
@@ -568,7 +568,7 @@ __nfweak bool ConfigurationManager_UpdateConfigurationBlock(
                 platform_free(configSectorCopy);
 
                 // operation is successfull (nothing to update)
-                return TRUE;
+                return UpdateConfigurationResult_NoChanges;
             }
 
             // storage address from block address
@@ -585,7 +585,7 @@ __nfweak bool ConfigurationManager_UpdateConfigurationBlock(
             // free memory first
             platform_free(configSectorCopy);
 
-            return FALSE;
+            return UpdateConfigurationResult_Failed;
         }
 
         // erase config sector
@@ -603,12 +603,15 @@ __nfweak bool ConfigurationManager_UpdateConfigurationBlock(
             memcpy(blockAddressInCopy, configurationBlock, blockSize);
 
             // copy the config block copy back to the config block storage
-            success = STM32FlashDriver_Write(
-                NULL,
-                (uint32_t)&__nanoConfig_start__,
-                sizeOfConfigSector,
-                (unsigned char *)configSectorCopy,
-                true);
+            if (STM32FlashDriver_Write(
+                    NULL,
+                    (uint32_t)&__nanoConfig_start__,
+                    sizeOfConfigSector,
+                    (unsigned char *)configSectorCopy,
+                    true))
+            {
+                success = UpdateConfigurationResult_Success;
+            }
         }
 
         // free memory

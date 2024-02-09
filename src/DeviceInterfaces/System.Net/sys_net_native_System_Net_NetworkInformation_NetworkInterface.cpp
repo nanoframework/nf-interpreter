@@ -154,6 +154,7 @@ HRESULT Library_sys_net_native_System_Net_NetworkInformation_NetworkInterface::U
     CLR_UINT32 interfaceIndex;
     CLR_UINT32 updateFlags;
     CLR_RT_HeapBlock_Array *pMACAddress;
+    UpdateConfigurationResult updateResult = UpdateConfigurationResult_Failed;
 
     CLR_RT_HeapBlock *pConfig = stack.Arg0().Dereference();
     FAULT_ON_NULL(pConfig);
@@ -189,13 +190,23 @@ HRESULT Library_sys_net_native_System_Net_NetworkInformation_NetworkInterface::U
 
     // store configuration, updating the configuration block
     // it's up to the configuration manager to decide if the config actually needs to be updated
-    if (ConfigurationManager_UpdateConfigurationBlock(&config, DeviceConfigurationOption_Network, interfaceIndex) !=
-        TRUE)
+    updateResult =
+        ConfigurationManager_UpdateConfigurationBlock(&config, DeviceConfigurationOption_Network, interfaceIndex);
+
+    if (updateResult == UpdateConfigurationResult_Success)
     {
+        // config changed therefore we need to update the adapter configuration
+        NANOCLR_CHECK_HRESULT(SOCK_CONFIGURATION_UpdateAdapterConfiguration(&config, interfaceIndex, updateFlags));
+    }
+    else if (updateResult == UpdateConfigurationResult_Failed)
+    {
+        // storing config failed
         NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
     }
-
-    NANOCLR_CHECK_HRESULT(SOCK_CONFIGURATION_UpdateAdapterConfiguration(&config, interfaceIndex, updateFlags));
+    else
+    {
+        // config hasn't changed, nothing to do here
+    }
 
     NANOCLR_NOCLEANUP();
 }
