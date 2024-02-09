@@ -345,7 +345,7 @@ HRESULT CLR_RT_SignatureParser::Advance(Element &res)
 
         case c_Object:
         {
-            CLR_RT_TypeDescriptor desc;
+            CLR_RT_TypeDescriptor desc{};
             CLR_RT_HeapBlock *ptr = m_lst++;
 
             if (m_flags)
@@ -1339,7 +1339,7 @@ HRESULT CLR_RT_TypeDescriptor::ExtractTypeIndexFromObject(const CLR_RT_HeapBlock
 
     if (NANOCLR_INDEX_IS_INVALID(res))
     {
-        CLR_RT_TypeDescriptor desc;
+        CLR_RT_TypeDescriptor desc{};
 
         NANOCLR_CHECK_HRESULT(desc.InitializeFromObject(ref))
 
@@ -1643,7 +1643,7 @@ HRESULT CLR_RT_Assembly::CreateInstance(const CLR_RECORD_ASSEMBLY *header, CLR_R
         }
 
 #if !defined(NANOCLR_APPDOMAINS)
-        offsets.iStaticFields = ROUNDTOMULTIPLE(skeleton->m_iStaticFields * sizeof(CLR_RT_HeapBlock), CLR_UINT32);
+        offsets.iStaticFields = ROUNDTOMULTIPLE(skeleton->m_iStaticFields * sizeof(struct CLR_RT_HeapBlock), CLR_UINT32);
 #endif
 
 #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
@@ -1680,8 +1680,8 @@ HRESULT CLR_RT_Assembly::CreateInstance(const CLR_RECORD_ASSEMBLY *header, CLR_R
             CLR_RT_HeapBlock *src = skeleton;
             CLR_RT_HeapBlock *dst = assm;
 
-            memset(&dst[1], 0, iTotalRamSize - sizeof(CLR_RT_HeapBlock));
-            memcpy(&dst[1], &src[1], sizeof(*assm) - sizeof(CLR_RT_HeapBlock));
+            memset(&dst[1], 0, iTotalRamSize - sizeof(struct CLR_RT_HeapBlock));
+            memcpy(&dst[1], &src[1], sizeof(*assm) - sizeof(struct CLR_RT_HeapBlock));
         }
 
         assm->Assembly_Initialize(offsets);
@@ -3952,7 +3952,7 @@ HRESULT CLR_RT_TypeSystem::ResolveAll()
                     CLR_UINT32);
 
 #if !defined(NANOCLR_APPDOMAINS)
-                offsets.iStaticFields += ROUNDTOMULTIPLE(pASSM->m_iStaticFields * sizeof(CLR_RT_HeapBlock), CLR_UINT32);
+                offsets.iStaticFields += ROUNDTOMULTIPLE(pASSM->m_iStaticFields * sizeof(struct CLR_RT_HeapBlock), CLR_UINT32);
 #endif
 
 #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
@@ -4092,6 +4092,8 @@ HRESULT CLR_RT_TypeSystem::PrepareForExecution()
     if (g_CLR_RT_ExecutionEngine.m_outOfMemoryException == NULL)
     {
         CLR_RT_HeapBlock exception;
+
+        memset(&exception, 0, sizeof(struct CLR_RT_HeapBlock));
 
         NANOCLR_CHECK_HRESULT(
             g_CLR_RT_ExecutionEngine.NewObjectFromIndex(exception, g_CLR_RT_WellKnownTypes.m_OutOfMemoryException));
@@ -4636,6 +4638,7 @@ HRESULT CLR_RT_AttributeParser::Next(Value *&res)
 
         m_lastValue.m_mode = Value::c_DefaultConstructor;
         m_lastValue.m_name = NULL;
+        memset(&m_lastValue.m_value, 0, sizeof(struct CLR_RT_HeapBlock));
 
         NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObject(m_lastValue.m_value, m_td));
 
@@ -4651,6 +4654,7 @@ HRESULT CLR_RT_AttributeParser::Next(Value *&res)
 
         m_lastValue.m_mode = Value::c_ConstructorArgument;
         m_lastValue.m_name = NULL;
+        memset(&m_lastValue.m_value, 0, sizeof(struct CLR_RT_HeapBlock));
 
         // get type
         NANOCLR_CHECK_HRESULT(m_parser.Advance(m_res));
@@ -4845,7 +4849,7 @@ HRESULT CLR_RT_AttributeParser::ReadString(CLR_RT_HeapBlock *&value)
 
     CLR_UINT32 tk;
 
-    CLR_RT_TypeDescriptor desc;
+    CLR_RT_TypeDescriptor desc{};
     NANOCLR_CHECK_HRESULT(desc.InitializeFromType(g_CLR_RT_WellKnownTypes.m_String));
 
     NANOCLR_READ_UNALIGNED_UINT16(tk, m_blob);
@@ -4866,7 +4870,7 @@ HRESULT CLR_RT_AttributeParser::ReadNumericValue(
 {
     NANOCLR_HEADER();
 
-    CLR_RT_TypeDescriptor desc;
+    CLR_RT_TypeDescriptor desc{};
     NANOCLR_CHECK_HRESULT(desc.InitializeFromType(*m_cls));
 
     NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObjectFromIndex(*value, g_CLR_RT_WellKnownTypes.m_TypeStatic));

@@ -40,6 +40,19 @@ extern "C"
 
     } DeviceConfigurationOption;
 
+    typedef enum UpdateConfigurationResult
+    {
+        // update succesfull
+        UpdateConfigurationResult_Success = 1,
+
+        // update failed
+        UpdateConfigurationResult_Failed = 2,
+
+        // update not required
+        UpdateConfigurationResult_NoChanges = 3,
+
+    } UpdateConfigurationResult;
+
     // network interface configuration struct
     // declared with a flexible array member to allow N config blocks totally independent of compilation
     typedef struct HAL_CONFIGURATION_NETWORK
@@ -143,7 +156,7 @@ extern "C"
 
     // UpdateConfigurationBlock() is defined in targetHAL_ConfigurationManager.cpp at target level because the target
     // needs to be free to implement the storage of the configuration block as they see fit
-    bool ConfigurationManager_UpdateConfigurationBlock(
+    UpdateConfigurationResult ConfigurationManager_UpdateConfigurationBlock(
         void *configurationBlock,
         DeviceConfigurationOption configuration,
         uint32_t configurationIndex);

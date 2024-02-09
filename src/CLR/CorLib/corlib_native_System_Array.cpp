@@ -14,6 +14,9 @@ HRESULT Library_corlib_native_System_Array::System_Collections_IList_get_Item___
     int index = stack.Arg1().NumericByRef().s4;
 
     CLR_RT_HeapBlock ref;
+
+    memset(&ref, 0, sizeof(struct CLR_RT_HeapBlock));
+
     NANOCLR_CHECK_HRESULT(ref.InitializeArrayReference(thisRef, index));
 
     {
@@ -36,6 +39,9 @@ HRESULT Library_corlib_native_System_Array::System_Collections_IList_set_Item___
     int index = stack.Arg1().NumericByRef().s4;
 
     CLR_RT_HeapBlock ref;
+
+    memset(&ref, 0, sizeof(struct CLR_RT_HeapBlock));
+
     NANOCLR_CHECK_HRESULT(ref.InitializeArrayReference(thisRef, index));
 
     NANOCLR_SET_AND_LEAVE(stack.Arg2().StoreToReference(ref, 0));

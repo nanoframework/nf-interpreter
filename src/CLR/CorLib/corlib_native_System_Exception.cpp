@@ -42,17 +42,22 @@ HRESULT Library_corlib_native_System_Exception::get_StackTrace___STRING(CLR_RT_S
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
 
-    CLR_RT_HeapBlock_Array *pArray;
-    StackTrace *pStackTrace;
-    CLR_RT_HeapBlock *pBlkString;
     char buf[512];
     char *strName;
     size_t iName;
+    int depth = 0;
+
+    CLR_RT_HeapBlock_Array *pArray;
+    StackTrace *pStackTrace;
+    CLR_RT_HeapBlock *pBlkString;
     CLR_RT_HeapBlock tmpArray;
+    CLR_RT_HeapBlock *pThis;
+
+    memset(&tmpArray, 0, sizeof(struct CLR_RT_HeapBlock));
     tmpArray.SetObjectReference(NULL);
     CLR_RT_ProtectFromGC gc(tmpArray);
-    int depth = 0;
-    CLR_RT_HeapBlock *pThis = stack.This();
+
+    pThis = stack.This();
     FAULT_ON_NULL(pThis);
 
     pArray = pThis[FIELD___stackTrace].DereferenceArray();

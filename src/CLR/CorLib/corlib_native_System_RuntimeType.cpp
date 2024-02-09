@@ -183,7 +183,7 @@ HRESULT Library_corlib_native_System_RuntimeType::GetElementType___SystemType(CL
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
 
-    CLR_RT_TypeDescriptor desc;
+    CLR_RT_TypeDescriptor desc{};
     CLR_RT_TypeDescriptor descSub;
     CLR_RT_HeapBlock &top = stack.PushValueAndClear();
     CLR_RT_HeapBlock *hbType = stack.Arg0().Dereference();
@@ -342,7 +342,7 @@ HRESULT Library_corlib_native_System_RuntimeType::GetCustomAttributes(
             attributeEnumerator.GetCurrent(&instanceTypeDef);
 
             // setup attribute parser
-            CLR_RT_AttributeParser parser;
+            CLR_RT_AttributeParser parser{};
             NANOCLR_CHECK_HRESULT(parser.Initialize(attributeEnumerator));
 
             while (true)

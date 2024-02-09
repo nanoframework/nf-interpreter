@@ -1302,10 +1302,8 @@ HRESULT LWIP_SOCKETS_Driver::UpdateAdapterConfiguration(
         if (enableDHCP)
         {
             // need to start DHCP
-            if (ERR_OK != dhcp_start(networkInterface))
-            {
-                return CLR_E_FAIL;
-            }
+            // no need to check for return value, even if it fails, it will retry
+            dhcp_start(networkInterface);
         }
         else
         {

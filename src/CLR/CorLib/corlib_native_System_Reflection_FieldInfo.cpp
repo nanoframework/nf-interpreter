@@ -19,6 +19,8 @@ HRESULT Library_corlib_native_System_Reflection_FieldInfo::SetValue___VOID__OBJE
     bool fValueType;
     CLR_RT_HeapBlock &srcVal = stack.Arg2();
     CLR_RT_HeapBlock val;
+
+    memset(&val, 0, sizeof(struct CLR_RT_HeapBlock));
     val.Assign(srcVal);
     CLR_RT_ProtectFromGC gc(val);
 

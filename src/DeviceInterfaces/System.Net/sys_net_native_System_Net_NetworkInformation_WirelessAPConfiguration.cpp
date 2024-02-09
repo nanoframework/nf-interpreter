@@ -145,7 +145,7 @@ HRESULT Library_sys_net_native_System_Net_NetworkInformation_WirelessAPConfigura
     if (ConfigurationManager_UpdateConfigurationBlock(
             &config,
             DeviceConfigurationOption_WirelessNetworkAP,
-            configurationIndex) != TRUE)
+            configurationIndex) == UpdateConfigurationResult_Failed)
     {
         NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
     }
