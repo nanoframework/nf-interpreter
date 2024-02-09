@@ -35,10 +35,10 @@ __nfweak void ConfigurationManager_Initialize()
     memset(&stream, 0, sizeof(BlockStorageStream));
     BlockStorageStream_Initialize(&stream, BlockUsage_CONFIG);
 
-    BlockStorageDevice* device = BlockStorageList_GetFirstDevice();
-    DeviceBlockInfo * deviceBlockInfo = BlockStorageDevice_GetDeviceInfo(device);
-    
-    if(deviceBlockInfo->Regions[stream.RegionIndex].Attributes & BlockRegionAttribute_ProgramWidthIs64bits)
+    BlockStorageDevice *device = BlockStorageList_GetFirstDevice();
+    DeviceBlockInfo *deviceBlockInfo = BlockStorageDevice_GetDeviceInfo(device);
+
+    if (deviceBlockInfo->Regions[stream.RegionIndex].Attributes & BlockRegionAttribute_ProgramWidthIs64bits)
     {
         programWidth = 64 / 8;
     }
@@ -335,7 +335,7 @@ __nfweak bool ConfigurationManager_StoreConfigurationBlock(
             storageAddress = (uint32_t)&__nanoConfig_start__ + sizeof(HAL_Configuration_NetworkInterface);
 
             // check programming width
-            if(programWidth > 0)
+            if (programWidth > 0)
             {
                 // round address to the next valid programming width
                 storageAddress += programWidth - storageAddress % programWidth;

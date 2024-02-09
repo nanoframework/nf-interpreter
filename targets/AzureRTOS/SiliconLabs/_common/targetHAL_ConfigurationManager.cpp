@@ -6,7 +6,7 @@
 #include <nanoHAL.h>
 #include <nanoHAL_v2.h>
 #include <nanoWeak.h>
-//#include <network_options.h>
+// #include <network_options.h>
 
 #if defined(WIFI_DRIVER_ISM43362) && defined(I_AM_NANOCLR)
 #include <wifi.h>
