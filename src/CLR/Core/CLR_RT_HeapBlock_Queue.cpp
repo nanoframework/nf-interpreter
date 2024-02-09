@@ -51,8 +51,9 @@ HRESULT CLR_RT_HeapBlock_Queue::Enqueue(CLR_RT_HeapBlock *value)
         CLR_RT_HeapBlock newArrayHB;
 
         // Protect value from GC, in case CreateInstance triggers one
-        CLR_RT_HeapBlock valueHB; valueHB.SetObjectReference( value );
-        CLR_RT_ProtectFromGC gc( valueHB );
+        CLR_RT_HeapBlock valueHB;
+        valueHB.SetObjectReference(value);
+        CLR_RT_ProtectFromGC gc(valueHB);
 
         capacity *= 2;
 
@@ -149,7 +150,7 @@ HRESULT CLR_RT_HeapBlock_Queue::CopyTo(CLR_RT_HeapBlock_Array *toArray, CLR_INT3
 
     // if the target array is of type Object, we don't need to call the complex Array::Copy() since there will be no
     // casting involved
-    HRESULT (*arrayCopy)
+    HRESULT(*arrayCopy)
     (CLR_RT_HeapBlock_Array *, int, CLR_RT_HeapBlock_Array *, int, int) =
         (toArray->m_typeOfElement == DATATYPE_OBJECT) ? ObjArrayMemcpy : CLR_RT_HeapBlock_Array::Copy;
 
