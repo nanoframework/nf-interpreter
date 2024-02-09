@@ -49,7 +49,7 @@ HRESULT Library_corlib_native_System_Type::IsInstanceOfType___BOOLEAN__OBJECT(CL
     NANOCLR_HEADER();
 
     CLR_RT_TypeDescriptor descTarget;
-    CLR_RT_TypeDescriptor desc;
+    CLR_RT_TypeDescriptor desc{};
     CLR_RT_HeapBlock *hbType = stack.Arg0().Dereference();
 
     if (hbType->DataType() != DATATYPE_REFLECTION)

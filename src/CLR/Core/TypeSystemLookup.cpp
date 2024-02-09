@@ -38,7 +38,7 @@
 #define DT_I4 sizeof(CLR_INT32)
 #define DT_U8 sizeof(CLR_UINT64)
 #define DT_I8 sizeof(CLR_INT64)
-#define DT_BL sizeof(CLR_RT_HeapBlock)
+#define DT_BL sizeof(struct CLR_RT_HeapBlock)
 
 #define DT_T(x)   (CLR_UINT8)DATATYPE_##x
 #define DT_CNV(x) (CLR_UINT8)ELEMENT_TYPE_##x

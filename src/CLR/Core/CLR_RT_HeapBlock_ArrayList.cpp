@@ -46,7 +46,7 @@ HRESULT CLR_RT_HeapBlock_ArrayList::Add(CLR_RT_HeapBlock *value, CLR_INT32 &inde
         // Protect value from GC, in case EnsureCapacity triggers one
         CLR_RT_HeapBlock valueHB;
 
-        memset(&valueHB, 0, sizeof(CLR_RT_HeapBlock));
+        memset(&valueHB, 0, sizeof(struct CLR_RT_HeapBlock));
         valueHB.SetObjectReference(value);
         CLR_RT_ProtectFromGC gc(valueHB);
 
@@ -94,8 +94,8 @@ HRESULT CLR_RT_HeapBlock_ArrayList::Insert(CLR_INT32 index, CLR_RT_HeapBlock *va
     {
         // Protect value from GC, in case EnsureCapacity triggers one
         CLR_RT_HeapBlock valueHB;
-        
-        memset(&valueHB, 0, sizeof(CLR_RT_HeapBlock));
+
+        memset(&valueHB, 0, sizeof(struct CLR_RT_HeapBlock));
         valueHB.SetObjectReference(value);
         CLR_RT_ProtectFromGC gc(valueHB);
 
@@ -171,7 +171,7 @@ HRESULT CLR_RT_HeapBlock_ArrayList::SetCapacity(CLR_UINT32 newCapacity)
         CLR_RT_HeapBlock newItemsHB;
         CLR_RT_HeapBlock_Array *newItems;
 
-        memset(&newItemsHB, 0, sizeof(CLR_RT_HeapBlock));
+        memset(&newItemsHB, 0, sizeof(struct CLR_RT_HeapBlock));
 
         if (newCapacity < size)
             NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_RANGE);
@@ -188,7 +188,7 @@ HRESULT CLR_RT_HeapBlock_ArrayList::SetCapacity(CLR_UINT32 newCapacity)
 
         if (size > 0)
         {
-            memcpy(newItems->GetFirstElement(), items->GetFirstElement(), size * sizeof(CLR_RT_HeapBlock));
+            memcpy(newItems->GetFirstElement(), items->GetFirstElement(), size * sizeof(struct CLR_RT_HeapBlock));
         }
 
         SetItems(newItems);
