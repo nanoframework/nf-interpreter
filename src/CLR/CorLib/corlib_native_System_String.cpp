@@ -197,7 +197,7 @@ HRESULT Library_corlib_native_System_String::_ctor___VOID__CHAR__I4(CLR_RT_Stack
 
     CLR_UINT16 ch = stack.Arg1().NumericByRef().u2;
     int len = stack.Arg2().NumericByRef().s4;
-    
+
     if (len < 0)
     {
         NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_RANGE);
@@ -948,11 +948,11 @@ HRESULT Library_corlib_native_System_String::Trim(
 
     CLR_RT_HeapBlock refTmp;
     CLR_RT_HeapBlock_Array *arrayTmp;
-    
+
     memset(&refTmp, 0, sizeof(struct CLR_RT_HeapBlock));
     refTmp.SetObjectReference(NULL);
     CLR_RT_ProtectFromGC gc(refTmp);
-    
+
     NANOCLR_CHECK_HRESULT(ConvertToCharArray(stack, refTmp, arrayTmp, 0, -1));
 
     pSrcStart = (CLR_UINT16 *)arrayTmp->GetFirstElement();

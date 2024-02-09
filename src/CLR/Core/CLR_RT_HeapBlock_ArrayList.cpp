@@ -94,7 +94,7 @@ HRESULT CLR_RT_HeapBlock_ArrayList::Insert(CLR_INT32 index, CLR_RT_HeapBlock *va
     {
         // Protect value from GC, in case EnsureCapacity triggers one
         CLR_RT_HeapBlock valueHB;
-        
+
         memset(&valueHB, 0, sizeof(struct CLR_RT_HeapBlock));
         valueHB.SetObjectReference(value);
         CLR_RT_ProtectFromGC gc(valueHB);
