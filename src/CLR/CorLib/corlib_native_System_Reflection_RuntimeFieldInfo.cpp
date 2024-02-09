@@ -54,7 +54,7 @@ HRESULT Library_corlib_native_System_Reflection_RuntimeFieldInfo::get_FieldType_
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
 
-    CLR_RT_TypeDescriptor desc;
+    CLR_RT_TypeDescriptor desc{};
     CLR_RT_FieldDef_Instance fd;
     CLR_RT_HeapBlock *hbField = stack.Arg0().Dereference();
 
@@ -85,6 +85,8 @@ HRESULT Library_corlib_native_System_Reflection_RuntimeFieldInfo::GetValue___OBJ
     const CLR_RECORD_FIELDDEF *fd;
     CLR_RT_HeapBlock *obj;
     CLR_RT_HeapBlock dst;
+
+    memset(&dst, 0, sizeof(struct CLR_RT_HeapBlock));
 
     NANOCLR_CHECK_HRESULT(Library_corlib_native_System_Reflection_FieldInfo::Initialize(stack, instFD, instTD, obj));
 

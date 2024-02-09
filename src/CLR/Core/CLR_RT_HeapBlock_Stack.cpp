@@ -49,8 +49,12 @@ HRESULT CLR_RT_HeapBlock_Stack::Push(CLR_RT_HeapBlock *value)
         CLR_RT_HeapBlock newArrayHB;
         CLR_RT_HeapBlock_Array *newArray;
 
+        memset(&newArrayHB, 0, sizeof(struct CLR_RT_HeapBlock));
+
         // Protect value from GC, in case CreateInstance triggers one
         CLR_RT_HeapBlock valueHB;
+
+        memset(&valueHB, 0, sizeof(struct CLR_RT_HeapBlock));
         valueHB.SetObjectReference(value);
         CLR_RT_ProtectFromGC gc(valueHB);
 
@@ -61,7 +65,7 @@ HRESULT CLR_RT_HeapBlock_Stack::Push(CLR_RT_HeapBlock *value)
 
         newArray = newArrayHB.DereferenceArray();
 
-        memcpy(newArray->GetElement(size), array->GetFirstElement(), size * sizeof(CLR_RT_HeapBlock));
+        memcpy(newArray->GetElement(size), array->GetFirstElement(), size * sizeof(struct CLR_RT_HeapBlock));
 
         SetArray(newArray);
         array = newArray;

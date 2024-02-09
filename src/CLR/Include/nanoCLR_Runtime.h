@@ -949,7 +949,6 @@ class UnicodeString
 {
   private:
     CLR_RT_UnicodeHelper m_unicodeHelper;
-    CLR_RT_HeapBlock m_uHeapBlock;
     CLR_UINT16 *m_wCharArray;
     int m_length; /// Length in wide characters (not bytes).
 
@@ -3899,12 +3898,12 @@ extern CLR_UINT32 g_buildCRC;
 //
 
 #ifdef _WIN64
-CT_ASSERT(sizeof(CLR_RT_HeapBlock) == 20)
+CT_ASSERT(sizeof(struct CLR_RT_HeapBlock) == 20)
 #else
-CT_ASSERT(sizeof(CLR_RT_HeapBlock) == 12)
+CT_ASSERT(sizeof(struct CLR_RT_HeapBlock) == 12)
 #endif // _WIN64
 
-CT_ASSERT(sizeof(CLR_RT_HeapBlock_Raw) == sizeof(CLR_RT_HeapBlock))
+CT_ASSERT(sizeof(CLR_RT_HeapBlock_Raw) == sizeof(struct CLR_RT_HeapBlock))
 
 #if defined(NANOCLR_TRACE_MEMORY_STATS)
 #define NANOCLR_TRACE_MEMORY_STATS_EXTRA_SIZE sizeof(const char *)
