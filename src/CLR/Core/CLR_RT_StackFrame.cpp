@@ -573,7 +573,7 @@ HRESULT CLR_RT_StackFrame::MakeCall(
     int argsOffset = 0;
     CLR_RT_StackFrame *stackSub;
     CLR_RT_HeapBlock tmp;
-    
+
     memset(&tmp, 0, sizeof(struct CLR_RT_HeapBlock));
     tmp.SetObjectReference(NULL);
     CLR_RT_ProtectFromGC gc(tmp);

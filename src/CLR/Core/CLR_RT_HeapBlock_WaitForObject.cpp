@@ -29,7 +29,8 @@ HRESULT CLR_RT_HeapBlock_WaitForObject::CreateInstance(
 
     _ASSERTE(sizeof(CLR_RT_HeapBlock_WaitForObject) % 4 == 0);
 
-    CLR_UINT32 totLength = (CLR_UINT32)(sizeof(CLR_RT_HeapBlock_WaitForObject) + cObjects * sizeof(struct CLR_RT_HeapBlock));
+    CLR_UINT32 totLength =
+        (CLR_UINT32)(sizeof(CLR_RT_HeapBlock_WaitForObject) + cObjects * sizeof(struct CLR_RT_HeapBlock));
 
     CLR_RT_HeapBlock_WaitForObject *wait = EVENTCACHE_EXTRACT_NODE_AS_BYTES(
         g_CLR_RT_EventCache,
