@@ -1205,7 +1205,7 @@ HRESULT Library_corlib_native_System_String::ConvertToCharArray(
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
 
-    CLR_RT_UnicodeHelper uh;
+    CLR_RT_UnicodeHelper uh{};
     int totLength;
 
     FAULT_ON_NULL(szText);
