@@ -172,6 +172,7 @@ HRESULT CLR_RT_HeapBlock_ArrayList::SetCapacity(CLR_UINT32 newCapacity)
         CLR_RT_HeapBlock_Array *newItems;
 
         memset(&newItemsHB, 0, sizeof(struct CLR_RT_HeapBlock));
+        CLR_RT_ProtectFromGC gc(newItemsHB);
 
         if (newCapacity < size)
             NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_RANGE);

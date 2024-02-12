@@ -408,12 +408,6 @@ HRESULT Library_nf_system_collections_System_Collections_Hashtable::Expand(CLR_R
         }
     }
 
-    if (i == lenghtOfPrimes)
-    {
-        // we are not supporting hastables bigger than this size
-        NANOCLR_SET_AND_LEAVE(CLR_E_NOT_SUPPORTED)
-    }
-
     // Don't replace any internal state until we've finished adding to the
     // new Bucket[].  This serves two purposes:
     //   1) Allow concurrent readers to see valid hashtable contents
@@ -426,6 +420,14 @@ HRESULT Library_nf_system_collections_System_Collections_Hashtable::Expand(CLR_R
 
     // create a new array of <Bucket>
     memset(&newBucketsHB, 0, sizeof(struct CLR_RT_HeapBlock));
+    CLR_RT_ProtectFromGC gc(newBucketsHB);
+
+    if (i == lenghtOfPrimes)
+    {
+        // we are not supporting hastables bigger than this size
+        NANOCLR_SET_AND_LEAVE(CLR_E_NOT_SUPPORTED)
+    }
+
     NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance(newBucketsHB, newSize, bucketTypeDef))
     newBuckets = newBucketsHB.DereferenceArray();
 
