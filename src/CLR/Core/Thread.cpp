@@ -919,7 +919,10 @@ HRESULT CLR_RT_Thread::ProcessException_Phase1()
                         // Copy local variables and arguments so the filter has access to them.
                         if (numArgs)
                         {
-                            memcpy(newStack->m_arguments, stack->m_arguments, sizeof(struct CLR_RT_HeapBlock) * numArgs);
+                            memcpy(
+                                newStack->m_arguments,
+                                stack->m_arguments,
+                                sizeof(struct CLR_RT_HeapBlock) * numArgs);
                         }
 
                         if (stack->m_call.m_target->numLocals)

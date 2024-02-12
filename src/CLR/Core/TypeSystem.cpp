@@ -1643,7 +1643,8 @@ HRESULT CLR_RT_Assembly::CreateInstance(const CLR_RECORD_ASSEMBLY *header, CLR_R
         }
 
 #if !defined(NANOCLR_APPDOMAINS)
-        offsets.iStaticFields = ROUNDTOMULTIPLE(skeleton->m_iStaticFields * sizeof(struct CLR_RT_HeapBlock), CLR_UINT32);
+        offsets.iStaticFields =
+            ROUNDTOMULTIPLE(skeleton->m_iStaticFields * sizeof(struct CLR_RT_HeapBlock), CLR_UINT32);
 #endif
 
 #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
@@ -3952,7 +3953,8 @@ HRESULT CLR_RT_TypeSystem::ResolveAll()
                     CLR_UINT32);
 
 #if !defined(NANOCLR_APPDOMAINS)
-                offsets.iStaticFields += ROUNDTOMULTIPLE(pASSM->m_iStaticFields * sizeof(struct CLR_RT_HeapBlock), CLR_UINT32);
+                offsets.iStaticFields +=
+                    ROUNDTOMULTIPLE(pASSM->m_iStaticFields * sizeof(struct CLR_RT_HeapBlock), CLR_UINT32);
 #endif
 
 #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)

@@ -2609,7 +2609,7 @@ bool CLR_DBG_Debugger::Debugging_Value_ResizeScratchPad(WP_Message *msg)
 
     CLR_DBG_Commands::Debugging_Value_ResizeScratchPad *cmd =
         (CLR_DBG_Commands::Debugging_Value_ResizeScratchPad *)msg->m_payload;
-    
+
     CLR_RT_HeapBlock ref;
 
     memset(&ref, 0, sizeof(struct CLR_RT_HeapBlock));

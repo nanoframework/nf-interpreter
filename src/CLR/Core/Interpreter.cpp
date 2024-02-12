@@ -2123,7 +2123,10 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                             }
                             else
                             {
-                                memmove(&pThis[0], &pThis[1], calleeInst.m_target->numArgs * sizeof(struct CLR_RT_HeapBlock));
+                                memmove(
+                                    &pThis[0],
+                                    &pThis[1],
+                                    calleeInst.m_target->numArgs * sizeof(struct CLR_RT_HeapBlock));
 
                                 evalPos--;
                             }
@@ -3015,7 +3018,7 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                     memset(&ref, 0, sizeof(struct CLR_RT_HeapBlock));
 
                     NANOCLR_CHECK_HRESULT(ref.InitializeArrayReference(evalPos[1], evalPos[2].NumericByRef().s4));
-                    
+
                     int size = 0;
 
                     switch (op)

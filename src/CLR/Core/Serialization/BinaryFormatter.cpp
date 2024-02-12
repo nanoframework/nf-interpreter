@@ -1367,7 +1367,7 @@ HRESULT CLR_RT_BinaryFormatter::State::AssignAndFixBoxing(CLR_RT_HeapBlock &dst)
                         break;
 
                     default:
-						NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+                        NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
                 }
 
                 //
@@ -1801,7 +1801,7 @@ HRESULT CLR_RT_BinaryFormatter::CreateInstance(CLR_UINT8 *buf, int len, CLR_RT_B
                                               //
     ptr->m_fDeserialize = (buf != NULL);      // bool                           m_fDeserialize;
     memset(&ptr->m_value, 0, sizeof(struct CLR_RT_HeapBlock));
-    ptr->m_value.SetObjectReference(NULL);    // CLR_RT_HeapBlock               m_value;
+    ptr->m_value.SetObjectReference(NULL);         // CLR_RT_HeapBlock               m_value;
     ptr->m_value_desc.TypeDescriptor_Initialize(); // CLR_RT_TypeDescriptor          m_value_desc;
 
     NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_MemoryStream::CreateInstance(ptr->m_stream, buf, len));
