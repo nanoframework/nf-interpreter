@@ -27,7 +27,7 @@ HRESULT Library_corlib_native_System_Reflection_RuntimeFieldInfo::get_DeclaringT
     NANOCLR_HEADER();
 
     CLR_RT_FieldDef_Instance fd;
-    CLR_RT_TypeDef_Instance cls;
+    CLR_RT_TypeDef_Instance cls{};
     CLR_RT_HeapBlock *hbField = stack.Arg0().Dereference();
 
     if (GetFieldDescriptor(stack, *hbField, fd) == false)

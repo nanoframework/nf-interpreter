@@ -143,7 +143,7 @@ HRESULT CLR_RT_Thread::PushThreadProcDelegate(CLR_RT_HeapBlock_Delegate *pDelega
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
 
-    CLR_RT_MethodDef_Instance inst;
+    CLR_RT_MethodDef_Instance inst{};
 
 #if defined(NANOCLR_APPDOMAINS)
     CLR_RT_AppDomain *appDomainSav = g_CLR_RT_ExecutionEngine.SetCurrentAppDomain(pDelegate->m_appDomain);
@@ -919,7 +919,10 @@ HRESULT CLR_RT_Thread::ProcessException_Phase1()
                         // Copy local variables and arguments so the filter has access to them.
                         if (numArgs)
                         {
-                            memcpy(newStack->m_arguments, stack->m_arguments, sizeof(struct CLR_RT_HeapBlock) * numArgs);
+                            memcpy(
+                                newStack->m_arguments,
+                                stack->m_arguments,
+                                sizeof(struct CLR_RT_HeapBlock) * numArgs);
                         }
 
                         if (stack->m_call.m_target->numLocals)

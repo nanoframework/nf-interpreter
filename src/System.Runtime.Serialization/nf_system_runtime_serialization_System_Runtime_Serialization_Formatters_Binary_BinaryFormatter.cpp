@@ -44,8 +44,8 @@ HRESULT Library_nf_system_runtime_serialization_System_Runtime_Serialization_For
             if (hash != 0)
             {
                 // if there is a hash, set the Type field ONLY IF the type is found
-                CLR_RT_ReflectionDef_Index idx;
-                CLR_RT_TypeDef_Instance inst;
+                CLR_RT_ReflectionDef_Index idx{};
+                CLR_RT_TypeDef_Instance inst{};
 
                 idx.InitializeFromHash(hash);
 

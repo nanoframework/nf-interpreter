@@ -608,8 +608,8 @@ void CLR_RT_GarbageCollector::CheckMemoryPressure()
                     if (weak->m_targetSerialized && weak->m_targetDirect == NULL)
                     {
 #if !defined(BUILD_RTM)
-                        CLR_RT_ReflectionDef_Index val;
-                        CLR_RT_TypeDef_Instance inst;
+                        CLR_RT_ReflectionDef_Index val{};
+                        CLR_RT_TypeDef_Instance inst{};
                         char rgBuffer[512];
                         char *szBuffer = rgBuffer;
                         size_t iBuffer = MAXSTRLEN(rgBuffer);

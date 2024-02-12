@@ -17,7 +17,7 @@ HRESULT CLR_RT_HeapBlock_Array::CreateInstance(
 
     CLR_RT_HeapBlock_Array *pArray;
     CLR_RT_TypeDef_Index cls;
-    CLR_RT_TypeDef_Instance inst;
+    CLR_RT_TypeDef_Instance inst{};
 
     reference.SetObjectReference(NULL);
 
@@ -92,12 +92,10 @@ HRESULT CLR_RT_HeapBlock_Array::CreateInstance(
     NANOCLR_HEADER();
 
     CLR_RT_HeapBlock ref;
-    CLR_RT_TypeDef_Instance cls;
-    CLR_RT_TypeSpec_Instance def;
+    CLR_RT_TypeDef_Instance cls{};
+    CLR_RT_TypeSpec_Instance def{};
 
     memset(&ref, 0, sizeof(struct CLR_RT_HeapBlock));
-    memset(&cls, 0, sizeof(CLR_RT_TypeDef_Instance));
-    memset(&def, 0, sizeof(CLR_RT_TypeSpec_Instance));
 
     if (cls.ResolveToken(tk, assm))
     {
@@ -382,15 +380,13 @@ HRESULT CLR_RT_HeapBlock_Array::Copy(
         }
         else
         {
-            CLR_RT_TypeDescriptor descSrc;
-            CLR_RT_TypeDescriptor descDst;
+            CLR_RT_TypeDescriptor descSrc{};
+            CLR_RT_TypeDescriptor descDst{};
             CLR_RT_HeapBlock ref;
             CLR_RT_HeapBlock elem;
 
             memset(&ref, 0, sizeof(struct CLR_RT_HeapBlock));
             memset(&elem, 0, sizeof(struct CLR_RT_HeapBlock));
-            memset(&descSrc, 0, sizeof(CLR_RT_TypeDescriptor));
-            memset(&descDst, 0, sizeof(CLR_RT_TypeDescriptor));
 
             elem.SetObjectReference(NULL);
             CLR_RT_ProtectFromGC gc(elem);

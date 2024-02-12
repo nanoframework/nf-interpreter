@@ -2107,7 +2107,7 @@ static HRESULT Debugging_Thread_Create_Helper(CLR_RT_MethodDef_Index &md, CLR_RT
 
         if (numArgs)
         {
-            CLR_RT_SignatureParser parser;
+            CLR_RT_SignatureParser parser{};
             parser.Initialize_MethodSignature(stack->m_call.m_assm, target);
             CLR_RT_SignatureParser::Element res;
             CLR_RT_HeapBlock *args = stack->m_arguments;
@@ -2609,7 +2609,7 @@ bool CLR_DBG_Debugger::Debugging_Value_ResizeScratchPad(WP_Message *msg)
 
     CLR_DBG_Commands::Debugging_Value_ResizeScratchPad *cmd =
         (CLR_DBG_Commands::Debugging_Value_ResizeScratchPad *)msg->m_payload;
-    
+
     CLR_RT_HeapBlock ref;
 
     memset(&ref, 0, sizeof(struct CLR_RT_HeapBlock));
@@ -2718,7 +2718,7 @@ bool CLR_DBG_Debugger::Debugging_Value_GetStack(WP_Message *msg)
         if (cmd->m_kind != CLR_DBG_Commands::Debugging_Value_GetStack::c_EvalStack && IsBlockEnumMaybe(blk))
         {
             CLR_UINT32 iElement = cmd->m_index;
-            CLR_RT_SignatureParser parser;
+            CLR_RT_SignatureParser parser{};
             CLR_RT_SignatureParser::Element res;
             CLR_RT_TypeDescriptor desc{};
 
@@ -2787,19 +2787,20 @@ bool CLR_DBG_Debugger::Debugging_Value_GetField(WP_Message *msg)
 {
     NATIVE_PROFILE_CLR_DEBUGGER();
 
+    CLR_UINT32 offset;
+
     CLR_DBG_Commands::Debugging_Value_GetField *cmd = (CLR_DBG_Commands::Debugging_Value_GetField *)msg->m_payload;
     CLR_RT_HeapBlock *blk = cmd->m_heapblock;
     CLR_RT_HeapBlock *reference = NULL;
-    CLR_RT_HeapBlock tmp;
-    CLR_RT_TypeDescriptor desc{};
-    CLR_RT_TypeDef_Instance td;
     CLR_RT_TypeDef_Instance *pTD = NULL;
+    CLR_RT_TypeDescriptor desc{};
+    CLR_RT_HeapBlock tmp;
+    CLR_RT_TypeDef_Instance td;
     CLR_RT_FieldDef_Instance inst;
-    CLR_UINT32 offset;
 
     memset(&tmp, 0, sizeof(struct CLR_RT_HeapBlock));
+    memset(&td, 0, sizeof(CLR_RT_TypeDef_Instance));
     memset(&inst, 0, sizeof(CLR_RT_FieldDef_Instance));
-    memset(&desc, 0, sizeof(CLR_RT_TypeDescriptor));
 
     if (blk != NULL && cmd->m_offset > 0)
     {
@@ -2903,14 +2904,13 @@ bool CLR_DBG_Debugger::Debugging_Value_GetArray(WP_Message *msg)
     CLR_DBG_Commands::Debugging_Value_GetArray *cmd = (CLR_DBG_Commands::Debugging_Value_GetArray *)msg->m_payload;
     CLR_RT_HeapBlock *blk = NULL;
     CLR_RT_HeapBlock *reference = NULL;
+    CLR_RT_TypeDef_Instance *pTD = NULL;
     CLR_RT_HeapBlock tmp;
     CLR_RT_HeapBlock ref;
-    CLR_RT_TypeDef_Instance *pTD = NULL;
-    CLR_RT_TypeDef_Instance td;
+    CLR_RT_TypeDef_Instance td{};
 
     memset(&tmp, 0, sizeof(struct CLR_RT_HeapBlock));
     memset(&ref, 0, sizeof(struct CLR_RT_HeapBlock));
-    memset(&td, 0, sizeof(CLR_RT_TypeDef_Instance));
 
     tmp.SetObjectReference(cmd->m_heapblock);
 
@@ -3569,7 +3569,7 @@ bool CLR_DBG_Debugger::Debugging_Resolve_Field(WP_Message *msg)
 
             if (SUCCEEDED(g_CLR_RT_TypeSystem.BuildFieldName(inst, szBuffer, iBuffer)))
             {
-                CLR_RT_TypeDef_Instance instClass;
+                CLR_RT_TypeDef_Instance instClass{};
                 instClass.InitializeFromField(inst);
 
                 cmdReply->m_td.m_data = instClass.m_data;
@@ -3596,7 +3596,7 @@ bool CLR_DBG_Debugger::Debugging_Resolve_Method(WP_Message *msg)
 
     CLR_DBG_Commands::Debugging_Resolve_Method::Reply *cmdReply;
     CLR_RT_MethodDef_Instance inst;
-    CLR_RT_TypeDef_Instance instOwner;
+    CLR_RT_TypeDef_Instance instOwner{};
 
     CLR_DBG_Commands::Debugging_Resolve_Method *cmd = (CLR_DBG_Commands::Debugging_Resolve_Method *)msg->m_payload;
 
@@ -3755,7 +3755,7 @@ bool CLR_DBG_Debugger::Debugging_Info_SetJMC_Type(const CLR_RT_TypeDef_Index &id
     const CLR_RECORD_TYPEDEF *td;
     CLR_RT_TypeDef_Instance inst;
     int totMethods;
-    CLR_RT_MethodDef_Index md;
+    CLR_RT_MethodDef_Index md{};
 
     if (!CheckTypeDef(idx, inst))
         return false;
