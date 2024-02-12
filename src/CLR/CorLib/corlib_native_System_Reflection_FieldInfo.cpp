@@ -12,8 +12,8 @@ HRESULT Library_corlib_native_System_Reflection_FieldInfo::SetValue___VOID__OBJE
 
     CLR_RT_FieldDef_Instance instFD;
     CLR_RT_TypeDef_Instance instTD;
-    CLR_RT_TypeDescriptor instTDescObj;
-    CLR_RT_TypeDef_Instance instTDField;
+    CLR_RT_TypeDescriptor instTDescObj{};
+    CLR_RT_TypeDef_Instance instTDField{};
     const CLR_RECORD_FIELDDEF *fd;
     CLR_RT_HeapBlock *obj;
     bool fValueType;

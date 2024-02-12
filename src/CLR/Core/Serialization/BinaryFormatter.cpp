@@ -1210,9 +1210,9 @@ HRESULT CLR_RT_BinaryFormatter::State::FindHints(SerializationHintsAttribute &hi
 
     if (cls.m_target->flags & CLR_RECORD_TYPEDEF::TD_HasAttributes)
     {
-        CLR_RT_TypeDef_Instance inst;
+        CLR_RT_TypeDef_Instance inst{};
         inst.InitializeFromIndex(g_CLR_RT_WellKnownTypes.m_SerializationHintsAttribute);
-        CLR_RT_AttributeEnumerator en;
+        CLR_RT_AttributeEnumerator en{};
         en.Initialize(cls);
 
         if (en.MatchNext(&inst, NULL))
@@ -1247,9 +1247,9 @@ HRESULT CLR_RT_BinaryFormatter::State::FindHints(
 
     if (fld.m_target->flags & CLR_RECORD_FIELDDEF::FD_HasAttributes)
     {
-        CLR_RT_TypeDef_Instance inst;
+        CLR_RT_TypeDef_Instance inst{};
         inst.InitializeFromIndex(g_CLR_RT_WellKnownTypes.m_SerializationHintsAttribute);
-        CLR_RT_AttributeEnumerator en;
+        CLR_RT_AttributeEnumerator en{};
         en.Initialize(fld);
 
         if (en.MatchNext(&inst, NULL))

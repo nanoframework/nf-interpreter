@@ -580,7 +580,7 @@ HRESULT CLR_RT_StackFrame::MakeCall(
 
     if (mdR->flags & CLR_RECORD_METHODDEF::MD_Constructor)
     {
-        CLR_RT_TypeDef_Instance owner;
+        CLR_RT_TypeDef_Instance owner{};
         owner.InitializeFromMethod(md);
 
         _ASSERTE(obj == NULL);
@@ -680,7 +680,7 @@ HRESULT CLR_RT_StackFrame::FixCall()
     //
     if (numArgs)
     {
-        CLR_RT_SignatureParser parser;
+        CLR_RT_SignatureParser parser{};
         parser.Initialize_MethodSignature(m_call.m_assm, target);
         CLR_RT_SignatureParser::Element res;
         CLR_RT_HeapBlock *args = m_arguments;
@@ -704,7 +704,7 @@ HRESULT CLR_RT_StackFrame::FixCall()
 
             if (args->DataType() == DATATYPE_OBJECT)
             {
-                CLR_RT_TypeDef_Instance inst;
+                CLR_RT_TypeDef_Instance inst{};
                 inst.InitializeFromIndex(res.m_cls);
                 CLR_DataType dtT = (CLR_DataType)inst.m_target->dataType;
                 const CLR_RT_DataTypeLookup &dtl = c_CLR_RT_DataTypeLookup[dtT];
@@ -973,7 +973,7 @@ void CLR_RT_StackFrame::Pop()
                 }
                 else if (m_call.m_target->retVal != DATATYPE_VOID)
                 {
-                    CLR_RT_SignatureParser sig;
+                    CLR_RT_SignatureParser sig{};
                     sig.Initialize_MethodSignature(this->m_call.m_assm, this->m_call.m_target);
                     CLR_RT_SignatureParser::Element res;
                     CLR_RT_TypeDescriptor desc{};
