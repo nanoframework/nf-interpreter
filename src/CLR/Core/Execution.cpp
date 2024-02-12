@@ -971,7 +971,7 @@ void CLR_RT_ExecutionEngine::SpawnStaticConstructor(CLR_RT_Thread *&pCctorThread
     if (dlg != NULL)
     {
         CLR_RT_MethodDef_Index idx = dlg->DelegateFtn();
-        CLR_RT_MethodDef_Instance inst;
+        CLR_RT_MethodDef_Instance inst{};
 
         // Find next static constructor for given idx
         _ASSERTE(NANOCLR_INDEX_IS_VALID(idx));
@@ -1797,7 +1797,7 @@ HRESULT CLR_RT_ExecutionEngine::InitializeReference(CLR_RT_HeapBlock &ref, CLR_R
     {
         if (dt == DATATYPE_VALUETYPE)
         {
-            CLR_RT_TypeDef_Instance inst;
+            CLR_RT_TypeDef_Instance inst{};
             inst.InitializeFromIndex(res.m_cls);
 
             if ((inst.m_target->flags & CLR_RECORD_TYPEDEF::TD_Semantics_Mask) == CLR_RECORD_TYPEDEF::TD_Semantics_Enum)
@@ -1832,7 +1832,7 @@ HRESULT CLR_RT_ExecutionEngine::InitializeReference(
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
 
-    CLR_RT_SignatureParser parser;
+    CLR_RT_SignatureParser parser{};
     parser.Initialize_FieldDef(assm, target);
 
     NANOCLR_SET_AND_LEAVE(InitializeReference(ref, parser));
@@ -1894,7 +1894,7 @@ HRESULT CLR_RT_ExecutionEngine::InitializeLocals(
                     {
                         case TBL_TypeSpec:
                         {
-                            CLR_RT_SignatureParser sub;
+                            CLR_RT_SignatureParser sub{};
                             sub.Initialize_TypeSpec(assm, assm->GetTypeSpec(idx));
                             CLR_RT_SignatureParser::Element res;
 
@@ -1949,7 +1949,7 @@ HRESULT CLR_RT_ExecutionEngine::InitializeLocals(
         {
             if (dt == DATATYPE_VALUETYPE)
             {
-                CLR_RT_TypeDef_Instance inst;
+                CLR_RT_TypeDef_Instance inst{};
                 inst.InitializeFromIndex(cls);
 
                 if (inst.m_target->dataType != DATATYPE_VALUETYPE)
@@ -2006,7 +2006,7 @@ HRESULT CLR_RT_ExecutionEngine::NewObjectFromIndex(CLR_RT_HeapBlock &reference, 
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
 
-    CLR_RT_TypeDef_Instance inst;
+    CLR_RT_TypeDef_Instance inst{};
 
     if (inst.InitializeFromIndex(cls) == false)
         NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
@@ -2131,7 +2131,7 @@ HRESULT CLR_RT_ExecutionEngine::NewObject(CLR_RT_HeapBlock &reference, CLR_UINT3
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
 
-    CLR_RT_TypeDef_Instance res;
+    CLR_RT_TypeDef_Instance res{};
 
     if (res.ResolveToken(tk, assm) == false)
         NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
@@ -2212,7 +2212,7 @@ HRESULT CLR_RT_ExecutionEngine::CopyValueType(CLR_RT_HeapBlock *destination, con
         const CLR_RT_TypeDef_Index &cls = source->ObjectCls();
         if (cls.m_data == destination->ObjectCls().m_data)
         {
-            CLR_RT_TypeDef_Instance inst;
+            CLR_RT_TypeDef_Instance inst{};
             inst.InitializeFromIndex(cls);
             CLR_UINT32 totFields = inst.CrossReference().m_totalFields;
 
@@ -2293,7 +2293,7 @@ HRESULT CLR_RT_ExecutionEngine::FindFieldDef(
     NANOCLR_HEADER();
 
     CLR_RT_HeapBlock *obj;
-    CLR_RT_TypeDef_Instance inst;
+    CLR_RT_TypeDef_Instance inst{};
 
     if (reference.DataType() != DATATYPE_OBJECT)
         NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
@@ -2934,7 +2934,7 @@ bool CLR_RT_ExecutionEngine::IsInstanceOf(
         //
         if (semanticTarget == CLR_RECORD_TYPEDEF::TD_Semantics_Interface && inst.m_target->interfaces != CLR_EmptyIndex)
         {
-            CLR_RT_SignatureParser parser;
+            CLR_RT_SignatureParser parser{};
             parser.Initialize_Interfaces(inst.m_assm, inst.m_target);
             CLR_RT_SignatureParser::Element res;
 
@@ -2990,9 +2990,9 @@ bool CLR_RT_ExecutionEngine::IsInstanceOf(
 {
     NATIVE_PROFILE_CLR_CORE();
     CLR_RT_TypeDescriptor desc{};
-    CLR_RT_TypeDescriptor descTarget;
-    CLR_RT_TypeDef_Instance clsTarget;
-    CLR_RT_TypeSpec_Instance defTarget;
+    CLR_RT_TypeDescriptor descTarget{};
+    CLR_RT_TypeDef_Instance clsTarget{};
+    CLR_RT_TypeSpec_Instance defTarget{};
 
     if (FAILED(desc.InitializeFromObject(obj)))
         return false;
@@ -3129,7 +3129,7 @@ void CLR_RT_ExecutionEngine::SetDebuggingInfoBreakpoints(bool fSet)
 
         if (def.m_flags & CLR_DBG_Commands::Debugging_Execution_BreakpointDef::c_HARD)
         {
-            CLR_RT_MethodDef_Instance inst;
+            CLR_RT_MethodDef_Instance inst{};
 
             if (inst.InitializeFromIndex(def.m_md))
             {
