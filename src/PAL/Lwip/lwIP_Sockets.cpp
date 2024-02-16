@@ -283,7 +283,10 @@ bool LWIP_SOCKETS_Driver::Initialize()
 
         g_LWIP_SOCKETS_Driver.m_interfaces[i].m_interfaceNumber = interfaceNumber;
 
-        UpdateAdapterConfiguration(i, (NetworkInterface_UpdateOperation_Dns), &networkConfiguration);
+        UpdateAdapterConfiguration(
+            i,
+            (NetworkInterface_UpdateOperation_Dhcp | NetworkInterface_UpdateOperation_Dns),
+            &networkConfiguration);
 
         networkInterface = netif_find_interface(interfaceNumber);
 
@@ -1343,12 +1346,6 @@ HRESULT LWIP_SOCKETS_Driver::UpdateAdapterConfiguration(
         else if (0 != (updateFlags & NetworkInterface_UpdateOperation_DhcpRenew))
         {
             dhcp_renew(networkInterface);
-        }
-        else if (
-            0 !=
-            (updateFlags & (NetworkInterface_UpdateOperation_DhcpRelease | NetworkInterface_UpdateOperation_DhcpRenew)))
-        {
-            return CLR_E_INVALID_PARAMETER;
         }
     }
 #endif
