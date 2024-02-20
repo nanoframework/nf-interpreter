@@ -1,0 +1,11 @@
+name: Build SKY_CEVB1_Release
+
+on:
+  workflow_dispatch
+
+jobs:
+  build_SKY_CEVB1_Release:
+    name: Build SKY_CEVB1_Release
+    uses: ./.github/workflows/skyworks_evb_build.yaml
+    with:
+      targetName: 'SKY_CEVB1_Release'
