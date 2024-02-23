@@ -10,8 +10,8 @@ function(nf_set_optimization_options target)
 
     target_compile_options(${target} PRIVATE
         $<$<CONFIG:Debug>:-Og -ggdb>
-        $<$<CONFIG:Release>:-O3 -flto -ffat-lto-objects>
-        $<$<CONFIG:MinSizeRel>:-Os -flto -ffat-lto-objects>
+        $<$<CONFIG:Release>:-O3 -flto>
+        $<$<CONFIG:MinSizeRel>:-Os -flto>
         $<$<CONFIG:RelWithDebInfo>:-Os -femit-class-debug-always -ggdb>
     )
 
