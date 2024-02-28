@@ -56,6 +56,17 @@ typedef enum MemoryMap_Options
 
 } MemoryMap_Options;
 
+// structure for storage operations
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// !!! KEEP IN SYNC WITH nanoFramework.Tools.Debugger.WireProtocol.Monitor_StorageOperation.StorageOperation (in managed code) !!! //
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+typedef enum Monitor_StorageOperation
+{
+    StorageOperation_None   = 0,
+    StorageOperation_Write  = 1,
+    StorageOperation_Delete = 2
+} Monitor_StorageOperation;
+
 //////////////////////////////////////////
 // typedefs
 
@@ -163,6 +174,22 @@ typedef struct __nfpack Monitor_UpdateConfiguration_Command
 
 } Monitor_UpdateConfiguration_Command;
 
+
+typedef struct Monitor_StorageOperation_Command
+{
+    uint8_t     Operation;
+    uint32_t    Length;
+    uint8_t     StorageName[128];
+    uint8_t     Data[1];
+
+} Monitor_StorageOperation_Command;
+
+typedef struct Monitor_StorageOperation_Reply
+{
+    uint32_t ErrorCode;
+
+} Monitor_StorageOperation_Reply;
+
 typedef struct Monitor_UpdateConfiguration_Reply
 {
     uint32_t ErrorCode;
@@ -196,6 +223,7 @@ extern "C"
     int Monitor_Reboot(WP_Message *message);
     int Monitor_EraseMemory(WP_Message *message);
     int Monitor_QueryConfiguration(WP_Message *message);
+    int Monitor_StorageOperation(WP_Message *message);
     int Monitor_UpdateConfiguration(WP_Message *message);
     int Monitor_CheckMemory(WP_Message *message);
     int Monitor_MemoryMap(WP_Message *message);
