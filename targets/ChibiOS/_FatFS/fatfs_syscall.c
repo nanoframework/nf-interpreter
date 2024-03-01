@@ -1,6 +1,6 @@
 // clang-format off
 
-// ChibiOs version can be found at:
+// ChibiOS version can be found at:
 // https://github.com/ArduPilot/ChibiOS.svn/blob/master/os/various/fatfs_bindings/fatfs_syscall.c
 // but currently locked to R0.14b.
 // This file aligns with compatibility with R0.15+
@@ -20,7 +20,7 @@
 /* Allocate/Free a Memory Block                                           */
 /*------------------------------------------------------------------------*/
 
-void* ff_memalloc (	/* Returns pointer to the allocated memory block (null if not enough core) */
+void *ff_memalloc (	/* Returns pointer to the allocated memory block (null if not enough core) */
     UINT msize		/* Number of bytes to allocate */
 )
 {
@@ -31,7 +31,7 @@ void* ff_memalloc (	/* Returns pointer to the allocated memory block (null if no
 
 
 void ff_memfree (
-    void* mblock	/* Pointer to the memory block to free (no effect if null) */
+    void *mblock	/* Pointer to the memory block to free (no effect if null) */
 )
 {
     // NOTE: we no longer choose to use the ChibiOs memory allocation functions.

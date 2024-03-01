@@ -5,7 +5,9 @@
 /* disk I/O modules and attach it to FatFs module with common interface. */
 /*-----------------------------------------------------------------------*/
 
-#include "hal.h"
+#include <nanoHAL_v2.h>
+#include <hal.h>
+#include <cache.h>
 #include "ffconf.h"
 #include "ff.h"     /* Obtains integer types */
 #include "diskio.h" /* Declarations of disk functions */
@@ -109,6 +111,11 @@ DSTATUS disk_status(BYTE pdrv /* Physical drive number (0..) */
 /*-----------------------------------------------------------------------*/
 /* Read Sector(s)                                                        */
 
+#if defined(__GNUC__)
+__attribute__((aligned(32)))
+#endif
+uint8_t sd_readBuffer[MMCSD_BLOCK_SIZE];
+
 DRESULT disk_read(
     BYTE pdrv,    /* Physical drive number (0..) */
     BYTE *buff,   /* Data buffer to store read data */
@@ -142,12 +149,21 @@ DRESULT disk_read(
             return RES_OK;
 #else
         case SDC:
+
+            // clear read buffer
+            memset(sd_readBuffer, 0,  MMCSD_BLOCK_SIZE * count);
+
             if (blkGetDriverState(&FATFS_HAL_DEVICE) != BLK_READY)
+            {
                 return RES_NOTRDY;
-            if (sdcRead(&FATFS_HAL_DEVICE, sector, buff, count))
+            }
+            if (sdcRead(&FATFS_HAL_DEVICE, sector, sd_readBuffer, count))
+            {
                 return RES_ERROR;
+            }
             // invalidate cache over read buffer to ensure that content from DMA is read
-            cacheBufferInvalidate(buff, MMCSD_BLOCK_SIZE * count);
+            cacheBufferInvalidate(sd_readBuffer, MMCSD_BLOCK_SIZE * count);
+            memcpy(buff, sd_readBuffer, MMCSD_BLOCK_SIZE * count);
             return RES_OK;
 #endif
     }
