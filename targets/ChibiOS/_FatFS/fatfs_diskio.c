@@ -151,7 +151,7 @@ DRESULT disk_read(
         case SDC:
 
             // clear read buffer
-            memset(sd_readBuffer, 0,  MMCSD_BLOCK_SIZE * count);
+            memset(sd_readBuffer, 0, MMCSD_BLOCK_SIZE * count);
 
             if (blkGetDriverState(&FATFS_HAL_DEVICE) != BLK_READY)
             {
