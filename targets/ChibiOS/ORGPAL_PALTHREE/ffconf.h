@@ -2,7 +2,7 @@
 #define FFCONF_H
 
 /* CHIBIOS FIX */
-#include <ch.h>
+#include "ch.h"
 
 /*---------------------------------------------------------------------------/
 /  Configurations of FatFs Module
