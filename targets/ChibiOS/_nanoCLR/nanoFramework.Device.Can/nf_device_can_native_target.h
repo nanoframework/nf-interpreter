@@ -22,7 +22,7 @@ typedef struct
 } NF_PAL_CAN;
 
 ///////////////////////////////////////////
-// declaration of the CAN PAL strucs     //
+// declaration of the CAN PAL structs     //
 ///////////////////////////////////////////
 #if defined(STM32_CAN_USE_CAN1) && (STM32_CAN_USE_CAN1 == TRUE)
 extern NF_PAL_CAN Can1_PAL;
