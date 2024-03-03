@@ -239,7 +239,7 @@ HRESULT BuildPathsArray(const char *vfsFolderPath, const char *folderPath, CLR_R
         stringBuffer = (char *)platform_malloc(FF_LFN_BUF + 1);
         workingBuffer = (char *)platform_malloc(2 * FF_LFN_BUF + 1);
 
-        // sanity check for successfull malloc
+        // sanity check for successful malloc
         if (stringBuffer == NULL || workingBuffer == NULL)
         {
             // failed to allocate memory
