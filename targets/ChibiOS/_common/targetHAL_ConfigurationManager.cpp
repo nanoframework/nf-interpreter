@@ -476,7 +476,7 @@ __nfweak UpdateConfigurationResult ConfigurationManager_UpdateConfigurationBlock
                 // free memory
                 platform_free(configSectorCopy);
 
-                // operation is successfull (nothing to update)
+                // operation is successful (nothing to update)
                 return UpdateConfigurationResult_NoChanges;
             }
 
@@ -507,7 +507,7 @@ __nfweak UpdateConfigurationResult ConfigurationManager_UpdateConfigurationBlock
                 // free memory
                 platform_free(configSectorCopy);
 
-                // operation is successfull (nothing to update)
+                // operation is successful (nothing to update)
                 return UpdateConfigurationResult_NoChanges;
             }
 
@@ -536,7 +536,7 @@ __nfweak UpdateConfigurationResult ConfigurationManager_UpdateConfigurationBlock
                 // free memory
                 platform_free(configSectorCopy);
 
-                // operation is successfull (nothing to update)
+                // operation is successful (nothing to update)
                 return UpdateConfigurationResult_NoChanges;
             }
 
@@ -567,7 +567,7 @@ __nfweak UpdateConfigurationResult ConfigurationManager_UpdateConfigurationBlock
                 // free memory
                 platform_free(configSectorCopy);
 
-                // operation is successfull (nothing to update)
+                // operation is successful (nothing to update)
                 return UpdateConfigurationResult_NoChanges;
             }
 

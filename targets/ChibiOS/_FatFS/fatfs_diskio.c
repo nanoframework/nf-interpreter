@@ -41,7 +41,7 @@ extern RTCDriver RTCD1;
 #define SDC 0
 
 /*-----------------------------------------------------------------------*/
-/* Inidialize a Drive                                                    */
+/* Initialize a Drive                                                    */
 
 DSTATUS disk_initialize(BYTE pdrv /* Physical drive number (0..) */
 )
