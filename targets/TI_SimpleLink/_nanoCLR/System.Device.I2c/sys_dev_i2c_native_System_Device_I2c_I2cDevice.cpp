@@ -263,7 +263,7 @@ HRESULT Library_sys_dev_i2c_native_System_Device_I2c_I2cDevice::
                 result = top.Dereference();
                 FAULT_ON_NULL(result);
 
-                // successfull transaction
+                // successful transaction
                 // set the result field
                 result[Library_win_dev_i2c_native_Windows_Devices_I2c_I2cTransferResult::FIELD___status].SetInteger(
                     (CLR_UINT32)I2cTransferStatus_FullTransfer);

@@ -100,7 +100,7 @@ int main(void)
     // for nanoBooter we have to init it here to have access to network configuration blocks
     ConfigurationManager_Initialize();
 
-    // report successfull nanoBooter execution
+    // report successful nanoBooter execution
     ReportSuccessfullNanoBooter();
 
     //  Normal main() thread

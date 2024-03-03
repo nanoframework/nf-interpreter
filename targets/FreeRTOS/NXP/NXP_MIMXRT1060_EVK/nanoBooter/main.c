@@ -97,7 +97,7 @@ int main(void)
     // for nanoBooter we have to init it here to have access to network configuration blocks
     ConfigurationManager_Initialize();
 
-    // report successfull nanoBooter execution
+    // report successful nanoBooter execution
     ReportSuccessfullNanoBooter();
 
     xTaskCreate(blink_task, "blink_task", configMINIMAL_STACK_SIZE + 10, NULL, configMAX_PRIORITIES - 1, NULL);
