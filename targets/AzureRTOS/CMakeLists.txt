@@ -87,7 +87,7 @@ if(NO_AZURERTOS_SOURCE_FOLDER)
 
     FetchContent_Declare(
         azure_rtos
-        GIT_REPOSITORY https://github.com/azure-rtos/threadx.git
+        GIT_REPOSITORY https://github.com/eclipse-threadx/threadx.git
         GIT_TAG ${RTOS_VERSION}
     )
 
@@ -146,7 +146,7 @@ if(AZURERTOS_USBX_REQUIRED)
 
         FetchContent_Declare(
             azure_rtos_usbx
-            GIT_REPOSITORY https://github.com/azure-rtos/usbx.git
+            GIT_REPOSITORY https://github.com/eclipse-threadx/usbx.git
             GIT_TAG ${RTOS_VERSION}
         )
 
@@ -207,7 +207,7 @@ if(AZURERTOS_FILEX_REQUIRED)
 
         FetchContent_Declare(
             azure_rtos_filex
-            GIT_REPOSITORY https://github.com/azure-rtos/filex.git
+            GIT_REPOSITORY https://github.com/eclipse-threadx/filex.git
             GIT_TAG ${FILEX_VERSION}
         )
 
@@ -268,7 +268,7 @@ if(AZURERTOS_NETXDUO_REQUIRED)
 
         FetchContent_Declare(
             azure_rtos_netxduo
-            GIT_REPOSITORY https://github.com/azure-rtos/netxduo.git
+            GIT_REPOSITORY https://github.com/eclipse-threadx/netxduo.git
             GIT_TAG ${NETXDUO_VERSION}
         )
 
