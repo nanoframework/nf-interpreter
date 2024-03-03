@@ -37,7 +37,7 @@
 #include <target_platform.h>
 
 #include <Target_Windows_Storage.h>
-#include <nanoHAL_Windows_Storage.h>
+#include <nanoHAL_Persistent_Storage.h>
 
 #if !defined(CONFIG_IDF_TARGET_ESP32C3) && (HAL_USE_SDC == TRUE)
 

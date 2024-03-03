@@ -6,14 +6,14 @@
 #include "nf_sys_io_filesystem.h"
 
 #include <ff.h>
-#include <nanoHAL_Windows_Storage.h>
+#include <nanoHAL_Persistent_Storage.h>
 
 extern void CombinePathAndName(char *outpath, const char *path1, const char *path2);
 extern char *ConvertToVfsPath(const char *filepath);
 
 bool IsInternalFilePath(const char *filePath)
 {
-    if (filePath[0] == INTERNAL_DRIVE0_LETTER[0])
+    if (filePath[0] == INDEX3_DRIVE_LETTER[0])
     {
         return true;
     }

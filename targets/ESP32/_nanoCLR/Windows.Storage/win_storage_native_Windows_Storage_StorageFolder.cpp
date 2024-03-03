@@ -6,7 +6,7 @@
 #include "win_storage_native_target.h"
 #include <target_windows_storage_config.h>
 #include <Target_Windows_Storage.h>
-#include <nanoHAL_Windows_Storage.h>
+#include <nanoHAL_Persistent_Storage.h>
 #include <target_platform.h>
 
 //
@@ -302,7 +302,7 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::
             // dereference the object in order to reach its fields
             hbObj = storageFolder->Dereference();
 
-            memcpy(workingDrive, INTERNAL_DRIVE0_PATH, DRIVE_PATH_LENGTH);
+            memcpy(workingDrive, INDEX3_DRIVE_PATH, DRIVE_PATH_LENGTH);
 
             // set the managed fields
             NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_String::CreateInstance(
