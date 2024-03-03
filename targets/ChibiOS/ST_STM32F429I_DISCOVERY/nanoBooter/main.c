@@ -87,7 +87,7 @@ int main(void)
     BlockStorageList_Initialize();
     BlockStorage_AddDevices();
 
-    // report successfull nanoBooter execution
+    // report successful nanoBooter execution
     ReportSuccessfullNanoBooter();
 
     //  Normal main() thread

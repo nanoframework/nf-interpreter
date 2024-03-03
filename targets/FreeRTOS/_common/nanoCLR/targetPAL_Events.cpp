@@ -96,7 +96,7 @@ uint32_t Events_WaitForEvents(uint32_t powerLevel, uint32_t wakeupSystemEvents, 
         }
 
         // no events, pass control to the OS
-        taskYIELD();
+        vTaskDelay(1);
 
         // check if reboot or exit flags were set when the other OS threads executed
         if (CLR_EE_DBG_IS(RebootPending) || CLR_EE_DBG_IS(ExitPending))

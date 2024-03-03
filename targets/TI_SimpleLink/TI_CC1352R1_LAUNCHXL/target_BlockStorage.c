@@ -15,5 +15,5 @@ void BlockStorage_AddDevices()
         (BlockStorageDevice *)&Device_BlockStorage,
         &CC13xx_26xxFlash_BlockStorageInterface,
         &Device_BlockStorageConfig,
-        true);
+        false);
 }

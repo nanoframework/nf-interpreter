@@ -219,7 +219,7 @@ HRESULT Library_nf_system_resourcemanager_System_Resources_ResourceManager::
     CLR_RT_HeapBlock &blkEnumObj = stack.Arg1();
     CLR_RT_HeapBlock *blkVT = blkEnumObj.Dereference();
     CLR_RT_HeapBlock *blkEnum = blkVT + 1;
-    CLR_RT_MethodDef_Instance md;
+    CLR_RT_MethodDef_Instance md{};
 
     if (stack.m_customState == 0)
     {
@@ -247,7 +247,7 @@ HRESULT Library_nf_system_resourcemanager_System_Resources_ResourceManager::
     NANOCLR_HEADER();
 
     CLR_RT_HeapBlock &blkResourceManager = stack.Arg0();
-    CLR_RT_MethodDef_Instance md;
+    CLR_RT_MethodDef_Instance md{};
 
     if (stack.m_customState == 0)
     {

@@ -237,6 +237,31 @@
  */
 #define ESP_DHCP_DISABLE_CLIENT_ID      CONFIG_LWIP_DHCP_DISABLE_CLIENT_ID
 
+#define DHCP_DEFINE_CUSTOM_TIMEOUTS     1
+/* Since for embedded devices it's not that hard to miss a discover packet, so lower
+ * the discover and request retry backoff time from (2,4,8,16,32,60,60)s to (500m,1,2,4,4,4,4)s.
+ */
+#define DHCP_REQUEST_TIMEOUT_SEQUENCE(tries) ((uint16_t)(((tries) < 5 ? 1 << (tries) : 16) * 250))
+
+#define DHCP_COARSE_TIMER_SECS CONFIG_LWIP_DHCP_COARSE_TIMER_SECS
+
+static inline uint32_t timeout_from_offered(uint32_t lease, uint32_t min)
+{
+    uint32_t timeout = lease;
+    if (timeout == 0) {
+      timeout = min;
+    }
+    timeout = (timeout + DHCP_COARSE_TIMER_SECS - 1) / DHCP_COARSE_TIMER_SECS;
+    return timeout;
+}
+
+#define DHCP_CALC_TIMEOUT_FROM_OFFERED_T0_LEASE(dhcp) \
+   timeout_from_offered((dhcp)->offered_t0_lease, 120)
+#define DHCP_CALC_TIMEOUT_FROM_OFFERED_T1_RENEW(dhcp) \
+   timeout_from_offered((dhcp)->offered_t1_renew, (dhcp)->t0_timeout >> 1 /* 50% */)
+#define DHCP_CALC_TIMEOUT_FROM_OFFERED_T2_REBIND(dhcp) \
+   timeout_from_offered((dhcp)->offered_t2_rebind, ((dhcp)->t0_timeout / 8) * 7 /* 87.5% */)
+
 /**
  * CONFIG_LWIP_DHCP_RESTORE_LAST_IP==1: Last valid IP address obtained from DHCP server
  * is restored after reset/power-up.
@@ -364,6 +389,11 @@
  * TCP_MSL: The maximum segment lifetime in milliseconds
  */
 #define TCP_MSL                         CONFIG_LWIP_TCP_MSL
+
+/**
+ * TCP_FIN_WAIT_TIMEOUT: The maximum FIN segment lifetime in milliseconds
+ */
+#define TCP_FIN_WAIT_TIMEOUT            CONFIG_LWIP_TCP_FIN_WAIT_TIMEOUT
 
 /**
  * TCP_MAXRTX: Maximum number of retransmissions of data segments.
@@ -580,11 +610,30 @@
    ---------- Sequential layer options ----------
    ----------------------------------------------
 */
-/**
- * LWIP_TCPIP_CORE_LOCKING: (EXPERIMENTAL!)
- * Don't use it if you're not an active lwIP project member
+
+#define LWIP_NETCONN                    1
+
+/** LWIP_NETCONN_SEM_PER_THREAD==1: Use one (thread-local) semaphore per
+ * thread calling socket/netconn functions instead of allocating one
+ * semaphore per netconn (and per select etc.)
+ * ATTENTION: a thread-local semaphore for API calls is needed:
+ * - LWIP_NETCONN_THREAD_SEM_GET() returning a sys_sem_t*
+ * - LWIP_NETCONN_THREAD_SEM_ALLOC() creating the semaphore
+ * - LWIP_NETCONN_THREAD_SEM_FREE() freeing the semaphore
+ * The latter 2 can be invoked up by calling netconn_thread_init()/netconn_thread_cleanup().
+ * Ports may call these for threads created with sys_thread_new().
  */
-#define LWIP_TCPIP_CORE_LOCKING         0
+#define LWIP_NETCONN_SEM_PER_THREAD     1
+
+/** LWIP_NETCONN_FULLDUPLEX==1: Enable code that allows reading from one thread,
+ * writing from a 2nd thread and closing from a 3rd thread at the same time.
+ * ATTENTION: This is currently really alpha! Some requirements:
+ * - LWIP_NETCONN_SEM_PER_THREAD==1 is required to use one socket/netconn from
+ *   multiple threads at once
+ * - sys_mbox_free() has to unblock receive tasks waiting on recvmbox/acceptmbox
+ *   and prevent a task pending on this during/after deletion
+ */
+#define LWIP_NETCONN_FULLDUPLEX         1
 
 /*
    ------------------------------------
@@ -734,7 +783,24 @@
 #define PPP_DEBUG                       LWIP_DBG_OFF
 #endif
 
-#endif
+#endif  /* PPP SUPPORT */
+
+/*
+   ------------------------------------
+   --------- LCP Echo options ---------
+   ------------------------------------
+*/
+#if CONFIG_LWIP_ENABLE_LCP_ECHO
+/**
+ * LCP_ECHOINTERVAL: Interval in seconds between keepalive LCP echo requests, 0 to disable.
+ */
+#define LCP_ECHOINTERVAL                CONFIG_LWIP_LCP_ECHOINTERVAL
+
+/**
+ * LCP_MAXECHOFAILS: Number of consecutive unanswered echo requests before failure is indicated.
+ */
+#define LCP_MAXECHOFAILS                CONFIG_LWIP_LCP_MAXECHOFAILS
+#endif /* CONFIG_LWIP_ENABLE_LCP_ECHO */
 
 /*
    --------------------------------------
@@ -761,6 +827,16 @@
  * LWIP_ND6_NUM_NEIGHBORS: Number of entries in IPv6 neighbor cache
  */
 #define LWIP_ND6_NUM_NEIGHBORS          CONFIG_LWIP_IPV6_ND6_NUM_NEIGHBORS
+
+
+/**
+ * ESP_MLDV6_REPORT==1: This option allows to send mldv6 report periodically.
+ */
+#ifdef CONFIG_LWIP_ESP_MLDV6_REPORT
+#define ESP_MLDV6_REPORT              1
+#else
+#define ESP_MLDV6_REPORT              0
+#endif
 
 /*
    ---------------------------------------
@@ -883,6 +959,15 @@
 #endif
 
 /**
+ * SNTP_DEBUG: Enable debugging for SNTP.
+ */
+#ifdef CONFIG_LWIP_SNTP_DEBUG
+#define SNTP_DEBUG                       LWIP_DBG_ON
+#else
+#define SNTP_DEBUG                       LWIP_DBG_OFF
+#endif
+
+/**
  * MEMP_DEBUG: Enable debugging in memp.c.
  */
 #define MEMP_DEBUG                      LWIP_DBG_OFF
@@ -936,6 +1021,14 @@
  */
 #define LWIP_SOCKET_OFFSET              (FD_SETSIZE - CONFIG_LWIP_MAX_SOCKETS)
 
+#define LWIP_IPV6_FORWARD               CONFIG_LWIP_IPV6_FORWARD
+
+#define LWIP_IPV6_NUM_ADDRESSES         CONFIG_LWIP_IPV6_NUM_ADDRESSES
+
+#define LWIP_ND6_RDNSS_MAX_DNS_SERVERS  CONFIG_LWIP_IPV6_RDNSS_MAX_DNS_SERVERS
+
+#define LWIP_IPV6_DHCP6                 CONFIG_LWIP_IPV6_DHCP6
+
 /* Enable all Espressif-only options */
 
 #define ESP_LWIP                        1
@@ -950,6 +1043,7 @@
 #define ESP_IP4_ATON                    1
 #define ESP_LIGHT_SLEEP                 1
 #define ESP_L2_TO_L3_COPY               CONFIG_LWIP_L2_TO_L3_COPY
+#define LWIP_NETIF_API                  CONFIG_LWIP_NETIF_API
 #define ESP_STATS_MEM                   CONFIG_LWIP_STATS
 #define ESP_STATS_DROP                  CONFIG_LWIP_STATS
 #define ESP_STATS_TCP                   0
@@ -974,6 +1068,7 @@
 #define ESP_LWIP_SELECT                 1
 #define ESP_LWIP_LOCK                   1
 #define ESP_THREAD_PROTECTION           1
+#define ESP_IP_FORWARD                  1
 
 #ifdef CONFIG_LWIP_IPV6_AUTOCONFIG
 #define ESP_IPV6_AUTOCONFIG             CONFIG_LWIP_IPV6_AUTOCONFIG
@@ -987,9 +1082,25 @@
 #ifdef CONFIG_LWIP_TIMERS_ONDEMAND
 #define ESP_LWIP_IGMP_TIMERS_ONDEMAND            1
 #define ESP_LWIP_MLD6_TIMERS_ONDEMAND            1
+#define ESP_LWIP_DHCP_FINE_TIMERS_ONDEMAND       1
+#define ESP_LWIP_DNS_TIMERS_ONDEMAND             1
+#if IP_REASSEMBLY
+#define ESP_LWIP_IP4_REASSEMBLY_TIMERS_ONDEMAND  1
+#endif /* IP_REASSEMBLY */
+#if LWIP_IPV6_REASS
+#define ESP_LWIP_IP6_REASSEMBLY_TIMERS_ONDEMAND  1
+#endif /* LWIP_IPV6_REASS */
 #else
 #define ESP_LWIP_IGMP_TIMERS_ONDEMAND            0
 #define ESP_LWIP_MLD6_TIMERS_ONDEMAND            0
+#define ESP_LWIP_DHCP_FINE_TIMERS_ONDEMAND       0
+#define ESP_LWIP_DNS_TIMERS_ONDEMAND             0
+#if IP_REASSEMBLY
+#define ESP_LWIP_IP4_REASSEMBLY_TIMERS_ONDEMAND  0
+#endif /* IP_REASSEMBLY */
+#if LWIP_IPV6_REASS
+#define ESP_LWIP_IP6_REASSEMBLY_TIMERS_ONDEMAND  0
+#endif /* LWIP_IPV6_REASS */
 #endif
 
 #define TCP_SND_BUF                     CONFIG_LWIP_TCP_SND_BUF_DEFAULT
@@ -1009,7 +1120,6 @@
 #define CHECKSUM_CHECK_ICMP             CONFIG_LWIP_CHECKSUM_CHECK_ICMP
 
 #define LWIP_NETCONN_FULLDUPLEX         1
-#define LWIP_NETCONN_SEM_PER_THREAD     1
 
 #define LWIP_DHCP_MAX_NTP_SERVERS       CONFIG_LWIP_DHCP_MAX_NTP_SERVERS
 #define LWIP_TIMEVAL_PRIVATE            0
@@ -1019,9 +1129,32 @@
    ------------ SNTP options ------------
    --------------------------------------
 */
-/*
- * SNTP update delay - in milliseconds
+
+// Max number of SNTP servers handled (default equal to LWIP_DHCP_MAX_NTP_SERVERS)
+// we're setting this in nf_lwipopts_sntp, so removing it here
+// #if defined CONFIG_LWIP_SNTP_MAX_SERVERS
+// #define SNTP_MAX_SERVERS                CONFIG_LWIP_SNTP_MAX_SERVERS
+// #endif // CONFIG_LWIP_SNTP_MAX_SERVERS
+
+#ifdef CONFIG_LWIP_DHCP_GET_NTP_SRV
+#define LWIP_DHCP_GET_NTP_SRV           CONFIG_LWIP_DHCP_GET_NTP_SRV
+#endif // CONFIG_LWIP_DHCP_GET_NTP_SRV
+
+/** Set this to 1 to support DNS names (or IP address strings) to set sntp servers
+ * One server address/name can be defined as default if SNTP_SERVER_DNS == 1:
+ * \#define SNTP_SERVER_ADDRESS "pool.ntp.org"
  */
+#define SNTP_SERVER_DNS            1
+
+// It disables a check of SNTP_UPDATE_DELAY it is done in sntp_set_sync_interval
+#define SNTP_SUPPRESS_DELAY_CHECK
+
+// we are not exposing these on our SNTP API, so removing them
+// #define SNTP_UPDATE_DELAY                 (sntp_get_sync_interval())
+// #define SNTP_SET_SYSTEM_TIME_US(sec, us)  (sntp_set_system_time(sec, us))
+// #define SNTP_GET_SYSTEM_TIME(sec, us)     (sntp_get_system_time(&(sec), &(us)))
+
+#define SOC_SEND_LOG //printf
 
 /*
  * Forward declarations of weak definitions from lwip's sntp.c which could
@@ -1034,39 +1167,6 @@
 #else
 #define LWIP_FORWARD_DECLARE_C_CXX
 #endif
-
-LWIP_FORWARD_DECLARE_C_CXX void sntp_sync_time(struct timeval *tv);
-
-LWIP_FORWARD_DECLARE_C_CXX uint32_t sntp_get_sync_interval(void);
-
-/** Set this to 1 to support DNS names (or IP address strings) to set sntp servers
- * One server address/name can be defined as default if SNTP_SERVER_DNS == 1:
- * \#define SNTP_SERVER_ADDRESS "pool.ntp.org"
- */
-#define SNTP_SERVER_DNS            1
-
-// It disables a check of SNTP_UPDATE_DELAY it is done in sntp_set_sync_interval
-#define SNTP_SUPPRESS_DELAY_CHECK
-
-#define SNTP_UPDATE_DELAY              (sntp_get_sync_interval())
-
-#define SNTP_SET_SYSTEM_TIME_US(sec, us)  \
-    do { \
-        struct timeval tv = { .tv_sec = sec, .tv_usec = us }; \
-        sntp_sync_time(&tv); \
-    } while (0);
-
-#define SNTP_GET_SYSTEM_TIME(sec, us) \
-    do { \
-        struct timeval tv = { .tv_sec = 0, .tv_usec = 0 }; \
-        gettimeofday(&tv, NULL); \
-        (sec) = tv.tv_sec;  \
-        (us) = tv.tv_usec; \
-        sntp_set_sync_status(SNTP_SYNC_STATUS_RESET); \
-    } while (0);
-
-#define SOC_SEND_LOG //printf
-
-#endif /* __LWIPOPTS_H__ */
+#endif /* LWIP_HDR_ESP_LWIPOPTS_H */
 
 // clang-format on

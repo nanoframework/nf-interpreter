@@ -29,7 +29,7 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_File::ExistsNative___STATIC__BOOL
     // setup file path
     filePath = (char *)platform_malloc(2 * FF_LFN_BUF + 1);
 
-    // sanity check for successfull malloc
+    // sanity check for successful malloc
     if (filePath == NULL)
     {
         // failed to allocate memory

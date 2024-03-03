@@ -26,7 +26,7 @@ RUN wget $CMAKE_SCRIPT \
     && /tmp/dc-downloads/cmake-install.sh --skip-license --prefix=/tmp/dc-extracted/cmake \
     && rm /tmp/dc-downloads/cmake-install.sh
 
-FROM ubuntu:latest AS devcontainer
+FROM python:3.10 AS devcontainer
 
 # Avoid warnings by switching to noninteractive
 ENV DEBIAN_FRONTEND=noninteractive
@@ -41,35 +41,27 @@ RUN apt-get update \
     && apt-get -y install --no-install-recommends apt-utils dialog icu-devtools 2>&1 \
     && apt-get install -y \
     git \
+    git-lfs \
     git-svn \
     subversion \
     clang-format \
     curl \
     ninja-build \
-    srecord
+    srecord \
+    nodejs \
+    libffi-dev
 
 # Create needed directories
 RUN mkdir -p /usr/local/bin/gcc
 
-# Clone ChibiOS repo (used for HAL)
-# RUN git svn clone http://svn.code.sf.net/p/chibios/code/branches/stable_21.11.x -rHEAD ./sources/ChibiOs
-# Alternative source for those having issues with git svn downloads:
-RUN git clone --branch stable_21.11.x https://github.com/ArduPilot/ChibiOS.svn.git --depth 1 ./sources/ChibiOs
-
-# Clone repos for STM32
-RUN git clone --branch nf-build https://github.com/nanoframework/STM32CubeL4.git --depth 1 ./sources/STM32CubeL4 \
-    && git clone --branch nf-build https://github.com/nanoframework/STM32CubeF7.git --depth 1 ./sources/STM32CubeF7 \
-    && git clone --branch nf-build https://github.com/nanoframework/STM32CubeF4.git --depth 1 ./sources/STM32CubeF4 \
-    && git clone --branch nf-build https://github.com/nanoframework/STM32CubeH7.git --depth 1 ./sources/STM32CubeH7
-
-# Clone repos for AzureRTOS
-RUN git clone --branch v6.3.0_rel --recursive https://github.com/azure-rtos/threadx.git --depth 1 ./sources/AzureRTOS \
-    && git clone --branch v6.3.0_rel --recursive https://github.com/azure-rtos/netxduo.git --depth 1 ./sources/NetxDuo
-
-# Clone dependent repos (mbedtls, fatfs and spiffs)
+# Clone libs mbedtls and fatfs etc.
 RUN git clone --branch mbedtls-2.28.5 https://github.com/ARMmbed/mbedtls.git --depth 1 ./sources/mbedtls \
     && git clone --branch R0.15 https://github.com/abbrev/fatfs.git --depth 1 ./sources/fatfs \
-    && git clone --branch nf-build https://github.com/nanoframework/spiffs.git --depth 1 ./sources/spiffs
+    && git clone --branch STABLE-2_1_3_RELEASE https://github.com/lwip-tcpip/lwip.git --depth 1 ./sources/lwip
+    
+# Clone FreeRTOS
+RUN git clone --branch V10.4.1-kernel-only https://github.com/FreeRTOS/FreeRTOS-Kernel.git --depth 1 ./sources/FreeRTOS \
+    && git clone --branch 5.5.1 https://github.com/ARM-software/CMSIS_5.git --depth 1 ./sources/CMSIS_5
 
 # set gcc location
 ARG TMP_GCC_PATH=/usr/local/bin/gcc
@@ -81,13 +73,9 @@ COPY --from=downloader /tmp/dc-extracted/cmake /usr/bin/cmake
 
 ENV PATH=/usr/bin/cmake/bin:${PATH}
 
-# Putting hex2dfu in the container
-ENV HEX2DFU_PATH=/usr/local/bin/hex2dfu
-
-ARG HEX2DFU=https://github.com/nanoframework/hex2dfu/releases/latest/download/hex2dfu
-RUN mkdir -p  $HEX2DFU_PATH \
-    && curl -o  $HEX2DFU_PATH/hex2dfu $HEX2DFU -L \
-    && chmod +x  $HEX2DFU_PATH/hex2dfu
+# Creating static link python for pyhton3
+RUN ln -fs /usr/bin/python3 /usr/bin/python \
+    && pip3 install pyserial
 
 # Clean up downloaded files
 RUN apt-get autoremove -y \

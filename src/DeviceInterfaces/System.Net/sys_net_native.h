@@ -137,7 +137,8 @@ struct Library_sys_net_native_System_Net_NetworkInformation_NetworkInterface
     NANOCLR_NATIVE_DECLARE(GetIsNetworkAvailable___STATIC__BOOLEAN);
     NANOCLR_NATIVE_DECLARE(GetNetworkInterfaceCount___STATIC__I4);
     NANOCLR_NATIVE_DECLARE(GetNetworkInterface___STATIC__SystemNetNetworkInformationNetworkInterface__U4);
-    NANOCLR_NATIVE_DECLARE(IPAddressFromString___STATIC__I8__STRING);
+    NANOCLR_NATIVE_DECLARE(IPV4AddressFromString___STATIC__I8__STRING);
+    NANOCLR_NATIVE_DECLARE(IPV6AddressFromString___STATIC__SZARRAY_U2__STRING);
 
     //--//
 };
@@ -160,12 +161,18 @@ struct Library_sys_net_native_System_Net_IPAddress
 {
     static const int FIELD_STATIC__Any = 8;
     static const int FIELD_STATIC__Loopback = 9;
+    static const int FIELD_STATIC__Broadcast = 10;
+    static const int FIELD_STATIC__None = 11;
+    static const int FIELD_STATIC__IPv6Any = 12;
+    static const int FIELD_STATIC__IPv6Loopback = 13;
 
     static const int FIELD__Address = 1;
     static const int FIELD___family = 2;
     static const int FIELD___numbers = 3;
+    static const int FIELD___scopeid = 4;
 
     NANOCLR_NATIVE_DECLARE(IPv4ToString___STATIC__STRING__U4);
+    NANOCLR_NATIVE_DECLARE(IPv6ToString___STATIC__STRING__SZARRAY_U2);
 
     //--//
 };
@@ -210,9 +217,9 @@ struct Library_sys_net_native_System_Net_NetworkInformation_NetworkAvailabilityE
 
 struct Library_sys_net_native_System_Net_NetworkInformation_NetworkChange
 {
-    static const int FIELD_STATIC__NetworkAddressChanged = 10;
-    static const int FIELD_STATIC__NetworkAvailabilityChanged = 11;
-    static const int FIELD_STATIC__NetworkAPStationChanged = 12;
+    static const int FIELD_STATIC__NetworkAddressChanged = 14;
+    static const int FIELD_STATIC__NetworkAvailabilityChanged = 15;
+    static const int FIELD_STATIC__NetworkAPStationChanged = 16;
 
     //--//
 };
@@ -341,10 +348,10 @@ struct Library_sys_net_native_System_Security_Cryptography_X509Certificates_X509
 
 struct Library_sys_net_native_System_Net_Security_SslStream
 {
-    static const int FIELD___sslVerification = 7;
-    static const int FIELD___useStoredDeviceCertificate = 8;
-    static const int FIELD___sslContext = 9;
-    static const int FIELD___isServer = 10;
+    static const int FIELD___sslVerification = 6;
+    static const int FIELD___useStoredDeviceCertificate = 7;
+    static const int FIELD___sslContext = 8;
+    static const int FIELD___isServer = 9;
 
     //--//
 };
@@ -407,11 +414,11 @@ struct Library_sys_net_native_System_Net_Sockets_NativeSocket
 
 struct Library_sys_net_native_System_Net_Sockets_NetworkStream
 {
-    static const int FIELD___socket = 2;
-    static const int FIELD___socketType = 3;
-    static const int FIELD___remoteEndPoint = 4;
-    static const int FIELD___ownsSocket = 5;
-    static const int FIELD___disposed = 6;
+    static const int FIELD___socket = 1;
+    static const int FIELD___socketType = 2;
+    static const int FIELD___remoteEndPoint = 3;
+    static const int FIELD___ownsSocket = 4;
+    static const int FIELD___disposed = 5;
 
     //--//
 };

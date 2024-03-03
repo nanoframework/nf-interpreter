@@ -295,6 +295,8 @@ HRESULT Library_corlib_native_System_Reflection_Assembly::Load___STATIC__SystemR
 
     header = (CLR_RECORD_ASSEMBLY *)array->GetFirstElement();
 
+    memset(&hbTimeout, 0, sizeof(struct CLR_RT_HeapBlock));
+
     // !! need to cast to CLR_INT64 otherwise it wont setup a proper timeout
     hbTimeout.SetInteger((CLR_INT64)2 * CLR_RT_Thread::c_TimeQuantum_Milliseconds * TIME_CONVERSION__TO_MILLISECONDS);
 

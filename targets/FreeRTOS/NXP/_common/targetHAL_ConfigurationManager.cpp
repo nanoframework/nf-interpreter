@@ -291,7 +291,7 @@ bool ConfigurationManager_StoreConfigurationBlock(
 
 // Updates a configuration block in the configuration flash sector
 // The flash sector has to be erased before writing the updated block
-bool ConfigurationManager_UpdateConfigurationBlock(
+UpdateConfigurationResult ConfigurationManager_UpdateConfigurationBlock(
     void *configurationBlock,
     DeviceConfigurationOption configuration,
     uint32_t configurationIndex)
@@ -300,7 +300,7 @@ bool ConfigurationManager_UpdateConfigurationBlock(
     uint32_t blockOffset;
     uint8_t *blockAddressInCopy;
     uint32_t blockSize;
-    bool success = FALSE;
+    UpdateConfigurationResult success = UpdateConfigurationResult_Failed;
 
     // config sector size
     int sizeOfConfigSector = (uint32_t)&__nanoConfig_end__ - (uint32_t)&__nanoConfig_start__;
@@ -366,7 +366,7 @@ bool ConfigurationManager_UpdateConfigurationBlock(
             // free memory first
             platform_free(configSectorCopy);
 
-            return FALSE;
+            return UpdateConfigurationResult_Failed;
         }
 
         // erase config sector
@@ -384,12 +384,15 @@ bool ConfigurationManager_UpdateConfigurationBlock(
             memcpy(blockAddressInCopy, configSectorCopy, blockSize);
 
             // copy the config block copy back to the config block storage
-            success = iMXRTFlexSPIDriver_Write(
-                NULL,
-                (uint32_t)&__nanoConfig_start__,
-                sizeOfConfigSector,
-                (unsigned char *)configSectorCopy,
-                false);
+            if (iMXRTFlexSPIDriver_Write(
+                    NULL,
+                    (uint32_t)&__nanoConfig_start__,
+                    sizeOfConfigSector,
+                    (unsigned char *)configSectorCopy,
+                    false))
+            {
+                success = UpdateConfigurationResult_Success;
+            }
         }
 
         // free memory
