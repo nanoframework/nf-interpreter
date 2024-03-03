@@ -21,6 +21,24 @@
 #include <mbedtls/platform.h>
 #include <mbedtls/md.h>
 #include <mbedtls/md_internal.h>
+#include <mbedtls/aes.h>
+
+typedef enum __nfpack CipherMode
+{
+    CipherMode_None = 0,
+    CipherMode_ECB = 2,
+} CipherMode;
+
+struct Library_nf_sys_sec_cryptography_System_Security_Cryptography_Aes
+{
+    static const int FIELD___mode = 1;
+    static const int FIELD___key = 2;
+
+    NANOCLR_NATIVE_DECLARE(EncryptAesEcb___SZARRAY_U1__SZARRAY_U1);
+    NANOCLR_NATIVE_DECLARE(DecryptAesEcb___SZARRAY_U1__SZARRAY_U1);
+
+    //--//
+};
 
 struct Library_nf_sys_sec_cryptography_System_Security_Cryptography_HMACSHA256
 {

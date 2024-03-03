@@ -369,7 +369,7 @@ void ClrStartup(CLR_SETTINGS params)
 {
     NATIVE_PROFILE_CLR_STARTUP();
     Settings settings;
-    ASSERT(sizeof(CLR_RT_HeapBlock_Raw) == sizeof(CLR_RT_HeapBlock));
+    ASSERT(sizeof(CLR_RT_HeapBlock_Raw) == sizeof(struct CLR_RT_HeapBlock));
     bool softReboot;
 
     do

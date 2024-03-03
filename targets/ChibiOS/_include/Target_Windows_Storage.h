@@ -34,7 +34,7 @@
 #define USB_MSD_DRIVE_INDEX         "1:"
 #define USB_MSD_DRIVE_INDEX_NUMERIC (1)
 
-#elif !#if (HAL_USE_SDC == TRUE) && defined(HAL_USBH_USE_MSD)
+#elif (HAL_USE_SDC == FALSE) && defined(HAL_USBH_USE_MSD)
 
 #define USB_MSD_DRIVE_INDEX         "0:"
 #define USB_MSD_DRIVE_INDEX_NUMERIC (0)

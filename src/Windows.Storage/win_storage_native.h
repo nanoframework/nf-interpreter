@@ -9,6 +9,12 @@
 #include <nanoCLR_Interop.h>
 #include <nanoCLR_Runtime.h>
 
+typedef enum __nfpack KnownFolderId
+{
+    KnownFolderId_RemovableDevices = 10,
+    KnownFolderId_InternalDevices = 14,
+} KnownFolderId;
+
 struct Library_win_storage_native_Windows_Storage_Devices_SDCard
 {
     static const int FIELD_STATIC___mounted = 0;
@@ -92,6 +98,8 @@ struct Library_win_storage_native_Windows_Storage_StorageProvider
 {
     static const int FIELD___displayName = 1;
     static const int FIELD___id = 2;
+
+    NANOCLR_NATIVE_DECLARE(FormatVolume___VOID__STRING);
 
     //--//
 };
