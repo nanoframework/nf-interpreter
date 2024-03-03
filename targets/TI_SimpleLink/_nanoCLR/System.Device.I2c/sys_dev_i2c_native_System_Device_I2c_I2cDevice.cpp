@@ -10,7 +10,7 @@ typedef Library_sys_dev_i2c_native_System_Device_I2c_I2cTransferResult I2cTransf
 typedef Library_corlib_native_System_SpanByte SpanByte;
 
 /////////////////////////////////////////////////////
-// I2C PAL strucs declared in sys_dev_i2c_native.h //
+// I2C PAL structs declared in sys_dev_i2c_native.h //
 /////////////////////////////////////////////////////
 NF_PAL_I2C I2C1_PAL;
 

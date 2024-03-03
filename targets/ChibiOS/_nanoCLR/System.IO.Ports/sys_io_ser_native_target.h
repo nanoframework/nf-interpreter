@@ -32,7 +32,7 @@ typedef struct
 } NF_PAL_UART;
 
 ////////////////////////////////////////////
-// declaration of the the UART PAL strucs //
+// declaration of the the UART PAL structs //
 ////////////////////////////////////////////
 #if defined(NF_SERIAL_COMM_STM32_UART_USE_USART1) && (NF_SERIAL_COMM_STM32_UART_USE_USART1 == TRUE)
 extern NF_PAL_UART Uart1_PAL;
