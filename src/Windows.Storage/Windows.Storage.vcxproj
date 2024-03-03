@@ -24,6 +24,7 @@
     <ClCompile Include="win_storage_native_Windows_Storage_FileIO_stubs.cpp" />
     <ClCompile Include="win_storage_native_Windows_Storage_StorageFile_stubs.cpp" />
     <ClCompile Include="win_storage_native_Windows_Storage_StorageFolder_stubs.cpp" />
+    <ClCompile Include="win_storage_native_Windows_Storage_StorageProvider_stubs.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="win_storage_native.h" />
