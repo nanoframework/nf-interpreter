@@ -204,7 +204,7 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_Directory::GetFilesNative___STATI
             stringBuffer = (char *)platform_malloc(FF_LFN_BUF + 1);
             workingBuffer = (char *)platform_malloc(2 * FF_LFN_BUF + 1);
 
-            // sanity check for successfull malloc
+            // sanity check for successful malloc
             if (stringBuffer == NULL || workingBuffer == NULL)
             {
                 // failed to allocate memory
@@ -337,7 +337,7 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_Directory::GetDirectoriesNative__
             stringBuffer = (char *)platform_malloc(FF_LFN_BUF + 1);
             workingBuffer = (char *)platform_malloc(2 * FF_LFN_BUF + 1);
 
-            // sanity check for successfull malloc
+            // sanity check for successful malloc
             if (stringBuffer == NULL || workingBuffer == NULL)
             {
                 // failed to allocate memory
