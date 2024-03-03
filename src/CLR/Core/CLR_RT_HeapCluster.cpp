@@ -12,7 +12,7 @@ void CLR_RT_HeapCluster::HeapCluster_Initialize(CLR_UINT32 size, CLR_UINT32 bloc
     NATIVE_PROFILE_CLR_CORE();
     GenericNode_Initialize();
 
-    size = (size - sizeof(*this)) / sizeof(CLR_RT_HeapBlock);
+    size = (size - sizeof(*this)) / sizeof(struct CLR_RT_HeapBlock);
 
     m_freeList.DblLinkedList_Initialize();              // CLR_RT_DblLinkedList    m_freeList;
     m_payloadStart = (CLR_RT_HeapBlock_Node *)&this[1]; // CLR_RT_HeapBlock_Node*  m_payloadStart;
@@ -108,8 +108,12 @@ CLR_RT_HeapBlock *CLR_RT_HeapCluster::ExtractBlocks(CLR_UINT32 dataType, CLR_UIN
             {
                 res = ptr;
 
-                _ASSERTE((void *)res >= (void *)s_CLR_RT_Heap.m_location);
-                _ASSERTE((void *)res < (void *)(s_CLR_RT_Heap.m_location + s_CLR_RT_Heap.m_size));
+                // sanity checks for out of bounds
+                if ((void *)res < (void *)s_CLR_RT_Heap.m_location ||
+                    (void *)res >= (void *)(s_CLR_RT_Heap.m_location + s_CLR_RT_Heap.m_size))
+                {
+                    return NULL;
+                }
 
                 break;
             }
@@ -124,10 +128,14 @@ CLR_RT_HeapBlock *CLR_RT_HeapCluster::ExtractBlocks(CLR_UINT32 dataType, CLR_UIN
 
         available -= length;
 
-        _ASSERTE((void *)next >= (void *)s_CLR_RT_Heap.m_location);
-        _ASSERTE((void *)next < (void *)(s_CLR_RT_Heap.m_location + s_CLR_RT_Heap.m_size));
-        _ASSERTE((void *)prev >= (void *)s_CLR_RT_Heap.m_location);
-        _ASSERTE((void *)prev < (void *)(s_CLR_RT_Heap.m_location + s_CLR_RT_Heap.m_size));
+        // sanity checks for out of bounds
+        if (((void *)next < (void *)s_CLR_RT_Heap.m_location) ||
+            (void *)next >= (void *)(s_CLR_RT_Heap.m_location + s_CLR_RT_Heap.m_size) ||
+            (void *)prev < (void *)s_CLR_RT_Heap.m_location ||
+            (void *)prev >= (void *)(s_CLR_RT_Heap.m_location + s_CLR_RT_Heap.m_size))
+        {
+            return NULL;
+        }
 
         if (available != 0)
         {
@@ -137,15 +145,23 @@ CLR_RT_HeapBlock *CLR_RT_HeapCluster::ExtractBlocks(CLR_UINT32 dataType, CLR_UIN
 
                 res += available;
 
-                _ASSERTE((void *)res >= (void *)s_CLR_RT_Heap.m_location);
-                _ASSERTE((void *)res < (void *)(s_CLR_RT_Heap.m_location + s_CLR_RT_Heap.m_size));
+                // sanity checks for out of bounds
+                if ((void *)res < (void *)s_CLR_RT_Heap.m_location ||
+                    (void *)res >= (void *)(s_CLR_RT_Heap.m_location + s_CLR_RT_Heap.m_size))
+                {
+                    return NULL;
+                }
             }
             else
             {
                 CLR_RT_HeapBlock_Node *ptr = &res[length];
 
-                _ASSERTE((void *)ptr >= (void *)s_CLR_RT_Heap.m_location);
-                _ASSERTE((void *)ptr < (void *)(s_CLR_RT_Heap.m_location + s_CLR_RT_Heap.m_size));
+                // sanity checks for out of bounds
+                if ((void *)ptr < (void *)s_CLR_RT_Heap.m_location ||
+                    (void *)ptr >= (void *)(s_CLR_RT_Heap.m_location + s_CLR_RT_Heap.m_size))
+                {
+                    return NULL;
+                }
 
                 //
                 // Relink to the new free block.

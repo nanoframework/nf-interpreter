@@ -206,18 +206,18 @@ HRESULT SOCK_CONFIGURATION_LinkStatus(uint32_t interfaceIndex, bool *status)
     return HAL_SOCK_CONFIGURATION_Link_status(interfaceIndex, status);
 }
 
-HRESULT SOCK_IPAddressFromString(const char *ipString, uint64_t *address)
+HRESULT SOCK_IPV4AddressFromString(const char *ipString, uint64_t *address)
 {
     NATIVE_PROFILE_PAL_COM();
 
-    return HAL_SOCK_IPAddressFromString(ipString, address);
+    return HAL_SOCK_IPV4AddressFromString(ipString, address);
 }
 
-const char *SOCK_IPAddressToString(uint32_t address)
+const char *SOCK_IPV4AddressToString(uint32_t address)
 {
     NATIVE_PROFILE_PAL_COM();
 
-    return HAL_SOCK_IPAddressToString(address);
+    return HAL_SOCK_IPV4AddressToString(address);
 }
 
 #define SOCKET_SHUTDOWN_READ       0

@@ -23,8 +23,9 @@ HRESULT CLR_RT_HeapBlock_Lock::CreateInstance(
     lock = EVENTCACHE_EXTRACT_NODE(g_CLR_RT_EventCache, CLR_RT_HeapBlock_Lock, DATATYPE_LOCK_HEAD);
     CHECK_ALLOCATION(lock);
 
-    lock->m_owningThread = th;                   // CLR_RT_Thread*          m_owningThread;
-                                                 //
+    lock->m_owningThread = th; // CLR_RT_Thread*          m_owningThread;
+                               //
+    memset(&lock->m_resource, 0, sizeof(struct CLR_RT_HeapBlock));
     lock->m_resource.Assign(resource);           // CLR_RT_HeapBlock        m_resource;
                                                  //
     lock->m_owners.DblLinkedList_Initialize();   // CLR_RT_DblLinkedList    m_owners;

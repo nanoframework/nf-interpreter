@@ -16,6 +16,18 @@ extern SYSTEMTIME GetDateTime(uint16_t date, uint16_t time);
 #define NANO_DIR DIR
 #endif
 
+// We will use this to extract the file extension
+const char *get_filename_ext(const char *filename)
+{
+    char *dot = strrchr(filename, '.');
+    if (!dot || dot == filename)
+    {
+        return NULL;
+    }
+
+    return dot + 1;
+}
+
 HRESULT Library_nf_sys_io_filesystem_System_IO_Directory::ExistsNative___STATIC__BOOLEAN__STRING(
     CLR_RT_StackFrame &stack)
 {
@@ -172,7 +184,8 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_Directory::GetFilesNative___STATI
                 // but skip if:
                 // - has system attribute set
                 // - has hidden attribute set
-                if ((fileInfo.fattrib & AM_ARC) && !(fileInfo.fattrib & AM_SYS) && !(fileInfo.fattrib & AM_HID))
+                if ((fileInfo.fattrib & AM_ARC) && !(fileInfo.fattrib & AM_SYS) && !(fileInfo.fattrib & AM_HID) &&
+                    strcmp(get_filename_ext(fileInfo.fname), "sys"))
                 {
                     fileCount++;
                 }
@@ -191,7 +204,7 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_Directory::GetFilesNative___STATI
             stringBuffer = (char *)platform_malloc(FF_LFN_BUF + 1);
             workingBuffer = (char *)platform_malloc(2 * FF_LFN_BUF + 1);
 
-            // sanity check for successfull malloc
+            // sanity check for successful malloc
             if (stringBuffer == NULL || workingBuffer == NULL)
             {
                 // failed to allocate memory
@@ -217,7 +230,8 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_Directory::GetFilesNative___STATI
                 // but skip if:
                 // - has system attribute set
                 // - has hidden attribute set
-                if ((fileInfo.fattrib & AM_ARC) && !(fileInfo.fattrib & AM_SYS) && !(fileInfo.fattrib & AM_HID))
+                if ((fileInfo.fattrib & AM_ARC) && !(fileInfo.fattrib & AM_SYS) && !(fileInfo.fattrib & AM_HID) &&
+                    strcmp(get_filename_ext(fileInfo.fname), "sys"))
                 {
                     // clear working buffer
                     memset(workingBuffer, 0, 2 * FF_LFN_BUF + 1);
@@ -323,7 +337,7 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_Directory::GetDirectoriesNative__
             stringBuffer = (char *)platform_malloc(FF_LFN_BUF + 1);
             workingBuffer = (char *)platform_malloc(2 * FF_LFN_BUF + 1);
 
-            // sanity check for successfull malloc
+            // sanity check for successful malloc
             if (stringBuffer == NULL || workingBuffer == NULL)
             {
                 // failed to allocate memory

@@ -35,10 +35,10 @@ __nfweak void ConfigurationManager_Initialize()
     memset(&stream, 0, sizeof(BlockStorageStream));
     BlockStorageStream_Initialize(&stream, BlockUsage_CONFIG);
 
-    BlockStorageDevice* device = BlockStorageList_GetFirstDevice();
-    DeviceBlockInfo * deviceBlockInfo = BlockStorageDevice_GetDeviceInfo(device);
-    
-    if(deviceBlockInfo->Regions[stream.RegionIndex].Attributes & BlockRegionAttribute_ProgramWidthIs64bits)
+    BlockStorageDevice *device = BlockStorageList_GetFirstDevice();
+    DeviceBlockInfo *deviceBlockInfo = BlockStorageDevice_GetDeviceInfo(device);
+
+    if (deviceBlockInfo->Regions[stream.RegionIndex].Attributes & BlockRegionAttribute_ProgramWidthIs64bits)
     {
         programWidth = 64 / 8;
     }
@@ -335,7 +335,7 @@ __nfweak bool ConfigurationManager_StoreConfigurationBlock(
             storageAddress = (uint32_t)&__nanoConfig_start__ + sizeof(HAL_Configuration_NetworkInterface);
 
             // check programming width
-            if(programWidth > 0)
+            if (programWidth > 0)
             {
                 // round address to the next valid programming width
                 storageAddress += programWidth - storageAddress % programWidth;
@@ -507,7 +507,7 @@ __nfweak bool ConfigurationManager_StoreConfigurationBlock(
 // The flash sector has to be erased before writing the updated block
 // it's implemented with 'weak' attribute so it can be replaced at target level if a different persistance mechanism is
 // used
-__nfweak bool ConfigurationManager_UpdateConfigurationBlock(
+__nfweak UpdateConfigurationResult ConfigurationManager_UpdateConfigurationBlock(
     void *configurationBlock,
     DeviceConfigurationOption configuration,
     uint32_t configurationIndex)
@@ -516,7 +516,7 @@ __nfweak bool ConfigurationManager_UpdateConfigurationBlock(
     uint32_t blockOffset;
     uint8_t *blockAddressInCopy;
     uint32_t blockSize;
-    bool success = FALSE;
+    UpdateConfigurationResult success = UpdateConfigurationResult_Failed;
 
     // config sector size
     int sizeOfConfigSector = (uint32_t)&__nanoConfig_end__ - (uint32_t)&__nanoConfig_start__;
@@ -549,8 +549,8 @@ __nfweak bool ConfigurationManager_UpdateConfigurationBlock(
                 // free memory
                 platform_free(configSectorCopy);
 
-                // operation is successfull (nothing to update)
-                return TRUE;
+                // operation is successful (nothing to update)
+                return UpdateConfigurationResult_NoChanges;
             }
 
             // get storage address from block address
@@ -580,8 +580,8 @@ __nfweak bool ConfigurationManager_UpdateConfigurationBlock(
                 // free memory
                 platform_free(configSectorCopy);
 
-                // operation is successfull (nothing to update)
-                return TRUE;
+                // operation is successful (nothing to update)
+                return UpdateConfigurationResult_NoChanges;
             }
 
             // storage address from block address
@@ -609,8 +609,8 @@ __nfweak bool ConfigurationManager_UpdateConfigurationBlock(
                 // free memory
                 platform_free(configSectorCopy);
 
-                // operation is successfull (nothing to update)
-                return TRUE;
+                // operation is successful (nothing to update)
+                return UpdateConfigurationResult_NoChanges;
             }
 
             // storage address from block address
@@ -640,8 +640,8 @@ __nfweak bool ConfigurationManager_UpdateConfigurationBlock(
                 // free memory
                 platform_free(configSectorCopy);
 
-                // operation is successfull (nothing to update)
-                return TRUE;
+                // operation is successful (nothing to update)
+                return UpdateConfigurationResult_NoChanges;
             }
 
             // storage address from block address
@@ -658,7 +658,7 @@ __nfweak bool ConfigurationManager_UpdateConfigurationBlock(
             // free memory first
             platform_free(configSectorCopy);
 
-            return FALSE;
+            return UpdateConfigurationResult_Failed;
         }
 
         // erase config sector
@@ -676,12 +676,16 @@ __nfweak bool ConfigurationManager_UpdateConfigurationBlock(
             memcpy(blockAddressInCopy, configurationBlock, blockSize);
 
             // copy the config block copy back to the config block storage
-            success = STM32FlashDriver_Write(
-                NULL,
-                (uint32_t)&__nanoConfig_start__,
-                sizeOfConfigSector,
-                (unsigned char *)configSectorCopy,
-                true);
+            if (STM32FlashDriver_Write(
+                    NULL,
+                    (uint32_t)&__nanoConfig_start__,
+                    sizeOfConfigSector,
+                    (unsigned char *)configSectorCopy,
+                    true))
+            {
+                // operation is successfull
+                success = UpdateConfigurationResult_Success;
+            }
         }
 
         // free memory
@@ -704,7 +708,8 @@ __nfweak void InitialiseWirelessDefaultConfig(HAL_Configuration_Wireless80211 *c
     config->Id = configurationIndex;
 
     config->Options =
-        (Wireless80211Configuration_ConfigurationOptions)(Wireless80211Configuration_ConfigurationOptions_AutoConnect | Wireless80211Configuration_ConfigurationOptions_Enable);
+        (Wireless80211Configuration_ConfigurationOptions)(Wireless80211Configuration_ConfigurationOptions_AutoConnect |
+                                                          Wireless80211Configuration_ConfigurationOptions_Enable);
 }
 
 //  Default initialisation for Network interface config blocks

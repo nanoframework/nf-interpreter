@@ -92,20 +92,14 @@ HRESULT LWIP_SOCKETS_Driver::Link_status(uint32_t interfaceIndex, bool *status)
     return S_OK;
 }
 
-HRESULT LWIP_SOCKETS_Driver::IPAddressFromString(const char *ipString, uint64_t *address)
+HRESULT LWIP_SOCKETS_Driver::IPV4AddressFromString(const char *ipString, uint64_t *address)
 {
     ip4_addr_t ipv4Address;
-    // FIXME IPV6
-    // ip6_addr_t ipv6Address
 
     if (ip4addr_aton(ipString, &ipv4Address))
     {
         *address = ipv4Address.addr;
     }
-    // FIXME IPV6
-    // else if(ip6addr_aton(ipString, &ipv6Address))
-    // {
-    // }
     else
     {
         return CLR_E_INVALID_PARAMETER;
@@ -114,14 +108,50 @@ HRESULT LWIP_SOCKETS_Driver::IPAddressFromString(const char *ipString, uint64_t 
     return S_OK;
 }
 
-const char *LWIP_SOCKETS_Driver::IPAddressToString(uint32_t address)
+const char *LWIP_SOCKETS_Driver::IP4AddressToString(uint32_t address)
 {
     // get IP v4 address in numeric format
-    // FIXME IPV6
     const ip4_addr_t ip4Address = {address};
 
     return ip4addr_ntoa(&ip4Address);
 }
+
+#if LWIP_IPV6
+HRESULT LWIP_SOCKETS_Driver::IPV6AddressFromString(const char *ipString, uint16_t *address)
+{
+    ip6_addr_t ipv6Address;
+
+    if (ip6addr_aton(ipString, &ipv6Address))
+    {
+        address[0] = IP6_ADDR_BLOCK1(&ipv6Address);
+        address[1] = IP6_ADDR_BLOCK2(&ipv6Address);
+        address[2] = IP6_ADDR_BLOCK3(&ipv6Address);
+        address[3] = IP6_ADDR_BLOCK4(&ipv6Address);
+        address[4] = IP6_ADDR_BLOCK5(&ipv6Address);
+        address[5] = IP6_ADDR_BLOCK6(&ipv6Address);
+        address[6] = IP6_ADDR_BLOCK7(&ipv6Address);
+        address[7] = IP6_ADDR_BLOCK8(&ipv6Address);
+    }
+    else
+    {
+        return CLR_E_INVALID_PARAMETER;
+    }
+    return S_OK;
+}
+
+const char *LWIP_SOCKETS_Driver::IP6AddressToString(uint16_t *address)
+{
+    // get IP v6 address in numeric format
+    ip6_addr_t ip6Address;
+
+    ip6Address.addr[0] = lwip_htonl((address[0] << 16) + address[1]);
+    ip6Address.addr[1] = lwip_htonl((address[2] << 16) + address[3]);
+    ip6Address.addr[2] = lwip_htonl((address[4] << 16) + address[5]);
+    ip6Address.addr[3] = lwip_htonl((address[6] << 16) + address[7]);
+
+    return ip6addr_ntoa(&ip6Address);
+}
+#endif
 
 #if LWIP_NETIF_LINK_CALLBACK == 1
 void LWIP_SOCKETS_Driver::Link_callback(struct netif *netif)
@@ -129,13 +159,18 @@ void LWIP_SOCKETS_Driver::Link_callback(struct netif *netif)
     if (netif_is_link_up(netif))
     {
         if (!PostAvailabilityOnContinuation.IsLinked())
+        {
             PostAvailabilityOnContinuation.Enqueue();
+        }
     }
     else
     {
         if (!PostAvailabilityOffContinuation.IsLinked())
+        {
             PostAvailabilityOffContinuation.Enqueue();
+        }
     }
+
     Events_Set(SYSTEM_EVENT_FLAG_SOCKET);
     Events_Set(SYSTEM_EVENT_FLAG_NETWORK);
 }
@@ -149,22 +184,24 @@ void LWIP_SOCKETS_Driver::Status_callback(struct netif *netif)
 #endif
 
     if (!PostAddressChangedContinuation.IsLinked())
+    {
         PostAddressChangedContinuation.Enqueue();
+    }
 
 #if !defined(BUILD_RTM)
-        // lcd_printf("\f\n\n\n\n\n\nLink Update: %s\n", (netif_is_up(netif) ? "UP  " : "DOWN"));
-        // lcd_printf("         IP: %d.%d.%d.%d\n", (netif->ip_addr.addr >> 0) & 0xFF,
-        // 	(netif->ip_addr.addr >> 8) & 0xFF,
-        // 	(netif->ip_addr.addr >> 16) & 0xFF,
-        // 	(netif->ip_addr.addr >> 24) & 0xFF);
-        // lcd_printf("         SM: %d.%d.%d.%d\n", (netif->netmask.addr >> 0) & 0xFF,
-        // 	(netif->netmask.addr >> 8) & 0xFF,
-        // 	(netif->netmask.addr >> 16) & 0xFF,
-        // 	(netif->netmask.addr >> 24) & 0xFF);
-        // lcd_printf("         GW: %d.%d.%d.%d\n", (netif->gw.addr >> 0) & 0xFF,
-        // 	(netif->gw.addr >> 8) & 0xFF,
-        // 	(netif->gw.addr >> 16) & 0xFF,
-        // 	(netif->gw.addr >> 24) & 0xFF);
+    // lcd_printf("\f\n\n\n\n\n\nLink Update: %s\n", (netif_is_up(netif) ? "UP  " : "DOWN"));
+    // lcd_printf("         IP: %d.%d.%d.%d\n", (netif->ip_addr.addr >> 0) & 0xFF,
+    // 	(netif->ip_addr.addr >> 8) & 0xFF,
+    // 	(netif->ip_addr.addr >> 16) & 0xFF,
+    // 	(netif->ip_addr.addr >> 24) & 0xFF);
+    // lcd_printf("         SM: %d.%d.%d.%d\n", (netif->netmask.addr >> 0) & 0xFF,
+    // 	(netif->netmask.addr >> 8) & 0xFF,
+    // 	(netif->netmask.addr >> 16) & 0xFF,
+    // 	(netif->netmask.addr >> 24) & 0xFF);
+    // lcd_printf("         GW: %d.%d.%d.%d\n", (netif->gw.addr >> 0) & 0xFF,
+    // 	(netif->gw.addr >> 8) & 0xFF,
+    // 	(netif->gw.addr >> 16) & 0xFF,
+    // 	(netif->gw.addr >> 24) & 0xFF);
 
 // FIXME debug_printf("IP Address: %d.%d.%d.%d\n", (netif->ip_addr.u_addr.ip4.addr >> 0) & 0xFF,
 // 	(netif->ip_addr.u_addr.ip4.addr >> 8) & 0xFF,
@@ -188,6 +225,7 @@ void LWIP_SOCKETS_Driver::Status_callback(struct netif *netif)
     }
 #endif
 #endif
+
     Events_Set(SYSTEM_EVENT_FLAG_SOCKET);
     Events_Set(SYSTEM_EVENT_FLAG_NETWORK);
 }
@@ -214,7 +252,8 @@ bool LWIP_SOCKETS_Driver::Initialize()
     g_LWIP_SOCKETS_Driver.m_interfaces =
         (LWIP_DRIVER_INTERFACE_DATA *)platform_malloc(interfaceCount * sizeof(LWIP_DRIVER_INTERFACE_DATA));
 
-    /* Initialize the target board lwIP stack */
+    // Initialize the target board lwIP stack
+    // Developer note: this call can only return AFTER the stack has been initialized
     nanoHAL_Network_Initialize();
 
     for (int i = 0; i < g_TargetConfiguration.NetworkInterfaceConfigs->Count; i++)
@@ -232,7 +271,7 @@ bool LWIP_SOCKETS_Driver::Initialize()
         }
         _ASSERTE(networkConfiguration.StartupAddressMode > 0);
 
-        /* Bind and Open the Ethernet driver */
+        // Bind and Open the Ethernet driver
         Network_Interface_Bind(i);
         interfaceNumber = Network_Interface_Open(i);
 
@@ -244,7 +283,10 @@ bool LWIP_SOCKETS_Driver::Initialize()
 
         g_LWIP_SOCKETS_Driver.m_interfaces[i].m_interfaceNumber = interfaceNumber;
 
-        UpdateAdapterConfiguration(i, (NetworkInterface_UpdateOperation_Dns), &networkConfiguration);
+        UpdateAdapterConfiguration(
+            i,
+            (NetworkInterface_UpdateOperation_Dhcp | NetworkInterface_UpdateOperation_Dns),
+            &networkConfiguration);
 
         networkInterface = netif_find_interface(interfaceNumber);
 
@@ -260,11 +302,6 @@ bool LWIP_SOCKETS_Driver::Initialize()
 #endif
 #if LWIP_NETIF_STATUS_CALLBACK == 1
             netif_set_status_callback(networkInterface, Status_callback);
-
-            if (netif_is_up(networkInterface))
-            {
-                Status_callback(networkInterface);
-            }
 #endif
 
             // default debugger interface
@@ -315,14 +352,31 @@ SOCK_SOCKET LWIP_SOCKETS_Driver::Socket(int family, int type, int protocol)
 {
     NATIVE_PROFILE_PAL_NETWORK();
 
+    switch (family)
+    {
+        case SOCK_AF_INET:
+            family = AF_INET;
+            break;
+
+        case SOCK_AF_INET6:
+            family = AF_INET6;
+            break;
+
+        default:
+            family = AF_UNSPEC;
+            break;
+    }
+
     switch (protocol)
     {
         case SOCK_IPPROTO_TCP:
             protocol = IPPROTO_TCP;
             break;
+
         case SOCK_IPPROTO_UDP:
             protocol = IPPROTO_UDP;
             break;
+
         case SOCK_IPPROTO_ICMP:
             protocol = IP_PROTO_ICMP;
             break;
@@ -330,29 +384,119 @@ SOCK_SOCKET LWIP_SOCKETS_Driver::Socket(int family, int type, int protocol)
         case SOCK_IPPROTO_IGMP:
             protocol = IP_PROTO_IGMP;
             break;
+
+        case SOCK_IPPROTO_RAW:
+            protocol = IPPROTO_RAW;
+            break;
     }
 
     return lwip_socket(family, type, protocol);
+}
+
+sockaddr *Sock_SockaddrToSockaddrV4(const SOCK_sockaddr *ssa, sockaddr_in *sai, int *addrLen)
+{
+    // IPV4
+    sai->sin_len = (u8_t)sizeof(sockaddr_in);
+    sai->sin_family = AF_INET;
+    sai->sin_port = ((SOCK_sockaddr_in *)ssa)->sin_port;
+    sai->sin_addr.s_addr = ((SOCK_sockaddr_in *)ssa)->sin_addr.S_un.S_addr;
+
+    memcpy(sai->sin_zero, ((SOCK_sockaddr_in *)ssa)->sin_zero, sizeof(sai->sin_zero));
+
+    *addrLen = sizeof(sockaddr_in);
+
+    return (sockaddr *)sai;
+}
+
+#if LWIP_IPV6
+sockaddr *Sock_SockaddrToSockaddrV6(const SOCK_sockaddr *ssa, sockaddr_in6 *sai, int *addrLen)
+{
+    // IPV6
+    sai->sin6_len = (u8_t)sizeof(sockaddr_in6);
+    sai->sin6_family = AF_INET6;
+    sai->sin6_port = ((SOCK_sockaddr_in6 *)ssa)->sin_port;
+
+    for (int i = 0; i < 4; i++)
+    {
+        sai->sin6_addr.un.u32_addr[i] = ((SOCK_sockaddr_in6 *)ssa)->sin_addr.un.u32_addr[i];
+    }
+
+    sai->sin6_scope_id = ((SOCK_sockaddr_in6 *)ssa)->scopeId;
+
+    *addrLen = sizeof(sockaddr_in6);
+    return (sockaddr *)sai;
+}
+#endif
+
+sockaddr *Sock_SockaddrToSockaddr(const SOCK_sockaddr *ssa, sockaddr *sai, int *addrLen)
+{
+#if LWIP_IPV6
+    if (ssa->sa_family == SOCK_AF_INET6)
+    {
+        return Sock_SockaddrToSockaddrV6(ssa, (sockaddr_in6 *)sai, addrLen);
+    }
+#endif
+
+    return Sock_SockaddrToSockaddrV4(ssa, (sockaddr_in *)sai, addrLen);
+}
+
+void sockaddrToSock_SockAddr(SOCK_sockaddr *ssa, sockaddr *sa, int *addrLen)
+{
+#if LWIP_IPV6
+    if (sa->sa_family == AF_INET6)
+    {
+        sockaddr_in6 *sa6 = (sockaddr_in6 *)sa;
+        ((SOCK_sockaddr_in6 *)ssa)->sin_port = sa6->sin6_port;
+        ((SOCK_sockaddr_in6 *)ssa)->sin_family = SOCK_AF_INET6;
+
+        for (int i = 0; i < 4; i++)
+        {
+            ((SOCK_sockaddr_in6 *)ssa)->sin_addr.un.u32_addr[i] = sa6->sin6_addr.un.u32_addr[i];
+        }
+
+        ((SOCK_sockaddr_in6 *)ssa)->scopeId = sa6->sin6_scope_id;
+        *addrLen = sizeof(SOCK_sockaddr_in6);
+    }
+    else
+#endif
+    {
+        sockaddr_in *sa4 = (sockaddr_in *)sa;
+        ((SOCK_sockaddr_in *)ssa)->sin_port = sa4->sin_port;
+        ((SOCK_sockaddr_in *)ssa)->sin_addr.S_un.S_addr = sa4->sin_addr.s_addr;
+        ((SOCK_sockaddr_in *)ssa)->sin_family = SOCK_AF_INET;
+        memcpy(((SOCK_sockaddr_in *)ssa)->sin_zero, sa4->sin_zero, sizeof(((SOCK_sockaddr_in *)ssa)->sin_zero));
+        *addrLen = sizeof(SOCK_sockaddr_in);
+    }
 }
 
 int LWIP_SOCKETS_Driver::Bind(SOCK_SOCKET socket, const SOCK_sockaddr *address, int addressLen)
 {
     NATIVE_PROFILE_PAL_NETWORK();
 
+#if LWIP_IPV6
+    sockaddr_in6 addr;
+#else
     sockaddr_in addr;
+#endif
 
-    SOCK_SOCKADDR_TO_SOCKADDR(address, addr, &addressLen);
+    Sock_SockaddrToSockaddr(address, (sockaddr *)&addr, &addressLen);
 
-    return lwip_bind(socket, (sockaddr *)&addr, addressLen);
+    int ret = lwip_bind(socket, (sockaddr *)&addr, addressLen);
+
+    return ret;
 }
 
 int LWIP_SOCKETS_Driver::Connect(SOCK_SOCKET socket, const SOCK_sockaddr *address, int addressLen)
 {
     NATIVE_PROFILE_PAL_NETWORK();
 
+#if LWIP_IPV6
+    sockaddr_in6 addr;
+#else
     sockaddr_in addr;
+#endif
 
-    SOCK_SOCKADDR_TO_SOCKADDR(address, addr, &addressLen);
+    Sock_SockaddrToSockaddr(address, (sockaddr *)&addr, &addressLen);
 
     return lwip_connect(socket, (sockaddr *)&addr, addressLen);
 }
@@ -401,18 +545,22 @@ SOCK_SOCKET LWIP_SOCKETS_Driver::Accept(SOCK_SOCKET socket, SOCK_sockaddr *addre
     NATIVE_PROFILE_PAL_NETWORK();
     SOCK_SOCKET ret;
 
+#if LWIP_IPV6
+    sockaddr_in6 addr;
+#else
     sockaddr_in addr;
+#endif
 
     if (address)
     {
-        SOCK_SOCKADDR_TO_SOCKADDR(address, addr, addressLen);
+        Sock_SockaddrToSockaddr(address, (sockaddr *)&addr, addressLen);
     }
 
     ret = lwip_accept(socket, address ? (sockaddr *)&addr : NULL, (u32_t *)addressLen);
 
     if (address)
     {
-        SOCKADDR_TO_SOCK_SOCKADDR(address, addr, addressLen);
+        sockaddrToSock_SockAddr(address, (sockaddr *)&addr, addressLen);
     }
 
     return ret;
@@ -425,13 +573,27 @@ int LWIP_SOCKETS_Driver::Shutdown(SOCK_SOCKET socket, int how)
     return lwip_shutdown(socket, how);
 }
 
-SOCK_addrinfo *CreateAddressRecord(u_long addr, short family, u_short port, char *canonname, const SOCK_addrinfo *hints)
+SOCK_addrinfo *CreateAddressRecord(
+    short family,
+    ip_addr_t &addr,
+    u_short port,
+    char *canonname,
+    const SOCK_addrinfo *hints)
 {
     SOCK_addrinfo *ai;
     SOCK_sockaddr_in *sa = NULL;
-    int total_size = sizeof(SOCK_addrinfo) + sizeof(SOCK_sockaddr_in);
+#if LWIP_IPV6
+    SOCK_sockaddr_in6 *sa6 = NULL;
+#endif
+    int total_size = sizeof(SOCK_addrinfo);
     int canonNameSize;
-    void *dummyPtr;
+    void *saPtr;
+
+#if LWIP_IPV6
+    total_size += (family == SOCK_AF_INET6) ? sizeof(SOCK_sockaddr_in6) : sizeof(SOCK_sockaddr_in);
+#else
+    total_size += sizeof(SOCK_sockaddr_in);
+#endif
 
     // Allow for canon name if available
     if (canonname != NULL)
@@ -449,12 +611,41 @@ SOCK_addrinfo *CreateAddressRecord(u_long addr, short family, u_short port, char
     }
 
     memset(ai, 0, total_size);
-    sa = (SOCK_sockaddr_in *)((u8_t *)ai + sizeof(SOCK_addrinfo));
 
-    // set up sockaddr
-    sa->sin_addr.S_un.S_addr = addr;
-    sa->sin_family = family;
-    sa->sin_port = port;
+#if LWIP_IPV6
+    if (family == SOCK_AF_INET6)
+    {
+        // IPV6 address
+        sa6 = (SOCK_sockaddr_in6 *)((u8_t *)ai + sizeof(SOCK_addrinfo));
+
+        // set up sockaddr
+        sa6->sin_family = family;
+        sa6->sin_port = port;
+        sa6->sin_addr.un.u32_addr[0] = addr.u_addr.ip6.addr[0];
+        sa6->sin_addr.un.u32_addr[1] = addr.u_addr.ip6.addr[1];
+        sa6->sin_addr.un.u32_addr[2] = addr.u_addr.ip6.addr[2];
+        sa6->sin_addr.un.u32_addr[3] = addr.u_addr.ip6.addr[3];
+
+        saPtr = sa6;
+        ai->ai_addrlen = sizeof(SOCK_sockaddr_in6);
+    }
+    else
+#endif
+    {
+        // IPV4 address
+        sa = (SOCK_sockaddr_in *)((u8_t *)ai + sizeof(SOCK_addrinfo));
+
+        // set up sockaddr
+        sa->sin_family = family;
+        sa->sin_port = port;
+#if LWIP_IPV6
+        sa->sin_addr.S_un.S_addr = (u_long)addr.u_addr.ip4.addr;
+#else
+        sa->sin_addr.S_un.S_addr = (u_long)addr.addr;
+#endif
+        saPtr = sa;
+        ai->ai_addrlen = sizeof(SOCK_sockaddr_in);
+    }
 
     // set up addrinfo
     ai->ai_family = family;
@@ -473,12 +664,7 @@ SOCK_addrinfo *CreateAddressRecord(u_long addr, short family, u_short port, char
         memcpy(ai->ai_canonname, canonname, canonNameSize);
     }
 
-    // need this to keep the compiler happy about the cast to SOCK_sockaddr
-    // which is intended and perfectly safe
-    dummyPtr = sa;
-
-    ai->ai_addrlen = sizeof(SOCK_sockaddr_in);
-    ai->ai_addr = (SOCK_sockaddr *)dummyPtr;
+    ai->ai_addr = (SOCK_sockaddr *)saPtr;
 
     return ai;
 }
@@ -518,20 +704,39 @@ int LWIP_SOCKETS_Driver::GetAddrInfo(
             }
 
 #if LWIP_IPV6
-            u_long addr = networkInterface->ip_addr.u_addr.ip4.addr;
+            int numadrs = 4;
 #else
-            u_long addr = networkInterface->ip_addr.addr;
+            int numadrs = 1;
 #endif
-            ai = CreateAddressRecord(addr, AF_INET, 0, NULL, hints);
-            if (ai == NULL)
-            {
-                // Out of memory ?
-                return SOCK_SOCKET_ERROR;
-            }
 
-            // Link SOCK_addrinfo +  records together
-            ai->ai_next = nextAi;
-            nextAi = ai;
+            for (int addresses = (numadrs - 1); addresses >= 0; addresses--)
+            {
+                short family = SOCK_AF_INET;
+                ip_addr_t addr;
+
+                if (addresses == 0)
+                {
+                    addr = networkInterface->ip_addr;
+                }
+#if LWIP_IPV6
+                else
+                {
+                    // IPv6 interfaces
+                    family = SOCK_AF_INET6;
+                    addr = networkInterface->ip6_addr[addresses - 1];
+                }
+#endif
+                ai = CreateAddressRecord(family, addr, 0, NULL, hints);
+                if (ai == NULL)
+                {
+                    // Out of memory ?
+                    return SOCK_SOCKET_ERROR;
+                }
+
+                // Link SOCK_addrinfo +  records together
+                ai->ai_next = nextAi;
+                nextAi = ai;
+            }
         }
 
         if (ai == NULL)
@@ -552,10 +757,17 @@ int LWIP_SOCKETS_Driver::GetAddrInfo(
         /// Marshal addrinfo data
         ///
         struct sockaddr_in *lwip_sockaddr_in = ((struct sockaddr_in *)lwipAddrinfo->ai_addr);
+        ip_addr_t addr;
+
+#if LWIP_IPV6
+        addr.u_addr.ip4.addr = lwip_sockaddr_in->sin_addr.s_addr;
+#else
+        addr.addr = lwip_sockaddr_in->sin_addr.s_addr;
+#endif
 
         ai = CreateAddressRecord(
-            lwip_sockaddr_in->sin_addr.s_addr,
-            lwip_sockaddr_in->sin_family,
+            (lwip_sockaddr_in->sin_family == AF_INET6) ? SOCK_AF_INET6 : SOCK_AF_INET,
+            addr,
             lwip_sockaddr_in->sin_port,
             lwipAddrinfo->ai_canonname,
             hints);
@@ -889,13 +1101,15 @@ int LWIP_SOCKETS_Driver::GetPeerName(SOCK_SOCKET socket, SOCK_sockaddr *name, in
     NATIVE_PROFILE_PAL_NETWORK();
     int ret;
 
+#if LWIP_IPV6
+    sockaddr_in6 addr;
+#else
     sockaddr_in addr;
-
-    SOCK_SOCKADDR_TO_SOCKADDR(name, addr, namelen);
+#endif
 
     ret = lwip_getpeername(socket, (sockaddr *)&addr, (u32_t *)namelen);
 
-    SOCKADDR_TO_SOCK_SOCKADDR(name, addr, namelen);
+    sockaddrToSock_SockAddr(name, (sockaddr *)&addr, namelen);
 
     return ret;
 }
@@ -905,13 +1119,15 @@ int LWIP_SOCKETS_Driver::GetSockName(SOCK_SOCKET socket, SOCK_sockaddr *name, in
     NATIVE_PROFILE_PAL_NETWORK();
     int ret;
 
+#if LWIP_IPV6
+    sockaddr_in6 addr;
+#else
     sockaddr_in addr;
-
-    SOCK_SOCKADDR_TO_SOCKADDR(name, addr, namelen);
+#endif
 
     ret = lwip_getsockname(socket, (sockaddr *)&addr, (u32_t *)namelen);
 
-    SOCKADDR_TO_SOCK_SOCKADDR(name, addr, namelen);
+    sockaddrToSock_SockAddr(name, (sockaddr *)&addr, namelen);
 
     return ret;
 }
@@ -919,13 +1135,19 @@ int LWIP_SOCKETS_Driver::GetSockName(SOCK_SOCKET socket, SOCK_sockaddr *name, in
 int LWIP_SOCKETS_Driver::RecvFrom(SOCK_SOCKET socket, char *buf, int len, int flags, SOCK_sockaddr *from, int *fromlen)
 {
     NATIVE_PROFILE_PAL_NETWORK();
-    sockaddr_in addr;
     sockaddr *pFrom = NULL;
     int ret;
 
+#if LWIP_IPV6
+    sockaddr_in6 addr;
+#else
+    sockaddr_in addr;
+#endif
+
     if (from)
     {
-        SOCK_SOCKADDR_TO_SOCKADDR(from, addr, fromlen);
+        Sock_SockaddrToSockaddr(from, (sockaddr *)&addr, fromlen);
+
         pFrom = (sockaddr *)&addr;
     }
 
@@ -933,7 +1155,7 @@ int LWIP_SOCKETS_Driver::RecvFrom(SOCK_SOCKET socket, char *buf, int len, int fl
 
     if (from && ret != SOCK_SOCKET_ERROR)
     {
-        SOCKADDR_TO_SOCK_SOCKADDR(from, addr, fromlen);
+        sockaddrToSock_SockAddr(from, (sockaddr *)&addr, fromlen);
     }
 
     return ret;
@@ -1083,10 +1305,8 @@ HRESULT LWIP_SOCKETS_Driver::UpdateAdapterConfiguration(
         if (enableDHCP)
         {
             // need to start DHCP
-            if (ERR_OK != dhcp_start(networkInterface))
-            {
-                return CLR_E_FAIL;
-            }
+            // no need to check for return value, even if it fails, it will retry
+            dhcp_start(networkInterface);
         }
         else
         {
@@ -1126,12 +1346,6 @@ HRESULT LWIP_SOCKETS_Driver::UpdateAdapterConfiguration(
         else if (0 != (updateFlags & NetworkInterface_UpdateOperation_DhcpRenew))
         {
             dhcp_renew(networkInterface);
-        }
-        else if (
-            0 !=
-            (updateFlags & (NetworkInterface_UpdateOperation_DhcpRelease | NetworkInterface_UpdateOperation_DhcpRenew)))
-        {
-            return CLR_E_INVALID_PARAMETER;
         }
     }
 #endif

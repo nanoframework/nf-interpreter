@@ -16,6 +16,15 @@ static const CLR_RT_MethodHandler method_lookup[] =
     NULL,
     NULL,
     NULL,
+    Library_nf_sys_sec_cryptography_System_Security_Cryptography_Aes::EncryptAesEcb___SZARRAY_U1__SZARRAY_U1,
+    Library_nf_sys_sec_cryptography_System_Security_Cryptography_Aes::DecryptAesEcb___SZARRAY_U1__SZARRAY_U1,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
     NULL,
     NULL,
     Library_nf_sys_sec_cryptography_System_Security_Cryptography_HMACSHA256::HashCore___STATIC__SZARRAY_U1__SZARRAY_U1__SZARRAY_U1,
@@ -24,9 +33,9 @@ static const CLR_RT_MethodHandler method_lookup[] =
 const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_nanoFramework_System_Security_Cryptography =
 {
     "nanoFramework.System.Security.Cryptography",
-    0xC71CFC75,
+    0xF4AEFE6C,
     method_lookup,
-    { 100, 0, 0, 1 }
+    { 100, 0, 0, 2 }
 };
 
 // clang-format on
