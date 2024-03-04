@@ -126,7 +126,7 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::
             // malloc stringBuffer to work with FS
             char *stringBuffer = (char *)platform_malloc(FF_LFN_BUF + 1);
 
-            // sanity check for successfull malloc
+            // sanity check for successful malloc
             if (stringBuffer == NULL)
             {
                 // failed to allocate memory
@@ -277,7 +277,7 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::
             stringBuffer = (char *)platform_malloc(FF_LFN_BUF + 1);
             workingBuffer = (char *)platform_malloc(2 * FF_LFN_BUF + 1);
 
-            // sanity check for successfull malloc
+            // sanity check for successful malloc
             if (stringBuffer == NULL || workingBuffer == NULL)
             {
                 // failed to allocate memory
@@ -470,7 +470,7 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::
             stringBuffer = (char *)platform_malloc(FF_LFN_BUF + 1);
             workingBuffer = (char *)platform_malloc(2 * FF_LFN_BUF + 1);
 
-            // sanity check for successfull malloc
+            // sanity check for successful malloc
             if (stringBuffer == NULL || workingBuffer == NULL)
             {
                 // failed to allocate memory
@@ -674,7 +674,7 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::
         // setup file path
         filePath = (char *)platform_malloc(2 * FF_LFN_BUF + 1);
 
-        // sanity check for successfull malloc
+        // sanity check for successful malloc
         if (filePath == NULL)
         {
             // failed to allocate memory
@@ -782,7 +782,7 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::
             // setup file path
             filePath = (char *)platform_malloc(2 * FF_LFN_BUF + 1);
 
-            // sanity check for successfull malloc
+            // sanity check for successful malloc
             if (filePath == NULL)
             {
                 // failed to allocate memory
@@ -859,7 +859,7 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::
 
         folderPath = (char *)platform_malloc(2 * FF_LFN_BUF + 1);
 
-        // sanity check for successfull malloc
+        // sanity check for successful malloc
         if (folderPath == NULL)
         {
             // failed to allocate memory
@@ -1111,7 +1111,7 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::GetFolderNativ
 
     folderPath = (char *)platform_malloc(2 * FF_LFN_BUF + 1);
 
-    // sanity check for successfull malloc
+    // sanity check for successful malloc
     if (folderPath == NULL)
     {
         // failed to allocate memory
