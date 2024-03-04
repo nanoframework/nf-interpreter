@@ -129,7 +129,7 @@ int main(void)
     // init boot clipboard
     InitBootClipboard();
 
-    // report successfull nanoBooter execution
+    // report successful nanoBooter execution
     ReportSuccessfullNanoBooter();
 
     // the following IF is not mandatory, it's just providing a way for a user to 'force'

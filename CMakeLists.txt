@@ -160,15 +160,6 @@ if(RTOS_CHIBIOS_CHECK OR RTOS_TI_SIMPLELINK_CHECK)
     unset(LINK_OPTIONS)
     #################################################################
 
-    #################################################################
-    # clear other options and definitions that we want to set
-    unset(COMPILE_OPTIONS)
-    unset(C_COMPILE_OPTIONS)
-    unset(CXX_COMPILE_OPTIONS)
-    unset(COMPILE_DEFINITIONS)
-    unset(LINK_OPTIONS)
-    #################################################################
-
 endif()
 
 #################################################################################

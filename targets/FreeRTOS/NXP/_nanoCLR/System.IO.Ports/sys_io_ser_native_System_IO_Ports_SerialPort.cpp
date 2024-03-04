@@ -6,7 +6,7 @@
 #include "sys_io_ser_native_target.h"
 
 /////////////////////////////////////////////////////////
-// UART PAL strucs delcared in win_dev_serial_native.h //
+// UART PAL structs declared in win_dev_serial_native.h //
 /////////////////////////////////////////////////////////
 
 static LPUART_Type *const lpuart_bases[] = LPUART_BASE_PTRS;

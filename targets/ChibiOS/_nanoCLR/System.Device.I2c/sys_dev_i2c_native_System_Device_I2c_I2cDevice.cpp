@@ -648,7 +648,7 @@ HRESULT Library_sys_dev_i2c_native_System_Device_I2c_I2cDevice::
             }
             else
             {
-                // successfull transaction
+                // successful transaction
                 // set the result field
                 result[I2cTransferResult::FIELD___status].SetInteger((CLR_UINT32)I2cTransferStatus_FullTransfer);
 

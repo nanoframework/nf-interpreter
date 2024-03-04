@@ -1,9 +1,9 @@
 // clang-format off
 
-// chibios version can be found at:
+// ChibiOs version can be found at:
 // https://github.com/ArduPilot/ChibiOS.svn/blob/master/os/various/fatfs_bindings/fatfs_syscall.c
 // but currently locked to R0.14b.
-// This file aligns with comaptibility with R0.15+
+// This file aligns with compatibility with R0.15+
 // And also allows use of nF specific capabilities.
 
 /*------------------------------------------------------------------------*/
