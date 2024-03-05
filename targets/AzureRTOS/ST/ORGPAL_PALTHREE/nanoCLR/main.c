@@ -12,7 +12,7 @@
 #include <nanoHAL_v2.h>
 #include <targetPAL.h>
 
-extern uint8_t hal_spiffs_config();
+extern int32_t hal_spiffs_config();
 
 extern CLR_SETTINGS clrSettings;
 
