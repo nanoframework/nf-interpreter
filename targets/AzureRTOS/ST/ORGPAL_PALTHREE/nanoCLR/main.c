@@ -97,7 +97,7 @@ void tx_application_define(void *first_unused_memory)
 
     // Create NetX Duo thread
     status = tx_thread_create(
-        & netxDuoThread,
+        &netxDuoThread,
         "NetXDuo Thread",
         NetXDuoThread_entry,
         0,
