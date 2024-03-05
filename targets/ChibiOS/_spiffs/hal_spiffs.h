@@ -70,7 +70,7 @@ extern "C"
     int32_t hal_spiffs_get_instances_count();
 
     // declarations of hal/target implementations
-    uint8_t hal_spiffs_config();
+    int32_t hal_spiffs_config();
     int32_t hal_spiffs_format(int32_t index);
 
 #if SPIFFS_SINGLETON
