@@ -7,8 +7,8 @@ steps:
   - task: Cache@2
     displayName: Cache ESP32 tools
     inputs:
-      key: 'esp32_tools | 4_4_6'
-      restoreKeys: 4_4_6
+      key: 'esp32_tools | 4_4_7'
+      restoreKeys: 4_4_7
       path: $(UserProfile)\.espressif\tools
       cacheHitVar: ESP32_TOOLS_CACHE_RESTORED
 
