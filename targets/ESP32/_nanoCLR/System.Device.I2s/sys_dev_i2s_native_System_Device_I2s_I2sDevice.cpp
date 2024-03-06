@@ -239,7 +239,7 @@ HRESULT SetI2sConfig(i2s_port_t bus, CLR_RT_HeapBlock *config)
         if (mode & I2S_MODE_ADC_BUILT_IN)
         {
             // TODO - make attenuation configurable?
-            adc_atten_t atten = ADC_ATTEN_DB_11;
+            adc_atten_t atten = ADC_ATTEN_DB_12;
 
             // TODO Re-use logic in ADC?
             int channelNumber = -1;
