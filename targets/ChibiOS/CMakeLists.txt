@@ -373,8 +373,6 @@ if(NF_FEATURE_USE_SPIFFS)
         FetchContent_Populate(spiffs)
     endif()
 
-    add_subdirectory(_spiffs)
-
 endif()
 
 # add target ChibiOS dirs

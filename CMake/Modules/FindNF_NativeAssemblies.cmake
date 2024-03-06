@@ -448,19 +448,21 @@ include(FindPackageHandleStandardArgs)
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(NF_NativeAssemblies DEFAULT_MSG NF_NativeAssemblies_INCLUDE_DIRS NF_NativeAssemblies_SOURCES)
 
 # macro to be called from binutils to add Core CLR library
+# optional EXTRA_SOURCES with source files to be added to the library
 # optional EXTRA_INCLUDES with include paths to be added to the library
 # optional EXTRA_COMPILE_DEFINITIONS with compiler definitions to be added to the library
 macro(nf_add_lib_native_assemblies)
 
     # parse arguments
-    cmake_parse_arguments(NFALNA "" "" "EXTRA_INCLUDES;EXTRA_COMPILE_DEFINITIONS" ${ARGN})
+    cmake_parse_arguments(NFALNA "" "" "EXTRA_SOURCES;EXTRA_INCLUDES;EXTRA_COMPILE_DEFINITIONS" ${ARGN})
 
     # add this has a library
     set(LIB_NAME NF_NativeAssemblies)
 
     add_library(
         ${LIB_NAME} STATIC 
-            ${NF_NativeAssemblies_SOURCES})   
+            ${NF_NativeAssemblies_SOURCES}
+            ${NFALNA_EXTRA_SOURCES})   
 
     target_include_directories(
         ${LIB_NAME} 
