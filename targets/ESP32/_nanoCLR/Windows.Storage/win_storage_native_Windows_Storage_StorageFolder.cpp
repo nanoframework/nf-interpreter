@@ -9,6 +9,13 @@
 #include <nanoHAL_Windows_Storage.h>
 #include <target_platform.h>
 
+#if (HAL_USE_SDC == TRUE) || (HAL_USBH_USE_MSD == TRUE)
+#include <ff.h>
+#else
+// use copy of FATFS define ANSI/OEM at DBCS
+#define FF_LFN_BUF 765
+#endif
+
 //
 //  Converts from windows type path       "c:\folder\folder\file.ext"
 //  to linux type path used in ESP32 VFS  "/c/folder/folder/file.exe

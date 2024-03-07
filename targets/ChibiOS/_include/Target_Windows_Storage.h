@@ -7,7 +7,13 @@
 #define TARGET_WINDOWS_STORAGE_H
 
 #include <hal.h>
-#include <ffconf.h>
+
+#if (HAL_USE_SDC == TRUE)
+#include <ff.h>
+#else
+// use copy of FATFS define ANSI/OEM at DBCS
+#define FF_LFN_BUF 765
+#endif
 
 #if defined(HAL_USBH_USE_MSD) && (HAL_USBH_USE_MSD == TRUE)
 #include "usbh/dev/msd.h"
