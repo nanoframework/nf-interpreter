@@ -411,6 +411,6 @@ extern "C"
 #include <nanoHAL_Watchdog.h>
 #include <nanoHAL_Rtos.h>
 
-#include <nanoHAL_Windows_Storage.h>
+#include <nanoHAL_Persistent_Storage.h>
 
 #endif // NANOHAL_V2_H

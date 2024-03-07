@@ -5,7 +5,7 @@
 
 #include "win_storage_native_target.h"
 #include <target_windows_storage_config.h>
-#include <nanoHAL_Windows_Storage.h>
+#include <nanoHAL_Persistent_Storage.h>
 #include <target_platform.h>
 #include <Esp32_DeviceMapping.h>
 
