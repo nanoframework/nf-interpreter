@@ -7,10 +7,6 @@
 
 #include <Target_Windows_Storage.h>
 
-// FatFs define for size of file name members
-// ANSI/OEM at DBCS
-#define FF_LFN_BUF 255
-
 // driver letters and paths
 // drive letter for SD Card
 #define INDEX0_DRIVE_LETTER "D:"
