@@ -11,6 +11,7 @@
 #include <targetHAL.h>
 #include <nanoPAL_BlockStorage.h>
 #include <nanoHAL_ConfigurationManager.h>
+#include <nanoHAL_StorageOperation.h>
 
 #include <led.h>
 

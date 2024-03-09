@@ -1335,6 +1335,29 @@ bool CLR_DBG_Debugger::Monitor_UpdateConfiguration(WP_Message *message)
 #endif
 }
 
+bool CLR_DBG_Debugger::Monitor_StorageOperation(WP_Message *message)
+{
+    NATIVE_PROFILE_CLR_DEBUGGER();
+    debug_printf("Monitor_StorageOperation");
+#if (HAS_INTERNAL_STORAGE == TRUE)
+
+    Monitor_StorageOperation_Command *cmd = (Monitor_StorageOperation_Command *)message->m_payload;
+    Monitor_StorageOperation_Reply cmdReply;
+    uint8_t err = 0;
+
+    //HAL_StorageOperation(cmd->Operation, cmd->Length, cmd->StorageName, cmd->Data, &err);
+    cmdReply.ErrorCode = err;
+    
+    WP_ReplyToCommand(message, true, false, &cmdReply, sizeof(cmdReply));
+
+    return true;
+
+#endif
+
+    (void)message;
+    return false;
+}
+
 //--//
 
 bool CLR_DBG_Debugger::Debugging_Execution_BasePtr(WP_Message *msg)

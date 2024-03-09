@@ -253,6 +253,28 @@ int Monitor_UpdateConfiguration(WP_Message *message)
     return success;
 }
 
+int Monitor_StorageOperation(WP_Message *message)
+{
+    debug_printf("Monitor_StorageOperation");
+#if (HAS_INTERNAL_STORAGE == TRUE)
+
+    Monitor_StorageOperation_Command *cmd = (Monitor_StorageOperation_Command *)message->m_payload;
+    Monitor_StorageOperation_Reply cmdReply;
+    uint8_t err = 0;
+
+    HAL_StorageOperation(cmd->Operation, cmd->Length, cmd->StorageName, cmd->Data, &err);
+    cmdReply.ErrorCode = err;
+    
+    WP_ReplyToCommand(message, true, false, &cmdReply, sizeof(cmdReply));
+
+    return true;
+
+#endif
+
+    (void)message;
+    return false;
+}
+
 int Monitor_CheckMemory(WP_Message *message)
 {
     bool ret = false;

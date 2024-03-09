@@ -297,6 +297,19 @@ else()
 endif()
 
 #################################################################
+# enables internal storage support
+# (default is OFF so Configuration block storage is NOT supported)
+option(NF_FEATURE_HAS_INTERNAL_STORAGE "option to enable internal storage")
+
+if(NF_FEATURE_HAS_INTERNAL_STORAGE)
+    set(TARGET_HAS_INTERNAL_STORAGE TRUE CACHE INTERNAL "Option for internal storage")
+    message(STATUS "Configuration internal storage is included")
+else()
+    set(TARGET_HAS_INTERNAL_STORAGE FALSE CACHE INTERNAL "Option for internal storage")
+    message(STATUS "Configuration internal storage **IS NOT** included")
+endif()
+
+#################################################################
 # enables support for SD Card
 # (default is OFF so SD Card is NOT supported)
 option(NF_FEATURE_HAS_SDCARD "option to enable support for SD Card")

@@ -10,6 +10,7 @@
 #include <nanoPAL_Events.h>
 #include <nanoPAL_BlockStorage.h>
 #include <nanoHAL_ConfigurationManager.h>
+#include <nanoHAL_StorageOperation.h>
 #include <nanoHAL_Graphics.h>
 
 #include <mxc_device.h>
