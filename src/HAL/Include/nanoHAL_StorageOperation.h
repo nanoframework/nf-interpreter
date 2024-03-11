@@ -15,8 +15,8 @@ extern "C"
 
     void HAL_StorageOperation(
         uint8_t operation,
-        uint32_t *length,
-        uint8_t *storageName,
+        uint32_t nameLength,
+        uint32_t dataLength,
         uint8_t *data,
         uint32_t *errorCode);
 

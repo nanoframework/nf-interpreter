@@ -21,8 +21,8 @@ void EnsureStorageInitialized()
     }
 }
 
-void HAL_StorageOperation(uint8_t operation, uint32_t *length, uint8_t *storageName, uint8_t *data, uint32_t *errorCode)
-{
+void HAL_StorageOperation(uint8_t operation, uint32_t nameLength, uint32_t dataLength, uint8_t *data, uint32_t *errorCode)
+{    
     EnsureStorageInitialized();
 
     // reset error code
@@ -30,20 +30,47 @@ void HAL_StorageOperation(uint8_t operation, uint32_t *length, uint8_t *storageN
     size_t result;
 
     // convert storageName to char*
-    char *storageNameChar = ConvertToVfsPath(reinterpret_cast<char *>(storageName));
+    char* strName = (char *)platform_malloc(nameLength + 1);
+    for(uint32_t i = 0; i < nameLength; i++)
+    {
+        strName[i] = static_cast<char>(data[i]);
+    }
 
-    CLR_Debug::Printf("StorageOperation: %s", storageNameChar);
+    // Just making sure it's properly 0 terminated
+    strName[nameLength] = '\0';
+
+    char *storageNameChar = ConvertToVfsPath(strName);
+
+    // Cleaning the temporary name buffer
+    platform_free(strName);
 
     if (operation == (uint8_t)(StorageOperation_Monitor::StorageOperation_Write))
     {
+        // Remove the file if already exists
+        remove(storageNameChar);
+
         // Open the file in read mode
         FILE *file = fopen(storageNameChar, "w");
 
         // append more data
-        result = fwrite((const void *)data, 1, (size_t)length, file);
+        result = fwrite((const void *)(data + nameLength), 1, (size_t)dataLength, file);
         fclose(file);
 
-        if (result != (size_t)length)
+        if (result != (size_t)dataLength)
+        {
+            *errorCode = (uint32_t)(StorageOperationErrorCodes::WriteError);
+        }
+    }
+    else if(operation == (uint8_t)(StorageOperation_Monitor::StorageOperation_Append))
+    {
+        // Open the file in read mode
+        FILE *file = fopen(storageNameChar, "a");
+        fseek(file, 0, SEEK_END);
+        // append more data
+        result = fwrite((const void *)(data + nameLength), 1, (size_t)dataLength, file);
+        fclose(file);
+
+        if (result != (size_t)dataLength)
         {
             *errorCode = (uint32_t)(StorageOperationErrorCodes::WriteError);
         }

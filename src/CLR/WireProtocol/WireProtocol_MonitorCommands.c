@@ -262,9 +262,9 @@ int Monitor_StorageOperation(WP_Message *message)
     Monitor_StorageOperation_Reply cmdReply;
     uint8_t err = 0;
 
-    HAL_StorageOperation(cmd->Operation, cmd->Length, cmd->StorageName, cmd->Data, &err);
+    HAL_StorageOperation(cmd->Operation, cmd->NameLength, cmd->DataLength, cmd->Data, &err);
     cmdReply.ErrorCode = err;
-    
+
     WP_ReplyToCommand(message, true, false, &cmdReply, sizeof(cmdReply));
 
     return true;
