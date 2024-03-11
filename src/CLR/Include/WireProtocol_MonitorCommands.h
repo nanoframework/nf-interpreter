@@ -64,7 +64,8 @@ typedef enum StorageOperation_Monitor
 {
     StorageOperation_None   = 0,
     StorageOperation_Write  = 1,
-    StorageOperation_Delete = 2
+    StorageOperation_Delete = 2,
+    StorageOperation_Append = 3
 } StorageOperation_Monitor;
 
 //////////////////////////////////////////
@@ -177,9 +178,9 @@ typedef struct __nfpack Monitor_UpdateConfiguration_Command
 
 typedef struct Monitor_StorageOperation_Command
 {
-    uint8_t     Operation;
-    uint32_t    Length;
-    uint8_t     StorageName[128];
+    uint32_t    Operation;
+    uint32_t    NameLength;
+    uint32_t    DataLength;
     uint8_t     Data[1];
 
 } Monitor_StorageOperation_Command;
