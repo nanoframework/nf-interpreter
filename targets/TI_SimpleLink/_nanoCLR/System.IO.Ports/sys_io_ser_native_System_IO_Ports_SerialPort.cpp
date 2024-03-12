@@ -7,7 +7,7 @@
 #include "sys_io_ser_native_target.h"
 
 ////////////////////////////////////////////////////////////
-// UART PAL strucs delcared in sys_io_ser_native_target.h //
+// UART PAL structs declared in sys_io_ser_native_target.h //
 ////////////////////////////////////////////////////////////
 #if defined(NF_SERIAL_COMM_TI_USE_UART1) && (NF_SERIAL_COMM_TI_USE_UART1 == TRUE)
 NF_PAL_UART Uart1_PAL;

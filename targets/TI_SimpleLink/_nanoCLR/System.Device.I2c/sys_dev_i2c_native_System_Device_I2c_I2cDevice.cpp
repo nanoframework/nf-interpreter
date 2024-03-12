@@ -10,7 +10,7 @@ typedef Library_sys_dev_i2c_native_System_Device_I2c_I2cTransferResult I2cTransf
 typedef Library_corlib_native_System_SpanByte SpanByte;
 
 /////////////////////////////////////////////////////
-// I2C PAL strucs declared in sys_dev_i2c_native.h //
+// I2C PAL structs declared in sys_dev_i2c_native.h //
 /////////////////////////////////////////////////////
 NF_PAL_I2C I2C1_PAL;
 
@@ -263,7 +263,7 @@ HRESULT Library_sys_dev_i2c_native_System_Device_I2c_I2cDevice::
                 result = top.Dereference();
                 FAULT_ON_NULL(result);
 
-                // successfull transaction
+                // successful transaction
                 // set the result field
                 result[Library_win_dev_i2c_native_Windows_Devices_I2c_I2cTransferResult::FIELD___status].SetInteger(
                     (CLR_UINT32)I2cTransferStatus_FullTransfer);

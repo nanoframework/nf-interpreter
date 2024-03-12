@@ -115,7 +115,7 @@ void tx_application_define(void *first_unused_memory)
         }
     }
 
-    // report successfull nanoBooter execution
+    // report successful nanoBooter execution
     ReportSuccessfullNanoBooter();
 }
 

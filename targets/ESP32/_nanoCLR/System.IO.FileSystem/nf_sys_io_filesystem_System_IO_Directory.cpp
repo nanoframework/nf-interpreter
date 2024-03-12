@@ -236,9 +236,9 @@ HRESULT BuildPathsArray(const char *vfsFolderPath, const char *folderPath, CLR_R
 
         // allocate memory for buffers
         stringBuffer = (char *)platform_malloc(FF_LFN_BUF + 1);
-        workingBuffer = (char *)platform_malloc(2 * FF_LFN_BUF + 1);
+        workingBuffer = (char *)platform_malloc(FF_LFN_BUF + 1);
 
-        // sanity check for successfull malloc
+        // sanity check for successful malloc
         if (stringBuffer == NULL || workingBuffer == NULL)
         {
             // failed to allocate memory
@@ -269,7 +269,7 @@ HRESULT BuildPathsArray(const char *vfsFolderPath, const char *folderPath, CLR_R
             if ((fileInfo->d_type & entryType) && (strcmp(get_filename_ext(fileInfo->d_name), "sys")))
             {
                 // clear working buffer
-                memset(workingBuffer, 0, 2 * FF_LFN_BUF + 1);
+                memset(workingBuffer, 0, FF_LFN_BUF + 1);
 
                 // compose file path
                 CombinePathAndName(workingBuffer, folderPath, fileInfo->d_name);

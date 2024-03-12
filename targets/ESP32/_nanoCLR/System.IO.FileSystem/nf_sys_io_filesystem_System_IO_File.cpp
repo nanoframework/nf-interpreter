@@ -38,9 +38,9 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_File::ExistsNative___STATIC__BOOL
     // TODO don't really need to pass in path & filename, whole path would have been OK for ESP32
 
     // setup file path
-    filePath = (char *)platform_malloc(2 * FF_LFN_BUF + 1);
+    filePath = (char *)platform_malloc(FF_LFN_BUF + 1);
 
-    // sanity check for successfull malloc
+    // sanity check for successful malloc
     if (filePath == NULL)
     {
         // failed to allocate memory
@@ -48,7 +48,7 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_File::ExistsNative___STATIC__BOOL
     }
 
     // clear working buffer
-    filePath[0] = 0;
+    memset(filePath, 0, FF_LFN_BUF + 1);
 
     // compose file path
     CombinePathAndName(filePath, workingPath, fileName);

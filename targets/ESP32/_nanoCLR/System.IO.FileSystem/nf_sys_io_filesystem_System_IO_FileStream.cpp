@@ -3,7 +3,7 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#include "nf_sys_io_filesystem.h"
+#include <nf_sys_io_filesystem.h>
 
 #include <ff.h>
 #include <nanoHAL_Windows_Storage.h>
@@ -28,9 +28,9 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_FileStream::OpenFileNative___VOID
     FAULT_ON_NULL(fileName);
 
     // setup file path
-    filePath = (char *)platform_malloc(2 * FF_LFN_BUF + 1);
+    filePath = (char *)platform_malloc(FF_LFN_BUF + 1);
 
-    // sanity check for successfull malloc
+    // sanity check for successful malloc
     if (filePath == NULL)
     {
         // failed to allocate memory
@@ -38,7 +38,7 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_FileStream::OpenFileNative___VOID
     }
 
     // clear working buffer
-    filePath[0] = 0;
+    memset(filePath, 0, FF_LFN_BUF + 1);
 
     // compose file path
     CombinePathAndName(filePath, workingPath, fileName);
@@ -164,9 +164,9 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_FileStream::ReadNative___I4__STRI
     buffer = pArray->GetFirstElement();
 
     // setup file path
-    filePath = (char *)platform_malloc(2 * FF_LFN_BUF + 1);
+    filePath = (char *)platform_malloc(FF_LFN_BUF + 1);
 
-    // sanity check for successfull malloc
+    // sanity check for successful malloc
     if (filePath == NULL)
     {
         // failed to allocate memory
@@ -174,7 +174,7 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_FileStream::ReadNative___I4__STRI
     }
 
     // clear working buffer
-    filePath[0] = 0;
+    memset(filePath, 0, FF_LFN_BUF + 1);
 
     // combine file path & file name
     CombinePathAndName(filePath, workingPath, fileName);
@@ -256,9 +256,9 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_FileStream::WriteNative___VOID__S
     buffer = pArray->GetFirstElement();
 
     // setup file path
-    filePath = (char *)platform_malloc(2 * FF_LFN_BUF + 1);
+    filePath = (char *)platform_malloc(FF_LFN_BUF + 1);
 
-    // sanity check for successfull mallocs
+    // sanity check for successful mallocs
     if (filePath == NULL)
     {
         // failed to allocate memory
@@ -266,7 +266,7 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_FileStream::WriteNative___VOID__S
     }
 
     // clear working buffer
-    filePath[0] = 0;
+    memset(filePath, 0, FF_LFN_BUF + 1);
 
     // compose file path
     CombinePathAndName(filePath, workingPath, fileName);
@@ -338,9 +338,9 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_FileStream::GetLengthNative___I8_
     FAULT_ON_NULL(fileName);
 
     // setup file path
-    filePath = (char *)platform_malloc(2 * FF_LFN_BUF + 1);
+    filePath = (char *)platform_malloc(FF_LFN_BUF + 1);
 
-    // sanity check for successfull malloc
+    // sanity check for successful malloc
     if (filePath == NULL)
     {
         // failed to allocate memory
@@ -348,7 +348,7 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_FileStream::GetLengthNative___I8_
     }
 
     // clear working buffer
-    filePath[0] = 0;
+    memset(filePath, 0, FF_LFN_BUF + 1);
 
     // compose file path
     CombinePathAndName(filePath, workingPath, fileName);
