@@ -3,8 +3,8 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#define SNTP_SERVER0_DEFAULT_ADDRESS "0.pool.ntp.org"
-#define SNTP_SERVER1_DEFAULT_ADDRESS "1.pool.ntp.org"
+#define SNTP_SERVER0_DEFAULT_ADDRESS "pool.ntp.org"
+#define SNTP_SERVER1_DEFAULT_ADDRESS "time.cloudflare.com"
 
 // update delay (default 1 hour)
 // (value in milliseconds)
