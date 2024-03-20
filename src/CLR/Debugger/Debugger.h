@@ -113,6 +113,8 @@ typedef enum StorageOperationErrorCode
     WriteError = 0x0010,
     // delete error
     DeleteError = 0x0020,
+    // platform error
+    PlatformError = 0x0030,
 
 } StorageOperationErrorCode;
 
