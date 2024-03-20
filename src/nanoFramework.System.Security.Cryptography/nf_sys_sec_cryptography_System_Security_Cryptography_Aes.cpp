@@ -157,6 +157,7 @@ HRESULT Library_nf_sys_sec_cryptography_System_Security_Cryptography_Aes::Encryp
     NANOCLR_HEADER();
 
     mbedtls_aes_context encodeContext;
+    uint8_t *ivCopy = NULL;
 
     CLR_RT_HeapBlock_Array *keyArray;
     CLR_RT_HeapBlock_Array *ivArray;
@@ -176,7 +177,17 @@ HRESULT Library_nf_sys_sec_cryptography_System_Security_Cryptography_Aes::Encryp
 
     // grab IV
     // (expecting this to be filled with the IV from managed code)
-    ivArray = pThis[FIELD___key].DereferenceArray();
+    ivArray = pThis[FIELD___iv].DereferenceArray();
+
+    // need a copy of the IV because it will be modified by mbedtls
+    ivCopy = (uint8_t *)platform_malloc(ivArray->m_numOfElements);
+
+    if (ivCopy == NULL)
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
+    }
+
+    memcpy(ivCopy, ivArray->GetFirstElement(), ivArray->m_numOfElements);
 
     // grab plain text and check for NULL
     plainTextArray = stack.Arg1().DereferenceArray();
@@ -209,7 +220,7 @@ HRESULT Library_nf_sys_sec_cryptography_System_Security_Cryptography_Aes::Encryp
             &encodeContext,
             MBEDTLS_AES_ENCRYPT,
             plainTextArray->m_numOfElements,
-            ivArray->GetFirstElement(),
+            ivCopy,
             plainTextArray->GetFirstElement(),
             cipherTextArray->GetFirstElement()) != 0)
     {
@@ -220,6 +231,7 @@ HRESULT Library_nf_sys_sec_cryptography_System_Security_Cryptography_Aes::Encryp
 
     // make sure nothing is left in memory
     mbedtls_aes_free(&encodeContext);
+    platform_free(ivCopy);
 
     NANOCLR_CLEANUP_END();
 }
@@ -230,6 +242,7 @@ HRESULT Library_nf_sys_sec_cryptography_System_Security_Cryptography_Aes::Decryp
     NANOCLR_HEADER();
 
     mbedtls_aes_context decodeContext;
+    uint8_t *ivCopy = NULL;
 
     CLR_RT_HeapBlock_Array *keyArray;
     CLR_RT_HeapBlock_Array *ivArray;
@@ -259,7 +272,17 @@ HRESULT Library_nf_sys_sec_cryptography_System_Security_Cryptography_Aes::Decryp
 
     // grab IV
     // (expecting this to be filled with the IV from managed code)
-    ivArray = pThis[FIELD___key].DereferenceArray();
+    ivArray = pThis[FIELD___iv].DereferenceArray();
+
+    // need a copy of the IV because it will be modified by mbedtls
+    ivCopy = (uint8_t *)platform_malloc(ivArray->m_numOfElements);
+
+    if (ivCopy == NULL)
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
+    }
+
+    memcpy(ivCopy, ivArray->GetFirstElement(), ivArray->m_numOfElements);
 
     // create the return array (same length as the input)
     stack.PushValueAndClear();
@@ -282,7 +305,7 @@ HRESULT Library_nf_sys_sec_cryptography_System_Security_Cryptography_Aes::Decryp
             &decodeContext,
             MBEDTLS_AES_DECRYPT,
             plainTextArray->m_numOfElements,
-            ivArray->GetFirstElement(),
+            ivCopy,
             plainTextArray->GetFirstElement(),
             cipherTextArray->GetFirstElement()) != 0)
     {
@@ -293,6 +316,7 @@ HRESULT Library_nf_sys_sec_cryptography_System_Security_Cryptography_Aes::Decryp
 
     // make sure nothing is left in memory
     mbedtls_aes_free(&decodeContext);
+    platform_free(ivCopy);
 
     NANOCLR_CLEANUP_END();
 }
