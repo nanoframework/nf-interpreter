@@ -21,17 +21,22 @@ void EnsureStorageInitialized()
     }
 }
 
-void HAL_StorageOperation(uint8_t operation, uint32_t nameLength, uint32_t dataLength, uint8_t *data, uint32_t *errorCode)
-{    
+void HAL_StorageOperation(
+    uint8_t operation,
+    uint32_t nameLength,
+    uint32_t dataLength,
+    uint8_t *data,
+    uint32_t *errorCode)
+{
     EnsureStorageInitialized();
 
     // reset error code
-    *errorCode = (uint32_t)(StorageOperationErrorCodes::NoError);
+    *errorCode = (uint32_t)(StorageOperationErrorCode::NoError);
     size_t result;
 
     // convert storageName to char*
-    char* strName = (char *)platform_malloc(nameLength + 1);
-    for(uint32_t i = 0; i < nameLength; i++)
+    char *strName = (char *)platform_malloc(nameLength + 1);
+    for (uint32_t i = 0; i < nameLength; i++)
     {
         strName[i] = static_cast<char>(data[i]);
     }
@@ -58,10 +63,10 @@ void HAL_StorageOperation(uint8_t operation, uint32_t nameLength, uint32_t dataL
 
         if (result != (size_t)dataLength)
         {
-            *errorCode = (uint32_t)(StorageOperationErrorCodes::WriteError);
+            *errorCode = (uint32_t)(StorageOperationErrorCode::WriteError);
         }
     }
-    else if(operation == (uint8_t)(StorageOperation_Monitor::StorageOperation_Append))
+    else if (operation == (uint8_t)(StorageOperation_Monitor::StorageOperation_Append))
     {
         // Open the file in read mode
         FILE *file = fopen(storageNameChar, "a");
@@ -72,7 +77,7 @@ void HAL_StorageOperation(uint8_t operation, uint32_t nameLength, uint32_t dataL
 
         if (result != (size_t)dataLength)
         {
-            *errorCode = (uint32_t)(StorageOperationErrorCodes::WriteError);
+            *errorCode = (uint32_t)(StorageOperationErrorCode::WriteError);
         }
     }
     else if (operation == (uint8_t)(StorageOperation_Monitor::StorageOperation_Delete))
@@ -80,7 +85,7 @@ void HAL_StorageOperation(uint8_t operation, uint32_t nameLength, uint32_t dataL
         result = remove(storageNameChar);
         if (result != 0)
         {
-            *errorCode = (uint32_t)(StorageOperationErrorCodes::DeleteError);
+            *errorCode = (uint32_t)(StorageOperationErrorCode::DeleteError);
         }
     }
 
