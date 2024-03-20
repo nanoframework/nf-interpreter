@@ -21,18 +21,19 @@ void EnsureStorageInitialized()
     }
 }
 
-void HAL_StorageOperation(
+uint32_t HAL_StorageOperation(
     uint8_t operation,
     uint32_t nameLength,
     uint32_t dataLength,
-    uint8_t *data,
-    uint32_t *errorCode)
+    uint32_t offset,
+    uint8_t *data)
 {
-    EnsureStorageInitialized();
+    (void)offset;
 
-    // reset error code
-    *errorCode = (uint32_t)(StorageOperationErrorCode::NoError);
     size_t result;
+    StorageOperationErrorCode errorCode = StorageOperationErrorCode::NoError;
+    
+    EnsureStorageInitialized();
 
     // convert storageName to char*
     char *strName = (char *)platform_malloc(nameLength + 1);
@@ -63,7 +64,7 @@ void HAL_StorageOperation(
 
         if (result != (size_t)dataLength)
         {
-            *errorCode = (uint32_t)(StorageOperationErrorCode::WriteError);
+            errorCode = StorageOperationErrorCode::WriteError;
         }
     }
     else if (operation == (uint8_t)(StorageOperation_Monitor::StorageOperation_Append))
@@ -77,7 +78,7 @@ void HAL_StorageOperation(
 
         if (result != (size_t)dataLength)
         {
-            *errorCode = (uint32_t)(StorageOperationErrorCode::WriteError);
+            errorCode = StorageOperationErrorCode::WriteError;
         }
     }
     else if (operation == (uint8_t)(StorageOperation_Monitor::StorageOperation_Delete))
@@ -85,7 +86,7 @@ void HAL_StorageOperation(
         result = remove(storageNameChar);
         if (result != 0)
         {
-            *errorCode = (uint32_t)(StorageOperationErrorCode::DeleteError);
+            errorCode = StorageOperationErrorCode::DeleteError;
         }
     }
 
@@ -93,4 +94,6 @@ void HAL_StorageOperation(
     {
         platform_free(storageNameChar);
     }
+
+    return errorCode;
 }

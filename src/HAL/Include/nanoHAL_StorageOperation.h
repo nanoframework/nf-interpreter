@@ -7,18 +7,19 @@
 #define NANOHAL_STORAGE_OPERATION_H
 
 #include <nanoCLR_Headers.h>
+#include <nanoCLR_Headers.h>
 
 #ifdef __cplusplus
 extern "C"
 {
 #endif
 
-    void HAL_StorageOperation(
+    uint32_t HAL_StorageOperation(
         uint8_t operation,
         uint32_t nameLength,
         uint32_t dataLength,
-        uint8_t *data,
-        uint32_t *errorCode);
+        uint32_t offset,
+        uint8_t *data);
 
 #ifdef __cplusplus
 }
