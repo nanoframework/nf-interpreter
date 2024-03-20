@@ -102,15 +102,18 @@ typedef enum AccessMemoryErrorCodes
 
 } AccessMemoryErrorCodes;
 
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// !!! KEEP IN SYNC WITH nanoFramework.Tools.Debugger.WireProtocol.StorageOperationErrorCodes (in managed code) !!! //
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-typedef enum StorageOperationErrorCodes
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// !!! KEEP IN SYNC WITH nanoFramework.Tools.Debugger.WireProtocol.StorageOperationErrorCode (in managed code) !!! //
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+typedef enum StorageOperationErrorCode
 {
-    NoError = 0x0001,     // no error
-    WriteError = 0x0010,  // write error
-    DeleteError = 0x0020, // delete error
+    // no error
+    NoError = 0x0001,
+    // write error
+    WriteError = 0x0010,
+    // delete error
+    DeleteError = 0x0020,
 
-} StorageOperationErrorCodes;
+} StorageOperationErrorCode;
 
 #endif // DEBUGGER_H
