@@ -231,7 +231,10 @@ HRESULT Library_nf_sys_sec_cryptography_System_Security_Cryptography_Aes::Encryp
 
     // make sure nothing is left in memory
     mbedtls_aes_free(&encodeContext);
-    platform_free(ivCopy);
+    if (ivCopy != NULL)
+    {
+        platform_free(ivCopy);
+    }
 
     NANOCLR_CLEANUP_END();
 }
@@ -316,7 +319,10 @@ HRESULT Library_nf_sys_sec_cryptography_System_Security_Cryptography_Aes::Decryp
 
     // make sure nothing is left in memory
     mbedtls_aes_free(&decodeContext);
-    platform_free(ivCopy);
+    if (ivCopy != NULL)
+    {
+        platform_free(ivCopy);
+    }
 
     NANOCLR_CLEANUP_END();
 }
