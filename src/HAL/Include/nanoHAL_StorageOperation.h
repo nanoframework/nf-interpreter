@@ -25,4 +25,4 @@ extern "C"
 }
 #endif
 
-#endif // NANOHAL_STORAGE_OPERATIN_H
+#endif // NANOHAL_STORAGE_OPERATION_H
