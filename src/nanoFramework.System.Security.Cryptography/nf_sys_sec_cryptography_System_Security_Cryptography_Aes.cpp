@@ -11,6 +11,7 @@ HRESULT Library_nf_sys_sec_cryptography_System_Security_Cryptography_Aes::Encryp
     NANOCLR_HEADER();
 
     mbedtls_aes_context encodeContext;
+    uint16_t passCount = 0;
 
     CLR_RT_HeapBlock_Array *keyArray;
     CLR_RT_HeapBlock_Array *plainTextArray;
@@ -54,13 +55,19 @@ HRESULT Library_nf_sys_sec_cryptography_System_Security_Cryptography_Aes::Encryp
         NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
     }
 
-    if (mbedtls_aes_crypt_ecb(
-            &encodeContext,
-            MBEDTLS_AES_ENCRYPT,
-            plainTextArray->GetFirstElement(),
-            cipherTextArray->GetFirstElement()) != 0)
+    // itereate through the plain text array, encrypting 16 bytes at a time
+    while (passCount < plainTextArray->m_numOfElements / 16)
     {
-        NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
+        if (mbedtls_aes_crypt_ecb(
+                &encodeContext,
+                MBEDTLS_AES_ENCRYPT,
+                plainTextArray->GetElement(passCount * 16),
+                cipherTextArray->GetElement(passCount * 16)) != 0)
+        {
+            NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
+        }
+
+        passCount++;
     }
 
     NANOCLR_CLEANUP();
@@ -77,6 +84,7 @@ HRESULT Library_nf_sys_sec_cryptography_System_Security_Cryptography_Aes::Decryp
     NANOCLR_HEADER();
 
     mbedtls_aes_context decodeContext;
+    uint16_t passCount = 0;
 
     CLR_RT_HeapBlock_Array *keyArray;
     CLR_RT_HeapBlock_Array *plainTextArray;
@@ -120,13 +128,19 @@ HRESULT Library_nf_sys_sec_cryptography_System_Security_Cryptography_Aes::Decryp
         NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
     }
 
-    if (mbedtls_aes_crypt_ecb(
-            &decodeContext,
-            MBEDTLS_AES_DECRYPT,
-            cipherTextArray->GetFirstElement(),
-            plainTextArray->GetFirstElement()) != 0)
+    // itereate through the cipher text array, decrypting 16 bytes at a time
+    while (passCount < cipherTextArray->m_numOfElements / 16)
     {
-        NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
+        if (mbedtls_aes_crypt_ecb(
+                &decodeContext,
+                MBEDTLS_AES_DECRYPT,
+                cipherTextArray->GetElement(passCount * 16),
+                plainTextArray->GetElement(passCount * 16)) != 0)
+        {
+            NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
+        }
+
+        passCount++;
     }
 
     NANOCLR_CLEANUP();
