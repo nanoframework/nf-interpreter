@@ -309,8 +309,8 @@ HRESULT Library_nf_sys_sec_cryptography_System_Security_Cryptography_Aes::Decryp
             MBEDTLS_AES_DECRYPT,
             plainTextArray->m_numOfElements,
             ivCopy,
-            plainTextArray->GetFirstElement(),
-            cipherTextArray->GetFirstElement()) != 0)
+            cipherTextArray->GetFirstElement(),
+            plainTextArray->GetFirstElement()) != 0)
     {
         NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
     }
