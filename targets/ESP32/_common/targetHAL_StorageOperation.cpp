@@ -37,6 +37,13 @@ uint32_t HAL_StorageOperation(
 
     // convert storageName to char*
     char *strName = (char *)platform_malloc(nameLength + 1);
+    
+    // sanity check for successfull malloc
+    if (strName == NULL)
+    {
+        return StorageOperationErrorCode::PlatformError;
+    }
+
     for (uint32_t i = 0; i < nameLength; i++)
     {
         strName[i] = static_cast<char>(data[i]);
