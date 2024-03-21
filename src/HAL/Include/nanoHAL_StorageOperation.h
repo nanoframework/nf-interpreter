@@ -7,7 +7,6 @@
 #define NANOHAL_STORAGE_OPERATION_H
 
 #include <nanoCLR_Headers.h>
-#include <nanoCLR_Headers.h>
 
 #ifdef __cplusplus
 extern "C"
