@@ -10,6 +10,11 @@
 #include <WireProtocol_Message.h>
 #include <WireProtocol_HAL_Interface.h>
 
+#if CONFIG_TINYUSB_CDC_ENABLED
+#include <tinyusb.h>
+#include <tusb_cdc_acm.h>
+#endif
+
 ////////////////////////////////////////////////////////////////////
 // Baudrate for the serial port                                   //
 // Can be overriden by the build parameter TARGET_SERIAL_BAUDRATE //
@@ -216,7 +221,7 @@ uint8_t WP_TransmitMessage(WP_Message *message)
     return true;
 }
 
-#elif (CONFIG_IDF_TARGET_ESP32S2 || CONFIG_IDF_TARGET_ESP32S3) && CONFIG_USB_CDC_ENABLED
+#elif (CONFIG_IDF_TARGET_ESP32S2 || CONFIG_IDF_TARGET_ESP32S3) && CONFIG_TINYUSB_CDC_ENABLED
 
 static bool WP_Port_Intitialised = false;
 

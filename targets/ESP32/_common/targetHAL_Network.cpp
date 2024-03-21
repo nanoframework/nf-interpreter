@@ -13,12 +13,16 @@
 #include "esp_mac.h"
 #include "esp_eth_com.h"
 
+#if HAL_USE_THREAD == TRUE
+#include "../_nanoCLR/nanoFramework.Networking.Thread/net_thread_native.h"
+#endif
+
 extern "C" void set_signal_sock_function(void (*funcPtr)());
 extern esp_netif_t * WifiStationEspNetif;
 
 #define WIFI_EVENT_TYPE_SCAN_COMPLETE 1
 
-// #define 	PRINT_NET_EVENT 	1
+//#define 	PRINT_NET_EVENT 	1
 
 // buffer with host name
 char hostName[18] = "nanodevice_";
@@ -84,6 +88,13 @@ static void PostConnectResult(int result)
     // fire event for Wi-Fi station job complete
     Events_Set(SYSTEM_EVENT_FLAG_WIFI_STATION);
 }
+
+#if HAL_USE_THREAD == TRUE
+static void PostThreadEvent(OpenThreadEventType event, uint16_t data1, uint32_t data2)
+{
+    PostManagedEvent(EVENT_CUSTOM, event, data1, data2);
+}
+#endif
 
 static void initialize_sntp()
 {
@@ -399,30 +410,36 @@ static void thread_event_handler(void *arg, esp_event_base_t event_base, int32_t
 #ifdef PRINT_NET_EVENT
             ets_printf("OPENTHREAD_EVENT_START\n");
 #endif
+            PostThreadEvent(OpenThreadEventType_StateChanged, 0, event_id);
             break;
 
         case OPENTHREAD_EVENT_STOP:
 #ifdef PRINT_NET_EVENT
             ets_printf("OPENTHREAD_EVENT_STOP\n");
 #endif
+            PostThreadEvent(OpenThreadEventType_StateChanged, 0, event_id);
             break;
 
         case OPENTHREAD_EVENT_IF_UP:
 #ifdef PRINT_NET_EVENT
             ets_printf("OPENTHREAD_EVENT_IF_UP\n");
 #endif
+            PostThreadEvent(OpenThreadEventType_StateChanged, 0, event_id);
             break;
 
         case OPENTHREAD_EVENT_IF_DOWN:
 #ifdef PRINT_NET_EVENT
             ets_printf("OPENTHREAD_EVENT_IF_DOWN\n");
 #endif
+            PostThreadEvent(OpenThreadEventType_StateChanged, 0, event_id);
             break;
+
         case OPENTHREAD_EVENT_GOT_IP6:
 #ifdef PRINT_NET_EVENT
             ets_printf("OPENTHREAD_EVENT_GOT_IP6\n");
 #endif
             PostAddressChanged(IDF_OT_DEF);
+            PostThreadEvent(OpenThreadEventType_StateChanged, 0, event_id);
             break;
 
         case OPENTHREAD_EVENT_LOST_IP6:
@@ -436,6 +453,7 @@ static void thread_event_handler(void *arg, esp_event_base_t event_base, int32_t
 #ifdef PRINT_NET_EVENT
             ets_printf("OPENTHREAD_EVENT_DETACHED\n");
 #endif
+            PostThreadEvent(OpenThreadEventType_StateChanged, 0, event_id);
             PostAvailabilityOff(IDF_OT_DEF);
             break;
 
@@ -444,11 +462,23 @@ static void thread_event_handler(void *arg, esp_event_base_t event_base, int32_t
             ets_printf("OPENTHREAD_EVENT_ATTACHED\n");
 #endif
             PostAvailabilityOn(IDF_OT_DEF);
+            PostThreadEvent(OpenThreadEventType_StateChanged, 0, event_id);
+            break;
+
+        case OPENTHREAD_EVENT_ROLE_CHANGED:
+#ifdef PRINT_NET_EVENT
+            {
+                esp_openthread_role_changed_event_t * optevent = (esp_openthread_role_changed_event_t *)event_data;
+                ets_printf("OPENTHREAD_EVENT_ROLE_CHANGED %d->%d\n", optevent->previous_role, optevent->current_role);
+
+                PostThreadEvent(OpenThreadEventType_RoleChanged, 0, (optevent->previous_role << 8) + optevent->current_role);
+            }
+#endif
             break;
 
         default:
 #ifdef PRINT_NET_EVENT
-        ets_printf("Thread Event %d, ID: %d\n", event_base, event_id);
+            ets_printf("Thread Event %d, ID: %d\n", event_base, event_id);
 #endif
         break;
     }
