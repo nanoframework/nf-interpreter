@@ -14,7 +14,6 @@
 #include <WireProtocol_ReceiverThread.h>
 #include <nanoPAL_BlockStorage.h>
 #include <nanoHAL_ConfigurationManager.h>
-#include <nanoHAL_StorageOperation.h>
 #include <LaunchCLR.h>
 
 // need to declare the Receiver thread here

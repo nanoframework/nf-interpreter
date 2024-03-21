@@ -13,7 +13,6 @@
 #include <targetHAL.h>
 #include <nanoPAL_BlockStorage.h>
 #include <nanoHAL_ConfigurationManager.h>
-#include <nanoHAL_StorageOperation.h>
 
 // byte pool configuration and definitions
 #define DEFAULT_BYTE_POOL_SIZE 4096
