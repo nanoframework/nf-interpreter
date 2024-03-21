@@ -12,6 +12,7 @@
 #include "Debugger.h"
 #include <corlib_native.h>
 #include <target_common.h>
+#include <nanoHAL_StorageOperation.h>
 
 #define __min(a, b) (((a) < (b)) ? (a) : (b))
 
@@ -1333,6 +1334,27 @@ bool CLR_DBG_Debugger::Monitor_UpdateConfiguration(WP_Message *message)
     return false;
 
 #endif
+}
+
+bool CLR_DBG_Debugger::Monitor_StorageOperation(WP_Message *message)
+{
+    NATIVE_PROFILE_CLR_DEBUGGER();
+
+#if (HAS_ACCESSIBLE_STORAGE == TRUE)
+
+    Monitor_StorageOperation_Command *cmd = (Monitor_StorageOperation_Command *)message->m_payload;
+    Monitor_StorageOperation_Reply cmdReply;
+
+    cmdReply.ErrorCode = HAL_StorageOperation(cmd->Operation, cmd->NameLength, cmd->DataLength, cmd->Offset, cmd->Data);
+
+    WP_ReplyToCommand(message, true, false, &cmdReply, sizeof(cmdReply));
+
+    return true;
+
+#endif
+
+    (void)message;
+    return false;
 }
 
 //--//

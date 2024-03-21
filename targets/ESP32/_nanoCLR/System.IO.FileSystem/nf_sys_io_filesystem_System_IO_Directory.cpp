@@ -6,9 +6,8 @@
 #include "nf_sys_io_filesystem.h"
 #include <dirent.h>
 #include <ff.h>
+#include <targetHAL_FileOperation.h>
 
-extern void CombinePathAndName(char *outpath, const char *path1, const char *path2);
-extern char *ConvertToVfsPath(const char *filepath);
 extern SYSTEMTIME GetDateTimeFromStat(time_t *time);
 
 // We will use this to extract the file extension
