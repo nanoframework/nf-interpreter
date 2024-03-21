@@ -256,7 +256,7 @@ int Monitor_UpdateConfiguration(WP_Message *message)
 int Monitor_StorageOperation(WP_Message *message)
 {
     debug_printf("Monitor_StorageOperation");
-#if (HAS_INTERNAL_STORAGE == TRUE)
+#if (HAS_ACCESSIBLE_STORAGE == TRUE)
 
     Monitor_StorageOperation_Command *cmd = (Monitor_StorageOperation_Command *)message->m_payload;
     Monitor_StorageOperation_Reply cmdReply;

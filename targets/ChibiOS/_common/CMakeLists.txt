@@ -20,7 +20,7 @@ if(NF_FEATURE_HAS_CONFIG_BLOCK)
 endif()
 
 # include internal storage, if feature is enabled
-if(NF_FEATURE_HAS_INTERNAL_STORAGE)
+if(NF_FEATURE_HAS_ACCESSIBLE_STORAGE)
     list(APPEND TARGET_CHIBIOS_COMMON_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/targetHAL_StorageOperation.cpp)
 endif()
 

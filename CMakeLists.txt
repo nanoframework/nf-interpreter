@@ -289,15 +289,15 @@ endif()
 
 #################################################################
 # enables internal storage support
-# (default is OFF so Configuration block storage is NOT supported)
-option(NF_FEATURE_HAS_INTERNAL_STORAGE "option to enable internal storage")
+# (default is OFF so Accessible Storage Feature is NOT supported)
+option(NF_FEATURE_HAS_ACCESSIBLE_STORAGE "option to enable accessible storage")
 
-if(NF_FEATURE_HAS_INTERNAL_STORAGE)
-    set(TARGET_HAS_INTERNAL_STORAGE TRUE CACHE INTERNAL "Option for internal storage")
-    message(STATUS "Configuration internal storage is included")
+if(NF_FEATURE_HAS_ACCESSIBLE_STORAGE)
+    set(TARGET_HAS_ACCESSIBLE_STORAGE TRUE CACHE INTERNAL "Option for accessible storage")
+    message(STATUS "Accessible Storage feature is included")
 else()
-    set(TARGET_HAS_INTERNAL_STORAGE FALSE CACHE INTERNAL "Option for internal storage")
-    message(STATUS "Configuration internal storage **IS NOT** included")
+    set(TARGET_HAS_ACCESSIBLE_STORAGE FALSE CACHE INTERNAL "Option for accessible storage")
+    message(STATUS "Accessible Storage feature **IS NOT** included")
 endif()
 
 #################################################################
