@@ -22,6 +22,11 @@ if(NF_FEATURE_HAS_CONFIG_BLOCK)
     list(APPEND TARGET_AZURERTOS_COMMON_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/targetHAL_ConfigurationManager.cpp)
 endif()
 
+# include internal storage, if feature is enabled
+if(NF_FEATURE_HAS_ACCESSIBLE_STORAGE)
+    list(APPEND TARGET_AZURERTOS_COMMON_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/targetHAL_StorageOperation.cpp)
+endif()
+
 if(NF_TRACE_TO_STDIO)
     list(APPEND TARGET_AZURERTOS_COMMON_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/Target_GenericPort_stdio.c)
     list(APPEND TARGET_AZURERTOS_COMMON_SOURCES ${TARGET_BASE_LOCATION}/target_stdio_config.c)

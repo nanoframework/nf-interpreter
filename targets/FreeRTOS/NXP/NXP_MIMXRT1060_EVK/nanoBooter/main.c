@@ -17,6 +17,7 @@
 #include <WireProtocol_ReceiverThread.h>
 #include <nanoPAL_BlockStorage.h>
 #include "nanoHAL_ConfigurationManager.h"
+#include "nanoHAL_StorageOperation.h"
 #include "Target_BlockStorage_iMXRTFlashDriver.h"
 #include <nanoHAL_v2.h>
 

@@ -10,6 +10,7 @@
 #include <nanoPAL_Events.h>
 #include <nanoPAL_BlockStorage.h>
 #include <nanoHAL_ConfigurationManager.h>
+#include <nanoHAL_StorageOperation.h>
 
 #include <ti/drivers/pin/PINCC26XX.h>
 

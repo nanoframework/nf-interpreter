@@ -28,6 +28,7 @@ const CLR_Messaging_CommandHandlerLookup c_Debugger_Lookup_Request[] = {
     DEFINE_CMD2(EraseMemory),
     DEFINE_CMD2(QueryConfiguration),
     DEFINE_CMD2(UpdateConfiguration),
+    DEFINE_CMD2(StorageOperation),
     //
     DEFINE_CMD2(Execute),
     DEFINE_CMD2(Reboot),
