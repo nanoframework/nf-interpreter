@@ -12,6 +12,7 @@
 #define ESP32_SPIRAM_FOR_IDF_ALLOCATION       @ESP32_SPIRAM_FOR_IDF_ALLOCATION@
 #define ESP32_RESERVED_RAM_FOR_IDF_ALLOCATION @ESP32_RESERVED_RAM_FOR_IDF_ALLOCATION@
 #define HAL_USE_SPI                           @HAL_USE_SPI_OPTION@
+#define HAL_USE_UART                          @HAL_USE_UART_OPTION@
 #define HAL_USE_SDC                           @HAL_USE_SDC_OPTION@
 #define HAL_USE_BLE                           @HAL_USE_BLE_OPTION@
 #define HAL_WP_USE_SERIAL                     @HAL_WP_USE_SERIAL_OPTION@
