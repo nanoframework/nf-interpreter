@@ -491,8 +491,8 @@ jobs:
         CMakePreset: ESP32_S3_BLE
 
       ESP32_WESP32:
-        TargetBoard: ESP32
         TargetSeries: 'esp32'
+        TargetBoard: ESP32
         BuildOptions: 
         IDF_Target: esp32
         TargetName: ESP32_WESP32
@@ -503,11 +503,11 @@ jobs:
         TargetBoard: ESP32
         TargetSeries: 'esp32'
         BuildOptions: 
-        IDF_Target: esp32
         TargetName: ESP32_WT32_ETH01
+        IDF_Target: esp32
         PackageName: ESP32_WT32_ETH01
-        CMakePreset: ESP32_WT32_ETH01 
-        
+        CMakePreset: ESP32_WT32_ETH01   
+
   variables:
     DOTNET_NOLOGO: true
     # creates a counter and assigns it to the revision variable
