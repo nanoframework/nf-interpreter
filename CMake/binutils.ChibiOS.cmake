@@ -235,6 +235,8 @@ macro(nf_add_platform_include_directories target)
         ${TARGET_CMSIS_COMMON_INCLUDE_DIRS}
         ${TARGET_CHIBIOS_COMMON_INCLUDE_DIRS}
         ${lWIP_INCLUDE_DIRS}
+        ${SPIFFS_INCLUDE_DIRS}
+
     )
     
     # includes specific to nanoBooter
@@ -243,7 +245,6 @@ macro(nf_add_platform_include_directories target)
         target_include_directories(${target}.elf PUBLIC
 
             ${TARGET_CHIBIOS_NANOBOOTER_INCLUDE_DIRS}
-    
         )
 
     endif()

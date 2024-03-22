@@ -7,9 +7,7 @@
 
 #include <ff.h>
 #include <nanoHAL_Windows_Storage.h>
-
-extern void CombinePathAndName(char *outpath, const char *path1, const char *path2);
-extern char *ConvertToVfsPath(const char *filepath);
+#include <targetHAL_FileOperation.h>
 
 bool IsInternalFilePath(const char *filePath)
 {
