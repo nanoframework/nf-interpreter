@@ -30,7 +30,6 @@
 #include <targetHAL.h>
 #include <nanoHAL_Types.h>
 #include <nanoHAL_ReleaseInfo.h>
-#include <algorithm>
 
 // #if !defined(_WIN32) && !defined(FIQ_SAMPLING_PROFILER) && !defined(HAL_REDUCESIZE) && defined(PROFILE_BUILD)
 // #define ENABLE_NATIVE_PROFILER
@@ -518,6 +517,7 @@ template <typename T> class Hal_Queue_UnknownSize
 
 template <typename T> class HAL_RingBuffer
 {
+    size_t _dataSize;
     size_t _size;
     size_t _capacity;
     size_t _write_index;
@@ -527,7 +527,9 @@ template <typename T> class HAL_RingBuffer
   public:
     void Initialize(T *data, size_t size)
     {
-        _capacity = size;
+        _dataSize = sizeof(T);
+
+        _capacity = (size * _dataSize);
         _write_index = 0;
         _read_index = 0;
         _size = 0;
@@ -537,26 +539,36 @@ template <typename T> class HAL_RingBuffer
 
     size_t Capacity()
     {
-        return _capacity;
+        return (_capacity / _dataSize);
     }
 
     size_t Length()
     {
-        return _size;
+        return (_size / _dataSize);
     }
 
     // Push a single element to the buffer.
     size_t Push(const T data)
     {
+        // check for buffer full
         if (_size == _capacity)
         {
+            // buffer full
             return 0;
         }
 
-        _buffer[_write_index] = data;
-        _write_index = (_write_index + 1) % Capacity();
+        T *destination = _buffer;
+        destination += _write_index;
 
-        _size++;
+        *destination = data;
+        _write_index += _dataSize;
+
+        // check if we are the end of the capacity
+        if (_write_index == _capacity)
+            _write_index = 0;
+
+        // update ring buffer size
+        _size += _dataSize;
 
         return 1;
     }
@@ -564,51 +576,64 @@ template <typename T> class HAL_RingBuffer
     // Push N elements to the buffer.
     size_t Push(const T *data, size_t length)
     {
-        if (Length() > Capacity())
+        size_t lengthToWrite = 0;
+
+        // sanity check for 0 length
+        if (length == 0)
+            return 0;
+
+        // check for buffer full
+        if (_size == _capacity)
         {
-            // todo: handle the error appropriately
+            // buffer full
             return 0;
         }
 
-        size_t lengthToWrite = std::min(length, Capacity() - Length());
-
-        for (size_t i = 0; i < lengthToWrite; ++i)
+        if ((length * _dataSize) < (_capacity - _size))
         {
-            _buffer[_write_index] = data[i];
-            _write_index = (_write_index + 1) % Capacity();
+            lengthToWrite = (length * _dataSize);
+        }
+        else
+        {
+            lengthToWrite = (_capacity - _size);
         }
 
+        // single memcpy
+        if (lengthToWrite <= _capacity - _write_index)
+        {
+            memcpy(_buffer + _write_index, data, lengthToWrite);
+            _write_index += lengthToWrite;
+
+            // check if we are the end of the capacity
+            if (_write_index == _capacity)
+                _write_index = 0;
+        }
+        // need to memcpy in two chunks
+        else
+        {
+            size_t chunk1Size = _capacity - _write_index;
+            memcpy(_buffer + _write_index, data, chunk1Size);
+
+            size_t chunk2Size = lengthToWrite - chunk1Size;
+            memcpy(_buffer, data + chunk1Size, chunk2Size);
+
+            _write_index = chunk2Size;
+        }
+
+        // update ring buffer size
         _size += lengthToWrite;
 
-        return lengthToWrite;
+        return (lengthToWrite / _dataSize);
     }
 
     // Pop N elements from ring buffer returning them in the data argument.
     size_t Pop(T *data, size_t length)
     {
-        size_t lengthToRead = std::min(length, Length());
-
-        for (size_t i = 0; i < lengthToRead; ++i)
-        {
-            data[i] = _buffer[_read_index];
-            _read_index = (_read_index + 1) % Capacity();
-        }
-
-        _size -= lengthToRead;
-
-        return lengthToRead;
-    }
-
-    // Pop 1 element from ring buffer. The element is not actually returned, just popped from the buffer.
-    size_t Pop(size_t length)
-    {
         size_t lengthToRead = 0;
 
         // sanity check for 0 length
         if (length == 0)
-        {
             return 0;
-        }
 
         // check for buffer empty
         if (_size == 0)
@@ -616,23 +641,75 @@ template <typename T> class HAL_RingBuffer
             return 0;
         }
 
-        lengthToRead = min(length, Length());
+        lengthToRead = (length * _dataSize);
 
         // can read in a single memcpy
-        if (lengthToRead <= Capacity() - _read_index)
+        if (lengthToRead <= _capacity - _read_index)
         {
+            memcpy(data, _buffer + _read_index, lengthToRead);
             _read_index += lengthToRead;
 
             // check if we are at end of capacity
-            if (_read_index == Capacity())
-            {
+            if (_read_index == _capacity)
                 _read_index = 0;
-            }
         }
         // need to memcpy in two steps
         else
         {
-            size_t chunk1Size = Capacity() - _read_index;
+            size_t chunk1Size = _capacity - _read_index;
+            memcpy(data, _buffer + _read_index, chunk1Size);
+
+            size_t chunk2Size = lengthToRead - chunk1Size;
+            memcpy(data + chunk1Size, _buffer, chunk2Size);
+
+            _read_index = chunk2Size;
+        }
+
+        // update ring buffer size
+        _size -= lengthToRead;
+
+        // check for optimization to improve sequential push
+        // buffer has to be empty and read and write indexes coincide
+        if (_size == 0 && (_write_index == _read_index))
+        {
+            // reset the read/write index
+            _write_index = 0;
+            _read_index = 0;
+        }
+
+        return (lengthToRead / _dataSize);
+    }
+
+    // Pop N elements from ring buffer. The elements are not actually returned, just popped from the buffer.
+    size_t Pop(size_t length)
+    {
+        size_t lengthToRead = 0;
+
+        // sanity check for 0 length
+        if (length == 0)
+            return 0;
+
+        // check for buffer empty
+        if (_size == 0)
+        {
+            return 0;
+        }
+
+        lengthToRead = (length * _dataSize);
+
+        // can read in a single memcpy
+        if (lengthToRead <= _capacity - _read_index)
+        {
+            _read_index += lengthToRead;
+
+            // check if we are at end of capacity
+            if (_read_index == _capacity)
+                _read_index = 0;
+        }
+        // need to memcpy in two steps
+        else
+        {
+            size_t chunk1Size = _capacity - _read_index;
             size_t chunk2Size = lengthToRead - chunk1Size;
             _read_index = chunk2Size;
         }
@@ -649,22 +726,18 @@ template <typename T> class HAL_RingBuffer
             _read_index = 0;
         }
 
-        return lengthToRead;
+        return (lengthToRead / _dataSize);
     }
 
     void OptimizeSequence()
     {
         // no elements, so there is nothing to optimize
         if (_size == 0)
-        {
             return;
-        }
 
         // read index is already at index 0, so there is nothing to optimize
         if (_read_index == 0)
-        {
             return;
-        }
 
         // can move data in a single memcpy
         if (_read_index < _write_index)
@@ -687,12 +760,6 @@ template <typename T> class HAL_RingBuffer
             {
                 // 1st move tail to temp buffer (need to malloc first)
                 tempBuffer = (T *)platform_malloc(tailSize);
-
-                // sanity check for malloc
-                if (tempBuffer == NULL)
-                {
-                    return;
-                }
 
                 memcpy(tempBuffer, _buffer, tailSize);
             }
