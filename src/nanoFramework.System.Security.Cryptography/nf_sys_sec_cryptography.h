@@ -25,6 +25,7 @@
 #include <mbedtls/md.h>
 #if MBEDTLS_VERSION_MAJOR == 2
 #include <mbedtls/md_internal.h>
+#endif
 #include <mbedtls/aes.h>
 
 typedef enum __nfpack CipherMode

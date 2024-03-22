@@ -42,11 +42,7 @@ HRESULT Library_sys_dev_adc_native_System_Device_Adc_AdcController::NativeOpenCh
     esp_err_t result;
     // default to MAX bit width for SoC
     adc_bits_width_t width_bit = (adc_bits_width_t)SOC_ADC_RTC_MAX_BITWIDTH;
-<<<<<<< HEAD
     adc_atten_t atten = ADC_ATTEN_DB_12;
-=======
-    adc_atten_t atten = ADC_ATTEN_DB_11;
->>>>>>> 64d0c011920768fbe691fc30b4f4c61adb50b41d
 
     // get a pointer to the managed object instance and check that it's not NULL
     CLR_RT_HeapBlock *pThis = stack.This();

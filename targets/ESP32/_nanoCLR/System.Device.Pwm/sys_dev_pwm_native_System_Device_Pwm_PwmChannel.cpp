@@ -115,7 +115,6 @@ HRESULT sys_dev_pwm_native_System_Device_Pwm_PwmChannelHelpers::ConfigureAndStar
 {
     int32_t timerId;
     int32_t pinNumber;
-    uint32_t rawDutyCycle;
     uint32_t dutyCycle;
 
     PwmPulsePolarity polarity;
@@ -135,7 +134,7 @@ HRESULT sys_dev_pwm_native_System_Device_Pwm_PwmChannelHelpers::ConfigureAndStar
     // Retrieves the needed parameters from private class properties or method parameters
     timerId = pThis[Library_sys_dev_pwm_native_System_Device_Pwm_PwmChannel::FIELD___pwmTimer].NumericByRef().s4;
     pinNumber = pThis[Library_sys_dev_pwm_native_System_Device_Pwm_PwmChannel::FIELD___pinNumber].NumericByRef().s4;
-    rawDutyCycle = pThis[Library_sys_dev_pwm_native_System_Device_Pwm_PwmChannel::FIELD___dutyCycle].NumericByRef().u4;
+    dutyCycle = pThis[Library_sys_dev_pwm_native_System_Device_Pwm_PwmChannel::FIELD___dutyCycle].NumericByRef().u4;
     polarity = (PwmPulsePolarity)(pThis[Library_sys_dev_pwm_native_System_Device_Pwm_PwmChannel::FIELD___polarity]
                                       .NumericByRef()
                                       .u4);
