@@ -17,10 +17,10 @@
 
 static const char *TAG = "SerialDevice";
 
-static NF_PAL_UART Uart0_PAL;
-static NF_PAL_UART Uart1_PAL;
+NF_PAL_UART Uart0_PAL;
+NF_PAL_UART Uart1_PAL;
 #if defined(UART_NUM_2)
-static NF_PAL_UART Uart2_PAL;
+NF_PAL_UART Uart2_PAL;
 #endif
 
 NF_PAL_UART *GetPalUartFromUartNum_sys(int uart_num)

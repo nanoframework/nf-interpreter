@@ -3,8 +3,8 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#ifndef SYS_IO_SER_NATIVE_
-#define SYS_IO_SER_NATIVE_
+#ifndef SYS_IO_SER_NATIVE_TARGET_H
+#define SYS_IO_SER_NASYS_IO_SER_NATIVE_TARGET_HTIVE_H
 
 #include <sys_io_ser_native.h>
 
@@ -32,4 +32,13 @@ typedef struct
 
 } NF_PAL_UART;
 
-#endif // SYS_IO_SER_NATIVE_
+////////////////////////////////////////////
+// declaration of the the UART PAL structs //
+////////////////////////////////////////////
+extern NF_PAL_UART Uart0_PAL;
+extern NF_PAL_UART Uart1_PAL;
+#if defined(UART_NUM_2)
+extern NF_PAL_UART Uart2_PAL;
+#endif
+
+#endif // SYS_IO_SER_NATIVE_TARGET_H
