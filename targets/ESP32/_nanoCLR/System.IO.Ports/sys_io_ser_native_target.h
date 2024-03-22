@@ -15,8 +15,6 @@ typedef struct
     TaskHandle_t UartEventTask;
     QueueHandle_t UartEventQueue;
 
-    CLR_RT_HeapBlock *SerialDevice;
-
     uint8_t *TxBuffer;
     uint16_t TxOngoingCount;
 
