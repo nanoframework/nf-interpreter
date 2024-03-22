@@ -322,31 +322,6 @@ extern "C" {
 #define ESP_DHCP_DISABLE_CLIENT_ID      0
 #endif
 
-#define DHCP_DEFINE_CUSTOM_TIMEOUTS     1
-/* Since for embedded devices it's not that hard to miss a discover packet, so lower
- * the discover and request retry backoff time from (2,4,8,16,32,60,60)s to (500m,1,2,4,4,4,4)s.
- */
-#define DHCP_REQUEST_TIMEOUT_SEQUENCE(tries) ((uint16_t)(((tries) < 5 ? 1 << (tries) : 16) * 250))
-
-#define DHCP_COARSE_TIMER_SECS CONFIG_LWIP_DHCP_COARSE_TIMER_SECS
-
-static inline uint32_t timeout_from_offered(uint32_t lease, uint32_t min)
-{
-    uint32_t timeout = lease;
-    if (timeout == 0) {
-      timeout = min;
-    }
-    timeout = (timeout + DHCP_COARSE_TIMER_SECS - 1) / DHCP_COARSE_TIMER_SECS;
-    return timeout;
-}
-
-#define DHCP_CALC_TIMEOUT_FROM_OFFERED_T0_LEASE(dhcp) \
-   timeout_from_offered((dhcp)->offered_t0_lease, 120)
-#define DHCP_CALC_TIMEOUT_FROM_OFFERED_T1_RENEW(dhcp) \
-   timeout_from_offered((dhcp)->offered_t1_renew, (dhcp)->t0_timeout >> 1 /* 50% */)
-#define DHCP_CALC_TIMEOUT_FROM_OFFERED_T2_REBIND(dhcp) \
-   timeout_from_offered((dhcp)->offered_t2_rebind, ((dhcp)->t0_timeout / 8) * 7 /* 87.5% */)
-
 /**
  * ESP specific option only applicable if ESP_DHCP=1
  * CONFIG_LWIP_DHCP_RESTORE_LAST_IP==1: Last valid IP address obtained from DHCP server
@@ -538,11 +513,6 @@ static inline uint32_t timeout_from_offered(uint32_t lease, uint32_t min)
  * will be TCP_WND >> TCP_RCV_SCALE
  */
 #define TCP_WND                         CONFIG_LWIP_TCP_WND_DEFAULT
-
-/**
- * TCP_FIN_WAIT_TIMEOUT: The maximum FIN segment lifetime in milliseconds
- */
-#define TCP_FIN_WAIT_TIMEOUT            CONFIG_LWIP_TCP_FIN_WAIT_TIMEOUT
 
 /**
  * TCP_MAXRTX: Maximum number of retransmissions of data segments.
@@ -1617,6 +1587,7 @@ static inline uint32_t timeout_from_offered(uint32_t lease, uint32_t min)
 #ifdef __cplusplus
 }
 #endif
+
 #endif /* LWIP_HDR_ESP_LWIPOPTS_H */
 
 // clang-format on

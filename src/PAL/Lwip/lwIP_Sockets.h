@@ -42,6 +42,8 @@ struct LWIP_SOCKETS_Driver
 {
     static bool Initialize();
 
+    static bool InitializeInterfaceIndex(int i, int interfaceNumber, HAL_Configuration_NetworkInterface &networkConfiguration);
+
     static bool Uninitialize();
 
     static SOCK_SOCKET Socket(int family, int type, int protocol);

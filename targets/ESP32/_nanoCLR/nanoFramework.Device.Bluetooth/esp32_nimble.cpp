@@ -14,7 +14,7 @@ static uint8_t esp32_addr_type;
 
 bool Esp32BleStartAdvertise(bleServicesContext *context);
 void BleCentralStartScan();
-void ble_store_config_init();
+extern "C" void ble_store_config_init();
 
 uint16_t ble_event_next_id = 1;
 device_ble_event_data ble_event_data;
@@ -588,11 +588,17 @@ void SetSecuritySettings(
 
     ble_hs_cfg.store_status_cb = ble_store_util_status_rr;
 
+    // Enable appropriate bit masks to make sure the keys are exchanged
+    ble_hs_cfg.sm_our_key_dist |= BLE_SM_PAIR_KEY_DIST_ENC;
+    ble_hs_cfg.sm_their_key_dist |= BLE_SM_PAIR_KEY_DIST_ENC;
+
     BLE_DEBUG_PRINTF(
-        "SetSecuritySettings sc=%d mitm=%d bonding %d\n",
+        "SetSecuritySettings sc=%d mitm=%d bonding %d our key %d their key %d\n",
         ble_hs_cfg.sm_sc,
         ble_hs_cfg.sm_mitm,
-        ble_hs_cfg.sm_bonding);
+        ble_hs_cfg.sm_bonding,
+        ble_hs_cfg.sm_our_key_dist,
+        ble_hs_cfg.sm_their_key_dist);
 }
 
 bool DeviceBleInit()
@@ -625,6 +631,8 @@ bool DeviceBleInit()
     // Initialise default security/pairing settings
     SetSecuritySettings(DevicePairingIOCapabilities_NoInputNoOutput, DevicePairingProtectionLevel_Default, true, false);
 
+    ble_store_config_init();
+
     ble_initialized = true;
 
     return true;
@@ -642,6 +650,7 @@ void StartBleTask(char *deviceName, uint16_t appearance)
 
     rc = ble_svc_gap_device_appearance_set(appearance);
     assert(rc == 0);
+    BLE_DEBUG_PRINTF("ble_svc_gap_device_appearance_set %X\n", appearance);
 
     // Start the BLE task
     nimble_port_freertos_init(esp32_ble_host_task);

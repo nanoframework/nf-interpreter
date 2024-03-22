@@ -94,12 +94,12 @@ list(APPEND ESP32_IDF_INCLUDE_DIRS ${esp32_idf_SOURCE_DIR}/components/esp_rom/${
 
 # includes specific to ESP32S2 and ESP32S3
 if(${TARGET_SERIES_SHORT} STREQUAL "esp32s2" OR ${TARGET_SERIES_SHORT} STREQUAL "esp32s3")
-    list(APPEND ESP32_IDF_INCLUDE_DIRS ${esp32_idf_SOURCE_DIR}/components/tinyusb/additions/include)
-    list(APPEND ESP32_IDF_INCLUDE_DIRS ${esp32_idf_SOURCE_DIR}/components/tinyusb/tinyusb/src)
+    list(APPEND ESP32_IDF_INCLUDE_DIRS ${esp32_idf_SOURCE_DIR}/components/esp_tinyusb/include)
+    list(APPEND ESP32_IDF_INCLUDE_DIRS ${esp32_idf_SOURCE_DIR}/components/tinyusb/src)
     list(APPEND ESP32_IDF_INCLUDE_DIRS ${esp32_idf_SOURCE_DIR}/components/freertos/FreeRTOS-Kernel/include/freertos)
 endif()
 
-# includes specific to Thread (only for ESP32C6 and ESP32H2)
+# includes specific to Thread, native only for ESP32C6 and ESP32H2. Other mcu as attached network chip (EPS32-H2 etc)
 if(HAL_USE_THREAD_OPTION)
     list(APPEND ESP32_IDF_INCLUDE_DIRS ${esp32_idf_SOURCE_DIR}/components/openthread/include)
     list(APPEND ESP32_IDF_INCLUDE_DIRS ${esp32_idf_SOURCE_DIR}/components/openthread/openthread/include)

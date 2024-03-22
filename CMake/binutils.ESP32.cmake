@@ -522,8 +522,74 @@ macro(nf_setup_partition_tables_generator)
 
 endmacro()
 
+# macro to add the tinyusb component which has been downloaded from component registry to IDF components directory
+# As the Component Manager is not available for IDF as Library projects we need to set up environment manually for the 
+# esp_tinyusb to tinyusb dependency.
+macro(nf_add_tinyusb_component)
+
+    # get the esp_tinyusb target library name
+    idf_component_get_property(etusb_lib esp_tinyusb COMPONENT_LIB)
+    # add the tinyusb src directory as include path to esp_tinyusb library project
+    target_include_directories(${etusb_lib} PRIVATE ${esp32_idf_SOURCE_DIR}/components/tinyusb/src)
+
+    # also add the freertos directory as include path
+    idf_component_get_property(freertos_include freertos ORIG_INCLUDE_PATH)
+    target_include_directories(${etusb_lib} PRIVATE ${freertos_include})
+
+    # Set the CFG_TUSB_MCU compile option for the target MCU
+    # for esp_tinyusb lib and main project
+    if(${TARGET_SERIES_SHORT} STREQUAL "esp32s3")
+        set(tusb_mcu "OPT_MCU_ESP32S3")
+    elseif(${TARGET_SERIES_SHORT} STREQUAL "esp32s2")
+        set(tusb_mcu "OPT_MCU_ESP32S2")
+    elseif(${TARGET_SERIES_SHORT} STREQUAL "esp32p4")
+        set(tusb_mcu "OPT_MCU_ESP32P4")
+    endif()
+
+    set(compile_options
+        "-DCFG_TUSB_MCU=${tusb_mcu}"
+    )
+
+    target_compile_options(${etusb_lib} PUBLIC ${compile_options})
+    target_compile_options(${NANOCLR_PROJECT_NAME}.elf PUBLIC ${compile_options})
+
+endmacro()
+
+#macro to install component from component registry into IDF component directory
+macro(nf_install_idf_component_from_registry component_name object_id)
+
+    message(STATUS "Checking if component '" ${component_name} "' needs to be installed")
+    
+    set(downloadUrl https://components.espressif.com/api/download/?object_type=component&object_id=${object_id})
+    set(archiveName ${CMAKE_BINARY_DIR}/downloads/${component_name}_${object_id}.zip)
+    set(destinationPath ${IDF_PATH_CMAKED}/components/${component_name})
+
+    if(NOT EXISTS ${destinationPath})
+        file(DOWNLOAD ${downloadUrl} ${archiveName})
+        message(STATUS "Component archive '" ${component_name} "' downloaded")
+
+        file(ARCHIVE_EXTRACT 
+            INPUT ${archiveName} 
+            DESTINATION ${destinationPath}
+        )
+
+        # Remove idf_component.yml file otherwise we will get warning about Component manager not being enabled
+        file(REMOVE ${destinationPath}/idf_component.yml)
+        message(STATUS "'" ${component_name} "' installed in IDF component directory > " components/${component_name})
+    
+    endif()
+
+endmacro()
+
 # macro to add IDF as a library to the build and add the IDF components according to variant and options
 macro(nf_add_idf_as_library)
+
+    # Load any required Components from Component registry
+    # Must be done before "tools/cmake/idf.cmake" 
+    if(ESP32_USB_CDC)
+        nf_install_idf_component_from_registry(tinyusb a4c3e214-fc79-4264-8dfe-92f1555440b3) 
+        nf_install_idf_component_from_registry(esp_tinyusb 65318090-af6e-4dbe-a257-5074ed07a337) 
+    endif()
 
     include(${IDF_PATH_CMAKED}/tools/cmake/idf.cmake)
 
@@ -567,8 +633,13 @@ macro(nf_add_idf_as_library)
 
     # Save original contents to be restored later
     file(READ
-    "${SDKCONFIG_DEFAULTS_FILE}"
-    SDKCONFIG_ORIGINAL_CONTENTS)
+        "${SDKCONFIG_DEFAULTS_FILE}"
+        SDKCONFIG_ORIGINAL_CONTENTS
+    )
+
+    # Make temporary copy of sdkconfig.defaults.? file into build dir as we are going to make changes
+    set(SDKCONFIG_DEFAULTS_TEMP_FILE ${CMAKE_SOURCE_DIR}/build/sdkconfig.default)
+    file(WRITE ${SDKCONFIG_DEFAULTS_TEMP_FILE} ${SDKCONFIG_ORIGINAL_CONTENTS})
 
     # set list with the IDF components to add
     # need to match the list below with the respective libraries
@@ -598,7 +669,7 @@ macro(nf_add_idf_as_library)
         idf::vfs
         idf::esp_netif
         idf::esp_eth
-  )
+    )
 
     if(HAL_USE_BLE_OPTION)
         list(APPEND IDF_COMPONENTS_TO_ADD bt)
@@ -620,42 +691,38 @@ macro(nf_add_idf_as_library)
 
         # need to read the supplied SDK CONFIG file and replace the appropriate option
         file(READ
-            "${SDKCONFIG_DEFAULTS_FILE}"
-            SDKCONFIG_DEFAULT_CONTENTS)
+            "${SDKCONFIG_DEFAULTS_TEMP_FILE}"
+            SDKCONFIG_DEFAULT_CONTENTS
+        )
 
         if(ESP32_USB_CDC)
 
-            #idf_build_set_property(IDF_COMPONENT_MANAGER 1)
-            #idf_build_set_property(__COMPONENT_MANAGER_INTERFACE_VERSION 2)
-            #message(STATUS "Support for component manager enabled")
-
             # add IDF components specific to ESP32S2/S3 series
-            #list(APPEND IDF_COMPONENTS_TO_ADD esp_tinyusb) 
-            #list(APPEND IDF_LIBRARIES_TO_ADD idf::esp_tinyusb) 
+            # They have to be added in a specific order so they compile/link ok
+            list(APPEND IDF_COMPONENTS_TO_ADD tinyusb) 
+            list(APPEND IDF_COMPONENTS_TO_ADD esp_tinyusb) 
+            list(APPEND IDF_LIBRARIES_TO_ADD idf::esp_tinyusb) 
+            list(APPEND IDF_LIBRARIES_TO_ADD  idf::tinyusb) 
 
             string(APPEND SDKCONFIG_DEFAULT_CONTENTS "\nCONFIG_TINYUSB_ENABLED=y\n")
             string(APPEND SDKCONFIG_DEFAULT_CONTENTS "CONFIG_TINYUSB_CDC_ENABLED=y\n")
-            string(APPEND SDKCONFIG_DEFAULT_CONTENTS "CONFIG_TINYUSB_DESC_CDC_STRING='.NET nanoFramework device'\n")
+            string(APPEND SDKCONFIG_DEFAULT_CONTENTS "CONFIG_TINYUSB_DESC_PRODUCT_STRING=\"nanoFramework device\"\n")
+            string(APPEND SDKCONFIG_DEFAULT_CONTENTS "CONFIG_TINYUSB_DESC_CDC_STRING=\"nanoFramework device\"\n")
             string(APPEND SDKCONFIG_DEFAULT_CONTENTS "CONFIG_TINYUSB_CDC_RX_BUFSIZE=64\n")
             string(APPEND SDKCONFIG_DEFAULT_CONTENTS "CONFIG_TINYUSB_CDC_TX_BUFSIZE=1024\n")
 
-            #idf_component_register(${CMAKE_SOURCE_DIR}/targets/ESP32/_IDF/Components/Tinyusb)
-            #message(STATUS "Support for embedded USB CDC enabled")
-
-            # SDKCONFIG for ESP32S2 has embedded USB CDC enabled as default
-
+            message(STATUS "Support for embedded USB CDC enabled")
         else()
             message(STATUS "Support for embedded USB CDC **IS NOT** enabled")
 
             string(APPEND SDKCONFIG_DEFAULT_CONTENTS "\nCONFIG_TINYUSB_ENABLED=n\n")
-
         endif()
 
         # need to temporarily allow changes in source files
         set(CMAKE_DISABLE_SOURCE_CHANGES OFF)
 
         file(WRITE 
-            ${SDKCONFIG_DEFAULTS_FILE} 
+            ${SDKCONFIG_DEFAULTS_TEMP_FILE} 
             ${SDKCONFIG_DEFAULT_CONTENTS})
 
         set(CMAKE_DISABLE_SOURCE_CHANGES ON)
@@ -672,7 +739,7 @@ macro(nf_add_idf_as_library)
         message(DEBUG "Reading SDK config from '${SDKCONFIG_DEFAULTS_FILE}' for Thread options")
 
         file(READ
-            "${SDKCONFIG_DEFAULTS_FILE}"
+            "${SDKCONFIG_DEFAULTS_TEMP_FILE}"
             SDKCONFIG_DEFAULT_CONTENTS)
 
         # Append config based on options
@@ -733,7 +800,7 @@ macro(nf_add_idf_as_library)
         set(CMAKE_DISABLE_SOURCE_CHANGES OFF)
 
         file(WRITE 
-            ${SDKCONFIG_DEFAULTS_FILE} 
+            ${SDKCONFIG_DEFAULTS_TEMP_FILE} 
             ${SDKCONFIG_DEFAULT_CONTENTS})
 
         set(CMAKE_DISABLE_SOURCE_CHANGES ON)
@@ -754,7 +821,7 @@ macro(nf_add_idf_as_library)
         message(DEBUG "Reading SDK config from '${SDKCONFIG_DEFAULTS_FILE}'")
 
         file(READ
-            "${SDKCONFIG_DEFAULTS_FILE}"
+            "${SDKCONFIG_DEFAULTS_TEMP_FILE}"
             SDKCONFIG_DEFAULT_CONTENTS)
 
         string(APPEND SDKCONFIG_DEFAULT_CONTENTS "CONFIG_XTAL_FREQ_26=y\n")
@@ -763,7 +830,7 @@ macro(nf_add_idf_as_library)
         set(CMAKE_DISABLE_SOURCE_CHANGES OFF)
 
         file(WRITE 
-            ${SDKCONFIG_DEFAULTS_FILE} 
+            ${SDKCONFIG_DEFAULTS_TEMP_FILE} 
             ${SDKCONFIG_DEFAULT_CONTENTS})
 
         message(DEBUG "Wrote updated SDK config to '${SDKCONFIG_DEFAULTS_FILE}'")
@@ -777,10 +844,8 @@ macro(nf_add_idf_as_library)
     idf_build_process(${TARGET_SERIES_SHORT}
         COMPONENTS 
             ${IDF_COMPONENTS_TO_ADD}
-
-        # SDKCONFIG ${CMAKE_SOURCE_DIR}/targets/ESP32/_IDF/sdkconfig
         SDKCONFIG_DEFAULTS
-            ${SDKCONFIG_DEFAULTS_FILE}
+            ${SDKCONFIG_DEFAULTS_TEMP_FILE}
         PROJECT_NAME "nanoCLR"
         PROJECT_VER ${BUILD_VERSION}
         PROJECT_DIR ${CMAKE_SOURCE_DIR}
@@ -794,15 +859,6 @@ macro(nf_add_idf_as_library)
         ${CMAKE_SOURCE_DIR}/targets/ESP32/_IDF/${TARGET_SERIES_SHORT}/app_main.c
         ${CMAKE_SOURCE_DIR}/targets/ESP32/_IDF/project_elf_src_${TARGET_SERIES_SHORT}.c
     )
-
-    #Restore original sdkconfig back to defaults
-    set(CMAKE_DISABLE_SOURCE_CHANGES OFF)
-
-    file(WRITE 
-        ${SDKCONFIG_DEFAULTS_FILE} 
-        ${SDKCONFIG_ORIGINAL_CONTENTS})
-
-    set(CMAKE_DISABLE_SOURCE_CHANGES ON)
 
     if(USE_NETWORKING_OPTION)
 
@@ -962,6 +1018,11 @@ macro(nf_add_idf_as_library)
         set(BLE_INFO ", support for BLE")
     endif()    
 
+    # add tinyusb dependencies 
+    if(ESP32_USB_CDC)
+        nf_add_tinyusb_component()
+    endif()    
+
     # Disable warning on link
     target_link_libraries(${NANOCLR_PROJECT_NAME}.elf "-Wl,--no-warn-rwx-segments")
 
@@ -994,6 +1055,7 @@ endmacro()
 # macro to clear binary files related with nanoCLR from output
 # to make sure that the build file it's up to date
 macro(nf_clear_output_files_nanoclr)
+
     list(APPEND CLR_BUILD_FILES_TO_REMOVE ${CMAKE_BINARY_DIR}/${NANOCLR_PROJECT_NAME}.bin)
     list(APPEND CLR_BUILD_FILES_TO_REMOVE ${CMAKE_BINARY_DIR}/${NANOCLR_PROJECT_NAME}.elf)
 

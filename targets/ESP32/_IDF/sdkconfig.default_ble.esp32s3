@@ -5,18 +5,6 @@ CONFIG_IDF_CMAKE=y
 CONFIG_IDF_TARGET_ARCH_XTENSA=y
 CONFIG_IDF_TARGET="esp32s3"
 
-#
-# TinyUSB  ( no longer availble in IDF directly) 
-#
-CONFIG_TINYUSB_CDC_ENABLED=y
-CONFIG_TINYUSB_DESC_CDC_STRING=".NET nanoFramework device"
-CONFIG_TINYUSB_DESC_PRODUCT_STRING=".NET nanoFramework device"
-CONFIG_TINYUSB_CDC_RX_BUFSIZE=64
-# setting this to WP packet size
-CONFIG_TINYUSB_CDC_TX_BUFSIZE=2048
-# end of TinyUSB
-
-
 # Deprecated drivers, disable warnings on build
 CONFIG_ADC_SUPPRESS_DEPRECATE_WARN=y
 CONFIG_ADC_CALI_SUPPRESS_DEPRECATE_WARN=y

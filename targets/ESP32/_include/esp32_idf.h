@@ -93,13 +93,6 @@
 #include "esp_vfs_eventfd.h"
 #endif
 
-
-// includes specific for TinyUSB and CDC
-#if CONFIG_TINYUSB_CDC_ENABLED
-#include <tinyusb.h>
-#include <tusb_cdc_acm.h>
-#endif
-
 #if CONFIG_MBEDTLS_DEBUG
 #include <mbedtls/esp_debug.h>
 #endif

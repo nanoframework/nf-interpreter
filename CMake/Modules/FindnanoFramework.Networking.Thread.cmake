@@ -14,6 +14,7 @@ list(APPEND nanoFramework.Networking.Thread_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src
 # source files
 set(nanoFramework.Networking.Thread_SRCS
     net_thread_native.cpp
+    net_thread_native_nanoFramework_Networking_Thread_OpenThread.cpp
 )
 
 foreach(SRC_FILE ${nanoFramework.Networking.Thread_SRCS})
