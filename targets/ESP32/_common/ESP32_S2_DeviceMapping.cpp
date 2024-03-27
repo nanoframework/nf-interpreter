@@ -48,7 +48,7 @@ int8_t Esp32_I2C_DevicePinMap[I2C_NUM_MAX][2] = {
 //  LED PWM
 //  16 channels LED1 to LED16  or PWM1 to PWM16
 //  Map pins Data & Clock
-int8_t Esp32_LED_DevicePinMap[16] = {
+int8_t Esp32_LED_DevicePinMap[TARGET_LED_NUM_PINS] = {
     // Channels ( non assigned )
     -1, // 1
     -1, // 2
@@ -75,7 +75,7 @@ int8_t Esp32_LED_DevicePinMap[16] = {
 //  "    ADC1 channel  9 - Internal Hall Sensor (VN)
 //  "    ADC2 channels 10 - 19
 // TODO review ADC channels for ESP32_S2
-int8_t Esp32_ADC_DevicePinMap[20] = {
+int8_t Esp32_ADC_DevicePinMap[TARGET_ADC_NUM_PINS] = {
     // 0   1   2   3   4   5   6   7   8   9  10  11  12  13  14  15  16  17  18  19
     36, 37, 38, 39, 32, 33, 34, 35, 36, 39, 04, 00, 02, 15, 13, 12, 14, 27, 25, 26};
 

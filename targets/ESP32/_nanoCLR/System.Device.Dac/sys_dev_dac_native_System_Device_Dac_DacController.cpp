@@ -6,6 +6,8 @@
 
 #include "sys_dev_dac_native_target.h"
 
+dac_oneshot_handle_t dacChannelHandle[DacChannelCount];
+
 HRESULT Library_sys_dev_dac_native_System_Device_Dac_DacController::NativeOpenChannel___VOID__I4(
     CLR_RT_StackFrame &stack)
 {
@@ -13,7 +15,7 @@ HRESULT Library_sys_dev_dac_native_System_Device_Dac_DacController::NativeOpenCh
     {
         int controllerId;
         int channelNumber;
-        dac_channel_t dacChannel = DAC_CHANNEL_1;
+        dac_channel_t dacChannel = DAC_CHAN_0;
 
         // get a pointer to the managed object instance and check that it's not NULL
         CLR_RT_HeapBlock *pThis = stack.This();
@@ -34,19 +36,26 @@ HRESULT Library_sys_dev_dac_native_System_Device_Dac_DacController::NativeOpenCh
         switch (channelNumber)
         {
             case 0:
-                dacChannel = DAC_CHANNEL_1;
+                dacChannel = DAC_CHAN_0;
                 break;
 
             case 1:
-                dacChannel = DAC_CHANNEL_2;
+                dacChannel = DAC_CHAN_1;
                 break;
 
             default:
                 NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
         }
 
-        // Enable DAC for this channel
-        dac_output_enable(dacChannel);
+        dac_oneshot_config_t chan_cfg = {
+            .chan_id = dacChannel,
+        };
+
+        // Open DAC channel
+        if (dac_oneshot_new_channel(&chan_cfg, &dacChannelHandle[dacChannel]) != ESP_OK)
+        {
+            NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
+        }
     }
     NANOCLR_NOCLEANUP();
 }

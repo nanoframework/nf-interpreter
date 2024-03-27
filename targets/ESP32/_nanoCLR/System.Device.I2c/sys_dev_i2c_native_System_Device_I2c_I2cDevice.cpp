@@ -257,7 +257,7 @@ HRESULT Library_sys_dev_i2c_native_System_Device_I2c_I2cDevice::
 
     i2c_master_stop(cmd);
 
-    opResult = i2c_master_cmd_begin(bus, cmd, 1000 / portTICK_RATE_MS);
+    opResult = i2c_master_cmd_begin(bus, cmd, 1000 / portTICK_PERIOD_MS);
 
     if (opResult != ESP_OK && opResult != ESP_FAIL && opResult != ESP_ERR_TIMEOUT)
     {

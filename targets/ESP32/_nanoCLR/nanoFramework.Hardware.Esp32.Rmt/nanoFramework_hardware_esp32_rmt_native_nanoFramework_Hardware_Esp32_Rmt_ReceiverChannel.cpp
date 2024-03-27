@@ -216,7 +216,6 @@ HRESULT Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_E
     hr = g_CLR_RT_ExecutionEngine.NewObjectFromIndex(*returnArray, rmtCommandTypeDef);
     if (hr == S_OK)
     {
-
         // Set each value in the struct from the rmt_item32_t data
         CLR_RT_HeapBlock *dref = returnArray->Dereference();
         CLR_RT_HeapBlock &duration0FieldRef = dref[ManagedRmtCommand::FIELD___duration0];
@@ -392,7 +391,6 @@ HRESULT Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_E
 
     // get a reference to the configs in the managed code instance
     receiver_channel_settings = pThis[FIELD___receiverChannelSettings].Dereference();
-
     channel = receiver_channel_settings[RmtChannelSettings::FIELD___channel].NumericByRef().s4;
 
     err = rmt_set_rx_idle_thresh((rmt_channel_t)channel, threshold);

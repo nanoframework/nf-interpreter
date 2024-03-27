@@ -24,6 +24,7 @@ list(APPEND nanoFramework.Device.Bluetooth_INCLUDE_DIRS "${NIMBLE_COMPONENT_PATH
 list(APPEND nanoFramework.Device.Bluetooth_INCLUDE_DIRS "${NIMBLE_COMPONENT_PATH}/nimble/nimble/host/util/include")
 list(APPEND nanoFramework.Device.Bluetooth_INCLUDE_DIRS "${NIMBLE_COMPONENT_PATH}/nimble/nimble/host/services/gap/include")
 list(APPEND nanoFramework.Device.Bluetooth_INCLUDE_DIRS "${NIMBLE_COMPONENT_PATH}/nimble/nimble/host/services/gatt/include")
+list(APPEND nanoFramework.Device.Bluetooth_INCLUDE_DIRS "${NIMBLE_COMPONENT_PATH}/nimble/nimble/transport/include")
 
 # source files
 set(nanoFramework.Device.Bluetooth_SRCS

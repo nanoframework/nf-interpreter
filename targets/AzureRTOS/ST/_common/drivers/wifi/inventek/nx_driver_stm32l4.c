@@ -1207,7 +1207,7 @@ NX_PACKET *current_packet;
 ULONG packet_size;
 ULONG offset;
 uint16_t sent_size;
-UINT i;
+UINT i = 0;
 
     if (operation == NX_TCPIP_OFFLOAD_TCP_SERVER_SOCKET_LISTEN)
     {

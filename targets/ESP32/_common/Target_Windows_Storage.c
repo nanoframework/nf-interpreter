@@ -30,9 +30,9 @@
 #include <sys/stat.h>
 #include <esp32_idf.h>
 #include <esp_vfs_fat.h>
-#include <sdmmc_host.h>
-#include <sdspi_host.h>
-#include <include/sdmmc_cmd.h>
+#include <driver/sdmmc_host.h>
+#include <driver/sdspi_host.h>
+#include <sdmmc_cmd.h>
 
 #include <target_platform.h>
 
@@ -43,12 +43,20 @@
 
 static const char *TAG = "SDCard";
 
+static sdmmc_card_t *sdmmc_card;
+
 //
 //  Unmount SD card ( MMC/SDIO or SPI)
 //
-bool Storage_UnMountSDCard()
+bool Storage_UnMountSDCard(int driveIndex)
 {
-    if (esp_vfs_fat_sdmmc_unmount() != ESP_OK)
+    char mountPoint[] = INDEX0_DRIVE_LETTER;
+
+    // Change fatfs drive letter to mount point  D: -> /D for ESP32 VFS
+    mountPoint[1] = mountPoint[0] + driveIndex;
+    mountPoint[0] = '/';
+
+    if (esp_vfs_fat_sdcard_unmount(mountPoint, sdmmc_card) != ESP_OK)
     {
         return false;
     }
@@ -120,14 +128,13 @@ bool Storage_MountMMC(bool bit1Mode, int driveIndex)
         .max_files = SDC_MAX_OPEN_FILES,
         .allocation_unit_size = 16 * 1024};
 
-    sdmmc_card_t *card;
-    errCode = esp_vfs_fat_sdmmc_mount(mountPoint, &host, &slot_config, &mount_config, &card);
+    errCode = esp_vfs_fat_sdmmc_mount(mountPoint, &host, &slot_config, &mount_config, &sdmmc_card);
     if (errCode == ESP_ERR_INVALID_STATE)
     {
         // Invalid state means its already mounted, this can happen if you are trying to debug mount from managed code
         // and the code has already run & mounted
-        Storage_UnMountSDCard();
-        errCode = esp_vfs_fat_sdmmc_mount(mountPoint, &host, &slot_config, &mount_config, &card);
+        Storage_UnMountSDCard(driveIndex);
+        errCode = esp_vfs_fat_sdmmc_mount(mountPoint, &host, &slot_config, &mount_config, &sdmmc_card);
     }
 
     return LogMountResult(errCode);
@@ -155,7 +162,7 @@ bool Storage_MountSpi(int spiBus, uint32_t csPin, int driveIndex)
     ESP_LOGI(TAG, "Initializing SPI SD card");
 
     sdmmc_host_t host = SDSPI_HOST_DEFAULT();
-#if defined(CONFIG_IDF_TARGET_ESP32C3) || defined(CONFIG_IDF_TARGET_ESP32S3)
+#if defined(CONFIG_IDF_TARGET_ESP32C3) || defined(CONFIG_IDF_TARGET_ESP32S3) || defined(CONFIG_IDF_TARGET_ESP32C6) || defined(CONFIG_IDF_TARGET_ESP32H2)
     host.slot = spiBus;
 #else
     host.slot = spiBus + HSPI_HOST;
@@ -166,21 +173,19 @@ bool Storage_MountSpi(int spiBus, uint32_t csPin, int driveIndex)
         .max_files = 5,
         .allocation_unit_size = 16 * 1024};
 
-    sdmmc_card_t *card;
-
     // This initializes the slot without card detect (CD) and write protect (WP) signals.
     // Modify slot_config.gpio_cd and slot_config.gpio_wp if your board has these signals.
     sdspi_device_config_t slot_config = SDSPI_DEVICE_CONFIG_DEFAULT();
     slot_config.gpio_cs = (gpio_num_t)csPin;
     slot_config.host_id = (spi_host_device_t)host.slot;
 
-    errCode = esp_vfs_fat_sdspi_mount(mountPoint, &host, &slot_config, &mount_config, &card);
+    errCode = esp_vfs_fat_sdspi_mount(mountPoint, &host, &slot_config, &mount_config, &sdmmc_card);
     if (errCode == ESP_ERR_INVALID_STATE)
     {
         // Invalid state means its already mounted, this can happen if you are trying to debug mount from managed code
         // and the code has already run & mounted
-        Storage_UnMountSDCard();
-        errCode = esp_vfs_fat_sdspi_mount(mountPoint, &host, &slot_config, &mount_config, &card);
+        Storage_UnMountSDCard(driveIndex);
+        errCode = esp_vfs_fat_sdspi_mount(mountPoint, &host, &slot_config, &mount_config, &sdmmc_card);
     }
 
     return LogMountResult(errCode);

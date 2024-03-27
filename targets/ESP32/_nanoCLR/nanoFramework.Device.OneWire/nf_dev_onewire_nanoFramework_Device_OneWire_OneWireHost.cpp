@@ -39,7 +39,7 @@ HRESULT IRAM_ATTR oneWireInit()
         .stop_bits = UART_STOP_BITS_1,
         .flow_ctrl = UART_HW_FLOWCTRL_DISABLE,
         .rx_flow_ctrl_thresh = 0,
-        .use_ref_tick = false,
+        .source_clk = UART_SCLK_DEFAULT
     };
 
     // get GPIO pins configured for UART assigned to 1-Wire
@@ -93,7 +93,7 @@ uint8_t oneWireTouchReset(void)
     uart_set_baudrate(NF_ONEWIRE_ESP32_UART_NUM, 9600);
 
     uart_write_bytes(NF_ONEWIRE_ESP32_UART_NUM, (const char *)&reset, 1);
-    uart_read_bytes(NF_ONEWIRE_ESP32_UART_NUM, &presence, 1, 20 / portTICK_RATE_MS);
+    uart_read_bytes(NF_ONEWIRE_ESP32_UART_NUM, &presence, 1, 20 / portTICK_PERIOD_MS);
 
     // set UART baud rate to 115200bps (normal comm is performed at this baud rate)
     uart_set_baudrate(NF_ONEWIRE_ESP32_UART_NUM, 115200);
@@ -112,7 +112,7 @@ bool oneWireTouchBit(bool sendbit)
     uart_flush(NF_ONEWIRE_ESP32_UART_NUM);
 
     uart_write_bytes(NF_ONEWIRE_ESP32_UART_NUM, (const char *)&write, 1);
-    uart_read_bytes(NF_ONEWIRE_ESP32_UART_NUM, &reply, 1, 20 / portTICK_RATE_MS);
+    uart_read_bytes(NF_ONEWIRE_ESP32_UART_NUM, &reply, 1, 20 / portTICK_PERIOD_MS);
 
     // interpret 1-Wire reply
     return (reply == IWIRE_RD);
@@ -138,7 +138,7 @@ uint8_t oneWireTouchByte(uint8_t sendbyte)
     uart_flush(NF_ONEWIRE_ESP32_UART_NUM);
 
     uart_write_bytes(NF_ONEWIRE_ESP32_UART_NUM, (const char *)writeBuffer, 8);
-    uart_read_bytes(NF_ONEWIRE_ESP32_UART_NUM, readBuffer, 8, 20 / portTICK_RATE_MS);
+    uart_read_bytes(NF_ONEWIRE_ESP32_UART_NUM, readBuffer, 8, 20 / portTICK_PERIOD_MS);
 
     // reset send mask to interpret the reply
     send_mask = 0x01;
