@@ -902,7 +902,7 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeInit___VOID(
     esp_err = uart_driver_install(
         uart_num,
         // rx_buffer_size
-        bufferSize / 2,
+        bufferSize,
         // tx_buffer_size, not buffered
         0,
         // queue_size
