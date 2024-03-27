@@ -58,7 +58,7 @@
 #define FF_USE_STRFUNC 1
 #define FF_PRINT_LLI   0
 #define FF_PRINT_FLOAT 0
-#define FF_STRF_ENCODE 3
+#define FF_STRF_ENCODE 0
 /* FF_USE_STRFUNC switches string functions, f_gets(), f_putc(), f_puts() and
 /  f_printf().
 /
@@ -129,7 +129,7 @@
 /  memory for the working buffer, memory management functions, ff_memalloc() and
 /  ff_memfree() exemplified in ffsystem.c, need to be added to the project. */
 
-#define FF_LFN_UNICODE 2
+#define FF_LFN_UNICODE 0
 /* This option switches the character encoding on the API when LFN is enabled.
 /
 /   0: ANSI/OEM in current CP (TCHAR = char)
@@ -140,8 +140,8 @@
 /  Also behavior of string I/O functions will be affected by this option.
 /  When LFN is not enabled, this option has no effect. */
 
-#define FF_LFN_BUF 765
-#define FF_SFN_BUF 34
+#define FF_LFN_BUF 255
+#define FF_SFN_BUF 12
 /* This set of options defines size of file name members in the FILINFO structure
 /  which is used to read out directory items. These values should be suffcient for
 /  the file names to read. The maximum possible length of the read file name depends

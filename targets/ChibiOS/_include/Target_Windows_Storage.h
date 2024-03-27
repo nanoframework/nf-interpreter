@@ -11,8 +11,8 @@
 #if (HAL_USE_SDC == TRUE)
 #include <ff.h>
 #else
-// use copy of FATFS define ANSI/OEM at DBCS
-#define FF_LFN_BUF 765
+// use copy of FATFS define ANSI/OEM in SBCS
+#define FF_LFN_BUF 255
 #endif
 
 #if defined(HAL_USBH_USE_MSD) && (HAL_USBH_USE_MSD == TRUE)
