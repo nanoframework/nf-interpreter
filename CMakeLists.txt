@@ -362,26 +362,26 @@ endif()
 #################################################################
 
 #################################################################
-# enables support for SPI file system
-# (default is OFF so SPIFFS is NOT supported)
-option(NF_FEATURE_USE_SPIFFS "option to enable support for SPI file system")
+# enables support for littlefs file system
+# (default is OFF so littlefs is NOT supported)
+option(NF_FEATURE_USE_LITTLEFS "option to enable support for SPI file system")
 
-if(NF_FEATURE_USE_SPIFFS)
+if(NF_FEATURE_USE_LITTLEFS)
 
-    # this feature currently is supported only on ChibiOS and ESP32
+    # this feature currently is supported only on ChibiOS
     if(NOT RTOS_CHIBIOS_CHECK)
-        message(FATAL_ERROR "Support for SPIFFS is only available for ChibiOS Cortex-M and ESP32 targets.")
+        message(FATAL_ERROR "Support for SPIFFS is only available for ChibiOS Cortex-M targets.")
     endif()
 
-    # force inclusion of Windows.Storage API
-    set(API_Windows.Storage ON CACHE INTERNAL "Forcing Windows.Storage API option to ON")
+    # force inclusion of System.IO.FileSystem API
+    set(API_System.IO.FileSystem ON CACHE INTERNAL "Forcing System.IO.FileSystem API option to ON")
 
-    set(NF_FEATURE_USE_SPIFFS_OPTION TRUE CACHE INTERNAL "Set nF SPIFFS feature TRUE")
+    set(NF_FEATURE_USE_LITTLEFS_OPTION TRUE CACHE INTERNAL "Set nF littlefs feature TRUE")
 
-    message(STATUS "Support for SPIFFS is included")
+    message(STATUS "Support for littlefs is included")
 else()
-    set(NF_FEATURE_USE_SPIFFS_OPTION FALSE CACHE INTERNAL "Set nF SPIFFS feature FALSE")
-    message(STATUS "Support for SPIFFS **IS NOT** included")
+    set(NF_FEATURE_USE_LITTLEFS_OPTION FALSE CACHE INTERNAL "Set nF littlefs feature FALSE")
+    message(STATUS "Support for littlefs **IS NOT** included")
 endif()
 
 #################################################################

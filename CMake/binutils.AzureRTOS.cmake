@@ -114,13 +114,7 @@ macro(nf_add_platform_packages)
     # if(USE_FILESYSTEM_OPTION)
     #     find_package(CHIBIOS_FATFS REQUIRED QUIET)
     # endif()
-
-    # # SPIFFS
-    # if(NF_FEATURE_USE_SPIFFS)
-    #     find_package(STM32F7_CubePackage REQUIRED QUIET)
-    #     find_package(SPIFFS REQUIRED QUIET)
-    # endif()
-    
+   
     if(CHIBIOS_HAL_REQUIRED)
         find_package(ChibiOS_${TARGET_SERIES_SHORT}_HAL REQUIRED QUIET)
         find_package(ChibiOSnfOverlay REQUIRED QUIET)

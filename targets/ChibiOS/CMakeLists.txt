@@ -375,6 +375,49 @@ if(NF_FEATURE_USE_SPIFFS)
 
 endif()
 
+# if support for Lit is enabled add it to the build
+if(NF_FEATURE_USE_LITTLEFS)
+
+    # check if SPIFFS_SOURCE was specified or if it's empty (default is empty)
+    set(NO_LITTLEFS_SOURCE TRUE)
+
+    if(LITTLEFS_SOURCE)
+        if(NOT ${LITTLEFS_SOURCE} STREQUAL "")
+            set(NO_LITTLEFS_SOURCE FALSE)
+        endif()
+    endif()
+
+    if(NO_LITTLEFS_SOURCE)
+        # no littlefs source specified, download it from it's repo
+        message(STATUS "littlefs source from from GitHub repo")
+
+        FetchContent_Declare(
+            littlefs
+            GIT_REPOSITORY https://github.com/littlefs-project/littlefs
+            GIT_TAG "v2.9.1"
+        )
+
+    else()
+        # littlefs source was specified
+
+        message(STATUS "littlefs source from: ${LITTLEFS_SOURCE}")
+
+        FetchContent_Declare(
+            littlefs
+            SOURCE_DIR ${LITTLEFS_SOURCE}
+        )
+
+    endif()
+
+    # Check if population has already been performed
+    FetchContent_GetProperties(littlefs)
+    if(NOT littlefs_POPULATED)
+        # Fetch the content using previously declared details
+        FetchContent_Populate(littlefs)
+    endif()
+
+endif()
+
 # add target ChibiOS dirs
 add_subdirectory(_include)
 add_subdirectory(_common)

@@ -12,9 +12,6 @@
 #if (HAL_USBH_USE_MSD == TRUE)
 #include "usbh/dev/msd.h"
 #endif
-#if (NF_FEATURE_USE_SPIFFS == TRUE)
-#include <hal_spiffs.h>
-#endif
 
 int32_t GetInternalDriveIndex(char *drive)
 {
@@ -51,7 +48,7 @@ struct FileOperation
 #if (HAL_USE_SDC == TRUE) || (HAL_USBH_USE_MSD == TRUE)
     FIL *FatFile;
 #endif
-#if (NF_FEATURE_USE_SPIFFS == TRUE)
+#if defined(NF_FEATURE_USE_SPIFFS) && (NF_FEATURE_USE_SPIFFS == TRUE)
     spiffs_file *SpiffsFile;
     spiffs *SpiffsInstance;
 #endif
@@ -106,7 +103,7 @@ static THD_FUNCTION(ReadTextWorkingThread, arg)
         platform_free(fileIoOperation->FatFile);
     }
 #endif
-#if (NF_FEATURE_USE_SPIFFS == TRUE)
+#if defined(NF_FEATURE_USE_SPIFFS) && (NF_FEATURE_USE_SPIFFS == TRUE)
     if (fileIoOperation->SpiffsFile != NULL)
     {
         uint32_t bytesRead = SPIFFS_read(
@@ -181,7 +178,7 @@ static THD_FUNCTION(WriteTextWorkingThread, arg)
         platform_free(fileIoOperation->FatFile);
     }
 #endif
-#if (NF_FEATURE_USE_SPIFFS == TRUE)
+#if defined(NF_FEATURE_USE_SPIFFS) && (NF_FEATURE_USE_SPIFFS == TRUE)
     if (fileIoOperation->SpiffsFile != NULL)
     {
         if (SPIFFS_write(
@@ -254,7 +251,7 @@ static THD_FUNCTION(WriteBinaryWorkingThread, arg)
         platform_free(fileIoOperation->FatFile);
     }
 #endif
-#if (NF_FEATURE_USE_SPIFFS == TRUE)
+#if defined(NF_FEATURE_USE_SPIFFS) && (NF_FEATURE_USE_SPIFFS == TRUE)
     if (fileIoOperation->SpiffsFile != NULL)
     {
         if (SPIFFS_write(
@@ -328,7 +325,7 @@ static THD_FUNCTION(ReadBinaryWorkingThread, arg)
         platform_free(fileIoOperation->FatFile);
     }
 #endif
-#if (NF_FEATURE_USE_SPIFFS == TRUE)
+#if defined(NF_FEATURE_USE_SPIFFS) && (NF_FEATURE_USE_SPIFFS == TRUE)
     if (fileIoOperation->SpiffsFile != NULL)
     {
         uint32_t bytesRead = SPIFFS_read(
@@ -398,7 +395,7 @@ HRESULT Library_win_storage_native_Windows_Storage_FileIO::
     FIL *fatFile = NULL;
     FRESULT operationResult;
 #endif
-#if (NF_FEATURE_USE_SPIFFS == TRUE)
+#if defined(NF_FEATURE_USE_SPIFFS) && (NF_FEATURE_USE_SPIFFS == TRUE)
     spiffs_file *spiffsFile = NULL;
     spiffs *driveFs = NULL;
     int32_t driveIndex;
@@ -431,7 +428,7 @@ HRESULT Library_win_storage_native_Windows_Storage_FileIO::
 
         if (WORKING_DRIVE_IS_INTERNAL_DRIVE)
         {
-#if (NF_FEATURE_USE_SPIFFS == TRUE)
+#if defined(NF_FEATURE_USE_SPIFFS) && (NF_FEATURE_USE_SPIFFS == TRUE)
             // SPIFFS drive workflow
 
             // get SPIFFS drive index...
@@ -502,7 +499,7 @@ HRESULT Library_win_storage_native_Windows_Storage_FileIO::
 #if ((HAL_USE_SDC == TRUE) || (HAL_USBH_USE_MSD == TRUE))
         fileIoOperation->FatFile = fatFile;
 #endif
-#if (NF_FEATURE_USE_SPIFFS == TRUE)
+#if defined(NF_FEATURE_USE_SPIFFS) && (NF_FEATURE_USE_SPIFFS == TRUE)
         fileIoOperation->SpiffsFile = spiffsFile;
         fileIoOperation->SpiffsInstance = driveFs;
 #endif
@@ -598,7 +595,7 @@ HRESULT Library_win_storage_native_Windows_Storage_FileIO::WriteText___STATIC__V
     FIL *fatFile = NULL;
     FRESULT operationResult;
 #endif
-#if (NF_FEATURE_USE_SPIFFS == TRUE)
+#if defined(NF_FEATURE_USE_SPIFFS) && (NF_FEATURE_USE_SPIFFS == TRUE)
     spiffs_file *spiffsFile = NULL;
     spiffs *driveFs = NULL;
     int32_t driveIndex;
@@ -627,7 +624,7 @@ HRESULT Library_win_storage_native_Windows_Storage_FileIO::WriteText___STATIC__V
 
         if (WORKING_DRIVE_IS_INTERNAL_DRIVE)
         {
-#if (NF_FEATURE_USE_SPIFFS == TRUE)
+#if defined(NF_FEATURE_USE_SPIFFS) && (NF_FEATURE_USE_SPIFFS == TRUE)
             // SPIFFS drive workflow
 
             // get SPIFFS drive index...
@@ -695,7 +692,7 @@ HRESULT Library_win_storage_native_Windows_Storage_FileIO::WriteText___STATIC__V
 #if ((HAL_USE_SDC == TRUE) || (HAL_USBH_USE_MSD == TRUE))
         fileIoOperation->FatFile = fatFile;
 #endif
-#if (NF_FEATURE_USE_SPIFFS == TRUE)
+#if defined(NF_FEATURE_USE_SPIFFS) && (NF_FEATURE_USE_SPIFFS == TRUE)
         fileIoOperation->SpiffsFile = spiffsFile;
         fileIoOperation->SpiffsInstance = driveFs;
 #endif
@@ -790,7 +787,7 @@ HRESULT Library_win_storage_native_Windows_Storage_FileIO::
     FIL *fatFile = NULL;
     FRESULT operationResult;
 #endif
-#if (NF_FEATURE_USE_SPIFFS == TRUE)
+#if defined(NF_FEATURE_USE_SPIFFS) && (NF_FEATURE_USE_SPIFFS == TRUE)
     spiffs_file *spiffsFile = NULL;
     spiffs *driveFs = NULL;
     int32_t driveIndex;
@@ -816,7 +813,7 @@ HRESULT Library_win_storage_native_Windows_Storage_FileIO::
 
         if (WORKING_DRIVE_IS_INTERNAL_DRIVE)
         {
-#if (NF_FEATURE_USE_SPIFFS == TRUE)
+#if defined(NF_FEATURE_USE_SPIFFS) && (NF_FEATURE_USE_SPIFFS == TRUE)
             // SPIFFS drive workflow
 
             // get SPIFFS drive index...
@@ -908,7 +905,7 @@ HRESULT Library_win_storage_native_Windows_Storage_FileIO::
 #if ((HAL_USE_SDC == TRUE) || (HAL_USBH_USE_MSD == TRUE))
         fileIoOperation->FatFile = fatFile;
 #endif
-#if (NF_FEATURE_USE_SPIFFS == TRUE)
+#if defined(NF_FEATURE_USE_SPIFFS) && (NF_FEATURE_USE_SPIFFS == TRUE)
         fileIoOperation->SpiffsFile = spiffsFile;
         fileIoOperation->SpiffsInstance = driveFs;
 #endif
@@ -1003,7 +1000,7 @@ HRESULT Library_win_storage_native_Windows_Storage_FileIO::
     FIL *fatFile = NULL;
     FRESULT operationResult;
 #endif
-#if (NF_FEATURE_USE_SPIFFS == TRUE)
+#if defined(NF_FEATURE_USE_SPIFFS) && (NF_FEATURE_USE_SPIFFS == TRUE)
     spiffs_file *spiffsFile = NULL;
     spiffs *driveFs = NULL;
     int32_t driveIndex;
@@ -1029,7 +1026,7 @@ HRESULT Library_win_storage_native_Windows_Storage_FileIO::
 
         if (WORKING_DRIVE_IS_INTERNAL_DRIVE)
         {
-#if (NF_FEATURE_USE_SPIFFS == TRUE)
+#if defined(NF_FEATURE_USE_SPIFFS) && (NF_FEATURE_USE_SPIFFS == TRUE)
             // SPIFFS drive workflow
 
             // get SPIFFS drive index...
@@ -1121,7 +1118,7 @@ HRESULT Library_win_storage_native_Windows_Storage_FileIO::
 #if ((HAL_USE_SDC == TRUE) || (HAL_USBH_USE_MSD == TRUE))
         fileIoOperation->FatFile = fatFile;
 #endif
-#if (NF_FEATURE_USE_SPIFFS == TRUE)
+#if defined(NF_FEATURE_USE_SPIFFS) && (NF_FEATURE_USE_SPIFFS == TRUE)
         fileIoOperation->SpiffsFile = spiffsFile;
         fileIoOperation->SpiffsInstance = driveFs;
 #endif

@@ -13,11 +13,12 @@
 #include <target_platform.h>
 #include <target_os.h>
 #include <targetHAL_StorageOperation.h>
-#include <hal_spiffs.h>
 
 #if HAS_ACCESSIBLE_STORAGE
 
 #if defined(NF_FEATURE_USE_SPIFFS) && (NF_FEATURE_USE_SPIFFS == TRUE)
+
+#include <hal_spiffs.h>
 
 uint32_t HAL_StorageOperation(
     uint8_t operation,
@@ -128,5 +129,26 @@ done:
 }
 
 #endif // HAL_USE_SPIFFS
+
+#if defined(NF_FEATURE_USE_LITTLEFS) && (NF_FEATURE_USE_LITTLEFS == TRUE)
+
+uint32_t HAL_StorageOperation(
+    uint8_t operation,
+    uint32_t nameLength,
+    uint32_t dataLength,
+    uint32_t offset,
+    uint8_t *data)
+{
+    (void)offset;
+    (void)dataLength;
+    (void)nameLength;
+    (void)data;
+    (void)operation;
+
+    return StorageOperationErrorCode::PlatformError;
+}
+
+#endif // NF_FEATURE_USE_LITTLEFS
+
 #endif // HAS_ACCESSIBLE_STORAGE
 #endif // I_AM_NANOCLR

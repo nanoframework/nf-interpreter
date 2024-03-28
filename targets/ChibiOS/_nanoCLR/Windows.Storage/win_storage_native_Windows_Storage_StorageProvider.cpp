@@ -5,7 +5,7 @@
 
 #include <win_storage_native_target.h>
 
-#if (NF_FEATURE_USE_SPIFFS == TRUE)
+#if defined(NF_FEATURE_USE_SPIFFS) && (NF_FEATURE_USE_SPIFFS == TRUE)
 #include <hal_spiffs.h>
 #endif
 
@@ -17,7 +17,7 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageProvider::FormatVolume
     char workingDrive[DRIVE_LETTER_LENGTH];
     const char *driveName;
 
-#if (NF_FEATURE_USE_SPIFFS == TRUE)
+#if defined(NF_FEATURE_USE_SPIFFS) && (NF_FEATURE_USE_SPIFFS == TRUE)
     int32_t driveIndex;
 #endif
 
@@ -34,7 +34,7 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageProvider::FormatVolume
 
     if (WORKING_DRIVE_IS_INTERNAL_DRIVE)
     {
-#if (NF_FEATURE_USE_SPIFFS == TRUE)
+#if defined(NF_FEATURE_USE_SPIFFS) && (NF_FEATURE_USE_SPIFFS == TRUE)
         // SPIFFS drive workflow
         driveIndex = GetInternalDriveIndex(workingDrive);
 

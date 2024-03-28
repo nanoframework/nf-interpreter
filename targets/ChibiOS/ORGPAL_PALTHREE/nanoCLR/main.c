@@ -17,7 +17,7 @@
 #include <nanoHAL_v2.h>
 #include <targetPAL.h>
 
-extern int32_t hal_spiffs_config();
+extern int32_t hal_lfs_config();
 
 // need to declare the Receiver thread here
 osThreadDef(ReceiverThread, osPriorityHigh, 2048, "ReceiverThread");
@@ -96,9 +96,9 @@ int main(void)
     // this has to be called after osKernelInitialize, otherwise an hard fault will occur
     Target_ExternalMemoryInit();
 
-#if (NF_FEATURE_USE_SPIFFS == TRUE)
-    // config and init SPIFFS
-    hal_spiffs_config();
+#if (NF_FEATURE_USE_LITTLEFS == TRUE)
+    // config and init littlefs
+    hal_lfs_config();
 #endif
 
     //  Initializes a serial-over-USB CDC driver.

@@ -294,12 +294,6 @@ macro(nf_add_platform_dependencies target)
     #     find_package(CHIBIOS_FATFS REQUIRED)
     # endif()
 
-    # # SPIFFS
-    # if(NF_FEATURE_USE_SPIFFS)
-    #     find_package(STM32F7_CubePackage REQUIRED)
-    #     find_package(SPIFFS REQUIRED)
-    # endif()
-
 endmacro()
 
 # Add ESP32 platform include directories to a specific CMake target
