@@ -7,27 +7,10 @@
 
 mutex_t lfs_mutex[LITTLEFS_INSTANCES_COUNT];
 
-// spiffs fs[SPIFFS_INSTANCES_COUNT];
-// spiffs_config spiffs_cfg[SPIFFS_INSTANCES_COUNT];
 bool lfsFileSystemReady;
 lfs_t lfs[LITTLEFS_INSTANCES_COUNT];
 struct lfs_config lfsConfig[LITTLEFS_INSTANCES_COUNT];
 int8_t lfsInstanceIndex[LITTLEFS_INSTANCES_COUNT];
-
-// #if defined(__GNUC__)
-// __attribute__((aligned(32)))
-// #endif
-// uint8_t spiffs_work_buffer[SPIFFS_INSTANCES_COUNT][SPIFFS_WORK_BUFFER_SIZE];
-
-// #if defined(__GNUC__)
-// __attribute__((aligned(32)))
-// #endif
-// uint8_t spiffs_fd_space[SPIFFS_INSTANCES_COUNT][SPIFFS_FILE_DESCRIPTORS_SPACE];
-
-// #if defined(__GNUC__)
-// __attribute__((aligned(32)))
-// #endif
-// uint8_t spiffs_cache[SPIFFS_INSTANCES_COUNT][SPIFFS_CACHE_SIZE];
 
 void *hal_lfs_getReadHandler(int32_t index)
 {
@@ -311,7 +294,7 @@ int32_t hal_lfs_config()
     // // code block to assist testing littlefs
     // int32_t lfsIndex = 1;
     // char writeBuf[] = {
-    //     "Hello! if you get this message, congratulations, that's because SPIFFS is working on your device!!"};
+    //     "Hello! if you get this message, congratulations, that's because littlefs is working on your device!!"};
     // char readBuf[sizeof(writeBuf)];
 
     // lfs_file_t file;
@@ -366,99 +349,6 @@ int hal_lfs_unlock(const struct lfs_config *c)
     // nothing interesting to return...
     return 0;
 }
-
-// uint32_t hal_lfs_get_totalsize(int spiffsIndex)
-// {
-//     switch (spiffsIndex)
-//     {
-//         case 0:
-//             return SPIFFS0_TOTAL_SIZE;
-//             break;
-
-// #if SPIFFS_INSTANCES_COUNT > 1
-//         case 1:
-//             return SPIFFS1_TOTAL_SIZE;
-//             break;
-// #endif
-
-//         default:
-//             return 0;
-//     }
-// }
-
-// uint32_t hal_lfs_get_eraseblocksize(int spiffsIndex)
-// {
-//     switch (spiffsIndex)
-//     {
-//         case 0:
-//             return SPIFFS0_ERASE_BLOCK_SIZE;
-//             break;
-
-// #if SPIFFS_INSTANCES_COUNT > 1
-//         case 1:
-//             return SPIFFS1_ERASE_BLOCK_SIZE;
-//             break;
-// #endif
-
-//         default:
-//             return 0;
-//     }
-// }
-
-// uint32_t hal_lfs_get_logicalblocksize(int spiffsIndex)
-// {
-//     switch (spiffsIndex)
-//     {
-//         case 0:
-//             return SPIFFS0_LOGICAL_BLOCK_SIZE;
-//             break;
-
-// #if SPIFFS_INSTANCES_COUNT > 1
-//         case 1:
-//             return SPIFFS0_LOGICAL_BLOCK_SIZE;
-//             break;
-// #endif
-
-//         default:
-//             return 0;
-//     }
-// }
-
-// int32_t hal_lfs_get_fs_index(spiffs *fsInstance)
-// {
-//     if (fsInstance == &fs[0])
-//     {
-//         return 0;
-//     }
-// #if SPIFFS_INSTANCES_COUNT > 1
-//     if (fsInstance == &fs[1])
-//     {
-//         return 1;
-//     }
-// #endif
-//     else
-//     {
-//         HAL_AssertEx();
-//         return -1;
-//     }
-// }
-
-lfs_t *hal_lfs_get_fs_from_index(int32_t index)
-{
-    return &lfs[index];
-}
-
-// int32_t hal_lfs_get_instances_count()
-// {
-//     // there is at least one
-//     int32_t count = 1;
-
-// #if SPIFFS_INSTANCES_COUNT > 1
-//     count++;
-// #endif
-
-//     return count;
-// }
 
 int hal_lfs_read(const struct lfs_config *c, lfs_block_t block, lfs_off_t off, void *buffer, lfs_size_t size)
 {
