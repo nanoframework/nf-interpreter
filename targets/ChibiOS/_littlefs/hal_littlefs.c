@@ -392,6 +392,18 @@ lfs_t *hal_lfs_get_fs_from_index(int32_t index)
     return &lfs[index];
 }
 
+int32_t hal_lfs_get_instances_count()
+{
+    // there is at least one
+    int32_t count = 1;
+
+#if LITTLEFS_INSTANCES_COUNT > 1
+    count++;
+#endif
+
+    return count;
+}
+
 // Software CRC implementation with small lookup table
 uint32_t lfs_crc(uint32_t crc, const void *buffer, size_t size)
 {

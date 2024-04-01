@@ -36,6 +36,7 @@ extern "C"
     int hal_lfs_unlock(const struct lfs_config *c);
 
     lfs_t *hal_lfs_get_fs_from_index(int32_t index);
+    int32_t hal_lfs_get_instances_count();
 
 #ifdef __cplusplus
 }
