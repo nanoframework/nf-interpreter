@@ -16,9 +16,9 @@
 
 #if HAS_ACCESSIBLE_STORAGE
 
-#if defined(NF_FEATURE_USE_SPIFFS) && (NF_FEATURE_USE_SPIFFS == TRUE)
+#if defined(NF_FEATURE_USE_LITTLEFS) && (NF_FEATURE_USE_LITTLEFS == TRUE)
 
-#include <hal_spiffs.h>
+#include <hal_littlefs.h>
 
 uint32_t HAL_StorageOperation(
     uint8_t operation,
@@ -29,8 +29,9 @@ uint32_t HAL_StorageOperation(
 {
     (void)offset;
 
-    spiffs_file *spiffsFile = NULL;
-    spiffs *driveFs = NULL;
+    lfs_file_t *file = NULL;
+    lfs_t *lfsDrive = NULL;
+
     // default to drive 0
     int32_t driveIndex = 0;
     StorageOperationErrorCode errorCode = StorageOperationErrorCode::NoError;
@@ -56,38 +57,32 @@ uint32_t HAL_StorageOperation(
     // Just making sure it's properly 0 terminated
     storageName[nameLength] = '\0';
 
-    //... and pointer to the SPIFFS instance
-    driveFs = hal_spiffs_get_fs_from_index(driveIndex);
+    //... and pointer to the littlefs instance
+    lfsDrive = hal_lfs_get_fs_from_index(driveIndex);
 
     if (operation == StorageOperation_Monitor::StorageOperation_Write)
     {
-        // Open the file in read mode
-        *spiffsFile = SPIFFS_open(driveFs, storageName, SPIFFS_CREAT | SPIFFS_TRUNC | SPIFFS_RDWR, 0);
-        if (*spiffsFile < 0)
+        // Open/create the file in read mode
+        if (lfs_file_open(lfsDrive, file, storageName, LFS_O_RDWR | LFS_O_CREAT) != LFS_ERR_OK)
         {
             errorCode = StorageOperationErrorCode::WriteError;
 
             goto done;
         }
 
-        if (SPIFFS_write(
-                driveFs,
-                *spiffsFile,
-                (data + nameLength),
-                dataLength) < 0)
+        if (lfs_file_write(lfsDrive, file, (data + nameLength), dataLength) != (lfs_ssize_t)dataLength)
         {
             // failed to write expected number of bytes
             errorCode = StorageOperationErrorCode::WriteError;
         }
 
         // close file
-        SPIFFS_close(driveFs, *spiffsFile);
+        lfs_file_close(lfsDrive, file);
     }
     else if (operation == StorageOperation_Monitor::StorageOperation_Append)
     {
-        // Open the file in apped mode
-        *spiffsFile = SPIFFS_open(driveFs, storageName, SPIFFS_APPEND | SPIFFS_RDWR, 0);
-        if (*spiffsFile < 0)
+        // Open/create the file in read mode
+        if (lfs_file_open(lfsDrive, file, storageName, LFS_O_RDWR | LFS_O_APPEND) != LFS_ERR_OK)
         {
             errorCode = StorageOperationErrorCode::WriteError;
 
@@ -95,23 +90,19 @@ uint32_t HAL_StorageOperation(
         }
 
         // append more data
-        if (SPIFFS_write(
-                driveFs,
-                *spiffsFile,
-                (data + nameLength),
-                dataLength) < 0)
+        if (lfs_file_write(lfsDrive, file, (data + nameLength), dataLength) != (lfs_ssize_t)dataLength)
         {
             // failed to write expected number of bytes
             errorCode = StorageOperationErrorCode::WriteError;
         }
 
         // close file
-        SPIFFS_close(driveFs, *spiffsFile);
+        lfs_file_close(lfsDrive, file);
     }
     else if (operation == StorageOperation_Monitor::StorageOperation_Delete)
     {
         // remove the file
-        if (SPIFFS_remove(driveFs, storageName) < 0)
+        if (lfs_remove(lfsDrive, storageName) != LFS_ERR_OK)
         {
             errorCode = StorageOperationErrorCode::DeleteError;
         }
@@ -126,26 +117,6 @@ done:
     }
 
     return errorCode;
-}
-
-#endif // HAL_USE_SPIFFS
-
-#if defined(NF_FEATURE_USE_LITTLEFS) && (NF_FEATURE_USE_LITTLEFS == TRUE)
-
-uint32_t HAL_StorageOperation(
-    uint8_t operation,
-    uint32_t nameLength,
-    uint32_t dataLength,
-    uint32_t offset,
-    uint8_t *data)
-{
-    (void)offset;
-    (void)dataLength;
-    (void)nameLength;
-    (void)data;
-    (void)operation;
-
-    return StorageOperationErrorCode::PlatformError;
 }
 
 #endif // NF_FEATURE_USE_LITTLEFS
