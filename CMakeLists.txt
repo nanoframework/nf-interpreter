@@ -370,7 +370,7 @@ if(NF_FEATURE_USE_LITTLEFS)
 
     # this feature currently is supported only on ChibiOS
     if(NOT RTOS_CHIBIOS_CHECK)
-        message(FATAL_ERROR "Support for SPIFFS is only available for ChibiOS Cortex-M targets.")
+        message(FATAL_ERROR "Support for littlefs is only available for ChibiOS Cortex-M targets.")
     endif()
 
     # force inclusion of System.IO.FileSystem API

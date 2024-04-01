@@ -19,7 +19,7 @@ set(STM32F7_CubePackage_SRCS
 
     # add HAL files here as required
 
-    # SPIFFS
+    # littlefs
     stm32f7xx_hal_dma.c
     stm32f7xx_hal_qspi.c
 )

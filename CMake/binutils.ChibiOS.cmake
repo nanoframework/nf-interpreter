@@ -170,7 +170,6 @@ macro(nf_add_platform_dependencies target)
         nf_add_lib_native_assemblies(
             EXTRA_SOURCES
                 ${CHIBIOS_FATFS_SOURCES}
-                ${SPIFFS_SOURCES}
                 ${littlefs_SOURCES}
             EXTRA_INCLUDES
                 ${CHIBIOS_INCLUDE_DIRS}
@@ -180,7 +179,6 @@ macro(nf_add_platform_dependencies target)
                 ${CHIBIOS_CONTRIB_INCLUDE_DIRS}
                 ${lWIP_INCLUDE_DIRS}
                 ${CHIBIOS_FATFS_INCLUDE_DIRS}
-                ${SPIFFS_INCLUDE_DIRS}
                 ${littlefs_INCLUDE_DIRS}
                 ${TARGET_CHIBIOS_COMMON_INCLUDE_DIRS}
                 ${TARGET_CHIBIOS_NANOCLR_INCLUDE_DIRS}
@@ -237,7 +235,6 @@ macro(nf_add_platform_include_directories target)
         ${TARGET_CMSIS_COMMON_INCLUDE_DIRS}
         ${TARGET_CHIBIOS_COMMON_INCLUDE_DIRS}
         ${lWIP_INCLUDE_DIRS}
-        ${SPIFFS_INCLUDE_DIRS}
         ${littlefs_INCLUDE_DIRS}
 
     )

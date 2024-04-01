@@ -332,53 +332,10 @@ if(STM32_CUBE_PACKAGE_REQUIRED)
     ProcessSTM32CubePackage()
 endif()
 
-# if support for SPIFFS is enabled add it to the build
-if(NF_FEATURE_USE_SPIFFS)
-
-    # check if SPIFFS_SOURCE was specified or if it's empty (default is empty)
-    set(NO_SPIFFS_SOURCE TRUE)
-
-    if(SPIFFS_SOURCE)
-        if(NOT ${SPIFFS_SOURCE} STREQUAL "")
-            set(NO_SPIFFS_SOURCE FALSE)
-        endif()
-    endif()
-
-    if(NO_SPIFFS_SOURCE)
-        # no SPIFFS source specified, download it from it's repo
-        message(STATUS "SPIFFS source from from GitHub repo")
-
-        FetchContent_Declare(
-            spiffs
-            GIT_REPOSITORY https://github.com/nanoframework/spiffs
-            GIT_TAG "nf-build"
-        )
-
-    else()
-        # SPIFFS source was specified
-
-        message(STATUS "SPIFFS source from: ${SPIFFS_SOURCE}")
-
-        FetchContent_Declare(
-            spiffs
-            SOURCE_DIR ${SPIFFS_SOURCE}
-        )
-
-    endif()
-
-    # Check if population has already been performed
-    FetchContent_GetProperties(spiffs)
-    if(NOT spiffs_POPULATED)
-        # Fetch the content using previously declared details
-        FetchContent_Populate(spiffs)
-    endif()
-
-endif()
-
 # if support for Lit is enabled add it to the build
 if(NF_FEATURE_USE_LITTLEFS)
 
-    # check if SPIFFS_SOURCE was specified or if it's empty (default is empty)
+    # check if LITTLEFS_SOURCE was specified or if it's empty (default is empty)
     set(NO_LITTLEFS_SOURCE TRUE)
 
     if(LITTLEFS_SOURCE)
