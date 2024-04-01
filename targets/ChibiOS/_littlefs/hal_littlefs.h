@@ -35,6 +35,8 @@ extern "C"
     int hal_lfs_lock(const struct lfs_config *c);
     int hal_lfs_unlock(const struct lfs_config *c);
 
+    lfs_t *hal_lfs_get_fs_from_index(int32_t index);
+
 #ifdef __cplusplus
 }
 #endif

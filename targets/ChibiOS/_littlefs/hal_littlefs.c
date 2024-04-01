@@ -387,6 +387,11 @@ int hal_lfs_sync(const struct lfs_config *c)
     return 0;
 }
 
+lfs_t *hal_lfs_get_fs_from_index(int32_t index)
+{
+    return &lfs[index];
+}
+
 // Software CRC implementation with small lookup table
 uint32_t lfs_crc(uint32_t crc, const void *buffer, size_t size)
 {
