@@ -376,15 +376,18 @@ int NF_ESP32_OpenThread_Open(HAL_Configuration_NetworkInterface *config)
 {
     (void)config;
 
-    // We can start Thread automatocally using parameters from CmakePreset.json
+    // We can start Thread automatically using parameters from CmakePreset.json
     // If not available then can be configured and started from managed code (nanoFramework.Networking.Thread)
-    if ( IsAutoStartConfigured())
-    {
-        if (NF_ESP32_InitialiseOpenThread() == ESP_OK)
-        {
-            return NF_ESP32_Wait_NetNumber(IDF_OT_DEF);
-        }
-    }
+
+    // Disabled until further testing done
+    // Probably have model of not automatically starting from build config but from managed code
+    // if ( IsAutoStartConfigured())
+    // {
+    //     if (NF_ESP32_InitialiseOpenThread() == ESP_OK)
+    //     {
+    //         return NF_ESP32_Wait_NetNumber(IDF_OT_DEF);
+    //     }
+    // }
 
     return SOCK_SOCKET_ERROR;
 }

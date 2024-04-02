@@ -654,6 +654,7 @@ macro(nf_add_idf_as_library)
         vfs
         esp_netif
         esp_eth
+        esp_psram
     )
 
     # set list with the libraries for IDF components added
@@ -669,6 +670,7 @@ macro(nf_add_idf_as_library)
         idf::vfs
         idf::esp_netif
         idf::esp_eth
+        idf::esp_psram
     )
 
     if(HAL_USE_BLE_OPTION)
@@ -960,8 +962,6 @@ macro(nf_add_idf_as_library)
 
     nf_setup_partition_tables_generator()
 
-    # set variables to mirror SDK CONFIG options
-
     # need to read the supplied SDK CONFIG file        
     file(READ
         ${CMAKE_SOURCE_DIR}/sdkconfig
@@ -969,7 +969,7 @@ macro(nf_add_idf_as_library)
 
     # find out if there is support for PSRAM
     set(SPIRAM_SUPPORT_PRESENT -1)
-    string(FIND ${SDKCONFIG_DEFAULT_CONTENTS} "CONFIG_SOC_SPIRAM_SUPPORTED=y" SPIRAM_SUPPORT_PRESENT)
+    string(FIND ${SDKCONFIG_DEFAULT_CONTENTS} "CONFIG_SPIRAM=y" SPIRAM_SUPPORT_PRESENT)
     
     # set variable
     if(${SPIRAM_SUPPORT_PRESENT} GREATER -1)

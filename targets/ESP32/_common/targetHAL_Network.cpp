@@ -520,3 +520,8 @@ void nanoHAL_Network_Initialize()
     ESP_ERROR_CHECK(esp_event_handler_instance_register(OPENTHREAD_EVENT, ESP_EVENT_ANY_ID, &thread_event_handler, NULL, NULL));
 #endif
 }
+
+void nanoHAL_Network_Uninitialize()
+{
+    esp_event_loop_delete_default();
+}

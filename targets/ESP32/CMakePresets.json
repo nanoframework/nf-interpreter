@@ -355,7 +355,7 @@
                 "NF_FEATURE_RTC": "ON",
                 "NF_FEATURE_HAS_SDCARD": "ON",
                 "ESP32_USB_CDC": "ON",
-                "ESP32_RESERVED_RAM_FOR_IDF_ALLOCATION": "150"
+                "ESP32_RESERVED_RAM_FOR_IDF_ALLOCATION": "100"
             }
         },
         {
@@ -376,7 +376,7 @@
                 "ESP32_USB_CDC": "ON",
                 "API_nanoFramework.Device.Bluetooth": "ON",
                 "API_System.Device.I2c.Slave": "ON",
-                "ESP32_RESERVED_RAM_FOR_IDF_ALLOCATION": "180"
+                "ESP32_RESERVED_RAM_FOR_IDF_ALLOCATION": "100"
             }
         },
         {

@@ -320,9 +320,9 @@ bool LWIP_SOCKETS_Driver::Initialize()
                 i))
         {
             // failed to load configuration
-            // FIXME output error?
+            // FIXME output error, error message log ?
             // move to the next, if any
-            return FALSE;
+            continue; 
         }
         _ASSERTE(networkConfiguration.StartupAddressMode > 0);
 
@@ -333,13 +333,13 @@ bool LWIP_SOCKETS_Driver::Initialize()
         {
             g_LWIP_SOCKETS_Driver.m_interfaces[i].m_interfaceNumber = -1;
             DEBUG_HANDLE_SOCKET_ERROR("Network init", FALSE);
-            return FALSE;
+            continue;
         }
 
         InitializeInterfaceIndex(i, interfaceNumber, networkConfiguration);
     }
 
-    return TRUE;
+    return true;
 }
 
 bool LWIP_SOCKETS_Driver::Uninitialize()
@@ -359,8 +359,7 @@ bool LWIP_SOCKETS_Driver::Uninitialize()
         Network_Interface_Close(i);
     }
 
-    // FIXME    tcpip_shutdown();
-    // tcpip_shutdown is MS method added to lwip tcpip.c
+    nanoHAL_Network_Uninitialize();
 
     return TRUE;
 }
