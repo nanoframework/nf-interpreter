@@ -54,9 +54,11 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_Directory::ExistsNative___STATIC_
 #if defined(NF_FEATURE_USE_LITTLEFS) && (NF_FEATURE_USE_LITTLEFS == TRUE)
 
     int32_t driveIndex;
+    int32_t statResult;
     char workingDrive[DRIVE_LETTER_LENGTH];
-    lfs_dir_t *lfsDir = NULL;
+    bool exists = false;
     lfs_t *fsDrive = NULL;
+    lfs_info info;
 
     const char *workingPath = stack.Arg0().RecoverString();
     // check for null argument
@@ -71,11 +73,27 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_Directory::ExistsNative___STATIC_
     //... and pointer to the littlefs instance
     fsDrive = hal_lfs_get_fs_from_index(driveIndex);
 
-    // enough to check if the directory can be opened
-    stack.SetResult_Boolean(lfs_dir_open(lfs, lfsDir, workingPath) == LFS_ERR_OK);
+    statResult = lfs_stat(fsDrive, workingPath, &info);
+    if (statResult == LFS_ERR_NOENT)
+    {
+        // directory doesn't exist
+        exists = false;
+    }
+    else
+    {
+        // check if entry is a directory
+        if (statResult == LFS_ERR_OK && info.type == LFS_TYPE_DIR)
+        {
+            exists = true;
+        }
+        else
+        {
+            // not a directory
+            exists = false;
+        }
+    }
 
-    // need to close the directory
-    lfs_dir_close(fsDrive, lfsDir);
+    stack.SetResult_Boolean(exists);
 
 #else
 
@@ -326,7 +344,7 @@ static HRESULT BuildPathsArray(lfs_t *fsDrive, const char *folderPath, CLR_RT_He
 {
     NANOCLR_HEADER();
 
-    char *stringBuffer = NULL;
+    char *workingPath = NULL;
 
     uint32_t operationResult;
     lfs_dir_t *lfsDir = NULL;
@@ -345,10 +363,10 @@ static HRESULT BuildPathsArray(lfs_t *fsDrive, const char *folderPath, CLR_RT_He
     pathEntry = (CLR_RT_HeapBlock *)storageItem.DereferenceArray()->GetFirstElement();
 
     // allocate memory for buffers
-    stringBuffer = (char *)platform_malloc(LFS_NAME_MAX + 1);
+    workingPath = (char *)platform_malloc(LFS_NAME_MAX + 1);
 
     // sanity check for successful malloc
-    if (stringBuffer == NULL)
+    if (workingPath == NULL)
     {
         // failed to allocate memory
         NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
@@ -362,20 +380,20 @@ static HRESULT BuildPathsArray(lfs_t *fsDrive, const char *folderPath, CLR_RT_He
             // directory entry
 
             // compose file path
-            CombinePaths(stringBuffer, folderPath, info.name);
+            CombinePaths(workingPath, folderPath, info.name);
 
             // set file full path in array of strings
-            NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_String::CreateInstance(*pathEntry, stringBuffer));
+            NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_String::CreateInstance(*pathEntry, workingPath));
         }
         else
         {
             // file entry
 
             // compose file path
-            CombinePaths(stringBuffer, folderPath, info.name);
+            CombinePaths(workingPath, folderPath, info.name);
 
             // set file full path in array of strings
-            NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_String::CreateInstance(*pathEntry, stringBuffer));
+            NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_String::CreateInstance(*pathEntry, workingPath));
         }
 
         // move the file array pointer to the next item in the array
@@ -384,9 +402,9 @@ static HRESULT BuildPathsArray(lfs_t *fsDrive, const char *folderPath, CLR_RT_He
 
     NANOCLR_CLEANUP();
 
-    if (stringBuffer != NULL)
+    if (workingPath != NULL)
     {
-        platform_free(stringBuffer);
+        platform_free(workingPath);
     }
 
     // close directory

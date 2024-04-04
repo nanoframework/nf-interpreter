@@ -6,6 +6,7 @@
 #include <nf_sys_io_filesystem.h>
 #include <hal_littlefs.h>
 
+extern void CombinePaths(char *outpath, const char *path1, const char *path2);
 extern int32_t GetInternalDriveIndex(char *drive);
 
 bool IsInternalFilePath(const char *filePath)
@@ -25,36 +26,84 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_File::ExistsNative___STATIC__BOOL
 #if defined(NF_FEATURE_USE_LITTLEFS) && (NF_FEATURE_USE_LITTLEFS == TRUE)
 
     int32_t driveIndex;
+    int32_t statResult;
     char workingDrive[DRIVE_LETTER_LENGTH];
-    lfs_file_t *lfsFile = NULL;
+    bool exists = false;
     lfs_t *fsDrive = NULL;
+    lfs_info info;
+    char *workingPath = NULL;
 
-    const char *workingPath = stack.Arg0().RecoverString();
+    const char *filePath = stack.Arg0().RecoverString();
+    const char *fileName = stack.Arg1().RecoverString();
+
     // check for null argument
-    FAULT_ON_NULL_ARG(workingPath);
+    FAULT_ON_NULL_ARG(filePath);
+    FAULT_ON_NULL_ARG(fileName);
 
     // copy the first 2 letters of the path for the drive
     // path is 'D:\folder\file.txt', so we need 'D:'
-    memcpy(workingDrive, workingPath, DRIVE_LETTER_LENGTH);
+    memcpy(workingDrive, filePath, DRIVE_LETTER_LENGTH);
 
     // get littlefs drive index...
     driveIndex = GetInternalDriveIndex(workingDrive);
     //... and pointer to the littlefs instance
     fsDrive = hal_lfs_get_fs_from_index(driveIndex);
 
-    // enough to check if the directory can be opened
-    stack.SetResult_Boolean(lfs_file_open(lfs, lfsFile, workingPath, LFS_O_RDONLY) == LFS_ERR_OK);
+    // allocate memory for file path
+    workingPath = (char *)platform_malloc(LFS_NAME_MAX + 1);
 
-    // need to close the directory
-    lfs_file_close(fsDrive, lfsFile);
+    // sanity check for successful malloc
+    if (workingPath == NULL)
+    {
+        // failed to allocate memory
+        NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
+    }
+
+    // clear working buffer
+    memset(workingPath, 0, LFS_NAME_MAX + 1);
+
+    // compose file path
+    CombinePaths(workingPath, filePath, fileName);
+
+    statResult = lfs_stat(fsDrive, workingPath, &info);
+    if (statResult == LFS_ERR_NOENT)
+    {
+        // file doesn't exist
+        exists = false;
+    }
+    else
+    {
+        // check if entry is a file
+        if (statResult == LFS_ERR_OK && info.type == LFS_TYPE_REG)
+        {
+            exists = true;
+        }
+        else
+        {
+            // not a file
+            exists = false;
+        }
+    }
+
+    stack.SetResult_Boolean(exists);
+
+    NANOCLR_CLEANUP();
+
+    // free buffer memory, if allocated
+    if (workingPath != NULL)
+    {
+        platform_free(workingPath);
+    }
+
+    NANOCLR_CLEANUP_END();
 
 #else
 
     stack.NotImplementedStub();
 
-#endif
-
     NANOCLR_NOCLEANUP();
+
+#endif
 }
 
 HRESULT Library_nf_sys_io_filesystem_System_IO_File::MoveNative___STATIC__VOID__STRING__STRING(CLR_RT_StackFrame &stack)
@@ -215,8 +264,9 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_File::SetAttributesNative___STATI
 
 #if defined(NF_FEATURE_USE_LITTLEFS) && (NF_FEATURE_USE_LITTLEFS == TRUE)
 
-    // not supported in this platform
-    NANOCLR_SET_AND_LEAVE(CLR_E_NOT_SUPPORTED);
+    // TODO: implement attributes for LittleFS
+    // for the time being just return success
+    NANOCLR_SET_AND_LEAVE(S_OK);
 
 #else
 
