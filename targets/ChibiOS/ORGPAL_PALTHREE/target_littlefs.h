@@ -79,6 +79,10 @@
 #define LFS0_ERASE_HANDLER hal_lfs_erase_0
 #define LFS0_SYNC_HANDLER  hal_lfs_sync
 
+#define LFS0_WRITE_BUFFER     lfs0WriteBuffer
+#define LFS0_READ_BUFFER      lfs0ReadBuffer
+#define LFS0_LOOKAHEAD_BUFFER lfs0LookaheadBuffer
+
 #endif // LFS_SPI1
 
 //////////////////////////////////
@@ -214,12 +218,28 @@
 #define LFS1_ERASE_HANDLER hal_lfs_erase_1
 #define LFS1_SYNC_HANDLER  hal_lfs_sync
 
+#define LFS1_WRITE_BUFFER     lfs1WriteBuffer
+#define LFS1_READ_BUFFER      lfs1ReadBuffer
+#define LFS1_LOOKAHEAD_BUFFER lfs1LookaheadBuffer
+
 #endif // LFS_QSPI1
 
 #ifdef __cplusplus
 extern "C"
 {
 #endif
+
+#ifdef LFS_SPI1
+    extern uint8_t lfs0WriteBuffer[AT25SF641_PAGE_SIZE*2];
+    extern uint8_t lfs0ReadBuffer[AT25SF641_PAGE_SIZE*2];
+    extern uint8_t lfs0LookaheadBuffer[AT25SF641_PAGE_SIZE*2];
+#endif // LFS_SPI1
+
+#ifdef LFS_QSPI
+    extern uint8_t lfs1WriteBuffer[W25Q128_PAGE_SIZE];
+    extern uint8_t lfs1ReadBuffer[W25Q128_PAGE_SIZE];
+    extern uint8_t lfs1LookaheadBuffer[W25Q128_PAGE_SIZE];
+#endif // LFS_QSPI
 
     int32_t hal_lfs_erase_0(const struct lfs_config *c, lfs_block_t block);
     int32_t hal_lfs_read_0(const struct lfs_config *c, lfs_block_t block, lfs_off_t off, void *buffer, lfs_size_t size);

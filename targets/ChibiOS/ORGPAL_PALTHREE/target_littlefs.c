@@ -27,6 +27,19 @@ __attribute__((aligned(32)))
 #endif
 uint8_t readBuffer[AT25SF641_PAGE_SIZE];
 
+#if defined(__GNUC__)
+__attribute__((aligned(32)))
+#endif
+uint8_t lfs0WriteBuffer[AT25SF641_PAGE_SIZE*2];
+#if defined(__GNUC__)
+__attribute__((aligned(32)))
+#endif
+uint8_t lfs0ReadBuffer[AT25SF641_PAGE_SIZE*2];
+#if defined(__GNUC__)
+__attribute__((aligned(32)))
+#endif
+uint8_t lfs0LookaheadBuffer[AT25SF641_PAGE_SIZE*2];
+
 ///////////////
 // Definitions
 #define CS_SELECT   palClearPad(PAL_PORT(LINE_FLASH_SPI1_CS), PAL_PAD(LINE_FLASH_SPI1_CS))
@@ -239,6 +252,19 @@ bool SPI_Write(const uint8_t *pData, uint32_t writeAddr, uint32_t size)
 #ifdef LFS_QSPI
 
 #include <hal_stm32_qspi.h>
+
+#if defined(__GNUC__)
+__attribute__((aligned(32)))
+#endif
+uint8_t lfs1WriteBuffer[W25Q128_PAGE_SIZE];
+#if defined(__GNUC__)
+__attribute__((aligned(32)))
+#endif
+uint8_t lfs1ReadBuffer[W25Q128_PAGE_SIZE];
+#if defined(__GNUC__)
+__attribute__((aligned(32)))
+#endif
+uint8_t lfs1LookaheadBuffer[W25Q128_PAGE_SIZE];
 
 ///////////////
 // declarations
