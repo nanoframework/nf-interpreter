@@ -29,7 +29,7 @@ uint32_t HAL_StorageOperation(
 {
     (void)offset;
 
-    lfs_file_t *file = NULL;
+    lfs_file_t lfsFile;
     lfs_t *lfsDrive = NULL;
 
     // default to drive 0
@@ -62,27 +62,29 @@ uint32_t HAL_StorageOperation(
 
     if (operation == StorageOperation_Monitor::StorageOperation_Write)
     {
+        memset(&lfsFile, 0, sizeof(lfsFile));
+
         // Open/create the file in read mode
-        if (lfs_file_open(lfsDrive, file, storageName, LFS_O_RDWR | LFS_O_CREAT) != LFS_ERR_OK)
+        if (lfs_file_open(lfsDrive, &lfsFile, storageName, LFS_O_RDWR | LFS_O_CREAT) != LFS_ERR_OK)
         {
             errorCode = StorageOperationErrorCode::WriteError;
 
             goto done;
         }
 
-        if (lfs_file_write(lfsDrive, file, (data + nameLength), dataLength) != (lfs_ssize_t)dataLength)
+        if (lfs_file_write(lfsDrive, &lfsFile, (data + nameLength), dataLength) != (lfs_ssize_t)dataLength)
         {
             // failed to write expected number of bytes
             errorCode = StorageOperationErrorCode::WriteError;
         }
 
         // close file
-        lfs_file_close(lfsDrive, file);
+        lfs_file_close(lfsDrive, &lfsFile);
     }
     else if (operation == StorageOperation_Monitor::StorageOperation_Append)
     {
         // Open/create the file in read mode
-        if (lfs_file_open(lfsDrive, file, storageName, LFS_O_RDWR | LFS_O_APPEND) != LFS_ERR_OK)
+        if (lfs_file_open(lfsDrive, &lfsFile, storageName, LFS_O_RDWR | LFS_O_APPEND) != LFS_ERR_OK)
         {
             errorCode = StorageOperationErrorCode::WriteError;
 
@@ -90,14 +92,14 @@ uint32_t HAL_StorageOperation(
         }
 
         // append more data
-        if (lfs_file_write(lfsDrive, file, (data + nameLength), dataLength) != (lfs_ssize_t)dataLength)
+        if (lfs_file_write(lfsDrive, &lfsFile, (data + nameLength), dataLength) != (lfs_ssize_t)dataLength)
         {
             // failed to write expected number of bytes
             errorCode = StorageOperationErrorCode::WriteError;
         }
 
         // close file
-        lfs_file_close(lfsDrive, file);
+        lfs_file_close(lfsDrive, &lfsFile);
     }
     else if (operation == StorageOperation_Monitor::StorageOperation_Delete)
     {
