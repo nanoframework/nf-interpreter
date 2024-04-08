@@ -316,7 +316,7 @@ if(NF_FEATURE_HAS_SDCARD)
     set(API_Windows.Storage ON CACHE INTERNAL "Forcing Windows.Storage API option to ON")
 
     # force inclusion of System.IO.FileSystem API
-    set(API_System.IO.FileSystem ON CACHE INTERNAL "Forcing System.IO.FileSystem API option to ON")
+    # set(API_System.IO.FileSystem ON CACHE INTERNAL "Forcing System.IO.FileSystem API option to ON")
 
     message(STATUS "Support for SD Card is included")
 else()
