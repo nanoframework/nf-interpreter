@@ -38,6 +38,15 @@ typedef enum __nfpack StorageEventManager_StorageEventType
     StorageEventManager_StorageEventType_RemovableDeviceRemoval = 2,
 } StorageEventManager_StorageEventType;
 
+typedef enum __nfpack DriveType
+{
+    DriveType_Unknown = 0,
+    DriveType_NoRootDirectory = 1,
+    DriveType_Removable = 2,
+    DriveType_Fixed = 3,
+    DriveType_Ram = 4,
+} DriveType;
+
 typedef enum __nfpack FileAccess
 {
     FileAccess_Read = 1,
@@ -146,6 +155,19 @@ struct Library_nf_sys_io_filesystem_System_IO_Directory
     NANOCLR_NATIVE_DECLARE(GetDirectoriesNative___STATIC__SZARRAY_STRING__STRING);
     NANOCLR_NATIVE_DECLARE(GetLogicalDrivesNative___STATIC__SZARRAY_STRING);
     NANOCLR_NATIVE_DECLARE(GetLastWriteTimeNative___STATIC__SystemDateTime__STRING);
+
+    //--//
+};
+
+struct Library_nf_sys_io_filesystem_System_IO_DriveInfo
+{
+    static const int FIELD___driveType = 1;
+    static const int FIELD___name = 2;
+    static const int FIELD___totalSize = 3;
+
+    NANOCLR_NATIVE_DECLARE(DriveInfoNative___VOID__STRING);
+    NANOCLR_NATIVE_DECLARE(Format___STATIC__VOID__STRING);
+    NANOCLR_NATIVE_DECLARE(GetDrivesNative___STATIC__SZARRAY_SystemIODriveInfo);
 
     //--//
 };
