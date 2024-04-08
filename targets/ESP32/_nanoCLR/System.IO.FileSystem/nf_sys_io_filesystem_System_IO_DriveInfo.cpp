@@ -61,9 +61,12 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_DriveInfo::Format___STATIC__VOID_
     NANOCLR_HEADER();
 
     char workingDrive[DRIVE_LETTER_LENGTH];
+
+#if (HAL_USE_SDC == TRUE)
     char *vfsPath = NULL;
     int operationResult;
     struct stat fno;
+#endif
 
     CLR_RT_TypeDef_Index driveInfoTypeDef;
     CLR_RT_HeapBlock *driveInfo;
