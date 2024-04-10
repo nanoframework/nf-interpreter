@@ -46,6 +46,9 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_DriveInfo::DriveInfoNative___VOID
     // get a pointer to DriveInfo
     driveInfo = (CLR_RT_HeapBlock *)top.Dereference();
 
+    (void)driveIndex;
+    (void)driveInfo;
+
     if (WORKING_DRIVE_IS_INTERNAL_DRIVE)
     {
 #if defined(NF_FEATURE_USE_LITTLEFS) && (NF_FEATURE_USE_LITTLEFS == TRUE)
@@ -91,6 +94,9 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_DriveInfo::Format___STATIC__VOID_
     // copy the first 2 letters of the path for the drive
     // path is 'D:\folder\file.txt', so we need 'D:'
     memcpy(workingDrive, workingPath, DRIVE_LETTER_LENGTH);
+
+    (void)driveIndex;
+    (void)workingDrive;
 
     if (WORKING_DRIVE_IS_INTERNAL_DRIVE)
     {
@@ -147,6 +153,8 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_DriveInfo::GetDrivesNative___STAT
     // get a pointer to the first object in the array (which is of type <String>)
     volume = (CLR_RT_HeapBlock *)top.DereferenceArray()->GetFirstElement();
 
+    (void)workingDrive;
+    
 #if defined(NF_FEATURE_USE_LITTLEFS) && (NF_FEATURE_USE_LITTLEFS == TRUE)
 
     for (uint16_t driveIterator = 0; driveIterator < driveCount; driveIterator++)
