@@ -332,7 +332,7 @@ if(STM32_CUBE_PACKAGE_REQUIRED)
     ProcessSTM32CubePackage()
 endif()
 
-# if support for Lit is enabled add it to the build
+# if support for littlefs is enabled add it to the build
 if(NF_FEATURE_USE_LITTLEFS)
 
     # check if LITTLEFS_SOURCE was specified or if it's empty (default is empty)
