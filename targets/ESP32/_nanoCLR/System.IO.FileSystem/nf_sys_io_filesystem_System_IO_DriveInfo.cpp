@@ -23,45 +23,6 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_DriveInfo::DriveInfoNative___VOID
     char workingDrive[DRIVE_LETTER_LENGTH];
 
 #if (HAL_USE_SDC == TRUE)
-
-    // check if SD card is mounted
-    if (card != NULL)
-    {
-        // format it
-        const size_t workbuf_size = 4096;
-
-        void *workbuf = NULL;
-        BYTE pdrv;
-        DWORD plist[] = {100, 0, 0, 0};
-
-        workbuf = ff_memalloc(workbuf_size);
-        if (workbuf == NULL)
-        {
-            return ESP_ERR_NO_MEM;
-        }
-
-        ff_diskio_get_drive(&pdrv);
-
-        f_fdisk(pdrv, plist, workbuf);
-    }
-    else
-    {
-        // SD card is not mounted
-        // return error
-        NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
-    }
-#endif // HAL_USE_SDC
-
-    NANOCLR_NOCLEANUP();
-}
-
-HRESULT Library_nf_sys_io_filesystem_System_IO_DriveInfo::Format___STATIC__VOID__STRING(CLR_RT_StackFrame &stack)
-{
-    NANOCLR_HEADER();
-
-    char workingDrive[DRIVE_LETTER_LENGTH];
-
-#if (HAL_USE_SDC == TRUE)
     char *vfsPath = NULL;
     int operationResult;
     struct stat fno;
