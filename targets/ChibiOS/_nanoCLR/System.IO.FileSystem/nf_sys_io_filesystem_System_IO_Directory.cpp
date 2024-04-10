@@ -26,22 +26,22 @@ void CombinePaths(char *outpath, const char *path1, const char *path2)
 
 #if defined(NF_FEATURE_USE_LITTLEFS) && (NF_FEATURE_USE_LITTLEFS == TRUE)
 
-// TODO: add this when Windows.Storage APIs are removed
-// int32_t GetInternalDriveIndex(char *drive)
-// {
-//     if (memcmp(drive, INTERNAL_DRIVE0_LETTER, sizeof(INTERNAL_DRIVE0_LETTER) - 1) == 0)
-//     {
-//         return 0;
-//     }
-//     if (memcmp(drive, INTERNAL_DRIVE1_LETTER, sizeof(INTERNAL_DRIVE1_LETTER) - 1) == 0)
-//     {
-//         return 1;
-//     }
+int32_t GetInternalDriveIndex(char *drive)
+{
+    if (memcmp(drive, INTERNAL_DRIVE0_LETTER, sizeof(INTERNAL_DRIVE0_LETTER) - 1) == 0)
+    {
+        return 0;
+    }
+    if (memcmp(drive, INTERNAL_DRIVE1_LETTER, sizeof(INTERNAL_DRIVE1_LETTER) - 1) == 0)
+    {
+        return 1;
+    }
 
-//     HAL_AssertEx();
+    HAL_AssertEx();
 
-//     return -1;
-// }
+    return -1;
+}
+
 extern int32_t GetInternalDriveIndex(char *drive);
 
 #endif // NF_FEATURE_USE_LITTLEFS

@@ -312,9 +312,6 @@ if(NF_FEATURE_HAS_SDCARD)
         message(FATAL_ERROR "Support for SD Card is only available for ChibiOS Cortex-M targets, iMX.RT FreeRTOS and ESP32 targets..")
     endif()
 
-    # force inclusion of Windows.Storage API
-    set(API_Windows.Storage ON CACHE INTERNAL "Forcing Windows.Storage API option to ON")
-
     # force inclusion of System.IO.FileSystem API
     set(API_System.IO.FileSystem ON CACHE INTERNAL "Forcing System.IO.FileSystem API option to ON")
 
@@ -339,9 +336,6 @@ if(NF_FEATURE_HAS_USB_MSD)
 
     # this feature requires inclusion of ChibiOS contribution repository
     set(CHIBIOS_CONTRIB_REQUIRED ON CACHE INTERNAL "Forcing ChibiOS contribution repo option to ON")
-
-    # force inclusion of Windows.Storage API
-    set(API_Windows.Storage ON CACHE INTERNAL "Forcing Windows.Storage API option to ON")
 
     # force inclusion of System.IO.FileSystem API
     set(API_System.IO.FileSystem ON CACHE INTERNAL "Forcing System.IO.FileSystem API option to ON")
