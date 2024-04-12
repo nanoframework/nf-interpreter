@@ -24,9 +24,6 @@
     <ClCompile Include="nf_sys_io_filesystem_System_IO_DriveInfo_stubs.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="nf_sys_io_filesystem_System_IO_File_stubs.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="nf_sys_io_filesystem_System_IO_NativeFileStream_stubs.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>

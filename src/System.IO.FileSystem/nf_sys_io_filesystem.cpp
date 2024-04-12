@@ -142,7 +142,6 @@ static const CLR_RT_MethodHandler method_lookup[] =
     NULL,
     NULL,
     NULL,
-    Library_nf_sys_io_filesystem_System_IO_File::SetAttributesNative___STATIC__VOID__STRING__U1,
     NULL,
     NULL,
     NULL,
@@ -175,7 +174,6 @@ static const CLR_RT_MethodHandler method_lookup[] =
     Library_nf_sys_io_filesystem_System_IO_NativeFindFile::GetNext___SystemIONativeFileInfo,
     Library_nf_sys_io_filesystem_System_IO_NativeFindFile::Close___VOID,
     Library_nf_sys_io_filesystem_System_IO_NativeFindFile::GetFileInfo___STATIC__SystemIONativeFileInfo__STRING,
-    Library_nf_sys_io_filesystem_System_IO_NativeIO::Format___STATIC__VOID__STRING__STRING__STRING__U4,
     Library_nf_sys_io_filesystem_System_IO_NativeIO::Delete___STATIC__VOID__STRING__BOOLEAN,
     Library_nf_sys_io_filesystem_System_IO_NativeIO::Move___STATIC__BOOLEAN__STRING__STRING,
     Library_nf_sys_io_filesystem_System_IO_NativeIO::CreateDirectory___STATIC__VOID__STRING,
@@ -208,7 +206,7 @@ static const CLR_RT_MethodHandler method_lookup[] =
 const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_System_IO_FileSystem =
 {
     "System.IO.FileSystem",
-    0xD306D6D6,
+    0xA0BA24F7,
     method_lookup,
     { 1, 1, 0, 3 }
 };

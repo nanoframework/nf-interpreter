@@ -11,6 +11,7 @@
 #include <nanoPackStruct.h>
 #include <corlib_native.h>
 #include <target_platform.h>
+#include <nanoCLR_Stream.h>
 
 typedef enum __nfpack RemovableDeviceEventArgs_RemovableDeviceEvent
 {
@@ -205,8 +206,6 @@ struct Library_nf_sys_io_filesystem_System_IO_File
 {
     static const int FIELD_STATIC__EmptyBytes = 6;
 
-    NANOCLR_NATIVE_DECLARE(SetAttributesNative___STATIC__VOID__STRING__U1);
-
     //--//
 };
 
@@ -233,6 +232,8 @@ struct Library_nf_sys_io_filesystem_System_IO_NativeFileStream
     NANOCLR_NATIVE_DECLARE(Close___VOID);
 
     //--//
+    static HRESULT ReadWriteHelper(CLR_RT_StackFrame &stack, bool isRead);
+    static HRESULT GetFileStream(CLR_RT_StackFrame &stack, CLR_RT_FileStream *&fs);
 };
 
 struct Library_nf_sys_io_filesystem_System_IO_NativeFindFile
@@ -249,7 +250,6 @@ struct Library_nf_sys_io_filesystem_System_IO_NativeFindFile
 
 struct Library_nf_sys_io_filesystem_System_IO_NativeIO
 {
-    NANOCLR_NATIVE_DECLARE(Format___STATIC__VOID__STRING__STRING__STRING__U4);
     NANOCLR_NATIVE_DECLARE(Delete___STATIC__VOID__STRING__BOOLEAN);
     NANOCLR_NATIVE_DECLARE(Move___STATIC__BOOLEAN__STRING__STRING);
     NANOCLR_NATIVE_DECLARE(CreateDirectory___STATIC__VOID__STRING);
@@ -257,6 +257,7 @@ struct Library_nf_sys_io_filesystem_System_IO_NativeIO
     NANOCLR_NATIVE_DECLARE(SetAttributes___STATIC__VOID__STRING__U4);
 
     //--//
+    static HRESULT FindVolume(CLR_RT_HeapBlock &hbPathRef, FileSystemVolume *&volume, UnicodeString &relativePathW);
 };
 
 struct Library_nf_sys_io_filesystem_System_IO_Path
