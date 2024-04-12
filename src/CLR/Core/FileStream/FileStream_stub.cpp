@@ -6,7 +6,7 @@
 
 #include <Core.h>
 #include <nanoCLR_Types.h>
-#include <nanoCLR_Stream.h>
+#include <nanoCLR_FileStream.h>
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -110,7 +110,7 @@ HRESULT CLR_RT_FindFile::CreateInstance(CLR_RT_HeapBlock &ref, const char *path,
     (void)ref;
     (void)path;
     (void)searchPattern;
-        
+
     NANOCLR_FEATURE_STUB_RETURN();
 }
 

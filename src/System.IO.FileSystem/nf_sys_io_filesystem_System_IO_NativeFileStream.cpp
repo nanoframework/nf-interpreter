@@ -4,7 +4,7 @@
 //
 
 #include "nf_sys_io_filesystem.h"
-#include <nanoCLR_Stream.h>
+#include <nanoCLR_FileStream.h>
 
 HRESULT Library_nf_sys_io_filesystem_System_IO_NativeFileStream::_ctor___VOID__STRING__I4(CLR_RT_StackFrame &stack)
 {

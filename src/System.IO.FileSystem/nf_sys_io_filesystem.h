@@ -11,7 +11,7 @@
 #include <nanoPackStruct.h>
 #include <corlib_native.h>
 #include <target_platform.h>
-#include <nanoCLR_Stream.h>
+#include <nanoCLR_FileStream.h>
 
 typedef enum __nfpack RemovableDeviceEventArgs_RemovableDeviceEvent
 {
