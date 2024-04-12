@@ -61,6 +61,7 @@ typedef enum __nfpack FileAttributes
     FileAttributes_System = 4,
     FileAttributes_Directory = 16,
     FileAttributes_Archive = 32,
+    FileAttributes_Normal = 128,
 } FileAttributes;
 
 typedef enum __nfpack FileMode
@@ -145,16 +146,11 @@ struct Library_nf_sys_io_filesystem_nanoFramework_System_IO_FileSystem_StorageEv
     //--//
 };
 
-struct Library_nf_sys_io_filesystem_System_IO_Directory
+struct Library_nf_sys_io_filesystem_System_IO_NativeFileInfo
 {
-    NANOCLR_NATIVE_DECLARE(ExistsNative___STATIC__BOOLEAN__STRING);
-    NANOCLR_NATIVE_DECLARE(MoveNative___STATIC__VOID__STRING__STRING);
-    NANOCLR_NATIVE_DECLARE(DeleteNative___STATIC__VOID__STRING);
-    NANOCLR_NATIVE_DECLARE(CreateNative___STATIC__VOID__STRING);
-    NANOCLR_NATIVE_DECLARE(GetFilesNative___STATIC__SZARRAY_STRING__STRING);
-    NANOCLR_NATIVE_DECLARE(GetDirectoriesNative___STATIC__SZARRAY_STRING__STRING);
-    NANOCLR_NATIVE_DECLARE(GetLogicalDrivesNative___STATIC__SZARRAY_STRING);
-    NANOCLR_NATIVE_DECLARE(GetLastWriteTimeNative___STATIC__SystemDateTime__STRING);
+    static const int FIELD__Attributes = 1;
+    static const int FIELD__Size = 2;
+    static const int FIELD__FileName = 3;
 
     //--//
 };
@@ -172,45 +168,103 @@ struct Library_nf_sys_io_filesystem_System_IO_DriveInfo
     //--//
 };
 
+struct Library_nf_sys_io_filesystem_System_IO_FileSystemManager__FileRecord
+{
+    static const int FIELD__FullName = 1;
+    static const int FIELD__NativeFileStream = 2;
+    static const int FIELD__Share = 3;
+
+    //--//
+};
+
+struct Library_nf_sys_io_filesystem_System_IO_FileSystemManager
+{
+    static const int FIELD_STATIC___openFiles = 2;
+    static const int FIELD_STATIC___lockedDirs = 3;
+    static const int FIELD_STATIC___currentDirectoryRecord = 4;
+    static const int FIELD_STATIC__CurrentDirectory = 5;
+
+    //--//
+};
+
 struct Library_nf_sys_io_filesystem_System_IO_FileStream
 {
     static const int FIELD___canRead = 1;
     static const int FIELD___canWrite = 2;
     static const int FIELD___canSeek = 3;
     static const int FIELD___seekLimit = 4;
-    static const int FIELD___position = 5;
-    static const int FIELD___disposed = 6;
-    static const int FIELD___name = 7;
-    static const int FIELD___path = 8;
-
-    NANOCLR_NATIVE_DECLARE(OpenFileNative___VOID__STRING__STRING__I4);
-    NANOCLR_NATIVE_DECLARE(ReadNative___I4__STRING__STRING__I8__SZARRAY_U1__I4);
-    NANOCLR_NATIVE_DECLARE(WriteNative___VOID__STRING__STRING__I8__SZARRAY_U1__I4);
-    NANOCLR_NATIVE_DECLARE(GetLengthNative___I8__STRING__STRING);
+    static const int FIELD___disposed = 5;
+    static const int FIELD___fileName = 6;
+    static const int FIELD___nativeFileStream = 7;
+    static const int FIELD___fileRecord = 8;
 
     //--//
 };
 
 struct Library_nf_sys_io_filesystem_System_IO_File
 {
-    static const int FIELD_STATIC__EmptyBytes = 2;
+    static const int FIELD_STATIC__EmptyBytes = 6;
 
-    NANOCLR_NATIVE_DECLARE(DeleteNative___STATIC__VOID__STRING);
-    NANOCLR_NATIVE_DECLARE(ExistsNative___STATIC__BOOLEAN__STRING__STRING);
-    NANOCLR_NATIVE_DECLARE(GetAttributesNative___STATIC__U1__STRING);
-    NANOCLR_NATIVE_DECLARE(GetLastWriteTimeNative___STATIC__SystemDateTime__STRING);
-    NANOCLR_NATIVE_DECLARE(MoveNative___STATIC__VOID__STRING__STRING);
     NANOCLR_NATIVE_DECLARE(SetAttributesNative___STATIC__VOID__STRING__U1);
+
+    //--//
+};
+
+struct Library_nf_sys_io_filesystem_System_IO_FileSystemInfo
+{
+    static const int FIELD___nativeFileInfo = 1;
+    static const int FIELD___fullPath = 2;
+
+    //--//
+};
+
+struct Library_nf_sys_io_filesystem_System_IO_NativeFileStream
+{
+    static const int FIELD___fs = 1;
+
+    NANOCLR_NATIVE_DECLARE(_ctor___VOID__STRING__I4);
+    NANOCLR_NATIVE_DECLARE(Read___I4__SZARRAY_U1__I4__I4__I4);
+    NANOCLR_NATIVE_DECLARE(Write___I4__SZARRAY_U1__I4__I4__I4);
+    NANOCLR_NATIVE_DECLARE(Seek___I8__I8__U4);
+    NANOCLR_NATIVE_DECLARE(Flush___VOID);
+    NANOCLR_NATIVE_DECLARE(GetLength___I8);
+    NANOCLR_NATIVE_DECLARE(SetLength___VOID__I8);
+    NANOCLR_NATIVE_DECLARE(GetStreamProperties___VOID__BYREF_BOOLEAN__BYREF_BOOLEAN__BYREF_BOOLEAN);
+    NANOCLR_NATIVE_DECLARE(Close___VOID);
+
+    //--//
+};
+
+struct Library_nf_sys_io_filesystem_System_IO_NativeFindFile
+{
+    static const int FIELD___ff = 1;
+
+    NANOCLR_NATIVE_DECLARE(_ctor___VOID__STRING__STRING);
+    NANOCLR_NATIVE_DECLARE(GetNext___SystemIONativeFileInfo);
+    NANOCLR_NATIVE_DECLARE(Close___VOID);
+    NANOCLR_NATIVE_DECLARE(GetFileInfo___STATIC__SystemIONativeFileInfo__STRING);
+
+    //--//
+};
+
+struct Library_nf_sys_io_filesystem_System_IO_NativeIO
+{
+    NANOCLR_NATIVE_DECLARE(Format___STATIC__VOID__STRING__STRING__STRING__U4);
+    NANOCLR_NATIVE_DECLARE(Delete___STATIC__VOID__STRING__BOOLEAN);
+    NANOCLR_NATIVE_DECLARE(Move___STATIC__BOOLEAN__STRING__STRING);
+    NANOCLR_NATIVE_DECLARE(CreateDirectory___STATIC__VOID__STRING);
+    NANOCLR_NATIVE_DECLARE(GetAttributes___STATIC__U4__STRING);
+    NANOCLR_NATIVE_DECLARE(SetAttributes___STATIC__VOID__STRING__U4);
 
     //--//
 };
 
 struct Library_nf_sys_io_filesystem_System_IO_Path
 {
-    static const int FIELD_STATIC__DirectorySeparatorChar = 3;
-    static const int FIELD_STATIC__AltDirectorySeparatorChar = 4;
-    static const int FIELD_STATIC__VolumeSeparatorChar = 5;
-    static const int FIELD_STATIC__PathSeparator = 6;
+    static const int FIELD_STATIC__DirectorySeparatorChar = 7;
+    static const int FIELD_STATIC__AltDirectorySeparatorChar = 8;
+    static const int FIELD_STATIC__VolumeSeparatorChar = 9;
+    static const int FIELD_STATIC__PathSeparator = 10;
 
     //--//
 };
