@@ -62,6 +62,11 @@ void nanoHAL_Initialize()
 
     BlockStorageList_InitializeDevices();
 
+    FS_Initialize();
+    FileSystemVolumeList::Initialize();
+    FS_AddVolumes();
+    FileSystemVolumeList::InitializeVolumes();
+
     // clear managed heap region
     unsigned char *heapStart = NULL;
     unsigned int heapSize = 0;
@@ -182,6 +187,8 @@ void nanoHAL_Uninitialize(bool isPoweringDown)
     // TODO need to call this but it's preventing the debug session from starting
     // Network_Uninitialize();
 #endif
+
+    FileSystemVolumeList::UninitializeVolumes();
 
     BlockStorageList_UnInitializeDevices();
 

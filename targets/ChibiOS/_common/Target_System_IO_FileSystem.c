@@ -7,8 +7,8 @@
 #include <cmsis_os.h>
 #include <ff.h>
 #include <target_windows_storage_config.h>
-#include <nanoHAL_Windows_Storage.h>
-#include <Target_Windows_Storage.h>
+#include <nanoHAL_System_IO_FileSystem.h>
+#include <Target_System_IO_FileSystem.h>
 #include <nanoHAL_v2.h>
 
 #if defined(HAL_USBH_USE_MSD) && (HAL_USBH_USE_MSD == TRUE)
@@ -261,4 +261,21 @@ __attribute__((noreturn)) void UsbMsdWorkingThread(void const *argument)
     }
 }
 
+int32_t GetInternalDriveIndex(char *drive)
+{
+    if (memcmp(drive, INTERNAL_DRIVE0_LETTER, sizeof(INTERNAL_DRIVE0_LETTER) - 1) == 0)
+    {
+        return 0;
+    }
+    if (memcmp(drive, INTERNAL_DRIVE1_LETTER, sizeof(INTERNAL_DRIVE1_LETTER) - 1) == 0)
+    {
+        return 1;
+    }
+
+    HAL_AssertEx();
+
+    return -1;
+}
+
 #endif
+

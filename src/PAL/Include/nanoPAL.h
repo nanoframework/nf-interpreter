@@ -42,7 +42,7 @@ void HeapLocation(unsigned char *&BaseAddress, unsigned int &SizeInBytes);
 //#include <io_decl.h>
 //#include <instrumentation_decl.h>
 //
-//#include <FS_decl.h>
+#include <nanoPAL_FileSystem.h>
 //
 
 //
