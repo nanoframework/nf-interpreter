@@ -23,12 +23,17 @@ set(System.IO.FileSystem_SRCS
     nf_sys_io_filesystem.cpp
 
     nf_sys_io_filesystem_nanoFramework_System_IO_FileSystem_SDCard.cpp
-    nf_sys_io_filesystem_System_IO_Directory.cpp
     nf_sys_io_filesystem_System_IO_DriveInfo.cpp
-    nf_sys_io_filesystem_System_IO_File.cpp
-    nf_sys_io_filesystem_System_IO_FileStream.cpp
+    nf_sys_io_filesystem_System_IO_NativeFileStream.cpp
+    nf_sys_io_filesystem_System_IO_NativeFindFile.cpp
+    nf_sys_io_filesystem_System_IO_NativeIO.cpp
 
-    Target_Windows_Storage.c
+    # file system drivers
+    nanoPAL_FileSystem.cpp
+
+    targetPAL_FileSystem.cpp
+    Target_System_IO_FileSystem.c
+    target_FileSystem.cpp
 )
 
 foreach(SRC_FILE ${System.IO.FileSystem_SRCS})
@@ -40,7 +45,11 @@ foreach(SRC_FILE ${System.IO.FileSystem_SRCS})
 	        ${BASE_PATH_FOR_THIS_MODULE}
 	        ${TARGET_BASE_LOCATION}
             ${PROJECT_COMMON_PATH}
+            ${BASE_PATH_FOR_CLASS_LIBRARIES_MODULES}
+
             ${CMAKE_SOURCE_DIR}/src/System.IO.FileSystem
+
+            ${CMAKE_SOURCE_DIR}/src/PAL/FileSystem
 
 	    CMAKE_FIND_ROOT_PATH_BOTH
     )
