@@ -394,6 +394,7 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_Directory::GetDirectoriesNative__
 // Enumerate drives in system
 // if array == null then only count drives
 // Return number of drives
+// TO BE REMOVED AFTER managed Directory.GetLogicalDrives() is removed
 static HRESULT EnumerateDrives(CLR_RT_HeapBlock *array, int &count)
 {
     NANOCLR_HEADER();
