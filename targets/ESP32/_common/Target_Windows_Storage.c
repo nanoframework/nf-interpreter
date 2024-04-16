@@ -56,7 +56,7 @@ bool Storage_UnMountSDCard(int driveIndex)
     mountPoint[1] = mountPoint[0] + driveIndex;
     mountPoint[0] = '/';
 
-    if (esp_vfs_fat_sdcard_unmount(mountPoint, sdmmc_card) != ESP_OK)
+    if (esp_vfs_fat_sdcard_unmount(mountPoint, card) != ESP_OK)
     {
         return false;
     }
@@ -137,7 +137,7 @@ bool Storage_MountMMC(bool bit1Mode, int driveIndex)
         // Invalid state means its already mounted, this can happen if you are trying to debug mount from managed code
         // and the code has already run & mounted
         Storage_UnMountSDCard(driveIndex);
-        errCode = esp_vfs_fat_sdmmc_mount(mountPoint, &host, &slot_config, &mount_config, &sdmmc_card);
+        errCode = esp_vfs_fat_sdmmc_mount(mountPoint, &host, &slot_config, &mount_config, &card);
     }
 
     return LogMountResult(errCode);
@@ -182,13 +182,13 @@ bool Storage_MountSpi(int spiBus, uint32_t csPin, int driveIndex)
     slot_config.gpio_cs = (gpio_num_t)csPin;
     slot_config.host_id = (spi_host_device_t)host.slot;
 
-    errCode = esp_vfs_fat_sdspi_mount(mountPoint, &host, &slot_config, &mount_config, &sdmmc_card);
+    errCode = esp_vfs_fat_sdspi_mount(mountPoint, &host, &slot_config, &mount_config, &card);
     if (errCode == ESP_ERR_INVALID_STATE)
     {
         // Invalid state means its already mounted, this can happen if you are trying to debug mount from managed code
         // and the code has already run & mounted
         Storage_UnMountSDCard(driveIndex);
-        errCode = esp_vfs_fat_sdspi_mount(mountPoint, &host, &slot_config, &mount_config, &sdmmc_card);
+        errCode = esp_vfs_fat_sdspi_mount(mountPoint, &host, &slot_config, &mount_config, &card);
     }
 
     return LogMountResult(errCode);
