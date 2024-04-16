@@ -43,7 +43,7 @@
 
 static const char *TAG = "SDCard";
 
-static sdmmc_card_t *sdmmc_card;
+sdmmc_card_t *card;
 
 //
 //  Unmount SD card ( MMC/SDIO or SPI)
@@ -60,6 +60,9 @@ bool Storage_UnMountSDCard(int driveIndex)
     {
         return false;
     }
+
+    card = NULL;
+
     return true;
 }
 
@@ -128,7 +131,7 @@ bool Storage_MountMMC(bool bit1Mode, int driveIndex)
         .max_files = SDC_MAX_OPEN_FILES,
         .allocation_unit_size = 16 * 1024};
 
-    errCode = esp_vfs_fat_sdmmc_mount(mountPoint, &host, &slot_config, &mount_config, &sdmmc_card);
+    errCode = esp_vfs_fat_sdmmc_mount(mountPoint, &host, &slot_config, &mount_config, &card);
     if (errCode == ESP_ERR_INVALID_STATE)
     {
         // Invalid state means its already mounted, this can happen if you are trying to debug mount from managed code

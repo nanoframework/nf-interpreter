@@ -383,7 +383,7 @@ HRESULT Library_nanoFramework_hardware_esp32_native_System_Device_Gpio_GpioPulse
         // timespan in milliseconds, but...
         *val = (CLR_UINT64)relativeTime;
         // ... need to convert to ticks with this
-        *val *= TIME_CONVERSION__TICKUNITS;
+        *val *= TIME_CONVERSION__TICKUNITS / 1000;
 
 #else
         NANOCLR_SET_AND_LEAVE(stack.NotImplementedStub());

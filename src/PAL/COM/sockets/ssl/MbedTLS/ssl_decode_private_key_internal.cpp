@@ -9,7 +9,7 @@
 extern void SSL_GetCertDateTime_internal(DATE_TIME_INFO *dt, mbedtls_x509_time *mt);
 
 #if defined(PLATFORM_ESP32) && MBEDTLS_VERSION_MAJOR >= 3
-int random(void * a, unsigned char * b, size_t c)
+int random(void *a, unsigned char *b, size_t c)
 {
     (void)a;
     (void)b;
