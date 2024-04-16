@@ -288,10 +288,8 @@ uint8_t *hal_lfs_getLookaheadBuffer(int32_t index)
 }
 
 // initialization of littlefs: configurations, data structures, drivers and lock
-int32_t hal_lfs_config()
+void hal_lfs_config()
 {
-    int32_t mountResult = 0;
-
     // clear struts for all instances
     memset(&lfs, 0, sizeof(lfs));
     memset(&lfsConfig, 0, sizeof(lfsConfig));
@@ -331,23 +329,30 @@ int32_t hal_lfs_config()
         // store the instance index
         lfsInstanceIndex[i] = i;
         lfsConfig[i].context = &lfsInstanceIndex[i];
+    }
+}
 
-        // mount the file system
-        mountResult = lfs_mount(&lfs[i], &lfsConfig[i]);
+int32_t hal_lfs_mount(int32_t index)
+{
+    int32_t mountResult = 0;
+    // mount the file system
+    mountResult = lfs_mount(&lfs[index], &lfsConfig[index]);
 
-        if (mountResult != 0)
-        {
-            // looks like littlefs is not formated (occuring at 1st boot)
-            lfs_format(&lfs[i], &lfsConfig[i]);
+    if (mountResult != 0)
+    {
+        // looks like littlefs is not formated (occuring at 1st boot)
+        lfs_format(&lfs[index], &lfsConfig[index]);
 
-            // try mounting again
-            mountResult = lfs_mount(&lfs[i], &lfsConfig[i]);
-        }
+        // try mounting again
+        mountResult = lfs_mount(&lfs[index], &lfsConfig[index]);
+    }
+
+    // mirror littlefs mount result into global flag
+    lfsFileSystemReady = (mountResult == LFS_ERR_OK);
 
 #if !defined(BUILD_RTM)
-        ASSERT(mountResult == LFS_ERR_OK);
+    ASSERT(mountResult == LFS_ERR_OK);
 #endif
-    }
 
     // ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     // // code block to assist testing littlefs
@@ -384,9 +389,6 @@ int32_t hal_lfs_config()
     // }
 
     // /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-    // mirror littlefs mount result into global flag
-    lfsFileSystemReady = (mountResult == LFS_ERR_OK);
 
     return mountResult;
 }

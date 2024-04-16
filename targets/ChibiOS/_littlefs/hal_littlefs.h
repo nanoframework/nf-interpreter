@@ -25,7 +25,7 @@ extern "C"
 
     // declarations of hal/target implementations
     int8_t target_lfs_init();
-    int32_t hal_lfs_config();
+    void hal_lfs_config();
 
     int hal_lfs_read(const struct lfs_config *c, lfs_block_t block, lfs_off_t off, void *buffer, lfs_size_t size);
     int hal_lfs_prog(const struct lfs_config *c, lfs_block_t block, lfs_off_t off, const void *buffer, lfs_size_t size);
@@ -34,6 +34,8 @@ extern "C"
 
     int hal_lfs_lock(const struct lfs_config *c);
     int hal_lfs_unlock(const struct lfs_config *c);
+
+    int32_t hal_lfs_mount(int32_t index);
 
     lfs_t *hal_lfs_get_fs_from_index(int32_t index);
     int32_t hal_lfs_get_instances_count();
