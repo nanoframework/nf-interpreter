@@ -13,6 +13,11 @@
 #include <target_platform.h>
 #include <nanoCLR_FileStream.h>
 
+/////////////////////////////////////////////////////////////////////////
+// !!! KEEP IN SYNC WITH managed System.IO.NativeIO.EmptyAttribute !!! //
+/////////////////////////////////////////////////////////////////////////
+#define EMPTY_ATTRIBUTE 0xFFFFFFFF
+
 typedef enum __nfpack RemovableDeviceEventArgs_RemovableDeviceEvent
 {
     RemovableDeviceEventArgs_RemovableDeviceEvent_Inserted = 0,
@@ -257,7 +262,7 @@ struct Library_nf_sys_io_filesystem_System_IO_NativeIO
     NANOCLR_NATIVE_DECLARE(SetAttributes___STATIC__VOID__STRING__U4);
 
     //--//
-    static HRESULT FindVolume(CLR_RT_HeapBlock &hbPathRef, FileSystemVolume *&volume, UnicodeString &relativePathW);
+    static HRESULT FindVolume(CLR_RT_HeapBlock &hbPathRef, FileSystemVolume *&volume, char **relativePath);
 };
 
 struct Library_nf_sys_io_filesystem_System_IO_Path
