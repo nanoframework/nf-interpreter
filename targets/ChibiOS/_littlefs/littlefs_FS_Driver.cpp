@@ -15,7 +15,7 @@
 bool LITTLEFS_FS_Driver::LoadMedia(const void *driverInterface)
 {
     (void)driverInterface;
-    return TRUE; // FAT_LogicDisk::IsLoadableMedia(driverInterface);
+    return TRUE;
 }
 
 STREAM_DRIVER_DETAILS *LITTLEFS_FS_Driver::DriverDetails(const VOLUME_ID *volume)
