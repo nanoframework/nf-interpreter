@@ -121,7 +121,7 @@ HRESULT LITTLEFS_FS_Driver::Open(const VOLUME_ID *volume, const char *path, uint
     NANOCLR_HEADER();
 
     LITTLEFS_FileHandle *fileHandle = NULL;
-    // lfs_info info;
+    lfs_info info;
     bool fileExists = false;
 
     // allocate file handle
@@ -148,10 +148,10 @@ HRESULT LITTLEFS_FS_Driver::Open(const VOLUME_ID *volume, const char *path, uint
         path++;
     }
 
-    // // check for file existence
-    // fileExists = lfs_stat(fileHandle->fs, path, &info) == LFS_ERR_OK;
+    // check for file existence
+    fileExists = lfs_stat(fileHandle->fs, path, &info) == LFS_ERR_OK;
 
-    // if (!fileExists)
+    if (!fileExists)
     {
         // setup attributes stuff (with default value)
         fileHandle->nanoAttributes = FileAttributes_Normal;
@@ -165,7 +165,7 @@ HRESULT LITTLEFS_FS_Driver::Open(const VOLUME_ID *volume, const char *path, uint
 
     if (fileExists)
     {
-        // open the file (if it exists
+        // open the existing file
         if (lfs_file_open(fileHandle->fs, &fileHandle->file, path, LFS_O_CREAT | LFS_O_RDWR) == LFS_ERR_OK)
         {
             // store the handle
@@ -513,7 +513,6 @@ HRESULT LITTLEFS_FS_Driver::GetAttributes(const VOLUME_ID *volume, const char *p
         }
 
         // try to get the attributes
-        
 
         // even if this fails we return success as attributes have been set to EMPTY_ATTRIBUTE
         if (lfs_getattr(fsDrive, (const char *)path, NANO_LITTLEFS_ATTRIBUTE, attributes, sizeof(attributes)) ==
