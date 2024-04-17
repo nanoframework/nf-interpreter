@@ -37,6 +37,15 @@ set(System.IO.FileSystem_SRCS
     target_FileSystem.cpp
 )
 
+# add littlefs FS driver
+if(NF_FEATURE_USE_LITTLEFS)
+
+    list(APPEND System.IO.FileSystem_SRCS
+        littlefs_FS_Driver.cpp
+    )
+
+endif()
+
 foreach(SRC_FILE ${System.IO.FileSystem_SRCS})
 
     set(System.IO.FileSystem_SRC_FILE SRC_FILE-NOTFOUND)
@@ -51,6 +60,9 @@ foreach(SRC_FILE ${System.IO.FileSystem_SRCS})
             ${CMAKE_SOURCE_DIR}/src/System.IO.FileSystem
 
             ${CMAKE_SOURCE_DIR}/src/PAL/FileSystem
+
+            # littlefs
+            ${CMAKE_SOURCE_DIR}/targets/${RTOS}/_littlefs
 
 	    CMAKE_FIND_ROOT_PATH_BOTH
     )

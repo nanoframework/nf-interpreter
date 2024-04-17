@@ -32,7 +32,11 @@ struct CLR_RT_FileStream
 
     static void RelocationHandler(CLR_RT_HeapBlock_BinaryBlob *ptr);
 
-    static HRESULT SplitFilePath(LPCSTR fullPath, LPCSTR *nameSpace, uint32_t *nameSpaceLength, LPCSTR *relativePath);
+    static HRESULT SplitFilePath(
+        const char *fullPath,
+        char **rootName,
+        uint32_t *rootNameLength,
+        char **relativePath);
 
     //--//
 

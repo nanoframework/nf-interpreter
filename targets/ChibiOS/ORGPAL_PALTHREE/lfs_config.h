@@ -15,7 +15,6 @@
 #define LFS_FREE platform_free
 #define LFS_THREADSAFE
 
-
 // System includes
 #include <stdint.h>
 #include <stdbool.h>

@@ -19,6 +19,7 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_NativeFileStream::_ctor___VOID__S
 
     hbPath = pArgs[0].DereferenceString();
     FAULT_ON_NULL(hbPath);
+
     bufferSize = pArgs[1].NumericByRef().s4;
 
     if (bufferSize < 0)
@@ -236,10 +237,11 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_NativeFileStream::ReadWriteHelper
         NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
     }
 
-    if (timeoutHB->NumericByRef().s4 == 0) // Use default timeout
+    if (timeoutHB->NumericByRef().s4 == 0)
     {
-        int timeout = (isRead) ? fs->GetReadTimeout() : fs->GetWriteTimeout();
-        timeoutHB->NumericByRef().s4 = (timeout != 0) ? timeout : FS_DEFAULT_TIMEOUT;
+        // no timeout set, just use default timeout
+        CLR_INT64 timeout = (isRead) ? fs->GetReadTimeout() : fs->GetWriteTimeout();
+        timeoutHB->SetInteger((CLR_INT64)((timeout != 0) ? timeout : FS_DEFAULT_TIMEOUT));
     }
 
     NANOCLR_CHECK_HRESULT(stack.SetupTimeoutFromTicks(*timeoutHB, timeoutTicks));

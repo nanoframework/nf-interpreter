@@ -9,7 +9,7 @@
 
 // //--//
 
-// void FS_MountVolume( LPCSTR nameSpace, UINT32 serialNumber, UINT32 deviceFlags, BlockStorageDevice* blockStorageDevice )
+// void FS_MountVolume( LPCSTR rootName, UINT32 serialNumber, UINT32 deviceFlags, BlockStorageDevice* blockStorageDevice )
 // {
 // }
 
@@ -19,31 +19,31 @@
 
 // //--//
 
-__nfweak void FS_Initialize()
-{
-}
+// __nfweak void FS_Initialize()
+// {
+// }
 
-// //--//
+// // //--//
 
-// HAL_DblLinkedList<FileSystemVolume> FileSystemVolumeList::s_volumeList;
+// // HAL_DblLinkedList<FileSystemVolume> FileSystemVolumeList::s_volumeList;
 
-// //--//
+// // //--//
 
-void FileSystemVolumeList::Initialize()
-{
-}
+// __nfweak void FileSystemVolumeList::Initialize()
+// {
+// }
 
-__nfweak bool FileSystemVolumeList::InitializeVolumes()
-{
-    return TRUE;
-}
+// __nfweak bool FileSystemVolumeList::InitializeVolumes()
+// {
+//     return TRUE;
+// }
 
-__nfweak bool FileSystemVolumeList::UninitializeVolumes()
-{
-    return TRUE;
-}
+// __nfweak bool FileSystemVolumeList::UninitializeVolumes()
+// {
+//     return TRUE;
+// }
 
-// BOOL FileSystemVolumeList::AddVolume( FileSystemVolume* fsv, LPCSTR nameSpace, UINT32 serialNumber, UINT32 deviceFlags,
+// BOOL FileSystemVolumeList::AddVolume( FileSystemVolume* fsv, LPCSTR rootName, UINT32 serialNumber, UINT32 deviceFlags,
 //                                       STREAM_DRIVER_INTERFACE* streamDriver, FILESYSTEM_DRIVER_INTERFACE* fsDriver,
 //                                       BlockStorageDevice* blockStorageDevice, UINT32 volumeId, BOOL init )
 // {
@@ -70,7 +70,7 @@ __nfweak bool FileSystemVolumeList::UninitializeVolumes()
 //     return 0;
 // }
 
-// FileSystemVolume* FileSystemVolumeList::FindVolume( LPCSTR nameSpace, UINT32 nameSpaceLength )
+// FileSystemVolume* FileSystemVolumeList::FindVolume( LPCSTR rootName, UINT32 rootNameLength )
 // {
 //     return NULL;
 // }

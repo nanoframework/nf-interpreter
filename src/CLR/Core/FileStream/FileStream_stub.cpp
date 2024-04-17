@@ -30,13 +30,13 @@ void CLR_RT_FileStream::RelocationHandler(CLR_RT_HeapBlock_BinaryBlob *ptr)
 
 HRESULT CLR_RT_FileStream::SplitFilePath(
     const char *fullPath,
-    const char **nameSpace,
-    uint32_t *nameSpaceLength,
+    const char **rootName,
+    uint32_t *rootNameLength,
     const char **relativePath)
 {
     (void)fullPath;
-    (void)nameSpace;
-    (void)nameSpaceLength;
+    (void)rootName;
+    (void)rootNameLength;
     (void)relativePath;
 
     NANOCLR_FEATURE_STUB_RETURN();

@@ -80,7 +80,7 @@ extern "C"
 
     //--//
 
-    typedef bool (*FS_ISLOADABLEMEDIA)(BlockStorageDevice * /*driverInterface*/, uint32_t * /*numVolumes*/);
+    typedef bool (*FS_LOADMEDIA)(const void * /*pointer to media*/);
     typedef HRESULT (*FS_FORMAT)(const VOLUME_ID * /*volume*/, const char * /*volumeLabel*/, uint32_t /*parameters*/);
     typedef HRESULT (
         *FS_GETSIZEINFO)(const VOLUME_ID * /*volume*/, int64_t * /*totalSize*/, int64_t * /*totalFreeSpace*/);
@@ -88,31 +88,27 @@ extern "C"
     typedef HRESULT (
         *FS_GETVOLUMELABEL)(const VOLUME_ID * /*volume*/, const char * /*volumeLabel*/, int32_t /*volumeLabelLen*/);
 
-    typedef HRESULT (*FS_FINDOPEN)(const VOLUME_ID * /*volume*/, const wchar_t * /*path*/, uint32_t * /*findHandle*/);
+    typedef HRESULT (*FS_FINDOPEN)(const VOLUME_ID * /*volume*/, const char * /*path*/, uint32_t * /*findHandle*/);
     typedef HRESULT (*FS_FINDNEXT)(uint32_t /*findHandle*/, FS_FILEINFO * /*findData*/, bool * /*found*/);
     typedef HRESULT (*FS_FINDCLOSE)(uint32_t /*findHandle*/);
 
     typedef HRESULT (*FS_GETFILEINFO)(
         const VOLUME_ID * /*volume*/,
-        const wchar_t * /*path*/,
+        const char * /*path*/,
         FS_FILEINFO * /*fileInfo*/,
         bool * /*found*/);
 
-    typedef HRESULT (*FS_CREATEDIRECTORY)(const VOLUME_ID * /*volume*/, const wchar_t * /*path*/);
-    typedef HRESULT (*FS_MOVE)(const VOLUME_ID * /*volume*/, const wchar_t * /*oldPath*/, const wchar_t * /*newPath*/);
-    typedef HRESULT (*FS_DELETE)(const VOLUME_ID * /*volume*/, const wchar_t * /*path*/);
-    typedef HRESULT (
-        *FS_GETATTRIBUTES)(const VOLUME_ID * /*volume*/, const wchar_t * /*path*/, uint32_t * /*attributes*/);
-    typedef HRESULT (
-        *FS_SETATTRIBUTES)(const VOLUME_ID * /*volume*/, const wchar_t * /*path*/, uint32_t /*attributes*/);
+    typedef HRESULT (*FS_CREATEDIRECTORY)(const VOLUME_ID * /*volume*/, const char * /*path*/);
+    typedef HRESULT (*FS_MOVE)(const VOLUME_ID * /*volume*/, const char * /*oldPath*/, const char * /*newPath*/);
+    typedef HRESULT (*FS_DELETE)(const VOLUME_ID * /*volume*/, const char * /*path*/);
+    typedef HRESULT (*FS_GETATTRIBUTES)(const VOLUME_ID * /*volume*/, const char * /*path*/, uint32_t * /*attributes*/);
+    typedef HRESULT (*FS_SETATTRIBUTES)(const VOLUME_ID * /*volume*/, const char * /*path*/, uint32_t /*attributes*/);
 
     //--//
 
 #ifdef CreateDirectory
 #undef CreateDirectory
 #endif
-
-#define FS_DRIVER_ATTRIBUTE__FORMAT_REQUIRES_ERASE 0x10000000
 
     struct FILESYSTEM_DRIVER_INTERFACE
     {
@@ -130,12 +126,12 @@ extern "C"
         FS_SETATTRIBUTES SetAttributes;
 
         FS_FORMAT Format;
-        FS_ISLOADABLEMEDIA IsLoadableMedia;
+        FS_LOADMEDIA LoadMedia;
         FS_GETSIZEINFO GetSizeInfo;
         FS_FLUSHALL FlushAll;
         FS_GETVOLUMELABEL GetVolumeLabel;
 
-        LPCSTR Name;
+        const char *Name;
         uint32_t Flags;
     };
 
@@ -145,10 +141,10 @@ extern "C"
     typedef bool (*STREAM_INITIALIZEVOLUME)(const VOLUME_ID * /*volume*/);
     typedef bool (*STREAM_UNINITIALIZEVOLUME)(const VOLUME_ID * /*volume*/);
     typedef STREAM_DRIVER_DETAILS *(*STREAM_DRIVERDETAILS)(const VOLUME_ID * /*volume*/);
-    typedef HRESULT (*STREAM_OPEN)(const VOLUME_ID * /*volume*/, const wchar_t * /*path*/, uint32_t * /*handle*/);
+    typedef HRESULT (*STREAM_OPEN)(const VOLUME_ID * /*volume*/, const char * /*path*/, uint32_t * /*handle*/);
     typedef HRESULT (*STREAM_CLOSE)(uint32_t /*handle*/);
-    typedef HRESULT (*STREAM_READ)(uint32_t /*handle*/, int8_t * /*buffer*/, int /*count*/, int * /*int8_tsRead*/);
-    typedef HRESULT (*STREAM_WRITE)(uint32_t /*handle*/, int8_t * /*buffer*/, int /*count*/, int * /*int8_tsWritten*/);
+    typedef HRESULT (*STREAM_READ)(uint32_t /*handle*/, uint8_t * /*buffer*/, int /*count*/, int * /*readCount*/);
+    typedef HRESULT (*STREAM_WRITE)(uint32_t /*handle*/, uint8_t * /*buffer*/, int /*count*/, int * /*writtenCount*/);
     typedef HRESULT (*STREAM_FLUSH)(uint32_t /*handle*/);
     typedef HRESULT (*STREAM_SEEK_)(
         uint32_t /*handle*/,
@@ -174,23 +170,20 @@ extern "C"
         STREAM_SETLENGTH SetLength;
     };
 
-    //--//
+//--//
 
-    // Storage event bit fields
-    // 0-7  : Event Sub Category (Insert, Eject etc.)
-    // 8-15 : Category (always EVENT_STORAGE)
-    // 16-23: Internal flags.
-    // 24-31: Driver supplied custom flags.
+// Storage event bit fields
+// 0-7  : Event Sub Category (Insert, Eject etc.)
+// 8-15 : Category (always EVENT_STORAGE)
+// 16-23: Internal flags.
+// 24-31: Driver supplied custom flags.
 
-    // TODO
-    // #define EVENT_STORAGE                 3
-    #define EVENT_SUBCATEGORY_MEDIAINSERT 1
-    #define EVENT_SUBCATEGORY_MEDIAEJECT  2
+// TODO
+// #define EVENT_STORAGE                 3
+#define EVENT_SUBCATEGORY_MEDIAINSERT 1
+#define EVENT_SUBCATEGORY_MEDIAEJECT  2
 
-    void FS_MountVolume(
-        LPCSTR nameSpace,
-        uint32_t serialNumber,
-        uint32_t deviceFlags);
+    void FS_MountVolume(LPCSTR rootName, uint32_t deviceFlags);
     void FS_UnmountVolume(BlockStorageDevice *blockStorageDevice);
 
     void FS_Initialize();
@@ -208,7 +201,6 @@ extern "C"
 
     struct VOLUME_ID
     {
-        BlockStorageDevice *blockStorageDevice;
         uint32_t volumeId;
     };
 
@@ -267,7 +259,7 @@ extern "C"
             return m_fsDriver->FlushAll(&m_volumeId);
         }
 
-        HRESULT FindOpen(const wchar_t *path, uint32_t *findHandle)
+        HRESULT FindOpen(const char *path, uint32_t *findHandle)
         {
             // Use ValidateFind() to validate, this assert is for debug purpose only
             _ASSERTE(m_fsDriver && m_fsDriver->FindOpen);
@@ -291,7 +283,7 @@ extern "C"
             return m_fsDriver->FindClose(findHandle);
         }
 
-        HRESULT GetFileInfo(const wchar_t *path, FS_FILEINFO *fileInfo, bool *found)
+        HRESULT GetFileInfo(const char *path, FS_FILEINFO *fileInfo, bool *found)
         {
             if (!m_fsDriver || !(m_fsDriver->GetFileInfo))
             {
@@ -301,7 +293,7 @@ extern "C"
             return m_fsDriver->GetFileInfo(&m_volumeId, path, fileInfo, found);
         }
 
-        HRESULT CreateDirectory(const wchar_t *path)
+        HRESULT CreateDirectory(const char *path)
         {
             if (!m_fsDriver || !(m_fsDriver->CreateDirectory))
             {
@@ -311,7 +303,7 @@ extern "C"
             return m_fsDriver->CreateDirectory(&m_volumeId, path);
         }
 
-        HRESULT Move(const wchar_t *oldPath, const wchar_t *newPath)
+        HRESULT Move(const char *oldPath, const char *newPath)
         {
             if (!m_fsDriver || !(m_fsDriver->Move))
             {
@@ -321,7 +313,7 @@ extern "C"
             return m_fsDriver->Move(&m_volumeId, oldPath, newPath);
         }
 
-        HRESULT Delete(const wchar_t *path)
+        HRESULT Delete(const char *path)
         {
             if (!m_fsDriver || !(m_fsDriver->Delete))
             {
@@ -331,7 +323,7 @@ extern "C"
             return m_fsDriver->Delete(&m_volumeId, path);
         }
 
-        HRESULT GetAttributes(const wchar_t *path, uint32_t *attributes)
+        HRESULT GetAttributes(const char *path, uint32_t *attributes)
         {
             if (!m_fsDriver || !(m_fsDriver->GetAttributes))
             {
@@ -341,7 +333,7 @@ extern "C"
             return m_fsDriver->GetAttributes(&m_volumeId, path, attributes);
         }
 
-        HRESULT SetAttributes(const wchar_t *path, uint32_t attributes)
+        HRESULT SetAttributes(const char *path, uint32_t attributes)
         {
             if (!m_fsDriver || !(m_fsDriver->SetAttributes))
             {
@@ -359,7 +351,7 @@ extern "C"
             return m_streamDriver->DriverDetails(&m_volumeId);
         }
 
-        HRESULT Open(const wchar_t *path, uint32_t *handle)
+        HRESULT Open(const char *path, uint32_t *handle)
         {
             // Use ValidateStreamDriver() to validate, this assert is for debug purpose only
             _ASSERTE(m_streamDriver && m_streamDriver->Open);
@@ -375,20 +367,20 @@ extern "C"
             return m_streamDriver->Close(handle);
         }
 
-        HRESULT Read(uint32_t handle, int8_t *buffer, int count, int *int8_tsRead)
+        HRESULT Read(uint32_t handle, uint8_t *buffer, int count, int *readCount)
         {
             // Use ValidateStreamDriver() to validate, this assert is for debug purpose only
             _ASSERTE(m_streamDriver && m_streamDriver->Read);
 
-            return m_streamDriver->Read(handle, buffer, count, int8_tsRead);
+            return m_streamDriver->Read(handle, buffer, count, readCount);
         }
 
-        HRESULT Write(uint32_t handle, int8_t *buffer, int count, int *int8_tsWritten)
+        HRESULT Write(uint32_t handle, uint8_t *buffer, int count, int *writtenCount)
         {
             // Use ValidateStreamDriver() to validate, this assert is for debug purpose only
             _ASSERTE(m_streamDriver && m_streamDriver->Write);
 
-            return m_streamDriver->Write(handle, buffer, count, int8_tsWritten);
+            return m_streamDriver->Write(handle, buffer, count, writtenCount);
         }
 
         HRESULT Flush(uint32_t handle)
@@ -429,28 +421,31 @@ extern "C"
         {
             STREAM_DRIVER_DETAILS *details;
 
-            if (!m_streamDriver ||
-                !(m_streamDriver->DriverDetails)) // invalid streamDriver, or invalid DriverDetails Fn pointer
+            if (!m_streamDriver || !(m_streamDriver->DriverDetails))
             {
+                // invalid streamDriver, or invalid DriverDetails pointer
                 return FALSE;
             }
 
             details = m_streamDriver->DriverDetails(&m_volumeId);
 
-            if ((!details) || // Check for valid stream driver details
-                (details->bufferingStrategy < SYNC_IO ||
-                 details->bufferingStrategy > DRIVER_BUFFERED_IO) || // Check for valid bufferingStrategy
-                (!(m_streamDriver->Open) || !(m_streamDriver->Close) ||
-                 !(m_streamDriver->Flush) || // Open, Close, Flush, InitializeVolume, and
+            // Check for valid stream driver details
+            if ((!details) ||
+                // Check for valid bufferingStrategy
+                (details->bufferingStrategy < SYNC_IO || details->bufferingStrategy > DRIVER_BUFFERED_IO) ||
+                // Open, Close, Flush, InitializeVolume, and
+                (!(m_streamDriver->Open) || !(m_streamDriver->Close) || !(m_streamDriver->Flush) ||
                  !(m_streamDriver->InitializeVolume) ||
-                 !(m_streamDriver->UninitializeVolume)) ||         //    UninitializeVolume is required on all streams
-                (details->canRead && !(m_streamDriver->Read)) ||   // if the stream can read, Read is required
-                (details->canWrite && !(m_streamDriver->Write)) || // if the stream can write, Write is required
-                (details->canSeek &&
-                 (!(m_streamDriver->Seek) ||
-                  !(m_streamDriver->GetLength))) || // if the stream can seek, Seek and GetLength is required
-                (details->canSeek && details->canWrite &&
-                 (!(m_streamDriver->SetLength)))) // if the stream and seek and write, SetLength is required
+                 //    UninitializeVolume is required on all streams
+                 !(m_streamDriver->UninitializeVolume)) ||
+                // if the stream can read, Read is required
+                (details->canRead && !(m_streamDriver->Read)) ||
+                // if the stream can write, Write is required
+                (details->canWrite && !(m_streamDriver->Write)) ||
+                // if the stream can seek, Seek and GetLength is required
+                (details->canSeek && (!(m_streamDriver->Seek) || !(m_streamDriver->GetLength))) ||
+                // if the stream can seek AND write, SetLength is required
+                (details->canSeek && details->canWrite && (!(m_streamDriver->SetLength))))
             {
                 return FALSE;
             }
@@ -465,9 +460,7 @@ extern "C"
 
         //--//
 
-        char m_nameSpace[FS_NAME_MAXLENGTH];
-        char m_label[FS_LABEL_MAXLENGTH];
-        uint32_t m_serialNumber;
+        char m_rootName[FS_NAME_MAXLENGTH];
         uint32_t m_deviceFlags;
         STREAM_DRIVER_INTERFACE *m_streamDriver;
         FILESYSTEM_DRIVER_INTERFACE *m_fsDriver;
@@ -489,8 +482,7 @@ extern "C"
         // If init=true, the InitializeVolume() will be called.
         static bool AddVolume(
             FileSystemVolume *fsv,
-            char const *nameSpace,
-            uint32_t serialNumber,
+            char const *rootName,
             uint32_t deviceFlags,
             STREAM_DRIVER_INTERFACE *streamDriver,
             FILESYSTEM_DRIVER_INTERFACE *fsDriver,
@@ -511,7 +503,7 @@ extern "C"
         static uint32_t GetNumVolumes();
 
         // returns the volume driver for the specified namespace
-        static FileSystemVolume *FindVolume(char const *nameSpace, uint32_t nameSpaceLength);
+        static FileSystemVolume *FindVolume(char const *rootName, uint32_t rootNameLength);
 
         // returns true if fsv is in the list, false otherwise
         static bool Contains(FileSystemVolume *fsv);
