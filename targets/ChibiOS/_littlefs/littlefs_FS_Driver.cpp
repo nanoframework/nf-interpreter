@@ -209,9 +209,9 @@ HRESULT LITTLEFS_FS_Driver::Open(const VOLUME_ID *volume, const char *path, uint
 
     NANOCLR_CLEANUP();
 
-    if (handle != NULL)
+    if (fileHandle != NULL)
     {
-        platform_free(handle);
+        platform_free(fileHandle);
     }
 
     NANOCLR_CLEANUP_END();
