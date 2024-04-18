@@ -26,6 +26,13 @@ jobs:
     - name: Checkout Repository
       uses: actions/checkout@v4
 
+    - name: Free Disk Space (Ubuntu)
+      uses: jlumbroso/free-disk-space@main
+      with:
+        # this might remove tools that are actually needed,
+        # when set to "true" but frees about 6 GB
+        tool-cache: true
+
     - name: Get container version
       run: |
         $dockerfileContent = Get-Content(".devcontainer/TI/Dockerfile.TI")
