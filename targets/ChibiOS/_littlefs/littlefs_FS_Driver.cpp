@@ -122,6 +122,7 @@ HRESULT LITTLEFS_FS_Driver::Open(const VOLUME_ID *volume, const char *path, uint
 
     LITTLEFS_FileHandle *fileHandle = NULL;
     lfs_info info;
+    int32_t flags;
     bool fileExists = false;
 
     // allocate file handle
@@ -151,60 +152,45 @@ HRESULT LITTLEFS_FS_Driver::Open(const VOLUME_ID *volume, const char *path, uint
     // check for file existence
     fileExists = lfs_stat(fileHandle->fs, path, &info) == LFS_ERR_OK;
 
-    if (!fileExists)
-    {
-        // setup attributes stuff (with default value)
-        fileHandle->nanoAttributes = FileAttributes_Normal;
-        fileHandle->attr = {NANO_LITTLEFS_ATTRIBUTE, &fileHandle->nanoAttributes, sizeof(uint32_t)};
-        fileHandle->fileConfig = {
-            .buffer = NULL,
-            .attrs = &fileHandle->attr,
-            .attr_count = 1,
-        };
-    }
+    // setup attributes stuff (with default value)
+    // developer note: with the current littlefs implementation (v2.9), need to use the alternative API to handle
+    // attributes this is planned to be improved in a future version see (and related)
+    // https://github.com/littlefs-project/littlefs/issues/759
+    fileHandle->nanoAttributes = FileAttributes_Normal;
+    fileHandle->attr = {NANO_LITTLEFS_ATTRIBUTE, &fileHandle->nanoAttributes, sizeof(uint32_t)};
+    fileHandle->fileConfig = {
+        .buffer = NULL,
+        .attrs = &fileHandle->attr,
+        .attr_count = 1,
+    };
 
     if (fileExists)
     {
-        // open the existing file
-        if (lfs_file_open(fileHandle->fs, &fileHandle->file, path, LFS_O_CREAT | LFS_O_RDWR) == LFS_ERR_OK)
-        {
-            // store the handle
-            *handle = (uint32_t)fileHandle;
-
-            // done here, don't clear the handle
-            hr = S_OK;
-            NANOCLR_RETURN();
-        }
-        else
-        {
-            NANOCLR_SET_AND_LEAVE(CLR_E_FILE_IO);
-        }
+        // file already exists, open for R/W
+        flags = LFS_O_RDWR;
     }
     else
     {
         // file doesn't exist
-        // create with the alternative API to handle attributes
-        if (lfs_file_opencfg(
-                fileHandle->fs,
-                &fileHandle->file,
-                path,
-                LFS_O_CREAT | LFS_O_RDWR,
-                &fileHandle->fileConfig) == LFS_ERR_OK)
-        {
-            // store the handle
-            *handle = (uint32_t)fileHandle;
+        flags = LFS_O_CREAT | LFS_O_RDWR;
+    }
 
-            // flush the file, so attributes get saved
-            lfs_file_sync(fileHandle->fs, &fileHandle->file);
+    // need to use the alternative API to handle attributes
+    if (lfs_file_opencfg(fileHandle->fs, &fileHandle->file, path, flags, &fileHandle->fileConfig) == LFS_ERR_OK)
+    {
+        // store the handle
+        *handle = (uint32_t)fileHandle;
 
-            // done here, don't clear the handle
-            hr = S_OK;
-            NANOCLR_RETURN();
-        }
-        else
-        {
-            NANOCLR_SET_AND_LEAVE(CLR_E_FILE_IO);
-        }
+        // flush the file, so attributes get saved
+        lfs_file_sync(fileHandle->fs, &fileHandle->file);
+
+        // done here, return imediatly so handle doesn't get cleared
+        hr = S_OK;
+        NANOCLR_RETURN();
+    }
+    else
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_FILE_IO);
     }
 
     NANOCLR_CLEANUP();
