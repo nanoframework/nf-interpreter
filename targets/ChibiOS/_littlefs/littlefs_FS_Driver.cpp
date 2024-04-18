@@ -320,19 +320,46 @@ HRESULT LITTLEFS_FS_Driver::Flush(uint32_t handle)
 
 HRESULT LITTLEFS_FS_Driver::Seek(uint32_t handle, int64_t offset, uint32_t origin, int64_t *position)
 {
-    (void)handle;
-    (void)offset;
-    (void)origin;
-    (void)position;
+    LITTLEFS_FileHandle *fileHandle;
 
-    // if (handle == 0)
-    //     return CLR_E_INVALID_PARAMETER;
+    // set to invalid value
+    int32_t whence = -1;
 
-    // FAT_FileHandle *fileHandle = (FAT_FileHandle *)handle;
+    if (handle == 0)
+    {
+        return CLR_E_INVALID_PARAMETER;
+    }
 
-    // return fileHandle->Seek(offset, origin, position);
-    ASSERT(FALSE);
-    return CLR_E_INVALID_DRIVER;
+    fileHandle = (LITTLEFS_FileHandle *)handle;
+
+    // map the origin to littlefs
+    switch (origin)
+    {
+        case SEEKORIGIN_BEGIN:
+            whence = LFS_SEEK_SET;
+            // 1st need to rewind the file to get to a known position
+            lfs_file_rewind(fileHandle->fs, &fileHandle->file);
+            break;
+
+        case SEEKORIGIN_CURRENT:
+            whence = LFS_SEEK_CUR;
+            break;
+
+        case SEEKORIGIN_END:
+            whence = LFS_SEEK_END;
+            break;
+    }
+
+    // seek to the position
+    *position = lfs_file_seek(fileHandle->fs, &fileHandle->file, offset, whence);
+
+    if (*position < LFS_ERR_OK)
+    {
+        // failed to access the file
+        return CLR_E_FILE_IO;
+    }
+
+    return S_OK;
 }
 
 HRESULT LITTLEFS_FS_Driver::GetLength(uint32_t handle, int64_t *length)
