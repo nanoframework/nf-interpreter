@@ -420,12 +420,24 @@ HRESULT LITTLEFS_FS_Driver::SetLength(uint32_t handle, int64_t length)
     else
     {
         // extend the file, or keep the same size
+
+        // store the current position
+        int64_t currentPosition = lfs_file_tell(fileHandle->fs, &fileHandle->file);
+
+        // grow the file to the required size
         if (lfs_file_seek(fileHandle->fs, &fileHandle->file, length, LFS_SEEK_END) < LFS_ERR_OK)
         {
             return CLR_E_FILE_IO;
         }
 
+        // need to write at the current position to extend the file
         if (lfs_file_sync(fileHandle->fs, &fileHandle->file) != LFS_ERR_OK)
+        {
+            return CLR_E_FILE_IO;
+        }
+
+        // restore the position
+        if (lfs_file_seek(fileHandle->fs, &fileHandle->file, currentPosition, LFS_SEEK_SET) < LFS_ERR_OK)
         {
             return CLR_E_FILE_IO;
         }
