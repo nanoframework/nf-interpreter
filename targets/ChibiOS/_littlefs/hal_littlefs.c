@@ -7,7 +7,7 @@
 
 mutex_t lfs_mutex[LITTLEFS_INSTANCES_COUNT];
 
-bool lfsFileSystemReady;
+//bool lfsFileSystemReady;
 lfs_t lfs[LITTLEFS_INSTANCES_COUNT];
 struct lfs_config lfsConfig[LITTLEFS_INSTANCES_COUNT];
 int8_t lfsInstanceIndex[LITTLEFS_INSTANCES_COUNT];
@@ -348,7 +348,7 @@ int32_t hal_lfs_mount(int32_t index)
     }
 
     // mirror littlefs mount result into global flag
-    lfsFileSystemReady = (mountResult == LFS_ERR_OK);
+    //lfsFileSystemReady = (mountResult == LFS_ERR_OK);
 
 #if !defined(BUILD_RTM)
     ASSERT(mountResult == LFS_ERR_OK);

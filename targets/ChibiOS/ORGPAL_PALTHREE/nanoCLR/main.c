@@ -17,6 +17,8 @@
 #include <nanoHAL_v2.h>
 #include <targetPAL.h>
 
+extern int32_t hal_lfs_config();
+
 // need to declare the Receiver thread here
 osThreadDef(ReceiverThread, osPriorityHigh, 2048, "ReceiverThread");
 // declare CLRStartup thread here
@@ -93,6 +95,11 @@ int main(void)
     // config and init external memory
     // this has to be called after osKernelInitialize, otherwise an hard fault will occur
     Target_ExternalMemoryInit();
+
+#if (NF_FEATURE_USE_LITTLEFS == TRUE)
+    // config and init littlefs
+    hal_lfs_config();
+#endif
 
     //  Initializes a serial-over-USB CDC driver.
     sduObjectInit(&SERIAL_DRIVER);
