@@ -300,16 +300,22 @@ HRESULT LITTLEFS_FS_Driver::Write(uint32_t handle, uint8_t *buffer, int size, in
 
 HRESULT LITTLEFS_FS_Driver::Flush(uint32_t handle)
 {
-    (void)handle;
+    LITTLEFS_FileHandle *fileHandle;
 
-    // if (handle == 0)
-    //     return CLR_E_INVALID_PARAMETER;
+    if (handle == 0)
+    {
+        return CLR_E_INVALID_PARAMETER;
+    }
 
-    // FAT_FileHandle *fileHandle = (FAT_FileHandle *)handle;
+    fileHandle = (LITTLEFS_FileHandle *)handle;
 
-    // return fileHandle->Flush();
-    ASSERT(FALSE);
-    return CLR_E_INVALID_DRIVER;
+    if (lfs_file_sync(fileHandle->fs, &fileHandle->file) < LFS_ERR_OK)
+    {
+        // failed to access the file
+        return CLR_E_FILE_IO;
+    }
+
+    return S_OK;
 }
 
 HRESULT LITTLEFS_FS_Driver::Seek(uint32_t handle, int64_t offset, uint32_t origin, int64_t *position)
