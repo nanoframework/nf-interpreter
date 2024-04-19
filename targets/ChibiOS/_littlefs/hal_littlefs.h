@@ -14,7 +14,7 @@
 #include <lfs.h>
 #include <nanoHAL_v2.h>
 
-#define NANO_LITTLEFS_ATTRIBUTE  0
+#define NANO_LITTLEFS_ATTRIBUTE 0
 
 #ifdef __cplusplus
 extern "C"
