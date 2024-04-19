@@ -272,6 +272,24 @@ void hal_lfs_config()
     }
 }
 
+void hal_lfs_erase_chip(int32_t index)
+{
+    switch (index)
+    {
+        case 0:
+            hal_lfs_erase_chip_0();
+            break;
+
+#if LITTLEFS_INSTANCES_COUNT > 1
+        case 1:
+            hal_lfs_erase_chip_1();
+            break;
+#endif
+
+        default:
+            break;
+    }
+}
 
 int32_t hal_lfs_mount(int32_t index, bool forceFormat)
 {
