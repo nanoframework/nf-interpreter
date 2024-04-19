@@ -272,18 +272,27 @@ void hal_lfs_config()
     }
 }
 
-int32_t hal_lfs_mount(int32_t index)
+
+int32_t hal_lfs_mount(int32_t index, bool forceFormat)
 {
     int32_t mountResult = 0;
+
     // mount the file system
     mountResult = lfs_mount(&lfs[index], &lfsConfig[index]);
 
     if (mountResult != 0)
     {
         // looks like littlefs is not formated (occuring at 1st boot)
+
+        if (forceFormat)
+        {
+            // wipe out the chip
+            hal_lfs_erase_chip(index);
+        }
+
         lfs_format(&lfs[index], &lfsConfig[index]);
 
-        // try mounting again
+        // mount the file system again
         mountResult = lfs_mount(&lfs[index], &lfsConfig[index]);
     }
 
