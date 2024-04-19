@@ -3,6 +3,8 @@
 // See LICENSE file in the project root for full license information.
 //
 
+#include <ch.h>
+#include <hal.h>
 #include <target_littlefs.h>
 #include <hal_littlefs.h>
 
@@ -18,27 +20,10 @@ static const SPIConfig spiConfig = {
     // transfer length to 8bit
     .cr2 = SPI_CR2_DS_2 | SPI_CR2_DS_1 | SPI_CR2_DS_0};
 
-#if defined(__GNUC__)
-__attribute__((aligned(32)))
+#if CACHE_LINE_SIZE > 0
+CC_ALIGN_DATA(CACHE_LINE_SIZE)
 #endif
-uint8_t writeBuffer[AT25SF641_PAGE_SIZE];
-#if defined(__GNUC__)
-__attribute__((aligned(32)))
-#endif
-uint8_t readBuffer[AT25SF641_PAGE_SIZE];
-
-#if defined(__GNUC__)
-__attribute__((aligned(32)))
-#endif
-uint8_t lfs0WriteBuffer[AT25SF641_PAGE_SIZE*2];
-#if defined(__GNUC__)
-__attribute__((aligned(32)))
-#endif
-uint8_t lfs0ReadBuffer[AT25SF641_PAGE_SIZE*2];
-#if defined(__GNUC__)
-__attribute__((aligned(32)))
-#endif
-uint8_t lfs0LookaheadBuffer[AT25SF641_PAGE_SIZE*2];
+uint8_t dataBuffer[CACHE_SIZE_ALIGN(uint8_t, AT25SF641_PAGE_SIZE)];
 
 ///////////////
 // Definitions
@@ -47,9 +32,10 @@ uint8_t lfs0LookaheadBuffer[AT25SF641_PAGE_SIZE*2];
 
 ///////////////
 // declarations
-bool SPI_Erase_Block(uint32_t addr);
-bool SPI_Read(uint8_t *pData, uint32_t readAddr, uint32_t size);
-bool SPI_Write(const uint8_t *pData, uint32_t writeAddr, uint32_t size);
+static bool SPI_Erase_Block(uint32_t addr, bool largeBlock);
+static bool SPI_Read(uint8_t *pData, uint32_t readAddr, uint32_t size);
+static bool SPI_Write(const uint8_t *pData, uint32_t writeAddr, uint32_t size);
+static bool SPI_WaitOnBusy();
 
 extern uint32_t HAL_GetTick(void);
 
@@ -60,9 +46,9 @@ int32_t hal_lfs_erase_0(const struct lfs_config *c, lfs_block_t block)
 
     Watchdog_Reset();
 
-    uint32_t addr = block * AT25SF641_PAGE_SIZE;
+    uint32_t addr = block * c->block_size;
 
-    if (!SPI_Erase_Block(addr))
+    if (!SPI_Erase_Block(addr, false))
     {
         return LFS_ERR_IO;
     }
@@ -75,7 +61,7 @@ int32_t hal_lfs_read_0(const struct lfs_config *c, lfs_block_t block, lfs_off_t 
 {
     (void)c;
 
-    uint32_t addr = block * AT25SF641_PAGE_SIZE + off;
+    uint32_t addr = block * c->block_size + off;
 
     if (!SPI_Read(buffer, addr, size))
     {
@@ -95,33 +81,66 @@ int32_t hal_lfs_prog_0(
 {
     (void)c;
 
-    uint32_t addr = block * AT25SF641_PAGE_SIZE + off;
+    uint32_t addr = block * c->block_size + off;
 
     if (!SPI_Write(buffer, addr, size))
     {
         return LFS_ERR_IO;
     }
 
+#ifdef DEBUG
+
+    uint8_t tempBuffer[size];
+
+    // read back and compare
+    SPI_Read(tempBuffer, addr, size);
+    ASSERT(memcmp(buffer, tempBuffer, size) == 0);
+
+#endif
+
     return LFS_ERR_OK;
 }
 
-bool SPI_WaitOnBusy()
+// target specific implementation of chip erase
+bool hal_lfs_erase_chip_0()
+{
+    // need to do this one one block at a time to avoid watchdog reset
+    for (uint32_t i = 0; i < AT25SF641_FLASH_SIZE / AT25SF641_SECTOR_SIZE; i++)
+    {
+        if (!SPI_Erase_Block(i * AT25SF641_SECTOR_SIZE, true))
+        {
+            return false;
+        }
+
+        // reset watchdog
+        Watchdog_Reset();
+    }
+
+    return true;
+}
+
+static bool SPI_WaitOnBusy()
 {
     uint32_t tickstart = HAL_GetTick();
 
-    writeBuffer[0] = READ_STATUS_REG1_CMD;
+    // clear read buffer
+    memset(dataBuffer, 0xFF, 1);
+
+    dataBuffer[0] = READ_STATUS_REG1_CMD;
+    cacheBufferFlush(dataBuffer, 1);
 
     CS_SELECT;
 
     // send read status register 1
-    spiSend(&SPID1, 1, writeBuffer);
+    spiSend(&SPID1, 1, dataBuffer);
 
     while (true)
     {
         // read register value
-        spiReceive(&SPID1, 1, readBuffer);
+        spiReceive(&SPID1, 1, dataBuffer);
+        cacheBufferInvalidate(dataBuffer, 1);
 
-        if (!(readBuffer[0] & AT25SF641_SR_BUSY))
+        if (!(dataBuffer[0] & AT25SF641_SR_BUSY))
         {
             // BuSY bit is cleared
             break;
@@ -143,106 +162,114 @@ bool SPI_WaitOnBusy()
     return true;
 }
 
-bool SPI_Erase_Block(uint32_t addr)
+static bool SPI_Erase_Block(uint32_t addr, bool largeBlock)
 {
     // send write enable
-    writeBuffer[0] = WRITE_ENABLE_CMD;
+    dataBuffer[0] = WRITE_ENABLE_CMD;
+    cacheBufferFlush(dataBuffer, 1);
 
     CS_SELECT;
-    spiSend(&SPID1, 1, writeBuffer);
+    spiSend(&SPID1, 1, dataBuffer);
     CS_UNSELECT;
 
     // send block erase
-    writeBuffer[0] = SECTOR_ERASE_CMD;
-    writeBuffer[1] = (uint8_t)(addr >> 16);
-    writeBuffer[2] = (uint8_t)(addr >> 8);
-    writeBuffer[3] = (uint8_t)addr;
+    dataBuffer[0] = largeBlock ? BLOCK_ERASE_CMD : SECTOR_ERASE_CMD;
+    dataBuffer[1] = (uint8_t)(addr >> 16);
+    dataBuffer[2] = (uint8_t)(addr >> 8);
+    dataBuffer[3] = (uint8_t)addr;
 
     // flush DMA buffer to ensure cache coherency
     // (only required for Cortex-M7)
-    cacheBufferFlush(writeBuffer, 4);
+    cacheBufferFlush(dataBuffer, 4);
 
     CS_SELECT;
-    spiSend(&SPID1, 4, writeBuffer);
+    spiSend(&SPID1, 4, dataBuffer);
     CS_UNSELECT;
 
     // wait for erase operation to complete
     return SPI_WaitOnBusy();
 }
 
-bool SPI_Read(uint8_t *pData, uint32_t readAddr, uint32_t size)
+static bool SPI_Read(uint8_t *pData, uint32_t readAddr, uint32_t size)
 {
     // send read page command
-    writeBuffer[0] = READ_CMD;
-    writeBuffer[1] = (uint8_t)(readAddr >> 16);
-    writeBuffer[2] = (uint8_t)(readAddr >> 8);
-    writeBuffer[3] = (uint8_t)readAddr;
+    dataBuffer[0] = READ_CMD;
+    dataBuffer[1] = (uint8_t)(readAddr >> 16);
+    dataBuffer[2] = (uint8_t)(readAddr >> 8);
+    dataBuffer[3] = (uint8_t)readAddr;
 
     // flush DMA buffer to ensure cache coherency
     // (only required for Cortex-M7)
-    cacheBufferFlush(writeBuffer, 4);
+    cacheBufferFlush(dataBuffer, 4);
 
     CS_SELECT;
-    spiSend(&SPID1, 4, writeBuffer);
+    spiSend(&SPID1, 4, dataBuffer);
 
     // clear read buffer
-    memset(readBuffer, 0, AT25SF641_PAGE_SIZE);
+    memset(dataBuffer, 0xDD, size);
 
-    spiReceive(&SPID1, size, readBuffer);
+    spiReceive(&SPID1, size, dataBuffer);
     CS_UNSELECT;
 
     // invalidate cache
     // (only required for Cortex-M7)
-    cacheBufferInvalidate(readBuffer, size);
+    cacheBufferInvalidate(dataBuffer, AT25SF641_SUBSECTOR_SIZE);
 
     // copy to pointer
-    memcpy(pData, readBuffer, size);
+    memcpy(pData, dataBuffer, size);
 
     return true;
 }
 
-bool SPI_Write(const uint8_t *pData, uint32_t writeAddr, uint32_t size)
+static bool SPI_Write(const uint8_t *pData, uint32_t writeAddr, uint32_t size)
 {
-    // send write enable
-    writeBuffer[0] = WRITE_ENABLE_CMD;
+    uint32_t writeSize;
+    uint32_t address = writeAddr;
 
-    CS_SELECT;
-    spiSend(&SPID1, 1, writeBuffer);
-    CS_UNSELECT;
+    // perform paged program
+    while (size > 0)
+    {
+        // send write enable
+        dataBuffer[0] = WRITE_ENABLE_CMD;
+        cacheBufferFlush(dataBuffer, 1);
 
-    // send write page
-    writeBuffer[0] = PAGE_PROG_CMD;
-    writeBuffer[1] = (uint8_t)(writeAddr >> 16);
-    writeBuffer[2] = (uint8_t)(writeAddr >> 8);
-    writeBuffer[3] = (uint8_t)writeAddr;
+        CS_SELECT;
+        spiSend(&SPID1, 1, dataBuffer);
+        CS_UNSELECT;
 
-    // flush DMA buffer to ensure cache coherency
-    // (only required for Cortex-M7)
-    cacheBufferFlush(writeBuffer, 4);
+        // calculate write size
+        writeSize = __builtin_fmin(AT25SF641_PAGE_SIZE - (address % AT25SF641_PAGE_SIZE), size);
 
-    CS_SELECT;
-    spiSend(&SPID1, 4, writeBuffer);
+        // send write page
+        dataBuffer[0] = PAGE_PROG_CMD;
+        dataBuffer[1] = (uint8_t)(address >> 16);
+        dataBuffer[2] = (uint8_t)(address >> 8);
+        dataBuffer[3] = (uint8_t)address;
 
-    // copy from buffer
-    memcpy(writeBuffer, pData, size);
+        // flush DMA buffer to ensure cache coherency
+        // (only required for Cortex-M7)
+        cacheBufferFlush(dataBuffer, 4);
 
-    // flush DMA buffer to ensure cache coherency
-    // (only required for Cortex-M7)
-    cacheBufferFlush(writeBuffer, size);
+        CS_SELECT;
+        spiSend(&SPID1, 4, dataBuffer);
 
-    spiSend(&SPID1, size, writeBuffer);
-    CS_UNSELECT;
+        // copy from buffer
+        memcpy(dataBuffer, pData, writeSize);
 
-    // wait for operation to complete
-    SPI_WaitOnBusy();
+        // flush DMA buffer to ensure cache coherency
+        // (only required for Cortex-M7)
+        cacheBufferFlush(dataBuffer, writeSize);
 
-    // send write disable
-    writeBuffer[0] = WRITE_DISABLE_CMD;
-    cacheBufferFlush(writeBuffer, 1);
+        spiSend(&SPID1, writeSize, dataBuffer);
+        CS_UNSELECT;
 
-    CS_SELECT;
-    spiSend(&SPID1, 1, writeBuffer);
-    CS_UNSELECT;
+        // wait for operation to complete
+        SPI_WaitOnBusy();
+
+        address += writeSize;
+        pData += writeSize;
+        size -= writeSize;
+    }
 
     return true;
 }
@@ -279,7 +306,8 @@ static uint8_t QSPI_ReadChipID(QSPI_HandleTypeDef *hqspi, uint8_t *buffer);
 
 static uint8_t QSPI_Read(uint8_t *pData, uint32_t readAddr, uint32_t size);
 static uint8_t QSPI_Write(const uint8_t *pData, uint32_t writeAddr, uint32_t size);
-static uint8_t QSPI_Erase_Block(uint32_t blockAddress);
+static uint8_t QSPI_Erase_Block(uint32_t blockAddress, bool largeBlock);
+static uint8_t QSPI_Erase_Chip();
 
 // target specific implementation of hal_lfs_erase
 int32_t hal_lfs_erase_1(const struct lfs_config *c, lfs_block_t block)
@@ -290,7 +318,7 @@ int32_t hal_lfs_erase_1(const struct lfs_config *c, lfs_block_t block)
 
     uint32_t addr = block * W25Q128_PAGE_SIZE;
 
-    if (QSPI_Erase_Block(addr) != QSPI_OK)
+    if (QSPI_Erase_Block(addr, false) != QSPI_OK)
     {
         return LFS_ERR_IO;
     }
@@ -331,6 +359,12 @@ int32_t hal_lfs_prog_1(
     }
 
     return LFS_ERR_OK;
+}
+
+// target specific implementation of chip erase
+bool hal_lfs_erase_chip_1()
+{
+    return QSPI_Erase_Chip() == QSPI_OK;
 }
 
 static uint8_t QSPI_ResetMemory(QSPI_HandleTypeDef *hqspi)
@@ -655,13 +689,13 @@ uint8_t QSPI_Write(const uint8_t *pData, uint32_t writeAddr, uint32_t size)
     return QSPI_OK;
 }
 
-uint8_t QSPI_Erase_Block(uint32_t blockAddress)
+uint8_t QSPI_Erase_Block(uint32_t blockAddress, bool largeBlock)
 {
     QSPI_CommandTypeDef s_command;
 
-    /* Initialize the erase command */
+    // Initialize the erase command
     s_command.InstructionMode = QSPI_INSTRUCTION_1_LINE;
-    s_command.Instruction = SECTOR_ERASE_CMD;
+    s_command.Instruction = largeBlock ? SECTOR_ERASE_CMD : SUBSECTOR_ERASE_CMD;
     s_command.AddressMode = QSPI_ADDRESS_1_LINE;
     s_command.AddressSize = QSPI_ADDRESS_24_BITS;
     s_command.Address = blockAddress;
@@ -672,22 +706,39 @@ uint8_t QSPI_Erase_Block(uint32_t blockAddress)
     s_command.DdrHoldHalfCycle = QSPI_DDR_HHC_ANALOG_DELAY;
     s_command.SIOOMode = QSPI_SIOO_INST_EVERY_CMD;
 
-    /* Enable write operations */
+    // Enable write operations
     if (QSPI_WriteEnable(&QSPID1) != QSPI_OK)
     {
         return QSPI_ERROR;
     }
 
-    /* Send the command */
+    // Send the command
     if (HAL_QSPI_Command(&QSPID1, &s_command, HAL_QPSI_TIMEOUT_DEFAULT_VALUE) != HAL_OK)
     {
         return QSPI_ERROR;
     }
 
-    /* Configure automatic polling mode to wait for end of erase */
+    // Configure automatic polling mode to wait for end of erase
     if (QSPI_AutoPollingMemReady(&QSPID1, W25Q128_SECTOR_ERASE_MAX_TIME) != QSPI_OK)
     {
         return QSPI_ERROR;
+    }
+
+    return QSPI_OK;
+}
+
+static uint8_t QSPI_Erase_Chip()
+{
+    // need to do this one one block at a time to avoid watchdog reset
+    for (uint32_t i = 0; i < W25Q128_FLASH_SIZE / W25Q128_SECTOR_SIZE; i++)
+    {
+        if (QSPI_Erase_Block(i * W25Q128_SECTOR_SIZE, true) != QSPI_OK)
+        {
+            return QSPI_ERROR;
+        }
+
+        // reset watchdog
+        Watchdog_Reset();
     }
 
     return QSPI_OK;
@@ -709,26 +760,27 @@ int8_t target_lfs_init()
 
     // resume from deep power down
     // have to send this to make sure device is functional after sleep
-    writeBuffer[0] = RESUME_DEEP_PD_CMD;
+    dataBuffer[0] = RESUME_DEEP_PD_CMD;
 
     CS_SELECT;
-    spiSend(&SPID1, 1, writeBuffer);
+    spiSend(&SPID1, 1, dataBuffer);
     CS_UNSELECT;
 
     // sanity check: read device ID and unique ID
-    writeBuffer[0] = READ_ID_CMD2;
+    dataBuffer[0] = READ_ID_CMD2;
 
     // flush DMA buffer to ensure cache coherency
-    cacheBufferFlush(writeBuffer, 1);
+    cacheBufferFlush(dataBuffer, 1);
 
     CS_SELECT;
-    spiExchange(&SPID1, 4, writeBuffer, readBuffer);
+    spiSend(&SPID1, 1, dataBuffer);
+    spiReceive(&SPID1, 3, dataBuffer);
     CS_UNSELECT;
 
     // constants from ID Definitions table in AT25SF641 datasheet
-    ASSERT(readBuffer[1] == AT25SF641_MANUFACTURER_ID);
-    ASSERT(readBuffer[2] == AT25SF641_DEVICE_ID1);
-    ASSERT(readBuffer[3] == AT25SF641_DEVICE_ID2);
+    ASSERT(dataBuffer[0] == AT25SF641_MANUFACTURER_ID);
+    ASSERT(dataBuffer[1] == AT25SF641_DEVICE_ID1);
+    ASSERT(dataBuffer[2] == AT25SF641_DEVICE_ID2);
 
 #endif // LFS_SPI1
 
