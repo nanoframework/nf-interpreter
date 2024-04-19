@@ -230,63 +230,6 @@ uint32_t hal_lfs_getLookaheadSize(int32_t index)
     }
 }
 
-uint8_t *hal_lfs_getReadBuffer(int32_t index)
-{
-    switch (index)
-    {
-        case 0:
-            return LFS0_WRITE_BUFFER;
-            break;
-
-#if LITTLEFS_INSTANCES_COUNT > 1
-        case 1:
-            return LFS1_WRITE_BUFFER;
-            break;
-#endif
-
-        default:
-            return NULL;
-    }
-}
-
-uint8_t *hal_lfs_getProgBuffer(int32_t index)
-{
-    switch (index)
-    {
-        case 0:
-            return LFS0_READ_BUFFER;
-            break;
-
-#if LITTLEFS_INSTANCES_COUNT > 1
-        case 1:
-            return LFS1_READ_BUFFER;
-            break;
-#endif
-
-        default:
-            return NULL;
-    }
-}
-
-uint8_t *hal_lfs_getLookaheadBuffer(int32_t index)
-{
-    switch (index)
-    {
-        case 0:
-            return LFS0_LOOKAHEAD_BUFFER;
-            break;
-
-#if LITTLEFS_INSTANCES_COUNT > 1
-        case 1:
-            return LFS1_LOOKAHEAD_BUFFER;
-            break;
-#endif
-
-        default:
-            return NULL;
-    }
-}
-
 // initialization of littlefs: configurations, data structures, drivers and lock
 void hal_lfs_config()
 {
@@ -322,9 +265,6 @@ void hal_lfs_config()
         lfsConfig[i].block_cycles = hal_lfs_getBlockCycles(i);
         lfsConfig[i].cache_size = hal_lfs_getCacheSize(i);
         lfsConfig[i].lookahead_size = hal_lfs_getLookaheadSize(i);
-        lfsConfig[i].read_buffer = hal_lfs_getReadBuffer(i);
-        lfsConfig[i].prog_buffer = hal_lfs_getProgBuffer(i);
-        lfsConfig[i].lookahead_buffer = hal_lfs_getLookaheadBuffer(i);
 
         // store the instance index
         lfsInstanceIndex[i] = i;
