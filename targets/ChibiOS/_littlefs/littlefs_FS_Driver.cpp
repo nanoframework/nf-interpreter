@@ -531,7 +531,18 @@ HRESULT LITTLEFS_FS_Driver::GetAttributes(const VOLUME_ID *volume, const char *p
     if (fsDrive)
     {
         // check for file existence
+#ifdef DEBUG
+        int32_t result = lfs_stat(fsDrive, path, &info);
+        // ASSERT(result == LFS_ERR_CORRUPT);
+        if (result == LFS_ERR_CORRUPT)
+        {
+            __NOP();
+        }
+
+        if (result != LFS_ERR_OK)
+#else
         if (lfs_stat(fsDrive, path, &info) != LFS_ERR_OK)
+#endif
         {
             return S_OK;
         }
@@ -546,8 +557,19 @@ HRESULT LITTLEFS_FS_Driver::GetAttributes(const VOLUME_ID *volume, const char *p
         // try to get the attributes
 
         // even if this fails we return success as attributes have been set to EMPTY_ATTRIBUTE
+#ifdef DEBUG
+        result = lfs_getattr(fsDrive, (const char *)path, NANO_LITTLEFS_ATTRIBUTE, attributes, sizeof(uint32_t));
+        // ASSERT(result == LFS_ERR_CORRUPT);
+        if (result == LFS_ERR_CORRUPT)
+        {
+            __NOP();
+        }
+
+        if (result == LFS_ERR_OK)
+#else
         if (lfs_getattr(fsDrive, (const char *)path, NANO_LITTLEFS_ATTRIBUTE, attributes, sizeof(attributes)) ==
             LFS_ERR_OK)
+#endif
         {
             // add dir attributes
             lfs_stat(fsDrive, (const char *)path, &info);
