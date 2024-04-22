@@ -170,7 +170,7 @@ HRESULT LITTLEFS_FS_Driver::Open(const VOLUME_ID *volume, const char *path, uint
     // attributes this is planned to be improved in a future version see (and related)
     // https://github.com/littlefs-project/littlefs/issues/759
     fileHandle->nanoAttributes = FileAttributes_Normal;
-    fileHandle->attr = {NANO_LITTLEFS_ATTRIBUTE, &fileHandle->nanoAttributes, sizeof(uint32_t)};
+    fileHandle->attr = {NANO_LITTLEFS_ATTRIBUTE, &fileHandle->nanoAttributes, NANO_LITTLEFS_ATTRIBUTE};
     fileHandle->fileConfig = {
         .buffer = NULL,
         .attrs = &fileHandle->attr,
@@ -194,8 +194,11 @@ HRESULT LITTLEFS_FS_Driver::Open(const VOLUME_ID *volume, const char *path, uint
         // store the handle
         *handle = (uint32_t)fileHandle;
 
-        // flush the file, so attributes get saved
-        lfs_file_sync(fileHandle->fs, &fileHandle->file);
+        if (!fileExists)
+        {
+            // sync file to save attributes
+            ASSERT(lfs_file_sync(fileHandle->fs, &fileHandle->file) == LFS_ERR_OK);
+        }
 
         // done here, return imediatly so handle doesn't get cleared
         hr = S_OK;
@@ -580,7 +583,7 @@ HRESULT LITTLEFS_FS_Driver::GetAttributes(const VOLUME_ID *volume, const char *p
 
         // even if this fails we return success as attributes have been set to EMPTY_ATTRIBUTE
 #ifdef DEBUG
-        result = lfs_getattr(fsDrive, (const char *)path, NANO_LITTLEFS_ATTRIBUTE, attributes, sizeof(uint32_t));
+        result = lfs_getattr(fsDrive, (const char *)path, NANO_LITTLEFS_ATTRIBUTE, attributes, NANO_LITTLEFS_ATTRIBUTE_SIZE);
         // ASSERT(result == LFS_ERR_CORRUPT);
         if (result == LFS_ERR_CORRUPT)
         {
@@ -589,7 +592,7 @@ HRESULT LITTLEFS_FS_Driver::GetAttributes(const VOLUME_ID *volume, const char *p
 
         if (result == LFS_ERR_OK)
 #else
-        if (lfs_getattr(fsDrive, (const char *)path, NANO_LITTLEFS_ATTRIBUTE, attributes, sizeof(attributes)) ==
+        if (lfs_getattr(fsDrive, (const char *)path, NANO_LITTLEFS_ATTRIBUTE, attributes, NANO_LITTLEFS_ATTRIBUTE_SIZE) ==
             LFS_ERR_OK)
 #endif
         {
@@ -633,8 +636,8 @@ HRESULT LITTLEFS_FS_Driver::SetAttributes(const VOLUME_ID *volume, const char *p
                 fsDrive,
                 (const char *)path,
                 NANO_LITTLEFS_ATTRIBUTE,
-                (char *)&attributes,
-                sizeof(attributes)) != LFS_ERR_OK)
+                &attributes,
+                NANO_LITTLEFS_ATTRIBUTE_SIZE) != LFS_ERR_OK)
         {
             return CLR_E_FILE_IO;
         }
