@@ -31,17 +31,23 @@ STREAM_DRIVER_DETAILS *LITTLEFS_FS_Driver::DriverDetails(const VOLUME_ID *volume
 
 void LITTLEFS_FS_Driver::Initialize()
 {
-    // nothing to do here as the littlefs instances are already initialized in the target
+    // nothing to do here as the littlefs instances are already initialized at target boot
 }
 
 bool LITTLEFS_FS_Driver::InitializeVolume(const VOLUME_ID *volume)
 {
-    return hal_lfs_mount(volume->volumeId) == LFS_ERR_OK ? TRUE : FALSE;
+    (void)volume;
+
+    // nothing to do here as the littlefs instances are already initialized at target boot
+    return TRUE;
 }
 
 bool LITTLEFS_FS_Driver::UnInitializeVolume(const VOLUME_ID *volume)
 {
-    return lfs_unmount(hal_lfs_get_fs_from_index(volume->volumeId)) == LFS_ERR_OK ? TRUE : FALSE;
+    (void)volume;
+
+    // nothing to do here as the littlefs instances are already initialized at target boot
+    return TRUE;
 }
 
 HRESULT LITTLEFS_FS_Driver::Format(const VOLUME_ID *volume, const char *volumeLabel, uint32_t parameters)
