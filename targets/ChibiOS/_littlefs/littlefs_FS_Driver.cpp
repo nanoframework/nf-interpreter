@@ -120,6 +120,10 @@ HRESULT LITTLEFS_FS_Driver::Open(const VOLUME_ID *volume, const char *path, uint
 {
     NANOCLR_HEADER();
 
+#ifdef DEBUG
+    int32_t result;
+#endif
+
     LITTLEFS_FileHandle *fileHandle = NULL;
     lfs_info info;
     int32_t flags;
@@ -150,7 +154,16 @@ HRESULT LITTLEFS_FS_Driver::Open(const VOLUME_ID *volume, const char *path, uint
     }
 
     // check for file existence
+#ifdef DEBUG
+    result = lfs_stat(fileHandle->fs, path, &info);
+    // ASSERT(result == LFS_ERR_CORRUPT);
+    if (result == LFS_ERR_CORRUPT)
+    {
+        __NOP();
+    }
+#else
     fileExists = lfs_stat(fileHandle->fs, path, &info) == LFS_ERR_OK;
+#endif
 
     // setup attributes stuff (with default value)
     // developer note: with the current littlefs implementation (v2.9), need to use the alternative API to handle
@@ -214,7 +227,16 @@ HRESULT LITTLEFS_FS_Driver::Close(uint32_t handle)
 
     fileHandle = (LITTLEFS_FileHandle *)handle;
 
+#ifdef DEBUG
+    int32_t result = lfs_file_close(fileHandle->fs, &fileHandle->file);
+    // ASSERT(result == LFS_ERR_CORRUPT);
+    if (result == LFS_ERR_CORRUPT)
+    {
+        __NOP();
+    }
+#else
     lfs_file_close(fileHandle->fs, &fileHandle->file);
+#endif
 
     platform_free(fileHandle);
 
