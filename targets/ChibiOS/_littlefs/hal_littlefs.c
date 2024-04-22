@@ -236,6 +236,7 @@ void hal_lfs_config()
     // clear struts for all instances
     memset(&lfs, 0, sizeof(lfs));
     memset(&lfsConfig, 0, sizeof(lfsConfig));
+    memset(&lfs_mutex, 0, sizeof(lfs_mutex));
 
     // low level hardware and drivers initializations
     target_lfs_init();
@@ -254,8 +255,11 @@ void hal_lfs_config()
         lfsConfig[i].prog = hal_lfs_getProgHandler(i);
         lfsConfig[i].erase = hal_lfs_getEraseHandler(i);
         lfsConfig[i].sync = hal_lfs_getSyncHandler(i);
+
+#ifdef LFS_THREADSAFE
         lfsConfig[i].lock = &hal_lfs_lock;
         lfsConfig[i].unlock = &hal_lfs_unlock;
+#endif
 
         // setup littlefs configurations
         lfsConfig[i].read_size = hal_lfs_getReadSize(i);
