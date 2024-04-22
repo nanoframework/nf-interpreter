@@ -87,13 +87,13 @@ void FS_AddVolumes()
         0,
         FALSE);
 
-    // // W25Q128, drive F:, volume 1
-    // FileSystemVolumeList::AddVolume(
-    //     &g_FS_Volumes[1],
-    //     "J:",
-    //     0,
-    //     &g_LITTLEFS_STREAM_DriverInterface,
-    //     &g_LITTLEFS_FILE_SYSTEM_DriverInterface,
-    //     1,
-    //     FALSE);
+    // W25Q128, drive F:, volume 1
+    FileSystemVolumeList::AddVolume(
+        &g_FS_Volumes[1],
+        "J:",
+        0,
+        &g_LITTLEFS_STREAM_DriverInterface,
+        &g_LITTLEFS_FILE_SYSTEM_DriverInterface,
+        1,
+        FALSE);
 }
