@@ -162,11 +162,14 @@ HRESULT LITTLEFS_FS_Driver::Open(const VOLUME_ID *volume, const char *path, uint
     // check for file existence
 #ifdef DEBUG
     result = lfs_stat(fileHandle->fs, path, &info);
-    // ASSERT(result == LFS_ERR_CORRUPT);
+
     if (result == LFS_ERR_CORRUPT)
     {
         __NOP();
+        NANOCLR_SET_AND_LEAVE(CLR_E_FILE_IO);
     }
+
+    fileExists = result == LFS_ERR_OK;
 #else
     fileExists = lfs_stat(fileHandle->fs, path, &info) == LFS_ERR_OK;
 #endif
@@ -227,6 +230,8 @@ HRESULT LITTLEFS_FS_Driver::Open(const VOLUME_ID *volume, const char *path, uint
 
 HRESULT LITTLEFS_FS_Driver::Close(uint32_t handle)
 {
+    NANOCLR_HEADER();
+
     LITTLEFS_FileHandle *fileHandle;
 
     if (handle == 0)
@@ -238,18 +243,25 @@ HRESULT LITTLEFS_FS_Driver::Close(uint32_t handle)
 
 #ifdef DEBUG
     int32_t result = lfs_file_close(fileHandle->fs, &fileHandle->file);
-    // ASSERT(result == LFS_ERR_CORRUPT);
+
     if (result == LFS_ERR_CORRUPT)
     {
         __NOP();
+        NANOCLR_SET_AND_LEAVE(CLR_E_FILE_IO);
+    }
+    else
+    {
+        NANOCLR_SET_AND_LEAVE(result == LFS_ERR_OK ? S_OK : CLR_E_FILE_IO);
     }
 #else
-    lfs_file_close(fileHandle->fs, &fileHandle->file);
+    NANOCLR_SET_AND_LEAVE(lfs_file_close(fileHandle->fs, &fileHandle->file) == LFS_ERR_OK ? S_OK : CLR_E_FILE_IO);
 #endif
+
+    NANOCLR_CLEANUP();
 
     platform_free(fileHandle);
 
-    return S_OK;
+    NANOCLR_CLEANUP_END();
 }
 
 HRESULT LITTLEFS_FS_Driver::Read(uint32_t handle, uint8_t *buffer, int size, int *bytesRead)
@@ -544,8 +556,11 @@ HRESULT LITTLEFS_FS_Driver::GetFileInfo(const VOLUME_ID *volume, const char *pat
 
 HRESULT LITTLEFS_FS_Driver::GetAttributes(const VOLUME_ID *volume, const char *path, uint32_t *attributes)
 {
+    NANOCLR_HEADER();
+
     lfs_t *fsDrive = NULL;
     lfs_info info;
+    int32_t result;
 
     // set to empty attributes
     *attributes = EMPTY_ATTRIBUTE;
@@ -562,44 +577,48 @@ HRESULT LITTLEFS_FS_Driver::GetAttributes(const VOLUME_ID *volume, const char *p
     if (fsDrive)
     {
         // check for file existence
-#ifdef DEBUG
-        int32_t result = lfs_stat(fsDrive, path, &info);
-        // ASSERT(result == LFS_ERR_CORRUPT);
+        result = lfs_stat(fsDrive, path, &info);
+
         if (result == LFS_ERR_CORRUPT)
         {
             __NOP();
+            NANOCLR_SET_AND_LEAVE(CLR_E_FILE_IO);
         }
-
-        if (result != LFS_ERR_OK)
-#else
-        if (lfs_stat(fsDrive, path, &info) != LFS_ERR_OK)
-#endif
+        else if (result == LFS_ERR_NOENT)
         {
-            return S_OK;
+            // file doesn't exist
+            // even if this fails we return success as attributes have been set to EMPTY_ATTRIBUTE
+            NANOCLR_SET_AND_LEAVE(S_OK);
         }
 
         // if this is home directory
         if (info.type == LFS_TYPE_DIR && *path == '\0')
         {
             *attributes = FileAttributes::FileAttributes_Directory;
-            return S_OK;
+
+            NANOCLR_SET_AND_LEAVE(S_OK);
         }
 
         // try to get the attributes
-
         // even if this fails we return success as attributes have been set to EMPTY_ATTRIBUTE
 #ifdef DEBUG
-        result = lfs_getattr(fsDrive, (const char *)path, NANO_LITTLEFS_ATTRIBUTE, attributes, NANO_LITTLEFS_ATTRIBUTE_SIZE);
+        result =
+            lfs_getattr(fsDrive, (const char *)path, NANO_LITTLEFS_ATTRIBUTE, attributes, NANO_LITTLEFS_ATTRIBUTE_SIZE);
         // ASSERT(result == LFS_ERR_CORRUPT);
         if (result == LFS_ERR_CORRUPT)
         {
             __NOP();
+            NANOCLR_SET_AND_LEAVE(CLR_E_FILE_IO);
         }
 
         if (result == LFS_ERR_OK)
 #else
-        if (lfs_getattr(fsDrive, (const char *)path, NANO_LITTLEFS_ATTRIBUTE, attributes, NANO_LITTLEFS_ATTRIBUTE_SIZE) ==
-            LFS_ERR_OK)
+        if (lfs_getattr(
+                fsDrive,
+                (const char *)path,
+                NANO_LITTLEFS_ATTRIBUTE,
+                attributes,
+                NANO_LITTLEFS_ATTRIBUTE_SIZE) == LFS_ERR_OK)
 #endif
         {
             // add dir attributes
@@ -609,11 +628,13 @@ HRESULT LITTLEFS_FS_Driver::GetAttributes(const VOLUME_ID *volume, const char *p
                 *attributes |= FileAttributes::FileAttributes_Directory;
             }
         }
-
-        return S_OK;
+    }
+    else
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_DRIVER);
     }
 
-    return CLR_E_INVALID_DRIVER;
+    NANOCLR_NOCLEANUP();
 }
 
 HRESULT LITTLEFS_FS_Driver::SetAttributes(const VOLUME_ID *volume, const char *path, uint32_t attributes)
