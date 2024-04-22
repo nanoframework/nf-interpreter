@@ -26,12 +26,12 @@
 #define HAL_SPI_TIMEOUT_DEFAULT_VALUE ((uint32_t)4000)
 
 // 64 Mbits => 8 MByte
-#define AT25SF641_FLASH_SIZE 0x1000000
-// 256 sectors of 64kBytes
+#define AT25SF641_FLASH_SIZE 0x800000
+// 128 sectors of 64kBytes
 #define AT25SF641_SECTOR_SIZE 0x10000
-// 4096 subsectors of 4kBytes (!!minimum erase size!!)
+// 2048 subsectors of 4kBytes (!!minimum erase size!!)
 #define AT25SF641_SUBSECTOR_SIZE 0x1000
-// 65536 pages of 256 bytes
+// 32768 pages of 256 bytes
 #define AT25SF641_PAGE_SIZE 0x100
 
 // AT25SF641 Commands
@@ -76,7 +76,7 @@
 #define LFS0_BLOCK_COUNT    AT25SF641_FLASH_SIZE / AT25SF641_SUBSECTOR_SIZE
 #define LFS0_BLOCK_CYCLES   100
 #define LFS0_CACHE_SIZE     AT25SF641_PAGE_SIZE
-#define LFS0_LOOKAHEAD_SIZE 8
+#define LFS0_LOOKAHEAD_SIZE LFS0_BLOCK_COUNT / 8
 
 #define LFS0_READ_HANDLER  hal_lfs_read_0
 #define LFS0_PROG_HANDLER  hal_lfs_prog_0
@@ -95,7 +95,7 @@
 // W25Q128 Configuration
 // 128 MBits => 16MBytes ()
 #define W25Q128_FLASH_SIZE 0x1000000
-// 255 sectors of 64KBytes
+// 256 sectors of 64KBytes
 #define W25Q128_SECTOR_SIZE 0x10000
 // 4096 subsectors of 4kBytes (!!minimum erase size!!)
 #define W25Q128_SUBSECTOR_SIZE 0x1000
@@ -218,7 +218,7 @@
 #define LFS1_BLOCK_COUNT    W25Q128_FLASH_SIZE / W25Q128_SUBSECTOR_SIZE
 #define LFS1_BLOCK_CYCLES   100
 #define LFS1_CACHE_SIZE     W25Q128_PAGE_SIZE
-#define LFS1_LOOKAHEAD_SIZE 8
+#define LFS1_LOOKAHEAD_SIZE LFS1_BLOCK_COUNT / 8
 
 #define LFS1_READ_HANDLER  hal_lfs_read_1
 #define LFS1_PROG_HANDLER  hal_lfs_prog_1
