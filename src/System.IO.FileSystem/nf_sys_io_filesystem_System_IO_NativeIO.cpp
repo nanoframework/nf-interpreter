@@ -26,8 +26,27 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_NativeIO::Move___STATIC__BOOLEAN_
 {
     NATIVE_PROFILE_CLR_IO();
     NANOCLR_HEADER();
-ASSERT(FALSE);
-    NANOCLR_SET_AND_LEAVE(stack.NotImplementedStub());
+
+    char *path1;
+    char *path2;
+    FileSystemVolume *driver1;
+    FileSystemVolume *driver2;
+
+    NANOCLR_CHECK_HRESULT(FindVolume(stack.Arg0(), driver1, &path1));
+    NANOCLR_CHECK_HRESULT(FindVolume(stack.Arg1(), driver2, &path2));
+
+    // check if the two volumes are the same
+    if (driver1 != driver2)
+    {
+        // need cross-volume move, so return false and let managed code deal with this
+        stack.SetResult_Boolean(false);
+    }
+    else
+    {
+        NANOCLR_CHECK_HRESULT(driver1->Move(path1, path2));
+
+        stack.SetResult_Boolean(true);
+    }
 
     NANOCLR_NOCLEANUP();
 }

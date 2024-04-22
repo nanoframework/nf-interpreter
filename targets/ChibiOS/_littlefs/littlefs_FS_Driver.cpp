@@ -692,17 +692,45 @@ HRESULT LITTLEFS_FS_Driver::CreateDirectory(const VOLUME_ID *volume, const char 
 
 HRESULT LITTLEFS_FS_Driver::Move(const VOLUME_ID *volume, const char *oldPath, const char *newPath)
 {
-    (void)volume;
-    (void)oldPath;
-    (void)newPath;
+    lfs_t *fsDrive = NULL;
+    lfs_info info;
 
-    // FAT_LogicDisk *logicDisk = FAT_MemoryManager::GetLogicDisk(volume);
+    // adjust path to remove leading backslash
+    if (*oldPath == '\\')
+    {
+        oldPath++;
+    }
 
-    // if (logicDisk)
-    // {
-    //     return logicDisk->Move(oldPath, newPath);
-    // }
-    ASSERT(FALSE);
+    if (*newPath == '\\')
+    {
+        newPath++;
+    }
+
+    // get littlefs instance
+    fsDrive = hal_lfs_get_fs_from_index(volume->volumeId);
+
+    if (fsDrive)
+    {
+        // check for file existence
+        if (lfs_stat(fsDrive, oldPath, &info) != LFS_ERR_OK)
+        {
+            return CLR_E_FILE_NOT_FOUND;
+        }
+
+        // check if destination file already exists
+        if (lfs_stat(fsDrive, newPath, &info) == LFS_ERR_OK)
+        {
+            return CLR_E_FILE_IO;
+        }
+
+        if (lfs_rename(fsDrive, oldPath, newPath) != LFS_ERR_OK)
+        {
+            return CLR_E_FILE_IO;
+        }
+
+        return S_OK;
+    }
+
     return CLR_E_INVALID_DRIVER;
 }
 
