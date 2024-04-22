@@ -316,7 +316,7 @@ int32_t hal_lfs_erase_1(const struct lfs_config *c, lfs_block_t block)
 
     Watchdog_Reset();
 
-    uint32_t addr = block * W25Q128_PAGE_SIZE;
+    uint32_t addr = block * W25Q128_SUBSECTOR_SIZE;
 
     if (QSPI_Erase_Block(addr, false) != QSPI_OK)
     {
@@ -331,7 +331,7 @@ int32_t hal_lfs_read_1(const struct lfs_config *c, lfs_block_t block, lfs_off_t 
 {
     (void)c;
 
-    uint32_t addr = block * AT25SF641_PAGE_SIZE + off;
+    uint32_t addr = block * W25Q128_SUBSECTOR_SIZE + off;
 
     if (QSPI_Read(buffer, addr, size) != QSPI_OK)
     {
@@ -351,7 +351,7 @@ int32_t hal_lfs_prog_1(
 {
     (void)c;
 
-    uint32_t addr = block * AT25SF641_PAGE_SIZE + off;
+    uint32_t addr = block * W25Q128_SUBSECTOR_SIZE + off;
 
     if (QSPI_Write(buffer, addr, size) != QSPI_OK)
     {
