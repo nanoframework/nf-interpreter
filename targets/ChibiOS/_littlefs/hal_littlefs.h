@@ -14,7 +14,7 @@
 #include <lfs.h>
 #include <nanoHAL_v2.h>
 
-#define NANO_LITTLEFS_ATTRIBUTE 0
+#define NANO_LITTLEFS_ATTRIBUTE      0
 #define NANO_LITTLEFS_ATTRIBUTE_SIZE (sizeof(uint32_t))
 
 #ifdef __cplusplus
@@ -38,7 +38,8 @@ extern "C"
     int hal_lfs_lock(const struct lfs_config *c);
     int hal_lfs_unlock(const struct lfs_config *c);
 
-    int32_t hal_lfs_mount(int32_t index, bool forceFormat);
+    void hal_lfs_mount();
+    int32_t hal_lfs_mount_partition(int32_t index, bool forceFormat);
 
     lfs_t *hal_lfs_get_fs_from_index(int32_t index);
     int32_t hal_lfs_get_instances_count();
