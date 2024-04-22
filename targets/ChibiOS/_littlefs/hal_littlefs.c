@@ -295,14 +295,23 @@ void hal_lfs_erase_chip(int32_t index)
     }
 }
 
-int32_t hal_lfs_mount(int32_t index, bool forceFormat)
+void hal_lfs_mount()
 {
-    int32_t mountResult = 0;
+    hal_lfs_mount_partition(0, false);
+
+#if LITTLEFS_INSTANCES_COUNT > 1
+    hal_lfs_mount_partition(1, false);
+#endif
+}
+
+int32_t hal_lfs_mount_partition(int32_t index, bool forceFormat)
+{
+    int32_t operationResult = 0;
 
     // mount the file system
-    mountResult = lfs_mount(&lfs[index], &lfsConfig[index]);
+    operationResult = lfs_mount(&lfs[index], &lfsConfig[index]);
 
-    if (mountResult != 0)
+    if (operationResult != 0)
     {
         // looks like littlefs is not formated (occuring at 1st boot)
 
@@ -315,14 +324,11 @@ int32_t hal_lfs_mount(int32_t index, bool forceFormat)
         lfs_format(&lfs[index], &lfsConfig[index]);
 
         // mount the file system again
-        mountResult = lfs_mount(&lfs[index], &lfsConfig[index]);
+        operationResult = lfs_mount(&lfs[index], &lfsConfig[index]);
     }
 
-    // mirror littlefs mount result into global flag
-    //lfsFileSystemReady = (mountResult == LFS_ERR_OK);
-
 #if !defined(BUILD_RTM)
-    ASSERT(mountResult == LFS_ERR_OK);
+    ASSERT(operationResult == LFS_ERR_OK);
 #endif
 
     // ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -361,7 +367,7 @@ int32_t hal_lfs_mount(int32_t index, bool forceFormat)
 
     // /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    return mountResult;
+    return operationResult;
 }
 
 int hal_lfs_lock(const struct lfs_config *c)
