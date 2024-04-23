@@ -57,7 +57,7 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_NativeIO::CreateDirectory___STATI
     NATIVE_PROFILE_CLR_IO();
     NANOCLR_HEADER();
 
-ASSERT(FALSE);
+    ASSERT(FALSE);
     NANOCLR_SET_AND_LEAVE(stack.NotImplementedStub());
 
     NANOCLR_NOCLEANUP();
