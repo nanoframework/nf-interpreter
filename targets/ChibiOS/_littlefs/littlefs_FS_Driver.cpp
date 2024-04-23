@@ -604,7 +604,7 @@ HRESULT LITTLEFS_FS_Driver::GetAttributes(const VOLUME_ID *volume, const char *p
 #ifdef DEBUG
         result =
             lfs_getattr(fsDrive, (const char *)path, NANO_LITTLEFS_ATTRIBUTE, attributes, NANO_LITTLEFS_ATTRIBUTE_SIZE);
-        // ASSERT(result == LFS_ERR_CORRUPT);
+
         if (result == LFS_ERR_CORRUPT)
         {
             __NOP();
@@ -623,6 +623,7 @@ HRESULT LITTLEFS_FS_Driver::GetAttributes(const VOLUME_ID *volume, const char *p
         {
             // add dir attributes
             lfs_stat(fsDrive, (const char *)path, &info);
+
             if (info.type == LFS_TYPE_DIR)
             {
                 *attributes |= FileAttributes::FileAttributes_Directory;
@@ -641,6 +642,7 @@ HRESULT LITTLEFS_FS_Driver::SetAttributes(const VOLUME_ID *volume, const char *p
 {
     lfs_t *fsDrive = NULL;
     lfs_info info;
+    uint32_t currentAttributes;
 
     // adjust path to remove leading backslash
     if (*path == '\\')
@@ -659,11 +661,28 @@ HRESULT LITTLEFS_FS_Driver::SetAttributes(const VOLUME_ID *volume, const char *p
             return CLR_E_FILE_NOT_FOUND;
         }
 
+        // read current attributes
+        if (lfs_getattr(
+                fsDrive,
+                (const char *)path,
+                NANO_LITTLEFS_ATTRIBUTE,
+                &currentAttributes,
+                NANO_LITTLEFS_ATTRIBUTE_SIZE) != LFS_ERR_OK)
+        {
+            return CLR_E_FILE_IO;
+        }
+
+        // clear attributes
+        currentAttributes &= ~ATTRIBUTE_SET_MASK;
+
+        // set new attributes
+        currentAttributes |= attributes & ATTRIBUTE_SET_MASK;
+
         if (lfs_setattr(
                 fsDrive,
                 (const char *)path,
                 NANO_LITTLEFS_ATTRIBUTE,
-                &attributes,
+                &currentAttributes,
                 NANO_LITTLEFS_ATTRIBUTE_SIZE) != LFS_ERR_OK)
         {
             return CLR_E_FILE_IO;

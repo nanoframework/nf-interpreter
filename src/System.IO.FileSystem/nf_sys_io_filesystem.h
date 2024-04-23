@@ -17,6 +17,10 @@
 // !!! KEEP IN SYNC WITH managed System.IO.NativeIO.EmptyAttribute !!! //
 /////////////////////////////////////////////////////////////////////////
 #define EMPTY_ATTRIBUTE 0xFFFFFFFF
+#define ATTRIBUTE_SET_MASK                                                                                             \
+    (FileAttributes::FileAttributes_ReadOnly | FileAttributes::FileAttributes_Hidden |                                 \
+     FileAttributes::FileAttributes_System | FileAttributes::FileAttributes_Directory |                                \
+     FileAttributes::FileAttributes_Archive)
 
 typedef enum __nfpack RemovableDeviceEventArgs_RemovableDeviceEvent
 {
