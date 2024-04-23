@@ -57,8 +57,17 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_NativeIO::CreateDirectory___STATI
     NATIVE_PROFILE_CLR_IO();
     NANOCLR_HEADER();
 
-    ASSERT(FALSE);
-    NANOCLR_SET_AND_LEAVE(stack.NotImplementedStub());
+    char *path;
+    FileSystemVolume *driver;
+
+    NANOCLR_CHECK_HRESULT(FindVolume(stack.Arg0(), driver, &path));
+
+    if (hal_strlen_s(path) >= FS_MAX_DIRECTORY_LENGTH)
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_PATH_TOO_LONG);
+    }
+
+    NANOCLR_CHECK_HRESULT(driver->CreateDirectory(path));
 
     NANOCLR_NOCLEANUP();
 }
