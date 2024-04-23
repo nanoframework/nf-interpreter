@@ -712,7 +712,6 @@ HRESULT LITTLEFS_FS_Driver::CreateDirectory(const VOLUME_ID *volume, const char 
 HRESULT LITTLEFS_FS_Driver::Move(const VOLUME_ID *volume, const char *oldPath, const char *newPath)
 {
     lfs_t *fsDrive = NULL;
-    lfs_info info;
 
     // adjust path to remove leading backslash
     if (*oldPath == '\\')
@@ -730,17 +729,7 @@ HRESULT LITTLEFS_FS_Driver::Move(const VOLUME_ID *volume, const char *oldPath, c
 
     if (fsDrive)
     {
-        // check for file existence
-        if (lfs_stat(fsDrive, oldPath, &info) != LFS_ERR_OK)
-        {
-            return CLR_E_FILE_NOT_FOUND;
-        }
-
-        // check if destination file already exists
-        if (lfs_stat(fsDrive, newPath, &info) == LFS_ERR_OK)
-        {
-            return CLR_E_FILE_IO;
-        }
+        // the check for source file and destination file existence has already been made in managed code
 
         if (lfs_rename(fsDrive, oldPath, newPath) != LFS_ERR_OK)
         {
