@@ -694,16 +694,52 @@ HRESULT LITTLEFS_FS_Driver::SetAttributes(const VOLUME_ID *volume, const char *p
 
 HRESULT LITTLEFS_FS_Driver::CreateDirectory(const VOLUME_ID *volume, const char *path)
 {
-    (void)volume;
-    (void)path;
+    lfs_t *fsDrive = NULL;
+    int32_t result;
 
-    // FAT_LogicDisk *logicDisk = FAT_MemoryManager::GetLogicDisk(volume);
+    // adjust path to remove leading backslash
+    if (*path == '\\')
+    {
+        path++;
+    }
 
-    // if (logicDisk)
-    // {
-    //     return logicDisk->CreateDirectory(path);
-    // }
-    ASSERT(FALSE);
+    // get littlefs instance
+    fsDrive = hal_lfs_get_fs_from_index(volume->volumeId);
+
+    if (fsDrive)
+    {
+        result = lfs_mkdir(fsDrive, path);
+
+        // if the directory already exists, return success
+        if (result == LFS_ERR_OK)
+        {
+            // need to set the attributes for the directory
+            uint32_t attributes = FileAttributes::FileAttributes_Directory;
+
+            if (lfs_setattr(
+                    fsDrive,
+                    (const char *)path,
+                    NANO_LITTLEFS_ATTRIBUTE,
+                    &attributes,
+                    NANO_LITTLEFS_ATTRIBUTE_SIZE) != LFS_ERR_OK)
+            {
+                return CLR_E_FILE_IO;
+            }
+
+            // done here
+            return S_OK;
+        }
+        else if (result == LFS_ERR_EXIST)
+        {
+            return S_OK;
+        }
+        {
+            return S_FALSE;
+        }
+
+        return CLR_E_FILE_IO;
+    }
+
     return CLR_E_INVALID_DRIVER;
 }
 
