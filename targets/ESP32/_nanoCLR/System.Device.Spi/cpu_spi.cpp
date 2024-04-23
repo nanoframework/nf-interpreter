@@ -189,7 +189,7 @@ bool CPU_SPI_Initialize(uint8_t busIndex, const SPI_DEVICE_CONFIGURATION &spiDev
     if (ret != ESP_OK)
     {
 #if defined(CONFIG_IDF_TARGET_ESP32C3) || defined(CONFIG_IDF_TARGET_ESP32S3)
-        ESP_LOGE(TAG, "Unable to init SPI bus %d esp_err %d", busIndex, ret);
+        ESP_LOGE(TAG, "Unable to init SPI bus %d esp_err %d", busIndex + SPI2_HOST, ret);
 #else
         ESP_LOGE(TAG, "Unable to init SPI bus %d esp_err %d", busIndex + HSPI_HOST, ret);
 #endif
@@ -208,7 +208,7 @@ bool CPU_SPI_Initialize(uint8_t busIndex, const SPI_DEVICE_CONFIGURATION &spiDev
 bool CPU_SPI_Uninitialize(uint8_t busIndex)
 {
 #if defined(CONFIG_IDF_TARGET_ESP32C3) || defined(CONFIG_IDF_TARGET_ESP32S3)
-    esp_err_t ret = spi_bus_free((spi_host_device_t)(busIndex));
+    esp_err_t ret = spi_bus_free((spi_host_device_t)(busIndex + SPI2_HOST));
 #else
     esp_err_t ret = spi_bus_free((spi_host_device_t)(busIndex + HSPI_HOST));
 #endif
@@ -216,7 +216,7 @@ bool CPU_SPI_Uninitialize(uint8_t busIndex)
     if (ret != ESP_OK)
     {
 #if defined(CONFIG_IDF_TARGET_ESP32C3) || defined(CONFIG_IDF_TARGET_ESP32S3)
-        ESP_LOGE(TAG, "spi_bus_free bus %d esp_err %d", busIndex, ret);
+        ESP_LOGE(TAG, "spi_bus_free bus %d esp_err %d", busIndex + SPI2_HOST, ret);
 #else
         ESP_LOGE(TAG, "spi_bus_free bus %d esp_err %d", busIndex + HSPI_HOST, ret);
 #endif
