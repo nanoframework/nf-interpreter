@@ -611,7 +611,7 @@ HRESULT LITTLEFS_FS_Driver::GetAttributes(const VOLUME_ID *volume, const char *p
             NANOCLR_SET_AND_LEAVE(CLR_E_FILE_IO);
         }
 
-        if (result == LFS_ERR_OK)
+        if (result == LFS_ERR_OK || result == LFS_ERR_NOATTR)
 #else
         if (lfs_getattr(
                 fsDrive,
@@ -621,9 +621,7 @@ HRESULT LITTLEFS_FS_Driver::GetAttributes(const VOLUME_ID *volume, const char *p
                 NANO_LITTLEFS_ATTRIBUTE_SIZE) == LFS_ERR_OK)
 #endif
         {
-            // add dir attributes
-            lfs_stat(fsDrive, (const char *)path, &info);
-
+            // add dir attribute, if this is a directory
             if (info.type == LFS_TYPE_DIR)
             {
                 *attributes |= FileAttributes::FileAttributes_Directory;
