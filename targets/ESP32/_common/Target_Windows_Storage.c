@@ -160,8 +160,10 @@ bool Storage_MountSpi(int spiBus, uint32_t csPin, int driveIndex)
 
     sdmmc_host_t host = SDSPI_HOST_DEFAULT();
 #if defined(CONFIG_IDF_TARGET_ESP32C3) || defined(CONFIG_IDF_TARGET_ESP32S3)
-    host.slot = spiBus;
+    // First available bus on ESP32_C3/S3 is SPI2_HOST
+    host.slot = spiBus + SPI2_HOST;
 #else
+    // First available bus on ESP32 is HSPI_HOST(1)
     host.slot = spiBus + HSPI_HOST;
 #endif
 
