@@ -6,30 +6,34 @@
 #ifndef HALCONF_NF_H
 #define HALCONF_NF_H
 
+// Enables the SD card
+#if !defined(FATFS_HAL_DEVICE) || defined(__DOXYGEN__)
+// this board requires SDCD2 not SDCD1
+#define FATFS_HAL_DEVICE SDCD2
+#endif
+
 // enables STM32 Flash driver
-#if !defined(HAL_NF_USE_STM32_FLASH) 
-#define HAL_NF_USE_STM32_FLASH         TRUE
+#if !defined(HAL_NF_USE_STM32_FLASH)
+#define HAL_NF_USE_STM32_FLASH TRUE
 #endif
 
 //  Enables the FSMC subsystem.
 #if !defined(HAL_NF_USE_FSMC)
-#define HAL_NF_USE_FSMC                TRUE
+#define HAL_NF_USE_FSMC TRUE
 #endif
 
 // enables STM32 QSPI driver
 #if !defined(HAL_NF_USE_STM32_QSPI)
-#define HAL_NF_USE_STM32_QSPI          FALSE
+#define HAL_NF_USE_STM32_QSPI FALSE
 #endif
 
 // enable STM32 graphics
 #if !defined(HAL_DSI_MODULE_ENABLED)
-#define HAL_DSI_MODULE_ENABLED          TRUE
+#define HAL_DSI_MODULE_ENABLED TRUE
 #endif
 
 #if !defined(HAL_LTDC_MODULE_ENABLED)
-#define HAL_LTDC_MODULE_ENABLED          TRUE
+#define HAL_LTDC_MODULE_ENABLED TRUE
 #endif
-
-
 
 #endif // HALCONF_NF_H
