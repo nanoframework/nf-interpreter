@@ -1333,12 +1333,6 @@ HRESULT LWIP_SOCKETS_Driver::UpdateAdapterConfiguration(
 
     if (enableDHCP)
     {
-        // developer note: on legacy source there was a hack of trying to renew before release and
-        // also setting the release flag in managed call when the intent was to renew only
-        // nowadays lwIP seems to be doing what is told, so no need for these hacks anymore
-        // also it's NOT possible to renew & release on the same pass, so adding an extra else-if for that
-        // just in case it's request from the managed code
-
         if (0 != (updateFlags & NetworkInterface_UpdateOperation_DhcpRelease))
         {
             dhcp_release_and_stop(networkInterface);
