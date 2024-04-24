@@ -1311,7 +1311,7 @@ HRESULT LWIP_SOCKETS_Driver::UpdateAdapterConfiguration(
         else
         {
             // stop DHCP
-            dhcp_stop(networkInterface);
+            dhcp_release_and_stop(networkInterface);
 
             // need to convert these first
             ip_addr_t ipAddress, mask, gateway;
@@ -1341,7 +1341,7 @@ HRESULT LWIP_SOCKETS_Driver::UpdateAdapterConfiguration(
 
         if (0 != (updateFlags & NetworkInterface_UpdateOperation_DhcpRelease))
         {
-            dhcp_release(networkInterface);
+            dhcp_release_and_stop(networkInterface);
         }
         else if (0 != (updateFlags & NetworkInterface_UpdateOperation_DhcpRenew))
         {
