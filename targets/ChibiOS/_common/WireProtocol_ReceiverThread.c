@@ -19,8 +19,6 @@ __attribute__((noreturn)) void ReceiverThread(void const *argument)
 {
     (void)argument;
 
-    osDelay(500);
-
     WP_Message_PrepareReception();
 
     // loop until thread receives a request to terminate
@@ -53,7 +51,12 @@ __attribute__((noreturn)) void ReceiverThread(void const *argument)
     // this function never returns
 }
 
+__nfweak void WP_Message_PrepareReception_Target()
+{
+    // empty on purpose, to be implemented by target if needed
+}
+
 void WP_Message_PrepareReception_Platform()
 {
-    // empty on purpose, nothing to configure
+    WP_Message_PrepareReception_Target();
 }
