@@ -255,6 +255,8 @@ struct Library_nf_sys_io_filesystem_System_IO_NativeFindFile
     NANOCLR_NATIVE_DECLARE(GetFileInfo___STATIC__SystemIONativeFileInfo__STRING);
 
     //--//
+
+    static HRESULT GetFindFile(CLR_RT_StackFrame &stack, CLR_RT_FindFile *&ff);
 };
 
 struct Library_nf_sys_io_filesystem_System_IO_NativeIO

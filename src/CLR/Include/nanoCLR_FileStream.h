@@ -87,7 +87,7 @@ struct CLR_RT_FindFile
     FileSystemVolume *m_driver;
     uint32_t m_handle;
     FS_FILEINFO m_fi;
-    uint16_t *m_fullPath;
+    char *m_fullPath;
     uint32_t m_fullPathBufferSize;
 
   public:

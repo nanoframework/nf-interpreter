@@ -26,6 +26,14 @@ struct LITTLEFS_FileHandle
     uint32_t nanoAttributes;
 };
 
+struct LITTLEFS_FindFileHandle
+{
+    lfs_t *fs;
+    lfs_file_t file;
+    lfs_dir_t dir;
+    lfs_soff_t offset;
+};
+
 struct LITTLEFS_FS_Driver
 {
     static void Initialize();
