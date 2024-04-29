@@ -256,7 +256,12 @@ void lwipDefaultLinkUpCB(void *p)
 #endif
 
 #if SNTP_SERVER_DNS
-    sntp_init();
+    // if not using DHCP then start SNTP
+    // otherwise SNTP will be started when DHCP request succeeds
+    if (addressMode != NET_ADDRESS_DHCP)
+    {
+        sntp_init();
+    }
 #endif
 }
 
