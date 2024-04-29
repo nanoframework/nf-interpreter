@@ -17,6 +17,7 @@ extern "C"
 #include "lwip/sockets.h"
 #include "lwip/dhcp.h"
 #include "lwip/netif.h"
+#include <lwip/apps/sntp.h>
 }
 
 int errorCode;
@@ -187,6 +188,12 @@ void LWIP_SOCKETS_Driver::Status_callback(struct netif *netif)
     {
         PostAddressChangedContinuation.Enqueue();
     }
+
+    // need to restart SNTP client
+#if SNTP_SERVER_DNS
+    sntp_stop();
+    sntp_init();
+#endif
 
 #if !defined(BUILD_RTM)
     // lcd_printf("\f\n\n\n\n\n\nLink Update: %s\n", (netif_is_up(netif) ? "UP  " : "DOWN"));
