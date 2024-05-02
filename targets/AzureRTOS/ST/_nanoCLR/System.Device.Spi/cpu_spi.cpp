@@ -6,7 +6,7 @@
 #include <sys_dev_spi_native_target.h>
 
 /////////////////////////////////////////////////////
-// SPI PAL strucs declared in win_dev_spi_native.h //
+// SPI PAL structs declared in win_dev_spi_native.h //
 /////////////////////////////////////////////////////
 #if STM32_SPI_USE_SPI1
 NF_PAL_SPI SPI1_PAL;

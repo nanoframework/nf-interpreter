@@ -38,12 +38,12 @@ void CLR_RT_GarbageCollector::GC_Stats(
                 if (ptr->IsEvent())
                 {
                     resNumberEvents += 1;
-                    resSizeEvents += size * sizeof(CLR_RT_HeapBlock);
+                    resSizeEvents += size * sizeof(struct CLR_RT_HeapBlock);
                 }
                 else
                 {
                     resNumberObjects += 1;
-                    resSizeObjects += size * sizeof(CLR_RT_HeapBlock);
+                    resSizeObjects += size * sizeof(struct CLR_RT_HeapBlock);
                 }
             }
 

@@ -13,6 +13,7 @@
 #include <targetHAL.h>
 #include <nanoPAL_BlockStorage.h>
 #include <nanoHAL_ConfigurationManager.h>
+#include <nanoHAL_StorageOperation.h>
 #include <nanoCLR_Application.h>
 #include <nanoHAL_v2.h>
 #include <nanoPAL_COM.h>

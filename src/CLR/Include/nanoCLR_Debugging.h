@@ -933,7 +933,7 @@ public:
     static bool Monitor_DeploymentMap                   ( WP_Message *msg );
     static bool Monitor_QueryConfiguration              ( WP_Message *msg );
     static bool Monitor_UpdateConfiguration             ( WP_Message *msg );
-
+    static bool Monitor_StorageOperation                ( WP_Message *msg );
                                              
     static bool Debugging_Execution_BasePtr             ( WP_Message *msg );
     static bool Debugging_Execution_ChangeConditions    ( WP_Message *msg );

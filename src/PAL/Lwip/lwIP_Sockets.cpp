@@ -17,6 +17,7 @@ extern "C"
 #include "lwip/sockets.h"
 #include "lwip/dhcp.h"
 #include "lwip/netif.h"
+#include <lwip/apps/sntp.h>
 }
 
 int errorCode;
@@ -188,6 +189,12 @@ void LWIP_SOCKETS_Driver::Status_callback(struct netif *netif)
         PostAddressChangedContinuation.Enqueue();
     }
 
+    // need to restart SNTP client
+#if SNTP_SERVER_DNS
+    sntp_stop();
+    sntp_init();
+#endif
+
 #if !defined(BUILD_RTM)
     // lcd_printf("\f\n\n\n\n\n\nLink Update: %s\n", (netif_is_up(netif) ? "UP  " : "DOWN"));
     // lcd_printf("         IP: %d.%d.%d.%d\n", (netif->ip_addr.addr >> 0) & 0xFF,
@@ -283,7 +290,10 @@ bool LWIP_SOCKETS_Driver::Initialize()
 
         g_LWIP_SOCKETS_Driver.m_interfaces[i].m_interfaceNumber = interfaceNumber;
 
-        UpdateAdapterConfiguration(i, (NetworkInterface_UpdateOperation_Dns), &networkConfiguration);
+        UpdateAdapterConfiguration(
+            i,
+            (NetworkInterface_UpdateOperation_Dhcp | NetworkInterface_UpdateOperation_Dns),
+            &networkConfiguration);
 
         networkInterface = netif_find_interface(interfaceNumber);
 
@@ -1302,15 +1312,13 @@ HRESULT LWIP_SOCKETS_Driver::UpdateAdapterConfiguration(
         if (enableDHCP)
         {
             // need to start DHCP
-            if (ERR_OK != dhcp_start(networkInterface))
-            {
-                return CLR_E_FAIL;
-            }
+            // no need to check for return value, even if it fails, it will retry
+            dhcp_start(networkInterface);
         }
         else
         {
             // stop DHCP
-            dhcp_stop(networkInterface);
+            dhcp_release_and_stop(networkInterface);
 
             // need to convert these first
             ip_addr_t ipAddress, mask, gateway;
@@ -1332,25 +1340,13 @@ HRESULT LWIP_SOCKETS_Driver::UpdateAdapterConfiguration(
 
     if (enableDHCP)
     {
-        // developer note: on legacy source there was a hack of trying to renew before release and
-        // also setting the release flag in managed call when the intent was to renew only
-        // nowadays lwIP seems to be doing what is told, so no need for these hacks anymore
-        // also it's NOT possible to renew & release on the same pass, so adding an extra else-if for that
-        // just in case it's request from the managed code
-
         if (0 != (updateFlags & NetworkInterface_UpdateOperation_DhcpRelease))
         {
-            dhcp_release(networkInterface);
+            dhcp_release_and_stop(networkInterface);
         }
         else if (0 != (updateFlags & NetworkInterface_UpdateOperation_DhcpRenew))
         {
             dhcp_renew(networkInterface);
-        }
-        else if (
-            0 !=
-            (updateFlags & (NetworkInterface_UpdateOperation_DhcpRelease | NetworkInterface_UpdateOperation_DhcpRenew)))
-        {
-            return CLR_E_INVALID_PARAMETER;
         }
     }
 #endif

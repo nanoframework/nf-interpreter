@@ -43,6 +43,8 @@
 
 static const char *TAG = "SDCard";
 
+sdmmc_card_t *card;
+
 //
 //  Unmount SD card ( MMC/SDIO or SPI)
 //
@@ -52,6 +54,9 @@ bool Storage_UnMountSDCard()
     {
         return false;
     }
+
+    card = NULL;
+
     return true;
 }
 
@@ -120,7 +125,6 @@ bool Storage_MountMMC(bool bit1Mode, int driveIndex)
         .max_files = SDC_MAX_OPEN_FILES,
         .allocation_unit_size = 16 * 1024};
 
-    sdmmc_card_t *card;
     errCode = esp_vfs_fat_sdmmc_mount(mountPoint, &host, &slot_config, &mount_config, &card);
     if (errCode == ESP_ERR_INVALID_STATE)
     {
@@ -156,8 +160,10 @@ bool Storage_MountSpi(int spiBus, uint32_t csPin, int driveIndex)
 
     sdmmc_host_t host = SDSPI_HOST_DEFAULT();
 #if defined(CONFIG_IDF_TARGET_ESP32C3) || defined(CONFIG_IDF_TARGET_ESP32S3)
-    host.slot = spiBus;
+    // First available bus on ESP32_C3/S3 is SPI2_HOST
+    host.slot = spiBus + SPI2_HOST;
 #else
+    // First available bus on ESP32 is HSPI_HOST(1)
     host.slot = spiBus + HSPI_HOST;
 #endif
 
@@ -165,8 +171,6 @@ bool Storage_MountSpi(int spiBus, uint32_t csPin, int driveIndex)
         .format_if_mount_failed = false,
         .max_files = 5,
         .allocation_unit_size = 16 * 1024};
-
-    sdmmc_card_t *card;
 
     // This initializes the slot without card detect (CD) and write protect (WP) signals.
     // Modify slot_config.gpio_cd and slot_config.gpio_wp if your board has these signals.

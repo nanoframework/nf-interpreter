@@ -127,7 +127,7 @@ struct Library_sys_io_ser_native_System_IO_Ports_SerialDeviceEventListener
 
 struct Library_sys_io_ser_native_System_IO_Ports_SerialStream
 {
-    static const int FIELD___serial = 2;
+    static const int FIELD___serial = 1;
 
     //--//
 };

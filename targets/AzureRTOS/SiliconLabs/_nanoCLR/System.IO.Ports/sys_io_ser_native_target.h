@@ -84,7 +84,7 @@ typedef struct
 } NF_PAL_UART;
 
 ////////////////////////////////////////////
-// declaration of the the UART PAL strucs //
+// declaration of the the UART PAL structs //
 ////////////////////////////////////////////
 #if defined(GECKO_USE_USART0) && (GECKO_USE_USART0 == TRUE)
 extern NF_PAL_UART Uart0_PAL;

@@ -12,9 +12,6 @@
 #define NANO_SPIFFS_BASE_PATH   "/I"
 #define NANO_SPIFFS_CONFIG_NAME "con_"
 
-// label for the config partition (same as partition CSV file)
-#define SPIFFS_PARTITION_LABEL "config"
-
 static const char *TAG = "Config";
 
 typedef enum ConfigIoType
@@ -126,6 +123,9 @@ void ConfigStorage_GetConfigFileName(
 
     // add configuration INDEX
     strcat(configName, configIndexAsString);
+
+    // add ".sys" extension
+    strcat(configName, ".sys");
 }
 
 //

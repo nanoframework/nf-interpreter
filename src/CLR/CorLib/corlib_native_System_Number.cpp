@@ -962,7 +962,7 @@ HRESULT Library_corlib_native_System_Number::
     FAULT_ON_NULL(numberGroupSizes);
 
     {
-        CLR_RT_TypeDescriptor desc;
+        CLR_RT_TypeDescriptor desc{};
         NANOCLR_CHECK_HRESULT(desc.InitializeFromObject(*value));
         NANOCLR_CHECK_HRESULT(value->PerformUnboxing(desc.m_handlerCls));
     }

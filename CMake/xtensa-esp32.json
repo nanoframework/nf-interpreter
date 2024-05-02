@@ -20,6 +20,7 @@
                 "TARGET_SERIES": "ESP32",
                 "TARGET_BOARD": "ESP32",
                 "NF_FEATURE_HAS_CONFIG_BLOCK": "ON",
+                "NF_FEATURE_HAS_ACCESSIBLE_STORAGE": "ON",
                 "SUPPORT_ANY_BASE_CONVERSION": "ON",
                 "API_System.Net": "ON",
                 "API_System.Math": "ON",

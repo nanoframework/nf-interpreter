@@ -26,10 +26,33 @@ __attribute__((aligned(32)))
 #endif
 uint8_t spiffs_cache[SPIFFS_INSTANCES_COUNT][SPIFFS_CACHE_SIZE];
 
-// initialization of SPIFFS: configurations, data structures, drivers and lock
-uint8_t hal_spiffs_config()
+int32_t hal_spiffs_format(int32_t index)
 {
-    uint8_t mountResult;
+    // need to unmount 1st
+    SPIFFS_unmount(&fs[index]);
+
+    // now format
+    if (SPIFFS_format(&fs[index]) != SPIFFS_OK)
+    {
+        return -1;
+    }
+
+    // finally try mounting it again
+    return SPIFFS_mount(
+        &fs[index],
+        &spiffs_cfg[index],
+        spiffs_work_buffer[index],
+        spiffs_fd_space[index],
+        SPIFFS_FILE_DESCRIPTORS_SPACE,
+        spiffs_cache,
+        SPIFFS_CACHE_SIZE,
+        0);
+}
+
+// initialization of SPIFFS: configurations, data structures, drivers and lock
+int32_t hal_spiffs_config()
+{
+    int32_t mountResult = 0;
 
     // low level hardware and drivers initializations
     target_spiffs_init();
@@ -76,26 +99,7 @@ uint8_t hal_spiffs_config()
         if (mountResult != SPIFFS_OK && SPIFFS_errno(&fs[i]) == SPIFFS_ERR_NOT_A_FS)
         {
             // looks like SPIFFS is not formated
-
-            // need to unmount 1st
-            SPIFFS_unmount(&fs[i]);
-
-            // now format
-            if (SPIFFS_format(&fs[i]) != SPIFFS_OK)
-            {
-                return -1;
-            }
-
-            // finally try mounting it again
-            mountResult = SPIFFS_mount(
-                &fs[i],
-                &spiffs_cfg[i],
-                spiffs_work_buffer[i],
-                spiffs_fd_space[i],
-                SPIFFS_FILE_DESCRIPTORS_SPACE,
-                spiffs_cache,
-                SPIFFS_CACHE_SIZE,
-                0);
+            mountResult = hal_spiffs_format(i);
         }
 
 #if !defined(BUILD_RTM)

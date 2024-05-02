@@ -7,6 +7,7 @@
 #include <nanoHAL_Time.h>
 #include "sys_io_ser_native_target.h"
 #include <Esp32_DeviceMapping.h>
+#include <esp32_idf.h>
 
 // in UWP the COM ports are named COM1, COM2, COM3. But ESP32 uses internally UART0, UART1, UART2. This maps the port
 // index 1, 2 or 3 to the uart number 0, 1 or 2
@@ -17,44 +18,40 @@
 
 static const char *TAG = "SerialDevice";
 
-static NF_PAL_UART Uart0_PAL;
-static NF_PAL_UART Uart1_PAL;
+NF_PAL_UART Uart0_PAL;
+NF_PAL_UART Uart1_PAL;
 #if defined(UART_NUM_2)
-static NF_PAL_UART Uart2_PAL;
+NF_PAL_UART Uart2_PAL;
 #endif
 
 NF_PAL_UART *GetPalUartFromUartNum_sys(int uart_num)
 {
-    NF_PAL_UART *palUart = NULL;
-
     switch (uart_num)
     {
         case UART_NUM_0:
             // set UART PAL
-            palUart = &Uart0_PAL;
-            break;
+            return &Uart0_PAL;
 
         case UART_NUM_1:
             // set UART PAL
-            palUart = &Uart1_PAL;
-            break;
+            return &Uart1_PAL;
 
 #if defined(UART_NUM_2)
         case UART_NUM_2:
             // set UART PAL
-            palUart = &Uart2_PAL;
-            break;
+            return &Uart2_PAL;
 #endif
 
         default:
             break;
     }
-    return palUart;
+
+    return NULL;
 }
 
 void UninitializePalUart_sys(NF_PAL_UART *palUart)
 {
-    if (palUart && palUart->SerialDevice)
+    if (palUart && palUart->UartEventTask)
     {
         // send the exit signal to the UART event handling queue
         uart_event_t event;
@@ -68,7 +65,6 @@ void UninitializePalUart_sys(NF_PAL_UART *palUart)
         // null all pointers
         palUart->RxBuffer = NULL;
         palUart->TxBuffer = NULL;
-        palUart->SerialDevice = NULL;
 
         // delete driver
         uart_driver_delete((uart_port_t)palUart->UartNum);
@@ -158,7 +154,7 @@ void uart_event_task_sys(void *pvParameters)
                     if (buffer)
                     {
                         // try to read RX FIFO
-                        readCount = uart_read_bytes(palUart->UartNum, buffer, bufferedSize, 1);
+                        readCount = uart_read_bytes(palUart->UartNum, buffer, bufferedSize, portMAX_DELAY);
 
                         // push to UART RX buffer
                         palUart->RxRingBuffer.Push(buffer, readCount);
@@ -201,19 +197,13 @@ void uart_event_task_sys(void *pvParameters)
                             {
                                 // post a managed event with the port index and event code (check if there is a watch
                                 // char in the buffer or just any char)
-                                //  check if callbacks are registered so this is called only if there is anyone
-                                //  listening otherwise don't bother
-                                if (palUart
-                                        ->SerialDevice[Library_sys_io_ser_native_System_IO_Ports_SerialPort::
-                                                           FIELD___callbacksDataReceivedEvent]
-                                        .Dereference() != NULL)
-                                {
-                                    PostManagedEvent(
-                                        EVENT_SERIAL,
-                                        0,
-                                        UART_NUM_TO_PORT_INDEX(palUart->UartNum),
-                                        (watchCharPos > -1) ? SerialData_WatchChar : SerialData_Chars);
-                                }
+                                // TODO: check if callbacks are registered so this is called only if there is anyone
+                                // listening otherwise don't bother
+                                PostManagedEvent(
+                                    EVENT_SERIAL,
+                                    0,
+                                    UART_NUM_TO_PORT_INDEX(palUart->UartNum),
+                                    (watchCharPos > -1) ? SerialData_WatchChar : SerialData_Chars);
                             }
                         }
 
@@ -335,7 +325,7 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::set_InvertSignalLe
     }
 
     // check if UART it's already opened
-    if (palUart->SerialDevice)
+    if (palUart->UartEventTask)
     {
         // it is opened, so we can't change the signal levels
         NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_OPERATION);
@@ -565,11 +555,12 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::ReadLine___STRING(
     uart_port_t uart_num;
 
     uint8_t *line = NULL;
-    const char *newLine;
+    const char *newLine = NULL;
     uint32_t newLineLength;
 
     int64_t *timeoutTicks;
     bool eventResult = true;
+    bool newLineFound = false;
 
     // get a pointer to the managed object instance and check that it's not NULL
     CLR_RT_HeapBlock *pThis = stack.This();
@@ -597,7 +588,11 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::ReadLine___STRING(
     if (stack.m_customState == 1)
     {
         // check if there is a full line available to read
-        if (GetLineFromRxBuffer(pThis, &(palUart->RxRingBuffer), line))
+        GLOBAL_LOCK();
+        newLineFound = GetLineFromRxBuffer(pThis, &(palUart->RxRingBuffer), line);
+        GLOBAL_UNLOCK();
+
+        if (newLineFound)
         {
             // got one!
             eventResult = false;
@@ -606,13 +601,19 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::ReadLine___STRING(
         {
             // get new line from field
             newLine = pThis[FIELD___newLine].RecoverString();
+
+            // sanity check for NULL string
+            if (newLine == NULL)
+            {
+                NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+            }
+
             newLineLength = hal_strlen_s(newLine);
-            // need to subtract one because we are 0 indexed
-            newLineLength--;
 
             // set new line char as the last one in the string
             // only if this one is found it will have a chance of the others being there
-            palUart->NewLineChar = newLine[newLineLength];
+            // need to subtract one because we are 0 indexed
+            palUart->NewLineChar = newLine[newLineLength - 1];
 
             stack.m_customState = 2;
         }
@@ -629,7 +630,9 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::ReadLine___STRING(
 
         if (eventResult)
         {
+            GLOBAL_LOCK();
             GetLineFromRxBuffer(pThis, &(palUart->RxRingBuffer), line);
+            GLOBAL_UNLOCK();
 
             // done here
             break;
@@ -889,7 +892,6 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeInit___VOID(
     palUart->RxRingBuffer.Initialize(palUart->RxBuffer, bufferSize);
 
     // set/reset all the rest
-    palUart->SerialDevice = stack.This();
     palUart->UartNum = uart_num;
     palUart->TxOngoingCount = 0;
     palUart->RxBytesToRead = 0;
@@ -917,9 +919,6 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeInit___VOID(
 
     // Get the watch char
     watchChar = (uint8_t)pThis[FIELD___watchChar].NumericByRef().u1;
-
-    // get watch character
-    watchChar = pThis[FIELD___watchChar].NumericByRef().u1;
 
     // set watch char, if set
     if (watchChar != 0)
@@ -1064,7 +1063,7 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeConfig___VOI
         }
 
         // Already Initialised ?
-        if (GetPalUartFromUartNum_sys(uart_num)->SerialDevice)
+        if (GetPalUartFromUartNum_sys(uart_num)->UartEventTask)
         {
             int errors = 0;
 

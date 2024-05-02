@@ -160,15 +160,6 @@ if(RTOS_CHIBIOS_CHECK OR RTOS_TI_SIMPLELINK_CHECK)
     unset(LINK_OPTIONS)
     #################################################################
 
-    #################################################################
-    # clear other options and definitions that we want to set
-    unset(COMPILE_OPTIONS)
-    unset(C_COMPILE_OPTIONS)
-    unset(CXX_COMPILE_OPTIONS)
-    unset(COMPILE_DEFINITIONS)
-    unset(LINK_OPTIONS)
-    #################################################################
-
 endif()
 
 #################################################################################
@@ -294,6 +285,19 @@ if(NF_FEATURE_HAS_CONFIG_BLOCK)
 else()
     set(TARGET_HAS_CONFIG_BLOCK FALSE CACHE INTERNAL "Option for config block")
     message(STATUS "Configuration block storage **IS NOT** included")
+endif()
+
+#################################################################
+# enables internal storage support
+# (default is OFF so Accessible Storage Feature is NOT supported)
+option(NF_FEATURE_HAS_ACCESSIBLE_STORAGE "option to enable accessible storage")
+
+if(NF_FEATURE_HAS_ACCESSIBLE_STORAGE)
+    set(TARGET_HAS_ACCESSIBLE_STORAGE TRUE CACHE INTERNAL "Option for accessible storage")
+    message(STATUS "Accessible Storage feature is included")
+else()
+    set(TARGET_HAS_ACCESSIBLE_STORAGE FALSE CACHE INTERNAL "Option for accessible storage")
+    message(STATUS "Accessible Storage feature **IS NOT** included")
 endif()
 
 #################################################################
