@@ -351,7 +351,7 @@ if(NF_FEATURE_USE_LITTLEFS)
         FetchContent_Declare(
             littlefs
             GIT_REPOSITORY https://github.com/littlefs-project/littlefs
-            GIT_TAG "v2.9.2"
+            GIT_TAG "v2.9.3"
         )
 
     else()
