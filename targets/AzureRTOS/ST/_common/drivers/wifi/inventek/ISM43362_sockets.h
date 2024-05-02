@@ -8,6 +8,7 @@
 
 #include <nanoHAL.h>
 #include <nanoHAL_ConfigurationManager.h>
+#include <nanoHAL_StorageOperation.h>
 #include "wifi.h"
 
 #define NATIVE_PROFILE_PAL_NETWORK()

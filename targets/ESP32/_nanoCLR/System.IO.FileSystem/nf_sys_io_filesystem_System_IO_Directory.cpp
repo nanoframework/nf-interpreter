@@ -6,9 +6,8 @@
 #include "nf_sys_io_filesystem.h"
 #include <dirent.h>
 #include <ff.h>
+#include <targetHAL_FileOperation.h>
 
-extern void CombinePathAndName(char *outpath, const char *path1, const char *path2);
-extern char *ConvertToVfsPath(const char *filepath);
 extern SYSTEMTIME GetDateTimeFromStat(time_t *time);
 
 // We will use this to extract the file extension
@@ -237,7 +236,7 @@ HRESULT BuildPathsArray(const char *vfsFolderPath, const char *folderPath, CLR_R
 
         // allocate memory for buffers
         stringBuffer = (char *)platform_malloc(FF_LFN_BUF + 1);
-        workingBuffer = (char *)platform_malloc(2 * FF_LFN_BUF + 1);
+        workingBuffer = (char *)platform_malloc(FF_LFN_BUF + 1);
 
         // sanity check for successful malloc
         if (stringBuffer == NULL || workingBuffer == NULL)
@@ -270,7 +269,7 @@ HRESULT BuildPathsArray(const char *vfsFolderPath, const char *folderPath, CLR_R
             if ((fileInfo->d_type & entryType) && (strcmp(get_filename_ext(fileInfo->d_name), "sys")))
             {
                 // clear working buffer
-                memset(workingBuffer, 0, 2 * FF_LFN_BUF + 1);
+                memset(workingBuffer, 0, FF_LFN_BUF + 1);
 
                 // compose file path
                 CombinePathAndName(workingBuffer, folderPath, fileInfo->d_name);
@@ -395,6 +394,7 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_Directory::GetDirectoriesNative__
 // Enumerate drives in system
 // if array == null then only count drives
 // Return number of drives
+// TO BE REMOVED AFTER managed Directory.GetLogicalDrives() is removed
 static HRESULT EnumerateDrives(CLR_RT_HeapBlock *array, int &count)
 {
     NANOCLR_HEADER();

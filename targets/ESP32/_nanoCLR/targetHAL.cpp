@@ -11,8 +11,11 @@
 #include <nanoPAL_Events.h>
 #include <nanoPAL_BlockStorage.h>
 #include <nanoHAL_ConfigurationManager.h>
+#include <nanoHAL_StorageOperation.h>
 #include <nanoHAL_Graphics.h>
-
+#if (HAL_USE_UART == TRUE)
+#include <sys_io_ser_native_target.h>
+#endif
 void Storage_Initialize();
 void Storage_Uninitialize();
 
@@ -95,6 +98,16 @@ void nanoHAL_Initialize()
 
 #if (HAL_USE_SPI == TRUE)
     nanoSPI_Initialize();
+#endif
+
+#if (HAL_USE_UART == TRUE)
+
+    memset(&Uart0_PAL, 0, sizeof(Uart0_PAL));
+    memset(&Uart1_PAL, 0, sizeof(Uart1_PAL));
+#if defined(UART_NUM_2)
+    memset(&Uart2_PAL, 0, sizeof(Uart2_PAL));
+#endif
+
 #endif
 
     // no PAL events required until now
