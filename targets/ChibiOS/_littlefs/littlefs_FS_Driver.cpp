@@ -12,6 +12,8 @@
 #include "littlefs_FS_Driver.h"
 #include "hal_littlefs.h"
 
+static char *NormalizePath(const char *path);
+
 bool LITTLEFS_FS_Driver::LoadMedia(const void *driverInterface)
 {
     (void)driverInterface;
@@ -133,7 +135,7 @@ HRESULT LITTLEFS_FS_Driver::Open(const VOLUME_ID *volume, const char *path, uint
     LITTLEFS_FileHandle *fileHandle = NULL;
     lfs_info info;
     int32_t flags;
-    char *workingPath;
+    char *normalizedPath;
     bool fileExists = false;
 
     // allocate file handle
@@ -154,27 +156,16 @@ HRESULT LITTLEFS_FS_Driver::Open(const VOLUME_ID *volume, const char *path, uint
         NANOCLR_SET_AND_LEAVE(CLR_E_FILE_IO);
     }
 
-    // adjust path to replace \ with /
-    workingPath = (char *)path;
-    while (*workingPath)
+    normalizedPath = NormalizePath(path);
+    if (normalizedPath == NULL)
     {
-        if (*workingPath == '\\')
-        {
-            *workingPath = '/';
-        }
-
-        workingPath++;
-    }
-
-    // adjust path to remove leading backslash
-    if (*path == '/')
-    {
-        path++;
+        // path is too long, return an error
+        return CLR_E_PATH_TOO_LONG;
     }
 
     // check for file existence
 #ifdef DEBUG
-    result = lfs_stat(fileHandle->fs, path, &info);
+    result = lfs_stat(fileHandle->fs, normalizedPath, &info);
 
     if (result == LFS_ERR_CORRUPT)
     {
@@ -184,7 +175,7 @@ HRESULT LITTLEFS_FS_Driver::Open(const VOLUME_ID *volume, const char *path, uint
 
     fileExists = result == LFS_ERR_OK;
 #else
-    fileExists = lfs_stat(fileHandle->fs, path, &info) == LFS_ERR_OK;
+    fileExists = lfs_stat(fileHandle->fs, normalizedPath, &info) == LFS_ERR_OK;
 #endif
 
     // setup attributes stuff (with default value)
@@ -211,7 +202,8 @@ HRESULT LITTLEFS_FS_Driver::Open(const VOLUME_ID *volume, const char *path, uint
     }
 
     // need to use the alternative API to handle attributes
-    if (lfs_file_opencfg(fileHandle->fs, &fileHandle->file, path, flags, &fileHandle->fileConfig) == LFS_ERR_OK)
+    if (lfs_file_opencfg(fileHandle->fs, &fileHandle->file, normalizedPath, flags, &fileHandle->fileConfig) ==
+        LFS_ERR_OK)
     {
         // store the handle
         *handle = (uint32_t)fileHandle;
@@ -508,7 +500,7 @@ HRESULT LITTLEFS_FS_Driver::FindOpen(const VOLUME_ID *volume, const char *path, 
 {
     NANOCLR_HEADER();
 
-    char *workingPath;
+    char *normalizedPath;
     LITTLEFS_FindFileHandle *findHandle = NULL;
 
     // allocate file handle
@@ -529,26 +521,15 @@ HRESULT LITTLEFS_FS_Driver::FindOpen(const VOLUME_ID *volume, const char *path, 
         NANOCLR_SET_AND_LEAVE(CLR_E_FILE_IO);
     }
 
-    // adjust path to replace \ with /
-    workingPath = (char *)path;
-    while (*workingPath)
+    normalizedPath = NormalizePath(path);
+    if (normalizedPath == NULL)
     {
-        if (*workingPath == '\\')
-        {
-            *workingPath = '/';
-        }
-
-        workingPath++;
-    }
-
-    // adjust path to remove leading backslash
-    if (*path == '/')
-    {
-        path++;
+        // path is too long, return an error
+        return CLR_E_PATH_TOO_LONG;
     }
 
     // open directory for seek
-    if (lfs_dir_open(findHandle->fs, &findHandle->dir, path) == LFS_ERR_OK)
+    if (lfs_dir_open(findHandle->fs, &findHandle->dir, normalizedPath) == LFS_ERR_OK)
     {
         lfs_dir_seek(findHandle->fs, &findHandle->dir, 0);
 
@@ -557,6 +538,7 @@ HRESULT LITTLEFS_FS_Driver::FindOpen(const VOLUME_ID *volume, const char *path, 
 
         // done here, return imediatly so handle doesn't get cleared
         hr = S_OK;
+
         NANOCLR_RETURN();
     }
 
@@ -669,18 +651,13 @@ HRESULT LITTLEFS_FS_Driver::GetFileInfo(const VOLUME_ID *volume, const char *pat
 {
     lfs_t *fsDrive = NULL;
     lfs_info info;
-    char *workingPath;
+    char *normalizedPath;
 
-    // adjust path to replace \ with /
-    workingPath = (char *)path;
-    while (*workingPath)
+    normalizedPath = NormalizePath(path);
+    if (normalizedPath == NULL)
     {
-        if (*workingPath == '\\')
-        {
-            *workingPath = '/';
-        }
-
-        workingPath++;
+        // path is too long, return an error
+        return CLR_E_PATH_TOO_LONG;
     }
 
     // get littlefs instance
@@ -689,7 +666,7 @@ HRESULT LITTLEFS_FS_Driver::GetFileInfo(const VOLUME_ID *volume, const char *pat
     if (fsDrive)
     {
         // root is different
-        if (*path == '/' && *(path + 1) == '\0')
+        if (*normalizedPath == '/' && *(normalizedPath + 1) == '\0')
         {
 
             // this is the root directory
@@ -700,7 +677,7 @@ HRESULT LITTLEFS_FS_Driver::GetFileInfo(const VOLUME_ID *volume, const char *pat
         else
         {
             // check for file existence
-            if (lfs_stat(fsDrive, path, &info) != LFS_ERR_OK)
+            if (lfs_stat(fsDrive, normalizedPath, &info) != LFS_ERR_OK)
             {
                 *found = false;
                 return S_OK;
@@ -710,7 +687,12 @@ HRESULT LITTLEFS_FS_Driver::GetFileInfo(const VOLUME_ID *volume, const char *pat
             *found = true;
 
             // read and set the attributes
-            lfs_getattr(fsDrive, path, NANO_LITTLEFS_ATTRIBUTE, &fileInfo->Attributes, NANO_LITTLEFS_ATTRIBUTE_SIZE);
+            lfs_getattr(
+                fsDrive,
+                normalizedPath,
+                NANO_LITTLEFS_ATTRIBUTE,
+                &fileInfo->Attributes,
+                NANO_LITTLEFS_ATTRIBUTE_SIZE);
 
             // no need to set the file name details as managed code already has this info
         }
@@ -728,28 +710,17 @@ HRESULT LITTLEFS_FS_Driver::GetAttributes(const VOLUME_ID *volume, const char *p
     lfs_t *fsDrive = NULL;
     lfs_info info;
     int32_t result;
-    char *workingPath;
+    char *normalizedPath;
 
     // set to empty attributes
     *attributes = EMPTY_ATTRIBUTE;
 
-    // adjust path to replace \ with /
-    workingPath = (char *)path;
-    while (*workingPath)
+    normalizedPath = NormalizePath(path);
+    if (normalizedPath == NULL)
     {
-        if (*workingPath == '\\')
-        {
-            *workingPath = '/';
-        }
-
-        workingPath++;
+        // path is too long, return an error
+        return CLR_E_PATH_TOO_LONG;
     }
-
-    // // adjust path to remove leading backslash
-    // if (*path == '/')
-    // {
-    //     path++;
-    // }
 
     // get littlefs instance
     fsDrive = hal_lfs_get_fs_from_index(volume->volumeId);
@@ -757,7 +728,7 @@ HRESULT LITTLEFS_FS_Driver::GetAttributes(const VOLUME_ID *volume, const char *p
     if (fsDrive)
     {
         // check for file existence
-        result = lfs_stat(fsDrive, path, &info);
+        result = lfs_stat(fsDrive, normalizedPath, &info);
 
         if (result == LFS_ERR_CORRUPT)
         {
@@ -772,7 +743,7 @@ HRESULT LITTLEFS_FS_Driver::GetAttributes(const VOLUME_ID *volume, const char *p
         }
 
         // if this is home directory
-        if (info.type == LFS_TYPE_DIR && *path == '\0')
+        if (info.type == LFS_TYPE_DIR && *normalizedPath == '\0')
         {
             *attributes = FileAttributes::FileAttributes_Directory;
 
@@ -781,8 +752,12 @@ HRESULT LITTLEFS_FS_Driver::GetAttributes(const VOLUME_ID *volume, const char *p
 
         // try to get the attributes
         // even if this fails we return success as attributes have been set to EMPTY_ATTRIBUTE
-        result =
-            lfs_getattr(fsDrive, (const char *)path, NANO_LITTLEFS_ATTRIBUTE, attributes, NANO_LITTLEFS_ATTRIBUTE_SIZE);
+        result = lfs_getattr(
+            fsDrive,
+            (const char *)normalizedPath,
+            NANO_LITTLEFS_ATTRIBUTE,
+            attributes,
+            NANO_LITTLEFS_ATTRIBUTE_SIZE);
 
         if (result == LFS_ERR_OK || result == LFS_ERR_NOATTR)
         {
@@ -820,24 +795,13 @@ HRESULT LITTLEFS_FS_Driver::SetAttributes(const VOLUME_ID *volume, const char *p
     lfs_t *fsDrive = NULL;
     lfs_info info;
     uint32_t currentAttributes;
-    char *workingPath;
+    char *normalizedPath;
 
-    // adjust path to replace \ with /
-    workingPath = (char *)path;
-    while (*workingPath)
+    normalizedPath = NormalizePath(path);
+    if (normalizedPath == NULL)
     {
-        if (*workingPath == '\\')
-        {
-            *workingPath = '/';
-        }
-
-        workingPath++;
-    }
-
-    // adjust path to remove leading backslash
-    if (*path == '/')
-    {
-        path++;
+        // path is too long, return an error
+        return CLR_E_PATH_TOO_LONG;
     }
 
     // get littlefs instance
@@ -846,7 +810,7 @@ HRESULT LITTLEFS_FS_Driver::SetAttributes(const VOLUME_ID *volume, const char *p
     if (fsDrive)
     {
         // check for file existence
-        if (lfs_stat(fsDrive, path, &info) != LFS_ERR_OK)
+        if (lfs_stat(fsDrive, normalizedPath, &info) != LFS_ERR_OK)
         {
             return CLR_E_FILE_NOT_FOUND;
         }
@@ -854,7 +818,7 @@ HRESULT LITTLEFS_FS_Driver::SetAttributes(const VOLUME_ID *volume, const char *p
         // read current attributes
         if (lfs_getattr(
                 fsDrive,
-                (const char *)path,
+                (const char *)normalizedPath,
                 NANO_LITTLEFS_ATTRIBUTE,
                 &currentAttributes,
                 NANO_LITTLEFS_ATTRIBUTE_SIZE) != LFS_ERR_OK)
@@ -870,7 +834,7 @@ HRESULT LITTLEFS_FS_Driver::SetAttributes(const VOLUME_ID *volume, const char *p
 
         if (lfs_setattr(
                 fsDrive,
-                (const char *)path,
+                (const char *)normalizedPath,
                 NANO_LITTLEFS_ATTRIBUTE,
                 &currentAttributes,
                 NANO_LITTLEFS_ATTRIBUTE_SIZE) != LFS_ERR_OK)
@@ -888,31 +852,16 @@ HRESULT LITTLEFS_FS_Driver::CreateDirectory(const VOLUME_ID *volume, const char 
 {
     lfs_t *fsDrive = NULL;
     int32_t result = LFS_ERR_OK;
+    char *normalizedPath;
     char *workingPath;
     char tempPath[FS_MAX_DIRECTORY_LENGTH];
     char *tempPathP = tempPath;
 
-    // adjust path to replace \ with /
-    workingPath = (char *)path;
-    while (*workingPath)
+    normalizedPath = NormalizePath(path);
+    if (normalizedPath == NULL)
     {
-        if (*workingPath == '\\')
-        {
-            *workingPath = '/';
-        }
-        
-        workingPath++;
-        tempPathP++;
-    }
-
-    *tempPathP = '/';
-    tempPathP++;
-    *tempPathP = '\0';
-
-    // adjust path to remove leading backslash
-    if (*path == '/')
-    {
-        path++;
+        // path is too long, return an error
+        return CLR_E_PATH_TOO_LONG;
     }
 
     // get littlefs instance
@@ -930,23 +879,23 @@ HRESULT LITTLEFS_FS_Driver::CreateDirectory(const VOLUME_ID *volume, const char 
         do
         {
             // find the next path separator
-            workingPath = strchr(path, '/');
+            workingPath = strchr(normalizedPath, '/');
 
             if (workingPath)
             {
                 // copy the path part to tempPath
-                memcpy(tempPathP, path, workingPath - path);
+                memcpy(tempPathP, normalizedPath, workingPath - normalizedPath);
 
                 // store pointer to tempPath
-                tempPathP += (workingPath - path);
+                tempPathP += (workingPath - normalizedPath);
 
                 // move to the next part of the path
-                path = workingPath + 1;
+                normalizedPath = workingPath + 1;
             }
             else
             {
                 // this is the last part of the path
-                hal_strcpy_s(tempPathP, FS_MAX_PATH_LENGTH, path);
+                hal_strcpy_s(tempPathP, FS_MAX_PATH_LENGTH, normalizedPath);
             }
 
             // create the directory
@@ -997,40 +946,53 @@ HRESULT LITTLEFS_FS_Driver::CreateDirectory(const VOLUME_ID *volume, const char 
 HRESULT LITTLEFS_FS_Driver::Move(const VOLUME_ID *volume, const char *oldPath, const char *newPath)
 {
     lfs_t *fsDrive = NULL;
-    char *workingPath;
+    char *normalizedNewPath;
+    char *normalizedOldPath;
 
-    // adjust path to replace \ with /
-    workingPath = (char *)oldPath;
-    while (*workingPath)
+    normalizedNewPath = NormalizePath(newPath);
+    if (normalizedNewPath == NULL)
     {
-        if (*workingPath == '\\')
+        // path is too long, return an error
+        return CLR_E_PATH_TOO_LONG;
+    }
+
+    normalizedOldPath = NormalizePath(oldPath);
+    if (normalizedOldPath == NULL)
+    {
+        // path is too long, return an error
+        return CLR_E_PATH_TOO_LONG;
+    }
+
+    // get littlefs instance
+    fsDrive = hal_lfs_get_fs_from_index(volume->volumeId);
+
+    if (fsDrive)
+    {
+        // the check for source file and destination file existence has already been made in managed code
+
+        if (lfs_rename(fsDrive, normalizedOldPath, normalizedNewPath) != LFS_ERR_OK)
         {
-            *workingPath = '/';
+            return CLR_E_FILE_IO;
         }
 
-        workingPath++;
+        return S_OK;
     }
 
-    workingPath = (char *)newPath;
-    while (*workingPath)
-    {
-        if (*workingPath == '\\')
-        {
-            *workingPath = '/';
-        }
+    return CLR_E_INVALID_DRIVER;
+}
 
-        workingPath++;
-    }
+HRESULT LITTLEFS_FS_Driver::Delete(const VOLUME_ID *volume, const char *path, bool recursive)
+{
+    lfs_t *fsDrive = NULL;
+    lfs_info info;
+    char *normalizedPath;
+    int32_t result;
 
-    // adjust path to remove leading backslash
-    if (*oldPath == '/')
+    normalizedPath = NormalizePath(path);
+    if (normalizedPath == NULL)
     {
-        oldPath++;
-    }
-
-    if (*newPath == '/')
-    {
-        newPath++;
+        // path is too long, return an error
+        return CLR_E_PATH_TOO_LONG;
     }
 
     // get littlefs instance
@@ -1051,15 +1013,72 @@ HRESULT LITTLEFS_FS_Driver::Move(const VOLUME_ID *volume, const char *oldPath, c
     return CLR_E_INVALID_DRIVER;
 }
 
-HRESULT LITTLEFS_FS_Driver::Delete(const VOLUME_ID *volume, const char *path)
+static uint32_t RemoveAllFiles(lfs_t *fs, const char *path)
 {
-    lfs_t *fsDrive = NULL;
+    lfs_dir dir;
     lfs_info info;
+    int32_t result;
+    char buffer[FS_MAX_PATH_LENGTH];
+    char *bufferP = buffer;
+    size_t bufferSize = FS_MAX_PATH_LENGTH;
+
+    // open the directory
+    result = lfs_dir_open(fs, &dir, path);
+    if (result != LFS_ERR_OK)
+    {
+        return result;
+    }
+
+    // read the directory
+    while (lfs_dir_read(fs, &dir, &info) > LFS_ERR_OK)
+    {
+        // skip the '.' and '..' entries
+        if (info.name[0] == '.')
+        {
+            continue;
+        }
+
+        // reset and prepare the buffer
+        memset(buffer, 0, FS_MAX_PATH_LENGTH);
+        bufferP = buffer;
+
+        // join filename with the path
+        CLR_SafeSprintf(bufferP, bufferSize, "%s/%s", path, info.name);
+
+        // check if this is a directory
+        if (info.type == LFS_TYPE_DIR)
+        {
+            // recursivelly delete all files and subdirectories
+            result = RemoveAllFiles(fs, buffer);
+
+            if (result != LFS_ERR_OK)
+            {
+                return result;
+            }
+        }
+
+        // remove the entry (OK to remove files and directories)
+        result = lfs_remove(fs, buffer);
+        if (result != LFS_ERR_OK)
+        {
+            return result;
+        }
+    }
+
+    // close the directory
+    return lfs_dir_close(fs, &dir);
+}
+
+// adjust path to replace \ with / and handle other normalization issues
+static char *NormalizePath(const char *path)
+{
+    static char tempPath[FS_MAX_DIRECTORY_LENGTH];
+    char *tempPathP = tempPath;
     char *workingPath;
 
-    // adjust path to replace \ with /
     workingPath = (char *)path;
-    while (*workingPath)
+
+    while (*workingPath && (tempPathP - tempPath < FS_MAX_DIRECTORY_LENGTH))
     {
         if (*workingPath == '\\')
         {
@@ -1067,36 +1086,26 @@ HRESULT LITTLEFS_FS_Driver::Delete(const VOLUME_ID *volume, const char *path)
         }
 
         workingPath++;
+        tempPathP++;
     }
+
+    if (tempPathP - tempPath >= FS_MAX_DIRECTORY_LENGTH)
+    {
+        // path is too long, return NULL
+        return NULL;
+    }
+
+    *tempPathP = '/';
+    tempPathP++;
+    *tempPathP = '\0';
 
     // adjust path to remove leading backslash
-    if (*path == '/')
+    if (*tempPath == '/')
     {
-        path++;
+        tempPathP = tempPath + 1;
     }
 
-    // get littlefs instance
-    fsDrive = hal_lfs_get_fs_from_index(volume->volumeId);
-
-    if (fsDrive)
-    {
-        // check for file existence
-        if (lfs_stat(fsDrive, path, &info) != LFS_ERR_OK)
-        {
-            return CLR_E_FILE_NOT_FOUND;
-        }
-
-        // TODO check read only attribute
-
-        if (lfs_remove(fsDrive, path) != LFS_ERR_OK)
-        {
-            return CLR_E_FILE_IO;
-        }
-
-        return S_OK;
-    }
-
-    return CLR_E_INVALID_DRIVER;
+    return tempPathP;
 }
 
 //////////////////
