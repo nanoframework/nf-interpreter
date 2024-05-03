@@ -13,10 +13,11 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_NativeIO::Delete___STATIC__VOID__
 
     FileSystemVolume *driver;
     char *path = NULL;
+    bool recursive = stack.Arg1().NumericByRef().u1 != 0;
 
     NANOCLR_CHECK_HRESULT(FindVolume(stack.Arg0(), driver, &path));
 
-    NANOCLR_CHECK_HRESULT(driver->Delete(path));
+    NANOCLR_CHECK_HRESULT(driver->Delete(path, recursive));
 
     NANOCLR_NOCLEANUP();
 }

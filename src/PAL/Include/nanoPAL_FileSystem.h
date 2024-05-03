@@ -100,7 +100,7 @@ extern "C"
 
     typedef HRESULT (*FS_CREATEDIRECTORY)(const VOLUME_ID * /*volume*/, const char * /*path*/);
     typedef HRESULT (*FS_MOVE)(const VOLUME_ID * /*volume*/, const char * /*oldPath*/, const char * /*newPath*/);
-    typedef HRESULT (*FS_DELETE)(const VOLUME_ID * /*volume*/, const char * /*path*/);
+    typedef HRESULT (*FS_DELETE)(const VOLUME_ID * /*volume*/, const char * /*path*/, bool /*recursive*/);
     typedef HRESULT (*FS_GETATTRIBUTES)(const VOLUME_ID * /*volume*/, const char * /*path*/, uint32_t * /*attributes*/);
     typedef HRESULT (*FS_SETATTRIBUTES)(const VOLUME_ID * /*volume*/, const char * /*path*/, uint32_t /*attributes*/);
 
@@ -313,14 +313,14 @@ extern "C"
             return m_fsDriver->Move(&m_volumeId, oldPath, newPath);
         }
 
-        HRESULT Delete(const char *path)
+        HRESULT Delete(const char *path, bool recursive)
         {
             if (!m_fsDriver || !(m_fsDriver->Delete))
             {
                 return CLR_E_NOT_SUPPORTED;
             }
 
-            return m_fsDriver->Delete(&m_volumeId, path);
+            return m_fsDriver->Delete(&m_volumeId, path, recursive);
         }
 
         HRESULT GetAttributes(const char *path, uint32_t *attributes)

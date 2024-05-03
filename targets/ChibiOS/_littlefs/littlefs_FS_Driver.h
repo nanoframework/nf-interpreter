@@ -66,7 +66,7 @@ struct LITTLEFS_FS_Driver
     static HRESULT SetAttributes(const VOLUME_ID *volume, const char * path, uint32_t attributes);
     static HRESULT CreateDirectory(const VOLUME_ID *volume, const char * path);
     static HRESULT Move(const VOLUME_ID *volume, const char * oldPath, const char * newPath);
-    static HRESULT Delete(const VOLUME_ID *volume, const char * path);
+    static HRESULT Delete(const VOLUME_ID *volume, const char * path, bool recursive);
 
     //--//
 };

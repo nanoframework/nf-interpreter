@@ -12,6 +12,7 @@
 #include "littlefs_FS_Driver.h"
 #include "hal_littlefs.h"
 
+static uint32_t RemoveAllFiles(lfs_t *fs, const char *path);
 static char *NormalizePath(const char *path);
 
 bool LITTLEFS_FS_Driver::LoadMedia(const void *driverInterface)
@@ -1000,9 +1001,33 @@ HRESULT LITTLEFS_FS_Driver::Delete(const VOLUME_ID *volume, const char *path, bo
 
     if (fsDrive)
     {
-        // the check for source file and destination file existence has already been made in managed code
+        // check for file existence
+        if (lfs_stat(fsDrive, normalizedPath, &info) != LFS_ERR_OK)
+        {
+            return CLR_E_FILE_NOT_FOUND;
+        }
 
-        if (lfs_rename(fsDrive, oldPath, newPath) != LFS_ERR_OK)
+    remove_entry:
+        // remove the directory
+        result = lfs_remove(fsDrive, normalizedPath);
+
+        if (result == LFS_ERR_NOTEMPTY)
+        {
+            if (!recursive)
+            {
+                // directory is not empty and we are not in recursive mode
+                return CLR_E_DIRECTORY_NOT_EMPTY;
+            }
+
+            // recursivelly delete all files and subdirectories
+            if (RemoveAllFiles(fsDrive, normalizedPath) != LFS_ERR_OK)
+            {
+                return CLR_E_FILE_IO;
+            }
+
+            goto remove_entry;
+        }
+        else if (result != LFS_ERR_OK)
         {
             return CLR_E_FILE_IO;
         }
