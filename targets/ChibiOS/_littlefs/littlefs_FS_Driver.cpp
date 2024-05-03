@@ -747,31 +747,30 @@ HRESULT LITTLEFS_FS_Driver::GetAttributes(const VOLUME_ID *volume, const char *p
 
         // try to get the attributes
         // even if this fails we return success as attributes have been set to EMPTY_ATTRIBUTE
-#ifdef DEBUG
         result =
             lfs_getattr(fsDrive, (const char *)path, NANO_LITTLEFS_ATTRIBUTE, attributes, NANO_LITTLEFS_ATTRIBUTE_SIZE);
 
-        if (result == LFS_ERR_CORRUPT)
-        {
-            __NOP();
-            NANOCLR_SET_AND_LEAVE(CLR_E_FILE_IO);
-        }
-
         if (result == LFS_ERR_OK || result == LFS_ERR_NOATTR)
-#else
-        if (lfs_getattr(
-                fsDrive,
-                (const char *)path,
-                NANO_LITTLEFS_ATTRIBUTE,
-                attributes,
-                NANO_LITTLEFS_ATTRIBUTE_SIZE) == LFS_ERR_OK)
-#endif
         {
-            // add dir attribute, if this is a directory
             if (info.type == LFS_TYPE_DIR)
             {
-                *attributes |= FileAttributes::FileAttributes_Directory;
+                if (result == LFS_ERR_NOATTR)
+                {
+                    // this is a directory, set dir attribute
+                    *attributes = FileAttributes::FileAttributes_Directory;
+                }
+                else
+                {
+                    // this is a directory, add dir attribute
+                    *attributes |= FileAttributes::FileAttributes_Directory;
+                }
             }
+
+            NANOCLR_SET_AND_LEAVE(S_OK);
+        }
+        else
+        {
+            NANOCLR_SET_AND_LEAVE(CLR_E_FILE_IO);
         }
     }
     else
