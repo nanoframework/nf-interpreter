@@ -210,12 +210,8 @@ HRESULT LITTLEFS_FS_Driver::Open(const VOLUME_ID *volume, const char *path, uint
         flags = LFS_O_CREAT | LFS_O_RDWR;
     }
 
-lfs_dir_t dir;
-    // open the directory
-    lfs_dir_open(fileHandle->fs, &dir, "temp/testdir");
-
     // need to use the alternative API to handle attributes
-    if (lfs_file_opencfg(fileHandle->fs, &fileHandle->file, "file1.txt", flags, &fileHandle->fileConfig) == LFS_ERR_OK)
+    if (lfs_file_opencfg(fileHandle->fs, &fileHandle->file, path, flags, &fileHandle->fileConfig) == LFS_ERR_OK)
     {
         // store the handle
         *handle = (uint32_t)fileHandle;
