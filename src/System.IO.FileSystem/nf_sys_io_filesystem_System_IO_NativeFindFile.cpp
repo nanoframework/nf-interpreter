@@ -59,8 +59,8 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_NativeFindFile::GetNext___SystemI
 
         managedFindFile = top.Dereference();
 
-        managedFindFile[NativeFileInfo::FIELD__Attributes].NumericByRef().u4 = fi->Attributes;
-        managedFindFile[NativeFileInfo::FIELD__Size].NumericByRef().s8 = fi->Size;
+        managedFindFile[NativeFileInfo::FIELD__Attributes].SetInteger((CLR_INT32)fi->Attributes);
+        managedFindFile[NativeFileInfo::FIELD__Size].SetInteger((CLR_INT64)fi->Size);
 
         NANOCLR_CHECK_HRESULT(ff->CreateFilenameString(managedFindFile[NativeFileInfo::FIELD__FileName]));
     }
