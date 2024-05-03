@@ -12,7 +12,7 @@
 #include "littlefs_FS_Driver.h"
 #include "hal_littlefs.h"
 
-static uint32_t RemoveAllFiles(lfs_t *fs, const char *path);
+static int32_t RemoveAllFiles(lfs_t *fs, const char *path);
 static int NormalizePath(const char *path, char *buffer, size_t bufferSize);
 
 bool LITTLEFS_FS_Driver::LoadMedia(const void *driverInterface)
@@ -1042,7 +1042,7 @@ HRESULT LITTLEFS_FS_Driver::Delete(const VOLUME_ID *volume, const char *path, bo
     return CLR_E_INVALID_DRIVER;
 }
 
-static uint32_t RemoveAllFiles(lfs_t *fs, const char *path)
+static int32_t RemoveAllFiles(lfs_t *fs, const char *path)
 {
     lfs_dir dir;
     lfs_info info;
