@@ -866,16 +866,14 @@ HRESULT LITTLEFS_FS_Driver::CreateDirectory(const VOLUME_ID *volume, const char 
         {
             *workingPath = '/';
         }
-// tempPathP = workingPath;
+        
         workingPath++;
         tempPathP++;
     }
 
-*tempPathP = '/';
+    *tempPathP = '/';
     tempPathP++;
     *tempPathP = '\0';
-
-    //memcpy(tempPath, path, FS_MAX_DIRECTORY_LENGTH)
 
     // adjust path to remove leading backslash
     if (*path == '/')
@@ -888,31 +886,69 @@ HRESULT LITTLEFS_FS_Driver::CreateDirectory(const VOLUME_ID *volume, const char 
 
     if (fsDrive)
     {
-        //lfs_mkdir(fsDrive, "/");
+        // clear the tempPath
+        memset(tempPath, 0, FS_MAX_DIRECTORY_LENGTH);
 
-        // create the directory
-        result = lfs_mkdir(fsDrive, "temp");
-       result = lfs_mkdir(fsDrive, "temp/testdir");
+        // store pointer to tempPath
+        tempPathP = tempPath;
 
-        // if the directory already exists, return success
+        // create all the diretories in the path, walking the path
+        do
+        {
+            // find the next path separator
+            workingPath = strchr(path, '/');
+
+            if (workingPath)
+            {
+                // copy the path part to tempPath
+                memcpy(tempPathP, path, workingPath - path);
+
+                // store pointer to tempPath
+                tempPathP += (workingPath - path);
+
+                // move to the next part of the path
+                path = workingPath + 1;
+            }
+            else
+            {
+                // this is the last part of the path
+                hal_strcpy_s(tempPathP, FS_MAX_PATH_LENGTH, path);
+            }
+
+            // create the directory
+            result = lfs_mkdir(fsDrive, tempPath);
+
+            // add the separator
+            if (workingPath)
+            {
+                *tempPathP = '/';
+
+                // update pointer
+                tempPathP++;
+            }
+
+        } while (workingPath && (result == LFS_ERR_OK || result == LFS_ERR_EXIST));
+
         if (result == LFS_ERR_OK)
         {
             // need to set the attributes for the directory
-            uint32_t attributes = FileAttributes::FileAttributes_Directory;
+            // TODO: need to check if DIR attr work the same way as file attr
+            // uint32_t attributes = FileAttributes::FileAttributes_Directory;
 
-            if (lfs_setattr(
-                    fsDrive,
-                    (const char *)path,
-                    NANO_LITTLEFS_ATTRIBUTE,
-                    &attributes,
-                    NANO_LITTLEFS_ATTRIBUTE_SIZE) != LFS_ERR_OK)
-            {
-                return CLR_E_FILE_IO;
-            }
+            // if (lfs_setattr(
+            //         fsDrive,
+            //         (const char *)tempPath,
+            //         NANO_LITTLEFS_ATTRIBUTE,
+            //         &attributes,
+            //         NANO_LITTLEFS_ATTRIBUTE_SIZE) != LFS_ERR_OK)
+            // {
+            //     return CLR_E_FILE_IO;
+            // }
 
             // done here
             return S_OK;
         }
+        // if the directory already exists, return success
         else if (result == LFS_ERR_EXIST)
         {
             return S_OK;
