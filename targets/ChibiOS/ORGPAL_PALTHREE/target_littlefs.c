@@ -42,8 +42,6 @@ extern uint32_t HAL_GetTick(void);
 // target specific implementation of hal_lfs_erase
 int32_t hal_lfs_erase_0(const struct lfs_config *c, lfs_block_t block)
 {
-    (void)c;
-
     Watchdog_Reset();
 
     uint32_t addr = block * c->block_size;
@@ -59,8 +57,6 @@ int32_t hal_lfs_erase_0(const struct lfs_config *c, lfs_block_t block)
 // target specific implementation of hal_lfs_read
 int32_t hal_lfs_read_0(const struct lfs_config *c, lfs_block_t block, lfs_off_t off, void *buffer, lfs_size_t size)
 {
-    (void)c;
-
     uint32_t addr = block * c->block_size + off;
 
     if (!SPI_Read(buffer, addr, size))
@@ -79,8 +75,6 @@ int32_t hal_lfs_prog_0(
     const void *buffer,
     lfs_size_t size)
 {
-    (void)c;
-
     uint32_t addr = block * c->block_size + off;
 
     if (!SPI_Write(buffer, addr, size))
@@ -91,6 +85,7 @@ int32_t hal_lfs_prog_0(
 #ifdef DEBUG
 
     uint8_t tempBuffer[size];
+    memset(tempBuffer, 0xBB, size);
 
     // read back and compare
     SPI_Read(tempBuffer, addr, size);
@@ -312,11 +307,9 @@ static uint8_t QSPI_Erase_Chip();
 // target specific implementation of hal_lfs_erase
 int32_t hal_lfs_erase_1(const struct lfs_config *c, lfs_block_t block)
 {
-    (void)c;
-
     Watchdog_Reset();
 
-    uint32_t addr = block * W25Q128_SUBSECTOR_SIZE;
+    uint32_t addr = block * c->block_size;
 
     if (QSPI_Erase_Block(addr, false) != QSPI_OK)
     {
@@ -329,9 +322,7 @@ int32_t hal_lfs_erase_1(const struct lfs_config *c, lfs_block_t block)
 // target specific implementation of hal_lfs_read
 int32_t hal_lfs_read_1(const struct lfs_config *c, lfs_block_t block, lfs_off_t off, void *buffer, lfs_size_t size)
 {
-    (void)c;
-
-    uint32_t addr = block * W25Q128_SUBSECTOR_SIZE + off;
+    uint32_t addr = block * c->block_size + off;
 
     if (QSPI_Read(buffer, addr, size) != QSPI_OK)
     {
@@ -349,9 +340,7 @@ int32_t hal_lfs_prog_1(
     const void *buffer,
     lfs_size_t size)
 {
-    (void)c;
-
-    uint32_t addr = block * W25Q128_SUBSECTOR_SIZE + off;
+    uint32_t addr = block * c->block_size + off;
 
     if (QSPI_Write(buffer, addr, size) != QSPI_OK)
     {
