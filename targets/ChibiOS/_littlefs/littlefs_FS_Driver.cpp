@@ -847,13 +847,14 @@ HRESULT LITTLEFS_FS_Driver::SetAttributes(const VOLUME_ID *volume, const char *p
 HRESULT LITTLEFS_FS_Driver::CreateDirectory(const VOLUME_ID *volume, const char *path)
 {
     lfs_t *fsDrive = NULL;
-    lfs_info info;
     int32_t result = LFS_ERR_OK;
     char normalizedPath[FS_MAX_DIRECTORY_LENGTH];
-    char *workingPath;
     char tempPath[FS_MAX_DIRECTORY_LENGTH + 1];
-    char *tempPathP = tempPath;
-    int32_t pathIndex = 0;
+    char *segment;
+
+    // TODO: remove this
+    int i = 0;
+    (void)i;
 
     if (NormalizePath(path, normalizedPath, sizeof(normalizedPath)) < 0)
     {
@@ -866,61 +867,54 @@ HRESULT LITTLEFS_FS_Driver::CreateDirectory(const VOLUME_ID *volume, const char 
 
     if (fsDrive)
     {
-        // store pointer to tempPath
-        tempPathP = tempPath;
+        memset(tempPath, 0, sizeof(tempPath));
 
-        // create all the diretories in the path, walking the path
-        do
+        // iterate over the path segments and create the directories
+        segment = strtok(normalizedPath, "/");
+
+        while (segment && (result == LFS_ERR_OK || result == LFS_ERR_EXIST))
         {
-            // find the next path separator
-            workingPath = strchr(&normalizedPath[pathIndex], '/');
+            strcat(tempPath, segment);
 
-            if (workingPath)
-            {
-                // copy the path part to tempPath
-                memcpy(tempPathP, &normalizedPath[pathIndex], workingPath - &normalizedPath[pathIndex]);
-
-                // store pointer to tempPath
-                tempPathP += (workingPath - &normalizedPath[pathIndex]);
-
-                // move to the next part of the path
-                pathIndex = workingPath - normalizedPath + 1;
-            }
-            else
-            {
-                break;
-            }
-
-            // add null terminator
-            *tempPathP = '\0';
-
-            // create the directory
             result = lfs_mkdir(fsDrive, tempPath);
 
-            if (workingPath)
-            {
-                // add the separator
-                *tempPathP = '/';
+            // TODO: remove this
+            // // hard coded paths for debugging
+            // if (i == 0)
+            // {
+            //     result = lfs_mkdir(fsDrive, "temp");
+            // }
+            // else if (i == 1)
+            // {
+            //     result = lfs_mkdir(fsDrive, "temp/testdir");
+            // }
+            // else if (i == 2)
+            // {
+            //     result = lfs_mkdir(fsDrive, "temp/testdir/subdir");
+            // }
 
-                // update pointer
-                tempPathP++;
+            // i++;
+
+            if (result != LFS_ERR_OK && result != LFS_ERR_EXIST)
+            {
+                __NOP();
+                return CLR_E_FILE_IO;
             }
 
-        } while (workingPath && (result == LFS_ERR_OK || result == LFS_ERR_EXIST));
-
-        // create the directory
-        if (lfs_mkdir(fsDrive, normalizedPath) != LFS_ERR_OK)
-        {
-            return CLR_E_FILE_IO;
+            segment = strtok(NULL, "/");
         }
 
         // sanity check for success
-        if (lfs_stat(fsDrive, normalizedPath, &info) != LFS_ERR_OK)
-        {
-            return CLR_E_FILE_IO;
-        }
+        lfs_info info;
+        int32_t dirExists = lfs_stat(fsDrive, normalizedPath, &info);
+        _ASSERTE(dirExists == LFS_ERR_OK || dirExists == LFS_ERR_EXIST);
 
-        if (result == LFS_ERR_OK)
+        // sanity check for success
+        if (result == LFS_ERR_EXIST)
+        {
+            return S_OK;
+        }
+        else if (result == LFS_ERR_OK)
         {
             // need to set the attributes for the directory
             // TODO: need to check if DIR attr work the same way as file attr
@@ -939,13 +933,11 @@ HRESULT LITTLEFS_FS_Driver::CreateDirectory(const VOLUME_ID *volume, const char 
             // done here
             return S_OK;
         }
-        // if the directory already exists, return success
-        else if (result == LFS_ERR_EXIST)
+        else
         {
-            return S_OK;
+            __NOP();
+            return CLR_E_FILE_IO;
         }
-
-        return CLR_E_FILE_IO;
     }
 
     return CLR_E_INVALID_DRIVER;
