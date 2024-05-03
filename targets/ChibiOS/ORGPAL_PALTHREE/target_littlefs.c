@@ -347,7 +347,16 @@ int32_t hal_lfs_prog_1(
         return LFS_ERR_IO;
     }
 
-    return LFS_ERR_OK;
+#ifdef DEBUG
+
+    uint8_t tempBuffer[size];
+    memset(tempBuffer, 0xBB, size);
+
+    // read back and compare
+    QSPI_Read(tempBuffer, addr, size);
+    ASSERT(memcmp(buffer, tempBuffer, size) == 0);
+
+#endif
 
     return size;
 }
