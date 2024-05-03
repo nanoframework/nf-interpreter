@@ -370,7 +370,14 @@ HRESULT CLR_RT_FindFile::GetNext(FS_FILEINFO **fi, bool *found)
 
 HRESULT CLR_RT_FindFile::CreateFilenameString(CLR_RT_HeapBlock &ref)
 {
-    return CLR_RT_HeapBlock_String::CreateInstance(ref, m_fullPath, m_fullPathBufferSize);
+    // join found filename with the path
+    char buffer[FS_MAX_PATH_LENGTH];
+    char *bufferP = buffer;
+    size_t bufferSize = FS_MAX_PATH_LENGTH;
+
+    CLR_SafeSprintf(bufferP, bufferSize, "%s%s", m_fullPath, m_fi.FileName);
+
+    return CLR_RT_HeapBlock_String::CreateInstance(ref, buffer, hal_strlen_s(buffer));
 }
 
 HRESULT CLR_RT_FindFile::Close()
