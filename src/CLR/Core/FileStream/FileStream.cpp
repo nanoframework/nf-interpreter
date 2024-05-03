@@ -325,6 +325,9 @@ HRESULT CLR_RT_FindFile::CreateInstance(CLR_RT_HeapBlock &ref, const char *path,
         ff->m_fullPath[i] = path[i];
     }
 
+    // need to remove the '\' from the root name
+    i--;
+
     // Copy the rest of the path from the relative path
     for (j = 0; i < fullPathBufferSize && relativePath[j] != 0; i++, j++)
     {
@@ -335,6 +338,7 @@ HRESULT CLR_RT_FindFile::CreateInstance(CLR_RT_HeapBlock &ref, const char *path,
     if (ff->m_fullPath[i - 1] != '\\')
     {
         ff->m_fullPath[i++] = '\\';
+        ff->m_fullPath[i] = 0;
     }
 
     ff->m_fi.FileName = &(ff->m_fullPath[i]);
