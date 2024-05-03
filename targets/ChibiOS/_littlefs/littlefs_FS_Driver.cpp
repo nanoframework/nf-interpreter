@@ -601,8 +601,17 @@ HRESULT LITTLEFS_FS_Driver::FindNext(uint32_t handle, FS_FILEINFO *fi, bool *fil
     // set file name size
     fi->FileNameSize = hal_strlen_s(info.name);
 
-    // copy the file name
-    hal_strcpy_s(fi->FileName, fi->FileNameSize, info.name);
+    // allocate memory for the file name
+    fi->FileName = (char *)platform_malloc(fi->FileNameSize + 1);
+
+    // sanity check for successfull malloc
+    if (fi->FileName == NULL)
+    {
+        return CLR_E_OUT_OF_MEMORY;
+    }
+
+    // copy the file name, including the string terminator
+    hal_strcpy_s(fi->FileName, fi->FileNameSize + 1, info.name);
 
     // read and set the attributes
     lfs_getattr(findHandle->fs, info.name, NANO_LITTLEFS_ATTRIBUTE, &fi->Attributes, NANO_LITTLEFS_ATTRIBUTE_SIZE);

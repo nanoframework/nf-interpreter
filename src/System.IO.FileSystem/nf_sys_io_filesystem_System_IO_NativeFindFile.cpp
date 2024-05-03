@@ -59,8 +59,8 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_NativeFindFile::GetNext___SystemI
 
         managedFindFile = top.Dereference();
 
-        managedFindFile[NativeFileInfo::FIELD__Attributes].SetInteger((CLR_UINT32)fi->Attributes);
-        managedFindFile[NativeFileInfo::FIELD__Size].SetInteger((CLR_INT64)fi->Size);
+        managedFindFile[NativeFileInfo::FIELD__Attributes].NumericByRef().u4 = fi->Attributes;
+        managedFindFile[NativeFileInfo::FIELD__Size].NumericByRef().s8 = fi->Size;
 
         NANOCLR_CHECK_HRESULT(ff->CreateFilenameString(managedFindFile[NativeFileInfo::FIELD__FileName]));
     }
@@ -69,7 +69,14 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_NativeFindFile::GetNext___SystemI
         top.SetObjectReference(NULL);
     }
 
-    NANOCLR_NOCLEANUP();
+    NANOCLR_CLEANUP();
+
+    if (fi->FileName != NULL)
+    {
+        platform_free(fi->FileName);
+    }
+
+    NANOCLR_CLEANUP_END();
 }
 
 HRESULT Library_nf_sys_io_filesystem_System_IO_NativeFindFile::Close___VOID(CLR_RT_StackFrame &stack)
