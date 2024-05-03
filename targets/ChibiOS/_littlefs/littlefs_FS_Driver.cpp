@@ -574,12 +574,21 @@ HRESULT LITTLEFS_FS_Driver::FindOpen(const VOLUME_ID *volume, const char *path, 
 
 HRESULT LITTLEFS_FS_Driver::FindNext(uint32_t handle, FS_FILEINFO *fi, bool *fileFound)
 {
+    NANOCLR_HEADER();
+
     LITTLEFS_FindFileHandle *findHandle;
     lfs_info info;
+    int32_t result;
 
     if (handle == 0)
     {
-        return CLR_E_INVALID_PARAMETER;
+        NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+    }
+
+    // check file parameters
+    if (!fi || !fileFound)
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_FILE_IO);
     }
 
     findHandle = (LITTLEFS_FindFileHandle *)handle;
@@ -587,9 +596,19 @@ HRESULT LITTLEFS_FS_Driver::FindNext(uint32_t handle, FS_FILEINFO *fi, bool *fil
     // read the next entry
     do
     {
-        if (lfs_dir_read(findHandle->fs, &findHandle->dir, &info) <= LFS_ERR_OK)
+        // read the next entry
+        result = lfs_dir_read(findHandle->fs, &findHandle->dir, &info);
+
+        // no more entries
+        if (result == LFS_ERR_OK)
         {
-            return CLR_E_FILE_IO;
+            *fileFound = false;
+            NANOCLR_SET_AND_LEAVE(S_OK);
+        }
+        // something went wrong
+        else if (result < LFS_ERR_OK)
+        {
+            NANOCLR_SET_AND_LEAVE(CLR_E_FILE_IO);
         }
 
         // skip the '.' and '..' entries
@@ -607,19 +626,25 @@ HRESULT LITTLEFS_FS_Driver::FindNext(uint32_t handle, FS_FILEINFO *fi, bool *fil
     // sanity check for successfull malloc
     if (fi->FileName == NULL)
     {
-        return CLR_E_OUT_OF_MEMORY;
+        NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
     }
 
     // copy the file name, including the string terminator
     hal_strcpy_s(fi->FileName, fi->FileNameSize + 1, info.name);
 
-    // read and set the attributes
+    // read and set the attributes (don't care about the result, if it fails the attribute will be set to normal)
     lfs_getattr(findHandle->fs, info.name, NANO_LITTLEFS_ATTRIBUTE, &fi->Attributes, NANO_LITTLEFS_ATTRIBUTE_SIZE);
+
+    // adjust attributes, if this is a directory
+    if (info.type == LFS_TYPE_DIR)
+    {
+        fi->Attributes |= FileAttributes::FileAttributes_Directory;
+    }
 
     // set the size
     fi->Size = info.size;
 
-    return S_OK;
+    NANOCLR_NOCLEANUP();
 }
 
 HRESULT LITTLEFS_FS_Driver::FindClose(uint32_t handle)
