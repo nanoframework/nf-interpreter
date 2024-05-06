@@ -325,6 +325,9 @@ int32_t hal_lfs_mount_partition(int32_t index, bool forceFormat)
 
         // mount the file system again
         operationResult = lfs_mount(&lfs[index], &lfsConfig[index]);
+
+        // create the root directory
+        lfs_mkdir(&lfs[index], "/");
     }
 
 #if !defined(BUILD_RTM)

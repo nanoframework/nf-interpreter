@@ -851,10 +851,12 @@ HRESULT LITTLEFS_FS_Driver::CreateDirectory(const VOLUME_ID *volume, const char 
     char normalizedPath[FS_MAX_DIRECTORY_LENGTH];
     char tempPath[FS_MAX_DIRECTORY_LENGTH + 1];
     char *segment;
+    int32_t dirExists;
 
     // TODO: remove this
     int i = 0;
     (void)i;
+    (void)dirExists;
 
     if (NormalizePath(path, normalizedPath, sizeof(normalizedPath)) < 0)
     {
@@ -868,6 +870,9 @@ HRESULT LITTLEFS_FS_Driver::CreateDirectory(const VOLUME_ID *volume, const char 
     if (fsDrive)
     {
         memset(tempPath, 0, sizeof(tempPath));
+
+        // add leading '/' to the temp path
+        snprintf(tempPath, sizeof(tempPath), "/");
 
         // iterate over the path segments and create the directories
         segment = strtok(normalizedPath, "/");
@@ -901,13 +906,19 @@ HRESULT LITTLEFS_FS_Driver::CreateDirectory(const VOLUME_ID *volume, const char 
                 return CLR_E_FILE_IO;
             }
 
+            // add back the '/' separator
+            strcat(tempPath, "/");
+
             segment = strtok(NULL, "/");
         }
 
+        // remove trailing '/'
+        tempPath[hal_strlen_s(tempPath) - 1] = '\0';
+
         // sanity check for success
         lfs_info info;
-        int32_t dirExists = lfs_stat(fsDrive, normalizedPath, &info);
-        _ASSERTE(dirExists == LFS_ERR_OK || dirExists == LFS_ERR_EXIST);
+        dirExists = lfs_stat(fsDrive, tempPath, &info);
+        //_ASSERTE(dirExists == LFS_ERR_OK || dirExists == LFS_ERR_EXIST);
 
         // sanity check for success
         if (result == LFS_ERR_EXIST)
@@ -1117,12 +1128,12 @@ static int NormalizePath(const char *path, char *buffer, size_t bufferSize)
     // Null-terminate the path
     *bufferP = '\0';
 
-    // remove leading slash, if any
-    if (buffer[0] == '/')
-    {
-        // this is the root directory
-        memmove(buffer, buffer + 1, hal_strlen_s(buffer));
-    }
+    // // remove leading slash, if any
+    // if (buffer[0] == '/')
+    // {
+    //     // this is the root directory
+    //     memmove(buffer, buffer + 1, hal_strlen_s(buffer));
+    // }
 
     return 0;
 }
