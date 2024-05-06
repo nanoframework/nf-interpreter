@@ -139,12 +139,12 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_DriveInfo::GetDrivesNative___STAT
     CLR_RT_HeapBlock &top = stack.PushValueAndClear();
 
 #if defined(NF_FEATURE_USE_LITTLEFS) && (NF_FEATURE_USE_LITTLEFS == TRUE)
-    // is littlefs file system available and mounted?
-    if (lfsFileSystemReady)
-    {
-        // get SPIFFS instances count
-        driveCount += hal_lfs_get_instances_count();
-    }
+    // // is littlefs file system available and mounted?
+    // if (lfsFileSystemReady)
+    // {
+    //     // get SPIFFS instances count
+    //     driveCount += hal_lfs_get_instances_count();
+    // }
 
 #endif
 
