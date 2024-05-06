@@ -129,7 +129,7 @@ set(gecko_sdk_srcs
     sl_event_handler.c
     sl_board_default_init_stub.c
     sl_i2cspm_init.c
-    sli_crypto_trng_driver.c
+    sli_crypto_driver_trng.c
     # candidate for replacement with RTOS friendly version
     sl_i2cspm.c
     sl_string.c
