@@ -256,7 +256,12 @@ void lwipDefaultLinkUpCB(void *p)
 #endif
 
 #if SNTP_SERVER_DNS
-    sntp_init();
+    // if not using DHCP then start SNTP
+    // otherwise SNTP will be started when DHCP request succeeds
+    if (addressMode != NET_ADDRESS_DHCP)
+    {
+        sntp_init();
+    }
 #endif
 }
 
@@ -275,7 +280,7 @@ void lwipDefaultLinkDownCB(void *p)
 #if LWIP_DHCP
     if (addressMode == NET_ADDRESS_DHCP)
     {
-        dhcp_stop(ifc);
+        dhcp_release_and_stop(ifc);
     }
 #endif
 
@@ -500,7 +505,9 @@ static void do_reconfigure(void *p)
         case NET_ADDRESS_DHCP:
         {
             if (netif_is_up(&thisif))
-                dhcp_stop(&thisif);
+            {
+                dhcp_release_and_stop(&thisif);
+            }
             break;
         }
 #endif
@@ -532,8 +539,7 @@ static void do_reconfigure(void *p)
 #if LWIP_DHCP
         case NET_ADDRESS_DHCP:
         {
-            if (netif_is_up(&thisif))
-                dhcp_start(&thisif);
+            dhcp_start(&thisif);
             break;
         }
 #endif
