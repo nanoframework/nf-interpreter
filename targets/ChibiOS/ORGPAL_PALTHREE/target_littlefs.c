@@ -93,7 +93,7 @@ int32_t hal_lfs_prog_0(
 
 #endif
 
-    return size;
+    return LFS_ERR_OK;
 }
 
 // target specific implementation of chip erase
@@ -358,7 +358,7 @@ int32_t hal_lfs_prog_1(
 
 #endif
 
-    return size;
+    return LFS_ERR_OK;
 }
 
 // target specific implementation of chip erase
