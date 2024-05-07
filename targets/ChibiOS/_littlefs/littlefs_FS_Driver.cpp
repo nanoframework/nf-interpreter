@@ -756,7 +756,7 @@ HRESULT LITTLEFS_FS_Driver::GetAttributes(const VOLUME_ID *volume, const char *p
             attributes,
             NANO_LITTLEFS_ATTRIBUTE_SIZE);
 
-        if (result == LFS_ERR_OK || result == LFS_ERR_NOATTR)
+        if (result >= LFS_ERR_OK || result == LFS_ERR_NOATTR)
         {
             if (info.type == LFS_TYPE_DIR)
             {
