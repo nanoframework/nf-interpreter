@@ -817,7 +817,7 @@ HRESULT LITTLEFS_FS_Driver::SetAttributes(const VOLUME_ID *volume, const char *p
                 (const char *)normalizedPath,
                 NANO_LITTLEFS_ATTRIBUTE,
                 &currentAttributes,
-                NANO_LITTLEFS_ATTRIBUTE_SIZE) != LFS_ERR_OK)
+                NANO_LITTLEFS_ATTRIBUTE_SIZE) < LFS_ERR_OK)
         {
             return CLR_E_FILE_IO;
         }
