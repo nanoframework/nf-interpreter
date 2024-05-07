@@ -959,6 +959,7 @@ HRESULT LITTLEFS_FS_Driver::Move(const VOLUME_ID *volume, const char *oldPath, c
     lfs_t *fsDrive = NULL;
     char normalizedNewPath[FS_MAX_DIRECTORY_LENGTH];
     char normalizedOldPath[FS_MAX_DIRECTORY_LENGTH];
+    int32_t result = LFS_ERR_OK;
 
     if (NormalizePath(newPath, normalizedNewPath, sizeof(normalizedNewPath)) < 0)
     {
@@ -978,13 +979,20 @@ HRESULT LITTLEFS_FS_Driver::Move(const VOLUME_ID *volume, const char *oldPath, c
     if (fsDrive)
     {
         // the check for source file and destination file existence has already been made in managed code
-
-        if (lfs_rename(fsDrive, normalizedOldPath, normalizedNewPath) != LFS_ERR_OK)
+        result = lfs_rename(fsDrive, normalizedOldPath, normalizedNewPath);
+        if (result == LFS_ERR_OK)
+        {
+            return S_OK;
+        }
+        else if (result == LFS_ERR_NOTEMPTY)
+        {
+            // failed to move directory because it's not empty
+            return S_FALSE;
+        }
+        else
         {
             return CLR_E_FILE_IO;
         }
-
-        return S_OK;
     }
 
     return CLR_E_INVALID_DRIVER;
