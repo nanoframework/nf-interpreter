@@ -18,6 +18,18 @@
 #define HAL_WP_USE_SERIAL                     @HAL_WP_USE_SERIAL_OPTION@
 #define HAL_WP_USE_USB_CDC                    @HAL_WP_USE_USB_CDC_OPTION@
 
+#define HAL_USE_THREAD                        @HAL_USE_THREAD_OPTION@
+
+enum esp_threadRoles{ FTD, MED, SED};
+#define THREAD_NODE_ROLE                      @THREAD_NODE_ROLE@ 
+
+enum nf_openThreadModes{ NATIVE, SPI, UART};
+#define THREAD_RADIO_MODE                     @THREAD_RADIO_MODE@
+// UART or SPI parameters (currently not used, WIP)
+#define THREAD_RCP_PARAMS                     @THREAD_RCP_PARAMS@
+// DatasetTLVS to use for Auto connect
+#define THREAD_DATASETTLVS                    "@THREAD_DATASETTLVS@"
+
 #if (HAL_USE_SDC == TRUE)
 #define SDC_MAX_OPEN_FILES 5
 #endif

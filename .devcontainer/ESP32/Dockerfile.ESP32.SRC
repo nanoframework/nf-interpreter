@@ -18,7 +18,7 @@ RUN wget $CMAKE_SCRIPT \
     && /tmp/dc-downloads/cmake-install.sh --skip-license --prefix=/tmp/dc-extracted/cmake \
     && rm /tmp/dc-downloads/cmake-install.sh
 
-FROM python:3.10 AS devcontainer
+FROM python:3.11 AS devcontainer
 
 # Avoid warnings by switching to noninteractive
 ENV DEBIAN_FRONTEND=noninteractive
@@ -48,7 +48,7 @@ RUN mkdir -p /usr/local/bin/gcc
 RUN git clone --branch R0.15 https://github.com/abbrev/fatfs.git --depth 1 ./sources/fatfs
 
 # Clone ESP-IDF
-RUN git clone --branch v4.4.7 https://github.com/espressif/esp-idf --depth 1 --recursive ./sources/esp-idf
+RUN git clone --branch v5.1.3 https://github.com/espressif/esp-idf --depth 1 --recursive ./sources/esp-idf
 
 # Creating static link python for pyhton3
 RUN ln -fs /usr/bin/python3 /usr/bin/python \
@@ -61,12 +61,12 @@ ENV PATH=/usr/bin/cmake/bin:${PATH}
 
 # Install ESP-IDF
 ENV IDF_PATH=/sources/esp-idf
-ENV ESP_PATCH_VER=esp-2021r2-patch5-8.4.0
+ENV ESP_PATCH_VER=esp-12.2.0_20230208
 # This is now taking care in the following line
 # RUN python -m pip install -r $IDF_PATH/requirements.txt
 RUN $IDF_PATH/install.sh
 
-ENV PATH=/root/.espressif/python_env/idf4.4_py3.10_env/bin:$PATH:\
+ENV PATH=/root/.espressif/python_env/idf5.1_py3.11_env/bin:$PATH:\
 $IDF_PATH/components/esptool_py/esptool:\
 $IDF_PATH/components/espcoredump:\ 
 $IDF_PATH/components/partition_table/:\

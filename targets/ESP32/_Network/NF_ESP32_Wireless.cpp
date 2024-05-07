@@ -8,6 +8,8 @@
 #include "NF_ESP32_Network.h"
 #include "esp_netif_net_stack.h"
 
+#if defined(CONFIG_SOC_WIFI_SUPPORTED)    
+
 static const char *TAG = "wifi";
 
 static wifi_mode_t wifiMode;
@@ -279,7 +281,6 @@ int NF_ESP32_Wireless_Open(HAL_Configuration_NetworkInterface *config)
     bool okToStartSmartConnect = false;
 
     ec = NF_ESP32_InitaliseWifi();
-
     if (ec != ESP_OK)
     {
         return SOCK_SOCKET_ERROR;
@@ -499,6 +500,8 @@ bool NF_ESP32_WirelessAP_Close()
     return true;
 }
 
+#endif
+
 // Wait for the network interface to become available
 int NF_ESP32_Wait_NetNumber(int num)
 {
@@ -522,6 +525,10 @@ int NF_ESP32_Wait_NetNumber(int num)
                 espNetif = esp_netif_get_handle_from_ifkey("ETH_DEF");
                 break;
 
+            case IDF_OT_DEF:
+                espNetif = esp_netif_get_handle_from_ifkey("OT_DEF");
+                break;
+
             default:
                 // can't reach here
                 HAL_AssertEx();
@@ -538,3 +545,4 @@ int NF_ESP32_Wait_NetNumber(int num)
 
     return espNetif->lwip_netif->num;
 }
+

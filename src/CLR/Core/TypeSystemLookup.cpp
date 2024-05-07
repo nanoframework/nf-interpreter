@@ -10,6 +10,11 @@
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
+#ifdef DT_DIR
+// When building with ESP32 "DT_DIR" clashes with esp_vfs.h 
+#undef DT_DIR
+#endif
+
 #define DT_NA    CLR_RT_DataTypeLookup::c_NA
 #define DT_VS    CLR_RT_DataTypeLookup::c_VariableSize
 

@@ -12,15 +12,20 @@
 #include <corlib_native.h>
 
 #ifdef PLATFORM_ESP32
+#define MBEDTLS_SHA256_C
 #include <esp32_idf.h>
 #include <mbedtls/esp_config.h>
 #else
 #include <nf_mbedtls_config.h>
 #endif
 
+
+#include "mbedtls/version.h"
 #include <mbedtls/platform.h>
 #include <mbedtls/md.h>
+#if MBEDTLS_VERSION_MAJOR == 2
 #include <mbedtls/md_internal.h>
+#endif
 #include <mbedtls/aes.h>
 
 typedef enum __nfpack CipherMode
