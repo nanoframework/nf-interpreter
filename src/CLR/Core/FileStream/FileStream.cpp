@@ -302,7 +302,7 @@ HRESULT CLR_RT_FindFile::CreateInstance(CLR_RT_HeapBlock &ref, const char *path,
     ff = (CLR_RT_FindFile *)blob->GetData();
 
     // Clear the memory
-    CLR_RT_Memory::ZeroFill(ff, sizeof(CLR_RT_FindFile));
+    CLR_RT_Memory::ZeroFill(ff, size);
 
     /// Retrieve appropriate driver that handles this namespace.
     if ((ff->m_driver = FileSystemVolumeList::FindVolume(rootName, rootNameLength)) == NULL)
