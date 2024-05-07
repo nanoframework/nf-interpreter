@@ -666,7 +666,6 @@ HRESULT LITTLEFS_FS_Driver::GetFileInfo(const VOLUME_ID *volume, const char *pat
         // root is different
         if (*normalizedPath == '/' && *(normalizedPath + 1) == '\0')
         {
-
             // this is the root directory
             fileInfo->Attributes = FileAttributes::FileAttributes_Directory;
             fileInfo->Size = 0;
