@@ -1128,12 +1128,18 @@ static int NormalizePath(const char *path, char *buffer, size_t bufferSize)
     // Null-terminate the path
     *bufferP = '\0';
 
-    // // remove leading slash, if any
-    // if (buffer[0] == '/')
-    // {
-    //     // this is the root directory
-    //     memmove(buffer, buffer + 1, hal_strlen_s(buffer));
-    // }
+    // remove trailing slash, if any
+    if (bufferP[-1] == '/')
+    {
+        bufferP--;
+        *bufferP = '\0';
+    }
+
+    if (buffer[0] == '/')
+    {
+        // this is the root directory
+        memmove(buffer, buffer + 1, hal_strlen_s(buffer));
+    }
 
     return 0;
 }
