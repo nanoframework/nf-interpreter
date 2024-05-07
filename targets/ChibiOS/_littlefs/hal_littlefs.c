@@ -270,6 +270,8 @@ void hal_lfs_config()
         lfsConfig[i].cache_size = hal_lfs_getCacheSize(i);
         lfsConfig[i].lookahead_size = hal_lfs_getLookaheadSize(i);
 
+        lfsConfig[i].inline_max = -1;
+
         // store the instance index
         lfsInstanceIndex[i] = i;
         lfsConfig[i].context = &lfsInstanceIndex[i];
