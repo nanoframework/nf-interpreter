@@ -17,7 +17,6 @@ HRESULT Library_sys_dev_adc_native_System_Device_Adc_AdcChannel::NativeReadValue
     int channelNumber;
     int adcNumber;
     int reading = 0;
-    esp_err_t result;
 
     // get a pointer to the managed object instance and check that it's not NULL
     CLR_RT_HeapBlock *pThis = stack.This();
@@ -26,8 +25,8 @@ HRESULT Library_sys_dev_adc_native_System_Device_Adc_AdcChannel::NativeReadValue
     // Get channel from _channelNumber field
     channelNumber = pThis[FIELD___channelNumber].NumericByRef().s4;
 
-    // Calculate internal ADC number based on channel number
-    adcNumber = channelNumber <= 9 ? 1 : 2;
+    // Calculate internal ADC number based on channel number, 0->(CONFIG_SOC_ADC_MAX_CHANNEL_NUM - 1)
+    adcNumber = channelNumber < CONFIG_SOC_ADC_MAX_CHANNEL_NUM ? 1 : 2;
 
     if (adcNumber == 1)
     {
@@ -49,17 +48,19 @@ HRESULT Library_sys_dev_adc_native_System_Device_Adc_AdcChannel::NativeReadValue
                 break;
         }
     }
+#if (CONFIG_SOC_ADC_PERIPH_NUM >= 2)
     else if (adcNumber == 2)
     {
         // Adjust channel number for ADC2
-        channelNumber -= 10;
-        result = adc2_get_raw((adc2_channel_t)channelNumber, (adc_bits_width_t)SOC_ADC_MAX_BITWIDTH, &reading);
+        channelNumber -= CONFIG_SOC_ADC_MAX_CHANNEL_NUM;
+        esp_err_t result = adc2_get_raw((adc2_channel_t)channelNumber, (adc_bits_width_t)SOC_ADC_RTC_MAX_BITWIDTH, &reading);
 
         if (result != ESP_OK)
         {
             NANOCLR_SET_AND_LEAVE(CLR_E_PIN_UNAVAILABLE);
         }
     }
+#endif
     else
     {
         NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
