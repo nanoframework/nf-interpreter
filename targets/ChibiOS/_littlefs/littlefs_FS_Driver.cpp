@@ -852,11 +852,6 @@ HRESULT LITTLEFS_FS_Driver::CreateDirectory(const VOLUME_ID *volume, const char 
     char *segment;
     int32_t dirExists;
 
-    // TODO: remove this
-    int i = 0;
-    (void)i;
-    (void)dirExists;
-
     if (NormalizePath(path, normalizedPath, sizeof(normalizedPath)) < 0)
     {
         // handle error
@@ -882,23 +877,6 @@ HRESULT LITTLEFS_FS_Driver::CreateDirectory(const VOLUME_ID *volume, const char 
 
             result = lfs_mkdir(fsDrive, tempPath);
 
-            // TODO: remove this
-            // // hard coded paths for debugging
-            // if (i == 0)
-            // {
-            //     result = lfs_mkdir(fsDrive, "temp");
-            // }
-            // else if (i == 1)
-            // {
-            //     result = lfs_mkdir(fsDrive, "temp/testdir");
-            // }
-            // else if (i == 2)
-            // {
-            //     result = lfs_mkdir(fsDrive, "temp/testdir/subdir");
-            // }
-
-            // i++;
-
             if (result != LFS_ERR_OK && result != LFS_ERR_EXIST)
             {
                 __NOP();
@@ -917,7 +895,6 @@ HRESULT LITTLEFS_FS_Driver::CreateDirectory(const VOLUME_ID *volume, const char 
         // sanity check for success
         lfs_info info;
         dirExists = lfs_stat(fsDrive, tempPath, &info);
-        //_ASSERTE(dirExists == LFS_ERR_OK || dirExists == LFS_ERR_EXIST);
 
         // sanity check for success
         if (result == LFS_ERR_EXIST)
@@ -1144,7 +1121,7 @@ static int NormalizePath(const char *path, char *buffer, size_t bufferSize)
 
     if (buffer[0] == '/')
     {
-        // this is the root directory
+        // remove leading slash
         memmove(buffer, buffer + 1, hal_strlen_s(buffer));
     }
 
