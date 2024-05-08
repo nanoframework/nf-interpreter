@@ -560,10 +560,7 @@ static bool WSPI_Write(const uint8_t *pData, uint32_t writeAddr, uint32_t size)
         // (only required for Cortex-M7)
         cacheBufferFlush(dataBuffer_1, writeSize);
 
-        // update command address
-        cmdp.addr = address;
-        __DSB();
-        wspiSend(&WSPID1, &cmdp, size, dataBuffer_1);
+        wspiSend(&WSPID1, &cmdp, writeSize, dataBuffer_1);
 
         // wait for operation to complete
         WSPI_WaitOnBusy();
@@ -571,6 +568,9 @@ static bool WSPI_Write(const uint8_t *pData, uint32_t writeAddr, uint32_t size)
         address += writeSize;
         pData += writeSize;
         size -= writeSize;
+
+        // update command address
+        cmdp.addr = address;
     }
 
     return true;
