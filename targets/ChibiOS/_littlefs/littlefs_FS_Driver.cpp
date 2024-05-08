@@ -852,6 +852,8 @@ HRESULT LITTLEFS_FS_Driver::CreateDirectory(const VOLUME_ID *volume, const char 
     char *segment;
     int32_t dirExists;
 
+    (void)dirExists;
+
     if (NormalizePath(path, normalizedPath, sizeof(normalizedPath)) < 0)
     {
         // handle error
