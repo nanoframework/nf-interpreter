@@ -407,15 +407,15 @@ static bool WSPI_WaitOnBusy()
 
         if (!(dataBuffer_1[0] & W25Q128_SR_WIP))
         {
-            // WIP bit is cleared
+            // BuSY bit is cleared
             return true;
         }
-    }
-
-    if ((HAL_GetTick() - tickstart) > HAL_SPI_TIMEOUT_DEFAULT_VALUE)
-    {
-        // operation timeout
-        return false;
+       
+        if ((HAL_GetTick() - tickstart) > HAL_SPI_TIMEOUT_DEFAULT_VALUE)
+        {
+            // operation timeout
+            return false;
+        }
     }
 }
 
