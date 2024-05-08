@@ -623,68 +623,61 @@ uint8_t QSPI_Read(uint8_t *pData, uint32_t readAddr, uint32_t size)
 uint8_t QSPI_Write(const uint8_t *pData, uint32_t writeAddr, uint32_t size)
 {
     QSPI_CommandTypeDef s_command;
-    uint32_t end_addr, current_size, current_addr;
 
-    /* Calculation of the size between the write address and the end of the page */
-    current_size = W25Q128_PAGE_SIZE - (writeAddr % (W25Q128_PAGE_SIZE));
-
-    /* Check if the size of the data is less than the remaining place in the page */
-    if (current_size > size)
-    {
-        current_size = size;
-    }
-
-    /* Initialize the adress variables */
-    current_addr = writeAddr;
-    end_addr = writeAddr + size;
+    uint32_t writeSize;
+    uint32_t address = writeAddr;
 
     /* Initialize the program command */
     s_command.InstructionMode = QSPI_INSTRUCTION_1_LINE;
-    s_command.Instruction = QUAD_IN_FAST_PROG_CMD; /* same value on both memory types */
+    s_command.Instruction = 0x02;
     s_command.AddressMode = QSPI_ADDRESS_1_LINE;
     s_command.AddressSize = QSPI_ADDRESS_24_BITS;
     s_command.AlternateByteMode = QSPI_ALTERNATE_BYTES_NONE;
-    s_command.DataMode = QSPI_DATA_4_LINES;
+    s_command.DataMode = QSPI_DATA_1_LINE;
     s_command.DummyCycles = 0;
     s_command.DdrMode = QSPI_DDR_MODE_DISABLE;
     s_command.DdrHoldHalfCycle = QSPI_DDR_HHC_ANALOG_DELAY;
     s_command.SIOOMode = QSPI_SIOO_INST_EVERY_CMD;
 
-    /* Perform the write page by page */
-    do
+    // perform paged program
+    while (size > 0)
     {
-        s_command.Address = current_addr;
-        s_command.NbData = current_size;
-
-        /* Enable write operations */
+        // Enable write operations
         if (QSPI_WriteEnable(&QSPID1) != QSPI_OK)
         {
             return QSPI_ERROR;
         }
 
-        /* Configure the command */
+        // calculate write size
+        writeSize = __builtin_fmin(W25Q128_PAGE_SIZE - (address % W25Q128_PAGE_SIZE), size);
+
+        // update the write command
+        s_command.Address = address;
+        s_command.NbData = writeSize;
+
+        // Configure the command
         if (HAL_QSPI_Command(&QSPID1, &s_command, HAL_QPSI_TIMEOUT_DEFAULT_VALUE) != HAL_OK)
         {
             return QSPI_ERROR;
         }
 
-        /* Transmission of the data */
+        // Transmission of the data
         if (HAL_QSPI_Transmit(&QSPID1, (uint8_t *)pData, HAL_QPSI_TIMEOUT_DEFAULT_VALUE) != HAL_OK)
         {
             return QSPI_ERROR;
         }
 
-        /* Configure automatic polling mode to wait for end of program */
+        // Configure automatic polling mode to wait for end of program
         if (QSPI_AutoPollingMemReady(&QSPID1, HAL_QPSI_TIMEOUT_DEFAULT_VALUE) != QSPI_OK)
         {
             return QSPI_ERROR;
         }
 
-        /* Update the address and size variables for next page programming */
-        current_addr += current_size;
-        pData += current_size;
-        current_size = ((current_addr + W25Q128_PAGE_SIZE) > end_addr) ? (end_addr - current_addr) : W25Q128_PAGE_SIZE;
-    } while (current_addr < end_addr);
+        // Update the address and size variables for next page programming
+        address += writeSize;
+        pData += writeSize;
+        size -= writeSize;
+    }
 
     return QSPI_OK;
 }
