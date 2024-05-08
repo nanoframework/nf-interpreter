@@ -6,12 +6,17 @@
 //
 
 #include <pthread.h>
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
+#include "freertos/semphr.h"
+#include "freertos/queue.h"
 #include "lwip/debug.h"
 #include "lwip/def.h"
 #include "lwip/sys.h"
 #include "lwip/mem.h"
-#include "arch/sys_arch.h"
 #include "lwip/stats.h"
+#include "arch/sys_arch.h"
+#include "arch/vfs_lwip.h"
 #include "esp_log.h"
 #include "esp_compiler.h"
 
@@ -55,9 +60,9 @@ void
 sys_mutex_lock(sys_mutex_t *pxMutex)
 {
   BaseType_t ret = xSemaphoreTake(*pxMutex, portMAX_DELAY);
-  (void)ret;
 
   LWIP_ASSERT("failed to take the mutex", ret == pdTRUE);
+  (void)ret;
 }
 
 /**
@@ -69,9 +74,9 @@ void
 sys_mutex_unlock(sys_mutex_t *pxMutex)
 {
   BaseType_t ret = xSemaphoreGive(*pxMutex);
-  (void)ret;
 
   LWIP_ASSERT("failed to give the mutex", ret == pdTRUE);
+  (void)ret;
 }
 
 /**
@@ -110,9 +115,8 @@ sys_sem_new(sys_sem_t *sem, u8_t count)
 
   if (count == 1) {
       BaseType_t ret = xSemaphoreGive(*sem);
-      (void)ret;
-
       LWIP_ASSERT("sys_sem_new: initial give failed", ret == pdTRUE);
+      (void)ret;
   }
 
   return ERR_OK;
@@ -127,11 +131,10 @@ void
 sys_sem_signal(sys_sem_t *sem)
 {
   BaseType_t ret = xSemaphoreGive(*sem);
-  (void)ret;
-
   /* queue full is OK, this is a signal only... */
   LWIP_ASSERT("sys_sem_signal: sane return value",
              (ret == pdTRUE) || (ret == errQUEUE_FULL));
+  (void)ret;
 }
 
 /*-----------------------------------------------------------------------------------*/
@@ -148,7 +151,7 @@ sys_sem_signal_isr(sys_sem_t *sem)
  * @brief Wait for a semaphore to be signaled
  *
  * @param sem pointer of the semaphore
- * @param timeout if zero, will wait infinitely, or will wait for milliseconds specify by this argument
+ * @param timeout if zero, will wait infinitely, or will wait at least for milliseconds specified by this argument
  * @return SYS_ARCH_TIMEOUT when timeout, 0 otherwise
  */
 u32_t
@@ -161,7 +164,13 @@ sys_arch_sem_wait(sys_sem_t *sem, u32_t timeout)
     ret = xSemaphoreTake(*sem, portMAX_DELAY);
     LWIP_ASSERT("taking semaphore failed", ret == pdTRUE);
   } else {
-    TickType_t timeout_ticks = timeout / portTICK_RATE_MS;
+    /* Round up the number of ticks.
+     * Not only we need to round up the number of ticks, but we also need to add 1.
+     * Indeed, this function shall wait for AT LEAST timeout, but on FreeRTOS,
+     * if we specify a timeout of 1 tick to `xSemaphoreTake`, it will take AT MOST
+     * 1 tick before triggering a timeout. Thus, we need to pass 2 ticks as a timeout
+     * to `xSemaphoreTake`. */
+    TickType_t timeout_ticks = ((timeout + portTICK_PERIOD_MS - 1) / portTICK_PERIOD_MS) + 1;
     ret = xSemaphoreTake(*sem, timeout_ticks);
     if (ret == errQUEUE_EMPTY) {
       /* timed out */
@@ -227,9 +236,8 @@ void
 sys_mbox_post(sys_mbox_t *mbox, void *msg)
 {
   BaseType_t ret = xQueueSendToBack((*mbox)->os_mbox, &msg, portMAX_DELAY);
-  (void)ret;
-
   LWIP_ASSERT("mbox post failed", ret == pdTRUE);
+  (void)ret;
 }
 
 /**
@@ -304,7 +312,7 @@ sys_arch_mbox_fetch(sys_mbox_t *mbox, void **msg, u32_t timeout)
     ret = xQueueReceive((*mbox)->os_mbox, &(*msg), portMAX_DELAY);
     LWIP_ASSERT("mbox fetch failed", ret == pdTRUE);
   } else {
-    TickType_t timeout_ticks = timeout / portTICK_RATE_MS;
+    TickType_t timeout_ticks = timeout / portTICK_PERIOD_MS;
     ret = xQueueReceive((*mbox)->os_mbox, &(*msg), timeout_ticks);
     if (ret == errQUEUE_EMPTY) {
       /* timed out */
@@ -364,13 +372,13 @@ sys_mbox_free(sys_mbox_t *mbox)
     return;
   }
   UBaseType_t msgs_waiting = uxQueueMessagesWaiting((*mbox)->os_mbox);
-  (void)msgs_waiting;
-
   LWIP_ASSERT("mbox quence not empty", msgs_waiting == 0);
 
   vQueueDelete((*mbox)->os_mbox);
   free(*mbox);
   *mbox = NULL;
+
+  (void)msgs_waiting;
 }
 
 /**
@@ -393,6 +401,9 @@ sys_thread_new(const char *name, lwip_thread_fn thread, void *arg, int stacksize
      thread function without adaption here. */
   ret = xTaskCreatePinnedToCore(thread, name, stacksize, arg, prio, &rtos_task,
           CONFIG_LWIP_TCPIP_TASK_AFFINITY);
+
+  LWIP_DEBUGF(TCPIP_DEBUG, ("new lwip task : %x, prio:%d,stack:%d\n",
+             (u32_t)rtos_task, prio, stacksize));
 
   if (ret != pdTRUE) {
     return NULL;

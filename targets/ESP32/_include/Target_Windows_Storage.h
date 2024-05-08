@@ -15,7 +15,7 @@ extern "C"
 
     bool Storage_MountMMC(bool bit1Mode, int driveIndex);
     bool Storage_MountSpi(int spiBus, uint32_t CSPin, int driveIndex);
-    bool Storage_UnMountSDCard();
+    bool Storage_UnMountSDCard(int driveIndex);
 
 #ifdef __cplusplus
 }

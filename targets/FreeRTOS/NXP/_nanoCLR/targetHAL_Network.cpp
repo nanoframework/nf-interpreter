@@ -86,3 +86,8 @@ void nanoHAL_Network_Initialize()
         lwIPInit(&lwipOptions);
     }
 }
+
+void nanoHAL_Network_Uninitialize()
+{
+    // empty
+}

@@ -44,8 +44,8 @@ find_program(
    riscv32-esp-elf-size
    CMAKE_FIND_ROOT_PATH_BOTH)
 
-set(CMAKE_C_FLAGS " -march=rv32imc -Wno-frame-address" CACHE STRING "C Compiler Base Flags")
-set(CMAKE_CXX_FLAGS " -march=rv32imc -Wno-frame-address" CACHE STRING "C++ Compiler Base Flags")
+set(CMAKE_C_FLAGS " -march=rv32imc_zicsr_zifencei -Wno-frame-address" CACHE STRING "C Compiler Base Flags")
+set(CMAKE_CXX_FLAGS " -march=rv32imc_zicsr_zifencei -Wno-frame-address -Wno-literal-suffix" CACHE STRING "C++ Compiler Base Flags")
 
 # root paths to search on the filesystem for cross-compiling
 get_filename_component(CMAKE_FIND_ROOT_PATH ${CMAKE_C_COMPILER} DIRECTORY CACHE)

@@ -238,11 +238,66 @@ void LWIP_SOCKETS_Driver::Status_callback(struct netif *netif)
 }
 #endif
 
+//  Initialise a network interface with interface number
+//  returns 
+//     True if interface initialised 
+//     False if failed or not ready
+//
+bool LWIP_SOCKETS_Driver::InitializeInterfaceIndex(
+    int i, 
+    int interfaceNumber, 
+    HAL_Configuration_NetworkInterface &networkConfiguration)
+{
+    struct netif *networkInterface;
+    
+    g_LWIP_SOCKETS_Driver.m_interfaces[i].m_interfaceNumber = interfaceNumber;
+
+    UpdateAdapterConfiguration(i, (NetworkInterface_UpdateOperation_Dns), &networkConfiguration);
+
+    networkInterface = netif_find_interface(interfaceNumber);
+    if (networkInterface)
+    {
+    #if LWIP_NETIF_LINK_CALLBACK == 1
+        netif_set_link_callback(networkInterface, Link_callback);
+
+        if (netif_is_link_up(networkInterface))
+        {
+            Link_callback(networkInterface);
+        }
+    #endif
+    #if LWIP_NETIF_STATUS_CALLBACK == 1
+        netif_set_status_callback(networkInterface, Status_callback);
+
+        if (netif_is_up(networkInterface))
+        {
+            Status_callback(networkInterface);
+        }
+    #endif
+
+        // default debugger interface
+        if (0 == i)
+        {
+    #if LWIP_IPV6
+            // uint8_t* addr = (uint8_t*)&networkInterface->ip_addr.u_addr.ip4.addr;
+    #else
+            // uint8_t* addr = (uint8_t*)&networkInterface->ip_addr.addr;
+    #endif
+            //                lcd_printf("\f\n\n\n\n\n\n\nip address: %d.%d.%d.%d\r\n", addr[0], addr[1], addr[2],
+            //                addr[3]);
+            // FIXME               debug_printf("ip address from interface info: %d.%d.%d.%d\r\n", addr[0], addr[1],
+            // addr[2], addr[3]);
+        }
+    
+        return TRUE;
+    }
+
+    return FALSE;
+}
+
 bool LWIP_SOCKETS_Driver::Initialize()
 {
     NATIVE_PROFILE_PAL_NETWORK();
 
-    struct netif *networkInterface;
     HAL_Configuration_NetworkInterface networkConfiguration;
     int interfaceNumber;
 
@@ -272,62 +327,26 @@ bool LWIP_SOCKETS_Driver::Initialize()
                 i))
         {
             // failed to load configuration
-            // FIXME output error?
+            // FIXME output error, error message log ?
             // move to the next, if any
-            continue;
+            continue; 
         }
         _ASSERTE(networkConfiguration.StartupAddressMode > 0);
 
-        // Bind and Open the Ethernet driver
+        // Bind and Open the network driver 
         Network_Interface_Bind(i);
         interfaceNumber = Network_Interface_Open(i);
-
         if (interfaceNumber == SOCK_SOCKET_ERROR)
         {
+            g_LWIP_SOCKETS_Driver.m_interfaces[i].m_interfaceNumber = -1;
             DEBUG_HANDLE_SOCKET_ERROR("Network init", FALSE);
             continue;
         }
 
-        g_LWIP_SOCKETS_Driver.m_interfaces[i].m_interfaceNumber = interfaceNumber;
-
-        UpdateAdapterConfiguration(
-            i,
-            (NetworkInterface_UpdateOperation_Dhcp | NetworkInterface_UpdateOperation_Dns),
-            &networkConfiguration);
-
-        networkInterface = netif_find_interface(interfaceNumber);
-
-        if (networkInterface)
-        {
-#if LWIP_NETIF_LINK_CALLBACK == 1
-            netif_set_link_callback(networkInterface, Link_callback);
-
-            if (netif_is_link_up(networkInterface))
-            {
-                Link_callback(networkInterface);
-            }
-#endif
-#if LWIP_NETIF_STATUS_CALLBACK == 1
-            netif_set_status_callback(networkInterface, Status_callback);
-#endif
-
-            // default debugger interface
-            if (0 == i)
-            {
-#if LWIP_IPV6
-                // uint8_t* addr = (uint8_t*)&networkInterface->ip_addr.u_addr.ip4.addr;
-#else
-                // uint8_t* addr = (uint8_t*)&networkInterface->ip_addr.addr;
-#endif
-                //                lcd_printf("\f\n\n\n\n\n\n\nip address: %d.%d.%d.%d\r\n", addr[0], addr[1], addr[2],
-                //                addr[3]);
-                // FIXME               debug_printf("ip address from interface info: %d.%d.%d.%d\r\n", addr[0], addr[1],
-                // addr[2], addr[3]);
-            }
-        }
+        InitializeInterfaceIndex(i, interfaceNumber, networkConfiguration);
     }
 
-    return TRUE;
+    return true;
 }
 
 bool LWIP_SOCKETS_Driver::Uninitialize()
@@ -347,8 +366,7 @@ bool LWIP_SOCKETS_Driver::Uninitialize()
         Network_Interface_Close(i);
     }
 
-    // FIXME    tcpip_shutdown();
-    // tcpip_shutdown is MS method added to lwip tcpip.c
+    nanoHAL_Network_Uninitialize();
 
     return TRUE;
 }
@@ -429,7 +447,6 @@ sockaddr *Sock_SockaddrToSockaddrV6(const SOCK_sockaddr *ssa, sockaddr_in6 *sai,
     }
 
     sai->sin6_scope_id = ((SOCK_sockaddr_in6 *)ssa)->scopeId;
-
     *addrLen = sizeof(sockaddr_in6);
     return (sockaddr *)sai;
 }

@@ -56,7 +56,7 @@ void UninitializePalUart_sys(NF_PAL_UART *palUart)
         // send the exit signal to the UART event handling queue
         uart_event_t event;
         event.type = UART_EVENT_MAX;
-        xQueueSend(palUart->UartEventQueue, &event, (portTickType)0);
+        xQueueSend(palUart->UartEventQueue, &event, 0);
         palUart->UartEventTask = NULL;
 
         // free buffer memory
@@ -96,7 +96,7 @@ void uart_event_task_sys(void *pvParameters)
     while (run)
     {
         // Waiting for UART event.
-        if (xQueueReceive(palUart->UartEventQueue, &event, (portTickType)portMAX_DELAY))
+        if (xQueueReceive(palUart->UartEventQueue, &event, portMAX_DELAY))
         {
             // reset vars
             readData = false;
@@ -862,7 +862,7 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeInit___VOID(
     }
 
     // unless the build is configure to use USB CDC, COM1 is being used for VS debug, so it's not available
-#if !defined(CONFIG_USB_CDC_ENABLED)
+#if !defined(CONFIG_TINYUSB_CDC_ENABLED)
     if (uart_num == 0)
     {
         NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
@@ -1420,7 +1420,7 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::GetDeviceSelector_
     static char deviceSelectorString[] =
 
     // unless the build is configure to use USB CDC, COM1 is being used for VS debug, so it's not available
-#if defined(CONFIG_USB_CDC_ENABLED)
+#if defined(CONFIG_TINYUSB_CDC_ENABLED)
         "COM1,"
 #endif
 #if defined(UART_NUM_1)

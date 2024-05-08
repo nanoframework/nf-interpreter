@@ -8,7 +8,9 @@
 #include <ssl.h>
 #include "mbedtls.h"
 #include "mbedtls/debug.h"
+#if MBEDTLS_VERSION_MAJOR < 3
 #include <mbedtls/pk_internal.h>
+#endif
 
 bool ssl_generic_init_internal(
     int sslMode,
@@ -23,8 +25,11 @@ bool ssl_generic_init_internal(
     bool useDeviceCertificate,
     bool isServer)
 {
+#if MBEDTLS_VERSION_MAJOR < 3
     int minVersion = MBEDTLS_SSL_MINOR_VERSION_3;
     int maxVersion = MBEDTLS_SSL_MINOR_VERSION_1;
+#endif
+
     int sslContexIndex = -1;
     int authMode = MBEDTLS_SSL_VERIFY_NONE;
     int endpoint = 0;
@@ -157,6 +162,8 @@ bool ssl_generic_init_internal(
         goto error;
     }
 
+#if MBEDTLS_VERSION_MAJOR < 3
+    // TLS1.0/1.1/1.2 deprecated in MBEDTLS version 3
     // find minimum version
     if (sslMode & (SslProtocols_TLSv11 | SslProtocols_TLSv1))
     {
@@ -178,6 +185,7 @@ bool ssl_generic_init_internal(
         maxVersion = MBEDTLS_SSL_MINOR_VERSION_3;
     }
     mbedtls_ssl_conf_max_version(context->conf, MBEDTLS_SSL_MAJOR_VERSION_3, maxVersion);
+#endif
 
     // configure random generator
     mbedtls_ssl_conf_rng(context->conf, mbedtls_ctr_drbg_random, context->ctr_drbg);
@@ -236,13 +244,18 @@ bool ssl_generic_init_internal(
         // is there a private key?
         if (privateKey != NULL && privateKeyLength > 0)
         {
-
             if (mbedtls_pk_parse_key(
                     context->pk,
                     privateKey,
                     privateKeyLength,
                     (const unsigned char *)pkPassword,
+#if MBEDTLS_VERSION_MAJOR < 3
                     pkPasswordLength) < 0)
+#else
+                    pkPasswordLength,
+                    mbedtls_ctr_drbg_random, 
+                    context->ctr_drbg) < 0)
+#endif
             {
                 // private key parse failed
                 goto error;
