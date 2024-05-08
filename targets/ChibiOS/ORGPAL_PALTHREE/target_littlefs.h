@@ -212,11 +212,11 @@
 //////////////////////////////////
 // remapping into littlefs defines
 
-#define LFS1_READ_SIZE      1
-#define LFS1_PROG_SIZE      1
+#define LFS1_READ_SIZE      8
+#define LFS1_PROG_SIZE      32
 #define LFS1_BLOCK_SIZE     W25Q128_SUBSECTOR_SIZE
 #define LFS1_BLOCK_COUNT    W25Q128_FLASH_SIZE / W25Q128_SUBSECTOR_SIZE
-#define LFS1_BLOCK_CYCLES   100
+#define LFS1_BLOCK_CYCLES   -1
 #define LFS1_CACHE_SIZE     W25Q128_PAGE_SIZE
 #define LFS1_LOOKAHEAD_SIZE LFS1_BLOCK_COUNT / 8
 
