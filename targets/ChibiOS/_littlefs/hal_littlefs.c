@@ -271,6 +271,9 @@ void hal_lfs_config()
         lfsConfig[i].lookahead_size = hal_lfs_getLookaheadSize(i);
 
         lfsConfig[i].inline_max = -1;
+        lfsConfig[i].attr_max = NANO_LITTLEFS_ATTRIBUTE_SIZE;
+        lfsConfig[i].metadata_max = 0;
+        lfsConfig[i].compact_thresh = -1;
 
         // store the instance index
         lfsInstanceIndex[i] = i;
