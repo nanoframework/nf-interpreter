@@ -239,7 +239,8 @@ static bool SPI_Write(const uint8_t *pData, uint32_t writeAddr, uint32_t size)
         dataBuffer_0[0] = PAGE_PROG_CMD;
         dataBuffer_0[1] = (uint8_t)(address >> 16);
         dataBuffer_0[2] = (uint8_t)(address >> 8);
-        dataBuffer_0[3] = (uint8_t)address;
+        // adjust address if writeSize is the full page
+        dataBuffer_0[3] = (uint8_t)(writeSize == W25Q128_PAGE_SIZE ? address & 0xFFFFFFF0 : address);
 
         // flush DMA buffer to ensure cache coherency
         // (only required for Cortex-M7)
@@ -553,6 +554,9 @@ static bool WSPI_Write(const uint8_t *pData, uint32_t writeAddr, uint32_t size)
         // calculate write size
         writeSize = __builtin_fmin(W25Q128_PAGE_SIZE - (address % W25Q128_PAGE_SIZE), size);
 
+        // adjust address if writeSize is the full page
+        cmdp.addr = writeSize == W25Q128_PAGE_SIZE ? address & 0xFFFFFFF0 : address;
+
         // copy from buffer
         memcpy(dataBuffer_1, pData, writeSize);
 
@@ -568,9 +572,6 @@ static bool WSPI_Write(const uint8_t *pData, uint32_t writeAddr, uint32_t size)
         address += writeSize;
         pData += writeSize;
         size -= writeSize;
-
-        // update command address
-        cmdp.addr = address;
     }
 
     return true;
