@@ -208,7 +208,7 @@ static bool SPI_Read(uint8_t *pData, uint32_t readAddr, uint32_t size)
 
     // invalidate cache
     // (only required for Cortex-M7)
-    cacheBufferInvalidate(dataBuffer, AT25SF641_SUBSECTOR_SIZE);
+    cacheBufferInvalidate(dataBuffer, size);
 
     // copy to pointer
     memcpy(pData, dataBuffer, size);
@@ -275,34 +275,29 @@ static bool SPI_Write(const uint8_t *pData, uint32_t writeAddr, uint32_t size)
 
 #include <hal_stm32_qspi.h>
 
-#if defined(__GNUC__)
-__attribute__((aligned(32)))
+static const WSPIConfig wspiConfig = {
+    .end_cb = NULL,
+    .error_cb = NULL,
+    .dcr = STM32_DCR_FSIZE(23U) | STM32_DCR_CSHT(5U)};
+
+#if CACHE_LINE_SIZE > 0
+CC_ALIGN_DATA(CACHE_LINE_SIZE)
 #endif
-uint8_t lfs1WriteBuffer[W25Q128_PAGE_SIZE];
-#if defined(__GNUC__)
-__attribute__((aligned(32)))
-#endif
-uint8_t lfs1ReadBuffer[W25Q128_PAGE_SIZE];
-#if defined(__GNUC__)
-__attribute__((aligned(32)))
-#endif
-uint8_t lfs1LookaheadBuffer[W25Q128_PAGE_SIZE];
+uint8_t dataBuffer_1[CACHE_SIZE_ALIGN(uint8_t, W25Q128_PAGE_SIZE)];
 
 ///////////////
 // declarations
 
-static uint8_t QSPI_ResetMemory(QSPI_HandleTypeDef *hqspi);
-// static uint8_t QSPI_EnterFourBytesAddress(QSPI_HandleTypeDef *hqspi);
-static uint8_t QSPI_EnterMemory_QPI(QSPI_HandleTypeDef *hqspi);
-// static uint8_t QSPI_ExitMemory_QPI(QSPI_HandleTypeDef *hqspi);
-static uint8_t QSPI_WriteEnable(QSPI_HandleTypeDef *hqspi);
-static uint8_t QSPI_AutoPollingMemReady(QSPI_HandleTypeDef *hqspi, uint32_t Timeout);
-static uint8_t QSPI_ReadChipID(QSPI_HandleTypeDef *hqspi, uint8_t *buffer);
+static void WSPI_ResetMemory();
+static void WSPI_EnableQuad();
+static bool WSPI_WriteEnable();
+static bool WSPI_WaitOnBusy();
+static bool WSPI_ReadChipID(uint8_t *buffer);
 
-static uint8_t QSPI_Read(uint8_t *pData, uint32_t readAddr, uint32_t size);
-static uint8_t QSPI_Write(const uint8_t *pData, uint32_t writeAddr, uint32_t size);
-static uint8_t QSPI_Erase_Block(uint32_t blockAddress, bool largeBlock);
-static uint8_t QSPI_Erase_Chip();
+static bool WSPI_Read(uint8_t *pData, uint32_t readAddr, uint32_t size);
+static bool WSPI_Write(const uint8_t *pData, uint32_t writeAddr, uint32_t size);
+static bool WSPI_Erase_Block(uint32_t blockAddress, bool largeBlock);
+static bool WSPI_Erase_Chip();
 
 // target specific implementation of hal_lfs_erase
 int32_t hal_lfs_erase_1(const struct lfs_config *c, lfs_block_t block)
@@ -311,7 +306,7 @@ int32_t hal_lfs_erase_1(const struct lfs_config *c, lfs_block_t block)
 
     uint32_t addr = block * c->block_size;
 
-    if (QSPI_Erase_Block(addr, false) != QSPI_OK)
+    if (!WSPI_Erase_Block(addr, false))
     {
         return LFS_ERR_IO;
     }
@@ -324,7 +319,7 @@ int32_t hal_lfs_read_1(const struct lfs_config *c, lfs_block_t block, lfs_off_t 
 {
     uint32_t addr = block * c->block_size + off;
 
-    if (QSPI_Read(buffer, addr, size) != QSPI_OK)
+    if (!WSPI_Read(buffer, addr, size))
     {
         return LFS_ERR_IO;
     }
@@ -342,7 +337,7 @@ int32_t hal_lfs_prog_1(
 {
     uint32_t addr = block * c->block_size + off;
 
-    if (QSPI_Write(buffer, addr, size) != QSPI_OK)
+    if (WSPI_Write((const uint8_t *)buffer, addr, size) != TRUE)
     {
         return LFS_ERR_IO;
     }
@@ -353,8 +348,11 @@ int32_t hal_lfs_prog_1(
     memset(tempBuffer, 0xBB, size);
 
     // read back and compare
-    QSPI_Read(tempBuffer, addr, size);
-    ASSERT(memcmp(buffer, tempBuffer, size) == 0);
+    WSPI_Read(tempBuffer, (block * c->block_size + off), size);
+    for (lfs_size_t i = 0; i < size; i++)
+    {
+        ASSERT(((const uint8_t *)buffer)[i] == tempBuffer[i]);
+    }
 
 #endif
 
@@ -364,377 +362,235 @@ int32_t hal_lfs_prog_1(
 // target specific implementation of chip erase
 bool hal_lfs_erase_chip_1()
 {
-    return QSPI_Erase_Chip() == QSPI_OK;
+    return WSPI_Erase_Chip();
 }
 
-static uint8_t QSPI_ResetMemory(QSPI_HandleTypeDef *hqspi)
-{
-    QSPI_CommandTypeDef s_command;
-
-    /* Initialize the Mode Bit Reset command */
-    s_command.InstructionMode = QSPI_INSTRUCTION_1_LINE;
-    s_command.Instruction = RESET_ENABLE_CMD;
-    s_command.AddressMode = QSPI_ADDRESS_NONE;
-    s_command.AlternateByteMode = QSPI_ALTERNATE_BYTES_NONE;
-    s_command.DataMode = QSPI_DATA_NONE;
-    s_command.DummyCycles = 0;
-    s_command.DdrMode = QSPI_DDR_MODE_DISABLE;
-    s_command.DdrHoldHalfCycle = QSPI_DDR_HHC_ANALOG_DELAY;
-    s_command.SIOOMode = QSPI_SIOO_INST_EVERY_CMD;
-
-    /* Send the command */
-    if (HAL_QSPI_Command(hqspi, &s_command, HAL_QPSI_TIMEOUT_DEFAULT_VALUE) != HAL_OK)
-    {
-        return QSPI_ERROR;
-    }
-
-    /* Send the SW reset command */
-    s_command.Instruction = RESET_MEMORY_CMD;
-    if (HAL_QSPI_Command(hqspi, &s_command, HAL_QPSI_TIMEOUT_DEFAULT_VALUE) != HAL_OK)
-    {
-        return QSPI_ERROR;
-    }
-
-    /* Configure automatic polling mode to wait the memory is ready */
-    if (QSPI_AutoPollingMemReady(hqspi, HAL_QPSI_TIMEOUT_DEFAULT_VALUE) != QSPI_OK)
-    {
-        return QSPI_ERROR;
-    }
-
-    return QSPI_OK;
-}
-
-static uint8_t QSPI_EnterMemory_QPI(QSPI_HandleTypeDef *hqspi)
-{
-    QSPI_CommandTypeDef s_command;
-    uint8_t reg[] = {0};
-
-    /* Initialize the read volatile configuration register command */
-    s_command.InstructionMode = QSPI_INSTRUCTION_1_LINE;
-    s_command.Instruction = READ_STATUS_REG2_CMD;
-    s_command.AddressMode = QSPI_ADDRESS_NONE;
-    s_command.AlternateByteMode = QSPI_ALTERNATE_BYTES_NONE;
-    s_command.DataMode = QSPI_DATA_1_LINE;
-    s_command.DummyCycles = 0;
-    s_command.NbData = 1;
-    s_command.DdrMode = QSPI_DDR_MODE_DISABLE;
-    s_command.DdrHoldHalfCycle = QSPI_DDR_HHC_ANALOG_DELAY;
-    s_command.SIOOMode = QSPI_SIOO_INST_EVERY_CMD;
-
-    /* Configure the command */
-    if (HAL_QSPI_Command(hqspi, &s_command, HAL_QPSI_TIMEOUT_DEFAULT_VALUE) != HAL_OK)
-    {
-        return QSPI_ERROR;
-    }
-
-    /* Reception of the data */
-    if (HAL_QSPI_Receive(hqspi, &reg[0], HAL_QPSI_TIMEOUT_DEFAULT_VALUE) != HAL_OK)
-    {
-        return QSPI_ERROR;
-    }
-
-    /* Enable write operations */
-    if (QSPI_WriteEnable(hqspi) != QSPI_OK)
-    {
-        return QSPI_ERROR;
-    }
-
-    /* Update status register 2 (with quad enable bit) */
-    s_command.Instruction = WRITE_STATUS_REG2_CMD;
-    MODIFY_REG(reg[0], 0, W25Q128_SR2_QE);
-
-    /* write status register 2 */
-    if (HAL_QSPI_Command(hqspi, &s_command, HAL_QPSI_TIMEOUT_DEFAULT_VALUE) != HAL_OK)
-    {
-        return QSPI_ERROR;
-    }
-
-    /* Transmission of the data */
-    if (HAL_QSPI_Transmit(hqspi, &reg[0], HAL_QPSI_TIMEOUT_DEFAULT_VALUE) != HAL_OK)
-    {
-        return QSPI_ERROR;
-    }
-
-    // read status register for confirmation
-    s_command.Instruction = READ_STATUS_REG2_CMD;
-
-    /* Configure the command */
-    if (HAL_QSPI_Command(hqspi, &s_command, HAL_QPSI_TIMEOUT_DEFAULT_VALUE) != HAL_OK)
-    {
-        return QSPI_ERROR;
-    }
-
-    /* Reception of the data */
-    if (HAL_QSPI_Receive(hqspi, &reg[0], HAL_QPSI_TIMEOUT_DEFAULT_VALUE) != HAL_OK)
-    {
-        return QSPI_ERROR;
-    }
-
-    if (reg[0] & W25Q128_SR2_QE)
-    {
-        return QSPI_OK;
-    }
-    else
-    {
-        return QSPI_ERROR;
-    }
-}
-
-static uint8_t QSPI_WriteEnable(QSPI_HandleTypeDef *hqspi)
-{
-    QSPI_CommandTypeDef s_command;
-    QSPI_AutoPollingTypeDef s_config;
-
-    /* Enable write operations */
-    s_command.InstructionMode = QSPI_INSTRUCTION_1_LINE;
-    s_command.Instruction = WRITE_ENABLE_CMD;
-    s_command.AddressMode = QSPI_ADDRESS_NONE;
-    s_command.AlternateByteMode = QSPI_ALTERNATE_BYTES_NONE;
-    s_command.DataMode = QSPI_DATA_NONE;
-    s_command.DummyCycles = 0;
-    s_command.DdrMode = QSPI_DDR_MODE_DISABLE;
-    s_command.DdrHoldHalfCycle = QSPI_DDR_HHC_ANALOG_DELAY;
-    s_command.SIOOMode = QSPI_SIOO_INST_EVERY_CMD;
-
-    if (HAL_QSPI_Command(hqspi, &s_command, HAL_QPSI_TIMEOUT_DEFAULT_VALUE) != HAL_OK)
-    {
-        return QSPI_ERROR;
-    }
-
-    /* Configure automatic polling mode to wait for write enabling */
-    s_config.Match = W25Q128_SR_WREN;
-    s_config.Mask = W25Q128_SR_WREN;
-    s_config.MatchMode = QSPI_MATCH_MODE_AND;
-    s_config.StatusBytesSize = 1;
-    s_config.Interval = 0x10;
-    s_config.AutomaticStop = QSPI_AUTOMATIC_STOP_ENABLE;
-
-    s_command.Instruction = READ_STATUS_REG1_CMD;
-    s_command.DataMode = QSPI_DATA_1_LINE;
-
-    if (HAL_QSPI_AutoPolling(hqspi, &s_command, &s_config, HAL_QPSI_TIMEOUT_DEFAULT_VALUE) != HAL_OK)
-    {
-        return QSPI_ERROR;
-    }
-
-    return QSPI_OK;
-}
-
-static uint8_t QSPI_AutoPollingMemReady(QSPI_HandleTypeDef *hqspi, uint32_t Timeout)
-{
-    QSPI_CommandTypeDef s_command;
-    QSPI_AutoPollingTypeDef sConfig;
-
-    /* Configure automatic polling mode to wait for memory ready */
-    s_command.InstructionMode = QSPI_INSTRUCTION_1_LINE;
-    s_command.Instruction = READ_STATUS_REG1_CMD; /* same value on both memory types */
-    s_command.AddressMode = QSPI_ADDRESS_NONE;
-    s_command.AlternateByteMode = QSPI_ALTERNATE_BYTES_NONE;
-    s_command.DataMode = QSPI_DATA_1_LINE;
-    s_command.DummyCycles = 0;
-    s_command.DdrMode = QSPI_DDR_MODE_DISABLE;
-    s_command.DdrHoldHalfCycle = QSPI_DDR_HHC_ANALOG_DELAY;
-    s_command.SIOOMode = QSPI_SIOO_INST_EVERY_CMD;
-
-    sConfig.Match = 0;
-    sConfig.Mask = W25Q128_SR_WIP; /* same value on both memory types */
-    sConfig.MatchMode = QSPI_MATCH_MODE_AND;
-    sConfig.StatusBytesSize = 1;
-    sConfig.Interval = 0x10;
-    sConfig.AutomaticStop = QSPI_AUTOMATIC_STOP_ENABLE;
-
-    if (HAL_QSPI_AutoPolling(hqspi, &s_command, &sConfig, Timeout) != HAL_OK)
-    {
-        return QSPI_ERROR;
-    }
-
-    return QSPI_OK;
-}
-
-static uint8_t QSPI_ReadChipID(QSPI_HandleTypeDef *hqspi, uint8_t *buffer)
-{
-    QSPI_CommandTypeDef s_command;
-
-    /* Configure automatic polling mode to wait for memory ready */
-    s_command.InstructionMode = QSPI_INSTRUCTION_1_LINE;
-    s_command.Instruction = READ_ID_CMD2;
-    s_command.AddressMode = QSPI_ADDRESS_NONE;
-    s_command.AlternateByteMode = QSPI_ALTERNATE_BYTES_NONE;
-    s_command.DataMode = QSPI_DATA_1_LINE;
-    s_command.NbData = 6;
-    s_command.DummyCycles = 0;
-    s_command.DdrMode = QSPI_DDR_MODE_DISABLE;
-    s_command.DdrHoldHalfCycle = QSPI_DDR_HHC_ANALOG_DELAY;
-    s_command.SIOOMode = QSPI_SIOO_INST_EVERY_CMD;
-
-    if (HAL_QSPI_Command(hqspi, &s_command, HAL_QPSI_TIMEOUT_DEFAULT_VALUE) != HAL_OK)
-    {
-        return QSPI_ERROR;
-    }
-
-    /* Reception of the data */
-    if (HAL_QSPI_Receive(hqspi, buffer, HAL_QPSI_TIMEOUT_DEFAULT_VALUE) != HAL_OK)
-    {
-        return QSPI_ERROR;
-    }
-
-    return QSPI_OK;
-}
-
-uint8_t QSPI_Read(uint8_t *pData, uint32_t readAddr, uint32_t size)
-{
-    QSPI_CommandTypeDef s_command;
-
-    /* Initialize the read command */
-    s_command.InstructionMode = QSPI_INSTRUCTION_1_LINE;
-    s_command.Instruction = QUAD_OUT_FAST_READ_CMD; /* same value on both memory types */
-    s_command.AddressMode = QSPI_ADDRESS_1_LINE;
-    s_command.AddressSize = QSPI_ADDRESS_24_BITS;
-    s_command.Address = readAddr;
-    s_command.AlternateByteMode = QSPI_ALTERNATE_BYTES_NONE;
-    s_command.DataMode = QSPI_DATA_4_LINES;
-    s_command.DummyCycles = W25Q128_DUMMY_CYCLES_READ_QUAD;
-    s_command.NbData = size;
-    s_command.DdrMode = QSPI_DDR_MODE_DISABLE;
-    s_command.DdrHoldHalfCycle = QSPI_DDR_HHC_ANALOG_DELAY;
-    s_command.SIOOMode = QSPI_SIOO_INST_EVERY_CMD;
-
-    /* Configure the command */
-    if (HAL_QSPI_Command(&QSPID1, &s_command, HAL_QPSI_TIMEOUT_DEFAULT_VALUE) != HAL_OK)
-    {
-        return QSPI_ERROR;
-    }
-
-    /* Set S# timing for Read command */
-    MODIFY_REG(QSPID1.Instance->DCR, QUADSPI_DCR_CSHT, QSPI_CS_HIGH_TIME_2_CYCLE);
-
-    /* Reception of the data */
-    if (HAL_QSPI_Receive(&QSPID1, pData, HAL_QPSI_TIMEOUT_DEFAULT_VALUE) != HAL_OK)
-    {
-        return QSPI_ERROR;
-    }
-
-    /* Restore S# timing for nonRead commands */
-    MODIFY_REG(QSPID1.Instance->DCR, QUADSPI_DCR_CSHT, QSPI_CS_HIGH_TIME_5_CYCLE);
-
-    return QSPI_OK;
-}
-
-uint8_t QSPI_Write(const uint8_t *pData, uint32_t writeAddr, uint32_t size)
-{
-    QSPI_CommandTypeDef s_command;
-
-    uint32_t writeSize;
-    uint32_t address = writeAddr;
-
-    /* Initialize the program command */
-    s_command.InstructionMode = QSPI_INSTRUCTION_1_LINE;
-    s_command.Instruction = 0x02;
-    s_command.AddressMode = QSPI_ADDRESS_1_LINE;
-    s_command.AddressSize = QSPI_ADDRESS_24_BITS;
-    s_command.AlternateByteMode = QSPI_ALTERNATE_BYTES_NONE;
-    s_command.DataMode = QSPI_DATA_1_LINE;
-    s_command.DummyCycles = 0;
-    s_command.DdrMode = QSPI_DDR_MODE_DISABLE;
-    s_command.DdrHoldHalfCycle = QSPI_DDR_HHC_ANALOG_DELAY;
-    s_command.SIOOMode = QSPI_SIOO_INST_EVERY_CMD;
-
-    // perform paged program
-    while (size > 0)
-    {
-        // Enable write operations
-        if (QSPI_WriteEnable(&QSPID1) != QSPI_OK)
-        {
-            return QSPI_ERROR;
-        }
-
-        // calculate write size
-        writeSize = __builtin_fmin(W25Q128_PAGE_SIZE - (address % W25Q128_PAGE_SIZE), size);
-
-        // update the write command
-        s_command.Address = address;
-        s_command.NbData = writeSize;
-
-        // Configure the command
-        if (HAL_QSPI_Command(&QSPID1, &s_command, HAL_QPSI_TIMEOUT_DEFAULT_VALUE) != HAL_OK)
-        {
-            return QSPI_ERROR;
-        }
-
-        // Transmission of the data
-        if (HAL_QSPI_Transmit(&QSPID1, (uint8_t *)pData, HAL_QPSI_TIMEOUT_DEFAULT_VALUE) != HAL_OK)
-        {
-            return QSPI_ERROR;
-        }
-
-        // Configure automatic polling mode to wait for end of program
-        if (QSPI_AutoPollingMemReady(&QSPID1, HAL_QPSI_TIMEOUT_DEFAULT_VALUE) != QSPI_OK)
-        {
-            return QSPI_ERROR;
-        }
-
-        // Update the address and size variables for next page programming
-        address += writeSize;
-        pData += writeSize;
-        size -= writeSize;
-    }
-
-    return QSPI_OK;
-}
-
-uint8_t QSPI_Erase_Block(uint32_t blockAddress, bool largeBlock)
-{
-    QSPI_CommandTypeDef s_command;
-
-    // Initialize the erase command
-    s_command.InstructionMode = QSPI_INSTRUCTION_1_LINE;
-    s_command.Instruction = largeBlock ? SECTOR_ERASE_CMD : SUBSECTOR_ERASE_CMD;
-    s_command.AddressMode = QSPI_ADDRESS_1_LINE;
-    s_command.AddressSize = QSPI_ADDRESS_24_BITS;
-    s_command.Address = blockAddress;
-    s_command.AlternateByteMode = QSPI_ALTERNATE_BYTES_NONE;
-    s_command.DataMode = QSPI_DATA_NONE;
-    s_command.DummyCycles = 0;
-    s_command.DdrMode = QSPI_DDR_MODE_DISABLE;
-    s_command.DdrHoldHalfCycle = QSPI_DDR_HHC_ANALOG_DELAY;
-    s_command.SIOOMode = QSPI_SIOO_INST_EVERY_CMD;
-
-    // Enable write operations
-    if (QSPI_WriteEnable(&QSPID1) != QSPI_OK)
-    {
-        return QSPI_ERROR;
-    }
-
-    // Send the command
-    if (HAL_QSPI_Command(&QSPID1, &s_command, HAL_QPSI_TIMEOUT_DEFAULT_VALUE) != HAL_OK)
-    {
-        return QSPI_ERROR;
-    }
-
-    // Configure automatic polling mode to wait for end of erase
-    if (QSPI_AutoPollingMemReady(&QSPID1, W25Q128_SECTOR_ERASE_MAX_TIME) != QSPI_OK)
-    {
-        return QSPI_ERROR;
-    }
-
-    return QSPI_OK;
-}
-
-static uint8_t QSPI_Erase_Chip()
+static bool WSPI_Erase_Chip()
 {
     // need to do this one one block at a time to avoid watchdog reset
     for (uint32_t i = 0; i < W25Q128_FLASH_SIZE / W25Q128_SECTOR_SIZE; i++)
     {
-        if (QSPI_Erase_Block(i * W25Q128_SECTOR_SIZE, true) != QSPI_OK)
+        if (WSPI_Erase_Block(i * W25Q128_SECTOR_SIZE, true) != TRUE)
         {
-            return QSPI_ERROR;
+            return FALSE;
         }
 
         // reset watchdog
         Watchdog_Reset();
     }
 
-    return QSPI_OK;
+    return TRUE;
+}
+
+static bool WSPI_WaitOnBusy()
+{
+    uint32_t tickstart = HAL_GetTick();
+
+    wspi_command_t cmdp = {
+        .cfg =
+            (WSPI_CFG_CMD_MODE_ONE_LINE | WSPI_CFG_ADDR_MODE_NONE | WSPI_CFG_ALT_MODE_NONE |
+             WSPI_CFG_DATA_MODE_ONE_LINE | WSPI_CFG_CMD_SIZE_8 | WSPI_CFG_ADDR_SIZE_24),
+        .cmd = READ_STATUS_REG1_CMD,
+        .addr = 0,
+        .alt = 0,
+        .dummy = 0};
+
+    // send read status register 1
+    spiSend(&SPID1, 1, dataBuffer);
+
+    while (true)
+    {
+        // clear read buffer
+        memset(dataBuffer_1, 0xFF, 1);
+
+        wspiReceive(&WSPID1, &cmdp, 1, dataBuffer_1);
+
+        cacheBufferInvalidate(dataBuffer_1, 1);
+
+        if (!(dataBuffer_1[0] & W25Q128_SR_WIP))
+        {
+            // WIP bit is cleared
+            return true;
+        }
+    }
+
+    if ((HAL_GetTick() - tickstart) > HAL_SPI_TIMEOUT_DEFAULT_VALUE)
+    {
+        // operation timeout
+        return false;
+    }
+}
+
+static bool WSPI_WriteEnable()
+{
+    wspi_command_t cmdp = {
+        .cfg =
+            (WSPI_CFG_CMD_MODE_ONE_LINE | WSPI_CFG_ADDR_MODE_NONE | WSPI_CFG_ALT_MODE_NONE | WSPI_CFG_DATA_MODE_NONE |
+             WSPI_CFG_CMD_SIZE_8 | WSPI_CFG_ADDR_SIZE_24),
+        .cmd = WRITE_ENABLE_CMD,
+        .addr = 0,
+        .alt = 0,
+        .dummy = 0};
+
+    return wspiCommand(&WSPID1, &cmdp);
+}
+
+static void WSPI_ResetMemory()
+{
+    wspi_command_t cmdp = {
+        .cfg =
+            (WSPI_CFG_CMD_MODE_ONE_LINE | WSPI_CFG_ADDR_MODE_NONE | WSPI_CFG_ALT_MODE_NONE | WSPI_CFG_DATA_MODE_NONE |
+             WSPI_CFG_CMD_SIZE_8 | WSPI_CFG_ADDR_SIZE_24),
+        .cmd = RESET_ENABLE_CMD,
+        .addr = 0,
+        .alt = 0,
+        .dummy = 0};
+
+    // set enable reset command
+    wspiCommand(&WSPID1, &cmdp);
+
+    cmdp.cmd = RESET_MEMORY_CMD;
+
+    // reset memory
+    wspiCommand(&WSPID1, &cmdp);
+}
+
+static void WSPI_EnableQuad()
+{
+    // read status register 2
+    wspi_command_t cmdp = {
+        .cfg =
+            (WSPI_CFG_CMD_MODE_ONE_LINE | WSPI_CFG_ADDR_MODE_NONE | WSPI_CFG_ALT_MODE_NONE |
+             WSPI_CFG_DATA_MODE_ONE_LINE | WSPI_CFG_CMD_SIZE_8 | WSPI_CFG_ADDR_SIZE_24),
+        .cmd = READ_STATUS_REG2_CMD,
+        .addr = 0,
+        .alt = 0,
+        .dummy = 0};
+
+    // clear read buffer
+    memset(dataBuffer_1, 0xFF, 1);
+    wspiReceive(&WSPID1, &cmdp, 1, dataBuffer_1);
+
+    // set the quad enable bit
+    dataBuffer_1[0] |= W25Q128_SR2_QE;
+
+    // set command to write status register 2
+    cmdp.cmd = WRITE_STATUS_REG2_CMD;
+
+    // send write enable
+    WSPI_WriteEnable();
+
+    // write status register 2
+    wspiSend(&WSPID1, &cmdp, 1, dataBuffer_1);
+}
+
+static bool WSPI_Erase_Block(uint32_t blockAddress, bool largeBlock)
+{
+    // send write enable
+    WSPI_WriteEnable();
+
+    wspi_command_t cmdp = {
+        .cfg =
+            (WSPI_CFG_CMD_MODE_ONE_LINE | WSPI_CFG_ADDR_MODE_ONE_LINE | WSPI_CFG_ALT_MODE_NONE |
+             WSPI_CFG_DATA_MODE_NONE | WSPI_CFG_CMD_SIZE_8 | WSPI_CFG_ADDR_SIZE_24),
+        .cmd = largeBlock ? SECTOR_ERASE_CMD : SUBSECTOR_ERASE_CMD,
+        .addr = blockAddress,
+        .alt = 0,
+        .dummy = 0};
+
+    wspiCommand(&WSPID1, &cmdp);
+
+    // Configure automatic polling mode to wait for end of erase
+    return (WSPI_WaitOnBusy(&WSPID1, W25Q128_SECTOR_ERASE_MAX_TIME) == TRUE);
+}
+
+static bool WSPI_Read(uint8_t *pData, uint32_t readAddr, uint32_t size)
+{
+    // sanity check for buffer overflow
+    ASSERT(size <= W25Q128_PAGE_SIZE);
+
+    // clear read buffer
+    memset(dataBuffer_1, 0xDD, size);
+
+    wspi_command_t cmdp = {
+        .cfg =
+            (WSPI_CFG_CMD_MODE_ONE_LINE | WSPI_CFG_ADDR_MODE_ONE_LINE | WSPI_CFG_ALT_MODE_NONE |
+             WSPI_CFG_DATA_MODE_FOUR_LINES | WSPI_CFG_CMD_SIZE_8 | WSPI_CFG_ADDR_SIZE_24),
+        .cmd = QUAD_OUT_FAST_READ_CMD,
+        .addr = readAddr,
+        .alt = 0,
+        .dummy = W25Q128_DUMMY_CYCLES_READ_QUAD};
+
+    wspiReceive(&WSPID1, &cmdp, size, dataBuffer_1);
+
+    // invalidate cache
+    // (only required for Cortex-M7)
+    cacheBufferInvalidate(dataBuffer_1, size);
+
+    // copy to pointer
+    memcpy(pData, dataBuffer_1, size);
+
+    return true;
+}
+
+static bool WSPI_Write(const uint8_t *pData, uint32_t writeAddr, uint32_t size)
+{
+    uint32_t writeSize;
+    uint32_t address = writeAddr;
+
+    wspi_command_t cmdp = {
+        .cfg =
+            (WSPI_CFG_CMD_MODE_ONE_LINE | WSPI_CFG_ADDR_MODE_ONE_LINE | WSPI_CFG_ALT_MODE_NONE |
+             WSPI_CFG_DATA_MODE_ONE_LINE | WSPI_CFG_CMD_SIZE_8 | WSPI_CFG_ADDR_SIZE_24),
+        .cmd = PAGE_PROG_CMD,
+        .addr = address,
+        .alt = 0,
+        .dummy = 0};
+
+    // perform paged program
+    while (size > 0)
+    {
+        // send write enable
+        WSPI_WriteEnable();
+
+        // calculate write size
+        writeSize = __builtin_fmin(W25Q128_PAGE_SIZE - (address % W25Q128_PAGE_SIZE), size);
+
+        // copy from buffer
+        memcpy(dataBuffer_1, pData, writeSize);
+
+        // flush DMA buffer to ensure cache coherency
+        // (only required for Cortex-M7)
+        cacheBufferFlush(dataBuffer_1, writeSize);
+
+        // update command address
+        cmdp.addr = address;
+__DSB();
+        wspiSend(&WSPID1, &cmdp, size, dataBuffer_1);
+
+        // wait for operation to complete
+        WSPI_WaitOnBusy();
+
+        address += writeSize;
+        pData += writeSize;
+        size -= writeSize;
+    }
+
+    return true;
+}
+
+static bool WSPI_ReadChipID(uint8_t *buffer)
+{
+    wspi_command_t cmdp = {
+        .cfg =
+            (WSPI_CFG_CMD_MODE_ONE_LINE | WSPI_CFG_ADDR_MODE_NONE | WSPI_CFG_ALT_MODE_NONE |
+             WSPI_CFG_DATA_MODE_ONE_LINE | WSPI_CFG_CMD_SIZE_8 | WSPI_CFG_ADDR_SIZE_24),
+        .cmd = READ_ID_CMD2,
+        .addr = 0,
+        .alt = 0,
+        .dummy = 0};
+
+    return wspiReceive(&WSPID1, &cmdp, 3, buffer);
 }
 
 #endif // LFS_QSPI
@@ -779,58 +635,21 @@ int8_t target_lfs_init()
 
 #ifdef LFS_QSPI
 
-    uint8_t device_id[6];
-    memset(device_id, 0, sizeof(device_id));
-
-    // QSPI initialization
-    QSPID1.Init.ClockPrescaler = 1;
-    QSPID1.Init.FifoThreshold = 4;
-    QSPID1.Init.SampleShifting = QSPI_SAMPLE_SHIFTING_HALFCYCLE;
-    // OK to use the W25Q128_FLASH_SIZE for this instance
-    QSPID1.Init.FlashSize = POSITION_VAL(W25Q128_FLASH_SIZE) - 1;
-    QSPID1.Init.ChipSelectHighTime = QSPI_CS_HIGH_TIME_2_CYCLE;
-    QSPID1.Init.ClockMode = QSPI_CLOCK_MODE_0;
-    QSPID1.Init.FlashID = QSPI_FLASH_ID_1;
-    QSPID1.Init.DualFlash = QSPI_DUALFLASH_DISABLE;
-
     // init driver
-    qspiStart(&QSPID1);
+    wspiAcquireBus(&WSPID1);
+    wspiStart(&WSPID1, &wspiConfig);
 
-    if (HAL_QSPI_Init(&QSPID1) != HAL_OK)
-    {
-        return QSPI_ERROR;
-    }
+    memset(dataBuffer_1, 0, 3);
 
-    /* QSPI memory reset */
-    if (QSPI_ResetMemory(&QSPID1) != QSPI_OK)
-    {
-        return QSPI_NOT_SUPPORTED;
-    }
-
-    /* Put QSPI memory in QPI mode */
-    if (QSPI_EnterMemory_QPI(&QSPID1) != QSPI_OK)
-    {
-        return QSPI_NOT_SUPPORTED;
-    }
-
-    // not used with this memory chip
-    // /* Set the QSPI memory in 4-bytes address mode */
-    // if(QSPI_EnterFourBytesAddress(&QSPID1) != QSPI_OK)
-    // {
-    //     return QSPI_NOT_SUPPORTED;
-    // }
-
-    // sanity check: read device ID and unique ID
-    // this instruction requires a buffer with 6 positions
-    if (QSPI_ReadChipID(&QSPID1, device_id) != QSPI_OK)
-    {
-        return QSPI_ERROR;
-    }
+    WSPI_ReadChipID(dataBuffer_1);
 
     // constants from ID Definitions table in W25Q128 datasheet
-    ASSERT(device_id[0] == W25Q128_MANUFACTURER_ID);
-    ASSERT(device_id[1] == W25Q128_DEVICE_ID1);
-    ASSERT(device_id[2] == W25Q128_DEVICE_ID2);
+    ASSERT(dataBuffer_1[0] == W25Q128_MANUFACTURER_ID);
+    ASSERT(dataBuffer_1[1] == W25Q128_DEVICE_ID1);
+    ASSERT(dataBuffer_1[2] == W25Q128_DEVICE_ID2);
+
+    WSPI_ResetMemory();
+    WSPI_EnableQuad();
 
 #endif // LFS_QSPI
 
