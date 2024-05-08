@@ -865,9 +865,6 @@ HRESULT LITTLEFS_FS_Driver::CreateDirectory(const VOLUME_ID *volume, const char 
     {
         memset(tempPath, 0, sizeof(tempPath));
 
-        // add leading '/' to the temp path
-        snprintf(tempPath, sizeof(tempPath), "/");
-
         // iterate over the path segments and create the directories
         segment = strtok(normalizedPath, "/");
 
