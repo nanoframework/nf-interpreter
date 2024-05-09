@@ -3,11 +3,8 @@
 // See LICENSE file in the project root for full license information.
 //
 #include <hal.h>
-// #include <ch.h>
-// #include <nanoCLR_Headers.h>
 #include <target_littlefs.h>
 #include <nanoHAL_v2.h>
-#include <nanoPAL_FileSystem.h>
 #include <nf_sys_io_filesystem.h>
 #include "littlefs_FS_Driver.h"
 #include "hal_littlefs.h"
