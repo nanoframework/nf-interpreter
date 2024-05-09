@@ -142,7 +142,7 @@ HRESULT CLR_RT_FileStream::SplitFilePath(
     bool isForwardSlash = false;
 
     char *c = (char *)fullPath;
-    u_int32_t rootLen = 0;
+    uint32_t rootLen = 0;
 
     if (!fullPath || !rootName || !rootNameLength || !relativePath)
     {

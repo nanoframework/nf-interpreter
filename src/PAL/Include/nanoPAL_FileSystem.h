@@ -6,7 +6,14 @@
 #ifndef NANOPAL_FILESYSTEM_H
 #define NANOPAL_FILESYSTEM_H
 
+#ifdef VIRTUAL_DEVICE
+// #include <stdafx.h>
+#include <nanoCLR_Headers.h>
+#include <nf_errors_exceptions.h>
+#include <nanoCLR_PlatformDef.h>
+#else
 #include <nanoHAL.h>
+#endif
 
 #ifdef __cplusplus
 extern "C"
@@ -183,8 +190,8 @@ extern "C"
 #define EVENT_SUBCATEGORY_MEDIAINSERT 1
 #define EVENT_SUBCATEGORY_MEDIAEJECT  2
 
-    void FS_MountVolume(LPCSTR rootName, uint32_t deviceFlags);
-    void FS_UnmountVolume(BlockStorageDevice *blockStorageDevice);
+    void FS_MountVolume(const char *rootName, uint32_t deviceFlags);
+    // void FS_UnmountVolume(BlockStorageDevice *blockStorageDevice);
 
     void FS_Initialize();
 
@@ -229,7 +236,7 @@ extern "C"
             return m_streamDriver->UninitializeVolume(&m_volumeId);
         }
 
-        HRESULT Format(LPCSTR volumeLabel, uint32_t parameters)
+        HRESULT Format(const char *volumeLabel, uint32_t parameters)
         {
             if (!m_fsDriver || !(m_fsDriver->Format))
             {

@@ -4,7 +4,8 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#include <nanoHAL_v2.h>
+#include "stdafx.h"
+
 #include <nanoCRT.h>
 #include <nanoPAL.h>
 
@@ -108,38 +109,38 @@ void FS_MountVolume(
     }
 }
 
-void FS_UnmountVolume(BlockStorageDevice *blockStorageDevice)
-{
-    (void)blockStorageDevice;
-    // FileSystemVolume *current = FileSystemVolumeList::GetFirstVolume();
-    // FileSystemVolume *next;
+// void FS_UnmountVolume(BlockStorageDevice *blockStorageDevice)
+// {
+//     (void)blockStorageDevice;
+//     // FileSystemVolume *current = FileSystemVolumeList::GetFirstVolume();
+//     // FileSystemVolume *next;
 
-    // while (current)
-    // {
-    //     if (current->m_volumeId.blockStorageDevice == blockStorageDevice)
-    //     {
-    //         // get the next node from the link list before removing it
-    //         next = FileSystemVolumeList::GetNextVolume(*current);
+//     // while (current)
+//     // {
+//     //     if (current->m_volumeId.blockStorageDevice == blockStorageDevice)
+//     //     {
+//     //         // get the next node from the link list before removing it
+//     //         next = FileSystemVolumeList::GetNextVolume(*current);
 
-    //         /// Let FS uninitialize now for this volume. Note this happens before managed stack
-    //         /// is informed.
-    //         FileSystemVolumeList::RemoveVolume(current, TRUE);
+//     //         /// Let FS uninitialize now for this volume. Note this happens before managed stack
+//     //         /// is informed.
+//     //         FileSystemVolumeList::RemoveVolume(current, TRUE);
 
-    //         // Move the volume into the zombie list rather than free up the memory so all the subsequent Close() from
-    //         // opened handles will complete and/or fail properly
-    //         FileSystemVolumeList::s_zombieVolumeList.LinkAtBack(current);
+//     //         // Move the volume into the zombie list rather than free up the memory so all the subsequent Close() from
+//     //         // opened handles will complete and/or fail properly
+//     //         FileSystemVolumeList::s_zombieVolumeList.LinkAtBack(current);
 
-    //         /// Notify managed code.
-    //         PostManagedEvent(EVENT_STORAGE, EVENT_SUBCATEGORY_MEDIAEJECT, 0, (uint32_t)current);
+//     //         /// Notify managed code.
+//     //         PostManagedEvent(EVENT_STORAGE, EVENT_SUBCATEGORY_MEDIAEJECT, 0, (uint32_t)current);
 
-    //         current = next;
-    //     }
-    //     else
-    //     {
-    //         current = FileSystemVolumeList::GetNextVolume(*current);
-    //     }
-    // }
-}
+//     //         current = next;
+//     //     }
+//     //     else
+//     //     {
+//     //         current = FileSystemVolumeList::GetNextVolume(*current);
+//     //     }
+//     // }
+// }
 
 //--//
 
