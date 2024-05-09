@@ -373,7 +373,101 @@ int32_t hal_lfs_mount_partition(int32_t index, bool forceFormat)
     //     return -1;
     // }
 
-    // /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    // code reproducing the same workflow as the managed API
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    // // get attributes on non existing file
+    // char *filePath = "temp/testdir/file1.txt";
+    // char *dir1Path = "temp";
+    // char *dir2Path = "temp/testdir";
+
+    // uint32_t attributes;
+    // volatile int32_t result;
+    // struct lfs_info info;
+    // lfs_file_t file;
+    // //lfs_dir_t dir;
+    // struct lfs_attr attr;
+    // struct lfs_file_config fileConfig;
+    // uint32_t nanoAttributes;
+    // (void)result;
+
+    // // check file path
+    // result = lfs_stat(&lfs[index], filePath, &info);
+
+    // // try to get file attributes
+    // result = lfs_getattr(
+    //         &lfs[index],
+    //         (const char *)filePath,
+    //         NANO_LITTLEFS_ATTRIBUTE,
+    //         &attributes,
+    //         NANO_LITTLEFS_ATTRIBUTE_SIZE);
+
+    // // create directories in the path
+    // result = lfs_mkdir(&lfs[index], dir1Path);
+    // result = lfs_mkdir(&lfs[index], dir2Path);
+
+    // // open file
+    // //result = lfs_file_open(&lfs[index], &file, filePath, LFS_O_CREAT | LFS_O_RDWR);
+
+    // // close file
+    // //result = lfs_file_close(&lfs[index], &file);
+
+    // // check directory exists
+    // //result = lfs_stat(&lfs[index], dir2Path, &info);
+
+    // // // try to get directory attributes
+    // // result = lfs_getattr(
+    // //         &lfs[index],
+    // //         (const char *)dir2Path,
+    // //         NANO_LITTLEFS_ATTRIBUTE,
+    // //         &attributes,
+    // //         NANO_LITTLEFS_ATTRIBUTE_SIZE);
+
+    // // check file path
+    // //result = lfs_stat(&lfs[index], filePath, &info);
+
+    // // set file attributes
+    // // hardcoded to 128 which is value for FileAttributes_Normal
+    // nanoAttributes = 128;
+    // attr = (struct lfs_attr){
+    //     .type = NANO_LITTLEFS_ATTRIBUTE,
+    //     .size = NANO_LITTLEFS_ATTRIBUTE_SIZE,
+    //     .buffer = &nanoAttributes
+    // };
+
+    // fileConfig = (struct lfs_file_config) {
+    //     .buffer = NULL,
+    //     .attrs = &attr,
+    //     .attr_count = 1,
+    // };
+
+    // // create file
+    // result =  lfs_file_opencfg(&lfs[index], &file, filePath,  LFS_O_CREAT | LFS_O_RDWR, &fileConfig);
+
+    //  // sync file to save attributes
+    // result = lfs_file_sync(&lfs[index], &file);
+
+    // // read file attributes
+    // result = lfs_getattr(
+    //         &lfs[index],
+    //         (const char *)filePath,
+    //         NANO_LITTLEFS_ATTRIBUTE,
+    //         &attributes,
+    //         NANO_LITTLEFS_ATTRIBUTE_SIZE);
+
+    // // close file
+    // result = lfs_file_close(&lfs[index], &file);
+
+    // // check file existance
+    // result = lfs_stat(&lfs[index], filePath, &info);
+
+    // // read file attributes
+    // result = lfs_getattr(
+    //         &lfs[index],
+    //         (const char *)filePath,
+    //         NANO_LITTLEFS_ATTRIBUTE,
+    //         &attributes,
+    //         NANO_LITTLEFS_ATTRIBUTE_SIZE);
 
     return operationResult;
 }
@@ -429,6 +523,8 @@ int hal_lfs_erase(const struct lfs_config *c, lfs_block_t block)
 int hal_lfs_sync(const struct lfs_config *c)
 {
     (void)c;
+
+    __DSB();
 
     return 0;
 }

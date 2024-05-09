@@ -1007,7 +1007,8 @@ HRESULT LITTLEFS_FS_Driver::Delete(const VOLUME_ID *volume, const char *path, bo
             }
 
             // recursivelly delete all files and subdirectories
-            if (RemoveAllFiles(fsDrive, normalizedPath) != LFS_ERR_OK)
+            result = RemoveAllFiles(fsDrive, normalizedPath);
+            if (result != LFS_ERR_OK)
             {
                 return CLR_E_FILE_IO;
             }
