@@ -183,7 +183,7 @@ HRESULT LITTLEFS_FS_Driver::Open(const VOLUME_ID *volume, const char *path, uint
     // attributes this is planned to be improved in a future version see (and related)
     // https://github.com/littlefs-project/littlefs/issues/759
     fileHandle->nanoAttributes = FileAttributes_Normal;
-    fileHandle->attr = {NANO_LITTLEFS_ATTRIBUTE, &fileHandle->nanoAttributes, NANO_LITTLEFS_ATTRIBUTE};
+    fileHandle->attr = {NANO_LITTLEFS_ATTRIBUTE, &fileHandle->nanoAttributes, NANO_LITTLEFS_ATTRIBUTE_SIZE};
     fileHandle->fileConfig = {
         .buffer = NULL,
         .attrs = &fileHandle->attr,
