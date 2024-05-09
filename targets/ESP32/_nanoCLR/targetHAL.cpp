@@ -147,10 +147,7 @@ void nanoHAL_Uninitialize(bool isPoweringDown)
 
     SOCKETS_CloseConnections();
 
-#if !defined(HAL_REDUCESIZE)
-    // TODO need to call this but it's preventing the debug session from starting
-    // Network_Uninitialize();
-#endif
+    Network_Uninitialize();
 
     // required to remove flash partitions memory mapping
     BlockStorageList_UnInitializeDevices();

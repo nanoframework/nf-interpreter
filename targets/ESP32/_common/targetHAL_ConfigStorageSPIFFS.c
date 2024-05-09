@@ -47,7 +47,11 @@ void ConfigStorage_Initialise()
         }
         else
         {
-            ESP_LOGE(TAG, "NANO: Failed to initialize SPIFFS (%s)", esp_err_to_name(ret));
+            // If not already running then report error (happens on soft reboot for debug)
+            if (ret != ESP_ERR_INVALID_STATE)
+            {
+                ESP_LOGE(TAG, "NANO: Failed to initialize SPIFFS (%s)", esp_err_to_name(ret));
+            }
         }
     }
 

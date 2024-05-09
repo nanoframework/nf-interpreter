@@ -220,7 +220,7 @@ int CountEntries(const char *folderPath, int type)
     return count;
 }
 
-HRESULT BuildPathsArray(const char *vfsFolderPath, const char *folderPath, CLR_RT_HeapBlock arrayPaths, int entryType)
+HRESULT BuildPathsArray(const char *vfsFolderPath, const char *folderPath, CLR_RT_HeapBlock * arrayPaths, int entryType)
 {
     char *stringBuffer = NULL;
     char *workingBuffer = NULL;
@@ -232,7 +232,7 @@ HRESULT BuildPathsArray(const char *vfsFolderPath, const char *folderPath, CLR_R
         struct dirent *fileInfo;
 
         // get a pointer to the first object in the array (which is of type <String>)
-        pathEntry = (CLR_RT_HeapBlock *)arrayPaths.DereferenceArray()->GetFirstElement();
+        pathEntry = (CLR_RT_HeapBlock *)arrayPaths->DereferenceArray()->GetFirstElement();
 
         // allocate memory for buffers
         stringBuffer = (char *)platform_malloc(FF_LFN_BUF + 1);
@@ -333,7 +333,7 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_Directory::GetFilesNative___STATI
     if (fileCount > 0)
     {
         // 2nd pass fill directory path names
-        NANOCLR_CHECK_HRESULT(BuildPathsArray(vfsPath, folderPath, folderArrayPaths, DT_REG))
+        NANOCLR_CHECK_HRESULT(BuildPathsArray(vfsPath, folderPath, &folderArrayPaths, DT_REG))
     }
 
     NANOCLR_CLEANUP();
@@ -377,7 +377,7 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_Directory::GetDirectoriesNative__
     if (directoryCount > 0)
     {
         // 2nd pass fill directory path names
-        NANOCLR_CHECK_HRESULT(BuildPathsArray(vfsPath, folderPath, folderArrayPaths, DT_DIR))
+        NANOCLR_CHECK_HRESULT(BuildPathsArray(vfsPath, folderPath, &folderArrayPaths, DT_DIR))
     }
 
     NANOCLR_CLEANUP();

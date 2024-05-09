@@ -196,11 +196,11 @@ int32_t sys_dev_pwm_native_System_Device_Pwm_PwmChannelHelpers::GetOptimumResolu
 
     optimumDutyResolution = 1;
 
-    for (int dutyResolution = SOC_LEDC_TIMER_BIT_WIDE_NUM - 1; dutyResolution > 0; dutyResolution--)
+    for (int dutyResolution = SOC_LEDC_TIMER_BIT_WIDTH - 1; dutyResolution > 0; dutyResolution--)
     {
         precision = (0x1 << dutyResolution); // 2**depth
 
-        divParam = ((uint64_t)LEDC_APB_CLK_HZ << 8) / desiredFrequency / precision;
+        divParam = ((uint64_t)APB_CLK_FREQ << 8) / desiredFrequency / precision;
 
         if (divParam > 256)
         {

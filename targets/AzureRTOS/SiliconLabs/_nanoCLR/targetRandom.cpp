@@ -4,7 +4,7 @@
 //
 #include "Core.h"
 #include <em_device.h>
-#include <sli_crypto_trng_driver.h>
+#include <sli_crypto_driver_trng.h>
 
 void CLR_RT_Random::Initialize()
 {

@@ -30,9 +30,9 @@
 #include <sys/stat.h>
 #include <esp32_idf.h>
 #include <esp_vfs_fat.h>
-#include <sdmmc_host.h>
-#include <sdspi_host.h>
-#include <include/sdmmc_cmd.h>
+#include <driver/sdmmc_host.h>
+#include <driver/sdspi_host.h>
+#include <sdmmc_cmd.h>
 
 #include <target_platform.h>
 
@@ -48,9 +48,15 @@ sdmmc_card_t *card;
 //
 //  Unmount SD card ( MMC/SDIO or SPI)
 //
-bool Storage_UnMountSDCard()
+bool Storage_UnMountSDCard(int driveIndex)
 {
-    if (esp_vfs_fat_sdmmc_unmount() != ESP_OK)
+    char mountPoint[] = INDEX0_DRIVE_LETTER;
+
+    // Change fatfs drive letter to mount point  D: -> /D for ESP32 VFS
+    mountPoint[1] = mountPoint[0] + driveIndex;
+    mountPoint[0] = '/';
+
+    if (esp_vfs_fat_sdcard_unmount(mountPoint, card) != ESP_OK)
     {
         return false;
     }
@@ -130,7 +136,7 @@ bool Storage_MountMMC(bool bit1Mode, int driveIndex)
     {
         // Invalid state means its already mounted, this can happen if you are trying to debug mount from managed code
         // and the code has already run & mounted
-        Storage_UnMountSDCard();
+        Storage_UnMountSDCard(driveIndex);
         errCode = esp_vfs_fat_sdmmc_mount(mountPoint, &host, &slot_config, &mount_config, &card);
     }
 
@@ -159,9 +165,11 @@ bool Storage_MountSpi(int spiBus, uint32_t csPin, int driveIndex)
     ESP_LOGI(TAG, "Initializing SPI SD card");
 
     sdmmc_host_t host = SDSPI_HOST_DEFAULT();
-#if defined(CONFIG_IDF_TARGET_ESP32C3) || defined(CONFIG_IDF_TARGET_ESP32S3)
-    host.slot = spiBus;
+#if defined(CONFIG_IDF_TARGET_ESP32C3) || defined(CONFIG_IDF_TARGET_ESP32S3) || defined(CONFIG_IDF_TARGET_ESP32C6) || defined(CONFIG_IDF_TARGET_ESP32H2)
+    // First available bus on ESP32_C3/S3/C6/H2 is SPI2_HOST
+    host.slot = spiBus + SPI2_HOST;
 #else
+    // First available bus on ESP32 is HSPI_HOST(1)
     host.slot = spiBus + HSPI_HOST;
 #endif
 
@@ -181,7 +189,7 @@ bool Storage_MountSpi(int spiBus, uint32_t csPin, int driveIndex)
     {
         // Invalid state means its already mounted, this can happen if you are trying to debug mount from managed code
         // and the code has already run & mounted
-        Storage_UnMountSDCard();
+        Storage_UnMountSDCard(driveIndex);
         errCode = esp_vfs_fat_sdspi_mount(mountPoint, &host, &slot_config, &mount_config, &card);
     }
 

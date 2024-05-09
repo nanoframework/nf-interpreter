@@ -18,6 +18,7 @@ HRESULT Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32
     NativeEnableWakeupByTimer___STATIC__nanoFrameworkHardwareEsp32EspNativeError__U8(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
+#if !defined(CONFIG_IDF_TARGET_ESP32H2)
     {
         uint64_t time_us = (uint64_t)stack.Arg0().NumericByRef().s8;
 
@@ -27,6 +28,10 @@ HRESULT Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32
         stack.SetResult_I4((int)err);
     }
     NANOCLR_NOCLEANUP_NOLABEL();
+#else
+    NANOCLR_SET_AND_LEAVE(CLR_E_NOT_SUPPORTED);
+    NANOCLR_NOCLEANUP();
+#endif
 }
 
 HRESULT Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32_Sleep::
@@ -209,7 +214,7 @@ HRESULT Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32
     touch_pad_set_fsm_mode(TOUCH_FSM_MODE_TIMER);
     touch_pad_fsm_start();
     // Giving time for measurements
-    vTaskDelay(100 / portTICK_RATE_MS);
+    vTaskDelay(100 / portTICK_PERIOD_MS);
 
     coefficient = stack.Arg2().NumericByRef().u1;
 
@@ -258,6 +263,7 @@ HRESULT Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32
     NativeStartLightSleep___STATIC__nanoFrameworkHardwareEsp32EspNativeError(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
+#if !defined(CONFIG_IDF_TARGET_ESP32H2)
     {
         esp_err_t err = esp_light_sleep_start();
 
@@ -265,6 +271,10 @@ HRESULT Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32
         stack.SetResult_I4((int)err);
     }
     NANOCLR_NOCLEANUP_NOLABEL();
+#else
+    NANOCLR_SET_AND_LEAVE(CLR_E_NOT_SUPPORTED);
+    NANOCLR_NOCLEANUP();
+#endif
 }
 
 HRESULT Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32_Sleep::

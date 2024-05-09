@@ -5,7 +5,7 @@
 
 #include <nf_sys_io_filesystem.h>
 #include <esp_vfs_fat.h>
-#include <sdmmc_host.h>
+#include <driver/sdmmc_host.h>
 #include <diskio_impl.h>
 #include <targetHAL_FileOperation.h>
 #include <targetHAL_ConfigStorage.h>

@@ -14,7 +14,7 @@ resources:
       type: github
       name: espressif/esp-idf
       endpoint: nanoframework
-      ref: refs/tags/v4.4.7
+      ref: refs/tags/v5.1.1
     
 # scheduled build
 # the schedule is defined at the AZDO web interface because of inconsistencies with time zones
@@ -489,6 +489,24 @@ jobs:
         TargetName: ESP32_S3_BLE
         PackageName: ESP32_S3_BLE
         CMakePreset: ESP32_S3_BLE
+
+      ESP32_WESP32:
+        TargetSeries: 'esp32'
+        TargetBoard: ESP32
+        BuildOptions: 
+        IDF_Target: esp32
+        TargetName: ESP32_WESP32
+        PackageName: ESP32_WESP32
+        CMakePreset: ESP32_WESP32   
+
+      ESP32_WT32_ETH01:
+        TargetBoard: ESP32
+        TargetSeries: 'esp32'
+        BuildOptions: 
+        TargetName: ESP32_WT32_ETH01
+        IDF_Target: esp32
+        PackageName: ESP32_WT32_ETH01
+        CMakePreset: ESP32_WT32_ETH01   
 
   variables:
     DOTNET_NOLOGO: true
