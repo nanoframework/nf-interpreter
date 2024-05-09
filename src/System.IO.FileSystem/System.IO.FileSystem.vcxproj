@@ -22,9 +22,9 @@
     <ClCompile Include="nf_sys_io_filesystem.cpp" />
     <ClCompile Include="nf_sys_io_filesystem_nanoFramework_System_IO_FileSystem_SDCard_stubs.cpp" />
     <ClCompile Include="nf_sys_io_filesystem_System_IO_DriveInfo_stubs.cpp" />
-    <ClCompile Include="nf_sys_io_filesystem_System_IO_NativeFileStream_stubs.cpp" />
-    <ClCompile Include="nf_sys_io_filesystem_System_IO_NativeFindFile_stubs.cpp" />
-    <ClCompile Include="nf_sys_io_filesystem_System_IO_NativeIO_stubs.cpp" />
+    <ClCompile Include="nf_sys_io_filesystem_System_IO_NativeFileStream.cpp" />
+    <ClCompile Include="nf_sys_io_filesystem_System_IO_NativeFindFile.cpp" />
+    <ClCompile Include="nf_sys_io_filesystem_System_IO_NativeIO.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="win_storage_native.h" />
@@ -107,7 +107,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\targets\win32\Include;..\Include;..\CLR\Include;..\CorLib;..\HAL\Include;..\PAL\Include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\targets\win32\Include;..\Include;..\CLR\Include;..\CorLib;..\HAL\Include;..\PAL\Include;$(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -120,7 +120,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\targets\win32\Include;..\Include;..\CLR\Include;..\CorLib;..\HAL\Include;..\PAL\Include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\targets\win32\Include;..\Include;..\CLR\Include;..\CorLib;..\HAL\Include;..\PAL\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -135,7 +135,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\targets\win32\Include;..\Include;..\CLR\Include;..\CorLib;..\HAL\Include;..\PAL\Include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\targets\win32\Include;..\Include;..\CLR\Include;..\CorLib;..\HAL\Include;..\PAL\Include;$(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -152,7 +152,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\targets\win32\Include;..\Include;..\CLR\Include;..\CorLib;..\HAL\Include;..\PAL\Include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\targets\win32\Include;..\Include;..\CLR\Include;..\CorLib;..\HAL\Include;..\PAL\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>

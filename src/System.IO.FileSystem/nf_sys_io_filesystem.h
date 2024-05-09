@@ -9,7 +9,6 @@
 #include <nanoCLR_Interop.h>
 #include <nanoCLR_Runtime.h>
 #include <nanoPackStruct.h>
-#include <corlib_native.h>
 #include <target_platform.h>
 #include <nanoCLR_FileStream.h>
 

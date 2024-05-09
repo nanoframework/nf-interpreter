@@ -24,19 +24,14 @@
     <ClCompile Include="nf_sys_io_filesystem_System_IO_DriveInfo_stubs.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="nf_sys_io_filesystem_System_IO_NativeFileStream_stubs.cpp">
+    <ClCompile Include="nf_sys_io_filesystem_System_IO_NativeFileStream.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="nf_sys_io_filesystem_System_IO_NativeFindFile_stubs.cpp">
+    <ClCompile Include="nf_sys_io_filesystem_System_IO_NativeFindFile.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="nf_sys_io_filesystem_System_IO_NativeIO_stubs.cpp">
+    <ClCompile Include="nf_sys_io_filesystem_System_IO_NativeIO.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="win_storage_native.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
   </ItemGroup>
 </Project>
