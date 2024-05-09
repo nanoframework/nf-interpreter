@@ -5,7 +5,6 @@
 
 #include <nanoHAL_v2.h>
 #include <nanoWeak.h>
-#include <targetHAL.h>
 
 volatile int32_t SystemStates[SYSTEM_STATE_TOTAL_STATES];
 
