@@ -126,6 +126,12 @@
     <ClCompile Include="..\..\win32\nanoCLR\Various.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\src\PAL\FileSystem\nanoPAL_FileSystem.cpp">
+      <Filter>Source Files\PAL</Filter>
+    </ClCompile>
+    <ClCompile Include="target_FileSystem.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Include\targetHAL_Time.h">

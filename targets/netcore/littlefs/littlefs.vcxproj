@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="Current" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -19,12 +19,18 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="FileStream.cpp" />
+    <ClCompile Include="$(LITTLEFS_PATH)\lfs.c" />
+    <ClCompile Include="$(LITTLEFS_PATH)\lfs_util.c" />
+    <ClCompile Include="hal_littlefs.c" />
+    <ClCompile Include="littlefs_FS_Driver.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="$(LITTLEFS_PATH)\lfs.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{abfe159e-84d5-489e-bfe6-8a7f4b597a44}</ProjectGuid>
+    <ProjectGuid>{5b70a795-a6f2-44df-8566-5d68d9e892db}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
-    <RootNamespace>FileStream</RootNamespace>
+    <RootNamespace>System.IO.FileSystem</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -61,28 +67,28 @@
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-    <Import Project="..\..\..\..\nf.props" />
+    <Import Project="..\..\..\nf.props" />
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-    <Import Project="..\..\..\..\nf.props" />
+    <Import Project="..\..\..\nf.props" />
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-    <Import Project="..\..\..\..\nf.props" />
+    <Import Project="..\..\..\nf.props" />
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-    <Import Project="..\..\..\..\nf.props" />
+    <Import Project="..\..\..\nf.props" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <OutDir>$(SolutionDir)$(Configuration)\</OutDir>
-    <IntDir>$(Configuration)\</IntDir>
+    <OutDir>$(BinDir)</OutDir>
+    <IntDir>$(IntDir)</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <OutDir>$(SolutionDir)$(Configuration)\</OutDir>
-    <IntDir>$(Configuration)\</IntDir>
+    <OutDir>$(BinDir)</OutDir>
+    <IntDir>$(IntDir)</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <OutDir>$(BinDir)</OutDir>
@@ -98,8 +104,8 @@
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\..\..\targets\win32\Include;..\;..\..\Include;..\..\CorLib;..\..\..\HAL\Include;..\..\..\PAL\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>LFS_CONFIG=lfs_config.h;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(LITTLEFS_PATH);..\..\..\src\System.IO.FileSystem;..\..\..\targets\netcore\littlefs;..\..\..\targets\win32\Include;..\Include;..\CLR\Include;..\CorLib;..\..\..\src\PAL\Include;..\..\..\src\CLR\Include;..\..\..\..\src\CLR\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -111,8 +117,8 @@
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\..\..\targets\win32\Include;..\;..\..\Include;..\..\CorLib;..\..\..\HAL\Include;..\..\..\PAL\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>LFS_CONFIG=lfs_config.h;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(LITTLEFS_PATH);..\..\..\src\System.IO.FileSystem;..\..\..\targets\netcore\littlefs;..\..\..\targets\win32\Include;..\Include;..\CLR\Include;..\CorLib;..\..\..\src\PAL\Include;..\..\..\src\CLR\Include;..\..\..\..\src\CLR\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -126,8 +132,8 @@
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\..\..\targets\win32\Include;..\;..\..\Include;..\..\CorLib;..\..\..\HAL\Include;..\..\..\PAL\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>LFS_CONFIG=lfs_config.h;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(LITTLEFS_PATH);..\..\..\src\System.IO.FileSystem;..\..\..\targets\netcore\littlefs;..\..\..\targets\win32\Include;..\Include;..\CLR\Include;..\CorLib;..\..\..\src\PAL\Include;..\..\..\src\CLR\Include;..\..\..\..\src\CLR\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -143,8 +149,8 @@
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\..\..\targets\win32\Include;..\;..\..\Include;..\..\CorLib;..\..\..\HAL\Include;..\..\..\PAL\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>NDEBUG;_LIB;LFS_CONFIG=lfs_config.h;%(PreprocessorDefinitions);</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(LITTLEFS_PATH);..\..\..\src\System.IO.FileSystem;..\..\..\targets\netcore\littlefs;..\..\..\targets\win32\Include;..\Include;..\CLR\Include;..\CorLib;..\..\..\src\PAL\Include;..\..\..\src\CLR\Include;..\..\..\..\src\CLR\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
