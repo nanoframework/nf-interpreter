@@ -162,6 +162,7 @@
     <ClInclude Include="..\Include\targetHAL_Time.h" />
     <ClInclude Include="..\Include\targetPAL_time.h" />
     <ClInclude Include="..\Include\target_platform.h" />
+    <ClInclude Include="lfs_config.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="nanoCLR_native.h" />
     <ClInclude Include="platform_selector.h" />
@@ -210,6 +211,7 @@
     <ClCompile Include="target_FileSystem.cpp" />
     <ClCompile Include="Target_HAL.cpp" />
     <ClCompile Include="..\..\win32\nanoCLR\WatchDog.cpp" />
+    <ClCompile Include="target_littlefs.cpp" />
     <ClCompile Include="WireProtocol_HAL_Interface.cpp" />
   </ItemGroup>
   <ItemGroup>

@@ -31,7 +31,8 @@ STREAM_DRIVER_DETAILS *LITTLEFS_FS_Driver::DriverDetails(const VOLUME_ID *volume
 
 void LITTLEFS_FS_Driver::Initialize()
 {
-    // nothing to do here as the littlefs instances are already initialized at target boot
+    hal_lfs_config();
+    hal_lfs_mount();
 }
 
 bool LITTLEFS_FS_Driver::InitializeVolume(const VOLUME_ID *volume)

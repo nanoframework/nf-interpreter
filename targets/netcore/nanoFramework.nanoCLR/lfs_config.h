@@ -22,7 +22,7 @@ extern void platform_free(void *ptr);
 #define LFS_NO_DEBUG
 #define LFS_MALLOC platform_malloc
 #define LFS_FREE   platform_free
-#define LFS_THREADSAFE
+//#define LFS_THREADSAFE
 
 #ifndef LFS_NO_MALLOC
 #include <stdlib.h>

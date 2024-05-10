@@ -50,10 +50,8 @@ FileSystemVolume *g_FS_Volumes;
 
 void FS_AddVolumes()
 {
-    // 2 SPI flash devices
-    // 1 SD card
-    // 1 USB MSD device
-    g_FS_NumVolumes = 4;
+    // 1 memory mapped volume
+    g_FS_NumVolumes = 1;
 
     g_FS_Volumes = (FileSystemVolume *)platform_malloc(sizeof(FileSystemVolume) * g_FS_NumVolumes);
 
@@ -79,7 +77,7 @@ void FS_AddVolumes()
     // clear the memory
     memset(g_FS_DriverDetails, 0, sizeof(STREAM_DRIVER_DETAILS) * g_FS_NumVolumes);
 
-    // AT25SF641, drive I:, volume 0
+    // memory mapped, drive I:, volume 0
     FileSystemVolumeList::AddVolume(
         &g_FS_Volumes[0],
         "I:",
@@ -87,15 +85,5 @@ void FS_AddVolumes()
         &g_LITTLEFS_STREAM_DriverInterface,
         &g_LITTLEFS_FILE_SYSTEM_DriverInterface,
         0,
-        FALSE);
-
-    // W25Q128, drive F:, volume 1
-    FileSystemVolumeList::AddVolume(
-        &g_FS_Volumes[1],
-        "J:",
-        0,
-        &g_LITTLEFS_STREAM_DriverInterface,
-        &g_LITTLEFS_FILE_SYSTEM_DriverInterface,
-        1,
         FALSE);
 }

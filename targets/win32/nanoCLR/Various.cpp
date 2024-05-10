@@ -151,6 +151,11 @@ void __cdecl nanoHAL_Initialize(void)
     HAL_CONTINUATION::InitializeList();
     HAL_COMPLETION::InitializeList();
 
+    FS_Initialize();
+    FileSystemVolumeList::Initialize();
+    FS_AddVolumes();
+    FileSystemVolumeList::InitializeVolumes();
+
     Events_Initialize();
 }
 
@@ -170,6 +175,13 @@ void __cdecl nanoHAL_Uninitialize(bool isPoweringDown)
             return;
         }
     }
+
+    FileSystemVolumeList::UninitializeVolumes();
+
+    Events_Uninitialize();
+
+    HAL_CONTINUATION::Uninitialize();
+    HAL_COMPLETION ::Uninitialize();
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
