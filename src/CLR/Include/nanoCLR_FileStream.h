@@ -23,7 +23,7 @@ struct CLR_RT_FileStream
     uint8_t *m_dataOut;
     int m_dataInSize;
     int m_dataOutSize;
-    uint32_t m_handle;
+    void *m_handle;
 
     //--//
 
@@ -85,13 +85,13 @@ struct CLR_RT_FindFile
 {
   private:
     FileSystemVolume *m_driver;
-    uint32_t m_handle;
+    void *m_handle;
     FS_FILEINFO m_fi;
     char *m_fullPath;
     uint32_t m_fullPathBufferSize;
 
   public:
-    static HRESULT CreateInstance(CLR_RT_HeapBlock &ref, LPCSTR path, LPCSTR searchPattern);
+    static HRESULT CreateInstance(CLR_RT_HeapBlock &ref, const char *path, const char *searchPattern);
 
     static void RelocationHandler(CLR_RT_HeapBlock_BinaryBlob *ptr);
 

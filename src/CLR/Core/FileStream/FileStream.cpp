@@ -101,7 +101,7 @@ HRESULT CLR_RT_FileStream::CreateInstance(CLR_RT_HeapBlock &ref, const char *pat
             break;
     }
 
-    NANOCLR_CHECK_HRESULT(driver->Open(relativePath, &(fs->m_handle)));
+    NANOCLR_CHECK_HRESULT(driver->Open(relativePath, fs->m_handle));
 
     NANOCLR_NOCLEANUP();
 }
@@ -344,7 +344,7 @@ HRESULT CLR_RT_FindFile::CreateInstance(CLR_RT_HeapBlock &ref, const char *path,
     ff->m_fi.FileName = &(ff->m_fullPath[i]);
     ff->m_fi.FileNameSize = fullPathBufferSize - i;
 
-    NANOCLR_CHECK_HRESULT(ff->m_driver->FindOpen(relativePath, &(ff->m_handle)));
+    NANOCLR_CHECK_HRESULT(ff->m_driver->FindOpen(relativePath, ff->m_handle));
 
     NANOCLR_NOCLEANUP();
 }

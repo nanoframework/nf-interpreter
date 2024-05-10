@@ -95,9 +95,9 @@ extern "C"
     typedef HRESULT (
         *FS_GETVOLUMELABEL)(const VOLUME_ID * /*volume*/, const char * /*volumeLabel*/, int32_t /*volumeLabelLen*/);
 
-    typedef HRESULT (*FS_FINDOPEN)(const VOLUME_ID * /*volume*/, const char * /*path*/, uint32_t * /*findHandle*/);
-    typedef HRESULT (*FS_FINDNEXT)(uint32_t /*findHandle*/, FS_FILEINFO * /*findData*/, bool * /*found*/);
-    typedef HRESULT (*FS_FINDCLOSE)(uint32_t /*findHandle*/);
+    typedef HRESULT (*FS_FINDOPEN)(const VOLUME_ID * /*volume*/, const char * /*path*/, void *& /*findHandle*/);
+    typedef HRESULT (*FS_FINDNEXT)(void * /*findHandle*/, FS_FILEINFO * /*findData*/, bool * /*found*/);
+    typedef HRESULT (*FS_FINDCLOSE)(void * /*findHandle*/);
 
     typedef HRESULT (*FS_GETFILEINFO)(
         const VOLUME_ID * /*volume*/,
@@ -148,18 +148,18 @@ extern "C"
     typedef bool (*STREAM_INITIALIZEVOLUME)(const VOLUME_ID * /*volume*/);
     typedef bool (*STREAM_UNINITIALIZEVOLUME)(const VOLUME_ID * /*volume*/);
     typedef STREAM_DRIVER_DETAILS *(*STREAM_DRIVERDETAILS)(const VOLUME_ID * /*volume*/);
-    typedef HRESULT (*STREAM_OPEN)(const VOLUME_ID * /*volume*/, const char * /*path*/, uint32_t * /*handle*/);
-    typedef HRESULT (*STREAM_CLOSE)(uint32_t /*handle*/);
-    typedef HRESULT (*STREAM_READ)(uint32_t /*handle*/, uint8_t * /*buffer*/, int /*count*/, int * /*readCount*/);
-    typedef HRESULT (*STREAM_WRITE)(uint32_t /*handle*/, uint8_t * /*buffer*/, int /*count*/, int * /*writtenCount*/);
-    typedef HRESULT (*STREAM_FLUSH)(uint32_t /*handle*/);
+    typedef HRESULT (*STREAM_OPEN)(const VOLUME_ID * /*volume*/, const char * /*path*/, void *& /*handle*/);
+    typedef HRESULT (*STREAM_CLOSE)(void * /*handle*/);
+    typedef HRESULT (*STREAM_READ)(void * /*handle*/, uint8_t * /*buffer*/, int /*count*/, int * /*readCount*/);
+    typedef HRESULT (*STREAM_WRITE)(void * /*handle*/, uint8_t * /*buffer*/, int /*count*/, int * /*writtenCount*/);
+    typedef HRESULT (*STREAM_FLUSH)(void * /*handle*/);
     typedef HRESULT (*STREAM_SEEK_)(
-        uint32_t /*handle*/,
+        void * /*handle*/,
         int64_t /*offset*/,
         uint32_t /*origin*/,
         int64_t * /*position*/); // STREAM_SEEK conflicts with some windows header, use STREAM_SEEK_ instead
-    typedef HRESULT (*STREAM_GETLENGTH)(uint32_t /*handle*/, int64_t * /*length*/);
-    typedef HRESULT (*STREAM_SETLENGTH)(uint32_t /*handle*/, int64_t /*length*/);
+    typedef HRESULT (*STREAM_GETLENGTH)(void * /*handle*/, int64_t * /*length*/);
+    typedef HRESULT (*STREAM_SETLENGTH)(void * /*handle*/, int64_t /*length*/);
 
     struct STREAM_DRIVER_INTERFACE
     {
@@ -266,7 +266,7 @@ extern "C"
             return m_fsDriver->FlushAll(&m_volumeId);
         }
 
-        HRESULT FindOpen(const char *path, uint32_t *findHandle)
+        HRESULT FindOpen(const char *path, void *&findHandle)
         {
             // Use ValidateFind() to validate, this assert is for debug purpose only
             _ASSERTE(m_fsDriver && m_fsDriver->FindOpen);
@@ -274,7 +274,7 @@ extern "C"
             return m_fsDriver->FindOpen(&m_volumeId, path, findHandle);
         }
 
-        HRESULT FindNext(uint32_t findHandle, FS_FILEINFO *findData, bool *found)
+        HRESULT FindNext(void *findHandle, FS_FILEINFO *findData, bool *found)
         {
             // Use ValidateFind() to validate, this assert is for debug purpose only
             _ASSERTE(m_fsDriver && m_fsDriver->FindNext);
@@ -282,7 +282,7 @@ extern "C"
             return m_fsDriver->FindNext(findHandle, findData, found);
         }
 
-        HRESULT FindClose(uint32_t findHandle)
+        HRESULT FindClose(void *findHandle)
         {
             // Use ValidateFind() to validate, this assert is for debug purpose only
             _ASSERTE(m_fsDriver && m_fsDriver->FindClose);
@@ -358,7 +358,7 @@ extern "C"
             return m_streamDriver->DriverDetails(&m_volumeId);
         }
 
-        HRESULT Open(const char *path, uint32_t *handle)
+        HRESULT Open(const char *path, void *&handle)
         {
             // Use ValidateStreamDriver() to validate, this assert is for debug purpose only
             _ASSERTE(m_streamDriver && m_streamDriver->Open);
@@ -366,7 +366,7 @@ extern "C"
             return m_streamDriver->Open(&m_volumeId, path, handle);
         }
 
-        HRESULT Close(uint32_t handle)
+        HRESULT Close(void *handle)
         {
             // Use ValidateStreamDriver() to validate, this assert is for debug purpose only
             _ASSERTE(m_streamDriver && m_streamDriver->Close);
@@ -374,7 +374,7 @@ extern "C"
             return m_streamDriver->Close(handle);
         }
 
-        HRESULT Read(uint32_t handle, uint8_t *buffer, int count, int *readCount)
+        HRESULT Read(void *handle, uint8_t *buffer, int count, int *readCount)
         {
             // Use ValidateStreamDriver() to validate, this assert is for debug purpose only
             _ASSERTE(m_streamDriver && m_streamDriver->Read);
@@ -382,7 +382,7 @@ extern "C"
             return m_streamDriver->Read(handle, buffer, count, readCount);
         }
 
-        HRESULT Write(uint32_t handle, uint8_t *buffer, int count, int *writtenCount)
+        HRESULT Write(void *handle, uint8_t *buffer, int count, int *writtenCount)
         {
             // Use ValidateStreamDriver() to validate, this assert is for debug purpose only
             _ASSERTE(m_streamDriver && m_streamDriver->Write);
@@ -390,7 +390,7 @@ extern "C"
             return m_streamDriver->Write(handle, buffer, count, writtenCount);
         }
 
-        HRESULT Flush(uint32_t handle)
+        HRESULT Flush(void *handle)
         {
             // Use ValidateStreamDriver() to validate, this assert is for debug purpose only
             _ASSERTE(m_streamDriver && m_streamDriver->Flush);
@@ -398,7 +398,7 @@ extern "C"
             return m_streamDriver->Flush(handle);
         }
 
-        HRESULT Seek(uint32_t handle, int64_t offset, uint32_t origin, int64_t *position)
+        HRESULT Seek(void *handle, int64_t offset, uint32_t origin, int64_t *position)
         {
             // Use ValidateStreamDriver() to validate, this assert is for debug purpose only
             _ASSERTE(m_streamDriver && m_streamDriver->Seek);
@@ -406,7 +406,7 @@ extern "C"
             return m_streamDriver->Seek(handle, offset, origin, position);
         }
 
-        HRESULT GetLength(uint32_t handle, int64_t *length)
+        HRESULT GetLength(void *handle, int64_t *length)
         {
             // Use ValidateStreamDriver() to validate, this assert is for debug purpose only
             _ASSERTE(m_streamDriver && m_streamDriver->GetLength);
@@ -414,7 +414,7 @@ extern "C"
             return m_streamDriver->GetLength(handle, length);
         }
 
-        HRESULT SetLength(uint32_t handle, int64_t length)
+        HRESULT SetLength(void *handle, int64_t length)
         {
             // Use ValidateStreamDriver() to validate, this assert is for debug purpose only
             _ASSERTE(m_streamDriver && m_streamDriver->SetLength);

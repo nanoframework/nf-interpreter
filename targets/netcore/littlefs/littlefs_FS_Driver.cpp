@@ -123,7 +123,7 @@ HRESULT LITTLEFS_FS_Driver::GetVolumeLabel(const VOLUME_ID *volume, const char *
 
 //--//
 
-HRESULT LITTLEFS_FS_Driver::Open(const VOLUME_ID *volume, const char *path, uint32_t *handle)
+HRESULT LITTLEFS_FS_Driver::Open(const VOLUME_ID *volume, const char *path, void *&handle)
 {
     NANOCLR_HEADER();
 
@@ -204,7 +204,7 @@ HRESULT LITTLEFS_FS_Driver::Open(const VOLUME_ID *volume, const char *path, uint
         LFS_ERR_OK)
     {
         // store the handle
-        *handle = (uint32_t)fileHandle;
+        handle = fileHandle;
 
         if (!fileExists)
         {
@@ -231,7 +231,7 @@ HRESULT LITTLEFS_FS_Driver::Open(const VOLUME_ID *volume, const char *path, uint
     NANOCLR_CLEANUP_END();
 }
 
-HRESULT LITTLEFS_FS_Driver::Close(uint32_t handle)
+HRESULT LITTLEFS_FS_Driver::Close(void *handle)
 {
     NANOCLR_HEADER();
 
@@ -267,7 +267,7 @@ HRESULT LITTLEFS_FS_Driver::Close(uint32_t handle)
     NANOCLR_CLEANUP_END();
 }
 
-HRESULT LITTLEFS_FS_Driver::Read(uint32_t handle, uint8_t *buffer, int size, int *bytesRead)
+HRESULT LITTLEFS_FS_Driver::Read(void *handle, uint8_t *buffer, int size, int *bytesRead)
 {
     NANOCLR_HEADER();
 
@@ -312,7 +312,7 @@ HRESULT LITTLEFS_FS_Driver::Read(uint32_t handle, uint8_t *buffer, int size, int
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT LITTLEFS_FS_Driver::Write(uint32_t handle, uint8_t *buffer, int size, int *bytesWritten)
+HRESULT LITTLEFS_FS_Driver::Write(void *handle, uint8_t *buffer, int size, int *bytesWritten)
 {
     NANOCLR_HEADER();
 
@@ -344,7 +344,7 @@ HRESULT LITTLEFS_FS_Driver::Write(uint32_t handle, uint8_t *buffer, int size, in
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT LITTLEFS_FS_Driver::Flush(uint32_t handle)
+HRESULT LITTLEFS_FS_Driver::Flush(void *handle)
 {
     LITTLEFS_FileHandle *fileHandle;
 
@@ -364,7 +364,7 @@ HRESULT LITTLEFS_FS_Driver::Flush(uint32_t handle)
     return S_OK;
 }
 
-HRESULT LITTLEFS_FS_Driver::Seek(uint32_t handle, int64_t offset, uint32_t origin, int64_t *position)
+HRESULT LITTLEFS_FS_Driver::Seek(void *handle, int64_t offset, uint32_t origin, int64_t *position)
 {
     LITTLEFS_FileHandle *fileHandle;
 
@@ -408,7 +408,7 @@ HRESULT LITTLEFS_FS_Driver::Seek(uint32_t handle, int64_t offset, uint32_t origi
     return S_OK;
 }
 
-HRESULT LITTLEFS_FS_Driver::GetLength(uint32_t handle, int64_t *length)
+HRESULT LITTLEFS_FS_Driver::GetLength(void *handle, int64_t *length)
 {
     LITTLEFS_FileHandle *fileHandle;
 
@@ -430,7 +430,7 @@ HRESULT LITTLEFS_FS_Driver::GetLength(uint32_t handle, int64_t *length)
     return S_OK;
 }
 
-HRESULT LITTLEFS_FS_Driver::SetLength(uint32_t handle, int64_t length)
+HRESULT LITTLEFS_FS_Driver::SetLength(void *handle, int64_t length)
 {
     LITTLEFS_FileHandle *fileHandle;
     uint32_t currentLength;
@@ -494,7 +494,7 @@ HRESULT LITTLEFS_FS_Driver::SetLength(uint32_t handle, int64_t length)
 
 //--//
 
-HRESULT LITTLEFS_FS_Driver::FindOpen(const VOLUME_ID *volume, const char *path, uint32_t *handle)
+HRESULT LITTLEFS_FS_Driver::FindOpen(const VOLUME_ID *volume, const char *path, void *&handle)
 {
     NANOCLR_HEADER();
 
@@ -531,7 +531,7 @@ HRESULT LITTLEFS_FS_Driver::FindOpen(const VOLUME_ID *volume, const char *path, 
         lfs_dir_seek(findHandle->fs, &findHandle->dir, 0);
 
         // store the handle
-        *handle = (uint32_t)findHandle;
+        handle = findHandle;
 
         // done here, return imediatly so handle doesn't get cleared
         hr = S_OK;
@@ -551,7 +551,7 @@ HRESULT LITTLEFS_FS_Driver::FindOpen(const VOLUME_ID *volume, const char *path, 
     NANOCLR_CLEANUP_END();
 }
 
-HRESULT LITTLEFS_FS_Driver::FindNext(uint32_t handle, FS_FILEINFO *fi, bool *fileFound)
+HRESULT LITTLEFS_FS_Driver::FindNext(void *handle, FS_FILEINFO *fi, bool *fileFound)
 {
     NANOCLR_HEADER();
 
@@ -626,7 +626,7 @@ HRESULT LITTLEFS_FS_Driver::FindNext(uint32_t handle, FS_FILEINFO *fi, bool *fil
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT LITTLEFS_FS_Driver::FindClose(uint32_t handle)
+HRESULT LITTLEFS_FS_Driver::FindClose(void *handle)
 {
     LITTLEFS_FindFileHandle *findHandle;
 
