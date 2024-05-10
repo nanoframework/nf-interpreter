@@ -18,11 +18,11 @@
 #endif
 
 extern "C" void set_signal_sock_function(void (*funcPtr)());
-extern esp_netif_t * WifiStationEspNetif;
+extern esp_netif_t *WifiStationEspNetif;
 
 #define WIFI_EVENT_TYPE_SCAN_COMPLETE 1
 
-//#define 	PRINT_NET_EVENT 	1
+// #define 	PRINT_NET_EVENT 	1
 
 // buffer with host name
 char hostName[18] = "nanodevice_";
@@ -98,23 +98,25 @@ static void PostThreadEvent(OpenThreadEventType event, uint16_t data1, uint32_t 
 
 static void initialize_sntp()
 {
-    esp_sntp_config_t config = { 
-        .smooth_sync = false, 
-        .server_from_dhcp = false, 
-        .wait_for_sync = true, 
-        .start = true, 
-        .sync_cb = NULL, 
-        .renew_servers_after_new_IP = false, 
-        .ip_event_to_renew = (ip_event_t)0, 
-        .index_of_first_server = 0, 
-        .num_of_servers = 2
-        };
+    esp_sntp_config_t config = {
+        .smooth_sync = false,
+        .server_from_dhcp = false,
+        .wait_for_sync = true,
+        .start = true,
+        .sync_cb = NULL,
+        .renew_servers_after_new_IP = false,
+        .ip_event_to_renew = (ip_event_t)0,
+        .index_of_first_server = 0,
+        .num_of_servers = CONFIG_LWIP_SNTP_MAX_SERVERS};
 
     config.servers[0] = SNTP_SERVER0_DEFAULT_ADDRESS;
+
+#if (CONFIG_LWIP_SNTP_MAX_SERVERS > 1)
     config.servers[1] = SNTP_SERVER1_DEFAULT_ADDRESS;
+#endif
 
     esp_netif_sntp_init(&config);
- }
+}
 
 static void compose_esp32_hostname()
 {
@@ -150,7 +152,7 @@ static void event_handler(void *arg, esp_event_base_t event_base, int32_t event_
     ets_printf("Event %d, ID: %d\n", event_base, event_id);
 #endif
 
-#if defined(CONFIG_SOC_WIFI_SUPPORTED)    
+#if defined(CONFIG_SOC_WIFI_SUPPORTED)
     if (event_base == WIFI_EVENT)
     {
         switch (event_id)
@@ -183,8 +185,8 @@ static void event_handler(void *arg, esp_event_base_t event_base, int32_t event_
 #if LWIP_IPV6
                 {
                     // Note: Did use esp_netif_create_ip6_linklocal originally but this failed because
-                    // it tests for Netif to be up and didn't seem to be. Calling netif_create_ip6_linklocal_address directly
-                    // seems to work fine.
+                    // it tests for Netif to be up and didn't seem to be. Calling netif_create_ip6_linklocal_address
+                    // directly seems to work fine.
                     struct netif *netif = esp_netif_get_handle_from_ifkey("WIFI_STA_DEF")->lwip_netif;
                     netif_create_ip6_linklocal_address(netif, 1);
                 }
@@ -301,9 +303,9 @@ static void event_handler(void *arg, esp_event_base_t event_base, int32_t event_
                 break;
         }
     }
-    else 
+    else
 #endif
-    if (event_base == IP_EVENT)
+        if (event_base == IP_EVENT)
     {
         switch (event_id)
         {
@@ -390,22 +392,22 @@ static void event_handler(void *arg, esp_event_base_t event_base, int32_t event_
 #if HAL_USE_THREAD == TRUE
 static void thread_event_handler(void *arg, esp_event_base_t event_base, int32_t event_id, void *event_data)
 {
-    // Possible events 
-    // OPENTHREAD_EVENT_START,                    
-    // OPENTHREAD_EVENT_STOP,                     
-    // OPENTHREAD_EVENT_DETACHED,                 
-    // OPENTHREAD_EVENT_ATTACHED,                 
-    // OPENTHREAD_EVENT_ROLE_CHANGED,             
-    // OPENTHREAD_EVENT_IF_UP,                    
-    // OPENTHREAD_EVENT_IF_DOWN,                  
-    // OPENTHREAD_EVENT_GOT_IP6,                  
-    // OPENTHREAD_EVENT_LOST_IP6,                 
-    // OPENTHREAD_EVENT_MULTICAST_GROUP_JOIN,     
-    // OPENTHREAD_EVENT_MULTICAST_GROUP_LEAVE,    
-    // OPENTHREAD_EVENT_TREL_ADD_IP6,             
-    // OPENTHREAD_EVENT_TREL_REMOVE_IP6,          
+    // Possible events
+    // OPENTHREAD_EVENT_START,
+    // OPENTHREAD_EVENT_STOP,
+    // OPENTHREAD_EVENT_DETACHED,
+    // OPENTHREAD_EVENT_ATTACHED,
+    // OPENTHREAD_EVENT_ROLE_CHANGED,
+    // OPENTHREAD_EVENT_IF_UP,
+    // OPENTHREAD_EVENT_IF_DOWN,
+    // OPENTHREAD_EVENT_GOT_IP6,
+    // OPENTHREAD_EVENT_LOST_IP6,
+    // OPENTHREAD_EVENT_MULTICAST_GROUP_JOIN,
+    // OPENTHREAD_EVENT_MULTICAST_GROUP_LEAVE,
+    // OPENTHREAD_EVENT_TREL_ADD_IP6,
+    // OPENTHREAD_EVENT_TREL_REMOVE_IP6,
     // OPENTHREAD_EVENT_TREL_MULTICAST_GROUP_JOIN,
-    // OPENTHREAD_EVENT_SET_DNS_SERVER,      
+    // OPENTHREAD_EVENT_SET_DNS_SERVER,
 
     switch (event_id)
     {
@@ -470,20 +472,23 @@ static void thread_event_handler(void *arg, esp_event_base_t event_base, int32_t
 
         case OPENTHREAD_EVENT_ROLE_CHANGED:
 #ifdef PRINT_NET_EVENT
-            {
-                esp_openthread_role_changed_event_t * optevent = (esp_openthread_role_changed_event_t *)event_data;
-                ets_printf("OPENTHREAD_EVENT_ROLE_CHANGED %d->%d\n", optevent->previous_role, optevent->current_role);
+        {
+            esp_openthread_role_changed_event_t *optevent = (esp_openthread_role_changed_event_t *)event_data;
+            ets_printf("OPENTHREAD_EVENT_ROLE_CHANGED %d->%d\n", optevent->previous_role, optevent->current_role);
 
-                PostThreadEvent(OpenThreadEventType_RoleChanged, 0, (optevent->previous_role << 8) + optevent->current_role);
-            }
+            PostThreadEvent(
+                OpenThreadEventType_RoleChanged,
+                0,
+                (optevent->previous_role << 8) + optevent->current_role);
+        }
 #endif
-            break;
+        break;
 
         default:
 #ifdef PRINT_NET_EVENT
             ets_printf("Thread Event %d, ID: %d\n", event_base, event_id);
 #endif
-        break;
+            break;
     }
 }
 #endif
@@ -502,7 +507,7 @@ void nanoHAL_Network_Initialize()
     // create the default event loop
     ESP_ERROR_CHECK(esp_event_loop_create_default());
 
-#if defined(CONFIG_SOC_WIFI_SUPPORTED)    
+#if defined(CONFIG_SOC_WIFI_SUPPORTED)
     // register the handler for WIFI events
     ESP_ERROR_CHECK(esp_event_handler_instance_register(WIFI_EVENT, ESP_EVENT_ANY_ID, &event_handler, NULL, NULL));
 #endif
@@ -517,7 +522,8 @@ void nanoHAL_Network_Initialize()
 
 #if HAL_USE_THREAD == TRUE
     // register the event handler for OpenThread events
-    ESP_ERROR_CHECK(esp_event_handler_instance_register(OPENTHREAD_EVENT, ESP_EVENT_ANY_ID, &thread_event_handler, NULL, NULL));
+    ESP_ERROR_CHECK(
+        esp_event_handler_instance_register(OPENTHREAD_EVENT, ESP_EVENT_ANY_ID, &thread_event_handler, NULL, NULL));
 #endif
 }
 
