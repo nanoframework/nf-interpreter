@@ -107,11 +107,14 @@ static void initialize_sntp()
         .renew_servers_after_new_IP = false, 
         .ip_event_to_renew = (ip_event_t)0, 
         .index_of_first_server = 0, 
-        .num_of_servers = 2
+        .num_of_servers = CONFIG_LWIP_SNTP_MAX_SERVERS
         };
 
     config.servers[0] = SNTP_SERVER0_DEFAULT_ADDRESS;
+
+#if (CONFIG_LWIP_SNTP_MAX_SERVERS > 1)    
     config.servers[1] = SNTP_SERVER1_DEFAULT_ADDRESS;
+#endif
 
     esp_netif_sntp_init(&config);
  }
