@@ -7,7 +7,6 @@
 #define LITTLEFS_FS_DRIVER_H
 
 #include <nanoCLR_Headers.h>
-//#include <target_littlefs.h>
 #include <nanoHAL_v2.h>
 #include <lfs.h>
 

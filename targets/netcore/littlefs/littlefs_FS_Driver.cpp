@@ -2,8 +2,7 @@
 // Copyright (c) .NET Foundation and Contributors
 // See LICENSE file in the project root for full license information.
 //
-//#include <target_littlefs.h>
-//#include <nanoHAL.h>
+
 #include <nanoPAL_FileSystem.h>
 #include <nf_sys_io_filesystem.h>
 #include "littlefs_FS_Driver.h"
