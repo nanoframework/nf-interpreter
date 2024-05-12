@@ -22,7 +22,7 @@ extern esp_netif_t *WifiStationEspNetif;
 
 #define WIFI_EVENT_TYPE_SCAN_COMPLETE 1
 
-#define 	PRINT_NET_EVENT 	1
+// #define 	PRINT_NET_EVENT 	1
 
 // buffer with host name
 char hostName[18] = "nanodevice_";
@@ -197,28 +197,6 @@ static void event_handler(void *arg, esp_event_base_t event_base, int32_t event_
                 }
 
                 PostAvailabilityOn(IDF_WIFI_STA_DEF);
-
-
-
-                espNetif = esp_netif_get_handle_from_ifkey("WIFI_STA_DEF");
-                ets_printf("WIFI_EVENT_STA_CONNECTED flags %X dhcp %d\n", espNetif->flags, espNetif->dhcpc_status);
-
-
-// #ifdef PRINT_NET_EVENT
-//                 esp_netif_dhcp_status_t dhcp_status;
-//                 result = esp_netif_dhcpc_get_status(espNetif, &dhcp_status);
-//                 ets_printf("WIFI_EVENT_STA_CONNECTED dhcp status %d\n", dhcp_status);
-
-                // if (dhcp_status == ESP_NETIF_DHCP_INIT)
-                // {
-                //     result = esp_netif_dhcpc_start(espNetif);
-                //     ets_printf("esp_netif_dhcpc_start %d \n", result);
-
-                //     result = esp_netif_dhcpc_get_status(espNetif, &dhcp_status);
-                //     ets_printf("WIFI_EVENT_STA_CONNECTED dhcp again status  %d \n", dhcp_status);
-                // }
-//#endif
-
                 break;
 
             case WIFI_EVENT_STA_DISCONNECTED:
@@ -235,10 +213,6 @@ static void event_handler(void *arg, esp_event_base_t event_base, int32_t event_
                 }
 
                 PostAvailabilityOff(IDF_WIFI_STA_DEF);
-
-                // AS debug
-                espNetif = esp_netif_get_handle_from_ifkey("WIFI_STA_DEF");
-                ets_printf("WIFI_EVENT_STA_DISCONNECTED flags %X dhcp %d\n", espNetif->flags, espNetif->dhcpc_status);
 
                 if (NF_ESP32_IsToConnect)
                 {
@@ -536,7 +510,7 @@ void nanoHAL_Network_Initialize()
     result = esp_event_loop_create_default();
 
     // If the default event loop is already created (ESP_ERR_INVALID_STATE) then don't need to register 
-    // This happens when debugging in VS as it does warm reboot 
+    // This happens when debugging in VS, as it does a warm reboot 
     if (result != ESP_ERR_INVALID_STATE)
     {
         ESP_ERROR_CHECK(result);
