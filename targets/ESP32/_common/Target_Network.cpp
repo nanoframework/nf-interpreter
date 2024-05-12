@@ -29,7 +29,7 @@ bool Network_Interface_Bind(int index)
 int Network_Interface_Open(int index)
 {
     HAL_Configuration_NetworkInterface networkConfiguration;
-
+ets_printf("Network_Interface_Open %d\n", index);
     // load network interface configuration from storage
     if (!ConfigurationManager_GetConfigurationBlock(
             (void *)&networkConfiguration,
@@ -73,6 +73,7 @@ int Network_Interface_Open(int index)
 bool Network_Interface_Close(int index)
 {
     HAL_Configuration_NetworkInterface networkConfiguration;
+ets_printf("Network_Interface_Close %d\n", index);
 
     // load network interface configuration from storage
     if (!ConfigurationManager_GetConfigurationBlock(

@@ -339,12 +339,7 @@ bool NF_ESP32_Wireless_Close()
 {
     if (IsWifiInitialised)
     {
-        esp_wifi_stop();
-        esp_wifi_deinit();
-
-        // clear flags
-        IsWifiInitialised = false;
-        NF_ESP32_IsToConnect = false;
+        NF_ESP32_DeinitWifi();
     }
 
     return false;
