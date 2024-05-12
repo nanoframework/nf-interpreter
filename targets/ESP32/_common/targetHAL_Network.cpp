@@ -509,8 +509,8 @@ void nanoHAL_Network_Initialize()
     // create the default event loop if required
     result = esp_event_loop_create_default();
 
-    // If the default event loop is already created (ESP_ERR_INVALID_STATE) then don't need to register 
-    // This happens when debugging in VS, as it does a warm reboot 
+    // If the default event loop is already created (ESP_ERR_INVALID_STATE) then don't need to register
+    // This happens when debugging in VS, as it does a warm reboot
     if (result != ESP_ERR_INVALID_STATE)
     {
         ESP_ERROR_CHECK(result);
