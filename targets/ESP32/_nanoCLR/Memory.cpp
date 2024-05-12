@@ -104,7 +104,7 @@ void HeapLocation(unsigned char *&baseAddress, unsigned int &sizeInBytes)
         size_t largestFreeBlock;
 
         // check if we have any SPIRAM
-        size_t spiramMaxSize = heap_caps_get_largest_free_block(memoryCaps | MALLOC_CAP_SPIRAM);
+        size_t spiramMaxSize = heap_caps_get_largest_free_block(MALLOC_CAP_SPIRAM);
 
         // Sanity check - Make sure there is at least managedHeapSize available in SPIRAM
         if (spiramMaxSize)
