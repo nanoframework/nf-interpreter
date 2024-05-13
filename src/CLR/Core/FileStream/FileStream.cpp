@@ -22,6 +22,7 @@ HRESULT CLR_RT_FileStream::CreateInstance(CLR_RT_HeapBlock &ref, const char *pat
     char *rootName;
     char *relativePath;
     uint32_t rootNameLength = 0;
+    uint32_t *rootNameLengthP = &rootNameLength;
 
     int inputBufferSize = 0;
     int outputBufferSize = 0;
@@ -29,7 +30,7 @@ HRESULT CLR_RT_FileStream::CreateInstance(CLR_RT_HeapBlock &ref, const char *pat
     FileSystemVolume *driver;
     STREAM_DRIVER_DETAILS *sdd;
 
-    NANOCLR_CHECK_HRESULT(CLR_RT_FileStream::SplitFilePath(path, &rootName, &rootNameLength, &relativePath));
+    NANOCLR_CHECK_HRESULT(CLR_RT_FileStream::SplitFilePath(path, rootName, rootNameLengthP, relativePath));
 
     // Retrieve appropriate driver that handles this root name
     if ((driver = FileSystemVolumeList::FindVolume(rootName, rootNameLength)) == NULL)
@@ -128,9 +129,9 @@ void CLR_RT_FileStream::RelocationHandler(CLR_RT_HeapBlock_BinaryBlob *ptr)
 
 HRESULT CLR_RT_FileStream::SplitFilePath(
     const char *fullPath,
-    char **rootName,
-    uint32_t *rootNameLength,
-    char **relativePath)
+    char *&rootName,
+    uint32_t *&rootNameLength,
+    char *&relativePath)
 {
 
     NATIVE_PROFILE_CLR_IO();
@@ -141,7 +142,7 @@ HRESULT CLR_RT_FileStream::SplitFilePath(
 
     bool isForwardSlash = false;
 
-    char *c = (char *)fullPath;
+    const char *c = fullPath;
     uint32_t rootLen = 0;
 
     if (!fullPath || !rootName || !rootNameLength || !relativePath)
@@ -149,7 +150,7 @@ HRESULT CLR_RT_FileStream::SplitFilePath(
         NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
     }
 
-    *rootName = c;
+    rootName = const_cast<char *>(c);
     // handle both '\' and '/' as path separator
     while ((*c != '\\') && (*c != '/') && (*c != 0))
     {
@@ -163,10 +164,11 @@ HRESULT CLR_RT_FileStream::SplitFilePath(
     }
 
     // relative path always have to start with a '\' (or '/') (*c will be '\0' only when fullPath is \<root>)
-    *relativePath = (*c == 0) ? (isForwardSlash ? (char *)root1 : (char *)root) : c;
+    relativePath =
+        (*c == 0) ? (isForwardSlash ? const_cast<char *>(root1) : const_cast<char *>(root)) : const_cast<char *>(c);
 
     // Invalid paths should be taken care of by Path.NormalizePath() in the managed code
-    if (rootLen >= FS_NAME_MAXLENGTH || hal_strlen_s(*relativePath) >= FS_MAX_PATH_LENGTH)
+    if (rootLen >= FS_NAME_MAXLENGTH || hal_strlen_s(relativePath) >= FS_MAX_PATH_LENGTH)
     {
         NANOCLR_SET_AND_LEAVE(CLR_E_PATH_TOO_LONG);
     }
@@ -281,6 +283,8 @@ HRESULT CLR_RT_FindFile::CreateInstance(CLR_RT_HeapBlock &ref, const char *path,
     char *rootName;
     char *relativePath;
     uint32_t rootNameLength = 0;
+    uint32_t *rootNameLengthP = &rootNameLength;
+
 
     // We will support only the "*" search pattern for now
     if (hal_strncmp_s(searchPattern, "*", 2) != 0)
@@ -288,7 +292,7 @@ HRESULT CLR_RT_FindFile::CreateInstance(CLR_RT_HeapBlock &ref, const char *path,
         NANOCLR_SET_AND_LEAVE(CLR_E_NOT_SUPPORTED);
     }
 
-    NANOCLR_CHECK_HRESULT(CLR_RT_FileStream::SplitFilePath(path, &rootName, &rootNameLength, &relativePath));
+    NANOCLR_CHECK_HRESULT(CLR_RT_FileStream::SplitFilePath(path, rootName, rootNameLengthP, relativePath));
 
     // '\' before the namespace
     fullPathBufferSize = FS_MAX_PATH_LENGTH + rootNameLength + 1;
@@ -316,13 +320,13 @@ HRESULT CLR_RT_FindFile::CreateInstance(CLR_RT_HeapBlock &ref, const char *path,
         NANOCLR_SET_AND_LEAVE(CLR_E_NOT_SUPPORTED);
     }
 
-    ff->m_fullPath = (char *)(&ff[1]);
+    ff->m_fullPath = (void *)(&ff[1]);
     ff->m_fullPathBufferSize = fullPathBufferSize;
 
     // Copy the '\' and root name
     for (i = 0; i < rootNameLength + 1; i++)
     {
-        ff->m_fullPath[i] = path[i];
+        ((char*)ff->m_fullPath)[i] = path[i];
     }
 
     // need to remove the '\' from the root name
@@ -331,17 +335,17 @@ HRESULT CLR_RT_FindFile::CreateInstance(CLR_RT_HeapBlock &ref, const char *path,
     // Copy the rest of the path from the relative path
     for (j = 0; i < fullPathBufferSize && relativePath[j] != 0; i++, j++)
     {
-        ff->m_fullPath[i] = relativePath[j];
+        ((char *)ff->m_fullPath)[i] = relativePath[j];
     }
 
     // Make sure we always ends with '\\'
-    if (ff->m_fullPath[i - 1] != '\\')
+    if (((char *)ff->m_fullPath)[i - 1] != '\\')
     {
-        ff->m_fullPath[i++] = '\\';
-        ff->m_fullPath[i] = 0;
+        ((char *)ff->m_fullPath)[i++] = '\\';
+        ((char *)ff->m_fullPath)[i] = 0;
     }
 
-    ff->m_fi.FileName = &(ff->m_fullPath[i]);
+    ff->m_fi.FileName = &(((char *)ff->m_fullPath)[i]);
     ff->m_fi.FileNameSize = fullPathBufferSize - i;
 
     NANOCLR_CHECK_HRESULT(ff->m_driver->FindOpen(relativePath, ff->m_handle));

@@ -109,7 +109,7 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_NativeFindFile::GetFileInfo___STA
 
     CLR_RT_HeapBlock &top = stack.PushValueAndClear();
 
-    NANOCLR_CHECK_HRESULT(Library_nf_sys_io_filesystem_System_IO_NativeIO::FindVolume(stack.Arg0(), driver, &path));
+    NANOCLR_CHECK_HRESULT(Library_nf_sys_io_filesystem_System_IO_NativeIO::FindVolume(stack.Arg0(), driver, path));
 
     NANOCLR_CHECK_HRESULT(driver->GetFileInfo(path, &fileInfo, &found));
 

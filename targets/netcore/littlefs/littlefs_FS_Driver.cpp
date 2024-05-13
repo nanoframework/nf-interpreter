@@ -608,7 +608,7 @@ HRESULT LITTLEFS_FS_Driver::FindNext(void *handle, FS_FILEINFO *fi, bool *fileFo
     }
 
     // copy the file name, including the string terminator
-    hal_strcpy_s(fi->FileName, fi->FileNameSize + 1, info.name);
+    hal_strcpy_s((char *)fi->FileName, fi->FileNameSize + 1, info.name);
 
     // read and set the attributes (don't care about the result, if it fails the attribute will be set to normal)
     lfs_getattr(findHandle->fs, info.name, NANO_LITTLEFS_ATTRIBUTE, &fi->Attributes, NANO_LITTLEFS_ATTRIBUTE_SIZE);

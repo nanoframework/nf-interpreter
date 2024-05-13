@@ -32,7 +32,7 @@ struct CLR_RT_FileStream
 
     static void RelocationHandler(CLR_RT_HeapBlock_BinaryBlob *ptr);
 
-    static HRESULT SplitFilePath(const char *fullPath, char **rootName, uint32_t *rootNameLength, char **relativePath);
+    static HRESULT SplitFilePath(const char *fullPath, char *&rootName, uint32_t *&rootNameLength, char *&relativePath);
 
     //--//
 
@@ -87,7 +87,7 @@ struct CLR_RT_FindFile
     FileSystemVolume *m_driver;
     void *m_handle;
     FS_FILEINFO m_fi;
-    char *m_fullPath;
+    void *m_fullPath;
     uint32_t m_fullPathBufferSize;
 
   public:

@@ -266,7 +266,7 @@ struct Library_nf_sys_io_filesystem_System_IO_NativeIO
     NANOCLR_NATIVE_DECLARE(SetAttributes___STATIC__VOID__STRING__U4);
 
     //--//
-    static HRESULT FindVolume(CLR_RT_HeapBlock &hbPathRef, FileSystemVolume *&volume, char **relativePath);
+    static HRESULT FindVolume(CLR_RT_HeapBlock &hbPathRef, FileSystemVolume *&volume, char *&relativePath);
 };
 
 struct Library_nf_sys_io_filesystem_System_IO_Path

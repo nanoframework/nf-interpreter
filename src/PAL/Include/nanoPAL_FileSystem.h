@@ -54,7 +54,7 @@ extern "C"
         uint32_t Attributes;
         int64_t Size;
         // This will point to a buffer of size FileNameSize
-        char *FileName;
+        void *FileName;
         // This is the size of the buffer, determined by the size of the base path given in FindOpen
         uint32_t FileNameSize;
     };
