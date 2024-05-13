@@ -599,6 +599,7 @@ HRESULT LITTLEFS_FS_Driver::FindNext(void *handle, FS_FILEINFO *fi, bool *fileFo
     fi->FileNameSize = hal_strlen_s(info.name);
 
     // allocate memory for the file name
+    // MUST BE FREED BY THE CALLER
     fi->FileName = (char *)platform_malloc(fi->FileNameSize + 1);
 
     // sanity check for successfull malloc
@@ -608,7 +609,7 @@ HRESULT LITTLEFS_FS_Driver::FindNext(void *handle, FS_FILEINFO *fi, bool *fileFo
     }
 
     // copy the file name, including the string terminator
-    hal_strcpy_s(fi->FileName, fi->FileNameSize + 1, info.name);
+    hal_strcpy_s((char *)fi->FileName, fi->FileNameSize + 1, info.name);
 
     // read and set the attributes (don't care about the result, if it fails the attribute will be set to normal)
     lfs_getattr(findHandle->fs, info.name, NANO_LITTLEFS_ATTRIBUTE, &fi->Attributes, NANO_LITTLEFS_ATTRIBUTE_SIZE);
@@ -629,16 +630,17 @@ HRESULT LITTLEFS_FS_Driver::FindClose(void *handle)
 {
     LITTLEFS_FindFileHandle *findHandle;
 
-    if (handle == 0)
+    if (handle != 0)
     {
-        return CLR_E_INVALID_PARAMETER;
+        findHandle = (LITTLEFS_FindFileHandle *)handle;
+
+        if (findHandle->fs != NULL)
+        {
+            lfs_dir_close(findHandle->fs, &findHandle->dir);
+
+            platform_free(findHandle);
+        }
     }
-
-    findHandle = (LITTLEFS_FindFileHandle *)handle;
-
-    lfs_dir_close(findHandle->fs, &findHandle->dir);
-
-    platform_free(findHandle);
 
     return S_OK;
 }

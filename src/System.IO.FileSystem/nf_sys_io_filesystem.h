@@ -155,13 +155,13 @@ struct Library_nf_sys_io_filesystem_nanoFramework_System_IO_FileSystem_StorageEv
     //--//
 };
 
-struct Library_nf_sys_io_filesystem_System_IO_NativeFileInfo
+struct Library_nf_sys_io_filesystem_System_IO_Directory
 {
-    static const int FIELD__Attributes = 1;
-    static const int FIELD__Size = 2;
-    static const int FIELD__FileName = 3;
+    NANOCLR_NATIVE_DECLARE(NativeGetChildren___STATIC__SZARRAY_STRING__STRING__BOOLEAN);
 
     //--//
+
+    static void CombinePaths(char *outpath, const char *path1, const char *path2);
 };
 
 struct Library_nf_sys_io_filesystem_System_IO_DriveInfo
@@ -217,6 +217,15 @@ struct Library_nf_sys_io_filesystem_System_IO_File
     //--//
 };
 
+struct Library_nf_sys_io_filesystem_System_IO_NativeFileInfo
+{
+    static const int FIELD__Attributes = 1;
+    static const int FIELD__Size = 2;
+    static const int FIELD__FileName = 3;
+
+    //--//
+};
+
 struct Library_nf_sys_io_filesystem_System_IO_FileSystemInfo
 {
     static const int FIELD___nativeFileInfo = 1;
@@ -246,15 +255,9 @@ struct Library_nf_sys_io_filesystem_System_IO_NativeFileStream
 
 struct Library_nf_sys_io_filesystem_System_IO_NativeFindFile
 {
-    static const int FIELD___ff = 1;
-
-    NANOCLR_NATIVE_DECLARE(_ctor___VOID__STRING__STRING);
-    NANOCLR_NATIVE_DECLARE(GetNext___SystemIONativeFileInfo);
-    NANOCLR_NATIVE_DECLARE(Close___VOID);
     NANOCLR_NATIVE_DECLARE(GetFileInfo___STATIC__SystemIONativeFileInfo__STRING);
 
     //--//
-    static HRESULT GetFindFile(CLR_RT_StackFrame &stack, CLR_RT_FindFile *&ff);
 };
 
 struct Library_nf_sys_io_filesystem_System_IO_NativeIO

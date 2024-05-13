@@ -33,5 +33,13 @@
     <ClCompile Include="nf_sys_io_filesystem_System_IO_NativeIO.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="nf_sys_io_filesystem_System_IO_Directory.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="win_storage_native.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

@@ -24,6 +24,7 @@ set(System.IO.FileSystem_SRCS
 
     nf_sys_io_filesystem_nanoFramework_System_IO_FileSystem_SDCard__.cpp
     nf_sys_io_filesystem_nanoFramework_System_IO_FileSystem_SDCard.cpp
+    nf_sys_io_filesystem_System_IO_Directory.cpp
     nf_sys_io_filesystem_System_IO_DriveInfo.cpp
     nf_sys_io_filesystem_System_IO_NativeFileStream.cpp
     nf_sys_io_filesystem_System_IO_NativeFindFile.cpp
