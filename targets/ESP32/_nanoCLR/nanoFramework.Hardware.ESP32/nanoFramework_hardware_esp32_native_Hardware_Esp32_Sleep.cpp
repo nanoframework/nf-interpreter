@@ -18,7 +18,6 @@ HRESULT Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32
     NativeEnableWakeupByTimer___STATIC__nanoFrameworkHardwareEsp32EspNativeError__U8(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
-#if !defined(CONFIG_IDF_TARGET_ESP32H2)
     {
         uint64_t time_us = (uint64_t)stack.Arg0().NumericByRef().s8;
 
@@ -28,10 +27,6 @@ HRESULT Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32
         stack.SetResult_I4((int)err);
     }
     NANOCLR_NOCLEANUP_NOLABEL();
-#else
-    NANOCLR_SET_AND_LEAVE(CLR_E_NOT_SUPPORTED);
-    NANOCLR_NOCLEANUP();
-#endif
 }
 
 HRESULT Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32_Sleep::
@@ -40,7 +35,7 @@ HRESULT Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32
 {
     NANOCLR_HEADER();
 
-#if SOC_PM_SUPPORT_EXT_WAKEUP
+#if CONFIG_SOC_PM_SUPPORT_EXT0_WAKEUP
 
     gpio_num_t gpio_num;
     esp_err_t err;
@@ -85,7 +80,7 @@ HRESULT Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32
 {
     NANOCLR_HEADER();
 
-#if SOC_PM_SUPPORT_EXT_WAKEUP
+#if CONFIG_SOC_PM_SUPPORT_EXT1_WAKEUP
 
     uint64_t mask = (uint64_t)stack.Arg0().NumericByRef().s8;
     esp_sleep_ext1_wakeup_mode_t mode = (esp_sleep_ext1_wakeup_mode_t)stack.Arg1().NumericByRef().s4;
@@ -112,7 +107,7 @@ HRESULT Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32
 {
     NANOCLR_HEADER();
 
-#if SOC_PM_SUPPORT_EXT_WAKEUP
+#if CONFIG_SOC_PM_SUPPORT_TOUCH_SENSOR_WAKEUP
     esp_err_t err;
     int pad1;
     int coefficient;
@@ -263,7 +258,6 @@ HRESULT Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32
     NativeStartLightSleep___STATIC__nanoFrameworkHardwareEsp32EspNativeError(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
-#if !defined(CONFIG_IDF_TARGET_ESP32H2)
     {
         esp_err_t err = esp_light_sleep_start();
 
@@ -271,10 +265,6 @@ HRESULT Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32
         stack.SetResult_I4((int)err);
     }
     NANOCLR_NOCLEANUP_NOLABEL();
-#else
-    NANOCLR_SET_AND_LEAVE(CLR_E_NOT_SUPPORTED);
-    NANOCLR_NOCLEANUP();
-#endif
 }
 
 HRESULT Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32_Sleep::
@@ -310,22 +300,12 @@ HRESULT Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32
 {
     NANOCLR_HEADER();
 
-#if SOC_PM_SUPPORT_EXT_WAKEUP
-
     esp_sleep_wakeup_cause_t cause = esp_sleep_get_wakeup_cause();
 
     // Return value to the managed application
     stack.SetResult_I4((int32_t)cause);
 
     NANOCLR_NOCLEANUP_NOLABEL();
-
-#else
-
-    NANOCLR_SET_AND_LEAVE(CLR_E_NOT_SUPPORTED);
-
-    NANOCLR_NOCLEANUP();
-
-#endif
 }
 
 HRESULT Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32_Sleep::
@@ -333,7 +313,7 @@ HRESULT Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32
 {
     NANOCLR_HEADER();
 
-#if SOC_PM_SUPPORT_EXT_WAKEUP
+#if CONFIG_SOC_PM_SUPPORT_EXT1_WAKEUP
 
     int64_t pin = (int64_t)esp_sleep_get_ext1_wakeup_status();
 
@@ -356,7 +336,7 @@ HRESULT Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32
 {
     NANOCLR_HEADER();
 
-#if SOC_PM_SUPPORT_EXT_WAKEUP
+#if CONFIG_SOC_PM_SUPPORT_TOUCH_SENSOR_WAKEUP
 
     touch_pad_t touch_pad = esp_sleep_get_touchpad_wakeup_status();
     int retValue = (int)touch_pad;

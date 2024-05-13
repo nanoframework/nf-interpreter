@@ -495,39 +495,47 @@ static void thread_event_handler(void *arg, esp_event_base_t event_base, int32_t
 
 void nanoHAL_Network_Initialize()
 {
+    esp_err_t result;
+
     // Initialise the lwIP CLR signal call-back
     set_signal_sock_function(&sys_signal_sock_event);
 
     // initialize network interface
     ESP_ERROR_CHECK(esp_netif_init());
 
-    // set hostname
+    // set default hostname
     compose_esp32_hostname();
 
-    // create the default event loop
-    ESP_ERROR_CHECK(esp_event_loop_create_default());
+    // create the default event loop if required
+    result = esp_event_loop_create_default();
+
+    // If the default event loop is already created (ESP_ERR_INVALID_STATE) then don't need to register
+    // This happens when debugging in VS, as it does a warm reboot
+    if (result != ESP_ERR_INVALID_STATE)
+    {
+        ESP_ERROR_CHECK(result);
 
 #if defined(CONFIG_SOC_WIFI_SUPPORTED)
-    // register the handler for WIFI events
-    ESP_ERROR_CHECK(esp_event_handler_instance_register(WIFI_EVENT, ESP_EVENT_ANY_ID, &event_handler, NULL, NULL));
+        // register the handler for WIFI events
+        ESP_ERROR_CHECK(esp_event_handler_instance_register(WIFI_EVENT, ESP_EVENT_ANY_ID, &event_handler, NULL, NULL));
 #endif
 
-    // register the event handler for IP events
-    ESP_ERROR_CHECK(esp_event_handler_instance_register(IP_EVENT, ESP_EVENT_ANY_ID, &event_handler, NULL, NULL));
+        // register the event handler for IP events
+        ESP_ERROR_CHECK(esp_event_handler_instance_register(IP_EVENT, ESP_EVENT_ANY_ID, &event_handler, NULL, NULL));
 
 #ifdef ESP32_ETHERNET_SUPPORT
-    // register the event handler for Ethernet events
-    ESP_ERROR_CHECK(esp_event_handler_instance_register(ETH_EVENT, ESP_EVENT_ANY_ID, &event_handler, NULL, NULL));
+        // register the event handler for Ethernet events
+        ESP_ERROR_CHECK(esp_event_handler_instance_register(ETH_EVENT, ESP_EVENT_ANY_ID, &event_handler, NULL, NULL));
 #endif
 
 #if HAL_USE_THREAD == TRUE
-    // register the event handler for OpenThread events
-    ESP_ERROR_CHECK(
-        esp_event_handler_instance_register(OPENTHREAD_EVENT, ESP_EVENT_ANY_ID, &thread_event_handler, NULL, NULL));
+        // register the event handler for OpenThread events
+        ESP_ERROR_CHECK(
+            esp_event_handler_instance_register(OPENTHREAD_EVENT, ESP_EVENT_ANY_ID, &thread_event_handler, NULL, NULL));
 #endif
+    }
 }
 
 void nanoHAL_Network_Uninitialize()
 {
-    esp_event_loop_delete_default();
 }
