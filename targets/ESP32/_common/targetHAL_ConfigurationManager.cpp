@@ -162,7 +162,7 @@ void ConfigurationManager_EnumerateConfigurationBlocks()
         // ESP32 can have have up to 4 network interfaces: Wireless Station, Wireless AP, Ethernet and OpenThread
 
         // Allocate count & types of network interfaces
-#if defined(CONFIG_SOC_WIFI_SUPPORTED)    
+#if defined(CONFIG_SOC_WIFI_SUPPORTED)
         // Wireless Support
         netTypes[networkCount++] = NetworkInterfaceType_Wireless80211;
         netTypes[networkCount++] = NetworkInterfaceType_WirelessAP;
@@ -173,7 +173,7 @@ void ConfigurationManager_EnumerateConfigurationBlocks()
         ethernetEnabled = true;
 #endif
 
-#ifdef HAL_USE_THREAD
+#if HAL_USE_THREAD == TRUE
         netTypes[networkCount++] = NetworkInterfaceType_Thread;
 #endif
         // allocate memory for ONE network configuration
@@ -379,10 +379,10 @@ bool InitialiseNetworkDefaultConfig(HAL_Configuration_NetworkInterface *config, 
             esp_read_mac(config->MacAddress, ESP_MAC_ETH);
             break;
 
-        case NetworkInterfaceType_Thread: //OpenThread  IPV6 only
+        case NetworkInterfaceType_Thread: // OpenThread  IPV6 only
             config->StartupAddressMode = AddressMode_Static;
             config->AutomaticDNS = 1;
-           break;
+            break;
 
         default:
             break;
