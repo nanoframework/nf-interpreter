@@ -173,7 +173,7 @@ void ConfigurationManager_EnumerateConfigurationBlocks()
         ethernetEnabled = true;
 #endif
 
-#ifdef HAL_USE_THREAD
+#if HAL_USE_THREAD == TRUE
         netTypes[networkCount++] = NetworkInterfaceType_Thread;
 #endif
         // allocate memory for ONE network configuration

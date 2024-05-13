@@ -45,6 +45,11 @@ esp_err_t NF_ESP32_InitialiseEthernet(uint8_t *pMacAdr)
 
 #ifdef ESP32_ETHERNET_SUPPORT
 
+    if (eth_handle != NULL)
+    {
+        return esp_eth_start(eth_handle);
+    }
+
     esp_netif_config_t cfg = ESP_NETIF_DEFAULT_ETH();
     esp_netif_t *eth_netif = esp_netif_new(&cfg);
 
