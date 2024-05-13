@@ -8,7 +8,7 @@
 #include "NF_ESP32_Network.h"
 #include "esp_netif_net_stack.h"
 
-#if defined(CONFIG_SOC_WIFI_SUPPORTED)    
+#if defined(CONFIG_SOC_WIFI_SUPPORTED)
 
 static const char *TAG = "wifi";
 
@@ -339,12 +339,7 @@ bool NF_ESP32_Wireless_Close()
 {
     if (IsWifiInitialised)
     {
-        esp_wifi_stop();
-        esp_wifi_deinit();
-
-        // clear flags
-        IsWifiInitialised = false;
-        NF_ESP32_IsToConnect = false;
+        NF_ESP32_DeinitWifi();
     }
 
     return false;
@@ -545,4 +540,3 @@ int NF_ESP32_Wait_NetNumber(int num)
 
     return espNetif->lwip_netif->num;
 }
-
