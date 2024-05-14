@@ -201,7 +201,7 @@
  * @brief   Enables the WSPI subsystem.
  */
 #if !defined(HAL_USE_WSPI) || defined(__DOXYGEN__)
-#define HAL_USE_WSPI                        FALSE
+#define HAL_USE_WSPI                        TRUE
 #endif
 
 /*===========================================================================*/
@@ -547,7 +547,6 @@
 #if !defined(WSPI_USE_MUTUAL_EXCLUSION) || defined(__DOXYGEN__)
 #define WSPI_USE_MUTUAL_EXCLUSION           TRUE
 #endif
-
 
 // header for nanoFramework overlay
 #include "halconf_nf.h"
