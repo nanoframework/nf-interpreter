@@ -28,7 +28,7 @@
 
 // enables STM32 QSPI driver
 #if !defined(HAL_NF_USE_STM32_QSPI)
-#define HAL_NF_USE_STM32_QSPI          FALSE
+#define HAL_NF_USE_STM32_QSPI          TRUE
 #endif
 
 #endif // HALCONF_NF_H
