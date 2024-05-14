@@ -14,7 +14,7 @@ resources:
       type: github
       name: espressif/esp-idf
       endpoint: nanoframework
-      ref: refs/tags/v5.1.1
+      ref: refs/tags/v5.1.3
     
 # scheduled build
 # the schedule is defined at the AZDO web interface because of inconsistencies with time zones
@@ -267,6 +267,14 @@ jobs:
         NeedsDFU: true
         NeedsSRECORD: false
         CMakePreset: ORGPAL_PALTHREE
+
+      ORGPAL_PALX:
+        TargetBoard: ORGPAL_PALX
+        TargetSeries: 'stm32f7xx'
+        BuildOptions: 
+        NeedsDFU: true
+        NeedsSRECORD: false
+        CMakePreset: ORGPAL_PALX
 
       ST_NUCLEO64_F091RC:
         TargetBoard: ST_NUCLEO64_F091RC
