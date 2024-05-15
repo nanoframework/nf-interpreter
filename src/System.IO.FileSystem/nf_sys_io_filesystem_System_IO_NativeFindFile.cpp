@@ -18,8 +18,8 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_NativeFindFile::GetFileInfo___STA
 
     FS_FILEINFO fileInfo;
     bool found;
-    char *path;
-    FileSystemVolume *driver;
+    char *path = NULL;
+    FileSystemVolume *driver = NULL;
 
     CLR_RT_HeapBlock &top = stack.PushValueAndClear();
 

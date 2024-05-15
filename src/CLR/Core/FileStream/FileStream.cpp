@@ -19,18 +19,16 @@ HRESULT CLR_RT_FileStream::CreateInstance(CLR_RT_HeapBlock &ref, const char *pat
     uint32_t blobSize = sizeof(CLR_RT_FileStream);
     CLR_RT_FileStream *fs;
 
-    char *rootName;
-    char *relativePath;
+    char *rootName = NULL;
+    char *relativePath = NULL;
     uint32_t rootNameLength = 0;
-    uint32_t *rootNameLengthP = &rootNameLength;
-
     int inputBufferSize = 0;
     int outputBufferSize = 0;
 
     FileSystemVolume *driver;
     STREAM_DRIVER_DETAILS *sdd;
 
-    NANOCLR_CHECK_HRESULT(CLR_RT_FileStream::SplitFilePath(path, rootName, rootNameLengthP, relativePath));
+    NANOCLR_CHECK_HRESULT(CLR_RT_FileStream::SplitFilePath(path, rootName, rootNameLength, relativePath));
 
     // Retrieve appropriate driver that handles this root name
     if ((driver = FileSystemVolumeList::FindVolume(rootName, rootNameLength)) == NULL)
@@ -130,7 +128,7 @@ void CLR_RT_FileStream::RelocationHandler(CLR_RT_HeapBlock_BinaryBlob *ptr)
 HRESULT CLR_RT_FileStream::SplitFilePath(
     const char *fullPath,
     char *&rootName,
-    uint32_t *&rootNameLength,
+    uint32_t &rootNameLength,
     char *&relativePath)
 {
 
@@ -173,7 +171,7 @@ HRESULT CLR_RT_FileStream::SplitFilePath(
         NANOCLR_SET_AND_LEAVE(CLR_E_PATH_TOO_LONG);
     }
 
-    *rootNameLength = rootLen;
+    rootNameLength = rootLen;
 
     NANOCLR_NOCLEANUP();
 }
