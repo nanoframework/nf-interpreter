@@ -14,6 +14,10 @@ CC_ALIGN_DATA(CACHE_LINE_SIZE)
 #endif
 uint8_t dataBuffer_0[CACHE_SIZE_ALIGN(uint8_t, W25Q128_PAGE_SIZE)];
 
+#ifdef DEBUG
+uint8_t tempBuffer[W25Q128_PAGE_SIZE];
+#endif
+
 ///////////////
 // declarations
 
@@ -82,7 +86,6 @@ int32_t hal_lfs_prog_0(
 
 #ifdef DEBUG
 
-    uint8_t tempBuffer[size];
     memset(tempBuffer, 0xBB, size);
 
     // read back and compare
