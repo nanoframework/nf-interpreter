@@ -33,6 +33,7 @@ void WP_ReceiveBytes(uint8_t **ptr, uint32_t *size)
     // save for later comparison
     uint32_t requestedSize = *size;
     sl_status_t requestResult;
+    bool conn = false;
 
 #if HAL_WP_USE_SERIAL == TRUE
     size_t bytesRead;
@@ -43,6 +44,15 @@ void WP_ReceiveBytes(uint8_t **ptr, uint32_t *size)
     // check for requests with 0 size
     if (*size)
     {
+        // check if device is connected
+        sl_usbd_cdc_acm_is_enabled(sl_usbd_cdc_acm_acm0_number, &conn);
+
+        if (!conn)
+        {
+            // device is not connected
+            return;
+        }
+
 #if HAL_WP_USE_SERIAL == TRUE
         // blocking receive as SL API does not support non-blocking
         requestResult = sl_iostream_read(sl_iostream_vcom_handle, *ptr, requestedSize, &bytesRead);
