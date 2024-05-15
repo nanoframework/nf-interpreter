@@ -9,13 +9,6 @@
 #include <hal_littlefs.h>
 #include <hal_stm32_qspi.h>
 
-extern uint32_t HAL_GetTick(void);
-
-// static const WSPIConfig wspiConfig = {
-//     .end_cb = NULL,
-//     .error_cb = NULL,
-//     .dcr = STM32_DCR_FSIZE(23U) | STM32_DCR_CSHT(5U)};
-
 #if CACHE_LINE_SIZE > 0
 CC_ALIGN_DATA(CACHE_LINE_SIZE)
 #endif
@@ -25,9 +18,7 @@ uint8_t dataBuffer_0[CACHE_SIZE_ALIGN(uint8_t, W25Q128_PAGE_SIZE)];
 // declarations
 
 static uint8_t QSPI_ResetMemory(QSPI_HandleTypeDef *hqspi);
-// static uint8_t QSPI_EnterFourBytesAddress(QSPI_HandleTypeDef *hqspi);
 static uint8_t QSPI_EnterMemory_QPI(QSPI_HandleTypeDef *hqspi);
-// static uint8_t QSPI_ExitMemory_QPI(QSPI_HandleTypeDef *hqspi);
 static uint8_t QSPI_WriteEnable(QSPI_HandleTypeDef *hqspi);
 static uint8_t QSPI_AutoPollingMemReady(QSPI_HandleTypeDef *hqspi, uint32_t Timeout);
 static uint8_t QSPI_ReadChipID(QSPI_HandleTypeDef *hqspi, uint8_t *buffer);
@@ -350,7 +341,7 @@ uint8_t QSPI_Read(uint8_t *pData, uint32_t readAddr, uint32_t size)
 
     // Initialize the read command
     s_command.InstructionMode = QSPI_INSTRUCTION_1_LINE;
-    s_command.Instruction = QUAD_OUT_FAST_READ_CMD; // same value on both memory types
+    s_command.Instruction = QUAD_OUT_FAST_READ_CMD;
     s_command.AddressMode = QSPI_ADDRESS_1_LINE;
     s_command.AddressSize = QSPI_ADDRESS_24_BITS;
     s_command.Address = readAddr;
