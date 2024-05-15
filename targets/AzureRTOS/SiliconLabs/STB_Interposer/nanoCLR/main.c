@@ -138,7 +138,7 @@ void tx_application_define(void *first_unused_memory)
 
     clrSettings.MaxContextSwitches = 50;
     clrSettings.WaitForDebugger = false;
-    clrSettings.RevertToBooterOnFault = false;
+    clrSettings.RevertToBooterOnFault = true;
 
     // do NOT enter debugger loop on RTM builds
     // this will cause the board to keep rebooting until there is an application deployed
