@@ -85,11 +85,22 @@ void WP_ReceiveBytes(uint8_t **ptr, uint32_t *size)
 
 uint8_t WP_TransmitMessage(WP_Message *message)
 {
+    bool conn = false;
+
 #if HAL_WP_USE_USB_CDC == TRUE
     uint32_t dummy = 0;
 #endif
 
     TRACE_WP_HEADER(WP_TXMSG, message);
+
+    // check if device is connected
+    sl_usbd_cdc_acm_is_enabled(sl_usbd_cdc_acm_acm0_number, &conn);
+
+    if (!conn)
+    {
+        // device is not connected
+        return false;
+    }
 
 #if HAL_WP_USE_SERIAL == TRUE
     // non-blocking transmit
