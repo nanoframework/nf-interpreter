@@ -33,17 +33,18 @@ void WP_ReceiveBytes(uint8_t **ptr, uint32_t *size)
     // save for later comparison
     uint32_t requestedSize = *size;
     sl_status_t requestResult;
-    bool conn = false;
 
 #if HAL_WP_USE_SERIAL == TRUE
     size_t bytesRead;
 #elif HAL_WP_USE_USB_CDC == TRUE
+    bool conn = false;
     uint32_t bytesRead;
 #endif
 
     // check for requests with 0 size
     if (*size)
     {
+#if HAL_WP_USE_USB_CDC == TRUE
         // check if device is connected
         sl_usbd_cdc_acm_is_enabled(sl_usbd_cdc_acm_acm0_number, &conn);
 
@@ -52,6 +53,7 @@ void WP_ReceiveBytes(uint8_t **ptr, uint32_t *size)
             // device is not connected
             return;
         }
+#endif
 
 #if HAL_WP_USE_SERIAL == TRUE
         // blocking receive as SL API does not support non-blocking
@@ -85,14 +87,14 @@ void WP_ReceiveBytes(uint8_t **ptr, uint32_t *size)
 
 uint8_t WP_TransmitMessage(WP_Message *message)
 {
-    bool conn = false;
-
 #if HAL_WP_USE_USB_CDC == TRUE
+    bool conn = false;
     uint32_t dummy = 0;
 #endif
 
     TRACE_WP_HEADER(WP_TXMSG, message);
 
+#if HAL_WP_USE_USB_CDC == TRUE
     // check if device is connected
     sl_usbd_cdc_acm_is_enabled(sl_usbd_cdc_acm_acm0_number, &conn);
 
@@ -101,6 +103,7 @@ uint8_t WP_TransmitMessage(WP_Message *message)
         // device is not connected
         return false;
     }
+#endif
 
 #if HAL_WP_USE_SERIAL == TRUE
     // non-blocking transmit
