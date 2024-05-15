@@ -21,6 +21,9 @@ extern void sli_usbd_configuration_config0_init(void);
 extern void sli_usbd_cdc_acm_acm0_init(void);
 extern void usb_device_cdc_acm_app_init(void);
 
+// copy from CLR define CLR_E_ENTRYPOINT_NOT_FOUND
+#define CLR_E_ENTRYPOINT_NOT_FOUND ((int32_t)0xA2000000)
+
 // flags for hardware events
 TX_EVENT_FLAGS_GROUP nanoHardwareEvents;
 
@@ -151,12 +154,27 @@ int main(void)
     // init boot clipboard
     InitBootClipboard();
 
-    // the following IF is not mandatory, it's just providing a way for a user to 'force'
-    // the board to remain in nanoBooter and not launching nanoCLR
-
     // check if there is a request to remain on nanoBooter
-    if (!IsToRemainInBooter())
+    if (IsToRemainInBooter())
     {
+        // check if error code is for a missing deployment image
+        if (g_BootClipboard.ErrorCode == CLR_E_ENTRYPOINT_NOT_FOUND)
+        {
+            // yes, remain on booter waiting for a deployment image to be flashed
+        }
+        else
+        {
+            // some other error, proceed with usual workflow
+            goto checkRemainBooter;
+        }
+    }
+    else
+    {
+
+    checkRemainBooter:
+
+        // the following IF is not mandatory, it's just providing a way for a user to 'force'
+        // the board to remain in nanoBooter and not launching nanoCLR
         // if the BTN0 is pressed, skip the check for a valid CLR image and remain in booter
         if (GPIO_PinInGet(gpioPortE, 8) != 0)
         {
