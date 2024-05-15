@@ -369,13 +369,12 @@ uint8_t QSPI_Read(uint8_t *pData, uint32_t readAddr, uint32_t size)
     if (status != HAL_OK)
     {
         __NOP();
-        return QSPI_ERROR;
     }
 
     // Restore S# timing for nonRead commands
     MODIFY_REG(QSPID1.Instance->DCR, QUADSPI_DCR_CSHT, QSPI_CS_HIGH_TIME_5_CYCLE);
 
-    return QSPI_OK;
+    return status == HAL_OK ? QSPI_OK : QSPI_ERROR;
 }
 
 uint8_t QSPI_Write(uint8_t *pData, uint32_t writeAddr, uint32_t size)
