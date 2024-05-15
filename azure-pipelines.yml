@@ -533,6 +533,15 @@ jobs:
         PackageName: ESP32_S3
         CMakePreset: ESP32_S3
 
+      ESP32_S3_ALL:
+        TargetBoard: ESP32_S3
+        TargetSeries: 'esp32s3'
+        BuildOptions: 
+        IDF_Target: esp32s3
+        TargetName: ESP32_S3_ALL
+        PackageName: ESP32_S3_ALL
+        CMakePreset: ESP32_S3_ALL
+
       ESP32_ETHERNET_KIT_1.2:
         TargetBoard: ESP32
         TargetSeries: 'esp32'

@@ -56,6 +56,16 @@
       "problemMatcher": []
     },
     {
+      "label": "Decode ESP32 (riscv32 series) backtrace",
+      "type": "shell",
+      "command": "riscv32-esp-elf-addr2line -apsfCire \"${input:espBacktraceElfFile}\" \"${input:espBacktrace}\"",
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      },
+      "problemMatcher": []
+    },
+    {
       "label": "Flash MIMXRT1060",
       "type": "shell",
       "command": "C:/nxp/MCUXpressoIDE_10.2.1_795/ide/bin/crt_emu_cm_redlink.exe",
