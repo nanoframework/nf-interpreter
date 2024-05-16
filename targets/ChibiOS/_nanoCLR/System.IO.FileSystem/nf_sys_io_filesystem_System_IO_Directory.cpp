@@ -127,8 +127,8 @@ CLR_RT_HeapBlock *pathEntry;
             }
 
             // compose file path
-            char workingPath[FS_NAME_MAXLENGTH];
-            CombinePaths(workingPath, path, (const char*)fileData.FileName);
+            char workingPath[FS_MAX_PATH_LENGTH + 1];
+            CombinePaths(workingPath, path, (const char *)fileData.FileName);
 
             // set file full path in array of strings
             NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_String::CreateInstance(*pathEntry, workingPath));
