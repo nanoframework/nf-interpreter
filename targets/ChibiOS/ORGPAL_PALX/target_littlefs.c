@@ -32,6 +32,16 @@ static uint8_t QSPI_Write(uint8_t *pData, uint32_t writeAddr, uint32_t size);
 static uint8_t QSPI_Erase_Block(uint32_t blockAddress);
 static bool QSPI_Erase_Chip();
 
+// target specific implementation of hal_lfs_sync
+int32_t hal_lfs_sync_(const struct lfs_config *c)
+{
+    (void)c;
+
+    __DSB();
+
+    return 0;
+}
+
 // target specific implementation of hal_lfs_erase
 int32_t hal_lfs_erase_0(const struct lfs_config *c, lfs_block_t block)
 {

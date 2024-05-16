@@ -124,7 +124,7 @@
 #define LFS0_READ_HANDLER  hal_lfs_read_0
 #define LFS0_PROG_HANDLER  hal_lfs_prog_0
 #define LFS0_ERASE_HANDLER hal_lfs_erase_0
-#define LFS0_SYNC_HANDLER  hal_lfs_sync
+#define LFS0_SYNC_HANDLER  hal_lfs_sync_
 
 #ifdef __cplusplus
 extern "C"
@@ -132,6 +132,7 @@ extern "C"
 #endif
 
     bool hal_lfs_erase_chip_0();
+    int32_t hal_lfs_sync_(const struct lfs_config *c);
     int32_t hal_lfs_erase_0(const struct lfs_config *c, lfs_block_t block);
     int32_t hal_lfs_read_0(const struct lfs_config *c, lfs_block_t block, lfs_off_t off, void *buffer, lfs_size_t size);
     int32_t hal_lfs_prog_0(
