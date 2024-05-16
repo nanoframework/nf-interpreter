@@ -142,16 +142,6 @@ extern "C"
         const void *buffer,
         lfs_size_t size);
 
-    bool hal_lfs_erase_chip_1();
-    int32_t hal_lfs_erase_1(const struct lfs_config *c, lfs_block_t block);
-    int32_t hal_lfs_read_1(const struct lfs_config *c, lfs_block_t block, lfs_off_t off, void *buffer, lfs_size_t size);
-    int32_t hal_lfs_prog_1(
-        const struct lfs_config *c,
-        lfs_block_t block,
-        lfs_off_t off,
-        const void *buffer,
-        lfs_size_t size);
-
 #ifdef __cplusplus
 }
 #endif
