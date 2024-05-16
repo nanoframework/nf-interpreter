@@ -869,14 +869,21 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeInit___VOID(
     }
 #endif
 
-    // call the configure and abort if not OK
-    NANOCLR_CHECK_HRESULT(NativeConfig___VOID(stack));
-
     palUart = GetPalUartFromUartNum_sys(uart_num);
     if (palUart == NULL)
     {
         NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
     }
+
+    // If driver already installed then clean up first
+    // Open/Close/Open without dispose
+    if (uart_is_driver_installed(uart_num))
+    {
+        UninitializePalUart_sys(palUart);
+    }
+
+    // call the configure and abort if not OK
+    NANOCLR_CHECK_HRESULT(NativeConfig___VOID(stack));
 
     // alloc buffer memory
     bufferSize = pThis[FIELD___bufferSize].NumericByRef().s4;
@@ -953,6 +960,9 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeConfig___VOI
         // get a pointer to the managed object instance and check that it's not NULL
         CLR_RT_HeapBlock *pThis = stack.This();
         FAULT_ON_NULL(pThis);
+
+        // Init clock source (added in IDF 5.x)
+        uart_config.source_clk = UART_SCLK_DEFAULT;
 
         // Get Uart number for serial device
         uart_port_t uart_num = (uart_port_t)PORT_INDEX_TO_UART_NUM(pThis[FIELD___portIndex].NumericByRef().s4);
