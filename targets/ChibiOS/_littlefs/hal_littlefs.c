@@ -521,8 +521,6 @@ int hal_lfs_sync(const struct lfs_config *c)
 {
     (void)c;
 
-    __DSB();
-
     return 0;
 }
 
