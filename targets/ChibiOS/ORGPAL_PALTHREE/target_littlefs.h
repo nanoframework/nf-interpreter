@@ -51,8 +51,6 @@
 
 // Erase Operations
 #define SUBSECTOR_ERASE_CMD 0x20
-#define SECTOR_ERASE_CMD    0xD8
-#define BULK_ERASE_CMD      0xC7
 #define READ_ID_CMD         0x90
 #define READ_ID_CMD2        0x9F
 
@@ -81,7 +79,7 @@
 #define LFS0_READ_HANDLER  hal_lfs_read_0
 #define LFS0_PROG_HANDLER  hal_lfs_prog_0
 #define LFS0_ERASE_HANDLER hal_lfs_erase_0
-#define LFS0_SYNC_HANDLER  hal_lfs_sync
+#define LFS0_SYNC_HANDLER  hal_lfs_sync_
 
 #endif // LFS_SPI1
 
@@ -115,54 +113,28 @@
 #define RESET_MEMORY_CMD 0x99
 
 // Identification Operations
-#define READ_ID_CMD                       0x90
-#define READ_ID_CMD2                      0x9F
-#define MULTIPLE_IO_READ_ID_CMD           0xAF
-#define READ_SERIAL_FLASH_DISCO_PARAM_CMD 0x5A
+#define READ_ID_CMD  0x90
+#define READ_ID_CMD2 0x9F
 
 // Read Operations
-#define READ_CMD                 0x03
-#define FAST_READ_CMD            0x0B
-#define DUAL_OUT_FAST_READ_CMD   0x3B
-#define DUAL_INOUT_FAST_READ_CMD 0xBB
-#define QUAD_OUT_FAST_READ_CMD   0x6B
-#define QUAD_INOUT_FAST_READ_CMD 0xEB
+#define READ_CMD               0x03
+#define QUAD_OUT_FAST_READ_CMD 0x6B
 
 // Write Operations
-#define WRITE_ENABLE_CMD  0x06
-#define WRITE_DISABLE_CMD 0x04
+#define WRITE_ENABLE_CMD 0x06
 
 // Register Operations
-#define READ_STATUS_REG1_CMD           0x05
-#define WRITE_STATUS_REG1_CMD          0x01
-#define READ_STATUS_REG2_CMD           0x35
-#define WRITE_STATUS_REG2_CMD          0x31
-#define READ_LOCK_REG_CMD              0xE8
-#define WRITE_LOCK_REG_CMD             0xE5
-#define READ_FLAG_STATUS_REG_CMD       0x70
-#define CLEAR_FLAG_STATUS_REG_CMD      0x50
-#define READ_NONVOL_CFG_REG_CMD        0xB5
-#define WRITE_NONVOL_CFG_REG_CMD       0xB1
-#define READ_ENHANCED_VOL_CFG_REG_CMD  0x65
-#define WRITE_ENHANCED_VOL_CFG_REG_CMD 0x61
+#define READ_STATUS_REG1_CMD  0x05
+#define READ_STATUS_REG2_CMD  0x35
+#define WRITE_STATUS_REG2_CMD 0x31
 
 // Program Operations
-#define PAGE_PROG_CMD             0x02
-#define DUAL_IN_FAST_PROG_CMD     0xA2
-#define EXT_DUAL_IN_FAST_PROG_CMD 0xD2
-#define QUAD_IN_FAST_PROG_CMD     0x32
-#define EXT_QUAD_IN_FAST_PROG_CMD 0x12
+#define PAGE_PROG_CMD         0x02
+#define QUAD_IN_FAST_PROG_CMD 0x32
 
 // Erase Operations
-#define SUBSECTOR_ERASE_CMD    0x20
-#define SECTOR_ERASE_CMD       0xD8
-#define BULK_ERASE_CMD         0xC7
-#define PROG_ERASE_RESUME_CMD  0x7A
-#define PROG_ERASE_SUSPEND_CMD 0x75
-
-// One-Time Programmable Operations
-#define READ_OTP_ARRAY_CMD 0x4B
-#define PROG_OTP_ARRAY_CMD 0x42
+#define SECTOR_ERASE_CMD    0xD8
+#define SUBSECTOR_ERASE_CMD 0x20
 
 //  W25Q128 Registers
 // Status Register 1
@@ -212,18 +184,18 @@
 //////////////////////////////////
 // remapping into littlefs defines
 
-#define LFS1_READ_SIZE      8
-#define LFS1_PROG_SIZE      32
+#define LFS1_READ_SIZE      1
+#define LFS1_PROG_SIZE      1
 #define LFS1_BLOCK_SIZE     W25Q128_SUBSECTOR_SIZE
 #define LFS1_BLOCK_COUNT    W25Q128_FLASH_SIZE / W25Q128_SUBSECTOR_SIZE
-#define LFS1_BLOCK_CYCLES   -1
+#define LFS1_BLOCK_CYCLES   100
 #define LFS1_CACHE_SIZE     W25Q128_PAGE_SIZE
 #define LFS1_LOOKAHEAD_SIZE LFS1_BLOCK_COUNT / 8
 
 #define LFS1_READ_HANDLER  hal_lfs_read_1
 #define LFS1_PROG_HANDLER  hal_lfs_prog_1
 #define LFS1_ERASE_HANDLER hal_lfs_erase_1
-#define LFS1_SYNC_HANDLER  hal_lfs_sync
+#define LFS1_SYNC_HANDLER  hal_lfs_sync_
 
 #endif // LFS_QSPI1
 
@@ -231,6 +203,8 @@
 extern "C"
 {
 #endif
+
+    int32_t hal_lfs_sync_(const struct lfs_config *c);
 
     bool hal_lfs_erase_chip_0();
     int32_t hal_lfs_erase_0(const struct lfs_config *c, lfs_block_t block);
