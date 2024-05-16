@@ -542,5 +542,8 @@ int8_t target_lfs_init()
     ASSERT(dataBuffer_0[1] == W25Q128_DEVICE_ID1);
     ASSERT(dataBuffer_0[2] == W25Q128_DEVICE_ID2);
 
+    // from W25Q128 datasheet: Time Delay Before Write Instruction is >5ms
+    chThdSleepMilliseconds(10);
+
     return LFS_ERR_OK;
 }
