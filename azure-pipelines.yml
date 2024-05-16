@@ -76,14 +76,14 @@ jobs:
         # this is a release prep so NO build
         echo "##vso[task.setvariable variable=SKIP_BUILD;isOutput=true]true"
         
-        Write-Host "Release preparation, skipping build."
+        Write-Host "##[command] Release preparation, skipping build."
       }
       else
       {
         # get commit details, if this is a PR
         if($env:System_PullRequest_PullRequestId -ne $null)
         {
-          Write-Host "**This is a PR build**"
+          Write-Host "##[command] **This is a PR build**"
 
           $commit = Invoke-RestMethod -Uri "https://api.github.com/repos/nanoframework/nf-interpreter/commits/$(Build.SourceVersion)" -ContentType "application/json" -Method GET
 
@@ -105,7 +105,7 @@ jobs:
         }
         else
         {
-          Write-Host "**build for other reasons**"
+          Write-Host "##[command] **build for other reasons**"
 
           echo "##vso[task.setvariable variable=SKIP_BUILD;isOutput=true]false"
         }
@@ -128,7 +128,7 @@ jobs:
       elseif($env:Build_Reason -eq "Manual")
       {
           # this is a manual build, no need to check anything 
-          Write-host "Manual build"
+          Write-host "##[command] Manual build"
       }      
       else
       {
@@ -136,7 +136,7 @@ jobs:
           if($env:Build_Reason -eq "Manual")
           {
               # this is a manual build, no need to check anything 
-              Write-host "Manual build"
+              Write-host "##[command] Manual build"
           }
           if($env:System_PullRequest_PullRequestId -ne $null)
           {
@@ -158,9 +158,9 @@ jobs:
           # get file names only
           $files = $files | % {$_.filename}
 
-          Write-host "Files changed:"
+          Write-host "##[group] Files changed:"
           $files | % { Write-host $_ }
-          Write-host ""
+          Write-host "##[endgroup]"
 
           # set default values 
           echo "##vso[task.setvariable variable=BUILD_CHIBIOS;isOutput=true]false"  
@@ -187,7 +187,7 @@ jobs:
 
               echo "##vso[task.setvariable variable=BUILD_ALL;isOutput=true]true"
               
-              Write-host "Building ALL targets"
+              Write-host "##[command] Building ALL targets"
           }
 
           if( ($files.where{$_.Contains('targets/ChibiOS')}).Count -gt 0)
@@ -195,7 +195,7 @@ jobs:
               # files at ChibiOS folder
               echo "##vso[task.setvariable variable=BUILD_CHIBIOS;isOutput=true]true"
 
-              Write-host "Building ChibiOS targets"
+              Write-host "##[command] Building ChibiOS targets"
           }
 
           if( ($files.where{$_.Contains('targets/FreeRTOS')}).Count -gt 0)
@@ -203,7 +203,7 @@ jobs:
               # files at FreeRTOS folder
               echo "##vso[task.setvariable variable=BUILD_FREERTOS;isOutput=true]true"
 
-              Write-host "Building FreeRTOS targets"
+              Write-host "##[command] Building FreeRTOS targets"
           }
 
           if( ($files.where{$_.Contains('targets/ESP32')}).Count -gt 0)
@@ -211,7 +211,7 @@ jobs:
               # files at ESP32 folder
               echo "##vso[task.setvariable variable=BUILD_ESP32;isOutput=true]true"
 
-              Write-host "Building ESP32 targets"
+              Write-host "##[command] Building ESP32 targets"
           }
 
           if( ($files.where{$_.Contains('targets/TI_SimpleLink')}).Count -gt 0)
@@ -219,7 +219,7 @@ jobs:
               # files at TI_SimpleLink folder
               echo "##vso[task.setvariable variable=BUILD_TI;isOutput=true]true"
 
-              Write-host "Building TI SimpleLink targets"
+              Write-host "##[command] Building TI SimpleLink targets"
           }
 
           if( ($files.where{$_.Contains('targets/AzureRTOS')}).Count -gt 0)
@@ -227,7 +227,7 @@ jobs:
               # files at AzureRTOS folder
               echo "##vso[task.setvariable variable=BUILD_AZURERTOS;isOutput=true]true"
 
-              Write-host "Building Azure RTOS targets"
+              Write-host "##[command] Building Azure RTOS targets"
           }
 
           if( 
@@ -239,7 +239,7 @@ jobs:
               # files at win32 or netcore folders
               echo "##vso[task.setvariable variable=BUILD_WIN32;isOutput=true]true"
 
-              Write-host "Building nanoCLR target"
+              Write-host "##[command] Building nanoCLR target"
           }
           
           if( 
@@ -251,7 +251,7 @@ jobs:
               # files at nanoCLR CLI or Host folders
               echo "##vso[task.setvariable variable=BUILD_NANOCLR_CLI;isOutput=true]true"
 
-              Write-host "Building nanoCLR CLI target"
+              Write-host "##[command] Building nanoCLR CLI target"
           }
 
       }
@@ -308,7 +308,7 @@ jobs:
       {
           $result = Invoke-RestMethod -Method Post -UserAgent [Microsoft.PowerShell.Commands.PSUserAgent]::InternetExplorer -Uri  $githubApiEndpoint -Header $headers -ContentType "application/json" -Body $prRequestBody
           'Started PR for new release...' | Write-Host -NoNewline
-          'OK' | Write-Host -ForegroundColor Green
+          '##[error] OK' | Write-Host -ForegroundColor Green
       }
       catch 
       {
@@ -318,7 +318,7 @@ jobs:
           $reader.DiscardBufferedData()
           $responseBody = $reader.ReadToEnd();
 
-          "Error starting PR: $responseBody" | Write-Host -ForegroundColor Red
+          "##[error] Error starting PR: $responseBody" | Write-Host -ForegroundColor Red
       }
 
     condition: eq( variables['StartReleaseCandidate'], true )
@@ -532,6 +532,15 @@ jobs:
         TargetName: ESP32_S3
         PackageName: ESP32_S3
         CMakePreset: ESP32_S3
+
+      ESP32_S3_ALL:
+        TargetBoard: ESP32_S3
+        TargetSeries: 'esp32s3'
+        BuildOptions: 
+        IDF_Target: esp32s3
+        TargetName: ESP32_S3_ALL
+        PackageName: ESP32_S3_ALL
+        CMakePreset: ESP32_S3_ALL
 
       ESP32_ETHERNET_KIT_1.2:
         TargetBoard: ESP32

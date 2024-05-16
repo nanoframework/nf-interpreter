@@ -14,7 +14,7 @@ resources:
       type: github
       name: espressif/esp-idf
       endpoint: nanoframework
-      ref: refs/tags/v5.1.1
+      ref: refs/tags/v5.1.3
     
 # scheduled build
 # the schedule is defined at the AZDO web interface because of inconsistencies with time zones
@@ -102,7 +102,7 @@ jobs:
       if($env:StartReleaseCandidate -like "true")
       {
           # this is a release prep so NO build
-          Write-host "Start Release candidate build, don't build"
+          Write-host "##[command] Start Release candidate build, don't build"
       }
       else
       {
@@ -110,7 +110,7 @@ jobs:
           if($env:Build_Reason -eq "Manual")
           {
               # this is a manual build, no need to check anything 
-              Write-host "Manual build"
+              Write-host "##[command] Manual build"
           }
           else
           {
@@ -137,9 +137,9 @@ jobs:
                 $files = $files | % {$_.SubString(2)}
             }
 
-            Write-host "Files changed:"
+            Write-host "##[group] Files changed:"
             $files | % { Write-host $_ }
-            Write-host ""
+            Write-host "##[endgroup]"
 
             if(
                 (($files.where{$_.Contains('/')}).Count -eq 0) -Or
@@ -158,12 +158,12 @@ jobs:
                 {
                     # ChibiOS targets are the only ones needing to be build on a global change
                     echo "##vso[task.setvariable variable=BUILD_CHIBIOS;isOutput=true]true"
-                    Write-host "Building ChibiOS targets"
+                    Write-host "##[command] Building ChibiOS targets"
                 }
                 else
                 {
                     echo "##vso[task.setvariable variable=BUILD_ALL;isOutput=true]true"
-                    Write-host "Building ALL targets"
+                    Write-host "##[command] Building ALL targets"
                 }              
             }
 
@@ -186,7 +186,7 @@ jobs:
                     # files at ChibiOS global folders or targets being built with this pipeline
                     echo "##vso[task.setvariable variable=BUILD_CHIBIOS;isOutput=true]true"
 
-                    Write-host "Building ChibiOS targets"
+                    Write-host "##[command] Building ChibiOS targets"
                 }
             }
             else
@@ -196,7 +196,7 @@ jobs:
                     # files at ChibiOS folder
                     echo "##vso[task.setvariable variable=BUILD_CHIBIOS;isOutput=true]true"
 
-                    Write-host "Building ChibiOS targets"
+                    Write-host "##[command] Building ChibiOS targets"
                 }
             }
 
@@ -207,7 +207,7 @@ jobs:
                 # files at ESP32 folder
                 echo "##vso[task.setvariable variable=BUILD_ESP32;isOutput=true]true"
 
-                Write-host "Building ESP32 targets"
+                Write-host "##[command] Building ESP32 targets"
             }
 
             if(
@@ -217,7 +217,7 @@ jobs:
                 # files at TI_SimpleLink folder
                 echo "##vso[task.setvariable variable=BUILD_TI;isOutput=true]true"
 
-                Write-host "Building TI SimpleLink targets"
+                Write-host "##[command] Building TI SimpleLink targets"
             }
 
             if( 
@@ -227,7 +227,7 @@ jobs:
                 # files at AzureRTOS folder
                 echo "##vso[task.setvariable variable=BUILD_AZURERTOS;isOutput=true]true"
 
-                Write-host "Building Azure RTOS targets"
+                Write-host "##[command] Building Azure RTOS targets"
             }
           }
       }
@@ -267,6 +267,14 @@ jobs:
         NeedsDFU: true
         NeedsSRECORD: false
         CMakePreset: ORGPAL_PALTHREE
+
+      ORGPAL_PALX:
+        TargetBoard: ORGPAL_PALX
+        TargetSeries: 'stm32f7xx'
+        BuildOptions: 
+        NeedsDFU: true
+        NeedsSRECORD: false
+        CMakePreset: ORGPAL_PALX
 
       ST_NUCLEO64_F091RC:
         TargetBoard: ST_NUCLEO64_F091RC
