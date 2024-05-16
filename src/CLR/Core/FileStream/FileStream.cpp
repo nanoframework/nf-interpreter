@@ -19,9 +19,11 @@ HRESULT CLR_RT_FileStream::CreateInstance(CLR_RT_HeapBlock &ref, const char *pat
     uint32_t blobSize = sizeof(CLR_RT_FileStream);
     CLR_RT_FileStream *fs;
 
-    char *rootName = NULL;
-    char *relativePath = NULL;
-    uint32_t rootNameLength = 0;
+    char rootNameBuffer[FS_NAME_MAXLENGTH + 1];
+    char relativePathBuffer[FS_MAX_PATH_LENGTH + 1];
+    char *rootName = rootNameBuffer;
+    char *relativePath = relativePathBuffer;
+    uint32_t rootNameLength = -1;
     int inputBufferSize = 0;
     int outputBufferSize = 0;
 

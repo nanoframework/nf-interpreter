@@ -11,13 +11,14 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_Directory::NativeGetChildren___ST
     NATIVE_PROFILE_CLR_IO();
     NANOCLR_HEADER();
 
-    FileSystemVolume *driver;
+    FileSystemVolume *driver = NULL;
     char *path;
     bool isDirectory;
-    char *rootName;
-    char *relativePath;
-    uint32_t rootNameLength = 0;
-    uint32_t *rootNameLengthP = &rootNameLength;
+    char rootNameBuffer[FS_NAME_MAXLENGTH + 1];
+    char relativePathBuffer[FS_MAX_PATH_LENGTH + 1];
+    char *rootName = rootNameBuffer;
+    char *relativePath = relativePathBuffer;
+    uint32_t rootNameLength = -1;
     bool found = false;
     bool *foundP = &found;
     void *findHandle = NULL;
@@ -33,7 +34,7 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_Directory::NativeGetChildren___ST
     FAULT_ON_NULL(hbPath);
 
     NANOCLR_CHECK_HRESULT(
-        CLR_RT_FileStream::SplitFilePath(hbPath->StringText(), rootName, rootNameLengthP, relativePath));
+        CLR_RT_FileStream::SplitFilePath(hbPath->StringText(), rootName, rootNameLength, relativePath));
 
     NANOCLR_CHECK_HRESULT(Library_nf_sys_io_filesystem_System_IO_NativeIO::FindVolume(stack.Arg0(), driver, path));
 
@@ -151,5 +152,6 @@ void Library_nf_sys_io_filesystem_System_IO_Directory::CombinePaths(char *outpat
     {
         strcat(outpath, "\\");
     }
+
     strcat(outpath, path2);
 }

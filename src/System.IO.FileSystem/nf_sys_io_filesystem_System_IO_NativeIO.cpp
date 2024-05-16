@@ -12,7 +12,8 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_NativeIO::Delete___STATIC__VOID__
     NANOCLR_HEADER();
 
     FileSystemVolume *driver = NULL;
-    char *path = NULL;
+    char pathBuffer[FS_MAX_PATH_LENGTH + 1];
+    char *path = pathBuffer;
     bool recursive = stack.Arg1().NumericByRef().u1 != 0;
 
     NANOCLR_CHECK_HRESULT(FindVolume(stack.Arg0(), driver, path));
@@ -28,8 +29,11 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_NativeIO::Move___STATIC__BOOLEAN_
     NATIVE_PROFILE_CLR_IO();
     NANOCLR_HEADER();
 
-    char *path1 = NULL;
-    char *path2 = NULL;
+    char path1Buffer[FS_MAX_PATH_LENGTH + 1];
+    char path2Buffer[FS_MAX_PATH_LENGTH + 1];
+    char *path1 = path1Buffer;
+    char *path2 = path2Buffer;
+
     FileSystemVolume *driver1 = NULL;
     FileSystemVolume *driver2 = NULL;
 
@@ -58,12 +62,12 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_NativeIO::CreateDirectory___STATI
     NATIVE_PROFILE_CLR_IO();
     NANOCLR_HEADER();
 
-    char path[FS_MAX_PATH_LENGTH + 1];
-    char *ptrToPath = path;
+    char pathBuffer[FS_MAX_PATH_LENGTH + 1];
+    char *path = pathBuffer;
 
     FileSystemVolume *driver;
 
-    NANOCLR_CHECK_HRESULT(FindVolume(stack.Arg0(), driver, ptrToPath));
+    NANOCLR_CHECK_HRESULT(FindVolume(stack.Arg0(), driver, path));
 
     if (hal_strlen_s(path) >= FS_MAX_DIRECTORY_LENGTH)
     {
@@ -81,11 +85,11 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_NativeIO::GetAttributes___STATIC_
     NANOCLR_HEADER();
 
     uint32_t attributes;
-    char path[FS_MAX_PATH_LENGTH + 1];
-    char *ptrToPath = path;
+    char pathBuffer[FS_MAX_PATH_LENGTH + 1];
+    char *path = pathBuffer;
     FileSystemVolume *driver;
 
-    NANOCLR_CHECK_HRESULT(FindVolume(stack.Arg0(), driver, ptrToPath));
+    NANOCLR_CHECK_HRESULT(FindVolume(stack.Arg0(), driver, path));
 
     NANOCLR_CHECK_HRESULT(driver->GetAttributes(path, &attributes));
 
@@ -101,11 +105,11 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_NativeIO::SetAttributes___STATIC_
     NANOCLR_HEADER();
 
     uint32_t attributes;
-    char path[FS_MAX_PATH_LENGTH + 1];
-    char *ptrToPath = path;
+    char pathBuffer[FS_MAX_PATH_LENGTH + 1];
+    char *path = pathBuffer;
     FileSystemVolume *driver;
 
-    NANOCLR_CHECK_HRESULT(FindVolume(stack.Arg0(), driver, ptrToPath));
+    NANOCLR_CHECK_HRESULT(FindVolume(stack.Arg0(), driver, path));
 
     attributes = stack.Arg1().NumericByRef().u4;
 
@@ -124,7 +128,8 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_NativeIO::FindVolume(
 
     CLR_RT_HeapBlock_String *hbName;
     char *fullPath;
-    char *rootName;
+    char rootNameBuffer[FS_MAX_PATH_LENGTH + 1];
+    char *rootName = rootNameBuffer;
     uint32_t rootNameLength = -1;
 
     hbName = hbPathRef.DereferenceString();
