@@ -260,7 +260,7 @@
                 "API_System.IO.FileSystem": "ON",
                 "API_Windows.Storage": "ON",
                 "API_nanoFramework.Device.OneWire": "OFF",
-                "ESP32_RESERVED_RAM_FOR_IDF_ALLOCATION": "100"
+                "ESP32_RESERVED_RAM_FOR_IDF_ALLOCATION": "50"
             }
         },
         {
@@ -282,7 +282,7 @@
                 "API_Windows.Storage": "ON",
                 "API_nanoFramework.Device.OneWire": "OFF",
                 "API_nanoFramework.Device.Bluetooth": "ON",
-                "ESP32_RESERVED_RAM_FOR_IDF_ALLOCATION": "100"
+                "ESP32_RESERVED_RAM_FOR_IDF_ALLOCATION": "50"
             }
         },
         {
@@ -426,7 +426,7 @@
                 "API_Windows.Storage": "ON",
                 "API_nanoFramework.Hardware.Esp32.Rmt": "ON",
                 "API_nanoFramework.Device.OneWire": "OFF",
-                "ESP32_RESERVED_RAM_FOR_IDF_ALLOCATION": "100"
+                "ESP32_RESERVED_RAM_FOR_IDF_ALLOCATION": "50"
             }
         },
         {
