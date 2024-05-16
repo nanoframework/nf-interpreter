@@ -49,7 +49,7 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_Directory::NativeGetChildren___ST
     int32_t itemsCount = 0;
     FS_FILEINFO fileData;
 
-CLR_RT_HeapBlock *pathEntry;
+    CLR_RT_HeapBlock *pathEntry;
 
     CLR_RT_HeapBlock &top = stack.PushValue();
 
