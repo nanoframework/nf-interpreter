@@ -526,6 +526,11 @@ int hal_lfs_sync(const struct lfs_config *c)
 
 lfs_t *hal_lfs_get_fs_from_index(int32_t index)
 {
+    if (index >= LITTLEFS_INSTANCES_COUNT)
+    {
+        return NULL;
+    }
+
     return &lfs[index];
 }
 
