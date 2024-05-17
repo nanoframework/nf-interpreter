@@ -9,30 +9,6 @@
 #include <nanoPAL_FileSystem.h>
 #include <littlefs_FS_Driver.h>
 
-FILESYSTEM_DRIVER_INTERFACE g_LITTLEFS_FILE_SYSTEM_DriverInterface = {
-    &LITTLEFS_FS_Driver::FindOpen,
-    &LITTLEFS_FS_Driver::FindNext,
-    &LITTLEFS_FS_Driver::FindClose,
-
-    &LITTLEFS_FS_Driver::GetFileInfo,
-
-    &LITTLEFS_FS_Driver::CreateDirectory,
-    &LITTLEFS_FS_Driver::Move,
-    &LITTLEFS_FS_Driver::Delete,
-
-    &LITTLEFS_FS_Driver::GetAttributes,
-    &LITTLEFS_FS_Driver::SetAttributes,
-
-    &LITTLEFS_FS_Driver::Format,
-    &LITTLEFS_FS_Driver::LoadMedia,
-    &LITTLEFS_FS_Driver::GetSizeInfo,
-    &LITTLEFS_FS_Driver::FlushAll,
-    &LITTLEFS_FS_Driver::GetVolumeLabel,
-
-    "LITTLEFS",
-    0,
-};
-
 extern STREAM_DRIVER_INTERFACE g_LITTLEFS_STREAM_DriverInterface;
 
 FILESYSTEM_INTERFACES g_AvailableFSInterfaces[] = {

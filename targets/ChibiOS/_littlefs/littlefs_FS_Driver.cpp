@@ -1129,30 +1129,6 @@ static int NormalizePath(const char *path, char *buffer, size_t bufferSize)
 
 //////////////////
 
-// FILESYSTEM_DRIVER_INTERFACE g_FAT32_FILE_SYSTEM_DriverInterface = {
-//     &LITTLEFS_FS_Driver::FindOpen,
-//     &LITTLEFS_FS_Driver::FindNext,
-//     &LITTLEFS_FS_Driver::FindClose,
-
-//     &LITTLEFS_FS_Driver::GetFileInfo,
-
-//     &LITTLEFS_FS_Driver::CreateDirectory,
-//     &LITTLEFS_FS_Driver::Move,
-//     &LITTLEFS_FS_Driver::Delete,
-
-//     &LITTLEFS_FS_Driver::GetAttributes,
-//     &LITTLEFS_FS_Driver::SetAttributes,
-
-//     &LITTLEFS_FS_Driver::Format,
-//     &LITTLEFS_FS_Driver::LoadMedia,
-//     &LITTLEFS_FS_Driver::GetSizeInfo,
-//     &LITTLEFS_FS_Driver::FlushAll,
-//     &LITTLEFS_FS_Driver::GetVolumeLabel,
-
-//     "LITTLEFS",
-//     0,
-// };
-
 STREAM_DRIVER_INTERFACE g_LITTLEFS_STREAM_DriverInterface = {
     &LITTLEFS_FS_Driver::Initialize,
     &LITTLEFS_FS_Driver::InitializeVolume,
@@ -1166,4 +1142,28 @@ STREAM_DRIVER_INTERFACE g_LITTLEFS_STREAM_DriverInterface = {
     &LITTLEFS_FS_Driver::Seek,
     &LITTLEFS_FS_Driver::GetLength,
     &LITTLEFS_FS_Driver::SetLength,
+};
+
+FILESYSTEM_DRIVER_INTERFACE g_LITTLEFS_FILE_SYSTEM_DriverInterface = {
+    &LITTLEFS_FS_Driver::FindOpen,
+    &LITTLEFS_FS_Driver::FindNext,
+    &LITTLEFS_FS_Driver::FindClose,
+
+    &LITTLEFS_FS_Driver::GetFileInfo,
+
+    &LITTLEFS_FS_Driver::CreateDirectory,
+    &LITTLEFS_FS_Driver::Move,
+    &LITTLEFS_FS_Driver::Delete,
+
+    &LITTLEFS_FS_Driver::GetAttributes,
+    &LITTLEFS_FS_Driver::SetAttributes,
+
+    &LITTLEFS_FS_Driver::Format,
+    &LITTLEFS_FS_Driver::LoadMedia,
+    &LITTLEFS_FS_Driver::GetSizeInfo,
+    &LITTLEFS_FS_Driver::FlushAll,
+    &LITTLEFS_FS_Driver::GetVolumeLabel,
+
+    "LITTLEFS",
+    0,
 };
