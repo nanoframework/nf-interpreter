@@ -9,6 +9,7 @@
 #include <nanoPAL_FileSystem.h>
 #include <littlefs_FS_Driver.h>
 
+extern FILESYSTEM_DRIVER_INTERFACE g_LITTLEFS_FILE_SYSTEM_DriverInterface;
 extern STREAM_DRIVER_INTERFACE g_LITTLEFS_STREAM_DriverInterface;
 
 FILESYSTEM_INTERFACES g_AvailableFSInterfaces[] = {
