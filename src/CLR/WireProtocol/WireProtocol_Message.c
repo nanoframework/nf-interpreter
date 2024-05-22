@@ -407,7 +407,7 @@ void WP_Message_Process()
                         {
                             if (_inboundMessage.m_payload != NULL)
                             {
-                                 SetReceiveExpiryTicks(c_PayloadTimeout);
+                                SetReceiveExpiryTicks(c_PayloadTimeout);
                                 _pos = _inboundMessage.m_payload;
                                 _size = _inboundMessage.m_header.m_size;
 
