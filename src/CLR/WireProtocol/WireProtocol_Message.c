@@ -10,8 +10,8 @@
 #include <targetHAL_Time.h>
 #include "WireProtocol_Message.h"
 
-// from nanoHAL_Time.h
-#define TIME_CONVERSION__TO_SYSTICKS 10000
+// from nanoHAL_Time.h (TIME_CONVERSION__TO_SECONDS)
+#define TIME_CONVERSION__TO_SYSTICKS 10000000
 
 static uint16_t _lastOutboundMessage = 0;
 static uint64_t _receiveExpiryTicks;
@@ -45,6 +45,11 @@ bool CheckTimeout(uint64_t expiryTicks)
 {
     uint64_t now = HAL_Time_SysTicksToTime(HAL_Time_CurrentSysTicks());
     return expiryTicks > now;
+}
+
+void SetReceiveExpiryTicks(uint64_t timeout)
+{
+    _receiveExpiryTicks = HAL_Time_SysTicksToTime(HAL_Time_CurrentSysTicks()) + timeout;
 }
 
 void RestartStateMachine()
@@ -320,8 +325,7 @@ void WP_Message_Process()
                 _size = sizeof(_inboundMessage.m_header);
 
                 // reset timeout to start receiving the header
-                _receiveExpiryTicks = HAL_Time_SysTicksToTime(HAL_Time_CurrentSysTicks()) + c_HeaderTimeout;
-
+                SetReceiveExpiryTicks(c_HeaderTimeout);
                 break;
 
             case ReceiveState_WaitingForHeader:
@@ -359,7 +363,7 @@ void WP_Message_Process()
                 {
                     // still missing some bytes for the header
                     _rxState = ReceiveState_ReadingHeader;
-                    _receiveExpiryTicks = HAL_Time_SysTicksToTime(HAL_Time_CurrentSysTicks()) + c_HeaderTimeout;
+                    SetReceiveExpiryTicks(c_HeaderTimeout);
                 }
 
                 break;
@@ -403,8 +407,7 @@ void WP_Message_Process()
                         {
                             if (_inboundMessage.m_payload != NULL)
                             {
-                                _receiveExpiryTicks =
-                                    HAL_Time_SysTicksToTime(HAL_Time_CurrentSysTicks()) + c_PayloadTimeout;
+                                 SetReceiveExpiryTicks(c_PayloadTimeout);
                                 _pos = _inboundMessage.m_payload;
                                 _size = _inboundMessage.m_header.m_size;
 
