@@ -23,7 +23,7 @@
                 "SUPPORT_ANY_BASE_CONVERSION": "ON",
                 "NF_FEATURE_DEBUGGER": "ON",
                 "NF_FEATURE_RTC": "ON",
-                "NF_FEATURE_HAS_SDCARD": "OFF",
+                "NF_FEATURE_HAS_SDCARD": "ON",
                 "NF_FEATURE_HAS_CONFIG_BLOCK": "ON",
                 "NF_FEATURE_HAS_USB_MSD": "ON",
                 "NF_FEATURE_USE_LITTLEFS": "ON",
