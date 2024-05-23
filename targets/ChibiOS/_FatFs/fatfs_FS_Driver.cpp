@@ -1,0 +1,988 @@
+//
+// Copyright (c) .NET Foundation and Contributors
+// See LICENSE file in the project root for full license information.
+//
+#include <hal.h>
+#include <nanoHAL_v2.h>
+#include <nf_sys_io_filesystem.h>
+#include "fatfs_FS_Driver.h"
+#include <stdlib.h>
+
+extern FileSystemVolume *g_FS_Volumes;
+
+FATFS fatFS[FF_VOLUMES];
+
+// static FATFS *GetFileSystemForVolume(const VOLUME_ID *volume, bool isMount);
+// static FileSystemVolume *GetFatFsForVolume(const VOLUME_ID *volume);
+// static void GetDriveIndexFromVolumeId(int8_t id, char *buffer);
+
+static int32_t RemoveAllFiles(const char *path);
+static int NormalizePath(const char *path, char *buffer, size_t bufferSize);
+
+bool FATFS_FS_Driver::LoadMedia(const void *driverInterface)
+{
+    (void)driverInterface;
+    return TRUE;
+}
+
+STREAM_DRIVER_DETAILS *FATFS_FS_Driver::DriverDetails(const VOLUME_ID *volume)
+{
+    (void)volume;
+
+    static STREAM_DRIVER_DETAILS driverDetail = {SYSTEM_BUFFERED_IO, NULL, NULL, 0, 0, TRUE, TRUE, TRUE, 0, 0};
+
+    return &driverDetail;
+}
+
+//--//
+
+void FATFS_FS_Driver::Initialize()
+{
+    // reset all the FATFS instances
+    memset(fatFS, 0, sizeof(fatFS));
+}
+
+bool FATFS_FS_Driver::InitializeVolume(const VOLUME_ID *volume, const char *path)
+{
+    return f_mount(&fatFS[volume->volumeId], path, 1) == FR_OK;
+}
+
+bool FATFS_FS_Driver::UnInitializeVolume(const VOLUME_ID *volume)
+{
+    (void)volume;
+
+    // nothing to do here as the littlefs instances are already initialized at target boot
+    return TRUE;
+}
+
+HRESULT FATFS_FS_Driver::Format(const VOLUME_ID *volume, const char *volumeLabel, uint32_t parameters)
+{
+    (void)volume;
+    (void)volumeLabel;
+    (void)parameters;
+
+    // ::Watchdog_GetSetEnabled(FALSE, TRUE);
+
+    // HRESULT hr = FAT_LogicDisk::Format(volume, volumeLabel, parameters);
+
+    // ::Watchdog_GetSetEnabled(TRUE, TRUE);
+    ASSERT(FALSE);
+    return S_FALSE; // hr
+}
+
+HRESULT FATFS_FS_Driver::GetSizeInfo(const VOLUME_ID *volume, int64_t *totalSize, int64_t *totalFreeSpace)
+{
+    (void)totalSize;
+
+    char buffer[3];
+    FATFS fs;
+    FATFS *fsPtr = &fs;
+    DWORD freeClusters, freeSectors, totalSectors;
+
+    FileSystemVolume *currentVolume = FileSystemVolumeList::FindVolume(volume->volumeId);
+
+    f_chdrive(currentVolume->m_rootName);
+
+    // get free clusters
+    f_getfree(buffer, &freeClusters, &fsPtr);
+
+    // Get total sectors and free sectors
+    totalSectors = (fs.n_fatent - 2) * fs.csize;
+    freeSectors = freeClusters * fs.csize;
+
+#if FF_MAX_SS != FF_MIN_SS
+    *totalSize = (int64_t)totalSectors * fs.ssize;
+    *totalFreeSpace = (int64_t)freeSectors * fs.ssize;
+#else
+    *totalSize = (int64_t)totalSectors * FF_MAX_SS;
+    *totalFreeSpace = (int64_t)freeSectors * FF_MAX_SS;
+#endif
+
+    return CLR_E_INVALID_DRIVER;
+}
+
+HRESULT FATFS_FS_Driver::FlushAll(const VOLUME_ID *volume)
+{
+    (void)volume;
+    // FAT_LogicDisk *logicDisk = FAT_MemoryManager::GetLogicDisk(volume);
+
+    // if (logicDisk)
+    // {
+    //     logicDisk->SectorCache.FlushAll();
+
+    //     return S_OK;
+    // }
+    ASSERT(FALSE);
+    return CLR_E_INVALID_DRIVER;
+}
+
+HRESULT FATFS_FS_Driver::GetVolumeLabel(const VOLUME_ID *volume, char *volumeLabel, int32_t volumeLabelLen)
+{
+    (void)volume;
+    (void)volumeLabel;
+    (void)volumeLabelLen;
+
+    // FATFS *fs = NULL;
+
+    // //fs = GetFileSystemForVolume(volume, true);
+
+    // if (fs == NULL)
+    // {
+    //     return FALSE;
+    // }
+
+    // memcpy(volumeLabel, fatFS.lfnbuf, volumeLabelLen);
+
+    // FAT_LogicDisk *logicDisk = FAT_MemoryManager::GetLogicDisk(volume);
+
+    // if (logicDisk)
+    // {
+    //     if (volumeLabelLen < FAT_Directory::DIR_Name__size)
+    //     {
+    //         return CLR_E_BUFFER_TOO_SMALL;
+    //     }
+
+    //     return logicDisk->GetDiskVolLab(volumeLabel);
+    // }
+    ASSERT(FALSE);
+    return CLR_E_INVALID_DRIVER;
+}
+
+//--//
+
+HRESULT FATFS_FS_Driver::Open(const VOLUME_ID *volume, const char *path, void *&handle)
+{
+    NANOCLR_HEADER();
+
+    (void)volume;
+
+#ifdef DEBUG
+    int32_t result;
+#endif
+
+    FATFS_FileHandle *fileHandle = NULL;
+    FILINFO info;
+    int32_t flags;
+    char normalizedPath[FS_MAX_DIRECTORY_LENGTH];
+    bool fileExists = false;
+
+    // allocate file handle
+    fileHandle = (FATFS_FileHandle *)platform_malloc(sizeof(FATFS_FileHandle));
+
+    if (fileHandle == NULL)
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
+    }
+
+    memset(fileHandle, 0, sizeof(FATFS_FileHandle));
+
+    if (NormalizePath(path, normalizedPath, sizeof(normalizedPath)) < 0)
+    {
+        // handle error
+        return CLR_E_PATH_TOO_LONG;
+    }
+
+    // check for file existence
+#ifdef DEBUG
+    result = f_stat(normalizedPath, &info);
+
+    fileExists = result == FR_OK;
+#else
+    fileExists = f_stat(normalizedPath, &info) == FR_OK;
+#endif
+
+    if (fileExists)
+    {
+        // file already exists, open for R/W
+        flags = FA_OPEN_ALWAYS | FA_WRITE | FA_READ;
+    }
+    else
+    {
+        // file doesn't exist, creat and open for R/W
+        flags = FA_CREATE_NEW | FA_WRITE | FA_READ;
+    }
+
+    if (f_open(&fileHandle->file, normalizedPath, flags) == FR_OK)
+    {
+        // store the handle
+        handle = fileHandle;
+
+        // store attributes
+        f_chmod(normalizedPath, AM_ARC, AM_ARC);
+
+        if (!fileExists)
+        {
+            // sync file to save attributes
+            ASSERT(f_sync(&fileHandle->file) == FR_OK);
+        }
+
+        // done here, return imediatly so handle doesn't get cleared
+        hr = S_OK;
+        NANOCLR_RETURN();
+    }
+    else
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_FILE_IO);
+    }
+
+    NANOCLR_CLEANUP();
+
+    if (fileHandle != NULL)
+    {
+        platform_free(fileHandle);
+    }
+
+    NANOCLR_CLEANUP_END();
+}
+
+HRESULT FATFS_FS_Driver::Close(void *handle)
+{
+    NANOCLR_HEADER();
+
+    FATFS_FileHandle *fileHandle;
+
+    if (handle == 0)
+    {
+        return CLR_E_INVALID_PARAMETER;
+    }
+
+    fileHandle = (FATFS_FileHandle *)handle;
+
+    NANOCLR_SET_AND_LEAVE(f_close(&fileHandle->file) == FR_OK ? S_OK : CLR_E_FILE_IO);
+
+    NANOCLR_CLEANUP();
+
+    platform_free(fileHandle);
+
+    NANOCLR_CLEANUP_END();
+}
+
+HRESULT FATFS_FS_Driver::Read(void *handle, uint8_t *buffer, int size, int *bytesRead)
+{
+    NANOCLR_HEADER();
+
+    unsigned int readCount;
+    FRESULT result;
+    FATFS_FileHandle *fileHandle;
+
+    if (handle == 0)
+    {
+        return CLR_E_INVALID_PARAMETER;
+    }
+
+    if (!buffer || size < 0 || !bytesRead)
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+    }
+
+    fileHandle = (FATFS_FileHandle *)handle;
+
+    result = f_read(&fileHandle->file, buffer, size, &readCount);
+
+    // check for EOF
+    if (result > 0)
+    {
+        *bytesRead = readCount;
+    }
+    else if (result == 0)
+    {
+        // if (lfs_file_tell(fileHandle->fs, &fileHandle->file) == lfs_file_size(fileHandle->fs, &fileHandle->file))
+        // {
+        //     // signal EOF
+        //     *bytesRead = -1;
+        // }
+    }
+    else
+    {
+        // failed to read from the file
+        NANOCLR_SET_AND_LEAVE(CLR_E_FILE_IO);
+    }
+
+    hr = S_OK;
+
+    NANOCLR_NOCLEANUP();
+}
+
+HRESULT FATFS_FS_Driver::Write(void *handle, uint8_t *buffer, int size, int *bytesWritten)
+{
+    NANOCLR_HEADER();
+
+    unsigned int writeCount;
+    FRESULT result;
+    FATFS_FileHandle *fileHandle;
+
+    if (handle == 0)
+    {
+        return CLR_E_INVALID_PARAMETER;
+    }
+
+    if (size < 0)
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+    }
+
+    fileHandle = (FATFS_FileHandle *)handle;
+
+    // write to the file
+    result = f_write(&fileHandle->file, buffer, size, &writeCount);
+
+    if (result != FR_OK)
+    {
+        // failed to write to the file
+        NANOCLR_SET_AND_LEAVE(CLR_E_FILE_IO);
+    }
+
+    *bytesWritten = writeCount;
+
+    hr = S_OK;
+
+    NANOCLR_NOCLEANUP();
+}
+
+HRESULT FATFS_FS_Driver::Flush(void *handle)
+{
+    FATFS_FileHandle *fileHandle;
+
+    if (handle == 0)
+    {
+        return CLR_E_INVALID_PARAMETER;
+    }
+
+    fileHandle = (FATFS_FileHandle *)handle;
+
+    if (f_sync(&fileHandle->file) != FR_OK)
+    {
+        // failed to access the file
+        return CLR_E_FILE_IO;
+    }
+
+    return S_OK;
+}
+
+HRESULT FATFS_FS_Driver::Seek(void *handle, int64_t offset, uint32_t origin, int64_t *position)
+{
+    FATFS_FileHandle *fileHandle;
+    FRESULT result;
+
+    if (handle == 0)
+    {
+        return CLR_E_INVALID_PARAMETER;
+    }
+
+    fileHandle = (FATFS_FileHandle *)handle;
+
+    // map the origin to littlefs
+    switch (origin)
+    {
+        case SEEKORIGIN_BEGIN:
+            // 1st need to rewind the file to get to a known position
+            f_rewind(&fileHandle->file);
+            break;
+
+        case SEEKORIGIN_CURRENT:
+            // get the current position
+            offset += f_tell(&fileHandle->file);
+            break;
+
+        case SEEKORIGIN_END:
+            // get the file size
+            offset += f_size(&fileHandle->file);
+            break;
+    }
+
+    // seek to the position
+    result = f_lseek(&fileHandle->file, offset);
+
+    if (result != FR_OK)
+    {
+        // failed to access the file
+        return CLR_E_FILE_IO;
+    }
+
+    // get the current position
+    *position = f_tell(&fileHandle->file);
+
+    return S_OK;
+}
+
+HRESULT FATFS_FS_Driver::GetLength(void *handle, int64_t *length)
+{
+    FATFS_FileHandle *fileHandle;
+
+    if (handle == 0)
+    {
+        return CLR_E_INVALID_PARAMETER;
+    }
+
+    fileHandle = (FATFS_FileHandle *)handle;
+
+    *length = f_size(&fileHandle->file);
+
+    return S_OK;
+}
+
+HRESULT FATFS_FS_Driver::SetLength(void *handle, int64_t length)
+{
+    FATFS_FileHandle *fileHandle;
+    FRESULT result;
+
+    if (handle == 0)
+    {
+        return CLR_E_INVALID_PARAMETER;
+    }
+
+    fileHandle = (FATFS_FileHandle *)handle;
+
+    // move the file pointer to the desired position
+    result = f_lseek(&fileHandle->file, length);
+
+    if (result != FR_OK)
+    {
+        return CLR_E_FILE_IO;
+    }
+
+    // truncate the file at the current position
+    result = f_truncate(&fileHandle->file);
+
+    if (result != FR_OK)
+    {
+        return CLR_E_FILE_IO;
+    }
+
+    return S_OK;
+}
+
+//--//
+
+HRESULT FATFS_FS_Driver::FindOpen(const VOLUME_ID *volume, const char *path, void *&handle)
+{
+    NANOCLR_HEADER();
+
+    (void)volume;
+
+    char normalizedPath[FS_MAX_DIRECTORY_LENGTH];
+    FATFS_FindFileHandle *findHandle = NULL;
+
+    // allocate file handle
+    findHandle = (FATFS_FindFileHandle *)platform_malloc(sizeof(FATFS_FindFileHandle));
+
+    if (findHandle == NULL)
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
+    }
+
+    memset(findHandle, 0, sizeof(FATFS_FindFileHandle));
+
+    if (NormalizePath(path, normalizedPath, sizeof(normalizedPath)) < 0)
+    {
+        // handle error
+        return CLR_E_PATH_TOO_LONG;
+    }
+
+    // open directory for seek
+    if (f_opendir(&findHandle->dir, normalizedPath) == FR_OK)
+    {
+        // store the handle
+        handle = findHandle;
+
+        // done here, return imediatly so handle doesn't get cleared
+        hr = S_OK;
+
+        NANOCLR_RETURN();
+    }
+
+    NANOCLR_SET_AND_LEAVE(CLR_E_FILE_IO);
+
+    NANOCLR_CLEANUP();
+
+    if (findHandle != NULL)
+    {
+        platform_free(findHandle);
+    }
+
+    NANOCLR_CLEANUP_END();
+}
+
+HRESULT FATFS_FS_Driver::FindNext(void *handle, FS_FILEINFO *fi, bool *fileFound)
+{
+    NANOCLR_HEADER();
+
+    FATFS_FindFileHandle *findHandle;
+    FILINFO info;
+    FRESULT result;
+
+    if (handle == 0)
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+    }
+
+    // check file parameters
+    if (!fi || !fileFound)
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_FILE_IO);
+    }
+
+    findHandle = (FATFS_FindFileHandle *)handle;
+
+    // read the next entry
+    do
+    {
+        // read the next entry
+        result = f_readdir(&findHandle->dir, &info);
+
+        // no more entries
+        if (result == FR_NO_FILE)
+        {
+            *fileFound = false;
+            NANOCLR_SET_AND_LEAVE(S_OK);
+        }
+        else
+        {
+            // something went wrong
+            NANOCLR_SET_AND_LEAVE(CLR_E_FILE_IO);
+        }
+
+        // skip the '.' and '..' entries
+    } while (info.fname[0] == '.');
+
+    // found a file
+    *fileFound = true;
+
+    // set file name size
+    fi->FileNameSize = hal_strlen_s(info.fname);
+
+    // allocate memory for the file name
+    // MUST BE FREED BY THE CALLER
+    fi->FileName = (char *)platform_malloc(fi->FileNameSize + 1);
+
+    // sanity check for successfull malloc
+    if (fi->FileName == NULL)
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
+    }
+
+    // copy the file name, including the string terminator
+    hal_strcpy_s((char *)fi->FileName, fi->FileNameSize + 1, info.fname);
+
+    // store the attributes
+    fi->Attributes = info.fattrib;
+
+    // set the size
+    fi->Size = info.fsize;
+
+    NANOCLR_NOCLEANUP();
+}
+
+HRESULT FATFS_FS_Driver::FindClose(void *handle)
+{
+    FATFS_FindFileHandle *findHandle;
+
+    if (handle != 0)
+    {
+        findHandle = (FATFS_FindFileHandle *)handle;
+
+        f_closedir(&findHandle->dir);
+
+        platform_free(findHandle);
+    }
+
+    return S_OK;
+}
+
+HRESULT FATFS_FS_Driver::GetFileInfo(const VOLUME_ID *volume, const char *path, FS_FILEINFO *fileInfo, bool *found)
+{
+    (void)volume;
+
+    FILINFO info;
+    char normalizedPath[FS_MAX_DIRECTORY_LENGTH];
+
+    if (NormalizePath(path, normalizedPath, sizeof(normalizedPath)) < 0)
+    {
+        // handle error
+        return CLR_E_PATH_TOO_LONG;
+    }
+
+    // root is different
+    if (*normalizedPath == '/' && *(normalizedPath + 1) == '\0')
+    {
+        // this is the root directory
+        fileInfo->Attributes = FileAttributes::FileAttributes_Directory;
+        fileInfo->Size = 0;
+        fileInfo->FileNameSize = 1;
+    }
+    else
+    {
+        // check for file existence
+        if (f_stat(normalizedPath, &info) != FR_OK)
+        {
+            *found = false;
+            return S_OK;
+        }
+
+        // set found flag
+        *found = true;
+
+        // store the attributes
+        fileInfo->Attributes = info.fattrib;
+
+        // no need to set the file name details as managed code already has this info
+    }
+
+    return S_OK;
+}
+
+HRESULT FATFS_FS_Driver::GetAttributes(const VOLUME_ID *volume, const char *path, uint32_t *attributes)
+{
+    NANOCLR_HEADER();
+
+    FILINFO info;
+    int32_t result;
+    char normalizedPath[FS_MAX_DIRECTORY_LENGTH];
+    // char buffer[3];
+
+    // set to empty attributes
+    *attributes = EMPTY_ATTRIBUTE;
+
+    if (NormalizePath(path, normalizedPath, sizeof(normalizedPath)) < 0)
+    {
+        // handle error
+        return CLR_E_PATH_TOO_LONG;
+    }
+
+    FileSystemVolume *currentVolume = FileSystemVolumeList::FindVolume(volume->volumeId);
+
+    f_chdrive(currentVolume->m_rootName);
+
+    //GetDriveIndexFromVolumeId(volume->volumeId, buffer);
+    // f_chdrive(buffer);
+
+    // check for file existence
+    result = f_stat(normalizedPath, &info);
+
+    if (result == FR_NO_PATH || result == FR_NO_FILE)
+    {
+        // file doesn't exist
+        // even if this fails we return success as attributes have been set to EMPTY_ATTRIBUTE
+        NANOCLR_SET_AND_LEAVE(S_OK);
+    }
+
+    // store attributes
+    *attributes = info.fattrib;
+
+    NANOCLR_SET_AND_LEAVE(S_OK);
+
+    NANOCLR_NOCLEANUP();
+}
+
+HRESULT FATFS_FS_Driver::SetAttributes(const VOLUME_ID *volume, const char *path, uint32_t attributes)
+{
+    (void)volume;
+
+    FILINFO info;
+    char normalizedPath[FS_MAX_DIRECTORY_LENGTH];
+
+    if (NormalizePath(path, normalizedPath, sizeof(normalizedPath)) < 0)
+    {
+        // handle error
+        return CLR_E_PATH_TOO_LONG;
+    }
+
+    // check for file existence
+    if (f_stat(normalizedPath, &info) != FR_OK)
+    {
+        return CLR_E_FILE_NOT_FOUND;
+    }
+
+    if (f_chmod((const char *)normalizedPath, attributes, attributes) != FR_OK)
+    {
+        return CLR_E_FILE_IO;
+    }
+
+    return S_OK;
+}
+
+HRESULT FATFS_FS_Driver::CreateDirectory(const VOLUME_ID *volume, const char *path)
+{
+    (void)volume;
+
+    FILINFO info;
+    int32_t result = FR_OK;
+    char normalizedPath[FS_MAX_DIRECTORY_LENGTH];
+    char tempPath[FS_MAX_DIRECTORY_LENGTH + 1];
+    char *segment;
+    int32_t dirExists;
+
+    (void)dirExists;
+
+    if (NormalizePath(path, normalizedPath, sizeof(normalizedPath)) < 0)
+    {
+        // handle error
+        return CLR_E_PATH_TOO_LONG;
+    }
+    memset(tempPath, 0, sizeof(tempPath));
+
+    // iterate over the path segments and create the directories
+    segment = strtok(normalizedPath, "/");
+
+    while (segment && (result == FR_OK || result == FR_EXIST))
+    {
+        strcat(tempPath, segment);
+
+        result = f_mkdir(tempPath);
+
+        if (result != FR_OK && result != FR_EXIST)
+        {
+            __NOP();
+            return CLR_E_FILE_IO;
+        }
+
+        // add back the '/' separator
+        strcat(tempPath, "/");
+
+        segment = strtok(NULL, "/");
+    }
+
+    // remove trailing '/'
+    tempPath[hal_strlen_s(tempPath) - 1] = '\0';
+
+    // sanity check for success
+
+    dirExists = f_stat(tempPath, &info);
+
+    // sanity check for success
+    if (result == FR_OK)
+    {
+        return S_OK;
+    }
+    else
+    {
+        __NOP();
+        return CLR_E_FILE_IO;
+    }
+
+    return CLR_E_INVALID_DRIVER;
+}
+
+HRESULT FATFS_FS_Driver::Move(const VOLUME_ID *volume, const char *oldPath, const char *newPath)
+{
+    (void)volume;
+
+    char normalizedNewPath[FS_MAX_DIRECTORY_LENGTH];
+    char normalizedOldPath[FS_MAX_DIRECTORY_LENGTH];
+    int32_t result = FR_OK;
+
+    if (NormalizePath(newPath, normalizedNewPath, sizeof(normalizedNewPath)) < 0)
+    {
+        // handle error
+        return CLR_E_PATH_TOO_LONG;
+    }
+
+    if (NormalizePath(oldPath, normalizedOldPath, sizeof(normalizedOldPath)) < 0)
+    {
+        // handle error
+        return CLR_E_PATH_TOO_LONG;
+    }
+
+    // the check for source file and destination file existence has already been made in managed code
+    result = f_rename(normalizedOldPath, normalizedNewPath);
+    if (result == FR_OK)
+    {
+        return S_OK;
+    }
+    else if (result == FR_EXIST)
+    {
+        // failed to move directory because it's not empty
+        return S_FALSE;
+    }
+    else
+    {
+        return CLR_E_FILE_IO;
+    }
+}
+
+HRESULT FATFS_FS_Driver::Delete(const VOLUME_ID *volume, const char *path, bool recursive)
+{
+    (void)volume;
+
+    FILINFO info;
+    char normalizedPath[FS_MAX_DIRECTORY_LENGTH];
+    int32_t result;
+
+    if (NormalizePath(path, normalizedPath, sizeof(normalizedPath)) < 0)
+    {
+        // handle error
+        return CLR_E_PATH_TOO_LONG;
+    }
+
+    // check for file existence
+    if (f_stat(normalizedPath, &info) != FR_OK)
+    {
+        return CLR_E_FILE_NOT_FOUND;
+    }
+
+remove_entry:
+    // remove the directory
+    result = f_rmdir(normalizedPath);
+
+    if (result == FR_DENIED)
+    {
+        if (!recursive)
+        {
+            // directory is not empty and we are not in recursive mode
+            return CLR_E_DIRECTORY_NOT_EMPTY;
+        }
+
+        // recursivelly delete all files and subdirectories
+        result = RemoveAllFiles(normalizedPath);
+        if (result != FR_OK)
+        {
+            return CLR_E_FILE_IO;
+        }
+
+        goto remove_entry;
+    }
+    else if (result != FR_OK)
+    {
+        return CLR_E_FILE_IO;
+    }
+
+    return S_OK;
+}
+
+static int32_t RemoveAllFiles(const char *path)
+{
+    DIR dir;
+    FILINFO info;
+    int32_t result;
+    char buffer[FS_MAX_PATH_LENGTH];
+    char *bufferP = buffer;
+    size_t bufferSize = FS_MAX_PATH_LENGTH;
+
+    // open the directory
+    result = f_opendir(&dir, path);
+    if (result != FR_OK)
+    {
+        return result;
+    }
+
+    // read the directory
+    while (!(f_readdir(&dir, &info) == FR_OK && info.fname[0] == 0))
+    {
+        // skip the '.' and '..' entries
+        if (info.fname[0] == '.')
+        {
+            continue;
+        }
+
+        // reset and prepare the buffer
+        memset(buffer, 0, FS_MAX_PATH_LENGTH);
+        bufferP = buffer;
+
+        // join filename with the path
+        CLR_SafeSprintf(bufferP, bufferSize, "%s%s", path, info.fname);
+
+        // check if this is a directory
+        if (info.fattrib & AM_DIR)
+        {
+            // recursivelly delete all files and subdirectories
+            result = RemoveAllFiles(buffer);
+
+            if (result != FR_OK)
+            {
+                return result;
+            }
+        }
+
+        // remove the entry (OK to remove files and directories)
+        result = f_rmdir(buffer);
+        if (result != FR_OK)
+        {
+            return result;
+        }
+    }
+
+    // close the directory
+    return f_closedir(&dir);
+}
+
+// normalize path by:
+// - replace \ with /
+// - remove leading slash
+// - handle other normalization issues
+static int NormalizePath(const char *path, char *buffer, size_t bufferSize)
+{
+    const char *workingPath = path;
+    char *bufferP = buffer;
+
+    while (*workingPath && (static_cast<size_t>(bufferP - buffer) < bufferSize))
+    {
+        // Copy the character, replacing backslashes with forward slashes
+        *bufferP = (*workingPath == '\\') ? '/' : *workingPath;
+
+        workingPath++;
+        bufferP++;
+    }
+
+    if (static_cast<size_t>(bufferP - buffer) >= bufferSize)
+    {
+        // path is too long, return an error
+        return -1;
+    }
+
+    // Null-terminate the path
+    *bufferP = '\0';
+
+    if (buffer[0] == '/')
+    {
+        // remove leading slash
+        memmove(buffer, buffer + 1, hal_strlen_s(buffer));
+    }
+
+    return 0;
+}
+
+// static char * GetVolumePathFromVolumeId(int8_t id, char *buffer)
+// {
+//     __itoa(id, buffer, 10);
+// }
+
+//////////////////
+
+STREAM_DRIVER_INTERFACE g_FATFS_STREAM_DriverInterface = {
+    &FATFS_FS_Driver::Initialize,
+    &FATFS_FS_Driver::InitializeVolume,
+    &FATFS_FS_Driver::UnInitializeVolume,
+    &FATFS_FS_Driver::DriverDetails,
+    &FATFS_FS_Driver::Open,
+    &FATFS_FS_Driver::Close,
+    &FATFS_FS_Driver::Read,
+    &FATFS_FS_Driver::Write,
+    &FATFS_FS_Driver::Flush,
+    &FATFS_FS_Driver::Seek,
+    &FATFS_FS_Driver::GetLength,
+    &FATFS_FS_Driver::SetLength,
+};
+
+FILESYSTEM_DRIVER_INTERFACE g_FATFS_FILE_SYSTEM_DriverInterface = {
+    &FATFS_FS_Driver::FindOpen,
+    &FATFS_FS_Driver::FindNext,
+    &FATFS_FS_Driver::FindClose,
+
+    &FATFS_FS_Driver::GetFileInfo,
+
+    &FATFS_FS_Driver::CreateDirectory,
+    &FATFS_FS_Driver::Move,
+    &FATFS_FS_Driver::Delete,
+
+    &FATFS_FS_Driver::GetAttributes,
+    &FATFS_FS_Driver::SetAttributes,
+
+    &FATFS_FS_Driver::Format,
+    &FATFS_FS_Driver::LoadMedia,
+    &FATFS_FS_Driver::GetSizeInfo,
+    &FATFS_FS_Driver::FlushAll,
+    &FATFS_FS_Driver::GetVolumeLabel,
+
+    "FATFS",
+    0,
+};
