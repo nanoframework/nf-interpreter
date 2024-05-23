@@ -34,9 +34,10 @@ void LITTLEFS_FS_Driver::Initialize()
     hal_lfs_mount();
 }
 
-bool LITTLEFS_FS_Driver::InitializeVolume(const VOLUME_ID *volume)
+bool LITTLEFS_FS_Driver::InitializeVolume(const VOLUME_ID *volume, const char *path)
 {
     (void)volume;
+    (void)path;
 
     // nothing to do here as the littlefs instances are already initialized at target boot
     return TRUE;

@@ -145,7 +145,7 @@ extern "C"
     //--//
 
     typedef void (*STREAM_INITIALIZE)();
-    typedef bool (*STREAM_INITIALIZEVOLUME)(const VOLUME_ID * /*volume*/);
+    typedef bool (*STREAM_INITIALIZEVOLUME)(const VOLUME_ID * /*volume*/, const char * /*path*/);
     typedef bool (*STREAM_UNINITIALIZEVOLUME)(const VOLUME_ID * /*volume*/);
     typedef STREAM_DRIVER_DETAILS *(*STREAM_DRIVERDETAILS)(const VOLUME_ID * /*volume*/);
     typedef HRESULT (*STREAM_OPEN)(const VOLUME_ID * /*volume*/, const char * /*path*/, void *& /*handle*/);
@@ -190,7 +190,7 @@ extern "C"
 #define EVENT_SUBCATEGORY_MEDIAINSERT 1
 #define EVENT_SUBCATEGORY_MEDIAEJECT  2
 
-    void FS_MountVolume(const char *rootName, uint32_t deviceFlags);
+    void FS_MountVolume(const char *rootName, uint32_t deviceFlags, char *fileSystemDriver);
     // void FS_UnmountVolume(BlockStorageDevice *blockStorageDevice);
 
     void FS_Initialize();
@@ -222,7 +222,7 @@ extern "C"
                 return FALSE;
             }
 
-            return m_streamDriver->InitializeVolume(&m_volumeId);
+            return m_streamDriver->InitializeVolume(&m_volumeId, m_rootName);
         }
 
         bool UninitializeVolume()

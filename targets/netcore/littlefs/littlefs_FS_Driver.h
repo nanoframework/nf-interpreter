@@ -35,7 +35,7 @@ extern "C"
     struct LITTLEFS_FS_Driver
     {
         static void Initialize();
-        static bool InitializeVolume(const VOLUME_ID *volume);
+        static bool InitializeVolume(const VOLUME_ID *volume, const char *path);
         static bool UnInitializeVolume(const VOLUME_ID *volume);
         static HRESULT Format(const VOLUME_ID *volume, char * volumeLabel, uint32_t parameters);
         static HRESULT GetSizeInfo(const VOLUME_ID *volume, int64_t *totalSize, int64_t *totalFreeSpace);
