@@ -468,6 +468,7 @@ extern "C"
         //--//
 
         char m_rootName[FS_NAME_MAXLENGTH];
+        char m_label[FS_LABEL_MAXLENGTH];
         uint32_t m_deviceFlags;
         STREAM_DRIVER_INTERFACE *m_streamDriver;
         FILESYSTEM_DRIVER_INTERFACE *m_fsDriver;
