@@ -13,12 +13,9 @@ HAL_DblLinkedList<FileSystemVolume> FileSystemVolumeList::s_zombieVolumeList;
 
 //--//
 
-void FS_MountVolume(
-    const char *rootName,
-    uint32_t deviceFlags)
+void FS_MountVolume(const char *rootName, uint32_t deviceFlags, char *fileSystemDriver)
 {
     FileSystemVolume *volume = NULL;
-    uint32_t numVolumes = 0;
     FILESYSTEM_DRIVER_INTERFACE *fsDriver = NULL;
     STREAM_DRIVER_INTERFACE *streamDriver = NULL;
     uint32_t i;

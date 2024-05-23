@@ -9,7 +9,7 @@
 
 // //--//
 
-// void FS_MountVolume( LPCSTR rootName, UINT32 serialNumber, UINT32 deviceFlags, BlockStorageDevice* blockStorageDevice )
+// void FS_MountVolume( LPCSTR rootName, UINT32 serialNumber, UINT32 deviceFlags, char * fileSystemDriver )
 // {
 // }
 
