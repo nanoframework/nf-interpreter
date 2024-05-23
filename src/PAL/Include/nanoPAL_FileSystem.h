@@ -93,7 +93,7 @@ extern "C"
         *FS_GETSIZEINFO)(const VOLUME_ID * /*volume*/, int64_t * /*totalSize*/, int64_t * /*totalFreeSpace*/);
     typedef HRESULT (*FS_FLUSHALL)(const VOLUME_ID * /*volume*/);
     typedef HRESULT (
-        *FS_GETVOLUMELABEL)(const VOLUME_ID * /*volume*/, const char * /*volumeLabel*/, int32_t /*volumeLabelLen*/);
+        *FS_GETVOLUMELABEL)(const VOLUME_ID * /*volume*/, char * /*volumeLabel*/, int32_t /*volumeLabelLen*/);
 
     typedef HRESULT (*FS_FINDOPEN)(const VOLUME_ID * /*volume*/, const char * /*path*/, void *& /*findHandle*/);
     typedef HRESULT (*FS_FINDNEXT)(void * /*findHandle*/, FS_FILEINFO * /*findData*/, bool * /*found*/);
