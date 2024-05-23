@@ -13,16 +13,16 @@ HAL_DblLinkedList<FileSystemVolume> FileSystemVolumeList::s_zombieVolumeList;
 
 //--//
 
-void FS_MountVolume(const char *rootName, uint32_t deviceFlags, char *fileSystemDriver)
+bool FS_MountVolume(const char *rootName, uint32_t deviceFlags, char *fileSystemDriver)
 {
     FileSystemVolume *volume = NULL;
     FILESYSTEM_DRIVER_INTERFACE *fsDriver = NULL;
     STREAM_DRIVER_INTERFACE *streamDriver = NULL;
-    uint32_t i;
+    uint32_t volumeId;
 
     if (!rootName)
     {
-        return;
+        return FALSE;
     }
 
     //--//
@@ -53,13 +53,13 @@ void FS_MountVolume(const char *rootName, uint32_t deviceFlags, char *fileSystem
         }
 
         current = next;
-    }   
+    }
 
     // find the FSDriver that will mount the block storage
-    for (i = 0; i < g_InstalledFSCount; i++)
+    for (uint32_t i = 0; i < g_InstalledFSCount; i++)
     {
-        if (g_AvailableFSInterfaces[i].fsDriver && g_AvailableFSInterfaces[i].fsDriver->LoadMedia &&
-            g_AvailableFSInterfaces[i].fsDriver->LoadMedia(NULL))
+        if (g_AvailableFSInterfaces[i].fsDriver &&
+            hal_stricmp(g_AvailableFSInterfaces[i].fsDriver->Name, fileSystemDriver) == 0)
         {
             fsDriver = g_AvailableFSInterfaces[i].fsDriver;
             streamDriver = g_AvailableFSInterfaces[i].streamDriver;
@@ -67,77 +67,63 @@ void FS_MountVolume(const char *rootName, uint32_t deviceFlags, char *fileSystem
         }
     }
 
-    if (!fsDriver)
+    // get the next free volume id
+    volumeId = FileSystemVolumeList::GetNextFreeVolumeId();
+
+    // allocate the memory for this FileSystemVolume
+    volume = (FileSystemVolume *)platform_malloc(sizeof(FileSystemVolume));
+
+    // sanity check
+    if (!volume)
     {
-        numVolumes = 1;
+        return FALSE;
     }
 
-    for (i = 0; i < numVolumes; i++)
+    // initialize content to 0
+    memset(volume, 0, sizeof(FileSystemVolume));
+
+    if (FileSystemVolumeList::AddVolume(
+            volume,
+            rootName,
+            deviceFlags,
+            streamDriver,
+            fsDriver,
+            volumeId,
+            (fsDriver) ? TRUE : FALSE))
     {
-        // Allocate the memory for this FileSystemVolume
-        volume = (FileSystemVolume *)platform_malloc(sizeof(FileSystemVolume));
-
-        // sanity check
-        if (!volume)
-        {
-            return;
-        }
-
-        // initialize content to 0
-        memset(volume, 0, sizeof(FileSystemVolume));
-
-        if (!FileSystemVolumeList::AddVolume(
-                volume,
-                rootName,
-                deviceFlags,
-                streamDriver,
-                fsDriver,
-                i,
-                // init only when we have a valid fsDriver
-                (fsDriver) ? TRUE : FALSE)) 
-        {
-            // If for some reason, AddVolume fails, we'll keep trying other volumes
-            platform_free(volume);
-            continue;
-        }
 
         // Now we can notify managed code
         PostManagedEvent(EVENT_STORAGE, EVENT_SUBCATEGORY_MEDIAINSERT, 0, (uint32_t)volume);
+
+        // done here
+        return TRUE;
+    }
+    else
+    {
+        // if for some reason, AddVolume fails, there is not much that can be done
+        platform_free(volume);
+
+        return FALSE;
     }
 }
 
-// void FS_UnmountVolume(BlockStorageDevice *blockStorageDevice)
-// {
-//     (void)blockStorageDevice;
-//     // FileSystemVolume *current = FileSystemVolumeList::GetFirstVolume();
-//     // FileSystemVolume *next;
+void FS_UnmountVolume(const char *rootName)
+{
+    FileSystemVolume *volume = FileSystemVolumeList::FindVolume(rootName, hal_strlen_s(rootName));
 
-//     // while (current)
-//     // {
-//     //     if (current->m_volumeId.blockStorageDevice == blockStorageDevice)
-//     //     {
-//     //         // get the next node from the link list before removing it
-//     //         next = FileSystemVolumeList::GetNextVolume(*current);
+    if (volume)
+    {
+        // Let FS uninitialize now for this volume. Note this happens before managed stack is informed
+        FileSystemVolumeList::RemoveVolume(volume, TRUE);
 
-//     //         /// Let FS uninitialize now for this volume. Note this happens before managed stack
-//     //         /// is informed.
-//     //         FileSystemVolumeList::RemoveVolume(current, TRUE);
+        // Move the volume into the zombie list rather than free up the memory so all the subsequent Close() from opened
+        // handles will complete and/or fail properly
+        FileSystemVolumeList::s_zombieVolumeList.LinkAtBack(volume);
 
-//     //         // Move the volume into the zombie list rather than free up the memory so all the subsequent Close() from
-//     //         // opened handles will complete and/or fail properly
-//     //         FileSystemVolumeList::s_zombieVolumeList.LinkAtBack(current);
-
-//     //         /// Notify managed code.
-//     //         PostManagedEvent(EVENT_STORAGE, EVENT_SUBCATEGORY_MEDIAEJECT, 0, (uint32_t)current);
-
-//     //         current = next;
-//     //     }
-//     //     else
-//     //     {
-//     //         current = FileSystemVolumeList::GetNextVolume(*current);
-//     //     }
-//     // }
-// }
+        // Notify managed code
+        PostManagedEvent(EVENT_STORAGE, EVENT_SUBCATEGORY_MEDIAEJECT, 0, (uint32_t)volume);
+    }
+}
 
 //--//
 
@@ -265,11 +251,11 @@ bool FileSystemVolumeList::AddVolume(
     {
         success = fsv->InitializeVolume();
 
-        //fsDriver->GetVolumeLabel(&fsv->m_volumeId, fsv->m_label, ARRAYSIZE(fsv->m_label));
+        // fsDriver->GetVolumeLabel(&fsv->m_volumeId, fsv->m_label, ARRAYSIZE(fsv->m_label));
     }
     else
     {
-        //fsv->m_label[0] = 0;
+        fsv->m_label[0] = 0;
     }
 
     // only add the volume if initialization was successful, when requested at all
@@ -321,7 +307,7 @@ uint32_t FileSystemVolumeList::GetNumVolumes()
     return s_volumeList.NumOfNodes();
 }
 
-FileSystemVolume *FileSystemVolumeList::FindVolume(const char * rootName, uint32_t rootNameLength)
+FileSystemVolume *FileSystemVolumeList::FindVolume(const char *rootName, uint32_t rootNameLength)
 {
     FileSystemVolume *volume = GetFirstVolume();
     char root[FS_NAME_MAXLENGTH];

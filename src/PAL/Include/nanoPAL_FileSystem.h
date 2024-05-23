@@ -190,8 +190,8 @@ extern "C"
 #define EVENT_SUBCATEGORY_MEDIAINSERT 1
 #define EVENT_SUBCATEGORY_MEDIAEJECT  2
 
-    void FS_MountVolume(const char *rootName, uint32_t deviceFlags, char *fileSystemDriver);
-    // void FS_UnmountVolume(BlockStorageDevice *blockStorageDevice);
+    bool FS_MountVolume(const char *rootName, uint32_t deviceFlags, char *fileSystemDriver);
+    void FS_UnmountVolume(const char *rootName);
 
     void FS_Initialize();
 
