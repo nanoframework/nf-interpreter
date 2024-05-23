@@ -67,21 +67,31 @@ HRESULT LITTLEFS_FS_Driver::Format(const VOLUME_ID *volume, const char *volumeLa
 
 HRESULT LITTLEFS_FS_Driver::GetSizeInfo(const VOLUME_ID *volume, int64_t *totalSize, int64_t *totalFreeSpace)
 {
-    (void)volume;
-    (void)totalSize;
-    (void)totalFreeSpace;
+    NANOCLR_HEADER();
 
-    // FAT_LogicDisk *logicDisk = FAT_MemoryManager::GetLogicDisk(volume);
+    lfs_ssize_t allocBlocks;
+    LITTLEFS_FileHandle *fileHandle = NULL;
 
-    // if (logicDisk)
-    // {
-    //     *totalSize = (int64_t)logicDisk->GetDiskTotalSize();
-    //     *totalFreeSpace = (int64_t)logicDisk->GetDiskFreeSize();
+    // get littlefs instance
+    fileHandle->fs = hal_lfs_get_fs_from_index(volume->volumeId);
 
-    //     return S_OK;
-    // }
-    ASSERT(FALSE);
-    return CLR_E_INVALID_DRIVER;
+    if (!fileHandle->fs)
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_FILE_IO);
+    }
+
+    // get the littlefs info
+    allocBlocks = lfs_fs_size(fileHandle->fs);
+
+    if (allocBlocks < 0)
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_FILE_IO);
+    }
+
+    *totalSize = (int64_t)(fileHandle->fs->cfg->block_size * fileHandle->fs->cfg->block_count);
+    *totalFreeSpace = (int64_t)(totalSize - (allocBlocks * fileHandle->fs->cfg->block_size));
+
+    NANOCLR_NOCLEANUP();
 }
 
 HRESULT LITTLEFS_FS_Driver::FlushAll(const VOLUME_ID *volume)
@@ -99,7 +109,7 @@ HRESULT LITTLEFS_FS_Driver::FlushAll(const VOLUME_ID *volume)
     return CLR_E_INVALID_DRIVER;
 }
 
-HRESULT LITTLEFS_FS_Driver::GetVolumeLabel(const VOLUME_ID *volume, const char *volumeLabel, int32_t volumeLabelLen)
+HRESULT LITTLEFS_FS_Driver::GetVolumeLabel(const VOLUME_ID *volume, char *volumeLabel, int32_t volumeLabelLen)
 {
     (void)volume;
     (void)volumeLabel;
