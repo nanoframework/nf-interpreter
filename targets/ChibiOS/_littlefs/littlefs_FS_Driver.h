@@ -39,10 +39,10 @@ extern "C"
         static void Initialize();
         static bool InitializeVolume(const VOLUME_ID *volume);
         static bool UnInitializeVolume(const VOLUME_ID *volume);
-        static HRESULT Format(const VOLUME_ID *volume, LPCSTR volumeLabel, uint32_t parameters);
+        static HRESULT Format(const VOLUME_ID *volume, const char * volumeLabel, uint32_t parameters);
         static HRESULT GetSizeInfo(const VOLUME_ID *volume, int64_t *totalSize, int64_t *totalFreeSpace);
         static HRESULT FlushAll(const VOLUME_ID *volume);
-        static HRESULT GetVolumeLabel(const VOLUME_ID *volume, const char *volumeLabel, int32_t volumeLabelLen);
+        static HRESULT GetVolumeLabel(const VOLUME_ID *volume, char *volumeLabel, int32_t volumeLabelLen);
 
         //--//
         static bool LoadMedia(const void *driverInterface);

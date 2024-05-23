@@ -99,7 +99,7 @@ HRESULT LITTLEFS_FS_Driver::FlushAll(const VOLUME_ID *volume)
     return CLR_E_INVALID_DRIVER;
 }
 
-HRESULT LITTLEFS_FS_Driver::GetVolumeLabel(const VOLUME_ID *volume, const char *volumeLabel, int32_t volumeLabelLen)
+HRESULT LITTLEFS_FS_Driver::GetVolumeLabel(const VOLUME_ID *volume, char *volumeLabel, int32_t volumeLabelLen)
 {
     (void)volume;
     (void)volumeLabel;
