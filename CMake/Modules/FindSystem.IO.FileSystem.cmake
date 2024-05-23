@@ -42,9 +42,18 @@ set(System.IO.FileSystem_SRCS
 if(NF_FEATURE_USE_LITTLEFS)
 
     list(APPEND System.IO.FileSystem_SRCS
-        littlefs_FS_Driver.cpp
-    )
+        littlefs_FS_Driver.cpp)
+    
+    list(APPEND System.IO.FileSystem_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/targets/${RTOS}/_littlefs)
+endif()
 
+# add FatFs FS driver
+if(NF_FEATURE_HAS_SDCARD OR NF_FEATURE_HAS_USB_MSD)
+
+    list(APPEND System.IO.FileSystem_SRCS
+        fatfs_FS_Driver.cpp)
+
+    list(APPEND System.IO.FileSystem_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/targets/${RTOS}/_FatFs)
 endif()
 
 foreach(SRC_FILE ${System.IO.FileSystem_SRCS})
@@ -64,6 +73,9 @@ foreach(SRC_FILE ${System.IO.FileSystem_SRCS})
 
             # littlefs
             ${CMAKE_SOURCE_DIR}/targets/${RTOS}/_littlefs
+
+            # FatFs
+            ${CMAKE_SOURCE_DIR}/targets/${RTOS}/_FatFs
 
 	    CMAKE_FIND_ROOT_PATH_BOTH
     )
