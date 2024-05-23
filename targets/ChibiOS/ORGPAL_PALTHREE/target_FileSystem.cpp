@@ -8,12 +8,17 @@
 #include <nanoHAL_Types.h>
 #include <nanoPAL_FileSystem.h>
 #include <littlefs_FS_Driver.h>
+#include <fatfs_FS_Driver.h>
+#include "Target_System_IO_FileSystem.h"
 
 extern FILESYSTEM_DRIVER_INTERFACE g_LITTLEFS_FILE_SYSTEM_DriverInterface;
+extern STREAM_DRIVER_INTERFACE g_FATFS_STREAM_DriverInterface;
+
+extern FILESYSTEM_DRIVER_INTERFACE g_FATFS_FILE_SYSTEM_DriverInterface;
 extern STREAM_DRIVER_INTERFACE g_LITTLEFS_STREAM_DriverInterface;
 
 FILESYSTEM_INTERFACES g_AvailableFSInterfaces[] = {
-    // { &g_WINDOWS_FILE_SYSTEM_DriverInterface       , &g_WINDOWS_STREAMING_DriverInterface },
+    {&g_FATFS_FILE_SYSTEM_DriverInterface, &g_FATFS_STREAM_DriverInterface},
     {&g_LITTLEFS_FILE_SYSTEM_DriverInterface, &g_LITTLEFS_STREAM_DriverInterface},
 };
 
@@ -26,41 +31,18 @@ FileSystemVolume *g_FS_Volumes;
 void FS_AddVolumes()
 {
     // 2 SPI flash devices
-    // 1 SD card
-    // 1 USB MSD device
-    g_FS_NumVolumes = 4;
+    g_FS_NumVolumes = 2;
 
-    g_FS_Volumes = (FileSystemVolume *)platform_malloc(sizeof(FileSystemVolume) * g_FS_NumVolumes);
-
-    // sanity check
-    if (g_FS_Volumes == NULL)
-    {
-        platform_free(g_FS_DriverDetails);
-
-        return;
-    }
-
-    // clear the memory
-    memset(g_FS_Volumes, 0, sizeof(FileSystemVolume) * g_FS_NumVolumes);
-
-    g_FS_DriverDetails = (STREAM_DRIVER_DETAILS *)platform_malloc(sizeof(STREAM_DRIVER_DETAILS) * g_FS_NumVolumes);
-
-    // sanity check
-    if (g_FS_DriverDetails == NULL)
-    {
-        return;
-    }
-
-    // clear the memory
-    memset(g_FS_DriverDetails, 0, sizeof(STREAM_DRIVER_DETAILS) * g_FS_NumVolumes);
+    g_FS_Volumes = new FileSystemVolume[g_FS_NumVolumes];
+    g_FS_DriverDetails = new STREAM_DRIVER_DETAILS[g_FS_NumVolumes];
 
     // AT25SF641, drive I:, volume 0
     FileSystemVolumeList::AddVolume(
         &g_FS_Volumes[0],
         "I:",
         0,
-        &g_LITTLEFS_STREAM_DriverInterface,
-        &g_LITTLEFS_FILE_SYSTEM_DriverInterface,
+        g_AvailableFSInterfaces[1].streamDriver,
+        g_AvailableFSInterfaces[1].fsDriver,
         0,
         FALSE);
 
@@ -69,8 +51,8 @@ void FS_AddVolumes()
         &g_FS_Volumes[1],
         "J:",
         0,
-        &g_LITTLEFS_STREAM_DriverInterface,
-        &g_LITTLEFS_FILE_SYSTEM_DriverInterface,
+        g_AvailableFSInterfaces[1].streamDriver,
+        g_AvailableFSInterfaces[1].fsDriver,
         1,
         FALSE);
 }
