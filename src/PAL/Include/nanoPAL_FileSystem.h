@@ -512,8 +512,14 @@ extern "C"
         // returns the volume driver for the specified namespace
         static FileSystemVolume *FindVolume(char const *rootName, uint32_t rootNameLength);
 
+        // returns the volume driver for the specified VolumeID
+        static FileSystemVolume *FindVolume(uint32_t volumeId);
+
         // returns true if fsv is in the list, false otherwise
         static bool Contains(FileSystemVolume *fsv);
+
+        // returns the next free volume ID
+        static uint32_t GetNextFreeVolumeId();
 
         //--//
 

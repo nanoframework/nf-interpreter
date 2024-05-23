@@ -347,6 +347,41 @@ FileSystemVolume *FileSystemVolumeList::FindVolume(const char * rootName, uint32
     return NULL;
 }
 
+FileSystemVolume *FileSystemVolumeList::FindVolume(uint32_t volumeId)
+{
+    FileSystemVolume *volume = GetFirstVolume();
+
+    while (volume)
+    {
+        if (volume->m_volumeId.volumeId == volumeId)
+        {
+            return volume;
+        }
+
+        volume = FileSystemVolumeList::GetNextVolume(*volume);
+    }
+
+    return NULL;
+}
+
+uint32_t FileSystemVolumeList::GetNextFreeVolumeId()
+{
+    FileSystemVolume *volume = GetFirstVolume();
+    int64_t maxVolumeId = -1;
+
+    while (volume)
+    {
+        if (volume->m_volumeId.volumeId > maxVolumeId)
+        {
+            maxVolumeId = volume->m_volumeId.volumeId;
+        }
+
+        volume = FileSystemVolumeList::GetNextVolume(*volume);
+    }
+
+    return maxVolumeId + 1;
+}
+
 bool FileSystemVolumeList::Contains(FileSystemVolume *fsv)
 {
     FileSystemVolume *volume = GetFirstVolume();
