@@ -175,6 +175,8 @@ struct Library_nf_sys_io_filesystem_System_IO_DriveInfo
     NANOCLR_NATIVE_DECLARE(GetDrivesNative___STATIC__SZARRAY_SystemIODriveInfo);
 
     //--//
+
+    static HRESULT UpdateVolumeInfo(CLR_RT_HeapBlock *hbVolume, FileSystemVolume *volume);
 };
 
 struct Library_nf_sys_io_filesystem_System_IO_FileSystemManager__FileRecord

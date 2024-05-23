@@ -130,59 +130,68 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_DriveInfo::GetDrivesNative___STAT
 {
     NANOCLR_HEADER();
 
-    char workingDrive[sizeof(DRIVE_PATH_LENGTH)];
+    CLR_RT_TypeDef_Index driveInfoTypeDef;
 
-    uint32_t driveCount = 0;
+    uint32_t volumeCount = FileSystemVolumeList::GetNumVolumes();
+    FileSystemVolume *currentVolume;
 
-    CLR_RT_HeapBlock *volume = NULL;
+    // CLR_RT_HeapBlock *volume = NULL;
+    CLR_RT_HeapBlock *hbVolumes;
 
     CLR_RT_HeapBlock &top = stack.PushValueAndClear();
 
-#if defined(NF_FEATURE_USE_LITTLEFS) && (NF_FEATURE_USE_LITTLEFS == TRUE)
-    // // is littlefs file system available and mounted?
-    // if (lfsFileSystemReady)
-    // {
-    //     // get SPIFFS instances count
-    //     driveCount += hal_lfs_get_instances_count();
-    // }
+    // find <DriveInfo> type definition, don't bother checking the result as it exists for sure
+    g_CLR_RT_TypeSystem.FindTypeDef("DriveInfo", "System.IO", driveInfoTypeDef);
 
-#endif
+    NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance(top, volumeCount, driveInfoTypeDef));
 
-    // create an array of files paths <String> for count drives
-    NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance(top, driveCount, g_CLR_RT_WellKnownTypes.m_String));
-    // get a pointer to the first object in the array (which is of type <String>)
-    volume = (CLR_RT_HeapBlock *)top.DereferenceArray()->GetFirstElement();
+    hbVolumes = (CLR_RT_HeapBlock *)top.DereferenceArray()->GetFirstElement();
 
-    (void)workingDrive;
-    
-#if defined(NF_FEATURE_USE_LITTLEFS) && (NF_FEATURE_USE_LITTLEFS == TRUE)
+    currentVolume = FileSystemVolumeList::GetFirstVolume();
 
-    for (uint16_t driveIterator = 0; driveIterator < driveCount; driveIterator++)
+    for (uint8_t i = 0; i < volumeCount; i++)
     {
-        // fill the folder name and path
-        switch (driveIterator)
-        {
-            case 0:
-                memcpy(workingDrive, INTERNAL_DRIVE0_PATH, DRIVE_PATH_LENGTH);
-                break;
+        NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObjectFromIndex(hbVolumes[i], driveInfoTypeDef));
 
-            case 1:
-                memcpy(workingDrive, INTERNAL_DRIVE1_PATH, DRIVE_PATH_LENGTH);
-                break;
+        NANOCLR_CHECK_HRESULT(UpdateVolumeInfo(hbVolumes[i].Dereference(), currentVolume));
 
-            default:
-                HAL_AssertEx();
-                NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
-        }
-
-        // set the drive letter in string array
-        NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_String::CreateInstance(*volume, workingDrive));
-
-        // Next element in array
-        volume++;
+        currentVolume = FileSystemVolumeList::GetNextVolume(*currentVolume);
     }
 
-#endif
+    NANOCLR_NOCLEANUP();
+}
+
+HRESULT Library_nf_sys_io_filesystem_System_IO_DriveInfo::UpdateVolumeInfo(
+    CLR_RT_HeapBlock *hbVolume,
+    FileSystemVolume *volume)
+{
+    NATIVE_PROFILE_CLR_IO();
+    NANOCLR_HEADER();
+
+    int64_t totalSize;
+    int64_t totalFreeSpace;
+
+    NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_String::CreateInstance(hbVolume[FIELD___name], volume->m_rootName));
+
+    // map the drive type to the managed enum
+    if (memcmp(volume->m_rootName, INTERNAL_DRIVE0_LETTER, sizeof(INTERNAL_DRIVE0_LETTER) - 1) == 0 ||
+        memcmp(volume->m_rootName, INTERNAL_DRIVE1_LETTER, sizeof(INTERNAL_DRIVE1_LETTER) - 1) == 0)
+    {
+        hbVolume[FIELD___driveType].SetInteger(DriveType_Fixed);
+    }
+    else
+    {
+        // all other drives are considered removable
+        hbVolume[FIELD___driveType].SetInteger(DriveType_Removable);
+    }
+
+    if (FAILED(volume->GetSizeInfo(&totalSize, &totalFreeSpace)))
+    {
+        totalSize = 0;
+        totalFreeSpace = 0;
+    }
+
+    hbVolume[FIELD___totalSize].SetInteger(totalSize);
 
     NANOCLR_NOCLEANUP();
 }
