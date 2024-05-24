@@ -88,7 +88,7 @@ extern "C"
     //--//
 
     typedef bool (*FS_LOADMEDIA)(const void * /*pointer to media*/);
-    typedef HRESULT (*FS_FORMAT)(const VOLUME_ID * /*volume*/, char * /*volumeLabel*/, uint32_t /*parameters*/);
+    typedef HRESULT (*FS_FORMAT)(const VOLUME_ID * /*volume*/, const char * /*volumeLabel*/, uint32_t /*parameters*/);
     typedef HRESULT (
         *FS_GETSIZEINFO)(const VOLUME_ID * /*volume*/, int64_t * /*totalSize*/, int64_t * /*totalFreeSpace*/);
     typedef HRESULT (*FS_FLUSHALL)(const VOLUME_ID * /*volume*/);
