@@ -17,6 +17,11 @@ extern STREAM_DRIVER_INTERFACE g_FATFS_STREAM_DriverInterface;
 extern FILESYSTEM_DRIVER_INTERFACE g_FATFS_FILE_SYSTEM_DriverInterface;
 extern STREAM_DRIVER_INTERFACE g_LITTLEFS_STREAM_DriverInterface;
 
+#if HAL_USE_SDC
+#include <target_windows_storage_config.h>
+extern "C" void SdCardDetectCallback(void *arg);
+#endif
+
 FILESYSTEM_INTERFACES g_AvailableFSInterfaces[] = {
     {&g_FATFS_FILE_SYSTEM_DriverInterface, &g_FATFS_STREAM_DriverInterface},
     {&g_LITTLEFS_FILE_SYSTEM_DriverInterface, &g_LITTLEFS_STREAM_DriverInterface},
@@ -55,4 +60,13 @@ void FS_AddVolumes()
         g_AvailableFSInterfaces[1].fsDriver,
         1,
         FALSE);
+}
+
+void FS_MountRemovableVolumes()
+{
+
+#if HAL_USE_SDC
+    SdCardDetectCallback(&SD_CARD_DRIVER);
+#endif
+
 }
