@@ -651,9 +651,6 @@ HRESULT FATFS_FS_Driver::GetAttributes(const VOLUME_ID *volume, const char *path
 
     f_chdrive(currentVolume->m_rootName);
 
-    //GetDriveIndexFromVolumeId(volume->volumeId, buffer);
-    // f_chdrive(buffer);
-
     // check for file existence
     result = f_stat(normalizedPath, &info);
 

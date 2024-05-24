@@ -9,8 +9,6 @@
 #include <hal_littlefs.h>
 #endif
 
-extern int32_t GetInternalDriveIndex(char *drive);
-
 #define WORKING_DRIVE_IS_INTERNAL_DRIVE                                                                                \
     (memcmp(workingDrive, INTERNAL_DRIVE0_LETTER, sizeof(INTERNAL_DRIVE0_LETTER) - 1) == 0 ||                          \
      memcmp(workingDrive, INTERNAL_DRIVE1_LETTER, sizeof(INTERNAL_DRIVE1_LETTER) - 1) == 0)
@@ -53,22 +51,6 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_DriveInfo::DriveInfoNative___VOID
     {
 #if defined(NF_FEATURE_USE_LITTLEFS) && (NF_FEATURE_USE_LITTLEFS == TRUE)
 
-        lfs_t *fsDrive = NULL;
-
-        // get littlefs drive index...
-        driveIndex = GetInternalDriveIndex(workingDrive);
-        //... and pointer to the littlefs instance
-        fsDrive = hal_lfs_get_fs_from_index(driveIndex);
-
-        // get the drive info from littlefs
-        lfs_fsinfo fsinfo;
-        lfs_fs_stat(fsDrive, &fsinfo);
-
-        // fill in the drive info namaged fields
-        driveInfo[FIELD___driveType].SetInteger(DriveType_Fixed);
-        CLR_RT_HeapBlock_String::CreateInstance(driveInfo[FIELD___name], workingDrive);
-        driveInfo[FIELD___totalSize].SetInteger((CLR_UINT32)(fsinfo.block_size * fsinfo.block_count));
-
 #endif
     }
     else
@@ -100,22 +82,7 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_DriveInfo::Format___STATIC__VOID_
 
     if (WORKING_DRIVE_IS_INTERNAL_DRIVE)
     {
-#if defined(NF_FEATURE_USE_LITTLEFS) && (NF_FEATURE_USE_LITTLEFS == TRUE)
 
-        lfs_t *fsDrive = NULL;
-
-        // get littlefs drive index...
-        driveIndex = GetInternalDriveIndex(workingDrive);
-        //... and pointer to the littlefs instance
-        fsDrive = hal_lfs_get_fs_from_index(driveIndex);
-
-        // looks like littlefs is not formated (occuring at 1st boot)
-        lfs_format(fsDrive, &lfsConfig[driveIndex]);
-
-        // try mounting again
-        lfs_mount(fsDrive, &lfsConfig[driveIndex]);
-
-#endif
     }
     else
     {
