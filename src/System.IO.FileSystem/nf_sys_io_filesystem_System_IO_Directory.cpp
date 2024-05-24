@@ -23,7 +23,7 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_Directory::NativeGetChildren___ST
     bool *foundP = &found;
     void *findHandle = NULL;
     int32_t itemsCount = 0;
-    FS_FILEINFO fileData = {0};
+    FS_FILEINFO fileData;
 
     CLR_RT_HeapBlock *pathEntry;
     CLR_RT_HeapBlock_String *hbPath;
@@ -96,29 +96,32 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_Directory::NativeGetChildren___ST
         // do nothing here, just iterate to count the items
         if (found)
         {
-            if ((isDirectory && ((fileData.Attributes & FileAttributes::FileAttributes_Directory) ==
-                                 FileAttributes::FileAttributes_Directory)) ||
-
-                !isDirectory && ((fileData.Attributes & FileAttributes::FileAttributes_Directory) !=
+            if (isDirectory && ((fileData.Attributes & FileAttributes::FileAttributes_Directory) !=
+                                FileAttributes::FileAttributes_Directory))
+            {
+                continue;
+            }
+            else if (
+                !isDirectory && ((fileData.Attributes & FileAttributes::FileAttributes_Directory) ==
                                  FileAttributes::FileAttributes_Directory))
             {
-                // compose file path
-                char workingPath[FS_MAX_PATH_LENGTH];
-                hal_snprintf(workingPath, rootNameLength + 1, "%s", rootName);
-                hal_snprintf(
-                    workingPath,
-                    FS_MAX_PATH_LENGTH,
-                    "%s%s%s",
-                    workingPath,
-                    path,
-                    (const char *)fileData.FileName);
-
-                // set file full path in array of strings
-                NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_String::CreateInstance(*pathEntry, workingPath));
-
-                // move the file array pointer to the next item in the array
-                pathEntry++;
+                continue;
             }
+
+            // compose file path
+            char workingPath[FS_MAX_PATH_LENGTH + 1];
+            memset(workingPath, 0, sizeof(workingPath));
+
+            hal_strncpy_s(workingPath, sizeof(workingPath), rootName, rootNameLength);
+            size_t bufferSize = FS_MAX_PATH_LENGTH - rootNameLength;
+            char *bufferP = &workingPath[rootNameLength];
+            CLR_SafeSprintf(bufferP, bufferSize, "%s%s", path, (const char *)fileData.FileName);
+
+            // set file full path in array of strings
+            NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_String::CreateInstance(*pathEntry, workingPath));
+
+            // move the file array pointer to the next item in the array
+            pathEntry++;
         }
 
         // free memory for the file name
