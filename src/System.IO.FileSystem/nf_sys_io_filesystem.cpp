@@ -84,6 +84,7 @@ static const CLR_RT_MethodHandler method_lookup[] =
     Library_nf_sys_io_filesystem_System_IO_DriveInfo::DriveInfoNative___VOID__STRING,
     NULL,
     Library_nf_sys_io_filesystem_System_IO_DriveInfo::Format___STATIC__VOID__STRING,
+    Library_nf_sys_io_filesystem_System_IO_DriveInfo::MountRemovableVolumes___STATIC__VOID,
     Library_nf_sys_io_filesystem_System_IO_DriveInfo::GetDrivesNative___STATIC__SZARRAY_SystemIODriveInfo,
     NULL,
     NULL,
@@ -205,7 +206,7 @@ static const CLR_RT_MethodHandler method_lookup[] =
 const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_System_IO_FileSystem =
 {
     "System.IO.FileSystem",
-    0xD978787E,
+    0x937D8A2F,
     method_lookup,
     { 1, 1, 0, 3 }
 };

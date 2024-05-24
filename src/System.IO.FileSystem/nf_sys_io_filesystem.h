@@ -172,6 +172,7 @@ struct Library_nf_sys_io_filesystem_System_IO_DriveInfo
 
     NANOCLR_NATIVE_DECLARE(DriveInfoNative___VOID__STRING);
     NANOCLR_NATIVE_DECLARE(Format___STATIC__VOID__STRING);
+    NANOCLR_NATIVE_DECLARE(MountRemovableVolumes___STATIC__VOID);
     NANOCLR_NATIVE_DECLARE(GetDrivesNative___STATIC__SZARRAY_SystemIODriveInfo);
 
     //--//

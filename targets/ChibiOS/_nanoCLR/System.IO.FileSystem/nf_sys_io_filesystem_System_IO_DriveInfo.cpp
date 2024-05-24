@@ -125,6 +125,18 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_DriveInfo::Format___STATIC__VOID_
     NANOCLR_NOCLEANUP();
 }
 
+HRESULT Library_nf_sys_io_filesystem_System_IO_DriveInfo::MountRemovableVolumes___STATIC__VOID(CLR_RT_StackFrame &stack)
+{
+    NATIVE_PROFILE_CLR_IO();
+    NANOCLR_HEADER();
+
+    (void)stack;
+
+    FS_MountRemovableVolumes();
+
+    NANOCLR_NOCLEANUP_NOLABEL();
+}
+
 HRESULT Library_nf_sys_io_filesystem_System_IO_DriveInfo::GetDrivesNative___STATIC__SZARRAY_SystemIODriveInfo(
     CLR_RT_StackFrame &stack)
 {
