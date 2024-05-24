@@ -64,7 +64,7 @@ static void SdCardInsertionMonitorCallback(virtual_timer_t *vtp, void *p)
     chSysUnlockFromISR();
 }
 
-static void SdCardDetectCallback(void *arg)
+void SdCardDetectCallback(void *arg)
 {
     BaseBlockDevice *bbdp = (BaseBlockDevice *)arg;
 
