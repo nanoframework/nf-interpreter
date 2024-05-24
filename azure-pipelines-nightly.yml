@@ -40,7 +40,11 @@ jobs:
 
       if($env:Build_Reason -eq "Schedule")
       {
-          # scheduled daily build: get commit date 
+          # scheduled daily build
+          $now = [System.DateTime]::UtcNow.Date
+          "Today is $now" | Write-Host
+
+          # get commit date 
           $commitDate = git show -s --format=%cd --date=short
           $commitDate = [DateTime]$commitDate
 
@@ -178,7 +182,7 @@ jobs:
                     ($files.where{$_.Contains('targets/ChibiOS/_nanoCLR')}).Count -gt 0 -Or
                     ($files.where{$_.Contains('targets/ChibiOS/_FatFS')}).Count -gt 0 -Or
                     ($files.where{$_.Contains('targets/ChibiOS/_nf-overlay')}).Count -gt 0 -Or
-                    ($files.where{$_.Contains('targets/ChibiOS/_spiffs')}).Count -gt 0 -Or
+                    ($files.where{$_.Contains('targets/ChibiOS/_littlefs')}).Count -gt 0 -Or
                     ($files.where{$_.Contains('targets/ChibiOS/ORGPAL_PALTHREE')}).Count -gt 0 -Or
                     ($files.where{$_.Contains('targets/ChibiOS/ST_NUCLEO64_F091RC')}).Count -gt 0
                   )
