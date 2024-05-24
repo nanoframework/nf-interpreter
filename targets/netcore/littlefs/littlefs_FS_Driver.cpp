@@ -51,7 +51,7 @@ bool LITTLEFS_FS_Driver::UnInitializeVolume(const VOLUME_ID *volume)
     return TRUE;
 }
 
-HRESULT LITTLEFS_FS_Driver::Format(const VOLUME_ID *volume, const char *volumeLabel, uint32_t parameters)
+HRESULT LITTLEFS_FS_Driver::Format(const VOLUME_ID *volume, char *volumeLabel, uint32_t parameters)
 {
     NANOCLR_HEADER();
 
