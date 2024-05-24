@@ -53,17 +53,28 @@ bool LITTLEFS_FS_Driver::UnInitializeVolume(const VOLUME_ID *volume)
 
 HRESULT LITTLEFS_FS_Driver::Format(const VOLUME_ID *volume, const char *volumeLabel, uint32_t parameters)
 {
-    (void)volume;
+    NANOCLR_HEADER();
+
     (void)volumeLabel;
     (void)parameters;
 
-    // ::Watchdog_GetSetEnabled(FALSE, TRUE);
+    LITTLEFS_FileHandle *fileHandle = NULL;
+    uint8_t *index = NULL;
 
-    // HRESULT hr = FAT_LogicDisk::Format(volume, volumeLabel, parameters);
+    // get littlefs instance
+    fileHandle->fs = hal_lfs_get_fs_from_index(volume->volumeId);
 
-    // ::Watchdog_GetSetEnabled(TRUE, TRUE);
-    ASSERT(FALSE);
-    return S_FALSE; // hr
+    if (!fileHandle->fs)
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_FILE_IO);
+    }
+
+    // get index of the partition
+    index = (uint8_t *)fileHandle->fs->cfg->context;
+
+    hal_lfs_mount_partition(*index, true);
+
+    NANOCLR_NOCLEANUP();
 }
 
 HRESULT LITTLEFS_FS_Driver::GetSizeInfo(const VOLUME_ID *volume, int64_t *totalSize, int64_t *totalFreeSpace)
