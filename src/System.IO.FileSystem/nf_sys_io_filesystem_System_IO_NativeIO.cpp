@@ -33,6 +33,7 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_NativeIO::Move___STATIC__BOOLEAN_
     char path2Buffer[FS_MAX_PATH_LENGTH + 1];
     char *path1 = path1Buffer;
     char *path2 = path2Buffer;
+    bool moveResult = false;
 
     FileSystemVolume *driver1 = NULL;
     FileSystemVolume *driver2 = NULL;
@@ -48,9 +49,10 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_NativeIO::Move___STATIC__BOOLEAN_
     }
     else
     {
-        NANOCLR_CHECK_HRESULT(driver1->Move(path1, path2));
+        moveResult = driver1->Move(path1, path2);
+        NANOCLR_CHECK_HRESULT(moveResult);
 
-        stack.SetResult_Boolean(true);
+        stack.SetResult_Boolean(moveResult == S_OK);
     }
 
     NANOCLR_NOCLEANUP();
