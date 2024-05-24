@@ -741,11 +741,10 @@ HRESULT FATFS_FS_Driver::CreateDirectory(const VOLUME_ID *volume, const char *pa
     tempPath[hal_strlen_s(tempPath) - 1] = '\0';
 
     // sanity check for success
-
     dirExists = f_stat(tempPath, &info);
 
     // sanity check for success
-    if (result == FR_OK)
+    if (dirExists == FR_OK || dirExists == FR_EXIST)
     {
         return S_OK;
     }

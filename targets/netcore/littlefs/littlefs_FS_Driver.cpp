@@ -905,11 +905,11 @@ HRESULT LITTLEFS_FS_Driver::CreateDirectory(const VOLUME_ID *volume, const char 
         dirExists = lfs_stat(fsDrive, tempPath, &info);
 
         // sanity check for success
-        if (result == LFS_ERR_EXIST)
+        if (dirExists == LFS_ERR_EXIST)
         {
             return S_OK;
         }
-        else if (result == LFS_ERR_OK)
+        else if (dirExists == LFS_ERR_OK)
         {
             // need to set the attributes for the directory
             // TODO: need to check if DIR attr work the same way as file attr
