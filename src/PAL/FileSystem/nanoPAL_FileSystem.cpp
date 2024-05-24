@@ -220,22 +220,25 @@ bool FileSystemVolumeList::AddVolume(
     FileSystemVolume *current;
     bool nameOK = true;
 
-    do
+    // Detect if this namespace is already taken over or not.
+    current = FileSystemVolumeList::GetFirstVolume();
+
+    while (current)
     {
-        // Detect if this namespace is already taken over or not.
-        current = FileSystemVolumeList::GetFirstVolume();
-
-        while (current)
+        if (0 == hal_stricmp(current->m_rootName, rootName))
         {
-            if (0 == hal_stricmp(current->m_rootName, rootName))
-            {
-                nameOK = false;
-                break;
-            }
-
-            current = FileSystemVolumeList::GetNextVolume(*current);
+            nameOK = false;
+            break;
         }
-    } while (nameOK == false);
+
+        current = FileSystemVolumeList::GetNextVolume(*current);
+    }
+
+    // if the name is already taken, there is no need to add the volume
+    if (nameOK == false)
+    {
+        return TRUE;
+    }
 
     // initialize the members of the FileSystemVolume
     memcpy(fsv->m_rootName, rootName, FS_NAME_MAXLENGTH);
