@@ -163,6 +163,7 @@ HRESULT FATFS_FS_Driver::Open(const VOLUME_ID *volume, const char *path, void *&
     int32_t flags;
     char normalizedPath[FS_MAX_DIRECTORY_LENGTH];
     bool fileExists = false;
+    FileSystemVolume *currentVolume;
 
     // allocate file handle
     fileHandle = (FATFS_FileHandle *)platform_malloc(sizeof(FATFS_FileHandle));
@@ -180,6 +181,10 @@ HRESULT FATFS_FS_Driver::Open(const VOLUME_ID *volume, const char *path, void *&
         return CLR_E_PATH_TOO_LONG;
     }
 
+    currentVolume = FileSystemVolumeList::FindVolume(volume->volumeId);
+
+    f_chdrive(currentVolume->m_rootName);
+
     // check for file existence
 #ifdef DEBUG
     result = f_stat(normalizedPath, &info);
@@ -192,7 +197,7 @@ HRESULT FATFS_FS_Driver::Open(const VOLUME_ID *volume, const char *path, void *&
     if (fileExists)
     {
         // file already exists, open for R/W
-        flags = FA_OPEN_ALWAYS | FA_WRITE | FA_READ;
+        flags = FA_OPEN_EXISTING | FA_WRITE | FA_READ;
     }
     else
     {
@@ -277,18 +282,18 @@ HRESULT FATFS_FS_Driver::Read(void *handle, uint8_t *buffer, int size, int *byte
 
     result = f_read(&fileHandle->file, buffer, size, &readCount);
 
-    // check for EOF
-    if (result > 0)
+    cacheBufferInvalidate(buffer, size);
+
+    if (result == FR_OK)
     {
         *bytesRead = readCount;
-    }
-    else if (result == 0)
-    {
-        // if (lfs_file_tell(fileHandle->fs, &fileHandle->file) == lfs_file_size(fileHandle->fs, &fileHandle->file))
-        // {
-        //     // signal EOF
-        //     *bytesRead = -1;
-        // }
+
+        // check for EOF
+        if (readCount == 0 && f_eof(&fileHandle->file))
+        {
+            // signal EOF
+            *bytesRead = -1;
+        }
     }
     else
     {
@@ -320,6 +325,8 @@ HRESULT FATFS_FS_Driver::Write(void *handle, uint8_t *buffer, int size, int *byt
     }
 
     fileHandle = (FATFS_FileHandle *)handle;
+
+    cacheBufferFlush(buffer, size);
 
     // write to the file
     result = f_write(&fileHandle->file, buffer, size, &writeCount);
@@ -523,33 +530,27 @@ HRESULT FATFS_FS_Driver::FindNext(void *handle, FS_FILEINFO *fi, bool *fileFound
     findHandle = (FATFS_FindFileHandle *)handle;
 
     // read the next entry
-    do
+    result = f_readdir(&findHandle->dir, &info);
+
+    if (result != FR_OK)
     {
-        // read the next entry
-        result = f_readdir(&findHandle->dir, &info);
-
+        // something went wrong
+        NANOCLR_SET_AND_LEAVE(CLR_E_FILE_IO);
+    }
+    else if (result == FR_OK && info.fname[0] == 0)
+    {
         // no more entries
-        if (result == FR_NO_FILE)
-        {
-            *fileFound = false;
-            NANOCLR_SET_AND_LEAVE(S_OK);
-        }
-        else
-        {
-            // something went wrong
-            NANOCLR_SET_AND_LEAVE(CLR_E_FILE_IO);
-        }
+        *fileFound = false;
+        NANOCLR_SET_AND_LEAVE(S_OK);
+    }
 
-        // skip the '.' and '..' entries
-    } while (info.fname[0] == '.');
-
-    // found a file
+    // found an entry
     *fileFound = true;
 
-    // set file name size
+    // set name size
     fi->FileNameSize = hal_strlen_s(info.fname);
 
-    // allocate memory for the file name
+    // allocate memory for the name
     // MUST BE FREED BY THE CALLER
     fi->FileName = (char *)platform_malloc(fi->FileNameSize + 1);
 
@@ -559,7 +560,7 @@ HRESULT FATFS_FS_Driver::FindNext(void *handle, FS_FILEINFO *fi, bool *fileFound
         NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
     }
 
-    // copy the file name, including the string terminator
+    // copy the name, including the string terminator
     hal_strcpy_s((char *)fi->FileName, fi->FileNameSize + 1, info.fname);
 
     // store the attributes
@@ -862,18 +863,12 @@ static int32_t RemoveAllFiles(const char *path)
     // read the directory
     while (!(f_readdir(&dir, &info) == FR_OK && info.fname[0] == 0))
     {
-        // skip the '.' and '..' entries
-        if (info.fname[0] == '.')
-        {
-            continue;
-        }
-
         // reset and prepare the buffer
         memset(buffer, 0, FS_MAX_PATH_LENGTH);
         bufferP = buffer;
 
         // join filename with the path
-        CLR_SafeSprintf(bufferP, bufferSize, "%s%s", path, info.fname);
+        CLR_SafeSprintf(bufferP, bufferSize, "%s/%s", path, info.fname);
 
         // check if this is a directory
         if (info.fattrib & AM_DIR)
