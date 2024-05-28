@@ -426,6 +426,7 @@ HRESULT FATFS_FS_Driver::SetLength(void *handle, int64_t length)
 {
     FATFS_FileHandle *fileHandle;
     FRESULT result;
+    uint32_t currentPosition;
 
     if (handle == 0)
     {
@@ -433,6 +434,9 @@ HRESULT FATFS_FS_Driver::SetLength(void *handle, int64_t length)
     }
 
     fileHandle = (FATFS_FileHandle *)handle;
+
+    // store current position
+    currentPosition = f_tell(&fileHandle->file);
 
     // move the file pointer to the desired position
     result = f_lseek(&fileHandle->file, length);
@@ -449,6 +453,9 @@ HRESULT FATFS_FS_Driver::SetLength(void *handle, int64_t length)
     {
         return CLR_E_FILE_IO;
     }
+
+    // restore file position
+    f_lseek(&fileHandle->file, currentPosition);
 
     return S_OK;
 }
