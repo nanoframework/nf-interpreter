@@ -282,8 +282,6 @@ HRESULT FATFS_FS_Driver::Read(void *handle, uint8_t *buffer, int size, int *byte
 
     result = f_read(&fileHandle->file, buffer, size, &readCount);
 
-    cacheBufferInvalidate(buffer, size);
-
     if (result == FR_OK)
     {
         *bytesRead = readCount;
@@ -325,8 +323,6 @@ HRESULT FATFS_FS_Driver::Write(void *handle, uint8_t *buffer, int size, int *byt
     }
 
     fileHandle = (FATFS_FileHandle *)handle;
-
-    cacheBufferFlush(buffer, size);
 
     // write to the file
     result = f_write(&fileHandle->file, buffer, size, &writeCount);
