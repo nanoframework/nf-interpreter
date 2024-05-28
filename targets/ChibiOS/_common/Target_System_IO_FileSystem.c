@@ -27,8 +27,6 @@ extern void PostManagedEvent(uint8_t category, uint8_t subCategory, uint16_t dat
 
 #if HAL_USE_SDC
 
-static SDCConfig SDC_CFG;
-
 // SD Card event sources
 static event_source_t sdInsertedEvent, sdRemovedEvent;
 
@@ -130,7 +128,7 @@ __attribute__((noreturn)) void SdCardWorkingThread(void const *argument)
     const evhandler_t sdcardEventHandler[] = {SdcardInsertHandler, SdCardRemoveHandler};
 
     // activates the SDC driver using default configuration
-    sdcStart(&SD_CARD_DRIVER, &SDC_CFG);
+    sdcStart(&SD_CARD_DRIVER, NULL);
 
     // setup line event in SD Card detect GPIO
     palEnableLineEvent(SDCARD_LINE_DETECT, PAL_EVENT_MODE_BOTH_EDGES);
