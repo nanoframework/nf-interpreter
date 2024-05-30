@@ -206,7 +206,6 @@
                 "SDK_CONFIG_FILE": "sdkconfig.default_pico",
                 "TARGET_SERIAL_BAUDRATE": "115200",
                 "ESP32_SPIRAM_FOR_IDF_ALLOCATION": "0",
-                "ESP32_RESERVED_RAM_FOR_IDF_ALLOCATION": "15",
                 "NF_BUILD_RTM": "OFF",
                 "NF_FEATURE_DEBUGGER": "ON",
                 "NF_FEATURE_RTC": "ON",
@@ -259,8 +258,7 @@
                 "NF_FEATURE_HAS_SDCARD": "OFF",
                 "API_System.IO.FileSystem": "ON",
                 "API_Windows.Storage": "ON",
-                "API_nanoFramework.Device.OneWire": "OFF",
-                "ESP32_RESERVED_RAM_FOR_IDF_ALLOCATION": "100"
+                "API_nanoFramework.Device.OneWire": "OFF"
             }
         },
         {
@@ -281,8 +279,7 @@
                 "API_System.IO.FileSystem": "ON",
                 "API_Windows.Storage": "ON",
                 "API_nanoFramework.Device.OneWire": "OFF",
-                "API_nanoFramework.Device.Bluetooth": "ON",
-                "ESP32_RESERVED_RAM_FOR_IDF_ALLOCATION": "100"
+                "API_nanoFramework.Device.Bluetooth": "ON"
             }
         },
         {
@@ -306,7 +303,6 @@
                 "API_System.Device.Adc": "ON",
                 "API_nanoFramework.Device.OneWire": "OFF",
                 "API_nanoFramework.Device.Bluetooth": "ON",
-                "ESP32_RESERVED_RAM_FOR_IDF_ALLOCATION": "150",
                 "API_nanoFramework.Networking.Thread": "ON",
                 "THREAD_NODE_ROLE": "FTD",
                 "THREAD_DATASETTLVS": "0e080000000000000000000300001435060004001fffe00208473b6d471ac9b62d0708fd881c8e81b2f28c0510b933f687d1537c252ee7e680d41e1483030d6e616e6f6672616d65776f726b010256190410fd62447741af00be7f8139d6489127ef0c0402a0f7f8"
@@ -333,7 +329,6 @@
                 "API_System.Device.Adc": "ON",
                 "API_nanoFramework.Device.OneWire": "OFF",
                 "API_nanoFramework.Device.Bluetooth": "ON",
-                "ESP32_RESERVED_RAM_FOR_IDF_ALLOCATION": "70",
                 "API_nanoFramework.Networking.Thread": "ON",
                 "test_THREAD_NODE_ROLE": "FTD",
                 "test_THREAD_DATASETTLVS": "0e080000000000000000000300001435060004001fffe00208473b6d471ac9b62d0708fd881c8e81b2f28c0510b933f687d1537c252ee7e680d41e1483030d6e616e6f6672616d65776f726b010256190410fd62447741af00be7f8139d6489127ef0c0402a0f7f8"
@@ -354,8 +349,7 @@
                 "NF_FEATURE_DEBUGGER": "ON",
                 "NF_FEATURE_RTC": "ON",
                 "NF_FEATURE_HAS_SDCARD": "ON",
-                "ESP32_USB_CDC": "ON",
-                "ESP32_RESERVED_RAM_FOR_IDF_ALLOCATION": "100"
+                "ESP32_USB_CDC": "ON"
             }
         },
         {
@@ -375,8 +369,7 @@
                 "NF_FEATURE_HAS_SDCARD": "ON",
                 "ESP32_USB_CDC": "ON",
                 "API_nanoFramework.Device.Bluetooth": "ON",
-                "API_System.Device.I2c.Slave": "ON",
-                "ESP32_RESERVED_RAM_FOR_IDF_ALLOCATION": "100"
+                "API_System.Device.I2c.Slave": "ON"
             }
         },
         {
@@ -476,8 +469,7 @@
                 "GRAPHICS_DISPLAY": "ILI9342_320x240_SPI.cpp",
                 "TOUCHPANEL_DEVICE": "XPT2046.cpp",
                 "GRAPHICS_DISPLAY_INTERFACE": "Spi_To_Display.cpp",
-                "TOUCHPANEL_INTERFACE": "Spi_To_TouchPanel.cpp",
-                "ESP32_RESERVED_RAM_FOR_IDF_ALLOCATION": "50"
+                "TOUCHPANEL_INTERFACE": "Spi_To_TouchPanel.cpp"
             }
         },
         {
@@ -504,8 +496,7 @@
                 "TOUCHPANEL_DEVICE": "XPT2046.cpp",
                 "GRAPHICS_DISPLAY_INTERFACE": "Spi_To_Display.cpp",
                 "TOUCHPANEL_INTERFACE": "Spi_To_TouchPanel.cpp",
-                "ESP32_SPIRAM_FOR_IDF_ALLOCATION": "1024 * 1024",
-                "ESP32_RESERVED_RAM_FOR_IDF_ALLOCATION": "50"
+                "ESP32_SPIRAM_FOR_IDF_ALLOCATION": "1024 * 1024"
             }
         },
         {
@@ -554,8 +545,7 @@
                 "GRAPHICS_DISPLAY": "Generic_SPI.cpp",
                 "TOUCHPANEL_DEVICE": "XPT2046.cpp",
                 "GRAPHICS_DISPLAY_INTERFACE": "Spi_To_Display.cpp",
-                "TOUCHPANEL_INTERFACE": "Spi_To_TouchPanel.cpp",
-                "ESP32_RESERVED_RAM_FOR_IDF_ALLOCATION": "50"
+                "TOUCHPANEL_INTERFACE": "Spi_To_TouchPanel.cpp"
             }
         },
         {
@@ -582,8 +572,7 @@
                 "TOUCHPANEL_DEVICE": "XPT2046.cpp",
                 "GRAPHICS_DISPLAY_INTERFACE": "Spi_To_Display.cpp",
                 "TOUCHPANEL_INTERFACE": "Spi_To_TouchPanel.cpp",
-                "ESP32_SPIRAM_FOR_IDF_ALLOCATION": "1024 * 1024",
-                "ESP32_RESERVED_RAM_FOR_IDF_ALLOCATION": "50"
+                "ESP32_SPIRAM_FOR_IDF_ALLOCATION": "1024 * 1024"
             }
         },
         {
@@ -620,7 +609,6 @@
             "cacheVariables": {
                 "TARGET_NAME": "${presetName}",
                 "SDK_CONFIG_FILE": "",
-                "ESP32_RESERVED_RAM_FOR_IDF_ALLOCATION": "10",
                 "NF_BUILD_RTM": "OFF",
                 "NF_FEATURE_DEBUGGER": "ON",
                 "NF_FEATURE_RTC": "ON",
@@ -746,7 +734,6 @@
             "cacheVariables": {
                 "TARGET_NAME": "${presetName}",
                 "SDK_CONFIG_FILE": "",
-                "ESP32_RESERVED_RAM_FOR_IDF_ALLOCATION": "10",
                 "NF_BUILD_RTM": "OFF",
                 "NF_FEATURE_DEBUGGER": "ON",
                 "NF_FEATURE_RTC": "ON",
@@ -772,7 +759,6 @@
                 "TARGET_NAME": "${presetName}",
                 "SDK_CONFIG_FILE": "sdkconfig.default_pico",
                 "ESP32_SPIRAM_FOR_IDF_ALLOCATION": "0",
-                "ESP32_RESERVED_RAM_FOR_IDF_ALLOCATION": "15",
                 "NF_BUILD_RTM": "OFF",
                 "NF_FEATURE_DEBUGGER": "ON",
                 "TARGET_SERIAL_BAUDRATE": "115200",
@@ -798,7 +784,6 @@
             "cacheVariables": {
                 "TARGET_NAME": "${presetName}",
                 "SDK_CONFIG_FILE": "sdkconfig.default_nopsram.esp32",
-                "ESP32_RESERVED_RAM_FOR_IDF_ALLOCATION": "50",
                 "NF_BUILD_RTM": "OFF",
                 "NF_FEATURE_DEBUGGER": "ON",
                 "TARGET_SERIAL_BAUDRATE": "115200",
