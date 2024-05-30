@@ -40,7 +40,11 @@ jobs:
 
       if($env:Build_Reason -eq "Schedule")
       {
-          # scheduled daily build: get commit date 
+          # scheduled daily build
+          $now = [System.DateTime]::UtcNow.Date
+          "Today is $now" | Write-Host
+
+          # get commit date 
           $commitDate = git show -s --format=%cd --date=short
           $commitDate = [DateTime]$commitDate
 
@@ -50,7 +54,7 @@ jobs:
           "Comparing with $yesterdayDate" | Write-Host
           
           # shceduled build is at start of day, so check if commit date was from yesterday
-          if($commitDate -eq $yesterdayDate)
+          if($commitDate -ge $yesterdayDate)
           {
               # last commit was yesterday, build images
               echo "##vso[task.setvariable variable=CHECK_CHANGES;isOutput=true]true" 
@@ -58,7 +62,7 @@ jobs:
           }
           else
           {
-            # last commit is older than yesterday, skip build
+            # last commit is not from yesterday, skip build
             "***************************************************" | Write-Host
             "* Last commit is older than today, skipping build *" | Write-Host
             "***************************************************" | Write-Host
@@ -178,7 +182,7 @@ jobs:
                     ($files.where{$_.Contains('targets/ChibiOS/_nanoCLR')}).Count -gt 0 -Or
                     ($files.where{$_.Contains('targets/ChibiOS/_FatFS')}).Count -gt 0 -Or
                     ($files.where{$_.Contains('targets/ChibiOS/_nf-overlay')}).Count -gt 0 -Or
-                    ($files.where{$_.Contains('targets/ChibiOS/_spiffs')}).Count -gt 0 -Or
+                    ($files.where{$_.Contains('targets/ChibiOS/_littlefs')}).Count -gt 0 -Or
                     ($files.where{$_.Contains('targets/ChibiOS/ORGPAL_PALTHREE')}).Count -gt 0 -Or
                     ($files.where{$_.Contains('targets/ChibiOS/ST_NUCLEO64_F091RC')}).Count -gt 0
                   )
