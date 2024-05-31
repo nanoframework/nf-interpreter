@@ -153,7 +153,11 @@ esp_err_t NF_ESP32_InitaliseWifi()
         if (expectedWifiMode & WIFI_MODE_AP)
         {
             // create AP (ignoring return)
-            esp_netif_create_default_wifi_ap();
+            esp_netif_t * nap = esp_netif_create_default_wifi_ap();
+
+            // Remove DHCP server flag as not configured in sdkconfig, DHCP server done in managed code
+            // Otherwise startup hangs
+            nap->flags = (esp_netif_flags_t)(ESP_NETIF_FLAG_AUTOUP);
         }
 
         // Initialise WiFi, allocate resource for WiFi driver, such as WiFi control structure,
