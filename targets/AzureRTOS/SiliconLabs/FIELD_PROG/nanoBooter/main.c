@@ -148,36 +148,24 @@ int main(void)
     // configure LED READY for output
     GPIO_PinModeSet(gpioPortB, 12, gpioModePushPull, 0);
 
-    // configure
+    // configure S2 switch for input
     GPIO_PinModeSet(gpioPortE, 8, gpioModeInput, 0);
 
     // init boot clipboard
     InitBootClipboard();
 
     // check if there is a request to remain on nanoBooter
-    if (IsToRemainInBooter())
+    // or if there is an error code for a missing deployment
+    if (IsToRemainInBooter() || g_BootClipboard.ErrorCode == CLR_E_ENTRYPOINT_NOT_FOUND)
     {
-        // check if error code is for a missing deployment image
-        if (g_BootClipboard.ErrorCode == CLR_E_ENTRYPOINT_NOT_FOUND)
-        {
-            // yes, remain on booter waiting for a deployment image to be flashed
-        }
-        else
-        {
-            // some other error, proceed with usual workflow
-            goto checkRemainBooter;
-        }
+        // do not load CLR, remain in nanoBooter
     }
     else
     {
-
-    checkRemainBooter:
-
-        // the following IF is not mandatory, it's just providing a way for a user to 'force'
-        // the board to remain in nanoBooter and not launching nanoCLR
-
-        // if the BTN0 is pressed, skip the check for a valid CLR image and remain in booter
+        // check if user is 'forcing' the board to remain in nanoBooter and not launching nanoCLR
+        // if S2 switch is pressed, skip the check for a valid CLR image and remain in booter
         if (GPIO_PinInGet(gpioPortE, 8) != 0)
+
         {
             // check for valid CLR image
             // we are checking for a valid image at the deployment address, which is pointing to the CLR address
