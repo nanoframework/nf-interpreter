@@ -3,10 +3,10 @@
 // See LICENSE file in the project root for full license information.
 //
 
-namespace nanoFramework.Targets.ORGPAL_PALTHREE
+namespace nanoFramework.Targets.ORGPAL_PALX
 {
     /// <summary>
-    /// Enumeration of ADC channels available in ORGPAL_PALTHREE
+    /// Enumeration of ADC channels available in ORGPAL_PALX
     /// </summary>
     public static class AdcChannels
     {

@@ -1,13 +1,13 @@
 <?xml version="1.0"?>
 <package >
   <metadata>
-    <id>nanoFramework.Targets.ORGPAL_PALTHREE</id>
-    <title>nanoFramework.Targets.ORGPAL_PALTHREE</title>
+    <id>nanoFramework.Targets.ORGPAL_PALX</id>
+    <title>nanoFramework.Targets.ORGPAL_PALX</title>
     <version>1.0.1</version>
     <authors>nanoframework</authors>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>
-      Helper classes to use ORGPAL_PALTHREE target in C# applications.
+      Helper classes to use ORGPAL_PALX target in C# applications.
     </description>
     <releaseNotes>
     </releaseNotes>
@@ -19,7 +19,7 @@
     <tags>nanoFramework, nano Framework, NETNF, NETMF, Micro Framework, STM32, .net, STM32F769I </tags>
   </metadata>
   <files>
-    <file src="ORGPAL_PALTHREE.Adc.cs" target="content" />
+    <file src="ORGPAL_PALX.Adc.cs" target="content" />
     <file src="..\..\..\..\..\assets\nf-logo.png" target="images" />
     <file src="LICENSE.md" target="" />
   </files>
