@@ -30,9 +30,9 @@
  * Memory attributes settings.
  */
 #define STM32_NOCACHE_ENABLE                FALSE
-// #define STM32_NOCACHE_MPU_REGION            MPU_REGION_6
-// #define STM32_NOCACHE_RBAR                  0x2004C000U
-// #define STM32_NOCACHE_RASR                  MPU_RASR_SIZE_16K
+#define STM32_NOCACHE_MPU_REGION            MPU_REGION_6
+#define STM32_NOCACHE_RBAR                  0x20000000U
+#define STM32_NOCACHE_RASR                  MPU_RASR_SIZE_128K
 
 /*
  * HAL driver system settings.
