@@ -15,6 +15,14 @@ FATFS fatFS[FF_VOLUMES];
 // static FATFS *GetFileSystemForVolume(const VOLUME_ID *volume, bool isMount);
 // static FileSystemVolume *GetFatFsForVolume(const VOLUME_ID *volume);
 // static void GetDriveIndexFromVolumeId(int8_t id, char *buffer);
+#if CACHE_LINE_SIZE > 0
+CC_ALIGN_DATA(CACHE_LINE_SIZE)
+uint8_t inputBuffer[CACHE_SIZE_ALIGN(uint8_t, FF_MAX_SS)] __attribute__((section(".nocache")));
+#endif
+#if CACHE_LINE_SIZE > 0
+CC_ALIGN_DATA(CACHE_LINE_SIZE)
+uint8_t outputBuffer[CACHE_SIZE_ALIGN(uint8_t, FF_MAX_SS)] __attribute__((section(".nocache")));
+#endif
 
 static int32_t RemoveAllFiles(const char *path);
 static int NormalizePath(const char *path, char *buffer, size_t bufferSize);
@@ -29,7 +37,8 @@ STREAM_DRIVER_DETAILS *FATFS_FS_Driver::DriverDetails(const VOLUME_ID *volume)
 {
     (void)volume;
 
-    static STREAM_DRIVER_DETAILS driverDetail = {SYSTEM_BUFFERED_IO, NULL, NULL, 0, 0, TRUE, TRUE, TRUE, 0, 0};
+    static STREAM_DRIVER_DETAILS driverDetail =
+        {DRIVER_BUFFERED_IO, inputBuffer, outputBuffer, FF_MAX_SS, FF_MAX_SS, TRUE, TRUE, TRUE, 0, 0};
 
     return &driverDetail;
 }
