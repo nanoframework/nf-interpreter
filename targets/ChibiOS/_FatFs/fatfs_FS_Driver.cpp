@@ -261,7 +261,7 @@ HRESULT FATFS_FS_Driver::Open(const VOLUME_ID *volume, const char *path, void *&
         if (!fileExists)
         {
             // sync file to save attributes
-            ASSERT(f_sync(&fileHandle->file) == FR_OK);
+            f_sync(&fileHandle->file);
         }
 
         // done here, return imediatly so handle doesn't get cleared
