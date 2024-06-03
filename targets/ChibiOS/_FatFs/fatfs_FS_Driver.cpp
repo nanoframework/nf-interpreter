@@ -10,16 +10,25 @@
 
 extern FileSystemVolume *g_FS_Volumes;
 
+#if CACHE_LINE_SIZE > 0
+static FATFS fatFS[FF_VOLUMES] __attribute__((section(".nocache")));
+#else
 static FATFS fatFS[FF_VOLUMES];
+#endif
 static uint8_t volumeAssignment[FF_VOLUMES];
 
 #if CACHE_LINE_SIZE > 0
 CC_ALIGN_DATA(CACHE_LINE_SIZE)
 uint8_t inputBuffer[CACHE_SIZE_ALIGN(uint8_t, FF_MAX_SS)] __attribute__((section(".nocache")));
+#else
+uint8_t inputBuffer[FF_MAX_SS];
 #endif
+
 #if CACHE_LINE_SIZE > 0
 CC_ALIGN_DATA(CACHE_LINE_SIZE)
 uint8_t outputBuffer[CACHE_SIZE_ALIGN(uint8_t, FF_MAX_SS)] __attribute__((section(".nocache")));
+#else
+uint8_t outputBuffer[FF_MAX_SS];
 #endif
 
 static int32_t RemoveAllFiles(const char *path);
