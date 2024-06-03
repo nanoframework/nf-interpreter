@@ -373,6 +373,9 @@ HRESULT FATFS_FS_Driver::Write(void *handle, uint8_t *buffer, int size, int *byt
         NANOCLR_SET_AND_LEAVE(CLR_E_FILE_IO);
     }
 
+    // #endif
+    f_sync(&fileHandle->file);
+
     *bytesWritten = writeCount;
 
     hr = S_OK;
@@ -496,6 +499,8 @@ HRESULT FATFS_FS_Driver::SetLength(void *handle, int64_t length)
 
     // restore file position
     f_lseek(&fileHandle->file, currentPosition);
+
+    f_sync(&fileHandle->file);
 
     return S_OK;
 }
