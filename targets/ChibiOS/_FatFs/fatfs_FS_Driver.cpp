@@ -10,11 +10,9 @@
 
 extern FileSystemVolume *g_FS_Volumes;
 
-FATFS fatFS[FF_VOLUMES];
+static FATFS fatFS[FF_VOLUMES];
+static uint8_t volumeAssignment[FF_VOLUMES];
 
-// static FATFS *GetFileSystemForVolume(const VOLUME_ID *volume, bool isMount);
-// static FileSystemVolume *GetFatFsForVolume(const VOLUME_ID *volume);
-// static void GetDriveIndexFromVolumeId(int8_t id, char *buffer);
 #if CACHE_LINE_SIZE > 0
 CC_ALIGN_DATA(CACHE_LINE_SIZE)
 uint8_t inputBuffer[CACHE_SIZE_ALIGN(uint8_t, FF_MAX_SS)] __attribute__((section(".nocache")));
@@ -26,6 +24,8 @@ uint8_t outputBuffer[CACHE_SIZE_ALIGN(uint8_t, FF_MAX_SS)] __attribute__((sectio
 
 static int32_t RemoveAllFiles(const char *path);
 static int NormalizePath(const char *path, char *buffer, size_t bufferSize);
+static FATFS *GetFatFsByVolumeId(const VOLUME_ID *volumeId, bool assignVolume);
+static void FreeFatFsByVolumeId(const VOLUME_ID *volumeId);
 
 bool FATFS_FS_Driver::LoadMedia(const void *driverInterface)
 {
@@ -49,18 +49,49 @@ void FATFS_FS_Driver::Initialize()
 {
     // reset all the FATFS instances
     memset(fatFS, 0, sizeof(fatFS));
+
+    // reset the volume assignment to impossible value
+    memset(volumeAssignment, 0xFF, sizeof(volumeAssignment));
 }
 
 bool FATFS_FS_Driver::InitializeVolume(const VOLUME_ID *volume, const char *path)
 {
-    return f_mount(&fatFS[volume->volumeId], path, 1) == FR_OK;
+    // find  a free volume
+    FATFS *fs = GetFatFsByVolumeId(volume, true);
+
+    if (fs == NULL)
+    {
+        return FALSE;
+    }
+
+    // try mounting the volume
+    if (f_mount(fs, path, 1) == FR_OK)
+    {
+        return TRUE;
+    }
+
+    // something went wrong, free the volume
+    FreeFatFsByVolumeId(volume);
+
+    return FALSE;
 }
 
 bool FATFS_FS_Driver::UnInitializeVolume(const VOLUME_ID *volume)
 {
-    (void)volume;
+    FATFS *fs = GetFatFsByVolumeId(volume, false);
 
-    // nothing to do here as the littlefs instances are already initialized at target boot
+    if (fs == NULL)
+    {
+        return FALSE;
+    }
+
+    FileSystemVolume *currentVolume = FileSystemVolumeList::FindVolume(volume->volumeId);
+
+    f_unmount(currentVolume->m_rootName);
+
+    // free assigned volume
+    FreeFatFsByVolumeId(volume);
+
     return TRUE;
 }
 
@@ -942,10 +973,35 @@ static int NormalizePath(const char *path, char *buffer, size_t bufferSize)
     return 0;
 }
 
-// static char * GetVolumePathFromVolumeId(int8_t id, char *buffer)
-// {
-//     __itoa(id, buffer, 10);
-// }
+static FATFS *GetFatFsByVolumeId(const VOLUME_ID *volumeId, bool assignVolume)
+{
+    for (uint8_t volumeIndex = 0; volumeIndex < FF_VOLUMES; volumeIndex++)
+    {
+        if (assignVolume && volumeAssignment[volumeIndex] == 0xFF)
+        {
+            volumeAssignment[volumeIndex] = volumeId->volumeId;
+            return &fatFS[volumeIndex];
+        }
+        else if (volumeAssignment[volumeIndex] == volumeId->volumeId)
+        {
+            return &fatFS[volumeIndex];
+        }
+    }
+
+    return NULL;
+}
+
+static void FreeFatFsByVolumeId(const VOLUME_ID *volumeId)
+{
+    for (uint8_t volumeIndex = 0; volumeIndex < FF_VOLUMES; volumeIndex++)
+    {
+        if (volumeAssignment[volumeIndex] == volumeId->volumeId)
+        {
+            volumeAssignment[volumeIndex] = 0xFF;
+            break;
+        }
+    }
+}
 
 //////////////////
 
