@@ -309,8 +309,8 @@ HRESULT FATFS_FS_Driver::Read(void *handle, uint8_t *buffer, int size, int *byte
 {
     NANOCLR_HEADER();
 
-    unsigned int readCount;
-    FRESULT result;
+    unsigned int readCount = 0;
+    FRESULT result = FR_OK;
     FATFS_FileHandle *fileHandle;
 
     if (handle == 0)
@@ -325,6 +325,7 @@ HRESULT FATFS_FS_Driver::Read(void *handle, uint8_t *buffer, int size, int *byte
 
     fileHandle = (FATFS_FileHandle *)handle;
 
+    // read from the file
     result = f_read(&fileHandle->file, buffer, size, &readCount);
 
     if (result == FR_OK)
@@ -353,7 +354,7 @@ HRESULT FATFS_FS_Driver::Write(void *handle, uint8_t *buffer, int size, int *byt
 {
     NANOCLR_HEADER();
 
-    unsigned int writeCount;
+    unsigned int writeCount = 0;
     FRESULT result;
     FATFS_FileHandle *fileHandle;
 
@@ -378,7 +379,6 @@ HRESULT FATFS_FS_Driver::Write(void *handle, uint8_t *buffer, int size, int *byt
         NANOCLR_SET_AND_LEAVE(CLR_E_FILE_IO);
     }
 
-    // #endif
     f_sync(&fileHandle->file);
 
     *bytesWritten = writeCount;
