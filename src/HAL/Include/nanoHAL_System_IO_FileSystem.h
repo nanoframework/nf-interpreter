@@ -42,7 +42,6 @@ typedef enum StorageEventType
 } StorageEventType;
 
 // constants to be used throughout the code
-#define SUPPORTED_DRIVES_COUNT (2)
 #define DRIVE_LETTER_LENGTH    sizeof(INDEX0_DRIVE_LETTER)
 #define DRIVE_PATH_LENGTH      sizeof(INDEX0_DRIVE_PATH)
 
