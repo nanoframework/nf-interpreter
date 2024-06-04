@@ -3,6 +3,7 @@
 
 /* CHIBIOS FIX */
 #include "ch.h"
+#include <target_platform.h>
 
 /*---------------------------------------------------------------------------/
 /  Configurations of FatFs Module
@@ -157,11 +158,17 @@
 / Drive/Volume Configurations
 /---------------------------------------------------------------------------*/
 
-#define FF_VOLUMES 3
 /* Number of volumes (logical drives) to be used. (1-10) */
+#if (HAL_USE_SDC == TRUE) && (HAL_USBH_USE_MSD == TRUE)
+#define FF_VOLUMES 2
+#elif (HAL_USE_SDC == FALSE) && (HAL_USBH_USE_MSD == TRUE)
+#define FF_VOLUMES 1
+#else
+#error "FatFS being configured without SDCard or USB Mass Storage Device enabled. Check configuration."
+#endif
 
 #define FF_STR_VOLUME_ID 1
-#define FF_VOLUME_STRS   "D", "E", "F"
+
 /* FF_STR_VOLUME_ID switches support for volume ID in arbitrary strings.
 /  When FF_STR_VOLUME_ID is set to 1 or 2, arbitrary strings can be used as drive
 /  number in the path name. FF_VOLUME_STRS defines the volume ID strings for each
@@ -172,6 +179,13 @@
 /
 /  const char* VolumeStr[FF_VOLUMES] = {"ram","flash","sd","usb",...
 */
+#if (HAL_USE_SDC == TRUE) && (HAL_USBH_USE_MSD == TRUE)
+#define FF_VOLUME_STRS   "D", "E"
+#elif (HAL_USE_SDC == FALSE) && (HAL_USBH_USE_MSD == TRUE)
+#define FF_VOLUME_STRS   "E"
+#else
+#error "FatFS being configured without SDCard or USB Mass Storage Device enabled. Check configuration."
+#endif
 
 #define FF_MULTI_PARTITION 0
 /* This option switches support for multiple volumes on the physical drive.
