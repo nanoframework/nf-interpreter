@@ -79,7 +79,10 @@ bool FATFS_FS_Driver::InitializeVolume(const VOLUME_ID *volume, const char *path
         return TRUE;
     }
 
-    // something went wrong, free the volume
+    // something went wrong, unmount the volume...
+    f_unmount(path);
+
+    // ... and free the volume
     FreeFatFsByVolumeId(volume);
 
     return FALSE;
