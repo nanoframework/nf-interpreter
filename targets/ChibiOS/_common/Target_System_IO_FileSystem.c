@@ -217,4 +217,19 @@ __attribute__((noreturn)) void UsbMsdWorkingThread(void const *argument)
     }
 }
 
+// Handler to force USB MSD mount
+void UsbMsdForceMount()
+{
+    USBHMassStorageLUNDriver *msBlk = (USBHMassStorageLUNDriver *)&MSBLKD[0];
+
+    // force unmount, just in case
+    FS_UnmountVolume(INDEX1_DRIVE_LETTER);
+
+    if (blkGetDriverState(msBlk) >= BLK_ACTIVE)
+    {
+        // if the driver is active, force disconnect to reset the USB stack
+        usbhmsdLUNDisconnect((USBHMassStorageLUNDriver *)&MSBLKD[0]);
+    }
+}
+
 #endif
