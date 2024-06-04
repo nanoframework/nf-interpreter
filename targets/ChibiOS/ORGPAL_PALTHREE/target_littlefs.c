@@ -796,8 +796,8 @@ int8_t target_lfs_init()
     // sanity check: read device ID and unique ID
     dataBuffer_0[0] = READ_ID_CMD2;
 
-    // // flush DMA buffer to ensure cache coherency
-    // cacheBufferFlush(dataBuffer_0, sizeof(dataBuffer_0));
+    // from AT25SF641 datasheet: need time for chip to become fully responsive
+    chThdSleepMilliseconds(10);
 
     CS_SELECT;
     spiSend(&SPID1, 1, dataBuffer_0);
@@ -844,6 +844,9 @@ int8_t target_lfs_init()
         return QSPI_NOT_SUPPORTED;
     }
 
+    // from W25Q128 datasheet: Time Delay Before Write Instruction is >5ms
+    chThdSleepMilliseconds(10);
+
     // sanity check: read device ID and unique ID
     // this instruction requires a buffer with 6 positions
     if (QSPI_ReadChipID(&QSPID1, dataBuffer_1) != QSPI_OK)
@@ -855,9 +858,6 @@ int8_t target_lfs_init()
     ASSERT(dataBuffer_1[0] == W25Q128_MANUFACTURER_ID);
     ASSERT(dataBuffer_1[1] == W25Q128_DEVICE_ID1);
     ASSERT(dataBuffer_1[2] == W25Q128_DEVICE_ID2);
-
-    // from W25Q128 datasheet: Time Delay Before Write Instruction is >5ms
-    chThdSleepMilliseconds(10);
 
 #endif // LFS_QSPI
 
