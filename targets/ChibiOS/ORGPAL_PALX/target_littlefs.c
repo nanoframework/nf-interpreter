@@ -12,10 +12,10 @@
 #if CACHE_LINE_SIZE > 0
 CC_ALIGN_DATA(CACHE_LINE_SIZE)
 #endif
-uint8_t dataBuffer_0[CACHE_SIZE_ALIGN(uint8_t, W25Q128_PAGE_SIZE)];
+uint8_t dataBuffer_0[CACHE_SIZE_ALIGN(uint8_t, W25Q512_PAGE_SIZE)];
 
 #ifdef DEBUG
-uint8_t tempBuffer[W25Q128_PAGE_SIZE];
+uint8_t tempBuffer[W25Q512_PAGE_SIZE];
 #endif
 
 ///////////////
@@ -119,9 +119,9 @@ bool hal_lfs_erase_chip_0()
 static bool QSPI_Erase_Chip()
 {
     // need to do this one one block at a time to avoid watchdog reset
-    for (uint32_t i = 0; i < W25Q128_FLASH_SIZE / W25Q128_SECTOR_SIZE; i++)
+    for (uint32_t i = 0; i < W25Q512_FLASH_SIZE / W25Q512_SECTOR_SIZE; i++)
     {
-        if (QSPI_Erase_Block(i * W25Q128_SECTOR_SIZE) != QSPI_OK)
+        if (QSPI_Erase_Block(i * W25Q512_SECTOR_SIZE) != QSPI_OK)
         {
             return FALSE;
         }
@@ -207,7 +207,7 @@ static uint8_t QSPI_EnterMemory_QPI(QSPI_HandleTypeDef *hqspi)
 
     // Update status register 2 (with quad enable bit)
     s_command.Instruction = WRITE_STATUS_REG2_CMD;
-    MODIFY_REG(reg[0], 0, W25Q128_SR2_QE);
+    MODIFY_REG(reg[0], 0, W25Q512_SR2_QE);
 
     // write status register 2
     if (HAL_QSPI_Command(hqspi, &s_command, HAL_QPSI_TIMEOUT_DEFAULT_VALUE) != HAL_OK)
@@ -236,7 +236,7 @@ static uint8_t QSPI_EnterMemory_QPI(QSPI_HandleTypeDef *hqspi)
         return QSPI_ERROR;
     }
 
-    if (reg[0] & W25Q128_SR2_QE)
+    if (reg[0] & W25Q512_SR2_QE)
     {
         return QSPI_OK;
     }
@@ -268,8 +268,8 @@ static uint8_t QSPI_WriteEnable(QSPI_HandleTypeDef *hqspi)
     }
 
     // Configure automatic polling mode to wait for write enabling
-    s_config.Match = W25Q128_SR_WREN;
-    s_config.Mask = W25Q128_SR_WREN;
+    s_config.Match = W25Q512_SR_WREN;
+    s_config.Mask = W25Q512_SR_WREN;
     s_config.MatchMode = QSPI_MATCH_MODE_AND;
     s_config.StatusBytesSize = 1;
     s_config.Interval = 0x10;
@@ -303,7 +303,7 @@ static uint8_t QSPI_AutoPollingMemReady(QSPI_HandleTypeDef *hqspi, uint32_t Time
     s_command.SIOOMode = QSPI_SIOO_INST_EVERY_CMD;
 
     sConfig.Match = 0;
-    sConfig.Mask = W25Q128_SR_WIP; // same value on both memory types
+    sConfig.Mask = W25Q512_SR_WIP; // same value on both memory types
     sConfig.MatchMode = QSPI_MATCH_MODE_AND;
     sConfig.StatusBytesSize = 1;
     sConfig.Interval = 0x10;
@@ -360,7 +360,7 @@ uint8_t QSPI_Read(uint8_t *pData, uint32_t readAddr, uint32_t size)
     s_command.Address = readAddr;
     s_command.AlternateByteMode = QSPI_ALTERNATE_BYTES_NONE;
     s_command.DataMode = QSPI_DATA_4_LINES;
-    s_command.DummyCycles = W25Q128_DUMMY_CYCLES_READ_QUAD;
+    s_command.DummyCycles = W25Q512_DUMMY_CYCLES_READ_QUAD;
     s_command.NbData = size;
     s_command.DdrMode = QSPI_DDR_MODE_DISABLE;
     s_command.DdrHoldHalfCycle = QSPI_DDR_HHC_ANALOG_DELAY;
@@ -396,7 +396,7 @@ uint8_t QSPI_Write(uint8_t *pData, uint32_t writeAddr, uint32_t size)
     uint32_t end_addr, current_size, current_addr;
 
     // Calculation of the size between the write address and the end of the page
-    current_size = W25Q128_PAGE_SIZE - (writeAddr % (W25Q128_PAGE_SIZE));
+    current_size = W25Q512_PAGE_SIZE - (writeAddr % (W25Q512_PAGE_SIZE));
 
     // Check if the size of the data is less than the remaining place in the page
     if (current_size > size)
@@ -453,7 +453,7 @@ uint8_t QSPI_Write(uint8_t *pData, uint32_t writeAddr, uint32_t size)
         // Update the address and size variables for next page programming
         current_addr += current_size;
         pData += current_size;
-        current_size = ((current_addr + W25Q128_PAGE_SIZE) > end_addr) ? (end_addr - current_addr) : W25Q128_PAGE_SIZE;
+        current_size = ((current_addr + W25Q512_PAGE_SIZE) > end_addr) ? (end_addr - current_addr) : W25Q512_PAGE_SIZE;
     } while (current_addr < end_addr);
 
     return QSPI_OK;
@@ -489,7 +489,7 @@ uint8_t QSPI_Erase_Block(uint32_t blockAddress)
     }
 
     // Configure automatic polling mode to wait for end of erase
-    if (QSPI_AutoPollingMemReady(&QSPID1, W25Q128_SECTOR_ERASE_MAX_TIME) != QSPI_OK)
+    if (QSPI_AutoPollingMemReady(&QSPID1, W25Q512_SECTOR_ERASE_MAX_TIME) != QSPI_OK)
     {
         return QSPI_ERROR;
     }
@@ -504,7 +504,7 @@ int8_t target_lfs_init()
     QSPID1.Init.FifoThreshold = 4;
     QSPID1.Init.SampleShifting = QSPI_SAMPLE_SHIFTING_HALFCYCLE;
     // OK to use the SPIFFS_TOTAL_SIZE for this instance
-    QSPID1.Init.FlashSize = POSITION_VAL(W25Q128_FLASH_SIZE) - 1;
+    QSPID1.Init.FlashSize = POSITION_VAL(W25Q512_FLASH_SIZE) - 1;
     QSPID1.Init.ChipSelectHighTime = QSPI_CS_HIGH_TIME_2_CYCLE;
     QSPID1.Init.ClockMode = QSPI_CLOCK_MODE_0;
     QSPID1.Init.FlashID = QSPI_FLASH_ID_1;
@@ -537,12 +537,12 @@ int8_t target_lfs_init()
         return QSPI_ERROR;
     }
 
-    // constants from ID Definitions table in W25Q128 datasheet
-    ASSERT(dataBuffer_0[0] == W25Q128_MANUFACTURER_ID);
-    ASSERT(dataBuffer_0[1] == W25Q128_DEVICE_ID1);
-    ASSERT(dataBuffer_0[2] == W25Q128_DEVICE_ID2);
+    // constants from ID Definitions table in W25Q512 datasheet
+    ASSERT(dataBuffer_0[0] == W25Q512_MANUFACTURER_ID);
+    ASSERT(dataBuffer_0[1] == W25Q512_DEVICE_ID1);
+    ASSERT(dataBuffer_0[2] == W25Q512_DEVICE_ID2);
 
-    // from W25Q128 datasheet: Time Delay Before Write Instruction is >5ms
+    // from W25Q512 datasheet: Time Delay Before Write Instruction is >5ms
     chThdSleepMilliseconds(10);
 
     return LFS_ERR_OK;
