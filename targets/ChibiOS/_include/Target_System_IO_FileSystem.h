@@ -40,8 +40,6 @@
 #elif (HAL_USE_SDC == TRUE) && (HAL_USBH_USE_MSD == FALSE)
 #define SD_CARD_DRIVE_INDEX         "0:"
 #define SD_CARD_DRIVE_INDEX_NUMERIC (0)
-#else
-#error "FatFS being configured without SDCard or USB Mass Storage Device enabled. Check configuration."
 #endif
 
 #ifdef __cplusplus
