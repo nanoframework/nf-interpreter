@@ -33,7 +33,6 @@ set(System.IO.FileSystem_SRCS
     # file system drivers
     nanoPAL_FileSystem.cpp
 
-    targetPAL_FileSystem.cpp
     Target_System_IO_FileSystem.c
     target_FileSystem.cpp
 )
