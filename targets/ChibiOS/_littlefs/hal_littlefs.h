@@ -22,10 +22,6 @@ extern "C"
 {
 #endif
 
-    extern bool lfsFileSystemReady;
-    extern lfs_t lfs[LITTLEFS_INSTANCES_COUNT];
-    extern struct lfs_config lfsConfig[LITTLEFS_INSTANCES_COUNT];
-
     // declarations of hal/target implementations
     int8_t target_lfs_init();
     void hal_lfs_config();
