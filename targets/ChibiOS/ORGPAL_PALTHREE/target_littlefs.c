@@ -22,8 +22,19 @@ static const SPIConfig spiConfig = {
 
 #if CACHE_LINE_SIZE > 0
 CC_ALIGN_DATA(CACHE_LINE_SIZE)
+uint8_t dataBuffer_0[CACHE_SIZE_ALIGN(uint8_t, AT25SF641_PAGE_SIZE)] __attribute__((section(".nocache")));
+#else
+uint8_t dataBuffer_0[AT25SF641_PAGE_SIZE];
 #endif
-uint8_t dataBuffer_0[CACHE_SIZE_ALIGN(uint8_t, AT25SF641_PAGE_SIZE)];
+
+#ifdef DEBUG
+#if CACHE_LINE_SIZE > 0
+CC_ALIGN_DATA(CACHE_LINE_SIZE)
+uint8_t tempBuffer[CACHE_SIZE_ALIGN(uint8_t, AT25SF641_PAGE_SIZE)] __attribute__((section(".nocache")));
+#else
+uint8_t tempBuffer[AT25SF641_PAGE_SIZE];
+#endif
+#endif
 
 ///////////////
 // Definitions
@@ -84,7 +95,6 @@ int32_t hal_lfs_prog_0(
 
 #ifdef DEBUG
 
-    uint8_t tempBuffer[size];
     memset(tempBuffer, 0xBB, size);
 
     // read back and compare
@@ -173,9 +183,9 @@ static bool SPI_Erase_Block(uint32_t addr, bool largeBlock)
     dataBuffer_0[2] = (uint8_t)(addr >> 8);
     dataBuffer_0[3] = (uint8_t)addr;
 
-    // flush DMA buffer to ensure cache coherency
-    // (only required for Cortex-M7)
-    cacheBufferFlush(dataBuffer_0, sizeof(dataBuffer_0));
+    // // flush DMA buffer to ensure cache coherency
+    // // (only required for Cortex-M7)
+    // cacheBufferFlush(dataBuffer_0, sizeof(dataBuffer_0));
 
     CS_SELECT;
     spiSend(&SPID1, 4, dataBuffer_0);
@@ -193,9 +203,9 @@ static bool SPI_Read(uint8_t *pData, uint32_t readAddr, uint32_t size)
     dataBuffer_0[2] = (uint8_t)(readAddr >> 8);
     dataBuffer_0[3] = (uint8_t)readAddr;
 
-    // flush DMA buffer to ensure cache coherency
-    // (only required for Cortex-M7)
-    cacheBufferFlush(dataBuffer_0, sizeof(dataBuffer_0));
+    // // flush DMA buffer to ensure cache coherency
+    // // (only required for Cortex-M7)
+    // cacheBufferFlush(dataBuffer_0, sizeof(dataBuffer_0));
 
     CS_SELECT;
     spiSend(&SPID1, 4, dataBuffer_0);
@@ -242,9 +252,9 @@ static bool SPI_Write(const uint8_t *pData, uint32_t writeAddr, uint32_t size)
         // adjust address if writeSize is the full page
         dataBuffer_0[3] = (uint8_t)(writeSize == W25Q128_PAGE_SIZE ? address & 0xFFFFFFF0 : address);
 
-        // flush DMA buffer to ensure cache coherency
-        // (only required for Cortex-M7)
-        cacheBufferFlush(dataBuffer_0, sizeof(dataBuffer_0));
+        // // flush DMA buffer to ensure cache coherency
+        // // (only required for Cortex-M7)
+        // cacheBufferFlush(dataBuffer_0, sizeof(dataBuffer_0));
 
         CS_SELECT;
         spiSend(&SPID1, 4, dataBuffer_0);
@@ -252,9 +262,9 @@ static bool SPI_Write(const uint8_t *pData, uint32_t writeAddr, uint32_t size)
         // copy from buffer
         memcpy(dataBuffer_0, pData, writeSize);
 
-        // flush DMA buffer to ensure cache coherency
-        // (only required for Cortex-M7)
-        cacheBufferFlush(dataBuffer_0, sizeof(dataBuffer_0));
+        // // flush DMA buffer to ensure cache coherency
+        // // (only required for Cortex-M7)
+        // cacheBufferFlush(dataBuffer_0, sizeof(dataBuffer_0));
 
         spiSend(&SPID1, writeSize, dataBuffer_0);
         CS_UNSELECT;
@@ -278,11 +288,18 @@ static bool SPI_Write(const uint8_t *pData, uint32_t writeAddr, uint32_t size)
 
 #if CACHE_LINE_SIZE > 0
 CC_ALIGN_DATA(CACHE_LINE_SIZE)
+uint8_t dataBuffer_1[CACHE_SIZE_ALIGN(uint8_t, W25Q128_PAGE_SIZE)] __attribute__((section(".nocache")));
+#else
+uint8_t dataBuffer_1[AT25SF641_PAGE_SIZE];
 #endif
-uint8_t dataBuffer_1[CACHE_SIZE_ALIGN(uint8_t, W25Q128_PAGE_SIZE)];
 
 #ifdef DEBUG
+#if CACHE_LINE_SIZE > 0
+CC_ALIGN_DATA(CACHE_LINE_SIZE)
+uint8_t tempBuffer[CACHE_SIZE_ALIGN(uint8_t, W25Q128_PAGE_SIZE)] __attribute__((section(".nocache")));
+#else
 uint8_t tempBuffer[W25Q128_PAGE_SIZE];
+#endif
 #endif
 
 ///////////////
@@ -779,8 +796,8 @@ int8_t target_lfs_init()
     // sanity check: read device ID and unique ID
     dataBuffer_0[0] = READ_ID_CMD2;
 
-    // flush DMA buffer to ensure cache coherency
-    cacheBufferFlush(dataBuffer_0, sizeof(dataBuffer_0));
+    // // flush DMA buffer to ensure cache coherency
+    // cacheBufferFlush(dataBuffer_0, sizeof(dataBuffer_0));
 
     CS_SELECT;
     spiSend(&SPID1, 1, dataBuffer_0);

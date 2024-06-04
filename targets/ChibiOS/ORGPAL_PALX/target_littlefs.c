@@ -11,11 +11,18 @@
 
 #if CACHE_LINE_SIZE > 0
 CC_ALIGN_DATA(CACHE_LINE_SIZE)
+uint8_t dataBuffer_0[CACHE_SIZE_ALIGN(uint8_t, W25Q512_PAGE_SIZE)] __attribute__((section(".nocache")));
+#else
+uint8_t dataBuffer_0[W25Q512_PAGE_SIZE];
 #endif
-uint8_t dataBuffer_0[CACHE_SIZE_ALIGN(uint8_t, W25Q512_PAGE_SIZE)];
 
 #ifdef DEBUG
+#if CACHE_LINE_SIZE > 0
+CC_ALIGN_DATA(CACHE_LINE_SIZE)
+uint8_t tempBuffer[CACHE_SIZE_ALIGN(uint8_t, W25Q512_PAGE_SIZE)] __attribute__((section(".nocache")));
+#else
 uint8_t tempBuffer[W25Q512_PAGE_SIZE];
+#endif
 #endif
 
 ///////////////
