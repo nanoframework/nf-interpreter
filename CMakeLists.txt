@@ -3,6 +3,8 @@
 # See LICENSE file in the project root for full license information.
 #
 
+# Update to see if CLR build # changes
+
 cmake_minimum_required(VERSION 3.24)
 
 include(CMakeToolsHelpers OPTIONAL)
