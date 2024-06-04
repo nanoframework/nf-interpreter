@@ -133,7 +133,6 @@
 #define QUAD_IN_FAST_PROG_CMD 0x32
 
 // Erase Operations
-#define SECTOR_ERASE_CMD    0xD8
 #define SUBSECTOR_ERASE_CMD 0x20
 
 //  W25Q128 Registers
