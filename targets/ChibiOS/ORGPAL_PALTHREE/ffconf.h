@@ -163,6 +163,8 @@
 #define FF_VOLUMES 2
 #elif (HAL_USE_SDC == FALSE) && (HAL_USBH_USE_MSD == TRUE)
 #define FF_VOLUMES 1
+#elif (HAL_USE_SDC == TRUE) && (HAL_USBH_USE_MSD == FALSE)
+#define FF_VOLUMES 1
 #else
 #error "FatFS being configured without SDCard or USB Mass Storage Device enabled. Check configuration."
 #endif
@@ -183,6 +185,8 @@
 #define FF_VOLUME_STRS   "D", "E"
 #elif (HAL_USE_SDC == FALSE) && (HAL_USBH_USE_MSD == TRUE)
 #define FF_VOLUME_STRS   "E"
+#elif (HAL_USE_SDC == TRUE) && (HAL_USBH_USE_MSD == FALSE)
+#define FF_VOLUME_STRS   "D"
 #else
 #error "FatFS being configured without SDCard or USB Mass Storage Device enabled. Check configuration."
 #endif
