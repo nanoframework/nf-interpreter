@@ -699,10 +699,12 @@ HRESULT FATFS_FS_Driver::GetAttributes(const VOLUME_ID *volume, const char *path
     FILINFO info;
     int32_t result;
     char normalizedPath[FS_MAX_DIRECTORY_LENGTH];
-    // char buffer[3];
+    size_t pathLength;
 
     // set to empty attributes
     *attributes = EMPTY_ATTRIBUTE;
+
+    pathLength = hal_strlen_s(path);
 
     if (NormalizePath(path, normalizedPath, sizeof(normalizedPath)) < 0)
     {
@@ -724,8 +726,22 @@ HRESULT FATFS_FS_Driver::GetAttributes(const VOLUME_ID *volume, const char *path
         NANOCLR_SET_AND_LEAVE(S_OK);
     }
 
+    // if this is home directory
+    if (pathLength == 1 && *normalizedPath == '\0')
+    {
+        *attributes = FileAttributes::FileAttributes_Directory;
+
+        NANOCLR_SET_AND_LEAVE(S_OK);
+    }
+
     // store attributes
     *attributes = info.fattrib;
+
+    // check if this is a directory and fix the attributes
+    if (info.fattrib & AM_DIR)
+    {
+        *attributes |= FileAttributes::FileAttributes_Directory;
+    }
 
     NANOCLR_SET_AND_LEAVE(S_OK);
 
