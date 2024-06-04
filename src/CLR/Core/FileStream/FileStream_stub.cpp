@@ -30,9 +30,9 @@ void CLR_RT_FileStream::RelocationHandler(CLR_RT_HeapBlock_BinaryBlob *ptr)
 
 HRESULT CLR_RT_FileStream::SplitFilePath(
     const char *fullPath,
-    const char **rootName,
-    uint32_t *rootNameLength,
-    const char **relativePath)
+    char *&rootName,
+    uint32_t &rootNameLength,
+    char *&relativePath)
 {
     (void)fullPath;
     (void)rootName;
@@ -100,36 +100,5 @@ HRESULT CLR_RT_FileStream::SetLength(int64_t length)
 {
     (void)length;
 
-    NANOCLR_FEATURE_STUB_RETURN();
-}
-
-//--//
-
-HRESULT CLR_RT_FindFile::CreateInstance(CLR_RT_HeapBlock &ref, const char *path, const char *searchPattern)
-{
-    (void)ref;
-    (void)path;
-    (void)searchPattern;
-
-    NANOCLR_FEATURE_STUB_RETURN();
-}
-
-HRESULT CLR_RT_FindFile::GetNext(FS_FILEINFO **fi, bool *found)
-{
-    (void)fi;
-    (void)found;
-
-    NANOCLR_FEATURE_STUB_RETURN();
-}
-
-HRESULT CLR_RT_FindFile::CreateFilenameString(CLR_RT_HeapBlock &ref)
-{
-    (void)ref;
-
-    NANOCLR_FEATURE_STUB_RETURN();
-}
-
-HRESULT CLR_RT_FindFile::Close()
-{
     NANOCLR_FEATURE_STUB_RETURN();
 }
