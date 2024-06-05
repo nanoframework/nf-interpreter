@@ -510,7 +510,7 @@ int8_t target_lfs_init()
     QSPID1.Init.ClockPrescaler = 1;
     QSPID1.Init.FifoThreshold = 4;
     QSPID1.Init.SampleShifting = QSPI_SAMPLE_SHIFTING_HALFCYCLE;
-    // OK to use the SPIFFS_TOTAL_SIZE for this instance
+    // OK to use the W25Q512_FLASH_SIZE for this instance
     QSPID1.Init.FlashSize = POSITION_VAL(W25Q512_FLASH_SIZE) - 1;
     QSPID1.Init.ChipSelectHighTime = QSPI_CS_HIGH_TIME_2_CYCLE;
     QSPID1.Init.ClockMode = QSPI_CLOCK_MODE_0;
