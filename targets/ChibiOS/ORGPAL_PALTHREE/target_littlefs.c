@@ -739,7 +739,7 @@ uint8_t QSPI_Erase_Block(uint32_t blockAddress)
 
     // Initialize the erase command
     s_command.InstructionMode = QSPI_INSTRUCTION_1_LINE;
-    s_command.Instruction = SUBSECTOR_ERASE_CMD;
+    s_command.Instruction = SECTOR_ERASE_CMD;
     s_command.AddressMode = QSPI_ADDRESS_1_LINE;
     s_command.AddressSize = QSPI_ADDRESS_24_BITS;
     s_command.Address = blockAddress;

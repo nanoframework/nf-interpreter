@@ -50,9 +50,9 @@
 #define WRITE_STATUS_REG2_CMD 0x31
 
 // Erase Operations
-#define SUBSECTOR_ERASE_CMD 0x20
-#define READ_ID_CMD         0x90
-#define READ_ID_CMD2        0x9F
+#define SECTOR_ERASE_CMD 0x20
+#define READ_ID_CMD      0x90
+#define READ_ID_CMD2     0x9F
 
 // power commands
 #define RESUME_DEEP_PD_CMD  0xAB
@@ -93,19 +93,19 @@
 // W25Q128 Configuration
 // 128 MBits => 16MBytes ()
 #define W25Q128_FLASH_SIZE 0x1000000
-// 256 sectors of 64KBytes
-#define W25Q128_SECTOR_SIZE 0x10000
-// 4096 subsectors of 4kBytes (!!minimum erase size!!)
-#define W25Q128_SUBSECTOR_SIZE 0x1000
+// 256 blocks of 64KBytes
+#define W25Q128_BLOCK_SIZE 0x10000
+// 4096 sectors of 4kBytes (!!minimum erase size!!)
+#define W25Q128_SECTOR_SIZE 0x1000
 // 65536 pages of 256 bytes
 #define W25Q128_PAGE_SIZE 0x100
 
 // timings
-#define W25Q128_DUMMY_CYCLES_READ        8
-#define W25Q128_DUMMY_CYCLES_READ_QUAD   8
-#define W25Q128_BULK_ERASE_MAX_TIME      250000
-#define W25Q128_SECTOR_ERASE_MAX_TIME    3000
-#define W25Q128_SUBSECTOR_ERASE_MAX_TIME 800
+#define W25Q128_DUMMY_CYCLES_READ      8
+#define W25Q128_DUMMY_CYCLES_READ_QUAD 8
+#define W25Q128_BULK_ERASE_MAX_TIME    250000
+#define W25Q128_BLOCK_ERASE_MAX_TIME   3000
+#define W25Q128_SECTOR_ERASE_MAX_TIME  800
 
 // W25Q128 Commands
 // Reset Operations
@@ -133,7 +133,7 @@
 #define QUAD_IN_FAST_PROG_CMD 0x32
 
 // Erase Operations
-#define SUBSECTOR_ERASE_CMD 0x20
+#define SECTOR_ERASE_CMD 0x20
 
 //  W25Q128 Registers
 // Status Register 1
@@ -185,8 +185,8 @@
 
 #define LFS1_READ_SIZE      1
 #define LFS1_PROG_SIZE      1
-#define LFS1_BLOCK_SIZE     W25Q128_SUBSECTOR_SIZE
-#define LFS1_BLOCK_COUNT    W25Q128_FLASH_SIZE / W25Q128_SUBSECTOR_SIZE
+#define LFS1_BLOCK_SIZE     W25Q128_SECTOR_SIZE
+#define LFS1_BLOCK_COUNT    W25Q128_FLASH_SIZE / W25Q128_SECTOR_SIZE
 #define LFS1_BLOCK_CYCLES   100
 #define LFS1_CACHE_SIZE     W25Q128_PAGE_SIZE
 #define LFS1_LOOKAHEAD_SIZE LFS1_BLOCK_COUNT / 8
