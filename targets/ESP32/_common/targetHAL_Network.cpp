@@ -92,7 +92,7 @@ static void PostConnectResult(int result)
 #if HAL_USE_THREAD == TRUE
 static void PostThreadEvent(OpenThreadEventType event, uint16_t data1, uint32_t data2)
 {
-    PostManagedEvent(EVENT_CUSTOM, event, data1, data2);
+    PostManagedEvent(EVENT_OPENTHREAD, event, data1, data2);
 }
 #endif
 
@@ -305,7 +305,7 @@ static void event_handler(void *arg, esp_event_base_t event_base, int32_t event_
     }
     else
 #endif
-        if (event_base == IP_EVENT)
+    if (event_base == IP_EVENT)
     {
         switch (event_id)
         {
@@ -471,18 +471,14 @@ static void thread_event_handler(void *arg, esp_event_base_t event_base, int32_t
             break;
 
         case OPENTHREAD_EVENT_ROLE_CHANGED:
+            {
+                esp_openthread_role_changed_event_t * optevent = (esp_openthread_role_changed_event_t *)event_data;
 #ifdef PRINT_NET_EVENT
-        {
-            esp_openthread_role_changed_event_t *optevent = (esp_openthread_role_changed_event_t *)event_data;
-            ets_printf("OPENTHREAD_EVENT_ROLE_CHANGED %d->%d\n", optevent->previous_role, optevent->current_role);
-
-            PostThreadEvent(
-                OpenThreadEventType_RoleChanged,
-                0,
-                (optevent->previous_role << 8) + optevent->current_role);
-        }
+                ets_printf("OPENTHREAD_EVENT_ROLE_CHANGED %d->%d\n", optevent->previous_role, optevent->current_role);
 #endif
-        break;
+                PostThreadEvent(OpenThreadEventType_RoleChanged, 0, (optevent->previous_role << 8) + optevent->current_role);
+            }
+            break;
 
         default:
 #ifdef PRINT_NET_EVENT

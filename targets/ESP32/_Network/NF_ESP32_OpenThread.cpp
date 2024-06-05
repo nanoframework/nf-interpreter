@@ -3,9 +3,10 @@
 // See LICENSE file in the project root for full license information.
 //
 
-// This file includes the board specific OpenThread Intialisation
-
 #if (HAL_USE_THREAD == TRUE)
+
+#include <list>
+#include <string>
 
 #include <NF_ESP32_Network.h>
 #include <esp32_idf.h>
@@ -17,10 +18,14 @@
 #include "esp_openthread_types.h"
 #include "esp_vfs_eventfd.h"
 #include "openthread/logging.h"
+#include "openthread/cli.h"
+#include "openthread/coap.h"
 #include "Esp32_DeviceMapping.h"
 #include "../_nanoCLR/nanoFramework.Networking.Thread/net_thread_native.h"
 
 static const char *TAG = "espOt";
+
+extern void ThreadSetInterfaceNumber(int networkInterfaceNumber);
 
 #define OPENTHREAD_NETWORK_POLLPERIOD_TIME 3000
 
@@ -56,8 +61,7 @@ static const char *TAG = "espOt";
 #define ESP_OPENTHREAD_DEFAULT_SPI_HOST_CONFIG()                                                                       \
     {                                                                                                                  \
         .host_connection_mode = HOST_CONNECTION_MODE_RCP_SPI,                                                          \
-        .spi_slave_config =                                                                                            \
-        {                                                                                                              \
+        .spi_slave_config = {                                                                                          \
             .host_device = SPI2_HOST,                                                                                  \
             .bus_config =                                                                                              \
                 {                                                                                                      \
@@ -75,7 +79,7 @@ static const char *TAG = "espOt";
                     .queue_size = 3,                                                                                   \
                     .mode = 0,                                                                                         \
                 },                                                                                                     \
-            .intr_pin = (gpio_num_t)9,                                                                                             \
+            .intr_pin = (gpio_num_t)9,                                                                                 \
                                                                                                                        \
         },                                                                                                             \
     }
@@ -93,6 +97,21 @@ static const char *TAG = "espOt";
 
 static esp_netif_t *openthread_netif = NULL;
 
+// Maximum number of entries in cliOutputsList
+#define cliListMaxSize 50
+// Maximum line size
+#define cliBufferSize 120
+
+// line buffer used to accumulate cli output until we have a whole line
+static char cliLineBuffer[cliBufferSize];
+static short cliLineBufferCount = 0;
+static short cliIgnoreLine = 0;
+
+static std::list<std::string> cliOutputsList;
+bool cliHandleResponse = false;
+bool IsThreadInitialised = false;
+TaskHandle_t threadTask;
+
 static esp_netif_t *init_openthread_netif(const esp_openthread_platform_config_t *config)
 {
     esp_netif_config_t cfg = ESP_NETIF_DEFAULT_OPENTHREAD();
@@ -102,26 +121,6 @@ static esp_netif_t *init_openthread_netif(const esp_openthread_platform_config_t
     ESP_ERROR_CHECK(esp_netif_attach(netif, esp_openthread_netif_glue_init(config)));
 
     return netif;
-}
-
-static void enableSleepyEndDevice(uint32_t pollPeriod)
-{
-    otInstance *instance = esp_openthread_get_instance();
-
-    otLinkModeConfig linkMode = {0};
-    linkMode.mRxOnWhenIdle = false;
-    linkMode.mDeviceType = false;
-    linkMode.mNetworkData = false;
-
-    if (otLinkSetPollPeriod(instance, pollPeriod) != OT_ERROR_NONE)
-    {
-        ESP_LOGE(TAG, "Failed to set OpenThread pollperiod.");
-    }
-
-    if (otThreadSetLinkMode(instance, linkMode) != OT_ERROR_NONE)
-    {
-        ESP_LOGE(TAG, "Failed to set OpenThread linkmode.");
-    }
 }
 
 static esp_err_t powerSaveInit()
@@ -141,6 +140,51 @@ static esp_err_t powerSaveInit()
     rc = esp_pm_configure(&pm_config);
 #endif
     return rc;
+}
+
+static void setDeviceType(ThreadDeviceType devType, uint32_t pollPeriod)
+{
+    otInstance *instance = esp_openthread_get_instance();
+
+    otLinkModeConfig linkMode = {linkMode.mRxOnWhenIdle = true};
+
+    switch (devType)
+    {
+        case ThreadDeviceType_Router:
+            linkMode.mRxOnWhenIdle = true;
+            linkMode.mDeviceType = true;
+            linkMode.mNetworkData = true;
+            break;
+
+        case ThreadDeviceType_EndDevice:
+            linkMode.mRxOnWhenIdle = true;
+            // Not FTD ( end device )
+            linkMode.mDeviceType = false;
+            linkMode.mNetworkData = false;
+            break;
+
+        case ThreadDeviceType_SleepyEndDevice:
+            // Not receiving all the time
+            // sleepy end device will poll router for info
+            linkMode.mRxOnWhenIdle = false;
+            // Not FTD ( end device )
+            linkMode.mDeviceType = false;
+            linkMode.mNetworkData = false;
+
+            // Set poll period for polling
+            if (otLinkSetPollPeriod(instance, pollPeriod) != OT_ERROR_NONE)
+            {
+                ESP_LOGE(TAG, "Failed to set OpenThread poll period.");
+            }
+
+            powerSaveInit();
+            break;
+    }
+
+    if (otThreadSetLinkMode(instance, linkMode) != OT_ERROR_NONE)
+    {
+        ESP_LOGE(TAG, "Failed to set OpenThread linkmode.");
+    }
 }
 
 uint8_t charTobyte(char i)
@@ -177,29 +221,159 @@ int hexTobin(const char *src, uint8_t *target)
     return len;
 }
 
+void ResetLineBuffer()
+{
+    cliLineBuffer[0] = 0;
+    cliLineBufferCount = 0;
+}
+
 //
-//  Initialise openThread for the required radio interface
+//  We need to accumulate output into line buffer until we see a CRLF
+//
+int cliOutputCallback(void *aContext, const char *aFormat, va_list aArguments)
+{
+    // Find length of string with args
+    int length = std::vsnprintf(nullptr, 0, aFormat, aArguments);
+
+    if (((cliLineBufferCount + length) > cliBufferSize) || cliIgnoreLine > 0)
+    {
+        cliIgnoreLine = 0;
+
+        // ignore as too big for buffer
+        return length;
+    }
+
+    // format into buffer
+    std::vsnprintf(&cliLineBuffer[cliLineBufferCount], cliBufferSize - length, aFormat, aArguments);
+
+    // Update count
+    cliLineBufferCount += length;
+
+    // zero Terminate
+    cliLineBuffer[cliLineBufferCount] = 0;
+
+    // End of line ?
+    if ((cliLineBufferCount >= 2) && (cliLineBuffer[cliLineBufferCount - 1] == 10) &&
+        (cliLineBuffer[cliLineBufferCount - 2] == 13))
+    {
+        // remove CRLF and re-terminate
+        cliLineBufferCount -= 2;
+        cliLineBuffer[cliLineBufferCount] = 0;
+
+        if (cliLineBufferCount > 0)
+        {
+            std::string line(cliLineBuffer);
+
+            // Restrict size of list or not insert last line of command
+            if (cliOutputsList.size() < cliListMaxSize)
+            {
+                // Save line to list
+                cliOutputsList.push_back(line);
+            }
+
+            // Reset line buffer
+            ResetLineBuffer();
+
+            // Command response done ?
+            if (cliHandleResponse)
+            {
+                // Command output complete 'Done' ?
+                if (hal_strncmp_s(line.c_str(), "Done", 4) == 0)
+                {
+                    // Signal managed code of CLI output
+                    PostManagedEvent(EVENT_OPENTHREAD, OpenThreadEventType_CommandOutputAvailable, 0, 0);
+
+                    cliHandleResponse = false;
+
+                    // Ignore next output (prompt)
+                    cliIgnoreLine = 1;
+                }
+            }
+            else
+            {
+                // Unsolicited message then signal managed code of output
+                PostManagedEvent(EVENT_OPENTHREAD, OpenThreadEventType_CommandOutputAvailable, 0, 0);
+            }
+        }
+    }
+
+    return length;
+}
+
+HRESULT OpenThreadCliOutput(CLR_RT_HeapBlock &arrayBlock)
+{
+    NANOCLR_HEADER();
+    {
+        CLR_RT_HeapBlock_Array *array;
+
+        NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance(
+            arrayBlock,
+            cliOutputsList.size(),
+            g_CLR_RT_WellKnownTypes.m_String));
+
+        array = arrayBlock.Array();
+
+        int index = 0;
+        for (std::list<std::string>::iterator it = cliOutputsList.begin(); it != cliOutputsList.end(); it++, index++)
+        {
+            CLR_RT_HeapBlock *blk = (CLR_RT_HeapBlock *)array->GetElement(index);
+
+            NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_String::CreateInstance(*blk, (*it).c_str()));
+        }
+
+        cliOutputsList.clear();
+    }
+    NANOCLR_NOCLEANUP();
+}
+
+//
+// Send command line to openthread CLI
+//
+void OpenThreadCliInput(const char *inputLine, bool response)
+{
+    if (response)
+    {
+        cliOutputsList.clear();
+        cliHandleResponse = true;
+    }
+
+    // Need to take a copy of inputLine as otCliInputLine modifies the line when parsing
+    int length = hal_strlen_s(inputLine);
+    char *cliLine = new char[length + 1];
+    hal_strcpy_s(cliLine, length + 1, inputLine);
+
+    otCliInputLine((char *)cliLine);
+
+    delete cliLine;
+}
+
+//
+//  Initialize openThread for the required radio interface
 //  This will depend on SOC this is running on.  ESP32_C6 & ESP32_H2 have a openTHread radio
 //  Other SOC will need to interface to another SOC with radio like ESP32_H2.
-//  Return 0 if openThread succesfully initialised.
+//  Return 0 if openThread successfully initialized.
 //
-esp_err_t initOpenThread(esp_openthread_radio_mode_t radioMode, int port, ThreadDeviceType deviceType )
+esp_err_t initOpenThread(ThreadDeviceType deviceType, esp_openthread_radio_mode_t radioMode, int port, int baud_rate)
 {
     esp_openthread_platform_config_t config;
-    esp_err_t  err;
+    esp_err_t err;
 
     esp_vfs_eventfd_config_t eventfd_config = {
         .max_fds = 3,
     };
 
-    ESP_ERROR_CHECK(esp_vfs_eventfd_register(&eventfd_config));
+    err = esp_vfs_eventfd_register(&eventfd_config);
+    if (err != ERR_OK)
+    {
+        ESP_LOGI(TAG, "esp_vfs_eventfd_register failed with error %d", err);
+        return err;
+    }
 
     switch (radioMode)
     {
         case RADIO_MODE_NATIVE:
             config.radio_config = ESP_OPENTHREAD_DEFAULT_RADIO_CONFIG();
             config.host_config = ESP_OPENTHREAD_NO_HOST_CONFIG();
-            debug_printf("RADIO_MODE_NATIVE mode\n");
             break;
 
         case RADIO_MODE_UART_RCP:
@@ -207,132 +381,72 @@ esp_err_t initOpenThread(esp_openthread_radio_mode_t radioMode, int port, Thread
 
             // Use default uart config 460800 baud, 8 bit, no parity
             config.host_config = ESP_OPENTHREAD_DEFAULT_UART_HOST_CONFIG();
-            
+
             // Set COM port using ESP32 configured pins
             config.host_config.host_uart_config.port = port;
 
+            config.host_config.host_uart_config.uart_config.baud_rate = baud_rate;
+
             // Pick up configured pin numbers for port
-            config.host_config.host_uart_config.tx_pin= (gpio_num_t)Esp32_GetMappedDevicePins(DEV_TYPE_SERIAL, port, Esp32SerialPin_Tx);
-            config.host_config.host_uart_config.rx_pin = (gpio_num_t)Esp32_GetMappedDevicePins(DEV_TYPE_SERIAL, port, Esp32SerialPin_Rx);
+            config.host_config.host_uart_config.tx_pin =
+                (gpio_num_t)Esp32_GetMappedDevicePins(DEV_TYPE_SERIAL, port, Esp32SerialPin_Tx);
+            config.host_config.host_uart_config.rx_pin =
+                (gpio_num_t)Esp32_GetMappedDevicePins(DEV_TYPE_SERIAL, port, Esp32SerialPin_Rx);
             break;
 
         case RADIO_MODE_SPI_RCP:
             config.radio_config.radio_mode = RADIO_MODE_SPI_RCP;
             config.host_config = ESP_OPENTHREAD_DEFAULT_SPI_HOST_CONFIG();
-
             config.host_config.spi_slave_config.host_device = (spi_host_device_t)port;
-            config.host_config.spi_slave_config.bus_config.miso_io_num = Esp32_GetMappedDevicePins(DEV_TYPE_SPI, port, Esp32SpiPin_Mosi );;
-            config.host_config.spi_slave_config.bus_config.mosi_io_num = Esp32_GetMappedDevicePins(DEV_TYPE_SPI, port, Esp32SpiPin_Miso);;
-            config.host_config.spi_slave_config.bus_config.sclk_io_num = Esp32_GetMappedDevicePins(DEV_TYPE_SPI, port, Esp32SpiPin_Clk);;
+            config.host_config.spi_slave_config.bus_config.miso_io_num =
+                Esp32_GetMappedDevicePins(DEV_TYPE_SPI, port, Esp32SpiPin_Mosi);
+            config.host_config.spi_slave_config.bus_config.mosi_io_num =
+                Esp32_GetMappedDevicePins(DEV_TYPE_SPI, port, Esp32SpiPin_Miso);
+            config.host_config.spi_slave_config.bus_config.sclk_io_num =
+                Esp32_GetMappedDevicePins(DEV_TYPE_SPI, port, Esp32SpiPin_Clk);
             break;
 
         default:
-            return false;    
+            return false;
     }
 
     config.port_config = ESP_OPENTHREAD_DEFAULT_PORT_CONFIG();
 
     // Initialize the OpenThread stack
     err = esp_openthread_init(&config);
-debug_printf("esp_openthread_init %d\n",err);
     if (err != ERR_OK)
     {
         ESP_LOGI(TAG, "esp_openthread_init failed with error %d", err);
         return err;
     }
 
+    IsThreadInitialised = true;
+
     // The OpenThread log level directly matches ESP log level
     (void)otLoggingSetLevel(CONFIG_LOG_DEFAULT_LEVEL);
+
+    otCliInit(esp_openthread_get_instance(), cliOutputCallback, NULL);
+
+    // Clear '>' from output on init
+    ResetLineBuffer();
 
     // Initialize the esp_netif bindings
     openthread_netif = init_openthread_netif(&config);
     err = esp_netif_set_default_netif(openthread_netif);
-debug_printf("esp_netif_set_default_netif %d\n",err);
     if (err != ERR_OK)
     {
         ESP_LOGI(TAG, "esp_netif_set_default_netif failed with error %d", err);
     }
 
-    if (deviceType == ThreadDeviceType_SleepyEndDevice)
-    {
-        // For sleepy end device we need to enable polling and configure power management
-        enableSleepyEndDevice(OPENTHREAD_NETWORK_POLLPERIOD_TIME);
-        powerSaveInit();
-    }
+    setDeviceType(deviceType, OPENTHREAD_NETWORK_POLLPERIOD_TIME);
 
-debug_printf("return %d\n",err);
+    ThreadSetInterfaceNumber(openthread_netif->lwip_netif->num);
+
     return err;
 }
 
 static void openThreadMainTask(void *aContext)
 {
-      // Run the main loop
-    esp_openthread_launch_mainloop();
-
-    // Clean up
-    esp_netif_destroy(openthread_netif);
-    esp_openthread_netif_glue_deinit();
-
-    esp_vfs_eventfd_unregister();
-    vTaskDelete(NULL);
-}
-  
-void startOpenThreadTask()
-{
-    int stack = 10000;
-    xTaskCreate(openThreadMainTask, "otmain", stack, xTaskGetCurrentTaskHandle(), 5, NULL);
-}
-
-
-static void threadMainTask(void *aContext)
-{
-    esp_openthread_platform_config_t config;
-
-#if defined(CONFIG_OPENTHREAD_RADIO_NATIVE)
-    config.radio_config = ESP_OPENTHREAD_DEFAULT_RADIO_CONFIG();
-    config.host_config = ESP_OPENTHREAD_NO_HOST_CONFIG();
-#endif
-#if defined(CONFIG_OPENTHREAD_RADIO_SPINEL_UART)
-    config.radio_mode = RADIO_MODE_UART_RCP;
-    config.host_config = ESP_OPENTHREAD_DEFAULT_UART_HOST_CONFIG();
-#endif
-#if defined(CONFIG_OPENTHREAD_RADIO_SPINEL_SPI)
-    config.radio_mode = RADIO_MODE_SPI_RCP;
-    config.host_config = ESP_OPENTHREAD_DEFAULT_SPI_HOST_CONFIG();
-#endif
-
-    config.port_config = ESP_OPENTHREAD_DEFAULT_PORT_CONFIG();
-
-    // Initialize the OpenThread stack
-    ESP_ERROR_CHECK(esp_openthread_init(&config));
-
-    // The OpenThread log level directly matches ESP log level
-    (void)otLoggingSetLevel(CONFIG_LOG_DEFAULT_LEVEL);
-
-    esp_netif_t *openthread_netif;
-    // Initialize the esp_netif bindings
-    openthread_netif = init_openthread_netif(&config);
-    esp_netif_set_default_netif(openthread_netif);
-
-#if (THREAD_NODE_ROLE == SED)
-    // For enabling sleepy end device
-    enableSleepyEndDevice(OPENTHREAD_NETWORK_POLLPERIOD_TIME);
-    powerSaveInit();
-#endif
-
-#if defined(THREAD_DATASETTLVS)
-    if (hal_strlen_s(THREAD_DATASETTLVS) > 0)
-    {
-        otOperationalDatasetTlvs datasetTlvs;
-
-        //    const char * datasetString =
-        //    "0e080000000000010000000300001435060004001fffe00208473b6d471ac9b62d0708fd881c8e81b2f28c0510b933f687d1537c252ee7e680d41e1483030f4f70656e5468726561642d35363139010256190410fd62447741af00be7f8139d6489127ef0c0402a0f7f8";
-        const char *datasetString = THREAD_DATASETTLVS;
-        datasetTlvs.mLength = hexTobin(datasetString, datasetTlvs.mTlvs);
-        esp_openthread_auto_start(&datasetTlvs);
-    }
-#endif
-
     // Run the main loop
     esp_openthread_launch_mainloop();
 
@@ -344,58 +458,84 @@ static void threadMainTask(void *aContext)
     vTaskDelete(NULL);
 }
 
-esp_err_t NF_ESP32_InitialiseOpenThread()
+bool startStopOpenThread(bool start)
 {
-    esp_vfs_eventfd_config_t eventfd_config = {
-        .max_fds = 3,
-    };
-
-    ESP_ERROR_CHECK(esp_vfs_eventfd_register(&eventfd_config));
-
-    int stack = 10000;
-
-    xTaskCreate(threadMainTask, "otmain", stack, xTaskGetCurrentTaskHandle(), 5, NULL);
-
-    return ESP_OK;
+    // Start Thread operation
+    if (otThreadSetEnabled(esp_openthread_get_instance(), start) != OT_ERROR_NONE)
+    {
+        return false;
+    }
+    return true;
 }
 
-// Return true if THREAD_DATASETTLVS && THREAD_NODE_ROLE defined in CmakePreset.json for current device
 //
-bool IsAutoStartConfigured()
+// Start Thread and main thread task
+void startOpenThreadTask()
 {
-#if defined(THREAD_DATASETTLVS) && defined(THREAD_NODE_ROLE)
-    if (hal_strlen_s(THREAD_DATASETTLVS) > 0)
-    {
-        return true;
-    }
-#endif
-    return false;
+    int stack = 10000;
+    xTaskCreate(openThreadMainTask, "otmain", stack, xTaskGetCurrentTaskHandle(), 5, &threadTask);
 }
 
 int NF_ESP32_OpenThread_Open(HAL_Configuration_NetworkInterface *config)
 {
     (void)config;
 
-    // We can start Thread automatically using parameters from CmakePreset.json
-    // If not available then can be configured and started from managed code (nanoFramework.Networking.Thread)
-
-    // Disabled until further testing done
-    // Probably have model of not automatically starting from build config but from managed code
-    // if ( IsAutoStartConfigured())
-    // {
-    //     if (NF_ESP32_InitialiseOpenThread() == ESP_OK)
-    //     {
-    //         return NF_ESP32_Wait_NetNumber(IDF_OT_DEF);
-    //     }
-    // }
+    // OpenThread is always started from managed code (nanoFramework.Networking.Thread)
 
     return SOCK_SOCKET_ERROR;
 }
 
 bool NF_ESP32_OpenThread_Close()
 {
-    esp_openthread_deinit();
+    if (IsThreadInitialised)
+    {
+        // Make Thread close down
+        esp_openthread_deinit();
+
+        // Give it time to stop thread & maybe exit
+        vTaskDelay(500 / portTICK_PERIOD_MS);
+
+        // Seems to be bug in IDF, the main loop task never shutdowns so do it manually for now until fixed in IDF
+        vTaskDelete(threadTask);
+
+        // Clean up
+        esp_netif_destroy(openthread_netif);
+        esp_openthread_netif_glue_deinit();
+
+        esp_vfs_eventfd_unregister();
+
+        IsThreadInitialised = false;
+
+        // Remove interface number from nanoclr
+        ThreadSetInterfaceNumber(-1);
+    }
 
     return true;
 }
+
+//
+// Return the local mesh address
+void GetThreadLocalMeshAddress(unsigned char *addr)
+{
+    const otIp6Address *ipaddress = otThreadGetMeshLocalEid(esp_openthread_get_instance());
+    memcpy(addr, ipaddress->mFields.m8, sizeof(ipaddress->mFields.m8));
+}
+
+void JoinerCallback(otError aError, void *aContext)
+{
+    // Signal managed code of Joiner start completed
+    PostManagedEvent(EVENT_OPENTHREAD, OpenThreadEventType_JoinerComplete, 0, aError);
+}
+
+void JoinerStart(const char *pskc, const char *url)
+{
+    otError oterr;
+
+    oterr = otJoinerStart(esp_openthread_get_instance(), pskc, url, NULL, NULL, NULL, NULL, JoinerCallback, NULL);
+    if (oterr != OT_ERROR_NONE)
+    {
+        JoinerCallback(oterr, NULL);
+    }
+}
+
 #endif

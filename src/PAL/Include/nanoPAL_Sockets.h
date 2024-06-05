@@ -771,6 +771,7 @@ const char *HAL_SOCK_IPV6AddressToString(uint16_t *address);
 #endif
 void *HAL_SOCK_GlobalLockContext();
 void HAL_SOCK_EventsSet(uint32_t events);
+void HAL_SOCK_SetInterfaceNumber(uint32_t interfaceIndex, uint32_t interfaceNumber);
 
 //--//
 

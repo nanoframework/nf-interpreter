@@ -238,6 +238,13 @@ void LWIP_SOCKETS_Driver::Status_callback(struct netif *netif)
 }
 #endif
 
+//  When network interface is not initialised/started at boot we can set net interface number when started 
+//
+void LWIP_SOCKETS_Driver::SetSocketDriverInterface(int i, int interfaceNumber)
+{
+    g_LWIP_SOCKETS_Driver.m_interfaces[i].m_interfaceNumber = interfaceNumber;
+}
+
 //  Initialise a network interface with interface number
 //  returns 
 //     True if interface initialised 
@@ -250,7 +257,7 @@ bool LWIP_SOCKETS_Driver::InitializeInterfaceIndex(
 {
     struct netif *networkInterface;
     
-    g_LWIP_SOCKETS_Driver.m_interfaces[i].m_interfaceNumber = interfaceNumber;
+    SetSocketDriverInterface(i, interfaceNumber);
 
     UpdateAdapterConfiguration(i, (NetworkInterface_UpdateOperation_Dns), &networkConfiguration);
 
@@ -274,20 +281,6 @@ bool LWIP_SOCKETS_Driver::InitializeInterfaceIndex(
         }
     #endif
 
-        // default debugger interface
-        if (0 == i)
-        {
-    #if LWIP_IPV6
-            // uint8_t* addr = (uint8_t*)&networkInterface->ip_addr.u_addr.ip4.addr;
-    #else
-            // uint8_t* addr = (uint8_t*)&networkInterface->ip_addr.addr;
-    #endif
-            //                lcd_printf("\f\n\n\n\n\n\n\nip address: %d.%d.%d.%d\r\n", addr[0], addr[1], addr[2],
-            //                addr[3]);
-            // FIXME               debug_printf("ip address from interface info: %d.%d.%d.%d\r\n", addr[0], addr[1],
-            // addr[2], addr[3]);
-        }
-    
         return TRUE;
     }
 
@@ -995,6 +988,12 @@ int LWIP_SOCKETS_Driver::SetSockOpt(SOCK_SOCKET socket, int level, int optname, 
             nativeLevel = IPPROTO_IP;
             nativeOptionName = GetNativeIPOption(optname);
             break;
+#if LWIP_IPV6
+        case SOCK_IPPROTO_IPV6:
+            nativeLevel = IPPROTO_IPV6;
+            nativeOptionName = GetNativeIPV6Option(optname);
+            break;
+#endif
         case SOCK_IPPROTO_TCP:
             nativeLevel = IPPROTO_TCP;
             nativeOptionName = GetNativeTcpOption(optname);
@@ -1074,6 +1073,12 @@ int LWIP_SOCKETS_Driver::GetSockOpt(SOCK_SOCKET socket, int level, int optname, 
             nativeLevel = IPPROTO_IP;
             nativeOptionName = GetNativeIPOption(optname);
             break;
+#if LWIP_IPV6
+        case SOCK_IPPROTO_IPV6:
+            nativeLevel = IPPROTO_IPV6;
+            nativeOptionName = GetNativeIPV6Option(optname);
+            break;
+#endif
         case SOCK_IPPROTO_TCP:
             nativeLevel = IPPROTO_TCP;
             nativeOptionName = GetNativeTcpOption(optname);
@@ -1159,23 +1164,23 @@ int LWIP_SOCKETS_Driver::GetSockName(SOCK_SOCKET socket, SOCK_sockaddr *name, in
 int LWIP_SOCKETS_Driver::RecvFrom(SOCK_SOCKET socket, char *buf, int len, int flags, SOCK_sockaddr *from, int *fromlen)
 {
     NATIVE_PROFILE_PAL_NETWORK();
-    sockaddr *pFrom = NULL;
     int ret;
+    socklen_t addrLen;
 
 #if LWIP_IPV6
     sockaddr_in6 addr;
+    addrLen = sizeof(sockaddr_in6);
 #else
     sockaddr_in addr;
+    addrLen = sizeof(sockaddr_in);
 #endif
 
     if (from)
     {
         Sock_SockaddrToSockaddr(from, (sockaddr *)&addr, fromlen);
-
-        pFrom = (sockaddr *)&addr;
     }
 
-    ret = lwip_recvfrom(socket, buf, len, flags, pFrom, (u32_t *)fromlen);
+    ret = lwip_recvfrom(socket, buf, len, flags, (sockaddr *)&addr, &addrLen);
 
     if (from && ret != SOCK_SOCKET_ERROR)
     {
@@ -1195,9 +1200,13 @@ int LWIP_SOCKETS_Driver::SendTo(
 {
     NATIVE_PROFILE_PAL_NETWORK();
 
+#if LWIP_IPV6
+    sockaddr_in6 addr;
+#else
     sockaddr_in addr;
+#endif
 
-    SOCK_SOCKADDR_TO_SOCKADDR(to, addr, &tolen);
+    Sock_SockaddrToSockaddr(to, (sockaddr *)&addr, &tolen);
 
     return lwip_sendto(socket, buf, len, flags, (sockaddr *)&addr, (u32_t)tolen);
 }
@@ -1538,6 +1547,32 @@ int LWIP_SOCKETS_Driver::GetNativeIPOption(int optname)
 
     return nativeOptionName;
 }
+
+#if LWIP_IPV6
+int LWIP_SOCKETS_Driver::GetNativeIPV6Option(int optname)
+{
+    NATIVE_PROFILE_PAL_NETWORK();
+    int nativeOptionName = optname;
+
+    switch (optname)
+    {
+        case SOCK_IPO_ADD_MEMBERSHIP:
+            nativeOptionName = IPV6_ADD_MEMBERSHIP;
+            break;
+        case SOCK_IPO_DROP_MEMBERSHIP:
+            nativeOptionName = IPV6_DROP_MEMBERSHIP;
+            break;     
+
+        // allow the C# user to specify LWIP options that our managed enum
+        // doesn't support
+        default:
+            nativeOptionName = optname;
+            break;
+    }
+
+    return nativeOptionName;
+}
+#endif
 
 int LWIP_SOCKETS_Driver::GetNativeError(int error)
 {

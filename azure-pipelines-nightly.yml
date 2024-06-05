@@ -493,6 +493,16 @@ jobs:
         PackageName: ESP32_PSRAM_BLE_GenericGraphic_REV3
         CMakePreset: ESP32_PSRAM_BLE_GenericGraphic_REV3
 
+      ESP32_PSRAM_REV3_IPV6:
+        TargetBoard: ESP32
+        TargetPlatform: 'esp32'
+        TargetSeries: 'esp32'
+        BuildOptions: 
+        IDF_Target: esp32
+        TargetName: ESP32_PSRAM_REV3_IPV6
+        PackageName: ESP32_PSRAM_REV3_IPV6
+        CMakePreset: ESP32_PSRAM_REV3_IPV6
+
       XIAO_ESP32C3:
         TargetBoard: ESP32_C3
         TargetSeries: 'esp32c3'

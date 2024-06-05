@@ -12,6 +12,8 @@
 
 bool NF_ESP32_ConnectInProgress = false;
 int NF_ESP32_ConnectResult = 0;
+int nf_threadNetworkIndex = -1;
+
 
 bool StoreConfigBlock(
     DeviceConfigurationOption configType,
@@ -63,6 +65,8 @@ int Network_Interface_Open(int index)
 #if HAL_USE_THREAD == TRUE
         // OpenThread
         case NetworkInterfaceType_Thread:
+            // save index for later use by managed code interface
+            nf_threadNetworkIndex = index;
             return NF_ESP32_OpenThread_Open(&networkConfiguration);
 #endif
     }
@@ -381,3 +385,11 @@ void Network_Interface_Deauth_Station(uint16_t stationIndex)
     }
 }
 #endif
+
+void ThreadSetInterfaceNumber(int networkInterfaceNumber)
+{
+    if (nf_threadNetworkIndex != -1)
+    {
+        HAL_SOCK_SetInterfaceNumber(nf_threadNetworkIndex, networkInterfaceNumber);
+    }
+}
