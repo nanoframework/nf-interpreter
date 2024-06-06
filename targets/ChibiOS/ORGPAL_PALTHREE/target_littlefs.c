@@ -567,7 +567,7 @@ static uint8_t QSPI_AutoPollingMemReady(QSPI_HandleTypeDef *hqspi, uint32_t Time
 
     // Configure automatic polling mode to wait for memory ready
     s_command.InstructionMode = QSPI_INSTRUCTION_1_LINE;
-    s_command.Instruction = READ_STATUS_REG1_CMD; // same value on both memory types
+    s_command.Instruction = READ_STATUS_REG1_CMD;
     s_command.AddressMode = QSPI_ADDRESS_NONE;
     s_command.AlternateByteMode = QSPI_ALTERNATE_BYTES_NONE;
     s_command.DataMode = QSPI_DATA_1_LINE;
@@ -577,7 +577,7 @@ static uint8_t QSPI_AutoPollingMemReady(QSPI_HandleTypeDef *hqspi, uint32_t Time
     s_command.SIOOMode = QSPI_SIOO_INST_EVERY_CMD;
 
     sConfig.Match = 0;
-    sConfig.Mask = W25Q128_SR_WIP; // same value on both memory types
+    sConfig.Mask = W25Q128_SR_WIP;
     sConfig.MatchMode = QSPI_MATCH_MODE_AND;
     sConfig.StatusBytesSize = 1;
     sConfig.Interval = 0x10;
