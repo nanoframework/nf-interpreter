@@ -205,7 +205,7 @@ static bool SPI_Erase_Block(uint32_t addr, bool largeBlock)
     CS_UNSELECT;
 
     // send block erase
-    dataBuffer_0[0] = largeBlock ? BLOCK_ERASE_CMD : SUBSECTOR_ERASE_CMD;
+    dataBuffer_0[0] = largeBlock ? BLOCK_ERASE_CMD : SECTOR_ERASE_CMD;
     dataBuffer_0[1] = (uint8_t)(addr >> 16);
     dataBuffer_0[2] = (uint8_t)(addr >> 8);
     dataBuffer_0[3] = (uint8_t)addr;
@@ -313,20 +313,10 @@ static bool SPI_Write(const uint8_t *pData, uint32_t writeAddr, uint32_t size)
 
 #include <hal_stm32_qspi.h>
 
-#if CACHE_LINE_SIZE > 0
-CC_ALIGN_DATA(CACHE_LINE_SIZE)
-uint8_t dataBuffer_1[CACHE_SIZE_ALIGN(uint8_t, W25Q128_PAGE_SIZE)] __attribute__((section(".nocache")));
-#else
-uint8_t dataBuffer_1[AT25SF641_PAGE_SIZE];
-#endif
+#define HAL_QPSI_TIMEOUT_CONFIG_COMMAND ((uint32_t)10)
 
 #ifdef DEBUG
-#if CACHE_LINE_SIZE > 0
-CC_ALIGN_DATA(CACHE_LINE_SIZE)
-uint8_t tempBuffer[CACHE_SIZE_ALIGN(uint8_t, W25Q128_PAGE_SIZE)] __attribute__((section(".nocache")));
-#else
 uint8_t tempBuffer[W25Q128_PAGE_SIZE];
-#endif
 #endif
 
 ///////////////
@@ -413,7 +403,7 @@ int32_t hal_lfs_prog_1(
 // target specific implementation of chip erase
 bool hal_lfs_erase_chip_1()
 {
-    return QSPI_Erase_Chip();
+    return QSPI_Erase_Chip() == TRUE;
 }
 
 static bool QSPI_Erase_Chip()
@@ -651,6 +641,7 @@ uint8_t QSPI_Read(uint8_t *pData, uint32_t readAddr, uint32_t size)
 {
     QSPI_CommandTypeDef s_command;
     HAL_StatusTypeDef status;
+    uint8_t retryCounter = 3;
 
     // Initialize the read command
     s_command.InstructionMode = QSPI_INSTRUCTION_1_LINE;
@@ -666,12 +657,28 @@ uint8_t QSPI_Read(uint8_t *pData, uint32_t readAddr, uint32_t size)
     s_command.DdrHoldHalfCycle = QSPI_DDR_HHC_ANALOG_DELAY;
     s_command.SIOOMode = QSPI_SIOO_INST_EVERY_CMD;
 
+config_command:
+
     // Configure the command
-    status = HAL_QSPI_Command(&QSPID1, &s_command, HAL_QPSI_TIMEOUT_DEFAULT_VALUE);
+    status = HAL_QSPI_Command(&QSPID1, &s_command, HAL_QPSI_TIMEOUT_CONFIG_COMMAND);
+
     if (status != HAL_OK)
     {
-        __NOP();
-        return QSPI_ERROR;
+        // try to clear busy bit, if retry counter not exceeded
+        if (retryCounter-- == 0)
+        {
+            __NOP();
+            return QSPI_ERROR;
+        }
+        else
+        {
+            // clear QSPI Busy bit
+            // https://community.st.com/t5/stm32-mcus-products/qspi-flag-qspi-flag-busy-sometimes-stays-set/td-p/365865
+            QSPID1.State = HAL_QSPI_STATE_BUSY;
+            status = HAL_QSPI_Abort(&QSPID1);
+
+            goto config_command;
+        }
     }
 
     // Set S# timing for Read command
@@ -710,11 +717,11 @@ uint8_t QSPI_Write(uint8_t *pData, uint32_t writeAddr, uint32_t size)
 
     // Initialize the program command
     s_command.InstructionMode = QSPI_INSTRUCTION_1_LINE;
-    s_command.Instruction = QUAD_IN_FAST_PROG_CMD; // same value on both memory types
+    s_command.Instruction = PAGE_PROG_CMD;
     s_command.AddressMode = QSPI_ADDRESS_1_LINE;
     s_command.AddressSize = QSPI_ADDRESS_24_BITS;
     s_command.AlternateByteMode = QSPI_ALTERNATE_BYTES_NONE;
-    s_command.DataMode = QSPI_DATA_4_LINES;
+    s_command.DataMode = QSPI_DATA_1_LINE;
     s_command.DummyCycles = 0;
     s_command.DdrMode = QSPI_DDR_MODE_DISABLE;
     s_command.DdrHoldHalfCycle = QSPI_DDR_HHC_ANALOG_DELAY;
@@ -839,6 +846,34 @@ int8_t target_lfs_init()
 
 #ifdef LFS_QSPI
 
+    uint8_t dataBuffer[3];
+
+    // need to adjust MPU in order to use QSPI memory, despite using indirect access
+    // this is a know issue with STM32F7
+    // https://community.st.com/t5/stm32-mcus-products/qspi-flag-qspi-flag-busy-sometimes-stays-set/td-p/365865
+
+    // need to disable MPU in order to change regions
+    HAL_MPU_Disable();
+
+    MPU_Region_InitTypeDef MPU_InitStruct;
+
+    MPU_InitStruct.Enable = MPU_REGION_ENABLE;
+    MPU_InitStruct.Number = MPU_REGION_NUMBER1;
+    MPU_InitStruct.BaseAddress = 0x90000000;
+    MPU_InitStruct.Size = MPU_REGION_SIZE_64MB;
+    MPU_InitStruct.SubRegionDisable = 0x0;
+    MPU_InitStruct.TypeExtField = MPU_TEX_LEVEL0;
+    MPU_InitStruct.AccessPermission = MPU_REGION_NO_ACCESS;
+    MPU_InitStruct.DisableExec = MPU_INSTRUCTION_ACCESS_DISABLE;
+    MPU_InitStruct.IsShareable = MPU_ACCESS_NOT_SHAREABLE;
+    MPU_InitStruct.IsCacheable = MPU_ACCESS_NOT_CACHEABLE;
+    MPU_InitStruct.IsBufferable = MPU_ACCESS_NOT_BUFFERABLE;
+
+    HAL_MPU_ConfigRegion(&MPU_InitStruct);
+
+    // Enable the MPU
+    HAL_MPU_Enable(MPU_PRIVILEGED_DEFAULT);
+
     // QSPI initialization
     QSPID1.Init.ClockPrescaler = 1;
     QSPID1.Init.FifoThreshold = 4;
@@ -875,15 +910,15 @@ int8_t target_lfs_init()
 
     // sanity check: read device ID and unique ID
     // this instruction requires a buffer with 6 positions
-    if (QSPI_ReadChipID(&QSPID1, dataBuffer_1) != QSPI_OK)
+    if (QSPI_ReadChipID(&QSPID1, dataBuffer) != QSPI_OK)
     {
         return QSPI_ERROR;
     }
 
     // constants from ID Definitions table in W25Q128 datasheet
-    ASSERT(dataBuffer_1[0] == W25Q128_MANUFACTURER_ID);
-    ASSERT(dataBuffer_1[1] == W25Q128_DEVICE_ID1);
-    ASSERT(dataBuffer_1[2] == W25Q128_DEVICE_ID2);
+    ASSERT(dataBuffer[0] == W25Q128_MANUFACTURER_ID);
+    ASSERT(dataBuffer[1] == W25Q128_DEVICE_ID1);
+    ASSERT(dataBuffer[2] == W25Q128_DEVICE_ID2);
 
 #endif // LFS_QSPI
 
