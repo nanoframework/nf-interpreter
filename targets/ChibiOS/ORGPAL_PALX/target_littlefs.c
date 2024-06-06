@@ -9,20 +9,16 @@
 #include <hal_littlefs.h>
 #include <hal_stm32_qspi.h>
 
-#if CACHE_LINE_SIZE > 0
-CC_ALIGN_DATA(CACHE_LINE_SIZE)
-uint8_t dataBuffer_0[CACHE_SIZE_ALIGN(uint8_t, W25Q512_PAGE_SIZE)] __attribute__((section(".nocache")));
-#else
-uint8_t dataBuffer_0[W25Q512_PAGE_SIZE];
-#endif
+#define HAL_QPSI_TIMEOUT_CONFIG_COMMAND ((uint32_t)10)
+
+uint8_t lfs_inputBuffer[W25Q512_PAGE_SIZE];
+uint8_t lfs_outputBuffer[W25Q512_PAGE_SIZE];
+
+int32_t lfs_inputBufferSize = W25Q512_PAGE_SIZE;
+int32_t lfs_outputBufferSize = W25Q512_PAGE_SIZE;
 
 #ifdef DEBUG
-#if CACHE_LINE_SIZE > 0
-CC_ALIGN_DATA(CACHE_LINE_SIZE)
-uint8_t tempBuffer[CACHE_SIZE_ALIGN(uint8_t, W25Q512_PAGE_SIZE)] __attribute__((section(".nocache")));
-#else
 uint8_t tempBuffer[W25Q512_PAGE_SIZE];
-#endif
 #endif
 
 ///////////////
@@ -506,6 +502,8 @@ uint8_t QSPI_Erase_Block(uint32_t blockAddress)
 
 int8_t target_lfs_init()
 {
+    uint8_t dataBuffer[3];
+
     // QSPI initialization
     QSPID1.Init.ClockPrescaler = 1;
     QSPID1.Init.FifoThreshold = 4;
@@ -539,15 +537,15 @@ int8_t target_lfs_init()
 
     // sanity check: read device ID and unique ID
     // this instruction requires a buffer with 6 positions
-    if (QSPI_ReadChipID(&QSPID1, dataBuffer_0) != QSPI_OK)
+    if (QSPI_ReadChipID(&QSPID1, dataBuffer) != QSPI_OK)
     {
         return QSPI_ERROR;
     }
 
     // constants from ID Definitions table in W25Q512 datasheet
-    ASSERT(dataBuffer_0[0] == W25Q512_MANUFACTURER_ID);
-    ASSERT(dataBuffer_0[1] == W25Q512_DEVICE_ID1);
-    ASSERT(dataBuffer_0[2] == W25Q512_DEVICE_ID2);
+    ASSERT(dataBuffer[0] == W25Q512_MANUFACTURER_ID);
+    ASSERT(dataBuffer[1] == W25Q512_DEVICE_ID1);
+    ASSERT(dataBuffer[2] == W25Q512_DEVICE_ID2);
 
     // from W25Q512 datasheet: Time Delay Before Write Instruction is >5ms
     chThdSleepMilliseconds(10);
