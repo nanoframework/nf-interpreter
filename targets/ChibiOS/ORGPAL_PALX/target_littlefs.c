@@ -413,11 +413,11 @@ uint8_t QSPI_Write(uint8_t *pData, uint32_t writeAddr, uint32_t size)
 
     // Initialize the program command
     s_command.InstructionMode = QSPI_INSTRUCTION_1_LINE;
-    s_command.Instruction = QUAD_IN_FAST_PROG_CMD; // same value on both memory types
+    s_command.Instruction = PAGE_PROG_CMD;
     s_command.AddressMode = QSPI_ADDRESS_1_LINE;
     s_command.AddressSize = QSPI_ADDRESS_24_BITS;
     s_command.AlternateByteMode = QSPI_ALTERNATE_BYTES_NONE;
-    s_command.DataMode = QSPI_DATA_4_LINES;
+    s_command.DataMode = QSPI_DATA_1_LINE;
     s_command.DummyCycles = 0;
     s_command.DdrMode = QSPI_DDR_MODE_DISABLE;
     s_command.DdrHoldHalfCycle = QSPI_DDR_HHC_ANALOG_DELAY;
