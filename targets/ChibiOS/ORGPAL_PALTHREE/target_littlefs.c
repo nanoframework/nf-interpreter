@@ -865,7 +865,17 @@ int8_t target_lfs_init()
 }
 
 // target specific implementation of hal_lfs_sync
-int32_t hal_lfs_sync_(const struct lfs_config *c)
+int32_t hal_lfs_sync_0(const struct lfs_config *c)
+{
+    (void)c;
+
+    __DSB();
+
+    return 0;
+}
+
+// target specific implementation of hal_lfs_sync
+int32_t hal_lfs_sync_1(const struct lfs_config *c)
 {
     (void)c;
 

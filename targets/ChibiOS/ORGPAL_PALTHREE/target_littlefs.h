@@ -79,7 +79,7 @@
 #define LFS0_READ_HANDLER  hal_lfs_read_0
 #define LFS0_PROG_HANDLER  hal_lfs_prog_0
 #define LFS0_ERASE_HANDLER hal_lfs_erase_0
-#define LFS0_SYNC_HANDLER  hal_lfs_sync_
+#define LFS0_SYNC_HANDLER  hal_lfs_sync_0
 
 #endif // LFS_SPI1
 
@@ -194,7 +194,7 @@
 #define LFS1_READ_HANDLER  hal_lfs_read_1
 #define LFS1_PROG_HANDLER  hal_lfs_prog_1
 #define LFS1_ERASE_HANDLER hal_lfs_erase_1
-#define LFS1_SYNC_HANDLER  hal_lfs_sync_
+#define LFS1_SYNC_HANDLER  hal_lfs_sync_1
 
 #endif // LFS_QSPI1
 
@@ -203,7 +203,8 @@ extern "C"
 {
 #endif
 
-    int32_t hal_lfs_sync_(const struct lfs_config *c);
+    int32_t hal_lfs_sync_0(const struct lfs_config *c);
+    int32_t hal_lfs_sync_1(const struct lfs_config *c);
 
     bool hal_lfs_erase_chip_0();
     int32_t hal_lfs_erase_0(const struct lfs_config *c, lfs_block_t block);
