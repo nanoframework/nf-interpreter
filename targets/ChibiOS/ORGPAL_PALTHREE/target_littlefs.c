@@ -346,7 +346,6 @@ static bool QSPI_Erase_Chip();
 // target specific implementation of hal_lfs_erase
 int32_t hal_lfs_erase_1(const struct lfs_config *c, lfs_block_t block)
 {
-    Watchdog_Reset();
     uint32_t ret;
     uint32_t addr = block * c->block_size;
 
