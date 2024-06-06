@@ -19,14 +19,14 @@ static uint8_t volumeAssignment[FF_VOLUMES];
 
 #if CACHE_LINE_SIZE > 0
 CC_ALIGN_DATA(CACHE_LINE_SIZE)
-uint8_t inputBuffer[CACHE_SIZE_ALIGN(uint8_t, FF_MAX_SS)] __attribute__((section(".nocache")));
+uint8_t fatfs_inputBuffer[CACHE_SIZE_ALIGN(uint8_t, FF_MAX_SS)] __attribute__((section(".nocache")));
 #else
 uint8_t inputBuffer[FF_MAX_SS];
 #endif
 
 #if CACHE_LINE_SIZE > 0
 CC_ALIGN_DATA(CACHE_LINE_SIZE)
-uint8_t outputBuffer[CACHE_SIZE_ALIGN(uint8_t, FF_MAX_SS)] __attribute__((section(".nocache")));
+uint8_t fatfs_outputBuffer[CACHE_SIZE_ALIGN(uint8_t, FF_MAX_SS)] __attribute__((section(".nocache")));
 #else
 uint8_t outputBuffer[FF_MAX_SS];
 #endif
@@ -48,7 +48,7 @@ STREAM_DRIVER_DETAILS *FATFS_FS_Driver::DriverDetails(const VOLUME_ID *volume)
     (void)volume;
 
     static STREAM_DRIVER_DETAILS driverDetail =
-        {DRIVER_BUFFERED_IO, inputBuffer, outputBuffer, FF_MAX_SS, FF_MAX_SS, TRUE, TRUE, TRUE, 0, 0};
+        {DRIVER_BUFFERED_IO, fatfs_inputBuffer, fatfs_outputBuffer, FF_MAX_SS, FF_MAX_SS, TRUE, TRUE, TRUE, 0, 0};
 
     return &driverDetail;
 }
