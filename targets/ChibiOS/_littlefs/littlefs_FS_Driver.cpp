@@ -732,9 +732,8 @@ HRESULT LITTLEFS_FS_Driver::GetAttributes(const VOLUME_ID *volume, const char *p
     lfs_info info;
     int32_t result;
     char normalizedPath[FS_MAX_DIRECTORY_LENGTH];
-
     // set to empty attributes
-    *attributes = EMPTY_ATTRIBUTE;
+    uint32_t attributeBuffer = EMPTY_ATTRIBUTE;
 
     if (NormalizePath(path, normalizedPath, sizeof(normalizedPath)) < 0)
     {
@@ -765,7 +764,7 @@ HRESULT LITTLEFS_FS_Driver::GetAttributes(const VOLUME_ID *volume, const char *p
         // if this is home directory
         if (info.type == LFS_TYPE_DIR && *normalizedPath == '\0')
         {
-            *attributes = FileAttributes::FileAttributes_Directory;
+            attributeBuffer = FileAttributes::FileAttributes_Directory;
 
             NANOCLR_SET_AND_LEAVE(S_OK);
         }
@@ -776,7 +775,7 @@ HRESULT LITTLEFS_FS_Driver::GetAttributes(const VOLUME_ID *volume, const char *p
             fsDrive,
             (const char *)normalizedPath,
             NANO_LITTLEFS_ATTRIBUTE,
-            attributes,
+            &attributeBuffer,
             NANO_LITTLEFS_ATTRIBUTE_SIZE);
 
         if (result >= LFS_ERR_OK || result == LFS_ERR_NOATTR)
@@ -786,12 +785,12 @@ HRESULT LITTLEFS_FS_Driver::GetAttributes(const VOLUME_ID *volume, const char *p
                 if (result == LFS_ERR_NOATTR)
                 {
                     // this is a directory, set dir attribute
-                    *attributes = FileAttributes::FileAttributes_Directory;
+                    attributeBuffer = FileAttributes::FileAttributes_Directory;
                 }
                 else
                 {
                     // this is a directory, add dir attribute
-                    *attributes |= FileAttributes::FileAttributes_Directory;
+                    attributeBuffer |= FileAttributes::FileAttributes_Directory;
                 }
             }
 
@@ -807,7 +806,11 @@ HRESULT LITTLEFS_FS_Driver::GetAttributes(const VOLUME_ID *volume, const char *p
         NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_DRIVER);
     }
 
-    NANOCLR_NOCLEANUP();
+    NANOCLR_CLEANUP();
+
+    *attributes = attributeBuffer;
+
+    NANOCLR_CLEANUP_END();
 }
 
 HRESULT LITTLEFS_FS_Driver::SetAttributes(const VOLUME_ID *volume, const char *path, uint32_t attributes)
