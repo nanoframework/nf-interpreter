@@ -48,7 +48,6 @@ int32_t hal_lfs_sync_(const struct lfs_config *c)
 // target specific implementation of hal_lfs_erase
 int32_t hal_lfs_erase_0(const struct lfs_config *c, lfs_block_t block)
 {
-    Watchdog_Reset();
     uint32_t ret;
     uint32_t addr = block * c->block_size;
 
