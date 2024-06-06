@@ -9,6 +9,14 @@
 #include "littlefs_FS_Driver.h"
 #include "hal_littlefs.h"
 
+extern "C"
+{
+    extern uint8_t lfs_inputBuffer[];
+    extern uint8_t lfs_outputBuffer[];
+    extern int32_t lfs_inputBufferSize;
+    extern int32_t lfs_outputBufferSize;
+}
+
 static int32_t RemoveAllFiles(lfs_t *fs, const char *path);
 static int NormalizePath(const char *path, char *buffer, size_t bufferSize);
 
@@ -22,7 +30,17 @@ STREAM_DRIVER_DETAILS *LITTLEFS_FS_Driver::DriverDetails(const VOLUME_ID *volume
 {
     (void)volume;
 
-    static STREAM_DRIVER_DETAILS driverDetail = {SYSTEM_BUFFERED_IO, NULL, NULL, 0, 0, TRUE, TRUE, TRUE, 0, 0};
+    static STREAM_DRIVER_DETAILS driverDetail = {
+        DRIVER_BUFFERED_IO,
+        lfs_inputBuffer,
+        lfs_outputBuffer,
+        lfs_inputBufferSize,
+        lfs_outputBufferSize,
+        TRUE,
+        TRUE,
+        TRUE,
+        0,
+        0};
 
     return &driverDetail;
 }
