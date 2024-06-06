@@ -18,6 +18,7 @@ list(APPEND STM32F7_CubePackage_INCLUDE_DIRS ${TARGET_BASE_LOCATION})
 set(STM32F7_CubePackage_SRCS
 
     # add HAL files here as required
+    stm32f7xx_hal_cortex.c
 
     # littlefs
     stm32f7xx_hal_dma.c
