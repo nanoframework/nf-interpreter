@@ -354,6 +354,7 @@ uint8_t QSPI_Read(uint8_t *pData, uint32_t readAddr, uint32_t size)
 {
     QSPI_CommandTypeDef s_command;
     HAL_StatusTypeDef status;
+    uint8_t retryCounter = 3;
 
     // Initialize the read command
     s_command.InstructionMode = QSPI_INSTRUCTION_1_LINE;
@@ -369,12 +370,28 @@ uint8_t QSPI_Read(uint8_t *pData, uint32_t readAddr, uint32_t size)
     s_command.DdrHoldHalfCycle = QSPI_DDR_HHC_ANALOG_DELAY;
     s_command.SIOOMode = QSPI_SIOO_INST_EVERY_CMD;
 
+config_command:
+
     // Configure the command
-    status = HAL_QSPI_Command(&QSPID1, &s_command, HAL_QPSI_TIMEOUT_DEFAULT_VALUE);
+    status = HAL_QSPI_Command(&QSPID1, &s_command, HAL_QPSI_TIMEOUT_CONFIG_COMMAND);
+
     if (status != HAL_OK)
     {
-        __NOP();
-        return QSPI_ERROR;
+        // try to clear busy bit, if retry counter not exceeded
+        if (retryCounter-- == 0)
+        {
+            __NOP();
+            return QSPI_ERROR;
+        }
+        else
+        {
+            // clear QSPI Busy bit
+            // https://community.st.com/t5/stm32-mcus-products/qspi-flag-qspi-flag-busy-sometimes-stays-set/td-p/365865
+            QSPID1.State = HAL_QSPI_STATE_BUSY;
+            status = HAL_QSPI_Abort(&QSPID1);
+
+            goto config_command;
+        }
     }
 
     // Set S# timing for Read command
