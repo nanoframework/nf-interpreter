@@ -31,6 +31,18 @@ uint8_t fatfs_outputBuffer[CACHE_SIZE_ALIGN(uint8_t, FF_MAX_SS)] __attribute__((
 uint8_t outputBuffer[FF_MAX_SS];
 #endif
 
+#if CACHE_LINE_SIZE > 0
+// Define the memory pool
+static memory_pool_t fileHandlerPool;
+
+// Define the storage for the pool
+// 16 file handles should be enough for most systems
+#define FILE_HANDLER_POOL_SIZE 16
+
+static uint8_t fileHandlerPoolStorage[FILE_HANDLER_POOL_SIZE * sizeof(FATFS_FileHandle)];
+#endif
+
+
 static int32_t RemoveAllFiles(const char *path);
 static int NormalizePath(const char *path, char *buffer, size_t bufferSize);
 static FATFS *GetFatFsByVolumeId(const VOLUME_ID *volumeId, bool assignVolume);
@@ -62,6 +74,12 @@ void FATFS_FS_Driver::Initialize()
 
     // reset the volume assignment to impossible value
     memset(volumeAssignment, 0xFF, sizeof(volumeAssignment));
+
+    // initialize the file handler pool
+#if CACHE_LINE_SIZE > 0
+    chPoolObjectInit(&fileHandlerPool, sizeof(FATFS_FileHandle), NULL);
+    chPoolLoadArray(&fileHandlerPool, fileHandlerPoolStorage, FILE_HANDLER_POOL_SIZE);
+#endif
 }
 
 bool FATFS_FS_Driver::InitializeVolume(const VOLUME_ID *volume, const char *path)
@@ -233,7 +251,11 @@ HRESULT FATFS_FS_Driver::Open(const VOLUME_ID *volume, const char *path, void *&
     FileSystemVolume *currentVolume;
 
     // allocate file handle
+#if CACHE_LINE_SIZE > 0
+    fileHandle = (FATFS_FileHandle *)chPoolAlloc(&fileHandlerPool);
+#else    
     fileHandle = (FATFS_FileHandle *)platform_malloc(sizeof(FATFS_FileHandle));
+#endif
 
     if (fileHandle == NULL)
     {
@@ -322,7 +344,11 @@ HRESULT FATFS_FS_Driver::Close(void *handle)
 
     NANOCLR_CLEANUP();
 
+#if CACHE_LINE_SIZE > 0
+    chPoolFree(&fileHandlerPool, fileHandle);
+#else
     platform_free(fileHandle);
+#endif
 
     NANOCLR_CLEANUP_END();
 }
