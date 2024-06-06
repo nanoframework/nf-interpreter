@@ -92,6 +92,9 @@ HRESULT LITTLEFS_FS_Driver::GetSizeInfo(const VOLUME_ID *volume, int64_t *totalS
         NANOCLR_SET_AND_LEAVE(CLR_E_FILE_IO);
     }
 
+    // compute the total size
+    *totalSize = (int64_t)(fileHandle->fs->cfg->block_size * fileHandle->fs->cfg->block_count);
+
     // get the littlefs info
     allocBlocks = lfs_fs_size(fileHandle->fs);
 
@@ -100,8 +103,8 @@ HRESULT LITTLEFS_FS_Driver::GetSizeInfo(const VOLUME_ID *volume, int64_t *totalS
         NANOCLR_SET_AND_LEAVE(CLR_E_FILE_IO);
     }
 
-    *totalSize = (int64_t)(fileHandle->fs->cfg->block_size * fileHandle->fs->cfg->block_count);
-    *totalFreeSpace = (int64_t)(totalSize - (allocBlocks * fileHandle->fs->cfg->block_size));
+    // compute the total free space
+    *totalFreeSpace = (int64_t)(*totalSize - (allocBlocks * fileHandle->fs->cfg->block_size));
 
     NANOCLR_NOCLEANUP();
 }
