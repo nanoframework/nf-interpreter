@@ -34,6 +34,7 @@ uint8_t outputBuffer[FF_MAX_SS];
 static int32_t RemoveAllFiles(const char *path);
 static int NormalizePath(const char *path, char *buffer, size_t bufferSize);
 static FATFS *GetFatFsByVolumeId(const VOLUME_ID *volumeId, bool assignVolume);
+static int8_t GetVolumeIndexByVolumeId(const VOLUME_ID *volumeId);
 static void FreeFatFsByVolumeId(const VOLUME_ID *volumeId);
 
 bool FATFS_FS_Driver::LoadMedia(const void *driverInterface)
@@ -90,16 +91,25 @@ bool FATFS_FS_Driver::InitializeVolume(const VOLUME_ID *volume, const char *path
 
 bool FATFS_FS_Driver::UnInitializeVolume(const VOLUME_ID *volume)
 {
-    FATFS *fs = GetFatFsByVolumeId(volume, false);
+    char volumeIndexName[3];
 
-    if (fs == NULL)
+    // get the volume index
+    int8_t volumeIndex = GetVolumeIndexByVolumeId(volume);
+
+    // sanity check
+    if (volumeIndex < 0)
     {
         return FALSE;
     }
 
-    FileSystemVolume *currentVolume = FileSystemVolumeList::FindVolume(volume->volumeId);
+    // need to converto to string
+    __itoa(volumeIndex, volumeIndexName, 10);
 
-    f_unmount(currentVolume->m_rootName);
+    // add semi-colon at the end
+    volumeIndexName[1] = ':';
+    volumeIndexName[2] = '\0';
+
+    f_unmount(volumeIndexName);
 
     // free assigned volume
     FreeFatFsByVolumeId(volume);
@@ -1031,14 +1041,22 @@ static FATFS *GetFatFsByVolumeId(const VOLUME_ID *volumeId, bool assignVolume)
 
 static void FreeFatFsByVolumeId(const VOLUME_ID *volumeId)
 {
+    uint8_t volumeIndex = GetVolumeIndexByVolumeId(volumeId);
+
+    volumeAssignment[volumeIndex] = 0xFF;
+}
+
+static int8_t GetVolumeIndexByVolumeId(const VOLUME_ID *volumeId)
+{
     for (uint8_t volumeIndex = 0; volumeIndex < FF_VOLUMES; volumeIndex++)
     {
         if (volumeAssignment[volumeIndex] == volumeId->volumeId)
         {
-            volumeAssignment[volumeIndex] = 0xFF;
-            break;
+            return volumeIndex;
         }
     }
+
+    return -1;
 }
 
 //////////////////
