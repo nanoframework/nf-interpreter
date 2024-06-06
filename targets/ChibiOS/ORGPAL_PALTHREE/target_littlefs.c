@@ -8,6 +8,33 @@
 #include <target_littlefs.h>
 #include <hal_littlefs.h>
 
+#if defined(LFS_SPI1) && !defined(LFS_QSPI)
+#define LFS_CACHE_SIZE AT25SF641_PAGE_SIZE
+#elif defined(LFS_QSPI) && !defined(LFS_SPI1)
+#define LFS_CACHE_SIZE W25Q128_PAGE_SIZE
+#elif defined(LFS_SPI1) && defined(LFS_QSPI)
+#if AT25SF641_PAGE_SIZE > W25Q128_PAGE_SIZE
+#define LFS_CACHE_SIZE AT25SF641_PAGE_SIZE
+#else
+#define LFS_CACHE_SIZE W25Q128_PAGE_SIZE
+#endif
+#else
+#error "Exactly one of LFS_SPI1 or LFS_QSPI must be defined"
+#endif
+
+#if CACHE_LINE_SIZE > 0
+CC_ALIGN_DATA(CACHE_LINE_SIZE)
+uint8_t lfs_inputBuffer[CACHE_SIZE_ALIGN(uint8_t, LFS_CACHE_SIZE)] __attribute__((section(".nocache")));
+CC_ALIGN_DATA(CACHE_LINE_SIZE)
+uint8_t lfs_outputBuffer[CACHE_SIZE_ALIGN(uint8_t, LFS_CACHE_SIZE)] __attribute__((section(".nocache")));
+#else
+uint8_t lfs_inputBuffer[];
+uint8_t lfs_outputBuffer[];
+#endif
+
+int32_t lfs_inputBufferSize = LFS_CACHE_SIZE;
+int32_t lfs_outputBufferSize = LFS_CACHE_SIZE;
+
 #ifdef LFS_SPI1
 
 static const SPIConfig spiConfig = {
