@@ -5,17 +5,10 @@
 
 #include "hal_littlefs.h"
 
-#if CACHE_LINE_SIZE > 0
-static mutex_t lfs_mutex[LITTLEFS_INSTANCES_COUNT] __attribute__((section(".nocache")));
-static lfs_t lfs[LITTLEFS_INSTANCES_COUNT] __attribute__((section(".nocache")));
-static struct lfs_config lfsConfig[LITTLEFS_INSTANCES_COUNT] __attribute__((section(".nocache")));
-static int8_t lfsInstanceIndex[LITTLEFS_INSTANCES_COUNT] __attribute__((section(".nocache")));
-#else
 static mutex_t lfs_mutex[LITTLEFS_INSTANCES_COUNT];
 static lfs_t lfs[LITTLEFS_INSTANCES_COUNT];
 static struct lfs_config lfsConfig[LITTLEFS_INSTANCES_COUNT];
 static int8_t lfsInstanceIndex[LITTLEFS_INSTANCES_COUNT];
-#endif
 
 void *hal_lfs_getReadHandler(int32_t index)
 {
