@@ -30,7 +30,7 @@
  * Memory attributes settings.
  */
 #define STM32_NOCACHE_ENABLE                TRUE
-#define STM32_NOCACHE_MPU_REGION            MPU_REGION_6
+#define STM32_NOCACHE_MPU_REGION            MPU_REGION_0
 #define STM32_NOCACHE_RBAR                  0x20000000U
 #define STM32_NOCACHE_RASR                  MPU_RASR_SIZE_128K
 
@@ -95,7 +95,6 @@
 #define STM32_CK48MSEL         STM32_CK48MSEL_PLL
 #define STM32_SDMMC1SEL        STM32_SDMMC1SEL_PLL48CLK
 #define STM32_SDMMC2SEL        STM32_SDMMC2SEL_PLL48CLK
-#define STM32_SRAM2_NOCACHE    FALSE
 
 /*
  * IRQ system settings.
