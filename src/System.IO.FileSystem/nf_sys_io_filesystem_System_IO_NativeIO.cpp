@@ -121,6 +121,38 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_NativeIO::SetAttributes___STATIC_
 }
 
 HRESULT Library_nf_sys_io_filesystem_System_IO_NativeIO::FindVolume(
+    CLR_RT_HeapBlock &hbNamespaceRef,
+    FileSystemVolume *&volume)
+{
+    NATIVE_PROFILE_CLR_IO();
+    NANOCLR_HEADER();
+
+    CLR_RT_HeapBlock_String *hbName;
+    char *rootName;
+    uint32_t rootNameLength = -1;
+
+    hbName = hbNamespaceRef.DereferenceString();
+    FAULT_ON_NULL(hbName);
+
+    rootName = (char *)hbName->StringText();
+
+    if (rootName[0] == '\\')
+    {
+        rootName++;
+    }
+
+    rootNameLength = hal_strlen_s(rootName);
+
+    // Retrieve appropriate driver that handles this namespace
+    if ((volume = FileSystemVolumeList::FindVolume(rootName, rootNameLength)) == NULL)
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_VOLUME_NOT_FOUND);
+    }
+
+    NANOCLR_NOCLEANUP();
+}
+
+HRESULT Library_nf_sys_io_filesystem_System_IO_NativeIO::FindVolume(
     CLR_RT_HeapBlock &hbPathRef,
     FileSystemVolume *&volume,
     char *&relativePath)
