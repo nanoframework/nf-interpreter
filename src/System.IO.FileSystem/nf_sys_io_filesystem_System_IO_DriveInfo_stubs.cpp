@@ -5,8 +5,7 @@
 
 #include "nf_sys_io_filesystem.h"
 
-
-HRESULT Library_nf_sys_io_filesystem_System_IO_DriveInfo::DriveInfoNative___VOID__STRING( CLR_RT_StackFrame &stack )
+HRESULT Library_nf_sys_io_filesystem_System_IO_DriveInfo::DriveInfoNative___VOID__STRING(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
@@ -15,7 +14,7 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_DriveInfo::DriveInfoNative___VOID
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_nf_sys_io_filesystem_System_IO_DriveInfo::_ctor___VOID__U4( CLR_RT_StackFrame &stack )
+HRESULT Library_nf_sys_io_filesystem_System_IO_DriveInfo::_ctor___VOID__U4(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
@@ -24,7 +23,7 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_DriveInfo::_ctor___VOID__U4( CLR_
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_nf_sys_io_filesystem_System_IO_DriveInfo::Format___STATIC__VOID__STRING( CLR_RT_StackFrame &stack )
+HRESULT Library_nf_sys_io_filesystem_System_IO_DriveInfo::Format___STATIC__VOID__STRING(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
@@ -33,7 +32,7 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_DriveInfo::Format___STATIC__VOID_
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_nf_sys_io_filesystem_System_IO_DriveInfo::MountRemovableVolumes___STATIC__VOID( CLR_RT_StackFrame &stack )
+HRESULT Library_nf_sys_io_filesystem_System_IO_DriveInfo::MountRemovableVolumes___STATIC__VOID(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
@@ -42,7 +41,8 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_DriveInfo::MountRemovableVolumes_
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_nf_sys_io_filesystem_System_IO_DriveInfo::GetDrivesNative___STATIC__SZARRAY_SystemIODriveInfo( CLR_RT_StackFrame &stack )
+HRESULT Library_nf_sys_io_filesystem_System_IO_DriveInfo::GetDrivesNative___STATIC__SZARRAY_SystemIODriveInfo(
+    CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 

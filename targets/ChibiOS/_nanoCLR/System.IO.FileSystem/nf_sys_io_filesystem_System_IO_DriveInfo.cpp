@@ -15,54 +15,42 @@
 
 HRESULT Library_nf_sys_io_filesystem_System_IO_DriveInfo::DriveInfoNative___VOID__STRING(CLR_RT_StackFrame &stack)
 {
+    NATIVE_PROFILE_CLR_IO();
     NANOCLR_HEADER();
 
-    char workingDrive[DRIVE_LETTER_LENGTH];
+    FileSystemVolume *volume;
 
-    int32_t driveIndex;
+    NANOCLR_CHECK_HRESULT(Library_nf_sys_io_filesystem_System_IO_NativeIO::FindVolume(stack.Arg1(), volume));
 
-    CLR_RT_TypeDef_Index driveInfoTypeDef;
-    CLR_RT_HeapBlock *driveInfo;
+    NANOCLR_CHECK_HRESULT(UpdateVolumeInfo(stack.This(), volume));
 
-    CLR_RT_HeapBlock &top = stack.PushValue();
+    NANOCLR_NOCLEANUP();
+}
 
-    const char *workingPath = stack.Arg0().RecoverString();
-    // check for null argument
-    FAULT_ON_NULL_ARG(workingPath);
+HRESULT Library_nf_sys_io_filesystem_System_IO_DriveInfo::_ctor___VOID__U4(CLR_RT_StackFrame &stack)
+{
+    NATIVE_PROFILE_CLR_IO();
+    NANOCLR_HEADER();
 
-    // copy the first 2 letters of the path for the drive
-    // path is 'D:\folder\file.txt', so we need 'D:'
-    memcpy(workingDrive, workingPath, DRIVE_LETTER_LENGTH);
+    FileSystemVolume *volume;
 
-    // start composing the reply
-    // find <DriveInfo> type definition, don't bother checking the result as it exists for sure
-    g_CLR_RT_TypeSystem.FindTypeDef("DriveInfo", "System.IO", driveInfoTypeDef);
+    uint32_t driveIndex = stack.Arg1().NumericByRef().u4;
 
-    // create an instance of <DriveInfo>
-    NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObjectFromIndex(top, driveInfoTypeDef));
+    volume = FileSystemVolumeList::FindVolume(driveIndex);
 
-    // get a pointer to DriveInfo
-    driveInfo = (CLR_RT_HeapBlock *)top.Dereference();
-
-    (void)driveIndex;
-    (void)driveInfo;
-
-    if (WORKING_DRIVE_IS_INTERNAL_DRIVE)
+    if (volume != NULL)
     {
-#if defined(NF_FEATURE_USE_LITTLEFS) && (NF_FEATURE_USE_LITTLEFS == TRUE)
+        NANOCLR_SET_AND_LEAVE(UpdateVolumeInfo(stack.This(), volume));
+    }
 
-#endif
-    }
-    else
-    {
-        stack.NotImplementedStub();
-    }
+    NANOCLR_SET_AND_LEAVE(CLR_E_FILE_IO);
 
     NANOCLR_NOCLEANUP();
 }
 
 HRESULT Library_nf_sys_io_filesystem_System_IO_DriveInfo::Format___STATIC__VOID__STRING(CLR_RT_StackFrame &stack)
 {
+    NATIVE_PROFILE_CLR_IO();
     NANOCLR_HEADER();
 
     char workingDrive[DRIVE_LETTER_LENGTH];
@@ -82,7 +70,6 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_DriveInfo::Format___STATIC__VOID_
 
     if (WORKING_DRIVE_IS_INTERNAL_DRIVE)
     {
-
     }
     else
     {
@@ -171,6 +158,8 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_DriveInfo::UpdateVolumeInfo(
     }
 
     hbVolume[FIELD___totalSize].SetInteger(totalSize);
+
+    hbVolume[FIELD___volumeIndex].SetInteger((CLR_UINT32)volume->m_volumeId.volumeId);
 
     NANOCLR_NOCLEANUP();
 }
