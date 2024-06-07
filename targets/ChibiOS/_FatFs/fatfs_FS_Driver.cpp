@@ -42,7 +42,6 @@ static memory_pool_t fileHandlerPool;
 static uint8_t fileHandlerPoolStorage[FILE_HANDLER_POOL_SIZE * sizeof(FATFS_FileHandle)];
 #endif
 
-
 static int32_t RemoveAllFiles(const char *path);
 static int NormalizePath(const char *path, char *buffer, size_t bufferSize);
 static FATFS *GetFatFsByVolumeId(const VOLUME_ID *volumeId, bool assignVolume);
@@ -237,8 +236,6 @@ HRESULT FATFS_FS_Driver::Open(const VOLUME_ID *volume, const char *path, void *&
 {
     NANOCLR_HEADER();
 
-    (void)volume;
-
 #ifdef DEBUG
     int32_t result;
 #endif
@@ -253,7 +250,7 @@ HRESULT FATFS_FS_Driver::Open(const VOLUME_ID *volume, const char *path, void *&
     // allocate file handle
 #if CACHE_LINE_SIZE > 0
     fileHandle = (FATFS_FileHandle *)chPoolAlloc(&fileHandlerPool);
-#else    
+#else
     fileHandle = (FATFS_FileHandle *)platform_malloc(sizeof(FATFS_FileHandle));
 #endif
 
@@ -564,10 +561,9 @@ HRESULT FATFS_FS_Driver::FindOpen(const VOLUME_ID *volume, const char *path, voi
 {
     NANOCLR_HEADER();
 
-    (void)volume;
-
     char normalizedPath[FS_MAX_DIRECTORY_LENGTH];
     FATFS_FindFileHandle *findHandle = NULL;
+    FileSystemVolume *currentVolume;
 
     // allocate file handle
     findHandle = (FATFS_FindFileHandle *)platform_malloc(sizeof(FATFS_FindFileHandle));
@@ -584,6 +580,10 @@ HRESULT FATFS_FS_Driver::FindOpen(const VOLUME_ID *volume, const char *path, voi
         // handle error
         return CLR_E_PATH_TOO_LONG;
     }
+
+    currentVolume = FileSystemVolumeList::FindVolume(volume->volumeId);
+
+    f_chdrive(currentVolume->m_rootName);
 
     // open directory for seek
     if (f_opendir(&findHandle->dir, normalizedPath) == FR_OK)
@@ -691,8 +691,6 @@ HRESULT FATFS_FS_Driver::FindClose(void *handle)
 
 HRESULT FATFS_FS_Driver::GetFileInfo(const VOLUME_ID *volume, const char *path, FS_FILEINFO *fileInfo, bool *found)
 {
-    (void)volume;
-
     FILINFO info;
     char normalizedPath[FS_MAX_DIRECTORY_LENGTH];
 
@@ -701,6 +699,10 @@ HRESULT FATFS_FS_Driver::GetFileInfo(const VOLUME_ID *volume, const char *path, 
         // handle error
         return CLR_E_PATH_TOO_LONG;
     }
+
+    FileSystemVolume *currentVolume = FileSystemVolumeList::FindVolume(volume->volumeId);
+
+    f_chdrive(currentVolume->m_rootName);
 
     // root is different
     if (*normalizedPath == '/' && *(normalizedPath + 1) == '\0')
@@ -789,8 +791,6 @@ HRESULT FATFS_FS_Driver::GetAttributes(const VOLUME_ID *volume, const char *path
 
 HRESULT FATFS_FS_Driver::SetAttributes(const VOLUME_ID *volume, const char *path, uint32_t attributes)
 {
-    (void)volume;
-
     FILINFO info;
     char normalizedPath[FS_MAX_DIRECTORY_LENGTH];
 
@@ -799,6 +799,10 @@ HRESULT FATFS_FS_Driver::SetAttributes(const VOLUME_ID *volume, const char *path
         // handle error
         return CLR_E_PATH_TOO_LONG;
     }
+
+    FileSystemVolume *currentVolume = FileSystemVolumeList::FindVolume(volume->volumeId);
+
+    f_chdrive(currentVolume->m_rootName);
 
     // check for file existence
     if (f_stat(normalizedPath, &info) != FR_OK)
@@ -816,8 +820,6 @@ HRESULT FATFS_FS_Driver::SetAttributes(const VOLUME_ID *volume, const char *path
 
 HRESULT FATFS_FS_Driver::CreateDirectory(const VOLUME_ID *volume, const char *path)
 {
-    (void)volume;
-
     FILINFO info;
     int32_t result = FR_OK;
     char normalizedPath[FS_MAX_DIRECTORY_LENGTH];
@@ -833,6 +835,10 @@ HRESULT FATFS_FS_Driver::CreateDirectory(const VOLUME_ID *volume, const char *pa
         return CLR_E_PATH_TOO_LONG;
     }
     memset(tempPath, 0, sizeof(tempPath));
+
+    FileSystemVolume *currentVolume = FileSystemVolumeList::FindVolume(volume->volumeId);
+
+    f_chdrive(currentVolume->m_rootName);
 
     // iterate over the path segments and create the directories
     segment = strtok(normalizedPath, "/");
@@ -877,8 +883,6 @@ HRESULT FATFS_FS_Driver::CreateDirectory(const VOLUME_ID *volume, const char *pa
 
 HRESULT FATFS_FS_Driver::Move(const VOLUME_ID *volume, const char *oldPath, const char *newPath)
 {
-    (void)volume;
-
     char normalizedNewPath[FS_MAX_DIRECTORY_LENGTH];
     char normalizedOldPath[FS_MAX_DIRECTORY_LENGTH];
     int32_t result = FR_OK;
@@ -895,8 +899,13 @@ HRESULT FATFS_FS_Driver::Move(const VOLUME_ID *volume, const char *oldPath, cons
         return CLR_E_PATH_TOO_LONG;
     }
 
+    FileSystemVolume *currentVolume = FileSystemVolumeList::FindVolume(volume->volumeId);
+
+    f_chdrive(currentVolume->m_rootName);
+
     // the check for source file and destination file existence has already been made in managed code
     result = f_rename(normalizedOldPath, normalizedNewPath);
+
     if (result == FR_OK)
     {
         return S_OK;
@@ -914,8 +923,6 @@ HRESULT FATFS_FS_Driver::Move(const VOLUME_ID *volume, const char *oldPath, cons
 
 HRESULT FATFS_FS_Driver::Delete(const VOLUME_ID *volume, const char *path, bool recursive)
 {
-    (void)volume;
-
     FILINFO info;
     char normalizedPath[FS_MAX_DIRECTORY_LENGTH];
     int32_t result;
@@ -925,6 +932,10 @@ HRESULT FATFS_FS_Driver::Delete(const VOLUME_ID *volume, const char *path, bool 
         // handle error
         return CLR_E_PATH_TOO_LONG;
     }
+
+    FileSystemVolume *currentVolume = FileSystemVolumeList::FindVolume(volume->volumeId);
+
+    f_chdrive(currentVolume->m_rootName);
 
     // check for file existence
     if (f_stat(normalizedPath, &info) != FR_OK)
