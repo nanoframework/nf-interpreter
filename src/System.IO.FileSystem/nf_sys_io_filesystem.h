@@ -21,12 +21,6 @@
      FileAttributes::FileAttributes_System | FileAttributes::FileAttributes_Directory |                                \
      FileAttributes::FileAttributes_Archive)
 
-typedef enum __nfpack RemovableDeviceEventArgs_RemovableDeviceEvent
-{
-    RemovableDeviceEventArgs_RemovableDeviceEvent_Inserted = 0,
-    RemovableDeviceEventArgs_RemovableDeviceEvent_Removed = 1,
-} RemovableDeviceEventArgs_RemovableDeviceEvent;
-
 typedef enum __nfpack SDCard_SDDataWidth
 {
     SDCard_SDDataWidth__1_bit = 1,
@@ -39,6 +33,12 @@ typedef enum __nfpack SDCard_SDInterfaceType
     SDCard_SDInterfaceType_Mmc = 1,
     SDCard_SDInterfaceType_Spi = 2,
 } SDCard_SDInterfaceType;
+
+typedef enum __nfpack RemovableDriveEventArgs_RemovableDeviceEvent
+{
+    RemovableDriveEventArgs_RemovableDeviceEvent_Inserted = 0,
+    RemovableDriveEventArgs_RemovableDeviceEvent_Removed = 1,
+} RemovableDriveEventArgs_RemovableDeviceEvent;
 
 typedef enum __nfpack StorageEventManager_StorageEventType
 {
@@ -91,14 +91,6 @@ typedef enum __nfpack FileShare
     FileShare_ReadWrite = 3,
 } FileShare;
 
-struct Library_nf_sys_io_filesystem_nanoFramework_System_IO_FileSystem_RemovableDeviceEventArgs
-{
-    static const int FIELD___path = 1;
-    static const int FIELD___event = 2;
-
-    //--//
-};
-
 struct Library_nf_sys_io_filesystem_nanoFramework_System_IO_FileSystem_SDCard
 {
     static const int FIELD___mounted = 1;
@@ -138,18 +130,44 @@ struct Library_nf_sys_io_filesystem_nanoFramework_System_IO_FileSystem_SDCard__S
     //--//
 };
 
-struct Library_nf_sys_io_filesystem_nanoFramework_System_IO_FileSystem_StorageEventManager
+struct Library_nf_sys_io_filesystem_nanoFramework_System_IO_RemovableDriveEventArgs
 {
-    static const int FIELD_STATIC__RemovableDeviceInserted = 0;
-    static const int FIELD_STATIC__RemovableDeviceRemoved = 1;
+    static const int FIELD___drive = 1;
+    static const int FIELD___event = 2;
 
     //--//
 };
 
-struct Library_nf_sys_io_filesystem_nanoFramework_System_IO_FileSystem_StorageEventManager__StorageEvent
+struct Library_nf_sys_io_filesystem_System_IO_DriveInfo
+{
+    static const int FIELD___driveType = 1;
+    static const int FIELD___name = 2;
+    static const int FIELD___totalSize = 3;
+    static const int FIELD___volumeIndex = 4;
+
+    NANOCLR_NATIVE_DECLARE(DriveInfoNative___VOID__STRING);
+    NANOCLR_NATIVE_DECLARE(_ctor___VOID__U4);
+    NANOCLR_NATIVE_DECLARE(Format___STATIC__VOID__STRING);
+    NANOCLR_NATIVE_DECLARE(MountRemovableVolumes___STATIC__VOID);
+    NANOCLR_NATIVE_DECLARE(GetDrivesNative___STATIC__SZARRAY_SystemIODriveInfo);
+
+    //--//
+    static HRESULT UpdateVolumeInfo(CLR_RT_HeapBlock *hbVolume, FileSystemVolume *volume);
+};
+
+struct Library_nf_sys_io_filesystem_nanoFramework_System_IO_StorageEventManager
+{
+    static const int FIELD_STATIC__RemovableDeviceInserted = 0;
+    static const int FIELD_STATIC__RemovableDeviceRemoved = 1;
+    static const int FIELD_STATIC___drives = 2;
+
+    //--//
+};
+
+struct Library_nf_sys_io_filesystem_nanoFramework_System_IO_StorageEventManager__StorageEvent
 {
     static const int FIELD__EventType = 3;
-    static const int FIELD__DriveIndex = 4;
+    static const int FIELD__VolumeIndex = 4;
     static const int FIELD__Time = 5;
 
     //--//
@@ -164,22 +182,6 @@ struct Library_nf_sys_io_filesystem_System_IO_Directory
     static void CombinePaths(char *outpath, const char *path1, const char *path2);
 };
 
-struct Library_nf_sys_io_filesystem_System_IO_DriveInfo
-{
-    static const int FIELD___driveType = 1;
-    static const int FIELD___name = 2;
-    static const int FIELD___totalSize = 3;
-
-    NANOCLR_NATIVE_DECLARE(DriveInfoNative___VOID__STRING);
-    NANOCLR_NATIVE_DECLARE(Format___STATIC__VOID__STRING);
-    NANOCLR_NATIVE_DECLARE(MountRemovableVolumes___STATIC__VOID);
-    NANOCLR_NATIVE_DECLARE(GetDrivesNative___STATIC__SZARRAY_SystemIODriveInfo);
-
-    //--//
-
-    static HRESULT UpdateVolumeInfo(CLR_RT_HeapBlock *hbVolume, FileSystemVolume *volume);
-};
-
 struct Library_nf_sys_io_filesystem_System_IO_FileSystemManager__FileRecord
 {
     static const int FIELD__FullName = 1;
@@ -191,10 +193,10 @@ struct Library_nf_sys_io_filesystem_System_IO_FileSystemManager__FileRecord
 
 struct Library_nf_sys_io_filesystem_System_IO_FileSystemManager
 {
-    static const int FIELD_STATIC___openFiles = 2;
-    static const int FIELD_STATIC___lockedDirs = 3;
-    static const int FIELD_STATIC___currentDirectoryRecord = 4;
-    static const int FIELD_STATIC__CurrentDirectory = 5;
+    static const int FIELD_STATIC___openFiles = 3;
+    static const int FIELD_STATIC___lockedDirs = 4;
+    static const int FIELD_STATIC___currentDirectoryRecord = 5;
+    static const int FIELD_STATIC__CurrentDirectory = 6;
 
     //--//
 };
@@ -215,7 +217,7 @@ struct Library_nf_sys_io_filesystem_System_IO_FileStream
 
 struct Library_nf_sys_io_filesystem_System_IO_File
 {
-    static const int FIELD_STATIC__EmptyBytes = 6;
+    static const int FIELD_STATIC__EmptyBytes = 7;
 
     //--//
 };
@@ -272,15 +274,16 @@ struct Library_nf_sys_io_filesystem_System_IO_NativeIO
     NANOCLR_NATIVE_DECLARE(SetAttributes___STATIC__VOID__STRING__U4);
 
     //--//
+    static HRESULT FindVolume(CLR_RT_HeapBlock &hbNamespaceRef, FileSystemVolume *&volume);
     static HRESULT FindVolume(CLR_RT_HeapBlock &hbPathRef, FileSystemVolume *&volume, char *&relativePath);
 };
 
 struct Library_nf_sys_io_filesystem_System_IO_Path
 {
-    static const int FIELD_STATIC__DirectorySeparatorChar = 7;
-    static const int FIELD_STATIC__AltDirectorySeparatorChar = 8;
-    static const int FIELD_STATIC__VolumeSeparatorChar = 9;
-    static const int FIELD_STATIC__PathSeparator = 10;
+    static const int FIELD_STATIC__DirectorySeparatorChar = 8;
+    static const int FIELD_STATIC__AltDirectorySeparatorChar = 9;
+    static const int FIELD_STATIC__VolumeSeparatorChar = 10;
+    static const int FIELD_STATIC__PathSeparator = 11;
 
     //--//
 };
