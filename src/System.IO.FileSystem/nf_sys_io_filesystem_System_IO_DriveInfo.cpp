@@ -5,6 +5,8 @@
 
 #include "nf_sys_io_filesystem.h"
 
+typedef Library_nf_sys_io_filesystem_System_IO_NativeIO NativeIO;
+
 HRESULT Library_nf_sys_io_filesystem_System_IO_DriveInfo::Refresh___VOID(CLR_RT_StackFrame &stack)
 {
     NATIVE_PROFILE_CLR_IO();
@@ -13,9 +15,9 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_DriveInfo::Refresh___VOID(CLR_RT_
     CLR_RT_HeapBlock *pThis = stack.This();
     FileSystemVolume *volume;
 
-    TINYCLR_CHECK_HRESULT(Library_nf_sys_io_filesystem_System_IO_NativeIO::FindVolume(pThis[FIELD__Name], volume));
+    NANOCLR_CHECK_HRESULT(NativeIO::FindVolume(pThis[FIELD___name], volume));
 
-    TINYCLR_CHECK_HRESULT(UpdateVolumeInfo(pThis, volume));
+    NANOCLR_CHECK_HRESULT(UpdateVolumeInfo(pThis, volume));
 
     NANOCLR_NOCLEANUP();
 }
@@ -27,7 +29,7 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_DriveInfo::DriveInfoNative___VOID
 
     FileSystemVolume *volume;
 
-    NANOCLR_CHECK_HRESULT(Library_nf_sys_io_filesystem_System_IO_NativeIO::FindVolume(stack.Arg1(), volume));
+    NANOCLR_CHECK_HRESULT(NativeIO::FindVolume(stack.Arg1(), volume));
 
     NANOCLR_CHECK_HRESULT(UpdateVolumeInfo(stack.This(), volume));
 
