@@ -1076,15 +1076,6 @@ jobs:
 
   - template: azure-pipelines-templates/install-nuget.yml@templates
 
-  - task: DotNetCoreCLI@2
-    displayName: Restore NuGet packages
-    inputs:
-      command: restore
-      verbosityRestore: minimal
-      projects: targets\netcore\nanoCLR.sln
-      feedsToUse: select
-      includeNuGetOrg: true
-
   - task: VSBuild@1
     displayName: Build .NET tool
     condition: succeeded()
