@@ -12,10 +12,10 @@
 #include "Target_System_IO_FileSystem.h"
 
 // extern FILESYSTEM_DRIVER_INTERFACE g_LITTLEFS_FILE_SYSTEM_DriverInterface;
-extern STREAM_DRIVER_INTERFACE g_FATFS_STREAM_DriverInterface;
+// extern STREAM_DRIVER_INTERFACE g_FATFS_STREAM_DriverInterface;
 
 // extern STREAM_DRIVER_INTERFACE g_LITTLEFS_STREAM_DriverInterface;
-extern FILESYSTEM_DRIVER_INTERFACE g_FATFS_FILE_SYSTEM_DriverInterface;
+// extern FILESYSTEM_DRIVER_INTERFACE g_FATFS_FILE_SYSTEM_DriverInterface;
 
 // #if HAL_USE_SDC
 // #include <target_windows_storage_config.h>
