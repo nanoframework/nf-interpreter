@@ -405,7 +405,7 @@ jobs:
         PackageName: ESP32_OLIMEX
         CMakePreset: ESP32_OLIMEX
 
-      ESP32_OLIMEX:
+      ESP32_OLIMEX_WROVER:
         TargetBoard: ESP32
         TargetSeries: 'esp32'
         BuildOptions: 
