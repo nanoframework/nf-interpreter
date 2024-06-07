@@ -34,6 +34,7 @@
                 "API_System.Device.Pwm": "ON",
                 "API_System.Device.Wifi": "ON",
                 "API_System.IO.Ports": "ON",
+                "API_System.IO.FileSystem": "ON",                
                 "API_Hardware.Esp32": "ON",
                 "API_nanoFramework.System.IO.Hashing": "ON",
                 "API_nanoFramework.System.Security.Cryptography": "ON",

@@ -6,12 +6,16 @@
 #ifndef TARGET_SYS_IO_FILESYSTEM_H
 #define TARGET_SYS_IO_FILESYSTEM_H
 
-
 #ifdef __cplusplus
 extern "C"
 {
 #endif
 
+#include <esp_vfs.h>
+
+    bool Storage_MountMMC(bool bit1Mode, int driveIndex);
+    bool Storage_MountSpi(int spiBus, uint32_t CSPin, int driveIndex);
+    bool Storage_UnMountSDCard(int driveIndex);
 
 #ifdef __cplusplus
 }

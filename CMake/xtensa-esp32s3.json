@@ -37,7 +37,6 @@
                 "API_nanoFramework.System.IO.Hashing": "ON",
                 "API_nanoFramework.System.Security.Cryptography": "ON",
                 "API_Hardware.Esp32": "ON",
-                "API_Windows.Storage": "ON",
                 "API_nanoFramework.Hardware.Esp32.Rmt": "ON",
                 "API_nanoFramework.ResourceManager": "ON",
                 "API_nanoFramework.System.Collections": "ON",

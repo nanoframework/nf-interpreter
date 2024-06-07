@@ -30,6 +30,7 @@
                 "API_System.Device.Spi": "ON",
                 "API_System.Device.Pwm": "ON",
                 "API_System.IO.Ports": "ON",
+                "API_System.IO.FileSystem": "ON",
                 "API_Hardware.Esp32": "ON",
                 "API_nanoFramework.Hardware.Esp32.Rmt": "ON",
                 "API_nanoFramework.ResourceManager": "ON",
