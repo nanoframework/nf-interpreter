@@ -1173,7 +1173,7 @@ jobs:
     condition: succeeded()
     displayName: Copy nanoclr
     inputs:
-      SourceFolder: '$(Build.Repository.LocalPath)/build/bin/Release'
+      SourceFolder: 'nf-interpreter/build/bin/Release'
       Contents: 'nanoFramework.nanoCLR.dll'
       TargetFolder: '$(Build.ArtifactStagingDirectory)/nanoclr'
 
