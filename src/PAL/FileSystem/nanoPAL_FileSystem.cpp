@@ -93,7 +93,7 @@ bool FS_MountVolume(const char *rootName, uint32_t deviceFlags, char *fileSystem
     {
 
         // Now we can notify managed code
-        PostManagedEvent(EVENT_STORAGE, EVENT_SUBCATEGORY_MEDIAINSERT, 0, (uint32_t)volume);
+        PostManagedEvent(EVENT_STORAGE, EVENT_SUBCATEGORY_MEDIAINSERT, 0, (uint32_t)volume->m_volumeId.volumeId);
 
         // done here
         return TRUE;
@@ -121,7 +121,7 @@ void FS_UnmountVolume(const char *rootName)
         FileSystemVolumeList::s_zombieVolumeList.LinkAtBack(volume);
 
         // Notify managed code
-        PostManagedEvent(EVENT_STORAGE, EVENT_SUBCATEGORY_MEDIAEJECT, 0, (uint32_t)volume);
+        PostManagedEvent(EVENT_STORAGE, EVENT_SUBCATEGORY_MEDIAEJECT, 0, (uint32_t)volume->m_volumeId.volumeId);
     }
 }
 
