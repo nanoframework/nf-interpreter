@@ -841,8 +841,15 @@ jobs:
     # creates a counter and assigns it to the revision variable
     - name: REVISION
       value: $[counter('WIN32_1_9_1_versioncounter', 0)]
+    - name: LITTLEFS_PATH
+      value: 'D:/a/1/s/littlefs'
 
   steps:
+
+  - checkout: self
+  - checkout: littlefs
+    fetchDepth: 1
+    
   - template: azure-pipelines-templates/nb-gitversioning.yml
 
   - task: PowerShell@2
@@ -861,14 +868,14 @@ jobs:
       command: restore
       restoreArguments: '--locked-mode'
       verbosityRestore: minimal
-      projects: targets\netcore\nanoCLR.sln
+      projects: nf-interpreter/targets/netcore/nanoCLR.sln
       feedsToUse: select
       includeNuGetOrg: true
 
   - task: VSBuild@1
     displayName: Build WIN32 EXE target
     inputs:
-      solution: 'targets\win32\nanoCLR.sln'
+      solution: 'nf-interpreter/targets/win32/nanoCLR.sln'
       platform: 'x86'
       maximumCpuCount: true
       msbuildArgs: '/p:PublicRelease=true'
@@ -877,7 +884,7 @@ jobs:
   - task: VSBuild@1
     displayName: Build WIN DLL target
     inputs:
-      solution: 'targets\netcore\nanoCLR.sln'
+      solution: 'nf-interpreter/targets/netcore/nanoCLR.sln'
       platform: 'Any CPU'
       maximumCpuCount: true
       msbuildArgs: '/p:PublicRelease=true'
@@ -922,7 +929,7 @@ jobs:
     displayName: Pack nanoCLR WIN32
     inputs:
       command: 'custom' 
-      arguments: 'pack targets\win32\nanoFramework.nanoCLR.Win32.nuspec -Version $(NBGV_NuGetPackageVersion)'
+      arguments: 'pack nf-interpreter/targets/win32/nanoFramework.nanoCLR.Win32.nuspec -Version $(NBGV_NuGetPackageVersion)'
 
   - task: CopyFiles@2
     condition: succeeded()
@@ -1080,7 +1087,7 @@ jobs:
     displayName: Build .NET tool
     condition: succeeded()
     inputs:
-      solution: 'targets\netcore\nanoCLR.sln'
+      solution: 'nf-interpreter/targets/netcore/nanoCLR.sln'
       platform: 'Any CPU'
       maximumCpuCount: true
       msbuildArgs: '/p:PublicRelease=true'
@@ -1124,7 +1131,7 @@ jobs:
     condition: succeeded()
     displayName: Pack nanoCLR CLI
     inputs:
-      solution: 'targets\netcore\nanoFramework.nanoCLR.CLI\nanoFramework.nanoCLR.CLI.csproj'
+      solution: 'nf-interpreter/targets/netcore/nanoFramework.nanoCLR.CLI/nanoFramework.nanoCLR.CLI.csproj'
       platform: 'Any CPU'
       msbuildArguments: '/p:PublicRelease=true /t:pack /p:PackageOutputPath=$(Build.ArtifactStagingDirectory) '
       configuration: 'Release'
@@ -1156,7 +1163,7 @@ jobs:
     condition: succeeded()
     displayName: Copy nanoclr
     inputs:
-      SourceFolder: '$(Build.Repository.LocalPath)\build\bin\Release'
+      SourceFolder: '$(Build.Repository.LocalPath)/build/bin/Release'
       Contents: 'nanoFramework.nanoCLR.dll'
       TargetFolder: '$(Build.ArtifactStagingDirectory)/nanoclr'
 

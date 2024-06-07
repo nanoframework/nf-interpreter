@@ -151,10 +151,12 @@ void __cdecl nanoHAL_Initialize(void)
     HAL_CONTINUATION::InitializeList();
     HAL_COMPLETION::InitializeList();
 
+#ifndef NANOWIN32
     FS_Initialize();
     FileSystemVolumeList::Initialize();
     FS_AddVolumes();
     FileSystemVolumeList::InitializeVolumes();
+#endif
 
     Events_Initialize();
 }
@@ -176,7 +178,9 @@ void __cdecl nanoHAL_Uninitialize(bool isPoweringDown)
         }
     }
 
+#ifndef NANOWIN32
     FileSystemVolumeList::UninitializeVolumes();
+#endif
 
     Events_Uninitialize();
 
