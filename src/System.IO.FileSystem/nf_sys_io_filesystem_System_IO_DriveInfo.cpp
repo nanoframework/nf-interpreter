@@ -7,9 +7,15 @@
 
 HRESULT Library_nf_sys_io_filesystem_System_IO_DriveInfo::Refresh___VOID(CLR_RT_StackFrame &stack)
 {
+    NATIVE_PROFILE_CLR_IO();
     NANOCLR_HEADER();
 
-    NANOCLR_SET_AND_LEAVE(stack.NotImplementedStub());
+    CLR_RT_HeapBlock *pThis = stack.This();
+    FileSystemVolume *volume;
+
+    TINYCLR_CHECK_HRESULT(Library_nf_sys_io_filesystem_System_IO_NativeIO::FindVolume(pThis[FIELD__Name], volume));
+
+    TINYCLR_CHECK_HRESULT(UpdateVolumeInfo(pThis, volume));
 
     NANOCLR_NOCLEANUP();
 }
