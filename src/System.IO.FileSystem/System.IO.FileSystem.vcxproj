@@ -22,7 +22,7 @@
     <ClCompile Include="nf_sys_io_filesystem.cpp" />
     <ClCompile Include="nf_sys_io_filesystem_nanoFramework_System_IO_FileSystem_SDCard_stubs.cpp" />
     <ClCompile Include="nf_sys_io_filesystem_System_IO_Directory.cpp" />
-    <ClCompile Include="nf_sys_io_filesystem_System_IO_DriveInfo_stubs.cpp" />
+    <ClCompile Include="nf_sys_io_filesystem_System_IO_DriveInfo.cpp" />
     <ClCompile Include="nf_sys_io_filesystem_System_IO_NativeFileStream.cpp" />
     <ClCompile Include="nf_sys_io_filesystem_System_IO_NativeFindFile.cpp" />
     <ClCompile Include="nf_sys_io_filesystem_System_IO_NativeIO.cpp" />
