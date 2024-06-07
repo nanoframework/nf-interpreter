@@ -50,6 +50,11 @@ resources:
       type: github
       name: nanoframework/CoreLibrary
       endpoint: nanoframework
+    - repository: littlefs
+      type: github
+      name: littlefs-project/littlefs
+      endpoint: nanoframework
+      ref: refs/tags/v2.9.3
       
 jobs:
 
@@ -1058,8 +1063,15 @@ jobs:
     - group: sign-client-credentials
     - name: DOTNET_NOLOGO
       value: true
+    - name: LITTLEFS_PATH
+      value: 'D:/a/1/s/littlefs'
   
   steps:
+  
+  - checkout: self
+  - checkout: littlefs
+    fetchDepth: 1
+
   - template: azure-pipelines-templates/nb-gitversioning.yml
 
   - template: azure-pipelines-templates/install-nuget.yml@templates

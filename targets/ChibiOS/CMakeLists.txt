@@ -338,6 +338,9 @@ if(NF_FEATURE_USE_LITTLEFS)
     # check if LITTLEFS_SOURCE was specified or if it's empty (default is empty)
     set(NO_LITTLEFS_SOURCE TRUE)
 
+    # WHEN CHANGING THIS MAKE SURE TO UPDATE THE DEV CONTAINERS AND PIPELINE YAML
+    set(LITTLEFS_VERSION_TAG "v2.9.3")
+
     if(LITTLEFS_SOURCE)
         if(NOT ${LITTLEFS_SOURCE} STREQUAL "")
             set(NO_LITTLEFS_SOURCE FALSE)
@@ -351,7 +354,7 @@ if(NF_FEATURE_USE_LITTLEFS)
         FetchContent_Declare(
             littlefs
             GIT_REPOSITORY https://github.com/littlefs-project/littlefs
-            GIT_TAG "v2.9.3"
+            GIT_TAG ${LITTLEFS_VERSION_TAG}
         )
 
     else()
