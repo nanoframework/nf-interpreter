@@ -134,6 +134,8 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_NativeIO::FindVolume(
     char *rootName = rootNameBuffer;
     uint32_t rootNameLength = -1;
 
+    memset(rootNameBuffer, 0, FS_MAX_PATH_LENGTH + 1);
+
     hbName = hbPathRef.DereferenceString();
     FAULT_ON_NULL(hbName);
 

@@ -28,6 +28,9 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_Directory::NativeGetChildren___ST
     CLR_RT_HeapBlock *pathEntry;
     CLR_RT_HeapBlock_String *hbPath;
 
+    memset(rootNameBuffer, 0, sizeof(rootNameBuffer));
+    memset(relativePathBuffer, 0, sizeof(relativePathBuffer));
+
     CLR_RT_HeapBlock &top = stack.PushValue();
 
     hbPath = stack.Arg0().DereferenceString();
