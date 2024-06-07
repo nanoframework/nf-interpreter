@@ -405,6 +405,15 @@ jobs:
         PackageName: ESP32_OLIMEX
         CMakePreset: ESP32_OLIMEX
 
+      ESP32_OLIMEX_WROVER:
+        TargetBoard: ESP32
+        TargetSeries: 'esp32'
+        BuildOptions: 
+        IDF_Target: esp32
+        TargetName: ESP32_OLIMEX_WROVER
+        PackageName: ESP32_OLIMEX_WROVER
+        CMakePreset: ESP32_OLIMEX_WROVER
+
       M5StickC:
         TargetBoard: ESP32
         TargetPlatform: 'esp32'
