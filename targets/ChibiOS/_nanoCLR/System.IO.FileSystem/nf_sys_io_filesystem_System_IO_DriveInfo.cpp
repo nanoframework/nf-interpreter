@@ -13,6 +13,15 @@
     (memcmp(workingDrive, INTERNAL_DRIVE0_LETTER, sizeof(INTERNAL_DRIVE0_LETTER) - 1) == 0 ||                          \
      memcmp(workingDrive, INTERNAL_DRIVE1_LETTER, sizeof(INTERNAL_DRIVE1_LETTER) - 1) == 0)
 
+HRESULT Library_nf_sys_io_filesystem_System_IO_DriveInfo::Refresh___VOID(CLR_RT_StackFrame &stack)
+{
+    NANOCLR_HEADER();
+
+    NANOCLR_SET_AND_LEAVE(stack.NotImplementedStub());
+
+    NANOCLR_NOCLEANUP();
+}
+
 HRESULT Library_nf_sys_io_filesystem_System_IO_DriveInfo::DriveInfoNative___VOID__STRING(CLR_RT_StackFrame &stack)
 {
     NATIVE_PROFILE_CLR_IO();
@@ -48,32 +57,24 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_DriveInfo::_ctor___VOID__U4(CLR_R
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_nf_sys_io_filesystem_System_IO_DriveInfo::Format___STATIC__VOID__STRING(CLR_RT_StackFrame &stack)
+HRESULT Library_nf_sys_io_filesystem_System_IO_DriveInfo::GetFileSystems___STATIC__SZARRAY_STRING(
+    CLR_RT_StackFrame &stack)
 {
     NATIVE_PROFILE_CLR_IO();
     NANOCLR_HEADER();
 
-    char workingDrive[DRIVE_LETTER_LENGTH];
+    CLR_RT_HeapBlock &ret = stack.PushValueAndClear();
+    CLR_RT_HeapBlock *fsNames;
 
-    int32_t driveIndex;
+    NANOCLR_CHECK_HRESULT(
+        CLR_RT_HeapBlock_Array::CreateInstance(ret, g_InstalledFSCount, g_CLR_RT_WellKnownTypes.m_String));
 
-    const char *workingPath = stack.Arg0().RecoverString();
-    // check for null argument
-    FAULT_ON_NULL_ARG(workingPath);
+    fsNames = (CLR_RT_HeapBlock *)ret.DereferenceArray()->GetFirstElement();
 
-    // copy the first 2 letters of the path for the drive
-    // path is 'D:\folder\file.txt', so we need 'D:'
-    memcpy(workingDrive, workingPath, DRIVE_LETTER_LENGTH);
-
-    (void)driveIndex;
-    (void)workingDrive;
-
-    if (WORKING_DRIVE_IS_INTERNAL_DRIVE)
+    for (uint32_t i = 0; i < g_InstalledFSCount; i++)
     {
-    }
-    else
-    {
-        stack.NotImplementedStub();
+        NANOCLR_CHECK_HRESULT(
+            CLR_RT_HeapBlock_String::CreateInstance(fsNames[i], g_AvailableFSInterfaces[i].fsDriver->Name));
     }
 
     NANOCLR_NOCLEANUP();

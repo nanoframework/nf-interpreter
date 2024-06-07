@@ -145,9 +145,10 @@ struct Library_nf_sys_io_filesystem_System_IO_DriveInfo
     static const int FIELD___totalSize = 3;
     static const int FIELD___volumeIndex = 4;
 
+    NANOCLR_NATIVE_DECLARE(Refresh___VOID);
     NANOCLR_NATIVE_DECLARE(DriveInfoNative___VOID__STRING);
     NANOCLR_NATIVE_DECLARE(_ctor___VOID__U4);
-    NANOCLR_NATIVE_DECLARE(Format___STATIC__VOID__STRING);
+    NANOCLR_NATIVE_DECLARE(GetFileSystems___STATIC__SZARRAY_STRING);
     NANOCLR_NATIVE_DECLARE(MountRemovableVolumes___STATIC__VOID);
     NANOCLR_NATIVE_DECLARE(GetDrivesNative___STATIC__SZARRAY_SystemIODriveInfo);
 
@@ -272,6 +273,7 @@ struct Library_nf_sys_io_filesystem_System_IO_NativeIO
     NANOCLR_NATIVE_DECLARE(CreateDirectory___STATIC__VOID__STRING);
     NANOCLR_NATIVE_DECLARE(GetAttributes___STATIC__U4__STRING);
     NANOCLR_NATIVE_DECLARE(SetAttributes___STATIC__VOID__STRING__U4);
+    NANOCLR_NATIVE_DECLARE(Format___STATIC__VOID__STRING__STRING__U4);
 
     //--//
     static HRESULT FindVolume(CLR_RT_HeapBlock &hbNamespaceRef, FileSystemVolume *&volume);

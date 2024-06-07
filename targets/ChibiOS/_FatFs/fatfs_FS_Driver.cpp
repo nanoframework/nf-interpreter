@@ -21,7 +21,7 @@ static uint8_t volumeAssignment[FF_VOLUMES];
 CC_ALIGN_DATA(CACHE_LINE_SIZE)
 uint8_t fatfs_inputBuffer[CACHE_SIZE_ALIGN(uint8_t, FF_MAX_SS)] __attribute__((section(".nocache")));
 #else
-uint8_t inputBuffer[FF_MAX_SS];
+uint8_t fatfs_inputBuffer[FF_MAX_SS];
 #endif
 
 #if CACHE_LINE_SIZE > 0
@@ -138,11 +138,28 @@ HRESULT FATFS_FS_Driver::Format(const VOLUME_ID *volume, const char *volumeLabel
 {
     NANOCLR_HEADER();
 
-    (void)volume;
     (void)volumeLabel;
     (void)parameters;
 
-    NANOCLR_SET_AND_LEAVE(CLR_E_NOTIMPL);
+    FileSystemVolume *currentVolume = FileSystemVolumeList::FindVolume(volume->volumeId);
+    f_chdrive(currentVolume->m_rootName);
+
+#if FF_USE_MKFS
+    MKFS_PARM mkfsParameters = {FM_FAT32, 1, 0, 0, 0};
+
+    if (f_mkfs(currentVolume->m_rootName, &mkfsParameters, fatfs_inputBuffer, sizeof(fatfs_inputBuffer)) == FR_OK)
+    {
+        // volume formatted
+        hr = S_OK;
+    }
+    else
+    {
+        // failed to format the volume
+        NANOCLR_SET_AND_LEAVE(CLR_E_FILE_IO);
+    }
+#else
+    NANOCLR_SET_AND_LEAVE(CLR_E_NOT_SUPPORTED);
+#endif
 
     NANOCLR_NOCLEANUP();
 }

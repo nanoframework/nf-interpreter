@@ -53,3 +53,12 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_NativeIO::SetAttributes___STATIC_
 
     NANOCLR_NOCLEANUP();
 }
+
+HRESULT Library_nf_sys_io_filesystem_System_IO_NativeIO::Format___STATIC__VOID__STRING__U4(CLR_RT_StackFrame &stack)
+{
+    NANOCLR_HEADER();
+
+    NANOCLR_SET_AND_LEAVE(stack.NotImplementedStub());
+
+    NANOCLR_NOCLEANUP();
+}

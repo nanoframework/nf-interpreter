@@ -120,6 +120,87 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_NativeIO::SetAttributes___STATIC_
     NANOCLR_NOCLEANUP();
 }
 
+HRESULT Library_nf_sys_io_filesystem_System_IO_NativeIO::Format___STATIC__VOID__STRING__STRING__U4(
+    CLR_RT_StackFrame &stack)
+{
+    NATIVE_PROFILE_CLR_IO();
+    NANOCLR_HEADER();
+
+    CLR_RT_HeapBlock_String *hbFileSystemName;
+    const char *fileSystemName;
+    uint32_t parameters;
+    char pathBuffer[FS_MAX_PATH_LENGTH + 1];
+    char *path = pathBuffer;
+    FileSystemVolume *driver;
+    FILESYSTEM_DRIVER_INTERFACE *originalFS = NULL;
+    STREAM_DRIVER_INTERFACE *originalStream = NULL;
+    bool needInitialize = FALSE;
+
+    NANOCLR_CHECK_HRESULT(FindVolume(stack.Arg0(), driver, path));
+    hbFileSystemName = stack.Arg1().DereferenceString();
+    parameters = stack.Arg2().NumericByRef().u4;
+
+    originalFS = driver->m_fsDriver;
+    originalStream = driver->m_streamDriver;
+
+    if (!hbFileSystemName)
+    {
+        needInitialize = TRUE;
+
+        NANOCLR_SET_AND_LEAVE(driver->Format("", parameters));
+    }
+
+    fileSystemName = hbFileSystemName->StringText();
+
+    for (uint32_t i = 0; i < g_InstalledFSCount; i++)
+    {
+        if (hal_strncmp_s(g_AvailableFSInterfaces[i].fsDriver->Name, fileSystemName, FS_NAME_DEFAULT_LENGTH) == 0)
+        {
+            if (originalFS)
+            {
+                driver->UninitializeVolume();
+            }
+
+            // From this point on, even if we fail, we should try to re-initialize before returning
+            needInitialize = TRUE;
+
+            driver->m_fsDriver = g_AvailableFSInterfaces[i].fsDriver;
+            driver->m_streamDriver = g_AvailableFSInterfaces[i].streamDriver;
+
+            NANOCLR_SET_AND_LEAVE(driver->Format("", parameters));
+        }
+    }
+
+    NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+
+    NANOCLR_CLEANUP();
+
+    if (needInitialize)
+    {
+        // format did't succeed, restore the original drivers
+        if (FAILED(hr))
+        {
+            driver->m_fsDriver = originalFS;
+            driver->m_streamDriver = originalStream;
+        }
+
+        if (!(driver->InitializeVolume()))
+        {
+            // if we were successful up to this point, fail, otherwise leave the original hresult
+            if (SUCCEEDED(hr))
+            {
+                hr = CLR_E_FILE_IO;
+            }
+        }
+        else
+        {
+            driver->m_fsDriver->GetVolumeLabel(&driver->m_volumeId, driver->m_label, ARRAYSIZE(driver->m_label));
+        }
+    }
+
+    NANOCLR_CLEANUP_END();
+}
+
 HRESULT Library_nf_sys_io_filesystem_System_IO_NativeIO::FindVolume(
     CLR_RT_HeapBlock &hbNamespaceRef,
     FileSystemVolume *&volume)
