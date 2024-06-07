@@ -41,5 +41,8 @@
     <ClInclude Include="win_storage_native.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="nf_sys_io_filesystem.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

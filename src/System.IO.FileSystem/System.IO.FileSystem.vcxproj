@@ -28,6 +28,7 @@
     <ClCompile Include="nf_sys_io_filesystem_System_IO_NativeIO.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="nf_sys_io_filesystem.h" />
     <ClInclude Include="win_storage_native.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
