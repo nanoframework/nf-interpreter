@@ -206,6 +206,7 @@
                 "SDK_CONFIG_FILE": "sdkconfig.default_pico",
                 "TARGET_SERIAL_BAUDRATE": "115200",
                 "ESP32_SPIRAM_FOR_IDF_ALLOCATION": "0",
+                "ESP32_RESERVED_RAM_FOR_IDF_ALLOCATION": "137",
                 "NF_BUILD_RTM": "OFF",
                 "NF_FEATURE_DEBUGGER": "ON",
                 "NF_FEATURE_RTC": "ON",
@@ -628,6 +629,29 @@
             }
         },
         {
+            "name": "ESP32_OLIMEX_WROVER",
+            "inherits": [
+                "xtensa-esp32-preset",
+                "user-tools-repos",
+                "user-prefs"
+            ],
+            "hidden": false,
+            "cacheVariables": {
+                "TARGET_NAME": "${presetName}",
+                "SDK_CONFIG_FILE": "sdkconfig.default_ble_rev3.esp32",
+                "NF_BUILD_RTM": "OFF",
+                "NF_FEATURE_DEBUGGER": "ON",
+                "NF_FEATURE_RTC": "ON",
+                "NF_FEATURE_HAS_SDCARD": "ON",
+                "API_System.IO.FileSystem": "ON",
+                "API_nanoFramework.Device.OneWire": "ON",
+                "API_System.Device.I2c.Slave": "ON",
+                "ESP32_ETHERNET_SUPPORT": "ON",
+                "ETH_PHY_RST_GPIO": "12",
+                "ETH_RMII_CLK_OUT_GPIO": "0"
+            }
+        },
+        {
             "name": "LilygoTWatch2020",
             "inherits": [
                 "xtensa-esp32-preset",
@@ -765,6 +789,7 @@
                 "TARGET_NAME": "${presetName}",
                 "SDK_CONFIG_FILE": "sdkconfig.default_pico",
                 "ESP32_SPIRAM_FOR_IDF_ALLOCATION": "0",
+                "ESP32_RESERVED_RAM_FOR_IDF_ALLOCATION": "125",
                 "NF_BUILD_RTM": "OFF",
                 "NF_FEATURE_DEBUGGER": "ON",
                 "TARGET_SERIAL_BAUDRATE": "115200",
@@ -1000,6 +1025,12 @@
             "name": "ESP32_OLIMEX",
             "displayName": "ESP32_OLIMEX",
             "configurePreset": "ESP32_OLIMEX"
+        },
+        {
+            "inherits": "base-user",
+            "name": "ESP32_OLIMEX_WROVER",
+            "displayName": "ESP32_OLIMEX_WROVER",
+            "configurePreset": "ESP32_OLIMEX_WROVER"
         },
         {
             "inherits": "base-user",
