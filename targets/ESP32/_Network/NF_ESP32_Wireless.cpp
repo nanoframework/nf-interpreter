@@ -17,8 +17,8 @@ static wifi_mode_t wifiMode;
 // flag to store if Wi-Fi has been initialized
 static bool IsWifiInitialised = false;
 
-static esp_netif_t * wifiStaNetif = NULL;
-static esp_netif_t * wifiAPNetif = NULL;
+static esp_netif_t *wifiStaNetif = NULL;
+static esp_netif_t *wifiAPNetif = NULL;
 
 // flag to signal if connect is to happen
 bool NF_ESP32_IsToConnect = false;
