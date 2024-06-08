@@ -16,6 +16,10 @@ static wifi_mode_t wifiMode;
 
 // flag to store if Wi-Fi has been initialized
 static bool IsWifiInitialised = false;
+
+static esp_netif_t *wifiStaNetif = NULL;
+static esp_netif_t *wifiAPNetif = NULL;
+
 // flag to signal if connect is to happen
 bool NF_ESP32_IsToConnect = false;
 
@@ -116,6 +120,11 @@ void NF_ESP32_DeinitWifi()
 
     esp_wifi_stop();
 
+    esp_netif_destroy_default_wifi(wifiStaNetif);
+    wifiStaNetif = NULL;
+    esp_netif_destroy_default_wifi(wifiAPNetif);
+    wifiAPNetif = NULL;
+
     esp_wifi_deinit();
 }
 
@@ -144,7 +153,7 @@ esp_err_t NF_ESP32_InitaliseWifi()
     if (!IsWifiInitialised)
     {
         // create Wi-Fi STA (ignoring return)
-        esp_netif_create_default_wifi_sta();
+        wifiStaNetif = esp_netif_create_default_wifi_sta();
 
         // We need to start the WIFI stack before the station can Connect
         // Also we can only get the NetIf number used by ESP IDF after it has been started.
@@ -153,11 +162,14 @@ esp_err_t NF_ESP32_InitaliseWifi()
         if (expectedWifiMode & WIFI_MODE_AP)
         {
             // create AP (ignoring return)
-            esp_netif_t *nap = esp_netif_create_default_wifi_ap();
+            wifiAPNetif = esp_netif_create_default_wifi_ap();
 
             // Remove DHCP server flag as not configured in sdkconfig, DHCP server done in managed code
             // Otherwise startup hangs
-            nap->flags = (esp_netif_flags_t)(ESP_NETIF_FLAG_AUTOUP);
+            if (wifiAPNetif)
+            {
+                wifiAPNetif->flags = (esp_netif_flags_t)(ESP_NETIF_FLAG_AUTOUP);
+            }
         }
 
         // Initialise WiFi, allocate resource for WiFi driver, such as WiFi control structure,
