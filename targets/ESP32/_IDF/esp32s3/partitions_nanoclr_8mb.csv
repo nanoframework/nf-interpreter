@@ -13,6 +13,6 @@ deploy,   data, 0x84,    0x1B0000, 0x2E0000,
 # Config data for Network, Wireless, certificates, user data  2MB
 config,   data, spiffs,  0x490000, 0x200000,  
 ##########################################
-# spare from 0x690000 (1.4MB)            #
+# spare from 0x690000 (1.4MB free)       #
 # total size has to be 0x800000 or less  #
 ##########################################
