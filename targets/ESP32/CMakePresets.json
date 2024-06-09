@@ -648,7 +648,7 @@
                 "API_System.Device.I2c.Slave": "ON",
                 "ESP32_ETHERNET_SUPPORT": "ON",
                 "ETH_PHY_RST_GPIO": "12",
-                "ETH_RMII_CLK_OUT_GPIO": "0"
+                "ETH_RMII_CLK_OUT_GPIO": "00"
             }
         },
         {
