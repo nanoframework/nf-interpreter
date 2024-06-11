@@ -240,469 +240,469 @@ jobs:
     displayName: Get targets to build
     condition: eq(variables['BuildOptions.CHECK_CHANGES'], 'True')
 
-################
-# STM32
-- job: Build_STM32_targets
-  condition: >-
-    or(
-      eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ALL'], true),
-      eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_CHIBIOS'], true),
-      contains(dependencies.Check_Build_Options.outputs['GetCommitDetails.COMMIT_MESSAGE'], '***BUILD_ALL***'),
-      and(
-        eq(variables['Build.Reason'], 'Manual'),
-        or(
-          eq(variables['BUILD_ALL__'], 'true'),
-          eq(variables['BUILD_CHIBIOS__'], 'true')
-        )
-      )
-    )
-  dependsOn:
-  - Check_Build_Options
+# ################
+# # STM32
+# - job: Build_STM32_targets
+#   condition: >-
+#     or(
+#       eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ALL'], true),
+#       eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_CHIBIOS'], true),
+#       contains(dependencies.Check_Build_Options.outputs['GetCommitDetails.COMMIT_MESSAGE'], '***BUILD_ALL***'),
+#       and(
+#         eq(variables['Build.Reason'], 'Manual'),
+#         or(
+#           eq(variables['BUILD_ALL__'], 'true'),
+#           eq(variables['BUILD_CHIBIOS__'], 'true')
+#         )
+#       )
+#     )
+#   dependsOn:
+#   - Check_Build_Options
 
-  pool:
-    vmImage: 'windows-latest'
+#   pool:
+#     vmImage: 'windows-latest'
 
-  strategy:
-    matrix:
-      ORGPAL_PALTHREE:
-        TargetBoard: ORGPAL_PALTHREE
-        TargetSeries: 'stm32f7xx'
-        BuildOptions: 
-        NeedsDFU: true
-        NeedsSRECORD: false
-        CMakePreset: ORGPAL_PALTHREE
+#   strategy:
+#     matrix:
+#       ORGPAL_PALTHREE:
+#         TargetBoard: ORGPAL_PALTHREE
+#         TargetSeries: 'stm32f7xx'
+#         BuildOptions: 
+#         NeedsDFU: true
+#         NeedsSRECORD: false
+#         CMakePreset: ORGPAL_PALTHREE
 
-      ORGPAL_PALX:
-        TargetBoard: ORGPAL_PALX
-        TargetSeries: 'stm32f7xx'
-        BuildOptions: 
-        NeedsDFU: true
-        NeedsSRECORD: false
-        CMakePreset: ORGPAL_PALX
+#       ORGPAL_PALX:
+#         TargetBoard: ORGPAL_PALX
+#         TargetSeries: 'stm32f7xx'
+#         BuildOptions: 
+#         NeedsDFU: true
+#         NeedsSRECORD: false
+#         CMakePreset: ORGPAL_PALX
 
-      ST_NUCLEO64_F091RC:
-        TargetBoard: ST_NUCLEO64_F091RC
-        TargetSeries: 'stm32f0xx'
-        BuildOptions: 
-        NeedsDFU: false
-        NeedsSRECORD: true
-        CMakePreset: ST_NUCLEO64_F091RC
+#       ST_NUCLEO64_F091RC:
+#         TargetBoard: ST_NUCLEO64_F091RC
+#         TargetSeries: 'stm32f0xx'
+#         BuildOptions: 
+#         NeedsDFU: false
+#         NeedsSRECORD: true
+#         CMakePreset: ST_NUCLEO64_F091RC
 
-  variables:
-    DOTNET_NOLOGO: true
-    # creates a counter and assigns it to the revision variable
-    REVISION: $[counter('STM32_1_9_1_versioncounter', 0)]
-    HelperPackageVersion: $[counter('HelperPackageVersioncounter', 0)]
-    TargetPlatform: 'stm32'
+#   variables:
+#     DOTNET_NOLOGO: true
+#     # creates a counter and assigns it to the revision variable
+#     REVISION: $[counter('STM32_1_9_1_versioncounter', 0)]
+#     HelperPackageVersion: $[counter('HelperPackageVersioncounter', 0)]
+#     TargetPlatform: 'stm32'
 
-  steps:
-  - template: azure-pipelines-templates/build-preparations.yml
-  - template: azure-pipelines-templates/nb-gitversioning.yml
-  - template: azure-pipelines-templates/download-install-arm-gcc-toolchain.yml
-  - template: azure-pipelines-templates/download-install-ninja.yml
-  - template: azure-pipelines-templates/download-srecord.yml
-  - template: azure-pipelines-templates/download-hexdfu.yml
-  - template: azure-pipelines-templates/build-chibios-stm32-targets.yml
-  - template: azure-pipelines-templates/pack-publish-artifacts.yml
-  - template: azure-pipelines-templates/publish-cloudsmith.yml
-  - template: azure-pipelines-templates/pack-publish-managed-helpers.yml
+#   steps:
+#   - template: azure-pipelines-templates/build-preparations.yml
+#   - template: azure-pipelines-templates/nb-gitversioning.yml
+#   - template: azure-pipelines-templates/download-install-arm-gcc-toolchain.yml
+#   - template: azure-pipelines-templates/download-install-ninja.yml
+#   - template: azure-pipelines-templates/download-srecord.yml
+#   - template: azure-pipelines-templates/download-hexdfu.yml
+#   - template: azure-pipelines-templates/build-chibios-stm32-targets.yml
+#   - template: azure-pipelines-templates/pack-publish-artifacts.yml
+#   - template: azure-pipelines-templates/publish-cloudsmith.yml
+#   - template: azure-pipelines-templates/pack-publish-managed-helpers.yml
 
-#################
-# ESP32 targets
-- job: Build_ESP32_targets
-  condition: >-
-    or(
-      eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ALL'], true),
-      eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ESP32'], true),
-      contains(dependencies.Check_Build_Options.outputs['GetCommitDetails.COMMIT_MESSAGE'], '***BUILD_ALL***'),
-      and(
-        eq(variables['Build.Reason'], 'Manual'),
-        or(
-          eq(variables['BUILD_ALL__'], 'true'),
-          eq(variables['BUILD_ESP32__'], 'true')
-        )
-      )
-    )  
+# #################
+# # ESP32 targets
+# - job: Build_ESP32_targets
+#   condition: >-
+#     or(
+#       eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ALL'], true),
+#       eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ESP32'], true),
+#       contains(dependencies.Check_Build_Options.outputs['GetCommitDetails.COMMIT_MESSAGE'], '***BUILD_ALL***'),
+#       and(
+#         eq(variables['Build.Reason'], 'Manual'),
+#         or(
+#           eq(variables['BUILD_ALL__'], 'true'),
+#           eq(variables['BUILD_ESP32__'], 'true')
+#         )
+#       )
+#     )  
 
-  dependsOn:
-  - Check_Build_Options
+#   dependsOn:
+#   - Check_Build_Options
 
-  pool:
-    vmImage: 'windows-latest'
+#   pool:
+#     vmImage: 'windows-latest'
 
-  strategy:
-    matrix:
-      ESP32_REV0:
-        TargetBoard: ESP32
-        TargetSeries: 'esp32'
-        BuildOptions: 
-        SDK_config: sdkconfig.default_nopsram.esp32
-        IDF_Target: esp32
-        TargetName: ESP32
-        PackageName: ESP32_REV0
-        CMakePreset: ESP32_REV0
+#   strategy:
+#     matrix:
+#       ESP32_REV0:
+#         TargetBoard: ESP32
+#         TargetSeries: 'esp32'
+#         BuildOptions: 
+#         SDK_config: sdkconfig.default_nopsram.esp32
+#         IDF_Target: esp32
+#         TargetName: ESP32
+#         PackageName: ESP32_REV0
+#         CMakePreset: ESP32_REV0
 
-      ESP32_PSRAM_REV3:
-        TargetBoard: ESP32
-        TargetSeries: 'esp32'
-        BuildOptions: 
-        IDF_Target: esp32
-        TargetName: ESP32
-        PackageName: ESP32_PSRAM_REV3
-        CMakePreset: ESP32_PSRAM_REV3
+#       ESP32_PSRAM_REV3:
+#         TargetBoard: ESP32
+#         TargetSeries: 'esp32'
+#         BuildOptions: 
+#         IDF_Target: esp32
+#         TargetName: ESP32
+#         PackageName: ESP32_PSRAM_REV3
+#         CMakePreset: ESP32_PSRAM_REV3
 
-      ESP32_PSRAM_XTAL26_REV0:
-        TargetBoard: ESP32
-        TargetSeries: 'esp32'
-        BuildOptions: 
-        IDF_Target: esp32
-        TargetName: ESP32
-        PackageName: ESP32_PSRAM_XTAL26_REV0
-        CMakePreset: ESP32_PSRAM_XTAL26_REV0
+#       ESP32_PSRAM_XTAL26_REV0:
+#         TargetBoard: ESP32
+#         TargetSeries: 'esp32'
+#         BuildOptions: 
+#         IDF_Target: esp32
+#         TargetName: ESP32
+#         PackageName: ESP32_PSRAM_XTAL26_REV0
+#         CMakePreset: ESP32_PSRAM_XTAL26_REV0
 
-      ESP32_REV3:
-        TargetBoard: ESP32
-        TargetSeries: 'esp32'
-        BuildOptions: 
-        IDF_Target: esp32
-        TargetName: ESP32
-        PackageName: ESP32_REV3
-        CMakePreset: ESP32_REV3
+#       ESP32_REV3:
+#         TargetBoard: ESP32
+#         TargetSeries: 'esp32'
+#         BuildOptions: 
+#         IDF_Target: esp32
+#         TargetName: ESP32
+#         PackageName: ESP32_REV3
+#         CMakePreset: ESP32_REV3
 
-      ESP32_PICO:
-        TargetBoard: ESP32
-        TargetSeries: 'esp32'
-        BuildOptions:
-        IDF_Target: esp32
-        TargetName: ESP32_PICO
-        PackageName: ESP32_PICO
-        CMakePreset: ESP32_PICO
+#       ESP32_PICO:
+#         TargetBoard: ESP32
+#         TargetSeries: 'esp32'
+#         BuildOptions:
+#         IDF_Target: esp32
+#         TargetName: ESP32_PICO
+#         PackageName: ESP32_PICO
+#         CMakePreset: ESP32_PICO
 
-      KALUGA_1:
-        TargetBoard: ESP32_S2
-        TargetSeries: 'esp32_s2'
-        BuildOptions: 
-        IDF_Target: esp32s2
-        TargetName: KALUGA_1
-        PackageName: KALUGA_1
-        CMakePreset: KALUGA_1
+#       KALUGA_1:
+#         TargetBoard: ESP32_S2
+#         TargetSeries: 'esp32_s2'
+#         BuildOptions: 
+#         IDF_Target: esp32s2
+#         TargetName: KALUGA_1
+#         PackageName: KALUGA_1
+#         CMakePreset: KALUGA_1
 
-      ESP32_BLE_REV3:
-        TargetBoard: ESP32
-        TargetSeries: 'esp32'
-        BuildOptions: 
-        IDF_Target: esp32
-        TargetName: ESP32
-        PackageName: ESP32_BLE_REV3
-        CMakePreset: ESP32_BLE_REV3
+#       ESP32_BLE_REV3:
+#         TargetBoard: ESP32
+#         TargetSeries: 'esp32'
+#         BuildOptions: 
+#         IDF_Target: esp32
+#         TargetName: ESP32
+#         PackageName: ESP32_BLE_REV3
+#         CMakePreset: ESP32_BLE_REV3
 
-      ESP32_OLIMEX:
-        TargetBoard: ESP32
-        TargetSeries: 'esp32'
-        BuildOptions: 
-        IDF_Target: esp32
-        TargetName: ESP32_OLIMEX
-        PackageName: ESP32_OLIMEX
-        CMakePreset: ESP32_OLIMEX
+#       ESP32_OLIMEX:
+#         TargetBoard: ESP32
+#         TargetSeries: 'esp32'
+#         BuildOptions: 
+#         IDF_Target: esp32
+#         TargetName: ESP32_OLIMEX
+#         PackageName: ESP32_OLIMEX
+#         CMakePreset: ESP32_OLIMEX
 
-      ESP32_OLIMEX_WROVER:
-        TargetBoard: ESP32
-        TargetSeries: 'esp32'
-        BuildOptions: 
-        IDF_Target: esp32
-        TargetName: ESP32_OLIMEX_WROVER
-        PackageName: ESP32_OLIMEX_WROVER
-        CMakePreset: ESP32_OLIMEX_WROVER
+#       ESP32_OLIMEX_WROVER:
+#         TargetBoard: ESP32
+#         TargetSeries: 'esp32'
+#         BuildOptions: 
+#         IDF_Target: esp32
+#         TargetName: ESP32_OLIMEX_WROVER
+#         PackageName: ESP32_OLIMEX_WROVER
+#         CMakePreset: ESP32_OLIMEX_WROVER
 
-      M5StickC:
-        TargetBoard: ESP32
-        TargetPlatform: 'esp32'
-        TargetSeries: 'esp32'
-        BuildOptions: 
-        IDF_Target: esp32
-        TargetName: M5StickC
-        PackageName: M5StickC
-        CMakePreset: M5StickC
+#       M5StickC:
+#         TargetBoard: ESP32
+#         TargetPlatform: 'esp32'
+#         TargetSeries: 'esp32'
+#         BuildOptions: 
+#         IDF_Target: esp32
+#         TargetName: M5StickC
+#         PackageName: M5StickC
+#         CMakePreset: M5StickC
 
-      M5StickCPlus:
-        TargetBoard: ESP32
-        TargetPlatform: 'esp32'
-        TargetSeries: 'esp32'
-        BuildOptions: 
-        IDF_Target: esp32
-        TargetName: M5StickCPlus
-        PackageName: M5StickCPlus
-        CMakePreset: M5StickCPlus
+#       M5StickCPlus:
+#         TargetBoard: ESP32
+#         TargetPlatform: 'esp32'
+#         TargetSeries: 'esp32'
+#         BuildOptions: 
+#         IDF_Target: esp32
+#         TargetName: M5StickCPlus
+#         PackageName: M5StickCPlus
+#         CMakePreset: M5StickCPlus
 
-      M5Core:
-        TargetBoard: ESP32
-        TargetPlatform: 'esp32'
-        TargetSeries: 'esp32'
-        BuildOptions: 
-        IDF_Target: esp32
-        TargetName: M5Core
-        PackageName: M5Core
-        CMakePreset: M5Core
+#       M5Core:
+#         TargetBoard: ESP32
+#         TargetPlatform: 'esp32'
+#         TargetSeries: 'esp32'
+#         BuildOptions: 
+#         IDF_Target: esp32
+#         TargetName: M5Core
+#         PackageName: M5Core
+#         CMakePreset: M5Core
 
-      M5Core2:
-        TargetBoard: ESP32
-        TargetPlatform: 'esp32'
-        TargetSeries: 'esp32'
-        BuildOptions: 
-        IDF_Target: esp32
-        TargetName: M5Core2
-        PackageName: M5Core2
-        CMakePreset: M5Core2
+#       M5Core2:
+#         TargetBoard: ESP32
+#         TargetPlatform: 'esp32'
+#         TargetSeries: 'esp32'
+#         BuildOptions: 
+#         IDF_Target: esp32
+#         TargetName: M5Core2
+#         PackageName: M5Core2
+#         CMakePreset: M5Core2
 
-      AtomS3:
-        TargetBoard: ESP32_S3
-        TargetPlatform: 'esp32'
-        TargetSeries: 'esp32s3'
-        BuildOptions: 
-        IDF_Target: esp32s3
-        TargetName: AtomS3
-        PackageName: AtomS3
-        CMakePreset: AtomS3
+#       AtomS3:
+#         TargetBoard: ESP32_S3
+#         TargetPlatform: 'esp32'
+#         TargetSeries: 'esp32s3'
+#         BuildOptions: 
+#         IDF_Target: esp32s3
+#         TargetName: AtomS3
+#         PackageName: AtomS3
+#         CMakePreset: AtomS3
 
-      ESP32_C3_REV3:
-        TargetBoard: ESP32_C3
-        TargetSeries: 'esp32c3'
-        BuildOptions: 
-        IDF_Target: esp32c3
-        TargetName: ESP32_C3_REV3
-        PackageName: ESP32_C3_REV3
-        CMakePreset: ESP32_C3_REV3
+#       ESP32_C3_REV3:
+#         TargetBoard: ESP32_C3
+#         TargetSeries: 'esp32c3'
+#         BuildOptions: 
+#         IDF_Target: esp32c3
+#         TargetName: ESP32_C3_REV3
+#         PackageName: ESP32_C3_REV3
+#         CMakePreset: ESP32_C3_REV3
 
-      ESP32_GenericDisplay_REV0:
-        TargetBoard: ESP32
-        TargetPlatform: 'esp32'
-        TargetSeries: 'esp32'
-        BuildOptions: 
-        IDF_Target: esp32
-        TargetName: ESP32_GenericDisplay_REV0
-        PackageName: ESP32_GenericDisplay_REV0
-        CMakePreset: ESP32_GenericDisplay_REV0
+#       ESP32_GenericDisplay_REV0:
+#         TargetBoard: ESP32
+#         TargetPlatform: 'esp32'
+#         TargetSeries: 'esp32'
+#         BuildOptions: 
+#         IDF_Target: esp32
+#         TargetName: ESP32_GenericDisplay_REV0
+#         PackageName: ESP32_GenericDisplay_REV0
+#         CMakePreset: ESP32_GenericDisplay_REV0
 
-      ESP32_PSRAM_BLE_GenericGraphic_REV3:
-        TargetBoard: ESP32
-        TargetPlatform: 'esp32'
-        TargetSeries: 'esp32'
-        BuildOptions: 
-        IDF_Target: esp32
-        TargetName: ESP32_PSRAM_BLE_GenericGraphic_REV3
-        PackageName: ESP32_PSRAM_BLE_GenericGraphic_REV3
-        CMakePreset: ESP32_PSRAM_BLE_GenericGraphic_REV3
+#       ESP32_PSRAM_BLE_GenericGraphic_REV3:
+#         TargetBoard: ESP32
+#         TargetPlatform: 'esp32'
+#         TargetSeries: 'esp32'
+#         BuildOptions: 
+#         IDF_Target: esp32
+#         TargetName: ESP32_PSRAM_BLE_GenericGraphic_REV3
+#         PackageName: ESP32_PSRAM_BLE_GenericGraphic_REV3
+#         CMakePreset: ESP32_PSRAM_BLE_GenericGraphic_REV3
 
-      XIAO_ESP32C3:
-        TargetBoard: ESP32_C3
-        TargetSeries: 'esp32c3'
-        BuildOptions: 
-        IDF_Target: esp32c3
-        TargetName: XIAO_ESP32C3
-        PackageName: XIAO_ESP32C3
-        CMakePreset: XIAO_ESP32C3
+#       XIAO_ESP32C3:
+#         TargetBoard: ESP32_C3
+#         TargetSeries: 'esp32c3'
+#         BuildOptions: 
+#         IDF_Target: esp32c3
+#         TargetName: XIAO_ESP32C3
+#         PackageName: XIAO_ESP32C3
+#         CMakePreset: XIAO_ESP32C3
 
-      ESP32_S3_BLE:
-        TargetBoard: ESP32_S3
-        TargetSeries: 'esp32s3'
-        BuildOptions: 
-        IDF_Target: esp32s3
-        TargetName: ESP32_S3_BLE
-        PackageName: ESP32_S3_BLE
-        CMakePreset: ESP32_S3_BLE
+#       ESP32_S3_BLE:
+#         TargetBoard: ESP32_S3
+#         TargetSeries: 'esp32s3'
+#         BuildOptions: 
+#         IDF_Target: esp32s3
+#         TargetName: ESP32_S3_BLE
+#         PackageName: ESP32_S3_BLE
+#         CMakePreset: ESP32_S3_BLE
 
-      ESP32_WESP32:
-        TargetSeries: 'esp32'
-        TargetBoard: ESP32
-        BuildOptions: 
-        IDF_Target: esp32
-        TargetName: ESP32_WESP32
-        PackageName: ESP32_WESP32
-        CMakePreset: ESP32_WESP32   
+#       ESP32_WESP32:
+#         TargetSeries: 'esp32'
+#         TargetBoard: ESP32
+#         BuildOptions: 
+#         IDF_Target: esp32
+#         TargetName: ESP32_WESP32
+#         PackageName: ESP32_WESP32
+#         CMakePreset: ESP32_WESP32   
 
-      ESP32_WT32_ETH01:
-        TargetBoard: ESP32
-        TargetSeries: 'esp32'
-        BuildOptions: 
-        TargetName: ESP32_WT32_ETH01
-        IDF_Target: esp32
-        PackageName: ESP32_WT32_ETH01
-        CMakePreset: ESP32_WT32_ETH01   
+#       ESP32_WT32_ETH01:
+#         TargetBoard: ESP32
+#         TargetSeries: 'esp32'
+#         BuildOptions: 
+#         TargetName: ESP32_WT32_ETH01
+#         IDF_Target: esp32
+#         PackageName: ESP32_WT32_ETH01
+#         CMakePreset: ESP32_WT32_ETH01   
 
-  variables:
-    DOTNET_NOLOGO: true
-    # creates a counter and assigns it to the revision variable
-    REVISION: $[counter('ESP32_1_9_1_versioncounter', 0)]
-    IDF_PATH: 'D:/a/1/s/esp-idf'
-    PIP_CACHE_DIR: $(Pipeline.Workspace)/.pip
-    TargetPlatform: 'esp32'
+#   variables:
+#     DOTNET_NOLOGO: true
+#     # creates a counter and assigns it to the revision variable
+#     REVISION: $[counter('ESP32_1_9_1_versioncounter', 0)]
+#     IDF_PATH: 'D:/a/1/s/esp-idf'
+#     PIP_CACHE_DIR: $(Pipeline.Workspace)/.pip
+#     TargetPlatform: 'esp32'
 
-  steps:
-  - checkout: self
-  - checkout: esp32_idf
-    fetchDepth: 1
+#   steps:
+#   - checkout: self
+#   - checkout: esp32_idf
+#     fetchDepth: 1
 
-  - template: azure-pipelines-templates/build-preparations.yml
-    parameters:
-      repoDirectory: '$(Build.SourcesDirectory)\nf-interpreter'
-  - template: azure-pipelines-templates/nb-gitversioning.yml
-    parameters:
-      repoDirectory: '$(Build.SourcesDirectory)\nf-interpreter'
-  - template: azure-pipelines-templates/download-install-esp32-build-components.yml
-  - template: azure-pipelines-templates/download-install-ninja.yml
-    parameters:
-      repoDirectory: '$(Build.SourcesDirectory)\nf-interpreter'
-  - template: azure-pipelines-templates/build-espressif-esp32-targets.yml
+#   - template: azure-pipelines-templates/build-preparations.yml
+#     parameters:
+#       repoDirectory: '$(Build.SourcesDirectory)\nf-interpreter'
+#   - template: azure-pipelines-templates/nb-gitversioning.yml
+#     parameters:
+#       repoDirectory: '$(Build.SourcesDirectory)\nf-interpreter'
+#   - template: azure-pipelines-templates/download-install-esp32-build-components.yml
+#   - template: azure-pipelines-templates/download-install-ninja.yml
+#     parameters:
+#       repoDirectory: '$(Build.SourcesDirectory)\nf-interpreter'
+#   - template: azure-pipelines-templates/build-espressif-esp32-targets.yml
 
-  - task: CopyFiles@2
-    condition: succeeded()
-    displayName: Copying bootloader
-    inputs:
-      sourceFolder: '$(Build.SourcesDirectory)\nf-interpreter\build\bootloader'
-      Contents: |
-        bootloader.bin
-      TargetFolder: '$(Build.ArtifactStagingDirectory)\$(TargetPublishName)'
-      flattenFolders: true
-      ignoreMakeDirErrors: true
+#   - task: CopyFiles@2
+#     condition: succeeded()
+#     displayName: Copying bootloader
+#     inputs:
+#       sourceFolder: '$(Build.SourcesDirectory)\nf-interpreter\build\bootloader'
+#       Contents: |
+#         bootloader.bin
+#       TargetFolder: '$(Build.ArtifactStagingDirectory)\$(TargetPublishName)'
+#       flattenFolders: true
+#       ignoreMakeDirErrors: true
 
-  - template: azure-pipelines-templates/copy-sdkconfig.yml
-  - template: azure-pipelines-templates/pack-publish-artifacts.yml
-    parameters:
-      buildDirectory: '$(Build.SourcesDirectory)\nf-interpreter\build'
-  - template: azure-pipelines-templates/publish-cloudsmith.yml
-  - template: azure-pipelines-templates/publish-sdkconfig.yml
+#   - template: azure-pipelines-templates/copy-sdkconfig.yml
+#   - template: azure-pipelines-templates/pack-publish-artifacts.yml
+#     parameters:
+#       buildDirectory: '$(Build.SourcesDirectory)\nf-interpreter\build'
+#   - template: azure-pipelines-templates/publish-cloudsmith.yml
+#   - template: azure-pipelines-templates/publish-sdkconfig.yml
 
-#################
-# TI SimpleLink
-- job: Build_TI_SimpleLink_targets
-  condition: >-
-    or(
-      eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ALL'], true),
-      eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_TI'], true),
-      contains(dependencies.Check_Build_Options.outputs['GetCommitDetails.COMMIT_MESSAGE'], '***BUILD_ALL***'),
-      and(
-        eq(variables['Build.Reason'], 'Manual'),
-        or(
-          eq(variables['BUILD_ALL__'], 'true'),
-          eq(variables['BUILD_TI__'], 'true')
-        )
-      )
-    )  
+# #################
+# # TI SimpleLink
+# - job: Build_TI_SimpleLink_targets
+#   condition: >-
+#     or(
+#       eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ALL'], true),
+#       eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_TI'], true),
+#       contains(dependencies.Check_Build_Options.outputs['GetCommitDetails.COMMIT_MESSAGE'], '***BUILD_ALL***'),
+#       and(
+#         eq(variables['Build.Reason'], 'Manual'),
+#         or(
+#           eq(variables['BUILD_ALL__'], 'true'),
+#           eq(variables['BUILD_TI__'], 'true')
+#         )
+#       )
+#     )  
 
-  dependsOn:
-  - Check_Build_Options
+#   dependsOn:
+#   - Check_Build_Options
 
-  pool:
-    vmImage: 'windows-latest'
+#   pool:
+#     vmImage: 'windows-latest'
 
-  strategy:
-    matrix:
-      TI_CC1352R1_LAUNCHXL_868:
-        TargetBoard: TI_CC1352R1_LAUNCHXL
-        PackageName: TI_CC1352R1_LAUNCHXL_868
-        TargetSeries: 'CC13X2'
-        BuildOptions: >-
-          -DRADIO_FREQUENCY=868
-        CMakePreset: TI_CC1352R1_LAUNCHXL
+#   strategy:
+#     matrix:
+#       TI_CC1352R1_LAUNCHXL_868:
+#         TargetBoard: TI_CC1352R1_LAUNCHXL
+#         PackageName: TI_CC1352R1_LAUNCHXL_868
+#         TargetSeries: 'CC13X2'
+#         BuildOptions: >-
+#           -DRADIO_FREQUENCY=868
+#         CMakePreset: TI_CC1352R1_LAUNCHXL
 
-  variables:
-    DOTNET_NOLOGO: true
-    # creates a counter and assigns it to the revision variable
-    REVISION: $[counter('TI_1_9_1_versioncounter', 0)]
-    HelperPackageVersion: $[counter('HelperPackageVersioncounter', 0)]
-    TargetPlatform: 'ti_simplelink'
+#   variables:
+#     DOTNET_NOLOGO: true
+#     # creates a counter and assigns it to the revision variable
+#     REVISION: $[counter('TI_1_9_1_versioncounter', 0)]
+#     HelperPackageVersion: $[counter('HelperPackageVersioncounter', 0)]
+#     TargetPlatform: 'ti_simplelink'
 
-  steps:
-  - template: azure-pipelines-templates/build-preparations.yml
-  - template: azure-pipelines-templates/nb-gitversioning.yml
-  - template: azure-pipelines-templates/download-install-arm-gcc-toolchain.yml
-  - template: azure-pipelines-templates/download-install-ninja.yml
-  - template: azure-pipelines-templates/build-ti-simplelink-targets.yml
-  - template: azure-pipelines-templates/pack-publish-artifacts.yml
-  - template: azure-pipelines-templates/publish-cloudsmith.yml
-  - template: azure-pipelines-templates/pack-publish-ti-sl-managed-helpers.yml
+#   steps:
+#   - template: azure-pipelines-templates/build-preparations.yml
+#   - template: azure-pipelines-templates/nb-gitversioning.yml
+#   - template: azure-pipelines-templates/download-install-arm-gcc-toolchain.yml
+#   - template: azure-pipelines-templates/download-install-ninja.yml
+#   - template: azure-pipelines-templates/build-ti-simplelink-targets.yml
+#   - template: azure-pipelines-templates/pack-publish-artifacts.yml
+#   - template: azure-pipelines-templates/publish-cloudsmith.yml
+#   - template: azure-pipelines-templates/pack-publish-ti-sl-managed-helpers.yml
 
-#################
-# Azure RTOS
-- job: Build_Azure_RTOS_targets
-  condition: >-
-    or(
-      eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ALL'], true),
-      eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_AZURERTOS'], true),
-      contains(dependencies.Check_Build_Options.outputs['GetCommitDetails.COMMIT_MESSAGE'], '***BUILD_ALL***'),
-      and(
-        eq(variables['Build.Reason'], 'Manual'),
-        or(
-          eq(variables['BUILD_ALL__'], 'true'),
-          eq(variables['BUILD_AZURERTOS__'], 'true')
-        )
-      )
-    )
+# #################
+# # Azure RTOS
+# - job: Build_Azure_RTOS_targets
+#   condition: >-
+#     or(
+#       eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ALL'], true),
+#       eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_AZURERTOS'], true),
+#       contains(dependencies.Check_Build_Options.outputs['GetCommitDetails.COMMIT_MESSAGE'], '***BUILD_ALL***'),
+#       and(
+#         eq(variables['Build.Reason'], 'Manual'),
+#         or(
+#           eq(variables['BUILD_ALL__'], 'true'),
+#           eq(variables['BUILD_AZURERTOS__'], 'true')
+#         )
+#       )
+#     )
 
-  dependsOn:
-  - Check_Build_Options
+#   dependsOn:
+#   - Check_Build_Options
 
-  pool:
-    vmImage: 'windows-latest'
+#   pool:
+#     vmImage: 'windows-latest'
 
-  strategy:
-    matrix:
+#   strategy:
+#     matrix:
 
-      SL_STK3701A_REVB:
-        TargetBoard: SL_STK3701A_REVB
-        TargetSeries: 'efm32gg11'
-        BuildOptions:
-        NeedsDFU: false
-        NeedsSRECORD: false
-        TargetName: SL_STK3701A_REVB
-        PackageName: SL_STK3701A_REVB
-        CMakePreset: SL_STK3701A_REVB
+#       SL_STK3701A_REVB:
+#         TargetBoard: SL_STK3701A_REVB
+#         TargetSeries: 'efm32gg11'
+#         BuildOptions:
+#         NeedsDFU: false
+#         NeedsSRECORD: false
+#         TargetName: SL_STK3701A_REVB
+#         PackageName: SL_STK3701A_REVB
+#         CMakePreset: SL_STK3701A_REVB
 
-  variables:
-    # creates a counter and assigns it to the revision variable
-    REVISION: $[counter('AZURERTOS_1_9_1_versioncounter', 0)]
-    HelperPackageVersion: $[counter('HelperPackageVersioncounter', 0)]
-    TargetPlatform: 'azure_rtos'
+#   variables:
+#     # creates a counter and assigns it to the revision variable
+#     REVISION: $[counter('AZURERTOS_1_9_1_versioncounter', 0)]
+#     HelperPackageVersion: $[counter('HelperPackageVersioncounter', 0)]
+#     TargetPlatform: 'azure_rtos'
 
-  steps:
-  - template: azure-pipelines-templates/build-preparations.yml
-  - template: azure-pipelines-templates/nb-gitversioning.yml
-  - template: azure-pipelines-templates/download-install-arm-gcc-toolchain.yml
-  - template: azure-pipelines-templates/download-install-ninja.yml
-  - template: azure-pipelines-templates/download-hexdfu.yml
-  - template: azure-pipelines-templates/download-srecord.yml
-  - template: azure-pipelines-templates/build-azurertos-targets.yml
-  - template: azure-pipelines-templates/pack-publish-artifacts.yml
-  - template: azure-pipelines-templates/publish-cloudsmith.yml
-  - template: azure-pipelines-templates/pack-publish-managed-helpers.yml
+#   steps:
+#   - template: azure-pipelines-templates/build-preparations.yml
+#   - template: azure-pipelines-templates/nb-gitversioning.yml
+#   - template: azure-pipelines-templates/download-install-arm-gcc-toolchain.yml
+#   - template: azure-pipelines-templates/download-install-ninja.yml
+#   - template: azure-pipelines-templates/download-hexdfu.yml
+#   - template: azure-pipelines-templates/download-srecord.yml
+#   - template: azure-pipelines-templates/build-azurertos-targets.yml
+#   - template: azure-pipelines-templates/pack-publish-artifacts.yml
+#   - template: azure-pipelines-templates/publish-cloudsmith.yml
+#   - template: azure-pipelines-templates/pack-publish-managed-helpers.yml
 
-#################################
-# report build failure to Discord
-- job: Report_Build_Failure
-  dependsOn:
-  - Build_STM32_targets
-  - Build_ESP32_targets
-  - Build_TI_SimpleLink_targets
-  - Build_Azure_RTOS_targets
-  condition: >-
-    or(
-      failed('Build_STM32_targets'),
-      failed('Build_ESP32_targets'),
-      failed('Build_TI_SimpleLink_targets'),
-      failed('Build_Azure_RTOS_targets')
-    )
+# #################################
+# # report build failure to Discord
+# - job: Report_Build_Failure
+#   dependsOn:
+#   - Build_STM32_targets
+#   - Build_ESP32_targets
+#   - Build_TI_SimpleLink_targets
+#   - Build_Azure_RTOS_targets
+#   condition: >-
+#     or(
+#       failed('Build_STM32_targets'),
+#       failed('Build_ESP32_targets'),
+#       failed('Build_TI_SimpleLink_targets'),
+#       failed('Build_Azure_RTOS_targets')
+#     )
 
-  pool:
-    vmImage: 'windows-latest'
+#   pool:
+#     vmImage: 'windows-latest'
 
-  steps:
+#   steps:
 
-  - checkout: self
-    fetchDepth: 1
+#   - checkout: self
+#     fetchDepth: 1
 
-  # step from template @ nf-tools repo
-  - template: azure-pipelines-templates/discord-webhook.yml@templates  
-    parameters:
-      status: 'failure'
-      webhookUrl: '$(DiscordWebhook)'
-      message: ''
+#   # step from template @ nf-tools repo
+#   - template: azure-pipelines-templates/discord-webhook.yml@templates  
+#     parameters:
+#       status: 'failure'
+#       webhookUrl: '$(DiscordWebhook)'
+#       message: ''
