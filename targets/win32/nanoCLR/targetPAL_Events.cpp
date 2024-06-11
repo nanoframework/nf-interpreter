@@ -7,8 +7,8 @@
 #include "stdafx.h"
 #include <Win32TimerQueue.h>
 
-static std::unique_ptr<Microsoft::Win32::Timer> boolEventsTimer;
-static bool *saveTimerCompleteFlag = 0;
+static std::unique_ptr<Microsoft::Win32::Timer> boolEventsTimer = nullptr;
+static bool *saveTimerCompleteFlag = nullptr;
 
 void local_Events_SetBoolTimer_Callback()
 {
@@ -53,22 +53,27 @@ bool Events_Initialize()
 {
     Events_Initialize_Platform();
 
-    std::unique_lock lock(EventsMutex);
+    std::lock_guard<std::mutex> lock(EventsMutex);
+
     SystemEvents = 0;
+
     return TRUE;
 }
 
 bool Events_Uninitialize()
 {
-    std::unique_lock lock(EventsMutex);
-    SystemEvents = 0;
+    {
+        const std::lock_guard<std::mutex> lock(EventsMutex);
+        SystemEvents = 0;
+    }
+
     return TRUE;
 }
 
 void Events_Set(UINT32 Events)
 {
     {
-        std::unique_lock lock(EventsMutex);
+        const std::lock_guard<std::mutex> lock(EventsMutex);
         SystemEvents |= Events;
     }
 
@@ -77,18 +82,20 @@ void Events_Set(UINT32 Events)
 
 uint32_t Events_Get(UINT32 EventsOfInterest)
 {
-    std::unique_lock lock(EventsMutex);
+    const std::lock_guard<std::mutex> lock(EventsMutex);
     auto retVal = SystemEvents & EventsOfInterest;
     SystemEvents &= ~EventsOfInterest;
+
     return retVal;
 }
 
 void Events_Clear(UINT32 Events)
 {
     {
-        std::unique_lock lock(EventsMutex);
+        const std::lock_guard<std::mutex> lock(EventsMutex);
         SystemEvents &= ~Events;
     }
+
     EventsConditionVar.notify_all();
 }
 
@@ -102,7 +109,7 @@ uint32_t Events_WaitForEvents(uint32_t powerLevel, uint32_t wakeupSystemEvents, 
 {
     (void)powerLevel;
 
-    std::unique_lock lock(EventsMutex);
+    std::unique_lock<std::mutex> lock(EventsMutex);
 
     if (CLR_EE_DBG_IS(RebootPending) || CLR_EE_DBG_IS(ExitPending))
     {
@@ -125,15 +132,18 @@ uint32_t Events_WaitForEvents(uint32_t powerLevel, uint32_t wakeupSystemEvents, 
 
 void Events_SetCallback(set_Event_Callback pfn, void *arg)
 {
+    (void)pfn;
+    (void)arg;
+
     _ASSERTE(FALSE);
 }
 
 void FreeManagedEvent(uint8_t category, uint8_t subCategory, uint16_t data1, uint32_t data2)
 {
-	(void)category;
-	(void)subCategory;
-	(void)data1;
-	(void)data2;
+    (void)category;
+    (void)subCategory;
+    (void)data1;
+    (void)data2;
 
     // nothing to release in this platform
 }
