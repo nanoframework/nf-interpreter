@@ -51,7 +51,9 @@ static uint32_t SystemEvents;
 
 bool Events_Initialize()
 {
-    std::unique_lock scopeLock(EventsMutex);
+    //Events_Initialize_Platform();
+
+    //std::unique_lock scopeLock(EventsMutex);
     SystemEvents = 0;
     return TRUE;
 }
