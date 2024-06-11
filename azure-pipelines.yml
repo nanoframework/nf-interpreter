@@ -1287,7 +1287,7 @@ jobs:
       displayName: Copy vstest dump files
       inputs:
         SourceFolder: 'D:\a\_temp\'
-        Contents: '*.dmp'
+        Contents: '**\*.dmp'
         TargetFolder: '$(Build.ArtifactStagingDirectory)/vstest_dumps'
 
     - task: PublishPipelineArtifact@1
