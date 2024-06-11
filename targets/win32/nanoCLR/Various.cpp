@@ -151,7 +151,7 @@ void nanoHAL_Initialize(void)
     HAL_CONTINUATION::InitializeList();
     HAL_COMPLETION::InitializeList();
 
-    Events_Initialize();
+    //Events_Initialize();
 }
 
 void nanoHAL_Uninitialize(bool isPoweringDown)
