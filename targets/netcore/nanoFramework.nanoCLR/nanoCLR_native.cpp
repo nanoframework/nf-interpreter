@@ -99,23 +99,23 @@ void nanoCLR_Run(NANO_CLR_SETTINGS nanoClrSettings)
         VERSION_REVISION);
 
     // initialize nanoHAL
-    nanoHAL_Initialize();
+    //nanoHAL_Initialize();
 
-    // take care of block storage here as we are RAM based
-    BlockStorageList_Initialize();
-    BlockStorage_AddDevices();
-    BlockStorageList_InitializeDevices();
+    //// take care of block storage here as we are RAM based
+    //BlockStorageList_Initialize();
+    //BlockStorage_AddDevices();
+    //BlockStorageList_InitializeDevices();
 
-    CLR_SETTINGS clrSettings;
-    ZeroMemory(&clrSettings, sizeof(CLR_SETTINGS));
+    //CLR_SETTINGS clrSettings;
+    //ZeroMemory(&clrSettings, sizeof(CLR_SETTINGS));
 
-    clrSettings.MaxContextSwitches = nanoClrSettings.MaxContextSwitches;
-    clrSettings.WaitForDebugger = nanoClrSettings.WaitForDebugger;
-    clrSettings.EnterDebuggerLoopAfterExit = nanoClrSettings.EnterDebuggerLoopAfterExit;
-    clrSettings.PerformGarbageCollection = nanoClrSettings.PerformGarbageCollection;
-    clrSettings.PerformHeapCompaction = nanoClrSettings.PerformHeapCompaction;
+    //clrSettings.MaxContextSwitches = nanoClrSettings.MaxContextSwitches;
+    //clrSettings.WaitForDebugger = nanoClrSettings.WaitForDebugger;
+    //clrSettings.EnterDebuggerLoopAfterExit = nanoClrSettings.EnterDebuggerLoopAfterExit;
+    //clrSettings.PerformGarbageCollection = nanoClrSettings.PerformGarbageCollection;
+    //clrSettings.PerformHeapCompaction = nanoClrSettings.PerformHeapCompaction;
 
-    ClrStartup(clrSettings);
+    //ClrStartup(clrSettings);
 
 #if !defined(BUILD_RTM)
     CLR_Debug::Printf("Exiting.\r\n");
