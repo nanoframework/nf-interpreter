@@ -3,10 +3,12 @@ FROM mcr.microsoft.com/windows/servercore:ltsc2022
 
 # Install .NET SDK
 ADD https://dot.net/v1/dotnet-install.ps1 C:\\temp\\dotnet-install.ps1
-RUN powershell.exe -NoProfile -ExecutionPolicy Bypass C:\temp\dotnet-install.ps1 -Channel 6.0 -InstallDir C:\Program Files\dotnet
+RUN powershell.exe -NoProfile -ExecutionPolicy Bypass C:\temp\dotnet-install.ps1 -Channel LTS -InstallDir C:\Program Files\dotnet
 
-# Set the path environment variable so that the .NET tools can be used directly
-RUN setx /M PATH "%PATH%;C:\Program Files\dotnet"
+# Ensure the PATH is correctly set for this session and future sessions
+RUN $newPath = 'C:\Program Files\dotnet;' + $env:PATH; \
+    setx /M PATH $newPath; \
+    [Environment]::SetEnvironmentVariable('PATH', $newPath, [EnvironmentVariableTarget]::Machine)
 
 # Configure any additional tools and settings you need for development
 # For example, Git, NuGet, or specific .NET SDK versions

@@ -1,7 +1,7 @@
 # Copyright (c) .NET Foundation and Contributors
 # See LICENSE file in the project root for full license information.
 
-name: Build Dev Container for TI
+name: Build Dev Container for Windows Server
 
 env:
   CONTAINER_REPO: ghcr.io
