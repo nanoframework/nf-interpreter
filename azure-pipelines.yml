@@ -1290,8 +1290,17 @@ jobs:
         Contents: '**\*.dmp'
         TargetFolder: '$(Build.ArtifactStagingDirectory)/vstest_dumps'
 
+    - script: |
+        if (Test-Path "$(Build.ArtifactStagingDirectory)/vstest_dumps/*" -PathType Leaf) {
+          echo "##vso[task.setvariable variable=hasFiles;isOutput=true]true"
+        } else {
+          echo "##vso[task.setvariable variable=hasFiles;isOutput=true]false"
+        }
+      displayName: 'Check for files'
+      name: checkFiles
+
     - task: PublishPipelineArtifact@1
-      condition: succeededOrFailed()
+      condition: eq(variables['hasFiles'], 'true')
       displayName: Publish vstest dump files
       inputs:
         targetPath: '$(Build.ArtifactStagingDirectory)/vstest_dumps'
