@@ -1,0 +1,15 @@
+{
+    "name": "Windows Server 2022 .NET Development",
+    "dockerFile": "Dockerfile.WindowsServer",
+    "context": ".",
+    "customizations": {
+        "vscode": {
+            "settings": {
+            },
+            "extensions": [
+                "ms-dotnettools.csharp",
+                "ms-vscode.cpptools"
+            ]
+        }
+    }
+}

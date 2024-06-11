@@ -1,0 +1,23 @@
+# Use the Windows Server Core image with .NET Framework
+FROM mcr.microsoft.com/windows/servercore:ltsc2022
+
+# Install .NET SDK
+ADD https://dot.net/v1/dotnet-install.ps1 C:\\temp\\dotnet-install.ps1
+RUN powershell.exe -NoProfile -ExecutionPolicy Bypass C:\temp\dotnet-install.ps1 -Channel 6.0 -InstallDir C:\Program Files\dotnet
+
+# Set the path environment variable so that the .NET tools can be used directly
+RUN setx /M PATH "%PATH%;C:\Program Files\dotnet"
+
+# Configure any additional tools and settings you need for development
+# For example, Git, NuGet, or specific .NET SDK versions
+
+# Install Visual Studio Build Tools and latest Windows SDK
+RUN powershell.exe -Command \
+    $ErrorActionPreference = 'Stop'; \
+    [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; \
+    Invoke-WebRequest -UseBasicParsing https://aka.ms/vs/16/release/vs_buildtools.exe -OutFile vs_buildtools.exe; \
+    Start-Process -FilePath 'vs_buildtools.exe' -ArgumentList '--add', 'Microsoft.VisualStudio.Workload.VCTools', '--add', 'Microsoft.VisualStudio.Component.Windows10SDK', '--quiet', '--norestart', '--nocache' -NoNewWindow -Wait; \
+    Remove-Item -Force vs_buildtools.exe
+
+# Set a working directory
+WORKDIR C:/workspace

@@ -19,6 +19,7 @@ You can choose the dev container needed when opening a remote container in VSCod
 * `nanoFramework-ESP32` to use the pre build container with all the elements to build ESP32 targets
 * `nanoFramework-TI` to use the pre build container with all the elements to build TI SimpleLink targets
 * `nanoFramework-FreeRTOS-NXP` to use the pre build container with all the elements to build TI SimpleLink targets
+* `nanoFramework-WindowsServer` to use the pre build container with all the elements to build the Virtual nanoCLR targets
 
 To use the source dockerfile for the respective platform adjust its `devcontainer.json` file and change the `"dockerFile": "Dockerfile.<platform>"` element for the image you would like to use:
 
@@ -28,7 +29,7 @@ To use the source dockerfile for the respective platform adjust its `devcontaine
 * `Dockerfile.ESP32.SRC` to build the container image from the source with all the elements to build ESP32 based devices
 * `Dockerfile.TI.SRC` to build the container image from the source with all the elements to build TI SimpleLink based devices
 * `Dockerfile.FreeRTOS.NXP.SRC` to build the container image from the source with all the elements to build NXP based devices
-
+* `Dockerfile.WindowsServer.SRC` to build the container image from the source with all the elements to build the Virtual nanoCLR
 
 ## Building and releasing Docker images in a fork
 
