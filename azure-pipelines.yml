@@ -1282,11 +1282,21 @@ jobs:
         unitTestRunsettings: '$(System.DefaultWorkingDirectory)\nf-interpreter\targets\netcore\pipeline_tests.runsettings'
         packagesDirectory: '$(Build.SourcesDirectory)/CoreLibrary/packages'
 
-    - task: PublishBuildArtifacts@1
+    - task: CopyFiles@2
+      condition: succeededOrFailed()
+      displayName: Copy vstest dump files
       inputs:
-        PathtoPublish: 'D:\a\_temp\*.dmp' # Path to the crash dump files
-        ArtifactName: 'CrashDumps' # Name of the artifact
-        publishLocation: 'Container'
+        SourceFolder: 'D:\a\_temp\'
+        Contents: '*.dmp'
+        TargetFolder: '$(Build.ArtifactStagingDirectory)/vstest_dumps'
+
+    - task: PublishPipelineArtifact@1
+      condition: succeededOrFailed()
+      displayName: Publish vstest dump files
+      inputs:
+        targetPath: '$(Build.ArtifactStagingDirectory)/vstest_dumps'
+        artifactName: VsTestCrashDumps
+        artifactType: pipeline
 
 # ######################
 # # generate change log
