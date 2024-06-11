@@ -106,8 +106,8 @@ void nanoCLR_Run(NANO_CLR_SETTINGS nanoClrSettings)
     BlockStorage_AddDevices();
     BlockStorageList_InitializeDevices();
 
-    //CLR_SETTINGS clrSettings;
-    //ZeroMemory(&clrSettings, sizeof(CLR_SETTINGS));
+    CLR_SETTINGS clrSettings;
+    ZeroMemory(&clrSettings, sizeof(CLR_SETTINGS));
 
     //clrSettings.MaxContextSwitches = nanoClrSettings.MaxContextSwitches;
     //clrSettings.WaitForDebugger = nanoClrSettings.WaitForDebugger;
