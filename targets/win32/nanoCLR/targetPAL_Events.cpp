@@ -51,16 +51,16 @@ static uint32_t SystemEvents;
 
 bool Events_Initialize()
 {
-    //Events_Initialize_Platform();
+    Events_Initialize_Platform();
 
-    //std::unique_lock scopeLock(EventsMutex);
+    std::unique_lock lock(EventsMutex);
     SystemEvents = 0;
     return TRUE;
 }
 
 bool Events_Uninitialize()
 {
-    std::unique_lock scopeLock(EventsMutex);
+    std::unique_lock lock(EventsMutex);
     SystemEvents = 0;
     return TRUE;
 }
@@ -68,7 +68,7 @@ bool Events_Uninitialize()
 void Events_Set(UINT32 Events)
 {
     {
-        std::unique_lock scopeLock(EventsMutex);
+        std::unique_lock lock(EventsMutex);
         SystemEvents |= Events;
     }
 
@@ -77,7 +77,7 @@ void Events_Set(UINT32 Events)
 
 uint32_t Events_Get(UINT32 EventsOfInterest)
 {
-    std::unique_lock scopeLock(EventsMutex);
+    std::unique_lock lock(EventsMutex);
     auto retVal = SystemEvents & EventsOfInterest;
     SystemEvents &= ~EventsOfInterest;
     return retVal;
@@ -86,7 +86,7 @@ uint32_t Events_Get(UINT32 EventsOfInterest)
 void Events_Clear(UINT32 Events)
 {
     {
-        std::unique_lock scopeLock(EventsMutex);
+        std::unique_lock lock(EventsMutex);
         SystemEvents &= ~Events;
     }
     EventsConditionVar.notify_all();
@@ -102,7 +102,7 @@ uint32_t Events_WaitForEvents(uint32_t powerLevel, uint32_t wakeupSystemEvents, 
 {
     (void)powerLevel;
 
-    std::unique_lock scopeLock(EventsMutex);
+    std::unique_lock lock(EventsMutex);
 
     if (CLR_EE_DBG_IS(RebootPending) || CLR_EE_DBG_IS(ExitPending))
     {
@@ -115,7 +115,7 @@ uint32_t Events_WaitForEvents(uint32_t powerLevel, uint32_t wakeupSystemEvents, 
     // check current condition before waiting as Condition var doesn't do that
     if ((wakeupSystemEvents & SystemEvents) == 0)
     {
-        timeout = !EventsConditionVar.wait_for(scopeLock, std::chrono::milliseconds(timeoutMilliseconds), [=]() {
+        timeout = !EventsConditionVar.wait_for(lock, std::chrono::milliseconds(timeoutMilliseconds), [=]() {
             return (wakeupSystemEvents & SystemEvents) != 0;
         });
     }
