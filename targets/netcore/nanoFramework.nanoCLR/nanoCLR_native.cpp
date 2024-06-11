@@ -115,7 +115,7 @@ void nanoCLR_Run(NANO_CLR_SETTINGS nanoClrSettings)
     clrSettings.PerformGarbageCollection = nanoClrSettings.PerformGarbageCollection;
     clrSettings.PerformHeapCompaction = nanoClrSettings.PerformHeapCompaction;
 
-    // ClrStartup(clrSettings);
+    ClrStartup(clrSettings);
 
 #if !defined(BUILD_RTM)
     CLR_Debug::Printf("Exiting.\r\n");

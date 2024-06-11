@@ -19,7 +19,7 @@ void local_Events_SetBoolTimer_Callback()
 
 bool Events_Initialize_Platform()
 {
-    boolEventsTimer = NULL;
+    boolEventsTimer = nullptr;
 
     return true;
 }
@@ -29,9 +29,9 @@ void Events_SetBoolTimer(bool *timerCompleteFlag, uint32_t millisecondsFromNow)
     NATIVE_PROFILE_PAL_EVENTS();
 
     // we assume only 1 can be active, abort previous just in case
-    if (boolEventsTimer != NULL)
+    if (boolEventsTimer != nullptr)
     {
-        delete boolEventsTimer.release();
+        boolEventsTimer.reset();
     }
 
     if (timerCompleteFlag)
@@ -51,14 +51,14 @@ static uint32_t SystemEvents;
 
 bool Events_Initialize()
 {
-    std::unique_lock<std::mutex> scopeLock(EventsMutex);
+    std::unique_lock scopeLock(EventsMutex);
     SystemEvents = 0;
     return TRUE;
 }
 
 bool Events_Uninitialize()
 {
-    std::unique_lock<std::mutex> scopeLock(EventsMutex);
+    std::unique_lock scopeLock(EventsMutex);
     SystemEvents = 0;
     return TRUE;
 }
@@ -66,15 +66,16 @@ bool Events_Uninitialize()
 void Events_Set(UINT32 Events)
 {
     {
-        std::unique_lock<std::mutex> scopeLock(EventsMutex);
+        std::unique_lock scopeLock(EventsMutex);
         SystemEvents |= Events;
     }
+
     EventsConditionVar.notify_all();
 }
 
 uint32_t Events_Get(UINT32 EventsOfInterest)
 {
-    std::unique_lock<std::mutex> scopeLock(EventsMutex);
+    std::unique_lock scopeLock(EventsMutex);
     auto retVal = SystemEvents & EventsOfInterest;
     SystemEvents &= ~EventsOfInterest;
     return retVal;
@@ -83,7 +84,7 @@ uint32_t Events_Get(UINT32 EventsOfInterest)
 void Events_Clear(UINT32 Events)
 {
     {
-        std::unique_lock<std::mutex> scopeLock(EventsMutex);
+        std::unique_lock scopeLock(EventsMutex);
         SystemEvents &= ~Events;
     }
     EventsConditionVar.notify_all();
@@ -97,7 +98,9 @@ uint32_t Events_MaskedRead(uint32_t Events)
 // block this thread and wake up when at least one of the requested events is set or a timeout occurs...
 uint32_t Events_WaitForEvents(uint32_t powerLevel, uint32_t wakeupSystemEvents, uint32_t timeoutMilliseconds)
 {
-    std::unique_lock<std::mutex> scopeLock(EventsMutex);
+    (void)powerLevel;
+
+    std::unique_lock scopeLock(EventsMutex);
 
     if (CLR_EE_DBG_IS(RebootPending) || CLR_EE_DBG_IS(ExitPending))
     {
@@ -125,4 +128,10 @@ void Events_SetCallback(set_Event_Callback pfn, void *arg)
 
 void FreeManagedEvent(uint8_t category, uint8_t subCategory, uint16_t data1, uint32_t data2)
 {
+	(void)category;
+	(void)subCategory;
+	(void)data1;
+	(void)data2;
+
+    // nothing to release in this platform
 }
