@@ -87,16 +87,6 @@ int _tmain(int argc, _TCHAR *argv[])
     clrSettings.WaitForDebugger = false;
     clrSettings.EnterDebuggerLoopAfterExit = false;
 
-    // fill arguments from command line
-    clrSettings.StartArgs.resize(argc - 1);
-
-    std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
-
-    for (int i = 0; i < argc - 1; i++)
-    {
-        clrSettings.StartArgs[i] = converter.from_bytes(argv[1 + i]);
-    }
-
     ClrStartup(clrSettings);
 
 #if !defined(BUILD_RTM)
