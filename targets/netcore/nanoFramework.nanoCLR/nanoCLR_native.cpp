@@ -32,8 +32,8 @@
 #else
 
 #pragma comment(                                                                                                       \
-    lib,                                                                                                               \
-    "WireProtocol.lib") // UNDONE: FIXME: SUPPORT_ComputeCRC required by TypeSystem.cpp, CLR_RT_HeapBlock
+        lib,                                                                                                           \
+            "WireProtocol.lib") // UNDONE: FIXME: SUPPORT_ComputeCRC required by TypeSystem.cpp, CLR_RT_HeapBlock
 
 #pragma comment(lib, "Debugger_stub.lib")
 #pragma comment(lib, "Diagnostics_stub.lib")
