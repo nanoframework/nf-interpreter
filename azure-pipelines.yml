@@ -1211,7 +1211,6 @@ jobs:
 - job: Run_UnitTests_mscorlib
   condition: >-
     and(
-      succeeded('Check_Code_Style'),
       succeeded('Build_nanoCLR_CLI'),
       ne(dependencies.Check_Build_Options.outputs['BuildOptions.SKIP_BUILD'], true),
       or(
@@ -1283,6 +1282,35 @@ jobs:
         runUnitTests: true
         unitTestRunsettings: '$(System.DefaultWorkingDirectory)\nf-interpreter\targets\netcore\pipeline_tests.runsettings'
         packagesDirectory: '$(Build.SourcesDirectory)/CoreLibrary/packages'
+
+    - task: CopyFiles@2
+      condition: succeededOrFailed()
+      displayName: Copy vstest dump files
+      inputs:
+        SourceFolder: 'D:\a\_temp\'
+        Contents: '**/*.dmp'
+        TargetFolder: '$(Build.ArtifactStagingDirectory)/vstest_dumps'
+        flattenFolders: true
+
+    - powershell: |
+        $dumpPath = "$(Build.ArtifactStagingDirectory)/vstest_dumps"
+        $hasFiles = $false
+
+        if (Test-Path $dumpPath -PathType Container) {
+            $fileCount = (Get-ChildItem $dumpPath -File | Measure-Object).Count
+            $hasFiles = $fileCount -gt 0
+        }
+        echo "##vso[task.setvariable variable=hasFiles;isOutput=true]$hasFiles"
+      displayName: 'Check for dump files'
+      name: checkFiles
+
+    - task: PublishPipelineArtifact@1
+      condition: eq(variables['hasFiles'], 'true')
+      displayName: Publish vstest dump files
+      inputs:
+        targetPath: '$(Build.ArtifactStagingDirectory)/vstest_dumps'
+        artifactName: VsTestCrashDumps
+        artifactType: pipeline
 
 ######################
 # generate change log

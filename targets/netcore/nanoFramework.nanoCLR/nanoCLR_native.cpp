@@ -31,9 +31,7 @@
 
 #else
 
-#pragma comment(                                                                                                       \
-    lib,                                                                                                               \
-    "WireProtocol.lib") // UNDONE: FIXME: SUPPORT_ComputeCRC required by TypeSystem.cpp, CLR_RT_HeapBlock
+#pragma comment(lib, "WireProtocol.lib")
 
 #pragma comment(lib, "Debugger_stub.lib")
 #pragma comment(lib, "Diagnostics_stub.lib")
@@ -107,7 +105,7 @@ void nanoCLR_Run(NANO_CLR_SETTINGS nanoClrSettings)
     BlockStorageList_InitializeDevices();
 
     CLR_SETTINGS clrSettings;
-    ZeroMemory(&clrSettings, sizeof(clrSettings));
+    ZeroMemory(&clrSettings, sizeof(CLR_SETTINGS));
 
     clrSettings.MaxContextSwitches = nanoClrSettings.MaxContextSwitches;
     clrSettings.WaitForDebugger = nanoClrSettings.WaitForDebugger;
