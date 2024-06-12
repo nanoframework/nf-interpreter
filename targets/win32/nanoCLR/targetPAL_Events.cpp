@@ -53,7 +53,7 @@ bool Events_Initialize()
 {
     Events_Initialize_Platform();
 
-    std::lock_guard<std::mutex> lock(EventsMutex);
+    //std::lock_guard<std::mutex> lock(EventsMutex);
 
     SystemEvents = 0;
 
