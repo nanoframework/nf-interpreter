@@ -45,7 +45,7 @@ void Events_SetBoolTimer(bool *timerCompleteFlag, uint32_t millisecondsFromNow)
     }
 }
 
-// mutex, condition variable and flags for CLR's global events state
+// semaphore, condition variable and flags for CLR's global events state
 static std::binary_semaphore EventsSemaphore(1);
 static std::condition_variable EventsConditionVar;
 static uint32_t SystemEvents;
@@ -67,9 +67,9 @@ bool Events_Uninitialize()
 {
     EventsSemaphore.acquire();
 
-        SystemEvents = 0;
+    SystemEvents = 0;
 
-        EventsSemaphore.release();
+    EventsSemaphore.release();
 
     return TRUE;
 }
@@ -78,9 +78,9 @@ void Events_Set(UINT32 Events)
 {
     EventsSemaphore.acquire();
 
-        SystemEvents |= Events;
-    
-        EventsSemaphore.release();
+    SystemEvents |= Events;
+
+    EventsSemaphore.release();
 
     EventsConditionVar.notify_all();
 }
@@ -101,9 +101,9 @@ void Events_Clear(UINT32 Events)
 {
     EventsSemaphore.acquire();
 
-        SystemEvents &= ~Events;
-    
-        EventsSemaphore.release();
+    SystemEvents &= ~Events;
+
+    EventsSemaphore.release();
 
     EventsConditionVar.notify_all();
 }
@@ -131,12 +131,12 @@ uint32_t Events_WaitForEvents(uint32_t powerLevel, uint32_t wakeupSystemEvents, 
             {
                 // Condition met or special case encountered, break the loop
                 // Release the semaphore before breaking
-                EventsSemaphore.release(); 
+                EventsSemaphore.release();
                 break;
             }
 
             // Release the semaphore if condition not met
-            EventsSemaphore.release(); 
+            EventsSemaphore.release();
         }
 
         if (std::chrono::steady_clock::now() >= endTime)
@@ -144,7 +144,7 @@ uint32_t Events_WaitForEvents(uint32_t powerLevel, uint32_t wakeupSystemEvents, 
             timeout = true;
 
             // Exit the loop if timeout reached
-            break; 
+            break;
         }
     }
 
