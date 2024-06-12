@@ -26,8 +26,9 @@
 //     {&g_FATFS_FILE_SYSTEM_DriverInterface, &g_FATFS_STREAM_DriverInterface},
 //     // {&g_LITTLEFS_FILE_SYSTEM_DriverInterface, &g_LITTLEFS_STREAM_DriverInterface},
 // };
+FILESYSTEM_INTERFACES g_AvailableFSInterfaces[] = {0};
 
-// const size_t g_InstalledFSCount = ARRAYSIZE(g_AvailableFSInterfaces);
+const size_t g_InstalledFSCount = ARRAYSIZE(g_AvailableFSInterfaces);
 
 uint32_t g_FS_NumVolumes;
 STREAM_DRIVER_DETAILS *g_FS_DriverDetails;
