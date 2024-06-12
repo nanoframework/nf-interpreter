@@ -12,7 +12,7 @@
 #include <nanoCLR_Hardware.h>
 #include <nanoCLR_FileStream.h>
 // #include <nanoCLR_Xml.h>
-// #include <nanoCLR_Application.h>
+#include <nanoCLR_Application.h>
 //
 // #include <nanoCLR_ParseOptions.h>
 //

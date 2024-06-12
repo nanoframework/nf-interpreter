@@ -501,6 +501,18 @@ macro(nf_setup_partition_tables_generator)
 
     endif()
 
+    if(${TARGET_SERIES_SHORT} STREQUAL "esp32s3")
+
+        # 32MB partition table for ESP32_S3
+        add_custom_command( TARGET ${NANOCLR_PROJECT_NAME}.elf POST_BUILD
+            COMMAND ${gen_partition_table} 
+            --flash-size 32MB 
+            ${CMAKE_SOURCE_DIR}/targets/ESP32/_IDF/${TARGET_SERIES_SHORT}/partitions_nanoclr_32mb.csv
+            ${CMAKE_BINARY_DIR}/partitions_32mb.bin
+            COMMENT "Generate partition table for 32MB flash" )
+
+    endif()
+
     if(${TARGET_SERIES_SHORT} STREQUAL "esp32" OR 
        ${TARGET_SERIES_SHORT} STREQUAL "esp32c3" OR
        ${TARGET_SERIES_SHORT} STREQUAL "esp32h2" )

@@ -146,7 +146,7 @@ void __cdecl HAL_AddSoftRebootHandler(ON_SOFT_REBOOT_HANDLER handler)
 
 bool g_fDoNotUninitializeDebuggerPort = false;
 
-void __cdecl nanoHAL_Initialize(void)
+void nanoHAL_Initialize(void)
 {
     HAL_CONTINUATION::InitializeList();
     HAL_COMPLETION::InitializeList();
@@ -161,15 +161,13 @@ void __cdecl nanoHAL_Initialize(void)
     Events_Initialize();
 }
 
-void __cdecl nanoHAL_Uninitialize(bool isPoweringDown)
+void nanoHAL_Uninitialize(bool isPoweringDown)
 {
     (void)isPoweringDown;
 
-    int i;
-
     // UNDONE: FIXME: CPU_GPIO_Uninitialize();
 
-    for (i = 0; i < ARRAYSIZE(s_rebootHandlers); i++)
+    for (int i = 0; i < ARRAYSIZE(s_rebootHandlers); i++)
     {
         if (s_rebootHandlers[i] != NULL)
         {
