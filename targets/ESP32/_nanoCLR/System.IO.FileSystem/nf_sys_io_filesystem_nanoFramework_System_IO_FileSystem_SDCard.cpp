@@ -267,6 +267,9 @@ HRESULT Library_nf_sys_io_filesystem_nanoFramework_System_IO_FileSystem_SDCard::
             break;
     } // switch
 
+    // add volume to the file system
+    FS_MountVolume(INDEX0_DRIVE_LETTER, 0, "FATFS");
+
     pThis[FIELD___mounted].NumericByRef().s4 = 1;
 
 #else
@@ -316,6 +319,8 @@ HRESULT Library_nf_sys_io_filesystem_nanoFramework_System_IO_FileSystem_SDCard::
             NANOCLR_SET_AND_LEAVE(CLR_E_NOT_SUPPORTED);
             break;
     }
+
+    FS_UnmountVolume(INDEX0_DRIVE_LETTER);
 
     pThis[FIELD___mounted].NumericByRef().s4 = 0;
 

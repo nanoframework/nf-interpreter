@@ -42,8 +42,8 @@ typedef enum StorageEventType
 } StorageEventType;
 
 // constants to be used throughout the code
-#define DRIVE_LETTER_LENGTH    sizeof(INDEX0_DRIVE_LETTER)
-#define DRIVE_PATH_LENGTH      sizeof(INDEX0_DRIVE_PATH)
+#define DRIVE_LETTER_LENGTH sizeof(INDEX0_DRIVE_LETTER)
+#define DRIVE_PATH_LENGTH   sizeof(INDEX0_DRIVE_PATH)
 
 /////////////////////////////////////////////////////////////////////////////////////////
 // !!! KEEP IN SYNC WITH Windows.Storage.CreationCollisionOption (in managed code) !!! //

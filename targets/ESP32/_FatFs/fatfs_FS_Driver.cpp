@@ -9,17 +9,8 @@
 
 extern FileSystemVolume *g_FS_Volumes;
 
-static FATFS fatFS[FF_VOLUMES];
-static uint8_t volumeAssignment[FF_VOLUMES];
-
-uint8_t fatfs_inputBuffer[FF_MAX_SS];
-uint8_t fatfs_outputBuffer[FF_MAX_SS];
-
 static int32_t RemoveAllFiles(const char *path);
-static int NormalizePath(const char *path, char *buffer, size_t bufferSize);
-static FATFS *GetFatFsByVolumeId(const VOLUME_ID *volumeId, bool assignVolume);
-static int8_t GetVolumeIndexByVolumeId(const VOLUME_ID *volumeId);
-static void FreeFatFsByVolumeId(const VOLUME_ID *volumeId);
+static int NormalizePath(const char *root, const char *path, char *buffer, size_t bufferSize);
 
 bool FATFS_FS_Driver::LoadMedia(const void *driverInterface)
 {
@@ -31,8 +22,7 @@ STREAM_DRIVER_DETAILS *FATFS_FS_Driver::DriverDetails(const VOLUME_ID *volume)
 {
     (void)volume;
 
-    static STREAM_DRIVER_DETAILS driverDetail =
-        {DRIVER_BUFFERED_IO, fatfs_inputBuffer, fatfs_outputBuffer, FF_MAX_SS, FF_MAX_SS, TRUE, TRUE, TRUE, 0, 0};
+    static STREAM_DRIVER_DETAILS driverDetail = {DIRECT_IO, NULL, NULL, 0, 0, TRUE, TRUE, TRUE, 0, 0};
 
     return &driverDetail;
 }
@@ -41,62 +31,19 @@ STREAM_DRIVER_DETAILS *FATFS_FS_Driver::DriverDetails(const VOLUME_ID *volume)
 
 void FATFS_FS_Driver::Initialize()
 {
-    // reset all the FATFS instances
-    memset(fatFS, 0, sizeof(fatFS));
-
-    // reset the volume assignment to impossible value
-    memset(volumeAssignment, 0xFF, sizeof(volumeAssignment));
+    // nothing to do here as IDF takes care of this
 }
 
 bool FATFS_FS_Driver::InitializeVolume(const VOLUME_ID *volume, const char *path)
 {
-    // find  a free volume
-    FATFS *fs = GetFatFsByVolumeId(volume, true);
+    // nothing to do here as the mount API will take care of this
 
-    if (fs == NULL)
-    {
-        return FALSE;
-    }
-
-    // try mounting the volume
-    if (f_mount(fs, path, 1) == FR_OK)
-    {
-        return TRUE;
-    }
-
-    // something went wrong, unmount the volume...
-    f_unmount(path);
-
-    // ... and free the volume
-    FreeFatFsByVolumeId(volume);
-
-    return FALSE;
+    return TRUE;
 }
 
 bool FATFS_FS_Driver::UnInitializeVolume(const VOLUME_ID *volume)
 {
-    char volumeIndexName[3];
-
-    // get the volume index
-    int8_t volumeIndex = GetVolumeIndexByVolumeId(volume);
-
-    // sanity check
-    if (volumeIndex < 0)
-    {
-        return FALSE;
-    }
-
-    // need to converto to string
-    __itoa(volumeIndex, volumeIndexName, 10);
-
-    // add semi-colon at the end
-    volumeIndexName[1] = ':';
-    volumeIndexName[2] = '\0';
-
-    f_unmount(volumeIndexName);
-
-    // free assigned volume
-    FreeFatFsByVolumeId(volume);
+    // nothing to do here as the unmount API will take care of this
 
     return TRUE;
 }
@@ -105,28 +52,29 @@ HRESULT FATFS_FS_Driver::Format(const VOLUME_ID *volume, const char *volumeLabel
 {
     NANOCLR_HEADER();
 
-    (void)volumeLabel;
-    (void)parameters;
+    //     (void)volumeLabel;
+    //     (void)parameters;
 
-    FileSystemVolume *currentVolume = FileSystemVolumeList::FindVolume(volume->volumeId);
-    f_chdrive(currentVolume->m_rootName);
+    //     FileSystemVolume *currentVolume = FileSystemVolumeList::FindVolume(volume->volumeId);
+    //     f_chdrive(currentVolume->m_rootName);
 
-#if FF_USE_MKFS
-    MKFS_PARM mkfsParameters = {FM_FAT32, 1, 0, 0, 0};
+    // #if FF_USE_MKFS
+    //     MKFS_PARM mkfsParameters = {FM_FAT32, 1, 0, 0, 0};
 
-    if (f_mkfs(currentVolume->m_rootName, &mkfsParameters, fatfs_inputBuffer, sizeof(fatfs_inputBuffer)) == FR_OK)
-    {
-        // volume formatted
-        hr = S_OK;
-    }
-    else
-    {
-        // failed to format the volume
-        NANOCLR_SET_AND_LEAVE(CLR_E_FILE_IO);
-    }
-#else
+    //     if (f_mkfs(currentVolume->m_rootName, &mkfsParameters, fatfs_inputBuffer, sizeof(fatfs_inputBuffer)) ==
+    //     FR_OK)
+    //     {
+    //         // volume formatted
+    //         hr = S_OK;
+    //     }
+    //     else
+    //     {
+    //         // failed to format the volume
+    //         NANOCLR_SET_AND_LEAVE(CLR_E_FILE_IO);
+    //     }
+    // #else
     NANOCLR_SET_AND_LEAVE(CLR_E_NOT_SUPPORTED);
-#endif
+    // #endif
 
     NANOCLR_NOCLEANUP();
 }
@@ -241,15 +189,13 @@ HRESULT FATFS_FS_Driver::Open(const VOLUME_ID *volume, const char *path, void *&
 
     memset(fileHandle, 0, sizeof(FATFS_FileHandle));
 
-    if (NormalizePath(path, normalizedPath, sizeof(normalizedPath)) < 0)
+    currentVolume = FileSystemVolumeList::FindVolume(volume->volumeId);
+
+    if (NormalizePath(currentVolume->m_rootName, path, normalizedPath, sizeof(normalizedPath)) < 0)
     {
         // handle error
         return CLR_E_PATH_TOO_LONG;
     }
-
-    currentVolume = FileSystemVolumeList::FindVolume(volume->volumeId);
-
-    f_chdrive(currentVolume->m_rootName);
 
     // check for file existence
 #ifdef DEBUG
@@ -551,15 +497,13 @@ HRESULT FATFS_FS_Driver::FindOpen(const VOLUME_ID *volume, const char *path, voi
 
     memset(findHandle, 0, sizeof(FATFS_FindFileHandle));
 
-    if (NormalizePath(path, normalizedPath, sizeof(normalizedPath)) < 0)
+    currentVolume = FileSystemVolumeList::FindVolume(volume->volumeId);
+
+    if (NormalizePath(currentVolume->m_rootName, path, normalizedPath, sizeof(normalizedPath)) < 0)
     {
         // handle error
         return CLR_E_PATH_TOO_LONG;
     }
-
-    currentVolume = FileSystemVolumeList::FindVolume(volume->volumeId);
-
-    f_chdrive(currentVolume->m_rootName);
 
     // open directory for seek
     if (f_opendir(&findHandle->dir, normalizedPath) == FR_OK)
@@ -670,15 +614,13 @@ HRESULT FATFS_FS_Driver::GetFileInfo(const VOLUME_ID *volume, const char *path, 
     FILINFO info;
     char normalizedPath[FS_MAX_DIRECTORY_LENGTH];
 
-    if (NormalizePath(path, normalizedPath, sizeof(normalizedPath)) < 0)
+    FileSystemVolume *currentVolume = FileSystemVolumeList::FindVolume(volume->volumeId);
+
+    if (NormalizePath(currentVolume->m_rootName, path, normalizedPath, sizeof(normalizedPath)) < 0)
     {
         // handle error
         return CLR_E_PATH_TOO_LONG;
     }
-
-    FileSystemVolume *currentVolume = FileSystemVolumeList::FindVolume(volume->volumeId);
-
-    f_chdrive(currentVolume->m_rootName);
 
     // root is different
     if (*normalizedPath == '/' && *(normalizedPath + 1) == '\0')
@@ -723,15 +665,13 @@ HRESULT FATFS_FS_Driver::GetAttributes(const VOLUME_ID *volume, const char *path
 
     pathLength = hal_strlen_s(path);
 
-    if (NormalizePath(path, normalizedPath, sizeof(normalizedPath)) < 0)
+    FileSystemVolume *currentVolume = FileSystemVolumeList::FindVolume(volume->volumeId);
+
+    if (NormalizePath(currentVolume->m_rootName, path, normalizedPath, sizeof(normalizedPath)) < 0)
     {
         // handle error
         return CLR_E_PATH_TOO_LONG;
     }
-
-    FileSystemVolume *currentVolume = FileSystemVolumeList::FindVolume(volume->volumeId);
-
-    f_chdrive(currentVolume->m_rootName);
 
     // check for file existence
     result = f_stat(normalizedPath, &info);
@@ -770,15 +710,13 @@ HRESULT FATFS_FS_Driver::SetAttributes(const VOLUME_ID *volume, const char *path
     FILINFO info;
     char normalizedPath[FS_MAX_DIRECTORY_LENGTH];
 
-    if (NormalizePath(path, normalizedPath, sizeof(normalizedPath)) < 0)
+    FileSystemVolume *currentVolume = FileSystemVolumeList::FindVolume(volume->volumeId);
+
+    if (NormalizePath(currentVolume->m_rootName, path, normalizedPath, sizeof(normalizedPath)) < 0)
     {
         // handle error
         return CLR_E_PATH_TOO_LONG;
     }
-
-    FileSystemVolume *currentVolume = FileSystemVolumeList::FindVolume(volume->volumeId);
-
-    f_chdrive(currentVolume->m_rootName);
 
     // check for file existence
     if (f_stat(normalizedPath, &info) != FR_OK)
@@ -805,16 +743,15 @@ HRESULT FATFS_FS_Driver::CreateDirectory(const VOLUME_ID *volume, const char *pa
 
     (void)dirExists;
 
-    if (NormalizePath(path, normalizedPath, sizeof(normalizedPath)) < 0)
+    FileSystemVolume *currentVolume = FileSystemVolumeList::FindVolume(volume->volumeId);
+
+    if (NormalizePath(currentVolume->m_rootName, path, normalizedPath, sizeof(normalizedPath)) < 0)
     {
         // handle error
         return CLR_E_PATH_TOO_LONG;
     }
+
     memset(tempPath, 0, sizeof(tempPath));
-
-    FileSystemVolume *currentVolume = FileSystemVolumeList::FindVolume(volume->volumeId);
-
-    f_chdrive(currentVolume->m_rootName);
 
     // iterate over the path segments and create the directories
     segment = strtok(normalizedPath, "/");
@@ -861,21 +798,19 @@ HRESULT FATFS_FS_Driver::Move(const VOLUME_ID *volume, const char *oldPath, cons
     char normalizedOldPath[FS_MAX_DIRECTORY_LENGTH];
     int32_t result = FR_OK;
 
-    if (NormalizePath(newPath, normalizedNewPath, sizeof(normalizedNewPath)) < 0)
-    {
-        // handle error
-        return CLR_E_PATH_TOO_LONG;
-    }
-
-    if (NormalizePath(oldPath, normalizedOldPath, sizeof(normalizedOldPath)) < 0)
-    {
-        // handle error
-        return CLR_E_PATH_TOO_LONG;
-    }
-
     FileSystemVolume *currentVolume = FileSystemVolumeList::FindVolume(volume->volumeId);
 
-    f_chdrive(currentVolume->m_rootName);
+    if (NormalizePath(currentVolume->m_rootName, newPath, normalizedNewPath, sizeof(normalizedNewPath)) < 0)
+    {
+        // handle error
+        return CLR_E_PATH_TOO_LONG;
+    }
+
+    if (NormalizePath(currentVolume->m_rootName, oldPath, normalizedOldPath, sizeof(normalizedOldPath)) < 0)
+    {
+        // handle error
+        return CLR_E_PATH_TOO_LONG;
+    }
 
     // the check for source file and destination file existence has already been made in managed code
     result = f_rename(normalizedOldPath, normalizedNewPath);
@@ -901,15 +836,13 @@ HRESULT FATFS_FS_Driver::Delete(const VOLUME_ID *volume, const char *path, bool 
     char normalizedPath[FS_MAX_DIRECTORY_LENGTH];
     int32_t result;
 
-    if (NormalizePath(path, normalizedPath, sizeof(normalizedPath)) < 0)
+    FileSystemVolume *currentVolume = FileSystemVolumeList::FindVolume(volume->volumeId);
+
+    if (NormalizePath(currentVolume->m_rootName, path, normalizedPath, sizeof(normalizedPath)) < 0)
     {
         // handle error
         return CLR_E_PATH_TOO_LONG;
     }
-
-    FileSystemVolume *currentVolume = FileSystemVolumeList::FindVolume(volume->volumeId);
-
-    f_chdrive(currentVolume->m_rootName);
 
     // check for file existence
     if (f_stat(normalizedPath, &info) != FR_OK)
@@ -996,14 +929,24 @@ static int32_t RemoveAllFiles(const char *path)
     return f_closedir(&dir);
 }
 
-// normalize path by:
+// normalize path and convert to ESP32 VFS by:
 // - replace \ with /
 // - remove leading slash
 // - handle other normalization issues
-static int NormalizePath(const char *path, char *buffer, size_t bufferSize)
+static int NormalizePath(const char *root, const char *path, char *buffer, size_t bufferSize)
 {
     const char *workingPath = path;
     char *bufferP = buffer;
+
+    // start with /
+    *bufferP++ = '/';
+
+    // copy the root (presumed to be a drive letter
+    *bufferP++ = *root++;
+
+    // drop ':' from the path
+    // add a '/' after the drive letter
+    *bufferP++ = '/';
 
     while (*workingPath && (static_cast<size_t>(bufferP - buffer) < bufferSize))
     {
@@ -1023,51 +966,7 @@ static int NormalizePath(const char *path, char *buffer, size_t bufferSize)
     // Null-terminate the path
     *bufferP = '\0';
 
-    if (buffer[0] == '/')
-    {
-        // remove leading slash
-        memmove(buffer, buffer + 1, hal_strlen_s(buffer));
-    }
-
     return 0;
-}
-
-static FATFS *GetFatFsByVolumeId(const VOLUME_ID *volumeId, bool assignVolume)
-{
-    for (uint8_t volumeIndex = 0; volumeIndex < FF_VOLUMES; volumeIndex++)
-    {
-        if (assignVolume && volumeAssignment[volumeIndex] == 0xFF)
-        {
-            volumeAssignment[volumeIndex] = volumeId->volumeId;
-            return &fatFS[volumeIndex];
-        }
-        else if (volumeAssignment[volumeIndex] == volumeId->volumeId)
-        {
-            return &fatFS[volumeIndex];
-        }
-    }
-
-    return NULL;
-}
-
-static void FreeFatFsByVolumeId(const VOLUME_ID *volumeId)
-{
-    uint8_t volumeIndex = GetVolumeIndexByVolumeId(volumeId);
-
-    volumeAssignment[volumeIndex] = 0xFF;
-}
-
-static int8_t GetVolumeIndexByVolumeId(const VOLUME_ID *volumeId)
-{
-    for (uint8_t volumeIndex = 0; volumeIndex < FF_VOLUMES; volumeIndex++)
-    {
-        if (volumeAssignment[volumeIndex] == volumeId->volumeId)
-        {
-            return volumeIndex;
-        }
-    }
-
-    return -1;
 }
 
 //////////////////
