@@ -411,10 +411,10 @@ extern "C"
 #include <nanoHAL_Watchdog.h>
 #include <nanoHAL_Rtos.h>
 
-#include <nanoHAL_System_IO_FileSystem.h>
-
 #ifdef INCLUDE_WINDOWS_STORAGE
 #include <nanoHAL_Windows_Storage.h>
+#else
+#include <nanoHAL_System_IO_FileSystem.h>
 #endif
 
 #endif // NANOHAL_V2_H
