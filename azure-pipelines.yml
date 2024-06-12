@@ -1293,8 +1293,13 @@ jobs:
         flattenFolders: true
 
     - script: |
-        if (Test-Path "$(Build.ArtifactStagingDirectory)/vstest_dumps/*" -PathType Leaf) {
-          echo "##vso[task.setvariable variable=hasFiles;isOutput=true]true"
+        $dumpPath = "$(Build.ArtifactStagingDirectory)/vstest_dumps"
+        if (Test-Path $dumpPath -PathType Container) {
+          if (Get-ChildItem $dumpPath -File | Measure-Object).Count -gt 0 {
+            echo "##vso[task.setvariable variable=hasFiles;isOutput=true]true"
+          } else {
+            echo "##vso[task.setvariable variable=hasFiles;isOutput=true]false"
+          }
         } else {
           echo "##vso[task.setvariable variable=hasFiles;isOutput=true]false"
         }
