@@ -313,14 +313,15 @@ if(NF_FEATURE_HAS_SDCARD)
     endif()
 
     if(RTOS_FREERTOS_CHECK)
-        # force inclusion of Windows.Storage API
+        # ONLY FOR FREERTOS+NXP force inclusion of Windows.Storage API
         set(API_Windows.Storage ON CACHE INTERNAL "Forcing Windows.Storage API option to ON")
+    else()
+        # all the others RTOSes: force inclusion of System.IO.FileSystem API
+        set(API_System.IO.FileSystem ON CACHE INTERNAL "Forcing System.IO.FileSystem API option to ON")
     endif()
 
-    # force inclusion of System.IO.FileSystem API
-    set(API_System.IO.FileSystem ON CACHE INTERNAL "Forcing System.IO.FileSystem API option to ON")
-
     message(STATUS "Support for SD Card is included")
+
 else()
     message(STATUS "Support for SD Card **IS NOT** included")
 endif()
