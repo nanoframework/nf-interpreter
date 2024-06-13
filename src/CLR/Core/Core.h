@@ -8,17 +8,17 @@
 
 #include <nanoCLR_Runtime.h>
 #include <nanoCLR_Checks.h>
-//#include <nanoCLR_Diagnostics.h>
+// #include <nanoCLR_Diagnostics.h>
 #include <nanoCLR_Hardware.h>
-//#include <nanoCLR_Stream.h>
-//#include <nanoCLR_Xml.h>
-//#include <nanoCLR_Application.h>
+// #include <nanoCLR_Stream.h>
+// #include <nanoCLR_Xml.h>
+#include <nanoCLR_Application.h>
 //
-//#include <nanoCLR_ParseOptions.h>
+// #include <nanoCLR_ParseOptions.h>
 //
 #include <corlib_native.h>
-//#include <SPOT_native.h>
-//#include <SPOT_hardware_native.h>
+// #include <SPOT_native.h>
+// #include <SPOT_hardware_native.h>
 #include <nanoCLR_Runtime__HeapBlock.h>
 
 #endif // NANOCLR_CORE_H

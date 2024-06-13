@@ -32,9 +32,7 @@
 
 #else
 
-#pragma comment(                                                                                                       \
-    lib,                                                                                                               \
-    "WireProtocol.lib") // UNDONE: FIXME: SUPPORT_ComputeCRC required by TypeSystem.cpp, CLR_RT_HeapBlock
+#pragma comment(lib, "WireProtocol.lib")
 
 #pragma comment(lib, "Debugger_stub.lib")
 #pragma comment(lib, "Diagnostics_stub.lib")
@@ -86,16 +84,6 @@ int _tmain(int argc, _TCHAR *argv[])
     clrSettings.MaxContextSwitches = 50;
     clrSettings.WaitForDebugger = false;
     clrSettings.EnterDebuggerLoopAfterExit = false;
-
-    // fill arguments from command line
-    clrSettings.StartArgs.resize(argc - 1);
-
-    std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
-
-    for (int i = 0; i < argc - 1; i++)
-    {
-        clrSettings.StartArgs[i] = converter.from_bytes(argv[1 + i]);
-    }
 
     ClrStartup(clrSettings);
 
