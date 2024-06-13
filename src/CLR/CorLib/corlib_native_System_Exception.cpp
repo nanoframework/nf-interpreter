@@ -12,10 +12,7 @@ struct ExceptionLookup
 };
 
 static const ExceptionLookup c_ExceptionLookup[] = {
-#define EL(hr, fld)                                                                                                    \
-    {                                                                                                                  \
-        hr, &g_CLR_RT_WellKnownTypes.fld                                                                               \
-    }
+#define EL(hr, fld) {hr, &g_CLR_RT_WellKnownTypes.fld}
     EL(CLR_E_APPDOMAIN_EXITED, m_AppDomainUnloadedException),
     EL(CLR_E_INVALID_PARAMETER, m_ArgumentException),
     EL(CLR_E_ARGUMENT_NULL, m_ArgumentNullException),
@@ -196,18 +193,15 @@ HRESULT Library_corlib_native_System_Exception::SetStackTrace(CLR_RT_HeapBlock &
 
 #if defined(NANOCLR_TRACE_EXCEPTIONS)
 
-        if (CLR_EE_DBG_IS(NoStackTraceInExceptions))
+        if (CLR_EE_DBG_IS(NoStackTraceInExceptions) || CLR_EE_DBG_IS_NOT(Enabled))
         {
-            // stack trace is DISABLED
+            // stack trace is DISABLED or no debugger is attached
 
             (void)dst;
             (void)array;
 
-            // create an empty array for the stack trace
-            NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance(
-                obj[FIELD___stackTrace],
-                depth,
-                g_CLR_RT_WellKnownTypes.m_UInt8));
+            // null the array that would hold the stack trace
+            obj[FIELD___stackTrace].SetObjectReference(NULL);
         }
         else
         {
@@ -245,7 +239,7 @@ HRESULT Library_corlib_native_System_Exception::SetStackTrace(CLR_RT_HeapBlock &
             if (!g_CLR_RT_ExecutionEngine.m_fShuttingDown)
 #endif
             {
-                if (CLR_EE_DBG_IS_NOT(NoStackTraceInExceptions))
+                if (CLR_EE_DBG_IS_NOT(NoStackTraceInExceptions) && CLR_EE_DBG_IS(Enabled))
                 {
                     CLR_RT_DUMP::EXCEPTION(*stack, ref);
                 }
