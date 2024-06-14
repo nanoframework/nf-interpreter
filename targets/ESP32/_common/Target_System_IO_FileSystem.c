@@ -112,18 +112,66 @@ bool Storage_MountMMC(bool bit1Mode, int driveIndex)
     // Modify slot_config.gpio_cd and slot_config.gpio_wp if your board has these signals.
     sdmmc_slot_config_t slot_config = SDMMC_SLOT_CONFIG_DEFAULT();
 
-    // GPIOs 15, 2, 4, 12, 13 should have external 10k pull-ups.
-    // Internal pull-ups are not sufficient. However, enabling internal pull-ups
-    // does make a difference some boards, so we do that here.
-    gpio_set_pull_mode((gpio_num_t)15, GPIO_PULLUP_ONLY); // CMD, needed in 4- and 1- line modes
-    gpio_set_pull_mode((gpio_num_t)2, GPIO_PULLUP_ONLY);  // D0, needed in 4- and 1-line modes
-
-    if (!bit1Mode)
+    // Set bus width to use
+    if (bit1Mode)
     {
-        gpio_set_pull_mode((gpio_num_t)4, GPIO_PULLUP_ONLY);  // D1, needed in 4-line mode only
-        gpio_set_pull_mode((gpio_num_t)12, GPIO_PULLUP_ONLY); // D2, needed in 4-line mode only
-        gpio_set_pull_mode((gpio_num_t)13, GPIO_PULLUP_ONLY); // D3, needed in 4-line modes only
+        slot_config.width = 1;
     }
+    else
+    {
+        slot_config.width = 4;
+    }
+
+    // from IDF readme on SDMMC
+    //
+    ///////////////////////////////
+    // Pin assignments for ESP32 //
+    ///////////////////////////////
+    // On ESP32, SDMMC peripheral is connected to specific GPIO pins using the IO MUX.
+    // GPIO pins cannot be customized. Please see the table below for the pin connections.
+
+    // When using an ESP-WROVER-KIT board, this example runs without any extra modifications required.
+    // Only an SD card needs to be inserted into the slot.
+
+    // ESP32 pin     | SD card pin | Notes
+    // --------------|-------------|------------
+    // GPIO14 (MTMS) | CLK         | 10k pullup in SD mode
+    // GPIO15 (MTDO) | CMD         | 10k pullup in SD mode
+    // GPIO2         | D0          | 10k pullup in SD mode, pull low to go into download mode (see Note about GPIO2
+    // below!) GPIO4         | D1          | not used in 1-line SD mode; 10k pullup in 4-line SD mode GPIO12 (MTDI) | D2
+    // | not used in 1-line SD mode; 10k pullup in 4-line SD mode (see Note about GPIO12 below!) GPIO13 (MTCK) | D3 |
+    // not used in 1-line SD mode, but card's D3 pin must have a 10k pullup
+
+    //////////////////////////////////
+    // Pin assignments for ESP32-S3 //
+    //////////////////////////////////
+    // On ESP32-S3, SDMMC peripheral is connected to GPIO pins using GPIO matrix.
+    // This allows arbitrary GPIOs to be used to connect an SD card. In this example, GPIOs can be configured in two
+    // ways:
+
+    // 1. Using menuconfig: Run `idf.py menuconfig` in the project directory and open "SD/MMC Example Configuration"
+    // menu.
+    // 2. In the source code: See the initialization of ``sdmmc_slot_config_t slot_config`` structure in the example
+    // code.
+
+    // The table below lists the default pin assignments.
+
+    // When using an ESP32-S3-USB-OTG board, this example runs without any extra modifications required.
+    // Only an SD card needs to be inserted into the slot.
+
+    // ESP32-S3 pin  | SD card pin | Notes
+    // --------------|-------------|------------
+    // GPIO36        | CLK         | 10k pullup
+    // GPIO35        | CMD         | 10k pullup
+    // GPIO37        | D0          | 10k pullup
+    // GPIO38        | D1          | not used in 1-line SD mode; 10k pullup in 4-line mode
+    // GPIO33        | D2          | not used in 1-line SD mode; 10k pullup in 4-line mode
+    // GPIO34        | D3          | not used in 1-line SD mode, but card's D3 pin must have a 10k pullup
+
+    // Enable internal pullups on enabled pins. The internal pullups
+    // are insufficient however, please make sure 10k external pullups are
+    // connected on the bus.
+    slot_config.flags |= SDMMC_SLOT_FLAG_INTERNAL_PULLUP;
 
     //	Mount the SDCard device as a FAT device on the VFS
     esp_vfs_fat_sdmmc_mount_config_t mount_config = {
@@ -165,7 +213,8 @@ bool Storage_MountSpi(int spiBus, uint32_t csPin, int driveIndex)
     ESP_LOGI(TAG, "Initializing SPI SD card");
 
     sdmmc_host_t host = SDSPI_HOST_DEFAULT();
-#if defined(CONFIG_IDF_TARGET_ESP32C3) || defined(CONFIG_IDF_TARGET_ESP32S3) || defined(CONFIG_IDF_TARGET_ESP32C6) || defined(CONFIG_IDF_TARGET_ESP32H2)
+#if defined(CONFIG_IDF_TARGET_ESP32C3) || defined(CONFIG_IDF_TARGET_ESP32S3) || defined(CONFIG_IDF_TARGET_ESP32C6) ||  \
+    defined(CONFIG_IDF_TARGET_ESP32H2)
     // First available bus on ESP32_C3/S3/C6/H2 is SPI2_HOST
     host.slot = spiBus + SPI2_HOST;
 #else
