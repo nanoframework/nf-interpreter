@@ -193,9 +193,13 @@ HRESULT Library_corlib_native_System_Exception::SetStackTrace(CLR_RT_HeapBlock &
 
 #if defined(NANOCLR_TRACE_EXCEPTIONS)
 
-        if (CLR_EE_DBG_IS(NoStackTraceInExceptions) || CLR_EE_DBG_IS_NOT(Enabled))
+        if (CLR_EE_DBG_IS(NoStackTraceInExceptions) || CLR_EE_DBG_IS_NOT(Enabled) || CLR_EE_IS(Compaction_Pending) ||
+            g_CLR_RT_ExecutionEngine.m_fPerformGarbageCollection)
         {
-            // stack trace is DISABLED or no debugger is attached
+            // stack trace is DISABLED or...
+            // no debugger is attached or...
+            // compaction is pending so better not mess around or...
+            // GC is requested or in progress so better not mess around
 
             (void)dst;
             (void)array;

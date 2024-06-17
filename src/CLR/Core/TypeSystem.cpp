@@ -2276,8 +2276,8 @@ HRESULT CLR_RT_AppDomain::LoadAssembly(CLR_RT_Assembly *assm)
 
     NANOCLR_CHECK_HRESULT(CLR_RT_AppDomainAssembly::CreateInstance(this, assm, appDomainAssembly));
 
-    // Allocate an out of memory exception.  We should never get into a case where an out of memory exception
-    // cannot be thrown.
+    // Preemptively allocate an out of memory exception.
+    // We can never get into a case where an out of memory exception cannot be thrown.
 
     _ASSERTE(!strcmp(assm->m_szName, "mscorlib")); // always the first assembly to be loaded
 
@@ -4087,6 +4087,9 @@ HRESULT CLR_RT_TypeSystem::PrepareForExecution()
 #endif // #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
 
 #if !defined(NANOCLR_APPDOMAINS)
+
+    // Preemptively create an out of memory exception.
+    // We can never get into a case where an out of memory exception cannot be thrown.
     NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObjectFromIndex(
         g_CLR_RT_ExecutionEngine.m_outOfMemoryException,
         g_CLR_RT_WellKnownTypes.m_OutOfMemoryException));
