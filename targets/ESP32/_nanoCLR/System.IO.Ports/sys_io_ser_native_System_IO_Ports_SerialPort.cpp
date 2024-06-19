@@ -11,7 +11,7 @@
 
 // in UWP the COM ports are named COM1, COM2, COM3. But ESP32 uses internally UART0, UART1, UART2. This maps the port
 // index 1, 2 or 3 to the uart number 0, 1 or 2
-#define PORT_INDEX_TO_UART_NUM(portIndex) ((portIndex)-1)
+#define PORT_INDEX_TO_UART_NUM(portIndex) ((portIndex) - 1)
 // in UWP the COM ports are named COM1, COM2, COM3. But ESP32 uses internally UART0, UART1, UART2. This maps the uart
 // number 0, 1 or 2 to the port index 1, 2 or 3
 #define UART_NUM_TO_PORT_INDEX(uart_num) ((uart_num) + 1)
