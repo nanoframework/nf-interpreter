@@ -380,10 +380,10 @@ bool InitialiseNetworkDefaultConfig(HAL_Configuration_NetworkInterface *config, 
             break;
 
 #if HAL_USE_THREAD == TRUE
-        case NetworkInterfaceType_Thread: //OpenThread  IPV6 only
+        case NetworkInterfaceType_Thread: // OpenThread  IPV6 only
             config->StartupAddressMode = AddressMode_Static;
             config->AutomaticDNS = 1;
-           break;
+            break;
 #endif
 
         default:

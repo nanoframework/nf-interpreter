@@ -41,58 +41,59 @@ extern void ThreadSetInterfaceNumber(int networkInterfaceNumber);
 #define ESP_OPENTHREAD_DEFAULT_UART_HOST_CONFIG()                                                                      \
     {                                                                                                                  \
         .host_connection_mode = HOST_CONNECTION_MODE_RCP_UART,                                                         \
-        .host_uart_config = {                                                                                          \
-            .port = 0,                                                                                                 \
-            .uart_config =                                                                                             \
-                {                                                                                                      \
-                    .baud_rate = 460800,                                                                               \
-                    .data_bits = UART_DATA_8_BITS,                                                                     \
-                    .parity = UART_PARITY_DISABLE,                                                                     \
-                    .stop_bits = UART_STOP_BITS_1,                                                                     \
-                    .flow_ctrl = UART_HW_FLOWCTRL_DISABLE,                                                             \
-                    .rx_flow_ctrl_thresh = 0,                                                                          \
-                    .source_clk = UART_SCLK_DEFAULT,                                                                   \
-                },                                                                                                     \
-            .rx_pin = (gpio_num_t)OPENTHREAD_RCP_UART_RX_PIN,                                                          \
-            .tx_pin = (gpio_num_t)OPENTHREAD_RCP_UART_TX_PIN,                                                          \
-        },                                                                                                             \
+        .host_uart_config =                                                                                            \
+            {                                                                                                          \
+                .port = 0,                                                                                             \
+                .uart_config =                                                                                         \
+                    {                                                                                                  \
+                        .baud_rate = 460800,                                                                           \
+                        .data_bits = UART_DATA_8_BITS,                                                                 \
+                        .parity = UART_PARITY_DISABLE,                                                                 \
+                        .stop_bits = UART_STOP_BITS_1,                                                                 \
+                        .flow_ctrl = UART_HW_FLOWCTRL_DISABLE,                                                         \
+                        .rx_flow_ctrl_thresh = 0,                                                                      \
+                        .source_clk = UART_SCLK_DEFAULT,                                                               \
+                    },                                                                                                 \
+                .rx_pin = (gpio_num_t)OPENTHREAD_RCP_UART_RX_PIN,                                                      \
+                .tx_pin = (gpio_num_t)OPENTHREAD_RCP_UART_TX_PIN,                                                      \
+            },                                                                                                         \
     }
 
 #define ESP_OPENTHREAD_DEFAULT_SPI_HOST_CONFIG()                                                                       \
     {                                                                                                                  \
         .host_connection_mode = HOST_CONNECTION_MODE_RCP_SPI,                                                          \
-        .spi_slave_config = {                                                                                          \
-            .host_device = SPI2_HOST,                                                                                  \
-            .bus_config =                                                                                              \
-                {                                                                                                      \
-                    .mosi_io_num = 3,                                                                                  \
-                    .miso_io_num = 1,                                                                                  \
-                    .sclk_io_num = 0,                                                                                  \
-                    .quadwp_io_num = -1,                                                                               \
-                    .quadhd_io_num = -1,                                                                               \
-                    .isr_cpu_id = INTR_CPU_ID_0,                                                                       \
-                },                                                                                                     \
-            .slave_config =                                                                                            \
-                {                                                                                                      \
-                    .spics_io_num = 2,                                                                                 \
-                    .flags = 0,                                                                                        \
-                    .queue_size = 3,                                                                                   \
-                    .mode = 0,                                                                                         \
-                },                                                                                                     \
-            .intr_pin = (gpio_num_t)9,                                                                                 \
+        .spi_slave_config =                                                                                            \
+            {                                                                                                          \
+                .host_device = SPI2_HOST,                                                                              \
+                .bus_config =                                                                                          \
+                    {                                                                                                  \
+                        .mosi_io_num = 3,                                                                              \
+                        .miso_io_num = 1,                                                                              \
+                        .sclk_io_num = 0,                                                                              \
+                        .quadwp_io_num = -1,                                                                           \
+                        .quadhd_io_num = -1,                                                                           \
+                        .isr_cpu_id = INTR_CPU_ID_0,                                                                   \
+                    },                                                                                                 \
+                .slave_config =                                                                                        \
+                    {                                                                                                  \
+                        .spics_io_num = 2,                                                                             \
+                        .flags = 0,                                                                                    \
+                        .queue_size = 3,                                                                               \
+                        .mode = 0,                                                                                     \
+                    },                                                                                                 \
+                .intr_pin = (gpio_num_t)9,                                                                             \
                                                                                                                        \
-        },                                                                                                             \
+            },                                                                                                         \
     }
 
 // Default config for native RADIO
-#define ESP_OPENTHREAD_NO_HOST_CONFIG()                                                                                \
-    {                                                                                                                  \
-        .host_connection_mode = HOST_CONNECTION_MODE_NONE                                                              \
-    }
+#define ESP_OPENTHREAD_NO_HOST_CONFIG() {.host_connection_mode = HOST_CONNECTION_MODE_NONE}
 
 #define ESP_OPENTHREAD_DEFAULT_PORT_CONFIG()                                                                           \
     {                                                                                                                  \
-        .storage_partition_name = "nvs", .netif_queue_size = 10, .task_queue_size = 10,                                \
+        .storage_partition_name = "nvs",                                                                               \
+        .netif_queue_size = 10,                                                                                        \
+        .task_queue_size = 10,                                                                                         \
     }
 
 static esp_netif_t *openthread_netif = NULL;
