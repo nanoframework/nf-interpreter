@@ -662,7 +662,6 @@ void CLR_RT_GarbageCollector::AppDomain_Mark()
 
         CheckSingleBlock_Force(appDomain->m_globalLock);
         CheckSingleBlock_Force(appDomain->m_strName);
-        CheckSingleBlock_Force(appDomain->m_outOfMemoryException);
     }
     NANOCLR_FOREACH_NODE_END();
 }
