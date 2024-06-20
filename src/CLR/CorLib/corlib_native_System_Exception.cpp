@@ -12,7 +12,10 @@ struct ExceptionLookup
 };
 
 static const ExceptionLookup c_ExceptionLookup[] = {
-#define EL(hr, fld) {hr, &g_CLR_RT_WellKnownTypes.fld}
+#define EL(hr, fld)                                                                                                    \
+    {                                                                                                                  \
+        hr, &g_CLR_RT_WellKnownTypes.fld                                                                               \
+    }
     EL(CLR_E_APPDOMAIN_EXITED, m_AppDomainUnloadedException),
     EL(CLR_E_INVALID_PARAMETER, m_ArgumentException),
     EL(CLR_E_ARGUMENT_NULL, m_ArgumentNullException),
