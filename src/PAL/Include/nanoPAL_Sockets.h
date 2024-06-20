@@ -331,9 +331,9 @@ typedef struct SOCK_discoveryinfo
 } SOCK_discoveryinfo;
 
 #define SOCK_MAKE_IP_ADDR(w, x, y, z)                                                                                  \
-    ((uint32_t)(w)&0xFF) << 24 | ((uint32_t)(x)&0xff) << 16 | ((uint32_t)(y)&0xff) << 8 | ((uint32_t)(z)&0xff)
+    ((uint32_t)(w) & 0xFF) << 24 | ((uint32_t)(x) & 0xff) << 16 | ((uint32_t)(y) & 0xff) << 8 | ((uint32_t)(z) & 0xff)
 #define SOCK_MAKE_IP_ADDR_LITTLEEND(w, x, y, z)                                                                        \
-    ((uint32_t)(z)&0xFF) << 24 | ((uint32_t)(y)&0xff) << 16 | ((uint32_t)(x)&0xff) << 8 | ((uint32_t)(w)&0xff)
+    ((uint32_t)(z) & 0xFF) << 24 | ((uint32_t)(y) & 0xff) << 16 | ((uint32_t)(x) & 0xff) << 8 | ((uint32_t)(w) & 0xff)
 
 #ifndef SOCKET_READ_PEEK_OPTION
 #define SOCKET_READ_PEEK_OPTION 2
@@ -386,13 +386,13 @@ typedef struct SOCK_timeval
 #define SOCK_NETWORKCONFIGURATION_FLAGS_TYPE__mask        0x000F0000
 #define SOCK_NETWORKCONFIGURATION_FLAGS_TYPE__shift       16
 #define SOCK_NETWORKCONFIGURATION_FLAGS_TYPE__value(x)                                                                 \
-    (((x)&SOCK_NETWORKCONFIGURATION_FLAGS_TYPE__mask) >> SOCK_NETWORKCONFIGURATION_FLAGS_TYPE__shift)
+    (((x) & SOCK_NETWORKCONFIGURATION_FLAGS_TYPE__mask) >> SOCK_NETWORKCONFIGURATION_FLAGS_TYPE__shift)
 #define SOCK_NETWORKCONFIGURATION_FLAGS_TYPE__set(x)                                                                   \
     (((x) << SOCK_NETWORKCONFIGURATION_FLAGS_TYPE__shift) & SOCK_NETWORKCONFIGURATION_FLAGS_TYPE__mask)
 #define SOCK_NETWORKCONFIGURATION_FLAGS_SUBINDEX__mask  0x00F00000
 #define SOCK_NETWORKCONFIGURATION_FLAGS_SUBINDEX__shift 20
 #define SOCK_NETWORKCONFIGURATION_FLAGS_SUBINDEX__value(x)                                                             \
-    (((x)&SOCK_NETWORKCONFIGURATION_FLAGS_SUBINDEX__mask) >> SOCK_NETWORKCONFIGURATION_FLAGS_SUBINDEX__shift)
+    (((x) & SOCK_NETWORKCONFIGURATION_FLAGS_SUBINDEX__mask) >> SOCK_NETWORKCONFIGURATION_FLAGS_SUBINDEX__shift)
 #define SOCK_NETWORKCONFIGURATION_FLAGS_SUBINDEX__set(x)                                                               \
     (((x) << SOCK_NETWORKCONFIGURATION_FLAGS_SUBINDEX__shift) & SOCK_NETWORKCONFIGURATION_FLAGS_SUBINDEX__mask)
 
@@ -429,7 +429,7 @@ typedef enum __nfpack NetworkInterface_UpdateOperation
 #define WIRELESS_FLAG_AUTHENTICATION__shift 0
 #define WIRELESS_FLAG_AUTHENTICATION__mask  0x0000000F
 #define WIRELESS_FLAG_AUTHENTICATION__value(x)                                                                         \
-    (((x)&WIRELESS_FLAG_AUTHENTICATION__mask) >> WIRELESS_FLAG_AUTHENTICATION__shift)
+    (((x) & WIRELESS_FLAG_AUTHENTICATION__mask) >> WIRELESS_FLAG_AUTHENTICATION__shift)
 #define WIRELESS_FLAG_AUTHENTICATION__set(x)                                                                           \
     (((x) << WIRELESS_FLAG_AUTHENTICATION__shift) & WIRELESS_FLAG_AUTHENTICATION__mask)
 
@@ -445,7 +445,7 @@ typedef enum __nfpack NetworkInterface_UpdateOperation
 #define WIRELESS_FLAG_ENCRYPTION_Certificate 4
 #define WIRELESS_FLAG_ENCRYPTION__shift      4
 #define WIRELESS_FLAG_ENCRYPTION__mask       0x000000F0
-#define WIRELESS_FLAG_ENCRYPTION__value(x)   (((x)&WIRELESS_FLAG_ENCRYPTION__mask) >> WIRELESS_FLAG_ENCRYPTION__shift)
+#define WIRELESS_FLAG_ENCRYPTION__value(x)   (((x) & WIRELESS_FLAG_ENCRYPTION__mask) >> WIRELESS_FLAG_ENCRYPTION__shift)
 #define WIRELESS_FLAG_ENCRYPTION__set(x)     (((x) << WIRELESS_FLAG_ENCRYPTION__shift) & WIRELESS_FLAG_ENCRYPTION__mask)
 
 ///
@@ -459,26 +459,28 @@ typedef enum __nfpack NetworkInterface_UpdateOperation
 #define WIRELESS_FLAG_RADIO_n         8
 #define WIRELESS_FLAG_RADIO__shift    8
 #define WIRELESS_FLAG_RADIO__mask     0x00000F00
-#define WIRELESS_FLAG_RADIO__value(x) (((x)&WIRELESS_FLAG_RADIO__mask) >> WIRELESS_FLAG_RADIO__shift)
+#define WIRELESS_FLAG_RADIO__value(x) (((x) & WIRELESS_FLAG_RADIO__mask) >> WIRELESS_FLAG_RADIO__shift)
 #define WIRELESS_FLAG_RADIO__set(x)   (((x) << WIRELESS_FLAG_RADIO__shift) & WIRELESS_FLAG_RADIO__mask)
 
 // Wireless flags bits 12 - 15
 #define WIRELESS_FLAG_DATA_ENCRYPTED 1
 #define WIRELESS_FLAG_DATA__shift    12
 #define WIRELESS_FLAG_DATA__mask     0x0000F000
-#define WIRELESS_FLAG_DATA__value(x) (((x)&WIRELESS_FLAG_DATA__mask) >> WIRELESS_FLAG_DATA__shift)
+#define WIRELESS_FLAG_DATA__value(x) (((x) & WIRELESS_FLAG_DATA__mask) >> WIRELESS_FLAG_DATA__shift)
 #define WIRELESS_FLAG_DATA__set(x)   (((x) << WIRELESS_FLAG_DATA__shift) & WIRELESS_FLAG_DATA__mask)
 
 // extern const ConfigurationSector g_ConfigurationSector;
 
 //--//
 
-#define SOCK_htons(x) ((((x)&0x000000FFUL) << 8) | (((x)&0x0000FF00UL) >> 8))
+#define SOCK_htons(x) ((((x) & 0x000000FFUL) << 8) | (((x) & 0x0000FF00UL) >> 8))
 #define SOCK_htonl(x)                                                                                                  \
-    ((((x)&0x000000FFUL) << 24) | (((x)&0x0000FF00UL) << 8) | (((x)&0x00FF0000UL) >> 8) | (((x)&0xFF000000UL) >> 24))
+    ((((x) & 0x000000FFUL) << 24) | (((x) & 0x0000FF00UL) << 8) | (((x) & 0x00FF0000UL) >> 8) |                        \
+     (((x) & 0xFF000000UL) >> 24))
 #define SOCK_ntohs(x) SOCK_htons(x)
 #define SOCK_ntohl(x)                                                                                                  \
-    ((((x)&0x000000FFUL) << 24) | (((x)&0x0000FF00UL) << 8) | (((x)&0x00FF0000UL) >> 8) | (((x)&0xFF000000UL) >> 24))
+    ((((x) & 0x000000FFUL) << 24) | (((x) & 0x0000FF00UL) << 8) | (((x) & 0x00FF0000UL) >> 8) |                        \
+     (((x) & 0xFF000000UL) >> 24))
 
 #define SOCK_FD_ZERO(x) memset(x, 0, sizeof(*x))
 __inline bool SOCK_FD_ISSET(int y, SOCK_fd_set *x)

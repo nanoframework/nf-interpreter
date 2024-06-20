@@ -14,7 +14,6 @@ bool NF_ESP32_ConnectInProgress = false;
 int NF_ESP32_ConnectResult = 0;
 int nf_threadNetworkIndex = -1;
 
-
 bool StoreConfigBlock(
     DeviceConfigurationOption configType,
     uint32_t configurationIndex,
@@ -46,7 +45,7 @@ int Network_Interface_Open(int index)
 
     switch (networkConfiguration.InterfaceType)
     {
-#if defined(CONFIG_SOC_WIFI_SUPPORTED)          
+#if defined(CONFIG_SOC_WIFI_SUPPORTED)
         // Wi-Fi (STA)
         case NetworkInterfaceType_Wireless80211:
             return NF_ESP32_Wireless_Open(&networkConfiguration);
@@ -91,7 +90,7 @@ bool Network_Interface_Close(int index)
 
     switch (networkConfiguration.InterfaceType)
     {
-#if defined(CONFIG_SOC_WIFI_SUPPORTED)    
+#if defined(CONFIG_SOC_WIFI_SUPPORTED)
         // Wireless
         case NetworkInterfaceType_Wireless80211:
             return NF_ESP32_Wireless_Close();
@@ -117,8 +116,8 @@ bool Network_Interface_Close(int index)
     return false;
 }
 
-#if defined(CONFIG_SOC_WIFI_SUPPORTED)    
- int Network_Interface_Start_Scan(int index)
+#if defined(CONFIG_SOC_WIFI_SUPPORTED)
+int Network_Interface_Start_Scan(int index)
 {
     HAL_Configuration_NetworkInterface networkConfiguration;
 
@@ -208,17 +207,20 @@ int Network_Interface_Start_Connect(int index, const char *ssid, const char *pas
     {
         // need this stupid cast because the current gcc version with ESP32 IDF is not happy with the simple syntax '|='
         wirelessConfig->Options =
-            (Wireless80211Configuration_ConfigurationOptions)(wirelessConfig->Options | Wireless80211Configuration_ConfigurationOptions_AutoConnect);
+            (Wireless80211Configuration_ConfigurationOptions)(wirelessConfig->Options |
+                                                              Wireless80211Configuration_ConfigurationOptions_AutoConnect);
     }
     else
     {
         // need this stupid cast because the current gcc version with ESP32 IDF is not happy with the simple syntax '^='
         wirelessConfig->Options =
-            (Wireless80211Configuration_ConfigurationOptions)(wirelessConfig->Options ^ Wireless80211Configuration_ConfigurationOptions_AutoConnect);
+            (Wireless80211Configuration_ConfigurationOptions)(wirelessConfig->Options ^
+                                                              Wireless80211Configuration_ConfigurationOptions_AutoConnect);
 
         // Make sure we are still enabled because AutoConnect includes Enable
         wirelessConfig->Options =
-            (Wireless80211Configuration_ConfigurationOptions)(wirelessConfig->Options | Wireless80211Configuration_ConfigurationOptions_Enable);
+            (Wireless80211Configuration_ConfigurationOptions)(wirelessConfig->Options |
+                                                              Wireless80211Configuration_ConfigurationOptions_Enable);
     }
 
     // Update Wireless structure with new SSID and passphase

@@ -238,7 +238,7 @@ void LWIP_SOCKETS_Driver::Status_callback(struct netif *netif)
 }
 #endif
 
-//  When network interface is not initialised/started at boot we can set net interface number when started 
+//  When network interface is not initialised/started at boot we can set net interface number when started
 //
 void LWIP_SOCKETS_Driver::SetSocketDriverInterface(int i, int interfaceNumber)
 {
@@ -246,17 +246,17 @@ void LWIP_SOCKETS_Driver::SetSocketDriverInterface(int i, int interfaceNumber)
 }
 
 //  Initialise a network interface with interface number
-//  returns 
-//     True if interface initialised 
+//  returns
+//     True if interface initialised
 //     False if failed or not ready
 //
 bool LWIP_SOCKETS_Driver::InitializeInterfaceIndex(
-    int i, 
-    int interfaceNumber, 
+    int i,
+    int interfaceNumber,
     HAL_Configuration_NetworkInterface &networkConfiguration)
 {
     struct netif *networkInterface;
-    
+
     SetSocketDriverInterface(i, interfaceNumber);
 
     UpdateAdapterConfiguration(i, (NetworkInterface_UpdateOperation_Dns), &networkConfiguration);
@@ -264,22 +264,22 @@ bool LWIP_SOCKETS_Driver::InitializeInterfaceIndex(
     networkInterface = netif_find_interface(interfaceNumber);
     if (networkInterface)
     {
-    #if LWIP_NETIF_LINK_CALLBACK == 1
+#if LWIP_NETIF_LINK_CALLBACK == 1
         netif_set_link_callback(networkInterface, Link_callback);
 
         if (netif_is_link_up(networkInterface))
         {
             Link_callback(networkInterface);
         }
-    #endif
-    #if LWIP_NETIF_STATUS_CALLBACK == 1
+#endif
+#if LWIP_NETIF_STATUS_CALLBACK == 1
         netif_set_status_callback(networkInterface, Status_callback);
 
         if (netif_is_up(networkInterface))
         {
             Status_callback(networkInterface);
         }
-    #endif
+#endif
 
         return TRUE;
     }
@@ -322,11 +322,11 @@ bool LWIP_SOCKETS_Driver::Initialize()
             // failed to load configuration
             // FIXME output error, error message log ?
             // move to the next, if any
-            continue; 
+            continue;
         }
         _ASSERTE(networkConfiguration.StartupAddressMode > 0);
 
-        // Bind and Open the network driver 
+        // Bind and Open the network driver
         Network_Interface_Bind(i);
         interfaceNumber = Network_Interface_Open(i);
         if (interfaceNumber == SOCK_SOCKET_ERROR)
@@ -1561,7 +1561,7 @@ int LWIP_SOCKETS_Driver::GetNativeIPV6Option(int optname)
             break;
         case SOCK_IPO_DROP_MEMBERSHIP:
             nativeOptionName = IPV6_DROP_MEMBERSHIP;
-            break;     
+            break;
 
         // allow the C# user to specify LWIP options that our managed enum
         // doesn't support
