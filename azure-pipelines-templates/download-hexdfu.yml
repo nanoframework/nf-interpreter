@@ -4,7 +4,7 @@
 steps:
   - task: Cache@2
     inputs:
-      key: '3-0 | hex2dfuKey'
+      key: "3-0 | hex2dfuKey"
       restoreKeys: hex2dfuKey
       path: $(Agent.TempDirectory)/hex2dfu
       cacheHitVar: HEX2DFU_CACHE_RESTORED
@@ -15,17 +15,17 @@ steps:
     condition: and( eq(variables['NeedsDFU'], true), ne(variables.HEX2DFU_CACHE_RESTORED, 'true'))
     displayName: Install HEX2DFU
     inputs:
-        targetType: 'filePath'
-        filePath: '$(Build.Repository.LocalPath)\install-scripts\install-nf-hex2dfu.ps1'
-        failOnStderr: 'true'
+      targetType: "filePath"
+      filePath: '$(Build.Repository.LocalPath)\install-scripts\install-nf-hex2dfu.ps1'
+      failOnStderr: true
 
   - task: PowerShell@2
     inputs:
-        targetType: 'inline'
-        script: |
-            $newPath = "$env:Agent_TempDirectory".Replace('\','/') + "/hex2dfu"
-            Write-Host "$("##vso[task.setvariable variable=HEX2DFU_PATH]")$newPath"
-        errorActionPreference: 'stop'
-        failOnStderr: 'true'
+      targetType: "inline"
+      script: |
+        $newPath = "$env:Agent_TempDirectory".Replace('\','/') + "/hex2dfu"
+        Write-Host "$("##vso[task.setvariable variable=HEX2DFU_PATH]")$newPath"
+      errorActionPreference: "stop"
+      failOnStderr: true
     condition: eq(variables['NeedsDFU'], true)
     displayName: Adjust HexDFU path
