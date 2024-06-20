@@ -2,7 +2,6 @@
 # See LICENSE file in the project root for full license information.
 
 steps:
-
   # check if managed helper files where changed
   - powershell: |
       git config --global user.email "nanoframework@outlook.com"
@@ -36,7 +35,7 @@ steps:
 
   - task: NuGetCommand@2
     inputs:
-      command: 'custom' 
+      command: "custom"
       arguments: 'pack targets\TI_SimpleLink\$(TargetBoard)\managed_helpers\package.nuspec -Version $(PACKAGE_NUGET_VERSION)'
     condition: and( succeeded(), eq(variables['BUILD_NUGET_PACKAGE'], true) )
     displayName: Pack managed helpers NuGet
@@ -48,7 +47,7 @@ steps:
       sourceFolder: $(Build.SourcesDirectory)
       Contents: |
         **\nanoFramework.Targets*.nupkg
-      TargetFolder: '$(Build.ArtifactStagingDirectory)'
+      TargetFolder: "$(Build.ArtifactStagingDirectory)"
       flattenFolders: true
       ignoreMakeDirErrors: true
 
@@ -57,7 +56,7 @@ steps:
     inputs:
       command: push
       nuGetFeedType: external
-      packagesToPush: '$(Build.ArtifactStagingDirectory)/*.nupkg'
-      publishFeedCredentials: 'NuGet-$(System.TeamProject)'
+      packagesToPush: "$(Build.ArtifactStagingDirectory)/*.nupkg"
+      publishFeedCredentials: "NuGet-$(System.TeamProject)"
     condition: and( succeeded(), eq(variables['BUILD_NUGET_PACKAGE'], true), eq(variables['System.PullRequest.PullRequestId'], '') )
     displayName: Push managed helpers NuGet packages to NuGet

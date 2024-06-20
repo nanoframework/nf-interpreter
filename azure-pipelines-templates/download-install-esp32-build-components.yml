@@ -2,12 +2,11 @@
 # See LICENSE file in the project root for full license information.
 
 steps:
-  
   # cache IDF tools folder
   - task: Cache@2
     displayName: Cache ESP32 tools
     inputs:
-      key: 'esp32_tools | 5_1_3'
+      key: "esp32_tools | 5_1_3"
       restoreKeys: 5_1_3
       path: $(UserProfile)\.espressif\tools
       cacheHitVar: ESP32_TOOLS_CACHE_RESTORED
@@ -25,31 +24,31 @@ steps:
   - task: UsePythonVersion@0
     displayName: Set Python to v3.11
     inputs:
-      versionSpec: '3.11'
+      versionSpec: "3.11"
       addToPath: true
 
   - task: PowerShell@2
     displayName: Fix install.ps1
     inputs:
-      targetType: 'inline'
+      targetType: "inline"
       workingDirectory: $(Agent.BuildDirectory)\s\esp-idf
       script: |
         $filecontent = Get-Content('install.ps1')
         attrib $file -r
         $filecontent -replace '--features=${FEATURES}' , ' ' | Out-File 'install.ps1' -Encoding utf8
-          
+
   # run IDF installers
   - task: PowerShell@2
     displayName: Install IDF (step 1)
     inputs:
-      targetType: 'filePath'
+      targetType: "filePath"
       filePath: $(Agent.BuildDirectory)\s\esp-idf\install.ps1
       workingDirectory: $(Agent.BuildDirectory)\s\esp-idf
 
   - task: PowerShell@2
     displayName: Install IDF (step 2)
     inputs:
-      targetType: 'inline'
+      targetType: "inline"
       workingDirectory: $(Agent.BuildDirectory)\s\esp-idf\tools\requirements
       script: |
         python -m pip install -r requirements.core.txt
@@ -57,19 +56,19 @@ steps:
   - task: PowerShell@2
     displayName: Install IDF (step 3)
     inputs:
-      targetType: 'filePath'
+      targetType: "filePath"
       filePath: $(Agent.BuildDirectory)\s\esp-idf\export.ps1
       workingDirectory: $(Agent.BuildDirectory)\s\esp-idf
 
   - task: PowerShell@2
     displayName: Update PATH with IDF tools
     inputs:
-      targetType: 'inline'
+      targetType: "inline"
       workingDirectory: $(Agent.BuildDirectory)\s\esp-idf
       script: |
         $ErrorActionPreference = 'SilentlyContinue'
         $envars_raw = python tools/idf_tools.py export --format key-value 2>$null
-        
+
         # find element the PATH collection
         $pathElement = 0
 

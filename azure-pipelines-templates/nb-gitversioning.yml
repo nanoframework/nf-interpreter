@@ -17,18 +17,18 @@ steps:
     condition: ne(variables['system.pullrequest.pullRequestId'], '')
     displayName: Set temporary build number
     inputs:
-        targetType: 'inline'
-        script: |
-            Write-Host "$("##vso[task.setvariable variable=NBGV_Version]")0.0.0"
-            Write-Host "$("##vso[task.setvariable variable=NBGV_VersionMajor]")0"
-            Write-Host "$("##vso[task.setvariable variable=NBGV_VersionMinor]")$env:System_PullRequest_PullRequestNumber"
-            Write-Host "$("##vso[task.setvariable variable=NBGV_AssemblyInformationalVersion]")00000000000"
-            Write-Host "$("##vso[task.setvariable variable=NBGV_NuGetPackageVersion]")0.0.$env:System_PullRequest_PullRequestNumber-alpha.$env:NBGV_BuildNumber"
+      targetType: "inline"
+      script: |
+        Write-Host "$("##vso[task.setvariable variable=NBGV_Version]")0.0.0"
+        Write-Host "$("##vso[task.setvariable variable=NBGV_VersionMajor]")0"
+        Write-Host "$("##vso[task.setvariable variable=NBGV_VersionMinor]")$env:System_PullRequest_PullRequestNumber"
+        Write-Host "$("##vso[task.setvariable variable=NBGV_AssemblyInformationalVersion]")00000000000"
+        Write-Host "$("##vso[task.setvariable variable=NBGV_NuGetPackageVersion]")0.0.$env:System_PullRequest_PullRequestNumber-alpha.$env:NBGV_BuildNumber"
 
   - task: PowerShell@2
     displayName: Get target build counter
     inputs:
-      targetType: 'inline'
+      targetType: "inline"
       script: |
         $counter = $env:REVISION
         $version = ([int]$counter).ToString()
