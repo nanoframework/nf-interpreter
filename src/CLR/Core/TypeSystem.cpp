@@ -1535,27 +1535,36 @@ void CLR_RT_Assembly::Assembly_Initialize(CLR_RT_Assembly::Offsets &offsets)
 
     //--//
 
-    {ITERATE_THROUGH_RECORDS(this, i, TypeDef, TYPEDEF){dst->m_flags = 0;
-    dst->m_totalFields = 0;
-    dst->m_hash = 0;
-}
-}
+    {
+        ITERATE_THROUGH_RECORDS(this, i, TypeDef, TYPEDEF)
+        {
+            dst->m_flags = 0;
+            dst->m_totalFields = 0;
+            dst->m_hash = 0;
+        }
+    }
 
-{ITERATE_THROUGH_RECORDS(this, i, FieldDef, FIELDDEF){dst->m_offset = CLR_EmptyIndex;
-}
-}
+    {
+        ITERATE_THROUGH_RECORDS(this, i, FieldDef, FIELDDEF)
+        {
+            dst->m_offset = CLR_EmptyIndex;
+        }
+    }
 
-{ITERATE_THROUGH_RECORDS(this, i, MethodDef, METHODDEF){dst->m_data = CLR_EmptyIndex;
-}
-}
+    {
+        ITERATE_THROUGH_RECORDS(this, i, MethodDef, METHODDEF)
+        {
+            dst->m_data = CLR_EmptyIndex;
+        }
+    }
 
 #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
-{
-    m_pDebuggingInfo_MethodDef = (CLR_RT_MethodDef_DebuggingInfo *)buffer;
-    buffer += offsets.iDebuggingInfoMethods;
+    {
+        m_pDebuggingInfo_MethodDef = (CLR_RT_MethodDef_DebuggingInfo *)buffer;
+        buffer += offsets.iDebuggingInfoMethods;
 
-    memset(m_pDebuggingInfo_MethodDef, 0, offsets.iDebuggingInfoMethods);
-}
+        memset(m_pDebuggingInfo_MethodDef, 0, offsets.iDebuggingInfoMethods);
+    }
 #endif // #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
 }
 
@@ -2765,10 +2774,7 @@ struct TypeIndexLookup
 };
 
 static const TypeIndexLookup c_TypeIndexLookup[] = {
-#define TIL(ns, nm, fld)                                                                                               \
-    {                                                                                                                  \
-        ns, nm, &g_CLR_RT_WellKnownTypes.fld                                                                           \
-    }
+#define TIL(ns, nm, fld) {ns, nm, &g_CLR_RT_WellKnownTypes.fld}
     TIL("System", "Boolean", m_Boolean),
     TIL("System", "Char", m_Char),
     TIL("System", "SByte", m_Int8),
@@ -2864,10 +2870,7 @@ struct MethodIndexLookup
 };
 
 static const MethodIndexLookup c_MethodIndexLookup[] = {
-#define MIL(nm, type, method)                                                                                          \
-    {                                                                                                                  \
-        nm, &g_CLR_RT_WellKnownTypes.type, &g_CLR_RT_WellKnownMethods.method                                           \
-    }
+#define MIL(nm, type, method) {nm, &g_CLR_RT_WellKnownTypes.type, &g_CLR_RT_WellKnownMethods.method}
 
     MIL("GetObjectFromId", m_ResourceManager, m_ResourceManager_GetObjectFromId),
     MIL("GetObjectChunkFromId", m_ResourceManager, m_ResourceManager_GetObjectChunkFromId),
