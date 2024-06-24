@@ -188,8 +188,8 @@ HRESULT Library_sys_dev_usbstream_native_System_Device_Usb_UsbStream::Read___I4_
             // cancel the async operation...
             sl_usbd_vendor_abort_read_bulk(sl_usbd_vendor_winusb_number);
 
-            // ... return exception
-            NANOCLR_SET_AND_LEAVE(CLR_E_TIMEOUT);
+            // clear RX counter
+            UsbStream_PAL.RxBytesReceived = 0;
         }
     }
 
