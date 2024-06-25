@@ -65,8 +65,8 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::SetupWriteLine(
                 *isNewAllocation = true;
 
                 // concatenate both strings
-                strcat(*buffer, text);
-                strcat(*buffer, newLine);
+                memcpy(*buffer, text, textLength);
+                memcpy(*buffer + textLength, newLine, newLineLength);
             }
             else
             {

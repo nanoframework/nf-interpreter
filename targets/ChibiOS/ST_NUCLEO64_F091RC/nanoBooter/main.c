@@ -15,7 +15,7 @@
 #include <LaunchCLR.h>
 
 // need to declare the Receiver thread here
-osThreadDef(ReceiverThread, osPriorityHigh, 512, "ReceiverThread");
+osThreadDef(ReceiverThread, osPriorityHigh, 1024, "ReceiverThread");
 
 // Application entry point.
 int main(void)
