@@ -72,6 +72,17 @@ static const CLR_RT_MethodHandler method_lookup[] =
     NULL,
     NULL,
     NULL,
+    Library_nf_sys_io_filesystem_System_IO_DriveInfo::DriveInfoNative___VOID__STRING,
+    NULL,
+    Library_nf_sys_io_filesystem_System_IO_DriveInfo::Format___STATIC__VOID__STRING,
+    Library_nf_sys_io_filesystem_System_IO_DriveInfo::GetDrivesNative___STATIC__SZARRAY_SystemIODriveInfo,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
     NULL,
     NULL,
     NULL,
@@ -133,14 +144,15 @@ static const CLR_RT_MethodHandler method_lookup[] =
     NULL,
     NULL,
     NULL,
+    NULL,
 };
 
 const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_System_IO_FileSystem =
 {
     "System.IO.FileSystem",
-    0x545A6C79,
+    0xCC556D24,
     method_lookup,
-    { 1, 0, 0, 2 }
+    { 1, 1, 0, 0 }
 };
 
 // clang-format on

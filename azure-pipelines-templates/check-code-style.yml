@@ -2,14 +2,13 @@
 # See LICENSE file in the project root for full license information.
 
 steps:
-
   - task: PowerShell@2
     name: Check_Code_Style
     displayName: Check code style
     condition: ne(variables['System.PullRequest.PullRequestId'], '')
     inputs:
       failOnStderr: false
-      targetType: 'inline'
+      targetType: "inline"
       script: |
         # need this to remove definition of redirect stdErr (only on Azure Pipelines image fo VS2019)
         $env:GIT_REDIRECT_STDERR = '2>&1'
@@ -29,12 +28,12 @@ steps:
 
         if($($pr.number) -eq "$env:System_PullRequest_PullRequestNumber")
         {
-          'OK' | Write-Host -ForegroundColor Green
+          '##[command] OK' | Write-Host -ForegroundColor Green
         }
 
         # fetch GitHub repo & branches
-        Write-Debug "Fetch GitHub repo & branches"
-        
+        Write-Debug "##[debug] Fetch GitHub repo & branches"
+
         # add remote for PR head
         "Adding remote: $($pr.head.repo.html_url)..." | Write-Host -ForegroundColor White
 
@@ -56,12 +55,12 @@ steps:
         $prFiles = Invoke-WebRequest "https://api.github.com/repos/$env:Build_Repository_Name/pulls/$env:System_PullRequest_PullRequestNumber/files" | ConvertFrom-Json
 
         "Starting file check..." | Write-Host -ForegroundColor White
-        
+
         # find clang-format
         $clangFormat = "clang-format.exe"
         if(!(Get-Command $clangFormat -ErrorAction SilentlyContinue))
         {
-            Write-Information "Can't find clang-format.exe in %PATH%, trying to use %VCINSTALLDIR%..."
+            Write-Information "##[warning] Can't find clang-format.exe in %PATH%, trying to use %VCINSTALLDIR%..."
             
             $clangFormat="$(Agent.TempDirectory)\llvm\bin\clang-format.exe"
             
@@ -74,7 +73,7 @@ steps:
         # have clang-format parse each file source file
         foreach($file in $prFiles)
         {
-          Write-Debug "checking: $($file.filename)"
+          Write-Debug "##[debug] checking: $($file.filename)"
           
           # don't process deleted files
           if( $($file.status) -eq "modified" -or
@@ -106,7 +105,7 @@ steps:
           # commit changed files
           git add -A 2>&1
           git commit -m "Code style fixes" -m "Automated fixes for code style." > $null
-      
+
           "Pushing changes..." | Write-Host -ForegroundColor White
 
           # push to nf-interpreter repo
@@ -116,7 +115,7 @@ steps:
           $prRequestBody = @{title="Code style fixes for $env:Build_Repository_Name PR#$env:System_PullRequest_PullRequestNumber";body="Automated fix of code style using project clang-format rules.`nYou can review and make changes or simply merge this PR to apply the fixes.";head="nanoFramework:$branchName";base="$($pr.head.ref)"} | ConvertTo-Json
 
           # start PR
-          Write-Debug "Starting PR with fixes."
+          Write-Debug "##[debug] Starting PR with fixes."
           "Creating PR..." | Write-Host -ForegroundColor White
 
           $githubApiEndpoint = "https://api.github.com/repos/$($pr.head.repo.full_name)/pulls"
@@ -136,7 +135,7 @@ steps:
           }
           catch 
           {
-              "Failed" | Write-Host -ForegroundColor Red
+              "##[error] Failed" | Write-Host -ForegroundColor Red
 
               $result = $_.Exception.Response.GetResponseStream()
               $reader = New-Object System.IO.StreamReader($result)
@@ -144,7 +143,7 @@ steps:
               $reader.DiscardBufferedData()
               $responseBody = $reader.ReadToEnd()
 
-              "Error submitting PR: $responseBody" | Write-Host -ForegroundColor Red
+              "##[error] Error submitting PR: $responseBody" | Write-Host -ForegroundColor Red
 
               # most likely this is a permissions issue because the base repo is read only or protected
               # report to user
@@ -152,14 +151,14 @@ steps:
               $codeStyleFixesComment = @{body="@$($pr.user.login) there are issues with the code style on the source files.`n`n:warning:Couldn't submit a PR with the fixes against your repo.:warning:`n`nPlease merge the changes from https://github.com/$env:Build_Repository_Name/tree/$branchName.`n`n<!-- nfbot fix request DO NOT REMOVE -->"} | ConvertTo-Json
               $result = Invoke-RestMethod -Method Post -UserAgent [Microsoft.PowerShell.Commands.PSUserAgent]::InternetExplorer -Uri $($pr.comments_url) -Header @{"Authorization"="$auth"} -ContentType "application/json" -Body $codeStyleFixesComment
 
-              throw "Error starting PR: $responseBody"
+              throw "##[error] Error starting PR: $responseBody"
           }
 
           # set variable to skip build failure report on Discord
           echo "##vso[task.setvariable variable=CODE_STYLE_CHECK_FAILED;isOutput=true]true"
 
           # force the check to fail
-          throw "Code style check failed"
+          throw "##[error] Code style check failed."
         }
 
   - task: PowerShell@2
@@ -167,5 +166,5 @@ steps:
     displayName: Check code style (SKIP)
     condition: eq(variables['System.PullRequest.PullRequestId'], '')
     inputs:
-      targetType: 'inline'
+      targetType: "inline"
       script: exit 0

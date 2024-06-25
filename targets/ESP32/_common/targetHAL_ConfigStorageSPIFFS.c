@@ -12,9 +12,6 @@
 #define NANO_SPIFFS_BASE_PATH   "/I"
 #define NANO_SPIFFS_CONFIG_NAME "con_"
 
-// label for the config partition (same as partition CSV file)
-#define SPIFFS_PARTITION_LABEL "config"
-
 static const char *TAG = "Config";
 
 typedef enum ConfigIoType
@@ -50,7 +47,11 @@ void ConfigStorage_Initialise()
         }
         else
         {
-            ESP_LOGE(TAG, "NANO: Failed to initialize SPIFFS (%s)", esp_err_to_name(ret));
+            // If not already running then report error (happens on soft reboot for debug)
+            if (ret != ESP_ERR_INVALID_STATE)
+            {
+                ESP_LOGE(TAG, "NANO: Failed to initialize SPIFFS (%s)", esp_err_to_name(ret));
+            }
         }
     }
 

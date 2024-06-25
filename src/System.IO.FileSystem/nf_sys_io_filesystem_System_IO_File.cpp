@@ -27,7 +27,7 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_File::ExistsNative___STATIC__BOOL
     FAULT_ON_NULL(fileName);
 
     // setup file path
-    filePath = (char *)platform_malloc(2 * FF_LFN_BUF + 1);
+    filePath = (char *)platform_malloc(FF_LFN_BUF + 1);
 
     // sanity check for successful malloc
     if (filePath == NULL)
@@ -37,7 +37,7 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_File::ExistsNative___STATIC__BOOL
     }
 
     // clear working buffer
-    memset(filePath, 0, 2 * FF_LFN_BUF + 1);
+    memset(filePath, 0, FF_LFN_BUF + 1);
 
     // compose file path
     CombinePathAndName(filePath, workingPath, fileName);

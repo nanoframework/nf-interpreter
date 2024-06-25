@@ -7,7 +7,9 @@ include(FetchContent)
 FetchContent_GetProperties(spiffs)
 
 # List of the required include paths
-list(APPEND SPIFFS_INCLUDE_DIRS ${spiffs_SOURCE_DIR}/src)
+list(APPEND SPIFFS_INCLUDE_DIRS
+    ${spiffs_SOURCE_DIR}/src
+    ${CMAKE_SOURCE_DIR}/targets/${RTOS}/_spiffs)
 
 set(src_spiffs
 
@@ -19,7 +21,7 @@ set(src_spiffs
 
     # HAL implementation specific to a platform
     # has to be included at platform level
-    # hal_spiffs.c
+    hal_spiffs.c
 
     target_spiffs.c
 )
@@ -32,6 +34,7 @@ foreach(SRC_FILE ${src_spiffs})
         PATHS
 
             ${spiffs_SOURCE_DIR}/src
+            ${CMAKE_SOURCE_DIR}/targets/${RTOS}/_spiffs
             ${TARGET_BASE_LOCATION}
 
         CMAKE_FIND_ROOT_PATH_BOTH

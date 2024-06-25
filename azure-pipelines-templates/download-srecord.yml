@@ -6,7 +6,7 @@ steps:
     condition: eq(variables['NeedsSRECORD'], true)
     displayName: Cache SRECORD
     inputs:
-      key: '1-0 | srecordKey'
+      key: "1-0 | srecordKey"
       restoreKeys: srecordKey
       path: $(Agent.TempDirectory)/srecord
       cacheHitVar: SRECORD_CACHE_RESTORED
@@ -15,13 +15,13 @@ steps:
     condition: eq(variables['NeedsSRECORD'], true)
     displayName: Install SRECORD
     inputs:
-        targetType: 'filePath'
-        filePath: '$(Build.Repository.LocalPath)\install-scripts\install-srecord.ps1'
-        failOnStderr: true
+      targetType: "filePath"
+      filePath: '$(Build.Repository.LocalPath)\install-scripts\install-srecord.ps1'
+      failOnStderr: true
 
   - task: ExtractFiles@1
     condition: and( eq(variables['NeedsSRECORD'], true), ne(variables.SRECORD_CACHE_RESTORED, 'true'))
     displayName: Extract SRECORD
     inputs:
-      archiveFilePatterns: '$(Agent.TempDirectory)\srecord.zip' 
-      destinationFolder: '$(Agent.TempDirectory)\srecord' 
+      archiveFilePatterns: '$(Agent.TempDirectory)\srecord.zip'
+      destinationFolder: '$(Agent.TempDirectory)\srecord'

@@ -50,9 +50,9 @@ int32_t hal_spiffs_format(int32_t index)
 }
 
 // initialization of SPIFFS: configurations, data structures, drivers and lock
-uint8_t hal_spiffs_config()
+int32_t hal_spiffs_config()
 {
-    uint8_t mountResult;
+    int32_t mountResult = 0;
 
     // low level hardware and drivers initializations
     target_spiffs_init();
@@ -99,7 +99,7 @@ uint8_t hal_spiffs_config()
         if (mountResult != SPIFFS_OK && SPIFFS_errno(&fs[i]) == SPIFFS_ERR_NOT_A_FS)
         {
             // looks like SPIFFS is not formated
-            hal_spiffs_format(i);
+            mountResult = hal_spiffs_format(i);
         }
 
 #if !defined(BUILD_RTM)

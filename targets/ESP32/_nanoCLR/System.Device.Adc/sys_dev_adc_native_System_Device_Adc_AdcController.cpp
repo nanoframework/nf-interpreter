@@ -5,8 +5,9 @@
 //
 
 #include <sys_dev_adc_native_target.h>
+#include <Esp32_DeviceMapping.h>
 
-// ESP32 ADC controller
+// Details for ESP32 ADC controllers
 //
 // Contains ADC1 and ADC2
 // ADC1 with 8 channels ( GPIO 32 - 39 ) 0=36, 1=37, 2=38, 3=39, 4=32, 5=33, 6=34, 7=35
@@ -29,6 +30,8 @@
 //  9               - Internal Hall Sensor
 // ADC2 / 10 - 19   - 10 Channels -( GPIOs 0, 2, 4, 12 - 15 and 25 - 27. )
 
+// Note: ESP32-H2 and ESP32-C6 have only 1 ADC and limited number of channels
+
 HRESULT Library_sys_dev_adc_native_System_Device_Adc_AdcController::NativeOpenChannel___VOID__I4(
     CLR_RT_StackFrame &stack)
 {
@@ -38,8 +41,8 @@ HRESULT Library_sys_dev_adc_native_System_Device_Adc_AdcController::NativeOpenCh
     int adcUnit;
     esp_err_t result;
     // default to MAX bit width for SoC
-    adc_bits_width_t width_bit = (adc_bits_width_t)SOC_ADC_MAX_BITWIDTH;
-    adc_atten_t atten = ADC_ATTEN_DB_11;
+    adc_bits_width_t width_bit = (adc_bits_width_t)SOC_ADC_RTC_MAX_BITWIDTH;
+    adc_atten_t atten = ADC_ATTEN_DB_12;
 
     // get a pointer to the managed object instance and check that it's not NULL
     CLR_RT_HeapBlock *pThis = stack.This();
@@ -48,18 +51,17 @@ HRESULT Library_sys_dev_adc_native_System_Device_Adc_AdcController::NativeOpenCh
     // Get channel from argument
     channelNumber = stack.Arg1().NumericByRef().s4;
 
-    if (channelNumber < ADC_CHANNEL_0 || channelNumber > 19)
+    if (channelNumber < ADC_CHANNEL_0 || channelNumber > TARGET_ADC_NUM_PINS)
     {
         NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
     }
 
     // Get ADC device number from channel
-    adcUnit = channelNumber <= 9 ? 1 : 2;
-
-    adc_power_acquire(); // Make sure powered on
+    adcUnit = channelNumber < CONFIG_SOC_ADC_MAX_CHANNEL_NUM ? 1 : 2;
 
     switch (adcUnit)
     {
+#if (CONFIG_SOC_ADC_PERIPH_NUM >= 1)
         case 1:
             // Normal channel 0-7 ?
             if (channelNumber <= 7)
@@ -73,10 +75,12 @@ HRESULT Library_sys_dev_adc_native_System_Device_Adc_AdcController::NativeOpenCh
                 }
             }
             break;
+#endif
 
+#if (CONFIG_SOC_ADC_PERIPH_NUM >= 2)
         case 2:
             // Adjust for ADC2
-            channelNumber -= 10;
+            channelNumber -= CONFIG_SOC_ADC_MAX_CHANNEL_NUM;
             result = adc2_config_channel_atten((adc2_channel_t)channelNumber, atten);
 
             if (result != ESP_OK)
@@ -84,6 +88,9 @@ HRESULT Library_sys_dev_adc_native_System_Device_Adc_AdcController::NativeOpenCh
                 NANOCLR_SET_AND_LEAVE(CLR_E_PIN_UNAVAILABLE);
             }
             break;
+#endif
+        default:
+            NANOCLR_SET_AND_LEAVE(CLR_E_PIN_UNAVAILABLE);
     }
 
     NANOCLR_NOCLEANUP();

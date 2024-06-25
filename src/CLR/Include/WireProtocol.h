@@ -87,6 +87,7 @@ typedef enum CLR_DBG_Commands_Monitor
     CLR_DBG_Commands_c_Monitor_OemInfo             = 0x0000000E,
     CLR_DBG_Commands_c_Monitor_QueryConfiguration  = 0x0000000F,
     CLR_DBG_Commands_c_Monitor_UpdateConfiguration = 0x00000010,
+    CLR_DBG_Commands_c_Monitor_StorageOperation    = 0x00000011,
     CLR_DBG_Commands_c_Monitor_TargetInfo          = 0x00000020,
 }CLR_DBG_Commands_Monitor;
 

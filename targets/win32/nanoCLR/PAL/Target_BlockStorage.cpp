@@ -4,7 +4,6 @@
 //
 
 #include <nanoPAL_BlockStorage.h>
-#include <targetHAL.h>
 
 bool BlockStorageStream_Initialize(BlockStorageStream *stream, uint32_t blockUsage)
 {

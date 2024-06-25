@@ -45,11 +45,17 @@ esp_err_t NF_ESP32_InitialiseEthernet(uint8_t *pMacAdr)
 
 #ifdef ESP32_ETHERNET_SUPPORT
 
+    if (eth_handle != NULL)
+    {
+        return esp_eth_start(eth_handle);
+    }
+
     esp_netif_config_t cfg = ESP_NETIF_DEFAULT_ETH();
     esp_netif_t *eth_netif = esp_netif_new(&cfg);
 
     // now MAC and PHY configs
     eth_mac_config_t mac_config = ETH_MAC_DEFAULT_CONFIG();
+    eth_esp32_emac_config_t esp32_emac_config = ETH_ESP32_EMAC_DEFAULT_CONFIG();
     eth_phy_config_t phy_config = ETH_PHY_DEFAULT_CONFIG();
     phy_config.phy_addr = ETH_PHY_ADDR;
 
@@ -74,24 +80,24 @@ esp_err_t NF_ESP32_InitialiseEthernet(uint8_t *pMacAdr)
 
     // Set Clock modes to override whats in sdkconfig
 #ifdef ETH_RMII_CLK_OUT_GPIO
-    mac_config.clock_config.rmii.clock_mode = EMAC_CLK_OUT;
-    mac_config.clock_config.rmii.clock_gpio = (emac_rmii_clock_gpio_t)ETH_RMII_CLK_OUT_GPIO; // always 16 or 17
+    esp32_emac_config.clock_config.rmii.clock_mode = EMAC_CLK_OUT;
+    esp32_emac_config.clock_config.rmii.clock_gpio = (emac_rmii_clock_gpio_t)ETH_RMII_CLK_OUT_GPIO; // always 16 or 17
     ESP_LOGI(TAG, "Ethernet clock_config OUT gpio %d\n", ETH_RMII_CLK_OUT_GPIO);
 
     CPU_GPIO_ReservePin(EMAC_CLK_OUT, true);          // REF_CLK OUT
     CPU_GPIO_ReservePin(ETH_RMII_CLK_OUT_GPIO, true); // REF_CLK OUT
 #else
-    mac_config.clock_config.rmii.clock_mode = EMAC_CLK_EXT_IN;
-    mac_config.clock_config.rmii.clock_gpio = EMAC_CLK_IN_GPIO; // always 0
+    esp32_emac_config.clock_config.rmii.clock_mode = EMAC_CLK_EXT_IN;
+    esp32_emac_config.clock_config.rmii.clock_gpio = EMAC_CLK_IN_GPIO; // always 0
     ESP_LOGI(TAG, "Ethernet clock_config IN gpio 0\n");
 
     CPU_GPIO_ReservePin(EMAC_CLK_EXT_IN, true);  // REF_CLK EXT
     CPU_GPIO_ReservePin(EMAC_CLK_IN_GPIO, true); // REF_CLK IN
 #endif
 
-    mac_config.smi_mdc_gpio_num = ETH_MDC_GPIO;
-    mac_config.smi_mdio_gpio_num = ETH_MDIO_GPIO;
-    esp_eth_mac_t *mac = esp_eth_mac_new_esp32(&mac_config);
+    esp32_emac_config.smi_mdc_gpio_num = ETH_MDC_GPIO;
+    esp32_emac_config.smi_mdio_gpio_num = ETH_MDIO_GPIO;
+    esp_eth_mac_t *mac = esp_eth_mac_new_esp32(&esp32_emac_config, &mac_config);
 
     ESP_LOGI(TAG, "Ethernet mdio %d mdc %d\n", ETH_MDIO_GPIO, ETH_MDC_GPIO);
 
@@ -114,20 +120,19 @@ esp_err_t NF_ESP32_InitialiseEthernet(uint8_t *pMacAdr)
     esp_eth_phy_t *phy = esp_eth_phy_new_rtl8201(&phy_config);
 #elif defined(ESP32_ETHERNET_PHY_LAN8720)
     ESP_LOGI(TAG, "Ethernet Lan8720 phy\n");
-    esp_eth_phy_t *phy = esp_eth_phy_new_lan8720(&phy_config);
+    esp_eth_phy_t *phy = esp_eth_phy_new_lan87xx(&phy_config);
 #elif defined(ESP32_ETHERNET_PHY_DP83848)
     ESP_LOGI(TAG, "Ethernet DP83848 phy\n");
     esp_eth_phy_t *phy = esp_eth_phy_new_dp83848(&phy_config);
 #elif defined(ESP32_ETHERNET_PHY_KSZ8041)
     ESP_LOGI(TAG, "Ethernet KSZ8041 phy\n");
-    esp_eth_phy_t *phy = esp_eth_phy_new_ksz8041(&phy_config);
+    esp_eth_phy_t *phy = esp_eth_phy_new_ksz80xx(&phy_config);
 #endif
 
 #elif ESP32_ETHERNET_SPI == TRUE
     // Or Use SPI ethernet module
     // Initialise SPI bus
     gpio_install_isr_service(0);
-    spi_device_handle_t spi_handle = NULL;
     spi_bus_config_t buscfg = {0};
     buscfg.miso_io_num = ESP32_ETHERNET_SPI_MISO_GPIO;
     buscfg.mosi_io_num = ESP32_ETHERNET_SPI_MOSI_GPIO;
@@ -148,12 +153,11 @@ esp_err_t NF_ESP32_InitialiseEthernet(uint8_t *pMacAdr)
         .spics_io_num = ESP32_ETHERNET_SPI_CS,
         .queue_size = 20};
 
-    ESP_ERROR_CHECK(spi_bus_add_device(ESP32_ETHERNET_SPI_HOST, &devcfg, &spi_handle));
-
     /* dm9051 ethernet driver is based on spi driver */
-    eth_dm9051_config_t dm9051_config = ETH_DM9051_DEFAULT_CONFIG(spi_handle);
+    eth_dm9051_config_t dm9051_config = ETH_DM9051_DEFAULT_CONFIG(CONFIG_EXAMPLE_ETH_SPI_HOST, &devcfg);
     dm9051_config.int_gpio_num = ESP32_ETHERNET_SPI_INT_GPIO;
     esp_eth_mac_t *mac = esp_eth_mac_new_dm9051(&dm9051_config, &mac_config);
+    esp_eth_phy_t *phy = esp_eth_phy_new_dm9051(&phy_config);
 
     ESP_LOGI(TAG, "Ethernet DM9051 spi\n");
 
@@ -167,10 +171,8 @@ esp_err_t NF_ESP32_InitialiseEthernet(uint8_t *pMacAdr)
         .spics_io_num = ESP32_ETHERNET_SPI_CS,
         .queue_size = 20};
 
-    ESP_ERROR_CHECK(spi_bus_add_device(ESP32_ETHERNET_SPI_HOST, &devcfg, &spi_handle));
-
     // w5500 ethernet driver is based on spi driver
-    eth_w5500_config_t w5500_config = ETH_W5500_DEFAULT_CONFIG(spi_handle);
+    eth_w5500_config_t w5500_config = ETH_W5500_DEFAULT_CONFIG(CONFIG_EXAMPLE_ETH_SPI_HOST, &devcfg);
     w5500_config.int_gpio_num = ESP32_ETHERNET_SPI_INT_GPIO;
     esp_eth_mac_t *mac = esp_eth_mac_new_w5500(&w5500_config, &mac_config);
     esp_eth_phy_t *phy = esp_eth_phy_new_w5500(&phy_config);
@@ -185,9 +187,9 @@ esp_err_t NF_ESP32_InitialiseEthernet(uint8_t *pMacAdr)
         .clock_speed_hz = ESP32_ETHERNET_SPI_CLOCK_MHZ * 1000 * 1000,
         .spics_io_num = ESP32_ETHERNET_SPI_CS,
         .queue_size = 20};
-    ESP_ERROR_CHECK(spi_bus_add_device(ESP32_ETHERNET_SPI_HOST, &devcfg, &spi_handle));
-    /*  enj28j60 ethernet driver is based on spi driver */
-    eth_dm9051_config_t enj28j60_config = ETH_ENJ28J60_DEFAULT_CONFIG(spi_handle);
+
+    //  enj28j60 ethernet driver is based on spi driver
+    eth_dm9051_config_t enj28j60_config = ETH_ENJ28J60_DEFAULT_CONFIG(CONFIG_EXAMPLE_ETH_SPI_HOST, &devcfg);
     enj28j60_config.int_gpio_num = ESP32_ETHERNET_SPI_INT_GPIO;
     esp_eth_mac_t *mac = esp_eth_mac_new_enj28j60(&enj28j60_config, &mac_config);
 

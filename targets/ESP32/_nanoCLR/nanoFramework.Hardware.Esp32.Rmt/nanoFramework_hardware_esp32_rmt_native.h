@@ -14,7 +14,7 @@
 #include <nanoPackStruct.h>
 #include <corlib_native.h>
 
-#include <rmt.h>
+#include <driver/rmt.h>
 
 // Reduce line lengths
 #define CHANNEL(channel) static_cast<rmt_channel_t>(channel)

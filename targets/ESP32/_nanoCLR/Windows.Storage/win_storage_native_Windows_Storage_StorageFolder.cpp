@@ -9,6 +9,13 @@
 #include <nanoHAL_Windows_Storage.h>
 #include <target_platform.h>
 
+#if (HAL_USE_SDC == TRUE) || (HAL_USBH_USE_MSD == TRUE)
+#include <ff.h>
+#else
+// use copy of FATFS define ANSI/OEM in SBCS
+#define FF_LFN_BUF 255
+#endif
+
 //
 //  Converts from windows type path       "c:\folder\folder\file.ext"
 //  to linux type path used in ESP32 VFS  "/c/folder/folder/file.exe
@@ -390,7 +397,7 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::
         {
             // allocate memory for buffers
             stringBuffer = (char *)platform_malloc(FF_LFN_BUF + 1);
-            workingBuffer = (char *)platform_malloc(2 * FF_LFN_BUF + 1);
+            workingBuffer = (char *)platform_malloc(FF_LFN_BUF + 1);
 
             // sanity check for successful malloc
             if (stringBuffer == NULL || workingBuffer == NULL)
@@ -431,7 +438,7 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::
                         dirInfo->d_name));
 
                     // clear working buffer
-                    memset(workingBuffer, 0, 2 * FF_LFN_BUF + 1);
+                    memset(workingBuffer, 0, FF_LFN_BUF + 1);
 
                     // compose return directory path
                     CombinePath(workingBuffer, managedPath, (const char *)dirInfo->d_name);
@@ -575,7 +582,7 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::
         {
             // allocate memory for buffers
             stringBuffer = (char *)platform_malloc(FF_LFN_BUF + 1);
-            workingBuffer = (char *)platform_malloc(2 * FF_LFN_BUF + 1);
+            workingBuffer = (char *)platform_malloc(FF_LFN_BUF + 1);
 
             // sanity check for successful malloc
             if (stringBuffer == NULL || workingBuffer == NULL)
@@ -623,7 +630,7 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::
                             dirInfo->d_name));
 
                         // clear working buffer
-                        memset(workingBuffer, 0, 2 * FF_LFN_BUF + 1);
+                        memset(workingBuffer, 0, FF_LFN_BUF + 1);
 
                         // compose file path
                         CombinePath(workingBuffer, managedPath, (const char *)dirInfo->d_name);
@@ -729,7 +736,7 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::
     fileName = stack.Arg1().DereferenceString()->StringText();
 
     // setup file path
-    filePath = (char *)platform_malloc(2 * FF_LFN_BUF + 1);
+    filePath = (char *)platform_malloc(FF_LFN_BUF + 1);
 
     // sanity check for successful malloc
     if (filePath == NULL)
@@ -739,7 +746,7 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::
     }
 
     // clear working buffer
-    memset(filePath, 0, 2 * FF_LFN_BUF + 1);
+    memset(filePath, 0, FF_LFN_BUF + 1);
 
     // compose file path
     CombinePath(filePath, managedPath, fileName);
@@ -887,7 +894,7 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::
     // get a pointer to the desired folder name
     folderName = stack.Arg1().DereferenceString()->StringText();
 
-    folderPath = (char *)platform_malloc(2 * FF_LFN_BUF + 1);
+    folderPath = (char *)platform_malloc(FF_LFN_BUF + 1);
 
     // sanity check for successful malloc
     if (folderPath == NULL)
@@ -897,7 +904,7 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::
     }
 
     // clear working buffer
-    memset(folderPath, 0, 2 * FF_LFN_BUF + 1);
+    memset(folderPath, 0, FF_LFN_BUF + 1);
 
     // compose folder path
     CombinePath(folderPath, managedPath, folderName);
@@ -1140,7 +1147,7 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::GetFolderNativ
     // get a pointer to the desired folder name
     folderName = stack.Arg1().DereferenceString()->StringText();
 
-    folderPath = (char *)platform_malloc(2 * FF_LFN_BUF + 1);
+    folderPath = (char *)platform_malloc(FF_LFN_BUF + 1);
 
     // sanity check for successful malloc
     if (folderPath == NULL)
@@ -1150,7 +1157,7 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::GetFolderNativ
     }
 
     // clear working buffer
-    memset(folderPath, 0, 2 * FF_LFN_BUF + 1);
+    memset(folderPath, 0, FF_LFN_BUF + 1);
 
     // compose folder path
     CombinePath(folderPath, managedPath, folderName);

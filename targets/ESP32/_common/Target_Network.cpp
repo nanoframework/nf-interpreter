@@ -44,6 +44,7 @@ int Network_Interface_Open(int index)
 
     switch (networkConfiguration.InterfaceType)
     {
+#if defined(CONFIG_SOC_WIFI_SUPPORTED)          
         // Wi-Fi (STA)
         case NetworkInterfaceType_Wireless80211:
             return NF_ESP32_Wireless_Open(&networkConfiguration);
@@ -51,11 +52,18 @@ int Network_Interface_Open(int index)
         // Wi-Fi (Soft AP)
         case NetworkInterfaceType_WirelessAP:
             return NF_ESP32_WirelessAP_Open(&networkConfiguration);
+#endif
 
 #ifdef ESP32_ETHERNET_SUPPORT
         // Ethernet
         case NetworkInterfaceType_Ethernet:
             return NF_ESP32_Ethernet_Open(&networkConfiguration);
+#endif
+
+#if HAL_USE_THREAD == TRUE
+        // OpenThread
+        case NetworkInterfaceType_Thread:
+            return NF_ESP32_OpenThread_Open(&networkConfiguration);
 #endif
     }
 
@@ -79,6 +87,7 @@ bool Network_Interface_Close(int index)
 
     switch (networkConfiguration.InterfaceType)
     {
+#if defined(CONFIG_SOC_WIFI_SUPPORTED)    
         // Wireless
         case NetworkInterfaceType_Wireless80211:
             return NF_ESP32_Wireless_Close();
@@ -86,18 +95,26 @@ bool Network_Interface_Close(int index)
         // Soft AP
         case NetworkInterfaceType_WirelessAP:
             return NF_ESP32_WirelessAP_Close();
+#endif
 
 #ifdef ESP32_ETHERNET_SUPPORT
         // Ethernet
         case NetworkInterfaceType_Ethernet:
             return NF_ESP32_Ethernet_Close();
 #endif
+
+#if HAL_USE_THREAD == TRUE
+        // OpenThread
+        case NetworkInterfaceType_Thread:
+            return NF_ESP32_OpenThread_Close();
+#endif
     }
 
     return false;
 }
 
-int Network_Interface_Start_Scan(int index)
+#if defined(CONFIG_SOC_WIFI_SUPPORTED)    
+ int Network_Interface_Start_Scan(int index)
 {
     HAL_Configuration_NetworkInterface networkConfiguration;
 
@@ -363,3 +380,4 @@ void Network_Interface_Deauth_Station(uint16_t stationIndex)
         esp_wifi_deauth_sta(stationIndex);
     }
 }
+#endif

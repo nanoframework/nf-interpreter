@@ -202,7 +202,7 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_Directory::GetFilesNative___STATI
         {
             // allocate memory for buffers
             stringBuffer = (char *)platform_malloc(FF_LFN_BUF + 1);
-            workingBuffer = (char *)platform_malloc(2 * FF_LFN_BUF + 1);
+            workingBuffer = (char *)platform_malloc(FF_LFN_BUF + 1);
 
             // sanity check for successful malloc
             if (stringBuffer == NULL || workingBuffer == NULL)
@@ -234,7 +234,7 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_Directory::GetFilesNative___STATI
                     strcmp(get_filename_ext(fileInfo.fname), "sys"))
                 {
                     // clear working buffer
-                    memset(workingBuffer, 0, 2 * FF_LFN_BUF + 1);
+                    memset(workingBuffer, 0, FF_LFN_BUF + 1);
                     // compose file path
                     CombinePathAndName(workingBuffer, folderPath, fileInfo.fname);
                     // set file full path in array of strings
@@ -335,7 +335,7 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_Directory::GetDirectoriesNative__
         {
             // allocate memory for buffers
             stringBuffer = (char *)platform_malloc(FF_LFN_BUF + 1);
-            workingBuffer = (char *)platform_malloc(2 * FF_LFN_BUF + 1);
+            workingBuffer = (char *)platform_malloc(FF_LFN_BUF + 1);
 
             // sanity check for successful malloc
             if (stringBuffer == NULL || workingBuffer == NULL)
@@ -366,7 +366,7 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_Directory::GetDirectoriesNative__
                 if ((fileInfo.fattrib & AM_DIR) && !(fileInfo.fattrib & AM_SYS) && !(fileInfo.fattrib & AM_HID))
                 {
                     // clear working buffer
-                    memset(workingBuffer, 0, 2 * FF_LFN_BUF + 1);
+                    memset(workingBuffer, 0, FF_LFN_BUF + 1);
                     // compose directory path
                     CombinePathAndName(workingBuffer, folderPath, fileInfo.fname);
                     // set directory full path in array of strings

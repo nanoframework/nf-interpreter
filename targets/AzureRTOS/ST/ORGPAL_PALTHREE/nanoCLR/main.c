@@ -12,7 +12,7 @@
 #include <nanoHAL_v2.h>
 #include <targetPAL.h>
 
-extern uint8_t hal_spiffs_config();
+extern int32_t hal_spiffs_config();
 
 extern CLR_SETTINGS clrSettings;
 
@@ -97,7 +97,7 @@ void tx_application_define(void *first_unused_memory)
 
     // Create NetX Duo thread
     status = tx_thread_create(
-        & netxDuoThread,
+        &netxDuoThread,
         "NetXDuo Thread",
         NetXDuoThread_entry,
         0,

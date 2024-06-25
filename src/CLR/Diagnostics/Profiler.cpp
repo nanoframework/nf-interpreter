@@ -439,7 +439,6 @@ void CLR_PRF_Profiler::DumpObject(CLR_RT_HeapBlock *ptr)
                 DumpListOfReferences(appDomain->m_appDomainAssemblies);
                 DumpSingleReference(appDomain->m_globalLock);
                 DumpSingleReference(appDomain->m_strName);
-                DumpSingleReference(appDomain->m_outOfMemoryException);
                 break;
             }
 

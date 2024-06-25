@@ -22,10 +22,18 @@ jobs:
     if: ${{ vars.PUBLISH_DOCKER_IMAGE == 'true' }}
     runs-on: ubuntu-latest
     steps:
-
+    
     - name: Checkout Repository
       uses: actions/checkout@v4
 
+    - name: Free Disk Space (Ubuntu)
+      uses: jlumbroso/free-disk-space@main
+      with:
+        # this might remove tools that are actually needed,
+        # when set to "true" but frees about 6 GB
+        tool-cache: true
+        large-packages: false
+    
     - name: Get container version
       run: |
         $dockerfileContent = Get-Content(".devcontainer/AzureRTOS/Dockerfile.AzureRTOS")

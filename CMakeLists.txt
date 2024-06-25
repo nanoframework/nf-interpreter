@@ -288,6 +288,19 @@ else()
 endif()
 
 #################################################################
+# enables internal storage support
+# (default is OFF so Accessible Storage Feature is NOT supported)
+option(NF_FEATURE_HAS_ACCESSIBLE_STORAGE "option to enable accessible storage")
+
+if(NF_FEATURE_HAS_ACCESSIBLE_STORAGE)
+    set(TARGET_HAS_ACCESSIBLE_STORAGE TRUE CACHE INTERNAL "Option for accessible storage")
+    message(STATUS "Accessible Storage feature is included")
+else()
+    set(TARGET_HAS_ACCESSIBLE_STORAGE FALSE CACHE INTERNAL "Option for accessible storage")
+    message(STATUS "Accessible Storage feature **IS NOT** included")
+endif()
+
+#################################################################
 # enables support for SD Card
 # (default is OFF so SD Card is NOT supported)
 option(NF_FEATURE_HAS_SDCARD "option to enable support for SD Card")
@@ -856,6 +869,30 @@ elseif(RTOS_ESP32_CHECK)
         message(STATUS "Support for Ethernet network interface enabled")
     else()
         message(STATUS "Support for Ethernet network interface disabled")
+    endif()
+
+    if(API_nanoFramework.Networking.Thread)
+        set(HAL_USE_THREAD_OPTION TRUE CACHE INTERNAL "OpenThread Support")
+        message(STATUS "Support for Thread enabled")
+
+        if(NOT THREAD_NODE_ROLE)
+            unset(THREAD_NODE_ROLE CACHE)
+            set(THREAD_NODE_ROLE "FTD" CACHE STRING "Setting default value for THREAD_NODE_ROLE to FTD")
+        endif()
+
+        if(NOT THREAD_RADIO_MODE)
+            unset(THREAD_RADIO_MODE CACHE)
+            set(THREAD_RADIO_MODE "NATIVE" CACHE STRING "Setting default value for THREAD_RADIO_MODE to NATIVE")
+        endif()
+
+        if(NOT THREAD_DATASETTLVS)
+            unset(THREAD_DATASETTLVS CACHE)
+            set(THREAD_DATASETTLVS "" CACHE STRING "Setting default value for THREAD_DATASETTLVS to empty string")
+        endif()
+
+    else()
+        set(HAL_USE_THREAD_OPTION FALSE CACHE INTERNAL "No OpenThread Support")
+        message(STATUS "Support for Thread disabled")
     endif()
 
     # check watchdog feature
