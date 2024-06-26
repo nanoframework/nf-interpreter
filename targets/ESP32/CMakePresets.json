@@ -289,7 +289,7 @@
                 "API_nanoFramework.Device.Bluetooth": "ON"
             }
         },
-        {
+       {
             "name": "ESP32_C6_THREAD",
             "inherits": [
                 "xtensa-esp32c6-preset",
