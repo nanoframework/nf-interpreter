@@ -33,14 +33,6 @@
 #define HAL_USE_PAL                         TRUE
 #endif
 
-//Not in default template, added manually
-#if !defined(FATFS_HAL_DEVICE) || defined(__DOXYGEN__)
-//this board requires SDCD2 not SDCD1
-#define FATFS_HAL_DEVICE SDCD2
-#endif
-////////
-
-//#define STM32_SDC_SDMMC_50MHZ               TRUE
 
 /**
  * @brief   Enables the ADC subsystem.
@@ -348,15 +340,18 @@
 /*===========================================================================*/
 
 /**
- * @brief   Delays insertions.
- * @details If enabled this options inserts delays into the MMC waiting
- *          routines releasing some extra CPU time for the threads with
- *          lower priority, this may slow down the driver a bit however.
- *          This option is recommended also if the SPI driver does not
- *          use a DMA channel and heavily loads the CPU.
+ * @brief   Timeout before assuming a failure while waiting for card idle.
+ * @note    Time is in milliseconds.
  */
-#if !defined(MMC_NICE_WAITING) || defined(__DOXYGEN__)
-#define MMC_NICE_WAITING                    TRUE
+#if !defined(MMC_IDLE_TIMEOUT_MS) || defined(__DOXYGEN__)
+#define MMC_IDLE_TIMEOUT_MS                 1000
+#endif
+
+/**
+ * @brief   Mutual exclusion on the SPI bus.
+ */
+#if !defined(MMC_USE_MUTUAL_EXCLUSION) || defined(__DOXYGEN__)
+#define MMC_USE_MUTUAL_EXCLUSION            TRUE
 #endif
 
 /*===========================================================================*/
