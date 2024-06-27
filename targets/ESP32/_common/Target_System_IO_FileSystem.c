@@ -101,13 +101,6 @@ bool Storage_MountMMC(bool bit1Mode, int driveIndex)
 
     sdmmc_host_t host = SDMMC_HOST_DEFAULT();
 
-    // Using 1 bit data ( OLimex EVB etc )
-    if (bit1Mode)
-    {
-        host.flags = SDMMC_HOST_FLAG_1BIT;
-        host.max_freq_khz = SDMMC_FREQ_PROBING;
-    }
-
     // This initializes the slot without card detect (CD) and write protect (WP) signals.
     // Modify slot_config.gpio_cd and slot_config.gpio_wp if your board has these signals.
     sdmmc_slot_config_t slot_config = SDMMC_SLOT_CONFIG_DEFAULT();
