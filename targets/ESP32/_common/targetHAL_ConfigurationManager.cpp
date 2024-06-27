@@ -379,10 +379,12 @@ bool InitialiseNetworkDefaultConfig(HAL_Configuration_NetworkInterface *config, 
             esp_read_mac(config->MacAddress, ESP_MAC_ETH);
             break;
 
+#if HAL_USE_THREAD == TRUE
         case NetworkInterfaceType_Thread: // OpenThread  IPV6 only
             config->StartupAddressMode = AddressMode_Static;
             config->AutomaticDNS = 1;
             break;
+#endif
 
         default:
             break;

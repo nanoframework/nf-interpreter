@@ -23,7 +23,7 @@
                 "SUPPORT_ANY_BASE_CONVERSION": "ON",
                 "API_System.Net": "ON",
                 "API_System.Math": "ON",
-                "API_System.Device.Adc": "OFF",
+                "API_System.Device.Adc": "ON",
                 "API_System.Device.Gpio": "ON",
                 "API_System.Device.I2c": "ON",
                 "API_System.Device.I2c.Slave": "ON",
@@ -32,12 +32,14 @@
                 "API_System.Device.Pwm": "ON",
                 "API_System.Device.Wifi": "ON",
                 "API_System.IO.Ports": "ON",
+                "API_System.IO.FileSystem": "ON",
+                "API_nanoFramework.System.IO.Hashing": "ON",
+                "API_nanoFramework.System.Security.Cryptography": "ON",
                 "API_Hardware.Esp32": "ON",
                 "API_nanoFramework.Hardware.Esp32.Rmt": "ON",
                 "API_nanoFramework.ResourceManager": "ON",
                 "API_nanoFramework.System.Collections": "ON",
                 "API_nanoFramework.System.Text": "ON"
-
             }
         }
     ]
