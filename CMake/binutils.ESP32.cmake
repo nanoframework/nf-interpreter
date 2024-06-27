@@ -748,13 +748,10 @@ macro(nf_add_idf_as_library)
     endif()
 
     option(HAL_USE_THREAD_OPTION "option to enable OpenThread support")
-    option(THREAD_NODE_ROLE "option to specify OpenThread node role (SED, MED, FTD")
-    option(THREAD_RADIO_MODE "option to specify OpenThread radio location (NATIVE, UART, SPI")
-    option(THREAD_RCP_PARAMS "option to specify OpenThread spi or uart radio co-processor(RCP) parameters")
-    option(THREAD_DATASETTLVS "OpenThread network parameters, if specified will automatically start thread network")
+    option(THREAD_DEVICE_TYPE "option to specify OpenThread device type (FTD or MTD")
 
     if(HAL_USE_THREAD_OPTION)
-        message(DEBUG "Reading SDK config from '${SDKCONFIG_DEFAULTS_FILE}' for Thread options")
+        message(DEBUG "Reading SDK config from '${SDKCONFIG_DEFAULTS_FILE}' to set Thread options")
 
         file(READ
             "${SDKCONFIG_DEFAULTS_TEMP_FILE}"
@@ -762,56 +759,31 @@ macro(nf_add_idf_as_library)
 
         # Append config based on options
         string(APPEND SDKCONFIG_DEFAULT_CONTENTS "\nCONFIG_OPENTHREAD_ENABLED=y\n")
+        string(APPEND SDKCONFIG_DEFAULT_CONTENTS "\nCONFIG_OPENTHREAD_CLI=y\n")
         string(APPEND SDKCONFIG_DEFAULT_CONTENTS "CONFIG_OPENTHREAD_LOG_LEVEL_DYNAMIC=y\n")
+        string(APPEND SDKCONFIG_DEFAULT_CONTENTS "CONFIG_OPENTHREAD_JOINER=y\n")
         
-        # THREAD_NODE_ROLE
-        set(THREAD_NODE_SUPPORTED_ROLE "FTD" "MED" "SED" CACHE INTERNAL "supported THREAD node roles")
-        list(FIND THREAD_NODE_SUPPORTED_ROLE ${THREAD_NODE_ROLE} THREAD_ROLE_INDEX)
+        # make sure these options are enabled for openthread & mbedtls
+        string(APPEND SDKCONFIG_DEFAULT_CONTENTS "CONFIG_MBEDTLS_CMAC_C=y\n")
+        string(APPEND SDKCONFIG_DEFAULT_CONTENTS "CONFIG_MBEDTLS_SSL_PROTO_DTLS=y\n")
+        string(APPEND SDKCONFIG_DEFAULT_CONTENTS "CONFIG_MBEDTLS_KEY_EXCHANGE_ECJPAKE=y\n")
+        string(APPEND SDKCONFIG_DEFAULT_CONTENTS "CONFIG_MBEDTLS_ECJPAKE_C=y\n")
+        
+        # THREAD_DEVICE_TYPE
+        set(THREAD_DEVICE_TYPE_SUPPORTED "FTD" "MTD" CACHE INTERNAL "supported THREAD device types")
+        list(FIND THREAD_DEVICE_TYPE_SUPPORTED ${THREAD_DEVICE_TYPE} THREAD_DEVICE_TYPE_INDEX)
 
-        if(THREAD_ROLE_INDEX EQUAL -1)
-            message(STATUS "Invalid THREAD_NODE_ROLE value, should be one of following 'FTD, SED, MED'. Defaulting to FTD")
-            set(THREAD_ROLE_INDEX 0)
+        if(THREAD_DEVICE_TYPE_INDEX EQUAL -1)
+            # Default FTD if not specified
+            set(THREAD_DEVICE_TYPE_INDEX 0)
         endif()
         
-        if (${THREAD_ROLE_INDEX} EQUAL 0)
+        if (${THREAD_DEVICE_TYPE_INDEX} EQUAL 0)
             string(APPEND SDKCONFIG_DEFAULT_CONTENTS "CONFIG_OPENTHREAD_FTD=y\n")
             message(STATUS "OpenThread configured as full thread device (FTD)")
         else()
             string(APPEND SDKCONFIG_DEFAULT_CONTENTS "CONFIG_OPENTHREAD_MTD=y\n")
-            message(STATUS "OpenThread configured as a minimal thread device (${THREAD_NODE_ROLE})")
-        endif()
-
-        # THREAD_RADIO_MODE
-        set(THREAD_RADIO_SUPPORTED_MODE "NATIVE" "SPI" "UART" CACHE INTERNAL "supported THREAD radio modes")
-        list(FIND THREAD_RADIO_SUPPORTED_MODE ${THREAD_RADIO_MODE} THREAD_RADIO_MODE_INDEX)
-
-        if(THREAD_RADIO_MODE_INDEX EQUAL -1)
-            message(STATUS "Invalid THREAD_RADIO_MODE value, should be one of following 'NATVE, SPI, UART'. Defaulting to NATIVE")
-            set(THREAD_RADIO_MODE_INDEX 0)
-        endif()
-
-        if (${THREAD_RADIO_MODE_INDEX} EQUAL 0)
-            string(APPEND SDKCONFIG_DEFAULT_CONTENTS "CONFIG_OPENTHREAD_RADIO_NATIVE=y\n")
-            message(STATUS "OpenThread using native radio")
-        elseif(${THREAD_RADIO_MODE_INDEX} EQUAL 1)
-            string(APPEND SDKCONFIG_DEFAULT_CONTENTS "CONFIG_OPENTHREAD_RADIO_SPINEL_SPI=y\n")
-            message(STATUS "OpenThread using radio connected via SPI")
-        else()
-            string(APPEND SDKCONFIG_DEFAULT_CONTENTS "CONFIG_OPENTHREAD_RADIO_SPINEL_UART=y\n")
-            message(STATUS "OpenThread using radio connected via UART")
-        endif()
-
-        # THREAD_DATASETTLVS
-        if(THREAD_DATASETTLVS)
-            string(LENGTH ${THREAD_DATASETTLVS} THREAD_DATASETTLVS_LENGTH)
-            if(THREAD_DATASETTLVS_LENGTH GREATER_EQUAL 200 )
-                message(STATUS "OpenThread DATASETTLVS supplied for auto connecting to network")
-            else()
-                message(STATUS "OpenThread invalid DATASETTLVS supplied, length < 200")
-                set(THREAD_DATASETTLVS "")
-            endif()
-        else()
-            message(STATUS "OpenThread no DATASETTLVS supplied")
+            message(STATUS "OpenThread configured as a minimal thread device (MTD)")
         endif()
 
         # need to temporarilly allow changes in source files
