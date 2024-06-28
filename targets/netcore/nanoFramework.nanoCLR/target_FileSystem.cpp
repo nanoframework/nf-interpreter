@@ -36,8 +36,8 @@ void FS_AddVolumes()
         &g_FS_Volumes[0],
         "I:",
         0,
-        g_AvailableFSInterfaces[1].streamDriver,
-        g_AvailableFSInterfaces[1].fsDriver,
+        g_AvailableFSInterfaces[0].streamDriver,
+        g_AvailableFSInterfaces[0].fsDriver,
         0,
         FALSE);
 }
