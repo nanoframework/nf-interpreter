@@ -78,7 +78,13 @@
                 "API_nanoFramework.Device.OneWire": "ON",
                 "API_nanoFramework.ResourceManager": "ON",
                 "API_nanoFramework.System.Collections": "ON",
-                "API_nanoFramework.System.Text": "ON"
+                "API_nanoFramework.System.Text": "ON",
+                "API_nanoFramework.Networking.Thread": "ON",
+                "GRAPHICS_DISPLAY": "Generic_SPI.cpp",
+                "TOUCHPANEL_DEVICE": "XPT2046.cpp",
+                "GRAPHICS_DISPLAY_INTERFACE": "Spi_To_Display.cpp",
+                "TOUCHPANEL_INTERFACE": "Spi_To_TouchPanel.cpp",
+                "ESP32_SPIRAM_FOR_IDF_ALLOCATION": "1024 * 1024"
             }
         },
         {
@@ -283,12 +289,10 @@
                 "NF_FEATURE_RTC": "ON",
                 "NF_FEATURE_HAS_SDCARD": "OFF",
                 "HAL_WP_USE_USB_CDC": "ON",
-                "API_System.Device.Adc": "ON",
                 "API_nanoFramework.Device.OneWire": "OFF",
                 "API_nanoFramework.Device.Bluetooth": "ON",
                 "API_nanoFramework.Networking.Thread": "ON",
-                "THREAD_NODE_ROLE": "FTD",
-                "THREAD_DATASETTLVS": "0e080000000000000000000300001435060004001fffe00208473b6d471ac9b62d0708fd881c8e81b2f28c0510b933f687d1537c252ee7e680d41e1483030d6e616e6f6672616d65776f726b010256190410fd62447741af00be7f8139d6489127ef0c0402a0f7f8"
+                "THREAD_DEVICE_TYPE": "FTD"
             }
         },
         {
@@ -307,12 +311,10 @@
                 "NF_FEATURE_RTC": "ON",
                 "NF_FEATURE_HAS_SDCARD": "OFF",
                 "HAL_WP_USE_USB_CDC": "ON",
-                "API_System.Device.Adc": "ON",
                 "API_nanoFramework.Device.OneWire": "OFF",
                 "API_nanoFramework.Device.Bluetooth": "ON",
                 "API_nanoFramework.Networking.Thread": "ON",
-                "test_THREAD_NODE_ROLE": "FTD",
-                "test_THREAD_DATASETTLVS": "0e080000000000000000000300001435060004001fffe00208473b6d471ac9b62d0708fd881c8e81b2f28c0510b933f687d1537c252ee7e680d41e1483030d6e616e6f6672616d65776f726b010256190410fd62447741af00be7f8139d6489127ef0c0402a0f7f8"
+                "THREAD_DEVICE_TYPE": "FTD"
             }
         },
         {
@@ -842,6 +844,12 @@
             "name": "ESP32_PSRAM_REV3",
             "displayName": "ESP32_PSRAM_REV3",
             "configurePreset": "ESP32_PSRAM_REV3"
+        },
+        {
+            "inherits": "base-user",
+            "name": "ESP32_PSRAM_REV3_IPV6",
+            "displayName": "ESP32_PSRAM_REV3_IPV6",
+            "configurePreset": "ESP32_PSRAM_REV3_IPV6"
         },
         {
             "inherits": "base-user",
