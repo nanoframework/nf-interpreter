@@ -3,14 +3,13 @@
 // See LICENSE file in the project root for full license information.
 //
 
-// #include <nanoHAL.h>
-// #include <nanoWeak.h>
 #include "targetHAL_ConfigStorage.h"
 #include <esp_vfs.h>
+#include <esp_littlefs.h>
 
 // this one is following the the same "drive letter" as the HAL Windows Storage INTERNAL_DRIVE0_LETTER
-#define NANO_SPIFFS_BASE_PATH   "/I"
-#define NANO_SPIFFS_CONFIG_NAME "con_"
+#define NANO_LITTLEFS_BASE_PATH   "/I"
+#define NANO_LITTLEFS_CONFIG_NAME "con_"
 
 static const char *TAG = "Config";
 
@@ -27,40 +26,40 @@ void ConfigStorage_Initialise()
 {
     esp_err_t ret;
 
-    esp_vfs_spiffs_conf_t conf = {
-        .base_path = NANO_SPIFFS_BASE_PATH,
-        .partition_label = SPIFFS_PARTITION_LABEL,
-        .max_files = 5,
-        .format_if_mount_failed = true};
+    esp_vfs_littlefs_conf_t conf = {
+        .base_path = NANO_LITTLEFS_BASE_PATH,
+        .partition_label = LITTLEFS_PARTITION_LABEL,
+        .format_if_mount_failed = true,
+        .dont_mount = false};
 
-    ret = esp_vfs_spiffs_register(&conf);
+    ret = esp_vfs_littlefs_register(&conf);
 
     if (ret != ESP_OK)
     {
         if (ret == ESP_FAIL)
         {
-            ESP_LOGE(TAG, "NANO: Failed to mount or format filesystem");
+            ESP_LOGE(TAG, "NANO: Failed to mount or format littlefs file system");
         }
         else if (ret == ESP_ERR_NOT_FOUND)
         {
-            ESP_LOGE(TAG, "NANO: Failed to find SPIFFS partition");
+            ESP_LOGE(TAG, "NANO: Failed to find littlefs partition");
         }
         else
         {
             // If not already running then report error (happens on soft reboot for debug)
             if (ret != ESP_ERR_INVALID_STATE)
             {
-                ESP_LOGE(TAG, "NANO: Failed to initialize SPIFFS (%s)", esp_err_to_name(ret));
+                ESP_LOGE(TAG, "NANO: Failed to initialize littlefs (%s)", esp_err_to_name(ret));
             }
         }
     }
 
     size_t total = 0, used = 0;
-    ret = esp_spiffs_info(SPIFFS_PARTITION_LABEL, &total, &used);
+    ret = esp_littlefs_info(LITTLEFS_PARTITION_LABEL, &total, &used);
 
     if (ret == ESP_OK)
     {
-        ESP_LOGI(TAG, "NANO: SPIFFS Partition size: total: %d, used: %d", total, used);
+        ESP_LOGI(TAG, "NANO: littlefs partition size: total: %d, used: %d", total, used);
     }
 }
 
@@ -84,13 +83,13 @@ void ConfigStorage_GetConfigFileName(
     itoa(configurationIndex, configIndexAsString, 10);
 
     // Add filesystem name
-    strcat(configName, NANO_SPIFFS_BASE_PATH);
+    strcat(configName, NANO_LITTLEFS_BASE_PATH);
 
     // separator
     strcat(configName, "/");
 
     // Add base name
-    strcat(configName, NANO_SPIFFS_CONFIG_NAME);
+    strcat(configName, NANO_LITTLEFS_CONFIG_NAME);
 
     // add configuration code
     switch (configuration)
@@ -154,7 +153,7 @@ FILE *ConfigStorage_OpenFile(
 {
     // buffer for file name
     // add extra position for terminator
-    char fileName[SPIFFS_OBJ_NAME_LEN + 1] = {0};
+    char fileName[CONFIG_LITTLEFS_OBJ_NAME_LEN + 1] = {0};
 
     ConfigStorage_GetConfigFileName(configuration, configurationIndex, fileName);
 
@@ -186,7 +185,7 @@ bool ConfigStorage_DeleteFile(DeviceConfigurationOption configuration, uint32_t 
 {
     // buffer for file name
     // add extra position for terminator
-    char fileName[SPIFFS_OBJ_NAME_LEN + 1] = {0};
+    char fileName[CONFIG_LITTLEFS_OBJ_NAME_LEN + 1] = {0};
 
     ConfigStorage_GetConfigFileName(configuration, configurationIndex, fileName);
 
@@ -347,7 +346,7 @@ int32_t ConfigStorage_ReadFile(FILE *handle, uint8_t *pData, int32_t maxSizeData
 
 HAL_CONFIGURATION_NETWORK *ConfigStorage_FindNetworkConfigurationBlocks()
 {
-    DIR *dir = opendir(NANO_SPIFFS_BASE_PATH);
+    DIR *dir = opendir(NANO_LITTLEFS_BASE_PATH);
     struct dirent *dirInfo = {0};
 
     uint32_t configCount = 0;
@@ -392,7 +391,7 @@ HAL_CONFIGURATION_NETWORK *ConfigStorage_FindNetworkConfigurationBlocks()
 
 HAL_CONFIGURATION_NETWORK_WIRELESS80211 *ConfigStorage_FindNetworkWireless80211ConfigurationBlocks()
 {
-    DIR *dir = opendir(NANO_SPIFFS_BASE_PATH);
+    DIR *dir = opendir(NANO_LITTLEFS_BASE_PATH);
     struct dirent *dirInfo = {0};
 
     uint32_t configCount = 0;
@@ -438,7 +437,7 @@ HAL_CONFIGURATION_NETWORK_WIRELESS80211 *ConfigStorage_FindNetworkWireless80211C
 
 HAL_CONFIGURATION_NETWORK_WIRELESSAP *ConfigStorage_FindNetworkWirelessAPConfigurationBlocks()
 {
-    DIR *dir = opendir(NANO_SPIFFS_BASE_PATH);
+    DIR *dir = opendir(NANO_LITTLEFS_BASE_PATH);
     struct dirent *dirInfo = {0};
 
     uint32_t configCount = 0;
@@ -484,7 +483,7 @@ HAL_CONFIGURATION_NETWORK_WIRELESSAP *ConfigStorage_FindNetworkWirelessAPConfigu
 
 HAL_CONFIGURATION_X509_CERTIFICATE *ConfigStorage_FindX509CertificateConfigurationBlocks()
 {
-    DIR *dir = opendir(NANO_SPIFFS_BASE_PATH);
+    DIR *dir = opendir(NANO_LITTLEFS_BASE_PATH);
     struct dirent *dirInfo = {0};
 
     uint32_t certCount = 0;
@@ -562,7 +561,7 @@ HAL_CONFIGURATION_X509_CERTIFICATE *ConfigStorage_FindX509CertificateConfigurati
 
 HAL_CONFIGURATION_X509_DEVICE_CERTIFICATE *IRAM_ATTR ConfigStorage_FindX509DeviceCertificatesConfigurationBlocks()
 {
-    DIR *dir = opendir(NANO_SPIFFS_BASE_PATH);
+    DIR *dir = opendir(NANO_LITTLEFS_BASE_PATH);
     struct dirent *dirInfo = {0};
 
     uint32_t certCount = 0;

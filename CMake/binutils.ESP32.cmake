@@ -597,6 +597,8 @@ macro(nf_add_idf_as_library)
         nf_install_idf_component_from_registry(esp_tinyusb 65318090-af6e-4dbe-a257-5074ed07a337) 
     endif()
 
+    nf_install_idf_component_from_registry(littlefs a52ea255-cc2f-483c-a742-e4631623b8c2) 
+    
     include(${IDF_PATH_CMAKED}/tools/cmake/idf.cmake)
 
     # "fix" the reported version so it doesn't show '-dirty' 
@@ -653,7 +655,6 @@ macro(nf_add_idf_as_library)
         lwip
         freertos
         esptool_py
-        spiffs
         fatfs
         esp_wifi
         esp_event
@@ -661,6 +662,7 @@ macro(nf_add_idf_as_library)
         esp_netif
         esp_eth
         esp_psram
+        littlefs
     )
 
     # set list with the libraries for IDF components added
@@ -669,7 +671,6 @@ macro(nf_add_idf_as_library)
         idf::lwip
         idf::freertos
         idf::esptool_py
-        idf::spiffs
         idf::fatfs
         idf::esp_wifi
         idf::esp_event
@@ -677,6 +678,7 @@ macro(nf_add_idf_as_library)
         idf::esp_netif
         idf::esp_eth
         idf::esp_psram
+        idf::littlefs
     )
 
     if(HAL_USE_BLE_OPTION)

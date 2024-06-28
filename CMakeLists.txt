@@ -380,8 +380,14 @@ if(NF_FEATURE_USE_LITTLEFS)
 
     message(STATUS "Support for littlefs is included")
 else()
-    set(NF_FEATURE_USE_LITTLEFS_OPTION FALSE CACHE INTERNAL "Set nF littlefs feature FALSE")
-    message(STATUS "Support for littlefs **IS NOT** included")
+    if(RTOS_ESP32_CHECK)
+        # littlefs is included as default in ESP32 targets
+        message(STATUS "Support for littlefs is included")
+    else()
+        set(API_System.IO.FileSystem OFF CACHE INTERNAL "Forcing **REMOVAL** of System.IO.FileSystem API option")
+        set(NF_FEATURE_USE_LITTLEFS_OPTION FALSE CACHE INTERNAL "Set nF littlefs feature FALSE")
+        message(STATUS "Support for littlefs **IS NOT** included")
+    endif()
 endif()
 
 #################################################################
