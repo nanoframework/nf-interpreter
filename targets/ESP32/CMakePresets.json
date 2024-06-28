@@ -732,7 +732,7 @@
                 "ESP32_ETHERNET_INTERFACE": "RTL8201",
                 "ETH_RMII_CLK_IN_GPIO": "0",
                 "ETH_MDIO_GPIO": "17",
-                "ETH_MDC_GPIO": "16",               
+                "ETH_MDC_GPIO": "16",
                 "API_nanoFramework.Device.OneWire": "ON"
             }
         },
@@ -908,7 +908,7 @@
             "name": "ESP32_H2_THREAD",
             "displayName": "ESP32_H2_THREAD",
             "configurePreset": "ESP32_H2_THREAD"
-        },        
+        },
         {
             "inherits": "base-user",
             "name": "ESP32_S3",
