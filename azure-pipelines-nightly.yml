@@ -17,7 +17,7 @@ resources:
       type: github
       name: espressif/esp-idf
       endpoint: nanoframework
-      ref: refs/tags/v5.1.3
+      ref: refs/tags/v5.1.4
 
 # scheduled build
 # the schedule is defined at the AZDO web interface because of inconsistencies with time zones
@@ -293,7 +293,7 @@ jobs:
     variables:
       DOTNET_NOLOGO: true
       # creates a counter and assigns it to the revision variable
-      REVISION: $[counter('STM32_1_9_1_versioncounter', 0)]
+      REVISION: $[counter('STM32_1_10_0_versioncounter', 0)]
       HelperPackageVersion: $[counter('HelperPackageVersioncounter', 0)]
       TargetPlatform: "stm32"
 
@@ -544,7 +544,7 @@ jobs:
     variables:
       DOTNET_NOLOGO: true
       # creates a counter and assigns it to the revision variable
-      REVISION: $[counter('ESP32_1_9_1_versioncounter', 0)]
+      REVISION: $[counter('ESP32_1_10_0_versioncounter', 0)]
       IDF_PATH: "D:/a/1/s/esp-idf"
       PIP_CACHE_DIR: $(Pipeline.Workspace)/.pip
       TargetPlatform: "esp32"
@@ -620,7 +620,7 @@ jobs:
     variables:
       DOTNET_NOLOGO: true
       # creates a counter and assigns it to the revision variable
-      REVISION: $[counter('TI_1_9_1_versioncounter', 0)]
+      REVISION: $[counter('TI_1_10_0_versioncounter', 0)]
       HelperPackageVersion: $[counter('HelperPackageVersioncounter', 0)]
       TargetPlatform: "ti_simplelink"
 
@@ -671,7 +671,7 @@ jobs:
 
     variables:
       # creates a counter and assigns it to the revision variable
-      REVISION: $[counter('AZURERTOS_1_9_1_versioncounter', 0)]
+      REVISION: $[counter('AZURERTOS_1_10_0_versioncounter', 0)]
       HelperPackageVersion: $[counter('HelperPackageVersioncounter', 0)]
       TargetPlatform: "azure_rtos"
 
