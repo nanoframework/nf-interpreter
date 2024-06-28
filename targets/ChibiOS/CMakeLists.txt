@@ -333,7 +333,7 @@ if(STM32_CUBE_PACKAGE_REQUIRED)
 endif()
 
 # if support for littlefs is enabled add it to the build
-if(NF_FEATURE_USE_LITTLEFS)
+if(NF_FEATURE_USE_LITTLEFS_OPTION)
 
     # check if LITTLEFS_SOURCE was specified or if it's empty (default is empty)
     set(NO_LITTLEFS_SOURCE TRUE)

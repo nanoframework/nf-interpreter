@@ -38,7 +38,7 @@ set(System.IO.FileSystem_SRCS
 )
 
 # add littlefs FS driver
-if(NF_FEATURE_USE_LITTLEFS)
+if(NF_FEATURE_USE_LITTLEFS_OPTION)
 
     list(APPEND System.IO.FileSystem_SRCS
         littlefs_FS_Driver.cpp)

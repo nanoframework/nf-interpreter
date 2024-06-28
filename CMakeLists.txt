@@ -369,8 +369,8 @@ option(NF_FEATURE_USE_LITTLEFS "option to enable support for SPI file system")
 if(NF_FEATURE_USE_LITTLEFS)
 
     # this feature currently is supported only on ChibiOS
-    if(NOT RTOS_CHIBIOS_CHECK)
-        message(FATAL_ERROR "Support for littlefs is only available for ChibiOS Cortex-M targets.")
+    if(NOT RTOS_CHIBIOS_CHECK AND NOT RTOS_ESP32_CHECK)
+        message(FATAL_ERROR "Support for littlefs is only available for ChibiOS Cortex-M and ESP32 targets.")
     endif()
 
     # force inclusion of System.IO.FileSystem API
@@ -380,14 +380,8 @@ if(NF_FEATURE_USE_LITTLEFS)
 
     message(STATUS "Support for littlefs is included")
 else()
-    if(RTOS_ESP32_CHECK)
-        # littlefs is included as default in ESP32 targets
-        message(STATUS "Support for littlefs is included")
-    else()
-        set(API_System.IO.FileSystem OFF CACHE INTERNAL "Forcing **REMOVAL** of System.IO.FileSystem API option")
-        set(NF_FEATURE_USE_LITTLEFS_OPTION FALSE CACHE INTERNAL "Set nF littlefs feature FALSE")
-        message(STATUS "Support for littlefs **IS NOT** included")
-    endif()
+    set(NF_FEATURE_USE_LITTLEFS_OPTION FALSE CACHE INTERNAL "Set nF littlefs feature FALSE")
+    message(STATUS "Support for littlefs **IS NOT** included")
 endif()
 
 #################################################################
