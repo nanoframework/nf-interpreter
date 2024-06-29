@@ -889,6 +889,12 @@
         },
         {
             "inherits": "base-user",
+            "name": "ESP32_PSRAM_REV3_IPV6",
+            "displayName": "ESP32_PSRAM_REV3_IPV6",
+            "configurePreset": "ESP32_PSRAM_REV3_IPV6"
+        },
+        {
+            "inherits": "base-user",
             "name": "ESP32_REV0",
             "displayName": "ESP32_REV0",
             "configurePreset": "ESP32_REV0"
