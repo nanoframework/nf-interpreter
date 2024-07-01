@@ -548,7 +548,6 @@
 #define WSPI_USE_MUTUAL_EXCLUSION           TRUE
 #endif
 
-
 // header for nanoFramework overlay
 #include "halconf_nf.h"
 #include "halconf_community.h"

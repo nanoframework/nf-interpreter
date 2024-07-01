@@ -47,7 +47,6 @@
                 "API_nanoFramework.ResourceManager": "OFF",
                 "API_nanoFramework.System.Collections": "ON",
                 "API_nanoFramework.System.Text": "ON",
-                "API_Windows.Storage": "OFF",
                 "API_nanoFramework.Graphics": "OFF"
             }
         }

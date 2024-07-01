@@ -7,7 +7,7 @@
 #include <esp32_idf.h>
 
 // label for the config partition (same as partition CSV file)
-#define SPIFFS_PARTITION_LABEL "config"
+#define LITTLEFS_PARTITION_LABEL "config"
 
 #ifdef __cplusplus
 extern "C"

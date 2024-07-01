@@ -9,7 +9,7 @@
 #include <nanoPAL_BlockStorage.h>
 
 const UINT32 RAM_BLOCK_COUNT = 128;
-const UINT32 RAM_BYTES_PER_BLOCK = 0x8000;
+const UINT32 RAM_BYTES_PER_BLOCK = 0x1000;
 const UINT32 RAM_BYTES_PER_SECTOR = 1;
 
 const BlockRange BlockRange1[] = {

@@ -32,7 +32,6 @@ RUN  mkdir -p /tmp/dc-extracted/titools \
     && curl -o /tmp/dc-downloads/titools.zip $TI_TOOL_URL -L \
     && unzip -d /tmp/dc-extracted/titools /tmp/dc-downloads/titools.zip
 
-
 FROM ubuntu:latest AS devcontainer
 
 # Avoid warnings by switching to noninteractive

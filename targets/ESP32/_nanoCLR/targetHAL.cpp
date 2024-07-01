@@ -81,6 +81,11 @@ void nanoHAL_Initialize()
     // required to setup flash partitions memory mapping
     BlockStorageList_InitializeDevices();
 
+    FS_Initialize();
+    FileSystemVolumeList::Initialize();
+    FS_AddVolumes();
+    FileSystemVolumeList::InitializeVolumes();
+
     // allocate & clear managed heap region
     unsigned char *heapStart = NULL;
     unsigned int heapSize = 0;
@@ -148,6 +153,8 @@ void nanoHAL_Uninitialize(bool isPoweringDown)
     SOCKETS_CloseConnections();
 
     Network_Uninitialize();
+
+    FileSystemVolumeList::UninitializeVolumes();
 
     // required to remove flash partitions memory mapping
     BlockStorageList_UnInitializeDevices();

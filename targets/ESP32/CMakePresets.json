@@ -25,7 +25,6 @@
                 "NF_FEATURE_DEBUGGER": "ON",
                 "NF_FEATURE_RTC": "ON",
                 "NF_FEATURE_HAS_SDCARD": "ON",
-                "API_System.IO.FileSystem": "ON",
                 "API_System.Math": "ON",
                 "API_System.Device.Adc": "ON",
                 "API_System.Device.Dac": "ON",
@@ -55,7 +54,6 @@
                 "NF_FEATURE_DEBUGGER": "ON",
                 "NF_FEATURE_RTC": "ON",
                 "NF_FEATURE_HAS_SDCARD": "ON",
-                "API_System.IO.FileSystem": "ON",
                 "API_nanoFramework.Device.OneWire": "ON",
                 "API_nanoFramework.ResourceManager": "ON",
                 "API_nanoFramework.System.Collections": "ON",
@@ -77,7 +75,6 @@
                 "NF_FEATURE_DEBUGGER": "ON",
                 "NF_FEATURE_RTC": "ON",
                 "NF_FEATURE_HAS_SDCARD": "ON",
-                "API_System.IO.FileSystem": "ON",
                 "API_nanoFramework.Device.OneWire": "ON",
                 "API_nanoFramework.ResourceManager": "ON",
                 "API_nanoFramework.System.Collections": "ON",
@@ -106,7 +103,6 @@
                 "NF_FEATURE_RTC": "ON",
                 "NF_FEATURE_HAS_SDCARD": "ON",
                 "API_System.Net": "ON",
-                "API_System.IO.FileSystem": "ON",
                 "API_System.Math": "ON",
                 "API_System.Device.Adc": "ON",
                 "API_System.Device.Dac": "ON",
@@ -133,7 +129,6 @@
                 "NF_FEATURE_DEBUGGER": "ON",
                 "NF_FEATURE_RTC": "ON",
                 "NF_FEATURE_HAS_SDCARD": "ON",
-                "API_System.IO.FileSystem": "ON",
                 "API_nanoFramework.Device.OneWire": "ON"
             }
         },
@@ -153,7 +148,6 @@
                 "NF_FEATURE_DEBUGGER": "ON",
                 "NF_FEATURE_RTC": "ON",
                 "NF_FEATURE_HAS_SDCARD": "ON",
-                "API_System.IO.FileSystem": "ON",
                 "API_nanoFramework.Device.OneWire": "ON"
             }
         },
@@ -172,7 +166,6 @@
                 "NF_FEATURE_DEBUGGER": "ON",
                 "NF_FEATURE_RTC": "ON",
                 "NF_FEATURE_HAS_SDCARD": "ON",
-                "API_System.IO.FileSystem": "ON",
                 "API_System.Device.I2c.Slave": "OFF",
                 "API_nanoFramework.Device.OneWire": "ON",
                 "API_nanoFramework.Device.Bluetooth": "ON"
@@ -193,7 +186,6 @@
                 "NF_FEATURE_DEBUGGER": "ON",
                 "NF_FEATURE_RTC": "ON",
                 "NF_FEATURE_HAS_SDCARD": "ON",
-                "API_System.IO.FileSystem": "ON",
                 "API_System.Device.I2c.Slave": "OFF",
                 "API_nanoFramework.Device.OneWire": "ON",
                 "API_nanoFramework.Device.Bluetooth": "ON"
@@ -217,8 +209,6 @@
                 "NF_FEATURE_DEBUGGER": "ON",
                 "NF_FEATURE_RTC": "ON",
                 "NF_FEATURE_HAS_SDCARD": "OFF",
-                "API_System.IO.FileSystem": "ON",
-                "API_Windows.Storage": "ON",
                 "API_System.Device.I2s": "OFF",
                 "API_System.Device.I2c.Slave": "OFF"
             }
@@ -238,8 +228,6 @@
                 "NF_FEATURE_DEBUGGER": "ON",
                 "NF_FEATURE_RTC": "ON",
                 "NF_FEATURE_HAS_SDCARD": "ON",
-                "API_System.IO.FileSystem": "ON",
-                "API_Windows.Storage": "ON",
                 "API_nanoFramework.Graphics": "ON",
                 "API_nanoFramework.Device.OneWire": "ON",
                 "GRAPHICS_DISPLAY": "ILI9341_240x320_SPI.cpp",
@@ -263,8 +251,6 @@
                 "NF_FEATURE_DEBUGGER": "ON",
                 "NF_FEATURE_RTC": "ON",
                 "NF_FEATURE_HAS_SDCARD": "OFF",
-                "API_System.IO.FileSystem": "ON",
-                "API_Windows.Storage": "ON",
                 "API_nanoFramework.Device.OneWire": "OFF"
             }
         },
@@ -283,13 +269,11 @@
                 "NF_FEATURE_DEBUGGER": "ON",
                 "NF_FEATURE_RTC": "ON",
                 "NF_FEATURE_HAS_SDCARD": "OFF",
-                "API_System.IO.FileSystem": "ON",
-                "API_Windows.Storage": "ON",
                 "API_nanoFramework.Device.OneWire": "OFF",
                 "API_nanoFramework.Device.Bluetooth": "ON"
             }
         },
-       {
+        {
             "name": "ESP32_C6_THREAD",
             "inherits": [
                 "xtensa-esp32c6-preset",
@@ -305,7 +289,7 @@
                 "NF_FEATURE_RTC": "ON",
                 "NF_FEATURE_HAS_SDCARD": "OFF",
                 "HAL_WP_USE_USB_CDC": "ON",
-                "API_Windows.Storage": "ON",
+                "API_nanoFramework.Device.OneWire": "OFF",
                 "API_nanoFramework.Device.Bluetooth": "ON",
                 "API_nanoFramework.Networking.Thread": "ON",
                 "THREAD_DEVICE_TYPE": "FTD"
@@ -327,7 +311,6 @@
                 "NF_FEATURE_RTC": "ON",
                 "NF_FEATURE_HAS_SDCARD": "OFF",
                 "HAL_WP_USE_USB_CDC": "ON",
-                "API_Windows.Storage": "ON",
                 "API_nanoFramework.Device.OneWire": "OFF",
                 "API_nanoFramework.Device.Bluetooth": "ON",
                 "API_nanoFramework.Networking.Thread": "ON",
@@ -421,8 +404,6 @@
                 "NF_FEATURE_HAS_SDCARD": "OFF",
                 "HAL_WP_USE_SERIAL": "OFF",
                 "HAL_WP_USE_USB_CDC": "ON",
-                "API_System.IO.FileSystem": "ON",
-                "API_Windows.Storage": "ON",
                 "API_nanoFramework.Hardware.Esp32.Rmt": "ON",
                 "API_nanoFramework.Device.OneWire": "OFF"
             }
@@ -442,8 +423,6 @@
                 "NF_FEATURE_DEBUGGER": "ON",
                 "NF_FEATURE_RTC": "ON",
                 "NF_FEATURE_HAS_SDCARD": "ON",
-                "API_System.IO.FileSystem": "ON",
-                "API_Windows.Storage": "ON",
                 "API_nanoFramework.Device.OneWire": "ON",
                 "API_nanoFramework.Device.Bluetooth": "OFF",
                 "API_nanoFramework.Graphics": "ON",
@@ -468,8 +447,6 @@
                 "NF_FEATURE_DEBUGGER": "ON",
                 "NF_FEATURE_RTC": "ON",
                 "NF_FEATURE_HAS_SDCARD": "ON",
-                "API_System.IO.FileSystem": "ON",
-                "API_Windows.Storage": "ON",
                 "API_nanoFramework.Device.OneWire": "ON",
                 "API_nanoFramework.Graphics": "ON",
                 "GRAPHICS_DISPLAY": "ILI9342_320x240_SPI.cpp",
@@ -493,8 +470,6 @@
                 "NF_FEATURE_DEBUGGER": "ON",
                 "NF_FEATURE_RTC": "ON",
                 "NF_FEATURE_HAS_SDCARD": "ON",
-                "API_System.IO.FileSystem": "ON",
-                "API_Windows.Storage": "ON",
                 "API_nanoFramework.Device.OneWire": "ON",
                 "API_nanoFramework.Device.Bluetooth": "ON",
                 "API_nanoFramework.Graphics": "ON",
@@ -521,8 +496,6 @@
                 "NF_FEATURE_RTC": "ON",
                 "NF_FEATURE_HAS_SDCARD": "OFF",
                 "ESP32_USB_CDC": "ON",
-                "API_System.IO.FileSystem": "ON",
-                "API_Windows.Storage": "ON",
                 "API_nanoFramework.Device.OneWire": "OFF",
                 "API_nanoFramework.Device.Bluetooth": "OFF",
                 "API_nanoFramework.Graphics": "OFF",
@@ -544,8 +517,6 @@
                 "NF_FEATURE_DEBUGGER": "ON",
                 "NF_FEATURE_RTC": "ON",
                 "NF_FEATURE_HAS_SDCARD": "ON",
-                "API_System.IO.FileSystem": "ON",
-                "API_Windows.Storage": "ON",
                 "API_nanoFramework.Device.OneWire": "ON",
                 "API_nanoFramework.Graphics": "ON",
                 "GRAPHICS_DISPLAY": "Generic_SPI.cpp",
@@ -569,8 +540,6 @@
                 "NF_FEATURE_DEBUGGER": "ON",
                 "NF_FEATURE_RTC": "ON",
                 "NF_FEATURE_HAS_SDCARD": "ON",
-                "API_System.IO.FileSystem": "ON",
-                "API_Windows.Storage": "ON",
                 "API_nanoFramework.Device.OneWire": "ON",
                 "API_nanoFramework.Device.Bluetooth": "ON",
                 "API_nanoFramework.Graphics": "ON",
@@ -599,7 +568,6 @@
                 "ESP32_ETHERNET_SUPPORT": "ON",
                 "ETH_PHY_RST_GPIO": "5",
                 "ETH_RMII_CLK_OUT_GPIO": "17",
-                "API_System.IO.FileSystem": "ON",
                 "API_System.Device.I2c.Slave": "OFF",
                 "API_nanoFramework.Device.OneWire": "ON"
             }
@@ -622,7 +590,6 @@
                 "ESP32_ETHERNET_SUPPORT": "ON",
                 "ETH_PHY_RST_GPIO": "12",
                 "ETH_RMII_CLK_OUT_GPIO": "17",
-                "API_System.IO.FileSystem": "ON",
                 "API_nanoFramework.Device.OneWire": "ON",
                 "API_System.Device.I2c.Slave": "OFF"
             }
@@ -642,7 +609,6 @@
                 "NF_FEATURE_DEBUGGER": "ON",
                 "NF_FEATURE_RTC": "ON",
                 "NF_FEATURE_HAS_SDCARD": "ON",
-                "API_System.IO.FileSystem": "ON",
                 "API_nanoFramework.Device.OneWire": "ON",
                 "API_System.Device.I2c.Slave": "ON",
                 "ESP32_ETHERNET_SUPPORT": "ON",
@@ -664,7 +630,6 @@
                 "NF_BUILD_RTM": "OFF",
                 "NF_FEATURE_DEBUGGER": "ON",
                 "NF_FEATURE_RTC": "ON",
-                "API_System.IO.FileSystem": "ON",
                 "API_nanoFramework.Device.OneWire": "ON",
                 "API_nanoFramework.Graphics": "ON",
                 "API_System.Device.I2c.Slave": "OFF",
@@ -722,7 +687,6 @@
                 "ETH_PHY_RST_GPIO": "5",
                 "ETH_RMII_CLK_IN_GPIO": "0",
                 "ETH_PHY_ADDR": "1",
-                "API_System.IO.FileSystem": "ON",
                 "API_nanoFramework.Device.OneWire": "ON",
                 "API_nanoFramework.Device.Bluetooth": "ON",
                 "API_System.Device.I2c.Slave": "OFF"
@@ -747,7 +711,6 @@
                 "ETH_RMII_CLK_IN_GPIO": "0",
                 "ETH_PHY_ADDR": "1",
                 "ETH_PHY_RST_GPIO": "16",
-                "API_System.IO.FileSystem": "ON",
                 "API_nanoFramework.Device.OneWire": "ON",
                 "API_System.Device.I2c.Slave": "OFF"
             }
@@ -772,7 +735,6 @@
                 "ETH_RMII_CLK_IN_GPIO": "0",
                 "ETH_MDIO_GPIO": "17",
                 "ETH_MDC_GPIO": "16",
-                "API_System.IO.FileSystem": "ON",
                 "API_nanoFramework.Device.OneWire": "ON"
             }
         },
@@ -793,7 +755,6 @@
                 "NF_FEATURE_DEBUGGER": "ON",
                 "TARGET_SERIAL_BAUDRATE": "115200",
                 "NF_FEATURE_RTC": "ON",
-                "API_System.IO.FileSystem": "ON",
                 "API_nanoFramework.Device.OneWire": "ON",
                 "API_nanoFramework.Graphics": "ON",
                 "API_System.Device.I2c.Slave": "OFF",
@@ -818,7 +779,6 @@
                 "NF_FEATURE_DEBUGGER": "ON",
                 "TARGET_SERIAL_BAUDRATE": "115200",
                 "NF_FEATURE_RTC": "ON",
-                "API_System.IO.FileSystem": "ON",
                 "API_nanoFramework.Device.OneWire": "ON",
                 "API_System.Device.I2c.Slave": "OFF",
                 "API_nanoFramework.Graphics": "ON",
@@ -843,7 +803,6 @@
                 "NF_FEATURE_DEBUGGER": "ON",
                 "NF_FEATURE_RTC": "ON",
                 "NF_FEATURE_HAS_SDCARD": "OFF",
-                "API_System.IO.FileSystem": "ON",
                 "ESP32_ETHERNET_SUPPORT": "OFF",
                 "ESP32_CONFIG_PIN_PHY_POWER": "",
                 "ESP32_CONFIG_PHY_CLOCK_MODE": "",
@@ -865,7 +824,6 @@
                 "NF_BUILD_RTM": "OFF",
                 "NF_FEATURE_DEBUGGER": "ON",
                 "NF_FEATURE_RTC": "ON",
-                "API_System.IO.FileSystem": "ON",
                 "API_nanoFramework.Graphics": "ON",
                 "GRAPHICS_DISPLAY": "ILI9341_240x320_SPI.cpp",
                 "TOUCHPANEL_DEVICE": "XPT2046.cpp",
@@ -958,7 +916,7 @@
             "name": "ESP32_H2_THREAD",
             "displayName": "ESP32_H2_THREAD",
             "configurePreset": "ESP32_H2_THREAD"
-        },        
+        },
         {
             "inherits": "base-user",
             "name": "ESP32_S3",

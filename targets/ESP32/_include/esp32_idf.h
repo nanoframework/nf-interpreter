@@ -57,26 +57,23 @@
 
 #include <driver/i2s.h>
 #include <soc/i2s_reg.h>
-//#include <driver/i2s_std.h>
-//#include <driver/i2s_pdm.h>
+// #include <driver/i2s_std.h>
+// #include <driver/i2s_pdm.h>
 
 #include <driver/uart.h>
 #include <driver/ledc.h>
 
 #include <driver/adc.h>
-//#include <esp_adc/adc_oneshot.h>
+// #include <esp_adc/adc_oneshot.h>
 
 #if defined(CONFIG_IDF_TARGET_ESP32) || defined(CONFIG_IDF_TARGET_ESP32S2)
 #include <driver/dac_oneshot.h>
 #endif
 
 #include <driver/gptimer.h>
-#include <esp_spiffs.h>
 #include <driver/pulse_cnt.h>
 
 #include <soc/uart_channel.h>
-#include <spiffs_config.h>
-#include <esp_spiffs.h>
 #include <esp_rom_crc.h>
 #include <esp_rom_caps.h>
 #include <esp_pm.h>
@@ -98,10 +95,11 @@
 #endif
 
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
 
-int ets_printf(const char *fmt, ...);
+    int ets_printf(const char *fmt, ...);
 
 #ifdef __cplusplus
 }

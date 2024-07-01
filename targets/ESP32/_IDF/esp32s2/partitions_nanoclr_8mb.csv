@@ -11,7 +11,7 @@ factory,  app, factory,  0x10000,  0x1A0000,
 # Deployment area for Managed code 2944k, Mapping issues with deployment areas over 3.5Mb, see issue #691
 deploy,   data, 0x84,    0x1B0000, 0x2E0000, 
 # Config data for Network, Wireless, certificates, user data  2Mb
-config,   data, spiffs,  0x490000, 0x200000,  
+config,   data, littlefs,  0x490000, 0x200000,  
 ##########################################
 # total size has to be 0x800000 or less  #
 ##########################################

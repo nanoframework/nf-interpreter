@@ -42,7 +42,6 @@
                 "API_nanoFramework.System.Text": "ON",
                 "API_nanoFramework.System.IO.Hashing": "ON",
                 "API_nanoFramework.GiantGecko.Adc": "OFF",
-                "API_Windows.Storage": "OFF",
                 "API_nanoFramework.Graphics": "OFF",
                 "API_System.Device.UsbStream": "ON",
                 "HAL_WP_USE_SERIAL": "ON"

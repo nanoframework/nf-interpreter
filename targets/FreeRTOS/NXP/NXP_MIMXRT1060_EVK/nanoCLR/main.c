@@ -20,6 +20,8 @@
 #include "Target_BlockStorage_iMXRTFlashDriver.h"
 #include "CLR_Startup_Thread.h"
 
+extern void SdCardThread(void * argument);
+
 // configure heap memory
 __attribute__((section(".noinit.$SRAM_OC.ucHeap"))) uint8_t ucHeap[configTOTAL_HEAP_SIZE];
 
