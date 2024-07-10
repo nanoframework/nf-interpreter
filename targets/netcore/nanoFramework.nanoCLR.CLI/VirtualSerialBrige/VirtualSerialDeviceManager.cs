@@ -12,6 +12,10 @@ using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
 
+// TODO: Add IsInstalled method that does the following:
+// A) Get the guid from SerialPortLibraryClass
+// B) Checks registry for the existence of the library ex: HKEY_CLASSES_ROOT\CLSID\{e13da62c-3a88-45a4-a5d0-224dea7bf4ff}
+// TODO: Check license AFTER confirming installation so a more specific error can be displayed
 namespace nanoFramework.nanoCLR.CLI
 {
     public class VirtualSerialDeviceManager
@@ -190,16 +194,26 @@ namespace nanoFramework.nanoCLR.CLI
         {
             var assembly = typeof(VirtualSerialDeviceManager).GetTypeInfo().Assembly;
 
-            Stream resource = assembly.GetManifestResourceStream(_licenseResourceName);
-            MemoryStream memoryStream = new MemoryStream();
+            using var resource = assembly.GetManifestResourceStream(_licenseResourceName);
+            if (resource is null)
+            {
+                // TODO: Should probably return an error
+                return;
+            }
+
+            using var memoryStream = new MemoryStream();
 
             resource.CopyTo(memoryStream);
             var bytes = memoryStream.ToArray();
 
-            if (bytes.Length > 0)
+            if (bytes.Length <= 0)
             {
-                _serialPortLibrary.installLicenseInMemory(bytes);
+                // TODO: Should probably return an error
+                return;
             }
+            
+            // This appears to be a misleading name as the license appears to be persisted
+            _serialPortLibrary.installLicenseInMemory(bytes);
         }
     }
 }
