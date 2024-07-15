@@ -201,9 +201,9 @@ HRESULT LITTLEFS_FS_Driver::Open(const VOLUME_ID *volume, const char *path, void
 #ifdef DEBUG
     result = stat(normalizedPath, &info);
 
-    fileExists = result == FR_OK;
+    fileExists = (result == FR_OK);
 #else
-    fileExists = f_stat(normalizedPath, &info) == FR_OK;
+    fileExists = (stat(normalizedPath, &info) == FR_OK);
 #endif
 
     if (fileExists)
@@ -988,7 +988,7 @@ static int32_t RemoveAllFiles(const char *path)
             result = rmdir(buffer);
             if (result != 0)
             {
-                result = -1; 
+                result = -1;
                 break;
             }
         }
