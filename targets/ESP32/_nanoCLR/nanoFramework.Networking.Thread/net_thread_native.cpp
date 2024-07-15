@@ -36,6 +36,14 @@ static const CLR_RT_MethodHandler method_lookup[] =
     NULL,
     NULL,
     NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
     Library_net_thread_native_nanoFramework_Networking_Thread_OpenThread::NativeCreateStack___VOID,
     Library_net_thread_native_nanoFramework_Networking_Thread_OpenThread::NativeSetActiveDataset___VOID,
     Library_net_thread_native_nanoFramework_Networking_Thread_OpenThread::NativeGetActiveDataset___VOID,
@@ -82,12 +90,14 @@ static const CLR_RT_MethodHandler method_lookup[] =
     NULL,
     NULL,
     NULL,
+    NULL,
+    NULL,
 };
 
 const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_nanoFramework_Networking_Thread =
 {
     "nanoFramework.Networking.Thread",
-    0xBFBB09A8,
+    0x4EF1F92D,
     method_lookup,
     { 1, 0, 0, 0 }
 };
