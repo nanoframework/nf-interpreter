@@ -48,13 +48,13 @@ typedef enum __nfpack ThreadDeviceRole
 
 typedef enum __nfpack ThreadDeviceState
 {
-    ThreadDeviceState_OPENTHREAD_EVENT_START = 0,
-    ThreadDeviceState_OPENTHREAD_EVENT_STOP = 1,
-    ThreadDeviceState_OPENTHREAD_EVENT_DETACHED = 2,
-    ThreadDeviceState_OPENTHREAD_EVENT_ATTACHED = 3,
-    ThreadDeviceState_OPENTHREAD_EVENT_IF_UP = 5,
-    ThreadDeviceState_OPENTHREAD_EVENT_IF_DOWN = 6,
-    ThreadDeviceState_OPENTHREAD_EVENT_GOT_IP6 = 7,
+    ThreadDeviceState_Start = 0,
+    ThreadDeviceState_Stop = 1,
+    ThreadDeviceState_Detached = 2,
+    ThreadDeviceState_Attached = 3,
+    ThreadDeviceState_InterfaceUp = 5,
+    ThreadDeviceState_InterfaceDown = 6,
+    ThreadDeviceState_GotIpv6 = 7,
 } ThreadDeviceState;
 
 typedef enum __nfpack ThreadDeviceType
@@ -66,22 +66,22 @@ typedef enum __nfpack ThreadDeviceType
 
 struct Library_net_thread_native_nanoFramework_Networking_Thread_OpenThreadStateChangeEventArgs
 {
-    static const int FIELD__currentState = 3;
+    static const int FIELD___currentState = 3;
 
     //--//
 };
 
 struct Library_net_thread_native_nanoFramework_Networking_Thread_OpenThreadRoleChangeEventArgs
 {
-    static const int FIELD__previousRole = 3;
-    static const int FIELD__currentRole = 4;
+    static const int FIELD___previousRole = 3;
+    static const int FIELD___currentRole = 4;
 
     //--//
 };
 
 struct Library_net_thread_native_nanoFramework_Networking_Thread_OpenThreadConsoleOutputAvailableArgs
 {
-    static const int FIELD__consoleLines = 3;
+    static const int FIELD___consoleLines = 3;
 
     //--//
 };
@@ -136,7 +136,7 @@ struct Library_net_thread_native_nanoFramework_Networking_Thread_OpenThreadDatas
 
 struct Library_net_thread_native_nanoFramework_Networking_Thread_OpenThreadJoinerStartCompleteEventArgs
 {
-    static const int FIELD__error = 3;
+    static const int FIELD___error = 3;
 
     //--//
 };
