@@ -128,7 +128,8 @@ bool Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_Esp3
     return true;
 }
 
-HRESULT Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_Esp32_Rmt_RmtChannel::NativeGetSourceClockFrequency___STATIC__I4( CLR_RT_StackFrame &stack )
+HRESULT Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_Esp32_Rmt_RmtChannel::
+    NativeGetSourceClockFrequency___STATIC__I4(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
