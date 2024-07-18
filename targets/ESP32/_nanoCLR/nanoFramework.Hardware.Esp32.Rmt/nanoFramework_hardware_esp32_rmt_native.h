@@ -91,6 +91,7 @@ struct Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_Es
     NANOCLR_NATIVE_DECLARE(NativeSetGpioPin___VOID__I4__U1__I4__BOOLEAN);
     NANOCLR_NATIVE_DECLARE(NativeSetClockDivider___VOID__U1);
     NANOCLR_NATIVE_DECLARE(NativeSetNumberOfMemoryBlocks___VOID__U1);
+    NANOCLR_NATIVE_DECLARE(NativeGetSourceClockFrequency___STATIC__I4);
 
     //--//
 
