@@ -127,3 +127,18 @@ bool Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_Esp3
 
     return true;
 }
+
+HRESULT Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_Esp32_Rmt_RmtChannel::
+    NativeGetSourceClockFrequency___STATIC__I4(CLR_RT_StackFrame &stack)
+{
+    NANOCLR_HEADER();
+
+// Currently we use the default clock for all targets. This is 80Mhz except for H2 where it is 32Mhz.
+#if defined(CONFIG_IDF_TARGET_ESP32H2)
+    stack.SetResult_I4(32000000);
+#else
+    stack.SetResult_I4(80000000);
+#endif
+
+    NANOCLR_NOCLEANUP_NOLABEL();
+}
