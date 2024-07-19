@@ -37,7 +37,6 @@ inline bool CPU_IsSoftRebootSupported()
 
 void CPU_SetPowerMode(PowerLevel_type powerLevel)
 {
-#if !defined(CONFIG_IDF_TARGET_ESP32H2)
     switch (powerLevel)
     {
         case PowerLevel__Off:
@@ -52,5 +51,4 @@ void CPU_SetPowerMode(PowerLevel_type powerLevel)
             // all the other power modes are unsupported here
             break;
     }
-#endif
 }
