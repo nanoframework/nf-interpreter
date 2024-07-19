@@ -68,12 +68,27 @@ typedef enum __nfpack Sleep_WakeupGpioPin
 {
     Sleep_WakeupGpioPin_None = 0,
     Sleep_WakeupGpioPin_Pin0 = 1,
+    Sleep_WakeupGpioPin_Pin1 = 2,
     Sleep_WakeupGpioPin_Pin2 = 4,
+    Sleep_WakeupGpioPin_Pin3 = 8,
     Sleep_WakeupGpioPin_Pin4 = 16,
+    Sleep_WakeupGpioPin_Pin5 = 32,
+    Sleep_WakeupGpioPin_Pin6 = 64,
+    Sleep_WakeupGpioPin_Pin7 = 128,
+    Sleep_WakeupGpioPin_Pin8 = 256,
+    Sleep_WakeupGpioPin_Pin9 = 512,
+    Sleep_WakeupGpioPin_Pin10 = 1024,
+    Sleep_WakeupGpioPin_Pin11 = 2048,
     Sleep_WakeupGpioPin_Pin12 = 4096,
     Sleep_WakeupGpioPin_Pin13 = 8192,
     Sleep_WakeupGpioPin_Pin14 = 16384,
     Sleep_WakeupGpioPin_Pin15 = 32768,
+    Sleep_WakeupGpioPin_Pin16 = 65536,
+    Sleep_WakeupGpioPin_Pin17 = 131072,
+    Sleep_WakeupGpioPin_Pin18 = 262144,
+    Sleep_WakeupGpioPin_Pin19 = 524288,
+    Sleep_WakeupGpioPin_Pin20 = 1048576,
+    Sleep_WakeupGpioPin_Pin21 = 2097152,
     Sleep_WakeupGpioPin_Pin25 = 33554432,
     Sleep_WakeupGpioPin_Pin26 = 67108864,
     Sleep_WakeupGpioPin_Pin27 = 134217728,
@@ -226,12 +241,12 @@ typedef enum __nfpack ValueTypes
     ValueTypes_DeviceType = 65536,
 } ValueTypes;
 
-typedef enum __nfpack GpioChangePolarity
+typedef enum __nfpack GpioPulsePolarity
 {
-    GpioChangePolarity_Both = 0,
-    GpioChangePolarity_Falling = 1,
-    GpioChangePolarity_Rising = 2,
-} GpioChangePolarity;
+    GpioPulsePolarity_Both = 0,
+    GpioPulsePolarity_Falling = 1,
+    GpioPulsePolarity_Rising = 2,
+} GpioPulsePolarity;
 
 struct Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32_Configuration
 {

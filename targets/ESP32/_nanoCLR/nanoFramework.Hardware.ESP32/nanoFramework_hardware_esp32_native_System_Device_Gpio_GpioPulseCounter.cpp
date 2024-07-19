@@ -159,7 +159,7 @@ static pcnt_unit_handle_t InitialiseCounter(int counterIndex)
     return (ec == ESP_OK) ? counter->unitHandle : NULL;
 }
 
-static pcnt_unit_handle_t InitialiseEdgeAndActions(int counterIndex, GpioChangePolarity polarity)
+static pcnt_unit_handle_t InitialiseEdgeAndActions(int counterIndex, GpioPulsePolarity polarity)
 {
     esp_err_t ec = ESP_OK;
     bool countRising = false;
@@ -169,17 +169,17 @@ static pcnt_unit_handle_t InitialiseEdgeAndActions(int counterIndex, GpioChangeP
 
     switch (polarity)
     {
-        case GpioChangePolarity_Both:
+        case GpioPulsePolarity_Both:
             countRising = true;
             countFalling = true;
             break;
 
-        case GpioChangePolarity_Rising:
+        case GpioPulsePolarity_Rising:
             countRising = true;
             countFalling = false;
             break;
 
-        case GpioChangePolarity_Falling:
+        case GpioPulsePolarity_Falling:
             countRising = false;
             countFalling = true;
             break;
@@ -420,7 +420,7 @@ HRESULT Library_nanoFramework_hardware_esp32_native_System_Device_Gpio_GpioPulse
         // must be disabled to change
         pcnt_unit_disable(unitHandle);
 
-        GpioChangePolarity polarity = (GpioChangePolarity)pThis[FIELD___polarity].NumericByRefConst().s4;
+        GpioPulsePolarity polarity = (GpioPulsePolarity)pThis[FIELD___polarity].NumericByRefConst().s4;
         InitialiseEdgeAndActions(counterIndex, polarity);
 
         // Apply filter.
