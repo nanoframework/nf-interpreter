@@ -5,11 +5,104 @@
 
 #include "sys_dev_i2c_slave_native_target.h"
 
+// copied from esp-idf\components\driver\test\test_i2c.c because they aren't made available on a header
+#define I2C_MASTER_TX_BUF_DISABLE 0
+#define I2C_MASTER_RX_BUF_DISABLE 0
+
+#define I2C_SLAVE_WORKER_TASK_STACK_SIZE 2048
+
 typedef Library_corlib_native_System_SpanByte SpanByte;
+
+#if SOC_I2C_NUM > 0
+NF_PAL_I2CSLAVE I2cSlave0_PAL;
+#endif
+#if SOC_I2C_NUM > 1
+NF_PAL_I2CSLAVE I2cSlave1_PAL;
+#endif
+
+NF_PAL_I2CSLAVE *GetPalI2cSlaveFromBusIndex(int busIndex)
+{
+    // find matching I2C PAL
+    switch (busIndex)
+    {
+
+#if SOC_I2C_NUM > 0
+        case I2C_NUM_0:
+            return &I2cSlave0_PAL;
+#endif
+
+#if SOC_I2C_NUM > 1
+        case I2C_NUM_1:
+            // set UART PAL
+            return &I2cSlave1_PAL;
+#endif
+
+        default:
+            return NULL;
+    }
+}
+
+void UninitializePalI2cSlave(NF_PAL_I2CSLAVE *palI2cSlave)
+{
+    if (palI2cSlave && palI2cSlave->I2cSlaveWorkerTask)
+    {
+        // delete driver
+        i2c_driver_delete(palI2cSlave->BusNum);
+
+        // flag bus as uninitialized & unused
+        Esp_I2C_Initialised_Flag[palI2cSlave->BusNum] = 0;
+    }
+}
+
+void Esp32_I2cSlave_UninitializeAll()
+{
+    for (int busIndex = 0; busIndex < I2C_NUM_MAX; busIndex++)
+    {
+        if (Esp_I2C_Initialised_Flag[busIndex])
+        {
+            // free buffers memory
+            UninitializePalI2cSlave(GetPalI2cSlaveFromBusIndex(busIndex));
+        }
+    }
+}
+
+void I2cSlaveRxWorkerTask(void *pvParameters)
+{
+    // get PAL UART from task parameters
+    NF_PAL_I2CSLAVE *palI2c = (NF_PAL_I2CSLAVE *)pvParameters;
+
+    // read data to I2C slave
+    palI2c->BytesTransferred =
+        i2c_slave_read_buffer(palI2c->BusNum, palI2c->Buffer, palI2c->RequestedBytes, palI2c->TimeoutTicks);
+
+    // set event flag for I2C Slave
+    Events_Set(SYSTEM_EVENT_FLAG_I2C_SLAVE);
+
+    // delete task
+    vTaskDelete(NULL);
+}
+
+void I2cSlaveTxWorkerTask(void *pvParameters)
+{
+    // get PAL UART from task parameters
+    NF_PAL_I2CSLAVE *palI2c = (NF_PAL_I2CSLAVE *)pvParameters;
+
+    // write data to I2C slave
+    palI2c->BytesTransferred =
+        i2c_slave_write_buffer(palI2c->BusNum, palI2c->Buffer, palI2c->RequestedBytes, palI2c->TimeoutTicks);
+
+    // set event flag for I2C Slave
+    Events_Set(SYSTEM_EVENT_FLAG_I2C_SLAVE);
+
+    // delete task
+    vTaskDelete(NULL);
+}
 
 HRESULT Library_sys_dev_i2c_slave_native_System_Device_I2c_I2cSlaveDevice::NativeInit___VOID(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
+
+    NF_PAL_I2CSLAVE *palI2c;
 
     uint16_t deviceAddress;
     i2c_port_t bus;
@@ -33,54 +126,60 @@ HRESULT Library_sys_dev_i2c_slave_native_System_Device_I2c_I2cSlaveDevice::Nativ
     // subtract 1 to get ESP32 bus number
     bus = (i2c_port_t)(pThis[FIELD___busId].NumericByRef().s4 - 1);
 
-    if (bus != I2C_NUM_0
-#if I2C_NUM_MAX > 1
-        && bus != I2C_NUM_1
-#endif
-    )
+    if (bus < I2C_NUM_0 || bus >= SOC_I2C_NUM)
     {
         NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
     }
 
-    // check if this bus is already used
-    if (Esp_I2C_Initialised_Flag[bus] != 0)
+    // if this bus hasn't been initialized yet, let's do it
+    if (Esp_I2C_Initialised_Flag[bus] == 0)
     {
-        NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+        // get the address field
+        deviceAddress = pThis[FIELD___deviceAddress].NumericByRef().s4;
+
+        // compose the configuration
+        dataPin = (gpio_num_t)Esp32_GetMappedDevicePins(DEV_TYPE_I2C, bus, 0);
+        clockPin = (gpio_num_t)Esp32_GetMappedDevicePins(DEV_TYPE_I2C, bus, 1);
+
+        configSlave.sda_io_num = dataPin;
+        configSlave.scl_io_num = clockPin;
+        configSlave.slave.slave_addr = deviceAddress;
+
+        // config I2C parameters
+        res = i2c_param_config(bus, &configSlave);
+
+        ASSERT(res == ESP_OK);
+
+        if (res != ESP_OK)
+        {
+            NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
+        }
+
+        res = i2c_driver_install(bus, I2C_MODE_SLAVE, I2C_SLAVE_RX_BUF_LEN, I2C_SLAVE_TX_BUF_LEN, 0);
+
+        if (res != ESP_OK)
+        {
+            NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
+        }
+
+        // Ensure driver gets uninitialized during soft reboot
+        HAL_AddSoftRebootHandler(Esp32_I2cSlave_UninitializeAll);
+
+        // flag bus as initialized & used
+        Esp_I2C_Initialised_Flag[bus]++;
+
+        palI2c = GetPalI2cSlaveFromBusIndex(bus);
+        if (palI2c == NULL)
+        {
+            NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+        }
+
+        palI2c->BusNum = bus;
+        palI2c->Buffer = NULL;
+        palI2c->RequestedBytes = 0;
+        palI2c->BytesTransferred = 0;
+        palI2c->TimeoutTicks = 0;
     }
-
-    // get the address field
-    deviceAddress = pThis[FIELD___deviceAddress].NumericByRef().s4;
-
-    // compose the configuration
-    dataPin = (gpio_num_t)Esp32_GetMappedDevicePins(DEV_TYPE_I2C, bus, 0);
-    clockPin = (gpio_num_t)Esp32_GetMappedDevicePins(DEV_TYPE_I2C, bus, 1);
-
-    configSlave.sda_io_num = dataPin;
-    configSlave.scl_io_num = clockPin;
-    configSlave.slave.slave_addr = deviceAddress;
-
-    // config I2C parameters
-    res = i2c_param_config(bus, &configSlave);
-
-    ASSERT(res == ESP_OK);
-
-    if (res != ESP_OK)
-    {
-        NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
-    }
-
-    res = i2c_driver_install(bus, I2C_MODE_MASTER, I2C_SLAVE_RX_BUF_LEN, I2C_SLAVE_TX_BUF_LEN, 0);
-
-    if (res != ESP_OK)
-    {
-        NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
-    }
-
-    // Ensure driver gets uninitialized during soft reboot
-    HAL_AddSoftRebootHandler(Esp32_I2c_UnitializeAll);
-
-    // flag bus as initialized & used
-    Esp_I2C_Initialised_Flag[bus]++;
 
     NANOCLR_NOCLEANUP();
 }
@@ -100,11 +199,7 @@ HRESULT Library_sys_dev_i2c_slave_native_System_Device_I2c_I2cSlaveDevice::Nativ
     // subtract 1 to get ESP32 bus number
     bus = (i2c_port_t)(pThis[FIELD___busId].NumericByRef().s4 - 1);
 
-    // delete driver
-    i2c_driver_delete(bus);
-
-    // flag bus as uninitialized & unused
-    Esp_I2C_Initialised_Flag[bus] = 0;
+    UninitializePalI2cSlave(GetPalI2cSlaveFromBusIndex(bus));
 
     NANOCLR_NOCLEANUP();
 }
@@ -114,18 +209,23 @@ HRESULT Library_sys_dev_i2c_slave_native_System_Device_I2c_I2cSlaveDevice::
 {
     NANOCLR_HEADER();
 
-    uint8_t *workBuffer = NULL;
-    int bufferOffset = 0;
-    int bufferSize = 0;
-    i2c_port_t bus;
-    int readCount;
-    bool isRead;
-    int64_t timeoutMs;
+    NF_PAL_I2CSLAVE *palI2c = NULL;
 
+    int32_t bufferOffset = 0;
+    int32_t requestedCount = 0;
+    uint32_t readCount = 0;
+    uint32_t bytesTransfered = 0;
+    i2c_port_t bus;
+    bool isRead = false;
+    int64_t timeoutMs;
+    int64_t *timeoutTicks;
+    bool eventResult = true;
+
+    CLR_RT_HeapBlock hbTimeout;
     CLR_RT_HeapBlock *readSpanByte;
     CLR_RT_HeapBlock *writeSpanByte;
-    CLR_RT_HeapBlock *workingSpanByte;
-    CLR_RT_HeapBlock_Array *workingData = NULL;
+    CLR_RT_HeapBlock_Array *readBuffer = NULL;
+    CLR_RT_HeapBlock_Array *writeBuffer = NULL;
 
     // get a pointer to the managed object instance and check that it's not NULL
     CLR_RT_HeapBlock *pThis = stack.This();
@@ -135,89 +235,265 @@ HRESULT Library_sys_dev_i2c_slave_native_System_Device_I2c_I2cSlaveDevice::
     // subtract 1 to get ESP32 bus number
     bus = (i2c_port_t)(pThis[FIELD___busId].NumericByRef().s4 - 1);
 
+    // get pointer to PAL UART
+    palI2c = GetPalI2cSlaveFromBusIndex(bus);
+    if (palI2c == NULL)
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+    }
+
     // get read buffer
     readSpanByte = stack.Arg1().Dereference();
 
     // get write buffer
     writeSpanByte = stack.Arg2().Dereference();
 
-    if (readSpanByte != NULL)
+    // both parameters can't be null
+    if (!(readSpanByte) && !(writeSpanByte))
     {
-        workingSpanByte = readSpanByte;
-        isRead = true;
-    }
-    else if (writeSpanByte != NULL)
-    {
-        workingSpanByte = writeSpanByte;
-        isRead = false;
-    }
-    else
-    {
-        // something wrong here!!
         NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
     }
 
-    workingData = workingSpanByte[SpanByte::FIELD___array].DereferenceArray();
+    readBuffer = readSpanByte[SpanByte::FIELD___array].DereferenceArray();
 
-    // Get the read offset, only the elements defined by the span must be read, not the whole array
-    bufferOffset = workingSpanByte[SpanByte::FIELD___start].NumericByRef().s4;
+    if (readBuffer != NULL)
+    {
+        // set flag to read operation
+        isRead = true;
 
-    // use the span length as read size, only the elements defined by the span must be read
-    bufferSize = workingSpanByte[SpanByte::FIELD___length].NumericByRef().s4;
+        // Get the read offset, only the elements defined by the span must be read, not the whole array
+        bufferOffset = readSpanByte[SpanByte::FIELD___start].NumericByRef().s4;
 
-    if (bufferSize == 0 || workingData == NULL)
+        // use the span length as read size, only the elements defined by the span must be read
+        requestedCount = readSpanByte[SpanByte::FIELD___length].NumericByRef().s4;
+    }
+
+    if (!isRead)
+    {
+        writeBuffer = writeSpanByte[SpanByte::FIELD___array].DereferenceArray();
+
+        if (writeBuffer != NULL)
+        {
+            // Get the write offset, only the elements defined by the span must be written, not the whole array
+            bufferOffset = writeSpanByte[SpanByte::FIELD___start].NumericByRef().s4;
+
+            // use the span length as write size, only the elements defined by the span must be written
+            requestedCount = writeSpanByte[SpanByte::FIELD___length].NumericByRef().s4;
+        }
+    }
+
+    if (requestedCount == 0 || (writeBuffer == NULL && readBuffer == NULL))
     {
         // nothing to do here
         NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
     }
 
-    timeoutMs = stack.Arg3().NumericByRef().s4;
-    if (timeoutMs == -1)
+    // setup timeout
+    // always set CLR infinite timeout as the FreeRTOS task takes care of the timeout
+    hbTimeout.SetInteger((CLR_INT64)-1);
+    NANOCLR_CHECK_HRESULT(stack.SetupTimeoutFromTicks(hbTimeout, timeoutTicks));
+
+    if (stack.m_customState == 1)
     {
-        timeoutMs = portMAX_DELAY;
-    }
-    else
-    {
-        timeoutMs = timeoutMs / portTICK_PERIOD_MS;
+        // perform parameter validation and setup TX operation
+        timeoutMs = stack.Arg3().NumericByRef().s4;
+
+        if (timeoutMs == -1)
+        {
+            palI2c->TimeoutTicks = portMAX_DELAY;
+        }
+        else
+        {
+            palI2c->TimeoutTicks = timeoutMs / portTICK_PERIOD_MS;
+        }
+
+        // need to allocate buffer from internal memory
+        palI2c->Buffer = (uint8_t *)heap_caps_malloc(requestedCount, MALLOC_CAP_8BIT | MALLOC_CAP_INTERNAL);
+
+        if (palI2c->Buffer == NULL)
+        {
+            NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
+        }
+
+        if (isRead)
+        {
+            // read operation
+            // clear allocated buffer
+            memset(palI2c->Buffer, 0, requestedCount);
+
+            // set buffer size
+            palI2c->RequestedBytes = requestedCount;
+
+            // ... and try to read the requested number of bytes from the I2C buffer
+            palI2c->BytesTransferred = i2c_slave_read_buffer(palI2c->BusNum, palI2c->Buffer, palI2c->RequestedBytes, 1);
+
+            // did we read the requested number of bytes?
+            if (palI2c->BytesTransferred == requestedCount)
+            {
+                // yes, set buffer size to 0
+                palI2c->RequestedBytes = 0;
+
+                // update counter
+                bytesTransfered = palI2c->BytesTransferred;
+
+                // we have enough bytes, skip wait for event
+                eventResult = false;
+
+                // clear event by getting it
+                Events_Get(SYSTEM_EVENT_FLAG_I2C_SLAVE);
+
+                // push dummy value onto the eval stack
+                stack.PushValueU4(0);
+            }
+            else
+            {
+                // no, adjust the requested bytes count
+                palI2c->RequestedBytes = requestedCount - palI2c->BytesTransferred;
+
+                // push read count onto the eval stack
+                stack.PushValueU4(palI2c->BytesTransferred);
+
+                // allocate memory for the task stack
+                palI2c->I2cSlaveWorkerTaskStack = (StackType_t *)heap_caps_malloc(
+                    I2C_SLAVE_WORKER_TASK_STACK_SIZE,
+                    MALLOC_CAP_8BIT | MALLOC_CAP_INTERNAL);
+
+                // create the worker task
+                palI2c->I2cSlaveWorkerTask = xTaskCreateStatic(
+                    I2cSlaveRxWorkerTask,
+                    "I2CSlaveWrk",
+                    I2C_SLAVE_WORKER_TASK_STACK_SIZE,
+                    palI2c,
+                    12,
+                    palI2c->I2cSlaveWorkerTaskStack,
+                    &palI2c->I2cSlaveWorkerTaskBuffer);
+            }
+        }
+        else
+        {
+            // write operation
+
+            // copy buffer content to working buffer
+            memcpy(palI2c->Buffer, (uint8_t *)writeBuffer->GetElement(bufferOffset), requestedCount);
+
+            if (requestedCount < I2C_SLAVE_TX_BUF_LEN)
+            {
+                // write data to I2C slave directly
+
+                palI2c->BytesTransferred =
+                    i2c_slave_write_buffer(palI2c->BusNum, palI2c->Buffer, requestedCount, portMAX_DELAY);
+
+                // update counter
+                bytesTransfered = palI2c->BytesTransferred;
+
+                // skip waiting for the event
+                eventResult = false;
+
+                // clear event by getting it
+                Events_Get(SYSTEM_EVENT_FLAG_I2C_SLAVE);
+
+                // push dummy value onto the eval stack
+                stack.PushValueU4(0);
+            }
+            else
+            {
+                // setup task to write data to I2C slave
+
+                // no, adjust the requested bytes count
+                palI2c->RequestedBytes = requestedCount;
+
+                // push write count onto the eval stack
+                stack.PushValueU4(palI2c->BytesTransferred);
+
+                // allocate memory for the task stack
+                palI2c->I2cSlaveWorkerTaskStack = (StackType_t *)heap_caps_malloc(
+                    I2C_SLAVE_WORKER_TASK_STACK_SIZE,
+                    MALLOC_CAP_8BIT | MALLOC_CAP_INTERNAL);
+
+                // create the worker task
+                palI2c->I2cSlaveWorkerTask = xTaskCreateStatic(
+                    I2cSlaveTxWorkerTask,
+                    "I2CSlaveWrk",
+                    I2C_SLAVE_WORKER_TASK_STACK_SIZE,
+                    palI2c,
+                    12,
+                    palI2c->I2cSlaveWorkerTaskStack,
+                    &palI2c->I2cSlaveWorkerTaskBuffer);
+            }
+        }
+
+        // update custom state
+        stack.m_customState = 2;
     }
 
-    // need to allocate buffer from internal memory
-    workBuffer = (uint8_t *)heap_caps_malloc(bufferSize, MALLOC_CAP_8BIT | MALLOC_CAP_INTERNAL);
+    // get count of bytes already read from the eval stack
+    readCount = stack.m_evalStack[1].NumericByRef().u4;
 
-    if (workBuffer == NULL)
+    while (eventResult)
     {
-        NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
-    }
+        // non-blocking wait allowing other threads to run while we wait for the Tx operation to complete
+        NANOCLR_CHECK_HRESULT(
+            g_CLR_RT_ExecutionEngine.WaitEvents(stack.m_owningThread, *timeoutTicks, Event_I2cSlave, eventResult));
 
-    // clear allocated buffer
-    memset(workBuffer, 0, bufferSize);
+        if (eventResult)
+        {
+            // event occurred
+            // check for errors
+            if (palI2c->BytesTransferred < 0)
+            {
+                // error
+                NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
+            }
+            else
+            {
+                // update counter
+                bytesTransfered = palI2c->BytesTransferred + readCount;
+
+                // done here
+                break;
+            }
+
+            // done here
+            break;
+        }
+        else
+        {
+            // timeout expired
+            // nothing to do here
+            break;
+        }
+    }
 
     if (isRead)
     {
-        // read data from I2C master
-        readCount = i2c_slave_read_buffer(bus, workBuffer, bufferSize, timeoutMs);
-
         // copy over to the managed buffer
         // grab the pointer to the array by starting and the offset specified in the span
-        memcpy(workingData->GetElement(bufferOffset), workBuffer, bufferSize);
+        memcpy(readBuffer->GetElement(bufferOffset), palI2c->Buffer, bytesTransfered);
     }
-    else
-    {
-        // copy buffer content
-        memcpy(workBuffer, (uint8_t *)workingData->GetElement(bufferOffset), bufferSize);
 
-        // write data to I2C master
-        readCount = i2c_slave_write_buffer(bus, workBuffer, bufferSize, timeoutMs);
-    }
+    // pop read count from the stack
+    stack.PopValue();
+
+    // pop timeout heap block from stack
+    stack.PopValue();
 
     // set result to the number of bytes read/written
-    stack.SetInteger(readCount);
+    stack.SetResult_I4((CLR_INT32)bytesTransfered);
 
     NANOCLR_CLEANUP();
 
-    if (workBuffer != NULL)
+    if (FAILED(hr) && hr != CLR_E_THREAD_WAITING)
     {
-        heap_caps_free(workBuffer);
+        if (palI2c != NULL && palI2c->Buffer != NULL)
+        {
+            heap_caps_free(palI2c->Buffer);
+            palI2c->Buffer = NULL;
+        }
+        if (palI2c != NULL && palI2c->I2cSlaveWorkerTaskStack != NULL)
+        {
+            heap_caps_free(palI2c->I2cSlaveWorkerTaskStack);
+            palI2c->I2cSlaveWorkerTaskStack = NULL;
+        }
     }
 
     NANOCLR_CLEANUP_END();
