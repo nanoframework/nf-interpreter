@@ -563,11 +563,13 @@ HRESULT LITTLEFS_FS_Driver::FindNext(void *handle, FS_FILEINFO *fi, bool *fileFo
     if (entry == NULL)
     {
         // readdir() returns NULL on error or if end of directory is reached
+
+        // End of directory
+        *fileFound = false;
+
         // To distinguish between the two, you can check errno
         if (errno == 0)
         {
-            // End of directory
-            *fileFound = false;
             NANOCLR_SET_AND_LEAVE(S_OK);
         }
         else
