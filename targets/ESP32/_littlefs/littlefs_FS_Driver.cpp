@@ -511,6 +511,9 @@ HRESULT LITTLEFS_FS_Driver::FindOpen(const VOLUME_ID *volume, const char *path, 
         return CLR_E_PATH_TOO_LONG;
     }
 
+    // save base path
+    hal_strcpy_s(findHandle->basePath, sizeof(findHandle->basePath), normalizedPath);
+
     // open directory for seek
     findHandle->dir = opendir(normalizedPath);
     if (findHandle->dir != NULL)
@@ -541,6 +544,8 @@ HRESULT LITTLEFS_FS_Driver::FindNext(void *handle, FS_FILEINFO *fi, bool *fileFo
     NANOCLR_HEADER();
 
     LITTLEFS_FindFileHandle *findHandle;
+    char buffer[FS_MAX_PATH_LENGTH];
+
     struct stat info;
     struct dirent *entry;
 

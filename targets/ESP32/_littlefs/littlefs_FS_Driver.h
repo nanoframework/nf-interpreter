@@ -25,6 +25,7 @@ extern "C"
     {
         FILE *file;
         DIR *dir;
+        char basePath[FS_MAX_DIRECTORY_LENGTH];
     };
 
     struct LITTLEFS_FS_Driver
