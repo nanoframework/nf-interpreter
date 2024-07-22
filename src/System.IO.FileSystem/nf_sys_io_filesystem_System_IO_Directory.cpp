@@ -137,8 +137,11 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_Directory::NativeGetChildren___ST
 
     NANOCLR_CLEANUP();
 
-    // close find handle
-    driver->FindClose(findHandle);
+    // close find handle (watch out for NULL handle)
+    if (findHandle != NULL)
+    {
+        driver->FindClose(findHandle);
+    }
 
     // free memory for the file name
     if (fileData.FileName != NULL)
