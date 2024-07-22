@@ -578,45 +578,55 @@ HRESULT LITTLEFS_FS_Driver::FindNext(void *handle, FS_FILEINFO *fi, bool *fileFo
     }
     else
     {
-        // Found an entry
-        *fileFound = true;
-
-        // Set name size
-        fi->FileNameSize = hal_strlen_s(entry->d_name);
-
-        // Allocate memory for the name
-        // MUST BE FREED BY THE CALLER
-        fi->FileName = (char *)platform_malloc(fi->FileNameSize + 1);
-
-        // Sanity check for successful malloc
-        if (fi->FileName == NULL)
+        if (entry->d_name[0] == 0)
         {
-            NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
-        }
-
-        // Copy the name, including the string terminator
-        hal_strcpy_s((char *)fi->FileName, fi->FileNameSize + 1, entry->d_name);
-
-        // POSIX dirent does not directly provide file attributes or size
-        // You would need to use stat() function to retrieve that information
-        // Example:
-        if (stat((char *)fi->FileName, &info) == 0)
-        {
-            if (S_ISDIR(info.st_mode))
-            {
-                fi->Attributes = FileAttributes::FileAttributes_Directory;
-            }
-            else
-            {
-                fi->Attributes = FileAttributes::FileAttributes_Archive;
-            }
-
-            fi->Size = info.st_size;
+            // end of directory
+            *fileFound = false;
         }
         else
         {
-            // Error occurred
-            NANOCLR_SET_AND_LEAVE(CLR_E_FILE_IO);
+            // Found an entry
+            *fileFound = true;
+
+            // Set name size
+            fi->FileNameSize = hal_strlen_s(entry->d_name);
+
+            // Allocate memory for the name
+            // MUST BE FREED BY THE CALLER
+            fi->FileName = (char *)platform_malloc(fi->FileNameSize + 1);
+
+            // Sanity check for successful malloc
+            if (fi->FileName == NULL)
+            {
+                NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
+            }
+
+            // Copy the name, including the string terminator
+            hal_strcpy_s((char *)fi->FileName, fi->FileNameSize + 1, entry->d_name);
+
+            // compose the full path of the current entry
+            snprintf(buffer, FS_MAX_PATH_LENGTH, "%s%s", findHandle->basePath, entry->d_name);
+
+            // POSIX dirent does not directly provide file attributes or size
+            // need to use stat() function to retrieve that information
+            if (stat((char *)buffer, &info) == 0)
+            {
+                if (S_ISDIR(info.st_mode))
+                {
+                    fi->Attributes = FileAttributes::FileAttributes_Directory;
+                }
+                else
+                {
+                    fi->Attributes = FileAttributes::FileAttributes_Archive;
+                }
+
+                // POSIX API does not provide file size
+            }
+            else
+            {
+                // Error occurred
+                NANOCLR_SET_AND_LEAVE(CLR_E_FILE_IO);
+            }
         }
     }
 
