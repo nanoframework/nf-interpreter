@@ -905,36 +905,51 @@ HRESULT LITTLEFS_FS_Driver::Delete(const VOLUME_ID *volume, const char *path, bo
         return CLR_E_PATH_TOO_LONG;
     }
 
+remove_entry:
+
     // check for file existence
     if (stat(normalizedPath, &info) != FR_OK)
     {
         return CLR_E_FILE_NOT_FOUND;
     }
 
-remove_entry:
-    // remove the directory
-    result = rmdir(normalizedPath);
-
-    if (result == -1)
+    if (!S_ISDIR(info.st_mode))
     {
-        if (!recursive)
+        // Entry is a file, remove it
+        result = unlink(normalizedPath);
+        if (result != 0)
         {
-            // directory is not empty and we are not in recursive mode
-            return CLR_E_DIRECTORY_NOT_EMPTY;
+            return CLR_E_FILE_IO;
+            ;
         }
+    }
+    else
+    {
+        // Entry is a directory...
+        // ... remove the directory
+        result = rmdir(normalizedPath);
 
-        // recursivelly delete all files and subdirectories
-        result = RemoveAllFiles(normalizedPath);
-        if (result != FR_OK)
+        if (result == -1)
+        {
+            if (!recursive)
+            {
+                // directory is not empty and we are not in recursive mode
+                return CLR_E_DIRECTORY_NOT_EMPTY;
+            }
+
+            // recursivelly delete all files and subdirectories
+            result = RemoveAllFiles(normalizedPath);
+            if (result != FR_OK)
+            {
+                return CLR_E_FILE_IO;
+            }
+
+            goto remove_entry;
+        }
+        else if (result != FR_OK)
         {
             return CLR_E_FILE_IO;
         }
-
-        goto remove_entry;
-    }
-    else if (result != FR_OK)
-    {
-        return CLR_E_FILE_IO;
     }
 
     return S_OK;
