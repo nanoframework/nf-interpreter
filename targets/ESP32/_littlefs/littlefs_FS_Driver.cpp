@@ -723,7 +723,7 @@ HRESULT LITTLEFS_FS_Driver::GetAttributes(const VOLUME_ID *volume, const char *p
     // check for file existence
     result = stat(normalizedPath, &info);
 
-    if (result == FR_NO_PATH || result == FR_NO_FILE)
+    if (result == -1)
     {
         // file doesn't exist
         // even if this fails we return success as attributes have been set to EMPTY_ATTRIBUTE
