@@ -794,13 +794,6 @@ HRESULT LITTLEFS_FS_Driver::SetAttributes(const VOLUME_ID *volume, const char *p
         newMode |= S_IWUSR;
     }
 
-    // TODO
-    // if (chmod(normalizedPath, newMode) != 0)
-    // {
-    //     // Handle error for chmod failure
-    //     return CLR_E_FILE_IO;
-    // }
-
     return S_OK;
 }
 
