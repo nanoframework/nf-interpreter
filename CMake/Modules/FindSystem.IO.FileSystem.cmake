@@ -22,14 +22,38 @@ set(System.IO.FileSystem_SRCS
 
     nf_sys_io_filesystem.cpp
 
+    nf_sys_io_filesystem_nanoFramework_System_IO_FileSystem_SDCard_stubs.cpp
     nf_sys_io_filesystem_nanoFramework_System_IO_FileSystem_SDCard.cpp
     nf_sys_io_filesystem_System_IO_Directory.cpp
     nf_sys_io_filesystem_System_IO_DriveInfo.cpp
-    nf_sys_io_filesystem_System_IO_File.cpp
-    nf_sys_io_filesystem_System_IO_FileStream.cpp
+    nf_sys_io_filesystem_System_IO_NativeFileStream.cpp
+    nf_sys_io_filesystem_System_IO_NativeFindFile.cpp
+    nf_sys_io_filesystem_System_IO_NativeIO.cpp
 
-    Target_Windows_Storage.c
+    # file system drivers
+    nanoPAL_FileSystem.cpp
+
+    Target_System_IO_FileSystem.c
+    target_FileSystem.cpp
 )
+
+# add littlefs FS driver
+if(NF_FEATURE_USE_LITTLEFS_OPTION)
+
+    list(APPEND System.IO.FileSystem_SRCS
+        littlefs_FS_Driver.cpp)
+    
+    list(APPEND System.IO.FileSystem_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/targets/${RTOS}/_littlefs)
+endif()
+
+# add FatFs FS driver
+if(NF_FEATURE_HAS_SDCARD OR NF_FEATURE_HAS_USB_MSD)
+
+    list(APPEND System.IO.FileSystem_SRCS
+        fatfs_FS_Driver.cpp)
+
+    list(APPEND System.IO.FileSystem_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/targets/${RTOS}/_FatFs)
+endif()
 
 foreach(SRC_FILE ${System.IO.FileSystem_SRCS})
 
@@ -40,7 +64,17 @@ foreach(SRC_FILE ${System.IO.FileSystem_SRCS})
 	        ${BASE_PATH_FOR_THIS_MODULE}
 	        ${TARGET_BASE_LOCATION}
             ${PROJECT_COMMON_PATH}
+            ${BASE_PATH_FOR_CLASS_LIBRARIES_MODULES}
+
             ${CMAKE_SOURCE_DIR}/src/System.IO.FileSystem
+
+            ${CMAKE_SOURCE_DIR}/src/PAL/FileSystem
+
+            # littlefs
+            ${CMAKE_SOURCE_DIR}/targets/${RTOS}/_littlefs
+
+            # FatFs
+            ${CMAKE_SOURCE_DIR}/targets/${RTOS}/_FatFs
 
 	    CMAKE_FIND_ROOT_PATH_BOTH
     )

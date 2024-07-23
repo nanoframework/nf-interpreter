@@ -8,6 +8,7 @@
 #include <nanoWeak.h>
 #include <nanoCLR_Types.h>
 #include "esp32_idf.h"
+#include <esp_littlefs.h>
 #include <target_platform.h>
 #include <targetHAL_StorageOperation.h>
 #include <targetHAL_FileOperation.h>
@@ -15,7 +16,7 @@
 // Ensure Storage is initialized
 void EnsureStorageInitialized()
 {
-    if (!esp_spiffs_mounted(SPIFFS_PARTITION_LABEL))
+    if (!esp_littlefs_mounted(LITTLEFS_PARTITION_LABEL))
     {
         ConfigStorage_Initialise();
     }

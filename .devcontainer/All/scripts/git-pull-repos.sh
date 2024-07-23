@@ -24,8 +24,8 @@ cd /sources/CMSIS_5
 git pull origin 5.5.1
 cd /sources/lwip
 git pull origin STABLE-2_1_3_RELEASE
-cd /sources/spiffs
-git pull origin nf-build
+cd /sources/littlefs
+git pull origin v2.9.3
 cd /sources/SimpleLinkCC32
 git pull origin 4.10.00.07
 cd /sources/SimpleLinkCC13
