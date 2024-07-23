@@ -57,7 +57,7 @@ else()
 
 endif()
 
-FetchContent_Populate(nRFConnectSdk)
+FetchContent_MakeAvailable(nRFConnectSdk)
 
 # Point to NCS root directory
 set(NRF_DIR ${nRFConnectSdk_SOURCE_DIR} CACHE PATH "NCS root directory")

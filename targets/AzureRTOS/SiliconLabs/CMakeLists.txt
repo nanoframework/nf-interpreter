@@ -114,7 +114,7 @@ else()
 endif()
 
 FetchContent_GetProperties(gecko_sdk)
-FetchContent_Populate(gecko_sdk)
+FetchContent_MakeAvailable(gecko_sdk)
 
 # including here the CMake files for the source files specific to the target series
 include(AzureRTOS_${TARGET_SERIES}_sources)

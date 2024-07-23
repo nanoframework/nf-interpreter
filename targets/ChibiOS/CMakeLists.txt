@@ -106,7 +106,7 @@ endif()
 FetchContent_GetProperties(chibios)
 if(NOT chibios_POPULATED)
     # Fetch the content using previously declared details
-    FetchContent_Populate(chibios)
+    FetchContent_MakeAvailable(chibios)
 endif()
 
 if(CHIBIOS_CONTRIB_REQUIRED)
@@ -137,7 +137,7 @@ if(CHIBIOS_CONTRIB_REQUIRED)
     FetchContent_GetProperties(chibios-contrib)
     if(NOT chibios-contrib_POPULATED)
         # Fetch the content using previously declared details
-        FetchContent_Populate(chibios-contrib)
+        FetchContent_MakeAvailable(chibios-contrib)
     endif()
 
 endif()
@@ -199,7 +199,7 @@ if(NF_FEATURE_HAS_SDCARD OR NF_FEATURE_HAS_USB_MSD)
     FetchContent_GetProperties(fatfs)
     if(NOT fatfs_POPULATED)
         # Fetch the content using previously declared details
-        FetchContent_Populate(fatfs)
+        FetchContent_MakeAvailable(fatfs)
     endif()
 
     # have to delete the ffconf.h template from the repo
@@ -373,7 +373,7 @@ if(NF_FEATURE_USE_LITTLEFS_OPTION)
     FetchContent_GetProperties(littlefs)
     if(NOT littlefs_POPULATED)
         # Fetch the content using previously declared details
-        FetchContent_Populate(littlefs)
+        FetchContent_MakeAvailable(littlefs)
     endif()
 
 endif()

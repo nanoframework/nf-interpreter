@@ -109,7 +109,7 @@ else()
 
 endif()
 
-FetchContent_Populate(azure_rtos)
+FetchContent_MakeAvailable(azure_rtos)
 
 ###########################
 # Azure RTOS USBX
@@ -168,7 +168,7 @@ if(AZURERTOS_USBX_REQUIRED)
 
     endif()
 
-    FetchContent_Populate(azure_rtos_usbx)
+    FetchContent_MakeAvailable(azure_rtos_usbx)
 
 endif()
 
@@ -229,7 +229,7 @@ if(AZURERTOS_FILEX_REQUIRED)
 
     endif()
 
-    FetchContent_Populate(azure_rtos_filex)
+    FetchContent_MakeAvailable(azure_rtos_filex)
 
 endif()
 
@@ -293,7 +293,7 @@ if(AZURERTOS_NETXDUO_REQUIRED)
     # enable BSD layer in NetX Duo
     set(NXD_ENABLE_BSD TRUE)
 
-    FetchContent_Populate(azure_rtos_netxduo)
+    FetchContent_MakeAvailable(azure_rtos_netxduo)
 
 endif()
 
