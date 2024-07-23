@@ -11,9 +11,16 @@ steps:
     parameters:
       repoDirectory: ${{ parameters.repoDirectory }}
 
+  - task: Cache@2
+    displayName: Cache ccache files
+    inputs:
+      key: 'ccache-ti-simplelink | 0'
+      path: $(Build.SourcesDirectory)/nf-interpreter/.ccache
+      cacheHitVar: CCACHE_RESTORED
+
   - task: CMake@1
     inputs:
-      cmakeArgs: " --preset $(TargetBoard) -DCMAKE_BUILD_TYPE=MinSizeRel -DBUILD_VERSION=$(NBGV_VersionMajor).$(NBGV_VersionMinor).$(NBGV_BuildNumber).$(TARGET_BUILD_COUNTER) -DTARGET_BOARD=$(TargetBoard) -DTARGET_NAME=$(TargetPublishName) $(BuildOptions)"
+      cmakeArgs: " --preset $(TargetBoard) -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_BUILD_TYPE=MinSizeRel -DBUILD_VERSION=$(NBGV_VersionMajor).$(NBGV_VersionMinor).$(NBGV_BuildNumber).$(TARGET_BUILD_COUNTER) -DTARGET_BOARD=$(TargetBoard) -DTARGET_NAME=$(TargetPublishName) $(BuildOptions)"
       workingDirectory: ${{ parameters.repoDirectory }}
     displayName: Setup build with CMake
 
@@ -22,3 +29,9 @@ steps:
       cmakeArgs: "--build --preset $(TargetBoard) --target all --config MinSizeRel"
       workingDirectory: ${{ parameters.repoDirectory }}
     displayName: Build with CMake
+
+  - task: Cache@2
+    displayName: Save ccache files
+    inputs:
+      key: 'ccache-ti-simplelink | 0'
+      path: $(Build.SourcesDirectory)/nf-interpreter/.ccache

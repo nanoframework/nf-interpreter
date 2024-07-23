@@ -1,0 +1,33 @@
+# Copyright (c) .NET Foundation and Contributors
+# See LICENSE file in the project root for full license information.
+
+steps:
+  - task: Cache@2
+    displayName: "Cache ccache"
+    inputs:
+      key: "ccache | 4_10_2"
+      path: 'C:\Program Files\ccache'
+      cacheHitVar: CCACHE_CACHE_RESTORED
+
+  - task: PowerShell@2
+    displayName: Downloading Ccache
+    condition: ne(variables.CCACHE_CACHE_RESTORED, 'true')
+    inputs:
+      targetType: "inline"
+      script: |
+        $url = "https://github.com/ccache/ccache/releases/download/v4.10.2/ccache-4.10.2-windows-x86_64.zip"
+        $output = "$(Agent.TempDirectory)\ccache.zip"
+        (New-Object Net.WebClient).DownloadFile($url, $output)
+      errorActionPreference: "stop"
+      failOnStderr: true
+
+  - task: ExtractFiles@1
+    displayName: Install Ccache
+    condition: ne(variables.CCACHE_CACHE_RESTORED, 'true')
+    inputs:
+      archiveFilePatterns: '$(Agent.TempDirectory)\ccache.zip'
+      destinationFolder: '$(Agent.TempDirectory)\ccache'
+
+  - script: echo "##vso[task.prependpath]$(Agent.TempDirectory)\ccache"
+    displayName: Add Ccache to PATH
+    condition: succeeded()

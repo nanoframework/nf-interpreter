@@ -14,11 +14,25 @@ steps:
     parameters:
       repoDirectory: ${{ parameters.repoDirectory }}
 
+  - task: Cache@2
+    displayName: Cache IDF components
+    inputs:
+      key: 'esp-idf-components-cache | 0'
+      path: $(Agent.BuildDirectory)/s/esp-idf/components
+      cacheHitVar: ESP32_COMPONENTS_RESTORED
+
+  - task: Cache@2
+    displayName: Cache ccache files
+    inputs:
+      key: 'ccache-$(IDF_Target) | 0'
+      path: $(Build.SourcesDirectory)/nf-interpreter/.ccache
+      cacheHitVar: CCACHE_RESTORED
+
   - task: CMake@1
     condition: succeeded()
     displayName: Setup build with CMake
     inputs:
-      cmakeArgs: "--preset $(CMakePreset) -DESP32_IDF_PATH=$(IDF_PATH) -DCMAKE_BUILD_TYPE=MinSizeRel -DBUILD_VERSION=$(NBGV_VersionMajor).$(NBGV_VersionMinor).$(NBGV_BuildNumber).$(TARGET_BUILD_COUNTER) -DTARGET_NAME=$(TargetPublishName) $(BuildOptions)"
+      cmakeArgs: "--preset $(CMakePreset) -DCCACHE_ENABLE=ON -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DESP32_IDF_PATH=$(IDF_PATH) -DCMAKE_BUILD_TYPE=MinSizeRel -DBUILD_VERSION=$(NBGV_VersionMajor).$(NBGV_VersionMinor).$(NBGV_BuildNumber).$(TARGET_BUILD_COUNTER) -DTARGET_NAME=$(TargetPublishName) $(BuildOptions)"
       workingDirectory: ${{ parameters.repoDirectory }}
 
   - task: CMake@1
@@ -97,3 +111,15 @@ steps:
       TargetFolder: ${{ parameters.repoDirectory }}\build
       flattenFolders: false
       ignoreMakeDirErrors: true
+
+  - task: Cache@2
+    displayName: Save IDF components
+    inputs:
+      key: 'esp-idf-components-cache | 0'
+      path: $(Agent.BuildDirectory)/s/esp-idf/components
+
+  - task: Cache@2
+    displayName: Save ccache files
+    inputs:
+      key: 'ccache-$(IDF_Target) | 0'
+      path: $(Build.SourcesDirectory)/nf-interpreter/.ccache
