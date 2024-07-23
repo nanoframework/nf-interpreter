@@ -145,11 +145,6 @@ HRESULT CLR_RT_FileStream::SplitFilePath(
     const char *c = fullPath;
     uint32_t rootLen = 0;
 
-    if (!fullPath || !rootName || !rootNameLength || !relativePath)
-    {
-        NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
-    }
-
     rootName = const_cast<char *>(c);
     // handle both '\' and '/' as path separator
     while ((*c != '\\') && (*c != '/') && (*c != 0))
