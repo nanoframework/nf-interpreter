@@ -10,7 +10,7 @@
 #include <nanoCLR_Checks.h>
 // #include <nanoCLR_Diagnostics.h>
 #include <nanoCLR_Hardware.h>
-// #include <nanoCLR_Stream.h>
+#include <nanoCLR_FileStream.h>
 // #include <nanoCLR_Xml.h>
 #include <nanoCLR_Application.h>
 //
