@@ -906,8 +906,7 @@ jobs:
       - pwsh: |
           .\sign code azure-key-vault `
           "**/nanoFramework.nanoCLR.*" `
-          --base-directory "$(Build.Repository.LocalPath)\build\bin\Release" `
-          --file-list "$(Build.Repository.LocalPath)\config\filelist.txt" `
+          --base-directory "$(Build.SourcesDirectory)/nf-interpreter/build/bin/Release" `
           --publisher-name ".NET nanoFramework" `
           --description "nanoFramework.nanoCLR" `
           --description-url "https://github.com/$env:Build_Repository_Name" `
@@ -969,7 +968,6 @@ jobs:
           .\sign code azure-key-vault `
           "**/*.nupkg" `
           --base-directory "$(Build.ArtifactStagingDirectory)" `
-          --file-list "$(Build.Repository.LocalPath)\config\filelist.txt" `
           --publisher-name ".NET nanoFramework" `
           --description "nanoFramework.nanoCLR NuGets" `
           --description-url "https://github.com/$env:Build_Repository_Name" `
@@ -1118,8 +1116,7 @@ jobs:
       - pwsh: |
           .\sign code azure-key-vault `
           "**/nanoFramework.nanoCLR.*" `
-          --base-directory "$(Build.Repository.LocalPath)\build\bin\Release" `
-          --file-list "$(Build.Repository.LocalPath)\config\filelist.txt" `
+          --base-directory "$(Build.SourcesDirectory)/nf-interpreter/build/bin/Release" `
           --publisher-name ".NET nanoFramework" `
           --description "nanoFramework.nanoCLR.CLI" `
           --description-url "https://github.com/$env:Build_Repository_Name" `
@@ -1151,7 +1148,6 @@ jobs:
           .\sign code azure-key-vault `
           "**/*.nupkg" `
           --base-directory "$(Build.ArtifactStagingDirectory)" `
-          --file-list "$(Build.Repository.LocalPath)\config\filelist.txt" `
           --publisher-name ".NET nanoFramework" `
           --description "nanoFramework.nanoCLR.CLI NuGet" `
           --description-url "https://github.com/$env:Build_Repository_Name" `
