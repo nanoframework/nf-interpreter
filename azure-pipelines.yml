@@ -414,6 +414,7 @@ jobs:
       REVISION: $[counter('STM32_1_10_0_versioncounter', 0)]
       HelperPackageVersion: $[counter('HelperPackageVersioncounter', 0)]
       TargetPlatform: "stm32"
+      CCACHE_DIR: $(Build.SourcesDirectory)/nf-interpreter/.ccache
 
     steps:
       - template: azure-pipelines-templates/build-preparations.yml
@@ -422,6 +423,7 @@ jobs:
       - template: azure-pipelines-templates/download-install-ninja.yml
       - template: azure-pipelines-templates/download-srecord.yml
       - template: azure-pipelines-templates/download-hexdfu.yml
+      - template: azure-pipelines-templates/download-ccache.yml
       - template: azure-pipelines-templates/build-chibios-stm32-targets.yml
       - template: azure-pipelines-templates/pack-publish-artifacts.yml
       - template: azure-pipelines-templates/publish-cloudsmith.yml
@@ -563,6 +565,9 @@ jobs:
       # creates a counter and assigns it to the revision variable
       REVISION: $[counter('ESP32_1_10_0_versioncounter', 0)]
       IDF_PATH: "D:/a/1/s/esp-idf"
+      IDF_CCACHE_ENABLE: "1"
+      CCACHE_NOHASHDIR: "1"
+      CCACHE_DIR: $(Build.SourcesDirectory)/nf-interpreter/.ccache
       PIP_CACHE_DIR: $(Pipeline.Workspace)/.pip
       TargetPlatform: "esp32"
 
@@ -645,6 +650,7 @@ jobs:
       REVISION: $[counter('NXP_1_10_0_versioncounter', 0)]
       GIT_LFS_SKIP_SMUDGE: 1
       TargetPlatform: "freertos"
+      CCACHE_DIR: $(Build.SourcesDirectory)/nf-interpreter/.ccache
 
     steps:
       - template: azure-pipelines-templates/build-preparations.yml
@@ -652,6 +658,7 @@ jobs:
       - template: azure-pipelines-templates/download-install-arm-gcc-toolchain.yml
       - template: azure-pipelines-templates/download-install-ninja.yml
       - template: azure-pipelines-templates/download-srecord.yml
+      - template: azure-pipelines-templates/download-ccache.yml
       - template: azure-pipelines-templates/build-freertos-nxp-targets.yml
       - template: azure-pipelines-templates/pack-publish-artifacts.yml
       - template: azure-pipelines-templates/publish-cloudsmith.yml
@@ -723,12 +730,14 @@ jobs:
       REVISION: $[counter('TI_1_10_0_versioncounter', 0)]
       HelperPackageVersion: $[counter('HelperPackageVersioncounter', 0)]
       TargetPlatform: "ti_simplelink"
+      CCACHE_DIR: $(Build.SourcesDirectory)/nf-interpreter/.ccache
 
     steps:
       - template: azure-pipelines-templates/build-preparations.yml
       - template: azure-pipelines-templates/nb-gitversioning.yml
       - template: azure-pipelines-templates/download-install-arm-gcc-toolchain.yml
       - template: azure-pipelines-templates/download-install-ninja.yml
+      - template: azure-pipelines-templates/download-ccache.yml
       - template: azure-pipelines-templates/build-ti-simplelink-targets.yml
       - template: azure-pipelines-templates/pack-publish-artifacts.yml
       - template: azure-pipelines-templates/publish-cloudsmith.yml
@@ -794,6 +803,7 @@ jobs:
       REVISION: $[counter('AZURERTOS_1_10_0_versioncounter', 0)]
       HelperPackageVersion: $[counter('HelperPackageVersioncounter', 0)]
       TargetPlatform: "azure_rtos"
+      CCACHE_DIR: $(Build.SourcesDirectory)/nf-interpreter/.ccache
 
     steps:
       - template: azure-pipelines-templates/build-preparations.yml
@@ -802,6 +812,7 @@ jobs:
       - template: azure-pipelines-templates/download-install-ninja.yml
       - template: azure-pipelines-templates/download-hexdfu.yml
       - template: azure-pipelines-templates/download-srecord.yml
+      - template: azure-pipelines-templates/download-ccache.yml
       - template: azure-pipelines-templates/build-azurertos-targets.yml
       - template: azure-pipelines-templates/pack-publish-artifacts.yml
       - template: azure-pipelines-templates/publish-cloudsmith.yml
