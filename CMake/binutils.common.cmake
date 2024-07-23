@@ -719,7 +719,7 @@ function(nf_add_mbedtls_library)
 
     if(NO_MBEDTLS_SOURCE)
         # no Mbed TLS source specified, download it from it's repo
-        message(STATUS "MbedTLS ${MBEDTLS_GIT_TAG} from GitHub repo")
+        message(STATUS "Mbed TLS ${MBEDTLS_GIT_TAG} from GitHub repo")
 
         FetchContent_Declare(
             mbedtls
@@ -730,7 +730,7 @@ function(nf_add_mbedtls_library)
     else()
         # MbedTLS source was specified
 
-        message(STATUS "MbedTLS ${MBEDTLS_GIT_TAG} (source from: ${MBEDTLS_SOURCE})")
+        message(STATUS "Mbed TLS ${MBEDTLS_GIT_TAG} (source from: ${MBEDTLS_SOURCE})")
             
         FetchContent_Declare(
             mbedtls
@@ -739,19 +739,18 @@ function(nf_add_mbedtls_library)
 
     endif()
 
-    # Check if population has already been performed
-    FetchContent_GetProperties(mbedtls)
-    if(NOT mbedtls_POPULATED)
-        # Fetch the content using previously declared details
-        FetchContent_Populate(mbedtls)
-    endif()
-
     # don't include tests or programs, only build libraries
     set(ENABLE_TESTING CACHE BOOL OFF)
     set(ENABLE_PROGRAMS CACHE BOOL OFF)
 
     cmake_policy(SET CMP0048 NEW)
-    add_subdirectory(${mbedtls_SOURCE_DIR} mbedtls_build)
+
+    # Check if population has already been performed
+    FetchContent_GetProperties(mbedtls)
+    if(NOT mbedtls_POPULATED)
+        # Fetch the content using previously declared details
+        FetchContent_MakeAvailable(mbedtls)
+    endif()
 
 endfunction()
 
@@ -781,7 +780,7 @@ function(nf_add_lwip_library)
         message(STATUS "LWIP ${LWIP_GIT_TAG} from Git repo")
 
         FetchContent_Declare(
-            lwip
+            lwIP
             GIT_REPOSITORY https://github.com/lwip-tcpip/lwip.git
             GIT_TAG ${LWIP_GIT_TAG}
         )
@@ -792,7 +791,7 @@ function(nf_add_lwip_library)
         message(STATUS "LWIP ${LWIP_GIT_TAG} (source from: ${LWIP_SOURCE})")
             
         FetchContent_Declare(
-            lwip
+            lwIP
             SOURCE_DIR ${LWIP_SOURCE}
         )
 
@@ -801,9 +800,15 @@ function(nf_add_lwip_library)
     # Check if population has already been performed
     FetchContent_GetProperties(lwip)
 
-    if(NOT lwip_POPULATED)
+    if(NOT lwIP_POPULATED)
         # Fetch the content using previously declared details
-        FetchContent_Populate(lwip)
+        FetchContent_MakeAvailable(lwIP)
     endif()
+
+    ########################################################################
+    # add lwipdocs target, just to keep cmake happy
+    # after moving to a more recent lwIP versions this is not needed anymore
+    add_custom_target(lwipdocs)
+    ########################################################################
 
 endfunction()

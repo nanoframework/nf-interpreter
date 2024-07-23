@@ -75,7 +75,7 @@ endif()
 FetchContent_GetProperties(freertos)
 if(NOT freertos_POPULATED)
     # Fetch the content using previously declared details
-    FetchContent_Populate(freertos)
+    FetchContent_MakeAvailable(freertos)
 endif()
 
 # check if CMSIS_SOURCE was specified or if it's empty (default is empty)
@@ -129,10 +129,10 @@ else()
 endif()
 
 FetchContent_GetProperties(cmsis)
-FetchContent_Populate(cmsis)
+FetchContent_MakeAvailable(cmsis)
 if(NOT cmsis_POPULATED)
     # Fetch the content using previously declared details
-    FetchContent_Populate(cmsis)
+    FetchContent_MakeAvailable(cmsis)
 endif()
 
 # FreeRTOS common directories
