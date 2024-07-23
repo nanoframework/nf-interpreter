@@ -40,7 +40,6 @@
 #include "sli_usbd_driver.h"
 
 #include <nanoHAL_v2.h>
-#include <targetHAL.h>
 
 /********************************************************************************************************
  ********************************************************************************************************
@@ -5544,9 +5543,9 @@ void sli_usbd_core_task_handler(void)
 
 #if SL_USBD_AUTO_START_USB_DEVICE == 1
 // [NF_CHANGE]
-  // Starting at SDK 4.4.0 it's OK to start the USB device without stopping it first
-  // sl_usbd_core_stop_device();
-  // tx_thread_sleep(TX_TICKS_PER_MILLISEC(50));
+// Starting at SDK 4.4.0 it's OK to start the USB device without stopping it first
+// sl_usbd_core_stop_device();
+// tx_thread_sleep(TX_TICKS_PER_MILLISEC(50));
 // [END_NF_CHANGE]  
   sl_usbd_core_start_device();
 #endif

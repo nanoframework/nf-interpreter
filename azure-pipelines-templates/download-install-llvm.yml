@@ -6,7 +6,7 @@ steps:
     condition: ne(variables['System.PullRequest.PullRequestId'], '')
     displayName: Cache LLVM
     inputs:
-      key: 'llvm_15_0_6_0 | llvmUpdateKey'
+      key: "llvm_18_1_7_0 | llvmUpdateKey"
       restoreKeys: llvmUpdateKey
       path: $(Agent.TempDirectory)\llvm
       cacheHitVar: LLVM_CACHE_RESTORED
@@ -19,13 +19,13 @@ steps:
         ne(variables.LLVM_CACHE_RESTORED, 'true')
       )
     inputs:
-      targetType: 'inline'
+      targetType: "inline"
       script: |
-        $url = "https://github.com/llvm/llvm-project/releases/download/llvmorg-15.0.6/LLVM-15.0.6-win64.exe"
-        $output = "$(Agent.TempDirectory)\LLVM-15.0.6-win64.exe"
+        $url = "https://github.com/llvm/llvm-project/releases/download/llvmorg-18.1.7/LLVM-18.1.7-win64.exe"
+        $output = "$(Agent.TempDirectory)\LLVM-18.1.7-win64.exe"
         (New-Object Net.WebClient).DownloadFile($url, $output)
-      errorActionPreference: 'stop'
-      failOnStderr: 'true'
+      errorActionPreference: "stop"
+      failOnStderr: true
 
   - task: ExtractFiles@1
     displayName: Install LLVM
@@ -35,9 +35,9 @@ steps:
         ne(variables.LLVM_CACHE_RESTORED, 'true')
       )
     inputs:
-      archiveFilePatterns: '$(Agent.TempDirectory)\LLVM-15.0.6-win64.exe' 
+      archiveFilePatterns: '$(Agent.TempDirectory)\LLVM-18.1.7-win64.exe'
       destinationFolder: '$(Agent.TempDirectory)\llvm'
-  
+
   - script: echo "##vso[task.prependpath]$(Agent.TempDirectory)\llvm\bin"
     displayName: Add LLVM to PATH
     condition: ne(variables['System.PullRequest.PullRequestId'], '')

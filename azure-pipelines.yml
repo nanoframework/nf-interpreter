@@ -1,6 +1,9 @@
+# Copyright (c) .NET Foundation and Contributors
+# See LICENSE file in the project root for full license information.
+
 trigger:
   branches:
-    include: 
+    include:
       - main
       - develop*
       - release-*
@@ -45,1415 +48,1412 @@ resources:
       type: github
       name: espressif/esp-idf
       endpoint: nanoframework
-      ref: refs/tags/v5.1.3
+      ref: 'refs/tags/v5.1.4'
     - repository: mscorlib
       type: github
       name: nanoframework/CoreLibrary
       endpoint: nanoframework
-      
+
 jobs:
+  ##############################
+  - job: Check_Build_Options
+    pool:
+      vmImage: "windows-latest"
 
-##############################
-- job: Check_Build_Options
-  pool:
-    vmImage: 'windows-latest'
+    variables:
+      DOTNET_NOLOGO: true
 
-  variables:
-    DOTNET_NOLOGO: true
+    steps:
+      - checkout: self
+        fetchDepth: 1
 
-  steps:
-  - checkout: self
-    fetchDepth: 1
+      # get commit message
+      - powershell: |
 
-  # get commit message
-  - powershell: |
+          # set default values
+          echo "##vso[task.setvariable variable=RUN_MSCORLIB_TESTS;isOutput=true]false"
 
-      # set default values
-      echo "##vso[task.setvariable variable=RUN_MSCORLIB_TESTS;isOutput=true]false"
-
-      if($env:StartReleaseCandidate -like "true")
-      {
-        # this is a release prep so NO build
-        echo "##vso[task.setvariable variable=SKIP_BUILD;isOutput=true]true"
-        
-        Write-Host "##[command] Release preparation, skipping build."
-      }
-      else
-      {
-        # get commit details, if this is a PR
-        if($env:System_PullRequest_PullRequestId -ne $null)
-        {
-          Write-Host "##[command] **This is a PR build**"
-
-          $commit = Invoke-RestMethod -Uri "https://api.github.com/repos/nanoframework/nf-interpreter/commits/$(Build.SourceVersion)" -ContentType "application/json" -Method GET
-
-          if( ($commit.commit.author.name -eq "nfbot") -and ($commit.commit.message -like "*[version update]*") )
+          if($env:StartReleaseCandidate -like "true")
           {
-            echo "##vso[task.setvariable variable=SKIP_BUILD;isOutput=true]true"  
+            # this is a release prep so NO build
+            echo "##vso[task.setvariable variable=SKIP_BUILD;isOutput=true]true"
+            
+            Write-Host "##[command] Release preparation, skipping build."
           }
           else
           {
-            echo "##vso[task.setvariable variable=SKIP_BUILD;isOutput=true]false"  
+            # get commit details, if this is a PR
+            if($env:System_PullRequest_PullRequestId -ne $null)
+            {
+              Write-Host "##[command] **This is a PR build**"
+
+              $commit = Invoke-RestMethod -Uri "https://api.github.com/repos/nanoframework/nf-interpreter/commits/$(Build.SourceVersion)" -ContentType "application/json" -Method GET
+
+              if( ($commit.commit.author.name -eq "nfbot") -and ($commit.commit.message -like "*[version update]*") )
+              {
+                echo "##vso[task.setvariable variable=SKIP_BUILD;isOutput=true]true"  
+              }
+              else
+              {
+                echo "##vso[task.setvariable variable=SKIP_BUILD;isOutput=true]false"  
+              }
+
+              # check if Unit Tests for mscorlib should be run
+              if($commit.commit.message -like "*[run mscorlib tests]*")
+              {
+                echo "##vso[task.setvariable variable=RUN_MSCORLIB_TESTS;isOutput=true]true"
+              }
+
+            }
+            else
+            {
+              Write-Host "##[command] **build for other reasons**"
+
+              echo "##vso[task.setvariable variable=SKIP_BUILD;isOutput=true]false"
+            }
           }
 
-          # check if Unit Tests for mscorlib should be run
-          if($commit.commit.message -like "*[run mscorlib tests]*")
+        name: BuildOptions
+        displayName: Get build options
+
+      # check what changed
+      - powershell: |
+          git config --global user.email "nfbot"
+          git config --global user.name "nanoframework@outlook.com"
+
+          $auth = "basic $([System.Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes(":$(GitHubToken)")))"
+
+          if($env:StartReleaseCandidate -like "true")
           {
-            echo "##vso[task.setvariable variable=RUN_MSCORLIB_TESTS;isOutput=true]true"
+              # this is a release prep so NO build
           }
-
-        }
-        else
-        {
-          Write-Host "##[command] **build for other reasons**"
-
-          echo "##vso[task.setvariable variable=SKIP_BUILD;isOutput=true]false"
-        }
-      }
-
-    name: BuildOptions
-    displayName: Get build options
-
-  # check what changed
-  - powershell: |
-      git config --global user.email "nfbot"
-      git config --global user.name "nanoframework@outlook.com"
-
-      $auth = "basic $([System.Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes(":$(GitHubToken)")))"
-      
-      if($env:StartReleaseCandidate -like "true")
-      {
-          # this is a release prep so NO build
-      }
-      elseif($env:Build_Reason -eq "Manual")
-      {
-          # this is a manual build, no need to check anything 
-          Write-host "##[command] Manual build"
-      }      
-      else
-      {
-          # check if this build was triggered by the pipeline itself
-          if($env:Build_Reason -eq "Manual")
+          elseif($env:Build_Reason -eq "Manual")
           {
               # this is a manual build, no need to check anything 
               Write-host "##[command] Manual build"
-          }
-          if($env:System_PullRequest_PullRequestId -ne $null)
-          {
-              # get files changed in PR, if this is a PR
-              $commit = Invoke-RestMethod -Uri "https://api.github.com/repos/nanoframework/nf-interpreter/pulls/$env:System_PullRequest_PullRequestNumber/files" -Header @{"Authorization"="$auth"} -ContentType "application/json" -Method GET
-
-              # filter removed files              
-              $files = $commit.where{$_.status -ne 'removed'}
-          }
+          }      
           else
           {
-              # get files changed in the commit, if this is NOT a PR
-              $commit = Invoke-RestMethod -Uri "https://api.github.com/repos/nanoframework/nf-interpreter/commits/$(Build.SourceVersion)" -Header @{"Authorization"="$auth"} -ContentType "application/json" -Method GET
+              # check if this build was triggered by the pipeline itself
+              if($env:Build_Reason -eq "Manual")
+              {
+                  # this is a manual build, no need to check anything 
+                  Write-host "##[command] Manual build"
+              }
+              if($env:System_PullRequest_PullRequestId -ne $null)
+              {
+                  # get files changed in PR, if this is a PR
+                  $commit = Invoke-RestMethod -Uri "https://api.github.com/repos/nanoframework/nf-interpreter/pulls/$env:System_PullRequest_PullRequestNumber/files" -Header @{"Authorization"="$auth"} -ContentType "application/json" -Method GET
 
-              # filter removed files              
-              $files = $commit.files.where{$_.status -ne 'removed'}
-          }
+                  # filter removed files              
+                  $files = $commit.where{$_.status -ne 'removed'}
+              }
+              else
+              {
+                  # get files changed in the commit, if this is NOT a PR
+                  $commit = Invoke-RestMethod -Uri "https://api.github.com/repos/nanoframework/nf-interpreter/commits/$(Build.SourceVersion)" -Header @{"Authorization"="$auth"} -ContentType "application/json" -Method GET
 
-          # get file names only
-          $files = $files | % {$_.filename}
+                  # filter removed files              
+                  $files = $commit.files.where{$_.status -ne 'removed'}
+              }
 
-          Write-host "##[group] Files changed:"
-          $files | % { Write-host $_ }
-          Write-host "##[endgroup]"
+              # get file names only
+              $files = $files | % {$_.filename}
 
-          # set default values 
-          echo "##vso[task.setvariable variable=BUILD_CHIBIOS;isOutput=true]false"  
-          echo "##vso[task.setvariable variable=BUILD_FREERTOS;isOutput=true]false"  
-          echo "##vso[task.setvariable variable=BUILD_ESP32;isOutput=true]false"  
-          echo "##vso[task.setvariable variable=BUILD_TI;isOutput=true]false"
-          echo "##vso[task.setvariable variable=BUILD_AZURERTOS;isOutput=true]false"
-          echo "##vso[task.setvariable variable=BUILD_WIN32;isOutput=true]false"  
-          echo "##vso[task.setvariable variable=BUILD_NANOCLR_CLI;isOutput=true]false"  
-          echo "##vso[task.setvariable variable=BUILD_ALL;isOutput=true]false"  
+              Write-host "##[group] Files changed:"
+              $files | % { Write-host $_ }
+              Write-host "##[endgroup]"
 
-          if( 
-              (($files.where{$_.Contains('/')}).Count -eq 0) -Or
-              (($files.where{$_.StartsWith('azure-pipelines-templates')}).Count -gt 0) -Or
-              (($files.where{$_.StartsWith('CMake')}).Count -gt 0) -Or
-              (($files.where{$_.StartsWith('src')}).Count -gt 0)
-            )
-          {
-              # files at:
-              # - repo root
-              # - azure-pipelines-templates
-              # - CMake
-              # - src
+              # set default values 
+              echo "##vso[task.setvariable variable=BUILD_CHIBIOS;isOutput=true]false"  
+              echo "##vso[task.setvariable variable=BUILD_FREERTOS;isOutput=true]false"  
+              echo "##vso[task.setvariable variable=BUILD_ESP32;isOutput=true]false"  
+              echo "##vso[task.setvariable variable=BUILD_TI;isOutput=true]false"
+              echo "##vso[task.setvariable variable=BUILD_AZURERTOS;isOutput=true]false"
+              echo "##vso[task.setvariable variable=BUILD_WIN32;isOutput=true]false"  
+              echo "##vso[task.setvariable variable=BUILD_NANOCLR_CLI;isOutput=true]false"  
+              echo "##vso[task.setvariable variable=BUILD_ALL;isOutput=true]false"  
 
-              echo "##vso[task.setvariable variable=BUILD_ALL;isOutput=true]true"
+              if( 
+                  (($files.where{$_.Contains('/')}).Count -eq 0) -Or
+                  (($files.where{$_.StartsWith('azure-pipelines-templates')}).Count -gt 0) -Or
+                  (($files.where{$_.StartsWith('CMake')}).Count -gt 0) -Or
+                  (($files.where{$_.StartsWith('src')}).Count -gt 0)
+                )
+              {
+                  # files at:
+                  # - repo root
+                  # - azure-pipelines-templates
+                  # - CMake
+                  # - src
+
+                  echo "##vso[task.setvariable variable=BUILD_ALL;isOutput=true]true"
+                  
+                  Write-host "##[command] Building ALL targets"
+              }
+
+              if( ($files.where{$_.Contains('targets/ChibiOS')}).Count -gt 0)
+              {
+                  # files at ChibiOS folder
+                  echo "##vso[task.setvariable variable=BUILD_CHIBIOS;isOutput=true]true"
+
+                  Write-host "##[command] Building ChibiOS targets"
+              }
+
+              if( ($files.where{$_.Contains('targets/FreeRTOS')}).Count -gt 0)
+              {
+                  # files at FreeRTOS folder
+                  echo "##vso[task.setvariable variable=BUILD_FREERTOS;isOutput=true]true"
+
+                  Write-host "##[command] Building FreeRTOS targets"
+              }
+
+              if( ($files.where{$_.Contains('targets/ESP32')}).Count -gt 0)
+              {
+                  # files at ESP32 folder
+                  echo "##vso[task.setvariable variable=BUILD_ESP32;isOutput=true]true"
+
+                  Write-host "##[command] Building ESP32 targets"
+              }
+
+              if( ($files.where{$_.Contains('targets/TI_SimpleLink')}).Count -gt 0)
+              {
+                  # files at TI_SimpleLink folder
+                  echo "##vso[task.setvariable variable=BUILD_TI;isOutput=true]true"
+
+                  Write-host "##[command] Building TI SimpleLink targets"
+              }
+
+              if( ($files.where{$_.Contains('targets/AzureRTOS')}).Count -gt 0)
+              {
+                  # files at AzureRTOS folder
+                  echo "##vso[task.setvariable variable=BUILD_AZURERTOS;isOutput=true]true"
+
+                  Write-host "##[command] Building Azure RTOS targets"
+              }
+
+              if( 
+                (($files.where{$_.Contains('targets/netcore/nanoFramework.nanoCLR')}).Count -gt 0) -Or
+                (($files.where{$_.Contains('targets/netcore/nanoCLR.sln')}).Count -gt 0) -Or
+                (($files.where{$_.Contains('targets/win32')}).Count -gt 0)
+                )
+              {
+                  # files at win32 or netcore folders
+                  echo "##vso[task.setvariable variable=BUILD_WIN32;isOutput=true]true"
+
+                  Write-host "##[command] Building nanoCLR target"
+              }
               
-              Write-host "##[command] Building ALL targets"
+              if( 
+                (($files.where{$_.Contains('targets/netcore/nanoFramework.nanoCLR.CLI')}).Count -gt 0) -Or
+                (($files.where{$_.Contains('targets/netcore/nanoCLR.sln')}).Count -gt 0) -Or
+                (($files.where{$_.Contains('targets/netcore/nanoFramework.nanoCLR.Host')}).Count -gt 0)
+                )
+              {
+                  # files at nanoCLR CLI or Host folders
+                  echo "##vso[task.setvariable variable=BUILD_NANOCLR_CLI;isOutput=true]true"
+
+                  Write-host "##[command] Building nanoCLR CLI target"
+              }
+
           }
 
-          if( ($files.where{$_.Contains('targets/ChibiOS')}).Count -gt 0)
+        name: TargetsToBuild
+        displayName: Get targets to build
+
+      - task: DotNetCoreCLI@2
+        condition: eq( variables['StartReleaseCandidate'], true )
+        displayName: Install NBGV tool
+        inputs:
+          command: custom
+          custom: tool
+          arguments: install -g nbgv
+
+      - powershell: |
+
+          # compute authorization header in format "AUTHORIZATION: basic 'encoded token'"
+          # 'encoded token' is the Base64 of the string "nfbot:personal-token"
+          $auth = "basic $([System.Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes("nfbot:$(GitHubToken)")))"
+
+          cd "$env:Agent_TempDirectory" > $null
+
+          git init "$env:Agent_TempDirectory\repo"
+          cd repo > $null
+          git remote add origin "$env:Build_Repository_Uri"
+          git config --global gc.auto 0
+          git config --global user.name nfbot
+          git config --global user.email nanoframework@outlook.com
+          git config --global core.autocrlf true
+          git -c http.extraheader="AUTHORIZATION: $auth" fetch --progress origin
+
+          git checkout develop
+
+          # prepare release and capture output
+          $release = nbgv prepare-release
+
+          # push all changes to github
+          git -c http.extraheader="AUTHORIZATION: $auth" push --all origin
+
+          # get release branch name
+          $branch = $release.Split(' ')[0]
+
+          # start PR for release
+          $prRequestBody = @{title="Release $branch";body="";head="$branch";base="main"} | ConvertTo-Json
+          $githubApiEndpoint = "https://api.github.com/repos/$env:Build_Repository_Name/pulls"
+          [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+
+          $headers = @{}
+          $headers.Add("Authorization","$auth")
+          $headers.Add("Accept","application/vnd.github.symmetra-preview+json")
+
+          try 
           {
-              # files at ChibiOS folder
-              echo "##vso[task.setvariable variable=BUILD_CHIBIOS;isOutput=true]true"
-
-              Write-host "##[command] Building ChibiOS targets"
+              $result = Invoke-RestMethod -Method Post -UserAgent [Microsoft.PowerShell.Commands.PSUserAgent]::InternetExplorer -Uri  $githubApiEndpoint -Header $headers -ContentType "application/json" -Body $prRequestBody
+              'Started PR for new release...' | Write-Host -NoNewline
+              '##[error] OK' | Write-Host -ForegroundColor Green
           }
-
-          if( ($files.where{$_.Contains('targets/FreeRTOS')}).Count -gt 0)
+          catch 
           {
-              # files at FreeRTOS folder
-              echo "##vso[task.setvariable variable=BUILD_FREERTOS;isOutput=true]true"
+              $result = $_.Exception.Response.GetResponseStream()
+              $reader = New-Object System.IO.StreamReader($result)
+              $reader.BaseStream.Position = 0
+              $reader.DiscardBufferedData()
+              $responseBody = $reader.ReadToEnd();
 
-              Write-host "##[command] Building FreeRTOS targets"
+              "##[error] Error starting PR: $responseBody" | Write-Host -ForegroundColor Red
           }
 
-          if( ($files.where{$_.Contains('targets/ESP32')}).Count -gt 0)
-          {
-              # files at ESP32 folder
-              echo "##vso[task.setvariable variable=BUILD_ESP32;isOutput=true]true"
-
-              Write-host "##[command] Building ESP32 targets"
-          }
-
-          if( ($files.where{$_.Contains('targets/TI_SimpleLink')}).Count -gt 0)
-          {
-              # files at TI_SimpleLink folder
-              echo "##vso[task.setvariable variable=BUILD_TI;isOutput=true]true"
-
-              Write-host "##[command] Building TI SimpleLink targets"
-          }
-
-          if( ($files.where{$_.Contains('targets/AzureRTOS')}).Count -gt 0)
-          {
-              # files at AzureRTOS folder
-              echo "##vso[task.setvariable variable=BUILD_AZURERTOS;isOutput=true]true"
-
-              Write-host "##[command] Building Azure RTOS targets"
-          }
-
-          if( 
-            (($files.where{$_.Contains('targets/netcore/nanoFramework.nanoCLR')}).Count -gt 0) -Or
-            (($files.where{$_.Contains('targets/netcore/nanoCLR.sln')}).Count -gt 0) -Or
-            (($files.where{$_.Contains('targets/win32')}).Count -gt 0)
-            )
-          {
-              # files at win32 or netcore folders
-              echo "##vso[task.setvariable variable=BUILD_WIN32;isOutput=true]true"
-
-              Write-host "##[command] Building nanoCLR target"
-          }
-          
-          if( 
-            (($files.where{$_.Contains('targets/netcore/nanoFramework.nanoCLR.CLI')}).Count -gt 0) -Or
-            (($files.where{$_.Contains('targets/netcore/nanoCLR.sln')}).Count -gt 0) -Or
-            (($files.where{$_.Contains('targets/netcore/nanoFramework.nanoCLR.Host')}).Count -gt 0)
-            )
-          {
-              # files at nanoCLR CLI or Host folders
-              echo "##vso[task.setvariable variable=BUILD_NANOCLR_CLI;isOutput=true]true"
-
-              Write-host "##[command] Building nanoCLR CLI target"
-          }
-
-      }
-
-    name: TargetsToBuild
-    displayName: Get targets to build
-
-  - task: DotNetCoreCLI@2  
-    condition: eq( variables['StartReleaseCandidate'], true )
-    displayName: Install NBGV tool
-    inputs:
-      command: custom
-      custom: tool
-      arguments: install -g nbgv
-
-  - powershell: |
-
-      # compute authorization header in format "AUTHORIZATION: basic 'encoded token'"
-      # 'encoded token' is the Base64 of the string "nfbot:personal-token"
-      $auth = "basic $([System.Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes("nfbot:$(GitHubToken)")))"
-
-      cd "$env:Agent_TempDirectory" > $null
-
-      git init "$env:Agent_TempDirectory\repo"
-      cd repo > $null
-      git remote add origin "$env:Build_Repository_Uri"
-      git config --global gc.auto 0
-      git config --global user.name nfbot
-      git config --global user.email nanoframework@outlook.com
-      git config --global core.autocrlf true
-      git -c http.extraheader="AUTHORIZATION: $auth" fetch --progress origin
-      
-      git checkout develop
-
-      # prepare release and capture output
-      $release = nbgv prepare-release
-
-      # push all changes to github
-      git -c http.extraheader="AUTHORIZATION: $auth" push --all origin
-
-      # get release branch name
-      $branch = $release.Split(' ')[0]
-
-      # start PR for release
-      $prRequestBody = @{title="Release $branch";body="";head="$branch";base="main"} | ConvertTo-Json
-      $githubApiEndpoint = "https://api.github.com/repos/$env:Build_Repository_Name/pulls"
-      [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
-
-      $headers = @{}
-      $headers.Add("Authorization","$auth")
-      $headers.Add("Accept","application/vnd.github.symmetra-preview+json")
-
-      try 
-      {
-          $result = Invoke-RestMethod -Method Post -UserAgent [Microsoft.PowerShell.Commands.PSUserAgent]::InternetExplorer -Uri  $githubApiEndpoint -Header $headers -ContentType "application/json" -Body $prRequestBody
-          'Started PR for new release...' | Write-Host -NoNewline
-          '##[error] OK' | Write-Host -ForegroundColor Green
-      }
-      catch 
-      {
-          $result = $_.Exception.Response.GetResponseStream()
-          $reader = New-Object System.IO.StreamReader($result)
-          $reader.BaseStream.Position = 0
-          $reader.DiscardBufferedData()
-          $responseBody = $reader.ReadToEnd();
-
-          "##[error] Error starting PR: $responseBody" | Write-Host -ForegroundColor Red
-      }
-
-    condition: eq( variables['StartReleaseCandidate'], true )
-    displayName: NBGV prepare release
-
-##############################
-- job: Check_Code_Style
-  condition: >-
-    and(
-      ne(dependencies.Check_Build_Options.outputs['BuildOptions.SKIP_BUILD'], true),
-      or(
-        eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ALL'], true),
-        eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_CHIBIOS'], true),
-        eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ESP32'], true),
-        eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_FREERTOS'], true),
-        eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_TI'], true),
-        eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_AZURERTOS'], true),
-        eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_WIN32'], true)
-      )
-    )
-
-  dependsOn:
-  - Check_Build_Options
-
-  pool:
-    vmImage: 'windows-latest'
-
-  steps:
-  - checkout: self
-    fetchDepth: 1
-    condition: ne(variables['System.PullRequest.PullRequestId'], '')
-
-  - template: azure-pipelines-templates/download-install-llvm.yml
-  - template: azure-pipelines-templates/check-code-style.yml
-
-################
-# STM32
-- job: Build_STM32_targets
-  condition: >-
-    or(
-      and(
-        succeeded('Check_Code_Style'),
-        ne( dependencies.Check_Build_Options.outputs['BuildOptions.SKIP_BUILD'], true ),
-        or(
-          eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ALL'], true),
-          eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_CHIBIOS'], true)
-        )
-      ),
-      and(
-        eq(variables['Build.Reason'], 'Manual'),
-        or(
-          eq(variables['BUILD_ALL__'], 'true'),
-          eq(variables['BUILD_CHIBIOS__'], 'true')
-        )
-      )
-    )
-
-  dependsOn:
-  - Check_Build_Options
-  - Check_Code_Style
-
-  pool:
-    vmImage: 'windows-latest'
-
-  strategy:
-    matrix:
-      ST_STM32F429I_DISCOVERY:
-        TargetBoard: ST_STM32F429I_DISCOVERY
-        TargetSeries: 'stm32f4xx'
-        BuildOptions: 
-        NeedsDFU: false
-        NeedsSRECORD: false
-        CMakePreset: ST_STM32F429I_DISCOVERY
-
-      ST_STM32F769I_DISCOVERY:
-        TargetBoard: ST_STM32F769I_DISCOVERY
-        TargetSeries: 'stm32f7xx'
-        BuildOptions: 
-        NeedsDFU: false
-        NeedsSRECORD: true
-        CMakePreset: ST_STM32F769I_DISCOVERY
-
-  variables:
-    DOTNET_NOLOGO: true
-    # creates a counter and assigns it to the revision variable
-    REVISION: $[counter('STM32_1_9_1_versioncounter', 0)]
-    HelperPackageVersion: $[counter('HelperPackageVersioncounter', 0)]
-    TargetPlatform: 'stm32'
-
-  steps:
-  - template: azure-pipelines-templates/build-preparations.yml
-  - template: azure-pipelines-templates/nb-gitversioning.yml
-  - template: azure-pipelines-templates/download-install-arm-gcc-toolchain.yml
-  - template: azure-pipelines-templates/download-install-ninja.yml
-  - template: azure-pipelines-templates/download-srecord.yml
-  - template: azure-pipelines-templates/download-hexdfu.yml
-  - template: azure-pipelines-templates/build-chibios-stm32-targets.yml
-  - template: azure-pipelines-templates/pack-publish-artifacts.yml
-  - template: azure-pipelines-templates/publish-cloudsmith.yml
-  - template: azure-pipelines-templates/pack-publish-managed-helpers.yml
-
-#################
-# ESP32 targets
-- job: Build_ESP32_targets
-  condition: >-
-    or(
-      and(
-        succeeded('Check_Code_Style'),
-        ne( dependencies.Check_Build_Options.outputs['BuildOptions.SKIP_BUILD'], true ),
-        or(
-          eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ALL'], true),
-          eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ESP32'], true)
-        )
-      ),
-      and(
-        eq(variables['Build.Reason'], 'Manual'),
-        or(
-          eq(variables['BUILD_ALL__'], 'true'),
-          eq(variables['BUILD_ESP32__'], 'true')
-        )
-      )
-    )
-
-  dependsOn:
-  - Check_Build_Options
-  - Check_Code_Style
-
-  pool:
-    vmImage: 'windows-latest'
-
-  # there is only a single ESP32 target, but this is already config as a matrix to make it easy to add new ones
-  strategy:
-    matrix:
-      ESP32_PSRAM_REV0:
-        TargetBoard: ESP32
-        TargetSeries: 'esp32'
-        BuildOptions: 
-        IDF_Target: esp32
-        TargetName: ESP32
-        PackageName: ESP32_PSRAM_REV0
-        CMakePreset: ESP32_PSRAM_REV0
-
-      ESP32_BLE_REV0:
-        TargetBoard: ESP32
-        TargetSeries: 'esp32'
-        BuildOptions: 
-        IDF_Target: esp32
-        TargetName: ESP32
-        PackageName: ESP32_BLE_REV0
-        CMakePreset: ESP32_BLE_REV0
-
-      ESP_WROVER_KIT:
-         TargetBoard: ESP32
-         TargetSeries: 'esp32'
-         BuildOptions: 
-         IDF_Target: esp32
-         TargetName: ESP_WROVER_KIT
-         PackageName: ESP_WROVER_KIT
-         CMakePreset: ESP_WROVER_KIT
-
-      ESP32_LILYGO:
-        TargetBoard: ESP32
-        TargetSeries: 'esp32'
-        BuildOptions: 
-        IDF_Target: esp32
-        TargetName: ESP32_LILYGO
-        PackageName: ESP32_LILYGO
-        CMakePreset: ESP32_LILYGO
-
-      FEATHER_S2:
-        TargetBoard: ESP32_S2
-        TargetSeries: 'esp32_s2'
-        BuildOptions: 
-        IDF_Target: esp32s2
-        TargetName: FEATHER_S2
-        PackageName: FEATHER_S2
-        CMakePreset: FEATHER_S2
-
-      ESP32_C3:
-        TargetBoard: ESP32_C3
-        TargetSeries: 'esp32c3'
-        BuildOptions: 
-        IDF_Target: esp32c3
-        TargetName: ESP32_C3
-        PackageName: ESP32_C3
-        CMakePreset: ESP32_C3
-
-      ESP32_C6_THREAD:
-        TargetBoard: ESP32_C6
-        TargetSeries: 'esp32c6'
-        BuildOptions: 
-        IDF_Target: esp32c6
-        TargetName: ESP32_C6_THREAD
-        PackageName: ESP32_C6_THREAD
-        CMakePreset: ESP32_C6_THREAD
-
-      ESP32_H2_THREAD:
-        TargetBoard: ESP32_H2
-        TargetSeries: 'esp32h2'
-        BuildOptions: 
-        IDF_Target: esp32h2
-        TargetName: ESP32_H2_THREAD
-        PackageName: ESP32_H2_THREAD
-        CMakePreset: ESP32_H2_THREAD
-
-      ESP32_S3:
-        TargetBoard: ESP32_S3
-        TargetSeries: 'esp32s3'
-        BuildOptions: 
-        IDF_Target: esp32s3
-        TargetName: ESP32_S3
-        PackageName: ESP32_S3
-        CMakePreset: ESP32_S3
-
-      ESP32_S3_ALL:
-        TargetBoard: ESP32_S3
-        TargetSeries: 'esp32s3'
-        BuildOptions: 
-        IDF_Target: esp32s3
-        TargetName: ESP32_S3_ALL
-        PackageName: ESP32_S3_ALL
-        CMakePreset: ESP32_S3_ALL
-
-      ESP32_ETHERNET_KIT_1.2:
-        TargetBoard: ESP32
-        TargetSeries: 'esp32'
-        BuildOptions: 
-        IDF_Target: esp32
-        TargetName: ESP32_ETHERNET_KIT_1.2
-        PackageName: ESP32_ETHERNET_KIT_1.2
-        CMakePreset: ESP32_ETHERNET_KIT_1.2     
-  
-  variables:
-    DOTNET_NOLOGO: true
-    # creates a counter and assigns it to the revision variable
-    REVISION: $[counter('ESP32_1_9_1_versioncounter', 0)]
-    IDF_PATH: 'D:/a/1/s/esp-idf'
-    PIP_CACHE_DIR: $(Pipeline.Workspace)/.pip
-    TargetPlatform: 'esp32'
-
-  steps:
-  - checkout: self
-  - checkout: esp32_idf
-    fetchDepth: 1
-
-  - template: azure-pipelines-templates/build-preparations.yml
-    parameters:
-      repoDirectory: '$(Build.SourcesDirectory)\nf-interpreter'
-  - template: azure-pipelines-templates/nb-gitversioning.yml
-    parameters:
-      repoDirectory: '$(Build.SourcesDirectory)\nf-interpreter'
-  - template: azure-pipelines-templates/download-install-esp32-build-components.yml
-  - template: azure-pipelines-templates/download-install-ninja.yml
-    parameters:
-      repoDirectory: '$(Build.SourcesDirectory)\nf-interpreter'
-  - template: azure-pipelines-templates/build-espressif-esp32-targets.yml
-
-  - task: CopyFiles@2
-    condition: succeeded()
-    displayName: Copying bootloader
-    inputs:
-      sourceFolder: '$(Build.SourcesDirectory)\nf-interpreter\build\bootloader'
-      Contents: |
-        bootloader.bin
-      TargetFolder: '$(Build.ArtifactStagingDirectory)\$(TargetPublishName)'
-      flattenFolders: true
-      ignoreMakeDirErrors: true
-
-  - template: azure-pipelines-templates/copy-sdkconfig.yml
-  - template: azure-pipelines-templates/pack-publish-artifacts.yml
-    parameters:
-      buildDirectory: '$(Build.SourcesDirectory)\nf-interpreter\build'
-  - template: azure-pipelines-templates/publish-cloudsmith.yml
-  - template: azure-pipelines-templates/publish-sdkconfig.yml
-
-#################
-# NXP
-- job: Build_NXP_targets
-  condition: >-
-    or(
-      and(
-        succeeded('Check_Code_Style'),
-        ne( dependencies.Check_Build_Options.outputs['BuildOptions.SKIP_BUILD'], true ),
-        or(
-          eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ALL'], true),
-          eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_FREERTOS'], true)
-        )
-      ),
-      and(
-        eq(variables['Build.Reason'], 'Manual'),
-        or(
-          eq(variables['BUILD_ALL__'], 'true'),
-          eq(variables['BUILD_NXP__'], 'true')
-        )
-      )
-    )
-
-  dependsOn:
-  - Check_Build_Options
-  - Check_Code_Style
-
-  pool:
-    vmImage: 'windows-latest'
-
-  strategy:
-    matrix:
-      NXP_MIMXRT1060_EVK:
-        TargetBoard: NXP_MIMXRT1060_EVK
-        TargetSeries: 'imxrt10xx'
-        BuildOptions: 
-        NeedsSRECORD: true
-        CMakePreset: NXP_MIMXRT1060_EVK
-
-  variables:
-    DOTNET_NOLOGO: true
-    # creates a counter and assigns it to the revision variable
-    REVISION: $[counter('NXP_1_9_1_versioncounter', 0)]
-    GIT_LFS_SKIP_SMUDGE: 1
-    TargetPlatform: 'freertos'
-
-  steps:
-  - template: azure-pipelines-templates/build-preparations.yml
-  - template: azure-pipelines-templates/nb-gitversioning.yml
-  - template: azure-pipelines-templates/download-install-arm-gcc-toolchain.yml
-  - template: azure-pipelines-templates/download-install-ninja.yml
-  - template: azure-pipelines-templates/download-srecord.yml
-  - template: azure-pipelines-templates/build-freertos-nxp-targets.yml
-  - template: azure-pipelines-templates/pack-publish-artifacts.yml
-  - template: azure-pipelines-templates/publish-cloudsmith.yml
-  - template: azure-pipelines-templates/pack-publish-managed-helpers.yml
-
-#################
-# TI SimpleLink
-- job: Build_TI_SimpleLink_targets
-  condition: >-
-    or(
-      and(
-        succeeded('Check_Code_Style'),
-        ne( dependencies.Check_Build_Options.outputs['BuildOptions.SKIP_BUILD'], true ),
-        or(
-          eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ALL'], true),
-          eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_TI'], true)
-        )
-      ),
-      and(
-          eq(variables['Build.Reason'], 'Manual'),
-          or(
-            eq(variables['BUILD_ALL__'], 'true'),
-            eq(variables['BUILD_TI__'], 'true')
-          )
-      )    
-    )
-
-  dependsOn:
-  - Check_Build_Options
-  - Check_Code_Style
-
-  pool:
-    vmImage: 'windows-latest'
-
-  strategy:
-    matrix:
-      # disabled: waiting to update SDK to latest version with Sys Config
-      # TI_CC3220SF_LAUNCHXL:
-      #   TargetBoard: TI_CC3220SF_LAUNCHXL
-      #   TargetSeries: 'cc32xx'
-      #   BuildOptions: >-
-          #  -DTARGET_SERIES=CC32xx
-          #  -DRTOS=TI_SimpleLink
-          #  -DSUPPORT_ANY_BASE_CONVERSION=OFF
-          #  -DNF_FEATURE_DEBUGGER=ON
-          #  -DNF_FEATURE_RTC=ON
-          #  -DNF_FEATURE_WATCHDOG=OFF
-          #  -DNF_FEATURE_HAS_CONFIG_BLOCK=ON
-          #  -DAPI_System.Device.Gpio=ON
-          #  -DAPI_System.Device.Spi=ON
-          #  -DAPI_System.Device.I2c=ON
-          #  -DAPI_System.Device.Pwm=ON
-          #  -DAPI_System.Device.Adc=ON
-          #  -DAPI_System.Net=ON
-          #  -DAPI_nanoFramework.System.Collections=ON
-          #  -DAPI_nanoFramework.System.Text=ON
-
-      TI_CC1352R1_LAUNCHXL_915:
-        TargetBoard: TI_CC1352R1_LAUNCHXL
-        PackageName: TI_CC1352R1_LAUNCHXL_915
-        TargetSeries: 'CC13X2'
-        BuildOptions: >-
-          -DRADIO_FREQUENCY=915
-        CMakePreset: TI_CC1352R1_LAUNCHXL
-
-  variables:
-    DOTNET_NOLOGO: true
-    # creates a counter and assigns it to the revision variable
-    REVISION: $[counter('TI_1_9_1_versioncounter', 0)]
-    HelperPackageVersion: $[counter('HelperPackageVersioncounter', 0)]
-    TargetPlatform: 'ti_simplelink'
-
-  steps:
-  - template: azure-pipelines-templates/build-preparations.yml
-  - template: azure-pipelines-templates/nb-gitversioning.yml
-  - template: azure-pipelines-templates/download-install-arm-gcc-toolchain.yml
-  - template: azure-pipelines-templates/download-install-ninja.yml
-  - template: azure-pipelines-templates/build-ti-simplelink-targets.yml
-  - template: azure-pipelines-templates/pack-publish-artifacts.yml
-  - template: azure-pipelines-templates/publish-cloudsmith.yml
-  - template: azure-pipelines-templates/pack-publish-ti-sl-managed-helpers.yml
-
-#################
-# Azure RTOS
-- job: Build_Azure_RTOS_targets
-  condition: >-
-    or(
-      and(
-        succeeded('Check_Code_Style'),
-        ne( dependencies.Check_Build_Options.outputs['BuildOptions.SKIP_BUILD'], true ),
-        or(
-          eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ALL'], true),
-          eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_AZURERTOS'], true)
-        )
-      ),
-      and(
-        eq(variables['Build.Reason'], 'Manual'),
-        or(
-          eq(variables['BUILD_ALL__'], 'true'),
-          eq(variables['BUILD_AZURERTOS__'], 'true')
-        )
-      )
-    )
-
-  dependsOn:
-  - Check_Build_Options
-  - Check_Code_Style
-
-  pool:
-    vmImage: 'windows-latest'
-
-  strategy:
-    matrix:
-      # ST_B_L475E_IOT01A:
-      #   TargetBoard: ST_B_L475E_IOT01A
-      #   TargetSeries: 'stm32l4xx'
-      #   BuildOptions: 
-      #   NeedsDFU: true
-      #   NeedsSRECORD: false
-      #   CMakePreset: ST_B_L475E_IOT01A
-
-      # ORGPAL_PALTHREE:
-      #   TargetBoard: ORGPAL_PALTHREE
-      #   TargetSeries: 'stm32f7xx'
-      #   BuildOptions:
-      #   NeedsDFU: true
-      #   NeedsSRECORD: false
-      #   CMakePreset: ORGPAL_PALTHREE
-
-      SL_STK3701A:
-        TargetBoard: SL_STK3701A
-        TargetSeries: 'efm32gg11'
-        BuildOptions:
-        NeedsDFU: false
-        NeedsSRECORD: false
-        CMakePreset: SL_STK3701A
-
-  variables:
-    # creates a counter and assigns it to the revision variable
-    REVISION: $[counter('AZURERTOS_1_9_1_versioncounter', 0)]
-    HelperPackageVersion: $[counter('HelperPackageVersioncounter', 0)]
-    TargetPlatform: 'azure_rtos'
-
-  steps:
-  - template: azure-pipelines-templates/build-preparations.yml
-  - template: azure-pipelines-templates/nb-gitversioning.yml
-  - template: azure-pipelines-templates/download-install-arm-gcc-toolchain.yml
-  - template: azure-pipelines-templates/download-install-ninja.yml
-  - template: azure-pipelines-templates/download-hexdfu.yml
-  - template: azure-pipelines-templates/download-srecord.yml
-  - template: azure-pipelines-templates/build-azurertos-targets.yml
-  - template: azure-pipelines-templates/pack-publish-artifacts.yml
-  - template: azure-pipelines-templates/publish-cloudsmith.yml
-  - template: azure-pipelines-templates/pack-publish-managed-helpers.yml
-
-#################
-# WIN32 executable 
-- job: Build_WIN32_nanoCLR
-  condition: >-
-    or(
-      and(
-        succeeded('Check_Code_Style'),
-        ne( dependencies.Check_Build_Options.outputs['BuildOptions.SKIP_BUILD'], true ),
-        or(
-          eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ALL'], true),
-          eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_WIN32'], true)
-        )
-      ),
-      and(
-        eq(variables['Build.Reason'], 'Manual'),
-        or(
-          eq(variables['BUILD_ALL__'], 'true'),
-          eq(variables['BUILD_WINDOWS_NANOCLR__'], 'true')
-        )
-      )
-    )
-
-  dependsOn:
-  - Check_Build_Options
-  - Check_Code_Style
-
-  pool:
-    vmImage: 'windows-latest'
-
-  variables:
-    - group: sign-client-credentials
-    - name: DOTNET_NOLOGO
-      value: true
-    # creates a counter and assigns it to the revision variable
-    - name: REVISION
-      value: $[counter('WIN32_1_9_1_versioncounter', 0)]
-
-  steps:
-  - template: azure-pipelines-templates/nb-gitversioning.yml
-
-  - task: PowerShell@2
-    displayName: Store package version
-    inputs:
-      targetType: 'inline'
-      script: |
-        Write-Host "$("##vso[task.setvariable variable=WINCLR_PACKAGE_VERSION]")$(NBGV_VersionMajor).$(NBGV_VersionMinor).$(NBGV_BuildNumber).$(TARGET_BUILD_COUNTER)"
-        Write-Host "$("##vso[task.setvariable variable=WINCLR_AssemblyInformationalVersion]")$(NBGV_VersionMajor).$(NBGV_VersionMinor).$(NBGV_BuildNumber).$(TARGET_BUILD_COUNTER)$(NBGV_BuildMetadataFragment)"
-
-  - template: azure-pipelines-templates/install-nuget.yml@templates
-
-  - task: DotNetCoreCLI@2
-    displayName: Restore NuGet packages
-    inputs:
-      command: restore
-      restoreArguments: '--locked-mode'
-      verbosityRestore: minimal
-      projects: targets\netcore\nanoCLR.sln
-      feedsToUse: select
-      includeNuGetOrg: true
-
-  - task: VSBuild@1
-    displayName: Build WIN32 EXE target
-    inputs:
-      solution: 'targets\win32\nanoCLR.sln'
-      platform: 'x86'
-      maximumCpuCount: true
-      msbuildArgs: '/p:PublicRelease=true'
-      configuration: 'Release'
-
-  - task: VSBuild@1
-    displayName: Build WIN DLL target
-    inputs:
-      solution: 'targets\netcore\nanoCLR.sln'
-      platform: 'Any CPU'
-      maximumCpuCount: true
-      msbuildArgs: '/p:PublicRelease=true'
-      configuration: 'Release'
-
-  - task: DotNetCoreCLI@2
-    displayName: Install Sign Client CLI
+        condition: eq( variables['StartReleaseCandidate'], true )
+        displayName: NBGV prepare release
+
+  ##############################
+  - job: Check_Code_Style
     condition: >-
       and(
-        succeeded(),
-        eq(variables['System.PullRequest.PullRequestId'], '')
-      )
-    inputs:
-      command: custom
-      custom: tool
-      arguments: install --tool-path . sign --version 0.9.1-beta.23530.1
-
-  - pwsh: |
-      .\sign code azure-key-vault `
-      "**/nanoFramework.nanoCLR.*" `
-      --base-directory "$(Build.Repository.LocalPath)\build\bin\Release" `
-      --file-list "$(Build.Repository.LocalPath)\config\filelist.txt" `
-      --publisher-name ".NET nanoFramework" `
-      --description "nanoFramework.nanoCLR" `
-      --description-url "https://github.com/$env:Build_Repository_Name" `
-      --azure-key-vault-tenant-id "$(SignTenantId)" `
-      --azure-key-vault-client-id "$(SignClientId)" `
-      --azure-key-vault-client-secret "$(SignClientSecret)" `
-      --azure-key-vault-certificate "$(SignKeyVaultCertificate)" `
-      --azure-key-vault-url "$(SignKeyVaultUrl)" `
-      --timestamp-url http://timestamp.digicert.com
-    displayName: Sign nanoCLR assemblies
-    continueOnError: true
-    condition: >-
-      and(
-        succeeded(),
-        eq(variables['System.PullRequest.PullRequestId'], '')
-      )
-
-  - task: NuGetCommand@2
-    condition: succeeded()
-    displayName: Pack nanoCLR WIN32
-    inputs:
-      command: 'custom' 
-      arguments: 'pack targets\win32\nanoFramework.nanoCLR.Win32.nuspec -Version $(NBGV_NuGetPackageVersion)'
-
-  - task: CopyFiles@2
-    condition: succeeded()
-    displayName: Collecting NuGet packages
-    inputs:
-      sourceFolder: $(Build.SourcesDirectory)
-      Contents: |
-        **\nanoFramework.nanoCLR.Win32*.nupkg
-      TargetFolder: '$(Build.ArtifactStagingDirectory)'
-      flattenFolders: true
-      ignoreMakeDirErrors: true
-
-  - task: CopyFiles@2
-    condition: succeeded()
-    displayName: Adding nanoCLR WIN32 to deployable artifacts
-    inputs:
-      sourceFolder: $(Build.SourcesDirectory)
-      Contents: |
-        **\nanoFramework.nanoCLR.exe
-      TargetFolder: '$(Build.ArtifactStagingDirectory)\WIN32_nanoCLR'
-      flattenFolders: true
-      ignoreMakeDirErrors: true
-
-  - task: CopyFiles@2
-    condition: succeeded()
-    displayName: Adding nanoCLR DLL to deployable artifacts
-    inputs:
-      sourceFolder: $(Build.SourcesDirectory)
-      Contents: |
-        **\nanoFramework.nanoCLR.dll
-      TargetFolder: '$(Build.ArtifactStagingDirectory)\WIN_DLL_nanoCLR'
-      flattenFolders: true
-      ignoreMakeDirErrors: true
-
-  - pwsh: |
-      .\sign code azure-key-vault `
-      "**/*.nupkg" `
-      --base-directory "$(Build.ArtifactStagingDirectory)" `
-      --file-list "$(Build.Repository.LocalPath)\config\filelist.txt" `
-      --publisher-name ".NET nanoFramework" `
-      --description "nanoFramework.nanoCLR NuGets" `
-      --description-url "https://github.com/$env:Build_Repository_Name" `
-      --azure-key-vault-tenant-id "$(SignTenantId)" `
-      --azure-key-vault-client-id "$(SignClientId)" `
-      --azure-key-vault-client-secret "$(SignClientSecret)" `
-      --azure-key-vault-certificate "$(SignKeyVaultCertificate)" `
-      --azure-key-vault-url "$(SignKeyVaultUrl)" `
-      --timestamp-url http://timestamp.digicert.com
-    displayName: Sign packages
-    continueOnError: true
-    condition: >-
-      and(
-        succeeded(),
-        eq(variables['System.PullRequest.PullRequestId'], '')
-      )
-    
-  # publish artifacts
-  - task: PublishPipelineArtifact@1
-    condition: succeeded()
-    displayName: Publish deployables artifacts
-    inputs:
-      targetPath: '$(Build.ArtifactStagingDirectory)'
-      artifactName: nanoclr_win32
-      artifactType: pipeline
-
-  # push NuGet packages to Azure Artifacts feed (always happens when building from main, except on PR builds)
-  - task: NuGetCommand@2
-    condition: >-
-      and(
-        succeeded(),
-        eq(variables['System.PullRequest.PullRequestId'], ''),
-        or(
-          eq(variables['ForceUpload'], true),
-          eq(variables['Build.SourceBranchName'], 'main')
-        )
-      )      
-    continueOnError: true
-    displayName: Push NuGet packages to Azure Artifacts
-    inputs:
-      command: push
-      nuGetFeedType: external
-      packagesToPush: '$(Build.ArtifactStagingDirectory)/*.nupkg'
-      publishFeedCredentials: 'AzureArtifacts-nf-interpreter'
-      allowPackageConflicts: true
-
-  # push NuGet packages to NuGet (always happens when building from main, except on PR builds)
-  - task: NuGetCommand@2
-    condition: >-
-      and(
-        succeeded(),
-        eq(variables['System.PullRequest.PullRequestId'], ''),
-        or(
-          eq(variables['ForceUpload'], true),
-          eq(variables['Build.SourceBranchName'], 'main')
-        )
-      )      
-    continueOnError: true
-    displayName: Push NuGet packages to NuGet
-    inputs:
-      command: push
-      nuGetFeedType: external
-      allowPackageConflicts: true
-      packagesToPush: '$(Build.ArtifactStagingDirectory)/*.nupkg'
-      publishFeedCredentials: 'NuGet-nf-interpreter'
-
-  - template: azure-pipelines-templates/publish-nanoclr.yml
-
-#################
-# nanoCLR CLI tool
-- job: Build_nanoCLR_CLI
-  condition: >-
-    or(
-      and(
-        succeeded('Check_Code_Style'),
         ne(dependencies.Check_Build_Options.outputs['BuildOptions.SKIP_BUILD'], true),
         or(
           eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ALL'], true),
-          eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_NANOCLR_CLI'], true)
-        )
-      ),
-      and(
-        eq(variables['Build.Reason'], 'Manual'),
-        or(
-          eq(variables['BUILD_ALL__'], 'true'),
-          eq(variables['BUILD_NANOCLR_CLI__'], 'true')
+          eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_CHIBIOS'], true),
+          eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ESP32'], true),
+          eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_FREERTOS'], true),
+          eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_TI'], true),
+          eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_AZURERTOS'], true),
+          eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_WIN32'], true)
         )
       )
-    )
 
-  dependsOn:
-  - Check_Build_Options
-  - Check_Code_Style
+    dependsOn:
+      - Check_Build_Options
 
-  pool:
-    vmImage: 'windows-latest'
+    pool:
+      vmImage: "windows-latest"
 
-  variables:
-    - group: sign-client-credentials
-    - name: DOTNET_NOLOGO
-      value: true
-  
-  steps:
-  - template: azure-pipelines-templates/nb-gitversioning.yml
+    steps:
+      - checkout: self
+        fetchDepth: 1
+        condition: ne(variables['System.PullRequest.PullRequestId'], '')
 
-  - template: azure-pipelines-templates/install-nuget.yml@templates
+      - template: azure-pipelines-templates/download-install-llvm.yml
+      - template: azure-pipelines-templates/check-code-style.yml
 
-  - task: DotNetCoreCLI@2
-    displayName: Restore NuGet packages
-    inputs:
-      command: restore
-      verbosityRestore: minimal
-      projects: targets\netcore\nanoCLR.sln
-      feedsToUse: select
-      includeNuGetOrg: true
-
-  - task: VSBuild@1
-    displayName: Build .NET tool
-    condition: succeeded()
-    inputs:
-      solution: 'targets\netcore\nanoCLR.sln'
-      platform: 'Any CPU'
-      maximumCpuCount: true
-      msbuildArgs: '/p:PublicRelease=true'
-      configuration: 'Release'
-
-  - task: DotNetCoreCLI@2
-    displayName: Install Sign Client CLI
+  ################
+  # STM32
+  - job: Build_STM32_targets
     condition: >-
-      and(
-        succeeded(),
-        eq(variables['System.PullRequest.PullRequestId'], '')
-      )
-    inputs:
-      command: custom
-      custom: tool
-      arguments: install --tool-path . sign --version 0.9.1-beta.23530.1
-
-  - pwsh: |
-      .\sign code azure-key-vault `
-      "**/nanoFramework.nanoCLR.*" `
-      --base-directory "$(Build.Repository.LocalPath)\build\bin\Release" `
-      --file-list "$(Build.Repository.LocalPath)\config\filelist.txt" `
-      --publisher-name ".NET nanoFramework" `
-      --description "nanoFramework.nanoCLR.CLI" `
-      --description-url "https://github.com/$env:Build_Repository_Name" `
-      --azure-key-vault-tenant-id "$(SignTenantId)" `
-      --azure-key-vault-client-id "$(SignClientId)" `
-      --azure-key-vault-client-secret "$(SignClientSecret)" `
-      --azure-key-vault-certificate "$(SignKeyVaultCertificate)" `
-      --azure-key-vault-url "$(SignKeyVaultUrl)" `
-      --timestamp-url http://timestamp.digicert.com
-    displayName: Sign nanoCLR assemblies
-    continueOnError: true
-    condition: >-
-      and(
-        succeeded(),
-        eq(variables['System.PullRequest.PullRequestId'], '')
-      )
-
-  - task: MSBuild@1
-    condition: succeeded()
-    displayName: Pack nanoCLR CLI
-    inputs:
-      solution: 'targets\netcore\nanoFramework.nanoCLR.CLI\nanoFramework.nanoCLR.CLI.csproj'
-      platform: 'Any CPU'
-      msbuildArguments: '/p:PublicRelease=true /t:pack /p:PackageOutputPath=$(Build.ArtifactStagingDirectory) '
-      configuration: 'Release'
-      maximumCpuCount: true
-
-  - pwsh: |
-      .\sign code azure-key-vault `
-      "**/*.nupkg" `
-      --base-directory "$(Build.ArtifactStagingDirectory)" `
-      --file-list "$(Build.Repository.LocalPath)\config\filelist.txt" `
-      --publisher-name ".NET nanoFramework" `
-      --description "nanoFramework.nanoCLR.CLI NuGet" `
-      --description-url "https://github.com/$env:Build_Repository_Name" `
-      --azure-key-vault-tenant-id "$(SignTenantId)" `
-      --azure-key-vault-client-id "$(SignClientId)" `
-      --azure-key-vault-client-secret "$(SignClientSecret)" `
-      --azure-key-vault-certificate "$(SignKeyVaultCertificate)" `
-      --azure-key-vault-url "$(SignKeyVaultUrl)" `
-      --timestamp-url http://timestamp.digicert.com
-    displayName: Sign packages
-    continueOnError: true
-    condition: >-
-      and(
-        succeeded(),
-        eq(variables['System.PullRequest.PullRequestId'], '')
-      )
-
-  - task: CopyFiles@2
-    condition: succeeded()
-    displayName: Copy nanoclr
-    inputs:
-      SourceFolder: '$(Build.Repository.LocalPath)\build\bin\Release'
-      Contents: 'nanoFramework.nanoCLR.dll'
-      TargetFolder: '$(Build.ArtifactStagingDirectory)/nanoclr'
-
-  - task: PublishPipelineArtifact@1
-    condition: succeeded()
-    displayName: Publish nanoclr
-    inputs:
-      targetPath: '$(Build.ArtifactStagingDirectory)/nanoclr'
-      artifactName: nanoclr_cli
-      artifactType: pipeline
-
-  # push NuGet packages to Azure Artifacts feed (always happens when building from main, except on PR builds)
-  - task: NuGetCommand@2
-    condition: >-
-      and(
-        succeeded(),
-        eq(variables['System.PullRequest.PullRequestId'], ''),
-        or(
-          eq(variables['ForceUpload'], true),
-          eq(variables['Build.SourceBranchName'], 'main')
-        )
-      )      
-    continueOnError: true
-    displayName: Push NuGet packages to Azure Artifacts
-    inputs:
-      command: push
-      nuGetFeedType: external
-      packagesToPush: '$(Build.ArtifactStagingDirectory)/*.nupkg'
-      publishFeedCredentials: 'AzureArtifacts-nf-interpreter'
-      allowPackageConflicts: true
-
-  # push NuGet packages to NuGet (always happens when building from main, except on PR builds)
-  - task: NuGetCommand@2
-    condition: >-
-      and(
-        succeeded(),
-        eq(variables['System.PullRequest.PullRequestId'], ''),
-        or(
-          eq(variables['ForceUpload'], true),
-          eq(variables['Build.SourceBranchName'], 'main')
-        )
-      )      
-    continueOnError: true
-    displayName: Push NuGet packages to NuGet
-    inputs:
-      command: push
-      nuGetFeedType: external
-      allowPackageConflicts: true
-      packagesToPush: '$(Build.ArtifactStagingDirectory)/*.nupkg'
-      publishFeedCredentials: 'NuGet-nf-interpreter'
-
-#########################
-# Run mscorlib Unit Tests
-
-- job: Run_UnitTests_mscorlib
-  condition: >-
-    and(
-      succeeded('Build_nanoCLR_CLI'),
-      ne(dependencies.Check_Build_Options.outputs['BuildOptions.SKIP_BUILD'], true),
       or(
-        eq(variables['BUILD_NANOCLR_CLI__'], true),
-        eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ALL'], true),
-        eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_NANOCLR_CLI'], true),
-        eq(dependencies.Check_Build_Options.outputs['BuildOptions.RUN_MSCORLIB_TESTS'], true)
-      )
-    )
-
-  dependsOn:
-  - Build_nanoCLR_CLI
-
-  pool:
-    vmImage: 'windows-latest'
-
-  variables:
-    DOTNET_NOLOGO: true
-    solution: 'nanoFramework.CoreLibrary.sln'
-    buildPlatform: 'Any CPU'
-    buildConfiguration: 'Release'
-
-  steps:
-
-    - checkout: self
-      fetchDepth: 1
-    - checkout: mscorlib
-      fetchDepth: 100
-      submodules: true
-
-    # Download nanoclr from build artifacts 
-    - task: DownloadBuildArtifacts@1
-      inputs:
-        buildType: 'current'
-        artifactName: 'nanoclr_cli' 
-        downloadPath: '$(Agent.TempDirectory)/nanoclr_cli'
-
-    # build mscorlib 
-
-    - task: InstallNanoMSBuildComponents@1
-      condition: succeeded()
-      displayName: Install .NET nanoFramework MSBuild components
-      inputs:
-        GitHubToken: $(GitHubToken)
-  
-    - template: azure-pipelines-templates/install-nuget.yml@templates
-
-    - task: NuGetCommand@2
-      condition: succeeded()
-      displayName: NuGet restore
-      retryCountOnTaskFailure: 5
-      inputs:
-        restoreSolution: '**/nanoFramework.CoreLibrary.sln'
-        feedsToUse: select
-      
-    - task: VSBuild@1
-      condition: succeeded()
-      inputs:
-        solution: '**/nanoFramework.CoreLibrary.sln'
-        platform: 'Any CPU'
-        msbuildArgs: '/p:PublicRelease=true'
-        configuration: 'Release'
-        msbuildArchitecture: 'x64'
-        maximumCpuCount: true
-
-    # run tests
-    - template: azure-pipelines-templates/run-unit-tests.yml@templates  
-      parameters:
-        runUnitTests: true
-        unitTestRunsettings: '$(System.DefaultWorkingDirectory)\nf-interpreter\targets\netcore\pipeline_tests.runsettings'
-        packagesDirectory: '$(Build.SourcesDirectory)/CoreLibrary/packages'
-
-    - task: CopyFiles@2
-      condition: succeededOrFailed()
-      displayName: Copy vstest dump files
-      inputs:
-        SourceFolder: 'D:\a\_temp\'
-        Contents: '**/*.dmp'
-        TargetFolder: '$(Build.ArtifactStagingDirectory)/vstest_dumps'
-        flattenFolders: true
-
-    - powershell: |
-        $dumpPath = "$(Build.ArtifactStagingDirectory)/vstest_dumps"
-        $hasFiles = $false
-
-        if (Test-Path $dumpPath -PathType Container) {
-            $fileCount = (Get-ChildItem $dumpPath -File | Measure-Object).Count
-            $hasFiles = $fileCount -gt 0
-        }
-        echo "##vso[task.setvariable variable=hasFiles;isOutput=true]$hasFiles"
-      displayName: 'Check for dump files'
-      name: checkFiles
-
-    - task: PublishPipelineArtifact@1
-      condition: eq(variables['hasFiles'], 'true')
-      displayName: Publish vstest dump files
-      inputs:
-        targetPath: '$(Build.ArtifactStagingDirectory)/vstest_dumps'
-        artifactName: VsTestCrashDumps
-        artifactType: pipeline
-
-######################
-# generate change log
-- job: Generate_change_log
-  dependsOn:
-  - Build_STM32_targets
-  - Build_ESP32_targets
-  - Build_NXP_targets
-  - Build_TI_SimpleLink_targets
-  - Build_Azure_RTOS_targets
-  # skip build if this is a PR, submitted by nfbot and the commit message contains [version update]
-  condition: >-
-    and(
-      succeeded('Build_STM32_targets'),
-      succeeded('Build_ESP32_targets'),
-      succeeded('Build_NXP_targets'),
-      succeeded('Build_TI_SimpleLink_targets'),
-      succeeded('Build_Azure_RTOS_targets'),
-      not( eq(variables['Build.Reason'], 'PullRequest')
-    ),
-    or(
-      eq(variables['Build.SourceBranchName'], 'main'),
-      startsWith(variables['Build.SourceBranch'], 'refs/tags/v') ),
-      ne( variables['StartReleaseCandidate'], true )
-    )
-
-  pool:
-    vmImage: 'windows-latest'
-
-  steps:
-  - task: DotNetCoreCLI@2  
-    condition: succeeded()
-    displayName: Install NBGV tool
-    inputs:
-      command: custom
-      custom: tool
-      arguments: install --tool-path . nbgv
-
-  - script: nbgv cloud -a -c
-    condition: succeeded()
-    displayName: Set build number
-
-  - task: UseRubyVersion@0
-    condition: succeeded()
-    inputs:
-      versionSpec: '= 3.0'
-      addToPath: true
-
-  # Cache change log cache files
-  - task: Cache@2
-    displayName: Cache change log cache files
-    condition: >-
-      and(
-        succeeded(),
-        eq(variables['System.PullRequest.PullRequestId'], ''),
-        startsWith(variables['Build.SourceBranch'], 'refs/tags/v')
-      )
-    inputs:
-      key: 'changeLogCacheFiles'
-      restoreKeys: 1_0
-      path: |
-        $(Agent.TempDirectory)/github-changelog-logger.log
-        $(Agent.TempDirectory)/github-changelog-http-cache
-
-  # generate change log including future version
-  - powershell: |
-        gem install github_changelog_generator --quiet --no-document
-        # need to call it passing both cache options with full path otherwise it won't work
-        github_changelog_generator --token $(GitHubToken) --cache-log  $env:AGENT_TEMPDIRECTORY\github-changelog-logger.log --cache-file $env:AGENT_TEMPDIRECTORY\github-changelog-http-cache --pr-wo-labels --future-release "v$env:NBGV_AssemblyVersion"
-    condition: >-
-      and(
-        succeeded(),
-        eq(variables['System.PullRequest.PullRequestId'], ''),
-        startsWith(variables['Build.SourceBranch'], 'refs/tags/v')
-      )
-    displayName: Generate change log
-
-  # push new changelog to GitHub repo
-  - powershell: |
-        git config --global gc.auto 0
-        git config --global user.name nfbot
-        git config --global user.email nanoframework@outlook.com
-        git config --global core.autocrlf true
-
-        git add CHANGELOG.md
-        git commit -m "Update CHANGELOG" -m"***NO_CI***"
-
-        # compute authorization header in format "AUTHORIZATION: basic 'encoded token'"
-        # 'encoded token' is the Base64 of the string "nfbot:personal-token"
-        $auth = "basic $([System.Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes("nfbot:$(GitHubToken)")))"
-
-        git -c http.extraheader="AUTHORIZATION: $auth" push origin "HEAD:$(Build.SourceBranchName)"
-    condition: >-
-      and(
-        succeeded(),
-        eq(variables['System.PullRequest.PullRequestId'], ''),
-        not(
-          startsWith(variables['Build.SourceBranch'], 'refs/tags/v')
+        and(
+          succeeded('Check_Code_Style'),
+          ne( dependencies.Check_Build_Options.outputs['BuildOptions.SKIP_BUILD'], true ),
+          or(
+            eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ALL'], true),
+            eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_CHIBIOS'], true)
+          )
         ),
-        eq( variables['StartReleaseCandidate'], false )
+        and(
+          eq(variables['Build.Reason'], 'Manual'),
+          or(
+            eq(variables['BUILD_ALL__'], 'true'),
+            eq(variables['BUILD_CHIBIOS__'], 'true')
+          )
+        )
       )
-    continueOnError: true
-    displayName: Push changelog to GitHub
 
-#################################
-# report build failure to Discord
-- job: Report_Build_Failure
-  dependsOn:
-  - Build_STM32_targets
-  - Build_ESP32_targets
-  - Build_NXP_targets
-  - Build_TI_SimpleLink_targets
-  - Build_Azure_RTOS_targets
-  - Build_WIN32_nanoCLR
-  - Build_nanoCLR_CLI
-  - Generate_change_log
-  - Check_Code_Style
-  condition: >-
-    and(
-      ne( dependencies.Check_Code_Style.outputs['Check_Code_Style.CODE_STYLE_CHECK_FAILED'], true),
+    dependsOn:
+      - Check_Build_Options
+      - Check_Code_Style
+
+    pool:
+      vmImage: "windows-latest"
+
+    strategy:
+      matrix:
+        ST_STM32F429I_DISCOVERY:
+          TargetBoard: ST_STM32F429I_DISCOVERY
+          TargetSeries: "stm32f4xx"
+          BuildOptions:
+          NeedsDFU: false
+          NeedsSRECORD: false
+          CMakePreset: ST_STM32F429I_DISCOVERY
+
+        ST_STM32F769I_DISCOVERY:
+          TargetBoard: ST_STM32F769I_DISCOVERY
+          TargetSeries: "stm32f7xx"
+          BuildOptions:
+          NeedsDFU: false
+          NeedsSRECORD: true
+          CMakePreset: ST_STM32F769I_DISCOVERY
+
+    variables:
+      DOTNET_NOLOGO: true
+      # creates a counter and assigns it to the revision variable
+      REVISION: $[counter('STM32_1_10_0_versioncounter', 0)]
+      HelperPackageVersion: $[counter('HelperPackageVersioncounter', 0)]
+      TargetPlatform: "stm32"
+
+    steps:
+      - template: azure-pipelines-templates/build-preparations.yml
+      - template: azure-pipelines-templates/nb-gitversioning.yml
+      - template: azure-pipelines-templates/download-install-arm-gcc-toolchain.yml
+      - template: azure-pipelines-templates/download-install-ninja.yml
+      - template: azure-pipelines-templates/download-srecord.yml
+      - template: azure-pipelines-templates/download-hexdfu.yml
+      - template: azure-pipelines-templates/build-chibios-stm32-targets.yml
+      - template: azure-pipelines-templates/pack-publish-artifacts.yml
+      - template: azure-pipelines-templates/publish-cloudsmith.yml
+      - template: azure-pipelines-templates/pack-publish-managed-helpers.yml
+
+  #################
+  # ESP32 targets
+  - job: Build_ESP32_targets
+    condition: >-
       or(
-        failed('Build_STM32_targets'),
-        failed('Build_ESP32_targets'),
-        failed('Build_NXP_targets'),
-        failed('Build_TI_SimpleLink_targets'),
-        failed('Build_Azure_RTOS_targets'),
-        failed('Build_WIN32_nanoCLR'),
-        failed('Build_nanoCLR_CLI'),
-        failed('Generate_change_log')
+        and(
+          succeeded('Check_Code_Style'),
+          ne( dependencies.Check_Build_Options.outputs['BuildOptions.SKIP_BUILD'], true ),
+          or(
+            eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ALL'], true),
+            eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ESP32'], true)
+          )
+        ),
+        and(
+          eq(variables['Build.Reason'], 'Manual'),
+          or(
+            eq(variables['BUILD_ALL__'], 'true'),
+            eq(variables['BUILD_ESP32__'], 'true')
+          )
+        )
       )
-    )
 
-  pool:
-    vmImage: 'windows-latest'
+    dependsOn:
+      - Check_Build_Options
+      - Check_Code_Style
 
-  steps:
+    pool:
+      vmImage: "windows-latest"
 
-  - checkout: self
-    fetchDepth: 1
+    # there is only a single ESP32 target, but this is already config as a matrix to make it easy to add new ones
+    strategy:
+      matrix:
+        ESP32_PSRAM_REV0:
+          TargetBoard: ESP32
+          TargetSeries: "esp32"
+          BuildOptions:
+          IDF_Target: esp32
+          TargetName: ESP32
+          PackageName: ESP32_PSRAM_REV0
+          CMakePreset: ESP32_PSRAM_REV0
 
-  # step from template @ nf-tools repo
-  - template: azure-pipelines-templates/discord-webhook.yml@templates  
-    parameters:
-      status: 'failure'
-      webhookUrl: '$(DiscordWebhook)'
-      message: ''
+        ESP32_BLE_REV0:
+          TargetBoard: ESP32
+          TargetSeries: "esp32"
+          BuildOptions:
+          IDF_Target: esp32
+          TargetName: ESP32
+          PackageName: ESP32_BLE_REV0
+          CMakePreset: ESP32_BLE_REV0
+
+        ESP_WROVER_KIT:
+          TargetBoard: ESP32
+          TargetSeries: "esp32"
+          BuildOptions:
+          IDF_Target: esp32
+          TargetName: ESP_WROVER_KIT
+          PackageName: ESP_WROVER_KIT
+          CMakePreset: ESP_WROVER_KIT
+
+        ESP32_LILYGO:
+          TargetBoard: ESP32
+          TargetSeries: "esp32"
+          BuildOptions:
+          IDF_Target: esp32
+          TargetName: ESP32_LILYGO
+          PackageName: ESP32_LILYGO
+          CMakePreset: ESP32_LILYGO
+
+        FEATHER_S2:
+          TargetBoard: ESP32_S2
+          TargetSeries: "esp32_s2"
+          BuildOptions:
+          IDF_Target: esp32s2
+          TargetName: FEATHER_S2
+          PackageName: FEATHER_S2
+          CMakePreset: FEATHER_S2
+
+        ESP32_C3:
+          TargetBoard: ESP32_C3
+          TargetSeries: "esp32c3"
+          BuildOptions:
+          IDF_Target: esp32c3
+          TargetName: ESP32_C3
+          PackageName: ESP32_C3
+          CMakePreset: ESP32_C3
+
+        ESP32_C6_THREAD:
+          TargetBoard: ESP32_C6
+          TargetSeries: "esp32c6"
+          BuildOptions:
+          IDF_Target: esp32c6
+          TargetName: ESP32_C6_THREAD
+          PackageName: ESP32_C6_THREAD
+          CMakePreset: ESP32_C6_THREAD
+
+        ESP32_H2_THREAD:
+          TargetBoard: ESP32_H2
+          TargetSeries: "esp32h2"
+          BuildOptions:
+          IDF_Target: esp32h2
+          TargetName: ESP32_H2_THREAD
+          PackageName: ESP32_H2_THREAD
+          CMakePreset: ESP32_H2_THREAD
+
+        ESP32_S3:
+          TargetBoard: ESP32_S3
+          TargetSeries: "esp32s3"
+          BuildOptions:
+          IDF_Target: esp32s3
+          TargetName: ESP32_S3
+          PackageName: ESP32_S3
+          CMakePreset: ESP32_S3
+
+        ESP32_S3_ALL:
+          TargetBoard: ESP32_S3
+          TargetSeries: "esp32s3"
+          BuildOptions:
+          IDF_Target: esp32s3
+          TargetName: ESP32_S3_ALL
+          PackageName: ESP32_S3_ALL
+          CMakePreset: ESP32_S3_ALL
+
+        ESP32_ETHERNET_KIT_1.2:
+          TargetBoard: ESP32
+          TargetSeries: "esp32"
+          BuildOptions:
+          IDF_Target: esp32
+          TargetName: ESP32_ETHERNET_KIT_1.2
+          PackageName: ESP32_ETHERNET_KIT_1.2
+          CMakePreset: ESP32_ETHERNET_KIT_1.2
+
+    variables:
+      DOTNET_NOLOGO: true
+      # creates a counter and assigns it to the revision variable
+      REVISION: $[counter('ESP32_1_10_0_versioncounter', 0)]
+      IDF_PATH: "D:/a/1/s/esp-idf"
+      PIP_CACHE_DIR: $(Pipeline.Workspace)/.pip
+      TargetPlatform: "esp32"
+
+    steps:
+      - checkout: self
+      - checkout: esp32_idf
+        fetchDepth: 1
+
+      - template: azure-pipelines-templates/build-preparations.yml
+        parameters:
+          repoDirectory: '$(Build.SourcesDirectory)\nf-interpreter'
+      - template: azure-pipelines-templates/nb-gitversioning.yml
+        parameters:
+          repoDirectory: '$(Build.SourcesDirectory)\nf-interpreter'
+      - template: azure-pipelines-templates/download-install-esp32-build-components.yml
+      - template: azure-pipelines-templates/download-install-ninja.yml
+        parameters:
+          repoDirectory: '$(Build.SourcesDirectory)\nf-interpreter'
+      - template: azure-pipelines-templates/build-espressif-esp32-targets.yml
+
+      - task: CopyFiles@2
+        condition: succeeded()
+        displayName: Copying bootloader
+        inputs:
+          sourceFolder: '$(Build.SourcesDirectory)\nf-interpreter\build\bootloader'
+          Contents: |
+            bootloader.bin
+          TargetFolder: '$(Build.ArtifactStagingDirectory)\$(TargetPublishName)'
+          flattenFolders: true
+          ignoreMakeDirErrors: true
+
+      - template: azure-pipelines-templates/copy-sdkconfig.yml
+      - template: azure-pipelines-templates/pack-publish-artifacts.yml
+        parameters:
+          buildDirectory: '$(Build.SourcesDirectory)\nf-interpreter\build'
+      - template: azure-pipelines-templates/publish-cloudsmith.yml
+      - template: azure-pipelines-templates/publish-sdkconfig.yml
+
+  #################
+  # NXP
+  - job: Build_NXP_targets
+    condition: >-
+      or(
+        and(
+          succeeded('Check_Code_Style'),
+          ne( dependencies.Check_Build_Options.outputs['BuildOptions.SKIP_BUILD'], true ),
+          or(
+            eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ALL'], true),
+            eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_FREERTOS'], true)
+          )
+        ),
+        and(
+          eq(variables['Build.Reason'], 'Manual'),
+          or(
+            eq(variables['BUILD_ALL__'], 'true'),
+            eq(variables['BUILD_NXP__'], 'true')
+          )
+        )
+      )
+
+    dependsOn:
+      - Check_Build_Options
+      - Check_Code_Style
+
+    pool:
+      vmImage: "windows-latest"
+
+    strategy:
+      matrix:
+        NXP_MIMXRT1060_EVK:
+          TargetBoard: NXP_MIMXRT1060_EVK
+          TargetSeries: "imxrt10xx"
+          BuildOptions:
+          NeedsSRECORD: true
+          CMakePreset: NXP_MIMXRT1060_EVK
+
+    variables:
+      DOTNET_NOLOGO: true
+      # creates a counter and assigns it to the revision variable
+      REVISION: $[counter('NXP_1_10_0_versioncounter', 0)]
+      GIT_LFS_SKIP_SMUDGE: 1
+      TargetPlatform: "freertos"
+
+    steps:
+      - template: azure-pipelines-templates/build-preparations.yml
+      - template: azure-pipelines-templates/nb-gitversioning.yml
+      - template: azure-pipelines-templates/download-install-arm-gcc-toolchain.yml
+      - template: azure-pipelines-templates/download-install-ninja.yml
+      - template: azure-pipelines-templates/download-srecord.yml
+      - template: azure-pipelines-templates/build-freertos-nxp-targets.yml
+      - template: azure-pipelines-templates/pack-publish-artifacts.yml
+      - template: azure-pipelines-templates/publish-cloudsmith.yml
+      - template: azure-pipelines-templates/pack-publish-managed-helpers.yml
+
+  #################
+  # TI SimpleLink
+  - job: Build_TI_SimpleLink_targets
+    condition: >-
+      or(
+        and(
+          succeeded('Check_Code_Style'),
+          ne( dependencies.Check_Build_Options.outputs['BuildOptions.SKIP_BUILD'], true ),
+          or(
+            eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ALL'], true),
+            eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_TI'], true)
+          )
+        ),
+        and(
+            eq(variables['Build.Reason'], 'Manual'),
+            or(
+              eq(variables['BUILD_ALL__'], 'true'),
+              eq(variables['BUILD_TI__'], 'true')
+            )
+        )    
+      )
+
+    dependsOn:
+      - Check_Build_Options
+      - Check_Code_Style
+
+    pool:
+      vmImage: "windows-latest"
+
+    strategy:
+      matrix:
+        # disabled: waiting to update SDK to latest version with Sys Config
+        # TI_CC3220SF_LAUNCHXL:
+        #   TargetBoard: TI_CC3220SF_LAUNCHXL
+        #   TargetSeries: 'cc32xx'
+        #   BuildOptions: >-
+        #  -DTARGET_SERIES=CC32xx
+        #  -DRTOS=TI_SimpleLink
+        #  -DSUPPORT_ANY_BASE_CONVERSION=OFF
+        #  -DNF_FEATURE_DEBUGGER=ON
+        #  -DNF_FEATURE_RTC=ON
+        #  -DNF_FEATURE_WATCHDOG=OFF
+        #  -DNF_FEATURE_HAS_CONFIG_BLOCK=ON
+        #  -DAPI_System.Device.Gpio=ON
+        #  -DAPI_System.Device.Spi=ON
+        #  -DAPI_System.Device.I2c=ON
+        #  -DAPI_System.Device.Pwm=ON
+        #  -DAPI_System.Device.Adc=ON
+        #  -DAPI_System.Net=ON
+        #  -DAPI_nanoFramework.System.Collections=ON
+        #  -DAPI_nanoFramework.System.Text=ON
+
+        TI_CC1352R1_LAUNCHXL_915:
+          TargetBoard: TI_CC1352R1_LAUNCHXL
+          PackageName: TI_CC1352R1_LAUNCHXL_915
+          TargetSeries: "CC13X2"
+          BuildOptions: >-
+            -DRADIO_FREQUENCY=915
+          CMakePreset: TI_CC1352R1_LAUNCHXL
+
+    variables:
+      DOTNET_NOLOGO: true
+      # creates a counter and assigns it to the revision variable
+      REVISION: $[counter('TI_1_10_0_versioncounter', 0)]
+      HelperPackageVersion: $[counter('HelperPackageVersioncounter', 0)]
+      TargetPlatform: "ti_simplelink"
+
+    steps:
+      - template: azure-pipelines-templates/build-preparations.yml
+      - template: azure-pipelines-templates/nb-gitversioning.yml
+      - template: azure-pipelines-templates/download-install-arm-gcc-toolchain.yml
+      - template: azure-pipelines-templates/download-install-ninja.yml
+      - template: azure-pipelines-templates/build-ti-simplelink-targets.yml
+      - template: azure-pipelines-templates/pack-publish-artifacts.yml
+      - template: azure-pipelines-templates/publish-cloudsmith.yml
+      - template: azure-pipelines-templates/pack-publish-ti-sl-managed-helpers.yml
+
+  #################
+  # Azure RTOS
+  - job: Build_Azure_RTOS_targets
+    condition: >-
+      or(
+        and(
+          succeeded('Check_Code_Style'),
+          ne( dependencies.Check_Build_Options.outputs['BuildOptions.SKIP_BUILD'], true ),
+          or(
+            eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ALL'], true),
+            eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_AZURERTOS'], true)
+          )
+        ),
+        and(
+          eq(variables['Build.Reason'], 'Manual'),
+          or(
+            eq(variables['BUILD_ALL__'], 'true'),
+            eq(variables['BUILD_AZURERTOS__'], 'true')
+          )
+        )
+      )
+
+    dependsOn:
+      - Check_Build_Options
+      - Check_Code_Style
+
+    pool:
+      vmImage: "windows-latest"
+
+    strategy:
+      matrix:
+        # ST_B_L475E_IOT01A:
+        #   TargetBoard: ST_B_L475E_IOT01A
+        #   TargetSeries: 'stm32l4xx'
+        #   BuildOptions:
+        #   NeedsDFU: true
+        #   NeedsSRECORD: false
+        #   CMakePreset: ST_B_L475E_IOT01A
+
+        # ORGPAL_PALTHREE:
+        #   TargetBoard: ORGPAL_PALTHREE
+        #   TargetSeries: 'stm32f7xx'
+        #   BuildOptions:
+        #   NeedsDFU: true
+        #   NeedsSRECORD: false
+        #   CMakePreset: ORGPAL_PALTHREE
+
+        SL_STK3701A:
+          TargetBoard: SL_STK3701A
+          TargetSeries: "efm32gg11"
+          BuildOptions:
+          NeedsDFU: false
+          NeedsSRECORD: false
+          CMakePreset: SL_STK3701A
+
+    variables:
+      # creates a counter and assigns it to the revision variable
+      REVISION: $[counter('AZURERTOS_1_10_0_versioncounter', 0)]
+      HelperPackageVersion: $[counter('HelperPackageVersioncounter', 0)]
+      TargetPlatform: "azure_rtos"
+
+    steps:
+      - template: azure-pipelines-templates/build-preparations.yml
+      - template: azure-pipelines-templates/nb-gitversioning.yml
+      - template: azure-pipelines-templates/download-install-arm-gcc-toolchain.yml
+      - template: azure-pipelines-templates/download-install-ninja.yml
+      - template: azure-pipelines-templates/download-hexdfu.yml
+      - template: azure-pipelines-templates/download-srecord.yml
+      - template: azure-pipelines-templates/build-azurertos-targets.yml
+      - template: azure-pipelines-templates/pack-publish-artifacts.yml
+      - template: azure-pipelines-templates/publish-cloudsmith.yml
+      - template: azure-pipelines-templates/pack-publish-managed-helpers.yml
+
+  #################
+  # WIN32 executable
+  - job: Build_WIN32_nanoCLR
+    condition: >-
+      or(
+        and(
+          succeeded('Check_Code_Style'),
+          ne( dependencies.Check_Build_Options.outputs['BuildOptions.SKIP_BUILD'], true ),
+          or(
+            eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ALL'], true),
+            eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_WIN32'], true)
+          )
+        ),
+        and(
+          eq(variables['Build.Reason'], 'Manual'),
+          or(
+            eq(variables['BUILD_ALL__'], 'true'),
+            eq(variables['BUILD_WINDOWS_NANOCLR__'], 'true')
+          )
+        )
+      )
+
+    dependsOn:
+      - Check_Build_Options
+      - Check_Code_Style
+
+    pool:
+      vmImage: "windows-latest"
+
+    variables:
+      - group: sign-client-credentials
+      - name: DOTNET_NOLOGO
+        value: true
+      # creates a counter and assigns it to the revision variable
+      - name: REVISION
+        value: $[counter('WIN32_1_10_0_versioncounter', 0)]
+
+    steps:
+      - template: azure-pipelines-templates/nb-gitversioning.yml
+
+      - task: PowerShell@2
+        displayName: Store package version
+        inputs:
+          targetType: "inline"
+          script: |
+            Write-Host "$("##vso[task.setvariable variable=WINCLR_PACKAGE_VERSION]")$(NBGV_VersionMajor).$(NBGV_VersionMinor).$(NBGV_BuildNumber).$(TARGET_BUILD_COUNTER)"
+            Write-Host "$("##vso[task.setvariable variable=WINCLR_AssemblyInformationalVersion]")$(NBGV_VersionMajor).$(NBGV_VersionMinor).$(NBGV_BuildNumber).$(TARGET_BUILD_COUNTER)$(NBGV_BuildMetadataFragment)"
+
+      - template: azure-pipelines-templates/install-nuget.yml@templates
+
+      - task: DotNetCoreCLI@2
+        displayName: Restore NuGet packages
+        inputs:
+          command: restore
+          restoreArguments: "--locked-mode"
+          verbosityRestore: minimal
+          projects: targets\netcore\nanoCLR.sln
+          feedsToUse: select
+          includeNuGetOrg: true
+
+      - task: VSBuild@1
+        displayName: Build WIN32 EXE target
+        inputs:
+          solution: 'targets\win32\nanoCLR.sln'
+          platform: "x86"
+          maximumCpuCount: true
+          msbuildArgs: "/p:PublicRelease=true"
+          configuration: "Release"
+
+      - task: VSBuild@1
+        displayName: Build WIN DLL target
+        inputs:
+          solution: 'targets\netcore\nanoCLR.sln'
+          platform: "Any CPU"
+          maximumCpuCount: true
+          msbuildArgs: "/p:PublicRelease=true"
+          configuration: "Release"
+
+      - task: DotNetCoreCLI@2
+        displayName: Install Sign Client CLI
+        condition: >-
+          and(
+            succeeded(),
+            eq(variables['System.PullRequest.PullRequestId'], '')
+          )
+        inputs:
+          command: custom
+          custom: tool
+          arguments: install --tool-path . sign --version 0.9.1-beta.23530.1
+
+      - pwsh: |
+          .\sign code azure-key-vault `
+          "**/nanoFramework.nanoCLR.*" `
+          --base-directory "$(Build.Repository.LocalPath)\build\bin\Release" `
+          --file-list "$(Build.Repository.LocalPath)\config\filelist.txt" `
+          --publisher-name ".NET nanoFramework" `
+          --description "nanoFramework.nanoCLR" `
+          --description-url "https://github.com/$env:Build_Repository_Name" `
+          --azure-key-vault-tenant-id "$(SignTenantId)" `
+          --azure-key-vault-client-id "$(SignClientId)" `
+          --azure-key-vault-client-secret "$(SignClientSecret)" `
+          --azure-key-vault-certificate "$(SignKeyVaultCertificate)" `
+          --azure-key-vault-url "$(SignKeyVaultUrl)" `
+          --timestamp-url http://timestamp.digicert.com
+        displayName: Sign nanoCLR assemblies
+        continueOnError: true
+        condition: >-
+          and(
+            succeeded(),
+            eq(variables['System.PullRequest.PullRequestId'], '')
+          )
+
+      - task: NuGetCommand@2
+        condition: succeeded()
+        displayName: Pack nanoCLR WIN32
+        inputs:
+          command: "custom"
+          arguments: 'pack targets\win32\nanoFramework.nanoCLR.Win32.nuspec -Version $(NBGV_NuGetPackageVersion)'
+
+      - task: CopyFiles@2
+        condition: succeeded()
+        displayName: Collecting NuGet packages
+        inputs:
+          sourceFolder: $(Build.SourcesDirectory)
+          Contents: |
+            **\nanoFramework.nanoCLR.Win32*.nupkg
+          TargetFolder: "$(Build.ArtifactStagingDirectory)"
+          flattenFolders: true
+          ignoreMakeDirErrors: true
+
+      - task: CopyFiles@2
+        condition: succeeded()
+        displayName: Adding nanoCLR WIN32 to deployable artifacts
+        inputs:
+          sourceFolder: $(Build.SourcesDirectory)
+          Contents: |
+            **\nanoFramework.nanoCLR.exe
+          TargetFolder: '$(Build.ArtifactStagingDirectory)\WIN32_nanoCLR'
+          flattenFolders: true
+          ignoreMakeDirErrors: true
+
+      - task: CopyFiles@2
+        condition: succeeded()
+        displayName: Adding nanoCLR DLL to deployable artifacts
+        inputs:
+          sourceFolder: $(Build.SourcesDirectory)
+          Contents: |
+            **\nanoFramework.nanoCLR.dll
+          TargetFolder: '$(Build.ArtifactStagingDirectory)\WIN_DLL_nanoCLR'
+          flattenFolders: true
+          ignoreMakeDirErrors: true
+
+      - pwsh: |
+          .\sign code azure-key-vault `
+          "**/*.nupkg" `
+          --base-directory "$(Build.ArtifactStagingDirectory)" `
+          --file-list "$(Build.Repository.LocalPath)\config\filelist.txt" `
+          --publisher-name ".NET nanoFramework" `
+          --description "nanoFramework.nanoCLR NuGets" `
+          --description-url "https://github.com/$env:Build_Repository_Name" `
+          --azure-key-vault-tenant-id "$(SignTenantId)" `
+          --azure-key-vault-client-id "$(SignClientId)" `
+          --azure-key-vault-client-secret "$(SignClientSecret)" `
+          --azure-key-vault-certificate "$(SignKeyVaultCertificate)" `
+          --azure-key-vault-url "$(SignKeyVaultUrl)" `
+          --timestamp-url http://timestamp.digicert.com
+        displayName: Sign packages
+        continueOnError: true
+        condition: >-
+          and(
+            succeeded(),
+            eq(variables['System.PullRequest.PullRequestId'], '')
+          )
+
+      # publish artifacts
+      - task: PublishPipelineArtifact@1
+        condition: succeeded()
+        displayName: Publish deployables artifacts
+        inputs:
+          targetPath: "$(Build.ArtifactStagingDirectory)"
+          artifactName: nanoclr_win32
+          artifactType: pipeline
+
+      # push NuGet packages to Azure Artifacts feed (always happens when building from main, except on PR builds)
+      - task: NuGetCommand@2
+        condition: >-
+          and(
+            succeeded(),
+            eq(variables['System.PullRequest.PullRequestId'], ''),
+            or(
+              eq(variables['ForceUpload'], true),
+              eq(variables['Build.SourceBranchName'], 'main')
+            )
+          )
+        continueOnError: true
+        displayName: Push NuGet packages to Azure Artifacts
+        inputs:
+          command: push
+          nuGetFeedType: external
+          packagesToPush: "$(Build.ArtifactStagingDirectory)/*.nupkg"
+          publishFeedCredentials: "AzureArtifacts-nf-interpreter"
+          allowPackageConflicts: true
+
+      # push NuGet packages to NuGet (always happens when building from main, except on PR builds)
+      - task: NuGetCommand@2
+        condition: >-
+          and(
+            succeeded(),
+            eq(variables['System.PullRequest.PullRequestId'], ''),
+            or(
+              eq(variables['ForceUpload'], true),
+              eq(variables['Build.SourceBranchName'], 'main')
+            )
+          )
+        continueOnError: true
+        displayName: Push NuGet packages to NuGet
+        inputs:
+          command: push
+          nuGetFeedType: external
+          allowPackageConflicts: true
+          packagesToPush: "$(Build.ArtifactStagingDirectory)/*.nupkg"
+          publishFeedCredentials: "NuGet-nf-interpreter"
+
+      - template: azure-pipelines-templates/publish-nanoclr.yml
+
+  #################
+  # nanoCLR CLI tool
+  - job: Build_nanoCLR_CLI
+    condition: >-
+      or(
+        and(
+          succeeded('Check_Code_Style'),
+          ne(dependencies.Check_Build_Options.outputs['BuildOptions.SKIP_BUILD'], true),
+          or(
+            eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ALL'], true),
+            eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_NANOCLR_CLI'], true)
+          )
+        ),
+        and(
+          eq(variables['Build.Reason'], 'Manual'),
+          or(
+            eq(variables['BUILD_ALL__'], 'true'),
+            eq(variables['BUILD_NANOCLR_CLI__'], 'true')
+          )
+        )
+      )
+
+    dependsOn:
+      - Check_Build_Options
+      - Check_Code_Style
+
+    pool:
+      vmImage: "windows-latest"
+
+    variables:
+      - group: sign-client-credentials
+      - name: DOTNET_NOLOGO
+        value: true
+
+    steps:
+      - template: azure-pipelines-templates/nb-gitversioning.yml
+
+      - template: azure-pipelines-templates/install-nuget.yml@templates
+
+      - task: DotNetCoreCLI@2
+        displayName: Restore NuGet packages
+        inputs:
+          command: restore
+          verbosityRestore: minimal
+          projects: targets\netcore\nanoCLR.sln
+          feedsToUse: select
+          includeNuGetOrg: true
+
+      - task: VSBuild@1
+        displayName: Build .NET tool
+        condition: succeeded()
+        inputs:
+          solution: 'targets\netcore\nanoCLR.sln'
+          platform: "Any CPU"
+          maximumCpuCount: true
+          msbuildArgs: "/p:PublicRelease=true"
+          configuration: "Release"
+
+      - task: DotNetCoreCLI@2
+        displayName: Install Sign Client CLI
+        condition: >-
+          and(
+            succeeded(),
+            eq(variables['System.PullRequest.PullRequestId'], '')
+          )
+        inputs:
+          command: custom
+          custom: tool
+          arguments: install --tool-path . sign --version 0.9.1-beta.23530.1
+
+      - pwsh: |
+          .\sign code azure-key-vault `
+          "**/nanoFramework.nanoCLR.*" `
+          --base-directory "$(Build.Repository.LocalPath)\build\bin\Release" `
+          --file-list "$(Build.Repository.LocalPath)\config\filelist.txt" `
+          --publisher-name ".NET nanoFramework" `
+          --description "nanoFramework.nanoCLR.CLI" `
+          --description-url "https://github.com/$env:Build_Repository_Name" `
+          --azure-key-vault-tenant-id "$(SignTenantId)" `
+          --azure-key-vault-client-id "$(SignClientId)" `
+          --azure-key-vault-client-secret "$(SignClientSecret)" `
+          --azure-key-vault-certificate "$(SignKeyVaultCertificate)" `
+          --azure-key-vault-url "$(SignKeyVaultUrl)" `
+          --timestamp-url http://timestamp.digicert.com
+        displayName: Sign nanoCLR assemblies
+        continueOnError: true
+        condition: >-
+          and(
+            succeeded(),
+            eq(variables['System.PullRequest.PullRequestId'], '')
+          )
+
+      - task: MSBuild@1
+        condition: succeeded()
+        displayName: Pack nanoCLR CLI
+        inputs:
+          solution: 'targets\netcore\nanoFramework.nanoCLR.CLI\nanoFramework.nanoCLR.CLI.csproj'
+          platform: "Any CPU"
+          msbuildArguments: "/p:PublicRelease=true /t:pack /p:PackageOutputPath=$(Build.ArtifactStagingDirectory) "
+          configuration: "Release"
+          maximumCpuCount: true
+
+      - pwsh: |
+          .\sign code azure-key-vault `
+          "**/*.nupkg" `
+          --base-directory "$(Build.ArtifactStagingDirectory)" `
+          --file-list "$(Build.Repository.LocalPath)\config\filelist.txt" `
+          --publisher-name ".NET nanoFramework" `
+          --description "nanoFramework.nanoCLR.CLI NuGet" `
+          --description-url "https://github.com/$env:Build_Repository_Name" `
+          --azure-key-vault-tenant-id "$(SignTenantId)" `
+          --azure-key-vault-client-id "$(SignClientId)" `
+          --azure-key-vault-client-secret "$(SignClientSecret)" `
+          --azure-key-vault-certificate "$(SignKeyVaultCertificate)" `
+          --azure-key-vault-url "$(SignKeyVaultUrl)" `
+          --timestamp-url http://timestamp.digicert.com
+        displayName: Sign packages
+        continueOnError: true
+        condition: >-
+          and(
+            succeeded(),
+            eq(variables['System.PullRequest.PullRequestId'], '')
+          )
+
+      - task: CopyFiles@2
+        condition: succeeded()
+        displayName: Copy nanoclr
+        inputs:
+          SourceFolder: '$(Build.Repository.LocalPath)\build\bin\Release'
+          Contents: "nanoFramework.nanoCLR.dll"
+          TargetFolder: "$(Build.ArtifactStagingDirectory)/nanoclr"
+
+      - task: PublishPipelineArtifact@1
+        condition: succeeded()
+        displayName: Publish nanoclr
+        inputs:
+          targetPath: "$(Build.ArtifactStagingDirectory)/nanoclr"
+          artifactName: nanoclr_cli
+          artifactType: pipeline
+
+      # push NuGet packages to Azure Artifacts feed (always happens when building from main, except on PR builds)
+      - task: NuGetCommand@2
+        condition: >-
+          and(
+            succeeded(),
+            eq(variables['System.PullRequest.PullRequestId'], ''),
+            or(
+              eq(variables['ForceUpload'], true),
+              eq(variables['Build.SourceBranchName'], 'main')
+            )
+          )
+        continueOnError: true
+        displayName: Push NuGet packages to Azure Artifacts
+        inputs:
+          command: push
+          nuGetFeedType: external
+          packagesToPush: "$(Build.ArtifactStagingDirectory)/*.nupkg"
+          publishFeedCredentials: "AzureArtifacts-nf-interpreter"
+          allowPackageConflicts: true
+
+      # push NuGet packages to NuGet (always happens when building from main, except on PR builds)
+      - task: NuGetCommand@2
+        condition: >-
+          and(
+            succeeded(),
+            eq(variables['System.PullRequest.PullRequestId'], ''),
+            or(
+              eq(variables['ForceUpload'], true),
+              eq(variables['Build.SourceBranchName'], 'main')
+            )
+          )
+        continueOnError: true
+        displayName: Push NuGet packages to NuGet
+        inputs:
+          command: push
+          nuGetFeedType: external
+          allowPackageConflicts: true
+          packagesToPush: "$(Build.ArtifactStagingDirectory)/*.nupkg"
+          publishFeedCredentials: "NuGet-nf-interpreter"
+
+  #########################
+  # Run mscorlib Unit Tests
+
+  - job: Run_UnitTests_mscorlib
+    condition: >-
+      and(
+        succeeded('Build_nanoCLR_CLI'),
+        ne(dependencies.Check_Build_Options.outputs['BuildOptions.SKIP_BUILD'], true),
+        or(
+          eq(variables['BUILD_NANOCLR_CLI__'], true),
+          eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ALL'], true),
+          eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_NANOCLR_CLI'], true),
+          eq(dependencies.Check_Build_Options.outputs['BuildOptions.RUN_MSCORLIB_TESTS'], true)
+        )
+      )
+
+    dependsOn:
+      - Build_nanoCLR_CLI
+
+    pool:
+      vmImage: "windows-latest"
+
+    variables:
+      DOTNET_NOLOGO: true
+      solution: "nanoFramework.CoreLibrary.sln"
+      buildPlatform: "Any CPU"
+      buildConfiguration: "Release"
+
+    steps:
+      - checkout: self
+        fetchDepth: 1
+      - checkout: mscorlib
+        fetchDepth: 100
+        submodules: true
+
+      # Download nanoclr from build artifacts
+      - task: DownloadBuildArtifacts@1
+        inputs:
+          buildType: "current"
+          artifactName: "nanoclr_cli"
+          downloadPath: "$(Agent.TempDirectory)/nanoclr_cli"
+
+      # build mscorlib
+
+      - task: InstallNanoMSBuildComponents@1
+        condition: succeeded()
+        displayName: Install .NET nanoFramework MSBuild components
+        inputs:
+          GitHubToken: $(GitHubToken)
+
+      - template: azure-pipelines-templates/install-nuget.yml@templates
+
+      - task: NuGetCommand@2
+        condition: succeeded()
+        displayName: NuGet restore
+        retryCountOnTaskFailure: 5
+        inputs:
+          restoreSolution: "**/nanoFramework.CoreLibrary.sln"
+          feedsToUse: select
+
+      - task: VSBuild@1
+        condition: succeeded()
+        inputs:
+          solution: "**/nanoFramework.CoreLibrary.sln"
+          platform: "Any CPU"
+          msbuildArgs: "/p:PublicRelease=true"
+          configuration: "Release"
+          msbuildArchitecture: "x64"
+          maximumCpuCount: true
+
+      # run tests
+      - template: azure-pipelines-templates/run-unit-tests.yml@templates
+        parameters:
+          runUnitTests: true
+          unitTestRunsettings: '$(System.DefaultWorkingDirectory)\nf-interpreter\targets\netcore\pipeline_tests.runsettings'
+          packagesDirectory: "$(Build.SourcesDirectory)/CoreLibrary/packages"
+
+      - task: CopyFiles@2
+        condition: succeededOrFailed()
+        displayName: Copy vstest dump files
+        inputs:
+          SourceFolder: 'D:\a\_temp\'
+          Contents: "**/*.dmp"
+          TargetFolder: "$(Build.ArtifactStagingDirectory)/vstest_dumps"
+          flattenFolders: true
+
+      - powershell: |
+          $dumpPath = "$(Build.ArtifactStagingDirectory)/vstest_dumps"
+          $hasFiles = $false
+
+          if (Test-Path $dumpPath -PathType Container) {
+              $fileCount = (Get-ChildItem $dumpPath -File | Measure-Object).Count
+              $hasFiles = $fileCount -gt 0
+          }
+          echo "##vso[task.setvariable variable=hasFiles;isOutput=true]$hasFiles"
+        displayName: "Check for dump files"
+        name: checkFiles
+
+      - task: PublishPipelineArtifact@1
+        condition: eq(variables['hasFiles'], 'true')
+        displayName: Publish vstest dump files
+        inputs:
+          targetPath: "$(Build.ArtifactStagingDirectory)/vstest_dumps"
+          artifactName: VsTestCrashDumps
+          artifactType: pipeline
+
+  ######################
+  # generate change log
+  - job: Generate_change_log
+    dependsOn:
+      - Build_STM32_targets
+      - Build_ESP32_targets
+      - Build_NXP_targets
+      - Build_TI_SimpleLink_targets
+      - Build_Azure_RTOS_targets
+    # skip build if this is a PR, submitted by nfbot and the commit message contains [version update]
+    condition: >-
+      and(
+        succeeded('Build_STM32_targets'),
+        succeeded('Build_ESP32_targets'),
+        succeeded('Build_NXP_targets'),
+        succeeded('Build_TI_SimpleLink_targets'),
+        succeeded('Build_Azure_RTOS_targets'),
+        not( eq(variables['Build.Reason'], 'PullRequest')
+      ),
+      or(
+        eq(variables['Build.SourceBranchName'], 'main'),
+        startsWith(variables['Build.SourceBranch'], 'refs/tags/v') ),
+        ne( variables['StartReleaseCandidate'], true )
+      )
+
+    pool:
+      vmImage: "windows-latest"
+
+    steps:
+      - task: DotNetCoreCLI@2
+        condition: succeeded()
+        displayName: Install NBGV tool
+        inputs:
+          command: custom
+          custom: tool
+          arguments: install --tool-path . nbgv
+
+      - script: nbgv cloud -a -c
+        condition: succeeded()
+        displayName: Set build number
+
+      - task: UseRubyVersion@0
+        condition: succeeded()
+        inputs:
+          versionSpec: "= 3.0"
+          addToPath: true
+
+      # Cache change log cache files
+      - task: Cache@2
+        displayName: Cache change log cache files
+        condition: >-
+          and(
+            succeeded(),
+            eq(variables['System.PullRequest.PullRequestId'], ''),
+            startsWith(variables['Build.SourceBranch'], 'refs/tags/v')
+          )
+        inputs:
+          key: "changeLogCacheFiles"
+          restoreKeys: 1_0
+          path: |
+            $(Agent.TempDirectory)/github-changelog-logger.log
+            $(Agent.TempDirectory)/github-changelog-http-cache
+
+      # generate change log including future version
+      - powershell: |
+          gem install github_changelog_generator --quiet --no-document
+          # need to call it passing both cache options with full path otherwise it won't work
+          github_changelog_generator --token $(GitHubToken) --cache-log  $env:AGENT_TEMPDIRECTORY\github-changelog-logger.log --cache-file $env:AGENT_TEMPDIRECTORY\github-changelog-http-cache --pr-wo-labels --future-release "v$env:NBGV_AssemblyVersion"
+        condition: >-
+          and(
+            succeeded(),
+            eq(variables['System.PullRequest.PullRequestId'], ''),
+            startsWith(variables['Build.SourceBranch'], 'refs/tags/v')
+          )
+        displayName: Generate change log
+
+      # push new changelog to GitHub repo
+      - powershell: |
+          git config --global gc.auto 0
+          git config --global user.name nfbot
+          git config --global user.email nanoframework@outlook.com
+          git config --global core.autocrlf true
+
+          git add CHANGELOG.md
+          git commit -m "Update CHANGELOG" -m"***NO_CI***"
+
+          # compute authorization header in format "AUTHORIZATION: basic 'encoded token'"
+          # 'encoded token' is the Base64 of the string "nfbot:personal-token"
+          $auth = "basic $([System.Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes("nfbot:$(GitHubToken)")))"
+
+          git -c http.extraheader="AUTHORIZATION: $auth" push origin "HEAD:$(Build.SourceBranchName)"
+        condition: >-
+          and(
+            succeeded(),
+            eq(variables['System.PullRequest.PullRequestId'], ''),
+            not(
+              startsWith(variables['Build.SourceBranch'], 'refs/tags/v')
+            ),
+            eq( variables['StartReleaseCandidate'], false )
+          )
+        continueOnError: true
+        displayName: Push changelog to GitHub
+
+  #################################
+  # report build failure to Discord
+  - job: Report_Build_Failure
+    dependsOn:
+      - Build_STM32_targets
+      - Build_ESP32_targets
+      - Build_NXP_targets
+      - Build_TI_SimpleLink_targets
+      - Build_Azure_RTOS_targets
+      - Build_WIN32_nanoCLR
+      - Build_nanoCLR_CLI
+      - Generate_change_log
+      - Check_Code_Style
+    condition: >-
+      and(
+        ne( dependencies.Check_Code_Style.outputs['Check_Code_Style.CODE_STYLE_CHECK_FAILED'], true),
+        or(
+          failed('Build_STM32_targets'),
+          failed('Build_ESP32_targets'),
+          failed('Build_NXP_targets'),
+          failed('Build_TI_SimpleLink_targets'),
+          failed('Build_Azure_RTOS_targets'),
+          failed('Build_WIN32_nanoCLR'),
+          failed('Build_nanoCLR_CLI'),
+          failed('Generate_change_log')
+        )
+      )
+
+    pool:
+      vmImage: "windows-latest"
+
+    steps:
+      - checkout: self
+        fetchDepth: 1
+
+      # step from template @ nf-tools repo
+      - template: azure-pipelines-templates/discord-webhook.yml@templates
+        parameters:
+          status: "failure"
+          webhookUrl: "$(DiscordWebhook)"
+          message: ""

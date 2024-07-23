@@ -2,14 +2,13 @@
 # See LICENSE file in the project root for full license information.
 
 steps:
-
   - task: PowerShell@2
     name: Check_Code_Style
     displayName: Check code style
     condition: ne(variables['System.PullRequest.PullRequestId'], '')
     inputs:
       failOnStderr: false
-      targetType: 'inline'
+      targetType: "inline"
       script: |
         # need this to remove definition of redirect stdErr (only on Azure Pipelines image fo VS2019)
         $env:GIT_REDIRECT_STDERR = '2>&1'
@@ -34,7 +33,7 @@ steps:
 
         # fetch GitHub repo & branches
         Write-Debug "##[debug] Fetch GitHub repo & branches"
-        
+
         # add remote for PR head
         "Adding remote: $($pr.head.repo.html_url)..." | Write-Host -ForegroundColor White
 
@@ -56,7 +55,7 @@ steps:
         $prFiles = Invoke-WebRequest "https://api.github.com/repos/$env:Build_Repository_Name/pulls/$env:System_PullRequest_PullRequestNumber/files" | ConvertFrom-Json
 
         "Starting file check..." | Write-Host -ForegroundColor White
-        
+
         # find clang-format
         $clangFormat = "clang-format.exe"
         if(!(Get-Command $clangFormat -ErrorAction SilentlyContinue))
@@ -106,7 +105,7 @@ steps:
           # commit changed files
           git add -A 2>&1
           git commit -m "Code style fixes" -m "Automated fixes for code style." > $null
-      
+
           "Pushing changes..." | Write-Host -ForegroundColor White
 
           # push to nf-interpreter repo
@@ -167,5 +166,5 @@ steps:
     displayName: Check code style (SKIP)
     condition: eq(variables['System.PullRequest.PullRequestId'], '')
     inputs:
-      targetType: 'inline'
+      targetType: "inline"
       script: exit 0

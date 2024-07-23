@@ -7,19 +7,18 @@ parameters:
     default: $(Build.SourcesDirectory)
 
 steps:
-
   - template: setup-cmake-user-presets.yml
     parameters:
       repoDirectory: ${{ parameters.repoDirectory }}
 
   - task: CMake@1
     inputs:
-      cmakeArgs: ' --preset $(TargetBoard) -DCMAKE_BUILD_TYPE=MinSizeRel -DBUILD_VERSION=$(NBGV_VersionMajor).$(NBGV_VersionMinor).$(NBGV_BuildNumber).$(TARGET_BUILD_COUNTER) -DTARGET_BOARD=$(TargetBoard) -DTARGET_NAME=$(TargetPublishName) $(BuildOptions)'
-      workingDirectory:  ${{ parameters.repoDirectory }}
+      cmakeArgs: " --preset $(TargetBoard) -DCMAKE_BUILD_TYPE=MinSizeRel -DBUILD_VERSION=$(NBGV_VersionMajor).$(NBGV_VersionMinor).$(NBGV_BuildNumber).$(TARGET_BUILD_COUNTER) -DTARGET_BOARD=$(TargetBoard) -DTARGET_NAME=$(TargetPublishName) $(BuildOptions)"
+      workingDirectory: ${{ parameters.repoDirectory }}
     displayName: Setup build with CMake
 
   - task: CMake@1
     inputs:
-      cmakeArgs: '--build --preset $(TargetBoard) --target all --config MinSizeRel'
-      workingDirectory:  ${{ parameters.repoDirectory }}
+      cmakeArgs: "--build --preset $(TargetBoard) --target all --config MinSizeRel"
+      workingDirectory: ${{ parameters.repoDirectory }}
     displayName: Build with CMake

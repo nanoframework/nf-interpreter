@@ -11,7 +11,7 @@
 
 // in UWP the COM ports are named COM1, COM2, COM3. But ESP32 uses internally UART0, UART1, UART2. This maps the port
 // index 1, 2 or 3 to the uart number 0, 1 or 2
-#define PORT_INDEX_TO_UART_NUM(portIndex) ((portIndex)-1)
+#define PORT_INDEX_TO_UART_NUM(portIndex) ((portIndex) - 1)
 // in UWP the COM ports are named COM1, COM2, COM3. But ESP32 uses internally UART0, UART1, UART2. This maps the uart
 // number 0, 1 or 2 to the port index 1, 2 or 3
 #define UART_NUM_TO_PORT_INDEX(uart_num) ((uart_num) + 1)
@@ -862,7 +862,7 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeInit___VOID(
     }
 
     // unless the build is configure to use USB CDC, COM1 is being used for VS debug, so it's not available
-#if !defined(CONFIG_TINYUSB_CDC_ENABLED)
+#if !defined(CONFIG_TINYUSB_CDC_ENABLED) && !defined(CONFIG_ESP_CONSOLE_USB_SERIAL_JTAG_ENABLED)
     if (uart_num == 0)
     {
         NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
@@ -1430,7 +1430,7 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::GetDeviceSelector_
     static char deviceSelectorString[] =
 
     // unless the build is configure to use USB CDC, COM1 is being used for VS debug, so it's not available
-#if defined(CONFIG_TINYUSB_CDC_ENABLED)
+#if defined(CONFIG_TINYUSB_CDC_ENABLED) || defined(CONFIG_ESP_CONSOLE_USB_SERIAL_JTAG_ENABLED)
         "COM1,"
 #endif
 #if defined(UART_NUM_1)

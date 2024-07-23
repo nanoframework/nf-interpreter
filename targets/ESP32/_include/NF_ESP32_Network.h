@@ -61,7 +61,4 @@ void NF_ESP32_Start_wifi_smart_config(void);
 // Helpers
 int NF_ESP32_Wait_NetNumber(int num);
 
-// OpenThread
-int NF_ESP32_InitialiseOpenThread();
-
 #endif // NF_ESP32_NETWORK_H
