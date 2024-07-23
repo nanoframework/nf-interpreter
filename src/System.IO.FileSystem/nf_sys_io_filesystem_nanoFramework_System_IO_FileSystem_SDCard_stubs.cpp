@@ -5,7 +5,8 @@
 
 #include "nf_sys_io_filesystem.h"
 
-HRESULT Library_nf_sys_io_filesystem_nanoFramework_System_IO_FileSystem_SDCard::InitNative___VOID( CLR_RT_StackFrame &stack )
+__nfweak HRESULT
+    Library_nf_sys_io_filesystem_nanoFramework_System_IO_FileSystem_SDCard::InitNative___VOID(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
@@ -14,7 +15,8 @@ HRESULT Library_nf_sys_io_filesystem_nanoFramework_System_IO_FileSystem_SDCard::
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_nf_sys_io_filesystem_nanoFramework_System_IO_FileSystem_SDCard::NativeDispose___VOID( CLR_RT_StackFrame &stack )
+__nfweak HRESULT Library_nf_sys_io_filesystem_nanoFramework_System_IO_FileSystem_SDCard::NativeDispose___VOID(
+    CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
@@ -23,7 +25,8 @@ HRESULT Library_nf_sys_io_filesystem_nanoFramework_System_IO_FileSystem_SDCard::
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_nf_sys_io_filesystem_nanoFramework_System_IO_FileSystem_SDCard::MountNative___VOID( CLR_RT_StackFrame &stack )
+__nfweak HRESULT
+    Library_nf_sys_io_filesystem_nanoFramework_System_IO_FileSystem_SDCard::MountNative___VOID(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
@@ -32,7 +35,8 @@ HRESULT Library_nf_sys_io_filesystem_nanoFramework_System_IO_FileSystem_SDCard::
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_nf_sys_io_filesystem_nanoFramework_System_IO_FileSystem_SDCard::UnmountNative___VOID( CLR_RT_StackFrame &stack )
+__nfweak HRESULT Library_nf_sys_io_filesystem_nanoFramework_System_IO_FileSystem_SDCard::UnmountNative___VOID(
+    CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
@@ -41,7 +45,8 @@ HRESULT Library_nf_sys_io_filesystem_nanoFramework_System_IO_FileSystem_SDCard::
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_nf_sys_io_filesystem_nanoFramework_System_IO_FileSystem_SDCard::PollCardDetectNative___BOOLEAN( CLR_RT_StackFrame &stack )
+__nfweak HRESULT Library_nf_sys_io_filesystem_nanoFramework_System_IO_FileSystem_SDCard::PollCardDetectNative___BOOLEAN(
+    CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
