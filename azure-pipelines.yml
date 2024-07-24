@@ -852,6 +852,8 @@ jobs:
         fetchDepth: 1
 
       - template: azure-pipelines-templates/nb-gitversioning.yml
+        parameters:
+          repoDirectory: '$(Build.SourcesDirectory)/nf-interpreter'
 
       - task: PowerShell@2
         displayName: Store package version
@@ -1078,6 +1080,8 @@ jobs:
         fetchDepth: 1
 
       - template: azure-pipelines-templates/nb-gitversioning.yml
+        parameters:
+          repoDirectory: '$(Build.SourcesDirectory)/nf-interpreter'
 
       - template: azure-pipelines-templates/install-nuget.yml@templates
 
