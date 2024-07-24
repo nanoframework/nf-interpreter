@@ -104,9 +104,3 @@ steps:
       TargetFolder: ${{ parameters.repoDirectory }}\build
       flattenFolders: false
       ignoreMakeDirErrors: true
-
-  - task: Cache@2
-    displayName: Save IDF components
-    inputs:
-      key: 'esp-idf-components-cache | 0'
-      path: $(Agent.BuildDirectory)/s/esp-idf/components
