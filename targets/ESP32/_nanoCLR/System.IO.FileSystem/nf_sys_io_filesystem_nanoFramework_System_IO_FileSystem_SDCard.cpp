@@ -23,6 +23,8 @@ void cardDetect_interrupt(GPIO_PIN Pin, bool pinState, void *pArg)
     postManagedStorageEvent(pinState, (uint32_t)pArg);
 }
 
+#if SOC_SDMMC_HOST_SUPPORTED
+
 // Reserve all MMC pins
 // CMD, Data0, Data1, Data2, Data3
 int8_t pins4bit[] = {15, 2, 4, 12, 13};
@@ -42,6 +44,7 @@ void GetMMCPins(bool _1bit, int *count, int8_t **pPins)
         *count = sizeof(pins4bit);
     }
 }
+#endif
 
 void UnReservePins(int count, int8_t *pPins)
 {
@@ -97,6 +100,7 @@ HRESULT Library_nf_sys_io_filesystem_nanoFramework_System_IO_FileSystem_SDCard::
     {
         case SDCard_SDInterfaceType::SDCard_SDInterfaceType_Mmc:
         {
+#if SOC_SDMMC_HOST_SUPPORTED
             bool bit1Mode = pThis[FIELD___dataWidth].NumericByRef().s4 == SDCard_SDDataWidth::SDCard_SDDataWidth__1_bit;
 
             int count;
@@ -108,6 +112,9 @@ HRESULT Library_nf_sys_io_filesystem_nanoFramework_System_IO_FileSystem_SDCard::
             {
                 NANOCLR_SET_AND_LEAVE(CLR_E_PIN_UNAVAILABLE);
             }
+#else
+            NANOCLR_SET_AND_LEAVE(CLR_E_NOT_SUPPORTED);
+#endif
         }
         break;
 
@@ -180,6 +187,7 @@ HRESULT Library_nf_sys_io_filesystem_nanoFramework_System_IO_FileSystem_SDCard::
         // Unreserve MMC pins. I suppose they could be used for something else
         case SDCard_SDInterfaceType::SDCard_SDInterfaceType_Mmc:
         {
+#if SOC_SDMMC_HOST_SUPPORTED
             bool bit1Mode = pThis[FIELD___dataWidth].NumericByRef().s4 == SDCard_SDDataWidth::SDCard_SDDataWidth__1_bit;
 
             int count;
@@ -188,6 +196,9 @@ HRESULT Library_nf_sys_io_filesystem_nanoFramework_System_IO_FileSystem_SDCard::
             GetMMCPins(bit1Mode, &count, &pPins);
 
             UnReservePins(count, pPins);
+#else
+            NANOCLR_SET_AND_LEAVE(CLR_E_NOT_SUPPORTED);
+#endif
         }
         break;
 
@@ -224,12 +235,16 @@ HRESULT Library_nf_sys_io_filesystem_nanoFramework_System_IO_FileSystem_SDCard::
     {
         case SDCard_SDInterfaceType::SDCard_SDInterfaceType_Mmc:
         {
+#if SOC_SDMMC_HOST_SUPPORTED
             bool bit1Mode = pThis[FIELD___dataWidth].NumericByRef().s4 == SDCard_SDDataWidth::SDCard_SDDataWidth__1_bit;
 
             if (!Storage_MountMMC(bit1Mode, 0))
             {
                 NANOCLR_SET_AND_LEAVE(CLR_E_VOLUME_NOT_FOUND);
             }
+#else
+            NANOCLR_SET_AND_LEAVE(CLR_E_NOT_SUPPORTED);
+#endif
         }
         break;
 

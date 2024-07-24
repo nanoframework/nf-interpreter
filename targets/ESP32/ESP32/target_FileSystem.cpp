@@ -8,7 +8,11 @@
 #include <nanoHAL_Types.h>
 #include <nanoPAL_FileSystem.h>
 #include <littlefs_FS_Driver.h>
+
+#if (HAL_USE_SDC == TRUE) 
 #include <fatfs_FS_Driver.h>
+#endif
+
 #include "Target_System_IO_FileSystem.h"
 
 extern FILESYSTEM_DRIVER_INTERFACE g_LITTLEFS_FILE_SYSTEM_DriverInterface;
@@ -18,7 +22,9 @@ extern STREAM_DRIVER_INTERFACE g_LITTLEFS_STREAM_DriverInterface;
 extern FILESYSTEM_DRIVER_INTERFACE g_FATFS_FILE_SYSTEM_DriverInterface;
 
 FILESYSTEM_INTERFACES g_AvailableFSInterfaces[] = {
+#if (HAL_USE_SDC == TRUE)
     {&g_FATFS_FILE_SYSTEM_DriverInterface, &g_FATFS_STREAM_DriverInterface},
+#endif
     {&g_LITTLEFS_FILE_SYSTEM_DriverInterface, &g_LITTLEFS_STREAM_DriverInterface},
 };
 
@@ -30,6 +36,12 @@ FileSystemVolume *g_FS_Volumes;
 
 void FS_AddVolumes()
 {
+#if (HAL_USE_SDC == TRUE)
+    int interfaceIndex = 1;
+#else
+    int interfaceIndex = 0;
+#endif
+
     // one internal storage in littlefs partition
     g_FS_NumVolumes = 1;
 
@@ -41,8 +53,8 @@ void FS_AddVolumes()
         &g_FS_Volumes[0],
         "I:",
         0,
-        g_AvailableFSInterfaces[1].streamDriver,
-        g_AvailableFSInterfaces[1].fsDriver,
+        g_AvailableFSInterfaces[interfaceIndex].streamDriver,
+        g_AvailableFSInterfaces[interfaceIndex].fsDriver,
         0,
         FALSE);
 }
