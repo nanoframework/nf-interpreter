@@ -82,6 +82,8 @@ bool LogMountResult(esp_err_t errCode)
     }
     return true;
 }
+
+#if SOC_SDMMC_HOST_SUPPORTED
 //
 // Mount SDcard on MMC/SDIO bus
 //
@@ -183,6 +185,7 @@ bool Storage_MountMMC(bool bit1Mode, int driveIndex)
 
     return LogMountResult(errCode);
 }
+#endif
 
 //
 // Mount card on SPI bus
