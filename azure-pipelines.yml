@@ -240,6 +240,7 @@ jobs:
               if( 
                 (($files.where{$_.Contains('targets/netcore/nanoFramework.nanoCLR')}).Count -gt 0) -Or
                 (($files.where{$_.Contains('targets/netcore/nanoCLR.sln')}).Count -gt 0) -Or
+                (($files.where{$_.Contains('targets/netcore/littlefs')}).Count -gt 0) -Or
                 (($files.where{$_.Contains('targets/win32')}).Count -gt 0)
                 )
               {
