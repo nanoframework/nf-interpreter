@@ -62,7 +62,7 @@ else()
 
 endif()
 
-FetchContent_Populate(maxim_micros_sdk)
+FetchContent_MakeAvailable(maxim_micros_sdk)
 
 # make vars global
 set(NANOCLR_PROJECT_SOURCES ${NANOCLR_PROJECT_SOURCES} CACHE INTERNAL "make global")
@@ -125,7 +125,7 @@ else()
 endif()
 
 FetchContent_GetProperties(cmsis)
-FetchContent_Populate(cmsis)
+FetchContent_MakeAvailable(cmsis)
 
 # add platform dirs
 add_subdirectory(_include)

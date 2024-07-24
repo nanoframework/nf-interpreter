@@ -3427,6 +3427,7 @@ typedef enum Events
     Event_Bluetooth         = 0x00001000,
     Event_UsbIn             = 0x00002000,
     Event_UsbOut            = 0x00004000,
+    Event_IO                = 0x00008000,
     Event_I2cSlave          = 0x00010000,
     Event_AppDomain         = 0x02000000,
     Event_Socket            = 0x20000000,

@@ -106,7 +106,7 @@ endif()
 FetchContent_GetProperties(chibios)
 if(NOT chibios_POPULATED)
     # Fetch the content using previously declared details
-    FetchContent_Populate(chibios)
+    FetchContent_MakeAvailable(chibios)
 endif()
 
 if(CHIBIOS_CONTRIB_REQUIRED)
@@ -137,7 +137,7 @@ if(CHIBIOS_CONTRIB_REQUIRED)
     FetchContent_GetProperties(chibios-contrib)
     if(NOT chibios-contrib_POPULATED)
         # Fetch the content using previously declared details
-        FetchContent_Populate(chibios-contrib)
+        FetchContent_MakeAvailable(chibios-contrib)
     endif()
 
 endif()
@@ -199,7 +199,7 @@ if(NF_FEATURE_HAS_SDCARD OR NF_FEATURE_HAS_USB_MSD)
     FetchContent_GetProperties(fatfs)
     if(NOT fatfs_POPULATED)
         # Fetch the content using previously declared details
-        FetchContent_Populate(fatfs)
+        FetchContent_MakeAvailable(fatfs)
     endif()
 
     # have to delete the ffconf.h template from the repo
@@ -332,45 +332,48 @@ if(STM32_CUBE_PACKAGE_REQUIRED)
     ProcessSTM32CubePackage()
 endif()
 
-# if support for SPIFFS is enabled add it to the build
-if(NF_FEATURE_USE_SPIFFS)
+# if support for littlefs is enabled add it to the build
+if(NF_FEATURE_USE_LITTLEFS_OPTION)
 
-    # check if SPIFFS_SOURCE was specified or if it's empty (default is empty)
-    set(NO_SPIFFS_SOURCE TRUE)
+    # check if LITTLEFS_SOURCE was specified or if it's empty (default is empty)
+    set(NO_LITTLEFS_SOURCE TRUE)
 
-    if(SPIFFS_SOURCE)
-        if(NOT ${SPIFFS_SOURCE} STREQUAL "")
-            set(NO_SPIFFS_SOURCE FALSE)
+    # WHEN CHANGING THIS MAKE SURE TO UPDATE THE DEV CONTAINERS AND PIPELINE YAML
+    set(LITTLEFS_VERSION_TAG "v2.9.3")
+
+    if(LITTLEFS_SOURCE)
+        if(NOT ${LITTLEFS_SOURCE} STREQUAL "")
+            set(NO_LITTLEFS_SOURCE FALSE)
         endif()
     endif()
 
-    if(NO_SPIFFS_SOURCE)
-        # no SPIFFS source specified, download it from it's repo
-        message(STATUS "SPIFFS source from from GitHub repo")
+    if(NO_LITTLEFS_SOURCE)
+        # no littlefs source specified, download it from it's repo
+        message(STATUS "littlefs source from from GitHub repo")
 
         FetchContent_Declare(
-            spiffs
-            GIT_REPOSITORY https://github.com/nanoframework/spiffs
-            GIT_TAG "nf-build"
+            littlefs
+            GIT_REPOSITORY https://github.com/littlefs-project/littlefs
+            GIT_TAG ${LITTLEFS_VERSION_TAG}
         )
 
     else()
-        # SPIFFS source was specified
+        # littlefs source was specified
 
-        message(STATUS "SPIFFS source from: ${SPIFFS_SOURCE}")
+        message(STATUS "littlefs source from: ${LITTLEFS_SOURCE}")
 
         FetchContent_Declare(
-            spiffs
-            SOURCE_DIR ${SPIFFS_SOURCE}
+            littlefs
+            SOURCE_DIR ${LITTLEFS_SOURCE}
         )
 
     endif()
 
     # Check if population has already been performed
-    FetchContent_GetProperties(spiffs)
-    if(NOT spiffs_POPULATED)
+    FetchContent_GetProperties(littlefs)
+    if(NOT littlefs_POPULATED)
         # Fetch the content using previously declared details
-        FetchContent_Populate(spiffs)
+        FetchContent_MakeAvailable(littlefs)
     endif()
 
 endif()

@@ -743,7 +743,7 @@ function(nf_add_mbedtls_library)
     FetchContent_GetProperties(mbedtls)
     if(NOT mbedtls_POPULATED)
         # Fetch the content using previously declared details
-        FetchContent_Populate(mbedtls)
+        FetchContent_MakeAvailable(mbedtls)
     endif()
 
     # don't include tests or programs, only build libraries
@@ -803,7 +803,7 @@ function(nf_add_lwip_library)
 
     if(NOT lwip_POPULATED)
         # Fetch the content using previously declared details
-        FetchContent_Populate(lwip)
+        FetchContent_MakeAvailable(lwip)
     endif()
 
 endfunction()

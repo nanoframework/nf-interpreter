@@ -77,10 +77,10 @@ RUN git clone --branch nf-build https://github.com/nanoframework/STM32CubeL4.git
 RUN git clone --branch v6.4.0_rel --recursive https://github.com/eclipse-threadx/threadx.git --depth 1 ./sources/AzureRTOS \
     && git clone --branch v6.3.0_rel --recursive https://github.com/eclipse-threadx/netxduo.git --depth 1 ./sources/NetxDuo
 
-# Clone dependent repos (mbedtls, fatfs and spiffs)
+# Clone dependent repos (mbedtls, fatfs and littlefs)
 RUN git clone --branch mbedtls-2.28.5 https://github.com/ARMmbed/mbedtls.git --depth 1 ./sources/mbedtls \
     && git clone --branch R0.15 https://github.com/abbrev/fatfs.git --depth 1 ./sources/fatfs \
-    && git clone --branch nf-build https://github.com/nanoframework/spiffs.git --depth 1 ./sources/spiffs
+    && git clone --branch v2.9.3 https://github.com/littlefs-project/littlefs --depth 1 ./sources/littlefs
 
 # Clone FreeRTOS and what is needed for ESP32
 RUN git clone --branch V10.4.1-kernel-only https://github.com/FreeRTOS/FreeRTOS-Kernel.git --depth 1 ./sources/FreeRTOS \

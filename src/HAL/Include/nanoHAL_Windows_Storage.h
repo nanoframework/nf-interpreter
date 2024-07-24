@@ -5,7 +5,9 @@
 #ifndef NANOHAL_WINDOWS_STORAGE_H
 #define NANOHAL_WINDOWS_STORAGE_H
 
-#include <Target_Windows_Storage.h>
+/////////////////////////////////////////////////////////////////////////
+// TO BE RENAMED TO SYS.IO.FILESYSTEM after removal of Windows.Storage //
+/////////////////////////////////////////////////////////////////////////
 
 // driver letters and paths
 // drive letter for SD Card

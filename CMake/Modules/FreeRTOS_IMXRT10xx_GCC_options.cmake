@@ -33,6 +33,8 @@ macro(nf_set_compile_options)
     # this series has FPU 
     target_compile_definitions(${NFSCO_TARGET} PUBLIC -DPLATFORM_ARM -DCORTEX_USE_FPU=TRUE -DUSE_FPU=TRUE) 
 
+    # temporarily force inclusion of Windows Storage headers
+    target_compile_definitions(${NFSCO_TARGET} PUBLIC -DINCLUDE_WINDOWS_STORAGE)
 endmacro()
 
 
