@@ -58,7 +58,7 @@ endif()
 FetchContent_GetProperties(fatfs)
 if(NOT fatfs_POPULATED)
     # Fetch the content using previously declared details
-    FetchContent_Populate(fatfs)
+    FetchContent_MakeAvailable(fatfs)
 endif()
 
 # have to delete the ffconf.h template from the repo

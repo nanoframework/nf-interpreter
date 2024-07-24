@@ -153,13 +153,13 @@ macro(ProcessSTM32CubePackage)
     endif()
 
     FetchContent_GetProperties(stm32${TARGET_SERIES_SHORT_LOWER}_hal_driver)
-    FetchContent_Populate(stm32${TARGET_SERIES_SHORT_LOWER}_hal_driver)
+    FetchContent_MakeAvailable(stm32${TARGET_SERIES_SHORT_LOWER}_hal_driver)
 
     FetchContent_GetProperties(cmsis_device_${TARGET_SERIES_SHORT_LOWER})
-    FetchContent_Populate(cmsis_device_${TARGET_SERIES_SHORT_LOWER})
+    FetchContent_MakeAvailable(cmsis_device_${TARGET_SERIES_SHORT_LOWER})
     
     FetchContent_GetProperties(cmsis_core)
-    FetchContent_Populate(cmsis_core)
+    FetchContent_MakeAvailable(cmsis_core)
 
 endmacro()
 

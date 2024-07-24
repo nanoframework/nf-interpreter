@@ -88,7 +88,7 @@ endif()
 FetchContent_GetProperties(esp32_idf)
 if(NOT esp32_idf_POPULATED)
     # Fetch the content using previously declared details
-    FetchContent_Populate(esp32_idf)
+    FetchContent_MakeAvailable(esp32_idf)
 endif()
 
 # add IDF CMake dir to modules path
