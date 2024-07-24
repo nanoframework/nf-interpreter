@@ -44,6 +44,7 @@ void GetMMCPins(bool _1bit, int *count, int8_t **pPins)
         *count = sizeof(pins4bit);
     }
 }
+
 #endif
 
 void UnReservePins(int count, int8_t *pPins)
@@ -115,8 +116,8 @@ HRESULT Library_nf_sys_io_filesystem_nanoFramework_System_IO_FileSystem_SDCard::
 #else
             NANOCLR_SET_AND_LEAVE(CLR_E_NOT_SUPPORTED);
 #endif
+            break;
         }
-        break;
 
         case SDCard_SDInterfaceType::SDCard_SDInterfaceType_Spi:
             // TODO reserve pins ?
@@ -199,8 +200,8 @@ HRESULT Library_nf_sys_io_filesystem_nanoFramework_System_IO_FileSystem_SDCard::
 #else
             NANOCLR_SET_AND_LEAVE(CLR_E_NOT_SUPPORTED);
 #endif
+            break;
         }
-        break;
 
         default:
             break;
@@ -245,8 +246,8 @@ HRESULT Library_nf_sys_io_filesystem_nanoFramework_System_IO_FileSystem_SDCard::
 #else
             NANOCLR_SET_AND_LEAVE(CLR_E_NOT_SUPPORTED);
 #endif
+            break;
         }
-        break;
 
         case SDCard_SDInterfaceType::SDCard_SDInterfaceType_Spi:
         {
