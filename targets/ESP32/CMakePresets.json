@@ -293,6 +293,7 @@
                 "API_nanoFramework.Device.Bluetooth": "ON",
                 "API_nanoFramework.Networking.Thread": "ON",
                 "THREAD_DEVICE_TYPE": "FTD",
+                "API_nanoFramework.Graphics": "ON",
                 "GRAPHICS_DISPLAY": "Generic_SPI.cpp",
                 "TOUCHPANEL_DEVICE": "XPT2046.cpp",
                 "GRAPHICS_DISPLAY_INTERFACE": "Spi_To_Display.cpp",
