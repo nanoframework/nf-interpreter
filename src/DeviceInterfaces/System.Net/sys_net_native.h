@@ -113,6 +113,16 @@
 //     WirelessAPConfiguration_ConfigurationOptions_HiddenSSID = 8,
 // } WirelessAPConfiguration_ConfigurationOptions;
 
+// MOVED TO src\PAL\COM\sockets\ssl\ssl_functions.h for convinience
+// typedef enum __nfpack SslProtocols
+// {
+//     SslProtocols_None = 0,
+//     SslProtocols_Tls = 192,
+//     SslProtocols_Tls11 = 768,
+//     SslProtocols_Tls12 = 3072,
+//     SslProtocols_Tls13 = 12288,
+// } SslProtocols;
+
 struct Library_sys_net_native_System_Net_NetworkInformation_NetworkInterface
 {
     static const int FIELD___interfaceIndex = 1;

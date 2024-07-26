@@ -7,31 +7,25 @@
 #define MBEDTLS_H
 
 #include <nanoHAL.h>
+#include <sockets_lwip.h>
 
 #ifdef PLATFORM_ESP32
 #include <esp32_idf.h>
 #include <mbedtls/esp_config.h>
-#else
-#include "nf_mbedtls_config.h"
 #endif
-
-#include <sockets_lwip.h>
 
 #ifdef __cplusplus
 extern "C"
 {
 #endif
 
-#include "mbedtls/version.h"
-#include "mbedtls/platform.h"
-#include "mbedtls/net_sockets.h"
-#include "mbedtls/ssl.h"
-#include "mbedtls/entropy.h"
-#include "mbedtls/ctr_drbg.h"
-#include "mbedtls/error.h"
-#if MBEDTLS_VERSION_MAJOR < 3
-#include "mbedtls/certs.h"
-#endif
+#include <mbedtls/version.h>
+#include <mbedtls/platform.h>
+#include <mbedtls/net_sockets.h>
+#include <mbedtls/ssl.h>
+#include <mbedtls/entropy.h>
+#include <mbedtls/ctr_drbg.h>
+#include <mbedtls/error.h>
 
     typedef struct mbedTLS_NFContext
     {
