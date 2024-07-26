@@ -89,9 +89,9 @@ HRESULT LITTLEFS_FS_Driver::GetSizeInfo(const VOLUME_ID *volume, int64_t *totalS
 
     // FATFS *fs = GetFatFsByVolumeId(volume, false);
 
-    FileSystemVolume *currentVolume = FileSystemVolumeList::FindVolume(volume->volumeId);
+    // FileSystemVolume *currentVolume = FileSystemVolumeList::FindVolume(volume->volumeId);
 
-    f_chdrive(currentVolume->m_rootName);
+    // f_chdrive(currentVolume->m_rootName);
 
     // // this call is prone to take a long time, thus hitting the watchdog, therefore we are skipping this for now
     // //     // get free clusters

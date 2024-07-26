@@ -52,11 +52,11 @@ int dummyLog(const char *format, va_list arg)
 void app_main()
 {
     // Switch off logging so as not to interfere with WireProtocol over Uart0
-    esp_log_level_set("*", ESP_LOG_VERBOSE);
+    esp_log_level_set("*", ESP_LOG_NONE);
 
     // Stop any logging being directed to VS connection, was an issue with Nimble, outputting on Uart0
     // TODO : redirect these to debugger controlled from nanoframework.Hardware.Esp32
-   // esp_log_set_vprintf(dummyLog);
+    // esp_log_set_vprintf(dummyLog);
 
     ESP_ERROR_CHECK(nvs_flash_init());
 

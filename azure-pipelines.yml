@@ -240,6 +240,7 @@ jobs:
               if( 
                 (($files.where{$_.Contains('targets/netcore/nanoFramework.nanoCLR')}).Count -gt 0) -Or
                 (($files.where{$_.Contains('targets/netcore/nanoCLR.sln')}).Count -gt 0) -Or
+                (($files.where{$_.Contains('targets/netcore/littlefs')}).Count -gt 0) -Or
                 (($files.where{$_.Contains('targets/win32')}).Count -gt 0)
                 )
               {
@@ -852,6 +853,8 @@ jobs:
         fetchDepth: 1
 
       - template: azure-pipelines-templates/nb-gitversioning.yml
+        parameters:
+          repoDirectory: '$(Build.SourcesDirectory)/nf-interpreter'
 
       - task: PowerShell@2
         displayName: Store package version
@@ -906,8 +909,7 @@ jobs:
       - pwsh: |
           .\sign code azure-key-vault `
           "**/nanoFramework.nanoCLR.*" `
-          --base-directory "$(Build.Repository.LocalPath)\build\bin\Release" `
-          --file-list "$(Build.Repository.LocalPath)\config\filelist.txt" `
+          --base-directory "$(Build.SourcesDirectory)/nf-interpreter/build/bin/Release" `
           --publisher-name ".NET nanoFramework" `
           --description "nanoFramework.nanoCLR" `
           --description-url "https://github.com/$env:Build_Repository_Name" `
@@ -969,7 +971,6 @@ jobs:
           .\sign code azure-key-vault `
           "**/*.nupkg" `
           --base-directory "$(Build.ArtifactStagingDirectory)" `
-          --file-list "$(Build.Repository.LocalPath)\config\filelist.txt" `
           --publisher-name ".NET nanoFramework" `
           --description "nanoFramework.nanoCLR NuGets" `
           --description-url "https://github.com/$env:Build_Repository_Name" `
@@ -1080,6 +1081,8 @@ jobs:
         fetchDepth: 1
 
       - template: azure-pipelines-templates/nb-gitversioning.yml
+        parameters:
+          repoDirectory: '$(Build.SourcesDirectory)/nf-interpreter'
 
       - template: azure-pipelines-templates/install-nuget.yml@templates
 
@@ -1118,8 +1121,7 @@ jobs:
       - pwsh: |
           .\sign code azure-key-vault `
           "**/nanoFramework.nanoCLR.*" `
-          --base-directory "$(Build.Repository.LocalPath)\build\bin\Release" `
-          --file-list "$(Build.Repository.LocalPath)\config\filelist.txt" `
+          --base-directory "$(Build.SourcesDirectory)/nf-interpreter/build/bin/Release" `
           --publisher-name ".NET nanoFramework" `
           --description "nanoFramework.nanoCLR.CLI" `
           --description-url "https://github.com/$env:Build_Repository_Name" `
@@ -1151,7 +1153,6 @@ jobs:
           .\sign code azure-key-vault `
           "**/*.nupkg" `
           --base-directory "$(Build.ArtifactStagingDirectory)" `
-          --file-list "$(Build.Repository.LocalPath)\config\filelist.txt" `
           --publisher-name ".NET nanoFramework" `
           --description "nanoFramework.nanoCLR.CLI NuGet" `
           --description-url "https://github.com/$env:Build_Repository_Name" `
