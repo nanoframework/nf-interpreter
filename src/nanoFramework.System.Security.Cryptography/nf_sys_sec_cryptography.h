@@ -19,14 +19,10 @@
 #include <nf_mbedtls_config.h>
 #endif
 
-
 #include "mbedtls/version.h"
 #include <mbedtls/platform.h>
 #include <mbedtls/md.h>
-#if MBEDTLS_VERSION_MAJOR == 2
-#include <mbedtls/md_internal.h>
-#endif
-#include <mbedtls/aes.h>
+#include <mbedtls/cipher.h>
 
 typedef enum __nfpack CipherMode
 {
@@ -47,6 +43,10 @@ struct Library_nf_sys_sec_cryptography_System_Security_Cryptography_Aes
     NANOCLR_NATIVE_DECLARE(DecryptAesCbc___SZARRAY_U1__SZARRAY_U1);
 
     //--//
+    static HRESULT EncryptDecrypt(
+        CLR_RT_StackFrame &stack,
+        mbedtls_cipher_type_t cipher,
+        mbedtls_operation_t operation);
 };
 
 struct Library_nf_sys_sec_cryptography_System_Security_Cryptography_HMACSHA256
