@@ -16,10 +16,11 @@
 ///////////////////////////////////////////////////////////////////////////////////
 enum SslProtocols
 {
-    SslProtocols_None = 0x00,
-    SslProtocols_TLSv1 = 0x10,
-    SslProtocols_TLSv11 = 0x20,
-    SslProtocols_TLSv12 = 0x40,
+    SslProtocols_None = 0,
+    SslProtocols_Tls = 192,
+    SslProtocols_Tls11 = 768,
+    SslProtocols_Tls12 = 3072,
+    SslProtocols_Tls13 = 12288,
 };
 
 //////////////////////////////////////////////////////////////////////////////////////

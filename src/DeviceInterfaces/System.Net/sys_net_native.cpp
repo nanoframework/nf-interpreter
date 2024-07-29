@@ -347,8 +347,7 @@ const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_System_Net =
     "System.Net",
     0xD82C1452,
     method_lookup,
-    { 100, 2, 0, 1 }
+    { 100, 2, 0, 11 }
 };
 
 // clang-format on
-

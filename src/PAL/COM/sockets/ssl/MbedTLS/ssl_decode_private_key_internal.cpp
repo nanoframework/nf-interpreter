@@ -8,14 +8,32 @@
 
 extern void SSL_GetCertDateTime_internal(DATE_TIME_INFO *dt, mbedtls_x509_time *mt);
 
-#if defined(PLATFORM_ESP32) && MBEDTLS_VERSION_MAJOR >= 3
-int random(void *a, unsigned char *b, size_t c)
+#if defined(PLATFORM_ESP32)
+int random(void *ctx, unsigned char *buf, size_t len)
 {
-    (void)a;
-    (void)b;
-    (void)c;
+    return mbedtls_ctr_drbg_random(ctx, buf, len);
+}
+#else
 
-    return esp_random();
+#include <hal.h>
+#include <hal_nf_community.h>
+
+int random(void *context, unsigned char *output, size_t output_size)
+{
+    (void)context;
+
+    // start random generator
+    rngStart();
+
+    for (size_t i = 0; i < output_size; i++)
+    {
+        // our generator returns 32bits numbers
+        *output = (uint8_t)rngGenerateRandomNumber();
+
+        output++;
+    }
+
+    return 0;
 }
 #endif
 
