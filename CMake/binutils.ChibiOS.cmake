@@ -213,6 +213,7 @@ macro(nf_add_platform_dependencies target)
             # security provider is MbedTLS
             if(USE_SECURITY_MBEDTLS_OPTION)
                 add_dependencies(NF_Network nano::NF_Network)
+                target_compile_definitions(NF_Network PUBLIC -DMBEDTLS_CONFIG_FILE=\"${CMAKE_SOURCE_DIR}/src/PAL/COM/sockets/ssl/MbedTLS/nf_mbedtls_config.h\")
             endif()
 
         endif()
@@ -263,7 +264,7 @@ macro(nf_add_platform_include_directories target)
 
             # need to add extra include directories for MbedTLS
             target_include_directories(
-                mbedcrypto PUBLIC
+                mbedcrypto PRIVATE
                 ${CHIBIOS_HAL_INCLUDE_DIRS}
                 ${CHIBIOS_INCLUDE_DIRS}
                 ${ChibiOSnfOverlay_INCLUDE_DIRS}
@@ -331,10 +332,11 @@ macro(nf_add_platform_sources target)
 
             if(USE_SECURITY_MBEDTLS_OPTION)
                 target_link_libraries(${target}.elf
-                mbedtls
+                    mbedtls
                 )
 
                 add_dependencies(NF_Network mbedtls)
+
             endif()
 
         endif()

@@ -334,45 +334,42 @@ int32_t hal_lfs_mount_partition(int32_t index, bool forceFormat)
 
         // mount the file system again
         operationResult = lfs_mount(&lfs[index], &lfsConfig[index]);
-
-        // create the root directory
-        lfs_mkdir(&lfs[index], "/");
     }
 
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     // code block to assist testing littlefs
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    int32_t lfsIndex = 0;
-    char writeBuf[] = {
-        "Hello! if you get this message, congratulations, that's because littlefs is working on your device!!"};
-    char readBuf[sizeof(writeBuf)];
+    // int32_t lfsIndex = 0;
+    // char writeBuf[] = {
+    //     "Hello! if you get this message, congratulations, that's because littlefs is working on your device!!"};
+    // char readBuf[sizeof(writeBuf)];
 
-    lfs_file_t file;
-    lfs_file_open(&lfs[lfsIndex], &file, "file1.txt", LFS_O_RDWR | LFS_O_CREAT);
+    // lfs_file_t file;
+    // lfs_file_open(&lfs[lfsIndex], &file, "file1.txt", LFS_O_RDWR | LFS_O_CREAT);
 
-    if (lfs_file_write(&lfs[lfsIndex], &file, writeBuf, sizeof(writeBuf)) != sizeof(writeBuf))
-    {
-        // something went wrong
-        return -1;
-    }
+    // if (lfs_file_write(&lfs[lfsIndex], &file, writeBuf, sizeof(writeBuf)) != sizeof(writeBuf))
+    //{
+    //     // something went wrong
+    //     return -1;
+    // }
 
-    lfs_file_close(&lfs[lfsIndex], &file);
+    // lfs_file_close(&lfs[lfsIndex], &file);
 
-    // reopen the file and read it
-    lfs_file_open(&lfs[lfsIndex], &file, "file1.txt", LFS_O_RDONLY);
-    if (lfs_file_read(&lfs[lfsIndex], &file, readBuf, sizeof(readBuf)) != sizeof(writeBuf))
-    {
-        // something went wrong
-        return -1;
-    }
+    //// reopen the file and read it
+    // lfs_file_open(&lfs[lfsIndex], &file, "file1.txt", LFS_O_RDONLY);
+    // if (lfs_file_read(&lfs[lfsIndex], &file, readBuf, sizeof(readBuf)) != sizeof(writeBuf))
+    //{
+    //     // something went wrong
+    //     return -1;
+    // }
 
-    lfs_file_close(&lfs[lfsIndex], &file);
+    // lfs_file_close(&lfs[lfsIndex], &file);
 
-    if (memcmp(writeBuf, readBuf, sizeof(writeBuf)) != 0)
-    {
-        // content doesn't match
-        return -1;
-    }
+    // if (memcmp(writeBuf, readBuf, sizeof(writeBuf)) != 0)
+    //{
+    //     // content doesn't match
+    //     return -1;
+    // }
 
     return operationResult;
 }

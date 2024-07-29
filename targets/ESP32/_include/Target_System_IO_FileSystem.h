@@ -13,7 +13,9 @@ extern "C"
 
 #include <esp_vfs.h>
 
+#if SOC_SDMMC_HOST_SUPPORTED
     bool Storage_MountMMC(bool bit1Mode, int driveIndex);
+#endif
     bool Storage_MountSpi(int spiBus, uint32_t CSPin, int driveIndex);
     bool Storage_UnMountSDCard(int driveIndex);
 
