@@ -572,6 +572,11 @@ macro(nf_setup_target_build_common)
     nf_add_platform_packages(TARGET ${NANOCLR_PROJECT_NAME})
     nf_add_platform_dependencies(${NANOCLR_PROJECT_NAME})
 
+    if(API_nanoFramework.System.Security.Cryptography)
+        # need to add MbedTLS configuration file
+        target_sources(NF_NativeAssemblies PRIVATE ${CMAKE_SOURCE_DIR}/src/PAL/COM/sockets/ssl/MbedTLS/nf_mbedtls_config.h)
+    endif()
+
     nf_add_common_sources(TARGET ${NANOCLR_PROJECT_NAME} EXTRA_LIBRARIES ${CLR_EXTRA_LIBRARIES})
     nf_add_platform_sources(${NANOCLR_PROJECT_NAME})
 
@@ -585,11 +590,14 @@ macro(nf_setup_target_build_common)
     if(USE_SECURITY_MBEDTLS_OPTION AND NOT RTOS_ESP32_CHECK)
 
         # MbedTLS requires setting a compiler definition in order to pass a config file
-        target_compile_definitions(mbedcrypto PUBLIC "-DMBEDTLS_CONFIG_FILE=\"${CMAKE_SOURCE_DIR}/src/PAL/COM/sockets/ssl/MbedTLS/nf_mbedtls_config.h\"")
-        
-        # need to add extra include directories for MbedTLS
-        target_include_directories(
-            mbedcrypto PUBLIC
+        target_compile_definitions(mbedtls PUBLIC -DMBEDTLS_CONFIG_FILE=\"${CMAKE_SOURCE_DIR}/src/PAL/COM/sockets/ssl/MbedTLS/nf_mbedtls_config.h\")
+        target_compile_definitions(mbedcrypto PUBLIC -DMBEDTLS_CONFIG_FILE=\"${CMAKE_SOURCE_DIR}/src/PAL/COM/sockets/ssl/MbedTLS/nf_mbedtls_config.h\")
+        target_compile_definitions(mbedx509 PUBLIC -DMBEDTLS_CONFIG_FILE=\"${CMAKE_SOURCE_DIR}/src/PAL/COM/sockets/ssl/MbedTLS/nf_mbedtls_config.h\")
+        target_compile_definitions(p256m PUBLIC -DMBEDTLS_CONFIG_FILE=\"${CMAKE_SOURCE_DIR}/src/PAL/COM/sockets/ssl/MbedTLS/nf_mbedtls_config.h\")
+        target_compile_definitions(everest PUBLIC -DMBEDTLS_CONFIG_FILE=\"${CMAKE_SOURCE_DIR}/src/PAL/COM/sockets/ssl/MbedTLS/nf_mbedtls_config.h\")
+
+        # set include directories for MbedTLS
+        set(MBEDTLS_INCLUDE_DIRECTORIES
             ${CMAKE_SOURCE_DIR}/src/CLR/Include
             ${CMAKE_SOURCE_DIR}/src/HAL/Include
             ${CMAKE_SOURCE_DIR}/src/PAL
@@ -600,7 +608,35 @@ macro(nf_setup_target_build_common)
             ${CMAKE_SOURCE_DIR}/targets/${RTOS}/_include
             ${TARGET_BASE_LOCATION}/nanoCLR
             ${TARGET_BASE_LOCATION}
+            ${CMAKE_BINARY_DIR}/targets/${RTOS}/${TARGET_BOARD}
         )
+
+        # need to add extra include directories for MbedTLS
+        target_include_directories(
+            mbedtls PRIVATE
+                ${MBEDTLS_INCLUDE_DIRECTORIES}
+        )
+
+        target_include_directories(
+            mbedcrypto PRIVATE
+                ${MBEDTLS_INCLUDE_DIRECTORIES}
+        )
+
+        target_include_directories(
+            mbedx509 PRIVATE
+                ${MBEDTLS_INCLUDE_DIRECTORIES}
+        )
+
+        target_include_directories(
+            p256m PRIVATE
+                ${MBEDTLS_INCLUDE_DIRECTORIES}
+        )
+
+        target_include_directories(
+            everest PRIVATE
+                ${MBEDTLS_INCLUDE_DIRECTORIES}
+        )
+
         # platform implementation of hardware random provider
         target_sources(mbedcrypto PRIVATE ${BASE_PATH_FOR_CLASS_LIBRARIES_MODULES}/mbedtls_entropy_hardware_pool.c)
 
@@ -610,6 +646,11 @@ macro(nf_setup_target_build_common)
         nf_set_compile_definitions(TARGET mbedcrypto BUILD_TARGET ${NANOCLR_PROJECT_NAME})
         nf_set_compile_definitions(TARGET mbedx509 BUILD_TARGET ${NANOCLR_PROJECT_NAME})
         nf_set_compile_definitions(TARGET mbedtls BUILD_TARGET ${NANOCLR_PROJECT_NAME})
+
+        # need to unset several flags for MbedTLS to compile correctly
+        target_compile_options(mbedtls PRIVATE -Wno-undef -Wno-error=unused-function -Wno-error=discarded-qualifiers -Wno-error=unused-parameter)
+        target_compile_options(mbedcrypto PRIVATE -Wno-undef -Wno-error=unused-function -Wno-error=discarded-qualifiers -Wno-error=unused-parameter)
+        target_compile_options(mbedx509 PRIVATE -Wno-undef -Wno-error=unused-function -Wno-error=discarded-qualifiers -Wno-error=unused-parameter)
 
     endif()
 
@@ -712,14 +753,14 @@ function(nf_add_mbedtls_library)
 
     # set tag for currently supported version
     # WHEN CHANGING THIS MAKE SURE TO UPDATE THE DEV CONTAINERS
-    set(MBEDTLS_GIT_TAG "mbedtls-2.28.5")
+    set(MBEDTLS_GIT_TAG "mbedtls-3.5.2")
 
     # set options for Mbed TLS
     option(ENABLE_TESTING "no testing when building Mbed TLS." OFF)
 
     if(NO_MBEDTLS_SOURCE)
         # no Mbed TLS source specified, download it from it's repo
-        message(STATUS "MbedTLS ${MBEDTLS_GIT_TAG} from GitHub repo")
+        message(STATUS "Mbed TLS ${MBEDTLS_GIT_TAG} from GitHub repo")
 
         FetchContent_Declare(
             mbedtls
@@ -730,7 +771,7 @@ function(nf_add_mbedtls_library)
     else()
         # MbedTLS source was specified
 
-        message(STATUS "MbedTLS ${MBEDTLS_GIT_TAG} (source from: ${MBEDTLS_SOURCE})")
+        message(STATUS "Mbed TLS ${MBEDTLS_GIT_TAG} (source from: ${MBEDTLS_SOURCE})")
             
         FetchContent_Declare(
             mbedtls
@@ -739,6 +780,12 @@ function(nf_add_mbedtls_library)
 
     endif()
 
+    # don't include tests or programs, only build libraries
+    set(ENABLE_TESTING CACHE BOOL OFF)
+    set(ENABLE_PROGRAMS CACHE BOOL OFF)
+
+    cmake_policy(SET CMP0048 NEW)
+
     # Check if population has already been performed
     FetchContent_GetProperties(mbedtls)
     if(NOT mbedtls_POPULATED)
@@ -746,12 +793,11 @@ function(nf_add_mbedtls_library)
         FetchContent_MakeAvailable(mbedtls)
     endif()
 
-    # don't include tests or programs, only build libraries
-    set(ENABLE_TESTING CACHE BOOL OFF)
-    set(ENABLE_PROGRAMS CACHE BOOL OFF)
+    set(MBEDTLS_AS_SUBPROJECT TRUE)
+    set(DISABLE_PACKAGE_CONFIG_AND_INSTALL OFF)
 
-    cmake_policy(SET CMP0048 NEW)
-    add_subdirectory(${mbedtls_SOURCE_DIR} mbedtls_build)
+    # add the MbedTLS library
+    add_subdirectory(${mbedtls_SOURCE_DIR} MbedTLS_Source)
 
 endfunction()
 
@@ -781,7 +827,7 @@ function(nf_add_lwip_library)
         message(STATUS "LWIP ${LWIP_GIT_TAG} from Git repo")
 
         FetchContent_Declare(
-            lwip
+            lwIP
             GIT_REPOSITORY https://github.com/lwip-tcpip/lwip.git
             GIT_TAG ${LWIP_GIT_TAG}
         )
@@ -792,7 +838,7 @@ function(nf_add_lwip_library)
         message(STATUS "LWIP ${LWIP_GIT_TAG} (source from: ${LWIP_SOURCE})")
             
         FetchContent_Declare(
-            lwip
+            lwIP
             SOURCE_DIR ${LWIP_SOURCE}
         )
 
@@ -801,9 +847,15 @@ function(nf_add_lwip_library)
     # Check if population has already been performed
     FetchContent_GetProperties(lwip)
 
-    if(NOT lwip_POPULATED)
+    if(NOT lwIP_POPULATED)
         # Fetch the content using previously declared details
-        FetchContent_MakeAvailable(lwip)
+        FetchContent_MakeAvailable(lwIP)
     endif()
+
+    ########################################################################
+    # add lwipdocs target, just to keep cmake happy
+    # after moving to a more recent lwIP versions this is not needed anymore
+    add_custom_target(lwipdocs)
+    ########################################################################
 
 endfunction()
