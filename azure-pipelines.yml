@@ -856,6 +856,11 @@ jobs:
         parameters:
           repoDirectory: '$(Build.SourcesDirectory)/nf-interpreter'
 
+      - script: |
+          echo "##vso[task.setvariable variable=CLR_REVISION;isOutput=true]$(REVISION)"
+        name: SetRevision
+        displayName: Store CLR DLL revision
+
       - task: PowerShell@2
         displayName: Store package version
         inputs:
@@ -1064,6 +1069,7 @@ jobs:
     dependsOn:
       - Check_Build_Options
       - Check_Code_Style
+      - Build_WIN32_nanoCLR
 
     pool:
       vmImage: "windows-latest"
@@ -1074,6 +1080,8 @@ jobs:
         value: true
       - name: LITTLEFS_PATH
         value: "D:/a/1/s/littlefs"
+      - name: REVISION
+        value: $[dependencies.Build_WIN32_nanoCLR.outputs['SetRevision.CLR_REVISION']]
 
     steps:
       - checkout: self
