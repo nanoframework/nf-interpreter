@@ -130,14 +130,8 @@ namespace nanoFramework.nanoCLR.Host
             return s_nanoClrHost;
         }
 
-        public void UnloadNanoClrDll()
-        {
-            Interop.nanoCLR.UnloadNanoClrImageDll();
-        }
+        public void UnloadNanoClrDll() => Interop.nanoCLR.UnloadNanoClrImageDll();
 
-        public void OutputNanoClrDllInfo()
-        {
-            Console.WriteLine($"nanoCLR loaded from '{Interop.nanoCLR.FindNanoClrDll()}'");
-        }
+        public void OutputNanoClrDllInfo() => Console.WriteLine($"nanoCLR loaded from '{Interop.nanoCLR.FindNanoClrDll()}'");
     }
 }
