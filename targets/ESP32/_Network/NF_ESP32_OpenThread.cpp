@@ -43,7 +43,7 @@ extern void ThreadSetInterfaceNumber(int networkInterfaceNumber);
         .host_connection_mode = HOST_CONNECTION_MODE_RCP_UART,                                                         \
         .host_uart_config =                                                                                            \
             {                                                                                                          \
-                .port = 0,                                                                                             \
+                .port = (uart_port_t)0,                                                                                \
                 .uart_config =                                                                                         \
                     {                                                                                                  \
                         .baud_rate = 460800,                                                                           \
@@ -72,7 +72,7 @@ extern void ThreadSetInterfaceNumber(int networkInterfaceNumber);
                         .sclk_io_num = 0,                                                                              \
                         .quadwp_io_num = -1,                                                                           \
                         .quadhd_io_num = -1,                                                                           \
-                        .isr_cpu_id = INTR_CPU_ID_0,                                                                   \
+                        .isr_cpu_id = ESP_INTR_CPU_AFFINITY_0,                                                         \
                     },                                                                                                 \
                 .slave_config =                                                                                        \
                     {                                                                                                  \
@@ -384,7 +384,7 @@ esp_err_t initOpenThread(ThreadDeviceType deviceType, esp_openthread_radio_mode_
             config.host_config = ESP_OPENTHREAD_DEFAULT_UART_HOST_CONFIG();
 
             // Set COM port using ESP32 configured pins
-            config.host_config.host_uart_config.port = port;
+            config.host_config.host_uart_config.port = (uart_port_t)port;
 
             config.host_config.host_uart_config.uart_config.baud_rate = baud_rate;
 

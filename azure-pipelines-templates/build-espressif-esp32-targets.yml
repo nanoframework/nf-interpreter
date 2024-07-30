@@ -17,7 +17,7 @@ steps:
   - task: Cache@2
     displayName: Cache IDF components
     inputs:
-      key: 'esp-idf-components-cache | 0'
+      key: 'esp-idf-components-cache | 5_2_2'
       path: $(Agent.BuildDirectory)/s/esp-idf/components
       cacheHitVar: ESP32_COMPONENTS_RESTORED
 

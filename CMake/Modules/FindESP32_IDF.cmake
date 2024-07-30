@@ -114,8 +114,10 @@ include(${TARGET_SERIES}_GCC_options)
 # freertos #
 ############
 
+list(APPEND ESP32_IDF_INCLUDE_DIRS ${esp32_idf_SOURCE_DIR}/components/freertos/config/include)
+list(APPEND ESP32_IDF_INCLUDE_DIRS ${esp32_idf_SOURCE_DIR}/components/freertos/config/include/freertos)
+list(APPEND ESP32_IDF_INCLUDE_DIRS ${esp32_idf_SOURCE_DIR}/components/freertos/config/${ESP32_CPU_TYPE}/include)
 list(APPEND ESP32_IDF_INCLUDE_DIRS ${esp32_idf_SOURCE_DIR}/components/freertos/FreeRTOS-Kernel/include)
-list(APPEND ESP32_IDF_INCLUDE_DIRS ${esp32_idf_SOURCE_DIR}/components/freertos/include/esp_additions)
 list(APPEND ESP32_IDF_INCLUDE_DIRS ${esp32_idf_SOURCE_DIR}/components/freertos/esp_additions/include)
 list(APPEND ESP32_IDF_INCLUDE_DIRS ${esp32_idf_SOURCE_DIR}/components/freertos/esp_additions/include/freertos)
 list(APPEND ESP32_IDF_INCLUDE_DIRS ${esp32_idf_SOURCE_DIR}/components/freertos/esp_additions/arch/${ESP32_CPU_TYPE}/include)
