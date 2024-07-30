@@ -862,6 +862,14 @@ jobs:
         displayName: Store CLR DLL revision
 
       - task: PowerShell@2
+        displayName: Store CLR DLL revision
+        name: SetRevision
+        inputs:
+          targetType: "inline"
+          script: |
+            Write-Host "$("##vso[task.setvariable variable=CLR_REVISION;isOutput=true]")$(REVISION)"
+
+      - task: PowerShell@2
         displayName: Store package version
         inputs:
           targetType: "inline"
