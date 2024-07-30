@@ -48,7 +48,7 @@ RUN mkdir -p /usr/local/bin/gcc
 RUN git clone --branch R0.15 https://github.com/abbrev/fatfs.git --depth 1 ./sources/fatfs
 
 # Clone ESP-IDF
-RUN git clone --branch v5.1.4 https://github.com/espressif/esp-idf --depth 1 --recursive ./sources/esp-idf
+RUN git clone --branch v5.2.2 https://github.com/espressif/esp-idf --depth 1 --recursive ./sources/esp-idf
 
 # Creating static link python for pyhton3
 RUN ln -fs /usr/bin/python3 /usr/bin/python \

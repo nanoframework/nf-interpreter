@@ -38,7 +38,7 @@ static void IsrCallBack(void *arg)
 #if defined(CONFIG_IDF_TARGET_ESP32)
     touch_pad_intr_clear();
 #else
-    touch_pad_intr_clear(TOUCH_PAD_INTR_MASK_ACTIVE | TOUCH_PAD_INTR_MASK_INACTIVE | TOUCH_PAD_INTR_MASK_TIMEOUT);
+    touch_pad_intr_clear((touch_pad_intr_mask_t)(TOUCH_PAD_INTR_MASK_ACTIVE | TOUCH_PAD_INTR_MASK_INACTIVE | TOUCH_PAD_INTR_MASK_TIMEOUT));
 #endif
     for (int i = 0; i < TOUCH_PAD_MAX; i++)
     {
@@ -71,7 +71,7 @@ static void TouchPad_Uninitialize()
 #if defined(CONFIG_IDF_TARGET_ESP32)
     touch_pad_intr_disable();
 #else
-    touch_pad_intr_disable(TOUCH_PAD_INTR_MASK_ACTIVE | TOUCH_PAD_INTR_MASK_INACTIVE | TOUCH_PAD_INTR_MASK_TIMEOUT);
+    touch_pad_intr_disable((touch_pad_intr_mask_t)(TOUCH_PAD_INTR_MASK_ACTIVE | TOUCH_PAD_INTR_MASK_INACTIVE | TOUCH_PAD_INTR_MASK_TIMEOUT));
 #endif
     touch_pad_isr_deregister(IsrCallBack, NULL);
     // Clean filter and uninstall the driver

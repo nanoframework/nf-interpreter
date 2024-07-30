@@ -707,10 +707,6 @@ macro(nf_add_idf_as_library)
 
         if(ESP32_USB_CDC)
 
-            #idf_build_set_property(IDF_COMPONENT_MANAGER 1)
-            #idf_build_set_property(__COMPONENT_MANAGER_INTERFACE_VERSION 2)
-            #message(STATUS "Support for component manager enabled")
-
             # add IDF components specific to ESP32S2/S3 series
             # They have to be added in a specific order so they compile/link ok
             list(APPEND IDF_COMPONENTS_TO_ADD tinyusb) 

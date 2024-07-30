@@ -20,8 +20,11 @@ static const char *TAG = "SerialDevice";
 
 NF_PAL_UART Uart0_PAL;
 NF_PAL_UART Uart1_PAL;
-#if defined(UART_NUM_2)
+#if SOC_UART_HP_NUM > 2
 NF_PAL_UART Uart2_PAL;
+#endif
+#if SOC_UART_HP_NUM > 3
+NF_PAL_UART Uart3_PAL;
 #endif
 
 NF_PAL_UART *GetPalUartFromUartNum_sys(int uart_num)
@@ -36,10 +39,16 @@ NF_PAL_UART *GetPalUartFromUartNum_sys(int uart_num)
             // set UART PAL
             return &Uart1_PAL;
 
-#if defined(UART_NUM_2)
+#if SOC_UART_HP_NUM > 2
         case UART_NUM_2:
             // set UART PAL
             return &Uart2_PAL;
+#endif
+
+#if SOC_UART_HP_NUM > 3
+        case UART_NUM_2:
+            // set UART PAL
+            return &Uart3_PAL;
 #endif
 
         default:
@@ -1433,11 +1442,14 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::GetDeviceSelector_
 #if defined(CONFIG_TINYUSB_CDC_ENABLED) || defined(CONFIG_ESP_CONSOLE_USB_SERIAL_JTAG_ENABLED)
         "COM1,"
 #endif
-#if defined(UART_NUM_1)
+#if SOC_UART_HP_NUM > 1
         "COM2,"
 #endif
-#if defined(UART_NUM_2)
+#if SOC_UART_HP_NUM > 2
         "COM3,"
+#endif
+#if SOC_UART_HP_NUM > 3
+        "COM4,"
 #endif
         ;
 

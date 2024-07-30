@@ -174,7 +174,7 @@ bool CPU_SPI_Initialize(uint8_t busIndex, const SPI_DEVICE_CONFIGURATION &spiDev
         max_transfer_sz : 16384,
         // SPICOMMON_BUSFLAG_* flags
         flags : 0,
-        isr_cpu_id : INTR_CPU_ID_0,
+        isr_cpu_id : ESP_INTR_CPU_AFFINITY_AUTO,
         intr_flags : ESP_INTR_FLAG_IRAM
     };
 

@@ -48,7 +48,7 @@ resources:
       type: github
       name: espressif/esp-idf
       endpoint: nanoframework
-      ref: 'refs/tags/v5.1.4'
+      ref: 'refs/tags/v5.2.2'
     - repository: mscorlib
       type: github
       name: nanoframework/CoreLibrary
