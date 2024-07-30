@@ -857,7 +857,7 @@ jobs:
           repoDirectory: '$(Build.SourcesDirectory)/nf-interpreter'
 
       - script: |
-          echo "##vso[task.setvariable variable=CLR_REVISION;isOutput=true]$(REVISION)"
+          Write-Host "$("##vso[task.setvariable variable=CLR_REVISION;isOutput=true]")$(REVISION)"
         name: SetRevision
         displayName: Store CLR DLL revision
 
