@@ -125,7 +125,7 @@ RUN ln -fs /usr/bin/python3 /usr/bin/python \
 
 # Install ESP-IDF
 ENV IDF_PATH=/sources/esp-idf
-ENV ESP_PATCH_VER=esp-12.2.0_20230208
+ENV ESP_PATCH_VER=esp-13.2.0_20230928
 # This is now taking care in the following line
 # RUN python -m pip install -r $IDF_PATH/requirements.txt
 RUN $IDF_PATH/install.sh
