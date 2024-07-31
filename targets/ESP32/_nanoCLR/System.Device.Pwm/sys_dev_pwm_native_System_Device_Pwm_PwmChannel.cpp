@@ -160,7 +160,7 @@ HRESULT sys_dev_pwm_native_System_Device_Pwm_PwmChannelHelpers::ConfigureAndStar
 
     duty_res = (ledc_timer_bit_t)optimumDutyResolution;
 
-    timer_conf = {mode, duty_res, timer_sel, (uint32_t)desiredFrequency, LEDC_AUTO_CLK};
+    timer_conf = {mode, duty_res, timer_sel, (uint32_t)desiredFrequency, LEDC_AUTO_CLK, true};
 
     result = ledc_timer_config(&timer_conf);
 
@@ -316,7 +316,7 @@ HRESULT Library_sys_dev_pwm_native_System_Device_Pwm_PwmChannel::NativeSetDesire
 
     duty_res = (ledc_timer_bit_t)optimumDutyResolution;
 
-    timer_conf = {mode, duty_res, timer, (uint32_t)desiredFrequency, LEDC_AUTO_CLK};
+    timer_conf = {mode, duty_res, timer, (uint32_t)desiredFrequency, LEDC_AUTO_CLK, true};
 
     result = ledc_timer_config(&timer_conf);
 

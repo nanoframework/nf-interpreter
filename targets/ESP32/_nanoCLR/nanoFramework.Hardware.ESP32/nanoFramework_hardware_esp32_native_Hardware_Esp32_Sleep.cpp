@@ -239,11 +239,11 @@ HRESULT Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32
     NANOCLR_HEADER();
     {
         esp_err_t err;
-        int uartNum;
+        uart_port_t uartNum;
         int threshold;
 
         // Static arguments starts at 0
-        uartNum = stack.Arg0().NumericByRef().s4;
+        uartNum = (uart_port_t)stack.Arg0().NumericByRef().s4;
         threshold = stack.Arg1().NumericByRef().s4;
         uart_set_wakeup_threshold(uartNum, threshold);
         err = esp_sleep_enable_uart_wakeup(uartNum);

@@ -55,7 +55,7 @@ RUN apt-get update \
 RUN mkdir -p /usr/local/bin/gcc
 
 # Clone libs mbedtls and fatfs etc.
-RUN git clone --branch mbedtls-3.5.2 https://github.com/ARMmbed/mbedtls.git --depth 1 ./sources/mbedtls \
+RUN git clone --branch mbedtls-3.6.0 https://github.com/ARMmbed/mbedtls.git --depth 1 ./sources/mbedtls \
     && git clone --branch R0.15 https://github.com/abbrev/fatfs.git --depth 1 ./sources/fatfs \
     && git clone --branch STABLE-2_1_3_RELEASE https://github.com/lwip-tcpip/lwip.git --depth 1 ./sources/lwip
     
