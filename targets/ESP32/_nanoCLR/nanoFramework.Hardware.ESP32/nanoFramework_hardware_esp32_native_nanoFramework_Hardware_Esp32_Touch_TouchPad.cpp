@@ -38,7 +38,8 @@ static void IsrCallBack(void *arg)
 #if defined(CONFIG_IDF_TARGET_ESP32)
     touch_pad_intr_clear();
 #else
-    touch_pad_intr_clear(TOUCH_PAD_INTR_MASK_ACTIVE | TOUCH_PAD_INTR_MASK_INACTIVE | TOUCH_PAD_INTR_MASK_TIMEOUT);
+    touch_pad_intr_clear((touch_pad_intr_mask_t)(TOUCH_PAD_INTR_MASK_ACTIVE | TOUCH_PAD_INTR_MASK_INACTIVE |
+                                                 TOUCH_PAD_INTR_MASK_TIMEOUT));
 #endif
     for (int i = 0; i < TOUCH_PAD_MAX; i++)
     {
@@ -71,7 +72,8 @@ static void TouchPad_Uninitialize()
 #if defined(CONFIG_IDF_TARGET_ESP32)
     touch_pad_intr_disable();
 #else
-    touch_pad_intr_disable(TOUCH_PAD_INTR_MASK_ACTIVE | TOUCH_PAD_INTR_MASK_INACTIVE | TOUCH_PAD_INTR_MASK_TIMEOUT);
+    touch_pad_intr_disable((touch_pad_intr_mask_t)(TOUCH_PAD_INTR_MASK_ACTIVE | TOUCH_PAD_INTR_MASK_INACTIVE |
+                                                   TOUCH_PAD_INTR_MASK_TIMEOUT));
 #endif
     touch_pad_isr_deregister(IsrCallBack, NULL);
     // Clean filter and uninstall the driver
@@ -1014,7 +1016,8 @@ HRESULT Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32
     uint16_t meas = (uint16_t)stack.Arg1().NumericByRef().u2;
 
 #if defined(CONFIG_IDF_TARGET_ESP32)
-    if ((touch_pad_set_measurement_clock_cycles(sleep) != ESP_OK) || (touch_pad_set_measurement_interval(meas) != ESP_OK))
+    if ((touch_pad_set_measurement_clock_cycles(sleep) != ESP_OK) ||
+        (touch_pad_set_measurement_interval(meas) != ESP_OK))
     {
         NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_OPERATION);
     }
@@ -1044,12 +1047,14 @@ HRESULT Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32
     uint16_t meas;
 
 #if defined(CONFIG_IDF_TARGET_ESP32)
-    if ((touch_pad_get_measurement_clock_cycles(&sleep) != ESP_OK) || (touch_pad_get_measurement_interval(&meas) != ESP_OK))
+    if ((touch_pad_get_measurement_clock_cycles(&sleep) != ESP_OK) ||
+        (touch_pad_get_measurement_interval(&meas) != ESP_OK))
     {
         NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_OPERATION);
     }
 #else
-    if ((touch_pad_get_charge_discharge_times(&sleep) != ESP_OK) || (touch_pad_get_measurement_interval(&meas) != ESP_OK))
+    if ((touch_pad_get_charge_discharge_times(&sleep) != ESP_OK) ||
+        (touch_pad_get_measurement_interval(&meas) != ESP_OK))
     {
         NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_OPERATION);
     }

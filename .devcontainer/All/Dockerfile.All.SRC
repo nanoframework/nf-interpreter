@@ -78,7 +78,7 @@ RUN git clone --branch v6.4.0_rel --recursive https://github.com/eclipse-threadx
     && git clone --branch v6.3.0_rel --recursive https://github.com/eclipse-threadx/netxduo.git --depth 1 ./sources/NetxDuo
 
 # Clone dependent repos (mbedtls, fatfs and littlefs)
-RUN git clone --branch mbedtls-3.5.2 https://github.com/ARMmbed/mbedtls.git --depth 1 ./sources/mbedtls \
+RUN git clone --branch mbedtls-3.6.0 https://github.com/ARMmbed/mbedtls.git --depth 1 ./sources/mbedtls \
     && git clone --branch R0.15 https://github.com/abbrev/fatfs.git --depth 1 ./sources/fatfs \
     && git clone --branch v2.9.3 https://github.com/littlefs-project/littlefs --depth 1 ./sources/littlefs
 
@@ -90,7 +90,7 @@ RUN git clone --branch V10.4.1-kernel-only https://github.com/FreeRTOS/FreeRTOS-
 RUN git clone --branch STABLE-2_1_3_RELEASE https://github.com/lwip-tcpip/lwip.git --depth 1 ./sources/lwip
 
 # Clone ESP-IDF
-RUN git clone --branch v5.1.4 https://github.com/espressif/esp-idf --depth 1 --recursive ./sources/esp-idf
+RUN git clone --branch v5.2.2 https://github.com/espressif/esp-idf --depth 1 --recursive ./sources/esp-idf
 
 # Clone what is needed for TI
 RUN git clone --branch 4.10.00.07 https://github.com/nanoframework/SimpleLink_CC32xx_SDK.git --depth 1 ./sources/SimpleLinkCC32 \
@@ -125,7 +125,7 @@ RUN ln -fs /usr/bin/python3 /usr/bin/python \
 
 # Install ESP-IDF
 ENV IDF_PATH=/sources/esp-idf
-ENV ESP_PATCH_VER=esp-12.2.0_20230208
+ENV ESP_PATCH_VER=esp-13.2.0_20230928
 # This is now taking care in the following line
 # RUN python -m pip install -r $IDF_PATH/requirements.txt
 RUN $IDF_PATH/install.sh
