@@ -25,12 +25,15 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_NativeFindFile::GetFileInfo___STA
 
     NANOCLR_CHECK_HRESULT(Library_nf_sys_io_filesystem_System_IO_NativeIO::FindVolume(stack.Arg0(), driver, path));
 
+    // zero initialize the fileInfo
+    memset(&fileInfo, 0, sizeof(FS_FILEINFO));
+
     NANOCLR_CHECK_HRESULT(driver->GetFileInfo(path, &fileInfo, &found));
 
     if (found)
     {
         // find <NativeFindFile> type definition, don't bother checking the result as it exists for sure
-        g_CLR_RT_TypeSystem.FindTypeDef("NativeFindFile", "System.IO", nativeFindFileTypeDef);
+        g_CLR_RT_TypeSystem.FindTypeDef("NativeFileInfo", "System.IO", nativeFindFileTypeDef);
 
         // create an instance of <NativeFindFile>
         NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObjectFromIndex(top, nativeFindFileTypeDef));
