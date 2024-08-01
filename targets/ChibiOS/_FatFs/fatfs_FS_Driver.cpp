@@ -744,6 +744,9 @@ HRESULT FATFS_FS_Driver::GetFileInfo(const VOLUME_ID *volume, const char *path, 
         // store the attributes
         fileInfo->Attributes = info.fattrib;
 
+        // set the file size
+        fileInfo->Size = info.fsize;
+
         // no need to set the file name details as managed code already has this info
     }
 

@@ -699,6 +699,9 @@ HRESULT LITTLEFS_FS_Driver::GetFileInfo(const VOLUME_ID *volume, const char *pat
             fileInfo->Attributes = FileAttributes::FileAttributes_Archive;
         }
 
+        // set the file size
+        fileInfo->Size = info.st_size;
+
         // no need to set the file name details as managed code already has this info
     }
 
