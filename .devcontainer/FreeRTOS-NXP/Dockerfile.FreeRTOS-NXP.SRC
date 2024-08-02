@@ -55,9 +55,11 @@ RUN apt-get update \
 RUN mkdir -p /usr/local/bin/gcc
 
 # Clone libs mbedtls and fatfs etc.
-RUN git clone --branch mbedtls-3.6.0 https://github.com/ARMmbed/mbedtls.git --depth 1 ./sources/mbedtls \
-    && git clone --branch R0.15 https://github.com/abbrev/fatfs.git --depth 1 ./sources/fatfs \
-    && git clone --branch STABLE-2_1_3_RELEASE https://github.com/lwip-tcpip/lwip.git --depth 1 ./sources/lwip
+RUN git clone --branch R0.15 https://github.com/abbrev/fatfs.git --depth 1 ./sources/fatfs \
+    && git clone --branch STABLE-2_1_3_RELEASE https://github.com/lwip-tcpip/lwip.git --depth 1 ./sources/lwip \
+    && git clone --branch mbedtls-3.6.0 https://github.com/ARMmbed/mbedtls.git --depth 1 ./sources/mbedtls \
+    && cd ./sources/mbedtls \
+    && git submodule update --init --recursive
     
 # Clone FreeRTOS
 RUN git clone --branch V10.4.1-kernel-only https://github.com/FreeRTOS/FreeRTOS-Kernel.git --depth 1 ./sources/FreeRTOS \
