@@ -130,15 +130,13 @@ ENV ESP_PATCH_VER=esp-13.2.0_20230928
 # RUN python -m pip install -r $IDF_PATH/requirements.txt
 RUN $IDF_PATH/install.sh
 
-ENV PATH=/root/.espressif/python_env/idf5.1_py3.11_env/bin:$PATH:\
+ENV PATH=/root/.espressif/python_env/idf5.2_py3.11_env/bin:$PATH:\
 $IDF_PATH/components/esptool_py/esptool:\
 $IDF_PATH/components/espcoredump:\ 
 $IDF_PATH/components/partition_table/:\
 $IDF_PATH/tools/:\
 $IDF_PATH/components/app_update:\
-/root/.espressif/tools/xtensa-esp32-elf/$ESP_PATCH_VER/xtensa-esp32-elf/bin:\
-/root/.espressif/tools/xtensa-esp32s2-elf/$ESP_PATCH_VER/xtensa-esp32s2-elf/bin:\
-/root/.espressif/tools/xtensa-esp32s3-elf/$ESP_PATCH_VER/xtensa-esp32s3-elf/bin:\
+/root/.espressif/tools/xtensa-esp-elf/$ESP_PATCH_VER/xtensa-esp-elf/bin:\
 /root/.espressif/tools/riscv32-esp-elf/$ESP_PATCH_VER/riscv32-esp-elf/bin
 
 # Clean up downloaded files
