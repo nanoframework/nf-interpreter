@@ -649,7 +649,7 @@ HRESULT FATFS_FS_Driver::GetFileInfo(const VOLUME_ID *volume, const char *path, 
         }
         else
         {
-            fileInfo->Attributes = FileAttributes::FileAttributes_Archive;
+            fileInfo->Attributes = FileAttributes::FileAttributes_Normal;
         }
 
         // store the attributes
