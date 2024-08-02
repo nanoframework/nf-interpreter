@@ -702,6 +702,8 @@ HRESULT LITTLEFS_FS_Driver::GetFileInfo(const VOLUME_ID *volume, const char *pat
                 &fileInfo->Attributes,
                 NANO_LITTLEFS_ATTRIBUTE_SIZE);
 
+            fileInfo->Size = info.size;
+
             // no need to set the file name details as managed code already has this info
         }
 
