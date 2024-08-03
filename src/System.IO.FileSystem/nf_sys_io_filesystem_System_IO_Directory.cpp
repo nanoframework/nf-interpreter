@@ -134,7 +134,11 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_Directory::NativeGetChildren___ST
                 continue;
             }
             // skip entries that are directories when looking for files
-            // skip also files with hidden and system attribute along with extension 'sys'
+            else if (!isDirectory && (fileData.Attributes & FileAttributes::FileAttributes_Directory))
+            {
+                continue;
+            }
+            // skip files with hidden and system attribute along with extension 'sys'
             else if (!isDirectory && !(fileData.Attributes & FileAttributes::FileAttributes_Directory))
             {
                 const char *fileName = (const char *)fileData.FileName;
