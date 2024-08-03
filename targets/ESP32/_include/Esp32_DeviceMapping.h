@@ -41,6 +41,17 @@ enum Esp32SpiPin
     Esp32SpiPin_Max,
 };
 
+enum Esp32SdmmcPin
+{
+    Esp32SdmmcPin_Clock,
+    Esp32SdmmcPin_Command,
+    Esp32SdmmcPin_D0,
+    Esp32SdmmcPin_D1,
+    Esp32SdmmcPin_D2,
+    Esp32SdmmcPin_D3,
+    Esp32SdmmcPin_Max,
+};
+
 enum Esp32_MapDeviceType
 {
     DEV_TYPE_GPIO,
@@ -51,8 +62,11 @@ enum Esp32_MapDeviceType
     DEV_TYPE_ADC,
     DEV_TYPE_I2S,
     DEV_TYPE_DAC,
+    DEV_TYPE_SDMMC,
     DEV_TYPE_MAX,
 };
+
+#ifdef __cplusplus
 
 extern int8_t Esp32_SPI_DevicePinMap[MAX_SPI_DEVICES][Esp32SpiPin_Max];
 extern int8_t Esp32_I2C_DevicePinMap[I2C_NUM_MAX][2];
@@ -79,7 +93,9 @@ extern int8_t Esp32_DAC_DevicePinMap[2];
 
 extern int8_t Esp32_ADC_DevicePinMap[TARGET_ADC_NUM_PINS];
 extern int8_t Esp32_LED_DevicePinMap[TARGET_LED_NUM_PINS];
-
+#if (defined(CONFIG_IDF_TARGET_ESP32) || defined(CONFIG_IDF_TARGET_ESP32S3) || defined(CONFIG_IDF_TARGET_ESP32P4))
+extern int8_t Esp32_SDMMC_DevicePinMap[CONFIG_SOC_SDMMC_NUM_SLOTS][Esp32SdmmcPin_Max];
+#endif
 
 void Esp32_DecodeAlternateFunction(
     uint32_t alternateFunction,
@@ -94,5 +110,10 @@ int Esp32_SetMappedDevicePins(uint8_t pin, int32_t alternateFunction);
 void Esp32_SetMappedDevicePins(Esp32_MapDeviceType deviceType, int busIndex, int8_t pinIndex, int ioPinNumber);
 
 int Esp32_ValidateMappedDevicePin(Esp32_MapDeviceType deviceType, int ioPinNumber);
+
+#else
+// For C code access
+int Esp32_GetSDmmcDevicePins_C(int busIndex, int pinIndex);
+#endif
 
 #endif // ESP32_DEVICEMAPPING_H
