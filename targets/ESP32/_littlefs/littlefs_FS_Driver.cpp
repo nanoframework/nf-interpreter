@@ -624,7 +624,7 @@ HRESULT LITTLEFS_FS_Driver::FindNext(void *handle, FS_FILEINFO *fi, bool *fileFo
                 }
                 else
                 {
-                    fi->Attributes = FileAttributes::FileAttributes_Archive;
+                    fi->Attributes = FileAttributes::FileAttributes_Normal;
                 }
 
                 // POSIX API does not provide file size
@@ -696,8 +696,11 @@ HRESULT LITTLEFS_FS_Driver::GetFileInfo(const VOLUME_ID *volume, const char *pat
         }
         else
         {
-            fileInfo->Attributes = FileAttributes::FileAttributes_Archive;
+            fileInfo->Attributes = FileAttributes::FileAttributes_Normal;
         }
+
+        // set the file size
+        fileInfo->Size = info.st_size;
 
         // no need to set the file name details as managed code already has this info
     }

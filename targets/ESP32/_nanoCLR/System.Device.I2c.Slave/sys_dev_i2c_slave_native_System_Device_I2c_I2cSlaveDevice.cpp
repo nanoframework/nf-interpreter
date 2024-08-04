@@ -46,6 +46,9 @@ void UninitializePalI2cSlave(NF_PAL_I2CSLAVE *palI2cSlave)
 {
     if (palI2cSlave && palI2cSlave->I2cSlaveWorkerTask)
     {
+        i2c_reset_tx_fifo(palI2cSlave->BusNum);
+        i2c_reset_rx_fifo(palI2cSlave->BusNum);
+
         // delete driver
         i2c_driver_delete(palI2cSlave->BusNum);
 
@@ -86,6 +89,9 @@ void I2cSlaveTxWorkerTask(void *pvParameters)
 {
     // get PAL UART from task parameters
     NF_PAL_I2CSLAVE *palI2c = (NF_PAL_I2CSLAVE *)pvParameters;
+
+    // reset TX fifo before the operation
+    i2c_reset_tx_fifo(palI2c->BusNum);
 
     // write data to I2C slave
     palI2c->BytesTransferred =
@@ -179,6 +185,10 @@ HRESULT Library_sys_dev_i2c_slave_native_System_Device_I2c_I2cSlaveDevice::Nativ
         palI2c->RequestedBytes = 0;
         palI2c->BytesTransferred = 0;
         palI2c->TimeoutTicks = 0;
+
+        // reset buffers, just in case
+        i2c_reset_tx_fifo(bus);
+        i2c_reset_rx_fifo(bus);
     }
 
     NANOCLR_NOCLEANUP();
@@ -482,7 +492,7 @@ HRESULT Library_sys_dev_i2c_slave_native_System_Device_I2c_I2cSlaveDevice::
 
     NANOCLR_CLEANUP();
 
-    if (FAILED(hr) && hr != CLR_E_THREAD_WAITING)
+    if (hr != CLR_E_THREAD_WAITING)
     {
         if (palI2c != NULL && palI2c->Buffer != NULL)
         {

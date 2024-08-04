@@ -13,8 +13,8 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_NativeFindFile::GetFileInfo___STA
     NATIVE_PROFILE_CLR_IO();
     NANOCLR_HEADER();
 
-    CLR_RT_HeapBlock *managedFindFile;
-    CLR_RT_TypeDef_Index nativeFindFileTypeDef;
+    CLR_RT_HeapBlock *managedNativeFileInfo;
+    CLR_RT_TypeDef_Index nativeFileInfoTypeDef;
 
     FS_FILEINFO fileInfo;
     bool found;
@@ -25,21 +25,24 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_NativeFindFile::GetFileInfo___STA
 
     NANOCLR_CHECK_HRESULT(Library_nf_sys_io_filesystem_System_IO_NativeIO::FindVolume(stack.Arg0(), driver, path));
 
+    // zero initialize the fileInfo
+    memset(&fileInfo, 0, sizeof(FS_FILEINFO));
+
     NANOCLR_CHECK_HRESULT(driver->GetFileInfo(path, &fileInfo, &found));
 
     if (found)
     {
-        // find <NativeFindFile> type definition, don't bother checking the result as it exists for sure
-        g_CLR_RT_TypeSystem.FindTypeDef("NativeFindFile", "System.IO", nativeFindFileTypeDef);
+        // find <NativeFileInfo> type definition, don't bother checking the result as it exists for sure
+        g_CLR_RT_TypeSystem.FindTypeDef("NativeFileInfo", "System.IO", nativeFileInfoTypeDef);
 
         // create an instance of <NativeFindFile>
-        NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObjectFromIndex(top, nativeFindFileTypeDef));
+        NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObjectFromIndex(top, nativeFileInfoTypeDef));
 
-        managedFindFile = top.Dereference();
+        managedNativeFileInfo = top.Dereference();
 
-        managedFindFile[NativeFileInfo::FIELD__Attributes].SetInteger((CLR_UINT32)fileInfo.Attributes);
-        managedFindFile[NativeFileInfo::FIELD__Size].SetInteger((CLR_INT64)fileInfo.Size);
-        managedFindFile[NativeFileInfo::FIELD__FileName].SetObjectReference(NULL);
+        managedNativeFileInfo[NativeFileInfo::FIELD__Attributes].SetInteger((CLR_UINT32)fileInfo.Attributes);
+        managedNativeFileInfo[NativeFileInfo::FIELD__Size].SetInteger((CLR_INT64)fileInfo.Size);
+        managedNativeFileInfo[NativeFileInfo::FIELD__FileName].SetObjectReference(NULL);
     }
     else
     {

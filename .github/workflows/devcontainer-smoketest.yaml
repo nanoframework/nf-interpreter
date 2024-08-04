@@ -5,10 +5,6 @@ on:
     paths:
       - '.devcontainer/**/*'
       - '.github/workflows/*'
-  # push:
-  #   paths:
-  #     - '.devcontainer/**/*'
-  #     - '.github/workflows/*'
 
 jobs:
   build-target:
@@ -22,7 +18,12 @@ jobs:
           { target: ST_STM32F769I_DISCOVERY, build-type: Debug, container: ChibiOS },
           { target: ST_STM32F769I_DISCOVERY, build-type: Debug, container: All },
           { target: M5Core2,                 build-type: Debug, container: ESP32 },
-          { target: M5Core2,                 build-type: Debug, container: All },
+          { target: ESP_WROVER_KIT,          build-type: Debug, container: ESP32 },
+          { target: FEATHER_S2,              build-type: Debug, container: ESP32 },
+          { target: ESP32_S3,                build-type: Debug, container: ESP32 },
+          { target: ESP32_C3,                build-type: Debug, container: ESP32 },
+          { target: ESP32_C6_THREAD,         build-type: Debug, container: ESP32 },
+          { target: ESP32_H2_THREAD,         build-type: Debug, container: ESP32 },
           { target: NXP_MIMXRT1060_EVK,      build-type: Debug, container: FreeRTOS-NXP },
           { target: NXP_MIMXRT1060_EVK,      build-type: Debug, container: All },
           { target: TI_CC1352R1_LAUNCHXL,    build-type: Debug, container: TI, radio-freq: 915 },
