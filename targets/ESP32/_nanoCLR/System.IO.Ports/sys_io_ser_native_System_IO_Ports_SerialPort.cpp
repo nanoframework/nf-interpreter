@@ -912,7 +912,6 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeInit___VOID(
     palUart->TxOngoingCount = 0;
     palUart->RxBytesToRead = 0;
     palUart->NewLineChar = 0;
-    palUart->SignalLevelsInverted = 0;
 
     // Install driver
     esp_err = uart_driver_install(
