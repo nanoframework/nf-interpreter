@@ -30,7 +30,7 @@ static const char *TAG = "Memory";
 // If bluetooth configured then increase minimum by value
 #define BLE_EXTRA_IDF_MEMORY_RESERVE (30 * 1024)
 // If Thread configured then increase minimum by value
-#define THREAD_EXTRA_IDF_MEMORY_RESERVE (30 * 1024)
+#define THREAD_EXTRA_IDF_MEMORY_RESERVE (20 * 1024)
 
 // Space to leave free in internal RAM for allocation by IDF malloc
 #define INTERNAL_RAM_LEAVE_FREE_FOR_ALLOCATION (ESP32_RESERVED_RAM_FOR_IDF_ALLOCATION * 1024)

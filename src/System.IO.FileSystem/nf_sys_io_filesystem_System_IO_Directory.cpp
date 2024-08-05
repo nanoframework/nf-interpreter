@@ -70,22 +70,23 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_Directory::NativeGetChildren___ST
             }
             // skip entries that are directories when looking for files
             // skip also files with hidden and system attribute along with extension 'sys'
-            else if (
-                !isDirectory &&
-                ((fileData.Attributes & FileAttributes::FileAttributes_Directory) !=
-                 FileAttributes::FileAttributes_Directory) &&
-                ((fileData.Attributes & FileAttributes::FileAttributes_Hidden) !=
-                 FileAttributes::FileAttributes_Hidden) &&
-                ((fileData.Attributes & FileAttributes::FileAttributes_System) !=
-                 FileAttributes::FileAttributes_System))
+            else if (!isDirectory && !(fileData.Attributes & FileAttributes::FileAttributes_Directory))
             {
                 const char *fileName = (const char *)fileData.FileName;
                 const char *extension = strrchr(fileName, '.');
 
                 if (extension == NULL || strcmp(extension, ".sys") != 0)
                 {
-                    // file does not have a .sys extension, OK to add to list
-                    itemsCount++;
+                    // file does not have a .sys extension, maybe OK to add to list
+                    // now check other attributes
+
+                    if (((fileData.Attributes & FileAttributes::FileAttributes_Hidden) !=
+                         FileAttributes::FileAttributes_Hidden) &&
+                        ((fileData.Attributes & FileAttributes::FileAttributes_System) !=
+                         FileAttributes::FileAttributes_System))
+                    {
+                        itemsCount++;
+                    }
                 }
             }
         }
@@ -133,21 +134,27 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_Directory::NativeGetChildren___ST
                 continue;
             }
             // skip entries that are directories when looking for files
-            // skip also files with hidden and system attribute along with extension 'sys'
-            else if (
-                !isDirectory &&
-                ((fileData.Attributes & FileAttributes::FileAttributes_Directory) ==
-                 FileAttributes::FileAttributes_Directory) &&
-                ((fileData.Attributes & FileAttributes::FileAttributes_Hidden) ==
-                 FileAttributes::FileAttributes_Hidden) &&
-                ((fileData.Attributes & FileAttributes::FileAttributes_System) ==
-                 FileAttributes::FileAttributes_System))
+            else if (!isDirectory && (fileData.Attributes & FileAttributes::FileAttributes_Directory))
+            {
+                continue;
+            }
+            // skip files with hidden and system attribute along with extension 'sys'
+            else if (!isDirectory && !(fileData.Attributes & FileAttributes::FileAttributes_Directory))
             {
                 const char *fileName = (const char *)fileData.FileName;
                 const char *extension = strrchr(fileName, '.');
                 if (extension != NULL && strcmp(extension, ".sys") == 0)
                 {
                     // file has a .sys extension, skip it
+                    continue;
+                }
+
+                // check for hidden and system attributes
+                if (((fileData.Attributes & FileAttributes::FileAttributes_Hidden) ==
+                     FileAttributes::FileAttributes_Hidden) &&
+                    ((fileData.Attributes & FileAttributes::FileAttributes_System) ==
+                     FileAttributes::FileAttributes_System))
+                {
                     continue;
                 }
             }
