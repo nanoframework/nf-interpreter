@@ -4,7 +4,7 @@
 parameters:
   - name: gccArmVersion
     type: string
-    default: "13.2.rel1"
+    default: "13.3.rel1"
 
 steps:
   - task: Cache@2

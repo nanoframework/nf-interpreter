@@ -12,7 +12,7 @@ param (
 
 # set default GNU GCC version
 if ([string]::IsNullOrEmpty($Version)) {
-    $Version = "13.2.rel1"
+    $Version = "13.3.rel1"
 }
 
 # check if running on Azure Pipelines by looking at this two environment variables
