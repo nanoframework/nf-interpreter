@@ -975,7 +975,7 @@ HRESULT CLR_RT_Thread::Execute_DelegateInvoke(CLR_RT_StackFrame &stackArg)
 
     {
         CLR_RT_ProtectFromGC gc(*dlg);
-        CLR_RT_MethodDef_Instance inst;
+        CLR_RT_MethodDef_Instance inst{};
         inst.InitializeFromIndex(dlg->DelegateFtn());
         bool fStaticMethod = (inst.m_target->flags & CLR_RECORD_METHODDEF::MD_Static) != 0;
 
@@ -2092,7 +2092,7 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                 {
                     FETCH_ARG_COMPRESSED_METHODTOKEN(arg, ip);
 
-                    CLR_RT_MethodDef_Instance calleeInst;
+                    CLR_RT_MethodDef_Instance calleeInst{};
                     if (calleeInst.ResolveToken(arg, assm) == false)
                         NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
                     CLR_RT_TypeDef_Index cls;
@@ -2123,7 +2123,10 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                             }
                             else
                             {
-                                memmove(&pThis[0], &pThis[1], calleeInst.m_target->numArgs * sizeof(CLR_RT_HeapBlock));
+                                memmove(
+                                    &pThis[0],
+                                    &pThis[1],
+                                    calleeInst.m_target->numArgs * sizeof(struct CLR_RT_HeapBlock));
 
                                 evalPos--;
                             }
@@ -2269,7 +2272,7 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                 {
                     FETCH_ARG_COMPRESSED_TYPETOKEN(arg, ip);
 
-                    CLR_RT_TypeDef_Instance type;
+                    CLR_RT_TypeDef_Instance type{};
                     CLR_RT_TypeDef_Index cls;
 
                     if (type.ResolveToken(arg, assm) == false)
@@ -2290,6 +2293,8 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                         // Save the pointer to the object to load/copy and protect it from GC.
                         //
                         CLR_RT_HeapBlock safeSource;
+
+                        memset(&safeSource, 0, sizeof(struct CLR_RT_HeapBlock));
                         safeSource.Assign(evalPos[0]);
                         CLR_RT_ProtectFromGC gc(safeSource);
 
@@ -2321,10 +2326,10 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                 {
                     FETCH_ARG_COMPRESSED_METHODTOKEN(arg, ip);
 
-                    CLR_RT_MethodDef_Instance calleeInst;
+                    CLR_RT_MethodDef_Instance calleeInst{};
                     if (calleeInst.ResolveToken(arg, assm) == false)
                         NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
-                    CLR_RT_TypeDef_Instance cls;
+                    CLR_RT_TypeDef_Instance cls{};
                     CLR_RT_HeapBlock *top;
                     CLR_INT32 changes;
 
@@ -2363,7 +2368,7 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
 
                         dlg->m_cls = cls;
 
-                        CLR_RT_MethodDef_Instance dlgInst;
+                        CLR_RT_MethodDef_Instance dlgInst{};
 
                         if (dlgInst.InitializeFromIndex(dlg->DelegateFtn()) == false)
                         {
@@ -2703,7 +2708,7 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                 {
                     FETCH_ARG_COMPRESSED_TYPETOKEN(arg, ip);
 
-                    CLR_RT_TypeDef_Instance typeInst;
+                    CLR_RT_TypeDef_Instance typeInst{};
                     if (typeInst.ResolveToken(arg, assm) == false)
                         NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
 
@@ -2732,7 +2737,7 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                     // ldobj.) When applied to a reference type, the unbox.any instruction has the same effect as
                     // castclass typeTok.
 
-                    CLR_RT_TypeDef_Instance typeInst;
+                    CLR_RT_TypeDef_Instance typeInst{};
                     if (typeInst.ResolveToken(arg, assm) == false)
                         NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
 
@@ -2749,6 +2754,8 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                         //"ldobj"
                         {
                             CLR_RT_HeapBlock safeSource;
+
+                            memset(&safeSource, 0, sizeof(struct CLR_RT_HeapBlock));
                             safeSource.Assign(evalPos[0]);
                             CLR_RT_ProtectFromGC gc(safeSource);
 
@@ -2859,6 +2866,9 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                     // then dereference it.
                     //
                     CLR_RT_HeapBlock ref;
+
+                    memset(&ref, 0, sizeof(struct CLR_RT_HeapBlock));
+
                     NANOCLR_CHECK_HRESULT(ref.InitializeArrayReference(evalPos[0], evalPos[1].NumericByRef().s4));
 
                     NANOCLR_CHECK_HRESULT(evalPos[0].LoadFromReference(ref));
@@ -2886,7 +2896,7 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                     evalPos[0].FixArrayReferenceForValueTypes();
                     //</LDELEMA>
                     // <LDOBJ>
-                    CLR_RT_TypeDef_Instance type;
+                    CLR_RT_TypeDef_Instance type{};
                     CLR_RT_TypeDef_Index cls;
 
                     if (!type.ResolveToken(arg, assm))
@@ -2902,6 +2912,8 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                     {
                         // Save the pointer to the object to load/copy and protect it from GC.
                         CLR_RT_HeapBlock safeSource;
+
+                        memset(&safeSource, 0, sizeof(struct CLR_RT_HeapBlock));
                         safeSource.Assign(evalPos[0]);
                         CLR_RT_ProtectFromGC gc(safeSource);
 
@@ -3002,7 +3014,11 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                     // then dereference it.
                     //
                     CLR_RT_HeapBlock ref;
+
+                    memset(&ref, 0, sizeof(struct CLR_RT_HeapBlock));
+
                     NANOCLR_CHECK_HRESULT(ref.InitializeArrayReference(evalPos[1], evalPos[2].NumericByRef().s4));
+
                     int size = 0;
 
                     switch (op)
@@ -3078,7 +3094,7 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                     {
                         case TBL_TypeSpec:
                         {
-                            CLR_RT_TypeSpec_Instance sig;
+                            CLR_RT_TypeSpec_Instance sig{};
                             if (sig.ResolveToken(arg, assm) == false)
                                 NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
 
@@ -3089,7 +3105,7 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                         case TBL_TypeRef:
                         case TBL_TypeDef:
                         {
-                            CLR_RT_TypeDef_Instance cls;
+                            CLR_RT_TypeDef_Instance cls{};
                             if (cls.ResolveToken(arg, assm) == false)
                                 NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
 
@@ -3111,7 +3127,7 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                         case TBL_MethodRef:
                         case TBL_MethodDef:
                         {
-                            CLR_RT_MethodDef_Instance method;
+                            CLR_RT_MethodDef_Instance method{};
                             if (method.ResolveToken(arg, assm) == false)
                                 NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
 
@@ -3265,7 +3281,7 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                     evalPos++;
                     CHECKSTACK(stack, evalPos);
 
-                    CLR_RT_MethodDef_Instance method;
+                    CLR_RT_MethodDef_Instance method{};
                     if (method.ResolveToken(arg, assm) == false)
                         NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
 
@@ -3281,7 +3297,7 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                 {
                     FETCH_ARG_COMPRESSED_METHODTOKEN(arg, ip);
 
-                    CLR_RT_MethodDef_Instance callee;
+                    CLR_RT_MethodDef_Instance callee{};
                     if (callee.ResolveToken(arg, assm) == false)
                         NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
                     CLR_RT_TypeDef_Index cls;
@@ -3346,19 +3362,19 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                 {
                     FETCH_ARG_COMPRESSED_TYPETOKEN(arg, ip);
 
-                    CLR_RT_TypeDef_Instance clsInst;
+                    CLR_RT_TypeDef_Instance clsInst{};
                     if (clsInst.ResolveToken(arg, assm) == false)
                         NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
                     CLR_INT32 len;
 
                     if (clsInst.m_target->dataType)
                     {
-                        len = sizeof(CLR_RT_HeapBlock);
+                        len = sizeof(struct CLR_RT_HeapBlock);
                     }
                     else
                     {
                         len = (CLR_RT_HeapBlock::HB_Object_Fields_Offset + clsInst.CrossReference().m_totalFields) *
-                              sizeof(CLR_RT_HeapBlock);
+                              sizeof(struct CLR_RT_HeapBlock);
                     }
 
                     evalPos++;

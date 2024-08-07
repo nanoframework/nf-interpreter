@@ -12,6 +12,11 @@ if(NF_FEATURE_HAS_CONFIG_BLOCK)
     list(APPEND TARGET_AZURERTOS_COMMON_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/targetHAL_ConfigurationManager.cpp)
 endif()
 
+# include internal storage, if feature is enabled
+if(NF_FEATURE_HAS_ACCESSIBLE_STORAGE)
+    list(APPEND TARGET_AZURERTOS_COMMON_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/targetHAL_StorageOperation.cpp)
+endif()
+
 # append hard fault handler if the build type is to include debug info
 if(CMAKE_BUILD_TYPE STREQUAL "Debug" OR CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo")
     list(APPEND TARGET_AZURERTOS_COMMON_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/hard_fault_handler.c)

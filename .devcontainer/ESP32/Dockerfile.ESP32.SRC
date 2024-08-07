@@ -1,0 +1,84 @@
+FROM ubuntu:latest AS downloader
+RUN apt-get update \
+    && apt-get -y install --no-install-recommends apt-utils \
+    && apt-get install -y \
+    curl \
+    bzip2 \
+    unzip \
+    wget 
+
+RUN mkdir -p /tmp/dc-downloads /tmp/dc-extracted
+
+ARG CMAKE_VERSION=3.27.6
+ARG CMAKE_SCRIPT=https://github.com/Kitware/CMake/releases/download/v$CMAKE_VERSION/cmake-$CMAKE_VERSION-linux-x86_64.sh
+RUN wget $CMAKE_SCRIPT \
+    -q -O /tmp/dc-downloads/cmake-install.sh \
+    && chmod u+x /tmp/dc-downloads/cmake-install.sh \
+    && mkdir -p /tmp/dc-extracted/cmake \
+    && /tmp/dc-downloads/cmake-install.sh --skip-license --prefix=/tmp/dc-extracted/cmake \
+    && rm /tmp/dc-downloads/cmake-install.sh
+
+FROM python:3.11 AS devcontainer
+
+# Avoid warnings by switching to noninteractive
+ENV DEBIAN_FRONTEND=noninteractive
+
+# You can set up non-root user
+# ARG USERNAME=vscode
+# ARG USER_UID=1000
+# ARG USER_GID=$USER_UID
+
+# Configure apt and install packages
+RUN apt-get update \
+    && apt-get -y install --no-install-recommends apt-utils dialog icu-devtools 2>&1 \
+    && apt-get install -y \
+    git \
+    git-lfs \
+    clang-format \
+    curl \
+    ninja-build \
+    srecord \
+    nodejs \
+    libffi-dev
+
+# Create needed directories
+RUN mkdir -p /usr/local/bin/gcc
+
+# Clone fatfs
+RUN git clone --branch R0.15 https://github.com/abbrev/fatfs.git --depth 1 ./sources/fatfs
+
+# Clone ESP-IDF
+RUN git clone --branch v5.2.2 https://github.com/espressif/esp-idf --depth 1 --recursive ./sources/esp-idf
+
+# Creating static link python for pyhton3
+RUN ln -fs /usr/bin/python3 /usr/bin/python \
+    && pip3 install pyserial
+
+# copy from our other container
+COPY --from=downloader /tmp/dc-extracted/cmake /usr/bin/cmake
+
+ENV PATH=/usr/bin/cmake/bin:${PATH}
+
+# Install ESP-IDF
+ENV IDF_PATH=/sources/esp-idf
+ENV ESP_PATCH_VER=esp-13.2.0_20230928
+# This is now taking care in the following line
+# RUN python -m pip install -r $IDF_PATH/requirements.txt
+RUN $IDF_PATH/install.sh
+
+ENV PATH=/root/.espressif/python_env/idf5.2_py3.11_env/bin:$PATH:\
+$IDF_PATH/components/esptool_py/esptool:\
+$IDF_PATH/components/espcoredump:\ 
+$IDF_PATH/components/partition_table/:\
+$IDF_PATH/tools/:\
+$IDF_PATH/components/app_update:\
+/root/.espressif/tools/xtensa-esp-elf/$ESP_PATCH_VER/xtensa-esp-elf/bin:\
+/root/.espressif/tools/riscv32-esp-elf/$ESP_PATCH_VER/riscv32-esp-elf/bin
+
+# Clean up downloaded files
+RUN apt-get autoremove -y \
+    && apt-get clean -y \
+    && rm -rf /var/lib/apt/lists/*
+
+# Switch back to dialog for any ad-hoc use of apt-get
+ENV DEBIAN_FRONTEND=dialog

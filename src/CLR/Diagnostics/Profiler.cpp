@@ -228,8 +228,8 @@ void CLR_PRF_Profiler::DumpObject(CLR_RT_HeapBlock *ptr)
     CLR_DataType dt = ptr->DataType();
     _ASSERTE(dt < DATATYPE_FIRST_INVALID);
     _ASSERTE(
-        sizeof(CLR_RT_HeapBlock) ==
-        12); // HeapBlockObjectPacket in ProfilerPackets.cs assumes sizeof(CLR_RT_HeapBlock) == 12
+        sizeof(struct CLR_RT_HeapBlock) ==
+        12); // HeapBlockObjectPacket in ProfilerPackets.cs assumes sizeof(struct CLR_RT_HeapBlock) == 12
 
     if (dt != DATATYPE_FREEBLOCK && dt != DATATYPE_CACHEDBLOCK)
     {
@@ -439,7 +439,6 @@ void CLR_PRF_Profiler::DumpObject(CLR_RT_HeapBlock *ptr)
                 DumpListOfReferences(appDomain->m_appDomainAssemblies);
                 DumpSingleReference(appDomain->m_globalLock);
                 DumpSingleReference(appDomain->m_strName);
-                DumpSingleReference(appDomain->m_outOfMemoryException);
                 break;
             }
 
@@ -705,7 +704,7 @@ void CLR_PRF_Profiler::TrackObjectCreation(CLR_RT_HeapBlock *ptr)
                     (size_t)((CLR_UINT8 *)ptr),
                     (CLR_UINT32)((size_t *)ptr - s_CLR_RT_Heap.m_location),
                     (CLR_UINT32)dt,
-                    (dataSize * sizeof(CLR_RT_HeapBlock)),
+                    (dataSize * sizeof(struct CLR_RT_HeapBlock)),
                     idx.m_data);
 
 #else
@@ -714,7 +713,7 @@ void CLR_PRF_Profiler::TrackObjectCreation(CLR_RT_HeapBlock *ptr)
                     (CLR_UINT32)((CLR_UINT8 *)ptr),
                     (CLR_UINT32)((CLR_UINT8 *)ptr - s_CLR_RT_Heap.m_location),
                     (CLR_UINT32)dt,
-                    (dataSize * sizeof(CLR_RT_HeapBlock)),
+                    (dataSize * sizeof(struct CLR_RT_HeapBlock)),
                     idx.m_data);
 #endif
 
@@ -736,7 +735,7 @@ void CLR_PRF_Profiler::TrackObjectCreation(CLR_RT_HeapBlock *ptr)
                     (CLR_UINT32)((size_t *)ptr - s_CLR_RT_Heap.m_location),
                     (CLR_UINT32)dt,
                     elementIdx.m_data,
-                    (dataSize * sizeof(CLR_RT_HeapBlock)));
+                    (dataSize * sizeof(struct CLR_RT_HeapBlock)));
 
 #else
                 CLR_Debug::Printf(
@@ -745,7 +744,7 @@ void CLR_PRF_Profiler::TrackObjectCreation(CLR_RT_HeapBlock *ptr)
                     (CLR_UINT32)((CLR_UINT8 *)ptr - s_CLR_RT_Heap.m_location),
                     (CLR_UINT32)dt,
                     elementIdx.m_data,
-                    (dataSize * sizeof(CLR_RT_HeapBlock)));
+                    (dataSize * sizeof(struct CLR_RT_HeapBlock)));
 #endif
 #endif // NANOCLR_TRACE_PROFILER_MESSAGES
             }
@@ -758,7 +757,7 @@ void CLR_PRF_Profiler::TrackObjectCreation(CLR_RT_HeapBlock *ptr)
                     (size_t)((CLR_UINT8 *)ptr),
                     (CLR_UINT32)((size_t *)ptr - s_CLR_RT_Heap.m_location),
                     (CLR_UINT32)dt,
-                    (dataSize * sizeof(CLR_RT_HeapBlock)));
+                    (dataSize * sizeof(struct CLR_RT_HeapBlock)));
 
 #else
                 CLR_Debug::Printf(
@@ -766,7 +765,7 @@ void CLR_PRF_Profiler::TrackObjectCreation(CLR_RT_HeapBlock *ptr)
                     (CLR_UINT32)((CLR_UINT8 *)ptr),
                     (CLR_UINT32)((CLR_UINT8 *)ptr - s_CLR_RT_Heap.m_location),
                     (CLR_UINT32)dt,
-                    (dataSize * sizeof(CLR_RT_HeapBlock)));
+                    (dataSize * sizeof(struct CLR_RT_HeapBlock)));
 #endif
             }
 #endif // NANOCLR_TRACE_PROFILER_MESSAGES
@@ -806,14 +805,14 @@ void CLR_PRF_Profiler::TrackObjectDeletion(CLR_RT_HeapBlock *ptr)
             "\r\n    Profiler info: * (0x0x%I64X | %d) %d bytes\r\n",
             (size_t)((CLR_UINT8 *)ptr),
             (CLR_UINT32)((size_t *)ptr - s_CLR_RT_Heap.m_location),
-            (dataSize * sizeof(CLR_RT_HeapBlock)));
+            (dataSize * sizeof(struct CLR_RT_HeapBlock)));
 
 #else
         CLR_Debug::Printf(
             "\r\n    Profiler info: * (0x%08X | %d) %d bytes\r\n",
             (CLR_UINT32)((CLR_UINT8 *)ptr),
             (CLR_UINT32)((CLR_UINT8 *)ptr - s_CLR_RT_Heap.m_location),
-            (dataSize * sizeof(CLR_RT_HeapBlock)));
+            (dataSize * sizeof(struct CLR_RT_HeapBlock)));
 #endif
 
 #endif // NANOCLR_TRACE_PROFILER_MESSAGES

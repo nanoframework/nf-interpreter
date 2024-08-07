@@ -156,17 +156,31 @@ HRESULT HAL_SOCK_CONFIGURATION_Link_status(uint32_t interfaceIndex, bool *status
     return LWIP_SOCKETS_Driver::Link_status(interfaceIndex, status);
 }
 
-HRESULT HAL_SOCK_IPAddressFromString(const char *ipString, uint64_t *address)
+HRESULT HAL_SOCK_IPV4AddressFromString(const char *ipString, uint64_t *address)
 {
     NATIVE_PROFILE_PAL_NETWORK();
-    return LWIP_SOCKETS_Driver::IPAddressFromString(ipString, address);
+    return LWIP_SOCKETS_Driver::IPV4AddressFromString(ipString, address);
 }
 
-const char *HAL_SOCK_IPAddressToString(uint32_t address)
+const char *HAL_SOCK_IPV4AddressToString(uint32_t address)
 {
     NATIVE_PROFILE_PAL_NETWORK();
-    return LWIP_SOCKETS_Driver::IPAddressToString(address);
+    return LWIP_SOCKETS_Driver::IP4AddressToString(address);
 }
+
+#if LWIP_IPV6
+HRESULT HAL_SOCK_IPV6AddressFromString(const char *ipString, uint16_t *address)
+{
+    NATIVE_PROFILE_PAL_NETWORK();
+    return LWIP_SOCKETS_Driver::IPV6AddressFromString(ipString, address);
+}
+
+const char *HAL_SOCK_IPV6AddressToString(uint16_t *addr)
+{
+    NATIVE_PROFILE_PAL_NETWORK();
+    return LWIP_SOCKETS_Driver::IP6AddressToString(addr);
+}
+#endif
 
 void HAL_SOCK_EventsSet(uint32_t events)
 {
@@ -184,4 +198,9 @@ void *HAL_SOCK_GlobalLockContext()
 {
     NATIVE_PROFILE_PAL_NETWORK();
     return NULL;
+}
+
+void HAL_SOCK_SetInterfaceNumber(uint32_t interfaceIndex, uint32_t interfaceNumber)
+{
+    LWIP_SOCKETS_Driver::SetSocketDriverInterface(interfaceIndex, interfaceNumber);
 }

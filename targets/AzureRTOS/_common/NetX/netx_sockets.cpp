@@ -76,7 +76,7 @@ HRESULT NETX_SOCKETS_Driver::Link_status(uint32_t interfaceIndex, bool *status)
     return S_OK;
 }
 
-HRESULT NETX_SOCKETS_Driver::IPAddressFromString(const char *ipString, uint64_t *address)
+HRESULT NETX_SOCKETS_Driver::IPV4AddressFromString(const char *ipString, uint64_t *address)
 {
     struct in_addr ipv4_addr;
 
@@ -92,7 +92,7 @@ HRESULT NETX_SOCKETS_Driver::IPAddressFromString(const char *ipString, uint64_t 
     return S_OK;
 }
 
-const char *NETX_SOCKETS_Driver::IPAddressToString(uint32_t address)
+const char *NETX_SOCKETS_Driver::IPV4AddressToString(uint32_t address)
 {
     // get IP v4 address in numeric format
     // FIXME IPV6
@@ -189,7 +189,7 @@ bool NETX_SOCKETS_Driver::Initialize()
     int interfaceCount = g_TargetConfiguration.NetworkInterfaceConfigs->Count;
 
     // sanity check for any interfaces
-    if(interfaceCount > 0)
+    if (interfaceCount > 0)
     {
         g_NETX_SOCKETS_Driver.m_interfaces =
             (NETX_DRIVER_INTERFACE_DATA *)platform_malloc(interfaceCount * sizeof(NETX_DRIVER_INTERFACE_DATA));
@@ -212,7 +212,7 @@ bool NETX_SOCKETS_Driver::Initialize()
             }
 
             // sanity check
-            if(networkConfiguration.StartupAddressMode == 0)
+            if (networkConfiguration.StartupAddressMode == 0)
             {
                 return FALSE;
             }
@@ -321,9 +321,9 @@ int NETX_SOCKETS_Driver::Bind(SOCK_SOCKET socket, const SOCK_sockaddr *address, 
 
     SOCK_SOCKADDR_TO_SOCKADDR(address, addr, &addressLen);
 
-errorCode = bind(socket, (sockaddr *)&addr, addressLen);
+    errorCode = bind(socket, (sockaddr *)&addr, addressLen);
 
-return errorCode;
+    return errorCode;
 }
 
 int NETX_SOCKETS_Driver::Connect(SOCK_SOCKET socket, const SOCK_sockaddr *address, int addressLen)
@@ -372,7 +372,7 @@ int NETX_SOCKETS_Driver::Close(SOCK_SOCKET socket)
 {
     NATIVE_PROFILE_PAL_NETWORK();
 
-    errorCode =  soc_close(socket);
+    errorCode = soc_close(socket);
 
     return errorCode;
 }
@@ -381,9 +381,9 @@ int NETX_SOCKETS_Driver::Listen(SOCK_SOCKET socket, int backlog)
 {
     NATIVE_PROFILE_PAL_NETWORK();
 
-errorCode =  listen(socket, backlog);
+    errorCode = listen(socket, backlog);
 
-return errorCode;
+    return errorCode;
 }
 
 SOCK_SOCKET NETX_SOCKETS_Driver::Accept(SOCK_SOCKET socket, SOCK_sockaddr *address, int *addressLen)
@@ -580,7 +580,7 @@ int NETX_SOCKETS_Driver::GetLastError()
 int NETX_SOCKETS_Driver::GetSockLastError(SOCK_SOCKET socket)
 {
     (void)socket;
-    
+
     NATIVE_PROFILE_PAL_NETWORK();
 
     // get last error number from socket
@@ -884,10 +884,9 @@ int NETX_SOCKETS_Driver::SendTo(
     return sendto(socket, (CHAR *)buf, len, flags, (sockaddr *)&addr, tolen);
 }
 
-// this implementation it's weak so it can be replaced at plaftorm level 
-__nfweak HRESULT NETX_SOCKETS_Driver::LoadAdapterConfiguration(
-    HAL_Configuration_NetworkInterface *config,
-    uint32_t interfaceIndex)
+// this implementation it's weak so it can be replaced at plaftorm level
+__nfweak HRESULT
+    NETX_SOCKETS_Driver::LoadAdapterConfiguration(HAL_Configuration_NetworkInterface *config, uint32_t interfaceIndex)
 {
     (void)interfaceIndex;
 
@@ -950,13 +949,13 @@ struct dhcp_client_id
     uint8_t clientId[6];
 };
 
-// this implementation it's weak so it can be replaced at plaftorm level 
+// this implementation it's weak so it can be replaced at plaftorm level
 __nfweak HRESULT NETX_SOCKETS_Driver::UpdateAdapterConfiguration(
     uint32_t interfaceIndex,
     uint32_t updateFlags,
     HAL_Configuration_NetworkInterface *config)
 {
-    (void) interfaceIndex;
+    (void)interfaceIndex;
 
     NATIVE_PROFILE_PAL_NETWORK();
 
@@ -1102,7 +1101,7 @@ int NETX_SOCKETS_Driver::GetNativeSockOption(int optname)
             nativeOptionName = SO_SNDBUF;
             break;
         // not supported
-        //case SOCK_SOCKO_ACCEPTCONNECTION:
+        // case SOCK_SOCKO_ACCEPTCONNECTION:
         // case SOCK_SOCKO_USELOOPBACK:
         case SOCK_SOCKO_DONTROUTE:
             nativeOptionName = SO_DONTROUTE;
@@ -1146,9 +1145,9 @@ int NETX_SOCKETS_Driver::GetNativeIPOption(int optname)
 
     switch (optname)
     {
-        // not supported
-        // case SOCK_IPO_TTL:
-        // case SOCK_IPO_TOS:
+            // not supported
+            // case SOCK_IPO_TTL:
+            // case SOCK_IPO_TOS:
 
         case SOCK_IPO_MULTICAST_IF:
             nativeOptionName = IP_MULTICAST_IF;

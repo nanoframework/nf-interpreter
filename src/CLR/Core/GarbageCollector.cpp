@@ -237,7 +237,7 @@ CLR_UINT32 CLR_RT_GarbageCollector::ExecuteGarbageCollection()
                     "Type %02X (%-20s): %8d bytes\r\n",
                     dt,
                     c_CLR_RT_DataTypeLookup[dt].m_name,
-                    countBlocks[dt] * sizeof(CLR_RT_HeapBlock));
+                    countBlocks[dt] * sizeof(struct CLR_RT_HeapBlock));
 
                 if (dt == DATATYPE_SZARRAY)
                 {
@@ -249,7 +249,7 @@ CLR_UINT32 CLR_RT_GarbageCollector::ExecuteGarbageCollection()
                                 "   Type %02X (%-17s): %8d bytes\r\n",
                                 dt2,
                                 c_CLR_RT_DataTypeLookup[dt2].m_name,
-                                countArryBlocks[dt2] * sizeof(CLR_RT_HeapBlock));
+                                countArryBlocks[dt2] * sizeof(struct CLR_RT_HeapBlock));
                         }
                     }
                 }
@@ -608,8 +608,8 @@ void CLR_RT_GarbageCollector::CheckMemoryPressure()
                     if (weak->m_targetSerialized && weak->m_targetDirect == NULL)
                     {
 #if !defined(BUILD_RTM)
-                        CLR_RT_ReflectionDef_Index val;
-                        CLR_RT_TypeDef_Instance inst;
+                        CLR_RT_ReflectionDef_Index val{};
+                        CLR_RT_TypeDef_Instance inst{};
                         char rgBuffer[512];
                         char *szBuffer = rgBuffer;
                         size_t iBuffer = MAXSTRLEN(rgBuffer);
@@ -662,7 +662,6 @@ void CLR_RT_GarbageCollector::AppDomain_Mark()
 
         CheckSingleBlock_Force(appDomain->m_globalLock);
         CheckSingleBlock_Force(appDomain->m_strName);
-        CheckSingleBlock_Force(appDomain->m_outOfMemoryException);
     }
     NANOCLR_FOREACH_NODE_END();
 }
@@ -850,7 +849,7 @@ CLR_UINT32 CLR_RT_GarbageCollector::Heap_ComputeAliveVsDeadRatio()
     NANOCLR_FOREACH_NODE_END();
 
     m_totalBytes = totalBytes;
-    m_freeBytes = freeBlocks * sizeof(CLR_RT_HeapBlock);
+    m_freeBytes = freeBlocks * sizeof(struct CLR_RT_HeapBlock);
 
     return m_freeBytes;
 }

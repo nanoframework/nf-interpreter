@@ -58,7 +58,7 @@ if("${TARGET_SERIES}" STREQUAL "CC32xx")
     FetchContent_GetProperties(simplelinkcc32xxsdk)
     if(NOT simplelinkcc32xxsdk_POPULATED)
             # Fetch the content using previously declared details
-            FetchContent_Populate(simplelinkcc32xxsdk)
+            FetchContent_MakeAvailable(simplelinkcc32xxsdk)
     endif()
 
     # check if TI_XDCTOOLS_SOURCE was specified or if it's empty (default is empty)
@@ -108,7 +108,7 @@ if("${TARGET_SERIES}" STREQUAL "CC32xx")
     FetchContent_GetProperties(ti_xdctools)
     if(NOT ti_xdctools_POPULATED)
         # Fetch the content using previously declared details
-        FetchContent_Populate(ti_xdctools)
+        FetchContent_MakeAvailable(ti_xdctools)
     endif()
 
     set(TI_XDCTools_INCLUDE_DIR ${ti_xdctools_SOURCE_DIR}/packages/ PARENT_SCOPE)
@@ -159,7 +159,7 @@ elseif( "${TARGET_SERIES}" STREQUAL "CC13X2" )
     FetchContent_GetProperties(simplelinkcc13xx_26xxsdk)
     if(NOT simplelinkcc13xx_26xxsdk_POPULATED)
         # Fetch the content using previously declared details
-        FetchContent_Populate(simplelinkcc13xx_26xxsdk)
+        FetchContent_MakeAvailable(simplelinkcc13xx_26xxsdk)
     endif()
     
     # check if TI_SYSCONFIG_SOURCE was specified or if it's empty (default is empty)
@@ -209,7 +209,7 @@ elseif( "${TARGET_SERIES}" STREQUAL "CC13X2" )
     FetchContent_GetProperties(ti_sysconfig)
     if(NOT ti_sysconfig_POPULATED)
         # Fetch the content using previously declared details
-        FetchContent_Populate(ti_sysconfig)
+        FetchContent_MakeAvailable(ti_sysconfig)
     endif()
         
     # check if TI_XDCTOOLS_SOURCE was specified or if it's empty (default is empty)
@@ -259,7 +259,7 @@ elseif( "${TARGET_SERIES}" STREQUAL "CC13X2" )
     FetchContent_GetProperties(ti_xdctools)
     if(NOT ti_xdctools_POPULATED)
         # Fetch the content using previously declared details
-        FetchContent_Populate(ti_xdctools)
+        FetchContent_MakeAvailable(ti_xdctools)
     endif()
 
     set(TI_XDCTools_INCLUDE_DIR ${ti_xdctools_SOURCE_DIR}/packages/ PARENT_SCOPE)

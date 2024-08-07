@@ -6,9 +6,8 @@
 //
 
 #include <ssl.h>
-#include "mbedtls.h"
-#include "mbedtls/debug.h"
-#include <mbedtls/pk_internal.h>
+#include <mbedtls.h>
+#include <mbedtls/debug.h>
 
 bool ssl_generic_init_internal(
     int sslMode,
@@ -23,8 +22,11 @@ bool ssl_generic_init_internal(
     bool useDeviceCertificate,
     bool isServer)
 {
-    int minVersion = MBEDTLS_SSL_MINOR_VERSION_3;
-    int maxVersion = MBEDTLS_SSL_MINOR_VERSION_1;
+    // set default values for min and max protocol versions
+    // aiming for TLS 1.3 which is the most secure
+    mbedtls_ssl_protocol_version minVersion = MBEDTLS_SSL_VERSION_TLS1_3;
+    mbedtls_ssl_protocol_version maxVersion = MBEDTLS_SSL_VERSION_TLS1_3;
+
     int sslContexIndex = -1;
     int authMode = MBEDTLS_SSL_VERIFY_NONE;
     int endpoint = 0;
@@ -47,7 +49,9 @@ bool ssl_generic_init_internal(
     }
 
     if (sslContexIndex == -1)
+    {
         return FALSE;
+    }
 
     // create and init MbedTLS nanoFramework context
     // this needs to be freed in ssl_exit_context_internal
@@ -77,25 +81,6 @@ bool ssl_generic_init_internal(
         endpoint = MBEDTLS_SSL_IS_CLIENT;
     }
 
-    // create and init private key context
-    // this needs to be freed in ssl_exit_context_internal
-    context->pk = (mbedtls_pk_context *)platform_malloc(sizeof(mbedtls_pk_context));
-    if (context->pk == NULL)
-    {
-        goto error;
-    }
-
-    mbedtls_pk_init(context->pk);
-
-    // create and init CTR_DRBG
-    // this needs to be freed in ssl_exit_context_internal
-    context->ctr_drbg = (mbedtls_ctr_drbg_context *)platform_malloc(sizeof(mbedtls_ctr_drbg_context));
-    if (context->ctr_drbg == NULL)
-    {
-        goto error;
-    }
-    mbedtls_ctr_drbg_init(context->ctr_drbg);
-
     // create and init SSL context
     // this needs to be freed in ssl_exit_context_internal
     context->ssl = (mbedtls_ssl_context *)platform_malloc(sizeof(mbedtls_ssl_context));
@@ -115,14 +100,14 @@ bool ssl_generic_init_internal(
 
     mbedtls_ssl_config_init(context->conf);
 
-    // create and init X509 CRT
+    // create and init CTR_DRBG
     // this needs to be freed in ssl_exit_context_internal
-    context->x509_crt = (mbedtls_x509_crt *)platform_malloc(sizeof(mbedtls_x509_crt));
-    if (context->x509_crt == NULL)
+    context->ctr_drbg = (mbedtls_ctr_drbg_context *)platform_malloc(sizeof(mbedtls_ctr_drbg_context));
+    if (context->ctr_drbg == NULL)
     {
         goto error;
     }
-    mbedtls_x509_crt_init(context->x509_crt);
+    mbedtls_ctr_drbg_init(context->ctr_drbg);
 
     // create and init entropy context
     // this needs to be freed in ssl_exit_context_internal
@@ -132,6 +117,25 @@ bool ssl_generic_init_internal(
         goto error;
     }
     mbedtls_entropy_init(context->entropy);
+
+    // create and init private key context
+    // this needs to be freed in ssl_exit_context_internal
+    context->pk = (mbedtls_pk_context *)platform_malloc(sizeof(mbedtls_pk_context));
+    if (context->pk == NULL)
+    {
+        goto error;
+    }
+
+    mbedtls_pk_init(context->pk);
+
+    // create and init X509 CRT
+    // this needs to be freed in ssl_exit_context_internal
+    context->x509_crt = (mbedtls_x509_crt *)platform_malloc(sizeof(mbedtls_x509_crt));
+    if (context->x509_crt == NULL)
+    {
+        goto error;
+    }
+    mbedtls_x509_crt_init(context->x509_crt);
 
     // TODO: review if we can add some instance-unique data to the custom argument below
     if (mbedtls_ctr_drbg_seed(context->ctr_drbg, mbedtls_entropy_func, context->entropy, NULL, 0) != 0)
@@ -150,34 +154,35 @@ bool ssl_generic_init_internal(
         goto error;
     }
 
-    // figure out the min and max protocol version to support
-    // sanity check for none, application has to set the supported protocols
-    if ((SslProtocols)sslMode == SslProtocols_None)
+    // figure out the min and max protocol version requested
+    // if none is provided, then set the min/max supported
+    if ((SslProtocols)sslMode != SslProtocols_None)
     {
-        goto error;
+        // find minimum version
+        if ((sslMode & SslProtocols_Tls) || (sslMode & SslProtocols_Tls11) || (sslMode & SslProtocols_Tls12))
+        {
+            // nothing to do as 1.2 is the minimum supported
+            minVersion = MBEDTLS_SSL_VERSION_TLS1_2;
+        }
+        else if (sslMode & SslProtocols_Tls13)
+        {
+            minVersion = MBEDTLS_SSL_VERSION_TLS1_3;
+        }
+
+        // find maximum version
+        if (sslMode & SslProtocols_Tls13)
+        {
+            maxVersion = MBEDTLS_SSL_VERSION_TLS1_3;
+        }
+        else
+        {
+            // has to be 1.2
+            maxVersion = MBEDTLS_SSL_VERSION_TLS1_2;
+        }
     }
 
-    // find minimum version
-    if (sslMode & (SslProtocols_TLSv11 | SslProtocols_TLSv1))
-    {
-        minVersion = MBEDTLS_SSL_MINOR_VERSION_2;
-    }
-    if (sslMode & SslProtocols_TLSv1)
-    {
-        minVersion = MBEDTLS_SSL_MINOR_VERSION_1;
-    }
-    mbedtls_ssl_conf_min_version(context->conf, MBEDTLS_SSL_MAJOR_VERSION_3, minVersion);
-
-    // find maximum version
-    if (sslMode & (SslProtocols_TLSv12 | SslProtocols_TLSv11))
-    {
-        maxVersion = MBEDTLS_SSL_MINOR_VERSION_2;
-    }
-    if (sslMode & SslProtocols_TLSv12)
-    {
-        maxVersion = MBEDTLS_SSL_MINOR_VERSION_3;
-    }
-    mbedtls_ssl_conf_max_version(context->conf, MBEDTLS_SSL_MAJOR_VERSION_3, maxVersion);
+    mbedtls_ssl_conf_max_tls_version(context->conf, maxVersion);
+    mbedtls_ssl_conf_min_tls_version(context->conf, minVersion);
 
     // configure random generator
     mbedtls_ssl_conf_rng(context->conf, mbedtls_ctr_drbg_random, context->ctr_drbg);
@@ -236,13 +241,18 @@ bool ssl_generic_init_internal(
         // is there a private key?
         if (privateKey != NULL && privateKeyLength > 0)
         {
-
             if (mbedtls_pk_parse_key(
                     context->pk,
                     privateKey,
                     privateKeyLength,
                     (const unsigned char *)pkPassword,
+#if MBEDTLS_VERSION_MAJOR < 3
                     pkPasswordLength) < 0)
+#else
+                    pkPasswordLength,
+                    mbedtls_ctr_drbg_random,
+                    context->ctr_drbg) < 0)
+#endif
             {
                 // private key parse failed
                 goto error;
@@ -285,6 +295,8 @@ bool ssl_generic_init_internal(
     }
 
     mbedtls_ssl_conf_ca_chain(context->conf, context->x509_crt, NULL);
+
+    psa_crypto_init();
 
     // set certificate verification
     // the current options provided by Mbed TLS are only verify or don't verify

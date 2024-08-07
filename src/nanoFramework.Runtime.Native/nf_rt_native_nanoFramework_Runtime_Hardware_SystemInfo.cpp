@@ -21,6 +21,11 @@ HRESULT Library_nf_rt_native_nanoFramework_Runtime_Native_SystemInfo::
 
         NFReleaseInfo releaseInfo;
 
+        memset(&hbMajor, 0, sizeof(struct CLR_RT_HeapBlock));
+        memset(&hbMinor, 0, sizeof(struct CLR_RT_HeapBlock));
+        memset(&hbBuild, 0, sizeof(struct CLR_RT_HeapBlock));
+        memset(&hbRevision, 0, sizeof(struct CLR_RT_HeapBlock));
+
         Target_GetReleaseInfo(releaseInfo);
 
         hbMajor.SetInteger(releaseInfo.Version.usMajor);

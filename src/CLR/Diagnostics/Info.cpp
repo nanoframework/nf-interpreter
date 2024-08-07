@@ -728,7 +728,7 @@ void CLR_RT_DUMP::TYPE(const CLR_RT_TypeDef_Index &cls)
 void CLR_RT_DUMP::TYPE(const CLR_RT_ReflectionDef_Index &reflex)
 {
     NATIVE_PROFILE_CLR_DIAGNOSTICS();
-    CLR_RT_TypeDef_Instance inst;
+    CLR_RT_TypeDef_Instance inst{};
     CLR_UINT32 levels;
 
     if (inst.InitializeFromReflection(reflex, &levels))

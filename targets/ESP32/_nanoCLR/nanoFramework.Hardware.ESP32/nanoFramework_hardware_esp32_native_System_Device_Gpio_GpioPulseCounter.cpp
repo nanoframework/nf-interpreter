@@ -7,54 +7,76 @@
 #include "nanoFramework_hardware_esp32_native.h"
 #include <Core.h>
 
-#if defined(CONFIG_IDF_TARGET_ESP32) || defined(CONFIG_IDF_TARGET_ESP32S2) || defined(CONFIG_IDF_TARGET_ESP32S3)
+// PCNT device not available of the ESP32-C3
+#if !defined(CONFIG_IDF_TARGET_ESP32C3)
 
-#include "pcnt.h"
+#include "driver/pulse_cnt.h"
 
 typedef Library_nanoFramework_hardware_esp32_native_System_Device_Gpio_GpioPulseCount GpioPulseCount;
 typedef Library_nanoFramework_hardware_esp32_native_System_Device_Gpio_GpioPulseCounter GpioPulseCounter;
 typedef Library_corlib_native_System_TimeSpan TimeSpan;
 
-// Map Gpio pin number to 1 of 8 ESP32 counters, -1 = not mapped
-// Each pulse counter is a 16 bit signed value.
-// The managed code requires a 64 bit counter so we accumulate the overflows in an interrupt when count gets to 0x7fff
+// Counter by target device
+// ESP32 - 8, ESP32_S2 = 4, ESP32S3 = 4, ESP32_C3 = 0, ESP32_C6 = 4, , ESP32_H2 = 4
+// As each target device type has a different number of counters
+// Calculate number of counters in target
+#define PCNT_NUM_UNIT (SOC_PCNT_GROUPS * SOC_PCNT_UNITS_PER_GROUP)
 
-static bool isrInstalled = false;
-static int8_t gpioCounterMap[PCNT_UNIT_MAX];
-static int64_t overflowCount[PCNT_UNIT_MAX];
-static int8_t numberCounterUsed = 0;
-
+// Maximum count value from driver
 #define MAX_COUNTER_VALUE 0x7fff
 
-// Interrupt routine used to catch overflows so we can have a 64 bit counter
-static void IRAM_ATTR pcnt_intr_handler(void *arg)
+// Pulse counter information entry held in "counterEntries" array when active, inactive entries will be NULL.
+struct PulseCounterEntry
 {
-    int counterIndex = (int)arg;
+    int8_t gpioPinA;
+    int8_t gpioPinB;
+    pcnt_unit_handle_t unitHandle;
+    pcnt_channel_handle_t chanHandleA;
+    pcnt_channel_handle_t chanHandleB;
+    int64_t overflowCount;
+};
 
-    uint32_t status;
-    pcnt_get_event_status((pcnt_unit_t)counterIndex, &status);
+static PulseCounterEntry *counterEntries[PCNT_NUM_UNIT];
+static int8_t numberCounterUsed = 0;
 
-    if (status & PCNT_EVT_H_LIM)
+// Callback routine used to catch overflows/underflows so we can have a 64 bit counter
+static IRAM_ATTR bool pcnt_callback_handler(
+    pcnt_unit_handle_t unit,
+    const pcnt_watch_event_data_t *edata,
+    void *user_ctx)
+{
+    PulseCounterEntry *entry = counterEntries[(int)user_ctx];
+    if (entry != NULL)
     {
-        overflowCount[counterIndex] += MAX_COUNTER_VALUE;
+        if (edata->watch_point_value == MAX_COUNTER_VALUE)
+        {
+            entry->overflowCount += MAX_COUNTER_VALUE;
+        }
+
+        if (edata->watch_point_value == -MAX_COUNTER_VALUE)
+        {
+            entry->overflowCount -= MAX_COUNTER_VALUE;
+        }
     }
 
-    if (status & PCNT_EVT_L_LIM)
-    {
-        overflowCount[counterIndex] -= MAX_COUNTER_VALUE;
-    }
+    return false;
 }
 
-// Find an unused counter, returns counter index or -1 if not found
-static int FindFreeCounter(int gpioPin)
+// Find & create an unused counter entry, returns index or -1 if not available
+static int FindFreeCounter(int gpioPinA, int gpioPinB)
 {
     int counterIndex;
 
-    for (counterIndex = 0; counterIndex < 8; counterIndex++)
+    for (counterIndex = 0; counterIndex < PCNT_NUM_UNIT; counterIndex++)
     {
-        if (gpioCounterMap[counterIndex] == -1)
+        if (counterEntries[counterIndex] == NULL)
         {
-            gpioCounterMap[counterIndex] = gpioPin;
+            PulseCounterEntry *counter = new PulseCounterEntry();
+            counterEntries[counterIndex] = counter;
+            counter->gpioPinA = gpioPinA;
+            counter->gpioPinB = gpioPinB;
+            counter->overflowCount = 0;
+
             numberCounterUsed++;
             return counterIndex;
         }
@@ -63,14 +85,14 @@ static int FindFreeCounter(int gpioPin)
     return -1;
 }
 
-// Find the index of counter for a gpio pin, returns index or -1 if not found
+// Find the pcnt_unit_handle_t  of counter for a GPIO pin, returns index or -1 if not found
 static int FindCounterForGpio(int gpioPin)
 {
     int counterIndex;
 
-    for (counterIndex = 0; counterIndex < PCNT_UNIT_MAX; counterIndex++)
+    for (counterIndex = 0; counterIndex < PCNT_NUM_UNIT; counterIndex++)
     {
-        if (gpioCounterMap[counterIndex] == gpioPin)
+        if (counterEntries[counterIndex] != NULL && counterEntries[counterIndex]->gpioPinA == gpioPin)
         {
             return counterIndex;
         }
@@ -79,76 +101,156 @@ static int FindCounterForGpio(int gpioPin)
     return -1;
 }
 
-// Initalise the ESP32 counter
-// return true if ok
-static bool InitialiseCounter(int counterIndex, int gpioNumA, int gpioNumB, bool countRising, bool countFalling)
+// Initialize the ESP32 counter
+// Create unit & channels
+// return true if OK
+static pcnt_unit_handle_t InitialiseCounter(int counterIndex)
 {
     esp_err_t ec;
 
+    if (counterIndex >= SOC_PCNT_UNITS_PER_GROUP)
+    {
+        return NULL;
+    }
+
+    PulseCounterEntry *counter = counterEntries[counterIndex];
+
     // Prepare configuration for the PCNT unit */
-    pcnt_config_t pcnt_config;
+    pcnt_unit_config_t unit_config = {};
 
-    // Set PCNT input signal and control GPIOs
-    pcnt_config.pulse_gpio_num = gpioNumA;
-    pcnt_config.ctrl_gpio_num = gpioNumB;
+    unit_config.low_limit = -MAX_COUNTER_VALUE;
+    unit_config.high_limit = MAX_COUNTER_VALUE;
 
-    pcnt_config.channel = PCNT_CHANNEL_0;
-    pcnt_config.unit = (pcnt_unit_t)counterIndex;
-
-    if (gpioNumB >= 0)
+    counter->unitHandle = NULL;
+    ec = pcnt_new_unit(&unit_config, &counter->unitHandle);
+    if (ec != ESP_OK)
     {
-        pcnt_config.pos_mode = PCNT_COUNT_DEC;
-        pcnt_config.neg_mode = PCNT_COUNT_INC;
-    }
-    else
-    {
-        // What to do on the positive / negative edge of pulse input?
-        pcnt_config.pos_mode = countRising ? PCNT_COUNT_INC : PCNT_COUNT_DIS;  // positive edge count ?
-        pcnt_config.neg_mode = countFalling ? PCNT_COUNT_INC : PCNT_COUNT_DIS; // falling edge count ?
+        return NULL;
     }
 
-    // What to do when control input is low or high?
-    pcnt_config.lctrl_mode = gpioNumB < 0 ? PCNT_MODE_KEEP : PCNT_MODE_REVERSE; // Keep the primary counter mode if low
-    pcnt_config.hctrl_mode = PCNT_MODE_KEEP;                                    // Keep the primary counter mode if high
+    pcnt_chan_config_t chan_config_a = {};
+    chan_config_a.edge_gpio_num = counter->gpioPinA;
+    chan_config_a.level_gpio_num = counter->gpioPinB;
 
-    // Set the maximum and minimum limit values to watch
-    pcnt_config.counter_h_lim = MAX_COUNTER_VALUE;
-    pcnt_config.counter_l_lim = -MAX_COUNTER_VALUE;
+    counter->chanHandleA = NULL;
+    counter->chanHandleB = NULL;
 
-    //* Initialize PCNT unit
-    ec = pcnt_unit_config(&pcnt_config);
+    ec |= pcnt_new_channel(counter->unitHandle, &chan_config_a, &counter->chanHandleA);
 
-    if (gpioNumB >= 0)
+    // Add 2nd channel if required
+    if (counter->gpioPinB >= 0)
     {
-        pcnt_config.pulse_gpio_num = gpioNumB;
-        pcnt_config.ctrl_gpio_num = gpioNumA;
-        pcnt_config.channel = PCNT_CHANNEL_1;
-        // Setup reverse behavior on second counter
-        pcnt_config.pos_mode = PCNT_COUNT_INC;
-        pcnt_config.neg_mode = PCNT_COUNT_DEC;
-        ec |= pcnt_unit_config(&pcnt_config);
+        pcnt_chan_config_t chan_config_b = {};
+        chan_config_b.edge_gpio_num = counter->gpioPinB;
+        chan_config_b.level_gpio_num = counter->gpioPinA;
+
+        pcnt_new_channel(counter->unitHandle, &chan_config_b, &counter->chanHandleB);
     }
 
-    if ((gpioNumB < 0) && (gpioNumA < 0))
+    pcnt_unit_add_watch_point(counter->unitHandle, MAX_COUNTER_VALUE);
+    pcnt_unit_add_watch_point(counter->unitHandle, -MAX_COUNTER_VALUE);
+    pcnt_unit_clear_count(counter->unitHandle);
+
+    // Register callbacks
+    pcnt_event_callbacks_t cbs = {};
+    cbs.on_reach = pcnt_callback_handler;
+    pcnt_unit_register_event_callbacks(counter->unitHandle, &cbs, (void *)counterIndex);
+
+    return (ec == ESP_OK) ? counter->unitHandle : NULL;
+}
+
+static pcnt_unit_handle_t InitialiseEdgeAndActions(int counterIndex, GpioPulsePolarity polarity)
+{
+    esp_err_t ec = ESP_OK;
+    bool countRising = false;
+    bool countFalling = false;
+
+    PulseCounterEntry *counter = counterEntries[counterIndex];
+
+    switch (polarity)
     {
-        pcnt_config.pulse_gpio_num = gpioNumB;
-        pcnt_config.ctrl_gpio_num = gpioNumA;
-        pcnt_config.channel = PCNT_CHANNEL_1;
-        pcnt_config.pos_mode = PCNT_COUNT_DIS;
-        pcnt_config.neg_mode = PCNT_COUNT_DIS;
-        ec |= pcnt_unit_config(&pcnt_config);
+        case GpioPulsePolarity_Both:
+            countRising = true;
+            countFalling = true;
+            break;
+
+        case GpioPulsePolarity_Rising:
+            countRising = true;
+            countFalling = false;
+            break;
+
+        case GpioPulsePolarity_Falling:
+            countRising = false;
+            countFalling = true;
+            break;
     }
 
-    return ec == ESP_OK;
+    ec |= pcnt_channel_set_edge_action(
+        counter->chanHandleA,
+        countRising ? PCNT_CHANNEL_EDGE_ACTION_INCREASE : PCNT_CHANNEL_EDGE_ACTION_HOLD,
+        countFalling ? PCNT_CHANNEL_EDGE_ACTION_INCREASE : PCNT_CHANNEL_EDGE_ACTION_HOLD);
+
+    ec |= pcnt_channel_set_level_action(
+        counter->chanHandleA,
+        PCNT_CHANNEL_LEVEL_ACTION_KEEP,
+        PCNT_CHANNEL_LEVEL_ACTION_KEEP);
+
+    if (counter->gpioPinB >= 0)
+    {
+        pcnt_channel_set_edge_action(
+            counter->chanHandleB,
+            PCNT_CHANNEL_EDGE_ACTION_INCREASE,
+            PCNT_CHANNEL_EDGE_ACTION_DECREASE);
+        pcnt_channel_set_level_action(
+            counter->chanHandleB,
+            PCNT_CHANNEL_LEVEL_ACTION_KEEP,
+            PCNT_CHANNEL_LEVEL_ACTION_INVERSE);
+        pcnt_channel_set_level_action(
+            counter->chanHandleA,
+            PCNT_CHANNEL_LEVEL_ACTION_KEEP,
+            PCNT_CHANNEL_LEVEL_ACTION_INVERSE);
+    }
+
+    return (ec == ESP_OK) ? counter->unitHandle : NULL;
+}
+
+static void DisposeCounter(int counterIndex)
+{
+    PulseCounterEntry *counter = counterEntries[counterIndex];
+    if (counter != NULL)
+    {
+        pcnt_unit_disable(counter->unitHandle);
+
+        pcnt_unit_remove_watch_point(counter->unitHandle, 0);
+        pcnt_unit_remove_watch_point(counter->unitHandle, 1);
+
+        pcnt_del_unit(counter->unitHandle);
+
+        // delete channel A ?
+        if (counter->chanHandleA != NULL)
+        {
+            pcnt_del_channel(counter->chanHandleA);
+        }
+
+        // delete channel B ?
+        if (counter->chanHandleB != NULL)
+        {
+            pcnt_del_channel(counter->chanHandleB);
+        }
+
+        counterEntries[counterIndex] = NULL;
+        delete counter;
+    }
 }
 
 void PulseCountUninitialize()
 {
-    if (isrInstalled)
+    for (int counterIndex = 0; counterIndex < PCNT_NUM_UNIT; counterIndex++)
     {
-        pcnt_isr_service_uninstall();
-        isrInstalled = false;
-        numberCounterUsed = 0;
+        if (counterEntries[counterIndex] != NULL)
+        {
+            DisposeCounter(counterIndex);
+        }
     }
 }
 
@@ -159,7 +261,7 @@ HRESULT Library_nanoFramework_hardware_esp32_native_System_Device_Gpio_GpioPulse
 {
     NANOCLR_HEADER();
     {
-#if defined(CONFIG_IDF_TARGET_ESP32) || defined(CONFIG_IDF_TARGET_ESP32S2) || defined(CONFIG_IDF_TARGET_ESP32S3)
+#if !defined(CONFIG_IDF_TARGET_ESP32C3)
 
         int16_t pinNumberA;
         int16_t pinNumberB;
@@ -172,9 +274,9 @@ HRESULT Library_nanoFramework_hardware_esp32_native_System_Device_Gpio_GpioPulse
             HAL_AddSoftRebootHandler(PulseCountUninitialize);
 
             // We need to initialize the array if it's the first one
-            for (int i = 0; i < PCNT_UNIT_MAX; i++)
+            for (int i = 0; i < PCNT_NUM_UNIT; i++)
             {
-                gpioCounterMap[i] = -1;
+                counterEntries[i] = NULL;
             }
         }
 
@@ -182,17 +284,22 @@ HRESULT Library_nanoFramework_hardware_esp32_native_System_Device_Gpio_GpioPulse
         pinNumberB = pThis[FIELD___pinNumberB].NumericByRefConst().s4;
         if (pinNumberB < 0)
         {
-            pinNumberB = PCNT_PIN_NOT_USED;
+            pinNumberB = -1;
         }
 
-        int index = FindFreeCounter(pinNumberA);
-        if (index == -1)
+        int counterIndex = FindFreeCounter(pinNumberA, pinNumberB);
+        if (counterIndex == -1)
         {
             // No free counters
             NANOCLR_SET_AND_LEAVE(CLR_E_NOT_SUPPORTED);
         }
 
-        overflowCount[index] = 0;
+        if (InitialiseCounter(counterIndex) == NULL)
+        {
+            DisposeCounter(counterIndex);
+            NANOCLR_SET_AND_LEAVE(CLR_E_NOT_SUPPORTED);
+        }
+
         // Reserve pin for Counter use
         CPU_GPIO_ReservePin(pinNumberA, true);
         if (pinNumberB >= 0)
@@ -212,7 +319,7 @@ HRESULT Library_nanoFramework_hardware_esp32_native_System_Device_Gpio_GpioPulse
 {
     NANOCLR_HEADER();
     {
-#if defined(CONFIG_IDF_TARGET_ESP32) || defined(CONFIG_IDF_TARGET_ESP32S2) || defined(CONFIG_IDF_TARGET_ESP32S3)
+#if !defined(CONFIG_IDF_TARGET_ESP32C3)
 
         CLR_RT_TypeDef_Index gpioPulseCountTypeDef;
         CLR_RT_HeapBlock *gpioPulseCount;
@@ -229,28 +336,29 @@ HRESULT Library_nanoFramework_hardware_esp32_native_System_Device_Gpio_GpioPulse
         int pinNumberA = pThis[FIELD___pinNumberA].NumericByRefConst().s4;
 
         int counterIndex = FindCounterForGpio(pinNumberA);
-
         if (counterIndex == -1)
         {
             NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
         }
 
+        PulseCounterEntry *counter = counterEntries[counterIndex];
+
         bool resetAfterRead = (bool)stack.Arg1().NumericByRef().u1;
 
-        int16_t counter;
+        int count;
 
-        pcnt_get_counter_value((pcnt_unit_t)counterIndex, &counter);
+        pcnt_unit_get_count(counter->unitHandle, &count);
 
         // relativeTime Read Time,  Number of micro seconds since boot
         int64_t relativeTime = esp_timer_get_time();
 
         // Combine to make a 64 bit value
-        uint64_t totalCount = overflowCount[counterIndex] + (uint64_t)counter;
+        uint64_t totalCount = counter->overflowCount + (uint64_t)count;
 
         if (resetAfterRead)
         {
-            pcnt_counter_clear((pcnt_unit_t)counterIndex);
-            overflowCount[counterIndex] = 0;
+            pcnt_unit_clear_count(counter->unitHandle);
+            counter->overflowCount = 0;
         }
 
         // push return value to stack
@@ -275,7 +383,7 @@ HRESULT Library_nanoFramework_hardware_esp32_native_System_Device_Gpio_GpioPulse
         // timespan in milliseconds, but...
         *val = (CLR_UINT64)relativeTime;
         // ... need to convert to ticks with this
-        *val *= TIME_CONVERSION__TICKUNITS;
+        *val *= TIME_CONVERSION__TICKUNITS / 1000;
 
 #else
         NANOCLR_SET_AND_LEAVE(stack.NotImplementedStub());
@@ -289,10 +397,7 @@ HRESULT Library_nanoFramework_hardware_esp32_native_System_Device_Gpio_GpioPulse
 {
     NANOCLR_HEADER();
     {
-#if defined(CONFIG_IDF_TARGET_ESP32) || defined(CONFIG_IDF_TARGET_ESP32S2) || defined(CONFIG_IDF_TARGET_ESP32S3)
-
-        bool countRising = false;
-        bool countFalling = false;
+#if !defined(CONFIG_IDF_TARGET_ESP32C3)
 
         CLR_RT_HeapBlock *pThis = stack.This();
         FAULT_ON_NULL(pThis);
@@ -303,66 +408,34 @@ HRESULT Library_nanoFramework_hardware_esp32_native_System_Device_Gpio_GpioPulse
             NANOCLR_SET_AND_LEAVE(CLR_E_OBJECT_DISPOSED);
         }
 
-        int pinNumberA = pThis[FIELD___pinNumberA].NumericByRefConst().s4;
-        int pinNumberB = pThis[FIELD___pinNumberB].NumericByRefConst().s4;
-
-        int counterIndex = FindCounterForGpio(pinNumberA);
+        int counterIndex = FindCounterForGpio(pThis[FIELD___pinNumberA].NumericByRefConst().s4);
         if (counterIndex == -1)
         {
             NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
         }
 
-        GpioChangePolarity polarity = (GpioChangePolarity)pThis[FIELD___polarity].NumericByRefConst().s4;
+        pcnt_unit_handle_t unitHandle = counterEntries[counterIndex]->unitHandle;
 
-        switch (polarity)
-        {
-            case GpioChangePolarity_Both:
-                countRising = true;
-                countFalling = true;
-                break;
+        // Between Stop and Start the Polarity and filter can change
+        // must be disabled to change
+        pcnt_unit_disable(unitHandle);
 
-            case GpioChangePolarity_Rising:
-                countRising = true;
-                countFalling = false;
-                break;
-
-            case GpioChangePolarity_Falling:
-                countRising = false;
-                countFalling = true;
-                break;
-        }
-
-        if (!InitialiseCounter(counterIndex, pinNumberA, pinNumberB, countRising, countFalling))
-        {
-            NANOCLR_SET_AND_LEAVE(CLR_E_NOT_SUPPORTED);
-        }
+        GpioPulsePolarity polarity = (GpioPulsePolarity)pThis[FIELD___polarity].NumericByRefConst().s4;
+        InitialiseEdgeAndActions(counterIndex, polarity);
 
         // Apply filter.
         uint16_t filter = pThis[GpioPulseCounter::FIELD___filter].NumericByRef().u2;
-        pcnt_set_filter_value((pcnt_unit_t)counterIndex, filter);
-        pcnt_filter_enable((pcnt_unit_t)counterIndex);
 
-        pcnt_event_enable((pcnt_unit_t)counterIndex, PCNT_EVT_H_LIM);
-        pcnt_event_enable((pcnt_unit_t)counterIndex, PCNT_EVT_L_LIM);
+        pcnt_glitch_filter_config_t filterConfig;
+        filterConfig.max_glitch_ns = filter;
+        pcnt_unit_set_glitch_filter(unitHandle, &filterConfig);
 
-        pcnt_counter_pause((pcnt_unit_t)counterIndex);
+        pcnt_unit_clear_count(unitHandle);
+        counterEntries[counterIndex]->overflowCount = 0;
 
-        pcnt_counter_clear((pcnt_unit_t)counterIndex);
-        overflowCount[counterIndex] = 0;
+        pcnt_unit_enable(unitHandle);
 
-        // Register ISR handler and enable interrupts for PCNT unit */
-        if (isrInstalled == false)
-        {
-            pcnt_isr_service_install(0);
-            isrInstalled = true;
-        }
-
-        pcnt_isr_handler_add((pcnt_unit_t)counterIndex, pcnt_intr_handler, (void *)counterIndex);
-
-        // enable interrupts for PCNT unit
-        pcnt_intr_enable((pcnt_unit_t)counterIndex);
-
-        pcnt_counter_resume((pcnt_unit_t)counterIndex);
+        pcnt_unit_start(unitHandle);
 
 #else
         NANOCLR_SET_AND_LEAVE(stack.NotImplementedStub());
@@ -376,7 +449,7 @@ HRESULT Library_nanoFramework_hardware_esp32_native_System_Device_Gpio_GpioPulse
 {
     NANOCLR_HEADER();
     {
-#if defined(CONFIG_IDF_TARGET_ESP32) || defined(CONFIG_IDF_TARGET_ESP32S2) || defined(CONFIG_IDF_TARGET_ESP32S3)
+#if !defined(CONFIG_IDF_TARGET_ESP32C3)
 
         CLR_RT_HeapBlock *pThis = stack.This();
         FAULT_ON_NULL(pThis);
@@ -395,7 +468,7 @@ HRESULT Library_nanoFramework_hardware_esp32_native_System_Device_Gpio_GpioPulse
             NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
         }
 
-        pcnt_counter_pause((pcnt_unit_t)counterIndex);
+        pcnt_unit_stop(counterEntries[counterIndex]->unitHandle);
 
 #else
         NANOCLR_SET_AND_LEAVE(stack.NotImplementedStub());
@@ -409,7 +482,7 @@ HRESULT Library_nanoFramework_hardware_esp32_native_System_Device_Gpio_GpioPulse
 {
     NANOCLR_HEADER();
     {
-#if defined(CONFIG_IDF_TARGET_ESP32) || defined(CONFIG_IDF_TARGET_ESP32S2) || defined(CONFIG_IDF_TARGET_ESP32S3)
+#if !defined(CONFIG_IDF_TARGET_ESP32C3)
 
         CLR_RT_HeapBlock *pThis = stack.This();
         FAULT_ON_NULL(pThis);
@@ -424,18 +497,9 @@ HRESULT Library_nanoFramework_hardware_esp32_native_System_Device_Gpio_GpioPulse
         }
 
         numberCounterUsed--;
-        pcnt_isr_handler_remove((pcnt_unit_t)counterIndex);
-        if (numberCounterUsed == 0)
-        {
-            pcnt_isr_service_uninstall();
-            isrInstalled = false;
-        }
 
-        // Disable counter, remove gpio pin
-        InitialiseCounter(counterIndex, PCNT_PIN_NOT_USED, PCNT_PIN_NOT_USED, false, false);
-
-        // Clear counter / gpio mapping
-        gpioCounterMap[counterIndex] = -1;
+        // Disable counter, remove GPIO pin
+        DisposeCounter(counterIndex);
 
         CPU_GPIO_ReservePin(pinNumberA, false);
         if (pinNumberB >= 0)

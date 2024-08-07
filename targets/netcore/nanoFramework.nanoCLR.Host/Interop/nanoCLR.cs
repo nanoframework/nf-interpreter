@@ -4,7 +4,9 @@
 //
 
 using System;
+using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Runtime.InteropServices;
 
 namespace nanoFramework.nanoCLR.Host.Interop
@@ -97,33 +99,52 @@ namespace nanoFramework.nanoCLR.Host.Interop
         {
             string nanoClrDllLocation = Path.Combine(DllPath, _nanoClrDllName);
 
-            foreach (System.Diagnostics.ProcessModule mod in System.Diagnostics.Process.GetCurrentProcess().Modules)
-            {
-                if (mod.FileName.Equals(nanoClrDllLocation, StringComparison.OrdinalIgnoreCase))
-                {
-                    FreeLibrary(mod.BaseAddress);
+            var modules = Process.GetCurrentProcess().Modules.Cast<ProcessModule>()
+                .Where(mod => mod.FileName.Equals(nanoClrDllLocation, StringComparison.OrdinalIgnoreCase));
 
-                    // done here!
-                    break;
+            foreach (var mod in modules)
+            {
+                try
+                {
+                    if (FreeLibrary(mod.BaseAddress))
+                    {
+                        // Successfully unloaded the DLL
+                        break;
+                    }
+                    else
+                    {
+                        // Handle the error if FreeLibrary fails
+                        int errorCode = Marshal.GetLastWin32Error();
+                        Console.WriteLine($"Failed to unload nanoCLR DLL. Error code: {errorCode}");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    // Handle any exceptions that occur during the unload process
+                    Console.WriteLine($"Exception occurred while unloading nanoCLR DLL: {ex.Message}");
                 }
             }
         }
 
         public static string FindNanoClrDll()
         {
-            // perform dummy call to load DLL, in case it's not loaded
-            _ = nanoCLR_GetVersion();
-
-            // sweep processes and look for a DLL with the nanoCLR namme
-            foreach (System.Diagnostics.ProcessModule mod in System.Diagnostics.Process.GetCurrentProcess().Modules)
+            try
             {
-                if (mod.FileName.EndsWith(_nanoClrDllName, StringComparison.OrdinalIgnoreCase))
-                {
-                    return mod.FileName;
-                }
-            }
+                // Perform dummy call to load DLL, in case it's not loaded
+                _ = nanoCLR_GetVersion();
 
-            return "";
+                // Sweep processes and look for a DLL with the nanoCLR name
+                var module = Process.GetCurrentProcess().Modules.Cast<ProcessModule>()
+                    .FirstOrDefault(mod => mod.FileName.EndsWith(_nanoClrDllName, StringComparison.OrdinalIgnoreCase));
+
+                return module?.FileName ?? string.Empty;
+            }
+            catch (Exception ex)
+            {
+                // Handle any exceptions that occur during the process
+                Console.WriteLine($"Exception occurred while finding nanoCLR DLL: {ex.Message}");
+                return string.Empty;
+            }
         }
 
         [DllImport("kernel32.dll", CharSet = CharSet.Auto, SetLastError = true)]

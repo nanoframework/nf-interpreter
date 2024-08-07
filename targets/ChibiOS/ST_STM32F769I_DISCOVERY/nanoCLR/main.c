@@ -18,12 +18,10 @@
 #include <nanoHAL_v2.h>
 #include <targetPAL.h>
 
-extern uint8_t hal_spiffs_config();
-
 // need to declare the Receiver thread here
 osThreadDef(ReceiverThread, osPriorityHigh, 2048, "ReceiverThread");
 // declare CLRStartup thread here
-osThreadDef(CLRStartupThread, osPriorityNormal, 4096, "CLRStartupThread");
+osThreadDef(CLRStartupThread, osPriorityNormal, 6144, "CLRStartupThread");
 
 #if HAL_USE_SDC
 // declare SD Card working thread here
@@ -64,11 +62,6 @@ int main(void)
     // config and init external memory
     // this has to be called after osKernelInitialize, otherwise an hard fault will occur
     Target_ExternalMemoryInit();
-
-#if (NF_FEATURE_USE_SPIFFS == TRUE)
-    // config and init SPIFFS
-    hal_spiffs_config();
-#endif
 
     // starts the serial driver
     sdStart(&SERIAL_DRIVER, NULL);

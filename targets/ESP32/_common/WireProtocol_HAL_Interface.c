@@ -10,6 +10,11 @@
 #include <WireProtocol_Message.h>
 #include <WireProtocol_HAL_Interface.h>
 
+#if CONFIG_TINYUSB_CDC_ENABLED
+#include <tinyusb.h>
+#include <tusb_cdc_acm.h>
+#endif
+
 ////////////////////////////////////////////////////////////////////
 // Baudrate for the serial port                                   //
 // Can be overriden by the build parameter TARGET_SERIAL_BAUDRATE //
@@ -73,9 +78,33 @@ static uart_port_t ESP32_WP_UART = UART_NUM_0;
 #define ESP32_WP_RX_PIN UART_NUM_0_RXD_DIRECT_GPIO_NUM
 #define ESP32_WP_TX_PIN UART_NUM_0_TXD_DIRECT_GPIO_NUM
 
+#elif CONFIG_IDF_TARGET_ESP32C6
+
+// WP uses UART0
+static uart_port_t ESP32_WP_UART = UART_NUM_0;
+
+// UART pins for ESP32-C6
+// U0RXD 16
+// U0TXD 17
+
+#define ESP32_WP_RX_PIN UART_NUM_0_RXD_DIRECT_GPIO_NUM
+#define ESP32_WP_TX_PIN UART_NUM_0_TXD_DIRECT_GPIO_NUM
+
+#elif CONFIG_IDF_TARGET_ESP32H2
+
+// WP uses UART0
+static uart_port_t ESP32_WP_UART = UART_NUM_0;
+
+// UART pins for ESP32-H2
+// U0RXD 23
+// U0TXD 24
+
+#define ESP32_WP_RX_PIN UART_NUM_0_RXD_DIRECT_GPIO_NUM
+#define ESP32_WP_TX_PIN UART_NUM_0_TXD_DIRECT_GPIO_NUM
+
 #endif
 
-#if CONFIG_IDF_TARGET_ESP32C3 && HAL_WP_USE_USB_CDC
+#if (CONFIG_IDF_TARGET_ESP32C3 || CONFIG_IDF_TARGET_ESP32C6 || CONFIG_IDF_TARGET_ESP32H2) && HAL_WP_USE_USB_CDC
 
 #include <hal/usb_serial_jtag_ll.h>
 
@@ -192,7 +221,7 @@ uint8_t WP_TransmitMessage(WP_Message *message)
     return true;
 }
 
-#elif (CONFIG_IDF_TARGET_ESP32S2 || CONFIG_IDF_TARGET_ESP32S3) && CONFIG_USB_CDC_ENABLED
+#elif (CONFIG_IDF_TARGET_ESP32S2 || CONFIG_IDF_TARGET_ESP32S3) && CONFIG_TINYUSB_CDC_ENABLED
 
 static bool WP_Port_Intitialised = false;
 

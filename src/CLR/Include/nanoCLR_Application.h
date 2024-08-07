@@ -33,7 +33,6 @@ typedef struct CLR_SETTINGS
     bool PerformGarbageCollection;
     bool PerformHeapCompaction;
     bool EnableNetwork;
-    CLR_RT_StringVector StartArgs;
 #endif
 
 } CLR_SETTINGS;

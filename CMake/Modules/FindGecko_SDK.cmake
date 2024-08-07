@@ -47,6 +47,8 @@ list(APPEND Gecko_SDK_INCLUDE_DIRS ${gecko_sdk_SOURCE_DIR}/platform/service/slee
 list(APPEND Gecko_SDK_INCLUDE_DIRS ${gecko_sdk_SOURCE_DIR}/platform/emdrv/uartdrv/inc)
 list(APPEND Gecko_SDK_INCLUDE_DIRS ${gecko_sdk_SOURCE_DIR}/platform/service/udelay/inc)
 list(APPEND Gecko_SDK_INCLUDE_DIRS ${gecko_sdk_SOURCE_DIR}/platform/driver/i2cspm/inc)
+list(APPEND Gecko_SDK_INCLUDE_DIRS ${gecko_sdk_SOURCE_DIR}/platform/security/sl_component/sl_psa_driver/inc)
+list(APPEND Gecko_SDK_INCLUDE_DIRS ${gecko_sdk_SOURCE_DIR}/util/third_party/mbedtls/include)
 
 if(GECKO_FEATURE_USBD_HID OR 
    HAL_WP_USE_USB_CDC OR
@@ -127,6 +129,7 @@ set(gecko_sdk_srcs
     sl_event_handler.c
     sl_board_default_init_stub.c
     sl_i2cspm_init.c
+    sli_crypto_driver_trng.c
     # candidate for replacement with RTOS friendly version
     sl_i2cspm.c
     sl_string.c
@@ -224,6 +227,7 @@ if("${TARGET_SERIES}" STREQUAL "EFM32GG11")
             ${gecko_sdk_SOURCE_DIR}/platform/service/sleeptimer/src
             ${gecko_sdk_SOURCE_DIR}/platform/service/system/src
             ${gecko_sdk_SOURCE_DIR}/platform/service/udelay/src
+            ${gecko_sdk_SOURCE_DIR}/platform/security/sl_component/sl_psa_driver/src            
             ${gecko_sdk_SOURCE_DIR}/platform/driver/i2cspm/src
             ${gecko_sdk_SOURCE_DIR}/util/silicon_labs/silabs_core/memory_manager
             
@@ -303,6 +307,7 @@ macro(nf_add_gecko_sdk)
 
     nf_set_compile_options(TARGET ${LIB_NAME} BUILD_TARGET ${NFGCKSDK_BUILD_TARGET})
     nf_set_compile_definitions(TARGET ${LIB_NAME} EXTRA_COMPILE_DEFINITIONS ${NFGCKSDK_EXTRA_COMPILE_DEFINITIONS} BUILD_TARGET ${NFGCKSDK_BUILD_TARGET})
+    nf_set_compile_definitions(TARGET ${LIB_NAME} EXTRA_COMPILE_DEFINITIONS MBEDTLS_ENTROPY_HARDWARE_ALT BUILD_TARGET ${NFGCKSDK_BUILD_TARGET})
 
     # add compile definitions required for WinUSB
     if(GECKO_FEATURE_USBD_WINUSB)

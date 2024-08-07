@@ -62,8 +62,8 @@ HRESULT Library_sys_net_native_System_Net_Security_CertificateManager::
     {
         // update the configuration block
         // we only support one CA root bundle, so this is fixed to 0
-        if (ConfigurationManager_UpdateConfigurationBlock(caBundle, DeviceConfigurationOption_X509CaRootBundle, 0) !=
-            TRUE)
+        if (ConfigurationManager_UpdateConfigurationBlock(caBundle, DeviceConfigurationOption_X509CaRootBundle, 0) ==
+            UpdateConfigurationResult_Failed)
         {
             NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
         }

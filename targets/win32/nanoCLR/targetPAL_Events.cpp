@@ -6,9 +6,10 @@
 
 #include "stdafx.h"
 #include <Win32TimerQueue.h>
+#include <semaphore>
 
-static std::unique_ptr<Microsoft::Win32::Timer> boolEventsTimer;
-static bool *saveTimerCompleteFlag = 0;
+static std::unique_ptr<Microsoft::Win32::Timer> boolEventsTimer = nullptr;
+static bool *saveTimerCompleteFlag = nullptr;
 
 void local_Events_SetBoolTimer_Callback()
 {
@@ -19,7 +20,7 @@ void local_Events_SetBoolTimer_Callback()
 
 bool Events_Initialize_Platform()
 {
-    boolEventsTimer = NULL;
+    boolEventsTimer = nullptr;
 
     return true;
 }
@@ -29,9 +30,9 @@ void Events_SetBoolTimer(bool *timerCompleteFlag, uint32_t millisecondsFromNow)
     NATIVE_PROFILE_PAL_EVENTS();
 
     // we assume only 1 can be active, abort previous just in case
-    if (boolEventsTimer != NULL)
+    if (boolEventsTimer != nullptr)
     {
-        delete boolEventsTimer.release();
+        boolEventsTimer.reset();
     }
 
     if (timerCompleteFlag)
@@ -44,48 +45,66 @@ void Events_SetBoolTimer(bool *timerCompleteFlag, uint32_t millisecondsFromNow)
     }
 }
 
-// mutex, condition variable and flags for CLR's global events state
-static std::mutex EventsMutex;
+// semaphore, condition variable and flags for CLR's global events state
+static std::binary_semaphore EventsSemaphore(1);
 static std::condition_variable EventsConditionVar;
 static uint32_t SystemEvents;
 
 bool Events_Initialize()
 {
-    std::unique_lock<std::mutex> scopeLock(EventsMutex);
+    Events_Initialize_Platform();
+
+    EventsSemaphore.acquire();
+
     SystemEvents = 0;
+
+    EventsSemaphore.release();
+
     return TRUE;
 }
 
 bool Events_Uninitialize()
 {
-    std::unique_lock<std::mutex> scopeLock(EventsMutex);
+    EventsSemaphore.acquire();
+
     SystemEvents = 0;
+
+    EventsSemaphore.release();
+
     return TRUE;
 }
 
 void Events_Set(UINT32 Events)
 {
-    {
-        std::unique_lock<std::mutex> scopeLock(EventsMutex);
-        SystemEvents |= Events;
-    }
+    EventsSemaphore.acquire();
+
+    SystemEvents |= Events;
+
+    EventsSemaphore.release();
+
     EventsConditionVar.notify_all();
 }
 
 uint32_t Events_Get(UINT32 EventsOfInterest)
 {
-    std::unique_lock<std::mutex> scopeLock(EventsMutex);
+    EventsSemaphore.acquire();
+
     auto retVal = SystemEvents & EventsOfInterest;
     SystemEvents &= ~EventsOfInterest;
+
+    EventsSemaphore.release();
+
     return retVal;
 }
 
 void Events_Clear(UINT32 Events)
 {
-    {
-        std::unique_lock<std::mutex> scopeLock(EventsMutex);
-        SystemEvents &= ~Events;
-    }
+    EventsSemaphore.acquire();
+
+    SystemEvents &= ~Events;
+
+    EventsSemaphore.release();
+
     EventsConditionVar.notify_all();
 }
 
@@ -97,22 +116,36 @@ uint32_t Events_MaskedRead(uint32_t Events)
 // block this thread and wake up when at least one of the requested events is set or a timeout occurs...
 uint32_t Events_WaitForEvents(uint32_t powerLevel, uint32_t wakeupSystemEvents, uint32_t timeoutMilliseconds)
 {
-    std::unique_lock<std::mutex> scopeLock(EventsMutex);
+    (void)powerLevel; // Assuming powerLevel is not used in this context
 
-    if (CLR_EE_DBG_IS(RebootPending) || CLR_EE_DBG_IS(ExitPending))
-    {
-        // there is a reboot or program exit condition pending, no need to wait for anything
-        return 0;
-    }
-
+    auto startTime = std::chrono::steady_clock::now();
+    auto endTime = startTime + std::chrono::milliseconds(timeoutMilliseconds);
     bool timeout = false;
 
-    // check current condition before waiting as Condition var doesn't do that
-    if ((wakeupSystemEvents & SystemEvents) == 0)
+    while (true)
     {
-        timeout = !EventsConditionVar.wait_for(scopeLock, std::chrono::milliseconds(timeoutMilliseconds), [=]() {
-            return (wakeupSystemEvents & SystemEvents) != 0;
-        });
+        // Attempt to acquire the semaphore with a short wait to poll the condition
+        if (EventsSemaphore.try_acquire_for(std::chrono::milliseconds(10)))
+        {
+            if (CLR_EE_DBG_IS(RebootPending) || CLR_EE_DBG_IS(ExitPending) || (wakeupSystemEvents & SystemEvents) != 0)
+            {
+                // Condition met or special case encountered, break the loop
+                // Release the semaphore before breaking
+                EventsSemaphore.release();
+                break;
+            }
+
+            // Release the semaphore if condition not met
+            EventsSemaphore.release();
+        }
+
+        if (std::chrono::steady_clock::now() >= endTime)
+        {
+            timeout = true;
+
+            // Exit the loop if timeout reached
+            break;
+        }
     }
 
     return timeout ? 0 : SystemEvents & wakeupSystemEvents;
@@ -120,9 +153,18 @@ uint32_t Events_WaitForEvents(uint32_t powerLevel, uint32_t wakeupSystemEvents, 
 
 void Events_SetCallback(set_Event_Callback pfn, void *arg)
 {
+    (void)pfn;
+    (void)arg;
+
     _ASSERTE(FALSE);
 }
 
 void FreeManagedEvent(uint8_t category, uint8_t subCategory, uint16_t data1, uint32_t data2)
 {
+    (void)category;
+    (void)subCategory;
+    (void)data1;
+    (void)data2;
+
+    // nothing to release in this platform
 }

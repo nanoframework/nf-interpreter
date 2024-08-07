@@ -12,6 +12,7 @@
 
 bool NF_ESP32_ConnectInProgress = false;
 int NF_ESP32_ConnectResult = 0;
+int nf_threadNetworkIndex = -1;
 
 bool StoreConfigBlock(
     DeviceConfigurationOption configType,
@@ -44,6 +45,7 @@ int Network_Interface_Open(int index)
 
     switch (networkConfiguration.InterfaceType)
     {
+#if defined(CONFIG_SOC_WIFI_SUPPORTED)
         // Wi-Fi (STA)
         case NetworkInterfaceType_Wireless80211:
             return NF_ESP32_Wireless_Open(&networkConfiguration);
@@ -51,11 +53,20 @@ int Network_Interface_Open(int index)
         // Wi-Fi (Soft AP)
         case NetworkInterfaceType_WirelessAP:
             return NF_ESP32_WirelessAP_Open(&networkConfiguration);
+#endif
 
 #ifdef ESP32_ETHERNET_SUPPORT
         // Ethernet
         case NetworkInterfaceType_Ethernet:
             return NF_ESP32_Ethernet_Open(&networkConfiguration);
+#endif
+
+#if HAL_USE_THREAD == TRUE
+        // OpenThread
+        case NetworkInterfaceType_Thread:
+            // save index for later use by managed code interface
+            nf_threadNetworkIndex = index;
+            return NF_ESP32_OpenThread_Open(&networkConfiguration);
 #endif
     }
 
@@ -79,6 +90,7 @@ bool Network_Interface_Close(int index)
 
     switch (networkConfiguration.InterfaceType)
     {
+#if defined(CONFIG_SOC_WIFI_SUPPORTED)
         // Wireless
         case NetworkInterfaceType_Wireless80211:
             return NF_ESP32_Wireless_Close();
@@ -86,17 +98,25 @@ bool Network_Interface_Close(int index)
         // Soft AP
         case NetworkInterfaceType_WirelessAP:
             return NF_ESP32_WirelessAP_Close();
+#endif
 
 #ifdef ESP32_ETHERNET_SUPPORT
         // Ethernet
         case NetworkInterfaceType_Ethernet:
             return NF_ESP32_Ethernet_Close();
 #endif
+
+#if HAL_USE_THREAD == TRUE
+        // OpenThread
+        case NetworkInterfaceType_Thread:
+            return NF_ESP32_OpenThread_Close();
+#endif
     }
 
     return false;
 }
 
+#if defined(CONFIG_SOC_WIFI_SUPPORTED)
 int Network_Interface_Start_Scan(int index)
 {
     HAL_Configuration_NetworkInterface networkConfiguration;
@@ -187,17 +207,20 @@ int Network_Interface_Start_Connect(int index, const char *ssid, const char *pas
     {
         // need this stupid cast because the current gcc version with ESP32 IDF is not happy with the simple syntax '|='
         wirelessConfig->Options =
-            (Wireless80211Configuration_ConfigurationOptions)(wirelessConfig->Options | Wireless80211Configuration_ConfigurationOptions_AutoConnect);
+            (Wireless80211Configuration_ConfigurationOptions)(wirelessConfig->Options |
+                                                              Wireless80211Configuration_ConfigurationOptions_AutoConnect);
     }
     else
     {
         // need this stupid cast because the current gcc version with ESP32 IDF is not happy with the simple syntax '^='
         wirelessConfig->Options =
-            (Wireless80211Configuration_ConfigurationOptions)(wirelessConfig->Options ^ Wireless80211Configuration_ConfigurationOptions_AutoConnect);
+            (Wireless80211Configuration_ConfigurationOptions)(wirelessConfig->Options ^
+                                                              Wireless80211Configuration_ConfigurationOptions_AutoConnect);
 
         // Make sure we are still enabled because AutoConnect includes Enable
         wirelessConfig->Options =
-            (Wireless80211Configuration_ConfigurationOptions)(wirelessConfig->Options | Wireless80211Configuration_ConfigurationOptions_Enable);
+            (Wireless80211Configuration_ConfigurationOptions)(wirelessConfig->Options |
+                                                              Wireless80211Configuration_ConfigurationOptions_Enable);
     }
 
     // Update Wireless structure with new SSID and passphase
@@ -361,5 +384,14 @@ void Network_Interface_Deauth_Station(uint16_t stationIndex)
     if (stationIndex >= 1 && stationIndex <= ESP_WIFI_MAX_CONN_NUM)
     {
         esp_wifi_deauth_sta(stationIndex);
+    }
+}
+#endif
+
+void ThreadSetInterfaceNumber(int networkInterfaceNumber)
+{
+    if (nf_threadNetworkIndex != -1)
+    {
+        HAL_SOCK_SetInterfaceNumber(nf_threadNetworkIndex, networkInterfaceNumber);
     }
 }

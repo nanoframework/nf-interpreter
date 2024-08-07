@@ -210,3 +210,9 @@ time_t nf_get_unix_epoch()
 
     return mktime(&time);
 }
+
+mbedtls_ms_time_t mbedtls_ms_time(void)
+{
+    // convert to milliseconds
+    return nf_get_unix_epoch() * 1000;
+}

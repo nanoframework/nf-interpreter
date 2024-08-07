@@ -19,7 +19,7 @@ struct Settings : CLR_RT_ParseOptions
 
     //--//
 
-    HRESULT Initialize(CLR_SETTINGS params)
+    HRESULT Initialize(CLR_SETTINGS const &params)
     {
         NANOCLR_HEADER();
 
@@ -118,8 +118,6 @@ struct Settings : CLR_RT_ParseOptions
 
         // clear flag (in case EE wasn't restarted)
         CLR_EE_DBG_CLR(StateResolutionFailed);
-
-        NANOCLR_CHECK_HRESULT(ProcessOptions(m_clrOptions.StartArgs));
 
 #if !defined(BUILD_RTM)
         CLR_Debug::Printf("Loading Assemblies.\r\n");
@@ -596,8 +594,7 @@ HRESULT ClrLoadDAT(const wchar_t *szDatFilePath)
 void ClrStartup(CLR_SETTINGS params)
 {
     NATIVE_PROFILE_CLR_STARTUP();
-    // Settings settings;
-    ASSERT(sizeof(CLR_RT_HeapBlock_Raw) == sizeof(CLR_RT_HeapBlock));
+    ASSERT(sizeof(CLR_RT_HeapBlock_Raw) == sizeof(struct CLR_RT_HeapBlock));
     bool softReboot;
 
     do

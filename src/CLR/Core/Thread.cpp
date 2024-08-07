@@ -143,7 +143,7 @@ HRESULT CLR_RT_Thread::PushThreadProcDelegate(CLR_RT_HeapBlock_Delegate *pDelega
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
 
-    CLR_RT_MethodDef_Instance inst;
+    CLR_RT_MethodDef_Instance inst{};
 
 #if defined(NANOCLR_APPDOMAINS)
     CLR_RT_AppDomain *appDomainSav = g_CLR_RT_ExecutionEngine.SetCurrentAppDomain(pDelegate->m_appDomain);
@@ -208,13 +208,14 @@ HRESULT CLR_RT_Thread::CreateInstance(int pid, int priority, CLR_RT_Thread *&th,
 
         th->Initialize();
 
-        th->m_pid = pid;                                 // int                        m_pid;
-        th->m_status = TH_S_Unstarted;                   // CLR_UINT32                 m_status;
-        th->m_flags = flags;                             // CLR_UINT32                 m_flags;
-        th->m_executionCounter = 0;                      // int                        m_executionCounter;
-        th->m_timeQuantumExpired = false;                // bool                       m_timeQuantumExpired;
-                                                         //
-        th->m_dlg = NULL;                                // CLR_RT_HeapBlock_Delegate* m_dlg;
+        th->m_pid = pid;                  // int                        m_pid;
+        th->m_status = TH_S_Unstarted;    // CLR_UINT32                 m_status;
+        th->m_flags = flags;              // CLR_UINT32                 m_flags;
+        th->m_executionCounter = 0;       // int                        m_executionCounter;
+        th->m_timeQuantumExpired = false; // bool                       m_timeQuantumExpired;
+                                          //
+        th->m_dlg = NULL;                 // CLR_RT_HeapBlock_Delegate* m_dlg;
+        memset(&th->m_currentException, 0, sizeof(struct CLR_RT_HeapBlock));
         th->m_currentException.SetObjectReference(NULL); // CLR_RT_HeapBlock           m_currentException;
                                                          // UnwindStack m_nestedExceptions[c_MaxStackUnwindDepth];
         th->m_nestedExceptionsPos = 0;                   // int                        m_nestedExceptionsPos;
@@ -596,12 +597,12 @@ void CLR_RT_Thread::ProcessException_FilterPseudoFrameCopyVars(CLR_RT_StackFrame
 
     if (numArgs)
     {
-        memcpy(to->m_arguments, from->m_arguments, sizeof(CLR_RT_HeapBlock) * numArgs);
+        memcpy(to->m_arguments, from->m_arguments, sizeof(struct CLR_RT_HeapBlock) * numArgs);
     }
 
     if (from->m_call.m_target->numLocals)
     {
-        memcpy(to->m_locals, from->m_locals, sizeof(CLR_RT_HeapBlock) * from->m_call.m_target->numLocals);
+        memcpy(to->m_locals, from->m_locals, sizeof(struct CLR_RT_HeapBlock) * from->m_call.m_target->numLocals);
     }
 }
 
@@ -918,7 +919,10 @@ HRESULT CLR_RT_Thread::ProcessException_Phase1()
                         // Copy local variables and arguments so the filter has access to them.
                         if (numArgs)
                         {
-                            memcpy(newStack->m_arguments, stack->m_arguments, sizeof(CLR_RT_HeapBlock) * numArgs);
+                            memcpy(
+                                newStack->m_arguments,
+                                stack->m_arguments,
+                                sizeof(struct CLR_RT_HeapBlock) * numArgs);
                         }
 
                         if (stack->m_call.m_target->numLocals)
@@ -926,7 +930,7 @@ HRESULT CLR_RT_Thread::ProcessException_Phase1()
                             memcpy(
                                 newStack->m_locals,
                                 stack->m_locals,
-                                sizeof(CLR_RT_HeapBlock) * stack->m_call.m_target->numLocals);
+                                sizeof(struct CLR_RT_HeapBlock) * stack->m_call.m_target->numLocals);
                         }
 
                         newStack->PushValueAndAssign(m_currentException);

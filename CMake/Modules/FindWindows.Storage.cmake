@@ -30,7 +30,8 @@ set(Windows.Storage_SRCS
 
     win_storage_native_Windows_Storage_FileIO.cpp
     win_storage_native_Windows_Storage_StorageFile.cpp  
-    win_storage_native_Windows_Storage_StorageFolder.cpp  
+    win_storage_native_Windows_Storage_StorageFolder.cpp
+    win_storage_native_Windows_Storage_StorageProvider.cpp 
     win_storage_native_Windows_Storage_Devices_SDCard.cpp
     win_storage_native.cpp
 )

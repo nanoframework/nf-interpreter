@@ -83,6 +83,11 @@ void nanoHAL_Network_Initialize()
         lwipOptions.ourHostName = hostName;
 
         // Start lwIP thread in ChibiOS bindings using the above options
-        lwipInit(&lwipOptions);
+        lwIPInit(&lwipOptions);
     }
+}
+
+void nanoHAL_Network_Uninitialize()
+{
+    // empty
 }

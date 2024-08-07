@@ -171,7 +171,7 @@ void tx_application_define(void *first_unused_memory)
     usb_device_cdc_acm_app_init();
 #endif
 
-    // report successfull nanoBooter execution
+    // report successful nanoBooter execution
     ReportSuccessfullNanoBooter();
 }
 

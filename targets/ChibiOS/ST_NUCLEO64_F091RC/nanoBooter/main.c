@@ -15,7 +15,7 @@
 #include <LaunchCLR.h>
 
 // need to declare the Receiver thread here
-osThreadDef(ReceiverThread, osPriorityHigh, 512, "ReceiverThread");
+osThreadDef(ReceiverThread, osPriorityHigh, 1024, "ReceiverThread");
 
 // Application entry point.
 int main(void)
@@ -71,7 +71,7 @@ int main(void)
     BlockStorageList_Initialize();
     BlockStorage_AddDevices();
 
-    // report successfull nanoBooter execution
+    // report successful nanoBooter execution
     ReportSuccessfullNanoBooter();
 
     //  Normal main() thread

@@ -23,28 +23,28 @@ macro(ProcessSTM32CubePackage)
 
     if("${TARGET_SERIES}" STREQUAL "STM32F0xx")
         # WHEN CHANGING THESE MAKE SURE TO UPDATE THE DEV CONTAINERS
-        set(HAL_DRIVER_GIT_TAG v1.7.6)
-        set(CMSIS_DEVICE_GIT_TAG v2.3.6)
+        set(HAL_DRIVER_GIT_TAG v1.7.8)
+        set(CMSIS_DEVICE_GIT_TAG v2.3.7)
     elseif("${TARGET_SERIES}" STREQUAL "STM32F4xx")
         # WHEN CHANGING THESE MAKE SURE TO UPDATE THE DEV CONTAINERS
-        set(HAL_DRIVER_GIT_TAG v1.7.13)
-        set(CMSIS_DEVICE_GIT_TAG v2.6.7)
+        set(HAL_DRIVER_GIT_TAG v1.8.2)
+        set(CMSIS_DEVICE_GIT_TAG v2.6.9)
     elseif("${TARGET_SERIES}" STREQUAL "STM32F7xx")
         # WHEN CHANGING THESE MAKE SURE TO UPDATE THE DEV CONTAINERS
-        set(HAL_DRIVER_GIT_TAG v1.2.10)
-        set(CMSIS_DEVICE_GIT_TAG v1.2.7)
+        set(HAL_DRIVER_GIT_TAG v1.3.1)
+        set(CMSIS_DEVICE_GIT_TAG v1.2.9)
     elseif("${TARGET_SERIES}" STREQUAL "STM32H7xx")
         # WHEN CHANGING THESE MAKE SURE TO UPDATE THE DEV CONTAINERS
-        set(HAL_DRIVER_GIT_TAG v1.10.1)
-        set(CMSIS_DEVICE_GIT_TAG v1.10.1)
+        set(HAL_DRIVER_GIT_TAG v1.11.3)
+        set(CMSIS_DEVICE_GIT_TAG v1.10.4)
     elseif("${TARGET_SERIES}" STREQUAL "STM32L0xx")
         # WHEN CHANGING THESE MAKE SURE TO UPDATE THE DEV CONTAINERS
-        set(HAL_DRIVER_GIT_TAG v1.10.5)
-        set(CMSIS_DEVICE_GIT_TAG v1.9.2)
+        set(HAL_DRIVER_GIT_TAG v1.10.6)
+        set(CMSIS_DEVICE_GIT_TAG v1.9.3)
     elseif("${TARGET_SERIES}" STREQUAL "STM32L4xx")
         # WHEN CHANGING THESE MAKE SURE TO UPDATE THE DEV CONTAINERS
-        set(HAL_DRIVER_GIT_TAG v1.13.2)
-        set(CMSIS_DEVICE_GIT_TAG v1.7.2)
+        set(HAL_DRIVER_GIT_TAG v1.13.4)
+        set(CMSIS_DEVICE_GIT_TAG v1.7.3)
     endif()
 
     set(NO_STM32_HAL_DRIVER_SOURCE TRUE)
@@ -153,13 +153,13 @@ macro(ProcessSTM32CubePackage)
     endif()
 
     FetchContent_GetProperties(stm32${TARGET_SERIES_SHORT_LOWER}_hal_driver)
-    FetchContent_Populate(stm32${TARGET_SERIES_SHORT_LOWER}_hal_driver)
+    FetchContent_MakeAvailable(stm32${TARGET_SERIES_SHORT_LOWER}_hal_driver)
 
     FetchContent_GetProperties(cmsis_device_${TARGET_SERIES_SHORT_LOWER})
-    FetchContent_Populate(cmsis_device_${TARGET_SERIES_SHORT_LOWER})
+    FetchContent_MakeAvailable(cmsis_device_${TARGET_SERIES_SHORT_LOWER})
     
     FetchContent_GetProperties(cmsis_core)
-    FetchContent_Populate(cmsis_core)
+    FetchContent_MakeAvailable(cmsis_core)
 
 endmacro()
 

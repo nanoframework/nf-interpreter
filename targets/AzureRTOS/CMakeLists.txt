@@ -77,7 +77,7 @@ endif()
 if(RTOS_VERSION_EMPTY)
     # no AzureRTOS version actualy specified, must be empty which is fine, we'll default to a known good version
     # WHEN CHANGING THIS MAKE SURE TO UPDATE THE DEV CONTAINERS
-    set(RTOS_VERSION "v6.3.0_rel")
+    set(RTOS_VERSION "v6.4.0_rel")
 endif()
 
 if(NO_AZURERTOS_SOURCE_FOLDER)
@@ -87,7 +87,7 @@ if(NO_AZURERTOS_SOURCE_FOLDER)
 
     FetchContent_Declare(
         azure_rtos
-        GIT_REPOSITORY https://github.com/azure-rtos/threadx.git
+        GIT_REPOSITORY https://github.com/eclipse-threadx/threadx.git
         GIT_TAG ${RTOS_VERSION}
     )
 
@@ -109,7 +109,11 @@ else()
 
 endif()
 
-FetchContent_Populate(azure_rtos)
+FetchContent_GetProperties(azure_rtos)
+if(NOT azure_rtos_POPULATED)
+    # Fetch the content using previously declared details
+    FetchContent_Populate(azure_rtos)
+endif()
 
 ###########################
 # Azure RTOS USBX
@@ -146,7 +150,7 @@ if(AZURERTOS_USBX_REQUIRED)
 
         FetchContent_Declare(
             azure_rtos_usbx
-            GIT_REPOSITORY https://github.com/azure-rtos/usbx.git
+            GIT_REPOSITORY https://github.com/eclipse-threadx/usbx.git
             GIT_TAG ${RTOS_VERSION}
         )
 
@@ -168,7 +172,11 @@ if(AZURERTOS_USBX_REQUIRED)
 
     endif()
 
-    FetchContent_Populate(azure_rtos_usbx)
+    FetchContent_GetProperties(azure_rtos_usbx)
+    if(NOT azure_rtos_usbx_POPULATED)
+        # Fetch the content using previously declared details
+        FetchContent_Populate(azure_rtos_usbx)
+    endif()
 
 endif()
 
@@ -207,7 +215,7 @@ if(AZURERTOS_FILEX_REQUIRED)
 
         FetchContent_Declare(
             azure_rtos_filex
-            GIT_REPOSITORY https://github.com/azure-rtos/filex.git
+            GIT_REPOSITORY https://github.com/eclipse-threadx/filex.git
             GIT_TAG ${FILEX_VERSION}
         )
 
@@ -229,7 +237,11 @@ if(AZURERTOS_FILEX_REQUIRED)
 
     endif()
 
-    FetchContent_Populate(azure_rtos_filex)
+    FetchContent_GetProperties(azure_rtos_filex)
+    if(NOT azure_rtos_filex_POPULATED)
+        # Fetch the content using previously declared details
+        FetchContent_Populate(azure_rtos_filex)
+    endif()
 
 endif()
 
@@ -268,7 +280,7 @@ if(AZURERTOS_NETXDUO_REQUIRED)
 
         FetchContent_Declare(
             azure_rtos_netxduo
-            GIT_REPOSITORY https://github.com/azure-rtos/netxduo.git
+            GIT_REPOSITORY https://github.com/eclipse-threadx/netxduo.git
             GIT_TAG ${NETXDUO_VERSION}
         )
 
@@ -293,7 +305,11 @@ if(AZURERTOS_NETXDUO_REQUIRED)
     # enable BSD layer in NetX Duo
     set(NXD_ENABLE_BSD TRUE)
 
-    FetchContent_Populate(azure_rtos_netxduo)
+    FetchContent_GetProperties(azure_rtos_netxduo)
+    if(NOT azure_rtos_netxduo_POPULATED)
+        # Fetch the content using previously declared details
+        FetchContent_Populate(azure_rtos_netxduo)
+    endif()
 
 endif()
 

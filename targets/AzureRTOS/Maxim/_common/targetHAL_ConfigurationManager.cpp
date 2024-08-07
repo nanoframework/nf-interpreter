@@ -395,7 +395,7 @@ __nfweak bool ConfigurationManager_UpdateConfigurationBlock(
                 // free memory
                 platform_free(configSectorCopy);
 
-                // operation is successfull (nothing to update)
+                // operation is successful (nothing to update)
                 return TRUE;
             }
 
@@ -426,7 +426,7 @@ __nfweak bool ConfigurationManager_UpdateConfigurationBlock(
                 // free memory
                 platform_free(configSectorCopy);
 
-                // operation is successfull (nothing to update)
+                // operation is successful (nothing to update)
                 return TRUE;
             }
 
@@ -455,7 +455,7 @@ __nfweak bool ConfigurationManager_UpdateConfigurationBlock(
                 // free memory
                 platform_free(configSectorCopy);
 
-                // operation is successfull (nothing to update)
+                // operation is successful (nothing to update)
                 return TRUE;
             }
 

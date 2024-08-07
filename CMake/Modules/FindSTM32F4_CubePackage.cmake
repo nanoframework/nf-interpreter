@@ -21,7 +21,7 @@ set(STM32F4_CubePackage_SRCS
     stm32f4xx_hal.c
     stm32f4xx_hal_eth.c
 
-    # SPIFFS
+    # littlefs
     stm32f4xx_hal_dma.c
     stm32f4xx_hal_qspi.c
 )

@@ -30,7 +30,7 @@ struct NF_PAL_SPI
 };
 
 /////////////////////////////////////////////////////
-// SPI PAL strucs declared in win_dev_spi_native.h //
+// SPI PAL structs declared in win_dev_spi_native.h //
 /////////////////////////////////////////////////////
 NF_PAL_SPI SPI1_PAL;
 

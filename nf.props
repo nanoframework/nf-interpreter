@@ -24,6 +24,7 @@
   <ItemDefinitionGroup>
     <ClCompile>
       <PreprocessorDefinitions>VIRTUAL_DEVICE;SUPPORT_ANY_BASE_CONVERSION;NANOCLR_REFLECTION=TRUE;NANOCLR_SYSTEM_COLLECTIONS=TRUE;_SILENCE_CXX17_CODECVT_HEADER_DEPRECATION_WARNING;VERSION_MAJOR=$(NBGV_VersionMajor);VERSION_MINOR=$(NBGV_VersionMinor);VERSION_BUILD=$(NBGV_BuildNumber);VERSION_REVISION=$(TARGET_BUILD_COUNTER);PLATFORMNAMESTRING="WINDOWS";</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\..\targets\win32\Include;..\..\targets\netcore\nanoFramework.nanoCLR;..\..\..\targets\netcore\nanoFramework.nanoCLR;..\..\..\..\targets\netcore\nanoFramework.nanoCLR;..\CLR\Include;..\..\CLR\Include;..\CorLib;..\HAL\Include;..\..\src\HAL\Include;..\..\..\src\HAL\Include;..\..\..\..\src\HAL\Include;..\PAL\Include;</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
     </ClCompile>

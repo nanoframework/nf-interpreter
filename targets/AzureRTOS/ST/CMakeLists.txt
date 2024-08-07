@@ -81,7 +81,7 @@ else()
 endif()
 
 FetchContent_GetProperties(chibios)
-FetchContent_Populate(chibios)
+FetchContent_MakeAvailable(chibios)
 
 list(APPEND TARGET_AZURERTOS_COMMON_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/_include)
 

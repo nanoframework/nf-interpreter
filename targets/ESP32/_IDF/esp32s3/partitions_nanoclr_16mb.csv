@@ -8,10 +8,11 @@ nvs,      data, nvs,     0x9000,   0x6000,
 phy_init, data, phy,     0xf000,   0x1000,
 # Factory area for NanoCLR - 1664k
 factory,  app, factory,  0x10000,  0x1A0000,
-# Deployment area for Managed code 2944k, Mapping issues with deployment areas over 3.5Mb, see issue #691
+# Deployment area for Managed code 2944k
 deploy,   data, 0x84,    0x1B0000, 0x2E0000, 
 # Config data for Network, Wireless, certificates, user data  3MB
-config,   data, spiffs,  0x490000, 0x300000,
+config,   data, littlefs,  0x490000, 0x300000,
 ##########################################
+# spare from 0x790000 (8Mb free)         #
 # total size has to be 0x1000000 or less #
 ##########################################

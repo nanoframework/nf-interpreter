@@ -8,39 +8,45 @@
 #include <nanoWeak.h>
 #include <nanoHAL_v2.h>
 
-BlockStorageList             g_BlockStorage;
-
+BlockStorageList g_BlockStorage;
 
 /////////////////////////////////////////////////////
 // DeviceBlockInfo stubs
 
-SectorAddress DeviceBlockInfo_PhysicalToSectorAddress(DeviceBlockInfo* blockInfo,  const BlockRegionInfo* pRegion, ByteAddress phyAddress)
+SectorAddress DeviceBlockInfo_PhysicalToSectorAddress(
+    DeviceBlockInfo *blockInfo,
+    const BlockRegionInfo *pRegion,
+    ByteAddress phyAddress)
 {
     return (phyAddress - pRegion->Start) / blockInfo->BytesPerSector;
 }
 
-bool DeviceBlockInfo_FindRegionFromAddress(DeviceBlockInfo* blockInfo, ByteAddress address, unsigned int* blockRegionIndex, unsigned int* blockRangeIndex)
+bool DeviceBlockInfo_FindRegionFromAddress(
+    DeviceBlockInfo *blockInfo,
+    ByteAddress address,
+    unsigned int *blockRegionIndex,
+    unsigned int *blockRangeIndex)
 {
     const BlockRegionInfo *pRegion;
 
     *blockRegionIndex = 0;
 
-    for(uint32_t i = 0; i < blockInfo->NumRegions;  i++)
+    for (uint32_t i = 0; i < blockInfo->NumRegions; i++)
     {
         pRegion = &blockInfo->Regions[i];
 
-        if(pRegion->Start <= address && address < (pRegion->Start + pRegion->NumBlocks * pRegion->BytesPerBlock))
+        if (pRegion->Start <= address && address < (pRegion->Start + pRegion->NumBlocks * pRegion->BytesPerBlock))
         {
             uint32_t endRangeAddr = pRegion->Start + pRegion->BytesPerBlock * pRegion->BlockRanges[0].StartBlock;
-            
-            for(uint32_t j =0; j < pRegion->NumBlockRanges; j++)
+
+            for (uint32_t j = 0; j < pRegion->NumBlockRanges; j++)
             {
                 endRangeAddr += pRegion->BytesPerBlock * BlockRange_GetBlockCount(pRegion->BlockRanges[j]);
-                
-                if(address < endRangeAddr)
+
+                if (address < endRangeAddr)
                 {
                     *blockRegionIndex = i;
-                    *blockRangeIndex  = j;
+                    *blockRangeIndex = j;
                     return true;
                 }
             }
@@ -50,23 +56,28 @@ bool DeviceBlockInfo_FindRegionFromAddress(DeviceBlockInfo* blockInfo, ByteAddre
     return false;
 }
 
-bool DeviceBlockInfo_FindNextUsageBlock(DeviceBlockInfo* blockInfo, unsigned int blockUsage, unsigned int* address, unsigned int* blockRegionIndex, unsigned int* blockRangeIndex)
+bool DeviceBlockInfo_FindNextUsageBlock(
+    DeviceBlockInfo *blockInfo,
+    unsigned int blockUsage,
+    unsigned int *address,
+    unsigned int *blockRegionIndex,
+    unsigned int *blockRangeIndex)
 {
     BlockRegionInfo *region;
 
-    for(uint32_t i = *blockRegionIndex; i < blockInfo->NumRegions; i++)
+    for (uint32_t i = *blockRegionIndex; i < blockInfo->NumRegions; i++)
     {
         region = &blockInfo->Regions[i];
 
-        for( int j = *blockRangeIndex; j < (int)region->NumBlockRanges; j++)
+        for (int j = *blockRangeIndex; j < (int)region->NumBlockRanges; j++)
         {
-            BlockRange *pRange = (BlockRange*)&region->BlockRanges[j];
-            
+            BlockRange *pRange = (BlockRange *)&region->BlockRanges[j];
+
             if ((pRange->RangeType & BlockRange_USAGE_MASK) == blockUsage || blockUsage == BlockUsage_ANY)
             {
                 *address = BlockRegionInfo_BlockAddress(region, pRange->StartBlock);
                 *blockRegionIndex = i;
-                *blockRangeIndex  = j;
+                *blockRangeIndex = j;
 
                 return true;
             }
@@ -74,11 +85,16 @@ bool DeviceBlockInfo_FindNextUsageBlock(DeviceBlockInfo* blockInfo, unsigned int
 
         *blockRangeIndex = 0;
     }
-    
+
     return false;
 }
 
-bool DeviceBlockInfo_FindForBlockUsage(DeviceBlockInfo* blockInfo, unsigned int blockUsage, unsigned int* address, unsigned int* blockRegionIndex, unsigned int* blockRangeIndex)
+bool DeviceBlockInfo_FindForBlockUsage(
+    DeviceBlockInfo *blockInfo,
+    unsigned int blockUsage,
+    unsigned int *address,
+    unsigned int *blockRegionIndex,
+    unsigned int *blockRangeIndex)
 {
     (void)blockInfo;
     (void)blockUsage;
@@ -86,10 +102,9 @@ bool DeviceBlockInfo_FindForBlockUsage(DeviceBlockInfo* blockInfo, unsigned int 
     address = 0;
     blockRegionIndex = 0;
     blockRangeIndex = 0;
-    
-    return DeviceBlockInfo_FindNextUsageBlock(blockInfo, blockUsage, address, blockRegionIndex, blockRangeIndex );
-}
 
+    return DeviceBlockInfo_FindNextUsageBlock(blockInfo, blockUsage, address, blockRegionIndex, blockRangeIndex);
+}
 
 /////////////////////////////////////////////////////
 // BlockStorageStream stubs
@@ -120,16 +135,19 @@ bool BlockStorageStream_Initialize(BlockStorageStream *stream, unsigned int bloc
     return BlockStorageStream_InitializeWithBlockStorageDevice(stream, blockUsage, NULL);
 }
 
-bool BlockStorageStream_InitializeWithBlockStorageDevice(BlockStorageStream *stream, unsigned int blockUsage, BlockStorageDevice *pDevice)
+bool BlockStorageStream_InitializeWithBlockStorageDevice(
+    BlockStorageStream *stream,
+    unsigned int blockUsage,
+    BlockStorageDevice *pDevice)
 {
-    DeviceBlockInfo* deviceInfo = NULL;
+    DeviceBlockInfo *deviceInfo = NULL;
     BlockStorageStream backupStream;
     BlockStorageDevice *device = NULL;
 
     // backup original stream, in case this gets messed up
     memcpy(&backupStream, stream, sizeof(BlockStorageStream));
 
-    if(pDevice != NULL)
+    if (pDevice != NULL)
     {
         device = pDevice;
 
@@ -137,13 +155,18 @@ bool BlockStorageStream_InitializeWithBlockStorageDevice(BlockStorageStream *str
     }
     else
     {
-        for(int i = 0; i < TARGET_BLOCKSTORAGE_COUNT; i++)
+        for (int i = 0; i < TARGET_BLOCKSTORAGE_COUNT; i++)
         {
             device = g_BlockStorage.DeviceList[i];
 
             deviceInfo = BlockStorageDevice_GetDeviceInfo(g_BlockStorage.DeviceList[i]);
-            
-            if(DeviceBlockInfo_FindNextUsageBlock(deviceInfo, blockUsage, &stream->BaseAddress, &stream->RegionIndex, &stream->RangeIndex))
+
+            if (DeviceBlockInfo_FindNextUsageBlock(
+                    deviceInfo,
+                    blockUsage,
+                    &stream->BaseAddress,
+                    &stream->RegionIndex,
+                    &stream->RangeIndex))
             {
                 // found a block matching the request usage
                 break;
@@ -157,17 +180,17 @@ bool BlockStorageStream_InitializeWithBlockStorageDevice(BlockStorageStream *str
         }
     }
 
-    if(deviceInfo != NULL)
+    if (deviceInfo != NULL)
     {
-        BlockRegionInfo* pRegion = &deviceInfo->Regions[stream->RegionIndex];
+        BlockRegionInfo *pRegion = &deviceInfo->Regions[stream->RegionIndex];
 
         stream->CurrentIndex = 0;
-        stream->Length       = BlockRange_GetBlockCount(pRegion->BlockRanges[stream->RangeIndex])* pRegion->BytesPerBlock;
-        stream->BlockLength  = pRegion->BytesPerBlock;
+        stream->Length = BlockRange_GetBlockCount(pRegion->BlockRanges[stream->RangeIndex]) * pRegion->BytesPerBlock;
+        stream->BlockLength = pRegion->BytesPerBlock;
         stream->CurrentUsage = (pRegion->BlockRanges[stream->RangeIndex].RangeType & BlockRange_USAGE_MASK);
-        stream->Device       = device;
+        stream->Device = device;
 
-        if(deviceInfo->Attribute & MediaAttribute_SupportsXIP)
+        if (deviceInfo->Attribute & MediaAttribute_SupportsXIP)
         {
             stream->Flags |= BLOCKSTORAGESTREAM_c_BlockStorageStream__XIP;
         }
@@ -177,9 +200,13 @@ bool BlockStorageStream_InitializeWithBlockStorageDevice(BlockStorageStream *str
         }
 
         // check if block region is memory mapped
-        if(pRegion->Attributes & BlockRegionAttribute_MemoryMapped)
+        if (pRegion->Attributes & BlockRegionAttribute_MemoryMapped)
         {
-            BlockStorageDevice_GetMemoryMappedAddress(device, stream->RegionIndex, stream->RangeIndex, &stream->MemoryMappedAddress);
+            BlockStorageDevice_GetMemoryMappedAddress(
+                device,
+                stream->RegionIndex,
+                stream->RangeIndex,
+                &stream->MemoryMappedAddress);
 
             stream->Flags |= BLOCKSTORAGESTREAM_c_BlockStorageStream__MemoryMapped;
         }
@@ -198,12 +225,13 @@ bool BlockStorageStream_InitializeWithBlockStorageDevice(BlockStorageStream *str
     return false;
 }
 
-bool BlockStorageStream_NextStream(BlockStorageStream* stream)
+bool BlockStorageStream_NextStream(BlockStorageStream *stream)
 {
-    if(stream->Device == NULL || BlockStorageDevice_Prev(stream->Device) == NULL) return false;
+    if (stream->Device == NULL || BlockStorageDevice_Prev(stream->Device) == NULL)
+        return false;
 
-    const BlockRegionInfo* pRegion;
-    const DeviceBlockInfo* deviceInfo = BlockStorageDevice_GetDeviceInfo(stream->Device);
+    const BlockRegionInfo *pRegion;
+    const DeviceBlockInfo *deviceInfo = BlockStorageDevice_GetDeviceInfo(stream->Device);
 
     BlockStorageStream orig;
 
@@ -212,21 +240,21 @@ bool BlockStorageStream_NextStream(BlockStorageStream* stream)
     do
     {
         bool fLastIndex = false;
-        
-        if(stream->RangeIndex == 0) 
+
+        if (stream->RangeIndex == 0)
         {
-            if(stream->RegionIndex == 0)
+            if (stream->RegionIndex == 0)
             {
                 stream->Device = BlockStorageDevice_Prev(stream->Device);
-                
-                if(stream->Device == NULL || BlockStorageDevice_Prev(stream->Device) == NULL)
+
+                if (stream->Device == NULL || BlockStorageDevice_Prev(stream->Device) == NULL)
                 {
                     memcpy(stream, &orig, sizeof(orig));
                     return false;
                 }
-                
+
                 deviceInfo = BlockStorageDevice_GetDeviceInfo(stream->Device);
-            
+
                 stream->RegionIndex = deviceInfo->NumRegions - 1;
             }
             else
@@ -243,14 +271,14 @@ bool BlockStorageStream_NextStream(BlockStorageStream* stream)
 
         pRegion = &deviceInfo->Regions[stream->RegionIndex];
 
-        if(fLastIndex)
+        if (fLastIndex)
         {
             stream->RangeIndex = pRegion->NumBlockRanges - 1;
         }
 
-    } while( BlockRange_GetBlockUsage(pRegion->BlockRanges[stream->RangeIndex]) != stream->Usage );
+    } while (BlockRange_GetBlockUsage(pRegion->BlockRanges[stream->RangeIndex]) != stream->Usage);
 
-    if(deviceInfo->Attribute & MediaAttribute_SupportsXIP)
+    if (deviceInfo->Attribute & MediaAttribute_SupportsXIP)
     {
         stream->Flags |= BLOCKSTORAGESTREAM_c_BlockStorageStream__XIP;
     }
@@ -258,21 +286,22 @@ bool BlockStorageStream_NextStream(BlockStorageStream* stream)
     {
         stream->Flags &= ~BLOCKSTORAGESTREAM_c_BlockStorageStream__XIP;
     }
-    
-    stream->BlockLength  = pRegion->BytesPerBlock;
-    stream->BaseAddress  = pRegion->Start + pRegion->BlockRanges[stream->RangeIndex].StartBlock * stream->BlockLength;
-    stream->Length       = BlockRange_GetBlockCount(pRegion->BlockRanges[stream->RangeIndex]) * stream->BlockLength;
+
+    stream->BlockLength = pRegion->BytesPerBlock;
+    stream->BaseAddress = pRegion->Start + pRegion->BlockRanges[stream->RangeIndex].StartBlock * stream->BlockLength;
+    stream->Length = BlockRange_GetBlockCount(pRegion->BlockRanges[stream->RangeIndex]) * stream->BlockLength;
     stream->CurrentIndex = 0;
 
     return true;
 }
 
-bool BlockStorageStream_PrevStream(BlockStorageStream* stream)
+bool BlockStorageStream_PrevStream(BlockStorageStream *stream)
 {
-    if(stream->Device == NULL || BlockStorageDevice_Prev(stream->Device) == NULL) return false;
+    if (stream->Device == NULL || BlockStorageDevice_Prev(stream->Device) == NULL)
+        return false;
 
-    const BlockRegionInfo* pRegion;
-    const DeviceBlockInfo* deviceInfo = BlockStorageDevice_GetDeviceInfo(stream->Device);
+    const BlockRegionInfo *pRegion;
+    const DeviceBlockInfo *deviceInfo = BlockStorageDevice_GetDeviceInfo(stream->Device);
 
     BlockStorageStream orig;
 
@@ -281,21 +310,21 @@ bool BlockStorageStream_PrevStream(BlockStorageStream* stream)
     do
     {
         bool fLastIndex = false;
-        
-        if(stream->RangeIndex == 0) 
+
+        if (stream->RangeIndex == 0)
         {
-            if(stream->RegionIndex == 0)
+            if (stream->RegionIndex == 0)
             {
                 stream->Device = BlockStorageDevice_Prev(stream->Device);
-                
-                if(stream->Device == NULL || BlockStorageDevice_Prev(stream->Device) == NULL)
+
+                if (stream->Device == NULL || BlockStorageDevice_Prev(stream->Device) == NULL)
                 {
                     memcpy(stream, &orig, sizeof(orig));
                     return false;
                 }
-                
+
                 deviceInfo = BlockStorageDevice_GetDeviceInfo(stream->Device);
-            
+
                 stream->RegionIndex = deviceInfo->NumRegions - 1;
             }
             else
@@ -312,14 +341,14 @@ bool BlockStorageStream_PrevStream(BlockStorageStream* stream)
 
         pRegion = &deviceInfo->Regions[stream->RegionIndex];
 
-        if(fLastIndex)
+        if (fLastIndex)
         {
             stream->RangeIndex = pRegion->NumBlockRanges - 1;
         }
 
-    } while( BlockRange_GetBlockUsage(pRegion->BlockRanges[stream->RangeIndex]) != stream->Usage );
+    } while (BlockRange_GetBlockUsage(pRegion->BlockRanges[stream->RangeIndex]) != stream->Usage);
 
-    if(deviceInfo->Attribute & MediaAttribute_SupportsXIP)
+    if (deviceInfo->Attribute & MediaAttribute_SupportsXIP)
     {
         stream->Flags |= BLOCKSTORAGESTREAM_c_BlockStorageStream__XIP;
     }
@@ -327,10 +356,10 @@ bool BlockStorageStream_PrevStream(BlockStorageStream* stream)
     {
         stream->Flags &= ~BLOCKSTORAGESTREAM_c_BlockStorageStream__XIP;
     }
-    
-    stream->BlockLength  = pRegion->BytesPerBlock;
-    stream->BaseAddress  = pRegion->Start + pRegion->BlockRanges[stream->RangeIndex].StartBlock * stream->BlockLength;
-    stream->Length       = BlockRange_GetBlockCount(pRegion->BlockRanges[stream->RangeIndex]) * stream->BlockLength;
+
+    stream->BlockLength = pRegion->BytesPerBlock;
+    stream->BaseAddress = pRegion->Start + pRegion->BlockRanges[stream->RangeIndex].StartBlock * stream->BlockLength;
+    stream->Length = BlockRange_GetBlockCount(pRegion->BlockRanges[stream->RangeIndex]) * stream->BlockLength;
     stream->CurrentIndex = 0;
 
     return true;
@@ -342,21 +371,21 @@ bool BlockStorageStream_Seek(BlockStorageStream *stream, unsigned int offset, Se
 
     switch (origin)
     {
-    case BlockStorageStream_SeekBegin:
-        seekIndex = 0;
-        break;
+        case BlockStorageStream_SeekBegin:
+            seekIndex = 0;
+            break;
 
-    case BlockStorageStream_SeekCurrent:
-        seekIndex = stream->CurrentIndex;
-        break;
+        case BlockStorageStream_SeekCurrent:
+            seekIndex = stream->CurrentIndex;
+            break;
 
-    case BlockStorageStream_SeekEnd:
-        seekIndex = stream->Length;
-        break;
+        case BlockStorageStream_SeekEnd:
+            seekIndex = stream->Length;
+            break;
 
-    default:
+        default:
 
-        return false;
+            return false;
     }
 
     seekIndex += offset;
@@ -404,60 +433,61 @@ bool BlockStorageStream_ReadIntoBuffer(BlockStorageStream *stream, unsigned char
     return false;
 }
 
-bool BlockStorageStream_Read(BlockStorageStream* stream, unsigned char** buffer, unsigned int length)
+bool BlockStorageStream_Read(BlockStorageStream *stream, unsigned char **buffer, unsigned int length)
 {
-    if(stream == NULL || stream->Device == NULL || buffer == 0)
+    if (stream == NULL || stream->Device == NULL || buffer == 0)
     {
         return false;
     }
 
-    DeviceBlockInfo* deviceInfo = BlockStorageDevice_GetDeviceInfo(stream->Device);
-    unsigned char* pBuffer = *buffer;
+    DeviceBlockInfo *deviceInfo = BlockStorageDevice_GetDeviceInfo(stream->Device);
+    unsigned char *pBuffer = *buffer;
 
-    while(length > 0)
+    while (length > 0)
     {
         int readLen = length;
 
         // find the next stream if we are at the end of this one
-        if(stream->CurrentIndex == stream->Length)
+        if (stream->CurrentIndex == stream->Length)
         {
             // TODO FIXME
             // need to check implementation of this call to get pointers to stream continuation
-            //if(!NextStream()) return FALSE;
+            // if(!NextStream()) return FALSE;
         }
 
-        if((stream->CurrentIndex + readLen) > stream->Length)
+        if ((stream->CurrentIndex + readLen) > stream->Length)
         {
             readLen = stream->Length - stream->CurrentIndex;
         }
 
-        if(deviceInfo->Attribute & MediaAttribute_SupportsXIP)
+        if (deviceInfo->Attribute & MediaAttribute_SupportsXIP)
         {
             // XIP assumes contiguous USAGE blocks
-            *buffer = (unsigned char*)(BlockStorageStream_CurrentAddress(stream));
+            *buffer = (unsigned char *)(BlockStorageStream_CurrentAddress(stream));
         }
         else
         {
             // non XIP storage...
 
-            if(stream->Flags & BLOCKSTORAGESTREAM_c_BlockStorageStream__MemoryMapped)
+            if (stream->Flags & BLOCKSTORAGESTREAM_c_BlockStorageStream__MemoryMapped)
             {
                 // memory mapped region, get mapped address for read
-                *buffer = (unsigned char*)(BlockStorageStream_CurrentMappedAddress(stream));
+                *buffer = (unsigned char *)(BlockStorageStream_CurrentMappedAddress(stream));
             }
             else
             {
                 // non mapped access... need to call driver
-                if(!stream->Device->m_BSD->Read(stream->Device->m_context, BlockStorageStream_CurrentAddress(stream), readLen, pBuffer))
+                if (!stream->Device->m_BSD
+                         ->Read(stream->Device->m_context, BlockStorageStream_CurrentAddress(stream), readLen, pBuffer))
                 {
                     return false;
                 }
             }
         }
 
-        length       -= readLen;
-        pBuffer      += readLen;
-        stream->CurrentIndex += readLen;    
+        length -= readLen;
+        pBuffer += readLen;
+        stream->CurrentIndex += readLen;
     }
 
     return true;
@@ -477,21 +507,21 @@ bool BlockStorageStream_IsErased(BlockStorageStream *stream, unsigned int length
 {
     (void)stream;
     (void)length;
-    
+
     return false;
 }
 
 /////////////////////////////////////////////////////
 // BlockStorageDevice stubs
 
-BlockStorageDevice* BlockStorageDevice_Next(BlockStorageDevice* device)
+BlockStorageDevice *BlockStorageDevice_Next(BlockStorageDevice *device)
 {
     (void)device;
 
     return NULL;
 }
 
-BlockStorageDevice* BlockStorageDevice_Prev(BlockStorageDevice* device)
+BlockStorageDevice *BlockStorageDevice_Prev(BlockStorageDevice *device)
 {
     (void)device;
 
@@ -501,7 +531,7 @@ BlockStorageDevice* BlockStorageDevice_Prev(BlockStorageDevice* device)
 /////////////////////////////////////////////////////////
 // Description:
 //    Initializes a given block device for use
-// 
+//
 // Returns:
 //   true if successful; false if not
 //
@@ -509,7 +539,7 @@ BlockStorageDevice* BlockStorageDevice_Prev(BlockStorageDevice* device)
 //    No other functions in this interface may be called
 //    until after Init returns.
 //
-bool BlockStorageDevice_InitializeDevice(BlockStorageDevice* device)
+bool BlockStorageDevice_InitializeDevice(BlockStorageDevice *device)
 {
     ASSERT(device != NULL);
     ASSERT(device->m_context != NULL);
@@ -520,14 +550,14 @@ bool BlockStorageDevice_InitializeDevice(BlockStorageDevice* device)
 /////////////////////////////////////////////////////////
 // Description:
 //    Initializes a given block device for use
-// 
+//
 // Returns:
 //   true if successful; false if not
 //
 // Remarks:
 //   De initializes the device when no longer needed
 //
-bool BlockStorageDevice_UninitializeDevice(BlockStorageDevice* device)
+bool BlockStorageDevice_UninitializeDevice(BlockStorageDevice *device)
 {
     ASSERT(device != NULL);
     ASSERT(device->m_context != NULL);
@@ -539,7 +569,7 @@ bool BlockStorageDevice_UninitializeDevice(BlockStorageDevice* device)
 // Description:
 //    Gets the information describing the device
 //
-DeviceBlockInfo* BlockStorageDevice_GetDeviceInfo(BlockStorageDevice* device)
+DeviceBlockInfo *BlockStorageDevice_GetDeviceInfo(BlockStorageDevice *device)
 {
     ASSERT(device != NULL);
     ASSERT(device->m_context != NULL);
@@ -560,27 +590,31 @@ DeviceBlockInfo* BlockStorageDevice_GetDeviceInfo(BlockStorageDevice* device)
 //
 //    pSectorMetadata - pointer to an array of structured (one for each sector)
 //                      for the extra sector information.
-// 
+//
 // Returns:
 //   true if successful; false if not
 //
 // Remarks:
 //   This function reads the number of sectors specified from the device.
-//   
+//
 //   pSectorBuff may be NULL. This is to allow for reading just the metadata.
-// 
+//
 //   pSectorMetadata can be set to NULL if the caller does not need the extra
 //   data.
 //
-//   If the device does not support sector Metadata it should fail if the 
+//   If the device does not support sector Metadata it should fail if the
 //   pSectorMetadata parameter is not NULL.
 //
-bool BlockStorageDevice_Read(BlockStorageDevice* device, unsigned int startAddress, unsigned int numBytes, unsigned char* buffer)
+bool BlockStorageDevice_Read(
+    BlockStorageDevice *device,
+    unsigned int startAddress,
+    unsigned int numBytes,
+    unsigned char *buffer)
 {
     ASSERT(device != NULL);
     ASSERT(device->m_context != NULL);
 
-     return device->m_BSD->Read(device->m_context, startAddress, numBytes, buffer);
+    return device->m_BSD->Read(device->m_context, startAddress, numBytes, buffer);
 }
 
 /////////////////////////////////////////////////////////
@@ -596,7 +630,7 @@ bool BlockStorageDevice_Read(BlockStorageDevice* device, unsigned int startAddre
 //
 //    pSectorMetadata - pointer to an array of structures (one for each sector)
 //                      for the extra sector information.
-// 
+//
 // Returns:
 //   true if successful; false if not
 //
@@ -606,15 +640,20 @@ bool BlockStorageDevice_Read(BlockStorageDevice* device, unsigned int startAddre
 //   to manage wear leveling etc... (mostly for NOR and NAND). The metadata
 //   is used by upper layers to ensure that data is moved around on the flash
 //   when writing to prevent failure of the device from too many erase cycles
-//   on a sector. 
-//   
-//   If the device does not support sector Metadata it should fail if the 
+//   on a sector.
+//
+//   If the device does not support sector Metadata it should fail if the
 //   pSectorMetadata parameter is not NULL.
 //
 //   pSectorMetadata can be set to NULL if the caller does not need the extra
-//   data. Implementations must not attempt to write data through a NULL pointer! 
+//   data. Implementations must not attempt to write data through a NULL pointer!
 //
-bool BlockStorageDevice_Write(BlockStorageDevice* device, unsigned int startAddress, unsigned int numBytes, unsigned char* buffer, bool readModifyWrite)
+bool BlockStorageDevice_Write(
+    BlockStorageDevice *device,
+    unsigned int startAddress,
+    unsigned int numBytes,
+    unsigned char *buffer,
+    bool readModifyWrite)
 {
     ASSERT(device != NULL);
     ASSERT(device->m_context != NULL);
@@ -622,7 +661,11 @@ bool BlockStorageDevice_Write(BlockStorageDevice* device, unsigned int startAddr
     return device->m_BSD->Write(device->m_context, startAddress, numBytes, buffer, readModifyWrite);
 }
 
-bool BlockStorageDevice_Memset(BlockStorageDevice* device, unsigned int startAddress, unsigned char buffer, unsigned int numBytes)
+bool BlockStorageDevice_Memset(
+    BlockStorageDevice *device,
+    unsigned int startAddress,
+    unsigned char buffer,
+    unsigned int numBytes)
 {
     ASSERT(device != NULL);
     ASSERT(device->m_context != NULL);
@@ -630,13 +673,14 @@ bool BlockStorageDevice_Memset(BlockStorageDevice* device, unsigned int startAdd
     return device->m_BSD->Memset(device->m_context, startAddress, buffer, numBytes);
 }
 
-// bool BlockStorageDevice_GetSectorMetadata(BlockStorageDevice* device, unsigned int sectorStart, SectorMetadata* pSectorMetadata);
-// bool BlockStorageDevice_SetSectorMetadata(BlockStorageDevice* device, unsigned int sectorStart, SectorMetadata* pSectorMetadata);
+// bool BlockStorageDevice_GetSectorMetadata(BlockStorageDevice* device, unsigned int sectorStart, SectorMetadata*
+// pSectorMetadata); bool BlockStorageDevice_SetSectorMetadata(BlockStorageDevice* device, unsigned int sectorStart,
+// SectorMetadata* pSectorMetadata);
 
 /////////////////////////////////////////////////////////
 // Description:
 //    Check a block is erased or not
-// 
+//
 // Input:
 //    Address - Logical Sector Address
 //
@@ -645,8 +689,8 @@ bool BlockStorageDevice_Memset(BlockStorageDevice* device, unsigned int startAdd
 //
 // Remarks:
 //    check the block containing the sector address specified.
-//  
-bool BlockStorageDevice_IsBlockErased(BlockStorageDevice* device, unsigned int blockStartAddress, unsigned int length)
+//
+bool BlockStorageDevice_IsBlockErased(BlockStorageDevice *device, unsigned int blockStartAddress, unsigned int length)
 {
     ASSERT(device != NULL);
     ASSERT(device->m_context != NULL);
@@ -657,7 +701,7 @@ bool BlockStorageDevice_IsBlockErased(BlockStorageDevice* device, unsigned int b
 /////////////////////////////////////////////////////////
 // Description:
 //    Erases a block
-// 
+//
 // Input:
 //    Address - Logical Sector Address
 //
@@ -667,7 +711,7 @@ bool BlockStorageDevice_IsBlockErased(BlockStorageDevice* device, unsigned int b
 // Remarks:
 //    Erases the block containing the sector address specified.
 //
-bool BlockStorageDevice_EraseBlock(BlockStorageDevice* device, unsigned int address)
+bool BlockStorageDevice_EraseBlock(BlockStorageDevice *device, unsigned int address)
 {
     ASSERT(device != NULL);
     ASSERT(device->m_context != NULL);
@@ -678,16 +722,16 @@ bool BlockStorageDevice_EraseBlock(BlockStorageDevice* device, unsigned int addr
 /////////////////////////////////////////////////////////
 // Description:
 //   Changes the power state of the device
-// 
+//
 // Input:
 //    state   - true= power on; false = power off
 //
 // Remarks:
-//   This function allows systems to conserve power by 
-//   shutting down the hardware when the system is 
+//   This function allows systems to conserve power by
+//   shutting down the hardware when the system is
 //   going into low power states.
 //
-void BlockStorageDevice_SetPowerState(BlockStorageDevice* device, unsigned int state)
+void BlockStorageDevice_SetPowerState(BlockStorageDevice *device, unsigned int state)
 {
     ASSERT(device != NULL);
     ASSERT(device->m_context != NULL);
@@ -695,34 +739,52 @@ void BlockStorageDevice_SetPowerState(BlockStorageDevice* device, unsigned int s
     device->m_BSD->SetPowerState(device->m_context, state);
 }
 
-bool BlockStorageDevice_FindRegionFromAddress(BlockStorageDevice* device, unsigned int address, unsigned int* blockRegionIndex, unsigned int* blockRangeIndex)
+bool BlockStorageDevice_FindRegionFromAddress(
+    BlockStorageDevice *device,
+    unsigned int address,
+    unsigned int *blockRegionIndex,
+    unsigned int *blockRangeIndex)
 {
     ASSERT(device != NULL);
 
-    DeviceBlockInfo* deviceInfo = BlockStorageDevice_GetDeviceInfo(device);
+    DeviceBlockInfo *deviceInfo = BlockStorageDevice_GetDeviceInfo(device);
 
     return DeviceBlockInfo_FindRegionFromAddress(deviceInfo, address, blockRegionIndex, blockRangeIndex);
 }
 
-bool BlockStorageDevice_FindForBlockUsage(BlockStorageDevice* device, unsigned int blockUsage, unsigned int* address, unsigned int* blockRegionIndex, unsigned int* blockRangeIndex)
+bool BlockStorageDevice_FindForBlockUsage(
+    BlockStorageDevice *device,
+    unsigned int blockUsage,
+    unsigned int *address,
+    unsigned int *blockRegionIndex,
+    unsigned int *blockRangeIndex)
 {
     ASSERT(device != NULL);
 
-    DeviceBlockInfo* deviceInfo = BlockStorageDevice_GetDeviceInfo(device);
+    DeviceBlockInfo *deviceInfo = BlockStorageDevice_GetDeviceInfo(device);
 
     return DeviceBlockInfo_FindForBlockUsage(deviceInfo, blockUsage, address, blockRegionIndex, blockRangeIndex);
 }
 
-bool BlockStorageDevice_FindNextUsageBlock(BlockStorageDevice* device, unsigned int blockUsage, unsigned int* address, unsigned int* blockRegionIndex, unsigned int* blockRangeIndex)
+bool BlockStorageDevice_FindNextUsageBlock(
+    BlockStorageDevice *device,
+    unsigned int blockUsage,
+    unsigned int *address,
+    unsigned int *blockRegionIndex,
+    unsigned int *blockRangeIndex)
 {
     ASSERT(device != NULL);
 
-    DeviceBlockInfo* deviceInfo = BlockStorageDevice_GetDeviceInfo(device);
+    DeviceBlockInfo *deviceInfo = BlockStorageDevice_GetDeviceInfo(device);
 
     return DeviceBlockInfo_FindNextUsageBlock(deviceInfo, blockUsage, address, blockRegionIndex, blockRangeIndex);
 }
 
-bool BlockStorageDevice_GetMemoryMappedAddress(BlockStorageDevice* device, unsigned int blockRegionIndex, unsigned int blockRangeIndex, unsigned int* address)
+bool BlockStorageDevice_GetMemoryMappedAddress(
+    BlockStorageDevice *device,
+    unsigned int blockRegionIndex,
+    unsigned int blockRangeIndex,
+    unsigned int *address)
 {
     ASSERT(device != NULL);
     ASSERT(device->m_context != NULL);
@@ -731,12 +793,12 @@ bool BlockStorageDevice_GetMemoryMappedAddress(BlockStorageDevice* device, unsig
 }
 
 ///////////////////////////////////////////////////
-// BlockStorageList declarations 
+// BlockStorageList declarations
 
 // initialize the storage
 void BlockStorageList_Initialize()
 {
-    for(int i = 0; i < TARGET_BLOCKSTORAGE_COUNT; i++)
+    for (int i = 0; i < TARGET_BLOCKSTORAGE_COUNT; i++)
     {
         g_BlockStorage.DeviceList[i] = NULL;
     }
@@ -747,40 +809,57 @@ void BlockStorageList_Initialize()
 // walk through list of devices and calls Init() function
 bool BlockStorageList_InitializeDevices()
 {
-    // TODO FIXME
+    for (int i = 0; i < TARGET_BLOCKSTORAGE_COUNT; i++)
+    {
+        if (g_BlockStorage.DeviceList[i] != NULL)
+        {
+            BlockStorageDevice_InitializeDevice(g_BlockStorage.DeviceList[i]);
+        }
+    }
+
     return true;
 }
 
 // walk through list of devices and calls UnInit() function
 bool BlockStorageList_UnInitializeDevices()
 {
-    // TODO FIXME
+    for (int i = 0; i < TARGET_BLOCKSTORAGE_COUNT; i++)
+    {
+        if (g_BlockStorage.DeviceList[i] != NULL)
+        {
+            BlockStorageDevice_UninitializeDevice(g_BlockStorage.DeviceList[i]);
+            g_BlockStorage.DeviceList[i] = NULL;
+
+            g_BlockStorage.DeviceCount--;
+        }
+    }
+
     return true;
 }
 
-bool BlockStorageList_AddDevice(BlockStorageDevice* pBSD, IBlockStorageDevice* vtable, void* config, bool init)
+bool BlockStorageList_AddDevice(BlockStorageDevice *pBSD, IBlockStorageDevice *vtable, void *config, bool init)
 {
     bool success = true;
 
     // find next empty device slot
-    for(int i = 0; i < TARGET_BLOCKSTORAGE_COUNT; i++)
+    for (int i = 0; i < TARGET_BLOCKSTORAGE_COUNT; i++)
     {
-        if(g_BlockStorage.DeviceList[i] == NULL)
+        if (g_BlockStorage.DeviceList[i] == NULL)
         {
             // found an empty slot
 
             // link the driver and context
-            pBSD->m_BSD     = vtable;
+            pBSD->m_BSD = vtable;
             pBSD->m_context = config;
 
             // call initialize device, if requested
-            if(init)
+            if (init)
             {
                 success = BlockStorageDevice_InitializeDevice(pBSD);
             }
-          
+
             // add device to list only init was successful
-            if(success)
+            if (success)
             {
                 // add the BSD
                 g_BlockStorage.DeviceList[i] = pBSD;
@@ -796,21 +875,21 @@ bool BlockStorageList_AddDevice(BlockStorageDevice* pBSD, IBlockStorageDevice* v
     return false;
 }
 
-bool BlockStorageList_RemoveDevice(BlockStorageDevice* pBSD, bool unInit)
+bool BlockStorageList_RemoveDevice(BlockStorageDevice *pBSD, bool unInit)
 {
     // find device
-    for(int i = 0; i < TARGET_BLOCKSTORAGE_COUNT; i++)
+    for (int i = 0; i < TARGET_BLOCKSTORAGE_COUNT; i++)
     {
-        if(g_BlockStorage.DeviceList[i] == pBSD)
+        if (g_BlockStorage.DeviceList[i] == pBSD)
         {
             // found it
 
             // call uninitialize device, if requested
-            if(unInit)
+            if (unInit)
             {
                 BlockStorageDevice_UninitializeDevice(pBSD);
             }
-          
+
             // remove device
             g_BlockStorage.DeviceList[i] = NULL;
 
@@ -822,26 +901,31 @@ bool BlockStorageList_RemoveDevice(BlockStorageDevice* pBSD, bool unInit)
     return false;
 }
 
-bool BlockStorageList_FindDeviceForPhysicalAddress(BlockStorageDevice** pBSD, unsigned int physicalAddress, ByteAddress* blockAddress)
+bool BlockStorageList_FindDeviceForPhysicalAddress(
+    BlockStorageDevice **pBSD,
+    unsigned int physicalAddress,
+    ByteAddress *blockAddress)
 {
     *pBSD = NULL;
-       
-    BlockStorageDevice* block = BlockStorageList_GetFirstDevice();
+
+    BlockStorageDevice *block = BlockStorageList_GetFirstDevice();
 
     // this has to add to make metadataprocessor happy
-    if(!block) return true;
+    if (!block)
+        return true;
 
-    DeviceBlockInfo* pDeviceInfo = BlockStorageDevice_GetDeviceInfo(block);
-        
-    for(uint32_t i=0; i < pDeviceInfo->NumRegions; i++)
+    DeviceBlockInfo *pDeviceInfo = BlockStorageDevice_GetDeviceInfo(block);
+
+    for (uint32_t i = 0; i < pDeviceInfo->NumRegions; i++)
     {
-        BlockRegionInfo* pRegion = &pDeviceInfo->Regions[i];
-        
-        if(pRegion->Start <= physicalAddress && physicalAddress < (pRegion->Start + pRegion->NumBlocks * pRegion->BytesPerBlock))
-        {
-            *pBSD = block; 
+        BlockRegionInfo *pRegion = &pDeviceInfo->Regions[i];
 
-            // get block start address 
+        if (pRegion->Start <= physicalAddress &&
+            physicalAddress < (pRegion->Start + pRegion->NumBlocks * pRegion->BytesPerBlock))
+        {
+            *pBSD = block;
+
+            // get block start address
             *blockAddress = (ByteAddress)((physicalAddress - pRegion->Start) / pRegion->BytesPerBlock);
             *blockAddress *= pRegion->BytesPerBlock;
             *blockAddress += pRegion->Start;
@@ -853,11 +937,11 @@ bool BlockStorageList_FindDeviceForPhysicalAddress(BlockStorageDevice** pBSD, un
     return false;
 }
 
-BlockStorageDevice* BlockStorageList_GetFirstDevice()
+BlockStorageDevice *BlockStorageList_GetFirstDevice()
 {
-    for(int i = 0; i < TARGET_BLOCKSTORAGE_COUNT; i++)
+    for (int i = 0; i < TARGET_BLOCKSTORAGE_COUNT; i++)
     {
-        if(g_BlockStorage.DeviceList[i] != NULL)
+        if (g_BlockStorage.DeviceList[i] != NULL)
         {
             return g_BlockStorage.DeviceList[i];
         }
@@ -867,15 +951,16 @@ BlockStorageDevice* BlockStorageList_GetFirstDevice()
 }
 
 // returns the next device in BlockStorageList
-BlockStorageDevice* BlockStorageList_GetNextDevice(BlockStorageDevice* device)
+BlockStorageDevice *BlockStorageList_GetNextDevice(BlockStorageDevice *device)
 {
-	for(int i = 0; i < TARGET_BLOCKSTORAGE_COUNT; i++)
+    for (int i = 0; i < TARGET_BLOCKSTORAGE_COUNT; i++)
     {
-        if(g_BlockStorage.DeviceList[i] == device)
+        if (g_BlockStorage.DeviceList[i] == device)
         {
-			if((i + 1) < TARGET_BLOCKSTORAGE_COUNT){
-				return g_BlockStorage.DeviceList[i + 1];
-			}
+            if ((i + 1) < TARGET_BLOCKSTORAGE_COUNT)
+            {
+                return g_BlockStorage.DeviceList[i + 1];
+            }
         }
     }
     return NULL;

@@ -65,8 +65,8 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::SetupWriteLine(
                 *isNewAllocation = true;
 
                 // concatenate both strings
-                strcat(*buffer, text);
-                strcat(*buffer, newLine);
+                memcpy(*buffer, text, textLength);
+                memcpy(*buffer + textLength, newLine, newLineLength);
             }
             else
             {
@@ -92,11 +92,11 @@ bool Library_sys_io_ser_native_System_IO_Ports_SerialPort::GetLineFromRxBuffer(
     uint8_t *&line)
 {
     const char *newLine;
-    uint32_t newLineLength;
-    uint32_t newLineIndex;
-    int32_t compareIndex;
+    uint32_t newLineLength = 0;
+    uint32_t newLineIndex = 0;
+    int32_t compareIndex = 0;
     uint8_t *buffer;
-    uint8_t *comparison;
+    uint8_t *comparison = NULL;
     uint32_t matchCount = 0;
     uint32_t index = 0;
 
@@ -108,7 +108,16 @@ bool Library_sys_io_ser_native_System_IO_Ports_SerialPort::GetLineFromRxBuffer(
     {
         // get "new line" from field
         newLine = serialDevice[FIELD___newLine].RecoverString();
-        newLineLength = hal_strlen_s(newLine);
+
+        if (newLine != NULL)
+        {
+            newLineLength = hal_strlen_s(newLine);
+        }
+        else
+        {
+            // TODO: maybe handle the error more appropriately
+            return false;
+        }
 
         // need to subtract one because we are 0 indexed
         newLineIndex = newLineLength - 1;
@@ -143,12 +152,16 @@ bool Library_sys_io_ser_native_System_IO_Ports_SerialPort::GetLineFromRxBuffer(
 
                     do
                     {
+                        // Ensure comparison does not point to a location before the start of the buffer
+                        if (comparison < ringBuffer->Reader())
+                        {
+                            break;
+                        }
+
                         if (*comparison == newLine[compareIndex])
                         {
                             // found another match
                             matchCount++;
-
-                            //
                         }
 
                         // move comparer to position before
@@ -162,8 +175,7 @@ bool Library_sys_io_ser_native_System_IO_Ports_SerialPort::GetLineFromRxBuffer(
             buffer++;
             index++;
 
-        } while (index < ringBuffer->Length() || matchCount < newLineLength);
-
+        } while (index < ringBuffer->Length() && matchCount < newLineLength);
         // sequence found?
         if (matchCount == newLineLength)
         {

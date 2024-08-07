@@ -7,7 +7,6 @@ parameters:
     default: $(Build.SourcesDirectory)
 
 steps:
-
   - template: setup-cmake-user-presets.yml
     parameters:
       repoDirectory: ${{ parameters.repoDirectory }}
@@ -16,32 +15,32 @@ steps:
     displayName: Setup CMake (DFU, no SRecord)
     condition: and(eq(variables['NeedsDFU'], true), eq(variables['NeedsSRECORD'], 'false'))
     inputs:
-      cmakeArgs: '--preset $(CMakePreset) -DCMAKE_BUILD_TYPE=MinSizeRel -DBUILD_VERSION=$(NBGV_VersionMajor).$(NBGV_VersionMinor).$(NBGV_BuildNumber).$(TARGET_BUILD_COUNTER) -DTARGET_NAME=$(TargetPublishName) -DTOOL_HEX2DFU_PREFIX=$(HEX2DFU_PATH) $(BuildOptions) '
-      workingDirectory:  ${{ parameters.repoDirectory }}
+      cmakeArgs: "--preset $(CMakePreset) -DCMAKE_BUILD_TYPE=MinSizeRel -DBUILD_VERSION=$(NBGV_VersionMajor).$(NBGV_VersionMinor).$(NBGV_BuildNumber).$(TARGET_BUILD_COUNTER) -DTARGET_NAME=$(TargetPublishName) -DTOOL_HEX2DFU_PREFIX=$(HEX2DFU_PATH) $(BuildOptions) "
+      workingDirectory: ${{ parameters.repoDirectory }}
 
   - task: CMake@1
     displayName: Setup CMake build (SRecord, no DFU)
     condition: and(eq(variables['NeedsSRECORD'], true), eq(variables['NeedsDFU'], false))
     inputs:
-      cmakeArgs: '--preset $(CMakePreset) -DCMAKE_BUILD_TYPE=MinSizeRel -DBUILD_VERSION=$(NBGV_VersionMajor).$(NBGV_VersionMinor).$(NBGV_BuildNumber).$(TARGET_BUILD_COUNTER) -DTARGET_NAME=$(TargetPublishName) -DTOOL_SRECORD_PREFIX=$(SRECORD_PATH)/srecord/ $(BuildOptions)  '
-      workingDirectory:  ${{ parameters.repoDirectory }}
+      cmakeArgs: "--preset $(CMakePreset) -DCMAKE_BUILD_TYPE=MinSizeRel -DBUILD_VERSION=$(NBGV_VersionMajor).$(NBGV_VersionMinor).$(NBGV_BuildNumber).$(TARGET_BUILD_COUNTER) -DTARGET_NAME=$(TargetPublishName) -DTOOL_SRECORD_PREFIX=$(SRECORD_PATH)/srecord/ $(BuildOptions)  "
+      workingDirectory: ${{ parameters.repoDirectory }}
 
   - task: CMake@1
     displayName: Setup CMake build (DFU and SRecord)
     condition: and(eq(variables['NeedsDFU'], true), eq(variables['NeedsSRECORD'], true))
     inputs:
-      cmakeArgs: '--preset $(CMakePreset) -DCMAKE_BUILD_TYPE=MinSizeRel -DBUILD_VERSION=$(NBGV_VersionMajor).$(NBGV_VersionMinor).$(NBGV_BuildNumber).$(TARGET_BUILD_COUNTER) -DTARGET_NAME=$(TargetPublishName) -DTOOL_HEX2DFU_PREFIX=$(HEX2DFU_PATH) -DTOOL_SRECORD_PREFIX=$(SRECORD_PATH)/srecord/ $(BuildOptions) '
-      workingDirectory:  ${{ parameters.repoDirectory }}
+      cmakeArgs: "--preset $(CMakePreset) -DCMAKE_BUILD_TYPE=MinSizeRel -DBUILD_VERSION=$(NBGV_VersionMajor).$(NBGV_VersionMinor).$(NBGV_BuildNumber).$(TARGET_BUILD_COUNTER) -DTARGET_NAME=$(TargetPublishName) -DTOOL_HEX2DFU_PREFIX=$(HEX2DFU_PATH) -DTOOL_SRECORD_PREFIX=$(SRECORD_PATH)/srecord/ $(BuildOptions) "
+      workingDirectory: ${{ parameters.repoDirectory }}
 
   - task: CMake@1
     displayName: Setup CMake build (no DFU, no SRecord)
     condition: and(eq(variables['NeedsDFU'], false), eq(variables['NeedsSRECORD'], false))
     inputs:
-      cmakeArgs: '--preset $(CMakePreset) -DCMAKE_BUILD_TYPE=MinSizeRel -DBUILD_VERSION=$(NBGV_VersionMajor).$(NBGV_VersionMinor).$(NBGV_BuildNumber).$(TARGET_BUILD_COUNTER) -DTARGET_NAME=$(TargetPublishName) $(BuildOptions) '
-      workingDirectory:  ${{ parameters.repoDirectory }}
+      cmakeArgs: "--preset $(CMakePreset) -DCMAKE_BUILD_TYPE=MinSizeRel -DBUILD_VERSION=$(NBGV_VersionMajor).$(NBGV_VersionMinor).$(NBGV_BuildNumber).$(TARGET_BUILD_COUNTER) -DTARGET_NAME=$(TargetPublishName) $(BuildOptions) "
+      workingDirectory: ${{ parameters.repoDirectory }}
 
   - task: CMake@1
     displayName: Build with CMake
     inputs:
-      cmakeArgs: '--build  --preset $(CMakePreset) --target all --config MinSizeRel'
-      workingDirectory:  ${{ parameters.repoDirectory }}
+      cmakeArgs: "--build  --preset $(CMakePreset) --target all --config MinSizeRel"
+      workingDirectory: ${{ parameters.repoDirectory }}

@@ -119,7 +119,7 @@ void tx_application_define(void *first_unused_memory)
     // for nanoBooter we have to init it here to have access to network configuration blocks
     ConfigurationManager_Initialize();
 
-    // report successfull nanoBooter execution
+    // report successful nanoBooter execution
     ReportSuccessfullNanoBooter();
 }
 
