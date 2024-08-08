@@ -16,6 +16,9 @@
     <Filter Include="Source Files\PAL">
       <UniqueIdentifier>{4a8f1020-5d97-4a6f-b9c1-1460ae41f71b}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\nanoFramework.Runtime.Events">
+      <UniqueIdentifier>{27c2cf5b-4789-40b1-b760-fc55c60546f0}</UniqueIdentifier>
+    </Filter>
     <Filter Include="Source Files\Generated">
       <UniqueIdentifier>{917f0887-d239-439f-b246-e18c1f726304}</UniqueIdentifier>
     </Filter>
@@ -78,6 +81,15 @@
     <ClCompile Include="WireProtocol_HAL_Interface.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\src\nanoFramework.Runtime.Events\nf_rt_events_native_nanoFramework_Runtime_Events_WeakDelegate.cpp">
+      <Filter>Source Files\nanoFramework.Runtime.Events</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\nanoFramework.Runtime.Events\nf_rt_events_native_nanoFramework_Runtime_Events_EventSink.cpp">
+      <Filter>Source Files\nanoFramework.Runtime.Events</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\nanoFramework.Runtime.Events\nf_rt_events_native_nanoFramework_Runtime_Events_NativeEventDispatcher.cpp">
+      <Filter>Source Files\nanoFramework.Runtime.Events</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\win32\nanoCLR\Generated\CLR_RT_InteropAssembliesTable.cpp">
       <Filter>Source Files\Generated</Filter>
     </ClCompile>
@@ -94,6 +106,9 @@
       <Filter>Source Files\PAL</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\PAL\Double\nanoPAL_NativeDouble.cpp">
+      <Filter>Source Files\PAL</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\CLR\Core\NativeEventDispatcher\NativeEventDispatcher.cpp">
       <Filter>Source Files\PAL</Filter>
     </ClCompile>
     <ClCompile Include="Target_BlockStorage.cpp">
