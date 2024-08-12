@@ -11,12 +11,12 @@ namespace nanoFramework.Targets.ORGPAL_PALX
     public static class AdcChannels
     {
         /// <summary>
-        /// Channel 0, exposed on A0, connected to PA6 (ADC1 - IN6)
+        /// Channel 0, exposed on A0, connected to PA2 (ADC1 - IN1)
         /// </summary>
         public const int Channel_0 = 0;
 
         /// <summary>
-        /// Channel 1, exposed on A1, connected to PA4 (ADC1 - IN4)
+        /// Channel 1, exposed on A1, connected to PB0 (ADC1 - IN8)
         /// </summary>
         public const int Channel_1 = 1;
 
@@ -26,32 +26,22 @@ namespace nanoFramework.Targets.ORGPAL_PALX
         public const int Channel_2 = 2;
 
         /// <summary>
-        /// Channel 3, exposed on A3, connected to PF10 (ADC1 - IN8)
+        /// Channel 3, exposed on A3, connected to PC3 (ADC1 - IN13)
         /// </summary>
         public const int Channel_3 = 3;
 
         /// <summary>
-        /// Channel 4, exposed on A4, connected to PF8 (ADC3 - IN6)
-        /// </summary>
-        public const int Channel_4 = 4;
-
-        /// <summary>
-        /// Channel 5, exposed on A5, connected to PB8 (ADC3 - IN7)
-        /// </summary>
-        public const int Channel_5 = 5;
-
-        /// <summary>
-        /// Channel 6, internal temperature sensor, connected to ADC1
+        /// Channel 4, internal temperature sensor, connected to ADC1
         /// </summary>
         public const int Channel_TemperatureSensor = 6;
 
         /// <summary>
-        /// Channel 7, internal voltage reference, connected to ADC1
+        /// Channel 5, internal voltage reference, connected to ADC1
         /// </summary>
         public const int Channel_VrefIn = 7;
 
         /// <summary>
-        /// Channel 8, connected to VBatt pin, ADC1
+        /// Channel 6, connected to VBatt pin, ADC1
         /// </summary>
         public const int Channel_Vbatt = 8;
     }
