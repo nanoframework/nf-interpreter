@@ -186,6 +186,7 @@ jobs:
                         ($files.where{$_.Contains('targets/ChibiOS/_nf-overlay')}).Count -gt 0 -Or
                         ($files.where{$_.Contains('targets/ChibiOS/_littlefs')}).Count -gt 0 -Or
                         ($files.where{$_.Contains('targets/ChibiOS/ORGPAL_PALTHREE')}).Count -gt 0 -Or
+                        ($files.where{$_.Contains('targets/ChibiOS/ORGPAL_PALX')}).Count -gt 0 -Or
                         ($files.where{$_.Contains('targets/ChibiOS/ST_NUCLEO64_F091RC')}).Count -gt 0
                       )
                     {
