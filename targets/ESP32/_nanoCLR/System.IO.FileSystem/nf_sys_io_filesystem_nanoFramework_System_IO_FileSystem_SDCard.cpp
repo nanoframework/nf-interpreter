@@ -25,7 +25,7 @@ void cardDetect_interrupt(GPIO_PIN Pin, bool pinState, void *pArg)
 
 void GetMMCPins(int slotIndex, bool _1bit, int *count, int8_t **pPins)
 {
-    *pPins = &Esp32_SDMMC_DevicePinMap[slotIndex][Esp32SdmmcPin_Clock];   
+    *pPins = &Esp32_SDMMC_DevicePinMap[slotIndex][Esp32SdmmcPin_Clock];
     *count = _1bit ? 3 : 6;
 }
 
@@ -126,13 +126,13 @@ HRESULT Library_nf_sys_io_filesystem_nanoFramework_System_IO_FileSystem_SDCard::
         }
 
         // Set interrupt for change on Card Detect GPIO pin
-        PinMode pullups = cardDetectedState? PinMode::PinMode_InputPullDown : PinMode::PinMode_InputPullUp;
+        PinMode pullups = cardDetectedState ? PinMode::PinMode_InputPullDown : PinMode::PinMode_InputPullUp;
 
         if (!CPU_GPIO_EnableInputPin(
                 cardDetectPin,
                 200,
                 cardDetect_interrupt,
-                (void*)slotIndex,
+                (void *)slotIndex,
                 GPIO_INT_EDGE::GPIO_INT_EDGE_BOTH,
                 pullups))
         {
