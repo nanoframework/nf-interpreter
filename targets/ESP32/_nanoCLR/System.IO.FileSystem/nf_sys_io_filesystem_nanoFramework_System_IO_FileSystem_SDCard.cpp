@@ -8,7 +8,6 @@
 
 void postManagedStorageEvent(bool pinState, uint32_t slotIndex)
 {
-    ets_printf("post pin %d slot %d\n", pinState, slotIndex);
     PostManagedEvent(EVENT_STORAGE, StorageEventType_CardDetectChanged, pinState, slotIndex);
 }
 
