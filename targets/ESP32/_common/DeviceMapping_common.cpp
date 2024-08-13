@@ -6,7 +6,6 @@
 #include <esp32_idf.h>
 #include <Esp32_DeviceMapping.h>
 
-
 void Esp32_DecodeAlternateFunction(
     uint32_t alternateFunction,
     Esp32_MapDeviceType &deviceType,
@@ -58,7 +57,7 @@ int Esp32_GetMappedDevicePins(Esp32_MapDeviceType deviceType, int busIndex, int 
                 return (int)Esp32_DAC_DevicePinMap[pinIndex];
 #endif
 
-#if (defined(CONFIG_IDF_TARGET_ESP32)|| defined(CONFIG_IDF_TARGET_ESP32S3))
+#if (defined(CONFIG_IDF_TARGET_ESP32) || defined(CONFIG_IDF_TARGET_ESP32S3))
             case DEV_TYPE_SDMMC:
                 return (int)Esp32_SDMMC_DevicePinMap[busIndex][pinIndex];
 #endif
@@ -210,12 +209,12 @@ int Esp32_SetMappedDevicePins(uint8_t pin, int32_t alternateFunction)
 
 #if (defined(CONFIG_IDF_TARGET_ESP32S3) || defined(CONFIG_IDF_TARGET_ESP32P4))
         case DEV_TYPE_SDMMC:
-         if (busIndex <= 1)
-         {
-            Esp32_SDMMC_DevicePinMap[busIndex][gpioMapping] = pin;
-            return true;
-         }
-         break;
+            if (busIndex <= 1)
+            {
+                Esp32_SDMMC_DevicePinMap[busIndex][gpioMapping] = pin;
+                return true;
+            }
+            break;
 #endif
 
         default:
