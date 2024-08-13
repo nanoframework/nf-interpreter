@@ -16,7 +16,7 @@ void cardDetect_interrupt(GPIO_PIN Pin, bool pinState, void *pArg)
     (void)Pin;
 
     // Decode pArg
-    int slotIndex = (uint32_t)(0xff && pArg);
+    int slotIndex = (uint32_t)0xff && pArg;
 
     postManagedStorageEvent(pinState, slotIndex);
 }
