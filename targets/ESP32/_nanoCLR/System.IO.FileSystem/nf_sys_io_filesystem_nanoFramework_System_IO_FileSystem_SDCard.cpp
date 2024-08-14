@@ -159,14 +159,18 @@ HRESULT Library_nf_sys_io_filesystem_nanoFramework_System_IO_FileSystem_SDCard::
     NANOCLR_HEADER();
 
     SDCard_SDInterfaceType cardType;
-    int slotIndex;
     int cardDetectPin;
+#if SOC_SDMMC_HOST_SUPPORTED
+    int slotIndex;
+#endif
 
     // get a pointer to the managed object instance and check that it's not NULL
     CLR_RT_HeapBlock *pThis = stack.This();
     FAULT_ON_NULL(pThis);
 
+#if SOC_SDMMC_HOST_SUPPORTED
     slotIndex = (pThis[FIELD___slotIndex].NumericByRef().u4);
+#endif
 
     if ((bool)(pThis[FIELD___enableCardDetectPin].NumericByRef().s4))
     {
