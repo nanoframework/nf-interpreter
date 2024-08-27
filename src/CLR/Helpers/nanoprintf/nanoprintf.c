@@ -1240,4 +1240,29 @@ void putchar_(char character)
 }
 // [END_NF_CHANGE]
 
+// [NF_CHANGE]
+printf_t vsnprintf_(char *buffer, size_t bufsz, char const *format, va_list vlist)
+{
+    size_t count;
+    va_list vlistCopy;
+    va_copy(vlistCopy, vlist);
+
+    count = doprnt(&buffer, putbuf, bufsz, format, vlistCopy);
+
+    // append null terminator
+    if(count < bufsz)
+    {
+        buffer[count] = '\0';
+    }
+    else
+    {
+        buffer[bufsz - 1] = '\0';
+    }
+
+    va_end(vlistCopy);
+
+    return count;
+}
+// [END_NF_CHANGE]
+
 // clang-format on
