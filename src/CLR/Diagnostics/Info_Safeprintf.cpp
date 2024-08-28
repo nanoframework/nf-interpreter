@@ -5,6 +5,7 @@
 //
 
 #include <nanoCLR_Types.h>
+#include <nanoprintf.h>
 
 bool CLR_SafeSprintfV(char *&szBuffer, size_t &iBuffer, const char *format, va_list arg)
 {

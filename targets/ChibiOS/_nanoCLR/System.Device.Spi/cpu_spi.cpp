@@ -554,7 +554,7 @@ HRESULT CPU_SPI_nWrite_nRead(
             if (wrc.DeviceChipSelect >= 0)
             {
                 // de-assert pin based on CS active level
-                CPU_GPIO_SetPinState(wrc.DeviceChipSelect, (GpioPinValue)wrc.ChipSelectActiveState);
+                CPU_GPIO_SetPinState(wrc.DeviceChipSelect, (GpioPinValue)!wrc.ChipSelectActiveState);
             }
         }
         else
