@@ -143,7 +143,6 @@ set(NF_CoreCLR_SRCS
     Messaging_stub.cpp
 
     # Helpers
-    nanoprintf.c
     nanoRingBuffer.c
     Info_Safeprintf.cpp
 

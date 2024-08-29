@@ -19,7 +19,6 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\Helpers\nanoprintf\nanoprintf.c" />
     <ClCompile Include="Cache.cpp" />
     <ClCompile Include="Checks.cpp" />
     <ClCompile Include="CLR_RT_DblLinkedList.cpp" />

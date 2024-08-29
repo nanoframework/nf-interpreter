@@ -5,7 +5,13 @@
 //
 
 #include <nanoCLR_Types.h>
+
+//////////////////////////////////////////////////////////////////////////
+// this is required to include the NanoPrintf implementation
+// only once in the build, so using it here as this is part of all builds
+#define NANOPRINTF_IMPLEMENTATION 1
 #include <nanoprintf.h>
+//////////////////////////////////////////////////////////////////////////
 
 bool CLR_SafeSprintfV(char *&szBuffer, size_t &iBuffer, const char *format, va_list arg)
 {
