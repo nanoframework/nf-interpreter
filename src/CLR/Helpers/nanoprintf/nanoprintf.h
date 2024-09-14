@@ -63,6 +63,7 @@ extern "C"
 printf_t printf_(const char *, ...);
 printf_t sprintf_(char *, const char *, ...);
 printf_t snprintf_(char *, size_t n, const char *, ...);
+printf_t vsnprintf_(char *, size_t n, const char *, va_list);
 
 #ifdef __cplusplus
 }
@@ -288,6 +289,7 @@ End of customisations - Stop Editing!
 #define printf      printf_
 #define sprintf     sprintf_
 #define snprintf    snprintf_
+#define vsnprintf   vsnprintf_
 
 #endif // NANOPRINTF_H
 
