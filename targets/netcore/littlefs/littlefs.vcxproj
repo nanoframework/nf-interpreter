@@ -161,4 +161,7 @@
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
+  <Target Name="LITTLEFS_PATH_verification" Condition=" '$(LITTLEFS_PATH)' == '' " BeforeTargets="ClCompile">
+	<Error Text="Assign the path of a clone of the littlefs repository to the LITTLEFS_PATH environment variable."/>
+  </Target>
 </Project>
