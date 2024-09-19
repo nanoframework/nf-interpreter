@@ -1621,16 +1621,6 @@ CLR_RT_HeapBlock *CLR_RT_ExecutionEngine::ExtractHeapBlocks(
         g_CLR_RT_EventCache.EventCache_Cleanup();
         PerformGarbageCollection();
     }
-#else
-
-#if !defined(BUILD_RTM) || defined(VIRTUAL_DEVICE)
-    if (g_CLR_RT_ExecutionEngine.m_fPerformGarbageCollection)
-    {
-        g_CLR_RT_EventCache.EventCache_Cleanup();
-        PerformGarbageCollection();
-    }
-#endif
-
 #endif
 
     for (int phase = 0;; phase++)
