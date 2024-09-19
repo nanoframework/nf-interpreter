@@ -122,7 +122,32 @@ Features and pre-defined sets are set out in the following sections.
         | USE_LONG_LONG   \
 )
 
-#define FEATURE_FLAGS CUSTOM_SET
+#define NANOFRAMEWORK_SET ( 0 \
+        | USE_FLOAT       \
+        | USE_LONG        \
+        | USE_BINARY      \
+        | USE_OCTAL       \
+        | USE_SIGNED      \
+        | USE_SIGNED_I    \
+        | USE_UNSIGNED    \
+        | USE_HEX_LOWER   \
+        | USE_HEX_UPPER   \
+        | USE_HEX_UPPER_L \
+        | USE_CHAR        \
+        | USE_STRING      \
+        | USE_FSTRING     \
+        | USE_PRECISION   \
+        | USE_ZERO_PAD    \
+        | USE_SPACE_PAD   \
+        | USE_INDIRECT    \
+        | USE_PLUS_SIGN   \
+        | USE_SPACE_SIGN  \
+        | USE_LEFT_JUST   \
+        | USE_SPECIAL     \
+        | USE_LONG_LONG   \
+)
+
+#define FEATURE_FLAGS NANOFRAMEWORK_SET
 
 /*************************************************************************
 End of customisations - Stop Editing!
