@@ -607,29 +607,36 @@ void CLR_RT_GarbageCollector::CheckMemoryPressure()
                 {
                     if (weak->m_targetSerialized && weak->m_targetDirect == NULL)
                     {
-#if !defined(BUILD_RTM)
+#if defined(NANOCLR_GC_VERBOSE) && !defined(BUILD_RTM)
+
                         CLR_RT_ReflectionDef_Index val{};
                         CLR_RT_TypeDef_Instance inst{};
                         char rgBuffer[512];
                         char *szBuffer = rgBuffer;
                         size_t iBuffer = MAXSTRLEN(rgBuffer);
 
-                        CLR_Debug::Printf("DROPPING OBJECT ");
-
-                        val.InitializeFromHash(weak->m_identity.m_selectorHash);
-
-                        if (inst.InitializeFromReflection(val, NULL))
+                        if (s_CLR_RT_fTrace_Memory >= c_CLR_RT_Trace_Info)
                         {
-                            g_CLR_RT_TypeSystem.BuildTypeName(inst, szBuffer, iBuffer);
-                            rgBuffer[MAXSTRLEN(rgBuffer)] = 0;
+                            CLR_Debug::Printf("DROPPING OBJECT %s:%d ", rgBuffer, weak->m_identity.m_id);
 
-                            CLR_Debug::Printf("%s:%d ", rgBuffer, weak->m_identity.m_id);
+                            // Move this under a separate check
+                            if (s_CLR_RT_fTrace_Memory >= c_CLR_RT_Trace_Verbose)
+                            {
+                                val.InitializeFromHash(weak->m_identity.m_selectorHash);
+
+                                if (inst.InitializeFromReflection(val, NULL))
+                                {
+                                    g_CLR_RT_TypeSystem.BuildTypeName(inst, szBuffer, iBuffer);
+                                    rgBuffer[MAXSTRLEN(rgBuffer)] = 0;
+                                    CLR_Debug::Printf("[%s] ", rgBuffer);
+                                }
+                            }
+
+                            CLR_Debug::Printf(
+                                "[%d bytes] %s\r\n",
+                                weak->m_targetSerialized->m_numOfElements,
+                                (weak->m_targetDirect ? "DIRECT" : ""));
                         }
-
-                        CLR_Debug::Printf(
-                            " [%d bytes] %s\r\n",
-                            weak->m_targetSerialized->m_numOfElements,
-                            (weak->m_targetDirect ? "DIRECT" : ""));
 #endif
 
                         break;

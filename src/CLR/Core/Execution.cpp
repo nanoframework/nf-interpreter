@@ -1606,7 +1606,13 @@ CLR_RT_HeapBlock *CLR_RT_ExecutionEngine::ExtractHeapBlocks(
 #if !defined(BUILD_RTM)
     if (m_heapState == c_HeapState_UnderGC && ((flags & CLR_RT_HeapBlock::HB_SpecialGCAllocation) == 0))
     {
-        CLR_Debug::Printf("Internal error: call to memory allocation during garbage collection!!!\r\n");
+
+#if defined(NANOCLR_GC_VERBOSE)
+        if (s_CLR_RT_fTrace_Memory >= c_CLR_RT_Trace_Info)
+        {
+            CLR_Debug::Printf("Internal error: call to memory allocation during garbage collection!!!\r\n");
+        }
+#endif
 
         // Getting here during a GC is possible, since the watchdog ISR may now require
         // dynamic memory allocation for logging.  Returning NULL means the watchdog log will
@@ -1710,22 +1716,28 @@ CLR_RT_HeapBlock *CLR_RT_ExecutionEngine::ExtractHeapBlocks(
                     // Throw the OOM, and schedule a compaction at a safe point
                     CLR_EE_SET(Compaction_Pending);
 
-#if !defined(BUILD_RTM)
-                    CLR_Debug::Printf(
-                        "\r\n\r\nFailed allocation for %d blocks, %d bytes.\r\nThere's enough free memory, heap "
-                        "compaction scheduled.\r\n\r\n",
-                        length,
-                        length * sizeof(struct CLR_RT_HeapBlock));
+#if defined(NANOCLR_GC_VERBOSE)
+                    if (s_CLR_RT_fTrace_Memory >= c_CLR_RT_Trace_Info)
+                    {
+                        CLR_Debug::Printf(
+                            "\r\n\r\nFailed allocation for %d blocks, %d bytes.\r\nThere's enough free memory, heap "
+                            "compaction scheduled.\r\n\r\n",
+                            length,
+                            length * sizeof(struct CLR_RT_HeapBlock));
+                    }
 #endif
                 }
                 else
                 {
 
-#if !defined(BUILD_RTM)
-                    CLR_Debug::Printf(
-                        "\r\n\r\nFailed allocation for %d blocks, %d bytes\r\n\r\n",
-                        length,
-                        length * sizeof(struct CLR_RT_HeapBlock));
+#if defined(NANOCLR_GC_VERBOSE)
+                    if (s_CLR_RT_fTrace_Memory >= c_CLR_RT_Trace_Info)
+                    {
+                        CLR_Debug::Printf(
+                            "\r\n\r\nFailed allocation for %d blocks, %d bytes\r\n\r\n",
+                            length,
+                            length * sizeof(struct CLR_RT_HeapBlock));
+                    }
 #endif
                 }
 
