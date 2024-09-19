@@ -22,7 +22,7 @@ bool CLR_SafeSprintfV(char *&szBuffer, size_t &iBuffer, const char *format, va_l
 
     szBuffer += chars;
     // Null-terminate the buffer
-    szBuffer[0] = 0; 
+    szBuffer[0] = 0;
     iBuffer -= chars;
 
     return fRes;
