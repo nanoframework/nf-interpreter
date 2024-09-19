@@ -10,6 +10,7 @@
 #include <stdarg.h>
 #include <math.h>
 #include "nanoprintf.h"
+#include "nanoprintf_cfg.h"
 #include <float.h>
 
 /* Define default macro to access the format string using a pointer. */
@@ -251,63 +252,48 @@ static char *format_float(double number, flt_width_t ndigits, flt_width_t width,
 #endif
         }
 #else
+        /* Normalise using a binary search, making the largest possible
+         * adjustment first and getting progressively smaller. This gets
+         * to the answer in the fastest time, with the minimum number of
+         * operations to introduce rounding errors.
+         */
+        // First make small numbers bigger.
         flt_width_t power10 = MAX_POWER;
         decpt = 1;
-
-        if(number == DBL_MAX)
+        i = 0;
+        while (number < 1.0)
         {
-            number = 1.7976931348623157;
-            decpt = 309;
+            while (number < smalltable[i + 1])
+            {
+                number /= smalltable[i];
+                decpt -= power10;
+            }
+            power10 >>= 1;
+            i++;
         }
-        else if(number == DBL_MIN)
+        // Then make big numbers smaller.
+        power10 = MAX_POWER;
+        i = 0;
+        while (number >= 10.0)
         {
-            number = -1.7976931348623157;
-			decpt = -309;
-		}
-        else
-        {
-            /* Normalise using a binary search, making the largest possible
-             * adjustment first and getting progressively smaller. This gets
-             * to the answer in the fastest time, with the minimum number of
-             * operations to introduce rounding errors.
-             */
-            // First make small numbers bigger.
-
-            i = 0;
-            while (number < 1.0)
+            while (number >= largetable[i])
             {
-                while (number < smalltable[i + 1])
-                {
-                    number /= smalltable[i];
-                    decpt -= power10;
-                }
-                power10 >>= 1;
-                i++;
-            }
-            // Then make big numbers smaller.
-            power10 = MAX_POWER;
-            i = 0;
-            while (number >= 10.0)
-            {
-                while (number >= largetable[i])
-                {
-                    number /= largetable[i];
-                    decpt += power10;
+                number /= largetable[i];
+                decpt += power10;
 #ifdef NO_ISNAN_ISINF
-                    // Avoid this loop hanging on infinity.
-                    if (decpt > DP_LIMIT)
-                    {
-                        buf[0] = 'I';
-                        buf[1] = 'n';
-                        buf[2] = 'f';
-                        buf[3] = '\0';
-                        return buf;
-                    }
-#endif
+                // Avoid this loop hanging on infinity.
+                if (decpt > DP_LIMIT)
+                {
+                    buf[0] = 'I';
+                    buf[1] = 'n';
+                    buf[2] = 'f';
+                    buf[3] = '\0';
+                    return buf;
                 }
-                power10 >>= 1;
-                i++;
+#endif
             }
+            power10 >>= 1;
+            i++;
         }
 #endif
     }
@@ -1128,15 +1114,29 @@ The context is normally required, but is not used at present. It could be
 extended to include streams or to avoid output mixing in multi-threaded use.
 If using BASIC_PRINTF, context is not supported.
 --------------------------------------------------------------------------- */
-#ifdef BASIC_PRINTF_ONLY
-static void putout(char c)
+// [NF_CHANGE]
+// #ifdef BASIC_PRINTF_ONLY
+// static void putout(char c)
+// {
+// #else
+// static void putout(char c, void *context)
+// {
+//     (void) context;     // Suppress compiler warning about unused argument.
+// #endif
+//     PUTCHAR_FUNC(c);
+// }
+// [END_NF_CHANGE]  
+/* ---------------------------------------------------------------------------
+Function: putbuf()
+This is the output function used for sprintf.
+Here the context is a pointer to a pointer to the buffer.
+Double indirection allows the function to increment the buffer pointer.
+--------------------------------------------------------------------------- */
+static void putbuf(char c, void *context)
 {
-#else
-static void putout(char c, void *context)
-{
-    (void) context;     // Suppress compiler warning about unused argument.
-#endif
-    PUTCHAR_FUNC(c);
+    char *buf = *((char **) context);
+    *buf++ = c;
+    *((char **) context) = buf;
 }
 
 /* ---------------------------------------------------------------------------
@@ -1145,7 +1145,7 @@ Replacement for library printf - writes to output (normally serial)
 It uses the output function putout() to update the serial output.
 If PRINTF_T is defined then the number of characters generated is returned.
 --------------------------------------------------------------------------- */
-printf_t printf_(const char *fmt, ...)
+printf_t _prntf(const char *fmt, ...)
 {
     va_list ap;
 #ifdef PRINTF_T
@@ -1157,7 +1157,7 @@ printf_t printf_(const char *fmt, ...)
   #ifdef BASIC_PRINTF_ONLY
     Count = doprnt(putout, fmt, ap);
   #else
-    Count = doprnt((void *)0, putout, BUFMAX, fmt, ap);
+    Count = doprnt((void *)0, putbuf, BUFMAX, fmt, ap);
   #endif
 #else
   #ifdef BASIC_PRINTF_ONLY
@@ -1174,18 +1174,6 @@ printf_t printf_(const char *fmt, ...)
 }
 
 #ifndef BASIC_PRINTF_ONLY
-/* ---------------------------------------------------------------------------
-Function: putbuf()
-This is the output function used for sprintf.
-Here the context is a pointer to a pointer to the buffer.
-Double indirection allows the function to increment the buffer pointer.
---------------------------------------------------------------------------- */
-static void putbuf(char c, void *context)
-{
-    char *buf = *((char **) context);
-    *buf++ = c;
-    *((char **) context) = buf;
-}
 
 /* ---------------------------------------------------------------------------
 Function: sprintf()
@@ -1194,7 +1182,7 @@ Normally it uses the output function putout() to update the buffer.
 sprintf is not supported when using BASIC_PRINTF
 If PRINTF_T is defined then the number of characters generated is returned.
 --------------------------------------------------------------------------- */
-printf_t sprintf_(char *buf, const char *fmt, ... )
+printf_t sprintf_(char *buffer, const char *fmt, ... )
 {
     va_list ap;
 #ifdef PRINTF_T
@@ -1203,13 +1191,21 @@ printf_t sprintf_(char *buf, const char *fmt, ... )
 
     va_start(ap, fmt);
 #ifdef PRINTF_T
-    Count = doprnt(&buf, putbuf, BUFMAX, fmt, ap);
+  #ifdef BASIC_PRINTF_ONLY
+    Count = doprnt(putout, fmt, ap);
+  #else
+    Count = doprnt(&buffer, putbuf, BUFMAX, fmt, ap);
+  #endif
 #else
-    doprnt(&buf, putbuf, fmt, ap);
+  #ifdef BASIC_PRINTF_ONLY
+    doprnt(putout, fmt, ap);
+  #else
+    doprnt(&buffer, putout, fmt, ap);
+  #endif
 #endif
     va_end(ap);
     // Append null terminator.
-    *buf = '\0';
+    *buffer = '\0';
     
 #ifdef PRINTF_T
     return Count;
@@ -1218,16 +1214,28 @@ printf_t sprintf_(char *buf, const char *fmt, ... )
 #endif
 
 // [NF_CHANGE]
-printf_t snprintf_(char *buf, size_t n,const char *fmt, ... )
+printf_t snprintf_(char *buffer, size_t n, const char *fmt, ... )
 {
     va_list ap;
     int Count;
 
     va_start(ap, fmt);
-    Count = doprnt(&buf, putbuf, n, fmt, ap);
+#ifdef PRINTF_T
+  #ifdef BASIC_PRINTF_ONLY
+    Count = doprnt(putout, fmt, ap);
+  #else
+    Count = doprnt(&buffer, putbuf, n, fmt, ap);
+  #endif
+#else
+  #ifdef BASIC_PRINTF_ONLY
+    doprnt(putout, fmt, ap);
+  #else
+    doprnt(&buffer, putout, fmt, ap);
+  #endif
+#endif
     va_end(ap);
     // Append null terminator.
-    *buf = '\0';
+    *buffer = '\0';
     
    return Count;
 }
