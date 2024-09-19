@@ -12,13 +12,17 @@ bool CLR_SafeSprintfV(char *&szBuffer, size_t &iBuffer, const char *format, va_l
     NATIVE_PROFILE_CLR_DIAGNOSTICS();
 
     size_t chars = vsnprintf(szBuffer, iBuffer, format, arg);
-    bool fRes = (chars > 0);
+    bool fRes = (chars < iBuffer);
 
-    if (fRes == false)
-        chars = (int)iBuffer;
+    if (!fRes)
+    {
+        // If the buffer was too small, set chars to iBuffer - 1 to ensure null-termination
+        chars = iBuffer - 1;
+    }
 
     szBuffer += chars;
-    szBuffer[0] = 0;
+    // Null-terminate the buffer
+    szBuffer[0] = 0; 
     iBuffer -= chars;
 
     return fRes;

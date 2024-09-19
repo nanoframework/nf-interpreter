@@ -1,5 +1,5 @@
 //
-// Copyright 2006 - 2021 Skirrid Systems. All rights reserved. 
+// Copyright 2006 - 2021 Skirrid Systems. All rights reserved.
 // Portions Copyright (c) .NET Foundation and Contributors
 // See LICENSE file in the project root for full license information.
 //
