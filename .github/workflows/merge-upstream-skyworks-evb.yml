@@ -18,11 +18,12 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Merge from upstream repo
-        uses: aormsby/Fork-Sync-With-Upstream-action@v3.4
+        uses: aormsby/Fork-Sync-With-Upstream-action@v3.4.1
         with:
           target_sync_branch: skyworks-evb
           upstream_sync_branch: main
           upstream_sync_repo: Skyworks-Timing-Software/nf-interpreter
+          target_repo_token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: New commits found
         if: steps.sync.outputs.has_new_commits == 'true'
