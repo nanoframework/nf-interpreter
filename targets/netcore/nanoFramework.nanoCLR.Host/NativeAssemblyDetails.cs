@@ -45,7 +45,7 @@ namespace nanoFramework.nanoCLR.Host
         /// </summary>
         /// <returns>Returns a list with the metadata of native assemblies. If the runtime does
         /// not support this, <c>null</c> is returned.</returns>
-        public static List<NativeAssemblyDetails> Get()
+        public static List<NativeAssemblyDetails>? Get()
         {
             var result = new List<NativeAssemblyDetails>();
 
@@ -64,7 +64,10 @@ namespace nanoFramework.nanoCLR.Host
             }
 
             byte[] data = new byte[numAssemblies * /* size per assembly: */  (4 + 4 * 2 + 128 * 1)];
-            Interop.nanoCLR.nanoCLR_GetNativeAssemblyInformation(data, data.Length);
+            if (!Interop.nanoCLR.nanoCLR_GetNativeAssemblyInformation(data, data.Length))
+            {
+                return null;
+            }
 
             using var buffer = new MemoryStream(data);
             using var reader = new BinaryReader(buffer);

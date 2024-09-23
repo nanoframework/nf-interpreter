@@ -173,7 +173,7 @@ macro(PerformSettingsForInteropEntry interopAssemblyName)
     list(REMOVE_DUPLICATES NF_NativeAssemblies_SOURCES)
 
     # add the assembly version to the list
-    AddNativeAssemblyVersion(interopAssemblyName interopAssemblyNameWithoutDots "${${apiNamespace}_SOURCES}")
+    AddNativeAssemblyVersion(interopAssemblyName interopAssemblyNameWithoutDots "${${interopAssemblyName}_SOURCES}")
 endmacro()
 
 #################################################################
