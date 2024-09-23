@@ -1,16 +1,14 @@
-//
-// Copyright (c) .NET Foundation and Contributors
-// See LICENSE file in the project root for full license information.
-//
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
-using nanoFramework.nanoCLR.Host;
-using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Net.Http;
 using System.Reflection;
 using System.Threading.Tasks;
+using nanoFramework.nanoCLR.Host;
+using Newtonsoft.Json;
 
 namespace nanoFramework.nanoCLR.CLI
 {
@@ -23,7 +21,29 @@ namespace nanoFramework.nanoCLR.CLI
         {
             Program.ProcessVerbosityOptions(options.Verbosity);
 
-            nanoCLRHostBuilder hostBuilder = nanoCLRHost.CreateBuilder();
+            nanoCLRHostBuilder hostBuilder;
+
+            // are we to use a local DLL?
+            if (options.LocalInstance != null)
+            {
+                if (options.UpdateCLR)
+                {
+                    // These options cannot be combined
+                    throw new CLIException(ExitCode.E9009);
+                }
+
+                // check if path exists
+                if (!Directory.Exists(options.LocalInstance))
+                {
+                    throw new CLIException(ExitCode.E9009);
+                }
+
+                hostBuilder = nanoCLRHost.CreateBuilder(options.LocalInstance);
+            }
+            else
+            {
+                hostBuilder = nanoCLRHost.CreateBuilder();
+            }
             hostBuilder.UseConsoleDebugPrint();
 
             if (options.UpdateCLR)
@@ -33,14 +53,39 @@ namespace nanoFramework.nanoCLR.CLI
                     hostBuilder.GetCLRVersion(),
                     hostBuilder).Result;
             }
-            else if (options.GetCLRVersion)
+            else if (options.GetCLRVersion || options.GetNativeAssemblies)
             {
                 if (Program.VerbosityLevel > VerbosityLevel.Normal)
                 {
                     hostBuilder.OutputNanoClrDllInfo();
                 }
 
-                Console.WriteLine($"nanoCLR version: {hostBuilder.GetCLRVersion()}");
+                if (options.GetCLRVersion)
+                {
+                    Console.WriteLine($"nanoCLR version: {hostBuilder.GetCLRVersion()}");
+                }
+
+                if (options.GetNativeAssemblies)
+                {
+                    List<NativeAssemblyDetails> nativeAssemblies = hostBuilder.GetNativeAssemblies();
+                    if (nativeAssemblies is not null)
+                    {
+                        if (options.GetCLRVersion)
+                        {
+                            Console.WriteLine();
+                        }
+                        Console.WriteLine("Native assembly,Version,Checksum");
+
+                        foreach (NativeAssemblyDetails assembly in nativeAssemblies)
+                        {
+                            Console.WriteLine($"{assembly.Name},{assembly.Version},{assembly.CheckSum:x}");
+                        }
+                    }
+                    else if (Program.VerbosityLevel > VerbosityLevel.Normal)
+                    {
+                        Console.WriteLine("CLR instance is too old; native assembly information not available.");
+                    }
+                }
 
                 return (int)ExitCode.OK;
             }
