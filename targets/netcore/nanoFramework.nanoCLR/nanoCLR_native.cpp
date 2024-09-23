@@ -188,8 +188,14 @@ uint16_t nanoCLR_GetNativeAssemblyCount()
     return g_CLR_InteropAssembliesCount;
 }
 
-void nanoCLR_GetNativeAssemblyInformation(const CLR_UINT8 *data, size_t size)
+bool nanoCLR_GetNativeAssemblyInformation(const CLR_UINT8 *data, size_t size)
 {
+	onst size_t requiredSize = g_CLR_InteropAssembliesCount * (sizeof(uint32_t) + 4 * sizeof(CLR_UINT16) + 128);
+    if (size < requiredSize)
+    {
+        return false; // Buffer too small
+    }
+	
     // clear buffer memory
     memset((void *)data, 0, size);
 
@@ -214,4 +220,6 @@ void nanoCLR_GetNativeAssemblyInformation(const CLR_UINT8 *data, size_t size)
         hal_strcpy_s((char *)data, 128, g_CLR_InteropAssembliesNativeData[i]->m_szAssemblyName);
         data += 128;
     }
+	
+	return true; // Success
 }

@@ -94,7 +94,7 @@ namespace nanoFramework.nanoCLR.Host.Interop
         internal static extern ushort nanoCLR_GetNativeAssemblyCount();
 
         [DllImport(NativeLibraryName, CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl)]
-        internal static extern void nanoCLR_GetNativeAssemblyInformation(byte[] buffer, int size);
+        internal static extern bool nanoCLR_GetNativeAssemblyInformation(byte[] buffer, int size);
 
         [DllImport("kernel32", SetLastError = true)]
         private static extern bool FreeLibrary(IntPtr hModule);

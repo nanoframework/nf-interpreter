@@ -67,7 +67,7 @@ namespace nanoFramework.nanoCLR.CLI
 
                 if (options.GetNativeAssemblies)
                 {
-                    List<NativeAssemblyDetails> nativeAssemblies = hostBuilder.GetNativeAssemblies();
+                    List<NativeAssemblyDetails>? nativeAssemblies = hostBuilder.GetNativeAssemblies();
                     if (nativeAssemblies is not null)
                     {
                         if (options.GetCLRVersion)

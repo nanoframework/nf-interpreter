@@ -91,7 +91,7 @@ namespace nanoFramework.nanoCLR.Host
         public string GetCLRVersion() =>
             Interop.nanoCLR.nanoCLR_GetVersion();
 
-        public List<NativeAssemblyDetails> GetNativeAssemblies()
+        public List<NativeAssemblyDetails>? GetNativeAssemblies()
             => NativeAssemblyDetails.Get();
 
         public nanoCLRHostBuilder UseSerialPortWireProtocol(string comPort) =>
