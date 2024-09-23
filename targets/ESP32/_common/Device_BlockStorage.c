@@ -61,7 +61,7 @@ BlockRegionInfo BlockRegions[] = {
         BlockRange2,
     },
 
-    // Config, SPIFS partition
+    // Config, littlefs partition
     {
         // no attributes for this region
         (0),
