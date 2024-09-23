@@ -1,7 +1,5 @@
-﻿//
-// Copyright (c) .NET Foundation and Contributors
-// See LICENSE file in the project root for full license information.
-//
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using CommandLine;
 
@@ -17,6 +15,12 @@ namespace nanoFramework.nanoCLR.CLI
             Required = false,
             HelpText = "Gets the version of the current nanoCLR instance.")]
         public bool GetCLRVersion { get; set; }
+
+        [Option(
+            "getnativeassemblies",
+            Required = false,
+            HelpText = "Gets the names and versions of the native assemblies.")]
+        public bool GetNativeAssemblies { get; set; }
 
         [Option(
             "update",
@@ -37,6 +41,14 @@ namespace nanoFramework.nanoCLR.CLI
             Default = null,
             HelpText = "Specify a version of nanoCRL to install.")]
         public string TargetVersion { get; set; }
+
+        [Option(
+            "clrinstancepath",
+            Required = false,
+            Default = null,
+            Hidden = true,
+            HelpText = "Path to the directory where a local version of nanoFramework.nanoCLR.dll is located.")]
+        public string LocalInstance { get; set; }
 
         /// <summary>
         /// Allowed values:
