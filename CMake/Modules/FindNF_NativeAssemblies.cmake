@@ -173,7 +173,7 @@ macro(PerformSettingsForInteropEntry interopAssemblyName)
     list(REMOVE_DUPLICATES NF_NativeAssemblies_SOURCES)
 
     # add the assembly version to the list
-    AddNativeAssemblyVersion(interopAssemblyName interopAssemblyNameWithoutDots "${${interopAssemblyName}_SOURCES}")
+    AddNativeAssemblyVersion("${interopAssemblyName}" "${interopAssemblyNameWithoutDots}" "${${interopAssemblyName}_SOURCES}")
 endmacro()
 
 #################################################################
@@ -485,7 +485,10 @@ list(APPEND NF_NativeAssemblies_SOURCES "${CMAKE_CURRENT_BINARY_DIR}/CLR_RT_Inte
 
 # create a .csv file with native assembly versions in the output directory
 string(REPLACE ";" "\r\n" NF_NativeAssemblies_CSV "${NF_NativeAssemblies_VERSIONS}")
-file(WRITE "${CMAKE_BINARY_DIR}/native_assemblies.csv" "${NF_NativeAssemblies_CSV}")
+file(WRITE "${CMAKE_BINARY_DIR}/native_assemblies.csv" "${NF_NativeAssemblies_CSV}" RESULT_VARIABLE WRITE_RESULT)
+if(NOT WRITE_RESULT EQUAL 0)
+    message(WARNING "Failed to write native_assemblies.csv file")
+endif()
 
 # output the list of APIs included
 list(LENGTH apiListing apiListingLenght)
