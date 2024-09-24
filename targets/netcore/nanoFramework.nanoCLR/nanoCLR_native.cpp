@@ -190,7 +190,7 @@ uint16_t nanoCLR_GetNativeAssemblyCount()
 
 bool nanoCLR_GetNativeAssemblyInformation(const CLR_UINT8 *data, size_t size)
 {
-    const size_t requiredSize = g_CLR_InteropAssembliesCount * (sizeof(uint32_t) + 4 * sizeof(CLR_UINT16) + 128);
+    const size_t requiredSize = g_CLR_InteropAssembliesCount * (5 * sizeof(CLR_UINT16) + 128);
     if (size < requiredSize)
     {
         return false; // Buffer too small
@@ -202,8 +202,8 @@ bool nanoCLR_GetNativeAssemblyInformation(const CLR_UINT8 *data, size_t size)
     // fill the array
     for (uint32_t i = 0; i < g_CLR_InteropAssembliesCount; i++)
     {
-        memcpy((void *)data, &g_CLR_InteropAssembliesNativeData[i]->m_checkSum, sizeof(uint32_t));
-        data += sizeof(uint32_t);
+        memcpy((void *)data, &g_CLR_InteropAssembliesNativeData[i]->m_checkSum, sizeof(CLR_UINT32));
+        data += sizeof(CLR_UINT32);
 
         memcpy((void *)data, &g_CLR_InteropAssembliesNativeData[i]->m_Version.iMajorVersion, sizeof(CLR_UINT16));
         data += sizeof(CLR_UINT16);
