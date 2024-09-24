@@ -71,10 +71,10 @@ macro(AddNativeAssemblyVersion apiNamespace apiNamespaceWithoutDots nativeAssemb
 
         file(READ "${apiSourceFile}" sourceCode)
 
-        string(REGEX MATCH "[ \t\r\n]+CLR_RT_NativeAssemblyData[ \t\r\n]+g_CLR_AssemblyNative_${apiNamespaceWithoutDots}[ \t\r\n]*=[^{]+{[^0]+0x([0-9A-Za-z]+)[^{]+{[ \t\r\n]*([0-9]+)[ \t\r\n]*,[ \t\r\n]*([0-9]+)[ \t\r\n]*,[ \t\r\n]*([0-9]+)[ \t\r\n]*,[ \t\r\n]*([0-9]+)"  _ "${sourceCode}")
+        string(REGEX MATCH "[ \t\r\n]+CLR_RT_NativeAssemblyData[ \t\r\n]+g_CLR_AssemblyNative_${apiNamespaceWithoutDots}[ \t\r\n]*=[^{]+{[^0]+0x([0-9A-Za-z]+)[^{]+{[ \t\r\n]*([0-9]+)[ \t\r\n]*,[ \t\r\n]*([0-9]+)[ \t\r\n]*,[ \t\r\n]*([0-9]+)[ \t\r\n]*,[ \t\r\n]*([0-9]+)" _ "${sourceCode}")
 
         if(NOT "${CMAKE_MATCH_1}" STREQUAL "")
-            list(APPEND NF_NativeAssemblies_VERSIONS "${apiNamespace},${CMAKE_MATCH_2}.${CMAKE_MATCH_3}.${CMAKE_MATCH_4}.${CMAKE_MATCH_5},${CMAKE_MATCH_1}")
+            list(APPEND NF_NativeAssemblies_VERSIONS "${apiNamespace},${CMAKE_MATCH_2}.${CMAKE_MATCH_3}.${CMAKE_MATCH_4}.${CMAKE_MATCH_5},0x${CMAKE_MATCH_1}")
             break()
         endif()
 
@@ -92,13 +92,13 @@ macro(AddCorLibAssemblyVersion apiNamespace apiNamespaceWithoutDots nativeAssemb
 
         file(READ "${apiSourceFile}" sourceCode)
 
-        string(REGEX MATCH "[ \t\r\n]+CLR_RT_NativeAssemblyData[ \t\r\n]+g_CLR_AssemblyNative_${apiNamespaceWithoutDots}[ \t\r\n]*=[^{]+{[^0]+0x([0-9A-Za-z]+)[^0]+0x([0-9A-Za-z]+)[^{]+{[ \t\r\n]*([0-9]+)[ \t\r\n]*,[ \t\r\n]*([0-9]+)[ \t\r\n]*,[ \t\r\n]*([0-9]+)[ \t\r\n]*,[ \t\r\n]*([0-9]+)"  _ "${sourceCode}")
+        string(REGEX MATCH "[ \t\r\n]+CLR_RT_NativeAssemblyData[ \t\r\n]+g_CLR_AssemblyNative_${apiNamespaceWithoutDots}[ \t\r\n]*=[^{]+{[^0]+0x([0-9A-Za-z]+)[^0]+0x([0-9A-Za-z]+)[^{]+{[ \t\r\n]*([0-9]+)[ \t\r\n]*,[ \t\r\n]*([0-9]+)[ \t\r\n]*,[ \t\r\n]*([0-9]+)[ \t\r\n]*,[ \t\r\n]*([0-9]+)" _ "${sourceCode}")
 
         if(NOT "${CMAKE_MATCH_1}" STREQUAL "")
             if (NF_FEATURE_SUPPORT_REFLECTION)
-                list(APPEND NF_NativeAssemblies_VERSIONS "${apiNamespace},${CMAKE_MATCH_3}.${CMAKE_MATCH_4}.${CMAKE_MATCH_5}.${CMAKE_MATCH_6},${CMAKE_MATCH_1}")
+                list(APPEND NF_NativeAssemblies_VERSIONS "${apiNamespace},${CMAKE_MATCH_3}.${CMAKE_MATCH_4}.${CMAKE_MATCH_5}.${CMAKE_MATCH_6},0x${CMAKE_MATCH_1}")
             else()
-                list(APPEND NF_NativeAssemblies_VERSIONS "${apiNamespace},${CMAKE_MATCH_3}.${CMAKE_MATCH_4}.${CMAKE_MATCH_5}.${CMAKE_MATCH_6},${CMAKE_MATCH_2}")
+                list(APPEND NF_NativeAssemblies_VERSIONS "${apiNamespace},${CMAKE_MATCH_3}.${CMAKE_MATCH_4}.${CMAKE_MATCH_5}.${CMAKE_MATCH_6},0x${CMAKE_MATCH_2}")
             endif()
 
             break()
@@ -485,10 +485,7 @@ list(APPEND NF_NativeAssemblies_SOURCES "${CMAKE_CURRENT_BINARY_DIR}/CLR_RT_Inte
 
 # create a .csv file with native assembly versions in the output directory
 string(REPLACE ";" "\r\n" NF_NativeAssemblies_CSV "${NF_NativeAssemblies_VERSIONS}")
-file(WRITE "${CMAKE_BINARY_DIR}/native_assemblies.csv" "${NF_NativeAssemblies_CSV}" RESULT_VARIABLE WRITE_RESULT)
-if(NOT WRITE_RESULT EQUAL 0)
-    message(WARNING "Failed to write native_assemblies.csv file")
-endif()
+file(WRITE "${CMAKE_BINARY_DIR}/native_assemblies.csv" "${NF_NativeAssemblies_CSV}")
 
 # output the list of APIs included
 list(LENGTH apiListing apiListingLenght)

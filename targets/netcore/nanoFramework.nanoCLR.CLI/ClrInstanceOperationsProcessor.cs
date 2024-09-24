@@ -78,7 +78,7 @@ namespace nanoFramework.nanoCLR.CLI
 
                         foreach (NativeAssemblyDetails assembly in nativeAssemblies)
                         {
-                            Console.WriteLine($"{assembly.Name},{assembly.Version},{assembly.CheckSum:x}");
+                            Console.WriteLine($"{assembly.Name},{assembly.Version},0x{assembly.CheckSum:x}");
                         }
                     }
                     else if (Program.VerbosityLevel > VerbosityLevel.Normal)
