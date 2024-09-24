@@ -15,7 +15,7 @@ namespace nanoFramework.nanoCLR.Host
     {
         #region Properties
         /// <summary>
-        /// Name of the assembly.
+        /// Gets the name of the assembly.
         /// </summary>
         public string Name
         {
@@ -23,7 +23,7 @@ namespace nanoFramework.nanoCLR.Host
         }
 
         /// <summary>
-        /// Version of the assembly.
+        /// Gets the version of the assembly.
         /// </summary>
         public Version Version
         {
@@ -31,7 +31,7 @@ namespace nanoFramework.nanoCLR.Host
         }
 
         /// <summary>
-        /// Checksum of the assembly.
+        /// Gets the checksum of the assembly.
         /// </summary>
         public uint CheckSum
         {
@@ -58,6 +58,7 @@ namespace nanoFramework.nanoCLR.Host
             {
                 return null;
             }
+
             if (numAssemblies == 0)
             {
                 return result;
@@ -107,15 +108,20 @@ namespace nanoFramework.nanoCLR.Host
         /// <returns></returns>
         private static string GetZeroTerminatedString(byte[] buf, bool fUTF8)
         {
-            if (buf == null) return null;
+            if (buf is null)
+            {
+                return null;
+            }
 
             int len = 0;
             int num = buf.Length;
 
-            while (len < num && buf[len] != 0) len++;
+            while (len < num && buf[len] != 0)
+            {
+                len++;
+            }
 
-            if (fUTF8) return Encoding.UTF8.GetString(buf, 0, len);
-            else return Encoding.ASCII.GetString(buf, 0, len);
+            return fUTF8 ? Encoding.UTF8.GetString(buf, 0, len) : Encoding.ASCII.GetString(buf, 0, len);
         }
         #endregion
     }
