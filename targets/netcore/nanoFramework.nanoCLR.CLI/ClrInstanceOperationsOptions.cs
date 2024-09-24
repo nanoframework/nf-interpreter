@@ -46,7 +46,6 @@ namespace nanoFramework.nanoCLR.CLI
             "clrinstancepath",
             Required = false,
             Default = null,
-            Hidden = true,
             HelpText = "Path to the directory where a local version of nanoFramework.nanoCLR.dll is located.")]
         public string LocalInstance { get; set; }
 
