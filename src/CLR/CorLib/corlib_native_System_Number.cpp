@@ -4,7 +4,6 @@
 // See LICENSE file in the project root for full license information.
 //
 #include "CorLib.h"
-#include <nanoprintf.h>
 
 // must be big enough to fit the biggest number
 // decorated with negative signs, group separators, etc.

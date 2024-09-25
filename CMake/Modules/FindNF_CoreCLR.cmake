@@ -22,7 +22,6 @@ list(APPEND NF_CoreCLR_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/targets/${RTOS}/_include
 list(APPEND NF_CoreCLR_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/CLR/Diagnostics)
 list(APPEND NF_CoreCLR_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/CLR/Debugger)
 list(APPEND NF_CoreCLR_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/CLR/Helpers/NanoRingBuffer)
-list(APPEND NF_CoreCLR_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/CLR/Helpers/nanoprintf)
 list(APPEND NF_CoreCLR_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/CLR/Helpers/Base64)
 list(APPEND NF_CoreCLR_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/nanoFramework.Runtime.Events)
 list(APPEND NF_CoreCLR_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/nanoFramework.Runtime.Native)
@@ -143,7 +142,6 @@ set(NF_CoreCLR_SRCS
     Messaging_stub.cpp
 
     # Helpers
-    nanoprintf.c
     nanoRingBuffer.c
     Info_Safeprintf.cpp
 
@@ -268,7 +266,6 @@ foreach(SRC_FILE ${NF_CoreCLR_SRCS})
         ${CMAKE_SOURCE_DIR}/src/CLR/Messaging
 
         # Helpers
-        ${CMAKE_SOURCE_DIR}/src/CLR/Helpers/nanoprintf
         ${CMAKE_SOURCE_DIR}/src/CLR/Helpers/NanoRingBuffer
         ${CMAKE_SOURCE_DIR}/src/CLR/Helpers/Base64
         ${CMAKE_SOURCE_DIR}/src/CLR/Diagnostics
