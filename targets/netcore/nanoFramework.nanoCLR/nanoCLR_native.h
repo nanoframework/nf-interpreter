@@ -69,4 +69,4 @@ extern "C" NANOCLRNATIVE_API void nanoCLR_WireProtocolProcess();
 extern "C" NANOCLRNATIVE_API const char *nanoCLR_GetVersion();
 
 extern "C" NANOCLRNATIVE_API uint16_t nanoCLR_GetNativeAssemblyCount();
-extern "C" NANOCLRNATIVE_API bool nanoCLR_GetNativeAssemblyInformation(const CLR_UINT8 *data, size_t size);
+extern "C" NANOCLRNATIVE_API bool nanoCLR_GetNativeAssemblyInformation(CLR_UINT8 *data, size_t size);
