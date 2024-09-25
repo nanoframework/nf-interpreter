@@ -64,7 +64,11 @@ namespace nanoFramework.nanoCLR.Host
                 return result;
             }
 
-            byte[] data = new byte[numAssemblies * /* size per assembly: */  (4 + 4 * 2 + 128 * 1)];
+            // assembly data size is comming from debugger library: NativeAssemblyDetails.Size
+            const int assemblyDataSize = 4 + 4 * 2 + 128 * 1;
+
+            byte[] data = new byte[numAssemblies * assemblyDataSize];
+
             if (!Interop.nanoCLR.nanoCLR_GetNativeAssemblyInformation(data, data.Length))
             {
                 return null;
