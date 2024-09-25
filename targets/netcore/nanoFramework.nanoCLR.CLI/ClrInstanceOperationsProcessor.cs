@@ -24,7 +24,7 @@ namespace nanoFramework.nanoCLR.CLI
             nanoCLRHostBuilder hostBuilder;
 
             // are we to use a local DLL?
-            if (options.LocalInstance != null)
+            if (options.PathToCLRInstance != null)
             {
                 if (options.UpdateCLR)
                 {
@@ -33,12 +33,12 @@ namespace nanoFramework.nanoCLR.CLI
                 }
 
                 // check if path exists
-                if (!Directory.Exists(options.LocalInstance))
+                if (!Directory.Exists(options.PathToCLRInstance))
                 {
                     throw new CLIException(ExitCode.E9009);
                 }
 
-                hostBuilder = nanoCLRHost.CreateBuilder(options.LocalInstance);
+                hostBuilder = nanoCLRHost.CreateBuilder(options.PathToCLRInstance);
             }
             else
             {

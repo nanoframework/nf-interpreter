@@ -23,6 +23,12 @@ namespace nanoFramework.nanoCLR.Host.Interop
 
             set
             {
+                // Ensure the path includes a trailing path separator
+                if (!value.EndsWith(Path.DirectorySeparatorChar.ToString(), StringComparison.Ordinal))
+                {
+                    value += Path.DirectorySeparatorChar;
+                }
+
                 _dllPath = value;
 
                 // set path to search nanoCLR DLL
