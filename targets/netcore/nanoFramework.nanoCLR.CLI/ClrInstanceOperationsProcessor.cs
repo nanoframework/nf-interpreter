@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Net.Http;
 using System.Reflection;
 using System.Threading.Tasks;
@@ -76,16 +77,11 @@ namespace nanoFramework.nanoCLR.CLI
                             Console.WriteLine();
                         }
 
-                        Console.WriteLine("Native assembly,Version,Checksum");
-
-                        foreach (NativeAssemblyDetails assembly in nativeAssemblies)
-                        {
-                            Console.WriteLine($"{assembly.Name},{assembly.Version},0x{assembly.CheckSum:x}");
-                        }
+                        OutputNativeAssembliesList(nativeAssemblies);
                     }
                     else if (Program.VerbosityLevel > VerbosityLevel.Normal)
                     {
-                        Console.WriteLine("CLR instance is too old; native assembly information not available.");
+                        return (int)ExitCode.E9011;
                     }
                 }
 
@@ -93,6 +89,20 @@ namespace nanoFramework.nanoCLR.CLI
             }
 
             return (int)ExitCode.OK;
+        }
+
+        private static void OutputNativeAssembliesList(List<NativeAssemblyDetails> nativeAssemblies)
+        {
+            Console.WriteLine("Native assemblies:");
+
+            // do some math to get a tidy output
+            int maxAssemblyNameLength = nativeAssemblies.Max(assembly => assembly.Name.Length);
+            int maxAssemblyVersionLength = nativeAssemblies.Max(assembly => assembly.Version.ToString().Length);
+
+            foreach (NativeAssemblyDetails assembly in nativeAssemblies)
+            {
+                Console.WriteLine($"  {assembly.Name.PadRight(maxAssemblyNameLength)} v{assembly.Version.ToString().PadRight(maxAssemblyVersionLength)} 0x{assembly.CheckSum:X8}");
+            }
         }
 
         private static async Task<ExitCode> UpdateNanoCLRAsync(

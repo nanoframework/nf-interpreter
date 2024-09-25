@@ -112,5 +112,11 @@ namespace nanoFramework.nanoCLR.CLI
         /// </summary>
         [Display(Name = "Cannot update the CLR instance when requesting to load a specific version of it.")]
         E9010 = 9010,
+
+        /// <summary>
+        /// Cannot retrieve list of native assemblies.
+        /// </summary>
+        [Display(Name = "Cannot retrieve list of native assemblies.")]
+        E9011 = 9011,
     }
 }
