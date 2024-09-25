@@ -29,7 +29,7 @@ namespace nanoFramework.nanoCLR.CLI
                 if (options.UpdateCLR)
                 {
                     // These options cannot be combined
-                    throw new CLIException(ExitCode.E9009);
+                    throw new CLIException(ExitCode.E9010);
                 }
 
                 // check if path exists
@@ -68,12 +68,14 @@ namespace nanoFramework.nanoCLR.CLI
                 if (options.GetNativeAssemblies)
                 {
                     List<NativeAssemblyDetails>? nativeAssemblies = hostBuilder.GetNativeAssemblies();
+
                     if (nativeAssemblies is not null)
                     {
                         if (options.GetCLRVersion)
                         {
                             Console.WriteLine();
                         }
+
                         Console.WriteLine("Native assembly,Version,Checksum");
 
                         foreach (NativeAssemblyDetails assembly in nativeAssemblies)
