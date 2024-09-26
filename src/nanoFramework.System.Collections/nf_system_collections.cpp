@@ -107,5 +107,4 @@ const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_nanoFramework_System_Collec
     { 100, 0, 2, 0 }
 };
 
-
 // clang-format on
