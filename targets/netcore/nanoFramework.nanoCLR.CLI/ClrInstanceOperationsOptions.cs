@@ -8,7 +8,7 @@ namespace nanoFramework.nanoCLR.CLI
     [Verb(
         "instance",
         HelpText = "Operations with the current nanoCLR instance.")]
-    public class ClrInstanceOperationsOptions
+    public class ClrInstanceOperationsOptions : CommonOptions
     {
         [Option(
             "getversion",
@@ -41,28 +41,5 @@ namespace nanoFramework.nanoCLR.CLI
             Default = null,
             HelpText = "Specify a version of nanoCRL to install.")]
         public string TargetVersion { get; set; }
-
-        [Option(
-            "clrinstancepath",
-            Required = false,
-            Default = null,
-            HelpText = "Path to the directory where a local version of nanoFramework.nanoCLR.dll is located.")]
-        public string LocalInstance { get; set; }
-
-        /// <summary>
-        /// Allowed values:
-        /// q[uiet]
-        /// m[inimal]
-        /// n[ormal]
-        /// d[etailed]
-        /// diag[nostic]
-        /// </summary>
-        [Option(
-            'v',
-            "verbosity",
-            Required = false,
-            Default = "n",
-            HelpText = "Sets the verbosity level of the command. Allowed values are q[uiet], m[inimal], n[ormal], d[etailed], and diag[nostic]. Not supported in every command; see specific command page to determine if this option is available.")]
-        public string Verbosity { get; set; }
     }
 }

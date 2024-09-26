@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Net.Http;
 using System.Reflection;
 using System.Threading.Tasks;
@@ -24,21 +25,21 @@ namespace nanoFramework.nanoCLR.CLI
             nanoCLRHostBuilder hostBuilder;
 
             // are we to use a local DLL?
-            if (options.LocalInstance != null)
+            if (options.PathToCLRInstance != null)
             {
                 if (options.UpdateCLR)
                 {
                     // These options cannot be combined
-                    throw new CLIException(ExitCode.E9009);
+                    throw new CLIException(ExitCode.E9010);
                 }
 
                 // check if path exists
-                if (!Directory.Exists(options.LocalInstance))
+                if (!Directory.Exists(options.PathToCLRInstance))
                 {
                     throw new CLIException(ExitCode.E9009);
                 }
 
-                hostBuilder = nanoCLRHost.CreateBuilder(options.LocalInstance);
+                hostBuilder = nanoCLRHost.CreateBuilder(options.PathToCLRInstance);
             }
             else
             {
@@ -68,22 +69,19 @@ namespace nanoFramework.nanoCLR.CLI
                 if (options.GetNativeAssemblies)
                 {
                     List<NativeAssemblyDetails>? nativeAssemblies = hostBuilder.GetNativeAssemblies();
+
                     if (nativeAssemblies is not null)
                     {
                         if (options.GetCLRVersion)
                         {
                             Console.WriteLine();
                         }
-                        Console.WriteLine("Native assembly,Version,Checksum");
 
-                        foreach (NativeAssemblyDetails assembly in nativeAssemblies)
-                        {
-                            Console.WriteLine($"{assembly.Name},{assembly.Version},0x{assembly.CheckSum:x}");
-                        }
+                        OutputNativeAssembliesList(nativeAssemblies);
                     }
                     else if (Program.VerbosityLevel > VerbosityLevel.Normal)
                     {
-                        Console.WriteLine("CLR instance is too old; native assembly information not available.");
+                        return (int)ExitCode.E9011;
                     }
                 }
 
@@ -91,6 +89,20 @@ namespace nanoFramework.nanoCLR.CLI
             }
 
             return (int)ExitCode.OK;
+        }
+
+        private static void OutputNativeAssembliesList(List<NativeAssemblyDetails> nativeAssemblies)
+        {
+            Console.WriteLine("Native assemblies:");
+
+            // do some math to get a tidy output
+            int maxAssemblyNameLength = nativeAssemblies.Max(assembly => assembly.Name.Length);
+            int maxAssemblyVersionLength = nativeAssemblies.Max(assembly => assembly.Version.ToString().Length);
+
+            foreach (NativeAssemblyDetails assembly in nativeAssemblies)
+            {
+                Console.WriteLine($"  {assembly.Name.PadRight(maxAssemblyNameLength)} v{assembly.Version.ToString().PadRight(maxAssemblyVersionLength)} 0x{assembly.CheckSum:X8}");
+            }
         }
 
         private static async Task<ExitCode> UpdateNanoCLRAsync(

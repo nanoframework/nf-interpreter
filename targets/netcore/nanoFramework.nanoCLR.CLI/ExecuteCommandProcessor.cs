@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (c) .NET Foundation and Contributors
 // See LICENSE file in the project root for full license information.
 //
@@ -25,15 +25,15 @@ namespace nanoFramework.nanoCLR.CLI
             nanoCLRHostBuilder hostBuilder;
 
             // are we to use a local DLL?
-            if (options.LocalInstance != null)
+            if (options.PathToCLRInstance != null)
             {
                 // check if path exists
-                if (!File.Exists(options.LocalInstance))
+                if (!Directory.Exists(options.PathToCLRInstance))
                 {
                     throw new CLIException(ExitCode.E9009);
                 }
 
-                hostBuilder = nanoCLRHost.CreateBuilder(Path.GetDirectoryName(options.LocalInstance));
+                hostBuilder = nanoCLRHost.CreateBuilder(Path.GetDirectoryName(options.PathToCLRInstance));
             }
             else
             {
