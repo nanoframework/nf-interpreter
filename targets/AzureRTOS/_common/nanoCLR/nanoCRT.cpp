@@ -6,7 +6,6 @@
 
 #include <nanoHAL.h>
 #include <target_stdio_config.h>
-#include <nanoprintf.h>
 
 //--//
 /* STDIO stubs                                                              */
