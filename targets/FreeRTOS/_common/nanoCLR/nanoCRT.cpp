@@ -5,7 +5,6 @@
 //
 
 #include <nanoHAL.h>
-#include <nanoprintf.h>
 
 //--//
 /* STDIO stubs                                                              */
