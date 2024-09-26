@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.IO;
 using CommandLine;
 
 namespace nanoFramework.nanoCLR.CLI
@@ -26,7 +27,10 @@ namespace nanoFramework.nanoCLR.CLI
         {
             set
             {
-                PathToCLRInstance = value;
+                if (!string.IsNullOrEmpty(value))
+                {
+                    PathToCLRInstance = Path.GetDirectoryName(Path.GetFullPath(value));
+                }
             }
         }
 

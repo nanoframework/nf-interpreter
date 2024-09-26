@@ -68,7 +68,7 @@ namespace nanoFramework.nanoCLR.CLI
 
                 if (options.GetNativeAssemblies)
                 {
-                    List<NativeAssemblyDetails>? nativeAssemblies = hostBuilder.GetNativeAssemblies();
+                    List<NativeAssemblyDetails> nativeAssemblies = hostBuilder.GetNativeAssemblies();
 
                     if (nativeAssemblies is not null)
                     {
@@ -99,7 +99,9 @@ namespace nanoFramework.nanoCLR.CLI
             int maxAssemblyNameLength = nativeAssemblies.Max(assembly => assembly.Name.Length);
             int maxAssemblyVersionLength = nativeAssemblies.Max(assembly => assembly.Version.ToString().Length);
 
-            foreach (NativeAssemblyDetails assembly in nativeAssemblies)
+            foreach (NativeAssemblyDetails assembly in from na in nativeAssemblies
+                                                       orderby na.Name
+                                                       select na)
             {
                 Console.WriteLine($"  {assembly.Name.PadRight(maxAssemblyNameLength)} v{assembly.Version.ToString().PadRight(maxAssemblyVersionLength)} 0x{assembly.CheckSum:X8}");
             }
