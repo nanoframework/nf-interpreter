@@ -1,7 +1,5 @@
-﻿//
-// Copyright (c) .NET Foundation and Contributors
-// See LICENSE file in the project root for full license information.
-//
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Diagnostics;
@@ -25,6 +23,12 @@ namespace nanoFramework.nanoCLR.Host.Interop
 
             set
             {
+                // Ensure the path includes a trailing path separator
+                if (!value.EndsWith(Path.DirectorySeparatorChar.ToString(), StringComparison.Ordinal))
+                {
+                    value += Path.DirectorySeparatorChar;
+                }
+
                 _dllPath = value;
 
                 // set path to search nanoCLR DLL
@@ -91,6 +95,12 @@ namespace nanoFramework.nanoCLR.Host.Interop
         [DllImport(NativeLibraryName, CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl)]
         [return: MarshalAs(UnmanagedType.LPStr)]
         internal static extern string nanoCLR_GetVersion();
+
+        [DllImport(NativeLibraryName, CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl)]
+        internal static extern ushort nanoCLR_GetNativeAssemblyCount();
+
+        [DllImport(NativeLibraryName, CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl)]
+        internal static extern bool nanoCLR_GetNativeAssemblyInformation(byte[] buffer, int size);
 
         [DllImport("kernel32", SetLastError = true)]
         private static extern bool FreeLibrary(IntPtr hModule);

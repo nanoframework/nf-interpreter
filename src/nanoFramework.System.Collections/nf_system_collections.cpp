@@ -35,15 +35,17 @@ static const CLR_RT_MethodHandler method_lookup[] =
     NULL,
     NULL,
     Library_nf_system_collections_System_Collections_Hashtable::Clear___VOID,
-    Library_nf_system_collections_System_Collections_Hashtable::Contains___BOOLEAN__OBJECT,
-    Library_nf_system_collections_System_Collections_Hashtable::Remove___VOID__OBJECT,
     NULL,
     NULL,
     NULL,
     NULL,
     NULL,
-    Library_nf_system_collections_System_Collections_Hashtable::InsertNative___VOID__OBJECT__OBJECT__BOOLEAN,
-    Library_nf_system_collections_System_Collections_Hashtable::GetNative___OBJECT__OBJECT,
+    NULL,
+    NULL,
+    Library_nf_system_collections_System_Collections_Hashtable::InsertNative___VOID__OBJECT__OBJECT__BOOLEAN__I4,
+    Library_nf_system_collections_System_Collections_Hashtable::GetNative___OBJECT__OBJECT__I4,
+    Library_nf_system_collections_System_Collections_Hashtable::ContainsNative___BOOLEAN__OBJECT__I4,
+    Library_nf_system_collections_System_Collections_Hashtable::RemoveNative___VOID__OBJECT__I4,
     Library_nf_system_collections_System_Collections_Hashtable::GetPrimeNative___STATIC__I4__I4,
     NULL,
     NULL,
@@ -100,9 +102,9 @@ static const CLR_RT_MethodHandler method_lookup[] =
 const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_nanoFramework_System_Collections =
 {
     "nanoFramework.System.Collections",
-    0x2DC2B090,
+    0x40DC251F,
     method_lookup,
-    { 100, 0, 1, 0 }
+    { 100, 0, 2, 0 }
 };
 
 // clang-format on
