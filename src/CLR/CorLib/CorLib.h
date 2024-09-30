@@ -8,10 +8,14 @@
 
 #include <nanoCLR_Runtime.h>
 #include <nanoCLR_Checks.h>
-// #include <nanoCLR_Diagnostics.h>
-// #include <nanoCLR_Hardware.h>
+//#include <nanoCLR_Diagnostics.h>
+//#include <nanoCLR_Hardware.h>
 
 #include "corlib_native.h"
 #include "nanoCRT.h"
+
+#ifndef VIRTUAL_DEVICE
+#include <nanoprintf.h>
+#endif // VIRTUAL_DEVICE
 
 #endif // NANOCLR_CORLIB_NATIVE_H
