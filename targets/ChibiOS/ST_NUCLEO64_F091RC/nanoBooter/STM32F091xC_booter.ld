@@ -12,7 +12,7 @@
  */
 MEMORY
 {
-    flash0     (rx) : org = 0x08000000, len = 10k     /* space reserved for nanoBooter */
+    flash0     (rx) : org = 0x08000000, len = 12k     /* space reserved for nanoBooter */
     flash1     (rx) : org = 0x00000000, len = 0
     flash2     (rx) : org = 0x00000000, len = 0
     flash3     (rx) : org = 0x00000000, len = 0

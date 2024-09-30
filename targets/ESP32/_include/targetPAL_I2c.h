@@ -9,7 +9,6 @@
 #include <target_platform.h>
 #include <esp32_idf.h>
 #include <nanoHAL_v2.h>
-#include <soc/rtc_cntl_reg.h>
 
 extern uint8_t Esp_I2C_Initialised_Flag[I2C_NUM_MAX];
 

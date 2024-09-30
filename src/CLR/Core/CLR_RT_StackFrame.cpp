@@ -577,12 +577,14 @@ HRESULT CLR_RT_StackFrame::MakeCall(
     int argsOffset = 0;
     CLR_RT_StackFrame *stackSub;
     CLR_RT_HeapBlock tmp;
+
+    memset(&tmp, 0, sizeof(struct CLR_RT_HeapBlock));
     tmp.SetObjectReference(nullptr);
     CLR_RT_ProtectFromGC gc(tmp);
 
     if (mdR->flags & CLR_RECORD_METHODDEF::MD_Constructor)
     {
-        CLR_RT_TypeDef_Instance owner;
+        CLR_RT_TypeDef_Instance owner{};
         owner.InitializeFromMethod(md);
 
         _ASSERTE(obj == nullptr);
@@ -656,7 +658,7 @@ HRESULT CLR_RT_StackFrame::MakeCall(
 
         if (ArgumentsCount)
         {
-            memcpy(&stackSub->m_arguments[argsOffset], args, sizeof(CLR_RT_HeapBlock) * ArgumentsCount);
+            memcpy(&stackSub->m_arguments[argsOffset], args, sizeof(struct CLR_RT_HeapBlock) * numArgs);
         }
     }
 
@@ -758,6 +760,9 @@ HRESULT CLR_RT_StackFrame::HandleSynchronized(bool fAcquire, bool fGlobal)
     CLR_RT_HeapBlock ref;
     CLR_RT_HeapBlock **ppGlobalLock;
     CLR_RT_HeapBlock *pGlobalLock;
+
+    memset(&refType, 0, sizeof(struct CLR_RT_HeapBlock));
+    memset(&ref, 0, sizeof(struct CLR_RT_HeapBlock));
 
     if (fGlobal)
     {
@@ -975,7 +980,7 @@ void CLR_RT_StackFrame::Pop()
                     CLR_RT_SignatureParser sig;
                     sig.Initialize_MethodSignature(&this->m_call);
                     CLR_RT_SignatureParser::Element res;
-                    CLR_RT_TypeDescriptor desc;
+                    CLR_RT_TypeDescriptor desc{};
 
                     dst->Assign(this->TopValue());
 

@@ -5,6 +5,11 @@
 //
 #include "Diagnostics.h"
 
+#ifdef _WIN64
+#include <inttypes.h>
+#include <stdint.h>
+#endif
+
 #if defined(NANOCLR_PROFILE_NEW)
 
 CLR_PRF_Profiler g_CLR_PRF_Profiler;
@@ -225,8 +230,8 @@ void CLR_PRF_Profiler::DumpObject(CLR_RT_HeapBlock *ptr)
     NanoCLRDataType dt = ptr->DataType();
     _ASSERTE(dt < DATATYPE_FIRST_INVALID);
     _ASSERTE(
-        sizeof(CLR_RT_HeapBlock) ==
-        12); // HeapBlockObjectPacket in ProfilerPackets.cs assumes sizeof(CLR_RT_HeapBlock) == 12
+        sizeof(struct CLR_RT_HeapBlock) ==
+        12); // HeapBlockObjectPacket in ProfilerPackets.cs assumes sizeof(struct CLR_RT_HeapBlock) == 12
 
     if (dt != DATATYPE_FREEBLOCK && dt != DATATYPE_CACHEDBLOCK)
     {
@@ -436,7 +441,6 @@ void CLR_PRF_Profiler::DumpObject(CLR_RT_HeapBlock *ptr)
                 DumpListOfReferences(appDomain->m_appDomainAssemblies);
                 DumpSingleReference(appDomain->m_globalLock);
                 DumpSingleReference(appDomain->m_strName);
-                DumpSingleReference(appDomain->m_outOfMemoryException);
                 break;
             }
 
@@ -693,11 +697,11 @@ void CLR_PRF_Profiler::TrackObjectCreation(CLR_RT_HeapBlock *ptr)
 
 #ifdef _WIN64
                 CLR_Debug::Printf(
-                    "\r\n    Profiler info: ! (0x0x%I64X | %d) DT: %d %d bytes idx: %08x\r\n",
+                    "\r\n    Profiler info: ! (0x0x%" PRIx64 " | %d) DT: %d %d bytes idx: %08x\r\n",
                     (size_t)((CLR_UINT8 *)ptr),
-                    (CLR_UINT32)((size_t *)ptr - s_CLR_RT_Heap.m_location),
+                    (CLR_UINT32)((size_t *)ptr - (size_t *)s_CLR_RT_Heap.m_location),
                     (CLR_UINT32)dt,
-                    (dataSize * sizeof(CLR_RT_HeapBlock)),
+                    (dataSize * sizeof(struct CLR_RT_HeapBlock)),
                     idx.m_data);
 
 #else
@@ -706,7 +710,7 @@ void CLR_PRF_Profiler::TrackObjectCreation(CLR_RT_HeapBlock *ptr)
                     (CLR_UINT32)((CLR_UINT8 *)ptr),
                     (CLR_UINT32)((CLR_UINT8 *)ptr - s_CLR_RT_Heap.m_location),
                     (CLR_UINT32)dt,
-                    (dataSize * sizeof(CLR_RT_HeapBlock)),
+                    (dataSize * sizeof(struct CLR_RT_HeapBlock)),
                     idx.m_data);
 #endif
 
@@ -723,12 +727,12 @@ void CLR_PRF_Profiler::TrackObjectCreation(CLR_RT_HeapBlock *ptr)
 
 #ifdef _WIN64
                 CLR_Debug::Printf(
-                    "\r\n    Profiler info: ! (0x0x%I64X | %d) DT: %d [%08x] %d bytes\r\n",
+                    "\r\n    Profiler info: ! (0x0x%" PRIx64 " | %d) DT: %d [%08x] %d bytes\r\n",
                     (size_t)((CLR_UINT8 *)ptr),
-                    (CLR_UINT32)((size_t *)ptr - s_CLR_RT_Heap.m_location),
+                    (CLR_UINT32)((size_t *)ptr - (size_t *)s_CLR_RT_Heap.m_location),
                     (CLR_UINT32)dt,
                     elementIdx.m_data,
-                    (dataSize * sizeof(CLR_RT_HeapBlock)));
+                    (dataSize * sizeof(struct CLR_RT_HeapBlock)));
 
 #else
                 CLR_Debug::Printf(
@@ -737,7 +741,7 @@ void CLR_PRF_Profiler::TrackObjectCreation(CLR_RT_HeapBlock *ptr)
                     (CLR_UINT32)((CLR_UINT8 *)ptr - s_CLR_RT_Heap.m_location),
                     (CLR_UINT32)dt,
                     elementIdx.m_data,
-                    (dataSize * sizeof(CLR_RT_HeapBlock)));
+                    (dataSize * sizeof(struct CLR_RT_HeapBlock)));
 #endif
 #endif // NANOCLR_TRACE_PROFILER_MESSAGES
             }
@@ -746,11 +750,11 @@ void CLR_PRF_Profiler::TrackObjectCreation(CLR_RT_HeapBlock *ptr)
             {
 #ifdef _WIN64
                 CLR_Debug::Printf(
-                    "\r\n    Profiler info: ! (0x0x%I64X | %d) DT: %d %d bytes\r\n",
+                    "\r\n    Profiler info: ! (0x0x%" PRIx64 " | %d) DT: %d %d bytes\r\n",
                     (size_t)((CLR_UINT8 *)ptr),
-                    (CLR_UINT32)((size_t *)ptr - s_CLR_RT_Heap.m_location),
+                    (CLR_UINT32)((size_t *)ptr - (size_t *)s_CLR_RT_Heap.m_location),
                     (CLR_UINT32)dt,
-                    (dataSize * sizeof(CLR_RT_HeapBlock)));
+                    (dataSize * sizeof(struct CLR_RT_HeapBlock)));
 
 #else
                 CLR_Debug::Printf(
@@ -758,7 +762,7 @@ void CLR_PRF_Profiler::TrackObjectCreation(CLR_RT_HeapBlock *ptr)
                     (CLR_UINT32)((CLR_UINT8 *)ptr),
                     (CLR_UINT32)((CLR_UINT8 *)ptr - s_CLR_RT_Heap.m_location),
                     (CLR_UINT32)dt,
-                    (dataSize * sizeof(CLR_RT_HeapBlock)));
+                    (dataSize * sizeof(struct CLR_RT_HeapBlock)));
 #endif
             }
 #endif // NANOCLR_TRACE_PROFILER_MESSAGES
@@ -795,17 +799,17 @@ void CLR_PRF_Profiler::TrackObjectDeletion(CLR_RT_HeapBlock *ptr)
 
 #ifdef _WIN64
         CLR_Debug::Printf(
-            "\r\n    Profiler info: * (0x0x%I64X | %d) %d bytes\r\n",
+            "\r\n    Profiler info: * (0x0x%" PRIx64 " | %d) %d bytes\r\n",
             (size_t)((CLR_UINT8 *)ptr),
-            (CLR_UINT32)((size_t *)ptr - s_CLR_RT_Heap.m_location),
-            (dataSize * sizeof(CLR_RT_HeapBlock)));
+            (CLR_UINT32)((size_t *)ptr - (size_t *)s_CLR_RT_Heap.m_location),
+            (dataSize * sizeof(struct CLR_RT_HeapBlock)));
 
 #else
         CLR_Debug::Printf(
             "\r\n    Profiler info: * (0x%08X | %d) %d bytes\r\n",
             (CLR_UINT32)((CLR_UINT8 *)ptr),
             (CLR_UINT32)((CLR_UINT8 *)ptr - s_CLR_RT_Heap.m_location),
-            (dataSize * sizeof(CLR_RT_HeapBlock)));
+            (dataSize * sizeof(struct CLR_RT_HeapBlock)));
 #endif
 
 #endif // NANOCLR_TRACE_PROFILER_MESSAGES
@@ -841,7 +845,7 @@ void CLR_PRF_Profiler::TrackObjectRelocation()
 
 #ifdef _WIN64
             CLR_Debug::Printf(
-                "\r\n    Profiler msg: u 0x%I64X 0x%I64X %d\r\n",
+                "\r\n    Profiler msg: u 0x%" PRIx64 " 0x%" PRIx64 " %d\r\n",
                 relocBlocks[i].m_start,
                 relocBlocks[i].m_start + relocBlocks[i].m_offset,
                 relocBlocks[i].m_end - relocBlocks[i].m_offset);
@@ -880,7 +884,7 @@ void CLR_PRF_Profiler::RecordGarbageCollectionBegin()
 
 #ifdef _WIN64
         CLR_Debug::Printf(
-            "\r\n    Profiler msg: b 1 0 0 0x%I64X 0x%I64X %d 0\r\n",
+            "\r\n    Profiler msg: b 1 0 0 0x%" PRIx64 " 0x%" PRIx64 " %d 0\r\n",
             (CLR_UINT32)s_CLR_RT_Heap.m_location,
             s_CLR_RT_Heap.m_size,
             g_CLR_RT_GarbageCollector.m_totalBytes);
@@ -919,12 +923,12 @@ void CLR_PRF_Profiler::RecordGarbageCollectionEnd()
 #ifdef _WIN64
         NANOCLR_FOREACH_NODE(CLR_RT_HeapCluster, hc, g_CLR_RT_ExecutionEngine.m_heap)
         {
-            CLR_Debug::Printf("\r\n    Profiler msg: v 0x%I64X 0\r\n", (CLR_UINT32)hc->m_payloadStart);
+            CLR_Debug::Printf("\r\n    Profiler msg: v 0x%" PRIx64 " 0\r\n", (CLR_UINT32)hc->m_payloadStart);
         }
         NANOCLR_FOREACH_NODE_END();
 
         CLR_Debug::Printf(
-            "\r\n    Profiler msg: b 0 0 0 0x%I64X 0x%I64X %d 0\r\n",
+            "\r\n    Profiler msg: b 0 0 0 0x%" PRIx64 " 0x%" PRIx64 " %d 0\r\n",
             (CLR_UINT32)s_CLR_RT_Heap.m_location,
             s_CLR_RT_Heap.m_size,
             g_CLR_RT_GarbageCollector.m_totalBytes);
@@ -968,7 +972,7 @@ void CLR_PRF_Profiler::RecordHeapCompactionBegin()
 
 #ifdef _WIN64
         CLR_Debug::Printf(
-            "\r\n    Profiler msg: b 1 0 0 0x%I64X 0x%I64X %d 0\r\n",
+            "\r\n    Profiler msg: b 1 0 0 0x%" PRIx64 " 0x%" PRIx64 " %d 0\r\n",
             (CLR_UINT32)s_CLR_RT_Heap.m_location,
             s_CLR_RT_Heap.m_size,
             g_CLR_RT_GarbageCollector.m_totalBytes);
@@ -1006,7 +1010,7 @@ void CLR_PRF_Profiler::RecordHeapCompactionEnd()
 
 #ifdef _WIN64
         CLR_Debug::Printf(
-            "\r\n    Profiler msg: b 0 0 0 0x%I64X 0x%I64X %d 0\r\n",
+            "\r\n    Profiler msg: b 0 0 0 0x%" PRIx64 " 0x%" PRIx64 " %d 0\r\n",
             (CLR_UINT32)s_CLR_RT_Heap.m_location,
             s_CLR_RT_Heap.m_size,
             g_CLR_RT_GarbageCollector.m_totalBytes);

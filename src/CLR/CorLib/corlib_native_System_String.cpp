@@ -197,11 +197,16 @@ HRESULT Library_corlib_native_System_String::_ctor___VOID__CHAR__I4(CLR_RT_Stack
 
     CLR_UINT16 ch = stack.Arg1().NumericByRef().u2;
     int len = stack.Arg2().NumericByRef().s4;
+
     if (len < 0)
+    {
         NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_RANGE);
+    }
 
     {
         CLR_RT_HeapBlock tmp;
+
+        memset(&tmp, 0, sizeof(struct CLR_RT_HeapBlock));
         tmp.SetObjectReference(nullptr);
         CLR_RT_ProtectFromGC gc(tmp);
 
@@ -856,11 +861,13 @@ HRESULT Library_corlib_native_System_String::ChangeCase(CLR_RT_StackFrame &stack
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
 
+    CLR_UINT16 *ptr;
+    CLR_RT_HeapBlock_Array *arrayTmp;
     CLR_RT_HeapBlock refTmp;
+
+    memset(&refTmp, 0, sizeof(struct CLR_RT_HeapBlock));
     refTmp.SetObjectReference(nullptr);
     CLR_RT_ProtectFromGC gc(refTmp);
-    CLR_RT_HeapBlock_Array *arrayTmp;
-    CLR_UINT16 *ptr;
 
     NANOCLR_CHECK_HRESULT(ConvertToCharArray(stack, refTmp, arrayTmp, 0, -1));
 
@@ -897,10 +904,12 @@ HRESULT Library_corlib_native_System_String::Substring(CLR_RT_StackFrame &stack,
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
 
+    CLR_RT_HeapBlock_Array *arrayTmp;
     CLR_RT_HeapBlock refTmp;
+
+    memset(&refTmp, 0, sizeof(struct CLR_RT_HeapBlock));
     refTmp.SetObjectReference(nullptr);
     CLR_RT_ProtectFromGC gc(refTmp);
-    CLR_RT_HeapBlock_Array *arrayTmp;
 
     NANOCLR_CHECK_HRESULT(ConvertToCharArray(stack, refTmp, arrayTmp, 0, -1));
 
@@ -934,12 +943,15 @@ HRESULT Library_corlib_native_System_String::Trim(
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
 
-    CLR_RT_HeapBlock refTmp;
-    refTmp.SetObjectReference(nullptr);
-    CLR_RT_ProtectFromGC gc(refTmp);
-    CLR_RT_HeapBlock_Array *arrayTmp;
     CLR_UINT16 *pSrcStart;
     CLR_UINT16 *pSrcEnd;
+
+    CLR_RT_HeapBlock refTmp;
+    CLR_RT_HeapBlock_Array *arrayTmp;
+
+    memset(&refTmp, 0, sizeof(struct CLR_RT_HeapBlock));
+    refTmp.SetObjectReference(nullptr);
+    CLR_RT_ProtectFromGC gc(refTmp);
 
     NANOCLR_CHECK_HRESULT(ConvertToCharArray(stack, refTmp, arrayTmp, 0, -1));
 
@@ -1050,6 +1062,8 @@ HRESULT Library_corlib_native_System_String::Split(CLR_RT_StackFrame &stack, CLR
 
         {
             CLR_RT_HeapBlock refSrc;
+
+            memset(&refSrc, 0, sizeof(struct CLR_RT_HeapBlock));
             refSrc.SetObjectReference(nullptr);
             CLR_RT_ProtectFromGC gc(refSrc);
 
@@ -1191,7 +1205,7 @@ HRESULT Library_corlib_native_System_String::ConvertToCharArray(
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
 
-    CLR_RT_UnicodeHelper uh;
+    CLR_RT_UnicodeHelper uh{};
     int totLength;
 
     FAULT_ON_NULL(szText);

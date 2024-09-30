@@ -6,7 +6,7 @@
 #include <sys_dev_spi_native_target.h>
 
 /////////////////////////////////////////////////////
-// SPI PAL strucs declared in sys_dev_spi_native.h //
+// SPI PAL structs declared in sys_dev_spi_native.h //
 /////////////////////////////////////////////////////
 #if GECKO_USE_SPI0 == TRUE
 NF_PAL_SPI SPI0_PAL;

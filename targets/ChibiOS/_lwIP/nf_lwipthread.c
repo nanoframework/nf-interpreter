@@ -256,7 +256,12 @@ void lwipDefaultLinkUpCB(void *p)
 #endif
 
 #if SNTP_SERVER_DNS
-    sntp_init();
+    // if not using DHCP then start SNTP
+    // otherwise SNTP will be started when DHCP request succeeds
+    if (addressMode != NET_ADDRESS_DHCP)
+    {
+        sntp_init();
+    }
 #endif
 }
 
@@ -275,7 +280,7 @@ void lwipDefaultLinkDownCB(void *p)
 #if LWIP_DHCP
     if (addressMode == NET_ADDRESS_DHCP)
     {
-        dhcp_stop(ifc);
+        dhcp_release_and_stop(ifc);
     }
 #endif
 
@@ -300,9 +305,6 @@ static THD_FUNCTION(lwip_thread, p)
     tcpip_callback_fn link_down_cb = NULL;
 
     chRegSetThreadName(LWIP_THREAD_NAME);
-
-    /* Initializes the thing.*/
-    tcpip_init(NULL, NULL);
 
     /* TCP/IP parameters, runtime or compile time.*/
     if (p)
@@ -398,6 +400,7 @@ static THD_FUNCTION(lwip_thread, p)
 
 // setup SNTP
 #if SNTP_SERVER_DNS
+    sntp_stop();
     sntp_setoperatingmode(SNTP_OPMODE_POLL);
     sntp_setservername(0, SNTP_SERVER0_DEFAULT_ADDRESS);
     sntp_setservername(1, SNTP_SERVER1_DEFAULT_ADDRESS);
@@ -452,6 +455,12 @@ static THD_FUNCTION(lwip_thread, p)
     }
 }
 
+static void tcpIpInitDone(void *arg)
+{
+    semaphore_t *initDone = arg;
+    chSemSignal(initDone);
+}
+
 /**
  * @brief   Initializes the lwIP subsystem.
  * @note    The function exits after the initialization is finished.
@@ -459,18 +468,26 @@ static THD_FUNCTION(lwip_thread, p)
  * @param[in] opts      pointer to the configuration structure, if @p NULL
  *                      then the static configuration is used.
  */
-void lwipInit(const lwipthread_opts_t *opts)
+void lwIPInit(const lwipthread_opts_t *opts)
 {
-
-    /* Creating the lwIP thread (it changes priority internally).*/
+    // creates the lwIP thread (it changes priority internally)
     chThdCreateStatic(wa_lwip_thread, sizeof(wa_lwip_thread), chThdGetPriorityX() - 1, lwip_thread, (void *)opts);
 
-    /* Waiting for the lwIP thread complete initialization. Note,
-       this thread reaches the thread reference object first because
-       the relative priorities.*/
+    // creates the semaphore to wait for the initialization to complete
+    semaphore_t initDone;
+    chSemObjectInit(&initDone, 0);
+
+    // initializes TCP/IP stack
+    tcpip_init(tcpIpInitDone, &initDone);
+
+    // Waiting for the lwIP thread complete initialization.
+    // Note this thread reaches the thread reference object first because the relative priorities.
     chSysLock();
     chThdSuspendS(&lwip_trp);
     chSysUnlock();
+
+    // waits for the TCP/IP stack initialization to complete
+    chSemWait(&initDone);
 }
 
 typedef struct lwip_reconf_params
@@ -489,7 +506,9 @@ static void do_reconfigure(void *p)
         case NET_ADDRESS_DHCP:
         {
             if (netif_is_up(&thisif))
-                dhcp_stop(&thisif);
+            {
+                dhcp_release_and_stop(&thisif);
+            }
             break;
         }
 #endif
@@ -521,8 +540,7 @@ static void do_reconfigure(void *p)
 #if LWIP_DHCP
         case NET_ADDRESS_DHCP:
         {
-            if (netif_is_up(&thisif))
-                dhcp_start(&thisif);
+            dhcp_start(&thisif);
             break;
         }
 #endif

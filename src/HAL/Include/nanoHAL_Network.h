@@ -58,6 +58,7 @@ typedef enum __nfpack NetworkInterfaceType
     NetworkInterfaceType_Ethernet = 6,
     NetworkInterfaceType_Wireless80211 = 71,
     NetworkInterfaceType_WirelessAP = 72,
+    NetworkInterfaceType_Thread = 81
 } NetworkInterfaceType;
 
 typedef enum __nfpack Wireless80211Configuration_ConfigurationOptions

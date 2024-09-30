@@ -5,7 +5,6 @@
 # set 'ForceUpload' variable to true on target matrix
 
 steps:
-
   # execute on 'ForceUpload' parameter
   - task: PowerShell@2
     condition: >-
@@ -18,33 +17,33 @@ steps:
       )
     displayName: Set Cloudsmith repo path
     inputs:
-      targetType: 'inline'
+      targetType: "inline"
       script: |
-          $repoName = $env:Build_Repository_Name
-          $branchName = $env:Build_SourceBranchName
-          $forceUpload = $env:ForceUpload
+        $repoName = $env:Build_Repository_Name
+        $branchName = $env:Build_SourceBranchName
+        $forceUpload = $env:ForceUpload
 
-          Write-Host "repo name is: $repoName"
-          Write-Host "branch name is: $branchName"
+        Write-Host "repo name is: $repoName"
+        Write-Host "branch name is: $branchName"
 
-          if( $env:Build_SourceBranchName -match "develop" -or 
-              $env:Build_SourceBranchName -match "^release*" -or
-              $forceUpload -eq "true")
-          {
-            # this a dev, release branch or force upload, publish to Cloudsmith dev repo
-            Write-Host "$("##vso[task.setvariable variable=CLOUDSMITH_REPO]")nanoframework-images-dev"
-            # set version
-            Write-Host "$("##vso[task.setvariable variable=PACKAGE_VERSION]")$(NBGV_NuGetPackageVersion)"
-          }
-          else 
-          {
-            # this main branch, publish to Cloudsmith stable repo
-            Write-Host "$("##vso[task.setvariable variable=CLOUDSMITH_REPO]")nanoframework-images"
-            # set version
-            Write-Host "$("##vso[task.setvariable variable=PACKAGE_VERSION]")$(NBGV_SimpleVersion).$(TARGET_BUILD_COUNTER)"
-          }
-      errorActionPreference: 'stop'
-      failOnStderr: 'true'
+        if( $env:Build_SourceBranchName -match "develop" -or 
+            $env:Build_SourceBranchName -match "^release*" -or
+            $forceUpload -eq "true")
+        {
+          # this a dev, release branch or force upload, publish to Cloudsmith dev repo
+          Write-Host "$("##vso[task.setvariable variable=CLOUDSMITH_REPO]")nanoframework-images-dev"
+          # set version
+          Write-Host "$("##vso[task.setvariable variable=PACKAGE_VERSION]")$(NBGV_NuGetPackageVersion)"
+        }
+        else 
+        {
+          # this main branch, publish to Cloudsmith stable repo
+          Write-Host "$("##vso[task.setvariable variable=CLOUDSMITH_REPO]")nanoframework-images"
+          # set version
+          Write-Host "$("##vso[task.setvariable variable=PACKAGE_VERSION]")$(NBGV_SimpleVersion).$(TARGET_BUILD_COUNTER)"
+        }
+      errorActionPreference: "stop"
+      failOnStderr: true
 
   - task: PowerShell@2
     condition: >-
@@ -60,17 +59,17 @@ steps:
       )
     displayName: Upload nanoCLR to Cloudsmith
     inputs:
-      targetType: 'inline'
+      targetType: "inline"
       script: |
 
-          # install Cloudsmith CLI
-          python -m pip install --upgrade cloudsmith-cli --quiet
+        # install Cloudsmith CLI
+        python -m pip install --upgrade cloudsmith-cli --quiet
 
-          Write-Host "Uploading nanoCLR v$(WINCLR_PACKAGE_VERSION) to Cloudsmith"
+        Write-Host "Uploading nanoCLR v$(WINCLR_PACKAGE_VERSION) to Cloudsmith"
 
-          cloudsmith push raw net-nanoframework/$(CLOUDSMITH_REPO) $(Build.ArtifactStagingDirectory)\WIN32_nanoCLR\nanoFramework.nanoCLR.exe --name WIN32_nanoCLR --version $(WINCLR_PACKAGE_VERSION) -k $(CLOUDSMITH_KEY)
+        cloudsmith push raw net-nanoframework/$(CLOUDSMITH_REPO) $(Build.ArtifactStagingDirectory)\WIN32_nanoCLR\nanoFramework.nanoCLR.exe --name WIN32_nanoCLR --version $(WINCLR_PACKAGE_VERSION) -k $(CLOUDSMITH_KEY)
 
-          cloudsmith push raw net-nanoframework/$(CLOUDSMITH_REPO) $(Build.ArtifactStagingDirectory)\WIN_DLL_nanoCLR\nanoFramework.nanoCLR.dll --name WIN_DLL_nanoCLR --version $(WINCLR_PACKAGE_VERSION) -k $(CLOUDSMITH_KEY)
+        cloudsmith push raw net-nanoframework/$(CLOUDSMITH_REPO) $(Build.ArtifactStagingDirectory)\WIN_DLL_nanoCLR\nanoFramework.nanoCLR.dll --name WIN_DLL_nanoCLR --version $(WINCLR_PACKAGE_VERSION) -k $(CLOUDSMITH_KEY)
 
-      errorActionPreference: 'stop'
-      failOnStderr: 'false'
+      errorActionPreference: "stop"
+      failOnStderr: false

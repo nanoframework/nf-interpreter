@@ -22,7 +22,7 @@ HRESULT Library_corlib_native_System_Reflection_ConstructorInfo::Invoke___OBJECT
     NANOCLR_HEADER();
 
     CLR_RT_HeapBlock *thisRef = stack.ThisRef().Dereference();
-    CLR_RT_MethodDef_Instance md;
+    CLR_RT_MethodDef_Instance md{};
     CLR_RT_HeapBlock_Array *pArray = stack.Arg1().DereferenceArray();
     CLR_RT_HeapBlock *args = nullptr;
     int ArgumentsCount = 0;

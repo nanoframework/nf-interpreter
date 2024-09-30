@@ -113,9 +113,12 @@ typedef unsigned long u_long;
 typedef unsigned __int64 u_int64;
 //
 //
-#define SOCK_AF_UNSPEC 0 /* unspecified */
-#define SOCK_AF_INET   2 /* internetwork: UDP, TCP, etc. */
-#define SOCK_AF_INET6  28
+// unspecified
+#define SOCK_AF_UNSPEC 0
+// internetwork (IPV4): UDP, TCP, etc.
+#define SOCK_AF_INET 2
+// Ipv6
+#define SOCK_AF_INET6 23
 
 typedef int SOCK_SOCKET;
 
@@ -231,8 +234,13 @@ typedef int SOCK_SOCKET;
 #define SOCK_FIOASYNC SOCK__IOW('f', 125, u_long) /* set/clear async i/o */
 //
 
-#define SOCK_FD_SETSIZE    256
+#define SOCK_FD_SETSIZE 256
+
+#if defined(LWIP_IPV6) && LWIP_IPV6
+#define SOCK_MAX_ADDR_SIZE 26
+#else
 #define SOCK_MAX_ADDR_SIZE 14
+#endif
 
 typedef struct SOCK_fd_set
 {
@@ -246,7 +254,7 @@ typedef struct SOCK_sockaddr
     char sa_data[SOCK_MAX_ADDR_SIZE]; /* up to SOCK_MAX_ADDR_SIZE bytes of direct address */
 } SOCK_sockaddr;
 
-CT_ASSERT_UNIQUE_NAME(sizeof(SOCK_sockaddr) == (16), SOCK_SOCKADDR)
+CT_ASSERT_UNIQUE_NAME(sizeof(SOCK_sockaddr) == (SOCK_MAX_ADDR_SIZE + 2), SOCK_SOCKADDR)
 
 typedef struct GNU_PACKED SOCK_in_addr
 {
@@ -275,6 +283,28 @@ typedef struct GNU_PACKED SOCK_sockaddr_in
 
 CT_ASSERT_UNIQUE_NAME(sizeof(SOCK_sockaddr_in) == 16, SOCK_SOCKADDR_IN)
 
+#if defined(LWIP_IPV6) && LWIP_IPV6
+typedef struct GNU_PACKED SOCK_in_addr6
+{
+    union {
+        u32_t u32_addr[4];
+        u16_t u16_addr[8];
+        u8_t u8_addr[16];
+    } un;
+} SOCK_in_addr6;
+
+typedef struct GNU_PACKED SOCK_sockaddr_in6
+{
+    short sin_family;
+    u_short sin_port;
+    SOCK_in_addr6 sin_addr;
+    u32_t scopeId;
+} SOCK_sockaddr_in6;
+
+CT_ASSERT_UNIQUE_NAME(sizeof(SOCK_sockaddr_in6) == 24, SOCK_SOCKADDR_IN6)
+
+#endif
+
 typedef struct SOCK_addrinfo
 {
     int ai_flags;
@@ -301,9 +331,9 @@ typedef struct SOCK_discoveryinfo
 } SOCK_discoveryinfo;
 
 #define SOCK_MAKE_IP_ADDR(w, x, y, z)                                                                                  \
-    ((uint32_t)(w)&0xFF) << 24 | ((uint32_t)(x)&0xff) << 16 | ((uint32_t)(y)&0xff) << 8 | ((uint32_t)(z)&0xff)
+    ((uint32_t)(w) & 0xFF) << 24 | ((uint32_t)(x) & 0xff) << 16 | ((uint32_t)(y) & 0xff) << 8 | ((uint32_t)(z) & 0xff)
 #define SOCK_MAKE_IP_ADDR_LITTLEEND(w, x, y, z)                                                                        \
-    ((uint32_t)(z)&0xFF) << 24 | ((uint32_t)(y)&0xff) << 16 | ((uint32_t)(x)&0xff) << 8 | ((uint32_t)(w)&0xff)
+    ((uint32_t)(z) & 0xFF) << 24 | ((uint32_t)(y) & 0xff) << 16 | ((uint32_t)(x) & 0xff) << 8 | ((uint32_t)(w) & 0xff)
 
 #ifndef SOCKET_READ_PEEK_OPTION
 #define SOCKET_READ_PEEK_OPTION 2
@@ -356,13 +386,13 @@ typedef struct SOCK_timeval
 #define SOCK_NETWORKCONFIGURATION_FLAGS_TYPE__mask        0x000F0000
 #define SOCK_NETWORKCONFIGURATION_FLAGS_TYPE__shift       16
 #define SOCK_NETWORKCONFIGURATION_FLAGS_TYPE__value(x)                                                                 \
-    (((x)&SOCK_NETWORKCONFIGURATION_FLAGS_TYPE__mask) >> SOCK_NETWORKCONFIGURATION_FLAGS_TYPE__shift)
+    (((x) & SOCK_NETWORKCONFIGURATION_FLAGS_TYPE__mask) >> SOCK_NETWORKCONFIGURATION_FLAGS_TYPE__shift)
 #define SOCK_NETWORKCONFIGURATION_FLAGS_TYPE__set(x)                                                                   \
     (((x) << SOCK_NETWORKCONFIGURATION_FLAGS_TYPE__shift) & SOCK_NETWORKCONFIGURATION_FLAGS_TYPE__mask)
 #define SOCK_NETWORKCONFIGURATION_FLAGS_SUBINDEX__mask  0x00F00000
 #define SOCK_NETWORKCONFIGURATION_FLAGS_SUBINDEX__shift 20
 #define SOCK_NETWORKCONFIGURATION_FLAGS_SUBINDEX__value(x)                                                             \
-    (((x)&SOCK_NETWORKCONFIGURATION_FLAGS_SUBINDEX__mask) >> SOCK_NETWORKCONFIGURATION_FLAGS_SUBINDEX__shift)
+    (((x) & SOCK_NETWORKCONFIGURATION_FLAGS_SUBINDEX__mask) >> SOCK_NETWORKCONFIGURATION_FLAGS_SUBINDEX__shift)
 #define SOCK_NETWORKCONFIGURATION_FLAGS_SUBINDEX__set(x)                                                               \
     (((x) << SOCK_NETWORKCONFIGURATION_FLAGS_SUBINDEX__shift) & SOCK_NETWORKCONFIGURATION_FLAGS_SUBINDEX__mask)
 
@@ -399,7 +429,7 @@ typedef enum __nfpack NetworkInterface_UpdateOperation
 #define WIRELESS_FLAG_AUTHENTICATION__shift 0
 #define WIRELESS_FLAG_AUTHENTICATION__mask  0x0000000F
 #define WIRELESS_FLAG_AUTHENTICATION__value(x)                                                                         \
-    (((x)&WIRELESS_FLAG_AUTHENTICATION__mask) >> WIRELESS_FLAG_AUTHENTICATION__shift)
+    (((x) & WIRELESS_FLAG_AUTHENTICATION__mask) >> WIRELESS_FLAG_AUTHENTICATION__shift)
 #define WIRELESS_FLAG_AUTHENTICATION__set(x)                                                                           \
     (((x) << WIRELESS_FLAG_AUTHENTICATION__shift) & WIRELESS_FLAG_AUTHENTICATION__mask)
 
@@ -415,7 +445,7 @@ typedef enum __nfpack NetworkInterface_UpdateOperation
 #define WIRELESS_FLAG_ENCRYPTION_Certificate 4
 #define WIRELESS_FLAG_ENCRYPTION__shift      4
 #define WIRELESS_FLAG_ENCRYPTION__mask       0x000000F0
-#define WIRELESS_FLAG_ENCRYPTION__value(x)   (((x)&WIRELESS_FLAG_ENCRYPTION__mask) >> WIRELESS_FLAG_ENCRYPTION__shift)
+#define WIRELESS_FLAG_ENCRYPTION__value(x)   (((x) & WIRELESS_FLAG_ENCRYPTION__mask) >> WIRELESS_FLAG_ENCRYPTION__shift)
 #define WIRELESS_FLAG_ENCRYPTION__set(x)     (((x) << WIRELESS_FLAG_ENCRYPTION__shift) & WIRELESS_FLAG_ENCRYPTION__mask)
 
 ///
@@ -429,26 +459,28 @@ typedef enum __nfpack NetworkInterface_UpdateOperation
 #define WIRELESS_FLAG_RADIO_n         8
 #define WIRELESS_FLAG_RADIO__shift    8
 #define WIRELESS_FLAG_RADIO__mask     0x00000F00
-#define WIRELESS_FLAG_RADIO__value(x) (((x)&WIRELESS_FLAG_RADIO__mask) >> WIRELESS_FLAG_RADIO__shift)
+#define WIRELESS_FLAG_RADIO__value(x) (((x) & WIRELESS_FLAG_RADIO__mask) >> WIRELESS_FLAG_RADIO__shift)
 #define WIRELESS_FLAG_RADIO__set(x)   (((x) << WIRELESS_FLAG_RADIO__shift) & WIRELESS_FLAG_RADIO__mask)
 
 // Wireless flags bits 12 - 15
 #define WIRELESS_FLAG_DATA_ENCRYPTED 1
 #define WIRELESS_FLAG_DATA__shift    12
 #define WIRELESS_FLAG_DATA__mask     0x0000F000
-#define WIRELESS_FLAG_DATA__value(x) (((x)&WIRELESS_FLAG_DATA__mask) >> WIRELESS_FLAG_DATA__shift)
+#define WIRELESS_FLAG_DATA__value(x) (((x) & WIRELESS_FLAG_DATA__mask) >> WIRELESS_FLAG_DATA__shift)
 #define WIRELESS_FLAG_DATA__set(x)   (((x) << WIRELESS_FLAG_DATA__shift) & WIRELESS_FLAG_DATA__mask)
 
 // extern const ConfigurationSector g_ConfigurationSector;
 
 //--//
 
-#define SOCK_htons(x) ((((x)&0x000000FFUL) << 8) | (((x)&0x0000FF00UL) >> 8))
+#define SOCK_htons(x) ((((x) & 0x000000FFUL) << 8) | (((x) & 0x0000FF00UL) >> 8))
 #define SOCK_htonl(x)                                                                                                  \
-    ((((x)&0x000000FFUL) << 24) | (((x)&0x0000FF00UL) << 8) | (((x)&0x00FF0000UL) >> 8) | (((x)&0xFF000000UL) >> 24))
+    ((((x) & 0x000000FFUL) << 24) | (((x) & 0x0000FF00UL) << 8) | (((x) & 0x00FF0000UL) >> 8) |                        \
+     (((x) & 0xFF000000UL) >> 24))
 #define SOCK_ntohs(x) SOCK_htons(x)
 #define SOCK_ntohl(x)                                                                                                  \
-    ((((x)&0x000000FFUL) << 24) | (((x)&0x0000FF00UL) << 8) | (((x)&0x00FF0000UL) >> 8) | (((x)&0xFF000000UL) >> 24))
+    ((((x) & 0x000000FFUL) << 24) | (((x) & 0x0000FF00UL) << 8) | (((x) & 0x00FF0000UL) >> 8) |                        \
+     (((x) & 0xFF000000UL) >> 24))
 
 #define SOCK_FD_ZERO(x) memset(x, 0, sizeof(*x))
 __inline bool SOCK_FD_ISSET(int y, SOCK_fd_set *x)
@@ -635,8 +667,12 @@ HRESULT SOCK_CONFIGURATION_UpdateAdapterConfiguration(
     uint32_t updateFlags);
 HRESULT SOCK_CONFIGURATION_LoadConfiguration(HAL_Configuration_NetworkInterface *config, uint32_t interfaceIndex);
 HRESULT SOCK_CONFIGURATION_LinkStatus(uint32_t interfaceIndex, bool *status);
-HRESULT SOCK_IPAddressFromString(const char *ipString, uint64_t *address);
-const char *SOCK_IPAddressToString(uint32_t address);
+HRESULT SOCK_IPV4AddressFromString(const char *ipString, uint64_t *address);
+const char *SOCK_IPV4AddressToString(uint32_t address);
+#if defined(LWIP_IPV6) && LWIP_IPV6
+const char *SOCK_IPV6AddressToString(uint16_t *address);
+HRESULT SOCK_IPV6AddressFromString(const char *ipString, uint16_t *address);
+#endif
 
 //--// SSL
 
@@ -729,11 +765,15 @@ HRESULT HAL_SOCK_CONFIGURATION_UpdateAdapterConfiguration(
     uint32_t interfaceIndex,
     uint32_t updateFlags);
 HRESULT HAL_SOCK_CONFIGURATION_Link_status(uint32_t interfaceIndex, bool *status);
-HRESULT HAL_SOCK_IPAddressFromString(const char *ipString, uint64_t *address);
-const char *HAL_SOCK_IPAddressToString(uint32_t address);
-
+HRESULT HAL_SOCK_IPV4AddressFromString(const char *ipString, uint64_t *address);
+const char *HAL_SOCK_IPV4AddressToString(uint32_t address);
+#if defined(LWIP_IPV6) && LWIP_IPV6
+HRESULT HAL_SOCK_IPV6AddressFromString(const char *ipString, uint16_t *address);
+const char *HAL_SOCK_IPV6AddressToString(uint16_t *address);
+#endif
 void *HAL_SOCK_GlobalLockContext();
 void HAL_SOCK_EventsSet(uint32_t events);
+void HAL_SOCK_SetInterfaceNumber(uint32_t interfaceIndex, uint32_t interfaceNumber);
 
 //--//
 

@@ -20,7 +20,7 @@ typedef struct
 } NF_PAL_I2C;
 
 ///////////////////////////////////////////
-// declaration of the the I2C PAL strucs //
+// declaration of the the I2C PAL structs //
 ///////////////////////////////////////////
 extern NF_PAL_I2C I2C1_PAL;
 

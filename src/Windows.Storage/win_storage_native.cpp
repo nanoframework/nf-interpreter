@@ -97,17 +97,18 @@ static const CLR_RT_MethodHandler method_lookup[] =
     Library_win_storage_native_Windows_Storage_StorageFolder::DeleteFolderNative___VOID,
     Library_win_storage_native_Windows_Storage_StorageFolder::RenameFolderNative___VOID__STRING,
     Library_win_storage_native_Windows_Storage_StorageFolder::GetFolderNative___WindowsStorageStorageFolder__STRING,
-    nullptr,
-    nullptr,
-    nullptr,
+    NULL,
+    NULL,
+    Library_win_storage_native_Windows_Storage_StorageProvider::FormatVolume___VOID__STRING,
+    NULL,
 };
 
 const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_Windows_Storage =
 {
     "Windows.Storage",
-    0x954A4192,
+    0xF0C37E1B,
     method_lookup,
-    { 100, 0, 2, 0 }
+    { 100, 0, 3, 0 }
 };
 
 // clang-format on

@@ -26,7 +26,8 @@
                 "NF_FEATURE_HAS_SDCARD": "ON",
                 "NF_FEATURE_HAS_CONFIG_BLOCK": "ON",
                 "NF_FEATURE_HAS_USB_MSD": "ON",
-                "NF_FEATURE_USE_SPIFFS": "ON",
+                "NF_FEATURE_USE_LITTLEFS": "ON",
+                "NF_FEATURE_HAS_ACCESSIBLE_STORAGE": "ON",                
                 "NF_BUILD_RTM": "OFF",
                 "API_System.Math": "ON",
                 "API_Hardware.Stm32": "ON",
@@ -38,6 +39,7 @@
                 "API_System.Device.Adc": "ON",
                 "API_System.Device.Dac": "ON",
                 "API_System.Net": "ON",
+                "API_System.IO.FileSystem": "ON",
                 "API_nanoFramework.ResourceManager": "ON",
                 "API_nanoFramework.System.Collections": "ON",
                 "API_nanoFramework.System.Text": "ON"

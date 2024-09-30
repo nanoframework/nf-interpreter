@@ -154,6 +154,7 @@ HRESULT Library_sys_net_native_System_Net_NetworkInformation_NetworkInterface::U
     CLR_UINT32 interfaceIndex;
     CLR_UINT32 updateFlags;
     CLR_RT_HeapBlock_Array *pMACAddress;
+    UpdateConfigurationResult updateResult = UpdateConfigurationResult_Failed;
 
     CLR_RT_HeapBlock *pConfig = stack.Arg0().Dereference();
     FAULT_ON_NULL(pConfig);
@@ -189,13 +190,23 @@ HRESULT Library_sys_net_native_System_Net_NetworkInformation_NetworkInterface::U
 
     // store configuration, updating the configuration block
     // it's up to the configuration manager to decide if the config actually needs to be updated
-    if (ConfigurationManager_UpdateConfigurationBlock(&config, DeviceConfigurationOption_Network, interfaceIndex) !=
-        TRUE)
+    updateResult =
+        ConfigurationManager_UpdateConfigurationBlock(&config, DeviceConfigurationOption_Network, interfaceIndex);
+
+    if (updateResult == UpdateConfigurationResult_Success)
     {
+        // config changed therefore we need to update the adapter configuration
+        NANOCLR_CHECK_HRESULT(SOCK_CONFIGURATION_UpdateAdapterConfiguration(&config, interfaceIndex, updateFlags));
+    }
+    else if (updateResult == UpdateConfigurationResult_Failed)
+    {
+        // storing config failed
         NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
     }
-
-    NANOCLR_CHECK_HRESULT(SOCK_CONFIGURATION_UpdateAdapterConfiguration(&config, interfaceIndex, updateFlags));
+    else
+    {
+        // config hasn't changed, nothing to do here
+    }
 
     NANOCLR_NOCLEANUP();
 }
@@ -271,7 +282,7 @@ HRESULT Library_sys_net_native_System_Net_NetworkInformation_NetworkInterface::
     pConfig[FIELD___ipv4dnsAddress1].SetInteger((CLR_UINT32)config.IPv4DNSAddress1);
     pConfig[FIELD___ipv4dnsAddress2].SetInteger((CLR_UINT32)config.IPv4DNSAddress2);
 
-    // FIXME IPV6
+    // FIXME IPV6 these are arrays of CLR_UINT32
     // pConfig[ FIELD___ipv6Address            ].SetInteger( (CLR_UINT32)config.IPv6Address);
     // pConfig[ FIELD___ipv6GatewayAddress     ].SetInteger( (CLR_UINT32)config.IPv6GatewayAddress);
     // pConfig[ FIELD___ipv6NetMask            ].SetInteger( (CLR_UINT32)config.IPv6NetMask);
@@ -293,8 +304,8 @@ HRESULT Library_sys_net_native_System_Net_NetworkInformation_NetworkInterface::
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_sys_net_native_System_Net_NetworkInformation_NetworkInterface::IPAddressFromString___STATIC__I8__STRING(
-    CLR_RT_StackFrame &stack)
+HRESULT Library_sys_net_native_System_Net_NetworkInformation_NetworkInterface::
+    IPV4AddressFromString___STATIC__I8__STRING(CLR_RT_StackFrame &stack)
 {
     NATIVE_PROFILE_CLR_NETWORK();
     NANOCLR_HEADER();
@@ -303,9 +314,34 @@ HRESULT Library_sys_net_native_System_Net_NetworkInformation_NetworkInterface::I
 
     LPCSTR ipString = stack.Arg0().RecoverString();
 
-    NANOCLR_CHECK_HRESULT(SOCK_IPAddressFromString(ipString, &address));
+    NANOCLR_CHECK_HRESULT(SOCK_IPV4AddressFromString(ipString, &address));
 
     stack.PushValue().SetInteger((CLR_UINT64)address);
+
+    NANOCLR_NOCLEANUP();
+}
+
+HRESULT Library_sys_net_native_System_Net_NetworkInformation_NetworkInterface::
+    IPV6AddressFromString___STATIC__SZARRAY_U2__STRING(CLR_RT_StackFrame &stack)
+{
+    NANOCLR_HEADER();
+
+#if defined(LWIP_IPV6) && LWIP_IPV6
+    LPCSTR ipString = stack.Arg0().RecoverString();
+    uint16_t address[8];
+
+    NANOCLR_CHECK_HRESULT(SOCK_IPV6AddressFromString(ipString, address));
+
+    // Return array of uint16[8]
+    NANOCLR_CHECK_HRESULT(
+        CLR_RT_HeapBlock_Array::CreateInstance(stack.PushValueAndClear(), 8, g_CLR_RT_WellKnownTypes.m_UInt16));
+    {
+        uint16_t *p = (uint16_t *)stack.TopValue().DereferenceArray()->GetFirstElement();
+        memcpy(p, address, sizeof(address));
+    }
+#else
+    NANOCLR_SET_AND_LEAVE(stack.NotImplementedStub());
+#endif
 
     NANOCLR_NOCLEANUP();
 }

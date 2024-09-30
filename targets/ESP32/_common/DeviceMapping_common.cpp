@@ -46,10 +46,13 @@ int Esp32_GetMappedDevicePins(Esp32_MapDeviceType deviceType, int busIndex, int 
             case DEV_TYPE_LED_PWM:
                 return (int)Esp32_LED_DevicePinMap[busIndex];
 
+// only add ADC if there are supported channels
+#if TARGET_ADC_NUM_PINS > 0
             case DEV_TYPE_ADC:
                 return (int)Esp32_ADC_DevicePinMap[pinIndex];
+#endif
 
-#if !(defined(CONFIG_IDF_TARGET_ESP32C3) || defined(CONFIG_IDF_TARGET_ESP32S3))
+#if (defined(CONFIG_IDF_TARGET_ESP32) || defined(CONFIG_IDF_TARGET_ESP32S2))
             case DEV_TYPE_DAC:
                 return (int)Esp32_DAC_DevicePinMap[pinIndex];
 #endif
@@ -86,11 +89,14 @@ void Esp32_SetMappedDevicePins(Esp32_MapDeviceType deviceType, int busIndex, int
                 Esp32_LED_DevicePinMap[busIndex] = ioPinNumber;
                 break;
 
+// only add ADC if there are supported channels
+#if TARGET_ADC_NUM_PINS > 0
             case DEV_TYPE_ADC:
                 Esp32_ADC_DevicePinMap[pinIndex] = ioPinNumber;
                 break;
+#endif
 
-#if !(defined(CONFIG_IDF_TARGET_ESP32C3) || defined(CONFIG_IDF_TARGET_ESP32S3))
+#if defined(CONFIG_SOC_DAC_SUPPORTED)
             case DEV_TYPE_DAC:
                 Esp32_DAC_DevicePinMap[pinIndex] = ioPinNumber;
                 break;

@@ -12,7 +12,8 @@ HRESULT CLR_RT_HeapBlock_Delegate_List::CreateInstance(CLR_RT_HeapBlock_Delegate
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
 
-    CLR_UINT32 totLength = (CLR_UINT32)(sizeof(CLR_RT_HeapBlock_Delegate_List) + length * sizeof(CLR_RT_HeapBlock));
+    CLR_UINT32 totLength =
+        (CLR_UINT32)(sizeof(CLR_RT_HeapBlock_Delegate_List) + length * sizeof(struct CLR_RT_HeapBlock));
 
     list = (CLR_RT_HeapBlock_Delegate_List *)
                g_CLR_RT_ExecutionEngine.ExtractHeapBytesForObjects(DATATYPE_DELEGATELIST_HEAD, 0, totLength);
@@ -90,6 +91,8 @@ HRESULT CLR_RT_HeapBlock_Delegate_List::Change(
     if (dlg->DataType() == DATATYPE_DELEGATELIST_HEAD)
     {
         CLR_RT_HeapBlock intermediate;
+
+        memset(&intermediate, 0, sizeof(struct CLR_RT_HeapBlock));
         intermediate.Assign(delegateSrc);
         CLR_RT_ProtectFromGC gc(intermediate);
 

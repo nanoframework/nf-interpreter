@@ -192,7 +192,13 @@ HRESULT HAL_SOCK_IPAddressFromString(const char *ipString, uint64_t *address)
 const char *HAL_SOCK_IPAddressToString(uint32_t address)
 {
     NATIVE_PROFILE_PAL_NETWORK();
-    return LWIP_SOCKETS_Driver::IPAddressToString(address);
+    return LWIP_SOCKETS_Driver::IP4AddressToString(address);
+}
+
+const char *HAL_SOCK_IP6AddressToString(uint16_t *address)
+{
+    NATIVE_PROFILE_PAL_NETWORK();
+    return LWIP_SOCKETS_Driver::IP6AddressToString(address);
 }
 
 void HAL_SOCK_EventsSet(uint32_t events)

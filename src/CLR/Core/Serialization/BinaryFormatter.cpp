@@ -69,6 +69,7 @@ HRESULT CLR_RT_BinaryFormatter::TypeHandler::SetValue(CLR_RT_HeapBlock *v)
 
     m_value = nullptr;
     m_type = nullptr;
+    memset(&m_value_tmp, 0, sizeof(struct CLR_RT_HeapBlock));
 
     v = TypeHandler::FixNull(v);
     if (v)
@@ -506,6 +507,7 @@ HRESULT CLR_RT_BinaryFormatter::TypeHandler::ReadSignature(int &res)
 
     m_value = nullptr;
     m_type = nullptr;
+    memset(&m_value_tmp, 0, sizeof(struct CLR_RT_HeapBlock));
 
     if (m_typeForced)
     {
@@ -1143,9 +1145,9 @@ HRESULT CLR_RT_BinaryFormatter::State::CreateInstance(
     NANOCLR_HEADER();
 
     CLR_RT_TypeDef_Instance inst;
-    CLR_RT_TypeDescriptor desc;
+    CLR_RT_TypeDescriptor desc{};
     CLR_RT_TypeDescriptor *pDesc;
-    SerializationHintsAttribute hintsTmp;
+    SerializationHintsAttribute hintsTmp{};
 
     if (type && CLR_RT_ReflectionDef_Index::Convert(*type, inst, nullptr))
     {
@@ -1210,14 +1212,14 @@ HRESULT CLR_RT_BinaryFormatter::State::FindHints(SerializationHintsAttribute &hi
 
     if (cls.target->flags & CLR_RECORD_TYPEDEF::TD_HasAttributes)
     {
-        CLR_RT_TypeDef_Instance inst;
-        inst.InitializeFromIndex(g_CLR_RT_WellKnownTypes.SerializationHintsAttribute);
-        CLR_RT_AttributeEnumerator en;
+        CLR_RT_TypeDef_Instance inst{};
+        inst.InitializeFromIndex(g_CLR_RT_WellKnownTypes.m_SerializationHintsAttribute);
+        CLR_RT_AttributeEnumerator en{};
         en.Initialize(cls);
 
         if (en.MatchNext(&inst, nullptr))
         {
-            CLR_RT_AttributeParser parser;
+            CLR_RT_AttributeParser parser{};
 
             NANOCLR_CHECK_HRESULT(parser.Initialize(en));
 
@@ -1249,14 +1251,14 @@ HRESULT CLR_RT_BinaryFormatter::State::FindHints(
 
     if (fld.target->flags & CLR_RECORD_FIELDDEF::FD_HasAttributes)
     {
-        CLR_RT_TypeDef_Instance inst;
-        inst.InitializeFromIndex(g_CLR_RT_WellKnownTypes.SerializationHintsAttribute);
-        CLR_RT_AttributeEnumerator en;
+        CLR_RT_TypeDef_Instance inst{};
+        inst.InitializeFromIndex(g_CLR_RT_WellKnownTypes.m_SerializationHintsAttribute);
+        CLR_RT_AttributeEnumerator en{};
         en.Initialize(fld);
 
         if (en.MatchNext(&inst, nullptr))
         {
-            CLR_RT_AttributeParser parser;
+            CLR_RT_AttributeParser parser{};
 
             NANOCLR_CHECK_HRESULT(parser.Initialize(en));
 
@@ -1367,6 +1369,9 @@ HRESULT CLR_RT_BinaryFormatter::State::AssignAndFixBoxing(CLR_RT_HeapBlock &dst)
                     case REFLECTION_FIELD:
                         cls = &g_CLR_RT_WellKnownTypes.FieldInfo;
                         break;
+
+                    default:
+                        NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
                 }
 
                 //
@@ -1436,8 +1441,12 @@ HRESULT CLR_RT_BinaryFormatter::State::GetValue()
     if (prev->m_array_NeedProcessing)
     {
         CLR_RT_HeapBlock ref;
-        ref.InitializeArrayReferenceDirect(*prev->m_array, prev->m_array_CurrentPos - 1);
         CLR_RT_HeapBlock val;
+
+        memset(&ref, 0, sizeof(struct CLR_RT_HeapBlock));
+        memset(&val, 0, sizeof(struct CLR_RT_HeapBlock));
+
+        ref.InitializeArrayReferenceDirect(*prev->m_array, prev->m_array_CurrentPos - 1);
 
         NANOCLR_CHECK_HRESULT(val.LoadFromReference(ref));
 
@@ -1470,6 +1479,8 @@ HRESULT CLR_RT_BinaryFormatter::State::SetValueAndDestroyInstance()
             if (prev->m_array_NeedProcessing)
             {
                 CLR_RT_HeapBlock ref;
+
+                memset(&ref, 0, sizeof(struct CLR_RT_HeapBlock));
                 ref.InitializeArrayReferenceDirect(*prev->m_array, prev->m_array_CurrentPos - 1);
 
                 NANOCLR_CHECK_HRESULT(AssignAndFixBoxing(ref));
@@ -1549,7 +1560,7 @@ HRESULT CLR_RT_BinaryFormatter::State::Advance()
                             case REFLECTION_FIELD:
                             {
                                 CLR_RT_FieldDef_Instance inst;
-                                CLR_RT_TypeDescriptor desc;
+                                CLR_RT_TypeDescriptor desc{};
 
                                 if (!inst.InitializeFromIndex(value->ReflectionDataConst().m_data.m_field))
                                 {
@@ -1678,7 +1689,7 @@ HRESULT CLR_RT_BinaryFormatter::State::AdvanceToTheNextField()
             if ((inst.target->flags & CLR_RECORD_FIELDDEF::FD_NotSerialized) == 0)
             {
                 SerializationHintsAttribute hints;
-                CLR_RT_TypeDescriptor desc;
+                CLR_RT_TypeDescriptor desc{};
 
                 if (m_value.m_type->m_flags & CLR_RT_DataTypeLookup::c_Enum)
                 {
@@ -1793,8 +1804,10 @@ HRESULT CLR_RT_BinaryFormatter::CreateInstance(CLR_UINT8 *buf, int len, CLR_RT_B
     ptr->m_states.DblLinkedList_Initialize(); // CLR_RT_DblLinkedList           m_states;                // EVENT HEAP -
                                               // NO RELOCATION - list of CLR_RT_BinaryFormatter::State
                                               //
-    ptr->m_fDeserialize = (buf != nullptr);   // bool                           m_fDeserialize;
-    ptr->m_value.SetObjectReference(nullptr); // CLR_RT_HeapBlock               m_value;
+    ptr->m_fDeserialize = (buf != nullptr);      // bool                           m_fDeserialize;
+    memset(&ptr->m_value, 0, sizeof(struct CLR_RT_HeapBlock));
+    ptr->m_value.SetObjectReference(nullptr);         // CLR_RT_HeapBlock               m_value;
+    ptr->m_value.SetObjectReference(nullptr);      // CLR_RT_HeapBlock   
     ptr->m_value_desc.TypeDescriptor_Initialize(); // CLR_RT_TypeDescriptor          m_value_desc;
 
     NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_MemoryStream::CreateInstance(ptr->m_stream, buf, len));
@@ -1860,6 +1873,7 @@ HRESULT CLR_RT_BinaryFormatter::Serialize(CLR_RT_HeapBlock &refData, CLR_RT_Heap
     CLR_RT_HeapBlock cls;
     CLR_UINT32 flags = 0;
 
+    memset(&cls, 0, sizeof(struct CLR_RT_HeapBlock));
     cls.SetObjectReference(nullptr);
 
     // unbox reflection types
@@ -1914,6 +1928,7 @@ HRESULT CLR_RT_BinaryFormatter::Deserialize(
 
     CLR_RT_HeapBlock cls;
 
+    memset(&cls, 0, sizeof(struct CLR_RT_HeapBlock));
     cls.SetObjectReference(nullptr);
 
     // unbox reflection types

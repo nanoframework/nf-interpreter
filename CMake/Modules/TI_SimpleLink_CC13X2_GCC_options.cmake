@@ -14,7 +14,7 @@ FetchContent_GetProperties(simplelinkcc13xx_26xxsdk)
 set(CMAKE_ASM_FLAGS " -mthumb -mcpu=cortex-m4 -x assembler-with-cpp" CACHE INTERNAL "asm compiler flags")
 
 # need to specify linker flags here
-set(CMAKE_EXE_LINKER_FLAGS " -mfpu=fpv4-sp-d16 -ffunction-sections -fdata-sections -g -gdwarf-3 -gstrict-dwarf -Wall -mcpu=cortex-m4 -nostartfiles -static -Wl,--gc-sections -L${simplelinkcc13xx_26xxsdk_SOURCE_DIR}/source -L${simplelinkcc13xx_26xxsdk_SOURCE_DIR}/kernel/tirtos/packages -L${simplelinkcc13xx_26xxsdk_SOURCE_DIR}/kernel/tirtos/packages/gnu/targets/arm/libs/install-native/arm-none-eabi/lib/thumb/v7e-m/hard -Wl,--gc-sections -Wl,--no-wchar-size-warning -Wl,--print-memory-usage -march=armv7e-m -mthumb -mfloat-abi=hard -mfpu=fpv4-sp-d16 -Wall " CACHE INTERNAL "executable linker flags")
+set(CMAKE_EXE_LINKER_FLAGS " -Wl,--no-warn-rwx-segments -mfpu=fpv4-sp-d16 -ffunction-sections -fdata-sections -g -gdwarf-3 -gstrict-dwarf -Wall -mcpu=cortex-m4 -nostartfiles -static -Wl,--gc-sections -L${simplelinkcc13xx_26xxsdk_SOURCE_DIR}/source -L${simplelinkcc13xx_26xxsdk_SOURCE_DIR}/kernel/tirtos/packages -L${simplelinkcc13xx_26xxsdk_SOURCE_DIR}/kernel/tirtos/packages/gnu/targets/arm/libs/install-native/arm-none-eabi/lib/thumb/v7e-m/hard -Wl,--gc-sections -Wl,--no-wchar-size-warning -Wl,--print-memory-usage -march=armv7e-m -mthumb -mfloat-abi=hard -mfpu=fpv4-sp-d16 -Wall " CACHE INTERNAL "executable linker flags")
 
 
 # TARGET parameter to set the target that's setting them for
@@ -51,7 +51,7 @@ macro(nf_set_link_options)
 
     # set optimization linker flags for RELEASE and MinSizeRel
     if(CMAKE_BUILD_TYPE STREQUAL "Release" OR CMAKE_BUILD_TYPE STREQUAL "MinSizeRel")
-        set_property(TARGET ${NFSLO_TARGET} APPEND_STRING PROPERTY LINK_FLAGS " -Os -flto ")
+        set_property(TARGET ${NFSLO_TARGET} APPEND_STRING PROPERTY LINK_FLAGS " -Os -flto -fuse-linker-plugin ")
     endif()
 
     # request specs from newlib nano

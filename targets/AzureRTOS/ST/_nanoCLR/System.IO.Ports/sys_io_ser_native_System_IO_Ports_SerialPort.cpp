@@ -570,11 +570,12 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::ReadLine___STRING(
     NF_PAL_UART *palUart = NULL;
 
     uint8_t *line = NULL;
-    const char *newLine;
+    const char *newLine = NULL;
     uint32_t newLineLength;
 
     int64_t *timeoutTicks;
     bool eventResult = true;
+    bool newLineFound = false;
 
     // get a pointer to the managed object instance and check that it's not NULL
     CLR_RT_HeapBlock *pThis = stack.This();
@@ -599,7 +600,11 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::ReadLine___STRING(
     if (stack.m_customState == 1)
     {
         // check if there is a full line available to read
-        if (GetLineFromRxBuffer(pThis, &(palUart->RxRingBuffer), line))
+        GLOBAL_LOCK();
+        newLineFound = GetLineFromRxBuffer(pThis, &(palUart->RxRingBuffer), line);
+        GLOBAL_UNLOCK();
+
+        if (newLineFound)
         {
             // got one!
             eventResult = false;
@@ -608,13 +613,19 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::ReadLine___STRING(
         {
             // get new line from field
             newLine = pThis[FIELD___newLine].RecoverString();
+
+            // sanity check for NULL string
+            if (newLine == NULL)
+            {
+                NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+            }
+
             newLineLength = hal_strlen_s(newLine);
-            // need to subtract one because we are 0 indexed
-            newLineLength--;
 
             // set new line char as the last one in the string
             // only if this one is found it will have a chance of the others being there
-            palUart->NewLineChar = newLine[newLineLength];
+            // need to subtract one because we are 0 indexed
+            palUart->NewLineChar = newLine[newLineLength - 1];
 
             stack.m_customState = 2;
         }
@@ -631,7 +642,9 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::ReadLine___STRING(
 
         if (eventResult)
         {
+            GLOBAL_LOCK();
             GetLineFromRxBuffer(pThis, &(palUart->RxRingBuffer), line);
+            GLOBAL_UNLOCK();
 
             // done here
             break;

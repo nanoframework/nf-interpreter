@@ -9,7 +9,7 @@
 HRESULT Library_sys_net_native_System_Net_NetworkInformation_WirelessAPConfiguration::
     GetWirelessAPConfigurationCount___STATIC__I4(CLR_RT_StackFrame &stack)
 {
-#ifdef PLATFORM_ESP32
+#if defined(PLATFORM_ESP32) && !defined(CONFIG_IDF_TARGET_ESP32H2)
     NATIVE_PROFILE_CLR_NETWORK();
     NANOCLR_HEADER();
 
@@ -30,7 +30,7 @@ HRESULT Library_sys_net_native_System_Net_NetworkInformation_WirelessAPConfigura
     GetWirelessAPConfiguration___STATIC__SystemNetNetworkInformationWirelessAPConfiguration__I4(
         CLR_RT_StackFrame &stack)
 {
-#ifdef PLATFORM_ESP32
+#if defined(PLATFORM_ESP32) && !defined(CONFIG_IDF_TARGET_ESP32H2)
     NATIVE_PROFILE_CLR_NETWORK();
     NANOCLR_HEADER();
 
@@ -88,7 +88,7 @@ HRESULT Library_sys_net_native_System_Net_NetworkInformation_WirelessAPConfigura
 HRESULT Library_sys_net_native_System_Net_NetworkInformation_WirelessAPConfiguration::
     UpdateConfiguration___STATIC__VOID(CLR_RT_StackFrame &stack)
 {
-#ifdef PLATFORM_ESP32
+#if defined(PLATFORM_ESP32) && !defined(CONFIG_IDF_TARGET_ESP32H2)
     NATIVE_PROFILE_CLR_NETWORK();
     NANOCLR_HEADER();
 
@@ -117,9 +117,13 @@ HRESULT Library_sys_net_native_System_Net_NetworkInformation_WirelessAPConfigura
     // make sure the terminators are there
     hbPassword = pConfig[FIELD___apPassword].DereferenceString();
     FAULT_ON_NULL(hbPassword);
+
     passwordLength = hal_strlen_s(hbPassword->StringText());
     if (passwordLength >= sizeof(config.Password))
+    {
         NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+    }
+
     hal_strncpy_s(
         (char *)config.Password,
         WIRELESS82011_CONFIG_MAX_PASSWORD_LEN,
@@ -128,16 +132,21 @@ HRESULT Library_sys_net_native_System_Net_NetworkInformation_WirelessAPConfigura
 
     hbSsid = pConfig[FIELD___apSsid].DereferenceString();
     FAULT_ON_NULL(hbSsid);
+
     ssidLength = hal_strlen_s(hbSsid->StringText());
+
     if (ssidLength >= sizeof(config.Ssid))
+    {
         NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+    }
+
     hal_strncpy_s((char *)config.Ssid, WIRELESS82011_CONFIG_MAX_SSID_LEN, hbSsid->StringText(), ssidLength);
 
     // store configuration
     if (ConfigurationManager_UpdateConfigurationBlock(
             &config,
             DeviceConfigurationOption_WirelessNetworkAP,
-            configurationIndex) != TRUE)
+            configurationIndex) == UpdateConfigurationResult_Failed)
     {
         NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
     }
@@ -156,7 +165,7 @@ HRESULT Library_sys_net_native_System_Net_NetworkInformation_WirelessAPConfigura
     NativeGetConnectedClients___STATIC__SZARRAY_SystemNetNetworkInformationWirelessAPStation__I4(
         CLR_RT_StackFrame &stack)
 {
-#ifdef PLATFORM_ESP32
+#if defined(PLATFORM_ESP32) && !defined(CONFIG_IDF_TARGET_ESP32H2)
     NANOCLR_HEADER();
 
     CLR_RT_TypeDef_Index apStationTypeDef;
@@ -181,7 +190,9 @@ HRESULT Library_sys_net_native_System_Net_NetworkInformation_WirelessAPConfigura
     for (int x = 0; x < Network_Interface_Max_Stations(); x++)
     {
         if (index != 0 && x != index)
+        {
             continue;
+        }
 
         if (Network_Interface_Get_Station(x, mac, &rssi, &phyModes))
         {
@@ -201,7 +212,9 @@ HRESULT Library_sys_net_native_System_Net_NetworkInformation_WirelessAPConfigura
         for (int x = 0; x < Network_Interface_Max_Stations(); x++)
         {
             if (index != 0 && x != index)
+            {
                 continue;
+            }
 
             if (Network_Interface_Get_Station(x, mac, &rssi, &phyModes))
             {
@@ -250,7 +263,7 @@ HRESULT Library_sys_net_native_System_Net_NetworkInformation_WirelessAPConfigura
 HRESULT Library_sys_net_native_System_Net_NetworkInformation_WirelessAPConfiguration::
     NativeDeauthStation___STATIC__STRING__I4(CLR_RT_StackFrame &stack)
 {
-#ifdef PLATFORM_ESP32
+#if defined(PLATFORM_ESP32) && !defined(CONFIG_IDF_TARGET_ESP32H2)
     NANOCLR_HEADER();
 
     uint16_t index = (uint16_t)stack.Arg0().NumericByRef().u4;

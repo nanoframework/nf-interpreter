@@ -236,8 +236,8 @@ bool CLR_RT_EventCache::VirtualMethodTable::FindVirtualMethod(
     bool fVerify = false;
 
     {
-        CLR_RT_MethodDef_Instance instMD;
-        CLR_RT_TypeDef_Instance instCLS;
+        CLR_RT_MethodDef_Instance instMD{};
+        CLR_RT_TypeDef_Instance instCLS{};
 
         instMD.InitializeFromIndex(mdVirtual);
         instCLS.InitializeFromMethod(instMD);

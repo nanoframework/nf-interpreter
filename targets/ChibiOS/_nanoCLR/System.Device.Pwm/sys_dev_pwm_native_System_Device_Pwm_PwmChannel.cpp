@@ -219,8 +219,9 @@ int GetChannelPwm(int pin, int timerId)
                 case 1 * 16 + 4:
                     channel = 0;
                     break;
-                case 7: // PA7, PB5
+                case 7: // PA7, PB5, PC7
                 case 1 * 16 + 5:
+                case 2 * 16 + 7:
                     channel = 1;
                     break;
                 case 1 * 16 + 0: // PB0

@@ -55,6 +55,7 @@ HRESULT CLR_RT_HeapBlock_Delegate::CreateInstance(
     dlg->m_numOfStackFrames = length;
 #endif
 
+    memset(&dlg->m_object, 0, sizeof(struct CLR_RT_HeapBlock));
     dlg->m_object.SetObjectReference(nullptr);
 
 #if defined(NANOCLR_APPDOMAINS)

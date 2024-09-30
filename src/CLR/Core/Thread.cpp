@@ -151,7 +151,7 @@ HRESULT CLR_RT_Thread::PushThreadProcDelegate(CLR_RT_HeapBlock_Delegate *pDelega
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
 
-    CLR_RT_MethodDef_Instance inst;
+    CLR_RT_MethodDef_Instance inst{};
 
 #if defined(NANOCLR_APPDOMAINS)
     CLR_RT_AppDomain *appDomainSav = g_CLR_RT_ExecutionEngine.SetCurrentAppDomain(pDelegate->m_appDomain);
@@ -223,6 +223,7 @@ HRESULT CLR_RT_Thread::CreateInstance(int pid, int priority, CLR_RT_Thread *&th,
         th->m_timeQuantumExpired = false;                   // bool                       m_timeQuantumExpired;
                                                             //
         th->m_dlg = nullptr;                                // CLR_RT_HeapBlock_Delegate* m_dlg;
+        memset(&th->m_currentException, 0, sizeof(struct CLR_RT_HeapBlock));
         th->m_currentException.SetObjectReference(nullptr); // CLR_RT_HeapBlock           m_currentException;
                                                             // UnwindStack m_nestedExceptions[c_MaxStackUnwindDepth];
         th->m_nestedExceptionsPos = 0;                      // int                        m_nestedExceptionsPos;

@@ -16,7 +16,7 @@ HRESULT Library_corlib_native_System_RuntimeType::get_Assembly___SystemReflectio
     NANOCLR_CHECK_HRESULT(GetTypeDescriptor(*hbType, td, nullptr));
 
     {
-        CLR_RT_Assembly_Index index;
+        CLR_RT_Assembly_Index index{};
         index.Set(td.Assembly());
         CLR_RT_HeapBlock &top = stack.PushValue();
         CLR_RT_HeapBlock *hbObj;
@@ -133,7 +133,7 @@ HRESULT Library_corlib_native_System_RuntimeType::GetInterfaces___SZARRAY_System
         do
         {
             // Scan the list of interfaces.
-            CLR_RT_SignatureParser parser;
+            CLR_RT_SignatureParser parser{};
             parser.Initialize_Interfaces(td.assembly, td.target);
             CLR_RT_SignatureParser::Element res;
 
@@ -189,7 +189,7 @@ HRESULT Library_corlib_native_System_RuntimeType::GetElementType___SystemType(CL
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
 
-    CLR_RT_TypeDescriptor desc;
+    CLR_RT_TypeDescriptor desc{};
     CLR_RT_TypeDescriptor descSub;
     CLR_RT_HeapBlock &top = stack.PushValueAndClear();
     CLR_RT_HeapBlock *hbType = stack.Arg0().Dereference();
@@ -245,7 +245,7 @@ HRESULT Library_corlib_native_System_RuntimeType::GetName(CLR_RT_HeapBlock &arg,
 
     CLR_RT_TypeDef_Instance td;
     CLR_UINT32 levels;
-    char rgBuffer[256];
+    char rgBuffer[256]{};
     char *szBuffer;
     size_t iBuffer;
 
@@ -348,7 +348,7 @@ HRESULT Library_corlib_native_System_RuntimeType::GetCustomAttributes(
             attributeEnumerator.GetCurrent(&instanceTypeDef);
 
             // setup attribute parser
-            CLR_RT_AttributeParser parser;
+            CLR_RT_AttributeParser parser{};
             NANOCLR_CHECK_HRESULT(parser.Initialize(attributeEnumerator));
 
             while (true)
@@ -384,12 +384,12 @@ HRESULT Library_corlib_native_System_RuntimeType::GetCustomAttributes(
 
                         // get the type for the class object
                         // the assembly has to be the instance type
-                        CLR_RT_MethodDef_Index md;
+                        CLR_RT_MethodDef_Index md{};
                         md.Set(instanceTypeDef.assembly->assemblyIndex, parser.m_mdIndex.Method());
-                        CLR_RT_MethodDef_Instance mdInst;
+                        CLR_RT_MethodDef_Instance mdInst{};
                         mdInst.InitializeFromIndex(md);
 
-                        CLR_RT_TypeDef_Instance cls;
+                        CLR_RT_TypeDef_Instance cls{};
                         if (cls.InitializeFromMethod(mdInst) == false)
                             NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
 

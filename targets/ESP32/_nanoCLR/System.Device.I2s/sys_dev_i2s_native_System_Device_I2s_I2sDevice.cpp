@@ -213,8 +213,8 @@ HRESULT SetI2sConfig(i2s_port_t bus, CLR_RT_HeapBlock *config)
     conf.channel_format = format;
     conf.sample_rate = sample_rate;
     conf.intr_alloc_flags = ESP_INTR_FLAG_LOWMED;
-    conf.dma_buf_count = get_dma_buf_count(mode, bits, format, bufferSize);
-    conf.dma_buf_len = DMA_BUF_LEN_IN_I2S_FRAMES;
+    conf.dma_desc_num = get_dma_buf_count(mode, bits, format, bufferSize);
+    conf.dma_frame_num = DMA_BUF_LEN_IN_I2S_FRAMES;
     conf.use_apll = false;
     conf.tx_desc_auto_clear = true;
     conf.fixed_mclk = 0;
@@ -239,7 +239,7 @@ HRESULT SetI2sConfig(i2s_port_t bus, CLR_RT_HeapBlock *config)
         if (mode & I2S_MODE_ADC_BUILT_IN)
         {
             // TODO - make attenuation configurable?
-            adc_atten_t atten = ADC_ATTEN_DB_11;
+            adc_atten_t atten = ADC_ATTEN_DB_12;
 
             // TODO Re-use logic in ADC?
             int channelNumber = -1;
@@ -319,9 +319,20 @@ HRESULT SetI2sConfig(i2s_port_t bus, CLR_RT_HeapBlock *config)
 #endif
     }
 
-#if (ESP_IDF_VERSION_MAJOR == 4) && (ESP_IDF_VERSION_MINOR >= 4)
-    pin_config.mck_io_num = I2S_PIN_NO_CHANGE;
+#if !defined(CONFIG_IDF_TARGET_ESP32C3) && !defined(CONFIG_IDF_TARGET_ESP32C6) && !defined(CONFIG_IDF_TARGET_ESP32H2)  
+// apply low-level workaround for bug in some ESP-IDF versions that swap
+// the left and right channels
+// https://github.com/espressif/esp-idf/issues/6625
+#if CONFIG_IDF_TARGET_ESP32S3
+    REG_SET_BIT(I2S_TX_CONF_REG(bus), I2S_TX_MSB_SHIFT);
+    REG_SET_BIT(I2S_TX_CONF_REG(bus), I2S_RX_MSB_SHIFT);
+#else
+    REG_SET_BIT(I2S_CONF_REG(bus), I2S_TX_MSB_RIGHT);
+    REG_SET_BIT(I2S_CONF_REG(bus), I2S_RX_MSB_RIGHT);
 #endif
+#endif
+
+    pin_config.mck_io_num = I2S_PIN_NO_CHANGE;
 
     if (mode == (I2S_MODE_MASTER | I2S_MODE_RX))
     {

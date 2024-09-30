@@ -68,11 +68,7 @@ HRESULT Library_sys_dev_i2c_native_System_Device_I2c_I2cDevice::NativeInit___VOI
         // subtract 1 to get ESP32 bus number
         i2c_port_t bus = (i2c_port_t)(pConfig[I2cConnectionSettings::FIELD___busId].NumericByRef().s4 - 1);
 
-        if (bus != I2C_NUM_0
-#if I2C_NUM_MAX > 1
-            && bus != I2C_NUM_1
-#endif
-        )
+        if (bus < I2C_NUM_0 || bus >= SOC_I2C_NUM)
         {
             NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
         }
@@ -257,7 +253,7 @@ HRESULT Library_sys_dev_i2c_native_System_Device_I2c_I2cDevice::
 
     i2c_master_stop(cmd);
 
-    opResult = i2c_master_cmd_begin(bus, cmd, 1000 / portTICK_RATE_MS);
+    opResult = i2c_master_cmd_begin(bus, cmd, 1000 / portTICK_PERIOD_MS);
 
     if (opResult != ESP_OK && opResult != ESP_FAIL && opResult != ESP_ERR_TIMEOUT)
     {

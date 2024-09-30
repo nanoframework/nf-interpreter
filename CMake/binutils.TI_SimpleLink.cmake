@@ -13,8 +13,8 @@ function(nf_set_optimization_options target)
     # debug compile options: -Og (optimize for debugging) and -ggdb (produce debug symbols specifically for gdb)
     target_compile_options(${target} PRIVATE
         $<$<CONFIG:Debug>:-Og -ggdb>
-        $<$<CONFIG:Release>:-O3 -flto -ffat-lto-objects>
-        $<$<CONFIG:MinSizeRel>:-Os -flto -ffat-lto-objects>
+        $<$<CONFIG:Release>:-O3 -flto>
+        $<$<CONFIG:MinSizeRel>:-Os -flto>
         $<$<CONFIG:RelWithDebInfo>:-Os -ggdb>
     )
 
@@ -302,8 +302,8 @@ macro(nf_add_platform_sysconfig_steps ti_device ti_device_family)
         set(TI_RTOS_CONFIG_FILE ti-rtos-release.cfg)
     endif()
 
-    # remove bin suffix from the ARM path
-    string(REPLACE "/bin" "" ARM_TOOLCHAIN_PATH_WITHOUT_BIN ${ARM_TOOLCHAIN_PATH})
+    # get parent directory of the toochain path (remove /bin)
+    cmake_path(GET ARM_TOOLCHAIN_PATH PARENT_PATH ARM_TOOLCHAIN_PATH_WITHOUT_BIN)
 
     # need to use a specific target because target dependency PRE_BUILT doesn't work on NINJA build files
 

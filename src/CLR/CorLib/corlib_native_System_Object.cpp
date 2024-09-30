@@ -34,7 +34,7 @@ HRESULT Library_corlib_native_System_Object::GetType___SystemType(CLR_RT_StackFr
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
 
-    CLR_RT_TypeDescriptor desc;
+    CLR_RT_TypeDescriptor desc{};
     CLR_RT_ReflectionDef_Index index;
     CLR_RT_HeapBlock &arg0 = stack.Arg0();
     CLR_RT_HeapBlock *pObj;

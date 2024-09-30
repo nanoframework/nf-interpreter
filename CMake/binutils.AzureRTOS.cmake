@@ -10,8 +10,8 @@ function(nf_set_optimization_options target)
 
     target_compile_options(${target} PRIVATE
         $<$<CONFIG:Debug>:-Og -ggdb>
-        $<$<CONFIG:Release>:-O3 -flto -ffat-lto-objects>
-        $<$<CONFIG:MinSizeRel>:-Os -flto -ffat-lto-objects>
+        $<$<CONFIG:Release>:-O3 -flto>
+        $<$<CONFIG:MinSizeRel>:-Os -flto>
         $<$<CONFIG:RelWithDebInfo>:-Os -femit-class-debug-always -ggdb>
     )
 
@@ -114,13 +114,7 @@ macro(nf_add_platform_packages)
     # if(USE_FILESYSTEM_OPTION)
     #     find_package(CHIBIOS_FATFS REQUIRED QUIET)
     # endif()
-
-    # # SPIFFS
-    # if(NF_FEATURE_USE_SPIFFS)
-    #     find_package(STM32F7_CubePackage REQUIRED QUIET)
-    #     find_package(SPIFFS REQUIRED QUIET)
-    # endif()
-    
+   
     if(CHIBIOS_HAL_REQUIRED)
         find_package(ChibiOS_${TARGET_SERIES_SHORT}_HAL REQUIRED QUIET)
         find_package(ChibiOSnfOverlay REQUIRED QUIET)

@@ -71,7 +71,7 @@ endif()
 if(GECKO_SDK_VERSION_EMPTY)
     # no Gecko SDK version actualy specified, must be empty which is fine, we'll default to a known good version
     # WHEN CHANGING THIS MAKE SURE TO UPDATE THE DEV CONTAINERS
-    set(GECKO_SDK_VERSION "v4.3.2")
+    set(GECKO_SDK_VERSION "v4.4.4")
 endif()
 
 if(NO_GECKO_SDK_SOURCE)
@@ -114,7 +114,7 @@ else()
 endif()
 
 FetchContent_GetProperties(gecko_sdk)
-FetchContent_Populate(gecko_sdk)
+FetchContent_MakeAvailable(gecko_sdk)
 
 # including here the CMake files for the source files specific to the target series
 include(AzureRTOS_${TARGET_SERIES}_sources)

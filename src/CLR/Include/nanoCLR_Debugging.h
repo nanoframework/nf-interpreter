@@ -37,6 +37,7 @@ struct CLR_DBG_Commands
     static const unsigned int c_Monitor_OemInfo            = 0x0000000E;
     static const unsigned int c_Monitor_QueryConfiguration = 0x0000000F;
     static const unsigned int c_Monitor_UpdateConfiguration= 0x00000010;
+    static const unsigned int c_Monitor_StorageOperation   = 0x00000011;
     static const unsigned int c_Monitor_TargetInfo         = 0x00000020;
 
     //--//
@@ -943,7 +944,7 @@ public:
     static bool Monitor_DeploymentMap                   ( WP_Message *msg );
     static bool Monitor_QueryConfiguration              ( WP_Message *msg );
     static bool Monitor_UpdateConfiguration             ( WP_Message *msg );
-
+    static bool Monitor_StorageOperation                ( WP_Message *msg );
                                              
     static bool Debugging_Execution_BasePtr             ( WP_Message *msg );
     static bool Debugging_Execution_ChangeConditions    ( WP_Message *msg );

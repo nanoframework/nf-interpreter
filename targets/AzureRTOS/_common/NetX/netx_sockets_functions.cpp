@@ -156,16 +156,16 @@ HRESULT HAL_SOCK_CONFIGURATION_Link_status(uint32_t interfaceIndex, bool *status
     return NETX_SOCKETS_Driver::Link_status(interfaceIndex, status);
 }
 
-HRESULT HAL_SOCK_IPAddressFromString(const char *ipString, uint64_t *address)
+HRESULT HAL_SOCK_IPV4AddressFromString(const char *ipString, uint64_t *address)
 {
     NATIVE_PROFILE_PAL_NETWORK();
-    return NETX_SOCKETS_Driver::IPAddressFromString(ipString, address);
+    return NETX_SOCKETS_Driver::IPV4AddressFromString(ipString, address);
 }
 
-const char *HAL_SOCK_IPAddressToString(uint32_t address)
+const char *HAL_SOCK_IPV4AddressToString(uint32_t address)
 {
     NATIVE_PROFILE_PAL_NETWORK();
-    return NETX_SOCKETS_Driver::IPAddressToString(address);
+    return NETX_SOCKETS_Driver::IPV4AddressToString(address);
 }
 
 void HAL_SOCK_EventsSet(uint32_t events)

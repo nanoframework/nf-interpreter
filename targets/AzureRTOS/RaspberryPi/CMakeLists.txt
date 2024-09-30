@@ -60,7 +60,7 @@ else()
 
 endif()
 
-FetchContent_Populate(pico_sdk)
+FetchContent_MakeAvailable(pico_sdk)
 
 # set these to help Pico SDK
 set(PICO_TOOLCHAIN_PATH ${TOOLCHAIN_PREFIX})

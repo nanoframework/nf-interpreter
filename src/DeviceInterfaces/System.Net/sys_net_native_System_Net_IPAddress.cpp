@@ -9,12 +9,25 @@ HRESULT Library_sys_net_native_System_Net_IPAddress::IPv4ToString___STATIC__STRI
 {
     NANOCLR_HEADER();
 
-    // // get IP v4 address in numeric format
-    // const ip4_addr_t ip4Address = {stack.Arg0().NumericByRef().u4};
+    // get IP v4 address in numeric format
+    NANOCLR_CHECK_HRESULT(stack.SetResult_String(SOCK_IPV4AddressToString(stack.Arg0().NumericByRef().u4)));
 
-    // NANOCLR_CHECK_HRESULT(stack.SetResult_String(ip4addr_ntoa(&ip4Address)));
+    NANOCLR_NOCLEANUP();
+}
 
-    NANOCLR_CHECK_HRESULT(stack.SetResult_String(SOCK_IPAddressToString(stack.Arg0().NumericByRef().u4)));
+HRESULT Library_sys_net_native_System_Net_IPAddress::IPv6ToString___STATIC__STRING__SZARRAY_U2(CLR_RT_StackFrame &stack)
+{
+    NANOCLR_HEADER();
+
+#if defined(LWIP_IPV6) && LWIP_IPV6
+    // Get address of ushort array with ipv6 address
+    CLR_UINT16 *addr = (CLR_UINT16 *)stack.Arg0().DereferenceArray()->GetFirstElement();
+
+    // get IP v6 address in numeric format
+    NANOCLR_CHECK_HRESULT(stack.SetResult_String(SOCK_IPV6AddressToString(addr)));
+#else
+    NANOCLR_SET_AND_LEAVE(stack.NotImplementedStub());
+#endif
 
     NANOCLR_NOCLEANUP();
 }

@@ -70,7 +70,7 @@ typedef struct lwipthread_opts
 extern "C"
 {
 #endif
-    void lwipInit(const lwipthread_opts_t *opts);
+    void lwIPInit(const lwipthread_opts_t *opts);
 #ifdef __cplusplus
 }
 #endif

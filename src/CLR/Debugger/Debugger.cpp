@@ -12,6 +12,7 @@
 #include "Debugger.h"
 #include <corlib_native.h>
 #include <target_common.h>
+#include <nanoHAL_StorageOperation.h>
 
 #define __min(a, b) (((a) < (b)) ? (a) : (b))
 
@@ -1335,6 +1336,27 @@ bool CLR_DBG_Debugger::Monitor_UpdateConfiguration(WP_Message *message)
 #endif
 }
 
+bool CLR_DBG_Debugger::Monitor_StorageOperation(WP_Message *message)
+{
+    NATIVE_PROFILE_CLR_DEBUGGER();
+
+#if (HAS_ACCESSIBLE_STORAGE == TRUE)
+
+    Monitor_StorageOperation_Command *cmd = (Monitor_StorageOperation_Command *)message->m_payload;
+    Monitor_StorageOperation_Reply cmdReply;
+
+    cmdReply.ErrorCode = HAL_StorageOperation(cmd->Operation, cmd->NameLength, cmd->DataLength, cmd->Offset, cmd->Data);
+
+    WP_ReplyToCommand(message, true, false, &cmdReply, sizeof(cmdReply));
+
+    return true;
+
+#endif
+
+    (void)message;
+    return false;
+}
+
 //--//
 
 bool CLR_DBG_Debugger::Debugging_Execution_BasePtr(WP_Message *msg)
@@ -1770,7 +1792,7 @@ static bool FillValues(
 
     CLR_DBG_Commands::Debugging_Value *dst = array++;
     num--;
-    CLR_RT_TypeDescriptor desc;
+    CLR_RT_TypeDescriptor desc{};
 
     memset(dst, 0, sizeof(*dst));
 
@@ -2090,6 +2112,8 @@ static HRESULT Debugging_Thread_Create_Helper(CLR_RT_MethodDef_Index &md, CLR_RT
     NANOCLR_HEADER();
 
     CLR_RT_HeapBlock ref;
+    
+    memset(&ref, 0, sizeof(struct CLR_RT_HeapBlock));
     ref.SetObjectReference(nullptr);
     CLR_RT_ProtectFromGC gc(ref);
     CLR_RT_Thread *realThread = (pid != 0) ? CLR_DBG_Debugger::GetThreadFromPid(pid) : nullptr;
@@ -2113,7 +2137,7 @@ static HRESULT Debugging_Thread_Create_Helper(CLR_RT_MethodDef_Index &md, CLR_RT
 
         if (numArgs)
         {
-            CLR_RT_SignatureParser parser;
+            CLR_RT_SignatureParser parser{};
             parser.Initialize_MethodSignature(&stack->m_call);
             CLR_RT_SignatureParser::Element res;
             CLR_RT_HeapBlock *args = stack->m_arguments;
@@ -2350,7 +2374,7 @@ bool CLR_DBG_Debugger::Debugging_Thread_Get(WP_Message *msg)
 
     if (!fFound)
     {
-        pThread = (CLR_RT_HeapBlock *)platform_malloc(sizeof(CLR_RT_HeapBlock));
+        pThread = (CLR_RT_HeapBlock *)platform_malloc(sizeof(struct CLR_RT_HeapBlock));
 
         // Create the managed thread.
         // This implies that there is no state in the managed object.  This is not exactly true, as the managed thread
@@ -2524,7 +2548,7 @@ static bool IsBlockEnumMaybe(CLR_RT_HeapBlock *blk)
     NATIVE_PROFILE_CLR_DEBUGGER();
     const CLR_UINT32 c_MaskForPrimitive = CLR_RT_DataTypeLookup::c_Integer | CLR_RT_DataTypeLookup::c_Numeric;
 
-    CLR_RT_TypeDescriptor desc;
+    CLR_RT_TypeDescriptor desc{};
 
     if (FAILED(desc.InitializeFromObject(*blk)))
     {
@@ -2551,6 +2575,8 @@ static bool SetBlockHelper(CLR_RT_HeapBlock *blk, NanoCLRDataType dt, CLR_UINT8 
     {
         NanoCLRDataType dtDst;
         CLR_RT_HeapBlock src;
+
+        memset(&src, 0, sizeof(struct CLR_RT_HeapBlock));
 
         dtDst = blk->DataType();
 
@@ -2601,6 +2627,9 @@ static CLR_RT_HeapBlock *GetScratchPad_Helper(int index)
     CLR_RT_HeapBlock tmp;
     CLR_RT_HeapBlock ref;
 
+    memset(&tmp, 0, sizeof(struct CLR_RT_HeapBlock));
+    memset(&ref, 0, sizeof(struct CLR_RT_HeapBlock));
+
     tmp.SetObjectReference(array);
 
     if (SUCCEEDED(ref.InitializeArrayReference(tmp, index)))
@@ -2620,6 +2649,8 @@ bool CLR_DBG_Debugger::Debugging_Value_ResizeScratchPad(WP_Message *msg)
     auto *cmd = (CLR_DBG_Commands::Debugging_Value_ResizeScratchPad *)msg->m_payload;
     CLR_RT_HeapBlock ref;
 
+    memset(&ref, 0, sizeof(struct CLR_RT_HeapBlock));
+
     if (cmd->m_size == 0)
     {
         g_CLR_RT_ExecutionEngine.m_scratchPadArray = nullptr;
@@ -2636,7 +2667,7 @@ bool CLR_DBG_Debugger::Debugging_Value_ResizeScratchPad(WP_Message *msg)
                 memcpy(
                     pNew->GetFirstElement(),
                     pOld->GetFirstElement(),
-                    sizeof(CLR_RT_HeapBlock) * __min(pNew->m_numOfElements, pOld->m_numOfElements));
+                    sizeof(struct CLR_RT_HeapBlock) * __min(pNew->m_numOfElements, pOld->m_numOfElements));
             }
 
             g_CLR_RT_ExecutionEngine.m_scratchPadArray = pNew;
@@ -2719,12 +2750,14 @@ bool CLR_DBG_Debugger::Debugging_Value_GetStack(WP_Message *msg)
         CLR_RT_TypeDef_Instance *pTD = nullptr;
         CLR_RT_TypeDef_Instance td;
 
+        memset(&tmp, 0, sizeof(struct CLR_RT_HeapBlock));
+
         if (cmd->m_kind != CLR_DBG_Commands::Debugging_Value_GetStack::c_EvalStack && IsBlockEnumMaybe(blk))
         {
             CLR_UINT32 iElement = cmd->m_index;
-            CLR_RT_SignatureParser parser;
+            CLR_RT_SignatureParser parser{};
             CLR_RT_SignatureParser::Element res;
-            CLR_RT_TypeDescriptor desc;
+            CLR_RT_TypeDescriptor desc{};
             CLR_RT_TypeDef_Index targetClass;
             NanoCLRDataType targetDataType;
 
@@ -2841,7 +2874,10 @@ bool CLR_DBG_Debugger::Debugging_Value_GetField(WP_Message *msg)
     CLR_RT_TypeDef_Instance td;
     CLR_RT_TypeDef_Instance *pTD = nullptr;
     CLR_RT_FieldDef_Instance inst;
-    CLR_UINT32 offset;
+
+    memset(&tmp, 0, sizeof(struct CLR_RT_HeapBlock));
+    memset(&td, 0, sizeof(CLR_RT_TypeDef_Instance));
+    memset(&inst, 0, sizeof(CLR_RT_FieldDef_Instance));
 
     if (blk != nullptr && cmd->m_offset > 0)
     {
@@ -2951,6 +2987,9 @@ bool CLR_DBG_Debugger::Debugging_Value_GetArray(WP_Message *msg)
     CLR_RT_TypeDef_Instance *pTD = nullptr;
     CLR_RT_TypeDef_Instance td;
 
+    memset(&tmp, 0, sizeof(struct CLR_RT_HeapBlock));
+    memset(&ref, 0, sizeof(struct CLR_RT_HeapBlock));
+    
     tmp.SetObjectReference(cmd->m_heapblock);
 
     if (SUCCEEDED(ref.InitializeArrayReference(tmp, cmd->m_index)))
@@ -3036,6 +3075,8 @@ bool CLR_DBG_Debugger::Debugging_Value_SetArray(WP_Message *msg)
     CLR_RT_HeapBlock_Array *array = cmd->m_heapblock;
     CLR_RT_HeapBlock tmp;
 
+    memset(&tmp, 0, sizeof(struct CLR_RT_HeapBlock));
+
     tmp.SetObjectReference(cmd->m_heapblock);
 
     //
@@ -3044,6 +3085,8 @@ bool CLR_DBG_Debugger::Debugging_Value_SetArray(WP_Message *msg)
     if (array != nullptr && !array->m_fReference)
     {
         CLR_RT_HeapBlock ref;
+
+        memset(&ref, 0, sizeof(struct CLR_RT_HeapBlock));
 
         if (SUCCEEDED(ref.InitializeArrayReference(tmp, cmd->m_index)))
         {
@@ -3291,6 +3334,8 @@ static HRESULT Assign_Helper(CLR_RT_HeapBlock *blkDst, CLR_RT_HeapBlock *blkSrc)
     AnalyzeObject aoDst;
     AnalyzeObject aoSrc;
     CLR_RT_HeapBlock srcVal;
+
+    memset(&srcVal, 0, sizeof(struct CLR_RT_HeapBlock));
     srcVal.SetObjectReference(nullptr);
     CLR_RT_ProtectFromGC gc(srcVal);
 
@@ -3368,8 +3413,10 @@ bool CLR_DBG_Debugger::Debugging_TypeSys_Assemblies(WP_Message *msg)
 {
     NATIVE_PROFILE_CLR_DEBUGGER();
 
-    CLR_RT_Assembly_Index assemblies[CLR_RT_TypeSystem::c_MaxAssemblies];
     int num = 0;
+    CLR_RT_Assembly_Index assemblies[CLR_RT_TypeSystem::c_MaxAssemblies];
+
+    memset(assemblies, 0, sizeof(assemblies));
 
     NANOCLR_FOREACH_ASSEMBLY(g_CLR_RT_TypeSystem)
     {
@@ -3598,7 +3645,7 @@ bool CLR_DBG_Debugger::Debugging_Resolve_Field(WP_Message *msg)
 
             if (SUCCEEDED(g_CLR_RT_TypeSystem.BuildFieldName(inst, szBuffer, iBuffer)))
             {
-                CLR_RT_TypeDef_Instance instClass;
+                CLR_RT_TypeDef_Instance instClass{};
                 instClass.InitializeFromField(inst);
 
                 cmdReply->m_td = instClass;
@@ -3625,7 +3672,7 @@ bool CLR_DBG_Debugger::Debugging_Resolve_Method(WP_Message *msg)
 
     CLR_DBG_Commands::Debugging_Resolve_Method::Reply *cmdReply;
     CLR_RT_MethodDef_Instance inst;
-    CLR_RT_TypeDef_Instance instOwner;
+    CLR_RT_TypeDef_Instance instOwner{};
 
     auto *cmd = (CLR_DBG_Commands::Debugging_Resolve_Method *)msg->m_payload;
 
@@ -3783,7 +3830,7 @@ bool CLR_DBG_Debugger::Debugging_Info_SetJMC_Type(const CLR_RT_TypeDef_Index &id
     const CLR_RECORD_TYPEDEF *td;
     CLR_RT_TypeDef_Instance inst;
     int totMethods;
-    CLR_RT_MethodDef_Index md;
+    CLR_RT_MethodDef_Index md{};
 
     if (!CheckTypeDef(idx, inst))
         return false;

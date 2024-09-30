@@ -4,14 +4,14 @@
 parameters:
   - name: gccArmVersion
     type: string
-    default: "13.2.rel1"
+    default: "13.3.rel1"
 
 steps:
   - task: Cache@2
     condition: eq(variables.GccArm_Version, '')
     displayName: Cache latest ARM GCC toolchain
     inputs:
-      key: 'gcc-13_2_rel1 | gccUpdateKey'
+      key: "gcc-13_3_rel1 | gccUpdateKey"
       restoreKeys: gccUpdateKey
       path: $(Agent.TempDirectory)\arm-gnu-toolchain-${{ parameters.gccArmVersion }}-mingw-w64-i686-arm-none-eabi
       cacheHitVar: GCC_CACHE_RESTORED
@@ -20,17 +20,17 @@ steps:
     condition: ne(variables.GCC_CACHE_RESTORED, 'true')
     displayName: Downloading ARM GCC toolchain
     inputs:
-        targetType: 'filePath'
-        filePath: '$(Build.Repository.LocalPath)\install-scripts\install-arm-gcc-toolchain.ps1'
-        arguments: '-Version "${{ parameters.gccArmVersion }}"'
-        failOnStderr: true
+      targetType: "filePath"
+      filePath: '$(Build.Repository.LocalPath)\install-scripts\install-arm-gcc-toolchain.ps1'
+      arguments: '-Version "${{ parameters.gccArmVersion }}"'
+      failOnStderr: true
 
   - task: ExtractFiles@1
     displayName: Extracting ARM GCC toolchain
     condition: ne(variables.GCC_CACHE_RESTORED, 'true')
     inputs:
       archiveFilePatterns: '$(Agent.TempDirectory)\arm-gnu-toolchain-${{ parameters.gccArmVersion }}-mingw-w64-i686-arm-none-eabi.zip'
-      destinationFolder: '$(Agent.TempDirectory)'
+      destinationFolder: "$(Agent.TempDirectory)"
       cleanDestinationFolder: false
 
   - script: echo "##vso[task.prependpath]$(Agent.TempDirectory)\arm-gnu-toolchain-${{ parameters.gccArmVersion }}-mingw-w64-i686-arm-none-eabi\bin"

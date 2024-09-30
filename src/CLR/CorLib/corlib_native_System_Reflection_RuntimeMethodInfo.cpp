@@ -11,8 +11,8 @@ HRESULT Library_corlib_native_System_Reflection_RuntimeMethodInfo::get_ReturnTyp
     NANOCLR_HEADER();
 
     CLR_RT_MethodDef_Instance md;
-    CLR_RT_SignatureParser parser;
-    CLR_RT_TypeDescriptor desc;
+    CLR_RT_SignatureParser parser{};
+    CLR_RT_TypeDescriptor desc{};
     CLR_RT_HeapBlock *hbMeth = stack.Arg0().Dereference();
 
     NANOCLR_CHECK_HRESULT(Library_corlib_native_System_Reflection_MethodBase::GetMethodDescriptor(stack, *hbMeth, md));

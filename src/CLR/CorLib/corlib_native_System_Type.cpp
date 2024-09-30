@@ -49,7 +49,7 @@ HRESULT Library_corlib_native_System_Type::IsInstanceOfType___BOOLEAN__OBJECT(CL
     NANOCLR_HEADER();
 
     CLR_RT_TypeDescriptor descTarget;
-    CLR_RT_TypeDescriptor desc;
+    CLR_RT_TypeDescriptor desc{};
     CLR_RT_HeapBlock *hbType = stack.Arg0().Dereference();
 
     if (hbType->DataType() != DATATYPE_REFLECTION)
@@ -532,7 +532,7 @@ HRESULT Library_corlib_native_System_Type::GetMethods(
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
 
-    CLR_RT_MethodDef_Instance inst;
+    CLR_RT_MethodDef_Instance inst{};
     inst.Clear();
     CLR_RT_TypeDef_Instance td;
     CLR_RT_TypeDef_Instance tdArg;
@@ -640,9 +640,9 @@ HRESULT Library_corlib_native_System_Type::GetMethods(
 
                 if (pParams)
                 {
-                    CLR_RT_SignatureParser parserLeft;
+                    CLR_RT_SignatureParser parserLeft{};
                     parserLeft.Initialize_MethodSignature(assm, md);
-                    CLR_RT_SignatureParser parserRight;
+                    CLR_RT_SignatureParser parserRight{};
                     parserRight.Initialize_Objects(pParams, iParams, true);
                     CLR_RT_SignatureParser::Element res;
 
@@ -657,9 +657,9 @@ HRESULT Library_corlib_native_System_Type::GetMethods(
                     }
                 }
 
-                CLR_RT_MethodDef_Index index;
+                CLR_RT_MethodDef_Index index{};
                 index.Set(td.Assembly(), i + tdR->firstMethod);
-                CLR_RT_MethodDef_Instance inst2;
+                CLR_RT_MethodDef_Instance inst2{};
                 inst2.InitializeFromIndex(index);
 
                 if (fAllMatches)
@@ -686,9 +686,9 @@ HRESULT Library_corlib_native_System_Type::GetMethods(
 
                     if (NANOCLR_INDEX_IS_VALID(inst))
                     {
-                        CLR_RT_SignatureParser parserLeft;
+                        CLR_RT_SignatureParser parserLeft{};
                         parserLeft.Initialize_MethodSignature(&inst);
-                        CLR_RT_SignatureParser parserRight;
+                        CLR_RT_SignatureParser parserRight{};
                         parserRight.Initialize_MethodSignature(&inst2);
 
                         CLR_RT_SignatureParser::Element resLeft;

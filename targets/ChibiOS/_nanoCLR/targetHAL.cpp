@@ -12,6 +12,7 @@
 #include <nanoPAL_Events.h>
 #include <nanoPAL_BlockStorage.h>
 #include <nanoHAL_ConfigurationManager.h>
+#include <nanoHAL_StorageOperation.h>
 #include <nanoHAL_Graphics.h>
 
 #if (HAL_USE_CAN == TRUE)
@@ -60,6 +61,11 @@ void nanoHAL_Initialize()
     BlockStorage_AddDevices();
 
     BlockStorageList_InitializeDevices();
+
+    FS_Initialize();
+    FileSystemVolumeList::Initialize();
+    FS_AddVolumes();
+    FileSystemVolumeList::InitializeVolumes();
 
     // clear managed heap region
     unsigned char *heapStart = NULL;
@@ -181,6 +187,8 @@ void nanoHAL_Uninitialize(bool isPoweringDown)
     // TODO need to call this but it's preventing the debug session from starting
     // Network_Uninitialize();
 #endif
+
+    FileSystemVolumeList::UninitializeVolumes();
 
     BlockStorageList_UnInitializeDevices();
 

@@ -60,7 +60,7 @@ else()
 
 endif()
 
-FetchContent_Populate(CODALMicroBitV2)
+FetchContent_MakeAvailable(CODALMicroBitV2)
 
 ####################
 # CODAL Core
@@ -116,7 +116,7 @@ else()
 
 endif()
 
-FetchContent_Populate(CodalCore)
+FetchContent_MakeAvailable(CodalCore)
 
 ####################
 # CODAL NRF52
@@ -172,7 +172,7 @@ else()
 
 endif()
 
-FetchContent_Populate(CodalNrf52)
+FetchContent_MakeAvailable(CodalNrf52)
 
 ########################
 # CODAL Micro Bit NRF52 SDK
@@ -228,7 +228,7 @@ else()
 
 endif()
 
-FetchContent_Populate(CodalMicrobitNrf5Sdk)
+FetchContent_MakeAvailable(CodalMicrobitNrf5Sdk)
 
 # make vars global
 set(NANOCLR_PROJECT_SOURCES ${NANOCLR_PROJECT_SOURCES} CACHE INTERNAL "make global")

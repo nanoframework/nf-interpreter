@@ -160,15 +160,6 @@ if(RTOS_CHIBIOS_CHECK OR RTOS_TI_SIMPLELINK_CHECK)
     unset(LINK_OPTIONS)
     #################################################################
 
-    #################################################################
-    # clear other options and definitions that we want to set
-    unset(COMPILE_OPTIONS)
-    unset(C_COMPILE_OPTIONS)
-    unset(CXX_COMPILE_OPTIONS)
-    unset(COMPILE_DEFINITIONS)
-    unset(LINK_OPTIONS)
-    #################################################################
-
 endif()
 
 #################################################################################
@@ -297,6 +288,19 @@ else()
 endif()
 
 #################################################################
+# enables internal storage support
+# (default is OFF so Accessible Storage Feature is NOT supported)
+option(NF_FEATURE_HAS_ACCESSIBLE_STORAGE "option to enable accessible storage")
+
+if(NF_FEATURE_HAS_ACCESSIBLE_STORAGE)
+    set(TARGET_HAS_ACCESSIBLE_STORAGE TRUE CACHE INTERNAL "Option for accessible storage")
+    message(STATUS "Accessible Storage feature is included")
+else()
+    set(TARGET_HAS_ACCESSIBLE_STORAGE FALSE CACHE INTERNAL "Option for accessible storage")
+    message(STATUS "Accessible Storage feature **IS NOT** included")
+endif()
+
+#################################################################
 # enables support for SD Card
 # (default is OFF so SD Card is NOT supported)
 option(NF_FEATURE_HAS_SDCARD "option to enable support for SD Card")
@@ -308,13 +312,16 @@ if(NF_FEATURE_HAS_SDCARD)
         message(FATAL_ERROR "Support for SD Card is only available for ChibiOS Cortex-M targets, iMX.RT FreeRTOS and ESP32 targets..")
     endif()
 
-    # force inclusion of Windows.Storage API
-    set(API_Windows.Storage ON CACHE INTERNAL "Forcing Windows.Storage API option to ON")
-
-    # force inclusion of System.IO.FileSystem API
-    set(API_System.IO.FileSystem ON CACHE INTERNAL "Forcing System.IO.FileSystem API option to ON")
+    if(RTOS_FREERTOS_CHECK)
+        # ONLY FOR FREERTOS+NXP force inclusion of Windows.Storage API
+        set(API_Windows.Storage ON CACHE INTERNAL "Forcing Windows.Storage API option to ON")
+    else()
+        # all the others RTOSes: force inclusion of System.IO.FileSystem API
+        set(API_System.IO.FileSystem ON CACHE INTERNAL "Forcing System.IO.FileSystem API option to ON")
+    endif()
 
     message(STATUS "Support for SD Card is included")
+
 else()
     message(STATUS "Support for SD Card **IS NOT** included")
 endif()
@@ -336,9 +343,6 @@ if(NF_FEATURE_HAS_USB_MSD)
     # this feature requires inclusion of ChibiOS contribution repository
     set(CHIBIOS_CONTRIB_REQUIRED ON CACHE INTERNAL "Forcing ChibiOS contribution repo option to ON")
 
-    # force inclusion of Windows.Storage API
-    set(API_Windows.Storage ON CACHE INTERNAL "Forcing Windows.Storage API option to ON")
-
     # force inclusion of System.IO.FileSystem API
     set(API_System.IO.FileSystem ON CACHE INTERNAL "Forcing System.IO.FileSystem API option to ON")
 
@@ -358,26 +362,26 @@ endif()
 #################################################################
 
 #################################################################
-# enables support for SPI file system
-# (default is OFF so SPIFFS is NOT supported)
-option(NF_FEATURE_USE_SPIFFS "option to enable support for SPI file system")
+# enables support for littlefs file system
+# (default is OFF so littlefs is NOT supported)
+option(NF_FEATURE_USE_LITTLEFS "option to enable support for SPI file system")
 
-if(NF_FEATURE_USE_SPIFFS)
+if(NF_FEATURE_USE_LITTLEFS)
 
-    # this feature currently is supported only on ChibiOS and ESP32
-    if(NOT RTOS_CHIBIOS_CHECK)
-        message(FATAL_ERROR "Support for SPIFFS is only available for ChibiOS Cortex-M and ESP32 targets.")
+    # this feature currently is supported only on ChibiOS
+    if(NOT RTOS_CHIBIOS_CHECK AND NOT RTOS_ESP32_CHECK)
+        message(FATAL_ERROR "Support for littlefs is only available for ChibiOS Cortex-M and ESP32 targets.")
     endif()
 
-    # force inclusion of Windows.Storage API
-    set(API_Windows.Storage ON CACHE INTERNAL "Forcing Windows.Storage API option to ON")
+    # force inclusion of System.IO.FileSystem API
+    set(API_System.IO.FileSystem ON CACHE INTERNAL "Forcing System.IO.FileSystem API option to ON")
 
-    set(NF_FEATURE_USE_SPIFFS_OPTION TRUE CACHE INTERNAL "Set nF SPIFFS feature TRUE")
+    set(NF_FEATURE_USE_LITTLEFS_OPTION TRUE CACHE INTERNAL "Set nF littlefs feature TRUE")
 
-    message(STATUS "Support for SPIFFS is included")
+    message(STATUS "Support for littlefs is included")
 else()
-    set(NF_FEATURE_USE_SPIFFS_OPTION FALSE CACHE INTERNAL "Set nF SPIFFS feature FALSE")
-    message(STATUS "Support for SPIFFS **IS NOT** included")
+    set(NF_FEATURE_USE_LITTLEFS_OPTION FALSE CACHE INTERNAL "Set nF littlefs feature FALSE")
+    message(STATUS "Support for littlefs **IS NOT** included")
 endif()
 
 #################################################################
@@ -865,6 +869,30 @@ elseif(RTOS_ESP32_CHECK)
         message(STATUS "Support for Ethernet network interface enabled")
     else()
         message(STATUS "Support for Ethernet network interface disabled")
+    endif()
+
+    if(API_nanoFramework.Networking.Thread)
+        set(HAL_USE_THREAD_OPTION TRUE CACHE INTERNAL "OpenThread Support")
+        message(STATUS "Support for Thread enabled")
+
+        if(NOT THREAD_NODE_ROLE)
+            unset(THREAD_NODE_ROLE CACHE)
+            set(THREAD_NODE_ROLE "FTD" CACHE STRING "Setting default value for THREAD_NODE_ROLE to FTD")
+        endif()
+
+        if(NOT THREAD_RADIO_MODE)
+            unset(THREAD_RADIO_MODE CACHE)
+            set(THREAD_RADIO_MODE "NATIVE" CACHE STRING "Setting default value for THREAD_RADIO_MODE to NATIVE")
+        endif()
+
+        if(NOT THREAD_DATASETTLVS)
+            unset(THREAD_DATASETTLVS CACHE)
+            set(THREAD_DATASETTLVS "" CACHE STRING "Setting default value for THREAD_DATASETTLVS to empty string")
+        endif()
+
+    else()
+        set(HAL_USE_THREAD_OPTION FALSE CACHE INTERNAL "No OpenThread Support")
+        message(STATUS "Support for Thread disabled")
     endif()
 
     # check watchdog feature

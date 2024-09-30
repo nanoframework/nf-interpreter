@@ -7,27 +7,26 @@ parameters:
     default: $(Build.SourcesDirectory)
 
 steps:
-
   - task: PowerShell@2
     displayName: Set target publish package name
     inputs:
-        targetType: 'inline'
-        script: |
-            if($env:PackageName -eq $null)
-            {
-              Write-Host "$("##vso[task.setvariable variable=TargetPublishName]")$env:TargetBoard"
-            }
-            else
-            {
-              Write-Host "$("##vso[task.setvariable variable=TargetPublishName]")$env:PackageName"
-            }
-        errorActionPreference: 'stop'
-        failOnStderr: 'true'
+      targetType: "inline"
+      script: |
+        if($env:PackageName -eq $null)
+        {
+          Write-Host "$("##vso[task.setvariable variable=TargetPublishName]")$env:TargetBoard"
+        }
+        else
+        {
+          Write-Host "$("##vso[task.setvariable variable=TargetPublishName]")$env:PackageName"
+        }
+      errorActionPreference: "stop"
+      failOnStderr: true
 
   - task: PowerShell@2
     displayName: Enable long paths
     inputs:
-      targetType: 'inline'
+      targetType: "inline"
       script: New-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\FileSystem" -Name "LongPathsEnabled" -Value 1 -PropertyType DWORD -Force
 
   - task: PowerShell@2
@@ -35,6 +34,6 @@ steps:
     condition: ne(variables['Build.Repository.Name'], 'nanoframework/nf-Community-Targets')
     inputs:
       workingDirectory: ${{ parameters.repoDirectory }}\targets-community
-      targetType: 'inline'
+      targetType: "inline"
       script: |
         New-Item -Path . -Name "CMakePresets.json" -ItemType "file" -Value "{`n""version"": 4,`n""include"": []`n}"

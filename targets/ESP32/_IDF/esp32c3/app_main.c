@@ -44,14 +44,18 @@ void main_task(void *pvParameter)
 // Called from Esp32 IDF start up code before scheduler starts
 void app_main()
 {
+    UBaseType_t taskPriority = 5;
+
     // Switch off logging so as not to interfere with WireProtocol over Uart0
     esp_log_level_set("*", ESP_LOG_NONE);
 
     ESP_ERROR_CHECK(nvs_flash_init());
 
+    vTaskPrioritySet(NULL, taskPriority);
+
     // start receiver task
-    xTaskCreate(&receiver_task, "ReceiverThread", 3072, NULL, 5, &ReceiverTask);
+    xTaskCreate(&receiver_task, "ReceiverThread", 3072, NULL, taskPriority, &ReceiverTask);
 
     // start the CLR main task
-    xTaskCreate(&main_task, "main_task", 15000, NULL, 5, NULL);
+    xTaskCreate(&main_task, "main_task", 15000, NULL, taskPriority, NULL);
 }

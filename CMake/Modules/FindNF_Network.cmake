@@ -450,6 +450,23 @@ else()
 
         endforeach()
 
+        # unset this warning as error, which is required for these source files
+        # OK to remove after this issue is fixed upstream https://github.com/Mbed-TLS/mbedtls/issues/9425
+        set_source_files_properties(${CMAKE_SOURCE_DIR}/src/PAL/COM/sockets/ssl/MbedTLS/ssl_accept_internal.cpp PROPERTIES COMPILE_FLAGS -Wno-undef)
+        set_source_files_properties(${CMAKE_SOURCE_DIR}/src/PAL/COM/sockets/ssl/MbedTLS/ssl_add_cert_auth_internal.cpp PROPERTIES COMPILE_FLAGS -Wno-undef)
+        set_source_files_properties(${CMAKE_SOURCE_DIR}/src/PAL/COM/sockets/ssl/MbedTLS/ssl_close_socket_internal.cpp PROPERTIES COMPILE_FLAGS -Wno-undef)
+        set_source_files_properties(${CMAKE_SOURCE_DIR}/src/PAL/COM/sockets/ssl/MbedTLS/ssl_connect_internal.cpp PROPERTIES COMPILE_FLAGS -Wno-undef)
+        set_source_files_properties(${CMAKE_SOURCE_DIR}/src/PAL/COM/sockets/ssl/MbedTLS/ssl_decode_private_key_internal.cpp PROPERTIES COMPILE_FLAGS -Wno-undef)
+        set_source_files_properties(${CMAKE_SOURCE_DIR}/src/PAL/COM/sockets/ssl/MbedTLS/ssl_exit_context_internal.cpp PROPERTIES COMPILE_FLAGS -Wno-undef)
+        set_source_files_properties(${CMAKE_SOURCE_DIR}/src/PAL/COM/sockets/ssl/MbedTLS/ssl_generic.cpp PROPERTIES COMPILE_FLAGS -Wno-undef)
+        set_source_files_properties(${CMAKE_SOURCE_DIR}/src/PAL/COM/sockets/ssl/MbedTLS/ssl_generic_init_internal.cpp PROPERTIES COMPILE_FLAGS -Wno-undef)
+        set_source_files_properties(${CMAKE_SOURCE_DIR}/src/PAL/COM/sockets/ssl/MbedTLS/ssl_initialize_internal.cpp PROPERTIES COMPILE_FLAGS -Wno-undef)
+        set_source_files_properties(${CMAKE_SOURCE_DIR}/src/PAL/COM/sockets/ssl/MbedTLS/ssl_parse_certificate_internal.cpp PROPERTIES COMPILE_FLAGS -Wno-undef)
+        set_source_files_properties(${CMAKE_SOURCE_DIR}/src/PAL/COM/sockets/ssl/MbedTLS/ssl_available_internal.cpp PROPERTIES COMPILE_FLAGS -Wno-undef)
+        set_source_files_properties(${CMAKE_SOURCE_DIR}/src/PAL/COM/sockets/ssl/MbedTLS/ssl_read_internal.cpp PROPERTIES COMPILE_FLAGS -Wno-undef)
+        set_source_files_properties(${CMAKE_SOURCE_DIR}/src/PAL/COM/sockets/ssl/MbedTLS/ssl_uninitialize_internal.cpp PROPERTIES COMPILE_FLAGS -Wno-undef)
+        set_source_files_properties(${CMAKE_SOURCE_DIR}/src/PAL/COM/sockets/ssl/MbedTLS/ssl_write_internal.cpp PROPERTIES COMPILE_FLAGS -Wno-undef)
+
     endif()
 
     if(Use_Networking_Extra_Driver)
