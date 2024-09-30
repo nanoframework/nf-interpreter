@@ -1221,15 +1221,19 @@ printf_t sprintf_(char *buf, const char *fmt, ... )
 printf_t snprintf_(char *buf, size_t n,const char *fmt, ... )
 {
     va_list ap;
-    int Count;
+    int count;
 
     va_start(ap, fmt);
-    Count = doprnt(&buf, putbuf, n, fmt, ap);
+    count = doprnt(&buf, putbuf, n - 1, fmt, ap);
     va_end(ap);
-    // Append null terminator.
-    *buf = '\0';
+
+    // Append null terminator if there's space.
+    if (n > 0)
+    {
+        *buf = '\0';
+    }
     
-   return Count;
+   return count;
 }
 // [END_NF_CHANGE]
 
