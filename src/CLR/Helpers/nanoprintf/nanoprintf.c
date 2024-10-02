@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (c) .NET Foundation and Contributors
 // Portions Copyright (c) 2006 - 2021 Skirrid Systems. All rights reserved.
 // See LICENSE file in the project root for full license information.
@@ -93,7 +93,7 @@ Floating point
   #define DP_LIMIT      310
   #define MAX_POWER     256
 // [NF_CHANGE]
-  #define FLOAT_DIGITS  18
+  #define FLOAT_DIGITS  19
 // [END_NF_CHANGE]
 #else
   #define DP_LIMIT      40
@@ -271,6 +271,8 @@ static char *format_float(double number, flt_width_t ndigits, flt_width_t width,
              * to the answer in the fastest time, with the minimum number of
              * operations to introduce rounding errors.
              */
+
+            // Normalise the number such that it lies in the range 1 <= n < 10.
             // First make small numbers bigger.
 
             i = 0;
