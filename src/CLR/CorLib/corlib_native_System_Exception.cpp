@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (c) .NET Foundation and Contributors
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
@@ -51,6 +51,8 @@ HRESULT Library_corlib_native_System_Exception::get_StackTrace___STRING(CLR_RT_S
     StackTrace *pStackTrace;
     CLR_RT_HeapBlock *pBlkString;
     CLR_RT_HeapBlock tmpArray;
+    CLR_RT_HeapBlock *pThis;
+
     tmpArray.SetObjectReference(nullptr);
     CLR_RT_ProtectFromGC gc(tmpArray);
 

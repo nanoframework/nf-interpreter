@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (c) .NET Foundation and Contributors
 // See LICENSE file in the project root for full license information.
 //
@@ -104,7 +104,7 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_Directory::NativeGetChildren___ST
 
     // create an array of files paths <String>
     NANOCLR_CHECK_HRESULT(
-        CLR_RT_HeapBlock_Array::CreateInstance(top, (CLR_UINT32)itemsCount, g_CLR_RT_WellKnownTypes.m_String));
+        CLR_RT_HeapBlock_Array::CreateInstance(top, (CLR_UINT32)itemsCount, g_CLR_RT_WellKnownTypes.String));
 
     // 2nd pass to fill the array
     driver->FindOpen(path, findHandle);

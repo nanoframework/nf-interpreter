@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (c) .NET Foundation and Contributors
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
@@ -101,25 +101,16 @@ HRESULT Library_nf_system_text_System_Text_UTF8Encoding::Helper__GetChars(CLR_RT
 
     const char *szText;
     CLR_RT_HeapBlock ref;
+    memset(&ref, 0, sizeof(struct CLR_RT_HeapBlock));
     ref.SetObjectReference(nullptr);
     CLR_RT_ProtectFromGC gc(ref);
+
     CLR_RT_HeapBlock_Array *pArrayBytes = stack.Arg1().DereferenceArray();
     CLR_INT32 byteIdx = fIndexed ? stack.Arg2().NumericByRef().s4 : 0;
     CLR_INT32 byteCnt = fIndexed ? stack.Arg3().NumericByRef().s4 : pArrayBytes->m_numOfElements;
     CLR_RT_HeapBlock_Array *pArrayBytesCopy;
     CLR_RT_HeapBlock_Array *arrTmp;
     int cBytesCopy;
-    CLR_RT_HeapBlock ref;
-    CLR_RT_HeapBlock_Array *pArrayBytesCopy;
-    CLR_RT_HeapBlock_Array *arrTmp;
-
-    memset(&ref, 0, sizeof(struct CLR_RT_HeapBlock));
-    ref.SetObjectReference(NULL);
-    CLR_RT_ProtectFromGC gc(ref);
-
-    CLR_RT_HeapBlock_Array *pArrayBytes = stack.Arg1().DereferenceArray();
-    CLR_INT32 byteIdx = fIndexed ? stack.Arg2().NumericByRef().s4 : 0;
-    CLR_INT32 byteCnt = fIndexed ? stack.Arg3().NumericByRef().s4 : pArrayBytes->m_numOfElements;
 
     FAULT_ON_NULL(pArrayBytes);
 

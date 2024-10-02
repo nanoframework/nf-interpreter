@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (c) .NET Foundation and Contributors
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
@@ -25,14 +25,14 @@ HRESULT Library_corlib_native_System_Runtime_CompilerServices_RuntimeHelpers::
         NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
     }
 
-    if ((inst.m_target->flags & CLR_RECORD_FIELDDEF::FD_HasFieldRVA) == 0 ||
-        inst.m_target->defaultValue == CLR_EmptyIndex)
+    if ((inst.target->flags & CLR_RECORD_FIELDDEF::FD_HasFieldRVA) == 0 ||
+        inst.target->defaultValue == CLR_EmptyIndex)
     {
         NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
     }
 
     {
-        CLR_PMETADATA ptrSrc = inst.m_assm->GetSignature(inst.m_target->defaultValue);
+        CLR_PMETADATA ptrSrc = inst.assembly->GetSignature(inst.target->defaultValue);
         CLR_UINT32 lenSrc;
         NANOCLR_READ_UNALIGNED_UINT16(lenSrc, ptrSrc);
 

@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (c) .NET Foundation and Contributors
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
@@ -1213,7 +1213,7 @@ HRESULT CLR_RT_BinaryFormatter::State::FindHints(SerializationHintsAttribute &hi
     if (cls.target->flags & CLR_RECORD_TYPEDEF::TD_HasAttributes)
     {
         CLR_RT_TypeDef_Instance inst{};
-        inst.InitializeFromIndex(g_CLR_RT_WellKnownTypes.m_SerializationHintsAttribute);
+        inst.InitializeFromIndex(g_CLR_RT_WellKnownTypes.SerializationHintsAttribute);
         CLR_RT_AttributeEnumerator en{};
         en.Initialize(cls);
 
@@ -1252,7 +1252,7 @@ HRESULT CLR_RT_BinaryFormatter::State::FindHints(
     if (fld.target->flags & CLR_RECORD_FIELDDEF::FD_HasAttributes)
     {
         CLR_RT_TypeDef_Instance inst{};
-        inst.InitializeFromIndex(g_CLR_RT_WellKnownTypes.m_SerializationHintsAttribute);
+        inst.InitializeFromIndex(g_CLR_RT_WellKnownTypes.SerializationHintsAttribute);
         CLR_RT_AttributeEnumerator en{};
         en.Initialize(fld);
 

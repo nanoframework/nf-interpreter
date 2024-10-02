@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (c) .NET Foundation and Contributors
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
@@ -975,7 +975,7 @@ void CLR_RT_ExecutionEngine::SpawnStaticConstructor(CLR_RT_Thread *&pCctorThread
 
     if (dlg != nullptr)
     {
-        CLR_RT_MethodDef_Index idx = dlg->DelegateFtn();
+        CLR_RT_MethodDef_Index index = dlg->DelegateFtn();
         CLR_RT_MethodDef_Instance inst{};
 
         // Find next static constructor for given index
@@ -1843,7 +1843,7 @@ HRESULT CLR_RT_ExecutionEngine::InitializeReference(CLR_RT_HeapBlock &ref, CLR_R
         if (dt == DATATYPE_VALUETYPE)
         {
             CLR_RT_TypeDef_Instance inst{};
-            inst.InitializeFromIndex(res.m_cls);
+            inst.InitializeFromIndex(res.Class);
 
             if ((inst.target->flags & CLR_RECORD_TYPEDEF::TD_Semantics_Mask) == CLR_RECORD_TYPEDEF::TD_Semantics_Enum)
             {
@@ -3107,7 +3107,7 @@ bool CLR_RT_ExecutionEngine::IsInstanceOf(
         if (semanticTarget == CLR_RECORD_TYPEDEF::TD_Semantics_Interface && inst.target->interfaces != CLR_EmptyIndex)
         {
             CLR_RT_SignatureParser parser{};
-            parser.Initialize_Interfaces(inst.m_assm, inst.m_target);
+            parser.Initialize_Interfaces(inst.assembly, inst.target);
             CLR_RT_SignatureParser::Element res;
 
             while (parser.Available() > 0)

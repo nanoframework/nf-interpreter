@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (c) .NET Foundation and Contributors
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
@@ -2874,6 +2874,7 @@ bool CLR_DBG_Debugger::Debugging_Value_GetField(WP_Message *msg)
     CLR_RT_TypeDef_Instance td;
     CLR_RT_TypeDef_Instance *pTD = nullptr;
     CLR_RT_FieldDef_Instance inst;
+    CLR_UINT32 offset;
 
     memset(&tmp, 0, sizeof(struct CLR_RT_HeapBlock));
     memset(&td, 0, sizeof(CLR_RT_TypeDef_Instance));

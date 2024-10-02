@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (c) .NET Foundation and Contributors
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
@@ -658,7 +658,7 @@ HRESULT CLR_RT_StackFrame::MakeCall(
 
         if (ArgumentsCount)
         {
-            memcpy(&stackSub->m_arguments[argsOffset], args, sizeof(struct CLR_RT_HeapBlock) * numArgs);
+            memcpy(&stackSub->m_arguments[argsOffset], args, sizeof(struct CLR_RT_HeapBlock) * ArgumentsCount);
         }
     }
 

@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (c) .NET Foundation and Contributors
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
@@ -5549,7 +5549,7 @@ HRESULT CLR_RT_TypeSystem::PrepareForExecution()
     // We can never get into a case where an out of memory exception cannot be thrown.
     NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObjectFromIndex(
         g_CLR_RT_ExecutionEngine.m_outOfMemoryException,
-        g_CLR_RT_WellKnownTypes.m_OutOfMemoryException));
+        g_CLR_RT_WellKnownTypes.OutOfMemoryException));
 #endif
 
     // Load Runtime.Events to setup EventSink for other assemblies using it

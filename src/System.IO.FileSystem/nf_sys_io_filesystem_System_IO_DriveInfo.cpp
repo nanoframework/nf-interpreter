@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (c) .NET Foundation and Contributors
 // See LICENSE file in the project root for full license information.
 //
@@ -67,7 +67,7 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_DriveInfo::GetFileSystems___STATI
     CLR_RT_HeapBlock *fsNames;
 
     NANOCLR_CHECK_HRESULT(
-        CLR_RT_HeapBlock_Array::CreateInstance(ret, g_InstalledFSCount, g_CLR_RT_WellKnownTypes.m_String));
+        CLR_RT_HeapBlock_Array::CreateInstance(ret, g_InstalledFSCount, g_CLR_RT_WellKnownTypes.String));
 
     fsNames = (CLR_RT_HeapBlock *)ret.DereferenceArray()->GetFirstElement();
 

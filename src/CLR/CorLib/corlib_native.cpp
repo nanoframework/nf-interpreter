@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (c) .NET Foundation and Contributors
 // See LICENSE file in the project root for full license information.
 //
@@ -597,10 +597,10 @@ static const CLR_RT_MethodHandler method_lookup[] =
     nullptr,
     nullptr,
     Library_corlib_native_System_MathInternal::Abs___STATIC__I4__I4,
-    NULL,
-    NULL,
-    NULL,
-    NULL,
+    nullptr,
+    nullptr,
+    nullptr,
+    nullptr,
     Library_corlib_native_System_MulticastDelegate::op_Equality___STATIC__BOOLEAN__SystemMulticastDelegate__SystemMulticastDelegate,
     Library_corlib_native_System_MulticastDelegate::op_Inequality___STATIC__BOOLEAN__SystemMulticastDelegate__SystemMulticastDelegate,
     nullptr,
@@ -1483,7 +1483,7 @@ const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_mscorlib =
 
 #if (NANOCLR_REFLECTION == TRUE)
 
-    0x445C7AF9,
+    0x544772A9,
 
 #elif (NANOCLR_REFLECTION == FALSE)
 
