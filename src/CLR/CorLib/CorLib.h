@@ -14,4 +14,8 @@
 #include "corlib_native.h"
 #include "nanoCRT.h"
 
+#ifndef VIRTUAL_DEVICE
+#include <nanoprintf.h>
+#endif // VIRTUAL_DEVICE
+
 #endif // NANOCLR_CORLIB_NATIVE_H
