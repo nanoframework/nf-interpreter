@@ -1,9 +1,10 @@
-//
+﻿//
 // Copyright (c) .NET Foundation and Contributors
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
 //
 #include "CorLib.h"
+#include <nanoprintf.h>
 
 // must be big enough to fit the biggest number
 // decorated with negative signs, group separators, etc.
@@ -360,11 +361,22 @@ int Library_corlib_native_System_Number::Format_G(
             defaultPrecision = 9;
             break;
         case DATATYPE_R8:
+        {
             // from .NET documentation:
             // When used with a Double value, the "G17" format specifier ensures that the original Double value
             // successfully round-trips.
             defaultPrecision = 17;
+
+            CLR_DOUBLE_TEMP_CAST number = (CLR_DOUBLE_TEMP_CAST)value->NumericByRef().r8;
+
+            // check if number is an integer
+            if (number == (CLR_INT64_TEMP_CAST)number)
+            {
+                // this is an integer, set precision to a value achievable by the library
+                defaultPrecision = 15;
+            }
             break;
+        }
         default:
             break;
     }

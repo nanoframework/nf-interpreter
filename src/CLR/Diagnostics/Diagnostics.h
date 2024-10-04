@@ -11,4 +11,7 @@
 // #include <core.h>
 
 #include <corlib_native.h>
+#ifndef VIRTUAL_DEVICE
+#include <nanoprintf.h>
+#endif // VIRTUAL_DEVICE
 // #include <spot_net_native.h>

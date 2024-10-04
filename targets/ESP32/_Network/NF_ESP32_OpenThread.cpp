@@ -10,6 +10,7 @@
 
 #include <NF_ESP32_Network.h>
 #include <esp32_idf.h>
+#include <nanoprintf.h>
 
 #include "esp_openthread.h"
 #include "esp_openthread_cli.h"
