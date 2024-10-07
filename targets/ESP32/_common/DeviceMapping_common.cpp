@@ -57,14 +57,21 @@ int Esp32_GetMappedDevicePins(Esp32_MapDeviceType deviceType, int busIndex, int 
                 return (int)Esp32_DAC_DevicePinMap[pinIndex];
 #endif
 
-            case DEV_TYPE_I2S:
-                return (int)Esp32_I2S_DevicePinMap[busIndex][pinIndex];
-
+#if (defined(CONFIG_IDF_TARGET_ESP32) || defined(CONFIG_IDF_TARGET_ESP32S3))
+            case DEV_TYPE_SDMMC:
+                return (int)Esp32_SDMMC_DevicePinMap[busIndex][pinIndex];
+#endif
             default:
                 break;
         };
     }
     return -1;
+}
+
+// Function to map SdMmc from C to C++ code
+extern "C" int Esp32_GetSDmmcDevicePins_C(int busIndex, int pinIndex)
+{
+    return Esp32_GetMappedDevicePins(DEV_TYPE_SDMMC, busIndex, pinIndex);
 }
 
 void Esp32_SetMappedDevicePins(Esp32_MapDeviceType deviceType, int busIndex, int8_t pinIndex, int ioPinNumber)
@@ -105,6 +112,11 @@ void Esp32_SetMappedDevicePins(Esp32_MapDeviceType deviceType, int busIndex, int
             case DEV_TYPE_I2S:
                 Esp32_I2S_DevicePinMap[busIndex][pinIndex] = ioPinNumber;
                 break;
+
+#if (defined(CONFIG_IDF_TARGET_ESP32S3) || defined(CONFIG_IDF_TARGET_ESP32P4))
+            case DEV_TYPE_SDMMC:
+                Esp32_SDMMC_DevicePinMap[busIndex][pinIndex] = ioPinNumber;
+#endif
 
             default:
                 break;
@@ -194,6 +206,16 @@ int Esp32_SetMappedDevicePins(uint8_t pin, int32_t alternateFunction)
                 return true;
             }
             break;
+
+#if (defined(CONFIG_IDF_TARGET_ESP32S3) || defined(CONFIG_IDF_TARGET_ESP32P4))
+        case DEV_TYPE_SDMMC:
+            if (busIndex <= 1)
+            {
+                Esp32_SDMMC_DevicePinMap[busIndex][gpioMapping] = pin;
+                return true;
+            }
+            break;
+#endif
 
         default:
             // invalid device type
