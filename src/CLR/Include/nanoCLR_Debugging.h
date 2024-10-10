@@ -52,6 +52,7 @@ struct CLR_DBG_Commands
 
     /////////////////////////////////////////////////////////////////////////////////////////////////////////
     // !!! KEEP IN SYNC WITH nanoFramework.Tools.Debugger.WireProtocol.RebootOptions (in managed code) !!! //
+    // !!! KEEP IN SYNC WITH nanoFramework.Runtime.Native.WireProtocol.RebootOption  (in managed code) !!! //
     // CONSTANTS VALUES NEED TO BE 'FLAG' TYPE                                                             //
     /////////////////////////////////////////////////////////////////////////////////////////////////////////
     struct Monitor_Reboot

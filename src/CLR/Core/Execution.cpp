@@ -294,19 +294,25 @@ HRESULT CLR_RT_ExecutionEngine::StartHardware()
     NANOCLR_NOCLEANUP();
 }
 
-void CLR_RT_ExecutionEngine::Reboot(bool fHard)
+void CLR_RT_ExecutionEngine::Reboot(uint16_t rebootOptions)
 {
     NATIVE_PROFILE_CLR_CORE();
 
-    if (fHard)
+    if (CLR_DBG_Commands::Monitor_Reboot::c_EnterNanoBooter ==
+        (rebootOptions & CLR_DBG_Commands::Monitor_Reboot::c_EnterNanoBooter))
     {
-        ::CPU_Reset();
+        RequestToLaunchNanoBooter(0);
     }
-    else
+    else if (
+        CLR_DBG_Commands::Monitor_Reboot::c_EnterProprietaryBooter ==
+        (rebootOptions & CLR_DBG_Commands::Monitor_Reboot::c_EnterProprietaryBooter))
     {
-        CLR_EE_REBOOT_CLR;
-        CLR_EE_DBG_SET(RebootPending);
+        RequestToLaunchProprietaryBootloader();
     }
+
+    // apply reboot options and set reboot pending flag
+    g_CLR_RT_ExecutionEngine.m_iReboot_Options = rebootOptions;
+    CLR_EE_DBG_SET(RebootPending);
 }
 
 CLR_INT64 CLR_RT_ExecutionEngine::GetUptime()
