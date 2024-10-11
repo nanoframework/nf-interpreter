@@ -39,6 +39,9 @@ typedef enum StorageEventType
     // removable device removed
     StorageEventType_RemovableDeviceRemoval = 0x02,
 
+    // Card detect changed
+    StorageEventType_CardDetectChanged = 0x03
+
 } StorageEventType;
 
 // constants to be used throughout the code
