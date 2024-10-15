@@ -68,6 +68,7 @@
           "API_System.Device.Spi": "ON",
           "API_Hardware.Esp32": "ON",
           "API_nanoFramework.Hardware.Esp32.Rmt": "ON",
+          "API_nanoFramework.Espnow": "ON",
           "API_nanoFramework.Device.OneWire": "OFF",
           "API_nanoFramework.Graphics": "OFF",
           "API_nanoFramework.Device.Bluetooth": "OFF"
@@ -114,6 +115,7 @@
           "API_System.Device.Spi": "ON",
           "API_Hardware.Esp32": "ON",
           "API_nanoFramework.Hardware.Esp32.Rmt": "ON",
+          "API_nanoFramework.Espnow": "ON",
           "API_nanoFramework.Device.Bluetooth": "OFF",
           "API_nanoFramework.Device.OneWire": "OFF",
           "API_nanoFramework.Graphics": "ON",

@@ -65,6 +65,7 @@
           "API_System.Device.Spi": "ON",
           "API_Hardware.Esp32": "ON",
           "API_nanoFramework.Hardware.Esp32.Rmt": "ON",
+          "API_nanoFramework.Espnow": "ON",
           "API_nanoFramework.Device.OneWire": "ON",
           "API_nanoFramework.Graphics": "OFF",
           "API_nanoFramework.Device.Bluetooth": "OFF"
@@ -113,6 +114,7 @@
           "API_System.Device.Spi": "ON",
           "API_Hardware.Esp32": "ON",
           "API_nanoFramework.Hardware.Esp32.Rmt": "ON",
+          "API_nanoFramework.Espnow": "ON",
           "API_nanoFramework.Device.OneWire": "ON",
           "API_nanoFramework.Graphics": "OFF",
           "API_nanoFramework.Device.Bluetooth": "OFF"
@@ -162,6 +164,7 @@
           "API_System.Device.Spi": "ON",
           "API_Hardware.Esp32": "ON",
           "API_nanoFramework.Hardware.Esp32.Rmt": "ON",
+          "API_nanoFramework.Espnow": "ON",
           "API_nanoFramework.Device.OneWire": "ON",
           "API_nanoFramework.Graphics": "OFF",
           "API_nanoFramework.Device.Bluetooth": "ON"
@@ -212,6 +215,7 @@
           "API_System.Device.Spi": "ON",
           "API_Hardware.Esp32": "ON",
           "API_nanoFramework.Hardware.Esp32.Rmt": "ON",
+          "API_nanoFramework.Espnow": "ON",
           "API_nanoFramework.Device.OneWire": "ON",
           "API_nanoFramework.Graphics": "OFF",
           "API_nanoFramework.Device.Bluetooth": "OFF"
@@ -260,6 +264,7 @@
           "API_Windows.Storage": "ON",
           "API_Hardware.Esp32": "ON",
           "API_nanoFramework.Hardware.Esp32.Rmt": "ON",
+          "API_nanoFramework.Espnow": "ON",
           "API_nanoFramework.Device.Bluetooth": "OFF",
           "API_nanoFramework.Graphics": "ON",
           "GRAPHICS_DISPLAY": "ILI9341_240x320_SPI.cpp",
@@ -311,6 +316,7 @@
           "API_Windows.Storage": "ON",
           "API_Hardware.Esp32": "ON",
           "API_nanoFramework.Hardware.Esp32.Rmt": "ON",
+          "API_nanoFramework.Espnow": "ON",
           "API_nanoFramework.Device.Bluetooth": "OFF",
           "API_nanoFramework.Graphics": "ON",
           "GRAPHICS_DISPLAY": "ILI9341_240x320_SPI.cpp",
@@ -416,6 +422,7 @@
           "API_System.Device.Spi": "ON",
           "API_Hardware.Esp32": "ON",
           "API_nanoFramework.Hardware.Esp32.Rmt": "ON",
+          "API_nanoFramework.Espnow": "ON",
           "API_nanoFramework.Device.OneWire": "ON",
           "API_nanoFramework.Graphics": "OFF",
           "API_nanoFramework.Device.Bluetooth": "OFF"

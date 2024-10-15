@@ -16,6 +16,10 @@
 		// Keep command history 
 		"source=nano-bashhistory,target=/home/vscode/commandhistory,type=volume",
 	],
+	"workspaceFolder": "/workspace",
+  	//"workspaceMount": "type=bind,source=${localWorkspaceFolder},target=/worspaces/${localWorkspaceFolderBasename},consistency=cached",
+	"workspaceMount": "source=nf-interpreter,target=/workspace,type=volume",
+
 	// Set *default* container specific settings.json values on container create.
 	"settings": {
 		"cmake.preferredGenerators": [
@@ -31,8 +35,8 @@
 	},
 	// Add the IDs of extensions you want installed when the container is created.
 	"extensions": [
-		"ms-vsliveshare.vsliveshare-pack",
-        "streetsidesoftware.code-spell-checker",
+		//"ms-vsliveshare.vsliveshare-pack",
+        //"streetsidesoftware.code-spell-checker",
         "twxs.cmake",
         "ms-vscode.cmake-tools"
 	],

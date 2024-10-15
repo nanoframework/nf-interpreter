@@ -180,9 +180,9 @@ elseif ($TargetBoard -eq "ESP32_WROOM_32") {
 -DAPI_nanoFramework.System.Collections=ON
 -DAPI_nanoFramework.System.Text=ON
 -DAPI_nanoFramework.Hardware.Esp32.Rmt=ON
+-DAPI_nanoFramework.Espnow=ON
 -DAPI_System.Device.Dac=ON
 "@
-    
     # CMake prep
     $cmakePrep = @"
 -G Ninja
