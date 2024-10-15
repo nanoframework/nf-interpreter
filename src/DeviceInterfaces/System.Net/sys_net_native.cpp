@@ -330,15 +330,16 @@ static const CLR_RT_MethodHandler method_lookup[] =
     NULL,
     NULL,
     NULL,
+    NULL,
     Library_sys_net_native_System_Security_Cryptography_X509Certificates_X509Certificate2::DecodePrivateKeyNative___STATIC__VOID__SZARRAY_U1__STRING,
 };
 
 const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_System_Net =
 {
     "System.Net",
-    0x5B533478,
+    0xA01012C3,
     method_lookup,
-    { 100, 1, 4, 0 }
+    { 100, 1, 4, 1 }
 };
 
 // clang-format on

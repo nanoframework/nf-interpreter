@@ -53,13 +53,8 @@ HRESULT Library_sys_dev_i2c_native_System_Device_I2c_I2cDevice::NativeInit___VOI
         // If this is first device on Bus then init driver
         if (Esp_I2C_Initialised_Flag[bus] == 0)
         {
-            // install driver in RAM to prevent issues with PSRAM cache
-            esp_err_t res = i2c_driver_install(
-                bus,
-                I2C_MODE_MASTER,
-                I2C_MASTER_RX_BUF_DISABLE,
-                I2C_MASTER_TX_BUF_DISABLE,
-                ESP_INTR_FLAG_IRAM);
+            esp_err_t res =
+                i2c_driver_install(bus, I2C_MODE_MASTER, I2C_MASTER_RX_BUF_DISABLE, I2C_MASTER_TX_BUF_DISABLE, 0);
 
             if (res != ESP_OK)
             {
@@ -177,9 +172,12 @@ HRESULT Library_sys_dev_i2c_native_System_Device_I2c_I2cDevice::
                 // setup write transaction
                 i2c_master_start(cmd);
                 i2c_master_write_byte(cmd, (slaveAddress << 1) | I2C_MASTER_WRITE, ACK_CHECK_EN);
-                opResult = i2c_master_write(cmd, writeBuffer, writeSize, true);
 
-                ASSERT(opResult == ESP_OK);
+                opResult = i2c_master_write(cmd, writeBuffer, writeSize, true);
+                if (opResult != ESP_OK)
+                {
+                    NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_OPERATION);
+                }
             }
         }
     }
@@ -216,8 +214,10 @@ HRESULT Library_sys_dev_i2c_native_System_Device_I2c_I2cDevice::
 
                 // read all bytes with ACK except the last one
                 opResult = i2c_master_read(cmd, readBuffer, readSize, I2C_MASTER_LAST_NACK);
-
-                ASSERT(opResult == ESP_OK);
+                if (opResult != ESP_OK)
+                {
+                    NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_OPERATION);
+                }
             }
         }
     }
@@ -225,6 +225,12 @@ HRESULT Library_sys_dev_i2c_native_System_Device_I2c_I2cDevice::
     i2c_master_stop(cmd);
 
     opResult = i2c_master_cmd_begin(bus, cmd, 1000 / portTICK_RATE_MS);
+
+    if (opResult != ESP_OK && opResult != ESP_FAIL && opResult != ESP_ERR_TIMEOUT)
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_OPERATION);
+    }
+
     i2c_cmd_link_delete(cmd);
 
     // create return object
@@ -232,7 +238,6 @@ HRESULT Library_sys_dev_i2c_native_System_Device_I2c_I2cDevice::
         g_CLR_RT_ExecutionEngine.NewObjectFromIndex(top, g_CLR_RT_WellKnownTypes.m_I2cTransferResult));
 
     result = top.Dereference();
-
     FAULT_ON_NULL(result);
 
     if (opResult != ESP_OK)

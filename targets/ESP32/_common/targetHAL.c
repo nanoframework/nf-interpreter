@@ -42,3 +42,9 @@ inline TARGET_IFU_CAPABLE(false);
 
 // Mutex for GLOBAL_LOCK / GLOBAL_UNLOCK
 portMUX_TYPE globalLockMutex = portMUX_INITIALIZER_UNLOCKED;
+
+// ESP32 targets can't change MAC Address
+bool Target_CanChangeMacAddress()
+{
+    return false;
+}

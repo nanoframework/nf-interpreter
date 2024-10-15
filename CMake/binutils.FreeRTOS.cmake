@@ -62,7 +62,7 @@ macro(nf_add_platform_packages)
         # no packages for booter
     endif()
 
-    # packages specific for nanoCRL
+    # packages specific for nanoCLR
     if("${NFAPP_TARGET}" STREQUAL "${NANOCLR_PROJECT_NAME}")
 
         if(USE_NETWORKING_OPTION)
@@ -87,7 +87,7 @@ macro(nf_add_platform_dependencies target)
         # no packages for booter
     endif()
 
-    # dependencies specific to nanoCRL
+    # dependencies specific to nanoCLR
     if("${target}" STREQUAL "${NANOCLR_PROJECT_NAME}")
 
         nf_add_lib_coreclr(
@@ -185,7 +185,7 @@ macro(nf_add_platform_include_directories target)
 
     endif()
 
-    # includes specific to nanoCRL
+    # includes specific to nanoCLR
     if(${target} STREQUAL ${NANOCLR_PROJECT_NAME})
 
         target_include_directories(${target}.elf PUBLIC
@@ -233,7 +233,7 @@ macro(nf_add_platform_sources target)
 
     endif()
 
-    # sources specific to nanoCRL
+    # sources specific to nanoCLR
     if(${target} STREQUAL ${NANOCLR_PROJECT_NAME})
 
         # add header files with common OS definitions and board definitions 

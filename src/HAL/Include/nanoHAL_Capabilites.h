@@ -72,6 +72,10 @@ extern "C"
     // Information on whether the target is capable of IFU
     bool Target_IFUCapable();
 
+    // Information on whether the MAC address of the the device can be changed by the user
+    // No default implementation provided to make sure the platform/target esplicitly declares it
+    bool Target_CanChangeMacAddress();
+
 #ifdef __cplusplus
 }
 #endif

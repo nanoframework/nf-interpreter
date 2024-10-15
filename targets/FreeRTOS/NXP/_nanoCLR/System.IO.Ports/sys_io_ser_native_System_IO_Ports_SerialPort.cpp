@@ -689,6 +689,7 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeInit___VOID(
     LPUART_Type *base = NULL;
     NF_PAL_UART *palUart = NULL;
     BaseType_t xReturned;
+    int32_t bufferSize;
 
     CLR_RT_HeapBlock *pThis = stack.This();
     FAULT_ON_NULL(pThis);
@@ -706,14 +707,17 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeInit___VOID(
     palUart = Uart_PAL[uartNum];
 
     // Allocate memory for RX circular buffer
-    palUart->RxBuffer = (uint8_t *)platform_malloc(UART_RX_BUFER_SIZE * sizeof(uint8_t));
+    bufferSize = pThis[FIELD___bufferSize].NumericByRef().s4;
+
+    palUart->RxBuffer = (uint8_t *)platform_malloc(bufferSize * sizeof(uint8_t));
+
     if (palUart->RxBuffer == NULL)
     {
         NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
     }
 
     // Initialize RX buffer
-    palUart->RxRingBuffer.Initialize(palUart->RxBuffer, UART_RX_BUFER_SIZE);
+    palUart->RxRingBuffer.Initialize(palUart->RxBuffer, bufferSize);
     palUart->RxBytesToRead = 0;
 
     // now all the rest

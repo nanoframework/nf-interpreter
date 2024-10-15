@@ -19,16 +19,8 @@
 // in STM32F091RC datasheet)
 UART_CONFIG_PINS(8, GPIOC, GPIOC, 2, 3, 2)
 
-// buffers
-// buffers that are R/W by DMA are recommended to be aligned with 32 bytes cache page size boundary
-// because of issues with cache coherency and DMA (this is particularly important with Cortex-M7 because of cache)
-#if defined(__GNUC__)
-__attribute__((aligned(32)))
-#endif
-uint8_t Uart8_RxBuffer[UART8_RX_SIZE];
-
 // initialization for UART8
-UART_INIT(8, UART8_RX_SIZE)
+UART_INIT(8)
 
 // un-initialization for UART8
 UART_UNINIT(8)

@@ -54,6 +54,10 @@ static const CLR_RT_MethodHandler method_lookup[] =
     NULL,
     NULL,
     NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
     Library_sys_io_ser_native_System_IO_Ports_SerialPort::Read___I4__SZARRAY_U1__I4__I4,
     NULL,
     Library_sys_io_ser_native_System_IO_Ports_SerialPort::ReadExisting___STRING,
@@ -90,14 +94,15 @@ static const CLR_RT_MethodHandler method_lookup[] =
     NULL,
     NULL,
     NULL,
+    NULL,
 };
 
 const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_System_IO_Ports =
 {
     "System.IO.Ports",
-    0xA67E6317,
+    0xCB7C0ECA,
     method_lookup,
-    { 100, 1, 3, 0 }
+    { 100, 1, 4, 0 }
 };
 
 // clang-format on

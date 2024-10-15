@@ -6,17 +6,18 @@
 #include <nanoCLR_Application.h>
 #include <nanoHAL_v2.h>
 
-// RTOS header files
-#include <xdc/std.h>
+// board Header files
+#include <ti_drivers_config.h>
 #include <xdc/runtime/Error.h>
 #include <ti/sysbios/BIOS.h>
 #include <ti/sysbios/knl/Task.h>
-
-#include <ti/drivers/gpio/GPIOCC26XX.h>
 // clang-format off
 #include DeviceFamily_constructPath(inc/hw_prcm.h)
 #include DeviceFamily_constructPath(driverlib/sys_ctrl.h)
 // clang-format on
+
+// need this until fix in TI SDK is implemented
+extern void PIN_init_nano();
 
 //////////////////////////////
 
@@ -30,18 +31,6 @@ CLR_SETTINGS clrSettings;
 
 // this define has to match the one in cpu_gpio.cpp
 #define GPIO_MAX_PINS 16
-
-// these are declared in cpu_gpio.cpp
-extern GPIO_PinConfig gpioPinConfigs[GPIO_MAX_PINS];
-extern GPIO_CallbackFxn gpioCallbackFunctions[GPIO_MAX_PINS];
-
-// this has to be define in a C file, otherwise the linker can't replace the weak one declared in the SDK driver library
-// const GPIOCC26XX_Config GPIOCC26XX_config = {
-//     .pinConfigs = (GPIO_PinConfig *)gpioPinConfigs,
-//     .callbacks = (GPIO_CallbackFxn *)gpioCallbackFunctions,
-//     .numberOfPinConfigs = GPIO_MAX_PINS,
-//     .numberOfCallbacks = GPIO_MAX_PINS,
-//     .intPriority = (~0)};
 
 extern void ReceiverThread(UArg arg0, UArg arg1);
 extern void CLRStartupThread(UArg arg0, UArg arg1);
@@ -73,10 +62,13 @@ int main(void)
     // must be called before PIN_init()
     WakeupReasonStore = SysCtrlResetSourceGet();
 
-    // Call board init functions
-    Board_init();
+    // hack required to be able to config wakeup from deep sleep
+    // bug introduced in SDK 5.30.01.01.
+    PIN_init_nano();
 
-    GPIO_init();
+    // Call board init functions
+    // Board_init();
+
     ADC_init();
     ConfigUART();
 

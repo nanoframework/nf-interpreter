@@ -10,7 +10,7 @@
 ###########################################################################################
 
 option(API_nanoFramework.Devices.Can            "option for nanoFramework.Devices.Can")
-option(API_nanoFramework.Devices.OneWire        "option for nanoFramework.Devices.OneWire")
+option(API_nanoFramework.Device.OneWire        "option for nanoFramework.Device.OneWire")
 option(API_nanoFramework.Networking.Sntp        "option for nanoFramework.Networking.Sntp")
 option(API_nanoFramework.Runtime.Events         "option for nanoFramework.Runtime.Events API")
 option(API_nanoFramework.ResourceManager        "option for nanoFramework.ResourceManager")
@@ -209,10 +209,10 @@ if(API_nanoFramework.Graphics)
     PerformSettingsForApiEntry("nanoFramework.Graphics")
 endif()
 
-# nanoFramework.Devices.OneWire
-if(API_nanoFramework.Devices.OneWire)
+# nanoFramework.Device.OneWire
+if(API_nanoFramework.Device.OneWire)
     ##### API name here (doted name)
-    PerformSettingsForApiEntry("nanoFramework.Devices.OneWire")
+    PerformSettingsForApiEntry("nanoFramework.Device.OneWire")
 endif()
 
 # nanoFramework.Networking.Sntp

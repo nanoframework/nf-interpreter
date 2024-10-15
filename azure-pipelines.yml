@@ -326,7 +326,7 @@ jobs:
           -DAPI_Windows.Devices.Pwm=ON -DAPI_System.Device.Pwm=ON
           -DAPI_Windows.Devices.SerialCommunication=ON -DAPI_System.IO.Ports=ON
           -DAPI_Windows.Devices.Adc=ON -DAPI_System.Device.Adc=ON
-          -DAPI_nanoFramework.Devices.OneWire=ON
+          -DAPI_nanoFramework.Device.OneWire=ON
           -DAPI_nanoFramework.Devices.Can=ON
           -DAPI_nanoFramework.ResourceManager=ON
           -DAPI_nanoFramework.System.Collections=ON
@@ -357,7 +357,7 @@ jobs:
           -DAPI_System.Device.Dac=ON
           -DAPI_System.Net=ON
           -DNF_SECURITY_MBEDTLS=ON
-          -DAPI_nanoFramework.Devices.OneWire=ON
+          -DAPI_nanoFramework.Device.OneWire=ON
           -DAPI_nanoFramework.Devices.Can=ON
           -DAPI_System.IO.FileSystem=ON
           -DAPI_nanoFramework.ResourceManager=ON
@@ -377,7 +377,7 @@ jobs:
   variables:
     DOTNET_NOLOGO: true
     # creates a counter and assigns it to the revision variable
-    REVISION: $[counter('STM32_1_7_4_versioncounter', 0)]
+    REVISION: $[counter('STM32_1_8_0_versioncounter', 0)]
     GNU_GCC_TOOLCHAIN_PATH: $(Agent.TempDirectory)\GNU_Tools_ARM_Embedded
     HelperPackageVersion: $[counter('HelperPackageVersioncounter', 0)]
     TargetPlatform: 'stm32'
@@ -441,7 +441,7 @@ jobs:
           -DAPI_System.Net=ON
           -DAPI_System.Device.WiFi=ON
           -DAPI_Hardware.Esp32=ON
-          -DAPI_nanoFramework.Devices.OneWire=ON
+          -DAPI_nanoFramework.Device.OneWire=ON
           -DAPI_nanoFramework.ResourceManager=ON
           -DAPI_nanoFramework.System.Collections=ON
           -DAPI_nanoFramework.System.Text=ON
@@ -482,7 +482,7 @@ jobs:
           -DAPI_System.Net=ON
           -DAPI_System.Device.WiFi=ON
           -DAPI_Hardware.Esp32=ON
-          -DAPI_nanoFramework.Devices.OneWire=ON
+          -DAPI_nanoFramework.Device.OneWire=ON
           -DAPI_nanoFramework.ResourceManager=ON
           -DAPI_nanoFramework.System.Collections=ON
           -DAPI_nanoFramework.System.Text=ON
@@ -519,7 +519,7 @@ jobs:
           -DAPI_System.Net=ON
           -DAPI_System.Device.WiFi=ON
           -DAPI_Hardware.Esp32=ON
-          -DAPI_nanoFramework.Devices.OneWire=ON
+          -DAPI_nanoFramework.Device.OneWire=ON
           -DAPI_nanoFramework.ResourceManager=ON
           -DAPI_nanoFramework.System.Collections=ON
           -DAPI_nanoFramework.System.Text=ON
@@ -611,7 +611,7 @@ jobs:
   variables:
     DOTNET_NOLOGO: true
     # creates a counter and assigns it to the revision variable
-    REVISION: $[counter('ESP32_1_7_4_versioncounter', 0)]
+    REVISION: $[counter('ESP32_1_8_0_versioncounter', 0)]
     IDF_PATH: 'D:/a/1/s/esp-idf'
     PIP_CACHE_DIR: $(Pipeline.Workspace)/.pip
     TargetPlatform: 'esp32'
@@ -692,7 +692,7 @@ jobs:
   variables:
     DOTNET_NOLOGO: true
     # creates a counter and assigns it to the revision variable
-    REVISION: $[counter('NXP_1_7_4_versioncounter', 0)]
+    REVISION: $[counter('NXP_1_8_0_versioncounter', 0)]
     GNU_GCC_TOOLCHAIN_PATH: $(Agent.TempDirectory)\GNU_Tools_ARM_Embedded
     GIT_LFS_SKIP_SMUDGE: 1
     TargetPlatform: 'freertos'
@@ -777,13 +777,13 @@ jobs:
           -DAPI_Windows.Devices.Adc=ON -DAPI_System.Device.Adc=ON
           -DAPI_nanoFramework.TI.EasyLink=ON
           -DAPI_nanoFramework.Hardware.TI=ON
-
+          -DAPI_nanoFramework.System.Text=ON
         GccArm_Version:
 
   variables:
     DOTNET_NOLOGO: true
     # creates a counter and assigns it to the revision variable
-    REVISION: $[counter('TI_1_7_4_versioncounter', 0)]
+    REVISION: $[counter('TI_1_8_0_versioncounter', 0)]
     GNU_GCC_TOOLCHAIN_PATH: $(Agent.TempDirectory)\GNU_Tools_ARM_Embedded
     HelperPackageVersion: $[counter('HelperPackageVersioncounter', 0)]
     TargetPlatform: 'ti_simplelink'
@@ -822,7 +822,7 @@ jobs:
     DOTNET_NOLOGO: true
     TargetPublishName: WIN32_nanoCLR
     # creates a counter and assigns it to the revision variable
-    REVISION: $[counter('WIN32_1_7_4_versioncounter', 0)]
+    REVISION: $[counter('WIN32_1_8_0_versioncounter', 0)]
 
   steps:
   - template: azure-pipelines-templates/nb-gitversioning.yml
@@ -864,8 +864,26 @@ jobs:
       )
 
   - task: NuGetCommand@2
-    condition: succeeded()
-    displayName: Pack nanoCLR WIN32
+  condition: >-
+      and(
+        succeeded(),
+        startsWith(variables['Build.SourceBranchName'], 'main')
+      )
+    displayName: Pack nanoCLR WIN32 (stable)
+    inputs:
+      command: 'custom' 
+      arguments: 'pack targets\win32\nanoFramework.nanoCLR.Win32.nuspec -Version $(NBGV_SimpleVersion).$(TARGET_BUILD_COUNTER)'
+
+  - task: NuGetCommand@2
+    condition: >-
+      and(
+        succeeded(),
+        or(
+          startsWith(variables['Build.SourceBranchName'], 'develop'),
+          startsWith(variables['Build.SourceBranchName'], 'release')
+        )
+      )
+    displayName: Pack nanoCLR WIN32 (preview)
     inputs:
       command: 'custom' 
       arguments: 'pack targets\win32\nanoFramework.nanoCLR.Win32.nuspec -Version $(NBGV_NuGetPackageVersion)'
@@ -985,6 +1003,22 @@ jobs:
       versionSpec: '= 3.0'
       addToPath: true
 
+  # Cache change log cache files
+  - task: Cache@2
+    displayName: Cache change log cache files
+    condition: >-
+      and(
+        succeeded(),
+        eq(variables['System.PullRequest.PullRequestId'], ''),
+        startsWith(variables['Build.SourceBranch'], 'refs/tags/v')
+      )
+    inputs:
+      key: 'changeLogCacheFiles'
+      restoreKeys: 1_0
+      path: |
+        $(Agent.TempDirectory)/github-changelog-logger.log
+        $(Agent.TempDirectory)/github-changelog-http-cache
+
   # generate change log including future version
   - powershell: |
         gem install github_changelog_generator --quiet --no-document
@@ -994,28 +1028,7 @@ jobs:
       and(
         succeeded(),
         eq(variables['System.PullRequest.PullRequestId'], ''),
-        or(
-          eq(variables['Build.SourceBranchName'], 'main'),
-          startsWith(variables['Build.SourceBranch'], 'refs/tags/v')
-        )
-      )
-    displayName: Generate change log
-
-  # generate change log without future version
-  - powershell: |
-        gem install github_changelog_generator --quiet --no-document
-        # need to call it passing both cache options with full path otherwise it won't work
-        github_changelog_generator --token $(GitHubToken) --cache-log  $env:AGENT_TEMPDIRECTORY\github-changelog-logger.log --cache-file $env:AGENT_TEMPDIRECTORY\github-changelog-http-cache --pr-wo-labels
-    condition: >-
-      and(
-        succeeded(),
-        eq(variables['System.PullRequest.PullRequestId'], ''),
-        not(
-          or(
-            eq(variables['Build.SourceBranchName'], 'main'),
-            startsWith(variables['Build.SourceBranch'], 'refs/tags/v')
-          )
-        )
+        startsWith(variables['Build.SourceBranch'], 'refs/tags/v')
       )
     displayName: Generate change log
 
@@ -1045,64 +1058,6 @@ jobs:
       )
     continueOnError: true
     displayName: Push changelog to GitHub
-
-######################
-# create or update GitHub release ON tags from main branch or tags
-- job: Publish_Release
-  dependsOn:
-  - Build_STM32_targets
-  - Build_ESP32_targets
-  - Build_NXP_targets
-  - Build_TI_SimpleLink_targets
-  - Build_WIN32_nanoCLR
-  - Generate_change_log
-  # skip build if this is a PR, submitted by nfbot and the commit message contains [version update]
-  condition: >-
-    and(
-      succeeded('Build_STM32_targets'),
-      succeeded('Build_ESP32_targets'),
-      succeeded('Build_NXP_targets'),
-      succeeded('Build_TI_SimpleLink_targets'),
-      succeeded('Generate_change_log'),
-      eq(variables['System.PullRequest.PullRequestId'], ''),
-      or(
-        endsWith(variables['Build.SourceBranchName'], 'main'),
-        startsWith(variables['Build.SourceBranch'], 'refs/tags/v') ),
-        ne( variables['StartReleaseCandidate'], true )
-      )
-
-  pool:
-    vmImage: 'windows-2019'
-
-  steps:
-  - task: DotNetCoreCLI@2  
-    inputs:
-      command: custom
-      custom: tool
-      arguments: install --tool-path . nbgv
-    displayName: Install NBGV tool
-
-  - script: nbgv cloud -a -c
-    displayName: Set build number
-
-  - task: GitHubReleasePublish@1
-    condition: endsWith(variables['Build.SourceBranch'], 'main')
-    displayName: Create/Update GitHub stable release
-    inputs:
-      githubEndpoint: 'nanoframework'
-      githubOwner: 'nanoframework'
-      githubRepositoryName: nf-interpreter
-      githubTag: v$(NBGV_AssemblyVersion)
-      githubReleaseTitle: 'nf Interpreter v$(NBGV_AssemblyVersion)'
-      githubReleaseNotes: 'Check the [changelog]($(Build.Repository.Uri)/blob/$(Build.SourceBranchName)/CHANGELOG.md).<br><br>Download images from our Cloudsmith repo. See the available images [here](https://github.com/nanoframework/nf-interpreter/tree/main#firmware-for-reference-boards).'
-      githubTargetCommitsh: $(Build.SourceVersion)
-      githubReleaseDraft: false
-      githubReleasePrerelease: false
-      githubReuseDraftOnly: false
-      githubReuseRelease: true
-      githubEditRelease: true
-      githubDeleteEmptyTag: true
-      githubReleaseAsset: '$(Build.ArtifactStagingDirectory)/**/*.zip'
 
 #################################
 # report build failure to Discord

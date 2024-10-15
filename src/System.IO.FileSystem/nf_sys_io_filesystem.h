@@ -164,31 +164,19 @@ struct Library_nf_sys_io_filesystem_System_IO_File
 
 struct Library_nf_sys_io_filesystem_System_IO_FileStream
 {
-    static const int FIELD___canRead = 1;
-    static const int FIELD___canWrite = 2;
-    static const int FIELD___canSeek = 3;
-    static const int FIELD___seekLimit = 4;
-    static const int FIELD___position = 5;
-    static const int FIELD___disposed = 6;
-    static const int FIELD___name = 7;
-    static const int FIELD___path = 8;
+    static const int FIELD___canRead = 2;
+    static const int FIELD___canWrite = 3;
+    static const int FIELD___canSeek = 4;
+    static const int FIELD___seekLimit = 5;
+    static const int FIELD___position = 6;
+    static const int FIELD___disposed = 7;
+    static const int FIELD___name = 8;
+    static const int FIELD___path = 9;
 
     NANOCLR_NATIVE_DECLARE(OpenFileNative___VOID__STRING__STRING__I4);
     NANOCLR_NATIVE_DECLARE(ReadNative___I4__STRING__STRING__I8__SZARRAY_U1__I4);
     NANOCLR_NATIVE_DECLARE(WriteNative___VOID__STRING__STRING__I8__SZARRAY_U1__I4);
     NANOCLR_NATIVE_DECLARE(GetLengthNative___I8__STRING__STRING);
-
-    //--//
-};
-
-struct Library_nf_sys_io_filesystem_System_IO_MemoryStream
-{
-    static const int FIELD___buffer = 1;
-    static const int FIELD___position = 2;
-    static const int FIELD___length = 3;
-    static const int FIELD___capacity = 4;
-    static const int FIELD___expandable = 5;
-    static const int FIELD___isOpen = 6;
 
     //--//
 };
@@ -204,5 +192,4 @@ struct Library_nf_sys_io_filesystem_System_IO_Path
 
 extern const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_System_IO_FileSystem;
 
-#endif // NF_SYS_IO_FILESYSTEM_H
-
+#endif //_NF_SYS_IO_FILESYSTEM_H_

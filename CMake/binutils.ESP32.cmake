@@ -95,7 +95,7 @@ macro(nf_add_platform_packages)
 
     find_package(ESP32_IDF REQUIRED QUIET)
 
-    # packages specific for nanoCRL
+    # packages specific for nanoCLR
     if("${NFAPP_TARGET}" STREQUAL "${NANOCLR_PROJECT_NAME}")
 
         if(USE_NETWORKING_OPTION)
@@ -202,7 +202,7 @@ macro(nf_add_platform_include_directories target)
         ${NF_CoreCLR_INCLUDE_DIRS}
     )
 
-    # includes specific to nanoCRL
+    # includes specific to nanoCLR
     if(${target} STREQUAL ${NANOCLR_PROJECT_NAME})
 
         target_include_directories(${target}.elf PUBLIC
@@ -230,7 +230,7 @@ macro(nf_add_platform_sources target)
 
     )
 
-    # sources specific to nanoCRL
+    # sources specific to nanoCLR
     if(${target} STREQUAL ${NANOCLR_PROJECT_NAME})
            
         # add header with target platform definitions
@@ -608,7 +608,7 @@ macro(nf_add_idf_as_library)
         # SDKCONFIG ${CMAKE_SOURCE_DIR}/targets/ESP32/_IDF/sdkconfig
         SDKCONFIG_DEFAULTS
             ${SDKCONFIG_DEFAULTS_FILE}
-        PROJECT_NAME "nanoCRL"
+        PROJECT_NAME "nanoCLR"
         PROJECT_VER ${BUILD_VERSION}
     )
 
@@ -647,7 +647,7 @@ macro(nf_add_idf_as_library)
         # add nanoCLR include path to lwIP so our lwipots are taken instead of the IDF ones
         list(INSERT 
             IDF_LWIP_INCLUDE_DIRECTORIES 0
-                ${CMAKE_SOURCE_DIR}/targets/ESP32/_Include
+                ${CMAKE_SOURCE_DIR}/targets/ESP32/_include
                 ${CMAKE_SOURCE_DIR}/targets/ESP32/${TARGET_BOARD}
                 ${CMAKE_SOURCE_DIR}/src/DeviceInterfaces/Networking.Sntp
                 ${CMAKE_SOURCE_DIR}/src/CLR/Include

@@ -19,6 +19,8 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="nf_system_collections_System_Collections_Hashtable__HashtableEnumerator.cpp" />
+    <ClCompile Include="nf_system_collections_System_Collections_Hashtable.cpp" />
     <ClCompile Include="nf_system_collections_System_Collections_Queue.cpp" />
     <ClCompile Include="nf_system_collections_System_Collections_Stack.cpp" />
     <ClCompile Include="nf_system_collections.cpp" />

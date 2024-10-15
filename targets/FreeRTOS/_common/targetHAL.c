@@ -35,3 +35,10 @@ __nfweak GET_TARGET_CAPABILITIES(0);
 inline TARGET_HAS_PROPRIETARY_BOOTER(false);
 
 inline TARGET_IFU_CAPABLE(false);
+
+// NXP targets can't change MAC Address
+// Implemented as "weak" to allow it to be replaced with "hard" implementation at target level.
+__nfweak bool Target_CanChangeMacAddress()
+{
+    return false;
+}

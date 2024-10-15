@@ -1064,24 +1064,94 @@ CLR_UINT32 CLR_RT_HeapBlock::GetHashCode(CLR_RT_HeapBlock *ptr, bool fRecurse, C
         }
         break;
 
+        case DATATYPE_BOOLEAN:
+            crc = ptr->NumericByRef().u1 == 0 ? 0 : 1;
+            break;
+
+        case DATATYPE_I1:
+            crc = (CLR_UINT32)ptr->NumericByRef().s1;
+            break;
+
+        case DATATYPE_U1:
+            crc = (CLR_UINT32)ptr->NumericByRef().u1;
+            break;
+
+        case DATATYPE_CHAR:
+            crc = (CLR_UINT32)(ptr->NumericByRef().u2 | ptr->NumericByRef().u2 << 16);
+            break;
+
+        case DATATYPE_U2:
+            crc = (CLR_UINT32)ptr->NumericByRef().u2;
+            break;
+
+        case DATATYPE_I2:
+            crc = (CLR_UINT32)(ptr->NumericByRef().s2 | ptr->NumericByRef().s2 << 16);
+            break;
+
+        case DATATYPE_I4:
+            crc = (CLR_UINT32)ptr->NumericByRef().s4;
+            break;
+
+        case DATATYPE_U4:
+            crc = ptr->NumericByRef().u4;
+            break;
+
+        case DATATYPE_R4:
+            crc = (CLR_INT32)ptr->NumericByRef().u8.LL;
+            break;
+
+        case DATATYPE_U8:
+            crc = ((CLR_INT32)ptr->NumericByRef().u8.LL ^ (CLR_INT32)ptr->NumericByRef().u8.HH);
+            break;
+
+        case DATATYPE_I8:
+            crc = ((CLR_INT32)ptr->NumericByRef().s8.LL ^ (CLR_INT32)ptr->NumericByRef().s8.HH);
+            break;
+
+        case DATATYPE_R8:
+            crc = ((CLR_INT32)ptr->NumericByRef().r8.LL ^ (CLR_INT32)ptr->NumericByRef().r8.HH);
+            break;
+
         case DATATYPE_CLASS:
         case DATATYPE_VALUETYPE:
         {
-            // always starts with the pointer to the object to fully disambiguate
-            crc = SUPPORT_ComputeCRC(&ptr, sizeof(ptr), crc);
+            CLR_RT_TypeDef_Instance cls;
+            cls.InitializeFromIndex(ptr->ObjectCls());
 
-            if (fRecurse)
+            // check if this is any of the following types
+            // DATATYPE_BOOLEAN
+            // DATATYPE_I1
+            // DATATYPE_U1
+            // DATATYPE_CHAR
+            // DATATYPE_I2
+            // DATATYPE_U2
+            // DATATYPE_I4
+            // DATATYPE_U4
+            // DATATYPE_R4
+            // DATATYPE_I8
+            // DATATYPE_U8
+            // DATATYPE_R8
+            if (fRecurse && cls.m_target->dataType <= DATATYPE_R8)
             {
-                CLR_RT_TypeDef_Instance cls;
-                cls.InitializeFromIndex(ptr->ObjectCls());
-                int totFields = cls.CrossReference().m_totalFields;
+                // pass the 1st field which is the one holding the actual value
+                crc = GetHashCode(&ptr[CLR_RT_HeapBlock::HB_Object_Fields_Offset], false, crc);
+            }
+            else
+            {
+                // always starts with the pointer to the object to fully disambiguate
+                crc = SUPPORT_ComputeCRC(&ptr, sizeof(ptr), crc);
 
-                if (totFields > 0)
+                if (fRecurse)
                 {
-                    do
+                    int totFields = cls.CrossReference().m_totalFields;
+
+                    if (totFields > 0)
                     {
-                        crc = GetHashCode(&ptr[totFields + CLR_RT_HeapBlock::HB_Object_Fields_Offset], false, crc);
-                    } while (--totFields > 0);
+                        do
+                        {
+                            crc = GetHashCode(&ptr[totFields + CLR_RT_HeapBlock::HB_Object_Fields_Offset], false, crc);
+                        } while (--totFields > 0);
+                    }
                 }
             }
         }
@@ -1243,6 +1313,10 @@ bool CLR_RT_HeapBlock::ObjectsEqual(
                 {
                     return true;
                 }
+                break;
+
+            case DATATYPE_STRING:
+                return Compare_Values(pArgLeft, pArgRight, false) == 0;
                 break;
 
             default:

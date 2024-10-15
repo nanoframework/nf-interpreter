@@ -20,7 +20,7 @@ resources:
 schedules:
 - cron: "58 23 * * *"
   branches:
-    include: [ develop ]
+    include: [ main ]
   always: true
   displayName: Nightly build at 23:58
 
@@ -303,7 +303,7 @@ jobs:
   variables:
     DOTNET_NOLOGO: true
     # creates a counter and assigns it to the revision variable
-    REVISION: $[counter('STM32_1_7_4_versioncounter', 0)]
+    REVISION: $[counter('STM32_1_8_0_versioncounter', 0)]
     GNU_GCC_TOOLCHAIN_PATH: $(Agent.TempDirectory)\GNU_Tools_ARM_Embedded
     HelperPackageVersion: $[counter('HelperPackageVersioncounter', 0)]
     TargetPlatform: 'stm32'
@@ -368,7 +368,7 @@ jobs:
           -DAPI_System.Net=ON
           -DAPI_System.Device.WiFi=ON
           -DAPI_Hardware.Esp32=ON
-          -DAPI_nanoFramework.Devices.OneWire=ON
+          -DAPI_nanoFramework.Device.OneWire=ON
           -DAPI_nanoFramework.ResourceManager=ON
           -DAPI_nanoFramework.System.Collections=ON
           -DAPI_nanoFramework.System.Text=ON
@@ -404,7 +404,7 @@ jobs:
           -DAPI_System.Net=ON
           -DAPI_System.Device.WiFi=ON
           -DAPI_Hardware.Esp32=ON
-          -DAPI_nanoFramework.Devices.OneWire=ON
+          -DAPI_nanoFramework.Device.OneWire=ON
           -DAPI_nanoFramework.ResourceManager=ON
           -DAPI_nanoFramework.System.Collections=ON
           -DAPI_nanoFramework.System.Text=ON
@@ -441,7 +441,7 @@ jobs:
           -DAPI_System.Net=ON
           -DAPI_System.Device.WiFi=ON
           -DAPI_Hardware.Esp32=ON
-          -DAPI_nanoFramework.Devices.OneWire=ON
+          -DAPI_nanoFramework.Device.OneWire=ON
           -DAPI_nanoFramework.ResourceManager=ON
           -DAPI_nanoFramework.System.Collections=ON
           -DAPI_nanoFramework.System.Text=ON
@@ -477,7 +477,7 @@ jobs:
           -DAPI_System.Net=ON
           -DAPI_System.Device.WiFi=ON
           -DAPI_Hardware.Esp32=ON
-          -DAPI_nanoFramework.Devices.OneWire=ON
+          -DAPI_nanoFramework.Device.OneWire=ON
           -DAPI_nanoFramework.ResourceManager=ON
           -DAPI_nanoFramework.System.Collections=ON
           -DAPI_nanoFramework.System.Text=ON
@@ -591,7 +591,7 @@ jobs:
           -DAPI_System.Net=ON
           -DAPI_System.Device.WiFi=ON
           -DAPI_Hardware.Esp32=ON
-          -DAPI_nanoFramework.Devices.OneWire=ON
+          -DAPI_nanoFramework.Device.OneWire=ON
           -DAPI_nanoFramework.ResourceManager=ON
           -DAPI_nanoFramework.System.Collections=ON
           -DAPI_nanoFramework.System.Text=ON
@@ -812,7 +812,7 @@ jobs:
   variables:
     DOTNET_NOLOGO: true
     # creates a counter and assigns it to the revision variable
-    REVISION: $[counter('ESP32_1_7_4_versioncounter', 0)]
+    REVISION: $[counter('ESP32_1_8_0_versioncounter', 0)]
     IDF_PATH: 'D:/a/1/s/esp-idf'
     PIP_CACHE_DIR: $(Pipeline.Workspace)/.pip
     TargetPlatform: 'esp32'
@@ -891,13 +891,13 @@ jobs:
           -DAPI_Windows.Devices.Adc=ON -DAPI_System.Device.Adc=ON
           -DAPI_nanoFramework.TI.EasyLink=ON
           -DAPI_nanoFramework.Hardware.TI=ON
-
+          -DAPI_nanoFramework.System.Text=ON
         GccArm_Version:
 
   variables:
     DOTNET_NOLOGO: true
     # creates a counter and assigns it to the revision variable
-    REVISION: $[counter('TI_1_7_4_versioncounter', 0)]
+    REVISION: $[counter('TI_1_8_0_versioncounter', 0)]
     GNU_GCC_TOOLCHAIN_PATH: $(Agent.TempDirectory)\GNU_Tools_ARM_Embedded
     HelperPackageVersion: $[counter('HelperPackageVersioncounter', 0)]
     TargetPlatform: 'ti_simplelink'

@@ -3,8 +3,9 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#include "nf_devices_onewire_native_target.h"
-#include "target_nf_devices_onewire_config.h"
+#include "nf_dev_onewire_target.h"
+#include <target_nf_dev_onewire_config.h>
+#include <Esp32_DeviceMapping.h>
 
 // struct for working threads
 static OneWireFindStruct FindStruct;
@@ -14,21 +15,13 @@ static uint8_t LastDiscrepancy;
 static uint8_t LastFamilyDiscrepancy;
 static uint8_t LastDevice;
 static uint8_t SerialNum[8];
-// UART to use for 1-Wire comm
-static uart_port_t UartDriver;
+
 // Driver state.
-static oneWireState DriverState;
+static oneWireState DriverState = ONEWIRE_UNINIT;
 
-#if ONEWIRE_USE_MUTUAL_EXCLUSION
-// Mutex protecting the peripheral
-static mutex_t DriverLock;
-#endif // ONEWIRE_USE_MUTUAL_EXCLUSION
-
-bool oneWireInit()
+HRESULT oneWireInit()
 {
-    // TODO: make configurable
     DriverState = ONEWIRE_STOP;
-    UartDriver = NF_ONEWIRE_ESP32_UART_NUM;
 
     uart_config_t uart_config = {
         .baud_rate = 115200,
@@ -39,32 +32,48 @@ bool oneWireInit()
         .rx_flow_ctrl_thresh = 0,
         .use_ref_tick = false,
     };
-    if (gpio_set_direction(gpio_num_t(NF_ONEWIRE_ESP32_UART_TX_PIN), GPIO_MODE_OUTPUT_OD) != ESP_OK)
-        return false;
-    if (uart_param_config(UartDriver, &uart_config) != ESP_OK)
-        return false;
-    if (uart_set_pin(
-            UartDriver,
-            NF_ONEWIRE_ESP32_UART_TX_PIN,
-            NF_ONEWIRE_ESP32_UART_RX_PIN,
-            UART_PIN_NO_CHANGE,
-            UART_PIN_NO_CHANGE) != ESP_OK)
-        return false;
-    if (uart_driver_install(UartDriver, UART_FIFO_LEN * 2, 0, 0, NULL, ESP_INTR_FLAG_IRAM) != ESP_OK)
-        return false;
 
-#if (ONEWIRE_USE_MUTUAL_EXCLUSION == TRUE)
-    osalMutexObjectInit(&DriverLock);
-#endif
+    // get GPIO pins configured for UART assigned to 1-Wire
+    // need to subtract one to get the correct index of UART in mapped device pins
+    int txPin = Esp32_GetMappedDevicePins(DEV_TYPE_SERIAL, NF_ONEWIRE_ESP32_UART_NUM - 1, Esp32SerialPin_Tx);
+    int rxPin = Esp32_GetMappedDevicePins(DEV_TYPE_SERIAL, NF_ONEWIRE_ESP32_UART_NUM - 1, Esp32SerialPin_Rx);
+
+    // check if TX, RX pins have been previously set
+    if (txPin == UART_PIN_NO_CHANGE || rxPin == UART_PIN_NO_CHANGE)
+    {
+        return CLR_E_PIN_UNAVAILABLE;
+    }
+
+    // configure GPIO and UART
+    if (gpio_set_direction(gpio_num_t(txPin), GPIO_MODE_OUTPUT_OD) != ESP_OK)
+    {
+        return CLR_E_INVALID_OPERATION;
+    }
+
+    if (uart_param_config(NF_ONEWIRE_ESP32_UART_NUM, &uart_config) != ESP_OK)
+    {
+        return CLR_E_INVALID_OPERATION;
+    }
+
+    if (uart_set_pin(NF_ONEWIRE_ESP32_UART_NUM, txPin, rxPin, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE) != ESP_OK)
+    {
+        return CLR_E_INVALID_OPERATION;
+    }
+
+    if (uart_driver_install(NF_ONEWIRE_ESP32_UART_NUM, UART_FIFO_LEN * 2, 0, 0, NULL, ESP_INTR_FLAG_IRAM) != ESP_OK)
+    {
+        return CLR_E_INVALID_OPERATION;
+    }
 
     DriverState = ONEWIRE_READY;
-    return true;
+
+    return S_OK;
 }
 
 void oneWireStop()
 {
     // stop UART
-    uart_driver_delete(UartDriver);
+    uart_driver_delete(NF_ONEWIRE_ESP32_UART_NUM);
 
     // driver is stopped
     DriverState = ONEWIRE_STOP;
@@ -76,15 +85,15 @@ uint8_t oneWireTouchReset(void)
     uint8_t presence;
 
     // flush DMA buffer to ensure cache coherency
-    uart_flush(UartDriver);
+    uart_flush(NF_ONEWIRE_ESP32_UART_NUM);
     // set UART baud rate to 9600bps (required to send the RESET condition to the 1-Wire bus)
-    uart_set_baudrate(UartDriver, 9600);
+    uart_set_baudrate(NF_ONEWIRE_ESP32_UART_NUM, 9600);
 
-    uart_write_bytes(UartDriver, (const char *)&reset, 1);
-    uart_read_bytes(UartDriver, &presence, 1, 20 / portTICK_RATE_MS);
+    uart_write_bytes(NF_ONEWIRE_ESP32_UART_NUM, (const char *)&reset, 1);
+    uart_read_bytes(NF_ONEWIRE_ESP32_UART_NUM, &presence, 1, 20 / portTICK_RATE_MS);
 
     // set UART baud rate to 115200bps (normal comm is performed at this baud rate)
-    uart_set_baudrate(UartDriver, 115200);
+    uart_set_baudrate(NF_ONEWIRE_ESP32_UART_NUM, 115200);
 
     // check for presence pulse
     return (presence != reset);
@@ -97,10 +106,10 @@ bool oneWireTouchBit(bool sendbit)
     uint8_t reply;
 
     // flush DMA buffer to ensure cache coherency
-    uart_flush(UartDriver);
+    uart_flush(NF_ONEWIRE_ESP32_UART_NUM);
 
-    uart_write_bytes(UartDriver, (const char *)&write, 1);
-    uart_read_bytes(UartDriver, &reply, 1, 20 / portTICK_RATE_MS);
+    uart_write_bytes(NF_ONEWIRE_ESP32_UART_NUM, (const char *)&write, 1);
+    uart_read_bytes(NF_ONEWIRE_ESP32_UART_NUM, &reply, 1, 20 / portTICK_RATE_MS);
 
     // interpret 1-Wire reply
     return (reply == IWIRE_RD);
@@ -123,10 +132,10 @@ uint8_t oneWireTouchByte(uint8_t sendbyte)
     };
 
     // flush DMA buffer to ensure cache coherency
-    uart_flush(UartDriver);
+    uart_flush(NF_ONEWIRE_ESP32_UART_NUM);
 
-    uart_write_bytes(UartDriver, (const char *)writeBuffer, 8);
-    uart_read_bytes(UartDriver, readBuffer, 8, 20 / portTICK_RATE_MS);
+    uart_write_bytes(NF_ONEWIRE_ESP32_UART_NUM, (const char *)writeBuffer, 8);
+    uart_read_bytes(NF_ONEWIRE_ESP32_UART_NUM, readBuffer, 8, 20 / portTICK_RATE_MS);
 
     // reset send mask to interpret the reply
     send_mask = 0x01;
@@ -146,16 +155,10 @@ uint8_t oneWireTouchByte(uint8_t sendbyte)
 
 void oneWireAquire()
 {
-#if (ONEWIRE_USE_MUTUAL_EXCLUSION == TRUE)
-    osalMutexLock(&Driver.Lock);
-#endif
 }
 
 void oneWireRelease()
 {
-#if (ONEWIRE_USE_MUTUAL_EXCLUSION == TRUE)
-    osalMutexUnlock(&Driver.Lock);
-#endif
 }
 
 // compute CRC8 using running algorith (slower but saves FLASH)
@@ -443,17 +446,17 @@ HRESULT FindOneDevice(CLR_RT_StackFrame &stack, bool findFirst)
     CLR_RT_HeapBlock hbTimeout;
     CLR_INT64 *timeout;
     TaskHandle_t task;
-
-    // ensure the device is initialized
-    if (DriverState != ONEWIRE_READY && !oneWireInit())
-        return CLR_E_INVALID_PARAMETER;
+    HRESULT result;
 
     // set an infinite timeout to wait forever for the operation to complete
     // this value has to be in ticks to be properly loaded by SetupTimeoutFromTicks() below
     hbTimeout.SetInteger((CLR_INT64)-1);
-    HRESULT result = stack.SetupTimeoutFromTicks(hbTimeout, timeout);
+    result = stack.SetupTimeoutFromTicks(hbTimeout, timeout);
+
     if (result != S_OK)
+    {
         return result;
+    }
 
     // this is going to be used to check for the right event in case of simultaneous 1-Wire operations
     if (stack.m_customState == 1)
@@ -486,12 +489,13 @@ HRESULT FindOneDevice(CLR_RT_StackFrame &stack, bool findFirst)
         // get a pointer to the managed object instance and check that it's not NULL
         CLR_RT_HeapBlock *pThis = stack.This();
         if (pThis == NULL)
+        {
             return CLR_E_NULL_REFERENCE;
+        }
 
         // get a pointer to the serial number field in the OneWireController instance
         CLR_RT_HeapBlock_Array *serialNumberField =
-            pThis[Library_nf_devices_onewire_native_nanoFramework_Devices_OneWire_OneWireController::
-                      FIELD___serialNumber]
+            pThis[Library_nf_dev_onewire_nanoFramework_Device_OneWire_OneWireHost::FIELD___serialNumber]
                 .DereferenceArray();
 
         _ASSERTE(serialNumberField->m_numOfElements == 8);
@@ -511,81 +515,58 @@ HRESULT FindOneDevice(CLR_RT_StackFrame &stack, bool findFirst)
     return S_OK;
 }
 
-HRESULT Library_nf_devices_onewire_native_nanoFramework_Devices_OneWire_OneWireController::TouchReset___BOOLEAN(
+HRESULT Library_nf_dev_onewire_nanoFramework_Device_OneWire_OneWireHost::TouchReset___BOOLEAN(
     CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
-
-    // ensure the device is initialized
-    if (DriverState != ONEWIRE_READY && !oneWireInit())
-        NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
 
     stack.SetResult_Boolean(oneWireTouchReset());
 
-    NANOCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP_NOLABEL();
 }
 
-HRESULT Library_nf_devices_onewire_native_nanoFramework_Devices_OneWire_OneWireController::TouchBit___BOOLEAN__BOOLEAN(
+HRESULT Library_nf_dev_onewire_nanoFramework_Device_OneWire_OneWireHost::TouchBit___BOOLEAN__BOOLEAN(
     CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
-
-    // ensure the device is initialized
-    if (DriverState != ONEWIRE_READY && !oneWireInit())
-        NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
 
     stack.SetResult_Boolean(oneWireTouchBit(stack.Arg1().NumericByRefConst().u1 != 0));
 
-    NANOCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP_NOLABEL();
 }
 
-HRESULT Library_nf_devices_onewire_native_nanoFramework_Devices_OneWire_OneWireController::TouchByte___U1__U1(
-    CLR_RT_StackFrame &stack)
+HRESULT Library_nf_dev_onewire_nanoFramework_Device_OneWire_OneWireHost::TouchByte___U1__U1(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
-    // ensure the device is initialized
-    if (DriverState != ONEWIRE_READY && !oneWireInit())
-        NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
-
     stack.SetResult_U1(oneWireTouchByte((uint8_t)stack.Arg1().NumericByRefConst().u1));
 
-    NANOCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP_NOLABEL();
 }
 
-HRESULT Library_nf_devices_onewire_native_nanoFramework_Devices_OneWire_OneWireController::WriteByte___U1__U1(
-    CLR_RT_StackFrame &stack)
+HRESULT Library_nf_dev_onewire_nanoFramework_Device_OneWire_OneWireHost::WriteByte___U1__U1(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
     uint8_t sendbyte;
 
-    // ensure the device is initialized
-    if (DriverState != ONEWIRE_READY && !oneWireInit())
-        NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
-
     sendbyte = (uint8_t)stack.Arg1().NumericByRefConst().u1;
     stack.SetResult_U1(oneWireTouchByte(sendbyte) == sendbyte ? TRUE : FALSE);
 
-    NANOCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP_NOLABEL();
 }
 
-HRESULT Library_nf_devices_onewire_native_nanoFramework_Devices_OneWire_OneWireController::ReadByte___U1(
-    CLR_RT_StackFrame &stack)
+HRESULT Library_nf_dev_onewire_nanoFramework_Device_OneWire_OneWireHost::ReadByte___U1(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
-    // ensure the device is initialized
-    if (DriverState != ONEWIRE_READY && !oneWireInit())
-        NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
-
     stack.SetResult_U1(oneWireTouchByte(0xFF));
 
-    NANOCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP_NOLABEL();
 }
 
-HRESULT Library_nf_devices_onewire_native_nanoFramework_Devices_OneWire_OneWireController::
-    FindFirstDevice___BOOLEAN__BOOLEAN__BOOLEAN(CLR_RT_StackFrame &stack)
+HRESULT Library_nf_dev_onewire_nanoFramework_Device_OneWire_OneWireHost::FindFirstDevice___BOOLEAN__BOOLEAN__BOOLEAN(
+    CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
@@ -594,12 +575,35 @@ HRESULT Library_nf_devices_onewire_native_nanoFramework_Devices_OneWire_OneWireC
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_nf_devices_onewire_native_nanoFramework_Devices_OneWire_OneWireController::
-    FindNextDevice___BOOLEAN__BOOLEAN__BOOLEAN(CLR_RT_StackFrame &stack)
+HRESULT Library_nf_dev_onewire_nanoFramework_Device_OneWire_OneWireHost::FindNextDevice___BOOLEAN__BOOLEAN__BOOLEAN(
+    CLR_RT_StackFrame &stack)
 {
+    (void)stack;
+
     NANOCLR_HEADER();
 
     NANOCLR_CHECK_HRESULT(FindOneDevice(stack, false));
+
+    NANOCLR_NOCLEANUP();
+}
+
+HRESULT Library_nf_dev_onewire_nanoFramework_Device_OneWire_OneWireHost::NativeDispose___VOID(
+    CLR_RT_StackFrame &stack)
+{
+    (void)stack;
+
+    NANOCLR_HEADER();
+
+    oneWireStop();
+
+    NANOCLR_NOCLEANUP_NOLABEL();
+}
+
+HRESULT Library_nf_dev_onewire_nanoFramework_Device_OneWire_OneWireHost::NativeInit___VOID(CLR_RT_StackFrame &stack)
+{
+    NANOCLR_HEADER();
+
+    NANOCLR_CHECK_HRESULT(oneWireInit());
 
     NANOCLR_NOCLEANUP();
 }

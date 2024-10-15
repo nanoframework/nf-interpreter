@@ -20,6 +20,12 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="nf_system_collections_System_Collections_Hashtable__HashtableEnumerator.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="nf_system_collections_System_Collections_Hashtable.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="nf_system_collections_System_Collections_Queue.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>

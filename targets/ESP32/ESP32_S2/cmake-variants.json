@@ -69,7 +69,7 @@
           "API_Hardware.Esp32": "ON",
           "API_nanoFramework.Hardware.Esp32.Rmt": "ON",
           "API_nanoFramework.Espnow": "ON",
-          "API_nanoFramework.Devices.OneWire": "OFF",
+          "API_nanoFramework.Device.OneWire": "OFF",
           "API_nanoFramework.Graphics": "OFF",
           "API_nanoFramework.Device.Bluetooth": "OFF"
         }
@@ -117,7 +117,7 @@
           "API_nanoFramework.Hardware.Esp32.Rmt": "ON",
           "API_nanoFramework.Espnow": "ON",
           "API_nanoFramework.Device.Bluetooth": "OFF",
-          "API_nanoFramework.Devices.OneWire": "OFF",
+          "API_nanoFramework.Device.OneWire": "OFF",
           "API_nanoFramework.Graphics": "ON",
           "GRAPHICS_DISPLAY": "ILI9341_240x320_SPI.cpp",
           "TOUCHPANEL_DEVICE": "XPT2046.cpp",

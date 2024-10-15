@@ -92,7 +92,7 @@
           "NF_SECURITY_MBEDTLS": "OFF-default-ON-to-add-network-security-from-mbedTLS",
           "MBEDTLS_SOURCE": "<path-to-mbedtls-source-mind-the-forward-slashes>",
           "API_nanoFramework.Devices.Can": "OFF-default-ON-to-add-this-API",
-          "API_nanoFramework.Devices.OneWire": "OFF-default-ON-to-add-this-API",
+          "API_nanoFramework.Device.OneWire": "OFF-default-ON-to-add-this-API",
           "API_nanoFramework.ResourceManager": "OFF-default-ON-to-add-this-API",
           "API_nanoFramework.System.Collections": "OFF-default-ON-to-add-this-API",
           "API_nanoFramework.System.Text": "OFF-default-ON-to-add-this-API",

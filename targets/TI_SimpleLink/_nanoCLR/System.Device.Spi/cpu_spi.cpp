@@ -229,18 +229,30 @@ uint32_t CPU_SPI_PortsMap()
 }
 
 // Return SPI minimum clock frequency
-uint32_t CPU_SPI_MinClockFrequency(uint32_t spi_bus)
+HRESULT CPU_SPI_MinClockFrequency(uint32_t spiBus, int32_t *frequency)
 {
-    (void)spi_bus;
+    if (spiBus - 1 >= NUM_SPI_BUSES)
+    {
+        return CLR_E_INVALID_PARAMETER;
+    }
 
     // TODO check what is minimum ( min clock that can be configured on chip, master only)
-    return 10000000 / 256;
+    *frequency = 10000000 / 256;
+
+    return S_OK;
 }
 
 // Return SPI maximum clock frequency
-uint32_t CPU_SPI_MaxClockFrequency(uint32_t spi_bus)
+HRESULT CPU_SPI_MaxClockFrequency(uint32_t spiBus, int32_t *frequency)
 {
-    return 40000000;
+    if (spiBus - 1 >= NUM_SPI_BUSES)
+    {
+        return CLR_E_INVALID_PARAMETER;
+    }
+
+    *frequency = 40000000;
+
+    return S_OK;
 }
 
 //

@@ -11,55 +11,63 @@
 #include <nanoCLR_Runtime.h>
 #include <nanoCLR_Runtime__HeapBlock.h>
 
-struct Library_nf_system_collections_System_Collections_DictionaryEntry
+struct Library_nf_system_collections_System_Collections_Bucket
 {
-    static const int FIELD__Key = 1;
-    static const int FIELD__Value = 2;
-
-    //--//
-};
-
-struct Library_nf_system_collections_System_Collections_Hashtable__Entry
-{
-    static const int FIELD__key = 1;
-    static const int FIELD__value = 2;
-    static const int FIELD__next = 3;
+    static const int FIELD___key = 1;
+    static const int FIELD___value = 2;
+    static const int FIELD___hash = 3;
 
     //--//
 };
 
 struct Library_nf_system_collections_System_Collections_Hashtable
 {
+    static const int FIELD_STATIC___syncLock = 0;
+
     static const int FIELD___buckets = 1;
-    static const int FIELD___numberOfBuckets = 2;
-    static const int FIELD___count = 3;
-    static const int FIELD___loadFactor = 4;
-    static const int FIELD___maxLoadFactor = 5;
-    static const int FIELD___growthFactor = 6;
+    static const int FIELD___loadsize = 2;
+    static const int FIELD___loadFactor = 3;
+    static const int FIELD___count = 4;
+    static const int FIELD___version = 5;
+
+    NANOCLR_NATIVE_DECLARE(Clear___VOID);
+    NANOCLR_NATIVE_DECLARE(Contains___BOOLEAN__OBJECT);
+    NANOCLR_NATIVE_DECLARE(Remove___VOID__OBJECT);
+    NANOCLR_NATIVE_DECLARE(InsertNative___VOID__OBJECT__OBJECT__BOOLEAN);
+    NANOCLR_NATIVE_DECLARE(GetNative___OBJECT__OBJECT);
+    NANOCLR_NATIVE_DECLARE(GetPrimeNative___STATIC__I4__I4);
 
     //--//
+
+    static HRESULT Expand(CLR_RT_StackFrame &stack);
+    static uint32_t InitHash(CLR_RT_HeapBlock *key, int32_t hashsize, uint32_t *seed, uint32_t *incr);
 };
 
 struct Library_nf_system_collections_System_Collections_Hashtable__HashtableEnumerator
 {
-    static const int FIELD__ht = 1;
-    static const int FIELD__temp = 2;
-    static const int FIELD__index = 3;
-    static const int FIELD__returnType = 4;
+    static const int FIELD___hashtable = 1;
+    static const int FIELD___bucket = 2;
+    static const int FIELD___version = 3;
+    static const int FIELD___current = 4;
+    static const int FIELD___getObjectRetType = 5;
+    static const int FIELD___currentKey = 6;
+    static const int FIELD___currentValue = 7;
+
+    NANOCLR_NATIVE_DECLARE(MoveNext___BOOLEAN);
 
     //--//
 };
 
 struct Library_nf_system_collections_System_Collections_Hashtable__KeyCollection
 {
-    static const int FIELD__ht = 1;
+    static const int FIELD___hashtable = 1;
 
     //--//
 };
 
 struct Library_nf_system_collections_System_Collections_Hashtable__ValueCollection
 {
-    static const int FIELD__ht = 1;
+    static const int FIELD___hashtable = 1;
 
     //--//
 };

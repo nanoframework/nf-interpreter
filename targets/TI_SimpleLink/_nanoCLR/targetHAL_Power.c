@@ -25,7 +25,11 @@ void CPU_SetPowerMode(PowerLevel_type powerLevel)
     {
         case PowerLevel__Off:
             // gracefully shutdown everything
-            // FIXME TODO
+            nanoHAL_Uninitialize_C();
+
+            // now let's go with shutdown
+            Power_shutdown(0, 0);
+
             break;
 
         default:

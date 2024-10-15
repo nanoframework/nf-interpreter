@@ -164,7 +164,7 @@
           "type": "BOOL"
         },
         {
-          "name": "API_nanoFramework.Devices.OneWire",
+          "name": "API_nanoFramework.Device.OneWire",
           "value": "True",
           "type": "BOOL"
         },
@@ -449,7 +449,7 @@
           "type": "PATH"
         },
         {
-          "name": "API_nanoFramework.Devices.OneWire",
+          "name": "API_nanoFramework.Device.OneWire",
           "value": "True",
           "type": "BOOL"
         },

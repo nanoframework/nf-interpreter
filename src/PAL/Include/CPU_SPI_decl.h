@@ -136,10 +136,8 @@ uint32_t CPU_SPI_PortsCount();
 void CPU_SPI_GetPins(uint32_t spi_bus, GPIO_PIN &clk, GPIO_PIN &miso, GPIO_PIN &mosi);
 
 // Minimum and Maximum clock frequency available based on bus and configured pins
-uint32_t CPU_SPI_MinClockFrequency(uint32_t spi_bus);
-uint32_t CPU_SPI_MaxClockFrequency(uint32_t spi_bus);
-
-// Number of SPI devices that can simultaneously be opened on a bus ( hardware restrictions)
 uint32_t CPU_SPI_ChipSelectLineCount(uint32_t spi_bus);
+HRESULT CPU_SPI_MinClockFrequency(uint32_t spiBus, int32_t *frequency);
+HRESULT CPU_SPI_MaxClockFrequency(uint32_t spiBus, int32_t *frequency);
 
 #endif // DRIVERS_SPI_DECL_H

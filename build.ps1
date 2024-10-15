@@ -90,7 +90,7 @@ If ($TargetBoard -eq "ORGPAL_PALTHREE" -or
 -DAPI_Windows.Devices.Pwm=ON -DAPI_System.Device.Pwm=ON
 -DAPI_Windows.Devices.SerialCommunication=ON -DAPI_System.IO.Ports=ON
 -DAPI_Windows.Devices.Adc=ON -DAPI_System.Device.Adc=ON
--DAPI_nanoFramework.Devices.OneWire=ON
+-DAPI_nanoFramework.Device.OneWire=ON
 -DAPI_nanoFramework.Devices.Can=ON
 -DAPI_nanoFramework.ResourceManager=ON
 -DAPI_nanoFramework.System.Collections=ON
@@ -119,7 +119,7 @@ If ($TargetBoard -eq "ORGPAL_PALTHREE" -or
 -DAPI_System.Device.Dac=ON
 -DAPI_System.Net=ON
 -DNF_SECURITY_MBEDTLS=ON
--DAPI_nanoFramework.Devices.OneWire=ON
+-DAPI_nanoFramework.Device.OneWire=ON
 -DAPI_nanoFramework.Devices.Can=ON
 -DAPI_System.IO.FileSystem=ON
 -DAPI_nanoFramework.ResourceManager=ON
@@ -175,7 +175,7 @@ elseif ($TargetBoard -eq "ESP32_WROOM_32") {
 -DNF_SECURITY_MBEDTLS=ON
 -DAPI_Hardware.Esp32=ON
 -DSUPPORT_ANY_BASE_CONVERSION=ON
--DAPI_nanoFramework.Devices.OneWire=ON
+-DAPI_nanoFramework.Device.OneWire=ON
 -DAPI_nanoFramework.ResourceManager=ON
 -DAPI_nanoFramework.System.Collections=ON
 -DAPI_nanoFramework.System.Text=ON
@@ -291,7 +291,7 @@ elseif ($TargetBoard -eq "GHI_FEZ_CERB40_NF" -or
 -DAPI_Windows.Devices.SerialCommunication=ON -DAPI_System.IO.Ports=ON
 -DAPI_Windows.Devices.Adc=ON -DAPI_System.Device.Adc=ON
 -DAPI_System.Device.Dac=OFF
--DAPI_nanoFramework.Devices.OneWire=ON
+-DAPI_nanoFramework.Device.OneWire=ON
 -DAPI_nanoFramework.ResourceManager=ON
 -DAPI_nanoFramework.System.Collections=ON
 -DAPI_nanoFramework.System.Text=ON
@@ -342,7 +342,7 @@ elseif ($TargetBoard -eq "GHI_FEZ_CERB40_NF" -or
 -DAPI_Windows.Devices.Pwm=ON
 -DAPI_Windows.Devices.SerialCommunication=ON
 -DAPI_Windows.Devices.Adc=ON
--DAPI_nanoFramework.Devices.OneWire=ON
+-DAPI_nanoFramework.Device.OneWire=ON
 "@
     }
     elseif ($TargetBoard -eq "ST_NUCLEO64_F411RE_NF") {
@@ -418,7 +418,7 @@ elseif ($TargetBoard -eq "GHI_FEZ_CERB40_NF" -or
 -DAPI_Windows.Devices.Adc=ON -DAPI_System.Device.Adc=ON
 -DAPI_System.Net=ON
 -DNF_SECURITY_MBEDTLS=ON
--DAPI_nanoFramework.Devices.OneWire=ON
+-DAPI_nanoFramework.Device.OneWire=ON
 -DAPI_nanoFramework.System.Collections=ON
 -DAPI_nanoFramework.ResourceManager=ON
 -DAPI_nanoFramework.System.Text=ON
@@ -440,7 +440,7 @@ elseif ($TargetBoard -eq "GHI_FEZ_CERB40_NF" -or
 -DAPI_Windows.Devices.Pwm=ON -DAPI_System.Device.Pwm=ON
 -DAPI_Windows.Devices.SerialCommunication=ON -DAPI_System.IO.Ports=ON
 -DAPI_Windows.Devices.Adc=ON -DAPI_System.Device.Adc=ON
--DAPI_nanoFramework.Devices.OneWire=ON
+-DAPI_nanoFramework.Device.OneWire=ON
 -DAPI_nanoFramework.Devices.Can=ON
 "@
     }
@@ -480,7 +480,7 @@ elseif ($TargetBoard -eq "GHI_FEZ_CERB40_NF" -or
 -DAPI_Windows.Devices.I2c=ON -DAPI_System.Device.I2c=ON
 -DAPI_Windows.Devices.Pwm=ON -DAPI_System.Device.Pwm=ON
 -DAPI_Windows.Devices.SerialCommunication=ON -DAPI_System.IO.Ports=ON
--DAPI_nanoFramework.Devices.OneWire=ON
+-DAPI_nanoFramework.Device.OneWire=ON
 -DAPI_Windows.Storage=ON
 -DAPI_nanoFramework.ResourceManager=ON
 -DAPI_nanoFramework.System.Collections=ON

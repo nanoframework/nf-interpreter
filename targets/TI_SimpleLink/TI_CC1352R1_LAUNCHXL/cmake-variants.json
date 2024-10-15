@@ -56,7 +56,7 @@
           "API_System.IO.Ports": "OFF",
           "API_nanoFramework.ResourceManager": "OFF",
           "API_nanoFramework.System.Collections": "OFF",
-          "API_nanoFramework.System.Text": "OFF",
+          "API_nanoFramework.System.Text": "ON",
           "API_nanoFramework.TI.EasyLink": "ON",
           "API_nanoFramework.Hardware.TI": "ON"
         }

@@ -11,12 +11,10 @@
 #include <target_windows_devices_gpio.h>
 
 #include "rom.h"
-// #include "rom_map.h"
 #include <inc/hw_types.h>
 #include <inc/hw_memmap.h>
-// #include <inc/hw_common_reg.h>
 #include <gpio.h>
 #include <interrupt.h>
 #include <dpl/HwiP.h>
 
-#endif //WIN_DEV_GPIO_NATIVE_TARGET_H
+#endif // WIN_DEV_GPIO_NATIVE_TARGET_H

@@ -24,7 +24,7 @@ if ([string]::IsNullOrEmpty($Path) -or $force) {
     }
     else {
         # use default
-        $Path = E:\stm32_tools#"C:\nftools"
+        $Path = 'C:\nftools'
     }
 
     # append the tool path
@@ -60,7 +60,7 @@ If ($openOCDPathExists -eq $False -or $force) {
     Expand-Archive -Path $output -DestinationPath "$Path\temp"
 
     # move to final location
-    Get-ChildItem -Path "$Path\temp\xPack\OpenOCD\xpack-openocd-0.11.0-1" -Recurse | Move-Item -Destination "$Path"
+    Get-ChildItem -Path "$Path\temp\xpack-openocd-0.11.0-1" -Recurse | Move-Item -Destination "$Path"
 
     # remove temp directory
     Remove-Item $Path\temp -Recurse -Force

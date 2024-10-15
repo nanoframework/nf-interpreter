@@ -2034,6 +2034,13 @@ struct CLR_RT_AttributeParser
 
     HRESULT Next(Value *&res);
 
+    HRESULT ReadNumericValue(
+        CLR_RT_HeapBlock *&value,
+        const CLR_DataType dt,
+        const CLR_RT_TypeDef_Index *m_cls,
+        const CLR_UINT32 size);
+    HRESULT ReadString(CLR_RT_HeapBlock *&value);
+
   private:
     const char *GetString();
 };
@@ -3367,26 +3374,30 @@ extern bool g_CLR_RT_fBadStack;
 #endif
 
 //--//
+
+// clang-format off
 typedef enum Events
 {
     // this event is to be used when there is no event to actually wait for
-    Event_NoEvent = 0x00000001,
+    Event_NoEvent           = 0x00000001,
 
-    Event_SerialPortIn = 0x00000002,
-    Event_SerialPortOut = 0x00000004,
-    Event_EndPoint = 0x00000008,
-    Event_StorageIo = 0x00000020,
-    Event_I2cMaster = 0x00000080,
-    Event_SpiMaster = 0x00000100,
-    Event_OneWireMaster = 0x00000200,
-    Event_Radio = 0x00000400,
-    Event_Wifi_Station = 0x00000800,
-    Event_Bluetooth = 0x00001000,
-    Event_AppDomain = 0x02000000,
-    Event_Socket = 0x20000000,
-    Event_IdleCPU = 0x40000000,
-    Event_LowMemory = 0x80000000,
+    Event_SerialPortIn      = 0x00000002,
+    Event_SerialPortOut     = 0x00000004,
+    Event_EndPoint          = 0x00000008,
+    Event_StorageIo         = 0x00000020,
+    Event_I2cMaster         = 0x00000080,
+    Event_SpiMaster         = 0x00000100,
+    Event_OneWireHost       = 0x00000200,
+    Event_Radio             = 0x00000400,
+    Event_Wifi_Station      = 0x00000800,
+    Event_Bluetooth         = 0x00001000,
+    Event_AppDomain         = 0x02000000,
+    Event_Socket            = 0x20000000,
+    Event_IdleCPU           = 0x40000000,
+    Event_LowMemory         = 0x80000000,
 } Events;
+
+// clang-format on
 
 struct CLR_RT_ExecutionEngine
 {

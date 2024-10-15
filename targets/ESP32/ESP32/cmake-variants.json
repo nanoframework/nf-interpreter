@@ -66,7 +66,7 @@
           "API_Hardware.Esp32": "ON",
           "API_nanoFramework.Hardware.Esp32.Rmt": "ON",
           "API_nanoFramework.Espnow": "ON",
-          "API_nanoFramework.Devices.OneWire": "ON",
+          "API_nanoFramework.Device.OneWire": "ON",
           "API_nanoFramework.Graphics": "OFF",
           "API_nanoFramework.Device.Bluetooth": "OFF"
         }
@@ -115,7 +115,7 @@
           "API_Hardware.Esp32": "ON",
           "API_nanoFramework.Hardware.Esp32.Rmt": "ON",
           "API_nanoFramework.Espnow": "ON",
-          "API_nanoFramework.Devices.OneWire": "ON",
+          "API_nanoFramework.Device.OneWire": "ON",
           "API_nanoFramework.Graphics": "OFF",
           "API_nanoFramework.Device.Bluetooth": "OFF"
         }
@@ -165,7 +165,7 @@
           "API_Hardware.Esp32": "ON",
           "API_nanoFramework.Hardware.Esp32.Rmt": "ON",
           "API_nanoFramework.Espnow": "ON",
-          "API_nanoFramework.Devices.OneWire": "ON",
+          "API_nanoFramework.Device.OneWire": "ON",
           "API_nanoFramework.Graphics": "OFF",
           "API_nanoFramework.Device.Bluetooth": "ON"
         }
@@ -216,7 +216,7 @@
           "API_Hardware.Esp32": "ON",
           "API_nanoFramework.Hardware.Esp32.Rmt": "ON",
           "API_nanoFramework.Espnow": "ON",
-          "API_nanoFramework.Devices.OneWire": "ON",
+          "API_nanoFramework.Device.OneWire": "ON",
           "API_nanoFramework.Graphics": "OFF",
           "API_nanoFramework.Device.Bluetooth": "OFF"
         }
@@ -423,7 +423,7 @@
           "API_Hardware.Esp32": "ON",
           "API_nanoFramework.Hardware.Esp32.Rmt": "ON",
           "API_nanoFramework.Espnow": "ON",
-          "API_nanoFramework.Devices.OneWire": "ON",
+          "API_nanoFramework.Device.OneWire": "ON",
           "API_nanoFramework.Graphics": "OFF",
           "API_nanoFramework.Device.Bluetooth": "OFF"
         }

@@ -4,6 +4,29 @@
 //
 
 #include "nf_hardware_ti_native.h"
+#include <nanoCLR_Hardware.h>
+
+// hack required to be able to config wakeup from deep sleep
+// bug introduced in SDK 5.30.01.01.
+// waiting for a proper fix in a future SDK
+extern "C"
+{
+    PINCC26XX_HWAttrs PINCC26XX_hwAttrs = {.intPriority = ~0, .swiPriority = 0};
+
+    const PIN_Config BoardGpioInitTable[] = {PIN_TERMINATE};
+
+    void PIN_init_nano()
+    {
+        Power_init();
+
+        if (PIN_init(BoardGpioInitTable) != PIN_SUCCESS)
+        {
+            // Error with PIN_init
+            while (1)
+                ;
+        }
+    }
+}
 
 // declare a shorter type to make code readable
 typedef Library_nf_hardware_ti_native_nanoFramework_Hardware_TI_Power__PinWakeupConfig PinWakeupConfig;
@@ -47,7 +70,7 @@ HRESULT Library_nf_hardware_ti_native_nanoFramework_Hardware_TI_Power::
                 wakeupConfigurations[index] = PIN_ID(pinWakeupConfig[PinWakeupConfig::FIELD___pin].NumericByRef().s4);
 
                 // pin is always input
-                wakeupConfigurations[index] |= PIN_INPUT_EN;
+                wakeupConfigurations[index] |= PIN_INPUT_EN | PIN_NOPULL | PIN_IRQ_DIS;
 
                 // grab and set pullup/down option
                 wakeupConfigurations[index] |=
@@ -95,7 +118,12 @@ HRESULT Library_nf_hardware_ti_native_nanoFramework_Hardware_TI_Power::NativeEnt
 {
     NANOCLR_HEADER();
 
-    Power_shutdown(0, 0);
+    // set flags to stop debug...
+    CLR_EE_DBG_SET(RebootPending);
+    // ... reboot CLR so execution ends gracefully ...
+    CLR_EE_REBOOT_CLR;
+    // ... and set power level to OFF
+    g_CLR_HW_Hardware.m_powerLevel = PowerLevel__Off;
 
     NANOCLR_NOCLEANUP();
 }

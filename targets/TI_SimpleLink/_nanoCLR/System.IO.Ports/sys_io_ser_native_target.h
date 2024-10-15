@@ -41,7 +41,4 @@ typedef struct
 extern NF_PAL_UART Uart1_PAL;
 #endif
 
-#define UART_TX_BUFFER_SIZE(num) UART##num##_TX_SIZE
-#define UART_RX_BUFFER_SIZE(num) UART##num##_RX_SIZE
-
 #endif // SYS_IO_SER_NATIVE_TARGET_H

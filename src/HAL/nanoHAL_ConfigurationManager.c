@@ -328,8 +328,8 @@ __nfweak bool ConfigurationManager_CheckExistingConfigurationBlock(
     uint32_t newConfigBlockSize)
 {
     // config blocks parameters are addresses
-    volatile uint8_t *cursor1 = (volatile uint8_t *)existingConfigBlock;
-    volatile uint8_t *cursor2 = (volatile uint8_t *)newConfigBlock;
+    uint8_t *cursor1 = (uint8_t *)existingConfigBlock;
+    uint8_t *cursor2 = (uint8_t *)newConfigBlock;
 
     // obvious check
     if (existingConfigBlockSize != newConfigBlockSize)
@@ -337,14 +337,5 @@ __nfweak bool ConfigurationManager_CheckExistingConfigurationBlock(
         return false;
     }
 
-    while (existingConfigBlockSize--)
-    {
-        if (*cursor1++ != *cursor2++)
-        {
-            // content is different!!
-            return false;
-        }
-    }
-
-    return true;
+    return memcmp(cursor1, cursor2, existingConfigBlockSize) == 0;
 }

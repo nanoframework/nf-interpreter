@@ -57,7 +57,7 @@
           "API_System.IO.Ports": "ON",
           "API_Windows.Devices.Adc": "ON",
           "API_System.Device.Adc": "ON",
-          "API_nanoFramework.Devices.OneWire": "ON",
+          "API_nanoFramework.Device.OneWire": "ON",
           "API_nanoFramework.Devices.Can": "ON",
           "API_nanoFramework.ResourceManager": "ON",
           "API_nanoFramework.System.Collections": "ON",

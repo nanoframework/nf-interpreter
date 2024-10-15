@@ -8,9 +8,6 @@
 #include "sys_io_ser_native_target.h"
 #include <Esp32_DeviceMapping.h>
 
-// UART buffer size: 256 bytes
-#define UART_BUFER_SIZE 256
-
 // in UWP the COM ports are named COM1, COM2, COM3. But ESP32 uses internally UART0, UART1, UART2. This maps the port
 // index 1, 2 or 3 to the uart number 0, 1 or 2
 #define PORT_INDEX_TO_UART_NUM(portIndex) ((portIndex)-1)
@@ -860,6 +857,7 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeInit___VOID(
     char task_name[16];
     uart_port_t uart_num;
     esp_err_t esp_err;
+    int32_t bufferSize;
 
     NF_PAL_UART *palUart;
 
@@ -891,8 +889,9 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeInit___VOID(
         NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
     }
 
-    // alloc buffers memory
-    palUart->RxBuffer = (uint8_t *)platform_malloc(UART_BUFER_SIZE);
+    // alloc buffer memory
+    bufferSize = pThis[FIELD___bufferSize].NumericByRef().s4;
+    palUart->RxBuffer = (uint8_t *)platform_malloc(bufferSize);
 
     // sanity check
     if (palUart->RxBuffer == NULL)
@@ -901,7 +900,7 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeInit___VOID(
     }
 
     // init buffer
-    palUart->RxRingBuffer.Initialize(palUart->RxBuffer, UART_BUFER_SIZE);
+    palUart->RxRingBuffer.Initialize(palUart->RxBuffer, bufferSize);
 
     // set/reset all the rest
     palUart->SerialDevice = stack.This();
@@ -915,7 +914,7 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeInit___VOID(
     esp_err = uart_driver_install(
         uart_num,
         // rx_buffer_size
-        UART_BUFER_SIZE,
+        bufferSize,
         // tx_buffer_size, not buffered
         0,
         // queue_size
