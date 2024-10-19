@@ -481,3 +481,19 @@ HRESULT nanoSPI_Write_Read(
         readPtr,
         readSize);
 }
+
+//
+// Get the SPI handle from the device handle
+//
+uint32_t CPU_SPI_GetSpiHandle(uint32_t deviceHandle)
+{
+    uint8_t spiBus;
+    int deviceIndex;
+
+    if (!getDevice(deviceHandle, spiBus, deviceIndex))
+    {
+        return 0;
+    }
+
+    return spiconfig[spiBus].deviceHandles[deviceIndex];
+}
