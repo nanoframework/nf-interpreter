@@ -896,3 +896,11 @@ HAL_Configuration_X509DeviceCertificate *ConfigurationManager_GetDeviceCertifica
     // not found, or failed to allocate memory
     return NULL;
 }
+
+// default implementation
+// this is weak so a manufacturer can provide a strong implementation
+__nfweak void ConfigurationManager_GetSerialNumbers(char *serialNumbers, size_t serialNumbersSize)
+{
+    // do the thing to get unchangeable MAC address
+    memset(serialNumbers, 0, serialNumbersSize);
+}
