@@ -773,3 +773,11 @@ int32_t ConfigurationManager_FindNetworkConfigurationMatchingWirelessConfigurati
     // not found
     return -1;
 }
+
+// default implementation
+// this is weak so a manufacturer can provide a strong implementation
+__nfweak void ConfigurationManager_GetSerialNumbers(char *serialNumbers, size_t serialNumbersSize)
+{
+    // do the thing to get unique device ID
+    memset(serialNumbers, 0, serialNumbersSize);
+}

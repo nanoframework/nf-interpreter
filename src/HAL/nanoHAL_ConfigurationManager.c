@@ -339,3 +339,10 @@ __nfweak bool ConfigurationManager_CheckExistingConfigurationBlock(
 
     return memcmp(cursor1, cursor2, existingConfigBlockSize) == 0;
 }
+
+__nfweak void ConfigurationManager_GetOemModelSku(char *model, size_t modelSkuSize)
+{
+    // default implementation
+    // this is weak so the target can provide the implementation
+    memset(model, 0, modelSkuSize);
+}
