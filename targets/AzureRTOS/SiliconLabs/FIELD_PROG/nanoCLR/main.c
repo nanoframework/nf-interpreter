@@ -178,6 +178,9 @@ void tx_application_define(void *first_unused_memory)
     }
 
 #if GECKO_FEATURE_USBD_HID == TRUE || HAL_WP_USE_USB_CDC == TRUE || GECKO_FEATURE_USBD_WINUSB == TRUE
+    // wait a couple of seconds to allow all threads to init
+    tx_thread_sleep(TX_TICKS_PER_MILLISEC(2000));
+
     // can't call USBD init twice
     sli_usbd_init();
     sli_usbd_configuration_config0_init();
