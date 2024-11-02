@@ -36,9 +36,13 @@ bool GetHalSystemInfo(HalSystemInfo &systemInfo)
     ConfigurationManager_GetOemModelSku((char *)&systemInfo.m_OemModelInfo, sizeof(systemInfo.m_OemModelInfo));
 
     // OEM_SERIAL_NUMBERS:
-    ConfigurationManager_GetSerialNumbers(
-        (char *)&systemInfo.m_OemSerialNumbers,
-        sizeof(systemInfo.m_OemSerialNumbers));
+    ConfigurationManager_GetModuleSerialNumber(
+        (char *)&systemInfo.m_OemSerialNumbers.module_serial_number,
+        sizeof(systemInfo.m_OemSerialNumbers.module_serial_number));
+
+    ConfigurationManager_GetSystemSerialNumber(
+        (char *)&systemInfo.m_OemSerialNumbers.system_serial_number,
+        sizeof(systemInfo.m_OemSerialNumbers.system_serial_number));
 
     return TRUE;
 #endif

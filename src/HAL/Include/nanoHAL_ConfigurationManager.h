@@ -222,9 +222,13 @@ extern "C"
     // This is defined as weak to allow the target/platform to provide the implementation.
     void ConfigurationManager_GetOemModelSku(char *model, size_t modelSkuSize);
 
-    // Gets the serial numbers.
+    // Gets the module serial number.
     // This is defined as weak to allow the target/platform to provide the implementation.
-    void ConfigurationManager_GetSerialNumbers(char *serialNumbers, size_t serialNumbersSize);
+    void ConfigurationManager_GetModuleSerialNumber(char *serialNumber, size_t serialNumberSize);
+
+    // Gets the system serial number.
+    // This is defined as weak to allow the target/platform to provide the implementation.
+    void ConfigurationManager_GetSystemSerialNumber(char *serialNumber, size_t serialNumberSize);
 
 #ifdef __cplusplus
 }
