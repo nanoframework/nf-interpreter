@@ -7,6 +7,7 @@
 #include <nanoHAL_v2.h>
 #include <nanoWeak.h>
 // #include <network_options.h>
+#include <em_device.h>
 
 #if defined(WIFI_DRIVER_ISM43362) && defined(I_AM_NANOCLR)
 #include <wifi.h>
@@ -778,6 +779,36 @@ int32_t ConfigurationManager_FindNetworkConfigurationMatchingWirelessConfigurati
 // this is weak so a manufacturer can provide a strong implementation
 __nfweak void ConfigurationManager_GetSystemSerialNumber(char *serialNumber, size_t serialNumberSize)
 {
-    // do the thing to get unique device ID
     memset(serialNumber, 0, serialNumberSize);
+
+    // Use the device Unique ID which is 64 bits long
+    //Put it in the LSB of the serial number
+    int startOfId = serialNumberSize - 8;
+
+    // high 32 bits
+    uint32_t rawId = DEVINFO->UNIQUEH;
+
+    serialNumber[startOfId+3] = rawId;
+    rawId >>= 8;
+    serialNumber[startOfId+2] = rawId;
+    rawId >>= 8;
+    serialNumber[startOfId+1] = rawId;
+    rawId >>= 8;
+    serialNumber[startOfId+0] = rawId;
+
+    // low 32 bits
+    rawId = DEVINFO->UNIQUEL;
+
+    serialNumber[startOfId+7] = rawId;
+    rawId >>= 8;
+    serialNumber[startOfId+6] = rawId;
+    rawId >>= 8;
+    serialNumber[startOfId+5] = rawId;
+    rawId >>= 8;
+    serialNumber[startOfId+4] = rawId;
+
+    // Disambiguation is needed because the hardware-specific identifier used to create the
+    // default serial number on other platforms may be in the same range. 
+    // Set the first byte to a number that is unique (within the nanoFramework CLR) for the Giant Gecko.
+    serialNumber[0] = 3;
 }
