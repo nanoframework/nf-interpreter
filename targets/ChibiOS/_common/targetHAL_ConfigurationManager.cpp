@@ -648,4 +648,12 @@ __nfweak void ConfigurationManager_GetSystemSerialNumber(char *serialNumber, siz
 {
     // do the thing to get unique device ID
     memset(serialNumber, 0, serialNumberSize);
+    // Use the 96 bit unique device ID => 12 bytes
+    // memory copy from the address pointed by UID_BASE define (from STM32 HAL)
+    memcpy(&serialNumber[serialNumberSize - 12], ((uint8_t *)UID_BASE), 12);
+
+    // Disambiguation is needed because the hardware-specific identifier used to create the
+    // default serial number on other platforms may be in the same range. 
+    // Set the first byte to a number that is unique (within the nanoFramework CLR) for STM32.
+    serialNumber[0] = 2;
 }

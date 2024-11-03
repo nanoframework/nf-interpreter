@@ -70,3 +70,18 @@ __nfweak bool ConfigurationManager_CheckExistingConfigurationBlock(
 
     return false;
 }
+
+__nfweak void ConfigurationManager_GetOemModelSku(char *model, size_t modelSkuSize)
+{
+    memset(model, 0, modelSkuSize);
+}
+
+__nfweak void ConfigurationManager_GetModuleSerialNumber(char *serialNumber, size_t serialNumberSize)
+{
+    memset(serialNumber, 0, serialNumberSize);
+}
+
+__nfweak void ConfigurationManager_GetSystemSerialNumber(char *serialNumber, size_t serialNumberSize)
+{
+    memset(serialNumber, 0, serialNumberSize);
+}
