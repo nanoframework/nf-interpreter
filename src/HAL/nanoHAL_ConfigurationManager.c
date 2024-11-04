@@ -349,7 +349,7 @@ __nfweak void ConfigurationManager_GetOemModelSku(char *model, size_t modelSkuSi
 
 __nfweak void ConfigurationManager_GetModuleSerialNumber(char *serialNumber, size_t serialNumberSize)
 {
-// default implementation
-// this is weak so a manufacturer can provide a strong implementation
+    // default implementation
+    // this is weak so a manufacturer can provide a strong implementation
     memset(serialNumber, 0, serialNumberSize);
 }
