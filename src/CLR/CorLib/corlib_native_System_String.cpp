@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (c) .NET Foundation and Contributors
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
@@ -1157,23 +1157,24 @@ HRESULT Library_corlib_native_System_String::Concat(CLR_RT_StackFrame &stack, CL
 
         for (int iStr = 0; iStr < num; iStr++)
         {
-            _ASSERTE(ptrSrc->DataType() == DATATYPE_OBJECT);
-            _ASSERTE(FIMPLIES(ptrSrc->Dereference(), ptrSrc->Dereference()->DataType() == DATATYPE_STRING));
-
-            szTextSrc = ptrSrc->RecoverString();
-            if (szTextSrc)
+            if (ptrSrc->Dereference() != NULL && ptrSrc->Dereference()->DataType() == DATATYPE_STRING)
             {
-                len = (CLR_UINT32)hal_strlen_s(szTextSrc);
+                szTextSrc = ptrSrc->RecoverString();
 
-                if (i == 0)
+                if (szTextSrc)
                 {
-                    totLen += len;
-                }
-                else
-                {
-                    memcpy(szTextDst, szTextSrc, len);
+                    len = (CLR_UINT32)hal_strlen_s(szTextSrc);
 
-                    szTextDst += len;
+                    if (i == 0)
+                    {
+                        totLen += len;
+                    }
+                    else
+                    {
+                        memcpy(szTextDst, szTextSrc, len);
+
+                        szTextDst += len;
+                    }
                 }
             }
 
