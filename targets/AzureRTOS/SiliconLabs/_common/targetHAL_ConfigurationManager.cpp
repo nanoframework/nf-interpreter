@@ -787,25 +787,19 @@ __nfweak void ConfigurationManager_GetSystemSerialNumber(char *serialNumber, siz
 
     // high 32 bits
     uint32_t rawId = DEVINFO->UNIQUEH;
-
-    serialNumber[startOfId + 3] = rawId;
-    rawId >>= 8;
-    serialNumber[startOfId + 2] = rawId;
-    rawId >>= 8;
-    serialNumber[startOfId + 1] = rawId;
-    rawId >>= 8;
-    serialNumber[startOfId + 0] = rawId;
+    for (int i = 3; i >= 0; --i)
+    {
+        serialNumber[startOfId + i] = rawId & 0xFF;
+        rawId >>= 8;
+    }
 
     // low 32 bits
     rawId = DEVINFO->UNIQUEL;
-
-    serialNumber[startOfId + 7] = rawId;
-    rawId >>= 8;
-    serialNumber[startOfId + 6] = rawId;
-    rawId >>= 8;
-    serialNumber[startOfId + 5] = rawId;
-    rawId >>= 8;
-    serialNumber[startOfId + 4] = rawId;
+    for (int i = 7; i >= 4; --i)
+    {
+        serialNumber[startOfId + i] = rawId & 0xFF;
+        rawId >>= 8;
+    }
 
     // Disambiguation is needed because the hardware-specific identifier used to create the
     // default serial number on other platforms may be in the same range.
