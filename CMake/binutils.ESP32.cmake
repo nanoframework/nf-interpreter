@@ -566,9 +566,10 @@ macro(nf_install_idf_component_from_registry component_name object_id)
 
     message(STATUS "Checking if component '" ${component_name} "' needs to be installed")
     
-    set(downloadUrl https://components.espressif.com/api/download/?object_type=component&object_id=${object_id})
+    set(downloadUrl https://components.espressif.com/api/downloads/?object_type=component&object_id=${object_id})
     set(archiveName ${CMAKE_BINARY_DIR}/downloads/${component_name}_${object_id}.zip)
     set(destinationPath ${IDF_PATH_CMAKED}/components/${component_name})
+    set(extractPath ${IDF_PATH_CMAKED}/components)
 
     if(NOT EXISTS ${destinationPath})
         file(DOWNLOAD ${downloadUrl} ${archiveName})
@@ -576,7 +577,7 @@ macro(nf_install_idf_component_from_registry component_name object_id)
 
         file(ARCHIVE_EXTRACT 
             INPUT ${archiveName} 
-            DESTINATION ${destinationPath}
+            DESTINATION ${extractPath}
         )
 
         # Remove idf_component.yml file otherwise we will get warning about Component manager not being enabled
@@ -593,11 +594,11 @@ macro(nf_add_idf_as_library)
     # Load any required Components from Component registry
     # Must be done before "tools/cmake/idf.cmake" 
     if(ESP32_USB_CDC)
-        nf_install_idf_component_from_registry(tinyusb a4c3e214-fc79-4264-8dfe-92f1555440b3) 
-        nf_install_idf_component_from_registry(esp_tinyusb 65318090-af6e-4dbe-a257-5074ed07a337) 
+        nf_install_idf_component_from_registry(tinyusb 55142eec-a3a4-47a5-ad01-4ba3ef44444b) 
+        nf_install_idf_component_from_registry(esp_tinyusb 8115ffc9-366a-4340-94ab-e327aed20831) 
     endif()
 
-    nf_install_idf_component_from_registry(littlefs a52ea255-cc2f-483c-a742-e4631623b8c2) 
+    nf_install_idf_component_from_registry(littlefs 4831aa41-8b72-48ac-a534-910a985a5519) 
     
     include(${IDF_PATH_CMAKED}/tools/cmake/idf.cmake)
 
