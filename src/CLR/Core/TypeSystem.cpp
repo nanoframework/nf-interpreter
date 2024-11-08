@@ -4390,7 +4390,7 @@ bool CLR_RT_Assembly::FindGenericParamAtTypeSpec(
     // get type
     parser.Advance(element);
 
-    for (int i = 0; i <= genericParameterPosition; i++)
+    for (uint32_t i = 0; i <= genericParameterPosition; i++)
     {
         if (FAILED(parser.Advance(element)))
         {
