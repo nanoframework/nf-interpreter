@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (c) .NET Foundation and Contributors
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
@@ -350,11 +350,14 @@ struct Settings
 
         if (header->GoodAssembly() == false)
         {
-            wprintf(L"Invalid assembly format for '%s': ", src);
-            for (int i = 0; i < sizeof(header->marker); i++)
+            wprintf(L"Invalid assembly format for assembly '%s'\n", src);
+
+            wprintf(L"Header is: ");
+            for (size_t i = 0; i < sizeof(header->marker); i++)
             {
-                wprintf(L"%02x", header->marker[i]);
+                wprintf(L"%c", header->marker[i]);
             }
+
             wprintf(L"\n");
 
             NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
