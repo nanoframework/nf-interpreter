@@ -896,3 +896,23 @@ HAL_Configuration_X509DeviceCertificate *ConfigurationManager_GetDeviceCertifica
     // not found, or failed to allocate memory
     return NULL;
 }
+
+// default implementation
+// this is weak so a manufacturer can provide a strong implementation
+__nfweak void ConfigurationManager_GetSystemSerialNumber(char *serialNumber, size_t serialNumberSize)
+{
+    memset(serialNumber, 0, serialNumberSize);
+
+    // Use the factory-provided MAC address as unique ID
+    uint8_t macAddress[6];
+    esp_err_t err = esp_read_mac(macAddress, ESP_MAC_EFUSE_FACTORY);
+    if (err == ESP_OK)
+    {
+        memcpy(&serialNumber[serialNumberSize - sizeof(macAddress)], macAddress, sizeof(macAddress));
+
+        // Disambiguation is needed because the hardware-specific identifier used to create the
+        // default serial number on other platforms may be in the same range.
+        // Set the first byte to a number that is unique (within the nanoFramework CLR) for ESP32.
+        serialNumber[0] = 1;
+    }
+}
