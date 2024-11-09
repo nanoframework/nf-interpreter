@@ -526,3 +526,11 @@ __nfweak bool InitialiseNetworkDefaultConfig(HAL_Configuration_NetworkInterface 
     // can't create a "default" network config because we are lacking definition of a MAC address
     return FALSE;
 }
+
+// default implementation
+// this is weak so a manufacturer can provide a strong implementation
+__nfweak void ConfigurationManager_GetSystemSerialNumber(char *serialNumber, size_t serialNumberSize)
+{
+    // do the thing to get unique device ID
+    memset(serialNumber, 0, serialNumberSize);
+}
