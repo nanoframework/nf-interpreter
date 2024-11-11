@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (c) .NET Foundation and Contributors
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
@@ -7,41 +7,11 @@
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-HRESULT CLR_Checks::VerifyStackOK(CLR_RT_StackFrame &stack, CLR_RT_HeapBlock *top, int num)
+HRESULT CLR_Checks::VerifyStackOK(const CLR_RT_StackFrame &stack, const CLR_RT_HeapBlock *top, const int num)
 {
-    CLR_RT_StackFrame *stackArg = &stack;
-    CLR_RT_HeapBlock *topArg = top;
-    CLR_RT_HeapBlock const *evalStackArg = &stackArg->m_evalStackPos[-num];
-    int argCount = abs(num);
-
-    // if (num > 0)
-    //{
-    //     // loop through each parameter, if any and check validity
-    //     for (int pos = 0; pos < num; pos++)
-    //     {
-    //         if (!(evalStackArg <= top))
-    //         {
-    //             return S_FALSE;
-    //         }
-
-    //        topArg++;
-    //        evalStackArg++;
-    //    }
-    //}
-    // else if (num < 0)
-    //{
-    //    // loop through each parameter, if any and check validity
-    //    for (int pos = 0; pos > num; pos--)
-    //    {
-    //        if (!(evalStackArg <= top))
-    //        {
-    //            return S_FALSE;
-    //        }
-
-    //        topArg--;
-    //        evalStackArg++;
-    //    }
-    //}
+    (void)stack;
+    (void)top;
+    (void)num;
 
     return S_OK;
 }

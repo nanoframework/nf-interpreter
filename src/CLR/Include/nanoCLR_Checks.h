@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (c) .NET Foundation and Contributors
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
@@ -53,7 +53,7 @@ struct CLR_RT_DUMP
 
 struct CLR_Checks
 {
-    static HRESULT VerifyStackOK( CLR_RT_StackFrame& stack, CLR_RT_HeapBlock* top, int num );
+    static HRESULT VerifyStackOK( const CLR_RT_StackFrame& stack, const CLR_RT_HeapBlock* top, const int num );
 
     static HRESULT VerifyObject                ( CLR_RT_HeapBlock& top );
 
