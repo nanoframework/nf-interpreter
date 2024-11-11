@@ -8,73 +8,81 @@
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-HRESULT CLR_RT_HeapBlock_GenericInstance::CreateInstance(CLR_RT_HeapBlock& reference, const CLR_RT_TypeSpec_Index& tsIndex)
+HRESULT CLR_RT_HeapBlock_GenericInstance::CreateInstance(
+    CLR_RT_HeapBlock &reference,
+    const CLR_RT_TypeSpec_Index &tsIndex)
 {
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
 
-//     reference.SetObjectReference( nullptr );
+    (void)reference;
+    (void)tsIndex;
 
-//     CLR_UINT32 length = 0;
+    //     reference.SetObjectReference( nullptr );
 
-//   #if defined(NANOCLR_DELEGATE_PRESERVE_STACK)    
-//     if(call)
-//     {
-//         NANOCLR_FOREACH_NODE_BACKWARD__DIRECT(CLR_RT_StackFrame,ptr,call)
-//         {
-//             length++;
-//         }
-//         NANOCLR_FOREACH_NODE_BACKWARD_END();
-//     }
+    //     CLR_UINT32 length = 0;
 
-//     //
-//     // Limit depth to three callers.
-//     //
-//     if(length > 3) length = 3;
-//   #else
-//     (void)call;
-//   #endif
+    //   #if defined(NANOCLR_DELEGATE_PRESERVE_STACK)
+    //     if(call)
+    //     {
+    //         NANOCLR_FOREACH_NODE_BACKWARD__DIRECT(CLR_RT_StackFrame,ptr,call)
+    //         {
+    //             length++;
+    //         }
+    //         NANOCLR_FOREACH_NODE_BACKWARD_END();
+    //     }
 
-//     CLR_UINT32 totLength = (CLR_UINT32)(sizeof(CLR_RT_HeapBlock_Delegate) + length * sizeof(CLR_RT_MethodDef_Index));
+    //     //
+    //     // Limit depth to three callers.
+    //     //
+    //     if(length > 3) length = 3;
+    //   #else
+    //     (void)call;
+    //   #endif
 
-//     CLR_RT_HeapBlock_Delegate* dlg = (CLR_RT_HeapBlock_Delegate*)g_CLR_RT_ExecutionEngine.ExtractHeapBytesForObjects( DATATYPE_DELEGATE_HEAD, 0, totLength ); CHECK_ALLOCATION(dlg);
+    //     CLR_UINT32 totLength = (CLR_UINT32)(sizeof(CLR_RT_HeapBlock_Delegate) + length *
+    //     sizeof(CLR_RT_MethodDef_Index));
 
-//     reference.SetObjectReference( dlg );
+    //     CLR_RT_HeapBlock_Delegate* dlg =
+    //     (CLR_RT_HeapBlock_Delegate*)g_CLR_RT_ExecutionEngine.ExtractHeapBytesForObjects( DATATYPE_DELEGATE_HEAD, 0,
+    //     totLength ); CHECK_ALLOCATION(dlg);
 
-//     dlg->ClearData();
-//     dlg->m_cls.Clear();
-//     dlg->m_ftn              = ftn;
-// #if defined(NANOCLR_DELEGATE_PRESERVE_STACK)
-//     dlg->m_numOfStackFrames = length;
-// #endif
-    
-//     dlg->m_object.SetObjectReference( nullptr );
+    //     reference.SetObjectReference( dlg );
 
-// #if defined(NANOCLR_APPDOMAINS)
-//     dlg->m_appDomain = g_CLR_RT_ExecutionEngine.GetCurrentAppDomain();
-// #endif
+    //     dlg->ClearData();
+    //     dlg->m_cls.Clear();
+    //     dlg->m_ftn              = ftn;
+    // #if defined(NANOCLR_DELEGATE_PRESERVE_STACK)
+    //     dlg->m_numOfStackFrames = length;
+    // #endif
 
-// #if defined(NANOCLR_DELEGATE_PRESERVE_STACK)
-//     if(call)
-//     {
-//         CLR_RT_MethodDef_Index* callStack = dlg->GetStackFrames();
+    //     dlg->m_object.SetObjectReference( nullptr );
 
-//         NANOCLR_FOREACH_NODE_BACKWARD__DIRECT(CLR_RT_StackFrame,ptr,call)
-//         {
-//             if(length-- == 0) break;
+    // #if defined(NANOCLR_APPDOMAINS)
+    //     dlg->m_appDomain = g_CLR_RT_ExecutionEngine.GetCurrentAppDomain();
+    // #endif
 
-//             *callStack++ = ptr->m_call;
-//         }
-//         NANOCLR_FOREACH_NODE_BACKWARD_END();
-//     }
-// #endif
+    // #if defined(NANOCLR_DELEGATE_PRESERVE_STACK)
+    //     if(call)
+    //     {
+    //         CLR_RT_MethodDef_Index* callStack = dlg->GetStackFrames();
 
-    NANOCLR_NOCLEANUP();
+    //         NANOCLR_FOREACH_NODE_BACKWARD__DIRECT(CLR_RT_StackFrame,ptr,call)
+    //         {
+    //             if(length-- == 0) break;
+
+    //             *callStack++ = ptr->m_call;
+    //         }
+    //         NANOCLR_FOREACH_NODE_BACKWARD_END();
+    //     }
+    // #endif
+
+    // NANOCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP_NOLABEL();
 }
 
 void CLR_RT_HeapBlock_GenericInstance::Relocate()
 {
     NATIVE_PROFILE_CLR_CORE();
-    //m_object.Relocate__HeapBlock();
+    // m_object.Relocate__HeapBlock();
 }
-

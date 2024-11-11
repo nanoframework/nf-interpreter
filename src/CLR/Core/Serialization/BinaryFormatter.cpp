@@ -1009,7 +1009,7 @@ HRESULT CLR_RT_BinaryFormatter::TypeHandler::ReadValue(int &res)
     NATIVE_PROFILE_CLR_SERIALIZATION();
     NANOCLR_HEADER();
 
-    CLR_UINT64 *dst;
+    CLR_UINT64 *dst = nullptr;
     CLR_UINT64 val;
     CLR_UINT32 bits;
     bool fSigned;
