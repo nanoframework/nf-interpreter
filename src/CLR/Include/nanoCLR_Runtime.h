@@ -931,8 +931,6 @@ struct CLR_RT_GenericParam_CrossReference
     ///
     NanoCLRTable typeOrMethodDef;
 
-    CLR_RT_GenericParam_Index m_target;
-
     /// @brief DataType for the generic parameter
     ///
     NanoCLRDataType dataType;
@@ -940,6 +938,8 @@ struct CLR_RT_GenericParam_CrossReference
     /// @brief Class of the generic parameter
     ///
     CLR_RT_TypeDef_Index classTypeDef;
+
+    CLR_RT_GenericParam_Index m_target;
 };
 
 struct CLR_RT_MethodSpec_CrossReference

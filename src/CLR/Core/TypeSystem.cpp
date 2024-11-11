@@ -3276,10 +3276,7 @@ void CLR_RT_Assembly::ResolveLink()
 
                 for (; count; count--, gp++, indexGenericParam++)
                 {
-                    CLR_RT_GenericParam_Index gpIndex;
-                    gpIndex.Set(assemblyIndex, indexGenericParam);
-
-                    gp->m_target = gpIndex;
+                    gp->m_target.Set(assemblyIndex, indexGenericParam);
 
                     gp->data = indexType;
                     gp->typeOrMethodDef = TBL_TypeDef;
@@ -4148,10 +4145,7 @@ void CLR_RT_Assembly::ResolveMethodDef()
 
             for (; num; num--, gp++, indexGenericParam++)
             {
-                CLR_RT_GenericParam_Index gpIndex;
-                gpIndex.Set(assemblyIndex, indexGenericParam);
-
-                gp->m_target = gpIndex;
+                gp->m_target.Set(assemblyIndex, indexGenericParam);
 
                 gp->data = indexMethod;
                 gp->typeOrMethodDef = TBL_MethodDef;
