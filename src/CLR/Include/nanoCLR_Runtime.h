@@ -1581,7 +1581,7 @@ struct CLR_RT_WellKnownTypes
     CLR_RT_TypeDef_Index m_I2cTransferResult;
     CLR_RT_TypeDef_Index m_I2cTransferResult_old;
 
-    CLR_RT_TypeDef_Index m_RmtCommand;
+    CLR_RT_TypeDef_Index m_RmtSymbol;
 
     PROHIBIT_COPY_CONSTRUCTORS(CLR_RT_WellKnownTypes);
 };
@@ -3452,6 +3452,7 @@ typedef enum Events
     Event_UsbOut            = 0x00004000,
     Event_IO                = 0x00008000,
     Event_I2cSlave          = 0x00010000,
+    Event_RmtRx             = 0x00020000,
     Event_AppDomain         = 0x02000000,
     Event_Socket            = 0x20000000,
     Event_IdleCPU           = 0x40000000,

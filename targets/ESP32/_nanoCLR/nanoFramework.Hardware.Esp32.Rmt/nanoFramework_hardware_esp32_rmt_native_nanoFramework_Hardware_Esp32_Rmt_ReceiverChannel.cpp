@@ -1,227 +1,498 @@
-//
+﻿//
 // Copyright (c) 2020 The nanoFramework project contributors
 // See LICENSE file in the project root for full license information.
 //
 
 #include "nanoFramework_hardware_esp32_rmt_native.h"
 
-// typedefs for manged types to improve readability
+// typedefs for managed types to improve readability and size of lines
 typedef Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_Esp32_Rmt_RmtChannelSettings
     RmtChannelSettings;
 typedef Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_Esp32_Rmt_ReceiverChannelSettings
     ReceiverChannelSettings;
 typedef Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_Esp32_Rmt_RmtChannel RmtChannel;
-typedef Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_Esp32_Rmt_RmtCommand ManagedRmtCommand;
+typedef Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_Esp32_Rmt_RmtSymbol ManagedRmtSymbol;
 
-//--//
+HRESULT RXSetDemodulation(rmt_channel_handle_t rx_chan, CLR_RT_HeapBlock *receiver_channel_settings)
+{
+    NANOCLR_HEADER();
+
+    // pointers
+    CLR_RT_HeapBlock *settings;
+
+    // primitives
+    bool enableDemodulation;
+    esp_err_t err;
+
+    // structs
+    rmt_carrier_config_t rx_carrier_cfg;
+
+    settings = receiver_channel_settings;
+    enableDemodulation = settings[ReceiverChannelSettings::FIELD___enableDemodulation].NumericByRef().u1 != 0;
+
+    if (enableDemodulation)
+    {
+#if SOC_RMT_SUPPORT_RX_DEMODULATION
+
+        rx_carrier_cfg = {};
+        rx_carrier_cfg.frequency_hz = settings[ReceiverChannelSettings::FIELD___carrierWaveFrequency].NumericByRef().u4;
+
+        rx_carrier_cfg.duty_cycle =
+            settings[ReceiverChannelSettings::FIELD___carrierWaveDutyPercentage].NumericByRef().r4;
+        rx_carrier_cfg.duty_cycle /= 100.0;
+
+        rx_carrier_cfg.flags.polarity_active_low =
+            (bool)settings[ReceiverChannelSettings::FIELD___carrierLevel].NumericByRef().u1 ? 0 : 1;
+
+        err = rmt_apply_carrier(rx_chan, &rx_carrier_cfg);
+        NANOCLR_CHECK_HRESULT(RmtChannel::RmtMapEspErrToClrErr(err));
+#else
+        NANOCLR_SET_AND_LEAVE(CLR_E_NOT_SUPPORTED);
+#endif
+    }
+
+    NANOCLR_NOCLEANUP();
+}
+
+static IRAM_ATTR bool rmt_rx_done_callback(
+    rmt_channel_handle_t channel,
+    const rmt_rx_done_event_data_t *edata,
+    void *user_data)
+{
+    // primitives
+    BaseType_t high_task_wakeup;
+
+    // handles
+    QueueHandle_t cb_receive_queue;
+
+    high_task_wakeup = pdFALSE;
+    cb_receive_queue = (QueueHandle_t)user_data;
+
+    // send the received RMT symbols to the parser task
+    xQueueSendFromISR(cb_receive_queue, edata, &high_task_wakeup);
+
+    // Wake up receive thread
+    Events_Set(SYSTEM_EVENT_FLAG_RMT_RX);
+
+    // return whether any task is woken up
+    return high_task_wakeup == pdTRUE;
+}
 
 HRESULT Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_Esp32_Rmt_ReceiverChannel::
     NativeRxInit___I4(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
+    {
+        rmt_channel_handle_t rx_chan_handle = NULL;
+        QueueHandle_t receive_queue;
+        uint8_t *buffer = NULL;
+        CLR_INT32 buffer_size;
+        esp_err_t err;
 
-    int32_t channel;
-    int32_t pin_number = 0;
-    int32_t ring_buff_size;
+        CLR_RT_HeapBlock *receiver_channel_settings;
+
+        // get a pointer to the managed object instance and check that it's not NULL
+        CLR_RT_HeapBlock *pThis = stack.This();
+        FAULT_ON_NULL(pThis);
+
+        // get a reference to the configs in the managed code instance
+        receiver_channel_settings = pThis[FIELD___receiverChannelSettings].Dereference();
+
+        rmt_rx_channel_config_t rx_chan_config = {};
+
+        // Select default source clock for the target ESP32 type.
+        rx_chan_config.clk_src = RMT_CLK_SRC_DEFAULT;
+
+        // Driver will allocate the interrupt
+        rx_chan_config.intr_priority = 0;
+
+        // Gpio number for RMT rx
+        rx_chan_config.gpio_num =
+            (gpio_num_t)receiver_channel_settings[RmtChannelSettings::FIELD___pinNumber].NumericByRef().s4;
+
+        // Tick resolution, i.e., 1Mhz : 1 tick = 1 µs
+        rx_chan_config.resolution_hz =
+            receiver_channel_settings[RmtChannelSettings::FIELD___resolutionHz].NumericByRef().s4;
+
+        // Number of memory blocks * CONFIG_SOC_RMT_MEM_WORDS_PER_CHANNEL
+        rx_chan_config.mem_block_symbols =
+            receiver_channel_settings[RmtChannelSettings::FIELD___numberOfMemoryBlocks].NumericByRef().u1;
+        rx_chan_config.mem_block_symbols *= CONFIG_SOC_RMT_MEM_WORDS_PER_CHANNEL;
+
+        // Invert signal input ?
+        rx_chan_config.flags.invert_in =
+            receiver_channel_settings[RmtChannelSettings::FIELD___signalInverterEnabled].NumericByRef().u1;
+
+// Use dma if available
+#if SOC_RMT_SUPPORT_DMA
+        rx_chan_config.flags.with_dma = true;
+#else
+        rx_chan_config.flags.with_dma = false;
+#endif
+        rx_chan_config.flags.io_loop_back = false;
+
+        err = rmt_new_rx_channel(&rx_chan_config, &rx_chan_handle);
+
+        NANOCLR_CHECK_HRESULT(RmtChannel::RmtMapEspErrToClrErr(err));
+
+        // Enable Demodulation if feature available on target ?
+        NANOCLR_CHECK_HRESULT(RXSetDemodulation(rx_chan_handle, receiver_channel_settings));
+
+        receive_queue = xQueueCreate(1, sizeof(rmt_rx_done_event_data_t));
+
+        rmt_rx_event_callbacks_t cbs = {.on_recv_done = rmt_rx_done_callback};
+
+        // Register event for RX done events
+        err = rmt_rx_register_event_callbacks(rx_chan_handle, &cbs, receive_queue);
+        NANOCLR_CHECK_HRESULT(RmtChannel::RmtMapEspErrToClrErr(err));
+
+        // Buffer size from managed code is in number symbols to buffer
+        buffer_size = receiver_channel_settings[ReceiverChannelSettings::FIELD___bufferSize].NumericByRef().s4;
+        buffer_size *= sizeof(rmt_symbol_word_t);
+
+        buffer = (uint8_t *)platform_malloc(buffer_size);
+        if (buffer == NULL)
+        {
+            NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
+        }
+
+        // Enable RX channel
+        err = rmt_enable(rx_chan_handle);
+        NANOCLR_CHECK_HRESULT(RmtChannel::RmtMapEspErrToClrErr(err));
+
+        RmtChannel::AddRegisteredRxChannel(rx_chan_handle, receive_queue, buffer, buffer_size);
+
+        // Make sure all handles and buffers are disposed if system restarted(Debugging)
+        HAL_AddSoftRebootHandler(RmtChannel::UninitializeAll);
+
+        stack.SetResult_I4((CLR_INT32)rx_chan_handle);
+    }
+    NANOCLR_NOCLEANUP();
+}
+
+
+HRESULT StartReceive(rmt_channel_handle_t rx_handle, CLR_RT_HeapBlock *receiver_channel_settings, RmtChannelInfo *rcInfo)
+{
+    NANOCLR_HEADER();
+
+    rmt_receive_config_t rx_config;
     esp_err_t err;
 
+    rx_config = {};
+    rx_config.signal_range_max_ns =
+        receiver_channel_settings[ReceiverChannelSettings::FIELD___idleThreshold].NumericByRef().u4;
+
+    rx_config.signal_range_min_ns =
+        receiver_channel_settings[ReceiverChannelSettings::FIELD___filterThreshold].NumericByRef().u4;
+
+    rx_config.flags.en_partial_rx = false;
+
+    rmt_enable(rx_handle);
+
+    err = rmt_receive(rx_handle, rcInfo->rxBuffer, rcInfo->rxBufferSize, &rx_config);
+    if (err != ESP_OK)
+    {
+        NANOCLR_SET_AND_LEAVE(RmtChannel::RmtMapEspErrToClrErr(err));
+    }
+
+    NANOCLR_NOCLEANUP();
+}
+
+
+//
+//  Start continuous receive (non-blocking)
+//
+HRESULT Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_Esp32_Rmt_ReceiverChannel::
+    NativeStartReceive___VOID(CLR_RT_StackFrame &stack)
+{
+    NANOCLR_HEADER();
+
+    rmt_channel_handle_t rx_handle = NULL;
+    CLR_RT_HeapBlock *pThis;
+    CLR_RT_HeapBlock *receiver_channel_settings;
+    RmtChannelInfo *rcInfo;
+
+    pThis = stack.This();
+    FAULT_ON_NULL(pThis);
+
+    receiver_channel_settings = pThis[FIELD___receiverChannelSettings].Dereference();
+    rx_handle = (rmt_channel_handle_t)receiver_channel_settings[RmtChannelSettings::FIELD___handle].NumericByRef().s4;
+
+    rcInfo = RmtChannel::FindRegisteredRmtChannel(rx_handle, RmtChannelType::Receive);
+    if (rcInfo == nullptr)
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_OBJECT_DISPOSED);
+    }
+
+    if (rcInfo->isBlockingReceiving || rcInfo->isContinuousReceiving)
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_OPERATION);
+    }
+
+    NANOCLR_CHECK_HRESULT(StartReceive(rx_handle, receiver_channel_settings, rcInfo));
+
+    rcInfo->isContinuousReceiving = true;
+
+    NANOCLR_NOCLEANUP();
+}
+
+//
+//  Stop continuous receive
+//
+HRESULT Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_Esp32_Rmt_ReceiverChannel::
+    NativeStopReceive___VOID(CLR_RT_StackFrame &stack)
+{
+    NANOCLR_HEADER();
+
+    // handles
+    rmt_channel_handle_t rx_handle;
+
+    // pointers
+    CLR_RT_HeapBlock *pThis;
+    CLR_RT_HeapBlock *receiver_channel_settings;
+    RmtChannelInfo *rcInfo;
+
+    rx_handle = NULL;
+    pThis = stack.This();
+    FAULT_ON_NULL(pThis);
+
+    receiver_channel_settings = pThis[FIELD___receiverChannelSettings].Dereference();
+    rx_handle = (rmt_channel_handle_t)receiver_channel_settings[RmtChannelSettings::FIELD___handle].NumericByRef().s4;
+
+    rcInfo = RmtChannel::FindRegisteredRmtChannel(rx_handle, RmtChannelType::Receive);
+    if (rcInfo == nullptr)
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_OBJECT_DISPOSED);
+    }
+
+    if (!rcInfo->isContinuousReceiving)
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_OPERATION);
+    }
+
+    rmt_disable(rx_handle);
+    rcInfo->isContinuousReceiving = false;
+
+    NANOCLR_NOCLEANUP();
+}
+
+//
+//  Non-blocking poll for received symbols (only valid in continuous mode)
+//
+HRESULT Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_Esp32_Rmt_ReceiverChannel::
+    NativeTryGetReceived___SZARRAY_nanoFrameworkHardwareEsp32RmtRmtSymbol(CLR_RT_StackFrame &stack)
+{
+    NANOCLR_HEADER();
+
+    // handles
+    rmt_channel_handle_t rx_handle;
+
+    // pointers
+    CLR_RT_HeapBlock *pThis;
+    CLR_RT_HeapBlock *receiver_channel_settings;
+    RmtChannelInfo *rcInfo;
+    CLR_RT_HeapBlock *arrayDataPtr;
+
+    // primitives
+    int numItems;
+
+    // structs
+    rmt_rx_done_event_data_t rx_data;
+    CLR_RT_TypeDef_Index rmtSymbolTypeDef;
+    rmt_symbol_word_t *pData;
+
+    rx_handle = NULL;
+    arrayDataPtr = NULL;
+    numItems = 0;
+    rx_data = {};
+    rmtSymbolTypeDef = CLR_RT_TypeDef_Index();
+    pData = NULL;
+
+    pThis = stack.This();
+    FAULT_ON_NULL(pThis);
+
+    receiver_channel_settings = pThis[FIELD___receiverChannelSettings].Dereference();
+    rx_handle = (rmt_channel_handle_t)receiver_channel_settings[RmtChannelSettings::FIELD___handle].NumericByRef().s4;
+
+    rcInfo = RmtChannel::FindRegisteredRmtChannel(rx_handle, RmtChannelType::Receive);
+    if (rcInfo == nullptr)
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_OBJECT_DISPOSED);
+    }
+
+    if (rcInfo->isBlockingReceiving)
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_OPERATION);
+    }
+
+    if (!rcInfo->isContinuousReceiving)
+    {
+        stack.SetResult_Object(NULL);
+        NANOCLR_SET_AND_LEAVE(S_OK);
+    }
+
+    if (xQueueReceive(rcInfo->rxQueue, &rx_data, 0) != pdTRUE || rx_data.num_symbols == 0)
+    {
+        stack.SetResult_Object(NULL);
+        NANOCLR_SET_AND_LEAVE(S_OK);
+    }
+
+    numItems = rx_data.num_symbols;
+
+    NANOCLR_CHECK_HRESULT(CreateRmtArrayOnStack(stack, numItems, rmtSymbolTypeDef, &arrayDataPtr));
+
+    pData = rx_data.received_symbols;
+    while (numItems-- > 0)
+    {
+        NANOCLR_CHECK_HRESULT(CreateRmtElement(pData, arrayDataPtr, rmtSymbolTypeDef));
+        pData++;
+        arrayDataPtr++;
+    }
+
+    // Restart receive for next batch of symbols
+    NANOCLR_CHECK_HRESULT(StartReceive(rx_handle, receiver_channel_settings, rcInfo));
+
+    NANOCLR_NOCLEANUP();
+}
+
+//
+//  Blocking Receive()
+//
+HRESULT Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_Esp32_Rmt_ReceiverChannel::
+    NativeReceive___SZARRAY_nanoFrameworkHardwareEsp32RmtRmtSymbol(CLR_RT_StackFrame &stack)
+{
+    NANOCLR_HEADER();
+
+    int64_t *timeoutEvent;
+    CLR_RT_HeapBlock hbTimeout;
+    bool eventResult = true;
+    rmt_rx_done_event_data_t rx_data;
+    bool cancelReceive = false;
+    rmt_channel_handle_t rx_handle;
+    RmtChannelInfo *rcInfo = nullptr;
     CLR_RT_HeapBlock *receiver_channel_settings;
 
-    // get a pointer to the managed object instance and check that it's not NULL
+    // Get a pointer to the managed object instance and check that it's not NULL
     CLR_RT_HeapBlock *pThis = stack.This();
     FAULT_ON_NULL(pThis);
 
     // get a reference to the configs in the managed code instance
     receiver_channel_settings = pThis[FIELD___receiverChannelSettings].Dereference();
+    rx_handle = (rmt_channel_handle_t)receiver_channel_settings[RmtChannelSettings::FIELD___handle].NumericByRef().s4;
 
-    channel = receiver_channel_settings[RmtChannelSettings::FIELD___channel].NumericByRef().s4;
-    pin_number = receiver_channel_settings[RmtChannelSettings::FIELD___pinNumber].NumericByRef().s4;
-
-    if (channel < 0)
+    // Recall saved receiver channel info by handle
+    rcInfo = RmtChannel::FindRegisteredRmtChannel(rx_handle, RmtChannelType::Receive);
+    if (rcInfo == nullptr)
     {
-        channel = RmtChannel::FindNextChannel();
-        if (channel < 0)
-        {
-            NANOCLR_SET_AND_LEAVE(CLR_E_DRIVER_NOT_REGISTERED);
-        }
+        NANOCLR_SET_AND_LEAVE(CLR_E_OBJECT_DISPOSED);
     }
 
-    {
-        rmt_config_t rmt_rx_config = GetNewRmtRxConfig((gpio_num_t)pin_number, (rmt_channel_t)channel);
-
-        rmt_rx_config.clk_div = receiver_channel_settings[RmtChannelSettings::FIELD___clockDivider].NumericByRef().u1;
-        rmt_rx_config.mem_block_num =
-            receiver_channel_settings[RmtChannelSettings::FIELD___numberOfMemoryBlocks].NumericByRef().u1;
-        rmt_rx_config.rx_config.idle_threshold =
-            receiver_channel_settings[ReceiverChannelSettings::FIELD___idleThreshold].NumericByRef().u2;
-        rmt_rx_config.rx_config.filter_en =
-            receiver_channel_settings[ReceiverChannelSettings::FIELD___enableFilter].NumericByRef().u1 != 0;
-        rmt_rx_config.rx_config.filter_ticks_thresh =
-            receiver_channel_settings[ReceiverChannelSettings::FIELD___filterThreshold].NumericByRef().u1;
-
-#if SOC_RMT_SUPPORT_RX_DEMODULATION
-
-        rmt_rx_config.rx_config.rm_carrier =
-            receiver_channel_settings[ReceiverChannelSettings::FIELD___enableDemodulation].NumericByRef().u1 != 0;
-        rmt_rx_config.rx_config.carrier_freq_hz =
-            receiver_channel_settings[ReceiverChannelSettings::FIELD___carrierWaveFrequency].NumericByRef().u4;
-        rmt_rx_config.rx_config.carrier_duty_percent =
-            receiver_channel_settings[ReceiverChannelSettings::FIELD___carrierWaveDutyPercentage].NumericByRef().u1;
-        rmt_rx_config.rx_config.carrier_level =
-            (bool)receiver_channel_settings[ReceiverChannelSettings::FIELD___carrierLevel].NumericByRef().u1
-                ? RMT_CARRIER_LEVEL_HIGH
-                : RMT_CARRIER_LEVEL_LOW;
-
-#endif
-
-        err = rmt_config(&rmt_rx_config);
-        if (err != ESP_OK)
-        {
-            NANOCLR_SET_AND_LEAVE(CLR_E_DRIVER_NOT_REGISTERED);
-        }
-    }
-
-    ring_buff_size = receiver_channel_settings[RmtChannelSettings::FIELD___bufferSize].NumericByRef().s4;
-    ring_buff_size *= sizeof(rmt_item32_t);
-
-    err = rmt_driver_install((rmt_channel_t)channel, ring_buff_size, 0);
-    if (err != ESP_OK)
-    {
-        NANOCLR_SET_AND_LEAVE(CLR_E_DRIVER_NOT_REGISTERED);
-    }
-
-    RmtChannel::registredChannels.emplace(
-        std::piecewise_construct,
-        std::forward_as_tuple((rmt_channel_t)channel),
-        std::forward_as_tuple());
-
-    stack.SetResult_I4((CLR_INT32)channel);
-
-    NANOCLR_NOCLEANUP();
-}
-
-HRESULT Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_Esp32_Rmt_ReceiverChannel::
-    NativeRxStart___VOID__BOOLEAN(CLR_RT_StackFrame &stack)
-{
-    NANOCLR_HEADER();
-
-    CLR_RT_HeapBlock *receiver_channel_settings = NULL;
-    CLR_INT32 channel;
-    bool clearBuffer;
-    esp_err_t err;
-
-    CLR_RT_HeapBlock *pThis = stack.This();
-    FAULT_ON_NULL(pThis);
-
-    // get a reference to the configs in the managed code instance
-    receiver_channel_settings = pThis[FIELD___receiverChannelSettings].Dereference();
-
-    channel = receiver_channel_settings[RmtChannelSettings::FIELD___channel].NumericByRef().s4;
-
-    clearBuffer = stack.Arg1().NumericByRefConst().u1 != 0;
-
-    if (clearBuffer)
-    {
-        RingbufHandle_t ringbufHandle;
-
-        err = rmt_get_ringbuf_handle((rmt_channel_t)channel, &ringbufHandle);
-        if (err != ESP_OK)
-        {
-            NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
-        }
-
-        // Clear ring buffer
-        size_t length = 0;
-        rmt_item32_t *rmtItems;
-
-        while ((rmtItems = (rmt_item32_t *)xRingbufferReceive(ringbufHandle, &length, 0)) != NULL)
-        {
-            // Release items back to Ringbuffer
-            vRingbufferReturnItem(ringbufHandle, (void *)rmtItems);
-        };
-    }
-
-    err = rmt_rx_start((rmt_channel_t)channel, clearBuffer);
-    if (err != ESP_OK)
+    if (rcInfo->isContinuousReceiving || rcInfo->isBlockingReceiving)
     {
         NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_OPERATION);
     }
 
-    NANOCLR_NOCLEANUP();
-}
-
-HRESULT Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_Esp32_Rmt_ReceiverChannel::
-    NativeRxStop___VOID(CLR_RT_StackFrame &stack)
-{
-    NANOCLR_HEADER();
-
-    CLR_RT_HeapBlock *receiver_channel_settings = NULL;
-    CLR_INT32 channel;
-    esp_err_t err;
-
-    CLR_RT_HeapBlock *pThis = stack.This();
-    FAULT_ON_NULL(pThis);
-
-    // get a reference to the configs in the managed code instance
-    receiver_channel_settings = pThis[FIELD___receiverChannelSettings].Dereference();
-    channel = receiver_channel_settings[RmtChannelSettings::FIELD___channel].NumericByRef().s4;
-
-    err = rmt_rx_stop((rmt_channel_t)channel);
-    if (err != ESP_OK)
+    if (stack.m_customState == 0)
     {
-        NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_OPERATION);
+
+        NANOCLR_CHECK_HRESULT(StartReceive(rx_handle, receiver_channel_settings, rcInfo));
+
+        // Timespan in 100ns ticks
+        int64_t *timeoutTicks = Library_corlib_native_System_TimeSpan::GetValuePtr(
+            receiver_channel_settings[ReceiverChannelSettings::FIELD___receiveTimeout]);
+
+        // setup timeout
+        hbTimeout.SetInteger((CLR_INT64)*timeoutTicks);
     }
 
-    NANOCLR_NOCLEANUP();
-}
+    // Load expire time to timeoutEvent
+    NANOCLR_CHECK_HRESULT(stack.SetupTimeoutFromTicks(hbTimeout, timeoutEvent));
 
-HRESULT Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_Esp32_Rmt_ReceiverChannel::
-    NativeRxGetRingBufferCount___I4(CLR_RT_StackFrame &stack)
-{
-    NANOCLR_HEADER();
-
-    CLR_INT32 channel;
-    esp_err_t err;
-    RingbufHandle_t ringbufHandle;
-    UBaseType_t uxItemsWaiting;
-
-    CLR_RT_HeapBlock *receiver_channel_settings = NULL;
-
-    CLR_RT_HeapBlock *pThis = stack.This();
-    FAULT_ON_NULL(pThis);
-
-    // get a reference to the configs in the managed code instance
-    receiver_channel_settings = pThis[FIELD___receiverChannelSettings].Dereference();
-    channel = receiver_channel_settings[RmtChannelSettings::FIELD___channel].NumericByRef().s4;
-
-    err = rmt_get_ringbuf_handle((rmt_channel_t)channel, &ringbufHandle);
-    if (err != ESP_OK)
+    while (eventResult)
     {
-        NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+        // wait for event, exits with error CLR_E_THREAD_WAITING if no event yet
+        NANOCLR_CHECK_HRESULT(
+            g_CLR_RT_ExecutionEngine.WaitEvents(stack.m_owningThread, *timeoutEvent, Event_RmtRx, eventResult));
+
+        if (!eventResult)
+        {
+            cancelReceive = true;
+
+            // event timeout
+            NANOCLR_SET_AND_LEAVE(CLR_E_TIMEOUT);
+        }
+
+        // Receive event occured
+        // Check Message queue for this channel
+        // otherwise event from another channel so restart wait
+        if (xQueueReceive(rcInfo->rxQueue, &rx_data, 0) == pdTRUE)
+        {
+            break;
+        }
+
+        // loop and repeat wait
+    } // while eventResult
+
+    // pop "hbTimeout" heap block from stack
+    stack.PopValue();
+
+    // Return RmtSymbol array to user
+    // if no symbols return null
+    if (rx_data.num_symbols == 0)
+    {
+        stack.SetResult_Object(NULL);
+    }
+    else
+    {
+        CLR_RT_HeapBlock *arrayDataPtr = NULL;
+        CLR_RT_TypeDef_Index rmtSymbolTypeDef;
+
+        int numItems = rx_data.num_symbols;
+
+        // Build Header block for Array of RmtSymbol objects on top of stack
+        // Returns the rmtSysmbol type and pointer to first data ptr in array
+        NANOCLR_CHECK_HRESULT(CreateRmtArrayOnStack(stack, numItems, rmtSymbolTypeDef, &arrayDataPtr));
+
+        rmt_symbol_word_t *pData = rx_data.received_symbols;
+        while (numItems-- > 0)
+        {
+            // Add RMT item to managed array
+            NANOCLR_CHECK_HRESULT(CreateRmtElement(pData, arrayDataPtr, rmtSymbolTypeDef));
+
+            // Next item
+            pData++;
+            arrayDataPtr++;
+        }
     }
 
-    vRingbufferGetInfo(ringbufHandle, NULL, NULL, NULL, NULL, &uxItemsWaiting);
+    NANOCLR_CLEANUP();
 
-    stack.SetResult_I4(uxItemsWaiting);
+    rcInfo->isBlockingReceiving = false;
 
-    NANOCLR_NOCLEANUP();
+    if (cancelReceive)
+    {
+        rmt_disable(rx_handle);
+        rmt_enable(rx_handle);
+    }
+
+    NANOCLR_CLEANUP_END();
 }
 
 HRESULT Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_Esp32_Rmt_ReceiverChannel::
-    CreateRmtElement(rmt_item32_t *rmtItem, CLR_RT_HeapBlock *returnArray, CLR_RT_TypeDef_Index &rmtCommandTypeDef)
+    CreateRmtElement(rmt_symbol_word_t *rmtItem, CLR_RT_HeapBlock *returnArray, CLR_RT_TypeDef_Index &rmtSymbolTypeDef)
 {
     HRESULT hr = S_OK;
 
-    // create a new RmtCommand object and put it on the return array
-    hr = g_CLR_RT_ExecutionEngine.NewObjectFromIndex(*returnArray, rmtCommandTypeDef);
+    // create a new RmtSymbol object and put it on the return array
+    hr = g_CLR_RT_ExecutionEngine.NewObjectFromIndex(*returnArray, rmtSymbolTypeDef);
     if (hr == S_OK)
     {
-        // Set each value in the struct from the rmt_item32_t data
+        // Set each value in the struct from the rmt_symbol_word_t data
         CLR_RT_HeapBlock *dref = returnArray->Dereference();
-        CLR_RT_HeapBlock &duration0FieldRef = dref[ManagedRmtCommand::FIELD___duration0];
-        CLR_RT_HeapBlock &level0FieldRef = dref[ManagedRmtCommand::FIELD___level0];
-        CLR_RT_HeapBlock &duration1FieldRef = dref[ManagedRmtCommand::FIELD___duration1];
-        CLR_RT_HeapBlock &level1FieldRef = dref[ManagedRmtCommand::FIELD___level1];
+        CLR_RT_HeapBlock &duration0FieldRef = dref[ManagedRmtSymbol::FIELD___duration0];
+        CLR_RT_HeapBlock &level0FieldRef = dref[ManagedRmtSymbol::FIELD___level0];
+        CLR_RT_HeapBlock &duration1FieldRef = dref[ManagedRmtSymbol::FIELD___duration1];
+        CLR_RT_HeapBlock &level1FieldRef = dref[ManagedRmtSymbol::FIELD___level1];
 
         int32_t *d0 = (int32_t *)&duration0FieldRef.NumericByRef().s4;
         *d0 = rmtItem->duration0;
@@ -243,26 +514,25 @@ HRESULT Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_E
     CreateRmtArrayOnStack(
         CLR_RT_StackFrame &stack,
         CLR_INT32 numItems,
-        CLR_RT_TypeDef_Index &rmtCommandTypeDef,
+        CLR_RT_TypeDef_Index &rmtSymbolTypeDef,
         CLR_RT_HeapBlock **arrayDataPtr)
 {
     HRESULT hr = S_OK;
 
-    if (!g_CLR_RT_TypeSystem.FindTypeDef("RmtCommand", "nanoFramework.Hardware.Esp32.Rmt", rmtCommandTypeDef))
+    if (!g_CLR_RT_TypeSystem.FindTypeDef("RmtSymbol", "nanoFramework.Hardware.Esp32.Rmt", rmtSymbolTypeDef))
     {
         // Type not defined, build problem
         return CLR_E_NOT_SUPPORTED;
     }
 
-    // Create Array on top of stackof type "RmtCommand"
-    hr = CLR_RT_HeapBlock_Array::CreateInstance(stack.PushValue(), numItems, rmtCommandTypeDef);
-
+    // Create Array on top of stackof type "RmtSymbol"
+    hr = CLR_RT_HeapBlock_Array::CreateInstance(stack.PushValue(), numItems, rmtSymbolTypeDef);
     if (hr == S_OK)
     {
         // Get reference to Array
         CLR_RT_HeapBlock_Array *array = stack.TopValue().DereferenceArray();
 
-        //  Get start of array data, array of CLR_RT_HeapBlock * to RmtCommand structs
+        //  Get start of array data, array of CLR_RT_HeapBlock * to RmtSymbol structs
         *arrayDataPtr = (CLR_RT_HeapBlock *)array->GetFirstElement();
     }
 
@@ -270,192 +540,26 @@ HRESULT Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_E
 }
 
 HRESULT Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_Esp32_Rmt_ReceiverChannel::
-    NativeRxGetAllItems___SZARRAY_nanoFrameworkHardwareEsp32RmtRmtCommand(CLR_RT_StackFrame &stack)
-{
-    NANOCLR_HEADER();
-
-    CLR_INT32 channel;
-    esp_err_t err;
-    RingbufHandle_t ringbufHandle;
-    CLR_INT32 waitMs;
-    CLR_INT64 *timespan;
-    size_t length = 0;
-    rmt_item32_t *rmtItems = NULL;
-
-    CLR_RT_HeapBlock *receiver_channel_settings = NULL;
-
-    CLR_RT_HeapBlock *pThis = stack.This();
-    FAULT_ON_NULL(pThis);
-
-    // get a reference to the configs in the managed code instance
-    receiver_channel_settings = pThis[FIELD___receiverChannelSettings].Dereference();
-    channel = receiver_channel_settings[RmtChannelSettings::FIELD___channel].NumericByRef().s4;
-
-    err = rmt_get_ringbuf_handle((rmt_channel_t)channel, &ringbufHandle);
-    if (err != ESP_OK)
-    {
-        NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
-    }
-
-    // Timespan in 100ns ticks
-    timespan = Library_corlib_native_System_TimeSpan::GetValuePtr(
-        receiver_channel_settings[ReceiverChannelSettings::FIELD___receiveTimeout]);
-    // Convert to milli-secs for wait
-    waitMs = (CLR_INT32)(*timespan / TIME_CONVERSION__TO_MILLISECONDS);
-
-    // Get next Rmt item from ring buffer
-    rmtItems = (rmt_item32_t *)xRingbufferReceive(ringbufHandle, &length, pdMS_TO_TICKS(waitMs));
-    if (rmtItems)
-    {
-        if (length > 0)
-        {
-            CLR_RT_HeapBlock *arrayDataPtr = NULL;
-            CLR_RT_TypeDef_Index rmtCommandTypeDef;
-
-            int numItems = length / sizeof(rmt_item32_t);
-
-            // Build Header block for Array of RmtCommands objects on top of stack
-            // Returns the rmtCommand type and pointer to first data ptr in array
-            NANOCLR_CHECK_HRESULT(CreateRmtArrayOnStack(stack, numItems, rmtCommandTypeDef, &arrayDataPtr));
-
-            rmt_item32_t *pData = rmtItems;
-            while (numItems-- > 0)
-            {
-                // Add RMT item to managed array
-                NANOCLR_CHECK_HRESULT(CreateRmtElement(pData, arrayDataPtr, rmtCommandTypeDef));
-
-                // Next item
-                pData++;
-                arrayDataPtr++;
-            }
-        }
-
-        // Release items back to Ringbuffer
-        vRingbufferReturnItem(ringbufHandle, (void *)rmtItems);
-    }
-
-    if (length == 0)
-    {
-        stack.SetResult_Object(NULL);
-    }
-
-    NANOCLR_NOCLEANUP();
-}
-
-HRESULT Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_Esp32_Rmt_ReceiverChannel::
-    NativeRxEnableFilter___VOID__BOOLEAN__U1(CLR_RT_StackFrame &stack)
-{
-    NANOCLR_HEADER();
-
-    CLR_INT32 channel;
-    bool enableFilter;
-    uint8_t threshold;
-    esp_err_t err;
-
-    CLR_RT_HeapBlock *receiver_channel_settings = NULL;
-
-    CLR_RT_HeapBlock *pThis = stack.This();
-    FAULT_ON_NULL(pThis);
-
-    enableFilter = stack.Arg1().NumericByRefConst().u1 != 0;
-    threshold = stack.Arg2().NumericByRefConst().u1;
-
-    // get a reference to the configs in the managed code instance
-    receiver_channel_settings = pThis[FIELD___receiverChannelSettings].Dereference();
-    channel = receiver_channel_settings[RmtChannelSettings::FIELD___channel].NumericByRef().s4;
-
-    err = rmt_set_rx_filter((rmt_channel_t)channel, enableFilter, threshold);
-    if (err != ESP_OK)
-    {
-        NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_OPERATION);
-    }
-
-    NANOCLR_NOCLEANUP();
-}
-
-HRESULT Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_Esp32_Rmt_ReceiverChannel::
-    NativeRxSetIdleThresold___VOID__U2(CLR_RT_StackFrame &stack)
-{
-    NANOCLR_HEADER();
-
-    uint16_t threshold;
-    CLR_INT32 channel;
-    esp_err_t err;
-
-    CLR_RT_HeapBlock *receiver_channel_settings = NULL;
-
-    CLR_RT_HeapBlock *pThis = stack.This();
-    FAULT_ON_NULL(pThis);
-
-    threshold = stack.Arg1().NumericByRefConst().u2;
-
-    // get a reference to the configs in the managed code instance
-    receiver_channel_settings = pThis[FIELD___receiverChannelSettings].Dereference();
-    channel = receiver_channel_settings[RmtChannelSettings::FIELD___channel].NumericByRef().s4;
-
-    err = rmt_set_rx_idle_thresh((rmt_channel_t)channel, threshold);
-    if (err != ESP_OK)
-    {
-        NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
-    }
-
-    NANOCLR_NOCLEANUP();
-}
-
-HRESULT Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_Esp32_Rmt_ReceiverChannel::
     NativeRxDispose___VOID(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
-    CLR_INT32 channel;
-
-    CLR_RT_HeapBlock *receiver_channel_settings = NULL;
+    rmt_channel_handle_t handle;
+    CLR_RT_HeapBlock *receiver_channel_settings;
 
     CLR_RT_HeapBlock *pThis = stack.This();
     FAULT_ON_NULL(pThis);
 
     // get a reference to the configs in the managed code instance
     receiver_channel_settings = pThis[FIELD___receiverChannelSettings].Dereference();
-    channel = receiver_channel_settings[RmtChannelSettings::FIELD___channel].NumericByRef().s4;
+    handle = (rmt_channel_handle_t)receiver_channel_settings[RmtChannelSettings::FIELD___handle].NumericByRef().s4;
 
-    if (RmtChannel::registredChannels.find((rmt_channel_t)channel) == RmtChannel::registredChannels.end())
+    if (!RmtChannel::CheckChannel(handle))
     {
         NANOCLR_SET_AND_LEAVE(CLR_E_OBJECT_DISPOSED);
     }
 
-    if (rmt_driver_uninstall((rmt_channel_t)channel) != ESP_OK)
-    {
-        hr = CLR_E_PROCESS_EXCEPTION;
-    }
-
-    RmtChannel::registredChannels.erase((rmt_channel_t)channel);
+    RmtChannel::EraseChannel(handle);
 
     NANOCLR_NOCLEANUP();
-}
-
-rmt_config_t Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_Esp32_Rmt_ReceiverChannel::
-    GetNewRmtRxConfig(gpio_num_t pin, rmt_channel_t channel)
-{
-    rmt_config_t config = rmt_config_t();
-
-    config.rmt_mode = RMT_MODE_RX;
-    config.channel = channel;
-    config.gpio_num = pin;
-    config.clk_div = 80;
-    config.mem_block_num = 1;
-    config.flags = 0;
-
-    config.rx_config = rmt_rx_config_t();
-    config.rx_config.idle_threshold = 12000;
-    config.rx_config.filter_ticks_thresh = 100;
-    config.rx_config.filter_en = true;
-
-#if SOC_RMT_SUPPORT_RX_DEMODULATION
-    config.rx_config.rm_carrier = true;
-    config.rx_config.carrier_freq_hz = 38000;
-    config.rx_config.carrier_duty_percent = 33;
-    config.rx_config.carrier_level = RMT_CARRIER_LEVEL_HIGH;
-#endif
-
-    return config;
 }
