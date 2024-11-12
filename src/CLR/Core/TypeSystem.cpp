@@ -2024,6 +2024,14 @@ HRESULT CLR_RT_TypeDescriptor::ExtractTypeIndexFromObject(const CLR_RT_HeapBlock
 // static const char c_MARKER_ASSEMBLY_V1[] = "NFMRK1";
 static const char c_MARKER_ASSEMBLY_V2[] = "NFMRK2";
 
+bool CLR_RECORD_ASSEMBLY::ValidateMarker() const
+{
+    NATIVE_PROFILE_CLR_CORE();
+
+    // compare the marker
+    return memcmp(marker, c_MARKER_ASSEMBLY_V1, sizeof(c_MARKER_ASSEMBLY_V1)) == 0;
+}
+
 /// @brief Check for valid assembly header (CRC32 of header, string table version and marker)
 ///
 /// @return Check result
@@ -2043,7 +2051,7 @@ bool CLR_RECORD_ASSEMBLY::GoodHeader() const
         return false;
     }
 
-    return memcmp(marker, c_MARKER_ASSEMBLY_V2, sizeof(c_MARKER_ASSEMBLY_V2)) == 0;
+    return ValidateMarker();
 }
 
 /// @brief Check for valid assembly (header and CRC32 of assembly content)
