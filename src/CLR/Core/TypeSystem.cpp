@@ -1364,6 +1364,14 @@ HRESULT CLR_RT_TypeDescriptor::ExtractTypeIndexFromObject(const CLR_RT_HeapBlock
 //
 static const char c_MARKER_ASSEMBLY_V1[] = "NFMRK1";
 
+bool CLR_RECORD_ASSEMBLY::ValidateMarker() const
+{
+    NATIVE_PROFILE_CLR_CORE();
+
+    // compare the marker
+    return memcmp(marker, c_MARKER_ASSEMBLY_V1, sizeof(c_MARKER_ASSEMBLY_V1)) == 0;
+}
+
 bool CLR_RECORD_ASSEMBLY::GoodHeader() const
 {
     NATIVE_PROFILE_CLR_CORE();
@@ -1371,12 +1379,17 @@ bool CLR_RECORD_ASSEMBLY::GoodHeader() const
     header.headerCRC = 0;
 
     if (SUPPORT_ComputeCRC(&header, sizeof(header), 0) != this->headerCRC)
+    {
+        // check for a wrong version of the marker
         return false;
+    }
 
     if (this->stringTableVersion != c_CLR_StringTable_Version)
+    {
         return false;
+    }
 
-    return memcmp(marker, c_MARKER_ASSEMBLY_V1, sizeof(c_MARKER_ASSEMBLY_V1)) == 0;
+    return ValidateMarker();
 }
 
 bool CLR_RECORD_ASSEMBLY::GoodAssembly() const
