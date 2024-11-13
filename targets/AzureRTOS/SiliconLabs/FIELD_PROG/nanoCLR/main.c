@@ -16,15 +16,6 @@
 #include <tx_api.h>
 
 #include <nanoPAL_BlockStorage.h>
-// #include <nanoHAL_ConfigurationManager.h>
-
-extern void usb_device_hid_app_init(void);
-extern void sli_usbd_configuration_config0_init(void);
-extern void sli_usbd_hid_hid0_init(void);
-extern void sli_usbd_init(void);
-extern void sli_usbd_configuration_config0_init(void);
-extern void sli_usbd_cdc_acm_acm0_init(void);
-extern void usb_device_cdc_acm_app_init(void);
 
 // flags for hardware events
 TX_EVENT_FLAGS_GROUP nanoHardwareEvents;
@@ -66,10 +57,12 @@ extern sl_status_t sl_usbd_vendor_read_bulk_sync(
     uint16_t timeout,
     uint32_t *p_xfer_len);
 extern sl_status_t sl_usbd_vendor_is_enabled(uint8_t class_nbr, bool *p_enabled);
+extern void UsbStackInit();
 
 void BlinkThread_entry(uint32_t parameter)
 {
     (void)parameter;
+    UsbStackInit();
 
     while (1)
     {
@@ -176,25 +169,6 @@ void tx_application_define(void *first_unused_memory)
         {
         }
     }
-
-#if GECKO_FEATURE_USBD_HID == TRUE || HAL_WP_USE_USB_CDC == TRUE || GECKO_FEATURE_USBD_WINUSB == TRUE
-    // wait a couple of seconds to allow all threads to init
-    tx_thread_sleep(TX_TICKS_PER_MILLISEC(2000));
-
-    // can't call USBD init twice
-    sli_usbd_init();
-    sli_usbd_configuration_config0_init();
-#endif
-
-#if GECKO_FEATURE_USBD_HID == TRUE
-    sli_usbd_hid_hid0_init();
-    usb_device_hid_app_init();
-#endif
-
-#if HAL_WP_USE_USB_CDC == TRUE
-    sli_usbd_cdc_acm_acm0_init();
-    usb_device_cdc_acm_app_init();
-#endif
 }
 
 //  Application entry point.

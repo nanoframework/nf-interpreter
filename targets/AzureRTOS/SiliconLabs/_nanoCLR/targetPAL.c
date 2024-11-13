@@ -27,7 +27,7 @@ void UsbStackInit()
 
 #if GECKO_FEATURE_USBD_HID == TRUE || HAL_WP_USE_USB_CDC == TRUE || GECKO_FEATURE_USBD_WINUSB == TRUE
     // wait a couple of seconds to allow all other threads to init
-    tx_thread_sleep(TX_TICKS_PER_MILLISEC(4000));
+    tx_thread_sleep(TX_TICKS_PER_MILLISEC(2000));
 
     // can't call USBD init twice
     sli_usbd_init();
