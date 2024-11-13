@@ -3,8 +3,6 @@
     "include": [
         "SiliconLabs/SL_STK3701A/CMakePresets.json",
         "SiliconLabs/SKY_EEVB/CMakePresets.json",
-        "SiliconLabs/Si5575_CEVB/CMakePresets.json",
-        "SiliconLabs/Si5400_CEVB/CMakePresets.json",
         "SiliconLabs/SKY_CEVB1/CMakePresets.json",
         "SiliconLabs/STB_Interposer/CMakePresets.json",
         "SiliconLabs/FIELD_PROG/CMakePresets.json",
