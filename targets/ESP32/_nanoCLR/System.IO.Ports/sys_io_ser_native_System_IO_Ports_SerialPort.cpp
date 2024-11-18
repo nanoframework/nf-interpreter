@@ -946,7 +946,7 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeInit___VOID(
 
     // Create a task to handle UART event from ISR
     snprintf(task_name, ARRAYSIZE(task_name), "uart%d_events", uart_num);
-    if (xTaskCreatePinnedToCore(uart_event_task_sys, task_name, 2048, palUart, 12, &(palUart->UartEventTask), 1) !=
+    if (xTaskCreate(uart_event_task_sys, task_name, 2048, palUart, 12, &(palUart->UartEventTask)) !=
         pdPASS)
     {
         ESP_LOGE(TAG, "Failed to start UART events task");
