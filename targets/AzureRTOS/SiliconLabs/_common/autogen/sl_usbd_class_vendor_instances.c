@@ -117,8 +117,8 @@ sl_status_t sli_usbd_vendor_winusb_init()
 
     if (deviceState > SL_USBD_DEVICE_STATE_INIT)
     {
-        // device is already initialized, stop USB core, **ONLY** if there isn't a debugger connected
-        if (!DebuggerIsConnected())
+        // device is already initialized, stop USB core, **ONLY** if there isn't an active debug session 
+        if (!DebugSessionIsActive())
         {
             sl_usbd_core_stop_device();
 
