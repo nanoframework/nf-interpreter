@@ -72,5 +72,7 @@ bool DebuggerIsConnected()
 
 bool DebugSessionIsActive()
 {
-    return ((g_CLR_RT_ExecutionEngine.m_iDebugger_Conditions & CLR_RT_ExecutionEngine::c_fDebugger_SourceLevelDebugging) != 0);
+    return (
+        (g_CLR_RT_ExecutionEngine.m_iDebugger_Conditions & CLR_RT_ExecutionEngine::c_fDebugger_SourceLevelDebugging) !=
+        0);
 }
