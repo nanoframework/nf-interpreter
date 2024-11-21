@@ -5,7 +5,8 @@
 
 #include <ch.h>
 #include "hal.h"
-#include "fsmc_sdram_lld.h"
+#include <fsmc_sdram_lld.h>
+#include <stm32f7xx_hal.h>
 
 // SDRAM Mode definition register defines
 #define FMC_SDCMR_MRD_BURST_LENGTH_1             ((uint16_t)0x0000)
@@ -94,4 +95,47 @@ void Target_ExternalMemoryInit()
 {
     fsmcSdramInit();
     fsmcSdramStart(&SDRAMD, &sdram_cfg);
+}
+
+void Target_ExternalMemoryConfigMPU()
+{
+    // ARM: STM32F7: hard fault caused by unaligned Memory Access
+    // reference https://www.keil.com/support/docs/3777%20%20.htm
+    // SYMPTOM
+    // If you use an STM32F7xx microcontroller with an external SDRAM,
+    // the Cortex-M7 core may unexpectedly run into the hard fault handler because of unaligned access.
+    // This may happen for example, when the frame buffer of an LCD, a RAM filesystem or any other data is
+    // located into the SDRAM address range 0xC0000000 - 0xC03FFFFF (max. 4MB).
+    // The hard fault is executed although the bit UNALIGN_TRP (bit 3) in the CCR register is not enabled.
+
+    // CAUSE
+    // In general, RAM accesses on Cortex-M7 based devices do not have to be aligned in any way.
+    // The Cortex-M7 core can handle unaligned accesses by hardware.
+    // Usually, variables should be naturally aligned because these accesses are slightly faster than unaligned
+    // accesses.
+
+    // STM32F7xx devices have the external SDRAM mapped to the
+    // address range 0xC0000000 - 0xC03FFFFF (max. 4MB).
+    // According to the ARMv7-M Architecture Reference Manual chapter B3.1 (table B3-1),
+    // the area 0xC0000000-0xDFFFFFFF (32MB) is specified as Device Memory Type.
+    // According to chapter A3.2.1, all accesses to Device Memory Types must be naturally aligned.
+    // If they are not, a hard fault will execute no matter if the bit UNALIGN_TRP (bit 3) in the CCR register is
+    // enabled or not.
+
+    MPU_Region_InitTypeDef MPU_InitStruct;
+
+    // Configure the MPU attributes for SDRAM
+    MPU_InitStruct.Enable = MPU_REGION_ENABLE;
+    MPU_InitStruct.BaseAddress = 0xD0000000;
+    MPU_InitStruct.Size = MPU_REGION_SIZE_8MB;
+    MPU_InitStruct.AccessPermission = MPU_REGION_FULL_ACCESS;
+    MPU_InitStruct.IsBufferable = MPU_ACCESS_NOT_BUFFERABLE;
+    MPU_InitStruct.IsCacheable = MPU_ACCESS_NOT_CACHEABLE;
+    MPU_InitStruct.IsShareable = MPU_ACCESS_NOT_SHAREABLE;
+    MPU_InitStruct.Number = MPU_REGION_NUMBER0;
+    MPU_InitStruct.TypeExtField = MPU_TEX_LEVEL1;
+    MPU_InitStruct.SubRegionDisable = 0x00;
+    MPU_InitStruct.DisableExec = MPU_INSTRUCTION_ACCESS_DISABLE;
+
+    HAL_MPU_ConfigRegion(&MPU_InitStruct);
 }
