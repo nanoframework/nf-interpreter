@@ -69,3 +69,8 @@ bool DebuggerIsConnected()
 {
     return ((g_CLR_RT_ExecutionEngine.m_iDebugger_Conditions & CLR_RT_ExecutionEngine::c_fDebugger_Enabled) != 0);
 }
+
+bool DebugSessionIsActive()
+{
+    return ((g_CLR_RT_ExecutionEngine.m_iDebugger_Conditions & CLR_RT_ExecutionEngine::c_fDebugger_SourceLevelDebugging) != 0);
+}
