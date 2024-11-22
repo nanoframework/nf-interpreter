@@ -962,7 +962,7 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeConfig___VOI
 {
     NANOCLR_HEADER();
     {
-        uart_config_t uart_config;
+        uart_config_t uart_config = {};
 
         // get a pointer to the managed object instance and check that it's not NULL
         CLR_RT_HeapBlock *pThis = stack.This();

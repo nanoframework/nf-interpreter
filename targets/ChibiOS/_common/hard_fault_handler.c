@@ -60,11 +60,41 @@ void HardFault_Handler(void)
 
     // Flags about hardfault / busfault
     // See http://infocenter.arm.com/help/index.jsp?topic=/com.arm.doc.dui0552a/Cihdjcfc.html for reference
-    volatile bool isFaultPrecise = ((SCB->CFSR >> SCB_CFSR_BUSFAULTSR_Pos) & (1 << 1) ? true : false);
-    volatile bool isFaultImprecise = ((SCB->CFSR >> SCB_CFSR_BUSFAULTSR_Pos) & (1 << 2) ? true : false);
-    volatile bool isFaultOnUnstacking = ((SCB->CFSR >> SCB_CFSR_BUSFAULTSR_Pos) & (1 << 3) ? true : false);
-    volatile bool isFaultOnStacking = ((SCB->CFSR >> SCB_CFSR_BUSFAULTSR_Pos) & (1 << 4) ? true : false);
-    volatile bool isFaultAddressValid = ((SCB->CFSR >> SCB_CFSR_BUSFAULTSR_Pos) & (1 << 7) ? true : false);
+    // Configurable Fault Status Register
+    volatile uint32_t _CFSR = SCB->CFSR;
+
+    // IACCVIOL: Instruction access violation
+    volatile bool isFaultInstructionAccessViolation = ((_CFSR & (1 << 0)) ? true : false);
+    // DACCVIOL: Data access violation
+    volatile bool isFaultDataAccessViolation = ((_CFSR & (1 << 1)) ? true : false);
+    // MUNSTKERR: Unstacking error
+    volatile bool isFaultUnstackingError = ((_CFSR & (1 << 3)) ? true : false);
+    // MSTKERR: Stacking error
+    volatile bool isFaultStackingError = ((_CFSR & (1 << 4)) ? true : false);
+    // MMARVALID: MMAR is valid
+    volatile bool isMarkedMemoryAddressValid = ((_CFSR & (1 << 7)) ? true : false);
+    // IBUSERR: Instruction bus error
+    volatile bool isFaultInstructionBusError = ((_CFSR & (1 << 8)) ? true : false);
+    // PRECISERR: Precise data bus error
+    volatile bool isFaultPreciseDataBusError = ((_CFSR & (1 << 9)) ? true : false);
+    // IMPRECISERR: Imprecise data bus error
+    volatile bool isFaultImpreciseDataBusError = ((_CFSR & (1 << 10)) ? true : false);
+    // LSPERR: Lazy state preservation error
+    volatile bool isFaultLazyStatePreservationError = ((_CFSR & (1 << 13)) ? true : false);
+    // BFARVALID: BFAR is valid
+    volatile bool isFaultBusFaultAddressValid = ((_CFSR & (1 << 15)) ? true : false);
+    // UNDEFINSTR: Undefined instruction usage fault
+    volatile bool isUndefinedInstructionUsageFault = ((_CFSR & (1 << 16)) ? true : false);
+    // INVSTATE: Invalid state usage fault
+    volatile bool isInvalidStateUsageFault = ((_CFSR & (1 << 17)) ? true : false);
+    // INVPC: Invalid PC load usage fault
+    volatile bool isInvalidPcLoadUsageFault = ((_CFSR & (1 << 18)) ? true : false);
+    // NOCP: No coprocessor usage fault
+    volatile bool isNoCoprocessorUsageFault = ((_CFSR & (1 << 19)) ? true : false);
+    // UNALIGNED: Unaligned access usage fault
+    volatile bool isUnalignedAccessUsageFault = ((_CFSR & (1 << 24)) ? true : false);
+    // DIVBYZERO: Divide by zero usage fault
+    volatile bool isDivideByZeroUsageFault = ((_CFSR & (1 << 25)) ? true : false);
 
     // Hard Fault Status Register
     volatile unsigned long _HFSR = (*((volatile unsigned long *)(0xE000ED2C)));
