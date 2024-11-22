@@ -18,7 +18,8 @@ nf_setup_target_build(
     CLR_EXTRA_SOURCE_FILES
         # the next one is required is the target implements and it's using external memory
         ${CMAKE_CURRENT_SOURCE_DIR}/target_external_memory.c
-    
+        ${CMAKE_CURRENT_SOURCE_DIR}/target_mpu_config.c
+
     BOOTER_EXTRA_COMPILE_DEFINITIONS
         USBH_DEBUG_MULTI_HOST=0
 
