@@ -19,6 +19,7 @@
 
 extern int32_t hal_lfs_config();
 extern void hal_lfs_mount();
+extern void Target_ConfigMPU();
 
 // need to declare the Receiver thread here
 osThreadDef(ReceiverThread, osPriorityHigh, 2048, "ReceiverThread");
@@ -92,6 +93,9 @@ int main(void)
     // startup crc
     crcStart(NULL);
 #endif
+
+    // MPU configuration
+    Target_ConfigMPU();
 
     // config and init external memory
     // this has to be called after osKernelInitialize, otherwise an hard fault will occur
