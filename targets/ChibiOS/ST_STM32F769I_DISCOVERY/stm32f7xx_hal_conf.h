@@ -15,11 +15,26 @@ extern "C"
 #endif
 
 #define HAL_DMA_MODULE_ENABLED
+#define HAL_SDRAM_MODULE_ENABLED
 #define HAL_QSPI_MODULE_ENABLED
 #define HAL_RCC_MODULE_ENABLED
+#define HAL_CORTEX_MODULE_ENABLED
+
+// ########################### System Configuration #########################
+// This is the HAL system configuration section
+
+// Value of VDD in mv
+#define VDD_VALUE (3300U)
+// tick interrupt priority
+#define TICK_INT_PRIORITY (0x0FU)
+#define USE_RTOS          0U
+#define PREFETCH_ENABLE   1U
+// To enable instruction cache and prefetch
+#define ART_ACCELERATOR_ENABLE 1U
 
 #define USE_HAL_DMA2D_REGISTER_CALLBACKS 0U /* DMA2D register callback disabled     */
 #define USE_HAL_QSPI_REGISTER_CALLBACKS  0U /* QSPI register callback disabled      */
+#define USE_HAL_SDRAM_REGISTER_CALLBACKS 0U /* SDRAM register callback disabled     */
 
 #ifdef HAL_RCC_MODULE_ENABLED
 #include "stm32f7xx_hal_rcc.h"
@@ -32,6 +47,14 @@ extern "C"
 #ifdef HAL_QSPI_MODULE_ENABLED
 #include "stm32f7xx_hal_qspi.h"
 #endif /* HAL_QSPI_MODULE_ENABLED */
+
+#ifdef HAL_SDRAM_MODULE_ENABLED
+#include "stm32f7xx_hal_sdram.h"
+#endif /* HAL_SDRAM_MODULE_ENABLED */
+
+#ifdef HAL_CORTEX_MODULE_ENABLED
+#include "stm32f7xx_hal_cortex.h"
+#endif /* HAL_CORTEX_MODULE_ENABLED */
 
 #ifdef USE_FULL_ASSERT
     /**

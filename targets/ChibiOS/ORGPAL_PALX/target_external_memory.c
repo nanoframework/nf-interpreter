@@ -4,8 +4,9 @@
 //
 
 #include <ch.h>
-#include "hal.h"
-#include "fsmc_sdram_lld.h"
+#include <hal.h>
+#include <fsmc_sdram_lld.h>
+#include <stm32f7xx_hal.h>
 
 // SDRAM Mode definition register defines
 #define FMC_SDCMR_MRD_BURST_LENGTH_1             ((uint16_t)0x0000)
@@ -69,8 +70,6 @@
 #define SDRAM_SIZE  (8 * 1024 * 1024)
 #define SDRAM_START ((void *)FSMC_Bank6_MAP_BASE)
 
-void SetupDeviceMemoryToEliminateUnalignedAccess();
-
 // SDRAM driver configuration structure.
 static const SDRAMConfig sdram_cfg = {
     .sdcr = (uint32_t)FMC_ColumnBits_Number_8b | FMC_RowBits_Number_12b | FMC_SDMemory_Width_16b |
@@ -94,12 +93,11 @@ static const SDRAMConfig sdram_cfg = {
 
 void Target_ExternalMemoryInit()
 {
-    SetupDeviceMemoryToEliminateUnalignedAccess();
     fsmcSdramInit();
     fsmcSdramStart(&SDRAMD, &sdram_cfg);
 }
 
-void SetupDeviceMemoryToEliminateUnalignedAccess()
+void Target_ExternalMemoryConfigMPU()
 {
     // ARM: STM32F7: hard fault caused by unaligned Memory Access
     // reference https://www.keil.com/support/docs/3777%20%20.htm
@@ -124,37 +122,20 @@ void SetupDeviceMemoryToEliminateUnalignedAccess()
     // If they are not, a hard fault will execute no matter if the bit UNALIGN_TRP (bit 3) in the CCR register is
     // enabled or not.
 
-    // Solution recommended by KEIL
+    MPU_Region_InitTypeDef MPU_InitStruct;
 
-#define MPU_REGION_ENABLE              ((uint8_t)0x01U)
-#define MPU_REGION_SIZE_8MB            ((uint8_t)0x16U)
-#define MPU_REGION_FULL_ACCESS         ((uint8_t)0x03U)
-#define MPU_ACCESS_NOT_BUFFERABLE      ((uint8_t)0x00U)
-#define MPU_ACCESS_NOT_CACHEABLE       ((uint8_t)0x00U)
-#define MPU_ACCESS_NOT_SHAREABLE       ((uint8_t)0x00U)
-#define MPU_ACCESS_NOT_SHAREABLE       ((uint8_t)0x00U)
-#define MPU_REGION_NUMBER0             ((uint8_t)0x00U)
-#define MPU_TEX_LEVEL1                 ((uint8_t)0x01U)
-#define MPU_INSTRUCTION_ACCESS_DISABLE ((uint8_t)0x01U)
-#define MPU_PRIVILEGED_DEFAULT         ((uint32_t)0x00000004U)
+    // Configure the MPU attributes for SDRAM
+    MPU_InitStruct.Enable = MPU_REGION_ENABLE;
+    MPU_InitStruct.BaseAddress = 0xD0000000;
+    MPU_InitStruct.Size = MPU_REGION_SIZE_8MB;
+    MPU_InitStruct.AccessPermission = MPU_REGION_FULL_ACCESS;
+    MPU_InitStruct.IsBufferable = MPU_ACCESS_NOT_BUFFERABLE;
+    MPU_InitStruct.IsCacheable = MPU_ACCESS_NOT_CACHEABLE;
+    MPU_InitStruct.IsShareable = MPU_ACCESS_NOT_SHAREABLE;
+    MPU_InitStruct.Number = MPU_REGION_NUMBER0;
+    MPU_InitStruct.TypeExtField = MPU_TEX_LEVEL1;
+    MPU_InitStruct.SubRegionDisable = 0x00;
+    MPU_InitStruct.DisableExec = MPU_INSTRUCTION_ACCESS_DISABLE;
 
-    // Disable the MPU
-    __DMB();
-    SCB->SHCSR &= ~SCB_SHCSR_MEMFAULTENA_Msk;
-    MPU->CTRL = 0;
-
-    // Configure the region
-    MPU->RNR = MPU_REGION_NUMBER0;
-    MPU->RBAR = 0xC0000000;
-    MPU->RASR = (MPU_INSTRUCTION_ACCESS_DISABLE << MPU_RASR_XN_Pos) | (MPU_REGION_FULL_ACCESS << MPU_RASR_AP_Pos) |
-                (MPU_TEX_LEVEL1 << MPU_RASR_TEX_Pos) | (MPU_ACCESS_NOT_SHAREABLE << MPU_RASR_S_Pos) |
-                (MPU_ACCESS_NOT_CACHEABLE << MPU_RASR_C_Pos) | (MPU_ACCESS_NOT_BUFFERABLE << MPU_RASR_B_Pos) |
-                (0x00 << MPU_RASR_SRD_Pos) | (MPU_REGION_SIZE_8MB << MPU_RASR_SIZE_Pos) |
-                (MPU_REGION_ENABLE << MPU_RASR_ENABLE_Pos);
-
-    // Enable the MPU
-    MPU->CTRL = MPU_PRIVILEGED_DEFAULT | MPU_CTRL_ENABLE_Msk;
-    SCB->SHCSR |= SCB_SHCSR_MEMFAULTENA_Msk;
-    __DSB();
-    __ISB();
+    HAL_MPU_ConfigRegion(&MPU_InitStruct);
 }
