@@ -169,4 +169,7 @@ uint32_t CPU_SPI_ChipSelectLineCount(uint32_t busIndex);
 HRESULT CPU_SPI_MinClockFrequency(uint32_t busIndex, int32_t *frequency);
 HRESULT CPU_SPI_MaxClockFrequency(uint32_t busIndex, int32_t *frequency);
 
+// return the SPI hande for the SPI device (platform specific)
+uint32_t CPU_SPI_GetSpiHandle(uint32_t deviceHandle);
+
 #endif // DRIVERS_SPI_DECL_H

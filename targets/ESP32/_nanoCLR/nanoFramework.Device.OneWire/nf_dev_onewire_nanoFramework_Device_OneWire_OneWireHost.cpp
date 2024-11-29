@@ -19,7 +19,7 @@ static uint8_t SerialNum[8];
 // Driver state.
 static oneWireState DriverState = ONEWIRE_UNINIT;
 
-void IRAM_ATTR oneWireStop()
+void oneWireStop()
 {
     // stop UART
     uart_driver_delete(NF_ONEWIRE_ESP32_UART_NUM);
@@ -28,19 +28,18 @@ void IRAM_ATTR oneWireStop()
     DriverState = ONEWIRE_STOP;
 }
 
-HRESULT IRAM_ATTR oneWireInit()
+HRESULT oneWireInit()
 {
     DriverState = ONEWIRE_STOP;
 
-    uart_config_t uart_config = {
-        .baud_rate = 115200,
-        .data_bits = UART_DATA_8_BITS,
-        .parity = UART_PARITY_DISABLE,
-        .stop_bits = UART_STOP_BITS_1,
-        .flow_ctrl = UART_HW_FLOWCTRL_DISABLE,
-        .rx_flow_ctrl_thresh = 0,
-        .source_clk = UART_SCLK_DEFAULT
-    };
+    uart_config_t uart_config;
+    uart_config.baud_rate = 115200;
+    uart_config.data_bits = UART_DATA_8_BITS;
+    uart_config.parity = UART_PARITY_DISABLE;
+    uart_config.stop_bits = UART_STOP_BITS_1;
+    uart_config.flow_ctrl = UART_HW_FLOWCTRL_DISABLE;
+    uart_config.rx_flow_ctrl_thresh = 0;
+    uart_config.source_clk = UART_SCLK_DEFAULT;
 
     // get GPIO pins configured for UART assigned to 1-Wire
     // need to subtract one to get the correct index of UART in mapped device pins

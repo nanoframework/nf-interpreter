@@ -57,10 +57,16 @@ if(ESP32_IDF_PATH)
     endif()
 endif()
 
-# WHEN CHANGING THIS MAKE SURE TO UPDATE:
-# 1. the dev containers
-# 2. ref in AZDO pipeline yaml in Community Targets repo
-set(ESP32_IDF_TAG "5.2.2" CACHE INTERNAL "ESP32 IDF tag")
+#################################################################################
+# WHEN CHANGING THIS MAKE SURE TO UPDATE:                                       #
+# 1. the github tags in dev containers SRC                                      #     
+# 2. ref in AZDO pipeline yaml (main, nightly build and Community Targets repo) #
+# 3. cache tag in build and download AZDO yaml templates                        #
+#################################################################################
+#################################################################################
+set(ESP32_IDF_TAG "5.2.3" CACHE INTERNAL "ESP32 IDF tag")
+#################################################################################
+#################################################################################
 
 if(NO_ESP32_IDF_PATH)
     # no ESP32 IDF source specified, download it from official repo

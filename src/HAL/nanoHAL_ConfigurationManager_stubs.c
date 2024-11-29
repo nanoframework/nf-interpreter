@@ -5,7 +5,7 @@
 
 #include <nanoHAL_v2.h>
 
-__nfweak void ConfigurationManager_Initialize(){};
+__nfweak void ConfigurationManager_Initialize() {};
 
 __nfweak void *ConfigurationManager_FindNetworkConfigurationBlocks(uint32_t startAddress, uint32_t endAddress)
 {
@@ -69,4 +69,19 @@ __nfweak bool ConfigurationManager_CheckExistingConfigurationBlock(
     (void)newConfigBlockSize;
 
     return false;
+}
+
+__nfweak void ConfigurationManager_GetOemModelSku(char *model, size_t modelSkuSize)
+{
+    memset(model, 0, modelSkuSize);
+}
+
+__nfweak void ConfigurationManager_GetModuleSerialNumber(char *serialNumber, size_t serialNumberSize)
+{
+    memset(serialNumber, 0, serialNumberSize);
+}
+
+__nfweak void ConfigurationManager_GetSystemSerialNumber(char *serialNumber, size_t serialNumberSize)
+{
+    memset(serialNumber, 0, serialNumberSize);
 }

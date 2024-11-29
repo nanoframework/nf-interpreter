@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (c) .NET Foundation and Contributors
 // See LICENSE file in the project root for full license information.
 //
@@ -47,7 +47,7 @@ extern WireReceiveCallback WireProtocolReceiveCallback;
 // The following functions are exposed in the DLL and
 // meant to be called by the C# host application.
 // Keep their names in sync with the managed code declaration @ nanoFramework.nanoCLR.Host\Interop\Native.cs
-// and the code @ nanoCLR_native.c
+// and the code @ nanoCLR_native.cpp
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 extern "C" NANOCLRNATIVE_API void nanoCLR_Run(NANO_CLR_SETTINGS nanoClrSettings);
@@ -67,3 +67,6 @@ extern "C" NANOCLRNATIVE_API void nanoCLR_SetWireProtocolTransmitCallback(WireTr
 extern "C" NANOCLRNATIVE_API void nanoCLR_WireProtocolProcess();
 
 extern "C" NANOCLRNATIVE_API const char *nanoCLR_GetVersion();
+
+extern "C" NANOCLRNATIVE_API uint16_t nanoCLR_GetNativeAssemblyCount();
+extern "C" NANOCLRNATIVE_API bool nanoCLR_GetNativeAssemblyInformation(const CLR_UINT8 *data, size_t size);
