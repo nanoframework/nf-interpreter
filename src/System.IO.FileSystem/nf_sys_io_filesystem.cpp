@@ -23,6 +23,20 @@ static const CLR_RT_MethodHandler method_lookup[] =
     NULL,
     NULL,
     NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
     Library_nf_sys_io_filesystem_nanoFramework_System_IO_FileSystem_SDCard::InitNative___VOID,
     Library_nf_sys_io_filesystem_nanoFramework_System_IO_FileSystem_SDCard::NativeDispose___VOID,
     Library_nf_sys_io_filesystem_nanoFramework_System_IO_FileSystem_SDCard::MountNative___VOID,
@@ -52,6 +66,9 @@ static const CLR_RT_MethodHandler method_lookup[] =
     Library_nf_sys_io_filesystem_System_IO_DriveInfo::GetFileSystems___STATIC__SZARRAY_STRING,
     Library_nf_sys_io_filesystem_System_IO_DriveInfo::MountRemovableVolumes___STATIC__VOID,
     Library_nf_sys_io_filesystem_System_IO_DriveInfo::GetDrivesNative___STATIC__SZARRAY_SystemIODriveInfo,
+    NULL,
+    NULL,
+    NULL,
     NULL,
     NULL,
     NULL,
@@ -222,9 +239,9 @@ static const CLR_RT_MethodHandler method_lookup[] =
 const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_System_IO_FileSystem =
 {
     "System.IO.FileSystem",
-    0xB0025409,
+    0x1777E2FE,
     method_lookup,
-    { 1, 1, 0, 3 }
+    { 1, 1, 0, 4 }
 };
 
 // clang-format on
