@@ -92,6 +92,69 @@ esp_eth_handle_t eth_handle = NULL;
 #endif // CONFIG_IDF_TARGET_ESP32P4
 
 
+#if CONFIG_IDF_TARGET_ESP32
+#define NANO_ETH_ESP32_EMAC_DEFAULT_CONFIG()               \
+    {                                                 \
+        .smi_gpio =                                   \
+        {                                             \
+            .mdc_num = 23,                            \
+            .mdio_num = 18                            \
+        },                                            \
+        .interface = EMAC_DATA_INTERFACE_RMII,        \
+        .clock_config =                               \
+        {                                             \
+            .rmii =                                   \
+            {                                         \
+                .clock_mode = DEFAULT_RMII_CLK_MODE,  \
+                .clock_gpio = (emac_rmii_clock_gpio_t)DEFAULT_RMII_CLK_GPIO   \
+            }                                         \
+        },                                            \
+        .dma_burst_len = ETH_DMA_BURST_LEN_32,        \
+        .intr_priority = 0,                           \
+    }
+#elif CONFIG_IDF_TARGET_ESP32P4
+#define NANO_ETH_ESP32_EMAC_DEFAULT_CONFIG()          \
+    {                                                 \
+        .smi_gpio =                                   \
+        {                                             \
+            .mdc_num = 31,                            \
+            .mdio_num = 27                            \
+        },                                            \
+        .interface = EMAC_DATA_INTERFACE_RMII,        \
+        .clock_config =                               \
+        {                                             \
+            .rmii =                                   \
+            {                                         \
+                .clock_mode = EMAC_CLK_EXT_IN,        \
+                .clock_gpio = 50                      \
+            }                                         \
+        },                                            \
+        .dma_burst_len = ETH_DMA_BURST_LEN_32,        \
+        .intr_priority = 0,                           \
+        .emac_dataif_gpio =                           \
+        {                                             \
+            .rmii =                                   \
+            {                                         \
+                .tx_en_num = 49,                      \
+                .txd0_num = 34,                       \
+                .txd1_num = 35,                       \
+                .crs_dv_num = 28,                     \
+                .rxd0_num = 29,                       \
+                .rxd1_num = 30                        \
+            }                                         \
+        },                                            \
+        .clock_config_out_in =                        \
+        {                                             \
+            .rmii =                                   \
+            {                                         \
+                .clock_mode = EMAC_CLK_EXT_IN,        \
+                .clock_gpio = -1                      \
+            }                                         \
+        },                                            \
+    }
+#endif // CONFIG_IDF_TARGET_ESP32P4
+
+
 esp_err_t NF_ESP32_InitialiseEthernet(uint8_t *pMacAdr)
 {
     (void)pMacAdr;
