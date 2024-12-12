@@ -17,7 +17,7 @@ resources:
       type: github
       name: espressif/esp-idf
       endpoint: nanoframework
-      ref: refs/tags/v5.2.3
+      ref: refs/tags/v5.4.1
 
 # scheduled build
 # the schedule is defined at the AZDO web interface because of inconsistencies with time zones
@@ -602,7 +602,7 @@ jobs:
       IDF_PATH: "D:/a/1/s/esp-idf"
       PIP_CACHE_DIR: $(Pipeline.Workspace)/.pip
       TargetPlatform: "esp32"
-      IDF_TAG: "v5.2.3"
+      IDF_TAG: "v5.4.1"
 
     steps:
       - checkout: self

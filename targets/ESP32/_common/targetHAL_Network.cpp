@@ -152,7 +152,7 @@ static void event_handler(void *arg, esp_event_base_t event_base, int32_t event_
     ets_printf("Event %d, ID: %d\n", event_base, event_id);
 #endif
 
-#if defined(CONFIG_SOC_WIFI_SUPPORTED)
+#if defined(CONFIG_SOC_WIFI_SUPPORTED) || defined(CONFIG_SOC_WIRELESS_HOST_SUPPORTED)
     if (event_base == WIFI_EVENT)
     {
         switch (event_id)
@@ -523,7 +523,7 @@ void nanoHAL_Network_Initialize()
     {
         ESP_ERROR_CHECK(result);
 
-#if defined(CONFIG_SOC_WIFI_SUPPORTED)
+#if defined(CONFIG_SOC_WIFI_SUPPORTED) || defined(CONFIG_SOC_WIRELESS_HOST_SUPPORTED)
         // register the handler for WIFI events
         ESP_ERROR_CHECK(esp_event_handler_instance_register(WIFI_EVENT, ESP_EVENT_ANY_ID, &event_handler, NULL, NULL));
 #endif

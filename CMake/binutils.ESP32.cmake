@@ -184,7 +184,7 @@ function(nf_set_esp32_target_series)
     set(TARGET_SERIES_SHORT ${TARGET_SERIES_2} CACHE INTERNAL "ESP32 target series lower case, short version")
 
     # set the CPU type
-    if(${TARGET_SERIES_SHORT} STREQUAL "esp32c3" OR ${TARGET_SERIES_SHORT} STREQUAL "esp32c6" OR ${TARGET_SERIES_SHORT} STREQUAL "esp32h2" )
+    if(${TARGET_SERIES_SHORT} STREQUAL "esp32c3" OR ${TARGET_SERIES_SHORT} STREQUAL "esp32c6" OR ${TARGET_SERIES_SHORT} STREQUAL "esp32h2" OR ${TARGET_SERIES_SHORT} STREQUAL "esp32p4")
         set(ESP32_CPU_TYPE "riscv" CACHE INTERNAL "Setting CPU type")
     else()
         set(ESP32_CPU_TYPE "xtensa" CACHE INTERNAL "Setting CPU type")
@@ -468,6 +468,7 @@ macro(nf_setup_partition_tables_generator)
        ${TARGET_SERIES_SHORT} STREQUAL "esp32c3" OR 
        ${TARGET_SERIES_SHORT} STREQUAL "esp32c6" OR 
        ${TARGET_SERIES_SHORT} STREQUAL "esp32h2" OR 
+       ${TARGET_SERIES_SHORT} STREQUAL "esp32p4" OR 
        ${TARGET_SERIES_SHORT} STREQUAL "esp32s2" OR 
        ${TARGET_SERIES_SHORT} STREQUAL "esp32s3")
 
@@ -482,6 +483,7 @@ macro(nf_setup_partition_tables_generator)
 
     if(${TARGET_SERIES_SHORT} STREQUAL "esp32" OR 
        ${TARGET_SERIES_SHORT} STREQUAL "esp32c6" OR 
+       ${TARGET_SERIES_SHORT} STREQUAL "esp32p4" OR 
        ${TARGET_SERIES_SHORT} STREQUAL "esp32s2" OR 
        ${TARGET_SERIES_SHORT} STREQUAL "esp32s3")
 
@@ -501,7 +503,8 @@ macro(nf_setup_partition_tables_generator)
 
     endif()
 
-    if(${TARGET_SERIES_SHORT} STREQUAL "esp32s3")
+    if(${TARGET_SERIES_SHORT} STREQUAL "esp32s3" OR 
+       ${TARGET_SERIES_SHORT} STREQUAL "esp32p4")
 
         # 32MB partition table for ESP32_S3
         add_custom_command( TARGET ${NANOCLR_PROJECT_NAME}.elf POST_BUILD
@@ -599,6 +602,11 @@ macro(nf_add_idf_as_library)
     endif()
 
     nf_install_idf_component_from_registry(littlefs 4831aa41-8b72-48ac-a534-910a985a5519) 
+
+    if(${TARGET_SERIES_SHORT} STREQUAL "esp32p4")
+        nf_install_idf_component_from_registry(esp_wifi_remote af68cf54-0998-4681-b3b3-7776920067b5) 
+        nf_install_idf_component_from_registry(esp_hosted dd94b9d3-b756-41b1-be36-d3a4d0b0bde7) 
+    endif()
     
     include(${IDF_PATH_CMAKED}/tools/cmake/idf.cmake)
 
@@ -670,7 +678,6 @@ macro(nf_add_idf_as_library)
         freertos
         esptool_py
         fatfs
-        esp_wifi
         esp_event
         vfs
         esp_netif
@@ -686,7 +693,6 @@ macro(nf_add_idf_as_library)
         idf::freertos
         idf::esptool_py
         idf::fatfs
-        idf::esp_wifi
         idf::esp_event
         idf::vfs
         idf::esp_netif
@@ -694,6 +700,17 @@ macro(nf_add_idf_as_library)
         idf::esp_psram
         idf::littlefs
     )
+
+    # Needed for remote Wifi module on P4 boards
+    if(${TARGET_SERIES_SHORT} STREQUAL "esp32p4")
+        list(APPEND IDF_COMPONENTS_TO_ADD esp_wifi_remote)
+        list(APPEND IDF_COMPONENTS_TO_ADD esp_hosted)
+        list(APPEND IDF_LIBRARIES_TO_ADD idf::esp_hosted)
+        list(APPEND IDF_LIBRARIES_TO_ADD idf::esp_wifi_remote)
+    else()
+        list(APPEND IDF_COMPONENTS_TO_ADD esp_wifi)
+        list(APPEND IDF_LIBRARIES_TO_ADD idf::esp_wifi)
+    endif()
 
     if(HAL_USE_BLE_OPTION)
         list(APPEND IDF_COMPONENTS_TO_ADD bt)
@@ -917,6 +934,10 @@ macro(nf_add_idf_as_library)
             PROPERTY COMPILE_DEFINITIONS ${IDF_LWIP_COMPILE_DEFINITIONS}
         )
 
+        #Enable Smartconfig
+        set(ESP32_ENABLE_SMARTCONFIG "ON" CACHE INTERNAL "Enable support for Smartconfig")
+
+
     endif()
 
     # need to add include path to find our ffconfig.h and target_platform.h
@@ -1035,7 +1056,7 @@ macro(nf_add_idf_as_library)
     add_custom_command(
         TARGET ${NANOCLR_PROJECT_NAME}.elf POST_BUILD
         COMMAND ${output_idf_size}
-        --archives --target ${TARGET_SERIES_SHORT} ${CMAKE_BINARY_DIR}/${CMAKE_PROJECT_NAME}.map
+        --archives ${CMAKE_BINARY_DIR}/${CMAKE_PROJECT_NAME}.map
         COMMENT "Ouptut IDF size summary")
 
 endmacro()
