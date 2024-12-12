@@ -2,9 +2,10 @@
     "version": 4,
     "include": [
         "../../CMake/xtensa-esp32.json",
-        "../../CMake/xtensa-esp32c3.json",
-        "../../CMake/xtensa-esp32c6.json",
-        "../../CMake/xtensa-esp32h2.json",
+        "../../CMake/riscv-esp32c3.json",
+        "../../CMake/riscv-esp32c6.json",
+        "../../CMake/riscv-esp32h2.json",
+        "../../CMake/riscv-esp32p4.json",
         "../../CMake/xtensa-esp32s2.json",
         "../../CMake/xtensa-esp32s3.json",
         "../../config/user-tools-repos.json",
@@ -240,7 +241,7 @@
         {
             "name": "ESP32_C3",
             "inherits": [
-                "xtensa-esp32c3-preset",
+                "riscv-esp32c3-preset",
                 "user-tools-repos",
                 "user-prefs"
             ],
@@ -258,7 +259,7 @@
         {
             "name": "ESP32_C3_REV3",
             "inherits": [
-                "xtensa-esp32c3-preset",
+                "riscv-esp32c3-preset",
                 "user-tools-repos",
                 "user-prefs"
             ],
@@ -277,7 +278,7 @@
         {
             "name": "ESP32_C6_THREAD",
             "inherits": [
-                "xtensa-esp32c6-preset",
+                "riscv-esp32c6-preset",
                 "user-tools-repos",
                 "user-prefs"
             ],
@@ -304,7 +305,7 @@
         {
             "name": "ESP32_H2_THREAD",
             "inherits": [
-                "xtensa-esp32h2-preset",
+                "riscv-esp32h2-preset",
                 "user-tools-repos",
                 "user-prefs"
             ],
@@ -321,6 +322,58 @@
                 "API_nanoFramework.Device.Bluetooth": "ON",
                 "API_nanoFramework.Networking.Thread": "ON",
                 "THREAD_DEVICE_TYPE": "FTD"
+            }
+        },
+        {
+            "name": "ESP32_P4_UART",
+            "inherits": [
+                "riscv-esp32p4-preset",
+                "user-tools-repos",
+                "user-prefs"
+            ],
+            "hidden": false,
+            "cacheVariables": {
+                "TARGET_NAME": "${presetName}",
+                "SDK_CONFIG_FILE": "sdkconfig.default.esp32p4",
+                "NF_BUILD_RTM": "OFF",
+                "NF_FEATURE_DEBUGGER": "ON",
+                "TARGET_SERIAL_BAUDRATE": "921600",
+                "NF_FEATURE_RTC": "ON",
+                "NF_FEATURE_HAS_SDCARD": "ON",
+                "API_System.Device.Wifi": "ON",
+                "API_nanoFramework.Device.OneWire": "OFF",
+                "ESP32_ETHERNET_SUPPORT": "ON",
+                "ESP32_ETHERNET_INTERFACE": "IP101",
+                "ETH_MDC_GPIO" : "31",
+                "ETH_MDIO_GPIO": "52",
+                "ETH_PHY_RST_GPIO": "51",
+                "ETH_PHY_ADDR": "1"
+            }
+        },
+        {
+            "name": "ESP32_P4_USB",
+            "inherits": [
+                "riscv-esp32p4-preset",
+                "user-tools-repos",
+                "user-prefs"
+            ],
+            "hidden": false,
+            "cacheVariables": {
+                "TARGET_NAME": "${presetName}",
+                "SDK_CONFIG_FILE": "sdkconfig.default.esp32p4",
+                "NF_BUILD_RTM": "OFF",
+                "NF_FEATURE_DEBUGGER": "ON",
+                "HAL_WP_USE_USB_CDC": "ON",
+                "NF_FEATURE_RTC": "ON",
+                "NF_FEATURE_HAS_SDCARD": "ON",
+                "API_System.Device.Wifi": "ON",
+                "API_nanoFramework.Device.OneWire": "OFF",
+                "ESP32_ETHERNET_SUPPORT": "ON",
+                "ESP32_ETHERNET_INTERFACE": "IP101",
+                "ETH_MDC_GPIO" : "31",
+                "ETH_MDIO_GPIO": "52",
+                "ETH_PHY_RST_GPIO": "51",
+                "ETH_PHY_ADDR": "1"
             }
         },
         {
@@ -456,7 +509,7 @@
         {
             "name": "XIAO_ESP32C3",
             "inherits": [
-                "xtensa-esp32c3-preset",
+                "riscv-esp32c3-preset",
                 "user-tools-repos",
                 "user-prefs"
             ],

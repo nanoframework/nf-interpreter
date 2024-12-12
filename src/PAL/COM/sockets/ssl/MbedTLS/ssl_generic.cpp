@@ -45,12 +45,12 @@ void nf_debug(void *ctx, int level, const char *file, int line, const char *str)
     // this is a lightheight version with just the debug messages
     debug_printf("%s", str);
 }
-
+/*
 int net_would_block(const mbedtls_net_context *ctx)
 {
-    /*
-     * Never return 'WOULD BLOCK' on a non-blocking socket
-     */
+    //
+    // Never return 'WOULD BLOCK' on a non-blocking socket
+    //
     int val = 0;
 
     if ((fcntl(ctx->fd, F_GETFL, val) & O_NONBLOCK) != O_NONBLOCK)
@@ -158,7 +158,7 @@ int mbedtls_net_recv_timeout(void *ctx, unsigned char *buf, size_t len, uint32_t
 
     ret = select(fd + 1, &read_fds, NULL, NULL, timeout == 0 ? NULL : &tv);
 
-    /* Zero fds ready means we timed out */
+    // Zero fds ready means we timed out 
     if (ret == 0)
         return (MBEDTLS_ERR_SSL_TIMEOUT);
 
@@ -175,7 +175,7 @@ int mbedtls_net_recv_timeout(void *ctx, unsigned char *buf, size_t len, uint32_t
         return (MBEDTLS_ERR_NET_RECV_FAILED);
     }
 
-    /* This call will not block */
+    // This call will not block 
     return (mbedtls_net_recv(ctx, buf, len));
 }
 
@@ -190,6 +190,7 @@ void mbedtls_net_free(mbedtls_net_context *ctx)
 
     ctx->fd = -1;
 }
+*/
 
 // get Unix Epoch time from HAL SystemTime
 time_t nf_get_unix_epoch()

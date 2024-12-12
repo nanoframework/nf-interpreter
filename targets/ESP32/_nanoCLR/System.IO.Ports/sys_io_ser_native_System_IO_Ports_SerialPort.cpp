@@ -26,6 +26,9 @@ NF_PAL_UART Uart2_PAL;
 #if SOC_UART_HP_NUM > 3
 NF_PAL_UART Uart3_PAL;
 #endif
+#if SOC_UART_HP_NUM > 4
+NF_PAL_UART Uart4_PAL;
+#endif
 
 NF_PAL_UART *GetPalUartFromUartNum_sys(int uart_num)
 {
@@ -46,9 +49,15 @@ NF_PAL_UART *GetPalUartFromUartNum_sys(int uart_num)
 #endif
 
 #if SOC_UART_HP_NUM > 3
-        case UART_NUM_2:
+        case UART_NUM_3:
             // set UART PAL
             return &Uart3_PAL;
+#endif
+
+#if SOC_UART_HP_NUM > 4
+        case UART_NUM_4:
+            // set UART PAL
+            return &Uart4_PAL;
 #endif
 
         default:

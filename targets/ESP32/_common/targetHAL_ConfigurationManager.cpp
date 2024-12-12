@@ -16,6 +16,8 @@ bool ethernetEnabled = false;
 // NVS parameters for Interface config
 #define NVS_NAMESPACE "nanoF"
 
+static const char *TAG = "cm";
+
 // #define DEBUG_CONFIG        1
 
 #ifdef DEBUG_CONFIG
@@ -151,7 +153,7 @@ bool AppendConfigBlock(
 void ConfigurationManager_EnumerateConfigurationBlocks()
 {
     HAL_CONFIGURATION_NETWORK *networkConfigs = ConfigStorage_FindNetworkConfigurationBlocks();
-
+ESP_LOGI(TAG, "ConfigurationManager_EnumerateConfigurationBlocks %d",networkConfigs->Count);
     // check network configs count
     if (networkConfigs->Count == 0)
     {
@@ -162,7 +164,7 @@ void ConfigurationManager_EnumerateConfigurationBlocks()
         // ESP32 can have have up to 4 network interfaces: Wireless Station, Wireless AP, Ethernet and OpenThread
 
         // Allocate count & types of network interfaces
-#if defined(CONFIG_SOC_WIFI_SUPPORTED)
+#if defined(CONFIG_SOC_WIFI_SUPPORTED) || defined(CONFIG_SOC_WIRELESS_HOST_SUPPORTED)
         // Wireless Support
         netTypes[networkCount++] = NetworkInterfaceType_Wireless80211;
         netTypes[networkCount++] = NetworkInterfaceType_WirelessAP;
@@ -176,6 +178,8 @@ void ConfigurationManager_EnumerateConfigurationBlocks()
 #if HAL_USE_THREAD == TRUE
         netTypes[networkCount++] = NetworkInterfaceType_Thread;
 #endif
+ESP_LOGI(TAG, "networkCount %d", networkCount);
+
         // allocate memory for ONE network configuration
         HAL_Configuration_NetworkInterface *networkConfig =
             (HAL_Configuration_NetworkInterface *)platform_malloc(sizeof(HAL_Configuration_NetworkInterface));
@@ -203,6 +207,7 @@ void ConfigurationManager_EnumerateConfigurationBlocks()
 
         // have to enumerate again to pick it up
         networkConfigs = ConfigStorage_FindNetworkConfigurationBlocks();
+ESP_LOGI(TAG, "networkCount %d/%d", networkCount, networkConfigs->Count);
     }
 
     // find wireless 80211 network configuration blocks
