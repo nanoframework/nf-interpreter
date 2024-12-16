@@ -322,6 +322,20 @@ HRESULT CLR_RT_HeapBlock_Array::Copy(
             dataSrc += indexSrc * sizeElem;
             dataDst += indexDst * sizeElem;
 
+#if !defined(BUILD_RTM)
+            // Validate pointers and memory ranges
+            if (dataSrc == nullptr || dataDst == nullptr ||
+                dataSrc + length * sizeElem > arraySrc->GetFirstElement() + arraySrc->m_numOfElements * sizeElem ||
+                dataDst + length * sizeElem > arrayDst->GetFirstElement() + arrayDst->m_numOfElements * sizeElem)
+            {
+#ifdef DEBUG
+                _ASSERTE(FALSE);
+#endif
+
+                NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_RANGE);
+            }
+#endif
+
             if (!arraySrc->m_fReference)
             {
                 memmove(dataDst, dataSrc, length * sizeElem);
