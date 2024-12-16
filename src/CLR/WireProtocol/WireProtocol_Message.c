@@ -369,7 +369,7 @@ void WP_Message_Process()
                     }
                 }
 
-                if(!SyncToMessageStart())
+                if (!SyncToMessageStart())
                 {
                     // something went wrong
                     TRACE0(TRACE_ERRORS, "RxError: Failed to sync to message start\n");
