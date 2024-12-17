@@ -89,8 +89,8 @@ bool SyncToMessageStart()
         size_t moveLength = len - 1;
 
         // Ensure that the memory regions do not exceed allocated bounds
-        if ((src + moveLength > (uint8_t *)&_inboundMessage + sizeof(_inboundMessage)) ||
-            (dst + moveLength > (uint8_t *)&_inboundMessage + sizeof(_inboundMessage)))
+        if ((src + moveLength >= (uint8_t *)&_inboundMessage + sizeof(_inboundMessage)) ||
+            (dst + moveLength >= (uint8_t *)&_inboundMessage + sizeof(_inboundMessage)))
         {
             return false;
         }
