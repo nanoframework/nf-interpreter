@@ -343,7 +343,8 @@
                 "GRAPHICS_DISPLAY": "Generic_SPI.cpp",
                 "TOUCHPANEL_DEVICE": "XPT2046.cpp",
                 "GRAPHICS_DISPLAY_INTERFACE": "Spi_To_Display.cpp",
-                "TOUCHPANEL_INTERFACE": "Spi_To_TouchPanel.cpp"
+                "TOUCHPANEL_INTERFACE": "Spi_To_TouchPanel.cpp",
+                "ESP32_SPIRAM_FOR_IDF_ALLOCATION": "1024 * 1024"
             }
         },
         {
