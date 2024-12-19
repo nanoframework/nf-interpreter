@@ -111,7 +111,7 @@ void SpiTransferCompleteCallback(NF_SpiDriver_Handle_t handle, Ecode_t transferS
         //     // half duplex operation, clear output enable bit
         //     palSpi->Handle->spi->CR1 &= ~SPI_CR1_BIDIOE;
         // }
-        NF_SpiDriver_Receive(palSpi->Handle, palSpi->ReadBuffer, palSpi->ReadSize, SpiTransferCompleteCallback);
+        NF_SpiDriver_MReceive(palSpi->Handle, palSpi->ReadBuffer, palSpi->ReadSize, SpiTransferCompleteCallback);
     }
     else
     {
@@ -325,7 +325,7 @@ HRESULT CPU_SPI_nWrite_nRead(
                 {
                     // Full duplex
                     // Uses the largest buffer size as transfer size
-                    NF_SpiDriver_TransferBlocking(
+                    NF_SpiDriver_MTransferB(
                         palSpi->Handle,
                         palSpi->WriteBuffer,
                         palSpi->ReadBuffer,
@@ -340,7 +340,7 @@ HRESULT CPU_SPI_nWrite_nRead(
                     //     // half duplex operation, set output enable
                     //     palSpi->Handle->spi->CR1 |= SPI_CR1_BIDIOE;
                     // }
-                    NF_SpiDriver_TransmitBlocking(palSpi->Handle, palSpi->WriteBuffer, palSpi->WriteSize);
+                    NF_SpiDriver_MTransmitB(palSpi->Handle, palSpi->WriteBuffer, palSpi->WriteSize);
 
                     // receive operation
                     // TODO
@@ -349,7 +349,7 @@ HRESULT CPU_SPI_nWrite_nRead(
                     //     // half duplex operation, set output enable
                     //     palSpi->Handle->spi->CR1 &= ~SPI_CR1_BIDIOE;
                     // }
-                    NF_SpiDriver_ReceiveBlocking(palSpi->Handle, palSpi->ReadBuffer, palSpi->ReadSize);
+                    NF_SpiDriver_MReceiveB(palSpi->Handle, palSpi->ReadBuffer, palSpi->ReadSize);
                 }
             }
             else
@@ -364,7 +364,7 @@ HRESULT CPU_SPI_nWrite_nRead(
                     //     // half duplex operation, set output enable
                     //     palSpi->Handle->spi->CR1 &= ~SPI_CR1_BIDIOE;
                     // }
-                    NF_SpiDriver_ReceiveBlocking(palSpi->Handle, palSpi->ReadBuffer, palSpi->ReadSize);
+                    NF_SpiDriver_MReceiveB(palSpi->Handle, palSpi->ReadBuffer, palSpi->ReadSize);
                 }
                 else
                 {
@@ -375,7 +375,7 @@ HRESULT CPU_SPI_nWrite_nRead(
                         // half duplex operation, set output enable
                         // palSpi->Handle->spi->CR1 |= SPI_CR1_BIDIOE;
                     }
-                    NF_SpiDriver_TransmitBlocking(palSpi->Handle, palSpi->WriteBuffer, palSpi->WriteSize);
+                    NF_SpiDriver_MTransmitB(palSpi->Handle, palSpi->WriteBuffer, palSpi->WriteSize);
                 }
             }
 
@@ -413,7 +413,7 @@ HRESULT CPU_SPI_nWrite_nRead(
                     palSpi->SequentialTxRx = false;
 
                     // Uses the largest buffer size as transfer size
-                    NF_SpiDriver_Transfer(
+                    NF_SpiDriver_MTransfer(
                         palSpi->Handle,
                         palSpi->WriteBuffer,
                         palSpi->ReadBuffer,
@@ -433,7 +433,7 @@ HRESULT CPU_SPI_nWrite_nRead(
                     }
 
                     // receive operation will be started in the callback after the above completes
-                    NF_SpiDriver_Transmit(
+                    NF_SpiDriver_MTransmit(
                         palSpi->Handle,
                         palSpi->WriteBuffer,
                         palSpi->WriteSize,
@@ -449,7 +449,7 @@ HRESULT CPU_SPI_nWrite_nRead(
                     palSpi->SequentialTxRx = false;
 
                     // start receive
-                    NF_SpiDriver_Receive(
+                    NF_SpiDriver_MReceive(
                         palSpi->Handle,
                         palSpi->ReadBuffer,
                         palSpi->ReadSize,
@@ -461,7 +461,7 @@ HRESULT CPU_SPI_nWrite_nRead(
                     palSpi->SequentialTxRx = false;
 
                     // start send
-                    NF_SpiDriver_Transmit(
+                    NF_SpiDriver_MTransmit(
                         palSpi->Handle,
                         palSpi->WriteBuffer,
                         palSpi->WriteSize,
