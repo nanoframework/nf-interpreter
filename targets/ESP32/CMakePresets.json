@@ -80,6 +80,7 @@
                 "API_nanoFramework.System.Collections": "ON",
                 "API_nanoFramework.System.Text": "ON",
                 "API_nanoFramework.Networking.Thread": "ON",
+                "API_nanoFramework.Graphics": "ON",
                 "GRAPHICS_DISPLAY": "Generic_SPI.cpp",
                 "TOUCHPANEL_DEVICE": "XPT2046.cpp",
                 "GRAPHICS_DISPLAY_INTERFACE": "Spi_To_Display.cpp",
@@ -337,7 +338,13 @@
                 "NF_FEATURE_DEBUGGER": "ON",
                 "NF_FEATURE_RTC": "ON",
                 "NF_FEATURE_HAS_SDCARD": "ON",
-                "ESP32_USB_CDC": "ON"
+                "ESP32_USB_CDC": "ON",
+                "API_nanoFramework.Graphics": "ON",
+                "GRAPHICS_DISPLAY": "Generic_SPI.cpp",
+                "TOUCHPANEL_DEVICE": "XPT2046.cpp",
+                "GRAPHICS_DISPLAY_INTERFACE": "Spi_To_Display.cpp",
+                "TOUCHPANEL_INTERFACE": "Spi_To_TouchPanel.cpp",
+                "ESP32_SPIRAM_FOR_IDF_ALLOCATION": "1024 * 1024"
             }
         },
         {
@@ -796,7 +803,7 @@
             }
         },
         {
-            "name": "FEATHER_S2",
+            "name": "ESP32_S2_USB",
             "inherits": [
                 "xtensa-esp32s2-preset",
                 "user-tools-repos",
@@ -814,11 +821,17 @@
                 "ESP32_CONFIG_PIN_PHY_POWER": "",
                 "ESP32_CONFIG_PHY_CLOCK_MODE": "",
                 "ESP32_USB_CDC": "ON",
-                "API_nanoFramework.Device.OneWire": "OFF"
+                "API_nanoFramework.Device.OneWire": "OFF",
+                "API_nanoFramework.Graphics": "ON",
+                "GRAPHICS_DISPLAY": "Generic_SPI.cpp",
+                "TOUCHPANEL_DEVICE": "XPT2046.cpp",
+                "GRAPHICS_DISPLAY_INTERFACE": "Spi_To_Display.cpp",
+                "TOUCHPANEL_INTERFACE": "Spi_To_TouchPanel.cpp",
+                "ESP32_SPIRAM_FOR_IDF_ALLOCATION": "1024 * 1024"
             }
         },
         {
-            "name": "KALUGA_1",
+            "name": "ESP32_S2_UART",
             "inherits": [
                 "xtensa-esp32s2-preset",
                 "user-tools-repos",
@@ -832,10 +845,11 @@
                 "NF_FEATURE_DEBUGGER": "ON",
                 "NF_FEATURE_RTC": "ON",
                 "API_nanoFramework.Graphics": "ON",
-                "GRAPHICS_DISPLAY": "ILI9341_240x320_SPI.cpp",
+                "GRAPHICS_DISPLAY": "Generic_SPI.cpp",
                 "TOUCHPANEL_DEVICE": "XPT2046.cpp",
                 "GRAPHICS_DISPLAY_INTERFACE": "Spi_To_Display.cpp",
-                "TOUCHPANEL_INTERFACE": "Spi_To_TouchPanel.cpp"
+                "TOUCHPANEL_INTERFACE": "Spi_To_TouchPanel.cpp",
+                "ESP32_SPIRAM_FOR_IDF_ALLOCATION": "1024 * 1024"
             }
         }
     ],
@@ -1046,15 +1060,15 @@
         },
         {
             "inherits": "base-user",
-            "name": "FEATHER_S2",
-            "displayName": "FEATHER_S2",
-            "configurePreset": "FEATHER_S2"
+            "name": "ESP32_S2_USB",
+            "displayName": "ESP32_S2_USB",
+            "configurePreset": "ESP32_S2_USB"
         },
         {
             "inherits": "base-user",
-            "name": "KALUGA_1",
-            "displayName": "KALUGA_1",
-            "configurePreset": "KALUGA_1"
+            "name": "ESP32_S2_UART",
+            "displayName": "ESP32_S2_UART",
+            "configurePreset": "ESP32_S2_UART"
         }
     ]
 }

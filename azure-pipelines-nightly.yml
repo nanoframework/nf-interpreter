@@ -381,14 +381,23 @@ jobs:
           PackageName: ESP32_PICO
           CMakePreset: ESP32_PICO
 
-        KALUGA_1:
+        ESP32_S2_UART:
           TargetBoard: ESP32_S2
           TargetSeries: "esp32_s2"
           BuildOptions:
           IDF_Target: esp32s2
-          TargetName: KALUGA_1
-          PackageName: KALUGA_1
-          CMakePreset: KALUGA_1
+          TargetName: ESP32_S2_UART
+          PackageName: ESP32_S2_UART
+          CMakePreset: ESP32_S2_UART
+
+        ESP32_S2_USB:
+          TargetBoard: ESP32_S2
+          TargetSeries: "esp32_s2"
+          BuildOptions:
+          IDF_Target: esp32s2
+          TargetName: ESP32_S2_USB
+          PackageName: ESP32_S2_USB
+          CMakePreset: ESP32_S2_USB
 
         ESP32_BLE_REV3:
           TargetBoard: ESP32
