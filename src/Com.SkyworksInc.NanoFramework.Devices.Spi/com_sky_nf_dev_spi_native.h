@@ -65,7 +65,7 @@ struct Library_com_sky_nf_dev_spi_native_Com_SkyworksInc_NanoFramework_Devices_S
     //--//
 
     static HRESULT ExecuteTransfer(CLR_RT_StackFrame &stack);
-    static HRESULT ThrowError(CLR_RT_StackFrame &stack, CLR_INT32 errorCode);
+    static HRESULT ThrowError(CLR_RT_StackFrame &stack, CLR_UINT32 errorCode);
 };
 
 struct Library_com_sky_nf_dev_spi_native_Com_SkyworksInc_NanoFramework_Devices_Spi_SpiException
