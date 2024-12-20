@@ -496,15 +496,6 @@ jobs:
           PackageName: ESP32_LILYGO
           CMakePreset: ESP32_LILYGO
 
-        FEATHER_S2:
-          TargetBoard: ESP32_S2
-          TargetSeries: "esp32_s2"
-          BuildOptions:
-          IDF_Target: esp32s2
-          TargetName: FEATHER_S2
-          PackageName: FEATHER_S2
-          CMakePreset: FEATHER_S2
-
         ESP32_C3:
           TargetBoard: ESP32_C3
           TargetSeries: "esp32c3"
