@@ -40,14 +40,15 @@ static const CLR_RT_MethodHandler method_lookup[] =
     NULL,
     NULL,
     NULL,
+    NULL,
 };
 
 const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_Com_SkyworksInc_NanoFramework_Devices_Spi =
 {
     "Com.SkyworksInc.NanoFramework.Devices.Spi",
-    0xF287AE32,
+    0x25E3D06E,
     method_lookup,
-    { 100, 0, 0, 9 }
+    { 100, 0, 0, 10 }
 };
 
 // clang-format on

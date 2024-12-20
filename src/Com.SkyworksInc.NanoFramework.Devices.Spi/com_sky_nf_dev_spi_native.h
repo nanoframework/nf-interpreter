@@ -15,6 +15,13 @@
 //     DataFlow_LsbFirst = 1,
 // } DataFlow;
 
+typedef enum __nfpack SpiError
+{
+    SpiError_Unknown = 0,
+    SpiError_Timeout = 1,
+    SpiError_Aborted = 2,
+} SpiError;
+
 // defined src\System.Device.Spi\sys_dev_spi_native.h
 typedef enum __nfpack SpiPhasePolarityMode
 {
@@ -54,6 +61,16 @@ struct Library_com_sky_nf_dev_spi_native_Com_SkyworksInc_NanoFramework_Devices_S
         NativeTransfer___VOID__I4__SystemSpanByte__SystemSpanByte__BOOLEAN__ComSkyworksIncNanoFrameworkDevicesSpiSpiBaseConfiguration);
     NANOCLR_NATIVE_DECLARE(NativeReportBusSettingsChanged___VOID__I4);
     NANOCLR_NATIVE_DECLARE(NativeGetBusSpeed___I4__I4__ComSkyworksIncNanoFrameworkDevicesSpiSpiBaseConfiguration);
+
+    //--//
+
+    static HRESULT ExecuteTransfer(CLR_RT_StackFrame &stack);
+    static HRESULT ThrowError(CLR_RT_StackFrame &stack, CLR_INT32 errorCode);
+};
+
+struct Library_com_sky_nf_dev_spi_native_Com_SkyworksInc_NanoFramework_Devices_Spi_SpiException
+{
+    static const int FIELD___errorCode = 5;
 
     //--//
 };
