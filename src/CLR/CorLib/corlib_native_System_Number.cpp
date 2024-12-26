@@ -196,30 +196,45 @@ int Library_corlib_native_System_Number::GetDotIndex(char *buffer, int bufferCon
 void Library_corlib_native_System_Number::RoundUpNumStr(char *buffer, int *bufferContentLength)
 {
     char *c = &buffer[*bufferContentLength - 1];
+
     for (;;)
     {
         if (*c != '.' && *c != '-')
         {
             *c += 1;
+
             if (*c <= '9')
+            {
                 break;
+            }
+
             *c = '0';
         }
+
         if (c == buffer)
         {
             if (*c == '-')
             {
-                memmove(&buffer[2], &buffer[1], *bufferContentLength + 1);
-                buffer[1] = '1';
+                if (*bufferContentLength > 1)
+                {
+                    memmove(&buffer[2], &buffer[1], *bufferContentLength + 1);
+                    buffer[1] = '1';
+                }
             }
             else
             {
-                memmove(&buffer[1], buffer, *bufferContentLength + 1);
-                buffer[0] = '1';
+                if (*bufferContentLength > 0)
+                {
+                    memmove(&buffer[1], buffer, *bufferContentLength + 1);
+                    buffer[0] = '1';
+                }
             }
+
             (*bufferContentLength)++;
+
             break;
         }
+
         c--;
     }
 }
@@ -232,9 +247,12 @@ int Library_corlib_native_System_Number::ReplaceNegativeSign(char *buffer, int b
     {
         int negativeSignLength = GetStrLen(negativeSign);
 
-        memmove(&buffer[negativeSignLength], &buffer[1], bufferContentLength);
-        memcpy(buffer, negativeSign, negativeSignLength);
-        ret += negativeSignLength - 1;
+        if (bufferContentLength > 1)
+        {
+            memmove(&buffer[negativeSignLength], &buffer[1], bufferContentLength);
+            memcpy(buffer, negativeSign, negativeSignLength);
+            ret += negativeSignLength - 1;
+        }
     }
 
     return ret;
@@ -248,13 +266,22 @@ int Library_corlib_native_System_Number::ReplaceDecimalSeparator(
     int ret = bufferContentLength;
 
     int dotIndex = GetDotIndex(buffer, bufferContentLength);
+
     if (dotIndex != -1)
     {
         int decimalSeparatorLength = GetStrLen(decimalSeparator);
 
-        memmove(&buffer[dotIndex + decimalSeparatorLength], &buffer[dotIndex + 1], bufferContentLength);
-        memcpy(&buffer[dotIndex], decimalSeparator, decimalSeparatorLength);
-        ret += decimalSeparatorLength - 1;
+        if (bufferContentLength > dotIndex + 1)
+        {
+            memmove(
+                &buffer[dotIndex + decimalSeparatorLength],
+                &buffer[dotIndex + 1],
+                bufferContentLength - dotIndex - 1);
+
+            memcpy(&buffer[dotIndex], decimalSeparator, decimalSeparatorLength);
+
+            ret += decimalSeparatorLength - 1;
+        }
     }
 
     return ret;
@@ -271,10 +298,12 @@ int Library_corlib_native_System_Number::InsertGroupSeparators(
     int significantDigitsStartAtIndex = 0;
     int significantDigitCount = bufferContentLength - 1;
     int dotIndex = GetDotIndex(buffer, bufferContentLength);
+
     if (dotIndex != -1)
     {
         significantDigitCount = dotIndex - 1;
     }
+
     if (buffer[0] == '-')
     {
         significantDigitCount--;
@@ -289,27 +318,40 @@ int Library_corlib_native_System_Number::InsertGroupSeparators(
     {
         ret = bufferContentLength + plusLength;
 
-        int srcIdx = bufferContentLength;
-        int tgtIdx = ret;
+        int sourceIdx = bufferContentLength;
+        int targetIdx = ret;
 
         if (dotIndex != -1)
         {
             int fractionPostfixWithDotLength = bufferContentLength - dotIndex;
-            memmove(&buffer[dotIndex + plusLength], &buffer[dotIndex], fractionPostfixWithDotLength);
-            srcIdx -= fractionPostfixWithDotLength;
-            tgtIdx -= fractionPostfixWithDotLength;
+
+            if (bufferContentLength > dotIndex)
+            {
+                memmove(&buffer[dotIndex + plusLength], &buffer[dotIndex], fractionPostfixWithDotLength);
+
+                sourceIdx -= fractionPostfixWithDotLength;
+                targetIdx -= fractionPostfixWithDotLength;
+            }
         }
 
         for (;;)
         {
-            if ((srcIdx - significantDigitsStartAtIndex) <= groupSize)
+            if ((sourceIdx - significantDigitsStartAtIndex) <= groupSize)
+            {
                 break;
+            }
 
-            tgtIdx -= groupSize;
-            srcIdx -= groupSize;
-            memmove(&buffer[tgtIdx], &buffer[srcIdx], groupSize);
-            tgtIdx -= groupSepLength;
-            memcpy(&buffer[tgtIdx], groupSep, groupSepLength);
+            targetIdx -= groupSize;
+            sourceIdx -= groupSize;
+
+            if (bufferContentLength > sourceIdx)
+            {
+                memmove(&buffer[targetIdx], &buffer[sourceIdx], groupSize);
+
+                targetIdx -= groupSepLength;
+
+                memcpy(&buffer[targetIdx], groupSep, groupSepLength);
+            }
         }
     }
 
