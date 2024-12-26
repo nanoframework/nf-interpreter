@@ -256,13 +256,13 @@ void CLR_RT_GarbageCollector::Heap_Compact()
 
                     freeRegion->Unlink();
 
-#ifdef _DEBUG
+#ifdef DEBUG
 
                     _ASSERTE(relocCurrent->m_destination >= (CLR_UINT8 *)g_CLR_RT_ExecutionEngine.m_heap.FirstNode());
                     _ASSERTE(relocCurrent->m_destination < (CLR_UINT8 *)g_CLR_RT_ExecutionEngine.m_heap.LastNode());
                     _ASSERTE(relocCurrent->m_start >= (CLR_UINT8 *)g_CLR_RT_ExecutionEngine.m_heap.FirstNode());
                     _ASSERTE(relocCurrent->m_start < (CLR_UINT8 *)g_CLR_RT_ExecutionEngine.m_heap.LastNode());
-                    _ASSERTE(moveBytes <= freeRegion_Size);
+                    _ASSERTE(moveBytes <= (move * sizeof(CLR_RT_HeapBlock)));
 
 #endif
 
