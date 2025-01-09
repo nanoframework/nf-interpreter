@@ -583,7 +583,11 @@ HRESULT Library_sys_dev_i2c_native_System_Device_I2c_I2cDevice::
 
             if (status != TX_SUCCESS)
             {
-                NANOCLR_SET_AND_LEAVE(CLR_E_PROCESS_EXCEPTION);
+                // failed to create the thread
+                // free stack memory
+                platform_free(palI2c->WorkingThreadStack);
+
+                NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
             }
 
             // bump custom state
