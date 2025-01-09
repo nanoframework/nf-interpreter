@@ -396,7 +396,7 @@ HRESULT Library_sys_dev_i2c_native_System_Device_I2c_I2cDevice::
     NativeTransmit___SystemDeviceI2cI2cTransferResult__SystemSpanByte__SystemSpanByte(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
-    {
+    
         uint8_t busIndex;
         NF_PAL_I2C *palI2c = NULL;
         bool isLongRunningOperation = false;
@@ -409,6 +409,7 @@ HRESULT Library_sys_dev_i2c_native_System_Device_I2c_I2cDevice::
         CLR_RT_HeapBlock *result;
         CLR_RT_HeapBlock *writeSpanByte;
         CLR_RT_HeapBlock *readSpanByte;
+        CLR_RT_HeapBlock *connectionSettings;
         CLR_RT_HeapBlock_Array *writeBuffer = NULL;
         CLR_RT_HeapBlock_Array *readBuffer = NULL;
         int readOffset = 0;
@@ -421,7 +422,7 @@ HRESULT Library_sys_dev_i2c_native_System_Device_I2c_I2cDevice::
         FAULT_ON_NULL(pThis);
 
         // get pointer to connection settings field
-        CLR_RT_HeapBlock *connectionSettings = pThis[FIELD___connectionSettings].Dereference();
+        connectionSettings = pThis[FIELD___connectionSettings].Dereference();
 
         // get bus index
         busIndex = (uint8_t)connectionSettings[I2cConnectionSettings::FIELD___busId].NumericByRef().s4;
@@ -472,6 +473,9 @@ HRESULT Library_sys_dev_i2c_native_System_Device_I2c_I2cDevice::
 
                 // use the span length as write size, only the elements defined by the span must be written
                 palI2c->WriteSize = writeSpanByte[SpanByte::FIELD___length].NumericByRef().s4;
+
+                // pin the buffer so DMA can find it where its supposed to be
+                writeBuffer->Pin();
             }
         }
 
@@ -495,6 +499,9 @@ HRESULT Library_sys_dev_i2c_native_System_Device_I2c_I2cDevice::
 
                 // use the span length as read size, only the elements defined by the span must be read
                 palI2c->ReadSize = readSpanByte[SpanByte::FIELD___length].NumericByRef().s4;
+
+                // pin the buffer so DMA can find it where its supposed to be
+                readBuffer->Pin();
             }
         }
 
@@ -518,10 +525,6 @@ HRESULT Library_sys_dev_i2c_native_System_Device_I2c_I2cDevice::
             hbTimeout.SetInteger((CLR_INT64)estimatedDurationMiliseconds * TIME_CONVERSION__TO_MILLISECONDS);
 
             NANOCLR_CHECK_HRESULT(stack.SetupTimeoutFromTicks(hbTimeout, timeout));
-
-            // protect the buffers from GC so DMA can find them where they are supposed to be
-            CLR_RT_ProtectFromGC gcWriteBuffer(*writeBuffer);
-            CLR_RT_ProtectFromGC gcReadBuffer(*readBuffer);
         }
 
         // this is going to be used to check for the right event in case of simultaneous I2C transaction
@@ -725,7 +728,22 @@ HRESULT Library_sys_dev_i2c_native_System_Device_I2c_I2cDevice::
                     (CLR_UINT32)(palI2c->WriteSize + palI2c->ReadSize));
             }
         }
-    }
 
-    NANOCLR_NOCLEANUP();
-}
+        NANOCLR_CLEANUP();
+
+        if (hr != CLR_E_THREAD_WAITING)
+        {
+            // un-pin the buffers
+            if (writeBuffer != NULL && writeBuffer->IsPinned())
+            {
+                writeBuffer->Unpin();
+            }
+
+            if (readBuffer != NULL && readBuffer->IsPinned())
+            {
+                readBuffer->Unpin();
+            }
+        }
+
+        NANOCLR_CLEANUP_END();
+    }
