@@ -775,7 +775,7 @@ jobs:
 
         SL_STK3701A:
           TargetBoard: SL_STK3701A
-          TargetSeries: "efm32gg11"
+          TargetSeries: "gg11"
           BuildOptions:
           NeedsDFU: false
           NeedsSRECORD: false
@@ -785,7 +785,7 @@ jobs:
       # creates a counter and assigns it to the revision variable
       REVISION: $[counter('AZURERTOS_1_12_1_versioncounter', 0)]
       HelperPackageVersion: $[counter('HelperPackageVersioncounter', 0)]
-      TargetPlatform: "azure_rtos"
+      TargetPlatform: "efm32"
 
     steps:
       - template: azure-pipelines-templates/build-preparations.yml
