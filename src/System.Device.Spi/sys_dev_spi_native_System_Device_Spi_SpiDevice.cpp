@@ -76,8 +76,8 @@ HRESULT Library_sys_dev_spi_native_System_Device_Spi_SpiDevice::NativeTransfer(
 
     CLR_RT_HeapBlock *writeSpanByte;
     CLR_RT_HeapBlock *readSpanByte;
-    CLR_RT_HeapBlock_Array *writeBuffer;
-    CLR_RT_HeapBlock_Array *readBuffer;
+    CLR_RT_HeapBlock_Array *writeBuffer = NULL;
+    CLR_RT_HeapBlock_Array *readBuffer = NULL;
     uint8_t *writeData = NULL;
     uint8_t *readData = NULL;
     int16_t writeSize = 0;
@@ -298,6 +298,8 @@ HRESULT Library_sys_dev_spi_native_System_Device_Spi_SpiDevice::NativeTransfer(
             readBuffer->Unpin();
         }
     }
+
+    NANOCLR_CLEANUP_END();
 }
 
 HRESULT Library_sys_dev_spi_native_System_Device_Spi_SpiDevice::NativeOpenDevice___I4(CLR_RT_StackFrame &stack)
