@@ -85,6 +85,7 @@ HRESULT Library_sys_dev_spi_native_System_Device_Spi_SpiDevice::NativeTransfer(
     int16_t readOffset = 0;
     int16_t writeOffset = 0;
     SPI_WRITE_READ_SETTINGS rws;
+    uint32_t deviceId;
 
     bool isLongRunningOperation;
     uint32_t estimatedDurationMiliseconds;
@@ -98,8 +99,7 @@ HRESULT Library_sys_dev_spi_native_System_Device_Spi_SpiDevice::NativeTransfer(
     FAULT_ON_NULL(pThis);
 
     // get device handle saved on open
-    uint32_t deviceId =
-        pThis[Library_sys_dev_spi_native_System_Device_Spi_SpiDevice::FIELD___deviceId].NumericByRef().u4;
+    deviceId = pThis[Library_sys_dev_spi_native_System_Device_Spi_SpiDevice::FIELD___deviceId].NumericByRef().u4;
 
     if (stack.m_customState == 0)
     {
@@ -186,6 +186,7 @@ HRESULT Library_sys_dev_spi_native_System_Device_Spi_SpiDevice::NativeTransfer(
                 readSize = 0;
             }
         }
+
         // Are we using SPI full-duplex for transfer ?
         bool fullDuplex = (bool)stack.Arg3().NumericByRef().u1;
 
@@ -280,95 +281,95 @@ HRESULT Library_sys_dev_spi_native_System_Device_Spi_SpiDevice::NativeTransfer(
 
         // null pointers and vars
         pThis = NULL;
-
-        NANOCLR_CLEANUP();
-
-        if (hr != CLR_E_THREAD_WAITING)
-        {
-            // unpin buffers
-            if (writeBuffer != NULL && writeBuffer->IsPinned())
-            {
-                writeBuffer->Unpin();
-            }
-
-            if (readBuffer != NULL && readBuffer->IsPinned())
-            {
-                readBuffer->Unpin();
-            }
-        }
     }
 
-    HRESULT Library_sys_dev_spi_native_System_Device_Spi_SpiDevice::NativeOpenDevice___I4(CLR_RT_StackFrame & stack)
+    NANOCLR_CLEANUP();
+
+    if (hr != CLR_E_THREAD_WAITING)
     {
-        NANOCLR_HEADER();
+        // unpin buffers
+        if (writeBuffer != NULL && writeBuffer->IsPinned())
+        {
+            writeBuffer->Unpin();
+        }
 
-        uint32_t handle = -1;
-        SPI_DEVICE_CONFIGURATION spiConfig;
-        CLR_RT_HeapBlock *config = NULL;
+        if (readBuffer != NULL && readBuffer->IsPinned())
+        {
+            readBuffer->Unpin();
+        }
+    }
+}
 
+HRESULT Library_sys_dev_spi_native_System_Device_Spi_SpiDevice::NativeOpenDevice___I4(CLR_RT_StackFrame &stack)
+{
+    NANOCLR_HEADER();
+
+    uint32_t handle = -1;
+    SPI_DEVICE_CONFIGURATION spiConfig;
+    CLR_RT_HeapBlock *config = NULL;
+
+    // get a pointer to the managed object instance and check that it's not NULL
+    CLR_RT_HeapBlock *pThis = stack.This();
+    FAULT_ON_NULL(pThis);
+
+    // Get reference to manage code SPI settings
+    config = pThis[Library_sys_dev_spi_native_System_Device_Spi_SpiDevice::FIELD___connectionSettings].Dereference();
+
+    spiConfig.BusMode = SpiBusMode_master;
+    spiConfig.DataIs16bits = false;
+
+    // internally SPI bus ID is zero based, so better take care of that here
+    spiConfig.Spi_Bus = config[SpiConnectionSettings::FIELD___busId].NumericByRef().s4 - 1;
+
+    spiConfig.DeviceChipSelect = config[SpiConnectionSettings::FIELD___csLine].NumericByRef().s4;
+
+    // sanity check chip select line
+    if (spiConfig.DeviceChipSelect < -1)
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+    }
+
+    // load CS active state from config (which is always PinValue.Low or PinValue.High
+    spiConfig.ChipSelectActiveState =
+        (bool)config[SpiConnectionSettings::FIELD___chipSelectLineActiveState].NumericByRef().s4;
+
+    spiConfig.Spi_Mode = (SpiMode)config[SpiConnectionSettings::FIELD___spiMode].NumericByRef().s4;
+    spiConfig.DataOrder16 = (DataBitOrder)config[SpiConnectionSettings::FIELD___dataFlow].NumericByRef().s4;
+    spiConfig.Clock_RateHz = config[SpiConnectionSettings::FIELD___clockFrequency].NumericByRef().s4;
+    spiConfig.BusConfiguration =
+        (SpiBusConfiguration)config[SpiConnectionSettings::FIELD___busConfiguration].NumericByRef().s4;
+
+    // Returns handle to device
+    hr = nanoSPI_OpenDevice(spiConfig, handle);
+    NANOCLR_CHECK_HRESULT(hr);
+
+    // Return device handle
+    stack.SetResult_I4(handle);
+
+    NANOCLR_NOCLEANUP();
+}
+
+HRESULT Library_sys_dev_spi_native_System_Device_Spi_SpiDevice::NativeInit___VOID(CLR_RT_StackFrame &stack)
+{
+    NANOCLR_HEADER();
+    {
+        (void)stack;
+    }
+    NANOCLR_NOCLEANUP_NOLABEL();
+}
+
+HRESULT Library_sys_dev_spi_native_System_Device_Spi_SpiDevice::DisposeNative___VOID(CLR_RT_StackFrame &stack)
+{
+    NANOCLR_HEADER();
+    {
         // get a pointer to the managed object instance and check that it's not NULL
         CLR_RT_HeapBlock *pThis = stack.This();
-        FAULT_ON_NULL(pThis);
 
-        // Get reference to manage code SPI settings
-        config =
-            pThis[Library_sys_dev_spi_native_System_Device_Spi_SpiDevice::FIELD___connectionSettings].Dereference();
+        // get device handle
+        int32_t deviceId =
+            pThis[Library_sys_dev_spi_native_System_Device_Spi_SpiDevice::FIELD___deviceId].NumericByRef().s4;
 
-        spiConfig.BusMode = SpiBusMode_master;
-        spiConfig.DataIs16bits = false;
-
-        // internally SPI bus ID is zero based, so better take care of that here
-        spiConfig.Spi_Bus = config[SpiConnectionSettings::FIELD___busId].NumericByRef().s4 - 1;
-
-        spiConfig.DeviceChipSelect = config[SpiConnectionSettings::FIELD___csLine].NumericByRef().s4;
-
-        // sanity check chip select line
-        if (spiConfig.DeviceChipSelect < -1)
-        {
-            NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
-        }
-
-        // load CS active state from config (which is always PinValue.Low or PinValue.High
-        spiConfig.ChipSelectActiveState =
-            (bool)config[SpiConnectionSettings::FIELD___chipSelectLineActiveState].NumericByRef().s4;
-
-        spiConfig.Spi_Mode = (SpiMode)config[SpiConnectionSettings::FIELD___spiMode].NumericByRef().s4;
-        spiConfig.DataOrder16 = (DataBitOrder)config[SpiConnectionSettings::FIELD___dataFlow].NumericByRef().s4;
-        spiConfig.Clock_RateHz = config[SpiConnectionSettings::FIELD___clockFrequency].NumericByRef().s4;
-        spiConfig.BusConfiguration =
-            (SpiBusConfiguration)config[SpiConnectionSettings::FIELD___busConfiguration].NumericByRef().s4;
-
-        // Returns handle to device
-        hr = nanoSPI_OpenDevice(spiConfig, handle);
-        NANOCLR_CHECK_HRESULT(hr);
-
-        // Return device handle
-        stack.SetResult_I4(handle);
-
-        NANOCLR_NOCLEANUP();
+        nanoSPI_CloseDevice(deviceId);
     }
-
-    HRESULT Library_sys_dev_spi_native_System_Device_Spi_SpiDevice::NativeInit___VOID(CLR_RT_StackFrame & stack)
-    {
-        NANOCLR_HEADER();
-        {
-            (void)stack;
-        }
-        NANOCLR_NOCLEANUP_NOLABEL();
-    }
-
-    HRESULT Library_sys_dev_spi_native_System_Device_Spi_SpiDevice::DisposeNative___VOID(CLR_RT_StackFrame & stack)
-    {
-        NANOCLR_HEADER();
-        {
-            // get a pointer to the managed object instance and check that it's not NULL
-            CLR_RT_HeapBlock *pThis = stack.This();
-
-            // get device handle
-            int32_t deviceId =
-                pThis[Library_sys_dev_spi_native_System_Device_Spi_SpiDevice::FIELD___deviceId].NumericByRef().s4;
-
-            nanoSPI_CloseDevice(deviceId);
-        }
-        NANOCLR_NOCLEANUP_NOLABEL();
-    }
+    NANOCLR_NOCLEANUP_NOLABEL();
+}
