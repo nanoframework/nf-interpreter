@@ -17,7 +17,7 @@ resources:
       type: github
       name: espressif/esp-idf
       endpoint: nanoframework
-      ref: refs/tags/v5.2.3
+      ref: 'refs/tags/v5.2.3'
 
 # scheduled build
 # the schedule is defined at the AZDO web interface because of inconsistencies with time zones
