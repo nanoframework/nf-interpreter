@@ -17,18 +17,9 @@ steps:
   - task: Cache@2
     displayName: Cache IDF components
     inputs:
-      key: 'esp-idf-components-cache | 5_2_3'
+      key: 'esp-idf-components-cache | 5_2_3_'
       path: $(Agent.BuildDirectory)/s/esp-idf/components
       cacheHitVar: ESP32_COMPONENTS_RESTORED
-
-  - task: PowerShell@2
-    displayName: Checkout IDF tag
-    condition: succeeded()
-    inputs:
-      targetType: "inline"
-      workingDirectory: '$(Agent.BuildDirectory)/s/esp-idf'
-      script: |
-        git checkout $(IDF_TAG)
 
   - task: CMake@1
     condition: succeeded()
