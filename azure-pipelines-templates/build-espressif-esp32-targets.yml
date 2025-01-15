@@ -21,6 +21,15 @@ steps:
       path: $(Agent.BuildDirectory)/s/esp-idf/components
       cacheHitVar: ESP32_COMPONENTS_RESTORED
 
+  - task: PowerShell@2
+    displayName: Checkout IDF tag
+    condition: succeeded()
+    inputs:
+      targetType: "inline"
+      workingDirectory: '$(Agent.BuildDirectory)/s/esp-idf'
+      script: |
+        git checkout $(IDF_TAG)
+
   - task: CMake@1
     condition: succeeded()
     displayName: Setup build with CMake
