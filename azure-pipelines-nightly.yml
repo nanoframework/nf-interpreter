@@ -593,6 +593,8 @@ jobs:
           ignoreMakeDirErrors: true
 
       - template: azure-pipelines-templates/copy-sdkconfig.yml
+        parameters:
+          repoDirectory: '$(Agent.BuildDirectory)/s/nf-interpreter'
       - template: azure-pipelines-templates/pack-publish-artifacts.yml
         parameters:
           buildDirectory: '$(Agent.BuildDirectory)/s/nf-interpreter/build'
