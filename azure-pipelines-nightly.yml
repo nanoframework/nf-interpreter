@@ -562,8 +562,9 @@ jobs:
     steps:
       - checkout: self
       - checkout: esp32_idf
-        fetchDepth: 1
+        fetchDepth: 0
         fetchTags: true
+        persistCredentials: true
 
       - template: azure-pipelines-templates/build-preparations.yml
         parameters:
