@@ -579,6 +579,7 @@ jobs:
       - template: azure-pipelines-templates/build-espressif-esp32-targets.yml
         parameters:
           repoDirectory: '$(Agent.BuildDirectory)/s/nf-interpreter'
+          partitionsDirectory: '$(Agent.BuildDirectory)/s/nf-interpreter/targets/ESP32/_IDF/$(IDF_Target)'
       - task: CopyFiles@2
         condition: succeeded()
         displayName: Copying bootloader
