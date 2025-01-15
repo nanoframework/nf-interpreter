@@ -1,0 +1,20 @@
+# Copyright (c) .NET Foundation and Contributors
+# See LICENSE file in the project root for full license information.
+
+parameters:
+  - name: repoDirectory
+    type: string
+    default: $(Agent.BuildDirectory)/s
+
+steps:
+  - task: PowerShell@2
+    displayName: Checkout IDF
+    condition: succeeded()
+    inputs:
+      targetType: "inline"
+      script: |
+        # create directory for IDF
+        New-Item -Path ${{ parameters.repoDirectory }} -ItemType "directory"
+        # move to the build sources directory
+        Set-Location -Path ${{ parameters.repoDirectory }}
+        git clone --single-branch --depth 1 --branch $(IDF_TAG)  https://github.com/espressif/esp-idf

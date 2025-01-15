@@ -563,16 +563,9 @@ jobs:
       - checkout: self
         path: s/nf-interpreter
 
-      - task: PowerShell@2
-        displayName: Checkout IDF
-        condition: succeeded()
-        inputs:
-          targetType: "inline"
-          script: |
-            # create directory for IDF
-            Set-Location -Path $(Agent.BuildDirectory)/s
-            git clone --recurse-submodules --shallow-submodules --single-branch --depth 1 --branch $(IDF_TAG)  https://github.com/espressif/esp-idf
-
+      - template: azure-pipelines-templates/checkout-idf.yml
+        parameters:
+          repoDirectory: '$(Agent.BuildDirectory)/s'
       - template: azure-pipelines-templates/build-preparations.yml
         parameters:
           repoDirectory: '$(Agent.BuildDirectory)/s/nf-interpreter'
