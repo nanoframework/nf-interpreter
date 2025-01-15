@@ -48,7 +48,7 @@ resources:
       type: github
       name: espressif/esp-idf
       endpoint: nanoframework
-      ref: 'refs/tags/v5.2.3'
+      ref: refs/tags/v5.2.3
     - repository: mscorlib
       type: github
       name: nanoframework/CoreLibrary
@@ -562,6 +562,7 @@ jobs:
       - checkout: self
       - checkout: esp32_idf
         fetchDepth: 1
+        fetchTags: true
 
       - template: azure-pipelines-templates/build-preparations.yml
         parameters:
