@@ -13,8 +13,8 @@ steps:
     inputs:
       targetType: "inline"
       script: |
-        # create directory for IDF
-        New-Item -Path ${{ parameters.repoDirectory }} -ItemType "directory"
+        # create directory for IDF, ignore if it already exists
+        New-Item -Path ${{ parameters.repoDirectory }} -ItemType "directory" -ErrorAction SilentlyContinue
         # move to the build sources directory
         Set-Location -Path ${{ parameters.repoDirectory }}
         git clone --single-branch --depth 1 --branch $(IDF_TAG)  https://github.com/espressif/esp-idf
