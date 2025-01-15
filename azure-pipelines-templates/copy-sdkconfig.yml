@@ -11,7 +11,7 @@ steps:
     condition: succeeded()
     displayName: Copying SDKCONFIG
     inputs:
-      sourceFolder: '$${{ parameters.repoDirectory }}'
+      sourceFolder: "${{ parameters.repoDirectory }}"
       Contents: |
         sdkconfig
       TargetFolder: '$(Build.ArtifactStagingDirectory)\$(TargetPublishName)_sdkconfig'
