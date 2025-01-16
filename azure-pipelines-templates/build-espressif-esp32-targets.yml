@@ -14,13 +14,6 @@ steps:
     parameters:
       repoDirectory: ${{ parameters.repoDirectory }}
 
-  - task: Cache@2
-    displayName: Cache IDF components
-    inputs:
-      key: 'esp-idf-components-cache | 5_2_3'
-      path: $(Agent.BuildDirectory)/s/esp-idf/components
-      cacheHitVar: ESP32_COMPONENTS_RESTORED
-
   - task: CMake@1
     condition: succeeded()
     displayName: Setup build with CMake

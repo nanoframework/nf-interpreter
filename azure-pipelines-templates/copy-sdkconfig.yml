@@ -1,12 +1,17 @@
 # Copyright (c) .NET Foundation and Contributors
 # See LICENSE file in the project root for full license information.
 
+parameters:
+  - name: repoDirectory
+    type: string
+    default: $(Build.SourcesDirectory)\nf-interpreter
+
 steps:
   - task: CopyFiles@2
     condition: succeeded()
     displayName: Copying SDKCONFIG
     inputs:
-      sourceFolder: '$(Build.SourcesDirectory)\nf-interpreter'
+      sourceFolder: "${{ parameters.repoDirectory }}"
       Contents: |
         sdkconfig
       TargetFolder: '$(Build.ArtifactStagingDirectory)\$(TargetPublishName)_sdkconfig'

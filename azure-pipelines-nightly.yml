@@ -558,29 +558,34 @@ jobs:
       IDF_PATH: "D:/a/1/s/esp-idf"
       PIP_CACHE_DIR: $(Pipeline.Workspace)/.pip
       TargetPlatform: "esp32"
+      IDF_TAG: "v5.2.3"
 
     steps:
       - checkout: self
-      - checkout: esp32_idf
-        fetchDepth: 1
+        path: s/nf-interpreter
 
+      - template: azure-pipelines-templates/checkout-idf.yml
+        parameters:
+          repoDirectory: '$(Agent.BuildDirectory)/s'
       - template: azure-pipelines-templates/build-preparations.yml
         parameters:
-          repoDirectory: '$(Build.SourcesDirectory)\nf-interpreter'
+          repoDirectory: '$(Agent.BuildDirectory)/s/nf-interpreter'
       - template: azure-pipelines-templates/nb-gitversioning.yml
         parameters:
-          repoDirectory: '$(Build.SourcesDirectory)\nf-interpreter'
+          repoDirectory: '$(Agent.BuildDirectory)/s/nf-interpreter'
       - template: azure-pipelines-templates/download-install-esp32-build-components.yml
       - template: azure-pipelines-templates/download-install-ninja.yml
         parameters:
-          repoDirectory: '$(Build.SourcesDirectory)\nf-interpreter'
+          repoDirectory: '$(Agent.BuildDirectory)/s/nf-interpreter'
       - template: azure-pipelines-templates/build-espressif-esp32-targets.yml
-
+        parameters:
+          repoDirectory: '$(Agent.BuildDirectory)/s/nf-interpreter'
+          partitionsDirectory: '$(Agent.BuildDirectory)/s/nf-interpreter/targets/ESP32/_IDF/$(IDF_Target)'
       - task: CopyFiles@2
         condition: succeeded()
         displayName: Copying bootloader
         inputs:
-          sourceFolder: '$(Build.SourcesDirectory)\nf-interpreter\build\bootloader'
+          sourceFolder: '$(Agent.BuildDirectory)/s/nf-interpreter/build/bootloader'
           Contents: |
             bootloader.bin
           TargetFolder: '$(Build.ArtifactStagingDirectory)\$(TargetPublishName)'
@@ -588,9 +593,11 @@ jobs:
           ignoreMakeDirErrors: true
 
       - template: azure-pipelines-templates/copy-sdkconfig.yml
+        parameters:
+          repoDirectory: '$(Agent.BuildDirectory)/s/nf-interpreter'
       - template: azure-pipelines-templates/pack-publish-artifacts.yml
         parameters:
-          buildDirectory: '$(Build.SourcesDirectory)\nf-interpreter\build'
+          buildDirectory: '$(Agent.BuildDirectory)/s/nf-interpreter/build'
       - template: azure-pipelines-templates/publish-cloudsmith.yml
       - template: azure-pipelines-templates/publish-sdkconfig.yml
 
