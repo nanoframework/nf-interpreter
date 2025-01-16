@@ -566,7 +566,7 @@ jobs:
 
       - template: azure-pipelines-templates/checkout-idf.yml
         parameters:
-          repoDirectory: '$(Agent.BuildDirectory)/s'      
+          repoDirectory: '$(Agent.BuildDirectory)/s'
       - template: azure-pipelines-templates/build-preparations.yml
         parameters:
           repoDirectory: '$(Agent.BuildDirectory)/s/nf-interpreter'
