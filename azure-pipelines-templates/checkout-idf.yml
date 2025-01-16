@@ -7,9 +7,17 @@ parameters:
     default: $(Agent.BuildDirectory)/s
 
 steps:
+
+  - task: Cache@2
+    displayName: Cache IDF repository
+    inputs:
+      key: 'esp-idf | 5_2_3'
+      path: $(Agent.BuildDirectory)/s/esp-idf
+      cacheHitVar: ESP32_IDF_REPO_RESTORED
+
   - task: PowerShell@2
-    displayName: Checkout IDF
-    condition: succeeded()
+    displayName: Checkout IDF repository
+    condition: ne(variables.ESP32_IDF_REPO_RESTORED, 'true')
     inputs:
       targetType: "inline"
       script: |
@@ -17,4 +25,4 @@ steps:
         New-Item -Path ${{ parameters.repoDirectory }} -ItemType "directory" -ErrorAction SilentlyContinue
         # move to the build sources directory
         Set-Location -Path ${{ parameters.repoDirectory }}
-        git clone --single-branch --depth 1 --branch $(IDF_TAG)  https://github.com/espressif/esp-idf
+        git clone --recurse-submodules --shallow-submodules --single-branch --depth 1 --branch $(IDF_TAG)  https://github.com/espressif/esp-idf
