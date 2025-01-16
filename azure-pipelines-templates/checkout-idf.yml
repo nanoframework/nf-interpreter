@@ -21,37 +21,8 @@ steps:
     inputs:
       targetType: "inline"
       script: |
-        # Set error action preference to stop on any error
-        $ErrorActionPreference = "Stop"
-        
-        Write-Host "Creating directory at ${{ parameters.repoDirectory }}"
-        
         # create directory for IDF, ignore if it already exists
         New-Item -Path ${{ parameters.repoDirectory }} -ItemType "directory" -ErrorAction SilentlyContinue
-
-        Write-Host "Changing to directory ${{ parameters.repoDirectory }}"
-        
         # move to the build sources directory
         Set-Location -Path ${{ parameters.repoDirectory }}
-
-        Write-Host "Cloning ESP-IDF repository (tag: $(IDF_TAG))..."
-        
-        $cloneArgs = @(
-          'clone',
-          '--recurse-submodules',
-          '--shallow-submodules',
-          '--single-branch',
-          '--depth', '1',
-          '--branch', '$(IDF_TAG)',
-          '--progress',
-          'https://github.com/espressif/esp-idf'
-        )
-
-        $output = & git @cloneArgs 2>&1
-
-        if ($LASTEXITCODE -ne 0) {
-          Write-Error "Failed to clone ESP-IDF repository:`n$output"
-          exit 1
-        }
-
-        Write-Host "Successfully cloned ESP-IDF repository"
+        git clone --recurse-submodules --shallow-submodules --single-branch --depth 1 --branch $(IDF_TAG)  https://github.com/espressif/esp-idf
