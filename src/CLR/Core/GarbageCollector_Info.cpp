@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (c) .NET Foundation and Contributors
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
@@ -138,7 +138,11 @@ void CLR_RT_GarbageCollector::ValidateBlockNotInFreeList(CLR_RT_DblLinkedList &l
             if (ptr <= dst && dst < ptrEnd)
             {
 #ifdef _WIN64
-                CLR_Debug::Printf("Pointer into free list!! %I64X %I64X %I64X\r\n", dst, ptr, ptrEnd);
+                CLR_Debug::Printf(
+                    "Pointer into free list!! 0x%016" PRIxPTR " 0x%016" PRIxPTR " 0x%016" PRIxPTR "\r\n",
+                    (uintptr_t)dst,
+                    (uintptr_t)ptr,
+                    (uintptr_t)ptrEnd);
 #else
                 CLR_Debug::Printf("Pointer into free list!! %08x %08x %08x\r\n", dst, ptr, ptrEnd);
 #endif
@@ -225,7 +229,7 @@ bool CLR_RT_GarbageCollector::TestPointers_PopulateOld_Worker(void **ref)
         if (s_mapOldToRecord.find(ref) != s_mapOldToRecord.end())
         {
 #ifdef _WIN64
-            CLR_Debug::Printf("Duplicate base OLD: %I64X\r\n", ref);
+            CLR_Debug::Printf("Duplicate base OLD: 0x%016" PRIxPTR "\r\n", (uintptr_t)ref);
 #else
             CLR_Debug::Printf("Duplicate base OLD: %08x\r\n", ref);
 #endif
@@ -238,7 +242,7 @@ bool CLR_RT_GarbageCollector::TestPointers_PopulateOld_Worker(void **ref)
         if (IsBlockInFreeList(g_CLR_RT_ExecutionEngine.m_heap, (CLR_RT_HeapBlock_Node *)dst, false))
         {
 #ifdef _WIN64
-            CLR_Debug::Printf("Some data points into a free list: %I64X\r\n", dst);
+            CLR_Debug::Printf("Some data points into a free list: 0x%016" PRIxPTR "\r\n", (uintptr_t)dst);
 #else
             CLR_Debug::Printf("Some data points into a free list: %08x\r\n", dst);
 #endif
@@ -302,7 +306,7 @@ void CLR_RT_GarbageCollector::TestPointers_Remap()
         if (s_mapNewToRecord.find(ref) != s_mapNewToRecord.end())
         {
 #ifdef _WIN64
-            CLR_Debug::Printf("Duplicate base NEW: %I64X\r\n", ref);
+            CLR_Debug::Printf("Duplicate base NEW: 0x%016" PRIxPTR "\r\n", (uintptr_t)ref);
 #else
             CLR_Debug::Printf("Duplicate base NEW: %08x\r\n", ref);
 #endif
@@ -334,7 +338,10 @@ bool CLR_RT_GarbageCollector::TestPointers_PopulateNew_Worker(void **ref)
             if (ptr->newPtr != dst)
             {
 #ifdef _WIN64
-                CLR_Debug::Printf("Bad pointer: %I64X %I64X\r\n", ptr->newPtr, dst);
+                CLR_Debug::Printf(
+                    "Bad pointer: 0x%016" PRIxPTR " 0x%016" PRIxPTR "\r\n",
+                    (uintptr_t)ptr->newPtr,
+                    (uintptr_t)dst);
 #else
                 CLR_Debug::Printf("Bad pointer: %08x %08x\r\n", ptr->newPtr, dst);
 #endif
@@ -343,7 +350,10 @@ bool CLR_RT_GarbageCollector::TestPointers_PopulateNew_Worker(void **ref)
             else if (ptr->data != *dst)
             {
 #ifdef _WIN64
-                CLR_Debug::Printf("Bad data: %I64X %I64X\r\n", ptr->data, *dst);
+                CLR_Debug::Printf(
+                    "Bad data: 0x%016" PRIxPTR " 0x%016" PRIxPTR "\r\n",
+                    (uintptr_t)ptr->data,
+                    (uintptr_t)*dst);
 #else
                 CLR_Debug::Printf("Bad data: %08x %08x\r\n", ptr->data, *dst);
 #endif
@@ -354,7 +364,7 @@ bool CLR_RT_GarbageCollector::TestPointers_PopulateNew_Worker(void **ref)
             if (IsBlockInFreeList(g_CLR_RT_ExecutionEngine.m_heap, (CLR_RT_HeapBlock_Node *)dst, false))
             {
 #ifdef _WIN64
-                CLR_Debug::Printf("Some data points into a free list: %I64X\r\n", dst);
+                CLR_Debug::Printf("Some data points into a free list: 0x%016" PRIxPTR "\r\n", (uintptr_t)dst);
 #else
                 CLR_Debug::Printf("Some data points into a free list: %08x\r\n", dst);
 #endif
@@ -367,7 +377,7 @@ bool CLR_RT_GarbageCollector::TestPointers_PopulateNew_Worker(void **ref)
         else
         {
 #ifdef _WIN64
-            CLR_Debug::Printf("Bad base: 0x%0I64X\r\n", ref);
+            CLR_Debug::Printf("Bad base: 0x%016" PRIxPTR "\r\n", (uintptr_t)ref);
 #else
             CLR_Debug::Printf("Bad base: 0x%08x\r\n", ref);
 #endif
