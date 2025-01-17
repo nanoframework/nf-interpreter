@@ -138,7 +138,11 @@ void CLR_RT_GarbageCollector::ValidateBlockNotInFreeList(CLR_RT_DblLinkedList &l
             if (ptr <= dst && dst < ptrEnd)
             {
 #ifdef _WIN64
-                CLR_Debug::Printf("Pointer into free list!! 0x%016" PRIxPTR " 0x%016" PRIxPTR " 0x%016" PRIxPTR "\r\n", (uintptr_t)dst, (uintptr_t)ptr, (uintptr_t)ptrEnd);
+                CLR_Debug::Printf(
+                    "Pointer into free list!! 0x%016" PRIxPTR " 0x%016" PRIxPTR " 0x%016" PRIxPTR "\r\n",
+                    (uintptr_t)dst,
+                    (uintptr_t)ptr,
+                    (uintptr_t)ptrEnd);
 #else
                 CLR_Debug::Printf("Pointer into free list!! %08x %08x %08x\r\n", dst, ptr, ptrEnd);
 #endif
@@ -334,7 +338,10 @@ bool CLR_RT_GarbageCollector::TestPointers_PopulateNew_Worker(void **ref)
             if (ptr->newPtr != dst)
             {
 #ifdef _WIN64
-                CLR_Debug::Printf("Bad pointer: 0x%016" PRIxPTR " 0x%016" PRIxPTR "\r\n", (uintptr_t)ptr->newPtr, (uintptr_t)dst);
+                CLR_Debug::Printf(
+                    "Bad pointer: 0x%016" PRIxPTR " 0x%016" PRIxPTR "\r\n",
+                    (uintptr_t)ptr->newPtr,
+                    (uintptr_t)dst);
 #else
                 CLR_Debug::Printf("Bad pointer: %08x %08x\r\n", ptr->newPtr, dst);
 #endif
@@ -343,7 +350,10 @@ bool CLR_RT_GarbageCollector::TestPointers_PopulateNew_Worker(void **ref)
             else if (ptr->data != *dst)
             {
 #ifdef _WIN64
-                CLR_Debug::Printf("Bad data: 0x%016" PRIxPTR " 0x%016" PRIxPTR "\r\n", (uintptr_t)ptr->data, (uintptr_t)*dst);
+                CLR_Debug::Printf(
+                    "Bad data: 0x%016" PRIxPTR " 0x%016" PRIxPTR "\r\n",
+                    (uintptr_t)ptr->data,
+                    (uintptr_t)*dst);
 #else
                 CLR_Debug::Printf("Bad data: %08x %08x\r\n", ptr->data, *dst);
 #endif
