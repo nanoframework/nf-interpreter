@@ -536,6 +536,49 @@ struct Library_corlib_native_System_Delegate
     static CLR_RT_HeapBlock_Delegate *GetLastDelegate(CLR_RT_HeapBlock_Delegate *dlg);
 };
 
+struct Library_corlib_native_System_Diagnostics_CodeAnalysis_DoesNotReturnIfAttribute
+{
+    static const int FIELD___parameterValue = 1;
+
+    //--//
+};
+
+struct Library_corlib_native_System_Diagnostics_CodeAnalysis_MaybeNullWhenAttribute
+{
+    static const int FIELD___returnValue = 1;
+
+    //--//
+};
+
+struct Library_corlib_native_System_Diagnostics_CodeAnalysis_MemberNotNullAttribute
+{
+    static const int FIELD___members = 1;
+
+    //--//
+};
+
+struct Library_corlib_native_System_Diagnostics_CodeAnalysis_MemberNotNullWhenAttribute
+{
+    static const int FIELD___returnValue = 1;
+    static const int FIELD___members = 2;
+
+    //--//
+};
+
+struct Library_corlib_native_System_Diagnostics_CodeAnalysis_NotNullIfNotNullAttribute
+{
+    static const int FIELD___parameterName = 1;
+
+    //--//
+};
+
+struct Library_corlib_native_System_Diagnostics_CodeAnalysis_NotNullWhenAttribute
+{
+    static const int FIELD___returnValue = 1;
+
+    //--//
+};
+
 struct Library_corlib_native_System_Diagnostics_Debug
 {
     NANOCLR_NATIVE_DECLARE(WriteLineNative___STATIC__VOID__STRING__BOOLEAN);
@@ -812,6 +855,13 @@ struct Library_corlib_native_System_Reflection_RuntimeMethodInfo
 struct Library_corlib_native_System_Runtime_CompilerServices_AccessedThroughPropertyAttribute
 {
     static const int FIELD___propertyName = 1;
+
+    //--//
+};
+
+struct Library_corlib_native_System_Runtime_CompilerServices_CallerArgumentExpressionAttribute
+{
+    static const int FIELD___parameterName = 1;
 
     //--//
 };
