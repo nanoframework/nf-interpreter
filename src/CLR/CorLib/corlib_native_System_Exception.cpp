@@ -197,8 +197,7 @@ HRESULT Library_corlib_native_System_Exception::SetStackTrace(CLR_RT_HeapBlock &
 
 #if defined(NANOCLR_TRACE_EXCEPTIONS)
 
-        if (CLR_EE_DBG_IS(NoStackTraceInExceptions) || CLR_EE_DBG_IS_NOT(Enabled) || CLR_EE_IS(Compaction_Pending) ||
-            g_CLR_RT_ExecutionEngine.m_fPerformGarbageCollection)
+        if (CLR_EE_DBG_IS(NoStackTraceInExceptions))
         {
             // stack trace is DISABLED or...
             // no debugger is attached or...
@@ -208,8 +207,11 @@ HRESULT Library_corlib_native_System_Exception::SetStackTrace(CLR_RT_HeapBlock &
             (void)dst;
             (void)array;
 
-            // null the array that would hold the stack trace
-            obj[FIELD___stackTrace].SetObjectReference(nullptr);
+            // create an empty array for the stack trace
+            NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance(
+                obj[FIELD___stackTrace],
+                depth,
+                g_CLR_RT_WellKnownTypes.m_UInt8));
         }
         else
         {
@@ -247,10 +249,7 @@ HRESULT Library_corlib_native_System_Exception::SetStackTrace(CLR_RT_HeapBlock &
             if (!g_CLR_RT_ExecutionEngine.m_fShuttingDown)
 #endif
             {
-                if (CLR_EE_DBG_IS_NOT(NoStackTraceInExceptions) && CLR_EE_DBG_IS(Enabled))
-                {
-                    CLR_RT_DUMP::EXCEPTION(*stack, ref);
-                }
+                CLR_RT_DUMP::EXCEPTION(*stack, ref);
             }
         }
 
