@@ -101,7 +101,70 @@ void CLR_RT_GarbageCollector::ValidateCluster(CLR_RT_HeapCluster *hc)
 
     while (ptr < end)
     {
+        // Validate the block and check for memory corruption
         hc->ValidateBlock(ptr);
+
+#ifndef BUILD_RTM
+
+        // Perform boundary checks
+        if (ptr + ptr->DataSize() > end)
+        {
+
+#ifdef _WIN64
+            CLR_Debug::Printf("Block exceeds cluster boundary: 0x%016" PRIxPTR "\r\n", (uintptr_t)ptr);
+#else
+            CLR_Debug::Printf("Block exceeds cluster boundary: %08x\r\n", ptr);
+#endif
+
+            NANOCLR_DEBUG_STOP();
+        }
+
+        // Check for overlapping blocks, if this is not a class or value type
+        // First the next block
+        CLR_RT_HeapBlock_Node const *nextPtr = ptr->Next();
+        if ((ptr->DataType() != DATATYPE_VALUETYPE && ptr->DataType() != DATATYPE_CLASS) && nextPtr)
+        {
+            // is the next pointer before or after the current block?
+            if (nextPtr < ptr)
+            {
+                // nextPtr is before the current block
+                if (nextPtr + nextPtr->DataSize() > ptr)
+                {
+#ifdef _WIN64
+                    CLR_Debug::Printf(
+                        "Overlapping blocks detected. Next block of 0x%016" PRIxPTR " is overlapping it.\r\n",
+                        (uintptr_t)ptr);
+#else
+                    CLR_Debug::Printf("Overlapping blocks detected: Next block of %08x is overlapping it.\r\n", ptr);
+#endif
+                }
+            }
+        }
+
+        // now the previous block
+        CLR_RT_HeapBlock_Node const *prevPtr = ptr->Prev();
+        if ((ptr->DataType() != DATATYPE_VALUETYPE && ptr->DataType() != DATATYPE_CLASS) && prevPtr)
+        {
+            // is the previous pointer before or after the current block?
+            if (prevPtr < ptr)
+            {
+                // previousPtr is before the current block
+                if (prevPtr + prevPtr->DataSize() > ptr)
+                {
+#ifdef _WIN64
+                    CLR_Debug::Printf(
+                        "Overlapping blocks detected: Previous block of 0x%016" PRIxPTR " is overlapping it.\r\n",
+                        (uintptr_t)ptr);
+#else
+                    CLR_Debug::Printf(
+                        "Overlapping blocks detected: Previous block of  %08x is overlapping it.\r\n",
+                        ptr);
+#endif
+                }
+            }
+        }
+
+#endif // !BUILD_RTM
 
         ptr += ptr->DataSize();
     }

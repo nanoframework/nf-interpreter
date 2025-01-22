@@ -336,18 +336,39 @@ void CLR_RT_HeapCluster::ValidateBlock(CLR_RT_HeapBlock *ptr)
     {
         if (ptr < m_payloadStart || ptr >= m_payloadEnd)
         {
+#ifdef _WIN64
+            CLR_Debug::Printf(
+                "Block beyond cluster limits: 0x%016" PRIxPTR " [0x%016" PRIxPTR " : 0x%016" PRIxPTR "-0x%016" PRIxPTR
+                "]\r\n",
+                (uintptr_t)ptr,
+                (uintptr_t)this,
+                (uintptr_t)m_payloadStart,
+                (uintptr_t)m_payloadEnd);
+
+#else
+
             CLR_Debug::Printf(
                 "Block beyond cluster limits: %08x [%08x : %08x-%08x]\r\n",
                 (size_t)ptr,
                 (size_t)this,
                 (size_t)m_payloadStart,
                 (size_t)m_payloadEnd);
+#endif
 
             break;
         }
 
         if (ptr->DataType() >= DATATYPE_FIRST_INVALID)
         {
+#ifdef _WIN64
+            CLR_Debug::Printf(
+                "Bad Block Type: 0x%016" PRIxPTR " %02x [0x%016" PRIxPTR " : 0x%016" PRIxPTR "-0x%016" PRIxPTR "]\r\n",
+                (uintptr_t)ptr,
+                ptr->DataType(),
+                (uintptr_t)this,
+                (uintptr_t)m_payloadStart,
+                (uintptr_t)m_payloadEnd);
+#else
             CLR_Debug::Printf(
                 "Bad Block Type: %08x %02x [%08x : %08x-%08x]\r\n",
                 (size_t)ptr,
@@ -355,24 +376,42 @@ void CLR_RT_HeapCluster::ValidateBlock(CLR_RT_HeapBlock *ptr)
                 (size_t)this,
                 (size_t)m_payloadStart,
                 (size_t)m_payloadEnd);
+#endif
 
             break;
         }
 
         if (ptr->DataSize() == 0)
         {
+#ifdef _WIN64
+            CLR_Debug::Printf(
+                "Bad Block null-size: 0x%016" PRIxPTR " [0x%016" PRIxPTR " : 0x%016" PRIxPTR "-0x%016" PRIxPTR "]\r\n",
+                (uintptr_t)ptr,
+                (uintptr_t)this,
+                (uintptr_t)m_payloadStart,
+                (uintptr_t)m_payloadEnd);
+#else
             CLR_Debug::Printf(
                 "Bad Block null-size: %08x [%08x : %08x-%08x]\r\n",
                 (size_t)ptr,
                 (size_t)this,
                 (size_t)m_payloadStart,
                 (size_t)m_payloadEnd);
+#endif
 
             break;
         }
 
         if (ptr + ptr->DataSize() > m_payloadEnd)
         {
+#ifdef _WIN64
+            CLR_Debug::Printf(
+                "Bad Block size: 0x%016" PRIxPTR " [0x%016" PRIxPTR " : 0x%016" PRIxPTR "-0x%016" PRIxPTR "]\r\n",
+                (uintptr_t)ptr,
+                (uintptr_t)this,
+                (uintptr_t)m_payloadStart,
+                (uintptr_t)m_payloadEnd);
+#else
             CLR_Debug::Printf(
                 "Bad Block size: %d %08x [%08x : %08x-%08x]\r\n",
                 ptr->DataSize(),
@@ -380,6 +419,7 @@ void CLR_RT_HeapCluster::ValidateBlock(CLR_RT_HeapBlock *ptr)
                 (size_t)this,
                 (size_t)m_payloadStart,
                 (size_t)m_payloadEnd);
+#endif
 
             break;
         }

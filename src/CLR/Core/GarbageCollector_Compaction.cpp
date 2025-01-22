@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (c) .NET Foundation and Contributors
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
@@ -258,11 +258,11 @@ void CLR_RT_GarbageCollector::Heap_Compact()
 
 #ifdef DEBUG
 
-                    _ASSERTE(relocCurrent->m_destination >= (CLR_UINT8 *)g_CLR_RT_ExecutionEngine.m_heap.FirstNode());
-                    _ASSERTE(relocCurrent->m_destination < (CLR_UINT8 *)g_CLR_RT_ExecutionEngine.m_heap.LastNode());
-                    _ASSERTE(relocCurrent->m_start >= (CLR_UINT8 *)g_CLR_RT_ExecutionEngine.m_heap.FirstNode());
-                    _ASSERTE(relocCurrent->m_start < (CLR_UINT8 *)g_CLR_RT_ExecutionEngine.m_heap.LastNode());
-                    _ASSERTE(moveBytes <= (move * sizeof(CLR_RT_HeapBlock)));
+                    _ASSERTE(relocCurrent->m_destination >= (CLR_UINT8 *)freeRegion_hc->m_payloadStart);
+                    _ASSERTE(relocCurrent->m_destination < (CLR_UINT8 *)freeRegion_hc->m_payloadEnd);
+                    _ASSERTE(relocCurrent->m_start >= (CLR_UINT8 *)freeRegion_hc->m_payloadStart);
+                    _ASSERTE(relocCurrent->m_start < (CLR_UINT8 *)freeRegion_hc->m_payloadEnd);
+                    _ASSERTE(moveBytes == (move * sizeof(CLR_RT_HeapBlock)));
 
 #endif
 
@@ -472,19 +472,12 @@ void CLR_RT_GarbageCollector::Heap_Relocate_Pass(RelocateFtn ftn)
     NANOCLR_FOREACH_NODE(CLR_RT_HeapCluster, hc, g_CLR_RT_ExecutionEngine.m_heap)
     {
         CLR_RT_HeapBlock_Node *ptr = hc->m_payloadStart;
-        CLR_RT_HeapBlock_Node *end = hc->m_payloadEnd;
-
-        // check pointers
-        _ASSERTE(ptr >= (void *)s_CLR_RT_Heap.m_location);
-        _ASSERTE(ptr < (void *)(s_CLR_RT_Heap.m_location + s_CLR_RT_Heap.m_size));
-        _ASSERTE(end >= (void *)s_CLR_RT_Heap.m_location);
-        _ASSERTE(end <= (void *)(s_CLR_RT_Heap.m_location + s_CLR_RT_Heap.m_size));
+        CLR_RT_HeapBlock_Node const *end = hc->m_payloadEnd;
 
         while (ptr < end)
         {
             // check pointer
-            _ASSERTE(ptr >= (void *)s_CLR_RT_Heap.m_location);
-            _ASSERTE(ptr < (void *)(s_CLR_RT_Heap.m_location + s_CLR_RT_Heap.m_size));
+            _ASSERTE(ptr >= hc->m_payloadStart && ptr <= hc->m_payloadEnd);
 
             CLR_RT_HEAPBLOCK_RELOCATE(ptr);
 
@@ -544,7 +537,16 @@ void CLR_RT_GarbageCollector::Heap_Relocate(void **ref)
 #if defined(NANOCLR_TRACE_MEMORY_STATS)
         if (s_CLR_RT_fTrace_MemoryStats >= c_CLR_RT_Trace_Verbose)
         {
-            CLR_Debug::Printf("\r\nGC: Relocating Heap\r\n");
+            if (dst == nullptr)
+            {
+                // nothing to do here
+                CLR_Debug::Printf("\r\nGC: Skipping relocation as referenced object is null.\r\n");
+                return;
+            }
+            else
+            {
+                CLR_Debug::Printf("\r\nGC: Relocating Heap\r\n");
+            }
         }
 #endif
 
@@ -570,8 +572,6 @@ void CLR_RT_GarbageCollector::Heap_Relocate(void **ref)
                 else
                 {
                     destinationAddress = (void *)(dst + relocCurrent.m_offset);
-                    _ASSERTE(destinationAddress >= (void *)s_CLR_RT_Heap.m_location);
-                    _ASSERTE(destinationAddress < (void *)(s_CLR_RT_Heap.m_location + s_CLR_RT_Heap.m_size));
 
                     *ref = destinationAddress;
 
