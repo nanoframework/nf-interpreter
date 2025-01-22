@@ -552,14 +552,14 @@ void CLR_RT_GarbageCollector::Heap_Relocate(void **ref)
 
         if (dst >= g_CLR_RT_GarbageCollector.m_relocMinimum && dst < g_CLR_RT_GarbageCollector.m_relocMaximum)
         {
-            RelocationRegion *relocBlocks = g_CLR_RT_GarbageCollector.m_relocBlocks;
+            RelocationRegion const *relocBlocks = g_CLR_RT_GarbageCollector.m_relocBlocks;
             size_t left = 0;
             size_t right = g_CLR_RT_GarbageCollector.m_relocCount;
 
             while (left < right)
             {
                 size_t center = (left + right) / 2;
-                RelocationRegion &relocCurrent = relocBlocks[center];
+                RelocationRegion const &relocCurrent = relocBlocks[center];
 
                 if (dst < relocCurrent.m_start)
                 {
