@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (c) .NET Foundation and Contributors
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
@@ -181,8 +181,8 @@ HRESULT CLR_RT_ExecutionEngine::AllocateHeaps()
         CLR_Debug::Printf("Heap Cluster information\r\n");
 
 #ifdef _WIN64
-        CLR_Debug::Printf("Start:       0x%" PRIx64 "\r\n", (uint64_t)heapFirstFree);
-        CLR_Debug::Printf("Free:        0x%" PRIx64 "\r\n", (uint64_t)heapFree);
+        CLR_Debug::Printf("Start:       0x%" PRIx64 "\r\n", heapFirstFree);
+        CLR_Debug::Printf("Free:        0x%" PRIx64 "\r\n", heapFree);
         CLR_Debug::Printf("Block size:  %d\r\n", sizeof(struct CLR_RT_HeapBlock));
 #else
         CLR_Debug::Printf("Start:       %08x\r\n", (size_t)heapFirstFree);
@@ -421,6 +421,7 @@ CLR_UINT32 CLR_RT_ExecutionEngine::PerformGarbageCollection()
 void CLR_RT_ExecutionEngine::PerformHeapCompaction()
 {
     NATIVE_PROFILE_CLR_CORE();
+
     if (CLR_EE_DBG_IS(NoCompaction))
         return;
 
