@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (c) .NET Foundation and Contributors
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
@@ -12,11 +12,11 @@ void CLR_RT_HeapCluster::HeapCluster_Initialize(CLR_UINT32 size, CLR_UINT32 bloc
     NATIVE_PROFILE_CLR_CORE();
     GenericNode_Initialize();
 
-    size = (size - sizeof(*this)) / sizeof(struct CLR_RT_HeapBlock);
+    size = (size - sizeof(*this)) / sizeof(CLR_RT_HeapBlock);
 
-    m_freeList.DblLinkedList_Initialize();              // CLR_RT_DblLinkedList    m_freeList;
-    m_payloadStart = (CLR_RT_HeapBlock_Node *)&this[1]; // CLR_RT_HeapBlock_Node*  m_payloadStart;
-    m_payloadEnd = &m_payloadStart[size];               // CLR_RT_HeapBlock_Node*  m_payloadEnd;
+    m_freeList.DblLinkedList_Initialize();
+    m_payloadStart = static_cast<CLR_RT_HeapBlock_Node *>(&this[1]);
+    m_payloadEnd = &m_payloadStart[size];
 
     // Scan memory looking for possible objects to salvage
     CLR_RT_HeapBlock_Node *ptr = m_payloadStart;
@@ -26,7 +26,7 @@ void CLR_RT_HeapCluster::HeapCluster_Initialize(CLR_UINT32 size, CLR_UINT32 bloc
     {
         if (ptr->DataType() == DATATYPE_WEAKCLASS)
         {
-            CLR_RT_HeapBlock_WeakReference *weak = (CLR_RT_HeapBlock_WeakReference *)ptr;
+            CLR_RT_HeapBlock_WeakReference *weak = (CLR_RT_HeapBlock_WeakReference *)(ptr);
 
             if (weak->DataSize() == CONVERTFROMSIZETOHEAPBLOCKS(sizeof(*weak)) && weak->m_targetSerialized != nullptr &&
                 (weak->m_identity.m_flags & CLR_RT_HeapBlock_WeakReference::WR_SurviveBoot))
@@ -62,7 +62,7 @@ void CLR_RT_HeapCluster::HeapCluster_Initialize(CLR_UINT32 size, CLR_UINT32 bloc
             }
         }
 
-        if ((unsigned int)(ptr + blockSize) > (unsigned int)end)
+        if ((uintptr_t)(ptr + blockSize) > (uintptr_t)end)
         {
             blockSize = (CLR_UINT32)(end - ptr);
         }
@@ -208,7 +208,7 @@ void CLR_RT_HeapCluster::RecoverFromGC()
     NATIVE_PROFILE_CLR_CORE();
 
     CLR_RT_HeapBlock_Node *ptr = m_payloadStart;
-    CLR_RT_HeapBlock_Node *end = m_payloadEnd;
+    CLR_RT_HeapBlock_Node const *end = m_payloadEnd;
 
     //
     // Open the free list.
@@ -285,12 +285,14 @@ void CLR_RT_HeapCluster::RecoverFromGC()
 CLR_RT_HeapBlock_Node *CLR_RT_HeapCluster::InsertInOrder(CLR_RT_HeapBlock_Node *node, CLR_UINT32 size)
 {
     NATIVE_PROFILE_CLR_CORE();
-    CLR_RT_HeapBlock_Node *ptr;
+    CLR_RT_HeapBlock_Node *ptr = nullptr;
 
     NANOCLR_FOREACH_NODE__NODECL(CLR_RT_HeapBlock_Node, ptr, m_freeList)
     {
         if (ptr > node)
+        {
             break;
+        }
     }
     NANOCLR_FOREACH_NODE_END();
 
