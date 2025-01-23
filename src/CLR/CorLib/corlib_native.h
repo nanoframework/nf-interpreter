@@ -520,63 +520,19 @@ struct Library_corlib_native_System_Convert
 struct Library_corlib_native_System_Delegate
 {
     NANOCLR_NATIVE_DECLARE(Equals___BOOLEAN__OBJECT);
-    NANOCLR_NATIVE_DECLARE(Combine___STATIC__SystemDelegate__SystemDelegate__SystemDelegate);
-    NANOCLR_NATIVE_DECLARE(Remove___STATIC__SystemDelegate__SystemDelegate__SystemDelegate);
-    NANOCLR_NATIVE_DECLARE(op_Equality___STATIC__BOOLEAN__SystemDelegate__SystemDelegate);
-    NANOCLR_NATIVE_DECLARE(op_Inequality___STATIC__BOOLEAN__SystemDelegate__SystemDelegate);
-
 #if (NANOCLR_REFLECTION == TRUE)
     NANOCLR_NATIVE_DECLARE(GetInvocationList___SZARRAY_SystemDelegate);
     NANOCLR_NATIVE_DECLARE(get_Method___SystemReflectionMethodInfo);
     NANOCLR_NATIVE_DECLARE(get_Target___OBJECT);
 #endif // NANOCLR_REFLECTION
+    NANOCLR_NATIVE_DECLARE(Combine___STATIC__SystemDelegate__SystemDelegate__SystemDelegate);
+    NANOCLR_NATIVE_DECLARE(Remove___STATIC__SystemDelegate__SystemDelegate__SystemDelegate);
+    NANOCLR_NATIVE_DECLARE(op_Equality___STATIC__BOOLEAN__SystemDelegate__SystemDelegate);
+    NANOCLR_NATIVE_DECLARE(op_Inequality___STATIC__BOOLEAN__SystemDelegate__SystemDelegate);
 
     //--//
 
     static CLR_RT_HeapBlock_Delegate *GetLastDelegate(CLR_RT_HeapBlock_Delegate *dlg);
-};
-
-struct Library_corlib_native_System_Diagnostics_CodeAnalysis_DoesNotReturnIfAttribute
-{
-    static const int FIELD___parameterValue = 1;
-
-    //--//
-};
-
-struct Library_corlib_native_System_Diagnostics_CodeAnalysis_MaybeNullWhenAttribute
-{
-    static const int FIELD___returnValue = 1;
-
-    //--//
-};
-
-struct Library_corlib_native_System_Diagnostics_CodeAnalysis_MemberNotNullAttribute
-{
-    static const int FIELD___members = 1;
-
-    //--//
-};
-
-struct Library_corlib_native_System_Diagnostics_CodeAnalysis_MemberNotNullWhenAttribute
-{
-    static const int FIELD___returnValue = 1;
-    static const int FIELD___members = 2;
-
-    //--//
-};
-
-struct Library_corlib_native_System_Diagnostics_CodeAnalysis_NotNullIfNotNullAttribute
-{
-    static const int FIELD___parameterName = 1;
-
-    //--//
-};
-
-struct Library_corlib_native_System_Diagnostics_CodeAnalysis_NotNullWhenAttribute
-{
-    static const int FIELD___returnValue = 1;
-
-    //--//
 };
 
 struct Library_corlib_native_System_Diagnostics_Debug
@@ -855,13 +811,6 @@ struct Library_corlib_native_System_Reflection_RuntimeMethodInfo
 struct Library_corlib_native_System_Runtime_CompilerServices_AccessedThroughPropertyAttribute
 {
     static const int FIELD___propertyName = 1;
-
-    //--//
-};
-
-struct Library_corlib_native_System_Runtime_CompilerServices_CallerArgumentExpressionAttribute
-{
-    static const int FIELD___parameterName = 1;
 
     //--//
 };
