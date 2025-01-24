@@ -149,11 +149,9 @@ HRESULT Library_corlib_native_System_TimeSpan::Compare___STATIC__I4__SystemTimeS
     CLR_RT_HeapBlock resLeft;
     CLR_RT_HeapBlock resRight;
 
-    memset(&resLeft, 0, sizeof(struct CLR_RT_HeapBlock));
-    memset(&resRight, 0, sizeof(struct CLR_RT_HeapBlock));
-
     pLeft = Library_corlib_native_System_TimeSpan::GetValuePtr(stack);
     FAULT_ON_NULL(pLeft);
+
     pRight = Library_corlib_native_System_TimeSpan::GetValuePtr(stack.Arg1());
     FAULT_ON_NULL(pRight);
 

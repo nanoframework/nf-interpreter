@@ -215,7 +215,6 @@ HRESULT CLR_RT_Thread::CreateInstance(int pid, int priority, CLR_RT_Thread *&th,
         th->m_timeQuantumExpired = false; // bool                       m_timeQuantumExpired;
                                           //
         th->m_dlg = NULL;                 // CLR_RT_HeapBlock_Delegate* m_dlg;
-        memset(&th->m_currentException, 0, sizeof(struct CLR_RT_HeapBlock));
         th->m_currentException.SetObjectReference(NULL); // CLR_RT_HeapBlock           m_currentException;
                                                          // UnwindStack m_nestedExceptions[c_MaxStackUnwindDepth];
         th->m_nestedExceptionsPos = 0;                   // int                        m_nestedExceptionsPos;

@@ -50,7 +50,6 @@ HRESULT Library_corlib_native_System_Exception::get_StackTrace___STRING(CLR_RT_S
     CLR_RT_HeapBlock tmpArray;
     CLR_RT_HeapBlock *pThis;
 
-    memset(&tmpArray, 0, sizeof(struct CLR_RT_HeapBlock));
     tmpArray.SetObjectReference(NULL);
     CLR_RT_ProtectFromGC gc(tmpArray);
 

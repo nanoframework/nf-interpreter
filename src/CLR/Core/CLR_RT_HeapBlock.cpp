@@ -388,8 +388,6 @@ HRESULT CLR_RT_HeapBlock::LoadFromReference(CLR_RT_HeapBlock &ref)
     CLR_RT_HeapBlock *obj;
     CLR_DataType dt = ref.DataType();
 
-    memset(&tmp, 0, sizeof(struct CLR_RT_HeapBlock));
-
     if (dt == DATATYPE_ARRAY_BYREF)
     {
         CLR_RT_HeapBlock_Array *array = ref.m_data.arrayReference.array;
@@ -533,8 +531,6 @@ HRESULT CLR_RT_HeapBlock::StoreToReference(CLR_RT_HeapBlock &ref, int size)
                     CLR_DataType dtElem = (CLR_DataType)array->m_typeOfElement;
                     CLR_RT_HeapBlock blk;
 
-                    memset(&blk, 0, sizeof(struct CLR_RT_HeapBlock));
-
                     blk.Assign(*this);
 
                     NANOCLR_CHECK_HRESULT(blk.Convert(
@@ -655,8 +651,6 @@ HRESULT CLR_RT_HeapBlock::Reassign(const CLR_RT_HeapBlock &value)
 
     CLR_RT_HeapBlock *obj;
     CLR_RT_HeapBlock ref;
-
-    memset(&ref, 0, sizeof(struct CLR_RT_HeapBlock));
 
     if (this->DataType() == DATATYPE_BYREF)
     {
@@ -809,8 +803,6 @@ HRESULT CLR_RT_HeapBlock::PerformBoxing(const CLR_RT_TypeDef_Instance &cls)
     CLR_RT_HeapBlock tmp;
     CLR_RT_HeapBlock *obj = this;
     CLR_DataType dt = obj->DataType();
-
-    memset(&tmp, 0, sizeof(struct CLR_RT_HeapBlock));
 
     //
     // System.DateTime and System.TimeSpan are real value types, so sometimes they are passed by reference.
@@ -1642,9 +1634,6 @@ CLR_INT32 CLR_RT_HeapBlock::Compare_Values(const CLR_RT_HeapBlock &left, const C
                 const CLR_RT_HeapBlock *ptrRight;
                 CLR_RT_HeapBlock hbLeft;
                 CLR_RT_HeapBlock hbRight;
-
-                memset(&hbLeft, 0, sizeof(struct CLR_RT_HeapBlock));
-                memset(&hbRight, 0, sizeof(struct CLR_RT_HeapBlock));
 
                 if (left.ReflectionDataConst().m_kind != right.ReflectionDataConst().m_kind)
                 {
