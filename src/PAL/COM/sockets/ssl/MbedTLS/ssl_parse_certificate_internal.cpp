@@ -69,6 +69,11 @@ bool ssl_get_public_key_raw_internal(void *certificate, size_t size, void *x509R
 
     x509->len = cacert.raw.len;
     x509->p = (unsigned char *)platform_malloc(x509->len);
+    if (x509->p == NULL)
+    {
+        mbedtls_x509_crt_free(&cacert);
+        return false;
+    }
 
     memcpy(x509->p, cacert.raw.p, x509->len);
 

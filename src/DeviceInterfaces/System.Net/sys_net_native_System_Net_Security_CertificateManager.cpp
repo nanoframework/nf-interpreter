@@ -94,8 +94,11 @@ HRESULT Library_sys_net_native_System_Net_Security_CertificateManager::GetDevice
     if (deviceCert)
     {
         X509RawData rawData;
+        bool success = SSL_GetPublicKeyRaw((const char *)deviceCert->Certificate, deviceCert->CertificateSize, &rawData);
 
-        if (SSL_GetPublicKeyRaw((const char *)deviceCert->Certificate, deviceCert->CertificateSize, &rawData))
+        platform_free(deviceCert);
+
+        if (success)
         {
             CLR_RT_HeapBlock_Array *array;
 
@@ -108,8 +111,6 @@ HRESULT Library_sys_net_native_System_Net_Security_CertificateManager::GetDevice
 
             platform_free(rawData.p);
         }
-
-        platform_free(deviceCert);
     }
 
     NANOCLR_NOCLEANUP();
