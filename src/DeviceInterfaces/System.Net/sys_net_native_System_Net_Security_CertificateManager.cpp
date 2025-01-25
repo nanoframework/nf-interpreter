@@ -94,7 +94,8 @@ HRESULT Library_sys_net_native_System_Net_Security_CertificateManager::GetDevice
     if (deviceCert)
     {
         X509RawData rawData;
-        bool success = SSL_GetPublicKeyRaw((const char *)deviceCert->Certificate, deviceCert->CertificateSize, &rawData);
+        bool success =
+            SSL_GetPublicKeyRaw((const char *)deviceCert->Certificate, deviceCert->CertificateSize, &rawData);
 
         platform_free(deviceCert);
 
