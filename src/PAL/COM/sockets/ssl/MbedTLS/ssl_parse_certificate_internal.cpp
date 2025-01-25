@@ -51,3 +51,28 @@ bool ssl_parse_certificate_internal(void *certificate, size_t size, void *x509Ce
 
     return true;
 }
+
+bool ssl_get_public_key_raw_internal(void *certificate, size_t size, void *x509RawData)
+{
+    int ret;
+    X509RawData *x509 = (X509RawData *)x509RawData;
+
+    mbedtls_x509_crt cacert;
+    mbedtls_x509_crt_init(&cacert);
+
+    ret = mbedtls_x509_crt_parse(&cacert, (const unsigned char *)certificate, size);
+    if (ret < 0)
+    {
+        mbedtls_x509_crt_free(&cacert);
+        return false;
+    }
+
+    x509->len = cacert.raw.len;
+    x509->p = (unsigned char *)platform_malloc(x509->len);
+
+    memcpy(x509->p, cacert.raw.p, x509->len);
+
+    mbedtls_x509_crt_free(&cacert);
+
+    return true;
+}

@@ -81,3 +81,36 @@ HRESULT Library_sys_net_native_System_Net_Security_CertificateManager::
 
     NANOCLR_CLEANUP_END();
 }
+
+HRESULT Library_sys_net_native_System_Net_Security_CertificateManager::GetDevicePublicKeyRaw___STATIC__SZARRAY_U1(
+    CLR_RT_StackFrame &stack)
+{
+    NATIVE_PROFILE_CLR_NETWORK();
+    NANOCLR_HEADER();
+
+    CLR_RT_HeapBlock &ret = stack.PushValueAndClear();
+    HAL_Configuration_X509DeviceCertificate *deviceCert = ConfigurationManager_GetDeviceCertificate();
+
+    if (deviceCert)
+    {
+        X509RawData rawData;
+
+        if (SSL_GetPublicKeyRaw((const char *)deviceCert->Certificate, deviceCert->CertificateSize, &rawData))
+        {
+            CLR_RT_HeapBlock_Array *array;
+
+            NANOCLR_CHECK_HRESULT(
+                CLR_RT_HeapBlock_Array::CreateInstance(ret, rawData.len, g_CLR_RT_WellKnownTypes.m_UInt8));
+
+            array = ret.DereferenceArray();
+
+            memcpy(array->GetFirstElement(), rawData.p, rawData.len);
+
+            platform_free(rawData.p);
+        }
+
+        platform_free(deviceCert);
+    }
+
+    NANOCLR_NOCLEANUP();
+}

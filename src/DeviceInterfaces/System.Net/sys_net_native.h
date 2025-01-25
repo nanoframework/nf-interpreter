@@ -299,6 +299,7 @@ struct Library_sys_net_native_System_Net_NetworkInformation_WirelessAPConfigurat
 struct Library_sys_net_native_System_Net_Security_CertificateManager
 {
     NANOCLR_NATIVE_DECLARE(AddCaCertificateBundle___STATIC__BOOLEAN__SZARRAY_U1);
+    NANOCLR_NATIVE_DECLARE(GetDevicePublicKeyRaw___STATIC__SZARRAY_U1);
 
     //--//
 };

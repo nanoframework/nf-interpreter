@@ -195,6 +195,8 @@ static const CLR_RT_MethodHandler method_lookup[] =
     NULL,
     NULL,
     Library_sys_net_native_System_Net_Security_CertificateManager::AddCaCertificateBundle___STATIC__BOOLEAN__SZARRAY_U1,
+    NULL,
+    Library_sys_net_native_System_Net_Security_CertificateManager::GetDevicePublicKeyRaw___STATIC__SZARRAY_U1,
     Library_sys_net_native_System_Net_Security_SslNative::SecureServerInit___STATIC__I4__I4__I4__SystemSecurityCryptographyX509CertificatesX509Certificate__SystemSecurityCryptographyX509CertificatesX509Certificate__BOOLEAN,
     Library_sys_net_native_System_Net_Security_SslNative::SecureClientInit___STATIC__I4__I4__I4__SystemSecurityCryptographyX509CertificatesX509Certificate__SystemSecurityCryptographyX509CertificatesX509Certificate__BOOLEAN,
     Library_sys_net_native_System_Net_Security_SslNative::SecureAccept___STATIC__VOID__I4__OBJECT,
@@ -345,9 +347,9 @@ static const CLR_RT_MethodHandler method_lookup[] =
 const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_System_Net =
 {
     "System.Net",
-    0xD82C1452,
+    0x11125EA2,
     method_lookup,
-    { 100, 2, 0, 11 }
+    { 100, 2, 0, 12 }
 };
 
 // clang-format on
