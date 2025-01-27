@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (c) .NET Foundation and Contributors
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
@@ -4644,7 +4644,6 @@ HRESULT CLR_RT_AttributeParser::Next(Value *&res)
 
         m_lastValue.m_mode = Value::c_DefaultConstructor;
         m_lastValue.m_name = NULL;
-        memset(&m_lastValue.m_value, 0, sizeof(struct CLR_RT_HeapBlock));
 
         NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObject(m_lastValue.m_value, m_td));
 
@@ -4660,7 +4659,6 @@ HRESULT CLR_RT_AttributeParser::Next(Value *&res)
 
         m_lastValue.m_mode = Value::c_ConstructorArgument;
         m_lastValue.m_name = NULL;
-        memset(&m_lastValue.m_value, 0, sizeof(struct CLR_RT_HeapBlock));
 
         // get type
         NANOCLR_CHECK_HRESULT(m_parser.Advance(m_res));

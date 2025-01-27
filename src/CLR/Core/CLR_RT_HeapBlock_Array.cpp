@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (c) .NET Foundation and Contributors
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
@@ -398,9 +398,6 @@ HRESULT CLR_RT_HeapBlock_Array::Copy(
             CLR_RT_TypeDescriptor descDst{};
             CLR_RT_HeapBlock ref;
             CLR_RT_HeapBlock elem;
-
-            memset(&ref, 0, sizeof(struct CLR_RT_HeapBlock));
-            memset(&elem, 0, sizeof(struct CLR_RT_HeapBlock));
 
             elem.SetObjectReference(NULL);
             CLR_RT_ProtectFromGC gc(elem);

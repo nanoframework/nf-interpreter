@@ -49,8 +49,6 @@ HRESULT Library_corlib_native_System_Threading_SpinWait::Spin(CLR_RT_StackFrame 
     bool longRunning;
     bool eventResult = true;
 
-    memset(&hbTimeout, 0, sizeof(struct CLR_RT_HeapBlock));
-
     if (isTimeSpan)
     {
         timeout = Library_corlib_native_System_TimeSpan::GetValuePtr(stack.Arg0());

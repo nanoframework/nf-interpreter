@@ -206,7 +206,6 @@ HRESULT Library_corlib_native_System_String::_ctor___VOID__CHAR__I4(CLR_RT_Stack
     {
         CLR_RT_HeapBlock tmp;
 
-        memset(&tmp, 0, sizeof(struct CLR_RT_HeapBlock));
         tmp.SetObjectReference(NULL);
         CLR_RT_ProtectFromGC gc(tmp);
 
@@ -865,7 +864,6 @@ HRESULT Library_corlib_native_System_String::ChangeCase(CLR_RT_StackFrame &stack
     CLR_RT_HeapBlock_Array *arrayTmp;
     CLR_RT_HeapBlock refTmp;
 
-    memset(&refTmp, 0, sizeof(struct CLR_RT_HeapBlock));
     refTmp.SetObjectReference(NULL);
     CLR_RT_ProtectFromGC gc(refTmp);
 
@@ -907,7 +905,6 @@ HRESULT Library_corlib_native_System_String::Substring(CLR_RT_StackFrame &stack,
     CLR_RT_HeapBlock_Array *arrayTmp;
     CLR_RT_HeapBlock refTmp;
 
-    memset(&refTmp, 0, sizeof(struct CLR_RT_HeapBlock));
     refTmp.SetObjectReference(NULL);
     CLR_RT_ProtectFromGC gc(refTmp);
 
@@ -949,7 +946,6 @@ HRESULT Library_corlib_native_System_String::Trim(
     CLR_RT_HeapBlock refTmp;
     CLR_RT_HeapBlock_Array *arrayTmp;
 
-    memset(&refTmp, 0, sizeof(struct CLR_RT_HeapBlock));
     refTmp.SetObjectReference(NULL);
     CLR_RT_ProtectFromGC gc(refTmp);
 
@@ -1063,7 +1059,6 @@ HRESULT Library_corlib_native_System_String::Split(CLR_RT_StackFrame &stack, CLR
         {
             CLR_RT_HeapBlock refSrc;
 
-            memset(&refSrc, 0, sizeof(struct CLR_RT_HeapBlock));
             refSrc.SetObjectReference(NULL);
             CLR_RT_ProtectFromGC gc(refSrc);
 
