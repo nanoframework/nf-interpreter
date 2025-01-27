@@ -2112,9 +2112,7 @@ static HRESULT Debugging_Thread_Create_Helper(CLR_RT_MethodDef_Index &md, CLR_RT
     NANOCLR_HEADER();
 
     CLR_RT_HeapBlock ref;
-    
-    memset(&ref, 0, sizeof(struct CLR_RT_HeapBlock));
-    ref.SetObjectReference(nullptr);
+    ref.SetObjectReference(NULL);
     CLR_RT_ProtectFromGC gc(ref);
     CLR_RT_Thread *realThread = (pid != 0) ? CLR_DBG_Debugger::GetThreadFromPid(pid) : nullptr;
 
@@ -2576,8 +2574,6 @@ static bool SetBlockHelper(CLR_RT_HeapBlock *blk, NanoCLRDataType dt, CLR_UINT8 
         NanoCLRDataType dtDst;
         CLR_RT_HeapBlock src;
 
-        memset(&src, 0, sizeof(struct CLR_RT_HeapBlock));
-
         dtDst = blk->DataType();
 
         src.SetDataId(CLR_RT_HEAPBLOCK_RAW_ID(dt, 0, 1));
@@ -2627,9 +2623,6 @@ static CLR_RT_HeapBlock *GetScratchPad_Helper(int index)
     CLR_RT_HeapBlock tmp;
     CLR_RT_HeapBlock ref;
 
-    memset(&tmp, 0, sizeof(struct CLR_RT_HeapBlock));
-    memset(&ref, 0, sizeof(struct CLR_RT_HeapBlock));
-
     tmp.SetObjectReference(array);
 
     if (SUCCEEDED(ref.InitializeArrayReference(tmp, index)))
@@ -2648,8 +2641,6 @@ bool CLR_DBG_Debugger::Debugging_Value_ResizeScratchPad(WP_Message *msg)
 
     auto *cmd = (CLR_DBG_Commands::Debugging_Value_ResizeScratchPad *)msg->m_payload;
     CLR_RT_HeapBlock ref;
-
-    memset(&ref, 0, sizeof(struct CLR_RT_HeapBlock));
 
     if (cmd->m_size == 0)
     {
@@ -2749,8 +2740,6 @@ bool CLR_DBG_Debugger::Debugging_Value_GetStack(WP_Message *msg)
         CLR_RT_HeapBlock tmp;
         CLR_RT_TypeDef_Instance *pTD = nullptr;
         CLR_RT_TypeDef_Instance td;
-
-        memset(&tmp, 0, sizeof(struct CLR_RT_HeapBlock));
 
         if (cmd->m_kind != CLR_DBG_Commands::Debugging_Value_GetStack::c_EvalStack && IsBlockEnumMaybe(blk))
         {
@@ -2876,11 +2865,7 @@ bool CLR_DBG_Debugger::Debugging_Value_GetField(WP_Message *msg)
     CLR_RT_FieldDef_Instance inst;
     CLR_UINT32 offset;
 
-    memset(&tmp, 0, sizeof(struct CLR_RT_HeapBlock));
-    memset(&td, 0, sizeof(CLR_RT_TypeDef_Instance));
-    memset(&inst, 0, sizeof(CLR_RT_FieldDef_Instance));
-
-    if (blk != nullptr && cmd->m_offset > 0)
+    if (blk != NULL && cmd->m_offset > 0)
     {
         if (FAILED(desc.InitializeFromObject(*blk)))
         {
@@ -2988,9 +2973,6 @@ bool CLR_DBG_Debugger::Debugging_Value_GetArray(WP_Message *msg)
     CLR_RT_TypeDef_Instance *pTD = nullptr;
     CLR_RT_TypeDef_Instance td;
 
-    memset(&tmp, 0, sizeof(struct CLR_RT_HeapBlock));
-    memset(&ref, 0, sizeof(struct CLR_RT_HeapBlock));
-    
     tmp.SetObjectReference(cmd->m_heapblock);
 
     if (SUCCEEDED(ref.InitializeArrayReference(tmp, cmd->m_index)))
@@ -3076,8 +3058,6 @@ bool CLR_DBG_Debugger::Debugging_Value_SetArray(WP_Message *msg)
     CLR_RT_HeapBlock_Array *array = cmd->m_heapblock;
     CLR_RT_HeapBlock tmp;
 
-    memset(&tmp, 0, sizeof(struct CLR_RT_HeapBlock));
-
     tmp.SetObjectReference(cmd->m_heapblock);
 
     //
@@ -3086,8 +3066,6 @@ bool CLR_DBG_Debugger::Debugging_Value_SetArray(WP_Message *msg)
     if (array != nullptr && !array->m_fReference)
     {
         CLR_RT_HeapBlock ref;
-
-        memset(&ref, 0, sizeof(struct CLR_RT_HeapBlock));
 
         if (SUCCEEDED(ref.InitializeArrayReference(tmp, cmd->m_index)))
         {
@@ -3336,8 +3314,7 @@ static HRESULT Assign_Helper(CLR_RT_HeapBlock *blkDst, CLR_RT_HeapBlock *blkSrc)
     AnalyzeObject aoSrc;
     CLR_RT_HeapBlock srcVal;
 
-    memset(&srcVal, 0, sizeof(struct CLR_RT_HeapBlock));
-    srcVal.SetObjectReference(nullptr);
+    srcVal.SetObjectReference(NULL);
     CLR_RT_ProtectFromGC gc(srcVal);
 
     NANOCLR_CHECK_HRESULT(AnalyzeObject_Helper(blkDst, aoDst));

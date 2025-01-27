@@ -626,8 +626,6 @@ HRESULT CLR_RT_ExecutionEngine::Execute(wchar_t *entryPointArgs, int maxContextS
     CLR_RT_HeapBlock ref;
     CLR_RT_Thread *thMain = nullptr;
 
-    memset(&ref, 0, sizeof(struct CLR_RT_HeapBlock));
-
     if (NANOCLR_INDEX_IS_INVALID(g_CLR_RT_TypeSystem.m_entryPoint))
     {
 #if !defined(BUILD_RTM) || defined(VIRTUAL_DEVICE)
@@ -949,8 +947,7 @@ bool CLR_RT_ExecutionEngine::SpawnStaticConstructorHelper(
         CLR_RT_HeapBlock_Delegate *dlg;
         CLR_RT_HeapBlock refDlg;
 
-        memset(&refDlg, 0, sizeof(struct CLR_RT_HeapBlock));
-        refDlg.SetObjectReference(nullptr);
+        refDlg.SetObjectReference(NULL);
         CLR_RT_ProtectFromGC gc(refDlg);
 
         if (SUCCEEDED(CLR_RT_HeapBlock_Delegate::CreateInstance(refDlg, indexNext, nullptr)))
@@ -1047,8 +1044,7 @@ void CLR_RT_ExecutionEngine::SpawnFinalizer()
     {
         CLR_RT_HeapBlock delegate;
 
-        memset(&delegate, 0, sizeof(struct CLR_RT_HeapBlock));
-        delegate.SetObjectReference(nullptr);
+        delegate.SetObjectReference(NULL);
         CLR_RT_ProtectFromGC gc(delegate);
 
 #if defined(NANOCLR_APPDOMAINS)
@@ -2355,7 +2351,6 @@ HRESULT CLR_RT_ExecutionEngine::CloneObject(CLR_RT_HeapBlock &reference, const C
             //
             CLR_RT_HeapBlock safeSource;
 
-            memset(&safeSource, 0, sizeof(struct CLR_RT_HeapBlock));
             safeSource.SetObjectReference(obj);
             CLR_RT_ProtectFromGC gc(safeSource);
 

@@ -6419,8 +6419,7 @@ HRESULT CLR_RT_AttributeParser::Next(Value *&res)
         // Attribute class has no fields, no properties and only default constructor
 
         m_lastValue.m_mode = Value::c_DefaultConstructor;
-        m_lastValue.m_name = nullptr;
-        memset(&m_lastValue.m_value, 0, sizeof(struct CLR_RT_HeapBlock));
+        m_lastValue.m_name = NULL;
 
         NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObject(m_lastValue.m_value, m_td));
 
@@ -6435,8 +6434,7 @@ HRESULT CLR_RT_AttributeParser::Next(Value *&res)
         // Attribute class has a constructor with parameter(s)
 
         m_lastValue.m_mode = Value::c_ConstructorArgument;
-        m_lastValue.m_name = nullptr;
-        memset(&m_lastValue.m_value, 0, sizeof(struct CLR_RT_HeapBlock));
+        m_lastValue.m_name = NULL;
 
         // get type
         NANOCLR_CHECK_HRESULT(m_parser.Advance(m_res));

@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (c) .NET Foundation and Contributors
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
@@ -86,8 +86,6 @@ HRESULT Library_corlib_native_System_Reflection_RuntimeFieldInfo::GetValue___OBJ
     CLR_RT_HeapBlock *obj;
     CLR_RT_HeapBlock dst;
 
-    memset(&dst, 0, sizeof(struct CLR_RT_HeapBlock));
-    
     NANOCLR_CHECK_HRESULT(Library_corlib_native_System_Reflection_FieldInfo::Initialize(stack, instFD, instTD, obj));
 
     fd = instFD.target;

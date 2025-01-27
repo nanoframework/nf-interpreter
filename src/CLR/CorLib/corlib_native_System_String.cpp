@@ -206,8 +206,7 @@ HRESULT Library_corlib_native_System_String::_ctor___VOID__CHAR__I4(CLR_RT_Stack
     {
         CLR_RT_HeapBlock tmp;
 
-        memset(&tmp, 0, sizeof(struct CLR_RT_HeapBlock));
-        tmp.SetObjectReference(nullptr);
+        tmp.SetObjectReference(NULL);
         CLR_RT_ProtectFromGC gc(tmp);
 
         NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance(tmp, len, g_CLR_RT_WellKnownTypes.Char));
@@ -865,8 +864,7 @@ HRESULT Library_corlib_native_System_String::ChangeCase(CLR_RT_StackFrame &stack
     CLR_RT_HeapBlock_Array *arrayTmp;
     CLR_RT_HeapBlock refTmp;
 
-    memset(&refTmp, 0, sizeof(struct CLR_RT_HeapBlock));
-    refTmp.SetObjectReference(nullptr);
+    refTmp.SetObjectReference(NULL);
     CLR_RT_ProtectFromGC gc(refTmp);
 
     NANOCLR_CHECK_HRESULT(ConvertToCharArray(stack, refTmp, arrayTmp, 0, -1));
@@ -907,8 +905,7 @@ HRESULT Library_corlib_native_System_String::Substring(CLR_RT_StackFrame &stack,
     CLR_RT_HeapBlock_Array *arrayTmp;
     CLR_RT_HeapBlock refTmp;
 
-    memset(&refTmp, 0, sizeof(struct CLR_RT_HeapBlock));
-    refTmp.SetObjectReference(nullptr);
+    refTmp.SetObjectReference(NULL);
     CLR_RT_ProtectFromGC gc(refTmp);
 
     NANOCLR_CHECK_HRESULT(ConvertToCharArray(stack, refTmp, arrayTmp, 0, -1));
@@ -949,8 +946,7 @@ HRESULT Library_corlib_native_System_String::Trim(
     CLR_RT_HeapBlock refTmp;
     CLR_RT_HeapBlock_Array *arrayTmp;
 
-    memset(&refTmp, 0, sizeof(struct CLR_RT_HeapBlock));
-    refTmp.SetObjectReference(nullptr);
+    refTmp.SetObjectReference(NULL);
     CLR_RT_ProtectFromGC gc(refTmp);
 
     NANOCLR_CHECK_HRESULT(ConvertToCharArray(stack, refTmp, arrayTmp, 0, -1));
@@ -1063,8 +1059,7 @@ HRESULT Library_corlib_native_System_String::Split(CLR_RT_StackFrame &stack, CLR
         {
             CLR_RT_HeapBlock refSrc;
 
-            memset(&refSrc, 0, sizeof(struct CLR_RT_HeapBlock));
-            refSrc.SetObjectReference(nullptr);
+            refSrc.SetObjectReference(NULL);
             CLR_RT_ProtectFromGC gc(refSrc);
 
             NANOCLR_CHECK_HRESULT(ConvertToCharArray(stack, refSrc, arraySrc, 0, -1));

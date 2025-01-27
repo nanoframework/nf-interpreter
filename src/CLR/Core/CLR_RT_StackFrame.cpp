@@ -578,8 +578,7 @@ HRESULT CLR_RT_StackFrame::MakeCall(
     CLR_RT_StackFrame *stackSub;
     CLR_RT_HeapBlock tmp;
 
-    memset(&tmp, 0, sizeof(struct CLR_RT_HeapBlock));
-    tmp.SetObjectReference(nullptr);
+    tmp.SetObjectReference(NULL);
     CLR_RT_ProtectFromGC gc(tmp);
 
     if (mdR->flags & CLR_RECORD_METHODDEF::MD_Constructor)
@@ -759,10 +758,7 @@ HRESULT CLR_RT_StackFrame::HandleSynchronized(bool fAcquire, bool fGlobal)
     CLR_RT_HeapBlock *obj;
     CLR_RT_HeapBlock ref;
     CLR_RT_HeapBlock **ppGlobalLock;
-    CLR_RT_HeapBlock *pGlobalLock;
-
-    memset(&refType, 0, sizeof(struct CLR_RT_HeapBlock));
-    memset(&ref, 0, sizeof(struct CLR_RT_HeapBlock));
+    CLR_RT_HeapBlock const *pGlobalLock;
 
     if (fGlobal)
     {

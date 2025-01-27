@@ -101,8 +101,10 @@ HRESULT Library_nf_system_text_System_Text_UTF8Encoding::Helper__GetChars(CLR_RT
 
     const char *szText;
     CLR_RT_HeapBlock ref;
-    memset(&ref, 0, sizeof(struct CLR_RT_HeapBlock));
-    ref.SetObjectReference(nullptr);
+    CLR_RT_HeapBlock_Array *pArrayBytesCopy;
+    CLR_RT_HeapBlock_Array *arrTmp;
+
+    ref.SetObjectReference(NULL);
     CLR_RT_ProtectFromGC gc(ref);
 
     CLR_RT_HeapBlock_Array *pArrayBytes = stack.Arg1().DereferenceArray();
