@@ -1130,6 +1130,7 @@ bool CLR_DBG_Debugger::Monitor_QueryConfiguration(WP_Message *message)
 
     HAL_Configuration_NetworkInterface *configNetworkInterface;
     HAL_Configuration_Wireless80211 *configWireless80211NetworkInterface;
+    HAL_Configuration_WirelessAP *configWirelessAPNetworkInterface;
     HAL_Configuration_X509CaRootBundle *x509Certificate;
     HAL_Configuration_X509DeviceCertificate *x509DeviceCertificate;
 
@@ -1270,7 +1271,31 @@ bool CLR_DBG_Debugger::Monitor_QueryConfiguration(WP_Message *message)
             break;
 
         case DeviceConfigurationOption_WirelessNetworkAP:
-            // TODO missing implementation for now
+
+            configWirelessAPNetworkInterface =
+                (HAL_Configuration_WirelessAP *)platform_malloc(sizeof(HAL_Configuration_WirelessAP));
+
+            // check allocation
+            if (configWirelessAPNetworkInterface != NULL)
+            {
+                memset(configWirelessAPNetworkInterface, 0, sizeof(HAL_Configuration_WirelessAP));
+
+                if (ConfigurationManager_GetConfigurationBlock(
+                        configWirelessAPNetworkInterface,
+                        (DeviceConfigurationOption)cmd->Configuration,
+                        cmd->BlockIndex) == true)
+                {
+                    size = sizeof(HAL_Configuration_WirelessAP);
+
+                    WP_ReplyToCommand(message, true, false, (uint8_t *)configWirelessAPNetworkInterface, size);
+                }
+
+                platform_free(configWirelessAPNetworkInterface);
+
+                // done here
+                return true;
+            }
+
             break;
 
         default:
@@ -1301,6 +1326,7 @@ bool CLR_DBG_Debugger::Monitor_UpdateConfiguration(WP_Message *message)
     {
         case DeviceConfigurationOption_Network:
         case DeviceConfigurationOption_Wireless80211Network:
+        case DeviceConfigurationOption_WirelessNetworkAP:
         case DeviceConfigurationOption_X509CaRootBundle:
         case DeviceConfigurationOption_X509DeviceCertificates:
         case DeviceConfigurationOption_All:
