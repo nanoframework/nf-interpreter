@@ -260,8 +260,8 @@ void CLR_RT_GarbageCollector::Heap_Compact()
 
                     _ASSERTE(relocCurrent->m_destination >= (CLR_UINT8 *)freeRegion_hc->m_payloadStart);
                     _ASSERTE(relocCurrent->m_destination < (CLR_UINT8 *)freeRegion_hc->m_payloadEnd);
-                    _ASSERTE(relocCurrent->m_start >= (CLR_UINT8 *)freeRegion_hc->m_payloadStart);
-                    _ASSERTE(relocCurrent->m_start < (CLR_UINT8 *)freeRegion_hc->m_payloadEnd);
+                    _ASSERTE(relocCurrent->m_start >= (CLR_UINT8 *)currentSource_hc->m_payloadStart);
+                    _ASSERTE(relocCurrent->m_start < (CLR_UINT8 *)currentSource_hc->m_payloadEnd);
                     _ASSERTE(moveBytes == (move * sizeof(CLR_RT_HeapBlock)));
 
 #endif
