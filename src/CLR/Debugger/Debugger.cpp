@@ -3,6 +3,7 @@
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
 //
+
 #include <nanoCLR_Runtime.h>
 #include <nanoCLR_Debugging.h>
 #include <nanoHAL.h>
@@ -1301,6 +1302,7 @@ bool CLR_DBG_Debugger::Monitor_UpdateConfiguration(WP_Message *message)
     {
         case DeviceConfigurationOption_Network:
         case DeviceConfigurationOption_Wireless80211Network:
+        case DeviceConfigurationOption_WirelessNetworkAP:
         case DeviceConfigurationOption_X509CaRootBundle:
         case DeviceConfigurationOption_X509DeviceCertificates:
         case DeviceConfigurationOption_All:
