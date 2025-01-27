@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (c) .NET Foundation and Contributors
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
@@ -467,7 +467,7 @@ struct Library_corlib_native_System_TimeSpan
 
     //--//
 
-    static CLR_INT64 *NewObject(CLR_RT_HeapBlock &ref);
+    static CLR_INT64 *NewObject(CLR_RT_StackFrame &stack);
     static CLR_INT64 *GetValuePtr(CLR_RT_StackFrame &stack);
     static CLR_INT64 *GetValuePtr(CLR_RT_HeapBlock &ref);
 
@@ -496,7 +496,7 @@ struct Library_corlib_native_System_DateTime
 
     //--//
 
-    static CLR_INT64 *NewObject(CLR_RT_HeapBlock &ref);
+    static CLR_INT64 *NewObject(CLR_RT_StackFrame &stack);
     static CLR_INT64 *GetValuePtr(CLR_RT_StackFrame &stack);
     static CLR_INT64 *GetValuePtr(CLR_RT_HeapBlock &ref);
 

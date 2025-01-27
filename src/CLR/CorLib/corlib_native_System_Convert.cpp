@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (c) .NET Foundation and Contributors
 // Portions Copyright (c) Microsoft Corporation. All rights reserved.
 // Portions Copyright (C) 2002-2019 Free Software Foundation, Inc. All rights reserved.
@@ -533,12 +533,10 @@ HRESULT Library_corlib_native_System_Convert::NativeToDateTime___STATIC__SystemD
     // grab parameter with flag to throw on failure
     bool throwOnFailure = (bool)stack.Arg1().NumericByRefConst().u1;
 
-    CLR_RT_HeapBlock &ref = stack.PushValue();
-
     // check string parameter for null
     FAULT_ON_NULL_ARG(str);
 
-    pRes = Library_corlib_native_System_DateTime::NewObject(ref);
+    pRes = Library_corlib_native_System_DateTime::NewObject(stack);
     FAULT_ON_NULL(pRes);
 
     // try 'u' Universal time with sortable format (yyyy-MM-dd' 'HH:mm:ss)

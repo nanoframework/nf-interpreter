@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (c) .NET Foundation and Contributors
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
@@ -178,17 +178,14 @@ HRESULT Library_corlib_native_System_TimeSpan::Equals___STATIC__BOOLEAN__SystemT
 
 //--//
 
-CLR_INT64 *Library_corlib_native_System_TimeSpan::NewObject(CLR_RT_HeapBlock &ref)
+CLR_INT64 *Library_corlib_native_System_TimeSpan::NewObject(CLR_RT_StackFrame &stack)
 {
     NATIVE_PROFILE_CLR_CORE();
 
-    CLR_RT_TypeDescriptor dtType;
+    CLR_RT_HeapBlock &ref = stack.PushValue();
 
-    // initialize <DateTime> type descriptor
-    dtType.InitializeFromType(g_CLR_RT_WellKnownTypes.m_TimeSpan);
-
-    // create an instance of <TimeSpan>
-    g_CLR_RT_ExecutionEngine.NewObject(ref, dtType.m_handlerCls);
+    ref.SetDataId(CLR_RT_HEAPBLOCK_RAW_ID(DATATYPE_TIMESPAN, 0, 1));
+    ref.ClearData();
 
     return GetValuePtr(ref);
 }

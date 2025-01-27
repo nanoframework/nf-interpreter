@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (c) .NET Foundation and Contributors
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
@@ -154,9 +154,7 @@ HRESULT Library_corlib_native_System_DateTime::get_UtcNow___STATIC__SystemDateTi
 
     CLR_INT64 *val;
 
-    CLR_RT_HeapBlock &ref = stack.PushValue();
-
-    val = Library_corlib_native_System_DateTime::NewObject(ref);
+    val = Library_corlib_native_System_DateTime::NewObject(stack);
     FAULT_ON_NULL(val);
 
     // load with full date&time
@@ -171,9 +169,7 @@ HRESULT Library_corlib_native_System_DateTime::get_Today___STATIC__SystemDateTim
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
 
-    CLR_RT_HeapBlock &ref = stack.PushValue();
-
-    CLR_INT64 *val = NewObject(ref);
+    CLR_INT64 *val = NewObject(stack);
 
     // load with date part only
     // including UTC flag
@@ -184,17 +180,14 @@ HRESULT Library_corlib_native_System_DateTime::get_Today___STATIC__SystemDateTim
 
 //--//
 
-CLR_INT64 *Library_corlib_native_System_DateTime::NewObject(CLR_RT_HeapBlock &ref)
+CLR_INT64 *Library_corlib_native_System_DateTime::NewObject(CLR_RT_StackFrame &stack)
 {
     NATIVE_PROFILE_CLR_CORE();
 
-    CLR_RT_TypeDescriptor dtType;
+    CLR_RT_HeapBlock &ref = stack.PushValue();
 
-    // initialize <DateTime> type descriptor
-    dtType.InitializeFromType(g_CLR_RT_WellKnownTypes.m_DateTime);
-
-    // create an instance of <DateTime>
-    g_CLR_RT_ExecutionEngine.NewObject(ref, dtType.m_handlerCls);
+    ref.SetDataId(CLR_RT_HEAPBLOCK_RAW_ID(DATATYPE_DATETIME, 0, 1));
+    ref.ClearData();
 
     return GetValuePtr(ref);
 }
