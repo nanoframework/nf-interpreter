@@ -1735,7 +1735,7 @@ HRESULT CLR_RT_Assembly::CreateInstance(const CLR_RECORD_ASSEMBLY *header, CLR_R
 
                 CLR_Debug::Printf(" @ 0x%016" PRIxPTR "", (uintptr_t)assm);
 #else
-                CLR_Debug::Printf(" @ 0x%08" PRIxPTR "", (uintptr_t)assm);
+                CLR_Debug::Printf(" @ 0x%08 PRIxPTR ", (uintptr_t)assm);
 #endif
             }
 #endif
