@@ -271,7 +271,8 @@ CLR_UINT32 CLR_RT_GarbageCollector::ExecuteGarbageCollection()
     {
         CLR_Debug::Printf(
             "\r\n\r\nGC: (Run #%d) End %s\r\n",
-            m_numberOfGarbageCollections, HAL_Time_CurrentDateTimeToString());
+            m_numberOfGarbageCollections,
+            HAL_Time_CurrentDateTimeToString());
     }
 #endif
 

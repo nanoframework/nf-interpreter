@@ -1726,11 +1726,7 @@ HRESULT CLR_RT_Assembly::CreateInstance(const CLR_RECORD_ASSEMBLY *header, CLR_R
                                header->SizeOfTable(TBL_MethodDef) + header->SizeOfTable(TBL_Attributes) +
                                header->SizeOfTable(TBL_TypeSpec) + header->SizeOfTable(TBL_Signatures);
 
-            CLR_Debug::Printf(
-                " (%d RAM - %d ROM - %d METADATA)",
-                iTotalRamSize,
-                header->TotalSize(),
-                iMetaData);
+            CLR_Debug::Printf(" (%d RAM - %d ROM - %d METADATA)", iTotalRamSize, header->TotalSize(), iMetaData);
 
 #if defined(NANOCLR_GC_VERBOSE)
             if (s_CLR_RT_fTrace_Memory >= c_CLR_RT_Trace_Info)
