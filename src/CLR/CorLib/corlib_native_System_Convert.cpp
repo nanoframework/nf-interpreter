@@ -598,9 +598,9 @@ HRESULT Library_corlib_native_System_Convert::ToBase64String___STATIC__STRING__S
     unsigned char *outArray = NULL;
     char *outArrayWitLineBreak = NULL;
     unsigned char *inArrayPointer = NULL;
-    int32_t lineBreakCount;
+    size_t lineBreakCount;
     uint16_t offsetIndex = 0;
-    uint8_t count = 0;
+    size_t count = 0;
     int result;
 
     CLR_RT_HeapBlock_Array *inArray = stack.Arg0().DereferenceArray();
@@ -610,7 +610,7 @@ HRESULT Library_corlib_native_System_Convert::ToBase64String___STATIC__STRING__S
 
     FAULT_ON_NULL_ARG(inArray);
 
-    inArrayPointer = (unsigned char *)inArray->GetFirstElement();
+    inArrayPointer = inArray->GetFirstElement();
     inArrayPointer += (offset * sizeof(uint8_t));
 
     // compute base64 string length
@@ -644,7 +644,7 @@ HRESULT Library_corlib_native_System_Convert::ToBase64String___STATIC__STRING__S
         // break
         outArrayWitLineBreak = (char *)platform_malloc(outputLength + (lineBreakCount * 2) + 2);
 
-        for (int i = 0; i <= lineBreakCount; i++)
+        for (size_t i = 0; i <= lineBreakCount; i++)
         {
             // how many chars to copy
             if (outputLength > 76)
@@ -693,7 +693,7 @@ HRESULT Library_corlib_native_System_Convert::ToBase64String___STATIC__STRING__S
     {
         // set a return result in the stack argument using the appropriate SetResult according to the variable type (a
         // string here)
-        NANOCLR_CHECK_HRESULT(stack.SetResult_String(outArray));
+        NANOCLR_CHECK_HRESULT(stack.SetResult_String((const char *)outArray));
     }
 
     // need to free memory from arrays

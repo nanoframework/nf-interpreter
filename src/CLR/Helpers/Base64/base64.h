@@ -19,9 +19,10 @@
 #define MBEDTLS_ERR_BASE64_BUFFER_TOO_SMALL  -0x002A        /**< Output buffer too small. */
 #define MBEDTLS_ERR_BASE64_INVALID_CHARACTER -0x002C        /**< Invalid character in input. */
 
-#define MBEDTLS_BYTE_0(x) ((uint8_t)((x) & 0xff))
-#define MBEDTLS_BYTE_1(x) ((uint8_t)(((x) >> 8) & 0xff))
-#define MBEDTLS_BYTE_2(x) ((uint8_t)(((x) >> 16) & 0xff))
+// from MbedTLS common.h
+#define MBEDTLS_BYTE_0( x ) ( (uint8_t) (   ( x )         & 0xff ) )
+#define MBEDTLS_BYTE_1( x ) ( (uint8_t) ( ( ( x ) >> 8  ) & 0xff ) )
+#define MBEDTLS_BYTE_2( x ) ( (uint8_t) ( ( ( x ) >> 16 ) & 0xff ) )
 
 #ifdef __cplusplus
 extern "C"
