@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (c) .NET Foundation and Contributors
 // Portions Copyright (c) The Mbed TLS Contributors. All Rights Reserved.
 // See LICENSE file in the project root for full license information.
@@ -15,9 +15,14 @@
 // thus there will be no duplicate code                                                     //
 //////////////////////////////////////////////////////////////////////////////////////////////
 
-#define BASE64_SIZE_T_MAX                    ((size_t)-1) /* SIZE_T_MAX is not standard */
-#define MBEDTLS_ERR_BASE64_BUFFER_TOO_SMALL  -0x002A      /**< Output buffer too small. */
-#define MBEDTLS_ERR_BASE64_INVALID_CHARACTER -0x002C      /**< Invalid character in input. */
+#define BASE64_SIZE_T_MAX                    ((size_t) - 1) /* SIZE_T_MAX is not standard */
+#define MBEDTLS_ERR_BASE64_BUFFER_TOO_SMALL  -0x002A        /**< Output buffer too small. */
+#define MBEDTLS_ERR_BASE64_INVALID_CHARACTER -0x002C        /**< Invalid character in input. */
+
+// from MbedTLS common.h
+#define MBEDTLS_BYTE_0(x) ((uint8_t)((x) & 0xff))
+#define MBEDTLS_BYTE_1(x) ((uint8_t)(((x) >> 8) & 0xff))
+#define MBEDTLS_BYTE_2(x) ((uint8_t)(((x) >> 16) & 0xff))
 
 #ifdef __cplusplus
 extern "C"

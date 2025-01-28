@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (c) .NET Foundation and Contributors
 // Portions Copyright (c) Microsoft Corporation. All rights reserved.
 // Portions Copyright (C) 2002-2019 Free Software Foundation, Inc. All rights reserved.
@@ -596,13 +596,13 @@ HRESULT Library_corlib_native_System_Convert::ToBase64String___STATIC__STRING__S
 #if (SUPPORT_ANY_BASE_CONVERSION == TRUE)
 
     size_t outputLength;
-    char *outArray = nullptr;
+    unsigned char *outArray = nullptr;
     char *outArrayWitLineBreak = nullptr;
     uint8_t *inArrayPointer = nullptr;
     uint8_t lineBreakCount;
     uint16_t offsetIndex = 0;
-    uint8_t count = 0;
-    uint16_t result;
+    size_t count = 0;
+    int result;
 
     CLR_RT_HeapBlock_Array *inArray = stack.Arg0().DereferenceArray();
     size_t offset = (size_t)stack.Arg1().NumericByRef().s4;
@@ -611,14 +611,14 @@ HRESULT Library_corlib_native_System_Convert::ToBase64String___STATIC__STRING__S
 
     FAULT_ON_NULL_ARG(inArray);
 
-    inArrayPointer = (uint8_t *)inArray->GetFirstElement();
+    inArrayPointer = inArray->GetFirstElement();
     inArrayPointer += (offset * sizeof(uint8_t));
 
     // compute base64 string length
     outputLength = 4 * ((length + 2) / 3);
 
     // need malloc with base64 string length plus string terminator (+1)
-    outArray = (char *)platform_malloc(outputLength + 1);
+    outArray = (unsigned char *)platform_malloc(outputLength + 1);
 
     // check if have allocation
     if (outArray == nullptr)
@@ -628,8 +628,7 @@ HRESULT Library_corlib_native_System_Convert::ToBase64String___STATIC__STRING__S
 
     // perform the operation
     // need to tweak the parameter with the output length because it includes room for the terminator
-    result =
-        mbedtls_base64_encode((unsigned char *)outArray, (outputLength + 1), &outputLength, inArrayPointer, length);
+    result = mbedtls_base64_encode(outArray, (outputLength + 1), &outputLength, inArrayPointer, length);
 
     if (result != 0)
     {
@@ -646,7 +645,7 @@ HRESULT Library_corlib_native_System_Convert::ToBase64String___STATIC__STRING__S
         // break
         outArrayWitLineBreak = (char *)platform_malloc(outputLength + (lineBreakCount * 2) + 2);
 
-        for (int i = 0; i <= lineBreakCount; i++)
+        for (size_t i = 0; i <= lineBreakCount; i++)
         {
             // how many chars to copy
             if (outputLength > 76)
@@ -695,7 +694,7 @@ HRESULT Library_corlib_native_System_Convert::ToBase64String___STATIC__STRING__S
     {
         // set a return result in the stack argument using the appropriate SetResult according to the variable type (a
         // string here)
-        NANOCLR_CHECK_HRESULT(stack.SetResult_String(outArray));
+        NANOCLR_CHECK_HRESULT(stack.SetResult_String((const char *)outArray));
     }
 
     // need to free memory from arrays
@@ -723,10 +722,10 @@ HRESULT Library_corlib_native_System_Convert::FromBase64String___STATIC__SZARRAY
 
     CLR_RT_HeapBlock_String *inString = nullptr;
     size_t outputLength;
-    char *outArray = nullptr;
+    unsigned char *outArray = nullptr;
     CLR_UINT8 *returnArray;
-    uint16_t result;
-    uint32_t length;
+    int result;
+    size_t length;
 
     inString = stack.Arg0().DereferenceString();
     FAULT_ON_NULL(inString);
@@ -739,19 +738,21 @@ HRESULT Library_corlib_native_System_Convert::FromBase64String___STATIC__SZARRAY
     outputLength = length / 4 * 3;
 
     // alloc output array
-    outArray = (char *)platform_malloc(outputLength + 1);
+    outArray = (unsigned char *)platform_malloc(outputLength + 1);
     // check malloc success
     if (outArray == nullptr)
     {
         NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
     }
 
+    memset(outArray, 0, outputLength + 1);
+
     // perform the operation
     // need to tweak the parameter with the output length because it includes room for the terminator
     result = mbedtls_base64_decode(
-        (unsigned char *)outArray,
-        (size_t)(outputLength + 1),
-        (size_t *)&outputLength,
+        outArray,
+        (outputLength + 1),
+        &outputLength,
         (const unsigned char *)inString->StringText(),
         length);
 
