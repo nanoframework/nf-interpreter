@@ -39,7 +39,7 @@ CLR_UINT32 CLR_RT_GarbageCollector::ExecuteCompaction()
 #if defined(NANOCLR_TRACE_MEMORY_STATS)
     if (s_CLR_RT_fTrace_MemoryStats >= c_CLR_RT_Trace_Info)
     {
-        CLR_Debug::Printf("\r\n\r\nGC: heap compaction completed\r\n");
+        CLR_Debug::Printf("\r\n\r\nGC: (Run %d) heap compaction completed\r\n", m_numberOfCompactions);
     }
 #endif
 

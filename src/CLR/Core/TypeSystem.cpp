@@ -1727,10 +1727,23 @@ HRESULT CLR_RT_Assembly::CreateInstance(const CLR_RECORD_ASSEMBLY *header, CLR_R
                                header->SizeOfTable(TBL_TypeSpec) + header->SizeOfTable(TBL_Signatures);
 
             CLR_Debug::Printf(
-                " (%d RAM - %d ROM - %d METADATA)\r\n\r\n",
+                " (%d RAM - %d ROM - %d METADATA)",
                 iTotalRamSize,
                 header->TotalSize(),
                 iMetaData);
+
+#if defined(NANOCLR_GC_VERBOSE)
+            if (s_CLR_RT_fTrace_Memory >= c_CLR_RT_Trace_Info)
+            {
+#ifdef _WIN64
+
+                CLR_Debug::Printf(" @ 0x%016" PRIxPTR "", (uintptr_t)assm);
+#else
+                CLR_Debug::Printf(" @ 0x%08" PRIxPTR "", (uintptr_t)assm);
+#endif
+            }
+#endif
+            CLR_Debug::Printf("\r\n\r\n");
 
             CLR_Debug::Printf(
                 "   AssemblyRef    = %8d bytes (%8d elements)\r\n",
