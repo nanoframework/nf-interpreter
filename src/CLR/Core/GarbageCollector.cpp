@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (c) .NET Foundation and Contributors
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
@@ -144,7 +144,7 @@ CLR_UINT32 CLR_RT_GarbageCollector::ExecuteGarbageCollection()
 #if defined(NANOCLR_GC_VERBOSE)
     if (s_CLR_RT_fTrace_GC >= c_CLR_RT_Trace_Info)
     {
-        CLR_Debug::Printf("\r\n\r\n    Memory: Start %s\r\n", HAL_Time_CurrentDateTimeToString());
+        CLR_Debug::Printf("\r\n\r\nGC: Start %s\r\n", HAL_Time_CurrentDateTimeToString());
     }
 #endif
 
@@ -269,7 +269,10 @@ CLR_UINT32 CLR_RT_GarbageCollector::ExecuteGarbageCollection()
 #if defined(NANOCLR_GC_VERBOSE)
     if (s_CLR_RT_fTrace_GC >= c_CLR_RT_Trace_Info)
     {
-        CLR_Debug::Printf("\r\n\r\n    Memory: End %s\r\n", HAL_Time_CurrentDateTimeToString());
+        CLR_Debug::Printf(
+            "\r\n\r\nGC: (Run #%d) End %s\r\n",
+            m_numberOfGarbageCollections,
+            HAL_Time_CurrentDateTimeToString());
     }
 #endif
 
