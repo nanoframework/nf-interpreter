@@ -35,35 +35,20 @@ steps:
           $testPR = $matches[1]
           "Test PR found: $testPR" | Write-Host -ForegroundColor White
 
-          # store github reference in variable
-          Write-Host "##vso[task.setvariable variable=TEST_PR;isOutput=true]$testPR"
+          # move to the build sources directory
+          Set-Location -Path $(Agent.BuildDirectory)/s/CoreLibrary
+
+          # need to call this first to setup authentication
+          gh auth setup-git
+
+          # gh auth status
+          
+          Write-Host "Checking out mscorlib PR: #$testPR"
+          gh pr checkout $testPR
         }
         else
         {
-          "No test PR found." | Write-Host -ForegroundColor White
-
-          # use default (main) branch for tests
-          Write-Host "##vso[task.setvariable variable=TEST_PR;isOutput=true]"
+          "No test PR found. Using main branch" | Write-Host -ForegroundColor White
         }
-
-  - task: PowerShell@2
-    displayName: Checkout mscorlib
-    condition: ne(variables['System.PullRequest.PullRequestId'], '')
-    inputs:
-      targetType: "inline"
-      script: |
-        # create directory for mscorlib, ignore if it already exists
-        New-Item -Path $(Agent.BuildDirectory)/s -ItemType "directory" -ErrorAction SilentlyContinue
-        # move to the build sources directory
-        Set-Location -Path $(Agent.BuildDirectory)/s
-        
-        if($(Check_mscorlib_test.TEST_PR) -ne "")
-        {
-          Write-Host "Checking out mscorlib PR: #$(Check_mscorlib_test.TEST_PR)"
-          gh pr checkout $(Check_mscorlib_test.TEST_PR) --recurse-submodules 
-        }
-        else
-        {
-          Write-Host "Checking out mscorlib main branch"
-          gh repo clone nanoframework/CoreLibrary CoreLibrary --recurse-submodules
-        }
+    env:
+      GITHUB_TOKEN: $(GitHubToken)

@@ -49,6 +49,10 @@ resources:
       name: espressif/esp-idf
       endpoint: nanoframework
       ref: refs/tags/v5.2.3
+    - repository: mscorlib
+      type: github
+      name: nanoframework/CoreLibrary
+      endpoint: nanoframework
     - repository: littlefs
       type: github
       name: littlefs-project/littlefs
@@ -357,7 +361,7 @@ jobs:
       - template: azure-pipelines-templates/download-install-llvm.yml
       - template: azure-pipelines-templates/check-code-style.yml
 
-  ################
+  ###############
   # STM32
   - job: Build_STM32_targets
     condition: >-
@@ -1212,7 +1216,7 @@ jobs:
         succeeded('Build_nanoCLR_CLI'),
         ne(dependencies.Check_Build_Options.outputs['BuildOptions.SKIP_BUILD'], true),
         or(
-          eq(variables['RUN_MSCORLIB_TESTS__'], true)
+          eq(variables['RUN_MSCORLIB_TESTS__'], true),
           eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ALL'], true),
           eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_NANOCLR_CLI'], true),
           eq(dependencies.Check_Build_Options.outputs['BuildOptions.RUN_MSCORLIB_TESTS'], true)
@@ -1234,7 +1238,10 @@ jobs:
     steps:
       - checkout: self
         fetchDepth: 1
-        path: s/nf-interpreter
+      - checkout: mscorlib
+        fetchDepth: 100
+        submodules: true
+        persistCredentials: true
 
       - template: azure-pipelines-templates/check-mscorlib-to-test.yml
 
