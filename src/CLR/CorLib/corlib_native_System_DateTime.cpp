@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (c) .NET Foundation and Contributors
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
@@ -6,6 +6,11 @@
 
 #include "CorLib.h"
 #include <nanoCLR_Interop.h>
+
+/////////////////////////////////////////////////////////////////////////
+// !!! KEEP IN SYNC WITH DateTime._ticksAtOrigin (in managed code) !!! //
+/////////////////////////////////////////////////////////////////////////
+#define TICKS_AT_ORIGIN 504911232000000000
 
 ///////////////////////////////////////////////////////////////////////
 // !!! KEEP IN SYNC WITH DateTime.DateTimePart (in managed code) !!! //
@@ -147,56 +152,26 @@ HRESULT Library_corlib_native_System_DateTime::DaysInMonth___STATIC__I4__I4__I4(
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_corlib_native_System_DateTime::get_UtcNow___STATIC__SystemDateTime(CLR_RT_StackFrame &stack)
+HRESULT Library_corlib_native_System_DateTime::GetUtcNowAsTicks___STATIC__I8(CLR_RT_StackFrame &stack)
 {
-    NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
 
-    CLR_INT64 *val;
-
-    CLR_RT_HeapBlock &ref = stack.PushValue();
-
-    val = Library_corlib_native_System_DateTime::NewObject(ref);
-    FAULT_ON_NULL(val);
-
-    // load with full date&time
-    // including UTC flag
-    *val = (CLR_INT64)(HAL_Time_CurrentDateTime(false) | s_UTCMask);
-
-    NANOCLR_NOCLEANUP();
-}
-
-HRESULT Library_corlib_native_System_DateTime::get_Today___STATIC__SystemDateTime(CLR_RT_StackFrame &stack)
-{
-    NATIVE_PROFILE_CLR_CORE();
-    NANOCLR_HEADER();
-
-    CLR_RT_HeapBlock &ref = stack.PushValue();
-
-    CLR_INT64 *val = NewObject(ref);
-
-    // load with date part only
-    // including UTC flag
-    *val = (CLR_INT64)(HAL_Time_CurrentDateTime(true) | s_UTCMask);
+    CLR_INT64 value = HAL_Time_CurrentDateTime(false);
+    value += TICKS_AT_ORIGIN;
+    stack.SetResult_I8(value);
 
     NANOCLR_NOCLEANUP_NOLABEL();
 }
 
-//--//
-
-CLR_INT64 *Library_corlib_native_System_DateTime::NewObject(CLR_RT_HeapBlock &ref)
+HRESULT Library_corlib_native_System_DateTime::GetTodayAsTicks___STATIC__I8(CLR_RT_StackFrame &stack)
 {
-    NATIVE_PROFILE_CLR_CORE();
+    NANOCLR_HEADER();
 
-    CLR_RT_TypeDescriptor dtType;
+    CLR_INT64 value = HAL_Time_CurrentDateTime(true);
+    value += TICKS_AT_ORIGIN;
+    stack.SetResult_I8(value);
 
-    // initialize <DateTime> type descriptor
-    dtType.InitializeFromType(g_CLR_RT_WellKnownTypes.m_DateTime);
-
-    // create an instance of <DateTime>
-    g_CLR_RT_ExecutionEngine.NewObject(ref, dtType.m_handlerCls);
-
-    return GetValuePtr(ref);
+    NANOCLR_NOCLEANUP_NOLABEL();
 }
 
 //--//
