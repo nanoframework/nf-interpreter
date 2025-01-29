@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (c) .NET Foundation and Contributors
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
@@ -467,7 +467,6 @@ struct Library_corlib_native_System_TimeSpan
 
     //--//
 
-    static CLR_INT64 *NewObject(CLR_RT_HeapBlock &ref);
     static CLR_INT64 *GetValuePtr(CLR_RT_StackFrame &stack);
     static CLR_INT64 *GetValuePtr(CLR_RT_HeapBlock &ref);
 
@@ -491,12 +490,11 @@ struct Library_corlib_native_System_DateTime
     NANOCLR_NATIVE_DECLARE(_ctor___VOID__I4__I4__I4__I4__I4__I4__I4);
     NANOCLR_NATIVE_DECLARE(GetDateTimePart___I4__SystemDateTimeDateTimePart);
     NANOCLR_NATIVE_DECLARE(DaysInMonth___STATIC__I4__I4__I4);
-    NANOCLR_NATIVE_DECLARE(get_UtcNow___STATIC__SystemDateTime);
-    NANOCLR_NATIVE_DECLARE(get_Today___STATIC__SystemDateTime);
+    NANOCLR_NATIVE_DECLARE(GetUtcNowAsTicks___STATIC__I8);
+    NANOCLR_NATIVE_DECLARE(GetTodayAsTicks___STATIC__I8);
 
     //--//
 
-    static CLR_INT64 *NewObject(CLR_RT_HeapBlock &ref);
     static CLR_INT64 *GetValuePtr(CLR_RT_StackFrame &stack);
     static CLR_INT64 *GetValuePtr(CLR_RT_HeapBlock &ref);
 
@@ -508,7 +506,7 @@ struct Library_corlib_native_System_Convert
 {
     NANOCLR_NATIVE_DECLARE(NativeToInt64___STATIC__I8__STRING__BOOLEAN__I8__I8__I4__BOOLEAN__BYREF_BOOLEAN);
     NANOCLR_NATIVE_DECLARE(NativeToDouble___STATIC__R8__STRING__BOOLEAN__BYREF_BOOLEAN);
-    NANOCLR_NATIVE_DECLARE(NativeToDateTime___STATIC__SystemDateTime__STRING__BOOLEAN__BYREF_BOOLEAN);
+    NANOCLR_NATIVE_DECLARE(NativeToDateTime___STATIC__VOID__STRING__BOOLEAN__BYREF_BOOLEAN__BYREF_SystemDateTime);
     NANOCLR_NATIVE_DECLARE(ToBase64String___STATIC__STRING__SZARRAY_U1__I4__I4__BOOLEAN);
     NANOCLR_NATIVE_DECLARE(FromBase64String___STATIC__SZARRAY_U1__STRING);
 

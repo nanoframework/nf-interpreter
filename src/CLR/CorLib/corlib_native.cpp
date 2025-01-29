@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (c) .NET Foundation and Contributors
 // See LICENSE file in the project root for full license information.
 //
@@ -435,8 +435,6 @@ static const CLR_RT_MethodHandler method_lookup[] =
     NULL,
     Library_corlib_native_System_DateTime::DaysInMonth___STATIC__I4__I4__I4,
     NULL,
-    Library_corlib_native_System_DateTime::get_UtcNow___STATIC__SystemDateTime,
-    Library_corlib_native_System_DateTime::get_Today___STATIC__SystemDateTime,
     NULL,
     NULL,
     NULL,
@@ -449,10 +447,14 @@ static const CLR_RT_MethodHandler method_lookup[] =
     NULL,
     NULL,
     NULL,
+    NULL,
+    NULL,
+    Library_corlib_native_System_DateTime::GetUtcNowAsTicks___STATIC__I8,
+    Library_corlib_native_System_DateTime::GetTodayAsTicks___STATIC__I8,
     NULL,
     Library_corlib_native_System_Convert::NativeToInt64___STATIC__I8__STRING__BOOLEAN__I8__I8__I4__BOOLEAN__BYREF_BOOLEAN,
     Library_corlib_native_System_Convert::NativeToDouble___STATIC__R8__STRING__BOOLEAN__BYREF_BOOLEAN,
-    Library_corlib_native_System_Convert::NativeToDateTime___STATIC__SystemDateTime__STRING__BOOLEAN__BYREF_BOOLEAN,
+    Library_corlib_native_System_Convert::NativeToDateTime___STATIC__VOID__STRING__BOOLEAN__BYREF_BOOLEAN__BYREF_SystemDateTime,
     NULL,
     NULL,
     NULL,
@@ -671,6 +673,7 @@ static const CLR_RT_MethodHandler method_lookup[] =
     NULL,
     NULL,
     Library_corlib_native_System_Reflection_RuntimeMethodInfo::GetCustomAttributesNative___SZARRAY_OBJECT__BOOLEAN,
+    NULL,
     NULL,
     NULL,
     NULL,
@@ -1356,6 +1359,7 @@ static const CLR_RT_MethodHandler method_lookup[] =
     NULL,
     NULL,
     NULL,
+    NULL,
     Library_corlib_native_System_Runtime_CompilerServices_RuntimeHelpers::InitializeArray___STATIC__VOID__SystemArray__SystemRuntimeFieldHandle,
     Library_corlib_native_System_Runtime_CompilerServices_RuntimeHelpers::GetObjectValue___STATIC__OBJECT__OBJECT,
     Library_corlib_native_System_Runtime_CompilerServices_RuntimeHelpers::RunClassConstructor___STATIC__VOID__SystemRuntimeTypeHandle,
@@ -1483,11 +1487,11 @@ const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_mscorlib =
 
 #if (NANOCLR_REFLECTION == TRUE)
 
-    0x445C7AF9,
+    0xC5D5F755,
 
 #elif (NANOCLR_REFLECTION == FALSE)
 
-    0xE3A4B52F,
+    0x29A4F740,
 
 #else
 #error "NANOCLR_REFLECTION has to be define either TRUE or FALSE. Check the build options."
