@@ -478,24 +478,6 @@ jobs:
           PackageName: ESP32_BLE_REV0
           CMakePreset: ESP32_BLE_REV0
 
-        ESP_WROVER_KIT:
-          TargetBoard: ESP32
-          TargetSeries: "esp32"
-          BuildOptions:
-          IDF_Target: esp32
-          TargetName: ESP_WROVER_KIT
-          PackageName: ESP_WROVER_KIT
-          CMakePreset: ESP_WROVER_KIT
-
-        ESP32_LILYGO:
-          TargetBoard: ESP32
-          TargetSeries: "esp32"
-          BuildOptions:
-          IDF_Target: esp32
-          TargetName: ESP32_LILYGO
-          PackageName: ESP32_LILYGO
-          CMakePreset: ESP32_LILYGO
-
         ESP32_C3:
           TargetBoard: ESP32_C3
           TargetSeries: "esp32c3"
@@ -522,15 +504,6 @@ jobs:
           TargetName: ESP32_H2_THREAD
           PackageName: ESP32_H2_THREAD
           CMakePreset: ESP32_H2_THREAD
-
-        ESP32_S3:
-          TargetBoard: ESP32_S3
-          TargetSeries: "esp32s3"
-          BuildOptions:
-          IDF_Target: esp32s3
-          TargetName: ESP32_S3
-          PackageName: ESP32_S3
-          CMakePreset: ESP32_S3
 
         ESP32_S3_ALL:
           TargetBoard: ESP32_S3

@@ -551,6 +551,33 @@ jobs:
           PackageName: ESP32_WT32_ETH01
           CMakePreset: ESP32_WT32_ETH01
 
+        ESP32_LILYGO:
+          TargetBoard: ESP32
+          TargetSeries: "esp32"
+          BuildOptions:
+          IDF_Target: esp32
+          TargetName: ESP32_LILYGO
+          PackageName: ESP32_LILYGO
+          CMakePreset: ESP32_LILYGO
+
+        ESP32_S3:
+          TargetBoard: ESP32_S3
+          TargetSeries: "esp32s3"
+          BuildOptions:
+          IDF_Target: esp32s3
+          TargetName: ESP32_S3
+          PackageName: ESP32_S3
+          CMakePreset: ESP32_S3
+
+        ESP_WROVER_KIT:
+          TargetBoard: ESP32
+          TargetSeries: "esp32"
+          BuildOptions:
+          IDF_Target: esp32
+          TargetName: ESP_WROVER_KIT
+          PackageName: ESP_WROVER_KIT
+          CMakePreset: ESP_WROVER_KIT
+
     variables:
       DOTNET_NOLOGO: true
       # creates a counter and assigns it to the revision variable
