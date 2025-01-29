@@ -1,0 +1,69 @@
+# Copyright (c) .NET Foundation and Contributors
+# See LICENSE file in the project root for full license information.
+
+steps:
+  - task: PowerShell@2
+    name: Check_mscorlib_test
+    displayName: Check mscorlib to test
+    condition: ne(variables['System.PullRequest.PullRequestId'], '')
+    inputs:
+      failOnStderr: false
+      targetType: "inline"
+      script: |
+
+        # compute authorization header in format "AUTHORIZATION: basic 'encoded token'"
+        # 'encoded token' is the Base64 of the string "nfbot:personal-token"
+        $auth = "basic $([System.Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes("nfbot:$(GitHubToken)")))"
+
+        # find PR
+        "Getting PR#$env:System_PullRequest_PullRequestNumber details..." | Write-Host -ForegroundColor White -NoNewline
+        $pr = Invoke-WebRequest "https://api.github.com/repos/$env:Build_Repository_Name/pulls/$env:System_PullRequest_PullRequestNumber" | ConvertFrom-Json
+
+        if($($pr.number) -eq "$env:System_PullRequest_PullRequestNumber")
+        {
+          '##[command] OK' | Write-Host -ForegroundColor Green
+        }
+
+        # grab PR commit message
+        $prCommitMessage = $($pr.body)
+
+        # look for test prompt in PR commit message
+        # pattern is "Tested against nanoframework/CoreLibrary#NNNN"
+
+        if($prCommitMessage -match "Tested against nanoframework/CoreLibrary#(\d+)")
+        {
+          $testPR = $matches[1]
+          "Test PR found: $testPR" | Write-Host -ForegroundColor White
+
+          # store github reference in variable
+          Write-Host "##vso[task.setvariable variable=TEST_PR;isOutput=true]$testPR"
+        }
+        else
+        {
+          "No test PR found." | Write-Host -ForegroundColor White
+
+          # use default (main) branch for tests
+          Write-Host "##vso[task.setvariable variable=TEST_PR;isOutput=true]"
+        }
+
+  - task: PowerShell@2
+    displayName: Checkout mscorlib
+    condition: ne(variables['System.PullRequest.PullRequestId'], '')
+    inputs:
+      targetType: "inline"
+      script: |
+        # create directory for mscorlib, ignore if it already exists
+        New-Item -Path $(Agent.BuildDirectory)/s -ItemType "directory" -ErrorAction SilentlyContinue
+        # move to the build sources directory
+        Set-Location -Path $(Agent.BuildDirectory)/s
+        
+        if($(Check_mscorlib_test.TEST_PR) -ne "")
+        {
+          Write-Host "Checking out mscorlib PR: #$(Check_mscorlib_test.TEST_PR)"
+          gh pr checkout $(Check_mscorlib_test.TEST_PR) --recurse-submodules 
+        }
+        else
+        {
+          Write-Host "Checking out mscorlib main branch"
+          gh repo clone nanoframework/CoreLibrary CoreLibrary --recurse-submodules
+        }
