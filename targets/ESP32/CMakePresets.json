@@ -485,6 +485,7 @@
                 "NF_FEATURE_RTC": "ON",
                 "NF_FEATURE_HAS_SDCARD": "ON",
                 "ESP32_ETHERNET_SUPPORT": "ON",
+                "ESP32_ETHERNET_INTERFACE": "W5500",
                 "API_nanoFramework.Device.OneWire": "ON",
                 "API_nanoFramework.Device.Bluetooth": "ON",
                 "API_nanoFramework.Graphics": "ON",
