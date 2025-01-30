@@ -490,6 +490,7 @@
                 "ESP32_ETHERNET_SPI_MOSI_GPIO": "23",
                 "ESP32_ETHERNET_SPI_SCLK_GPIO": "18",
                 "ESP32_ETHERNET_SPI_INT_GPIO": "34",
+                "ESP32_ETHERNET_SPI_HOST": "HSPI_HOST",
                 "ESP32_ETHERNET_SPI_CS": "26",
                 "ETH_PHY_RST_GPIO": "13",
                 "API_nanoFramework.Device.OneWire": "ON",
