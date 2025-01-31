@@ -224,21 +224,15 @@ int CLR_Debug::PrintfV(const char *format, va_list arg)
     NATIVE_PROFILE_CLR_DIAGNOSTICS();
 
     // this should be more than enough for the existing output needs
+    // TODO: expose this in the build system to allow better adjustment according to the target
     const int16_t c_BufferSize = 512;
 
-    char *buffer = (char *)platform_malloc(c_BufferSize);
-
-    // sanity check for successfull allocation
-    if (buffer == NULL)
-    {
-        return 0;
-    }
-
+    char buffer[c_BufferSize];
     char *szBuffer = buffer;
+
     // need to leave space for the null terminator
     size_t bufferSize = c_BufferSize - 1;
     size_t iBuffer = bufferSize;
-    memset(buffer, 0, c_BufferSize);
 
 #if !defined(BUILD_RTM)
     bool fRes =
@@ -255,11 +249,6 @@ int CLR_Debug::PrintfV(const char *format, va_list arg)
     std::string outputString(buffer, iBuffer);
     SaveMessage(outputString);
 #endif
-
-    if (buffer != NULL)
-    {
-        platform_free(buffer);
-    }
 
     return (int)iBuffer;
 }
