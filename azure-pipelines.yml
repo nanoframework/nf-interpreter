@@ -1212,12 +1212,24 @@ jobs:
 
   - job: Run_UnitTests_mscorlib
     condition: >-
-      and(
-        succeeded('Build_nanoCLR_CLI'),
-        ne(dependencies.Check_Build_Options.outputs['BuildOptions.SKIP_BUILD'], true),
-        or(
-          eq(variables['RUN_MSCORLIB_TESTS__'], true),
-          eq(dependencies.Check_Build_Options.outputs['BuildOptions.RUN_MSCORLIB_TESTS'], true)
+      or(
+        and(
+          succeeded('Build_nanoCLR_CLI'),
+          ne(dependencies.Check_Build_Options.outputs['BuildOptions.SKIP_BUILD'], true),
+          eq(variables['System.PullRequest.PullRequestId'], ''),
+          or(
+            eq(dependencies.Check_Build_Options.outputs['BuildOptions.RUN_MSCORLIB_TESTS'], true),
+            eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ALL'], true),
+            eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_NANOCLR_CLI'], true)
+          )
+        ),
+        and(
+          eq(variables['Build.Reason'], 'Manual'),
+          or(
+            eq(variables['BUILD_ALL__'], 'true'),
+            eq(variables['BUILD_NANOCLR_CLI__'], 'true')
+          ),
+          eq(variables['RUN_MSCORLIB_TESTS__'], 'true')
         )
       )
 
