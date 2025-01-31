@@ -1217,8 +1217,6 @@ jobs:
         ne(dependencies.Check_Build_Options.outputs['BuildOptions.SKIP_BUILD'], true),
         or(
           eq(variables['RUN_MSCORLIB_TESTS__'], true),
-          eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ALL'], true),
-          eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_NANOCLR_CLI'], true),
           eq(dependencies.Check_Build_Options.outputs['BuildOptions.RUN_MSCORLIB_TESTS'], true)
         )
       )
