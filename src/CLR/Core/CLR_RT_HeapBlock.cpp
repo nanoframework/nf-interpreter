@@ -1102,8 +1102,21 @@ CLR_UINT32 CLR_RT_HeapBlock::GetHashCode(CLR_RT_HeapBlock *ptr, bool fRecurse, C
             break;
 
         case DATATYPE_R4:
-            crc = (CLR_INT32)ptr->NumericByRef().u8.LL;
+        {
+            // ensure that NaN and both zeros have the same hash code
+            int signBit = __signbitd(ptr->NumericByRef().r4);
+
+            if ((signBit && (__isnanf(ptr->NumericByRef().r4) || ptr->NumericByRef().r4 == 0)))
+            {
+                crc = (CLR_INT32)(ptr->NumericByRef().u8.LL & 0x7FFFFFFF);
+            }
+            else
+            {
+                crc = (CLR_INT32)ptr->NumericByRef().u8.LL;
+            }
+
             break;
+        }
 
         case DATATYPE_U8:
             crc = ((CLR_INT32)ptr->NumericByRef().u8.LL ^ (CLR_INT32)ptr->NumericByRef().u8.HH);
@@ -1114,8 +1127,20 @@ CLR_UINT32 CLR_RT_HeapBlock::GetHashCode(CLR_RT_HeapBlock *ptr, bool fRecurse, C
             break;
 
         case DATATYPE_R8:
-            crc = ((CLR_INT32)ptr->NumericByRef().r8.LL ^ (CLR_INT32)ptr->NumericByRef().r8.HH);
+        {
+            // ensure that NaN and both zeros have the same hash code
+            int signBit = __signbitd(ptr->NumericByRef().r8);
+
+            if ((signBit && (__isnand(ptr->NumericByRef().r8) || (double)ptr->NumericByRef().r8 == 0)))
+            {
+                crc = (CLR_INT32)(ptr->NumericByRef().r8.LL ^ ((CLR_INT32)ptr->NumericByRef().r8.HH & 0x7FFFFFFF));
+            }
+            else
+            {
+                crc = ((CLR_INT32)ptr->NumericByRef().r8.LL ^ (CLR_INT32)ptr->NumericByRef().r8.HH);
+            }
             break;
+        }
 
         case DATATYPE_CLASS:
         case DATATYPE_VALUETYPE:
@@ -1331,11 +1356,32 @@ bool CLR_RT_HeapBlock::ObjectsEqual(
         case DATATYPE_U4:
         case DATATYPE_I8:
         case DATATYPE_U8:
-        case DATATYPE_R4:
-        case DATATYPE_R8:
         case DATATYPE_DATETIME:
         case DATATYPE_TIMESPAN:
             return Compare_Values(pArgLeft, pArgRight, false) == 0;
+            break;
+
+        // edge cases, in .NET a NaN is equal to another NaN
+        // https://learn.microsoft.com/en-us/dotnet/fundamentals/runtime-libraries/system-double-equals?WT.mc_id=DT-MVP-5004179#nan
+        case DATATYPE_R4:
+            if (__isnanf(pArgLeft.NumericByRefConst().r4) && __isnanf(pArgRight.NumericByRefConst().r4))
+            {
+                return true;
+            }
+            else
+            {
+                return Compare_Values(pArgLeft, pArgRight, false) == 0;
+            }
+            break;
+        case DATATYPE_R8:
+            if (__isnand(pArgLeft.NumericByRefConst().r8) && __isnand(pArgRight.NumericByRefConst().r8))
+            {
+                return true;
+            }
+            else
+            {
+                return Compare_Values(pArgLeft, pArgRight, false) == 0;
+            }
             break;
 
         case DATATYPE_BYREF:
@@ -1657,14 +1703,9 @@ CLR_INT32 CLR_RT_HeapBlock::Compare_Values(const CLR_RT_HeapBlock &left, const C
             case DATATYPE_R4:
 
                 // deal with special cases:
-                // return 0 if numbers are both NaN
-                // return 1 if the numbers are unordered (either is NaN)
+                // return 1 if the numbers are unordered (either or both are NaN)
                 // this is post processed in interpreter so '1' will turn into '0'
-                if (__isnand(left.NumericByRefConst().r4) && __isnand(right.NumericByRefConst().r4))
-                {
-                    return 0;
-                }
-                else if (__isnand(left.NumericByRefConst().r4) || __isnand(right.NumericByRefConst().r4))
+                if (__isnanf(left.NumericByRefConst().r4) || __isnanf(right.NumericByRefConst().r4))
                 {
                     return 1;
                 }
@@ -1695,14 +1736,9 @@ CLR_INT32 CLR_RT_HeapBlock::Compare_Values(const CLR_RT_HeapBlock &left, const C
             case DATATYPE_R8:
 
                 // deal with special cases:
-                // return 0 if numbers are both NaN
-                // return 1 if the numbers are unordered (either is NaN)
+                // return 1 if the numbers are unordered (either or both are NaN)
                 // this is post processed in interpreter so '1' will turn into '0'
-                if (__isnand((double)left.NumericByRefConst().r8) && __isnand((double)right.NumericByRefConst().r8))
-                {
-                    return 0;
-                }
-                else if (__isnand((double)left.NumericByRefConst().r8) || __isnand((double)right.NumericByRefConst().r8))
+                if (__isnand((double)left.NumericByRefConst().r8) || __isnand((double)right.NumericByRefConst().r8))
                 {
                     return 1;
                 }
