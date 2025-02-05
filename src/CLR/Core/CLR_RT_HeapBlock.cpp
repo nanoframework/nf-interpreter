@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (c) .NET Foundation and Contributors
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
@@ -1331,6 +1331,8 @@ bool CLR_RT_HeapBlock::ObjectsEqual(
         case DATATYPE_U4:
         case DATATYPE_I8:
         case DATATYPE_U8:
+        case DATATYPE_R4:
+        case DATATYPE_R8:
         case DATATYPE_DATETIME:
         case DATATYPE_TIMESPAN:
             return Compare_Values(pArgLeft, pArgRight, false) == 0;
@@ -1655,9 +1657,14 @@ CLR_INT32 CLR_RT_HeapBlock::Compare_Values(const CLR_RT_HeapBlock &left, const C
             case DATATYPE_R4:
 
                 // deal with special cases:
-                // return 0 if the numbers are unordered (either or both are NaN)
+                // return 0 if numbers are both NaN
+                // return 1 if the numbers are unordered (either is NaN)
                 // this is post processed in interpreter so '1' will turn into '0'
                 if (__isnand(left.NumericByRefConst().r4) && __isnand(right.NumericByRefConst().r4))
+                {
+                    return 0;
+                }
+                else if (__isnand(left.NumericByRefConst().r4) || __isnand(right.NumericByRefConst().r4))
                 {
                     return 1;
                 }
@@ -1688,9 +1695,14 @@ CLR_INT32 CLR_RT_HeapBlock::Compare_Values(const CLR_RT_HeapBlock &left, const C
             case DATATYPE_R8:
 
                 // deal with special cases:
-                // return 0 if the numbers are unordered (either or both are NaN)
+                // return 0 if numbers are both NaN
+                // return 1 if the numbers are unordered (either is NaN)
                 // this is post processed in interpreter so '1' will turn into '0'
-                if (__isnand((double)left.NumericByRefConst().r8) || __isnand((double)right.NumericByRefConst().r8))
+                if (__isnand((double)left.NumericByRefConst().r8) && __isnand((double)right.NumericByRefConst().r8))
+                {
+                    return 0;
+                }
+                else if (__isnand((double)left.NumericByRefConst().r8) || __isnand((double)right.NumericByRefConst().r8))
                 {
                     return 1;
                 }
