@@ -96,6 +96,7 @@ jobs:
 
               if( ($commit.commit.author.name -eq "nfbot") -and ($commit.commit.message -like "*[version update]*") )
               {
+                Write-Host "##[command] **version update commit, skipping build**"
                 echo "##vso[task.setvariable variable=SKIP_BUILD;isOutput=true]true"  
               }
               else
@@ -106,6 +107,7 @@ jobs:
               # check if Unit Tests for mscorlib should be run
               if(($commit.commit.message -like "*[run mscorlib tests]*") -or ($commit.commit.message -match "Tested against nanoframework/CoreLibrary#(\d+)"))
               {
+                Write-Host "##[command] **mscorlib tests are to be runned**"
                 echo "##vso[task.setvariable variable=RUN_MSCORLIB_TESTS;isOutput=true]true"
               }
             }
@@ -1216,7 +1218,6 @@ jobs:
         and(
           succeeded('Build_nanoCLR_CLI'),
           ne(dependencies.Check_Build_Options.outputs['BuildOptions.SKIP_BUILD'], true),
-          eq(variables['System.PullRequest.PullRequestId'], ''),
           or(
             eq(dependencies.Check_Build_Options.outputs['BuildOptions.RUN_MSCORLIB_TESTS'], true),
             eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ALL'], true),
