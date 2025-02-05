@@ -1273,6 +1273,14 @@ jobs:
 
       - template: azure-pipelines-templates/install-nuget.yml@templates
 
+      - task: Cache@2
+        displayName: Cache NuGet packages
+        condition: succeeded()
+        continueOnError: true
+        inputs:
+          key: 'nuget | **/packages.lock.json'
+          path: $(UserProfile)/.nuget/packages
+
       - task: NuGetCommand@2
         condition: succeeded()
         displayName: NuGet restore
