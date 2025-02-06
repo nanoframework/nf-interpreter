@@ -1106,7 +1106,7 @@ CLR_UINT32 CLR_RT_HeapBlock::GetHashCode(CLR_RT_HeapBlock *ptr, bool fRecurse, C
             // ensure that NaN and both zeros have the same hash code
             int signBit = __signbitd(ptr->NumericByRef().r4);
 
-            if ((signBit && (__isnanf(ptr->NumericByRef().r4) || ptr->NumericByRef().r4 == 0)))
+            if (__isnanf(ptr->NumericByRef().r4) || (signBit && ptr->NumericByRef().r4 == 0))
             {
                 crc = (CLR_INT32)(ptr->NumericByRef().u8.LL & 0x7FFFFFFF);
             }
@@ -1129,9 +1129,9 @@ CLR_UINT32 CLR_RT_HeapBlock::GetHashCode(CLR_RT_HeapBlock *ptr, bool fRecurse, C
         case DATATYPE_R8:
         {
             // ensure that NaN and both zeros have the same hash code
-            int signBit = __signbitd(ptr->NumericByRef().r8);
+            int signBit = __signbitd((double)ptr->NumericByRef().r8);
 
-            if ((signBit && (__isnand(ptr->NumericByRef().r8) || (double)ptr->NumericByRef().r8 == 0)))
+            if (__isnand((double)ptr->NumericByRef().r8) || (signBit && (double)ptr->NumericByRef().r8 == 0))
             {
                 crc = (CLR_INT32)(ptr->NumericByRef().r8.LL ^ ((CLR_INT32)ptr->NumericByRef().r8.HH & 0x7FFFFFFF));
             }
@@ -1374,7 +1374,7 @@ bool CLR_RT_HeapBlock::ObjectsEqual(
             }
             break;
         case DATATYPE_R8:
-            if (__isnand(pArgLeft.NumericByRefConst().r8) && __isnand(pArgRight.NumericByRefConst().r8))
+            if (__isnand((double)pArgLeft.NumericByRefConst().r8) && __isnand((double)pArgRight.NumericByRefConst().r8))
             {
                 return true;
             }
