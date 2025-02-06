@@ -1218,6 +1218,7 @@ jobs:
         and(
           succeeded('Build_nanoCLR_CLI'),
           ne(dependencies.Check_Build_Options.outputs['BuildOptions.SKIP_BUILD'], true),
+          ne(variables['System.PullRequest.PullRequestId'], ''),
           or(
             eq(dependencies.Check_Build_Options.outputs['BuildOptions.RUN_MSCORLIB_TESTS'], true),
             eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ALL'], true),
