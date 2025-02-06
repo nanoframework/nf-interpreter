@@ -24,7 +24,7 @@ inline int __signbitd(double x)
 }
 
 #define rint(x)         floor((x) + 0.5)
-#define remainder(x, y) ((x) - ((y)*rint((x) / (y))))
+#define remainder(x, y) ((x) - ((y) * rint((x) / (y))))
 
 #define isgreater(param0, param1) (param0 > param1)
 #define isless(param0, param1)    (param0 < param1)
