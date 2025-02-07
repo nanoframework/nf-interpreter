@@ -81,7 +81,9 @@ foreach(SRC_FILE ${System.IO.FileSystem_SRCS})
 	    CMAKE_FIND_ROOT_PATH_BOTH
     )
 
+    if (BUILD_VERBOSE)
         message("${SRC_FILE} >> ${System.IO.FileSystem_SRC_FILE}")
+    endif()
 
     list(APPEND System.IO.FileSystem_SOURCES ${System.IO.FileSystem_SRC_FILE})
     
