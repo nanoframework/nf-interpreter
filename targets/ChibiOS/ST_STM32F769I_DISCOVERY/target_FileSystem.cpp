@@ -8,7 +8,7 @@
 #include <nanoHAL_Types.h>
 #include <nanoPAL_FileSystem.h>
 // #include <littlefs_FS_Driver.h>
-#include <fatfs_FS_Driver.h>
+// #include <fatfs_FS_Driver.h>
 #include "Target_System_IO_FileSystem.h"
 
 // extern FILESYSTEM_DRIVER_INTERFACE g_LITTLEFS_FILE_SYSTEM_DriverInterface;
