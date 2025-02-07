@@ -64,8 +64,6 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Runtime.Native", "..\..\src
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "nanoFramework.ResourceManager", "..\..\src\nanoFramework.ResourceManager\nanoFramework.ResourceManager.vcxproj", "{4F6DD35B-A0C8-47EE-880A-1224FADE9276}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Windows.Storage", "..\..\src\Windows.Storage\Windows.Storage.vcxproj", "{3CAE286F-0EF8-45E4-8111-AFA0AA9282B4}"
-EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Networking.Sntp", "..\..\src\DeviceInterfaces\Networking.Sntp\Networking.Sntp.vcxproj", "{84C62EFC-DBA2-4D47-BB81-322E8902C6D6}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "System.Net", "..\..\src\DeviceInterfaces\System.Net\System.Net.vcxproj", "{87B3B6FB-AE1F-4777-ABBF-3E42E0DEB336}"

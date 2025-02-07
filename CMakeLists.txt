@@ -312,13 +312,8 @@ if(NF_FEATURE_HAS_SDCARD)
         message(FATAL_ERROR "Support for SD Card is only available for ChibiOS Cortex-M targets, iMX.RT FreeRTOS and ESP32 targets..")
     endif()
 
-    if(RTOS_FREERTOS_CHECK)
-        # ONLY FOR FREERTOS+NXP force inclusion of Windows.Storage API
-        set(API_Windows.Storage ON CACHE INTERNAL "Forcing Windows.Storage API option to ON")
-    else()
-        # all the others RTOSes: force inclusion of System.IO.FileSystem API
-        set(API_System.IO.FileSystem ON CACHE INTERNAL "Forcing System.IO.FileSystem API option to ON")
-    endif()
+    # all RTOSes: force inclusion of System.IO.FileSystem API
+    set(API_System.IO.FileSystem ON CACHE INTERNAL "Forcing System.IO.FileSystem API option to ON")
 
     message(STATUS "Support for SD Card is included")
 
@@ -668,7 +663,6 @@ if( API_nanoFramework.Device.OneWire OR
     API_System.Device.Gpio OR
     API_System.IO.Ports OR
     API_nanoFramework.Device.Can OR
-    API_Windows.Storage OR
     API_System.IO.FileSystem)
 
     # these APIs requires nanoFramework.Runtime.Events

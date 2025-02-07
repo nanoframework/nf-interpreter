@@ -48,9 +48,6 @@ typedef enum StorageEventType
 #define DRIVE_LETTER_LENGTH sizeof(INDEX0_DRIVE_LETTER)
 #define DRIVE_PATH_LENGTH   sizeof(INDEX0_DRIVE_PATH)
 
-/////////////////////////////////////////////////////////////////////////////////////////
-// !!! KEEP IN SYNC WITH Windows.Storage.CreationCollisionOption (in managed code) !!! //
-/////////////////////////////////////////////////////////////////////////////////////////
 
 enum CreationCollisionOption
 {

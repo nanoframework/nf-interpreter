@@ -320,9 +320,6 @@
     <ProjectReference Include="..\..\..\src\System.Runtime.Serialization\System.Runtime.Serialization.vcxproj">
       <Project>{c9264d0a-ac25-46b0-bd08-4a3252427f19}</Project>
     </ProjectReference>
-    <ProjectReference Include="..\..\..\src\Windows.Storage\Windows.Storage.vcxproj">
-      <Project>{3cae286f-0ef8-45e4-8111-afa0aa9282b4}</Project>
-    </ProjectReference>
     <ProjectReference Include="..\littlefs\littlefs.vcxproj">
       <Project>{5b70a795-a6f2-44df-8566-5d68d9e892db}</Project>
     </ProjectReference>
