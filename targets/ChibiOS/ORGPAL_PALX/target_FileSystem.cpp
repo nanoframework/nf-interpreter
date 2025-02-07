@@ -18,7 +18,7 @@ extern FILESYSTEM_DRIVER_INTERFACE g_FATFS_FILE_SYSTEM_DriverInterface;
 extern STREAM_DRIVER_INTERFACE g_LITTLEFS_STREAM_DriverInterface;
 
 #if HAL_USE_SDC
-#include <target_windows_storage_config.h>
+#include <target_storage_config.h>
 extern "C" void SdCardDetectCallback(void *arg);
 #endif
 

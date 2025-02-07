@@ -29,7 +29,6 @@ option(API_System.Device.Pwm                            "option for System.Devic
 option(API_System.IO.Ports                              "option for System.IO.Ports API")
 option(API_System.Device.Spi                            "option for System.Device.Spi API")
 option(API_System.Runtime.Serialization                 "option for System.Runtime.Serialization API")
-option(API_Windows.Storage                              "option for Windows.Storage")
 option(API_nanoFramework.Graphics                       "option for nanoFramework.Graphics")
 option(API_nanoFramework.Device.Bluetooth               "option for nanoFramework.Device.Bluetooth")
 option(API_System.Device.UsbStream                      "option for System.Device.UsbStream API")
@@ -451,12 +450,6 @@ endif()
 if(API_System.Device.UsbStream)
     ##### API name here (doted name)
     PerformSettingsForApiEntry("System.Device.UsbStream")
-endif()
-
-# Windows.Storage
-if(API_Windows.Storage)
-    ##### API name here (doted name)
-    PerformSettingsForApiEntry("Windows.Storage")
 endif()
 
 # Interop assemblies
