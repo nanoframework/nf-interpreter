@@ -18,7 +18,7 @@
                 "TARGET_BOARD": "${presetName}",
                 "RTOS": "ChibiOS",
                 "TARGET_SERIES": "STM32F7xx",
-                "CHIBIOS_CONTRIB_REQUIRED": "OFF",
+                "CHIBIOS_CONTRIB_REQUIRED": "ON",
                 "STM32_CUBE_PACKAGE_REQUIRED": "ON",
                 "SUPPORT_ANY_BASE_CONVERSION": "ON",
                 "NF_FEATURE_DEBUGGER": "ON",
