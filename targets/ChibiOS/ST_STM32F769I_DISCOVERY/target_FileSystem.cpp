@@ -8,7 +8,7 @@
 #include <nanoHAL_Types.h>
 #include <nanoPAL_FileSystem.h>
 // #include <littlefs_FS_Driver.h>
-// #include <fatfs_FS_Driver.h>
+#include <fatfs_FS_Driver.h>
 #include "Target_System_IO_FileSystem.h"
 
 // extern FILESYSTEM_DRIVER_INTERFACE g_LITTLEFS_FILE_SYSTEM_DriverInterface;
@@ -22,7 +22,7 @@
 extern "C" void SdCardDetectCallback(void *arg);
 #endif
 
-// extern "C" void UsbMsdForceMount();
+extern "C" void UsbMsdForceMount();
 
 // FILESYSTEM_INTERFACES g_AvailableFSInterfaces[] = {
 //     {&g_FATFS_FILE_SYSTEM_DriverInterface, &g_FATFS_STREAM_DriverInterface},
@@ -71,7 +71,7 @@ void FS_MountRemovableVolumes()
     SdCardDetectCallback(&SD_CARD_DRIVER);
 #endif
 
-    // #if defined(HAL_USBH_USE_MSD) && (HAL_USBH_USE_MSD == TRUE)
-    //     UsbMsdForceMount();
-    // #endif
+#if defined(HAL_USBH_USE_MSD) && (HAL_USBH_USE_MSD == TRUE)
+    UsbMsdForceMount();
+#endif
 }
