@@ -182,13 +182,13 @@
 /  const char* VolumeStr[FF_VOLUMES] = {"ram","flash","sd","usb",...
 */
 #if (HAL_USE_SDC == TRUE) && (HAL_USBH_USE_MSD == TRUE)
-#define FF_VOLUME_STRS   "D", "E"
+#define FF_VOLUME_STRS "D", "E"
 #elif (HAL_USE_SDC == FALSE) && (HAL_USBH_USE_MSD == TRUE)
-#define FF_VOLUME_STRS   "E"
+#define FF_VOLUME_STRS "E"
 #elif (HAL_USE_SDC == TRUE) && (HAL_USBH_USE_MSD == FALSE)
-#define FF_VOLUME_STRS   "D"
+#define FF_VOLUME_STRS "D"
 #else
-#define FF_VOLUME_STRS   ""
+#define FF_VOLUME_STRS ""
 #endif
 
 #define FF_MULTI_PARTITION 0
