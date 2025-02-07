@@ -71,7 +71,7 @@ void FS_MountRemovableVolumes()
     SdCardDetectCallback(&SD_CARD_DRIVER);
 #endif
 
-// #if defined(HAL_USBH_USE_MSD) && (HAL_USBH_USE_MSD == TRUE)
-//     UsbMsdForceMount();
-// #endif
+    // #if defined(HAL_USBH_USE_MSD) && (HAL_USBH_USE_MSD == TRUE)
+    //     UsbMsdForceMount();
+    // #endif
 }
