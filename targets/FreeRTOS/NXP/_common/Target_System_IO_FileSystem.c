@@ -17,13 +17,11 @@ extern void PostManagedEvent(uint8_t category, uint8_t subCategory, uint16_t dat
 // TODO: complete migration to System.IO.FileSystem
 // // #include "fsl_sd.h"
 
-
 // // // need to declare this here as extern
 // // extern void PostManagedEvent(uint8_t category, uint8_t subCategory, uint16_t data1, uint32_t data2);
 
 // // #define SD_CARD_DRIVE_INDEX             "0"
 // // #define SD_CARD_DRIVE_INDEX_NUMERIC     (0)
-
 
 // // ///////////////////////////////////////////
 // // // code specific to SD Card
@@ -105,7 +103,8 @@ extern void PostManagedEvent(uint8_t category, uint8_t subCategory, uint16_t dat
 // //             sdCardFileSystemReady = true;
 
 // //             // post event to managed app
-// //             PostManagedEvent( EVENT_STORAGE, 0, StorageEventType_RemovableDeviceInsertion, SD_CARD_DRIVE_INDEX_NUMERIC );
+// //             PostManagedEvent( EVENT_STORAGE, 0, StorageEventType_RemovableDeviceInsertion,
+// SD_CARD_DRIVE_INDEX_NUMERIC );
 // //         }
 // //         else
 // //         {
@@ -115,7 +114,8 @@ extern void PostManagedEvent(uint8_t category, uint8_t subCategory, uint16_t dat
 // //             sdCardFileSystemReady = false;
 
 // //             // post event to managed app
-// //             PostManagedEvent( EVENT_STORAGE, 0, StorageEventType_RemovableDeviceRemoval, SD_CARD_DRIVE_INDEX_NUMERIC );
+// //             PostManagedEvent( EVENT_STORAGE, 0, StorageEventType_RemovableDeviceRemoval,
+// SD_CARD_DRIVE_INDEX_NUMERIC );
 // //         }
 // //     }
 // // }
@@ -123,7 +123,7 @@ extern void PostManagedEvent(uint8_t category, uint8_t subCategory, uint16_t dat
 // // void SdCardThread(void * argument)
 // // {
 // //     (void)argument;
-    
+
 // //     s_CardDetectSemaphore = xSemaphoreCreateBinary();
 
 // //     sdCardFileSystemReady = false;
@@ -142,7 +142,8 @@ extern void PostManagedEvent(uint8_t category, uint8_t subCategory, uint16_t dat
 // //         return;
 // //     }
 
-// //     xTaskCreate(CardDetectTask, "CardDetectTask", configMINIMAL_STACK_SIZE + 500, NULL, configMAX_PRIORITIES - 2, NULL);
+// //     xTaskCreate(CardDetectTask, "CardDetectTask", configMINIMAL_STACK_SIZE + 500, NULL, configMAX_PRIORITIES - 2,
+// NULL);
 
 // //     vTaskDelete(NULL);
 // // }
