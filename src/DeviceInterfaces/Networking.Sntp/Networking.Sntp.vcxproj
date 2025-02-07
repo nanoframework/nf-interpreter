@@ -28,7 +28,7 @@
   <PropertyGroup Label="Globals">
     <ProjectGuid>{84c62efc-dba2-4d47-bb81-322e8902c6d6}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
-    <RootNamespace>Windows.Storage</RootNamespace>
+    <RootNamespace>nanoFramework.Networking.Sntp</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
