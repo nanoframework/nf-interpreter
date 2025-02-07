@@ -65,8 +65,7 @@ void FS_AddVolumes()
 void FS_MountRemovableVolumes()
 {
 
-// #if HAL_USE_SDC
-//     SdCardDetectCallback(&SD_CARD_DRIVER);
-// #endif
-
+    // #if HAL_USE_SDC
+    //     SdCardDetectCallback(&SD_CARD_DRIVER);
+    // #endif
 }
