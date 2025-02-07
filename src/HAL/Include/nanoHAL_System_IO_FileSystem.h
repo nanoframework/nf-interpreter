@@ -48,15 +48,6 @@ typedef enum StorageEventType
 #define DRIVE_LETTER_LENGTH sizeof(INDEX0_DRIVE_LETTER)
 #define DRIVE_PATH_LENGTH   sizeof(INDEX0_DRIVE_PATH)
 
-
-enum CreationCollisionOption
-{
-    CreationCollisionOption_GenerateUniqueName = 0,
-    CreationCollisionOption_ReplaceExisting,
-    CreationCollisionOption_FailIfExists,
-    CreationCollisionOption_OpenIfExists
-};
-
 #ifdef __cplusplus
 extern "C"
 {
