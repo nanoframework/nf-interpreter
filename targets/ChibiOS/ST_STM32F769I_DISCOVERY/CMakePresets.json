@@ -16,8 +16,8 @@
             "hidden": false,
             "cacheVariables": {
                 "TARGET_BOARD": "${presetName}",
-                "RTOS": "ChibiOS",
                 "TARGET_SERIES": "STM32F7xx",
+                "RTOS": "ChibiOS",
                 "CHIBIOS_CONTRIB_REQUIRED": "OFF",
                 "STM32_CUBE_PACKAGE_REQUIRED": "ON",
                 "SUPPORT_ANY_BASE_CONVERSION": "ON",
