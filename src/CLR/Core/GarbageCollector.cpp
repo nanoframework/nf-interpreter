@@ -179,9 +179,8 @@ CLR_UINT32 CLR_RT_GarbageCollector::ExecuteGarbageCollection()
     if (s_CLR_RT_fTrace_MemoryStats >= c_CLR_RT_Trace_Info)
     {
         CLR_INT64 elapsed = HAL_Time_CurrentSysTicks() - stats_start;
-        ellapsedTimeMilliSec = (int)((::HAL_Time_SysTicksToTime(elapsed) +
-                                TIME_CONVERSION__TICKUNITS - 1) /
-                               TIME_CONVERSION__TICKUNITS);
+        ellapsedTimeMilliSec =
+            (int)((::HAL_Time_SysTicksToTime(elapsed) + TIME_CONVERSION__TICKUNITS - 1) / TIME_CONVERSION__TICKUNITS);
 
         CLR_Debug::Printf(
             "\r\nGC: %dmsec %d bytes used, %d bytes available\r\n\r\n",
