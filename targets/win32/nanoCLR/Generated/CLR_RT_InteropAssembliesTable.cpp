@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (c) .NET Foundation and Contributors
 // See LICENSE file in the project root for full license information.
 //
@@ -17,6 +17,8 @@ extern const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_System_Net;
 extern const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_System_IO_Ports;
 extern const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_System_Device_Gpio;
 extern const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_System_IO_FileSystem;
+extern const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_System_Device_I2c;
+extern const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_System_Device_Spi;
 
 // nanoFramework class libraries declarations
 extern const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_nanoFramework_Runtime_Events;
@@ -36,6 +38,8 @@ const CLR_RT_NativeAssemblyData *g_CLR_InteropAssembliesNativeData[] = {
     &g_CLR_AssemblyNative_System_Net,
     &g_CLR_AssemblyNative_System_IO_Ports,
     &g_CLR_AssemblyNative_System_Device_Gpio,
+    &g_CLR_AssemblyNative_System_Device_I2c,
+    &g_CLR_AssemblyNative_System_Device_Spi,
 #ifndef NANOWIN32
     &g_CLR_AssemblyNative_System_IO_FileSystem
 #endif
