@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (c) .NET Foundation and Contributors
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
@@ -92,10 +92,10 @@ struct CLR_RT_HeapBlock
 #if defined(NANOCLR_EMULATED_FLOATINGPOINT)
     /*********************************************************/
     // Keep  in Sync with nanoHAL.h
-    //#define HAL_FLOAT_SHIFT          10
-    //#define HAL_FLOAT_PRECISION      1000
-    //#define HAL_DOUBLE_SHIFT          16
-    //#define HAL_DOUBLE_PRECISION    10000
+    // #define HAL_FLOAT_SHIFT          10
+    // #define HAL_FLOAT_PRECISION      1000
+    // #define HAL_DOUBLE_SHIFT          16
+    // #define HAL_DOUBLE_PRECISION    10000
     /*********************************************************/
 
     static const int HB_FloatShift = 10;
@@ -1601,7 +1601,7 @@ struct CLR_RT_DblLinkedList
 #if NANOCLR_VALIDATE_HEAP >= NANOCLR_VALIDATE_HEAP_2_DblLinkedList
     void ValidateList();
 #else
-    void ValidateList(){};
+    void ValidateList() {};
 #endif
 
     //--//
@@ -2217,7 +2217,8 @@ struct CLR_RT_HeapBlock_MemoryStream : public CLR_RT_HeapBlock_Node // EVENT HEA
     struct Buffer : public CLR_RT_HeapBlock_Node // EVENT HEAP - NO RELOCATION -
     {
         static const int c_NumOfBlocks = 32;
-        static const int c_PayloadSize = c_NumOfBlocks * sizeof(struct CLR_RT_HeapBlock) - sizeof(CLR_UINT8 *) - sizeof(int);
+        static const int c_PayloadSize =
+            c_NumOfBlocks * sizeof(struct CLR_RT_HeapBlock) - sizeof(CLR_UINT8 *) - sizeof(int);
 
         CLR_UINT8 *m_data;
         int m_length;
