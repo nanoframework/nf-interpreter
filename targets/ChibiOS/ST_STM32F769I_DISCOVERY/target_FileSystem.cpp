@@ -12,7 +12,6 @@
 
 extern FILESYSTEM_DRIVER_INTERFACE g_FATFS_FILE_SYSTEM_DriverInterface;
 
-
 #if HAL_USE_SDC
 #include <target_storage_config.h>
 extern "C" void SdCardDetectCallback(void *arg);
@@ -27,12 +26,11 @@ FILESYSTEM_INTERFACES g_AvailableFSInterfaces[] = {
 const size_t g_InstalledFSCount = ARRAYSIZE(g_AvailableFSInterfaces);
 
 // uint32_t g_FS_NumVolumes;
-// STREAM_DRIVER_DETAILS *g_FS_DriverDetails;
 // FileSystemVolume *g_FS_Volumes;
 
 void FS_AddVolumes()
 {
- // This is the place to add volumes to the system
+    // This is the place to add volumes to the system
 }
 
 void FS_MountRemovableVolumes()
