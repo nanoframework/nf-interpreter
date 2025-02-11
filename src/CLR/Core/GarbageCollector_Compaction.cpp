@@ -14,10 +14,20 @@ CLR_UINT32 CLR_RT_GarbageCollector::ExecuteCompaction()
     g_CLR_PRF_Profiler.RecordHeapCompactionBegin();
 #endif
 
+    // bump the number of heap compactions
+    m_numberOfCompactions++;
+
 #if defined(NANOCLR_TRACE_MEMORY_STATS)
+
+    CLR_UINT64 stats_start = HAL_Time_CurrentSysTicks();
+    int ellapsedTimeMilliSec = 0;
+
     if (s_CLR_RT_fTrace_MemoryStats >= c_CLR_RT_Trace_Info)
     {
-        CLR_Debug::Printf("\r\nGC: performing heap compaction\r\n");
+        CLR_Debug::Printf(
+            "\r\n\r\nGC: Relocation - performing heap compaction run #%d @ %s\r\n",
+            m_numberOfCompactions,
+            HAL_Time_CurrentDateTimeToString());
     }
 #endif
 
@@ -29,8 +39,6 @@ CLR_UINT32 CLR_RT_GarbageCollector::ExecuteCompaction()
 
     CLR_RT_ExecutionEngine::ExecutionConstraint_Resume();
 
-    m_numberOfCompactions++;
-
     ////////////////////////////////////////////////////////////////////////////////////////////////
 #if defined(NANOCLR_PROFILE_NEW_ALLOCATIONS)
     g_CLR_PRF_Profiler.RecordHeapCompactionEnd();
@@ -39,7 +47,14 @@ CLR_UINT32 CLR_RT_GarbageCollector::ExecuteCompaction()
 #if defined(NANOCLR_TRACE_MEMORY_STATS)
     if (s_CLR_RT_fTrace_MemoryStats >= c_CLR_RT_Trace_Info)
     {
-        CLR_Debug::Printf("\r\n\r\nGC: (Run %d) heap compaction completed\r\n", m_numberOfCompactions);
+        ellapsedTimeMilliSec = ((int)::HAL_Time_SysTicksToTime(HAL_Time_CurrentSysTicks() - stats_start) +
+                                TIME_CONVERSION__TICKUNITS - 1) /
+                               TIME_CONVERSION__TICKUNITS;
+
+        CLR_Debug::Printf(
+            "\r\n\r\nGC: Relocation - heap compaction run #%d completed (took %dmsec)\r\n",
+            m_numberOfCompactions,
+            ellapsedTimeMilliSec);
     }
 #endif
 
