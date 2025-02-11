@@ -5,8 +5,7 @@
 
 #include "sys_dev_spi_native.h"
 
-
-HRESULT Library_sys_dev_spi_native_System_Device_Spi_SpiBusInfo::NativeMaxClockFrequency___I4( CLR_RT_StackFrame &stack )
+HRESULT Library_sys_dev_spi_native_System_Device_Spi_SpiBusInfo::NativeMaxClockFrequency___I4(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
@@ -15,7 +14,7 @@ HRESULT Library_sys_dev_spi_native_System_Device_Spi_SpiBusInfo::NativeMaxClockF
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_sys_dev_spi_native_System_Device_Spi_SpiBusInfo::NativeMinClockFrequency___I4( CLR_RT_StackFrame &stack )
+HRESULT Library_sys_dev_spi_native_System_Device_Spi_SpiBusInfo::NativeMinClockFrequency___I4(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
