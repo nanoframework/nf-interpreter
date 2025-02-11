@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (c) .NET Foundation and Contributors
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
@@ -445,7 +445,7 @@ void CLR_RT_EventCache::Append_Node(CLR_RT_HeapBlock *node)
 
     NANOCLR_CHECK_EARLY_COLLECTION(ptr);
 
-    ptr->Debug_ClearBlock(0xAB);
+    ptr->Debug_ClearBlock(SENTINEL_NODE_APPENDED);
 
     lst.m_blocks.LinkAtBack(ptr);
 
@@ -519,7 +519,7 @@ CLR_RT_HeapBlock *CLR_RT_EventCache::Extract_Node_Slow(CLR_UINT32 dataType, CLR_
         }
         else
         {
-            node->Debug_ClearBlock(0xAD);
+            node->Debug_ClearBlock(SENTINEL_NODE_EXTRACTED);
         }
 
 #if defined(NANOCLR_PROFILE_NEW_ALLOCATIONS)
@@ -550,7 +550,7 @@ CLR_RT_HeapBlock *CLR_RT_EventCache::Extract_Node_Fast(CLR_UINT32 dataType, CLR_
         }
         else
         {
-            ptr->Debug_ClearBlock(0xAD);
+            ptr->Debug_ClearBlock(SENTINEL_NODE_EXTRACTED);
         }
 
 #if defined(NANOCLR_PROFILE_NEW_ALLOCATIONS)

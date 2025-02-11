@@ -2515,19 +2515,24 @@ void CLR_RT_HeapBlock::Debug_CheckPointer() const
 void CLR_RT_HeapBlock::Debug_CheckPointer(void *ptr)
 {
     NATIVE_PROFILE_CLR_CORE();
-    switch ((size_t)ptr)
+
+    switch ((intptr_t)ptr)
     {
-        case 0xCFCFCFCF:
-        case 0xCBCBCBCB:
-        case 0xABABABAB:
-        case 0xADADADAD:
-        case 0xDFDFDFDF:
+        case SENTINEL_CLUSTER_INSERT:
+        case SENTINEL_CLEAR_BLOCK:
+        case SENTINEL_NODE_APPENDED:
+        case SENTINEL_NODE_EXTRACTED:
+        case SENTINEL_RECOVERED:
             NANOCLR_STOP();
             break;
     }
 }
 
-void CLR_RT_HeapBlock::Debug_ClearBlock(int data)
+#ifdef _WIN64
+void CLR_RT_HeapBlock::Debug_ClearBlock(CLR_UINT64 data)
+#else
+void CLR_RT_HeapBlock::Debug_ClearBlock(CLR_UINT32 data)
+#endif
 {
     NATIVE_PROFILE_CLR_CORE();
     CLR_UINT32 size = DataSize();
@@ -2536,19 +2541,25 @@ void CLR_RT_HeapBlock::Debug_ClearBlock(int data)
     {
         CLR_RT_HeapBlock_Raw *ptr = (CLR_RT_HeapBlock_Raw *)this;
         CLR_UINT32 raw1 = CLR_RT_HEAPBLOCK_RAW_ID(DATATYPE_OBJECT, 0, 1);
-        CLR_UINT32 raw2;
-
-        raw2 = data & 0xFF;
-        raw2 = raw2 | (raw2 << 8);
-        raw2 = raw2 | (raw2 << 16);
 
         while (--size)
         {
             ptr++;
 
             ptr->data[0] = raw1;
-            ptr->data[1] = raw2;
-            ptr->data[2] = raw2;
+
+#ifdef _WIN64
+            // need to cast this to CLR_UINT32 to avoid warning
+            // in the end these will be pointers so the size of the data type is irrelevant
+            ptr->data[1] = (CLR_UINT32)data;
+            ptr->data[2] = (CLR_UINT32)data;
+            ptr->data[3] = (CLR_UINT32)data;
+            ptr->data[4] = (CLR_UINT32)data;
+#else
+            ptr->data[1] = data;
+            ptr->data[2] = data;
+
+#endif
         }
     }
 }

@@ -820,15 +820,37 @@ struct CLR_RT_HeapBlock
 
     //--//
 
+#ifdef _WIN64
+#define SENTINEL_NODE_APPENDED  0xABABABABABABABAB
+#define SENTINEL_NODE_EXTRACTED 0xADADADADADADADAD
+#define SENTINEL_CLEAR_BLOCK    0xCBCBCBCBCBCBCBCB
+#define SENTINEL_CLUSTER_INSERT 0xCFCFCFCFCFCFCFCF
+#define SENTINEL_RECOVERED      0xDFDFDFDFDFDFDFDF
+#else
+#define SENTINEL_NODE_APPENDED  0xABABABAB
+#define SENTINEL_NODE_EXTRACTED 0xADADADAD
+#define SENTINEL_CLEAR_BLOCK    0xCBCBCBCB
+#define SENTINEL_CLUSTER_INSERT 0xCFCFCFCF
+#define SENTINEL_RECOVERED      0xDFDFDFDF
+#endif
+
 #if defined(NANOCLR_FILL_MEMORY_WITH_DIRTY_PATTERN)
 
-    void Debug_ClearBlock(int data);
+#ifdef _WIN64
+    void Debug_ClearBlock(CLR_UINT64 data);
+#else
+    void Debug_ClearBlock(CLR_UINT32 data);
+#endif
     void Debug_CheckPointer() const;
     static void Debug_CheckPointer(void *ptr);
 
 #else
 
-    void Debug_ClearBlock(int data)
+#ifdef _WIN64
+    void Debug_ClearBlock(CLR_UINT64 data)
+#else
+    void Debug_ClearBlock(CLR_UINT32 data)
+#endif
     {
     }
     void Debug_CheckPointer() const
