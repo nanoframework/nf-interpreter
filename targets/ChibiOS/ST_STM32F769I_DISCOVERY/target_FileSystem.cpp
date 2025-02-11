@@ -25,9 +25,6 @@ FILESYSTEM_INTERFACES g_AvailableFSInterfaces[] = {
 
 const size_t g_InstalledFSCount = ARRAYSIZE(g_AvailableFSInterfaces);
 
-// uint32_t g_FS_NumVolumes;
-// FileSystemVolume *g_FS_Volumes;
-
 void FS_AddVolumes()
 {
     // This is the place to add volumes to the system
