@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (c) .NET Foundation and Contributors
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
@@ -36,11 +36,11 @@ void CLR_RT_Memory::Reset()
 void *CLR_RT_Memory::SubtractFromSystem(size_t len)
 {
     NATIVE_PROFILE_CLR_CORE();
-    len = ROUNDTOMULTIPLE(len, CLR_UINT32);
+    len = ROUNDTOMULTIPLE(len, uintptr_t);
 
     if (len <= s_CLR_RT_Heap.m_size)
     {
-        s_CLR_RT_Heap.m_size -= (CLR_UINT32)len;
+        s_CLR_RT_Heap.m_size -= (uintptr_t)len;
 
         return &s_CLR_RT_Heap.m_location[s_CLR_RT_Heap.m_size];
     }
@@ -72,7 +72,7 @@ void CLR_RT_Memory::Release(void *ptr)
     if (ptr)
     {
 #if defined(NANOCLR_FILL_MEMORY_WITH_DIRTY_PATTERN)
-        DEBUG_POINTER_DECREMENT(ptr, c_extra + sizeof(CLR_UINT32));
+        DEBUG_POINTER_DECREMENT(ptr, c_extra + sizeof(uintptr_t));
 #endif
 
         CLR_RT_HeapBlock_BinaryBlob *pThis = CLR_RT_HeapBlock_BinaryBlob::GetBlob(ptr);
@@ -84,15 +84,15 @@ void CLR_RT_Memory::Release(void *ptr)
         else
         {
 #if defined(NANOCLR_FILL_MEMORY_WITH_DIRTY_PATTERN)
-            CLR_UINT32 len = *(CLR_UINT32 *)ptr;
+            uintptr_t len = *(uintptr_t *)ptr;
             CLR_UINT8 *blk;
-            CLR_UINT32 pos;
+            uintptr_t pos;
 
             for (pos = 0, blk = (CLR_UINT8 *)ptr + sizeof(len); pos < c_extra; pos++, blk++)
             {
                 if (*blk != 0xDD)
                 {
-                    CLR_Debug::Printf("CLR_RT_Memory::Release: HEAP OVERRUN START %08x(%d) = %08x\r\n", ptr, len, blk);
+                    CLR_Debug::Printf("CLR_RT_Memory::Release: HEAP OVERRUN START %p(%zu) = %p\r\n", ptr, len, blk);
                     NANOCLR_STOP();
                 }
             }
@@ -101,7 +101,7 @@ void CLR_RT_Memory::Release(void *ptr)
             {
                 if (*blk != 0xDD)
                 {
-                    CLR_Debug::Printf("CLR_RT_Memory::Release: HEAP OVERRUN END %08x(%d) = %08x\r\n", ptr, len, blk);
+                    CLR_Debug::Printf("CLR_RT_Memory::Release: HEAP OVERRUN END %p(%zu) = %p\r\n", ptr, len, blk);
                     NANOCLR_STOP();
                 }
             }
@@ -110,7 +110,7 @@ void CLR_RT_Memory::Release(void *ptr)
 #if defined(NANOCLR_TRACE_MALLOC)
             s_TotalAllocated -= pThis->DataSize();
             CLR_Debug::Printf(
-                "CLR_RT_Memory::Release : %08x = %3d blocks (tot %4d)\r\n",
+                "CLR_RT_Memory::Release : %p = %3d blocks (tot %4d)\r\n",
                 ptr,
                 pThis->DataSize(),
                 s_TotalAllocated);
@@ -149,7 +149,7 @@ void *CLR_RT_Memory::Allocate(size_t len, CLR_UINT32 flags)
     flags |= CLR_RT_HeapBlock::HB_Event;
 
 #if defined(NANOCLR_FILL_MEMORY_WITH_DIRTY_PATTERN)
-    len += c_extra * 2 + sizeof(CLR_UINT32);
+    len += c_extra * 2 + sizeof(uintptr_t);
 #endif
 
     CLR_RT_HeapBlock_BinaryBlob *obj = CLR_RT_HeapBlock_BinaryBlob::Allocate((CLR_UINT32)len, flags);
@@ -160,7 +160,7 @@ void *CLR_RT_Memory::Allocate(size_t len, CLR_UINT32 flags)
 #if defined(NANOCLR_TRACE_MALLOC)
         s_TotalAllocated += obj->DataSize();
         CLR_Debug::Printf(
-            "CLR_RT_Memory::Allocate: %08x = %3d blocks (tot %4d), %d bytes\r\n",
+            "CLR_RT_Memory::Allocate: %p = %3d blocks (tot %4d), %zu bytes\r\n",
             res,
             obj->DataSize(),
             s_TotalAllocated,
@@ -170,9 +170,9 @@ void *CLR_RT_Memory::Allocate(size_t len, CLR_UINT32 flags)
 #if defined(NANOCLR_FILL_MEMORY_WITH_DIRTY_PATTERN)
         memset(res, 0xDD, len);
 
-        *(CLR_UINT32 *)res = (CLR_UINT32)len;
+        *(uintptr_t *)res = (uintptr_t)len;
 
-        DEBUG_POINTER_INCREMENT(res, c_extra + sizeof(CLR_UINT32));
+        DEBUG_POINTER_INCREMENT(res, c_extra + sizeof(uintptr_t));
 #endif
 
         return res;

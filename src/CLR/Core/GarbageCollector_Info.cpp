@@ -109,12 +109,7 @@ void CLR_RT_GarbageCollector::ValidateCluster(CLR_RT_HeapCluster *hc)
         // Perform boundary checks
         if (ptr + ptr->DataSize() > end)
         {
-
-#ifdef _WIN64
-            CLR_Debug::Printf("Block exceeds cluster boundary: 0x%016" PRIxPTR "\r\n", (uintptr_t)ptr);
-#else
-            CLR_Debug::Printf("Block exceeds cluster boundary: 0x%08" PRIxPTR "\r\n", (uintptr_t)ptr)
-#endif
+            CLR_Debug::Printf("Block exceeds cluster boundary: 0x%" PRIxPTR "\r\n", (uintptr_t)ptr);
 
             NANOCLR_DEBUG_STOP();
         }
@@ -130,15 +125,9 @@ void CLR_RT_GarbageCollector::ValidateCluster(CLR_RT_HeapCluster *hc)
                 // nextPtr is before the current block
                 if (nextPtr + nextPtr->DataSize() > ptr)
                 {
-#ifdef _WIN64
                     CLR_Debug::Printf(
-                        "Overlapping blocks detected. Next block of 0x%016" PRIxPTR " is overlapping it.\r\n",
+                        "Overlapping blocks detected. Next block of 0x%" PRIxPTR " is overlapping it.\r\n",
                         (uintptr_t)ptr);
-#else
-                    CLR_Debug::Printf(
-                        "Overlapping blocks detected: Next block of 0x%08" PRIxPTR " is overlapping it.\r\n",
-                        (uintptr_t)ptr);
-#endif
                 }
             }
         }
@@ -153,15 +142,9 @@ void CLR_RT_GarbageCollector::ValidateCluster(CLR_RT_HeapCluster *hc)
                 // previousPtr is before the current block
                 if (prevPtr + prevPtr->DataSize() > ptr)
                 {
-#ifdef _WIN64
                     CLR_Debug::Printf(
-                        "Overlapping blocks detected: Previous block of 0x%016" PRIxPTR " is overlapping it.\r\n",
+                        "Overlapping blocks detected: Previous block of 0x%" PRIxPTR " is overlapping it.\r\n",
                         (uintptr_t)ptr);
-#else
-                    CLR_Debug::Printf(
-                        "Overlapping blocks detected: Previous block of 0x%08" PRIxPTR " is overlapping it.\r\n",
-                        (uintptr_t)ptr);
-#endif
                 }
             }
         }
@@ -202,19 +185,11 @@ void CLR_RT_GarbageCollector::ValidateBlockNotInFreeList(CLR_RT_DblLinkedList &l
 
             if (ptr <= dst && dst < ptrEnd)
             {
-#ifdef _WIN64
                 CLR_Debug::Printf(
-                    "Pointer into free list!! 0x%016" PRIxPTR " 0x%016" PRIxPTR " 0x%016" PRIxPTR "\r\n",
+                    "Pointer into free list!! 0x%" PRIxPTR " 0x%" PRIxPTR " 0x%" PRIxPTR "\r\n",
                     (uintptr_t)dst,
                     (uintptr_t)ptr,
                     (uintptr_t)ptrEnd);
-#else
-                CLR_Debug::Printf(
-                    "Pointer into free list!! 0x%08" PRIxPTR " 0x%08" PRIxPTR " 0x%08" PRIxPTR "\r\n",
-                    (uintptr_t)dst,
-                    (uintptr_t)ptr,
-                    (uintptr_t)ptrEnd);
-#endif
 
                 NANOCLR_DEBUG_STOP();
             }
@@ -279,7 +254,7 @@ CLR_RT_GarbageCollector::Rel_Map CLR_RT_GarbageCollector::s_mapNewToRecord;
 bool CLR_RT_GarbageCollector::TestPointers_PopulateOld_Worker(void **ref)
 {
     NATIVE_PROFILE_CLR_CORE();
-    CLR_UINT32 *dst = (CLR_UINT32 *)*ref;
+    uintptr_t *dst = (uintptr_t *)*ref;
 
     if (dst)
     {
@@ -302,11 +277,8 @@ bool CLR_RT_GarbageCollector::TestPointers_PopulateOld_Worker(void **ref)
 
         if (s_mapOldToRecord.find(ref) != s_mapOldToRecord.end())
         {
-#ifdef _WIN64
-            CLR_Debug::Printf("Duplicate base OLD: 0x%016" PRIxPTR "\r\n", (uintptr_t)ref);
-#else
-            CLR_Debug::Printf("Duplicate base OLD: 0x%08" PRIxPTR "\r\n", (uintptr_t)ref);
-#endif
+            CLR_Debug::Printf("Duplicate base OLD: 0x%" PRIxPTR "\r\n", (uintptr_t)ref);
+
             // need to free the memory allocated for the record
             platform_free(ptr);
 
@@ -317,11 +289,7 @@ bool CLR_RT_GarbageCollector::TestPointers_PopulateOld_Worker(void **ref)
 
         if (IsBlockInFreeList(g_CLR_RT_ExecutionEngine.m_heap, (CLR_RT_HeapBlock_Node *)dst, false))
         {
-#ifdef _WIN64
-            CLR_Debug::Printf("Some data points into a free list: 0x%016" PRIxPTR "\r\n", (uintptr_t)dst);
-#else
-            CLR_Debug::Printf("Some data points into a free list: 0x%08" PRIxPTR "\r\n", (uintptr_t)dst);
-#endif
+            CLR_Debug::Printf("Some data points into a free list: 0x%" PRIxPTR "\r\n", (uintptr_t)dst);
 
             // need to free the memory allocated for the record
             platform_free(ptr);
@@ -373,23 +341,19 @@ void CLR_RT_GarbageCollector::Relocation_UpdatePointer(void **ref)
 void CLR_RT_GarbageCollector::TestPointers_Remap()
 {
     NATIVE_PROFILE_CLR_CORE();
-    Rel_Map_Iter it;
 
-    for (it = s_mapOldToRecord.begin(); it != s_mapOldToRecord.end(); it++)
+    for (Rel_Map_Iter it = s_mapOldToRecord.begin(); it != s_mapOldToRecord.end(); it++)
     {
         RelocationRecord *ptr = it->second;
         void **ref = it->first;
         CLR_RT_GarbageCollector::Relocation_UpdatePointer((void **)&ref);
-        CLR_UINT32 *dst = ptr->oldPtr;
+        void *dst = ptr->oldPtr;
         CLR_RT_GarbageCollector::Relocation_UpdatePointer((void **)&dst);
 
         if (s_mapNewToRecord.find(ref) != s_mapNewToRecord.end())
         {
-#ifdef _WIN64
-            CLR_Debug::Printf("Duplicate base NEW: 0x%016" PRIxPTR "\r\n", (uintptr_t)ref);
-#else
-            CLR_Debug::Printf("Duplicate base NEW: 0x%08" PRIxPTR "\r\n", (uintptr_t)ref);
-#endif
+            CLR_Debug::Printf("Duplicate base NEW: 0x%" PRIxPTR "\r\n", (uintptr_t)ref);
+
             NANOCLR_DEBUG_STOP();
         }
 
@@ -405,7 +369,7 @@ void CLR_RT_GarbageCollector::TestPointers_Remap()
 bool CLR_RT_GarbageCollector::TestPointers_PopulateNew_Worker(void **ref)
 {
     NATIVE_PROFILE_CLR_CORE();
-    CLR_UINT32 *dst = (CLR_UINT32 *)*ref;
+    void *dst = *ref;
 
     if (dst)
     {
@@ -417,43 +381,23 @@ bool CLR_RT_GarbageCollector::TestPointers_PopulateNew_Worker(void **ref)
 
             if (ptr->newPtr != dst)
             {
-#ifdef _WIN64
                 CLR_Debug::Printf(
-                    "Bad pointer: 0x%016" PRIxPTR " 0x%016" PRIxPTR "\r\n",
+                    "Bad pointer: 0x%" PRIxPTR " 0x%" PRIxPTR "\r\n",
                     (uintptr_t)ptr->newPtr,
                     (uintptr_t)dst);
-#else
-                CLR_Debug::Printf(
-                    "Bad pointer: 0x%08" PRIxPTR " 0x%08" PRIxPTR "\r\n",
-                    (uintptr_t)ptr->newPtr,
-                    (uintptr_t)dst);
-#endif
+
                 NANOCLR_DEBUG_STOP();
             }
-            else if (ptr->data != *dst)
+            else if (ptr->data != *(uintptr_t *)dst)
             {
-#ifdef _WIN64
-                CLR_Debug::Printf(
-                    "Bad data: 0x%016" PRIxPTR " 0x%016" PRIxPTR "\r\n",
-                    (uintptr_t)ptr->data,
-                    (uintptr_t)*dst);
-#else
-                CLR_Debug::Printf(
-                    "Bad data: 0x%08" PRIxPTR " 0x%08" PRIxPTR "\r\n",
-                    (uintptr_t)ptr->data,
-                    (uintptr_t)*dst);
-#endif
+                CLR_Debug::Printf("Bad data: 0x%" PRIxPTR " 0x%" PRIxPTR "\r\n", ptr->data, *(uintptr_t *)dst);
 
                 NANOCLR_DEBUG_STOP();
             }
 
             if (IsBlockInFreeList(g_CLR_RT_ExecutionEngine.m_heap, (CLR_RT_HeapBlock_Node *)dst, false))
             {
-#ifdef _WIN64
-                CLR_Debug::Printf("Some data points into a free list: 0x%016" PRIxPTR "\r\n", (uintptr_t)dst);
-#else
-                CLR_Debug::Printf("Some data points into a free list: 0x%08" PRIxPTR "\r\n", (uintptr_t)dst);
-#endif
+                CLR_Debug::Printf("Some data points into a free list: 0x%" PRIxPTR "\r\n", (uintptr_t)dst);
 
                 NANOCLR_DEBUG_STOP();
             }
@@ -462,11 +406,7 @@ bool CLR_RT_GarbageCollector::TestPointers_PopulateNew_Worker(void **ref)
         }
         else
         {
-#ifdef _WIN64
-            CLR_Debug::Printf("Bad base: 0x%016" PRIxPTR "\r\n", (uintptr_t)ref);
-#else
-            CLR_Debug::Printf("Bad base: 0x0x%08" PRIxPTR "\r\n", (uintptr_t)ref);
-#endif
+            CLR_Debug::Printf("Bad base: 0x%" PRIxPTR "\r\n", (uintptr_t)ref);
 
             NANOCLR_DEBUG_STOP();
         }
