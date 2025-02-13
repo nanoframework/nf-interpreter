@@ -14,12 +14,13 @@
     limitations under the License.
 */
 
-// clang-format off
 
 /*
  * This file has been automatically generated using ChibiStudio board
  * generator plugin. Do not edit manually.
  */
+
+ // clang-format off
 
  #include "hal.h"
  #include "stm32_gpio.h"
