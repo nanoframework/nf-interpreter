@@ -1768,3 +1768,5 @@ extern "C" {
 #endif /* _FROM_ASM_ */
 
 #endif /* BOARD_H */
+
+// clang-format on
