@@ -19,7 +19,7 @@
  * generator plugin. Do not edit manually.
  */
 
- // clang-format off
+// clang-format off
 
  #include "hal.h"
  #include "stm32_gpio.h"
