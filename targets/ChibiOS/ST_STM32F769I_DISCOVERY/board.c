@@ -267,4 +267,3 @@ void boardInit(void) {
 }
 
 // clang-format on
- 
