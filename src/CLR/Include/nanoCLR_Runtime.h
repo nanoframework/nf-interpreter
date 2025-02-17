@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (c) .NET Foundation and Contributors
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
@@ -2599,7 +2599,11 @@ struct CLR_RT_GarbageCollector
         CLR_UINT8 *m_start;
         CLR_UINT8 *m_end;
         CLR_UINT8 *m_destination;
-        CLR_INT32 m_offset;
+#ifdef _WIN64
+        CLR_UINT64 m_offset;
+#else
+        CLR_UINT32 m_offset;
+#endif
     };
 
     //--//
