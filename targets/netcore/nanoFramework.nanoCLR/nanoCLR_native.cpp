@@ -46,6 +46,11 @@
 
 DebugPrintCallback gDebugPrintCallback = NULL;
 
+#if defined(VIRTUAL_DEVICE)
+ProfilerMessageCallback g_ProfilerMessageCallback = NULL;
+ProfilerDataCallback g_ProfilerDataCallback = NULL;
+#endif
+
 WireTransmitCallback WireProtocolTransmitCallback = NULL;
 WireReceiveCallback WireProtocolReceiveCallback = NULL;
 
@@ -229,3 +234,27 @@ bool nanoCLR_GetNativeAssemblyInformation(const CLR_UINT8 *data, size_t size)
 
     return true; // Success
 }
+
+#if defined(VIRTUAL_DEVICE)
+
+void nanoCLR_SetProfilerMessageCallback(ProfilerMessageCallback profilerMessageCallback)
+{
+    g_ProfilerMessageCallback = profilerMessageCallback;
+
+    // set profiling conditions
+    g_CLR_RT_ExecutionEngine.m_iProfiling_Conditions |= CLR_RT_ExecutionEngine::c_fProfiling_Enabled |
+                                                        CLR_RT_ExecutionEngine::c_fProfiling_Allocations |
+                                                        CLR_RT_ExecutionEngine::c_fProfiling_Calls;
+}
+
+void nanoCLR_SetProfilerDataCallback(ProfilerDataCallback profilerDataCallback)
+{
+    g_ProfilerDataCallback = profilerDataCallback;
+
+    // set profiling conditions
+    g_CLR_RT_ExecutionEngine.m_iProfiling_Conditions |= CLR_RT_ExecutionEngine::c_fProfiling_Enabled |
+                                                        CLR_RT_ExecutionEngine::c_fProfiling_Allocations |
+                                                        CLR_RT_ExecutionEngine::c_fProfiling_Calls;
+}
+
+#endif
