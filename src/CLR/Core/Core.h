@@ -21,8 +21,6 @@
 // #include <SPOT_hardware_native.h>
 #include <nanoCLR_Runtime__HeapBlock.h>
 
-#ifdef _WIN64
 #include <inttypes.h>
-#endif
 
 #endif // NANOCLR_CORE_H
