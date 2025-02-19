@@ -13,26 +13,28 @@ namespace nanoFramework.nanoCLR.Host.Profiler
     internal class ProfilerLogFileProcessor : IDisposable
     {
         private readonly StreamWriter _profilerDumpWriter;
+        private readonly string _logFilePath;
+        private bool _disposedValue;
 
         public ProfilerLogFileProcessor()
         {
             // create output file for profiler binary dump
             string _profileBinaryFileName = $"{Guid.NewGuid()}_{DateTime.Now.ToString("s").Replace(":", "_")}.log";
 
-            string logFilePath = Path.Combine(Path.GetTempPath(), _profileBinaryFileName);
+            _logFilePath = Path.Combine(Path.GetTempPath(), _profileBinaryFileName);
 
             // inform user about the binary file
-            Console.WriteLine($"Profiler log file: {logFilePath}");
+            Console.WriteLine($"{Environment.NewLine}Profiler log file: {_logFilePath}{Environment.NewLine}");
 
             try
             {
                 _profilerDumpWriter = new StreamWriter(
-                    logFilePath,
+                    _logFilePath,
                     new FileStreamOptions() { Mode = FileMode.Create, Access = FileAccess.ReadWrite, Options = FileOptions.WriteThrough, Share = FileShare.ReadWrite });
             }
             catch (IOException ex)
             {
-                throw new IOException($"Failed to create profiler message log file at {logFilePath}", ex);
+                throw new IOException($"Failed to create profiler message log file at {_logFilePath}", ex);
             }
         }
 
@@ -44,6 +46,30 @@ namespace nanoFramework.nanoCLR.Host.Profiler
 
         }
 
-        public void Dispose() => ((IDisposable)_profilerDumpWriter).Dispose();
+        #region Dispose implementation
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!_disposedValue)
+            {
+                if (disposing)
+                {
+                    // output the file path so user can find it (usefull in case of long running)
+                    Console.WriteLine($"{Environment.NewLine}Profiler log file: {_logFilePath}{Environment.NewLine}");
+
+                    _profilerDumpWriter.Dispose();
+                }
+
+                _disposedValue = true;
+            }
+        }
+
+        public void Dispose()
+        {
+            Dispose(disposing: true);
+            GC.SuppressFinalize(this);
+        }
+
+        #endregion
     }
 }
