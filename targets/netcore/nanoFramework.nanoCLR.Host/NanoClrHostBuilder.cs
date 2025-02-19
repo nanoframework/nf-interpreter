@@ -143,6 +143,7 @@ namespace nanoFramework.nanoCLR.Host
             s_nanoClrHost.WireProtocolPort = _wireProtocolPort;
             s_nanoClrHost.ConfigureSteps.AddRange(_configureSteps);
             s_nanoClrHost.PreInitConfigureSteps.AddRange(_preInitConfigureSteps);
+            s_nanoClrHost.CleanupSteps.AddRange(_cleanupSteps);
 
             s_nanoClrHost.nanoCLRSettings = new nanoCLRSettings
             {
