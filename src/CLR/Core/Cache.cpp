@@ -447,10 +447,6 @@ void CLR_RT_EventCache::Append_Node(CLR_RT_HeapBlock *node)
     ptr->Debug_ClearBlock(SENTINEL_NODE_APPENDED);
 
     lst.m_blocks.LinkAtBack(ptr);
-
-#if defined(NANOCLR_PROFILE_NEW_ALLOCATIONS)
-    g_CLR_PRF_Profiler.TrackObjectCreation(node);
-#endif
 }
 
 CLR_RT_HeapBlock *CLR_RT_EventCache::Extract_Node_Slow(CLR_UINT32 dataType, CLR_UINT32 flags, CLR_UINT32 blocks)

@@ -27,8 +27,9 @@ HRESULT CLR_PRF_Profiler::CreateInstance()
     g_CLR_PRF_Profiler.m_packetSeqId = 0;
     g_CLR_PRF_Profiler.m_stream = NULL;
     g_CLR_PRF_Profiler.m_lastTimestamp =
-        (CLR_UINT32)((CLR_UINT64)(HAL_Time_CurrentTime() + ((1ull << CLR_PRF_CMDS::Bits::TimestampShift) - 1)) >>
+        (CLR_UINT32)((HAL_Time_CurrentTime() + ((1ULL << CLR_PRF_CMDS::Bits::TimestampShift) - 1)) >>
                      CLR_PRF_CMDS::Bits::TimestampShift);
+
     g_CLR_PRF_Profiler.m_currentAssembly = 0;
     g_CLR_PRF_Profiler.m_currentThreadPID = 0;
     NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_MemoryStream::CreateInstance(g_CLR_PRF_Profiler.m_stream, NULL, 0));
@@ -718,7 +719,8 @@ void CLR_PRF_Profiler::TrackObjectCreation(CLR_RT_HeapBlock *ptr)
 
         CLR_UINT8 dt = ptr->DataType();
 
-        if (dt != DATATYPE_STACK_FRAME && dt != DATATYPE_BINARY_BLOB_HEAD)
+        if (dt != DATATYPE_STACK_FRAME && dt != DATATYPE_BINARY_BLOB_HEAD && dt != DATATYPE_CACHEDBLOCK &&
+            dt != DATATYPE_MEMORY_STREAM_HEAD && dt != DATATYPE_MEMORY_STREAM_DATA)
         {
             Timestamp();
 
@@ -891,7 +893,7 @@ void CLR_PRF_Profiler::TrackObjectDeletion(CLR_RT_HeapBlock *ptr)
         CLR_PROF_HANDLER_CALLCHAIN_VOID(perf);
 
         CLR_UINT8 dt = ptr->DataType();
-        if (dt != DATATYPE_STACK_FRAME && dt != DATATYPE_CACHEDBLOCK)
+        if (dt != DATATYPE_STACK_FRAME && dt != DATATYPE_BINARY_BLOB_HEAD && dt != DATATYPE_CACHEDBLOCK)
         {
             Timestamp();
             m_stream->WriteBits(CLR_PRF_CMDS::c_Profiling_Allocs_Delete, CLR_PRF_CMDS::Bits::CommandHeader);
@@ -1012,7 +1014,11 @@ void CLR_PRF_Profiler::TrackObjectRelocation()
         {
             DumpPointer(relocBlocks[i].m_start);
             DumpPointer(relocBlocks[i].m_end);
-            PackAndWriteBits(relocBlocks[i].m_offset);
+
+#ifdef _WIN64
+            PackAndWriteBits((CLR_UINT32)(relocBlocks[i].m_offset >> 32));
+#endif
+            PackAndWriteBits((CLR_UINT32)relocBlocks[i].m_offset);
 
 #if defined(VIRTUAL_DEVICE)
             if (g_ProfilerMessageCallback != NULL)
@@ -1226,9 +1232,8 @@ void CLR_PRF_Profiler::RecordHeapCompactionEnd()
 #if defined(VIRTUAL_DEVICE)
         if (g_ProfilerMessageCallback != NULL)
         {
-            std::string heapCompaction = std::format(
-                "Heap compaction: Finished run #{}\r\n",
-                g_CLR_RT_GarbageCollector.m_numberOfGarbageCollections);
+            std::string heapCompaction =
+                std::format("Heap compaction: Finished run #{}\r\n", g_CLR_RT_GarbageCollector.m_numberOfCompactions);
 
             g_ProfilerMessageCallback(heapCompaction.c_str());
         }
