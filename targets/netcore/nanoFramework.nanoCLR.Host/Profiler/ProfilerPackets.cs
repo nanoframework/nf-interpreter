@@ -69,7 +69,9 @@ namespace nanoFramework.Tools.NanoProfiler
                 case Packets.Commands.c_Profiling_HeapCompact_End:
                     return new Packets.HeapCompactionEndPacket(stream);
                 default:
-                    throw new ApplicationException("Unable to decode packet.");
+                    // throw new ApplicationException("Unable to decode packet.");
+                    // TODO: don't care about this for now
+                    return null;
             }
         }
     }

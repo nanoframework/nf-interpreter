@@ -243,7 +243,13 @@ void CLR_RT_HeapCluster::RecoverFromGC()
             } while (next < end && next->IsAlive() == false);
 
 #if defined(NANOCLR_PROFILE_NEW_ALLOCATIONS)
-            g_CLR_PRF_Profiler.TrackObjectDeletion(ptr);
+
+            // don't report free blocks, as they are not being deleted, rather grouped
+            if (ptr->DataType() != DATATYPE_FREEBLOCK)
+            {
+                g_CLR_PRF_Profiler.TrackObjectDeletion(ptr);
+            }
+
 #endif
             ptr->SetDataId(CLR_RT_HEAPBLOCK_RAW_ID(DATATYPE_FREEBLOCK, CLR_RT_HeapBlock::HB_Pinned, lenTot));
 

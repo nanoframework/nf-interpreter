@@ -10,12 +10,13 @@
 CLR_UINT32 CLR_RT_GarbageCollector::ExecuteCompaction()
 {
     NATIVE_PROFILE_CLR_CORE();
-#if defined(NANOCLR_PROFILE_NEW_ALLOCATIONS)
-    g_CLR_PRF_Profiler.RecordHeapCompactionBegin();
-#endif
 
     // bump the number of heap compactions
     m_numberOfCompactions++;
+
+#if defined(NANOCLR_PROFILE_NEW_ALLOCATIONS)
+    g_CLR_PRF_Profiler.RecordHeapCompactionBegin();
+#endif
 
 #if defined(NANOCLR_TRACE_MEMORY_STATS)
 

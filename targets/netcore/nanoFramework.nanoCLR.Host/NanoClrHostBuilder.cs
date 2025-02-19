@@ -163,7 +163,7 @@ namespace nanoFramework.nanoCLR.Host
 
         private nanoCLRHostBuilder SetProfilerMessageCallback(Action<string> profilerMessage)
         {
-            _preInitConfigureSteps.Add(() => Interop.nanoCLR.nanoCLR_SetProfilerMessageCallback((msg) => profilerMessage(msg)));
+            _configureSteps.Add(() => Interop.nanoCLR.nanoCLR_SetProfilerMessageCallback((msg) => profilerMessage(msg)));
 
             return this;
         }
