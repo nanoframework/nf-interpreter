@@ -81,7 +81,6 @@
     <ClInclude Include="..\Include\nanoCLR_Runtime__Serialization.h" />
     <ClInclude Include="..\Include\nanoCLR_Types.h" />
     <ClInclude Include="..\Include\nanoCLR_Win32.h" />
-    <ClInclude Include="..\Include\nanoHAL.h" />
     <ClInclude Include="..\Include\nanoHAL_Types.h" />
     <ClInclude Include="..\Include\nanoPAL.h" />
     <ClInclude Include="..\Include\nanoSupport.h" />
