@@ -1,11 +1,11 @@
-//
+﻿//
 // Copyright (c) .NET Foundation and Contributors
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
 //
+
 #include <nanoCLR_Runtime.h>
 #include <nanoCLR_Debugging.h>
-#include <nanoHAL.h>
 #include <WireProtocol.h>
 #include <WireProtocol_Message.h>
 #include <WireProtocol_MonitorCommands.h>
