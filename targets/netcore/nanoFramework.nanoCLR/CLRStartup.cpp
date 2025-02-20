@@ -6,10 +6,6 @@
 #include "stdafx.h"
 #include "nanoCLR_native.h"
 
-#if defined(VIRTUAL_DEVICE)
-
-#endif
-
 ////////////////////////////////////////////////////////////////////////////////
 
 struct Settings
