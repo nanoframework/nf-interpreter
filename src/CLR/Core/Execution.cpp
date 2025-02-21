@@ -91,8 +91,9 @@ HRESULT CLR_RT_ExecutionEngine::ExecutionEngine_Initialize()
                                                     // CLR_RT_Thread*                      m_cctorThread;
                                                     //
 #if !defined(NANOCLR_APPDOMAINS)
-    m_globalLock = NULL; // CLR_RT_HeapBlock*                  m_globalLock;
-#endif                   //
+    m_globalLock = NULL;           // CLR_RT_HeapBlock*                  m_globalLock;
+    m_outOfMemoryException = NULL; // CLR_RT_HeapBlock*                   m_outOfMemoryException;
+#endif
 
     m_currentUICulture = NULL; // CLR_RT_HeapBlock*                   m_currentUICulture;
 
@@ -449,6 +450,7 @@ void CLR_RT_ExecutionEngine::Relocate()
 
 #if !defined(NANOCLR_APPDOMAINS)
     CLR_RT_GarbageCollector::Heap_Relocate((void **)&m_globalLock);
+    CLR_RT_GarbageCollector::Heap_Relocate((void **)&m_outOfMemoryException);
 #endif
 
     CLR_RT_GarbageCollector::Heap_Relocate((void **)&m_currentUICulture);
