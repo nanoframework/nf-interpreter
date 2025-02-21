@@ -3401,6 +3401,7 @@ void CLR_RT_AppDomain::AppDomain_Initialize()
     m_id = g_CLR_RT_ExecutionEngine.m_appDomainIdNext++;
     m_globalLock = nullptr;
     m_strName = nullptr;
+    m_outOfMemoryException = nullptr;
     m_appDomainAssemblyLastAccess = nullptr;
 }
 
@@ -3455,12 +3456,17 @@ HRESULT CLR_RT_AppDomain::LoadAssembly(CLR_RT_Assembly *assm)
 
     // Preemptively allocate an out of memory exception.
     // We can never get into a case where an out of memory exception cannot be thrown.
+    if (m_outOfMemoryException == NULL)
+    {
+        _ASSERTE(!strcmp(assm->m_szName, "mscorlib")); // always the first assembly to be loaded
 
-    _ASSERTE(!strcmp(assm->m_szName, "mscorlib")); // always the first assembly to be loaded
+        CLR_RT_HeapBlock exception;
 
-    NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObjectFromIndex(
-        m_outOfMemoryException,
-        g_CLR_RT_WellKnownTypes.m_OutOfMemoryException));
+        NANOCLR_CHECK_HRESULT(
+            g_CLR_RT_ExecutionEngine.NewObjectFromIndex(exception, g_CLR_RT_WellKnownTypes.m_OutOfMemoryException));
+
+        m_outOfMemoryException = exception.Dereference();
+    }
 
     NANOCLR_CLEANUP();
 
@@ -3554,6 +3560,7 @@ void CLR_RT_AppDomain::Relocate()
     NATIVE_PROFILE_CLR_CORE();
     CLR_RT_GarbageCollector::Heap_Relocate((void **)&m_globalLock);
     CLR_RT_GarbageCollector::Heap_Relocate((void **)&m_strName);
+    CLR_RT_GarbageCollector::Heap_Relocate((void **)&m_outOfMemoryException);
 }
 
 HRESULT CLR_RT_AppDomain::VerifyTypeIsLoaded(const CLR_RT_TypeDef_Index &index)
@@ -5560,9 +5567,16 @@ HRESULT CLR_RT_TypeSystem::PrepareForExecution()
 
     // Preemptively create an out of memory exception.
     // We can never get into a case where an out of memory exception cannot be thrown.
-    NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObjectFromIndex(
-        g_CLR_RT_ExecutionEngine.m_outOfMemoryException,
-        g_CLR_RT_WellKnownTypes.OutOfMemoryException));
+
+    if (g_CLR_RT_ExecutionEngine.m_outOfMemoryException == nullptr)
+    {
+        CLR_RT_HeapBlock exception;
+
+        NANOCLR_CHECK_HRESULT(
+            g_CLR_RT_ExecutionEngine.NewObjectFromIndex(exception, g_CLR_RT_WellKnownTypes.OutOfMemoryException));
+
+        g_CLR_RT_ExecutionEngine.m_outOfMemoryException = exception.Dereference();
+    }
 #endif
 
     // Load Runtime.Events to setup EventSink for other assemblies using it

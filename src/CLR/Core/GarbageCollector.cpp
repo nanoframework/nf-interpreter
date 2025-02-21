@@ -409,6 +409,7 @@ void CLR_RT_GarbageCollector::Mark()
 
 #if !defined(NANOCLR_APPDOMAINS)
         CheckSingleBlock_Force(g_CLR_RT_ExecutionEngine.m_globalLock);
+        CheckSingleBlock_Force(g_CLR_RT_ExecutionEngine.m_outOfMemoryException);
 #endif
 
         CheckSingleBlock_Force(g_CLR_RT_ExecutionEngine.m_currentUICulture);
@@ -686,6 +687,7 @@ void CLR_RT_GarbageCollector::AppDomain_Mark()
 
         CheckSingleBlock_Force(appDomain->m_globalLock);
         CheckSingleBlock_Force(appDomain->m_strName);
+        CheckSingleBlock_Force(appDomain->m_outOfMemoryException);
     }
     NANOCLR_FOREACH_NODE_END();
 }
