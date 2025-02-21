@@ -76,7 +76,7 @@ list(APPEND CHIBIOS_HAL_SOURCES ${CMAKE_SOURCE_DIR}/targets/ChibiOS/_nf-overlay/
 list(APPEND CHIBIOS_HAL_SOURCES ${CMAKE_SOURCE_DIR}/targets/ChibiOS/_nf-overlay/os/hal/ports/STM32/LLD/RNGv1/rng_lld.c)
 
 ##########################################################################################################################
-# Add above ALL the source code file(s) low level driver specif for a series required for a new nanoFramework 
+# Add above ALL the source code file(s) low level driver specific for a series required for a new nanoFramework 
 # overlay component that you are adding following the template below. 
 #
 # list(APPEND CHIBIOS_SOURCES ${CMAKE_SOURCE_DIR}/targets/ChibiOS/_nf-overlay/os/hal/src/<path-here>)
