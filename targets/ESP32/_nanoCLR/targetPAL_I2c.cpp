@@ -7,7 +7,7 @@
 #include <esp32_idf.h>
 #include <nanoHAL_v2.h>
 
-uint8_t Esp_I2C_Initialised_Flag[I2C_NUM_MAX] = {
+int16_t Esp_I2C_Initialised_Flag[I2C_NUM_MAX] = {
     0
 #if I2C_NUM_MAX > 1
     ,
