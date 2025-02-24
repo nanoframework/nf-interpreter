@@ -590,6 +590,10 @@ void CLR_RT_GarbageCollector::Heap_Relocate(void **ref)
                     _ASSERTE(destinationAddress >= (void *)s_CLR_RT_Heap.location);
                     _ASSERTE(destinationAddress < (void *)(s_CLR_RT_Heap.location + s_CLR_RT_Heap.size));
 
+#if defined(NANOCLR_PROFILE_NEW_ALLOCATIONS)
+                    g_CLR_PRF_Profiler.TrackObjectRelocation(*ref, destinationAddress);
+#endif
+
                     *ref = destinationAddress;
 
                     return;
