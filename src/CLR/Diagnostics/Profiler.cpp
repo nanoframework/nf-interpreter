@@ -912,7 +912,7 @@ void CLR_PRF_Profiler::TrackObjectDeletion(CLR_RT_HeapBlock *ptr)
                     g_CLR_RT_TypeSystem.BuildTypeName(arrayTypeDef, szBuffer, iBuffer);
 
                     // compose output message
-                    std::string objectCreation = std::format(
+                    std::string objectDeletion = std::format(
                         "Delete {}[] @ 0x{:X} {} bytes [{:08x}] {} elements {} level(s)\r\n",
                         fullTypeName,
                         (CLR_UINT64)((CLR_UINT8 *)ptr),
@@ -921,7 +921,7 @@ void CLR_PRF_Profiler::TrackObjectDeletion(CLR_RT_HeapBlock *ptr)
                         array->m_numOfElements,
                         levels);
 
-                    g_ProfilerMessageCallback(objectCreation.c_str());
+                    g_ProfilerMessageCallback(objectDeletion.c_str());
                 }
                 else if (dt == DATATYPE_CLASS || dt == DATATYPE_VALUETYPE)
                 {
@@ -935,7 +935,7 @@ void CLR_PRF_Profiler::TrackObjectDeletion(CLR_RT_HeapBlock *ptr)
                     g_CLR_RT_TypeSystem.BuildTypeName(idx, szBuffer, iBuffer);
 
                     // compose output message
-                    std::string objectCreation = std::format(
+                    std::string objectDeletion = std::format(
                         "Delete {} {} @ 0x{:X} [{:08x}] {} bytes\r\n",
                         c_CLR_RT_DataTypeLookup[dt].m_name,
                         fullTypeName,
@@ -943,7 +943,7 @@ void CLR_PRF_Profiler::TrackObjectDeletion(CLR_RT_HeapBlock *ptr)
                         idx.data,
                         (ptr->DataSize() * sizeof(struct CLR_RT_HeapBlock)));
 
-                    g_ProfilerMessageCallback(objectCreation.c_str());
+                    g_ProfilerMessageCallback(objectDeletion.c_str());
                 }
                 else
                 {
