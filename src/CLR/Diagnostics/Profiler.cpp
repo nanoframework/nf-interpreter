@@ -1021,19 +1021,6 @@ void CLR_PRF_Profiler::TrackObjectRelocation()
 #endif
             PackAndWriteBits((CLR_UINT32)relocBlocks[i].m_offset);
 
-#if defined(VIRTUAL_DEVICE)
-            if (g_ProfilerMessageCallback != NULL)
-            {
-                std::string objectRelocation = std::format(
-                    "Relocate 0x{:X} to 0x{:X} offset 0x{:X}\r\n",
-                    (CLR_UINT64)relocBlocks[i].m_start,
-                    (CLR_UINT64)relocBlocks[i].m_destination,
-                    relocBlocks[i].m_offset);
-
-                g_ProfilerMessageCallback(objectRelocation.c_str());
-            }
-#endif
-
 #ifdef NANOCLR_TRACE_PROFILER_MESSAGES
 
 #ifdef _WIN64
@@ -1052,6 +1039,86 @@ void CLR_PRF_Profiler::TrackObjectRelocation()
 #endif
 
 #endif //  NANOCLR_TRACE_PROFILER_MESSAGES
+        }
+    }
+}
+
+void CLR_PRF_Profiler::TrackObjectRelocation(void *previousAddress, void *destinationAddress)
+{
+    NATIVE_PROFILE_CLR_DIAGNOSTICS();
+
+#ifdef NANOCLR_FORCE_PROFILER_EXECUTION
+    if (g_CLR_PRF_Profiler.m_initialized)
+#else
+    if (CLR_EE_PRF_IS(Allocations))
+#endif
+    {
+
+#if defined(VIRTUAL_DEVICE)
+        if (g_ProfilerMessageCallback != NULL)
+        {
+            CLR_RT_HeapBlock *ptr = (CLR_RT_HeapBlock *)destinationAddress;
+            CLR_UINT8 dt = ptr->DataType();
+            CLR_UINT16 dataSize = ptr->DataSize();
+
+            if (dt == DATATYPE_CLASS || dt == DATATYPE_VALUETYPE)
+            {
+                CLR_RT_TypeDef_Index idx = ptr->ObjectCls();
+
+                // build type name
+                char fullTypeName[1024] = {0};
+                char *szBuffer = fullTypeName;
+                size_t iBuffer = MAXSTRLEN(fullTypeName);
+
+                g_CLR_RT_TypeSystem.BuildTypeName(idx, szBuffer, iBuffer);
+
+                // compose output message
+                std::string objectRelocation = std::format(
+                    "Relocate {} {} from 0x{:X} to 0x{:X}\r\n",
+                    c_CLR_RT_DataTypeLookup[dt].m_name,
+                    fullTypeName,
+                    (CLR_UINT64)((CLR_UINT8 *)previousAddress),
+                    (CLR_UINT64)((CLR_UINT8 *)destinationAddress));
+
+                g_ProfilerMessageCallback(objectRelocation.c_str());
+            }
+            else if (dt == DATATYPE_SZARRAY)
+            {
+                CLR_RT_HeapBlock_Array *array = (CLR_RT_HeapBlock_Array *)ptr;
+                CLR_RT_TypeDef_Index elementIdx = array->ReflectionDataConst().m_data.m_type;
+
+                // build type name
+                char fullTypeName[1024] = {0};
+                char *szBuffer = fullTypeName;
+                size_t iBuffer = MAXSTRLEN(fullTypeName);
+
+                CLR_RT_TypeDef_Instance arrayTypeDef{};
+                CLR_UINT32 levels;
+                arrayTypeDef.InitializeFromReflection(array->ReflectionData(), &levels);
+
+                g_CLR_RT_TypeSystem.BuildTypeName(arrayTypeDef, szBuffer, iBuffer);
+
+                // compose output message
+                std::string objectRelocation = std::format(
+                    "Relocate {}[] from 0x{:X} to 0x{:X}\r\n",
+                    fullTypeName,
+                    (CLR_UINT64)((CLR_UINT8 *)previousAddress),
+                    (CLR_UINT64)((CLR_UINT8 *)destinationAddress));
+
+                g_ProfilerMessageCallback(objectRelocation.c_str());
+            }
+            else
+            {
+                // compose output message
+                std::string objectRelocation = std::format(
+                    "Relocate {} from 0x{:X} to 0x{:X}\r\n",
+                    c_CLR_RT_DataTypeLookup[dt].m_name,
+                    (CLR_UINT64)((CLR_UINT8 *)previousAddress),
+                    (CLR_UINT64)((CLR_UINT8 *)destinationAddress));
+
+                g_ProfilerMessageCallback(objectRelocation.c_str());
+            }
+#endif
         }
     }
 }
