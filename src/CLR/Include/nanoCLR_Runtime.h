@@ -3184,6 +3184,9 @@ struct ThreadPriority
     /*=========================================================================
     ** Constants for thread priorities.
     =========================================================================*/
+    ///////////////////////////////////////////////////////////////////////////
+    // !!! KEEP IN SYNC with System.Threading.ThreadPriority in mscorlib !!! //
+    ///////////////////////////////////////////////////////////////////////////
     static const int Lowest = 0;
     static const int BelowNormal = 1;
     static const int Normal = 2;
