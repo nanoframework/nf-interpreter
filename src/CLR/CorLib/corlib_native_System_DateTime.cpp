@@ -176,6 +176,17 @@ HRESULT Library_corlib_native_System_DateTime::GetTodayAsTicks___STATIC__I8(CLR_
 
 //--//
 
+CLR_INT64 *Library_corlib_native_System_DateTime::NewObject(CLR_RT_StackFrame &stack)
+{
+    NATIVE_PROFILE_CLR_CORE();
+    CLR_RT_HeapBlock &ref = stack.PushValue();
+
+    ref.SetDataId(CLR_RT_HEAPBLOCK_RAW_ID(DATATYPE_DATETIME, 0, 1));
+    ref.ClearData();
+
+    return (CLR_INT64 *)&ref.NumericByRef().s8;
+}
+
 CLR_INT64 *Library_corlib_native_System_DateTime::GetValuePtr(CLR_RT_StackFrame &stack)
 {
     NATIVE_PROFILE_CLR_CORE();
@@ -191,8 +202,12 @@ CLR_INT64 *Library_corlib_native_System_DateTime::GetValuePtr(CLR_RT_HeapBlock &
     if (dt == DATATYPE_OBJECT || dt == DATATYPE_BYREF)
     {
         obj = obj->Dereference();
+
         if (!obj)
+        {
             return NULL;
+        }
+
         dt = obj->DataType();
     }
 
@@ -201,8 +216,12 @@ CLR_INT64 *Library_corlib_native_System_DateTime::GetValuePtr(CLR_RT_HeapBlock &
     if (dt == DATATYPE_OBJECT)
     {
         obj = obj->Dereference();
+
         if (!obj)
+        {
             return NULL;
+        }
+
         dt = obj->DataType();
     }
 
