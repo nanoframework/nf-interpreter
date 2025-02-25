@@ -628,19 +628,9 @@ struct Library_corlib_native_System_Int16
 
 struct Library_corlib_native_System_Guid
 {
-    static const int FIELD_STATIC__Empty = 10;
+    static const int FIELD_STATIC__Empty = 14;
 
-    static const int FIELD___a = 1;
-    static const int FIELD___b = 2;
-    static const int FIELD___c = 3;
-    static const int FIELD___d = 4;
-    static const int FIELD___e = 5;
-    static const int FIELD___f = 6;
-    static const int FIELD___g = 7;
-    static const int FIELD___h = 8;
-    static const int FIELD___i = 9;
-    static const int FIELD___j = 10;
-    static const int FIELD___k = 11;
+    static const int FIELD___data = 1;
 
     NANOCLR_NATIVE_DECLARE(GenerateNewGuid___STATIC__SZARRAY_U1);
 
