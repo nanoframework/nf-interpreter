@@ -413,7 +413,7 @@ jobs:
     variables:
       DOTNET_NOLOGO: true
       # creates a counter and assigns it to the revision variable
-      REVISION: $[counter('STM32_1_12_3_versioncounter', 0)]
+      REVISION: $[counter('STM32_1_12_4_versioncounter', 0)]
       HelperPackageVersion: $[counter('HelperPackageVersioncounter', 0)]
       TargetPlatform: "stm32"
 
@@ -527,7 +527,7 @@ jobs:
     variables:
       DOTNET_NOLOGO: true
       # creates a counter and assigns it to the revision variable
-      REVISION: $[counter('ESP32_1_12_3_versioncounter', 0)]
+      REVISION: $[counter('ESP32_1_12_4_versioncounter', 0)]
       IDF_PATH: "D:/a/1/s/esp-idf"
       PIP_CACHE_DIR: $(Pipeline.Workspace)/.pip
       TargetPlatform: "esp32"
@@ -615,7 +615,7 @@ jobs:
     variables:
       DOTNET_NOLOGO: true
       # creates a counter and assigns it to the revision variable
-      REVISION: $[counter('NXP_1_12_3_versioncounter', 0)]
+      REVISION: $[counter('NXP_1_12_4_versioncounter', 0)]
       GIT_LFS_SKIP_SMUDGE: 1
       TargetPlatform: "freertos"
 
@@ -693,7 +693,7 @@ jobs:
     variables:
       DOTNET_NOLOGO: true
       # creates a counter and assigns it to the revision variable
-      REVISION: $[counter('TI_1_12_3_versioncounter', 0)]
+      REVISION: $[counter('TI_1_12_4_versioncounter', 0)]
       HelperPackageVersion: $[counter('HelperPackageVersioncounter', 0)]
       TargetPlatform: "ti_simplelink"
 
@@ -764,7 +764,7 @@ jobs:
 
     variables:
       # creates a counter and assigns it to the revision variable
-      REVISION: $[counter('AZURERTOS_1_12_3_versioncounter', 0)]
+      REVISION: $[counter('AZURERTOS_1_12_4_versioncounter', 0)]
       HelperPackageVersion: $[counter('HelperPackageVersioncounter', 0)]
       TargetPlatform: "efm32"
 
@@ -815,7 +815,7 @@ jobs:
         value: true
       # creates a counter and assigns it to the revision variable
       - name: REVISION
-        value: $[counter('WIN32_1_12_3_versioncounter', 0)]
+        value: $[counter('WIN32_1_12_4_versioncounter', 0)]
       - name: LITTLEFS_PATH
         value: "D:/a/1/s/littlefs"
 
