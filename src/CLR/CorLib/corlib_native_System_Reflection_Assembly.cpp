@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (c) .NET Foundation and Contributors
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
@@ -15,7 +15,7 @@ HRESULT Library_corlib_native_System_Reflection_Assembly::get_FullName___STRING(
     CLR_RT_Assembly *assm;
     char buffer[NANOCLR_MAX_ASSEMBLY_NAME * 2];
     const CLR_RECORD_ASSEMBLY *header;
-    CLR_RT_HeapBlock *hbAsm = stack.Arg0().Dereference();
+    CLR_RT_HeapBlock *hbAsm = stack.This();
 
     NANOCLR_CHECK_HRESULT(GetTypeDescriptor(*hbAsm, instance));
 
@@ -53,7 +53,7 @@ HRESULT Library_corlib_native_System_Reflection_Assembly::GetType___SystemType__
     CLR_RT_HeapBlock *hbRef;
     CLR_RT_HeapBlock *hbObj;
     const char *szClass = stack.Arg1().RecoverString();
-    CLR_RT_HeapBlock *hbAsm = stack.Arg0().Dereference();
+    CLR_RT_HeapBlock *hbAsm = stack.This();
 
     FAULT_ON_NULL(szClass);
     FAULT_ON_NULL(hbAsm);
@@ -80,7 +80,7 @@ HRESULT Library_corlib_native_System_Reflection_Assembly::GetTypes___SZARRAY_Sys
     NANOCLR_HEADER();
 
     CLR_RT_Assembly_Instance assm;
-    CLR_RT_HeapBlock *hbAsm = stack.Arg0().Dereference();
+    CLR_RT_HeapBlock *hbAsm = stack.This();
 
     NANOCLR_CHECK_HRESULT(GetTypeDescriptor(*hbAsm, assm));
 
@@ -127,7 +127,7 @@ HRESULT Library_corlib_native_System_Reflection_Assembly::GetVersion___VOID__BYR
     else
     {
         CLR_RT_Assembly_Instance assm;
-        CLR_RT_HeapBlock *hbAsm = stack.Arg0().Dereference();
+        CLR_RT_HeapBlock *hbAsm = stack.This();
 
         NANOCLR_CHECK_HRESULT(GetTypeDescriptor(*hbAsm, assm));
 
@@ -149,7 +149,7 @@ HRESULT Library_corlib_native_System_Reflection_Assembly::GetManifestResourceNam
     NANOCLR_HEADER();
 
     CLR_RT_Assembly_Instance assm;
-    CLR_RT_HeapBlock *hbAsm = stack.Arg0().Dereference();
+    CLR_RT_HeapBlock *hbAsm = stack.This();
 
     NANOCLR_CHECK_HRESULT(GetTypeDescriptor(*hbAsm, assm));
 

@@ -1,9 +1,12 @@
-//
+﻿//
 // Copyright (c) .NET Foundation and Contributors
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
 //
+
 #include "CorLib.h"
+
+typedef Library_corlib_native_System_Reflection_ParameterInfo ParameterInfo;
 
 HRESULT Library_corlib_native_System_Reflection_MethodBase::get_Name___STRING(CLR_RT_StackFrame &stack)
 {
@@ -11,7 +14,7 @@ HRESULT Library_corlib_native_System_Reflection_MethodBase::get_Name___STRING(CL
     NANOCLR_HEADER();
 
     CLR_RT_MethodDef_Instance md;
-    CLR_RT_HeapBlock *hbMeth = stack.Arg0().Dereference();
+    CLR_RT_HeapBlock *hbMeth = stack.This();
 
     NANOCLR_CHECK_HRESULT(GetMethodDescriptor(stack, *hbMeth, md));
 
@@ -27,7 +30,7 @@ HRESULT Library_corlib_native_System_Reflection_MethodBase::get_DeclaringType___
 
     CLR_RT_MethodDef_Instance md;
     CLR_RT_TypeDef_Instance cls{};
-    CLR_RT_HeapBlock *hbMeth = stack.Arg0().Dereference();
+    CLR_RT_HeapBlock *hbMeth = stack.This();
 
     NANOCLR_CHECK_HRESULT(GetMethodDescriptor(stack, *hbMeth, md));
 
@@ -110,7 +113,7 @@ HRESULT Library_corlib_native_System_Reflection_MethodBase::Invoke___OBJECT__OBJ
     CLR_RT_HeapBlock_Array *pArray = stack.Arg2().DereferenceArray();
     CLR_RT_HeapBlock *args = NULL;
     int numArgs = 0;
-    CLR_RT_HeapBlock *hbMeth = stack.Arg0().Dereference();
+    CLR_RT_HeapBlock *hbMeth = stack.This();
 
     NANOCLR_CHECK_HRESULT(GetMethodDescriptor(stack, *hbMeth, md));
 
@@ -171,7 +174,7 @@ HRESULT Library_corlib_native_System_Reflection_MethodBase::CheckFlags(
 
     CLR_RT_MethodDef_Instance md;
     bool fRes;
-    CLR_RT_HeapBlock *hbMeth = stack.Arg0().Dereference();
+    CLR_RT_HeapBlock *hbMeth = stack.This();
 
     NANOCLR_CHECK_HRESULT(GetMethodDescriptor(stack, *hbMeth, md));
 
@@ -206,9 +209,9 @@ HRESULT Library_corlib_native_System_Reflection_MethodBase::GetParametersNative_
 
     CLR_RT_HeapBlock &top = stack.PushValueAndClear();
 
-    CLR_RT_HeapBlock *hbMethodInfo = stack.Arg0().Dereference();
+    CLR_RT_HeapBlock *hbMethodInfo = stack.This();
 
-    idx.m_data = hbMethodInfo[Library_corlib_native_System_Reflection_MethodBase::FIELD___token].NumericByRef().u4;
+    idx.m_data = hbMethodInfo[FIELD___token].NumericByRef().u4;
     inst.InitializeFromIndex(idx);
 
     // 1st pass: get the number of parameters
@@ -247,8 +250,7 @@ HRESULT Library_corlib_native_System_Reflection_MethodBase::GetParametersNative_
         hbObj = paramInfoElement->Dereference();
 
         // get reference to the <ParameterInfo> instance
-        CLR_RT_HeapBlock &paraTypeHB =
-            hbObj[Library_corlib_native_System_Reflection_ParameterInfo::FIELD___parameterType];
+        CLR_RT_HeapBlock &paraTypeHB = hbObj[ParameterInfo::FIELD___parameterType];
 
         // create a new instance of the parameter type
         NANOCLR_CHECK_HRESULT(
