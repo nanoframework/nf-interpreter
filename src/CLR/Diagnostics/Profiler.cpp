@@ -1076,7 +1076,7 @@ void CLR_PRF_Profiler::TrackObjectRelocation(void *previousAddress, void *destin
             else if (dt == DATATYPE_SZARRAY)
             {
                 CLR_RT_HeapBlock_Array *array = (CLR_RT_HeapBlock_Array *)ptr;
-                CLR_RT_TypeDef_Index elementIdx = array->ReflectionDataConst().m_data.m_type;
+                CLR_RT_TypeDef_Index elementIdx = array->ReflectionDataConst().data.type;
 
                 // build type name
                 char fullTypeName[1024] = {0};
