@@ -674,8 +674,7 @@ HRESULT Library_corlib_native_System_Type::GetMethods(
                         NANOCLR_CHECK_HRESULT(hbObj->SetReflection(idx));
 
                         // store token for type
-                        hbObj[MethodBase::FIELD___token].NumericByRef().u4 =
-                            idx.m_data;
+                        hbObj[MethodBase::FIELD___token].NumericByRef().u4 = idx.m_data;
                     }
 
                     iMethod++;
@@ -768,8 +767,7 @@ HRESULT Library_corlib_native_System_Type::GetMethods(
                     hbObj->SetReflection(inst);
 
                     // store token for type
-                    hbObj[MethodBase::FIELD___token].NumericByRef().u4 =
-                        inst.m_data;
+                    hbObj[MethodBase::FIELD___token].NumericByRef().u4 = inst.m_data;
                 }
             }
 
