@@ -100,7 +100,7 @@ HRESULT Library_corlib_native_System_Reflection_FieldInfo::Initialize(
 {
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
-    CLR_RT_HeapBlock *hbField = stack.Arg0().Dereference();
+    CLR_RT_HeapBlock *hbField = stack.This();
 
     if (CLR_RT_ReflectionDef_Index::Convert(*hbField, instFD) == false || instTD.InitializeFromField(instFD) == false)
     {
@@ -143,7 +143,7 @@ HRESULT Library_corlib_native_System_Reflection_FieldInfo::GetCustomAttributesNa
     CLR_RT_HeapBlock &top = stack.PushValueAndClear();
 
     // get the caller field
-    callerField = stack.Arg0().Dereference();
+    callerField = stack.This();
 
     NANOCLR_CHECK_HRESULT(Library_corlib_native_System_Reflection_RuntimeFieldInfo::GetFieldDescriptor(
         stack,
