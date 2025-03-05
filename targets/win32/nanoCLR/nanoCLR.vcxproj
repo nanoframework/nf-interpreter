@@ -298,6 +298,9 @@
     <ProjectReference Include="..\..\..\src\nanoFramework.System.Collections\System.Collections.vcxproj">
       <Project>{091562a5-5c72-4115-a053-daf183a3b45b}</Project>
     </ProjectReference>
+    <ProjectReference Include="..\..\..\src\nanoFramework.System.IO.Hashing\System.IO.Hashing.vcxproj">
+      <Project>{856fbb90-ae1d-4f23-a919-53727e0e9bc6}</Project>
+    </ProjectReference>
     <ProjectReference Include="..\..\..\src\nanoFramework.System.Text\System.Text.vcxproj">
       <Project>{70922447-ebf0-4473-b014-776f8c9426e7}</Project>
     </ProjectReference>
