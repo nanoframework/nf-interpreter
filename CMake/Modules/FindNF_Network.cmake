@@ -340,6 +340,12 @@ else()
         set(Use_Networking_Extra_Driver TRUE)
     endif()
 
+    if(USE_WIZNET5500_DRIVER_OPTION)
+        list(APPEND NF_Network_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/DeviceInterfaces/Network/Wiznet5500)
+        list(APPEND NF_Network_Driver_Path ${CMAKE_SOURCE_DIR}/src/DeviceInterfaces/Network/Wiznet5500)
+        set(Use_Networking_Extra_Driver TRUE)
+    endif()
+
     # source files for nanoFramework Networking
     set(NF_Network_SRCS
 
@@ -384,13 +390,24 @@ else()
         list(APPEND NF_Network_SRCS Sockets_debugger.cpp)
     endif()
 
-    # add Enc28j60source files in two steps
+    # add Enc28j60 source files in two steps
     if(USE_ENC28J60_DRIVER_OPTION)
 
         set(NF_Network_Driver_Srcs
             enc28j60_lwip_config_stubs.cpp
             enc28j60_lwip.cpp
             enc28j60_lwip_driver.cpp
+        )
+
+    endif()
+
+    # add Wiznet5500 source files in two steps
+    if(USE_WIZNET5500_DRIVER_OPTION)
+
+        set(NF_Network_Driver_Srcs
+            wiznet5500_lwip_config_stubs.cpp
+            wiznet5500_lwip.cpp
+            wiznet5500_lwip_driver.cpp
         )
 
     endif()

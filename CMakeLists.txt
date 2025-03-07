@@ -454,6 +454,9 @@ option(NF_NETWORKING_SNTP "option to use add SNTP support, requires networking o
 # (default is OFF so driver is NOT used)
 option(NF_NETWORKING_ENC28J60 "option to use ENC28J60 network driver")
 
+# (default is OFF so driver is NOT used)
+option(NF_NETWORKING_WIZNET5500 "option to use WIZNET5500 network driver")
+
 #################################################################
 
 #############################################
@@ -552,6 +555,12 @@ if(API_System.Net)
         set(USE_ENC28J60_DRIVER_OPTION TRUE CACHE INTERNAL "NF ENC28J60 network driver")
     else()
         set(USE_ENC28J60_DRIVER_OPTION FALSE CACHE INTERNAL "NF ENC28J60 network driver")
+    endif()
+
+    if(NF_NETWORKING_WIZNET5500)
+        set(USE_WIZNET5500_DRIVER_OPTION TRUE CACHE INTERNAL "NF WIZNET5500 network driver")
+    else()
+        set(USE_WIZNET5500_DRIVER_OPTION FALSE CACHE INTERNAL "NF WIZNET5500 network driver")
     endif()
 
 else()
@@ -707,6 +716,10 @@ if(USE_NETWORKING_OPTION)
 
     if(NF_NETWORKING_ENC28J60)
         message(STATUS "Support for ENC28j60 network driver enabled")
+    endif()
+
+    if(NF_NETWORKING_WIZNET5500)
+        message(STATUS "Support for WIZNET5500 network driver enabled")
     endif()
 
     if(WIFI_DRIVER)
