@@ -71,7 +71,7 @@ endif()
 if(GECKO_SDK_VERSION_EMPTY)
     # no Gecko SDK version actualy specified, must be empty which is fine, we'll default to a known good version
     # WHEN CHANGING THIS MAKE SURE TO UPDATE THE DEV CONTAINERS
-    set(GECKO_SDK_VERSION "v4.4.5")
+    set(GECKO_SDK_VERSION "v4.4.6")
 endif()
 
 if(NO_GECKO_SDK_SOURCE)
