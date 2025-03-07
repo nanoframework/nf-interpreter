@@ -159,6 +159,17 @@ __nfweak bool SSL_ParseCertificate(const char *certificate, size_t certLength, X
     return TRUE;
 }
 
+__nfweak bool SSL_GetPublicKeyRaw(const char *certificate, size_t certLength, X509RawData *rawData)
+{
+    (void)certificate;
+    (void)certLength;
+    (void)rawData;
+
+    NATIVE_PROFILE_PAL_COM();
+
+    return FALSE;
+}
+
 __nfweak int SSL_DecodePrivateKey(
     const unsigned char *key,
     size_t keyLength,
