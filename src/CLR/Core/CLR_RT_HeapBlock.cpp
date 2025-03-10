@@ -1679,7 +1679,7 @@ CLR_INT32 CLR_RT_HeapBlock::Compare_Values(const CLR_RT_HeapBlock &left, const C
                 CLR_RT_HeapBlock hbLeft;
                 CLR_RT_HeapBlock hbRight;
 
-                if (left.ReflectionDataConst().m_kind != right.ReflectionDataConst().m_kind)
+                if (left.ReflectionDataConst().kind != right.ReflectionDataConst().kind)
                 {
                     ptrLeft = FixReflectionForType(left, hbLeft);
                     ptrRight = FixReflectionForType(right, hbRight);
