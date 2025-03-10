@@ -519,12 +519,12 @@ HRESULT Library_corlib_native_System_Convert::NativeToDouble___STATIC__R8__STRIN
     NANOCLR_CLEANUP_END();
 }
 
-HRESULT Library_corlib_native_System_Convert::NativeToDateTime___STATIC__SystemDateTime__STRING__BOOLEAN__BYREF_BOOLEAN(
-    CLR_RT_StackFrame &stack)
+HRESULT Library_corlib_native_System_Convert::
+    NativeToDateTime___STATIC__VOID__STRING__BOOLEAN__BYREF_BOOLEAN__BYREF_SystemDateTime(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
-    CLR_INT64 *pRes;
+    CLR_INT64 *pTicks;
 
     char *str = (char *)stack.Arg0().RecoverString();
     char *conversionResult = nullptr;
@@ -534,13 +534,8 @@ HRESULT Library_corlib_native_System_Convert::NativeToDateTime___STATIC__SystemD
     // grab parameter with flag to throw on failure
     bool throwOnFailure = (bool)stack.Arg1().NumericByRefConst().u1;
 
-    CLR_RT_HeapBlock &ref = stack.PushValue();
-
     // check string parameter for null
     FAULT_ON_NULL_ARG(str);
-
-    pRes = Library_corlib_native_System_DateTime::NewObject(ref);
-    FAULT_ON_NULL(pRes);
 
     // try 'u' Universal time with sortable format (yyyy-MM-dd' 'HH:mm:ss)
     conversionResult = Nano_strptime(str, "%Y-%m-%d %H:%M:%SZ", &ticks);
@@ -570,7 +565,9 @@ HRESULT Library_corlib_native_System_Convert::NativeToDateTime___STATIC__SystemD
     }
     else
     {
-        *pRes = ticks;
+        // get pointer to DateTime value type in parameter 3
+        pTicks = DateTime::GetValuePtr(stack.Arg3());
+        *pTicks = ticks;
     }
 
     NANOCLR_CLEANUP();

@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (c) .NET Foundation and Contributors
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
@@ -86,8 +86,8 @@ const CLR_RT_DataTypeLookup c_CLR_RT_DataTypeLookup[] =
     { DT_NUM | DT_INT | DT_SGN | DT_PRIM             | DT_DIRCT | DT_OPT | DT_MT           ,    64, DT_I8, DT_T(I8                  ), DT_CNV(I8         ), DT_CLS(Int64              ), DT_NOREL(CLR_RT_HeapBlock                                 ) DT_OPT_NAME(I8                  ) }, // DATATYPE_I8
     { DT_NUM | DT_INT          | DT_PRIM             | DT_DIRCT | DT_OPT | DT_MT           ,    64, DT_U8, DT_T(I8                  ), DT_CNV(U8         ), DT_CLS(UInt64             ), DT_NOREL(CLR_RT_HeapBlock                                 ) DT_OPT_NAME(U8                  ) }, // DATATYPE_U8
     { DT_NUM |          DT_SGN | DT_PRIM             | DT_DIRCT | DT_OPT | DT_MT           ,    64, DT_I8, DT_T(R8                  ), DT_CNV(R8         ), DT_CLS(Double             ), DT_NOREL(CLR_RT_HeapBlock                                 ) DT_OPT_NAME(R8                  ) }, // DATATYPE_R8
-    {          DT_INT | DT_SGN | DT_VALUE            | DT_DIRCT          | DT_MT           ,    64, DT_BL, DT_T(DATETIME            ), DT_CNV(END        ), DT_CLS(DateTime           ), DT_REL  (CLR_RT_HeapBlock              ::Relocate_Cls     ) DT_OPT_NAME(DATETIME            ) }, // DATATYPE_DATETIME
-    {          DT_INT | DT_SGN | DT_VALUE            | DT_DIRCT          | DT_MT           ,    64, DT_BL, DT_T(TIMESPAN            ), DT_CNV(END        ), DT_CLS(TimeSpan           ), DT_REL  (CLR_RT_HeapBlock              ::Relocate_Cls     ) DT_OPT_NAME(TIMESPAN            ) }, // DATATYPE_TIMESPAN
+    {          DT_INT | DT_SGN | DT_VALUE            | DT_DIRCT | DT_OPT | DT_MT           ,    64, DT_BL, DT_T(DATETIME            ), DT_CNV(END        ), DT_CLS(DateTime           ), DT_REL  (CLR_RT_HeapBlock              ::Relocate_Cls     ) DT_OPT_NAME(DATETIME            ) }, // DATATYPE_DATETIME
+    {          DT_INT | DT_SGN | DT_VALUE            | DT_DIRCT | DT_OPT | DT_MT           ,    64, DT_BL, DT_T(TIMESPAN            ), DT_CNV(END        ), DT_CLS(TimeSpan           ), DT_REL  (CLR_RT_HeapBlock              ::Relocate_Cls     ) DT_OPT_NAME(TIMESPAN            ) }, // DATATYPE_TIMESPAN
     { DT_REF                   | DT_PRIM             | DT_DIRCT          | DT_MT           , DT_VS, DT_BL, DT_T(STRING              ), DT_CNV(STRING     ), DT_CLS(String             ), DT_REL  (CLR_RT_HeapBlock              ::Relocate_String  ) DT_OPT_NAME(STRING              ) }, // DATATYPE_STRING
                                                                                                                                                                                                                                                                    //
     { DT_REF                                         | DT_DIRCT          | DT_MT           , DT_NA, DT_BL, DT_T(OBJECT              ), DT_CNV(OBJECT     ), DT_CLS(Object             ), DT_REL  (CLR_RT_HeapBlock              ::Relocate_Obj     ) DT_OPT_NAME(OBJECT              ) }, // DATATYPE_OBJECT
