@@ -7,9 +7,9 @@ using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Reflection;
+using System.Text.Json;
 using System.Threading.Tasks;
 using nanoFramework.nanoCLR.Host;
-using Newtonsoft.Json;
 
 namespace nanoFramework.nanoCLR.CLI
 {
@@ -147,7 +147,7 @@ namespace nanoFramework.nanoCLR.CLI
                     return ExitCode.E9005;
                 }
 
-                var packageInfo = JsonConvert.DeserializeObject<List<CloudsmithPackageInfo>>(responseBody);
+                var packageInfo = JsonSerializer.Deserialize<List<CloudsmithPackageInfo>>(responseBody);
 
                 if (packageInfo.Count != 1)
                 {
