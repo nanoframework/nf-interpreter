@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
     <Platforms>AnyCPU</Platforms>
     <RuntimeIdentifiers>any</RuntimeIdentifiers>
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -36,7 +36,7 @@
   <ItemGroup>
     <None Include="..\..\..\build\bin\$(Configuration)\nanoFramework.nanoCLR.dll" Link="NanoCLR\nanoFramework.nanoCLR.dll">
       <Pack>True</Pack>
-      <PackagePath>tools\net6.0\any\NanoCLR</PackagePath>
+      <PackagePath>tools\net8.0\any\NanoCLR</PackagePath>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="..\..\..\assets\nf-logo.png">
@@ -63,14 +63,14 @@
   </ItemGroup>
 
 	<PropertyGroup>
-		<!-- set this to 'net6.0\' to package contents in this TFM folder  -->
-		<PackageTfmSubFolder>net6.0\</PackageTfmSubFolder>
+		<!-- set this to 'net8.0\' to package contents in this TFM folder  -->
+		<PackageTfmSubFolder>net8.0\</PackageTfmSubFolder>
 	</PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="CommandLineParser" Version="2.9.1" />
-    <PackageReference Include="Nerdbank.GitVersioning" Version="3.5.119" PrivateAssets="All" />
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.2" />
+    <PackageReference Include="Nerdbank.GitVersioning" Version="3.7.115" PrivateAssets="All" />
+    <PackageReference Include="System.Runtime.Serialization.Json" Version="4.3.0" />
     <PackageReference Include="System.Security.Principal.Windows" Version="5.0.0" />
   </ItemGroup>
 
