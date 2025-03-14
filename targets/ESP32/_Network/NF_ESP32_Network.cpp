@@ -12,10 +12,11 @@
 int NF_ESP32_Wait_NetNumber(int num)
 {
     int number = 0;
-
+    int timeoutMs = 30000; // 30 seconds timeout
+    int elapsedMs = 0;
     esp_netif_t *espNetif;
 
-    while (true)
+    while (elapsedMs < timeoutMs)
     {
         switch (num)
         {
@@ -46,7 +47,15 @@ int NF_ESP32_Wait_NetNumber(int num)
             break;
         }
 
-        vTaskDelay(20 / portTICK_PERIOD_MS);
+        const int delayMs = 20;
+        vTaskDelay(delayMs / portTICK_PERIOD_MS);
+        elapsedMs += delayMs;
+    }
+
+    if (espNetif == NULL)
+    {
+        // Return error or default value
+        return SOCK_SOCKET_ERROR;
     }
 
     return espNetif->lwip_netif->num;
@@ -63,6 +72,7 @@ HAL_Configuration_NetworkInterface *NF_ESP32_GetNetworkConfigBlock(int index)
         {
             return networkConfig;
         }
+        platform_free(networkConfig);
     }
 
     return NULL;
