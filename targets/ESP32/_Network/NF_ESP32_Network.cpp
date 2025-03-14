@@ -52,7 +52,7 @@ int NF_ESP32_Wait_NetNumber(int num)
     return espNetif->lwip_netif->num;
 }
 
-HAL_Configuration_NetworkInterface * NF_ESP32_GetNetworkConfigBlock(int index)
+HAL_Configuration_NetworkInterface *NF_ESP32_GetNetworkConfigBlock(int index)
 {
     HAL_Configuration_NetworkInterface *networkConfig =
         (HAL_Configuration_NetworkInterface *)platform_malloc(sizeof(HAL_Configuration_NetworkInterface));
@@ -77,9 +77,9 @@ esp_err_t NF_ESP32_ConfigureNetwork(esp_netif_t *netIf, HAL_Configuration_Networ
     esp_netif_ip_info_t ip_info;
 
     ec = esp_netif_get_ip_info(netIf, &ip_info);
-    if (ec != ESP_OK) 
+    if (ec != ESP_OK)
     {
-          return ec;
+        return ec;
     }
 
     bool enableDHCP = (config->StartupAddressMode == AddressMode_DHCP);

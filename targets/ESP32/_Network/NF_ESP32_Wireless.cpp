@@ -163,8 +163,8 @@ esp_err_t NF_ESP32_InitaliseWifi()
         // Set static address if configured
         // ignore any errors
         ec = NF_ESP32_ConfigureNetworkStation(wifiStaNetif);
-        if (ec != ESP_OK) 
-        {               
+        if (ec != ESP_OK)
+        {
             ESP_LOGE(TAG, "Unable to configure Wifi station - result %d", ec);
         }
 
