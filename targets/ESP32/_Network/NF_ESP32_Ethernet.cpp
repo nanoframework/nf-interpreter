@@ -222,7 +222,7 @@ esp_err_t NF_ESP32_InitialiseEthernet(uint8_t *pMacAdr)
     // attach Ethernet driver to TCP/IP stack
     ESP_ERROR_CHECK(esp_netif_attach(eth_netif, esp_eth_new_netif_glue(eth_handle)));
 
-    // COnfigure static address if required in config
+    // Configure static address if required in config
     ESP_ERROR_CHECK(NF_ESP32_ConfigureNetworkByIndex(IDF_ETH_DEF, eth_netif));
 
     // start Ethernet driver state machine
