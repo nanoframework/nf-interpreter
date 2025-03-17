@@ -1,0 +1,12 @@
+name: Build SKY_UBT_EVB_Debug
+
+on:
+  workflow_dispatch
+
+jobs:
+  build_SKY_UBT_EVB_Debug:
+    name: Build SKY_UBT_EVB_Debug
+    uses: ./.github/workflows/skyworks_evb_build.yaml
+    with:
+      targetName: 'SKY_UBT_EVB'
+      buildType: 'Debug'
