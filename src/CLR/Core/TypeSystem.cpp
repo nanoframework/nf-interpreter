@@ -4291,10 +4291,48 @@ bool CLR_RT_Assembly::FindTypeDef(const char *typeName, const char *nameSpace, C
     NATIVE_PROFILE_CLR_CORE();
     const CLR_RECORD_TYPEDEF *target = GetTypeDef(0);
     int tblSize = tablesSize[TBL_TypeDef];
+    bool isNestedType = false;
+
+    // Check if typeName contains '/'
+    const char *slashPos = strchr(typeName, '/');
+    if (slashPos != nullptr)
+    {
+        // Extract the type name from the '/' to the end of the string
+        const char *extractedTypeName = slashPos + 1;
+
+        // Extract the enclosed type name from the '/' backwards to the '.' before
+        const char *dotPos = strrchr(typeName, '.');
+        std::string enclosedTypeName(dotPos + 1, slashPos);
+
+        // Extract the namespace from the beginning of the string to that '.'
+        std::string extractedNamespace(typeName, dotPos - typeName);
+
+        // Use the extracted values for further processing
+        typeName = extractedTypeName;
+        nameSpace = extractedNamespace.c_str();
+
+        // set flag to indicate that this is a nested type
+        isNestedType = true;
+    }
 
     for (int i = 0; i < tblSize; i++, target++)
     {
-        if (!target->HasValidEnclosingType())
+        if (isNestedType)
+        {
+            // check if this is a nested type
+            if (target->HasValidEnclosingType())
+            {
+                const char *szNameSpace = GetString(target->nameSpace);
+                const char *szName = GetString(target->name);
+
+                if (!strcmp(szName, typeName) && !strcmp(szNameSpace, nameSpace))
+                {
+                    index.Set(assemblyIndex, i);
+                    return true;
+                }
+            }
+        }
+        else if (!target->HasValidEnclosingType())
         {
             const char *szNameSpace = GetString(target->nameSpace);
             const char *szName = GetString(target->name);
@@ -4302,14 +4340,12 @@ bool CLR_RT_Assembly::FindTypeDef(const char *typeName, const char *nameSpace, C
             if (!strcmp(szName, typeName) && !strcmp(szNameSpace, nameSpace))
             {
                 index.Set(assemblyIndex, i);
-
                 return true;
             }
         }
     }
 
     index.Clear();
-
     return false;
 }
 
