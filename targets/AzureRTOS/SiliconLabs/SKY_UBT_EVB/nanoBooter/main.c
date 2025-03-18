@@ -55,7 +55,7 @@ void BlinkThread_entry(uint32_t parameter)
 
     while (1)
     {
-        GPIO_PinOutToggle(gpioPortB, 12);
+        GPIO_PinOutToggle(gpioPortB, 4);
         tx_thread_sleep(TX_TICKS_PER_MILLISEC(500));
     }
 }
@@ -146,10 +146,10 @@ int main(void)
     sl_system_init();
 
     // configure LED READY for output
-    GPIO_PinModeSet(gpioPortB, 12, gpioModePushPull, 0);
+    GPIO_PinModeSet(gpioPortB, 4, gpioModePushPull, 0);
 
     // configure S2 switch for input
-    GPIO_PinModeSet(gpioPortE, 8, gpioModeInput, 0);
+    GPIO_PinModeSet(gpioPortE, 4, gpioModeInput, 0);
 
     // init boot clipboard
     InitBootClipboard();
@@ -164,7 +164,7 @@ int main(void)
     {
         // check if user is 'forcing' the board to remain in nanoBooter and not launching nanoCLR
         // if S2 switch is pressed, skip the check for a valid CLR image and remain in booter
-        if (GPIO_PinInGet(gpioPortE, 8) != 0)
+        if (GPIO_PinInGet(gpioPortE, 4) != 0)
         {
             // check for valid CLR image
             // we are checking for a valid image at the deployment address, which is pointing to the CLR address

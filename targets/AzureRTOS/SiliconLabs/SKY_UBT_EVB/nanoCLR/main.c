@@ -63,7 +63,7 @@ void BlinkThread_entry(uint32_t parameter)
 {
     (void)parameter;
 
-    GPIO_PinOutToggle(gpioPortB, 12);
+    GPIO_PinOutToggle(gpioPortB, 4);
 
     UsbStackInit();
 
@@ -180,7 +180,7 @@ int main(void)
     sl_system_init();
 
     // configure LED READY for output
-    GPIO_PinModeSet(gpioPortB, 12, gpioModePushPull, 0);
+    GPIO_PinModeSet(gpioPortB, 4, gpioModePushPull, 0);
 
     // init boot clipboard
     InitBootClipboard();
