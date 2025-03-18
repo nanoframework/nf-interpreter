@@ -1150,7 +1150,7 @@ bool CLR_RT_FieldDef_Instance::ResolveToken(CLR_UINT32 tk, CLR_RT_Assembly *assm
                 switch (fr->Owner())
                 {
                     case TBL_TypeRef:
-                        data = assm->crossReferenceFieldRef[fr->OwnerIndex()].target.data;
+                        data = assm->crossReferenceFieldRef[index].target.data;
                         assembly = g_CLR_RT_TypeSystem.m_assemblies[Assembly() - 1];
                         target = assembly->GetFieldDef(Field());
 
