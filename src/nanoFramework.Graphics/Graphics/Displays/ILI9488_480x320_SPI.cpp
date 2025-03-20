@@ -87,7 +87,7 @@ enum ILI9488_Orientation : CLR_UINT8
     MADCTL_MX = 0x40, // sets the Column Order, 0=Left-Right and 1=Right-Left
     MADCTL_MY = 0x80, // sets the Row Order, 0=Top-Bottom and 1=Bottom-Top
 
-    MADCTL_BGR = 0x00, // Red-Green-Blue pixel order
+    MADCTL_RGB = 0x00, // Red-Green-Blue pixel order
 };
 
 bool DisplayDriver::Initialize()
@@ -172,19 +172,19 @@ bool DisplayDriver::ChangeOrientation(DisplayOrientation orientation)
             Attributes.Height = Attributes.LongerSide;
             Attributes.Width = Attributes.ShorterSide;
             g_DisplayInterface.SendCommand(2, Memory_Access_Control,
-                                           (MADCTL_MX | MADCTL_BGR)); // Portrait + BGR
+                                           (MADCTL_MX | MADCTL_RGB)); // Portrait
             break;
         case DisplayOrientation::DisplayOrientation_Portrait180:
             Attributes.Height = Attributes.LongerSide;
             Attributes.Width = Attributes.ShorterSide;
             g_DisplayInterface.SendCommand(2, Memory_Access_Control,
-                                           (MADCTL_MY | MADCTL_BGR)); // Portrait 180 + BGR
+                                           (MADCTL_MY | MADCTL_RGB)); // Portrait 180
             break;
         case DisplayOrientation::DisplayOrientation_Landscape:
             Attributes.Height = Attributes.ShorterSide;
             Attributes.Width = Attributes.LongerSide;
             g_DisplayInterface.SendCommand(2, Memory_Access_Control,
-                                           (MADCTL_MV | MADCTL_BGR)); // Landscape + BGR
+                                           (MADCTL_MV | MADCTL_RGB)); // Landscape
             break;
         case DisplayOrientation::DisplayOrientation_Landscape180:
             Attributes.Height = Attributes.ShorterSide;
@@ -192,7 +192,7 @@ bool DisplayDriver::ChangeOrientation(DisplayOrientation orientation)
             g_DisplayInterface.SendCommand(
                 2,
                 Memory_Access_Control,
-                (MADCTL_MX | MADCTL_MY | MADCTL_MV | MADCTL_BGR)); // Landscape 180 + BGR
+                (MADCTL_MX | MADCTL_MY | MADCTL_MV | MADCTL_RGB)); // Landscape 180
             break;
     }
     return true;
