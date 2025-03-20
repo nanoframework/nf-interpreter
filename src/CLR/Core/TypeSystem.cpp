@@ -6371,18 +6371,20 @@ bool CLR_RT_AttributeEnumerator::Advance()
         ptr++;
         num--;
 
-        if (ptr->Key() == key)
+        if (ptr->Key() == key && ptr->ownerIndex == m_data.ownerIndex)
         {
-            CLR_INDEX tk = ptr->constructor;
-            // check TYPEDEF
-            if (tk & 0x8000)
+            // get the token of the constructor (compressed format)
+            CLR_UINT32 token = CLR_UncompressMethodToken(ptr->constructor);
+
+            // get the method definition, by resolving the token
+            CLR_RT_MethodDef_Instance method{};
+            if (method.ResolveToken(token, m_assm) == false)
             {
-                m_match = m_assm->crossReferenceMethodRef[tk & 0x7FFF].target;
+                ASSERT(0);
             }
-            else
-            {
-                m_match.Set(m_assm->assemblyIndex, tk);
-            }
+
+            // get the method definition index
+            m_match.data = method.data;
 
             m_blob = m_assm->GetSignature(ptr->data);
 
