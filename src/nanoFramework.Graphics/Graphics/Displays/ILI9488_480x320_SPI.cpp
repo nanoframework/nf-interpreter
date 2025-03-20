@@ -87,7 +87,7 @@ enum ILI9488_Orientation : CLR_UINT8
     MADCTL_MX = 0x40, // sets the Column Order, 0=Left-Right and 1=Right-Left
     MADCTL_MY = 0x80, // sets the Row Order, 0=Top-Bottom and 1=Bottom-Top
 
-    MADCTL_BGR = 0x08, // Blue-Green-Red pixel order
+    MADCTL_BGR = 0x00, // Red-Green-Blue pixel order
 };
 
 bool DisplayDriver::Initialize()
@@ -140,7 +140,7 @@ bool DisplayDriver::Initialize()
     g_DisplayInterface.SendCommand(2, Interface_Signal_Control, 0x80);
     g_DisplayInterface.SendCommand(2, Frame_Rate_Control_Normal, 0xA0);
     g_DisplayInterface.SendCommand(2, Inversion_Control, 0x02);
-    g_DisplayInterface.SendCommand(3, Display_Function_Control, 0x02, 0x02, 0x3B);
+    g_DisplayInterface.SendCommand(4, Display_Function_Control, 0x02, 0x02, 0x3B);
     g_DisplayInterface.SendCommand(2, Set_Image_Function, 0x00);
     g_DisplayInterface.SendCommand(5, Pump_Ratio_Control, 0xA9, 0x51, 0x2C, 0x82);
     g_DisplayInterface.SendCommand(1, Sleep_Out);
@@ -288,36 +288,39 @@ void DisplayDriver::BitBlt(
     SetWindow(screenX, screenY, (screenX + width - 1), (screenY + height - 1));
 
     g_DisplayInterface.SendCommand(1, Memory_Write);
-
-    uint32_t numPixels = width * height;
+    
     uint32_t count = 0;
 
     CLR_UINT8 *TransferBuffer = Attributes.TransferBuffer;
     CLR_UINT32 TransferBufferSize = Attributes.TransferBufferSize;
 
     // only 18/24 bit is supported on SPI
-    for (uint32_t i = 0; i < numPixels; i++)
+    for (uint32_t y = srcY; y < srcY + height; y++)
     {
-        uint32_t element = data[i / 2]; // Each uint32 stores 2 pixels
-        uint16_t color = (i % 2 == 0) ? (element & 0xFFFF) : (element >> 16);
-
-        uint8_t b = color & 0x1F;
-        uint8_t g = (color >> 5) & 0x3F;
-        uint8_t r = (color >> 11) & 0x1F;
-
-        b = (b << 3) | (b >> 2);
-        g = (g << 2) | (g >> 4);
-        r = (r << 3) | (r >> 2);
-
-        TransferBuffer[count++] = b;
-        TransferBuffer[count++] = g;
-        TransferBuffer[count++] = r;
-
-        // can't fit another 3 bytes
-        if (count + 3 > TransferBufferSize - 1)
+        for (uint32_t x = srcX; x < srcX + width; x++)
         {
-            g_DisplayInterface.SendBytes(TransferBuffer, count);
-            count = 0;
+            uint32_t i = y * Attributes.Width + x;
+            uint32_t element = data[i / 2]; // Each uint32 stores 2 pixels
+            uint16_t color = (i % 2 == 0) ? (element & 0xFFFF) : (element >> 16);
+
+            uint8_t b = color & 0x1F;
+            uint8_t g = (color >> 5) & 0x3F;
+            uint8_t r = (color >> 11) & 0x1F;
+
+            b = (b << 3) | (b >> 2);
+            g = (g << 2) | (g >> 4);
+            r = (r << 3) | (r >> 2);
+
+            TransferBuffer[count++] = b;
+            TransferBuffer[count++] = g;
+            TransferBuffer[count++] = r;
+
+            // can't fit another 3 bytes
+            if (count + 3 > TransferBufferSize - 1)
+            {
+                g_DisplayInterface.SendBytes(TransferBuffer, count);
+                count = 0;
+            }
         }
     }
     g_DisplayInterface.SendBytes(TransferBuffer, count);
