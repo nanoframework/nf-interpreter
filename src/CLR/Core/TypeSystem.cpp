@@ -4363,9 +4363,14 @@ bool CLR_RT_Assembly::FindTypeDef(const char *typeName, CLR_INDEX scope, CLR_RT_
 
     for (int i = 0; i < tblSize; i++, target++)
     {
-        auto enclosingType = target->EnclosingType();
+        if (!target->HasValidEnclosingType())
+        {
+            continue;
+        }
 
-        if (enclosingType == scope)
+        CLR_INDEX enclosingTypeIndex = target->EnclosingTypeIndex();
+
+        if (enclosingTypeIndex == scope)
         {
             const char *szName = GetString(target->name);
 
