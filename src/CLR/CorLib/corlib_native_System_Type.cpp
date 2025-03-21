@@ -22,7 +22,7 @@ HRESULT Library_corlib_native_System_Type::get_DeclaringType___SystemType(CLR_RT
     if (td.target->HasValidEnclosingType())
     {
         CLR_RT_HeapBlock *hbObj;
-        td.Set(td.Assembly(), td.target->EnclosingType());
+        td.Set(td.Assembly(), td.target->EnclosingTypeIndex());
 
         NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObjectFromIndex(top, g_CLR_RT_WellKnownTypes.TypeStatic));
         hbObj = top.Dereference();
