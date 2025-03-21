@@ -2110,14 +2110,8 @@ CLR_PMETADATA CLR_RECORD_EH::ExtractEhFromByteCode(CLR_PMETADATA ipEnd, const CL
 CLR_UINT32 CLR_RECORD_EH::GetToken() const
 {
     NATIVE_PROFILE_CLR_CORE();
-    if (classToken & 0x8000)
-    {
-        return CLR_TkFromType(TBL_TypeRef, classToken & 0x7FFF);
-    }
-    else
-    {
-        return CLR_TkFromType(TBL_TypeDef, classToken);
-    }
+
+    return CLR_UncompressTypeToken(classToken);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
