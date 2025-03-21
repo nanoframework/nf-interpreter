@@ -4286,6 +4286,7 @@ bool CLR_RT_Assembly::FindTypeDef(const char *typeName, const char *nameSpace, C
     const CLR_RECORD_TYPEDEF *target = GetTypeDef(0);
     int tblSize = tablesSize[TBL_TypeDef];
     bool isNestedType = false;
+    std::string extractedNamespace;
 
     // Check if typeName contains '/'
     const char *slashPos = strchr(typeName, '/');
@@ -4296,10 +4297,19 @@ bool CLR_RT_Assembly::FindTypeDef(const char *typeName, const char *nameSpace, C
 
         // Extract the enclosed type name from the '/' backwards to the '.' before
         const char *dotPos = strrchr(typeName, '.');
-        std::string enclosedTypeName(dotPos + 1, slashPos);
+        std::string enclosedTypeName;
 
-        // Extract the namespace from the beginning of the string to that '.'
-        std::string extractedNamespace(typeName, dotPos - typeName);
+        if (dotPos != nullptr)
+        {
+            enclosedTypeName.assign(dotPos + 1, slashPos);
+            // Extract the namespace from the beginning of the string to that '.'
+            extractedNamespace.assign(typeName, dotPos - typeName);
+        }
+        else
+        {
+            enclosedTypeName.assign(typeName, slashPos);
+            extractedNamespace.clear();
+        }
 
         // Use the extracted values for further processing
         typeName = extractedTypeName;
@@ -4319,7 +4329,9 @@ bool CLR_RT_Assembly::FindTypeDef(const char *typeName, const char *nameSpace, C
                 const char *szNameSpace = GetString(target->nameSpace);
                 const char *szName = GetString(target->name);
 
-                if (!strcmp(szName, typeName) && !strcmp(szNameSpace, nameSpace))
+                // for nested types, there is no namespace encoded in the type
+                // looking at the type name only, does look a bit flaky but it will have to work for now
+                if (!strcmp(szName, typeName))
                 {
                     index.Set(assemblyIndex, i);
                     return true;
