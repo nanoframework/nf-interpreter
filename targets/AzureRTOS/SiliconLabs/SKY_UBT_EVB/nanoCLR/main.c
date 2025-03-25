@@ -69,7 +69,7 @@ void BlinkThread_entry(uint32_t parameter)
 
     while (1)
     {
-        GPIO_PinOutToggle(gpioPortB, 12);
+        GPIO_PinOutToggle(gpioPortB, 4);
         tx_thread_sleep(TX_TICKS_PER_MILLISEC(1500));
     }
 }
