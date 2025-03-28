@@ -10,50 +10,24 @@
 //////////
 
 // USART1
-// SCK: PD2
-// MOSI: PD0
-// MISO: PD1
-// CS: PD3
+// SPI1_SCK: PD2
+// SPI1_MOSI: PD0
+// SPI1_MISO: PD1
+// SPI1_CS: PD3
 // EMC encoded "port location", see Alternate Functionality Overview table in MCU datasheet
 
-INIT_SPI_CONFIG(1, 1, 1, 1, 1)
+INIT_SPI_CONFIG(1, 1, 1, 1)
 
 //////////
 // SPI2 //
 //////////
 
 // USART2
-// SCK: PA9     2
-// MOSI: PA7    2    
-// MISO: PA8    2
-// CS: PA10     2
+// SPI2_SCK: PF8
+// SPI2_MOSI: PF6
+// SPI2_MISO: PF7
+// SPI2_CS: PF9
 // EMC encoded "port location", see Alternate Functionality Overview table in MCU datasheet
 
-INIT_SPI_CONFIG(2, 2, 2, 2, 2)
-
-//////////
-// SPI3 //
-//////////
-
-// USART3
-// SCK: PA2     0
-// MOSI: PA0    0    
-// MISO: PA1    0
-// CS: PA3      0
-// EMC encoded "port location", see Alternate Functionality Overview table in MCU datasheet
-
-INIT_SPI_CONFIG(3, 0, 0, 0, 0)
-
-//////////
-// SPI4 //
-//////////
-
-// USART3
-// SCK: PC4     0
-// MOSI: PB7    0    
-// MISO: PB8    0
-// CS: PC5      0
-// EMC encoded "port location", see Alternate Functionality Overview table in MCU datasheet
-
-INIT_SPI_CONFIG(4, 0, 0, 0, 0)
+INIT_SPI_CONFIG(2, 4, 4, 4)
 

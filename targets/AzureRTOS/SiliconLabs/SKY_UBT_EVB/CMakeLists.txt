@@ -17,6 +17,8 @@ add_subdirectory(${azure_rtos_SOURCE_DIR} threadx)
 # add_subdirectory(${azure_rtos_netxduo_SOURCE_DIR} netxduo)
 # add_subdirectory(${azure_rtos_usbx_SOURCE_DIR} usbx)
 
+set(CMAKE_OBJECT_PATH_MAX 260)
+
 nf_setup_target_build(
     HAS_NANOBOOTER
 
@@ -27,7 +29,7 @@ nf_setup_target_build(
         efm32gg11b_CLR
 
     BOOTER_EXTRA_COMPILE_DEFINITIONS
-        EFM32GG11B820F2048GQ100=1
+        EFM32GG11B420F2048GL120=1
         SL_COMPONENT_CATALOG_PRESENT=1
         _SILICON_LABS_32B_SERIES_2_CONFIG=0
         BSP_LF_CLK_SEL=99 
@@ -36,7 +38,7 @@ nf_setup_target_build(
         SL_HEAP_SIZE=0x2000
 
     CLR_EXTRA_COMPILE_DEFINITIONS
-        EFM32GG11B820F2048GQ100=1
+        EFM32GG11B420F2048GL120=1
         SL_COMPONENT_CATALOG_PRESENT=1
         _SILICON_LABS_32B_SERIES_2_CONFIG=0
         BSP_LF_CLK_SEL=99

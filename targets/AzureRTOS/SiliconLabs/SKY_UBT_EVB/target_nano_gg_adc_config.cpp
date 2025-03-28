@@ -17,30 +17,30 @@
 // PA15 (Gecko APORT2X CH15) 16 analog channel ADC mux (see docs)
 // PE6 (Gecko APORT3X CH6) ADC Cal Channel
 
-// const NF_PAL_ADC_PORT_PIN_CHANNEL AdcPortPinConfig[] = {
+const NF_PAL_ADC_PORT_PIN_CHANNEL AdcPortPinConfig[] = {
 
-//     // IMON0
-//     {0, adcPosSelAPORT1XCH6},
-//     //
-//     {0, adcPosSelAPORT2XCH7},
-//     //
-//     {0, adcPosSelAPORT1XCH8},
-//     //
-//     {0, adcPosSelAPORT2XCH9},
-//     //
-//     {0, adcPosSelAPORT1XCH10},
-//     //
-//     {0, adcPosSelAPORT2XCH11},
-//     //
-//     {0, adcPosSelAPORT1XCH12},
-//     //
-//     {0, adcPosSelAPORT2XCH13},
-//     //
-//     {0, adcPosSelAPORT1XCH14},
-//     //
-//     {0, adcPosSelAPORT2XCH15},
-//     //
-//     {0, adcPosSelAPORT3XCH6},
-// };
+    // IMON0
+    {0, adcPosSelAPORT1XCH6},
+    //
+    {0, adcPosSelAPORT2XCH7},
+    //
+    {0, adcPosSelAPORT1XCH8},
+    //
+    {0, adcPosSelAPORT2XCH9},
+    //
+    {0, adcPosSelAPORT1XCH10},
+    //
+    {0, adcPosSelAPORT2XCH11},
+    //
+    {0, adcPosSelAPORT1XCH12},
+    //
+    {0, adcPosSelAPORT2XCH13},
+    //
+    {0, adcPosSelAPORT1XCH14},
+    //
+    {0, adcPosSelAPORT2XCH15},
+    //
+    {0, adcPosSelAPORT3XCH6},
+};
 
-// const int AdcChannelCount = ARRAYSIZE(AdcPortPinConfig);
+const int AdcChannelCount = ARRAYSIZE(AdcPortPinConfig);
