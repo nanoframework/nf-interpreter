@@ -415,7 +415,6 @@ struct Library_corlib_native_System_BitConverter
 
 struct Library_corlib_native_System_Byte
 {
-
     static const int FIELD__m_value = 1;
 
     //--//
@@ -470,6 +469,7 @@ struct Library_corlib_native_System_TimeSpan
 
     //--//
 
+    static CLR_INT64 *NewObject(CLR_RT_StackFrame &stack);
     static CLR_INT64 *GetValuePtr(CLR_RT_StackFrame &stack);
     static CLR_INT64 *GetValuePtr(CLR_RT_HeapBlock &ref);
 
@@ -523,16 +523,15 @@ struct Library_corlib_native_System_Convert
 struct Library_corlib_native_System_Delegate
 {
     NANOCLR_NATIVE_DECLARE(Equals___BOOLEAN__OBJECT);
-    NANOCLR_NATIVE_DECLARE(Combine___STATIC__SystemDelegate__SystemDelegate__SystemDelegate);
-    NANOCLR_NATIVE_DECLARE(Remove___STATIC__SystemDelegate__SystemDelegate__SystemDelegate);
-    NANOCLR_NATIVE_DECLARE(op_Equality___STATIC__BOOLEAN__SystemDelegate__SystemDelegate);
-    NANOCLR_NATIVE_DECLARE(op_Inequality___STATIC__BOOLEAN__SystemDelegate__SystemDelegate);
-
 #if (NANOCLR_REFLECTION == TRUE)
     NANOCLR_NATIVE_DECLARE(GetInvocationList___SZARRAY_SystemDelegate);
     NANOCLR_NATIVE_DECLARE(get_Method___SystemReflectionMethodInfo);
     NANOCLR_NATIVE_DECLARE(get_Target___OBJECT);
 #endif // NANOCLR_REFLECTION
+    NANOCLR_NATIVE_DECLARE(Combine___STATIC__SystemDelegate__SystemDelegate__SystemDelegate);
+    NANOCLR_NATIVE_DECLARE(Remove___STATIC__SystemDelegate__SystemDelegate__SystemDelegate);
+    NANOCLR_NATIVE_DECLARE(op_Equality___STATIC__BOOLEAN__SystemDelegate__SystemDelegate);
+    NANOCLR_NATIVE_DECLARE(op_Inequality___STATIC__BOOLEAN__SystemDelegate__SystemDelegate);
 
     //--//
 
@@ -843,7 +842,6 @@ struct Library_corlib_native_System_RuntimeType
 
 struct Library_corlib_native_System_SByte
 {
-
     static const int FIELD__m_value = 1;
 
     //--//

@@ -104,7 +104,7 @@
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>LFS_CONFIG=lfs_config.h;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>LFS_CONFIG=lfs_config.h;_DEBUG;DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(LITTLEFS_PATH);..\..\..\src\System.IO.FileSystem;..\..\..\targets\netcore\littlefs;..\..\..\targets\win32\Include;..\Include;..\CLR\Include;..\CorLib;..\..\..\src\PAL\Include;..\..\..\src\CLR\Include;..\..\..\..\src\CLR\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
@@ -117,7 +117,7 @@
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>LFS_CONFIG=lfs_config.h;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>LFS_CONFIG=lfs_config.h;_DEBUG;DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(LITTLEFS_PATH);..\..\..\src\System.IO.FileSystem;..\..\..\targets\netcore\littlefs;..\..\..\targets\win32\Include;..\Include;..\CLR\Include;..\CorLib;..\..\..\src\PAL\Include;..\..\..\src\CLR\Include;..\..\..\..\src\CLR\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>

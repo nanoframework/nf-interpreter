@@ -5,7 +5,6 @@
 
 #include <hal.h>
 #include <cmsis_os.h>
-#include <ff.h>
 #include <target_storage_config.h>
 #include <nanoHAL_System_IO_FileSystem.h>
 #include <Target_System_IO_FileSystem.h>

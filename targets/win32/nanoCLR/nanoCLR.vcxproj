@@ -107,7 +107,7 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>NANOWIN32;_DEBUG;_CONSOLE;VERSION_STRING="$(WINCLR_AssemblyInformationalVersion)";%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NANOWIN32;_DEBUG;DEBUG;_CONSOLE;VERSION_STRING="$(WINCLR_AssemblyInformationalVersion)";%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>..\..\..\src\CLR\Core;..\..\..\src\CLR\CorLib;..\..\..\src\CLR\Helpers\Base64;.;..\Include;..\..\..\src\CLR\Include;..\..\..\src\HAL\Include;..\..\..\src\PAL\Include;..\..\..\src\nanoFramework.Runtime.Events</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
@@ -120,7 +120,7 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>NANOWIN32;_DEBUG;_CONSOLE;VERSION_STRING="$(WINCLR_AssemblyInformationalVersion)";%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NANOWIN32;_DEBUG;DEBUG;_CONSOLE;VERSION_STRING="$(WINCLR_AssemblyInformationalVersion)";%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>..\..\..\src\CLR\Core;..\..\..\src\CLR\CorLib;..\..\..\src\CLR\Helpers\Base64;.;..\Include;..\..\..\src\CLR\Include;..\..\..\src\HAL\Include;..\..\..\src\PAL\Include;..\..\..\src\nanoFramework.Runtime.Events</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>

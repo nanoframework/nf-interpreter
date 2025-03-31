@@ -39,7 +39,7 @@
 #include <nanoHAL_System_IO_FileSystem.h>
 #include <Esp32_DeviceMapping.h>
 
-#if !defined(CONFIG_IDF_TARGET_ESP32C3) && (HAL_USE_SDC == TRUE)
+#if (HAL_USE_SDC == TRUE)
 
 static const char *TAG = "SDCard";
 
@@ -88,18 +88,18 @@ bool LogMountResult(esp_err_t errCode)
 // Mount SDcard on MMC/SDIO bus
 //
 //  bit1Mode- true to use 1 bit MMC interface
-//  driveIndex =  0 = first drive
+//  driveIndex =  0 = first drive, 1 = 2nd drive
 //
 bool Storage_MountMMC(bool bit1Mode, int driveIndex)
 {
     esp_err_t errCode;
     char mountPoint[] = INDEX0_DRIVE_LETTER;
 
-    // Change fatfs drive letter to mount point  D: -> /D for ESP32 VFS
+    // Change fatfs drive letter to mount point  D: -> /D for ESP32 VFS or /E
     mountPoint[1] = mountPoint[0] + driveIndex;
     mountPoint[0] = '/';
 
-    ESP_LOGI(TAG, "Initializing MMC SD card");
+    ESP_LOGI(TAG, "Initializing SDMMC%d SD card", driveIndex + 1);
 
     sdmmc_host_t host = SDMMC_HOST_DEFAULT();
 
@@ -107,7 +107,13 @@ bool Storage_MountMMC(bool bit1Mode, int driveIndex)
     // Modify slot_config.gpio_cd and slot_config.gpio_wp if your board has these signals.
     sdmmc_slot_config_t slot_config = SDMMC_SLOT_CONFIG_DEFAULT();
 
-    // Set bus width to use
+    // Set bus width and pins to use
+#if (defined(CONFIG_IDF_TARGET_ESP32S3) || defined(CONFIG_IDF_TARGET_ESP32P4))
+    slot_config.clk = (gpio_num_t)Esp32_GetSDmmcDevicePins_C(driveIndex, Esp32SdmmcPin_Clock);
+    slot_config.cmd = (gpio_num_t)Esp32_GetSDmmcDevicePins_C(driveIndex, Esp32SdmmcPin_Command);
+    slot_config.d0 = (gpio_num_t)Esp32_GetSDmmcDevicePins_C(driveIndex, Esp32SdmmcPin_D0);
+#endif
+
     if (bit1Mode)
     {
         slot_config.width = 1;
@@ -115,6 +121,11 @@ bool Storage_MountMMC(bool bit1Mode, int driveIndex)
     else
     {
         slot_config.width = 4;
+#if (defined(CONFIG_IDF_TARGET_ESP32S3) || defined(CONFIG_IDF_TARGET_ESP32P4))
+        slot_config.d1 = (gpio_num_t)Esp32_GetSDmmcDevicePins_C(driveIndex, Esp32SdmmcPin_D1);
+        slot_config.d2 = (gpio_num_t)Esp32_GetSDmmcDevicePins_C(driveIndex, Esp32SdmmcPin_D2);
+        slot_config.d3 = (gpio_num_t)Esp32_GetSDmmcDevicePins_C(driveIndex, Esp32SdmmcPin_D3);
+#endif
     }
 
     // from IDF readme on SDMMC
@@ -124,9 +135,6 @@ bool Storage_MountMMC(bool bit1Mode, int driveIndex)
     ///////////////////////////////
     // On ESP32, SDMMC peripheral is connected to specific GPIO pins using the IO MUX.
     // GPIO pins cannot be customized. Please see the table below for the pin connections.
-
-    // When using an ESP-WROVER-KIT board, this example runs without any extra modifications required.
-    // Only an SD card needs to be inserted into the slot.
 
     // ESP32 pin     | SD card pin | Notes
     // --------------|-------------|------------
@@ -144,15 +152,7 @@ bool Storage_MountMMC(bool bit1Mode, int driveIndex)
     // This allows arbitrary GPIOs to be used to connect an SD card. In this example, GPIOs can be configured in two
     // ways:
 
-    // 1. Using menuconfig: Run `idf.py menuconfig` in the project directory and open "SD/MMC Example Configuration"
-    // menu.
-    // 2. In the source code: See the initialization of ``sdmmc_slot_config_t slot_config`` structure in the example
-    // code.
-
     // The table below lists the default pin assignments.
-
-    // When using an ESP32-S3-USB-OTG board, this example runs without any extra modifications required.
-    // Only an SD card needs to be inserted into the slot.
 
     // ESP32-S3 pin  | SD card pin | Notes
     // --------------|-------------|------------

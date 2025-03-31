@@ -25,6 +25,8 @@ static const char *TAG = "Memory";
 #define MINIMUM_FREE_MEMORY_FOR_IDF (20 * 1024)
 #elif defined(CONFIG_IDF_TARGET_ESP32C6)
 #define MINIMUM_FREE_MEMORY_FOR_IDF (90 * 1024)
+#elif defined(CONFIG_IDF_TARGET_ESP32S3)
+#define MINIMUM_FREE_MEMORY_FOR_IDF (130 * 1024)
 #else
 #define MINIMUM_FREE_MEMORY_FOR_IDF (100 * 1024)
 #endif

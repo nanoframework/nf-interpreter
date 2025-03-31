@@ -32,6 +32,11 @@ HRESULT CLR_PRF_Profiler::CreateInstance()
     g_CLR_PRF_Profiler.m_currentThreadPID = 0;
     NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_MemoryStream::CreateInstance(g_CLR_PRF_Profiler.m_stream, nullptr, 0));
 
+
+#if defined(VIRTUAL_DEVICE)
+    // need to do the here to send the memory layout in the first packet
+    g_CLR_PRF_Profiler.SendMemoryLayout();
+#endif
 #if defined(VIRTUAL_DEVICE)
     // need to do the here to send the memory layout in the first packet
     g_CLR_PRF_Profiler.SendMemoryLayout();
@@ -782,6 +787,34 @@ void CLR_PRF_Profiler::TrackObjectCreation(CLR_RT_HeapBlock *ptr)
                 CLR_RT_TypeDef_Index elementIdx = array->ReflectionDataConst().data.type;
                 PackAndWriteBits(array->ReflectionDataConst().data.type);
                 PackAndWriteBits(array->ReflectionDataConst().levels);
+
+#if defined(VIRTUAL_DEVICE)
+                if (g_ProfilerMessageCallback != NULL)
+                {
+                    // build type name
+                    char fullTypeName[1024] = {0};
+                    char *szBuffer = fullTypeName;
+                    size_t iBuffer = MAXSTRLEN(fullTypeName);
+
+                    CLR_RT_TypeDef_Instance arrayTypeDef{};
+                    CLR_UINT32 levels;
+                    arrayTypeDef.InitializeFromReflection(array->ReflectionData(), &levels);
+
+                    g_CLR_RT_TypeSystem.BuildTypeName(arrayTypeDef, szBuffer, iBuffer);
+
+                    // compose output message
+                    std::string objectCreation = std::format(
+                        "New {}[] @ 0x{:X} {} bytes [{:08x}] {} elements {} level(s)\r\n",
+                        fullTypeName,
+                        (CLR_UINT64)((CLR_UINT8 *)ptr),
+                        (dataSize * sizeof(struct CLR_RT_HeapBlock)),
+                        elementIdx.data,
+                        array->m_numOfElements,
+                        levels);
+
+                    g_ProfilerMessageCallback(objectCreation.c_str());
+                }
+#endif
 
 #if defined(VIRTUAL_DEVICE)
                 if (g_ProfilerMessageCallback != NULL)

@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (c) .NET Foundation and Contributors
 // See LICENSE file in the project root for full license information.
 //
@@ -178,7 +178,6 @@ HRESULT LITTLEFS_FS_Driver::Open(const VOLUME_ID *volume, const char *path, void
 
     if (result == LFS_ERR_CORRUPT)
     {
-        __NOP();
         NANOCLR_SET_AND_LEAVE(CLR_E_FILE_IO);
     }
 
@@ -260,7 +259,6 @@ HRESULT LITTLEFS_FS_Driver::Close(void *handle)
 
     if (result == LFS_ERR_CORRUPT)
     {
-        __NOP();
         NANOCLR_SET_AND_LEAVE(CLR_E_FILE_IO);
     }
     else

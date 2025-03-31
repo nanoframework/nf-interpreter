@@ -174,8 +174,6 @@ HRESULT Library_corlib_native_System_DateTime::GetTodayAsTicks___STATIC__I8(CLR_
     NANOCLR_NOCLEANUP_NOLABEL();
 }
 
-//--//
-
 CLR_INT64 *Library_corlib_native_System_DateTime::GetValuePtr(CLR_RT_StackFrame &stack)
 {
     NATIVE_PROFILE_CLR_CORE();
@@ -191,8 +189,12 @@ CLR_INT64 *Library_corlib_native_System_DateTime::GetValuePtr(CLR_RT_HeapBlock &
     if (dt == DATATYPE_OBJECT || dt == DATATYPE_BYREF)
     {
         obj = obj->Dereference();
+
         if (!obj)
+        {
             return NULL;
+        }
+
         dt = obj->DataType();
     }
 

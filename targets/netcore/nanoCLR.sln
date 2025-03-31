@@ -83,6 +83,7 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "littlefs", "littlefs\littlefs.vcxproj", "{5B70A795-A6F2-44DF-8566-5D68D9E892DB}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "FileStream", "..\..\src\CLR\Core\FileStream\FileStream.vcxproj", "{ABFE159E-84D5-489E-BFE6-8A7F4B597A44}"
+EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{65520520-70C9-4D4A-89AD-74A13DE78A31}"
 	ProjectSection(SolutionItems) = preProject
 		..\..\nf.props = ..\..\nf.props

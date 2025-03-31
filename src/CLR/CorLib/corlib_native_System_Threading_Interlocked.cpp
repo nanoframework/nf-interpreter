@@ -3,6 +3,7 @@
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
 //
+
 #include "CorLib.h"
 
 HRESULT Library_corlib_native_System_Threading_Interlocked::Increment___STATIC__I4__BYREF_I4(CLR_RT_StackFrame &stack)

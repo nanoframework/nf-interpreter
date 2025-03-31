@@ -3,6 +3,7 @@
 
 /* CHIBIOS FIX */
 #include "ch.h"
+#include <target_platform.h>
 
 /*---------------------------------------------------------------------------/
 /  Configurations of FatFs Module
@@ -108,7 +109,7 @@
 /     0 - Include all code pages above and configured by f_setcp()
 */
 
-#define FF_USE_LFN 3
+#define FF_USE_LFN 2
 #define FF_MAX_LFN 255
 /* The FF_USE_LFN switches the support for LFN (long file name).
 /
@@ -181,13 +182,13 @@
 /  const char* VolumeStr[FF_VOLUMES] = {"ram","flash","sd","usb",...
 */
 #if (HAL_USE_SDC == TRUE) && (HAL_USBH_USE_MSD == TRUE)
-#define FF_VOLUME_STRS   "D", "E"
+#define FF_VOLUME_STRS "D", "E"
 #elif (HAL_USE_SDC == FALSE) && (HAL_USBH_USE_MSD == TRUE)
-#define FF_VOLUME_STRS   "E"
+#define FF_VOLUME_STRS "E"
 #elif (HAL_USE_SDC == TRUE) && (HAL_USBH_USE_MSD == FALSE)
-#define FF_VOLUME_STRS   "D"
+#define FF_VOLUME_STRS "D"
 #else
-#define FF_VOLUME_STRS   ""
+#define FF_VOLUME_STRS ""
 #endif
 
 #define FF_MULTI_PARTITION 0
