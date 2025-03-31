@@ -5,8 +5,7 @@
 //
 #include "CorLib.h"
 
-HRESULT Library_corlib_native_System_GC::EnableGCMessages___STATIC__VOID__BOOLEAN(
-    CLR_RT_StackFrame &stack)
+HRESULT Library_corlib_native_System_GC::EnableGCMessages___STATIC__VOID__BOOLEAN(CLR_RT_StackFrame &stack)
 {
     NATIVE_PROFILE_CLR_CORE();
 
