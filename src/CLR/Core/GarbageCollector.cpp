@@ -294,7 +294,7 @@ CLR_UINT32 CLR_RT_GarbageCollector::ExecuteGarbageCollection()
     g_CLR_PRF_Profiler.RecordGarbageCollectionEnd();
 #endif
 
-    return m_freeBytes;
+    return m_totalBytes - m_freeBytes;
 }
 
 //--//
