@@ -551,7 +551,7 @@ HRESULT Library_corlib_native_System_Convert::
         conversionResult = Nano_strptime(str, "%Y-%m-%dT%H:%M:%S", &ticks);
     }
 
-    if (conversionResult == NULL)
+    if (conversionResult == nullptr)
     {
         // try 'r/R' RFC 1123 date (ddd, dd MMM yyyy HH:mm:ss)
         conversionResult = Nano_strptime(str, "%a, %d %b %Y %H:%M:%S", &ticks);
