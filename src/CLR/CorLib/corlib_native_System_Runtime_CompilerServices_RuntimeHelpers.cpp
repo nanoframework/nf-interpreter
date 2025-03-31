@@ -25,8 +25,7 @@ HRESULT Library_corlib_native_System_Runtime_CompilerServices_RuntimeHelpers::
         NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
     }
 
-    if ((inst.target->flags & CLR_RECORD_FIELDDEF::FD_HasFieldRVA) == 0 ||
-        inst.target->defaultValue == CLR_EmptyIndex)
+    if ((inst.target->flags & CLR_RECORD_FIELDDEF::FD_HasFieldRVA) == 0 || inst.target->defaultValue == CLR_EmptyIndex)
     {
         NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
     }
