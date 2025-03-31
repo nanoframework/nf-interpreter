@@ -595,9 +595,11 @@ struct Library_corlib_native_System_EventArgs
 
 struct Library_corlib_native_System_GC
 {
-    NANOCLR_NATIVE_DECLARE(AnyPendingFinalizers___STATIC__BOOLEAN);
-    NANOCLR_NATIVE_DECLARE(SuppressFinalize___STATIC__VOID__OBJECT);
+    NANOCLR_NATIVE_DECLARE(EnableGCMessages___STATIC__VOID__BOOLEAN);
     NANOCLR_NATIVE_DECLARE(ReRegisterForFinalize___STATIC__VOID__OBJECT);
+    NANOCLR_NATIVE_DECLARE(SuppressFinalize___STATIC__VOID__OBJECT);
+    NANOCLR_NATIVE_DECLARE(AnyPendingFinalizers___STATIC__BOOLEAN);
+    NANOCLR_NATIVE_DECLARE(Run___STATIC__U4__BOOLEAN);
 
     //--//
 };
