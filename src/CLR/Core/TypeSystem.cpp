@@ -4,6 +4,7 @@
 // See LICENSE file in the project root for full license information.
 //
 #include "stdafx.h"
+#include <string>
 
 #include "Core.h"
 #include "corhdr_private.h"
@@ -4341,7 +4342,6 @@ bool CLR_RT_Assembly::FindTypeDef(const char *typeName, const char *nameSpace, C
             // check if this is a nested type
             if (target->HasValidEnclosingType())
             {
-                const char *szNameSpace = GetString(target->nameSpace);
                 const char *szName = GetString(target->name);
 
                 // for nested types, there is no namespace encoded in the type
