@@ -12,10 +12,7 @@ struct ExceptionLookup
 };
 
 static const ExceptionLookup c_ExceptionLookup[] = {
-#define EL(hr, fld)                                                                                                    \
-    {                                                                                                                  \
-        hr, &g_CLR_RT_WellKnownTypes.fld                                                                               \
-    }
+#define EL(hr, fld) {hr, &g_CLR_RT_WellKnownTypes.fld}
     EL(CLR_E_APPDOMAIN_EXITED, AppDomainUnloadedException),
     EL(CLR_E_INVALID_PARAMETER, ArgumentException),
     EL(CLR_E_ARGUMENT_NULL, ArgumentNullException),
@@ -208,10 +205,8 @@ HRESULT Library_corlib_native_System_Exception::SetStackTrace(CLR_RT_HeapBlock &
             (void)array;
 
             // create an empty array for the stack trace
-            NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance(
-                obj[FIELD___stackTrace],
-                depth,
-                g_CLR_RT_WellKnownTypes.UInt8));
+            NANOCLR_CHECK_HRESULT(
+                CLR_RT_HeapBlock_Array::CreateInstance(obj[FIELD___stackTrace], depth, g_CLR_RT_WellKnownTypes.UInt8));
         }
         else
         {
