@@ -556,123 +556,13 @@ HRESULT Library_sys_dev_i2c_native_System_Device_I2c_I2cDevice::
             }
             else
             {
-                if (palI2c->ReadSize == 0)
-                {
-                    // this is Write only transaction
-                    transactionResult = i2cMasterTransmitTimeout(
-                        palI2c->Driver,
-                        palI2c->Address,
-                        palI2c->WriteBuffer,
-                        palI2c->WriteSize,
-                        NULL,
-                        0,
-                        TIME_MS2I(20));
-                }
-                else
-                {
-                    // this is a Read only transaction
-                    transactionResult = i2cMasterReceiveTimeout(
-                        palI2c->Driver,
-                        palI2c->Address,
-                        palI2c->ReadBuffer,
-                        palI2c->ReadSize,
-                        TIME_MS2I(20));
-                }
-            }
-        }
-
-        while (eventResult)
-        {
-            if (!isLongRunningOperation)
-            {
-                // this is not a long running operation so nothing to do here
-                break;
-            }
-
-            if (palI2c->WorkingThread->state == CH_STATE_FINAL)
-            {
-                // I2C working thread is now complete
-                break;
-            }
-
-            // non-blocking wait allowing other threads to run while we wait for the I2C transaction to complete
-            NANOCLR_CHECK_HRESULT(
-                g_CLR_RT_ExecutionEngine.WaitEvents(stack.m_owningThread, *timeout, Event_I2cMaster, eventResult));
-        }
-
-        if (isLongRunningOperation)
-        {
-            // pop timeout heap block from stack
-            stack.PopValue();
-        }
-
-        if (eventResult || !isLongRunningOperation)
-        {
-            // event occurred
-            // OR this is NOT a long running operation
-
-            i2cReleaseBus(palI2c->Driver);
-
-            // create the return object (I2cTransferResult)
-            // only at this point we are sure that there will be a return from this thread so it's OK to use the
-            // managed stack
-            CLR_RT_HeapBlock &top = stack.PushValueAndClear();
-            NANOCLR_CHECK_HRESULT(
-                g_CLR_RT_ExecutionEngine.NewObjectFromIndex(top, g_CLR_RT_WellKnownTypes.I2cTransferResult));
-            result = top.Dereference();
-            FAULT_ON_NULL(result);
-
-            if (isLongRunningOperation)
-            {
-                // ChibiOS requirement: need to call chThdWait for I2C working thread in order to have it's memory
-                // released to the heap, otherwise it won't be returned
-                transactionResult = chThdWait(palI2c->WorkingThread);
-            }
-
-            // get the result from the working thread execution
-            if (transactionResult != MSG_OK)
-            {
-                // error in transaction
-                int errors = i2cGetErrors(palI2c->Driver);
-
-                // figure out what was the error and set the status field
-                switch (errors)
-                {
-                    case I2C_ACK_FAILURE:
-                        result[I2cTransferResult::FIELD___status].SetInteger(
-                            (CLR_UINT32)I2cTransferStatus_SlaveAddressNotAcknowledged);
-                        break;
-
-                    case I2C_TIMEOUT:
-                        result[I2cTransferResult::FIELD___status].SetInteger(
-                            (CLR_UINT32)I2cTransferStatus_ClockStretchTimeout);
-                        break;
-
-                    default:
-                        result[I2cTransferResult::FIELD___status].SetInteger(
-                            (CLR_UINT32)I2cTransferStatus_UnknownError);
-                }
-
-                // set the bytes transferred count to 0 because we don't have a way to know how many bytes were
-                // actually sent/received
-                result[I2cTransferResult::FIELD___bytesTransferred].SetInteger(0);
-            }
-            else
-            {
-                // successful transaction
-                // set the result field
-                result[I2cTransferResult::FIELD___status].SetInteger((CLR_UINT32)I2cTransferStatus_FullTransfer);
-
-                // set the bytes transferred field
-                result[I2cTransferResult::FIELD___bytesTransferred].SetInteger(
-                    (CLR_UINT32)(palI2c->WriteSize + palI2c->ReadSize));
-            }
-
-            if (palI2c->ReadSize > 0)
-            {
-                // invalidate cache over read buffer to ensure that content from DMA is read
-                // (only required for Cortex-M7)
-                cacheBufferInvalidate(palI2c->ReadBuffer, palI2c->ReadSize);
+                // this is a Read only transaction
+                transactionResult = i2cMasterReceiveTimeout(
+                    palI2c->Driver,
+                    palI2c->Address,
+                    palI2c->ReadBuffer,
+                    palI2c->ReadSize,
+                    TIME_MS2I(20));
             }
         }
     }

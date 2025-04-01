@@ -124,10 +124,10 @@ HRESULT Library_sys_net_native_System_Net_NetworkInformation_Wireless80211Config
     hal_strncpy_s((char *)config.Ssid, WIRELESS82011_CONFIG_MAX_SSID_LEN, hbSsid->StringText(), ssidLength);
 
     // store configuration
-    if (ConfigurationManager_UpdateConfigurationBlock(
-            &config,
-            DeviceConfigurationOption_Wireless80211Network,
-            configurationIndex) != TRUE)
+    if ((ConfigurationManager_UpdateConfigurationBlock(
+             &config,
+             DeviceConfigurationOption_Wireless80211Network,
+             configurationIndex) == UpdateConfigurationResult_Failed))
     {
         NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
     }
