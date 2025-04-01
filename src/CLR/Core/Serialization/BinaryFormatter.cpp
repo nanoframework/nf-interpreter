@@ -1052,7 +1052,7 @@ HRESULT CLR_RT_BinaryFormatter::TypeHandler::ReadValue(int &res)
                 auto dstString = (char *)str->StringText();
 
                 NANOCLR_CHECK_HRESULT(m_bf->ReadArray((CLR_UINT8 *)dstString, len));
-                dst[len] = 0;
+                dstString[len] = 0;
             }
 
             res = c_Action_None;
