@@ -540,7 +540,7 @@ void CLR_PRF_Profiler::DumpPointer(void *ptr)
     PackAndWriteBits((CLR_UINT32)(ptrVAlue >> 32));
     PackAndWriteBits((CLR_UINT32)ptrVAlue);
 #else
-    PackAndWriteBits((CLR_UINT32)((CLR_UINT8 *)ptr - s_CLR_RT_Heap.m_location));
+    PackAndWriteBits((CLR_UINT32)((CLR_UINT8 *)ptr - s_CLR_RT_Heap.location));
 #endif
 }
 

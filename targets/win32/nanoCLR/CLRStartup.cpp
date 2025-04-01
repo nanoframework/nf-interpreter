@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (c) .NET Foundation and Contributors
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
@@ -79,14 +79,14 @@ struct Settings : CLR_RT_ParseOptions
         NANOCLR_CHECK_HRESULT(CLR_RT_Assembly::CreateInstance(header, assm));
 
         // Get handlers for native functions in assembly
-        pNativeAssmData = GetAssemblyNativeData(assm->m_szName);
+        pNativeAssmData = GetAssemblyNativeData(assm->name);
 
         // If pNativeAssmData not NULL- means this assembly has native calls and there is pointer to table with native
         // calls.
         if (pNativeAssmData != NULL)
         {
             // First verify that check sum in assembly object matches hardcoded check sum.
-            if (assm->m_header->nativeMethodsChecksum != pNativeAssmData->m_checkSum)
+            if (assm->header->nativeMethodsChecksum != pNativeAssmData->m_checkSum)
             {
                 CLR_Debug::Printf(
                     "\r\n\r\n***********************************************************************\r\n");
@@ -96,8 +96,8 @@ struct Settings : CLR_RT_ParseOptions
                 CLR_Debug::Printf("*                                                                     *\r\n");
                 CLR_Debug::Printf(
                     "* Invalid native checksum: %s 0x%08X!=0x%08X *\r\n",
-                    assm->m_szName,
-                    assm->m_header->nativeMethodsChecksum,
+                    assm->name,
+                    assm->header->nativeMethodsChecksum,
                     pNativeAssmData->m_checkSum);
                 CLR_Debug::Printf("*                                                                     *\r\n");
                 CLR_Debug::Printf("***********************************************************************\r\n");
@@ -106,7 +106,7 @@ struct Settings : CLR_RT_ParseOptions
             }
 
             // Assembly has valid pointer to table with native methods. Save it.
-            assm->m_nativeCode = (const CLR_RT_MethodHandler *)pNativeAssmData->m_pNativeMethods;
+            assm->nativeCode = (const CLR_RT_MethodHandler *)pNativeAssmData->m_pNativeMethods;
         }
         g_CLR_RT_TypeSystem.Link(assm);
         NANOCLR_NOCLEANUP();
@@ -305,7 +305,7 @@ struct Settings : CLR_RT_ParseOptions
                     CLR_RT_Memory::Release(assembliesBuffer);
                 break;
             }
-            assm->m_flags |= CLR_RT_Assembly::Deployed;
+            assm->flags |= CLR_RT_Assembly::Deployed;
         }
         if (!isXIP)
             CLR_RT_Memory::Release(headerBuffer);
@@ -505,7 +505,7 @@ struct Settings : CLR_RT_ParseOptions
                     break;
                 }
 
-                CLR_RT_UnicodeHelper::ConvertFromUTF8(assm->m_szName, strName);
+                CLR_RT_UnicodeHelper::ConvertFromUTF8(assm->name, strName);
                 m_assemblies[strName] = bufferSub;
 
                 assm->DestroyInstance();
@@ -533,7 +533,7 @@ struct Settings : CLR_RT_ParseOptions
         NANOCLR_FOREACH_ASSEMBLY(g_CLR_RT_TypeSystem)
         {
             const CLR_RECORD_ASSEMBLYREF *src = (const CLR_RECORD_ASSEMBLYREF *)pASSM->GetTable(TBL_AssemblyRef);
-            for (int i = 0; i < pASSM->m_pTablesSize[TBL_AssemblyRef]; i++, src++)
+            for (int i = 0; i < pASSM->tablesSize[TBL_AssemblyRef]; i++, src++)
             {
                 const char *szName = pASSM->GetString(src->name);
 
@@ -542,10 +542,10 @@ struct Settings : CLR_RT_ParseOptions
                     printf(
                         "Missing assembly: %s (%d.%d.%d.%d)\n",
                         szName,
-                        src->version.iMajorVersion,
-                        src->version.iMinorVersion,
-                        src->version.iBuildNumber,
-                        src->version.iRevisionNumber);
+                        src->version.majorVersion,
+                        src->version.minorVersion,
+                        src->version.buildNumber,
+                        src->version.revisionNumber);
 
                     fError = true;
                 }
