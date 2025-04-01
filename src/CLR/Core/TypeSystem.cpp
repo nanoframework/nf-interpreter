@@ -598,7 +598,7 @@ HRESULT CLR_RT_SignatureParser::Advance(Element &res)
                         NANOCLR_SET_AND_LEAVE(S_OK);
 
                     case DATATYPE_VOID:
-                        res.Class = g_CLR_RT_WellKnownTypes.Void;
+                        res.Class = g_CLR_RT_WellKnownTypes.n_Void;
                         NANOCLR_SET_AND_LEAVE(S_OK);
 
                     case DATATYPE_GENERICINST:
@@ -3983,7 +3983,7 @@ static const TypeIndexLookup c_TypeIndexLookup[] = {
     TIL("System",                                   "TimeSpan",                         TimeSpan),
     TIL("System",                                   "String",                           String),
 
-    TIL("System",                                   "Void",                             Void),
+    TIL("System",                                   "Void",                             n_Void),
     TIL("System",                                   "Object",                           Object),
     TIL("System",                                   "ValueType",                        ValueType),
     TIL("System",                                   "Enum",                             Enum),

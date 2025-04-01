@@ -1685,7 +1685,8 @@ struct CLR_RT_WellKnownTypes
     CLR_RT_TypeDef_Index TimeSpan;
     CLR_RT_TypeDef_Index String;
 
-    CLR_RT_TypeDef_Index Void;
+    // need this prefix to disambiguate type in TI plaform
+    CLR_RT_TypeDef_Index n_Void;
     CLR_RT_TypeDef_Index Object;
     CLR_RT_TypeDef_Index ValueType;
     CLR_RT_TypeDef_Index Enum;
