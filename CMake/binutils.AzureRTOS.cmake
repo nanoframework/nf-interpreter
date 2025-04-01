@@ -4,14 +4,13 @@
 #
 
 include(binutils.common)
-# include(ChibiOS_HAL)
 
 function(nf_set_optimization_options target) 
 
     target_compile_options(${target} PRIVATE
         $<$<CONFIG:Debug>:-Og -ggdb>
-        $<$<CONFIG:Release>:-O3 -flto>
-        $<$<CONFIG:MinSizeRel>:-Os -flto>
+        $<$<CONFIG:Release>:-O3>
+        $<$<CONFIG:MinSizeRel>:-Os>
         $<$<CONFIG:RelWithDebInfo>:-Os -femit-class-debug-always -ggdb>
     )
 
