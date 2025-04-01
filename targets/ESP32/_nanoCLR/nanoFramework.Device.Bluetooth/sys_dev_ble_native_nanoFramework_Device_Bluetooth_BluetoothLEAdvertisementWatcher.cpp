@@ -135,7 +135,7 @@ Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_Advertisement_Bluetoot
                 NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance(
                     pThis[FIELD___rawAdvertData],
                     gEvent->disc.length_data,
-                    g_CLR_RT_WellKnownTypes.m_UInt8));
+                    g_CLR_RT_WellKnownTypes.UInt8));
 
                 buffer = pThis[FIELD___rawAdvertData].DereferenceArray()->GetFirstElement();
                 memcpy(buffer, gEvent->disc.data, gEvent->disc.length_data);

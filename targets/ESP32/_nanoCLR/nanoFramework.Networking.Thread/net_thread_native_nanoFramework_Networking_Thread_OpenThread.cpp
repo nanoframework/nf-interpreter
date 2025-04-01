@@ -108,7 +108,7 @@ HRESULT StoreDataset(CLR_RT_StackFrame &stack, otOperationalDataset &dataset, CL
             NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance(
                 datasetObject[OpenThreadDataSet::FIELD___networkName],
                 len,
-                g_CLR_RT_WellKnownTypes.m_UInt8));
+                g_CLR_RT_WellKnownTypes.UInt8));
             memcpy(
                 datasetObject[OpenThreadDataSet::FIELD___networkName].DereferenceArray()->GetElement(0),
                 dataset.mNetworkName.m8,
@@ -123,7 +123,7 @@ HRESULT StoreDataset(CLR_RT_StackFrame &stack, otOperationalDataset &dataset, CL
             NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance(
                 datasetObject[OpenThreadDataSet::FIELD___extendedPanId],
                 OT_EXT_PAN_ID_SIZE,
-                g_CLR_RT_WellKnownTypes.m_UInt8));
+                g_CLR_RT_WellKnownTypes.UInt8));
             memcpy(
                 datasetObject[OpenThreadDataSet::FIELD___extendedPanId].DereferenceArray()->GetElement(0),
                 dataset.mExtendedPanId.m8,
@@ -138,7 +138,7 @@ HRESULT StoreDataset(CLR_RT_StackFrame &stack, otOperationalDataset &dataset, CL
             NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance(
                 datasetObject[OpenThreadDataSet::FIELD___networkKey],
                 OT_NETWORK_KEY_SIZE,
-                g_CLR_RT_WellKnownTypes.m_UInt8));
+                g_CLR_RT_WellKnownTypes.UInt8));
             memcpy(
                 datasetObject[OpenThreadDataSet::FIELD___networkKey].DereferenceArray()->GetElement(0),
                 dataset.mNetworkKey.m8,
@@ -360,7 +360,7 @@ HRESULT Library_net_thread_native_nanoFramework_Networking_Thread_OpenThread::Na
         stack.PushValueAndClear();
 
         NANOCLR_CHECK_HRESULT(
-            CLR_RT_HeapBlock_Array::CreateInstance(stack.TopValue(), 16, g_CLR_RT_WellKnownTypes.m_UInt8));
+            CLR_RT_HeapBlock_Array::CreateInstance(stack.TopValue(), 16, g_CLR_RT_WellKnownTypes.UInt8));
 
         // Get address of frist element
         iparray = stack.TopValue().DereferenceArray()->GetFirstElement();

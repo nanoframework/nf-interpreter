@@ -1035,9 +1035,9 @@ bool CLR_RT_TypeDef_Instance::ResolveToken(
                 // }
                 // else
                 //{
-                //     m_data = g_CLR_RT_WellKnownTypes.m_Object.m_data;
-                //     m_assm = g_CLR_RT_TypeSystem.m_assemblies[g_CLR_RT_WellKnownTypes.m_Object.Assembly() - 1];
-                //     m_target = m_assm->GetTypeDef(g_CLR_RT_WellKnownTypes.m_Object.Type());
+                //     m_data = g_CLR_RT_WellKnownTypes.Object.m_data;
+                //     m_assm = g_CLR_RT_TypeSystem.m_assemblies[g_CLR_RT_WellKnownTypes.Object.Assembly() - 1];
+                //     m_target = m_assm->GetTypeDef(g_CLR_RT_WellKnownTypes.Object.Type());
                 // }
 
 #if defined(NANOCLR_INSTANCE_NAMES)
@@ -3250,7 +3250,7 @@ void CLR_RT_Assembly::ResolveLink()
                 }
 
 #if defined(NANOCLR_APPDOMAINS)
-                if (inst.m_data == g_CLR_RT_WellKnownTypes.m_MarshalByRefObject.m_data)
+                if (inst.m_data == g_CLR_RT_WellKnownTypes.MarshalByRefObject.m_data)
                 {
                     dst->m_flags |= CLR_RT_TypeDef_CrossReference::TD_CR_IsMarshalByRefObject;
                 }
@@ -3473,7 +3473,7 @@ HRESULT CLR_RT_AppDomain::LoadAssembly(CLR_RT_Assembly *assm)
         CLR_RT_HeapBlock exception;
 
         NANOCLR_CHECK_HRESULT(
-            g_CLR_RT_ExecutionEngine.NewObjectFromIndex(exception, g_CLR_RT_WellKnownTypes.m_OutOfMemoryException));
+            g_CLR_RT_ExecutionEngine.NewObjectFromIndex(exception, g_CLR_RT_WellKnownTypes.OutOfMemoryException));
 
         m_outOfMemoryException = exception.Dereference();
     }
@@ -3509,7 +3509,7 @@ HRESULT CLR_RT_AppDomain::GetManagedObject(CLR_RT_HeapBlock &res)
 
         _ASSERTE(FIMPLIES(obj, obj->DataType() == DATATYPE_CLASS || obj->DataType() == DATATYPE_VALUETYPE));
 
-        if (obj && obj->ObjectCls().m_data == g_CLR_RT_WellKnownTypes.m_AppDomain.m_data)
+        if (obj && obj->ObjectCls().m_data == g_CLR_RT_WellKnownTypes.AppDomain.m_data)
         {
             // managed appDomain is found.  Use it.
             res.SetObjectReference(ref->m_objectPtr);
@@ -3524,7 +3524,7 @@ HRESULT CLR_RT_AppDomain::GetManagedObject(CLR_RT_HeapBlock &res)
         CLR_RT_HeapBlock *pRes;
         CLR_RT_ProtectFromGC gc(res);
 
-        NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObjectFromIndex(res, g_CLR_RT_WellKnownTypes.m_AppDomain));
+        NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObjectFromIndex(res, g_CLR_RT_WellKnownTypes.AppDomain));
 
         pRes = res.Dereference();
 
@@ -3600,7 +3600,7 @@ HRESULT CLR_RT_AppDomain::MarshalObject(CLR_RT_HeapBlock &src, CLR_RT_HeapBlock 
     CLR_RT_HeapBlock *proxySrc = nullptr;
     CLR_RT_HeapBlock *mbroSrc = nullptr;
     bool fSimpleAssign = false;
-    CLR_RT_TypeDef_Index indexVerify = g_CLR_RT_WellKnownTypes.m_Object;
+    CLR_RT_TypeDef_Index indexVerify = g_CLR_RT_WellKnownTypes.Object;
     NanoCLRDataType dtSrc = src.DataType();
     CLR_RT_AppDomain *appDomainSav = g_CLR_RT_ExecutionEngine.GetCurrentAppDomain();
 
@@ -3831,7 +3831,7 @@ HRESULT CLR_RT_AppDomain::GetAssemblies(CLR_RT_HeapBlock &ref)
                 index.Set(pASSM->m_index);
 
                 NANOCLR_CHECK_HRESULT(
-                    g_CLR_RT_ExecutionEngine.NewObjectFromIndex(*pArray, g_CLR_RT_WellKnownTypes.m_Assembly));
+                    g_CLR_RT_ExecutionEngine.NewObjectFromIndex(*pArray, g_CLR_RT_WellKnownTypes.Assembly));
                 hbObj = pArray->Dereference();
 
                 hbObj->SetReflection(index);
@@ -3844,7 +3844,7 @@ HRESULT CLR_RT_AppDomain::GetAssemblies(CLR_RT_HeapBlock &ref)
         if (pass == 0)
         {
             NANOCLR_CHECK_HRESULT(
-                CLR_RT_HeapBlock_Array::CreateInstance(ref, count, g_CLR_RT_WellKnownTypes.m_Assembly));
+                CLR_RT_HeapBlock_Array::CreateInstance(ref, count, g_CLR_RT_WellKnownTypes.Assembly));
 
             pArray = (CLR_RT_HeapBlock *)ref.DereferenceArray()->GetFirstElement();
         }

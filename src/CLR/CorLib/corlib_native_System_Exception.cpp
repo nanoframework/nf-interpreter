@@ -254,7 +254,7 @@ HRESULT Library_corlib_native_System_Exception::SetStackTrace(CLR_RT_HeapBlock &
 
         // create an empty array for the stack trace
         NANOCLR_CHECK_HRESULT(
-            CLR_RT_HeapBlock_Array::CreateInstance(obj[FIELD___stackTrace], depth, g_CLR_RT_WellKnownTypes.m_UInt8));
+            CLR_RT_HeapBlock_Array::CreateInstance(obj[FIELD___stackTrace], depth, g_CLR_RT_WellKnownTypes.UInt8));
 
 #endif
     }

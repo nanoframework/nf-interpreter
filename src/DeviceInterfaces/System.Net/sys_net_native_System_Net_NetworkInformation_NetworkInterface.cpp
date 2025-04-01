@@ -334,7 +334,7 @@ HRESULT Library_sys_net_native_System_Net_NetworkInformation_NetworkInterface::
 
     // Return array of uint16[8]
     NANOCLR_CHECK_HRESULT(
-        CLR_RT_HeapBlock_Array::CreateInstance(stack.PushValueAndClear(), 8, g_CLR_RT_WellKnownTypes.m_UInt16));
+        CLR_RT_HeapBlock_Array::CreateInstance(stack.PushValueAndClear(), 8, g_CLR_RT_WellKnownTypes.UInt16));
     {
         uint16_t *p = (uint16_t *)stack.TopValue().DereferenceArray()->GetFirstElement();
         memcpy(p, address, sizeof(address));

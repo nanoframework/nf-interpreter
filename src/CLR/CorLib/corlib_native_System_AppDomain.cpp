@@ -83,7 +83,7 @@ HRESULT Library_corlib_native_System_AppDomain::
 
         index.Set(assembly->m_index);
 
-        NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObjectFromIndex(top, g_CLR_RT_WellKnownTypes.m_Assembly));
+        NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObjectFromIndex(top, g_CLR_RT_WellKnownTypes.Assembly));
 
         hbObj = top.Dereference();
         hbObj->SetReflection(index);
@@ -226,7 +226,7 @@ HRESULT Library_corlib_native_System_AppDomain::GetAppDomain(
     }
 
     _ASSERTE(obj->DataType() == DATATYPE_CLASS);
-    _ASSERTE(obj->ObjectCls().m_data == g_CLR_RT_WellKnownTypes.m_AppDomain.m_data);
+    _ASSERTE(obj->ObjectCls().m_data == g_CLR_RT_WellKnownTypes.AppDomain.m_data);
 
     src = CLR_RT_ObjectToEvent_Source::ExtractInstance(obj[FIELD___appDomain]);
     FAULT_ON_NULL(src);

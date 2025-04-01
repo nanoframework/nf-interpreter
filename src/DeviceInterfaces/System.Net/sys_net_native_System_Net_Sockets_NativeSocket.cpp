@@ -586,7 +586,7 @@ HRESULT Library_sys_net_native_System_Net_Sockets_NativeSocket::MarshalSockAddre
                 ipAddressHbObj[Library_sys_net_native_System_Net_IPAddress::FIELD___numbers];
 
             NANOCLR_CHECK_HRESULT(
-                CLR_RT_HeapBlock_Array::CreateInstance(numbersFieldRef, 8, g_CLR_RT_WellKnownTypes.m_UInt16));
+                CLR_RT_HeapBlock_Array::CreateInstance(numbersFieldRef, 8, g_CLR_RT_WellKnownTypes.UInt16));
 
             CLR_UINT16 *addrNumbers = (CLR_UINT16 *)numbersFieldRef.DereferenceArray()->GetFirstElement();
 

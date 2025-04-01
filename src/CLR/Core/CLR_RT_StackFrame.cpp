@@ -457,7 +457,7 @@ HRESULT CLR_RT_StackFrame::PopAppDomainTransition()
         _ASSERTE(m_owningThread->m_currentException.Dereference() != nullptr);
         _ASSERTE(
             m_owningThread->m_currentException.Dereference()->ObjectCls().m_data ==
-            g_CLR_RT_WellKnownTypes.m_ThreadAbortException.m_data);
+            g_CLR_RT_WellKnownTypes.ThreadAbortException.m_data);
         _ASSERTE(!m_appDomain->IsLoaded());
 
         m_owningThread->m_flags &= ~(CLR_RT_Thread::TH_F_Aborted | CLR_RT_Thread::TH_F_ContainsDoomedAppDomain);
