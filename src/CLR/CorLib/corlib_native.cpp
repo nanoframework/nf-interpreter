@@ -578,11 +578,11 @@ static const CLR_RT_MethodHandler method_lookup[] =
     nullptr,
     nullptr,
     nullptr,
-    nullptr,
-    nullptr,
-    nullptr,
-    nullptr,
     Library_corlib_native_System_Guid::GenerateNewGuid___STATIC__SZARRAY_U1,
+    nullptr,
+    nullptr,
+    nullptr,
+    nullptr,
     nullptr,
     nullptr,
     nullptr,
@@ -1315,11 +1315,11 @@ static const CLR_RT_MethodHandler method_lookup[] =
     nullptr,
     nullptr,
     nullptr,
-    nullptr,
-    nullptr,
-    nullptr,
-    nullptr,
     Library_corlib_native_System_Guid::GenerateNewGuid___STATIC__SZARRAY_U1,
+    nullptr,
+    nullptr,
+    nullptr,
+    nullptr,
     nullptr,
     nullptr,
     nullptr,
@@ -1505,11 +1505,11 @@ const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_mscorlib =
 
 #if (NANOCLR_REFLECTION == TRUE)
 
-    0xB069B85F,
+    0x4E06901B,
 
 #elif (NANOCLR_REFLECTION == FALSE)
 
-    0x14A216A1,
+    0xB9FA421B,
 ,
 
 #else
@@ -1517,7 +1517,7 @@ const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_mscorlib =
 #endif
 
     method_lookup,
-    { 100, 5, 0, 19 }
+    { 100, 5, 0, 24 }
 };
 
 // clang-format on
