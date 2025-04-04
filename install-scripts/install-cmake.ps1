@@ -1,18 +1,18 @@
 # Copyright (c) .NET Foundation and Contributors
 # See LICENSE file in the project root for full license information.
 
-# This PS installs CMake
+# This PS installs the expected CMake version
 
-# default version is:
-[version]$version="3.23.0"
+# Default (expected) version (or below) is:
+[version]$version="3.31.0"
 
-# check if CMake is installed
+# Check if CMake is installed
 $cmake = (Get-Command "cmake.exe" -ErrorAction SilentlyContinue)
 if($cmake)
 {
-    if($cmake.Version -ge $version)
+    if(($cmake.Version -le $version)
     {
-        "Skipping instal of CMake. Found v$version" | Write-Host -ForegroundColor Yellow
+        "Skipping install of CMake. Found v$version" | Write-Host -ForegroundColor Yellow
 
         exit 0
     }
