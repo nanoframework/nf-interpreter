@@ -300,10 +300,10 @@ typedef struct __nfpack HAL_Configuration_X509DeviceCertificate
     // this is the marker placeholder for this configuration block
     uint8_t Marker[4];
 
-    // Size of the X509 CA Root certificate bundle
+    // Size of the X509 device certificate
     uint32_t CertificateSize;
 
-    // X509 CA Root certificate bundle
+    // X509 device certificate
     uint8_t Certificate[1];
 
 } HAL_Configuration_X509DeviceCertificate;
