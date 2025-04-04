@@ -112,7 +112,7 @@ HRESULT Library_nf_sys_sec_cryptography_System_Security_Cryptography_Aes::Encryp
     NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance(
         stack.TopValue(),
         plainTextArray->m_numOfElements,
-        g_CLR_RT_WellKnownTypes.m_UInt8));
+        g_CLR_RT_WellKnownTypes.UInt8));
 
     // get a reference to the array to return
     cipherTextArray = stack.TopValue().DereferenceArray();

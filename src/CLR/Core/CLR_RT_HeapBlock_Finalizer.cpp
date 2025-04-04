@@ -16,11 +16,11 @@ HRESULT CLR_RT_HeapBlock_Finalizer::CreateInstance(CLR_RT_HeapBlock *object, con
 
     do
     {
-        if (inst2.m_target->flags & CLR_RECORD_TYPEDEF::TD_HasFinalizer)
+        if (inst2.target->flags & CLR_RECORD_TYPEDEF::TD_HasFinalizer)
         {
-            int pos = inst2.m_target->methods_First;
-            int end = pos + inst2.m_target->vMethods_Num + inst2.m_target->iMethods_Num;
-            const CLR_RECORD_METHODDEF *md = inst2.m_assm->GetMethodDef(pos);
+            int pos = inst2.target->firstMethod;
+            int end = pos + inst2.target->virtualMethodCount + inst2.target->instanceMethodCount;
+            const CLR_RECORD_METHODDEF *md = inst2.assembly->GetMethodDef(pos);
 
             for (; pos < end; pos++, md++)
             {

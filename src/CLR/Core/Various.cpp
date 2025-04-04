@@ -40,7 +40,7 @@ HRESULT CLR_RT_ArrayListHelper::PrepareArrayList(CLR_RT_HeapBlock &thisRef, int 
     }
 
     NANOCLR_CHECK_HRESULT(
-        CLR_RT_HeapBlock_Array::CreateInstance(pThis[FIELD___items], capacity, g_CLR_RT_WellKnownTypes.m_Object));
+        CLR_RT_HeapBlock_Array::CreateInstance(pThis[FIELD___items], capacity, g_CLR_RT_WellKnownTypes.Object));
 
     pThis[FIELD___size].NumericByRef().s4 = count;
 
@@ -89,7 +89,7 @@ HRESULT CLR_RT_ByteArrayReader::Init(const unsigned char *src, unsigned int srcS
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
 
-    if (src == NULL || srcSize == 0)
+    if (src == nullptr || srcSize == 0)
         NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
 
     source = src;

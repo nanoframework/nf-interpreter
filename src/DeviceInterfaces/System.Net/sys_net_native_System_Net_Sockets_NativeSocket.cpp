@@ -244,7 +244,7 @@ HRESULT Library_sys_net_native_System_Net_Sockets_NativeSocket::
                     NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance(
                         *pAddress,
                         (CLR_UINT32)addrT->ai_addrlen,
-                        g_CLR_RT_WellKnownTypes.m_UInt8));
+                        g_CLR_RT_WellKnownTypes.UInt8));
 
                     // copy address.
                     memcpy(pAddress->DereferenceArray()->GetFirstElement(), addrT->ai_addr, addrT->ai_addrlen);
@@ -258,9 +258,9 @@ HRESULT Library_sys_net_native_System_Net_Sockets_NativeSocket::
                 // allocate array of byte arrays
                 CLR_RT_ReflectionDef_Index idx;
 
-                idx.m_kind = REFLECTION_TYPE;
-                idx.m_levels = 2;
-                idx.m_data.m_type.m_data = g_CLR_RT_WellKnownTypes.m_UInt8.m_data;
+                idx.kind = REFLECTION_TYPE;
+                idx.levels = 2;
+                idx.data.type.data = g_CLR_RT_WellKnownTypes.UInt8.data;
 
                 NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance(hbAddresses, cAddresses, idx));
 
@@ -586,7 +586,7 @@ HRESULT Library_sys_net_native_System_Net_Sockets_NativeSocket::MarshalSockAddre
                 ipAddressHbObj[Library_sys_net_native_System_Net_IPAddress::FIELD___numbers];
 
             NANOCLR_CHECK_HRESULT(
-                CLR_RT_HeapBlock_Array::CreateInstance(numbersFieldRef, 8, g_CLR_RT_WellKnownTypes.m_UInt16));
+                CLR_RT_HeapBlock_Array::CreateInstance(numbersFieldRef, 8, g_CLR_RT_WellKnownTypes.UInt16));
 
             CLR_UINT16 *addrNumbers = (CLR_UINT16 *)numbersFieldRef.DereferenceArray()->GetFirstElement();
 
@@ -970,7 +970,7 @@ void Library_sys_net_native_System_Net_Sockets_NativeSocket::ThrowError(CLR_RT_S
 
     if ((Library_corlib_native_System_Exception::CreateInstance(
             res,
-            g_CLR_RT_WellKnownTypes.m_SocketException,
+            g_CLR_RT_WellKnownTypes.SocketException,
             CLR_E_FAIL,
             &stack)) == S_OK)
     {

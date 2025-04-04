@@ -58,7 +58,8 @@ HRESULT Library_corlib_native_System_Convert::
     {
         str++;
     }
-    endptr = NULL;
+
+    endptr = nullptr;
 
 #if (SUPPORT_ANY_BASE_CONVERSION == TRUE)
     // support for conversion from any base
@@ -526,7 +527,7 @@ HRESULT Library_corlib_native_System_Convert::
     CLR_INT64 *pTicks;
 
     char *str = (char *)stack.Arg0().RecoverString();
-    char *conversionResult = NULL;
+    char *conversionResult = nullptr;
     // char *str = (char *)"1999-10-31 10:00:00Z";
     uint64_t ticks;
 
@@ -538,25 +539,25 @@ HRESULT Library_corlib_native_System_Convert::
 
     // try 'u' Universal time with sortable format (yyyy-MM-dd' 'HH:mm:ss)
     conversionResult = Nano_strptime(str, "%Y-%m-%d %H:%M:%SZ", &ticks);
-    if (conversionResult == NULL)
+    if (conversionResult == nullptr)
     {
         // try 'o/O' Round Trip ISO 8601 compatible (yyyy-MM-ddTHH:mm:ss.fffffff)
         conversionResult = Nano_strptime(str, "%Y-%m-%dT%H:%M:%S.%f", &ticks);
     }
 
-    if (conversionResult == NULL)
+    if (conversionResult == nullptr)
     {
         // try 'o/O' Round Trip ISO 8601 compatible (yyyy-MM-ddTHH:mm:ss)
         conversionResult = Nano_strptime(str, "%Y-%m-%dT%H:%M:%S", &ticks);
     }
 
-    if (conversionResult == NULL)
+    if (conversionResult == nullptr)
     {
         // try 'r/R' RFC 1123 date (ddd, dd MMM yyyy HH:mm:ss)
         conversionResult = Nano_strptime(str, "%a, %d %b %Y %H:%M:%S", &ticks);
     }
 
-    if (conversionResult == NULL)
+    if (conversionResult == nullptr)
     {
         // failed to parse string
 
@@ -592,10 +593,10 @@ HRESULT Library_corlib_native_System_Convert::ToBase64String___STATIC__STRING__S
 #if (SUPPORT_ANY_BASE_CONVERSION == TRUE)
 
     size_t outputLength;
-    unsigned char *outArray = NULL;
-    char *outArrayWitLineBreak = NULL;
-    unsigned char *inArrayPointer = NULL;
-    size_t lineBreakCount;
+    unsigned char *outArray = nullptr;
+    char *outArrayWitLineBreak = nullptr;
+    uint8_t *inArrayPointer = nullptr;
+    uint8_t lineBreakCount;
     uint16_t offsetIndex = 0;
     size_t count = 0;
     int result;
@@ -617,7 +618,7 @@ HRESULT Library_corlib_native_System_Convert::ToBase64String___STATIC__STRING__S
     outArray = (unsigned char *)platform_malloc(outputLength + 1);
 
     // check if have allocation
-    if (outArray == NULL)
+    if (outArray == nullptr)
     {
         NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
     }
@@ -696,7 +697,7 @@ HRESULT Library_corlib_native_System_Convert::ToBase64String___STATIC__STRING__S
     // need to free memory from arrays
     platform_free((void *)outArray);
 
-    if (outArrayWitLineBreak != NULL)
+    if (outArrayWitLineBreak != nullptr)
     {
         platform_free((void *)outArrayWitLineBreak);
     }
@@ -716,9 +717,9 @@ HRESULT Library_corlib_native_System_Convert::FromBase64String___STATIC__SZARRAY
 
 #if (SUPPORT_ANY_BASE_CONVERSION == TRUE)
 
-    CLR_RT_HeapBlock_String *inString = NULL;
+    CLR_RT_HeapBlock_String *inString = nullptr;
     size_t outputLength;
-    unsigned char *outArray = NULL;
+    unsigned char *outArray = nullptr;
     CLR_UINT8 *returnArray;
     int result;
     size_t length;
@@ -736,7 +737,7 @@ HRESULT Library_corlib_native_System_Convert::FromBase64String___STATIC__SZARRAY
     // alloc output array
     outArray = (unsigned char *)platform_malloc(outputLength + 1);
     // check malloc success
-    if (outArray == NULL)
+    if (outArray == nullptr)
     {
         NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
     }
@@ -760,10 +761,8 @@ HRESULT Library_corlib_native_System_Convert::FromBase64String___STATIC__SZARRAY
 
     // create heap block array instance with appropriate size (the length of the output array)
     // and type (byte which is uint8_t)
-    NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance(
-        stack.PushValueAndClear(),
-        outputLength,
-        g_CLR_RT_WellKnownTypes.m_UInt8));
+    NANOCLR_CHECK_HRESULT(
+        CLR_RT_HeapBlock_Array::CreateInstance(stack.PushValueAndClear(), outputLength, g_CLR_RT_WellKnownTypes.UInt8));
 
     // get a pointer to the array in the heap block array just created
     returnArray = stack.TopValue().DereferenceArray()->GetFirstElement();
@@ -962,7 +961,7 @@ char *Library_corlib_native_System_Convert::Nano_strptime(const char *buf, const
             literal:
                 if (c != *bufPointer++)
                 {
-                    return NULL;
+                    return nullptr;
                 }
                 break;
 
@@ -984,7 +983,7 @@ char *Library_corlib_native_System_Convert::Nano_strptime(const char *buf, const
                 // no match
                 if (i == 7)
                 {
-                    return NULL;
+                    return nullptr;
                 }
 
                 st.wDayOfWeek = i;
@@ -1008,7 +1007,7 @@ char *Library_corlib_native_System_Convert::Nano_strptime(const char *buf, const
                 // no match
                 if (i == 12)
                 {
-                    return NULL;
+                    return nullptr;
                 }
 
                 st.wMonth = i + 1;
@@ -1019,7 +1018,7 @@ char *Library_corlib_native_System_Convert::Nano_strptime(const char *buf, const
             case 'd':
                 if (!(nano_conv_num(&bufPointer, &value, 1, 31)))
                 {
-                    return NULL;
+                    return nullptr;
                 }
                 st.wDay = value;
                 break;
@@ -1028,7 +1027,7 @@ char *Library_corlib_native_System_Convert::Nano_strptime(const char *buf, const
             case 'H':
                 if (!(nano_conv_num(&bufPointer, &value, 0, 23)))
                 {
-                    return NULL;
+                    return nullptr;
                 }
                 st.wHour = value;
                 break;
@@ -1037,7 +1036,7 @@ char *Library_corlib_native_System_Convert::Nano_strptime(const char *buf, const
             case 'M':
                 if (!(nano_conv_num(&bufPointer, &value, 0, 59)))
                 {
-                    return NULL;
+                    return nullptr;
                 }
                 st.wMinute = value;
                 break;
@@ -1046,7 +1045,7 @@ char *Library_corlib_native_System_Convert::Nano_strptime(const char *buf, const
             case 'm':
                 if (!(nano_conv_num(&bufPointer, &value, 1, 12)))
                 {
-                    return NULL;
+                    return nullptr;
                 }
                 st.wMonth = value;
                 break;
@@ -1055,7 +1054,7 @@ char *Library_corlib_native_System_Convert::Nano_strptime(const char *buf, const
             case 'S':
                 if (!(nano_conv_num(&bufPointer, &value, 0, 59)))
                 {
-                    return NULL;
+                    return nullptr;
                 }
                 st.wSecond = value;
                 break;
@@ -1064,7 +1063,7 @@ char *Library_corlib_native_System_Convert::Nano_strptime(const char *buf, const
             case 'Y':
                 if (!(nano_conv_num(&bufPointer, &value, 0, 9999)))
                 {
-                    return NULL;
+                    return nullptr;
                 }
 
                 st.wYear = value;
@@ -1074,7 +1073,7 @@ char *Library_corlib_native_System_Convert::Nano_strptime(const char *buf, const
             case 'f':
                 if (!(nano_conv_num(&bufPointer, &value, 0, 9999999)))
                 {
-                    return NULL;
+                    return nullptr;
                 }
 
                 extraTicks = value;
@@ -1092,7 +1091,7 @@ char *Library_corlib_native_System_Convert::Nano_strptime(const char *buf, const
 
                 // Unknown/unsupported conversion
             default:
-                return NULL;
+                return nullptr;
         }
     }
 

@@ -552,7 +552,7 @@ void Library_sys_net_native_System_Net_Security_SslNative::ThrowError(CLR_RT_Sta
 
     if ((Library_corlib_native_System_Exception::CreateInstance(
             res,
-            g_CLR_RT_WellKnownTypes.m_SocketException,
+            g_CLR_RT_WellKnownTypes.SocketException,
             CLR_E_FAIL,
             &stack)) == S_OK)
     {

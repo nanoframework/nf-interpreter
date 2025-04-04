@@ -165,7 +165,7 @@ HRESULT Interop_Marshal_UNSUPPORTED_TYPE(
     UNSUPPORTED_TYPE &param)
 {
     NATIVE_PROFILE_CLR_CORE();
-    param = NULL;
+    param = nullptr;
     return S_OK;
 }
 
@@ -202,7 +202,7 @@ static HRESULT Interop_Marshal_NUMERIC_ARRAY(
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
 
-    CLR_RT_HeapBlock_Array *pHeapBlockArray = NULL;
+    CLR_RT_HeapBlock_Array *pHeapBlockArray = nullptr;
 
     if (stackFrame.ArgN(paramIndex).DataType() != DATATYPE_OBJECT)
     {
@@ -808,7 +808,7 @@ HRESULT Interop_Marshal_UNSUPPORTED_TYPE_ByRef(
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
     NANOCLR_CHECK_HRESULT(((CLR_RT_HeapBlock *)pHeapBlock)->LoadFromReference(stackFrame.ArgN(paramIndex)));
-    pParam = NULL;
+    pParam = nullptr;
     NANOCLR_NOCLEANUP();
 }
 
@@ -978,7 +978,7 @@ signed __int64 &Interop_Marshal_GetField_double(CLR_RT_HeapBlock *pThis, unsigne
 #endif
 UNSUPPORTED_TYPE &Interop_Marshal_GetField_UNSUPPORTED_TYPE(CLR_RT_HeapBlock *pThis, unsigned int fieldIndex)
 {
-    return (UNSUPPORTED_TYPE &)(*((UNSUPPORTED_TYPE *)NULL));
+    return (UNSUPPORTED_TYPE &)(*((UNSUPPORTED_TYPE *)nullptr));
 }
 #ifdef __GNUC__
 #pragma GCC diagnostic pop

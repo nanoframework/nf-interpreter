@@ -11,7 +11,6 @@
 
 #include <targetHAL.h>
 #include <nanoCLR_Interop.h>
-#include <nanoCLR_Runtime.h>
 #include <nanoCLR_Checks.h>
 
 #include <sys_dev_spi_native.h>

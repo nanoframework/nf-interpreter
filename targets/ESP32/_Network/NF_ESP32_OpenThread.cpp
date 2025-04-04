@@ -311,7 +311,7 @@ HRESULT OpenThreadCliOutput(CLR_RT_HeapBlock &arrayBlock)
         NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance(
             arrayBlock,
             cliOutputsList.size(),
-            g_CLR_RT_WellKnownTypes.m_String));
+            g_CLR_RT_WellKnownTypes.String));
 
         array = arrayBlock.Array();
 

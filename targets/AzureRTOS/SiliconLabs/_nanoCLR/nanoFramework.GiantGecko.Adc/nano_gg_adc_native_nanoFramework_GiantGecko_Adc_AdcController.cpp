@@ -421,7 +421,7 @@ HRESULT Library_nano_gg_adc_native_nanoFramework_GiantGecko_Adc_AdcController::
     NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance(
         stack.PushValueAndClear(),
         ContinuousScanOperation->channelCount,
-        g_CLR_RT_WellKnownTypes.m_Int32));
+        g_CLR_RT_WellKnownTypes.Int32));
 
     sampleArray = stack.TopValue().DereferenceArray();
 

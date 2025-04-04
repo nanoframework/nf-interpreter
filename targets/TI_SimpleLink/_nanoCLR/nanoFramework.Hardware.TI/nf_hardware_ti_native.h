@@ -7,7 +7,6 @@
 #define NF_HARDWARE_TI_NATIVE_H
 
 #include <nanoCLR_Interop.h>
-#include <nanoCLR_Runtime.h>
 #include <nanoPackStruct.h>
 #include <corlib_native.h>
 

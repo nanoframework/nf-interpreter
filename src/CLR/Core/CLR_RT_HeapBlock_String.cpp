@@ -30,7 +30,7 @@ CLR_RT_HeapBlock_String *CLR_RT_HeapBlock_String::CreateInstance(CLR_RT_HeapBloc
 #if defined(NANOCLR_NO_ASSEMBLY_STRINGS)
         str->SetStringText(szText);
 #else
-        str->SetStringText(szText, NULL);
+        str->SetStringText(szText, nullptr);
 #endif
 
         // store reference to the storage area

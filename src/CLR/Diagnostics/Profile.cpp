@@ -20,7 +20,7 @@ void *CLR_PROF_CounterCallChain::Prepare(CLR_PROF_Handler *handler)
 
         handler->m_target_Mode = CLR_PROF_Handler::c_Mode_Ignore;
 
-        return NULL;
+        return nullptr;
     }
     else
     {
@@ -39,8 +39,8 @@ void CLR_PROF_CounterCallChain::Complete(CLR_UINT64 &t, CLR_PROF_Handler *handle
     {
         m_time_exclusive += t;
 
-        m_owningHandler->m_target = NULL;
-        m_owningHandler = NULL;
+        m_owningHandler->m_target = nullptr;
+        m_owningHandler = nullptr;
     }
 }
 
@@ -111,7 +111,7 @@ void CLR_PROF_Handler::Constructor()
 
     m_target_Mode = c_Mode_Ignore;
 
-    Init(NULL);
+    Init(nullptr);
 }
 
 #if defined(NANOCLR_PROFILE_NEW_CALLS)
@@ -169,13 +169,13 @@ void CLR_PROF_Handler::Init(void *target)
 
     if (m_target)
     {
-        if (m_containing && m_containing->m_target == NULL)
+        if (m_containing && m_containing->m_target == nullptr)
         {
-            m_target = NULL;
+            m_target = nullptr;
         }
     }
 
-    if (m_target == NULL)
+    if (m_target == nullptr)
     {
         m_target_Mode = c_Mode_Ignore;
     }
@@ -201,7 +201,7 @@ void CLR_PROF_Handler::Calibrate()
     if (s_initialized)
         return;
 
-    s_current = NULL;
+    s_current = nullptr;
     s_time_overhead = 0;
     s_time_freeze = 0;
     s_time_adjusted = 0;

@@ -115,8 +115,12 @@ HRESULT Library_corlib_native_System_Random::GetRandom(CLR_RT_StackFrame &stack,
 
     if (create)
     {
-        NANOCLR_CHECK_HRESULT(
-            CLR_RT_HeapBlock_BinaryBlob::CreateInstance(pThis[FIELD___random], sizeof(CLR_RT_Random), NULL, NULL, 0));
+        NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_BinaryBlob::CreateInstance(
+            pThis[FIELD___random],
+            sizeof(CLR_RT_Random),
+            nullptr,
+            nullptr,
+            0));
     }
 
     rand = (CLR_RT_Random *)pThis[FIELD___random].DereferenceBinaryBlob()->GetData();

@@ -85,7 +85,7 @@ extern HRESULT NANOCLR_DEBUG_PROCESS_EXCEPTION(HRESULT hr, const char *szFunc, c
         hr = (expr);                                                                                                   \
         NANOCLR_LEAVE();                                                                                               \
     }
-#define NANOCLR_MSG1_SET_AND_LEAVE(expr, msg, arg)                                                                     \
+#define NANOCLR_MSG1_SET_AND_LEAVE(expr, msg, ...)                                                                     \
     {                                                                                                                  \
         hr = (expr);                                                                                                   \
         NANOCLR_LEAVE();                                                                                               \
@@ -298,7 +298,7 @@ template <class T> class CLR_RT_TypedArray
   public:
     CLR_RT_TypedArray()
     {
-        m_pData = NULL;
+        m_pData = nullptr;
         m_ElemCount = 0;
     }
 
@@ -668,7 +668,7 @@ void SaveNativeEventToHALQueue(CLR_RT_HeapBlock_NativeEventDispatcher *pContext,
 // Cleans up the data in the queue after interrupts were closed and no managed callbacks are expected.
 void CleanupNativeEventsFromHALQueue(CLR_RT_HeapBlock_NativeEventDispatcher *pContext);
 
-void CLR_RetrieveCurrentMethod(unsigned int &assmIdx, unsigned int &methodIdx);
+void CLR_RetrieveCurrentMethod(unsigned int &assmIndex, unsigned int &methodIndex);
 
 void CLR_SoftReboot();
 

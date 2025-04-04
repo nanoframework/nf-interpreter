@@ -498,7 +498,7 @@ HRESULT Library_nf_ti_easylink_nanoFramework_TI_EasyLink_EasyLinkController::
                     NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance(
                         packet[ReceivedPacket::FIELD___address],
                         (CLR_UINT32)ARRAYSIZE(latestRxPacket.dstAddr),
-                        g_CLR_RT_WellKnownTypes.m_UInt8));
+                        g_CLR_RT_WellKnownTypes.UInt8));
                     buffer = packet[ReceivedPacket::FIELD___address].DereferenceArray();
                     // copy address
                     memcpy(buffer->GetFirstElement(), latestRxPacket.dstAddr, ARRAYSIZE(latestRxPacket.dstAddr));
@@ -507,7 +507,7 @@ HRESULT Library_nf_ti_easylink_nanoFramework_TI_EasyLink_EasyLinkController::
                     NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance(
                         packet[ReceivedPacket::FIELD___payload],
                         (CLR_UINT32)ARRAYSIZE(latestRxPacket.payload),
-                        g_CLR_RT_WellKnownTypes.m_UInt8));
+                        g_CLR_RT_WellKnownTypes.UInt8));
                     buffer = packet[ReceivedPacket::FIELD___payload].DereferenceArray();
                     // copy payload content
                     memcpy(buffer->GetFirstElement(), latestRxPacket.payload, ARRAYSIZE(latestRxPacket.payload));

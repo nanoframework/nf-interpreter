@@ -16,8 +16,8 @@ IBlockStorageDevice TransientFlash_BlockStorageInterface = {
     &TransientFlashDriver_GetDeviceInfo,
     &TransientFlashDriver_Read,
     &TransientFlashDriver_Write,
-    NULL,
+    nullptr,
     &TransientFlashDriver_IsBlockErased,
     &TransientFlashDriver_EraseBlock,
-    NULL,
-    NULL};
+    nullptr,
+    nullptr};

@@ -35,7 +35,7 @@ HRESULT Library_corlib_native_System_Object::GetType___SystemType(CLR_RT_StackFr
     NANOCLR_HEADER();
 
     CLR_RT_TypeDescriptor desc{};
-    CLR_RT_ReflectionDef_Index idx;
+    CLR_RT_ReflectionDef_Index index;
     CLR_RT_HeapBlock &arg0 = stack.Arg0();
     CLR_RT_HeapBlock *pObj;
 
@@ -45,23 +45,23 @@ HRESULT Library_corlib_native_System_Object::GetType___SystemType(CLR_RT_StackFr
 
     if (pObj && arg0.DataType() == DATATYPE_REFLECTION)
     {
-        idx.m_kind = REFLECTION_TYPE;
-        idx.m_levels = 0;
-        idx.m_data.m_type.m_data = desc.m_handlerCls.m_data;
+        index.kind = REFLECTION_TYPE;
+        index.levels = 0;
+        index.data.type.data = desc.m_handlerCls.data;
     }
     else
     {
-        idx = desc.m_reflex;
+        index = desc.m_reflex;
     }
 
     {
         CLR_RT_HeapBlock &top = stack.PushValue();
         CLR_RT_HeapBlock *hbObj;
 
-        NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObjectFromIndex(top, g_CLR_RT_WellKnownTypes.m_TypeStatic));
+        NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObjectFromIndex(top, g_CLR_RT_WellKnownTypes.TypeStatic));
 
         hbObj = top.Dereference();
-        hbObj->SetReflection(idx);
+        hbObj->SetReflection(index);
     }
 
     NANOCLR_NOCLEANUP();

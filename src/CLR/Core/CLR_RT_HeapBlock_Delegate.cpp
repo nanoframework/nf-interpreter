@@ -15,7 +15,7 @@ HRESULT CLR_RT_HeapBlock_Delegate::CreateInstance(
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
 
-    reference.SetObjectReference(NULL);
+    reference.SetObjectReference(nullptr);
 
     CLR_UINT32 length = 0;
 

@@ -10,22 +10,22 @@ static const CLR_RT_NativeAssemblyData *LookUpAssemblyNativeDataByName(
     const char *lpszAssemblyName)
 {
     // Just sanity check to avoid crash in strcmp if name is NULL.
-    if (lpszAssemblyName == NULL)
+    if (lpszAssemblyName == nullptr)
     {
-        return NULL;
+        return nullptr;
     }
 
     // Loops in all entries and looks for the CLR_RT_NativeAssemblyData with name same as lpszAssemblyName
     for (int i = 0; pAssembliesNativeData[i]; i++)
     {
-        if (i < g_CLR_InteropAssembliesCount && pAssembliesNativeData[i] != NULL &&
+        if (i < g_CLR_InteropAssembliesCount && pAssembliesNativeData[i] != nullptr &&
             0 == strcmp(lpszAssemblyName, pAssembliesNativeData[i]->m_szAssemblyName))
         {
             return pAssembliesNativeData[i];
         }
     }
 
-    return NULL;
+    return nullptr;
 }
 
 const CLR_RT_NativeAssemblyData *GetAssemblyNativeData(const char *lpszAssemblyName)

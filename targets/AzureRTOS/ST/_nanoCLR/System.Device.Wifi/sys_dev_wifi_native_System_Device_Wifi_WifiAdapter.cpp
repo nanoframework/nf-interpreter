@@ -273,7 +273,7 @@ HRESULT Library_sys_dev_wifi_native_System_Device_Wifi_WifiAdapter::GetNativeSca
     //         rlen = StoreApRecordsToString(0, ap_records, number);
     //     }
 
-    //     NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance(top, rlen, g_CLR_RT_WellKnownTypes.m_UInt8));
+    //     NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance(top, rlen, g_CLR_RT_WellKnownTypes.UInt8));
     //     array = top.DereferenceArray();
     //     buf = array->GetFirstElement();
 
@@ -331,7 +331,7 @@ HRESULT Library_sys_dev_wifi_native_System_Device_Wifi_WifiAdapter::NativeFindWi
     }
 
     // build array with indexes of Wireless interfaces
-    NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance(top, interfaceCount, g_CLR_RT_WellKnownTypes.m_UInt8));
+    NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance(top, interfaceCount, g_CLR_RT_WellKnownTypes.UInt8));
     array = top.DereferenceArray();
     arrayOfIndexes = array->GetFirstElement();
 

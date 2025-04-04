@@ -69,12 +69,12 @@ __nfweak bool CLR_RT_BinaryFormatter::TypeHandler::CompareTypes(
     return true;
 }
 
-__nfweak CLR_DataType CLR_RT_BinaryFormatter::TypeHandler::GetDataType(CLR_RT_TypeDescriptor *type)
+__nfweak NanoCLRDataType CLR_RT_BinaryFormatter::TypeHandler::GetDataType(CLR_RT_TypeDescriptor *type)
 {
     (void)type;
 
     NATIVE_PROFILE_CLR_SERIALIZATION();
-    return (CLR_DataType)0;
+    return (NanoCLRDataType)0;
 }
 
 __nfweak CLR_UINT32 CLR_RT_BinaryFormatter::TypeHandler::GetSizeOfType(CLR_RT_TypeDescriptor *type)
@@ -287,10 +287,16 @@ __nfweak void CLR_RT_BinaryFormatter::PrepareForGC(void *data)
     NATIVE_PROFILE_CLR_SERIALIZATION();
 }
 
-__nfweak HRESULT CLR_RT_BinaryFormatter::Serialize(CLR_RT_HeapBlock &refData, CLR_RT_HeapBlock &object)
+__nfweak HRESULT CLR_RT_BinaryFormatter::Serialize(
+    CLR_RT_HeapBlock &refData,
+    CLR_RT_HeapBlock &object,
+    CLR_RT_HeapBlock *cls,
+    CLR_UINT32 flags)
 {
     (void)refData;
     (void)object;
+    (void)cls;
+    (void)flags;
 
     NATIVE_PROFILE_CLR_SERIALIZATION();
     NANOCLR_FEATURE_STUB_RETURN();
@@ -299,11 +305,13 @@ __nfweak HRESULT CLR_RT_BinaryFormatter::Serialize(CLR_RT_HeapBlock &refData, CL
 __nfweak HRESULT CLR_RT_BinaryFormatter::Deserialize(
     CLR_RT_HeapBlock &refData,
     CLR_RT_HeapBlock &object,
+    CLR_RT_HeapBlock *cls,
     CLR_UINT32 *unknownType,
     CLR_UINT32 flags)
 {
     (void)refData;
     (void)object;
+    (void)cls;
     (void)unknownType;
     (void)flags;
 
@@ -348,9 +356,9 @@ __nfweak CLR_UINT32 CLR_RT_BinaryFormatter::SearchDuplicate(CLR_RT_HeapBlock *ob
     return (CLR_UINT32)-1;
 }
 
-__nfweak CLR_RT_HeapBlock *CLR_RT_BinaryFormatter::GetDuplicate(CLR_UINT32 idx)
+__nfweak CLR_RT_HeapBlock *CLR_RT_BinaryFormatter::GetDuplicate(CLR_UINT32 index)
 {
-    (void)idx;
+    (void)index;
 
     NATIVE_PROFILE_CLR_SERIALIZATION();
     return NULL;

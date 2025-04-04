@@ -43,9 +43,9 @@ HRESULT Library_nf_system_resourcemanager_System_Resources_ResourceManager::GetO
     NANOCLR_CHECK_HRESULT(
         g_CLR_RT_TypeSystem.LocateResource(assm, resourceFileId, pArgs[0].NumericByRefConst().s2, resource, size));
 
-    if (resource != NULL) // otherwise NULL is returned
+    if (resource != nullptr) // otherwise nullptr is returned
     {
-        pAssm = assm.m_assm;
+        pAssm = assm.assembly;
         buf = pAssm->GetResourceData(resource->offset);
 
         switch (resource->kind)
@@ -58,8 +58,7 @@ HRESULT Library_nf_system_resourcemanager_System_Resources_ResourceManager::GetO
 
             case CLR_RECORD_RESOURCE::RESOURCE_Binary:
             {
-                NANOCLR_CHECK_HRESULT(
-                    CLR_RT_HeapBlock_Array::CreateInstance(top, size, g_CLR_RT_WellKnownTypes.m_UInt8));
+                NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance(top, size, g_CLR_RT_WellKnownTypes.UInt8));
 
                 memcpy(top.DereferenceArray()->GetFirstElement(), buf, size);
             }
@@ -71,8 +70,7 @@ HRESULT Library_nf_system_resourcemanager_System_Resources_ResourceManager::GetO
             {
                 CLR_RT_HeapBlock *ptr;
 
-                NANOCLR_CHECK_HRESULT(
-                    g_CLR_RT_ExecutionEngine.NewObjectFromIndex(top, g_CLR_RT_WellKnownTypes.m_Bitmap));
+                NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObjectFromIndex(top, g_CLR_RT_WellKnownTypes.Bitmap));
 
                 ptr = top.Dereference();
 
@@ -85,7 +83,7 @@ HRESULT Library_nf_system_resourcemanager_System_Resources_ResourceManager::GetO
             {
                 CLR_RT_HeapBlock *ptr;
 
-                NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObjectFromIndex(top, g_CLR_RT_WellKnownTypes.m_Font));
+                NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObjectFromIndex(top, g_CLR_RT_WellKnownTypes.Font));
 
                 ptr = top.Dereference();
 
@@ -137,9 +135,9 @@ HRESULT Library_nf_system_resourcemanager_System_Resources_ResourceManager::GetO
     NANOCLR_CHECK_HRESULT(
         g_CLR_RT_TypeSystem.LocateResource(assm, resourceFileId, pArgs[0].NumericByRefConst().s2, resource, size));
 
-    if (resource != NULL) // otherwise NULL is returned
+    if (resource != nullptr) // otherwise nullptr is returned
     {
-        pAssm = assm.m_assm;
+        pAssm = assm.assembly;
         buf = pAssm->GetResourceData(resource->offset);
 
         switch (resource->kind)
@@ -171,7 +169,7 @@ HRESULT Library_nf_system_resourcemanager_System_Resources_ResourceManager::GetO
                 }
 
                 NANOCLR_CHECK_HRESULT(
-                    CLR_RT_HeapBlock_Array::CreateInstance(top, length, g_CLR_RT_WellKnownTypes.m_UInt8));
+                    CLR_RT_HeapBlock_Array::CreateInstance(top, length, g_CLR_RT_WellKnownTypes.UInt8));
 
                 memcpy(top.DereferenceArray()->GetFirstElement(), buf + offset, length);
             }
