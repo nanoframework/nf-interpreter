@@ -10,7 +10,7 @@
 $cmake = (Get-Command "cmake.exe" -ErrorAction SilentlyContinue)
 if($cmake)
 {
-    if(($cmake.Version -le $version)
+    if($cmake.Version -le $version)
     {
         "Skipping install of CMake. Found v$version" | Write-Host -ForegroundColor Yellow
 
