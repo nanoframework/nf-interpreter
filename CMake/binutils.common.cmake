@@ -784,7 +784,6 @@ function(nf_add_mbedtls_library)
     set(ENABLE_TESTING CACHE BOOL OFF)
     set(ENABLE_PROGRAMS CACHE BOOL OFF)
 
-    cmake_policy(SET CMP0048 NEW)
 
     # Check if population has already been performed
     FetchContent_GetProperties(mbedtls)
