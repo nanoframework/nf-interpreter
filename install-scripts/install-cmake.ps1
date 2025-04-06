@@ -4,7 +4,7 @@
 # This PS installs the expected CMake version
 
 # Default (expected) version (or below) is:
-[version]$version="3.31.0"
+[version]$version="3.31.6"
 
 # Check if CMake is installed
 $cmake = (Get-Command "cmake.exe" -ErrorAction SilentlyContinue)
