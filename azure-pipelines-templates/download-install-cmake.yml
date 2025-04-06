@@ -1,13 +1,18 @@
 # Copyright (c) .NET Foundation and Contributors
 # See LICENSE file in the project root for full license information.
 
+parameters:
+  - name: cmakeVersion
+    type: string
+    default: "3.31.6"
+
 steps:
   # - task: Cache@2
   #   inputs:
-  #     key: 'cmake|3.31.6|$(Agent.OS)'
-  #     restoreKeys: 'cmake|3.31|$(Agent.OS)'
-  #     path: 'C:\ProgramData\chocolatey\lib\cmake'
+  #     key: 'cmake|${{ parameters.cmakeVersion }}|$(Agent.OS)'
+  #     restoreKeys: 'cmake|${{ parameters.cmakeVersion }}|$(Agent.OS)'
+  #     path: '$(Agent.TempDirectory)/choco_cache/cmake'
 
   - script: |
-      choco install cmake --version=3.31.6 --force --yes
-    displayName: 'Force Install CMake 3.31.6'
+      choco install cmake --version=${{ parameters.cmakeVersion }} --force --yes --cache $(System.DefaultWorkingDirectory)/choco_cache/cmake
+    displayName: 'Force Install CMake ${{ parameters.cmakeVersion }}'
