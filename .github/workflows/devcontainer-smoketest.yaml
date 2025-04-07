@@ -19,7 +19,7 @@ jobs:
           { target: ST_STM32F769I_DISCOVERY, build-type: Debug, container: All },
           { target: M5Core2,                 build-type: Debug, container: ESP32 },
           { target: ESP_WROVER_KIT,          build-type: Debug, container: ESP32 },
-          { target: FEATHER_S2,              build-type: Debug, container: ESP32 },
+          { target: ESP32_S2_USB,            build-type: Debug, container: ESP32 },
           { target: ESP32_S3,                build-type: Debug, container: ESP32 },
           { target: ESP32_C3,                build-type: Debug, container: ESP32 },
           { target: ESP32_C6_THREAD,         build-type: Debug, container: ESP32 },
