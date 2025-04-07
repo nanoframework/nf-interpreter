@@ -7,11 +7,11 @@ parameters:
     default: "3.31.6"
 
 steps:
-  # - task: Cache@2
-  #   inputs:
-  #     key: 'cmake|${{ parameters.cmakeVersion }}|$(Agent.OS)'
-  #     restoreKeys: 'cmake|${{ parameters.cmakeVersion }}|$(Agent.OS)'
-  #     path: '$(Agent.TempDirectory)/choco_cache/cmake'
+  - task: Cache@2
+    inputs:
+      key: 'cmake-$(Agent.OS)-${{ parameters.cmakeVersion }}'
+      path: $(System.DefaultWorkingDirectory)/choco_cache/cmake
+    displayName: 'Cache CMake installation'
 
   - script: |
       choco install cmake --version=${{ parameters.cmakeVersion }} --force --yes --cache $(System.DefaultWorkingDirectory)/choco_cache/cmake
