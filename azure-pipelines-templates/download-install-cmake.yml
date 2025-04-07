@@ -14,5 +14,7 @@ steps:
     displayName: 'Cache CMake installation'
 
   - script: |
+      cmake --version
       choco install cmake --version=${{ parameters.cmakeVersion }} --force --yes --cache $(System.DefaultWorkingDirectory)/choco_cache/cmake
+      cmake --version
     displayName: 'Force Install CMake ${{ parameters.cmakeVersion }}'
