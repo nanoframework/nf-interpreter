@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (c) .NET Foundation and Contributors
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
@@ -216,16 +216,16 @@ HRESULT CLR_RT_Thread::CreateInstance(int pid, int priority, CLR_RT_Thread *&th,
 
         th->Initialize();
 
-        th->m_pid = pid;                                 // int                        m_pid;
-        th->m_status = TH_S_Unstarted;                   // CLR_UINT32                 m_status;
-        th->m_flags = flags;                             // CLR_UINT32                 m_flags;
-        th->m_executionCounter = 0;                      // int                        m_executionCounter;
-        th->m_timeQuantumExpired = false;                // bool                       m_timeQuantumExpired;
-                                                         //
-        th->m_dlg = NULL;                                // CLR_RT_HeapBlock_Delegate* m_dlg;
-        th->m_currentException.SetObjectReference(NULL); // CLR_RT_HeapBlock           m_currentException;
-                                                         // UnwindStack m_nestedExceptions[c_MaxStackUnwindDepth];
-        th->m_nestedExceptionsPos = 0;                   // int                        m_nestedExceptionsPos;
+        th->m_pid = pid;                                    // int                        m_pid;
+        th->m_status = TH_S_Unstarted;                      // CLR_UINT32                 m_status;
+        th->m_flags = flags;                                // CLR_UINT32                 m_flags;
+        th->m_executionCounter = 0;                         // int                        m_executionCounter;
+        th->m_timeQuantumExpired = false;                   // bool                       m_timeQuantumExpired;
+                                                            //
+        th->m_dlg = nullptr;                                // CLR_RT_HeapBlock_Delegate* m_dlg;
+        th->m_currentException.SetObjectReference(nullptr); // CLR_RT_HeapBlock           m_currentException;
+                                                            // UnwindStack m_nestedExceptions[c_MaxStackUnwindDepth];
+        th->m_nestedExceptionsPos = 0;                      // int                        m_nestedExceptionsPos;
 
         //
         // //--//
@@ -821,8 +821,8 @@ HRESULT CLR_RT_Thread::ProcessException_Phase1()
             us.GetPhase() < UnwindStack::p_1_SearchingForHandler_2_SentUsersChance && stack->m_IP)
         {
             // We have a debugger attached and we need to send some messages before we start searching.
-            // These messages should only get sent when the search reaches managed code. Stack::Push sets m_IP to NULL
-            // for native code, so therefore we need IP to be non-NULL
+            // These messages should only get sent when the search reaches managed code. Stack::Push sets m_IP to nullptr
+            // for native code, so therefore we need IP to be non-nullptr
 
             us.m_handlerStack = stack;
 
@@ -1144,7 +1144,7 @@ HRESULT CLR_RT_Thread::ProcessException_Phase2()
                 if (iterStack->m_IP)
                 {
                     // handlerBlockStart is used to not execute finally's who's protected blocks contain the handler
-                    // itself. NULL is used when we're not in the handler stack frame to make it work in the case of
+                    // itself. nullptr is used when we're not in the handler stack frame to make it work in the case of
                     // recursive functions with filtered handlers.
                     if (FindEhBlock(
                             iterStack,
@@ -1171,7 +1171,7 @@ HRESULT CLR_RT_Thread::ProcessException_Phase2()
                         if (CLR_EE_DBG_IS_NOT(NoStackTraceInExceptions))
                         {
 #ifndef NANOCLR_NO_IL_INLINE
-                            if (iterStack->m_inlineFrame == NULL)
+                            if (iterStack->m_inlineFrame == nullptr)
 #endif
                             {
                                 g_CLR_RT_ExecutionEngine.Breakpoint_StackFrame_Pop(iterStack, true);
@@ -1212,7 +1212,7 @@ HRESULT CLR_RT_Thread::ProcessException_Phase2()
                             if (CLR_EE_DBG_IS_NOT(NoStackTraceInExceptions))
                             {
 #ifndef NANOCLR_NO_IL_INLINE
-                                if (iterStack->m_inlineFrame == NULL)
+                                if (iterStack->m_inlineFrame == nullptr)
 #endif
                                 {
                                     g_CLR_RT_ExecutionEngine.Breakpoint_StackFrame_Pop(iterStack, true);

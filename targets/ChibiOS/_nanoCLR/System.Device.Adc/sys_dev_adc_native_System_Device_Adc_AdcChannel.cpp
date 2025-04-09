@@ -34,9 +34,9 @@ HRESULT Library_sys_dev_adc_native_System_Device_Adc_AdcChannel::NativeReadValue
     ADCConversionGroup adcgrpcfg1;
     bool enableVref;
 
-    ADCDriver *adcDriver = NULL;
+    ADCDriver *adcDriver = nullptr;
 
-    // get a pointer to the managed object instance and check that it's not NULL
+    // get a pointer to the managed object instance and check that it's not nullptr
     CLR_RT_HeapBlock *pThis = stack.This();
     FAULT_ON_NULL(pThis);
 
@@ -97,8 +97,8 @@ HRESULT Library_sys_dev_adc_native_System_Device_Adc_AdcChannel::NativeReadValue
     adcgrpcfg1 = {
         FALSE,
         1,
-        NULL,
-        NULL,                             // replace with adcerrorcallback if required for debug
+        nullptr,
+        nullptr,                             // replace with adcerrorcallback if required for debug
         0,                                /* CR1 */
         ADC_CR2_SWSTART,                  /* CR2 */
         ADC_SMPR1_SMP_AN11(ADC_SAMPLE_3), /* SMPR1 */

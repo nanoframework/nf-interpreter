@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (c) .NET Foundation and Contributors
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
@@ -72,11 +72,11 @@ HRESULT CLR_RT_HeapBlock_NativeEventDispatcher::CreateInstance(CLR_RT_HeapBlock 
         NANOCLR_CHECK_HRESULT(CLR_RT_ObjectToEvent_Source::CreateInstance(event, owner, eventRef));
     }
 
-    // Set pointer to driver custom data to NULL. It initialized later by users of
+    // Set pointer to driver custom data to nullptr. It initialized later by users of
     // CLR_RT_HeapBlock_NativeEventDispatcher
-    event->pDrvCustomData = NULL;
-    // Set pointers to drivers methods to NULL.
-    event->driverMethods = NULL;
+    event->pDrvCustomData = nullptr;
+    // Set pointers to drivers methods to nullptr.
+    event->driverMethods = nullptr;
 
     NANOCLR_CLEANUP();
 

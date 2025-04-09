@@ -27,7 +27,7 @@ HRESULT Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_E
 
     CLR_RT_HeapBlock *receiver_channel_settings;
 
-    // get a pointer to the managed object instance and check that it's not NULL
+    // get a pointer to the managed object instance and check that it's not nullptr
     CLR_RT_HeapBlock *pThis = stack.This();
     FAULT_ON_NULL(pThis);
 
@@ -105,7 +105,7 @@ HRESULT Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_E
 {
     NANOCLR_HEADER();
 
-    CLR_RT_HeapBlock *receiver_channel_settings = NULL;
+    CLR_RT_HeapBlock *receiver_channel_settings = nullptr;
     CLR_INT32 channel;
     bool clearBuffer;
     esp_err_t err;
@@ -134,7 +134,7 @@ HRESULT Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_E
         size_t length = 0;
         rmt_item32_t *rmtItems;
 
-        while ((rmtItems = (rmt_item32_t *)xRingbufferReceive(ringbufHandle, &length, 0)) != NULL)
+        while ((rmtItems = (rmt_item32_t *)xRingbufferReceive(ringbufHandle, &length, 0)) != nullptr)
         {
             // Release items back to Ringbuffer
             vRingbufferReturnItem(ringbufHandle, (void *)rmtItems);
@@ -155,7 +155,7 @@ HRESULT Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_E
 {
     NANOCLR_HEADER();
 
-    CLR_RT_HeapBlock *receiver_channel_settings = NULL;
+    CLR_RT_HeapBlock *receiver_channel_settings = nullptr;
     CLR_INT32 channel;
     esp_err_t err;
 
@@ -185,7 +185,7 @@ HRESULT Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_E
     RingbufHandle_t ringbufHandle;
     UBaseType_t uxItemsWaiting;
 
-    CLR_RT_HeapBlock *receiver_channel_settings = NULL;
+    CLR_RT_HeapBlock *receiver_channel_settings = nullptr;
 
     CLR_RT_HeapBlock *pThis = stack.This();
     FAULT_ON_NULL(pThis);
@@ -200,7 +200,7 @@ HRESULT Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_E
         NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
     }
 
-    vRingbufferGetInfo(ringbufHandle, NULL, NULL, NULL, NULL, &uxItemsWaiting);
+    vRingbufferGetInfo(ringbufHandle, nullptr, nullptr, nullptr, nullptr, &uxItemsWaiting);
 
     stack.SetResult_I4(uxItemsWaiting);
 
@@ -280,9 +280,9 @@ HRESULT Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_E
     CLR_INT32 waitMs;
     CLR_INT64 *timespan;
     size_t length = 0;
-    rmt_item32_t *rmtItems = NULL;
+    rmt_item32_t *rmtItems = nullptr;
 
-    CLR_RT_HeapBlock *receiver_channel_settings = NULL;
+    CLR_RT_HeapBlock *receiver_channel_settings = nullptr;
 
     CLR_RT_HeapBlock *pThis = stack.This();
     FAULT_ON_NULL(pThis);
@@ -336,7 +336,7 @@ HRESULT Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_E
 
     if (length == 0)
     {
-        stack.SetResult_Object(NULL);
+        stack.SetResult_Object(nullptr);
     }
 
     NANOCLR_NOCLEANUP();
@@ -352,7 +352,7 @@ HRESULT Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_E
     uint8_t threshold;
     esp_err_t err;
 
-    CLR_RT_HeapBlock *receiver_channel_settings = NULL;
+    CLR_RT_HeapBlock *receiver_channel_settings = nullptr;
 
     CLR_RT_HeapBlock *pThis = stack.This();
     FAULT_ON_NULL(pThis);
@@ -382,7 +382,7 @@ HRESULT Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_E
     CLR_INT32 channel;
     esp_err_t err;
 
-    CLR_RT_HeapBlock *receiver_channel_settings = NULL;
+    CLR_RT_HeapBlock *receiver_channel_settings = nullptr;
 
     CLR_RT_HeapBlock *pThis = stack.This();
     FAULT_ON_NULL(pThis);
@@ -409,7 +409,7 @@ HRESULT Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_E
 
     CLR_INT32 channel;
 
-    CLR_RT_HeapBlock *receiver_channel_settings = NULL;
+    CLR_RT_HeapBlock *receiver_channel_settings = nullptr;
 
     CLR_RT_HeapBlock *pThis = stack.This();
     FAULT_ON_NULL(pThis);

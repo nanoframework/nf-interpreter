@@ -3272,7 +3272,7 @@ struct CLR_RT_Thread : public CLR_RT_ObjectToEvent_Destination // EVENT HEAP - N
     //--//
 
     //
-    // For example, timers are implemented in terms of Threads. If not NULL, this is a worker thread for a timer.
+    // For example, timers are implemented in terms of Threads. If not nullptr, this is a worker thread for a timer.
     //
     ThreadTerminationCallback m_terminationCallback;
     void *m_terminationParameter; // EVENT HEAP - NO RELOCATION -

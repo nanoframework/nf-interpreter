@@ -42,7 +42,7 @@ void BleCentralStartScan()
     disc_params.filter_policy = BLE_HCI_SCAN_FILT_NO_WL;
     disc_params.limited = 0;
 
-    rc = ble_gap_disc(own_addr_type, BLE_HS_FOREVER, &disc_params, Esp32GapEvent, NULL);
+    rc = ble_gap_disc(own_addr_type, BLE_HS_FOREVER, &disc_params, Esp32GapEvent, nullptr);
     BLE_DEBUG_PRINTF("ble_gap_disc; reason=%d  active %d\n", rc, ble_gap_disc_active());
     if (rc != 0)
     {

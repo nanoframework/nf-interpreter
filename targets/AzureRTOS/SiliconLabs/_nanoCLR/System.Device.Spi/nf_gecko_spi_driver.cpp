@@ -73,7 +73,7 @@ static sl_power_manager_em_transition_event_info_t on_power_manager_event_info =
 };
 
 // List of EUSART handles
-sl_slist_node_t *eusart_handle_list = NULL;
+sl_slist_node_t *eusart_handle_list = nullptr;
 #endif
 
 static bool     spidrvIsInitialized = false;
@@ -209,7 +209,7 @@ Ecode_t NF_SpiDriver_Init(NF_SpiDriver_Handle_t handle, NF_SpiDriver_Init_t *ini
     result = NF_SpiDriver_InitEusart(handle, initData);
 #if defined(SL_CATALOG_POWER_MANAGER_PRESENT)
     // Subscribe to notification to re-enable eusart after deepsleep.
-    if (eusart_handle_list == NULL) {
+    if (eusart_handle_list == nullptr) {
       sl_power_manager_subscribe_em_transition_event(&on_power_manager_event_handle, &on_power_manager_event_info);
     }
     sl_slist_push(&eusart_handle_list, &handle->node);
@@ -250,11 +250,11 @@ static Ecode_t NF_SpiDriver_InitUsart(NF_SpiDriver_Handle_t handle, NF_SpiDriver
   int8_t spiPortNum = -1;
 #endif
 
-  if (handle == NULL) {
+  if (handle == nullptr) {
     return ECODE_EMDRV_SPIDRV_ILLEGAL_HANDLE;
   }
 
-  if (initData == NULL) {
+  if (initData == nullptr) {
     return ECODE_EMDRV_SPIDRV_PARAM_ERROR;
   }
 
@@ -495,11 +495,11 @@ static Ecode_t NF_SpiDriver_InitUsart(NF_SpiDriver_Handle_t handle, NF_SpiDriver
   // Initialize DMA.
   DMADRV_Init();
 
-  if (DMADRV_AllocateChannel(&handle->txDMACh, NULL) != ECODE_EMDRV_DMADRV_OK) {
+  if (DMADRV_AllocateChannel(&handle->txDMACh, nullptr) != ECODE_EMDRV_DMADRV_OK) {
     return ECODE_EMDRV_SPIDRV_DMA_ALLOC_ERROR;
   }
 
-  if (DMADRV_AllocateChannel(&handle->rxDMACh, NULL) != ECODE_EMDRV_DMADRV_OK) {
+  if (DMADRV_AllocateChannel(&handle->rxDMACh, nullptr) != ECODE_EMDRV_DMADRV_OK) {
     return ECODE_EMDRV_SPIDRV_DMA_ALLOC_ERROR;
   }
 
@@ -532,11 +532,11 @@ static Ecode_t NF_SpiDriver_InitEusart(NF_SpiDriver_Handle_t handle, NF_SpiDrive
 
   eusartSpiInit.advancedSettings = &eusartAdvancedSpiInit;
 
-  if (handle == NULL) {
+  if (handle == nullptr) {
     return ECODE_EMDRV_SPIDRV_ILLEGAL_HANDLE;
   }
 
-  if (initData == NULL) {
+  if (initData == nullptr) {
     return ECODE_EMDRV_SPIDRV_PARAM_ERROR;
   }
 
@@ -689,11 +689,11 @@ static Ecode_t NF_SpiDriver_InitEusart(NF_SpiDriver_Handle_t handle, NF_SpiDrive
   // Initialize DMA.
   DMADRV_Init();
 
-  if (DMADRV_AllocateChannel(&handle->txDMACh, NULL) != ECODE_EMDRV_DMADRV_OK) {
+  if (DMADRV_AllocateChannel(&handle->txDMACh, nullptr) != ECODE_EMDRV_DMADRV_OK) {
     return ECODE_EMDRV_SPIDRV_DMA_ALLOC_ERROR;
   }
 
-  if (DMADRV_AllocateChannel(&handle->rxDMACh, NULL) != ECODE_EMDRV_DMADRV_OK) {
+  if (DMADRV_AllocateChannel(&handle->rxDMACh, nullptr) != ECODE_EMDRV_DMADRV_OK) {
     return ECODE_EMDRV_SPIDRV_DMA_ALLOC_ERROR;
   }
 
@@ -755,7 +755,7 @@ Ecode_t NF_SpiDriver_DeInit(NF_SpiDriver_Handle_t handle)
   }
 #endif
 
-  if (handle == NULL) {
+  if (handle == nullptr) {
     return ECODE_EMDRV_SPIDRV_ILLEGAL_HANDLE;
   }
 
@@ -828,7 +828,7 @@ Ecode_t NF_SpiDriver_DeInit(NF_SpiDriver_Handle_t handle)
 #if defined(SL_CATALOG_POWER_MANAGER_PRESENT) && defined(EUSART_PRESENT)
   // Unsubscribe to notification to re-enable eusart after deepsleep.
   sl_slist_remove(&eusart_handle_list, &handle->node);
-  if (eusart_handle_list == NULL) {
+  if (eusart_handle_list == nullptr) {
     sl_power_manager_unsubscribe_em_transition_event(&on_power_manager_event_handle);
   }
 #endif
@@ -850,7 +850,7 @@ Ecode_t NF_SpiDriver_AbortTransfer(NF_SpiDriver_Handle_t handle)
 {
   CORE_DECLARE_IRQ_STATE;
 
-  if (handle == NULL) {
+  if (handle == nullptr) {
     return ECODE_EMDRV_SPIDRV_ILLEGAL_HANDLE;
   }
 
@@ -880,7 +880,7 @@ Ecode_t NF_SpiDriver_AbortTransfer(NF_SpiDriver_Handle_t handle)
 
   em1RequestRemove(handle);
 
-  if (handle->userCallback != NULL) {
+  if (handle->userCallback != nullptr) {
     handle->userCallback(handle,
                          ECODE_EMDRV_SPIDRV_ABORTED,
                          handle->transferCount - handle->remaining);
@@ -904,11 +904,11 @@ Ecode_t NF_SpiDriver_AbortTransfer(NF_SpiDriver_Handle_t handle)
  ******************************************************************************/
 Ecode_t NF_SpiDriver_GetBitrate(NF_SpiDriver_Handle_t handle, uint32_t *bitRate)
 {
-  if (handle == NULL) {
+  if (handle == nullptr) {
     return ECODE_EMDRV_SPIDRV_ILLEGAL_HANDLE;
   }
 
-  if (bitRate == NULL) {
+  if (bitRate == nullptr) {
     return ECODE_EMDRV_SPIDRV_PARAM_ERROR;
   }
 
@@ -942,11 +942,11 @@ Ecode_t NF_SpiDriver_GetBitrate(NF_SpiDriver_Handle_t handle, uint32_t *bitRate)
  ******************************************************************************/
 Ecode_t NF_SpiDriver_GetFramelength(NF_SpiDriver_Handle_t handle, uint32_t *frameLength)
 {
-  if (handle == NULL) {
+  if (handle == nullptr) {
     return ECODE_EMDRV_SPIDRV_ILLEGAL_HANDLE;
   }
 
-  if (frameLength == NULL) {
+  if (frameLength == nullptr) {
     return ECODE_EMDRV_SPIDRV_PARAM_ERROR;
   }
 
@@ -979,11 +979,11 @@ Ecode_t NF_SpiDriver_GetTransferStatus(NF_SpiDriver_Handle_t handle,
 {
   int remaining;
 
-  if (handle == NULL) {
+  if (handle == nullptr) {
     return ECODE_EMDRV_SPIDRV_ILLEGAL_HANDLE;
   }
 
-  if ((itemsTransferred == NULL) || (itemsRemaining == NULL)) {
+  if ((itemsTransferred == nullptr) || (itemsRemaining == nullptr)) {
     return ECODE_EMDRV_SPIDRV_PARAM_ERROR;
   }
 
@@ -1118,7 +1118,7 @@ Ecode_t NF_SpiDriver_MTransfer(NF_SpiDriver_Handle_t handle,
     return retVal;
   }
 
-  if (rxBuffer == NULL) {
+  if (rxBuffer == nullptr) {
     return ECODE_EMDRV_SPIDRV_PARAM_ERROR;
   }
 
@@ -1164,7 +1164,7 @@ Ecode_t NF_SpiDriver_MTransferB(NF_SpiDriver_Handle_t handle,
     return retVal;
   }
 
-  if (rxBuffer == NULL) {
+  if (rxBuffer == nullptr) {
     return ECODE_EMDRV_SPIDRV_PARAM_ERROR;
   }
 
@@ -1202,7 +1202,7 @@ Ecode_t NF_SpiDriver_MTransferSingleItemB(NF_SpiDriver_Handle_t handle,
   CORE_DECLARE_IRQ_STATE;
   uint32_t rxBuffer;
 
-  if (handle == NULL) {
+  if (handle == nullptr) {
     return ECODE_EMDRV_SPIDRV_ILLEGAL_HANDLE;
   }
 
@@ -1218,7 +1218,7 @@ Ecode_t NF_SpiDriver_MTransferSingleItemB(NF_SpiDriver_Handle_t handle,
   handle->state = spidrvStateTransferring;
   CORE_EXIT_ATOMIC();
 
-  if ((pRx = rxValue) == NULL) {
+  if ((pRx = rxValue) == nullptr) {
     pRx = &rxBuffer;
   }
 
@@ -1326,7 +1326,7 @@ Ecode_t NF_SpiDriver_SetBitrate(NF_SpiDriver_Handle_t handle, uint32_t bitRate)
 {
   CORE_DECLARE_IRQ_STATE;
 
-  if (handle == NULL) {
+  if (handle == nullptr) {
     return ECODE_EMDRV_SPIDRV_ILLEGAL_HANDLE;
   }
 
@@ -1371,7 +1371,7 @@ Ecode_t NF_SpiDriver_SetFramelength(NF_SpiDriver_Handle_t handle, uint32_t frame
 {
   CORE_DECLARE_IRQ_STATE;
 
-  if (handle == NULL) {
+  if (handle == nullptr) {
     return ECODE_EMDRV_SPIDRV_ILLEGAL_HANDLE;
   }
 
@@ -1579,7 +1579,7 @@ Ecode_t NF_SpiDriver_STransfer(NF_SpiDriver_Handle_t handle,
     return retVal;
   }
 
-  if (rxBuffer == NULL) {
+  if (rxBuffer == nullptr) {
     return ECODE_EMDRV_SPIDRV_PARAM_ERROR;
   }
 
@@ -1639,7 +1639,7 @@ Ecode_t NF_SpiDriver_STransferB(NF_SpiDriver_Handle_t handle,
     return retVal;
   }
 
-  if (rxBuffer == NULL) {
+  if (rxBuffer == nullptr) {
     return ECODE_EMDRV_SPIDRV_PARAM_ERROR;
   }
 
@@ -2085,7 +2085,7 @@ static bool RxDMAComplete(unsigned int channel,
   }
 #endif
 
-  if (handle->userCallback != NULL) {
+  if (handle->userCallback != nullptr) {
     handle->userCallback(handle, ECODE_EMDRV_SPIDRV_OK, handle->transferCount);
   }
 
@@ -2126,7 +2126,7 @@ static void SlaveTimeout(sl_sleeptimer_timer_handle_t *sleepdriver_handle, void 
     handle->transferStatus = ECODE_EMDRV_SPIDRV_TIMEOUT;
     handle->state          = spidrvStateIdle;
 
-    if (handle->userCallback != NULL) {
+    if (handle->userCallback != nullptr) {
       handle->userCallback(handle,
                            ECODE_EMDRV_SPIDRV_TIMEOUT,
                            handle->transferCount - handle->remaining);
@@ -2221,8 +2221,8 @@ static void StartReceiveDMA(NF_SpiDriver_Handle_t handle,
                           false,
                           count,
                           size,
-                          NULL,
-                          NULL);
+                          nullptr,
+                          nullptr);
 }
 
 /***************************************************************************//**
@@ -2298,8 +2298,8 @@ static void StartTransferDMA(NF_SpiDriver_Handle_t handle,
                           true,
                           count,
                           size,
-                          NULL,
-                          NULL);
+                          nullptr,
+                          nullptr);
 }
 
 /***************************************************************************//**
@@ -2375,8 +2375,8 @@ static void StartTransmitDMA(NF_SpiDriver_Handle_t handle,
                           true,
                           count,
                           size,
-                          NULL,
-                          NULL);
+                          nullptr,
+                          nullptr);
 }
 
 /***************************************************************************//**
@@ -2388,11 +2388,11 @@ static Ecode_t TransferApiBlockingPrologue(NF_SpiDriver_Handle_t handle,
 {
   CORE_DECLARE_IRQ_STATE;
 
-  if (handle == NULL) {
+  if (handle == nullptr) {
     return ECODE_EMDRV_SPIDRV_ILLEGAL_HANDLE;
   }
 
-  if ((buffer == NULL) || (count == 0) || (count > DMADRV_MAX_XFER_COUNT)) {
+  if ((buffer == nullptr) || (count == 0) || (count > DMADRV_MAX_XFER_COUNT)) {
     return ECODE_EMDRV_SPIDRV_PARAM_ERROR;
   }
 
@@ -2416,11 +2416,11 @@ static Ecode_t TransferApiPrologue(NF_SpiDriver_Handle_t handle,
 {
   CORE_DECLARE_IRQ_STATE;
 
-  if (handle == NULL) {
+  if (handle == nullptr) {
     return ECODE_EMDRV_SPIDRV_ILLEGAL_HANDLE;
   }
 
-  if ((buffer == NULL) || (count == 0) || (count > DMADRV_MAX_XFER_COUNT)) {
+  if ((buffer == nullptr) || (count == 0) || (count > DMADRV_MAX_XFER_COUNT)) {
     return ECODE_EMDRV_SPIDRV_PARAM_ERROR;
   }
 

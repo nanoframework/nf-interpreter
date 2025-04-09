@@ -71,7 +71,7 @@ struct Settings
         // Get handlers for native functions in assembly
         pNativeAssmData = GetAssemblyNativeData(assm->name);
 
-        // If pNativeAssmData not NULL - means this assembly has native calls and there is pointer to table with native
+        // If pNativeAssmData not nullptr - means this assembly has native calls and there is pointer to table with native
         // calls.
         if (pNativeAssmData != nullptr)
         {
@@ -400,7 +400,7 @@ void ClrStartup(CLR_SETTINGS params)
                 CLR_Debug::Printf("Ready.\r\n");
 #endif
 
-                hr = g_CLR_RT_ExecutionEngine.Execute(NULL, params.MaxContextSwitches);
+                hr = g_CLR_RT_ExecutionEngine.Execute(nullptr, params.MaxContextSwitches);
 
 #if !defined(BUILD_RTM)
                 CLR_Debug::Printf("Done.\r\n");

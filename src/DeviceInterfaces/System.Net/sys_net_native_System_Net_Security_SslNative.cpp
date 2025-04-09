@@ -419,15 +419,15 @@ HRESULT Library_sys_net_native_System_Net_Security_SslNative::InitHelper(CLR_RT_
     CLR_RT_HeapBlock *hbCert = stack.Arg2().Dereference();
     CLR_RT_HeapBlock *caCert = stack.Arg3().Dereference();
     bool useDeviceCertificate = (bool)stack.Arg4().NumericByRef().u1;
-    CLR_RT_HeapBlock_Array *arrCert = NULL;
-    CLR_RT_HeapBlock_Array *privateKey = NULL;
-    CLR_UINT8 *sslCert = NULL;
+    CLR_RT_HeapBlock_Array *arrCert = nullptr;
+    CLR_RT_HeapBlock_Array *privateKey = nullptr;
+    CLR_UINT8 *sslCert = nullptr;
     volatile int result;
-    uint8_t *pk = NULL;
-    const char *pkPassword = NULL;
+    uint8_t *pk = nullptr;
+    const char *pkPassword = nullptr;
     CLR_UINT32 pkPasswordLength = 0;
 
-    if (hbCert != NULL)
+    if (hbCert != nullptr)
     {
         g_CLR_RT_TypeSystem.FindTypeDef(
             "X509Certificate2",
@@ -471,9 +471,9 @@ HRESULT Library_sys_net_native_System_Net_Security_SslNative::InitHelper(CLR_RT_
                  sslMode,
                  sslVerify,
                  (const char *)sslCert,
-                 sslCert == NULL ? 0 : arrCert->m_numOfElements,
+                 sslCert == nullptr ? 0 : arrCert->m_numOfElements,
                  pk,
-                 pk == NULL ? 0 : privateKey->m_numOfElements,
+                 pk == nullptr ? 0 : privateKey->m_numOfElements,
                  pkPassword,
                  pkPasswordLength,
                  sslContext,
@@ -488,9 +488,9 @@ HRESULT Library_sys_net_native_System_Net_Security_SslNative::InitHelper(CLR_RT_
                  sslMode,
                  sslVerify,
                  (const char *)sslCert,
-                 sslCert == NULL ? 0 : arrCert->m_numOfElements,
+                 sslCert == nullptr ? 0 : arrCert->m_numOfElements,
                  pk,
-                 pk == NULL ? 0 : privateKey->m_numOfElements,
+                 pk == nullptr ? 0 : privateKey->m_numOfElements,
                  pkPassword,
                  pkPasswordLength,
                  sslContext,
@@ -501,12 +501,12 @@ HRESULT Library_sys_net_native_System_Net_Security_SslNative::InitHelper(CLR_RT_
 
     NANOCLR_CHECK_HRESULT(ThrowOnError(stack, result));
 
-    if (caCert != NULL)
+    if (caCert != nullptr)
     {
         arrCert = caCert[X509Certificate::FIELD___certificate].DereferenceArray();
 
-        // If arrCert == NULL then the certificate is an X509Certificate2 which uses a certificate handle
-        if (arrCert == NULL)
+        // If arrCert == nullptr then the certificate is an X509Certificate2 which uses a certificate handle
+        if (arrCert == nullptr)
         {
             arrCert = caCert[X509Certificate::FIELD___handle].DereferenceArray();
             FAULT_ON_NULL(arrCert);

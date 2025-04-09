@@ -61,7 +61,7 @@ bool Storage_UnMountSDCard(int driveIndex)
         return false;
     }
 
-    card = NULL;
+    card = nullptr;
 
     return true;
 }

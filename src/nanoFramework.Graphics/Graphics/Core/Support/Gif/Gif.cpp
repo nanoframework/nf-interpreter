@@ -11,7 +11,7 @@ HRESULT CLR_GFX_Bitmap::CreateInstanceGif(CLR_RT_HeapBlock &ref, const CLR_UINT8
     NANOCLR_HEADER();
 
     GifDecoder *decoder;
-    CLR_GFX_Bitmap *bitmap = NULL;
+    CLR_GFX_Bitmap *bitmap = nullptr;
     CLR_GFX_BitmapDescription bm;
 
     // Allocate the decoder

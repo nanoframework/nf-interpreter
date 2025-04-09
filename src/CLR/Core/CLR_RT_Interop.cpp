@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (c) .NET Foundation and Contributors
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
@@ -146,7 +146,7 @@ HRESULT Interop_Marshal_LPCSTR(const CLR_RT_StackFrame &stackFrame, unsigned int
         NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
     }
 
-    // Checks that the string was actually present in managed code, not a NULL reference to sting.
+    // Checks that the string was actually present in managed code, not a nullptr reference to sting.
     param = stackFrame.ArgN(paramIndex).RecoverString();
     FAULT_ON_NULL(param);
 

@@ -73,7 +73,7 @@ void CLR_PRF_Profiler::SendMemoryLayout()
     Stream_Send();
 
 #if defined(VIRTUAL_DEVICE)
-    if (g_ProfilerMessageCallback != NULL)
+    if (g_ProfilerMessageCallback != nullptr)
     {
         std::string memoryLayout = std::format(
             "** Memory layout **\r\n    start:0x{:X}\r\n      end:0x{:X}\r\n     size:0x{:X}\r\n",
@@ -731,7 +731,7 @@ void CLR_PRF_Profiler::TrackObjectCreation(CLR_RT_HeapBlock *ptr)
                 PackAndWriteBits(idx);
 
 #if defined(VIRTUAL_DEVICE)
-                if (g_ProfilerMessageCallback != NULL)
+                if (g_ProfilerMessageCallback != nullptr)
                 {
                     // build type name
                     char fullTypeName[1024] = {0};
@@ -784,7 +784,7 @@ void CLR_PRF_Profiler::TrackObjectCreation(CLR_RT_HeapBlock *ptr)
                 PackAndWriteBits(array->ReflectionDataConst().levels);
 
 #if defined(VIRTUAL_DEVICE)
-                if (g_ProfilerMessageCallback != NULL)
+                if (g_ProfilerMessageCallback != nullptr)
                 {
                     // build type name
                     char fullTypeName[1024] = {0};
@@ -893,7 +893,7 @@ void CLR_PRF_Profiler::TrackObjectDeletion(CLR_RT_HeapBlock *ptr)
             Stream_Send();
 
 #if defined(VIRTUAL_DEVICE)
-            if (g_ProfilerMessageCallback != NULL)
+            if (g_ProfilerMessageCallback != nullptr)
             {
                 if (dt == DATATYPE_SZARRAY)
                 {
@@ -1046,7 +1046,7 @@ void CLR_PRF_Profiler::TrackObjectRelocation(void *previousAddress, void *destin
     {
 
 #if defined(VIRTUAL_DEVICE)
-        if (g_ProfilerMessageCallback != NULL)
+        if (g_ProfilerMessageCallback != nullptr)
         {
             CLR_RT_HeapBlock *ptr = (CLR_RT_HeapBlock *)destinationAddress;
             CLR_UINT8 dt = ptr->DataType();
@@ -1132,7 +1132,7 @@ void CLR_PRF_Profiler::RecordGarbageCollectionBegin()
         Stream_Send();
 
 #if defined(VIRTUAL_DEVICE)
-        if (g_ProfilerMessageCallback != NULL)
+        if (g_ProfilerMessageCallback != nullptr)
         {
             std::string garbageCollection =
                 std::format("GC: Starting run #{}\r\n", g_CLR_RT_GarbageCollector.m_numberOfGarbageCollections);
@@ -1179,7 +1179,7 @@ void CLR_PRF_Profiler::RecordGarbageCollectionEnd()
         Stream_Send();
 
 #if defined(VIRTUAL_DEVICE)
-        if (g_ProfilerMessageCallback != NULL)
+        if (g_ProfilerMessageCallback != nullptr)
         {
             std::string garbageCollection = std::format(
                 "GC: Finished run #{} - {} bytes free\r\n",
@@ -1241,7 +1241,7 @@ void CLR_PRF_Profiler::RecordHeapCompactionBegin()
         Stream_Send();
 
 #if defined(VIRTUAL_DEVICE)
-        if (g_ProfilerMessageCallback != NULL)
+        if (g_ProfilerMessageCallback != nullptr)
         {
             std::string heapCompaction =
                 std::format("Heap compaction: Starting run #{} \r\n", g_CLR_RT_GarbageCollector.m_numberOfCompactions);
@@ -1289,7 +1289,7 @@ void CLR_PRF_Profiler::RecordHeapCompactionEnd()
         Stream_Send();
 
 #if defined(VIRTUAL_DEVICE)
-        if (g_ProfilerMessageCallback != NULL)
+        if (g_ProfilerMessageCallback != nullptr)
         {
             std::string heapCompaction =
                 std::format("Heap compaction: Finished run #{}\r\n", g_CLR_RT_GarbageCollector.m_numberOfCompactions);
@@ -1449,7 +1449,7 @@ HRESULT CLR_PRF_Profiler::Stream_Flush()
             }
 
 #if defined(VIRTUAL_DEVICE)
-            if (g_ProfilerDataCallback != NULL)
+            if (g_ProfilerDataCallback != nullptr)
             {
                 g_ProfilerDataCallback(ptr->m_payload, payloadLength);
             }

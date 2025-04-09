@@ -18,7 +18,7 @@ int socketErrorCode;
 
 static int MARSHAL_SOCK_FDSET_TO_SL_SDSET(SOCK_fd_set *sf, SlNetSock_SdSet_t *f)
 {
-    if (f != NULL && sf != NULL)
+    if (f != nullptr && sf != nullptr)
     {
         SlNetSock_sdsClrAll(f);
 
@@ -35,7 +35,7 @@ static int MARSHAL_SOCK_FDSET_TO_SL_SDSET(SOCK_fd_set *sf, SlNetSock_SdSet_t *f)
 
 static void MARSHAL_SL_SDSET_TO_SOCK_FDSET(SOCK_fd_set *sf, SlNetSock_SdSet_t *f)
 {
-    if (sf != NULL && f != NULL)
+    if (sf != nullptr && f != nullptr)
     {
         int cnt = sf->fd_count;
         sf->fd_count = 0;
@@ -321,17 +321,17 @@ int SOCK_getaddrinfo(
     NATIVE_PROFILE_PAL_COM();
 
     SOCK_addrinfo *ai;
-    SOCK_sockaddr_in *sa = NULL;
+    SOCK_sockaddr_in *sa = nullptr;
     int total_size = sizeof(SOCK_addrinfo) + sizeof(SOCK_sockaddr_in);
-    struct SlNetUtil_addrInfo_t *addrInfo = NULL;
+    struct SlNetUtil_addrInfo_t *addrInfo = nullptr;
 
-    if (res == NULL)
+    if (res == nullptr)
         return SOCK_SOCKET_ERROR;
 
-    *res = NULL;
+    *res = nullptr;
 
     // if the nodename == "" then return the IP address of this device
-    if (nodename[0] == 0 && servname == NULL)
+    if (nodename[0] == 0 && servname == nullptr)
     {
         uint16_t configOptions;
         uint16_t ipLen = sizeof(SlNetCfgIpV4Args_t);
@@ -341,7 +341,7 @@ int SOCK_getaddrinfo(
         {
             ai = (SOCK_addrinfo *)platform_malloc(total_size);
 
-            if (ai != NULL)
+            if (ai != nullptr)
             {
                 memset(ai, 0, total_size);
                 sa = (SOCK_sockaddr_in *)((uint8_t *)ai + sizeof(SOCK_addrinfo));
@@ -359,7 +359,7 @@ int SOCK_getaddrinfo(
 
                 // set up addrinfo
                 ai->ai_family = SL_AF_INET;
-                if (hints != NULL)
+                if (hints != nullptr)
                 {
                     // copy socktype & protocol from hints if specified
                     ai->ai_socktype = hints->ai_socktype;
@@ -388,7 +388,7 @@ int SOCK_getaddrinfo(
             SlNetSock_AddrIn_t *sockaddr_in;
 
             ai = (SOCK_addrinfo *)platform_malloc(total_size);
-            if (ai == NULL)
+            if (ai == nullptr)
             {
                 SlNetUtil_freeAddrInfo(addrInfo);
             }
@@ -406,7 +406,7 @@ int SOCK_getaddrinfo(
 
                 /* set up addrinfo */
                 ai->ai_family = addrInfo->ai_family;
-                if (hints != NULL)
+                if (hints != nullptr)
                 {
                     /* copy socktype & protocol from hints if specified */
                     ai->ai_socktype = hints->ai_socktype;
@@ -655,7 +655,7 @@ int SOCK_select(
     uint32_t networkInterfaceID;
 
     // If the network goes down then we should alert any pending socket actions
-    if (exceptfds != NULL && exceptfds->fd_count > 0)
+    if (exceptfds != nullptr && exceptfds->fd_count > 0)
     {
         // find the network interface for this socket
         // the socket handle is "burried" inside the exceptfds struct (see the caller code in Helper__SelectSocket)
@@ -669,11 +669,11 @@ int SOCK_select(
 
         if (SlNetIf_getConnectionStatus(networkInterfaceID) == SLNETIF_STATUS_DISCONNECTED)
         {
-            if (readfds != NULL)
+            if (readfds != nullptr)
             {
                 readfds->fd_count = 0;
             }
-            if (writefds != NULL)
+            if (writefds != nullptr)
             {
                 writefds->fd_count = 0;
             }
@@ -686,7 +686,7 @@ int SOCK_select(
 
     // developer note:
     // The original code, being lwIP based, uses the convention that 0 is infinite timeout
-    // Because SimpleLink infinite timeout is negative or NULL we need to translate it.
+    // Because SimpleLink infinite timeout is negative or nullptr we need to translate it.
     SlNetSock_Timeval_t timeoutCopy;
     bool isInfiniteTimeout = false;
 
@@ -705,7 +705,7 @@ int SOCK_select(
         (SlNetSock_SdSet_t *)readfds,
         (SlNetSock_SdSet_t *)writefds,
         (SlNetSock_SdSet_t *)exceptfds,
-        isInfiniteTimeout ? NULL : &timeoutCopy);
+        isInfiniteTimeout ? nullptr : &timeoutCopy);
 
     socketErrorCode = ret;
 

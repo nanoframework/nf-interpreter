@@ -172,7 +172,7 @@ HRESULT HAL_SOCK_CONFIGURATION_UpdateAdapterConfiguration(
 
     // all changes require SL reinit
     sl_Stop(0);
-    sl_Start(NULL, NULL, NULL);
+    sl_Start(nullptr, nullptr, nullptr);
 
     return S_OK;
 }
@@ -212,5 +212,5 @@ void HAL_SOCK_EventsSet(uint32_t events)
 void *HAL_SOCK_GlobalLockContext()
 {
     NATIVE_PROFILE_PAL_NETWORK();
-    return NULL;
+    return nullptr;
 }

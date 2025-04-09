@@ -110,7 +110,7 @@ HRESULT CLR_GFX_Bitmap::CreateInstance(
     NANOCLR_HEADER();
 
     CLR_RT_HeapBlock refUncompressed;
-    refUncompressed.SetObjectReference(NULL);
+    refUncompressed.SetObjectReference(nullptr);
     CLR_GFX_Bitmap *bitmap;
     CLR_GFX_Bitmap *bitmapNative;
     const CLR_GFX_BitmapDescription *bm;
@@ -294,7 +294,7 @@ HRESULT CLR_GFX_Bitmap::DeleteInstance(CLR_RT_HeapBlock &ref)
             break;
     }
 
-    ref.SetObjectReference(NULL);
+    ref.SetObjectReference(nullptr);
 
     NANOCLR_NOCLEANUP();
 }

@@ -126,7 +126,7 @@ void CLR_RT_GarbageCollector::Heap_Compact()
                     break;
                 }
 
-                freeRegion = NULL;
+                freeRegion = nullptr;
                 freeRegion_hc = freeRegion_hcNext;
             }
 
@@ -328,12 +328,12 @@ void CLR_RT_GarbageCollector::Heap_Compact()
 
                         freeRegion = freeRegion_hc->m_freeList.FirstNode();
 
-                        if (freeRegion != NULL && freeRegion->Next())
+                        if (freeRegion != nullptr && freeRegion->Next())
                         {
                             break;
                         }
 
-                        freeRegion = NULL;
+                        freeRegion = nullptr;
                         freeRegion_hc = freeRegion_hcNext;
                     }
 

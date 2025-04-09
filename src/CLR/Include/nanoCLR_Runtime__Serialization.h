@@ -70,7 +70,7 @@ struct CLR_RT_BinaryFormatter : public CLR_RT_HeapBlock_Node // EVENT HEAP - NO 
         //
         // Type of signatures:
         //
-        // 1) NULL
+        // 1) nullptr
         //
         //      Invalid for NeverNull
         //

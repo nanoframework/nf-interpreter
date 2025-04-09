@@ -61,7 +61,7 @@ HRESULT Library_corlib_native_System_Reflection_RuntimeMethodInfo::GetCustomAttr
 
     // the return array has two positions for each attribute:
     // 1st: the attribute type
-    // 2nd: the constructor parameters or NULL, if the attribute has no constructor
+    // 2nd: the constructor parameters or nullptr, if the attribute has no constructor
 
     // 1st pass: count attributes
     do

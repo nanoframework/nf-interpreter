@@ -547,7 +547,7 @@ HRESULT CLR_RT_HeapBlock::StoreToReference(CLR_RT_HeapBlock &ref, int size)
             CLR_INT32 sizeArray = array->m_sizeOfElement;
 
             //
-            // Cannot copy NULL reference to a primitive type array.
+            // Cannot copy nullptr reference to a primitive type array.
             //
             obj = FixBoxingReference();
             FAULT_ON_NULL(obj);
@@ -1441,7 +1441,7 @@ bool CLR_RT_HeapBlock::ObjectsEqual(
                 if (rightObj->DataType() == DATATYPE_VALUETYPE)
                 {
                     CLR_RT_TypeDef_Instance inst{};
-                    CLR_RT_HeapBlock *obj = NULL;
+                    CLR_RT_HeapBlock *obj = nullptr;
 
                     if (!inst.InitializeFromIndex(rightObj->ObjectCls()))
                     {
@@ -1462,7 +1462,7 @@ bool CLR_RT_HeapBlock::ObjectsEqual(
                 }
                 else
                 {
-                    if (rightObj == NULL)
+                    if (rightObj == nullptr)
                     {
                         return false;
                     }
@@ -1652,11 +1652,11 @@ CLR_INT32 CLR_RT_HeapBlock::Compare_Values(const CLR_RT_HeapBlock &left, const C
 
                 if (!leftObj)
                 {
-                    return !rightObj ? 0 : -1; // NULL references always compare smaller than non-NULL ones.
+                    return !rightObj ? 0 : -1; // nullptr references always compare smaller than non-nullptr ones.
                 }
                 else if (!rightObj)
                 {
-                    return 1; // NULL references always compare smaller than non-NULL ones.
+                    return 1; // nullptr references always compare smaller than non-nullptr ones.
                 }
 
                 return Compare_Values(*leftObj, *rightObj, fSigned);
@@ -1691,11 +1691,11 @@ CLR_INT32 CLR_RT_HeapBlock::Compare_Values(const CLR_RT_HeapBlock &left, const C
 
                 if (!leftLen)
                 {
-                    return !rightLen ? 0 : -1; // NULL references always compare smaller than non-NULL ones.
+                    return !rightLen ? 0 : -1; // nullptr references always compare smaller than non-nullptr ones.
                 }
                 else // rightLen != 0 for sure.
                 {
-                    return 1; // NULL references always compare smaller than non-NULL ones.
+                    return 1; // nullptr references always compare smaller than non-nullptr ones.
                 }
             }
 
@@ -1847,7 +1847,7 @@ CLR_INT32 CLR_RT_HeapBlock::Compare_Values(const CLR_RT_HeapBlock &left, const C
 
             if (!rightObj)
             {
-                return 1; // NULL references always compare smaller than non-NULL ones.
+                return 1; // nullptr references always compare smaller than non-nullptr ones.
             }
 
             return Compare_Values(left, *rightObj, fSigned);
@@ -1859,7 +1859,7 @@ CLR_INT32 CLR_RT_HeapBlock::Compare_Values(const CLR_RT_HeapBlock &left, const C
 
             if (!leftObj)
             {
-                return -1; // NULL references always compare smaller than non-NULL ones.
+                return -1; // nullptr references always compare smaller than non-nullptr ones.
             }
 
             return Compare_Values(*leftObj, right, fSigned);
@@ -1965,7 +1965,7 @@ HRESULT CLR_RT_HeapBlock::NumericAdd(const CLR_RT_HeapBlock &right)
         // Adding of value to array reference is like advancing the index in array.
         case DATATYPE_ARRAY_BYREF:
         {
-            // Retrieve refernced array. Test if it is not NULL
+            // Retrieve refernced array. Test if it is not nullptr
             CLR_RT_HeapBlock_Array *array = m_data.arrayReference.array;
             FAULT_ON_NULL(array);
             // Advance current index. C# on pointer operations multiplies the offset by object size. We need to reverse
@@ -2052,7 +2052,7 @@ HRESULT CLR_RT_HeapBlock::NumericSub(const CLR_RT_HeapBlock &right)
         // Substructing of value to array reference is like decreasing the index in array.
         case DATATYPE_ARRAY_BYREF:
         {
-            // Retrieve refernced array. Test if it is not NULL
+            // Retrieve refernced array. Test if it is not nullptr
             CLR_RT_HeapBlock_Array *array = m_data.arrayReference.array;
             FAULT_ON_NULL(array);
             // Advance current index. C# on pointer operations multiplies the offset by object size. We need to reverse

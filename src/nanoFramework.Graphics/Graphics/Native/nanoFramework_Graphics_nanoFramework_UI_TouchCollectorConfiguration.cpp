@@ -20,7 +20,7 @@ HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_TouchCollectorConfigurat
     CLR_RT_HeapBlock_Array *sx;
     CLR_RT_HeapBlock_Array *sy;
     int count = 0;
-    CLR_RT_HeapBlock *pArgs = NULL;
+    CLR_RT_HeapBlock *pArgs = nullptr;
     CLR_RT_HeapBlock *pArgs0 = &(stack.Arg0());
     NANOCLR_CHECK_HRESULT(hbCount.LoadFromReference(pArgs0[0]));
     count = hbCount.NumericByRef().s4;

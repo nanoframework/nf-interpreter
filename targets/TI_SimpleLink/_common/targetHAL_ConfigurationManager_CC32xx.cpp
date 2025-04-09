@@ -35,9 +35,9 @@ void *ConfigurationManagerCC32xx_FindNetworkConfigurationBlocks()
     fileList = (slGetfileList_t *)platform_malloc(sizeof(slGetfileList_t) * NETWORK_CONFIG_MAX_COUNT);
 
     // check successful malloc
-    if (fileList == NULL)
+    if (fileList == nullptr)
     {
-        return NULL;
+        return nullptr;
     }
 
     // clear memory
@@ -248,7 +248,7 @@ bool ConfigurationManager_GetConfigurationBlock(
     DeviceConfigurationOption configuration,
     uint32_t configurationIndex)
 {
-    unsigned char *fileName = NULL;
+    unsigned char *fileName = nullptr;
 
     int32_t fileHandle;
     uint32_t token = 0;
@@ -258,7 +258,7 @@ bool ConfigurationManager_GetConfigurationBlock(
     uint8_t dummyMAC[SL_MAC_ADDR_LEN];
     uint32_t dummyPriority;
 
-    HAL_Configuration_Wireless80211 *wirelessConfigBlock = NULL;
+    HAL_Configuration_Wireless80211 *wirelessConfigBlock = nullptr;
 
     // validate if the requested block exists
     // Count has to be non zero
@@ -332,7 +332,7 @@ bool ConfigurationManager_GetConfigurationBlock(
             }
         }
 
-        if (fileName != NULL)
+        if (fileName != nullptr)
         {
             platform_free(fileName);
         }
@@ -357,7 +357,7 @@ bool ConfigurationManager_GetConfigurationBlock(
             &dummyNameLen,
             &dummyMAC[0],
             &secParams,
-            NULL,
+            nullptr,
             &dummyPriority);
         if (retVal == SL_ERROR_WLAN_GET_PROFILE_INVALID_INDEX)
         {
@@ -369,7 +369,7 @@ bool ConfigurationManager_GetConfigurationBlock(
         wirelessConfigBlock->Authentication = GetAuthentication(secParams);
         wirelessConfigBlock->Encryption = GetEncryption(secParams);
 
-        // password is hidden, NULL the string
+        // password is hidden, nullptr the string
         memset(wirelessConfigBlock->Password, 0, sizeof(wirelessConfigBlock->Password));
         // wirelessConfigBlock->Radio
 
@@ -417,7 +417,7 @@ bool ConfigurationManager_StoreConfigurationBlock(
     bool requiresEnumeration = false;
     bool success = false;
 
-    unsigned char *fileName = NULL;
+    unsigned char *fileName = nullptr;
 
     int32_t fileHandle;
     uint32_t token = 0;
@@ -472,7 +472,7 @@ bool ConfigurationManager_StoreConfigurationBlock(
             }
         }
 
-        if (fileName != NULL)
+        if (fileName != nullptr)
         {
             platform_free(fileName);
         }
@@ -490,9 +490,9 @@ bool ConfigurationManager_StoreConfigurationBlock(
         retVal = sl_WlanProfileAdd(
             (const signed char *)wirelessConfigBlock->Ssid,
             hal_strlen_s((const char *)(wirelessConfigBlock->Ssid)),
-            NULL,
+            nullptr,
             &secParams,
-            NULL,
+            nullptr,
             0,
             0);
         if (retVal < 0)

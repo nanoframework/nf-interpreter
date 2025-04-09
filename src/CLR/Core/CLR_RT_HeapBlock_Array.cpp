@@ -399,7 +399,7 @@ HRESULT CLR_RT_HeapBlock_Array::Copy(
             CLR_RT_HeapBlock ref;
             CLR_RT_HeapBlock elem;
 
-            elem.SetObjectReference(NULL);
+            elem.SetObjectReference(nullptr);
             CLR_RT_ProtectFromGC gc(elem);
 
             NANOCLR_CHECK_HRESULT(descDst.InitializeFromObject(*arrayDst));

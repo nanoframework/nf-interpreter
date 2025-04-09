@@ -17,9 +17,9 @@ HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_TouchEventProcessor::
     CLR_UINT32 data1 = stack.Arg1().NumericByRef().u4;
     CLR_UINT32 numTouches = data1 >> 16;
     TouchPoint *touchPoint = (TouchPoint *)stack.Arg2().NumericByRef().u4;
-    CLR_RT_HeapBlock *touchEvent = NULL;
-    CLR_RT_HeapBlock_Array *touchInputArray = NULL;
-    CLR_RT_HeapBlock *touchInputObject = NULL;
+    CLR_RT_HeapBlock *touchEvent = nullptr;
+    CLR_RT_HeapBlock_Array *touchInputArray = nullptr;
+    CLR_RT_HeapBlock *touchInputObject = nullptr;
 
     // Create a nanoFramework.UI.TouchEvent object to return
     CLR_RT_HeapBlock &resultObject = stack.PushValue();

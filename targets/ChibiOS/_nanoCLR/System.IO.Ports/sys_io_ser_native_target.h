@@ -91,18 +91,18 @@ void ConfigPins_UART8();
 #define UART_INIT(num)                                                                                                 \
     void Init_UART##num()                                                                                              \
     {                                                                                                                  \
-        Uart##num##_PAL.Uart_cfg.txend2_cb = NULL;                                                                     \
-        Uart##num##_PAL.Uart_cfg.rxend_cb = NULL;                                                                      \
-        Uart##num##_PAL.Uart_cfg.rxerr_cb = NULL;                                                                      \
-        Uart##num##_PAL.Uart_cfg.timeout_cb = NULL;                                                                    \
+        Uart##num##_PAL.Uart_cfg.txend2_cb = nullptr;                                                                     \
+        Uart##num##_PAL.Uart_cfg.rxend_cb = nullptr;                                                                      \
+        Uart##num##_PAL.Uart_cfg.rxerr_cb = nullptr;                                                                      \
+        Uart##num##_PAL.Uart_cfg.timeout_cb = nullptr;                                                                    \
         Uart##num##_PAL.Uart_cfg.timeout = 0;                                                                          \
         Uart##num##_PAL.Uart_cfg.speed = 9600;                                                                         \
         Uart##num##_PAL.Uart_cfg.cr1 = 0;                                                                              \
         Uart##num##_PAL.Uart_cfg.cr2 = 0;                                                                              \
         Uart##num##_PAL.Uart_cfg.cr3 = 0;                                                                              \
-        Uart##num##_PAL.TxBuffer = NULL;                                                                               \
+        Uart##num##_PAL.TxBuffer = nullptr;                                                                               \
         Uart##num##_PAL.TxOngoingCount = 0;                                                                            \
-        Uart##num##_PAL.RxBuffer = NULL;                                                                               \
+        Uart##num##_PAL.RxBuffer = nullptr;                                                                               \
         Uart##num##_PAL.WatchChar = 0;                                                                                 \
         Uart##num##_PAL.NewLineChar = 0;                                                                               \
         Uart##num##_PAL.SignalLevelsInverted = false;                                                                  \
@@ -114,16 +114,16 @@ void ConfigPins_UART8();
 #define UART_INIT(num)                                                                                                 \
     void Init_UART##num()                                                                                              \
     {                                                                                                                  \
-        Uart##num##_PAL.Uart_cfg.txend2_cb = NULL;                                                                     \
-        Uart##num##_PAL.Uart_cfg.rxend_cb = NULL;                                                                      \
-        Uart##num##_PAL.Uart_cfg.rxerr_cb = NULL;                                                                      \
+        Uart##num##_PAL.Uart_cfg.txend2_cb = nullptr;                                                                     \
+        Uart##num##_PAL.Uart_cfg.rxend_cb = nullptr;                                                                      \
+        Uart##num##_PAL.Uart_cfg.rxerr_cb = nullptr;                                                                      \
         Uart##num##_PAL.Uart_cfg.speed = 9600;                                                                         \
         Uart##num##_PAL.Uart_cfg.cr1 = 0;                                                                              \
         Uart##num##_PAL.Uart_cfg.cr2 = 0;                                                                              \
         Uart##num##_PAL.Uart_cfg.cr3 = 0;                                                                              \
-        Uart##num##_PAL.TxBuffer = NULL;                                                                               \
+        Uart##num##_PAL.TxBuffer = nullptr;                                                                               \
         Uart##num##_PAL.TxOngoingCount = 0;                                                                            \
-        Uart##num##_PAL.RxBuffer = NULL;                                                                               \
+        Uart##num##_PAL.RxBuffer = nullptr;                                                                               \
         Uart##num##_PAL.WatchChar = 0;                                                                                 \
         Uart##num##_PAL.NewLineChar = 0;                                                                               \
         Uart##num##_PAL.SignalLevelsInverted = false;                                                                  \
@@ -149,9 +149,9 @@ void Init_UART8();
     {                                                                                                                  \
         uartStop(&UARTD##num);                                                                                         \
         platform_free(Uart##num##_PAL.RxBuffer);                                                                       \
-        Uart##num##_PAL.TxBuffer = NULL;                                                                               \
-        Uart##num##_PAL.RxBuffer = NULL;                                                                               \
-        Uart##num##_PAL.UartDriver = NULL;                                                                             \
+        Uart##num##_PAL.TxBuffer = nullptr;                                                                               \
+        Uart##num##_PAL.RxBuffer = nullptr;                                                                               \
+        Uart##num##_PAL.UartDriver = nullptr;                                                                             \
         return;                                                                                                        \
     }
 

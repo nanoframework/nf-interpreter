@@ -34,7 +34,7 @@ void Events_SetBoolTimer(bool *timerCompleteFlag, uint32_t millisecondsFromNow)
 {
     NATIVE_PROFILE_PAL_EVENTS();
 
-    if (timerCompleteFlag != NULL)
+    if (timerCompleteFlag != nullptr)
     {
         // no need to stop the timer even if it's running because the API does it anyway
         if (port_is_isr_context())

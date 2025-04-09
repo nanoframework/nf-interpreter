@@ -50,7 +50,7 @@ HRESULT Library_corlib_native_System_Exception::get_StackTrace___STRING(CLR_RT_S
     CLR_RT_HeapBlock tmpArray;
     CLR_RT_HeapBlock *pThis;
 
-    tmpArray.SetObjectReference(NULL);
+    tmpArray.SetObjectReference(nullptr);
     CLR_RT_ProtectFromGC gc(tmpArray);
 
     pThis = stack.This();

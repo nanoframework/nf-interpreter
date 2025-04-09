@@ -131,7 +131,7 @@ HRESULT Library_corlib_native_System_Reflection_Assembly::GetVersion___VOID__BYR
 
         const CLR_RECORD_VERSION &version = assm.assembly->header->version;
 
-        // we do not check for the reference not to be NULL because this is an internal method
+        // we do not check for the reference not to be nullptr because this is an internal method
         stack.Arg1().Dereference()->NumericByRef().s4 = version.majorVersion;
         stack.Arg2().Dereference()->NumericByRef().s4 = version.minorVersion;
         stack.Arg3().Dereference()->NumericByRef().s4 = version.buildNumber;
@@ -266,7 +266,7 @@ HRESULT Library_corlib_native_System_Reflection_Assembly::
 
     NANOCLR_CLEANUP();
 
-    // Avoid exception handling in common case.  Just return NULL on failure.
+    // Avoid exception handling in common case.  Just return nullptr on failure.
     // Managed code decides to throw the exception or not.
     hr = S_OK;
 

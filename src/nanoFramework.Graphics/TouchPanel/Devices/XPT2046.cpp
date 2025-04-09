@@ -23,7 +23,7 @@ bool TouchDevice::Initialize()
 
 bool TouchDevice::Enable(GPIO_INTERRUPT_SERVICE_ROUTINE touchIsrProc)
 {
-    if (touchIsrProc == NULL)
+    if (touchIsrProc == nullptr)
     {
     };
     return TRUE;

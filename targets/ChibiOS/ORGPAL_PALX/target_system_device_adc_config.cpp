@@ -14,9 +14,9 @@ const NF_PAL_ADC_PORT_PIN_CHANNEL AdcPortPinConfig[] = {
     {1, GPIOC, 3, ADC_CHANNEL_IN13},
 
     // these are the internal sources, available only at ADC1
-    {1, NULL, 0, ADC_CHANNEL_SENSOR},
-    {1, NULL, 0, ADC_CHANNEL_VREFINT},
-    {1, NULL, 0, ADC_CHANNEL_VBAT},
+    {1, nullptr, 0, ADC_CHANNEL_SENSOR},
+    {1, nullptr, 0, ADC_CHANNEL_VREFINT},
+    {1, nullptr, 0, ADC_CHANNEL_VBAT},
 };
 
 const int AdcChannelCount = ARRAYSIZE(AdcPortPinConfig);

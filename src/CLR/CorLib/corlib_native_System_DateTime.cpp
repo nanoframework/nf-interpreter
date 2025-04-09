@@ -205,7 +205,7 @@ CLR_INT64 *Library_corlib_native_System_DateTime::GetValuePtr(CLR_RT_HeapBlock &
 
         if (!obj)
         {
-            return NULL;
+            return nullptr;
         }
 
         dt = obj->DataType();

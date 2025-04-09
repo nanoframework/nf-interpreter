@@ -16,7 +16,7 @@ __nfweak CLR_RT_HeapBlock *CLR_RT_BinaryFormatter::TypeHandler::FixDereference(C
     (void)v;
 
     NATIVE_PROFILE_CLR_SERIALIZATION();
-    return NULL;
+    return nullptr;
 }
 
 __nfweak CLR_RT_HeapBlock *CLR_RT_BinaryFormatter::TypeHandler::FixNull(CLR_RT_HeapBlock *v)
@@ -24,7 +24,7 @@ __nfweak CLR_RT_HeapBlock *CLR_RT_BinaryFormatter::TypeHandler::FixNull(CLR_RT_H
     (void)v;
 
     NATIVE_PROFILE_CLR_SERIALIZATION();
-    return NULL;
+    return nullptr;
 }
 
 //--//
@@ -361,7 +361,7 @@ __nfweak CLR_RT_HeapBlock *CLR_RT_BinaryFormatter::GetDuplicate(CLR_UINT32 index
     (void)index;
 
     NATIVE_PROFILE_CLR_SERIALIZATION();
-    return NULL;
+    return nullptr;
 }
 
 //--//--//

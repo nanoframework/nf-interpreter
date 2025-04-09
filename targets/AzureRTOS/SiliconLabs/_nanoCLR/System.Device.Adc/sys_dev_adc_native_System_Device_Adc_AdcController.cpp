@@ -17,11 +17,11 @@ HRESULT Library_sys_dev_adc_native_System_Device_Adc_AdcController::NativeOpenCh
     NF_PAL_ADC_PORT_PIN_CHANNEL adcDefinition;
     ADC_Init_TypeDef adcInit;
     CMU_Clock_TypeDef adcClock;
-    ADC_TypeDef *adcDriver = NULL;
+    ADC_TypeDef *adcDriver = nullptr;
 
     adcInit = ADC_INIT_DEFAULT;
 
-    // get a pointer to the managed object instance and check that it's not NULL
+    // get a pointer to the managed object instance and check that it's not nullptr
     CLR_RT_HeapBlock *pThis = stack.This();
     FAULT_ON_NULL(pThis);
 

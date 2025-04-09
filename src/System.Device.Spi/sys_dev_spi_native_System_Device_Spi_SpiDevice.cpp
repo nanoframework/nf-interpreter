@@ -76,10 +76,10 @@ HRESULT Library_sys_dev_spi_native_System_Device_Spi_SpiDevice::NativeTransfer(
 
     CLR_RT_HeapBlock *writeSpanByte;
     CLR_RT_HeapBlock *readSpanByte;
-    CLR_RT_HeapBlock_Array *writeBuffer = NULL;
-    CLR_RT_HeapBlock_Array *readBuffer = NULL;
-    uint8_t *writeData = NULL;
-    uint8_t *readData = NULL;
+    CLR_RT_HeapBlock_Array *writeBuffer = nullptr;
+    CLR_RT_HeapBlock_Array *readBuffer = nullptr;
+    uint8_t *writeData = nullptr;
+    uint8_t *readData = nullptr;
     int16_t writeSize = 0;
     int16_t readSize = 0;
     int16_t readOffset = 0;
@@ -93,7 +93,7 @@ HRESULT Library_sys_dev_spi_native_System_Device_Spi_SpiDevice::NativeTransfer(
     CLR_INT64 *timeout;
     bool eventResult = true;
 
-    // get a pointer to the managed object instance and check that it's not NULL
+    // get a pointer to the managed object instance and check that it's not nullptr
     CLR_RT_HeapBlock *pThis = stack.This();
     CLR_RT_HeapBlock *connectionSettings;
     FAULT_ON_NULL(pThis);
@@ -107,7 +107,7 @@ HRESULT Library_sys_dev_spi_native_System_Device_Spi_SpiDevice::NativeTransfer(
         if (data16Bits)
         {
             writeBuffer = stack.Arg1().DereferenceArray();
-            if (writeBuffer != NULL)
+            if (writeBuffer != nullptr)
             {
                 // grab the pointer to the array by getting the first element of the array
                 writeData = (unsigned char *)writeBuffer->GetFirstElementUInt16();
@@ -120,7 +120,7 @@ HRESULT Library_sys_dev_spi_native_System_Device_Spi_SpiDevice::NativeTransfer(
             }
 
             readBuffer = stack.Arg2().DereferenceArray();
-            if (readBuffer != NULL)
+            if (readBuffer != nullptr)
             {
                 // grab the pointer to the array by getting the first element of the array
                 readData = (unsigned char *)readBuffer->GetFirstElementUInt16();
@@ -136,11 +136,11 @@ HRESULT Library_sys_dev_spi_native_System_Device_Spi_SpiDevice::NativeTransfer(
         {
             // dereference the write and read SpanByte from the arguments
             writeSpanByte = stack.Arg1().Dereference();
-            if (writeSpanByte != NULL)
+            if (writeSpanByte != nullptr)
             {
                 // get buffer
                 writeBuffer = writeSpanByte[SpanByte::FIELD___array].DereferenceArray();
-                if (writeBuffer != NULL)
+                if (writeBuffer != nullptr)
                 {
                     // Get the write offset, only the elements defined by the span must be written, not the whole
                     // array
@@ -155,18 +155,18 @@ HRESULT Library_sys_dev_spi_native_System_Device_Spi_SpiDevice::NativeTransfer(
                 }
             }
 
-            if (writeData == NULL)
+            if (writeData == nullptr)
             {
                 // nothing to write, have to zero this
                 writeSize = 0;
             }
 
             readSpanByte = stack.Arg2().Dereference();
-            if (readSpanByte != NULL)
+            if (readSpanByte != nullptr)
             {
                 // get buffer
                 readBuffer = readSpanByte[SpanByte::FIELD___array].DereferenceArray();
-                if (readBuffer != NULL)
+                if (readBuffer != nullptr)
                 {
                     // Get the read offset, only the elements defined by the span must be read, not the whole array
                     readOffset = readSpanByte[SpanByte::FIELD___start].NumericByRef().s4;
@@ -180,7 +180,7 @@ HRESULT Library_sys_dev_spi_native_System_Device_Spi_SpiDevice::NativeTransfer(
                 }
             }
 
-            if (readData == NULL)
+            if (readData == nullptr)
             {
                 // nothing to read, have to zero this
                 readSize = 0;
@@ -280,7 +280,7 @@ HRESULT Library_sys_dev_spi_native_System_Device_Spi_SpiDevice::NativeTransfer(
         stack.PopValue();
 
         // null pointers and vars
-        pThis = NULL;
+        pThis = nullptr;
     }
 
     NANOCLR_CLEANUP();
@@ -288,12 +288,12 @@ HRESULT Library_sys_dev_spi_native_System_Device_Spi_SpiDevice::NativeTransfer(
     if (hr != CLR_E_THREAD_WAITING)
     {
         // unpin buffers
-        if (writeBuffer != NULL && writeBuffer->IsPinned())
+        if (writeBuffer != nullptr && writeBuffer->IsPinned())
         {
             writeBuffer->Unpin();
         }
 
-        if (readBuffer != NULL && readBuffer->IsPinned())
+        if (readBuffer != nullptr && readBuffer->IsPinned())
         {
             readBuffer->Unpin();
         }
@@ -308,9 +308,9 @@ HRESULT Library_sys_dev_spi_native_System_Device_Spi_SpiDevice::NativeOpenDevice
 
     uint32_t handle = -1;
     SPI_DEVICE_CONFIGURATION spiConfig;
-    CLR_RT_HeapBlock *config = NULL;
+    CLR_RT_HeapBlock *config = nullptr;
 
-    // get a pointer to the managed object instance and check that it's not NULL
+    // get a pointer to the managed object instance and check that it's not nullptr
     CLR_RT_HeapBlock *pThis = stack.This();
     FAULT_ON_NULL(pThis);
 
@@ -364,7 +364,7 @@ HRESULT Library_sys_dev_spi_native_System_Device_Spi_SpiDevice::DisposeNative___
 {
     NANOCLR_HEADER();
     {
-        // get a pointer to the managed object instance and check that it's not NULL
+        // get a pointer to the managed object instance and check that it's not nullptr
         CLR_RT_HeapBlock *pThis = stack.This();
 
         // get device handle

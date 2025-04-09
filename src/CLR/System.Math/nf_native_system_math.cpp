@@ -32,7 +32,7 @@ static const CLR_RT_MethodHandler method_lookup[] =
     nullptr,
     Library_nf_native_system_math_System_Math::Max___STATIC__R8__R8__R8,
     Library_nf_native_system_math_System_Math::Max___STATIC__R4__R4__R4,
-    NULL,
+    nullptr,
     Library_nf_native_system_math_System_Math::Min___STATIC__R8__R8__R8,
     Library_nf_native_system_math_System_Math::Min___STATIC__R4__R4__R4,
     Library_nf_native_system_math_System_Math::Pow___STATIC__R8__R8__R8,

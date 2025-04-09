@@ -642,7 +642,7 @@ void CLR_RT_GarbageCollector::CheckMemoryPressure()
                             {
                                 val.InitializeFromHash(weak->m_identity.m_selectorHash);
 
-                                if (inst.InitializeFromReflection(val, NULL))
+                                if (inst.InitializeFromReflection(val, nullptr))
                                 {
                                     g_CLR_RT_TypeSystem.BuildTypeName(inst, szBuffer, iBuffer);
                                     rgBuffer[MAXSTRLEN(rgBuffer)] = 0;

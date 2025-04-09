@@ -1276,7 +1276,7 @@ bool CLR_DBG_Debugger::Monitor_QueryConfiguration(WP_Message *message)
                 (HAL_Configuration_WirelessAP *)platform_malloc(sizeof(HAL_Configuration_WirelessAP));
 
             // check allocation
-            if (configWirelessAPNetworkInterface != NULL)
+            if (configWirelessAPNetworkInterface != nullptr)
             {
                 memset(configWirelessAPNetworkInterface, 0, sizeof(HAL_Configuration_WirelessAP));
 
@@ -2138,7 +2138,7 @@ static HRESULT Debugging_Thread_Create_Helper(CLR_RT_MethodDef_Index &md, CLR_RT
     NANOCLR_HEADER();
 
     CLR_RT_HeapBlock ref;
-    ref.SetObjectReference(NULL);
+    ref.SetObjectReference(nullptr);
     CLR_RT_ProtectFromGC gc(ref);
     CLR_RT_Thread *realThread = (pid != 0) ? CLR_DBG_Debugger::GetThreadFromPid(pid) : nullptr;
 
@@ -2891,7 +2891,7 @@ bool CLR_DBG_Debugger::Debugging_Value_GetField(WP_Message *msg)
     CLR_RT_FieldDef_Instance inst;
     CLR_UINT32 offset;
 
-    if (blk != NULL && cmd->m_offset > 0)
+    if (blk != nullptr && cmd->m_offset > 0)
     {
         if (FAILED(desc.InitializeFromObject(*blk)))
         {
@@ -3340,7 +3340,7 @@ static HRESULT Assign_Helper(CLR_RT_HeapBlock *blkDst, CLR_RT_HeapBlock *blkSrc)
     AnalyzeObject aoSrc;
     CLR_RT_HeapBlock srcVal;
 
-    srcVal.SetObjectReference(NULL);
+    srcVal.SetObjectReference(nullptr);
     CLR_RT_ProtectFromGC gc(srcVal);
 
     NANOCLR_CHECK_HRESULT(AnalyzeObject_Helper(blkDst, aoDst));

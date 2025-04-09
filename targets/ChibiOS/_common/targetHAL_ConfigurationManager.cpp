@@ -151,7 +151,7 @@ __nfweak bool ConfigurationManager_GetConfigurationBlock(
     uint32_t configurationIndex)
 {
     int sizeOfBlock = 0;
-    uint8_t *blockAddress = NULL;
+    uint8_t *blockAddress = nullptr;
 
     // validate if the requested block exists
     // Count has to be non zero
@@ -242,7 +242,7 @@ __nfweak bool ConfigurationManager_StoreConfigurationBlock(
 
     if (configuration == DeviceConfigurationOption_Network)
     {
-        if (g_TargetConfiguration.NetworkInterfaceConfigs == NULL ||
+        if (g_TargetConfiguration.NetworkInterfaceConfigs == nullptr ||
             (g_TargetConfiguration.NetworkInterfaceConfigs->Count == 0 && configurationIndex == 0))
         {
             // there is no network config block, we are storing the default one
@@ -274,7 +274,7 @@ __nfweak bool ConfigurationManager_StoreConfigurationBlock(
     }
     else if (configuration == DeviceConfigurationOption_Wireless80211Network)
     {
-        if (g_TargetConfiguration.Wireless80211Configs == NULL ||
+        if (g_TargetConfiguration.Wireless80211Configs == nullptr ||
             (g_TargetConfiguration.Wireless80211Configs->Count == 0 ||
              (configurationIndex + 1) > g_TargetConfiguration.Wireless80211Configs->Count))
         {
@@ -316,7 +316,7 @@ __nfweak bool ConfigurationManager_StoreConfigurationBlock(
                 (ByteAddress)g_TargetConfiguration.CertificateStore->Certificates[configurationIndex] + offset;
         }
 
-        if (g_TargetConfiguration.CertificateStore == NULL ||
+        if (g_TargetConfiguration.CertificateStore == nullptr ||
             (g_TargetConfiguration.CertificateStore->Count == 0 ||
              (configurationIndex + 1) > g_TargetConfiguration.CertificateStore->Count))
         {
@@ -329,7 +329,7 @@ __nfweak bool ConfigurationManager_StoreConfigurationBlock(
             }
 
             // now check if memory is erase, so the block can be stored
-            if (!STM32FlashDriver_IsBlockErased(NULL, storageAddress, blockSize))
+            if (!STM32FlashDriver_IsBlockErased(nullptr, storageAddress, blockSize))
             {
                 // memory not erased, can't store
                 return FALSE;
@@ -366,7 +366,7 @@ __nfweak bool ConfigurationManager_StoreConfigurationBlock(
                 (ByteAddress)g_TargetConfiguration.DeviceCertificates->Certificates[configurationIndex] + offset;
         }
 
-        if (g_TargetConfiguration.DeviceCertificates == NULL ||
+        if (g_TargetConfiguration.DeviceCertificates == nullptr ||
             (g_TargetConfiguration.DeviceCertificates->Count == 0 ||
              (configurationIndex + 1) > g_TargetConfiguration.DeviceCertificates->Count))
         {
@@ -379,7 +379,7 @@ __nfweak bool ConfigurationManager_StoreConfigurationBlock(
             }
 
             // now check if memory is erase, so the block can be stored
-            if (!STM32FlashDriver_IsBlockErased(NULL, storageAddress, blockSize))
+            if (!STM32FlashDriver_IsBlockErased(nullptr, storageAddress, blockSize))
             {
                 // memory not erased, can't store
                 return FALSE;
@@ -410,7 +410,7 @@ __nfweak bool ConfigurationManager_StoreConfigurationBlock(
     }
 
     // copy the config block content to the config block storage
-    success = STM32FlashDriver_Write(NULL, storageAddress, blockSize, (unsigned char *)configurationBlock, true);
+    success = STM32FlashDriver_Write(nullptr, storageAddress, blockSize, (unsigned char *)configurationBlock, true);
 
     // enumeration is required after we are DONE with SUCCESSFULLY storing all the config chunks
     requiresEnumeration = (success && done);
@@ -451,7 +451,7 @@ __nfweak UpdateConfigurationResult ConfigurationManager_UpdateConfigurationBlock
     // allocate memory from CRT heap
     uint8_t *configSectorCopy = (uint8_t *)platform_malloc(sizeOfConfigSector);
 
-    if (configSectorCopy != NULL)
+    if (configSectorCopy != nullptr)
     {
         // copy config sector from flash to RAM
         memcpy(configSectorCopy, &__nanoConfig_start__, sizeOfConfigSector);
@@ -589,7 +589,7 @@ __nfweak UpdateConfigurationResult ConfigurationManager_UpdateConfigurationBlock
         }
 
         // erase config sector
-        if (STM32FlashDriver_EraseBlock(NULL, (uint32_t)&__nanoConfig_start__) == TRUE)
+        if (STM32FlashDriver_EraseBlock(nullptr, (uint32_t)&__nanoConfig_start__) == TRUE)
         {
             // flash block is erased
 
@@ -604,7 +604,7 @@ __nfweak UpdateConfigurationResult ConfigurationManager_UpdateConfigurationBlock
 
             // copy the config block copy back to the config block storage
             if (STM32FlashDriver_Write(
-                    NULL,
+                    nullptr,
                     (uint32_t)&__nanoConfig_start__,
                     sizeOfConfigSector,
                     (unsigned char *)configSectorCopy,

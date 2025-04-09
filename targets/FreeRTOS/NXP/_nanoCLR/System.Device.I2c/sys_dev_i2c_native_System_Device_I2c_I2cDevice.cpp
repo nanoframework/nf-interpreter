@@ -50,7 +50,7 @@ i2c_structure_t *I2C_ChoosePeripheralStructure(uint8_t busIndex)
     }
     else
     {
-        return NULL;
+        return nullptr;
     }
 }
 
@@ -171,7 +171,7 @@ HRESULT Library_sys_dev_i2c_native_System_Device_I2c_I2cDevice::NativeInit___VOI
         i2c_structure_t *pI2Cx;
         uint8_t busIndex;
 
-        // Get a pointer to the managed object instance and check that it's not NULL
+        // Get a pointer to the managed object instance and check that it's not nullptr
         CLR_RT_HeapBlock *pThis = stack.This();
         FAULT_ON_NULL(pThis);
 
@@ -220,7 +220,7 @@ HRESULT Library_sys_dev_i2c_native_System_Device_I2c_I2cDevice::NativeDispose___
 
         CLR_RT_HeapBlock *pConfig;
 
-        // Get a pointer to the managed object instance and check that it's not NULL
+        // Get a pointer to the managed object instance and check that it's not nullptr
         CLR_RT_HeapBlock *pThis = stack.This();
         FAULT_ON_NULL(pThis);
 
@@ -289,12 +289,12 @@ HRESULT Library_sys_dev_i2c_native_System_Device_I2c_I2cDevice::
 
         CLR_RT_HeapBlock *writeSpanByte;
         CLR_RT_HeapBlock *readSpanByte;
-        CLR_RT_HeapBlock_Array *writeBuffer = NULL;
-        CLR_RT_HeapBlock_Array *readBuffer = NULL;
+        CLR_RT_HeapBlock_Array *writeBuffer = nullptr;
+        CLR_RT_HeapBlock_Array *readBuffer = nullptr;
         CLR_RT_HeapBlock *result;
         CLR_RT_HeapBlock *pConfig;
 
-        // Get a pointer to the managed object instance and check that it's not NULL
+        // Get a pointer to the managed object instance and check that it's not nullptr
         CLR_RT_HeapBlock *pThis = stack.This();
         FAULT_ON_NULL(pThis);
         CLR_RT_HeapBlock &top = stack.PushValueAndClear();
@@ -311,38 +311,38 @@ HRESULT Library_sys_dev_i2c_native_System_Device_I2c_I2cDevice::
 
         // dereference the write and read SpanByte from the arguments
         writeSpanByte = stack.Arg1().Dereference();
-        if (writeSpanByte != NULL)
+        if (writeSpanByte != nullptr)
         {
             // get buffer
             writeBuffer = writeSpanByte[SpanByte::FIELD___array].DereferenceArray();
-            if (writeBuffer != NULL)
+            if (writeBuffer != nullptr)
             {
                 pI2Cx->txBuffer = writeBuffer->GetFirstElement();
                 pI2Cx->txSize = writeBuffer->m_numOfElements;
             }
         }
 
-        if (writeBuffer == NULL)
+        if (writeBuffer == nullptr)
         {
-            pI2Cx->txBuffer = NULL;
+            pI2Cx->txBuffer = nullptr;
             pI2Cx->txSize = 0;
         }
 
         readSpanByte = stack.Arg2().Dereference();
-        if (readSpanByte != NULL)
+        if (readSpanByte != nullptr)
         {
             // get buffer
             readBuffer = readSpanByte[SpanByte::FIELD___array].DereferenceArray();
-            if (readBuffer != NULL)
+            if (readBuffer != nullptr)
             {
                 pI2Cx->rxBuffer = readBuffer->GetFirstElement();
                 pI2Cx->rxSize = readBuffer->m_numOfElements;
             }
         }
 
-        if (readBuffer == NULL)
+        if (readBuffer == nullptr)
         {
-            pI2Cx->rxBuffer = NULL;
+            pI2Cx->rxBuffer = nullptr;
             pI2Cx->rxSize = 0;
         }
 

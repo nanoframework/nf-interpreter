@@ -7,7 +7,7 @@
 
 BluetoothNanoDevice_Mode ble_operatingMode = BluetoothNanoDevice_Mode_NotRunning;
 
-char *bleDeviceName = NULL;
+char *bleDeviceName = nullptr;
 
 void UpdateNameInContext()
 {
@@ -28,7 +28,7 @@ void SetDeviceName(const char *deviceName)
     if (bleDeviceName)
     {
         platform_free(bleDeviceName);
-        bleDeviceName = NULL;
+        bleDeviceName = nullptr;
     }
 
     size_t nlen = hal_strlen_s(deviceName);

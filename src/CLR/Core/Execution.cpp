@@ -656,7 +656,7 @@ HRESULT CLR_RT_ExecutionEngine::Execute(wchar_t *entryPointArgs, int maxContextS
         if (stack->m_call.target->argumentsCount > 0)
         {
             // Main entrypoint takes an optional String[] parameter.
-            // Set the arg to NULL, if that's the case.
+            // Set the arg to nullptr, if that's the case.
 
 #if defined(VIRTUAL_DEVICE)
             if (entryPointArgs != nullptr)
@@ -677,7 +677,7 @@ HRESULT CLR_RT_ExecutionEngine::Execute(wchar_t *entryPointArgs, int maxContextS
     // To debug static constructors, the thread should be created after the entrypoint thread.
     NANOCLR_CHECK_HRESULT(WaitForDebugger());
 
-    // m_cctorThread is NULL before call and inialized by the SpawnStaticConstructor
+    // m_cctorThread is nullptr before call and inialized by the SpawnStaticConstructor
     SpawnStaticConstructor(m_cctorThread);
 
     while (true)
@@ -949,7 +949,7 @@ bool CLR_RT_ExecutionEngine::SpawnStaticConstructorHelper(
         CLR_RT_HeapBlock_Delegate *dlg;
         CLR_RT_HeapBlock refDlg;
 
-        refDlg.SetObjectReference(NULL);
+        refDlg.SetObjectReference(nullptr);
         CLR_RT_ProtectFromGC gc(refDlg);
 
         if (SUCCEEDED(CLR_RT_HeapBlock_Delegate::CreateInstance(refDlg, indexNext, nullptr)))
@@ -1046,7 +1046,7 @@ void CLR_RT_ExecutionEngine::SpawnFinalizer()
     {
         CLR_RT_HeapBlock delegate;
 
-        delegate.SetObjectReference(NULL);
+        delegate.SetObjectReference(nullptr);
         CLR_RT_ProtectFromGC gc(delegate);
 
 #if defined(NANOCLR_APPDOMAINS)
@@ -1208,7 +1208,7 @@ HRESULT CLR_RT_ExecutionEngine::ScheduleThreads(int maxContextSwitch)
             }
         }
 
-        // If th->Next() is NULL, then there are no Ready to run threads in the system.
+        // If th->Next() is nullptr, then there are no Ready to run threads in the system.
         // In this case we spawn finalizer and make finalizer thread as ready one.
         if (th->Next() == nullptr)
         {
@@ -1665,7 +1665,7 @@ CLR_RT_HeapBlock *CLR_RT_ExecutionEngine::ExtractHeapBlocks(
 #endif
 
         // Getting here during a GC is possible, since the watchdog ISR may now require
-        // dynamic memory allocation for logging.  Returning NULL means the watchdog log will
+        // dynamic memory allocation for logging.  Returning nullptr means the watchdog log will
         // be lost, but without major restructuring there is not much we can do.
         return nullptr;
     }
@@ -1760,7 +1760,7 @@ CLR_RT_HeapBlock *CLR_RT_ExecutionEngine::ExtractHeapBlocks(
                 if (g_CLR_RT_GarbageCollector.m_freeBytes >= (length * sizeof(struct CLR_RT_HeapBlock)))
                 {
                     // A compaction probably would have saved this OOM
-                    // Compaction will occur for Bitmaps, Arrays, etc. if this function returns NULL, so lets not
+                    // Compaction will occur for Bitmaps, Arrays, etc. if this function returns nullptr, so lets not
                     // through an assert here
 
                     // Throw the OOM, and schedule a compaction at a safe point

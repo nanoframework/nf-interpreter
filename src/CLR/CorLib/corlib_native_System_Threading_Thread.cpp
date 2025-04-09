@@ -168,7 +168,7 @@ HRESULT Library_corlib_native_System_Threading_Thread::get_Priority___SystemThre
     pri = pThis[FIELD___priority].NumericByRef().s4;
 
     // Here we check consistency of values stored in C# and internal thread objects.
-    // Get thread associated with C# thread object. It might be NULL if thread was not started.
+    // Get thread associated with C# thread object. It might be nullptr if thread was not started.
     NANOCLR_CHECK_HRESULT(GetThread(stack, th, false, false));
 
     // If thread was started, then we use priority from the CLR_RT_Thread.

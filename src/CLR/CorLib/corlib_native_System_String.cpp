@@ -206,7 +206,7 @@ HRESULT Library_corlib_native_System_String::_ctor___VOID__CHAR__I4(CLR_RT_Stack
     {
         CLR_RT_HeapBlock tmp;
 
-        tmp.SetObjectReference(NULL);
+        tmp.SetObjectReference(nullptr);
         CLR_RT_ProtectFromGC gc(tmp);
 
         NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance(tmp, len, g_CLR_RT_WellKnownTypes.Char));
@@ -864,7 +864,7 @@ HRESULT Library_corlib_native_System_String::ChangeCase(CLR_RT_StackFrame &stack
     CLR_RT_HeapBlock_Array *arrayTmp;
     CLR_RT_HeapBlock refTmp;
 
-    refTmp.SetObjectReference(NULL);
+    refTmp.SetObjectReference(nullptr);
     CLR_RT_ProtectFromGC gc(refTmp);
 
     NANOCLR_CHECK_HRESULT(ConvertToCharArray(stack, refTmp, arrayTmp, 0, -1));
@@ -905,7 +905,7 @@ HRESULT Library_corlib_native_System_String::Substring(CLR_RT_StackFrame &stack,
     CLR_RT_HeapBlock_Array *arrayTmp;
     CLR_RT_HeapBlock refTmp;
 
-    refTmp.SetObjectReference(NULL);
+    refTmp.SetObjectReference(nullptr);
     CLR_RT_ProtectFromGC gc(refTmp);
 
     NANOCLR_CHECK_HRESULT(ConvertToCharArray(stack, refTmp, arrayTmp, 0, -1));
@@ -946,7 +946,7 @@ HRESULT Library_corlib_native_System_String::Trim(
     CLR_RT_HeapBlock refTmp;
     CLR_RT_HeapBlock_Array *arrayTmp;
 
-    refTmp.SetObjectReference(NULL);
+    refTmp.SetObjectReference(nullptr);
     CLR_RT_ProtectFromGC gc(refTmp);
 
     NANOCLR_CHECK_HRESULT(ConvertToCharArray(stack, refTmp, arrayTmp, 0, -1));
@@ -1059,7 +1059,7 @@ HRESULT Library_corlib_native_System_String::Split(CLR_RT_StackFrame &stack, CLR
         {
             CLR_RT_HeapBlock refSrc;
 
-            refSrc.SetObjectReference(NULL);
+            refSrc.SetObjectReference(nullptr);
             CLR_RT_ProtectFromGC gc(refSrc);
 
             NANOCLR_CHECK_HRESULT(ConvertToCharArray(stack, refSrc, arraySrc, 0, -1));
@@ -1152,7 +1152,7 @@ HRESULT Library_corlib_native_System_String::Concat(CLR_RT_StackFrame &stack, CL
 
         for (int iStr = 0; iStr < num; iStr++)
         {
-            if (ptrSrc->Dereference() != NULL && ptrSrc->Dereference()->DataType() == DATATYPE_STRING)
+            if (ptrSrc->Dereference() != nullptr && ptrSrc->Dereference()->DataType() == DATATYPE_STRING)
             {
                 szTextSrc = ptrSrc->RecoverString();
 

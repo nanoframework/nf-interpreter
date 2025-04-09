@@ -245,7 +245,7 @@ HRESULT Library_nf_system_collections_System_Collections_Hashtable::InsertNative
             CLR_RT_TypeDef_Index bucketTypeDef;
             CLR_RT_HeapBlock newBucket;
 
-            if (bucket == NULL)
+            if (bucket == nullptr)
             {
                 // find <Bucket> type, don't bother checking the result as it exists for sure
                 g_CLR_RT_TypeSystem.FindTypeDef("Bucket", "System.Collections", bucketTypeDef);

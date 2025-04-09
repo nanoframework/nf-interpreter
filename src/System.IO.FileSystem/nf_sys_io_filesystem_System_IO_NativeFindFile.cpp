@@ -18,8 +18,8 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_NativeFindFile::GetFileInfo___STA
 
     FS_FILEINFO fileInfo;
     bool found;
-    char *path = NULL;
-    FileSystemVolume *driver = NULL;
+    char *path = nullptr;
+    FileSystemVolume *driver = nullptr;
 
     CLR_RT_HeapBlock &top = stack.PushValueAndClear();
 
@@ -42,11 +42,11 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_NativeFindFile::GetFileInfo___STA
 
         managedNativeFileInfo[NativeFileInfo::FIELD__Attributes].SetInteger((CLR_UINT32)fileInfo.Attributes);
         managedNativeFileInfo[NativeFileInfo::FIELD__Size].SetInteger((CLR_INT64)fileInfo.Size);
-        managedNativeFileInfo[NativeFileInfo::FIELD__FileName].SetObjectReference(NULL);
+        managedNativeFileInfo[NativeFileInfo::FIELD__FileName].SetObjectReference(nullptr);
     }
     else
     {
-        top.SetObjectReference(NULL);
+        top.SetObjectReference(nullptr);
     }
 
     NANOCLR_NOCLEANUP();

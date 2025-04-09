@@ -308,7 +308,7 @@ HRESULT CLR_Messaging::DeleteInstance()
     // free messaging
     platform_free(g_CLR_Messaging);
 
-    g_CLR_Messaging = NULL;
+    g_CLR_Messaging = nullptr;
 
     NANOCLR_NOCLEANUP_NOLABEL();
 }

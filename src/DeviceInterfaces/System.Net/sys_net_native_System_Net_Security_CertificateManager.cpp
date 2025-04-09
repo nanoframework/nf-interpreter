@@ -14,7 +14,7 @@ HRESULT Library_sys_net_native_System_Net_Security_CertificateManager::
 
     uint32_t certificateSize;
     uint32_t allocationSize;
-    HAL_Configuration_X509CaRootBundle *caBundle = NULL;
+    HAL_Configuration_X509CaRootBundle *caBundle = nullptr;
 
     CLR_RT_HeapBlock_Array *arrayCA = stack.Arg0().DereferenceArray();
 
@@ -74,7 +74,7 @@ HRESULT Library_sys_net_native_System_Net_Security_CertificateManager::
 
     NANOCLR_CLEANUP();
 
-    if (caBundle != NULL)
+    if (caBundle != nullptr)
     {
         platform_free(caBundle);
     }

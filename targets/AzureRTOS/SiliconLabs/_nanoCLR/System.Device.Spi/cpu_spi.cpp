@@ -52,7 +52,7 @@ void SpiTransferCompleteCallback(NF_SpiDriver_Handle_t handle, Ecode_t transferS
 
     NATIVE_INTERRUPT_START
 
-    NF_PAL_SPI *palSpi = NULL;
+    NF_PAL_SPI *palSpi = nullptr;
 
     // Find the NF_PAL_SPI* for handle
 #if GECKO_USE_SPI0 == TRUE
@@ -136,10 +136,10 @@ void SpiTransferCompleteCallback(NF_SpiDriver_Handle_t handle, Ecode_t transferS
 };
 
 // Return the NF_PAL structure for busIndex
-// Return NULL is invalid bus
+// Return nullptr is invalid bus
 NF_PAL_SPI *GetNfPalfromBusIndex(uint8_t busIndex)
 {
-    NF_PAL_SPI *palSpi = NULL;
+    NF_PAL_SPI *palSpi = nullptr;
 
     // get the PAL struct for the SPI bus
     switch (busIndex)
@@ -273,12 +273,12 @@ HRESULT CPU_SPI_nWrite_nRead(
         // Callback sync / async
         palSpi->Callback = wrc.callback;
 
-        if (writeBuffer != NULL)
+        if (writeBuffer != nullptr)
         {
             palSpi->WriteSize = writeSize;
         }
 
-        if (readBuffer != NULL)
+        if (readBuffer != nullptr)
         {
             palSpi->ReadSize = readSize;
         }
@@ -292,13 +292,13 @@ HRESULT CPU_SPI_nWrite_nRead(
         // set bus config flag
         busConfigIsHalfDuplex = (palSpi->BusConfiguration == SpiBusConfiguration_HalfDuplex);
 
-        if (writeBuffer != NULL)
+        if (writeBuffer != nullptr)
         {
             // set the pointer to the write buffer as BYTE
             palSpi->WriteBuffer = (uint8_t *)writeBuffer;
         }
 
-        if (readBuffer != NULL)
+        if (readBuffer != nullptr)
         {
             // set DMA read buffer
             if (palSpi->ReadSize > 0)
@@ -486,8 +486,8 @@ bool CPU_SPI_Initialize_Extended(uint8_t busIndex, const SPI_DEVICE_CONFIGURATIO
 
     GPIO_Port_TypeDef port;
     uint32_t portPin;
-    NF_PAL_SPI *palSpi = NULL;
-    void (*initSpiConfig)(NF_SpiDriver_Init_t &, bool) = NULL;
+    NF_PAL_SPI *palSpi = nullptr;
+    void (*initSpiConfig)(NF_SpiDriver_Init_t &, bool) = nullptr;
 
     // init the PAL struct for this SPI bus and assign the respective driver
     // all this occurs if not already done
@@ -542,13 +542,13 @@ bool CPU_SPI_Initialize_Extended(uint8_t busIndex, const SPI_DEVICE_CONFIGURATIO
             return false;
     }
 
-    if (palSpi->Handle == NULL)
+    if (palSpi->Handle == nullptr)
     {
         // allocate memory for the USART_InitSync_TypeDef
         palSpi->Handle = (NF_SpiDriver_Handle_t)platform_malloc(sizeof(NF_SpiDriver_HandleData_t));
 
         // sanity check allocation
-        if (palSpi->Handle == NULL)
+        if (palSpi->Handle == nullptr)
         {
             return false;
         }
@@ -559,7 +559,7 @@ bool CPU_SPI_Initialize_Extended(uint8_t busIndex, const SPI_DEVICE_CONFIGURATIO
         palSpi->InitSpiData = (NF_SpiDriver_Init_t *)platform_malloc(sizeof(NF_SpiDriver_Init_t));
 
         // sanity check allocation
-        if (palSpi->InitSpiData == NULL)
+        if (palSpi->InitSpiData == nullptr)
         {
             platform_free(palSpi->Handle);
 
@@ -615,7 +615,7 @@ bool CPU_SPI_Initialize(uint8_t busIndex, const SPI_DEVICE_CONFIGURATION &busCon
 
 bool CPU_SPI_Uninitialize(uint8_t busIndex)
 {
-    NF_PAL_SPI *palSpi = NULL;
+    NF_PAL_SPI *palSpi = nullptr;
     GPIO_Port_TypeDef port;
     uint32_t portPin;
 
@@ -681,7 +681,7 @@ bool CPU_SPI_Uninitialize(uint8_t busIndex)
     platform_free(palSpi->Handle->initData);
     platform_free(palSpi->Handle);
 
-    palSpi->Handle = NULL;
+    palSpi->Handle = nullptr;
 
     return true;
 }

@@ -578,7 +578,7 @@ HRESULT CLR_RT_StackFrame::MakeCall(
     CLR_RT_StackFrame *stackSub;
     CLR_RT_HeapBlock tmp;
 
-    tmp.SetObjectReference(NULL);
+    tmp.SetObjectReference(nullptr);
     CLR_RT_ProtectFromGC gc(tmp);
 
     if (mdR->flags & CLR_RECORD_METHODDEF::MD_Constructor)

@@ -97,7 +97,7 @@ extern void ThreadSetInterfaceNumber(int networkInterfaceNumber);
         .task_queue_size = 10,                                                                                         \
     }
 
-static esp_netif_t *openthread_netif = NULL;
+static esp_netif_t *openthread_netif = nullptr;
 
 // Maximum number of entries in cliOutputsList
 #define cliListMaxSize 50
@@ -118,7 +118,7 @@ static esp_netif_t *init_openthread_netif(const esp_openthread_platform_config_t
 {
     esp_netif_config_t cfg = ESP_NETIF_DEFAULT_OPENTHREAD();
     esp_netif_t *netif = esp_netif_new(&cfg);
-    assert(netif != NULL);
+    assert(netif != nullptr);
 
     ESP_ERROR_CHECK(esp_netif_attach(netif, esp_openthread_netif_glue_init(config)));
 
@@ -427,7 +427,7 @@ esp_err_t initOpenThread(ThreadDeviceType deviceType, esp_openthread_radio_mode_
     // The OpenThread log level directly matches ESP log level
     (void)otLoggingSetLevel(CONFIG_LOG_DEFAULT_LEVEL);
 
-    otCliInit(esp_openthread_get_instance(), cliOutputCallback, NULL);
+    otCliInit(esp_openthread_get_instance(), cliOutputCallback, nullptr);
 
     // Clear '>' from output on init
     ResetLineBuffer();
@@ -457,7 +457,7 @@ static void openThreadMainTask(void *aContext)
     esp_openthread_netif_glue_deinit();
 
     esp_vfs_eventfd_unregister();
-    vTaskDelete(NULL);
+    vTaskDelete(nullptr);
 }
 
 bool startStopOpenThread(bool start)
@@ -533,10 +533,10 @@ void JoinerStart(const char *pskc, const char *url)
 {
     otError oterr;
 
-    oterr = otJoinerStart(esp_openthread_get_instance(), pskc, url, NULL, NULL, NULL, NULL, JoinerCallback, NULL);
+    oterr = otJoinerStart(esp_openthread_get_instance(), pskc, url, nullptr, nullptr, nullptr, nullptr, JoinerCallback, nullptr);
     if (oterr != OT_ERROR_NONE)
     {
-        JoinerCallback(oterr, NULL);
+        JoinerCallback(oterr, nullptr);
     }
 }
 

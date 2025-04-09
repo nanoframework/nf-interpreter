@@ -44,7 +44,7 @@ bool Events_Uninitialize_Platform()
 
 void Events_SetBoolTimer(bool *timerCompleteFlag, uint32_t millisecondsFromNow)
 {
-    if (timerCompleteFlag != NULL)
+    if (timerCompleteFlag != nullptr)
     {
         // As only one timer running at a time we will just save it
         saveTimerCompleteFlag = timerCompleteFlag;

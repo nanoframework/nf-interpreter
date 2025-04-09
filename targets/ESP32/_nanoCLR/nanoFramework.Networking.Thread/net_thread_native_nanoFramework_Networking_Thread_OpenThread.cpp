@@ -226,7 +226,7 @@ HRESULT Library_net_thread_native_nanoFramework_Networking_Thread_OpenThread::Na
 
         // Fill in active dataset from managed object
         CLR_RT_HeapBlock *datasetRef = pThis[Networking_Thread_OpenThread::FIELD___dataset].Dereference();
-        if (datasetRef != NULL)
+        if (datasetRef != nullptr)
         {
             LoadDataset(dataset, datasetRef);
 
@@ -260,7 +260,7 @@ HRESULT Library_net_thread_native_nanoFramework_Networking_Thread_OpenThread::Na
 
         // Save active dataset to managed object
         CLR_RT_HeapBlock *datasetRef = pThis[Networking_Thread_OpenThread::FIELD___dataset].Dereference();
-        if (datasetRef != NULL)
+        if (datasetRef != nullptr)
         {
             // Save active dataset to managed object
             oterr = otDatasetGetActive(instance, &dataset);
@@ -280,7 +280,7 @@ HRESULT Library_net_thread_native_nanoFramework_Networking_Thread_OpenThread::Na
     NANOCLR_HEADER();
     {
         const char *pskc = stack.Arg1().DereferenceString()->StringText();
-        JoinerStart(pskc, NULL);
+        JoinerStart(pskc, nullptr);
     }
     NANOCLR_NOCLEANUP_NOLABEL();
 }
@@ -326,7 +326,7 @@ HRESULT Library_net_thread_native_nanoFramework_Networking_Thread_OpenThread::
 {
     NANOCLR_HEADER();
     {
-        const char *commandLine = NULL;
+        const char *commandLine = nullptr;
         bool waitResponse = false;
 
         commandLine = stack.Arg1().DereferenceString()->StringText();

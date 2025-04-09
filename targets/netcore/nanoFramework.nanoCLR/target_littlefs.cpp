@@ -7,7 +7,7 @@
 #include <target_littlefs.h>
 #include <hal_littlefs.h>
 
-CLR_RT_Buffer *storageLfs0 = NULL;
+CLR_RT_Buffer *storageLfs0 = nullptr;
 
 // target specific implementation of hal_lfs_erase
 int32_t hal_lfs_erase_0(const struct lfs_config *c, lfs_block_t block)

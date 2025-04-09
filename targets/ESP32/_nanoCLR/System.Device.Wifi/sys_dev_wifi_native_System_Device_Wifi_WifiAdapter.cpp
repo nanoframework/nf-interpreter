@@ -330,7 +330,7 @@ HRESULT Library_sys_dev_wifi_native_System_Device_Wifi_WifiAdapter::NativeFindWi
         (HAL_Configuration_NetworkInterface *)platform_malloc(sizeof(HAL_Configuration_NetworkInterface));
 
     // check allocation
-    if (netInterfaceConfig == NULL)
+    if (netInterfaceConfig == nullptr)
     {
         NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
     }

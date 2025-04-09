@@ -57,7 +57,7 @@ bool IsValidGpioPin(GPIO_PIN pinNumber)
 }
 
 // Register (or unregister) ISR for a pin
-// send NULL in pinState to unregister callback
+// send nullptr in pinState to unregister callback
 unsigned int CallbackRegisterExt(uint8_t pin, gpio_input_state *pinState)
 {
     uint16_t intNo = INTERRUPT_UNAVAILABLE;
@@ -82,7 +82,7 @@ unsigned int CallbackRegisterExt(uint8_t pin, gpio_input_state *pinState)
         }
     }
 #else
-    if (gpioCallbacks[pin] == NULL)
+    if (gpioCallbacks[pin] == nullptr)
     {
         intNo = (unsigned int)pin;
     }
@@ -99,12 +99,12 @@ unsigned int CallbackRegisterExt(uint8_t pin, gpio_input_state *pinState)
 }
 
 // Get pointer to gpio_input_state for GPIO pin
-// return NULL if not found
+// return nullptr if not found
 gpio_input_state *GetGpioWithInterrupt(uint16_t gpioPin)
 {
     gpio_input_state *ptr = gpioInputList.FirstNode();
 
-    while (ptr->Next() != NULL)
+    while (ptr->Next() != nullptr)
     {
         if (GPIO_PIN(ptr->pinNumber) == gpioPin)
         {
@@ -114,7 +114,7 @@ gpio_input_state *GetGpioWithInterrupt(uint16_t gpioPin)
         ptr = ptr->Next();
     }
 
-    return NULL;
+    return nullptr;
 }
 
 static void DebounceTimerCallback(ULONG pinState)
@@ -157,7 +157,7 @@ static void GpioEventCallback(uint32_t intFlags)
 
         pGpio = gpioCallbacks[irqIdx];
 
-        if (pGpio != NULL)
+        if (pGpio != nullptr)
         {
             if (pGpio->waitingDebounce)
             {
@@ -196,12 +196,12 @@ static void GpioEventCallback(uint32_t intFlags)
 }
 
 // Get pointer to gpio_input_state for GPIO pin
-// return NULL if not found
+// return nullptr if not found
 gpio_input_state *GetInputState(GPIO_PIN pinNumber)
 {
     gpio_input_state *ptr = gpioInputList.FirstNode();
 
-    while (ptr->Next() != NULL)
+    while (ptr->Next() != nullptr)
     {
         if (ptr->pinNumber == pinNumber)
         {
@@ -211,7 +211,7 @@ gpio_input_state *GetInputState(GPIO_PIN pinNumber)
         ptr = ptr->Next();
     }
 
-    return NULL;
+    return nullptr;
 }
 
 // Allocate a new gpio_input_state and add to end of list
@@ -220,12 +220,12 @@ gpio_input_state *AllocateGpioInputState(GPIO_PIN pinNumber)
 {
     gpio_input_state *ptr = GetInputState(pinNumber);
 
-    if (ptr == NULL)
+    if (ptr == nullptr)
     {
         ptr = (gpio_input_state *)platform_malloc(sizeof(gpio_input_state));
 
         // sanity check
-        if (ptr != NULL)
+        if (ptr != nullptr)
         {
             memset(ptr, 0, sizeof(gpio_input_state));
             ptr->pinNumber = pinNumber;
@@ -256,7 +256,7 @@ void UnlinkInputState(gpio_input_state *pState)
 
     // disable the EXT interrupt channel
     // it's OK to do always this, no matter if it's enabled or not
-    CallbackRegisterExt(portPin, NULL);
+    CallbackRegisterExt(portPin, nullptr);
 
     pState->Unlink();
 
@@ -432,7 +432,7 @@ bool CPU_GPIO_EnableInputPin(
 
     // Link ISR ptr supplied and not already set up
     // CPU_GPIO_EnableInputPin could be called a 2nd time with changed parameters
-    if (pinISR != NULL && (pState->isrPtr == NULL))
+    if (pinISR != nullptr && (pState->isrPtr == nullptr))
     {
         // register nanoFramework callback and store associated interrupt ID
         interruptId = CallbackRegisterExt(portPin, pState);
@@ -468,18 +468,18 @@ bool CPU_GPIO_EnableInputPin(
                 break;
         }
     }
-    else if (pinISR == NULL && (pState->isrPtr != NULL))
+    else if (pinISR == nullptr && (pState->isrPtr != nullptr))
     {
         // there is no managed handler setup anymore
 
         // disable the EXT interrupt channel
         // it's OK to do always this, no matter if it's enabled or not
-        CallbackRegisterExt(portPin, NULL);
+        CallbackRegisterExt(portPin, nullptr);
 
         // clear parameters & configs
-        pState->isrPtr = NULL;
+        pState->isrPtr = nullptr;
         pState->mode = GPIO_INT_NONE;
-        pState->param = NULL;
+        pState->param = nullptr;
         pState->debounceMs = 0;
     }
 

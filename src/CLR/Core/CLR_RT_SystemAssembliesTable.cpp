@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (c) .NET Foundation and Contributors
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
@@ -9,7 +9,7 @@ static const CLR_RT_NativeAssemblyData *LookUpAssemblyNativeDataByName(
     const CLR_RT_NativeAssemblyData **pAssembliesNativeData,
     const char *lpszAssemblyName)
 {
-    // Just sanity check to avoid crash in strcmp if name is NULL.
+    // Just sanity check to avoid crash in strcmp if name is nullptr.
     if (lpszAssemblyName == nullptr)
     {
         return nullptr;

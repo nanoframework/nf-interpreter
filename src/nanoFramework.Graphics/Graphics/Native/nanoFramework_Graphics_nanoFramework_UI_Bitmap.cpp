@@ -243,7 +243,7 @@ HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::
     }
     else
     {
-        hbText.SetObjectReference(NULL);
+        hbText.SetObjectReference(nullptr);
     }
 
     hbXRelStart.SetInteger((CLR_INT32)xRelStart);
@@ -805,11 +805,11 @@ HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::GetPixelInt___U4
 HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::GetBitmap___SZARRAY_U1(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
-    CLR_RT_HeapBlock_Array *imageDataHB = NULL;
-    CLR_GFX_Bitmap *bitmap = NULL;
-    CLR_UINT32 *imageData = NULL;
-    CLR_UINT32 *row = NULL;
-    CLR_UINT32 *pixel = NULL;
+    CLR_RT_HeapBlock_Array *imageDataHB = nullptr;
+    CLR_GFX_Bitmap *bitmap = nullptr;
+    CLR_UINT32 *imageData = nullptr;
+    CLR_UINT32 *row = nullptr;
+    CLR_UINT32 *pixel = nullptr;
     int stride = 0;
 
     CLR_GFX_BitmapDescription bm;
@@ -1147,17 +1147,17 @@ HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::Dispose___VOID__
 
     CLR_RT_HeapBlock *pThis = stack.This();
 
-    if (pThis[CLR_GFX_Bitmap::FIELD__m_bitmap].Dereference() == NULL)
+    if (pThis[CLR_GFX_Bitmap::FIELD__m_bitmap].Dereference() == nullptr)
     {
         NANOCLR_SET_AND_LEAVE(S_OK);
     }
 
     NANOCLR_CHECK_HRESULT(CLR_GFX_Bitmap::DeleteInstance(pThis[FIELD__m_bitmap]));
-    pThis[FIELD__m_bitmap].SetObjectReference(NULL);
+    pThis[FIELD__m_bitmap].SetObjectReference(nullptr);
 
     //   Code from another version ?
     //   NANOCLR_CHECK_HRESULT(CLR_GFX_Bitmap::DeleteInstance(pThis[CLR_GFX_Bitmap::FIELD__m_bitmap]));
-    //   pThis[CLR_GFX_Bitmap::FIELD__m_bitmap].SetObjectReference(NULL);
+    //   pThis[CLR_GFX_Bitmap::FIELD__m_bitmap].SetObjectReference(nullptr);
 
     NANOCLR_NOCLEANUP();
 }

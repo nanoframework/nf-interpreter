@@ -11,14 +11,14 @@ int ssl_close_socket_internal(int sd)
     mbedTLS_NFContext *context = (mbedTLS_NFContext *)SOCKET_DRIVER.GetSocketSslData(sd);
 
     // sanity check
-    if (context != NULL)
+    if (context != nullptr)
     {
         mbedtls_ssl_context *ssl = context->ssl;
 
         // be nice and notify the peer that the connection is being closed
         mbedtls_ssl_close_notify(ssl);
 
-        SOCKET_DRIVER.SetSocketSslData(sd, NULL);
+        SOCKET_DRIVER.SetSocketSslData(sd, nullptr);
     }
 
     SOCK_close(sd);

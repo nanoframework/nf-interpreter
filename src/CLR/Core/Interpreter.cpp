@@ -429,12 +429,12 @@ bool CLR_RT_Thread::FindEhBlock(
     const CLR_RECORD_EH *ptrEh = nullptr;
     CLR_UINT32 numEh = 0;
 
-    // FROM is always non-NULL and indicates the current IP
+    // FROM is always non-nullptr and indicates the current IP
     _ASSERTE(from);
-    // onlyFinallys is false when we're searching for a handler for an exception, and to should be NULL
-    _ASSERTE(FIMPLIES(!onlyFinallys, to == NULL));
-    // onlyFinallys is true in Phase2, endfinally, leave, etc. to is NULL when we want to leave outside of the current
-    // stack frame, or non-NULL and pointing to an IL instruction that we are going to when finally's, if any, are
+    // onlyFinallys is false when we're searching for a handler for an exception, and to should be nullptr
+    _ASSERTE(FIMPLIES(!onlyFinallys, to == nullptr));
+    // onlyFinallys is true in Phase2, endfinally, leave, etc. to is nullptr when we want to leave outside of the current
+    // stack frame, or non-nullptr and pointing to an IL instruction that we are going to when finally's, if any, are
     // processed.
 
 #if defined(NANOCLR_TRACE_EXCEPTIONS)
@@ -2171,7 +2171,7 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                                 NANOCLR_CHECK_HRESULT(CLR_RT_TypeDescriptor::ExtractTypeIndexFromObject(pThis[0], cls));
 
                                 // This test is for performance reasons.  c# emits a callvirt on all instance methods to
-                                // make sure that a NullReferenceException is thrown if 'this' is NULL.  However, if the
+                                // make sure that a NullReferenceException is thrown if 'this' is nullptr.  However, if the
                                 // instance method isn't virtual we don't need to do the more expensive virtual method
                                 // lookup.
                                 if (op == CEE_CALLVIRT &&

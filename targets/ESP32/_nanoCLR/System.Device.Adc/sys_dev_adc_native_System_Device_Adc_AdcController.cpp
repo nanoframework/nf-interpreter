@@ -44,7 +44,7 @@ HRESULT Library_sys_dev_adc_native_System_Device_Adc_AdcController::NativeOpenCh
     adc_bits_width_t width_bit = (adc_bits_width_t)SOC_ADC_RTC_MAX_BITWIDTH;
     adc_atten_t atten = ADC_ATTEN_DB_12;
 
-    // get a pointer to the managed object instance and check that it's not NULL
+    // get a pointer to the managed object instance and check that it's not nullptr
     CLR_RT_HeapBlock *pThis = stack.This();
     FAULT_ON_NULL(pThis);
 

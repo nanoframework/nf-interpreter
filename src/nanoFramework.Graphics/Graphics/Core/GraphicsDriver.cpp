@@ -254,12 +254,12 @@ void GraphicsDriver::DrawRectangleNative(
     int xSrc = 0, ySrc = 0;
     // If the outset rect is completely outside of the drawing region, we can safely return (inset rect is always inside
     // the outset rect)
-    if (ClipToVisible(bitmap, outsetX, outsetY, outsetWidth, outsetHeight, NULL, xSrc, ySrc) == false)
+    if (ClipToVisible(bitmap, outsetX, outsetY, outsetWidth, outsetHeight, nullptr, xSrc, ySrc) == false)
         return;
 
     // If the inset rectangle is completely outside of the drawing region, the insetWidth and insetHeight would be set
     // to 0 (We have to keep going because the outset rect is at least partly visible)
-    ClipToVisible(bitmap, insetX, insetY, insetWidth, insetHeight, NULL, xSrc, ySrc);
+    ClipToVisible(bitmap, insetX, insetY, insetWidth, insetHeight, nullptr, xSrc, ySrc);
 
     // Outline
     if (pen.thickness > 0)
@@ -314,7 +314,7 @@ void GraphicsDriver::FillRectangleNative(const PAL_GFX_Bitmap &bitmap, GFX_Brush
     int height = rectangle.Height();
 
     int xSrc = 0, ySrc = 0;
-    if (ClipToVisible(bitmap, x, y, width, height, NULL, xSrc, ySrc) == false)
+    if (ClipToVisible(bitmap, x, y, width, height, nullptr, xSrc, ySrc) == false)
     {
         return;
     }
@@ -588,7 +588,7 @@ void GraphicsDriver::Draw4PointsRoundedRect(const PAL_GFX_Bitmap &bitmap, int of
 {
     Draw4PointsRoundedRectParams *p = (Draw4PointsRoundedRectParams *)params;
 
-    if (p->pen != NULL)
+    if (p->pen != nullptr)
     {
         if (p->pen->thickness < 2)
         {
@@ -669,14 +669,14 @@ void GraphicsDriver::DrawEllipseNative(
     /// If Fill is expected, then do fill part first before drawing outline.
     if (brush.opacity != PAL_GFX_Bitmap::c_OpacityTransparent)
     {
-        params.pen = NULL;
+        params.pen = nullptr;
         params.brush = &brush;
         params.lastFillOffsetY = -1;
         EllipseAlgorithm(bitmap, radiusX, radiusY, &params, &Draw4PointsEllipse);
     }
 
     params.pen = &pen;
-    params.brush = NULL;
+    params.brush = nullptr;
 
     EllipseAlgorithm(bitmap, radiusX, radiusY, &params, &Draw4PointsEllipse);
 }
@@ -687,7 +687,7 @@ void GraphicsDriver::Draw4PointsEllipse(const PAL_GFX_Bitmap &bitmap, int offset
     int centerX = p->centerX;
     int centerY = p->centerY;
 
-    if (p->pen != NULL)
+    if (p->pen != nullptr)
     {
         if (p->pen->thickness < 2)
         {
@@ -708,7 +708,7 @@ void GraphicsDriver::Draw4PointsEllipse(const PAL_GFX_Bitmap &bitmap, int offset
         }
     }
 
-    if (p->brush != NULL)
+    if (p->brush != nullptr)
     {
         int opacity = p->brush->opacity;
 
@@ -1098,7 +1098,7 @@ bool GraphicsDriver::ClipToVisible(
     int &xSrc,
     int &ySrc)
 {
-    if (pSrc != NULL)
+    if (pSrc != nullptr)
     {
         if (xSrc < 0 || ySrc < 0)
             return false;
@@ -1508,7 +1508,7 @@ void GraphicsDriver::SetPixelsHelper(
 
     if (config & PAL_GFX_Bitmap::c_SetPixelsConfig_Clip)
     {
-        if (g_GraphicsDriver.ClipToVisible(bitmap, x, y, width, height, NULL, xSrc, ySrc) == FALSE)
+        if (g_GraphicsDriver.ClipToVisible(bitmap, x, y, width, height, nullptr, xSrc, ySrc) == FALSE)
             return;
     }
 

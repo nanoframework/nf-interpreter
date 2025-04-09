@@ -122,7 +122,7 @@ HRESULT Library_nf_dev_onewire_nanoFramework_Device_OneWire_OneWireHost::FindFir
 
         // spawn working thread to perform the 1-Wire operations
         OneWireWorkingThread = chThdCreateFromHeap(
-            NULL,
+            nullptr,
             THD_WORKING_AREA_SIZE(256),
             "OWWT",
             NORMALPRIO,
@@ -161,7 +161,7 @@ HRESULT Library_nf_dev_onewire_nanoFramework_Device_OneWire_OneWireHost::FindFir
         {
             // if a device was found update serialNumber field in managed class
 
-            // get a pointer to the managed object instance and check that it's not NULL
+            // get a pointer to the managed object instance and check that it's not nullptr
             CLR_RT_HeapBlock *pThis = stack.This();
             FAULT_ON_NULL(pThis);
 
@@ -214,7 +214,7 @@ HRESULT Library_nf_dev_onewire_nanoFramework_Device_OneWire_OneWireHost::FindNex
 
         // spawn working thread to perform the 1-Wire operations
         OneWireWorkingThread = chThdCreateFromHeap(
-            NULL,
+            nullptr,
             THD_WORKING_AREA_SIZE(256),
             "OWWT",
             NORMALPRIO,
@@ -253,7 +253,7 @@ HRESULT Library_nf_dev_onewire_nanoFramework_Device_OneWire_OneWireHost::FindNex
         {
             // update serialNumber field
 
-            // get a pointer to the managed object instance and check that it's not NULL
+            // get a pointer to the managed object instance and check that it's not nullptr
             CLR_RT_HeapBlock *pThis = stack.This();
             FAULT_ON_NULL(pThis);
 

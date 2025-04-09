@@ -94,12 +94,12 @@ HRESULT Library_sys_net_native_System_Net_NetworkInformation_WirelessAPConfigura
 
     HAL_Configuration_WirelessAP config;
     CLR_RT_HeapBlock *pConfig = stack.Arg0().Dereference();
-    _ASSERTE(pConfig != NULL);
+    _ASSERTE(pConfig != nullptr);
 
     CLR_UINT32 configurationIndex = pConfig[FIELD___apConfigurationIndex].NumericByRefConst().u4;
 
-    CLR_RT_HeapBlock_String *hbPassword = NULL;
-    CLR_RT_HeapBlock_String *hbSsid = NULL;
+    CLR_RT_HeapBlock_String *hbPassword = nullptr;
+    CLR_RT_HeapBlock_String *hbSsid = nullptr;
     CLR_UINT32 ssidLength;
     CLR_UINT32 passwordLength;
 

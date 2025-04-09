@@ -47,7 +47,7 @@ CLR_UINT8 *TouchInterface::Write_Read(
     UNUSED(numberOfValuesToSend);
     UNUSED(numberValuesExpected);
 
-    // CLR_UINT8* receivedValues = NULL;
+    // CLR_UINT8* receivedValues = nullptr;
     // msg_t result = i2cMasterTransmitTimeout(&touchDriver, I2C_Address, valuesToSend, numberOfValuesToSend,
     // receivedValues, numberValuesExpected, TIME_MS2I(20)); return receivedValues;
 

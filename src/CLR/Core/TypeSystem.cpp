@@ -3466,7 +3466,7 @@ HRESULT CLR_RT_AppDomain::LoadAssembly(CLR_RT_Assembly *assm)
 
     // Preemptively allocate an out of memory exception.
     // We can never get into a case where an out of memory exception cannot be thrown.
-    if (m_outOfMemoryException == NULL)
+    if (m_outOfMemoryException == nullptr)
     {
         _ASSERTE(!strcmp(assm->m_szName, "mscorlib")); // always the first assembly to be loaded
 
@@ -6506,7 +6506,7 @@ HRESULT CLR_RT_AttributeParser::Next(Value *&res)
         // Attribute class has no fields, no properties and only default constructor
 
         m_lastValue.m_mode = Value::c_DefaultConstructor;
-        m_lastValue.m_name = NULL;
+        m_lastValue.m_name = nullptr;
 
         NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObject(m_lastValue.m_value, m_td));
 
@@ -6521,7 +6521,7 @@ HRESULT CLR_RT_AttributeParser::Next(Value *&res)
         // Attribute class has a constructor with parameter(s)
 
         m_lastValue.m_mode = Value::c_ConstructorArgument;
-        m_lastValue.m_name = NULL;
+        m_lastValue.m_name = nullptr;
 
         // get type
         NANOCLR_CHECK_HRESULT(m_parser.Advance(m_res));

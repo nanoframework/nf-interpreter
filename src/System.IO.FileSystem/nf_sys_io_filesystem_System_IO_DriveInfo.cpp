@@ -47,7 +47,7 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_DriveInfo::_ctor___VOID__U4(CLR_R
 
     volume = FileSystemVolumeList::FindVolume(driveIndex);
 
-    if (volume != NULL)
+    if (volume != nullptr)
     {
         NANOCLR_SET_AND_LEAVE(UpdateVolumeInfo(stack.This(), volume));
     }
@@ -102,7 +102,7 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_DriveInfo::GetDrivesNative___STAT
     uint32_t volumeCount = FileSystemVolumeList::GetNumVolumes();
     FileSystemVolume *currentVolume;
 
-    // CLR_RT_HeapBlock *volume = NULL;
+    // CLR_RT_HeapBlock *volume = nullptr;
     CLR_RT_HeapBlock *hbVolumes;
 
     CLR_RT_HeapBlock &top = stack.PushValueAndClear();

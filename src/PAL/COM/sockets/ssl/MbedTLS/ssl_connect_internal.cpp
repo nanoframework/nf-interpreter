@@ -25,7 +25,7 @@ int ssl_connect_internal(int sd, const char *szTargetHost, int contextHandle)
     // sd should already have been created
     // Now do the SSL negotiation
     context = (mbedTLS_NFContext *)g_SSL_Driver.ContextArray[contextHandle].Context;
-    if (context == NULL)
+    if (context == nullptr)
     {
         return false;
     }
@@ -33,7 +33,7 @@ int ssl_connect_internal(int sd, const char *szTargetHost, int contextHandle)
     // set socket in network context
     context->server_fd->fd = sd;
 
-    if (szTargetHost != NULL && szTargetHost[0] != 0)
+    if (szTargetHost != nullptr && szTargetHost[0] != 0)
     {
         if ((ret = mbedtls_ssl_set_hostname(context->ssl, szTargetHost)) != 0)
         {

@@ -209,7 +209,7 @@ HRESULT PushEmptyBufferToStack(CLR_RT_StackFrame &stack)
 
 bool LockEventMutex()
 {
-    if (ble_event_data.mutex == NULL)
+    if (ble_event_data.mutex == nullptr)
     {
         return false;
     }
@@ -219,7 +219,7 @@ bool LockEventMutex()
 
 void ReleaseEventMutex()
 {
-    if (ble_event_data.mutex == NULL)
+    if (ble_event_data.mutex == nullptr)
     {
         return;
     }

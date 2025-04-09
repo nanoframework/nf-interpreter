@@ -288,7 +288,7 @@ HRESULT Library_corlib_native_System_RuntimeType::GetCustomAttributesNative___SZ
 
     // the return array has two positions for each attribute:
     // 1st: the attribute type
-    // 2nd: the constructor parameters or NULL, if the attribute has no constructor
+    // 2nd: the constructor parameters or nullptr, if the attribute has no constructor
 
     // 1st pass: count attributes
     do
@@ -375,7 +375,7 @@ HRESULT Library_corlib_native_System_RuntimeType::GetCustomAttributes(
                         // no parameters for the constructor
                         returnArray++;
 
-                        // set next position to NULL
+                        // set next position to nullptr
                         returnArray->SetObjectReference(nullptr);
                     }
                     else if (val->m_mode == CLR_RT_AttributeParser::Value::c_ConstructorArgument)

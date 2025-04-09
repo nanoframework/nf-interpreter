@@ -67,8 +67,8 @@ HRESULT CLR_RT_BinaryFormatter::TypeHandler::SetValue(CLR_RT_HeapBlock *v)
     NATIVE_PROFILE_CLR_SERIALIZATION();
     NANOCLR_HEADER();
 
-    m_value = NULL;
-    m_type = NULL;
+    m_value = nullptr;
+    m_type = nullptr;
 
     v = TypeHandler::FixNull(v);
     if (v)
@@ -1798,8 +1798,8 @@ HRESULT CLR_RT_BinaryFormatter::CreateInstance(CLR_UINT8 *buf, int len, CLR_RT_B
     ptr->m_states.DblLinkedList_Initialize(); // CLR_RT_DblLinkedList           m_states;                // EVENT HEAP -
                                               // NO RELOCATION - list of CLR_RT_BinaryFormatter::State
                                               //
-    ptr->m_fDeserialize = (buf != NULL);      // bool                           m_fDeserialize;
-    ptr->m_value.SetObjectReference(NULL);    // CLR_RT_HeapBlock               m_value;
+    ptr->m_fDeserialize = (buf != nullptr);      // bool                           m_fDeserialize;
+    ptr->m_value.SetObjectReference(nullptr);    // CLR_RT_HeapBlock               m_value;
     ptr->m_value_desc.TypeDescriptor_Initialize(); // CLR_RT_TypeDescriptor          m_value_desc;
 
     NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_MemoryStream::CreateInstance(ptr->m_stream, buf, len));
@@ -1865,7 +1865,7 @@ HRESULT CLR_RT_BinaryFormatter::Serialize(CLR_RT_HeapBlock &refData, CLR_RT_Heap
     CLR_RT_HeapBlock cls;
     CLR_UINT32 flags = 0;
 
-    cls.SetObjectReference(NULL);
+    cls.SetObjectReference(nullptr);
 
     // unbox reflection types
     CLR_RT_HeapBlock *pObj = &object;
@@ -1918,7 +1918,7 @@ HRESULT CLR_RT_BinaryFormatter::Deserialize(
     NANOCLR_HEADER();
 
     CLR_RT_HeapBlock cls;
-    cls.SetObjectReference(NULL);
+    cls.SetObjectReference(nullptr);
 
     // unbox reflection types
     CLR_RT_HeapBlock *pObj = &object;

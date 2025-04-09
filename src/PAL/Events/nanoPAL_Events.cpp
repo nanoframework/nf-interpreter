@@ -8,8 +8,8 @@
 
 static uint32_t systemEvents;
 
-set_Event_Callback g_Event_Callback = NULL;
-void *g_Event_Callback_Arg = NULL;
+set_Event_Callback g_Event_Callback = nullptr;
+void *g_Event_Callback_Arg = nullptr;
 
 // functions below declared as weak can be replaced at target/platform level if needed
 
@@ -36,7 +36,7 @@ __nfweak void Events_Set(uint32_t events)
     __atomic_fetch_or(&systemEvents, events, __ATOMIC_RELAXED);
 #endif
 
-    if (g_Event_Callback != NULL)
+    if (g_Event_Callback != nullptr)
     {
         g_Event_Callback(g_Event_Callback_Arg);
     }

@@ -35,7 +35,7 @@ HRESULT Library_sys_dev_adc_native_System_Device_Adc_AdcChannel::NativeReadValue
     double rawValue;
     ADC_Handle adcHandler;
 
-    // get a pointer to the managed object instance and check that it's not NULL
+    // get a pointer to the managed object instance and check that it's not nullptr
     CLR_RT_HeapBlock *pThis = stack.This();
     FAULT_ON_NULL(pThis);
 
@@ -49,7 +49,7 @@ HRESULT Library_sys_dev_adc_native_System_Device_Adc_AdcChannel::NativeReadValue
     FAULT_ON_NULL(adcHandler);
 
     // sanity check
-    if (adcHandler == NULL)
+    if (adcHandler == nullptr)
     {
         NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
     }

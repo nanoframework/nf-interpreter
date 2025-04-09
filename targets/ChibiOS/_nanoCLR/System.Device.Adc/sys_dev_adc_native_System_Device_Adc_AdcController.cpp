@@ -14,9 +14,9 @@ HRESULT Library_sys_dev_adc_native_System_Device_Adc_AdcController::NativeOpenCh
     int channel;
     NF_PAL_ADC_PORT_PIN_CHANNEL adcDefinition;
 
-    ADCDriver *adcDriver = NULL;
+    ADCDriver *adcDriver = nullptr;
 
-    // get a pointer to the managed object instance and check that it's not NULL
+    // get a pointer to the managed object instance and check that it's not nullptr
     CLR_RT_HeapBlock *pThis = stack.This();
     FAULT_ON_NULL(pThis);
 
@@ -62,13 +62,13 @@ HRESULT Library_sys_dev_adc_native_System_Device_Adc_AdcController::NativeOpenCh
             NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
     }
 
-    if (adcDefinition.portId != NULL)
+    if (adcDefinition.portId != nullptr)
     {
         palSetGroupMode(adcDefinition.portId, PAL_PORT_BIT(adcDefinition.pin), 0, PAL_MODE_INPUT_ANALOG);
     }
 
     // start ADC
-    adcStart(adcDriver, NULL);
+    adcStart(adcDriver, nullptr);
 
     NANOCLR_NOCLEANUP();
 }
