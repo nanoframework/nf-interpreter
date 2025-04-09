@@ -9,11 +9,21 @@
 
 HRESULT CLR_Checks::VerifyStackOK(const CLR_RT_StackFrame &stack, const CLR_RT_HeapBlock *top, const int num)
 {
-    (void)stack;
-    (void)top;
-    (void)num;
+    NANOCLR_HEADER();
 
-    return S_OK;
+    // Check if stack has enough space for num elements
+    if (top + num > stack.m_evalStackEnd)
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_STACK_OVERFLOW);
+    }
+
+    // Check if top is within stack bounds
+    if (top < stack.m_evalStack || top >= stack.m_evalStackEnd)
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+    }
+
+    NANOCLR_NOCLEANUP();
 }
 
 HRESULT CLR_Checks::VerifyObject(CLR_RT_HeapBlock &top)
