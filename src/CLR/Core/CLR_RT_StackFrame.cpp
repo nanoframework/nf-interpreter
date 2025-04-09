@@ -38,7 +38,7 @@ HRESULT CLR_RT_StackFrame::Push(CLR_RT_Thread *th, const CLR_RT_MethodDef_Instan
 #ifndef NANOCLR_NO_IL_INLINE
     sizeEvalStack = md->lengthEvalStack + CLR_RT_StackFrame::c_OverheadForNewObjOrInteropMethod + 1;
 #else
-    sizeEvalStack = md->LengthEvalStack + CLR_RT_StackFrame::c_OverheadForNewObjOrInteropMethod;
+    sizeEvalStack = md->lengthEvalStack + CLR_RT_StackFrame::c_OverheadForNewObjOrInteropMethod;
 #endif
 
     //--//
