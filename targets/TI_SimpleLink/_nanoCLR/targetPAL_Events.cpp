@@ -24,7 +24,7 @@ bool Events_Initialize_Platform()
     Clock_Params params;
 
     Clock_Params_init(&params);
-    params.arg = nullptr;
+    params.arg = NULL;
     params.startFlag = FALSE;
     params.period = 0;
 
@@ -56,7 +56,7 @@ void Events_SetBoolTimer(bool *timerCompleteFlag, uint32_t millisecondsFromNow)
     // we assume only 1 can be active, abort previous just in case
     Clock_stop(boolEventsTimer);
 
-    if (timerCompleteFlag != nullptr)
+    if (timerCompleteFlag != NULL)
     {
         // As only one timer running at a time we will just save it
         saveTimerCompleteFlag = timerCompleteFlag;

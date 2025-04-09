@@ -160,14 +160,14 @@ FILE *ConfigStorage_OpenFile(
     // Open SPIFFS config storage
     FILE *file = fopen(fileName, isWrite ? (isAppend ? "a" : "w") : "r");
 
-    if (file != nullptr)
+    if (file != NULL)
     {
         return file;
     }
 
     ESP_LOGE(TAG, "NANO: Failed to open file (%s)", fileName);
 
-    return nullptr;
+    return NULL;
 }
 
 //
@@ -375,9 +375,9 @@ HAL_CONFIGURATION_NETWORK *ConfigStorage_FindNetworkConfigurationBlocks()
     HAL_CONFIGURATION_NETWORK *networkConfigs = (HAL_CONFIGURATION_NETWORK *)platform_malloc(allocationSize);
 
     // check allocation
-    if (networkConfigs == nullptr)
+    if (networkConfigs == NULL)
     {
-        return nullptr;
+        return NULL;
     }
 
     // clear memory
@@ -421,9 +421,9 @@ HAL_CONFIGURATION_NETWORK_WIRELESS80211 *ConfigStorage_FindNetworkWireless80211C
         (HAL_CONFIGURATION_NETWORK_WIRELESS80211 *)platform_malloc(allocationSize);
 
     // check allocation
-    if (networkWirelessConfigs == nullptr)
+    if (networkWirelessConfigs == NULL)
     {
-        return nullptr;
+        return NULL;
     }
 
     // clear memory
@@ -467,9 +467,9 @@ HAL_CONFIGURATION_NETWORK_WIRELESSAP *ConfigStorage_FindNetworkWirelessAPConfigu
         (HAL_CONFIGURATION_NETWORK_WIRELESSAP *)platform_malloc(allocationSize);
 
     // check allocation
-    if (networkWirelessAPConfigs == nullptr)
+    if (networkWirelessAPConfigs == NULL)
     {
-        return nullptr;
+        return NULL;
     }
 
     // clear memory
@@ -517,9 +517,9 @@ HAL_CONFIGURATION_X509_CERTIFICATE *ConfigStorage_FindX509CertificateConfigurati
         (HAL_CONFIGURATION_X509_CERTIFICATE *)platform_malloc(allocationSize);
 
     // check allocation
-    if (certificateStore == nullptr)
+    if (certificateStore == NULL)
     {
-        return nullptr;
+        return NULL;
     }
 
     // clear memory
@@ -535,9 +535,9 @@ HAL_CONFIGURATION_X509_CERTIFICATE *ConfigStorage_FindX509CertificateConfigurati
             (HAL_Configuration_X509CaRootBundle *)platform_malloc(sizeof(HAL_Configuration_X509CaRootBundle));
 
         // check allocation
-        if (certificate == nullptr)
+        if (certificate == NULL)
         {
-            return nullptr;
+            return NULL;
         }
 
         // clear memory
@@ -595,9 +595,9 @@ HAL_CONFIGURATION_X509_DEVICE_CERTIFICATE *IRAM_ATTR ConfigStorage_FindX509Devic
         (HAL_CONFIGURATION_X509_DEVICE_CERTIFICATE *)platform_malloc(allocationSize);
 
     // check allocation
-    if (deviceCertificate == nullptr)
+    if (deviceCertificate == NULL)
     {
-        return nullptr;
+        return NULL;
     }
 
     // clear memory
@@ -613,9 +613,9 @@ HAL_CONFIGURATION_X509_DEVICE_CERTIFICATE *IRAM_ATTR ConfigStorage_FindX509Devic
             (HAL_Configuration_X509DeviceCertificate *)platform_malloc(sizeof(HAL_Configuration_X509DeviceCertificate));
 
         // check allocation
-        if (certificate == nullptr)
+        if (certificate == NULL)
         {
-            return nullptr;
+            return NULL;
         }
 
         // clear memory
@@ -652,7 +652,7 @@ bool ConfigurationManager_GetConfigurationBlockFromStorage(
 
     handle = ConfigStorage_OpenFile(configuration, configurationIndex, false, false);
 
-    if (handle != nullptr)
+    if (handle != NULL)
     {
         readSize = ConfigStorage_ReadFile(handle, configurationBlock, maxBlockSize);
 
@@ -675,7 +675,7 @@ int32_t ConfigurationManager_GetConfigurationBlockSize(
 
     handle = ConfigStorage_OpenFile(configuration, configurationIndex, false, false);
 
-    if (handle != nullptr)
+    if (handle != NULL)
     {
         readSize = ConfigStorage_FileSize(handle);
 

@@ -23,7 +23,7 @@ HRESULT Time_Initialize()
     Clock_Params params;
 
     Clock_Params_init(&params);
-    params.arg = nullptr;
+    params.arg = NULL;
     params.startFlag = FALSE;
     params.period = 0;
 

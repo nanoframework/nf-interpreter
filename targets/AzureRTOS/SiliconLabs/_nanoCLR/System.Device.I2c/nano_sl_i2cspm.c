@@ -32,7 +32,7 @@ void I2CSPM_Init(I2CSPM_Init_TypeDef *init)
     CMU_Clock_TypeDef i2cClock;
     I2C_Init_TypeDef i2cInit;
 
-    EFM_ASSERT(init != nullptr);
+    EFM_ASSERT(init != NULL);
 
 #if defined(_CMU_HFPERCLKEN0_MASK)
     CMU_ClockEnable(cmuClock_HFPER, true);
