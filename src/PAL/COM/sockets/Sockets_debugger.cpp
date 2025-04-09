@@ -461,7 +461,7 @@ bool Sockets_LWIP_Driver::UpgradeToSsl(
         {
             int32_t ret;
 
-            SSL_AddCertificateAuthority(g_DebuggerPort_SslCtx_Handle, (const char *)pCACert, caCertLen, NULL);
+            SSL_AddCertificateAuthority(g_DebuggerPort_SslCtx_Handle, (const char *)pCACert, caCertLen);
 
             do
             {

@@ -6,14 +6,21 @@
 //
 
 #include <pthread.h>
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
+#include "freertos/semphr.h"
+#include "freertos/queue.h"
 #include "lwip/debug.h"
 #include "lwip/def.h"
 #include "lwip/sys.h"
 #include "lwip/mem.h"
-#include "arch/sys_arch.h"
 #include "lwip/stats.h"
+#include "arch/sys_arch.h"
+#include "arch/vfs_lwip.h"
 #include "esp_log.h"
 #include "esp_compiler.h"
+
+// clang-format off
 
 static const char* TAG = "lwip_arch";
 
@@ -55,6 +62,7 @@ sys_mutex_lock(sys_mutex_t *pxMutex)
   BaseType_t ret = xSemaphoreTake(*pxMutex, portMAX_DELAY);
 
   LWIP_ASSERT("failed to take the mutex", ret == pdTRUE);
+  (void)ret;
 }
 
 /**
@@ -68,6 +76,7 @@ sys_mutex_unlock(sys_mutex_t *pxMutex)
   BaseType_t ret = xSemaphoreGive(*pxMutex);
 
   LWIP_ASSERT("failed to give the mutex", ret == pdTRUE);
+  (void)ret;
 }
 
 /**
@@ -107,6 +116,7 @@ sys_sem_new(sys_sem_t *sem, u8_t count)
   if (count == 1) {
       BaseType_t ret = xSemaphoreGive(*sem);
       LWIP_ASSERT("sys_sem_new: initial give failed", ret == pdTRUE);
+      (void)ret;
   }
 
   return ERR_OK;
@@ -124,6 +134,7 @@ sys_sem_signal(sys_sem_t *sem)
   /* queue full is OK, this is a signal only... */
   LWIP_ASSERT("sys_sem_signal: sane return value",
              (ret == pdTRUE) || (ret == errQUEUE_FULL));
+  (void)ret;
 }
 
 /*-----------------------------------------------------------------------------------*/
@@ -140,7 +151,7 @@ sys_sem_signal_isr(sys_sem_t *sem)
  * @brief Wait for a semaphore to be signaled
  *
  * @param sem pointer of the semaphore
- * @param timeout if zero, will wait infinitely, or will wait for milliseconds specify by this argument
+ * @param timeout if zero, will wait infinitely, or will wait at least for milliseconds specified by this argument
  * @return SYS_ARCH_TIMEOUT when timeout, 0 otherwise
  */
 u32_t
@@ -153,7 +164,13 @@ sys_arch_sem_wait(sys_sem_t *sem, u32_t timeout)
     ret = xSemaphoreTake(*sem, portMAX_DELAY);
     LWIP_ASSERT("taking semaphore failed", ret == pdTRUE);
   } else {
-    TickType_t timeout_ticks = timeout / portTICK_RATE_MS;
+    /* Round up the number of ticks.
+     * Not only we need to round up the number of ticks, but we also need to add 1.
+     * Indeed, this function shall wait for AT LEAST timeout, but on FreeRTOS,
+     * if we specify a timeout of 1 tick to `xSemaphoreTake`, it will take AT MOST
+     * 1 tick before triggering a timeout. Thus, we need to pass 2 ticks as a timeout
+     * to `xSemaphoreTake`. */
+    TickType_t timeout_ticks = ((timeout + portTICK_PERIOD_MS - 1) / portTICK_PERIOD_MS) + 1;
     ret = xSemaphoreTake(*sem, timeout_ticks);
     if (ret == errQUEUE_EMPTY) {
       /* timed out */
@@ -220,6 +237,7 @@ sys_mbox_post(sys_mbox_t *mbox, void *msg)
 {
   BaseType_t ret = xQueueSendToBack((*mbox)->os_mbox, &msg, portMAX_DELAY);
   LWIP_ASSERT("mbox post failed", ret == pdTRUE);
+  (void)ret;
 }
 
 /**
@@ -294,7 +312,7 @@ sys_arch_mbox_fetch(sys_mbox_t *mbox, void **msg, u32_t timeout)
     ret = xQueueReceive((*mbox)->os_mbox, &(*msg), portMAX_DELAY);
     LWIP_ASSERT("mbox fetch failed", ret == pdTRUE);
   } else {
-    TickType_t timeout_ticks = timeout / portTICK_RATE_MS;
+    TickType_t timeout_ticks = timeout / portTICK_PERIOD_MS;
     ret = xQueueReceive((*mbox)->os_mbox, &(*msg), timeout_ticks);
     if (ret == errQUEUE_EMPTY) {
       /* timed out */
@@ -359,6 +377,8 @@ sys_mbox_free(sys_mbox_t *mbox)
   vQueueDelete((*mbox)->os_mbox);
   free(*mbox);
   *mbox = NULL;
+
+  (void)msgs_waiting;
 }
 
 /**
@@ -381,6 +401,9 @@ sys_thread_new(const char *name, lwip_thread_fn thread, void *arg, int stacksize
      thread function without adaption here. */
   ret = xTaskCreatePinnedToCore(thread, name, stacksize, arg, prio, &rtos_task,
           CONFIG_LWIP_TCPIP_TASK_AFFINITY);
+
+  LWIP_DEBUGF(TCPIP_DEBUG, ("new lwip task : %x, prio:%d,stack:%d\n",
+             (u32_t)rtos_task, prio, stacksize));
 
   if (ret != pdTRUE) {
     return NULL;
@@ -527,6 +550,39 @@ sys_delay_ms(uint32_t ms)
   vTaskDelay(ms / portTICK_PERIOD_MS);
 }
 
+bool
+sys_thread_tcpip(sys_thread_core_lock_t type)
+{
+    static sys_thread_t lwip_task = NULL;
+#if LWIP_TCPIP_CORE_LOCKING
+    static sys_thread_t core_lock_holder = NULL;
+#endif
+    switch (type) {
+        default:
+            return false;
+        case LWIP_CORE_IS_TCPIP_INITIALIZED:
+            return lwip_task != NULL;
+        case LWIP_CORE_MARK_TCPIP_TASK:
+            LWIP_ASSERT("LWIP_CORE_MARK_TCPIP_TASK: lwip_task == NULL", (lwip_task == NULL));
+            lwip_task = (sys_thread_t) xTaskGetCurrentTaskHandle();
+            return true;
+#if LWIP_TCPIP_CORE_LOCKING
+        case LWIP_CORE_LOCK_QUERY_HOLDER:
+            return lwip_task ? core_lock_holder == (sys_thread_t) xTaskGetCurrentTaskHandle() : true;
+        case LWIP_CORE_LOCK_MARK_HOLDER:
+            core_lock_holder = (sys_thread_t) xTaskGetCurrentTaskHandle();
+            return true;
+        case LWIP_CORE_LOCK_UNMARK_HOLDER:
+            core_lock_holder = NULL;
+            return true;
+#else
+        case LWIP_CORE_LOCK_QUERY_HOLDER:
+            return lwip_task == NULL || lwip_task == (sys_thread_t) xTaskGetCurrentTaskHandle();
+#endif /* LWIP_TCPIP_CORE_LOCKING */
+    }
+    return true;
+}
+
 // [NF_CHANGE]
 ////////////////////////////////////////////////////
 // nanoFramework "hack" extending LwIP original code
@@ -546,3 +602,5 @@ void sys_signal_sock_event()
     }
 }
 // [END_NF_CHANGE]
+
+// clang-format on

@@ -19,13 +19,25 @@
 #include "services/gatt/ble_svc_gatt.h"
 #pragma GCC diagnostic pop
 
+#include "nimble_utils.h"
+
 typedef struct
 {
     uint16_t eventId;
+
+    // Control access to event data
+    SemaphoreHandle_t mutex;
+
+    int result;
+
+    // Client Fields
     uint16_t conn_handle;
     uint16_t characteristicId;
     struct ble_gatt_access_ctxt *ctxt;
-    int result;
+
+    // Central fields
+    struct ble_gap_event *gapEvent;
+
 } device_ble_event_data;
 
 struct ble_context
@@ -50,7 +62,7 @@ struct ble_context
     ble_uuid_any_t *descriptorUuids;
 };
 
-struct ble_services_context
+struct bleServicesContext
 {
     // The service definition is discoverable
     bool isDiscoverable;
@@ -58,6 +70,17 @@ struct ble_services_context
     bool isConnectable;
     // The device name
     char *pDeviceName;
+
+    // True if using extended advertisements (Bluetooth 5.0)
+    bool useExtendedAdvert;
+
+    // Ptr & length of advertisement packet
+    int advertDataLen;
+    uint8_t *advertData;
+
+    // Ptr & length of scanresponse packet (Legacy)
+    int scanResponseLen;
+    uint8_t *scanResponse;
 
     // Number of services in service definition
     int serviceCount;
@@ -69,7 +92,22 @@ struct ble_services_context
     ble_context *bleSrvContexts;
 };
 
-extern ble_services_context bleContext;
-extern device_ble_event_data ble_event_data;
+void StartBleTask(char *deviceName, uint16_t appearance);
+bool DeviceBleInit();
+void Device_ble_dispose();
+int Esp32GapEvent(struct ble_gap_event *event, void *arg);
+int ConnectionCount();
+void SetSecuritySettings(
+    DevicePairingIOCapabilities IOCaps,
+    DevicePairingProtectionLevel protectionLevel,
+    bool allowBonding,
+    bool allowOob);
 
-#endif // SYS_BLE_H
+extern bleServicesContext bleContext;
+extern device_ble_event_data ble_event_data;
+extern EventGroupHandle_t ble_event_waitgroup;
+extern char *bleDeviceName;
+
+#define N_BLE_EVENT_HANDLED 1 // Bit 1 to signal event has been handled
+#define N_BLE_EVENT_STARTED 2 // Bit 2 to signal BLE stack has started
+#endif                        // SYS_BLE_H

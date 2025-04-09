@@ -12,7 +12,7 @@
 
 #include "stm32f769xx.h"
 #include "stm32f7xx.h"
-#include "Core_cm7.h"
+#include "core_cm7.h"
 #include "DisplayInterface.h"
 #include <nanoCLR_Interop.h>
 #include <stdarg.h>

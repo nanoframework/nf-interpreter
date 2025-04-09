@@ -11,8 +11,11 @@
 #include <nanoPAL_Events.h>
 #include <nanoPAL_BlockStorage.h>
 #include <nanoHAL_ConfigurationManager.h>
+#include <nanoHAL_StorageOperation.h>
 #include <nanoHAL_Graphics.h>
-
+#if (HAL_USE_UART == TRUE)
+#include <sys_io_ser_native_target.h>
+#endif
 void Storage_Initialize();
 void Storage_Uninitialize();
 
@@ -55,9 +58,9 @@ extern "C"
         nanoHAL_Initialize();
     }
 
-    void nanoHAL_Uninitialize_C()
+    void nanoHAL_Uninitialize_C(bool isPoweringDown)
     {
-        nanoHAL_Uninitialize();
+        nanoHAL_Uninitialize(isPoweringDown);
     }
 }
 
@@ -75,7 +78,13 @@ void nanoHAL_Initialize()
     // initialize block storage devices
     BlockStorage_AddDevices();
 
+    // required to setup flash partitions memory mapping
     BlockStorageList_InitializeDevices();
+
+    FS_Initialize();
+    FileSystemVolumeList::Initialize();
+    FS_AddVolumes();
+    FileSystemVolumeList::InitializeVolumes();
 
     // allocate & clear managed heap region
     unsigned char *heapStart = NULL;
@@ -96,6 +105,16 @@ void nanoHAL_Initialize()
     nanoSPI_Initialize();
 #endif
 
+#if (HAL_USE_UART == TRUE)
+
+    memset(&Uart0_PAL, 0, sizeof(Uart0_PAL));
+    memset(&Uart1_PAL, 0, sizeof(Uart1_PAL));
+#if defined(UART_NUM_2)
+    memset(&Uart2_PAL, 0, sizeof(Uart2_PAL));
+#endif
+
+#endif
+
     // no PAL events required until now
     // PalEvent_Initialize();
 
@@ -112,8 +131,10 @@ void nanoHAL_Initialize()
 #endif
 }
 
-void nanoHAL_Uninitialize()
+void nanoHAL_Uninitialize(bool isPoweringDown)
 {
+    (void)isPoweringDown;
+
     // check for s_rebootHandlers
     for (unsigned int i = 0; i < ARRAYSIZE(s_rebootHandlers); i++)
     {
@@ -131,11 +152,11 @@ void nanoHAL_Uninitialize()
 
     SOCKETS_CloseConnections();
 
-#if !defined(HAL_REDUCESIZE)
-    // TODO need to call this but it's preventing the debug session from starting
-    // Network_Uninitialize();
-#endif
+    Network_Uninitialize();
 
+    FileSystemVolumeList::UninitializeVolumes();
+
+    // required to remove flash partitions memory mapping
     BlockStorageList_UnInitializeDevices();
 
 #if (HAL_USE_SPI == TRUE)

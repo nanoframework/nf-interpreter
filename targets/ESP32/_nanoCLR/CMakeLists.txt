@@ -3,10 +3,6 @@
 # See LICENSE file in the project root for full license information.
 #
 
-# add header file with common target definitions
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/target_platform.h.in
-               ${CMAKE_CURRENT_BINARY_DIR}/target_platform.h @ONLY)
-
 # append target Esp32 nanoCLR source files
 list(APPEND TARGET_ESP32_IDF_NANOCLR_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/WireProtocol_MonitorCommands.c)
 list(APPEND TARGET_ESP32_IDF_NANOCLR_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/CLR_Startup_Thread.c) 
@@ -31,12 +27,10 @@ list(APPEND TARGET_ESP32_IDF_NANOCLR_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/targetH
 
 list(APPEND TARGET_ESP32_IDF_NANOCLR_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/targetHAL_Time.cpp)
 
-
-# append files from Runtime.Native
-list(APPEND TARGET_ESP32_IDF_NANOCLR_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/nanoFramework.Runtime.Native/nf_rt_native_nanoFramework_Runtime_Native_Rtc.cpp)
-
 # append nanoHAL
 list(APPEND TARGET_ESP32_IDF_NANOCLR_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/targetRandom.cpp)
+
+list(APPEND TARGET_ESP32_IDF_NANOCLR_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/targetPAL_I2c.cpp)
 
 # make var global
 set(TARGET_ESP32_IDF_NANOCLR_SOURCES ${TARGET_ESP32_IDF_NANOCLR_SOURCES} CACHE INTERNAL "make global")

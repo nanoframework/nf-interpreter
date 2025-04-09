@@ -40,7 +40,7 @@ const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_System_Device_I2c =
     "System.Device.I2c",
     0xFA806D33,
     method_lookup,
-    { 100, 0, 0, 1 }
+    { 100, 0, 0, 2 }
 };
 
 // clang-format on

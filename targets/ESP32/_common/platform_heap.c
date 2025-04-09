@@ -18,8 +18,3 @@ void platform_free(void *ptr)
 {
     heap_caps_free(ptr);
 }
-
-void *platform_realloc(void *ptr, size_t size)
-{
-    return heap_caps_realloc(ptr, size, DEFAULT_MALLOC_CAPS);
-}

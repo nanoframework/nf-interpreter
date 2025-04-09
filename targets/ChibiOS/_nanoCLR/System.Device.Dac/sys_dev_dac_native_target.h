@@ -35,7 +35,7 @@ struct NF_PAL_DAC
 };
 
 ////////////////////////////////////////////
-// declaration of the the DAC PAL strucs //
+// declaration of the the DAC PAL structs //
 ////////////////////////////////////////////
 #if STM32_DAC_USE_DAC1_CH1
 extern NF_PAL_DAC Dac1_1_PAL;

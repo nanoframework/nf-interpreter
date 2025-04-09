@@ -8,6 +8,7 @@
 #include <lwip/netifapi.h>
 
 extern "C" struct netif *nf_getNetif();
+
 //
 // Works with the Target_NetworkConfig to map the Network_Interface_XXXXX calls to the correct driver
 
@@ -58,6 +59,7 @@ bool Network_Interface_Close(int index)
     switch (index)
     {
         case 0:
+            macStop(&ETHD1);
             return true;
     }
     return false;

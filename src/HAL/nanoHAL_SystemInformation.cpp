@@ -6,6 +6,9 @@
 
 #include <nanoHAL.h>
 #include <targetHAL.h>
+#include <nanoCLR_Runtime.h>
+
+extern CLR_RT_ExecutionEngine g_CLR_RT_ExecutionEngine;
 
 bool GetHalSystemInfo(HalSystemInfo &systemInfo)
 {
@@ -29,15 +32,17 @@ bool GetHalSystemInfo(HalSystemInfo &systemInfo)
     len = sizeof(systemInfo.m_releaseInfo.TargetName);
     hal_strncpy_s((char *)&systemInfo.m_releaseInfo.TargetName[0], len, PLATFORMNAMESTRING, len - 1);
 
-    // we are not supporting this at this time
     // OEM_MODEL_SKU:
-    // memcpy((void*)&(systemInfo.m_OemModelInfo), (void*)&(g_ConfigurationSector.OEM_Model_SKU),
-    // sizeof(OEM_MODEL_SKU));
+    ConfigurationManager_GetOemModelSku((char *)&systemInfo.m_OemModelInfo, sizeof(systemInfo.m_OemModelInfo));
 
-    // we are not supporting this at this time
     // OEM_SERIAL_NUMBERS:
-    // memcpy((void*)&(systemInfo.m_OemSerialNumbers), (void*)&(g_ConfigurationSector.OemSerialNumbers),
-    // sizeof(OEM_SERIAL_NUMBERS));
+    ConfigurationManager_GetModuleSerialNumber(
+        (char *)&systemInfo.m_OemSerialNumbers.module_serial_number,
+        sizeof(systemInfo.m_OemSerialNumbers.module_serial_number));
+
+    ConfigurationManager_GetSystemSerialNumber(
+        (char *)&systemInfo.m_OemSerialNumbers.system_serial_number,
+        sizeof(systemInfo.m_OemSerialNumbers.system_serial_number));
 
     return TRUE;
 #endif
@@ -58,4 +63,16 @@ bool Target_GetReleaseInfo(NFReleaseInfo &releaseInfo)
         PLATFORMNAMESTRING,
         hal_strlen_s(PLATFORMNAMESTRING));
     return TRUE; // alternatively, return false if you didn't initialize the releaseInfo structure.
+}
+
+bool DebuggerIsConnected()
+{
+    return ((g_CLR_RT_ExecutionEngine.m_iDebugger_Conditions & CLR_RT_ExecutionEngine::c_fDebugger_Enabled) != 0);
+}
+
+bool DebugSessionIsActive()
+{
+    return (
+        (g_CLR_RT_ExecutionEngine.m_iDebugger_Conditions & CLR_RT_ExecutionEngine::c_fDebugger_SourceLevelDebugging) !=
+        0);
 }

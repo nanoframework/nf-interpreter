@@ -5,11 +5,7 @@
 //
 
 #include "CLRStartup.h"
-#include <nanoHAL.h>
-#include <nanoCLR_Application.h>
 #include <nanoCLR_Hardware.h>
-#include <nanoCLR_Runtime.h>
-#include <nanoCLR_Types.h>
 
 void ClrExit()
 {
@@ -25,7 +21,7 @@ void ClrReboot()
 }
 
 // the CLR Startup code on Windows version is different
-#ifndef WIN32
+#ifndef VIRTUAL_DEVICE
 
 struct Settings
 {
@@ -82,6 +78,7 @@ struct Settings
             // First verify that check sum in assembly object matches hardcoded check sum.
             if (assm->m_header->nativeMethodsChecksum != pNativeAssmData->m_checkSum)
             {
+#if !defined(BUILD_RTM)
                 CLR_Debug::Printf(
                     "\r\n\r\n***********************************************************************\r\n");
                 CLR_Debug::Printf("*                                                                     *\r\n");
@@ -95,6 +92,7 @@ struct Settings
                     pNativeAssmData->m_checkSum);
                 CLR_Debug::Printf("*                                                                     *\r\n");
                 CLR_Debug::Printf("***********************************************************************\r\n");
+#endif
 
                 NANOCLR_SET_AND_LEAVE(CLR_E_ASSM_WRONG_CHECKSUM);
             }
@@ -247,6 +245,9 @@ struct Settings
 
                 if (assembliesBuffer == NULL)
                 {
+                    // release the headerBuffer which has being used and leave
+                    platform_free(headerBuffer);
+
                     NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
                 }
 
@@ -270,7 +271,7 @@ struct Settings
             {
                 // check failed, try to continue to the next
 
-                if (!isXIP && assembliesBuffer != NULL)
+                if (!isXIP)
                 {
                     // release the assembliesBuffer
                     platform_free(assembliesBuffer);
@@ -287,7 +288,7 @@ struct Settings
             {
                 // load failed, try to continue to the next
 
-                if (!isXIP && assembliesBuffer != NULL)
+                if (!isXIP)
                 {
                     // release the assembliesBuffer which has being used and leave
                     platform_free(assembliesBuffer);
@@ -298,11 +299,17 @@ struct Settings
 
             // load successful, mark as deployed
             assm->m_flags |= CLR_RT_Assembly::Deployed;
+
+            // if header was malloced, set the flag to request freeing it
+            if (!isXIP)
+            {
+                assm->m_flags |= CLR_RT_Assembly::FreeOnDestroy;
+            }
         }
 
-        if (!isXIP && headerBuffer != NULL)
+        if (!isXIP)
         {
-            // release the headerbuffer which has being used and leave
+            // release the headerBuffer which has being used and leave
             platform_free(headerBuffer);
         }
 
@@ -358,7 +365,7 @@ void ClrStartup(CLR_SETTINGS params)
 {
     NATIVE_PROFILE_CLR_STARTUP();
     Settings settings;
-    ASSERT(sizeof(CLR_RT_HeapBlock_Raw) == sizeof(CLR_RT_HeapBlock));
+    ASSERT(sizeof(CLR_RT_HeapBlock_Raw) == sizeof(struct CLR_RT_HeapBlock));
     bool softReboot;
 
     do
@@ -393,7 +400,7 @@ void ClrStartup(CLR_SETTINGS params)
                 CLR_Debug::Printf("Ready.\r\n");
 #endif
 
-                (void)g_CLR_RT_ExecutionEngine.Execute(NULL, params.MaxContextSwitches);
+                hr = g_CLR_RT_ExecutionEngine.Execute(NULL, params.MaxContextSwitches);
 
 #if !defined(BUILD_RTM)
                 CLR_Debug::Printf("Done.\r\n");
@@ -413,14 +420,29 @@ void ClrStartup(CLR_SETTINGS params)
 #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
             CLR_EE_DBG_SET_MASK(StateProgramExited, StateMask);
             CLR_EE_DBG_EVENT_BROADCAST(CLR_DBG_Commands_c_Monitor_ProgramExit, 0, NULL, WP_Flags_c_NonCritical);
-#endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
+#endif // #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
 
-#if !defined(BUILD_RTM)
+#if defined(BUILD_RTM)
+            if (params.RevertToBooterOnFault)
+            {
+                // launch proprietary bootloader, if available
+                if (!RequestToLaunchProprietaryBootloader())
+                {
+                    // no proprietary bootloader available, launch nanoBooter
+
+#if (TARGET_HAS_NANOBOOTER == TRUE)
+
+                    RequestToLaunchNanoBooter(hr);
+                    CPU_Reset();
+#endif // TARGET_HAS_NANOBOOTER
+                }
+            }
+#endif
+
             if (params.EnterDebuggerLoopAfterExit)
             {
                 CLR_DBG_Debugger::Debugger_WaitForCommands();
             }
-#endif
         }
 
         // DO NOT USE 'ELSE IF' here because the state can change in Debugger_WaitForCommands() call
@@ -435,7 +457,7 @@ void ClrStartup(CLR_SETTINGS params)
 
                 s_ClrSettings.Cleanup();
 
-                nanoHAL_Uninitialize();
+                nanoHAL_Uninitialize(false);
 
                 // re-init the hal for the reboot (initially it is called in bootentry)
                 nanoHAL_Initialize();
@@ -459,4 +481,4 @@ void ClrStartup(CLR_SETTINGS params)
     CPU_Reset();
 }
 
-#endif // WIN32
+#endif // VIRTUAL_DEVICE

@@ -24,8 +24,14 @@ typedef struct CLR_SETTINGS
     // when building is set for RTM this configuration is ignored
     bool EnterDebuggerLoopAfterExit;
 
-#if defined(_WIN32)
-    CLR_RT_StringVector StartArgs;
+    // Set this to TRUE if the device is to reboot to nanoBoother (or proprietary bootloader) in case the there is a
+    // fault in loading the application.
+    // This option is only available when building is set for RTM
+    bool RevertToBooterOnFault;
+
+#if defined(VIRTUAL_DEVICE)
+    bool PerformGarbageCollection;
+    bool PerformHeapCompaction;
 #endif
 
 } CLR_SETTINGS;

@@ -43,7 +43,19 @@ HRESULT Library_sys_dev_adc_native_System_Device_Adc_AdcChannel::NativeReadValue
     // Get channel from _channelNumber field
     channelNumber = pThis[FIELD___channelNumber].NumericByRef().s4;
 
-    adcDefinition = AdcPortPinConfig[channelNumber];
+    // channel is static?
+    if (channelNumber < AdcChannelCount)
+    {
+        adcDefinition = AdcPortPinConfig[channelNumber];
+    }
+    else if (channelNumber < AdcChannelCount + RuntimeAdcChannelCount)
+    {
+        adcDefinition = RuntimeAdcPortPinConfig[channelNumber - AdcChannelCount];
+    }
+    else
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+    }
 
     // we should remove form the build the ADC options that aren't implemented
     // plus we have to use the default to catch invalid ADC Ids

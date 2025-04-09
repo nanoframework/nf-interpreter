@@ -7,6 +7,8 @@
 #ifndef MCUCONF_H
 #define MCUCONF_H
 
+// clang-format off
+
 /*
  * STM32F7xx drivers configuration.
  * The following settings override the default settings present in
@@ -23,6 +25,11 @@
 
 #define STM32F7xx_MCUCONF
 #define STM32F769_MCUCONF
+
+/*
+ * Memory attributes settings.
+ */
+#define STM32_NOCACHE_ENABLE                FALSE
 
 /*
  * HAL driver system settings.
@@ -85,7 +92,6 @@
 #define STM32_CK48MSEL         STM32_CK48MSEL_PLL
 #define STM32_SDMMC1SEL        STM32_SDMMC1SEL_PLL48CLK
 #define STM32_SDMMC2SEL        STM32_SDMMC2SEL_PLL48CLK
-#define STM32_SRAM2_NOCACHE    FALSE
 
 /*
  * IRQ system settings.
@@ -420,7 +426,7 @@
 /*
  * WSPI driver system settings.
  */
-#define STM32_WSPI_USE_QUADSPI1             FALSE
+#define STM32_WSPI_USE_QUADSPI1             TRUE
 #define STM32_WSPI_QUADSPI1_DMA_STREAM      STM32_DMA_STREAM_ID(2, 7)
 #define STM32_WSPI_QUADSPI1_PRESCALER_VALUE 2
 
@@ -429,3 +435,5 @@
 #include "mcuconf_community.h"
 
 #endif /* MCUCONF_H */
+
+// clang-format on

@@ -16,9 +16,19 @@
       "command": "install-scripts\\install-nf-tools.ps1 -TargetSeries ${input:targetSeries} -Path '${input:toolsPath}' "
     },
     {
-      "label": "Flash nanoCLR to ESP32",
+      "label": "Flash nanoCLR to ESP32 | ESP32-S2",
       "type": "shell",
-      "command": "python ${env:IDF_PATH}/components/esptool_py/esptool/esptool.py --chip detect --port \"${input:comPort}\" --baud 1500000 --before \"default_reset\" --after \"hard_reset\" write_flash -z --flash_mode \"dio\" --flash_freq \"40m\" --flash_size detect 0x1000 ${workspaceFolder}/build/bootloader/bootloader.bin 0x10000 ${workspaceFolder}/build/nanoCLR.bin 0x8000 ${workspaceFolder}/build/partitions_${input:esp32Partitions}.bin",
+      "command": "python ${env:IDF_PATH}/components/esptool_py/esptool/esptool.py --chip auto --port \"${input:comPort}\" --baud 1500000 --before \"default_reset\" --after \"hard_reset\" write_flash -z --flash_size detect 0x1000 ${workspaceFolder}/build/bootloader/bootloader.bin 0x10000 ${workspaceFolder}/build/nanoCLR.bin 0x8000 ${workspaceFolder}/build/partitions_${input:esp32Partitions}.bin",
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Flash nanoCLR to  ESP32-C3 | ESP32-C6 | ESP32-H2 | ESP32-S3",
+      "type": "shell",
+      "command": "python ${env:IDF_PATH}/components/esptool_py/esptool/esptool.py --chip auto --port \"${input:comPort}\" --baud 1500000 --before \"default_reset\" --after \"hard_reset\" write_flash -z --flash_size detect 0x0 ${workspaceFolder}/build/bootloader/bootloader.bin 0x10000 ${workspaceFolder}/build/nanoCLR.bin 0x8000 ${workspaceFolder}/build/partitions_${input:esp32Partitions}.bin",
       "presentation": {
         "reveal": "always",
         "panel": "shared"
@@ -28,7 +38,27 @@
     {
       "label": "Erase ESP32 flash",
       "type": "shell",
-      "command": "python ${env:IDF_PATH}/components/esptool_py/esptool/esptool.py --chip detect --port \"${input:comPort}\" --baud 1500000 --before \"default_reset\" --after \"hard_reset\" erase_flash",
+      "command": "python ${env:IDF_PATH}/components/esptool_py/esptool/esptool.py --chip auto --port \"${input:comPort}\" --baud 1500000 --before \"default_reset\" --after \"hard_reset\" erase_flash",
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Decode ESP32 backtrace",
+      "type": "shell",
+      "command": "xtensa-${input:esp32series}-elf-addr2line -apsfCire \"${input:espBacktraceElfFile}\" \"${input:espBacktrace}\"",
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Decode ESP32 (riscv32 series) backtrace",
+      "type": "shell",
+      "command": "riscv32-esp-elf-addr2line -apsfCire \"${input:espBacktraceElfFile}\" \"${input:espBacktrace}\"",
       "presentation": {
         "reveal": "always",
         "panel": "shared"
@@ -53,6 +83,39 @@
       "presentation": {
         "reveal": "always",
         "panel": "dedicated"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Erase flash Silabs GG11",
+      "type": "shell",
+      "command": "${env:JLINK_PATH}/Jlink.exe -device default -si swd -CommandFile ${workspaceRoot}/.jlink/erase_gg11.jlink",
+      "windows": {
+        "options": {
+          "shell": {
+            "executable": "cmd.exe",
+            "args": [
+              "/c"
+            ]
+          }
+        }
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Flash Silabs GG11",
+      "type": "shell",
+      "command": "${env:JLINK_PATH}/Jlink.exe -device default -si swd -CommandFile ${workspaceRoot}/.jlink/flash_gg11.jlink",
+      "windows": {
+        "options": {
+          "shell": {
+            "executable": "cmd.exe",
+            "args": [
+              "/c"
+            ]
+          },
+          "cwd": "${workspaceFolder}/Build"
+        }
       },
       "problemMatcher": []
     }
@@ -90,8 +153,32 @@
         "2mb",
         "4mb",
         "8mb",
-        "16mb"
+        "16mb",
+        "32mb"
       ]
+    },
+    {
+      "id": "esp32series",
+      "type": "pickString",
+      "description": "ESP32 series",
+      "default": "esp32",
+      "options": [
+        "esp32",
+        "esp32s2",
+        "esp32s3"
+      ]
+    },
+    {
+      "id": "espBacktrace",
+      "type": "promptString",
+      "default": "",
+      "description": "Backtrace information from 'Guru Meditation Error' output. *** JUST THE BACKTRACE line, NOT the whole output! ***"
+    },
+    {
+      "id": "espBacktraceElfFile",
+      "type": "promptString",
+      "default": "${workspaceFolder}/build/nanoCLR.elf",
+      "description": "Path to ELF file. Default is the current build executable."
     }
   ]
 }

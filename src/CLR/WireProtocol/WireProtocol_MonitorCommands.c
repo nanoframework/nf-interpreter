@@ -8,7 +8,7 @@
 #include <nanoPAL_BlockStorage.h>
 #include <target_board.h>
 
-#if !defined(_WIN32)
+#ifndef VIRTUAL_DEVICE
 
 // dummy implementation to allow build of nanoCLR
 __nfweak int AccessMemory(uint32_t location, uint32_t lengthInBytes, uint8_t *buffer, int32_t mode, uint32_t *errorCode)
@@ -424,4 +424,4 @@ int NanoBooter_GetReleaseInfo(ReleaseInfo *releaseInfo)
     return true;
 }
 
-#endif // WIN32
+#endif // VIRTUAL_DEVICE

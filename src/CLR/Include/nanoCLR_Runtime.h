@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (c) .NET Foundation and Contributors
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
@@ -59,7 +59,7 @@ typedef CLR_RT_AddressToSymbolMap::iterator CLR_RT_AddressToSymbolMapIter;
 #endif // #if defined(_WIN32)
 
 #if defined(_MSC_VER)
-#pragma pack(push, NANOCLR_RUNTIME_H, 4)
+#pragma pack(push, __NANOCLR_RUNTIME_H__, 4)
 #endif
 
 #if defined(_WIN32)
@@ -572,7 +572,7 @@ extern int s_CLR_RT_fTrace_GC_Depth;
 extern int s_CLR_RT_fTrace_SimulateSpeed;
 extern int s_CLR_RT_fTrace_AssemblyOverhead;
 
-#if defined(_WIN32)
+#if defined(VIRTUAL_DEVICE)
 extern int s_CLR_RT_fTrace_ARM_Execution;
 
 extern int s_CLR_RT_fTrace_RedirectLinesPerFile;
@@ -877,7 +877,7 @@ struct CLR_RT_MethodDef_DebuggingInfo
     }
 };
 
-#endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
+#endif // #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -939,7 +939,7 @@ struct CLR_RT_UnicodeHelper
 
     bool MoveBackwardInUTF8(const char *utf8StringStart, int iMaxChars);
 
-#if defined(_WIN32)
+#if defined(VIRTUAL_DEVICE)
     static void ConvertToUTF8(const std::wstring &src, std::string &dst);
     static void ConvertFromUTF8(const std::string &src, std::wstring &dst);
 #endif
@@ -949,7 +949,6 @@ class UnicodeString
 {
   private:
     CLR_RT_UnicodeHelper m_unicodeHelper;
-    CLR_RT_HeapBlock m_uHeapBlock;
     CLR_UINT16 *m_wCharArray;
     int m_length; /// Length in wide characters (not bytes).
 
@@ -1133,7 +1132,7 @@ struct CLR_RT_Assembly : public CLR_RT_HeapBlock_Node // EVENT HEAP - NO RELOCAT
 
 #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
         size_t iDebuggingInfoMethods;
-#endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
+#endif // #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
     };
 
     //--//
@@ -1149,6 +1148,8 @@ struct CLR_RT_Assembly : public CLR_RT_HeapBlock_Node // EVENT HEAP - NO RELOCAT
     static const CLR_UINT32 Deployed = 0x00000008;
     static const CLR_UINT32 PreparingForExecution = 0x00000010;
     static const CLR_UINT32 StaticConstructorsExecuted = 0x00000020;
+    // this flag should be set when the m_header was malloc'ed
+    static const CLR_UINT32 FreeOnDestroy = 0x00000100;
 
     CLR_UINT32 m_idx; // Relative to the type system (for static fields access).
     CLR_UINT32 m_flags;
@@ -1186,14 +1187,14 @@ struct CLR_RT_Assembly : public CLR_RT_HeapBlock_Node // EVENT HEAP - NO RELOCAT
 #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
     CLR_RT_MethodDef_DebuggingInfo
         *m_pDebuggingInfo_MethodDef; // EVENT HEAP - NO RELOCATION - (but the data they point to has to be relocated)
-#endif                               //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
+#endif                               // #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
 
-#if defined(NANOCLR_TRACE_STACK_HEAVY) && defined(_WIN32)
+#if defined(NANOCLR_TRACE_STACK_HEAVY) && defined(VIRTUAL_DEVICE)
     int m_maxOpcodes;
     int *m_stackDepth;
 #endif
 
-#if defined(_WIN32)
+#if defined(VIRTUAL_DEVICE)
     std::string *m_strPath;
 #endif
 
@@ -1203,7 +1204,7 @@ struct CLR_RT_Assembly : public CLR_RT_HeapBlock_Node // EVENT HEAP - NO RELOCAT
 
     bool IsSameAssembly(const CLR_RT_Assembly &assm) const;
 
-#if defined(_WIN32)
+#if defined(VIRTUAL_DEVICE)
 
     static void InitString(std::map<std::string, CLR_OFFSET> &map);
     static HRESULT CreateInstance(const CLR_RECORD_ASSEMBLY *data, CLR_RT_Assembly *&assm, const wchar_t *szName);
@@ -1351,7 +1352,7 @@ struct CLR_RT_Assembly : public CLR_RT_HeapBlock_Node // EVENT HEAP - NO RELOCAT
 
     //--//
 
-#if defined(_WIN32)
+#if defined(VIRTUAL_DEVICE)
     static FILE *s_output;
     static FILE *s_toclose;
 
@@ -1393,7 +1394,7 @@ struct CLR_RT_Assembly : public CLR_RT_HeapBlock_Node // EVENT HEAP - NO RELOCAT
 
 #endif
   private:
-#if defined(_WIN32)
+#if defined(VIRTUAL_DEVICE)
     void Dump_Token(CLR_UINT32 tk);
     void Dump_FieldOwner(CLR_UINT32 idx);
     void Dump_MethodOwner(CLR_UINT32 idx);
@@ -1635,7 +1636,7 @@ struct CLR_RT_DataTypeLookup
     CLR_RT_TypeDef_Index *m_cls;
     CLR_RT_HeapBlockRelocate m_relocate;
 
-#if defined(_WIN32) || defined(NANOCLR_TRACE_MEMORY_STATS)
+#if defined(VIRTUAL_DEVICE) || defined(NANOCLR_TRACE_MEMORY_STATS)
     const char *m_name;
 #endif
 };
@@ -1844,7 +1845,7 @@ struct CLR_RT_TypeSystem // EVENT HEAP - NO RELOCATION -
     static CLR_DataType MapElementTypeToDataType(CLR_UINT32 et);
     static CLR_UINT32 MapDataTypeToElementType(CLR_DataType dt);
 
-#if defined(_WIN32)
+#if defined(VIRTUAL_DEVICE)
     void Dump(const wchar_t *szFileName, bool fNoByteCode);
 #endif
 
@@ -1963,7 +1964,7 @@ struct CLR_RT_MethodDef_Instance : public CLR_RT_MethodDef_Index
     {
         return m_assm->m_pDebuggingInfo_MethodDef[Method()];
     }
-#endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
+#endif // #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -2125,7 +2126,7 @@ struct CLR_RT_HeapCluster : public CLR_RT_HeapBlock_Node // EVENT HEAP - NO RELO
 
 //--//
 
-#ifndef CLR_NO_IL_INLINE
+#ifndef NANOCLR_NO_IL_INLINE
 struct CLR_RT_InlineFrame
 {
     CLR_RT_HeapBlock *m_locals;
@@ -2234,13 +2235,13 @@ struct CLR_RT_StackFrame : public CLR_RT_HeapBlock_Node // EVENT HEAP - NO RELOC
         void *m_customPointer;
     };
 
-#ifndef CLR_NO_IL_INLINE
+#ifndef NANOCLR_NO_IL_INLINE
     CLR_RT_InlineBuffer *m_inlineFrame;
 #endif
 
 #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
     CLR_UINT32 m_depth;
-#endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
+#endif // #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
 
 #if defined(NANOCLR_PROFILE_NEW_CALLS)
     CLR_PROF_CounterCallChain m_callchain;
@@ -2262,7 +2263,7 @@ struct CLR_RT_StackFrame : public CLR_RT_HeapBlock_Node // EVENT HEAP - NO RELOC
 
     void Pop();
 
-#ifndef CLR_NO_IL_INLINE
+#ifndef NANOCLR_NO_IL_INLINE
     bool PushInline(
         CLR_PMETADATA &ip,
         CLR_RT_Assembly *&assm,
@@ -2451,19 +2452,46 @@ struct CLR_RT_StackFrame : public CLR_RT_HeapBlock_Node // EVENT HEAP - NO RELOC
 // The use of offsetof below throwns an "invalid offset warning" because CLR_RT_StackFrame is not POD type
 // C+17 is the first standard that allow this, so until we are using it we have to disable it to keep GCC happy
 
+#ifdef _MSC_VER
+
+CT_ASSERT(
+    offsetof(CLR_RT_StackFrame, CLR_RT_StackFrame::m_owningThread) + sizeof(CLR_RT_Thread *) ==
+    offsetof(CLR_RT_StackFrame, CLR_RT_StackFrame::m_evalStack))
+CT_ASSERT(
+    offsetof(CLR_RT_StackFrame, CLR_RT_StackFrame::m_evalStack) + sizeof(CLR_RT_HeapBlock *) ==
+    offsetof(CLR_RT_StackFrame, CLR_RT_StackFrame::m_arguments))
+CT_ASSERT(
+    offsetof(CLR_RT_StackFrame, CLR_RT_StackFrame::m_arguments) + sizeof(CLR_RT_HeapBlock *) ==
+    offsetof(CLR_RT_StackFrame, CLR_RT_StackFrame::m_locals))
+CT_ASSERT(
+    offsetof(CLR_RT_StackFrame, CLR_RT_StackFrame::m_locals) + sizeof(CLR_RT_HeapBlock *) ==
+    offsetof(CLR_RT_StackFrame, CLR_RT_StackFrame::m_IP))
+
+#else
+
 #ifdef __GNUC__
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Winvalid-offsetof"
 #endif
 
-CT_ASSERT(offsetof(CLR_RT_StackFrame, m_owningThread) + sizeof(CLR_UINT32) == offsetof(CLR_RT_StackFrame, m_evalStack))
-CT_ASSERT(offsetof(CLR_RT_StackFrame, m_evalStack) + sizeof(CLR_UINT32) == offsetof(CLR_RT_StackFrame, m_arguments))
-CT_ASSERT(offsetof(CLR_RT_StackFrame, m_arguments) + sizeof(CLR_UINT32) == offsetof(CLR_RT_StackFrame, m_locals))
-CT_ASSERT(offsetof(CLR_RT_StackFrame, m_locals) + sizeof(CLR_UINT32) == offsetof(CLR_RT_StackFrame, m_IP))
+CT_ASSERT(
+    offsetof(CLR_RT_StackFrame, CLR_RT_StackFrame::m_owningThread) + sizeof(CLR_RT_Thread *) ==
+    offsetof(CLR_RT_StackFrame, CLR_RT_StackFrame::m_evalStack))
+CT_ASSERT(
+    offsetof(CLR_RT_StackFrame, CLR_RT_StackFrame::m_evalStack) + sizeof(CLR_RT_HeapBlock *) ==
+    offsetof(CLR_RT_StackFrame, CLR_RT_StackFrame::m_arguments))
+CT_ASSERT(
+    offsetof(CLR_RT_StackFrame, CLR_RT_StackFrame::m_arguments) + sizeof(CLR_RT_HeapBlock *) ==
+    offsetof(CLR_RT_StackFrame, CLR_RT_StackFrame::m_locals))
+CT_ASSERT(
+    offsetof(CLR_RT_StackFrame, CLR_RT_StackFrame::m_locals) + sizeof(CLR_RT_HeapBlock *) ==
+    offsetof(CLR_RT_StackFrame, CLR_RT_StackFrame::m_IP))
 
 #ifdef __GNUC__
 #pragma GCC diagnostic pop
 #endif
+
+#endif // _MSC_VER
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -2571,7 +2599,11 @@ struct CLR_RT_GarbageCollector
         CLR_UINT8 *m_start;
         CLR_UINT8 *m_end;
         CLR_UINT8 *m_destination;
+#ifdef _WIN64
+        CLR_UINT64 m_offset;
+#else
         CLR_UINT32 m_offset;
+#endif
     };
 
     //--//
@@ -2579,18 +2611,20 @@ struct CLR_RT_GarbageCollector
     static const int c_minimumSpaceForGC = 128;
     static const int c_minimumSpaceForCompact = 128;
     static const CLR_UINT32 c_pressureThreshold = 10;
-    static const CLR_UINT32 c_memoryThreshold = HEAP_SIZE_THRESHOLD;
-    static const CLR_UINT32 c_memoryThreshold2 = HEAP_SIZE_THRESHOLD_UPPER;
 
     static const CLR_UINT32 c_StartGraphEvent = 0x00000001;
     static const CLR_UINT32 c_StopGraphEvent = 0x00000002;
     static const CLR_UINT32 c_DumpGraphHeapEvent = 0x00000004;
     static const CLR_UINT32 c_DumpPerfCountersEvent = 0x00000008;
 
+    CLR_UINT32 c_memoryThreshold;
+    CLR_UINT32 c_memoryThreshold2;
+
     CLR_UINT32 m_numberOfGarbageCollections;
     CLR_UINT32 m_numberOfCompactions;
 
-    CLR_RT_DblLinkedList m_weakDelegates_Reachable; // list of CLR_RT_HeapBlock_Delegate_List
+    // list of CLR_RT_HeapBlock_Delegate_List
+    CLR_RT_DblLinkedList m_weakDelegates_Reachable;
 
     CLR_UINT32 m_totalBytes;
     CLR_UINT32 m_freeBytes;
@@ -2613,7 +2647,7 @@ struct CLR_RT_GarbageCollector
 
     bool m_fOutOfStackSpaceForGC;
 
-#if defined(_WIN32)
+#if defined(VIRTUAL_DEVICE)
     CLR_UINT32 m_events;
 #endif
 
@@ -2658,6 +2692,12 @@ struct CLR_RT_GarbageCollector
 
     void ValidatePointers()
     {
+#if defined(NANOCLR_TRACE_MEMORY_STATS)
+        if (s_CLR_RT_fTrace_MemoryStats >= c_CLR_RT_Trace_Verbose)
+        {
+            CLR_Debug::Printf("\r\nGC: ValidatePointers\r\n");
+        }
+#endif
         Heap_Relocate_Pass(Relocation_JustCheck);
     }
 
@@ -2875,6 +2915,9 @@ struct ThreadPriority
     /*=========================================================================
     ** Constants for thread priorities.
     =========================================================================*/
+    ///////////////////////////////////////////////////////////////////////////
+    // !!! KEEP IN SYNC with System.Threading.ThreadPriority in mscorlib !!! //
+    ///////////////////////////////////////////////////////////////////////////
     static const int Lowest = 0;
     static const int BelowNormal = 1;
     static const int Normal = 2;
@@ -2986,7 +3029,7 @@ struct CLR_RT_Thread : public CLR_RT_ObjectToEvent_Destination // EVENT HEAP - N
                                  // However, if this thread was spawned on behalf of the debugger to evaluate
                                  // a property or function call, it points to the object coresponding to the
                                  // thread that is currently selected in the debugger.
-#endif                           //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
+#endif                           // #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
 
 #if defined(ENABLE_NATIVE_PROFILER)
     bool m_fNativeProfiled;
@@ -3130,19 +3173,19 @@ struct CLR_RT_Thread : public CLR_RT_ObjectToEvent_Destination // EVENT HEAP - N
 
 ////////////////////////////////////////////////////////////////////////////////
 
-extern size_t LinkArraySize();
-extern size_t LinkMRUArraySize();
-extern size_t PayloadArraySize();
-extern size_t InterruptRecords();
-#ifndef CLR_NO_IL_INLINE
-extern size_t InlineBufferCount();
+extern uint32_t LinkArraySize();
+extern uint32_t LinkMRUArraySize();
+extern uint32_t PayloadArraySize();
+extern uint32_t InterruptRecords();
+#ifndef NANOCLR_NO_IL_INLINE
+extern uint32_t InlineBufferCount();
 #endif
 
 extern CLR_UINT32 g_scratchVirtualMethodTableLink[];
 extern CLR_UINT32 g_scratchVirtualMethodTableLinkMRU[];
 extern CLR_UINT32 g_scratchVirtualMethodPayload[];
 extern CLR_UINT32 g_scratchInterruptDispatchingStorage[];
-#ifndef CLR_NO_IL_INLINE
+#ifndef NANOCLR_NO_IL_INLINE
 extern CLR_UINT32 g_scratchInlineBuffer[];
 #endif
 
@@ -3216,7 +3259,7 @@ struct CLR_RT_EventCache
 
         //--//
 
-#if defined(_WIN32)
+#if defined(VIRTUAL_DEVICE)
         void DumpTree();
         bool ConsistencyCheck();
         bool ConsistencyCheck(LookupEntry *node, int &depth);
@@ -3287,7 +3330,7 @@ struct CLR_RT_EventCache
     BoundedList *m_events;
 
     VirtualMethodTable m_lookup_VirtualMethod;
-#ifndef CLR_NO_IL_INLINE
+#ifndef NANOCLR_NO_IL_INLINE
     CLR_RT_InlineBuffer *m_inlineBufferStart;
 #endif
 
@@ -3307,7 +3350,7 @@ struct CLR_RT_EventCache
         const CLR_RT_MethodDef_Index &mdVirtual,
         CLR_RT_MethodDef_Index &md);
 
-#ifndef CLR_NO_IL_INLINE
+#ifndef NANOCLR_NO_IL_INLINE
     bool GetInlineFrameBuffer(CLR_RT_InlineBuffer **ppBuffer);
     bool FreeInlineBuffer(CLR_RT_InlineBuffer *pBuffer);
 #endif
@@ -3357,7 +3400,8 @@ CT_ASSERT(sizeof(CLR_RT_EventCache::Payload) == 12)
 
 #include <nanoCLR_Debugging.h>
 #include <nanoCLR_Profiling.h>
-//#include <nanoCLR_Messaging.h>
+#include <nanoCLR_Application.h>
+// #include <nanoCLR_Messaging.h>
 
 //--//
 
@@ -3388,6 +3432,10 @@ typedef enum Events
     Event_Radio             = 0x00000400,
     Event_Wifi_Station      = 0x00000800,
     Event_Bluetooth         = 0x00001000,
+    Event_UsbIn             = 0x00002000,
+    Event_UsbOut            = 0x00004000,
+    Event_IO                = 0x00008000,
+    Event_I2cSlave          = 0x00010000,
     Event_AppDomain         = 0x02000000,
     Event_Socket            = 0x20000000,
     Event_IdleCPU           = 0x40000000,
@@ -3408,10 +3456,9 @@ struct CLR_RT_ExecutionEngine
     static const int c_HeapState_Normal = 0x00000000;
     static const int c_HeapState_UnderGC = 0x00000001;
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    // NEED TO KEEP THESE IN SYNC WITH Enum 'Commands.Debugging_Execution_ChangeConditions...' on debugger library code
-    // //
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    // NEED TO KEEP THESE IN SYNC WITH Enum Commands.Debugging_Execution_ChangeConditions.. on debugger library code //
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     static const int c_fDebugger_StateInitialize = 0x00000000;
     static const int c_fDebugger_StateResolutionFailed = 0x00000001;
@@ -3421,13 +3468,16 @@ struct CLR_RT_ExecutionEngine
         c_fDebugger_StateProgramRunning + c_fDebugger_StateProgramExited + c_fDebugger_StateResolutionFailed;
     //
     static const int c_fDebugger_BreakpointsDisabled = 0x00001000;
-    //
-    static const int c_fDebugger_Quiet = 0x00010000; // Do not spew debug text to the debugger
+    // Do not spew debug text to the debugger
+    static const int c_fDebugger_Quiet = 0x00010000;
     static const int c_fDebugger_ExitPending = 0x00020000;
-    //
-    static const int c_fDebugger_PauseTimers =
-        0x04000000; // Threads associated with timers are created in "suspended" mode.
-    static const int c_fDebugger_NoCompaction = 0x08000000; // Don't perform compaction during execution.
+
+    // Execution engine won't process stack trace when an exception occurs.
+    static const int c_fDebugger_NoStackTraceInExceptions = 0x02000000;
+    // Threads associated with timers are created in "suspended" mode.
+    static const int c_fDebugger_PauseTimers = 0x04000000;
+    // Don't perform compaction during execution.
+    static const int c_fDebugger_NoCompaction = 0x08000000;
     //
     static const int c_fDebugger_SourceLevelDebugging = 0x10000000;
     static const int c_fDebugger_RebootPending = 0x20000000;
@@ -3473,9 +3523,9 @@ struct CLR_RT_ExecutionEngine
     CLR_DBG_Commands::Debugging_Execution_BreakpointDef *m_breakpoints;
     CLR_DBG_Commands::Debugging_Execution_BreakpointDef m_breakpointsActive[c_MaxBreakpointsActive];
     size_t m_breakpointsActiveNum;
-#endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
+#endif // #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
 
-#if !defined(BUILD_RTM) || defined(_WIN32)
+#if !defined(BUILD_RTM) || defined(VIRTUAL_DEVICE)
     bool m_fPerformGarbageCollection; // Should the EE do a GC every context switch
     bool m_fPerformHeapCompaction;    // Should the EE do a Compaction following every GC
 #endif
@@ -3631,7 +3681,11 @@ struct CLR_RT_ExecutionEngine
 
     //--//
 
+#if defined(VIRTUAL_DEVICE)
+    static HRESULT CreateInstance(CLR_SETTINGS params);
+#else
     static HRESULT CreateInstance();
+#endif
 
     HRESULT ExecutionEngine_Initialize();
 
@@ -3641,7 +3695,7 @@ struct CLR_RT_ExecutionEngine
 
     HRESULT StartHardware();
 
-    static void Reboot(bool fHard);
+    static void Reboot(uint16_t rebootOptions);
 
     void JoinAllThreadsAndExecuteFinalizer();
 
@@ -3767,7 +3821,7 @@ struct CLR_RT_ExecutionEngine
     void Breakpoint_Exception(CLR_RT_StackFrame *stack, CLR_UINT32 reason, CLR_PMETADATA ip);
     void Breakpoint_Exception_Intercepted(CLR_RT_StackFrame *stack);
     void Breakpoint_Exception_Uncaught(CLR_RT_Thread *th);
-#endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
+#endif // #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
 
     //--//
 
@@ -3824,7 +3878,7 @@ struct CLR_RT_ExecutionEngine
 
     CLR_UINT32 WaitSystemEvents(CLR_UINT32 powerLevel, CLR_UINT32 events, CLR_INT64 timeExpire);
 
-#if defined(_WIN32)
+#if defined(VIRTUAL_DEVICE)
     HRESULT CreateEntryPointArgs(CLR_RT_HeapBlock &args, wchar_t *szCommandLineArgs);
 #endif
 
@@ -3851,11 +3905,17 @@ extern CLR_UINT32 g_buildCRC;
 //
 // CT_ASSERT macro generates a compiler error in case the size of any structure changes.
 //
-CT_ASSERT(sizeof(CLR_RT_HeapBlock) == 12)
-CT_ASSERT(sizeof(CLR_RT_HeapBlock_Raw) == sizeof(CLR_RT_HeapBlock))
+
+#ifdef _WIN64
+CT_ASSERT(sizeof(struct CLR_RT_HeapBlock) == 20)
+#else
+CT_ASSERT(sizeof(struct CLR_RT_HeapBlock) == 12)
+#endif // _WIN64
+
+CT_ASSERT(sizeof(CLR_RT_HeapBlock_Raw) == sizeof(struct CLR_RT_HeapBlock))
 
 #if defined(NANOCLR_TRACE_MEMORY_STATS)
-#define NANOCLR_TRACE_MEMORY_STATS_EXTRA_SIZE 4
+#define NANOCLR_TRACE_MEMORY_STATS_EXTRA_SIZE sizeof(const char *)
 #else
 #define NANOCLR_TRACE_MEMORY_STATS_EXTRA_SIZE 0
 #endif
@@ -3863,8 +3923,21 @@ CT_ASSERT(sizeof(CLR_RT_HeapBlock_Raw) == sizeof(CLR_RT_HeapBlock))
 #if defined(__GNUC__) // Gcc compiler uses 8 bytes for a function pointer
 CT_ASSERT(sizeof(CLR_RT_DataTypeLookup) == 20 + NANOCLR_TRACE_MEMORY_STATS_EXTRA_SIZE)
 
-#elif defined(PLATFORM_WINDOWS_EMULATOR) || defined(NANOCLR_TRACE_MEMORY_STATS)
-CT_ASSERT(sizeof(CLR_RT_DataTypeLookup) == 16 + 4)
+#elif defined(VIRTUAL_DEVICE) && defined(NANOCLR_TRACE_MEMORY_STATS)
+
+#ifdef _WIN64
+CT_ASSERT(sizeof(CLR_RT_DataTypeLookup) == 24 + NANOCLR_TRACE_MEMORY_STATS_EXTRA_SIZE)
+#else
+CT_ASSERT(sizeof(CLR_RT_DataTypeLookup) == 16 + NANOCLR_TRACE_MEMORY_STATS_EXTRA_SIZE)
+#endif // _WIN64
+
+#elif defined(VIRTUAL_DEVICE) && !defined(NANOCLR_TRACE_MEMORY_STATS)
+
+#ifdef _WIN64
+CT_ASSERT(sizeof(CLR_RT_DataTypeLookup) == 32 + NANOCLR_TRACE_MEMORY_STATS_EXTRA_SIZE)
+#else
+CT_ASSERT(sizeof(CLR_RT_DataTypeLookup) == 16 + NANOCLR_TRACE_MEMORY_STATS_EXTRA_SIZE)
+#endif // _WIN64
 
 #else
 
@@ -3875,7 +3948,10 @@ CT_ASSERT(sizeof(CLR_RT_DataTypeLookup) == 16 + 4)
 //--//
 
 #if defined(_MSC_VER)
-#pragma pack(pop, NANOCLR_RUNTIME_H)
+#pragma pack(pop, __NANOCLR_RUNTIME_H__)
 #endif
+
+extern const CLR_RT_NativeAssemblyData *g_CLR_InteropAssembliesNativeData[];
+extern const uint16_t g_CLR_InteropAssembliesCount;
 
 #endif // NANOCLR_RUNTIME_H

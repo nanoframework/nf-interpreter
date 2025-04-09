@@ -135,6 +135,12 @@
     <ClCompile Include="..\Helpers\nanoprintf\nanoprintf.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="nanoSupport_CRC32.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GarbageCollector_Info.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Core.h">
@@ -162,9 +168,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\Include\netmf_errors.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Include\nanoHAL.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\Include\nanoCLR_Messaging.h">

@@ -30,7 +30,7 @@ struct NF_PAL_SPI
 };
 
 /////////////////////////////////////////////////////
-// SPI PAL strucs declared in win_dev_spi_native.h //
+// SPI PAL structs declared in win_dev_spi_native.h //
 /////////////////////////////////////////////////////
 NF_PAL_SPI SPI1_PAL;
 
@@ -80,9 +80,11 @@ void GetSPIConfig(const SPI_DEVICE_CONFIGURATION &spiDeviceConfig, SPI_WRITE_REA
     SPI1_PAL.callback = wrc.callback;
 }
 
-bool CPU_SPI_Initialize(uint8_t bus)
+bool CPU_SPI_Initialize(uint8_t bus, SPI_DEVICE_CONFIGURATION &spiDeviceConfig)
 {
     (void)bus;
+    (void)spiDeviceConfig;
+
     return true;
 }
 
@@ -213,9 +215,9 @@ HRESULT CPU_SPI_nWrite16_nRead16(
 
 // Return status of current SPI operation
 // Used to find status of an Async SPI call ( Not supported ), just return complete
-SPI_OP_STATUS CPU_SPI_OP_STATUS(uint8_t spi_bus, uint32_t deviceHandle)
+SPI_OP_STATUS CPU_SPI_OP_STATUS(uint8_t busIndex, uint32_t deviceHandle)
 {
-    (void)spi_bus;
+    (void)busIndex;
     (void)deviceHandle;
 
     return SPI1_PAL.status;
@@ -231,7 +233,8 @@ uint32_t CPU_SPI_PortsMap()
 // Return SPI minimum clock frequency
 HRESULT CPU_SPI_MinClockFrequency(uint32_t spiBus, int32_t *frequency)
 {
-    if (spiBus - 1 >= NUM_SPI_BUSES)
+    // bus index is 0 based, here it's 1 based
+    if (spiBus >= NUM_SPI_BUSES)
     {
         return CLR_E_INVALID_PARAMETER;
     }
@@ -245,7 +248,8 @@ HRESULT CPU_SPI_MinClockFrequency(uint32_t spiBus, int32_t *frequency)
 // Return SPI maximum clock frequency
 HRESULT CPU_SPI_MaxClockFrequency(uint32_t spiBus, int32_t *frequency)
 {
-    if (spiBus - 1 >= NUM_SPI_BUSES)
+    // bus index is 0 based, here it's 1 based
+    if (spiBus >= NUM_SPI_BUSES)
     {
         return CLR_E_INVALID_PARAMETER;
     }
@@ -258,9 +262,9 @@ HRESULT CPU_SPI_MaxClockFrequency(uint32_t spiBus, int32_t *frequency)
 //
 // Return the number of chip select lines available on the bus.
 // TODO this still needs to be sorted as no CS handling
-uint32_t CPU_SPI_ChipSelectLineCount(uint32_t spi_bus)
+uint32_t CPU_SPI_ChipSelectLineCount(uint32_t busIndex)
 {
-    (void)spi_bus;
+    (void)busIndex;
 
-    return 5;
+    return MAX_SPI_DEVICES;
 }

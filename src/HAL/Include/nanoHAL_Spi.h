@@ -18,9 +18,8 @@ struct nanoSPI_BusConfig
 {
     bool spiBusInited;
     int8_t devicesInUse;
-    SPI_DEVICE_CONFIGURATION deviceCongfig[MAX_SPI_DEVICES];
+    SPI_DEVICE_CONFIGURATION deviceConfig[MAX_SPI_DEVICES];
     uint32_t deviceHandles[MAX_SPI_DEVICES];
-    float byteTime[MAX_SPI_DEVICES];
     SPI_OP_STATUS spiStatus;
 };
 
@@ -52,6 +51,8 @@ HRESULT nanoSPI_CloseDevice(uint32_t handle);
 
 // Return the time in ms for a byte transfer
 float nanoSPI_GetByteTime(uint32_t handle);
+
+void nanoSPI_Wait_Busy(uint32_t handle);
 
 // Execute a SPI write/read operation
 // if callback is null the operation will completed as part of the call

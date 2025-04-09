@@ -6,11 +6,11 @@
 // #include <FreeRTOS.h>
 #include <ti/drivers/UART2.h>
 #include <ti/sysbios/knl/Clock.h>
-#include <board.h>
+#include <Board.h>
 #include <nanoHAL_v2.h>
 #include <WireProtocol.h>
 #include <WireProtocol_Message.h>
-#include <WireProtocol_HAL_interface.h>
+#include <WireProtocol_HAL_Interface.h>
 
 // UART operations timeout
 #define UART_TIMEOUT_MILLISECONDS 500000

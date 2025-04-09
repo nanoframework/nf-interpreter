@@ -104,9 +104,8 @@ HRESULT BmpDecoder::BmpInitOutput(const CLR_UINT8 *src, CLR_UINT32 srcSize)
             if (pbmih->biClrUsed != 0)
             {
                 palette = source.source;
-                paletteDepth = (CLR_UINT8)(
-                    (pbmfh->bfOffBits - sizeof(BITMAPINFOHEADER) - sizeof(BITMAPFILEHEADER)) /
-                    pbmih->biClrUsed); // the rest is the palette
+                paletteDepth = (CLR_UINT8)((pbmfh->bfOffBits - sizeof(BITMAPINFOHEADER) - sizeof(BITMAPFILEHEADER)) /
+                                           pbmih->biClrUsed); // the rest is the palette
                 encodingType = Bmp8Bit_Indexed;
             }
             break;
@@ -220,8 +219,11 @@ HRESULT BmpDecoder::BmpStartOutput(CLR_GFX_Bitmap *bitmap)
     NANOCLR_NOCLEANUP();
 }
 
-CLR_UINT32 BmpDecoder::BmpOutputHelper(CLR_UINT32 flags, CLR_UINT16 &opacity, void *param)
+CLR_UINT32 BmpDecoder::BmpOutputHelper(int x, int y, CLR_UINT32 flags, CLR_UINT16 &opacity, void *param)
 {
+    (void)x;
+    (void)y;
+
     BmpOutputHelperParam *myParam = (BmpOutputHelperParam *)param;
 
     if (flags & PAL_GFX_Bitmap::c_SetPixels_NewRow)
@@ -289,5 +291,5 @@ CLR_UINT32 BmpDecoder::BmpOutputHelper(CLR_UINT32 flags, CLR_UINT16 &opacity, vo
             break;
     }
 
-    return r | (g << 8) | (b << 16);
+    return (r << 16) | (g << 8) | b;
 }

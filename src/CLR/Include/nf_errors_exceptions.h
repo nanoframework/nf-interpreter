@@ -7,7 +7,7 @@
 #ifndef NF_ERRORS_H
 #define NF_ERRORS_H
 
-#if !defined(WIN32) && !defined(_WIN32)
+#ifndef VIRTUAL_DEVICE
 
 typedef int HRESULT;
 
@@ -62,7 +62,7 @@ typedef int HRESULT;
 #define MAKE_HRESULT(sev, fac, code)                                                                                   \
     ((HRESULT)(((unsigned long)(sev) << 31) | ((unsigned long)(fac) << 16) | ((unsigned long)(code))))
 
-#endif // !defined(WIN32) && !defined(_WIN32)
+#endif // VIRTUAL_DEVICE
 
 //--//
 

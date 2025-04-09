@@ -23,6 +23,7 @@ list(APPEND nanoFramework.Hardware.Esp32.Ble_INCLUDE_DIRS ${esp32_idf_SOURCE_DIR
 list(APPEND nanoFramework.Hardware.Esp32.Ble_INCLUDE_DIRS ${esp32_idf_SOURCE_DIR}/components/bt/host/nimble/nimble/nimble/host/util/include)
 list(APPEND nanoFramework.Hardware.Esp32.Ble_INCLUDE_DIRS ${esp32_idf_SOURCE_DIR}/components/bt/host/nimble/nimble/nimble/host/services/gap/include)
 list(APPEND nanoFramework.Hardware.Esp32.Ble_INCLUDE_DIRS ${esp32_idf_SOURCE_DIR}/components/bt/host/nimble/nimble/nimble/host/services/gatt/include)
+list(APPEND nanoFramework.Hardware.Esp32.Ble_INCLUDE_DIRS ${esp32_idf_SOURCE_DIR}/components/bt/host/nimble/nimble/nimble/transport/include)
 
 # source files
 set(nanoFramework.Hardware.Esp32.Ble_SRCS

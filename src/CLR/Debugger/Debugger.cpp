@@ -1,24 +1,22 @@
-//
+﻿//
 // Copyright (c) .NET Foundation and Contributors
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
 //
+
 #include <nanoCLR_Runtime.h>
 #include <nanoCLR_Debugging.h>
-#include <nanoHAL.h>
 #include <WireProtocol.h>
 #include <WireProtocol_Message.h>
 #include <WireProtocol_MonitorCommands.h>
 #include "Debugger.h"
 #include <corlib_native.h>
 #include <target_common.h>
+#include <nanoHAL_StorageOperation.h>
 
 #define __min(a, b) (((a) < (b)) ? (a) : (b))
 
 //--//
-
-extern const CLR_RT_NativeAssemblyData *g_CLR_InteropAssembliesNativeData[];
-extern uint16_t g_CLR_InteropAssembliesCount;
 
 CLR_DBG_Debugger *g_CLR_DBG_Debugger;
 
@@ -294,7 +292,7 @@ HRESULT CLR_DBG_Debugger::CreateListOfCalls(
             {
                 int tmp = num;
 
-#ifndef CLR_NO_IL_INLINE
+#ifndef NANOCLR_NO_IL_INLINE
                 if (call->m_inlineFrame)
                 {
                     CLR_DBG_Commands::Debugging_Thread_Stack::Reply::Call &dst = cmdReply->m_data[tmp++];
@@ -326,7 +324,7 @@ HRESULT CLR_DBG_Debugger::CreateListOfCalls(
 #endif
             }
 
-#ifndef CLR_NO_IL_INLINE
+#ifndef NANOCLR_NO_IL_INLINE
             if (call->m_inlineFrame)
             {
                 num++;
@@ -355,7 +353,7 @@ HRESULT CLR_DBG_Debugger::CreateListOfCalls(
     NANOCLR_NOCLEANUP();
 }
 
-#endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
+#endif // #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -368,6 +366,9 @@ bool CLR_DBG_Debugger::Monitor_Ping(WP_Message *msg)
     NATIVE_PROFILE_CLR_DEBUGGER();
     bool fStopOnBoot = true;
 
+#if !defined(BUILD_RTM) && defined(TRACE_TO_STDIO) && (TRACE_TO_STDIO == TRUE)
+    CLR_Debug::Printf("CLR_DBG_Debugger::Monitor_Ping...\r\n");
+#endif
     //
     // There's someone on the other side!!
     //
@@ -456,6 +457,7 @@ bool CLR_DBG_Debugger::Monitor_FlashSectorMap(WP_Message *msg)
     NATIVE_PROFILE_CLR_DEBUGGER();
 
     BlockStorageDevice *storageDevices = NULL;
+    BlockStorageDevice *device = NULL;
     DeviceBlockInfo *devicesBlockInfos = NULL;
     Flash_BlockRegionInfo *pData = NULL;
     bool success = false;
@@ -499,7 +501,8 @@ bool CLR_DBG_Debugger::Monitor_FlashSectorMap(WP_Message *msg)
             }
 
             // sanity check
-            if (&storageDevices[i] == NULL)
+            device = &storageDevices[i];
+            if (device == NULL)
             {
                 // failed
                 goto cmd_executed;
@@ -585,7 +588,7 @@ bool CLR_DBG_Debugger::Monitor_TargetInfo(WP_Message *msg)
 {
     Monitor_TargetInfo_Reply cmdReply;
 
-    bool fOK = nanoBooter_GetTargetInfo(&cmdReply.m_TargetInfo) == true;
+    bool fOK = (bool)nanoBooter_GetTargetInfo(&cmdReply.m_TargetInfo) == true;
 
     WP_ReplyToCommand(msg, fOK, false, &cmdReply, sizeof(Monitor_TargetInfo_Reply));
 
@@ -610,10 +613,6 @@ bool CLR_DBG_Debugger::CheckPermission(ByteAddress address, int mode)
             hasPermission = true;
             break;
         case AccessMemory_Read:
-#if defined(BUILD_RTM)
-            if (!DebuggerPort_IsUsingSsl(HalSystemConfig.DebuggerPort))
-                break;
-#endif
             switch (range.RangeType)
             {
                 // fall through
@@ -632,10 +631,6 @@ bool CLR_DBG_Debugger::CheckPermission(ByteAddress address, int mode)
             }
             break;
         case AccessMemory_Write:
-#if defined(BUILD_RTM)
-            if (!DebuggerPort_IsUsingSsl(HalSystemConfig.DebuggerPort))
-                break;
-#endif
             if (BlockRange_IsDeployment(range) || BlockRange_IsConfig(range))
             {
                 hasPermission = true;
@@ -646,10 +641,6 @@ bool CLR_DBG_Debugger::CheckPermission(ByteAddress address, int mode)
             }
             break;
         case AccessMemory_Erase:
-#if defined(BUILD_RTM)
-            if (!DebuggerPort_IsUsingSsl(HalSystemConfig.DebuggerPort))
-                break;
-#endif
             switch (range.RangeType)
             {
                 case BlockRange_BLOCKTYPE_DEPLOYMENT:
@@ -688,6 +679,7 @@ void CLR_DBG_Debugger::AccessMemory(
 
     //--//
     unsigned int iRegion, iRange;
+    uint32_t crc32 = 0;
 
     if (BlockStorageDevice_FindRegionFromAddress(m_deploymentStorageDevice, location, &iRegion, &iRange))
     {
@@ -698,6 +690,7 @@ void CLR_DBG_Debugger::AccessMemory(
 
         uint8_t *bufPtr = buf;
         signed int accessLenInBytes = lengthInBytes;
+        bool isMemoryMapped;
         signed int blockOffset =
             BlockRegionInfo_OffsetFromBlock(((BlockRegionInfo *)(&deviceInfo->Regions[iRegion])), accessAddress);
 
@@ -746,30 +739,45 @@ void CLR_DBG_Debugger::AccessMemory(
                 {
                     case AccessMemory_Check:
                     case AccessMemory_Read:
+
+                        // command execute
+                        proceed = true;
+
                         if (deviceInfo->Attribute & MediaAttribute_SupportsXIP)
                         {
                             // memory block support XIP, OK to read directly from address
                             if (mode == AccessMemory_Check)
                             {
                                 // compute CRC32 of the memory segment
-                                *(CLR_DBG_Commands_Monitor_CheckMemory_Reply *)buf =
-                                    SUPPORT_ComputeCRC((const void *)accessAddress, NumOfBytes, 0);
+                                crc32 = SUPPORT_ComputeCRC((const void *)accessAddress, NumOfBytes, crc32);
+                                *(CLR_DBG_Commands_Monitor_CheckMemory_Reply *)buf = crc32;
                             }
                             else
                             {
                                 // copy memory segment to buffer
                                 memcpy((unsigned char *)bufPtr, (const void *)accessAddress, NumOfBytes);
                             }
-
-                            // done here
-                            proceed = true;
                         }
                         else
                         {
-                            // need to use driver to access storage block
-                            if (mode == AccessMemory_Check)
+                            // no XIP, need to figure out the best way to read storage block
+                            isMemoryMapped = pRegion->Attributes & BlockRegionAttribute_MemoryMapped;
+
+                            if (isMemoryMapped)
                             {
-                                bufPtr = (unsigned char *)CLR_RT_Memory::Allocate(lengthInBytes, true);
+                                // memory mapped region, get mapped address for read
+                                BlockStorageDevice_GetMemoryMappedAddress(
+                                    m_deploymentStorageDevice,
+                                    iRegion,
+                                    iRange,
+                                    &accessAddress);
+                            }
+
+                            if (mode == AccessMemory_Check && !isMemoryMapped)
+                            {
+                                // allocate buffer large enough to read the block
+                                // for READ memory access, the buffer has already been allocated in the caller
+                                bufPtr = (unsigned char *)platform_malloc(lengthInBytes);
 
                                 if (!bufPtr)
                                 {
@@ -783,19 +791,39 @@ void CLR_DBG_Debugger::AccessMemory(
                                 }
                             }
 
-                            proceed = BlockStorageDevice_Read(
-                                m_deploymentStorageDevice,
-                                accessAddress,
-                                NumOfBytes,
-                                (unsigned char *)bufPtr);
-
-                            if (mode == AccessMemory_Check)
+                            if (!isMemoryMapped)
                             {
-                                // compute CRC32 of the memory segment
-                                *(CLR_DBG_Commands_Monitor_CheckMemory_Reply *)buf =
-                                    SUPPORT_ComputeCRC(bufPtr, NumOfBytes, 0);
+                                // read block from storage
+                                proceed = BlockStorageDevice_Read(
+                                    m_deploymentStorageDevice,
+                                    accessAddress,
+                                    NumOfBytes,
+                                    (unsigned char *)bufPtr);
+                            }
 
-                                CLR_RT_Memory::Release(bufPtr);
+                            if (mode == AccessMemory_Read && isMemoryMapped)
+                            {
+                                // copy memory segment to buffer
+                                memcpy((unsigned char *)bufPtr, (const void *)accessAddress, NumOfBytes);
+
+                                // done here
+                                return;
+                            }
+
+                            if (isMemoryMapped)
+                            {
+                                // adjust buffer pointer to match access address
+                                bufPtr = (unsigned char *)accessAddress;
+                            }
+
+                            // compute CRC32 of the memory segment
+                            crc32 = SUPPORT_ComputeCRC((const void *)bufPtr, NumOfBytes, crc32);
+                            *(CLR_DBG_Commands_Monitor_CheckMemory_Reply *)buf = crc32;
+
+                            // free buffer if allocated
+                            if (!isMemoryMapped)
+                            {
+                                platform_free(bufPtr);
                             }
                         }
                         break;
@@ -856,7 +884,7 @@ void CLR_DBG_Debugger::AccessMemory(
         //--// RAM write
         ByteAddress sectAddr = location;
 
-#if defined(_WIN32)
+#if defined(VIRTUAL_DEVICE)
 
         bool proceed = false;
         void *temp;
@@ -1039,7 +1067,7 @@ bool CLR_DBG_Debugger::Monitor_Reboot(WP_Message *msg)
     if (CLR_DBG_Commands::Monitor_Reboot::c_EnterNanoBooter ==
         (cmd->m_flags & CLR_DBG_Commands::Monitor_Reboot::c_EnterNanoBooter))
     {
-        success = RequestToLaunchNanoBooter();
+        success = RequestToLaunchNanoBooter(0);
     }
     else if (
         CLR_DBG_Commands::Monitor_Reboot::c_EnterProprietaryBooter ==
@@ -1102,6 +1130,7 @@ bool CLR_DBG_Debugger::Monitor_QueryConfiguration(WP_Message *message)
 
     HAL_Configuration_NetworkInterface *configNetworkInterface;
     HAL_Configuration_Wireless80211 *configWireless80211NetworkInterface;
+    HAL_Configuration_WirelessAP *configWirelessAPNetworkInterface;
     HAL_Configuration_X509CaRootBundle *x509Certificate;
     HAL_Configuration_X509DeviceCertificate *x509DeviceCertificate;
 
@@ -1242,7 +1271,31 @@ bool CLR_DBG_Debugger::Monitor_QueryConfiguration(WP_Message *message)
             break;
 
         case DeviceConfigurationOption_WirelessNetworkAP:
-            // TODO missing implementation for now
+
+            configWirelessAPNetworkInterface =
+                (HAL_Configuration_WirelessAP *)platform_malloc(sizeof(HAL_Configuration_WirelessAP));
+
+            // check allocation
+            if (configWirelessAPNetworkInterface != NULL)
+            {
+                memset(configWirelessAPNetworkInterface, 0, sizeof(HAL_Configuration_WirelessAP));
+
+                if (ConfigurationManager_GetConfigurationBlock(
+                        configWirelessAPNetworkInterface,
+                        (DeviceConfigurationOption)cmd->Configuration,
+                        cmd->BlockIndex) == true)
+                {
+                    size = sizeof(HAL_Configuration_WirelessAP);
+
+                    WP_ReplyToCommand(message, true, false, (uint8_t *)configWirelessAPNetworkInterface, size);
+                }
+
+                platform_free(configWirelessAPNetworkInterface);
+
+                // done here
+                return true;
+            }
+
             break;
 
         default:
@@ -1273,6 +1326,7 @@ bool CLR_DBG_Debugger::Monitor_UpdateConfiguration(WP_Message *message)
     {
         case DeviceConfigurationOption_Network:
         case DeviceConfigurationOption_Wireless80211Network:
+        case DeviceConfigurationOption_WirelessNetworkAP:
         case DeviceConfigurationOption_X509CaRootBundle:
         case DeviceConfigurationOption_X509DeviceCertificates:
         case DeviceConfigurationOption_All:
@@ -1306,6 +1360,27 @@ bool CLR_DBG_Debugger::Monitor_UpdateConfiguration(WP_Message *message)
     return false;
 
 #endif
+}
+
+bool CLR_DBG_Debugger::Monitor_StorageOperation(WP_Message *message)
+{
+    NATIVE_PROFILE_CLR_DEBUGGER();
+
+#if (HAS_ACCESSIBLE_STORAGE == TRUE)
+
+    Monitor_StorageOperation_Command *cmd = (Monitor_StorageOperation_Command *)message->m_payload;
+    Monitor_StorageOperation_Reply cmdReply;
+
+    cmdReply.ErrorCode = HAL_StorageOperation(cmd->Operation, cmd->NameLength, cmd->DataLength, cmd->Offset, cmd->Data);
+
+    WP_ReplyToCommand(message, true, false, &cmdReply, sizeof(cmdReply));
+
+    return true;
+
+#endif
+
+    (void)message;
+    return false;
 }
 
 //--//
@@ -1357,6 +1432,11 @@ bool CLR_DBG_Debugger::Debugging_Execution_ChangeConditions(WP_Message *msg)
     {
         // update conditions
         g_CLR_RT_ExecutionEngine.m_iDebugger_Conditions = newConditions;
+
+#ifdef VIRTTUAL_DEVICE
+        // fire event with update on debugger activity
+        ::Events_Set(SYSTEM_EVENT_FLAG_DEBUGGER_ACTIVITY);
+#endif // VIRTTUAL_DEVICE
     }
 
     return true;
@@ -1736,18 +1816,18 @@ static bool FillValues(
 
     CLR_DBG_Commands::Debugging_Value *dst = array++;
     num--;
-    CLR_RT_TypeDescriptor desc;
+    CLR_RT_TypeDescriptor desc{};
 
     memset(dst, 0, sizeof(*dst));
 
-    dst->m_referenceID = (reference != NULL) ? reference : ptr;
+    dst->m_referenceID = (CLR_UINT32)((reference != NULL) ? reference : ptr);
     dst->m_dt = ptr->DataType();
     dst->m_flags = ptr->DataFlags();
     dst->m_size = ptr->DataSize();
 
     if (pTD != NULL)
     {
-        dst->m_td = *pTD;
+        dst->m_td.m_data = pTD->m_data;
     }
     else if (SUCCEEDED(desc.InitializeFromObject(*ptr)))
     {
@@ -1786,7 +1866,7 @@ static bool FillValues(
 
             if (text != NULL)
             {
-                dst->m_charsInString = text;
+                dst->m_charsInString = (CLR_UINT32)text;
                 dst->m_bytesInString = (CLR_UINT32)hal_strlen_s(text);
 
                 hal_strncpy_s(
@@ -1797,7 +1877,8 @@ static bool FillValues(
             }
             else
             {
-                dst->m_charsInString = NULL;
+                // equivalent to a null string
+                dst->m_charsInString = 0;
                 dst->m_bytesInString = 0;
                 dst->m_builtinValue[0] = 0;
             }
@@ -1829,7 +1910,7 @@ static bool FillValues(
             break;
 
         case DATATYPE_ARRAY_BYREF:
-            dst->m_arrayref_referenceID = ptr->Array();
+            dst->m_arrayref_referenceID = (CLR_UINT32)ptr->Array();
             dst->m_arrayref_index = ptr->ArrayIndex();
 
             break;
@@ -2020,7 +2101,7 @@ CLR_RT_StackFrame *CLR_DBG_Debugger::CheckStackFrame(CLR_INT32 pid, CLR_UINT32 d
     {
         NANOCLR_FOREACH_NODE(CLR_RT_StackFrame, call, th->m_stackFrames)
         {
-#ifndef CLR_NO_IL_INLINE
+#ifndef NANOCLR_NO_IL_INLINE
             if (call->m_inlineFrame)
             {
                 if (depth-- == 0)
@@ -2050,6 +2131,7 @@ static HRESULT Debugging_Thread_Create_Helper(CLR_RT_MethodDef_Index &md, CLR_RT
     CLR_RT_HeapBlock ref;
     ref.SetObjectReference(NULL);
     CLR_RT_ProtectFromGC gc(ref);
+
     CLR_RT_Thread *realThread = (pid != 0) ? CLR_DBG_Debugger::GetThreadFromPid(pid) : NULL;
 
     th = NULL;
@@ -2071,7 +2153,7 @@ static HRESULT Debugging_Thread_Create_Helper(CLR_RT_MethodDef_Index &md, CLR_RT
 
         if (numArgs)
         {
-            CLR_RT_SignatureParser parser;
+            CLR_RT_SignatureParser parser{};
             parser.Initialize_MethodSignature(stack->m_call.m_assm, target);
             CLR_RT_SignatureParser::Element res;
             CLR_RT_HeapBlock *args = stack->m_arguments;
@@ -2270,7 +2352,7 @@ bool CLR_DBG_Debugger::Debugging_Thread_Get(WP_Message *msg)
     // If we are a thread spawned by the debugger to perform evaluations,
     // return the thread object that correspond to thread that has focus in debugger.
     th = th->m_realThread;
-#endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
+#endif // #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
 
     // Find an existing managed thread, if it exists
     // making sure to only return the managed object association with the current appdomain
@@ -2308,7 +2390,7 @@ bool CLR_DBG_Debugger::Debugging_Thread_Get(WP_Message *msg)
 
     if (!fFound)
     {
-        pThread = (CLR_RT_HeapBlock *)platform_malloc(sizeof(CLR_RT_HeapBlock));
+        pThread = (CLR_RT_HeapBlock *)platform_malloc(sizeof(struct CLR_RT_HeapBlock));
 
         // Create the managed thread.
         // This implies that there is no state in the managed object.  This is not exactly true, as the managed thread
@@ -2415,7 +2497,7 @@ bool CLR_DBG_Debugger::Debugging_Stack_Info(WP_Message *msg)
 
     if ((call = g_CLR_DBG_Debugger->CheckStackFrame(cmd->m_pid, cmd->m_depth, isInline)) != NULL)
     {
-#ifndef CLR_NO_IL_INLINE
+#ifndef NANOCLR_NO_IL_INLINE
         if (isInline)
         {
             cmdReply.m_md = call->m_inlineFrame->m_frame.m_call;
@@ -2452,7 +2534,7 @@ bool CLR_DBG_Debugger::Debugging_Stack_SetIP(WP_Message *msg)
 
     if ((call = g_CLR_DBG_Debugger->CheckStackFrame(cmd->m_pid, cmd->m_depth, isInline)) != NULL)
     {
-#ifndef CLR_NO_IL_INLINE
+#ifndef NANOCLR_NO_IL_INLINE
         if (isInline)
         {
             return false;
@@ -2481,7 +2563,7 @@ static bool IsBlockEnumMaybe(CLR_RT_HeapBlock *blk)
     NATIVE_PROFILE_CLR_DEBUGGER();
     const CLR_UINT32 c_MaskForPrimitive = CLR_RT_DataTypeLookup::c_Integer | CLR_RT_DataTypeLookup::c_Numeric;
 
-    CLR_RT_TypeDescriptor desc;
+    CLR_RT_TypeDescriptor desc{};
 
     if (FAILED(desc.InitializeFromObject(*blk)))
         return false;
@@ -2568,6 +2650,7 @@ bool CLR_DBG_Debugger::Debugging_Value_ResizeScratchPad(WP_Message *msg)
 
     CLR_DBG_Commands::Debugging_Value_ResizeScratchPad *cmd =
         (CLR_DBG_Commands::Debugging_Value_ResizeScratchPad *)msg->m_payload;
+
     CLR_RT_HeapBlock ref;
 
     if (cmd->m_size == 0)
@@ -2586,7 +2669,7 @@ bool CLR_DBG_Debugger::Debugging_Value_ResizeScratchPad(WP_Message *msg)
                 memcpy(
                     pNew->GetFirstElement(),
                     pOld->GetFirstElement(),
-                    sizeof(CLR_RT_HeapBlock) * __min(pNew->m_numOfElements, pOld->m_numOfElements));
+                    sizeof(struct CLR_RT_HeapBlock) * __min(pNew->m_numOfElements, pOld->m_numOfElements));
             }
 
             g_CLR_RT_ExecutionEngine.m_scratchPadArray = pNew;
@@ -2615,7 +2698,7 @@ bool CLR_DBG_Debugger::Debugging_Value_GetStack(WP_Message *msg)
     {
         CLR_RT_HeapBlock *array;
         CLR_UINT32 num;
-#ifndef CLR_NO_IL_INLINE
+#ifndef NANOCLR_NO_IL_INLINE
         CLR_RT_MethodDef_Instance &md = isInline ? call->m_inlineFrame->m_frame.m_call : call->m_call;
 #else
         CLR_RT_MethodDef_Instance &md = call->m_call;
@@ -2624,7 +2707,7 @@ bool CLR_DBG_Debugger::Debugging_Value_GetStack(WP_Message *msg)
         switch (cmd->m_kind)
         {
             case CLR_DBG_Commands::Debugging_Value_GetStack::c_Argument:
-#ifndef CLR_NO_IL_INLINE
+#ifndef NANOCLR_NO_IL_INLINE
                 array = isInline ? call->m_inlineFrame->m_frame.m_args : call->m_arguments;
                 num = isInline ? md.m_target->numArgs : md.m_target->numArgs;
 #else
@@ -2634,7 +2717,7 @@ bool CLR_DBG_Debugger::Debugging_Value_GetStack(WP_Message *msg)
                 break;
 
             case CLR_DBG_Commands::Debugging_Value_GetStack::c_Local:
-#ifndef CLR_NO_IL_INLINE
+#ifndef NANOCLR_NO_IL_INLINE
                 array = isInline ? call->m_inlineFrame->m_frame.m_locals : call->m_locals;
                 num = isInline ? md.m_target->numLocals : md.m_target->numLocals;
 #else
@@ -2644,7 +2727,7 @@ bool CLR_DBG_Debugger::Debugging_Value_GetStack(WP_Message *msg)
                 break;
 
             case CLR_DBG_Commands::Debugging_Value_GetStack::c_EvalStack:
-#ifndef CLR_NO_IL_INLINE
+#ifndef NANOCLR_NO_IL_INLINE
                 array = isInline ? call->m_inlineFrame->m_frame.m_evalStack : call->m_evalStack;
                 num = isInline ? (CLR_UINT32)(call->m_evalStack - call->m_inlineFrame->m_frame.m_evalStack)
                                : (CLR_UINT32)call->TopValuePosition();
@@ -2672,9 +2755,9 @@ bool CLR_DBG_Debugger::Debugging_Value_GetStack(WP_Message *msg)
         if (cmd->m_kind != CLR_DBG_Commands::Debugging_Value_GetStack::c_EvalStack && IsBlockEnumMaybe(blk))
         {
             CLR_UINT32 iElement = cmd->m_index;
-            CLR_RT_SignatureParser parser;
+            CLR_RT_SignatureParser parser{};
             CLR_RT_SignatureParser::Element res;
-            CLR_RT_TypeDescriptor desc;
+            CLR_RT_TypeDescriptor desc{};
 
             if (cmd->m_kind == CLR_DBG_Commands::Debugging_Value_GetStack::c_Argument)
             {
@@ -2741,15 +2824,16 @@ bool CLR_DBG_Debugger::Debugging_Value_GetField(WP_Message *msg)
 {
     NATIVE_PROFILE_CLR_DEBUGGER();
 
+    CLR_UINT32 offset;
+
     CLR_DBG_Commands::Debugging_Value_GetField *cmd = (CLR_DBG_Commands::Debugging_Value_GetField *)msg->m_payload;
     CLR_RT_HeapBlock *blk = cmd->m_heapblock;
     CLR_RT_HeapBlock *reference = NULL;
-    CLR_RT_HeapBlock tmp;
-    CLR_RT_TypeDescriptor desc;
-    CLR_RT_TypeDef_Instance td;
     CLR_RT_TypeDef_Instance *pTD = NULL;
+    CLR_RT_TypeDescriptor desc{};
+    CLR_RT_HeapBlock tmp;
+    CLR_RT_TypeDef_Instance td;
     CLR_RT_FieldDef_Instance inst;
-    CLR_UINT32 offset;
 
     if (blk != NULL && cmd->m_offset > 0)
     {
@@ -2853,10 +2937,10 @@ bool CLR_DBG_Debugger::Debugging_Value_GetArray(WP_Message *msg)
     CLR_DBG_Commands::Debugging_Value_GetArray *cmd = (CLR_DBG_Commands::Debugging_Value_GetArray *)msg->m_payload;
     CLR_RT_HeapBlock *blk = NULL;
     CLR_RT_HeapBlock *reference = NULL;
+    CLR_RT_TypeDef_Instance *pTD = NULL;
     CLR_RT_HeapBlock tmp;
     CLR_RT_HeapBlock ref;
-    CLR_RT_TypeDef_Instance *pTD = NULL;
-    CLR_RT_TypeDef_Instance td;
+    CLR_RT_TypeDef_Instance td{};
 
     tmp.SetObjectReference(cmd->m_heapblock);
 
@@ -3052,7 +3136,7 @@ bool CLR_DBG_Debugger::Debugging_Value_AllocateArray(WP_Message *msg)
     return true;
 }
 
-#endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
+#endif // #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
 
 #if defined(NANOCLR_PROFILE_NEW)
 bool CLR_DBG_Debugger::Profiling_Command(WP_Message *msg)
@@ -3075,6 +3159,8 @@ bool CLR_DBG_Debugger::Profiling_Command(WP_Message *msg)
         default:
             return false;
     }
+
+    return true;
 }
 
 bool CLR_DBG_Debugger::Profiling_ChangeConditions(WP_Message *msg)
@@ -3117,7 +3203,7 @@ bool CLR_DBG_Debugger::Profiling_FlushStream(WP_Message *msg)
     return true;
 }
 
-#endif //#if defined(NANOCLR_PROFILE_NEW)
+#endif // #if defined(NANOCLR_PROFILE_NEW)
 
 #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
 
@@ -3194,6 +3280,7 @@ static HRESULT Assign_Helper(CLR_RT_HeapBlock *blkDst, CLR_RT_HeapBlock *blkSrc)
     AnalyzeObject aoDst;
     AnalyzeObject aoSrc;
     CLR_RT_HeapBlock srcVal;
+
     srcVal.SetObjectReference(NULL);
     CLR_RT_ProtectFromGC gc(srcVal);
 
@@ -3270,8 +3357,10 @@ bool CLR_DBG_Debugger::Debugging_TypeSys_Assemblies(WP_Message *msg)
 {
     NATIVE_PROFILE_CLR_DEBUGGER();
 
-    CLR_RT_Assembly_Index assemblies[CLR_RT_TypeSystem::c_MaxAssemblies];
     int num = 0;
+    CLR_RT_Assembly_Index assemblies[CLR_RT_TypeSystem::c_MaxAssemblies];
+
+    memset(assemblies, 0, sizeof(assemblies));
 
     NANOCLR_FOREACH_ASSEMBLY(g_CLR_RT_TypeSystem)
     {
@@ -3395,7 +3484,7 @@ bool CLR_DBG_Debugger::Debugging_Resolve_Assembly(WP_Message *msg)
     {
         if (assm)
         {
-#if defined(_WIN32)
+#if defined(VIRTUAL_DEVICE)
             // append path
             if (assm->m_strPath != NULL)
             {
@@ -3505,10 +3594,10 @@ bool CLR_DBG_Debugger::Debugging_Resolve_Field(WP_Message *msg)
 
             if (SUCCEEDED(g_CLR_RT_TypeSystem.BuildFieldName(inst, szBuffer, iBuffer)))
             {
-                CLR_RT_TypeDef_Instance instClass;
+                CLR_RT_TypeDef_Instance instClass{};
                 instClass.InitializeFromField(inst);
 
-                cmdReply->m_td = instClass;
+                cmdReply->m_td.m_data = instClass.m_data;
                 cmdReply->m_index = inst.CrossReference().m_offset;
 
                 WP_ReplyToCommand(msg, true, false, cmdReply, sizeof(CLR_DBG_Commands::Debugging_Resolve_Field::Reply));
@@ -3532,7 +3621,7 @@ bool CLR_DBG_Debugger::Debugging_Resolve_Method(WP_Message *msg)
 
     CLR_DBG_Commands::Debugging_Resolve_Method::Reply *cmdReply;
     CLR_RT_MethodDef_Instance inst;
-    CLR_RT_TypeDef_Instance instOwner;
+    CLR_RT_TypeDef_Instance instOwner{};
 
     CLR_DBG_Commands::Debugging_Resolve_Method *cmd = (CLR_DBG_Commands::Debugging_Resolve_Method *)msg->m_payload;
 
@@ -3554,7 +3643,7 @@ bool CLR_DBG_Debugger::Debugging_Resolve_Method(WP_Message *msg)
             char *szBuffer = cmdReply->m_method;
             size_t iBuffer = MAXSTRLEN(cmdReply->m_method);
 
-            cmdReply->m_td = instOwner;
+            cmdReply->m_td.m_data = instOwner.m_data;
 
             CLR_SafeSprintf(szBuffer, iBuffer, "%s", inst.m_assm->GetString(inst.m_target->name));
 
@@ -3596,7 +3685,7 @@ bool CLR_DBG_Debugger::Debugging_Resolve_VirtualMethod(WP_Message *msg)
     return true;
 }
 
-#endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
+#endif // #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
 
 //--//
 
@@ -3691,7 +3780,7 @@ bool CLR_DBG_Debugger::Debugging_Info_SetJMC_Type(const CLR_RT_TypeDef_Index &id
     const CLR_RECORD_TYPEDEF *td;
     CLR_RT_TypeDef_Instance inst;
     int totMethods;
-    CLR_RT_MethodDef_Index md;
+    CLR_RT_MethodDef_Index md{};
 
     if (!CheckTypeDef(idx, inst))
         return false;
@@ -3764,4 +3853,4 @@ bool CLR_DBG_Debugger::Debugging_Info_SetJMC(WP_Message *msg)
     }
 }
 
-#endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
+#endif // #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)

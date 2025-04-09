@@ -1,0 +1,85 @@
+FROM ubuntu:latest AS downloader
+RUN apt-get update \
+    && apt-get -y install --no-install-recommends apt-utils \
+    && apt-get install -y \
+    curl \
+    xz-utils \
+    unzip \
+    wget
+
+RUN mkdir -p /tmp/dc-downloads /tmp/dc-extracted
+
+ARG GCC_VERSION=13.3.rel1
+ARG GCC_URI=https://armkeil.blob.core.windows.net/developer/Files/downloads/gnu/$GCC_VERSION/binrel/arm-gnu-toolchain-$GCC_VERSION-x86_64-arm-none-eabi.tar.xz
+RUN mkdir -p /tmp/dc-downloads /tmp/dc-extracted/gcc \
+    && curl -o /tmp/dc-downloads/gcc-arm.tar.xz  $GCC_URI \
+    && xz -d /tmp/dc-downloads/gcc-arm.tar.xz \
+    && tar -xvf /tmp/dc-downloads/gcc-arm.tar -C /tmp/dc-extracted/gcc --strip-components 1 \
+    && rm -rf /tmp/dc-extracted/gcc/share/doc/ /tmp/dc-extracted/gcc/share/gcc-arm-none-eabi/samples/
+
+ARG CMAKE_VERSION=3.31.6
+ARG CMAKE_SCRIPT=https://github.com/Kitware/CMake/releases/download/v$CMAKE_VERSION/cmake-$CMAKE_VERSION-linux-x86_64.sh
+RUN wget $CMAKE_SCRIPT \
+    -q -O /tmp/dc-downloads/cmake-install.sh \
+    && chmod u+x /tmp/dc-downloads/cmake-install.sh \
+    && mkdir -p /tmp/dc-extracted/cmake \
+    && /tmp/dc-downloads/cmake-install.sh --skip-license --prefix=/tmp/dc-extracted/cmake \
+    && rm /tmp/dc-downloads/cmake-install.sh
+
+# This is TI XDC tools for linux. Check all versions here: https://software-dl.ti.com/dsps/dsps_public_sw/sdo_sb/targetcontent/rtsc/index.html
+ARG TI_TOOL_URL=https://software-dl.ti.com/dsps/dsps_public_sw/sdo_sb/targetcontent/rtsc/3_62_00_08/exports/xdccore/xdctools_3_62_00_08_core_linux.zip
+RUN  mkdir -p /tmp/dc-extracted/titools \
+    && curl -o /tmp/dc-downloads/titools.zip $TI_TOOL_URL -L \
+    && unzip -d /tmp/dc-extracted/titools /tmp/dc-downloads/titools.zip
+
+FROM ubuntu:latest AS devcontainer
+
+# Avoid warnings by switching to noninteractive
+ENV DEBIAN_FRONTEND=noninteractive
+
+# You can set up non-root user
+# ARG USERNAME=vscode
+# ARG USER_UID=1000
+# ARG USER_GID=$USER_UID
+
+# Configure apt and install packages
+RUN apt-get update \
+    && apt-get -y install --no-install-recommends apt-utils dialog icu-devtools 2>&1 \
+    && apt-get install -y \
+    git \
+    clang-format \
+    curl \
+    ninja-build \
+    srecord \
+    nodejs
+
+# Create needed directories
+RUN mkdir -p /usr/local/bin/gcc \
+    && mkdir -p /usr/local/bin/titools
+
+# Clone what is needed for TI
+RUN git clone --branch 4.10.00.07 https://github.com/nanoframework/SimpleLink_CC32xx_SDK.git --depth 1 ./sources/SimpleLinkCC32 \
+    # you can't use the nanoFramework repository as it's Windows only
+    # && git clone --branch 3.62.01.15 https://github.com/nanoframework/TI_XDCTools.git --depth 1 ./sources/TI_XDCTools \
+    && git clone --branch 5.40.00.40 https://github.com/nanoframework/SimpleLink_CC13xx_26xx_SDK.git --depth 1 ./sources/SimpleLinkCC13 \
+    && git clone --branch 1.10.0 https://github.com/nanoframework/TI_SysConfig.git --depth 1 ./sources/TI_SysConfig \
+    && chmod +x ./sources/TI_SysConfig/sysconfig_cli.sh
+
+# set gcc location
+ARG TMP_GCC_PATH=/usr/local/bin/gcc
+ENV ARM_GCC_PATH=$TMP_GCC_PATH/bin
+
+# Copy from our other container
+COPY --from=downloader /tmp/dc-extracted/gcc $TMP_GCC_PATH
+COPY --from=downloader /tmp/dc-extracted/titools/xdctools_3_62_00_08_core /usr/local/bin/titools
+COPY --from=downloader /tmp/dc-extracted/cmake /usr/bin/cmake
+
+ENV PATH=/usr/bin/cmake/bin:${PATH}
+
+# Clean up downloaded files
+RUN apt-get autoremove -y \
+    && apt-get clean -y \
+    && rm -rf /var/lib/apt/lists/*
+
+# Switch back to dialog for any ad-hoc use of apt-get
+ENV DEBIAN_FRONTEND=dialog

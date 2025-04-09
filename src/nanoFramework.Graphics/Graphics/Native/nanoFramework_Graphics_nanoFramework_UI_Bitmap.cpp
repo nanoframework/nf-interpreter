@@ -3,25 +3,24 @@
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
 //
-//---------------------------------------------------------------------------
 
 #include "Graphics.h"
 #include "nanoFramework_Graphics.h"
 
 extern GraphicsDriver g_GraphicsDriver;
 
-// Helper routine 
-static HRESULT GetBitmap(CLR_RT_HeapBlock* pThis, bool fForWrite, CLR_GFX_Bitmap*& bitmap);
-static HRESULT GetBitmap(CLR_RT_StackFrame& stack, bool fForWrite, CLR_GFX_Bitmap*& bitmap);
+// Helper routine
+static HRESULT GetBitmap(CLR_RT_HeapBlock *pThis, bool fForWrite, CLR_GFX_Bitmap *&bitmap);
+static HRESULT GetBitmap(CLR_RT_StackFrame &stack, bool fForWrite, CLR_GFX_Bitmap *&bitmap);
 
-HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::_ctor___VOID__I4__I4(CLR_RT_StackFrame& stack)
+HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::_ctor___VOID__I4__I4(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
     CLR_GFX_BitmapDescription bm;
-    CLR_RT_HeapBlock* pThis = stack.This();
-    CLR_RT_HeapBlock* pArgs = &(stack.Arg1());
-    CLR_RT_HeapBlock* blob;
+    CLR_RT_HeapBlock *pThis = stack.This();
+    CLR_RT_HeapBlock *pArgs = &(stack.Arg1());
+    CLR_RT_HeapBlock *blob;
 
     //
     // Set up for restart on out of memory.
@@ -45,26 +44,27 @@ HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::_ctor___VOID__I4
     blob = pThis[CLR_GFX_Bitmap::FIELD__m_bitmap].Dereference();
     if (blob->DataType() == DATATYPE_BINARY_BLOB_HEAD)
     {
-        //The bitmap data is stored on the managed heap, so there is no need for the finalizer to run.
-        //This allows bitmaps on the managed heap to be reclaimed by GC when ExtractHeapBlocks cannot find memory
-        //rather than waiting for later when the finalizers run.
+        // The bitmap data is stored on the managed heap, so there is no need for the finalizer to run.
+        // This allows bitmaps on the managed heap to be reclaimed by GC when ExtractHeapBlocks cannot find memory
+        // rather than waiting for later when the finalizers run.
         CLR_RT_HeapBlock_Finalizer::SuppressFinalize(pThis);
     }
 
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::_ctor___VOID__SZARRAY_U1__nanoFrameworkUIBitmapBitmapImageType(CLR_RT_StackFrame& stack)
+HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::
+    _ctor___VOID__SZARRAY_U1__nanoFrameworkUIBitmapBitmapImageType(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
-    CLR_UINT8* imageData;
+    CLR_UINT8 *imageData;
     CLR_UINT32 imageDataSize;
-    CLR_UINT8  imageType;
+    CLR_UINT8 imageType;
 
-    CLR_RT_HeapBlock* pThis = stack.This();
-    CLR_RT_HeapBlock* pArgs = &(stack.Arg1());
-    CLR_RT_HeapBlock* blob;
+    CLR_RT_HeapBlock *pThis = stack.This();
+    CLR_RT_HeapBlock *pArgs = &(stack.Arg1());
+    CLR_RT_HeapBlock *blob;
 
     //
     // Set up for restart on out of memory.
@@ -75,7 +75,8 @@ HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::_ctor___VOID__SZ
         stack.m_flags |= CLR_RT_StackFrame::c_CompactAndRestartOnOutOfMemory;
     }
 
-    CLR_RT_HeapBlock_Array* imageDataHB = pArgs[0].DereferenceArray();  FAULT_ON_NULL(imageDataHB);
+    CLR_RT_HeapBlock_Array *imageDataHB = pArgs[0].DereferenceArray();
+    FAULT_ON_NULL(imageDataHB);
 
     imageType = pArgs[1].NumericByRef().u1;
 
@@ -85,17 +86,18 @@ HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::_ctor___VOID__SZ
     ASSERT(imageDataHB->m_typeOfElement == DATATYPE_U1);
     ASSERT(imageDataHB->m_sizeOfElement == 1);
 
-    imageData = (CLR_UINT8*)imageDataHB->GetFirstElement();
+    imageData = (CLR_UINT8 *)imageDataHB->GetFirstElement();
     imageDataSize = imageDataHB->m_numOfElements;
 
-    NANOCLR_CHECK_HRESULT(CLR_GFX_Bitmap::CreateInstance(pThis[CLR_GFX_Bitmap::FIELD__m_bitmap], imageData, imageDataSize, imageType));
+    NANOCLR_CHECK_HRESULT(
+        CLR_GFX_Bitmap::CreateInstance(pThis[CLR_GFX_Bitmap::FIELD__m_bitmap], imageData, imageDataSize, imageType));
 
     blob = pThis[CLR_GFX_Bitmap::FIELD__m_bitmap].Dereference();
     if (blob->DataType() == DATATYPE_BINARY_BLOB_HEAD)
     {
-        //The bitmap data is stored on the managed heap, so there is no need for the finalizer to run.
-        //This allows bitmaps on the managed heap to be reclaimed by GC when ExtractHeapBlocks cannot find memory
-        //rather than waiting for later when the finalizers run.
+        // The bitmap data is stored on the managed heap, so there is no need for the finalizer to run.
+        // This allows bitmaps on the managed heap to be reclaimed by GC when ExtractHeapBlocks cannot find memory
+        // rather than waiting for later when the finalizers run.
         CLR_RT_HeapBlock_Finalizer::SuppressFinalize(pThis);
     }
 
@@ -106,44 +108,81 @@ HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::_ctor___VOID__SZ
     NANOCLR_CLEANUP_END();
 }
 
-HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::Flush___VOID(CLR_RT_StackFrame& stack)
+HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::Flush___VOID(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
-    CLR_GFX_Bitmap* bitmap;
+    CLR_GFX_Bitmap *bitmap;
 
     NANOCLR_CHECK_HRESULT(GetBitmap(stack, false, bitmap));
 
-    g_GraphicsDriver.Screen_Flush(*bitmap, 0, 0, bitmap->m_bm.m_width, bitmap->m_bm.m_height);
+    g_GraphicsDriver.Screen_Flush(*bitmap, 0, 0, bitmap->m_bm.m_width, bitmap->m_bm.m_height, 0, 0);
 
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::Flush___VOID__I4__I4__I4__I4(CLR_RT_StackFrame& stack)
+HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::Flush___VOID__I4__I4__I4__I4(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
-    CLR_RT_HeapBlock* pArgs = &(stack.Arg1());
+    CLR_RT_HeapBlock *pArgs = &(stack.Arg1());
 
     CLR_INT32 x = pArgs[0].NumericByRef().s4;
     CLR_INT32 y = pArgs[1].NumericByRef().s4;
     CLR_INT32 width = pArgs[2].NumericByRef().s4;
     CLR_INT32 height = pArgs[3].NumericByRef().s4;
 
-    CLR_GFX_Bitmap* bitmap;
+    CLR_GFX_Bitmap *bitmap;
 
     NANOCLR_CHECK_HRESULT(GetBitmap(stack, false, bitmap));
 
-    g_GraphicsDriver.Screen_Flush(*bitmap, (CLR_UINT16)x, (CLR_UINT16)y, (CLR_UINT16)width, (CLR_UINT16)height);
+    g_GraphicsDriver.Screen_Flush(
+        *bitmap,
+        (CLR_UINT16)x,
+        (CLR_UINT16)y,
+        (CLR_UINT16)width,
+        (CLR_UINT16)height,
+        (CLR_UINT16)x,
+        (CLR_UINT16)y);
 
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::Clear___VOID(CLR_RT_StackFrame& stack)
+HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::Flush___VOID__I4__I4__I4__I4__I4__I4(
+    CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
-    CLR_GFX_Bitmap* bitmap;
+    CLR_RT_HeapBlock *pArgs = &(stack.Arg1());
+
+    CLR_INT32 srcX = pArgs[0].NumericByRef().s4;
+    CLR_INT32 srcY = pArgs[1].NumericByRef().s4;
+    CLR_INT32 width = pArgs[2].NumericByRef().s4;
+    CLR_INT32 height = pArgs[3].NumericByRef().s4;
+    CLR_INT32 screenX = pArgs[4].NumericByRef().s4;
+    CLR_INT32 screenY = pArgs[5].NumericByRef().s4;
+
+    CLR_GFX_Bitmap *bitmap;
+
+    NANOCLR_CHECK_HRESULT(GetBitmap(stack, false, bitmap));
+
+    g_GraphicsDriver.Screen_Flush(
+        *bitmap,
+        (CLR_UINT16)srcX,
+        (CLR_UINT16)srcY,
+        (CLR_UINT16)width,
+        (CLR_UINT16)height,
+        (CLR_UINT16)screenX,
+        (CLR_UINT16)screenY);
+
+    NANOCLR_NOCLEANUP();
+}
+
+HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::Clear___VOID(CLR_RT_StackFrame &stack)
+{
+    NANOCLR_HEADER();
+
+    CLR_GFX_Bitmap *bitmap;
 
     NANOCLR_CHECK_HRESULT(GetBitmap(stack, true, bitmap));
 
@@ -152,22 +191,23 @@ HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::Clear___VOID(CLR
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::DrawTextInRect___BOOLEAN__BYREF_STRING__BYREF_I4__BYREF_I4__I4__I4__I4__I4__U4__nanoFrameworkPresentationMediaColor__nanoFrameworkUIFont(CLR_RT_StackFrame& stack)
+HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::
+    DrawTextInRect___BOOLEAN__BYREF_STRING__BYREF_I4__BYREF_I4__I4__I4__I4__I4__U4__U4__nanoFrameworkUIFont(
+        CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
-    CLR_RT_HeapBlock* pArgs = &(stack.Arg1());
-    CLR_GFX_Bitmap* bitmap;
-    CLR_GFX_Font* font;
-    CLR_RT_HeapBlock& hbText = stack.PushValueAndClear();
-    CLR_RT_HeapBlock  hbXRelStart;
-    CLR_RT_HeapBlock  hbYRelStart;
-    LPCSTR            szText;
-    int               xRelStart;
-    int               yRelStart;
-    int               renderWidth;
-    int               renderHeight;
-
+    CLR_RT_HeapBlock *pArgs = &(stack.Arg1());
+    CLR_GFX_Bitmap *bitmap;
+    CLR_GFX_Font *font;
+    CLR_RT_HeapBlock &hbText = stack.PushValueAndClear();
+    CLR_RT_HeapBlock hbXRelStart;
+    CLR_RT_HeapBlock hbYRelStart;
+    LPCSTR szText;
+    int xRelStart;
+    int yRelStart;
+    int renderWidth;
+    int renderHeight;
 
     NANOCLR_CHECK_HRESULT(GetBitmap(stack, true, bitmap));
     NANOCLR_CHECK_HRESULT(Library_nanoFramework_Graphics_nanoFramework_UI_Font::GetFont(&pArgs[9], font));
@@ -176,11 +216,14 @@ HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::DrawTextInRect__
     NANOCLR_CHECK_HRESULT(hbXRelStart.LoadFromReference(pArgs[1]));
     NANOCLR_CHECK_HRESULT(hbYRelStart.LoadFromReference(pArgs[2]));
 
-    szText = hbText.RecoverString(); if (!szText) szText = "";
+    szText = hbText.RecoverString();
+    if (!szText)
+        szText = "";
     xRelStart = hbXRelStart.NumericByRef().s4;
     yRelStart = hbYRelStart.NumericByRef().s4;
 
-    NANOCLR_CHECK_HRESULT(CLR_GFX_Bitmap::DrawTextInRect(szText,
+    NANOCLR_CHECK_HRESULT(CLR_GFX_Bitmap::DrawTextInRect(
+        szText,
         xRelStart,
         yRelStart,
         renderWidth,
@@ -192,8 +235,7 @@ HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::DrawTextInRect__
         pArgs[6].NumericByRef().s4, /* height */
         pArgs[7].NumericByRef().u4, /* flags  */
         pArgs[8].NumericByRef().u4, /* color  */
-        font
-    ));
+        font));
 
     if (szText[0])
     {
@@ -221,13 +263,40 @@ HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::DrawTextInRect__
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::SetClippingRectangle___VOID__I4__I4__I4__I4(CLR_RT_StackFrame& stack)
+HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::DrawChar___VOID__U2__I4__I4__U4__nanoFrameworkUIFont(
+    CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
-    CLR_GFX_Bitmap* bitmap;
-    CLR_RT_HeapBlock* pArgs;
-    GFX_Rect      rc;
+    CLR_GFX_Bitmap *bitmap;
+
+    NANOCLR_CHECK_HRESULT(GetBitmap(stack, true, bitmap));
+
+    CLR_GFX_Font *font;
+    CLR_RT_HeapBlock *pArgs;
+
+    pArgs = &(stack.Arg1());
+
+    NANOCLR_CHECK_HRESULT(Library_nanoFramework_Graphics_nanoFramework_UI_Font::GetFont(&pArgs[4], font));
+
+    bitmap->DrawChar(
+        pArgs[0].NumericByRef().u2,
+        *font,
+        pArgs[3].NumericByRef().u4,
+        pArgs[1].NumericByRef().s4,
+        pArgs[2].NumericByRef().s4);
+
+    NANOCLR_NOCLEANUP();
+}
+
+HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::SetClippingRectangle___VOID__I4__I4__I4__I4(
+    CLR_RT_StackFrame &stack)
+{
+    NANOCLR_HEADER();
+
+    CLR_GFX_Bitmap *bitmap;
+    CLR_RT_HeapBlock *pArgs;
+    GFX_Rect rc;
 
     NANOCLR_CHECK_HRESULT(GetBitmap(stack, false, bitmap));
 
@@ -243,10 +312,10 @@ HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::SetClippingRecta
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::get_Width___I4(CLR_RT_StackFrame& stack)
+HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::get_Width___I4(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
-    CLR_GFX_Bitmap* bitmap;
+    CLR_GFX_Bitmap *bitmap;
 
     NANOCLR_CHECK_HRESULT(GetBitmap(stack, false, bitmap));
 
@@ -255,10 +324,10 @@ HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::get_Width___I4(C
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::get_Height___I4(CLR_RT_StackFrame& stack)
+HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::get_Height___I4(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
-    CLR_GFX_Bitmap* bitmap;
+    CLR_GFX_Bitmap *bitmap;
 
     NANOCLR_CHECK_HRESULT(GetBitmap(stack, false, bitmap));
 
@@ -267,12 +336,13 @@ HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::get_Height___I4(
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::DrawEllipse___VOID__nanoFrameworkPresentationMediaColor__I4__I4__I4__I4__I4__nanoFrameworkPresentationMediaColor__I4__I4__nanoFrameworkPresentationMediaColor__I4__I4__U2(CLR_RT_StackFrame& stack)
+HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::
+    DrawEllipse___VOID__U4__I4__I4__I4__I4__I4__U4__I4__I4__U4__I4__I4__U2(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
-    CLR_RT_HeapBlock* pArgs;
-    CLR_GFX_Bitmap* bitmap;
+    CLR_RT_HeapBlock *pArgs;
+    CLR_GFX_Bitmap *bitmap;
 
     NANOCLR_CHECK_HRESULT(GetBitmap(stack, true, bitmap));
     pArgs = &(stack.Arg1());
@@ -290,21 +360,23 @@ HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::DrawEllipse___VO
     brush.gradientEndY = pArgs[11].NumericByRef().s4;
     brush.opacity = pArgs[12].NumericByRef().u2;
 
-    bitmap->DrawEllipse(pen, brush,
+    bitmap->DrawEllipse(
+        pen,
+        brush,
         pArgs[2].NumericByRef().s4,
         pArgs[3].NumericByRef().s4,
         pArgs[4].NumericByRef().s4,
-        pArgs[5].NumericByRef().s4
-    );
+        pArgs[5].NumericByRef().s4);
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::DrawImage___VOID__I4__I4__nanoFrameworkUIBitmap__I4__I4__I4__I4__U2(CLR_RT_StackFrame& stack)
+HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::
+    DrawImage___VOID__I4__I4__nanoFrameworkUIBitmap__I4__I4__I4__I4__U2(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
-    CLR_RT_HeapBlock* pArgs;
-    CLR_GFX_Bitmap* bitmap;
-    CLR_GFX_Bitmap* bitmapSrc;
+    CLR_RT_HeapBlock *pArgs;
+    CLR_GFX_Bitmap *bitmap;
+    CLR_GFX_Bitmap *bitmapSrc;
     int width, height;
 
     pArgs = &(stack.Arg1());
@@ -344,13 +416,14 @@ HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::DrawImage___VOID
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::RotateImage___VOID__I4__I4__I4__nanoFrameworkUIBitmap__I4__I4__I4__I4__U2(CLR_RT_StackFrame& stack)
+HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::
+    RotateImage___VOID__I4__I4__I4__nanoFrameworkUIBitmap__I4__I4__I4__I4__U2(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
-    CLR_RT_HeapBlock* pArgs;
-    CLR_GFX_Bitmap* bitmap;
-    CLR_GFX_Bitmap* bitmapSrc;
+    CLR_RT_HeapBlock *pArgs;
+    CLR_GFX_Bitmap *bitmap;
+    CLR_GFX_Bitmap *bitmapSrc;
 
     pArgs = &(stack.Arg1());
     NANOCLR_CHECK_HRESULT(GetBitmap(stack, true, bitmap));
@@ -382,29 +455,27 @@ HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::RotateImage___VO
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::MakeTransparent___VOID__nanoFrameworkPresentationMediaColor(CLR_RT_StackFrame& stack)
+HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::MakeTransparent___VOID__U4(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
-    CLR_GFX_Bitmap* bitmap;
-    CLR_UINT32 color;
+    CLR_GFX_Bitmap *bitmap;
 
     NANOCLR_CHECK_HRESULT(GetBitmap(stack, true, bitmap));
-
-    color = stack.Arg1().NumericByRef().u4;
-
-    bitmap->m_palBitmap.transparentColor = (color & 0xFF000000) ? PAL_GFX_Bitmap::c_InvalidColor : color;
+    bitmap->m_palBitmap.transparentColor = stack.Arg1().NumericByRef().u4;
+    bitmap->m_palBitmap.transparentColorSet = PAL_GFX_Bitmap::c_TransparentColorSet;
 
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::StretchImage___VOID__I4__I4__nanoFrameworkUIBitmap__I4__I4__U2(CLR_RT_StackFrame& stack)
+HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::
+    StretchImage___VOID__I4__I4__nanoFrameworkUIBitmap__I4__I4__U2(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
-    CLR_GFX_Bitmap* bitmap;
-    CLR_GFX_Bitmap* bitmapSrc;
-    CLR_RT_HeapBlock* pArgs;
+    CLR_GFX_Bitmap *bitmap;
+    CLR_GFX_Bitmap *bitmapSrc;
+    CLR_RT_HeapBlock *pArgs;
 
     pArgs = &(stack.Arg1());
     NANOCLR_CHECK_HRESULT(GetBitmap(stack, true, bitmap));
@@ -434,11 +505,12 @@ HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::StretchImage___V
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::DrawLine___VOID__nanoFrameworkPresentationMediaColor__I4__I4__I4__I4__I4(CLR_RT_StackFrame& stack)
+HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::DrawLine___VOID__U4__I4__I4__I4__I4__I4(
+    CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
-    CLR_GFX_Bitmap* bitmap;
-    CLR_RT_HeapBlock* pArgs;
+    CLR_GFX_Bitmap *bitmap;
+    CLR_RT_HeapBlock *pArgs;
 
     NANOCLR_CHECK_HRESULT(GetBitmap(stack, true, bitmap));
     pArgs = &(stack.Arg1());
@@ -447,7 +519,8 @@ HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::DrawLine___VOID_
     pen.color = pArgs[0].NumericByRef().u4;
     pen.thickness = pArgs[1].NumericByRef().s4;
 
-    bitmap->DrawLine(pen,
+    bitmap->DrawLine(
+        pen,
         pArgs[2].NumericByRef().s4,
         pArgs[3].NumericByRef().s4,
         pArgs[4].NumericByRef().s4,
@@ -456,24 +529,195 @@ HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::DrawLine___VOID_
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::DrawRectangle___VOID__nanoFrameworkPresentationMediaColor__I4__I4__I4__I4__I4__I4__I4__nanoFrameworkPresentationMediaColor__I4__I4__nanoFrameworkPresentationMediaColor__I4__I4__U2(CLR_RT_StackFrame& stack)
+HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::DrawRectangle___VOID__I4__I4__I4__I4__I4__U4(
+    CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
-    CLR_RT_HeapBlock* pArgs;
-    CLR_GFX_Bitmap* bitmap;
-    GFX_Pen           pen;
-    GFX_Brush         brush;
-    GFX_Rect          rectangle;
-    int               radiusX;
-    int               radiusY;
+
+    CLR_RT_HeapBlock *pArgs;
+    CLR_GFX_Bitmap *bitmap;
+    GFX_Pen pen;
+    GFX_Brush brush;
+    GFX_Rect rectangle;
+
+    NANOCLR_CHECK_HRESULT(GetBitmap(stack, true, bitmap));
+
+    pArgs = &(stack.Arg1());
+
+    rectangle.left = pArgs[0].NumericByRef().s4;
+    rectangle.top = pArgs[1].NumericByRef().s4;
+    rectangle.right = rectangle.left + pArgs[2].NumericByRef().s4 - 1;
+    rectangle.bottom = rectangle.top + pArgs[3].NumericByRef().s4 - 1;
+
+    pen.thickness = pArgs[4].NumericByRef().s4;
+    pen.color = pArgs[5].NumericByRef().u4;
+
+    // No fill
+    brush.opacity = PAL_GFX_Bitmap::c_OpacityTransparent;
+
+    bitmap->DrawRectangle(pen, brush, rectangle);
+
+    NANOCLR_NOCLEANUP();
+}
+
+HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::
+    DrawRoundRectangle___VOID__I4__I4__I4__I4__I4__I4__I4__U4(CLR_RT_StackFrame &stack)
+{
+    NANOCLR_HEADER();
+
+    CLR_RT_HeapBlock *pArgs;
+    CLR_GFX_Bitmap *bitmap;
+    GFX_Pen pen;
+    GFX_Brush brush;
+    GFX_Rect rectangle;
+    int radiusX;
+    int radiusY;
+
+    NANOCLR_CHECK_HRESULT(GetBitmap(stack, true, bitmap));
+
+    pArgs = &(stack.Arg1());
+
+    rectangle.left = pArgs[0].NumericByRef().s4;
+    rectangle.top = pArgs[1].NumericByRef().s4;
+    rectangle.right = rectangle.left + pArgs[2].NumericByRef().s4 - 1;
+    rectangle.bottom = rectangle.top + pArgs[3].NumericByRef().s4 - 1;
+
+    pen.thickness = pArgs[4].NumericByRef().s4;
+    pen.color = pArgs[7].NumericByRef().u4;
+
+    radiusX = pArgs[5].NumericByRef().s4;
+    radiusY = pArgs[6].NumericByRef().s4;
+
+    // No fill
+    brush.opacity = PAL_GFX_Bitmap::c_OpacityTransparent;
+
+    bitmap->DrawRoundedRectangle(pen, brush, rectangle, radiusX, radiusY);
+
+    NANOCLR_NOCLEANUP();
+}
+
+HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::FillRectangle___VOID__I4__I4__I4__I4__U4__U2(
+    CLR_RT_StackFrame &stack)
+{
+    NANOCLR_HEADER();
+
+    CLR_RT_HeapBlock *pArgs;
+    CLR_GFX_Bitmap *bitmap;
+    GFX_Pen pen;
+    GFX_Brush brush;
+    GFX_Rect rectangle;
+
+    NANOCLR_CHECK_HRESULT(GetBitmap(stack, true, bitmap));
+
+    pArgs = &(stack.Arg1());
+
+    rectangle.left = pArgs[0].NumericByRef().s4;
+    rectangle.top = pArgs[1].NumericByRef().s4;
+    rectangle.right = rectangle.left + pArgs[2].NumericByRef().s4 - 1;
+    rectangle.bottom = rectangle.top + pArgs[3].NumericByRef().s4 - 1;
+
+    // No outline
+    pen.thickness = 0;
+
+    brush.gradientStartColor = pArgs[4].NumericByRef().u4;
+    brush.gradientEndColor = brush.gradientStartColor;
+    brush.opacity = pArgs[5].NumericByRef().u2;
+
+    bitmap->DrawRectangle(pen, brush, rectangle);
+
+    NANOCLR_NOCLEANUP();
+}
+
+HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::
+    FillRoundRectangle___VOID__I4__I4__I4__I4__I4__I4__U4__U2(CLR_RT_StackFrame &stack)
+{
+    NANOCLR_HEADER();
+
+    CLR_RT_HeapBlock *pArgs;
+    CLR_GFX_Bitmap *bitmap;
+    GFX_Pen pen;
+    GFX_Brush brush;
+    GFX_Rect rectangle;
+    int radiusX;
+    int radiusY;
+
+    NANOCLR_CHECK_HRESULT(GetBitmap(stack, true, bitmap));
+
+    pArgs = &(stack.Arg1());
+
+    rectangle.left = pArgs[0].NumericByRef().s4;
+    rectangle.top = pArgs[1].NumericByRef().s4;
+    rectangle.right = rectangle.left + pArgs[2].NumericByRef().s4 - 1;
+    rectangle.bottom = rectangle.top + pArgs[3].NumericByRef().s4 - 1;
+
+    radiusX = pArgs[4].NumericByRef().s4;
+    radiusY = pArgs[5].NumericByRef().s4;
+
+    // No outline
+    pen.thickness = 0;
+
+    brush.gradientStartColor = pArgs[6].NumericByRef().u4;
+    brush.gradientEndColor = brush.gradientStartColor;
+    brush.opacity = pArgs[7].NumericByRef().u2;
+
+    bitmap->DrawRoundedRectangle(pen, brush, rectangle, radiusX, radiusY);
+
+    NANOCLR_NOCLEANUP();
+}
+
+HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::
+    FillGradientRectangle___VOID__I4__I4__I4__I4__U4__I4__I4__U4__I4__I4__U2(CLR_RT_StackFrame &stack)
+{
+    NANOCLR_HEADER();
+
+    CLR_RT_HeapBlock *pArgs;
+    CLR_GFX_Bitmap *bitmap;
+    GFX_Pen pen;
+    GFX_Brush brush;
+    GFX_Rect rectangle;
+
+    NANOCLR_CHECK_HRESULT(GetBitmap(stack, true, bitmap));
+
+    pArgs = &(stack.Arg1());
+
+    rectangle.left = pArgs[0].NumericByRef().s4;
+    rectangle.top = pArgs[1].NumericByRef().s4;
+    rectangle.right = rectangle.left + pArgs[2].NumericByRef().s4 - 1;
+    rectangle.bottom = rectangle.top + pArgs[3].NumericByRef().s4 - 1;
+
+    // No outline
+    pen.thickness = 0;
+
+    brush.gradientStartColor = pArgs[4].NumericByRef().u4;
+    brush.gradientStartX = pArgs[5].NumericByRef().s4;
+    brush.gradientStartY = pArgs[6].NumericByRef().s4;
+    brush.gradientEndColor = pArgs[7].NumericByRef().u4;
+    brush.gradientEndX = pArgs[8].NumericByRef().s4;
+    brush.gradientEndY = pArgs[9].NumericByRef().s4;
+    brush.opacity = pArgs[10].NumericByRef().u2;
+
+    bitmap->DrawRectangle(pen, brush, rectangle);
+
+    NANOCLR_NOCLEANUP();
+}
+
+HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::
+    DrawRectangle___VOID__U4__I4__I4__I4__I4__I4__I4__I4__U4__I4__I4__U4__I4__I4__U2(CLR_RT_StackFrame &stack)
+{
+    NANOCLR_HEADER();
+    CLR_RT_HeapBlock *pArgs;
+    CLR_GFX_Bitmap *bitmap;
+    GFX_Pen pen;
+    GFX_Brush brush;
+    GFX_Rect rectangle;
+    int radiusX;
+    int radiusY;
 
     NANOCLR_CHECK_HRESULT(GetBitmap(stack, true, bitmap));
     pArgs = &(stack.Arg1());
 
-
     pen.color = pArgs[0].NumericByRef().u4;
     pen.thickness = pArgs[1].NumericByRef().s4;
-
 
     brush.gradientStartColor = pArgs[8].NumericByRef().u4;
     brush.gradientStartX = pArgs[9].NumericByRef().s4;
@@ -483,7 +727,6 @@ HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::DrawRectangle___
     brush.gradientEndY = pArgs[13].NumericByRef().s4;
     brush.opacity = pArgs[14].NumericByRef().u2;
 
-
     rectangle.left = pArgs[2].NumericByRef().s4;
     rectangle.top = pArgs[3].NumericByRef().s4;
     rectangle.right = rectangle.left + pArgs[4].NumericByRef().s4 - 1;
@@ -492,7 +735,7 @@ HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::DrawRectangle___
     radiusX = pArgs[6].NumericByRef().s4;
     radiusY = pArgs[7].NumericByRef().s4;
 
-    if (radiusX > 0 || radiusY > 0) //it must be an ellipse or rounded rectangle
+    if (radiusX > 0 || radiusY > 0) // it must be an ellipse or rounded rectangle
     {
         if (radiusX < 0 || radiusY < 0) // if one of the params is less than zero then signal error
         {
@@ -510,34 +753,35 @@ HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::DrawRectangle___
         NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
     }
 
-
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::DrawText___VOID__STRING__nanoFrameworkUIFont__nanoFrameworkPresentationMediaColor__I4__I4(CLR_RT_StackFrame& stack)
+HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::
+    DrawText___VOID__STRING__nanoFrameworkUIFont__U4__I4__I4(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
-    CLR_RT_HeapBlock* pArgs;
-    CLR_GFX_Bitmap* bitmap;
-    CLR_GFX_Font* font;
-    LPCSTR            szText;
+    CLR_RT_HeapBlock *pArgs;
+    CLR_GFX_Bitmap *bitmap;
+    CLR_GFX_Font *font;
+    LPCSTR szText;
 
     pArgs = &(stack.Arg1());
 
     NANOCLR_CHECK_HRESULT(GetBitmap(stack, true, bitmap));
     NANOCLR_CHECK_HRESULT(Library_nanoFramework_Graphics_nanoFramework_UI_Font::GetFont(&pArgs[1], font));
 
-    szText = pArgs[0].RecoverString(); FAULT_ON_NULL(szText);
+    szText = pArgs[0].RecoverString();
+    FAULT_ON_NULL(szText);
 
     bitmap->DrawText(szText, *font, pArgs[2].NumericByRef().u4, pArgs[3].NumericByRef().s4, pArgs[4].NumericByRef().s4);
 
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::SetPixel___VOID__I4__I4__nanoFrameworkPresentationMediaColor(CLR_RT_StackFrame& stack)
+HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::SetPixel___VOID__I4__I4__U4(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
-    CLR_GFX_Bitmap* bitmap;
+    CLR_GFX_Bitmap *bitmap;
 
     NANOCLR_CHECK_HRESULT(GetBitmap(stack, true, bitmap));
 
@@ -546,10 +790,10 @@ HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::SetPixel___VOID_
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::GetPixel___nanoFrameworkPresentationMediaColor__I4__I4(CLR_RT_StackFrame& stack)
+HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::GetPixelInt___U4__I4__I4(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
-    CLR_GFX_Bitmap* bitmap;
+    CLR_GFX_Bitmap *bitmap;
 
     NANOCLR_CHECK_HRESULT(GetBitmap(stack, true, bitmap));
 
@@ -558,19 +802,19 @@ HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::GetPixel___nanoF
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::GetBitmap___SZARRAY_U1(CLR_RT_StackFrame& stack)
+HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::GetBitmap___SZARRAY_U1(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
-    CLR_RT_HeapBlock_Array* imageDataHB = NULL;
-    CLR_GFX_Bitmap* bitmap = NULL;
-    CLR_UINT32* imageData = NULL;
-    CLR_UINT32* row = NULL;
-    CLR_UINT32* pixel = NULL;
-    int                     stride = 0;
+    CLR_RT_HeapBlock_Array *imageDataHB = NULL;
+    CLR_GFX_Bitmap *bitmap = NULL;
+    CLR_UINT32 *imageData = NULL;
+    CLR_UINT32 *row = NULL;
+    CLR_UINT32 *pixel = NULL;
+    int stride = 0;
 
     CLR_GFX_BitmapDescription bm;
 
-    CLR_RT_HeapBlock& array = stack.PushValue();
+    CLR_RT_HeapBlock &array = stack.PushValue();
 
     //
     // Set up for restart on out of memory.
@@ -588,13 +832,15 @@ HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::GetBitmap___SZAR
         NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
     }
 
-    NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance(array, bm.GetTotalSize(), g_CLR_RT_WellKnownTypes.m_UInt8));
+    NANOCLR_CHECK_HRESULT(
+        CLR_RT_HeapBlock_Array::CreateInstance(array, bm.GetTotalSize(), g_CLR_RT_WellKnownTypes.m_UInt8));
 
-    imageDataHB = array.DereferenceArray();  FAULT_ON_NULL(imageDataHB);
+    imageDataHB = array.DereferenceArray();
+    FAULT_ON_NULL(imageDataHB);
     imageDataHB->Pin();
 
     stride = bm.GetWidthInWords();
-    imageData = (CLR_UINT32*)imageDataHB->GetFirstElement();
+    imageData = (CLR_UINT32 *)imageDataHB->GetFirstElement();
     row = imageData;
     pixel = row;
 
@@ -613,13 +859,14 @@ HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::GetBitmap___SZAR
     NANOCLR_CLEANUP_END();
 }
 
-HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::StretchImage___VOID__I4__I4__I4__I4__nanoFrameworkUIBitmap__I4__I4__I4__I4__U2(CLR_RT_StackFrame& stack)
+HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::
+    StretchImage___VOID__I4__I4__I4__I4__nanoFrameworkUIBitmap__I4__I4__I4__I4__U2(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
-    CLR_GFX_Bitmap* bitmap;
-    CLR_GFX_Bitmap* bitmapSrc;
-    CLR_RT_HeapBlock* pArgs;
+    CLR_GFX_Bitmap *bitmap;
+    CLR_GFX_Bitmap *bitmapSrc;
+    CLR_RT_HeapBlock *pArgs;
 
     pArgs = &(stack.Arg1());
     NANOCLR_CHECK_HRESULT(GetBitmap(stack, true, bitmap));
@@ -649,12 +896,13 @@ HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::StretchImage___V
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::TileImage___VOID__I4__I4__nanoFrameworkUIBitmap__I4__I4__U2(CLR_RT_StackFrame& stack)
+HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::
+    TileImage___VOID__I4__I4__nanoFrameworkUIBitmap__I4__I4__U2(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
-    CLR_GFX_Bitmap* bitmap;
-    CLR_GFX_Bitmap* bitmapSrc;
-    CLR_RT_HeapBlock* pArgs;
+    CLR_GFX_Bitmap *bitmap;
+    CLR_GFX_Bitmap *bitmapSrc;
+    CLR_RT_HeapBlock *pArgs;
 
     pArgs = &(stack.Arg1());
     NANOCLR_CHECK_HRESULT(GetBitmap(stack, true, bitmap));
@@ -708,12 +956,13 @@ HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::TileImage___VOID
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::Scale9Image___VOID__I4__I4__I4__I4__nanoFrameworkUIBitmap__I4__I4__I4__I4__U2(CLR_RT_StackFrame& stack)
+HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::
+    Scale9Image___VOID__I4__I4__I4__I4__nanoFrameworkUIBitmap__I4__I4__I4__I4__U2(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
-    CLR_GFX_Bitmap* bitmap;
-    CLR_GFX_Bitmap* bitmapSrc;
-    CLR_RT_HeapBlock* pArgs;
+    CLR_GFX_Bitmap *bitmap;
+    CLR_GFX_Bitmap *bitmapSrc;
+    CLR_RT_HeapBlock *pArgs;
 
     pArgs = &(stack.Arg1());
     NANOCLR_CHECK_HRESULT(GetBitmap(stack, true, bitmap));
@@ -744,8 +993,8 @@ HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::Scale9Image___VO
             GFX_Rect src;
             GFX_Rect dst;
 
-            //top-left
-            //if(widthDst >= leftBorder && heightDst >= topBorder)
+            // top-left
+            // if(widthDst >= leftBorder && heightDst >= topBorder)
             dst.left = xDst;
             dst.top = yDst;
             dst.right = dst.left + leftBorder - 1;
@@ -755,9 +1004,9 @@ HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::Scale9Image___VO
             src.right = src.left + leftBorder - 1;
             src.bottom = src.top + topBorder - 1;
             bitmap->DrawImage(dst, *bitmapSrc, src, opacity);
-            //bmpDest.StretchImage(xDst, yDst, leftBorder, topBorder, bitmap, 0, 0, leftBorder, topBorder, opacity);
+            // bmpDest.StretchImage(xDst, yDst, leftBorder, topBorder, bitmap, 0, 0, leftBorder, topBorder, opacity);
 
-      //top-right
+            // top-right
             if (widthDst > leftBorder /*&& heightDst >= topBorder*/)
             {
                 dst.left = xDst + widthDst - rightBorder;
@@ -769,11 +1018,11 @@ HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::Scale9Image___VO
                 src.right = src.left + rightBorder - 1;
                 src.bottom = src.top + topBorder - 1;
                 bitmap->DrawImage(dst, *bitmapSrc, src, opacity);
-                //bmpDest.StretchImage(xDst + widthDst - rightBorder, yDst, rightBorder, topBorder, bitmap,
+                // bmpDest.StretchImage(xDst + widthDst - rightBorder, yDst, rightBorder, topBorder, bitmap,
                 //                     widthSrc - rightBorder, 0, rightBorder, topBorder, opacity);
             }
-            //bottom-left
-            if (/*widthDst >= leftBorder && */heightDst > topBorder)
+            // bottom-left
+            if (/*widthDst >= leftBorder && */ heightDst > topBorder)
             {
                 dst.left = xDst;
                 dst.top = yDst + heightDst - bottomBorder;
@@ -784,11 +1033,11 @@ HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::Scale9Image___VO
                 src.right = src.left + leftBorder - 1;
                 src.bottom = src.top + bottomBorder - 1;
                 bitmap->DrawImage(dst, *bitmapSrc, src, opacity);
-                //bmpDest.StretchImage(xDst, yDst + heightDst - bottomBorder, leftBorder, bottomBorder, bitmap,
+                // bmpDest.StretchImage(xDst, yDst + heightDst - bottomBorder, leftBorder, bottomBorder, bitmap,
                 //                     0, heightSrc - bottomBorder, leftBorder, bottomBorder, opacity);
             }
-            //bottom-right
-            if (widthDst > leftBorder&& heightDst > topBorder)
+            // bottom-right
+            if (widthDst > leftBorder && heightDst > topBorder)
             {
                 dst.left = xDst + widthDst - rightBorder;
                 dst.top = yDst + heightDst - bottomBorder;
@@ -799,10 +1048,12 @@ HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::Scale9Image___VO
                 src.right = src.left + rightBorder - 1;
                 src.bottom = src.top + bottomBorder - 1;
                 bitmap->DrawImage(dst, *bitmapSrc, src, opacity);
-                //bmpDest.StretchImage(xDst + widthDst - rightBorder, yDst + heightDst - bottomBorder, rightBorder, bottomBorder, bitmap,
-                //                     widthSrc - rightBorder, heightSrc - bottomBorder, rightBorder, bottomBorder, opacity);
+                // bmpDest.StretchImage(xDst + widthDst - rightBorder, yDst + heightDst - bottomBorder, rightBorder,
+                // bottomBorder, bitmap,
+                //                     widthSrc - rightBorder, heightSrc - bottomBorder, rightBorder, bottomBorder,
+                //                     opacity);
             }
-            //left
+            // left
             if (/*widthDst >= leftBorder &&*/ centerHeightDst > 0)
             {
                 dst.left = xDst;
@@ -814,10 +1065,10 @@ HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::Scale9Image___VO
                 src.right = src.left + leftBorder - 1;
                 src.bottom = src.top + centerHeightSrc - 1;
                 bitmap->DrawImage(dst, *bitmapSrc, src, opacity);
-                //bmpDest.StretchImage(xDst, yDst + topBorder, leftBorder, centerHeightDst, bitmap,
+                // bmpDest.StretchImage(xDst, yDst + topBorder, leftBorder, centerHeightDst, bitmap,
                 //                     0, topBorder, leftBorder, centerHeightSrc, opacity);
             }
-            //top
+            // top
             if (centerWidthDst > 0 /*&& heightDst >= topBorder*/)
             {
                 dst.left = xDst + leftBorder;
@@ -829,13 +1080,12 @@ HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::Scale9Image___VO
                 src.right = src.left + centerWidthSrc - 1;
                 src.bottom = src.top + topBorder - 1;
                 bitmap->DrawImage(dst, *bitmapSrc, src, opacity);
-                //bmpDest.StretchImage(xDst + leftBorder, yDst, centerWidthDst, topBorder, bitmap,
+                // bmpDest.StretchImage(xDst + leftBorder, yDst, centerWidthDst, topBorder, bitmap,
                 //                     leftBorder, 0, centerWidthSrc, topBorder, opacity);
             }
 
-
-            //right
-            if (widthDst > leftBorder&& centerHeightDst > 0)
+            // right
+            if (widthDst > leftBorder && centerHeightDst > 0)
             {
                 dst.left = xDst + widthDst - rightBorder;
                 dst.top = yDst + topBorder;
@@ -846,10 +1096,11 @@ HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::Scale9Image___VO
                 src.right = src.left + rightBorder - 1;
                 src.bottom = src.top + centerHeightSrc - 1;
                 bitmap->DrawImage(dst, *bitmapSrc, src, opacity);
-                //bmpDest.StretchImage(xDst + widthDst - rightBorder, yDst + topBorder, rightBorder, centerHeightDst, bitmap,
+                // bmpDest.StretchImage(xDst + widthDst - rightBorder, yDst + topBorder, rightBorder, centerHeightDst,
+                // bitmap,
                 //                     widthSrc - rightBorder, topBorder, rightBorder,  centerHeightSrc, opacity);
             }
-            //bottom
+            // bottom
             if (centerWidthDst > 0 && heightDst > topBorder)
             {
                 dst.left = xDst + leftBorder;
@@ -861,10 +1112,11 @@ HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::Scale9Image___VO
                 src.right = src.left + centerWidthSrc - 1;
                 src.bottom = src.top + bottomBorder - 1;
                 bitmap->DrawImage(dst, *bitmapSrc, src, opacity);
-                //bmpDest.StretchImage(xDst + leftBorder, yDst + heightDst - bottomBorder, centerWidthDst, bottomBorder, bitmap,
+                // bmpDest.StretchImage(xDst + leftBorder, yDst + heightDst - bottomBorder, centerWidthDst,
+                // bottomBorder, bitmap,
                 //                 leftBorder, heightSrc - bottomBorder, centerWidthSrc, bottomBorder, opacity);
             }
-            //center
+            // center
             if (centerWidthDst > 0 && centerHeightDst > 0)
             {
                 dst.left = xDst + leftBorder;
@@ -876,7 +1128,7 @@ HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::Scale9Image___VO
                 src.right = src.left + centerWidthSrc - 1;
                 src.bottom = src.top + centerHeightSrc - 1;
                 bitmap->DrawImage(dst, *bitmapSrc, src, opacity);
-                //bmpDest.StretchImage(xDst + leftBorder, yDst + topBorder, centerWidthDst, centerHeightDst, bitmap,
+                // bmpDest.StretchImage(xDst + leftBorder, yDst + topBorder, centerWidthDst, centerHeightDst, bitmap,
                 //                     leftBorder, topBorder, centerWidthSrc, centerHeightSrc, opacity);
             }
         }
@@ -889,11 +1141,11 @@ HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::Scale9Image___VO
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::Dispose___VOID__BOOLEAN(CLR_RT_StackFrame& stack)
+HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::Dispose___VOID__BOOLEAN(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
-    CLR_RT_HeapBlock* pThis = stack.This();
+    CLR_RT_HeapBlock *pThis = stack.This();
 
     if (pThis[CLR_GFX_Bitmap::FIELD__m_bitmap].Dereference() == NULL)
     {
@@ -903,7 +1155,6 @@ HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::Dispose___VOID__
     NANOCLR_CHECK_HRESULT(CLR_GFX_Bitmap::DeleteInstance(pThis[FIELD__m_bitmap]));
     pThis[FIELD__m_bitmap].SetObjectReference(NULL);
 
-
     //   Code from another version ?
     //   NANOCLR_CHECK_HRESULT(CLR_GFX_Bitmap::DeleteInstance(pThis[CLR_GFX_Bitmap::FIELD__m_bitmap]));
     //   pThis[CLR_GFX_Bitmap::FIELD__m_bitmap].SetObjectReference(NULL);
@@ -911,25 +1162,29 @@ HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::Dispose___VOID__
     NANOCLR_NOCLEANUP();
 }
 
-// Helper routines, not automatically generated as per above 
+// Helper routines, not automatically generated as per above
 //
 
-HRESULT GetBitmap(CLR_RT_HeapBlock* pThis, bool fForWrite, CLR_GFX_Bitmap*& bitmap)
+HRESULT GetBitmap(CLR_RT_HeapBlock *pThis, bool fForWrite, CLR_GFX_Bitmap *&bitmap)
 {
     NANOCLR_HEADER();
 
-    if (pThis) pThis = pThis->Dereference(); FAULT_ON_NULL(pThis);
+    if (pThis)
+        pThis = pThis->Dereference();
+    FAULT_ON_NULL(pThis);
 
-    NANOCLR_CHECK_HRESULT(CLR_GFX_Bitmap::GetInstanceFromGraphicsHeapBlock(pThis[CLR_GFX_Bitmap::FIELD__m_bitmap], bitmap));
+    NANOCLR_CHECK_HRESULT(
+        CLR_GFX_Bitmap::GetInstanceFromManagedCSharpReference(pThis[CLR_GFX_Bitmap::FIELD__m_bitmap], bitmap));
 
-    if ((bitmap->m_bm.m_flags & CLR_GFX_BitmapDescription::c_ReadOnly) && fForWrite) NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
-    if ((bitmap->m_bm.m_flags & CLR_GFX_BitmapDescription::c_Compressed)) NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+    if ((bitmap->m_bm.m_flags & CLR_GFX_BitmapDescription::c_ReadOnly) && fForWrite)
+        NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+    if ((bitmap->m_bm.m_flags & CLR_GFX_BitmapDescription::c_Compressed))
+        NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
 
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT GetBitmap(CLR_RT_StackFrame& stack, bool fForWrite, CLR_GFX_Bitmap*& bitmap)
+HRESULT GetBitmap(CLR_RT_StackFrame &stack, bool fForWrite, CLR_GFX_Bitmap *&bitmap)
 {
     return GetBitmap(&stack.Arg0(), fForWrite, bitmap);
 }
-

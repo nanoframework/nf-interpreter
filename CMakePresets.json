@@ -1,0 +1,16 @@
+{
+    "version": 4,
+    "include": [
+        "CMake/arm-gcc.json",
+        "CMake/xtensa-esp32.json",
+        "CMake/xtensa-esp32c3.json",
+        "CMake/xtensa-esp32s2.json",
+        "CMake/xtensa-esp32s3.json",
+        "targets/AzureRTOS/CMakePresets.json",
+        "targets/ChibiOS/CMakePresets.json",
+        "targets/ESP32/CMakePresets.json",
+        "targets/FreeRTOS/CMakePresets.json",
+        "targets/TI_SimpleLink/CMakePresets.json",
+        "targets-community/CMakePresets.json"
+    ]
+}

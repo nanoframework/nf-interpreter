@@ -1,3 +1,6 @@
+# Copyright (c) .NET Foundation and Contributors
+# See LICENSE file in the project root for full license information.
+
 trigger: none
 
 pr:
@@ -14,929 +17,749 @@ resources:
       type: github
       name: espressif/esp-idf
       endpoint: nanoframework
-      ref: refs/tags/v4.4
-    
+      ref: refs/tags/v5.2.3
+
 # scheduled build
-schedules:
-- cron: "58 23 * * *"
-  branches:
-    include: [ main ]
-  always: true
-  displayName: Nightly build at 23:58
+# the schedule is defined at the AZDO web interface because of inconsistencies with time zones
 
 jobs:
+  ##############################
+  - job: Check_Build_Options
+    pool:
+      vmImage: "windows-latest"
 
-##############################
-- job: Check_Build_Options
-  pool:
-    vmImage: 'windows-2019'
+    variables:
+      DOTNET_NOLOGO: true
 
-  variables:
-    DOTNET_NOLOGO: true
+    steps:
+      - checkout: self
+        fetchDepth: 1
 
-  steps:
-  - checkout: self
-    fetchDepth: 1
+      - template: azure-pipelines-templates/get-commit-details.yml@templates
 
-  - template: azure-pipelines-templates/get-commit-details.yml@templates
+      # check build options
+      - powershell: |
 
-  # check build options
-  - powershell: |
-
-      if($env:Build_Reason -eq "Schedule")
-      {
-          # scheduled daily build: get commit date 
-          $commitDate = git show -s --format=%cd --date=short
-          $commitDate = [DateTime]$commitDate
-          
-          if($commitDate -eq [System.DateTime]::UtcNow.Date)
+          if($env:Build_Reason -eq "Schedule")
           {
-              # last commit is from today, build images
-              echo "##vso[task.setvariable variable=CHECK_CHANGES;isOutput=true]true" 
-              "**Commits from today. Go and check what changed.**" | Write-Host
+              # scheduled daily build
+              $now = [System.DateTime]::UtcNow.Date
+              "Today is $now" | Write-Host
+
+              # get commit date 
+              $commitDate = git show -s --format=%cd --date=short
+              $commitDate = [DateTime]$commitDate
+
+              "Last commit dated $commitDate" | Write-Host
+
+              $yesterdayDate = [System.DateTime]::UtcNow.AddDays(-1).Date
+              "Comparing with $yesterdayDate" | Write-Host
+              
+              # shceduled build is at start of day, so check if commit date was from yesterday
+              if($commitDate -ge $yesterdayDate)
+              {
+                  # last commit was yesterday, build images
+                  echo "##vso[task.setvariable variable=CHECK_CHANGES;isOutput=true]true" 
+                  "**Commits from today. Go and check what changed.**" | Write-Host
+              }
+              else
+              {
+                # last commit is not from yesterday, skip build
+                "***************************************************" | Write-Host
+                "* Last commit is older than today, skipping build *" | Write-Host
+                "***************************************************" | Write-Host
+                echo "##vso[task.setvariable variable=CHECK_CHANGES;isOutput=true]false"
+              }
           }
           else
           {
-            # last commit is older than today, skip build
-            "***************************************************" | Write-Host
-            "* Last commit is older than today, skipping build *" | Write-Host
-            "***************************************************" | Write-Host
-            echo "##vso[task.setvariable variable=CHECK_CHANGES;isOutput=true]false"
-          }
-      }
-      else
-      {
-          # build for other reasons: build depending on target tag
-          echo "##vso[task.setvariable variable=CHECK_CHANGES;isOutput=true]true"
-          "**build for other reasons**" | Write-Host  
-      }
+              # build for other reasons: build depending on target tag
+              echo "##vso[task.setvariable variable=CHECK_CHANGES;isOutput=true]true"
 
-    name: BuildOptions
-    displayName: Get build options
-
-  # check what changed
-  - powershell: |
-      git config --global user.email "nfbot"
-      git config --global user.name "nanoframework@outlook.com"
-
-      $auth = "basic $([System.Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes(":$(GitHubToken)"))))"
-      
-      $buildingPr = $env:System_PullRequest_PullRequestId -ne $null
-
-      if($env:StartReleaseCandidate -like "true")
-      {
-          # this is a release prep so NO build
-      }
-      else
-      {
-          if($buildingPr)
-          {
-              # get files changed in PR, if this is a PR
-              $commit = Invoke-RestMethod -Uri "https://api.github.com/repos/nanoframework/nf-interpreter/pulls/$env:System_PullRequest_PullRequestNumber/files" -Header @{"Authorization"="$auth"} -ContentType "application/json" -Method GET
-
-              # filter removed files              
-              $files = $commit.where{$_.status -ne 'removed'}
-
-              # get file names only
-              $files = $files | % {$_.filename}
-          }
-          else
-          {
-              # scheduled build, grab repo history for the last day
-              $commitHistory = git log --name-status --since=1.day --format=
-
-              # filter removed files              
-              $files = $commitHistory.where{$_[0] -ne 'D'}
-
-              # get file names only
-              $files = $files | % {$_.SubString(2)}
+              if ($env:System_PullRequest_PullRequestId -ne $null)
+              {
+                "**This is a PR build**" | Write-Host
+              }
+              else
+              {
+                "**build for other reasons**" | Write-Host
+              }
           }
 
-          Write-host "Files changed:"
-          $files | % { Write-host $_ }
-          Write-host ""
+        name: BuildOptions
+        displayName: Get build options
+
+      # check what changed
+      - powershell: |
+          git config --global user.email "nfbot"
+          git config --global user.name "nanoframework@outlook.com"
+
+          $auth = "basic $([System.Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes(":$(GitHubToken)")))"
+
+          $buildingPr = $env:System_PullRequest_PullRequestId -ne $null
 
           # set default values
           echo "##vso[task.setvariable variable=BUILD_CHIBIOS;isOutput=true]false"  
           echo "##vso[task.setvariable variable=BUILD_ESP32;isOutput=true]false"  
           echo "##vso[task.setvariable variable=BUILD_TI;isOutput=true]false"  
+          echo "##vso[task.setvariable variable=BUILD_AZURERTOS;isOutput=true]false"
           echo "##vso[task.setvariable variable=BUILD_ALL;isOutput=true]false"  
 
-          if(
-              (($files.where{$_.Contains('/')}).Count -eq 0) -Or
-              (($files.where{$_.StartsWith('azure-pipelines-templates')}).Count -gt 0) -Or
-              (($files.where{$_.StartsWith('CMake')}).Count -gt 0) -Or
-              (($files.where{$_.StartsWith('src')}).Count -gt 0)
-            )
+          if($env:StartReleaseCandidate -like "true")
           {
-              # files at:
-              # - repo root
-              # - azure-pipelines-templates
-              # - CMake
-              # - src
-
-              if($buildingPr)
-              {
-                  # ChibiOS targets are the only ones needing to be build on a global change
-                  echo "##vso[task.setvariable variable=BUILD_CHIBIOS;isOutput=true]true"
-              }
-              else
-              {
-                  echo "##vso[task.setvariable variable=BUILD_ALL;isOutput=true]true"
-              }
-              
-              Write-host "Building ALL targets"
-          }
-
-          if($buildingPr)
-          {
-              if( 
-                  ($files.where{$_.Contains('targets/ChibiOS/_common')}).Count -gt 0 -Or
-                  ($files.where{$_.Contains('targets/ChibiOS/_FatFS')}).Count -gt 0 -Or
-                  ($files.where{$_.Contains('targets/ChibiOS/_include')}).Count -gt 0 -Or
-                  ($files.where{$_.Contains('targets/ChibiOS/_Lwip')}).Count -gt 0 -Or
-                  ($files.where{$_.Contains('targets/ChibiOS/_nanoBooter')}).Count -gt 0 -Or
-                  ($files.where{$_.Contains('targets/ChibiOS/_nanoCLR')}).Count -gt 0 -Or
-                  ($files.where{$_.Contains('targets/ChibiOS/_FatFS')}).Count -gt 0 -Or
-                  ($files.where{$_.Contains('targets/ChibiOS/_nf-overlay')}).Count -gt 0 -Or
-                  ($files.where{$_.Contains('targets/ChibiOS/_spiffs')}).Count -gt 0 -Or
-                  ($files.where{$_.Contains('targets/ChibiOS/ORGPAL_PALTHREE')}).Count -gt 0 -Or
-                  ($files.where{$_.Contains('targets/ChibiOS/ST_NUCLEO64_F091RC')}).Count -gt 0
-                )
-              {
-                  # files at ChibiOS global folders or targets being built with this pipeline
-                  echo "##vso[task.setvariable variable=BUILD_CHIBIOS;isOutput=true]true"
-
-                  Write-host "Building ChibiOS targets"
-              }
+              # this is a release prep so NO build
+              Write-host "##[command] Start Release candidate build, don't build"
           }
           else
           {
-              if( ($files.where{$_.Contains('targets/ChibiOS')}).Count -gt 0)
+              # check if this build was triggered by the pipeline itself
+              if($env:Build_Reason -eq "Manual")
               {
-                  # files at ChibiOS folder
-                  echo "##vso[task.setvariable variable=BUILD_CHIBIOS;isOutput=true]true"
+                  # this is a manual build, no need to check anything 
+                  Write-host "##[command] Manual build"
+              }
+              else
+              {
+                if($buildingPr)
+                {
+                    # get files changed in PR, if this is a PR
+                    $commit = Invoke-RestMethod -Uri "https://api.github.com/repos/nanoframework/nf-interpreter/pulls/$env:System_PullRequest_PullRequestNumber/files" -Header @{"Authorization"="$auth"} -ContentType "application/json" -Method GET
 
-                  Write-host "Building ChibiOS targets"
+                    # filter removed files              
+                    $files = $commit.where{$_.status -ne 'removed'}
+
+                    # get file names only
+                    $files = $files | % {$_.filename}
+                }
+                else
+                {
+                    # scheduled build, grab repo history for the last day
+                    $commitHistory = git log --name-status --since=1.day --format=
+
+                    # filter removed files              
+                    $files = $commitHistory.where{$_[0] -ne 'D'}
+
+                    # get file names only
+                    $files = $files | % {$_.SubString(2)}
+                }
+
+                Write-host "##[group] Files changed:"
+                $files | % { Write-host $_ }
+                Write-host "##[endgroup]"
+
+                if(
+                    (($files.where{$_.Contains('/')}).Count -eq 0) -Or
+                    (($files.where{$_.StartsWith('azure-pipelines-templates')}).Count -gt 0) -Or
+                    (($files.where{$_.StartsWith('CMake')}).Count -gt 0) -Or
+                    (($files.where{$_.StartsWith('src')}).Count -gt 0)
+                  )
+                {
+                    # files at:
+                    # - repo root
+                    # - azure-pipelines-templates
+                    # - CMake
+                    # - src
+
+                    if($buildingPr)
+                    {
+                        # ChibiOS targets are the only ones needing to be build on a global change
+                        echo "##vso[task.setvariable variable=BUILD_CHIBIOS;isOutput=true]true"
+                        Write-host "##[command] Building ChibiOS targets"
+                    }
+                    else
+                    {
+                        echo "##vso[task.setvariable variable=BUILD_ALL;isOutput=true]true"
+                        Write-host "##[command] Building ALL targets"
+                    }              
+                }
+
+                if($buildingPr)
+                {
+                    if( 
+                        ($files.where{$_.Contains('targets/ChibiOS/_common')}).Count -gt 0 -Or
+                        ($files.where{$_.Contains('targets/ChibiOS/_FatFS')}).Count -gt 0 -Or
+                        ($files.where{$_.Contains('targets/ChibiOS/_include')}).Count -gt 0 -Or
+                        ($files.where{$_.Contains('targets/ChibiOS/_Lwip')}).Count -gt 0 -Or
+                        ($files.where{$_.Contains('targets/ChibiOS/_nanoBooter')}).Count -gt 0 -Or
+                        ($files.where{$_.Contains('targets/ChibiOS/_nanoCLR')}).Count -gt 0 -Or
+                        ($files.where{$_.Contains('targets/ChibiOS/_FatFS')}).Count -gt 0 -Or
+                        ($files.where{$_.Contains('targets/ChibiOS/_nf-overlay')}).Count -gt 0 -Or
+                        ($files.where{$_.Contains('targets/ChibiOS/_littlefs')}).Count -gt 0 -Or
+                        ($files.where{$_.Contains('targets/ChibiOS/ORGPAL_PALTHREE')}).Count -gt 0 -Or
+                        ($files.where{$_.Contains('targets/ChibiOS/ORGPAL_PALX')}).Count -gt 0 -Or
+                        ($files.where{$_.Contains('targets/ChibiOS/ST_NUCLEO64_F091RC')}).Count -gt 0
+                      )
+                    {
+                        # files at ChibiOS global folders or targets being built with this pipeline
+                        echo "##vso[task.setvariable variable=BUILD_CHIBIOS;isOutput=true]true"
+
+                        Write-host "##[command] Building ChibiOS targets"
+                    }
+                }
+                else
+                {
+                    if( ($files.where{$_.Contains('targets/ChibiOS')}).Count -gt 0)
+                    {
+                        # files at ChibiOS folder
+                        echo "##vso[task.setvariable variable=BUILD_CHIBIOS;isOutput=true]true"
+
+                        Write-host "##[command] Building ChibiOS targets"
+                    }
+                }
+
+                if(
+                  !$buildingPr -And 
+                  ($files.where{$_.Contains('targets/ESP32')}).Count -gt 0)
+                {
+                    # files at ESP32 folder
+                    echo "##vso[task.setvariable variable=BUILD_ESP32;isOutput=true]true"
+
+                    Write-host "##[command] Building ESP32 targets"
+                }
+
+                if(
+                  !$buildingPr -And
+                  ($files.where{$_.Contains('targets/TI_SimpleLink')}).Count -gt 0)
+                {
+                    # files at TI_SimpleLink folder
+                    echo "##vso[task.setvariable variable=BUILD_TI;isOutput=true]true"
+
+                    Write-host "##[command] Building TI SimpleLink targets"
+                }
+
+                if( 
+                  !$buildingPr -And
+                  ($files.where{$_.Contains('targets/AzureRTOS')}).Count -gt 0)
+                {
+                    # files at AzureRTOS folder
+                    echo "##vso[task.setvariable variable=BUILD_AZURERTOS;isOutput=true]true"
+
+                    Write-host "##[command] Building Azure RTOS targets"
+                }
               }
           }
 
-          if(
-            !$buildingPr -And 
-            ($files.where{$_.Contains('targets/ESP32')}).Count -gt 0)
-          {
-              # files at ESP32 folder
-              echo "##vso[task.setvariable variable=BUILD_ESP32;isOutput=true]true"
+        name: TargetsToBuild
+        displayName: Get targets to build
+        condition: eq(variables['BuildOptions.CHECK_CHANGES'], 'True')
 
-              Write-host "Building ESP32 targets"
-          }
-
-          if(
-            !$buildingPr -And
-            ($files.where{$_.Contains('targets/TI_SimpleLink')}).Count -gt 0)
-          {
-              # files at TI_SimpleLink folder
-              echo "##vso[task.setvariable variable=BUILD_TI;isOutput=true]true"
-
-              Write-host "Building TI SimpleLink targets"
-          }
-      }
-
-    name: TargetsToBuild
-    displayName: Get targets to build
-    condition: eq(variables['BuildOptions.CHECK_CHANGES'], 'True')
-
-##############################
-- job: Check_Code_Style
-  dependsOn:
-  - Check_Build_Options
-
-  pool:
-    vmImage: 'windows-2019'
-
-  steps:
-  - checkout: self
-    fetchDepth: 1
-
-  - template: azure-pipelines-templates/download-install-llvm.yml
-  - template: azure-pipelines-templates/check-code-style.yml
-
-################
-# STM32
-- job: Build_STM32_targets
-  condition: >-
-    and(
-      succeeded('Check_Code_Style'),
+  ################
+  # STM32
+  - job: Build_STM32_targets
+    condition: >-
       or(
         eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ALL'], true),
         eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_CHIBIOS'], true),
         contains(dependencies.Check_Build_Options.outputs['GetCommitDetails.COMMIT_MESSAGE'], '***BUILD_ALL***'),
-        eq(variables['BUILD_ALL'], 'true'),
-        eq(variables['BUILD_CHIBIOS'], 'true')
+        and(
+          eq(variables['Build.Reason'], 'Manual'),
+          or(
+            eq(variables['BUILD_ALL__'], 'true'),
+            eq(variables['BUILD_CHIBIOS__'], 'true')
+          )
+        )
       )
-    )
-  dependsOn:
-  - Check_Build_Options
-  - Check_Code_Style
+    dependsOn:
+      - Check_Build_Options
 
-  pool:
-    vmImage: 'windows-2019'
+    pool:
+      vmImage: "windows-latest"
 
-  strategy:
-    matrix:
-      ORGPAL_PALTHREE:
-        TargetBoard: ORGPAL_PALTHREE
-        TargetSeries: 'stm32f7xx'
-        BuildOptions: >-
-          -DTARGET_SERIES=STM32F7xx
-          -DRTOS=ChibiOS
-          -DCHIBIOS_CONTRIB_REQUIRED=ON
-          -DSTM32_CUBE_PACKAGE_REQUIRED=ON
-          -DSUPPORT_ANY_BASE_CONVERSION=ON
-          -DNF_FEATURE_DEBUGGER=ON
-          -DNF_FEATURE_RTC=ON
-          -DNF_FEATURE_HAS_USB_MSD=ON
-          -DNF_FEATURE_HAS_SDCARD=ON
-          -DNF_FEATURE_USE_SPIFFS=ON
-          -DAPI_System.Math=ON
-          -DAPI_Hardware.Stm32=ON
-          -DNF_FEATURE_HAS_CONFIG_BLOCK=ON
-          -DAPI_Windows.Devices.Gpio=ON -DAPI_System.Device.Gpio=ON
-          -DAPI_Windows.Devices.Spi=ON -DAPI_System.Device.Spi=ON
-          -DAPI_Windows.Devices.I2c=ON -DAPI_System.Device.I2c=ON
-          -DAPI_Windows.Devices.Pwm=ON -DAPI_System.Device.Pwm=ON
-          -DAPI_Windows.Devices.SerialCommunication=ON -DAPI_System.IO.Ports=ON
-          -DAPI_Windows.Devices.Adc=ON -DAPI_System.Device.Adc=ON
-          -DAPI_System.Device.Dac=ON
-          -DAPI_System.Net=ON
-          -DNF_SECURITY_MBEDTLS=ON
-          -DAPI_nanoFramework.ResourceManager=ON
-          -DAPI_nanoFramework.System.Collections=ON
-          -DAPI_nanoFramework.System.Text=ON
+    strategy:
+      matrix:
+        ORGPAL_PALTHREE:
+          TargetBoard: ORGPAL_PALTHREE
+          TargetSeries: "stm32f7xx"
+          BuildOptions:
+          NeedsDFU: true
+          NeedsSRECORD: false
+          CMakePreset: ORGPAL_PALTHREE
 
-        GccArm_Version:
-        NeedsDFU: true
-        NeedsSRECORD: false
-      ST_NUCLEO64_F091RC:
-        TargetBoard: ST_NUCLEO64_F091RC
-        TargetSeries: 'stm32f0xx'
-        BuildOptions: >-
-          -DTARGET_SERIES=STM32F0xx
-          -DRTOS=ChibiOS
-          -DNF_FEATURE_DEBUGGER=ON
-          -DNF_FEATURE_RTC=ON
-          -DUSE_RNG=OFF
-          -DNF_PLATFORM_NO_CLR_TRACE=ON
-          -DNF_CLR_NO_IL_INLINE=ON
-          -DAPI_Hardware.Stm32=ON
-          -DAPI_Windows.Devices.Gpio=ON -DAPI_System.Device.Gpio=ON
-          -DAPI_Windows.Devices.Spi=ON -DAPI_System.Device.Spi=ON
-          -DAPI_Windows.Devices.I2c=ON -DAPI_System.Device.I2c=ON
-          -DAPI_Windows.Devices.Pwm=ON -DAPI_System.Device.Pwm=ON
-          -DAPI_Windows.Devices.SerialCommunication=ON -DAPI_System.IO.Ports=ON
-          -DAPI_nanoFramework.System.Text=ON
+        ORGPAL_PALX:
+          TargetBoard: ORGPAL_PALX
+          TargetSeries: "stm32f7xx"
+          BuildOptions:
+          NeedsDFU: true
+          NeedsSRECORD: false
+          CMakePreset: ORGPAL_PALX
 
-        GccArm_Version:
-        NeedsDFU: false
-        NeedsSRECORD: true
+        ST_NUCLEO64_F091RC:
+          TargetBoard: ST_NUCLEO64_F091RC
+          TargetSeries: "stm32f0xx"
+          BuildOptions:
+          NeedsDFU: false
+          NeedsSRECORD: true
+          CMakePreset: ST_NUCLEO64_F091RC
 
-  variables:
-    DOTNET_NOLOGO: true
-    # creates a counter and assigns it to the revision variable
-    REVISION: $[counter('STM32_1_8_0_versioncounter', 0)]
-    GNU_GCC_TOOLCHAIN_PATH: $(Agent.TempDirectory)\GNU_Tools_ARM_Embedded
-    HelperPackageVersion: $[counter('HelperPackageVersioncounter', 0)]
-    TargetPlatform: 'stm32'
+    variables:
+      DOTNET_NOLOGO: true
+      # creates a counter and assigns it to the revision variable
+      REVISION: $[counter('STM32_1_12_4_versioncounter', 0)]
+      HelperPackageVersion: $[counter('HelperPackageVersioncounter', 0)]
+      TargetPlatform: "stm32"
 
-  steps:
-  - template: azure-pipelines-templates/build-preparations.yml
-  - template: azure-pipelines-templates/nb-gitversioning.yml
-  - template: azure-pipelines-templates/download-install-arm-gcc-toolchain.yml
-  - template: azure-pipelines-templates/download-install-ninja.yml
-  - template: azure-pipelines-templates/download-srecord.yml
-  - template: azure-pipelines-templates/download-hexdfu.yml
-  - template: azure-pipelines-templates/build-chibios-stm32.yml
-  - template: azure-pipelines-templates/pack-publish-artifacts.yml
-  - template: azure-pipelines-templates/publish-cloudsmith.yml
-  - template: azure-pipelines-templates/pack-publish-managed-helpers.yml
+    steps:
+      - template: azure-pipelines-templates/build-preparations.yml
+      - template: azure-pipelines-templates/nb-gitversioning.yml
+      - template: azure-pipelines-templates/download-install-cmake.yml
+      - template: azure-pipelines-templates/download-install-arm-gcc-toolchain.yml
+      - template: azure-pipelines-templates/download-install-ninja.yml
+      - template: azure-pipelines-templates/download-srecord.yml
+      - template: azure-pipelines-templates/download-hexdfu.yml
+      - template: azure-pipelines-templates/build-chibios-stm32-targets.yml
+      - template: azure-pipelines-templates/pack-publish-artifacts.yml
+      - template: azure-pipelines-templates/publish-cloudsmith.yml
+      - template: azure-pipelines-templates/pack-publish-managed-helpers.yml
 
-#################
-# ESP32 targets
-- job: Build_ESP32_targets
-  condition: >-
-    and(
-      succeeded('Check_Code_Style'),
+  #################
+  # ESP32 targets
+  - job: Build_ESP32_targets
+    condition: >-
       or(
         eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ALL'], true),
         eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ESP32'], true),
         contains(dependencies.Check_Build_Options.outputs['GetCommitDetails.COMMIT_MESSAGE'], '***BUILD_ALL***'),
-        eq(variables['BUILD_ALL'], 'true'),
-        eq(variables['BUILD_ESP32'], 'true')
+        and(
+          eq(variables['Build.Reason'], 'Manual'),
+          or(
+            eq(variables['BUILD_ALL__'], 'true'),
+            eq(variables['BUILD_ESP32__'], 'true')
+          )
+        )
       )
-    )
 
-  dependsOn:
-  - Check_Build_Options
-  - Check_Code_Style
+    dependsOn:
+      - Check_Build_Options
 
-  pool:
-    vmImage: 'windows-2019'
+    pool:
+      vmImage: "windows-latest"
 
-  strategy:
-    matrix:
-      ESP32_REV0:
-        TargetBoard: ESP32
-        TargetSeries: 'esp32'
-        BuildOptions: >-
-          -DTARGET_SERIES=ESP32
-          -DRTOS=ESP32
-          -DNF_TARGET_HAS_NANOBOOTER=OFF
-          -DNF_FEATURE_DEBUGGER=ON
-          -DNF_FEATURE_RTC=ON
-          -DNF_FEATURE_HAS_CONFIG_BLOCK=ON
-          -DNF_SECURITY_MBEDTLS=ON
-          -DSUPPORT_ANY_BASE_CONVERSION=ON
-          -DNF_FEATURE_HAS_SDCARD=ON
-          -DAPI_System.IO.FileSystem=ON
-          -DAPI_System.Math=ON
-          -DAPI_Windows.Devices.Gpio=ON -DAPI_System.Device.Gpio=ON
-          -DAPI_Windows.Devices.Spi=ON -DAPI_System.Device.Spi=ON
-          -DAPI_Windows.Devices.I2c=ON -DAPI_System.Device.I2c=ON
-          -DAPI_Windows.Devices.Pwm=ON -DAPI_System.Device.Pwm=ON
-          -DAPI_Windows.Devices.SerialCommunication=ON -DAPI_System.IO.Ports=ON
-          -DAPI_Windows.Devices.Adc=ON -DAPI_System.Device.Adc=ON
-          -DAPI_System.Net=ON
-          -DAPI_System.Device.WiFi=ON
-          -DAPI_Hardware.Esp32=ON
-          -DAPI_nanoFramework.Device.OneWire=ON
-          -DAPI_nanoFramework.ResourceManager=ON
-          -DAPI_nanoFramework.System.Collections=ON
-          -DAPI_nanoFramework.System.Text=ON
-          -DAPI_nanoFramework.Hardware.Esp32.Rmt=ON
-          -DAPI_System.Device.Dac=ON
-        ToolchainFile: toolchain.xtensa-esp32-elf.cmake
-        SDK_config: sdkconfig.default_nopsram.esp32
-        IDF_Target: esp32
-        TargetName: ESP32
-        PackageName: ESP32_REV0
+    strategy:
+      matrix:
+        ESP32_REV0:
+          TargetBoard: ESP32
+          TargetSeries: "esp32"
+          BuildOptions:
+          SDK_config: sdkconfig.default_nopsram.esp32
+          IDF_Target: esp32
+          TargetName: ESP32
+          PackageName: ESP32_REV0
+          CMakePreset: ESP32_REV0
 
-      ESP32_PSRAM_REV3:
-        TargetBoard: ESP32
-        TargetSeries: 'esp32'
-        BuildOptions: >-
-          -DTARGET_SERIES=ESP32
-          -DRTOS=ESP32
-          -DNF_TARGET_HAS_NANOBOOTER=OFF
-          -DNF_FEATURE_DEBUGGER=ON
-          -DNF_FEATURE_RTC=ON
-          -DNF_FEATURE_HAS_CONFIG_BLOCK=ON
-          -DNF_SECURITY_MBEDTLS=ON
-          -DSUPPORT_ANY_BASE_CONVERSION=ON
-          -DNF_FEATURE_HAS_SDCARD=ON
-          -DAPI_System.IO.FileSystem=ON
-          -DAPI_System.Math=ON
-          -DAPI_Windows.Devices.Gpio=ON -DAPI_System.Device.Gpio=ON
-          -DAPI_Windows.Devices.Spi=ON -DAPI_System.Device.Spi=ON
-          -DAPI_Windows.Devices.I2c=ON -DAPI_System.Device.I2c=ON
-          -DAPI_Windows.Devices.Pwm=ON -DAPI_System.Device.Pwm=ON
-          -DAPI_Windows.Devices.SerialCommunication=ON -DAPI_System.IO.Ports=ON
-          -DAPI_Windows.Devices.Adc=ON -DAPI_System.Device.Adc=ON
-          -DAPI_System.Net=ON
-          -DAPI_System.Device.WiFi=ON
-          -DAPI_Hardware.Esp32=ON
-          -DAPI_nanoFramework.Device.OneWire=ON
-          -DAPI_nanoFramework.ResourceManager=ON
-          -DAPI_nanoFramework.System.Collections=ON
-          -DAPI_nanoFramework.System.Text=ON
-          -DAPI_nanoFramework.Hardware.Esp32.Rmt=ON
-          -DAPI_System.Device.Dac=ON
-        ToolchainFile: toolchain.xtensa-esp32-elf.cmake
-        SDK_config: sdkconfig.default_rev3.esp32
-        IDF_Target: esp32
-        TargetName: ESP32
-        PackageName: ESP32_PSRAM_REV3
+        ESP32_PSRAM_REV3:
+          TargetBoard: ESP32
+          TargetSeries: "esp32"
+          BuildOptions:
+          IDF_Target: esp32
+          TargetName: ESP32
+          PackageName: ESP32_PSRAM_REV3
+          CMakePreset: ESP32_PSRAM_REV3
 
-      ESP32_PSRAM_XTAL26_REV0:
-        TargetBoard: ESP32
-        TargetSeries: 'esp32'
-        BuildOptions: >-
-          -DTARGET_SERIES=ESP32
-          -DRTOS=ESP32
-          -DNF_TARGET_HAS_NANOBOOTER=OFF
-          -DESP32_XTAL_FREQ_26=ON
-          -DNF_FEATURE_DEBUGGER=ON
-          -DNF_FEATURE_RTC=ON
-          -DNF_FEATURE_HAS_CONFIG_BLOCK=ON
-          -DNF_SECURITY_MBEDTLS=ON
-          -DSUPPORT_ANY_BASE_CONVERSION=ON
-          -DNF_FEATURE_HAS_SDCARD=ON
-          -DAPI_System.IO.FileSystem=ON
-          -DAPI_System.Math=ON
-          -DAPI_Windows.Devices.Gpio=ON -DAPI_System.Device.Gpio=ON
-          -DAPI_Windows.Devices.Spi=ON -DAPI_System.Device.Spi=ON
-          -DAPI_Windows.Devices.I2c=ON -DAPI_System.Device.I2c=ON
-          -DAPI_Windows.Devices.Pwm=ON -DAPI_System.Device.Pwm=ON
-          -DAPI_Windows.Devices.SerialCommunication=ON -DAPI_System.IO.Ports=ON
-          -DAPI_Windows.Devices.Adc=ON -DAPI_System.Device.Adc=ON
-          -DAPI_System.Net=ON
-          -DAPI_System.Device.WiFi=ON
-          -DAPI_Hardware.Esp32=ON
-          -DAPI_nanoFramework.Device.OneWire=ON
-          -DAPI_nanoFramework.ResourceManager=ON
-          -DAPI_nanoFramework.System.Collections=ON
-          -DAPI_nanoFramework.System.Text=ON
-          -DAPI_nanoFramework.Hardware.Esp32.Rmt=ON
-          -DAPI_System.Device.Dac=ON
-        ToolchainFile: toolchain.xtensa-esp32-elf.cmake
-        SDK_config: sdkconfig.default.esp32
-        IDF_Target: esp32
-        TargetName: ESP32
-        PackageName: ESP32_PSRAM_XTAL26_REV0
+        ESP32_PSRAM_XTAL26_REV0:
+          TargetBoard: ESP32
+          TargetSeries: "esp32"
+          BuildOptions:
+          IDF_Target: esp32
+          TargetName: ESP32
+          PackageName: ESP32_PSRAM_XTAL26_REV0
+          CMakePreset: ESP32_PSRAM_XTAL26_REV0
 
-      ESP32_REV3:
-        TargetBoard: ESP32
-        TargetSeries: 'esp32'
-        BuildOptions: >-
-          -DTARGET_SERIES=ESP32
-          -DRTOS=ESP32
-          -DNF_TARGET_HAS_NANOBOOTER=OFF
-          -DNF_FEATURE_DEBUGGER=ON
-          -DNF_FEATURE_RTC=ON
-          -DNF_FEATURE_HAS_CONFIG_BLOCK=ON
-          -DNF_SECURITY_MBEDTLS=ON
-          -DSUPPORT_ANY_BASE_CONVERSION=ON
-          -DNF_FEATURE_HAS_SDCARD=ON
-          -DAPI_System.IO.FileSystem=ON
-          -DAPI_System.Math=ON
-          -DAPI_Windows.Devices.Gpio=ON -DAPI_System.Device.Gpio=ON
-          -DAPI_Windows.Devices.Spi=ON -DAPI_System.Device.Spi=ON
-          -DAPI_Windows.Devices.I2c=ON -DAPI_System.Device.I2c=ON
-          -DAPI_Windows.Devices.Pwm=ON -DAPI_System.Device.Pwm=ON
-          -DAPI_Windows.Devices.SerialCommunication=ON -DAPI_System.IO.Ports=ON
-          -DAPI_Windows.Devices.Adc=ON -DAPI_System.Device.Adc=ON
-          -DAPI_System.Net=ON
-          -DAPI_System.Device.WiFi=ON
-          -DAPI_Hardware.Esp32=ON
-          -DAPI_nanoFramework.Device.OneWire=ON
-          -DAPI_nanoFramework.ResourceManager=ON
-          -DAPI_nanoFramework.System.Collections=ON
-          -DAPI_nanoFramework.System.Text=ON
-          -DAPI_nanoFramework.Hardware.Esp32.Rmt=ON
-          -DAPI_System.Device.Dac=ON
-        ToolchainFile: toolchain.xtensa-esp32-elf.cmake
-        SDK_config: sdkconfig.default_nopsram_rev3.esp32
-        IDF_Target: esp32
-        TargetName: ESP32
-        PackageName: ESP32_REV3
+        ESP32_REV3:
+          TargetBoard: ESP32
+          TargetSeries: "esp32"
+          BuildOptions:
+          IDF_Target: esp32
+          TargetName: ESP32
+          PackageName: ESP32_REV3
+          CMakePreset: ESP32_REV3
 
-      ESP32_PICO:
-        TargetBoard: ESP32
-        TargetSeries: 'esp32'
-        BuildOptions: >-
-          -DTARGET_SERIES=ESP32
-          -DRTOS=ESP32
-          -DNF_TARGET_HAS_NANOBOOTER=OFF
-          -DTARGET_SERIAL_BAUDRATE=115200
-          -DNF_FEATURE_DEBUGGER=ON
-          -DNF_FEATURE_RTC=ON
-          -DNF_FEATURE_HAS_CONFIG_BLOCK=ON
-          -DNF_SECURITY_MBEDTLS=ON
-          -DSUPPORT_ANY_BASE_CONVERSION=ON
-          -DAPI_System.Math=ON
-          -DAPI_Windows.Devices.Gpio=ON -DAPI_System.Device.Gpio=ON
-          -DAPI_Windows.Devices.Spi=ON -DAPI_System.Device.Spi=ON
-          -DAPI_Windows.Devices.I2c=ON -DAPI_System.Device.I2c=ON
-          -DAPI_Windows.Devices.Pwm=ON -DAPI_System.Device.Pwm=ON
-          -DAPI_Windows.Devices.SerialCommunication=ON -DAPI_System.IO.Ports=ON
-          -DAPI_Windows.Devices.Adc=ON -DAPI_System.Device.Adc=ON
-          -DAPI_System.Net=ON
-          -DAPI_System.Device.WiFi=ON
-          -DAPI_Hardware.Esp32=ON
-          -DAPI_nanoFramework.ResourceManager=ON
-          -DAPI_nanoFramework.System.Collections=ON
-          -DAPI_nanoFramework.System.Text=ON
-          -DAPI_nanoFramework.Hardware.Esp32.Rmt=ON
-          -DAPI_System.Device.Dac=ON
-          -DAPI_Windows.Storage=ON
-        ToolchainFile: toolchain.xtensa-esp32-elf.cmake
-        SDK_config: sdkconfig.default_pico
-        IDF_Target: esp32
-        TargetName: ESP32_PICO
-        PackageName: ESP32_PICO
+        ESP32_PICO:
+          TargetBoard: ESP32
+          TargetSeries: "esp32"
+          BuildOptions:
+          IDF_Target: esp32
+          TargetName: ESP32_PICO
+          PackageName: ESP32_PICO
+          CMakePreset: ESP32_PICO
 
-      KALUGA_1:
-        TargetBoard: ESP32_S2
-        TargetSeries: 'esp32_s2'
-        BuildOptions: >-
-          -DTARGET_SERIES=ESP32_S2
-          -DRTOS=ESP32
-          -DNF_TARGET_HAS_NANOBOOTER=OFF
-          -DNF_FEATURE_DEBUGGER=ON
-          -DNF_FEATURE_RTC=ON
-          -DNF_FEATURE_HAS_CONFIG_BLOCK=ON
-          -DNF_SECURITY_MBEDTLS=ON
-          -DSUPPORT_ANY_BASE_CONVERSION=ON
-          -DAPI_System.Math=ON
-          -DAPI_Windows.Devices.Gpio=ON -DAPI_System.Device.Gpio=ON
-          -DAPI_Windows.Devices.Spi=ON -DAPI_System.Device.Spi=ON
-          -DAPI_Windows.Devices.I2c=ON -DAPI_System.Device.I2c=ON
-          -DAPI_Windows.Devices.Pwm=ON -DAPI_System.Device.Pwm=ON
-          -DAPI_Windows.Devices.SerialCommunication=ON -DAPI_System.IO.Ports=ON
-          -DAPI_Windows.Devices.Adc=ON -DAPI_System.Device.Adc=ON
-          -DAPI_System.Net=ON
-          -DAPI_System.Device.WiFi=ON
-          -DAPI_Hardware.Esp32=ON
-          -DAPI_nanoFramework.ResourceManager=ON
-          -DAPI_nanoFramework.System.Collections=ON
-          -DAPI_nanoFramework.System.Text=ON
-          -DAPI_nanoFramework.Hardware.Esp32.Rmt=ON
-          -DAPI_System.Device.Dac=ON
-          -DAPI_nanoFramework.Graphics=ON
-          -DGRAPHICS_DISPLAY="ILI9341_240x320_SPI.cpp"
-          -DTOUCHPANEL_DEVICE="XPT2046.cpp"
-          -DGRAPHICS_DISPLAY_INTERFACE="Spi_To_Display.cpp"
-          -DTOUCHPANEL_INTERFACE="Spi_To_TouchPanel.cpp"
-        ToolchainFile: toolchain.xtensa-esp32s2-elf.cmake
-        SDK_config: sdkconfig.default.esp32s2
-        IDF_Target: esp32s2
-        TargetName: KALUGA_1
-        PackageName: KALUGA_1
+        ESP32_S2_UART:
+          TargetBoard: ESP32_S2
+          TargetSeries: "esp32_s2"
+          BuildOptions:
+          IDF_Target: esp32s2
+          TargetName: ESP32_S2_UART
+          PackageName: ESP32_S2_UART
+          CMakePreset: ESP32_S2_UART
 
-      ESP32_BLE_REV3:
-        TargetBoard: ESP32
-        TargetSeries: 'esp32'
-        BuildOptions: >-
-          -DTARGET_SERIES=ESP32
-          -DRTOS=ESP32
-          -DNF_TARGET_HAS_NANOBOOTER=OFF
-          -DNF_FEATURE_DEBUGGER=ON
-          -DNF_FEATURE_RTC=ON
-          -DNF_FEATURE_HAS_CONFIG_BLOCK=ON
-          -DNF_SECURITY_MBEDTLS=ON
-          -DSUPPORT_ANY_BASE_CONVERSION=ON
-          -DNF_FEATURE_HAS_SDCARD=ON
-          -DAPI_System.IO.FileSystem=ON
-          -DAPI_System.Math=ON
-          -DAPI_Windows.Devices.Gpio=ON
-          -DAPI_System.Device.Gpio=ON
-          -DAPI_Windows.Devices.Spi=ON
-          -DAPI_System.Device.Spi=ON
-          -DAPI_Windows.Devices.I2c=ON
-          -DAPI_System.Device.I2c=ON
-          -DAPI_Windows.Devices.Pwm=ON
-          -DAPI_System.Device.Pwm=ON
-          -DAPI_Windows.Devices.SerialCommunication=ON
-          -DAPI_System.IO.Ports=ON
-          -DAPI_Windows.Devices.Adc=ON -DAPI_System.Device.Adc=ON
-          -DAPI_System.Net=ON
-          -DAPI_System.Device.WiFi=ON
-          -DAPI_Hardware.Esp32=ON
-          -DAPI_nanoFramework.Device.OneWire=ON
-          -DAPI_nanoFramework.ResourceManager=ON
-          -DAPI_nanoFramework.System.Collections=ON
-          -DAPI_nanoFramework.System.Text=ON
-          -DAPI_nanoFramework.Hardware.Esp32.Rmt=ON
-          -DAPI_System.Device.Dac=ON
-          -DAPI_nanoFramework.Device.Bluetooth=ON
-        ToolchainFile: toolchain.xtensa-esp32-elf.cmake
-        SDK_config: sdkconfig.default_ble_rev3.esp32
-        IDF_Target: esp32
-        TargetName: ESP32
-        PackageName: ESP32_BLE_REV3
+        ESP32_S2_USB:
+          TargetBoard: ESP32_S2
+          TargetSeries: "esp32_s2"
+          BuildOptions:
+          IDF_Target: esp32s2
+          TargetName: ESP32_S2_USB
+          PackageName: ESP32_S2_USB
+          CMakePreset: ESP32_S2_USB
 
-      ESP32_OLIMEX:
-        TargetBoard: ESP32
-        TargetSeries: 'esp32'
-        BuildOptions: >-
-          -DTARGET_SERIES=ESP32
-          -DRTOS=ESP32
-          -DNF_TARGET_HAS_NANOBOOTER=OFF
-          -DNF_FEATURE_DEBUGGER=ON
-          -DNF_FEATURE_RTC=ON
-          -DNF_FEATURE_HAS_CONFIG_BLOCK=ON
-          -DNF_SECURITY_MBEDTLS=ON
-          -DSUPPORT_ANY_BASE_CONVERSION=ON
-          -DNF_FEATURE_HAS_SDCARD=ON
-          -DAPI_System.IO.FileSystem=ON
-          -DAPI_System.Math=ON
-          -DAPI_Windows.Devices.Gpio=ON -DAPI_System.Device.Gpio=ON
-          -DAPI_Windows.Devices.Spi=ON -DAPI_System.Device.Spi=ON
-          -DAPI_Windows.Devices.I2c=ON -DAPI_System.Device.I2c=ON
-          -DAPI_Windows.Devices.Pwm=ON -DAPI_System.Device.Pwm=ON
-          -DAPI_Windows.Devices.SerialCommunication=ON -DAPI_System.IO.Ports=ON
-          -DAPI_Windows.Devices.Adc=ON -DAPI_System.Device.Adc=ON
-          -DAPI_System.Net=ON
-          -DAPI_System.Device.WiFi=ON
-          -DAPI_Hardware.Esp32=ON
-          -DAPI_nanoFramework.ResourceManager=ON
-          -DAPI_nanoFramework.System.Collections=ON
-          -DAPI_nanoFramework.System.Text=ON
-          -DAPI_nanoFramework.Hardware.Esp32.Rmt=ON
-          -DAPI_System.Device.Dac=ON
-          -DESP32_ETHERNET_SUPPORT=ON
-          -DETH_PHY_RST_GPIO=12
-          -DETH_RMII_CLK_OUT_GPIO=17
-        ToolchainFile: toolchain.xtensa-esp32-elf.cmake
-        SDK_config: 
-        IDF_Target: esp32
-        TargetName: ESP32_OLIMEX
-        PackageName: ESP32_OLIMEX
+        ESP32_BLE_REV3:
+          TargetBoard: ESP32
+          TargetSeries: "esp32"
+          BuildOptions:
+          IDF_Target: esp32
+          TargetName: ESP32
+          PackageName: ESP32_BLE_REV3
+          CMakePreset: ESP32_BLE_REV3
 
-      M5StickC:
-        TargetBoard: ESP32
-        TargetPlatform: 'esp32'
-        TargetSeries: 'esp32'
-        BuildOptions: >-
-          -DTARGET_SERIES=ESP32
-          -DRTOS=ESP32
-          -DNF_TARGET_HAS_NANOBOOTER=OFF
-          -DNF_FEATURE_DEBUGGER=ON
-          -DTARGET_SERIAL_BAUDRATE=115200
-          -DNF_FEATURE_RTC=ON
-          -DNF_FEATURE_HAS_CONFIG_BLOCK=ON
-          -DNF_SECURITY_MBEDTLS=ON
-          -DSUPPORT_ANY_BASE_CONVERSION=ON
-          -DNF_FEATURE_HAS_SDCARD=ON
-          -DAPI_System.IO.FileSystem=ON
-          -DAPI_System.Math=ON
-          -DAPI_Windows.Devices.Gpio=ON -DAPI_System.Device.Gpio=ON
-          -DAPI_Windows.Devices.Spi=ON -DAPI_System.Device.Spi=ON
-          -DAPI_Windows.Devices.I2c=ON -DAPI_System.Device.I2c=ON
-          -DAPI_Windows.Devices.Pwm=ON -DAPI_System.Device.Pwm=ON
-          -DAPI_Windows.Devices.SerialCommunication=ON -DAPI_System.IO.Ports=ON
-          -DAPI_Windows.Devices.Adc=ON -DAPI_System.Device.Adc=ON
-          -DAPI_System.Net=ON
-          -DAPI_System.Device.WiFi=ON
-          -DAPI_Hardware.Esp32=ON
-          -DAPI_nanoFramework.ResourceManager=ON
-          -DAPI_nanoFramework.System.Collections=ON
-          -DAPI_nanoFramework.System.Text=ON
-          -DAPI_nanoFramework.Hardware.Esp32.Rmt=ON
-          -DAPI_nanoFramework.Graphics=ON
-          -DGRAPHICS_DISPLAY="ST7735S_SPI.cpp"
-          -DTOUCHPANEL_DEVICE="XPT2046.cpp"
-          -DGRAPHICS_DISPLAY_INTERFACE="Spi_To_Display.cpp"
-          -DTOUCHPANEL_INTERFACE="Spi_To_TouchPanel.cpp"
-          -DAPI_System.Device.Dac=ON
-        ToolchainFile: toolchain.xtensa-esp32-elf.cmake
-        SDK_config: sdkconfig.default_pico 
-        IDF_Target: esp32
-        TargetName: M5StickC
-        PackageName: M5StickC
+        ESP32_OLIMEX:
+          TargetBoard: ESP32
+          TargetSeries: "esp32"
+          BuildOptions:
+          IDF_Target: esp32
+          TargetName: ESP32_OLIMEX
+          PackageName: ESP32_OLIMEX
+          CMakePreset: ESP32_OLIMEX
 
-      M5StickCPlus:
-        TargetBoard: ESP32
-        TargetPlatform: 'esp32'
-        TargetSeries: 'esp32'
-        BuildOptions: >-
-          -DTARGET_SERIES=ESP32
-          -DRTOS=ESP32
-          -DNF_TARGET_HAS_NANOBOOTER=OFF
-          -DNF_FEATURE_DEBUGGER=ON
-          -DTARGET_SERIAL_BAUDRATE=115200
-          -DNF_FEATURE_RTC=ON
-          -DNF_FEATURE_HAS_CONFIG_BLOCK=ON
-          -DNF_SECURITY_MBEDTLS=ON
-          -DSUPPORT_ANY_BASE_CONVERSION=ON
-          -DNF_FEATURE_HAS_SDCARD=ON
-          -DAPI_System.IO.FileSystem=ON
-          -DAPI_System.Math=ON
-          -DAPI_Windows.Devices.Gpio=ON -DAPI_System.Device.Gpio=ON
-          -DAPI_Windows.Devices.Spi=ON -DAPI_System.Device.Spi=ON
-          -DAPI_Windows.Devices.I2c=ON -DAPI_System.Device.I2c=ON
-          -DAPI_Windows.Devices.Pwm=ON -DAPI_System.Device.Pwm=ON
-          -DAPI_Windows.Devices.SerialCommunication=ON -DAPI_System.IO.Ports=ON
-          -DAPI_Windows.Devices.Adc=ON -DAPI_System.Device.Adc=ON
-          -DAPI_System.Net=ON
-          -DAPI_System.Device.WiFi=ON
-          -DAPI_Hardware.Esp32=ON
-          -DAPI_nanoFramework.ResourceManager=ON
-          -DAPI_nanoFramework.System.Collections=ON
-          -DAPI_nanoFramework.System.Text=ON
-          -DAPI_nanoFramework.Hardware.Esp32.Rmt=ON
-          -DAPI_nanoFramework.Graphics=ON
-          -DGRAPHICS_DISPLAY="ST7789V_240x320_SPI.cpp"
-          -DTOUCHPANEL_DEVICE="XPT2046.cpp"
-          -DGRAPHICS_DISPLAY_INTERFACE="Spi_To_Display.cpp"
-          -DTOUCHPANEL_INTERFACE="Spi_To_TouchPanel.cpp"
-          -DAPI_System.Device.Dac=ON
-        ToolchainFile: toolchain.xtensa-esp32-elf.cmake
-        SDK_config: sdkconfig.default_pico 
-        IDF_Target: esp32
-        TargetName: M5StickCPlus
-        PackageName: M5StickCPlus
+        ESP32_OLIMEX_WROVER:
+          TargetBoard: ESP32
+          TargetSeries: "esp32"
+          BuildOptions:
+          IDF_Target: esp32
+          TargetName: ESP32_OLIMEX_WROVER
+          PackageName: ESP32_OLIMEX_WROVER
+          CMakePreset: ESP32_OLIMEX_WROVER
 
-      M5Core:
-        TargetBoard: ESP32
-        TargetPlatform: 'esp32'
-        TargetSeries: 'esp32'
-        BuildOptions: >-
-          -DTARGET_SERIES=ESP32
-          -DRTOS=ESP32
-          -DNF_TARGET_HAS_NANOBOOTER=OFF
-          -DNF_FEATURE_DEBUGGER=ON
-          -DNF_FEATURE_RTC=ON
-          -DNF_FEATURE_HAS_CONFIG_BLOCK=ON
-          -DNF_SECURITY_MBEDTLS=ON
-          -DSUPPORT_ANY_BASE_CONVERSION=ON
-          -DNF_FEATURE_HAS_SDCARD=ON
-          -DAPI_System.IO.FileSystem=ON
-          -DAPI_System.Math=ON
-          -DAPI_Windows.Devices.Gpio=ON -DAPI_System.Device.Gpio=ON
-          -DAPI_Windows.Devices.Spi=ON -DAPI_System.Device.Spi=ON
-          -DAPI_Windows.Devices.I2c=ON -DAPI_System.Device.I2c=ON
-          -DAPI_Windows.Devices.Pwm=ON -DAPI_System.Device.Pwm=ON
-          -DAPI_Windows.Devices.SerialCommunication=ON -DAPI_System.IO.Ports=ON
-          -DAPI_Windows.Devices.Adc=ON -DAPI_System.Device.Adc=ON
-          -DAPI_System.Net=ON
-          -DAPI_System.Device.WiFi=ON
-          -DAPI_Hardware.Esp32=ON
-          -DAPI_nanoFramework.ResourceManager=ON
-          -DAPI_nanoFramework.System.Collections=ON
-          -DAPI_nanoFramework.System.Text=ON
-          -DAPI_nanoFramework.Hardware.Esp32.Rmt=ON
-          -DAPI_nanoFramework.Graphics=ON
-          -DGRAPHICS_DISPLAY="ILI9342_320x240_SPI.cpp"
-          -DTOUCHPANEL_DEVICE="XPT2046.cpp"
-          -DGRAPHICS_DISPLAY_INTERFACE="Spi_To_Display.cpp"
-          -DTOUCHPANEL_INTERFACE="Spi_To_TouchPanel.cpp"
-          -DAPI_System.Device.Dac=ON
-        ToolchainFile: toolchain.xtensa-esp32-elf.cmake
-        SDK_config: sdkconfig.default_nopsram.esp32 
-        IDF_Target: esp32
-        TargetName: M5Core
-        PackageName: M5Core
+        M5StickC:
+          TargetBoard: ESP32
+          TargetPlatform: "esp32"
+          TargetSeries: "esp32"
+          BuildOptions:
+          IDF_Target: esp32
+          TargetName: M5StickC
+          PackageName: M5StickC
+          CMakePreset: M5StickC
 
-      M5Core2:
-        TargetBoard: ESP32
-        TargetPlatform: 'esp32'
-        TargetSeries: 'esp32'
-        BuildOptions: >-
-          -DTARGET_SERIES=ESP32
-          -DRTOS=ESP32
-          -DNF_TARGET_HAS_NANOBOOTER=OFF
-          -DNF_FEATURE_DEBUGGER=ON
-          -DNF_FEATURE_RTC=ON
-          -DNF_FEATURE_HAS_CONFIG_BLOCK=ON
-          -DNF_SECURITY_MBEDTLS=ON
-          -DSUPPORT_ANY_BASE_CONVERSION=ON
-          -DNF_FEATURE_HAS_SDCARD=ON
-          -DAPI_System.IO.FileSystem=ON
-          -DAPI_System.Math=ON
-          -DAPI_Windows.Devices.Gpio=ON -DAPI_System.Device.Gpio=ON
-          -DAPI_Windows.Devices.Spi=ON -DAPI_System.Device.Spi=ON
-          -DAPI_Windows.Devices.I2c=ON -DAPI_System.Device.I2c=ON
-          -DAPI_Windows.Devices.Pwm=ON -DAPI_System.Device.Pwm=ON
-          -DAPI_Windows.Devices.SerialCommunication=ON -DAPI_System.IO.Ports=ON
-          -DAPI_Windows.Devices.Adc=ON -DAPI_System.Device.Adc=ON
-          -DAPI_System.Net=ON
-          -DAPI_System.Device.WiFi=ON
-          -DAPI_Hardware.Esp32=ON
-          -DAPI_nanoFramework.ResourceManager=ON
-          -DAPI_nanoFramework.System.Collections=ON
-          -DAPI_nanoFramework.System.Text=ON
-          -DAPI_nanoFramework.Hardware.Esp32.Rmt=ON
-          -DAPI_nanoFramework.Graphics=ON
-          -DGRAPHICS_DISPLAY="ILI9342_320x240_SPI.cpp"
-          -DTOUCHPANEL_DEVICE="XPT2046.cpp"
-          -DGRAPHICS_DISPLAY_INTERFACE="Spi_To_Display.cpp"
-          -DTOUCHPANEL_INTERFACE="Spi_To_TouchPanel.cpp"
-          -DAPI_System.Device.Dac=ON
-          -DAPI_nanoFramework.Device.Bluetooth=ON
-        ToolchainFile: toolchain.xtensa-esp32-elf.cmake
-        SDK_config: sdkconfig.default_ble_rev3.esp32
-        IDF_Target: esp32
-        TargetName: M5Core2
-        PackageName: M5Core2
+        M5StickCPlus:
+          TargetBoard: ESP32
+          TargetPlatform: "esp32"
+          TargetSeries: "esp32"
+          BuildOptions:
+          IDF_Target: esp32
+          TargetName: M5StickCPlus
+          PackageName: M5StickCPlus
+          CMakePreset: M5StickCPlus
 
-  variables:
-    DOTNET_NOLOGO: true
-    # creates a counter and assigns it to the revision variable
-    REVISION: $[counter('ESP32_1_8_0_versioncounter', 0)]
-    IDF_PATH: 'D:/a/1/s/esp-idf'
-    PIP_CACHE_DIR: $(Pipeline.Workspace)/.pip
-    TargetPlatform: 'esp32'
+        M5Core:
+          TargetBoard: ESP32
+          TargetPlatform: "esp32"
+          TargetSeries: "esp32"
+          BuildOptions:
+          IDF_Target: esp32
+          TargetName: M5Core
+          PackageName: M5Core
+          CMakePreset: M5Core
 
-  steps:
-  - checkout: self
-  - checkout: esp32_idf
-    fetchDepth: 1
+        M5Core2:
+          TargetBoard: ESP32
+          TargetPlatform: "esp32"
+          TargetSeries: "esp32"
+          BuildOptions:
+          IDF_Target: esp32
+          TargetName: M5Core2
+          PackageName: M5Core2
+          CMakePreset: M5Core2
 
-  - template: azure-pipelines-templates/build-preparations.yml
-  - template: azure-pipelines-templates/nb-gitversioning.yml
-    parameters:
-      repoDirectory: '$(Build.SourcesDirectory)\nf-interpreter'
-  - template: azure-pipelines-templates/download-install-esp32-build-components.yml
-  - template: azure-pipelines-templates/download-install-ninja.yml
-    parameters:
-      repoDirectory: '$(Build.SourcesDirectory)\nf-interpreter'
-  - template: azure-pipelines-templates/build-esp32.yml
+        AtomS3:
+          TargetBoard: ESP32_S3
+          TargetPlatform: "esp32"
+          TargetSeries: "esp32s3"
+          BuildOptions:
+          IDF_Target: esp32s3
+          TargetName: AtomS3
+          PackageName: AtomS3
+          CMakePreset: AtomS3
 
-  - task: CopyFiles@1
-    condition: succeeded()
-    displayName: Copying bootloader
-    inputs:
-      sourceFolder: '$(Build.SourcesDirectory)\nf-interpreter\build\bootloader'
-      Contents: |
-        bootloader.bin
-      TargetFolder: '$(Build.ArtifactStagingDirectory)\$(TargetPublishName)'
-      flattenFolders: true
+        ESP32_C3_REV3:
+          TargetBoard: ESP32_C3
+          TargetSeries: "esp32c3"
+          BuildOptions:
+          IDF_Target: esp32c3
+          TargetName: ESP32_C3_REV3
+          PackageName: ESP32_C3_REV3
+          CMakePreset: ESP32_C3_REV3
 
-  - template: azure-pipelines-templates/pack-publish-artifacts.yml
-    parameters:
-      buildDirectory: '$(Build.SourcesDirectory)\nf-interpreter\build'
-  - template: azure-pipelines-templates/publish-cloudsmith.yml
+        ESP32_GenericDisplay_REV0:
+          TargetBoard: ESP32
+          TargetPlatform: "esp32"
+          TargetSeries: "esp32"
+          BuildOptions:
+          IDF_Target: esp32
+          TargetName: ESP32_GenericDisplay_REV0
+          PackageName: ESP32_GenericDisplay_REV0
+          CMakePreset: ESP32_GenericDisplay_REV0
 
-#################
-# TI SimpleLink
-- job: Build_TI_SimpleLink_targets
-  condition: >-
-    and(
-      succeeded('Check_Code_Style'),
+        ESP32_PSRAM_BLE_GenericGraphic_REV3:
+          TargetBoard: ESP32
+          TargetPlatform: "esp32"
+          TargetSeries: "esp32"
+          BuildOptions:
+          IDF_Target: esp32
+          TargetName: ESP32_PSRAM_BLE_GenericGraphic_REV3
+          PackageName: ESP32_PSRAM_BLE_GenericGraphic_REV3
+          CMakePreset: ESP32_PSRAM_BLE_GenericGraphic_REV3
+
+        ESP32_PSRAM_REV3_IPV6:
+          TargetBoard: ESP32
+          TargetPlatform: 'esp32'
+          TargetSeries: 'esp32'
+          BuildOptions: 
+          IDF_Target: esp32
+          TargetName: ESP32_PSRAM_REV3_IPV6
+          PackageName: ESP32_PSRAM_REV3_IPV6
+          CMakePreset: ESP32_PSRAM_REV3_IPV6
+
+        XIAO_ESP32C3:
+          TargetBoard: ESP32_C3
+          TargetSeries: "esp32c3"
+          BuildOptions:
+          IDF_Target: esp32c3
+          TargetName: XIAO_ESP32C3
+          PackageName: XIAO_ESP32C3
+          CMakePreset: XIAO_ESP32C3
+
+        ESP32_S3_BLE:
+          TargetBoard: ESP32_S3
+          TargetSeries: "esp32s3"
+          BuildOptions:
+          IDF_Target: esp32s3
+          TargetName: ESP32_S3_BLE
+          PackageName: ESP32_S3_BLE
+          CMakePreset: ESP32_S3_BLE
+
+        ESP32_WESP32:
+          TargetSeries: "esp32"
+          TargetBoard: ESP32
+          BuildOptions:
+          IDF_Target: esp32
+          TargetName: ESP32_WESP32
+          PackageName: ESP32_WESP32
+          CMakePreset: ESP32_WESP32
+
+        ESP32_WT32_ETH01:
+          TargetBoard: ESP32
+          TargetSeries: "esp32"
+          BuildOptions:
+          TargetName: ESP32_WT32_ETH01
+          IDF_Target: esp32
+          PackageName: ESP32_WT32_ETH01
+          CMakePreset: ESP32_WT32_ETH01
+
+        ESP32_LILYGO:
+          TargetBoard: ESP32
+          TargetSeries: "esp32"
+          BuildOptions:
+          IDF_Target: esp32
+          TargetName: ESP32_LILYGO
+          PackageName: ESP32_LILYGO
+          CMakePreset: ESP32_LILYGO
+
+        ESP32_S3:
+          TargetBoard: ESP32_S3
+          TargetSeries: "esp32s3"
+          BuildOptions:
+          IDF_Target: esp32s3
+          TargetName: ESP32_S3
+          PackageName: ESP32_S3
+          CMakePreset: ESP32_S3
+
+        ESP_WROVER_KIT:
+          TargetBoard: ESP32
+          TargetSeries: "esp32"
+          BuildOptions:
+          IDF_Target: esp32
+          TargetName: ESP_WROVER_KIT
+          PackageName: ESP_WROVER_KIT
+          CMakePreset: ESP_WROVER_KIT
+
+    variables:
+      DOTNET_NOLOGO: true
+      # creates a counter and assigns it to the revision variable
+      REVISION: $[counter('ESP32_1_12_4_versioncounter', 0)]
+      IDF_PATH: "D:/a/1/s/esp-idf"
+      PIP_CACHE_DIR: $(Pipeline.Workspace)/.pip
+      TargetPlatform: "esp32"
+      IDF_TAG: "v5.2.3"
+
+    steps:
+      - checkout: self
+        path: s/nf-interpreter
+
+      - template: azure-pipelines-templates/checkout-idf.yml
+        parameters:
+          repoDirectory: '$(Agent.BuildDirectory)/s'
+      - template: azure-pipelines-templates/build-preparations.yml
+        parameters:
+          repoDirectory: '$(Agent.BuildDirectory)/s/nf-interpreter'
+      - template: azure-pipelines-templates/nb-gitversioning.yml
+        parameters:
+          repoDirectory: '$(Agent.BuildDirectory)/s/nf-interpreter'
+      - template: azure-pipelines-templates/download-install-esp32-build-components.yml
+      - template: azure-pipelines-templates/download-install-ninja.yml
+        parameters:
+          repoDirectory: '$(Agent.BuildDirectory)/s/nf-interpreter'
+      - template: azure-pipelines-templates/build-espressif-esp32-targets.yml
+        parameters:
+          repoDirectory: '$(Agent.BuildDirectory)/s/nf-interpreter'
+          partitionsDirectory: '$(Agent.BuildDirectory)/s/nf-interpreter/targets/ESP32/_IDF/$(IDF_Target)'
+      - task: CopyFiles@2
+        condition: succeeded()
+        displayName: Copying bootloader
+        inputs:
+          sourceFolder: '$(Agent.BuildDirectory)/s/nf-interpreter/build/bootloader'
+          Contents: |
+            bootloader.bin
+          TargetFolder: '$(Build.ArtifactStagingDirectory)\$(TargetPublishName)'
+          flattenFolders: true
+          ignoreMakeDirErrors: true
+
+      - template: azure-pipelines-templates/copy-sdkconfig.yml
+        parameters:
+          repoDirectory: '$(Agent.BuildDirectory)/s/nf-interpreter'
+      - template: azure-pipelines-templates/pack-publish-artifacts.yml
+        parameters:
+          buildDirectory: '$(Agent.BuildDirectory)/s/nf-interpreter/build'
+      - template: azure-pipelines-templates/publish-cloudsmith.yml
+      - template: azure-pipelines-templates/publish-sdkconfig.yml
+
+  #################
+  # TI SimpleLink
+  - job: Build_TI_SimpleLink_targets
+    condition: >-
       or(
         eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ALL'], true),
         eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_TI'], true),
         contains(dependencies.Check_Build_Options.outputs['GetCommitDetails.COMMIT_MESSAGE'], '***BUILD_ALL***'),
-        eq(variables['BUILD_ALL'], 'true'),
-        eq(variables['BUILD_TI'], 'true')
+        and(
+          eq(variables['Build.Reason'], 'Manual'),
+          or(
+            eq(variables['BUILD_ALL__'], 'true'),
+            eq(variables['BUILD_TI__'], 'true')
+          )
+        )
       )
-    )
 
-  dependsOn:
-  - Check_Build_Options
-  - Check_Code_Style
+    dependsOn:
+      - Check_Build_Options
 
-  pool:
-    vmImage: 'windows-2019'
+    pool:
+      vmImage: "windows-latest"
 
-  strategy:
-    matrix:
-      TI_CC1352R1_LAUNCHXL_868:
-        TargetBoard: TI_CC1352R1_LAUNCHXL
-        PackageName: TI_CC1352R1_LAUNCHXL_868
-        TargetSeries: 'cc13xx_26xx'
-        BuildOptions: >-
-          -DTARGET_SERIES=CC13X2
-          -DRTOS=TI_SimpleLink
-          -DRADIO_FREQUENCY=868
-          -DSUPPORT_ANY_BASE_CONVERSION=OFF
-          -DNF_FEATURE_DEBUGGER=ON
-          -DNF_FEATURE_RTC=ON
-          -DNF_FEATURE_WATCHDOG=OFF
-          -DAPI_Windows.Devices.Gpio=ON -DAPI_System.Device.Gpio=ON
-          -DAPI_Windows.Devices.Spi=OFF
-          -DAPI_Windows.Devices.I2c=OFF
-          -DAPI_Windows.Devices.Pwm=OFF
-          -DAPI_Windows.Devices.SerialCommunication=OFF -DAPI_System.IO.Ports=OFF
-          -DAPI_Windows.Devices.Adc=ON -DAPI_System.Device.Adc=ON
-          -DAPI_nanoFramework.TI.EasyLink=ON
-          -DAPI_nanoFramework.Hardware.TI=ON
-          -DAPI_nanoFramework.System.Text=ON
-        GccArm_Version:
+    strategy:
+      matrix:
+        TI_CC1352R1_LAUNCHXL_868:
+          TargetBoard: TI_CC1352R1_LAUNCHXL
+          PackageName: TI_CC1352R1_LAUNCHXL_868
+          TargetSeries: "CC13X2"
+          BuildOptions: >-
+            -DRADIO_FREQUENCY=868
+          CMakePreset: TI_CC1352R1_LAUNCHXL
 
-  variables:
-    DOTNET_NOLOGO: true
-    # creates a counter and assigns it to the revision variable
-    REVISION: $[counter('TI_1_8_0_versioncounter', 0)]
-    GNU_GCC_TOOLCHAIN_PATH: $(Agent.TempDirectory)\GNU_Tools_ARM_Embedded
-    HelperPackageVersion: $[counter('HelperPackageVersioncounter', 0)]
-    TargetPlatform: 'ti_simplelink'
+    variables:
+      DOTNET_NOLOGO: true
+      # creates a counter and assigns it to the revision variable
+      REVISION: $[counter('TI_1_12_4_versioncounter', 0)]
+      HelperPackageVersion: $[counter('HelperPackageVersioncounter', 0)]
+      TargetPlatform: "ti_simplelink"
 
-  steps:
-  - template: azure-pipelines-templates/build-preparations.yml
-  - template: azure-pipelines-templates/nb-gitversioning.yml
-  - template: azure-pipelines-templates/download-install-arm-gcc-toolchain.yml
-  - template: azure-pipelines-templates/download-install-ninja.yml
-  - template: azure-pipelines-templates/build-ti-simplelink.yml
-  - template: azure-pipelines-templates/pack-publish-artifacts.yml
-  - template: azure-pipelines-templates/publish-cloudsmith.yml
-  - template: azure-pipelines-templates/pack-publish-ti-sl-managed-helpers.yml
+    steps:
+      - template: azure-pipelines-templates/build-preparations.yml
+      - template: azure-pipelines-templates/nb-gitversioning.yml
+      - template: azure-pipelines-templates/download-install-cmake.yml
+      - template: azure-pipelines-templates/download-install-arm-gcc-toolchain.yml
+      - template: azure-pipelines-templates/download-install-ninja.yml
+      - template: azure-pipelines-templates/build-ti-simplelink-targets.yml
+      - template: azure-pipelines-templates/pack-publish-artifacts.yml
+      - template: azure-pipelines-templates/publish-cloudsmith.yml
+      - template: azure-pipelines-templates/pack-publish-ti-sl-managed-helpers.yml
 
-#################################
-# report build failure to Discord
-- job: Report_Build_Failure
-  dependsOn:
-  - Build_STM32_targets
-  - Build_ESP32_targets
-  - Build_TI_SimpleLink_targets
-  condition: >-
-    or(
-      failed('Build_STM32_targets'),
-      failed('Build_ESP32_targets'),
-      failed('Build_TI_SimpleLink_targets')
-    )
+  #################
+  # Azure RTOS
+  - job: Build_Azure_RTOS_targets
+    condition: >-
+      or(
+        eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ALL'], true),
+        eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_AZURERTOS'], true),
+        contains(dependencies.Check_Build_Options.outputs['GetCommitDetails.COMMIT_MESSAGE'], '***BUILD_ALL***'),
+        and(
+          eq(variables['Build.Reason'], 'Manual'),
+          or(
+            eq(variables['BUILD_ALL__'], 'true'),
+            eq(variables['BUILD_AZURERTOS__'], 'true')
+          )
+        )
+      )
 
-  pool:
-    vmImage: 'windows-2019'
+    dependsOn:
+      - Check_Build_Options
 
-  steps:
+    pool:
+      vmImage: "windows-latest"
 
-  - checkout: self
-    fetchDepth: 1
+    strategy:
+      matrix:
+        SL_STK3701A_REVB:
+          TargetBoard: SL_STK3701A_REVB
+          TargetSeries: "gg11"
+          BuildOptions:
+          NeedsDFU: false
+          NeedsSRECORD: false
+          TargetName: SL_STK3701A_REVB
+          PackageName: SL_STK3701A_REVB
+          CMakePreset: SL_STK3701A_REVB
 
-  # step from template @ nf-tools repo
-  - template: azure-pipelines-templates/discord-webhook.yml@templates  
-    parameters:
-      status: 'failure'
-      webhookUrl: '$(DiscordWebhook)'
-      message: ''
+    variables:
+      # creates a counter and assigns it to the revision variable
+      REVISION: $[counter('AZURERTOS_1_12_4_versioncounter', 0)]
+      HelperPackageVersion: $[counter('HelperPackageVersioncounter', 0)]
+      TargetPlatform: "efm32"
+
+    steps:
+      - template: azure-pipelines-templates/build-preparations.yml
+      - template: azure-pipelines-templates/nb-gitversioning.yml
+      - template: azure-pipelines-templates/download-install-cmake.yml
+      - template: azure-pipelines-templates/download-install-arm-gcc-toolchain.yml
+      - template: azure-pipelines-templates/download-install-ninja.yml
+      - template: azure-pipelines-templates/download-hexdfu.yml
+      - template: azure-pipelines-templates/download-srecord.yml
+      - template: azure-pipelines-templates/build-azurertos-targets.yml
+      - template: azure-pipelines-templates/pack-publish-artifacts.yml
+      - template: azure-pipelines-templates/publish-cloudsmith.yml
+      - template: azure-pipelines-templates/pack-publish-managed-helpers.yml
+
+  #################################
+  # report build failure to Discord
+  - job: Report_Build_Failure
+    dependsOn:
+      - Build_STM32_targets
+      - Build_ESP32_targets
+      - Build_TI_SimpleLink_targets
+      - Build_Azure_RTOS_targets
+    condition: >-
+      or(
+        failed('Build_STM32_targets'),
+        failed('Build_ESP32_targets'),
+        failed('Build_TI_SimpleLink_targets'),
+        failed('Build_Azure_RTOS_targets')
+      )
+
+    pool:
+      vmImage: "windows-latest"
+
+    steps:
+      - checkout: self
+        fetchDepth: 1
+
+      # step from template @ nf-tools repo
+      - template: azure-pipelines-templates/discord-webhook.yml@templates
+        parameters:
+          status: "failure"
+          webhookUrl: "$(DiscordWebhook)"
+          message: ""

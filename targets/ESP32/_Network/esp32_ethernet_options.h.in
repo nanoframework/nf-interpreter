@@ -12,43 +12,36 @@
 #define ESP32_ETHERNET_OPTIONS_H
 
 #cmakedefine ESP32_ETHERNET_SUPPORT
-#cmakedefine ETH_RMII_CLK_OUT_GPIO @ETH_RMII_CLK_OUT_GPIO@
-#cmakedefine ETH_PHY_RST_GPIO  @ETH_PHY_RST_GPIO@
+#ifdef ESP32_ETHERNET_SUPPORT
 
-// TODO this doesn't get defined when ETH_PHY_ADD = 0 
-// Default for Phy adr is 0
+#cmakedefine ETH_RMII_CLK_OUT_GPIO @ETH_RMII_CLK_OUT_GPIO@
+#cmakedefine ETH_RMII_CLK_IN_GPIO @ETH_RMII_CLK_IN_GPIO@
+#cmakedefine ETH_PHY_RST_GPIO @ETH_PHY_RST_GPIO@
+#cmakedefine ETH_MDIO_GPIO @ETH_MDIO_GPIO@
+#cmakedefine ETH_MDC_GPIO @ETH_MDC_GPIO@
+#define ESP32_ETHERNET_INTERNAL @ESP32_ETHERNET_INTERNAL_OPTION@
+#define ESP32_ETHERNET_SPI      @ESP32_ETHERNET_SPI_OPTION@
+
+// Default for PHY address is 0
 #cmakedefine ETH_PHY_ADDR @ETH_PHY_ADDR@
 
+#if ESP32_ETHERNET_SPI == TRUE
+// Experimental SPI (Untested)
+// Use an SPI Ethernet module
+// Pins choosen to work with wrover and jtag avoiding strapping pins (on same side of dev board)
+#define ESP32_ETHERNET_SPI_HOST      SPI2_HOST
+#define ESP32_ETHERNET_SPI_CLOCK_MHZ 8
+#define ESP32_ETHERNET_SPI_CS        5
+#define ESP32_ETHERNET_SPI_INT_GPIO  16
+// also requires ETH_PHY_RST_GPIO 17
 
-// Use internal ethernet 
-#define ESP32_ETHERNET_INTERNAL
+// Define SPI pins to use
+#define ESP32_ETHERNET_SPI_MISO_GPIO 23
+#define ESP32_ETHERNET_SPI_MOSI_GPIO 18
+#define ESP32_ETHERNET_SPI_SCLK_GPIO 19
 
-// Select one of following PHY for Internal Ethernet
-#define ESP32_ETHERNET_PHY_LAN8720
-//#define ESP32_ETHERNET_PHY_IP101
-//#define ESP32_ETHERNET_PHY_RTL8201
-//#define ESP32_ETHERNET_PHY_DP83848
-//#define ESP32_ETHERNET_PHY_KSZ8041
-
-
-
-#ifndef ESP32_ETHERNET_INTERNAL 
-// Experimental SPI (Untested) 
-// Use SPI Ethernet module
-// Comment out ESP32_ETHERNET_INTERNAL and define correct following information for your setup
-//#define ESP32_ETHERNET_SPI
-//#define ESP32_ETHERNET_SPI_CLOCK_MHZ 8
-//#define ESP32_ETHERNET_SPI_CS 15
-//#define ESP32_ETHERNET_SPI_INT_GPIO 16
-
-// Define SPI pins to use 
-//#define ESP32_ETHERNET_SPI_MISO_GPIO  23
-//#define ESP32_ETHERNET_SPI_MOSI_GPIO  18
-//#define ESP32_ETHERNET_SPI_SCLK_GPIO  19
-
-// One of following modules
-//#define ESP32_ETHERNET_SPI_MODULE_W5500
-//#define ESP32_ETHERNET_SPI_MODULE_DM9051
 #endif
+
+#endif // ESP32_ETHERNET_SUPPORT
 
 #endif // ESP32_ETHERNET_OPTIONS_H

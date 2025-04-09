@@ -7,5 +7,6 @@
 #define SYS_DEV_SPI_NATIVE_TARGET_H
 
 #include <sys_dev_spi_native.h>
+#include <targetPAL.h>
 
-#endif //SYS_DEV_SPI_NATIVE_TARGET_H
+#endif // SYS_DEV_SPI_NATIVE_TARGET_H

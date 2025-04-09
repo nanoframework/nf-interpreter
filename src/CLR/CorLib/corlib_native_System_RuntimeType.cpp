@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (c) .NET Foundation and Contributors
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
@@ -11,12 +11,12 @@ HRESULT Library_corlib_native_System_RuntimeType::get_Assembly___SystemReflectio
     NANOCLR_HEADER();
 
     CLR_RT_TypeDef_Instance td;
-    CLR_RT_HeapBlock *hbType = stack.Arg0().Dereference();
+    CLR_RT_HeapBlock *hbType = stack.This();
 
     NANOCLR_CHECK_HRESULT(GetTypeDescriptor(*hbType, td, NULL));
 
     {
-        CLR_RT_Assembly_Index idx;
+        CLR_RT_Assembly_Index idx{};
         idx.Set(td.Assembly());
         CLR_RT_HeapBlock &top = stack.PushValue();
         CLR_RT_HeapBlock *hbObj;
@@ -33,7 +33,7 @@ HRESULT Library_corlib_native_System_RuntimeType::get_Name___STRING(CLR_RT_Stack
 {
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
-    CLR_RT_HeapBlock *hbType = stack.Arg0().Dereference();
+    CLR_RT_HeapBlock *hbType = stack.This();
 
     NANOCLR_CHECK_HRESULT(GetName(*hbType, false, stack.PushValueAndClear()));
 
@@ -44,7 +44,7 @@ HRESULT Library_corlib_native_System_RuntimeType::get_FullName___STRING(CLR_RT_S
 {
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
-    CLR_RT_HeapBlock *hbType = stack.Arg0().Dereference();
+    CLR_RT_HeapBlock *hbType = stack.This();
 
     NANOCLR_CHECK_HRESULT(GetName(*hbType, true, stack.PushValueAndClear()));
 
@@ -59,7 +59,7 @@ HRESULT Library_corlib_native_System_RuntimeType::get_BaseType___SystemType(CLR_
     CLR_RT_TypeDef_Instance td;
     CLR_UINT32 levels;
     CLR_RT_HeapBlock &top = stack.PushValueAndClear();
-    CLR_RT_HeapBlock *hbType = stack.Arg0().Dereference();
+    CLR_RT_HeapBlock *hbType = stack.This();
 
     NANOCLR_CHECK_HRESULT(GetTypeDescriptor(*hbType, td, &levels));
 
@@ -116,7 +116,7 @@ HRESULT Library_corlib_native_System_RuntimeType::GetInterfaces___SZARRAY_System
     CLR_RT_TypeDef_Instance td;
     CLR_RT_HeapBlock &top = stack.PushValueAndClear();
     CLR_RT_HeapBlock *ptr = NULL;
-    CLR_RT_HeapBlock *hbType = stack.Arg0().Dereference();
+    CLR_RT_HeapBlock *hbType = stack.This();
     int count = 0;
 
     // 2-pass algorithm. 1. count the interfaces; 2. store the interfaces in an array
@@ -127,7 +127,7 @@ HRESULT Library_corlib_native_System_RuntimeType::GetInterfaces___SZARRAY_System
         do
         {
             // Scan the list of interfaces.
-            CLR_RT_SignatureParser parser;
+            CLR_RT_SignatureParser parser{};
             parser.Initialize_Interfaces(td.m_assm, td.m_target);
             CLR_RT_SignatureParser::Element res;
 
@@ -183,10 +183,10 @@ HRESULT Library_corlib_native_System_RuntimeType::GetElementType___SystemType(CL
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
 
-    CLR_RT_TypeDescriptor desc;
+    CLR_RT_TypeDescriptor desc{};
     CLR_RT_TypeDescriptor descSub;
     CLR_RT_HeapBlock &top = stack.PushValueAndClear();
-    CLR_RT_HeapBlock *hbType = stack.Arg0().Dereference();
+    CLR_RT_HeapBlock *hbType = stack.This();
 
     NANOCLR_CHECK_HRESULT(desc.InitializeFromReflection(hbType->ReflectionDataConst()));
 
@@ -239,7 +239,7 @@ HRESULT Library_corlib_native_System_RuntimeType::GetName(CLR_RT_HeapBlock &arg,
 
     CLR_RT_TypeDef_Instance td;
     CLR_UINT32 levels;
-    char rgBuffer[256];
+    char rgBuffer[256]{};
     char *szBuffer;
     size_t iBuffer;
 
@@ -272,7 +272,7 @@ HRESULT Library_corlib_native_System_RuntimeType::GetCustomAttributesNative___SZ
     CLR_RT_HeapBlock &top = stack.PushValueAndClear();
 
     // get the caller type
-    callerType = stack.Arg0().Dereference();
+    callerType = stack.This();
 
     NANOCLR_CHECK_HRESULT(GetTypeDescriptor(*callerType, typeDefinition));
 
@@ -342,7 +342,7 @@ HRESULT Library_corlib_native_System_RuntimeType::GetCustomAttributes(
             attributeEnumerator.GetCurrent(&instanceTypeDef);
 
             // setup attribute parser
-            CLR_RT_AttributeParser parser;
+            CLR_RT_AttributeParser parser{};
             NANOCLR_CHECK_HRESULT(parser.Initialize(attributeEnumerator));
 
             while (true)
@@ -378,12 +378,12 @@ HRESULT Library_corlib_native_System_RuntimeType::GetCustomAttributes(
 
                         // get the type for the class object
                         // the assembly has to be the instance type
-                        CLR_RT_MethodDef_Index md;
+                        CLR_RT_MethodDef_Index md{};
                         md.Set(instanceTypeDef.m_assm->m_idx, parser.m_mdIdx.Method());
-                        CLR_RT_MethodDef_Instance mdInst;
+                        CLR_RT_MethodDef_Instance mdInst{};
                         mdInst.InitializeFromIndex(md);
 
-                        CLR_RT_TypeDef_Instance cls;
+                        CLR_RT_TypeDef_Instance cls{};
                         if (cls.InitializeFromMethod(mdInst) == false)
                             NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
 

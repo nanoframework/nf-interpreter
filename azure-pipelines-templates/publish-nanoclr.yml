@@ -1,0 +1,75 @@
+# Copyright (c) .NET Foundation and Contributors
+# See LICENSE file in the project root for full license information.
+
+# To publish builds of targets in branches other than develop
+# set 'ForceUpload' variable to true on target matrix
+
+steps:
+  # execute on 'ForceUpload' parameter
+  - task: PowerShell@2
+    condition: >-
+      and(
+        succeeded(),
+        or(
+          eq(variables['ForceUpload'], true),
+          eq(variables['System.PullRequest.PullRequestId'], '')
+        )
+      )
+    displayName: Set Cloudsmith repo path
+    inputs:
+      targetType: "inline"
+      script: |
+        $repoName = $env:Build_Repository_Name
+        $branchName = $env:Build_SourceBranchName
+        $forceUpload = $env:ForceUpload
+
+        Write-Host "repo name is: $repoName"
+        Write-Host "branch name is: $branchName"
+
+        if( $env:Build_SourceBranchName -match "develop" -or 
+            $env:Build_SourceBranchName -match "^release*" -or
+            $forceUpload -eq "true")
+        {
+          # this a dev, release branch or force upload, publish to Cloudsmith dev repo
+          Write-Host "$("##vso[task.setvariable variable=CLOUDSMITH_REPO]")nanoframework-images-dev"
+          # set version
+          Write-Host "$("##vso[task.setvariable variable=PACKAGE_VERSION]")$(NBGV_NuGetPackageVersion)"
+        }
+        else 
+        {
+          # this main branch, publish to Cloudsmith stable repo
+          Write-Host "$("##vso[task.setvariable variable=CLOUDSMITH_REPO]")nanoframework-images"
+          # set version
+          Write-Host "$("##vso[task.setvariable variable=PACKAGE_VERSION]")$(NBGV_SimpleVersion).$(TARGET_BUILD_COUNTER)"
+        }
+      errorActionPreference: "stop"
+      failOnStderr: true
+
+  - task: PowerShell@2
+    condition: >-
+      and(
+        succeeded(),
+        or(
+          eq(variables['ForceUpload'], true),
+          and(
+            eq(variables['Build.SourceBranchName'], 'main'),
+            eq(variables['System.PullRequest.PullRequestId'], '')
+          )
+        )
+      )
+    displayName: Upload nanoCLR to Cloudsmith
+    inputs:
+      targetType: "inline"
+      script: |
+
+        # install Cloudsmith CLI
+        python -m pip install --upgrade cloudsmith-cli --quiet
+
+        Write-Host "Uploading nanoCLR v$(WINCLR_PACKAGE_VERSION) to Cloudsmith"
+
+        cloudsmith push raw net-nanoframework/$(CLOUDSMITH_REPO) $(Build.ArtifactStagingDirectory)\WIN32_nanoCLR\nanoFramework.nanoCLR.exe --name WIN32_nanoCLR --version $(WINCLR_PACKAGE_VERSION) -k $(CLOUDSMITH_KEY)
+
+        cloudsmith push raw net-nanoframework/$(CLOUDSMITH_REPO) $(Build.ArtifactStagingDirectory)\WIN_DLL_nanoCLR\nanoFramework.nanoCLR.dll --name WIN_DLL_nanoCLR --version $(WINCLR_PACKAGE_VERSION) -k $(CLOUDSMITH_KEY)
+
+      errorActionPreference: "stop"
+      failOnStderr: false

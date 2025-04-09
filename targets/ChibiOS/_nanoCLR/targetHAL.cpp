@@ -12,20 +12,19 @@
 #include <nanoPAL_Events.h>
 #include <nanoPAL_BlockStorage.h>
 #include <nanoHAL_ConfigurationManager.h>
+#include <nanoHAL_StorageOperation.h>
 #include <nanoHAL_Graphics.h>
 
 #if (HAL_USE_CAN == TRUE)
-#include <nf_devices_can_native_target.h>
+#include <nf_device_can_native_target.h>
 #endif
 #if (HAL_USE_I2C == TRUE)
-#include <win_dev_i2c_native_target.h>
+#include <sys_dev_i2c_native_target.h>
 #endif
 #if (HAL_USE_SPI == TRUE)
-#include <win_dev_spi_native_target.h>
 #include <sys_dev_spi_native_target.h>
 #endif
 #if (HAL_USE_UART == TRUE)
-#include <win_dev_serial_native_target.h>
 #include <sys_io_ser_native_target.h>
 #endif
 
@@ -42,9 +41,9 @@ extern "C"
         nanoHAL_Initialize();
     }
 
-    void nanoHAL_Uninitialize_C()
+    void nanoHAL_Uninitialize_C(bool isPoweringDown)
     {
-        nanoHAL_Uninitialize();
+        nanoHAL_Uninitialize(isPoweringDown);
     }
 }
 
@@ -63,6 +62,11 @@ void nanoHAL_Initialize()
 
     BlockStorageList_InitializeDevices();
 
+    FS_Initialize();
+    FileSystemVolumeList::Initialize();
+    FS_AddVolumes();
+    FileSystemVolumeList::InitializeVolumes();
+
     // clear managed heap region
     unsigned char *heapStart = NULL;
     unsigned int heapSize = 0;
@@ -79,13 +83,13 @@ void nanoHAL_Initialize()
 #if (HAL_USE_CAN == TRUE)
 
 #if defined(STM32_CAN_USE_CAN1) && (STM32_CAN_USE_CAN1 == TRUE)
-    Can1_PAL.Driver = NULL;
+    memset(&Can1_PAL, 0, sizeof(Can1_PAL));
 #endif
 #if (STM32_CAN_USE_CAN2) && (STM32_CAN_USE_CAN2 == TRUE)
-    Can2_PAL.Driver = NULL;
+    memset(&Can2_PAL, 0, sizeof(Can2_PAL));
 #endif
 #if (STM32_CAN_USE_CAN3) && (STM32_CAN_USE_CAN3 == TRUE)
-    Can3_PAL.Driver = NULL;
+    memset(&Can3_PAL, 0, sizeof(Can3_PAL));
 #endif
 
 #endif
@@ -93,16 +97,16 @@ void nanoHAL_Initialize()
 #if (HAL_USE_I2C == TRUE)
 
 #if defined(STM32_I2C_USE_I2C1) && (STM32_I2C_USE_I2C1 == TRUE)
-    I2C1_PAL.Driver = NULL;
+    memset(&I2C1_PAL, 0, sizeof(I2C1_PAL));
 #endif
 #if defined(STM32_I2C_USE_I2C2) && (STM32_I2C_USE_I2C2 == TRUE)
-    I2C2_PAL.Driver = NULL;
+    memset(&I2C2_PAL, 0, sizeof(I2C2_PAL));
 #endif
 #if defined(STM32_I2C_USE_I2C3) && (STM32_I2C_USE_I2C3 == TRUE)
-    I2C3_PAL.Driver = NULL;
+    memset(&I2C3_PAL, 0, sizeof(I2C3_PAL));
 #endif
 #if defined(STM32_I2C_USE_I2C4) && (STM32_I2C_USE_I2C4 == TRUE)
-    I2C4_PAL.Driver = NULL;
+    memset(&I2C4_PAL, 0, sizeof(I2C4_PAL));
 #endif
 
 #endif
@@ -114,36 +118,28 @@ void nanoHAL_Initialize()
 #if (HAL_USE_UART == TRUE)
 
 #if defined(NF_SERIAL_COMM_STM32_UART_USE_USART1) && (NF_SERIAL_COMM_STM32_UART_USE_USART1 == TRUE)
-    Uart1_PAL.UartDriver = NULL;
-    Uart1_PAL__.UartDriver = NULL;
+    memset(&Uart1_PAL, 0, sizeof(Uart1_PAL));
 #endif
 #if defined(NF_SERIAL_COMM_STM32_UART_USE_USART2) && (NF_SERIAL_COMM_STM32_UART_USE_USART2 == TRUE)
-    Uart2_PAL.UartDriver = NULL;
-    Uart2_PAL__.UartDriver = NULL;
+    memset(&Uart2_PAL, 0, sizeof(Uart2_PAL));
 #endif
 #if defined(NF_SERIAL_COMM_STM32_UART_USE_USART3) && (NF_SERIAL_COMM_STM32_UART_USE_USART3 == TRUE)
-    Uart3_PAL.UartDriver = NULL;
-    Uart3_PAL__.UartDriver = NULL;
+    memset(&Uart3_PAL, 0, sizeof(Uart3_PAL));
 #endif
 #if defined(NF_SERIAL_COMM_STM32_UART_USE_UART4) && (NF_SERIAL_COMM_STM32_UART_USE_UART4 == TRUE)
-    Uart4_PAL.UartDriver = NULL;
-    Uart4_PAL__.UartDriver = NULL;
+    memset(&Uart4_PAL, 0, sizeof(Uart4_PAL));
 #endif
 #if defined(NF_SERIAL_COMM_STM32_UART_USE_UART5) && (NF_SERIAL_COMM_STM32_UART_USE_UART5 == TRUE)
-    Uart5_PAL.UartDriver = NULL;
-    Uart5_PAL__.UartDriver = NULL;
+    memset(&Uart5_PAL, 0, sizeof(Uart5_PAL));
 #endif
 #if defined(NF_SERIAL_COMM_STM32_UART_USE_USART6) && (NF_SERIAL_COMM_STM32_UART_USE_USART6 == TRUE)
-    Uart6_PAL.UartDriver = NULL;
-    Uart6_PAL__.UartDriver = NULL;
+    memset(&Uart6_PAL, 0, sizeof(Uart6_PAL));
 #endif
 #if defined(NF_SERIAL_COMM_STM32_UART_USE_UART7) && (NF_SERIAL_COMM_STM32_UART_USE_UART7 == TRUE)
-    Uart7_PAL.UartDriver = NULL;
-    Uart7_PAL__.UartDriver = NULL;
+    memset(&Uart7_PAL, 0, sizeof(Uart7_PAL));
 #endif
 #if defined(NF_SERIAL_COMM_STM32_UART_USE_UART8) && (NF_SERIAL_COMM_STM32_UART_USE_UART8 == TRUE)
-    Uart8_PAL.UartDriver = NULL;
-    Uart8_PAL__.UartDriver = NULL;
+    memset(&Uart8_PAL, 0, sizeof(Uart8_PAL));
 #endif
 
 #endif
@@ -165,8 +161,10 @@ void nanoHAL_Initialize()
     Network_Initialize();
 }
 
-void nanoHAL_Uninitialize()
+void nanoHAL_Uninitialize(bool isPoweringDown)
 {
+    (void)isPoweringDown;
+
     // release the global mutex, just in case it's locked somewhere
     // chMtxUnlock(&interpreterGlobalMutex);
 
@@ -189,6 +187,8 @@ void nanoHAL_Uninitialize()
     // TODO need to call this but it's preventing the debug session from starting
     // Network_Uninitialize();
 #endif
+
+    FileSystemVolumeList::UninitializeVolumes();
 
     BlockStorageList_UnInitializeDevices();
 

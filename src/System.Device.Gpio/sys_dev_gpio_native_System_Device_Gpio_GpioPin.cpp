@@ -13,9 +13,13 @@
 // just make it shorter and readable
 typedef Library_sys_dev_gpio_native_System_Device_Gpio_PinValue PinValue;
 
-// declared here as external
-// the implementation will be moved here when Windows.Devices.Gpio is removed
-extern void Gpio_Interupt_ISR(GPIO_PIN pinNumber, bool pinState, void *pArg);
+void Gpio_Interupt_ISR(GPIO_PIN pinNumber, bool pinState, void *pArg)
+{
+    (void)pArg;
+
+    // if handle registered then post a managed event with the current pin reading
+    PostManagedEvent(EVENT_GPIO, 0, (uint16_t)pinNumber, (uint32_t)pinState);
+}
 
 HRESULT Library_sys_dev_gpio_native_System_Device_Gpio_GpioPin::Read___SystemDeviceGpioPinValue(
     CLR_RT_StackFrame &stack)
@@ -66,10 +70,10 @@ HRESULT Library_sys_dev_gpio_native_System_Device_Gpio_GpioPin::Toggle___VOID(CL
         }
 
         GPIO_PIN pinNumber = (GPIO_PIN)pThis[FIELD___pinNumber].NumericByRefConst().s4;
-        GpioPinDriveMode driveMode = (GpioPinDriveMode)pThis[FIELD___pinMode].NumericByRefConst().s4;
+        PinMode driveMode = (PinMode)pThis[FIELD___pinMode].NumericByRefConst().s4;
 
         // sanity check for drive mode set to output so we don't mess up writing to an input pin
-        if (driveMode >= GpioPinDriveMode_Output)
+        if (driveMode >= PinMode_Output)
         {
             CPU_GPIO_TogglePinState(pinNumber);
 
@@ -95,7 +99,7 @@ HRESULT Library_sys_dev_gpio_native_System_Device_Gpio_GpioPin::DisposeNative___
         // releases the pin
         GPIO_PIN pinNumber = (GPIO_PIN)pThis[FIELD___pinNumber].NumericByRefConst().s4;
 
-        CPU_GPIO_DisablePin(pinNumber, GpioPinDriveMode_Input, 0);
+        CPU_GPIO_DisablePin(pinNumber, PinMode_Input, 0);
     }
     NANOCLR_NOCLEANUP();
 }
@@ -110,7 +114,7 @@ HRESULT Library_sys_dev_gpio_native_System_Device_Gpio_GpioPin::
 
         GPIO_PIN pinNumber = (GPIO_PIN)pThis[FIELD___pinNumber].NumericByRefConst().s4;
 
-        GpioPinDriveMode driveMode = (GpioPinDriveMode)stack.Arg1().NumericByRef().s4;
+        PinMode driveMode = (PinMode)stack.Arg1().NumericByRef().s4;
 
         // Return value to the managed application
         stack.SetResult_Boolean(CPU_GPIO_DriveModeSupported(pinNumber, driveMode));
@@ -131,7 +135,7 @@ HRESULT Library_sys_dev_gpio_native_System_Device_Gpio_GpioPin::NativeSetPinMode
             NANOCLR_SET_AND_LEAVE(CLR_E_OBJECT_DISPOSED);
         }
 
-        GpioPinDriveMode driveMode = (GpioPinDriveMode)stack.Arg1().NumericByRef().s4;
+        PinMode driveMode = (PinMode)stack.Arg1().NumericByRef().s4;
 
         NANOCLR_CHECK_HRESULT(SetPinMode(pThis, driveMode));
 
@@ -211,7 +215,7 @@ HRESULT Library_sys_dev_gpio_native_System_Device_Gpio_GpioPin::NativeSetAlterna
         // get alternate function argument
         int32_t alternateFunction = stack.Arg1().NumericByRef().s4;
 
-        CPU_GPIO_DisablePin(pinNumber, GpioPinDriveMode_Input, alternateFunction);
+        CPU_GPIO_DisablePin(pinNumber, PinMode_Input, alternateFunction);
     }
     NANOCLR_NOCLEANUP();
 }
@@ -244,9 +248,7 @@ HRESULT Library_sys_dev_gpio_native_System_Device_Gpio_GpioPin::ExtractDebounceT
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_sys_dev_gpio_native_System_Device_Gpio_GpioPin::SetPinMode(
-    CLR_RT_HeapBlock *gpioPin,
-    GpioPinDriveMode pinMode)
+HRESULT Library_sys_dev_gpio_native_System_Device_Gpio_GpioPin::SetPinMode(CLR_RT_HeapBlock *gpioPin, PinMode pinMode)
 {
     NANOCLR_HEADER();
 
@@ -256,7 +258,7 @@ HRESULT Library_sys_dev_gpio_native_System_Device_Gpio_GpioPin::SetPinMode(
 
     GPIO_PIN pinNumber = (GPIO_PIN)gpioPin[FIELD___pinNumber].NumericByRefConst().s4;
 
-    if (pinMode >= (int)GpioPinDriveMode_Output)
+    if (pinMode >= (int)PinMode_Output)
     {
         validPin = CPU_GPIO_EnableOutputPin(pinNumber, GpioPinValue_Low, pinMode);
     }
@@ -293,10 +295,10 @@ HRESULT Library_sys_dev_gpio_native_System_Device_Gpio_GpioPin::SetPinMode(
 HRESULT Library_sys_dev_gpio_native_System_Device_Gpio_GpioPin::Write(CLR_RT_HeapBlock *gpioPin, GpioPinValue pinValue)
 {
     GPIO_PIN pinNumber = (GPIO_PIN)gpioPin[FIELD___pinNumber].NumericByRefConst().s4;
-    GpioPinDriveMode driveMode = (GpioPinDriveMode)gpioPin[FIELD___pinMode].NumericByRefConst().s4;
+    PinMode driveMode = (PinMode)gpioPin[FIELD___pinMode].NumericByRefConst().s4;
 
     // sanity check for drive mode set to output so we don't mess up writing to an input pin
-    if ((driveMode >= GpioPinDriveMode_Output))
+    if ((driveMode >= PinMode_Output))
     {
         CPU_GPIO_SetPinState(pinNumber, pinValue);
 

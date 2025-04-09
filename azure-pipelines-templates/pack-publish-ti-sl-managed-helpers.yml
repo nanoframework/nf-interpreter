@@ -2,13 +2,12 @@
 # See LICENSE file in the project root for full license information.
 
 steps:
-
   # check if managed helper files where changed
   - powershell: |
       git config --global user.email "nanoframework@outlook.com"
       git config --global user.name "nfbot"
 
-      $auth = "basic $([System.Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes(":$(GitHubToken)"))))"
+      $auth = "basic $([System.Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes(":$(GitHubToken)")))"
 
       $commit = Invoke-RestMethod -Uri "https://api.github.com/repos/nanoframework/nf-interpreter/commits/$(Build.SourceVersion)" -Header @{"Authorization"="$auth"} -ContentType "application/json" -Method GET
       Write-host "Files changed:"
@@ -36,27 +35,28 @@ steps:
 
   - task: NuGetCommand@2
     inputs:
-      command: 'custom' 
+      command: "custom"
       arguments: 'pack targets\TI_SimpleLink\$(TargetBoard)\managed_helpers\package.nuspec -Version $(PACKAGE_NUGET_VERSION)'
     condition: and( succeeded(), eq(variables['BUILD_NUGET_PACKAGE'], true) )
     displayName: Pack managed helpers NuGet
 
-  - task: CopyFiles@1
+  - task: CopyFiles@2
+    condition: and( succeeded(), eq(variables['BUILD_NUGET_PACKAGE'], true) )
+    displayName: Collecting managed helpers deployable artifacts
     inputs:
       sourceFolder: $(Build.SourcesDirectory)
       Contents: |
         **\nanoFramework.Targets*.nupkg
-      TargetFolder: '$(Build.ArtifactStagingDirectory)'
+      TargetFolder: "$(Build.ArtifactStagingDirectory)"
       flattenFolders: true
-    condition: and( succeeded(), eq(variables['BUILD_NUGET_PACKAGE'], true) )
-    displayName: Collecting managed helpers deployable artifacts
+      ignoreMakeDirErrors: true
 
   # push NuGet packages to NuGet (happens except on PR builds)
   - task: NuGetCommand@2
     inputs:
       command: push
       nuGetFeedType: external
-      packagesToPush: '$(Build.ArtifactStagingDirectory)/*.nupkg'
-      publishFeedCredentials: 'NuGet-$(System.TeamProject)'
+      packagesToPush: "$(Build.ArtifactStagingDirectory)/*.nupkg"
+      publishFeedCredentials: "NuGet-$(System.TeamProject)"
     condition: and( succeeded(), eq(variables['BUILD_NUGET_PACKAGE'], true), eq(variables['System.PullRequest.PullRequestId'], '') )
     displayName: Push managed helpers NuGet packages to NuGet

@@ -1,36 +1,57 @@
-//
+﻿//
 // Copyright (c) .NET Foundation and Contributors
-// Portions Copyright (c) 2001, 2002 Georges Menie. All rights reserved.
-// Portions Copyright (c) 2009-2013 Daniel D Miller. All rights reserved.
+// Portions Copyright (c) 2006 - 2021 Skirrid Systems. All rights reserved.
 // See LICENSE file in the project root for full license information.
 //
-
-/*
-    The interface of nanoprintf begins here, to be compiled only if
-    NANOPRINTF_IMPLEMENTATION is not defined. In a multi-file library what
-    follows would be the public-facing nanoprintf.h.
-*/
 
 #ifndef NANOPRINTF_H
 #define NANOPRINTF_H
 
 #include <stdarg.h>
-#include <stddef.h>
 
-/* Define this to fully sandbox nanoprintf inside of a translation unit. */
-#ifdef NANOPRINTF_VISIBILITY_STATIC
-#define NPF_VISIBILITY static
-#else
-#define NPF_VISIBILITY extern
-#endif
+// clang-format off
 
-/* Compilers can warn when printf formatting strings are incorrect. */
-#if defined(__clang__)
-#define NPF_PRINTF_ATTR(FORMAT_INDEX, VARGS_INDEX) __attribute__((__format__(__printf__, FORMAT_INDEX, VARGS_INDEX)))
-#elif defined(__GNUC__) || defined(__GNUG__)
-#define NPF_PRINTF_ATTR(FORMAT_INDEX, VARGS_INDEX) __attribute__((format(printf, FORMAT_INDEX, VARGS_INDEX)))
+/*************************************************************************
+Number of chars output
+
+Traditionally printf returns the number of chars output. If you are not
+interested in that value you can leave PRINTF_T undefined.
+On a small micro you can define the return type as unsigned char if you
+are sure the total output width will never exceed 255, or unsigned short.
+*************************************************************************/
+
+#define PRINTF_T size_t
+
+/*************************************************************************
+Memory access definitions
+
+Some micros such as the AVR can only support storing strings in flash
+memory by wrapping the string in a macro. To make this transparent we can
+define the printf function itself as a macro which performs the wrap and
+calls a renamed version of printf with an _ suffix and no i.
+*************************************************************************/
+
+/*
+Example for AVR micros using GCC toolchain from WinAVR or Atmel Studio
+
+#define sprintf(buf, format, args...)   _sprntf(buf, PSTR(format), ## args)
+#define printf(format, args...)         _prntf(PSTR(format), ## args)
+
+extern printf_t _sprntf(char *, const char *, ...);
+extern printf_t _prntf(const char *, ...);
+*/
+
+/*************************************************************************
+End of customisations - Stop Editing!
+
+The remainder of this file contains the function declarations.
+*************************************************************************/
+
+// Create a type definition for the return value
+#ifndef PRINTF_T
+typedef void printf_t;
 #else
-#define NPF_PRINTF_ATTR(FORMAT_INDEX, VARGS_INDEX)
+typedef PRINTF_T printf_t;
 #endif
 
 #ifdef __cplusplus
@@ -38,208 +59,259 @@ extern "C"
 {
 #endif
 
-    /* Public API */
-
-    NPF_VISIBILITY int npf_snprintf(char *buffer, size_t bufsz, const char *format, ...) NPF_PRINTF_ATTR(3, 4);
-
-    NPF_VISIBILITY int npf_vsnprintf(char *buffer, size_t bufsz, char const *format, va_list vlist)
-        NPF_PRINTF_ATTR(3, 0);
-
-    typedef void (*npf_putc)(int c, void *ctx);
-    NPF_VISIBILITY int npf_pprintf(npf_putc pc, void *pc_ctx, char const *format, ...) NPF_PRINTF_ATTR(3, 4);
-
-    NPF_VISIBILITY int npf_vpprintf(npf_putc pc, void *pc_ctx, char const *format, va_list vlist) NPF_PRINTF_ATTR(3, 0);
-
-/* Public Configuration */
-
-/* Pick reasonable defaults if nothing's been configured. */
-#if !defined(NANOPRINTF_USE_FIELD_WIDTH_FORMAT_SPECIFIERS) && !defined(NANOPRINTF_USE_PRECISION_FORMAT_SPECIFIERS) &&  \
-    !defined(NANOPRINTF_USE_FLOAT_FORMAT_SPECIFIERS) && !defined(NANOPRINTF_USE_LARGE_FORMAT_SPECIFIERS) &&            \
-    !defined(NANOPRINTF_USE_WRITEBACK_FORMAT_SPECIFIERS)
-#define NANOPRINTF_USE_FIELD_WIDTH_FORMAT_SPECIFIERS 1
-#define NANOPRINTF_USE_PRECISION_FORMAT_SPECIFIERS   1
-#define NANOPRINTF_USE_FLOAT_FORMAT_SPECIFIERS       1
-#define NANOPRINTF_USE_LARGE_FORMAT_SPECIFIERS       1
-#define NANOPRINTF_USE_WRITEBACK_FORMAT_SPECIFIERS   0
-#endif
-
-/* If anything's been configured, everything must be configured. */
-#ifndef NANOPRINTF_USE_FIELD_WIDTH_FORMAT_SPECIFIERS
-#error NANOPRINTF_USE_FIELD_WIDTH_FORMAT_SPECIFIERS must be #defined to 0 or 1
-#endif
-
-#ifndef NANOPRINTF_USE_PRECISION_FORMAT_SPECIFIERS
-#error NANOPRINTF_USE_PRECISION_FORMAT_SPECIFIERS must be #defined to 0 or 1
-#endif
-
-#ifndef NANOPRINTF_USE_LARGE_FORMAT_SPECIFIERS
-#error NANOPRINTF_USE_LARGE_FORMAT_SPECIFIERS must be #defined to 0 or 1
-#endif
-
-#ifndef NANOPRINTF_USE_FLOAT_FORMAT_SPECIFIERS
-#error NANOPRINTF_USE_FLOAT_FORMAT_SPECIFIERS must be #defined to 0 or 1
-#endif
-
-#ifndef NANOPRINTF_USE_WRITEBACK_FORMAT_SPECIFIERS
-#error NANOPRINTF_USE_WRITEBACK_FORMAT_SPECIFIERS must be #defined to 0 or 1
-#endif
-
-/* Ensure flags are compatible. */
-#if (NANOPRINTF_USE_FLOAT_FORMAT_SPECIFIERS == 1) && (NANOPRINTF_USE_PRECISION_FORMAT_SPECIFIERS == 0)
-#error Precision format specifiers must be enabled if float support is enabled.
-#endif
-
-/* intmax_t / uintmax_t require stdint from c99 / c++11 */
-#ifndef _MSC_VER
-#ifdef __cplusplus
-#if __cplusplus < 201103L
-#error nanoprintf requires C++11 or later.
-#endif
-#else
-#if __STDC_VERSION__ < 199409L
-#error nanoprintf requires C99 or later.
-#endif
-#endif
-#endif
-
-    /* Implementation Details (prototype / config helper functions) */
-
-#include <inttypes.h>
-#include <stdint.h>
-
-#if NANOPRINTF_USE_FIELD_WIDTH_FORMAT_SPECIFIERS == 1
-    typedef enum
-    {
-        NPF_FMT_SPEC_FIELD_WIDTH_NONE,
-        NPF_FMT_SPEC_FIELD_WIDTH_STAR,
-        NPF_FMT_SPEC_FIELD_WIDTH_LITERAL
-    } npf__format_spec_field_width_t;
-#endif
-
-#if NANOPRINTF_USE_PRECISION_FORMAT_SPECIFIERS == 1
-    typedef enum
-    {
-        NPF_FMT_SPEC_PRECISION_NONE,
-        NPF_FMT_SPEC_PRECISION_STAR,
-        NPF_FMT_SPEC_PRECISION_LITERAL
-    } npf__format_spec_precision_t;
-#endif
-
-    typedef enum
-    {
-        NPF_FMT_SPEC_LEN_MOD_NONE,
-        NPF_FMT_SPEC_LEN_MOD_SHORT,       /* 'h' */
-        NPF_FMT_SPEC_LEN_MOD_LONG,        /* 'l' */
-        NPF_FMT_SPEC_LEN_MOD_LONG_DOUBLE, /* 'L' */
-        NPF_FMT_SPEC_LEN_MOD_CHAR         /* 'hh' */
-#if NANOPRINTF_USE_LARGE_FORMAT_SPECIFIERS == 1
-        ,
-        NPF_FMT_SPEC_LEN_MOD_LARGE_LONG_LONG, /* 'll' */
-        NPF_FMT_SPEC_LEN_MOD_LARGE_INTMAX,    /* 'j' */
-        NPF_FMT_SPEC_LEN_MOD_LARGE_SIZET,     /* 'z' */
-        NPF_FMT_SPEC_LEN_MOD_LARGE_PTRDIFFT   /* 't' */
-#endif
-    } npf__format_spec_length_modifier_t;
-
-    typedef enum
-    {
-        NPF_FMT_SPEC_CONV_PERCENT,      /* '%' */
-        NPF_FMT_SPEC_CONV_CHAR,         /* 'c' */
-        NPF_FMT_SPEC_CONV_STRING,       /* 's' */
-        NPF_FMT_SPEC_CONV_SIGNED_INT,   /* 'i', 'd' */
-        NPF_FMT_SPEC_CONV_OCTAL,        /* 'o' */
-        NPF_FMT_SPEC_CONV_HEX_INT,      /* 'x', 'X' */
-        NPF_FMT_SPEC_CONV_UNSIGNED_INT, /* 'u' */
-        NPF_FMT_SPEC_CONV_POINTER       /* 'p' */
-#if NANOPRINTF_USE_WRITEBACK_FORMAT_SPECIFIERS == 1
-        ,
-        NPF_FMT_SPEC_CONV_WRITEBACK /* 'n' */
-#endif
-#if NANOPRINTF_USE_FLOAT_FORMAT_SPECIFIERS == 1
-        ,
-        NPF_FMT_SPEC_CONV_FLOAT_DECIMAL /* 'f', 'F' */
-#endif
-    } npf__format_spec_conversion_t;
-
-    typedef enum
-    {
-        NPF_FMT_SPEC_CONV_CASE_LOWER,
-        NPF_FMT_SPEC_CONV_CASE_UPPER
-    } npf__format_spec_conversion_case_t;
-
-    typedef struct
-    {
-        /* optional flags */
-        char prepend_sign;     /* '+' */
-        char prepend_space;    /* ' ' */
-        char alternative_form; /* '#' */
-
-#if NANOPRINTF_USE_FIELD_WIDTH_FORMAT_SPECIFIERS == 1
-        /* field width */
-        npf__format_spec_field_width_t field_width_type;
-        int field_width;
-        char left_justified;   /* '-' */
-        char leading_zero_pad; /* '0' */
-#endif
-
-#if NANOPRINTF_USE_PRECISION_FORMAT_SPECIFIERS == 1
-        /* precision */
-        npf__format_spec_precision_t precision_type;
-        int precision;
-#endif
-
-        /* length modifier for specifying argument size */
-        npf__format_spec_length_modifier_t length_modifier;
-
-        /* conversion specifiers */
-        npf__format_spec_conversion_t conv_spec;
-        npf__format_spec_conversion_case_t conv_spec_case;
-    } npf__format_spec_t;
-
-#if NANOPRINTF_USE_LARGE_FORMAT_SPECIFIERS == 0
-    typedef long npf__int_t;
-    typedef unsigned long npf__uint_t;
-#else
-typedef intmax_t npf__int_t;
-typedef uintmax_t npf__uint_t;
-#endif
-
-    NPF_VISIBILITY int npf__parse_format_spec(char const *format, npf__format_spec_t *out_spec);
-
-    typedef struct
-    {
-        char *dst;
-        size_t len;
-        size_t cur;
-    } npf__bufputc_ctx_t;
-
-    NPF_VISIBILITY void npf__bufputc(int c, void *ctx);
-    NPF_VISIBILITY void npf__bufputc_nop(int c, void *ctx);
-    NPF_VISIBILITY int npf__itoa_rev(char *buf, npf__int_t i);
-    NPF_VISIBILITY int npf__utoa_rev(char *buf, npf__uint_t i, unsigned base, npf__format_spec_conversion_case_t cc);
-#if NANOPRINTF_USE_FLOAT_FORMAT_SPECIFIERS == 1
-    NPF_VISIBILITY int npf__dsplit_abs(
-        double d,
-        uint64_t *out_int_part,
-        uint64_t *out_frac_part,
-        int *out_frac_base10_neg_e);
-    NPF_VISIBILITY int npf__dtoa_rev(
-        char *buf,
-        double d,
-        unsigned base,
-        npf__format_spec_conversion_case_t cc,
-        int *out_frac_chars);
-#endif
+// Function declarations, unless macros have been defined above
+printf_t printf_(const char *, ...);
+printf_t sprintf_(char *, const char *, ...);
+printf_t snprintf_(char *, size_t n, const char *, ...);
+printf_t vsnprintf_(char *, size_t n, const char *, va_list);
 
 #ifdef __cplusplus
 }
 #endif
 
-// do not define sprintf, it is not safe
-//#define sprintf snprintf(buff, ARRAYSIZE(buff), fmt, ##__VA_ARGS__)
+    // from config
 
-// the defines below allow using the regular calls to *snprintf
-#define snprintf  npf_snprintf
-#define vsnprintf npf_vsnprintf
+/*************************************************************************
+Basic printf only
+
+The code is designed to support a variety of printf-related functions.
+If simple serial output is all you want then you can save some space by
+defining BASIC_PRINTF_ONLY which allows the internal API to be simplified.
+Note that sprintf will not be supported in this case.
+*************************************************************************/
+
+// #define BASIC_PRINTF_ONLY
+
+/*************************************************************************
+Memory access definitions
+
+Some micros such as the AVR can only support storing and accessing strings
+in flash memory using special macros and functions. This section can be
+used to specify those methods. You may also need to modify printf.h
+to get the compiler to place the format strings in flash memory.
+
+The GET_FORMAT(ptr) macro is used to access a character in the printf
+format string. By default this does a normal memory pointer access, but
+you can configure it to access flash memory if needed.
+*************************************************************************/
+
+/*
+Example for AVR micros using GCC toolchain from WinAVR or Atmel Studio
+
+#include <avr/io.h>
+#include <avr/pgmspace.h>
+#define GET_FORMAT(p)   pgm_read_byte(p)
+*/
+
+/*************************************************************************
+Output configuration
+
+By default printf will use the putchar function. If this is not defined
+in your system you can set your own function here by defining
+PUTCHAR_FUNC to be the name of that function.
+*************************************************************************/
+
+void putchar_(char character);
+#define PUTCHAR_FUNC putchar_
+
+/*************************************************************************
+Compiler capability configuration
+
+Set some options that the C pre-processor will not tell us about.
+*************************************************************************/
+
+// Does the compiler support double precision or silently degrade to single?
+//#define NO_DOUBLE_PRECISION
+
+// Does the compiler support isnan and isinf floating point functions?
+// #define NO_ISNAN_ISINF
+
+/*************************************************************************
+Formatted item width
+
+Since it is extremely unlikely that you will ever want to use a formatted
+width for a single item of more than 127 chars (i.e. the expanded and
+padded size of a single % expression), the width variables can normally
+be restricted to 8 bits. On small micros this saves a lot of code and
+variable space. On a 32-bit RISC it may increase code size due to type
+conversions. Choose the variable type to suit your CPU.
+Note that a signed type is required.
+*************************************************************************/
+
+typedef signed char width_t;
+
+/*************************************************************************
+Feature configuration
+
+This section defines the individual feature flags.
+These are combined as needed to produce the FEATURE_FLAGS macro.
+*************************************************************************/
+
+// Include floating point number support
+#define USE_FLOAT (1 << 0)
+
+// Include support for long integers
+#define USE_LONG (1 << 1)
+
+// Include support for octal formatting
+#define USE_OCTAL (1 << 2)
+
+// Include support for %d decimal formatting
+#define USE_SIGNED (1 << 3)
+
+// Include support for the %i synonym for %d
+#define USE_SIGNED_I (1 << 4)
+
+// Include support for the %u unsigned decimal specifier
+#define USE_UNSIGNED (1 << 5)
+
+// Include support for the %x hex specifier (lowercase output)
+#define USE_HEX_LOWER (1 << 6)
+
+// Include support for the %X hex specifier (uppercase output)
+#define USE_HEX_UPPER (1 << 7)
+
+// Force uppercase output with %x.
+// Used in conjunction with USE_HEX_LOWER.
+// Ignored if USE_HEX_UPPER is also set.
+#define USE_HEX_UPPER_L (1 << 8)
+
+// Include support for %c single character
+#define USE_CHAR (1 << 9)
+
+// Include support for %s string
+#define USE_STRING (1 << 10)
+
+// Include support for %S string in flash memory
+// Only needed for architectures which cannot access program memory using normal pointers.
+// If you have not defined the GET_FORMAT() macro above then you don't need this option.
+#define USE_FSTRING (1 << 11)
+
+// Include support for %b binary specifier
+#define USE_BINARY (1 << 12)
+
+// Include precision support when floating point is not present.
+// Precision is automatically enabled when floating point support is used.
+#define USE_PRECISION (1UL << 16)
+
+// Allow use of leading zero padding e.g. "%03d"
+#define USE_ZERO_PAD (1UL << 17)
+
+// Allow use of space padding e.g. "%3d" or "%12s"
+#define USE_SPACE_PAD (1UL << 18)
+
+// Include indirect width/precision support e.g. "%*d"
+#define USE_INDIRECT (1UL << 19)
+
+// Allow forcing a leading plus sign e.g. "%+3d"
+#define USE_PLUS_SIGN (1UL << 20)
+
+// Allow forcing a leading space (instead of + or -) in front of zero e.g. "% 3d"
+#define USE_SPACE_SIGN (1UL << 21)
+
+// Include support for the left-justify '-' flag.
+#define USE_LEFT_JUST (1UL << 22)
+
+// Include support for the special '#' flag.
+#define USE_SPECIAL (1UL << 23)
+
+// Use smaller but less efficient floating point normalisation.
+// This is not recommended unless code space is critically low.
+#define USE_SMALL_FLOAT (1UL << 24)
+
+// Include support for 64-bit integers e.g. "%lld"
+#define USE_LONG_LONG (1UL << 25)
+
+/*************************************************************************
+Pre-defined feature sets
+
+This section provides some commonly used combinations of features.
+*************************************************************************/
+
+// Lowercase hex integers only. This really is the bare minimum.
+#define HEX_INT (USE_HEX_LOWER)
+
+// Decimal and lowercase hex only.
+#define MINIMAL_INT (USE_SIGNED | USE_HEX_LOWER)
+
+// Signed and unsigned decimal, lower case hex, zero & space padding, plus char and string
+#define BASIC_INT (USE_CHAR | USE_STRING | USE_SIGNED | USE_UNSIGNED | USE_HEX_LOWER | USE_ZERO_PAD | USE_SPACE_PAD)
+
+// All short integer features except octal, binary, %i, indirection and specials.
+#define SHORT_INT                                                                                                      \
+    (USE_CHAR | USE_STRING | USE_SIGNED | USE_UNSIGNED | USE_HEX_LOWER | USE_HEX_UPPER | USE_PRECISION |               \
+     USE_ZERO_PAD | USE_SPACE_PAD | USE_PLUS_SIGN | USE_SPACE_SIGN | USE_LEFT_JUST)
+
+// As above, but also supports long integers.
+#define LONG_INT (USE_LONG | SHORT_INT)
+
+// As above, but also supports long-long integers.
+#define LONG_LONG_INT (USE_LONG_LONG | LONG_INT)
+
+// All possible integer features.
+#define FULL_INT (USE_BINARY | USE_OCTAL | USE_SIGNED_I | USE_INDIRECT | USE_SPECIAL | LONG_LONG_INT)
+
+// All available features including floating point.
+#define FULL_FLOAT (USE_FLOAT | FULL_INT)
+
+/*************************************************************************
+Features included in your build of printf. Use only the features you need
+to keep code size and execution time to a minimum.
+
+You can use the custom set, with anything you don't want commented out,
+or you can use one of the pre-defined sets.
+
+Examples:
+
+#define FEATURE_FLAGS   CUSTOM_SET
+#define FEATURE_FLAGS   SHORT_INT
+
+Features and pre-defined sets are set out in the following sections.
+*************************************************************************/
+
+// Custom feature set. Comment out features you don't want.
+#define CUSTOM_SET                                                                                                     \
+    (0 | USE_FLOAT | USE_LONG | USE_BINARY | USE_OCTAL | USE_SIGNED | USE_SIGNED_I | USE_UNSIGNED | USE_HEX_LOWER |    \
+     USE_HEX_UPPER | USE_HEX_UPPER_L | USE_CHAR | USE_STRING | USE_FSTRING | USE_PRECISION | USE_ZERO_PAD |            \
+     USE_SPACE_PAD | USE_INDIRECT | USE_PLUS_SIGN | USE_SPACE_SIGN | USE_LEFT_JUST | USE_SPECIAL | USE_SMALL_FLOAT |   \
+     USE_LONG_LONG)
+
+#define NANOFRAMEWORK_SET ( 0 \
+        | USE_FLOAT       \
+        | USE_LONG        \
+        | USE_BINARY      \
+        | USE_OCTAL       \
+        | USE_SIGNED      \
+        | USE_SIGNED_I    \
+        | USE_UNSIGNED    \
+        | USE_HEX_LOWER   \
+        | USE_HEX_UPPER   \
+        | USE_HEX_UPPER_L \
+        | USE_CHAR        \
+        | USE_STRING      \
+        | USE_FSTRING     \
+        | USE_PRECISION   \
+        | USE_ZERO_PAD    \
+        | USE_SPACE_PAD   \
+        | USE_INDIRECT    \
+        | USE_PLUS_SIGN   \
+        | USE_SPACE_SIGN  \
+        | USE_LEFT_JUST   \
+        | USE_SPECIAL     \
+        | USE_LONG_LONG   \
+)
+
+#define FEATURE_FLAGS NANOFRAMEWORK_SET
+
+/*************************************************************************
+End of customisations - Stop Editing!
+*************************************************************************/
+
+#define printf      printf_
+#define sprintf     sprintf_
+#define snprintf    snprintf_
+#define vsnprintf   vsnprintf_
 
 #endif // NANOPRINTF_H
+
+// clang-format on

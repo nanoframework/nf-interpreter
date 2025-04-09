@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (c) .NET Foundation and Contributors
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
@@ -126,7 +126,7 @@ HRESULT Library_corlib_native_System_TimeSpan::CompareTo___I4__OBJECT(CLR_RT_Sta
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
 
-    CLR_RT_HeapBlock *pRight = stack.Arg1().Dereference();
+    CLR_RT_HeapBlock const *pRight = stack.Arg1().Dereference();
 
     if (pRight)
     {
@@ -144,13 +144,14 @@ HRESULT Library_corlib_native_System_TimeSpan::Compare___STATIC__I4__SystemTimeS
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
 
-    CLR_INT64 *pLeft;
-    CLR_INT64 *pRight;
-    CLR_RT_HeapBlock resLeft;
-    CLR_RT_HeapBlock resRight;
+    CLR_INT64 const *pLeft;
+    CLR_INT64 const *pRight;
+    CLR_RT_HeapBlock resLeft{};
+    CLR_RT_HeapBlock resRight{};
 
     pLeft = Library_corlib_native_System_TimeSpan::GetValuePtr(stack);
     FAULT_ON_NULL(pLeft);
+
     pRight = Library_corlib_native_System_TimeSpan::GetValuePtr(stack.Arg1());
     FAULT_ON_NULL(pRight);
 
@@ -203,8 +204,11 @@ CLR_INT64 *Library_corlib_native_System_TimeSpan::GetValuePtr(CLR_RT_HeapBlock &
     if (dt == DATATYPE_OBJECT || dt == DATATYPE_BYREF)
     {
         obj = obj->Dereference();
+
         if (!obj)
+        {
             return NULL;
+        }
 
         dt = obj->DataType();
     }

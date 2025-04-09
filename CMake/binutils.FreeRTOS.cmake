@@ -5,11 +5,12 @@
 
 function(nf_set_optimization_options target) 
 
+    # debug compile options: -Og (optimize for debugging) and -ggdb (produce debug symbols specifically for gdb)
     target_compile_options(${target} PRIVATE
-        $<$<CONFIG:Debug>:-Og -femit-class-debug-always -g3 -ggdb>
-        $<$<CONFIG:Release>:-O3 -flto -fuse-linker-plugin -fno-fat-lto-objects>
-        $<$<CONFIG:MinSizeRel>:-Os -flto -fuse-linker-plugin -fno-fat-lto-objects>
-        $<$<CONFIG:RelWithDebInfo>:-Os -femit-class-debug-always -g3 -ggdb>
+        $<$<CONFIG:Debug>:-Og -ggdb>
+        $<$<CONFIG:Release>:-O3 -flto>
+        $<$<CONFIG:MinSizeRel>:-Os -flto>
+        $<$<CONFIG:RelWithDebInfo>:-Os -ggdb>
     )
 
 endfunction()
@@ -68,7 +69,7 @@ macro(nf_add_platform_packages)
         if(USE_NETWORKING_OPTION)
 
             find_package(NF_Network REQUIRED QUIET)
-            find_package(LWIP REQUIRED QUIET)
+            find_package(lwIP REQUIRED QUIET)
 
         endif()
 
@@ -124,11 +125,15 @@ macro(nf_add_platform_dependencies target)
 
         endif()
 
+        if(API_nanoFramework.System.Security.Cryptography)
+            FetchContent_GetProperties(mbedtls)
+        endif()
+    
         nf_add_lib_native_assemblies(
             EXTRA_INCLUDES
                 ${CMSIS_INCLUDE_DIRS}
                 ${FreeRTOS_INCLUDE_DIRS}
-                ${LWIP_INCLUDE_DIRS}
+                ${lWIP_INCLUDE_DIRS}
                 ${TARGET_NXP_COMMON_INCLUDE_DIRS}
                 ${TARGET_NXP_NANOCLR_INCLUDE_DIRS}
                 ${TARGET_FREERTOS_COMMON_INCLUDE_DIRS}
@@ -136,7 +141,9 @@ macro(nf_add_platform_dependencies target)
                 ${FATFS_INCLUDE_DIRS}
                 ${CMAKE_CURRENT_BINARY_DIR}
                 ${CMAKE_SOURCE_DIR}/targets/FreeRTOS/NXP/_fatfs
-                ${CMAKE_BINARY_DIR}/targets/${RTOS}/${TARGET_BOARD})
+                ${CMAKE_BINARY_DIR}/targets/${RTOS}/${TARGET_BOARD}
+                ${mbedtls_SOURCE_DIR}/include
+                ${CMAKE_SOURCE_DIR}/src/PAL/COM/sockets/ssl/MbedTLS)
         
         add_dependencies(${target}.elf nano::NF_NativeAssemblies)
 
@@ -146,12 +153,12 @@ macro(nf_add_platform_dependencies target)
                 BUILD_TARGET
                     ${target}
                 EXTRA_SOURCES 
-                    ${LWIP_SOURCES}
+                    ${lWIP_SOURCES}
                 EXTRA_INCLUDES 
                     ${FreeRTOS_INCLUDE_DIRS}
                     ${TARGET_NXP_COMMON_INCLUDE_DIRS}
                     ${TARGET_FREERTOS_COMMON_INCLUDE_DIRS}
-                    ${LWIP_INCLUDE_DIRS}
+                    ${lWIP_INCLUDE_DIRS}
                     ${CMSIS_INCLUDE_DIRS})
 
             add_dependencies(${target}.elf nano::NF_Network)
@@ -171,6 +178,7 @@ macro(nf_add_platform_include_directories target)
         ${TARGET_FREERTOS_COMMON_INCLUDE_DIRS}
         ${TARGET_NXP_COMMON_INCLUDE_DIRS}
         ${FreeRTOS_INCLUDE_DIRS}
+        ${lWIP_INCLUDE_DIRS}
         ${CMSIS_INCLUDE_DIRS}
     )
     
@@ -192,8 +200,9 @@ macro(nf_add_platform_include_directories target)
 
             ${TARGET_NXP_NANOCLR_INCLUDE_DIRS}
             ${NANOCLR_PROJECT_INCLUDE_DIRS}
+            ${TARGET_FREERTOS_COMMON_INCLUDE_DIRS}
             ${TARGET_FREERTOS_NANOCLR_INCLUDE_DIRS}
-            ${LWIP_INCLUDE_DIRS}
+            ${lWIP_INCLUDE_DIRS}
             ${CMAKE_CURRENT_BINARY_DIR}
 
         )

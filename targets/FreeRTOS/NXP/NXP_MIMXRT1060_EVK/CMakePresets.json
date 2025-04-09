@@ -1,0 +1,51 @@
+{
+    "version": 4,
+    "include": [
+        "../../../../CMake/arm-gcc.json",
+        "../../../../config/user-tools-repos.json",
+        "../../../../config/user-prefs.json"
+    ],
+    "configurePresets": [
+        {
+            "name": "NXP_MIMXRT1060_EVK",
+            "inherits": [
+                "arm-gcc-cortex-preset",
+                "user-tools-repos",
+                "user-prefs"
+            ],
+            "hidden": false,
+            "cacheVariables": {
+                "TARGET_BOARD": "${presetName}",
+                "TARGET_SERIES": "IMXRT10xx",
+                "SUPPORT_ANY_BASE_CONVERSION": "ON",
+                "RTOS": "FreeRTOS",
+                "RTOS_VERSION": "",
+                "CMSIS_VERSION": "",
+                "FATFS_VERSION": "",
+                "LWIP_VERSION": "",
+                "NF_BUILD_RTM": "OFF",
+                "NF_FEATURE_DEBUGGER": "ON",
+                "NF_FEATURE_HAS_SDCARD": "OFF",
+                "NF_FEATURE_RTC": "ON",
+                "NF_FEATURE_HAS_CONFIG_BLOCK": "ON",
+                "NF_SECURITY_MBEDTLS": "OFF",
+                "API_System.Device.Gpio": "ON",
+                "API_System.Device.I2c": "OFF",
+                "API_System.Device.Adc": "OFF",
+                "API_System.IO.Ports": "ON",
+                "API_nanoFramework.ResourceManager": "ON",
+                "API_nanoFramework.System.Collections": "ON",
+                "API_System.Net": "ON",
+                "API_System.Math": "ON"
+            }
+        }
+    ],
+    "buildPresets": [
+        {
+            "inherits": "base-user",
+            "name": "NXP_MIMXRT1060_EVK",
+            "displayName": "NXP_MIMXRT1060_EVK",
+            "configurePreset": "NXP_MIMXRT1060_EVK"
+        }
+    ]
+}

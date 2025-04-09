@@ -6,7 +6,7 @@
 // This file includes the platform and board specific Network Intialisation
 
 #include <nanoHAL.h>
-#include <lwipthread.h>
+#include <nf_lwipthread.h>
 
 // this is the declaration for the callback implement in nf_sys_arch.c
 extern "C" void set_signal_sock_function(void (*funcPtr)());
@@ -83,6 +83,11 @@ void nanoHAL_Network_Initialize()
         lwipOptions.ourHostName = hostName;
 
         // Start lwIP thread in ChibiOS bindings using the above options
-        lwipInit(&lwipOptions);
+        lwIPInit(&lwipOptions);
     }
+}
+
+void nanoHAL_Network_Uninitialize()
+{
+    // Empty
 }

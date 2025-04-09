@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?> 
-<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project ToolsVersion="Current" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ImportGroup Label="PropertySheets" />
   <PropertyGroup Label="UserMacros" />
 
@@ -14,6 +14,24 @@
     <IntDir Condition="'$(__IntDir)'==''">$(BuildDir)obj\$(Configuration)\$(ProjectName)\</IntDir>
   </PropertyGroup>
 
-  <ItemDefinitionGroup />
-  <ItemGroup />
+  <PropertyGroup Condition="'$(Configuration)'=='Debug'">
+    <NBGV_VersionMajor Condition="'$(NBGV_VersionMajor)'==''">9</NBGV_VersionMajor>
+    <NBGV_VersionMinor Condition="'$(NBGV_VersionMinor)'==''">99</NBGV_VersionMinor>
+    <NBGV_BuildNumber Condition="'$(NBGV_BuildNumber)'==''">999</NBGV_BuildNumber>
+    <TARGET_BUILD_COUNTER Condition="'$(TARGET_BUILD_COUNTER)'==''">9999</TARGET_BUILD_COUNTER>
+  </PropertyGroup>
+
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <PreprocessorDefinitions>VIRTUAL_DEVICE;SUPPORT_ANY_BASE_CONVERSION;NANOCLR_REFLECTION=TRUE;NANOCLR_SYSTEM_COLLECTIONS=TRUE;_SILENCE_CXX17_CODECVT_HEADER_DEPRECATION_WARNING;VERSION_MAJOR=$(NBGV_VersionMajor);VERSION_MINOR=$(NBGV_VersionMinor);VERSION_BUILD=$(NBGV_BuildNumber);VERSION_REVISION=$(TARGET_BUILD_COUNTER);PLATFORMNAMESTRING="WINDOWS";</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\..\targets\win32\Include;..\..\targets\netcore\nanoFramework.nanoCLR;..\..\..\targets\netcore\nanoFramework.nanoCLR;..\..\..\..\targets\netcore\nanoFramework.nanoCLR;..\CLR\Include;..\..\CLR\Include;..\CorLib;..\HAL\Include;..\..\src\HAL\Include;..\..\..\src\HAL\Include;..\..\..\..\src\HAL\Include;..\PAL\Include;</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp20</LanguageStandard>
+      <LanguageStandard_C>stdc17</LanguageStandard_C>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  
+  <PropertyGroup>
+    <_NuGetTargetFallbackMoniker>$(_NuGetTargetFallbackMoniker);native,Version=v0.0</_NuGetTargetFallbackMoniker>
+  </PropertyGroup>
+
 </Project>

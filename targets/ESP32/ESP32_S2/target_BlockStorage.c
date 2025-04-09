@@ -13,11 +13,10 @@ extern IBlockStorageDevice ESP32Flash_BlockStorageInterface;
 
 void BlockStorage_AddDevices()
 {
-    // add device AND request initialization
-    // required to setup flash partitions memory mapping
+    // add device
     BlockStorageList_AddDevice(
         (BlockStorageDevice *)&Device_BlockStorage,
         &ESP32Flash_BlockStorageInterface,
         &Device_BlockStorageConfig,
-        true);
+        false);
 }

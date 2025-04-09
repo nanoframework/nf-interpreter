@@ -28,9 +28,7 @@
 #include "nf_errors_exceptions.h"
 
 #include "Display.h"
-
-#define UNUSED(X) (void)X /* To avoid gcc/g++ warnings */
-
+#include "Gestures.h"
 // ???? Redefined below but gets past the compile error of not defined
 // CLR_GFX_Font needs CLR_GFX_Bitmap  and CLR_GFX_Bitmap needs CLR_GFX_Font
 struct CLR_GFX_Bitmap;
@@ -245,8 +243,16 @@ struct DivHelper
         //       initY is the initial value of Y
         a = _a;
         b = _b;
+
         if (b != 0)
+        {
             stride = a / b;
+        }
+        else
+        {
+            stride = 0;
+        }
+
         DIncStride = 2 * (a - b * stride);
         DIncStridePlus1 = 2 * (a - b * (stride + 1));
         Reset(initY);
@@ -414,8 +420,11 @@ struct PAL_GFX_Bitmap
     CLR_UINT32 *data;
     GFX_Rect clipping;
     CLR_UINT32 transparentColor;
+    CLR_UINT16 transparentColorSet;
 
     static const CLR_UINT32 c_InvalidColor = 0xFF000000;
+    static const CLR_UINT16 c_TransparentColorNotSet = 0x00000000;
+    static const CLR_UINT16 c_TransparentColorSet = 0x00000001;
     static const CLR_UINT16 c_OpacityTransparent = 0;
     static const CLR_UINT16 c_OpacityOpaque = 256;
     static const CLR_UINT32 c_SetPixels_None = 0x00000000;
@@ -473,12 +482,12 @@ struct CLR_GFX_Bitmap
     static HRESULT CreateInstanceGif(CLR_RT_HeapBlock &ref, const CLR_UINT8 *data, const CLR_UINT32 size);
     static HRESULT CreateInstanceBmp(CLR_RT_HeapBlock &ref, const CLR_UINT8 *data, const CLR_UINT32 size);
 
-    static HRESULT GetInstanceFromGraphicsHeapBlock(const CLR_RT_HeapBlock &ref, CLR_GFX_Bitmap *&bitmap);
+    static HRESULT GetInstanceFromManagedCSharpReference(const CLR_RT_HeapBlock &ref, CLR_GFX_Bitmap *&bitmap);
     static HRESULT DeleteInstance(CLR_RT_HeapBlock &ref);
 
     static CLR_UINT32 CreateInstanceJpegHelper(int x, int y, CLR_UINT32 flags, CLR_UINT16 &opacity, void *param);
-    static CLR_UINT32 ConvertToNative1BppHelper(CLR_UINT32 flags, CLR_UINT16 &opacity, void *param);
-    static CLR_UINT32 ConvertToNative16BppHelper(CLR_UINT32 flags, CLR_UINT16 &opacity, void *param);
+    static CLR_UINT32 ConvertToNative1BppHelper(int x, int y, CLR_UINT32 flags, CLR_UINT16 &opacity, void *param);
+    static CLR_UINT32 ConvertToNative16BppHelper(int x, int y, CLR_UINT32 flags, CLR_UINT16 &opacity, void *param);
 
     void Bitmap_Initialize();
     void Clear();
@@ -489,6 +498,7 @@ struct CLR_GFX_Bitmap
 
     void DrawLine(const GFX_Pen &pen, int x0, int y0, int x1, int y1);
     void DrawRectangle(const GFX_Pen &pen, const GFX_Brush &brush, const GFX_Rect &rectangle);
+    void FillRectangle(const GFX_Brush &brush, const GFX_Rect &rectangle);
     void DrawRoundedRectangle(
         const GFX_Pen &pen,
         const GFX_Brush &brush,
@@ -505,6 +515,7 @@ struct CLR_GFX_Bitmap
         const GFX_Rect &src,
         CLR_UINT16 opacity);
 
+    void DrawChar(CLR_UINT16 c, CLR_GFX_Font &font, CLR_UINT32 color, int x, int y);
     void DrawText(LPCSTR str, CLR_GFX_Font &font, CLR_UINT32 color, int x, int y);
     static HRESULT DrawTextInRect(
         LPCSTR &szText,
@@ -611,7 +622,7 @@ struct GraphicsDriver
     static int GetHeight();
     static int GetBitsPerPixel();
     static DisplayOrientation GetOrientation();
-    static void ChangeOrientation(DisplayOrientation newOrientation);
+    static bool ChangeOrientation(DisplayOrientation newOrientation);
 
     static void Clear(const PAL_GFX_Bitmap &bitmap);
 
@@ -624,6 +635,7 @@ struct GraphicsDriver
         const GFX_Pen &pen,
         const GFX_Brush &brush,
         const GFX_Rect &rectangle);
+    static void FillRectangle(const PAL_GFX_Bitmap &bitmap, const GFX_Brush &brush, const GFX_Rect &rectangle);
     static void DrawRoundedRectangle(
         const PAL_GFX_Bitmap &bitmap,
         const GFX_Pen &pen,
@@ -659,7 +671,14 @@ struct GraphicsDriver
         const GFX_Rect &srcRect,
         CLR_UINT16 opacity);
 
-    static void Screen_Flush(CLR_GFX_Bitmap &bitmap, CLR_UINT16 x, CLR_UINT16 y, CLR_UINT16 width, CLR_UINT16 height);
+    static void Screen_Flush(
+        CLR_GFX_Bitmap &bitmap,
+        CLR_UINT16 srcX,
+        CLR_UINT16 srcY,
+        CLR_UINT16 width,
+        CLR_UINT16 height,
+        CLR_UINT16 screenX,
+        CLR_UINT16 screenY);
 
   private:
     static const CLR_UINT32 c_MaxSize = 2097152; // 2MB
@@ -673,6 +692,7 @@ struct GraphicsDriver
         GFX_Pen &pen,
         GFX_Brush &brush,
         const GFX_Rect &rectangle);
+    static void FillRectangleNative(const PAL_GFX_Bitmap &bitmap, GFX_Brush &brush, const GFX_Rect &rectangle);
     static void DrawRoundedRectangleNative(
         const PAL_GFX_Bitmap &bitmap,
         GFX_Pen &pen,
@@ -715,6 +735,14 @@ struct GraphicsDriver
 
     static void DrawBresLineNative(const PAL_GFX_Bitmap &bitmap, int x0, int y0, int x1, int y1, GFX_Pen &pen);
 
+    static void DrawScanlineNative(
+        const PAL_GFX_Bitmap &bitmap,
+        int x1,
+        int x2,
+        int y,
+        CLR_UINT32 color,
+        CLR_UINT16 opacity);
+
     static CLR_UINT32 NativeColorInterpolate(CLR_UINT32 colorTo, CLR_UINT32 colorFrom, CLR_UINT16 scalar);
 
     __inline static CLR_UINT8 NativeColorRValue(CLR_UINT32 color)
@@ -737,7 +765,7 @@ struct GraphicsDriver
 
     __inline static CLR_UINT8 ColorRValue(CLR_UINT32 color)
     {
-        return color & 0x0000FF;
+        return (color & 0xFF0000) >> 16;
     }
     __inline static CLR_UINT8 ColorGValue(CLR_UINT32 color)
     {
@@ -745,14 +773,14 @@ struct GraphicsDriver
     }
     __inline static CLR_UINT8 ColorBValue(CLR_UINT32 color)
     {
-        return (color & 0xFF0000) >> 16;
+        return color & 0x0000FF;
     }
     __inline static CLR_UINT32 ColorFromRGB(CLR_UINT8 r, CLR_UINT8 g, CLR_UINT8 b)
     {
-        return (b << 16) | (g << 8) | r;
+        return (r << 16) | (g << 8) | b;
     }
 
-    __inline static CLR_UINT32 ConvertNativeToColor(CLR_UINT32 nativeColor)
+    __inline static CLR_UINT32 ConvertNativeToARGB(CLR_UINT32 nativeColor)
     {
         int r = NativeColorRValue(nativeColor) << 3;
         if ((r & 0x8) != 0)
@@ -763,7 +791,8 @@ struct GraphicsDriver
         int b = NativeColorBValue(nativeColor) << 3;
         if ((b & 0x8) != 0)
             b |= 0x7; // Copy LSB
-        return ColorFromRGB(r, g, b);
+        CLR_UINT32 opaque = 0xff000000;
+        return ColorFromRGB(r, g, b) | opaque;
     }
     __inline static CLR_UINT32 ConvertColorToNative(CLR_UINT32 color)
     {
@@ -802,6 +831,12 @@ struct GraphicsDriver
 
     static void Draw4PointsEllipse(const PAL_GFX_Bitmap &bitmap, int offsetX, int offsetY, void *params);
     static void Draw4PointsRoundedRect(const PAL_GFX_Bitmap &bitmap, int offsetX, int offsetY, void *params);
+    static void Fill4PointLinesRoundedRect(const PAL_GFX_Bitmap &bitmap, int offsetX, int offsetY, void *params);
+    static void GradientFill4PointLinesRoundedRect(
+        const PAL_GFX_Bitmap &bitmap,
+        int offsetX,
+        int offsetY,
+        void *params);
 };
 
 // The PAL Graphics API uses the 24bit BGR color space, the one that's used for the
@@ -859,7 +894,7 @@ struct BmpDecoder
     BmpEncodingType encodingType;
     HRESULT BmpInitOutput(const CLR_UINT8 *src, CLR_UINT32 srcSize);
     HRESULT BmpStartOutput(CLR_GFX_Bitmap *bitmap);
-    static CLR_UINT32 BmpOutputHelper(CLR_UINT32 flags, CLR_UINT16 &opacity, void *param);
+    static CLR_UINT32 BmpOutputHelper(int x, int y, CLR_UINT32 flags, CLR_UINT16 &opacity, void *param);
 
   private:
     CLR_RT_ByteArrayReader source;

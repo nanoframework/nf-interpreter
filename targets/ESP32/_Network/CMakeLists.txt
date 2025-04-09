@@ -5,6 +5,8 @@
 
 option(ESP32_ETHERNET_SUPPORT "Enable ESP32 ethernet" OFF)
 
+nf_process_esp32_ethernet_options()
+
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/esp32_ethernet_options.h.in
                ${CMAKE_BINARY_DIR}/targets/${RTOS}/${TARGET_BOARD}/esp32_ethernet_options.h @ONLY)
  
@@ -12,6 +14,10 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/esp32_ethernet_options.h.in
 list(APPEND TARGET_ESP32_IDF_NETWORK_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/NF_ESP32_Ethernet.cpp)
 list(APPEND TARGET_ESP32_IDF_NETWORK_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/NF_ESP32_Wireless.cpp)
 list(APPEND TARGET_ESP32_IDF_NETWORK_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/NF_ESP32_SmartConfig.cpp)
+
+if (HAL_USE_THREAD_OPTION)
+  list(APPEND TARGET_ESP32_IDF_NETWORK_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/NF_ESP32_OpenThread.cpp)
+endif()
 
 # make var global
 set(TARGET_ESP32_IDF_NETWORK_SOURCES ${TARGET_ESP32_IDF_NETWORK_SOURCES} CACHE INTERNAL "make global")

@@ -1,0 +1,84 @@
+{
+    "version": 4,
+    "include": [
+        "../../../../CMake/arm-gcc.json",
+        "../../../../config/user-tools-repos.json",
+        "../../../../config/user-prefs.json"
+    ],
+    "configurePresets": [
+        {
+            "name": "SL_STK3701A",
+            "inherits": [
+                "arm-gcc-cortex-preset",
+                "user-tools-repos",
+                "user-prefs"
+            ],
+            "hidden": false,
+            "cacheVariables": {
+                "TARGET_BOARD": "${presetName}",
+                "RTOS": "AzureRTOS",
+                "TARGET_SERIES": "EFM32GG11",
+                "SUPPORT_ANY_BASE_CONVERSION": "OFF",
+                "NF_FEATURE_DEBUGGER": "ON",
+                "NF_FEATURE_RTC": "ON",
+                "NF_FEATURE_HAS_SDCARD": "OFF",
+                "NF_FEATURE_HAS_CONFIG_BLOCK": "ON",
+                "SWO_OUTPUT": "OFF",
+                "NF_BUILD_RTM": "OFF",
+                "API_System.Math": "ON",
+                "API_Hardware.GiantGecko": "ON",
+                "API_System.Device.Gpio": "ON",
+                "API_System.Device.Spi": "ON",
+                "API_System.Device.I2c": "ON",
+                "API_System.Device.Pwm": "ON",
+                "API_System.IO.Ports": "ON",
+                "API_System.Device.Adc": "ON",
+                "API_System.Device.Dac": "OFF",
+                "API_System.Net": "OFF",
+                "API_nanoFramework.Device.OneWire": "OFF",
+                "API_nanoFramework.Devices.Can": "OFF",
+                "API_nanoFramework.ResourceManager": "ON",
+                "API_nanoFramework.System.Collections": "ON",
+                "API_nanoFramework.System.Text": "ON",
+                "API_nanoFramework.System.IO.Hashing": "ON",
+                "API_nanoFramework.GiantGecko.Adc": "OFF",
+                "API_nanoFramework.Graphics": "OFF",
+                "API_System.Device.UsbStream": "ON",
+                "HAL_WP_USE_SERIAL": "ON"
+            }
+        },
+        {
+            "name": "SL_STK3701A_REVB",
+            "inherits": [
+                "SL_STK3701A"
+            ],
+            "cacheVariables": {
+                "TARGET_BOARD": {
+                    "type": "STRING",
+                    "value": "SL_STK3701A"
+                },
+                "TARGET_SERIAL_BAUDRATE": "115200",
+                "GECKO_FEATURE_USBD_HID": "OFF",
+                "HAL_WP_USE_SERIAL": "ON",
+                "HAL_WP_USE_USB_CDC": "OFF",
+                "API_System.Device.Adc": "ON",
+                "API_nanoFramework.GiantGecko.Adc": "OFF",
+                "API_System.Device.UsbStream": "ON"
+            }
+        }
+    ],
+    "buildPresets": [
+        {
+            "inherits": "base-user",
+            "name": "SL_STK3701A",
+            "displayName": "SL_STK3701A",
+            "configurePreset": "SL_STK3701A"
+        },
+        {
+            "inherits": "base-user",
+            "name": "SL_STK3701A_REVB",
+            "displayName": "SL_STK3701A_REVB",
+            "configurePreset": "SL_STK3701A_REVB"
+        }
+    ]
+}

@@ -4,11 +4,15 @@
 #
 
 include(FetchContent)
-FetchContent_GetProperties(stm32l0_cubepackage)
+FetchContent_GetProperties(stm32l0_hal_driver)
+FetchContent_GetProperties(cmsis_device_l0)
+FetchContent_GetProperties(cmsis_core)
 
 # set include directories
-list(APPEND STM32L0_CubePackage_INCLUDE_DIRS ${stm32l0_cubepackage_SOURCE_DIR}/Drivers/CMSIS/Device/ST/STM32L0xx/Include)
-list(APPEND STM32L0_CubePackage_INCLUDE_DIRS ${stm32l0_cubepackage_SOURCE_DIR}/Drivers/STM32L0xx_HAL_Driver/Inc)
+list(APPEND STM32L0_CubePackage_INCLUDE_DIRS ${cmsis_device_l0_SOURCE_DIR}/Include)
+list(APPEND STM32L0_CubePackage_INCLUDE_DIRS ${stm32l0_hal_driver_SOURCE_DIR}/Inc)
+list(APPEND STM32L0_CubePackage_INCLUDE_DIRS ${cmsis_core_SOURCE_DIR}/Include)
+list(APPEND STM32L0_CubePackage_INCLUDE_DIRS ${TARGET_BASE_LOCATION})
 
 # source files
 set(STM32L0_CubePackage_SRCS
@@ -23,7 +27,7 @@ foreach(SRC_FILE ${STM32L0_CubePackage_SRCS})
     find_file(STM32L0_CubePackage_SRC_FILE ${SRC_FILE}
         PATHS 
 
-        ${stm32l0_cubepackage_SOURCE_DIR}/Drivers/STM32L0xx_HAL_Driver/Src
+        ${stm32l0_hal_driver_SOURCE_DIR}/Src
 
         CMAKE_FIND_ROOT_PATH_BOTH
     )
@@ -36,6 +40,7 @@ foreach(SRC_FILE ${STM32L0_CubePackage_SRCS})
 
 endforeach()
 
+list(REMOVE_DUPLICATES STM32L0_CubePackage_INCLUDE_DIRS)
 
 include(FindPackageHandleStandardArgs)
 

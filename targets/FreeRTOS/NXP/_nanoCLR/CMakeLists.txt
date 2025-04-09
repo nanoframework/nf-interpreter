@@ -16,9 +16,6 @@ list(APPEND TARGET_NXP_NANOCLR_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/targetHAL_Pow
 # append Random number generator files
 list(APPEND TARGET_NXP_NANOCLR_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/targetRandom.cpp)
 
-# append files from Runtime.Native
-list(APPEND TARGET_NXP_NANOCLR_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/nanoFramework.Runtime.Native/nf_rt_native_nanoFramework_Runtime_Native_Rtc.cpp)
-
 # append target nanoCLR include directory
 list(APPEND TARGET_NXP_NANOCLR_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR})
 list(APPEND TARGET_NXP_NANOCLR_INCLUDE_DIRS ${CMAKE_CURRENT_BINARY_DIR})

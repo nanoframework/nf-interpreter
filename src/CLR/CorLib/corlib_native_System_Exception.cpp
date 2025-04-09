@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (c) .NET Foundation and Contributors
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
@@ -12,10 +12,7 @@ struct ExceptionLookup
 };
 
 static const ExceptionLookup c_ExceptionLookup[] = {
-#define EL(hr, fld)                                                                                                    \
-    {                                                                                                                  \
-        hr, &g_CLR_RT_WellKnownTypes.fld                                                                               \
-    }
+#define EL(hr, fld) {hr, &g_CLR_RT_WellKnownTypes.fld}
     EL(CLR_E_APPDOMAIN_EXITED, m_AppDomainUnloadedException),
     EL(CLR_E_INVALID_PARAMETER, m_ArgumentException),
     EL(CLR_E_ARGUMENT_NULL, m_ArgumentNullException),
@@ -42,17 +39,21 @@ HRESULT Library_corlib_native_System_Exception::get_StackTrace___STRING(CLR_RT_S
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
 
-    CLR_RT_HeapBlock_Array *pArray;
-    StackTrace *pStackTrace;
-    CLR_RT_HeapBlock *pBlkString;
     char buf[512];
     char *strName;
     size_t iName;
+    int depth = 0;
+
+    CLR_RT_HeapBlock_Array *pArray;
+    StackTrace *pStackTrace;
+    CLR_RT_HeapBlock *pBlkString;
     CLR_RT_HeapBlock tmpArray;
+    CLR_RT_HeapBlock *pThis;
+
     tmpArray.SetObjectReference(NULL);
     CLR_RT_ProtectFromGC gc(tmpArray);
-    int depth = 0;
-    CLR_RT_HeapBlock *pThis = stack.This();
+
+    pThis = stack.This();
     FAULT_ON_NULL(pThis);
 
     pArray = pThis[FIELD___stackTrace].DereferenceArray();
@@ -175,56 +176,87 @@ HRESULT Library_corlib_native_System_Exception::SetStackTrace(CLR_RT_HeapBlock &
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
 
+    CLR_RT_HeapBlock *obj;
+    CLR_RT_HeapBlock_Array *array;
+    StackTrace *dst;
+    CLR_UINT32 depth = 0;
+
+    obj = ref.Dereference();
+
     if (stack)
     {
-        CLR_RT_HeapBlock *obj;
-        CLR_RT_HeapBlock_Array *array;
-        StackTrace *dst;
-        CLR_UINT32 depth;
-
         if (CLR_RT_ExecutionEngine::IsInstanceOf(ref, g_CLR_RT_WellKnownTypes.m_Exception) == false)
+        {
             NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
-
-        //--//
-
-        obj = ref.Dereference();
-        depth = 0;
-
-        NANOCLR_FOREACH_NODE_BACKWARD__DIRECT(CLR_RT_StackFrame, stackSub, stack)
-        {
-            depth++;
         }
-        NANOCLR_FOREACH_NODE_BACKWARD_END();
 
-        //--//
+#if defined(NANOCLR_TRACE_EXCEPTIONS)
 
-        NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance(
-            obj[FIELD___stackTrace],
-            depth * sizeof(StackTrace),
-            g_CLR_RT_WellKnownTypes.m_UInt8));
-
-        //--//
-
-        array = obj[FIELD___stackTrace].DereferenceArray();
-        dst = (StackTrace *)array->GetFirstElement();
-
-        NANOCLR_FOREACH_NODE_BACKWARD__DIRECT(CLR_RT_StackFrame, stackSub, stack)
+        if (CLR_EE_DBG_IS(NoStackTraceInExceptions))
         {
-            dst->m_md = stackSub->m_call;
-            dst->m_IP = (CLR_UINT32)(stackSub->m_IP - stackSub->m_IPstart);
+            // stack trace is DISABLED or...
+            // no debugger is attached or...
+            // compaction is pending so better not mess around or...
+            // GC is requested or in progress so better not mess around
 
-            dst++;
+            (void)dst;
+            (void)array;
+
+            // create an empty array for the stack trace
+            NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance(
+                obj[FIELD___stackTrace],
+                depth,
+                g_CLR_RT_WellKnownTypes.m_UInt8));
         }
-        NANOCLR_FOREACH_NODE_BACKWARD_END();
+        else
+        {
+            // stack trace is enabled
+
+            // crawl the stack to get the depth
+            NANOCLR_FOREACH_NODE_BACKWARD__DIRECT(CLR_RT_StackFrame, stackSub, stack)
+            {
+                depth++;
+            }
+            NANOCLR_FOREACH_NODE_BACKWARD_END();
+
+            NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance(
+                obj[FIELD___stackTrace],
+                depth * sizeof(StackTrace),
+                g_CLR_RT_WellKnownTypes.m_UInt8));
+
+            // get a pointer to the array
+            array = obj[FIELD___stackTrace].DereferenceArray();
+            dst = (StackTrace *)array->GetFirstElement();
+
+            // crawl the stack to get the stack trace
+            NANOCLR_FOREACH_NODE_BACKWARD__DIRECT(CLR_RT_StackFrame, stackSub, stack)
+            {
+                dst->m_md = stackSub->m_call;
+                dst->m_IP = (CLR_UINT32)(stackSub->m_IP - stackSub->m_IPstart);
+
+                dst++;
+            }
+            NANOCLR_FOREACH_NODE_BACKWARD_END();
 
 #if !defined(BUILD_RTM)
-        // shutting down the EE happens by Thread->Abort.  These exceptions are by design, and
-        // don't need to be logged, or written to the console....
-        if (!g_CLR_RT_ExecutionEngine.m_fShuttingDown)
+            // shutting down the EE happens by Thread->Abort.  These exceptions are by design, and
+            // don't need to be logged, or written to the console....
+            if (!g_CLR_RT_ExecutionEngine.m_fShuttingDown)
 #endif
-        {
-            CLR_RT_DUMP::EXCEPTION(*stack, ref);
+            {
+                CLR_RT_DUMP::EXCEPTION(*stack, ref);
+            }
         }
+
+#else
+        (void)dst;
+        (void)array;
+
+        // create an empty array for the stack trace
+        NANOCLR_CHECK_HRESULT(
+            CLR_RT_HeapBlock_Array::CreateInstance(obj[FIELD___stackTrace], depth, g_CLR_RT_WellKnownTypes.m_UInt8));
+
+#endif
     }
 
     NANOCLR_NOCLEANUP();

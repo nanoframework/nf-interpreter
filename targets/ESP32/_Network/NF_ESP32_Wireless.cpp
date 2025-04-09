@@ -8,12 +8,18 @@
 #include "NF_ESP32_Network.h"
 #include "esp_netif_net_stack.h"
 
+#if defined(CONFIG_SOC_WIFI_SUPPORTED)
+
 static const char *TAG = "wifi";
 
 static wifi_mode_t wifiMode;
 
 // flag to store if Wi-Fi has been initialized
 static bool IsWifiInitialised = false;
+
+static esp_netif_t *wifiStaNetif = NULL;
+static esp_netif_t *wifiAPNetif = NULL;
+
 // flag to signal if connect is to happen
 bool NF_ESP32_IsToConnect = false;
 
@@ -114,6 +120,11 @@ void NF_ESP32_DeinitWifi()
 
     esp_wifi_stop();
 
+    esp_netif_destroy_default_wifi(wifiStaNetif);
+    wifiStaNetif = NULL;
+    esp_netif_destroy_default_wifi(wifiAPNetif);
+    wifiAPNetif = NULL;
+
     esp_wifi_deinit();
 }
 
@@ -142,7 +153,7 @@ esp_err_t NF_ESP32_InitaliseWifi()
     if (!IsWifiInitialised)
     {
         // create Wi-Fi STA (ignoring return)
-        esp_netif_create_default_wifi_sta();
+        wifiStaNetif = esp_netif_create_default_wifi_sta();
 
         // We need to start the WIFI stack before the station can Connect
         // Also we can only get the NetIf number used by ESP IDF after it has been started.
@@ -151,12 +162,30 @@ esp_err_t NF_ESP32_InitaliseWifi()
         if (expectedWifiMode & WIFI_MODE_AP)
         {
             // create AP (ignoring return)
-            esp_netif_create_default_wifi_ap();
+            wifiAPNetif = esp_netif_create_default_wifi_ap();
+
+            // Remove DHCP server flag as not configured in sdkconfig, DHCP server done in managed code
+            // Otherwise startup hangs
+            if (wifiAPNetif)
+            {
+                wifiAPNetif->flags = (esp_netif_flags_t)(ESP_NETIF_FLAG_AUTOUP);
+            }
         }
 
         // Initialise WiFi, allocate resource for WiFi driver, such as WiFi control structure,
         // RX/TX buffer, WiFi NVS structure etc, this WiFi also start WiFi task.
         wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
+
+#if CONFIG_SPIRAM_IGNORE_NOTFOUND
+        // The comment out function below is only avaliable in ESP IDF 5.1x
+        // if (!esp_psram_is_initialized()){
+        if (heap_caps_get_total_size(MALLOC_CAP_SPIRAM) == 0)
+        {
+            cfg.cache_tx_buf_num = 0;
+            cfg.feature_caps &= ~CONFIG_FEATURE_CACHE_TX_BUF_BIT;
+        }
+#endif
+
         ec = esp_wifi_init(&cfg);
 
         if (ec != ESP_OK)
@@ -252,6 +281,8 @@ esp_err_t NF_ESP32_Wireless_Disconnect()
 {
     esp_err_t ec;
 
+    NF_ESP32_IsToConnect = false;
+
     ec = esp_wifi_disconnect();
 
     if (ec != ESP_OK)
@@ -268,7 +299,6 @@ int NF_ESP32_Wireless_Open(HAL_Configuration_NetworkInterface *config)
     bool okToStartSmartConnect = false;
 
     ec = NF_ESP32_InitaliseWifi();
-
     if (ec != ESP_OK)
     {
         return SOCK_SOCKET_ERROR;
@@ -327,12 +357,7 @@ bool NF_ESP32_Wireless_Close()
 {
     if (IsWifiInitialised)
     {
-        esp_wifi_stop();
-        esp_wifi_deinit();
-
-        // clear flags
-        IsWifiInitialised = false;
-        NF_ESP32_IsToConnect = false;
+        NF_ESP32_DeinitWifi();
     }
 
     return false;
@@ -349,9 +374,7 @@ int NF_ESP32_Wireless_Scan()
 
     // Start a Wi-Fi scan
     // When complete a Scan Complete event will be fired
-    esp_err_t res = esp_wifi_scan_start(&config, false);
-
-    return (int)res;
+    return esp_wifi_scan_start(&config, false);
 }
 
 wifi_auth_mode_t MapAuthentication(AuthenticationType type)
@@ -490,6 +513,8 @@ bool NF_ESP32_WirelessAP_Close()
     return true;
 }
 
+#endif
+
 // Wait for the network interface to become available
 int NF_ESP32_Wait_NetNumber(int num)
 {
@@ -511,6 +536,10 @@ int NF_ESP32_Wait_NetNumber(int num)
 
             case IDF_ETH_DEF:
                 espNetif = esp_netif_get_handle_from_ifkey("ETH_DEF");
+                break;
+
+            case IDF_OT_DEF:
+                espNetif = esp_netif_get_handle_from_ifkey("OT_DEF");
                 break;
 
             default:

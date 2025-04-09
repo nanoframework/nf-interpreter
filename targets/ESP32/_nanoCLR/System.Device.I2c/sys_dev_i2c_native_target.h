@@ -9,6 +9,7 @@
 #include <sys_dev_i2c_native.h>
 #include <string.h>
 #include <targetPAL.h>
+#include <targetPAL_I2c.h>
 #include <Esp32_DeviceMapping.h>
 
-#endif //SYS_DEV_I2C_NATIVE_TARGET_H
+#endif // SYS_DEV_I2C_NATIVE_TARGET_H

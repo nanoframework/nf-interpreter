@@ -2,7 +2,7 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "ESP32_WROOM_32 - Wrover",
+            "name": "ESP32",
             "type": "cppdbg",
             "request": "launch",
             "MIMode": "gdb",
@@ -11,33 +11,30 @@
             "program": "${workspaceFolder}/build/nanoCLR.elf",
             "setupCommands": [
                 {
-                    "description": "",
                     "text": "set logging on"
                 },
                 {
-                    "description": "",
                     "text": "target extended-remote localhost:3333"
                 },
                 {
-                    "description": "",
-                    "text": "file ${workspaceFolder}/build/nanoCLR.elf"
+                    "text": "set remote hardware-watchpoint-limit 2"
                 },
                 {
-                    "description": "",
                     "text": "monitor reset halt"
                 },
                 {
-                    "description": "",
+                    "text": "flushregs"
+                },
+                {
                     "text": "thb app_main"
                 },
                 {
-                    "description": "",
                     "text": "x $a1=0"
                 }
             ],
-            "launchCompleteCommand": "exec-run",
+            "launchCompleteCommand": "None",
             "debugServerPath": "<absolute-path-to-esp32-openocd-mind-the-forward-slashes>/bin/openocd.exe",
-            "debugServerArgs": "-s \"<absolute-path-to-esp32-openocd-mind-the-forward-slashes>/share/openocd/scripts/\" -f interface/ftdi/esp32_devkitj_v1.cfg -f target/esp32.cfg -c \"adapter_khz 2000\" ",
+            "debugServerArgs": "-c \"set ESP_RTOS none\" -s \"<absolute-path-to-esp32-openocd-mind-the-forward-slashes>/share/openocd/scripts/\" -f interface/ftdi/esp32_devkitj_v1.cfg -f target/esp32.cfg -c \"adapter_khz 2000\" ",
             "serverStarted": "Info : .*Tensilica.*0x1.",
             "filterStderr": true,
             "externalConsole": true,
@@ -61,33 +58,33 @@
             "program": "${workspaceFolder}/build/nanoCLR.elf",
             "setupCommands": [
                 {
-                    "description": "",
                     "text": "set logging on"
                 },
                 {
-                    "description": "",
                     "text": "target extended-remote localhost:3333"
                 },
                 {
-                    "description": "",
                     "text": "file ${workspaceFolder}/build/nanoCLR.elf"
                 },
                 {
-                    "description": "",
+                    "text": "set remote hardware-watchpoint-limit 2"
+                },
+                {
                     "text": "monitor reset halt"
                 },
                 {
-                    "description": "",
+                    "text": "flushregs"
+                },
+                {
                     "text": "thb app_main"
                 },
                 {
-                    "description": "",
                     "text": "x $a1=0"
                 }
             ],
             "launchCompleteCommand": "exec-run",
             "debugServerPath": "<absolute-path-to-esp32-openocd-mind-the-forward-slashes>/bin/openocd.exe",
-            "debugServerArgs": "-s \"<absolute-path-to-esp32-openocd-mind-the-forward-slashes>/share/openocd/scripts/\" -f interface/ftdi/olimex-arm-usb-ocd-h.cfg -f target/esp32.cfg -c \"adapter_khz 3000\" ",
+            "debugServerArgs": "-c \"set ESP_RTOS none\" -s \"<absolute-path-to-esp32-openocd-mind-the-forward-slashes>/share/openocd/scripts/\" -f interface/ftdi/olimex-arm-usb-ocd-h.cfg -f target/esp32.cfg -c \"adapter_khz 3000\" ",
             "serverStarted": "Info : .*Tensilica.*0x1.",
             "filterStderr": true,
             "externalConsole": true,
@@ -119,8 +116,18 @@
                 {
                     "text": "file ${workspaceFolder}/build/nanoCLR.elf"
                 },
+                                {
+                    "text": "set remote hardware-watchpoint-limit 2"
+                },
+                
                 {
                     "text": "monitor reset halt"
+                },
+                {
+                    "text": "flushregs"
+                },
+                {
+                    "text": "thb app_main"
                 },
                 {
                     "text": "x $a1=0"
@@ -128,7 +135,7 @@
             ],
             "launchCompleteCommand": "exec-run",
             "debugServerPath": "<absolute-path-to-esp32-openocd-mind-the-forward-slashes>/bin/openocd.exe",
-            "debugServerArgs": "-s \"<absolute-path-to-esp32-openocd-mind-the-forward-slashes>/share/openocd/scripts/\" -f interface/jlink.cfg -f target/esp32.cfg -c \"adapter_khz 3000\" ",
+            "debugServerArgs": "-c \"set ESP_RTOS none\" -s \"<absolute-path-to-esp32-openocd-mind-the-forward-slashes>/share/openocd/scripts/\" -f interface/jlink.cfg -f target/esp32.cfg -c \"adapter_khz 3000\" ",
             "serverStarted": "Info : .*Tensilica.*0x1.",
             "filterStderr": true,
             "externalConsole": true,

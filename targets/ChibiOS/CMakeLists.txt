@@ -33,7 +33,7 @@ endif()
 ########################################################
 # check availability of SRecord tool, if specified
 if(DEFINED TOOL_SRECORD_PREFIX)
-    if(NOT ((EXISTS ${TOOL_SRECORD_PREFIX}/srec_cat.exe) OR (EXISTS ${TOOL_SRECORD_PREFIX}/srec_cat)))
+    if(NOT EXISTS ${TOOL_SRECORD_PREFIX}/srec_cat.exe AND NOT EXISTS ${TOOL_SRECORD_PREFIX}/srec_cat)
         message(STATUS "")
         message(STATUS "Couldn't find the srec_cat tool at the specified path: ${TOOL_SRECORD_PREFIX}/srec_cat.exe")
         message(STATUS "Make sure that the CMake option TOOL_SRECORD_PREFIX has the correct path.")
@@ -45,11 +45,11 @@ if(DEFINED TOOL_SRECORD_PREFIX)
     endif()
 endif()
 
-# check if RTOS_SOURCE_FOLDER was specified or if it's empty (default is empty)
-set(NO_RTOS_SOURCE_FOLDER TRUE)
-if(RTOS_SOURCE_FOLDER)
-    if(NOT ${RTOS_SOURCE_FOLDER} STREQUAL "")
-        set(NO_RTOS_SOURCE_FOLDER FALSE)
+# check if CHIBIOS_SOURCE_FOLDER was specified or if it's empty (default is empty)
+set(NO_CHIBIOS_SOURCE_FOLDER TRUE)
+if(CHIBIOS_SOURCE_FOLDER)
+    if(NOT ${CHIBIOS_SOURCE_FOLDER} STREQUAL "")
+        set(NO_CHIBIOS_SOURCE_FOLDER FALSE)
     endif()
 endif()
 
@@ -75,16 +75,17 @@ endif()
 if(RTOS_VERSION_EMPTY)
     # no ChibiOS version actualy specified, must be empty which is fine, we'll default to a known good version
     # WHEN CHANGING THIS MAKE SURE TO UPDATE THE DEV CONTAINERS
+    # WHEN CHANGING THIS MAKE SURE TO UPDATE AzureRTOS\ST\CMakeLists.txt
     set(RTOS_VERSION "stable_21.11.x")
 endif()
 
-if(NO_RTOS_SOURCE_FOLDER)
+if(NO_CHIBIOS_SOURCE_FOLDER)
     # no CHIBIOS source specified, download it from it's repo
     message(STATUS "RTOS is: ChibiOS ${RTOS_VERSION} from SVN official repo")
 
     FetchContent_Declare(
         chibios
-        SVN_REPOSITORY https://svn.osdn.net/svnroot/chibios/branches/${RTOS_VERSION}
+        SVN_REPOSITORY http://svn.code.sf.net/p/chibios/code/branches/${RTOS_VERSION}
         SVN_REVISION -rHEAD
     )
 
@@ -92,10 +93,10 @@ else()
     # ChibiOS source was specified
 
 
-    message(STATUS "RTOS is: ChibiOS ${RTOS_VERSION} (source from: ${RTOS_SOURCE_FOLDER})")
+    message(STATUS "RTOS is: ChibiOS ${RTOS_VERSION} (source from: ${CHIBIOS_SOURCE_FOLDER})")
     FetchContent_Declare(
         chibios
-        SOURCE_DIR ${RTOS_SOURCE_FOLDER}
+        SOURCE_DIR ${CHIBIOS_SOURCE_FOLDER}
     )
 
 
@@ -105,7 +106,7 @@ endif()
 FetchContent_GetProperties(chibios)
 if(NOT chibios_POPULATED)
     # Fetch the content using previously declared details
-    FetchContent_Populate(chibios)
+    FetchContent_MakeAvailable(chibios)
 endif()
 
 if(CHIBIOS_CONTRIB_REQUIRED)
@@ -114,8 +115,8 @@ if(CHIBIOS_CONTRIB_REQUIRED)
 
         FetchContent_Declare(
             chibios-contrib
-            GIT_REPOSITORY https://github.com/nanoframework/ChibiOS-Contrib
-            GIT_TAG nanoframework
+            GIT_REPOSITORY https://github.com/ChibiOS/ChibiOS-Contrib.git
+            GIT_TAG chibios-21.11.x
         )
 
         message(STATUS "ChibiOS-Contrib from GitHub repo")
@@ -136,7 +137,7 @@ if(CHIBIOS_CONTRIB_REQUIRED)
     FetchContent_GetProperties(chibios-contrib)
     if(NOT chibios-contrib_POPULATED)
         # Fetch the content using previously declared details
-        FetchContent_Populate(chibios-contrib)
+        FetchContent_MakeAvailable(chibios-contrib)
     endif()
 
 endif()
@@ -167,7 +168,7 @@ if(NF_FEATURE_HAS_SDCARD OR NF_FEATURE_HAS_USB_MSD)
     if(FATFS_VERSION_EMPTY)
         # no FatFS version actualy specified, must be empty which is fine, we'll default to a known good version
         # WHEN CHANGING THIS MAKE SURE TO UPDATE THE DEV CONTAINERS
-        set(FATFS_VERSION_TAG "R0.14")
+        set(FATFS_VERSION_TAG "R0.15")
     else()
         # set version 
         set(FATFS_VERSION_TAG ${FATFS_VERSION})
@@ -198,7 +199,7 @@ if(NF_FEATURE_HAS_SDCARD OR NF_FEATURE_HAS_USB_MSD)
     FetchContent_GetProperties(fatfs)
     if(NOT fatfs_POPULATED)
         # Fetch the content using previously declared details
-        FetchContent_Populate(fatfs)
+        FetchContent_MakeAvailable(fatfs)
     endif()
 
     # have to delete the ffconf.h template from the repo
@@ -208,60 +209,18 @@ if(NF_FEATURE_HAS_SDCARD OR NF_FEATURE_HAS_USB_MSD)
 
 endif()
 
-# if mbed TLS is enabled add it to the build
-if(NF_SECURITY_MBEDTLS)
+# if networking is enabled add lwIP to the build
+if(USE_NETWORKING_OPTION)
 
-    # check if MBEDTLS_SOURCE was specified or if it's empty (default is empty)
-    set(NO_MBEDTLS_SOURCE TRUE)
+    nf_add_lwip_library()
 
-    if(MBEDTLS_SOURCE)
-        if(NOT ${MBEDTLS_SOURCE} STREQUAL "")
-            set(NO_MBEDTLS_SOURCE FALSE)
-        endif()
-    endif()
+endif()
 
-    # set tag for currently supported version
-    # WHEN CHANGING THIS MAKE SURE TO UPDATE THE DEV CONTAINERS
-    set(MBEDTLS_GIT_TAG "mbedtls-2.28.0")
 
-    # set options for mbed TLS
-    option(ENABLE_TESTING "no testing when building mbed TLS." OFF)
+# if Mbed TLS is enabled add it to the build
+if(USE_SECURITY_MBEDTLS_OPTION OR NF_REQUIRES_MBEDTLS)
 
-    if(NO_MBEDTLS_SOURCE)
-        # no mbed TLS source specified, download it from it's repo
-        message(STATUS "mbedTLS ${MBEDTLS_GIT_TAG} from GitHub repo")
-
-        FetchContent_Declare(
-            mbedtls
-            GIT_REPOSITORY https://github.com/ARMmbed/mbedtls
-            GIT_TAG ${MBEDTLS_GIT_TAG}
-        )
-
-    else()
-        # mbedTLS source was specified
-
-        message(STATUS "mbedTLS ${MBEDTLS_GIT_TAG} (source from: ${MBEDTLS_SOURCE})")
-            
-        FetchContent_Declare(
-            mbedtls
-            SOURCE_DIR ${MBEDTLS_SOURCE}
-        )
-
-    endif()
-
-    # Check if population has already been performed
-    FetchContent_GetProperties(mbedtls)
-    if(NOT mbedtls_POPULATED)
-        # Fetch the content using previously declared details
-        FetchContent_Populate(mbedtls)
-    endif()
-
-    # don't include tests or programs, only build libraries
-    set(ENABLE_TESTING CACHE BOOL OFF)
-    set(ENABLE_PROGRAMS CACHE BOOL OFF)
-
-    cmake_policy(SET CMP0048 NEW)
-    add_subdirectory(${mbedtls_SOURCE_DIR} mbedtls_build)
+    nf_add_mbedtls_library()
 
 endif()
 
@@ -373,48 +332,49 @@ if(STM32_CUBE_PACKAGE_REQUIRED)
     ProcessSTM32CubePackage()
 endif()
 
-# if support for SPIFFS is enabled add it to the build
-if(NF_FEATURE_USE_SPIFFS)
+# if support for littlefs is enabled add it to the build
+if(NF_FEATURE_USE_LITTLEFS_OPTION)
 
-    # check if SPIFFS_SOURCE was specified or if it's empty (default is empty)
-    set(NO_SPIFFS_SOURCE TRUE)
+    # check if LITTLEFS_SOURCE was specified or if it's empty (default is empty)
+    set(NO_LITTLEFS_SOURCE TRUE)
 
-    if(SPIFFS_SOURCE)
-        if(NOT ${SPIFFS_SOURCE} STREQUAL "")
-            set(NO_SPIFFS_SOURCE FALSE)
+    # WHEN CHANGING THIS MAKE SURE TO UPDATE THE DEV CONTAINERS AND PIPELINE YAML
+    set(LITTLEFS_VERSION_TAG "v2.9.3")
+
+    if(LITTLEFS_SOURCE)
+        if(NOT ${LITTLEFS_SOURCE} STREQUAL "")
+            set(NO_LITTLEFS_SOURCE FALSE)
         endif()
     endif()
 
-    if(NO_SPIFFS_SOURCE)
-        # no SPIFFS source specified, download it from it's repo
-        message(STATUS "SPIFFS source from from GitHub repo")
+    if(NO_LITTLEFS_SOURCE)
+        # no littlefs source specified, download it from it's repo
+        message(STATUS "littlefs source from from GitHub repo")
 
         FetchContent_Declare(
-            spiffs
-            GIT_REPOSITORY https://github.com/nanoframework/spiffs
-            GIT_TAG "nf-build"
+            littlefs
+            GIT_REPOSITORY https://github.com/littlefs-project/littlefs
+            GIT_TAG ${LITTLEFS_VERSION_TAG}
         )
 
     else()
-        # SPIFFS source was specified
+        # littlefs source was specified
 
-        message(STATUS "SPIFFS source from: ${SPIFFS_SOURCE}")
+        message(STATUS "littlefs source from: ${LITTLEFS_SOURCE}")
 
         FetchContent_Declare(
-            spiffs
-            SOURCE_DIR ${SPIFFS_SOURCE}
+            littlefs
+            SOURCE_DIR ${LITTLEFS_SOURCE}
         )
 
     endif()
 
     # Check if population has already been performed
-    FetchContent_GetProperties(spiffs)
-    if(NOT spiffs_POPULATED)
+    FetchContent_GetProperties(littlefs)
+    if(NOT littlefs_POPULATED)
         # Fetch the content using previously declared details
-        FetchContent_Populate(spiffs)
+        FetchContent_MakeAvailable(littlefs)
     endif()
-
-    add_subdirectory(_spiffs)
 
 endif()
 

@@ -6,7 +6,8 @@
 #ifndef NANOCLR_PLATFORMDEF_H
 #define NANOCLR_PLATFORMDEF_H
 
-//#include <CLR_Defines.h>
+#include <target_platform.h>
+#include <target_common.h>
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // DEFINITIONS
@@ -33,35 +34,37 @@
 #if defined(DEBUG) || defined(_DEBUG)
 #define NANOCLR_TRACE_STACK // enables rich eval stack tracing
 #endif
-//#define TINYCLR_TRACE_INSTRUCTIONS 1    // enables tracing of instructions execution
-//#define NANOCLR_TRACE_HRESULT        // enable tracing of HRESULTS from interop libraries
+// #define TINYCLR_TRACE_INSTRUCTIONS 1    // enables tracing of instructions execution
+// #define NANOCLR_TRACE_HRESULT        // enable tracing of HRESULTS from interop libraries
+// #define NANOCLR_TRACE_PROFILER_MESSAGES  // enable tracing of profiler messages
+// #define NANOCLR_FORCE_PROFILER_EXECUTION // force Profiler execution
 
 //-o-//-o-//-o-//-o-//-o-//-o-//
 // PLATFORMS
 //-o-//-o-//-o-//-o-//-o-//-o-//
 
 //--//
-// Setting the threshold value to start Garbagge collector
-// PLATFORM_DEPENDENT_HEAP_SIZE_THRESHOLD should set in the file platform.settings file, eg sam7x_ek.settings.
-// defaults are 32Kb and 48 kb for lower and upper threshold respectively
+// Setting the threshold value to start garbage collection
+// PLATFORM_DEPENDENT_HEAP_SIZE_THRESHOLD should be set in target_platform or target_common to override the defaults.
+// defaults are 50% and 75% for lower and upper threshold respectively
 
 #ifdef PLATFORM_DEPENDENT_HEAP_SIZE_THRESHOLD
-#define HEAP_SIZE_THRESHOLD PLATFORM_DEPENDENT_HEAP_SIZE_THRESHOLD
+#define HEAP_SIZE_THRESHOLD_RATIO PLATFORM_DEPENDENT_HEAP_SIZE_THRESHOLD
 #else
-#define HEAP_SIZE_THRESHOLD 48 * 1024
+#define HEAP_SIZE_THRESHOLD_RATIO 0.5
 #endif
 
 #ifdef PLATFORM_DEPENDENT_HEAP_SIZE_THRESHOLD_UPPER
-#define HEAP_SIZE_THRESHOLD_UPPER PLATFORM_DEPENDENT_HEAP_SIZE_THRESHOLD_UPPER
+#define HEAP_SIZE_THRESHOLD_UPPER_RATIO PLATFORM_DEPENDENT_HEAP_SIZE_THRESHOLD_UPPER
 #else
-#define HEAP_SIZE_THRESHOLD_UPPER HEAP_SIZE_THRESHOLD + 16 * 1024
+#define HEAP_SIZE_THRESHOLD_UPPER_RATIO 0.75
 #endif
 
 //--//
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // WINDOWS
-#if defined(_WIN32)
+#if defined(VIRTUAL_DEVICE)
 
 #define NANOCLR_GC_VERBOSE
 #define NANOCLR_TRACE_MEMORY_STATS
@@ -70,11 +73,11 @@
 #define NANOCLR_PROFILE_NEW_ALLOCATIONS
 #if defined(DEBUG) || defined(_DEBUG)
 #define NANOCLR_VALIDATE_HEAP NANOCLR_VALIDATE_HEAP_2_DblLinkedList
-//#define NANOCLR_TRACE_MALLOC
+// #define NANOCLR_TRACE_MALLOC
 #define NANOCLR_FILL_MEMORY_WITH_DIRTY_PATTERN
 #define NANOCLR_TRACE_EARLYCOLLECTION
 #define NANOCLR_DELEGATE_PRESERVE_STACK
-//#define NANOCLR_VALIDATE_APPDOMAIN_ISOLATION
+// #define NANOCLR_VALIDATE_APPDOMAIN_ISOLATION
 #define NANOCLR_TRACE_HRESULT // enable tracing of HRESULTS from interop libraries
 #else                         // RELEASE
 #define NANOCLR_VALIDATE_HEAP NANOCLR_VALIDATE_HEAP_0_None
@@ -112,7 +115,7 @@
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // TRACE DEPENDENCIES
-#if defined(_WIN32)
+#if defined(VIRTUAL_DEVICE)
 #define NANOCLR_OPCODE_NAMES
 #define NANOCLR_OPCODE_PARSER
 #define NANOCLR_OPCODE_STACKCHANGES
@@ -136,13 +139,17 @@
 #define NANOCLR_PROFILE_NEW
 #endif
 
+#if defined(NANOCLR_FORCE_PROFILER_EXECUTION) && !defined(NANOCLR_PROFILE_NEW)
+#undef NANOCLR_FORCE_PROFILER_EXECUTION
+#endif
+
 //-o-//-o-//-o-//-o-//-o-//-o-//
 // CODE
 //-o-//-o-//-o-//-o-//-o-//-o-//
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // LANGUAGE
-#if defined(_WIN32)
+#if defined(VIRTUAL_DEVICE)
 #define PROHIBIT_ALL_CONSTRUCTORS(cls)                                                                                 \
   private:                                                                                                             \
     cls();                                                                                                             \
@@ -199,8 +206,6 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // INCLUDES
 #if defined(_WIN32)
-
-#define _WIN32_WINNT 0x0501
 
 // Unsafe string functions be avoided, but there isn't a safe crt for the arm, so
 // a bunch of macros, cleanup code needs to be done first

@@ -23,5 +23,11 @@
     <ClCompile Include="nf_system_text.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="nf_system_text_System_Text_UTF8Decoder.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="nf_system_text_System_Text_UTF8Encoding.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

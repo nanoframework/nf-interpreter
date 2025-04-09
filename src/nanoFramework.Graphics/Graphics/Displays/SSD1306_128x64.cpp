@@ -121,12 +121,12 @@ bool DisplayDriver::ChangeOrientation(DisplayOrientation orientation)
 {
     switch (orientation)
     {
-        case PORTRAIT:
-        case PORTRAIT180:
+        case DisplayOrientation::DisplayOrientation_Portrait:
+        case DisplayOrientation::DisplayOrientation_Portrait180:
             return false;
 
-        case LANDSCAPE:
-        case LANDSCAPE180:
+        case DisplayOrientation::DisplayOrientation_Landscape:
+        case DisplayOrientation::DisplayOrientation_Landscape180:
             Attributes.Height = Attributes.ShorterSide;
             Attributes.Width = Attributes.LongerSide;
 
@@ -139,7 +139,7 @@ bool DisplayDriver::ChangeOrientation(DisplayOrientation orientation)
 
 void DisplayDriver::SetDefaultOrientation()
 {
-    ChangeOrientation(LANDSCAPE);
+    ChangeOrientation(DisplayOrientation::DisplayOrientation_Landscape);
 }
 
 bool DisplayDriver::SetWindow(CLR_INT16 x1, CLR_INT16 y1, CLR_INT16 x2, CLR_INT16 y2)
@@ -169,39 +169,41 @@ void DisplayDriver::Clear()
 //
 // data[] reference to whole screen bitmap
 //
-void DisplayDriver::BitBlt(int x, int y, int width, int height, CLR_UINT32 data[])
+void DisplayDriver::BitBlt(
+    int srcX,
+    int srcY,
+    int width,
+    int height,
+    int stride,
+    int screenX,
+    int screenY,
+    CLR_UINT32 data[])
 {
     // // With the current design the Colour data is packed into the lower two bytes of each data array element
     // // 16 bit colour  RRRRRGGGGGGBBBBB mode 565
-    ASSERT((x >= 0) && ((x + width) <= Attributes.Width));
-    ASSERT((y >= 0) && ((y + height) <= Attributes.Height));
+    ASSERT((screenX >= 0) && ((screenX + width) <= Attributes.Width));
+    ASSERT((screenY >= 0) && ((screenY + height) <= Attributes.Height));
 
     CLR_UINT16 *pui16Data = (CLR_UINT16 *)data;
 
     // Round y position down as we can only deal with rows of 8 at a time
-    int offfset = y % 8;
-    y -= offfset;
+    int offset = srcY % 8;
+    srcY -= offset;
 
     // Increase height for change in y
-    height += offfset;
+    height += offset;
 
     // Round up height to multiple of 8
     height = (height + 7) & 0xfffffff8;
 
-    // Check not too big
-    if ((y + height) > Attributes.Height)
-    {
-        height = Attributes.Height - y;
-    }
-
     // Find position in buffer for start of data in window
-    pui16Data += x + (y * Attributes.Width);
+    pui16Data += srcX + (srcY * stride);
 
     // Set window for bitblt
-    SetWindow(x, y, x + width - 1, y + height - 1);
+    SetWindow(screenX, screenY, screenX + width - 1, screenY + height - 1);
 
-    CLR_INT16 firstPageToUpdate = y / 8;
-    CLR_INT16 lastPageToUpdate = (y + height - 1) / 8;
+    CLR_INT16 firstPageToUpdate = srcY / 8;
+    CLR_INT16 lastPageToUpdate = (srcY + height - 1) / 8;
 
     CLR_UINT8 *pui8Buf = Attributes.TransferBuffer;
     CLR_UINT32 numberOfBytesPerTransfer = width;
@@ -226,7 +228,7 @@ void DisplayDriver::BitBlt(int x, int y, int width, int height, CLR_UINT32 data[
                 }
             }
             mask <<= 1;
-            pui16Data += Attributes.Width; // Next row
+            pui16Data += stride; // Next row
         }
 
         g_DisplayInterface.WriteToFrameBuffer(Memory_Write, Attributes.TransferBuffer, numberOfBytesPerTransfer);

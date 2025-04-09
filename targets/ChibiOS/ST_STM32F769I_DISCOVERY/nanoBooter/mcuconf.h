@@ -7,6 +7,8 @@
 #ifndef MCUCONF_H
 #define MCUCONF_H
 
+// clang-format off
+
 /*
  * STM32F7xx drivers configuration.
  * The following settings override the default settings present in
@@ -22,11 +24,15 @@
  */
 
 #define STM32F7xx_MCUCONF
-//#define STM32F765_MCUCONF
-//#define STM32F767_MCUCONF
-//#define STM32F777_MCUCONF
 #define STM32F769_MCUCONF
-//#define STM32F779_MCUCONF
+
+/*
+ * Memory attributes settings.
+ */
+#define STM32_NOCACHE_ENABLE                FALSE
+// #define STM32_NOCACHE_MPU_REGION            MPU_REGION_6
+// #define STM32_NOCACHE_RBAR                  0x2004C000U
+// #define STM32_NOCACHE_RASR                  MPU_RASR_SIZE_16K
 
 /*
  * HAL driver system settings.
@@ -255,7 +261,7 @@
 /*
  * PWM driver system settings.
  */
-#define STM32_PWM_USE_ADVANCED              FALSE
+#define STM32_PWM_USE_ADVANCED              FALSE //NOT IN LATEST VERSION, KEEPING JUST INCASE
 #define STM32_PWM_USE_TIM1                  FALSE
 #define STM32_PWM_USE_TIM2                  FALSE
 #define STM32_PWM_USE_TIM3                  FALSE
@@ -428,4 +434,9 @@
 #define STM32_WSPI_QUADSPI1_DMA_STREAM      STM32_DMA_STREAM_ID(2, 7)
 #define STM32_WSPI_QUADSPI1_PRESCALER_VALUE 2
 
+// header for nanoFramework overlay drivers
+#include "mcuconf_nf.h"
+
 #endif /* MCUCONF_H */
+
+// clang-format on

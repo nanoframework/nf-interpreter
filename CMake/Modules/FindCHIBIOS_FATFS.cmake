@@ -27,7 +27,7 @@ foreach(SRC_FILE ${FATFS_SRCS})
 
     find_file(FATFS_SRC_FILE ${SRC_FILE}
         PATHS 
-            ${chibios_SOURCE_DIR}/os/various/fatfs_bindings
+            ${CMAKE_SOURCE_DIR}/targets/ChibiOS/_FatFs/
             ${fatfs_SOURCE_DIR}/source
 
         CMAKE_FIND_ROOT_PATH_BOTH
@@ -47,7 +47,7 @@ if(NF_FEATURE_HAS_USB_MSD)
     list(APPEND CHIBIOS_FATFS_SOURCES ${chibios-contrib_SOURCE_DIR}/os/various/fatfs_bindings/fatfs_diskio.c)
 else()
     # get it from the targets directory for fixing STM32F7 series Cache issues
-    list(APPEND CHIBIOS_FATFS_SOURCES ${CMAKE_SOURCE_DIR}/targets/ChibiOS/_FatFS/fatfs_diskio.c)
+    list(APPEND CHIBIOS_FATFS_SOURCES ${CMAKE_SOURCE_DIR}/targets/ChibiOS/_FatFs/fatfs_diskio.c)
 endif()
 
 include(FindPackageHandleStandardArgs)

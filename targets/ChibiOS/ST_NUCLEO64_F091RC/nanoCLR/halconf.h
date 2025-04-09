@@ -21,7 +21,7 @@
 #define HALCONF_H
 
 #define _CHIBIOS_HAL_CONF_
-#define _CHIBIOS_HAL_CONF_VER_8_0_
+#define _CHIBIOS_HAL_CONF_VER_8_4_
 
 #include <target_platform.h>
 #include "mcuconf.h"
@@ -405,7 +405,7 @@
  *          default configuration.
  */
 #if !defined(SERIAL_DEFAULT_BITRATE) || defined(__DOXYGEN__)
-#define SERIAL_DEFAULT_BITRATE              921600
+#define SERIAL_DEFAULT_BITRATE              115200
 #endif
 
 /**
@@ -495,7 +495,7 @@
  * @note    Disabling this option saves both code and data space.
  */
 #if !defined(SPI_SELECT_MODE) || defined(__DOXYGEN__)
-#define SPI_SELECT_MODE                     SPI_SELECT_MODE_PAD
+#define SPI_SELECT_MODE                     SPI_SELECT_MODE_NONE
 #endif
 
 /*===========================================================================*/

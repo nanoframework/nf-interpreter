@@ -1,0 +1,92 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <Platforms>AnyCPU</Platforms>
+    <RuntimeIdentifiers>any</RuntimeIdentifiers>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <OutputPath>..\..\..\build\bin\$(Configuration)</OutputPath>
+		<RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
+		<RestoreLockedMode>true</RestoreLockedMode>
+  </PropertyGroup>
+
+  <!-- NuGet package stuff -->
+  <PropertyGroup>
+    <PackageId>nanoclr</PackageId>
+    <PackAsTool>true</PackAsTool>
+    <ToolCommandName>nanoclr</ToolCommandName>
+    <Authors>nanoframework</Authors>
+    <Product>.NET nanoFramework CLR</Product>
+    <Copyright>Copyright (c) .NET Foundation and Contributors</Copyright>
+    <RepositoryType>git</RepositoryType>
+    <RepositoryUrl>https://github.com/nanoframework/nf-interpreter</RepositoryUrl>
+    <PackageProjectUrl>https://github.com/nanoframework/nf-interpreter</PackageProjectUrl>
+    <Description>.NET nanoFramework CLR as a .NET tool. Allows runing nanoCLR as a virtual device.</Description>
+    <!-- disable NuGet warning for DLLs outside the lib folder and for SemVer 2 package reference -->
+    <NoWarn>$(NoWarn);NU5100;NU5105;NU5118</NoWarn>
+    <PackageLicenseFile>LICENSE.md</PackageLicenseFile>
+    <PackageIcon>images\nf-logo.png</PackageIcon>
+    <PackageTags>nanoFramework, nano Framework, NETNF, NETMF, Micro Framework, .net</PackageTags>
+    <PackageReadmeFile>docs\README.md</PackageReadmeFile>
+    <PackageIconUrl />
+  </PropertyGroup>
+
+  <!-- NuGet package files -->
+  <ItemGroup>
+    <None Include="..\..\..\build\bin\$(Configuration)\nanoFramework.nanoCLR.dll" Link="NanoCLR\nanoFramework.nanoCLR.dll">
+      <Pack>True</Pack>
+      <PackagePath>tools\net8.0\any\NanoCLR</PackagePath>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="..\..\..\assets\nf-logo.png">
+      <Pack>True</Pack>
+      <PackagePath>images</PackagePath>
+    </None>
+    <None Include="..\..\..\LICENSE.md">
+      <Pack>True</Pack>
+      <PackagePath></PackagePath>
+    </None>
+    <None Include="README.md">
+      <Pack>True</Pack>
+      <PackagePath>docs</PackagePath>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="License\vspt.vsptlic" />
+    <EmbeddedResource Include="License\vspt.vsptlic" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\nanoFramework.nanoCLR.Host\nanoFramework.nanoCLR.Host.csproj" />
+  </ItemGroup>
+
+	<PropertyGroup>
+		<!-- set this to 'net8.0\' to package contents in this TFM folder  -->
+		<PackageTfmSubFolder>net8.0\</PackageTfmSubFolder>
+	</PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="CommandLineParser" Version="2.9.1" />
+    <PackageReference Include="Nerdbank.GitVersioning" Version="3.7.115" PrivateAssets="All" />
+    <PackageReference Include="System.Runtime.Serialization.Json" Version="4.3.0" />
+    <PackageReference Include="System.Security.Principal.Windows" Version="5.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="hhdvspkit.interop">
+      <HintPath>Vendor\hhdvspkit.interop.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="Vendor\hhdvspkit.interop.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="NanoCLR\" />
+  </ItemGroup>
+  
+</Project>

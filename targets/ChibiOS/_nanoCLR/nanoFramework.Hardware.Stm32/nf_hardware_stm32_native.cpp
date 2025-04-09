@@ -37,6 +37,18 @@ static const CLR_RT_MethodHandler method_lookup[] =
     Library_nf_hardware_stm32_native_nanoFramework_Hardware_Stm32_BackupMemory::ReadBytes___STATIC__VOID__U4__SZARRAY_U1,
     Library_nf_hardware_stm32_native_nanoFramework_Hardware_Stm32_BackupMemory::WriteBytes___STATIC__VOID__U4__SZARRAY_U1,
     Library_nf_hardware_stm32_native_nanoFramework_Hardware_Stm32_BackupMemory::GetSize___STATIC__I4,
+    Library_nf_hardware_stm32_native_nanoFramework_Hardware_Stm32_Configuration::ConfigurePin___STATIC__VOID__I4__nanoFrameworkHardwareStm32GpioConfiguration,
+    Library_nf_hardware_stm32_native_nanoFramework_Hardware_Stm32_Configuration::AddAdcChannel___STATIC__U4__U4__U4__U4,
+    Library_nf_hardware_stm32_native_nanoFramework_Hardware_Stm32_Configuration::RemoveAdcChannel___STATIC__VOID__U4,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
     NULL,
     Library_nf_hardware_stm32_native_nanoFramework_Hardware_Stm32_Power::get_WakeupReason___STATIC__nanoFrameworkHardwareStm32PowerWakeupReasonType,
     Library_nf_hardware_stm32_native_nanoFramework_Hardware_Stm32_Power::DisableWakeupPin___STATIC__VOID__nanoFrameworkHardwareStm32PowerWakeupPin,
@@ -56,9 +68,9 @@ static const CLR_RT_MethodHandler method_lookup[] =
 const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_nanoFramework_Hardware_Stm32 =
 {
     "nanoFramework.Hardware.Stm32",
-    0x0874B6FE,
+    0xFE16F347,
     method_lookup,
-    { 100, 0, 4, 4 }
+    { 100, 0, 5, 1 }
 };
 
 // clang-format on

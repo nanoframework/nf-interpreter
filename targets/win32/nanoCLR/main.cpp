@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (c) .NET Foundation and Contributors
 // See LICENSE file in the project root for full license information.
 //
@@ -6,7 +6,11 @@
 #include "stdafx.h"
 
 #include <nanoCLR_Application.h>
+#include <target_common.h>
 #include <iostream>
+#include <locale>
+#include <codecvt>
+#include <string>
 
 //
 // UNDONE: Feature configuration
@@ -28,9 +32,7 @@
 
 #else
 
-#pragma comment(                                                                                                       \
-    lib,                                                                                                               \
-    "WireProtocol.lib") // UNDONE: FIXME: SUPPORT_ComputeCRC required by TypeSystem.cpp, CLR_RT_HeapBlock
+#pragma comment(lib, "WireProtocol.lib")
 
 #pragma comment(lib, "Debugger_stub.lib")
 #pragma comment(lib, "Diagnostics_stub.lib")
@@ -83,15 +85,6 @@ int _tmain(int argc, _TCHAR *argv[])
     clrSettings.WaitForDebugger = false;
     clrSettings.EnterDebuggerLoopAfterExit = false;
 
-    // fill arguments from command line
-    clrSettings.StartArgs.resize(argc - 1);
-
-    for (int i = 0; i < argc - 1; i++)
-    {
-        std::wstring argv_ = std::wstring(argv[1 + i]);
-        clrSettings.StartArgs[i] = argv_;
-    }
-
     ClrStartup(clrSettings);
 
 #if !defined(BUILD_RTM)
@@ -99,4 +92,17 @@ int _tmain(int argc, _TCHAR *argv[])
 #endif
 
     return 0;
+}
+
+typedef void(__stdcall *ProfilerMessageCallback)(const char *szText);
+typedef void(__stdcall *ProfilerDataCallback)(const CLR_UINT8 *data, size_t size);
+ProfilerMessageCallback g_ProfilerMessageCallback;
+ProfilerDataCallback g_ProfilerDataCallback;
+
+void nanoCLR_SetProfilerMessageCallback(ProfilerMessageCallback profilerMessageCallback)
+{
+}
+
+void nanoCLR_SetProfilerDataCallback(ProfilerDataCallback profilerDataCallback)
+{
 }

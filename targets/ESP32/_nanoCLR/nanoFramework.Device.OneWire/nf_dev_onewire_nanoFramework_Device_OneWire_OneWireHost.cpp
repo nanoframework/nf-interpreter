@@ -19,24 +19,32 @@ static uint8_t SerialNum[8];
 // Driver state.
 static oneWireState DriverState = ONEWIRE_UNINIT;
 
+void oneWireStop()
+{
+    // stop UART
+    uart_driver_delete(NF_ONEWIRE_ESP32_UART_NUM);
+
+    // driver is stopped
+    DriverState = ONEWIRE_STOP;
+}
+
 HRESULT oneWireInit()
 {
     DriverState = ONEWIRE_STOP;
 
-    uart_config_t uart_config = {
-        .baud_rate = 115200,
-        .data_bits = UART_DATA_8_BITS,
-        .parity = UART_PARITY_DISABLE,
-        .stop_bits = UART_STOP_BITS_1,
-        .flow_ctrl = UART_HW_FLOWCTRL_DISABLE,
-        .rx_flow_ctrl_thresh = 0,
-        .use_ref_tick = false,
-    };
+    uart_config_t uart_config;
+    uart_config.baud_rate = 115200;
+    uart_config.data_bits = UART_DATA_8_BITS;
+    uart_config.parity = UART_PARITY_DISABLE;
+    uart_config.stop_bits = UART_STOP_BITS_1;
+    uart_config.flow_ctrl = UART_HW_FLOWCTRL_DISABLE;
+    uart_config.rx_flow_ctrl_thresh = 0;
+    uart_config.source_clk = UART_SCLK_DEFAULT;
 
     // get GPIO pins configured for UART assigned to 1-Wire
     // need to subtract one to get the correct index of UART in mapped device pins
-    int txPin = Esp32_GetMappedDevicePins(DEV_TYPE_SERIAL, NF_ONEWIRE_ESP32_UART_NUM - 1, Esp32SerialPin_Tx);
-    int rxPin = Esp32_GetMappedDevicePins(DEV_TYPE_SERIAL, NF_ONEWIRE_ESP32_UART_NUM - 1, Esp32SerialPin_Rx);
+    int txPin = Esp32_GetMappedDevicePins(DEV_TYPE_SERIAL, NF_ONEWIRE_ESP32_UART_NUM, Esp32SerialPin_Tx);
+    int rxPin = Esp32_GetMappedDevicePins(DEV_TYPE_SERIAL, NF_ONEWIRE_ESP32_UART_NUM, Esp32SerialPin_Rx);
 
     // check if TX, RX pins have been previously set
     if (txPin == UART_PIN_NO_CHANGE || rxPin == UART_PIN_NO_CHANGE)
@@ -60,23 +68,17 @@ HRESULT oneWireInit()
         return CLR_E_INVALID_OPERATION;
     }
 
-    if (uart_driver_install(NF_ONEWIRE_ESP32_UART_NUM, UART_FIFO_LEN * 2, 0, 0, NULL, ESP_INTR_FLAG_IRAM) != ESP_OK)
+    if (uart_driver_install(NF_ONEWIRE_ESP32_UART_NUM, 256, 256, 0, NULL, ESP_INTR_FLAG_IRAM) != ESP_OK)
     {
         return CLR_E_INVALID_OPERATION;
     }
 
+    // driver need to be deleted on soft reboot
+    HAL_AddSoftRebootHandler(oneWireStop);
+
     DriverState = ONEWIRE_READY;
 
     return S_OK;
-}
-
-void oneWireStop()
-{
-    // stop UART
-    uart_driver_delete(NF_ONEWIRE_ESP32_UART_NUM);
-
-    // driver is stopped
-    DriverState = ONEWIRE_STOP;
 }
 
 uint8_t oneWireTouchReset(void)
@@ -90,7 +92,7 @@ uint8_t oneWireTouchReset(void)
     uart_set_baudrate(NF_ONEWIRE_ESP32_UART_NUM, 9600);
 
     uart_write_bytes(NF_ONEWIRE_ESP32_UART_NUM, (const char *)&reset, 1);
-    uart_read_bytes(NF_ONEWIRE_ESP32_UART_NUM, &presence, 1, 20 / portTICK_RATE_MS);
+    uart_read_bytes(NF_ONEWIRE_ESP32_UART_NUM, &presence, 1, 20 / portTICK_PERIOD_MS);
 
     // set UART baud rate to 115200bps (normal comm is performed at this baud rate)
     uart_set_baudrate(NF_ONEWIRE_ESP32_UART_NUM, 115200);
@@ -109,7 +111,7 @@ bool oneWireTouchBit(bool sendbit)
     uart_flush(NF_ONEWIRE_ESP32_UART_NUM);
 
     uart_write_bytes(NF_ONEWIRE_ESP32_UART_NUM, (const char *)&write, 1);
-    uart_read_bytes(NF_ONEWIRE_ESP32_UART_NUM, &reply, 1, 20 / portTICK_RATE_MS);
+    uart_read_bytes(NF_ONEWIRE_ESP32_UART_NUM, &reply, 1, 20 / portTICK_PERIOD_MS);
 
     // interpret 1-Wire reply
     return (reply == IWIRE_RD);
@@ -135,7 +137,7 @@ uint8_t oneWireTouchByte(uint8_t sendbyte)
     uart_flush(NF_ONEWIRE_ESP32_UART_NUM);
 
     uart_write_bytes(NF_ONEWIRE_ESP32_UART_NUM, (const char *)writeBuffer, 8);
-    uart_read_bytes(NF_ONEWIRE_ESP32_UART_NUM, readBuffer, 8, 20 / portTICK_RATE_MS);
+    uart_read_bytes(NF_ONEWIRE_ESP32_UART_NUM, readBuffer, 8, 20 / portTICK_PERIOD_MS);
 
     // reset send mask to interpret the reply
     send_mask = 0x01;
@@ -515,8 +517,7 @@ HRESULT FindOneDevice(CLR_RT_StackFrame &stack, bool findFirst)
     return S_OK;
 }
 
-HRESULT Library_nf_dev_onewire_nanoFramework_Device_OneWire_OneWireHost::TouchReset___BOOLEAN(
-    CLR_RT_StackFrame &stack)
+HRESULT Library_nf_dev_onewire_nanoFramework_Device_OneWire_OneWireHost::TouchReset___BOOLEAN(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
@@ -587,8 +588,7 @@ HRESULT Library_nf_dev_onewire_nanoFramework_Device_OneWire_OneWireHost::FindNex
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_nf_dev_onewire_nanoFramework_Device_OneWire_OneWireHost::NativeDispose___VOID(
-    CLR_RT_StackFrame &stack)
+HRESULT Library_nf_dev_onewire_nanoFramework_Device_OneWire_OneWireHost::NativeDispose___VOID(CLR_RT_StackFrame &stack)
 {
     (void)stack;
 

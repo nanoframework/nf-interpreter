@@ -12,10 +12,6 @@ const CCFG     = scripting.addModule("/ti/devices/CCFG");
 const ADC      = scripting.addModule("/ti/drivers/ADC", {}, false);
 const ADC1     = ADC.addInstance();
 const GPIO     = scripting.addModule("/ti/drivers/GPIO", {}, false);
-const GPIO2    = GPIO.addInstance();
-const GPIO3    = GPIO.addInstance();
-const GPIO4    = GPIO.addInstance();
-const GPIO5    = GPIO.addInstance();
 const UART2    = scripting.addModule("/ti/drivers/UART2", {}, false);
 const UART21   = UART2.addInstance();
 const easylink = scripting.addModule("/ti/easylink/easylink");
@@ -29,28 +25,21 @@ CCFG.ccfgTemplate.$name = "ti_devices_CCFGTemplate0";
 ADC1.$name            = "ADC_0";
 ADC1.samplingDuration = "170 us";
 
-GPIO2.$name     = "CONFIG_GPIO_0";
-GPIO2.$hardware = system.deviceData.board.components.LED_RED;
-
-GPIO3.$name     = "CONFIG_GPIO_1";
-GPIO3.$hardware = system.deviceData.board.components.LED_GREEN;
-
-GPIO4.$name     = "CONFIG_GPIO_2";
-GPIO4.$hardware = system.deviceData.board.components["BTN-1"];
-
-GPIO5.$name     = "CONFIG_GPIO_3";
-GPIO5.$hardware = system.deviceData.board.components["BTN-2"];
-
-UART21.$name     = "UART0";
-UART21.$hardware = system.deviceData.board.components.XDS110UART;
+UART21.$name            = "UART0";
+UART21.$hardware        = system.deviceData.board.components.XDS110UART;
+UART21.rxRingBufferSize = 256;
 
 easylink.EasyLink_Phy_50kbps2gfsk                                  = true;
 easylink.EasyLink_Phy_5kbpsSlLr                                    = true;
 easylink.EasyLink_Phy_200kbps2gfsk                                 = true;
 easylink.enableAddrFilter                                          = false;
+easylink.radioConfigEasylinkPhyCustom.carrierFrequency             = 868.0000;
 easylink.radioConfigEasylinkPhyCustom.codeExportConfig.$name       = "ti_devices_radioconfig_code_export_param0";
+easylink.radioConfigEasylinkPhy50kbps2gfsk.carrierFrequency        = 868.0000;
 easylink.radioConfigEasylinkPhy50kbps2gfsk.codeExportConfig.$name  = "ti_devices_radioconfig_code_export_param1";
+easylink.radioConfigEasylinkPhy5kbpssllr.carrierFrequency          = 868.0000;
 easylink.radioConfigEasylinkPhy5kbpssllr.codeExportConfig.$name    = "ti_devices_radioconfig_code_export_param2";
+easylink.radioConfigEasylinkPhy200kbps2gfsk.carrierFrequency       = 868.0000;
 easylink.radioConfigEasylinkPhy200kbps2gfsk.codeExportConfig.$name = "ti_devices_radioconfig_code_export_param3";
 
 /**
@@ -60,10 +49,6 @@ easylink.radioConfigEasylinkPhy200kbps2gfsk.codeExportConfig.$name = "ti_devices
  */
 ADC1.adc.$suggestSolution          = "ADC0";
 ADC1.adc.adcPin.$suggestSolution   = "boosterpack.2";
-GPIO2.gpioPin.$suggestSolution     = "boosterpack.39";
-GPIO3.gpioPin.$suggestSolution     = "boosterpack.40";
-GPIO4.gpioPin.$suggestSolution     = "boosterpack.13";
-GPIO5.gpioPin.$suggestSolution     = "boosterpack.12";
 UART21.uart.$suggestSolution       = "UART0";
 UART21.uart.txPin.$suggestSolution = "boosterpack.4";
 UART21.uart.rxPin.$suggestSolution = "boosterpack.3";

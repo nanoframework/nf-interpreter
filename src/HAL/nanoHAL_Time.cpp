@@ -5,6 +5,7 @@
 //
 
 #include "stdafx.h"
+#include <stdint.h>
 
 #include <nanoHAL_Time.h>
 

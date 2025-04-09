@@ -66,12 +66,14 @@ typedef struct STM32FlashDriver
 #define HAL_FLASH_ERROR_OPERATION ((uint32_t)0x00000020U) /*!< Operation Error               */
 #define HAL_FLASH_ERROR_RD        ((uint32_t)0x00000040U) /*!< Read Protection Error         */
 
+#ifndef USE_HAL_DRIVER
 // FLASH_Program_Parallelism FLASH Program Parallelism
 #define FLASH_PSIZE_BYTE        ((uint32_t)0x00000000U)
 #define FLASH_PSIZE_HALF_WORD   ((uint32_t)0x00000100U)
 #define FLASH_PSIZE_WORD        ((uint32_t)0x00000200U)
 #define FLASH_PSIZE_DOUBLE_WORD ((uint32_t)0x00000300U)
 #define CR_PSIZE_MASK           ((uint32_t)0xFFFFFCFFU)
+#endif
 
 //---------------------------------- STM32F4xx ------------------------------//
 #if defined(STM32F427xx) || defined(STM32F437xx) || defined(STM32F429xx) || defined(STM32F439xx) ||                    \
@@ -436,9 +438,12 @@ typedef struct STM32FlashDriver
 extern "C"
 {
 #endif
+
+#ifndef USE_HAL_DRIVER
     bool HAL_FLASH_Unlock(void);
     void HAL_FLASH_Lock(void);
     bool FLASH_WaitForLastOperation(uint32_t timeout);
+#endif
 
     void flash_lld_init();
     void flash_lld_readBytes(uint32_t startAddress, uint32_t length, uint8_t *buffer);

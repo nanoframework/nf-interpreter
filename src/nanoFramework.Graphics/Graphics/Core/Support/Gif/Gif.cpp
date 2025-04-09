@@ -36,7 +36,7 @@ HRESULT CLR_GFX_Bitmap::CreateInstanceGif(CLR_RT_HeapBlock &ref, const CLR_UINT8
     // Allocate the memory that the decompressed bitmap would need
     NANOCLR_CHECK_HRESULT(CLR_GFX_Bitmap::CreateInstance(ref, bm));
 
-    NANOCLR_CHECK_HRESULT(CLR_GFX_Bitmap::GetInstanceFromGraphicsHeapBlock(ref, bitmap));
+    NANOCLR_CHECK_HRESULT(CLR_GFX_Bitmap::GetInstanceFromManagedCSharpReference(ref, bitmap));
 
     NANOCLR_CHECK_HRESULT(decoder->GifStartDecompress(bitmap));
 

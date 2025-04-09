@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (c) .NET Foundation and Contributors
 // See LICENSE file in the project root for full license information.
 //
@@ -39,6 +39,19 @@ extern "C"
         DeviceConfigurationOption_All = 255,
 
     } DeviceConfigurationOption;
+
+    typedef enum UpdateConfigurationResult
+    {
+        // update succesfull
+        UpdateConfigurationResult_Success = 1,
+
+        // update failed
+        UpdateConfigurationResult_Failed = 2,
+
+        // update not required
+        UpdateConfigurationResult_NoChanges = 3,
+
+    } UpdateConfigurationResult;
 
     // network interface configuration struct
     // declared with a flexible array member to allow N config blocks totally independent of compilation
@@ -143,13 +156,13 @@ extern "C"
 
     // UpdateConfigurationBlock() is defined in targetHAL_ConfigurationManager.cpp at target level because the target
     // needs to be free to implement the storage of the configuration block as they see fit
-    bool ConfigurationManager_UpdateConfigurationBlock(
+    UpdateConfigurationResult ConfigurationManager_UpdateConfigurationBlock(
         void *configurationBlock,
         DeviceConfigurationOption configuration,
         uint32_t configurationIndex);
 
-    // Checks if two configuration blocks are the same. Usefull to prevent going through the store process when the
-    // content is the same. Default implementation provided for memory addreasable implementations. defined as weak so
+    // Checks if two configuration blocks are the same. Useful to prevent going through the store process when the
+    // content is the same. Default implementation provided for memory addressable implementations. defined as weak so
     // targets are free to implement the storage of the configuration block as they see fit
     bool ConfigurationManager_CheckExistingConfigurationBlock(
         void *existingConfigBlock,
@@ -201,6 +214,21 @@ extern "C"
     // memory is allocated for the configuration block, has to be free by the caller
     // defined as weak to allow replacement at platform/target level to allow different storage management
     HAL_Configuration_X509DeviceCertificate *ConfigurationManager_GetDeviceCertificate();
+
+    // gets the HAL_Configuration_NetworkInterface configuration block that has the SpecificConfig Id, if that exists
+    int32_t ConfigurationManager_FindNetworkConfigurationMatchingWirelessConfigurationFromId(uint32_t configurationId);
+
+    // Gets the OEM model SKU.
+    // This is defined as weak to allow the target/platform to provide the implementation.
+    void ConfigurationManager_GetOemModelSku(char *model, size_t modelSkuSize);
+
+    // Gets the module serial number.
+    // This is defined as weak to allow the target/platform to provide the implementation.
+    void ConfigurationManager_GetModuleSerialNumber(char *serialNumber, size_t serialNumberSize);
+
+    // Gets the system serial number.
+    // This is defined as weak to allow the target/platform to provide the implementation.
+    void ConfigurationManager_GetSystemSerialNumber(char *serialNumber, size_t serialNumberSize);
 
 #ifdef __cplusplus
 }

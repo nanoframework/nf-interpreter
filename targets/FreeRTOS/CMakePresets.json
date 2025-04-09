@@ -1,0 +1,6 @@
+{
+    "version": 4,
+    "include": [
+        "NXP/NXP_MIMXRT1060_EVK/CMakePresets.json"
+    ]
+}

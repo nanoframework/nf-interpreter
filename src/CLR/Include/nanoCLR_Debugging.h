@@ -37,6 +37,7 @@ struct CLR_DBG_Commands
     static const unsigned int c_Monitor_OemInfo            = 0x0000000E;
     static const unsigned int c_Monitor_QueryConfiguration = 0x0000000F;
     static const unsigned int c_Monitor_UpdateConfiguration= 0x00000010;
+    static const unsigned int c_Monitor_StorageOperation   = 0x00000011;
     static const unsigned int c_Monitor_TargetInfo         = 0x00000020;
 
     //--//
@@ -51,6 +52,7 @@ struct CLR_DBG_Commands
 
     /////////////////////////////////////////////////////////////////////////////////////////////////////////
     // !!! KEEP IN SYNC WITH nanoFramework.Tools.Debugger.WireProtocol.RebootOptions (in managed code) !!! //
+    // !!! KEEP IN SYNC WITH nanoFramework.Runtime.Native.WireProtocol.RebootOption  (in managed code) !!! //
     // CONSTANTS VALUES NEED TO BE 'FLAG' TYPE                                                             //
     /////////////////////////////////////////////////////////////////////////////////////////////////////////
     struct Monitor_Reboot
@@ -550,7 +552,9 @@ struct CLR_DBG_Commands
 
     struct Debugging_Value
     {
-        CLR_RT_HeapBlock *      m_referenceID;
+        // this is a CLR_RT_HeapBlock *
+        // has to be stored as CLR_UINT32 because CLR_RT_HeapBlock has different size on 32 and 64 bit platforms
+        CLR_UINT32              m_referenceID;
         CLR_UINT32              m_dt;                // CLR_RT_HeapBlock::DataType ()
         CLR_UINT32              m_flags;             // CLR_RT_HeapBlock::DataFlags()
         CLR_UINT32              m_size;              // CLR_RT_HeapBlock::DataSize ()
@@ -564,7 +568,9 @@ struct CLR_DBG_Commands
         // For DATATYPE_STRING
         //
         CLR_UINT32              m_bytesInString;
-        const char *                 m_charsInString;
+        // this is a const char *
+        // has to be stored as CLR_UINT32 because const char * has different size on 32 and 64 bit platforms
+        CLR_UINT32 		        m_charsInString;
 
         //
         // For DATATYPE_VALUETYPE or DATATYPE_CLASSTYPE
@@ -581,7 +587,10 @@ struct CLR_DBG_Commands
         //
         // For values from an array.
         //
-        CLR_RT_HeapBlock_Array *m_arrayref_referenceID;
+        
+        // this is a CLR_RT_HeapBlock_Array *
+        // has to be stored as CLR_UINT32 because CLR_RT_HeapBlock_Array has different size on 32 and 64 bit platforms
+        CLR_UINT32              m_arrayref_referenceID;
         CLR_UINT32              m_arrayref_index;
     };
 
@@ -926,7 +935,7 @@ public:
     static bool Monitor_DeploymentMap                   ( WP_Message *msg );
     static bool Monitor_QueryConfiguration              ( WP_Message *msg );
     static bool Monitor_UpdateConfiguration             ( WP_Message *msg );
-
+    static bool Monitor_StorageOperation                ( WP_Message *msg );
                                              
     static bool Debugging_Execution_BasePtr             ( WP_Message *msg );
     static bool Debugging_Execution_ChangeConditions    ( WP_Message *msg );

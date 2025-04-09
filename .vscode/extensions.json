@@ -1,3 +1,8 @@
 {
-  "recommendations": ["ms-vscode.cpptools", "ms-vscode.cmake-tools", "nanoframework.vscode-nanoframework"]
+  "recommendations": [
+    "ms-vscode.cpptools",
+    "ms-vscode.cmake-tools",
+    "nanoframework.vscode-nanoframework",
+    "xaver.clang-format"
+  ]
 }

@@ -10,7 +10,7 @@
 //  2 devices (one it's not used)
 //  Map pins: mosi, miso, clock
 //
-int8_t Esp32_SPI_DevicePinMap[2][3] = {
+int8_t Esp32_SPI_DevicePinMap[MAX_SPI_DEVICES][Esp32SpiPin_Max] = {
     // SPI1 - use FeatherS2 pinout (SDO, SDI, CLK)
     {GPIO_NUM_35, GPIO_NUM_37, GPIO_NUM_36},
     // SPI2 - no pins assigned
@@ -34,7 +34,7 @@ int8_t Esp32_SERIAL_DevicePinMap[UART_NUM_MAX][Esp32SerialPin_Max] = {
 //  I2C
 //  2 devices I2C1 & I2C2
 //  Map pins Data & Clock
-int8_t Esp32_I2C_DevicePinMap[2][2] = {
+int8_t Esp32_I2C_DevicePinMap[I2C_NUM_MAX][2] = {
     // I2C1 - pins 8, 9
     {GPIO_NUM_8, GPIO_NUM_9},
     // I2C2 - pins 25, 26
@@ -44,7 +44,7 @@ int8_t Esp32_I2C_DevicePinMap[2][2] = {
 //  LED PWM
 //  16 channels LED1 to LED16  or PWM1 to PWM16
 //  Map pins Data & Clock
-int8_t Esp32_LED_DevicePinMap[16] = {
+int8_t Esp32_LED_DevicePinMap[TARGET_LED_NUM_PINS] = {
     // Channels ( non assigned )
     -1, // 1
     -1, // 2
@@ -68,7 +68,7 @@ int8_t Esp32_LED_DevicePinMap[16] = {
 // Mapped to ESP32-S2 controllers
 // ESP32-S2 ADC1 channels 0 - 9
 //  "       ADC2 channels 0 - 9
-int8_t Esp32_ADC_DevicePinMap[20] = {
+int8_t Esp32_ADC_DevicePinMap[TARGET_ADC_NUM_PINS] = {
     // 0   1   2   3   4   5   6   7   8   9  10  11  12  13  14  15  16  17  18  19
     1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20};
 
@@ -81,146 +81,9 @@ int8_t Esp32_DAC_DevicePinMap[2] = {
     25,
     26};
 
-void Esp32_DecodeAlternateFunction(
-    uint32_t alternateFunction,
-    Esp32_MapDeviceType &deviceType,
-    uint8_t &busIndex,
-    uint16_t &PinIndex)
-{
-    deviceType = (Esp32_MapDeviceType)((alternateFunction >> 16) & 0x00ff);
-    busIndex = (uint8_t)((alternateFunction >> 8) & 0x00ff) - 1;
-    PinIndex = (uint16_t)(alternateFunction & 0x00ff);
-}
-
-int Esp32_GetMappedDevicePins(Esp32_MapDeviceType deviceType, int DevNumber, int PinIndex)
-{
-    if (DevNumber >= 0)
-    {
-        switch (deviceType)
-        {
-            case DEV_TYPE_SPI:
-                return (int)Esp32_SPI_DevicePinMap[DevNumber][PinIndex];
-
-            case DEV_TYPE_I2C:
-                return (int)Esp32_I2C_DevicePinMap[DevNumber][PinIndex];
-
-            case DEV_TYPE_SERIAL:
-                return (int)Esp32_SERIAL_DevicePinMap[DevNumber][PinIndex];
-
-            case DEV_TYPE_LED_PWM:
-                return (int)Esp32_LED_DevicePinMap[DevNumber];
-
-            case DEV_TYPE_ADC:
-                return (int)Esp32_ADC_DevicePinMap[PinIndex];
-
-            case DEV_TYPE_DAC:
-                return (int)Esp32_DAC_DevicePinMap[PinIndex];
-
-            default:
-                break;
-        };
-    }
-    return -1;
-}
-
-int Esp32_GetMappedDevicePinsWithFunction(uint32_t alternateFunction)
-{
-    Esp32_MapDeviceType deviceType;
-    uint8_t deviceIndex;
-    uint16_t pinIndex;
-
-    Esp32_DecodeAlternateFunction(alternateFunction, deviceType, deviceIndex, pinIndex);
-
-    return Esp32_GetMappedDevicePins(deviceType, deviceIndex, pinIndex);
-}
-
-void Esp32_SetMappedDevicePins(Esp32_MapDeviceType deviceType, int devNumber, int8_t pinIndex, int ioPinNumber)
-{
-    if (devNumber >= 0)
-    {
-        switch (deviceType)
-        {
-            case DEV_TYPE_SPI:
-                Esp32_SPI_DevicePinMap[devNumber][pinIndex] = ioPinNumber;
-                break;
-
-            case DEV_TYPE_I2C:
-                Esp32_I2C_DevicePinMap[devNumber][pinIndex] = ioPinNumber;
-                break;
-
-            case DEV_TYPE_SERIAL:
-                Esp32_SERIAL_DevicePinMap[devNumber][pinIndex] = ioPinNumber;
-                break;
-
-            case DEV_TYPE_LED_PWM:
-                Esp32_LED_DevicePinMap[devNumber] = ioPinNumber;
-                break;
-
-            case DEV_TYPE_ADC:
-                Esp32_ADC_DevicePinMap[pinIndex] = ioPinNumber;
-                break;
-
-            case DEV_TYPE_DAC:
-                Esp32_DAC_DevicePinMap[pinIndex] = ioPinNumber;
-                break;
-
-            default:
-                break;
-        };
-    }
-}
-
-// Esp32_SetMappedDevicePins
-//
-// alternateFunction  32 bit integer where 00DDIIFF
-//    DD= device type
-//    II= device index 1,2,3 etc
-//    FF= functional pin i.e  data, clock, tx,rx
-//
-void Esp32_SetMappedDevicePins(uint8_t pin, int32_t alternateFunction)
-{
-    Esp32_MapDeviceType deviceType;
-    uint8_t deviceIndex;
-    uint16_t mapping;
-
-    Esp32_DecodeAlternateFunction(alternateFunction, deviceType, deviceIndex, mapping);
-
-    // Set the pins used by a device type / index
-    switch (deviceType)
-    {
-        case DEV_TYPE_GPIO:
-            // Just opening a GPIO pin will set it to GPIO function
-            break;
-
-        case DEV_TYPE_SPI:
-            if (deviceIndex <= 1 && mapping <= 2)
-            {
-                Esp32_SPI_DevicePinMap[deviceIndex][mapping] = pin;
-            }
-            break;
-
-        case DEV_TYPE_I2C:
-            if (deviceIndex <= 1 && mapping <= 1)
-            {
-                Esp32_I2C_DevicePinMap[deviceIndex][mapping] = pin;
-            }
-            break;
-
-        case DEV_TYPE_SERIAL:
-            if (deviceIndex < UART_NUM_MAX && mapping < Esp32SerialPin_Max)
-            {
-                Esp32_SERIAL_DevicePinMap[deviceIndex][mapping] = pin;
-            }
-            break;
-
-        case DEV_TYPE_LED_PWM:
-            if (deviceIndex <= 15)
-            {
-                Esp32_LED_DevicePinMap[deviceIndex] = pin;
-            }
-            break;
-
-        default: // ignore
-            break;
-    }
-}
+//  I2S
+//  1 device I2S1
+//  Map pins various pins. If not used, I2S_PIN_NO_CHANGE is used
+int8_t Esp32_I2S_DevicePinMap[I2S_NUM_MAX][5] = {
+    // No pin pre configured
+    {I2S_PIN_NO_CHANGE, I2S_PIN_NO_CHANGE, I2S_PIN_NO_CHANGE, I2S_PIN_NO_CHANGE, I2S_PIN_NO_CHANGE}};

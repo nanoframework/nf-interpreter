@@ -5,7 +5,9 @@
 
 #include <nanoHAL_v2.h>
 #include <nanoWeak.h>
+#ifdef __CM0_CMSIS_VERSION
 #include <targetHAL.h>
+#endif
 
 volatile int32_t SystemStates[SYSTEM_STATE_TOTAL_STATES];
 

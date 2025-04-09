@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (c) .NET Foundation and Contributors
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
@@ -6,6 +6,11 @@
 #include "Core.h"
 #include <nanoHAL_Power.h>
 #include <nanoHAL_Time.h>
+
+#ifdef _WIN64
+#include <inttypes.h>
+#include <stdint.h>
+#endif
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -16,6 +21,26 @@ static const CLR_INT64 c_MaximumTimeToActive = (TIME_CONVERSION__ONEMINUTE * TIM
 CLR_RT_ExecutionEngine::ExecutionConstraintCompensation CLR_RT_ExecutionEngine::s_compensation = {0, 0, 0};
 
 //--//
+
+#if defined(VIRTUAL_DEVICE)
+
+HRESULT CLR_RT_ExecutionEngine::CreateInstance(CLR_SETTINGS params)
+{
+    NATIVE_PROFILE_CLR_CORE();
+    NANOCLR_HEADER();
+
+    NANOCLR_CLEAR(g_CLR_RT_ExecutionEngine);
+
+    // config from CLR settings
+    g_CLR_RT_ExecutionEngine.m_fPerformGarbageCollection = params.PerformGarbageCollection;
+    g_CLR_RT_ExecutionEngine.m_fPerformHeapCompaction = params.PerformHeapCompaction;
+
+    NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.ExecutionEngine_Initialize());
+
+    NANOCLR_NOCLEANUP();
+}
+
+#else
 
 HRESULT CLR_RT_ExecutionEngine::CreateInstance()
 {
@@ -28,6 +53,8 @@ HRESULT CLR_RT_ExecutionEngine::CreateInstance()
 
     NANOCLR_NOCLEANUP();
 }
+
+#endif
 
 //--//
 
@@ -64,9 +91,9 @@ HRESULT CLR_RT_ExecutionEngine::ExecutionEngine_Initialize()
                                                     // CLR_RT_Thread*                      m_cctorThread;
                                                     //
 #if !defined(NANOCLR_APPDOMAINS)
-    m_globalLock = NULL;           // CLR_RT_HeapBlock*                   m_globalLock;
+    m_globalLock = NULL;           // CLR_RT_HeapBlock*                  m_globalLock;
     m_outOfMemoryException = NULL; // CLR_RT_HeapBlock*                   m_outOfMemoryException;
-#endif                             //
+#endif
 
     m_currentUICulture = NULL; // CLR_RT_HeapBlock*                   m_currentUICulture;
 
@@ -77,7 +104,7 @@ HRESULT CLR_RT_ExecutionEngine::ExecutionEngine_Initialize()
 
 #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
     m_scratchPadArray = NULL; // CLR_RT_HeapBlock_Array*             m_scratchPadArray;
-#endif                        //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
+#endif                        // #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
 
 #if defined(NANOCLR_APPDOMAINS)
     m_appDomains.DblLinkedList_Initialize(); // CLR_RT_DblLinkedList                m_appDomains;
@@ -133,7 +160,7 @@ HRESULT CLR_RT_ExecutionEngine::AllocateHeaps()
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
 
-    const CLR_UINT32 c_HeapClusterSize = sizeof(CLR_RT_HeapBlock) * CLR_RT_HeapBlock::HB_MaxSize;
+    const CLR_UINT32 c_HeapClusterSize = sizeof(struct CLR_RT_HeapBlock) * CLR_RT_HeapBlock::HB_MaxSize;
 
     CLR_UINT8 *heapFirstFree = s_CLR_RT_Heap.m_location;
     CLR_UINT32 heapFree = s_CLR_RT_Heap.m_size;
@@ -153,9 +180,16 @@ HRESULT CLR_RT_ExecutionEngine::AllocateHeaps()
 #if NANOCLR_VALIDATE_HEAP >= NANOCLR_VALIDATE_HEAP_1_HeapBlocksAndUnlink
 
         CLR_Debug::Printf("Heap Cluster information\r\n");
+
+#ifdef _WIN64
+        CLR_Debug::Printf("Start:       0x%" PRIx64 "\r\n", heapFirstFree);
+        CLR_Debug::Printf("Free:        0x%" PRIx64 "\r\n", heapFree);
+        CLR_Debug::Printf("Block size:  %d\r\n", sizeof(struct CLR_RT_HeapBlock));
+#else
         CLR_Debug::Printf("Start:       %08x\r\n", (size_t)heapFirstFree);
         CLR_Debug::Printf("Free:        %08x\r\n", (size_t)heapFree);
-        CLR_Debug::Printf("Block size:  %d\r\n", sizeof(CLR_RT_HeapBlock));
+        CLR_Debug::Printf("Block size:  %d\r\n", sizeof(struct CLR_RT_HeapBlock));
+#endif
 
 #endif
         ///
@@ -218,7 +252,7 @@ void CLR_RT_ExecutionEngine::ExecutionEngine_Cleanup()
     m_breakpointsNum = 0;
 
     CLR_DBG_Debugger::DeleteInstance();
-#endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
+#endif // #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
 
 #if defined(NANOCLR_PROFILE_NEW)
     CLR_PRF_Profiler::DeleteInstance();
@@ -261,19 +295,25 @@ HRESULT CLR_RT_ExecutionEngine::StartHardware()
     NANOCLR_NOCLEANUP();
 }
 
-void CLR_RT_ExecutionEngine::Reboot(bool fHard)
+void CLR_RT_ExecutionEngine::Reboot(uint16_t rebootOptions)
 {
     NATIVE_PROFILE_CLR_CORE();
 
-    if (fHard)
+    if (CLR_DBG_Commands::Monitor_Reboot::c_EnterNanoBooter ==
+        (rebootOptions & CLR_DBG_Commands::Monitor_Reboot::c_EnterNanoBooter))
     {
-        ::CPU_Reset();
+        RequestToLaunchNanoBooter(0);
     }
-    else
+    else if (
+        CLR_DBG_Commands::Monitor_Reboot::c_EnterProprietaryBooter ==
+        (rebootOptions & CLR_DBG_Commands::Monitor_Reboot::c_EnterProprietaryBooter))
     {
-        CLR_EE_REBOOT_CLR;
-        CLR_EE_DBG_SET(RebootPending);
+        RequestToLaunchProprietaryBootloader();
     }
+
+    // apply reboot options and set reboot pending flag
+    g_CLR_RT_ExecutionEngine.m_iReboot_Options = rebootOptions;
+    CLR_EE_DBG_SET(RebootPending);
 }
 
 CLR_INT64 CLR_RT_ExecutionEngine::GetUptime()
@@ -367,9 +407,11 @@ CLR_UINT32 CLR_RT_ExecutionEngine::PerformGarbageCollection()
 
     m_lastHcUsed = NULL;
 
-#if !defined(BUILD_RTM) || defined(_WIN32)
+#if !defined(BUILD_RTM) || defined(VIRTUAL_DEVICE)
     if (m_fPerformHeapCompaction)
+    {
         CLR_EE_SET(Compaction_Pending);
+    }
 #endif
 
     g_CLR_RT_ExecutionEngine.SpawnFinalizer();
@@ -380,6 +422,7 @@ CLR_UINT32 CLR_RT_ExecutionEngine::PerformGarbageCollection()
 void CLR_RT_ExecutionEngine::PerformHeapCompaction()
 {
     NATIVE_PROFILE_CLR_CORE();
+
     if (CLR_EE_DBG_IS(NoCompaction))
         return;
 
@@ -393,13 +436,21 @@ void CLR_RT_ExecutionEngine::PerformHeapCompaction()
 void CLR_RT_ExecutionEngine::Relocate()
 {
     NATIVE_PROFILE_CLR_CORE();
+
+#if defined(NANOCLR_TRACE_MEMORY_STATS)
+    if (s_CLR_RT_fTrace_MemoryStats >= c_CLR_RT_Trace_Verbose)
+    {
+        CLR_Debug::Printf("\r\nGC: performing EE relocation\r\n");
+    }
+#endif
+
 #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
     CLR_RT_GarbageCollector::Heap_Relocate((void **)&m_scratchPadArray);
-#endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
+#endif // #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
 
 #if !defined(NANOCLR_APPDOMAINS)
     CLR_RT_GarbageCollector::Heap_Relocate((void **)&m_globalLock);
-    // CLR_RT_GarbageCollector::Heap_Relocate( (void**)&m_outOfMemoryException );
+    CLR_RT_GarbageCollector::Heap_Relocate((void **)&m_outOfMemoryException);
 #endif
 
     CLR_RT_GarbageCollector::Heap_Relocate((void **)&m_currentUICulture);
@@ -490,7 +541,7 @@ bool CLR_RT_ExecutionEngine::TryToUnloadAppDomains()
         SignalEvents(Event_AppDomain);
 #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
         Breakpoint_Assemblies_Loaded();
-#endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
+#endif // #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
     }
 
     return fAnyAppDomainsUnloaded;
@@ -506,7 +557,7 @@ HRESULT CLR_RT_ExecutionEngine::WaitForDebugger()
     while (CLR_EE_DBG_IS(Stopped) && !CLR_EE_DBG_IS(RebootPending) && !CLR_EE_DBG_IS(ExitPending))
     {
         // TODO: Generalize this as a standard HAL API
-#if defined(WIN32)
+#if defined(VIRTUAL_DEVICE)
         if (HAL_Windows_IsShutdownPending())
         {
             NANOCLR_SET_AND_LEAVE(CLR_E_SHUTTING_DOWN);
@@ -516,24 +567,26 @@ HRESULT CLR_RT_ExecutionEngine::WaitForDebugger()
         DebuggerLoop();
     }
 
-#if defined(WIN32)
+#if defined(VIRTUAL_DEVICE)
     NANOCLR_NOCLEANUP();
 #else
     NANOCLR_NOCLEANUP_NOLABEL();
 #endif
 }
 
-#if defined(WIN32)
+#if defined(VIRTUAL_DEVICE)
 HRESULT CLR_RT_ExecutionEngine::CreateEntryPointArgs(CLR_RT_HeapBlock &argsBlk, wchar_t *szCommandLineArgs)
 {
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
 
     std::list<std::wstring> args;
+    CLR_RT_HeapBlock_Array *array;
+    CLR_UINT32 iArg;
 
     wchar_t *szArgNext = NULL;
     wchar_t *szArg = szCommandLineArgs;
-    wchar_t *sep = L" ";
+    const wchar_t *sep = L" ";
     wchar_t *context = NULL;
 
     szArg = wcstok_s(szArg, sep, &context);
@@ -549,8 +602,8 @@ HRESULT CLR_RT_ExecutionEngine::CreateEntryPointArgs(CLR_RT_HeapBlock &argsBlk, 
     NANOCLR_CHECK_HRESULT(
         CLR_RT_HeapBlock_Array::CreateInstance(argsBlk, (CLR_UINT32)args.size(), g_CLR_RT_WellKnownTypes.m_String));
 
-    CLR_RT_HeapBlock_Array *array = argsBlk.Array();
-    CLR_UINT32 iArg = 0;
+    array = argsBlk.Array();
+    iArg = 0;
 
     for (std::list<std::wstring>::iterator it = args.begin(); it != args.end(); it++, iArg++)
     {
@@ -577,7 +630,7 @@ HRESULT CLR_RT_ExecutionEngine::Execute(wchar_t *entryPointArgs, int maxContextS
 
     if (NANOCLR_INDEX_IS_INVALID(g_CLR_RT_TypeSystem.m_entryPoint))
     {
-#if !defined(BUILD_RTM) || defined(_WIN32)
+#if !defined(BUILD_RTM) || defined(VIRTUAL_DEVICE)
         CLR_Debug::Printf("Cannot find any entrypoint!\r\n");
 #endif
         NANOCLR_SET_AND_LEAVE(CLR_E_ENTRYPOINT_NOT_FOUND);
@@ -587,7 +640,7 @@ HRESULT CLR_RT_ExecutionEngine::Execute(wchar_t *entryPointArgs, int maxContextS
 
 #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
     CLR_EE_DBG_SET_MASK(StateProgramRunning, StateMask);
-#endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
+#endif // #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
 
     NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Delegate::CreateInstance(ref, g_CLR_RT_TypeSystem.m_entryPoint, NULL));
 
@@ -605,7 +658,7 @@ HRESULT CLR_RT_ExecutionEngine::Execute(wchar_t *entryPointArgs, int maxContextS
             // Main entrypoint takes an optional String[] parameter.
             // Set the arg to NULL, if that's the case.
 
-#if defined(WIN32)
+#if defined(VIRTUAL_DEVICE)
             if (entryPointArgs != NULL)
             {
                 NANOCLR_CHECK_HRESULT(CreateEntryPointArgs(stack->m_arguments[0], entryPointArgs));
@@ -646,7 +699,7 @@ HRESULT CLR_RT_ExecutionEngine::Execute(wchar_t *entryPointArgs, int maxContextS
 
             CLR_RT_ExecutionEngine::ExecutionConstraint_Resume();
         }
-#endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
+#endif // #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
 
         if (CLR_EE_IS(Compaction_Pending))
         {
@@ -660,7 +713,7 @@ HRESULT CLR_RT_ExecutionEngine::Execute(wchar_t *entryPointArgs, int maxContextS
         }
         else if (hr2 == CLR_S_QUANTUM_EXPIRED)
         {
-#if !defined(BUILD_RTM) || defined(_WIN32)
+#if !defined(BUILD_RTM) || defined(VIRTUAL_DEVICE)
             if (m_fPerformGarbageCollection)
             {
 #if defined(NANOCLR_GC_VERBOSE)
@@ -697,7 +750,7 @@ HRESULT CLR_RT_ExecutionEngine::Execute(wchar_t *entryPointArgs, int maxContextS
     g_CLR_PRF_Profiler.Stream_Flush();
 #endif
 
-#if defined(WIN32)
+#if defined(VIRTUAL_DEVICE)
 #if defined(NANOCLR_PROFILE_NEW)
     if (CLR_EE_PRF_IS(Enabled))
     {
@@ -893,6 +946,7 @@ bool CLR_RT_ExecutionEngine::SpawnStaticConstructorHelper(CLR_RT_Assembly *assem
     {
         CLR_RT_HeapBlock_Delegate *dlg;
         CLR_RT_HeapBlock refDlg;
+
         refDlg.SetObjectReference(NULL);
         CLR_RT_ProtectFromGC gc(refDlg);
 
@@ -926,7 +980,7 @@ void CLR_RT_ExecutionEngine::SpawnStaticConstructor(CLR_RT_Thread *&pCctorThread
     if (dlg != NULL)
     {
         CLR_RT_MethodDef_Index idx = dlg->DelegateFtn();
-        CLR_RT_MethodDef_Instance inst;
+        CLR_RT_MethodDef_Instance inst{};
 
         // Find next static constructor for given idx
         _ASSERTE(NANOCLR_INDEX_IS_VALID(idx));
@@ -985,9 +1039,11 @@ void CLR_RT_ExecutionEngine::SpawnFinalizer()
     NATIVE_PROFILE_CLR_CORE();
 
     CLR_RT_HeapBlock_Finalizer *fin = (CLR_RT_HeapBlock_Finalizer *)m_finalizersPending.FirstNode();
+
     if (fin->Next() != NULL)
     {
         CLR_RT_HeapBlock delegate;
+
         delegate.SetObjectReference(NULL);
         CLR_RT_ProtectFromGC gc(delegate);
 
@@ -1111,7 +1167,7 @@ HRESULT CLR_RT_ExecutionEngine::ScheduleThreads(int maxContextSwitch)
     while (maxContextSwitch-- > 0)
     {
 
-#if defined(WIN32)
+#if defined(VIRTUAL_DEVICE)
         if (HAL_Windows_IsShutdownPending())
         {
             NANOCLR_SET_AND_LEAVE(CLR_S_NO_THREADS);
@@ -1123,7 +1179,7 @@ HRESULT CLR_RT_ExecutionEngine::ScheduleThreads(int maxContextSwitch)
         {
             NANOCLR_SET_AND_LEAVE(CLR_S_NO_READY_THREADS);
         }
-#endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
+#endif // #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
 
         CLR_RT_Thread *th = NULL;
 
@@ -1166,7 +1222,7 @@ HRESULT CLR_RT_ExecutionEngine::ScheduleThreads(int maxContextSwitch)
             {
                 NANOCLR_SET_AND_LEAVE(CLR_S_NO_READY_THREADS);
             }
-#endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
+#endif // #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
         }
 
         // If there is ready thread - decrease m_executionCounter for this (th) thread.
@@ -1560,7 +1616,13 @@ CLR_RT_HeapBlock *CLR_RT_ExecutionEngine::ExtractHeapBlocks(
 #if !defined(BUILD_RTM)
     if (m_heapState == c_HeapState_UnderGC && ((flags & CLR_RT_HeapBlock::HB_SpecialGCAllocation) == 0))
     {
-        CLR_Debug::Printf("Internal error: call to memory allocation during garbage collection!!!\r\n");
+
+#if defined(NANOCLR_GC_VERBOSE)
+        if (s_CLR_RT_fTrace_Memory >= c_CLR_RT_Trace_Info)
+        {
+            CLR_Debug::Printf("Internal error: call to memory allocation during garbage collection!!!\r\n");
+        }
+#endif
 
         // Getting here during a GC is possible, since the watchdog ISR may now require
         // dynamic memory allocation for logging.  Returning NULL means the watchdog log will
@@ -1615,7 +1677,7 @@ CLR_RT_HeapBlock *CLR_RT_ExecutionEngine::ExtractHeapBlocks(
                         {
                             if (phase != 0)
                             {
-                                CLR_Debug::Printf("ExtractHeapBlocks succeeded at phase %d\r\n", phase);
+                                CLR_Debug::Printf("\r\n\r\nExtractHeapBlocks succeeded at phase %d\r\n", phase);
                             }
                         }
 #endif
@@ -1636,13 +1698,15 @@ CLR_RT_HeapBlock *CLR_RT_ExecutionEngine::ExtractHeapBlocks(
 
         switch (phase)
         {
+            // perform garbage collection to try to free up some memory
             case 0:
+
 #if defined(NANOCLR_GC_VERBOSE)
                 if (s_CLR_RT_fTrace_Memory >= c_CLR_RT_Trace_Info)
                 {
                     CLR_Debug::Printf(
-                        "    Memory: ExtractHeapBlocks: %d bytes needed.\r\n",
-                        length * sizeof(CLR_RT_HeapBlock));
+                        "\r\n\r\n    Memory: ExtractHeapBlocks: %d bytes needed.\r\n",
+                        length * sizeof(struct CLR_RT_HeapBlock));
                 }
 #endif
 
@@ -1650,22 +1714,41 @@ CLR_RT_HeapBlock *CLR_RT_ExecutionEngine::ExtractHeapBlocks(
 
                 break;
 
-            default: // Total failure...
-#if !defined(BUILD_RTM)
-                CLR_Debug::Printf(
-                    "Failed allocation for %d blocks, %d bytes\r\n\r\n",
-                    length,
-                    length * sizeof(CLR_RT_HeapBlock));
-#endif
-                if (g_CLR_RT_GarbageCollector.m_freeBytes >= (length * sizeof(CLR_RT_HeapBlock)))
-                {
+            // total failure on reclaiming enough memory
+            default:
 
+                if (g_CLR_RT_GarbageCollector.m_freeBytes >= (length * sizeof(struct CLR_RT_HeapBlock)))
+                {
                     // A compaction probably would have saved this OOM
                     // Compaction will occur for Bitmaps, Arrays, etc. if this function returns NULL, so lets not
                     // through an assert here
 
                     // Throw the OOM, and schedule a compaction at a safe point
                     CLR_EE_SET(Compaction_Pending);
+
+#if defined(NANOCLR_GC_VERBOSE)
+                    if (s_CLR_RT_fTrace_Memory >= c_CLR_RT_Trace_Info)
+                    {
+                        CLR_Debug::Printf(
+                            "\r\n\r\nFailed allocation for %d blocks, %d bytes.\r\nThere's enough free memory, heap "
+                            "compaction scheduled.\r\n\r\n",
+                            length,
+                            length * sizeof(struct CLR_RT_HeapBlock));
+                    }
+#endif
+                }
+                else
+                {
+
+#if defined(NANOCLR_GC_VERBOSE)
+                    if (s_CLR_RT_fTrace_Memory >= c_CLR_RT_Trace_Info)
+                    {
+                        CLR_Debug::Printf(
+                            "\r\n\r\nFailed allocation for %d blocks, %d bytes\r\n\r\n",
+                            length,
+                            length * sizeof(struct CLR_RT_HeapBlock));
+                    }
+#endif
                 }
 
                 return NULL;
@@ -1724,7 +1807,7 @@ HRESULT CLR_RT_ExecutionEngine::InitializeReference(CLR_RT_HeapBlock &ref, CLR_R
     {
         if (dt == DATATYPE_VALUETYPE)
         {
-            CLR_RT_TypeDef_Instance inst;
+            CLR_RT_TypeDef_Instance inst{};
             inst.InitializeFromIndex(res.m_cls);
 
             if ((inst.m_target->flags & CLR_RECORD_TYPEDEF::TD_Semantics_Mask) == CLR_RECORD_TYPEDEF::TD_Semantics_Enum)
@@ -1759,7 +1842,7 @@ HRESULT CLR_RT_ExecutionEngine::InitializeReference(
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
 
-    CLR_RT_SignatureParser parser;
+    CLR_RT_SignatureParser parser{};
     parser.Initialize_FieldDef(assm, target);
 
     NANOCLR_SET_AND_LEAVE(InitializeReference(ref, parser));
@@ -1821,7 +1904,7 @@ HRESULT CLR_RT_ExecutionEngine::InitializeLocals(
                     {
                         case TBL_TypeSpec:
                         {
-                            CLR_RT_SignatureParser sub;
+                            CLR_RT_SignatureParser sub{};
                             sub.Initialize_TypeSpec(assm, assm->GetTypeSpec(idx));
                             CLR_RT_SignatureParser::Element res;
 
@@ -1876,7 +1959,7 @@ HRESULT CLR_RT_ExecutionEngine::InitializeLocals(
         {
             if (dt == DATATYPE_VALUETYPE)
             {
-                CLR_RT_TypeDef_Instance inst;
+                CLR_RT_TypeDef_Instance inst{};
                 inst.InitializeFromIndex(cls);
 
                 if (inst.m_target->dataType != DATATYPE_VALUETYPE)
@@ -1933,7 +2016,7 @@ HRESULT CLR_RT_ExecutionEngine::NewObjectFromIndex(CLR_RT_HeapBlock &reference, 
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
 
-    CLR_RT_TypeDef_Instance inst;
+    CLR_RT_TypeDef_Instance inst{};
 
     if (inst.InitializeFromIndex(cls) == false)
         NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
@@ -2058,7 +2141,7 @@ HRESULT CLR_RT_ExecutionEngine::NewObject(CLR_RT_HeapBlock &reference, CLR_UINT3
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
 
-    CLR_RT_TypeDef_Instance res;
+    CLR_RT_TypeDef_Instance res{};
 
     if (res.ResolveToken(tk, assm) == false)
         NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
@@ -2103,6 +2186,7 @@ HRESULT CLR_RT_ExecutionEngine::CloneObject(CLR_RT_HeapBlock &reference, const C
             // Save the pointer to the object to clone, in case 'reference' and 'source' point to the same block.
             //
             CLR_RT_HeapBlock safeSource;
+
             safeSource.SetObjectReference(obj);
             CLR_RT_ProtectFromGC gc(safeSource);
 
@@ -2137,7 +2221,7 @@ HRESULT CLR_RT_ExecutionEngine::CopyValueType(CLR_RT_HeapBlock *destination, con
         const CLR_RT_TypeDef_Index &cls = source->ObjectCls();
         if (cls.m_data == destination->ObjectCls().m_data)
         {
-            CLR_RT_TypeDef_Instance inst;
+            CLR_RT_TypeDef_Instance inst{};
             inst.InitializeFromIndex(cls);
             CLR_UINT32 totFields = inst.CrossReference().m_totalFields;
 
@@ -2218,7 +2302,7 @@ HRESULT CLR_RT_ExecutionEngine::FindFieldDef(
     NANOCLR_HEADER();
 
     CLR_RT_HeapBlock *obj;
-    CLR_RT_TypeDef_Instance inst;
+    CLR_RT_TypeDef_Instance inst{};
 
     if (reference.DataType() != DATATYPE_OBJECT)
         NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
@@ -2404,6 +2488,7 @@ void CLR_RT_ExecutionEngine::ProcessHardware()
 {
     NATIVE_PROFILE_CLR_CORE();
     Watchdog_Reset();
+    RtosYield();
 
     g_CLR_HW_Hardware.ProcessActivity();
 }
@@ -2576,7 +2661,7 @@ void CLR_RT_ExecutionEngine::CheckThreads(CLR_INT64 &timeoutMin, CLR_RT_DblLinke
         {
             continue;
         }
-#endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
+#endif // #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
 
         //
         // Check events.
@@ -2807,8 +2892,11 @@ bool CLR_RT_ExecutionEngine::IsInstanceOf(
         fArray = true;
     }
 
-    if (desc.m_reflex.m_levels < descTarget.m_reflex.m_levels)
+    // only check reflection levels if this is not an array
+    if (!fArray && desc.m_reflex.m_levels < descTarget.m_reflex.m_levels)
+    {
         return false;
+    }
 
     if (desc.m_reflex.m_levels > descTarget.m_reflex.m_levels)
     {
@@ -2855,7 +2943,7 @@ bool CLR_RT_ExecutionEngine::IsInstanceOf(
         //
         if (semanticTarget == CLR_RECORD_TYPEDEF::TD_Semantics_Interface && inst.m_target->interfaces != CLR_EmptyIndex)
         {
-            CLR_RT_SignatureParser parser;
+            CLR_RT_SignatureParser parser{};
             parser.Initialize_Interfaces(inst.m_assm, inst.m_target);
             CLR_RT_SignatureParser::Element res;
 
@@ -2878,7 +2966,7 @@ bool CLR_RT_ExecutionEngine::IsInstanceOf(
 bool CLR_RT_ExecutionEngine::IsInstanceOf(const CLR_RT_TypeDef_Index &cls, const CLR_RT_TypeDef_Index &clsTarget)
 {
     NATIVE_PROFILE_CLR_CORE();
-    CLR_RT_TypeDescriptor desc;
+    CLR_RT_TypeDescriptor desc{};
     CLR_RT_TypeDescriptor descTarget;
 
     if (FAILED(desc.InitializeFromType(cls)))
@@ -2892,7 +2980,7 @@ bool CLR_RT_ExecutionEngine::IsInstanceOf(const CLR_RT_TypeDef_Index &cls, const
 bool CLR_RT_ExecutionEngine::IsInstanceOf(CLR_RT_HeapBlock &ref, const CLR_RT_TypeDef_Index &clsTarget)
 {
     NATIVE_PROFILE_CLR_CORE();
-    CLR_RT_TypeDescriptor desc;
+    CLR_RT_TypeDescriptor desc{};
     CLR_RT_TypeDescriptor descTarget;
 
     if (FAILED(desc.InitializeFromObject(ref)))
@@ -2910,10 +2998,10 @@ bool CLR_RT_ExecutionEngine::IsInstanceOf(
     bool isInstInstruction)
 {
     NATIVE_PROFILE_CLR_CORE();
-    CLR_RT_TypeDescriptor desc;
-    CLR_RT_TypeDescriptor descTarget;
-    CLR_RT_TypeDef_Instance clsTarget;
-    CLR_RT_TypeSpec_Instance defTarget;
+    CLR_RT_TypeDescriptor desc{};
+    CLR_RT_TypeDescriptor descTarget{};
+    CLR_RT_TypeDef_Instance clsTarget{};
+    CLR_RT_TypeSpec_Instance defTarget{};
 
     if (FAILED(desc.InitializeFromObject(obj)))
         return false;
@@ -3050,7 +3138,7 @@ void CLR_RT_ExecutionEngine::SetDebuggingInfoBreakpoints(bool fSet)
 
         if (def.m_flags & CLR_DBG_Commands::Debugging_Execution_BreakpointDef::c_HARD)
         {
-            CLR_RT_MethodDef_Instance inst;
+            CLR_RT_MethodDef_Instance inst{};
 
             if (inst.InitializeFromIndex(def.m_md))
             {
@@ -3286,7 +3374,7 @@ void CLR_RT_ExecutionEngine::Breakpoint_Threads_Prepare(CLR_RT_DblLinkedList &th
                     }
                 }
             }
-#ifndef CLR_NO_IL_INLINE
+#ifndef NANOCLR_NO_IL_INLINE
             if (call->m_inlineFrame)
             {
                 if (call->m_inlineFrame->m_frame.m_call.DebuggingInfo().HasBreakpoint())
@@ -3586,7 +3674,7 @@ void CLR_RT_ExecutionEngine::Breakpoint_Exception_Intercepted(CLR_RT_StackFrame 
     Breakpoint_System_Event(hit, event, NULL, stack, NULL);
 }
 
-#endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
+#endif // #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 

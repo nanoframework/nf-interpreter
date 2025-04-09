@@ -43,6 +43,10 @@ extern portMUX_TYPE globalLockMutex;
 
 #endif // !defined(BUILD_RTM)
 
+#ifndef HARD_BREAKPOINT
+#define HARD_BREAKPOINT()
+#endif // HARD_BREAKPOINT
+
 #define NANOCLR_STOP() HARD_BREAKPOINT()
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -59,4 +63,4 @@ extern portMUX_TYPE globalLockMutex;
 #endif // EVENTS_HEART_BEAT
 #endif
 
-#endif //TARGET_HAL_H
+#endif // TARGET_HAL_H

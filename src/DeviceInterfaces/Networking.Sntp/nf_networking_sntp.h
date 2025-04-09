@@ -16,10 +16,15 @@ extern "C"
 {
 #ifdef DeviceFamily_CC3220
 #include <targetSimpleLinkCC32xx_Sntp.h>
-#elif defined(_WIN32)
+#elif defined(VIRTUAL_DEVICE)
 // empty on purpose
+#elif defined(AZURE_RTOS_NETXDUO)
+#include <nxd_sntp_client.h>
+#elif defined(AZURE_RTOS_THREADX)
+// TODO
+// #include <nxd_sntp_client.h>
 #else
-#include <apps/sntp.h>
+#include <lwip/apps/sntp.h>
 #endif
 }
 

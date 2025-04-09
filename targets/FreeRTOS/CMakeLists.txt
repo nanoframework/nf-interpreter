@@ -11,11 +11,11 @@ include(binutils.FreeRTOS)
 # Define PLATFORM base path
 set(BASE_PATH_FOR_PLATFORM ${CMAKE_CURRENT_SOURCE_DIR} PARENT_SCOPE)
 
-# check if RTOS_SOURCE_FOLDER was specified or if it's empty (default is empty)
-set(NO_RTOS_SOURCE_FOLDER TRUE)
-if(RTOS_SOURCE_FOLDER)
-    if(NOT "${RTOS_SOURCE_FOLDER}" STREQUAL "")
-        set(NO_RTOS_SOURCE_FOLDER FALSE)
+# check if FREERTOS_SOURCE_FOLDER was specified or if it's empty (default is empty)
+set(NO_FREERTOS_SOURCE_FOLDER TRUE)
+if(FREERTOS_SOURCE_FOLDER)
+    if(NOT "${FREERTOS_SOURCE_FOLDER}" STREQUAL "")
+        set(NO_FREERTOS_SOURCE_FOLDER FALSE)
     endif()
 endif()
 
@@ -49,7 +49,7 @@ if(RTOS_VERSION_EMPTY)
     set(RTOS_VERSION "V10.4.1-kernel-only")
 endif()
 
-if(NO_RTOS_SOURCE_FOLDER)
+if(NO_FREERTOS_SOURCE_FOLDER)
     # no FreeRTOS source specified, download it from it's repo
 
     message(STATUS "RTOS is: FreeRTOS ${RTOS_VERSION} from GitHub repo")
@@ -63,11 +63,11 @@ if(NO_RTOS_SOURCE_FOLDER)
 else()
     # FreeRTOS source was specified
 
-    message(STATUS "RTOS is: FreeRTOS ${RTOS_VERSION} (source from: ${RTOS_SOURCE_FOLDER})")
+    message(STATUS "RTOS is: FreeRTOS ${RTOS_VERSION} (source from: ${FREERTOS_SOURCE_FOLDER})")
     
     FetchContent_Declare(
         freertos
-        SOURCE_DIR ${RTOS_SOURCE_FOLDER}
+        SOURCE_DIR ${FREERTOS_SOURCE_FOLDER}
     )
 
 endif()
@@ -75,7 +75,7 @@ endif()
 FetchContent_GetProperties(freertos)
 if(NOT freertos_POPULATED)
     # Fetch the content using previously declared details
-    FetchContent_Populate(freertos)
+    FetchContent_MakeAvailable(freertos)
 endif()
 
 # check if CMSIS_SOURCE was specified or if it's empty (default is empty)
@@ -129,10 +129,10 @@ else()
 endif()
 
 FetchContent_GetProperties(cmsis)
-FetchContent_Populate(cmsis)
+FetchContent_MakeAvailable(cmsis)
 if(NOT cmsis_POPULATED)
     # Fetch the content using previously declared details
-    FetchContent_Populate(cmsis)
+    FetchContent_MakeAvailable(cmsis)
 endif()
 
 # FreeRTOS common directories

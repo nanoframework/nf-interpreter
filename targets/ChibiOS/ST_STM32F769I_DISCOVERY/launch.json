@@ -6,6 +6,8 @@
             "type": "cppdbg",
             "request": "launch",
             "miDebuggerPath": "<absolute-path-to-the-toolchain-folder-mind-the-forward-slashes>/bin/arm-none-eabi-gdb.exe",
+            "MIMode": "gdb",
+            "miDebuggerArgs": "",
             "program": "${workspaceRoot}/build/nanoBooter.elf",
             "setupCommands": [
                 {
@@ -26,15 +28,7 @@
                 {
                     "text": "set output-radix 16",
                     "description": "set the default numeric base to 16",
-                    "ignoreFailures": false
-                }
-            ],
-            "customLaunchSetupCommands": [
-                {
-                    "text": "monitor reset_config none separate"
-                },
-                {
-                    "text": "monitor reset halt"
+                    "ignoreFailures": true
                 }
             ],
             "logging": {
@@ -46,17 +40,25 @@
             },
             "launchCompleteCommand": "exec-continue",
             "debugServerPath": "<absolute-path-to-openocd-mind-the-forward-slashes>/bin/openocd.exe",
-            "debugServerArgs": "-s \"<absolute-path-to-openocd-mind-the-forward-slashes>/scripts/\" -f board/stm32f7discovery.cfg",
-            "serverStarted": "Info\\ :\\ [\\w\\d\\.]*:\\ hardware",
+            "debugServerArgs": "-s \"<absolute-path-to-openocd-mind-the-forward-slashes>/scripts/\" -f board/stm32f769i-disco.cfg",
+            "serverStarted": "Listening on port .* for gdb connections",
             "filterStderr": true,
-            "externalConsole": true,
-            "cwd": "${cwd}"
+            "stopAtConnect": false,
+            "stopAtEntry": false,
+            "externalConsole": false,
+            "cwd": "${cwd}",
+            "hardwareBreakpoints": {
+                "require": true,
+                "limit": 6
+            }
         },
         {
             "name": "ST_STM32F769I_DISCOVERY nanoCLR",
             "type": "cppdbg",
             "request": "launch",
             "miDebuggerPath": "<absolute-path-to-the-toolchain-folder-mind-the-forward-slashes>/bin/arm-none-eabi-gdb.exe",
+            "MIMode": "gdb",
+            "miDebuggerArgs": "",
             "program": "${workspaceRoot}/build/nanoCLR.elf",
             "setupCommands": [
                 {
@@ -77,15 +79,7 @@
                 {
                     "text": "set output-radix 16",
                     "description": "set the default numeric base to 16",
-                    "ignoreFailures": false
-                }
-            ],
-            "customLaunchSetupCommands": [
-                {
-                    "text": "monitor reset_config none separate"
-                },
-                {
-                    "text": "monitor reset halt"
+                    "ignoreFailures": true
                 }
             ],
             "logging": {
@@ -97,11 +91,17 @@
             },
             "launchCompleteCommand": "exec-continue",
             "debugServerPath": "<absolute-path-to-openocd-mind-the-forward-slashes>/bin/openocd.exe",
-            "debugServerArgs": "-s \"<absolute-path-to-openocd-mind-the-forward-slashes>/scripts/\" -f board/stm32f7discovery.cfg",
-            "serverStarted": "Info\\ :\\ [\\w\\d\\.]*:\\ hardware",
+            "debugServerArgs": "-s \"<absolute-path-to-openocd-mind-the-forward-slashes>/scripts/\" -f board/stm32f769i-disco.cfg",
+            "serverStarted": "Listening on port .* for gdb connections",
             "filterStderr": true,
-            "externalConsole": true,
-            "cwd": "${cwd}"
+            "stopAtConnect": false,
+            "stopAtEntry": false,
+            "externalConsole": false,
+            "cwd": "${cwd}",
+            "hardwareBreakpoints": {
+                "require": true,
+                "limit": 6
+            }
         }
     ]
 }

@@ -6,11 +6,9 @@
 #include <nanoPAL_BlockStorage.h>
 #include <Target_BlockStorage_Esp32FlashDriver.h>
 
-extern int ets_printf(const char *fmt, ...);
-
 const DRAM_ATTR esp_partition_t *g_pFlashDriver_partition;
 const void *esp32_flash_start_ptr;
-spi_flash_mmap_handle_t g_esp32_flash_out_handle;
+esp_partition_mmap_handle_t g_esp32_flash_out_handle;
 
 // storing the CODE block start and size for quick access
 static ByteAddress CODE_Region_StartAddress;
@@ -69,7 +67,7 @@ bool Esp32FlashDriver_InitializeDevice(void *context)
             g_pFlashDriver_partition,
             0,
             g_pFlashDriver_partition->size,
-            SPI_FLASH_MMAP_DATA,
+            ESP_PARTITION_MMAP_DATA,
             &esp32_flash_start_ptr,
             &g_esp32_flash_out_handle) != ESP_OK)
     {
@@ -134,7 +132,7 @@ bool Esp32FlashDriver_UninitializeDevice(void *context)
     // Unmap the flash memory
     if (esp32_flash_start_ptr != NULL)
     {
-        spi_flash_munmap(g_esp32_flash_out_handle);
+        esp_partition_munmap(g_esp32_flash_out_handle);
         esp32_flash_start_ptr = NULL;
     }
 

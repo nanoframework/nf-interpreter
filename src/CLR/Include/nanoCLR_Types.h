@@ -80,7 +80,7 @@
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
 #if defined(_MSC_VER)
-#pragma pack(push, NANOCLR_TYPES_H, 4)
+#pragma pack(push, __NANOCLR_TYPES_H__, 4)
 #endif
 
 enum CLR_OPCODE
@@ -497,7 +497,7 @@ inline CLR_UINT32 CLR_UncompressMethodToken(CLR_UINT32 tk)
     return CLR_TkFromType(c_lookup[(tk >> 15) & 1], 0x7fff & tk);
 }
 
-#if defined(_WIN32)
+#if defined(VIRTUAL_DEVICE)
 
 CLR_UINT32 CLR_ReadTokenCompressed(CLR_PMETADATA &ip, CLR_OPCODE opcode);
 
@@ -927,7 +927,7 @@ inline CLR_OPCODE CLR_ReadNextOpcodeCompressed(CLR_PMETADATA &ip)
 
 //--//
 
-#if defined(_WIN32)
+#if defined(VIRTUAL_DEVICE)
 
 CLR_PMETADATA CLR_SkipBodyOfOpcode(CLR_PMETADATA ip, CLR_OPCODE opcode);
 CLR_PMETADATA CLR_SkipBodyOfOpcodeCompressed(CLR_PMETADATA ip, CLR_OPCODE opcode);
@@ -962,7 +962,7 @@ struct CLR_Debug
 
     typedef int (*OutputHandler)(const char *format, ...);
 
-#if defined(_WIN32)
+#if defined(VIRTUAL_DEVICE)
     static void RedirectToString(std::string *str);
     static void SaveMessage(std::string str);
 #endif
@@ -1011,8 +1011,9 @@ struct CLR_RECORD_ASSEMBLY
 
     bool GoodHeader() const;
     bool GoodAssembly() const;
+    bool ValidateMarker() const;
 
-#if defined(_WIN32)
+#if defined(VIRTUAL_DEVICE)
     void ComputeCRC();
 #endif
 
@@ -1312,7 +1313,7 @@ struct CLR_RECORD_RESOURCE
 };
 
 #if defined(_MSC_VER)
-#pragma pack(pop, NANOCLR_TYPES_H)
+#pragma pack(pop, __NANOCLR_TYPES_H__)
 #endif
 
 #endif // NANOCLR_TYPES_H

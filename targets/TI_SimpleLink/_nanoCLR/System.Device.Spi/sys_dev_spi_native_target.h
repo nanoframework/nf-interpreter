@@ -22,7 +22,7 @@ struct NF_PAL_SPI
 };
 
 ///////////////////////////////////////////
-// declaration of the the SPI PAL strucs //
+// declaration of the the SPI PAL structs //
 ///////////////////////////////////////////
 extern NF_PAL_SPI SPI1_PAL;
 

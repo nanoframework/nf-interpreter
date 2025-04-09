@@ -3,8 +3,8 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#ifndef GESTURES_H
-#define GESTURES_H
+#ifndef INK_H
+#define INK_H
 
 #include "Graphics.h"
 
@@ -42,4 +42,4 @@ class InkDriver
     static void InkContinuationRoutine(void *arg);
 };
 
-#endif // GESTURES_H
+#endif // INK_H

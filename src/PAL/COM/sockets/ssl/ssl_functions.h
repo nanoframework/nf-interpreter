@@ -16,10 +16,11 @@
 ///////////////////////////////////////////////////////////////////////////////////
 enum SslProtocols
 {
-    SslProtocols_None = 0x00,
-    SslProtocols_TLSv1 = 0x10,
-    SslProtocols_TLSv11 = 0x20,
-    SslProtocols_TLSv12 = 0x40,
+    SslProtocols_None = 0,
+    SslProtocols_Tls = 192,
+    SslProtocols_Tls11 = 768,
+    SslProtocols_Tls12 = 3072,
+    SslProtocols_Tls13 = 12288,
 };
 
 //////////////////////////////////////////////////////////////////////////////////////
@@ -34,7 +35,7 @@ enum SslVerification
     SslVerification_VerifyClientOnce = 8,
 };
 
-bool ssl_parse_certificate_internal(void *buf, size_t size, void *pwd, void *x509);
+bool ssl_parse_certificate_internal(void *buf, size_t size, void *x509);
 int ssl_decode_private_key_internal(
     const unsigned char *key,
     size_t keyLength,
@@ -54,13 +55,13 @@ bool ssl_generic_init_internal(
     int certLength,
     const uint8_t *privateKey,
     int privateKeyLength,
-    const char *password,
-    int passwordLength,
+    const char *pkPassword,
+    int pkPasswordLength,
     int &contextHandle,
     bool useDeviceCertificate,
     bool isServer);
 bool ssl_initialize_internal();
 bool ssl_uninitialize_internal();
-bool ssl_add_cert_auth_internal(int contextHandle, const char *certificate, int certLength, const char *certPassword);
+bool ssl_add_cert_auth_internal(int contextHandle, const char *certificate, int certLength);
 
 #endif // SSL_FUNCTIONS_H

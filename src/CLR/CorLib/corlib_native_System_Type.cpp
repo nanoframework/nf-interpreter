@@ -1,9 +1,12 @@
-//
+﻿//
 // Copyright (c) .NET Foundation and Contributors
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
 //
+
 #include "CorLib.h"
+
+typedef Library_corlib_native_System_Reflection_MethodBase MethodBase;
 
 HRESULT Library_corlib_native_System_Type::get_DeclaringType___SystemType(CLR_RT_StackFrame &stack)
 {
@@ -12,7 +15,7 @@ HRESULT Library_corlib_native_System_Type::get_DeclaringType___SystemType(CLR_RT
 
     CLR_RT_TypeDef_Instance td;
     CLR_RT_HeapBlock &top = stack.PushValueAndClear();
-    CLR_RT_HeapBlock *hbType = stack.Arg0().Dereference();
+    CLR_RT_HeapBlock *hbType = stack.This();
 
     NANOCLR_CHECK_HRESULT(Library_corlib_native_System_RuntimeType::GetTypeDescriptor(*hbType, td));
 
@@ -49,8 +52,8 @@ HRESULT Library_corlib_native_System_Type::IsInstanceOfType___BOOLEAN__OBJECT(CL
     NANOCLR_HEADER();
 
     CLR_RT_TypeDescriptor descTarget;
-    CLR_RT_TypeDescriptor desc;
-    CLR_RT_HeapBlock *hbType = stack.Arg0().Dereference();
+    CLR_RT_TypeDescriptor desc{};
+    CLR_RT_HeapBlock *hbType = stack.This();
 
     if (hbType->DataType() != DATATYPE_REFLECTION)
         NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
@@ -248,7 +251,7 @@ HRESULT Library_corlib_native_System_Type::get_IsArray___BOOLEAN(CLR_RT_StackFra
     NANOCLR_HEADER();
 
     CLR_RT_TypeDef_Instance td;
-    CLR_RT_HeapBlock *hbType = stack.Arg0().Dereference();
+    CLR_RT_HeapBlock *hbType = stack.This();
 
     NANOCLR_CHECK_HRESULT(Library_corlib_native_System_RuntimeType::GetTypeDescriptor(*hbType, td));
 
@@ -367,7 +370,7 @@ HRESULT Library_corlib_native_System_Type::CheckFlags(CLR_RT_StackFrame &stack, 
 
     CLR_RT_TypeDef_Instance td;
     bool fRes;
-    CLR_RT_HeapBlock *hbType = stack.Arg0().Dereference();
+    CLR_RT_HeapBlock *hbType = stack.This();
 
     NANOCLR_CHECK_HRESULT(Library_corlib_native_System_RuntimeType::GetTypeDescriptor(*hbType, td));
 
@@ -405,7 +408,7 @@ HRESULT Library_corlib_native_System_Type::GetFields(
     CLR_RT_TypeDef_Instance td;
     CLR_RT_TypeDef_Instance tdArg;
     int iField;
-    CLR_RT_HeapBlock *hbType = stack.Arg0().Dereference();
+    CLR_RT_HeapBlock *hbType = stack.This();
 
     if (bindingFlags == c_BindingFlags_Default)
         bindingFlags = c_BindingFlags_DefaultLookup;
@@ -529,13 +532,13 @@ HRESULT Library_corlib_native_System_Type::GetMethods(
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
 
-    CLR_RT_MethodDef_Instance inst;
+    CLR_RT_MethodDef_Instance inst{};
     inst.Clear();
     CLR_RT_TypeDef_Instance td;
     CLR_RT_TypeDef_Instance tdArg;
     int iMethod;
     CLR_RT_HeapBlock &top = stack.PushValueAndClear();
-    CLR_RT_HeapBlock *hbType = stack.Arg0().Dereference();
+    CLR_RT_HeapBlock *hbType = stack.This();
     bool staticInstanceOnly = false;
 
     if (bindingFlags == c_BindingFlags_Default)
@@ -637,9 +640,9 @@ HRESULT Library_corlib_native_System_Type::GetMethods(
 
                 if (pParams)
                 {
-                    CLR_RT_SignatureParser parserLeft;
+                    CLR_RT_SignatureParser parserLeft{};
                     parserLeft.Initialize_MethodSignature(assm, md);
-                    CLR_RT_SignatureParser parserRight;
+                    CLR_RT_SignatureParser parserRight{};
                     parserRight.Initialize_Objects(pParams, iParams, true);
                     CLR_RT_SignatureParser::Element res;
 
@@ -654,9 +657,9 @@ HRESULT Library_corlib_native_System_Type::GetMethods(
                     }
                 }
 
-                CLR_RT_MethodDef_Index idx;
+                CLR_RT_MethodDef_Index idx{};
                 idx.Set(td.Assembly(), i + tdR->methods_First);
-                CLR_RT_MethodDef_Instance inst2;
+                CLR_RT_MethodDef_Instance inst2{};
                 inst2.InitializeFromIndex(idx);
 
                 if (fAllMatches)
@@ -671,8 +674,7 @@ HRESULT Library_corlib_native_System_Type::GetMethods(
                         NANOCLR_CHECK_HRESULT(hbObj->SetReflection(idx));
 
                         // store token for type
-                        hbObj[Library_corlib_native_System_Reflection_MethodBase::FIELD___token].NumericByRef().u4 =
-                            idx.m_data;
+                        hbObj[MethodBase::FIELD___token].NumericByRef().u4 = idx.m_data;
                     }
 
                     iMethod++;
@@ -683,9 +685,9 @@ HRESULT Library_corlib_native_System_Type::GetMethods(
 
                     if (NANOCLR_INDEX_IS_VALID(inst))
                     {
-                        CLR_RT_SignatureParser parserLeft;
+                        CLR_RT_SignatureParser parserLeft{};
                         parserLeft.Initialize_MethodSignature(inst.m_assm, inst.m_target);
-                        CLR_RT_SignatureParser parserRight;
+                        CLR_RT_SignatureParser parserRight{};
                         parserRight.Initialize_MethodSignature(inst2.m_assm, inst2.m_target);
 
                         CLR_RT_SignatureParser::Element resLeft;
@@ -765,8 +767,7 @@ HRESULT Library_corlib_native_System_Type::GetMethods(
                     hbObj->SetReflection(inst);
 
                     // store token for type
-                    hbObj[Library_corlib_native_System_Reflection_MethodBase::FIELD___token].NumericByRef().u4 =
-                        inst.m_data;
+                    hbObj[MethodBase::FIELD___token].NumericByRef().u4 = inst.m_data;
                 }
             }
 

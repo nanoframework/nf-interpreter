@@ -20,6 +20,8 @@
 #include "Target_BlockStorage_iMXRTFlashDriver.h"
 #include "CLR_Startup_Thread.h"
 
+// TODO extern void SdCardThread(void * argument);
+
 // configure heap memory
 __attribute__((section(".noinit.$SRAM_OC.ucHeap"))) uint8_t ucHeap[configTOTAL_HEAP_SIZE];
 
@@ -38,7 +40,8 @@ int main(void)
 
     xTaskCreate(ReceiverThread, "ReceiverThread", 2048, NULL, configMAX_PRIORITIES - 1, NULL);
     xTaskCreate(CLRStartupThread, "CLRStartupThread", 8192, NULL, configMAX_PRIORITIES - 2, NULL);
-    xTaskCreate(SdCardThread, "SDCardThread", configMINIMAL_STACK_SIZE + 100, NULL, configMAX_PRIORITIES - 2, NULL);
+    // TODO xTaskCreate(SdCardThread, "SDCardThread", configMINIMAL_STACK_SIZE + 100, NULL, configMAX_PRIORITIES - 2,
+    // NULL);
     vTaskStartScheduler();
 
     for (;;)

@@ -1,4 +1,4 @@
-#
+﻿#
 # Copyright (c) .NET Foundation and Contributors
 # See LICENSE file in the project root for full license information.
 #
@@ -6,47 +6,107 @@
 ############################################################################################
 # WHEN ADDING A NEW API add the name that corresponds to the CMake option here
 # e.g.: for namespace System.Device.Gpio, the CMake option is 'API_System.Device.Gpio' 
-# and the namespace designation is 'Windows.Devices.Gpio'
+# and the namespace designation is 'System.Device.Gpio'
 ###########################################################################################
 
-option(API_nanoFramework.Devices.Can            "option for nanoFramework.Devices.Can")
-option(API_nanoFramework.Device.OneWire        "option for nanoFramework.Device.OneWire")
-option(API_nanoFramework.Networking.Sntp        "option for nanoFramework.Networking.Sntp")
-option(API_nanoFramework.Runtime.Events         "option for nanoFramework.Runtime.Events API")
-option(API_nanoFramework.ResourceManager        "option for nanoFramework.ResourceManager")
-option(API_nanoFramework.System.Collections     "option for nanoFramework.System.Collections")
-option(API_nanoFramework.System.Text            "option for nanoFramework.System.Text")
-option(API_System.IO.FileSystem                 "option for System.IO.FileSystem")
-option(API_System.Math                          "option for System.Math")
-option(API_System.Net                           "option for System.Net")
-option(API_Windows.Devices.Adc                  "option for Windows.Devices.Adc API")
-option(API_System.Device.Adc                    "option for System.Device.Adc API")
-option(API_System.Device.Dac                    "option for System.Device.Dac API")
-option(API_System.Device.Gpio                   "option for System.Device.Gpio API")
-option(API_System.Device.I2c                    "option for System.Device.I2c API")
-option(API_Windows.Devices.Gpio                 "option for Windows.Devices.Gpio API")
-option(API_Windows.Devices.I2c                  "option for Windows.Devices.I2c API")
-option(API_Windows.Devices.Pwm                  "option for Windows.Devices.Pwm API")
-option(API_System.Device.Pwm                    "option for System.Device.Pwm API")
-option(API_Windows.Devices.SerialCommunication  "option for Windows.Devices.SerialCommunication API")
-option(API_System.IO.Ports                      "option for System.IO.Ports API")
-option(API_Windows.Devices.Spi                  "option for Windows.Devices.Spi API")
-option(API_System.Device.Spi                    "option for System.Device.Spi API")
-option(API_Windows.Storage                      "option for Windows.Storage")
-option(API_nanoFramework.Graphics               "option for nanoFramework.Graphics")
-option(API_nanoFramework.Device.Bluetooth       "option for nanoFramework.Device.Bluetooth")
+option(API_nanoFramework.Device.Can                     "option for nanoFramework.Device.Can")
+option(API_nanoFramework.Device.OneWire                 "option for nanoFramework.Device.OneWire")
+option(API_nanoFramework.Networking.Sntp                "option for nanoFramework.Networking.Sntp")
+option(API_nanoFramework.Runtime.Events                 "option for nanoFramework.Runtime.Events API")
+option(API_nanoFramework.ResourceManager                "option for nanoFramework.ResourceManager")
+option(API_nanoFramework.System.Collections             "option for nanoFramework.System.Collections")
+option(API_nanoFramework.System.Text                    "option for nanoFramework.System.Text")
+option(API_System.IO.FileSystem                         "option for System.IO.FileSystem")
+option(API_System.Math                                  "option for System.Math")
+option(API_System.Net                                   "option for System.Net")
+option(API_System.Device.Adc                            "option for System.Device.Adc API")
+option(API_System.Device.Dac                            "option for System.Device.Dac API")
+option(API_System.Device.Gpio                           "option for System.Device.Gpio API")
+option(API_System.Device.I2c                            "option for System.Device.I2c API")
+option(API_System.Device.I2c.Slave                      "option for System.Device.I2c.Slave API")
+option(API_System.Device.I2s                            "option for System.Device.I2s API")
+option(API_System.Device.Pwm                            "option for System.Device.Pwm API")
+option(API_System.IO.Ports                              "option for System.IO.Ports API")
+option(API_System.Device.Spi                            "option for System.Device.Spi API")
+option(API_System.Runtime.Serialization                 "option for System.Runtime.Serialization API")
+option(API_nanoFramework.Graphics                       "option for nanoFramework.Graphics")
+option(API_nanoFramework.Device.Bluetooth               "option for nanoFramework.Device.Bluetooth")
+option(API_System.Device.UsbStream                      "option for System.Device.UsbStream API")
+option(API_nanoFramework.System.IO.Hashing              "option for nanoFramework.System.IO.Hashing API")
+option(API_nanoFramework.System.Security.Cryptography   "option for nanoFramework.System.Security.Cryptography API")
 
 # Esp32 only
-option(API_Hardware.Esp32                       "option for Hardware.Esp32")
-option(API_nanoFramework.Hardware.Esp32.Rmt     "option for nanoFramework.Hardware.Esp32.Rmt")
-
+option(API_Hardware.Esp32                               "option for Hardware.Esp32")
+option(API_nanoFramework.Hardware.Esp32.Rmt             "option for nanoFramework.Hardware.Esp32.Rmt")
+option(API_nanoFramework.Networking.Thread              "option for nanoFramework.Networking.Thread API")
 
 # Stm32 only
-option(API_Hardware.Stm32                       "option for Hardware.Stm32")
+option(API_Hardware.Stm32                               "option for Hardware.Stm32")
 
 # TI CC13xxCC26xx
-option(API_nanoFramework.TI.EasyLink            "option for nanoFramework.TI.EasyLink API")
-option(API_nanoFramework.Hardware.TI            "option for nanoFramework.Hardware.TI API")
+option(API_nanoFramework.TI.EasyLink                    "option for nanoFramework.TI.EasyLink API")
+option(API_nanoFramework.Hardware.TI                    "option for nanoFramework.Hardware.TI API")
+
+# Silabs Giant Gecko only
+option(API_nanoFramework.GiantGecko.Adc                 "option for nanoFramework.GiantGecko.Adc")
+option(API_Hardware.GiantGecko                          "option for Hardware.GiantGecko")
+
+###################################
+# add options for private APIs here
+
+###################################
+
+###################################
+# add options for private APIs here
+
+###################################
+
+#################################################################
+# macro to find the version of an API or Interop assembly
+macro(AddNativeAssemblyVersion apiNamespace apiNamespaceWithoutDots nativeAssemblySources)
+
+    # find the source file that contains the value of CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_${apiNamespaceWithoutDots}
+    foreach(apiSourceFile ${nativeAssemblySources})
+
+        file(READ "${apiSourceFile}" sourceCode)
+
+        string(REGEX MATCH "[ \t\r\n]+CLR_RT_NativeAssemblyData[ \t\r\n]+g_CLR_AssemblyNative_${apiNamespaceWithoutDots}[ \t\r\n]*=[^{]+{[^0]+0x([0-9A-Za-z]+)[^{]+{[ \t\r\n]*([0-9]+)[ \t\r\n]*,[ \t\r\n]*([0-9]+)[ \t\r\n]*,[ \t\r\n]*([0-9]+)[ \t\r\n]*,[ \t\r\n]*([0-9]+)" _ "${sourceCode}")
+
+        if(NOT "${CMAKE_MATCH_1}" STREQUAL "")
+            list(APPEND NF_NativeAssemblies_VERSIONS "${apiNamespace},${CMAKE_MATCH_2}.${CMAKE_MATCH_3}.${CMAKE_MATCH_4}.${CMAKE_MATCH_5},0x${CMAKE_MATCH_1}")
+            break()
+        endif()
+
+    endforeach()
+
+endmacro()
+#################################################################
+
+#################################################################
+# macro to find the version of the CorLib assembly
+macro(AddCorLibAssemblyVersion apiNamespace apiNamespaceWithoutDots nativeAssemblySources)
+
+    # find the source file that contains the value of CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_${apiNamespaceWithoutDots}
+    foreach(apiSourceFile ${nativeAssemblySources})
+
+        file(READ "${apiSourceFile}" sourceCode)
+
+        string(REGEX MATCH "[ \t\r\n]+CLR_RT_NativeAssemblyData[ \t\r\n]+g_CLR_AssemblyNative_${apiNamespaceWithoutDots}[ \t\r\n]*=[^{]+{[^0]+0x([0-9A-Za-z]+)[^0]+0x([0-9A-Za-z]+)[^{]+{[ \t\r\n]*([0-9]+)[ \t\r\n]*,[ \t\r\n]*([0-9]+)[ \t\r\n]*,[ \t\r\n]*([0-9]+)[ \t\r\n]*,[ \t\r\n]*([0-9]+)" _ "${sourceCode}")
+
+        if(NOT "${CMAKE_MATCH_1}" STREQUAL "")
+            if (NF_FEATURE_SUPPORT_REFLECTION)
+                list(APPEND NF_NativeAssemblies_VERSIONS "${apiNamespace},${CMAKE_MATCH_3}.${CMAKE_MATCH_4}.${CMAKE_MATCH_5}.${CMAKE_MATCH_6},0x${CMAKE_MATCH_1}")
+            else()
+                list(APPEND NF_NativeAssemblies_VERSIONS "${apiNamespace},${CMAKE_MATCH_3}.${CMAKE_MATCH_4}.${CMAKE_MATCH_5}.${CMAKE_MATCH_6},0x${CMAKE_MATCH_2}")
+            endif()
+
+            break()
+        endif()
+
+    endforeach()
+
+endmacro()
+#################################################################
 
 #################################################################
 # macro to perform individual settings to add an API to the build
@@ -71,10 +131,12 @@ macro(PerformSettingsForApiEntry apiNamespace)
     list(APPEND NF_NativeAssemblies_INCLUDE_DIRS "${${apiNamespace}_INCLUDE_DIRS}")
     list(REMOVE_DUPLICATES NF_NativeAssemblies_INCLUDE_DIRS)
 
-    # append source files to list wiht source files for all the APIs
+    # append source files to list with source files for all the APIs
     list(APPEND NF_NativeAssemblies_SOURCES "${${apiNamespace}_SOURCES}")
     list(REMOVE_DUPLICATES NF_NativeAssemblies_SOURCES)
 
+    # add the assembly version to the list
+    AddNativeAssemblyVersion("${apiNamespace}" "${apiNamespaceWithoutDots}" "${${apiNamespace}_SOURCES}")
 endmacro()
 #################################################################
 
@@ -109,6 +171,8 @@ macro(PerformSettingsForInteropEntry interopAssemblyName)
     list(APPEND NF_NativeAssemblies_SOURCES "${${interopAssemblyName}_SOURCES}")
     list(REMOVE_DUPLICATES NF_NativeAssemblies_SOURCES)
 
+    # add the assembly version to the list
+    AddNativeAssemblyVersion("${interopAssemblyName}" "${interopAssemblyNameWithoutDots}" "${${interopAssemblyName}_SOURCES}")
 endmacro()
 
 #################################################################
@@ -159,6 +223,14 @@ macro(ParseInteropAssemblies)
 endmacro()
 
 ############################################################################################
+#  Add versions of native assemblies that are always included
+############################################################################################
+
+AddCorLibAssemblyVersion("mscorlib" "mscorlib" "${CMAKE_SOURCE_DIR}/src/CLR/CorLib/corlib_native.cpp")
+
+AddNativeAssemblyVersion("nanoFramework.Runtime.Native" "nanoFramework_Runtime_Native" "${CMAKE_SOURCE_DIR}/src/nanoFramework.Runtime.Native/nf_rt_native.cpp")
+
+############################################################################################
 # WHEN ADDING A NEW API add the corresponding block below 
 # required changes:
 # 1. change the 'IF' to match the CMake option 
@@ -177,6 +249,12 @@ if(API_nanoFramework.Hardware.Esp32.Rmt)
     PerformSettingsForApiEntry("nanoFramework.Hardware.Esp32.Rmt")
 endif()
 
+# nanoFramework.Networking.Thread
+if(API_nanoFramework.Networking.Thread)
+    ##### API name here (doted name)
+    PerformSettingsForApiEntry("nanoFramework.Networking.Thread")
+endif()
+
 # nanoFramework.Device.Bluetooth
 if(API_nanoFramework.Device.Bluetooth)
     ##### API name here (doted name)
@@ -189,10 +267,10 @@ if(API_Hardware.Stm32)
     PerformSettingsForApiEntry("nanoFramework.Hardware.Stm32")
 endif()
 
-# nanoFramework.Devices.Can
-if(API_nanoFramework.Devices.Can)
+# nanoFramework.Device.Can
+if(API_nanoFramework.Device.Can)
     ##### API name here (doted name)
-    PerformSettingsForApiEntry("nanoFramework.Devices.Can")
+    PerformSettingsForApiEntry("nanoFramework.Device.Can")
 endif()
 
 # nanoFramework.Graphics
@@ -243,6 +321,33 @@ if(API_nanoFramework.Hardware.TI)
     PerformSettingsForApiEntry("nanoFramework.Hardware.TI")
 endif()
 
+# nanoFramework.Hardware.TI
+if(API_nanoFramework.GiantGecko.Adc)
+    ##### API name here (doted name)
+    PerformSettingsForApiEntry("nanoFramework.GiantGecko.Adc")
+endif()
+
+# nanoFramework.Hardware.GiantGecko
+if(API_Hardware.GiantGecko)
+    ##### API name here (doted name)
+    PerformSettingsForApiEntry("nanoFramework.Hardware.GiantGecko")
+endif()
+
+# nanoFramework.System.IO.Hashing
+if(API_nanoFramework.System.IO.Hashing)
+    ##### API name here (doted name)
+    PerformSettingsForApiEntry("nanoFramework.System.IO.Hashing")
+endif()
+
+# nanoFramework.System.Security.Cryptography
+if(API_nanoFramework.System.Security.Cryptography)
+    ##### API name here (doted name)
+    PerformSettingsForApiEntry("nanoFramework.System.Security.Cryptography")
+
+    # enable adding Mbed TLS to the build
+    set(NF_REQUIRES_MBEDTLS TRUE CACHE BOOL "Enable Mbed TLS for nanoFramework.System.Security.Cryptography" FORCE)
+endif()
+
 # nanoFramework.Runtime.Events
 if(API_nanoFramework.Runtime.Events)
     ##### API name here (doted name)
@@ -275,12 +380,6 @@ if(API_System.Net)
     PerformSettingsForApiEntry("System.Net")
 endif()
 
-# Windows.Devices.Adc
-if(API_Windows.Devices.Adc)
-    ##### API name here (doted name)
-    PerformSettingsForApiEntry("Windows.Devices.Adc")
-endif()
-
 # System.Device.Adc
 if(API_System.Device.Adc)
     ##### API name here (doted name)
@@ -299,28 +398,22 @@ if(API_System.Device.Gpio)
     PerformSettingsForApiEntry("System.Device.Gpio")
 endif()
 
-# Windows.Devices.Gpio
-if(API_Windows.Devices.Gpio)
-    ##### API name here (doted name)
-    PerformSettingsForApiEntry("Windows.Devices.Gpio")
-endif()
-
-# Windows.Devices.I2c
-if(API_Windows.Devices.I2c)
-    ##### API name here (doted name)
-    PerformSettingsForApiEntry("Windows.Devices.I2c")
-endif()
-
 # System.Device.I2c
 if(API_System.Device.I2c)
     ##### API name here (doted name)
     PerformSettingsForApiEntry("System.Device.I2c")
 endif()
 
-# Windows.Devices.Pwm
-if(API_Windows.Devices.Pwm)
+# System.Device.I2c.Slave
+if(API_System.Device.I2c.Slave)
     ##### API name here (doted name)
-    PerformSettingsForApiEntry("Windows.Devices.Pwm")
+    PerformSettingsForApiEntry("System.Device.I2c.Slave")
+endif()
+
+# System.Device.I2s
+if(API_System.Device.I2s)
+    ##### API name here (doted name)
+    PerformSettingsForApiEntry("System.Device.I2s")
 endif()
 
 # System.Device.Pwm
@@ -329,22 +422,10 @@ if(API_System.Device.Pwm)
     PerformSettingsForApiEntry("System.Device.Pwm")
 endif()
 
-# Windows.Devices.SerialCommunication
-if(API_Windows.Devices.SerialCommunication)
-    ##### API name here (doted name)
-    PerformSettingsForApiEntry("Windows.Devices.SerialCommunication")
-endif()
-
 # API_System.IO.Ports
 if(API_System.IO.Ports)
     ##### API name here (doted name)
     PerformSettingsForApiEntry("System.IO.Ports")
-endif()
-
-# Windows.Devices.Spi
-if(API_Windows.Devices.Spi)
-    ##### API name here (doted name)
-    PerformSettingsForApiEntry("Windows.Devices.Spi")
 endif()
 
 # System.Device.Spi
@@ -353,21 +434,31 @@ if(API_System.Device.Spi)
     PerformSettingsForApiEntry("System.Device.Spi")
 endif()
 
-# System.Device.WiFi
-if(API_System.Device.WiFi)
+# System.Runtime.Serialization
+if(API_System.Runtime.Serialization)
     ##### API name here (doted name)
-    PerformSettingsForApiEntry("System.Device.WiFi")
+    PerformSettingsForApiEntry("System.Runtime.Serialization")
 endif()
 
-# Windows.Storage
-if(API_Windows.Storage)
+# System.Device.Wifi
+if(API_System.Device.Wifi)
     ##### API name here (doted name)
-    PerformSettingsForApiEntry("Windows.Storage")
+    PerformSettingsForApiEntry("System.Device.Wifi")
+endif()
+
+# System.Device.UsbStream
+if(API_System.Device.UsbStream)
+    ##### API name here (doted name)
+    PerformSettingsForApiEntry("System.Device.UsbStream")
 endif()
 
 # Interop assemblies
 ParseInteropAssemblies()
 
+##################################
+# add parsing of private APIs here
+
+##################################
 
 # parse the declarations to have new lines and ';'
 string(REPLACE ";;" ";\n" CLR_RT_NativeAssemblyDataDeclarations "${CLR_RT_NativeAssemblyDataList}")
@@ -384,6 +475,10 @@ configure_file("${CMAKE_SOURCE_DIR}/InteropAssemblies/CLR_RT_InteropAssembliesTa
                 "${CMAKE_CURRENT_BINARY_DIR}/CLR_RT_InteropAssembliesTable.cpp" @ONLY)
 # ... now add Interop Assemblies table to ChibiOS nanoCLR sources list
 list(APPEND NF_NativeAssemblies_SOURCES "${CMAKE_CURRENT_BINARY_DIR}/CLR_RT_InteropAssembliesTable.cpp")
+
+# create a .csv file with native assembly versions in the output directory
+string(REPLACE ";" "\r\n" NF_NativeAssemblies_CSV "${NF_NativeAssemblies_VERSIONS}")
+file(WRITE "${CMAKE_BINARY_DIR}/native_assemblies.csv" "${NF_NativeAssemblies_CSV}")
 
 # output the list of APIs included
 list(LENGTH apiListing apiListingLenght)
@@ -415,19 +510,21 @@ include(FindPackageHandleStandardArgs)
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(NF_NativeAssemblies DEFAULT_MSG NF_NativeAssemblies_INCLUDE_DIRS NF_NativeAssemblies_SOURCES)
 
 # macro to be called from binutils to add Core CLR library
+# optional EXTRA_SOURCES with source files to be added to the library
 # optional EXTRA_INCLUDES with include paths to be added to the library
 # optional EXTRA_COMPILE_DEFINITIONS with compiler definitions to be added to the library
 macro(nf_add_lib_native_assemblies)
 
     # parse arguments
-    cmake_parse_arguments(NFALNA "" "" "EXTRA_INCLUDES;EXTRA_COMPILE_DEFINITIONS" ${ARGN})
+    cmake_parse_arguments(NFALNA "" "" "EXTRA_SOURCES;EXTRA_INCLUDES;EXTRA_COMPILE_DEFINITIONS" ${ARGN})
 
     # add this has a library
     set(LIB_NAME NF_NativeAssemblies)
 
     add_library(
         ${LIB_NAME} STATIC 
-            ${NF_NativeAssemblies_SOURCES})   
+            ${NF_NativeAssemblies_SOURCES}
+            ${NFALNA_EXTRA_SOURCES})   
 
     target_include_directories(
         ${LIB_NAME} 
@@ -441,7 +538,7 @@ macro(nf_add_lib_native_assemblies)
     if(RTOS_ESP32_CHECK)
         # this is the only one different
 
-        nf_set_compile_options(TARGET ${LIB_NAME} BUILD_TARGET ${NANOCLR_PROJECT_NAME})
+        nf_set_compile_options(TARGET ${LIB_NAME})
 
         nf_set_compile_definitions(
             TARGET ${LIB_NAME} 
@@ -453,7 +550,7 @@ macro(nf_add_lib_native_assemblies)
         nf_set_link_options(TARGET ${LIB_NAME})
 
     else() 
-        nf_set_compile_options(TARGET ${LIB_NAME} BUILD_TARGET ${NANOCLR_PROJECT_NAME})
+        nf_set_compile_options(TARGET ${LIB_NAME})
         nf_set_compile_definitions(TARGET ${LIB_NAME} EXTRA_COMPILE_DEFINITIONS ${NFALNA_EXTRA_COMPILE_DEFINITIONS} BUILD_TARGET ${NANOCLR_PROJECT_NAME})
         nf_set_link_options(TARGET ${LIB_NAME})
     endif()

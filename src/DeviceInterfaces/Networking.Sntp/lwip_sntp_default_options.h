@@ -13,10 +13,13 @@
 #define SNTP_UPDATE_DELAY 3600000
 #endif
 
-// better have a startup delay because we can have DHCP enabled (default 15 seconds)
-// value in milliseconds
-#define SNTP_STARTUP_DELAY 15 * 1000
+// startup delay (default 2 seconds)
+// (value in milliseconds)
+// Remarks: because we could have DHCP enabled
+//   we allow time for the IP to be established
+//   but also need to take into account that NetworkHelper is likely to timeout
+#define SNTP_STARTUP_DELAY 2000
 
 // retry timeout (15 minutes)
-// value in milliseconds
+// (value in milliseconds)
 #define SNTP_RETRY_TIMEOUT 900000

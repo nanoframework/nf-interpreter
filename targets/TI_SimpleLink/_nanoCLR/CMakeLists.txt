@@ -42,9 +42,6 @@ if(${TARGET_SERIES}" STREQUAL "CC32xx)
     list(APPEND TARGET_TI_SimpleLink_NANOCLR_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/targetSimpleLinkCC32xx_ProvisioningTask.c)
 endif()
 
-# append files from Runtime.Native
-# list(APPEND TARGET_TI_SimpleLink_NANOCLR_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/nanoFramework.Runtime.Native/nf_rt_native_nanoFramework_Runtime_Native_Rtc.cpp)
-
 # append TRNG only if option is ON
 if(USE_RNG)
     

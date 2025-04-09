@@ -3,6 +3,9 @@
 # See LICENSE file in the project root for full license information.
 #
 
+include(FetchContent)
+FetchContent_GetProperties(fatfs)
+
 # append include directory for target NXP
 list(APPEND TARGET_NXP_COMMON_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR})
 
@@ -68,11 +71,21 @@ list(APPEND TARGET_NXP_COMMON_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/Device_BlockSt
 list(APPEND TARGET_NXP_COMMON_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/Target_BlockStorage_iMXRTFlashDriver.c)
 list(APPEND TARGET_NXP_COMMON_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/platform_BlockStorage.c)
 
+list(APPEND TARGET_NXP_COMMON_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/sys_calls.c)
+
 # include configuration manager file, if feature is enabled
 if(NF_FEATURE_HAS_CONFIG_BLOCK)
     list(APPEND TARGET_NXP_COMMON_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/targetHAL_ConfigurationManager.cpp)
 endif()
 
+# include internal storage, if feature is enabled
+if(NF_FEATURE_HAS_ACCESSIBLE_STORAGE)
+    list(APPEND TARGET_NXP_COMMON_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/targetHAL_StorageOperation.cpp)
+endif()
+
+# List of the required FatFs include files.
+list(APPEND TARGET_NXP_COMMON_INCLUDE_DIRS ${fatfs_SOURCE_DIR}/source)
+list(APPEND TARGET_NXP_COMMON_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/targets/FreeRTOS/NXP/_fatfs)
 # make var global
 set(TARGET_NXP_COMMON_SOURCES ${TARGET_NXP_COMMON_SOURCES} CACHE INTERNAL "make global")
 set(TARGET_NXP_COMMON_INCLUDE_DIRS ${TARGET_NXP_COMMON_INCLUDE_DIRS} CACHE INTERNAL "make global")

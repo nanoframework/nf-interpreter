@@ -1,0 +1,89 @@
+name: Smoketest Dockerfile builds for selected targets
+
+on:
+  pull_request:
+    paths:
+      - '.devcontainer/**/*'
+      - '.github/workflows/*'
+
+jobs:
+  build-target:
+    strategy:
+      fail-fast: false # Continues to build other targets in the matrix, even if one fails.
+
+      matrix: # Add the target and build type you wish to generate firmware for:
+        include: [
+          { target: SL_STK3701A,             build-type: Debug, container: AzureRTOS},
+          { target: SL_STK3701A,             build-type: Debug, container: All},
+          { target: ST_STM32F769I_DISCOVERY, build-type: Debug, container: ChibiOS },
+          { target: ST_STM32F769I_DISCOVERY, build-type: Debug, container: All },
+          { target: M5Core2,                 build-type: Debug, container: ESP32 },
+          { target: ESP_WROVER_KIT,          build-type: Debug, container: ESP32 },
+          { target: ESP32_S2_USB,            build-type: Debug, container: ESP32 },
+          { target: ESP32_S3,                build-type: Debug, container: ESP32 },
+          { target: ESP32_C3,                build-type: Debug, container: ESP32 },
+          { target: ESP32_C6_THREAD,         build-type: Debug, container: ESP32 },
+          { target: ESP32_H2_THREAD,         build-type: Debug, container: ESP32 },
+          { target: NXP_MIMXRT1060_EVK,      build-type: Debug, container: FreeRTOS-NXP },
+          { target: NXP_MIMXRT1060_EVK,      build-type: Debug, container: All },
+          { target: TI_CC1352R1_LAUNCHXL,    build-type: Debug, container: TI, radio-freq: 915 },
+          { target: TI_CC1352R1_LAUNCHXL,    build-type: Debug, container: All, radio-freq: 915 },
+        ]
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+
+      - name: Free Disk Space (Ubuntu)
+        uses: jlumbroso/free-disk-space@main
+        with:
+          # this might remove tools that are actually needed,
+          # when set to "true" but frees about 6 GB
+          tool-cache: true
+          large-packages: false
+
+      - name: Update repo submodules
+        run: |
+          git submodule update --init
+
+      - name: Adjust config templates for a devcontainer
+        run: |
+          # Move into the config directory
+          pushd config
+
+          # Rename the templates
+          mv user-prefs.TEMPLATE.json user-prefs.json
+          mv user-tools-repos.TEMPLATE.json user-tools-repos.json
+
+          # Adjust the file content for a valid radio frequency (TI targets)
+          sed -i -- 's|"RADIO_FREQUENCY": "CHANGE_ME_TO_A_VALID_VALUE_868_OR_915"|"RADIO_FREQUENCY": "${{ matrix.radio-freq }}"|g' user-prefs.json
+
+          # Adjust the file content for a devcontainer
+          sed -i -- 's|"name": "user-tools-repos-container"|"name": "user-tools-repos"|g' user-tools-repos.json
+
+          # Move out of the config directory
+          popd
+
+      - name: Adjust devcontainer.json for ${{ matrix.container }} source
+        run: |
+          # Move into the .devcontainer directory
+          pushd .devcontainer/${{ matrix.container }}
+
+          # Target the dockerfile source.
+          sed -i -- 's|"dockerFile": "Dockerfile.${{ matrix.container }}"|"dockerFile": "Dockerfile.${{ matrix.container }}.SRC"|g' devcontainer.json
+
+          # Move out of the .devcontainer directory
+          popd
+
+      - name: Build ${{ matrix.target }} ${{ matrix.build-type }} Firmware
+        uses: devcontainers/ci@v0.3
+        with:
+          configFile: ./.devcontainer/${{ matrix.container }}/devcontainer.json
+          push: never
+          runCmd: |
+            # Build target:
+            cmake --preset=${{ matrix.target }} -DCMAKE_BUILD_TYPE=${{ matrix.build-type }}
+            cmake --build build

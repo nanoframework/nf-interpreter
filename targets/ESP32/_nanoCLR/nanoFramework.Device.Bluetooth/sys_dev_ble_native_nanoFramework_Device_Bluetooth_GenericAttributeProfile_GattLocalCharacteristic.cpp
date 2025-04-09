@@ -6,7 +6,7 @@
 
 #include "sys_dev_ble_native.h"
 
-extern uint16_t FindHandleIdFromId(ble_services_context &context, uint16_t characteristicId);
+extern uint16_t FindHandleIdFromId(bleServicesContext &context, uint16_t characteristicId);
 
 //
 //  Notify a Client

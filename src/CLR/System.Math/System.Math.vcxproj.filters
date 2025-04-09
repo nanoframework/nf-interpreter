@@ -20,10 +20,10 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="nf_native_system_math_stub.cpp">
+    <ClCompile Include="nf_native_system_math.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="nf_native_system_math.cpp">
+    <ClCompile Include="nf_native_system_math_System_Math.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

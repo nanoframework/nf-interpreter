@@ -137,7 +137,7 @@ void CLR_HW_Hardware::ProcessActivity()
     if ((events & SYSTEM_EVENT_HW_INTERRUPT)
 #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
         || (!CLR_EE_DBG_IS(Stopped) && !g_CLR_HW_Hardware.m_interruptData.m_applicationQueue.IsEmpty())
-#endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
+#endif // #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
     )
     {
         ProcessInterrupts();
@@ -156,6 +156,11 @@ void CLR_HW_Hardware::ProcessActivity()
     if (events & SYSTEM_EVENT_FLAG_I2C_MASTER)
     {
         eventsCLR |= Event_I2cMaster;
+    }
+
+    if (events & SYSTEM_EVENT_FLAG_I2C_SLAVE)
+    {
+        eventsCLR |= Event_I2cSlave;
     }
 
     if (events & SYSTEM_EVENT_FLAG_ONEWIRE_MASTER)
@@ -181,6 +186,16 @@ void CLR_HW_Hardware::ProcessActivity()
     if (events & SYSTEM_EVENT_FLAG_BLUETOOTH)
     {
         eventsCLR |= Event_Bluetooth;
+    }
+
+    if (events & SYSTEM_EVENT_FLAG_USB_IN)
+    {
+        eventsCLR |= Event_UsbIn;
+    }
+
+    if (events & SYSTEM_EVENT_FLAG_USB_OUT)
+    {
+        eventsCLR |= Event_UsbOut;
     }
 
     if (eventsCLR)

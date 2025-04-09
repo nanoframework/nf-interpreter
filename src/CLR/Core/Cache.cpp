@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (c) .NET Foundation and Contributors
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
@@ -232,12 +232,12 @@ bool CLR_RT_EventCache::VirtualMethodTable::FindVirtualMethod(
     CLR_UINT32 clsData = cls.m_data;
     CLR_UINT32 mdVirtualData = mdVirtual.m_data;
 
-#if defined(_WIN32)
+#if defined(VIRTUAL_DEVICE)
     bool fVerify = false;
 
     {
-        CLR_RT_MethodDef_Instance instMD;
-        CLR_RT_TypeDef_Instance instCLS;
+        CLR_RT_MethodDef_Instance instMD{};
+        CLR_RT_TypeDef_Instance instCLS{};
 
         instMD.InitializeFromIndex(mdVirtual);
         instCLS.InitializeFromMethod(instMD);
@@ -264,7 +264,7 @@ bool CLR_RT_EventCache::VirtualMethodTable::FindVirtualMethod(
 
         if (cls.Type() == owner)
         {
-#if defined(_WIN32)
+#if defined(VIRTUAL_DEVICE)
             if (fVerify != true)
             {
                 CLR_Debug::Printf(
@@ -282,7 +282,7 @@ bool CLR_RT_EventCache::VirtualMethodTable::FindVirtualMethod(
         }
     }
 
-#if defined(_WIN32)
+#if defined(VIRTUAL_DEVICE)
     if (fVerify != false)
     {
         CLR_Debug::Printf(
@@ -391,7 +391,7 @@ void CLR_RT_EventCache::EventCache_Initialize()
 
     m_lookup_VirtualMethod.Initialize();
 
-#ifndef CLR_NO_IL_INLINE
+#ifndef NANOCLR_NO_IL_INLINE
     m_inlineBufferStart = (CLR_RT_InlineBuffer *)g_scratchInlineBuffer;
 
     num = InlineBufferCount() - 1;
@@ -444,13 +444,9 @@ void CLR_RT_EventCache::Append_Node(CLR_RT_HeapBlock *node)
 
     NANOCLR_CHECK_EARLY_COLLECTION(ptr);
 
-    ptr->Debug_ClearBlock(0xAB);
+    ptr->Debug_ClearBlock(SENTINEL_NODE_APPENDED);
 
     lst.m_blocks.LinkAtBack(ptr);
-
-#if defined(NANOCLR_PROFILE_NEW_ALLOCATIONS)
-    g_CLR_PRF_Profiler.TrackObjectDeletion(node);
-#endif
 }
 
 CLR_RT_HeapBlock *CLR_RT_EventCache::Extract_Node_Slow(CLR_UINT32 dataType, CLR_UINT32 flags, CLR_UINT32 blocks)
@@ -518,7 +514,7 @@ CLR_RT_HeapBlock *CLR_RT_EventCache::Extract_Node_Slow(CLR_UINT32 dataType, CLR_
         }
         else
         {
-            node->Debug_ClearBlock(0xAD);
+            node->Debug_ClearBlock(SENTINEL_NODE_EXTRACTED);
         }
 
 #if defined(NANOCLR_PROFILE_NEW_ALLOCATIONS)
@@ -549,7 +545,7 @@ CLR_RT_HeapBlock *CLR_RT_EventCache::Extract_Node_Fast(CLR_UINT32 dataType, CLR_
         }
         else
         {
-            ptr->Debug_ClearBlock(0xAD);
+            ptr->Debug_ClearBlock(SENTINEL_NODE_EXTRACTED);
         }
 
 #if defined(NANOCLR_PROFILE_NEW_ALLOCATIONS)
@@ -571,13 +567,28 @@ CLR_RT_HeapBlock *CLR_RT_EventCache::Extract_Node_Bytes(CLR_UINT32 dataType, CLR
 CLR_RT_HeapBlock *CLR_RT_EventCache::Extract_Node(CLR_UINT32 dataType, CLR_UINT32 flags, CLR_UINT32 blocks)
 {
     NATIVE_PROFILE_CLR_CORE();
+
 #if defined(NANOCLR_FORCE_GC_BEFORE_EVERY_ALLOCATION)
     return g_CLR_RT_ExecutionEngine.ExtractHeapBlocksForEvents(dataType, flags, blocks);
 #else
-    if (blocks > 0 && blocks < c_maxFastLists)
-        return Extract_Node_Fast(dataType, flags, blocks);
+
+#if !defined(BUILD_RTM) || defined(VIRTUAL_DEVICE)
+    if (g_CLR_RT_ExecutionEngine.m_fPerformGarbageCollection)
+    {
+        return g_CLR_RT_ExecutionEngine.ExtractHeapBlocksForEvents(dataType, flags, blocks);
+    }
     else
-        return Extract_Node_Slow(dataType, flags, blocks);
+#endif
+    {
+        if (blocks > 0 && blocks < c_maxFastLists)
+        {
+            return Extract_Node_Fast(dataType, flags, blocks);
+        }
+        else
+        {
+            return Extract_Node_Slow(dataType, flags, blocks);
+        }
+    }
 #endif
 }
 
@@ -594,7 +605,7 @@ bool CLR_RT_EventCache::FindVirtualMethod(
 
 // -- //
 
-#ifndef CLR_NO_IL_INLINE
+#ifndef NANOCLR_NO_IL_INLINE
 bool CLR_RT_EventCache::GetInlineFrameBuffer(CLR_RT_InlineBuffer **ppBuffer)
 {
     if (m_inlineBufferStart != NULL)

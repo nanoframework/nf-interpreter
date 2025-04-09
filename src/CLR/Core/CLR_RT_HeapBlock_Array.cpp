@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (c) .NET Foundation and Contributors
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
@@ -17,7 +17,7 @@ HRESULT CLR_RT_HeapBlock_Array::CreateInstance(
 
     CLR_RT_HeapBlock_Array *pArray;
     CLR_RT_TypeDef_Index cls;
-    CLR_RT_TypeDef_Instance inst;
+    CLR_RT_TypeDef_Instance inst{};
 
     reference.SetObjectReference(NULL);
 
@@ -92,8 +92,10 @@ HRESULT CLR_RT_HeapBlock_Array::CreateInstance(
     NANOCLR_HEADER();
 
     CLR_RT_HeapBlock ref;
-    CLR_RT_TypeDef_Instance cls;
-    CLR_RT_TypeSpec_Instance def;
+    CLR_RT_TypeDef_Instance cls{};
+    CLR_RT_TypeSpec_Instance def{};
+
+    memset(&ref, 0, sizeof(struct CLR_RT_HeapBlock));
 
     if (cls.ResolveToken(tk, assm))
     {
@@ -320,6 +322,20 @@ HRESULT CLR_RT_HeapBlock_Array::Copy(
             dataSrc += indexSrc * sizeElem;
             dataDst += indexDst * sizeElem;
 
+#if !defined(BUILD_RTM)
+            // Validate pointers and memory ranges
+            if (dataSrc == nullptr || dataDst == nullptr ||
+                dataSrc + length * sizeElem > arraySrc->GetFirstElement() + arraySrc->m_numOfElements * sizeElem ||
+                dataDst + length * sizeElem > arrayDst->GetFirstElement() + arrayDst->m_numOfElements * sizeElem)
+            {
+#ifdef DEBUG
+                _ASSERTE(FALSE);
+#endif
+
+                NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_RANGE);
+            }
+#endif
+
             if (!arraySrc->m_fReference)
             {
                 memmove(dataDst, dataSrc, length * sizeElem);
@@ -378,10 +394,11 @@ HRESULT CLR_RT_HeapBlock_Array::Copy(
         }
         else
         {
-            CLR_RT_TypeDescriptor descSrc;
-            CLR_RT_TypeDescriptor descDst;
+            CLR_RT_TypeDescriptor descSrc{};
+            CLR_RT_TypeDescriptor descDst{};
             CLR_RT_HeapBlock ref;
             CLR_RT_HeapBlock elem;
+
             elem.SetObjectReference(NULL);
             CLR_RT_ProtectFromGC gc(elem);
 

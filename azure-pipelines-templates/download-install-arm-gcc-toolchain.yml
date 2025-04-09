@@ -1,31 +1,42 @@
 # Copyright (c) .NET Foundation and Contributors
 # See LICENSE file in the project root for full license information.
 
+parameters:
+  - name: gccArmVersion
+    type: string
+    default: "13.3.rel1"
+
 steps:
   - task: Cache@2
     condition: eq(variables.GccArm_Version, '')
     displayName: Cache latest ARM GCC toolchain
     inputs:
-      key: 'gcc-10_3_2021_10 | gccUpdateKey'
+      key: "gcc-13_3__rel1 | gccUpdateKey"
       restoreKeys: gccUpdateKey
-      path: $(Agent.TempDirectory)\GNU_Tools_ARM_Embedded
+      path: $(Agent.TempDirectory)\arm-gnu-toolchain-${{ parameters.gccArmVersion }}-mingw-w64-i686-arm-none-eabi
       cacheHitVar: GCC_CACHE_RESTORED
 
   - task: PowerShell@2
     condition: ne(variables.GCC_CACHE_RESTORED, 'true')
     displayName: Downloading ARM GCC toolchain
     inputs:
-        targetType: 'filePath'
-        filePath: '$(Build.Repository.LocalPath)\install-scripts\install-arm-gcc-toolchain.ps1'
-        arguments: '-Version "$(GccArm_Version)"'
-        failOnStderr: true
+      targetType: "filePath"
+      filePath: '$(Build.Repository.LocalPath)\install-scripts\install-arm-gcc-toolchain.ps1'
+      arguments: '-Version "${{ parameters.gccArmVersion }}"'
+      failOnStderr: true
 
   - task: ExtractFiles@1
     displayName: Extracting ARM GCC toolchain
     condition: ne(variables.GCC_CACHE_RESTORED, 'true')
     inputs:
-      archiveFilePatterns: '$(Agent.TempDirectory)\gcc-arm.7z' 
-      destinationFolder: '$(Agent.TempDirectory)\GNU_Tools_ARM_Embedded' 
+      archiveFilePatterns: '$(Agent.TempDirectory)\arm-gnu-toolchain-${{ parameters.gccArmVersion }}-mingw-w64-i686-arm-none-eabi.zip'
+      destinationFolder: "$(Agent.TempDirectory)"
+      cleanDestinationFolder: false
 
-  - script: echo "##vso[task.prependpath]C:\Windows\System32"
+  - script: echo "##vso[task.prependpath]$(Agent.TempDirectory)\arm-gnu-toolchain-${{ parameters.gccArmVersion }}-mingw-w64-i686-arm-none-eabi\bin"
+    displayName: Add GCC to PATH
+
+  - script: |
+      echo "##vso[task.prependpath]c:\windows\System32"
+      echo "##vso[task.prependpath]c:\windows\SysWoW64"
     displayName: Tweak PATH to reach cmd

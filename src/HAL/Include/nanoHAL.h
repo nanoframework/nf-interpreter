@@ -31,11 +31,11 @@
 #include <nanoHAL_Types.h>
 #include <nanoHAL_ReleaseInfo.h>
 
-//#if !defined(_WIN32) && !defined(FIQ_SAMPLING_PROFILER) && !defined(HAL_REDUCESIZE) && defined(PROFILE_BUILD)
-//#define ENABLE_NATIVE_PROFILER
-//#endif
+// #if !defined(_WIN32) && !defined(FIQ_SAMPLING_PROFILER) && !defined(HAL_REDUCESIZE) && defined(PROFILE_BUILD)
+// #define ENABLE_NATIVE_PROFILER
+// #endif
 
-//#include "..\pal\Diagnostics\Native_Profiler.h"
+// #include "..\pal\Diagnostics\Native_Profiler.h"
 
 #define NATIVE_PROFILE_CLR_DEBUGGER()
 #define NATIVE_PROFILE_CLR_UTF8_DECODER()
@@ -84,24 +84,21 @@
 
 // Macro to extract well-known system event flag ids from a COM_HANDLE
 #define ExtractEventFromTransport(x)                                                                                   \
-    (ExtractTransport(x) == USART_TRANSPORT                                                                            \
-         ? SYSTEM_EVENT_FLAG_COM_IN                                                                                    \
-         : ExtractTransport(x) == SOCKET_TRANSPORT                                                                     \
-               ? SYSTEM_EVENT_FLAG_SOCKET                                                                              \
-               : ExtractTransport(x) == GENERIC_TRANSPORT                                                              \
-                     ? SYSTEM_EVENT_FLAG_GENERIC_PORT                                                                  \
-                     : ExtractTransport(x) == DEBUG_TRANSPORT                                                          \
-                           ? SYSTEM_EVENT_FLAG_DEBUGGER_ACTIVITY                                                       \
-                           : ExtractTransport(x) == MESSAGING_TRANSPORT ? SYSTEM_EVENT_FLAG_MESSAGING_ACTIVITY : 0)
+    (ExtractTransport(x) == USART_TRANSPORT       ? SYSTEM_EVENT_FLAG_COM_IN                                           \
+     : ExtractTransport(x) == SOCKET_TRANSPORT    ? SYSTEM_EVENT_FLAG_SOCKET                                           \
+     : ExtractTransport(x) == GENERIC_TRANSPORT   ? SYSTEM_EVENT_FLAG_GENERIC_PORT                                     \
+     : ExtractTransport(x) == DEBUG_TRANSPORT     ? SYSTEM_EVENT_FLAG_DEBUGGER_ACTIVITY                                \
+     : ExtractTransport(x) == MESSAGING_TRANSPORT ? SYSTEM_EVENT_FLAG_MESSAGING_ACTIVITY                               \
+                                                  : 0)
 
 #define USART_TRANSPORT (1 << TRANSPORT_SHIFT)
-//#define COM_NULL                    ((COM_HANDLE)(USART_TRANSPORT))
+// #define COM_NULL                    ((COM_HANDLE)(USART_TRANSPORT))
 
 #define USB_TRANSPORT (2 << TRANSPORT_SHIFT)
-//#define USB_CONTROLLER_SHIFT        5
-//#define USB_CONTROLLER_MASK         0xE0
-//#define USB_STREAM_MASK             0x00FF
-//#define USB_STREAM_INDEX_MASK       0x001F
+// #define USB_CONTROLLER_SHIFT        5
+// #define USB_CONTROLLER_MASK         0xE0
+// #define USB_STREAM_MASK             0x00FF
+// #define USB_STREAM_INDEX_MASK       0x001F
 
 #define SOCKET_TRANSPORT (3 << TRANSPORT_SHIFT)
 #define COM_SOCKET_DBG   ((COM_HANDLE)(SOCKET_TRANSPORT + 1))
@@ -756,12 +753,16 @@ template <typename T> class HAL_RingBuffer
             // |xxxx......xxxxxx|
 
             // store size of tail
-            size_t tailSize = _write_index - (1 * _dataSize);
+            size_t tailSize = _write_index;
+            T *tempBuffer = NULL;
 
-            // 1st move tail to temp buffer (need to malloc first)
-            T *tempBuffer = (T *)platform_malloc(tailSize);
+            if (tailSize > 0)
+            {
+                // 1st move tail to temp buffer (need to malloc first)
+                tempBuffer = (T *)platform_malloc(tailSize);
 
-            memcpy(tempBuffer, _buffer, tailSize);
+                memcpy(tempBuffer, _buffer, tailSize);
+            }
 
             // store size of remaining buffer
             size_t headSize = _capacity - _read_index;
@@ -769,11 +770,14 @@ template <typename T> class HAL_RingBuffer
             // 2nd move head to start of buffer
             memcpy(_buffer, _buffer + _read_index, headSize);
 
-            // 3rd move temp buffer after head
-            memcpy(_buffer + headSize, tempBuffer, tailSize);
+            if (tailSize > 0)
+            {
+                // 3rd move temp buffer after head
+                memcpy(_buffer + headSize, tempBuffer, tailSize);
 
-            // free memory
-            platform_free(tempBuffer);
+                // free memory
+                platform_free(tempBuffer);
+            }
         }
 
         // adjust indexes
@@ -789,14 +793,14 @@ template <typename T> class HAL_RingBuffer
 
 //--//
 
-//#include <..\Initialization\MasterConfig.h>
+// #include <..\Initialization\MasterConfig.h>
 
 //--//
 
 // hal cleanup for CLR reboot
 
 void nanoHAL_Initialize();
-void nanoHAL_Uninitialize();
+void nanoHAL_Uninitialize(bool isPoweringDown);
 
 typedef void (*ON_SOFT_REBOOT_HANDLER)(void);
 
@@ -816,7 +820,7 @@ extern bool g_fDoNotUninitializeDebuggerPort;
 
 #include <nanoPAL_Network.h>
 #include <nanoPAL.h>
-//#include <drivers.h>
+// #include <drivers.h>
 
 /////////////////////////////////////////////////////////////////////
 //
@@ -824,18 +828,18 @@ extern bool g_fDoNotUninitializeDebuggerPort;
 //
 
 //// boot
-//#include <CPU_BOOT_decl.h>
+// #include <CPU_BOOT_decl.h>
 //
 //// Cache driver
-//#include <CPU_MMU_decl.h>
+// #include <CPU_MMU_decl.h>
 //
 //// Cache driver
-//#include <CPU_CACHE_decl.h>
+// #include <CPU_CACHE_decl.h>
 //
 //// Gp I/O driver
-//#include <CPU_INTC_decl.h>
+// #include <CPU_INTC_decl.h>
 //
-// Gp I/O driver
+//  Gp I/O driver
 #include <CPU_GPIO_decl.h>
 
 //
@@ -844,32 +848,32 @@ extern bool g_fDoNotUninitializeDebuggerPort;
 
 //
 //// External bus interface driver
-//#include <CPU_EBIU_decl.h>
+// #include <CPU_EBIU_decl.h>
 //
 //// Power control unit
-//#include <CPU_PCU_decl.h>
+// #include <CPU_PCU_decl.h>
 //
 //// Clock management unit driver
-//#include <CPU_CMU_decl.h>
+// #include <CPU_CMU_decl.h>
 //
 //// DMA driver
-//#include <CPU_DMA_decl.h>
+// #include <CPU_DMA_decl.h>
 //
-//#include <PerformanceCounters_decl.h>
+// #include <PerformanceCounters_decl.h>
 //
 //// Virtual Key
-//#include <VirtualKey_decl.h>
+// #include <VirtualKey_decl.h>
 //
 
 //// Power API
-//#include <Power_decl.h>
+// #include <Power_decl.h>
 
 //
 // Chipset
 //
 /////////////////////////////////////////////////////////////////////
 
-//#include <drivers.h>
+// #include <drivers.h>
 
 // platform_selector.h (from MasterConfig.h)
 

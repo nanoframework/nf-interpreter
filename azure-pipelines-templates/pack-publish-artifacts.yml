@@ -2,18 +2,21 @@
 # See LICENSE file in the project root for full license information.
 
 parameters:
-  buildDirectory: '$(Build.SourcesDirectory)\build'
+  - name: buildDirectory
+    type: string
+    default: '$(Build.SourcesDirectory)\build'
 
 steps:
-  - task: CopyFiles@1
+  - task: CopyFiles@2
+    condition: succeeded()
+    displayName: Collecting deployable artifacts
     inputs:
       sourceFolder: ${{ parameters.buildDirectory }}
       Contents: |
         *.bin
         *.hex
-        *.s19
         *.dfu
+        *.csv
       TargetFolder: '$(Build.ArtifactStagingDirectory)\$(TargetPublishName)'
       flattenFolders: true
-    condition: succeeded()
-    displayName: Collecting deployable artifacts
+      ignoreMakeDirErrors: true

@@ -6,7 +6,6 @@
 #include "nf_sys_io_filesystem.h"
 
 #include <ff.h>
-#include <nanoHAL_Windows_Storage.h>
 
 extern SYSTEMTIME GetDateTime(uint16_t date, uint16_t time);
 extern void CombinePathAndName(char *outpath, const char *path1, const char *path2);
@@ -27,9 +26,9 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_File::ExistsNative___STATIC__BOOL
     FAULT_ON_NULL(fileName);
 
     // setup file path
-    filePath = (char *)platform_malloc(2 * FF_LFN_BUF + 1);
+    filePath = (char *)platform_malloc(FF_LFN_BUF + 1);
 
-    // sanity check for successfull malloc
+    // sanity check for successful malloc
     if (filePath == NULL)
     {
         // failed to allocate memory
@@ -37,7 +36,7 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_File::ExistsNative___STATIC__BOOL
     }
 
     // clear working buffer
-    memset(filePath, 0, 2 * FF_LFN_BUF + 1);
+    memset(filePath, 0, FF_LFN_BUF + 1);
 
     // compose file path
     CombinePathAndName(filePath, workingPath, fileName);
@@ -189,7 +188,7 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_File::GetLastWriteTimeNative___ST
     NANOCLR_HEADER();
     {
         SYSTEMTIME fileInfoTime;
-        CLR_RT_TypeDescriptor dtType;
+        CLR_INT64 *pRes;
         FILINFO fileInfo;
 
         const char *filePath = stack.Arg0().RecoverString();
@@ -207,13 +206,9 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_File::GetLastWriteTimeNative___ST
 
         CLR_RT_HeapBlock &ref = stack.PushValue();
 
-        // initialize <DateTime> type descriptor
-        NANOCLR_CHECK_HRESULT(dtType.InitializeFromType(g_CLR_RT_WellKnownTypes.m_DateTime));
+        pRes = Library_corlib_native_System_DateTime::NewObject(ref);
+        FAULT_ON_NULL(pRes);
 
-        // create an instance of <DateTime>
-        NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObject(ref, dtType.m_handlerCls));
-
-        CLR_INT64 *pRes = Library_corlib_native_System_DateTime::GetValuePtr(ref);
         *pRes = HAL_Time_ConvertFromSystemTime(&fileInfoTime);
     }
     NANOCLR_NOCLEANUP();

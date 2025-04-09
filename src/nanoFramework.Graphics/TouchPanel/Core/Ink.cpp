@@ -26,7 +26,7 @@ HRESULT InkDriver::Initialize()
         m_ScreenBmp.width = g_DisplayDriver.Attributes.Width;
         m_ScreenBmp.height = g_DisplayDriver.Attributes.Height;
         //   m_ScreenBmp.data = Display::GetFrameBuffer();
-        m_ScreenBmp.transparentColor = PAL_GFX_Bitmap::c_InvalidColor;
+        m_ScreenBmp.transparentColorSet = PAL_GFX_Bitmap::c_TransparentColorNotSet;
     }
 
     return S_OK;

@@ -464,7 +464,7 @@ bool DisplayDriver::ChangeOrientation(DisplayOrientation orientation)
             return false;
 
         // Landscape only at the moment
-        case LANDSCAPE:
+        case DisplayOrientation::DisplayOrientation_Landscape:
             Attributes.Height = Attributes.ShorterSide;
             Attributes.Width = Attributes.LongerSide;
             g_DisplayInterface.SendCommand(2, MADCTR, 0x60);
@@ -475,7 +475,7 @@ bool DisplayDriver::ChangeOrientation(DisplayOrientation orientation)
 
 void DisplayDriver::SetDefaultOrientation()
 {
-    ChangeOrientation(LANDSCAPE);
+    ChangeOrientation(DisplayOrientation::DisplayOrientation_Landscape);
 }
 
 void DisplayDriver::Clear()
@@ -489,9 +489,18 @@ void DisplayDriver::DisplayBrightness(CLR_INT16 brightness)
     _ASSERTE(brightness >= 0 && brightness <= 100);
 }
 
-void DisplayDriver::BitBlt(int x, int y, int width, int height, CLR_UINT32 data[])
+void DisplayDriver::BitBlt(
+    int srcX,
+    int srcY,
+    int width,
+    int height,
+    int stride,
+    int screenX,
+    int screenY,
+    CLR_UINT32 data[])
 {
     CLR_UINT32 dataSize = width * height * 2;
+
     if (dataSize == (LCD_X_SIZE * LCD_Y_SIZE * 2))
     {
         // Full screen
@@ -501,20 +510,20 @@ void DisplayDriver::BitBlt(int x, int y, int width, int height, CLR_UINT32 data[
     {
         // Partial bitblt
         CLR_UINT16 *p16data = (CLR_UINT16 *)&data[0];
-        CLR_UINT32 srcOffset = (y * (CLR_UINT32)Attributes.Width) + x;
+        CLR_UINT32 srcOffset = (srcY * (CLR_UINT32)stride) + srcX;
         p16data += srcOffset;
 
         dataSize = width * 2;
 
         // Target 16bit offset in frame
-        CLR_UINT32 targetOffset = srcOffset;
+        CLR_UINT32 targetOffset = (screenY * (CLR_UINT32)Attributes.Width) + screenX;
 
         while (height--)
         {
             g_DisplayInterface.WriteToFrameBuffer(0, (CLR_UINT8 *)p16data, dataSize, targetOffset);
 
             // Next display row in data[]
-            p16data += Attributes.Width;
+            p16data += stride;
 
             // Next offset in target frame
             targetOffset += Attributes.Width;

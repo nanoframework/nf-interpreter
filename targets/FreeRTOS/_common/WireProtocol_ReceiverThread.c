@@ -22,7 +22,7 @@ void ReceiverThread(void *argument)
         WP_Message_Process();
 
         // Allow other tasks a chance to run
-        taskYIELD();
+        vTaskDelay(1);
     }
 
     // nothing to deinitialize or cleanup, so it's safe to return

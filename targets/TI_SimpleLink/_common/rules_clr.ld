@@ -6,7 +6,7 @@
     {
         . = ALIGN(8);
         __clr_managed_heap_base__ = .;
-        PROVIDE(HeapBegin = LOADADDR(.clr_managed_heap));
+        PROVIDE(HeapBegin = .);
         . = ORIGIN(CLR_MANAGED_HEAP_RAM) + LENGTH(CLR_MANAGED_HEAP_RAM);
         . = ALIGN(8);
         __clr_managed_heap_end__ = .;

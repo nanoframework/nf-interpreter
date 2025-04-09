@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (c) .NET Foundation and Contributors
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
@@ -7,7 +7,7 @@
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#if defined(_WIN32)
+#if defined(VIRTUAL_DEVICE)
 
 #include <iostream>
 #include <nanoCLR_Win32.h>
@@ -27,7 +27,7 @@ void CLR_Debug::SaveMessage(std::string str)
     NATIVE_PROFILE_CLR_DIAGNOSTICS();
 
     // clear LR & CR
-    int pos;
+    size_t pos;
     if ((pos = str.find('\n')) != std::string::npos)
     {
         str.erase(pos);
@@ -89,40 +89,6 @@ HRESULT NANOCLR_DEBUG_PROCESS_EXCEPTION(HRESULT hr, const char *szFunc, const ch
 
 //--//
 
-bool CLR_SafeSprintfV(char *&szBuffer, size_t &iBuffer, const char *format, va_list arg)
-{
-    NATIVE_PROFILE_CLR_DIAGNOSTICS();
-
-    int chars = vsnprintf(szBuffer, iBuffer, format, arg);
-    bool fRes = (chars >= 0);
-
-    if (fRes == false)
-        chars = (int)iBuffer;
-
-    szBuffer += chars;
-    szBuffer[0] = 0;
-    iBuffer -= chars;
-
-    return fRes;
-}
-
-bool CLR_SafeSprintf(char *&szBuffer, size_t &iBuffer, const char *format, ...)
-{
-    NATIVE_PROFILE_CLR_DIAGNOSTICS();
-    va_list arg;
-    bool fRes;
-
-    va_start(arg, format);
-
-    fRes = CLR_SafeSprintfV(szBuffer, iBuffer, format, arg);
-
-    va_end(arg);
-
-    return fRes;
-}
-
-//--//
-
 void CLR_Debug::Flush()
 {
     NATIVE_PROFILE_CLR_DIAGNOSTICS();
@@ -141,7 +107,7 @@ void CLR_Debug::Emit(const char *text, int len)
     if (len == -1)
         len = (int)hal_strlen_s(text);
 
-#if defined(_WIN32)
+#if defined(VIRTUAL_DEVICE)
     if (s_redirectedString)
     {
         s_redirectedString->append(text, len);
@@ -221,7 +187,7 @@ void CLR_Debug::Emit(const char *text, int len)
         if (s_chars > 80 || strchr(s_buffer, '\n'))
         {
             Watchdog_Reset();
-#ifdef WIN32
+#ifdef VIRTUAL_DEVICE
             OutputDebugStringA(s_buffer);
             HAL_Windows_Debug_Print(s_buffer);
 #endif
@@ -238,14 +204,14 @@ void CLR_Debug::Emit(const char *text, int len)
             if (CLR_EE_DBG_IS_NOT(Enabled) || HalSystemConfig.DebugTextPort != HalSystemConfig.DebuggerPort)
             {
 
-#if !defined(_WIN32)
+#ifndef VIRTUAL_DEVICE
                 DebuggerPort_Write(
                     HalSystemConfig.DebugTextPort,
                     s_buffer,
                     s_chars,
                     0);                                            // skip null terminator and don't bother retrying
                 DebuggerPort_Flush(HalSystemConfig.DebugTextPort); // skip null terminator
-#endif
+#endif                                                             // VIRTUAL_DEVICE
             }
 
             s_chars = 0;
@@ -257,22 +223,21 @@ int CLR_Debug::PrintfV(const char *format, va_list arg)
 {
     NATIVE_PROFILE_CLR_DIAGNOSTICS();
 
-#if defined(_WIN32)
-    char buffer[512];
-    char *szBuffer = buffer;
-    int16_t bufferSize = MAXSTRLEN(buffer);
-    size_t iBuffer = bufferSize;
-#else
     // this should be more than enough for the existing output needs
+    // TODO: expose this in the build system to allow better adjustment according to the target
     const int16_t c_BufferSize = 512;
 
-    char *buffer = (char *)platform_malloc(c_BufferSize);
+    char buffer[c_BufferSize];
     char *szBuffer = buffer;
-    size_t iBuffer = c_BufferSize;
-    int16_t bufferSize = c_BufferSize;
-#endif
 
-    bool fRes = CLR_SafeSprintfV(szBuffer, iBuffer, format, arg);
+    // need to leave space for the null terminator
+    size_t bufferSize = c_BufferSize - 1;
+    size_t iBuffer = bufferSize;
+
+#if !defined(BUILD_RTM)
+    bool fRes =
+#endif
+        CLR_SafeSprintfV(szBuffer, iBuffer, format, arg);
 
     _ASSERTE(fRes);
 
@@ -280,16 +245,9 @@ int CLR_Debug::PrintfV(const char *format, va_list arg)
 
     Emit(buffer, (int)iBuffer);
 
-#if defined(_WIN32)
+#if defined(VIRTUAL_DEVICE)
     std::string outputString(buffer, iBuffer);
     SaveMessage(outputString);
-#endif
-
-#if !defined(_WIN32)
-    if (buffer != NULL)
-    {
-        platform_free(buffer);
-    }
 #endif
 
     return (int)iBuffer;
@@ -312,7 +270,7 @@ int CLR_Debug::Printf(const char *format, ...)
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#if defined(_WIN32)
+#if defined(VIRTUAL_DEVICE)
 
 const CLR_UINT8 c_CLR_opParamSize[] = {
     4, // CLR_OpcodeParam_Field
@@ -759,7 +717,7 @@ void CLR_RT_DUMP::TYPE(const CLR_RT_TypeDef_Index &cls)
 void CLR_RT_DUMP::TYPE(const CLR_RT_ReflectionDef_Index &reflex)
 {
     NATIVE_PROFILE_CLR_DIAGNOSTICS();
-    CLR_RT_TypeDef_Instance inst;
+    CLR_RT_TypeDef_Instance inst{};
     CLR_UINT32 levels;
 
     if (inst.InitializeFromReflection(reflex, &levels))
@@ -1017,7 +975,7 @@ const char *CLR_RT_DUMP::GETERRORMESSAGE(HRESULT hrError)
     return s_tmp;
 }
 
-#if defined(_WIN32)
+#if defined(VIRTUAL_DEVICE)
 const char *CLR_RT_DUMP::GETERRORDETAIL()
 {
     return s_messageString.c_str();

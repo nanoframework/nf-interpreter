@@ -6,14 +6,14 @@
 #ifndef NANOCLR_RUNTIME__SERIALIZATION_H
 #define NANOCLR_RUNTIME__SERIALIZATION_H
 
+// clang-format off
+
 struct CLR_RT_BinaryFormatter : public CLR_RT_HeapBlock_Node // EVENT HEAP - NO RELOCATION -
 {
-    //////////////////////////////////////////////////////////////////
-    //
-    // Keep in sync with definitions in Reflection.cs!!!!
-    // Keep in sync with definitions in Reflection.cs!!!!
-    // Keep in sync with definitions in Reflection.cs!!!!
-    //
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////
+    // !!! KEEP IN SYNC WITH System.Runtime.Serialization.SerializationHintsAttribute (in managed code) !!! //
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////
+
     static const int        TE_L1           = 2;
     static const CLR_UINT32 TE_L1_Null      = 0x00000000;
     static const CLR_UINT32 TE_L1_Duplicate = 0x00000001; // N bits for the duplicate id.
@@ -42,10 +42,6 @@ struct CLR_RT_BinaryFormatter : public CLR_RT_HeapBlock_Node // EVENT HEAP - NO 
     //
     enum SerializationFlags
     {
-        SF_Encrypted         = 0x00000001,
-        SF_Compressed        = 0x00000002, // Value uses range compression (max 2^30 values).
-        SF_Optional          = 0x00000004, // If the value cannot be deserialized, skip it.
-
         SF_PointerNeverNull  = 0x00000010,
         SF_ElementsNeverNull = 0x00000020,
 
@@ -54,13 +50,17 @@ struct CLR_RT_BinaryFormatter : public CLR_RT_HeapBlock_Node // EVENT HEAP - NO 
     //
     struct SerializationHintsAttribute
     {
-        SerializationFlags m_flags;
+        SerializationFlags _options;
 
-        int                m_arraySize;     // -1 == extend to the end of the stream.
+        // -1 == extend to the end of the stream.
+        int                _arraySize;
 
-        int                m_bitPacked;     // In bits.
-        CLR_INT64          m_rangeBias;
-        CLR_UINT64         m_scale;         // For time, it's in ticks.
+        // In bits.
+        int                _bitPacked;
+        CLR_INT64          _rangeBias;
+
+        // For time, it's in ticks.
+        CLR_UINT64         _scale;
     };
     //
     //////////////////////////////////////////////////////////////////
@@ -246,8 +246,8 @@ struct CLR_RT_BinaryFormatter : public CLR_RT_HeapBlock_Node // EVENT HEAP - NO 
      void    DestroyInstance();
      HRESULT Advance        ();
 
-     static HRESULT Serialize  ( CLR_RT_HeapBlock& refData, CLR_RT_HeapBlock& object        , CLR_RT_HeapBlock* cls                         , CLR_UINT32 flags );
-     static HRESULT Deserialize( CLR_RT_HeapBlock& refData, CLR_RT_HeapBlock& object        , CLR_RT_HeapBlock* cls, CLR_UINT32* unknownType, CLR_UINT32 flags );
+     static HRESULT Serialize  ( CLR_RT_HeapBlock& refData, CLR_RT_HeapBlock& object                                                                           );
+     static HRESULT Deserialize( CLR_RT_HeapBlock& refData, CLR_RT_HeapBlock& object        , CLR_UINT32* unknownType                       , CLR_UINT32 flags );
      static HRESULT Deserialize( CLR_RT_HeapBlock& refData, CLR_UINT8* data, CLR_UINT32 size, CLR_RT_HeapBlock* cls, CLR_UINT32* unknownType, CLR_UINT32 flags );
 
      HRESULT           TrackDuplicate ( CLR_RT_HeapBlock* object );
@@ -280,5 +280,7 @@ private:
 
      static void PrepareForGC( void* data );
 };
+
+// clang-format on
 
 #endif // NANOCLR_RUNTIME__SERIALIZATION_H

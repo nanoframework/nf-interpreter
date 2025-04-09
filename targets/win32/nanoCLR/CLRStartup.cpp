@@ -5,7 +5,7 @@
 //
 #include "stdafx.h"
 
-#if defined(_WIN32)
+#if defined(VIRTUAL_DEVICE)
 
 #endif
 
@@ -19,7 +19,7 @@ struct Settings : CLR_RT_ParseOptions
 
     //--//
 
-    HRESULT Initialize(CLR_SETTINGS params)
+    HRESULT Initialize(CLR_SETTINGS const &params)
     {
         NANOCLR_HEADER();
 
@@ -45,7 +45,7 @@ struct Settings : CLR_RT_ParseOptions
         g_HAL_Configuration_Windows.GraphHeapEnabled = false;
 #endif
 
-        NANOCLR_CHECK_HRESULT(CLR_RT_ExecutionEngine::CreateInstance());
+        NANOCLR_CHECK_HRESULT(CLR_RT_ExecutionEngine::CreateInstance(params));
 #if !defined(BUILD_RTM)
         CLR_Debug::Printf("Created EE.\r\n");
 #endif
@@ -53,9 +53,7 @@ struct Settings : CLR_RT_ParseOptions
 #if !defined(BUILD_RTM)
         if (params.WaitForDebugger)
         {
-#if defined(_WIN32)
             CLR_EE_DBG_SET(Enabled);
-#endif
             CLR_EE_DBG_SET(Stopped);
         }
 #endif
@@ -120,8 +118,6 @@ struct Settings : CLR_RT_ParseOptions
 
         // clear flag (in case EE wasn't restarted)
         CLR_EE_DBG_CLR(StateResolutionFailed);
-
-        NANOCLR_CHECK_HRESULT(ProcessOptions(m_clrOptions.StartArgs));
 
 #if !defined(BUILD_RTM)
         CLR_Debug::Printf("Loading Assemblies.\r\n");
@@ -361,12 +357,12 @@ struct Settings : CLR_RT_ParseOptions
     Settings()
     {
         m_fInitialized = false;
-#if defined(_WIN32)
+#if defined(VIRTUAL_DEVICE)
         BuildOptions();
 #endif
     }
 
-#if defined(_WIN32)
+#if defined(VIRTUAL_DEVICE)
     ~Settings()
     {
         for (CLR_RT_ParseOptions::BufferMapIter it = m_assemblies.begin(); it != m_assemblies.end(); it++)
@@ -467,7 +463,7 @@ struct Settings : CLR_RT_ParseOptions
 
         if (!m_fInitialized)
         {
-            CLR_RT_ExecutionEngine::CreateInstance();
+            CLR_RT_ExecutionEngine::CreateInstance(m_clrOptions);
         }
 
         {
@@ -564,14 +560,14 @@ struct Settings : CLR_RT_ParseOptions
 
         NANOCLR_NOCLEANUP();
     }
-#endif //#if defined(_WIN32)
+#endif // #if defined(VIRTUAL_DEVICE)
 };
 
 static Settings s_ClrSettings;
 
 //--//
 
-#if defined(_WIN32)
+#if defined(VIRTUAL_DEVICE)
 HRESULT ClrLoadPE(const wchar_t *szPeFilePath)
 {
     CLR_RT_StringVector vec;
@@ -598,8 +594,7 @@ HRESULT ClrLoadDAT(const wchar_t *szDatFilePath)
 void ClrStartup(CLR_SETTINGS params)
 {
     NATIVE_PROFILE_CLR_STARTUP();
-    // Settings settings;
-    ASSERT(sizeof(CLR_RT_HeapBlock_Raw) == sizeof(CLR_RT_HeapBlock));
+    ASSERT(sizeof(CLR_RT_HeapBlock_Raw) == sizeof(struct CLR_RT_HeapBlock));
     bool softReboot;
 
     do
@@ -643,7 +638,7 @@ void ClrStartup(CLR_SETTINGS params)
 #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
             CLR_EE_DBG_SET_MASK(StateProgramExited, StateMask);
             CLR_EE_DBG_EVENT_BROADCAST(CLR_DBG_Commands::c_Monitor_ProgramExit, 0, NULL, WP_Flags_c_NonCritical);
-#endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
+#endif // #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
 
             if (params.EnterDebuggerLoopAfterExit)
             {

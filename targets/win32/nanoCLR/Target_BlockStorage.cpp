@@ -8,6 +8,11 @@
 /////////////////////////////////////////////////////
 // DeviceBlockInfo stubs
 
+void BlockStorage_AddDevices()
+{
+
+}
+
 __nfweak SectorAddress DeviceBlockInfo_PhysicalToSectorAddress(
     DeviceBlockInfo *blockInfo,
     const BlockRegionInfo *pRegion,
@@ -359,10 +364,19 @@ __nfweak bool BlockStorageDevice_Memset(
     return false;
 }
 
+__nfweak bool BlockStorageDevice_GetMemoryMappedAddress(
+    BlockStorageDevice *device,
+    unsigned int blockRegionIndex,
+    unsigned int blockRangeIndex,
+    unsigned int *address)
+{
+    return false;
+}
+
 //__nfweak bool BlockStorageDevice_GetSectorMetadata(BlockStorageDevice* device, unsigned int sectorStart,
-//SectorMetadata* pSectorMetadata);
+// SectorMetadata* pSectorMetadata);
 //__nfweak bool BlockStorageDevice_SetSectorMetadata(BlockStorageDevice* device, unsigned int sectorStart,
-//SectorMetadata* pSectorMetadata);
+// SectorMetadata* pSectorMetadata);
 
 __nfweak bool BlockStorageDevice_IsBlockErased(
     BlockStorageDevice *device,
@@ -409,6 +423,18 @@ __nfweak bool BlockStorageDevice_FindNextUsageBlock(
     unsigned int *blockRangeIndex)
 {
     return false;
+}
+
+bool BlockStorageList_InitializeDevices()
+{
+    // TODO FIXME
+    return true;
+}
+
+bool BlockStorageList_UnInitializeDevices()
+{
+    // TODO FIXME
+    return true;
 }
 
 /////////////////////////////////////////////////////

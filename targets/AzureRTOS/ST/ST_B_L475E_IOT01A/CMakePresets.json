@@ -1,0 +1,62 @@
+{
+    "version": 4,
+    "include": [
+        "../../../../CMake/arm-gcc.json",
+        "../../../../config/user-tools-repos.json",
+        "../../../../config/user-prefs.json"
+    ],
+    "configurePresets": [
+        {
+            "name": "ST_B_L475E_IOT01A",
+            "inherits": [
+                "arm-gcc-cortex-preset",
+                "user-tools-repos",
+                "user-prefs"
+            ],
+            "hidden": false,
+            "cacheVariables": {
+                "TARGET_BOARD": "${presetName}",
+                "RTOS": "AzureRTOS",
+                "TARGET_SERIES": "STM32L4xx",
+                "CHIBIOS_CONTRIB_REQUIRED": "OFF",
+                "STM32_CUBE_PACKAGE_REQUIRED": "ON",
+                "CHIBIOS_HAL_REQUIRED": "ON",
+                "WIFI_DRIVER": "ISM43362",
+                "SUPPORT_ANY_BASE_CONVERSION": "OFF",
+                "NF_PLATFORM_NO_CLR_TRACE": "ON",
+                "NF_CLR_NO_IL_INLINE": "ON",
+                "NF_FEATURE_DEBUGGER": "ON",
+                "NF_FEATURE_RTC": "ON",
+                "NF_FEATURE_HAS_SDCARD": "OFF",
+                "NF_FEATURE_HAS_CONFIG_BLOCK": "ON",
+                "SWO_OUTPUT": "OFF",
+                "NF_BUILD_RTM": "OFF",
+                "API_System.Math": "OFF",
+                "API_Hardware.Stm32": "OFF",
+                "API_System.Device.Gpio": "ON",
+                "API_System.Device.Spi": "ON",
+                "API_System.Device.I2c": "OFF",
+                "API_System.Device.Pwm": "OFF",
+                "API_System.IO.Ports": "ON",
+                "API_System.Device.Adc": "OFF",
+                "API_System.Device.Dac": "OFF",
+                "API_System.Net": "ON",
+                "API_System.Device.Wifi": "ON",
+                "API_nanoFramework.Device.OneWire": "OFF",
+                "API_nanoFramework.Devices.Can": "OFF",
+                "API_nanoFramework.ResourceManager": "OFF",
+                "API_nanoFramework.System.Collections": "ON",
+                "API_nanoFramework.System.Text": "ON",
+                "API_nanoFramework.Graphics": "OFF"
+            }
+        }
+    ],
+    "buildPresets": [
+        {
+            "inherits": "base-user",
+            "name": "ST_B_L475E_IOT01A",
+            "displayName": "ST_B_L475E_IOT01A",
+            "configurePreset": "ST_B_L475E_IOT01A"
+        }
+    ]
+}

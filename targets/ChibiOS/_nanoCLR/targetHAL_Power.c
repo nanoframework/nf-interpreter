@@ -11,6 +11,7 @@
 #include <target_platform.h>
 #include <target_common.h>
 #include <cmsis_os.h>
+#include <targetHAL_Watchdog.h>
 
 #if (STM32_USE_FSMC_SDRAM == TRUE)
 #include <fsmc_sdram_lld.h>
@@ -46,8 +47,11 @@ void CPU_SetPowerMode(PowerLevel_type powerLevel)
     switch (powerLevel)
     {
         case PowerLevel__Off:
+
+#if (HAL_USE_WDG == TRUE)
             // stop watchdog
             wdgStop(&WDGD1);
+#endif
 
 // shutdown memory
 #if (STM32_USE_FSMC_SDRAM == TRUE)
@@ -69,7 +73,7 @@ void CPU_SetPowerMode(PowerLevel_type powerLevel)
 #endif
 
             // gracefully shutdown everything
-            nanoHAL_Uninitialize_C();
+            nanoHAL_Uninitialize_C(true);
 
             chSysDisable();
 

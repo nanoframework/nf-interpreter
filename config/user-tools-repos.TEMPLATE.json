@@ -1,0 +1,60 @@
+{
+    "version": 4,
+    "configurePresets": [
+        {
+            "name": "user-tools-repos-local",
+            "description": "Cache variables with paths to local tools. Please replace with your own paths. Set to null to use build defaults or completly remove if your not building the concerned target.",
+            "hidden": true,
+            "cacheVariables": {
+                "TOOL_HEX2DFU_PREFIX": "<path-to-hex2dfu-utility-mind-the-forward-slash>",
+                "TOOL_SRECORD_PREFIX": "<path-to-srecord-utility-mind-the-forward-slash>",
+                "CHIBIOS_SOURCE_FOLDER": "<path-to-ChibiOS-source-folder-if-supported-mind-the-forward-slash>",
+                "FREERTOS_SOURCE_FOLDER": "<path-to-FreeRTOS-source-folder-if-supported-mind-the-forward-slash>",
+                "CHIBIOS_CONTRIB_SOURCE": "<path-to-local-ChibiOS-contrib-source-mind-the-forward-slash>",
+                "CHIBIOS_HAL_SOURCE": "<path-to-ChibiOS-source-folder-if-supported-mind-the-forward-slash>",
+                "STM32_CUBE_PACKAGE_SOURCE": "<path-to-stm32-cubemx-package-mind-the-forward-slash>",
+                "LWIP_SOURCE": "<path-to-lwip-source-mind-the-forward-slashes>",
+                "MBEDTLS_SOURCE": "<path-to-mbedtls-source-mind-the-forward-slashes>",
+                "FATFS_SOURCE": "<path-to-local-FATFS-source-mind-the-forward-slash>",
+                "LITTLEFS_SOURCE": "<path-to-local-littlefs-source-mind-the-forward-slash>",
+                "ESP32_IDF_PATH": "<absolute-path-to-the-IDF-folder-mind-the-forward-slashes>",
+                "TI_SL_CC32xx_SDK_SOURCE": "<path-to-local-TI_SimpleLink-CC32xx-SDK-source-mind-the-forward-slash>",
+                "TI_SL_CC13xx_26xx_SDK_SOURCE": "<path-to-local-TI_SimpleLink-CC13xx_26xx-SDK-source-mind-the-forward-slash>",
+                "TI_XDCTOOLS_SOURCE": "<path-to-local-TI-XDC-Tools-source-mind-the-forward-slash>",
+                "TI_SYSCONFIG_SOURCE": "<path-to-local-TI-SYSCONFIG-Tool-source-mind-the-forward-slash>",
+                "AZURERTOS_SOURCE_FOLDER": "<path-to-local-AzureRTOS-source-mind-the-forward-slash>",
+                "NETXDUO_SOURCE_FOLDER": "<path-to-local-NetxDuo-source-mind-the-forward-slash>"
+            }
+        },
+        {
+            "name": "user-tools-repos-container",
+            "description": "Cache variables with paths to local tools. Please replace with your own paths. Set to null to use build defaults or completly remove if your not building the concerned target.",
+            "hidden": true,
+            "cacheVariables": {
+                "TOOL_HEX2DFU_PREFIX": "/usr/local/bin/hex2dfu",
+                "TOOL_SRECORD_PREFIX": "/usr/bin",
+                "CHIBIOS_SOURCE_FOLDER": "/sources/ChibiOs",
+                "FREERTOS_SOURCE_FOLDER": "/sources/FreeRTOS",
+                "CHIBIOS_CONTRIB_SOURCE": "/sources/ChibiOs-Contrib",
+                "CHIBIOS_HAL_SOURCE": "/sources/ChibiOs",
+                "STM32_CUBE_PACKAGE_SOURCE": "/sources/STM32CubeF7",
+                "LWIP_SOURCE": "/sources/lwip",
+                "MBEDTLS_SOURCE": "/sources/mbedtls",
+                "FATFS_SOURCE": "/sources/fatfs",
+                "LITTLEFS_SOURCE": "/sources/littlefs",
+                "ESP32_IDF_PATH": "/sources/esp-idf",
+                "TI_SL_CC32xx_SDK_SOURCE": "/sources/SimpleLinkCC32",
+                "TI_SL_CC13xx_26xx_SDK_SOURCE": "/sources/SimpleLinkCC13",
+                "TI_XDCTOOLS_SOURCE": "/usr/local/bin/titools",
+                "TI_SYSCONFIG_SOURCE": "/sources/TI_SysConfig",
+                "AZURERTOS_SOURCE_FOLDER": "/sources/AzureRTOS",
+                "NETXDUO_SOURCE_FOLDER": "/sources/NetxDuo"
+            }
+        },
+        {
+            "name": "user-tools-repos-cloud",
+            "description": "Empty preset to be used in cloud builds",
+            "hidden": true
+        }
+    ]
+}

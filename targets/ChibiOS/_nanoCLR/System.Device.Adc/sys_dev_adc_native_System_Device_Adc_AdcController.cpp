@@ -23,7 +23,19 @@ HRESULT Library_sys_dev_adc_native_System_Device_Adc_AdcController::NativeOpenCh
     // Get channel from argument
     channel = stack.Arg1().NumericByRef().s4;
 
-    adcDefinition = AdcPortPinConfig[channel];
+    // channel is static?
+    if (channel < AdcChannelCount)
+    {
+        adcDefinition = AdcPortPinConfig[channel];
+    }
+    else if (channel < AdcChannelCount + RuntimeAdcChannelCount)
+    {
+        adcDefinition = RuntimeAdcPortPinConfig[channel - AdcChannelCount];
+    }
+    else
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+    }
 
     // we should remove from the build the ADC options that aren't implemented
     // plus we have to use the default to catch invalid ADC Ids
@@ -66,7 +78,7 @@ HRESULT Library_sys_dev_adc_native_System_Device_Adc_AdcController::NativeGetCha
     NANOCLR_HEADER();
 
     // Return value to the managed application
-    stack.SetResult_I4(AdcChannelCount);
+    stack.SetResult_I4(AdcChannelCount + RuntimeAdcChannelCount);
 
     NANOCLR_NOCLEANUP_NOLABEL();
 }

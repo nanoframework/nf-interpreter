@@ -79,7 +79,9 @@ class Timer
             {
                 auto err = ::GetLastError();
                 if (ERROR_IO_PENDING != err)
-                    throw std::exception("Internal error: DeleteTimerQueueTimer() FAILED!", err);
+                {
+                    CLR_Debug::Printf("Internal error: DeleteTimerQueueTimer() FAILED!\r\n");
+                }
             }
         }
 
@@ -136,7 +138,7 @@ class Timer
     {
         swap(hQueue, other.hQueue);
         swap(hTimer, other.hTimer);
-        swap(std::move(Callback), std::move(other.Callback));
+        swap(*std::move(Callback), *std::move(other.Callback));
         Period = other.Period;
         Flags = other.Flags;
     }

@@ -22,13 +22,18 @@ uint32_t SUPPORT_ComputeCRC(const void *rgBlock, const uint32_t nLength, const u
 
     // this series has ROM support for CRC32
 
-    // IDF CRC32 polinomial required this tweak
+    // IDF CRC32 polinomial requires this tweak
     if (crc == 0)
     {
+        // initialize CRC32 if initial value is 0
         newCrc = 0xFFFFFFFF;
+        newCrc = ~esp_rom_crc32_be(newCrc, ptr, lenght);
     }
-
-    newCrc = ~esp_rom_crc32_be(newCrc, ptr, lenght);
+    else
+    {
+        // need to invert the CRC32 value
+        newCrc = ~esp_rom_crc32_be(~newCrc, ptr, lenght);
+    }
 
 #else
 

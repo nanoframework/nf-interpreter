@@ -7,59 +7,65 @@
 #include <nanoHAL_Time.h>
 #include "sys_io_ser_native_target.h"
 #include <Esp32_DeviceMapping.h>
+#include <esp32_idf.h>
 
 // in UWP the COM ports are named COM1, COM2, COM3. But ESP32 uses internally UART0, UART1, UART2. This maps the port
 // index 1, 2 or 3 to the uart number 0, 1 or 2
-#define PORT_INDEX_TO_UART_NUM(portIndex) ((portIndex)-1)
+#define PORT_INDEX_TO_UART_NUM(portIndex) ((portIndex) - 1)
 // in UWP the COM ports are named COM1, COM2, COM3. But ESP32 uses internally UART0, UART1, UART2. This maps the uart
 // number 0, 1 or 2 to the port index 1, 2 or 3
 #define UART_NUM_TO_PORT_INDEX(uart_num) ((uart_num) + 1)
 
 static const char *TAG = "SerialDevice";
 
-static NF_PAL_UART Uart0_PAL;
-static NF_PAL_UART Uart1_PAL;
-#if defined(UART_NUM_2)
-static NF_PAL_UART Uart2_PAL;
+NF_PAL_UART Uart0_PAL;
+NF_PAL_UART Uart1_PAL;
+#if SOC_UART_HP_NUM > 2
+NF_PAL_UART Uart2_PAL;
+#endif
+#if SOC_UART_HP_NUM > 3
+NF_PAL_UART Uart3_PAL;
 #endif
 
 NF_PAL_UART *GetPalUartFromUartNum_sys(int uart_num)
 {
-    NF_PAL_UART *palUart = NULL;
-
     switch (uart_num)
     {
         case UART_NUM_0:
             // set UART PAL
-            palUart = &Uart0_PAL;
-            break;
+            return &Uart0_PAL;
 
         case UART_NUM_1:
             // set UART PAL
-            palUart = &Uart1_PAL;
-            break;
+            return &Uart1_PAL;
 
-#if defined(UART_NUM_2)
+#if SOC_UART_HP_NUM > 2
         case UART_NUM_2:
             // set UART PAL
-            palUart = &Uart2_PAL;
-            break;
+            return &Uart2_PAL;
+#endif
+
+#if SOC_UART_HP_NUM > 3
+        case UART_NUM_2:
+            // set UART PAL
+            return &Uart3_PAL;
 #endif
 
         default:
             break;
     }
-    return palUart;
+
+    return NULL;
 }
 
-void UnitializePalUart_sys(NF_PAL_UART *palUart)
+void UninitializePalUart_sys(NF_PAL_UART *palUart)
 {
-    if (palUart && palUart->SerialDevice)
+    if (palUart && palUart->UartEventTask)
     {
         // send the exit signal to the UART event handling queue
         uart_event_t event;
         event.type = UART_EVENT_MAX;
-        xQueueSend(palUart->UartEventQueue, &event, (portTickType)0);
+        xQueueSend(palUart->UartEventQueue, &event, 0);
         palUart->UartEventTask = NULL;
 
         // free buffer memory
@@ -68,19 +74,18 @@ void UnitializePalUart_sys(NF_PAL_UART *palUart)
         // null all pointers
         palUart->RxBuffer = NULL;
         palUart->TxBuffer = NULL;
-        palUart->SerialDevice = NULL;
 
         // delete driver
         uart_driver_delete((uart_port_t)palUart->UartNum);
     }
 }
 
-void Esp32_Serial_UnitializeAll_sys()
+void Esp32_Serial_UninitializeAll_sys()
 {
     for (int uart_num = 0; uart_num < UART_NUM_MAX; uart_num++)
     {
         // free buffers memory
-        UnitializePalUart_sys(GetPalUartFromUartNum_sys(uart_num));
+        UninitializePalUart_sys(GetPalUartFromUartNum_sys(uart_num));
     }
 }
 
@@ -100,7 +105,7 @@ void uart_event_task_sys(void *pvParameters)
     while (run)
     {
         // Waiting for UART event.
-        if (xQueueReceive(palUart->UartEventQueue, &event, (portTickType)portMAX_DELAY))
+        if (xQueueReceive(palUart->UartEventQueue, &event, portMAX_DELAY))
         {
             // reset vars
             readData = false;
@@ -158,7 +163,7 @@ void uart_event_task_sys(void *pvParameters)
                     if (buffer)
                     {
                         // try to read RX FIFO
-                        readCount = uart_read_bytes(palUart->UartNum, buffer, bufferedSize, 1);
+                        readCount = uart_read_bytes(palUart->UartNum, buffer, bufferedSize, portMAX_DELAY);
 
                         // push to UART RX buffer
                         palUart->RxRingBuffer.Push(buffer, readCount);
@@ -195,17 +200,14 @@ void uart_event_task_sys(void *pvParameters)
                         }
                         else
                         {
-                            // no read operation ongoing, so fire an event
-
-                            // post a managed event with the port index and event code (check if there is a watch char
-                            // in the buffer or just any char)
-                            //  check if callbacks are registered so this is called only if there is anyone listening
-                            //  otherwise don't bother
-                            if (palUart
-                                    ->SerialDevice[Library_sys_io_ser_native_System_IO_Ports_SerialPort::
-                                                       FIELD___callbacksDataReceivedEvent]
-                                    .Dereference() != NULL)
+                            // no read operation ongoing, so fire an event, if the available bytes are above the
+                            // threshold
+                            if (palUart->RxRingBuffer.Length() >= palUart->ReceivedBytesThreshold)
                             {
+                                // post a managed event with the port index and event code (check if there is a watch
+                                // char in the buffer or just any char)
+                                // TODO: check if callbacks are registered so this is called only if there is anyone
+                                // listening otherwise don't bother
                                 PostManagedEvent(
                                     EVENT_SERIAL,
                                     0,
@@ -239,23 +241,6 @@ void UartTxWorkerTask_sys(void *pvParameters)
 
     // delete task
     vTaskDelete(NULL);
-}
-
-// estimate the time required to perform the TX transaction
-bool IsLongRunningOperation_sys(uint32_t bufferSize, uint32_t baudRate, uint32_t &estimatedDurationMiliseconds)
-{
-    // simplifying calculation assuming worst case values for stop bits
-    estimatedDurationMiliseconds = ((8 + 2) * bufferSize * 1000) / baudRate;
-
-    if (estimatedDurationMiliseconds > CLR_RT_Thread::c_TimeQuantum_Milliseconds)
-    {
-        // total operation time will exceed thread quantum, so this is a long running operation
-        return true;
-    }
-    else
-    {
-        return false;
-    }
 }
 
 HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::get_BytesToRead___I4(CLR_RT_StackFrame &stack)
@@ -349,7 +334,7 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::set_InvertSignalLe
     }
 
     // check if UART it's already opened
-    if (palUart->SerialDevice)
+    if (palUart->UartEventTask)
     {
         // it is opened, so we can't change the signal levels
         NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_OPERATION);
@@ -579,11 +564,12 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::ReadLine___STRING(
     uart_port_t uart_num;
 
     uint8_t *line = NULL;
-    const char *newLine;
+    const char *newLine = NULL;
     uint32_t newLineLength;
 
     int64_t *timeoutTicks;
     bool eventResult = true;
+    bool newLineFound = false;
 
     // get a pointer to the managed object instance and check that it's not NULL
     CLR_RT_HeapBlock *pThis = stack.This();
@@ -611,7 +597,11 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::ReadLine___STRING(
     if (stack.m_customState == 1)
     {
         // check if there is a full line available to read
-        if (GetLineFromRxBuffer(pThis, &(palUart->RxRingBuffer), line))
+        GLOBAL_LOCK();
+        newLineFound = GetLineFromRxBuffer(pThis, &(palUart->RxRingBuffer), line);
+        GLOBAL_UNLOCK();
+
+        if (newLineFound)
         {
             // got one!
             eventResult = false;
@@ -620,13 +610,19 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::ReadLine___STRING(
         {
             // get new line from field
             newLine = pThis[FIELD___newLine].RecoverString();
+
+            // sanity check for NULL string
+            if (newLine == NULL)
+            {
+                NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+            }
+
             newLineLength = hal_strlen_s(newLine);
-            // need to subtract one because we are 0 indexed
-            newLineLength--;
 
             // set new line char as the last one in the string
             // only if this one is found it will have a chance of the others being there
-            palUart->NewLineChar = newLine[newLineLength];
+            // need to subtract one because we are 0 indexed
+            palUart->NewLineChar = newLine[newLineLength - 1];
 
             stack.m_customState = 2;
         }
@@ -643,7 +639,9 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::ReadLine___STRING(
 
         if (eventResult)
         {
+            GLOBAL_LOCK();
             GetLineFromRxBuffer(pThis, &(palUart->RxRingBuffer), line);
+            GLOBAL_UNLOCK();
 
             // done here
             break;
@@ -679,7 +677,6 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::Write___VOID__SZAR
     CLR_RT_HeapBlock_Array *dataBuffer;
     CLR_RT_HeapBlock hbTimeout;
 
-    uint32_t estimatedDurationMiliseconds;
     int32_t length = 0;
     uart_port_t uart_num;
 
@@ -736,11 +733,20 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::Write___VOID__SZAR
         // get a the pointer to the array by using the first element of the array
         data = dataBuffer->GetElement(offset);
 
-        // check if this is a long running operation
-        palUart->IsLongRunning = IsLongRunningOperation_sys(
-            count,
-            (uint32_t)pThis[FIELD___baudRate].NumericByRef().s4,
-            (uint32_t &)estimatedDurationMiliseconds);
+        // Try to send buffer to fifo first.
+        // if not all data written then use long running operation to complete.
+        palUart->IsLongRunning = false;
+        int txCount = uart_tx_chars(uart_num, (const char *)data, count);
+        if (txCount < count)
+        {
+            palUart->IsLongRunning = true;
+            if (txCount >= 0)
+            {
+                // Any written then update ptr / count
+                count -= txCount;
+                data += txCount;
+            }
+        }
 
         if (palUart->IsLongRunning)
         {
@@ -772,15 +778,6 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::Write___VOID__SZAR
 
             // bump custom state so the read value above is pushed only once
             stack.m_customState = 2;
-        }
-        else
-        {
-            // this is NOT a long running operation
-            // perform TX operation right away
-
-            // Write data to ring buffer to start sending
-            // by design: don't bother checking the return value
-            uart_write_bytes(uart_num, (const char *)data, count);
         }
     }
 
@@ -845,7 +842,7 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeDispose___VO
     // Get Uart number for serial device
     uart_num = (uart_port_t)PORT_INDEX_TO_UART_NUM(pThis[FIELD___portIndex].NumericByRef().s4);
 
-    UnitializePalUart_sys(GetPalUartFromUartNum_sys(uart_num));
+    UninitializePalUart_sys(GetPalUartFromUartNum_sys(uart_num));
 
     NANOCLR_NOCLEANUP();
 }
@@ -858,6 +855,7 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeInit___VOID(
     uart_port_t uart_num;
     esp_err_t esp_err;
     int32_t bufferSize;
+    uint8_t watchChar;
 
     NF_PAL_UART *palUart;
 
@@ -873,21 +871,28 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeInit___VOID(
     }
 
     // unless the build is configure to use USB CDC, COM1 is being used for VS debug, so it's not available
-#if !defined(CONFIG_USB_CDC_ENABLED)
+#if !defined(CONFIG_TINYUSB_CDC_ENABLED) && !defined(CONFIG_ESP_CONSOLE_USB_SERIAL_JTAG_ENABLED)
     if (uart_num == 0)
     {
         NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
     }
 #endif
 
-    // call the configure and abort if not OK
-    NANOCLR_CHECK_HRESULT(NativeConfig___VOID(stack));
-
     palUart = GetPalUartFromUartNum_sys(uart_num);
     if (palUart == NULL)
     {
         NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
     }
+
+    // If driver already installed then clean up first
+    // Open/Close/Open without dispose
+    if (uart_is_driver_installed(uart_num))
+    {
+        UninitializePalUart_sys(palUart);
+    }
+
+    // call the configure and abort if not OK
+    NANOCLR_CHECK_HRESULT(NativeConfig___VOID(stack));
 
     // alloc buffer memory
     bufferSize = pThis[FIELD___bufferSize].NumericByRef().s4;
@@ -903,12 +908,10 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeInit___VOID(
     palUart->RxRingBuffer.Initialize(palUart->RxBuffer, bufferSize);
 
     // set/reset all the rest
-    palUart->SerialDevice = stack.This();
     palUart->UartNum = uart_num;
     palUart->TxOngoingCount = 0;
     palUart->RxBytesToRead = 0;
     palUart->NewLineChar = 0;
-    palUart->SignalLevelsInverted = 0;
 
     // Install driver
     esp_err = uart_driver_install(
@@ -929,17 +932,28 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeInit___VOID(
 
     NANOCLR_CHECK_HRESULT(NativeConfig___VOID(stack));
 
+    // Get the watch char
+    watchChar = (uint8_t)pThis[FIELD___watchChar].NumericByRef().u1;
+
+    // set watch char, if set
+    if (watchChar != 0)
+    {
+        // Enable pattern detection for the serial device
+        uart_enable_pattern_det_baud_intr(uart_num, watchChar, 1, 9, 0, 00);
+        // Reset the pattern queue length to record at most 10 pattern positions.
+        uart_pattern_queue_reset(uart_num, 10);
+    }
+
     // Create a task to handle UART event from ISR
     snprintf(task_name, ARRAYSIZE(task_name), "uart%d_events", uart_num);
-    if (xTaskCreatePinnedToCore(uart_event_task_sys, task_name, 2048, palUart, 12, &(palUart->UartEventTask), 1) !=
-        pdPASS)
+    if (xTaskCreate(uart_event_task_sys, task_name, 2048, palUart, 12, &(palUart->UartEventTask)) != pdPASS)
     {
         ESP_LOGE(TAG, "Failed to start UART events task");
         NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
     }
 
-    // Ensure driver gets unitialized during soft reboot
-    HAL_AddSoftRebootHandler(Esp32_Serial_UnitializeAll_sys);
+    // Ensure driver gets uninitialized during soft reboot
+    HAL_AddSoftRebootHandler(Esp32_Serial_UninitializeAll_sys);
 
     NANOCLR_NOCLEANUP();
 }
@@ -948,11 +962,14 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeConfig___VOI
 {
     NANOCLR_HEADER();
     {
-        uart_config_t uart_config;
+        uart_config_t uart_config = {};
 
         // get a pointer to the managed object instance and check that it's not NULL
         CLR_RT_HeapBlock *pThis = stack.This();
         FAULT_ON_NULL(pThis);
+
+        // Init clock source (added in IDF 5.x)
+        uart_config.source_clk = UART_SCLK_DEFAULT;
 
         // Get Uart number for serial device
         uart_port_t uart_num = (uart_port_t)PORT_INDEX_TO_UART_NUM(pThis[FIELD___portIndex].NumericByRef().s4);
@@ -1063,7 +1080,7 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeConfig___VOI
         }
 
         // Already Initialised ?
-        if (GetPalUartFromUartNum_sys(uart_num)->SerialDevice)
+        if (GetPalUartFromUartNum_sys(uart_num)->UartEventTask)
         {
             int errors = 0;
 
@@ -1203,9 +1220,9 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeWriteString_
 
     bool isNewAllocation = false;
     char *buffer = NULL;
+    const char *bufferPointer = NULL;
     uint32_t bufferLength;
     int32_t length = 0;
-    uint32_t estimatedDurationMiliseconds;
 
     // get a pointer to the managed object instance and check that it's not NULL
     CLR_RT_HeapBlock *pThis = stack.This();
@@ -1239,11 +1256,25 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeWriteString_
         // get buffer to output
         NANOCLR_CHECK_HRESULT(SetupWriteLine(stack, &buffer, &bufferLength, &isNewAllocation));
 
-        // check if this is a long running operation
-        palUart->IsLongRunning = IsLongRunningOperation_sys(
-            bufferLength,
-            (uint32_t)pThis[FIELD___baudRate].NumericByRef().s4,
-            (uint32_t &)estimatedDurationMiliseconds);
+        // Try to send buffer to fifo first.
+        // if not all data written then use long running operation to complete.
+        palUart->IsLongRunning = false;
+
+        // store pointer because it will be changed after this call
+        bufferPointer = buffer;
+
+        int txCount = uart_tx_chars(uart_num, (const char *)buffer, bufferLength);
+
+        if (txCount < (int)bufferLength)
+        {
+            palUart->IsLongRunning = true;
+            if (txCount >= 0)
+            {
+                // Any written then update ptr / count
+                bufferLength -= txCount;
+                bufferPointer += txCount;
+            }
+        }
 
         if (palUart->IsLongRunning)
         {
@@ -1253,13 +1284,20 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeWriteString_
             NANOCLR_CHECK_HRESULT(stack.SetupTimeoutFromTicks(hbTimeout, timeoutTicks));
 
             // store pointer
-            palUart->TxBuffer = (uint8_t *)buffer;
+            palUart->TxBuffer = (uint8_t *)bufferPointer;
 
             // set TX count
             palUart->TxOngoingCount = bufferLength;
 
             // push onto the eval stack how many bytes are being pushed to the UART
             stack.PushValueI4(bufferLength);
+
+            // push onto the eval stack if the buffer was allocated
+            stack.PushValueI4(isNewAllocation ? 1 : 0);
+
+            // push buffer pointer to eval stack
+            // need this to release the buffer later, because the pointer is changed
+            stack.PushValueU4((CLR_UINT32)&bufferPointer);
 
             // Create a task to handle UART event from ISR
             char task_name[16];
@@ -1273,15 +1311,6 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeWriteString_
 
             // bump custom state so the read value above is pushed only once
             stack.m_customState = 2;
-        }
-        else
-        {
-            // this is NOT a long running operation
-            // perform TX operation right away
-
-            // Write data to ring buffer to start sending
-            // by design: don't bother checking the return value
-            uart_write_bytes(uart_num, (const char *)buffer, bufferLength);
         }
     }
 
@@ -1300,6 +1329,13 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeWriteString_
         if (eventResult)
         {
             // event occurred
+
+            // pop "buffer pointer" from the eval stack
+            buffer = (char *)stack.m_evalStack[3].NumericByRef().u4;
+
+            // pop "isNewAllocation" from the eval stack
+            isNewAllocation = stack.m_evalStack[2].NumericByRef().s4 == 1 ? true : false;
+
             // get from the eval stack how many bytes were buffered to TX
             length = stack.m_evalStack[1].NumericByRef().s4;
 
@@ -1320,6 +1356,12 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeWriteString_
         // pop "length" heap block from stack
         stack.PopValue();
 
+        // pop "isNewAllocation" heap block from stack
+        stack.PopValue();
+
+        // pop "buffer" heap block from stack
+        stack.PopValue();
+
         // pop "hbTimeout" heap block from stack
         stack.PopValue();
     }
@@ -1327,13 +1369,60 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeWriteString_
     stack.SetResult_U4(length);
 
     // free memory, if it was allocated
-    if (isNewAllocation && buffer)
+    if (isNewAllocation && buffer != NULL)
     {
         platform_free(buffer);
     }
 
     // null pointers and vars
     pThis = NULL;
+
+    NANOCLR_NOCLEANUP();
+}
+
+HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeReceivedBytesThreshold___VOID__I4(
+    CLR_RT_StackFrame &stack)
+{
+    NANOCLR_HEADER();
+
+    NF_PAL_UART *palUart;
+    int32_t threshold;
+    uart_port_t uart_num;
+
+    // get a pointer to the managed object instance and check that it's not NULL
+    CLR_RT_HeapBlock *pThis = stack.This();
+    FAULT_ON_NULL(pThis);
+
+    // check if threshold is valid
+    threshold = (int32_t)stack.Arg1().NumericByRef().s4;
+
+    if (threshold <= 0)
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_RANGE);
+    }
+
+    // Get UART number for serial device
+    uart_num = (uart_port_t)PORT_INDEX_TO_UART_NUM(pThis[FIELD___portIndex].NumericByRef().s4);
+
+    // get pointer to PAL UART
+    palUart = GetPalUartFromUartNum_sys(uart_num);
+    if (palUart == NULL)
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+    }
+
+    // update field
+    pThis[FIELD___receivedBytesThreshold].NumericByRef().s4 = threshold;
+
+    // update threshold value
+    palUart->ReceivedBytesThreshold = threshold;
+
+    // fake call to event handler in case port is open and the new threshold was set
+    // to a value lower than the bytes that are already available
+    if (pThis[FIELD___opened].NumericByRef().u1 && (uint32_t)threshold <= palUart->RxRingBuffer.Length())
+    {
+        PostManagedEvent(EVENT_SERIAL, 0, UART_NUM_TO_PORT_INDEX(palUart->UartNum), SerialData_Chars);
+    }
 
     NANOCLR_NOCLEANUP();
 }
@@ -1345,21 +1434,28 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::GetDeviceSelector_
 
     // declare the device selector string whose max size is "COM1,COM2,COM3" + terminator
     // and init with the terminator
-    char deviceSelectorString[14 + 1] = {0};
+    static char deviceSelectorString[] =
 
     // unless the build is configure to use USB CDC, COM1 is being used for VS debug, so it's not available
-#if defined(CONFIG_USB_CDC_ENABLED)
-    strcat(deviceSelectorString, "COM1,");
+#if defined(CONFIG_TINYUSB_CDC_ENABLED) || defined(CONFIG_ESP_CONSOLE_USB_SERIAL_JTAG_ENABLED)
+        "COM1,"
 #endif
-#if defined(UART_NUM_1)
-    strcat(deviceSelectorString, "COM2,");
+#if SOC_UART_HP_NUM > 1
+        "COM2,"
 #endif
-#if defined(UART_NUM_2)
-    strcat(deviceSelectorString, "COM3,");
+#if SOC_UART_HP_NUM > 2
+        "COM3,"
 #endif
+#if SOC_UART_HP_NUM > 3
+        "COM4,"
+#endif
+        ;
 
     // replace the last comma with a terminator
-    deviceSelectorString[hal_strlen_s(deviceSelectorString) - 1] = '\0';
+    if (deviceSelectorString[hal_strlen_s(deviceSelectorString) - 1] == ',')
+    {
+        deviceSelectorString[hal_strlen_s(deviceSelectorString) - 1] = '\0';
+    }
 
     // because the caller is expecting a result to be returned
     // we need set a return result in the stack argument using the appropriate SetResult according to the variable

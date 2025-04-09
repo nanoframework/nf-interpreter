@@ -174,8 +174,8 @@ bool DisplayDriver::ChangeOrientation(DisplayOrientation orientation)
 {
     switch (orientation)
     {
-        case PORTRAIT:
-        case PORTRAIT180:
+        case DisplayOrientation::DisplayOrientation_Portrait:
+        case DisplayOrientation::DisplayOrientation_Portrait180:
             Attributes.Height = Attributes.LongerSide;
             Attributes.Width = Attributes.ShorterSide;
             g_DisplayInterface.SendCommand(
@@ -183,8 +183,8 @@ bool DisplayDriver::ChangeOrientation(DisplayOrientation orientation)
                 Memory_Access_Control,
                 (MADCTL_MY | MADCTL_MX | MADCTL_MV | MADCTL_BGR)); // Landscape  + BGR
             break;
-        case LANDSCAPE:
-        case LANDSCAPE180:
+        case DisplayOrientation::DisplayOrientation_Landscape:
+        case DisplayOrientation::DisplayOrientation_Landscape180:
             Attributes.Height = Attributes.ShorterSide;
             Attributes.Width = Attributes.LongerSide;
             g_DisplayInterface.SendCommand(2, Memory_Access_Control,
@@ -196,7 +196,7 @@ bool DisplayDriver::ChangeOrientation(DisplayOrientation orientation)
 
 void DisplayDriver::SetDefaultOrientation()
 {
-    ChangeOrientation(LANDSCAPE);
+    ChangeOrientation(DisplayOrientation::DisplayOrientation_Landscape);
 }
 
 bool DisplayDriver::Uninitialize()
@@ -228,23 +228,9 @@ void DisplayDriver::Clear()
     // Clear the ILI9342 controller frame
     SetWindow(0, 0, Attributes.Width - 1, Attributes.Height - 1);
 
-    // Clear buffer
-    memset(Attributes.TransferBuffer, 0x00, Attributes.TransferBufferSize);
-    int totalBytesToClear = Attributes.Width * Attributes.Height * 2;
-    int fullTransferBuffersCount = totalBytesToClear / Attributes.TransferBufferSize;
-    int remainderTransferBuffer = totalBytesToClear % Attributes.TransferBufferSize;
+    g_DisplayInterface.SendCommand(1, Memory_Write);
 
-    CLR_UINT8 command = Memory_Write;
-    g_DisplayInterface.SendCommand(1, command);
-    for (int i = 0; i < fullTransferBuffersCount; i++)
-    {
-        g_DisplayInterface.SendBytes(Attributes.TransferBuffer, Attributes.TransferBufferSize);
-    }
-
-    if (remainderTransferBuffer > 0)
-    {
-        g_DisplayInterface.SendBytes(Attributes.TransferBuffer, remainderTransferBuffer);
-    }
+    g_DisplayInterface.FillData16(0, Attributes.Width * Attributes.Height);
 }
 
 void DisplayDriver::DisplayBrightness(CLR_INT16 brightness)
@@ -283,60 +269,26 @@ bool DisplayDriver::SetWindow(CLR_INT16 x1, CLR_INT16 y1, CLR_INT16 x2, CLR_INT1
     return true;
 }
 
-void DisplayDriver::BitBlt(int x, int y, int width, int height, CLR_UINT32 data[])
+void DisplayDriver::BitBlt(
+    int srcX,
+    int srcY,
+    int width,
+    int height,
+    int stride,
+    int screenX,
+    int screenY,
+    CLR_UINT32 data[])
 {
     // 16 bit colour  RRRRRGGGGGGBBBBB mode 565
 
-    ASSERT((x >= 0) && ((x + width) <= Attributes.Width));
-    ASSERT((y >= 0) && ((y + height) <= Attributes.Height));
+    ASSERT((screenX >= 0) && ((screenX + width) <= Attributes.Width));
+    ASSERT((screenY >= 0) && ((screenY + height) <= Attributes.Height));
 
-    SetWindow(x, y, (x + width - 1), (y + height - 1));
+    SetWindow(screenX, screenY, (screenX + width - 1), (screenY + height - 1));
 
-    CLR_UINT16 *StartOfLine_src = (CLR_UINT16 *)&data[0];
-    CLR_UINT8 *transferBufferIndex = Attributes.TransferBuffer;
-    CLR_UINT32 transferBufferCount = Attributes.TransferBufferSize;
-    CLR_UINT8 command = Memory_Write;
+    g_DisplayInterface.SendCommand(1, Memory_Write);
 
-    g_DisplayInterface.SendCommand(1, command);
-    while (height--)
-    {
-        CLR_UINT16 *src;
-        int xCount;
-
-        src = StartOfLine_src;
-        xCount = width;
-
-        while (xCount--)
-        {
-            CLR_UINT16 dt = *src++;
-            *transferBufferIndex++ = (dt >> 8);
-            *transferBufferIndex++ = dt & 0xff;
-            transferBufferCount -= 2;
-
-            // Send over SPI if no room for another 2 bytes
-            if (transferBufferCount < 1)
-            {
-                // Transfer buffer full, send it
-                g_DisplayInterface.SendBytes(
-                    Attributes.TransferBuffer,
-                    (Attributes.TransferBufferSize - transferBufferCount));
-
-                // Reset transfer ptrs/count
-                transferBufferIndex = Attributes.TransferBuffer;
-                transferBufferCount = Attributes.TransferBufferSize;
-            }
-        }
-
-        // Next row in data[]
-        StartOfLine_src += width;
-    }
-
-    // Send remaining data in transfer buffer to SPI
-    if (transferBufferCount < Attributes.TransferBufferSize)
-    {
-        // Transfer buffer full, send it
-        g_DisplayInterface.SendBytes(Attributes.TransferBuffer, (Attributes.TransferBufferSize - transferBufferCount));
-    }
+    g_DisplayInterface.SendData16Windowed((CLR_UINT16 *)&data[0], srcX, srcY, width, height, stride, true);
 
     return;
 }

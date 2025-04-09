@@ -32,10 +32,12 @@ typedef struct
 
     uint8_t WatchChar;
     uint8_t NewLineChar;
+    uint32_t ReceivedBytesThreshold;
+
 } NF_PAL_UART;
 
 ////////////////////////////////////////////
-// declaration of the the UART PAL strucs //
+// declaration of the the UART PAL structs //
 ////////////////////////////////////////////
 #if defined(NF_SERIAL_COMM_TI_USE_UART1) && (NF_SERIAL_COMM_TI_USE_UART1 == TRUE)
 extern NF_PAL_UART Uart1_PAL;

@@ -28,9 +28,9 @@ typedef struct NF_PAL_I2C_
     uint8_t ReadSize;
 } NF_PAL_I2C;
 
-///////////////////////////////////////////
-// declaration of the the I2C PAL strucs //
-///////////////////////////////////////////
+////////////////////////////////////////////
+// declaration of the the I2C PAL structs //
+////////////////////////////////////////////
 #if (STM32_I2C_USE_I2C1 == TRUE)
 extern NF_PAL_I2C I2C1_PAL;
 #endif
@@ -69,4 +69,4 @@ void ConfigPins_I2C2();
 void ConfigPins_I2C3();
 void ConfigPins_I2C4();
 
-#endif //SYS_DEV_I2C_NATIVE_TARGET_H
+#endif // SYS_DEV_I2C_NATIVE_TARGET_H

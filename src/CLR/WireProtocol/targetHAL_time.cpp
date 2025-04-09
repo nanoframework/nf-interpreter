@@ -10,7 +10,7 @@
 extern "C"
 {
 
-    unsigned int HAL_Time_CurrentSysTicks()
+    uint64_t HAL_Time_CurrentSysTicks()
     {
         // TODO need to check if using the Win32 100ns ticks works
         return 0; // UNDONE: FIXME: EmulatorNative::GetITimeDriver()->CurrentTicks();

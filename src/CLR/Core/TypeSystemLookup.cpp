@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (c) .NET Foundation and Contributors
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
@@ -9,6 +9,11 @@
 // clang-format off
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+#ifdef DT_DIR
+// When building with ESP32 "DT_DIR" clashes with esp_vfs.h 
+#undef DT_DIR
+#endif
 
 #define DT_NA    CLR_RT_DataTypeLookup::c_NA
 #define DT_VS    CLR_RT_DataTypeLookup::c_VariableSize
@@ -38,7 +43,7 @@
 #define DT_I4 sizeof(CLR_INT32)
 #define DT_U8 sizeof(CLR_UINT64)
 #define DT_I8 sizeof(CLR_INT64)
-#define DT_BL sizeof(CLR_RT_HeapBlock)
+#define DT_BL sizeof(struct CLR_RT_HeapBlock)
 
 #define DT_T(x)   (CLR_UINT8)DATATYPE_##x
 #define DT_CNV(x) (CLR_UINT8)ELEMENT_TYPE_##x
@@ -47,7 +52,7 @@
 #define DT_NOREL(x)  NULL
 #define DT_REL(x)    (CLR_RT_HeapBlockRelocate)&x
 
-#if defined(WIN32) || defined(NANOCLR_TRACE_MEMORY_STATS)
+#if defined(VIRTUAL_DEVICE) || defined(NANOCLR_TRACE_MEMORY_STATS)
 #define DT_OPT_NAME(x) , #x
 #else
 #define DT_OPT_NAME(x)

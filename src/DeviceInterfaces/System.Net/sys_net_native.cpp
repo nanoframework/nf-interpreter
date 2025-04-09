@@ -48,7 +48,18 @@ static const CLR_RT_MethodHandler method_lookup[] =
     NULL,
     Library_sys_net_native_System_Net_NetworkInformation_NetworkInterface::GetNetworkInterfaceCount___STATIC__I4,
     Library_sys_net_native_System_Net_NetworkInformation_NetworkInterface::GetNetworkInterface___STATIC__SystemNetNetworkInformationNetworkInterface__U4,
-    Library_sys_net_native_System_Net_NetworkInformation_NetworkInterface::IPAddressFromString___STATIC__I8__STRING,
+    Library_sys_net_native_System_Net_NetworkInformation_NetworkInterface::IPV4AddressFromString___STATIC__I8__STRING,
+    Library_sys_net_native_System_Net_NetworkInformation_NetworkInterface::IPV6AddressFromString___STATIC__SZARRAY_U2__STRING,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
     NULL,
     NULL,
     NULL,
@@ -85,6 +96,7 @@ static const CLR_RT_MethodHandler method_lookup[] =
     NULL,
     NULL,
     Library_sys_net_native_System_Net_IPAddress::IPv4ToString___STATIC__STRING__U4,
+    Library_sys_net_native_System_Net_IPAddress::IPv6ToString___STATIC__STRING__SZARRAY_U2,
     NULL,
     NULL,
     NULL,
@@ -242,9 +254,7 @@ static const CLR_RT_MethodHandler method_lookup[] =
     NULL,
     NULL,
     NULL,
-    NULL,
-    NULL,
-    Library_sys_net_native_System_Security_Cryptography_X509Certificates_X509Certificate::ParseCertificate___STATIC__VOID__SZARRAY_U1__STRING__BYREF_STRING__BYREF_STRING__BYREF_SystemDateTime__BYREF_SystemDateTime,
+    Library_sys_net_native_System_Security_Cryptography_X509Certificates_X509Certificate::ParseCertificate___STATIC__VOID__SZARRAY_U1__BYREF_STRING__BYREF_STRING__BYREF_SystemDateTime__BYREF_SystemDateTime,
     NULL,
     NULL,
     NULL,
@@ -329,17 +339,15 @@ static const CLR_RT_MethodHandler method_lookup[] =
     NULL,
     NULL,
     NULL,
-    NULL,
-    NULL,
     Library_sys_net_native_System_Security_Cryptography_X509Certificates_X509Certificate2::DecodePrivateKeyNative___STATIC__VOID__SZARRAY_U1__STRING,
 };
 
 const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_System_Net =
 {
     "System.Net",
-    0xA01012C3,
+    0xD82C1452,
     method_lookup,
-    { 100, 1, 4, 1 }
+    { 100, 2, 0, 11 }
 };
 
 // clang-format on

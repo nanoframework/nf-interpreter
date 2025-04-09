@@ -434,7 +434,7 @@ __nfweak bool ConfigurationManager_StoreConfigurationBlock(
 // The flash sector has to be erased before writing the updated block
 // it's implemented with 'weak' attribute so it can be replaced at target level if a different persistance mechanism is
 // used
-__nfweak bool ConfigurationManager_UpdateConfigurationBlock(
+__nfweak UpdateConfigurationResult ConfigurationManager_UpdateConfigurationBlock(
     void *configurationBlock,
     DeviceConfigurationOption configuration,
     uint32_t configurationIndex)
@@ -443,7 +443,7 @@ __nfweak bool ConfigurationManager_UpdateConfigurationBlock(
     uint32_t blockOffset;
     uint8_t *blockAddressInCopy;
     uint32_t blockSize;
-    bool success = FALSE;
+    UpdateConfigurationResult success = UpdateConfigurationResult_Failed;
 
     // config sector size
     int sizeOfConfigSector = (uint32_t)&__nanoConfig_end__ - (uint32_t)&__nanoConfig_start__;
@@ -476,8 +476,8 @@ __nfweak bool ConfigurationManager_UpdateConfigurationBlock(
                 // free memory
                 platform_free(configSectorCopy);
 
-                // operation is successfull (nothing to update)
-                return TRUE;
+                // operation is successful (nothing to update)
+                return UpdateConfigurationResult_NoChanges;
             }
 
             // get storage address from block address
@@ -507,8 +507,8 @@ __nfweak bool ConfigurationManager_UpdateConfigurationBlock(
                 // free memory
                 platform_free(configSectorCopy);
 
-                // operation is successfull (nothing to update)
-                return TRUE;
+                // operation is successful (nothing to update)
+                return UpdateConfigurationResult_NoChanges;
             }
 
             // storage address from block address
@@ -536,8 +536,8 @@ __nfweak bool ConfigurationManager_UpdateConfigurationBlock(
                 // free memory
                 platform_free(configSectorCopy);
 
-                // operation is successfull (nothing to update)
-                return TRUE;
+                // operation is successful (nothing to update)
+                return UpdateConfigurationResult_NoChanges;
             }
 
             // storage address from block address
@@ -567,8 +567,8 @@ __nfweak bool ConfigurationManager_UpdateConfigurationBlock(
                 // free memory
                 platform_free(configSectorCopy);
 
-                // operation is successfull (nothing to update)
-                return TRUE;
+                // operation is successful (nothing to update)
+                return UpdateConfigurationResult_NoChanges;
             }
 
             // storage address from block address
@@ -585,7 +585,7 @@ __nfweak bool ConfigurationManager_UpdateConfigurationBlock(
             // free memory first
             platform_free(configSectorCopy);
 
-            return FALSE;
+            return UpdateConfigurationResult_Failed;
         }
 
         // erase config sector
@@ -603,12 +603,15 @@ __nfweak bool ConfigurationManager_UpdateConfigurationBlock(
             memcpy(blockAddressInCopy, configurationBlock, blockSize);
 
             // copy the config block copy back to the config block storage
-            success = STM32FlashDriver_Write(
-                NULL,
-                (uint32_t)&__nanoConfig_start__,
-                sizeOfConfigSector,
-                (unsigned char *)configSectorCopy,
-                true);
+            if (STM32FlashDriver_Write(
+                    NULL,
+                    (uint32_t)&__nanoConfig_start__,
+                    sizeOfConfigSector,
+                    (unsigned char *)configSectorCopy,
+                    true))
+            {
+                success = UpdateConfigurationResult_Success;
+            }
         }
 
         // free memory
@@ -637,4 +640,20 @@ __nfweak bool InitialiseNetworkDefaultConfig(HAL_Configuration_NetworkInterface 
 
     // can't create a "default" network config because we are lacking definition of a MAC address
     return FALSE;
+}
+
+// default implementation
+// this is weak so a manufacturer can provide a strong implementation
+__nfweak void ConfigurationManager_GetSystemSerialNumber(char *serialNumber, size_t serialNumberSize)
+{
+    // do the thing to get unique device ID
+    memset(serialNumber, 0, serialNumberSize);
+    // Use the 96 bit unique device ID => 12 bytes
+    // memory copy from the address pointed by UID_BASE define (from STM32 HAL)
+    memcpy(&serialNumber[serialNumberSize - 12], ((uint8_t *)UID_BASE), 12);
+
+    // Disambiguation is needed because the hardware-specific identifier used to create the
+    // default serial number on other platforms may be in the same range.
+    // Set the first byte to a number that is unique (within the nanoFramework CLR) for STM32.
+    serialNumber[0] = 2;
 }

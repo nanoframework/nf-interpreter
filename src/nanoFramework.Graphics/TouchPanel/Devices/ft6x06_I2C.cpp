@@ -15,8 +15,8 @@
 struct TouchDevice g_TouchDevice;
 extern TouchInterface g_TouchInterface;
 
-#define FT6206_ID_VALUE     0x11
-#define FT6206_CHIP_ID_REG  0xA8
+#define FT6206_ID_VALUE    0x11
+#define FT6206_CHIP_ID_REG 0xA8
 
 #define FT6206_GMODE_REG                (CLR_UINT8)0xA4
 #define FT6206_G_MODE_INTERRUPT_TRIGGER (CLR_UINT8)0x01
@@ -28,17 +28,17 @@ extern TouchInterface g_TouchInterface;
 #define FT6206_MSB_MASK                 (CLR_UINT8)0x0F
 #define FT6206_LSB_MASK                 (CLR_UINT8)0xFF
 
-#define FT6206_P1_XH_REG                (CLR_UINT8)0x03
-#define FT6206_P2_XH_REG                (CLR_UINT8)0x09
+#define FT6206_P1_XH_REG (CLR_UINT8)0x03
+#define FT6206_P2_XH_REG (CLR_UINT8)0x09
 
-#define I2C_MEMADD_SIZE_8BIT            (0x00000001U)
+#define I2C_MEMADD_SIZE_8BIT (0x00000001U)
 
 bool TouchDevice::Initialize()
 {
-   // Read the FT6206 ID for confirmation
+    // Read the FT6206 ID for confirmation
     CLR_UINT8 chipIdRegister;
     chipIdRegister = FT6206_CHIP_ID_REG;
-    CLR_UINT8* id;
+    CLR_UINT8 *id;
     CLR_UINT16 numberValuesExpected = 1;
     id = g_TouchInterface.Write_Read(&chipIdRegister, 1, numberValuesExpected);
     bool result = (*id == FT6206_ID_VALUE);
@@ -51,18 +51,20 @@ bool TouchDevice::Enable(GPIO_INTERRUPT_SERVICE_ROUTINE touchIsrProc)
     // G3# - PI13  ( GPIOI_LCD_INT )
 
     GPIO_PIN FT6206_Interrupt = GPIOI_LCD_INT;
-    GpioPinDriveMode driveMode = GpioPinDriveMode_Input;
+    PinMode driveMode = PinMode_Input;
     GPIO_INT_EDGE IntEdge = GPIO_INT_EDGE_HIGH;
-    void* ISR_Param = NULL;
-    
+    void *ISR_Param = NULL;
+
     if (CPU_GPIO_ReservePin(GPIOI_LCD_INT, true))
     {
         if (CPU_GPIO_EnableInputPin(FT6206_Interrupt, 0, touchIsrProc, ISR_Param, IntEdge, driveMode))
         {
             // Configure the FT6206 device to generate IT on given INT pin connected to MCU as EXTI.
             uint8_t regValue = 0;
-            regValue = (FT6206_G_MODE_INTERRUPT_TRIGGER & (FT6206_G_MODE_INTERRUPT_MASK >> FT6206_G_MODE_INTERRUPT_SHIFT)) << FT6206_G_MODE_INTERRUPT_SHIFT;
-            CLR_UINT8 values[2] = { FT6206_GMODE_REG ,regValue };
+            regValue =
+                (FT6206_G_MODE_INTERRUPT_TRIGGER & (FT6206_G_MODE_INTERRUPT_MASK >> FT6206_G_MODE_INTERRUPT_SHIFT))
+                << FT6206_G_MODE_INTERRUPT_SHIFT;
+            CLR_UINT8 values[2] = {FT6206_GMODE_REG, regValue};
             g_TouchInterface.Write_Read(values, 2, 0);
         }
     }
@@ -72,10 +74,11 @@ bool TouchDevice::Enable(GPIO_INTERRUPT_SERVICE_ROUTINE touchIsrProc)
 bool TouchDevice::Disable()
 {
     // Configure the FT6206 device to stop generating IT on the given INT pin connected to MCU as EXTI.
-    CLR_UINT8 regValue = (FT6206_G_MODE_INTERRUPT_POLLING & (FT6206_G_MODE_INTERRUPT_MASK >> FT6206_G_MODE_INTERRUPT_SHIFT)) << FT6206_G_MODE_INTERRUPT_SHIFT;
-    CLR_UINT8 values[2] = { FT6206_GMODE_REG ,regValue };
+    CLR_UINT8 regValue =
+        (FT6206_G_MODE_INTERRUPT_POLLING & (FT6206_G_MODE_INTERRUPT_MASK >> FT6206_G_MODE_INTERRUPT_SHIFT))
+        << FT6206_G_MODE_INTERRUPT_SHIFT;
+    CLR_UINT8 values[2] = {FT6206_GMODE_REG, regValue};
     g_TouchInterface.Write_Read(values, 2, 0);
-
 
     return true;
 }
@@ -85,7 +88,7 @@ TouchPointDevice TouchDevice::GetPoint()
     TouchPointDevice t;
     CLR_UINT8 regAddress;
     regAddress = FT6206_P1_XH_REG;
-    CLR_UINT8* dataxy;
+    CLR_UINT8 *dataxy;
     CLR_UINT16 numberValuesExpected = 4;
 
     dataxy = g_TouchInterface.Write_Read(&regAddress, 1, numberValuesExpected);
@@ -95,6 +98,4 @@ TouchPointDevice TouchDevice::GetPoint()
     return t;
 }
 
-
 #endif // ft6x06_H
-

@@ -157,17 +157,17 @@ bool DisplayDriver::ChangeOrientation(DisplayOrientation orientation)
 
     switch (orientation)
     {
-        case PORTRAIT:
-        case PORTRAIT180:
+        case DisplayOrientation::DisplayOrientation_Portrait:
+        case DisplayOrientation::DisplayOrientation_Portrait180:
             return false;
 
-        case LANDSCAPE180:
+        case DisplayOrientation::DisplayOrientation_Landscape180:
             options |= 0x70;
             Attributes.Height = Attributes.ShorterSide;
             Attributes.Width = Attributes.LongerSide;
             break;
 
-        case LANDSCAPE:
+        case DisplayOrientation::DisplayOrientation_Landscape:
             options |= 0x72;
             Attributes.Height = Attributes.ShorterSide;
             Attributes.Width = Attributes.LongerSide;
@@ -181,7 +181,7 @@ bool DisplayDriver::ChangeOrientation(DisplayOrientation orientation)
 
 void DisplayDriver::SetDefaultOrientation()
 {
-    ChangeOrientation(LANDSCAPE);
+    ChangeOrientation(DisplayOrientation::DisplayOrientation_Landscape);
 }
 
 bool DisplayDriver::SetWindow(CLR_INT16 x1, CLR_INT16 y1, CLR_INT16 x2, CLR_INT16 y2)
@@ -239,63 +239,26 @@ void DisplayDriver::DisplayBrightness(CLR_INT16 brightness)
     return;
 }
 
-void DisplayDriver::BitBlt(int x, int y, int width, int height, CLR_UINT32 data[])
+void DisplayDriver::BitBlt(
+    int srcX,
+    int srcY,
+    int width,
+    int height,
+    int stride,
+    int screenX,
+    int screenY,
+    CLR_UINT32 data[])
 {
     // 16 bit colour  RRRRRGGGGGGBBBBB mode 565
 
-    ASSERT((x >= 0) && ((x + width) <= Attributes.Width));
-    ASSERT((y >= 0) && ((y + height) <= Attributes.Height));
+    ASSERT((screenX >= 0) && ((screenX + width) <= Attributes.Width));
+    ASSERT((screenY >= 0) && ((screenY + height) <= Attributes.Height));
 
-    CLR_UINT16 *StartOfLine_src = (CLR_UINT16 *)&data[0];
+    SetWindow(screenX, screenY, (screenX + width - 1), (screenY + height - 1));
 
-    SetWindow(x, y, (x + width - 1), (y + height - 1));
+    g_DisplayInterface.SendCommand(1, Memory_Write);
 
-    // Position to offset in data[] for stat of window
-    CLR_UINT16 offset = (y * Attributes.Width) + x;
-    StartOfLine_src += offset;
-
-    CLR_UINT8 *transferBufferIndex = Attributes.TransferBuffer;
-    CLR_UINT32 transferBufferCount = Attributes.TransferBufferSize;
-
-    while (height--)
-    {
-        CLR_UINT16 *src;
-        int xCount;
-
-        src = StartOfLine_src;
-        xCount = width;
-
-        while (xCount--)
-        {
-            CLR_UINT16 dt = *src++;
-            *transferBufferIndex++ = (dt >> 8);
-            *transferBufferIndex++ = dt & 0xff;
-            transferBufferCount -= 2;
-
-            // Send over SPI if no room for another 2 bytes
-            if (transferBufferCount < 1)
-            {
-                // Transfer buffer full, send it
-                g_DisplayInterface.SendBytes(
-                    Attributes.TransferBuffer,
-                    (Attributes.TransferBufferSize - transferBufferCount));
-
-                // Reset transfer ptrs/count
-                transferBufferIndex = Attributes.TransferBuffer;
-                transferBufferCount = Attributes.TransferBufferSize;
-            }
-        }
-
-        // Next row in data[]
-        StartOfLine_src += Attributes.Width;
-    }
-
-    // Send remaining data in transfer buffer to SPI
-    if (transferBufferCount < Attributes.TransferBufferSize)
-    {
-        // Transfer buffer full, send it
-        g_DisplayInterface.SendBytes(Attributes.TransferBuffer, (Attributes.TransferBufferSize - transferBufferCount));
-    }
+    g_DisplayInterface.SendData16Windowed((CLR_UINT16 *)&data[0], srcX, srcY, width, height, stride, true);
 
     return;
 }

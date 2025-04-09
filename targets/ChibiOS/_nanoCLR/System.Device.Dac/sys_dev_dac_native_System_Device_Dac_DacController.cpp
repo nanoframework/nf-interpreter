@@ -7,7 +7,7 @@
 #include "sys_dev_dac_native_target.h"
 
 ////////////////////////////////////////////////////////////
-// DAC PAL strucs delcared in sys_dev_dac_native_target.h //
+// DAC PAL structs declared in sys_dev_dac_native_target.h //
 ////////////////////////////////////////////////////////////
 #if STM32_DAC_USE_DAC1_CH1
 NF_PAL_DAC Dac1_1_PAL;

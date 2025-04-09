@@ -29,10 +29,3 @@ void platform_free(void *ptr)
 // define back
 #define free YOU_SHALL_NOT_USE_free
 }
-
-void *platform_realloc(void *ptr, size_t size)
-{
-    (void)size;
-
-    return ptr;
-}

@@ -27,6 +27,7 @@ list(APPEND CHIBIOS_HAL_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LL
 list(APPEND CHIBIOS_HAL_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/EXTIv1)
 list(APPEND CHIBIOS_HAL_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/GPIOv3)
 list(APPEND CHIBIOS_HAL_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/I2Cv2)
+list(APPEND CHIBIOS_HAL_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/MACv1)
 list(APPEND CHIBIOS_HAL_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/OTGv1)
 list(APPEND CHIBIOS_HAL_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/QUADSPIv1)
 list(APPEND CHIBIOS_HAL_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/RCCv1)
@@ -75,7 +76,7 @@ list(APPEND CHIBIOS_HAL_SOURCES ${CMAKE_SOURCE_DIR}/targets/ChibiOS/_nf-overlay/
 list(APPEND CHIBIOS_HAL_SOURCES ${CMAKE_SOURCE_DIR}/targets/ChibiOS/_nf-overlay/os/hal/ports/STM32/LLD/RNGv1/rng_lld.c)
 
 ##########################################################################################################################
-# Add above ALL the source code file(s) low level driver specif for a series required for a new nanoFramework 
+# Add above ALL the source code file(s) low level driver specific for a series required for a new nanoFramework 
 # overlay component that you are adding following the template below. 
 #
 # list(APPEND CHIBIOS_SOURCES ${CMAKE_SOURCE_DIR}/targets/ChibiOS/_nf-overlay/os/hal/src/<path-here>)
@@ -157,7 +158,6 @@ set(CHIBIOS_HAL_SRCS
     hal_trng_lld.c
     hal_rtc_lld.c
     hal_sdc_lld.c
-
     hal_i2s_lld.c
     hal_spi_v2_lld.c
 
@@ -170,7 +170,6 @@ set(CHIBIOS_HAL_SRCS
     hal_uart_lld.c
 
     hal_wdg_lld.c
-
 
     # OSAL 
     osal.c

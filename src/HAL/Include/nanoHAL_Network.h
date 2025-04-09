@@ -58,6 +58,7 @@ typedef enum __nfpack NetworkInterfaceType
     NetworkInterfaceType_Ethernet = 6,
     NetworkInterfaceType_Wireless80211 = 71,
     NetworkInterfaceType_WirelessAP = 72,
+    NetworkInterfaceType_Thread = 81
 } NetworkInterfaceType;
 
 typedef enum __nfpack Wireless80211Configuration_ConfigurationOptions
@@ -299,15 +300,16 @@ typedef struct __nfpack HAL_Configuration_X509DeviceCertificate
     // this is the marker placeholder for this configuration block
     uint8_t Marker[4];
 
-    // Size of the X509 CA Root certificate bundle
+    // Size of the X509 device certificate
     uint32_t CertificateSize;
 
-    // X509 CA Root certificate bundle
+    // X509 device certificate
     uint8_t Certificate[1];
 
 } HAL_Configuration_X509DeviceCertificate;
 
 void nanoHAL_Network_Initialize();
+void nanoHAL_Network_Uninitialize();
 void sys_signal_sock_event();
 
 #ifdef __cplusplus

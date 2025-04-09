@@ -7,6 +7,8 @@
 #define DISPLAY_INTERFACE_H
 
 #include "nanoCLR_Types.h"
+#include "nanoCLR_Interop.h"
+#include "Core.h"
 
 // Display configuration
 struct DisplayInterfaceConfig
@@ -26,6 +28,19 @@ struct DisplayInterfaceConfig
             CLR_INT8 address;
             CLR_INT8 fastMode;
         } I2c;
+        struct
+        {
+            CLR_INT16 enable;
+            CLR_INT16 control;
+            CLR_INT16 backlight;
+            CLR_INT16 Horizontal_synchronization;
+            CLR_INT16 Horizontal_back_porch;
+            CLR_INT16 Horizontal_front_porch;
+            CLR_INT16 Vertical_synchronization;
+            CLR_INT16 Vertical_back_porch;
+            CLR_INT16 Vertical_front_porch;
+            CLR_INT16 Frequency_Divider;
+        } VideoDisplay;
     };
     struct
     {
@@ -34,6 +49,26 @@ struct DisplayInterfaceConfig
         CLR_UINT16 width;
         CLR_UINT16 height;
     } Screen;
+    struct
+    {
+        CLR_UINT32 Width;
+        CLR_UINT32 Height;
+        CLR_UINT8 BitsPerPixel;
+        CLR_RT_HeapBlock_Array *InitializationSequence;
+        CLR_UINT8 MemoryWrite;
+        CLR_UINT8 SetColumnAddress;
+        CLR_UINT8 SetRowAddress;
+        CLR_RT_HeapBlock_Array *PowerModeNormal;
+        CLR_RT_HeapBlock_Array *PowerModeSleep;
+        CLR_RT_HeapBlock_Array *OrientationPortrait;
+        CLR_RT_HeapBlock_Array *OrientationPortrait180;
+        CLR_RT_HeapBlock_Array *OrientationLandscape;
+        CLR_RT_HeapBlock_Array *OrientationLandscape180;
+        CLR_RT_HeapBlock_Array *Clear;
+        CLR_UINT8 Brightness;
+        CLR_UINT8 DefaultOrientation;
+        CLR_UINT8 SetWindowType;
+    } GenericDriverCommands;
 };
 
 struct DisplayInterface
@@ -45,6 +80,15 @@ struct DisplayInterface
     void DisplayBacklight(bool on); // true = on
     void SendCommand(CLR_UINT8 arg_count, ...);
     void SendBytes(CLR_UINT8 *data, CLR_UINT32 length);
+    void SendData16Windowed(
+        CLR_UINT16 *data,
+        CLR_UINT32 startX,
+        CLR_UINT32 startY,
+        CLR_UINT32 width,
+        CLR_UINT32 height,
+        CLR_UINT32 stride,
+        bool doByteSwap);
+    void FillData16(CLR_UINT16 fillValue, CLR_UINT32 fillLength);
     void SetCommandMode(int mode);
 };
 

@@ -12,6 +12,8 @@ HRESULT CLR_RT_FileStore::LoadFile(const wchar_t *szFile, CLR_RT_Buffer &vec)
     NANOCLR_HEADER();
 
     FILE *stream;
+    long size;
+
     if (_wfopen_s(&stream, szFile, L"rb") != 0)
     {
         wprintf(L"Cannot open '%s'!\n", szFile);
@@ -19,7 +21,7 @@ HRESULT CLR_RT_FileStore::LoadFile(const wchar_t *szFile, CLR_RT_Buffer &vec)
     }
 
     /*********/ fseek(stream, 0, SEEK_END);
-    long size = ftell(stream);
+    size = ftell(stream);
     /*********/ fseek(stream, 0, SEEK_SET);
 
     vec.resize(size);

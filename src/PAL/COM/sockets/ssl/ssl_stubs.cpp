@@ -76,16 +76,11 @@ __nfweak bool SSL_ClientInit(
     return TRUE;
 }
 
-__nfweak bool SSL_AddCertificateAuthority(
-    int contextHandle,
-    const char *certificate,
-    int certLength,
-    const char *certPassword)
+__nfweak bool SSL_AddCertificateAuthority(int contextHandle, const char *certificate, int certLength)
 {
     (void)contextHandle;
     (void)certificate;
     (void)certLength;
-    (void)certPassword;
 
     NATIVE_PROFILE_PAL_COM();
 
@@ -153,15 +148,10 @@ __nfweak int SSL_CloseSocket(SOCK_SOCKET socket)
     return 0;
 }
 
-__nfweak bool SSL_ParseCertificate(
-    const char *certificate,
-    size_t certLength,
-    const char *password,
-    X509CertData *certData)
+__nfweak bool SSL_ParseCertificate(const char *certificate, size_t certLength, X509CertData *certData)
 {
     (void)certificate;
     (void)certLength;
-    (void)password;
     (void)certData;
 
     NATIVE_PROFILE_PAL_COM();

@@ -107,23 +107,11 @@ typedef struct STM32FlashDriver
 
 } STM32FlashDriver;
 
-/**
- * @brief  HAL Status structures definition
- */
-typedef enum
-{
-    HAL_OK = 0x00U,
-    HAL_ERROR = 0x01U,
-    HAL_BUSY = 0x02U,
-    HAL_TIMEOUT = 0x03U
-} HAL_StatusTypeDef;
-
 ///////////////////////////////////////////////////////////////////////////////
 // Driver macros.                                                            //
 ///////////////////////////////////////////////////////////////////////////////
 
 // From STMicroelectronics Cube HAL
-#define HAL_IS_BIT_SET(REG, BIT) (((REG) & (BIT)) != RESET)
 
 /**
  * @brief  Check whether the specified FLASH flag is set or not.

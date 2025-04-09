@@ -5,7 +5,6 @@
 # set 'ForceUpload' variable to true on target matrix
 
 steps:
-
   - task: ArchiveFiles@2
     condition: >-
       and(
@@ -19,13 +18,13 @@ steps:
       )
     displayName: Zip binary files (release & PR)
     inputs:
-      rootFolderOrFile: '$(Build.ArtifactStagingDirectory)\$(TargetPublishName)' 
+      rootFolderOrFile: '$(Build.ArtifactStagingDirectory)\$(TargetPublishName)'
       includeRootFolder: false
-      archiveType: 'zip'
+      archiveType: "zip"
       archiveFile: '$(Agent.TempDirectory)\$(TargetPublishName)-$(NBGV_SimpleVersion).$(TARGET_BUILD_COUNTER).zip'
       replaceExistingArchive: true
 
-  - task: CopyFiles@1
+  - task: CopyFiles@2
     condition: >-
       and(
         succeeded(),
@@ -43,6 +42,7 @@ steps:
         $(TargetPublishName)-$(NBGV_SimpleVersion).$(TARGET_BUILD_COUNTER).zip
       TargetFolder: '$(Build.ArtifactStagingDirectory)\$(TargetPublishName)'
       flattenFolders: true
+      ignoreMakeDirErrors: true
 
   - task: ArchiveFiles@2
     condition: >-
@@ -56,13 +56,13 @@ steps:
       )
     displayName: Zip binary files (preview)
     inputs:
-      rootFolderOrFile: '$(Build.ArtifactStagingDirectory)\$(TargetPublishName)' 
+      rootFolderOrFile: '$(Build.ArtifactStagingDirectory)\$(TargetPublishName)'
       includeRootFolder: false
-      archiveType: 'zip'
+      archiveType: "zip"
       archiveFile: '$(Agent.TempDirectory)\$(TargetPublishName)-$(NBGV_SimpleVersion)-preview.$(TARGET_BUILD_COUNTER).zip'
       replaceExistingArchive: true
 
-  - task: CopyFiles@1
+  - task: CopyFiles@2
     condition: >-
       and(
         succeeded(),
@@ -79,90 +79,105 @@ steps:
         $(TargetPublishName)-$(NBGV_SimpleVersion)-preview.$(TARGET_BUILD_COUNTER).zip
       TargetFolder: '$(Build.ArtifactStagingDirectory)\$(TargetPublishName)'
       flattenFolders: true
+      ignoreMakeDirErrors: true
 
-  - task: PublishBuildArtifacts@1
+  - task: PublishPipelineArtifact@1
     condition: succeeded()
     displayName: Publish deployables artifacts
     inputs:
-      PathtoPublish: '$(Build.ArtifactStagingDirectory)\$(TargetPublishName)'
-      ArtifactName: $(TargetPublishName)
-      ArtifactType: Container
+      targetPath: '$(Build.ArtifactStagingDirectory)\$(TargetPublishName)'
+      artifactName: $(TargetPublishName)
+      artifactType: pipeline
 
   # execute on 'ForceUpload' parameter
   - task: PowerShell@2
     condition: >-
-      or(
-        eq(variables['ForceUpload'], true),
-        and(
-          succeeded(),
+      and(
+        succeeded(),
+        or(
+          eq(variables['ForceUpload'], true),
           eq(variables['System.PullRequest.PullRequestId'], '')
         )
       )
     displayName: Set Cloudsmith repo path
     inputs:
-      targetType: 'inline'
+      targetType: "inline"
       script: |
 
-          $repoName = $env:Build_Repository_Name
-          $branchName = $env:Build_SourceBranchName
+        $repoName = $env:Build_Repository_Name
+        $branchName = $env:Build_SourceBranchName
+        $forceUpload = $env:ForceUpload
 
-          Write-Host "repo name is: $repoName"
-          Write-Host "branch name is: $branchName"
+        Write-Host "repo name is: $repoName"
+        Write-Host "branch name is: $branchName"
 
-          if( $env:Build_Repository_Name -like "*nf-Community-Targets" )
+        if( $env:Build_Repository_Name -like "*nf-Community-Targets" )
+        {
+          # this is a build for a community target
+          $cloudsmithRepo = "nanoframework-images-community-targets"
+          # set publishing package name
+          $publishingPackageName = "$(TargetPublishName)-$(NBGV_SimpleVersion).$(TARGET_BUILD_COUNTER)"
+          # set version
+          $packageVersion = "$(NBGV_SimpleVersion).$(TARGET_BUILD_COUNTER)"
+        }
+        else
+        {
+          if( $env:Build_SourceBranchName -match "develop" -or 
+              $env:Build_SourceBranchName -match "^release*" -or 
+              $env:ForceUpload -eq "true")
           {
-            # this is a build for a community target
-            Write-Host "$("##vso[task.setvariable variable=CLOUDSMITH_REPO]")nanoframework-images-community-targets"
+            # this a dev, release branch or force upload, publish to Cloudsmith dev repo
+            $cloudsmithRepo = "nanoframework-images-dev"
             # set publishing package name
-            Write-Host "$("##vso[task.setvariable variable=PUBLISHING_PACKAGE_NAME]")$(TargetPublishName)-$(NBGV_SimpleVersion).$(TARGET_BUILD_COUNTER)"
+            $publishingPackageName = "$(TargetPublishName)-$(NBGV_SimpleVersion)-preview.$(TARGET_BUILD_COUNTER)"
             # set version
-            Write-Host "$("##vso[task.setvariable variable=PACKAGE_VERSION]")$(NBGV_SimpleVersion).$(TARGET_BUILD_COUNTER)"
+            $packageVersion = "$(NBGV_SimpleVersion)-preview.$(TARGET_BUILD_COUNTER)"
           }
-          else
+          else 
           {
-            if( $env:Build_SourceBranchName -match "^develop*" -or 
-                $env:Build_SourceBranchName -match "^release*" )
-            {
-              # this a dev or release branch, publish to Cloudsmith dev repo
-              Write-Host "$("##vso[task.setvariable variable=CLOUDSMITH_REPO]")nanoframework-images-dev"
-              # set publishing package name
-              Write-Host "$("##vso[task.setvariable variable=PUBLISHING_PACKAGE_NAME]")$(TargetPublishName)-$(NBGV_SimpleVersion)-preview.$(TARGET_BUILD_COUNTER)"
-              # set version
-              Write-Host "$("##vso[task.setvariable variable=PACKAGE_VERSION]")$(NBGV_SimpleVersion)-preview.$(TARGET_BUILD_COUNTER)"
-            }
-            else 
-            {
-              # this main branch, publish to Cloudsmith stable repo
-              Write-Host "$("##vso[task.setvariable variable=CLOUDSMITH_REPO]")nanoframework-images"
-              # set publishing package name
-              Write-Host "$("##vso[task.setvariable variable=PUBLISHING_PACKAGE_NAME]")$(TargetPublishName)-$(NBGV_SimpleVersion).$(TARGET_BUILD_COUNTER)"
-              # set version
-              Write-Host "$("##vso[task.setvariable variable=PACKAGE_VERSION]")$(NBGV_SimpleVersion).$(TARGET_BUILD_COUNTER)"
-            }
+            # this main branch, publish to Cloudsmith stable repo
+            $cloudsmithRepo = "nanoframework-images"
+            # set publishing package name
+            $publishingPackageName = "$(TargetPublishName)-$(NBGV_SimpleVersion).$(TARGET_BUILD_COUNTER)"
+            # set version
+            $packageVersion = "$(NBGV_SimpleVersion).$(TARGET_BUILD_COUNTER)"
           }
-      errorActionPreference: 'stop'
-      failOnStderr: 'true'
+        }
+
+        Write-Host "$("##vso[task.setvariable variable=CLOUDSMITH_REPO]")$cloudsmithRepo"
+        Write-Host "$("##vso[task.setvariable variable=PUBLISHING_PACKAGE_NAME]")$publishingPackageName"
+        Write-Host "$("##vso[task.setvariable variable=PACKAGE_VERSION]")$packageVersion"
+
+        Write-Host "Cloudsmith repo: $cloudsmithRepo"
+        Write-Host "Cloudsmith package: $publishingPackageName"
+        Write-Host "Cloudsmith package version: $packageVersion"
+
+      errorActionPreference: "stop"
+      failOnStderr: true
 
   - task: PowerShell@2
     condition: >-
-      or(
-        eq(variables['ForceUpload'], true),
-        and(
-          succeeded(),
-          eq(variables['System.PullRequest.PullRequestId'], '')
+      and(
+        succeeded(),
+        or(
+          eq(variables['ForceUpload'], true),
+          and(
+            eq(variables['Build.SourceBranchName'], 'main'),
+            eq(variables['System.PullRequest.PullRequestId'], '')
+          )
         )
       )
     displayName: Upload package to Cloudsmith
     inputs:
-      targetType: 'inline'
+      targetType: "inline"
       script: |
 
-          # install Cloudsmith CLI
-          python -m pip install --upgrade cloudsmith-cli --quiet
+        # install Cloudsmith CLI
+        python -m pip install --upgrade cloudsmith-cli --quiet
 
-          Write-Host "Uploading $(PUBLISHING_PACKAGE_NAME) to v$(PACKAGE_VERSION)"
+        Write-Host "Uploading $(PUBLISHING_PACKAGE_NAME) v$(PACKAGE_VERSION) to $(CLOUDSMITH_REPO)"
 
-          cloudsmith push raw net-nanoframework/$(CLOUDSMITH_REPO) $(Agent.TempDirectory)\$(PUBLISHING_PACKAGE_NAME).zip --name $(TargetPublishName) --version $(PACKAGE_VERSION) --tags $(TargetPlatform),$(TargetSeries) --republish -k $(CLOUDSMITH_KEY)
+        cloudsmith push raw net-nanoframework/$(CLOUDSMITH_REPO) $(Agent.TempDirectory)\$(PUBLISHING_PACKAGE_NAME).zip --name $(TargetPublishName) --version $(PACKAGE_VERSION) --tags $(TargetPlatform),$(TargetSeries) --republish -k $(CLOUDSMITH_KEY)
 
-      errorActionPreference: 'stop'
-      failOnStderr: 'false'
+      errorActionPreference: "stop"
+      failOnStderr: false

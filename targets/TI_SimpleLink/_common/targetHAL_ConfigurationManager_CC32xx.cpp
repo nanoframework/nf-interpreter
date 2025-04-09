@@ -526,7 +526,7 @@ bool ConfigurationManager_StoreConfigurationBlock(
 }
 
 // Updates a configuration block
-bool ConfigurationManager_UpdateConfigurationBlock(
+UpdateConfigurationResult ConfigurationManager_UpdateConfigurationBlock(
     void *configurationBlock,
     DeviceConfigurationOption configuration,
     uint32_t configurationIndex)
@@ -537,19 +537,26 @@ bool ConfigurationManager_UpdateConfigurationBlock(
     {
         case DeviceConfigurationOption_Network:
         case DeviceConfigurationOption_Wireless80211Network:
-            return ConfigurationManager_StoreConfigurationBlock(
-                configurationBlock,
-                configuration,
-                configurationIndex,
-                0,
-                0,
-                false);
+            if (ConfigurationManager_StoreConfigurationBlock(
+                    configurationBlock,
+                    configuration,
+                    configurationIndex,
+                    0,
+                    0,
+                    false))
+            {
+                return UpdateConfigurationResult_Success;
+            }
+            else
+            {
+                return UpdateConfigurationResult_Failed;
+            }
 
         // this configuration option is not supported
         case DeviceConfigurationOption_X509CaRootBundle:
         default:
             // shouldn't ever reach here
-            return FALSE;
+            return UpdateConfigurationResult_Failed;
     }
 }
 
@@ -585,4 +592,12 @@ bool InitialiseNetworkDefaultConfig(HAL_Configuration_NetworkInterface *pconfig,
     sl_NetCfgGet(SL_NETCFG_MAC_ADDRESS_GET, 0, &macAddressLen, pconfig->MacAddress);
 
     return true;
+}
+
+// default implementation
+// this is weak so a manufacturer can provide a strong implementation
+__nfweak void ConfigurationManager_GetSystemSerialNumber(char *serialNumber, size_t serialNumberSize)
+{
+    // do the thing to get unique device ID
+    memset(serialNumber, 0, serialNumberSize);
 }

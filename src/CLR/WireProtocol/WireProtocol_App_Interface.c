@@ -7,6 +7,9 @@
 #include <WireProtocol_Message.h>
 #include <WireProtocol_App_Interface.h>
 
+#if defined(__GNUC__)
+__attribute__((aligned(32)))
+#endif
 static uint8_t receptionBuffer[sizeof(WP_Packet) + WP_PACKET_SIZE];
 
 // Initialize to a packet sequence number impossible to encounter
@@ -14,12 +17,6 @@ uint32_t WireProtocolLastPacketSequence = 0x00FEFFFF;
 
 uint8_t WP_App_ProcessHeader(WP_Message *message)
 {
-    // check for reception buffer overflow
-    if (message->m_header.m_size > WP_PACKET_SIZE)
-    {
-        return false;
-    }
-
     message->m_payload = receptionBuffer;
 
     return true;

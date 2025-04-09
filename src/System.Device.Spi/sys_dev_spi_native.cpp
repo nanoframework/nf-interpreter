@@ -62,7 +62,7 @@ const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_System_Device_Spi =
     "System.Device.Spi",
     0x3F6E2A7E,
     method_lookup,
-    { 100, 1, 1, 0 }
+    { 100, 1, 2, 0 }
 };
 
 // clang-format on

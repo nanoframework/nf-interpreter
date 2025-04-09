@@ -30,7 +30,10 @@ set(NF_HALCore_SRCS
 
 )
 
-# message("BASE_PATH_FOR_PLATFORM >> ${BASE_PATH_FOR_PLATFORM}") # debug helper
+if (BUILD_VERBOSE)
+    message("BASE_PATH_FOR_PLATFORM >> ${BASE_PATH_FOR_PLATFORM}")
+endif()
+
 foreach(SRC_FILE ${NF_HALCore_SRCS})
 
     set(NF_HALCore_SRC_FILE SRC_FILE-NOTFOUND)

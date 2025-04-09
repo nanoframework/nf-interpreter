@@ -6,7 +6,7 @@
 #include "sys_net_native.h"
 
 HRESULT Library_sys_net_native_System_Security_Cryptography_X509Certificates_X509Certificate::
-    ParseCertificate___STATIC__VOID__SZARRAY_U1__STRING__BYREF_STRING__BYREF_STRING__BYREF_SystemDateTime__BYREF_SystemDateTime(
+    ParseCertificate___STATIC__VOID__SZARRAY_U1__BYREF_STRING__BYREF_STRING__BYREF_SystemDateTime__BYREF_SystemDateTime(
         CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();

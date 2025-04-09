@@ -1,0 +1,54 @@
+{
+    "version": 4,
+    "include": [
+        "../../../../CMake/arm-gcc.json",
+        "../../../../config/user-tools-repos.json",
+        "../../../../config/user-prefs.json"
+    ],
+    "configurePresets": [
+        {
+            "name": "ORGPAL_PALTHREE_AZRT",
+            "inherits": [
+                "arm-gcc-cortex-preset",
+                "user-tools-repos",
+                "user-prefs"
+            ],
+            "hidden": false,
+            "cacheVariables": {
+                "TARGET_BOARD": "${presetName}",
+                "TARGET_SERIES": "STM32F7xx",
+                "RTOS": "AzureRTOS",
+                "STM32_CUBE_PACKAGE_REQUIRED": "ON",
+                "SUPPORT_ANY_BASE_CONVERSION": "ON",
+                "NF_FEATURE_DEBUGGER": "ON",
+                "NF_FEATURE_RTC": "ON",
+                "NF_FEATURE_HAS_SDCARD": "OFF",
+                "NF_FEATURE_HAS_CONFIG_BLOCK": "ON",
+                "NF_FEATURE_HAS_USB_MSD": "OFF",
+                "NF_BUILD_RTM": "OFF",
+                "API_System.Math": "ON",
+                "API_Hardware.Stm32": "ON",
+                "API_System.Device.Gpio": "ON",
+                "API_System.Device.Spi": "ON",
+                "API_System.Device.I2c": "ON",
+                "API_System.Device.Pwm": "ON",
+                "API_System.IO.Ports": "ON",
+                "API_System.Device.Adc": "ON",
+                "API_System.Device.Dac": "ON",
+                "API_System.Net": "ON",
+                "API_nanoFramework.ResourceManager": "ON",
+                "API_nanoFramework.System.Collections": "ON",
+                "API_nanoFramework.System.Text": "ON",
+                "API_nanoFramework.Graphics": "OFF"
+            }
+        }
+    ],
+    "buildPresets": [
+        {
+            "inherits": "base-user",
+            "name": "ORGPAL_PALTHREE_AZRT",
+            "displayName": "ORGPAL_PALTHREE_AZRT",
+            "configurePreset": "ORGPAL_PALTHREE_AZRT"
+        }
+    ]
+}
