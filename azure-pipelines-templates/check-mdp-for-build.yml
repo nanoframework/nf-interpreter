@@ -72,4 +72,4 @@ steps:
     inputs:
       targetType: 'inline'
       script: |
-        Write-Host "##vso[task.setvariable variable=NF_MDP_MSBUILDTASK_PATH]$(Pipeline.Workspace)/mdp/nanoFramework.Tools.MetadataProcessor.MsBuildTask.dll"
+        Write-Host "##vso[task.setvariable variable=NF_MDP_MSBUILDTASK_PATH]$(Pipeline.Workspace)\mdp"
