@@ -287,16 +287,10 @@ __nfweak void CLR_RT_BinaryFormatter::PrepareForGC(void *data)
     NATIVE_PROFILE_CLR_SERIALIZATION();
 }
 
-__nfweak HRESULT CLR_RT_BinaryFormatter::Serialize(
-    CLR_RT_HeapBlock &refData,
-    CLR_RT_HeapBlock &object,
-    CLR_RT_HeapBlock *cls,
-    CLR_UINT32 flags)
+__nfweak HRESULT CLR_RT_BinaryFormatter::Serialize(CLR_RT_HeapBlock &refData, CLR_RT_HeapBlock &object)
 {
     (void)refData;
     (void)object;
-    (void)cls;
-    (void)flags;
 
     NATIVE_PROFILE_CLR_SERIALIZATION();
     NANOCLR_FEATURE_STUB_RETURN();
@@ -305,13 +299,11 @@ __nfweak HRESULT CLR_RT_BinaryFormatter::Serialize(
 __nfweak HRESULT CLR_RT_BinaryFormatter::Deserialize(
     CLR_RT_HeapBlock &refData,
     CLR_RT_HeapBlock &object,
-    CLR_RT_HeapBlock *cls,
     CLR_UINT32 *unknownType,
     CLR_UINT32 flags)
 {
     (void)refData;
     (void)object;
-    (void)cls;
     (void)unknownType;
     (void)flags;
 
