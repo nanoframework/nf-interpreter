@@ -1,11 +1,11 @@
-//
+﻿//
 // Copyright (c) .NET Foundation and Contributors
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
 //
+
 #include <nanoCLR_Runtime.h>
 #include <nanoCLR_Debugging.h>
-#include <nanoHAL.h>
 #include <WireProtocol.h>
 #include <WireProtocol_Message.h>
 #include <WireProtocol_MonitorCommands.h>
@@ -1130,6 +1130,7 @@ bool CLR_DBG_Debugger::Monitor_QueryConfiguration(WP_Message *message)
 
     HAL_Configuration_NetworkInterface *configNetworkInterface;
     HAL_Configuration_Wireless80211 *configWireless80211NetworkInterface;
+    HAL_Configuration_WirelessAP *configWirelessAPNetworkInterface;
     HAL_Configuration_X509CaRootBundle *x509Certificate;
     HAL_Configuration_X509DeviceCertificate *x509DeviceCertificate;
 
@@ -1270,7 +1271,31 @@ bool CLR_DBG_Debugger::Monitor_QueryConfiguration(WP_Message *message)
             break;
 
         case DeviceConfigurationOption_WirelessNetworkAP:
-            // TODO missing implementation for now
+
+            configWirelessAPNetworkInterface =
+                (HAL_Configuration_WirelessAP *)platform_malloc(sizeof(HAL_Configuration_WirelessAP));
+
+            // check allocation
+            if (configWirelessAPNetworkInterface != NULL)
+            {
+                memset(configWirelessAPNetworkInterface, 0, sizeof(HAL_Configuration_WirelessAP));
+
+                if (ConfigurationManager_GetConfigurationBlock(
+                        configWirelessAPNetworkInterface,
+                        (DeviceConfigurationOption)cmd->Configuration,
+                        cmd->BlockIndex) == true)
+                {
+                    size = sizeof(HAL_Configuration_WirelessAP);
+
+                    WP_ReplyToCommand(message, true, false, (uint8_t *)configWirelessAPNetworkInterface, size);
+                }
+
+                platform_free(configWirelessAPNetworkInterface);
+
+                // done here
+                return true;
+            }
+
             break;
 
         default:
@@ -1301,6 +1326,7 @@ bool CLR_DBG_Debugger::Monitor_UpdateConfiguration(WP_Message *message)
     {
         case DeviceConfigurationOption_Network:
         case DeviceConfigurationOption_Wireless80211Network:
+        case DeviceConfigurationOption_WirelessNetworkAP:
         case DeviceConfigurationOption_X509CaRootBundle:
         case DeviceConfigurationOption_X509DeviceCertificates:
         case DeviceConfigurationOption_All:
@@ -2103,8 +2129,6 @@ static HRESULT Debugging_Thread_Create_Helper(CLR_RT_MethodDef_Index &md, CLR_RT
     NANOCLR_HEADER();
 
     CLR_RT_HeapBlock ref;
-
-    memset(&ref, 0, sizeof(struct CLR_RT_HeapBlock));
     ref.SetObjectReference(NULL);
     CLR_RT_ProtectFromGC gc(ref);
 
@@ -2559,8 +2583,6 @@ static bool SetBlockHelper(CLR_RT_HeapBlock *blk, CLR_DataType dt, CLR_UINT8 *bu
         CLR_DataType dtDst;
         CLR_RT_HeapBlock src;
 
-        memset(&src, 0, sizeof(struct CLR_RT_HeapBlock));
-
         dtDst = blk->DataType();
 
         src.SetDataId(CLR_RT_HEAPBLOCK_RAW_ID(dt, 0, 1));
@@ -2610,9 +2632,6 @@ static CLR_RT_HeapBlock *GetScratchPad_Helper(int idx)
     CLR_RT_HeapBlock tmp;
     CLR_RT_HeapBlock ref;
 
-    memset(&tmp, 0, sizeof(struct CLR_RT_HeapBlock));
-    memset(&ref, 0, sizeof(struct CLR_RT_HeapBlock));
-
     tmp.SetObjectReference(array);
 
     if (SUCCEEDED(ref.InitializeArrayReference(tmp, idx)))
@@ -2633,8 +2652,6 @@ bool CLR_DBG_Debugger::Debugging_Value_ResizeScratchPad(WP_Message *msg)
         (CLR_DBG_Commands::Debugging_Value_ResizeScratchPad *)msg->m_payload;
 
     CLR_RT_HeapBlock ref;
-
-    memset(&ref, 0, sizeof(struct CLR_RT_HeapBlock));
 
     if (cmd->m_size == 0)
     {
@@ -2735,8 +2752,6 @@ bool CLR_DBG_Debugger::Debugging_Value_GetStack(WP_Message *msg)
         CLR_RT_TypeDef_Instance *pTD = NULL;
         CLR_RT_TypeDef_Instance td;
 
-        memset(&tmp, 0, sizeof(struct CLR_RT_HeapBlock));
-
         if (cmd->m_kind != CLR_DBG_Commands::Debugging_Value_GetStack::c_EvalStack && IsBlockEnumMaybe(blk))
         {
             CLR_UINT32 iElement = cmd->m_index;
@@ -2819,10 +2834,6 @@ bool CLR_DBG_Debugger::Debugging_Value_GetField(WP_Message *msg)
     CLR_RT_HeapBlock tmp;
     CLR_RT_TypeDef_Instance td;
     CLR_RT_FieldDef_Instance inst;
-
-    memset(&tmp, 0, sizeof(struct CLR_RT_HeapBlock));
-    memset(&td, 0, sizeof(CLR_RT_TypeDef_Instance));
-    memset(&inst, 0, sizeof(CLR_RT_FieldDef_Instance));
 
     if (blk != NULL && cmd->m_offset > 0)
     {
@@ -2931,9 +2942,6 @@ bool CLR_DBG_Debugger::Debugging_Value_GetArray(WP_Message *msg)
     CLR_RT_HeapBlock ref;
     CLR_RT_TypeDef_Instance td{};
 
-    memset(&tmp, 0, sizeof(struct CLR_RT_HeapBlock));
-    memset(&ref, 0, sizeof(struct CLR_RT_HeapBlock));
-
     tmp.SetObjectReference(cmd->m_heapblock);
 
     if (SUCCEEDED(ref.InitializeArrayReference(tmp, cmd->m_index)))
@@ -3017,8 +3025,6 @@ bool CLR_DBG_Debugger::Debugging_Value_SetArray(WP_Message *msg)
     CLR_RT_HeapBlock_Array *array = cmd->m_heapblock;
     CLR_RT_HeapBlock tmp;
 
-    memset(&tmp, 0, sizeof(struct CLR_RT_HeapBlock));
-
     tmp.SetObjectReference(cmd->m_heapblock);
 
     //
@@ -3027,8 +3033,6 @@ bool CLR_DBG_Debugger::Debugging_Value_SetArray(WP_Message *msg)
     if (array != NULL && !array->m_fReference)
     {
         CLR_RT_HeapBlock ref;
-
-        memset(&ref, 0, sizeof(struct CLR_RT_HeapBlock));
 
         if (SUCCEEDED(ref.InitializeArrayReference(tmp, cmd->m_index)))
         {
@@ -3277,7 +3281,6 @@ static HRESULT Assign_Helper(CLR_RT_HeapBlock *blkDst, CLR_RT_HeapBlock *blkSrc)
     AnalyzeObject aoSrc;
     CLR_RT_HeapBlock srcVal;
 
-    memset(&srcVal, 0, sizeof(struct CLR_RT_HeapBlock));
     srcVal.SetObjectReference(NULL);
     CLR_RT_ProtectFromGC gc(srcVal);
 
@@ -3739,12 +3742,12 @@ bool CLR_DBG_Debugger::Debugging_Deployment_Status(WP_Message *msg)
 
         CLR_RT_Memory::Release(cmdReply);
 
-        WP_ReplyToCommand(msg, true, false, NULL, 0);
-
         return true;
     }
     else
     {
+        WP_ReplyToCommand(msg, true, false, NULL, 0);
+
         return false;
     }
 }

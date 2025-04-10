@@ -40,7 +40,7 @@ int8_t Esp32_I2C_DevicePinMap[I2C_NUM_MAX][2] = {{-1, -1}, {-1, -1}};
 //  LED PWM
 //  16 channels LED1 to LED16  or PWM1 to PWM16
 //  Map pins Data & Clock
-int8_t Esp32_LED_DevicePinMap[8] = {
+int8_t Esp32_LED_DevicePinMap[TARGET_LED_NUM_PINS] = {
     // Channels ( non assigned )
     -1, // 1
     -1, // 2
@@ -55,7 +55,7 @@ int8_t Esp32_LED_DevicePinMap[8] = {
 // Mapped to ESP32 controllers
 // ESP32 ADC1 channels 0 - 9
 //       ADC2 channels 10 - 19
-int8_t Esp32_ADC_DevicePinMap[20] = {
+int8_t Esp32_ADC_DevicePinMap[TARGET_ADC_NUM_PINS] = {
     ADC1_CHANNEL_0_GPIO_NUM, ADC1_CHANNEL_1_GPIO_NUM, ADC1_CHANNEL_2_GPIO_NUM, ADC1_CHANNEL_3_GPIO_NUM,
     ADC1_CHANNEL_4_GPIO_NUM, ADC1_CHANNEL_5_GPIO_NUM, ADC1_CHANNEL_6_GPIO_NUM, ADC1_CHANNEL_7_GPIO_NUM,
     ADC1_CHANNEL_8_GPIO_NUM, ADC1_CHANNEL_9_GPIO_NUM, ADC2_CHANNEL_0_GPIO_NUM, ADC2_CHANNEL_1_GPIO_NUM,
@@ -69,3 +69,11 @@ int8_t Esp32_ADC_DevicePinMap[20] = {
 int8_t Esp32_I2S_DevicePinMap[I2S_NUM_MAX][5] = {
     {I2S_PIN_NO_CHANGE, I2S_PIN_NO_CHANGE, I2S_PIN_NO_CHANGE, I2S_PIN_NO_CHANGE, I2S_PIN_NO_CHANGE},
     {I2S_PIN_NO_CHANGE, I2S_PIN_NO_CHANGE, I2S_PIN_NO_CHANGE, I2S_PIN_NO_CHANGE, I2S_PIN_NO_CHANGE}};
+
+// SDMMC
+// ESP32_S3 allows 2 sdmmc devices, allow for 4 data pins
+// Set SDMMC1 to default pins and SDMMC2 to not configured
+int8_t Esp32_SDMMC_DevicePinMap[CONFIG_SOC_SDMMC_NUM_SLOTS][6] = {
+    // Clock, Command, D0, D1, D2, D3, D4, D5, D6, D7, D8
+    {GPIO_NUM_14, GPIO_NUM_15, GPIO_NUM_2, GPIO_NUM_4, GPIO_NUM_12, GPIO_NUM_13},
+    {GPIO_NUM_NC, GPIO_NUM_NC, GPIO_NUM_NC, GPIO_NUM_NC, GPIO_NUM_NC, GPIO_NUM_NC}};

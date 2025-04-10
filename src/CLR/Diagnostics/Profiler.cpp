@@ -1,9 +1,19 @@
-//
+﻿//
 // Copyright (c) .NET Foundation and Contributors
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
 //
 #include "Diagnostics.h"
+
+#ifdef _WIN64
+#include <inttypes.h>
+#include <stdint.h>
+#endif
+
+#if defined(VIRTUAL_DEVICE)
+#include "nanoCLR_native.h"
+#include <format>
+#endif
 
 #if defined(NANOCLR_PROFILE_NEW)
 
@@ -17,13 +27,19 @@ HRESULT CLR_PRF_Profiler::CreateInstance()
     g_CLR_PRF_Profiler.m_packetSeqId = 0;
     g_CLR_PRF_Profiler.m_stream = NULL;
     g_CLR_PRF_Profiler.m_lastTimestamp =
-        (CLR_UINT32)((CLR_UINT64)(HAL_Time_CurrentTime() + ((1ull << CLR_PRF_CMDS::Bits::TimestampShift) - 1)) >>
+        (CLR_UINT32)((HAL_Time_CurrentTime() + ((1ULL << CLR_PRF_CMDS::Bits::TimestampShift) - 1)) >>
                      CLR_PRF_CMDS::Bits::TimestampShift);
+
     g_CLR_PRF_Profiler.m_currentAssembly = 0;
     g_CLR_PRF_Profiler.m_currentThreadPID = 0;
     NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_MemoryStream::CreateInstance(g_CLR_PRF_Profiler.m_stream, NULL, 0));
 
     g_CLR_PRF_Profiler.m_initialized = true;
+
+#if defined(VIRTUAL_DEVICE)
+    // need to do the here to send the memory layout in the first packet
+    g_CLR_PRF_Profiler.SendMemoryLayout();
+#endif
 
     NANOCLR_NOCLEANUP();
 }
@@ -50,10 +66,28 @@ void CLR_PRF_Profiler::SendMemoryLayout()
 
     // Send Memory Layout
     m_stream->WriteBits(CLR_PRF_CMDS::c_Profiling_Memory_Layout, CLR_PRF_CMDS::Bits::CommandHeader);
+
+#if defined(_WIN64)
+    PackAndWriteBits((CLR_UINT32)((CLR_UINT64)s_CLR_RT_Heap.m_location >> 32));
+#endif
     PackAndWriteBits((CLR_UINT32)s_CLR_RT_Heap.m_location);
+
     PackAndWriteBits(s_CLR_RT_Heap.m_size);
 
     Stream_Send();
+
+#if defined(VIRTUAL_DEVICE)
+    if (g_ProfilerMessageCallback != NULL)
+    {
+        std::string memoryLayout = std::format(
+            "** Memory layout **\r\n    start:0x{:X}\r\n      end:0x{:X}\r\n     size:0x{:X}\r\n",
+            (unsigned long long)s_CLR_RT_Heap.m_location,
+            (unsigned long long)s_CLR_RT_Heap.m_location + s_CLR_RT_Heap.m_size,
+            s_CLR_RT_Heap.m_size);
+
+        g_ProfilerMessageCallback(memoryLayout.c_str());
+    }
+#endif
 }
 
 HRESULT CLR_PRF_Profiler::DumpHeap()
@@ -503,7 +537,14 @@ void CLR_PRF_Profiler::DumpEndOfRefsList()
 void CLR_PRF_Profiler::DumpPointer(void *ptr)
 {
     NATIVE_PROFILE_CLR_DIAGNOSTICS();
+
+#ifdef _WIN64
+    CLR_UINT64 ptrVAlue = ((CLR_UINT8 *)ptr - s_CLR_RT_Heap.m_location);
+    PackAndWriteBits((CLR_UINT32)(ptrVAlue >> 32));
+    PackAndWriteBits((CLR_UINT32)ptrVAlue);
+#else
     PackAndWriteBits((CLR_UINT32)((CLR_UINT8 *)ptr - s_CLR_RT_Heap.m_location));
+#endif
 }
 
 void CLR_PRF_Profiler::DumpSingleReference(CLR_RT_HeapBlock *ptr)
@@ -679,7 +720,8 @@ void CLR_PRF_Profiler::TrackObjectCreation(CLR_RT_HeapBlock *ptr)
 
         CLR_UINT8 dt = ptr->DataType();
 
-        if (dt != DATATYPE_STACK_FRAME && dt != DATATYPE_BINARY_BLOB_HEAD)
+        if (dt != DATATYPE_STACK_FRAME && dt != DATATYPE_BINARY_BLOB_HEAD && dt != DATATYPE_CACHEDBLOCK &&
+            dt != DATATYPE_MEMORY_STREAM_HEAD && dt != DATATYPE_MEMORY_STREAM_DATA)
         {
             Timestamp();
 
@@ -697,13 +739,36 @@ void CLR_PRF_Profiler::TrackObjectCreation(CLR_RT_HeapBlock *ptr)
                 CLR_RT_TypeDef_Index idx = ptr->ObjectCls();
                 PackAndWriteBits(idx);
 
+#if defined(VIRTUAL_DEVICE)
+                if (g_ProfilerMessageCallback != NULL)
+                {
+                    // build type name
+                    char fullTypeName[1024] = {0};
+                    char *szBuffer = fullTypeName;
+                    size_t iBuffer = MAXSTRLEN(fullTypeName);
+
+                    g_CLR_RT_TypeSystem.BuildTypeName(idx, szBuffer, iBuffer);
+
+                    // compose output message
+                    std::string objectCreation = std::format(
+                        "New {} {} @ 0x{:X} [{:08x}] {} bytes\r\n",
+                        c_CLR_RT_DataTypeLookup[dt].m_name,
+                        fullTypeName,
+                        (CLR_UINT64)((CLR_UINT8 *)ptr),
+                        idx.m_data,
+                        (dataSize * sizeof(struct CLR_RT_HeapBlock)));
+
+                    g_ProfilerMessageCallback(objectCreation.c_str());
+                }
+#endif
+
 #ifdef NANOCLR_TRACE_PROFILER_MESSAGES
 
 #ifdef _WIN64
                 CLR_Debug::Printf(
-                    "\r\n    Profiler info: ! (0x0x%I64X | %d) DT: %d %d bytes idx: %08x\r\n",
+                    "\r\n    Profiler info: ! (0x0x%" PRIx64 " | %d) DT: %d %d bytes idx: %08x\r\n",
                     (size_t)((CLR_UINT8 *)ptr),
-                    (CLR_UINT32)((size_t *)ptr - s_CLR_RT_Heap.m_location),
+                    (CLR_UINT32)((size_t *)ptr - (size_t *)s_CLR_RT_Heap.m_location),
                     (CLR_UINT32)dt,
                     (dataSize * sizeof(struct CLR_RT_HeapBlock)),
                     idx.m_data);
@@ -727,13 +792,41 @@ void CLR_PRF_Profiler::TrackObjectCreation(CLR_RT_HeapBlock *ptr)
                 PackAndWriteBits(array->ReflectionDataConst().m_data.m_type);
                 PackAndWriteBits(array->ReflectionDataConst().m_levels);
 
+#if defined(VIRTUAL_DEVICE)
+                if (g_ProfilerMessageCallback != NULL)
+                {
+                    // build type name
+                    char fullTypeName[1024] = {0};
+                    char *szBuffer = fullTypeName;
+                    size_t iBuffer = MAXSTRLEN(fullTypeName);
+
+                    CLR_RT_TypeDef_Instance arrayTypeDef{};
+                    CLR_UINT32 levels;
+                    arrayTypeDef.InitializeFromReflection(array->ReflectionData(), &levels);
+
+                    g_CLR_RT_TypeSystem.BuildTypeName(arrayTypeDef, szBuffer, iBuffer);
+
+                    // compose output message
+                    std::string objectCreation = std::format(
+                        "New {}[] @ 0x{:X} {} bytes [{:08x}] {} elements {} level(s)\r\n",
+                        fullTypeName,
+                        (CLR_UINT64)((CLR_UINT8 *)ptr),
+                        (dataSize * sizeof(struct CLR_RT_HeapBlock)),
+                        elementIdx.m_data,
+                        array->m_numOfElements,
+                        levels);
+
+                    g_ProfilerMessageCallback(objectCreation.c_str());
+                }
+#endif
+
 #ifdef NANOCLR_TRACE_PROFILER_MESSAGES
 
 #ifdef _WIN64
                 CLR_Debug::Printf(
-                    "\r\n    Profiler info: ! (0x0x%I64X | %d) DT: %d [%08x] %d bytes\r\n",
+                    "\r\n    Profiler info: ! (0x0x%" PRIx64 " | %d) DT: %d [%08x] %d bytes\r\n",
                     (size_t)((CLR_UINT8 *)ptr),
-                    (CLR_UINT32)((size_t *)ptr - s_CLR_RT_Heap.m_location),
+                    (CLR_UINT32)((size_t *)ptr - (size_t *)s_CLR_RT_Heap.m_location),
                     (CLR_UINT32)dt,
                     elementIdx.m_data,
                     (dataSize * sizeof(struct CLR_RT_HeapBlock)));
@@ -749,14 +842,25 @@ void CLR_PRF_Profiler::TrackObjectCreation(CLR_RT_HeapBlock *ptr)
 #endif
 #endif // NANOCLR_TRACE_PROFILER_MESSAGES
             }
+            else
+            {
+                // compose output message
+                std::string objectCreation = std::format(
+                    "New {} @ 0x{:X} {} bytes\r\n",
+                    c_CLR_RT_DataTypeLookup[dt].m_name,
+                    (CLR_UINT64)((CLR_UINT8 *)ptr),
+                    (dataSize * sizeof(struct CLR_RT_HeapBlock)));
+
+                g_ProfilerMessageCallback(objectCreation.c_str());
+            }
 #ifdef NANOCLR_TRACE_PROFILER_MESSAGES
             else
             {
 #ifdef _WIN64
                 CLR_Debug::Printf(
-                    "\r\n    Profiler info: ! (0x0x%I64X | %d) DT: %d %d bytes\r\n",
+                    "\r\n    Profiler info: ! (0x0x%" PRIx64 " | %d) DT: %d %d bytes\r\n",
                     (size_t)((CLR_UINT8 *)ptr),
-                    (CLR_UINT32)((size_t *)ptr - s_CLR_RT_Heap.m_location),
+                    (CLR_UINT32)((size_t *)ptr - (size_t *)s_CLR_RT_Heap.m_location),
                     (CLR_UINT32)dt,
                     (dataSize * sizeof(struct CLR_RT_HeapBlock)));
 
@@ -790,12 +894,80 @@ void CLR_PRF_Profiler::TrackObjectDeletion(CLR_RT_HeapBlock *ptr)
         CLR_PROF_HANDLER_CALLCHAIN_VOID(perf);
 
         CLR_UINT8 dt = ptr->DataType();
-        if (dt != DATATYPE_STACK_FRAME && dt != DATATYPE_CACHEDBLOCK)
+        if (dt != DATATYPE_STACK_FRAME && dt != DATATYPE_BINARY_BLOB_HEAD && dt != DATATYPE_CACHEDBLOCK)
         {
             Timestamp();
             m_stream->WriteBits(CLR_PRF_CMDS::c_Profiling_Allocs_Delete, CLR_PRF_CMDS::Bits::CommandHeader);
             DumpPointer(ptr);
             Stream_Send();
+
+#if defined(VIRTUAL_DEVICE)
+            if (g_ProfilerMessageCallback != NULL)
+            {
+                if (dt == DATATYPE_SZARRAY)
+                {
+                    CLR_RT_HeapBlock_Array *array = (CLR_RT_HeapBlock_Array *)ptr;
+                    CLR_RT_TypeDef_Index elementIdx = array->ReflectionDataConst().m_data.m_type;
+
+                    // build type name
+                    char fullTypeName[1024] = {0};
+                    char *szBuffer = fullTypeName;
+                    size_t iBuffer = MAXSTRLEN(fullTypeName);
+
+                    CLR_RT_TypeDef_Instance arrayTypeDef{};
+                    CLR_UINT32 levels;
+                    arrayTypeDef.InitializeFromReflection(array->ReflectionData(), &levels);
+
+                    g_CLR_RT_TypeSystem.BuildTypeName(arrayTypeDef, szBuffer, iBuffer);
+
+                    // compose output message
+                    std::string objectDeletion = std::format(
+                        "Delete {}[] @ 0x{:X} {} bytes [{:08x}] {} elements {} level(s)\r\n",
+                        fullTypeName,
+                        (CLR_UINT64)((CLR_UINT8 *)ptr),
+                        (ptr->DataSize() * sizeof(struct CLR_RT_HeapBlock)),
+                        elementIdx.m_data,
+                        array->m_numOfElements,
+                        levels);
+
+                    g_ProfilerMessageCallback(objectDeletion.c_str());
+                }
+                else if (dt == DATATYPE_CLASS || dt == DATATYPE_VALUETYPE)
+                {
+                    CLR_RT_TypeDef_Index idx = ptr->ObjectCls();
+
+                    // build type name
+                    char fullTypeName[1024] = {0};
+                    char *szBuffer = fullTypeName;
+                    size_t iBuffer = MAXSTRLEN(fullTypeName);
+
+                    g_CLR_RT_TypeSystem.BuildTypeName(idx, szBuffer, iBuffer);
+
+                    // compose output message
+                    std::string objectDeletion = std::format(
+                        "Delete {} {} @ 0x{:X} [{:08x}] {} bytes\r\n",
+                        c_CLR_RT_DataTypeLookup[dt].m_name,
+                        fullTypeName,
+                        (CLR_UINT64)((CLR_UINT8 *)ptr),
+                        idx.m_data,
+                        (ptr->DataSize() * sizeof(struct CLR_RT_HeapBlock)));
+
+                    g_ProfilerMessageCallback(objectDeletion.c_str());
+                }
+                else
+                {
+                    CLR_UINT16 dataSize = ptr->DataSize();
+
+                    std::string objectDeletion = std::format(
+                        "Delete {} @ 0x{:X} {} bytes\r\n",
+                        c_CLR_RT_DataTypeLookup[dt].m_name,
+                        (CLR_UINT64)((CLR_UINT8 *)ptr),
+                        (dataSize * sizeof(struct CLR_RT_HeapBlock)));
+
+                    g_ProfilerMessageCallback(objectDeletion.c_str());
+                }
+            }
+#endif
         }
 
 #ifdef NANOCLR_TRACE_PROFILER_MESSAGES
@@ -803,9 +975,9 @@ void CLR_PRF_Profiler::TrackObjectDeletion(CLR_RT_HeapBlock *ptr)
 
 #ifdef _WIN64
         CLR_Debug::Printf(
-            "\r\n    Profiler info: * (0x0x%I64X | %d) %d bytes\r\n",
+            "\r\n    Profiler info: * (0x0x%" PRIx64 " | %d) %d bytes\r\n",
             (size_t)((CLR_UINT8 *)ptr),
-            (CLR_UINT32)((size_t *)ptr - s_CLR_RT_Heap.m_location),
+            (CLR_UINT32)((size_t *)ptr - (size_t *)s_CLR_RT_Heap.m_location),
             (dataSize * sizeof(struct CLR_RT_HeapBlock)));
 
 #else
@@ -843,13 +1015,17 @@ void CLR_PRF_Profiler::TrackObjectRelocation()
         {
             DumpPointer(relocBlocks[i].m_start);
             DumpPointer(relocBlocks[i].m_end);
-            PackAndWriteBits(relocBlocks[i].m_offset);
+
+#ifdef _WIN64
+            PackAndWriteBits((CLR_UINT32)(relocBlocks[i].m_offset >> 32));
+#endif
+            PackAndWriteBits((CLR_UINT32)relocBlocks[i].m_offset);
 
 #ifdef NANOCLR_TRACE_PROFILER_MESSAGES
 
 #ifdef _WIN64
             CLR_Debug::Printf(
-                "\r\n    Profiler msg: u 0x%I64X 0x%I64X %d\r\n",
+                "\r\n    Profiler msg: u 0x%" PRIx64 " 0x%" PRIx64 " %d\r\n",
                 relocBlocks[i].m_start,
                 relocBlocks[i].m_start + relocBlocks[i].m_offset,
                 relocBlocks[i].m_end - relocBlocks[i].m_offset);
@@ -863,6 +1039,86 @@ void CLR_PRF_Profiler::TrackObjectRelocation()
 #endif
 
 #endif //  NANOCLR_TRACE_PROFILER_MESSAGES
+        }
+    }
+}
+
+void CLR_PRF_Profiler::TrackObjectRelocation(void *previousAddress, void *destinationAddress)
+{
+    NATIVE_PROFILE_CLR_DIAGNOSTICS();
+
+#ifdef NANOCLR_FORCE_PROFILER_EXECUTION
+    if (g_CLR_PRF_Profiler.m_initialized)
+#else
+    if (CLR_EE_PRF_IS(Allocations))
+#endif
+    {
+
+#if defined(VIRTUAL_DEVICE)
+        if (g_ProfilerMessageCallback != NULL)
+        {
+            CLR_RT_HeapBlock *ptr = (CLR_RT_HeapBlock *)destinationAddress;
+            CLR_UINT8 dt = ptr->DataType();
+            CLR_UINT16 dataSize = ptr->DataSize();
+
+            if (dt == DATATYPE_CLASS || dt == DATATYPE_VALUETYPE)
+            {
+                CLR_RT_TypeDef_Index idx = ptr->ObjectCls();
+
+                // build type name
+                char fullTypeName[1024] = {0};
+                char *szBuffer = fullTypeName;
+                size_t iBuffer = MAXSTRLEN(fullTypeName);
+
+                g_CLR_RT_TypeSystem.BuildTypeName(idx, szBuffer, iBuffer);
+
+                // compose output message
+                std::string objectRelocation = std::format(
+                    "Relocate {} {} from 0x{:X} to 0x{:X}\r\n",
+                    c_CLR_RT_DataTypeLookup[dt].m_name,
+                    fullTypeName,
+                    (CLR_UINT64)((CLR_UINT8 *)previousAddress),
+                    (CLR_UINT64)((CLR_UINT8 *)destinationAddress));
+
+                g_ProfilerMessageCallback(objectRelocation.c_str());
+            }
+            else if (dt == DATATYPE_SZARRAY)
+            {
+                CLR_RT_HeapBlock_Array *array = (CLR_RT_HeapBlock_Array *)ptr;
+                CLR_RT_TypeDef_Index elementIdx = array->ReflectionDataConst().m_data.m_type;
+
+                // build type name
+                char fullTypeName[1024] = {0};
+                char *szBuffer = fullTypeName;
+                size_t iBuffer = MAXSTRLEN(fullTypeName);
+
+                CLR_RT_TypeDef_Instance arrayTypeDef{};
+                CLR_UINT32 levels;
+                arrayTypeDef.InitializeFromReflection(array->ReflectionData(), &levels);
+
+                g_CLR_RT_TypeSystem.BuildTypeName(arrayTypeDef, szBuffer, iBuffer);
+
+                // compose output message
+                std::string objectRelocation = std::format(
+                    "Relocate {}[] from 0x{:X} to 0x{:X}\r\n",
+                    fullTypeName,
+                    (CLR_UINT64)((CLR_UINT8 *)previousAddress),
+                    (CLR_UINT64)((CLR_UINT8 *)destinationAddress));
+
+                g_ProfilerMessageCallback(objectRelocation.c_str());
+            }
+            else
+            {
+                // compose output message
+                std::string objectRelocation = std::format(
+                    "Relocate {} from 0x{:X} to 0x{:X}\r\n",
+                    c_CLR_RT_DataTypeLookup[dt].m_name,
+                    (CLR_UINT64)((CLR_UINT8 *)previousAddress),
+                    (CLR_UINT64)((CLR_UINT8 *)destinationAddress));
+
+                g_ProfilerMessageCallback(objectRelocation.c_str());
+            }
+#endif
         }
     }
 }
@@ -884,11 +1140,20 @@ void CLR_PRF_Profiler::RecordGarbageCollectionBegin()
         PackAndWriteBits(g_CLR_RT_GarbageCollector.m_freeBytes);
         Stream_Send();
 
+#if defined(VIRTUAL_DEVICE)
+        if (g_ProfilerMessageCallback != NULL)
+        {
+            std::string garbageCollection =
+                std::format("GC: Starting run #{}\r\n", g_CLR_RT_GarbageCollector.m_numberOfGarbageCollections);
+            g_ProfilerMessageCallback(garbageCollection.c_str());
+        }
+#endif
+
 #ifdef NANOCLR_TRACE_PROFILER_MESSAGES
 
 #ifdef _WIN64
         CLR_Debug::Printf(
-            "\r\n    Profiler msg: b 1 0 0 0x%I64X 0x%I64X %d 0\r\n",
+            "\r\n    Profiler msg: b 1 0 0 0x%" PRIx64 " 0x%" PRIx64 " %d 0\r\n",
             (CLR_UINT32)s_CLR_RT_Heap.m_location,
             s_CLR_RT_Heap.m_size,
             g_CLR_RT_GarbageCollector.m_totalBytes);
@@ -922,17 +1187,29 @@ void CLR_PRF_Profiler::RecordGarbageCollectionEnd()
         PackAndWriteBits(g_CLR_RT_GarbageCollector.m_freeBytes);
         Stream_Send();
 
+#if defined(VIRTUAL_DEVICE)
+        if (g_ProfilerMessageCallback != NULL)
+        {
+            std::string garbageCollection = std::format(
+                "GC: Finished run #{} - {} bytes free\r\n",
+                g_CLR_RT_GarbageCollector.m_numberOfGarbageCollections,
+                g_CLR_RT_GarbageCollector.m_freeBytes);
+
+            g_ProfilerMessageCallback(garbageCollection.c_str());
+        }
+#endif
+
 #ifdef NANOCLR_TRACE_PROFILER_MESSAGES
 
 #ifdef _WIN64
         NANOCLR_FOREACH_NODE(CLR_RT_HeapCluster, hc, g_CLR_RT_ExecutionEngine.m_heap)
         {
-            CLR_Debug::Printf("\r\n    Profiler msg: v 0x%I64X 0\r\n", (CLR_UINT32)hc->m_payloadStart);
+            CLR_Debug::Printf("\r\n    Profiler msg: v 0x%" PRIx64 " 0\r\n", (CLR_UINT32)hc->m_payloadStart);
         }
         NANOCLR_FOREACH_NODE_END();
 
         CLR_Debug::Printf(
-            "\r\n    Profiler msg: b 0 0 0 0x%I64X 0x%I64X %d 0\r\n",
+            "\r\n    Profiler msg: b 0 0 0 0x%" PRIx64 " 0x%" PRIx64 " %d 0\r\n",
             (CLR_UINT32)s_CLR_RT_Heap.m_location,
             s_CLR_RT_Heap.m_size,
             g_CLR_RT_GarbageCollector.m_totalBytes);
@@ -972,11 +1249,21 @@ void CLR_PRF_Profiler::RecordHeapCompactionBegin()
         PackAndWriteBits(g_CLR_RT_GarbageCollector.m_freeBytes);
         Stream_Send();
 
+#if defined(VIRTUAL_DEVICE)
+        if (g_ProfilerMessageCallback != NULL)
+        {
+            std::string heapCompaction =
+                std::format("Heap compaction: Starting run #{} \r\n", g_CLR_RT_GarbageCollector.m_numberOfCompactions);
+
+            g_ProfilerMessageCallback(heapCompaction.c_str());
+        }
+#endif
+
 #ifdef NANOCLR_TRACE_PROFILER_MESSAGES
 
 #ifdef _WIN64
         CLR_Debug::Printf(
-            "\r\n    Profiler msg: b 1 0 0 0x%I64X 0x%I64X %d 0\r\n",
+            "\r\n    Profiler msg: b 1 0 0 0x%" PRIx64 " 0x%" PRIx64 " %d 0\r\n",
             (CLR_UINT32)s_CLR_RT_Heap.m_location,
             s_CLR_RT_Heap.m_size,
             g_CLR_RT_GarbageCollector.m_totalBytes);
@@ -1010,11 +1297,21 @@ void CLR_PRF_Profiler::RecordHeapCompactionEnd()
         PackAndWriteBits(g_CLR_RT_GarbageCollector.m_freeBytes);
         Stream_Send();
 
+#if defined(VIRTUAL_DEVICE)
+        if (g_ProfilerMessageCallback != NULL)
+        {
+            std::string heapCompaction =
+                std::format("Heap compaction: Finished run #{}\r\n", g_CLR_RT_GarbageCollector.m_numberOfCompactions);
+
+            g_ProfilerMessageCallback(heapCompaction.c_str());
+        }
+#endif
+
 #ifdef NANOCLR_TRACE_PROFILER_MESSAGES
 
 #ifdef _WIN64
         CLR_Debug::Printf(
-            "\r\n    Profiler msg: b 0 0 0 0x%I64X 0x%I64X %d 0\r\n",
+            "\r\n    Profiler msg: b 0 0 0 0x%" PRIx64 " 0x%" PRIx64 " %d 0\r\n",
             (CLR_UINT32)s_CLR_RT_Heap.m_location,
             s_CLR_RT_Heap.m_size,
             g_CLR_RT_GarbageCollector.m_totalBytes);
@@ -1159,6 +1456,13 @@ HRESULT CLR_PRF_Profiler::Stream_Flush()
                 _ASSERTE(false);
                 NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
             }
+
+#if defined(VIRTUAL_DEVICE)
+            if (g_ProfilerDataCallback != NULL)
+            {
+                g_ProfilerDataCallback(ptr->m_payload, payloadLength);
+            }
+#endif
         }
 
         // Don't go past the cursor.

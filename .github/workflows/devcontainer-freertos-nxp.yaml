@@ -1,20 +1,19 @@
 # Copyright (c) .NET Foundation and Contributors
 # See LICENSE file in the project root for full license information.
 
-name: Push Docker image [FreeRTOS-NXP]
+name: Build Dev Container for FreeRTOS-NXP
 
 env:
   CONTAINER_REPO: ghcr.io
   CONTAINER_NAME: dev-container-freertos-nxp
-  CONTAINER_SOURCE_FILE: .devcontainer/FreeRTOS-NXP/Dockerfile.FreeRTOS-NXP.SRC
-  CONTAINER_VERSION_FILE: .devcontainer/FreeRTOS-NXP/Dockerfile.FreeRTOS-NXP
+  CONTAINER_SRC_FILE: .devcontainer/FreeRTOS-NXP/Dockerfile.FreeRTOS-NXP.SRC
 
 on:
   push:
     branches:
       - main
     paths:
-      - '**Dockerfile.FreeRTOS-NXP' # We only care if the version has changed!
+      - '**Dockerfile.FreeRTOS-NXP'
 
   workflow_dispatch:
 
@@ -22,10 +21,6 @@ jobs:
   build:
     if: ${{ vars.PUBLISH_DOCKER_IMAGE == 'true' }}
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      packages: write
-
     steps:
 
     - name: Checkout Repository
@@ -40,29 +35,28 @@ jobs:
         large-packages: false
 
     - name: Get container version
-      shell: pwsh
       run: |
         $dockerfileContent = Get-Content("${{ env.CONTAINER_VERSION_FILE }}") -First 1
         $dockerfileContent -match '(?<=\:)(?:[v]\d+.\d+)'
         $containerVersion = $Matches[0].ToString()
         echo "GCR_VERSION=$containerVersion" | Out-File -FilePath $Env:GITHUB_ENV -Encoding utf-8 -Append
+      shell: pwsh
 
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v3
 
     - name: Login to GitHub Container Registry
-      if: ${{ github.event_name != 'pull_request' }}
       uses: docker/login-action@v3
       with:
-        registry: ${{ env.CONTAINER_REPO }}
+        registry: ghcr.io
         username: ${{ github.repository_owner }}
-        password: ${{ secrets.GITHUB_TOKEN }}
+        password: ${{ secrets.CONTAINER_BUILD_TOKEN }}
 
     - name: Build and Push Docker Image
       uses: docker/build-push-action@v5
       with:
-        file: ${{ env.CONTAINER_SOURCE_FILE }}
-        push: ${{ github.event_name != 'pull_request' }}
+        file: ${{ env.CONTAINER_SRC_FILE }}
+        push: true # Will only build if this is not here
         tags: |
           ${{ env.CONTAINER_REPO }}/${{ github.repository_owner }}/${{ env.CONTAINER_NAME }}:${{ env.GCR_VERSION }}
           ${{ env.CONTAINER_REPO }}/${{ github.repository_owner }}/${{ env.CONTAINER_NAME }}:latest

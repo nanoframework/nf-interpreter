@@ -158,6 +158,11 @@ void CLR_HW_Hardware::ProcessActivity()
         eventsCLR |= Event_I2cMaster;
     }
 
+    if (events & SYSTEM_EVENT_FLAG_I2C_SLAVE)
+    {
+        eventsCLR |= Event_I2cSlave;
+    }
+
     if (events & SYSTEM_EVENT_FLAG_ONEWIRE_MASTER)
     {
         eventsCLR |= Event_OneWireHost;

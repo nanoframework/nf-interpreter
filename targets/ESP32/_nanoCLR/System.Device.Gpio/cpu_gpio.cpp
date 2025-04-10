@@ -35,6 +35,12 @@ static const int spiReservedFinalGpio = 32;
 #elif defined(CONFIG_IDF_TARGET_ESP32C3)
 static const int spiReservedInitialGpio = 12;
 static const int spiReservedFinalGpio = 17;
+#elif defined(CONFIG_IDF_TARGET_ESP32C6)
+static const int spiReservedInitialGpio = 24;
+static const int spiReservedFinalGpio = 30;
+#elif defined(CONFIG_IDF_TARGET_ESP32H2)
+static const int spiReservedInitialGpio = 15;
+static const int spiReservedFinalGpio = 21;
 #else
 // use impossible GPIO numbers
 static const int spiReservedInitialGpio = 999;
@@ -52,11 +58,12 @@ struct gpio_input_state : public HAL_DblLinkedNode<gpio_input_state>
     uint32_t debounceMs;                   // debounce Millsecs, no debonce=0
     uint8_t mode;                          // Interrupt mode
     void *param;                           // Param to user isr call
+    bool current;                          // Current state
     bool expected;                         // Expected state for debounce handler
     bool waitingDebounce;                  // True if waiting for debounce timer to complete
 };
 
-static HAL_DblLinkedList<gpio_input_state> gpioInputList; // Doulble LInkedlist for GPIO input status
+static HAL_DblLinkedList<gpio_input_state> gpioInputList; // Double Linkedlist for GPIO input status
 static uint16_t pinReserved[TOTAL_GPIO_PORTS];            //  reserved - 1 bit per pin
 
 // memory for pin state
@@ -138,6 +145,7 @@ static void Esp_Gpio_DebounceHandler(TimerHandle_t timer)
 
         if (actual == state->expected)
         {
+            state->current = actual;
             state->isrPtr(state->pinNumber, actual, state->param);
 
             if (state->mode == GPIO_INT_EDGE_BOTH)
@@ -317,23 +325,20 @@ static void gpio_isr(void *arg)
         // flag waiting for debounce timeout
         state->waitingDebounce = true;
 
-        // store current state
-        state->expected = actual;
+        // store expected new state
+        state->expected = !state->current;
 
         // start timer
         xTimerStartFromISR(state->debounceTimer, &xHigherPriorityTaskWoken);
 
         if (xHigherPriorityTaskWoken != pdFAIL)
         {
-#if defined(CONFIG_IDF_TARGET_ESP32C3)
-            portYIELD_FROM_ISR();
-#else
             portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
-#endif            
         }
     }
     else
     {
+        state->current = actual;
         // just fire event
         state->isrPtr(state->pinNumber, actual, state->param);
     }
@@ -395,6 +400,7 @@ bool CPU_GPIO_EnableInputPin(
         state->mode = intEdge;
         state->param = (void *)isr_Param;
         state->debounceMs = debounceTimeMilliseconds;
+        state->current = CPU_GPIO_GetPinState(pinNumber);
 
         switch (intEdge)
         {
@@ -409,7 +415,7 @@ bool CPU_GPIO_EnableInputPin(
                 break;
 
             case GPIO_INT_EDGE_BOTH:
-                state->expected = !CPU_GPIO_GetPinState(pinNumber); // Use not current state
+                state->expected = !state->current; // Use not current state
                 break;
 
             default:
@@ -483,13 +489,13 @@ void CPU_GPIO_DisablePin(GPIO_PIN pinNumber, PinMode driveMode, uint32_t alterna
 bool CPU_GPIO_SetDriveMode(GPIO_PIN pinNumber, PinMode driveMode)
 {
     // Valid Pin
-    if (!GPIO_IS_VALID_GPIO(pinNumber))
+    if (!GPIO_IS_VALID_GPIO((int)pinNumber))
     {
         return false;
     }
 
     // Check Pin is output capable
-    if (driveMode >= (int)PinMode_Output && !GPIO_IS_VALID_OUTPUT_GPIO(pinNumber))
+    if (driveMode >= (int)PinMode_Output && !GPIO_IS_VALID_OUTPUT_GPIO((int)pinNumber))
     {
         return false;
     }
@@ -546,12 +552,12 @@ bool CPU_GPIO_SetDriveMode(GPIO_PIN pinNumber, PinMode driveMode)
 
 bool CPU_GPIO_DriveModeSupported(GPIO_PIN pinNumber, PinMode driveMode)
 {
-    if (!GPIO_IS_VALID_GPIO(pinNumber))
+    if (!GPIO_IS_VALID_GPIO((int)pinNumber))
         return false;
 
     // Input & Output pins use any valid drivemode.
     // Note: all output pins are also input pins
-    if (GPIO_IS_VALID_OUTPUT_GPIO(pinNumber))
+    if (GPIO_IS_VALID_OUTPUT_GPIO((int)pinNumber))
     {
         return (driveMode <= PinMode_OutputOpenSourcePullDown);
     }
@@ -562,7 +568,7 @@ bool CPU_GPIO_DriveModeSupported(GPIO_PIN pinNumber, PinMode driveMode)
 
 uint32_t CPU_GPIO_GetPinDebounce(GPIO_PIN pinNumber)
 {
-    if (!GPIO_IS_VALID_GPIO(pinNumber))
+    if (!GPIO_IS_VALID_GPIO((int)pinNumber))
     {
         return 0;
     }
@@ -578,7 +584,7 @@ uint32_t CPU_GPIO_GetPinDebounce(GPIO_PIN pinNumber)
 
 bool CPU_GPIO_SetPinDebounce(GPIO_PIN pinNumber, uint32_t debounceTimeMilliseconds)
 {
-    if (!GPIO_IS_VALID_GPIO(pinNumber))
+    if (!GPIO_IS_VALID_GPIO((int)pinNumber))
     {
         return false;
     }

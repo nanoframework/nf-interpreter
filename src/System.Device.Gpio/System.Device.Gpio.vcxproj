@@ -29,7 +29,7 @@
   <PropertyGroup Label="Globals">
     <ProjectGuid>{830a7e28-7b2b-4be6-8888-a39775a0092a}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
-    <RootNamespace>Windows.Storage</RootNamespace>
+    <RootNamespace>nanoFramework.System.Device.Gpio</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -103,8 +103,8 @@
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\targets\win32\Include;..\Include;..\CLR\Include;..\CorLib;..\HAL\Include;..\PAL\Include</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_DEBUG;DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\..\targets\win32\Include;..\Include;..\CLR\Include;..\CorLib;..\HAL\Include;..\PAL\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -116,8 +116,8 @@
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\targets\win32\Include;..\Include;..\CLR\Include;..\CorLib;..\HAL\Include;..\PAL\Include</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_DEBUG;DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\..\targets\win32\Include;..\Include;..\CLR\Include;..\CorLib;..\HAL\Include;..\PAL\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -132,7 +132,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\targets\win32\Include;..\Include;..\CLR\Include;..\CorLib;..\HAL\Include;..\PAL\Include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\targets\win32\Include;..\Include;..\CLR\Include;..\CorLib;..\HAL\Include;..\PAL\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -149,7 +149,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\targets\win32\Include;..\Include;..\CLR\Include;..\CorLib;..\HAL\Include;..\PAL\Include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\targets\win32\Include;..\Include;..\CLR\Include;..\CorLib;..\HAL\Include;..\PAL\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>

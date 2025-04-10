@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (c) .NET Foundation and Contributors
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
@@ -6,6 +6,11 @@
 #include "Core.h"
 #include <nanoHAL_Power.h>
 #include <nanoHAL_Time.h>
+
+#ifdef _WIN64
+#include <inttypes.h>
+#include <stdint.h>
+#endif
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -86,9 +91,9 @@ HRESULT CLR_RT_ExecutionEngine::ExecutionEngine_Initialize()
                                                     // CLR_RT_Thread*                      m_cctorThread;
                                                     //
 #if !defined(NANOCLR_APPDOMAINS)
-    m_globalLock = NULL;           // CLR_RT_HeapBlock*                   m_globalLock;
+    m_globalLock = NULL;           // CLR_RT_HeapBlock*                  m_globalLock;
     m_outOfMemoryException = NULL; // CLR_RT_HeapBlock*                   m_outOfMemoryException;
-#endif                             //
+#endif
 
     m_currentUICulture = NULL; // CLR_RT_HeapBlock*                   m_currentUICulture;
 
@@ -177,8 +182,8 @@ HRESULT CLR_RT_ExecutionEngine::AllocateHeaps()
         CLR_Debug::Printf("Heap Cluster information\r\n");
 
 #ifdef _WIN64
-        CLR_Debug::Printf("Start:       0x%I64X\r\n", (size_t)heapFirstFree);
-        CLR_Debug::Printf("Free:        0x%I64X\r\n", (size_t)heapFree);
+        CLR_Debug::Printf("Start:       0x%" PRIx64 "\r\n", heapFirstFree);
+        CLR_Debug::Printf("Free:        0x%" PRIx64 "\r\n", heapFree);
         CLR_Debug::Printf("Block size:  %d\r\n", sizeof(struct CLR_RT_HeapBlock));
 #else
         CLR_Debug::Printf("Start:       %08x\r\n", (size_t)heapFirstFree);
@@ -290,19 +295,25 @@ HRESULT CLR_RT_ExecutionEngine::StartHardware()
     NANOCLR_NOCLEANUP();
 }
 
-void CLR_RT_ExecutionEngine::Reboot(bool fHard)
+void CLR_RT_ExecutionEngine::Reboot(uint16_t rebootOptions)
 {
     NATIVE_PROFILE_CLR_CORE();
 
-    if (fHard)
+    if (CLR_DBG_Commands::Monitor_Reboot::c_EnterNanoBooter ==
+        (rebootOptions & CLR_DBG_Commands::Monitor_Reboot::c_EnterNanoBooter))
     {
-        ::CPU_Reset();
+        RequestToLaunchNanoBooter(0);
     }
-    else
+    else if (
+        CLR_DBG_Commands::Monitor_Reboot::c_EnterProprietaryBooter ==
+        (rebootOptions & CLR_DBG_Commands::Monitor_Reboot::c_EnterProprietaryBooter))
     {
-        CLR_EE_REBOOT_CLR;
-        CLR_EE_DBG_SET(RebootPending);
+        RequestToLaunchProprietaryBootloader();
     }
+
+    // apply reboot options and set reboot pending flag
+    g_CLR_RT_ExecutionEngine.m_iReboot_Options = rebootOptions;
+    CLR_EE_DBG_SET(RebootPending);
 }
 
 CLR_INT64 CLR_RT_ExecutionEngine::GetUptime()
@@ -411,6 +422,7 @@ CLR_UINT32 CLR_RT_ExecutionEngine::PerformGarbageCollection()
 void CLR_RT_ExecutionEngine::PerformHeapCompaction()
 {
     NATIVE_PROFILE_CLR_CORE();
+
     if (CLR_EE_DBG_IS(NoCompaction))
         return;
 
@@ -438,7 +450,7 @@ void CLR_RT_ExecutionEngine::Relocate()
 
 #if !defined(NANOCLR_APPDOMAINS)
     CLR_RT_GarbageCollector::Heap_Relocate((void **)&m_globalLock);
-    // CLR_RT_GarbageCollector::Heap_Relocate( (void**)&m_outOfMemoryException );
+    CLR_RT_GarbageCollector::Heap_Relocate((void **)&m_outOfMemoryException);
 #endif
 
     CLR_RT_GarbageCollector::Heap_Relocate((void **)&m_currentUICulture);
@@ -615,8 +627,6 @@ HRESULT CLR_RT_ExecutionEngine::Execute(wchar_t *entryPointArgs, int maxContextS
 
     CLR_RT_HeapBlock ref;
     CLR_RT_Thread *thMain = NULL;
-
-    memset(&ref, 0, sizeof(struct CLR_RT_HeapBlock));
 
     if (NANOCLR_INDEX_IS_INVALID(g_CLR_RT_TypeSystem.m_entryPoint))
     {
@@ -937,7 +947,6 @@ bool CLR_RT_ExecutionEngine::SpawnStaticConstructorHelper(CLR_RT_Assembly *assem
         CLR_RT_HeapBlock_Delegate *dlg;
         CLR_RT_HeapBlock refDlg;
 
-        memset(&refDlg, 0, sizeof(struct CLR_RT_HeapBlock));
         refDlg.SetObjectReference(NULL);
         CLR_RT_ProtectFromGC gc(refDlg);
 
@@ -1035,7 +1044,6 @@ void CLR_RT_ExecutionEngine::SpawnFinalizer()
     {
         CLR_RT_HeapBlock delegate;
 
-        memset(&delegate, 0, sizeof(struct CLR_RT_HeapBlock));
         delegate.SetObjectReference(NULL);
         CLR_RT_ProtectFromGC gc(delegate);
 
@@ -1608,7 +1616,13 @@ CLR_RT_HeapBlock *CLR_RT_ExecutionEngine::ExtractHeapBlocks(
 #if !defined(BUILD_RTM)
     if (m_heapState == c_HeapState_UnderGC && ((flags & CLR_RT_HeapBlock::HB_SpecialGCAllocation) == 0))
     {
-        CLR_Debug::Printf("Internal error: call to memory allocation during garbage collection!!!\r\n");
+
+#if defined(NANOCLR_GC_VERBOSE)
+        if (s_CLR_RT_fTrace_Memory >= c_CLR_RT_Trace_Info)
+        {
+            CLR_Debug::Printf("Internal error: call to memory allocation during garbage collection!!!\r\n");
+        }
+#endif
 
         // Getting here during a GC is possible, since the watchdog ISR may now require
         // dynamic memory allocation for logging.  Returning NULL means the watchdog log will
@@ -1623,16 +1637,6 @@ CLR_RT_HeapBlock *CLR_RT_ExecutionEngine::ExtractHeapBlocks(
         g_CLR_RT_EventCache.EventCache_Cleanup();
         PerformGarbageCollection();
     }
-#else
-
-#if !defined(BUILD_RTM) || defined(VIRTUAL_DEVICE)
-    if (g_CLR_RT_ExecutionEngine.m_fPerformGarbageCollection)
-    {
-        g_CLR_RT_EventCache.EventCache_Cleanup();
-        PerformGarbageCollection();
-    }
-#endif
-
 #endif
 
     for (int phase = 0;; phase++)
@@ -1722,22 +1726,28 @@ CLR_RT_HeapBlock *CLR_RT_ExecutionEngine::ExtractHeapBlocks(
                     // Throw the OOM, and schedule a compaction at a safe point
                     CLR_EE_SET(Compaction_Pending);
 
-#if !defined(BUILD_RTM)
-                    CLR_Debug::Printf(
-                        "\r\n\r\nFailed allocation for %d blocks, %d bytes.\r\nThere's enough free memory, heap "
-                        "compaction scheduled.\r\n\r\n",
-                        length,
-                        length * sizeof(struct CLR_RT_HeapBlock));
+#if defined(NANOCLR_GC_VERBOSE)
+                    if (s_CLR_RT_fTrace_Memory >= c_CLR_RT_Trace_Info)
+                    {
+                        CLR_Debug::Printf(
+                            "\r\n\r\nFailed allocation for %d blocks, %d bytes.\r\nThere's enough free memory, heap "
+                            "compaction scheduled.\r\n\r\n",
+                            length,
+                            length * sizeof(struct CLR_RT_HeapBlock));
+                    }
 #endif
                 }
                 else
                 {
 
-#if !defined(BUILD_RTM)
-                    CLR_Debug::Printf(
-                        "\r\n\r\nFailed allocation for %d blocks, %d bytes\r\n\r\n",
-                        length,
-                        length * sizeof(struct CLR_RT_HeapBlock));
+#if defined(NANOCLR_GC_VERBOSE)
+                    if (s_CLR_RT_fTrace_Memory >= c_CLR_RT_Trace_Info)
+                    {
+                        CLR_Debug::Printf(
+                            "\r\n\r\nFailed allocation for %d blocks, %d bytes\r\n\r\n",
+                            length,
+                            length * sizeof(struct CLR_RT_HeapBlock));
+                    }
 #endif
                 }
 
@@ -2177,7 +2187,6 @@ HRESULT CLR_RT_ExecutionEngine::CloneObject(CLR_RT_HeapBlock &reference, const C
             //
             CLR_RT_HeapBlock safeSource;
 
-            memset(&safeSource, 0, sizeof(struct CLR_RT_HeapBlock));
             safeSource.SetObjectReference(obj);
             CLR_RT_ProtectFromGC gc(safeSource);
 

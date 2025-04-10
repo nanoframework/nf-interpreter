@@ -3,15 +3,15 @@
 // See LICENSE file in the project root for full license information.
 //
 
-using CommandLine;
 using System.Collections.Generic;
+using CommandLine;
 
 namespace nanoFramework.nanoCLR.CLI
 {
     [Verb(
         "run",
         HelpText = "Run nanoCLR assembly.")]
-    public class ExecuteCommandLineOptions
+    public class ExecuteCommandLineOptions : CommonOptions
     {
         [Option(
             'a',
@@ -66,6 +66,20 @@ namespace nanoFramework.nanoCLR.CLI
         public bool TraceWireProtocol { get; set; }
 
         [Option(
+            "profiler",
+            Required = false,
+            Default = false,
+            HelpText = "Enable profiler.")]
+        public bool EnableProfiler { get; set; }
+
+        [Option(
+            "dumpprofilerdata",
+            Required = false,
+            Default = false,
+            HelpText = "Dump profiler raw data to a file.")]
+        public bool DumpProfilerData { get; set; }
+
+        [Option(
             'r',
             "resolve",
             Required = false,
@@ -106,29 +120,5 @@ namespace nanoFramework.nanoCLR.CLI
             Default = false,
             HelpText = "Option to force heap compaction after each GC run.")]
         public bool PerformHeapCompaction { get; set; }
-
-        [Option(
-            "localinstance",
-            Required = false,
-            Default = null,
-            Hidden = true,
-            HelpText = "Path to a local instance of the nanoCLR.")]
-        public string LocalInstance { get; set; }
-
-        /// <summary>
-        /// Allowed values:
-        /// q[uiet]
-        /// m[inimal]
-        /// n[ormal]
-        /// d[etailed]
-        /// diag[nostic]
-        /// </summary>
-        [Option(
-            'v',
-            "verbosity",
-            Required = false,
-            Default = "n",
-            HelpText = "Sets the verbosity level of the command. Allowed values are q[uiet], m[inimal], n[ormal], d[etailed], and diag[nostic]. Not supported in every command; see specific command page to determine if this option is available.")]
-        public string Verbosity { get; set; }
     }
 }

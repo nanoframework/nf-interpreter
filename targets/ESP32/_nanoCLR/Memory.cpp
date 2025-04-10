@@ -20,18 +20,35 @@
 
 static const char *TAG = "Memory";
 
-#if HAL_USE_BLE
-// Reduce Managed heap if using BLE without spiram
-#define INTERNAL_RAM_LEAVE_FREE_FOR_ALLOCATION (30 * 1024)
+// Minimum memory needed for IDF (native code)
+#if defined(CONFIG_IDF_TARGET_ESP32H2)
+#define MINIMUM_FREE_MEMORY_FOR_IDF (20 * 1024)
+#elif defined(CONFIG_IDF_TARGET_ESP32C6)
+#define MINIMUM_FREE_MEMORY_FOR_IDF (90 * 1024)
+#elif defined(CONFIG_IDF_TARGET_ESP32S3)
+#define MINIMUM_FREE_MEMORY_FOR_IDF (130 * 1024)
 #else
+#define MINIMUM_FREE_MEMORY_FOR_IDF (100 * 1024)
+#endif
+
+// If bluetooth configured then increase minimum by value
+#define BLE_EXTRA_IDF_MEMORY_RESERVE (30 * 1024)
+// If Thread configured then increase minimum by value
+#define THREAD_EXTRA_IDF_MEMORY_RESERVE (20 * 1024)
+
 // Space to leave free in internal RAM for allocation by IDF malloc
 #define INTERNAL_RAM_LEAVE_FREE_FOR_ALLOCATION (ESP32_RESERVED_RAM_FOR_IDF_ALLOCATION * 1024)
-#endif
+
+//////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////
+// uncomment, in case there is a need to check the heap info
+// #define PRINT_HEAP_INFO  1
 
 // Saved memory allocation for when heap is reset so we can return same value.
 unsigned char *managedHeap = NULL;
 size_t managedHeapSize = 0;
 
+#ifdef PRINT_HEAP_INFO
 extern "C"
 {
     typedef portMUX_TYPE multi_heap_lock_t;
@@ -80,6 +97,7 @@ void print_heap_info(uint32_t caps)
         info.minimum_free_bytes,
         info.largest_free_block);
 }
+#endif
 
 //
 //	Return the location and size of the managed heap
@@ -92,12 +110,9 @@ void HeapLocation(unsigned char *&baseAddress, unsigned int &sizeInBytes)
     // Memory allocated yet ?
     if (managedHeap == NULL)
     {
-        //////////////////////////////////////////////////////////////
-        //////////////////////////////////////////////////////////////
-        // uncomment, in case there is a need to check the heap info
-        //  print_heap_info(MALLOC_CAP_8BIT | MALLOC_CAP_32BIT | MALLOC_CAP_SPIRAM);
-        //////////////////////////////////////////////////////////////
-        //////////////////////////////////////////////////////////////
+#ifdef PRINT_HEAP_INFO
+        print_heap_info(MALLOC_CAP_8BIT | MALLOC_CAP_32BIT | MALLOC_CAP_SPIRAM);
+#endif
 
         // default memory caps
         uint32_t memoryCaps = MALLOC_CAP_8BIT | MALLOC_CAP_32BIT;
@@ -122,20 +137,44 @@ void HeapLocation(unsigned char *&baseAddress, unsigned int &sizeInBytes)
         }
         else
         {
-            // allocate from internal RAM
+            // No spiram found so allocate from internal RAM
+            // Calculate minimum memory reserved for IDF
+            size_t minIdfMemory = MINIMUM_FREE_MEMORY_FOR_IDF;
+#if HAL_USE_BLE
+            minIdfMemory += BLE_EXTRA_IDF_MEMORY_RESERVE;
+#endif
+#if HAL_USE_THREAD
+            minIdfMemory += THREAD_EXTRA_IDF_MEMORY_RESERVE;
+#endif
 
-            // find out how much can be allocated?
+            // Calculate extra IDF memory to reserve, at least minimum memory
+            // if ESP32_RESERVED_RAM_FOR_IDF_ALLOCATION specified then use it if bigger then minIdfMemory
+            size_t IdfToReserve =
+                (INTERNAL_RAM_LEAVE_FREE_FOR_ALLOCATION > 0) ? INTERNAL_RAM_LEAVE_FREE_FOR_ALLOCATION : minIdfMemory;
+
+            // Maximum free space in all heap blocks
+            size_t freeSpaceHeap = heap_caps_get_free_size(memoryCaps);
+
+            // find out largest available space for managed heap?
             largestFreeBlock = heap_caps_get_largest_free_block(memoryCaps);
 
-            // get heap size to allocate
-            managedHeapSize = largestFreeBlock - INTERNAL_RAM_LEAVE_FREE_FOR_ALLOCATION;
+            // get managed heap size to allocate and if required adjust down to fit in largest block
+            // Reserve minimum IDF memory by subtracting off free space
+            // Everything left can be used for managed code
+            ASSERT(freeSpaceHeap > IdfToReserve);
+            managedHeapSize = (freeSpaceHeap - IdfToReserve);
 
-            ESP_LOGI(TAG, "Allocating managed heap from internal RAM");
+            // Adjust managed heap size down to fit in largest native heap block
+            if (managedHeapSize > largestFreeBlock)
+            {
+                managedHeapSize = largestFreeBlock;
+            }
+
+            ESP_LOGI(TAG, "Allocating managed heap from internal RAM, total free heap %d", freeSpaceHeap);
         }
 
         // allocate managed heap
         managedHeap = (unsigned char *)heap_caps_malloc(managedHeapSize, memoryCaps);
-
         if (managedHeap)
         {
             // managed heap successfully allocated

@@ -14,7 +14,7 @@
 #include <nanoPackStruct.h>
 #include <corlib_native.h>
 
-#include <rmt.h>
+#include <driver/rmt.h>
 
 // Reduce line lengths
 #define CHANNEL(channel) static_cast<rmt_channel_t>(channel)
@@ -30,6 +30,18 @@ typedef enum __nfpack SourceClock
     SourceClock_APB = 0,
     SourceClock_REF = 1,
 } SourceClock;
+
+struct Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_Esp32_Rmt_RmtChannelSettings
+{
+    static const int FIELD___channel = 1;
+    static const int FIELD___pinNumber = 2;
+    static const int FIELD___clockDivider = 3;
+    static const int FIELD___numberOfMemoryBlocks = 4;
+    static const int FIELD___bufferSize = 5;
+    static const int FIELD___signalInverterEnabled = 6;
+
+    //--//
+};
 
 struct Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_Esp32_Rmt_RmtCommand
 {
@@ -91,6 +103,7 @@ struct Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_Es
     NANOCLR_NATIVE_DECLARE(NativeSetGpioPin___VOID__I4__U1__I4__BOOLEAN);
     NANOCLR_NATIVE_DECLARE(NativeSetClockDivider___VOID__U1);
     NANOCLR_NATIVE_DECLARE(NativeSetNumberOfMemoryBlocks___VOID__U1);
+    NANOCLR_NATIVE_DECLARE(NativeGetSourceClockFrequency___STATIC__I4);
 
     //--//
 
@@ -98,18 +111,6 @@ struct Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_Es
 
     static bool CheckChannel(int channel);
     static CLR_INT32 FindNextChannel();
-};
-
-struct Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_Esp32_Rmt_RmtChannelSettings
-{
-    static const int FIELD___channel = 1;
-    static const int FIELD___pinNumber = 2;
-    static const int FIELD___clockDivider = 3;
-    static const int FIELD___numberOfMemoryBlocks = 4;
-    static const int FIELD___bufferSize = 5;
-    static const int FIELD___signalInverterEnabled = 6;
-
-    //--//
 };
 
 struct Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_Esp32_Rmt_TransmitChannelSettings

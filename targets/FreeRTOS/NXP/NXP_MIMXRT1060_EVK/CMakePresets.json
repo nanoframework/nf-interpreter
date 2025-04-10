@@ -25,7 +25,7 @@
                 "LWIP_VERSION": "",
                 "NF_BUILD_RTM": "OFF",
                 "NF_FEATURE_DEBUGGER": "ON",
-                "NF_FEATURE_HAS_SDCARD": "ON",
+                "NF_FEATURE_HAS_SDCARD": "OFF",
                 "NF_FEATURE_RTC": "ON",
                 "NF_FEATURE_HAS_CONFIG_BLOCK": "ON",
                 "NF_SECURITY_MBEDTLS": "OFF",

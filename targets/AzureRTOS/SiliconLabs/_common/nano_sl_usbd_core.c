@@ -40,6 +40,7 @@
 #include "sli_usbd_driver.h"
 
 #include <nanoHAL_v2.h>
+#include <targetHAL.h>
 
 /********************************************************************************************************
  ********************************************************************************************************
@@ -985,12 +986,12 @@ sl_status_t sl_usbd_core_add_interface(uint8_t                cfg_nbr,
   p_dev = &usbd_ptr->device;
 
 // [NF_CHANGE]  
+// Following SDKv4.4.0 is now OK to perform this check here
 // Chk curr dev state.
-// {
-//  if ((p_dev->state != SL_USBD_DEVICE_STATE_NONE) && (p_dev->state != SL_USBD_DEVICE_STATE_INIT)) {
-//    *p_if_nbr = SL_USBD_INTERFACE_NBR_NONE;
-//    return SL_STATUS_INVALID_STATE;
-// }
+ if ((p_dev->state != SL_USBD_DEVICE_STATE_NONE) && (p_dev->state != SL_USBD_DEVICE_STATE_INIT)) {
+   *p_if_nbr = SL_USBD_INTERFACE_NBR_NONE;
+   return SL_STATUS_INVALID_STATE;
+}
 // [END_NF_CHANGE]
 
   // Get cfg struct.
@@ -5542,6 +5543,11 @@ void sli_usbd_core_task_handler(void)
   sl_status_t status;
 
 #if SL_USBD_AUTO_START_USB_DEVICE == 1
+// [NF_CHANGE]
+// Starting at SDK 4.4.0 it's OK to start the USB device without stopping it first
+// sl_usbd_core_stop_device();
+// tx_thread_sleep(TX_TICKS_PER_MILLISEC(50));
+// [END_NF_CHANGE]  
   sl_usbd_core_start_device();
 #endif
 

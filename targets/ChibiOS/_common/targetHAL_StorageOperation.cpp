@@ -13,11 +13,52 @@
 #include <target_platform.h>
 #include <target_os.h>
 #include <targetHAL_StorageOperation.h>
-#include <hal_spiffs.h>
 
 #if HAS_ACCESSIBLE_STORAGE
 
-#if defined(NF_FEATURE_USE_SPIFFS) && (NF_FEATURE_USE_SPIFFS == TRUE)
+#if defined(NF_FEATURE_USE_LITTLEFS) && (NF_FEATURE_USE_LITTLEFS == TRUE)
+
+#include <hal_littlefs.h>
+
+// Function to create all necessary intermediate directories with LittleFS
+int create_directories(lfs_t *lfs, const char *path)
+{
+    char temp[256];
+    char *pos = NULL;
+    size_t len = 0;
+    int res = 0;
+
+    len = hal_strlen_s(path);
+
+    snprintf(temp, sizeof(temp), "%s", path);
+    if (temp[len - 1] == '/')
+    {
+        temp[len - 1] = 0;
+    }
+
+    for (pos = temp + 1; *pos; pos++)
+    {
+        if (*pos == '/')
+        {
+            *pos = 0;
+            res = lfs_mkdir(lfs, temp);
+            if (res == LFS_ERR_OK)
+            {
+                *pos = '/';
+                continue;
+            }
+            else if (res != LFS_ERR_EXIST)
+            {
+                return -1;
+            }
+        }
+    }
+
+    // Create the final directory
+    res = lfs_mkdir(lfs, temp);
+
+    return res == LFS_ERR_OK || res == LFS_ERR_EXIST ? 0 : -1;
+}
 
 uint32_t HAL_StorageOperation(
     uint8_t operation,
@@ -28,8 +69,9 @@ uint32_t HAL_StorageOperation(
 {
     (void)offset;
 
-    spiffs_file *spiffsFile = NULL;
-    spiffs *driveFs = NULL;
+    lfs_file_t lfsFile;
+    lfs_t *lfsDrive = NULL;
+
     // default to drive 0
     int32_t driveIndex = 0;
     StorageOperationErrorCode errorCode = StorageOperationErrorCode::NoError;
@@ -55,38 +97,62 @@ uint32_t HAL_StorageOperation(
     // Just making sure it's properly 0 terminated
     storageName[nameLength] = '\0';
 
-    //... and pointer to the SPIFFS instance
-    driveFs = hal_spiffs_get_fs_from_index(driveIndex);
+    //... and pointer to the littlefs instance
+    lfsDrive = hal_lfs_get_fs_from_index(driveIndex);
 
     if (operation == StorageOperation_Monitor::StorageOperation_Write)
     {
-        // Open the file in read mode
-        *spiffsFile = SPIFFS_open(driveFs, storageName, SPIFFS_CREAT | SPIFFS_TRUNC | SPIFFS_RDWR, 0);
-        if (*spiffsFile < 0)
+        memset(&lfsFile, 0, sizeof(lfsFile));
+
+        // Extract directory path from file path
+        char dir_path[256];
+        snprintf(dir_path, sizeof(dir_path), "%s", storageName);
+        char *last_slash = strrchr(dir_path, '/');
+        if (last_slash != NULL)
+        {
+            *last_slash = '\0';
+        }
+        else
+        {
+            // No directory part, file is in the root
+            dir_path[0] = '\0';
+        }
+
+        // Check if there is only one slash in the path
+        if (strchr(dir_path, '/') == strrchr(dir_path, '/'))
+        {
+            // Only one slash, skip creating the directory
+            dir_path[0] = '\0';
+        }
+
+        // Create all necessary intermediate directories
+        if (dir_path[0] != '\0' && create_directories(lfsDrive, dir_path) != 0)
+        {
+            errorCode = StorageOperationErrorCode::WriteError;
+            goto done;
+        }
+
+        // Open/create the file in read mode
+        if (lfs_file_open(lfsDrive, &lfsFile, storageName, LFS_O_RDWR | LFS_O_CREAT) != LFS_ERR_OK)
         {
             errorCode = StorageOperationErrorCode::WriteError;
 
             goto done;
         }
 
-        if (SPIFFS_write(
-                driveFs,
-                *spiffsFile,
-                (data + nameLength),
-                dataLength) < 0)
+        if (lfs_file_write(lfsDrive, &lfsFile, (data + nameLength), dataLength) != (lfs_ssize_t)dataLength)
         {
             // failed to write expected number of bytes
             errorCode = StorageOperationErrorCode::WriteError;
         }
 
         // close file
-        SPIFFS_close(driveFs, *spiffsFile);
+        lfs_file_close(lfsDrive, &lfsFile);
     }
     else if (operation == StorageOperation_Monitor::StorageOperation_Append)
     {
-        // Open the file in apped mode
-        *spiffsFile = SPIFFS_open(driveFs, storageName, SPIFFS_APPEND | SPIFFS_RDWR, 0);
-        if (*spiffsFile < 0)
+        // Open/create the file in read mode
+        if (lfs_file_open(lfsDrive, &lfsFile, storageName, LFS_O_RDWR | LFS_O_APPEND) != LFS_ERR_OK)
         {
             errorCode = StorageOperationErrorCode::WriteError;
 
@@ -94,23 +160,19 @@ uint32_t HAL_StorageOperation(
         }
 
         // append more data
-        if (SPIFFS_write(
-                driveFs,
-                *spiffsFile,
-                (data + nameLength),
-                dataLength) < 0)
+        if (lfs_file_write(lfsDrive, &lfsFile, (data + nameLength), dataLength) != (lfs_ssize_t)dataLength)
         {
             // failed to write expected number of bytes
             errorCode = StorageOperationErrorCode::WriteError;
         }
 
         // close file
-        SPIFFS_close(driveFs, *spiffsFile);
+        lfs_file_close(lfsDrive, &lfsFile);
     }
     else if (operation == StorageOperation_Monitor::StorageOperation_Delete)
     {
         // remove the file
-        if (SPIFFS_remove(driveFs, storageName) < 0)
+        if (lfs_remove(lfsDrive, storageName) != LFS_ERR_OK)
         {
             errorCode = StorageOperationErrorCode::DeleteError;
         }
@@ -127,6 +189,7 @@ done:
     return errorCode;
 }
 
-#endif // HAL_USE_SPIFFS
+#endif // NF_FEATURE_USE_LITTLEFS
+
 #endif // HAS_ACCESSIBLE_STORAGE
 #endif // I_AM_NANOCLR

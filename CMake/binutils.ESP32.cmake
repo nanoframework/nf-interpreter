@@ -184,7 +184,7 @@ function(nf_set_esp32_target_series)
     set(TARGET_SERIES_SHORT ${TARGET_SERIES_2} CACHE INTERNAL "ESP32 target series lower case, short version")
 
     # set the CPU type
-    if(${TARGET_SERIES_SHORT} STREQUAL "esp32c3" OR ${TARGET_SERIES_SHORT} STREQUAL "esp32h2")
+    if(${TARGET_SERIES_SHORT} STREQUAL "esp32c3" OR ${TARGET_SERIES_SHORT} STREQUAL "esp32c6" OR ${TARGET_SERIES_SHORT} STREQUAL "esp32h2" )
         set(ESP32_CPU_TYPE "riscv" CACHE INTERNAL "Setting CPU type")
     else()
         set(ESP32_CPU_TYPE "xtensa" CACHE INTERNAL "Setting CPU type")
@@ -292,12 +292,6 @@ macro(nf_add_platform_dependencies target)
 
     # if(USE_FILESYSTEM_OPTION)
     #     find_package(CHIBIOS_FATFS REQUIRED)
-    # endif()
-
-    # # SPIFFS
-    # if(NF_FEATURE_USE_SPIFFS)
-    #     find_package(STM32F7_CubePackage REQUIRED)
-    #     find_package(SPIFFS REQUIRED)
     # endif()
 
 endmacro()
@@ -470,7 +464,12 @@ macro(nf_setup_partition_tables_generator)
     # create command line for partition table generator
     set(gen_partition_table "python" "${ESP32_PARTITION_TABLE_UTILITY}")
 
-    if(${TARGET_SERIES_SHORT} STREQUAL "esp32" OR ${TARGET_SERIES_SHORT} STREQUAL "esp32c3" OR ${TARGET_SERIES_SHORT} STREQUAL "esp32s2" OR ${TARGET_SERIES_SHORT} STREQUAL "esp32s3")
+    if(${TARGET_SERIES_SHORT} STREQUAL "esp32" OR 
+       ${TARGET_SERIES_SHORT} STREQUAL "esp32c3" OR 
+       ${TARGET_SERIES_SHORT} STREQUAL "esp32c6" OR 
+       ${TARGET_SERIES_SHORT} STREQUAL "esp32h2" OR 
+       ${TARGET_SERIES_SHORT} STREQUAL "esp32s2" OR 
+       ${TARGET_SERIES_SHORT} STREQUAL "esp32s3")
 
         add_custom_command( TARGET ${NANOCLR_PROJECT_NAME}.elf POST_BUILD
             COMMAND ${gen_partition_table} 
@@ -481,7 +480,10 @@ macro(nf_setup_partition_tables_generator)
 
     endif()
 
-    if(${TARGET_SERIES_SHORT} STREQUAL "esp32" OR ${TARGET_SERIES_SHORT} STREQUAL "esp32s2" OR ${TARGET_SERIES_SHORT} STREQUAL "esp32s3")
+    if(${TARGET_SERIES_SHORT} STREQUAL "esp32" OR 
+       ${TARGET_SERIES_SHORT} STREQUAL "esp32c6" OR 
+       ${TARGET_SERIES_SHORT} STREQUAL "esp32s2" OR 
+       ${TARGET_SERIES_SHORT} STREQUAL "esp32s3")
 
         add_custom_command( TARGET ${NANOCLR_PROJECT_NAME}.elf POST_BUILD
             COMMAND ${gen_partition_table} 
@@ -499,7 +501,21 @@ macro(nf_setup_partition_tables_generator)
 
     endif()
 
-    if(${TARGET_SERIES_SHORT} STREQUAL "esp32" OR ${TARGET_SERIES_SHORT} STREQUAL "esp32c3" )
+    if(${TARGET_SERIES_SHORT} STREQUAL "esp32s3")
+
+        # 32MB partition table for ESP32_S3
+        add_custom_command( TARGET ${NANOCLR_PROJECT_NAME}.elf POST_BUILD
+            COMMAND ${gen_partition_table} 
+            --flash-size 32MB 
+            ${CMAKE_SOURCE_DIR}/targets/ESP32/_IDF/${TARGET_SERIES_SHORT}/partitions_nanoclr_32mb.csv
+            ${CMAKE_BINARY_DIR}/partitions_32mb.bin
+            COMMENT "Generate partition table for 32MB flash" )
+
+    endif()
+
+    if(${TARGET_SERIES_SHORT} STREQUAL "esp32" OR 
+       ${TARGET_SERIES_SHORT} STREQUAL "esp32c3" OR
+       ${TARGET_SERIES_SHORT} STREQUAL "esp32h2" )
         # 2MB partition table for ESP32
        
         add_custom_command( TARGET ${NANOCLR_PROJECT_NAME}.elf POST_BUILD
@@ -512,25 +528,107 @@ macro(nf_setup_partition_tables_generator)
 
 endmacro()
 
+# macro to add the tinyusb component which has been downloaded from component registry to IDF components directory
+# As the Component Manager is not available for IDF as Library projects we need to set up environment manually for the 
+# esp_tinyusb to tinyusb dependency.
+macro(nf_add_tinyusb_component)
+
+    # get the esp_tinyusb target library name
+    idf_component_get_property(etusb_lib esp_tinyusb COMPONENT_LIB)
+    # add the tinyusb src directory as include path to esp_tinyusb library project
+    target_include_directories(${etusb_lib} PRIVATE ${esp32_idf_SOURCE_DIR}/components/tinyusb/src)
+
+    # also add the freertos directory as include path
+    idf_component_get_property(freertos_include freertos ORIG_INCLUDE_PATH)
+    target_include_directories(${etusb_lib} PRIVATE ${freertos_include})
+
+    # Set the CFG_TUSB_MCU compile option for the target MCU
+    # for esp_tinyusb lib and main project
+    if(${TARGET_SERIES_SHORT} STREQUAL "esp32s3")
+        set(tusb_mcu "OPT_MCU_ESP32S3")
+    elseif(${TARGET_SERIES_SHORT} STREQUAL "esp32s2")
+        set(tusb_mcu "OPT_MCU_ESP32S2")
+    elseif(${TARGET_SERIES_SHORT} STREQUAL "esp32p4")
+        set(tusb_mcu "OPT_MCU_ESP32P4")
+    endif()
+
+    set(compile_options
+        "-DCFG_TUSB_MCU=${tusb_mcu}"
+    )
+
+    target_compile_options(${etusb_lib} PUBLIC ${compile_options})
+    target_compile_options(${NANOCLR_PROJECT_NAME}.elf PUBLIC ${compile_options})
+
+endmacro()
+
+#macro to install component from component registry into IDF component directory
+macro(nf_install_idf_component_from_registry component_name object_id)
+
+    message(STATUS "Checking if component '" ${component_name} "' needs to be installed")
+    
+    set(downloadUrl https://components.espressif.com/api/downloads/?object_type=component&object_id=${object_id})
+    set(archiveName ${CMAKE_BINARY_DIR}/downloads/${component_name}_${object_id}.zip)
+    set(destinationPath ${IDF_PATH_CMAKED}/components/${component_name})
+    set(extractPath ${IDF_PATH_CMAKED}/components)
+
+    if(NOT EXISTS ${destinationPath})
+        file(DOWNLOAD ${downloadUrl} ${archiveName})
+        message(STATUS "Component archive '" ${component_name} "' downloaded")
+
+        file(ARCHIVE_EXTRACT 
+            INPUT ${archiveName} 
+            DESTINATION ${extractPath}
+        )
+
+        # Remove idf_component.yml file otherwise we will get warning about Component manager not being enabled
+        file(REMOVE ${destinationPath}/idf_component.yml)
+        message(STATUS "'" ${component_name} "' installed in IDF component directory > " components/${component_name})
+    
+    endif()
+
+endmacro()
+
 # macro to add IDF as a library to the build and add the IDF components according to variant and options
 macro(nf_add_idf_as_library)
 
+    # Load any required Components from Component registry
+    # Must be done before "tools/cmake/idf.cmake" 
+    if(ESP32_USB_CDC)
+        nf_install_idf_component_from_registry(tinyusb 55142eec-a3a4-47a5-ad01-4ba3ef44444b) 
+        nf_install_idf_component_from_registry(esp_tinyusb 8115ffc9-366a-4340-94ab-e327aed20831) 
+    endif()
+
+    nf_install_idf_component_from_registry(littlefs 4831aa41-8b72-48ac-a534-910a985a5519) 
+    
     include(${IDF_PATH_CMAKED}/tools/cmake/idf.cmake)
 
-    # "fix" the reported version so it doesn't show '-dirty' 
+    # if needed, "fix" the reported version so it doesn't show '-dirty'
     # this is because we could be deleting some files and tweaking others in the IDF
     get_property(MY_IDF_VER TARGET __idf_build_target PROPERTY IDF_VER)
-    string(REPLACE "-dirty" "" MY_IDF_VER_FIXED "${MY_IDF_VER}")
-    set_property(TARGET __idf_build_target PROPERTY IDF_VER ${MY_IDF_VER_FIXED})
-    set(IDF_VER_FIXED ${MY_IDF_VER_FIXED} CACHE INTERNAL "IDF version as CMake var")
 
-    # for COMPILE DEFINITIONS it's a bit more work
-    get_property(IDF_COMPILE_DEFINITIONS TARGET __idf_build_target PROPERTY COMPILE_DEFINITIONS )
+    # sanity check
+    if(${MY_IDF_VER} STREQUAL "")
+        message(FATAL_ERROR "Couldn't get IDF version from target __idf_build_target")
+    endif()
 
-    string(REPLACE "-dirty" "" IDF_COMPILE_DEFINITIONS_FIXED "${IDF_COMPILE_DEFINITIONS}")
-    set_property(TARGET __idf_build_target PROPERTY COMPILE_DEFINITIONS ${IDF_COMPILE_DEFINITIONS_FIXED})
-    
-    message(STATUS "Fixed IDF version. Is now: ${MY_IDF_VER_FIXED}")
+    message(STATUS "Current IDF version is: ${MY_IDF_VER}")
+
+    string(FIND ${MY_IDF_VER} "-dirty" MY_IDF_VER_DIRTY)
+    if(${MY_IDF_VER_DIRTY} GREATER -1)
+
+        # found '-dirty' in the version string
+        string(REPLACE "-dirty" "" MY_IDF_VER_FIXED "${MY_IDF_VER}")
+        set_property(TARGET __idf_build_target PROPERTY IDF_VER ${MY_IDF_VER_FIXED})
+        set(IDF_VER_FIXED ${MY_IDF_VER_FIXED} CACHE INTERNAL "IDF version as CMake var")
+
+        # for COMPILE DEFINITIONS it's a bit more work
+        get_property(IDF_COMPILE_DEFINITIONS TARGET __idf_build_target PROPERTY COMPILE_DEFINITIONS )
+
+        string(REPLACE "-dirty" "" IDF_COMPILE_DEFINITIONS_FIXED "${IDF_COMPILE_DEFINITIONS}")
+        set_property(TARGET __idf_build_target PROPERTY COMPILE_DEFINITIONS ${IDF_COMPILE_DEFINITIONS_FIXED})
+        
+        message(STATUS "Fixed IDF version. Is now: ${MY_IDF_VER_FIXED}")
+    endif()
 
     # check for SDK config from build options
     if(SDK_CONFIG_FILE)
@@ -557,28 +655,45 @@ macro(nf_add_idf_as_library)
 
     # Save original contents to be restored later
     file(READ
-    "${SDKCONFIG_DEFAULTS_FILE}"
-    SDKCONFIG_ORIGINAL_CONTENTS)
+        "${SDKCONFIG_DEFAULTS_FILE}"
+        SDKCONFIG_ORIGINAL_CONTENTS
+    )
+
+    # Make temporary copy of sdkconfig.defaults.? file into build dir as we are going to make changes
+    set(SDKCONFIG_DEFAULTS_TEMP_FILE ${CMAKE_SOURCE_DIR}/build/sdkconfig.default)
+    file(WRITE ${SDKCONFIG_DEFAULTS_TEMP_FILE} ${SDKCONFIG_ORIGINAL_CONTENTS})
 
     # set list with the IDF components to add
     # need to match the list below with the respective libraries
     set(IDF_COMPONENTS_TO_ADD
-        ${TARGET_SERIES_SHORT}
+        lwip
         freertos
         esptool_py
-        spiffs
         fatfs
+        esp_wifi
+        esp_event
+        vfs
+        esp_netif
+        esp_eth
+        esp_psram
+        littlefs
     )
 
     # set list with the libraries for IDF components added
     # need to match the list above with the IDF components
     set(IDF_LIBRARIES_TO_ADD
-        idf::${TARGET_SERIES_SHORT}
+        idf::lwip
         idf::freertos
         idf::esptool_py
-        idf::spiffs
         idf::fatfs
-  )
+        idf::esp_wifi
+        idf::esp_event
+        idf::vfs
+        idf::esp_netif
+        idf::esp_eth
+        idf::esp_psram
+        idf::littlefs
+    )
 
     if(HAL_USE_BLE_OPTION)
         list(APPEND IDF_COMPONENTS_TO_ADD bt)
@@ -590,44 +705,101 @@ macro(nf_add_idf_as_library)
         list(APPEND IDF_LIBRARIES_TO_ADD idf::esp_eth)
     endif()
 
+    if(HAL_USE_THREAD_OPTION)
+        list(APPEND IDF_COMPONENTS_TO_ADD openthread)
+        list(APPEND IDF_LIBRARIES_TO_ADD idf::openthread)
+    endif()
+
     # handle specifics for ESP32S2/S3 series
     if(${TARGET_SERIES_SHORT} STREQUAL "esp32s2" OR ${TARGET_SERIES_SHORT} STREQUAL "esp32s3")
+
+        # need to read the supplied SDK CONFIG file and replace the appropriate option
+        file(READ
+            "${SDKCONFIG_DEFAULTS_TEMP_FILE}"
+            SDKCONFIG_DEFAULT_CONTENTS
+        )
 
         if(ESP32_USB_CDC)
 
             # add IDF components specific to ESP32S2/S3 series
-            list(APPEND IDF_COMPONENTS_TO_ADD tinyusb)
-            list(APPEND IDF_LIBRARIES_TO_ADD idf::tinyusb)
+            # They have to be added in a specific order so they compile/link ok
+            list(APPEND IDF_COMPONENTS_TO_ADD tinyusb) 
+            list(APPEND IDF_COMPONENTS_TO_ADD esp_tinyusb) 
+            list(APPEND IDF_LIBRARIES_TO_ADD idf::esp_tinyusb) 
+            list(APPEND IDF_LIBRARIES_TO_ADD  idf::tinyusb) 
+
+            string(APPEND SDKCONFIG_DEFAULT_CONTENTS "\nCONFIG_TINYUSB_ENABLED=y\n")
+            string(APPEND SDKCONFIG_DEFAULT_CONTENTS "CONFIG_TINYUSB_CDC_ENABLED=y\n")
+            string(APPEND SDKCONFIG_DEFAULT_CONTENTS "CONFIG_TINYUSB_DESC_PRODUCT_STRING=\"nanoFramework device\"\n")
+            string(APPEND SDKCONFIG_DEFAULT_CONTENTS "CONFIG_TINYUSB_DESC_CDC_STRING=\"nanoFramework device\"\n")
+            string(APPEND SDKCONFIG_DEFAULT_CONTENTS "CONFIG_TINYUSB_CDC_RX_BUFSIZE=64\n")
+            string(APPEND SDKCONFIG_DEFAULT_CONTENTS "CONFIG_TINYUSB_CDC_TX_BUFSIZE=1024\n")
 
             message(STATUS "Support for embedded USB CDC enabled")
-
-            # SDKCONFIG for ESP32S2 has embedded USB CDC enabled as default
-
         else()
             message(STATUS "Support for embedded USB CDC **IS NOT** enabled")
 
-            # need to read the supplied SDK CONFIG file and replace the appropriate option
-            file(READ
-                "${SDKCONFIG_DEFAULTS_FILE}"
-                SDKCONFIG_DEFAULT_CONTENTS)
-
-            string(REPLACE
-                "CONFIG_USB_ENABLED=y"
-                "CONFIG_USB_ENABLED=n"
-                SDKCONFIG_DEFAULT_FINAL_CONTENTS
-                "${SDKCONFIG_DEFAULT_CONTENTS}")
-
-            # need to temporarilly allow changes in source files
-            set(CMAKE_DISABLE_SOURCE_CHANGES OFF)
-
-            file(WRITE 
-                ${SDKCONFIG_DEFAULTS_FILE} 
-                ${SDKCONFIG_DEFAULT_FINAL_CONTENTS})
-
-            set(CMAKE_DISABLE_SOURCE_CHANGES ON)
-
+            string(APPEND SDKCONFIG_DEFAULT_CONTENTS "\nCONFIG_TINYUSB_ENABLED=n\n")
         endif()
 
+        # need to temporarily allow changes in source files
+        set(CMAKE_DISABLE_SOURCE_CHANGES OFF)
+
+        file(WRITE 
+            ${SDKCONFIG_DEFAULTS_TEMP_FILE} 
+            ${SDKCONFIG_DEFAULT_CONTENTS})
+
+        set(CMAKE_DISABLE_SOURCE_CHANGES ON)
+
+    endif()
+
+    option(HAL_USE_THREAD_OPTION "option to enable OpenThread support")
+    option(THREAD_DEVICE_TYPE "option to specify OpenThread device type (FTD or MTD")
+
+    if(HAL_USE_THREAD_OPTION)
+        message(DEBUG "Reading SDK config from '${SDKCONFIG_DEFAULTS_FILE}' to set Thread options")
+
+        file(READ
+            "${SDKCONFIG_DEFAULTS_TEMP_FILE}"
+            SDKCONFIG_DEFAULT_CONTENTS)
+
+        # Append config based on options
+        string(APPEND SDKCONFIG_DEFAULT_CONTENTS "\nCONFIG_OPENTHREAD_ENABLED=y\n")
+        string(APPEND SDKCONFIG_DEFAULT_CONTENTS "\nCONFIG_OPENTHREAD_CLI=y\n")
+        string(APPEND SDKCONFIG_DEFAULT_CONTENTS "CONFIG_OPENTHREAD_LOG_LEVEL_DYNAMIC=y\n")
+        string(APPEND SDKCONFIG_DEFAULT_CONTENTS "CONFIG_OPENTHREAD_JOINER=y\n")
+        
+        # make sure these options are enabled for openthread & mbedtls
+        string(APPEND SDKCONFIG_DEFAULT_CONTENTS "CONFIG_MBEDTLS_CMAC_C=y\n")
+        string(APPEND SDKCONFIG_DEFAULT_CONTENTS "CONFIG_MBEDTLS_SSL_PROTO_DTLS=y\n")
+        string(APPEND SDKCONFIG_DEFAULT_CONTENTS "CONFIG_MBEDTLS_KEY_EXCHANGE_ECJPAKE=y\n")
+        string(APPEND SDKCONFIG_DEFAULT_CONTENTS "CONFIG_MBEDTLS_ECJPAKE_C=y\n")
+        
+        # THREAD_DEVICE_TYPE
+        set(THREAD_DEVICE_TYPE_SUPPORTED "FTD" "MTD" CACHE INTERNAL "supported THREAD device types")
+        list(FIND THREAD_DEVICE_TYPE_SUPPORTED ${THREAD_DEVICE_TYPE} THREAD_DEVICE_TYPE_INDEX)
+
+        if(THREAD_DEVICE_TYPE_INDEX EQUAL -1)
+            # Default FTD if not specified
+            set(THREAD_DEVICE_TYPE_INDEX 0)
+        endif()
+        
+        if (${THREAD_DEVICE_TYPE_INDEX} EQUAL 0)
+            string(APPEND SDKCONFIG_DEFAULT_CONTENTS "CONFIG_OPENTHREAD_FTD=y\n")
+            message(STATUS "OpenThread configured as full thread device (FTD)")
+        else()
+            string(APPEND SDKCONFIG_DEFAULT_CONTENTS "CONFIG_OPENTHREAD_MTD=y\n")
+            message(STATUS "OpenThread configured as a minimal thread device (MTD)")
+        endif()
+
+        # need to temporarilly allow changes in source files
+        set(CMAKE_DISABLE_SOURCE_CHANGES OFF)
+
+        file(WRITE 
+            ${SDKCONFIG_DEFAULTS_TEMP_FILE} 
+            ${SDKCONFIG_DEFAULT_CONTENTS})
+
+        set(CMAKE_DISABLE_SOURCE_CHANGES ON)
     endif()
 
     # option for automatic XTAL frequency detection
@@ -643,41 +815,21 @@ macro(nf_add_idf_as_library)
         # need to read the supplied SDK CONFIG file(s) and replace the appropriate options
 
         message(DEBUG "Reading SDK config from '${SDKCONFIG_DEFAULTS_FILE}'")
+
         file(READ
-            "${SDKCONFIG_DEFAULTS_FILE}"
+            "${SDKCONFIG_DEFAULTS_TEMP_FILE}"
             SDKCONFIG_DEFAULT_CONTENTS)
 
-        string(REPLACE
-            "CONFIG_ESP32_XTAL_FREQ_40"
-            "CONFIG_ESP32_XTAL_FREQ_26"
-            SDKCONFIG_DEFAULT_FINAL_CONTENTS
-            "${SDKCONFIG_DEFAULT_CONTENTS}")
-
-        # now do the same for the series config file, if it exists
-        file(READ
-            "${SDKCONFIG_DEFAULTS_FILE}.${TARGET_SERIES_SHORT}"
-            SDKCONFIG_DEFAULT_SERIES_CONTENTS)
-        
-        string(REPLACE
-            "CONFIG_ESP32_XTAL_FREQ_40"
-            "CONFIG_ESP32_XTAL_FREQ_26"
-            SDKCONFIG_DEFAULT_SERIES_FINAL_CONTENTS
-            "${SDKCONFIG_DEFAULT_SERIES_CONTENTS}")
+        string(APPEND SDKCONFIG_DEFAULT_CONTENTS "CONFIG_XTAL_FREQ_26=y\n")
 
         # need to temporarilly allow changes in source files
         set(CMAKE_DISABLE_SOURCE_CHANGES OFF)
 
         file(WRITE 
-            ${SDKCONFIG_DEFAULTS_FILE} 
-            ${SDKCONFIG_DEFAULT_FINAL_CONTENTS})
+            ${SDKCONFIG_DEFAULTS_TEMP_FILE} 
+            ${SDKCONFIG_DEFAULT_CONTENTS})
 
         message(DEBUG "Wrote updated SDK config to '${SDKCONFIG_DEFAULTS_FILE}'")
-
-        file(WRITE 
-            "${SDKCONFIG_DEFAULTS_FILE}.${TARGET_SERIES_SHORT}" 
-            ${SDKCONFIG_DEFAULT_SERIES_FINAL_CONTENTS})
-
-        message(DEBUG "Wrote updated SDK config to '${SDKCONFIG_DEFAULTS_FILE}.${TARGET_SERIES_SHORT}'")
 
         set(CMAKE_DISABLE_SOURCE_CHANGES ON)
     else()
@@ -688,10 +840,8 @@ macro(nf_add_idf_as_library)
     idf_build_process(${TARGET_SERIES_SHORT}
         COMPONENTS 
             ${IDF_COMPONENTS_TO_ADD}
-
-        # SDKCONFIG ${CMAKE_SOURCE_DIR}/targets/ESP32/_IDF/sdkconfig
         SDKCONFIG_DEFAULTS
-            ${SDKCONFIG_DEFAULTS_FILE}
+            ${SDKCONFIG_DEFAULTS_TEMP_FILE}
         PROJECT_NAME "nanoCLR"
         PROJECT_VER ${BUILD_VERSION}
         PROJECT_DIR ${CMAKE_SOURCE_DIR}
@@ -706,15 +856,6 @@ macro(nf_add_idf_as_library)
         ${CMAKE_SOURCE_DIR}/targets/ESP32/_IDF/project_elf_src_${TARGET_SERIES_SHORT}.c
     )
 
-    #Restore original sdkconfig back to defaults
-    set(CMAKE_DISABLE_SOURCE_CHANGES OFF)
-
-    file(WRITE 
-        ${SDKCONFIG_DEFAULTS_FILE} 
-        ${SDKCONFIG_ORIGINAL_CONTENTS})
-
-    set(CMAKE_DISABLE_SOURCE_CHANGES ON)
-
     if(USE_NETWORKING_OPTION)
 
         FetchContent_GetProperties(esp32_idf)
@@ -727,7 +868,7 @@ macro(nf_add_idf_as_library)
             IDF_LWIP_SOURCES
                 ${esp32_idf_SOURCE_DIR}/components/lwip/lwip/src/api/api_msg.c
                 ${esp32_idf_SOURCE_DIR}/components/lwip/lwip/src/api/sockets.c
-                ${esp32_idf_SOURCE_DIR}/components/lwip/port/esp32/freertos/sys_arch.c
+                ${esp32_idf_SOURCE_DIR}/components/lwip/port/freertos/sys_arch.c
         )
 
         # add our modified sources
@@ -766,7 +907,9 @@ macro(nf_add_idf_as_library)
         # add nanoCLR compile definitions to lwIP
         list(APPEND 
             IDF_LWIP_COMPILE_DEFINITIONS 
-                PLATFORM_ESP32 )
+                PLATFORM_ESP32
+                ESP_LWIP_COMPONENT_BUILD
+            )
 
         # add the compile definitions
         set_property(
@@ -809,8 +952,6 @@ macro(nf_add_idf_as_library)
 
     nf_setup_partition_tables_generator()
 
-    # set variables to mirror SDK CONFIG options
-
     # need to read the supplied SDK CONFIG file        
     file(READ
         ${CMAKE_SOURCE_DIR}/sdkconfig
@@ -818,14 +959,8 @@ macro(nf_add_idf_as_library)
 
     # find out if there is support for PSRAM
     set(SPIRAM_SUPPORT_PRESENT -1)
-    if(TARGET_SERIES_SHORT STREQUAL "esp32")
-        string(FIND ${SDKCONFIG_DEFAULT_CONTENTS} "CONFIG_ESP32_SPIRAM_SUPPORT=y" SPIRAM_SUPPORT_PRESENT)
-    elseif(TARGET_SERIES_SHORT STREQUAL "esp32s2")
-        string(FIND ${SDKCONFIG_DEFAULT_CONTENTS} "CONFIG_ESP32S2_SPIRAM_SUPPORT=y" SPIRAM_SUPPORT_PRESENT)
-    elseif(TARGET_SERIES_SHORT STREQUAL "esp32s3")
-        string(FIND ${SDKCONFIG_DEFAULT_CONTENTS} "CONFIG_ESP32S3_SPIRAM_SUPPORT=y" SPIRAM_SUPPORT_PRESENT)
-    endif()
-
+    string(FIND ${SDKCONFIG_DEFAULT_CONTENTS} "CONFIG_SPIRAM=y" SPIRAM_SUPPORT_PRESENT)
+    
     # set variable
     if(${SPIRAM_SUPPORT_PRESENT} GREATER -1)
         set(PSRAM_INFO ", support for PSRAM")
@@ -835,35 +970,33 @@ macro(nf_add_idf_as_library)
         message(STATUS "Support for PSRAM **IS NOT** included")
     endif()
 
-    # find out revision info (ESP32)
-    string(FIND ${SDKCONFIG_DEFAULT_CONTENTS} "CONFIG_ESP32_REV_MIN_0=y" CONFIG_ESP32_REV_MIN_0_POS)
-    string(FIND ${SDKCONFIG_DEFAULT_CONTENTS} "CONFIG_ESP32_REV_MIN_3=y" CONFIG_ESP32_REV_MIN_3_POS)
+    # find out revision info for any target series
+    unset(ESP32_REVISION)
+    string(TOUPPER CONFIG_${TARGET_SERIES_SHORT}_REV_MIN_ CONFIG_ESP32X_REV_MIN)
+    string(FIND ${SDKCONFIG_DEFAULT_CONTENTS} ${CONFIG_ESP32X_REV_MIN}0=y CONFIG_ESP32X_REV_MIN_0_POS)
+    string(FIND ${SDKCONFIG_DEFAULT_CONTENTS} ${CONFIG_ESP32X_REV_MIN}1=y CONFIG_ESP32X_REV_MIN_1_POS)
+    string(FIND ${SDKCONFIG_DEFAULT_CONTENTS} ${CONFIG_ESP32X_REV_MIN}2=y CONFIG_ESP32X_REV_MIN_2_POS)
+    string(FIND ${SDKCONFIG_DEFAULT_CONTENTS} ${CONFIG_ESP32X_REV_MIN}3=y CONFIG_ESP32X_REV_MIN_3_POS)
+    string(FIND ${SDKCONFIG_DEFAULT_CONTENTS} ${CONFIG_ESP32X_REV_MIN}4=y CONFIG_ESP32X_REV_MIN_4_POS)
 
     # set variable
-    if(${CONFIG_ESP32_REV_MIN_0_POS} GREATER -1)
+    if(${CONFIG_ESP32X_REV_MIN_0_POS} GREATER -1)
         set(REVISION_INFO ", chip rev. >= 0")
         message(STATUS "Building for chip revision >= 0")
-    elseif(${CONFIG_ESP32_REV_MIN_3_POS} GREATER -1)
-        set(REVISION_INFO ", chip rev. 3")
-        message(STATUS "Building for chip revision 3")
-    endif()
-
-    # find out revision info (ESP32-C3)
-    unset(ESP32_REVISION)
-    string(FIND ${SDKCONFIG_DEFAULT_CONTENTS} "CONFIG_ESP32C3_REV_MIN_2=y" CONFIG_ESP32C3_REV_MIN_2_POS)
-    string(FIND ${SDKCONFIG_DEFAULT_CONTENTS} "CONFIG_ESP32C3_REV_MIN_3=y" CONFIG_ESP32C3_REV_MIN_3_POS)
-    string(FIND ${SDKCONFIG_DEFAULT_CONTENTS} "CONFIG_ESP32C3_REV_MIN_4=y" CONFIG_ESP32C3_REV_MIN_4_POS)
-
-    # set variable
-    if(${CONFIG_ESP32C3_REV_MIN_2_POS} GREATER -1)
+        set(ESP32_REVISION "0" CACHE STRING "ESP32 revision")
+    elseif(${CONFIG_ESP32X_REV_MIN_1_POS} GREATER -1)
+        set(REVISION_INFO ", chip rev. >= 1")
+        message(STATUS "Building for chip revision >= 1")
+        set(ESP32_REVISION "1" CACHE STRING "ESP32 revision")
+    elseif(${CONFIG_ESP32X_REV_MIN_2_POS} GREATER -1)
         set(REVISION_INFO ", chip rev. >= 2")
         message(STATUS "Building for chip revision >= 2")
         set(ESP32_REVISION "2" CACHE STRING "ESP32 revision")
-    elseif(${CONFIG_ESP32C3_REV_MIN_3_POS} GREATER -1)
+    elseif(${CONFIG_ESP32X_REV_MIN_3_POS} GREATER -1)
         set(REVISION_INFO ", chip rev. >= 3")
         message(STATUS "Building for chip revision >= 3")
         set(ESP32_REVISION "3" CACHE STRING "ESP32 revision")
-    elseif(${CONFIG_ESP32C3_REV_MIN_4_POS} GREATER -1)
+    elseif(${CONFIG_ESP32X_REV_MIN_4_POS} GREATER -1)
         set(REVISION_INFO ", chip rev. 4")
         message(STATUS "Building for chip revision 4")
         set(ESP32_REVISION "4" CACHE STRING "ESP32 revision")
@@ -878,6 +1011,14 @@ macro(nf_add_idf_as_library)
     if(${CONFIG_BT_ENABLED_POS} GREATER -1)
         set(BLE_INFO ", support for BLE")
     endif()    
+
+    # add tinyusb dependencies 
+    if(ESP32_USB_CDC)
+        nf_add_tinyusb_component()
+    endif()    
+
+    # Disable warning on link
+    target_link_libraries(${NANOCLR_PROJECT_NAME}.elf "-Wl,--no-warn-rwx-segments")
 
     ############################################################
     # output component size summary for the nanoCLR executable #
@@ -908,6 +1049,7 @@ endmacro()
 # macro to clear binary files related with nanoCLR from output
 # to make sure that the build file it's up to date
 macro(nf_clear_output_files_nanoclr)
+
     list(APPEND CLR_BUILD_FILES_TO_REMOVE ${CMAKE_BINARY_DIR}/${NANOCLR_PROJECT_NAME}.bin)
     list(APPEND CLR_BUILD_FILES_TO_REMOVE ${CMAKE_BINARY_DIR}/${NANOCLR_PROJECT_NAME}.elf)
 

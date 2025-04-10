@@ -81,10 +81,10 @@ macro(nf_add_platform_packages)
         find_package(CHIBIOS_FATFS REQUIRED QUIET)
     endif()
 
-    # SPIFFS
-    if(NF_FEATURE_USE_SPIFFS)
+    # littlefs
+    if(NF_FEATURE_USE_LITTLEFS_OPTION)
         find_package(STM32F7_CubePackage REQUIRED QUIET)
-        find_package(SPIFFS REQUIRED QUIET)
+        find_package(littlefs REQUIRED QUIET)
     endif()
 
     if(STM32_CUBE_PACKAGE_REQUIRED)
@@ -170,7 +170,7 @@ macro(nf_add_platform_dependencies target)
         nf_add_lib_native_assemblies(
             EXTRA_SOURCES
                 ${CHIBIOS_FATFS_SOURCES}
-                ${SPIFFS_SOURCES}
+                ${littlefs_SOURCES}
             EXTRA_INCLUDES
                 ${CHIBIOS_INCLUDE_DIRS}
                 ${CHIBIOS_HAL_INCLUDE_DIRS}
@@ -179,7 +179,7 @@ macro(nf_add_platform_dependencies target)
                 ${CHIBIOS_CONTRIB_INCLUDE_DIRS}
                 ${lWIP_INCLUDE_DIRS}
                 ${CHIBIOS_FATFS_INCLUDE_DIRS}
-                ${SPIFFS_INCLUDE_DIRS}
+                ${littlefs_INCLUDE_DIRS}
                 ${TARGET_CHIBIOS_COMMON_INCLUDE_DIRS}
                 ${TARGET_CHIBIOS_NANOCLR_INCLUDE_DIRS}
                 ${chibios_SOURCE_DIR}/os/hal/boards/${TARGET_BOARD}
@@ -213,6 +213,7 @@ macro(nf_add_platform_dependencies target)
             # security provider is MbedTLS
             if(USE_SECURITY_MBEDTLS_OPTION)
                 add_dependencies(NF_Network nano::NF_Network)
+                target_compile_definitions(NF_Network PUBLIC -DMBEDTLS_CONFIG_FILE=\"${CMAKE_SOURCE_DIR}/src/PAL/COM/sockets/ssl/MbedTLS/nf_mbedtls_config.h\")
             endif()
 
         endif()
@@ -235,7 +236,7 @@ macro(nf_add_platform_include_directories target)
         ${TARGET_CMSIS_COMMON_INCLUDE_DIRS}
         ${TARGET_CHIBIOS_COMMON_INCLUDE_DIRS}
         ${lWIP_INCLUDE_DIRS}
-        ${SPIFFS_INCLUDE_DIRS}
+        ${littlefs_INCLUDE_DIRS}
 
     )
     
@@ -263,7 +264,7 @@ macro(nf_add_platform_include_directories target)
 
             # need to add extra include directories for MbedTLS
             target_include_directories(
-                mbedcrypto PUBLIC
+                mbedcrypto PRIVATE
                 ${CHIBIOS_HAL_INCLUDE_DIRS}
                 ${CHIBIOS_INCLUDE_DIRS}
                 ${ChibiOSnfOverlay_INCLUDE_DIRS}
@@ -331,10 +332,11 @@ macro(nf_add_platform_sources target)
 
             if(USE_SECURITY_MBEDTLS_OPTION)
                 target_link_libraries(${target}.elf
-                mbedtls
+                    mbedtls
                 )
 
                 add_dependencies(NF_Network mbedtls)
+
             endif()
 
         endif()

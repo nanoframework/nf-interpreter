@@ -2294,7 +2294,6 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                         //
                         CLR_RT_HeapBlock safeSource;
 
-                        memset(&safeSource, 0, sizeof(struct CLR_RT_HeapBlock));
                         safeSource.Assign(evalPos[0]);
                         CLR_RT_ProtectFromGC gc(safeSource);
 
@@ -2755,7 +2754,6 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                         {
                             CLR_RT_HeapBlock safeSource;
 
-                            memset(&safeSource, 0, sizeof(struct CLR_RT_HeapBlock));
                             safeSource.Assign(evalPos[0]);
                             CLR_RT_ProtectFromGC gc(safeSource);
 
@@ -2867,8 +2865,6 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                     //
                     CLR_RT_HeapBlock ref;
 
-                    memset(&ref, 0, sizeof(struct CLR_RT_HeapBlock));
-
                     NANOCLR_CHECK_HRESULT(ref.InitializeArrayReference(evalPos[0], evalPos[1].NumericByRef().s4));
 
                     NANOCLR_CHECK_HRESULT(evalPos[0].LoadFromReference(ref));
@@ -2912,8 +2908,6 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                     {
                         // Save the pointer to the object to load/copy and protect it from GC.
                         CLR_RT_HeapBlock safeSource;
-
-                        memset(&safeSource, 0, sizeof(struct CLR_RT_HeapBlock));
                         safeSource.Assign(evalPos[0]);
                         CLR_RT_ProtectFromGC gc(safeSource);
 
@@ -3014,8 +3008,6 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                     // then dereference it.
                     //
                     CLR_RT_HeapBlock ref;
-
-                    memset(&ref, 0, sizeof(struct CLR_RT_HeapBlock));
 
                     NANOCLR_CHECK_HRESULT(ref.InitializeArrayReference(evalPos[1], evalPos[2].NumericByRef().s4));
 

@@ -34,7 +34,7 @@ extern "C"
 // #define HAL_NAND_MODULE_ENABLED
 // #define HAL_NOR_MODULE_ENABLED
 // #define HAL_SRAM_MODULE_ENABLED
-// #define HAL_SDRAM_MODULE_ENABLED
+#define HAL_SDRAM_MODULE_ENABLED
 // #define HAL_HASH_MODULE_ENABLED
 // #define HAL_GPIO_MODULE_ENABLED
 // #define HAL_I2C_MODULE_ENABLED
@@ -45,19 +45,19 @@ extern "C"
 // #define HAL_PWR_MODULE_ENABLED
 #define HAL_QSPI_MODULE_ENABLED
 #define HAL_RCC_MODULE_ENABLED
-    // #define HAL_RNG_MODULE_ENABLED
-    // #define HAL_RTC_MODULE_ENABLED
-    // #define HAL_SAI_MODULE_ENABLED
-    // #define HAL_SD_MODULE_ENABLED
-    // #define HAL_SPDIFRX_MODULE_ENABLED
-    // #define HAL_SPI_MODULE_ENABLED
-    // #define HAL_TIM_MODULE_ENABLED
-    // #define HAL_UART_MODULE_ENABLED
-    // #define HAL_USART_MODULE_ENABLED
-    // #define HAL_IRDA_MODULE_ENABLED
-    // #define HAL_SMARTCARD_MODULE_ENABLED
-    // #define HAL_WWDG_MODULE_ENABLED
-    // #define HAL_CORTEX_MODULE_ENABLED
+// #define HAL_RNG_MODULE_ENABLED
+// #define HAL_RTC_MODULE_ENABLED
+// #define HAL_SAI_MODULE_ENABLED
+// #define HAL_SD_MODULE_ENABLED
+// #define HAL_SPDIFRX_MODULE_ENABLED
+// #define HAL_SPI_MODULE_ENABLED
+// #define HAL_TIM_MODULE_ENABLED
+// #define HAL_UART_MODULE_ENABLED
+// #define HAL_USART_MODULE_ENABLED
+// #define HAL_IRDA_MODULE_ENABLED
+// #define HAL_SMARTCARD_MODULE_ENABLED
+// #define HAL_WWDG_MODULE_ENABLED
+#define HAL_CORTEX_MODULE_ENABLED
     // #define HAL_PCD_MODULE_ENABLED
     // #define HAL_HCD_MODULE_ENABLED
     // #define HAL_DFSDM_MODULE_ENABLED
@@ -106,7 +106,7 @@ extern "C"
 #define USE_RTOS          0U
 #define PREFETCH_ENABLE   1U
 // To enable instruction cache and prefetch
-#define ART_ACCLERATOR_ENABLE 1U
+#define ART_ACCELERATOR_ENABLE 1U
 
 #define USE_HAL_ADC_REGISTER_CALLBACKS       0U /* ADC register callback disabled       */
 #define USE_HAL_CAN_REGISTER_CALLBACKS       0U /* CAN register callback disabled       */

@@ -7,12 +7,11 @@ parameters:
     default: $(Build.SourcesDirectory)
 
 steps:
-
   - task: PowerShell@2
     displayName: Compose CMakeUserPresets
     inputs:
-      workingDirectory:  ${{ parameters.repoDirectory }}/config
-      targetType: 'inline'
+      workingDirectory: ${{ parameters.repoDirectory }}/config
+      targetType: "inline"
       script: |
         $file = "user-tools-repos.json"
 
@@ -20,11 +19,11 @@ steps:
 
         [regex]$pattern='user-tools-repos-cloud'
         $pattern.replace([IO.File]::ReadAllText($file), 'user-tools-repos', 1) | Out-File $file -Encoding UTF8
-        
+
         $file = "user-prefs.json"
 
         Rename-Item -Path "user-prefs.TEMPLATE.json" -NewName $file
-        
+
         $filecontent = Get-Content($file)
         attrib $file -r
         $filecontent -replace  'Debug', 'MinSizeRel' | Out-File $file -Encoding UTF8

@@ -6,7 +6,10 @@
 #include <target_platform.h>
 #include <esp32_idf.h>
 #include <nanoHAL_v2.h>
+
+#if CONFIG_IDF_TARGET_ESP32C3
 #include <soc/rtc_cntl_reg.h>
+#endif
 
 inline void CPU_Reset()
 {

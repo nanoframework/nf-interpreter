@@ -9,7 +9,7 @@ RUN apt-get update \
 
 RUN mkdir -p /tmp/dc-downloads /tmp/dc-extracted
 
-ARG GCC_VERSION=13.2.rel1
+ARG GCC_VERSION=13.3.rel1
 ARG GCC_URI=https://armkeil.blob.core.windows.net/developer/Files/downloads/gnu/$GCC_VERSION/binrel/arm-gnu-toolchain-$GCC_VERSION-x86_64-arm-none-eabi.tar.xz
 RUN mkdir -p /tmp/dc-downloads /tmp/dc-extracted/gcc \
     && curl -o /tmp/dc-downloads/gcc-arm.tar.xz  $GCC_URI \
@@ -17,7 +17,7 @@ RUN mkdir -p /tmp/dc-downloads /tmp/dc-extracted/gcc \
     && tar -xvf /tmp/dc-downloads/gcc-arm.tar -C /tmp/dc-extracted/gcc --strip-components 1 \
     && rm -rf /tmp/dc-extracted/gcc/share/doc/ /tmp/dc-extracted/gcc/share/gcc-arm-none-eabi/samples/
 
-ARG CMAKE_VERSION=3.27.6
+ARG CMAKE_VERSION=3.31.6
 ARG CMAKE_SCRIPT=https://github.com/Kitware/CMake/releases/download/v$CMAKE_VERSION/cmake-$CMAKE_VERSION-linux-x86_64.sh
 RUN wget $CMAKE_SCRIPT \
     -q -O /tmp/dc-downloads/cmake-install.sh \
@@ -26,13 +26,13 @@ RUN wget $CMAKE_SCRIPT \
     && /tmp/dc-downloads/cmake-install.sh --skip-license --prefix=/tmp/dc-extracted/cmake \
     && rm /tmp/dc-downloads/cmake-install.sh
 
-# This is TI XDC tools for linux. Cheack all versions here: https://software-dl.ti.com/dsps/dsps_public_sw/sdo_sb/targetcontent/rtsc/index.html
+# This is TI XDC tools for linux. Check all versions here: https://software-dl.ti.com/dsps/dsps_public_sw/sdo_sb/targetcontent/rtsc/index.html
 ARG TI_TOOL_URL=https://software-dl.ti.com/dsps/dsps_public_sw/sdo_sb/targetcontent/rtsc/3_62_00_08/exports/xdccore/xdctools_3_62_00_08_core_linux.zip
 RUN  mkdir -p /tmp/dc-extracted/titools \
     && curl -o /tmp/dc-downloads/titools.zip $TI_TOOL_URL -L \
     && unzip -d /tmp/dc-extracted/titools /tmp/dc-downloads/titools.zip
 
-FROM python:3.10 AS devcontainer
+FROM python:3.11 AS devcontainer
 
 # Avoid warnings by switching to noninteractive
 ENV DEBIAN_FRONTEND=noninteractive
@@ -66,21 +66,23 @@ RUN mkdir -p /usr/local/bin/gcc \
 # Alternative source for those having issues with git svn downloads:
 RUN git clone --branch stable_21.11.x https://github.com/ArduPilot/ChibiOS.svn.git --depth 1 ./sources/ChibiOs
 
-# Clone support repos for STM32 including AzureRTOS
+# Clone support repos for STM32 including Eclipse ThreadX (a.k.a. Azure RTOS)
 RUN git clone --branch nf-build https://github.com/nanoframework/STM32CubeL4.git --depth 1 ./sources/STM32CubeL4 \
     && git clone --branch nf-build https://github.com/nanoframework/STM32CubeF7.git --depth 1 ./sources/STM32CubeF7 \
     && git clone --branch nf-build https://github.com/nanoframework/STM32CubeF4.git --depth 1 ./sources/STM32CubeF4 \
     && git clone --branch nf-build https://github.com/nanoframework/STM32CubeH7.git --depth 1 ./sources/STM32CubeH7 \
     && git clone --branch chibios-21.11.x https://github.com/ChibiOS/ChibiOS-Contrib.git --depth 1 ./sources/ChibiOs-Contrib
 
-# Clone repos for AzureRTOS
+# Clone repos for Eclipse ThreadX (a.k.a. Azure RTOS)
 RUN git clone --branch v6.4.0_rel --recursive https://github.com/eclipse-threadx/threadx.git --depth 1 ./sources/AzureRTOS \
     && git clone --branch v6.3.0_rel --recursive https://github.com/eclipse-threadx/netxduo.git --depth 1 ./sources/NetxDuo
 
-# Clone dependent repos (mbedtls, fatfs and spiffs)
-RUN git clone --branch mbedtls-2.28.5 https://github.com/ARMmbed/mbedtls.git --depth 1 ./sources/mbedtls \
-    && git clone --branch R0.15 https://github.com/abbrev/fatfs.git --depth 1 ./sources/fatfs \
-    && git clone --branch nf-build https://github.com/nanoframework/spiffs.git --depth 1 ./sources/spiffs
+# Clone dependent repos (mbedtls, fatfs and littlefs)
+RUN git clone --branch R0.15 https://github.com/abbrev/fatfs.git --depth 1 ./sources/fatfs \
+    && git clone --branch v2.9.3 https://github.com/littlefs-project/littlefs --depth 1 ./sources/littlefs \
+    && git clone --branch mbedtls-3.6.0 https://github.com/ARMmbed/mbedtls.git --depth 1 ./sources/mbedtls \
+    && cd ./sources/mbedtls \
+    && git submodule update --init --recursive
 
 # Clone FreeRTOS and what is needed for ESP32
 RUN git clone --branch V10.4.1-kernel-only https://github.com/FreeRTOS/FreeRTOS-Kernel.git --depth 1 ./sources/FreeRTOS \
@@ -90,7 +92,7 @@ RUN git clone --branch V10.4.1-kernel-only https://github.com/FreeRTOS/FreeRTOS-
 RUN git clone --branch STABLE-2_1_3_RELEASE https://github.com/lwip-tcpip/lwip.git --depth 1 ./sources/lwip
 
 # Clone ESP-IDF
-RUN git clone --branch v4.4.7 https://github.com/espressif/esp-idf --depth 1 --recursive ./sources/esp-idf
+RUN git clone --branch v5.2.3 https://github.com/espressif/esp-idf --depth 1 --recursive ./sources/esp-idf
 
 # Clone what is needed for TI
 RUN git clone --branch 4.10.00.07 https://github.com/nanoframework/SimpleLink_CC32xx_SDK.git --depth 1 ./sources/SimpleLinkCC32 \
@@ -125,20 +127,18 @@ RUN ln -fs /usr/bin/python3 /usr/bin/python \
 
 # Install ESP-IDF
 ENV IDF_PATH=/sources/esp-idf
-ENV ESP_PATCH_VER=esp-2021r2-patch5-8.4.0
+ENV ESP_PATCH_VER=esp-13.2.0_20230928
 # This is now taking care in the following line
 # RUN python -m pip install -r $IDF_PATH/requirements.txt
 RUN $IDF_PATH/install.sh
 
-ENV PATH=/root/.espressif/python_env/idf4.4_py3.10_env/bin:$PATH:\
+ENV PATH=/root/.espressif/python_env/idf5.2_py3.11_env/bin:$PATH:\
 $IDF_PATH/components/esptool_py/esptool:\
 $IDF_PATH/components/espcoredump:\ 
 $IDF_PATH/components/partition_table/:\
 $IDF_PATH/tools/:\
 $IDF_PATH/components/app_update:\
-/root/.espressif/tools/xtensa-esp32-elf/$ESP_PATCH_VER/xtensa-esp32-elf/bin:\
-/root/.espressif/tools/xtensa-esp32s2-elf/$ESP_PATCH_VER/xtensa-esp32s2-elf/bin:\
-/root/.espressif/tools/xtensa-esp32s3-elf/$ESP_PATCH_VER/xtensa-esp32s3-elf/bin:\
+/root/.espressif/tools/xtensa-esp-elf/$ESP_PATCH_VER/xtensa-esp-elf/bin:\
 /root/.espressif/tools/riscv32-esp-elf/$ESP_PATCH_VER/riscv32-esp-elf/bin
 
 # Clean up downloaded files

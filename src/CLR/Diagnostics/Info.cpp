@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (c) .NET Foundation and Contributors
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
@@ -223,20 +223,16 @@ int CLR_Debug::PrintfV(const char *format, va_list arg)
 {
     NATIVE_PROFILE_CLR_DIAGNOSTICS();
 
-#if defined(VIRTUAL_DEVICE)
-    char buffer[512];
-    char *szBuffer = buffer;
-    int16_t bufferSize = MAXSTRLEN(buffer);
-    size_t iBuffer = bufferSize;
-#else
     // this should be more than enough for the existing output needs
+    // TODO: expose this in the build system to allow better adjustment according to the target
     const int16_t c_BufferSize = 512;
 
-    char *buffer = (char *)platform_malloc(c_BufferSize);
+    char buffer[c_BufferSize];
     char *szBuffer = buffer;
-    size_t iBuffer = c_BufferSize;
-    int16_t bufferSize = c_BufferSize;
-#endif
+
+    // need to leave space for the null terminator
+    size_t bufferSize = c_BufferSize - 1;
+    size_t iBuffer = bufferSize;
 
 #if !defined(BUILD_RTM)
     bool fRes =
@@ -252,13 +248,6 @@ int CLR_Debug::PrintfV(const char *format, va_list arg)
 #if defined(VIRTUAL_DEVICE)
     std::string outputString(buffer, iBuffer);
     SaveMessage(outputString);
-#endif
-
-#ifndef VIRTUAL_DEVICE
-    if (buffer != NULL)
-    {
-        platform_free(buffer);
-    }
 #endif
 
     return (int)iBuffer;

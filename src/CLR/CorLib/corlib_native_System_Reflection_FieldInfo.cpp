@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (c) .NET Foundation and Contributors
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
@@ -20,7 +20,6 @@ HRESULT Library_corlib_native_System_Reflection_FieldInfo::SetValue___VOID__OBJE
     CLR_RT_HeapBlock &srcVal = stack.Arg2();
     CLR_RT_HeapBlock val;
 
-    memset(&val, 0, sizeof(struct CLR_RT_HeapBlock));
     val.Assign(srcVal);
     CLR_RT_ProtectFromGC gc(val);
 
@@ -101,7 +100,7 @@ HRESULT Library_corlib_native_System_Reflection_FieldInfo::Initialize(
 {
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
-    CLR_RT_HeapBlock *hbField = stack.Arg0().Dereference();
+    CLR_RT_HeapBlock *hbField = stack.This();
 
     if (CLR_RT_ReflectionDef_Index::Convert(*hbField, instFD) == false || instTD.InitializeFromField(instFD) == false)
     {
@@ -144,7 +143,7 @@ HRESULT Library_corlib_native_System_Reflection_FieldInfo::GetCustomAttributesNa
     CLR_RT_HeapBlock &top = stack.PushValueAndClear();
 
     // get the caller field
-    callerField = stack.Arg0().Dereference();
+    callerField = stack.This();
 
     NANOCLR_CHECK_HRESULT(Library_corlib_native_System_Reflection_RuntimeFieldInfo::GetFieldDescriptor(
         stack,

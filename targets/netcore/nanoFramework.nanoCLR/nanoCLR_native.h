@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (c) .NET Foundation and Contributors
 // See LICENSE file in the project root for full license information.
 //
@@ -36,19 +36,23 @@ typedef struct NANO_CLR_SETTINGS
 
 typedef HRESULT(__stdcall *ConfigureRuntimeCallback)();
 typedef void(__stdcall *DebugPrintCallback)(const char *szText);
+typedef void(__stdcall *ProfilerMessageCallback)(const char *szText);
+typedef void(__stdcall *ProfilerDataCallback)(const CLR_UINT8 *data, size_t size);
 typedef int(__stdcall *WireTransmitCallback)(const CLR_UINT8 *data, size_t size);
 typedef int(__stdcall *WireReceiveCallback)(const CLR_UINT8 *data, size_t size);
 
 extern DebugPrintCallback gDebugPrintCallback;
 extern WireTransmitCallback WireProtocolTransmitCallback;
 extern WireReceiveCallback WireProtocolReceiveCallback;
+extern ProfilerMessageCallback g_ProfilerMessageCallback;
+extern ProfilerDataCallback g_ProfilerDataCallback;
 
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// The following functions are exposed in the DLL and
-// meant to be called by the C# host application.
-// Keep their names in sync with the managed code declaration @ nanoFramework.nanoCLR.Host\Interop\Native.cs
-// and the code @ nanoCLR_native.c
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// The following functions are exposed in the DLL and                                                         //
+// meant to be called by the C# host application.                                                             //
+// Keep their names in sync with the managed code declaration @ nanoFramework.nanoCLR.Host\Interop\nanoCLR.cs //
+// and the code @ nanoCLR_native.cpp                                                                          //
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 extern "C" NANOCLRNATIVE_API void nanoCLR_Run(NANO_CLR_SETTINGS nanoClrSettings);
 extern "C" NANOCLRNATIVE_API HRESULT nanoCLR_LoadAssembly(const wchar_t *name, const CLR_UINT8 *data, size_t size);
@@ -64,6 +68,12 @@ extern "C" NANOCLRNATIVE_API void nanoCLR_WireProtocolClose();
 extern "C" NANOCLRNATIVE_API void nanoCLR_SetWireProtocolReceiveCallback(WireReceiveCallback receiveCallback);
 extern "C" NANOCLRNATIVE_API void nanoCLR_SetWireProtocolTransmitCallback(WireTransmitCallback transmitCallback);
 
+extern "C" NANOCLRNATIVE_API void nanoCLR_SetProfilerMessageCallback(ProfilerMessageCallback profilerMessageCallback);
+extern "C" NANOCLRNATIVE_API void nanoCLR_SetProfilerDataCallback(ProfilerDataCallback profilerDataCallback);
+
 extern "C" NANOCLRNATIVE_API void nanoCLR_WireProtocolProcess();
 
 extern "C" NANOCLRNATIVE_API const char *nanoCLR_GetVersion();
+
+extern "C" NANOCLRNATIVE_API uint16_t nanoCLR_GetNativeAssemblyCount();
+extern "C" NANOCLRNATIVE_API bool nanoCLR_GetNativeAssemblyInformation(const CLR_UINT8 *data, size_t size);

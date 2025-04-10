@@ -146,23 +146,28 @@ void __cdecl HAL_AddSoftRebootHandler(ON_SOFT_REBOOT_HANDLER handler)
 
 bool g_fDoNotUninitializeDebuggerPort = false;
 
-void __cdecl nanoHAL_Initialize(void)
+void nanoHAL_Initialize(void)
 {
     HAL_CONTINUATION::InitializeList();
     HAL_COMPLETION::InitializeList();
 
+#ifndef NANOWIN32
+    FS_Initialize();
+    FileSystemVolumeList::Initialize();
+    FS_AddVolumes();
+    FileSystemVolumeList::InitializeVolumes();
+#endif
+
     Events_Initialize();
 }
 
-void __cdecl nanoHAL_Uninitialize(bool isPoweringDown)
+void nanoHAL_Uninitialize(bool isPoweringDown)
 {
     (void)isPoweringDown;
 
-    int i;
-
     // UNDONE: FIXME: CPU_GPIO_Uninitialize();
 
-    for (i = 0; i < ARRAYSIZE(s_rebootHandlers); i++)
+    for (int i = 0; i < ARRAYSIZE(s_rebootHandlers); i++)
     {
         if (s_rebootHandlers[i] != NULL)
         {
@@ -170,6 +175,15 @@ void __cdecl nanoHAL_Uninitialize(bool isPoweringDown)
             return;
         }
     }
+
+#ifndef NANOWIN32
+    FileSystemVolumeList::UninitializeVolumes();
+#endif
+
+    Events_Uninitialize();
+
+    HAL_CONTINUATION::Uninitialize();
+    HAL_COMPLETION ::Uninitialize();
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////

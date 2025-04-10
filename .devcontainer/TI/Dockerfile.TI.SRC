@@ -9,7 +9,7 @@ RUN apt-get update \
 
 RUN mkdir -p /tmp/dc-downloads /tmp/dc-extracted
 
-ARG GCC_VERSION=13.2.rel1
+ARG GCC_VERSION=13.3.rel1
 ARG GCC_URI=https://armkeil.blob.core.windows.net/developer/Files/downloads/gnu/$GCC_VERSION/binrel/arm-gnu-toolchain-$GCC_VERSION-x86_64-arm-none-eabi.tar.xz
 RUN mkdir -p /tmp/dc-downloads /tmp/dc-extracted/gcc \
     && curl -o /tmp/dc-downloads/gcc-arm.tar.xz  $GCC_URI \
@@ -17,7 +17,7 @@ RUN mkdir -p /tmp/dc-downloads /tmp/dc-extracted/gcc \
     && tar -xvf /tmp/dc-downloads/gcc-arm.tar -C /tmp/dc-extracted/gcc --strip-components 1 \
     && rm -rf /tmp/dc-extracted/gcc/share/doc/ /tmp/dc-extracted/gcc/share/gcc-arm-none-eabi/samples/
 
-ARG CMAKE_VERSION=3.27.6
+ARG CMAKE_VERSION=3.31.6
 ARG CMAKE_SCRIPT=https://github.com/Kitware/CMake/releases/download/v$CMAKE_VERSION/cmake-$CMAKE_VERSION-linux-x86_64.sh
 RUN wget $CMAKE_SCRIPT \
     -q -O /tmp/dc-downloads/cmake-install.sh \
@@ -31,7 +31,6 @@ ARG TI_TOOL_URL=https://software-dl.ti.com/dsps/dsps_public_sw/sdo_sb/targetcont
 RUN  mkdir -p /tmp/dc-extracted/titools \
     && curl -o /tmp/dc-downloads/titools.zip $TI_TOOL_URL -L \
     && unzip -d /tmp/dc-extracted/titools /tmp/dc-downloads/titools.zip
-
 
 FROM ubuntu:latest AS devcontainer
 

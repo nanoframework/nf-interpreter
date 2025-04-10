@@ -9,12 +9,13 @@
 #include <nanoHAL.h>
 #include <esp32_idf.h>
 
-// ESP IDF 4.0 it's using an abstraction layer (esp_netif) that hides the netif index
+// ESP IDF 4.0 onwards is using an abstraction layer (esp_netif) that hides the netif index
 // we need that for our interface with lwIP, so we have to clone those here
 // not very elegant but will have to work for now
 #define IDF_WIFI_STA_DEF 0
 #define IDF_WIFI_AP_DEF  1
 #define IDF_ETH_DEF      2
+#define IDF_OT_DEF       3
 
 typedef enum __nfpack StartScanOutcome
 {
@@ -49,6 +50,10 @@ int NF_ESP32_Wireless_Start_Connect(HAL_Configuration_Wireless80211 *config);
 // Ethernet
 int NF_ESP32_Ethernet_Open(HAL_Configuration_NetworkInterface *config);
 bool NF_ESP32_Ethernet_Close();
+
+// OpenThread
+int NF_ESP32_OpenThread_Open(HAL_Configuration_NetworkInterface *config);
+bool NF_ESP32_OpenThread_Close();
 
 // Smart config
 void NF_ESP32_Start_wifi_smart_config(void);

@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (c) .NET Foundation and Contributors
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
@@ -12,10 +12,7 @@ struct ExceptionLookup
 };
 
 static const ExceptionLookup c_ExceptionLookup[] = {
-#define EL(hr, fld)                                                                                                    \
-    {                                                                                                                  \
-        hr, &g_CLR_RT_WellKnownTypes.fld                                                                               \
-    }
+#define EL(hr, fld) {hr, &g_CLR_RT_WellKnownTypes.fld}
     EL(CLR_E_APPDOMAIN_EXITED, m_AppDomainUnloadedException),
     EL(CLR_E_INVALID_PARAMETER, m_ArgumentException),
     EL(CLR_E_ARGUMENT_NULL, m_ArgumentNullException),
@@ -53,7 +50,6 @@ HRESULT Library_corlib_native_System_Exception::get_StackTrace___STRING(CLR_RT_S
     CLR_RT_HeapBlock tmpArray;
     CLR_RT_HeapBlock *pThis;
 
-    memset(&tmpArray, 0, sizeof(struct CLR_RT_HeapBlock));
     tmpArray.SetObjectReference(NULL);
     CLR_RT_ProtectFromGC gc(tmpArray);
 
@@ -198,7 +194,10 @@ HRESULT Library_corlib_native_System_Exception::SetStackTrace(CLR_RT_HeapBlock &
 
         if (CLR_EE_DBG_IS(NoStackTraceInExceptions))
         {
-            // stack trace is DISABLED
+            // stack trace is DISABLED or...
+            // no debugger is attached or...
+            // compaction is pending so better not mess around or...
+            // GC is requested or in progress so better not mess around
 
             (void)dst;
             (void)array;
@@ -245,10 +244,7 @@ HRESULT Library_corlib_native_System_Exception::SetStackTrace(CLR_RT_HeapBlock &
             if (!g_CLR_RT_ExecutionEngine.m_fShuttingDown)
 #endif
             {
-                if (CLR_EE_DBG_IS_NOT(NoStackTraceInExceptions))
-                {
-                    CLR_RT_DUMP::EXCEPTION(*stack, ref);
-                }
+                CLR_RT_DUMP::EXCEPTION(*stack, ref);
             }
         }
 

@@ -9,6 +9,7 @@
 #include "esp32_idf.h"
 #include <targetHAL_ConfigStorage.h>
 #include <target_platform.h>
+#include "esp_mac.h"
 
 bool ethernetEnabled = false;
 
@@ -155,16 +156,26 @@ void ConfigurationManager_EnumerateConfigurationBlocks()
     if (networkConfigs->Count == 0)
     {
         // there is no network config block available, need to create a default for each network interface
-        int networkCount;
+        int networkCount = 0;
+        NetworkInterfaceType netTypes[4] = {NetworkInterfaceType_Unknown};
 
-        // ESP32 can have has much as 3 network interfaces: Wireless Station, Wireless AP and Ethernet
-#ifdef ESP32_ETHERNET_SUPPORT
-        networkCount = 3;
-        ethernetEnabled = true;
-#else
-        networkCount = 2;
+        // ESP32 can have have up to 4 network interfaces: Wireless Station, Wireless AP, Ethernet and OpenThread
+
+        // Allocate count & types of network interfaces
+#if defined(CONFIG_SOC_WIFI_SUPPORTED)
+        // Wireless Support
+        netTypes[networkCount++] = NetworkInterfaceType_Wireless80211;
+        netTypes[networkCount++] = NetworkInterfaceType_WirelessAP;
 #endif
 
+#ifdef ESP32_ETHERNET_SUPPORT
+        netTypes[networkCount++] = NetworkInterfaceType_Ethernet;
+        ethernetEnabled = true;
+#endif
+
+#if HAL_USE_THREAD == TRUE
+        netTypes[networkCount++] = NetworkInterfaceType_Thread;
+#endif
         // allocate memory for ONE network configuration
         HAL_Configuration_NetworkInterface *networkConfig =
             (HAL_Configuration_NetworkInterface *)platform_malloc(sizeof(HAL_Configuration_NetworkInterface));
@@ -173,6 +184,8 @@ void ConfigurationManager_EnumerateConfigurationBlocks()
         {
             // clear memory
             memset(networkConfig, 0, sizeof(HAL_Configuration_NetworkInterface));
+
+            networkConfig->InterfaceType = netTypes[configIndex];
 
             // init to default
             InitialiseNetworkDefaultConfig(networkConfig, configIndex);
@@ -197,7 +210,7 @@ void ConfigurationManager_EnumerateConfigurationBlocks()
         (HAL_CONFIGURATION_NETWORK_WIRELESS80211 *)ConfigStorage_FindNetworkWireless80211ConfigurationBlocks();
 
     // check wireless configs count
-    if (networkWirelessConfigs->Count == 0)
+    if (networkWirelessConfigs != NULL && networkWirelessConfigs->Count == 0)
     {
         // allocate memory for ONE network configuration
         HAL_Configuration_Wireless80211 *wirelessConfig =
@@ -222,7 +235,7 @@ void ConfigurationManager_EnumerateConfigurationBlocks()
     HAL_CONFIGURATION_NETWORK_WIRELESSAP *wirelessAPconfigs = ConfigStorage_FindNetworkWirelessAPConfigurationBlocks();
 
     // check wireless AP configs count
-    if (wirelessAPconfigs->Count == 0)
+    if (wirelessAPconfigs != NULL && wirelessAPconfigs->Count == 0)
     {
         // allocate memory for ONE wireless AP configuration
         HAL_Configuration_WirelessAP *wirelessAPConfig =
@@ -332,15 +345,12 @@ void InitialiseWirelessAPDefaultConfig(HAL_Configuration_WirelessAP *config, uin
 //  Default initialisation of Network interface config blocks for ESP32 targets
 bool InitialiseNetworkDefaultConfig(HAL_Configuration_NetworkInterface *config, uint32_t configurationIndex)
 {
-    memset(config, 0, sizeof(HAL_Configuration_NetworkInterface));
-
     // make sure the config block marker is set
     memcpy(config->Marker, c_MARKER_CONFIGURATION_NETWORK_V1, sizeof(c_MARKER_CONFIGURATION_NETWORK_V1));
 
-    switch (configurationIndex)
+    switch (config->InterfaceType)
     {
-        case 0: // Wireless Station
-            config->InterfaceType = NetworkInterfaceType_Wireless80211;
+        case NetworkInterfaceType_Wireless80211: // Wireless Station
             config->StartupAddressMode = AddressMode_DHCP;
             config->AutomaticDNS = 1;
             config->SpecificConfigId = 0;
@@ -349,8 +359,7 @@ bool InitialiseNetworkDefaultConfig(HAL_Configuration_NetworkInterface *config, 
             esp_read_mac(config->MacAddress, ESP_MAC_WIFI_STA);
             break;
 
-        case 1: // Wireless AP
-            config->InterfaceType = NetworkInterfaceType_WirelessAP;
+        case NetworkInterfaceType_WirelessAP: // Wireless AP
             config->StartupAddressMode = AddressMode_Static;
             config->SpecificConfigId = 0;
             // Set default address 192.168.1.1
@@ -362,13 +371,22 @@ bool InitialiseNetworkDefaultConfig(HAL_Configuration_NetworkInterface *config, 
             esp_read_mac(config->MacAddress, ESP_MAC_WIFI_SOFTAP);
             break;
 
-        case 2: // Ethernet
-            config->InterfaceType = NetworkInterfaceType_Ethernet;
+        case NetworkInterfaceType_Ethernet: // Ethernet
             config->StartupAddressMode = AddressMode_DHCP;
             config->AutomaticDNS = 1;
 
             // get default MAC for interface
             esp_read_mac(config->MacAddress, ESP_MAC_ETH);
+            break;
+
+#if HAL_USE_THREAD == TRUE
+        case NetworkInterfaceType_Thread: // OpenThread  IPV6 only
+            config->StartupAddressMode = AddressMode_Static;
+            config->AutomaticDNS = 1;
+            break;
+#endif
+
+        default:
             break;
     }
 
@@ -396,7 +414,7 @@ bool ConfigurationManager_GetConfigurationBlock(
     int sizeOfBlock = 0;
 
 #ifdef DEBUG_CONFIG
-    ets_printf("GetConfig %d, %d\n", (int)configuration, configurationIndex);
+    ets_printf("GetConfig %X %d, %d\n", configurationBlock, (int)configuration, configurationIndex);
 #endif
 
     // validate if the requested block exists
@@ -877,4 +895,24 @@ HAL_Configuration_X509DeviceCertificate *ConfigurationManager_GetDeviceCertifica
 
     // not found, or failed to allocate memory
     return NULL;
+}
+
+// default implementation
+// this is weak so a manufacturer can provide a strong implementation
+__nfweak void ConfigurationManager_GetSystemSerialNumber(char *serialNumber, size_t serialNumberSize)
+{
+    memset(serialNumber, 0, serialNumberSize);
+
+    // Use the factory-provided MAC address as unique ID
+    uint8_t macAddress[6];
+    esp_err_t err = esp_read_mac(macAddress, ESP_MAC_EFUSE_FACTORY);
+    if (err == ESP_OK)
+    {
+        memcpy(&serialNumber[serialNumberSize - sizeof(macAddress)], macAddress, sizeof(macAddress));
+
+        // Disambiguation is needed because the hardware-specific identifier used to create the
+        // default serial number on other platforms may be in the same range.
+        // Set the first byte to a number that is unique (within the nanoFramework CLR) for ESP32.
+        serialNumber[0] = 1;
+    }
 }

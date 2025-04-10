@@ -26,7 +26,7 @@
 - [ ] Breaking change (fix or feature that would cause existing functionality to change)
 - [ ] Config and build (change in the configuration and build system, has no impact on code or features)
 - [ ] Dev Containers (changes related with Dev Containers, has no impact on code or features)
-- [ ] Dependencies (update dependencies and changes associated, has no impact on code or features)
+- [ ] Dependencies/declarations (update dependencies or assembly declarations and changes associated, has no impact on code or features)
 - [ ] Documentation (changes or updates in the documentation, has no impact on code or features)
 
 ## Checklist

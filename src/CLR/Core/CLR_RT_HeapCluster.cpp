@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (c) .NET Foundation and Contributors
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
@@ -12,11 +12,11 @@ void CLR_RT_HeapCluster::HeapCluster_Initialize(CLR_UINT32 size, CLR_UINT32 bloc
     NATIVE_PROFILE_CLR_CORE();
     GenericNode_Initialize();
 
-    size = (size - sizeof(*this)) / sizeof(struct CLR_RT_HeapBlock);
+    size = (size - sizeof(*this)) / sizeof(CLR_RT_HeapBlock);
 
-    m_freeList.DblLinkedList_Initialize();              // CLR_RT_DblLinkedList    m_freeList;
-    m_payloadStart = (CLR_RT_HeapBlock_Node *)&this[1]; // CLR_RT_HeapBlock_Node*  m_payloadStart;
-    m_payloadEnd = &m_payloadStart[size];               // CLR_RT_HeapBlock_Node*  m_payloadEnd;
+    m_freeList.DblLinkedList_Initialize();
+    m_payloadStart = static_cast<CLR_RT_HeapBlock_Node *>(&this[1]);
+    m_payloadEnd = &m_payloadStart[size];
 
     // Scan memory looking for possible objects to salvage
     CLR_RT_HeapBlock_Node *ptr = m_payloadStart;
@@ -26,7 +26,7 @@ void CLR_RT_HeapCluster::HeapCluster_Initialize(CLR_UINT32 size, CLR_UINT32 bloc
     {
         if (ptr->DataType() == DATATYPE_WEAKCLASS)
         {
-            CLR_RT_HeapBlock_WeakReference *weak = (CLR_RT_HeapBlock_WeakReference *)ptr;
+            CLR_RT_HeapBlock_WeakReference *weak = (CLR_RT_HeapBlock_WeakReference *)(ptr);
 
             if (weak->DataSize() == CONVERTFROMSIZETOHEAPBLOCKS(sizeof(*weak)) && weak->m_targetSerialized != NULL &&
                 (weak->m_identity.m_flags & CLR_RT_HeapBlock_WeakReference::WR_SurviveBoot))
@@ -62,7 +62,7 @@ void CLR_RT_HeapCluster::HeapCluster_Initialize(CLR_UINT32 size, CLR_UINT32 bloc
             }
         }
 
-        if ((unsigned int)(ptr + blockSize) > (unsigned int)end)
+        if ((uintptr_t)(ptr + blockSize) > (uintptr_t)end)
         {
             blockSize = (CLR_UINT32)(end - ptr);
         }
@@ -192,7 +192,7 @@ CLR_RT_HeapBlock *CLR_RT_HeapCluster::ExtractBlocks(CLR_UINT32 dataType, CLR_UIN
         }
         else
         {
-            res->Debug_ClearBlock(0xCB);
+            res->Debug_ClearBlock(SENTINEL_CLEAR_BLOCK);
         }
     }
 
@@ -208,7 +208,7 @@ void CLR_RT_HeapCluster::RecoverFromGC()
     NATIVE_PROFILE_CLR_CORE();
 
     CLR_RT_HeapBlock_Node *ptr = m_payloadStart;
-    CLR_RT_HeapBlock_Node *end = m_payloadEnd;
+    CLR_RT_HeapBlock_Node const *end = m_payloadEnd;
 
     //
     // Open the free list.
@@ -243,7 +243,13 @@ void CLR_RT_HeapCluster::RecoverFromGC()
             } while (next < end && next->IsAlive() == false);
 
 #if defined(NANOCLR_PROFILE_NEW_ALLOCATIONS)
-            g_CLR_PRF_Profiler.TrackObjectDeletion(ptr);
+
+            // don't report free blocks, as they are not being deleted, rather grouped
+            if (ptr->DataType() != DATATYPE_FREEBLOCK)
+            {
+                g_CLR_PRF_Profiler.TrackObjectDeletion(ptr);
+            }
+
 #endif
             ptr->SetDataId(CLR_RT_HEAPBLOCK_RAW_ID(DATATYPE_FREEBLOCK, CLR_RT_HeapBlock::HB_Pinned, lenTot));
 
@@ -254,7 +260,7 @@ void CLR_RT_HeapCluster::RecoverFromGC()
             ptr->SetPrev(last);
             last = ptr;
 
-            ptr->Debug_ClearBlock(0xDF);
+            ptr->Debug_ClearBlock(SENTINEL_RECOVERED);
 
             ptr = next;
         }
@@ -285,12 +291,14 @@ void CLR_RT_HeapCluster::RecoverFromGC()
 CLR_RT_HeapBlock_Node *CLR_RT_HeapCluster::InsertInOrder(CLR_RT_HeapBlock_Node *node, CLR_UINT32 size)
 {
     NATIVE_PROFILE_CLR_CORE();
-    CLR_RT_HeapBlock_Node *ptr;
+    CLR_RT_HeapBlock_Node *ptr = nullptr;
 
     NANOCLR_FOREACH_NODE__NODECL(CLR_RT_HeapBlock_Node, ptr, m_freeList)
     {
         if (ptr > node)
+        {
             break;
+        }
     }
     NANOCLR_FOREACH_NODE_END();
 
@@ -319,7 +327,7 @@ CLR_RT_HeapBlock_Node *CLR_RT_HeapCluster::InsertInOrder(CLR_RT_HeapBlock_Node *
     }
 
     node->SetDataId(CLR_RT_HEAPBLOCK_RAW_ID(DATATYPE_FREEBLOCK, CLR_RT_HeapBlock::HB_Pinned, size));
-    node->Debug_ClearBlock(0xCF);
+    node->Debug_ClearBlock(SENTINEL_CLUSTER_INSERT);
 
     return node;
 }
@@ -336,50 +344,90 @@ void CLR_RT_HeapCluster::ValidateBlock(CLR_RT_HeapBlock *ptr)
     {
         if (ptr < m_payloadStart || ptr >= m_payloadEnd)
         {
+#ifdef _WIN64
             CLR_Debug::Printf(
-                "Block beyond cluster limits: %08x [%08x : %08x-%08x]\r\n",
-                (size_t)ptr,
-                (size_t)this,
-                (size_t)m_payloadStart,
-                (size_t)m_payloadEnd);
+                "Block beyond cluster limits: 0x%016" PRIxPTR " [0x%016" PRIxPTR " : 0x%016" PRIxPTR "-0x%016" PRIxPTR
+                "]\r\n",
+                (uintptr_t)ptr,
+                (uintptr_t)this,
+                (uintptr_t)m_payloadStart,
+                (uintptr_t)m_payloadEnd);
+#else
+
+            CLR_Debug::Printf(
+                "Block beyond cluster limits: 0x%08" PRIxPTR " [0x%08" PRIxPTR " : 0x%08" PRIxPTR "-0x%08" PRIxPTR
+                "]\r\n",
+                (uintptr_t)ptr,
+                (uintptr_t)this,
+                (uintptr_t)m_payloadStart,
+                (uintptr_t)m_payloadEnd);
+#endif
 
             break;
         }
 
         if (ptr->DataType() >= DATATYPE_FIRST_INVALID)
         {
+#ifdef _WIN64
             CLR_Debug::Printf(
-                "Bad Block Type: %08x %02x [%08x : %08x-%08x]\r\n",
-                (size_t)ptr,
+                "Bad Block Type: 0x%016" PRIxPTR " %02x [0x%016" PRIxPTR " : 0x%016" PRIxPTR "-0x%016" PRIxPTR "]\r\n",
+                (uintptr_t)ptr,
                 ptr->DataType(),
-                (size_t)this,
-                (size_t)m_payloadStart,
-                (size_t)m_payloadEnd);
+                (uintptr_t)this,
+                (uintptr_t)m_payloadStart,
+                (uintptr_t)m_payloadEnd);
+#else
+            CLR_Debug::Printf(
+                "Bad Block Type: 0x%08" PRIxPTR " %02x [0x%08" PRIxPTR " : 0x%08" PRIxPTR "-0x%08" PRIxPTR "]\r\n",
+                (uintptr_t)ptr,
+                ptr->DataType(),
+                (uintptr_t)this,
+                (uintptr_t)m_payloadStart,
+                (uintptr_t)m_payloadEnd);
+#endif
 
             break;
         }
 
         if (ptr->DataSize() == 0)
         {
+#ifdef _WIN64
             CLR_Debug::Printf(
-                "Bad Block null-size: %08x [%08x : %08x-%08x]\r\n",
-                (size_t)ptr,
-                (size_t)this,
-                (size_t)m_payloadStart,
-                (size_t)m_payloadEnd);
+                "Bad Block null-size: 0x%016" PRIxPTR " [0x%016" PRIxPTR " : 0x%016" PRIxPTR "-0x%016" PRIxPTR "]\r\n",
+                (uintptr_t)ptr,
+                (uintptr_t)this,
+                (uintptr_t)m_payloadStart,
+                (uintptr_t)m_payloadEnd);
+#else
+            CLR_Debug::Printf(
+                "Bad Block null-size: 0x%08" PRIxPTR " [0x%08" PRIxPTR " : 0x%08" PRIxPTR "-0x%08" PRIxPTR "]\r\n",
+                (uintptr_t)ptr,
+                (uintptr_t)this,
+                (uintptr_t)m_payloadStart,
+                (uintptr_t)m_payloadEnd);
+#endif
 
             break;
         }
 
         if (ptr + ptr->DataSize() > m_payloadEnd)
         {
+#ifdef _WIN64
             CLR_Debug::Printf(
-                "Bad Block size: %d %08x [%08x : %08x-%08x]\r\n",
+                "Bad Block size: 0x%016" PRIxPTR " [0x%016" PRIxPTR " : 0x%016" PRIxPTR "-0x%016" PRIxPTR "]\r\n",
+                (uintptr_t)ptr,
+                (uintptr_t)this,
+                (uintptr_t)m_payloadStart,
+                (uintptr_t)m_payloadEnd);
+#else
+            CLR_Debug::Printf(
+                "Bad Block size: %d 0x%08" PRIxPTR " [0x%08" PRIxPTR " : 0x%08" PRIxPTR "-0x%08" PRIxPTR "]\r\n",
                 ptr->DataSize(),
-                (size_t)ptr,
-                (size_t)this,
-                (size_t)m_payloadStart,
-                (size_t)m_payloadEnd);
+                (uintptr_t)ptr,
+                (uintptr_t)this,
+                (uintptr_t)m_payloadStart,
+                (uintptr_t)m_payloadEnd);
+#endif
 
             break;
         }

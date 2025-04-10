@@ -26,7 +26,7 @@
       "problemMatcher": []
     },
     {
-      "label": "Flash nanoCLR to ESP32-C3 | ESP32-S3",
+      "label": "Flash nanoCLR to  ESP32-C3 | ESP32-C6 | ESP32-H2 | ESP32-S3",
       "type": "shell",
       "command": "python ${env:IDF_PATH}/components/esptool_py/esptool/esptool.py --chip auto --port \"${input:comPort}\" --baud 1500000 --before \"default_reset\" --after \"hard_reset\" write_flash -z --flash_size detect 0x0 ${workspaceFolder}/build/bootloader/bootloader.bin 0x10000 ${workspaceFolder}/build/nanoCLR.bin 0x8000 ${workspaceFolder}/build/partitions_${input:esp32Partitions}.bin",
       "presentation": {
@@ -38,7 +38,7 @@
     {
       "label": "Erase ESP32 flash",
       "type": "shell",
-      "command": "python ${env:IDF_PATH}/components/esptool_py/esptool/esptool.py --chip detect --port \"${input:comPort}\" --baud 1500000 --before \"default_reset\" --after \"hard_reset\" erase_flash",
+      "command": "python ${env:IDF_PATH}/components/esptool_py/esptool/esptool.py --chip auto --port \"${input:comPort}\" --baud 1500000 --before \"default_reset\" --after \"hard_reset\" erase_flash",
       "presentation": {
         "reveal": "always",
         "panel": "shared"
@@ -49,6 +49,16 @@
       "label": "Decode ESP32 backtrace",
       "type": "shell",
       "command": "xtensa-${input:esp32series}-elf-addr2line -apsfCire \"${input:espBacktraceElfFile}\" \"${input:espBacktrace}\"",
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Decode ESP32 (riscv32 series) backtrace",
+      "type": "shell",
+      "command": "riscv32-esp-elf-addr2line -apsfCire \"${input:espBacktraceElfFile}\" \"${input:espBacktrace}\"",
       "presentation": {
         "reveal": "always",
         "panel": "shared"
@@ -91,6 +101,23 @@
         }
       },
       "problemMatcher": []
+    },
+    {
+      "label": "Flash Silabs GG11",
+      "type": "shell",
+      "command": "${env:JLINK_PATH}/Jlink.exe -device default -si swd -CommandFile ${workspaceRoot}/.jlink/flash_gg11.jlink",
+      "windows": {
+        "options": {
+          "shell": {
+            "executable": "cmd.exe",
+            "args": [
+              "/c"
+            ]
+          },
+          "cwd": "${workspaceFolder}/Build"
+        }
+      },
+      "problemMatcher": []
     }
   ],
   "inputs": [
@@ -126,7 +153,8 @@
         "2mb",
         "4mb",
         "8mb",
-        "16mb"
+        "16mb",
+        "32mb"
       ]
     },
     {

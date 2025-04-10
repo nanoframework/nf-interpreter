@@ -58,6 +58,7 @@ extern "C"
     /// SPI driver instance type.
     SL_ENUM(NF_SpiDriver_Type_t){
         spidrvMaster = 0, ///< Act as an SPI master.
+        spidrvSlave = 1   ///< Act as an SPI slave.
     };
 
     /// SPI bus bit order.
@@ -87,8 +88,7 @@ extern "C"
     };
 
     /// Type of a USART peripheral
-    SL_ENUM(NF_SpiDriver_PeripheralType_t)
-    {
+    SL_ENUM(NF_SpiDriver_PeripheralType_t){
         spidrvPeripheralTypeUsart = 0, ///< USART peripheral
     };
 
@@ -117,7 +117,8 @@ extern "C"
      *   @ref ECODE_EMDRV_SPIDRV_OK on success, @ref ECODE_EMDRV_SPIDRV_TIMEOUT
      *   on timeout. Timeouts are only relevant for slave mode transfers.
      */
-    typedef void (*NF_SpiDriver_Callback_t)(struct NF_SpiDriver_HandleData *handle, Ecode_t transferStatus, int itemsTransferred);
+    typedef void (
+        *NF_SpiDriver_Callback_t)(struct NF_SpiDriver_HandleData *handle, Ecode_t transferStatus, int itemsTransferred);
 
     /// An SPI driver instance initialization structure.
     /// Contains a number of SPIDRV configuration options.
@@ -126,18 +127,19 @@ extern "C"
     /// @ref spidrv_init_structs
     typedef struct NF_SpiDriver_Init
     {
-        void *port; ///< The USART used for SPI.
-        uint8_t portLocationTx;  ///< A location number for the SPI Tx pin.
-        uint8_t portLocationRx;  ///< A location number for the SPI Rx pin.
-        uint8_t portLocationClk; ///< A location number for the SPI Clk pin.
-        uint8_t portLocationCs;  ///< A location number for the SPI Cs pin.
+        void *port;                         ///< The USART used for SPI.
+        uint8_t portLocationTx;             ///< A location number for the SPI Tx pin.
+        uint8_t portLocationRx;             ///< A location number for the SPI Rx pin.
+        uint8_t portLocationClk;            ///< A location number for the SPI Clk pin.
+        uint8_t portLocationCs;             ///< A location number for the SPI Cs pin.
         uint32_t bitRate;                   ///< An SPI bitrate.
         uint32_t frameLength;               ///< An SPI framelength, valid numbers are 4..16
         uint32_t dummyTxValue;              ///< The value to transmit when using SPI receive API functions.
-        NF_SpiDriver_BitOrder_t bitOrder;         ///< A bit order on the SPI bus, MSB or LSB first.
-        NF_SpiDriver_ClockMode_t clockMode;       ///< SPI mode, CLKPOL/CLKPHASE setting.
-        NF_SpiDriver_CsControl_t csControl;       ///< A select master mode chip select (CS) control scheme.
-        bool isHalfDuplex;                 ///< True if the SPI is half duplex.
+        NF_SpiDriver_Type_t type;           ///< An SPI type, master or slave.
+        NF_SpiDriver_BitOrder_t bitOrder;   ///< A bit order on the SPI bus, MSB or LSB first.
+        NF_SpiDriver_ClockMode_t clockMode; ///< SPI mode, CLKPOL/CLKPHASE setting.
+        NF_SpiDriver_CsControl_t csControl; ///< A select master mode chip select (CS) control scheme.
+        bool isHalfDuplex;                  ///< True if the SPI is half duplex.
     } NF_SpiDriver_Init_t;
 
     /// An SPI driver instance handle data structure.
@@ -186,22 +188,30 @@ extern "C"
 
     Ecode_t NF_SpiDriver_Init(NF_SpiDriver_Handle_t handle, NF_SpiDriver_Init_t *initData);
 
-    Ecode_t NF_SpiDriver_Receive(NF_SpiDriver_Handle_t handle, void *buffer, int count, NF_SpiDriver_Callback_t callback);
+    Ecode_t NF_SpiDriver_MReceive(
+        NF_SpiDriver_Handle_t handle,
+        void *buffer,
+        int count,
+        NF_SpiDriver_Callback_t callback);
 
-    Ecode_t NF_SpiDriver_ReceiveBlocking(NF_SpiDriver_Handle_t handle, void *buffer, int count);
+    Ecode_t NF_SpiDriver_MReceiveB(NF_SpiDriver_Handle_t handle, void *buffer, int count);
 
-    Ecode_t NF_SpiDriver_Transfer(
+    Ecode_t NF_SpiDriver_MTransfer(
         NF_SpiDriver_Handle_t handle,
         const void *txBuffer,
         void *rxBuffer,
         int count,
         NF_SpiDriver_Callback_t callback);
 
-    Ecode_t NF_SpiDriver_TransferBlocking(NF_SpiDriver_Handle_t handle, const void *txBuffer, void *rxBuffer, int count);
+    Ecode_t NF_SpiDriver_MTransferB(NF_SpiDriver_Handle_t handle, const void *txBuffer, void *rxBuffer, int count);
 
-    Ecode_t NF_SpiDriver_Transmit(NF_SpiDriver_Handle_t handle, const void *buffer, int count, NF_SpiDriver_Callback_t callback);
+    Ecode_t NF_SpiDriver_MTransmit(
+        NF_SpiDriver_Handle_t handle,
+        const void *buffer,
+        int count,
+        NF_SpiDriver_Callback_t callback);
 
-    Ecode_t NF_SpiDriver_TransmitBlocking(NF_SpiDriver_Handle_t handle, const void *buffer, int count);
+    Ecode_t NF_SpiDriver_MTransmitB(NF_SpiDriver_Handle_t handle, const void *buffer, int count);
 
     Ecode_t NF_SpiDriver_SetBitrate(NF_SpiDriver_Handle_t handle, uint32_t bitRate);
 

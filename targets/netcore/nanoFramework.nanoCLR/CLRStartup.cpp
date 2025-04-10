@@ -1,14 +1,10 @@
-//
+﻿//
 // Copyright (c) .NET Foundation and Contributors
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
 //
 #include "stdafx.h"
 #include "nanoCLR_native.h"
-
-#if defined(VIRTUAL_DEVICE)
-
-#endif
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -24,29 +20,11 @@ struct Settings
 
     //--//
 
-    HRESULT Initialize(CLR_SETTINGS params)
+    HRESULT Initialize(CLR_SETTINGS const &params)
     {
         NANOCLR_HEADER();
 
         m_clrOptions = params;
-
-#if defined(PLATFORM_WINDOWS_EMULATOR)
-
-        CLR_UINT32 clockFrequencyBaseline = 27000000;
-        CLR_UINT32 clockFrequency = CPU_SystemClock();
-        double clockFrequencyRatio = 1;
-
-        if (clockFrequency > 0)
-        {
-            clockFrequencyRatio = (double)clockFrequencyBaseline / (double)clockFrequency;
-        }
-
-        g_HAL_Configuration_Windows.ProductType = HAL_Configuration_Windows::Product_Aux;
-        g_HAL_Configuration_Windows.SlowClockPerSecond = 32768;
-        g_HAL_Configuration_Windows.TicksPerMethodCall = (CLR_UINT64)(45.0 * clockFrequencyRatio);
-        g_HAL_Configuration_Windows.TicksPerOpcode = (CLR_UINT64)(5.0 * clockFrequencyRatio);
-        g_HAL_Configuration_Windows.GraphHeapEnabled = false;
-#endif
 
         NANOCLR_CHECK_HRESULT(CLR_RT_ExecutionEngine::CreateInstance(params));
 #if !defined(BUILD_RTM)
@@ -362,32 +340,6 @@ struct Settings
         m_assemblies.clear(); // CLR_RT_ParseOptions::BufferMap m_assemblies;
     }
 
-    struct Command_Call : CLR_RT_ParseOptions::Command
-    {
-        typedef HRESULT (Settings::*FPN)(CLR_RT_ParseOptions::ParameterList *params);
-
-        Settings &m_parent;
-        FPN m_call;
-
-        Command_Call(Settings &parent, FPN call, const wchar_t *szName, const wchar_t *szDescription)
-            : CLR_RT_ParseOptions::Command(szName, szDescription), m_parent(parent), m_call(call)
-        {
-        }
-
-        virtual HRESULT Execute()
-        {
-            return (m_parent.*m_call)(&m_params);
-        }
-    };
-
-#define PARAM_GENERIC(parm1Name, parm1Desc)                                                                            \
-    param = new CLR_RT_ParseOptions::Parameter_Generic(parm1Name, parm1Desc);                                          \
-    cmd->m_params.push_back(param)
-#define OPTION_CALL(fpn, optName, optDesc)                                                                             \
-    cmd = new Command_Call(*this, &Settings::fpn, optName, optDesc);                                                   \
-    m_commands.push_back(cmd)
-#define PARAM_EXTRACT_STRING(lst, index) ((CLR_RT_ParseOptions::Parameter_Generic *)(*lst)[index])->m_data.c_str()
-
     HRESULT CheckAssemblyFormat(CLR_RECORD_ASSEMBLY *header, const wchar_t *src)
     {
         NANOCLR_HEADER();
@@ -564,7 +516,6 @@ void nanoCLR_SetConfigureCallback(ConfigureRuntimeCallback configureRuntimeCallb
 void ClrStartup(CLR_SETTINGS params)
 {
     NATIVE_PROFILE_CLR_STARTUP();
-    // Settings settings;
     ASSERT(sizeof(CLR_RT_HeapBlock_Raw) == sizeof(struct CLR_RT_HeapBlock));
     bool softReboot;
 

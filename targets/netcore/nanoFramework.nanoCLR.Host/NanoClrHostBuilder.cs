@@ -1,17 +1,16 @@
-//
-// Copyright (c) .NET Foundation and Contributors
-// See LICENSE file in the project root for full license information.
-//
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
-using nanoFramework.nanoCLR.Host.Port;
-using nanoFramework.nanoCLR.Host.Port.NamedPipe;
-using nanoFramework.nanoCLR.Host.Port.Serial;
-using nanoFramework.nanoCLR.Host.Port.TcpIp;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using nanoFramework.nanoCLR.Host.Port;
+using nanoFramework.nanoCLR.Host.Port.NamedPipe;
+using nanoFramework.nanoCLR.Host.Port.Serial;
+using nanoFramework.nanoCLR.Host.Port.TcpIp;
+using nanoFramework.nanoCLR.Host.Profiler;
 
 namespace nanoFramework.nanoCLR.Host
 {
@@ -20,7 +19,10 @@ namespace nanoFramework.nanoCLR.Host
         private static nanoCLRHost s_nanoClrHost = null;
         private readonly List<Action> _configureSteps = new();
         private readonly List<Action> _preInitConfigureSteps = new();
+        private readonly List<Action> _cleanupSteps = new();
         private IPort _wireProtocolPort;
+        private ProfilerMessageProcessor _profilerMessageProcessor;
+        private ProfilerLogFileProcessor _profilerLogFileProcessor;
 
         public int MaxContextSwitches { get; set; } = 50;
         public bool WaitForDebugger { get; set; } = false;
@@ -93,6 +95,9 @@ namespace nanoFramework.nanoCLR.Host
         public string GetCLRVersion() =>
             Interop.nanoCLR.nanoCLR_GetVersion();
 
+        public List<NativeAssemblyDetails> GetNativeAssemblies() =>
+            NativeAssemblyDetails.Get();
+
         public nanoCLRHostBuilder UseSerialPortWireProtocol(string comPort) =>
             UseWireProtocolPort(new SerialPort(comPort));
 
@@ -104,6 +109,27 @@ namespace nanoFramework.nanoCLR.Host
 
         public nanoCLRHostBuilder UsePortTrace() =>
             UseWireProtocolPort(new TraceDataPort(_wireProtocolPort));
+
+        public nanoCLRHostBuilder EnableProfiler()
+        {
+            _profilerMessageProcessor = new ProfilerMessageProcessor();
+            SetProfilerMessageCallback(_profilerMessageProcessor.MessageHandler);
+
+            _cleanupSteps.Add(() => _profilerMessageProcessor.Dispose());
+
+            return this;
+        }
+
+        public nanoCLRHostBuilder DumpProfilerLogData()
+        {
+            _profilerLogFileProcessor = new ProfilerLogFileProcessor();
+
+            SetProfilerLogDataCallback(_profilerLogFileProcessor.MessageHandler);
+
+            _cleanupSteps.Add(() => _profilerLogFileProcessor.Dispose());
+
+            return this;
+        }
 
         public nanoCLRHost Build()
         {
@@ -117,6 +143,7 @@ namespace nanoFramework.nanoCLR.Host
             s_nanoClrHost.WireProtocolPort = _wireProtocolPort;
             s_nanoClrHost.ConfigureSteps.AddRange(_configureSteps);
             s_nanoClrHost.PreInitConfigureSteps.AddRange(_preInitConfigureSteps);
+            s_nanoClrHost.CleanupSteps.AddRange(_cleanupSteps);
 
             s_nanoClrHost.nanoCLRSettings = new nanoCLRSettings
             {
@@ -130,14 +157,22 @@ namespace nanoFramework.nanoCLR.Host
             return s_nanoClrHost;
         }
 
-        public void UnloadNanoClrDll()
+        public void UnloadNanoClrDll() => Interop.nanoCLR.UnloadNanoClrImageDll();
+
+        public void OutputNanoClrDllInfo() => Console.WriteLine($"nanoCLR loaded from '{Interop.nanoCLR.FindNanoClrDll()}'");
+
+        private nanoCLRHostBuilder SetProfilerMessageCallback(Action<string> profilerMessage)
         {
-            Interop.nanoCLR.UnloadNanoClrImageDll();
+            _configureSteps.Add(() => Interop.nanoCLR.nanoCLR_SetProfilerMessageCallback((msg) => profilerMessage(msg)));
+
+            return this;
         }
 
-        public void OutputNanoClrDllInfo()
+        private nanoCLRHostBuilder SetProfilerLogDataCallback(Action<byte[], int> messageHandler)
         {
-            Console.WriteLine($"nanoCLR loaded from '{Interop.nanoCLR.FindNanoClrDll()}'");
+            _configureSteps.Add(() => Interop.nanoCLR.nanoCLR_SetProfilerDataCallback((data, length) => messageHandler(data, length)));
+
+            return this;
         }
     }
 }

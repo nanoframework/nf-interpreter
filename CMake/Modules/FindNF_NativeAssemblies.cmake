@@ -1,4 +1,4 @@
-#
+﻿#
 # Copyright (c) .NET Foundation and Contributors
 # See LICENSE file in the project root for full license information.
 #
@@ -29,7 +29,6 @@ option(API_System.Device.Pwm                            "option for System.Devic
 option(API_System.IO.Ports                              "option for System.IO.Ports API")
 option(API_System.Device.Spi                            "option for System.Device.Spi API")
 option(API_System.Runtime.Serialization                 "option for System.Runtime.Serialization API")
-option(API_Windows.Storage                              "option for Windows.Storage")
 option(API_nanoFramework.Graphics                       "option for nanoFramework.Graphics")
 option(API_nanoFramework.Device.Bluetooth               "option for nanoFramework.Device.Bluetooth")
 option(API_System.Device.UsbStream                      "option for System.Device.UsbStream API")
@@ -39,7 +38,7 @@ option(API_nanoFramework.System.Security.Cryptography   "option for nanoFramewor
 # Esp32 only
 option(API_Hardware.Esp32                               "option for Hardware.Esp32")
 option(API_nanoFramework.Hardware.Esp32.Rmt             "option for nanoFramework.Hardware.Esp32.Rmt")
-
+option(API_nanoFramework.Networking.Thread              "option for nanoFramework.Networking.Thread API")
 
 # Stm32 only
 option(API_Hardware.Stm32                               "option for Hardware.Stm32")
@@ -61,6 +60,53 @@ option(API_Hardware.GiantGecko                          "option for Hardware.Gia
 # add options for private APIs here
 
 ###################################
+
+#################################################################
+# macro to find the version of an API or Interop assembly
+macro(AddNativeAssemblyVersion apiNamespace apiNamespaceWithoutDots nativeAssemblySources)
+
+    # find the source file that contains the value of CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_${apiNamespaceWithoutDots}
+    foreach(apiSourceFile ${nativeAssemblySources})
+
+        file(READ "${apiSourceFile}" sourceCode)
+
+        string(REGEX MATCH "[ \t\r\n]+CLR_RT_NativeAssemblyData[ \t\r\n]+g_CLR_AssemblyNative_${apiNamespaceWithoutDots}[ \t\r\n]*=[^{]+{[^0]+0x([0-9A-Za-z]+)[^{]+{[ \t\r\n]*([0-9]+)[ \t\r\n]*,[ \t\r\n]*([0-9]+)[ \t\r\n]*,[ \t\r\n]*([0-9]+)[ \t\r\n]*,[ \t\r\n]*([0-9]+)" _ "${sourceCode}")
+
+        if(NOT "${CMAKE_MATCH_1}" STREQUAL "")
+            list(APPEND NF_NativeAssemblies_VERSIONS "${apiNamespace},${CMAKE_MATCH_2}.${CMAKE_MATCH_3}.${CMAKE_MATCH_4}.${CMAKE_MATCH_5},0x${CMAKE_MATCH_1}")
+            break()
+        endif()
+
+    endforeach()
+
+endmacro()
+#################################################################
+
+#################################################################
+# macro to find the version of the CorLib assembly
+macro(AddCorLibAssemblyVersion apiNamespace apiNamespaceWithoutDots nativeAssemblySources)
+
+    # find the source file that contains the value of CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_${apiNamespaceWithoutDots}
+    foreach(apiSourceFile ${nativeAssemblySources})
+
+        file(READ "${apiSourceFile}" sourceCode)
+
+        string(REGEX MATCH "[ \t\r\n]+CLR_RT_NativeAssemblyData[ \t\r\n]+g_CLR_AssemblyNative_${apiNamespaceWithoutDots}[ \t\r\n]*=[^{]+{[^0]+0x([0-9A-Za-z]+)[^0]+0x([0-9A-Za-z]+)[^{]+{[ \t\r\n]*([0-9]+)[ \t\r\n]*,[ \t\r\n]*([0-9]+)[ \t\r\n]*,[ \t\r\n]*([0-9]+)[ \t\r\n]*,[ \t\r\n]*([0-9]+)" _ "${sourceCode}")
+
+        if(NOT "${CMAKE_MATCH_1}" STREQUAL "")
+            if (NF_FEATURE_SUPPORT_REFLECTION)
+                list(APPEND NF_NativeAssemblies_VERSIONS "${apiNamespace},${CMAKE_MATCH_3}.${CMAKE_MATCH_4}.${CMAKE_MATCH_5}.${CMAKE_MATCH_6},0x${CMAKE_MATCH_1}")
+            else()
+                list(APPEND NF_NativeAssemblies_VERSIONS "${apiNamespace},${CMAKE_MATCH_3}.${CMAKE_MATCH_4}.${CMAKE_MATCH_5}.${CMAKE_MATCH_6},0x${CMAKE_MATCH_2}")
+            endif()
+
+            break()
+        endif()
+
+    endforeach()
+
+endmacro()
+#################################################################
 
 #################################################################
 # macro to perform individual settings to add an API to the build
@@ -85,10 +131,12 @@ macro(PerformSettingsForApiEntry apiNamespace)
     list(APPEND NF_NativeAssemblies_INCLUDE_DIRS "${${apiNamespace}_INCLUDE_DIRS}")
     list(REMOVE_DUPLICATES NF_NativeAssemblies_INCLUDE_DIRS)
 
-    # append source files to list wiht source files for all the APIs
+    # append source files to list with source files for all the APIs
     list(APPEND NF_NativeAssemblies_SOURCES "${${apiNamespace}_SOURCES}")
     list(REMOVE_DUPLICATES NF_NativeAssemblies_SOURCES)
 
+    # add the assembly version to the list
+    AddNativeAssemblyVersion("${apiNamespace}" "${apiNamespaceWithoutDots}" "${${apiNamespace}_SOURCES}")
 endmacro()
 #################################################################
 
@@ -123,6 +171,8 @@ macro(PerformSettingsForInteropEntry interopAssemblyName)
     list(APPEND NF_NativeAssemblies_SOURCES "${${interopAssemblyName}_SOURCES}")
     list(REMOVE_DUPLICATES NF_NativeAssemblies_SOURCES)
 
+    # add the assembly version to the list
+    AddNativeAssemblyVersion("${interopAssemblyName}" "${interopAssemblyNameWithoutDots}" "${${interopAssemblyName}_SOURCES}")
 endmacro()
 
 #################################################################
@@ -173,6 +223,14 @@ macro(ParseInteropAssemblies)
 endmacro()
 
 ############################################################################################
+#  Add versions of native assemblies that are always included
+############################################################################################
+
+AddCorLibAssemblyVersion("mscorlib" "mscorlib" "${CMAKE_SOURCE_DIR}/src/CLR/CorLib/corlib_native.cpp")
+
+AddNativeAssemblyVersion("nanoFramework.Runtime.Native" "nanoFramework_Runtime_Native" "${CMAKE_SOURCE_DIR}/src/nanoFramework.Runtime.Native/nf_rt_native.cpp")
+
+############################################################################################
 # WHEN ADDING A NEW API add the corresponding block below 
 # required changes:
 # 1. change the 'IF' to match the CMake option 
@@ -189,6 +247,12 @@ endif()
 if(API_nanoFramework.Hardware.Esp32.Rmt)
     ##### API name here (doted name)
     PerformSettingsForApiEntry("nanoFramework.Hardware.Esp32.Rmt")
+endif()
+
+# nanoFramework.Networking.Thread
+if(API_nanoFramework.Networking.Thread)
+    ##### API name here (doted name)
+    PerformSettingsForApiEntry("nanoFramework.Networking.Thread")
 endif()
 
 # nanoFramework.Device.Bluetooth
@@ -388,12 +452,6 @@ if(API_System.Device.UsbStream)
     PerformSettingsForApiEntry("System.Device.UsbStream")
 endif()
 
-# Windows.Storage
-if(API_Windows.Storage)
-    ##### API name here (doted name)
-    PerformSettingsForApiEntry("Windows.Storage")
-endif()
-
 # Interop assemblies
 ParseInteropAssemblies()
 
@@ -417,6 +475,10 @@ configure_file("${CMAKE_SOURCE_DIR}/InteropAssemblies/CLR_RT_InteropAssembliesTa
                 "${CMAKE_CURRENT_BINARY_DIR}/CLR_RT_InteropAssembliesTable.cpp" @ONLY)
 # ... now add Interop Assemblies table to ChibiOS nanoCLR sources list
 list(APPEND NF_NativeAssemblies_SOURCES "${CMAKE_CURRENT_BINARY_DIR}/CLR_RT_InteropAssembliesTable.cpp")
+
+# create a .csv file with native assembly versions in the output directory
+string(REPLACE ";" "\r\n" NF_NativeAssemblies_CSV "${NF_NativeAssemblies_VERSIONS}")
+file(WRITE "${CMAKE_BINARY_DIR}/native_assemblies.csv" "${NF_NativeAssemblies_CSV}")
 
 # output the list of APIs included
 list(LENGTH apiListing apiListingLenght)

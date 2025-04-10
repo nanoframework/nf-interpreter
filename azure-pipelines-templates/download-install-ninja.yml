@@ -9,7 +9,7 @@ parameters:
 steps:
   - task: Cache@2
     inputs:
-      key: '1-10-0 | ninjaKey'
+      key: "1-12-1 | ninjaKey"
       restoreKeys: ninjaKey
       path: $(Agent.TempDirectory)/ninja
       cacheHitVar: NINJA_CACHE_RESTORED
@@ -19,14 +19,14 @@ steps:
     condition: ne(variables.NINJA_CACHE_RESTORED, 'true')
     displayName: Download Ninja
     inputs:
-      targetType: 'filePath'
+      targetType: "filePath"
       filePath: '${{ parameters.repoDirectory }}\install-scripts\install-ninja.ps1'
-      failOnStderr: 'true'
+      failOnStderr: true
 
   - task: ExtractFiles@1
     inputs:
-      archiveFilePatterns: '$(Agent.TempDirectory)\ninja.zip' 
-      destinationFolder: '$(Agent.TempDirectory)\ninja' 
+      archiveFilePatterns: '$(Agent.TempDirectory)\ninja.zip'
+      destinationFolder: '$(Agent.TempDirectory)\ninja'
     condition: ne(variables.NINJA_CACHE_RESTORED, 'true')
     displayName: Extract Ninja
 

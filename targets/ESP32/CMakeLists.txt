@@ -57,10 +57,16 @@ if(ESP32_IDF_PATH)
     endif()
 endif()
 
-# WHEN CHANGING THIS MAKE SURE TO UPDATE:
-# 1. the dev containers
-# 2. ref in AZDO pipeline yaml in Community Targets repo
-set(ESP32_IDF_TAG "4.4.7" CACHE INTERNAL "ESP32 IDF tag")
+#################################################################################
+# WHEN CHANGING THIS MAKE SURE TO UPDATE:                                       #
+# 1. the github tags in dev containers SRC                                      #     
+# 2. ref in AZDO pipeline yaml (main, nightly build and Community Targets repo) #
+# 3. cache tag in build and download AZDO yaml templates                        #
+#################################################################################
+#################################################################################
+set(ESP32_IDF_TAG "5.2.3" CACHE INTERNAL "ESP32 IDF tag")
+#################################################################################
+#################################################################################
 
 if(NO_ESP32_IDF_PATH)
     # no ESP32 IDF source specified, download it from official repo
@@ -122,17 +128,29 @@ else()
 
 endif()
 
-# if using FatFS need to remove IDF ffconfig.h so it can pick ours
+# if using FatFS need to remove IDF ffconfig.h so it can pick ours, but save it first to "ffconf.h.sav" so it can be restored
 if(NF_FEATURE_HAS_SDCARD)
-    execute_process(
-        COMMAND ${CMAKE_COMMAND} -E remove ${esp32_idf_SOURCE_DIR}/components/fatfs/src/ffconf.h
-    )
+    if(EXISTS ${esp32_idf_SOURCE_DIR}/components/fatfs/src/ffconf.h)
+        execute_process(
+            COMMAND ${CMAKE_COMMAND} -E copy ${esp32_idf_SOURCE_DIR}/components/fatfs/src/ffconf.h ${esp32_idf_SOURCE_DIR}/components/fatfs/src/ffconf.h.sav
+        )
+        execute_process(
+            COMMAND ${CMAKE_COMMAND} -E remove ${esp32_idf_SOURCE_DIR}/components/fatfs/src/ffconf.h
+        )
+    endif()
 else()
-    # if not using FatFS need to check if IDF ffconfig.h exists
+    # if not using FatFS need to check if IDF ffconf.h exists
     if(EXISTS ${esp32_idf_SOURCE_DIR}/components/fatfs/src/ffconf.h)
         # all good, ffconf.h still there
     else()
-        message(FATAL_ERROR "\r\n*******************************************************************\r\n'${esp32_idf_SOURCE_DIR}/components/fatfs/src/ffconf.h' file is missing from IDF\r\nIf this was deleted on a previous build using SDCard, just revert the change and restore the file.\r\nNavigate to the source of IDF for example: 'cd /sources/esp-idf' and then run 'git checkout HEAD -- .' to fix it.\r\n*******************************************************************\r\n")
+        # ffconf.h doesn't exist so restore it
+        if(EXISTS ${esp32_idf_SOURCE_DIR}/components/fatfs/src/ffconf.h.sav)
+            execute_process(
+                COMMAND ${CMAKE_COMMAND} -E copy ${esp32_idf_SOURCE_DIR}/components/fatfs/src/ffconf.h.sav ${esp32_idf_SOURCE_DIR}/components/fatfs/src/ffconf.h
+            )
+        else()
+            message(FATAL_ERROR "\r\n*******************************************************************\r\n'${esp32_idf_SOURCE_DIR}/components/fatfs/src/ffconf.h' file is missing from IDF\r\nIf this was deleted on a previous build using SDCard, just revert the change and restore the file.\r\n*******************************************************************\r\n")
+        endif()
     endif()
 endif()
 
@@ -149,3 +167,4 @@ add_subdirectory(_nanoCLR)
 if(USE_NETWORKING_OPTION)
     add_subdirectory(_Network)
 endif()
+ 

@@ -11,7 +11,7 @@
 
 // in UWP the COM ports are named COM1, COM2, COM3. But ESP32 uses internally UART0, UART1, UART2. This maps the port
 // index 1, 2 or 3 to the uart number 0, 1 or 2
-#define PORT_INDEX_TO_UART_NUM(portIndex) ((portIndex)-1)
+#define PORT_INDEX_TO_UART_NUM(portIndex) ((portIndex) - 1)
 // in UWP the COM ports are named COM1, COM2, COM3. But ESP32 uses internally UART0, UART1, UART2. This maps the uart
 // number 0, 1 or 2 to the port index 1, 2 or 3
 #define UART_NUM_TO_PORT_INDEX(uart_num) ((uart_num) + 1)
@@ -20,8 +20,11 @@ static const char *TAG = "SerialDevice";
 
 NF_PAL_UART Uart0_PAL;
 NF_PAL_UART Uart1_PAL;
-#if defined(UART_NUM_2)
+#if SOC_UART_HP_NUM > 2
 NF_PAL_UART Uart2_PAL;
+#endif
+#if SOC_UART_HP_NUM > 3
+NF_PAL_UART Uart3_PAL;
 #endif
 
 NF_PAL_UART *GetPalUartFromUartNum_sys(int uart_num)
@@ -36,10 +39,16 @@ NF_PAL_UART *GetPalUartFromUartNum_sys(int uart_num)
             // set UART PAL
             return &Uart1_PAL;
 
-#if defined(UART_NUM_2)
+#if SOC_UART_HP_NUM > 2
         case UART_NUM_2:
             // set UART PAL
             return &Uart2_PAL;
+#endif
+
+#if SOC_UART_HP_NUM > 3
+        case UART_NUM_2:
+            // set UART PAL
+            return &Uart3_PAL;
 #endif
 
         default:
@@ -56,7 +65,7 @@ void UninitializePalUart_sys(NF_PAL_UART *palUart)
         // send the exit signal to the UART event handling queue
         uart_event_t event;
         event.type = UART_EVENT_MAX;
-        xQueueSend(palUart->UartEventQueue, &event, (portTickType)0);
+        xQueueSend(palUart->UartEventQueue, &event, 0);
         palUart->UartEventTask = NULL;
 
         // free buffer memory
@@ -96,7 +105,7 @@ void uart_event_task_sys(void *pvParameters)
     while (run)
     {
         // Waiting for UART event.
-        if (xQueueReceive(palUart->UartEventQueue, &event, (portTickType)portMAX_DELAY))
+        if (xQueueReceive(palUart->UartEventQueue, &event, portMAX_DELAY))
         {
             // reset vars
             readData = false;
@@ -862,21 +871,28 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeInit___VOID(
     }
 
     // unless the build is configure to use USB CDC, COM1 is being used for VS debug, so it's not available
-#if !defined(CONFIG_USB_CDC_ENABLED)
+#if !defined(CONFIG_TINYUSB_CDC_ENABLED) && !defined(CONFIG_ESP_CONSOLE_USB_SERIAL_JTAG_ENABLED)
     if (uart_num == 0)
     {
         NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
     }
 #endif
 
-    // call the configure and abort if not OK
-    NANOCLR_CHECK_HRESULT(NativeConfig___VOID(stack));
-
     palUart = GetPalUartFromUartNum_sys(uart_num);
     if (palUart == NULL)
     {
         NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
     }
+
+    // If driver already installed then clean up first
+    // Open/Close/Open without dispose
+    if (uart_is_driver_installed(uart_num))
+    {
+        UninitializePalUart_sys(palUart);
+    }
+
+    // call the configure and abort if not OK
+    NANOCLR_CHECK_HRESULT(NativeConfig___VOID(stack));
 
     // alloc buffer memory
     bufferSize = pThis[FIELD___bufferSize].NumericByRef().s4;
@@ -896,7 +912,6 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeInit___VOID(
     palUart->TxOngoingCount = 0;
     palUart->RxBytesToRead = 0;
     palUart->NewLineChar = 0;
-    palUart->SignalLevelsInverted = 0;
 
     // Install driver
     esp_err = uart_driver_install(
@@ -931,8 +946,7 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeInit___VOID(
 
     // Create a task to handle UART event from ISR
     snprintf(task_name, ARRAYSIZE(task_name), "uart%d_events", uart_num);
-    if (xTaskCreatePinnedToCore(uart_event_task_sys, task_name, 2048, palUart, 12, &(palUart->UartEventTask), 1) !=
-        pdPASS)
+    if (xTaskCreate(uart_event_task_sys, task_name, 2048, palUart, 12, &(palUart->UartEventTask)) != pdPASS)
     {
         ESP_LOGE(TAG, "Failed to start UART events task");
         NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
@@ -948,11 +962,14 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeConfig___VOI
 {
     NANOCLR_HEADER();
     {
-        uart_config_t uart_config;
+        uart_config_t uart_config = {};
 
         // get a pointer to the managed object instance and check that it's not NULL
         CLR_RT_HeapBlock *pThis = stack.This();
         FAULT_ON_NULL(pThis);
+
+        // Init clock source (added in IDF 5.x)
+        uart_config.source_clk = UART_SCLK_DEFAULT;
 
         // Get Uart number for serial device
         uart_port_t uart_num = (uart_port_t)PORT_INDEX_TO_UART_NUM(pThis[FIELD___portIndex].NumericByRef().s4);
@@ -1420,14 +1437,17 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::GetDeviceSelector_
     static char deviceSelectorString[] =
 
     // unless the build is configure to use USB CDC, COM1 is being used for VS debug, so it's not available
-#if defined(CONFIG_USB_CDC_ENABLED)
+#if defined(CONFIG_TINYUSB_CDC_ENABLED) || defined(CONFIG_ESP_CONSOLE_USB_SERIAL_JTAG_ENABLED)
         "COM1,"
 #endif
-#if defined(UART_NUM_1)
+#if SOC_UART_HP_NUM > 1
         "COM2,"
 #endif
-#if defined(UART_NUM_2)
+#if SOC_UART_HP_NUM > 2
         "COM3,"
+#endif
+#if SOC_UART_HP_NUM > 3
+        "COM4,"
 #endif
         ;
 

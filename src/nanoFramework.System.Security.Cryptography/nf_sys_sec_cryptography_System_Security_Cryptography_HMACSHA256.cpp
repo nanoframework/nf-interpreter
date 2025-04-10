@@ -10,7 +10,12 @@ HRESULT Library_nf_sys_sec_cryptography_System_Security_Cryptography_HMACSHA256:
 {
     NANOCLR_HEADER();
 
+#if MBEDTLS_VERSION_MAJOR >= 3
+    const mbedtls_md_info_t *md_info = mbedtls_md_info_from_type(MBEDTLS_MD_SHA256);
+#else
     const mbedtls_md_info_t *md_info = &mbedtls_sha256_info;
+#endif
+
     mbedtls_md_context_t ctx;
 
     CLR_RT_HeapBlock_Array *keyArray;

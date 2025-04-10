@@ -42,6 +42,11 @@ struct LWIP_SOCKETS_Driver
 {
     static bool Initialize();
 
+    static bool InitializeInterfaceIndex(
+        int i,
+        int interfaceNumber,
+        HAL_Configuration_NetworkInterface &networkConfiguration);
+
     static bool Uninitialize();
 
     static SOCK_SOCKET Socket(int family, int type, int protocol);
@@ -80,6 +85,10 @@ struct LWIP_SOCKETS_Driver
 
     static int GetNativeIPOption(int optname);
 
+#if LWIP_IPV6
+    static int GetNativeIPV6Option(int optname);
+#endif
+
     static int Select(
         int nfds,
         SOCK_fd_set *readfds,
@@ -116,6 +125,8 @@ struct LWIP_SOCKETS_Driver
         uint32_t interfaceIndex,
         uint32_t updateFlags,
         HAL_Configuration_NetworkInterface *config);
+
+    static void SetSocketDriverInterface(int i, int interfaceNumber);
 
   private:
     static void Status_callback(struct netif *netif);

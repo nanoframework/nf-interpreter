@@ -30,9 +30,6 @@
  * Memory attributes settings.
  */
 #define STM32_NOCACHE_ENABLE                FALSE
-// #define STM32_NOCACHE_MPU_REGION            MPU_REGION_6
-// #define STM32_NOCACHE_RBAR                  0x2004C000U
-// #define STM32_NOCACHE_RASR                  MPU_RASR_SIZE_16K
 
 /*
  * HAL driver system settings.
@@ -95,7 +92,6 @@
 #define STM32_CK48MSEL         STM32_CK48MSEL_PLL
 #define STM32_SDMMC1SEL        STM32_SDMMC1SEL_PLL48CLK
 #define STM32_SDMMC2SEL        STM32_SDMMC2SEL_PLL48CLK
-#define STM32_SRAM2_NOCACHE    FALSE
 
 /*
  * IRQ system settings.
@@ -430,7 +426,7 @@
 /*
  * WSPI driver system settings.
  */
-#define STM32_WSPI_USE_QUADSPI1             FALSE
+#define STM32_WSPI_USE_QUADSPI1             TRUE
 #define STM32_WSPI_QUADSPI1_DMA_STREAM      STM32_DMA_STREAM_ID(2, 7)
 #define STM32_WSPI_QUADSPI1_PRESCALER_VALUE 2
 

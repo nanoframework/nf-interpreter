@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (c) .NET Foundation and Contributors
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
@@ -1364,6 +1364,14 @@ HRESULT CLR_RT_TypeDescriptor::ExtractTypeIndexFromObject(const CLR_RT_HeapBlock
 //
 static const char c_MARKER_ASSEMBLY_V1[] = "NFMRK1";
 
+bool CLR_RECORD_ASSEMBLY::ValidateMarker() const
+{
+    NATIVE_PROFILE_CLR_CORE();
+
+    // compare the marker
+    return memcmp(marker, c_MARKER_ASSEMBLY_V1, sizeof(c_MARKER_ASSEMBLY_V1)) == 0;
+}
+
 bool CLR_RECORD_ASSEMBLY::GoodHeader() const
 {
     NATIVE_PROFILE_CLR_CORE();
@@ -1371,12 +1379,17 @@ bool CLR_RECORD_ASSEMBLY::GoodHeader() const
     header.headerCRC = 0;
 
     if (SUPPORT_ComputeCRC(&header, sizeof(header), 0) != this->headerCRC)
+    {
+        // check for a wrong version of the marker
         return false;
+    }
 
     if (this->stringTableVersion != c_CLR_StringTable_Version)
+    {
         return false;
+    }
 
-    return memcmp(marker, c_MARKER_ASSEMBLY_V1, sizeof(c_MARKER_ASSEMBLY_V1)) == 0;
+    return ValidateMarker();
 }
 
 bool CLR_RECORD_ASSEMBLY::GoodAssembly() const
@@ -1535,27 +1548,36 @@ void CLR_RT_Assembly::Assembly_Initialize(CLR_RT_Assembly::Offsets &offsets)
 
     //--//
 
-    {ITERATE_THROUGH_RECORDS(this, i, TypeDef, TYPEDEF){dst->m_flags = 0;
-    dst->m_totalFields = 0;
-    dst->m_hash = 0;
-}
-}
+    {
+        ITERATE_THROUGH_RECORDS(this, i, TypeDef, TYPEDEF)
+        {
+            dst->m_flags = 0;
+            dst->m_totalFields = 0;
+            dst->m_hash = 0;
+        }
+    }
 
-{ITERATE_THROUGH_RECORDS(this, i, FieldDef, FIELDDEF){dst->m_offset = CLR_EmptyIndex;
-}
-}
+    {
+        ITERATE_THROUGH_RECORDS(this, i, FieldDef, FIELDDEF)
+        {
+            dst->m_offset = CLR_EmptyIndex;
+        }
+    }
 
-{ITERATE_THROUGH_RECORDS(this, i, MethodDef, METHODDEF){dst->m_data = CLR_EmptyIndex;
-}
-}
+    {
+        ITERATE_THROUGH_RECORDS(this, i, MethodDef, METHODDEF)
+        {
+            dst->m_data = CLR_EmptyIndex;
+        }
+    }
 
 #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
-{
-    m_pDebuggingInfo_MethodDef = (CLR_RT_MethodDef_DebuggingInfo *)buffer;
-    buffer += offsets.iDebuggingInfoMethods;
+    {
+        m_pDebuggingInfo_MethodDef = (CLR_RT_MethodDef_DebuggingInfo *)buffer;
+        buffer += offsets.iDebuggingInfoMethods;
 
-    memset(m_pDebuggingInfo_MethodDef, 0, offsets.iDebuggingInfoMethods);
-}
+        memset(m_pDebuggingInfo_MethodDef, 0, offsets.iDebuggingInfoMethods);
+    }
 #endif // #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
 }
 
@@ -1704,11 +1726,20 @@ HRESULT CLR_RT_Assembly::CreateInstance(const CLR_RECORD_ASSEMBLY *header, CLR_R
                                header->SizeOfTable(TBL_MethodDef) + header->SizeOfTable(TBL_Attributes) +
                                header->SizeOfTable(TBL_TypeSpec) + header->SizeOfTable(TBL_Signatures);
 
-            CLR_Debug::Printf(
-                " (%d RAM - %d ROM - %d METADATA)\r\n\r\n",
-                iTotalRamSize,
-                header->TotalSize(),
-                iMetaData);
+            CLR_Debug::Printf(" (%d RAM - %d ROM - %d METADATA)", iTotalRamSize, header->TotalSize(), iMetaData);
+
+#if defined(NANOCLR_GC_VERBOSE)
+            if (s_CLR_RT_fTrace_Memory >= c_CLR_RT_Trace_Info)
+            {
+#ifdef _WIN64
+
+                CLR_Debug::Printf(" @ 0x%016" PRIxPTR "", (uintptr_t)assm);
+#else
+                CLR_Debug::Printf(" @ 0x%08 PRIxPTR ", (uintptr_t)assm);
+#endif
+            }
+#endif
+            CLR_Debug::Printf("\r\n\r\n");
 
             CLR_Debug::Printf(
                 "   AssemblyRef    = %8d bytes (%8d elements)\r\n",
@@ -2268,13 +2299,13 @@ HRESULT CLR_RT_AppDomain::LoadAssembly(CLR_RT_Assembly *assm)
 
     NANOCLR_CHECK_HRESULT(CLR_RT_AppDomainAssembly::CreateInstance(this, assm, appDomainAssembly));
 
+    // Preemptively allocate an out of memory exception.
+    // We can never get into a case where an out of memory exception cannot be thrown.
     if (m_outOfMemoryException == NULL)
     {
-        // Allocate an out of memory exception.  We should never get into a case where an out of memory exception
-        // cannot be thrown.
-        CLR_RT_HeapBlock exception;
-
         _ASSERTE(!strcmp(assm->m_szName, "mscorlib")); // always the first assembly to be loaded
+
+        CLR_RT_HeapBlock exception;
 
         NANOCLR_CHECK_HRESULT(
             g_CLR_RT_ExecutionEngine.NewObjectFromIndex(exception, g_CLR_RT_WellKnownTypes.m_OutOfMemoryException));
@@ -2765,10 +2796,7 @@ struct TypeIndexLookup
 };
 
 static const TypeIndexLookup c_TypeIndexLookup[] = {
-#define TIL(ns, nm, fld)                                                                                               \
-    {                                                                                                                  \
-        ns, nm, &g_CLR_RT_WellKnownTypes.fld                                                                           \
-    }
+#define TIL(ns, nm, fld) {ns, nm, &g_CLR_RT_WellKnownTypes.fld}
     TIL("System", "Boolean", m_Boolean),
     TIL("System", "Char", m_Char),
     TIL("System", "SByte", m_Int8),
@@ -2864,10 +2892,7 @@ struct MethodIndexLookup
 };
 
 static const MethodIndexLookup c_MethodIndexLookup[] = {
-#define MIL(nm, type, method)                                                                                          \
-    {                                                                                                                  \
-        nm, &g_CLR_RT_WellKnownTypes.type, &g_CLR_RT_WellKnownMethods.method                                           \
-    }
+#define MIL(nm, type, method) {nm, &g_CLR_RT_WellKnownTypes.type, &g_CLR_RT_WellKnownMethods.method}
 
     MIL("GetObjectFromId", m_ResourceManager, m_ResourceManager_GetObjectFromId),
     MIL("GetObjectChunkFromId", m_ResourceManager, m_ResourceManager_GetObjectChunkFromId),
@@ -4091,11 +4116,13 @@ HRESULT CLR_RT_TypeSystem::PrepareForExecution()
 #endif // #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
 
 #if !defined(NANOCLR_APPDOMAINS)
+
+    // Preemptively create an out of memory exception.
+    // We can never get into a case where an out of memory exception cannot be thrown.
+
     if (g_CLR_RT_ExecutionEngine.m_outOfMemoryException == NULL)
     {
         CLR_RT_HeapBlock exception;
-
-        memset(&exception, 0, sizeof(struct CLR_RT_HeapBlock));
 
         NANOCLR_CHECK_HRESULT(
             g_CLR_RT_ExecutionEngine.NewObjectFromIndex(exception, g_CLR_RT_WellKnownTypes.m_OutOfMemoryException));
@@ -4640,7 +4667,6 @@ HRESULT CLR_RT_AttributeParser::Next(Value *&res)
 
         m_lastValue.m_mode = Value::c_DefaultConstructor;
         m_lastValue.m_name = NULL;
-        memset(&m_lastValue.m_value, 0, sizeof(struct CLR_RT_HeapBlock));
 
         NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObject(m_lastValue.m_value, m_td));
 
@@ -4656,7 +4682,6 @@ HRESULT CLR_RT_AttributeParser::Next(Value *&res)
 
         m_lastValue.m_mode = Value::c_ConstructorArgument;
         m_lastValue.m_name = NULL;
-        memset(&m_lastValue.m_value, 0, sizeof(struct CLR_RT_HeapBlock));
 
         // get type
         NANOCLR_CHECK_HRESULT(m_parser.Advance(m_res));

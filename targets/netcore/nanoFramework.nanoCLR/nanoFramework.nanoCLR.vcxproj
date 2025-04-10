@@ -102,8 +102,8 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>NANOCLRNATIVE_EXPORTS;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\..\src\CLR\Core;..\..\..\src\CLR\CorLib;..\..\..\src\CLR\Helpers\Base64;.;..\..\win32\Include;..\..\..\src\CLR\Include;..\..\..\src\HAL\Include;..\..\..\src\PAL\Include;..\..\..\src\nanoFramework.Runtime.Events</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>NANOCLRNATIVE_EXPORTS;_DEBUG;DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\..\..\src\CLR\Core;..\..\..\src\CLR\CorLib;..\..\..\src\CLR\Helpers\Base64;.;..\..\win32\Include;..\..\..\src\CLR\Include;..\..\..\src\HAL\Include;..\..\..\src\PAL\Include;..\..\..\src\nanoFramework.Runtime.Events;..\littlefs;$(LITTLEFS_PATH);</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -116,8 +116,8 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>NANOCLRNATIVE_EXPORTS;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\..\src\CLR\Core;..\..\..\src\CLR\CorLib;..\..\..\src\CLR\Helpers\Base64;.;..\..\win32\Include;..\..\..\src\CLR\Include;..\..\..\src\HAL\Include;..\..\..\src\PAL\Include;..\..\..\src\nanoFramework.Runtime.Events</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>NANOCLRNATIVE_EXPORTS;_DEBUG;DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\..\..\src\CLR\Core;..\..\..\src\CLR\CorLib;..\..\..\src\CLR\Helpers\Base64;.;..\..\win32\Include;..\..\..\src\CLR\Include;..\..\..\src\HAL\Include;..\..\..\src\PAL\Include;..\..\..\src\nanoFramework.Runtime.Events;..\littlefs;$(LITTLEFS_PATH);</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -132,7 +132,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>NANOCLRNATIVE_EXPORTS;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\..\src\CLR\Core;..\..\..\src\CLR\CorLib;..\..\..\src\CLR\Helpers\Base64;.;..\..\win32\Include;..\..\..\src\CLR\Include;..\..\..\src\HAL\Include;..\..\..\src\PAL\Include;..\..\..\src\nanoFramework.Runtime.Events</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\..\src\CLR\Core;..\..\..\src\CLR\CorLib;..\..\..\src\CLR\Helpers\Base64;.;..\..\win32\Include;..\..\..\src\CLR\Include;..\..\..\src\HAL\Include;..\..\..\src\PAL\Include;..\..\..\src\nanoFramework.Runtime.Events;..\littlefs;$(LITTLEFS_PATH);</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -149,7 +149,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>NANOCLRNATIVE_EXPORTS;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\..\src\CLR\Core;..\..\..\src\CLR\CorLib;..\..\..\src\CLR\Helpers\Base64;.;..\..\win32\Include;..\..\..\src\CLR\Include;..\..\..\src\HAL\Include;..\..\..\src\PAL\Include;..\..\..\src\nanoFramework.Runtime.Events</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\..\src\CLR\Core;..\..\..\src\CLR\CorLib;..\..\..\src\CLR\Helpers\Base64;.;..\..\win32\Include;..\..\..\src\CLR\Include;..\..\..\src\HAL\Include;..\..\..\src\PAL\Include;..\..\..\src\nanoFramework.Runtime.Events;..\littlefs;$(LITTLEFS_PATH);</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -162,6 +162,7 @@
     <ClInclude Include="..\Include\targetHAL_Time.h" />
     <ClInclude Include="..\Include\targetPAL_time.h" />
     <ClInclude Include="..\Include\target_platform.h" />
+    <ClInclude Include="lfs_config.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="nanoCLR_native.h" />
     <ClInclude Include="platform_selector.h" />
@@ -170,6 +171,7 @@
     <ClInclude Include="Target_BlockStorage_TransientFlashDriver.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\..\src\PAL\FileSystem\nanoPAL_FileSystem.cpp" />
     <ClCompile Include="..\..\win32\nanoCLR\Various.cpp" />
     <ClCompile Include="Device_BlockStorage.cpp" />
     <ClCompile Include="dllmain.cpp" />
@@ -206,13 +208,18 @@
     <ClCompile Include="Target_BlockStorage.cpp" />
     <ClCompile Include="..\..\win32\nanoCLR\targetHAL_Time.cpp" />
     <ClCompile Include="Target_BlockStorage_TransientFlashDriver.cpp" />
+    <ClCompile Include="target_FileSystem.cpp" />
     <ClCompile Include="Target_HAL.cpp" />
     <ClCompile Include="..\..\win32\nanoCLR\WatchDog.cpp" />
+    <ClCompile Include="target_littlefs.cpp" />
     <ClCompile Include="WireProtocol_HAL_Interface.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\..\src\CLR\Core\Core.vcxproj">
       <Project>{89cf8bdb-9c8a-4d18-bc3e-4312c5bd34b1}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\src\CLR\Core\FileStream\FileStream.vcxproj">
+      <Project>{abfe159e-84d5-489e-bfe6-8a7f4b597a44}</Project>
     </ProjectReference>
     <ProjectReference Include="..\..\..\src\CLR\Core\Hardware\Hardware.vcxproj">
       <Project>{5d50772e-dac8-407d-972f-37deb4450b72}</Project>
@@ -298,11 +305,23 @@
     <ProjectReference Include="..\..\..\src\nanoFramework.System.Collections\System.Collections.vcxproj">
       <Project>{091562a5-5c72-4115-a053-daf183a3b45b}</Project>
     </ProjectReference>
+    <ProjectReference Include="..\..\..\src\nanoFramework.System.IO.Hashing\System.IO.Hashing.vcxproj">
+      <Project>{856fbb90-ae1d-4f23-a919-53727e0e9bc6}</Project>
+    </ProjectReference>
     <ProjectReference Include="..\..\..\src\nanoFramework.System.Text\System.Text.vcxproj">
       <Project>{70922447-ebf0-4473-b014-776f8c9426e7}</Project>
     </ProjectReference>
     <ProjectReference Include="..\..\..\src\System.Device.Gpio\System.Device.Gpio.vcxproj">
       <Project>{830a7e28-7b2b-4be6-8888-a39775a0092a}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\src\System.Device.I2c\System.Device.I2c.vcxproj">
+      <Project>{e9ae1af4-6b6a-4e10-b136-7a8affc5b910}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\src\System.Device.Spi\System.Device.Spi.vcxproj">
+      <Project>{197c5bb5-72d2-4634-a5f8-8443dbf39985}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\src\System.IO.FileSystem\System.IO.FileSystem.vcxproj">
+      <Project>{8fd84749-23ec-491c-9c21-41dbd72ba9f4}</Project>
     </ProjectReference>
     <ProjectReference Include="..\..\..\src\System.IO.Ports\System.IO.Ports.vcxproj">
       <Project>{46556afc-c248-4082-abe6-9b07f4e57579}</Project>
@@ -310,11 +329,14 @@
     <ProjectReference Include="..\..\..\src\System.Runtime.Serialization\System.Runtime.Serialization.vcxproj">
       <Project>{c9264d0a-ac25-46b0-bd08-4a3252427f19}</Project>
     </ProjectReference>
-    <ProjectReference Include="..\..\..\src\Windows.Storage\Windows.Storage.vcxproj">
-      <Project>{3cae286f-0ef8-45e4-8111-afa0aa9282b4}</Project>
+    <ProjectReference Include="..\littlefs\littlefs.vcxproj">
+      <Project>{5b70a795-a6f2-44df-8566-5d68d9e892db}</Project>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
+  <Target Name="LITTLEFS_PATH_verification" Condition=" '$(LITTLEFS_PATH)' == '' " BeforeTargets="ClCompile">
+    <Error Text="Assign the path of a clone of the littlefs repository to the LITTLEFS_PATH environment variable." />
+  </Target>
 </Project>
