@@ -18,7 +18,7 @@ HRESULT Library_corlib_native_System_Reflection_MethodBase::get_Name___STRING(CL
 
     NANOCLR_CHECK_HRESULT(GetMethodDescriptor(stack, *hbMeth, md));
 
-    NANOCLR_SET_AND_LEAVE(CLR_RT_HeapBlock_String::CreateInstance(stack.PushValue(), md.m_target->name, md.m_assm));
+    NANOCLR_SET_AND_LEAVE(CLR_RT_HeapBlock_String::CreateInstance(stack.PushValue(), md.target->name, md.assembly));
 
     NANOCLR_NOCLEANUP();
 }
@@ -41,7 +41,7 @@ HRESULT Library_corlib_native_System_Reflection_MethodBase::get_DeclaringType___
         CLR_RT_HeapBlock &top = stack.PushValue();
         CLR_RT_HeapBlock *hbObj;
 
-        NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObjectFromIndex(top, g_CLR_RT_WellKnownTypes.m_TypeStatic));
+        NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObjectFromIndex(top, g_CLR_RT_WellKnownTypes.TypeStatic));
 
         hbObj = top.Dereference();
         hbObj->SetReflection(cls);
@@ -111,13 +111,13 @@ HRESULT Library_corlib_native_System_Reflection_MethodBase::Invoke___OBJECT__OBJ
     CLR_RT_MethodDef_Instance md;
     const CLR_RECORD_METHODDEF *mdR;
     CLR_RT_HeapBlock_Array *pArray = stack.Arg2().DereferenceArray();
-    CLR_RT_HeapBlock *args = NULL;
-    int numArgs = 0;
+    CLR_RT_HeapBlock *args = nullptr;
+    int argumentsCount = 0;
     CLR_RT_HeapBlock *hbMeth = stack.This();
 
     NANOCLR_CHECK_HRESULT(GetMethodDescriptor(stack, *hbMeth, md));
 
-    mdR = md.m_target;
+    mdR = md.target;
 
     if (stack.m_customState == 0)
     {
@@ -126,25 +126,25 @@ HRESULT Library_corlib_native_System_Reflection_MethodBase::Invoke___OBJECT__OBJ
         if (pArray)
         {
             args = (CLR_RT_HeapBlock *)pArray->GetFirstElement();
-            numArgs = pArray->m_numOfElements;
+            argumentsCount = pArray->m_numOfElements;
         }
 
-        NANOCLR_CHECK_HRESULT(stack.MakeCall(md, &obj, args, numArgs));
+        NANOCLR_CHECK_HRESULT(stack.MakeCall(md, &obj, args, argumentsCount));
     }
     else
     {
-        if (mdR->retVal != DATATYPE_VOID)
+        if (mdR->retValDataType != DATATYPE_VOID)
         {
-            if (mdR->retVal < DATATYPE_I4)
+            if (mdR->retValDataType < DATATYPE_I4)
             {
-                stack.TopValue().ChangeDataType(mdR->retVal);
+                stack.TopValue().ChangeDataType(mdR->retValDataType);
             }
 
             NANOCLR_CHECK_HRESULT(stack.TopValue().PerformBoxingIfNeeded());
         }
         else
         {
-            stack.SetResult_Object(NULL);
+            stack.SetResult_Object(nullptr);
         }
     }
 
@@ -178,7 +178,7 @@ HRESULT Library_corlib_native_System_Reflection_MethodBase::CheckFlags(
 
     NANOCLR_CHECK_HRESULT(GetMethodDescriptor(stack, *hbMeth, md));
 
-    if ((md.m_target->flags & mask) == flag)
+    if ((md.target->flags & mask) == flag)
     {
         fRes = true;
     }
@@ -211,11 +211,11 @@ HRESULT Library_corlib_native_System_Reflection_MethodBase::GetParametersNative_
 
     CLR_RT_HeapBlock *hbMethodInfo = stack.This();
 
-    idx.m_data = hbMethodInfo[FIELD___token].NumericByRef().u4;
+    idx.data = hbMethodInfo[FIELD___token].NumericByRef().u4;
     inst.InitializeFromIndex(idx);
 
     // 1st pass: get the number of parameters
-    sigParser.Initialize_MethodSignature(inst.m_assm, inst.m_target);
+    sigParser.Initialize_MethodSignature(inst.assembly, inst.target);
 
     // discard return value
     sigParser.Advance(paramElement);
@@ -236,7 +236,7 @@ HRESULT Library_corlib_native_System_Reflection_MethodBase::GetParametersNative_
     paramInfoElement = (CLR_RT_HeapBlock *)top.DereferenceArray()->GetFirstElement();
 
     // 2nd pass: get the actual type of each parameter
-    sigParser.Initialize_MethodSignature(inst.m_assm, inst.m_target);
+    sigParser.Initialize_MethodSignature(inst.assembly, inst.target);
 
     // discard return value
     sigParser.Advance(paramElement);
@@ -254,14 +254,14 @@ HRESULT Library_corlib_native_System_Reflection_MethodBase::GetParametersNative_
 
         // create a new instance of the parameter type
         NANOCLR_CHECK_HRESULT(
-            g_CLR_RT_ExecutionEngine.NewObjectFromIndex(paraTypeHB, g_CLR_RT_WellKnownTypes.m_TypeStatic));
+            g_CLR_RT_ExecutionEngine.NewObjectFromIndex(paraTypeHB, g_CLR_RT_WellKnownTypes.TypeStatic));
         hbObj = paraTypeHB.Dereference();
-        hbObj->SetReflection(paramElement.m_cls);
+        hbObj->SetReflection(paramElement.Class);
 
         // deal with array types
-        if (paramElement.m_levels > 0)
+        if (paramElement.Levels > 0)
         {
-            hbObj->ReflectionData().m_levels = (CLR_UINT16)paramElement.m_levels;
+            hbObj->ReflectionData().levels = (CLR_UINT16)paramElement.Levels;
         }
 
         // move pointer to the next element

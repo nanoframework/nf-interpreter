@@ -73,7 +73,7 @@ HRESULT TouchPanelDriver::Initialize()
     g_TouchPanelDriver.m_runavgCount = 0;
     g_TouchPanelDriver.m_runavgIndex = 0;
 
-    g_TouchPanelDriver.m_startMovePtr = NULL;
+    g_TouchPanelDriver.m_startMovePtr = nullptr;
 
     g_TouchPanelDriver.m_touchMoveIndex = 0;
 
@@ -88,7 +88,7 @@ HRESULT TouchPanelDriver::Initialize()
         return CLR_E_FAIL;
     }
 
-    g_TouchPanelDriver.m_touchCompletion.InitializeForISR(TouchPanelDriver::TouchCompletion, NULL);
+    g_TouchPanelDriver.m_touchCompletion.InitializeForISR(TouchPanelDriver::TouchCompletion, nullptr);
     /// At this point we should be ready to recieve touch inputs.
 
     return S_OK;
@@ -131,7 +131,7 @@ void TouchPanelDriver::TouchPanelCalibratePoint(CLR_INT32 UncalX, CLR_INT32 Unca
 
 HRESULT TouchPanelDriver::GetDeviceCaps(unsigned int iIndex, void *lpOutput)
 {
-    if (lpOutput == NULL)
+    if (lpOutput == nullptr)
     {
         return FALSE;
     }
@@ -194,7 +194,7 @@ HRESULT TouchPanelDriver::SetCalibration(int pointCount, CLR_INT16 *sx, CLR_INT1
 
 void TouchPanelDriver::TouchCompletion(void *arg)
 {
-    if (arg == NULL)
+    if (arg == nullptr)
     {
     }; // Avoid the unused parameter, and maybe in future is it needed?
     /// Completion routine, called in every 10ms or so, when we are actively sampling stylus.
@@ -225,7 +225,7 @@ void TouchPanelDriver::PollTouchPoint()
         /// Driver should be doing all filter/averaging of the points.
         TouchPanelCalibratePoint(ux, uy, &x, &y);
 
-        TouchPoint *point = NULL;
+        TouchPoint *point = nullptr;
 
         if ((g_TouchPanelDriver.m_InternalFlags & Contact_Down) &&
             (!(g_TouchPanelDriver.m_InternalFlags & Contact_WasDown)))
@@ -240,7 +240,7 @@ void TouchPanelDriver::PollTouchPoint()
             /// Stylus down.
             PalEventDriver::PostEvent(PAL_EVENT_TOUCH, TouchPanelStylusDown);
 
-            if (NULL != (point = AddTouchPoint(0, x, y, time, ignoreDuplicates)))
+            if (nullptr != (point = AddTouchPoint(0, x, y, time, ignoreDuplicates)))
             {
                 PostManagedEvent(EVENT_TOUCH, TouchPanelStylusDown, 1, (CLR_UINT32)point);
             }
@@ -260,9 +260,9 @@ void TouchPanelDriver::PollTouchPoint()
             (g_TouchPanelDriver.m_InternalFlags & Contact_WasDown))
         {
             /// Stylus Move.
-            if (NULL != (point = AddTouchPoint(0, x, y, time, ignoreDuplicates)))
+            if (nullptr != (point = AddTouchPoint(0, x, y, time, ignoreDuplicates)))
             {
-                if (m_startMovePtr == NULL)
+                if (m_startMovePtr == nullptr)
                 {
                     m_startMovePtr = point;
                     m_touchMoveIndex = 1;
@@ -279,7 +279,7 @@ void TouchPanelDriver::PollTouchPoint()
                             m_touchMoveIndex,
                             (CLR_UINT32)m_startMovePtr);
 
-                        m_startMovePtr = NULL;
+                        m_startMovePtr = nullptr;
                         m_touchMoveIndex = 0;
                     }
                     else if (m_startMovePtr != point)
@@ -290,7 +290,7 @@ void TouchPanelDriver::PollTouchPoint()
             }
             // we will get here if the stylus is in a TouchDown state but hasn't moved, so if we don't have a current
             // move ptr, then set the start move ptr to the latest point
-            else if (m_startMovePtr == NULL)
+            else if (m_startMovePtr == nullptr)
             {
                 CLR_UINT32 touchflags =
                     GetTouchPointFlags_LatestPoint | GetTouchPointFlags_UseTime | GetTouchPointFlags_UseSource;
@@ -330,21 +330,21 @@ void TouchPanelDriver::PollTouchPoint()
         CLR_UINT32 touchflags =
             GetTouchPointFlags_LatestPoint | GetTouchPointFlags_UseTime | GetTouchPointFlags_UseSource;
 
-        TouchPoint *point = NULL;
+        TouchPoint *point = nullptr;
 
         /// Only send a move event if we have substantial data (more than two items) otherwise, the
         /// TouchUp event should suffice
-        if (m_touchMoveIndex > 2 && m_startMovePtr != NULL)
+        if (m_touchMoveIndex > 2 && m_startMovePtr != nullptr)
         {
             PostManagedEvent(EVENT_TOUCH, TouchPanelStylusMove, m_touchMoveIndex, (CLR_UINT32)m_startMovePtr);
         }
 
-        m_startMovePtr = NULL;
+        m_startMovePtr = nullptr;
         m_touchMoveIndex = 0;
 
         if (FAILED(GetTouchPoint(&touchflags, &point)))
         {
-            point = NULL;
+            point = nullptr;
         }
 
         /// Now add special contactup delimeter.
@@ -356,7 +356,7 @@ void TouchPanelDriver::PollTouchPoint()
         g_palEventDriver.PostEvent(PAL_EVENT_TOUCH, TouchPanelStylusUp);
 
         // Make a copy of the point for the nanoFramework.UI.Touch handler.
-        if (point == NULL)
+        if (point == nullptr)
         {
             m_tmpUpTouch.contact = 0;
             m_tmpUpTouch.time = time;
@@ -421,7 +421,7 @@ TouchPoint *TouchPanelDriver::AddTouchPoint(
 
             /// Ignore this point if it is too far from last point.
             if (dist2 > g_TouchPanel_Sampling_Settings.MaxFilterDistance)
-                return NULL;
+                return nullptr;
         }
 
         if (g_PAL_RunningAvg_Buffer_Size > 1)
@@ -461,7 +461,7 @@ TouchPoint *TouchPanelDriver::AddTouchPoint(
             CLR_UINT32 dy = abs(y - lastAddedY);
 
             if (dx <= 2 && dy <= 2)
-                return NULL;
+                return nullptr;
         }
 
         lastAddedX = x;
@@ -518,13 +518,13 @@ void TouchPanelDriver::TouchIsrProc(GPIO_PIN pin, bool pinState, void *pArg)
 
 HRESULT TouchPanelDriver::GetTouchPoints(int *pointCount, CLR_INT16 *sx, CLR_INT16 *sy)
 {
-    if (pointCount == NULL)
+    if (pointCount == nullptr)
     {
     }; // Avoid unused parameter, maybe used in the future?
-    if (sx == NULL)
+    if (sx == nullptr)
     {
     }; // Avoid unused parameter, maybe used in the future?
-    if (sy == NULL)
+    if (sy == nullptr)
     {
     }; // Avoid unused parameter, maybe used in the future?
 

@@ -14,13 +14,13 @@ bool ssl_exit_context_internal(int contextHandle)
 
     // Check contextHandle range
     if ((contextHandle >= (int)ARRAYSIZE(g_SSL_Driver.ContextArray)) || (contextHandle < 0) ||
-        (g_SSL_Driver.ContextArray[contextHandle].Context == NULL))
+        (g_SSL_Driver.ContextArray[contextHandle].Context == nullptr))
     {
         return false;
     }
 
     context = (mbedTLS_NFContext *)g_SSL_Driver.ContextArray[contextHandle].Context;
-    if (context == NULL)
+    if (context == nullptr)
     {
         return false;
     }

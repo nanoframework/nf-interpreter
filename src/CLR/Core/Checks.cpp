@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (c) .NET Foundation and Contributors
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
@@ -6,6 +6,25 @@
 #include "Core.h"
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+HRESULT CLR_Checks::VerifyStackOK(const CLR_RT_StackFrame &stack, const CLR_RT_HeapBlock *top, const int num)
+{
+    NANOCLR_HEADER();
+
+    // Check if stack has enough space for num elements
+    if (top + num > stack.m_evalStackEnd)
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_STACK_OVERFLOW);
+    }
+
+    // Check if top is within stack bounds
+    if (top < stack.m_evalStack || top >= stack.m_evalStackEnd)
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+    }
+
+    NANOCLR_NOCLEANUP();
+}
 
 HRESULT CLR_Checks::VerifyObject(CLR_RT_HeapBlock &top)
 {
@@ -16,12 +35,12 @@ HRESULT CLR_Checks::VerifyObject(CLR_RT_HeapBlock &top)
     {
         case DATATYPE_OBJECT:
         case DATATYPE_BYREF:
-            if (top.Dereference() != NULL)
+            if (top.Dereference() != nullptr)
                 NANOCLR_SET_AND_LEAVE(S_OK);
             break;
 
         case DATATYPE_ARRAY_BYREF:
-            if (top.DereferenceArray() != NULL)
+            if (top.DereferenceArray() != nullptr)
                 NANOCLR_SET_AND_LEAVE(S_OK);
             break;
 
@@ -47,7 +66,7 @@ HRESULT CLR_Checks::VerifyArrayReference(CLR_RT_HeapBlock &ref)
     }
 
     array = ref.DereferenceArray();
-    if (array == NULL)
+    if (array == nullptr)
     {
         NANOCLR_SET_AND_LEAVE(CLR_E_NULL_REFERENCE);
     }

@@ -10,7 +10,7 @@
 
 // timer for next event
 static TX_TIMER nextEventTimer;
-void *nextEventCallbackDummyArg = NULL;
+void *nextEventCallbackDummyArg = nullptr;
 
 static void NextEventTimer_Callback(uint32_t id)
 {

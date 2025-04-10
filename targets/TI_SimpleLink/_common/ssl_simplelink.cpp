@@ -102,7 +102,7 @@ bool ssl_generic_init_internal(
     ///////////////////////
     for (uint32_t i = 0; i < ARRAYSIZE(g_SSL_Driver.ContextArray); i++)
     {
-        if (g_SSL_Driver.ContextArray[i].Context == NULL)
+        if (g_SSL_Driver.ContextArray[i].Context == nullptr)
         {
             sslContexIndex = i;
             break;
@@ -115,7 +115,7 @@ bool ssl_generic_init_internal(
     // create and init nanoFramework Simple Link context
     // this needs to be freed in ssl_exit_context_internal
     context = (SlSSL_Context *)platform_malloc(sizeof(SlSSL_Context));
-    if (context == NULL)
+    if (context == nullptr)
     {
         goto error;
     }
@@ -124,7 +124,7 @@ bool ssl_generic_init_internal(
     // this is the equivalent of SSL context in MbedTLS
     // it needs to be freed in ssl_exit_context_internal
     context->SecurityAttributes = SlNetSock_secAttribCreate();
-    if (context->SecurityAttributes == NULL)
+    if (context->SecurityAttributes == nullptr)
     {
         goto error;
     }
@@ -166,7 +166,7 @@ bool ssl_generic_init_internal(
     // CA root certs are taken from Simple Link trusted root-certificate catalog, so nothing to do here
 
     // // parse "own" certificate if passed
-    // if(certificate != NULL && certLength > 0)
+    // if(certificate != nullptr && certLength > 0)
     // {
     //     // TODO
     //     // this isn't required for client authentication
@@ -185,7 +185,7 @@ bool ssl_generic_init_internal(
     //     // }
 
     //     // if( mbedtls_pk_parse_key( &pkey, (const unsigned char *) mbedtls_test_cli_key, mbedtls_test_cli_key_len,
-    //     NULL, 0 ) != 0)
+    //     nullptr, 0 ) != 0)
     //     // {
     //     //     // failed parsing the
     //     // }
@@ -225,12 +225,12 @@ bool ssl_generic_init_internal(
 error:
 
     // check for any memory allocation that needs to be freed before exiting
-    if (context != NULL)
+    if (context != nullptr)
     {
         platform_free(context);
     }
 
-    if (context->SecurityAttributes != NULL)
+    if (context->SecurityAttributes != nullptr)
     {
         SlNetSock_secAttribDelete(context->SecurityAttributes);
     }
@@ -240,17 +240,17 @@ error:
 
 bool ssl_exit_context_internal(int contextHandle)
 {
-    SlSSL_Context *context = NULL;
+    SlSSL_Context *context = nullptr;
 
     // Check contextHandle range
     if ((contextHandle >= (int)ARRAYSIZE(g_SSL_Driver.ContextArray)) || (contextHandle < 0) ||
-        (g_SSL_Driver.ContextArray[contextHandle].Context == NULL))
+        (g_SSL_Driver.ContextArray[contextHandle].Context == nullptr))
     {
         return false;
     }
 
     context = (SlSSL_Context *)g_SSL_Driver.ContextArray[contextHandle].Context;
-    if (context == NULL)
+    if (context == nullptr)
     {
         return false;
     }
@@ -283,7 +283,7 @@ int ssl_connect_internal(int sd, const char *szTargetHost, int contextHandle)
     // sd should already have been created
     // Now do the SSL negotiation
     context = (SlSSL_Context *)g_SSL_Driver.ContextArray[contextHandle].Context;
-    if (context == NULL)
+    if (context == nullptr)
     {
         return SOCK_SOCKET_ERROR;
     }
@@ -291,7 +291,7 @@ int ssl_connect_internal(int sd, const char *szTargetHost, int contextHandle)
     // set socket in network context
     context->SocketFd = sd;
 
-    if (szTargetHost != NULL && szTargetHost[0] != 0)
+    if (szTargetHost != nullptr && szTargetHost[0] != 0)
     {
         status = SlNetSock_secAttribSet(
             context->SecurityAttributes,

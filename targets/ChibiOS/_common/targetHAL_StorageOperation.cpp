@@ -24,7 +24,7 @@
 int create_directories(lfs_t *lfs, const char *path)
 {
     char temp[256];
-    char *pos = NULL;
+    char *pos = nullptr;
     size_t len = 0;
     int res = 0;
 
@@ -70,7 +70,7 @@ uint32_t HAL_StorageOperation(
     (void)offset;
 
     lfs_file_t lfsFile;
-    lfs_t *lfsDrive = NULL;
+    lfs_t *lfsDrive = nullptr;
 
     // default to drive 0
     int32_t driveIndex = 0;
@@ -86,7 +86,7 @@ uint32_t HAL_StorageOperation(
     char *storageName = (char *)platform_malloc(nameLength + 1);
 
     // sanity check for successfull malloc
-    if (storageName == NULL)
+    if (storageName == nullptr)
     {
         return StorageOperationErrorCode::PlatformError;
     }
@@ -108,7 +108,7 @@ uint32_t HAL_StorageOperation(
         char dir_path[256];
         snprintf(dir_path, sizeof(dir_path), "%s", storageName);
         char *last_slash = strrchr(dir_path, '/');
-        if (last_slash != NULL)
+        if (last_slash != nullptr)
         {
             *last_slash = '\0';
         }
@@ -181,7 +181,7 @@ uint32_t HAL_StorageOperation(
 done:
 
     // free buffer memory
-    if (storageName != NULL)
+    if (storageName != nullptr)
     {
         platform_free(storageName);
     }

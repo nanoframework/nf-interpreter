@@ -16,7 +16,7 @@ static NF_PAL_UART Uart_PAL1, Uart_PAL2, Uart_PAL3, Uart_PAL4, Uart_PAL5, Uart_P
 
 // Array of pointers to above config UART structs.
 NF_PAL_UART *const
-    Uart_PAL[]{NULL, &Uart_PAL1, &Uart_PAL2, &Uart_PAL3, &Uart_PAL4, &Uart_PAL5, &Uart_PAL6, &Uart_PAL7, &Uart_PAL8};
+    Uart_PAL[]{nullptr, &Uart_PAL1, &Uart_PAL2, &Uart_PAL3, &Uart_PAL4, &Uart_PAL5, &Uart_PAL6, &Uart_PAL7, &Uart_PAL8};
 
 // Task firing up event after receiving wanted amount of bytes
 static void vREvent(void *pvParameters)
@@ -210,10 +210,10 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::Read___I4__SZARRAY
     NANOCLR_HEADER();
 
     CLR_RT_HeapBlock hbTimeout;
-    CLR_RT_HeapBlock_Array *dataBuffer = NULL;
-    NF_PAL_UART *palUart = NULL;
+    CLR_RT_HeapBlock_Array *dataBuffer = nullptr;
+    NF_PAL_UART *palUart = nullptr;
 
-    uint8_t *data = NULL;
+    uint8_t *data = nullptr;
 
     uint8_t uartNum = 0;
     size_t bytesRead = 0;
@@ -351,14 +351,14 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::ReadExisting___STR
 {
     NANOCLR_HEADER();
 
-    NF_PAL_UART *palUart = NULL;
+    NF_PAL_UART *palUart = nullptr;
     uint8_t uartNum = 0;
-    uint8_t *buffer = NULL;
+    uint8_t *buffer = nullptr;
     uint32_t bufferLength;
 
     CLR_RT_HeapBlock &top = stack.PushValue();
 
-    // get a pointer to the managed object instance and check that it's not NULL
+    // get a pointer to the managed object instance and check that it's not nullptr
     CLR_RT_HeapBlock *pThis = stack.This();
     FAULT_ON_NULL(pThis);
 
@@ -387,7 +387,7 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::ReadExisting___STR
         buffer = (uint8_t *)platform_malloc(bufferLength);
 
         // sanity check
-        if (buffer == NULL)
+        if (buffer == nullptr)
         {
             NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
         }
@@ -400,12 +400,12 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::ReadExisting___STR
     else
     {
         // create an empty <string>
-        NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_String::CreateInstance(top, (const char *)NULL));
+        NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_String::CreateInstance(top, (const char *)nullptr));
     }
 
     NANOCLR_CLEANUP();
 
-    if (buffer != NULL)
+    if (buffer != nullptr)
     {
         platform_free(buffer);
     }
@@ -418,18 +418,18 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::ReadLine___STRING(
     NANOCLR_HEADER();
 
     CLR_RT_HeapBlock hbTimeout;
-    NF_PAL_UART *palUart = NULL;
+    NF_PAL_UART *palUart = nullptr;
     uint8_t uartNum = 0;
 
-    uint8_t *line = NULL;
-    const char *newLine = NULL;
+    uint8_t *line = nullptr;
+    const char *newLine = nullptr;
     uint32_t newLineLength;
 
     int64_t *timeoutTicks;
     bool eventResult = true;
     bool newLineFound = false;
 
-    // get a pointer to the managed object instance and check that it's not NULL
+    // get a pointer to the managed object instance and check that it's not nullptr
     CLR_RT_HeapBlock *pThis = stack.This();
     FAULT_ON_NULL(pThis);
 
@@ -471,8 +471,8 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::ReadLine___STRING(
             // get new line from field
             newLine = pThis[FIELD___newLine].RecoverString();
 
-            // sanity check for NULL string
-            if (newLine == NULL)
+            // sanity check for nullptr string
+            if (newLine == nullptr)
             {
                 NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
             }
@@ -520,7 +520,7 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::ReadLine___STRING(
     stack.SetResult_String((const char *)line);
 
     // free memory, if needed
-    if (line != NULL)
+    if (line != nullptr)
     {
         platform_free(line);
     }
@@ -532,7 +532,7 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::Write___VOID__SZAR
 {
     NANOCLR_HEADER();
 
-    NF_PAL_UART *palUart = NULL;
+    NF_PAL_UART *palUart = nullptr;
 
     size_t length = 0;
 
@@ -541,12 +541,12 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::Write___VOID__SZAR
     int64_t *timeoutTicks;
     bool eventResult = true;
 
-    uint8_t *data = NULL;
+    uint8_t *data = nullptr;
     uint8_t uartNum = 0;
     size_t count = 0;
     size_t offset = 0;
 
-    // get a pointer to the managed object instance and check that it's not NULL
+    // get a pointer to the managed object instance and check that it's not nullptr
     CLR_RT_HeapBlock *pThis = stack.This();
     FAULT_ON_NULL(pThis);
 
@@ -650,7 +650,7 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::Write___VOID__SZAR
     stack.SetResult_U4(count);
 
     // null pointers and vars
-    pThis = NULL;
+    pThis = nullptr;
 
     NANOCLR_NOCLEANUP();
 }
@@ -662,7 +662,7 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeDispose___VO
     NF_PAL_UART *palUart;
 
     uint8_t uartNum = 0;
-    LPUART_Type *base = NULL;
+    LPUART_Type *base = nullptr;
 
     CLR_RT_HeapBlock *pThis = stack.This();
     FAULT_ON_NULL(pThis);
@@ -671,7 +671,7 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeDispose___VO
     base = lpuart_bases[uartNum];
 
     // Quit if parameters or device is invalid or out of range
-    if (uartNum >= (sizeof(Uart_PAL) / sizeof(Uart_PAL[0])) || base == NULL)
+    if (uartNum >= (sizeof(Uart_PAL) / sizeof(Uart_PAL[0])) || base == nullptr)
     {
         NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
     }
@@ -682,8 +682,8 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeDispose___VO
     platform_free(palUart->RxBuffer);
 
     // null all pointers
-    palUart->RxBuffer = NULL;
-    palUart->TxBuffer = NULL;
+    palUart->RxBuffer = nullptr;
+    palUart->TxBuffer = nullptr;
 
     // Deinitialize device and delete FreeRTOS idle tasks
     LPUART_Deinit(base);
@@ -699,9 +699,9 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeInit___VOID(
 
     status_t status = 0;
     uint8_t uartNum = 0;
-    lpuart_config_t *config = NULL;
-    LPUART_Type *base = NULL;
-    NF_PAL_UART *palUart = NULL;
+    lpuart_config_t *config = nullptr;
+    LPUART_Type *base = nullptr;
+    NF_PAL_UART *palUart = nullptr;
     BaseType_t xReturned;
     int32_t bufferSize;
     uint8_t watchChar;
@@ -714,7 +714,7 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeInit___VOID(
     base = lpuart_bases[uartNum];
 
     // Quit if parameters or device is invalid or out of range
-    if (uartNum >= (sizeof(Uart_PAL) / sizeof(Uart_PAL[0])) || config == NULL || base == NULL)
+    if (uartNum >= (sizeof(Uart_PAL) / sizeof(Uart_PAL[0])) || config == nullptr || base == nullptr)
     {
         NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
     }
@@ -726,7 +726,7 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeInit___VOID(
 
     palUart->RxBuffer = (uint8_t *)platform_malloc(bufferSize * sizeof(uint8_t));
 
-    if (palUart->RxBuffer == NULL)
+    if (palUart->RxBuffer == nullptr)
     {
         NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
     }
@@ -803,8 +803,8 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeConfig___VOI
 
     status_t status = 0;
     uint8_t uartNum = 0;
-    lpuart_config_t *config = NULL;
-    LPUART_Type *base = NULL;
+    lpuart_config_t *config = nullptr;
+    LPUART_Type *base = nullptr;
 
     CLR_RT_HeapBlock *pThis = stack.This();
     FAULT_ON_NULL(pThis);
@@ -813,7 +813,7 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeConfig___VOI
     config = &Uart_PAL[uartNum]->uartCfg;
     base = lpuart_bases[uartNum];
 
-    if (uartNum >= (sizeof(Uart_PAL) / sizeof(Uart_PAL[0])) || config == NULL || base == NULL)
+    if (uartNum >= (sizeof(Uart_PAL) / sizeof(Uart_PAL[0])) || config == nullptr || base == nullptr)
     {
         NANOCLR_SET_AND_LEAVE(CLR_E_IO);
     }
@@ -897,7 +897,7 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeSetWatchChar
     NF_PAL_UART *palUart;
     uint8_t uartNum;
 
-    // get a pointer to the managed object instance and check that it's not NULL
+    // get a pointer to the managed object instance and check that it's not nullptr
     CLR_RT_HeapBlock *pThis = stack.This();
     FAULT_ON_NULL(pThis);
 
@@ -931,11 +931,11 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeWriteString_
     bool eventResult = true;
 
     bool isNewAllocation = false;
-    char *buffer = NULL;
+    char *buffer = nullptr;
     uint32_t bufferLength;
     int32_t length = 0;
 
-    // get a pointer to the managed object instance and check that it's not NULL
+    // get a pointer to the managed object instance and check that it's not nullptr
     CLR_RT_HeapBlock *pThis = stack.This();
     FAULT_ON_NULL(pThis);
 
@@ -955,7 +955,7 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeWriteString_
 
     palUart = Uart_PAL[uartNum];
 
-    if (stack.Arg1().RecoverString() == NULL)
+    if (stack.Arg1().RecoverString() == nullptr)
     {
         // text string it's empty so there is noting to do here
         stack.SetResult_U4(0);
@@ -1043,7 +1043,7 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeWriteString_
     }
 
     // null pointers and vars
-    pThis = NULL;
+    pThis = nullptr;
 
     NANOCLR_NOCLEANUP();
 }
@@ -1057,7 +1057,7 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeReceivedByte
     int32_t threshold;
     uint8_t uartNum;
 
-    // get a pointer to the managed object instance and check that it's not NULL
+    // get a pointer to the managed object instance and check that it's not nullptr
     CLR_RT_HeapBlock *pThis = stack.This();
     FAULT_ON_NULL(pThis);
 
@@ -1099,7 +1099,7 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::GetDeviceSelector_
     int len = 0;
     for (uint8_t i = 1; i < (sizeof(Uart_PAL) / sizeof(Uart_PAL[0])); i++)
     {
-        if (Uart_PAL[i] != NULL)
+        if (Uart_PAL[i] != nullptr)
         {
             char com[6] = "COM1,";
             com[3] = i + '0';

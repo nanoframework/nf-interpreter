@@ -347,7 +347,7 @@ HRESULT Library_nf_ti_easylink_nanoFramework_TI_EasyLink_EasyLinkController::Ini
         taskParams.priority = 4;
 
         // create task
-        Task_construct(&easyLinkTask, EasyLinkTask, &taskParams, NULL);
+        Task_construct(&easyLinkTask, EasyLinkTask, &taskParams, nullptr);
 
         // bump custom state
         stack.m_customState = 2;
@@ -403,7 +403,7 @@ HRESULT Library_nf_ti_easylink_nanoFramework_TI_EasyLink_EasyLinkController::
     CLR_INT64 *timeoutTicks;
     bool eventResult = true;
 
-    // get a pointer to the managed object instance and check that it's not NULL
+    // get a pointer to the managed object instance and check that it's not nullptr
     CLR_RT_HeapBlock *pThis = stack.This();
     FAULT_ON_NULL(pThis);
 
@@ -459,8 +459,8 @@ HRESULT Library_nf_ti_easylink_nanoFramework_TI_EasyLink_EasyLinkController::
         NANOCLR_CHECK_HRESULT(
             g_CLR_RT_ExecutionEngine.WaitEvents(stack.m_owningThread, *timeoutTicks, Event_Radio, eventResult));
 
-        // set to NULL and protect from GC
-        hbObj.SetObjectReference(NULL);
+        // set to nullptr and protect from GC
+        hbObj.SetObjectReference(nullptr);
         CLR_RT_ProtectFromGC gc1(hbObj);
 
         if (eventResult)
@@ -498,7 +498,7 @@ HRESULT Library_nf_ti_easylink_nanoFramework_TI_EasyLink_EasyLinkController::
                     NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance(
                         packet[ReceivedPacket::FIELD___address],
                         (CLR_UINT32)ARRAYSIZE(latestRxPacket.dstAddr),
-                        g_CLR_RT_WellKnownTypes.m_UInt8));
+                        g_CLR_RT_WellKnownTypes.UInt8));
                     buffer = packet[ReceivedPacket::FIELD___address].DereferenceArray();
                     // copy address
                     memcpy(buffer->GetFirstElement(), latestRxPacket.dstAddr, ARRAYSIZE(latestRxPacket.dstAddr));
@@ -507,7 +507,7 @@ HRESULT Library_nf_ti_easylink_nanoFramework_TI_EasyLink_EasyLinkController::
                     NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance(
                         packet[ReceivedPacket::FIELD___payload],
                         (CLR_UINT32)ARRAYSIZE(latestRxPacket.payload),
-                        g_CLR_RT_WellKnownTypes.m_UInt8));
+                        g_CLR_RT_WellKnownTypes.UInt8));
                     buffer = packet[ReceivedPacket::FIELD___payload].DereferenceArray();
                     // copy payload content
                     memcpy(buffer->GetFirstElement(), latestRxPacket.payload, ARRAYSIZE(latestRxPacket.payload));
@@ -533,7 +533,7 @@ HRESULT Library_nf_ti_easylink_nanoFramework_TI_EasyLink_EasyLinkController::
 
         // packet it's passed as "out" meaning BYREF
         // need to store the ReceivedPacket object in its reference
-        // hbObj it's either NULL or it's a properly formated ReceivedPacket object
+        // hbObj it's either nullptr or it's a properly formated ReceivedPacket object
         NANOCLR_CHECK_HRESULT(hbObj.StoreToReference(stack.Arg1(), 0));
     }
 
@@ -623,7 +623,7 @@ HRESULT Library_nf_ti_easylink_nanoFramework_TI_EasyLink_EasyLinkController::
     uint32_t absTime;
     bool eventResult = true;
 
-    // get a pointer to the managed object instance and check that it's not NULL
+    // get a pointer to the managed object instance and check that it's not nullptr
     CLR_RT_HeapBlock *pThis = stack.This();
     FAULT_ON_NULL(pThis);
 
@@ -758,17 +758,17 @@ HRESULT Library_nf_ti_easylink_nanoFramework_TI_EasyLink_EasyLinkController::Upd
 {
     NANOCLR_HEADER();
 
-    uint8_t *addressTable = NULL;
-    uint8_t *addressTableCursor = NULL;
+    uint8_t *addressTable = nullptr;
+    uint8_t *addressTableCursor = nullptr;
     uint8_t addressSize;
     // need to initialize these because they are passed by ref
     int addressCount = 0, capacity = 0;
-    CLR_RT_HeapBlock_Array *addressList = NULL;
+    CLR_RT_HeapBlock_Array *addressList = nullptr;
 
     CLR_RT_HeapBlock_Array *address;
     CLR_RT_HeapBlock *addressField;
 
-    // get a pointer to the managed object instance and check that it's not NULL
+    // get a pointer to the managed object instance and check that it's not nullptr
     CLR_RT_HeapBlock *pThis = stack.This();
     FAULT_ON_NULL(pThis);
 
@@ -788,7 +788,7 @@ HRESULT Library_nf_ti_easylink_nanoFramework_TI_EasyLink_EasyLinkController::Upd
         addressTable = (uint8_t *)platform_malloc(addressCount * addressSize);
 
         // sanity check
-        if (addressTable == NULL)
+        if (addressTable == nullptr)
         {
             // mem allocation failed
             NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
@@ -802,7 +802,7 @@ HRESULT Library_nf_ti_easylink_nanoFramework_TI_EasyLink_EasyLinkController::Upd
         for (int i = 0; i < addressCount; i++)
         {
             address = ((CLR_RT_HeapBlock_Array *)addressList->GetElement(i))->DereferenceArray();
-            if (address != NULL)
+            if (address != nullptr)
             {
                 memcpy(addressTableCursor, address->GetFirstElement(), addressSize);
 
@@ -814,7 +814,7 @@ HRESULT Library_nf_ti_easylink_nanoFramework_TI_EasyLink_EasyLinkController::Upd
         EasyLink_enableRxAddrFilter(addressTable, addressCount, addressSize);
     }
 
-    if (addressTable != NULL)
+    if (addressTable != nullptr)
     {
         platform_free(addressTable);
     }

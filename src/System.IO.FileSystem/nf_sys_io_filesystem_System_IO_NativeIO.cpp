@@ -11,7 +11,7 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_NativeIO::Delete___STATIC__VOID__
     NATIVE_PROFILE_CLR_IO();
     NANOCLR_HEADER();
 
-    FileSystemVolume *driver = NULL;
+    FileSystemVolume *driver = nullptr;
     char pathBuffer[FS_MAX_PATH_LENGTH + 1];
     char *path = pathBuffer;
     bool recursive = stack.Arg1().NumericByRef().u1 != 0;
@@ -35,8 +35,8 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_NativeIO::Move___STATIC__BOOLEAN_
     char *path2 = path2Buffer;
     bool moveResult = false;
 
-    FileSystemVolume *driver1 = NULL;
-    FileSystemVolume *driver2 = NULL;
+    FileSystemVolume *driver1 = nullptr;
+    FileSystemVolume *driver2 = nullptr;
 
     NANOCLR_CHECK_HRESULT(FindVolume(stack.Arg0(), driver1, path1));
     NANOCLR_CHECK_HRESULT(FindVolume(stack.Arg1(), driver2, path2));
@@ -132,8 +132,8 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_NativeIO::Format___STATIC__VOID__
     char pathBuffer[FS_MAX_PATH_LENGTH + 1];
     char *path = pathBuffer;
     FileSystemVolume *driver;
-    FILESYSTEM_DRIVER_INTERFACE *originalFS = NULL;
-    STREAM_DRIVER_INTERFACE *originalStream = NULL;
+    FILESYSTEM_DRIVER_INTERFACE *originalFS = nullptr;
+    STREAM_DRIVER_INTERFACE *originalStream = nullptr;
     bool needInitialize = FALSE;
 
     NANOCLR_CHECK_HRESULT(FindVolume(stack.Arg0(), driver, path));
@@ -225,7 +225,7 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_NativeIO::FindVolume(
     rootNameLength = hal_strlen_s(rootName);
 
     // Retrieve appropriate driver that handles this namespace
-    if ((volume = FileSystemVolumeList::FindVolume(rootName, rootNameLength)) == NULL)
+    if ((volume = FileSystemVolumeList::FindVolume(rootName, rootNameLength)) == nullptr)
     {
         NANOCLR_SET_AND_LEAVE(CLR_E_VOLUME_NOT_FOUND);
     }
@@ -257,7 +257,7 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_NativeIO::FindVolume(
     NANOCLR_CHECK_HRESULT(CLR_RT_FileStream::SplitFilePath(fullPath, rootName, rootNameLength, relativePath));
 
     // Retrieve appropriate driver that handles this root name
-    if ((volume = FileSystemVolumeList::FindVolume(rootName, rootNameLength)) == NULL)
+    if ((volume = FileSystemVolumeList::FindVolume(rootName, rootNameLength)) == nullptr)
     {
         NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_DRIVER);
     }

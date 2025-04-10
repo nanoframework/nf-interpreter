@@ -15,7 +15,7 @@ int ssl_write_internal(int sd, const char *data, size_t req_len)
     mbedtls_ssl_context *ssl = context->ssl;
 
     // sanity check
-    if (ssl == NULL)
+    if (ssl == nullptr)
     {
         return SOCK_SOCKET_ERROR;
     }

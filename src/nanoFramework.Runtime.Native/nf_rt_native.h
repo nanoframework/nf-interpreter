@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (c) .NET Foundation and Contributors
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
@@ -30,14 +30,6 @@ typedef enum __nfpack SystemInfo_FloatingPoint
 struct Library_nf_rt_native_nanoFramework_Runtime_Native_ExecutionConstraint
 {
     NANOCLR_NATIVE_DECLARE(Install___STATIC__VOID__I4__I4);
-
-    //--//
-};
-
-struct Library_nf_rt_native_nanoFramework_Runtime_Native_GC
-{
-    NANOCLR_NATIVE_DECLARE(Run___STATIC__U4__BOOLEAN);
-    NANOCLR_NATIVE_DECLARE(EnableGCMessages___STATIC__VOID__BOOLEAN);
 
     //--//
 };

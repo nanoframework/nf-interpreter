@@ -18,7 +18,7 @@ extern HRESULT NANOCLR_DEBUG_PROCESS_EXCEPTION(HRESULT hr, const char *szFunc, c
 #define NANOCLR_LEAVE()                                                                                                \
     {                                                                                                                  \
         if (FAILED(hr))                                                                                                \
-            NANOCLR_DEBUG_PROCESS_EXCEPTION(hr, NULL, NULL, 0);                                                        \
+            NANOCLR_DEBUG_PROCESS_EXCEPTION(hr, nullptr, nullptr, 0);                                                        \
         goto nanoCLR_Cleanup;                                                                                          \
     }
 #define NANOCLR_RETURN() return hr
@@ -85,7 +85,7 @@ extern HRESULT NANOCLR_DEBUG_PROCESS_EXCEPTION(HRESULT hr, const char *szFunc, c
         hr = (expr);                                                                                                   \
         NANOCLR_LEAVE();                                                                                               \
     }
-#define NANOCLR_MSG1_SET_AND_LEAVE(expr, msg, arg)                                                                     \
+#define NANOCLR_MSG1_SET_AND_LEAVE(expr, msg, ...)                                                                     \
     {                                                                                                                  \
         hr = (expr);                                                                                                   \
         NANOCLR_LEAVE();                                                                                               \
@@ -204,7 +204,7 @@ HRESULT Interop_Marshal_double(const CLR_RT_StackFrame &stackFrame, unsigned int
 #endif
 
 HRESULT Interop_Marshal_LPCSTR(const CLR_RT_StackFrame &stackFrame, unsigned int paramIndex, const char *&param);
-// For unsupported types we set param to NULL.
+// For unsupported types we set param to nullptr.
 HRESULT Interop_Marshal_UNSUPPORTED_TYPE(
     const CLR_RT_StackFrame &stackFrame,
     unsigned int paramIndex,
@@ -298,7 +298,7 @@ template <class T> class CLR_RT_TypedArray
   public:
     CLR_RT_TypedArray()
     {
-        m_pData = NULL;
+        m_pData = nullptr;
         m_ElemCount = 0;
     }
 
@@ -519,7 +519,7 @@ HRESULT Interop_Marshal_double_ByRef(
 
 #endif
 
-// For unsuppoted types return NULL reference
+// For unsuppoted types return nullptr reference
 
 HRESULT Interop_Marshal_UNSUPPORTED_TYPE_ByRef(
     const CLR_RT_StackFrame &stackFrame,
@@ -549,7 +549,7 @@ HRESULT Interop_Marshal_StoreRef(CLR_RT_StackFrame &stackFrame, void *pVoidHeapB
 **
 ** Arguments: [stackFrame]           - Reference to the managed stack frame.
 **
-** Returns:   Pointer to managed object or NULL in case of error.
+** Returns:   Pointer to managed object or nullptr in case of error.
 **********************************************************************/
 CLR_RT_HeapBlock *Interop_Marshal_RetrieveManagedObject(CLR_RT_StackFrame &stackFrame);
 
@@ -583,7 +583,7 @@ signed int &Interop_Marshal_GetField_float(CLR_RT_HeapBlock *pThis, unsigned int
 signed __int64 &Interop_Marshal_GetField_double(CLR_RT_HeapBlock *pThis, unsigned int fieldIndex);
 #endif
 
-// For all other unsupported types we always return NULL reference.
+// For all other unsupported types we always return nullptr reference.
 UNSUPPORTED_TYPE &Interop_Marshal_GetField_UNSUPPORTED_TYPE(CLR_RT_HeapBlock *pThis, unsigned int fieldIndex);
 
 /**********************************************************************
@@ -668,7 +668,7 @@ void SaveNativeEventToHALQueue(CLR_RT_HeapBlock_NativeEventDispatcher *pContext,
 // Cleans up the data in the queue after interrupts were closed and no managed callbacks are expected.
 void CleanupNativeEventsFromHALQueue(CLR_RT_HeapBlock_NativeEventDispatcher *pContext);
 
-void CLR_RetrieveCurrentMethod(unsigned int &assmIdx, unsigned int &methodIdx);
+void CLR_RetrieveCurrentMethod(unsigned int &assmIndex, unsigned int &methodIndex);
 
 void CLR_SoftReboot();
 

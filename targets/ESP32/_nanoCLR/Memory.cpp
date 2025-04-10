@@ -45,7 +45,7 @@ static const char *TAG = "Memory";
 // #define PRINT_HEAP_INFO  1
 
 // Saved memory allocation for when heap is reset so we can return same value.
-unsigned char *managedHeap = NULL;
+unsigned char *managedHeap = nullptr;
 size_t managedHeapSize = 0;
 
 #ifdef PRINT_HEAP_INFO
@@ -108,7 +108,7 @@ void HeapLocation(unsigned char *&baseAddress, unsigned int &sizeInBytes)
     NATIVE_PROFILE_PAL_HEAP();
 
     // Memory allocated yet ?
-    if (managedHeap == NULL)
+    if (managedHeap == nullptr)
     {
 #ifdef PRINT_HEAP_INFO
         print_heap_info(MALLOC_CAP_8BIT | MALLOC_CAP_32BIT | MALLOC_CAP_SPIRAM);

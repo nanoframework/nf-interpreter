@@ -120,7 +120,7 @@ HRESULT Library_sys_net_native_System_Net_Sockets_NativeSocket::accept___STATIC_
         NANOCLR_SET_AND_LEAVE(CLR_E_PROCESS_EXCEPTION);
     }
 
-    ret = SOCK_accept(handle, NULL, NULL);
+    ret = SOCK_accept(handle, nullptr, nullptr);
 
     if (ret != SOCK_SOCKET_ERROR)
     {
@@ -142,7 +142,7 @@ HRESULT Library_sys_net_native_System_Net_Sockets_NativeSocket::
 
     LPCSTR szName = stack.Arg0().RecoverString();
     struct SOCK_addrinfo hints;
-    struct SOCK_addrinfo *addr = NULL;
+    struct SOCK_addrinfo *addr = nullptr;
     struct SOCK_addrinfo *addrT;
     CLR_UINT32 cAddresses = 0;
     CLR_RT_HeapBlock *pAddress;
@@ -162,7 +162,7 @@ HRESULT Library_sys_net_native_System_Net_Sockets_NativeSocket::
     {
         memset(&hints, 0, sizeof(hints));
 
-        ret = SOCK_getaddrinfo(szName, NULL, &hints, &addr);
+        ret = SOCK_getaddrinfo(szName, nullptr, &hints, &addr);
 
         if (ret == SOCK_SOCKET_ERROR)
         {
@@ -216,17 +216,17 @@ HRESULT Library_sys_net_native_System_Net_Sockets_NativeSocket::
         CLR_RT_HeapBlock hbCanonicalName;
         CLR_RT_HeapBlock hbAddresses;
 
-        hbCanonicalName.SetObjectReference(NULL);
+        hbCanonicalName.SetObjectReference(nullptr);
         CLR_RT_ProtectFromGC gc(hbCanonicalName);
 
-        hbAddresses.SetObjectReference(NULL);
+        hbAddresses.SetObjectReference(nullptr);
         CLR_RT_ProtectFromGC gc2(hbAddresses);
 
         for (int pass = 0; pass < 2; pass++)
         {
             cAddresses = 0;
 
-            for (addrT = addr; addrT != NULL; addrT = addrT->ai_next)
+            for (addrT = addr; addrT != nullptr; addrT = addrT->ai_next)
             {
                 if (pass == 1)
                 {
@@ -244,7 +244,7 @@ HRESULT Library_sys_net_native_System_Net_Sockets_NativeSocket::
                     NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance(
                         *pAddress,
                         (CLR_UINT32)addrT->ai_addrlen,
-                        g_CLR_RT_WellKnownTypes.m_UInt8));
+                        g_CLR_RT_WellKnownTypes.UInt8));
 
                     // copy address.
                     memcpy(pAddress->DereferenceArray()->GetFirstElement(), addrT->ai_addr, addrT->ai_addrlen);
@@ -258,9 +258,9 @@ HRESULT Library_sys_net_native_System_Net_Sockets_NativeSocket::
                 // allocate array of byte arrays
                 CLR_RT_ReflectionDef_Index idx;
 
-                idx.m_kind = REFLECTION_TYPE;
-                idx.m_levels = 2;
-                idx.m_data.m_type.m_data = g_CLR_RT_WellKnownTypes.m_UInt8.m_data;
+                idx.kind = REFLECTION_TYPE;
+                idx.levels = 2;
+                idx.data.type.data = g_CLR_RT_WellKnownTypes.UInt8.data;
 
                 NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance(hbAddresses, cAddresses, idx));
 
@@ -473,9 +473,9 @@ HRESULT Library_sys_net_native_System_Net_Sockets_NativeSocket::BindConnectHelpe
 CLR_INT32 Library_sys_net_native_System_Net_Sockets_NativeSocket::Helper__SelectSocket(CLR_INT32 handle, CLR_INT32 mode)
 {
     struct SOCK_timeval timeval;
-    SOCK_fd_set *readfds = NULL;
-    SOCK_fd_set *writefds = NULL;
-    SOCK_fd_set *exceptfds = NULL;
+    SOCK_fd_set *readfds = nullptr;
+    SOCK_fd_set *writefds = nullptr;
+    SOCK_fd_set *exceptfds = nullptr;
     SOCK_fd_set fds;
     SOCK_fd_set fdsExcept;
     CLR_INT32 res = 0;
@@ -503,7 +503,7 @@ CLR_INT32 Library_sys_net_native_System_Net_Sockets_NativeSocket::Helper__Select
     // for a read, a write or an except. This causes a problem when there is a socket exception.  The
     // poll will continue to block forever because the select statement wasn't looking for exceptions
     // Therefore, we will force the select call to look for the except case if it is not already doing it.
-    if (exceptfds == NULL)
+    if (exceptfds == nullptr)
     {
         fdsExcept.fd_count = 1;
         fdsExcept.fd_array[0] = handle;
@@ -548,11 +548,11 @@ HRESULT Library_sys_net_native_System_Net_Sockets_NativeSocket::MarshalSockAddre
     CLR_RT_HeapBlock *ipEndPointHbObj;
 
     CLR_RT_HeapBlock ipAddress;
-    ipAddress.SetObjectReference(NULL);
+    ipAddress.SetObjectReference(nullptr);
     CLR_RT_ProtectFromGC gc1(ipAddress);
 
     CLR_RT_HeapBlock ipEndPoint;
-    ipEndPoint.SetObjectReference(NULL);
+    ipEndPoint.SetObjectReference(nullptr);
     CLR_RT_ProtectFromGC gc2(ipEndPoint);
 
     CLR_INT32 port;
@@ -586,7 +586,7 @@ HRESULT Library_sys_net_native_System_Net_Sockets_NativeSocket::MarshalSockAddre
                 ipAddressHbObj[Library_sys_net_native_System_Net_IPAddress::FIELD___numbers];
 
             NANOCLR_CHECK_HRESULT(
-                CLR_RT_HeapBlock_Array::CreateInstance(numbersFieldRef, 8, g_CLR_RT_WellKnownTypes.m_UInt16));
+                CLR_RT_HeapBlock_Array::CreateInstance(numbersFieldRef, 8, g_CLR_RT_WellKnownTypes.UInt16));
 
             CLR_UINT16 *addrNumbers = (CLR_UINT16 *)numbersFieldRef.DereferenceArray()->GetFirstElement();
 
@@ -970,7 +970,7 @@ void Library_sys_net_native_System_Net_Sockets_NativeSocket::ThrowError(CLR_RT_S
 
     if ((Library_corlib_native_System_Exception::CreateInstance(
             res,
-            g_CLR_RT_WellKnownTypes.m_SocketException,
+            g_CLR_RT_WellKnownTypes.SocketException,
             CLR_E_FAIL,
             &stack)) == S_OK)
     {

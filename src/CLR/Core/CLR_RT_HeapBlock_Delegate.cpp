@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (c) .NET Foundation and Contributors
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
@@ -15,7 +15,7 @@ HRESULT CLR_RT_HeapBlock_Delegate::CreateInstance(
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
 
-    reference.SetObjectReference(NULL);
+    reference.SetObjectReference(nullptr);
 
     CLR_UINT32 length = 0;
 
@@ -55,7 +55,7 @@ HRESULT CLR_RT_HeapBlock_Delegate::CreateInstance(
     dlg->m_numOfStackFrames = length;
 #endif
 
-    dlg->m_object.SetObjectReference(NULL);
+    dlg->m_object.SetObjectReference(nullptr);
 
 #if defined(NANOCLR_APPDOMAINS)
     dlg->m_appDomain = g_CLR_RT_ExecutionEngine.GetCurrentAppDomain();

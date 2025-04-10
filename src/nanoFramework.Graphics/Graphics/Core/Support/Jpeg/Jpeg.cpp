@@ -44,11 +44,11 @@ HRESULT CLR_GFX_Bitmap::CreateInstanceJpeg(CLR_RT_HeapBlock &ref, const CLR_UINT
     NANOCLR_HEADER();
 
     jpeg_decompress_struct cinfo;
-    CLR_GFX_Bitmap *bitmap = NULL;
+    CLR_GFX_Bitmap *bitmap = nullptr;
     CreateInstanceJpegHelperParam param;
     GFX_Rect rect;
 
-    param.curBuffer = NULL;
+    param.curBuffer = nullptr;
 
     // Set up the error handling
     JPEGErrorManager errorManager;

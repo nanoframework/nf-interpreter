@@ -377,7 +377,7 @@ HRESULT nanoSPI_OpenDeviceEx(
         false,
         0,
         spiDeviceConfig.DataIs16bits,
-        NULL,
+        nullptr,
         spiDeviceConfig.DeviceChipSelect,
         spiDeviceConfig.ChipSelectActiveState};
     uint8_t buffer[2] = {0, 0};

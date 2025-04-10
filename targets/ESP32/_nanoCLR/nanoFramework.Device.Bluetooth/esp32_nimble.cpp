@@ -444,7 +444,7 @@ bool Esp32BleStartAdvertise(bleServicesContext *context)
     adv_params.conn_mode = bleContext.isConnectable ? BLE_GAP_CONN_MODE_UND : BLE_GAP_CONN_MODE_NON;
     adv_params.disc_mode = bleContext.isDiscoverable ? BLE_GAP_DISC_MODE_GEN : BLE_GAP_DISC_MODE_NON;
 
-    rc = ble_gap_adv_start(BLE_OWN_ADDR_PUBLIC, NULL, BLE_HS_FOREVER, &adv_params, Esp32GapEvent, (void *)&bleContext);
+    rc = ble_gap_adv_start(BLE_OWN_ADDR_PUBLIC, nullptr, BLE_HS_FOREVER, &adv_params, Esp32GapEvent, (void *)&bleContext);
     if (rc != 0)
     {
         BLE_DEBUG_PRINTF("error enabling advertisement; rc=%d\n", rc);
@@ -468,7 +468,7 @@ static void Esp32BleOnSync(void)
     }
 
     uint8_t addr_val[6] = {0};
-    rc = ble_hs_id_copy_addr(esp32_addr_type, addr_val, NULL);
+    rc = ble_hs_id_copy_addr(esp32_addr_type, addr_val, nullptr);
     if (rc != 0)
     {
         ESP_LOGI(tag, "error ble_hs_id_copy_addr; rc=%d\n", rc);
@@ -549,8 +549,8 @@ void Device_ble_dispose()
         vSemaphoreDelete(ble_event_data.mutex);
     }
 
-    ble_event_waitgroup = NULL;
-    ble_event_data.mutex = NULL;
+    ble_event_waitgroup = nullptr;
+    ble_event_data.mutex = nullptr;
 
     ble_initialized = false;
 

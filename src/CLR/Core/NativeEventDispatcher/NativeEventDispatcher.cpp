@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (c) .NET Foundation and Contributors
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
@@ -38,10 +38,10 @@ void CLR_RT_HeapBlock_NativeEventDispatcher::HandlerMethod_CleanUp()
 
     CLR_RT_HeapBlock_NativeEventDispatcher *event;
 
-    while (NULL != (event = (CLR_RT_HeapBlock_NativeEventDispatcher *)
-                                CLR_RT_HeapBlock_NativeEventDispatcher::eventList.FirstValidNode()))
+    while (nullptr != (event = (CLR_RT_HeapBlock_NativeEventDispatcher *)
+                                   CLR_RT_HeapBlock_NativeEventDispatcher::eventList.FirstValidNode()))
     {
-        if (event->driverMethods != NULL)
+        if (event->driverMethods != nullptr)
         {
             event->driverMethods->cleanupProcessor(event);
         }
@@ -56,7 +56,7 @@ HRESULT CLR_RT_HeapBlock_NativeEventDispatcher::CreateInstance(CLR_RT_HeapBlock 
     NATIVE_PROFILE_CLR_IOPORT();
     NANOCLR_HEADER();
 
-    CLR_RT_HeapBlock_NativeEventDispatcher *event = NULL;
+    CLR_RT_HeapBlock_NativeEventDispatcher *event = nullptr;
 
     event = EVENTCACHE_EXTRACT_NODE(g_CLR_RT_EventCache, CLR_RT_HeapBlock_NativeEventDispatcher, DATATYPE_IO_PORT);
     CHECK_ALLOCATION(event);
@@ -72,11 +72,11 @@ HRESULT CLR_RT_HeapBlock_NativeEventDispatcher::CreateInstance(CLR_RT_HeapBlock 
         NANOCLR_CHECK_HRESULT(CLR_RT_ObjectToEvent_Source::CreateInstance(event, owner, eventRef));
     }
 
-    // Set pointer to driver custom data to NULL. It initialized later by users of
+    // Set pointer to driver custom data to nullptr. It initialized later by users of
     // CLR_RT_HeapBlock_NativeEventDispatcher
-    event->pDrvCustomData = NULL;
-    // Set pointers to drivers methods to NULL.
-    event->driverMethods = NULL;
+    event->pDrvCustomData = nullptr;
+    // Set pointers to drivers methods to nullptr.
+    event->driverMethods = nullptr;
 
     NANOCLR_CLEANUP();
 
@@ -160,7 +160,7 @@ void CLR_RT_HeapBlock_NativeEventDispatcher::RemoveFromHALQueue()
     for (CLR_UINT32 curElem = 0; curElem < elemCount; curElem++)
     {
         // Retrieve the element ( actually remove it from the queue )
-        CLR_HW_Hardware::HalInterruptRecord *testRec = NULL;
+        CLR_HW_Hardware::HalInterruptRecord *testRec = nullptr;
         GLOBAL_LOCK();
         testRec = g_CLR_HW_Hardware.m_interruptData.m_HalQueue.Pop();
         GLOBAL_UNLOCK();
@@ -170,7 +170,7 @@ void CLR_RT_HeapBlock_NativeEventDispatcher::RemoveFromHALQueue()
         if (testRec->m_context != this)
         {
             // If it is different from this instance of CLR_RT_HeapBlock_NativeEventDispatcher, thin push it back
-            CLR_HW_Hardware::HalInterruptRecord *newRec = NULL;
+            CLR_HW_Hardware::HalInterruptRecord *newRec = nullptr;
             GLOBAL_LOCK();
             newRec = g_CLR_HW_Hardware.m_interruptData.m_HalQueue.Push();
             GLOBAL_UNLOCK();
@@ -186,7 +186,7 @@ void CLR_RT_HeapBlock_NativeEventDispatcher::SaveToHALQueue(uint32_t data1, uint
 
     CLR_HW_Hardware::HalInterruptRecord *rec = g_CLR_HW_Hardware.m_interruptData.m_HalQueue.Push();
 
-    if (rec == NULL)
+    if (rec == nullptr)
     {
         // remove the oldest interrupt to make room for the newest
         g_CLR_HW_Hardware.m_interruptData.m_HalQueue.Pop();
@@ -242,7 +242,7 @@ HRESULT CLR_RT_HeapBlock_NativeEventDispatcher::StartDispatch(
 
     args = stackTop->m_arguments;
 
-    if ((stackTop->m_call.m_target->flags & CLR_RECORD_METHODDEF::MD_Static) == 0)
+    if ((stackTop->m_call.target->flags & CLR_RECORD_METHODDEF::MD_Static) == 0)
     {
         ++args;
     }
@@ -299,7 +299,7 @@ HRESULT CLR_RT_HeapBlock_NativeEventDispatcher::RecoverManagedObject(CLR_RT_Heap
     }
     NANOCLR_FOREACH_NODE_END();
 
-    event = NULL;
+    event = nullptr;
 
     NANOCLR_SET_AND_LEAVE(CLR_E_PIN_DEAD);
 

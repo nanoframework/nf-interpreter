@@ -234,7 +234,7 @@ void GestureDriver::ResetRecognition()
 
 void GestureDriver::GestureContinuationRoutine(void* arg)
 {
-    if (arg == NULL) {}; // avoid unused parameter, maybe used in the future
+    if (arg == nullptr) {}; // avoid unused parameter, maybe used in the future
     HRESULT hr = S_OK;
     CLR_UINT32 flags = (m_index << 16) | GetTouchPointFlags_NextPoint | GetTouchPointFlags_UseTime | GetTouchPointFlags_UseSource;
     CLR_UINT16 source = 0;

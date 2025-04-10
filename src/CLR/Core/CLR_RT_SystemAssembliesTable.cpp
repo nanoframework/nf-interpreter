@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (c) .NET Foundation and Contributors
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
@@ -9,23 +9,23 @@ static const CLR_RT_NativeAssemblyData *LookUpAssemblyNativeDataByName(
     const CLR_RT_NativeAssemblyData **pAssembliesNativeData,
     const char *lpszAssemblyName)
 {
-    // Just sanity check to avoid crash in strcmp if name is NULL.
-    if (lpszAssemblyName == NULL)
+    // Just sanity check to avoid crash in strcmp if name is nullptr.
+    if (lpszAssemblyName == nullptr)
     {
-        return NULL;
+        return nullptr;
     }
 
     // Loops in all entries and looks for the CLR_RT_NativeAssemblyData with name same as lpszAssemblyName
     for (int i = 0; pAssembliesNativeData[i]; i++)
     {
-        if (i < g_CLR_InteropAssembliesCount && pAssembliesNativeData[i] != NULL &&
+        if (i < g_CLR_InteropAssembliesCount && pAssembliesNativeData[i] != nullptr &&
             0 == strcmp(lpszAssemblyName, pAssembliesNativeData[i]->m_szAssemblyName))
         {
             return pAssembliesNativeData[i];
         }
     }
 
-    return NULL;
+    return nullptr;
 }
 
 const CLR_RT_NativeAssemblyData *GetAssemblyNativeData(const char *lpszAssemblyName)

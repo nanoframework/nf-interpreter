@@ -10,7 +10,7 @@
 
 static const char *TAG = "ETH";
 
-esp_eth_handle_t eth_handle = NULL;
+esp_eth_handle_t eth_handle = nullptr;
 
 // OLIMEX ESP32-EVB Rev B, OLIMEX ESP32-Gateway, Generic Lan8270
 // ETH_PHY_ADDR  0
@@ -45,7 +45,7 @@ esp_err_t NF_ESP32_InitialiseEthernet(uint8_t *pMacAdr)
 
 #ifdef ESP32_ETHERNET_SUPPORT
 
-    if (eth_handle != NULL)
+    if (eth_handle != nullptr)
     {
         return esp_eth_start(eth_handle);
     }

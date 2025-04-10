@@ -16,7 +16,7 @@ bool ssl_uninitialize_internal()
 
     for (uint32_t i = 0; i < ARRAYSIZE(g_SSL_Driver.ContextArray); i++)
     {
-        if (g_SSL_Driver.ContextArray[i].Context != NULL)
+        if (g_SSL_Driver.ContextArray[i].Context != nullptr)
         {
             ssl_exit_context_internal(i);
         }

@@ -116,9 +116,9 @@ bool SimpleLink_SOCKETS_Initialize()
 {
     NATIVE_PROFILE_PAL_NETWORK();
 
-    PostAddressChangedContinuation.InitializeCallback(PostAddressChanged, NULL);
-    PostAvailabilityOnContinuation.InitializeCallback(PostAvailabilityOn, NULL);
-    PostAvailabilityOffContinuation.InitializeCallback(PostAvailabilityOff, NULL);
+    PostAddressChangedContinuation.InitializeCallback(PostAddressChanged, nullptr);
+    PostAvailabilityOnContinuation.InitializeCallback(PostAvailabilityOn, nullptr);
+    PostAvailabilityOffContinuation.InitializeCallback(PostAvailabilityOff, nullptr);
 
     return true;
 }

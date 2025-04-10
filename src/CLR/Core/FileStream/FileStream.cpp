@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (c) .NET Foundation and Contributors
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
@@ -33,7 +33,7 @@ HRESULT CLR_RT_FileStream::CreateInstance(CLR_RT_HeapBlock &ref, const char *pat
     NANOCLR_CHECK_HRESULT(CLR_RT_FileStream::SplitFilePath(path, rootName, rootNameLength, relativePath));
 
     // Retrieve appropriate driver that handles this root name
-    if ((driver = FileSystemVolumeList::FindVolume(rootName, rootNameLength)) == NULL)
+    if ((driver = FileSystemVolumeList::FindVolume(rootName, rootNameLength)) == nullptr)
     {
         NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_DRIVER);
     }
@@ -62,7 +62,7 @@ HRESULT CLR_RT_FileStream::CreateInstance(CLR_RT_HeapBlock &ref, const char *pat
     }
 
     NANOCLR_CHECK_HRESULT(
-        CLR_RT_HeapBlock_BinaryBlob::CreateInstance(ref, blobSize, NULL, CLR_RT_FileStream::RelocationHandler, 0));
+        CLR_RT_HeapBlock_BinaryBlob::CreateInstance(ref, blobSize, nullptr, CLR_RT_FileStream::RelocationHandler, 0));
 
     blob = ref.DereferenceBinaryBlob();
     fs = (CLR_RT_FileStream *)blob->GetData();
@@ -86,7 +86,7 @@ HRESULT CLR_RT_FileStream::CreateInstance(CLR_RT_HeapBlock &ref, const char *pat
         }
         // I/O is asynchronous from a HAL level or HW buffer: the runtime will just handle the existing memory
         case DRIVER_BUFFERED_IO:
-            if ((sdd->inputBuffer == NULL && sdd->canRead) || (sdd->outputBuffer == NULL && sdd->canWrite))
+            if ((sdd->inputBuffer == nullptr && sdd->canRead) || (sdd->outputBuffer == nullptr && sdd->canWrite))
             {
                 NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_DRIVER);
             }

@@ -22,7 +22,7 @@ HRESULT Library_nf_hardware_stm32_native_nanoFramework_Hardware_Stm32_BackupMemo
     // address of bkp register 0
     __IO uint32_t *baseAddress = &(RTC->BKP0R);
     uint8_t *storeAddress = ((uint8_t *)baseAddress + position);
-    uint32_t *registerAddress = NULL;
+    uint32_t *registerAddress = nullptr;
     uint32_t tempRegisterValue;
     uint32_t counter = 0;
     uint32_t remainder;
@@ -128,7 +128,7 @@ HRESULT Library_nf_hardware_stm32_native_nanoFramework_Hardware_Stm32_BackupMemo
     // address of bkp register 0
     __IO uint32_t *baseAddress = &(RTC->BKP0R);
     uint8_t *storeAddress = ((uint8_t *)baseAddress + position);
-    uint32_t *registerAddress = NULL;
+    uint32_t *registerAddress = nullptr;
     uint32_t tempRegisterValue;
     uint32_t counter = 0;
     uint32_t remainder;

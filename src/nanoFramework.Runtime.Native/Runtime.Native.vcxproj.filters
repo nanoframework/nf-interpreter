@@ -26,9 +26,6 @@
     <ClCompile Include="nf_rt_native_nanoFramework_Runtime_Native_ExecutionConstraint.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="nf_rt_native_nanoFramework_Runtime_Native_GC.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="nf_rt_native_nanoFramework_Runtime_Native_Power.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>

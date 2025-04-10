@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (c) .NET Foundation and Contributors
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
@@ -21,7 +21,7 @@ HRESULT Library_nf_system_text_System_Text_UTF8Encoding::GetBytes___SZARRAY_U1__
     cBytes = hal_strlen_s(str);
 
     NANOCLR_CHECK_HRESULT(
-        CLR_RT_HeapBlock_Array::CreateInstance(ret, (CLR_UINT32)cBytes, g_CLR_RT_WellKnownTypes.m_UInt8));
+        CLR_RT_HeapBlock_Array::CreateInstance(ret, (CLR_UINT32)cBytes, g_CLR_RT_WellKnownTypes.UInt8));
 
     arr = ret.DereferenceArray();
 
@@ -105,12 +105,13 @@ HRESULT Library_nf_system_text_System_Text_UTF8Encoding::Helper__GetChars(CLR_RT
     CLR_RT_HeapBlock_Array *pArrayBytesCopy;
     CLR_RT_HeapBlock_Array *arrTmp;
 
-    ref.SetObjectReference(NULL);
+    ref.SetObjectReference(nullptr);
     CLR_RT_ProtectFromGC gc(ref);
 
     CLR_RT_HeapBlock_Array *pArrayBytes = stack.Arg1().DereferenceArray();
     CLR_INT32 byteIdx = fIndexed ? stack.Arg2().NumericByRef().s4 : 0;
     CLR_INT32 byteCnt = fIndexed ? stack.Arg3().NumericByRef().s4 : pArrayBytes->m_numOfElements;
+
 
     FAULT_ON_NULL(pArrayBytes);
 
@@ -122,7 +123,7 @@ HRESULT Library_nf_system_text_System_Text_UTF8Encoding::Helper__GetChars(CLR_RT
     cBytesCopy = byteCnt + 1;
 
     /* Copy the array to a temporary buffer to create a zero-terminated string */
-    NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance(ref, cBytesCopy, g_CLR_RT_WellKnownTypes.m_UInt8));
+    NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance(ref, cBytesCopy, g_CLR_RT_WellKnownTypes.UInt8));
 
     pArrayBytesCopy = ref.DereferenceArray();
     szText = (const char *)pArrayBytesCopy->GetFirstElement();

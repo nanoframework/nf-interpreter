@@ -48,7 +48,7 @@ central_context *GetContext(ushort connection)
 {
     central_context *ptr = ConnectionList.FirstNode();
 
-    while (ptr->Next() != NULL)
+    while (ptr->Next() != nullptr)
     {
         if (ptr->connectionHandle == connection)
         {
@@ -58,7 +58,7 @@ central_context *GetContext(ushort connection)
         ptr = ptr->Next();
     }
 
-    return NULL;
+    return nullptr;
 }
 
 void InitConnectionList()
@@ -388,7 +388,7 @@ HRESULT Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_BluetoothLEDev
         // Fill in details for Gap event to use.
         con->connectionHandle = eventRouting;
 
-        rc = ble_gap_connect(own_addr_type, &peerAddr, connectTimeout, NULL, CentralGapEvent, con);
+        rc = ble_gap_connect(own_addr_type, &peerAddr, connectTimeout, nullptr, CentralGapEvent, con);
         BLE_DEBUG_PRINTF("ble_gap_connect exit %X\n", rc);
 
         if (rc == BLE_HS_EDONE)
@@ -533,7 +533,7 @@ HRESULT Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_BluetoothLEDev
         central_context *con;
         BLE_DEBUG_PRINTF("NativeUpdateService\n");
 
-        // get a pointer to the managed object instance of BlueToothLEDevcie and check that it's not NULL
+        // get a pointer to the managed object instance of BlueToothLEDevcie and check that it's not nullptr
         CLR_RT_HeapBlock *pThis = stack.This();
         FAULT_ON_NULL(pThis);
 
@@ -671,7 +671,7 @@ HRESULT Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_GenericAttribu
 {
     NANOCLR_HEADER();
     {
-        // get a pointer to the managed object instance of GattDeviceService and check that it's not NULL
+        // get a pointer to the managed object instance of GattDeviceService and check that it's not nullptr
         CLR_RT_HeapBlock *pThis = stack.This();
         FAULT_ON_NULL(pThis);
 
@@ -790,7 +790,7 @@ HRESULT Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_BluetoothLEDev
         uint16_t val_handle = stack.Arg2().NumericByRef().u2;
 
         central_context *con = GetContext(conn_handle);
-        if (con == NULL)
+        if (con == nullptr)
         {
             rc = BLE_HS_ENOTCONN;
         }
@@ -893,7 +893,7 @@ HRESULT Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_BluetoothLEDev
         bufferPtr = heapBuffer->GetFirstElement();
 
         central_context *con = GetContext(conn_handle);
-        if (con == NULL)
+        if (con == nullptr)
         {
             rc = BLE_HS_ENOTCONN;
         }

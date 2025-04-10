@@ -78,7 +78,7 @@ HRESULT Library_sys_dev_gpio_native_System_Device_Gpio_GpioPin::Toggle___VOID(CL
             CPU_GPIO_TogglePinState(pinNumber);
 
             // fire event, only if there are callbacks registered
-            if (pThis[FIELD___callbacks].Dereference() != NULL)
+            if (pThis[FIELD___callbacks].Dereference() != nullptr)
             {
                 PostManagedEvent(EVENT_GPIO, 0, (uint16_t)pinNumber, (uint32_t)CPU_GPIO_GetPinState(pinNumber));
             }
@@ -268,13 +268,13 @@ HRESULT Library_sys_dev_gpio_native_System_Device_Gpio_GpioPin::SetPinMode(CLR_R
 
         // flag to determine if there are any callbacks registered in managed code
         // this is use to determine if there is any need to setup and process INT handler
-        callbacksRegistered = (gpioPin[FIELD___callbacks].Dereference() != NULL);
+        callbacksRegistered = (gpioPin[FIELD___callbacks].Dereference() != nullptr);
 
         validPin = CPU_GPIO_EnableInputPin(
             pinNumber,
             (uint32_t)debounceTimeoutMilsec,
-            callbacksRegistered ? Gpio_Interupt_ISR : NULL,
-            NULL,
+            callbacksRegistered ? Gpio_Interupt_ISR : nullptr,
+            nullptr,
             GPIO_INT_EDGE_BOTH,
             pinMode);
     }
@@ -303,7 +303,7 @@ HRESULT Library_sys_dev_gpio_native_System_Device_Gpio_GpioPin::Write(CLR_RT_Hea
         CPU_GPIO_SetPinState(pinNumber, pinValue);
 
         // fire event if there are callbacks registered
-        if (gpioPin[FIELD___callbacks].Dereference() != NULL)
+        if (gpioPin[FIELD___callbacks].Dereference() != nullptr)
         {
             PostManagedEvent(EVENT_GPIO, 0, (uint16_t)pinNumber, (uint32_t)pinValue);
         }

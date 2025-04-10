@@ -43,11 +43,11 @@ HRESULT Library_nf_system_collections_System_Collections_Hashtable__HashtableEnu
         bucketElement = ((CLR_RT_HeapBlock *)buckets->GetElement(bucket));
         currentBucket = bucketElement->Dereference();
 
-        if (currentBucket != NULL)
+        if (currentBucket != nullptr)
         {
             keyv = currentBucket[BucketType::FIELD___key].Dereference();
 
-            if (keyv != NULL)
+            if (keyv != nullptr)
             {
                 pThis[FIELD___currentKey].SetObjectReference(keyv);
                 pThis[FIELD___currentValue].SetObjectReference(currentBucket[BucketType::FIELD___value].Dereference());

@@ -26,7 +26,7 @@ HRESULT Library_sys_dev_dac_native_System_Device_Dac_DacChannel::NativeWriteValu
 {
     NANOCLR_HEADER();
 
-    CLR_RT_HeapBlock *dacController = NULL;
+    CLR_RT_HeapBlock *dacController = nullptr;
 
     // we are filling this below with the appropriate DAC port pin config and DAC driver
     NF_PAL_DAC_PORT_PIN_CHANNEL dacDefinition;
@@ -39,7 +39,7 @@ HRESULT Library_sys_dev_dac_native_System_Device_Dac_DacChannel::NativeWriteValu
     // assign the value to the buffer
     sample = (dacsample_t)stack.Arg1().NumericByRef().u2;
 
-    // get a pointer to the managed object instance and check that it's not NULL
+    // get a pointer to the managed object instance and check that it's not nullptr
     CLR_RT_HeapBlock *pThis = stack.This();
     FAULT_ON_NULL(pThis);
 
@@ -111,7 +111,7 @@ HRESULT Library_sys_dev_dac_native_System_Device_Dac_DacChannel::NativeDispose__
     int channelNumber;
     bool disposeController = false;
 
-    // get a pointer to the managed object instance and check that it's not NULL
+    // get a pointer to the managed object instance and check that it's not nullptr
     CLR_RT_HeapBlock *pThis = stack.This();
     FAULT_ON_NULL(pThis);
 

@@ -200,14 +200,14 @@ extern "C"
 }
 
 // Get pointer to gpio_input_state for Gpio pin
-// return NULL if not found
+// return nullptr if not found
 gpio_input_state *GetInputState(GPIO_PIN pinNumber)
 {
     int port = GetIoPort(pinNumber);
     int bit = GetIoBit(pinNumber);
 
-    if (port_array[port] == NULL)
-        return NULL;
+    if (port_array[port] == nullptr)
+        return nullptr;
 
     statePortArray *inputStates = port_array[port];
     return *inputStates[bit];
@@ -220,11 +220,11 @@ gpio_input_state *AllocateGpioInputState(GPIO_PIN pinNumber)
     int port = GetIoPort(pinNumber);
     int bit = GetIoBit(pinNumber);
 
-    if (port_array[port] == NULL)
+    if (port_array[port] == nullptr)
     {
         port_array[port] = (statePortArray *)platform_malloc(sizeof(statePortArray));
-        if (port_array[port] == NULL)
-            return NULL;
+        if (port_array[port] == nullptr)
+            return nullptr;
 
         memset(port_array[port], 0, sizeof(statePortArray));
     }
@@ -232,7 +232,7 @@ gpio_input_state *AllocateGpioInputState(GPIO_PIN pinNumber)
     statePortArray *inputStates = port_array[port];
 
     gpio_input_state *pState = (*inputStates)[bit];
-    if (pState == NULL)
+    if (pState == nullptr)
     {
         pState = (gpio_input_state *)platform_malloc(sizeof(gpio_input_state));
         memset(pState, 0, sizeof(gpio_input_state));
@@ -249,7 +249,7 @@ void DeleteInputState(GPIO_PIN pinNumber)
     int bit = GetIoBit(pinNumber);
 
     statePortArray *inputStates = port_array[port];
-    if (inputStates == NULL)
+    if (inputStates == nullptr)
         return;
 
     gpio_input_state *pState = (*inputStates)[bit];
@@ -265,7 +265,7 @@ void DeleteInputState(GPIO_PIN pinNumber)
         GPIO_PinInit(GPIO_BASE(pinNumber), GPIO_PIN(pinNumber), &config);
 
         platform_free(pState);
-        (*inputStates)[bit] = NULL;
+        (*inputStates)[bit] = nullptr;
     }
 }
 
@@ -292,10 +292,10 @@ bool CPU_GPIO_Uninitialize()
     for (int port = 0; port < TOTAL_GPIO_PORTS; port++)
     {
         statePortArray *inputStates = port_array[port];
-        if (inputStates != NULL)
+        if (inputStates != nullptr)
         {
             platform_free(port_array[port]); // free up inputStates array
-            port_array[port] = NULL;
+            port_array[port] = nullptr;
         }
     }
 
@@ -395,7 +395,7 @@ bool CPU_GPIO_EnableInputPin(
 
     pState = AllocateGpioInputState(pinNumber);
 
-    if (pinISR != NULL && (pState->isrPtr == NULL))
+    if (pinISR != nullptr && (pState->isrPtr == nullptr))
     {
         // enable interupt mode with correct edge
         gpio_pin_config_t config = {kGPIO_DigitalInput, 0, kGPIO_IntRisingOrFallingEdge};
@@ -441,7 +441,7 @@ bool CPU_GPIO_EnableInputPin(
             }
         }
     }
-    else if (pinISR == NULL && (pState->isrPtr != NULL))
+    else if (pinISR == nullptr && (pState->isrPtr != nullptr))
     {
         // there is no managed handler setup anymore
         // remove INT handler
@@ -450,9 +450,9 @@ bool CPU_GPIO_EnableInputPin(
         GPIO_PortDisableInterrupts(GPIO_BASE(pinNumber), 1U << GetIoBit(pinNumber));
 
         // clear parameters & configs
-        pState->isrPtr = NULL;
+        pState->isrPtr = nullptr;
         pState->mode = GPIO_INT_NONE;
-        pState->param = NULL;
+        pState->param = nullptr;
         pState->debounceMs = 0;
     }
 

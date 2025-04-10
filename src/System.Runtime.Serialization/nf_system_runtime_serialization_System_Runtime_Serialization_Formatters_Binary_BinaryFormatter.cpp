@@ -49,7 +49,7 @@ HRESULT Library_nf_system_runtime_serialization_System_Runtime_Serialization_For
 
                 idx.InitializeFromHash(hash);
 
-                if (inst.InitializeFromReflection(idx, NULL))
+                if (inst.InitializeFromReflection(idx, nullptr))
                 {
                     res.Dereference()
                         [Library_nf_system_runtime_serialization_System_Runtime_Serialization_SerializationException::

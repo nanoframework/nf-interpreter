@@ -63,7 +63,7 @@ HRESULT Library_corlib_native_System_BitConverter::GetBytes___STATIC__SZARRAY_U1
     bool input = stack.Arg0().NumericByRefConst().u1 != 0;
 
     NANOCLR_CHECK_HRESULT(
-        CLR_RT_HeapBlock_Array::CreateInstance(stack.PushValueAndClear(), 1, g_CLR_RT_WellKnownTypes.m_UInt8));
+        CLR_RT_HeapBlock_Array::CreateInstance(stack.PushValueAndClear(), 1, g_CLR_RT_WellKnownTypes.UInt8));
     {
         unsigned char *p = stack.TopValue().DereferenceArray()->GetFirstElement();
         *reinterpret_cast<bool *>(p) = input;
@@ -79,7 +79,7 @@ HRESULT Library_corlib_native_System_BitConverter::GetBytes___STATIC__SZARRAY_U1
     wchar_t input = stack.Arg0().NumericByRefConst().u2;
 
     NANOCLR_CHECK_HRESULT(
-        CLR_RT_HeapBlock_Array::CreateInstance(stack.PushValueAndClear(), 2, g_CLR_RT_WellKnownTypes.m_UInt8));
+        CLR_RT_HeapBlock_Array::CreateInstance(stack.PushValueAndClear(), 2, g_CLR_RT_WellKnownTypes.UInt8));
     {
         unsigned char *p = stack.TopValue().DereferenceArray()->GetFirstElement();
         *reinterpret_cast<wchar_t *>(p) = input;
@@ -99,7 +99,7 @@ HRESULT Library_corlib_native_System_BitConverter::GetBytes___STATIC__SZARRAY_U1
 #endif
 
     NANOCLR_CHECK_HRESULT(
-        CLR_RT_HeapBlock_Array::CreateInstance(stack.PushValueAndClear(), 8, g_CLR_RT_WellKnownTypes.m_UInt8));
+        CLR_RT_HeapBlock_Array::CreateInstance(stack.PushValueAndClear(), 8, g_CLR_RT_WellKnownTypes.UInt8));
     {
         unsigned char *p = stack.TopValue().DereferenceArray()->GetFirstElement();
 #if !defined(NANOCLR_EMULATED_FLOATINGPOINT)
@@ -123,7 +123,7 @@ HRESULT Library_corlib_native_System_BitConverter::GetBytes___STATIC__SZARRAY_U1
 #endif
 
     NANOCLR_CHECK_HRESULT(
-        CLR_RT_HeapBlock_Array::CreateInstance(stack.PushValueAndClear(), 4, g_CLR_RT_WellKnownTypes.m_UInt8));
+        CLR_RT_HeapBlock_Array::CreateInstance(stack.PushValueAndClear(), 4, g_CLR_RT_WellKnownTypes.UInt8));
     {
         unsigned char *p = stack.TopValue().DereferenceArray()->GetFirstElement();
 #if !defined(NANOCLR_EMULATED_FLOATINGPOINT)
@@ -143,7 +143,7 @@ HRESULT Library_corlib_native_System_BitConverter::GetBytes___STATIC__SZARRAY_U1
     int input = stack.Arg0().NumericByRefConst().s4;
 
     NANOCLR_CHECK_HRESULT(
-        CLR_RT_HeapBlock_Array::CreateInstance(stack.PushValueAndClear(), 4, g_CLR_RT_WellKnownTypes.m_UInt8));
+        CLR_RT_HeapBlock_Array::CreateInstance(stack.PushValueAndClear(), 4, g_CLR_RT_WellKnownTypes.UInt8));
     {
         unsigned char *p = stack.TopValue().DereferenceArray()->GetFirstElement();
         *reinterpret_cast<int *>(p) = input;
@@ -159,7 +159,7 @@ HRESULT Library_corlib_native_System_BitConverter::GetBytes___STATIC__SZARRAY_U1
     __int64 input = stack.Arg0().NumericByRefConst().s8;
 
     NANOCLR_CHECK_HRESULT(
-        CLR_RT_HeapBlock_Array::CreateInstance(stack.PushValueAndClear(), 8, g_CLR_RT_WellKnownTypes.m_UInt8));
+        CLR_RT_HeapBlock_Array::CreateInstance(stack.PushValueAndClear(), 8, g_CLR_RT_WellKnownTypes.UInt8));
     {
         unsigned char *p = stack.TopValue().DereferenceArray()->GetFirstElement();
         *reinterpret_cast<__int64 *>(p) = input;
@@ -175,7 +175,7 @@ HRESULT Library_corlib_native_System_BitConverter::GetBytes___STATIC__SZARRAY_U1
     short input = stack.Arg0().NumericByRefConst().s2;
 
     NANOCLR_CHECK_HRESULT(
-        CLR_RT_HeapBlock_Array::CreateInstance(stack.PushValueAndClear(), 2, g_CLR_RT_WellKnownTypes.m_UInt8));
+        CLR_RT_HeapBlock_Array::CreateInstance(stack.PushValueAndClear(), 2, g_CLR_RT_WellKnownTypes.UInt8));
     {
         unsigned char *p = stack.TopValue().DereferenceArray()->GetFirstElement();
         *reinterpret_cast<short *>(p) = input;
@@ -191,7 +191,7 @@ HRESULT Library_corlib_native_System_BitConverter::GetBytes___STATIC__SZARRAY_U1
     unsigned int input = stack.Arg0().NumericByRefConst().u4;
 
     NANOCLR_CHECK_HRESULT(
-        CLR_RT_HeapBlock_Array::CreateInstance(stack.PushValueAndClear(), 4, g_CLR_RT_WellKnownTypes.m_UInt8));
+        CLR_RT_HeapBlock_Array::CreateInstance(stack.PushValueAndClear(), 4, g_CLR_RT_WellKnownTypes.UInt8));
     {
         unsigned char *p = stack.TopValue().DereferenceArray()->GetFirstElement();
         *reinterpret_cast<unsigned int *>(p) = input;
@@ -207,7 +207,7 @@ HRESULT Library_corlib_native_System_BitConverter::GetBytes___STATIC__SZARRAY_U1
     unsigned __int64 input = stack.Arg0().NumericByRefConst().u8;
 
     NANOCLR_CHECK_HRESULT(
-        CLR_RT_HeapBlock_Array::CreateInstance(stack.PushValueAndClear(), 8, g_CLR_RT_WellKnownTypes.m_UInt8));
+        CLR_RT_HeapBlock_Array::CreateInstance(stack.PushValueAndClear(), 8, g_CLR_RT_WellKnownTypes.UInt8));
     {
         unsigned char *p = stack.TopValue().DereferenceArray()->GetFirstElement();
         *reinterpret_cast<unsigned __int64 *>(p) = input;
@@ -223,7 +223,7 @@ HRESULT Library_corlib_native_System_BitConverter::GetBytes___STATIC__SZARRAY_U1
     unsigned short input = stack.Arg0().NumericByRefConst().u2;
 
     NANOCLR_CHECK_HRESULT(
-        CLR_RT_HeapBlock_Array::CreateInstance(stack.PushValueAndClear(), 2, g_CLR_RT_WellKnownTypes.m_UInt8));
+        CLR_RT_HeapBlock_Array::CreateInstance(stack.PushValueAndClear(), 2, g_CLR_RT_WellKnownTypes.UInt8));
     {
         unsigned char *p = stack.TopValue().DereferenceArray()->GetFirstElement();
         *reinterpret_cast<unsigned short *>(p) = input;
@@ -252,7 +252,7 @@ HRESULT Library_corlib_native_System_BitConverter::ToBoolean___STATIC__BOOLEAN__
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
 
-    unsigned char *p = NULL;
+    unsigned char *p = nullptr;
     unsigned char b = 0;
     int index = 0;
     bool res = false;
@@ -277,7 +277,7 @@ HRESULT Library_corlib_native_System_BitConverter::ToChar___STATIC__CHAR__SZARRA
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
 
-    unsigned char *p = NULL;
+    unsigned char *p = nullptr;
     int index = 0;
     wchar_t value = 0;
     unsigned char *pValue = (unsigned char *)(&value);
@@ -306,7 +306,7 @@ HRESULT Library_corlib_native_System_BitConverter::ToDouble___STATIC__R8__SZARRA
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
 
-    unsigned char *p = NULL;
+    unsigned char *p = nullptr;
     int index = 0;
 
     double value = 0;
@@ -337,7 +337,7 @@ HRESULT Library_corlib_native_System_BitConverter::ToSingle___STATIC__R4__SZARRA
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
 
-    unsigned char *p = NULL;
+    unsigned char *p = nullptr;
     int index = 0;
     float value = 0;
     unsigned char *pValue = (unsigned char *)(&value);
@@ -368,7 +368,7 @@ HRESULT Library_corlib_native_System_BitConverter::ToInt16___STATIC__I2__SZARRAY
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
 
-    unsigned char *p = NULL;
+    unsigned char *p = nullptr;
     int index = 0;
     signed short value = 0;
     unsigned char *pValue = (unsigned char *)(&value);
@@ -398,7 +398,7 @@ HRESULT Library_corlib_native_System_BitConverter::ToInt32___STATIC__I4__SZARRAY
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
 
-    unsigned char *p = NULL;
+    unsigned char *p = nullptr;
     int index = 0;
 
     signed int value = 0;
@@ -429,7 +429,7 @@ HRESULT Library_corlib_native_System_BitConverter::ToInt64___STATIC__I8__SZARRAY
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
 
-    unsigned char *p = NULL;
+    unsigned char *p = nullptr;
     int index = 0;
 
     CLR_INT64 value = 0;
@@ -460,7 +460,7 @@ HRESULT Library_corlib_native_System_BitConverter::ToUInt16___STATIC__U2__SZARRA
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
 
-    unsigned char *p = NULL;
+    unsigned char *p = nullptr;
     int index = 0;
     CLR_UINT16 value = 0;
     unsigned char *pValue = (unsigned char *)(&value);
@@ -489,7 +489,7 @@ HRESULT Library_corlib_native_System_BitConverter::ToUInt32___STATIC__U4__SZARRA
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
 
-    unsigned char *p = NULL;
+    unsigned char *p = nullptr;
     int index = 0;
     CLR_UINT32 value = 0;
     unsigned char *pValue = (unsigned char *)(&value);
@@ -518,7 +518,7 @@ HRESULT Library_corlib_native_System_BitConverter::ToUInt64___STATIC__U8__SZARRA
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
 
-    unsigned char *p = NULL;
+    unsigned char *p = nullptr;
     int index = 0;
     CLR_UINT64 value = 0;
     unsigned char *pValue = (unsigned char *)(&value);

@@ -35,7 +35,7 @@ HRESULT Library_sys_dev_dac_native_System_Device_Dac_DacController::NativeOpenCh
     // Get channel from argument
     int channel = stack.Arg1().NumericByRef().s4;
 
-    // get a pointer to the managed object instance and check that it's not NULL
+    // get a pointer to the managed object instance and check that it's not nullptr
     CLR_RT_HeapBlock *pThis = stack.This();
     FAULT_ON_NULL(pThis);
 
@@ -97,7 +97,7 @@ HRESULT Library_sys_dev_dac_native_System_Device_Dac_DacController::NativeOpenCh
     // start DAC driver if it's not already started
     if (palDac->Driver->state < DAC_READY)
     {
-        if (dacDefinition.portId != NULL)
+        if (dacDefinition.portId != nullptr)
         {
             palSetPadMode(dacDefinition.portId, dacDefinition.pin, PAL_MODE_INPUT_ANALOG);
         }
@@ -160,7 +160,7 @@ HRESULT Library_sys_dev_dac_native_System_Device_Dac_DacController::NativeInit__
 
     int controllerId;
 
-    // get a pointer to the managed object instance and check that it's not NULL
+    // get a pointer to the managed object instance and check that it's not nullptr
     CLR_RT_HeapBlock *pThis = stack.This();
     FAULT_ON_NULL(pThis);
 

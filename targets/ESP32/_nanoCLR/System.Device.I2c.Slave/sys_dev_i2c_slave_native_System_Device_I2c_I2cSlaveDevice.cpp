@@ -38,7 +38,7 @@ NF_PAL_I2CSLAVE *GetPalI2cSlaveFromBusIndex(int busIndex)
 #endif
 
         default:
-            return NULL;
+            return nullptr;
     }
 }
 
@@ -82,7 +82,7 @@ void I2cSlaveRxWorkerTask(void *pvParameters)
     Events_Set(SYSTEM_EVENT_FLAG_I2C_SLAVE);
 
     // delete task
-    vTaskDelete(NULL);
+    vTaskDelete(nullptr);
 }
 
 void I2cSlaveTxWorkerTask(void *pvParameters)
@@ -101,7 +101,7 @@ void I2cSlaveTxWorkerTask(void *pvParameters)
     Events_Set(SYSTEM_EVENT_FLAG_I2C_SLAVE);
 
     // delete task
-    vTaskDelete(NULL);
+    vTaskDelete(nullptr);
 }
 
 HRESULT Library_sys_dev_i2c_slave_native_System_Device_I2c_I2cSlaveDevice::NativeInit___VOID(CLR_RT_StackFrame &stack)
@@ -124,7 +124,7 @@ HRESULT Library_sys_dev_i2c_slave_native_System_Device_I2c_I2cSlaveDevice::Nativ
         .slave = {.addr_10bit_en = 0, .slave_addr = 0, .maximum_speed = 0},
         .clk_flags = 0};
 
-    // get a pointer to the managed object instance and check that it's not NULL
+    // get a pointer to the managed object instance and check that it's not nullptr
     CLR_RT_HeapBlock *pThis = stack.This();
     FAULT_ON_NULL(pThis);
 
@@ -175,13 +175,13 @@ HRESULT Library_sys_dev_i2c_slave_native_System_Device_I2c_I2cSlaveDevice::Nativ
         Esp_I2C_Initialised_Flag[bus]++;
 
         palI2c = GetPalI2cSlaveFromBusIndex(bus);
-        if (palI2c == NULL)
+        if (palI2c == nullptr)
         {
             NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
         }
 
         palI2c->BusNum = bus;
-        palI2c->Buffer = NULL;
+        palI2c->Buffer = nullptr;
         palI2c->RequestedBytes = 0;
         palI2c->BytesTransferred = 0;
         palI2c->TimeoutTicks = 0;
@@ -201,7 +201,7 @@ HRESULT Library_sys_dev_i2c_slave_native_System_Device_I2c_I2cSlaveDevice::Nativ
 
     i2c_port_t bus;
 
-    // get a pointer to the managed object instance and check that it's not NULL
+    // get a pointer to the managed object instance and check that it's not nullptr
     CLR_RT_HeapBlock *pThis = stack.This();
     FAULT_ON_NULL(pThis);
 
@@ -219,7 +219,7 @@ HRESULT Library_sys_dev_i2c_slave_native_System_Device_I2c_I2cSlaveDevice::
 {
     NANOCLR_HEADER();
 
-    NF_PAL_I2CSLAVE *palI2c = NULL;
+    NF_PAL_I2CSLAVE *palI2c = nullptr;
 
     int32_t bufferOffset = 0;
     int32_t requestedCount = 0;
@@ -234,10 +234,10 @@ HRESULT Library_sys_dev_i2c_slave_native_System_Device_I2c_I2cSlaveDevice::
     CLR_RT_HeapBlock hbTimeout;
     CLR_RT_HeapBlock *readSpanByte;
     CLR_RT_HeapBlock *writeSpanByte;
-    CLR_RT_HeapBlock_Array *readBuffer = NULL;
-    CLR_RT_HeapBlock_Array *writeBuffer = NULL;
+    CLR_RT_HeapBlock_Array *readBuffer = nullptr;
+    CLR_RT_HeapBlock_Array *writeBuffer = nullptr;
 
-    // get a pointer to the managed object instance and check that it's not NULL
+    // get a pointer to the managed object instance and check that it's not nullptr
     CLR_RT_HeapBlock *pThis = stack.This();
     FAULT_ON_NULL(pThis);
 
@@ -247,7 +247,7 @@ HRESULT Library_sys_dev_i2c_slave_native_System_Device_I2c_I2cSlaveDevice::
 
     // get pointer to PAL UART
     palI2c = GetPalI2cSlaveFromBusIndex(bus);
-    if (palI2c == NULL)
+    if (palI2c == nullptr)
     {
         NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
     }
@@ -266,7 +266,7 @@ HRESULT Library_sys_dev_i2c_slave_native_System_Device_I2c_I2cSlaveDevice::
 
     readBuffer = readSpanByte[SpanByte::FIELD___array].DereferenceArray();
 
-    if (readBuffer != NULL)
+    if (readBuffer != nullptr)
     {
         // set flag to read operation
         isRead = true;
@@ -282,7 +282,7 @@ HRESULT Library_sys_dev_i2c_slave_native_System_Device_I2c_I2cSlaveDevice::
     {
         writeBuffer = writeSpanByte[SpanByte::FIELD___array].DereferenceArray();
 
-        if (writeBuffer != NULL)
+        if (writeBuffer != nullptr)
         {
             // Get the write offset, only the elements defined by the span must be written, not the whole array
             bufferOffset = writeSpanByte[SpanByte::FIELD___start].NumericByRef().s4;
@@ -292,7 +292,7 @@ HRESULT Library_sys_dev_i2c_slave_native_System_Device_I2c_I2cSlaveDevice::
         }
     }
 
-    if (requestedCount == 0 || (writeBuffer == NULL && readBuffer == NULL))
+    if (requestedCount == 0 || (writeBuffer == nullptr && readBuffer == nullptr))
     {
         // nothing to do here
         NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
@@ -320,7 +320,7 @@ HRESULT Library_sys_dev_i2c_slave_native_System_Device_I2c_I2cSlaveDevice::
         // need to allocate buffer from internal memory
         palI2c->Buffer = (uint8_t *)heap_caps_malloc(requestedCount, MALLOC_CAP_8BIT | MALLOC_CAP_INTERNAL);
 
-        if (palI2c->Buffer == NULL)
+        if (palI2c->Buffer == nullptr)
         {
             NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
         }
@@ -494,15 +494,15 @@ HRESULT Library_sys_dev_i2c_slave_native_System_Device_I2c_I2cSlaveDevice::
 
     if (hr != CLR_E_THREAD_WAITING)
     {
-        if (palI2c != NULL && palI2c->Buffer != NULL)
+        if (palI2c != nullptr && palI2c->Buffer != nullptr)
         {
             heap_caps_free(palI2c->Buffer);
-            palI2c->Buffer = NULL;
+            palI2c->Buffer = nullptr;
         }
-        if (palI2c != NULL && palI2c->I2cSlaveWorkerTaskStack != NULL)
+        if (palI2c != nullptr && palI2c->I2cSlaveWorkerTaskStack != nullptr)
         {
             heap_caps_free(palI2c->I2cSlaveWorkerTaskStack);
-            palI2c->I2cSlaveWorkerTaskStack = NULL;
+            palI2c->I2cSlaveWorkerTaskStack = nullptr;
         }
     }
 

@@ -260,7 +260,7 @@ void Sockets_LWIP_Driver::CloseConnections(bool fCloseDbg)
     {
         struct SocketRegisterMap &entry = g_Sockets_LWIP_Driver.m_socketHandles[i];
 
-        if (entry.m_socket != SOCK_SOCKET_ERROR && entry.m_sslData != NULL)
+        if (entry.m_socket != SOCK_SOCKET_ERROR && entry.m_sslData != nullptr)
         {
             SSL_CloseSocket(entry.m_socket);
         }
@@ -282,7 +282,7 @@ void Sockets_LWIP_Driver::CloseConnections(bool fCloseDbg)
 
                 g_Sockets_LWIP_Driver.m_socketHandles[i].m_socket = SOCK_SOCKET_ERROR;
                 g_Sockets_LWIP_Driver.m_socketHandles[i].m_flags = 0;
-                g_Sockets_LWIP_Driver.m_socketHandles[i].m_sslData = NULL;
+                g_Sockets_LWIP_Driver.m_socketHandles[i].m_sslData = nullptr;
                 g_Sockets_LWIP_Driver.m_cntSockets--;
             }
             else if (i > 0)
@@ -422,7 +422,7 @@ bool Sockets_LWIP_Driver::Initialize()
         {
             g_Sockets_LWIP_Driver.m_socketHandles[i].m_socket = SOCK_SOCKET_ERROR;
             g_Sockets_LWIP_Driver.m_socketHandles[i].m_flags = 0;
-            g_Sockets_LWIP_Driver.m_socketHandles[i].m_sslData = NULL;
+            g_Sockets_LWIP_Driver.m_socketHandles[i].m_sslData = nullptr;
         }
 
         SOCKET_CHECK_bool(HAL_SOCK_Initialize());
@@ -496,7 +496,7 @@ void Sockets_LWIP_Driver::RegisterSocket(SOCK_SOCKET sock, bool selectable, bool
 
     g_Sockets_LWIP_Driver.m_socketHandles[g_Sockets_LWIP_Driver.m_cntSockets].m_socket = sock;
     g_Sockets_LWIP_Driver.m_socketHandles[g_Sockets_LWIP_Driver.m_cntSockets].m_flags = 0;
-    g_Sockets_LWIP_Driver.m_socketHandles[g_Sockets_LWIP_Driver.m_cntSockets].m_sslData = NULL;
+    g_Sockets_LWIP_Driver.m_socketHandles[g_Sockets_LWIP_Driver.m_cntSockets].m_sslData = nullptr;
 
     if (fDebug)
         SET_SOCKET_FLAG(

@@ -32,15 +32,15 @@ bool ssl_generic_init_internal(
     int endpoint = 0;
     int ret = 0;
 
-    HAL_Configuration_X509CaRootBundle *certStore = NULL;
-    HAL_Configuration_X509DeviceCertificate *deviceCert = NULL;
+    HAL_Configuration_X509CaRootBundle *certStore = nullptr;
+    HAL_Configuration_X509DeviceCertificate *deviceCert = nullptr;
 
     ///////////////////////
     mbedTLS_NFContext *context;
 
     for (uint32_t i = 0; i < ARRAYSIZE(g_SSL_Driver.ContextArray); i++)
     {
-        if (g_SSL_Driver.ContextArray[i].Context == NULL)
+        if (g_SSL_Driver.ContextArray[i].Context == nullptr)
         {
             sslContexIndex = i;
             break;
@@ -55,7 +55,7 @@ bool ssl_generic_init_internal(
     // create and init MbedTLS nanoFramework context
     // this needs to be freed in ssl_exit_context_internal
     context = (mbedTLS_NFContext *)platform_malloc(sizeof(mbedTLS_NFContext));
-    if (context == NULL)
+    if (context == nullptr)
     {
         goto error;
     }
@@ -65,7 +65,7 @@ bool ssl_generic_init_internal(
     // allocate memory for net context
     // this needs to be freed in ssl_exit_context_internal
     context->server_fd = (mbedtls_net_context *)platform_malloc(sizeof(mbedtls_net_context));
-    if (context->server_fd == NULL)
+    if (context->server_fd == nullptr)
     {
         goto error;
     }
@@ -84,7 +84,7 @@ bool ssl_generic_init_internal(
     // create and init SSL context
     // this needs to be freed in ssl_exit_context_internal
     context->ssl = (mbedtls_ssl_context *)platform_malloc(sizeof(mbedtls_ssl_context));
-    if (context->ssl == NULL)
+    if (context->ssl == nullptr)
     {
         goto error;
     }
@@ -93,7 +93,7 @@ bool ssl_generic_init_internal(
     // create and init SSL configuration
     // this needs to be freed in ssl_exit_context_internal
     context->conf = (mbedtls_ssl_config *)platform_malloc(sizeof(mbedtls_ssl_config));
-    if (context->conf == NULL)
+    if (context->conf == nullptr)
     {
         goto error;
     }
@@ -103,7 +103,7 @@ bool ssl_generic_init_internal(
     // create and init CTR_DRBG
     // this needs to be freed in ssl_exit_context_internal
     context->ctr_drbg = (mbedtls_ctr_drbg_context *)platform_malloc(sizeof(mbedtls_ctr_drbg_context));
-    if (context->ctr_drbg == NULL)
+    if (context->ctr_drbg == nullptr)
     {
         goto error;
     }
@@ -112,7 +112,7 @@ bool ssl_generic_init_internal(
     // create and init entropy context
     // this needs to be freed in ssl_exit_context_internal
     context->entropy = (mbedtls_entropy_context *)platform_malloc(sizeof(mbedtls_entropy_context));
-    if (context->entropy == NULL)
+    if (context->entropy == nullptr)
     {
         goto error;
     }
@@ -121,7 +121,7 @@ bool ssl_generic_init_internal(
     // create and init private key context
     // this needs to be freed in ssl_exit_context_internal
     context->pk = (mbedtls_pk_context *)platform_malloc(sizeof(mbedtls_pk_context));
-    if (context->pk == NULL)
+    if (context->pk == nullptr)
     {
         goto error;
     }
@@ -131,14 +131,14 @@ bool ssl_generic_init_internal(
     // create and init X509 CRT
     // this needs to be freed in ssl_exit_context_internal
     context->ca_cert = (mbedtls_x509_crt *)platform_malloc(sizeof(mbedtls_x509_crt));
-    if (context->ca_cert == NULL)
+    if (context->ca_cert == nullptr)
     {
         goto error;
     }
     mbedtls_x509_crt_init(context->ca_cert);
 
     // TODO: review if we can add some instance-unique data to the custom argument below
-    if (mbedtls_ctr_drbg_seed(context->ctr_drbg, mbedtls_entropy_func, context->entropy, NULL, 0) != 0)
+    if (mbedtls_ctr_drbg_seed(context->ctr_drbg, mbedtls_entropy_func, context->entropy, nullptr, 0) != 0)
     {
         // ctr_drbg_seed_failed
         goto error;
@@ -212,7 +212,7 @@ bool ssl_generic_init_internal(
                 certStore->CertificateSize);
 
             platform_free(certStore);
-            certStore = NULL;
+            certStore = nullptr;
         }
     }
 
@@ -237,10 +237,10 @@ bool ssl_generic_init_internal(
     }
 
     // parse "own" certificate if passed
-    if (certificate != NULL && certLength > 0)
+    if (certificate != nullptr && certLength > 0)
     {
         // is there a private key?
-        if (privateKey != NULL && privateKeyLength > 0)
+        if (privateKey != nullptr && privateKeyLength > 0)
         {
             if (mbedtls_pk_parse_key(
                     context->pk,
@@ -263,7 +263,7 @@ bool ssl_generic_init_internal(
         // parse certificate
         // this needs to be freed in ssl_exit_context_internal
         context->own_cert = (mbedtls_x509_crt *)platform_malloc(sizeof(mbedtls_x509_crt));
-        if (context->own_cert == NULL)
+        if (context->own_cert == nullptr)
         {
             goto error;
         }
@@ -286,18 +286,18 @@ bool ssl_generic_init_internal(
         if (deviceCert)
         {
             platform_free(deviceCert);
-            deviceCert = NULL;
+            deviceCert = nullptr;
         }
     }
     else
     {
-        // no PK, need to set it to NULL
+        // no PK, need to set it to nullptr
         mbedtls_pk_free(context->pk);
         platform_free(context->pk);
-        context->pk = NULL;
+        context->pk = nullptr;
     }
 
-    mbedtls_ssl_conf_ca_chain(context->conf, context->ca_cert, NULL);
+    mbedtls_ssl_conf_ca_chain(context->conf, context->ca_cert, nullptr);
 
     psa_crypto_init();
 

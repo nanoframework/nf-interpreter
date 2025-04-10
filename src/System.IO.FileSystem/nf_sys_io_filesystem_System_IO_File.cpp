@@ -20,7 +20,7 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_File::ExistsNative___STATIC__BOOL
 
     bool exists = false;
     FRESULT operationResult;
-    char *filePath = NULL;
+    char *filePath = nullptr;
 
     FAULT_ON_NULL(workingPath);
     FAULT_ON_NULL(fileName);
@@ -29,7 +29,7 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_File::ExistsNative___STATIC__BOOL
     filePath = (char *)platform_malloc(FF_LFN_BUF + 1);
 
     // sanity check for successful malloc
-    if (filePath == NULL)
+    if (filePath == nullptr)
     {
         // failed to allocate memory
         NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
@@ -77,7 +77,7 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_File::ExistsNative___STATIC__BOOL
     NANOCLR_CLEANUP();
 
     // free buffer memory, if allocated
-    if (filePath != NULL)
+    if (filePath != nullptr)
     {
         platform_free(filePath);
     }

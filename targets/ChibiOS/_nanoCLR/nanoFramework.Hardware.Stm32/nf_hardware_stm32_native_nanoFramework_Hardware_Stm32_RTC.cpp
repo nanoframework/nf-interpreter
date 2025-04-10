@@ -29,7 +29,7 @@ HRESULT Library_nf_hardware_stm32_native_nanoFramework_Hardware_Stm32_RTC::
     // it's only possible to set seconds, minutes, hours and date (day)
 
     // to set the alarm, it has to be stoped first (in case there is one already set)
-    rtcSetAlarm(&RTCD1, ALARM_ID, NULL);
+    rtcSetAlarm(&RTCD1, ALARM_ID, nullptr);
 
     // alarm date (day) tens and units
     value = stack.Arg0().NumericByRef().u1;

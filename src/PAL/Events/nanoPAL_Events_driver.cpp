@@ -38,7 +38,7 @@ HRESULT PalEventDriver::PostEvent(uint32_t e, uint32_t param)
 {
     PalEventListener *listener = g_palEventDriver.listenerList.FirstNode();
         
-    while(listener->Next() != NULL)
+    while(listener->Next() != nullptr)
     {
         if (listener->m_eventMask & e)
         {

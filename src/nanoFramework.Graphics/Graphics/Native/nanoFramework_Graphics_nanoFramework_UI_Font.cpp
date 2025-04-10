@@ -174,7 +174,7 @@ HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Font::ComputeExtent___VO
     FAULT_ON_NULL(szText);
     kerning = pArgs[3].NumericByRef().s4;
 
-    width = font->StringOut(szText, -1, kerning, NULL, 0, 0, 0);
+    width = font->StringOut(szText, -1, kerning, nullptr, 0, 0, 0);
 
     hbWidth.SetInteger((CLR_INT32)width);
     NANOCLR_CHECK_HRESULT(hbWidth.StoreToReference(pArgs[1], 0));
@@ -218,7 +218,7 @@ HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Font::
         yRelStart,
         renderWidth,
         renderHeight,
-        NULL,
+        nullptr,
         0,
         0,
         availableWidth,

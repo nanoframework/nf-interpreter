@@ -193,7 +193,7 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_NativeFileStream::Close___VOID(CL
 
     NANOCLR_CLEANUP();
 
-    pThis[FIELD___fs].SetObjectReference(NULL);
+    pThis[FIELD___fs].SetObjectReference(nullptr);
 
     NANOCLR_CLEANUP_END();
 }
@@ -203,9 +203,9 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_NativeFileStream::ReadWriteHelper
     NATIVE_PROFILE_CLR_IO();
     NANOCLR_HEADER();
 
-    CLR_RT_HeapBlock_Array *bufHB = NULL;
+    CLR_RT_HeapBlock_Array *bufHB = nullptr;
     CLR_RT_FileStream *fs;
-    CLR_RT_HeapBlock *nativeFileStreamHB = NULL;
+    CLR_RT_HeapBlock *nativeFileStreamHB = nullptr;
 
     uint8_t *buffer;
     int32_t bufferLength;
@@ -284,7 +284,7 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_NativeFileStream::ReadWriteHelper
             switch (fs->GetBufferingStrategy())
             {
                 case DIRECT_IO:
-                    fs->AssignStorage(buffer, count, NULL, 0);
+                    fs->AssignStorage(buffer, count, nullptr, 0);
                     bufHB->Pin();
 
                     break;

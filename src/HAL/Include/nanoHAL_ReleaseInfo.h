@@ -45,11 +45,11 @@ struct __nfpack NFReleaseInfo
         unsigned short minor = 0,
         unsigned short build = 0,
         unsigned short revision = 0,
-        const char *info = (const char *)NULL,
+        const char *info = (const char *)nullptr,
         size_t infoLen = 0,
-        const char *target = (const char *)NULL,
+        const char *target = (const char *)nullptr,
         size_t targetLen = 0,
-        const char *platform = (const char *)NULL,
+        const char *platform = (const char *)nullptr,
         size_t platformLen = 0);
 };
 

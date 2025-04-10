@@ -15,7 +15,7 @@ HRESULT Library_sys_net_native_System_Security_Cryptography_X509Certificates_X50
     CLR_RT_HeapBlock_Array *keyData = stack.Arg0().DereferenceArray();
     CLR_UINT8 *keyBuffer;
     CLR_RT_HeapBlock *passwordHb = stack.Arg1().DereferenceString();
-    const char *password = NULL;
+    const char *password = nullptr;
     CLR_UINT32 passwordLength = 0;
 
     // get key buffer

@@ -46,13 +46,13 @@ HRESULT Library_nano_gg_adc_native_nanoFramework_GiantGecko_Adc_AdcChannel::Nati
     NF_PAL_ADC_PORT_PIN_CHANNEL adcDefinition;
 
     // ADC related variables
-    ADC_TypeDef *adcDriver = NULL;
+    ADC_TypeDef *adcDriver = nullptr;
     ADC_InitSingle_TypeDef channelInitSingle;
     uint64_t samplesAccumulator = 0;
     int32_t averageCount;
     int32_t samplesCount;
 
-    // get a pointer to the managed object instance and check that it's not NULL
+    // get a pointer to the managed object instance and check that it's not nullptr
     CLR_RT_HeapBlock *pThis = stack.This();
     FAULT_ON_NULL(pThis);
 

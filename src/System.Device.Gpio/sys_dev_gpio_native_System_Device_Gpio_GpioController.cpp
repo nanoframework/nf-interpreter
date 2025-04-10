@@ -66,7 +66,7 @@ HRESULT Library_sys_dev_gpio_native_System_Device_Gpio_GpioController::SetPinMod
 
     GPIO_PIN pinNumber;
     PinMode driveMode;
-    CLR_RT_HeapBlock *gpioPin = NULL;
+    CLR_RT_HeapBlock *gpioPin = nullptr;
 
     CLR_RT_HeapBlock *pThis = stack.This();
     FAULT_ON_NULL(pThis);
@@ -82,7 +82,7 @@ HRESULT Library_sys_dev_gpio_native_System_Device_Gpio_GpioController::SetPinMod
     // try to get GpioPin object
     GetGpioPin(pinNumber, stack, gpioPin);
 
-    if (gpioPin == NULL)
+    if (gpioPin == nullptr)
     {
         NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_OPERATION);
     }
@@ -98,7 +98,7 @@ HRESULT Library_sys_dev_gpio_native_System_Device_Gpio_GpioController::NativeRea
 
     GPIO_PIN pinNumber;
     bool pinValue;
-    CLR_RT_HeapBlock *gpioPin = NULL;
+    CLR_RT_HeapBlock *gpioPin = nullptr;
 
     CLR_RT_HeapBlock *pThis = stack.This();
     FAULT_ON_NULL(pThis);
@@ -113,7 +113,7 @@ HRESULT Library_sys_dev_gpio_native_System_Device_Gpio_GpioController::NativeRea
     // try to get GpioPin object
     GetGpioPin(pinNumber, stack, gpioPin);
 
-    if (gpioPin == NULL)
+    if (gpioPin == nullptr)
     {
         NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_OPERATION);
     }
@@ -133,7 +133,7 @@ HRESULT Library_sys_dev_gpio_native_System_Device_Gpio_GpioController::NativeWri
 
     GPIO_PIN pinNumber;
     GpioPinValue state;
-    CLR_RT_HeapBlock *gpioPin = NULL;
+    CLR_RT_HeapBlock *gpioPin = nullptr;
 
     CLR_RT_HeapBlock *pThis = stack.This();
     FAULT_ON_NULL(pThis);
@@ -149,7 +149,7 @@ HRESULT Library_sys_dev_gpio_native_System_Device_Gpio_GpioController::NativeWri
     // try to get GpioPin object
     GetGpioPin(pinNumber, stack, gpioPin);
 
-    if (gpioPin == NULL)
+    if (gpioPin == nullptr)
     {
         NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_OPERATION);
     }
@@ -164,18 +164,18 @@ void Library_sys_dev_gpio_native_System_Device_Gpio_GpioController::GetGpioPin(
     CLR_RT_StackFrame &stack,
     CLR_RT_HeapBlock *&gpioPin)
 {
-    CLR_IDX assemblyIdx;
+    CLR_INDEX assemblyIndex;
     CLR_INT32 index = 0;
-    CLR_RT_Assembly *thisAssembly = NULL;
-    CLR_RT_HeapBlock *gpioPinBundle = NULL;
-    CLR_RT_HeapBlock_ArrayList *gpioPins = NULL;
+    CLR_RT_Assembly *thisAssembly = nullptr;
+    CLR_RT_HeapBlock *gpioPinBundle = nullptr;
+    CLR_RT_HeapBlock_ArrayList *gpioPins = nullptr;
 
     // get "This" because we need to access the s_GpioPins field
     CLR_RT_HeapBlock *pThis = stack.This();
 
     // s_GpioPins it's a static field, need to access it through the assembly
-    assemblyIdx = pThis->ObjectCls().Assembly();
-    thisAssembly = g_CLR_RT_TypeSystem.m_assemblies[assemblyIdx - 1];
+    assemblyIndex = pThis->ObjectCls().Assembly();
+    thisAssembly = g_CLR_RT_TypeSystem.m_assemblies[assemblyIndex - 1];
 
     // finally dereference s_GpioPins (as an ArrayList)
     gpioPins = (CLR_RT_HeapBlock_ArrayList *)thisAssembly->GetStaticField(FIELD_STATIC__s_GpioPins)->Dereference();
@@ -186,10 +186,10 @@ void Library_sys_dev_gpio_native_System_Device_Gpio_GpioController::GetGpioPin(
         if (!SUCCEEDED(gpioPins->GetItem(index++, gpioPinBundle)))
         {
             // GetItem failed, clear to indicate failure.
-            gpioPinBundle = NULL;
+            gpioPinBundle = nullptr;
         }
 
-        if (gpioPinBundle == NULL)
+        if (gpioPinBundle == nullptr)
         {
             // no more items in the array
             break;

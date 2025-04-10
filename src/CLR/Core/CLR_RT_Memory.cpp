@@ -22,11 +22,11 @@ static size_t s_PreHeapInitIndex = 0;
 void CLR_RT_Memory::Reset()
 {
     NATIVE_PROFILE_CLR_CORE();
-    ::HeapLocation(s_CLR_RT_Heap.m_location, s_CLR_RT_Heap.m_size);
+    ::HeapLocation(s_CLR_RT_Heap.location, s_CLR_RT_Heap.size);
 
     // adjust GC thresholds
-    g_CLR_RT_GarbageCollector.c_memoryThreshold = (CLR_UINT32)(s_CLR_RT_Heap.m_size * HEAP_SIZE_THRESHOLD_RATIO);
-    g_CLR_RT_GarbageCollector.c_memoryThreshold2 = (CLR_UINT32)(s_CLR_RT_Heap.m_size * HEAP_SIZE_THRESHOLD_UPPER_RATIO);
+    g_CLR_RT_GarbageCollector.c_memoryThreshold = (CLR_UINT32)(s_CLR_RT_Heap.size * HEAP_SIZE_THRESHOLD_RATIO);
+    g_CLR_RT_GarbageCollector.c_memoryThreshold2 = (CLR_UINT32)(s_CLR_RT_Heap.size * HEAP_SIZE_THRESHOLD_UPPER_RATIO);
 
 #if defined(NANOCLR_TRACE_MALLOC)
     s_TotalAllocated = 0;
@@ -38,14 +38,14 @@ void *CLR_RT_Memory::SubtractFromSystem(size_t len)
     NATIVE_PROFILE_CLR_CORE();
     len = ROUNDTOMULTIPLE(len, uintptr_t);
 
-    if (len <= s_CLR_RT_Heap.m_size)
+    if (len <= s_CLR_RT_Heap.size)
     {
-        s_CLR_RT_Heap.m_size -= (uintptr_t)len;
+        s_CLR_RT_Heap.size -= (uintptr_t)len;
 
-        return &s_CLR_RT_Heap.m_location[s_CLR_RT_Heap.m_size];
+        return &s_CLR_RT_Heap.location[s_CLR_RT_Heap.size];
     }
 
-    return NULL;
+    return nullptr;
 }
 
 //--//
@@ -64,7 +64,7 @@ void CLR_RT_Memory::Release(void *ptr)
     NATIVE_PROFILE_CLR_CORE();
 
     // CLR heap not initialized yet, return (this is not an error condition because we allow pre
-    if (s_CLR_RT_Heap.m_size == 0)
+    if (s_CLR_RT_Heap.size == 0)
     {
         return;
     }
@@ -125,9 +125,9 @@ void *CLR_RT_Memory::Allocate(size_t len, CLR_UINT32 flags)
 {
     NATIVE_PROFILE_CLR_CORE();
 
-    if (s_CLR_RT_Heap.m_size == 0)
+    if (s_CLR_RT_Heap.size == 0)
     {
-        unsigned char *heapStart = NULL;
+        unsigned char *heapStart = nullptr;
         unsigned int heapSize = 0;
 
         ::HeapLocation(heapStart, heapSize);
@@ -135,7 +135,7 @@ void *CLR_RT_Memory::Allocate(size_t len, CLR_UINT32 flags)
         if (len > heapSize)
         {
             ASSERT(false);
-            return NULL;
+            return nullptr;
         }
 
         // use the current index to prevent heap thrashing before initialization
@@ -178,7 +178,7 @@ void *CLR_RT_Memory::Allocate(size_t len, CLR_UINT32 flags)
         return res;
     }
 
-    return NULL;
+    return nullptr;
 }
 
 void *CLR_RT_Memory::Allocate_And_Erase(size_t len, CLR_UINT32 flags)
@@ -198,8 +198,11 @@ void *CLR_RT_Memory::ReAllocate(void *ptr, size_t len)
 
     // allocate always as an event but do not run GC on failure
     void *p = CLR_RT_Memory::Allocate(len, CLR_RT_HeapBlock::HB_Event | CLR_RT_HeapBlock::HB_NoGcOnFailedAllocation);
+
     if (!p)
-        return NULL;
+    {
+        return nullptr;
+    }
 
     if (ptr)
     {

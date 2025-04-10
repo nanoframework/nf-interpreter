@@ -41,7 +41,7 @@ HRESULT Library_nf_hardware_stm32_native_nanoFramework_Hardware_Stm32_Power::Dis
 
     uint32_t wakeUpPin;
 
-    // get a pointer to the managed object instance and check that it's not NULL
+    // get a pointer to the managed object instance and check that it's not nullptr
     CLR_RT_HeapBlock* pThis = stack.This();  FAULT_ON_NULL(pThis);
 
     switch((WakeupPin)stack.Arg0().NumericByRef().u4)
@@ -110,7 +110,7 @@ HRESULT Library_nf_hardware_stm32_native_nanoFramework_Hardware_Stm32_Power::Ena
 
     uint32_t wakeUpPin;
 
-    // get a pointer to the managed object instance and check that it's not NULL
+    // get a pointer to the managed object instance and check that it's not nullptr
     CLR_RT_HeapBlock* pThis = stack.This();  FAULT_ON_NULL(pThis);
 
     switch((WakeupPin)stack.Arg0().NumericByRef().u4)

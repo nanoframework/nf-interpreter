@@ -80,7 +80,7 @@ HRESULT Library_nf_device_can_native_nanoFramework_Device_Can_CanController::
         CLR_RT_HeapBlock_Array *message;
         CANTxFrame txmsg;
 
-        // get a pointer to the managed object instance and check that it's not NULL
+        // get a pointer to the managed object instance and check that it's not nullptr
         CLR_RT_HeapBlock *pThis = stack.This();
         FAULT_ON_NULL(pThis);
         CLR_RT_HeapBlock *pMessage = stack.Arg1().Dereference();
@@ -110,7 +110,7 @@ HRESULT Library_nf_device_can_native_nanoFramework_Device_Can_CanController::
             NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_RANGE);
 
         // compose the transmit packet to send
-        if (message != NULL)
+        if (message != nullptr)
         {
             // copy message to structure
             memcpy(txmsg.data8, (uint8_t *)message->GetFirstElement(), message->m_numOfElements);
@@ -164,14 +164,14 @@ HRESULT Library_nf_device_can_native_nanoFramework_Device_Can_CanController::
     NANOCLR_HEADER();
 
     CLR_RT_TypeDef_Index canMessageTypeDef;
-    CLR_RT_HeapBlock *canMessage = NULL;
+    CLR_RT_HeapBlock *canMessage = nullptr;
 
     CANRxFrame canFrame;
     NF_PAL_CAN *palCan;
     uint8_t controllerIndex;
     size_t messageCount = 0;
 
-    // get a pointer to the managed object instance and check that it's not NULL
+    // get a pointer to the managed object instance and check that it's not nullptr
     CLR_RT_HeapBlock *pThis = stack.This();
     FAULT_ON_NULL(pThis);
 
@@ -253,7 +253,7 @@ HRESULT Library_nf_device_can_native_nanoFramework_Device_Can_CanController::
         CLR_RT_HeapBlock &dataArrayField = canMessage[ManagedCanMessage::FIELD___message];
         // create an array of <bytes>
         NANOCLR_CHECK_HRESULT(
-            CLR_RT_HeapBlock_Array::CreateInstance(dataArrayField, 8, g_CLR_RT_WellKnownTypes.m_UInt8));
+            CLR_RT_HeapBlock_Array::CreateInstance(dataArrayField, 8, g_CLR_RT_WellKnownTypes.UInt8));
 
         // get a pointer to the first object in the array
         CLR_UINT8 *dataBuffer = (CLR_UINT8 *)(dataArrayField.DereferenceArray()->GetFirstElement());
@@ -262,7 +262,7 @@ HRESULT Library_nf_device_can_native_nanoFramework_Device_Can_CanController::
     else
     {
         // no more messages, return null
-        stack.SetResult_Object(NULL);
+        stack.SetResult_Object(nullptr);
     }
 
     NANOCLR_NOCLEANUP();
@@ -275,7 +275,7 @@ HRESULT Library_nf_device_can_native_nanoFramework_Device_Can_CanController::Dis
 
     uint8_t controllerIndex;
 
-    // get a pointer to the managed object instance and check that it's not NULL
+    // get a pointer to the managed object instance and check that it's not nullptr
     CLR_RT_HeapBlock *pThis = stack.This();
     FAULT_ON_NULL(pThis);
 
@@ -288,7 +288,7 @@ HRESULT Library_nf_device_can_native_nanoFramework_Device_Can_CanController::Dis
     {
 #if defined(STM32_CAN_USE_CAN1) && (STM32_CAN_USE_CAN1 == TRUE)
         case 1:
-            Can1_PAL.Driver = NULL;
+            Can1_PAL.Driver = nullptr;
             // stop CAN
             canStop(&CAND1);
             break;
@@ -296,7 +296,7 @@ HRESULT Library_nf_device_can_native_nanoFramework_Device_Can_CanController::Dis
 
 #if (STM32_CAN_USE_CAN2) && (STM32_CAN_USE_CAN2 == TRUE)
         case 2:
-            Can2_PAL.Driver = NULL;
+            Can2_PAL.Driver = nullptr;
             // stop CAN
             canStop(&CAND2);
             break;
@@ -304,7 +304,7 @@ HRESULT Library_nf_device_can_native_nanoFramework_Device_Can_CanController::Dis
 
 #if (STM32_CAN_USE_CAN3) && (STM32_CAN_USE_CAN3 == TRUE)
         case 3:
-            Can3_PAL.Driver = NULL;
+            Can3_PAL.Driver = nullptr;
             // stop CAN
             canStop(&CAND3);
             break;
@@ -323,9 +323,9 @@ HRESULT Library_nf_device_can_native_nanoFramework_Device_Can_CanController::Nat
 {
     NANOCLR_HEADER();
     {
-        NF_PAL_CAN *palCan = NULL;
+        NF_PAL_CAN *palCan = nullptr;
 
-        // get a pointer to the managed object instance and check that it's not NULL
+        // get a pointer to the managed object instance and check that it's not nullptr
         CLR_RT_HeapBlock *pThis = stack.This();
         FAULT_ON_NULL(pThis);
 
@@ -389,7 +389,7 @@ HRESULT Library_nf_device_can_native_nanoFramework_Device_Can_CanController::Nat
 {
     NANOCLR_HEADER();
 
-    NF_PAL_CAN *palCan = NULL;
+    NF_PAL_CAN *palCan = nullptr;
     bool callbacksRegistered;
     uint8_t controllerIndex;
 
@@ -400,7 +400,7 @@ HRESULT Library_nf_device_can_native_nanoFramework_Device_Can_CanController::Nat
     controllerIndex = (uint8_t)(pThis[FIELD___controllerId].NumericByRef().s4);
 
     // flag to determine if there are any callbacks registered in managed code
-    callbacksRegistered = (pThis[FIELD___callbacks].Dereference() != NULL);
+    callbacksRegistered = (pThis[FIELD___callbacks].Dereference() != nullptr);
 
     switch (controllerIndex)
     {
@@ -437,7 +437,7 @@ HRESULT Library_nf_device_can_native_nanoFramework_Device_Can_CanController::Nat
     else
     {
         // no one listening, OK to remove
-        palCan->Driver->rxfull_cb = NULL;
+        palCan->Driver->rxfull_cb = nullptr;
     }
 
     // start CAN

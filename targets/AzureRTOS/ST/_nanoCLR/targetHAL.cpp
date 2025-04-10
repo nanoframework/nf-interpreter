@@ -61,7 +61,7 @@ void nanoHAL_Initialize()
     BlockStorageList_InitializeDevices();
 
     // clear managed heap region
-    unsigned char *heapStart = NULL;
+    unsigned char *heapStart = nullptr;
     unsigned int heapSize = 0;
 
     ::HeapLocation(heapStart, heapSize);
@@ -168,7 +168,7 @@ void nanoHAL_Uninitialize(bool isPoweringDown)
     // TODO check for s_rebootHandlers
     // for(int i = 0; i< ARRAYSIZE(s_rebootHandlers); i++)
     // {
-    //     if(s_rebootHandlers[i] != NULL)
+    //     if(s_rebootHandlers[i] != nullptr)
     //     {
     //         s_rebootHandlers[i]();
     //     }

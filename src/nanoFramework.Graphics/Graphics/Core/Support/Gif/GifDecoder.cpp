@@ -52,7 +52,7 @@ HRESULT GifDecoder::GifStartDecompress(CLR_GFX_Bitmap *bitmap)
         NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
     }
 
-    if (bitmap == NULL)
+    if (bitmap == nullptr)
     {
         NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
     }
@@ -130,7 +130,7 @@ HRESULT GifDecoder::ProcessImageChunk()
 {
     NANOCLR_HEADER();
 
-    LZWDecompressor *lzwDec = NULL;
+    LZWDecompressor *lzwDec = nullptr;
     GifImageDescriptor currentImageDescriptor;
 
     NANOCLR_CHECK_HRESULT(source.Read(&currentImageDescriptor, sizeof(GifImageDescriptor)));

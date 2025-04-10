@@ -70,7 +70,7 @@ static void SpiCallback(SPIDriver *spip)
 
     NATIVE_INTERRUPT_START
 
-    NF_PAL_SPI *palSpi = NULL;
+    NF_PAL_SPI *palSpi = nullptr;
 
     // Find the NF_PAL_SPI * for driver
 #if STM32_SPI_USE_SPI1
@@ -245,10 +245,10 @@ uint16_t ComputeBaudRate(SPI_DEVICE_CONFIGURATION &config, int32_t &actualFreque
 }
 
 // Return the NF_PAL structure for busIndex
-// Return NULL is invalid bus
+// Return nullptr is invalid bus
 NF_PAL_SPI *GetNfPalfromBusIndex(uint8_t busIndex)
 {
-    NF_PAL_SPI *palSpi = NULL;
+    NF_PAL_SPI *palSpi = nullptr;
 
     // get the PAL struct for the SPI bus
     // bus index is 0 based, here it's 1 based
@@ -415,12 +415,12 @@ HRESULT CPU_SPI_nWrite_nRead(
         // Callback sync / async
         palSpi->Callback = wrc.callback;
 
-        if (writeBuffer != NULL)
+        if (writeBuffer != nullptr)
         {
             palSpi->WriteSize = writeSize;
         }
 
-        if (readBuffer != NULL)
+        if (readBuffer != nullptr)
         {
             palSpi->ReadSize = readSize;
         }
@@ -437,10 +437,10 @@ HRESULT CPU_SPI_nWrite_nRead(
         // Clear callback if sync
         if (sync)
         {
-            palSpi->Configuration.data_cb = NULL;
+            palSpi->Configuration.data_cb = nullptr;
         }
 
-        if (writeBuffer != NULL)
+        if (writeBuffer != nullptr)
         {
             // set the pointer to the write buffer as BYTE
             palSpi->WriteBuffer = (uint8_t *)writeBuffer;
@@ -460,7 +460,7 @@ HRESULT CPU_SPI_nWrite_nRead(
             }
         }
 
-        if (readBuffer != NULL)
+        if (readBuffer != nullptr)
         {
             // set DMA read buffer
             if (palSpi->ReadSize > 0)
@@ -673,7 +673,7 @@ bool CPU_SPI_Initialize(uint8_t busIndex, const SPI_DEVICE_CONFIGURATION &spiDev
     {
 #if STM32_SPI_USE_SPI1
         case 1:
-            if (SPI1_PAL.Driver == NULL)
+            if (SPI1_PAL.Driver == nullptr)
             {
                 ConfigPins_SPI1(spiDeviceConfig);
                 SPI1_PAL.Driver = &SPID1;
@@ -683,7 +683,7 @@ bool CPU_SPI_Initialize(uint8_t busIndex, const SPI_DEVICE_CONFIGURATION &spiDev
 #endif
 #if STM32_SPI_USE_SPI2
         case 2:
-            if (SPI2_PAL.Driver == NULL)
+            if (SPI2_PAL.Driver == nullptr)
             {
                 ConfigPins_SPI2(spiDeviceConfig);
                 SPI2_PAL.Driver = &SPID2;
@@ -693,7 +693,7 @@ bool CPU_SPI_Initialize(uint8_t busIndex, const SPI_DEVICE_CONFIGURATION &spiDev
 #endif
 #if STM32_SPI_USE_SPI3
         case 3:
-            if (SPI3_PAL.Driver == NULL)
+            if (SPI3_PAL.Driver == nullptr)
             {
                 ConfigPins_SPI3(spiDeviceConfig);
                 SPI3_PAL.Driver = &SPID3;
@@ -703,7 +703,7 @@ bool CPU_SPI_Initialize(uint8_t busIndex, const SPI_DEVICE_CONFIGURATION &spiDev
 #endif
 #if STM32_SPI_USE_SPI4
         case 4:
-            if (SPI4_PAL.Driver == NULL)
+            if (SPI4_PAL.Driver == nullptr)
             {
                 ConfigPins_SPI4(spiDeviceConfig);
                 SPI4_PAL.Driver = &SPID4;
@@ -713,7 +713,7 @@ bool CPU_SPI_Initialize(uint8_t busIndex, const SPI_DEVICE_CONFIGURATION &spiDev
 #endif
 #if STM32_SPI_USE_SPI5
         case 5:
-            if (SPI5_PAL.Driver == NULL)
+            if (SPI5_PAL.Driver == nullptr)
             {
                 ConfigPins_SPI5(spiDeviceConfig);
                 SPI5_PAL.Driver = &SPID5;
@@ -723,7 +723,7 @@ bool CPU_SPI_Initialize(uint8_t busIndex, const SPI_DEVICE_CONFIGURATION &spiDev
 #endif
 #if STM32_SPI_USE_SPI6
         case 6:
-            if (SPI6_PAL.Driver == NULL)
+            if (SPI6_PAL.Driver == nullptr)
             {
                 ConfigPins_SPI6(spiDeviceConfig);
                 SPI6_PAL.Driver = &SPID6;
@@ -748,7 +748,7 @@ bool CPU_SPI_Uninitialize(uint8_t busIndex)
 #if STM32_SPI_USE_SPI1
         case 1:
             spiStop(&SPID1);
-            SPI1_PAL.Driver = NULL;
+            SPI1_PAL.Driver = nullptr;
             spiReleaseBus(&SPID1);
             break;
 #endif
@@ -756,7 +756,7 @@ bool CPU_SPI_Uninitialize(uint8_t busIndex)
 #if STM32_SPI_USE_SPI2
         case 2:
             spiStop(&SPID2);
-            SPI2_PAL.Driver = NULL;
+            SPI2_PAL.Driver = nullptr;
             spiReleaseBus(&SPID2);
             break;
 #endif
@@ -764,7 +764,7 @@ bool CPU_SPI_Uninitialize(uint8_t busIndex)
 #if STM32_SPI_USE_SPI3
         case 3:
             spiStop(&SPID3);
-            SPI3_PAL.Driver = NULL;
+            SPI3_PAL.Driver = nullptr;
             spiReleaseBus(&SPID3);
             break;
 #endif
@@ -772,7 +772,7 @@ bool CPU_SPI_Uninitialize(uint8_t busIndex)
 #if STM32_SPI_USE_SPI4
         case 4:
             spiStop(&SPID4);
-            SPI4_PAL.Driver = NULL;
+            SPI4_PAL.Driver = nullptr;
             spiReleaseBus(&SPID4);
             break;
 #endif
@@ -780,7 +780,7 @@ bool CPU_SPI_Uninitialize(uint8_t busIndex)
 #if STM32_SPI_USE_SPI5
         case 5:
             spiStop(&SPID5);
-            SPI5_PAL.Driver = NULL;
+            SPI5_PAL.Driver = nullptr;
             spiReleaseBus(&SPID5);
             break;
 #endif
@@ -788,7 +788,7 @@ bool CPU_SPI_Uninitialize(uint8_t busIndex)
 #if STM32_SPI_USE_SPI6
         case 6:
             spiStop(&SPID6);
-            SPI6_PAL.Driver = NULL;
+            SPI6_PAL.Driver = nullptr;
             spiReleaseBus(&SPID6);
             break;
 #endif

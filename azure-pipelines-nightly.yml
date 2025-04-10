@@ -283,13 +283,13 @@ jobs:
           NeedsSRECORD: false
           CMakePreset: ORGPAL_PALX
 
-        ST_NUCLEO64_F091RC:
-          TargetBoard: ST_NUCLEO64_F091RC
-          TargetSeries: "stm32f0xx"
-          BuildOptions:
-          NeedsDFU: false
-          NeedsSRECORD: true
-          CMakePreset: ST_NUCLEO64_F091RC
+        # ST_NUCLEO64_F091RC:
+        #   TargetBoard: ST_NUCLEO64_F091RC
+        #   TargetSeries: "stm32f0xx"
+        #   BuildOptions:
+        #   NeedsDFU: false
+        #   NeedsSRECORD: true
+        #   CMakePreset: ST_NUCLEO64_F091RC
 
     variables:
       DOTNET_NOLOGO: true

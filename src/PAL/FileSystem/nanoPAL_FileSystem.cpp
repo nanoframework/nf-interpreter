@@ -15,9 +15,9 @@ HAL_DblLinkedList<FileSystemVolume> FileSystemVolumeList::s_zombieVolumeList;
 
 bool FS_MountVolume(const char *rootName, uint32_t deviceFlags, const char *fileSystemDriver)
 {
-    FileSystemVolume *volume = NULL;
-    FILESYSTEM_DRIVER_INTERFACE *fsDriver = NULL;
-    STREAM_DRIVER_INTERFACE *streamDriver = NULL;
+    FileSystemVolume *volume = nullptr;
+    FILESYSTEM_DRIVER_INTERFACE *fsDriver = nullptr;
+    STREAM_DRIVER_INTERFACE *streamDriver = nullptr;
     uint32_t volumeId;
 
     if (!rootName)
@@ -41,7 +41,7 @@ bool FS_MountVolume(const char *rootName, uint32_t deviceFlags, const char *file
 
         if (!(next && next->Next()))
         {
-            next = NULL;
+            next = nullptr;
         }
 
         // We'll only free the memory of this storage device
@@ -151,7 +151,7 @@ bool FileSystemVolumeList::InitializeVolumes()
 {
     FileSystemVolume *volume = s_volumeList.FirstNode();
 
-    if (volume == NULL)
+    if (volume == nullptr)
     {
 #if defined(PLATFORM_ARM)
         debug_printf("There are no file system volume to initialize");
@@ -302,7 +302,7 @@ FileSystemVolume *FileSystemVolumeList::GetNextVolume(FileSystemVolume &volume)
         return nextVolume;
     }
 
-    return NULL;
+    return nullptr;
 }
 
 uint32_t FileSystemVolumeList::GetNumVolumes()
@@ -333,7 +333,7 @@ FileSystemVolume *FileSystemVolumeList::FindVolume(const char *rootName, uint32_
         volume = FileSystemVolumeList::GetNextVolume(*volume);
     }
 
-    return NULL;
+    return nullptr;
 }
 
 FileSystemVolume *FileSystemVolumeList::FindVolume(uint32_t volumeId)
@@ -350,7 +350,7 @@ FileSystemVolume *FileSystemVolumeList::FindVolume(uint32_t volumeId)
         volume = FileSystemVolumeList::GetNextVolume(*volume);
     }
 
-    return NULL;
+    return nullptr;
 }
 
 uint32_t FileSystemVolumeList::GetNextFreeVolumeId()

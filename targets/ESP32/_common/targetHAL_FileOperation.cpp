@@ -30,8 +30,8 @@ void CombinePathAndName(char *outpath, const char *path1, const char *path2)
 //
 char *ConvertToVfsPath(const char *filepath)
 {
-    char *startPath = NULL;
-    char *path = NULL;
+    char *startPath = nullptr;
+    char *path = nullptr;
 
     int pathlen = hal_strlen_s(filepath);
 
@@ -40,10 +40,10 @@ char *ConvertToVfsPath(const char *filepath)
     startPath = (char *)platform_malloc(pathlen + 1);
 
     // sanity check for successfull malloc
-    if (startPath == NULL)
+    if (startPath == nullptr)
     {
         // failed to allocate memory
-        return NULL;
+        return nullptr;
     }
 
     path = startPath;

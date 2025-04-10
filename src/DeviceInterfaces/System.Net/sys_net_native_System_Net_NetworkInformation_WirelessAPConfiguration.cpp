@@ -52,7 +52,7 @@ HRESULT Library_sys_net_native_System_Net_NetworkInformation_WirelessAPConfigura
 
     // create new object for configuration
     NANOCLR_CHECK_HRESULT(
-        g_CLR_RT_ExecutionEngine.NewObjectFromIndex(top, g_CLR_RT_WellKnownTypes.m_WirelessAPConfiguration));
+        g_CLR_RT_ExecutionEngine.NewObjectFromIndex(top, g_CLR_RT_WellKnownTypes.WirelessAPConfiguration));
 
     // load from stack
     pConfig = top.Dereference();
@@ -94,12 +94,12 @@ HRESULT Library_sys_net_native_System_Net_NetworkInformation_WirelessAPConfigura
 
     HAL_Configuration_WirelessAP config;
     CLR_RT_HeapBlock *pConfig = stack.Arg0().Dereference();
-    _ASSERTE(pConfig != NULL);
+    _ASSERTE(pConfig != nullptr);
 
     CLR_UINT32 configurationIndex = pConfig[FIELD___apConfigurationIndex].NumericByRefConst().u4;
 
-    CLR_RT_HeapBlock_String *hbPassword = NULL;
-    CLR_RT_HeapBlock_String *hbSsid = NULL;
+    CLR_RT_HeapBlock_String *hbPassword = nullptr;
+    CLR_RT_HeapBlock_String *hbSsid = nullptr;
     CLR_UINT32 ssidLength;
     CLR_UINT32 passwordLength;
 
@@ -227,7 +227,7 @@ HRESULT Library_sys_net_native_System_Net_NetworkInformation_WirelessAPConfigura
                 NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance(
                     hbObj[Library_sys_net_native_System_Net_NetworkInformation_WirelessAPStation::FIELD___macAddress],
                     6,
-                    g_CLR_RT_WellKnownTypes.m_UInt8));
+                    g_CLR_RT_WellKnownTypes.UInt8));
                 memcpy(
                     hbObj[Library_sys_net_native_System_Net_NetworkInformation_WirelessAPStation::FIELD___macAddress]
                         .DereferenceArray()

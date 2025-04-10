@@ -308,7 +308,7 @@ int Sockets_LWIP_Driver::Read(int ComPortNum, char *Data, size_t size)
         }
     }
 
-    if (SOCK_SOCKET_ERROR != HAL_SOCK_select(SOCK_FD_SETSIZE, &readSet, NULL, NULL, &timeout))
+    if (SOCK_SOCKET_ERROR != HAL_SOCK_select(SOCK_FD_SETSIZE, &readSet, nullptr, nullptr, &timeout))
     {
         // we always perform an accept so that we handle pending connections
         // if we already are connected and the debug stream socket is still active, then we immediately close
@@ -452,9 +452,9 @@ bool Sockets_LWIP_Driver::UpgradeToSsl(
                 0x04,
                 (const char *)pDeviceCert,
                 deviceCertLen,
-                NULL,
+                nullptr,
                 0,
-                NULL,
+                nullptr,
                 0,
                 g_DebuggerPort_SslCtx_Handle,
                 false))
@@ -503,7 +503,7 @@ bool Sockets_LWIP_Driver::InitializeMulticastDiscovery()
     if (g_Sockets_LWIP_Driver.s_discoveryInitialized)
         return TRUE;
 
-    MulticastResponseContinuation.InitializeCallback(MulticastDiscoveryRespond, NULL);
+    MulticastResponseContinuation.InitializeCallback(MulticastDiscoveryRespond, nullptr);
 
     // set up discovery socket to list to defined discovery port for any ip address
     memset(&sockAddr, 0, sizeof(sockAddr));
@@ -580,7 +580,7 @@ void Sockets_LWIP_Driver::MulticastDiscoverySchedule()
         privRead.fd_array[0] = g_Sockets_LWIP_Driver.m_multicastSocket;
         privRead.fd_count = 1;
 
-        if (1 == HAL_SOCK_select(1, &privRead, NULL, NULL, &to))
+        if (1 == HAL_SOCK_select(1, &privRead, nullptr, nullptr, &to))
         {
             if (!MulticastResponseContinuation.IsLinked())
             {

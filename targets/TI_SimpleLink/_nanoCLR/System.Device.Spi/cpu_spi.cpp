@@ -11,7 +11,6 @@
 
 #include <targetHAL.h>
 #include <nanoCLR_Interop.h>
-#include <nanoCLR_Runtime.h>
 #include <nanoCLR_Checks.h>
 
 #include <sys_dev_spi_native.h>
@@ -132,7 +131,7 @@ HRESULT CPU_SPI_nWrite_nRead(
 
     NANOCLR_HEADER();
     {
-        unsigned char *readDataBuffer = NULL;
+        unsigned char *readDataBuffer = nullptr;
 
         GetSPIConfig(sdev, wrc);
 
@@ -150,7 +149,7 @@ HRESULT CPU_SPI_nWrite_nRead(
         }
 
         // check allocation
-        if (SPI1_PAL.transactions == NULL)
+        if (SPI1_PAL.transactions == nullptr)
         {
             NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
         }

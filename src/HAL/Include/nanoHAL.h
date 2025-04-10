@@ -141,8 +141,8 @@ template <class T> class HAL_DblLinkedNode
   public:
     void Initialize()
     {
-        m_nextNode = NULL;
-        m_prevNode = NULL;
+        m_nextNode = nullptr;
+        m_prevNode = nullptr;
     }
 
     T *Next() const
@@ -165,7 +165,7 @@ template <class T> class HAL_DblLinkedNode
 
     bool IsLinked() const
     {
-        return m_nextNode != NULL;
+        return m_nextNode != nullptr;
     }
 
     //--//
@@ -191,8 +191,8 @@ template <class T> class HAL_DblLinkedNode
         if (next)
             next->m_prevNode = prev;
 
-        m_nextNode = NULL;
-        m_prevNode = NULL;
+        m_nextNode = nullptr;
+        m_prevNode = nullptr;
     }
 };
 
@@ -222,7 +222,7 @@ template <class T> class HAL_DblLinkedList
     void Initialize()
     {
         m_first = Tail();
-        m_null = NULL;
+        m_null = nullptr;
         m_last = Head();
     }
 
@@ -232,7 +232,7 @@ template <class T> class HAL_DblLinkedList
         T *ptrNext;
         int num = 0;
 
-        for (ptr = FirstNode(); (ptrNext = ptr->Next()) != NULL; ptr = ptrNext)
+        for (ptr = FirstNode(); (ptrNext = ptr->Next()) != nullptr; ptr = ptrNext)
         {
             num++;
         }
@@ -258,12 +258,12 @@ template <class T> class HAL_DblLinkedList
     T *FirstValidNode() const
     {
         T *res = m_first;
-        return res->Next() ? res : NULL;
+        return res->Next() ? res : nullptr;
     }
     T *LastValidNode() const
     {
         T *res = m_last;
-        return res->Prev() ? res : NULL;
+        return res->Prev() ? res : nullptr;
     }
 
     T *Head() const
@@ -292,7 +292,7 @@ template <class T> class HAL_DblLinkedList
     bool Exists(T *searchNode)
     {
         T *node = FirstValidNode();
-        while (node != NULL && node != searchNode)
+        while (node != nullptr && node != searchNode)
         {
             if (node == node->Next())
             {
@@ -300,7 +300,7 @@ template <class T> class HAL_DblLinkedList
             }
             node = node->Next();
         }
-        return (node == NULL ? false : true);
+        return (node == nullptr ? false : true);
     }
 #endif
 
@@ -402,7 +402,7 @@ template <typename T> class Hal_Queue_UnknownSize
     T *operator[](int index)
     {
         if (index < 0 || index >= NumberOfElements())
-            return NULL;
+            return nullptr;
 
         return &m_data[(m_reader + index) % m_size];
     }
@@ -412,7 +412,7 @@ template <typename T> class Hal_Queue_UnknownSize
         size_t oldWriter = m_writer;
 
         if (m_full)
-            return NULL;
+            return nullptr;
 
         m_writer++;
         if (m_writer == m_size)
@@ -427,7 +427,7 @@ template <typename T> class Hal_Queue_UnknownSize
     T *Peek()
     {
         if (m_writer == m_reader && !m_full)
-            return NULL;
+            return nullptr;
 
         return &m_data[m_reader];
     }
@@ -437,7 +437,7 @@ template <typename T> class Hal_Queue_UnknownSize
         size_t oldReader = m_reader;
 
         if (m_reader == m_writer && !m_full)
-            return (T *)NULL;
+            return (T *)nullptr;
 
         m_reader++;
         if (m_reader == m_size)
@@ -456,7 +456,7 @@ template <typename T> class Hal_Queue_UnknownSize
         if (m_full || (nElements == 0))
         {
             nElements = 0;
-            return NULL;
+            return nullptr;
         }
 
         if (m_writer < m_reader)
@@ -482,7 +482,7 @@ template <typename T> class Hal_Queue_UnknownSize
         size_t max = 0;
 
         if (nElements == 0)
-            return NULL;
+            return nullptr;
 
         if ((m_reader == m_writer) && !m_full)
         {
@@ -490,7 +490,7 @@ template <typename T> class Hal_Queue_UnknownSize
             // reset the reader/writer to maximize push potential
             m_reader = 0;
             m_writer = 0;
-            return NULL;
+            return nullptr;
         }
 
         if (m_writer <= m_reader)
@@ -754,7 +754,7 @@ template <typename T> class HAL_RingBuffer
 
             // store size of tail
             size_t tailSize = _write_index;
-            T *tempBuffer = NULL;
+            T *tempBuffer = nullptr;
 
             if (tailSize > 0)
             {

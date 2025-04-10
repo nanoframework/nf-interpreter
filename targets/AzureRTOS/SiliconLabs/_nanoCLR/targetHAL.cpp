@@ -42,13 +42,13 @@ extern void DeInitPwm();
 //  Reboot handlers clean up on reboot
 //
 static ON_SOFT_REBOOT_HANDLER s_rebootHandlers[16] =
-    {NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL};
+    {nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr};
 
 void HAL_AddSoftRebootHandler(ON_SOFT_REBOOT_HANDLER handler)
 {
     for (size_t i = 0; i < ARRAYSIZE(s_rebootHandlers); i++)
     {
-        if (s_rebootHandlers[i] == NULL)
+        if (s_rebootHandlers[i] == nullptr)
         {
             s_rebootHandlers[i] = handler;
             return;
@@ -89,7 +89,7 @@ void nanoHAL_Initialize()
     BlockStorageList_InitializeDevices();
 
     // clear managed heap region
-    unsigned char *heapStart = NULL;
+    unsigned char *heapStart = nullptr;
     unsigned int heapSize = 0;
 
     ::HeapLocation(heapStart, heapSize);
@@ -108,13 +108,13 @@ void nanoHAL_Initialize()
     // #if (HAL_USE_CAN == TRUE)
 
     // #if defined(STM32_CAN_USE_CAN1) && (STM32_CAN_USE_CAN1 == TRUE)
-    //     Can1_PAL.Driver = NULL;
+    //     Can1_PAL.Driver = nullptr;
     // #endif
     // #if (STM32_CAN_USE_CAN2) && (STM32_CAN_USE_CAN2 == TRUE)
-    //     Can2_PAL.Driver = NULL;
+    //     Can2_PAL.Driver = nullptr;
     // #endif
     // #if (STM32_CAN_USE_CAN3) && (STM32_CAN_USE_CAN3 == TRUE)
-    //     Can3_PAL.Driver = NULL;
+    //     Can3_PAL.Driver = nullptr;
     // #endif
 
     // #endif
@@ -210,7 +210,7 @@ void nanoHAL_Uninitialize(bool isPoweringDown)
     // process Reboot Handlers
     for (size_t i = 0; i < ARRAYSIZE(s_rebootHandlers); i++)
     {
-        if (s_rebootHandlers[i] != NULL)
+        if (s_rebootHandlers[i] != nullptr)
         {
             s_rebootHandlers[i]();
         }
@@ -251,26 +251,26 @@ void nanoHAL_Uninitialize(bool isPoweringDown)
     // #endif
 
 #if defined(I2C0) && (GECKO_USE_I2C0 == TRUE)
-    if (I2C0_PAL.Configuration != NULL)
+    if (I2C0_PAL.Configuration != nullptr)
     {
         platform_free(I2C0_PAL.Configuration);
-        I2C0_PAL.Configuration = NULL;
+        I2C0_PAL.Configuration = nullptr;
     }
     I2C_Reset(I2C0);
 #endif
 #if defined(I2C1) && (GECKO_USE_I2C1 == TRUE)
-    if (I2C1_PAL.Configuration != NULL)
+    if (I2C1_PAL.Configuration != nullptr)
     {
         platform_free(I2C1_PAL.Configuration);
-        I2C1_PAL.Configuration = NULL;
+        I2C1_PAL.Configuration = nullptr;
     }
     I2C_Reset(I2C1);
 #endif
 #if defined(I2C2) && (GECKO_USE_I2C2 == TRUE)
-    if (I2C2_PAL.Configuration != NULL)
+    if (I2C2_PAL.Configuration != nullptr)
     {
         platform_free(I2C2_PAL.Configuration);
-        I2C2_PAL.Configuration = NULL;
+        I2C2_PAL.Configuration = nullptr;
     }
     I2C_Reset(I2C2);
 #endif
@@ -297,37 +297,37 @@ void nanoHAL_Uninitialize(bool isPoweringDown)
 #endif
 
 #if defined(GECKO_USE_USART0) && (GECKO_USE_USART0 == TRUE)
-    if (Usart0_PAL.Usart != NULL)
+    if (Usart0_PAL.Usart != nullptr)
     {
         UnInit_UART0();
     }
 #endif
 #if defined(GECKO_USE_USART1) && (GECKO_USE_USART1 == TRUE)
-    if (Usart1_PAL.Usart != NULL)
+    if (Usart1_PAL.Usart != nullptr)
     {
         UnInit_UART1();
     }
 #endif
 #if defined(GECKO_USE_USART2) && (GECKO_USE_USART2 == TRUE)
-    if (Usart2_PAL.Usart != NULL)
+    if (Usart2_PAL.Usart != nullptr)
     {
         UnInit_UART2();
     }
 #endif
 #if defined(GECKO_USE_USART3) && (GECKO_USE_USART3 == TRUE)
-    if (Usart3_PAL.Usart != NULL)
+    if (Usart3_PAL.Usart != nullptr)
     {
         UnInit_UART3();
     }
 #endif
 #if defined(GECKO_USE_USART_UART4) && (GECKO_USE_USART_UART4 == TRUE)
-    if (Usart4_PAL.Usart != NULL)
+    if (Usart4_PAL.Usart != nullptr)
     {
         UnInit_UART4();
     }
 #endif
 #if defined(GECKO_USE_USART_UART5) && (GECKO_USE_USART_UART5 == TRUE)
-    if (Usart5_PAL.Usart != NULL)
+    if (Usart5_PAL.Usart != nullptr)
     {
         UnInit_UART5();
     }

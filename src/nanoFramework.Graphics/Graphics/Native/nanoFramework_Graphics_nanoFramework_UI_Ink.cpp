@@ -12,22 +12,22 @@
 extern InkDriver g_InkDriver;
 
 // Save a copy of the bimapped used by inking
-static CLR_RT_HeapBlock *m_InkPinnedBitmap = NULL;
+static CLR_RT_HeapBlock *m_InkPinnedBitmap = nullptr;
 
 HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Ink::
     SetInkRegion___STATIC__VOID__U4__I4__I4__I4__I4__I4__I4__I4__nanoFrameworkUIBitmap(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
-    CLR_GFX_Bitmap *bitmap = NULL;
-    PAL_GFX_Bitmap *palBmp = NULL;
+    CLR_GFX_Bitmap *bitmap = nullptr;
+    PAL_GFX_Bitmap *palBmp = nullptr;
 
     CLR_RT_HeapBlock *pArgs = &stack.Arg0();
 
-    if (m_InkPinnedBitmap != NULL)
+    if (m_InkPinnedBitmap != nullptr)
     {
         m_InkPinnedBitmap->Unpin();
-        m_InkPinnedBitmap = NULL;
+        m_InkPinnedBitmap = nullptr;
     }
 
     InkRegionInfo inkRegionInfo;
@@ -42,7 +42,7 @@ HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Ink::
 
     m_InkPinnedBitmap = pArgs[8].Dereference();
 
-    if (m_InkPinnedBitmap != NULL)
+    if (m_InkPinnedBitmap != nullptr)
     {
         // we are drawing on the object in the PAL therefore it should not move
         m_InkPinnedBitmap->Pin();
@@ -65,7 +65,7 @@ HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Ink::
 
     inkRegionInfo.Bmp = palBmp;
 
-    if (palBmp == NULL)
+    if (palBmp == nullptr)
     {
         NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
     }

@@ -7,7 +7,6 @@
 #define NF_TI_EASYLINK_H
 
 #include <nanoCLR_Interop.h>
-#include <nanoCLR_Runtime.h>
 #include <nanoHAL.h>
 #include <nanoPAL_Events.h>
 #include <corlib_native.h>

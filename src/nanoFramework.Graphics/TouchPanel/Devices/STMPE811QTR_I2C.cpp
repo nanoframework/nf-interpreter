@@ -58,7 +58,7 @@ bool TouchDevice::Enable(GPIO_INTERRUPT_SERVICE_ROUTINE touchIsrProc)
         GPIO_PIN STMPE811QTR_Interrupt = GPIOI_LCD_INT;
         PinMode driveMode = PinMode_Input;
         GPIO_INT_EDGE IntEdge = GPIO_INT_EDGE_HIGH;
-        void *ISR_Param = NULL;
+        void *ISR_Param = nullptr;
         if (CPU_GPIO_ReservePin(GPIOI_LCD_INT, true))
         {
             if (CPU_GPIO_EnableInputPin(STMPE811QTR_Interrupt, 0, touchIsrProc, ISR_Param, IntEdge, driveMode))

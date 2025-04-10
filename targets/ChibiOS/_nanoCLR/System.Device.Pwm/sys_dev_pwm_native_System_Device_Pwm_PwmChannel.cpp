@@ -826,7 +826,7 @@ int GetAlternateFunctionPwm(int timerId)
 
 PWMDriver *GetDriverPwm(int timerId)
 {
-    PWMDriver *pwmDriver = NULL;
+    PWMDriver *pwmDriver = nullptr;
 
     switch (timerId)
     {
@@ -897,7 +897,7 @@ HRESULT Library_sys_dev_pwm_native_System_Device_Pwm_PwmChannel::NativeSetDesire
 
     NANOCLR_HEADER();
 
-    // get a pointer to the managed object instance and check that it's not NULL
+    // get a pointer to the managed object instance and check that it's not nullptr
     CLR_RT_HeapBlock *pThis = stack.This();
     FAULT_ON_NULL(pThis);
 
@@ -933,12 +933,12 @@ HRESULT Library_sys_dev_pwm_native_System_Device_Pwm_PwmChannel::NativeSetDesire
         // PWM period
         (pwmcnt_t)period,
         // No callback
-        NULL,
+        nullptr,
         // Enable all channels
-        {{PWM_OUTPUT_ACTIVE_HIGH, NULL},
-         {PWM_OUTPUT_ACTIVE_HIGH, NULL},
-         {PWM_OUTPUT_ACTIVE_HIGH, NULL},
-         {PWM_OUTPUT_ACTIVE_HIGH, NULL}},
+        {{PWM_OUTPUT_ACTIVE_HIGH, nullptr},
+         {PWM_OUTPUT_ACTIVE_HIGH, nullptr},
+         {PWM_OUTPUT_ACTIVE_HIGH, nullptr},
+         {PWM_OUTPUT_ACTIVE_HIGH, nullptr}},
         0,
 #if STM32_PWM_USE_ADVANCED
         0,
@@ -970,7 +970,7 @@ HRESULT Library_sys_dev_pwm_native_System_Device_Pwm_PwmChannel::NativeSetActive
 
     NANOCLR_HEADER();
 
-    // get a pointer to the managed object instance and check that it's not NULL
+    // get a pointer to the managed object instance and check that it's not nullptr
     CLR_RT_HeapBlock *pThis = stack.This();
     FAULT_ON_NULL(pThis);
 
@@ -1009,7 +1009,7 @@ HRESULT Library_sys_dev_pwm_native_System_Device_Pwm_PwmChannel::NativeStart___V
 
     NANOCLR_HEADER();
 
-    // get a pointer to the managed object instance and check that it's not NULL
+    // get a pointer to the managed object instance and check that it's not nullptr
     CLR_RT_HeapBlock *pThis = stack.This();
     FAULT_ON_NULL(pThis);
 
@@ -1038,7 +1038,7 @@ HRESULT Library_sys_dev_pwm_native_System_Device_Pwm_PwmChannel::NativeStop___VO
 
     NANOCLR_HEADER();
 
-    // get a pointer to the managed object instance and check that it's not NULL
+    // get a pointer to the managed object instance and check that it's not nullptr
     CLR_RT_HeapBlock *pThis = stack.This();
     FAULT_ON_NULL(pThis);
 

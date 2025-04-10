@@ -91,7 +91,7 @@ HRESULT Library_sys_dev_usbstream_native_System_Device_Usb_UsbStream::Read___I4_
     uint32_t offset = 0;
     sl_status_t reqStatus;
 
-    // get a pointer to the managed object instance and check that it's not NULL
+    // get a pointer to the managed object instance and check that it's not nullptr
     CLR_RT_HeapBlock *pThis = stack.This();
     FAULT_ON_NULL(pThis);
 
@@ -205,7 +205,7 @@ HRESULT Library_sys_dev_usbstream_native_System_Device_Usb_UsbStream::Read___I4_
     if (hr != CLR_E_THREAD_WAITING)
     {
         // need to clean up the buffer, if this was not rescheduled
-        if (dataBuffer != NULL && dataBuffer->IsPinned())
+        if (dataBuffer != nullptr && dataBuffer->IsPinned())
         {
             dataBuffer->Unpin();
         }
@@ -233,7 +233,7 @@ HRESULT Library_sys_dev_usbstream_native_System_Device_Usb_UsbStream::Write___VO
     uint32_t xfer_len = 0;
     bool isLongRunning = false;
 
-    // get a pointer to the managed object instance and check that it's not NULL
+    // get a pointer to the managed object instance and check that it's not nullptr
     CLR_RT_HeapBlock *pThis = stack.This();
     FAULT_ON_NULL(pThis);
 
@@ -365,7 +365,7 @@ HRESULT Library_sys_dev_usbstream_native_System_Device_Usb_UsbStream::Write___VO
     if (isLongRunning && hr != CLR_E_THREAD_WAITING)
     {
         // need to clean up the buffer, if this was not rescheduled
-        if (dataBuffer != NULL && dataBuffer->IsPinned())
+        if (dataBuffer != nullptr && dataBuffer->IsPinned())
         {
             dataBuffer->Unpin();
         }
@@ -412,7 +412,7 @@ HRESULT Library_sys_dev_usbstream_native_System_Device_Usb_UsbStream::NativeOpen
 
     // int32_t bufferSize;
 
-    // get a pointer to the managed object instance and check that it's not NULL
+    // get a pointer to the managed object instance and check that it's not nullptr
     CLR_RT_HeapBlock *pThis = stack.This();
     FAULT_ON_NULL(pThis);
 

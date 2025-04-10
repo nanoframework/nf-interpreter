@@ -45,7 +45,7 @@ void Events_SetBoolTimer(bool *timerCompleteFlag, uint32_t millisecondsFromNow)
     // we assume only 1 can be active, abort previous just in case
     xTimerStop(boolEventsTimer, 0);
 
-    if (timerCompleteFlag != NULL)
+    if (timerCompleteFlag != nullptr)
     {
         vTimerSetTimerID(boolEventsTimer, (void *)timerCompleteFlag);
         xTimerChangePeriod(boolEventsTimer, millisecondsFromNow / portTICK_PERIOD_MS, 0);

@@ -29,7 +29,7 @@ HRESULT Library_nf_rt_native_nanoFramework_Runtime_Native_Rtc::Native_RTC_SetSys
 
         time_t t = mktime(&newTime);
         struct timeval now = { .tv_sec = t, .tv_usec = 0 };
-        settimeofday(&now, NULL);
+        settimeofday(&now, nullptr);
             
         // Return value to the managed application
         stack.SetResult_Boolean(true);

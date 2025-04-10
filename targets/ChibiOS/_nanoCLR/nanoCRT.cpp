@@ -137,7 +137,7 @@ int hal_strcpy_s(char *strDst, size_t sizeInBytes, const char *strSrc)
 #undef strcpy
 
     size_t len;
-    if (strDst == NULL || strSrc == NULL || sizeInBytes == 0)
+    if (strDst == nullptr || strSrc == nullptr || sizeInBytes == 0)
     {
         _ASSERTE(FALSE);
         return 1;
@@ -160,7 +160,7 @@ int hal_strncpy_s(char *strDst, size_t sizeInBytes, const char *strSrc, size_t c
 {
     NATIVE_PROFILE_PAL_CRT();
 #undef strncpy
-    if (strDst == NULL || strSrc == NULL || sizeInBytes == 0)
+    if (strDst == nullptr || strSrc == nullptr || sizeInBytes == 0)
     {
         _ASSERTE(FALSE);
         return 1;
@@ -194,7 +194,7 @@ int hal_strncmp_s(const char *str1, const char *str2, size_t num)
 {
     NATIVE_PROFILE_PAL_CRT();
 #undef strncmp
-    if (str1 == NULL || str2 == NULL)
+    if (str1 == nullptr || str2 == nullptr)
     {
         _ASSERTE(FALSE);
         return 1;

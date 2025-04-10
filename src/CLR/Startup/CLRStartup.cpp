@@ -69,14 +69,14 @@ struct Settings
         NANOCLR_CHECK_HRESULT(CLR_RT_Assembly::CreateInstance(header, assm));
 
         // Get handlers for native functions in assembly
-        pNativeAssmData = GetAssemblyNativeData(assm->m_szName);
+        pNativeAssmData = GetAssemblyNativeData(assm->name);
 
-        // If pNativeAssmData not NULL- means this assembly has native calls and there is pointer to table with native
+        // If pNativeAssmData not nullptr - means this assembly has native calls and there is pointer to table with native
         // calls.
-        if (pNativeAssmData != NULL)
+        if (pNativeAssmData != nullptr)
         {
             // First verify that check sum in assembly object matches hardcoded check sum.
-            if (assm->m_header->nativeMethodsChecksum != pNativeAssmData->m_checkSum)
+            if (assm->header->nativeMethodsChecksum != pNativeAssmData->m_checkSum)
             {
 #if !defined(BUILD_RTM)
                 CLR_Debug::Printf(
@@ -87,8 +87,8 @@ struct Settings
                 CLR_Debug::Printf("*                                                                     *\r\n");
                 CLR_Debug::Printf(
                     "* Invalid native checksum: %s 0x%08X!=0x%08X *\r\n",
-                    assm->m_szName,
-                    assm->m_header->nativeMethodsChecksum,
+                    assm->name,
+                    assm->header->nativeMethodsChecksum,
                     pNativeAssmData->m_checkSum);
                 CLR_Debug::Printf("*                                                                     *\r\n");
                 CLR_Debug::Printf("***********************************************************************\r\n");
@@ -98,7 +98,7 @@ struct Settings
             }
 
             // Assembly has valid pointer to table with native methods. Save it.
-            assm->m_nativeCode = (const CLR_RT_MethodHandler *)pNativeAssmData->m_pNativeMethods;
+            assm->nativeCode = (const CLR_RT_MethodHandler *)pNativeAssmData->m_pNativeMethods;
         }
         g_CLR_RT_TypeSystem.Link(assm);
         NANOCLR_NOCLEANUP();
@@ -188,7 +188,7 @@ struct Settings
         const CLR_RECORD_ASSEMBLY *header;
         unsigned char *assembliesBuffer;
         uint32_t headerInBytes = sizeof(CLR_RECORD_ASSEMBLY);
-        unsigned char *headerBuffer = NULL;
+        unsigned char *headerBuffer = nullptr;
 
         // for the context it's being used (read the assemblies)
         // XIP and memory mapped block regions are equivalent so they can be ORed
@@ -199,7 +199,7 @@ struct Settings
         {
             headerBuffer = (unsigned char *)platform_malloc(headerInBytes);
 
-            if (headerBuffer == NULL)
+            if (headerBuffer == nullptr)
             {
                 NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
             }
@@ -243,7 +243,7 @@ struct Settings
                 /////////////////////////////////////////////////////////////////////////////////////
                 assembliesBuffer = (unsigned char *)platform_malloc(assemblySizeInByte);
 
-                if (assembliesBuffer == NULL)
+                if (assembliesBuffer == nullptr)
                 {
                     // release the headerBuffer which has being used and leave
                     platform_free(headerBuffer);
@@ -298,12 +298,12 @@ struct Settings
             }
 
             // load successful, mark as deployed
-            assm->m_flags |= CLR_RT_Assembly::Deployed;
+            assm->flags |= CLR_RT_Assembly::Deployed;
 
             // if header was malloced, set the flag to request freeing it
             if (!isXIP)
             {
-                assm->m_flags |= CLR_RT_Assembly::FreeOnDestroy;
+                assm->flags |= CLR_RT_Assembly::FreeOnDestroy;
             }
         }
 
@@ -400,7 +400,7 @@ void ClrStartup(CLR_SETTINGS params)
                 CLR_Debug::Printf("Ready.\r\n");
 #endif
 
-                hr = g_CLR_RT_ExecutionEngine.Execute(NULL, params.MaxContextSwitches);
+                hr = g_CLR_RT_ExecutionEngine.Execute(nullptr, params.MaxContextSwitches);
 
 #if !defined(BUILD_RTM)
                 CLR_Debug::Printf("Done.\r\n");
@@ -419,7 +419,7 @@ void ClrStartup(CLR_SETTINGS params)
         {
 #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
             CLR_EE_DBG_SET_MASK(StateProgramExited, StateMask);
-            CLR_EE_DBG_EVENT_BROADCAST(CLR_DBG_Commands_c_Monitor_ProgramExit, 0, NULL, WP_Flags_c_NonCritical);
+            CLR_EE_DBG_EVENT_BROADCAST(CLR_DBG_Commands_c_Monitor_ProgramExit, 0, nullptr, WP_Flags_c_NonCritical);
 #endif // #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
 
 #if defined(BUILD_RTM)

@@ -12,7 +12,7 @@ int ssl_read_internal(int sd, char *data, size_t size)
     mbedtls_ssl_context *ssl = context->ssl;
 
     // sanity check
-    if (ssl == NULL)
+    if (ssl == nullptr)
     {
         return SOCK_SOCKET_ERROR;
     }

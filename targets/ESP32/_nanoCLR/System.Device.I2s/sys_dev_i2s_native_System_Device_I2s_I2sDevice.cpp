@@ -227,7 +227,7 @@ HRESULT SetI2sConfig(i2s_port_t bus, CLR_RT_HeapBlock *config)
     if (Esp_I2S_Initialised_Flag[bus] == 0)
     {
         // Install driver without events
-        esp_err_t res = i2s_driver_install(bus, &conf, 0, NULL);
+        esp_err_t res = i2s_driver_install(bus, &conf, 0, nullptr);
         if (res != ESP_OK)
         {
             NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
@@ -356,13 +356,13 @@ HRESULT Library_sys_dev_i2s_native_System_Device_I2s_I2sDevice::Read___VOID__Sys
     {
         CLR_RT_HeapBlock *pConfig;
 
-        // get a pointer to the managed object instance and check that it's not NULL
+        // get a pointer to the managed object instance and check that it's not nullptr
         CLR_RT_HeapBlock *pThis = stack.This();
         FAULT_ON_NULL(pThis);
 
-        CLR_RT_HeapBlock *readSpanByte = NULL;
-        CLR_RT_HeapBlock_Array *readBuffer = NULL;
-        uint8_t *readData = NULL;
+        CLR_RT_HeapBlock *readSpanByte = nullptr;
+        CLR_RT_HeapBlock_Array *readBuffer = nullptr;
+        uint8_t *readData = nullptr;
         int readSize = 0;
         int readOffset = 0;
         uint8_t transform_buffer[SIZEOF_TRANSFORM_BUFFER_IN_BYTES];
@@ -394,11 +394,11 @@ HRESULT Library_sys_dev_i2s_native_System_Device_I2s_I2sDevice::Read___VOID__Sys
 
         // dereference the SpanByte from the arguments
         readSpanByte = stack.Arg1().Dereference();
-        if (readSpanByte != NULL)
+        if (readSpanByte != nullptr)
         {
             readBuffer = readSpanByte[SpanByte::FIELD___array].DereferenceArray();
 
-            if (readBuffer != NULL)
+            if (readBuffer != nullptr)
             {
                 // Get the read offset, only the elements defined by the span must be read, not the whole array
                 readOffset = readSpanByte[SpanByte::FIELD___start].NumericByRef().s4;
@@ -477,13 +477,13 @@ HRESULT Library_sys_dev_i2s_native_System_Device_I2s_I2sDevice::Write___VOID__Sy
     {
         CLR_RT_HeapBlock *pConfig;
 
-        // get a pointer to the managed object instance and check that it's not NULL
+        // get a pointer to the managed object instance and check that it's not nullptr
         CLR_RT_HeapBlock *pThis = stack.This();
         FAULT_ON_NULL(pThis);
 
-        CLR_RT_HeapBlock *writeSpanByte = NULL;
-        CLR_RT_HeapBlock_Array *writeBuffer = NULL;
-        uint8_t *writeData = NULL;
+        CLR_RT_HeapBlock *writeSpanByte = nullptr;
+        CLR_RT_HeapBlock_Array *writeBuffer = nullptr;
+        uint8_t *writeData = nullptr;
         int writeSize = 0;
         int writeOffset = 0;
         size_t bytesWritten;
@@ -510,11 +510,11 @@ HRESULT Library_sys_dev_i2s_native_System_Device_I2s_I2sDevice::Write___VOID__Sy
 
         // dereference the write and read SpanByte from the arguments
         writeSpanByte = stack.Arg1().Dereference();
-        if (writeSpanByte != NULL)
+        if (writeSpanByte != nullptr)
         {
             writeBuffer = writeSpanByte[SpanByte::FIELD___array].DereferenceArray();
 
-            if (writeBuffer != NULL)
+            if (writeBuffer != nullptr)
             {
                 // Get the write offset, only the elements defined by the span must be written, not the whole array
                 writeOffset = writeSpanByte[SpanByte::FIELD___start].NumericByRef().s4;
@@ -553,7 +553,7 @@ HRESULT Library_sys_dev_i2s_native_System_Device_I2s_I2sDevice::NativeInit___VOI
     {
         CLR_RT_HeapBlock *pConfig;
 
-        // get a pointer to the managed object instance and check that it's not NULL
+        // get a pointer to the managed object instance and check that it's not nullptr
         CLR_RT_HeapBlock *pThis = stack.This();
         FAULT_ON_NULL(pThis);
 
@@ -594,7 +594,7 @@ HRESULT Library_sys_dev_i2s_native_System_Device_I2s_I2sDevice::NativeDispose___
 
     {
         CLR_RT_HeapBlock *pConfig;
-        // get a pointer to the managed object instance and check that it's not NULL
+        // get a pointer to the managed object instance and check that it's not nullptr
         CLR_RT_HeapBlock *pThis = stack.This();
         FAULT_ON_NULL(pThis);
 

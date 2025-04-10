@@ -26,7 +26,7 @@ HRESULT CLR_RT_HeapBlock_Stack::Pop(CLR_RT_HeapBlock *&value)
 
     value = removed->Dereference();
 
-    removed->SetObjectReference(NULL);
+    removed->SetObjectReference(nullptr);
 
     SetSize(size - 1);
 
@@ -58,11 +58,11 @@ HRESULT CLR_RT_HeapBlock_Stack::Push(CLR_RT_HeapBlock *value)
         capacity *= 2;
 
         NANOCLR_CHECK_HRESULT(
-            CLR_RT_HeapBlock_Array::CreateInstance(newArrayHB, capacity, g_CLR_RT_WellKnownTypes.m_Object));
+            CLR_RT_HeapBlock_Array::CreateInstance(newArrayHB, capacity, g_CLR_RT_WellKnownTypes.Object));
 
         newArray = newArrayHB.DereferenceArray();
 
-        memcpy(newArray->GetElement(size), array->GetFirstElement(), size * sizeof(struct CLR_RT_HeapBlock));
+        memcpy(newArray->GetElement(size), array->GetFirstElement(), size * sizeof(CLR_RT_HeapBlock));
 
         SetArray(newArray);
         array = newArray;

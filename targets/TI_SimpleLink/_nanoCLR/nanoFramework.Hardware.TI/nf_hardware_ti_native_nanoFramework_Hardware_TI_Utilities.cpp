@@ -16,7 +16,7 @@ HRESULT Library_nf_hardware_ti_native_nanoFramework_Hardware_TI_Utilities::Nativ
     CLR_RT_HeapBlock &top = stack.PushValueAndClear();
 
     // dereference the byte array from the static field
-    NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance(top, 8, g_CLR_RT_WellKnownTypes.m_UInt8));
+    NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance(top, 8, g_CLR_RT_WellKnownTypes.UInt8));
 
     ieeeAddress = top.DereferenceArray()->GetFirstElement();
     FAULT_ON_NULL(ieeeAddress);

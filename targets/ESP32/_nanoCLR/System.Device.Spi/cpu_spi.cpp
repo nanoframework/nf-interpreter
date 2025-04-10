@@ -433,8 +433,8 @@ HRESULT CPU_SPI_nWrite_nRead(
 {
     NANOCLR_HEADER();
     {
-        uint8_t *writeDataBuffer = NULL;
-        uint8_t *readDataBuffer = NULL;
+        uint8_t *writeDataBuffer = nullptr;
+        uint8_t *readDataBuffer = nullptr;
         bool async = (wrc.callback != 0);
         esp_err_t ret;
 

@@ -70,12 +70,12 @@ static uint16_t pinReserved[TOTAL_GPIO_PORTS];            //  reserved - 1 bit p
 static uint16_t pinStateStore[TOTAL_GPIO_PORTS];
 
 // Get pointer to gpio_input_state for Gpio pin
-// return NULL if not found
+// return nullptr if not found
 gpio_input_state *GetInputState(GPIO_PIN pinNumber)
 {
     gpio_input_state *ptr = gpioInputList.FirstNode();
 
-    while (ptr->Next() != NULL)
+    while (ptr->Next() != nullptr)
     {
         if (ptr->pinNumber == pinNumber)
         {
@@ -85,7 +85,7 @@ gpio_input_state *GetInputState(GPIO_PIN pinNumber)
         ptr = ptr->Next();
     }
 
-    return NULL;
+    return nullptr;
 }
 
 // Allocate a new gpio_input_state and add to end of list
@@ -94,7 +94,7 @@ gpio_input_state *AllocateGpioInputState(GPIO_PIN pinNumber)
 {
     gpio_input_state *ptr = GetInputState(pinNumber);
 
-    if (ptr == NULL)
+    if (ptr == nullptr)
     {
         ptr = (gpio_input_state *)platform_malloc(sizeof(gpio_input_state));
         memset(ptr, 0, sizeof(gpio_input_state));
@@ -107,7 +107,7 @@ gpio_input_state *AllocateGpioInputState(GPIO_PIN pinNumber)
 
 void UnlinkInputState(gpio_input_state *state)
 {
-    if (state->debounceTimer != NULL)
+    if (state->debounceTimer != nullptr)
     {
         xTimerDelete(state->debounceTimer, 100);
     }
@@ -138,7 +138,7 @@ static void Esp_Gpio_DebounceHandler(TimerHandle_t timer)
     gpio_input_state *state = (gpio_input_state *)pvTimerGetTimerID(timer);
 
     // sanity check
-    if (state != NULL)
+    if (state != nullptr)
     {
         // get current pin state
         bool actual = CPU_GPIO_GetPinState(state->pinNumber);
@@ -371,7 +371,7 @@ bool CPU_GPIO_EnableInputPin(
 
     // Link ISR ptr supplied and not already set up
     // CPU_GPIO_EnableInputPin could be called a 2nd time with changed parameters
-    if (pinISR != NULL && (state->isrPtr == NULL))
+    if (pinISR != nullptr && (state->isrPtr == nullptr))
     {
         ret = gpio_isr_handler_add((gpio_num_t)pinNumber, gpio_isr, (void *)state);
         if (ret != ESP_OK)
@@ -422,7 +422,7 @@ bool CPU_GPIO_EnableInputPin(
                 break;
         }
     }
-    else if (pinISR == NULL && (state->isrPtr != NULL))
+    else if (pinISR == nullptr && (state->isrPtr != nullptr))
     {
         // there is no managed handler setup anymore
         // remove INT handler
@@ -431,9 +431,9 @@ bool CPU_GPIO_EnableInputPin(
         gpio_isr_handler_remove((gpio_num_t)state->pinNumber);
 
         // clear parameters & configs
-        state->isrPtr = NULL;
+        state->isrPtr = nullptr;
         state->mode = GPIO_INT_NONE;
-        state->param = NULL;
+        state->param = nullptr;
         state->debounceMs = 0;
     }
 
@@ -609,7 +609,7 @@ bool CPU_GPIO_SetPinDebounce(GPIO_PIN pinNumber, uint32_t debounceTimeMillisecon
             }
 
             // check if there was a timer already setup
-            if (state->debounceTimer == NULL)
+            if (state->debounceTimer == nullptr)
             {
                 // Create timer because it doesn't exist for this pin
                 state->debounceTimer =

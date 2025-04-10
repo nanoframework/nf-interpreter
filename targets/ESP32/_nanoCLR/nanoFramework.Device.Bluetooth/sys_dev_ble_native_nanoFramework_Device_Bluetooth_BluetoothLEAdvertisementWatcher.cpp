@@ -42,7 +42,7 @@ void BleCentralStartScan()
     disc_params.filter_policy = BLE_HCI_SCAN_FILT_NO_WL;
     disc_params.limited = 0;
 
-    rc = ble_gap_disc(own_addr_type, BLE_HS_FOREVER, &disc_params, Esp32GapEvent, NULL);
+    rc = ble_gap_disc(own_addr_type, BLE_HS_FOREVER, &disc_params, Esp32GapEvent, nullptr);
     BLE_DEBUG_PRINTF("ble_gap_disc; reason=%d  active %d\n", rc, ble_gap_disc_active());
     if (rc != 0)
     {
@@ -135,7 +135,7 @@ Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_Advertisement_Bluetoot
                 NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance(
                     pThis[FIELD___rawAdvertData],
                     gEvent->disc.length_data,
-                    g_CLR_RT_WellKnownTypes.m_UInt8));
+                    g_CLR_RT_WellKnownTypes.UInt8));
 
                 buffer = pThis[FIELD___rawAdvertData].DereferenceArray()->GetFirstElement();
                 memcpy(buffer, gEvent->disc.data, gEvent->disc.length_data);

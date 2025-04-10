@@ -19,7 +19,7 @@ uint64_t  HAL_Time_CurrentDateTime(bool datePartOnly)
  
     struct timeval tv;
 
-    gettimeofday(&tv, NULL);
+    gettimeofday(&tv, nullptr);
 
     // Convert from Unix time(year since 1900) to SYSTEMTIME(Years since 1601)
 	int64_t time = ((int64_t)tv.tv_sec * (int64_t)TIME_CONVERSION__TO_SECONDS) + ((int64_t)tv.tv_usec * (int64_t)TIME_CONVERSION__TO_USECS) + TIME_UNIX_EPOCH_AS_TICKS;
@@ -58,7 +58,7 @@ void HAL_Time_SetUtcTime(uint64_t utcTime)
 
     time_t t = mktime(&newTime);
     struct timeval now = { .tv_sec = t, .tv_usec = 0 };
-    settimeofday(&now, NULL);
+    settimeofday(&now, nullptr);
 }
 
 bool HAL_Time_TimeSpanToStringEx( const int64_t& ticks, char*& buf, size_t& len )

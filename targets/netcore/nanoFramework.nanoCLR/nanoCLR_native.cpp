@@ -44,15 +44,15 @@
 
 #endif
 
-DebugPrintCallback gDebugPrintCallback = NULL;
+DebugPrintCallback gDebugPrintCallback = nullptr;
 
 #if defined(VIRTUAL_DEVICE)
-ProfilerMessageCallback g_ProfilerMessageCallback = NULL;
-ProfilerDataCallback g_ProfilerDataCallback = NULL;
+ProfilerMessageCallback g_ProfilerMessageCallback = nullptr;
+ProfilerDataCallback g_ProfilerDataCallback = nullptr;
 #endif
 
-WireTransmitCallback WireProtocolTransmitCallback = NULL;
-WireReceiveCallback WireProtocolReceiveCallback = NULL;
+WireTransmitCallback WireProtocolTransmitCallback = nullptr;
+WireReceiveCallback WireProtocolReceiveCallback = nullptr;
 
 // flag requesting stopping of WP processing
 bool _wireProtocolStopProcess;
@@ -216,16 +216,16 @@ bool nanoCLR_GetNativeAssemblyInformation(const CLR_UINT8 *data, size_t size)
         memcpy((void *)data, &g_CLR_InteropAssembliesNativeData[i]->m_checkSum, sizeof(CLR_UINT32));
         data += sizeof(CLR_UINT32);
 
-        memcpy((void *)data, &g_CLR_InteropAssembliesNativeData[i]->m_Version.iMajorVersion, sizeof(CLR_UINT16));
+        memcpy((void *)data, &g_CLR_InteropAssembliesNativeData[i]->m_Version.majorVersion, sizeof(CLR_UINT16));
         data += sizeof(CLR_UINT16);
 
-        memcpy((void *)data, &g_CLR_InteropAssembliesNativeData[i]->m_Version.iMinorVersion, sizeof(CLR_UINT16));
+        memcpy((void *)data, &g_CLR_InteropAssembliesNativeData[i]->m_Version.minorVersion, sizeof(CLR_UINT16));
         data += sizeof(CLR_UINT16);
 
-        memcpy((void *)data, &g_CLR_InteropAssembliesNativeData[i]->m_Version.iBuildNumber, sizeof(CLR_UINT16));
+        memcpy((void *)data, &g_CLR_InteropAssembliesNativeData[i]->m_Version.buildNumber, sizeof(CLR_UINT16));
         data += sizeof(CLR_UINT16);
 
-        memcpy((void *)data, &g_CLR_InteropAssembliesNativeData[i]->m_Version.iRevisionNumber, sizeof(CLR_UINT16));
+        memcpy((void *)data, &g_CLR_InteropAssembliesNativeData[i]->m_Version.revisionNumber, sizeof(CLR_UINT16));
         data += sizeof(CLR_UINT16);
 
         hal_strcpy_s((char *)data, 128, g_CLR_InteropAssembliesNativeData[i]->m_szAssemblyName);

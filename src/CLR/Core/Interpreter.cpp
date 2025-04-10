@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (c) .NET Foundation and Contributors
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
@@ -82,7 +82,7 @@ bool CLR_RT_HeapBlock::InitObject()
 {
     NATIVE_PROFILE_CLR_CORE();
     CLR_RT_HeapBlock *obj = this;
-    CLR_DataType dt = obj->DataType();
+    NanoCLRDataType dt = obj->DataType();
     const CLR_RT_DataTypeLookup &dtl = c_CLR_RT_DataTypeLookup[dt];
 
     if (dtl.m_flags & CLR_RT_DataTypeLookup::c_OptimizedValueType)
@@ -112,7 +112,7 @@ bool CLR_RT_HeapBlock::InitObject()
         if (ptr->InitObject() == false)
             return false;
 
-        obj->SetObjectReference(NULL);
+        obj->SetObjectReference(nullptr);
     }
 
     return true;
@@ -120,12 +120,12 @@ bool CLR_RT_HeapBlock::InitObject()
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-HRESULT CLR_RT_HeapBlock::Convert_Internal(CLR_DataType et)
+HRESULT CLR_RT_HeapBlock::Convert_Internal(NanoCLRDataType et)
 {
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
 
-    CLR_DataType dt = DataType();
+    NanoCLRDataType dt = DataType();
     const CLR_RT_DataTypeLookup &dtlSrc = c_CLR_RT_DataTypeLookup[dt];
     const CLR_RT_DataTypeLookup &dtlDst = c_CLR_RT_DataTypeLookup[et];
     int scaleIn;
@@ -424,17 +424,17 @@ bool CLR_RT_Thread::FindEhBlock(
     bool onlyFinallys)
 {
     NATIVE_PROFILE_CLR_CORE();
-    CLR_RT_Assembly *assm = stack->m_call.m_assm;
-    CLR_RT_ExceptionHandler *ptrEhExt = NULL;
-    const CLR_RECORD_EH *ptrEh = NULL;
+    CLR_RT_Assembly *assm = stack->m_call.assembly;
+    CLR_RT_ExceptionHandler *ptrEhExt = nullptr;
+    const CLR_RECORD_EH *ptrEh = nullptr;
     CLR_UINT32 numEh = 0;
 
-    // FROM is always non-NULL and indicates the current IP
+    // FROM is always non-nullptr and indicates the current IP
     _ASSERTE(from);
-    // onlyFinallys is false when we're searching for a handler for an exception, and to should be NULL
-    _ASSERTE(FIMPLIES(!onlyFinallys, to == NULL));
-    // onlyFinallys is true in Phase2, endfinally, leave, etc. to is NULL when we want to leave outside of the current
-    // stack frame, or non-NULL and pointing to an IL instruction that we are going to when finally's, if any, are
+    // onlyFinallys is false when we're searching for a handler for an exception, and to should be nullptr
+    _ASSERTE(FIMPLIES(!onlyFinallys, to == nullptr));
+    // onlyFinallys is true in Phase2, endfinally, leave, etc. to is nullptr when we want to leave outside of the current
+    // stack frame, or non-nullptr and pointing to an IL instruction that we are going to when finally's, if any, are
     // processed.
 
 #if defined(NANOCLR_TRACE_EXCEPTIONS)
@@ -443,13 +443,13 @@ bool CLR_RT_Thread::FindEhBlock(
         if (!onlyFinallys || s_CLR_RT_fTrace_Exceptions >= c_CLR_RT_Trace_Obnoxious)
         {
             CLR_Debug::Printf("Unwinding at ");
-            CLR_RT_DUMP::METHOD(stack->m_call);
+            CLR_RT_DUMP::METHOD(stack->m_call, nullptr);
             CLR_Debug::Printf(" [IP: %04x - %d]\r\n", (size_t)stack->m_IP, (stack->m_IP - stack->m_IPstart));
         }
     }
 #endif
 
-    if (stack->m_call.m_target->flags & CLR_RECORD_METHODDEF::MD_HasExceptionHandlers)
+    if (stack->m_call.target->flags & CLR_RECORD_METHODDEF::MD_HasExceptionHandlers)
     {
         switch (stack->m_flags & CLR_RT_StackFrame::c_MethodKind_Mask)
         {
@@ -476,7 +476,7 @@ bool CLR_RT_Thread::FindEhBlock(
                     return false;
                 }
 
-                ptrEhExt = NULL;
+                ptrEhExt = nullptr;
             }
             break;
 
@@ -499,7 +499,7 @@ bool CLR_RT_Thread::FindEhBlock(
 #if defined(NANOCLR_TRACE_EXCEPTIONS)
             if (CLR_EE_DBG_IS_NOT(NoStackTraceInExceptions) && s_CLR_RT_fTrace_Exceptions >= c_CLR_RT_Trace_Annoying)
             {
-                if (to == NULL || s_CLR_RT_fTrace_Exceptions >= c_CLR_RT_Trace_Obnoxious)
+                if (to == nullptr || s_CLR_RT_fTrace_Exceptions >= c_CLR_RT_Trace_Obnoxious)
                 {
                     CLR_Debug::Printf(
                         "Checking EH: %04X-%04X => %04X\r\n",
@@ -594,7 +594,7 @@ bool CLR_RT_Thread::FindEhBlock(
 #if defined(NANOCLR_TRACE_EXCEPTIONS)
     if (CLR_EE_DBG_IS_NOT(NoStackTraceInExceptions) && s_CLR_RT_fTrace_Exceptions >= c_CLR_RT_Trace_Annoying)
     {
-        if (to == NULL || s_CLR_RT_fTrace_Exceptions >= c_CLR_RT_Trace_Obnoxious)
+        if (to == nullptr || s_CLR_RT_fTrace_Exceptions >= c_CLR_RT_Trace_Obnoxious)
         {
             CLR_Debug::Printf("No match\r\n");
         }
@@ -619,7 +619,7 @@ HRESULT CLR_RT_Thread::Execute()
 
     g_CLR_RT_ExecutionEngine.m_currentThread = this;
 
-    if (m_currentException.Dereference() != NULL)
+    if (m_currentException.Dereference() != nullptr)
     {
         hr = CLR_E_PROCESS_EXCEPTION;
     }
@@ -661,19 +661,27 @@ HRESULT CLR_RT_Thread::Execute()
 
             default: // Allocate a new exception.
                 stack = CurrentFrame();
-                if (stack->Prev() != NULL)
+                if (stack->Prev() != nullptr)
                 {
-#if defined(NANOCLR_TRACE_INSTRUCTIONS) && defined(PLATFORM_WINDOWS_EMULATOR)
+#if defined(NANOCLR_TRACE_EXCEPTIONS) && defined(VIRTUAL_DEVICE)
                     for (int i = 0; i < ARRAYSIZE(s_track); i++)
                     {
-                        BackTrackExecution &track = s_track[(s_trackPos + i) % ARRAYSIZE(s_track)];
+                        BackTrackExecution &track = s_track[(s_trackPos + i - 1) % ARRAYSIZE(s_track)];
 
-                        CLR_Debug::Printf(" %3d ", track.m_depth);
+                        // check if there is a valid stack information
+                        if (track.m_assm != nullptr)
+                        {
+                            CLR_Debug::Printf(" %3d ", track.m_depth);
 
-                        CLR_RT_MethodDef_Instance inst;
-                        inst.InitializeFromIndex(track.m_call);
+                            CLR_RT_MethodDef_Instance inst;
+                            inst.InitializeFromIndex(track.m_call);
 
-                        // track.m_assm->DumpOpcodeDirect( inst, track.m_IP, track.m_IPstart, track.m_pid );
+                            track.m_assm->DumpOpcodeDirect(inst, track.m_IP, track.m_IPstart, track.m_pid);
+                        }
+                        else
+                        {
+                            break;
+                        }
                     }
 
                     CLR_Debug::Printf("\r\n");
@@ -702,7 +710,7 @@ HRESULT CLR_RT_Thread::Execute()
             break;
 #endif // #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
 
-        if (m_currentException.Dereference() != NULL)
+        if (m_currentException.Dereference() != nullptr)
         {
             break;
         }
@@ -718,7 +726,7 @@ HRESULT CLR_RT_Thread::Execute()
 
     g_CLR_RT_ExecutionEngine.m_currentThread = currentThreadSav;
 
-    ::Events_SetBoolTimer(NULL, 0);
+    ::Events_SetBoolTimer(nullptr, 0);
 
     NANOCLR_CLEANUP_END();
 }
@@ -739,7 +747,7 @@ HRESULT CLR_RT_Thread::Execute_Inner()
         }
 #endif
 
-        if (stack->Prev() == NULL)
+        if (stack->Prev() == nullptr)
         {
             m_status = CLR_RT_Thread::TH_S_Terminated;
 
@@ -844,7 +852,7 @@ HRESULT CLR_RT_Thread::Execute_Inner()
                 }
 
                 // check for exception injected by native code
-                if (m_currentException.Dereference() != NULL)
+                if (m_currentException.Dereference() != nullptr)
                 {
                     hr = CLR_E_PROCESS_EXCEPTION;
                 }
@@ -852,7 +860,7 @@ HRESULT CLR_RT_Thread::Execute_Inner()
                 // The inner loop may push or pop more stack frames
                 stack = CurrentFrame();
 
-                if (stack->Prev() == NULL)
+                if (stack->Prev() == nullptr)
                 {
                     m_status = CLR_RT_Thread::TH_S_Terminated;
 
@@ -932,7 +940,7 @@ HRESULT CLR_RT_Thread::Execute_DelegateInvoke(CLR_RT_StackFrame &stackArg)
     dlg = ptr->DereferenceDelegate();
     FAULT_ON_NULL(dlg);
 
-    md = stack->m_call.m_target;
+    md = stack->m_call.target;
 
     switch (dlg->DataType())
     {
@@ -963,7 +971,7 @@ HRESULT CLR_RT_Thread::Execute_DelegateInvoke(CLR_RT_StackFrame &stackArg)
 
         dlg = array[stack->m_customState++].DereferenceDelegate();
 
-        if (dlg == NULL || dlg->DataType() != DATATYPE_DELEGATE_HEAD)
+        if (dlg == nullptr || dlg->DataType() != DATATYPE_DELEGATE_HEAD)
             continue;
 
         break;
@@ -977,10 +985,13 @@ HRESULT CLR_RT_Thread::Execute_DelegateInvoke(CLR_RT_StackFrame &stackArg)
         CLR_RT_ProtectFromGC gc(*dlg);
         CLR_RT_MethodDef_Instance inst{};
         inst.InitializeFromIndex(dlg->DelegateFtn());
-        bool fStaticMethod = (inst.m_target->flags & CLR_RECORD_METHODDEF::MD_Static) != 0;
+        bool fStaticMethod = (inst.target->flags & CLR_RECORD_METHODDEF::MD_Static) != 0;
 
-        NANOCLR_CHECK_HRESULT(
-            stack->MakeCall(inst, fStaticMethod ? NULL : &dlg->m_object, &stack->m_arguments[1], md->numArgs - 1));
+        NANOCLR_CHECK_HRESULT(stack->MakeCall(
+            inst,
+            fStaticMethod ? nullptr : &dlg->m_object,
+            &stack->m_arguments[1],
+            md->argumentsCount - 1));
     }
 
     NANOCLR_NOCLEANUP();
@@ -994,7 +1005,7 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
     CLR_RT_StackFrame *stack = &stackArg;
 
     CLR_RT_Thread *th = stack->m_owningThread;
-    CLR_RT_Assembly *assm = stack->m_call.m_assm;
+    CLR_RT_Assembly *assm = stack->m_call.assembly;
     CLR_RT_HeapBlock *evalPos;
     CLR_PMETADATA ip;
     bool fCondition;
@@ -1332,7 +1343,7 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                     evalPos++;
                     CHECKSTACK(stack, evalPos);
 
-                    evalPos[0].SetObjectReference(NULL);
+                    evalPos[0].SetObjectReference(nullptr);
                     break;
                 }
 
@@ -2094,17 +2105,20 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
 
                     CLR_RT_MethodDef_Instance calleeInst{};
                     if (calleeInst.ResolveToken(arg, assm) == false)
+                    {
                         NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+                    }
+
                     CLR_RT_TypeDef_Index cls;
                     CLR_RT_HeapBlock *pThis;
 #if defined(NANOCLR_APPDOMAINS)
                     bool fAppDomainTransition = false;
 #endif
 
-                    pThis = &evalPos[1 - calleeInst.m_target->numArgs]; // Point to the first arg, 'this' if an instance
-                                                                        // method
+                    pThis = &evalPos[1 - calleeInst.target->argumentsCount]; // Point to the first arg, 'this' if an
+                                                                             // instance method
 
-                    if (calleeInst.m_target->flags & CLR_RECORD_METHODDEF::MD_DelegateInvoke)
+                    if (calleeInst.target->flags & CLR_RECORD_METHODDEF::MD_DelegateInvoke)
                     {
                         CLR_RT_HeapBlock_Delegate *dlg = pThis->DereferenceDelegate();
                         FAULT_ON_NULL(dlg);
@@ -2113,7 +2127,7 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                         {
                             calleeInst.InitializeFromIndex(dlg->DelegateFtn());
 
-                            if ((calleeInst.m_target->flags & CLR_RECORD_METHODDEF::MD_Static) == 0)
+                            if ((calleeInst.target->flags & CLR_RECORD_METHODDEF::MD_Static) == 0)
                             {
                                 pThis->Assign(dlg->m_object);
 
@@ -2126,7 +2140,7 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                                 memmove(
                                     &pThis[0],
                                     &pThis[1],
-                                    calleeInst.m_target->numArgs * sizeof(struct CLR_RT_HeapBlock));
+                                    calleeInst.target->argumentsCount * sizeof(struct CLR_RT_HeapBlock));
 
                                 evalPos--;
                             }
@@ -2142,11 +2156,11 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                     {
                         CLR_RT_MethodDef_Index calleeReal;
 
-                        if ((calleeInst.m_target->flags & CLR_RECORD_METHODDEF::MD_Static) == 0)
+                        if ((calleeInst.target->flags & CLR_RECORD_METHODDEF::MD_Static) == 0)
                         {
                             // Instance method, pThis[ 0 ] is valid
 
-                            if (op == CEE_CALL && pThis[0].Dereference() == NULL)
+                            if (op == CEE_CALL && pThis[0].Dereference() == nullptr)
                             {
                                 // CALL on a null instance is allowed, and should not throw a NullReferenceException on
                                 // the call although a NullReferenceException is likely to be thrown soon thereafter if
@@ -2157,11 +2171,11 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                                 NANOCLR_CHECK_HRESULT(CLR_RT_TypeDescriptor::ExtractTypeIndexFromObject(pThis[0], cls));
 
                                 // This test is for performance reasons.  c# emits a callvirt on all instance methods to
-                                // make sure that a NullReferenceException is thrown if 'this' is NULL.  However, if the
+                                // make sure that a NullReferenceException is thrown if 'this' is nullptr.  However, if the
                                 // instance method isn't virtual we don't need to do the more expensive virtual method
                                 // lookup.
                                 if (op == CEE_CALLVIRT &&
-                                    (calleeInst.m_target->flags &
+                                    (calleeInst.target->flags &
                                      (CLR_RECORD_METHODDEF::MD_Abstract | CLR_RECORD_METHODDEF::MD_Virtual)))
                                 {
                                     if (g_CLR_RT_EventCache.FindVirtualMethod(cls, calleeInst, calleeReal) == false)
@@ -2184,7 +2198,7 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                     {
                         WRITEBACK(stack, evalPos, ip, fDirty);
 
-                        _ASSERTE(FIMPLIES(pThis->DataType() == DATATYPE_OBJECT, pThis->Dereference() != NULL));
+                        _ASSERTE(FIMPLIES(pThis->DataType() == DATATYPE_OBJECT, pThis->Dereference() != nullptr));
                         NANOCLR_CHECK_HRESULT(
                             CLR_RT_StackFrame::PushAppDomainTransition(th, calleeInst, &pThis[0], &pThis[1]));
                     }
@@ -2217,7 +2231,7 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                         stack->PopInline();
 
                         ip = stack->m_IP;
-                        assm = stack->m_call.m_assm;
+                        assm = stack->m_call.assembly;
                         evalPos = stack->m_evalStackPos - 1;
                         fDirty = true;
 
@@ -2275,13 +2289,13 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                     CLR_RT_TypeDef_Instance type{};
                     CLR_RT_TypeDef_Index cls;
 
-                    if (type.ResolveToken(arg, assm) == false)
+                    if (type.ResolveToken(arg, assm, &stack->m_call) == false)
                         NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
 
                     NANOCLR_CHECK_HRESULT(CLR_RT_TypeDescriptor::ExtractTypeIndexFromObject(evalPos[0], cls));
 
                     // Check this is an object of the requested type.
-                    if (type.m_data != cls.m_data)
+                    if (type.data != cls.data)
                     {
                         NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
                     }
@@ -2327,7 +2341,10 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
 
                     CLR_RT_MethodDef_Instance calleeInst{};
                     if (calleeInst.ResolveToken(arg, assm) == false)
+                    {
                         NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+                    }
+
                     CLR_RT_TypeDef_Instance cls{};
                     CLR_RT_HeapBlock *top;
                     CLR_INT32 changes;
@@ -2338,13 +2355,13 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
 
                     WRITEBACK(stack, evalPos, ip, fDirty);
 
-                    if (cls.m_target->IsDelegate())
+                    if (cls.target->IsDelegate())
                     {
                         //
                         // Special case for delegates. LDFTN or LDVIRTFTN have already created the delegate object, just
                         // check that...
                         //
-                        changes = -calleeInst.m_target->numArgs;
+                        changes = -calleeInst.target->argumentsCount;
                         NANOCLR_CHECK_HRESULT(CLR_Checks::VerifyStackOK(
                             *stack,
                             stack->m_evalStackPos,
@@ -2360,7 +2377,7 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
 
                         CLR_RT_HeapBlock_Delegate *dlg = top[1].DereferenceDelegate();
 
-                        if (dlg == NULL)
+                        if (dlg == nullptr)
                         {
                             NANOCLR_CHECK_HRESULT(CLR_E_NULL_REFERENCE);
                         }
@@ -2374,7 +2391,7 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                             NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
                         }
 
-                        if ((dlgInst.m_target->flags & CLR_RECORD_METHODDEF::MD_Static) == 0)
+                        if ((dlgInst.target->flags & CLR_RECORD_METHODDEF::MD_Static) == 0)
                         {
                             dlg->m_object.Assign(top[0]);
                         }
@@ -2383,7 +2400,7 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                     }
                     else
                     {
-                        changes = calleeInst.m_target->numArgs;
+                        changes = calleeInst.target->argumentsCount;
                         NANOCLR_CHECK_HRESULT(CLR_Checks::VerifyStackOK(
                             *stack,
                             stack->m_evalStackPos,
@@ -2400,13 +2417,21 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                             top[0].Assign(top[-1]);
                             top--;
                         }
-                        top->SetObjectReference(NULL);
+                        top->SetObjectReference(nullptr);
 
                         // Stack: ... <null> <arg1> <arg2> ... <argN> -> ...
                         //            ^
                         //            Top points here.
 
-                        NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObject(top[0], cls));
+                        if (calleeInst.genericType == nullptr)
+                        {
+                            NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObject(top[0], cls));
+                        }
+                        else
+                        {
+                            NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine
+                                                      .NewGenericInstanceObject(top[0], cls, *calleeInst.genericType));
+                        }
 
                         //
                         // This is to flag the fact that we need to copy back the 'this' pointer into our stack.
@@ -2423,7 +2448,7 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                         //
                         // See CLR_RT_StackFrame::Pop()
                         //
-                        if ((cls.m_target->flags & CLR_RECORD_TYPEDEF::TD_Semantics_Mask) ==
+                        if ((cls.target->flags & CLR_RECORD_TYPEDEF::TD_Semantics_Mask) ==
                             CLR_RECORD_TYPEDEF::TD_Semantics_ValueType)
                         {
                             if (top[0].DataType() == DATATYPE_OBJECT)
@@ -2440,7 +2465,7 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                                 //
                                 top = stack->m_evalStackPos++;
 
-                                changes = calleeInst.m_target->numArgs;
+                                changes = calleeInst.target->argumentsCount;
                                 while (--changes > 0)
                                 {
                                     top[0].Assign(top[-1]);
@@ -2507,7 +2532,7 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                     if (fieldInst.ResolveToken(arg, assm) == false)
                         NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
                     CLR_RT_HeapBlock *obj = &evalPos[0];
-                    CLR_DataType dt = obj->DataType();
+                    NanoCLRDataType dt = obj->DataType();
 
                     NANOCLR_CHECK_HRESULT(CLR_RT_TypeDescriptor::ExtractObjectAndDataType(obj, dt));
 
@@ -2515,7 +2540,7 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                     {
                         case DATATYPE_CLASS:
                         case DATATYPE_VALUETYPE:
-                            evalPos[0].Assign(obj[fieldInst.CrossReference().m_offset]);
+                            evalPos[0].Assign(obj[fieldInst.CrossReference().offset]);
                             goto Execute_LoadAndPromote;
                         case DATATYPE_DATETIME:
                         case DATATYPE_TIMESPAN:
@@ -2557,7 +2582,7 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                     if (fieldInst.ResolveToken(arg, assm) == false)
                         NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
                     CLR_RT_HeapBlock *obj = &evalPos[0];
-                    CLR_DataType dt = obj->DataType();
+                    NanoCLRDataType dt = obj->DataType();
 
                     NANOCLR_CHECK_HRESULT(CLR_RT_TypeDescriptor::ExtractObjectAndDataType(obj, dt));
 
@@ -2566,7 +2591,7 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
 #endif
                     if (dt == DATATYPE_CLASS || dt == DATATYPE_VALUETYPE)
                     {
-                        evalPos[0].SetReference(obj[fieldInst.CrossReference().m_offset]);
+                        evalPos[0].SetReference(obj[fieldInst.CrossReference().offset]);
                     }
                     else if (dt == DATATYPE_DATETIME || dt == DATATYPE_TIMESPAN) // Special case.
                     {
@@ -2592,9 +2617,12 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
 
                     CLR_RT_FieldDef_Instance fieldInst;
                     if (fieldInst.ResolveToken(arg, assm) == false)
+                    {
                         NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+                    }
+
                     CLR_RT_HeapBlock *obj = &evalPos[1];
-                    CLR_DataType dt = obj->DataType();
+                    NanoCLRDataType dt = obj->DataType();
 
                     NANOCLR_CHECK_HRESULT(CLR_RT_TypeDescriptor::ExtractObjectAndDataType(obj, dt));
 
@@ -2602,7 +2630,8 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                     {
                         case DATATYPE_CLASS:
                         case DATATYPE_VALUETYPE:
-                            obj[fieldInst.CrossReference().m_offset].AssignAndPreserveType(evalPos[2]);
+                        case DATATYPE_GENERICINST:
+                            obj[fieldInst.CrossReference().offset].AssignAndPreserveType(evalPos[2]);
                             break;
                         case DATATYPE_DATETIME: // Special case.
                         case DATATYPE_TIMESPAN: // Special case.
@@ -2642,11 +2671,16 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
 
                     CLR_RT_FieldDef_Instance field;
                     if (field.ResolveToken(arg, assm) == false)
+                    {
                         NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+                    }
 
                     CLR_RT_HeapBlock *ptr = CLR_RT_ExecutionEngine::AccessStaticField(field);
-                    if (ptr == NULL)
+
+                    if (ptr == nullptr)
+                    {
                         NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+                    }
 
                     evalPos++;
                     CHECKSTACK(stack, evalPos);
@@ -2668,8 +2702,11 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                         NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
 
                     CLR_RT_HeapBlock *ptr = CLR_RT_ExecutionEngine::AccessStaticField(field);
-                    if (ptr == NULL)
+
+                    if (ptr == nullptr)
+                    {
                         NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+                    }
 
                     evalPos++;
                     CHECKSTACK(stack, evalPos);
@@ -2690,8 +2727,11 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                         NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
 
                     CLR_RT_HeapBlock *ptr = CLR_RT_ExecutionEngine::AccessStaticField(field);
-                    if (ptr == NULL)
+
+                    if (ptr == nullptr)
+                    {
                         NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+                    }
 
                     evalPos--;
                     CHECKSTACK(stack, evalPos);
@@ -2708,8 +2748,10 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                     FETCH_ARG_COMPRESSED_TYPETOKEN(arg, ip);
 
                     CLR_RT_TypeDef_Instance typeInst{};
-                    if (typeInst.ResolveToken(arg, assm) == false)
+                    if (typeInst.ResolveToken(arg, assm, &stack->m_call) == false)
+                    {
                         NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+                    }
 
                     UPDATESTACK(stack, evalPos);
 
@@ -2737,14 +2779,14 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                     // castclass typeTok.
 
                     CLR_RT_TypeDef_Instance typeInst{};
-                    if (typeInst.ResolveToken(arg, assm) == false)
+                    if (typeInst.ResolveToken(arg, assm, &stack->m_call) == false)
                         NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
 
                     UPDATESTACK(stack, evalPos);
 
-                    if (((typeInst.m_target->flags & CLR_RECORD_TYPEDEF::TD_Semantics_Mask) ==
+                    if (((typeInst.target->flags & CLR_RECORD_TYPEDEF::TD_Semantics_Mask) ==
                          CLR_RECORD_TYPEDEF::TD_Semantics_ValueType) ||
-                        ((typeInst.m_target->flags & CLR_RECORD_TYPEDEF::TD_Semantics_Mask) ==
+                        ((typeInst.target->flags & CLR_RECORD_TYPEDEF::TD_Semantics_Mask) ==
                          CLR_RECORD_TYPEDEF::TD_Semantics_Enum))
                     {
                         //"unbox"
@@ -2895,13 +2937,13 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                     CLR_RT_TypeDef_Instance type{};
                     CLR_RT_TypeDef_Index cls;
 
-                    if (!type.ResolveToken(arg, assm))
+                    if (!type.ResolveToken(arg, assm, &stack->m_call))
                         NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
 
                     NANOCLR_CHECK_HRESULT(CLR_RT_TypeDescriptor::ExtractTypeIndexFromObject(evalPos[0], cls));
 
                     // Check this is an object of the requested type.
-                    if (type.m_data != cls.m_data)
+                    if (type.data != cls.data)
                         NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
 
                     UPDATESTACK(stack, evalPos);
@@ -3080,7 +3122,7 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                     evalPos++;
                     CHECKSTACK(stack, evalPos);
 
-                    evalPos[0].SetObjectReference(NULL);
+                    evalPos[0].SetObjectReference(nullptr);
 
                     switch (CLR_TypeFromTk(arg))
                     {
@@ -3098,7 +3140,7 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                         case TBL_TypeDef:
                         {
                             CLR_RT_TypeDef_Instance cls{};
-                            if (cls.ResolveToken(arg, assm) == false)
+                            if (cls.ResolveToken(arg, assm, &stack->m_call) == false)
                                 NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
 
                             evalPos[0].SetReflection(cls);
@@ -3127,6 +3169,18 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                         }
                         break;
 
+                        case TBL_GenericParam:
+                        {
+                            CLR_RT_GenericParam_Instance param;
+                            if (param.ResolveToken(arg, assm) == false)
+                            {
+                                NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+                            }
+
+                            evalPos[0].SetReflection(param);
+                        }
+                        break;
+
                         default:
                             NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
                             break;
@@ -3143,7 +3197,7 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
 
                     NANOCLR_CHECK_HRESULT(th->ProcessException_EndFinally());
 
-                    _ASSERTE(th->m_currentException.Dereference() == NULL);
+                    _ASSERTE(th->m_currentException.Dereference() == nullptr);
                     stack = th->CurrentFrame();
                     goto Execute_Reload;
                 }
@@ -3178,7 +3232,7 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                             _ASSERTE(us);
 
                             us->m_stack = stack;
-                            us->m_exception = NULL;
+                            us->m_exception = nullptr;
                             us->m_ip = ipLeave;
                             us->m_currentBlockStart = eh.m_handlerStart;
                             us->m_currentBlockEnd = eh.m_handlerEnd;
@@ -3192,11 +3246,11 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
 
                         if (th->m_flags & CLR_RT_Thread::TH_F_Aborted)
                         {
-                            _ASSERTE(th->m_currentException.Dereference() == NULL);
+                            _ASSERTE(th->m_currentException.Dereference() == nullptr);
 
                             (void)Library_corlib_native_System_Exception::CreateInstance(
                                 th->m_currentException,
-                                g_CLR_RT_WellKnownTypes.m_ThreadAbortException,
+                                g_CLR_RT_WellKnownTypes.ThreadAbortException,
                                 S_OK,
                                 stack);
 
@@ -3355,18 +3409,18 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                     FETCH_ARG_COMPRESSED_TYPETOKEN(arg, ip);
 
                     CLR_RT_TypeDef_Instance clsInst{};
-                    if (clsInst.ResolveToken(arg, assm) == false)
+                    if (clsInst.ResolveToken(arg, assm, &stack->m_call) == false)
                         NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
                     CLR_INT32 len;
 
-                    if (clsInst.m_target->dataType)
+                    if (clsInst.target->dataType)
                     {
                         len = sizeof(struct CLR_RT_HeapBlock);
                     }
                     else
                     {
-                        len = (CLR_RT_HeapBlock::HB_Object_Fields_Offset + clsInst.CrossReference().m_totalFields) *
-                              sizeof(struct CLR_RT_HeapBlock);
+                        len = (CLR_RT_HeapBlock::HB_Object_Fields_Offset + clsInst.CrossReference().totalFields) *
+                              sizeof(CLR_RT_HeapBlock);
                     }
 
                     evalPos++;
@@ -3599,7 +3653,7 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
         {
             stack->m_flags |= CLR_RT_StackFrame::c_ExecutingIL;
 
-            assm = stack->m_call.m_assm;
+            assm = stack->m_call.assembly;
 
             READCACHE(stack, evalPos, ip, fDirty);
             continue;

@@ -25,7 +25,7 @@ typedef Library_corlib_native_System_TimeSpan TimeSpan;
 // Maximum count value from driver
 #define MAX_COUNTER_VALUE 0x7fff
 
-// Pulse counter information entry held in "counterEntries" array when active, inactive entries will be NULL.
+// Pulse counter information entry held in "counterEntries" array when active, inactive entries will be nullptr.
 struct PulseCounterEntry
 {
     int8_t gpioPinA;
@@ -46,7 +46,7 @@ static IRAM_ATTR bool pcnt_callback_handler(
     void *user_ctx)
 {
     PulseCounterEntry *entry = counterEntries[(int)user_ctx];
-    if (entry != NULL)
+    if (entry != nullptr)
     {
         if (edata->watch_point_value == MAX_COUNTER_VALUE)
         {
@@ -69,7 +69,7 @@ static int FindFreeCounter(int gpioPinA, int gpioPinB)
 
     for (counterIndex = 0; counterIndex < PCNT_NUM_UNIT; counterIndex++)
     {
-        if (counterEntries[counterIndex] == NULL)
+        if (counterEntries[counterIndex] == nullptr)
         {
             PulseCounterEntry *counter = new PulseCounterEntry();
             counterEntries[counterIndex] = counter;
@@ -92,7 +92,7 @@ static int FindCounterForGpio(int gpioPin)
 
     for (counterIndex = 0; counterIndex < PCNT_NUM_UNIT; counterIndex++)
     {
-        if (counterEntries[counterIndex] != NULL && counterEntries[counterIndex]->gpioPinA == gpioPin)
+        if (counterEntries[counterIndex] != nullptr && counterEntries[counterIndex]->gpioPinA == gpioPin)
         {
             return counterIndex;
         }
@@ -110,7 +110,7 @@ static pcnt_unit_handle_t InitialiseCounter(int counterIndex)
 
     if (counterIndex >= SOC_PCNT_UNITS_PER_GROUP)
     {
-        return NULL;
+        return nullptr;
     }
 
     PulseCounterEntry *counter = counterEntries[counterIndex];
@@ -121,19 +121,19 @@ static pcnt_unit_handle_t InitialiseCounter(int counterIndex)
     unit_config.low_limit = -MAX_COUNTER_VALUE;
     unit_config.high_limit = MAX_COUNTER_VALUE;
 
-    counter->unitHandle = NULL;
+    counter->unitHandle = nullptr;
     ec = pcnt_new_unit(&unit_config, &counter->unitHandle);
     if (ec != ESP_OK)
     {
-        return NULL;
+        return nullptr;
     }
 
     pcnt_chan_config_t chan_config_a = {};
     chan_config_a.edge_gpio_num = counter->gpioPinA;
     chan_config_a.level_gpio_num = counter->gpioPinB;
 
-    counter->chanHandleA = NULL;
-    counter->chanHandleB = NULL;
+    counter->chanHandleA = nullptr;
+    counter->chanHandleB = nullptr;
 
     ec |= pcnt_new_channel(counter->unitHandle, &chan_config_a, &counter->chanHandleA);
 
@@ -156,7 +156,7 @@ static pcnt_unit_handle_t InitialiseCounter(int counterIndex)
     cbs.on_reach = pcnt_callback_handler;
     pcnt_unit_register_event_callbacks(counter->unitHandle, &cbs, (void *)counterIndex);
 
-    return (ec == ESP_OK) ? counter->unitHandle : NULL;
+    return (ec == ESP_OK) ? counter->unitHandle : nullptr;
 }
 
 static pcnt_unit_handle_t InitialiseEdgeAndActions(int counterIndex, GpioPulsePolarity polarity)
@@ -211,13 +211,13 @@ static pcnt_unit_handle_t InitialiseEdgeAndActions(int counterIndex, GpioPulsePo
             PCNT_CHANNEL_LEVEL_ACTION_INVERSE);
     }
 
-    return (ec == ESP_OK) ? counter->unitHandle : NULL;
+    return (ec == ESP_OK) ? counter->unitHandle : nullptr;
 }
 
 static void DisposeCounter(int counterIndex)
 {
     PulseCounterEntry *counter = counterEntries[counterIndex];
-    if (counter != NULL)
+    if (counter != nullptr)
     {
         pcnt_unit_disable(counter->unitHandle);
 
@@ -227,18 +227,18 @@ static void DisposeCounter(int counterIndex)
         pcnt_del_unit(counter->unitHandle);
 
         // delete channel A ?
-        if (counter->chanHandleA != NULL)
+        if (counter->chanHandleA != nullptr)
         {
             pcnt_del_channel(counter->chanHandleA);
         }
 
         // delete channel B ?
-        if (counter->chanHandleB != NULL)
+        if (counter->chanHandleB != nullptr)
         {
             pcnt_del_channel(counter->chanHandleB);
         }
 
-        counterEntries[counterIndex] = NULL;
+        counterEntries[counterIndex] = nullptr;
         delete counter;
     }
 }
@@ -247,7 +247,7 @@ void PulseCountUninitialize()
 {
     for (int counterIndex = 0; counterIndex < PCNT_NUM_UNIT; counterIndex++)
     {
-        if (counterEntries[counterIndex] != NULL)
+        if (counterEntries[counterIndex] != nullptr)
         {
             DisposeCounter(counterIndex);
         }
@@ -276,7 +276,7 @@ HRESULT Library_nanoFramework_hardware_esp32_native_System_Device_Gpio_GpioPulse
             // We need to initialize the array if it's the first one
             for (int i = 0; i < PCNT_NUM_UNIT; i++)
             {
-                counterEntries[i] = NULL;
+                counterEntries[i] = nullptr;
             }
         }
 
@@ -294,7 +294,7 @@ HRESULT Library_nanoFramework_hardware_esp32_native_System_Device_Gpio_GpioPulse
             NANOCLR_SET_AND_LEAVE(CLR_E_NOT_SUPPORTED);
         }
 
-        if (InitialiseCounter(counterIndex) == NULL)
+        if (InitialiseCounter(counterIndex) == nullptr)
         {
             DisposeCounter(counterIndex);
             NANOCLR_SET_AND_LEAVE(CLR_E_NOT_SUPPORTED);

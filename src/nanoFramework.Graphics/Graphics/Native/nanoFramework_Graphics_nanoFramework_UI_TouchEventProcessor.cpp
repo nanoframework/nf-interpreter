@@ -17,15 +17,15 @@ HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_TouchEventProcessor::
     CLR_UINT32 data1 = stack.Arg1().NumericByRef().u4;
     CLR_UINT32 numTouches = data1 >> 16;
     TouchPoint *touchPoint = (TouchPoint *)stack.Arg2().NumericByRef().u4;
-    CLR_RT_HeapBlock *touchEvent = NULL;
-    CLR_RT_HeapBlock_Array *touchInputArray = NULL;
-    CLR_RT_HeapBlock *touchInputObject = NULL;
+    CLR_RT_HeapBlock *touchEvent = nullptr;
+    CLR_RT_HeapBlock_Array *touchInputArray = nullptr;
+    CLR_RT_HeapBlock *touchInputObject = nullptr;
 
     // Create a nanoFramework.UI.TouchEvent object to return
     CLR_RT_HeapBlock &resultObject = stack.PushValue();
 
     NANOCLR_CHECK_HRESULT(
-        g_CLR_RT_ExecutionEngine.NewObjectFromIndex(resultObject, g_CLR_RT_WellKnownTypes.m_TouchEvent));
+        g_CLR_RT_ExecutionEngine.NewObjectFromIndex(resultObject, g_CLR_RT_WellKnownTypes.TouchEvent));
 
     touchEvent = resultObject.Dereference();
     if (!touchEvent)
@@ -46,7 +46,7 @@ HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_TouchEventProcessor::
     NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance(
         touchEvent[Library_nanoFramework_Graphics_nanoFramework_UI_TouchEvent::FIELD__Touches],
         numTouches,
-        g_CLR_RT_WellKnownTypes.m_TouchInput));
+        g_CLR_RT_WellKnownTypes.TouchInput));
 
     touchInputArray =
         touchEvent[Library_nanoFramework_Graphics_nanoFramework_UI_TouchEvent::FIELD__Touches].DereferenceArray();
@@ -59,7 +59,7 @@ HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_TouchEventProcessor::
     touchInputObject = (CLR_RT_HeapBlock *)touchInputArray->GetFirstElement();
     for (; numTouches > 0; --numTouches, touchInputObject++, touchPoint++)
     {
-        g_CLR_RT_ExecutionEngine.NewObjectFromIndex(*touchInputObject, g_CLR_RT_WellKnownTypes.m_TouchInput);
+        g_CLR_RT_ExecutionEngine.NewObjectFromIndex(*touchInputObject, g_CLR_RT_WellKnownTypes.TouchInput);
         CLR_RT_HeapBlock *touchInput = touchInputObject->Dereference();
         if (!touchInput)
         {

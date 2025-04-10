@@ -103,7 +103,7 @@ bool ConfigurationManager_GetConfigurationBlock(
     uint32_t configurationIndex)
 {
     int sizeOfBlock = 0;
-    uint8_t *blockAddress = NULL;
+    uint8_t *blockAddress = nullptr;
 
     // validate if the requested block exists
     // Count has to be non zero
@@ -113,7 +113,7 @@ bool ConfigurationManager_GetConfigurationBlock(
         if (g_TargetConfiguration.NetworkInterfaceConfigs->Count == 0)
         {
             // there is no network config block, init one with default settings
-            if (!InitialiseNetworkDefaultConfig(NULL, 0))
+            if (!InitialiseNetworkDefaultConfig(nullptr, 0))
             {
                 return FALSE;
             }
@@ -270,7 +270,7 @@ bool ConfigurationManager_StoreConfigurationBlock(
     }
 
     // copy the config block content to the config block storage
-    success = iMXRTFlexSPIDriver_Write(NULL, storageAddress, blockSize, (unsigned char *)configurationBlock, false);
+    success = iMXRTFlexSPIDriver_Write(nullptr, storageAddress, blockSize, (unsigned char *)configurationBlock, false);
 
     // enumeration is required after we are DONE with SUCCESSFULLY storing all the config chunks
     requiresEnumeration = (success && done);
@@ -308,7 +308,7 @@ UpdateConfigurationResult ConfigurationManager_UpdateConfigurationBlock(
     // allocate memory from CRT heap
     uint8_t *configSectorCopy = (uint8_t *)platform_malloc(sizeOfConfigSector);
 
-    if (configSectorCopy != NULL)
+    if (configSectorCopy != nullptr)
     {
         // copy config sector from flash to RAM
         memcpy(configSectorCopy, &__nanoConfig_start__, sizeOfConfigSector);
@@ -370,7 +370,7 @@ UpdateConfigurationResult ConfigurationManager_UpdateConfigurationBlock(
         }
 
         // erase config sector
-        if (iMXRTFlexSPIDriver_EraseBlock(NULL, (uint32_t)&__nanoConfig_start__) == TRUE)
+        if (iMXRTFlexSPIDriver_EraseBlock(nullptr, (uint32_t)&__nanoConfig_start__) == TRUE)
         {
             // flash block is erased
 
@@ -385,7 +385,7 @@ UpdateConfigurationResult ConfigurationManager_UpdateConfigurationBlock(
 
             // copy the config block copy back to the config block storage
             if (iMXRTFlexSPIDriver_Write(
-                    NULL,
+                    nullptr,
                     (uint32_t)&__nanoConfig_start__,
                     sizeOfConfigSector,
                     (unsigned char *)configSectorCopy,
