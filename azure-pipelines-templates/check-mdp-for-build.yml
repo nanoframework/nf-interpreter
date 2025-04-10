@@ -1,0 +1,75 @@
+# Copyright (c) .NET Foundation and Contributors
+# See LICENSE file in the project root for full license information.
+
+steps:
+  - task: PowerShell@2
+    displayName: Check MDP for build
+    condition: ne(variables['System.PullRequest.PullRequestId'], '')
+    inputs:
+      failOnStderr: false
+      targetType: "inline"
+      script: |
+
+        # compute authorization header in format "AUTHORIZATION: basic 'encoded token'"
+        # 'encoded token' is the Base64 of the string "nfbot:personal-token"
+        $auth = "basic $([System.Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes("nfbot:$(GitHubToken)")))"
+
+        # find PR
+        "Getting PR#$env:System_PullRequest_PullRequestNumber details..." | Write-Host -ForegroundColor White -NoNewline
+        $pr = Invoke-WebRequest "https://api.github.com/repos/$env:Build_Repository_Name/pulls/$env:System_PullRequest_PullRequestNumber" | ConvertFrom-Json
+
+        if($($pr.number) -eq "$env:System_PullRequest_PullRequestNumber")
+        {
+          '##[command] OK' | Write-Host -ForegroundColor Green
+        }
+
+        # grab PR commit message
+        $prCommitMessage = $($pr.body)
+
+        # look for test prompt in PR commit message
+        # pattern is "[build with MDP buildId NNN]"
+
+        if($prCommitMessage -match "\[build with MDP buildId (\d+)\]")
+        {
+          $buildId = $matches[1]
+          "AZDO build ID found: $buildId" | Write-Host -ForegroundColor White
+
+          echo "##vso[task.setvariable variable=MDP_BUILDID]$buildId"
+        }
+        else
+        {
+          "No build ID found" | Write-Host -ForegroundColor Red
+        }
+    env:
+      GITHUB_TOKEN: $(GitHubToken)
+
+  - task: DownloadPipelineArtifact@2
+    condition: >-
+      and(
+        eq(variables['DownloadMDP'], true),
+        ne(variables['MDP_BUILDID'], '')
+      )
+    displayName: Download MDP
+    inputs:
+      buildType: specific
+      project: 'metadata-processor'
+      definition: '43'
+      buildVersionToDownload: specific
+      allowFailedBuilds: true
+      pipelineId: $(MDP_BUILDID)
+      artifactName: 'deployables'
+      targetPath: '$(Pipeline.Workspace)/mdp'
+      itemPattern: '*.MsBuildTask.dll'
+
+  - task: PowerShell@2
+    condition: >-
+      and(
+        succeeded(),
+        eq(variables['DownloadNanoClrPreview'], true),
+        ne(variables['MDP_BUILDID'], '')
+      )
+    displayName: Set MDP path
+    inputs:
+      targetType: 'inline'
+      script: |
+        Write-Host "##vso[task.setvariable variable=NF_MDP_MSBUILDTASK_PATH]$(Pipeline.Workspace)/mdp/nanoFramework.Tools.MetadataProcessor.MsBuildTask.dll"

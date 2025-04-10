@@ -92,6 +92,10 @@ jobs:
             {
               Write-Host "##[command] **This is a PR build**"
 
+              # compute authorization header in format "AUTHORIZATION: basic 'encoded token'"
+              # 'encoded token' is the Base64 of the string "nfbot:personal-token"
+              $auth = "basic $([System.Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes("nfbot:$(GitHubToken)")))"
+
               $commit = Invoke-RestMethod -Uri "https://api.github.com/repos/nanoframework/nf-interpreter/commits/$(Build.SourceVersion)" -ContentType "application/json" -Method GET
 
               if( ($commit.commit.author.name -eq "nfbot") -and ($commit.commit.message -like "*[version update]*") )
@@ -104,11 +108,33 @@ jobs:
                 echo "##vso[task.setvariable variable=SKIP_BUILD;isOutput=true]false"  
               }
 
-              # check if Unit Tests for mscorlib should be run
-              if(($commit.commit.message -like "*[run mscorlib tests]*") -or ($commit.commit.message -match "Tested against nanoframework/CoreLibrary#(\d+)"))
+              # find PR
+              "Getting PR#$env:System_PullRequest_PullRequestNumber details..." | Write-Host -ForegroundColor White -NoNewline
+              $pr = Invoke-WebRequest "https://api.github.com/repos/$env:Build_Repository_Name/pulls/$env:System_PullRequest_PullRequestNumber" | ConvertFrom-Json
+
+              if($($pr.number) -eq "$env:System_PullRequest_PullRequestNumber")
               {
-                Write-Host "##[command] **mscorlib tests are to be runned**"
+                '##[command] OK' | Write-Host -ForegroundColor Green
+              }
+
+              # grab PR commit message
+              $prCommitMessage = $($pr.body)
+
+              # debug output
+              # echo "=====`r`n$($prCommitMessage)`r`n====="
+
+              # check if Unit Tests for mscorlib should be run
+              if(($prCommitMessage  -like "*[run mscorlib tests]*") -or ($prCommitMessage -match "Tested against nanoframework/CoreLibrary#(\d+)"))
+              {
+                Write-Host "##[command] >> mscorlib tests are to be runned"
                 echo "##vso[task.setvariable variable=RUN_MSCORLIB_TESTS;isOutput=true]true"
+              }
+
+              # check if should use specific MDP for mscorlib
+              if($prCommitMessage  -match "\[build with MDP buildId (\d+)\]")
+              {
+                Write-Host "##[command] >> Using specific MDP for mscorlib build"
+                echo "##vso[task.setvariable variable=USE_SPECIFIC_MDP;isOutput=true]true"
               }
             }
             else
@@ -1241,6 +1267,7 @@ jobs:
 
     dependsOn:
       - Build_nanoCLR_CLI
+      - Check_Build_Options
 
     pool:
       vmImage: "windows-latest"
@@ -1250,6 +1277,7 @@ jobs:
       solution: "nanoFramework.CoreLibrary.sln"
       buildPlatform: "Any CPU"
       buildConfiguration: "Release"
+      DownloadMDP: $[ dependencies.Check_Build_Options.outputs['BuildOptions.USE_SPECIFIC_MDP'] ]
 
     steps:
       - checkout: self
@@ -1260,6 +1288,7 @@ jobs:
         persistCredentials: true
 
       - template: azure-pipelines-templates/check-mscorlib-to-test.yml
+      - template: azure-pipelines-templates/check-mdp-for-build.yml
 
       # Download nanoclr from build artifacts
       - task: DownloadBuildArtifacts@1
