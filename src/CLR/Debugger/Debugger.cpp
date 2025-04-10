@@ -3742,12 +3742,12 @@ bool CLR_DBG_Debugger::Debugging_Deployment_Status(WP_Message *msg)
 
         CLR_RT_Memory::Release(cmdReply);
 
-        WP_ReplyToCommand(msg, true, false, NULL, 0);
-
         return true;
     }
     else
     {
+        WP_ReplyToCommand(msg, true, false, NULL, 0);
+
         return false;
     }
 }
