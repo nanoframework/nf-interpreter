@@ -185,13 +185,13 @@ HRESULT FATFS_FS_Driver::GetSizeInfo(const VOLUME_ID *volume, int64_t *totalSize
     totalSectors = (fs.n_fatent - 2) * fs.csize;
     freeSectors = freeClusters * fs.csize;
 
-    #if FF_MAX_SS != FF_MIN_SS
-        *totalSize = (int64_t)totalSectors * fs.ssize;
-        *totalFreeSpace = (int64_t)freeSectors * fs.ssize;
-    #else
-        *totalSize = (int64_t)totalSectors * FF_MAX_SS;
-        *totalFreeSpace = (int64_t)freeSectors * FF_MAX_SS;
-    #endif
+#if FF_MAX_SS != FF_MIN_SS
+    *totalSize = (int64_t)totalSectors * fs.ssize;
+    *totalFreeSpace = (int64_t)freeSectors * fs.ssize;
+#else
+    *totalSize = (int64_t)totalSectors * FF_MAX_SS;
+    *totalFreeSpace = (int64_t)freeSectors * FF_MAX_SS;
+#endif
 
     return S_OK;
 }
