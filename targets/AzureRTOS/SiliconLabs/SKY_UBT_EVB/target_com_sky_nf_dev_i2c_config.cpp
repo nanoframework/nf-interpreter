@@ -33,4 +33,4 @@ I2C_CONFIG_PINS(1, gpioPortB, gpioPortB, 12, 11, 1, 1)
 // SDA: PC14
 
 // GPIO alternate pin function is 0 for both pins (see alternate function mapping table in device datasheet)
-// I2C_CONFIG_PINS(2, gpioPortC, gpioPortC, 15, 14, 1, 1)
+I2C_CONFIG_PINS(2, gpioPortC, gpioPortC, 15, 14, 1, 1)
