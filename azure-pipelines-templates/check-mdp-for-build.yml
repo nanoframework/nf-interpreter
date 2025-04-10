@@ -68,8 +68,26 @@ steps:
         eq(variables['DownloadMDP'], true),
         ne(variables['MDP_BUILDID'], '')
       )
-    displayName: Set MDP path
+    displayName: Copy MDP to build tool
     inputs:
       targetType: 'inline'
       script: |
-        Write-Host "##vso[task.setvariable variable=NF_MDP_MSBUILDTASK_PATH]$(Pipeline.Workspace)\mdp"
+        # Find which VS version is installed
+        $VsWherePath = "${env:PROGRAMFILES(X86)}\Microsoft Visual Studio\Installer\vswhere.exe"
+
+        Write-Output "VsWherePath is: $VsWherePath"
+
+        $VsInstance = $(&$VSWherePath -latest -property displayName)
+
+        Write-Output "Latest VS is: $VsInstance"
+
+        # copy MDP file to msbuild location
+        $VsPath = $(&$VsWherePath -latest -property installationPath)
+
+        Write-Debug "Copy MDP DLL to msbuild location"
+
+        $msbuildPath = $VsPath + "\MSBuild"
+
+        $extensionPath = $msbuildPath + "\nanoFramework\v1.0"
+
+        Copy-Item -Path "$env:Pipeline_Workspace\mdp" -Destination $msbuildPath -Recurse
