@@ -36,7 +36,7 @@ jobs:
 
     - name: Get container version
       run: |
-        $dockerfileContent = Get-Content(".devcontainer/FreeRTOS-NXP/Dockerfile.FreeRTOS-NXP")
+        $dockerfileContent = Get-Content("${{ env.CONTAINER_VERSION_FILE }}") -First 1
         $dockerfileContent -match '(?<=\:)(?:[v]\d+.\d+)'
         $containerVersion = $Matches[0].ToString()
         echo "GCR_VERSION=$containerVersion" | Out-File -FilePath $Env:GITHUB_ENV -Encoding utf-8 -Append
