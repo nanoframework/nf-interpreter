@@ -11,7 +11,7 @@ steps:
     condition: eq(variables.GccArm_Version, '')
     displayName: Cache latest ARM GCC toolchain
     inputs:
-      key: "gcc-13_3_rel1 | gccUpdateKey"
+      key: "gcc-13_3__rel1 | gccUpdateKey"
       restoreKeys: gccUpdateKey
       path: $(Agent.TempDirectory)\arm-gnu-toolchain-${{ parameters.gccArmVersion }}-mingw-w64-i686-arm-none-eabi
       cacheHitVar: GCC_CACHE_RESTORED

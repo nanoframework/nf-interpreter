@@ -19,6 +19,7 @@ extern const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_System_Device_Gpio;
 extern const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_System_IO_FileSystem;
 extern const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_System_Device_I2c;
 extern const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_System_Device_Spi;
+extern const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_nanoFramework_System_IO_Hashing;
 
 // nanoFramework class libraries declarations
 extern const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_nanoFramework_Runtime_Events;
@@ -40,6 +41,7 @@ const CLR_RT_NativeAssemblyData *g_CLR_InteropAssembliesNativeData[] = {
     &g_CLR_AssemblyNative_System_Device_Gpio,
     &g_CLR_AssemblyNative_System_Device_I2c,
     &g_CLR_AssemblyNative_System_Device_Spi,
+    &g_CLR_AssemblyNative_nanoFramework_System_IO_Hashing,
 #ifndef NANOWIN32
     &g_CLR_AssemblyNative_System_IO_FileSystem
 #endif

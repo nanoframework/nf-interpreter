@@ -819,13 +819,12 @@ static const CLR_RT_MethodHandler method_lookup[] =
     NULL,
     NULL,
     NULL,
-    NULL,
 };
 
 const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_nanoFramework_Device_Bluetooth =
 {
     "nanoFramework.Device.Bluetooth",
-    0xAA4B0676,
+    0xE610B405,
     method_lookup,
     { 100, 0, 5, 0 }
 };

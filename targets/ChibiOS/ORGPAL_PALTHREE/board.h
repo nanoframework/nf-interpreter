@@ -1,6 +1,8 @@
 #ifndef BOARD_H
 #define BOARD_H
 
+// clang-format off
+
 /*===========================================================================*/
 /* Driver constants.                                                         */
 /*===========================================================================*/
@@ -57,7 +59,7 @@
 #define GPIOA_RMII_REF_CLK          1U 
 #define GPIOA_RMII_MDIO             2U 
 #define GPIOA_IO1_P17_ADC1_IN3_IO	3U 
-#define GPIOA_IO0_P6_ADC1_IN4_IO    4U	
+#define GPIOA_IO0_P5_ADC1_IN4_IO    4U	
 #define GPIOA_FLASH_SPI1_SCK        5U	
 #define GPIOA_FLASH_SPI1_MISO       6U	
 #define GPIOA_RMII_CRS_DV           7U
@@ -191,9 +193,9 @@
 #define GPIOH_IO0_P12_IO           15U
 
 #define GPIOI_IO0_P20_ON_OFF        0U
-#define GPIOH_IO0_P24_IO            1U
-#define GPIOH_IO0_P5_IO             2U
-#define GPIOH_IO0_P23_INT           3U
+#define GPIOI_IO0_SPI2_CLK          1U
+#define GPIOI_IO0_SPI2_MISO         2U
+#define GPIOI_IO0_SPI2_MOSI         3U
 #define GPIOI_KEYPAD_2              4U
 #define GPIOI_KEYPAD_1              5U
 #define GPIOI_KEYPAD_4              6U
@@ -250,7 +252,7 @@
 #define LINE_RMII_REF_CLK           PAL_LINE(GPIOA, 1U)
 #define LINE_RMII_MDIO              PAL_LINE(GPIOA, 2U)
 #define LINE_IO1_P17_ADC1_IN3		PAL_LINE(GPIOA, 3U)
-#define LINE_IO0_P6_ADC1_IN4_IO     PAL_LINE(GPIOA, 4U)
+#define LINE_IO0_P5_ADC1_IN4_IO     PAL_LINE(GPIOA, 4U)
 #define LINE_FLASH_SPI1_SCK         PAL_LINE(GPIOA, 5U)
 #define LINE_FLASH_SPI1_MISO        PAL_LINE(GPIOA, 6U)
 #define LINE_RMII_CRS_DV            PAL_LINE(GPIOA, 7U)
@@ -352,9 +354,9 @@
 #define LINE_FMC_SDNE1              PAL_LINE(GPIOH, 6U)
 #define LINE_FMC_SDCKE1             PAL_LINE(GPIOH, 7U)
 #define LINE_I2C3_SDA               PAL_LINE(GPIOH, 8U)
-#define LINE_IO0_P24_WAKEUP_IO      PAL_LINE(GPIOI, 1U)
-#define LINE_SPI2_MISO              PAL_LINE(GPIOI, 2U)
-#define LINE_IO0_P23_INT_IO         PAL_LINE(GPIOI, 3U)
+#define LINE_IO0_SPI2_CLK           PAL_LINE(GPIOI, 1U)
+#define LINE_IO0_SPI2_MISO          PAL_LINE(GPIOI, 2U)
+#define LINE_IO0_SPI2_MOSI          PAL_LINE(GPIOI, 3U)
 #define LINE_KEYPAD_2               PAL_LINE(GPIOI, 4U)
 #define LINE_KEYPAD_1               PAL_LINE(GPIOI, 5U)
 #define LINE_KEYPAD_4               PAL_LINE(GPIOI, 6U)
@@ -434,7 +436,7 @@ The user should also disable the MCO pin of the clock output if not used.
 * PA1  - RMII_REF_CLK              (alternate 11).
 * PA2  - RMII_MDIO                 (alternate 11).
 * PA3  - IO1_P17_ADC1_IN3          (input pullup).
-* PA4  - IO0_P6_ADC1_IN4           (input pullup).
+* PA4  - IO0_P5_ADC1_IN4           (input pullup).
 * PA5  - SPI1_SCK                  (alternate 5).
 * PA6  - SPI1_MISO                 (alternate 5).
 * PA7  - RMII_CRS_DV               (alternate 11).
@@ -451,7 +453,7 @@ The user should also disable the MCO pin of the clock output if not used.
                                      PIN_MODE_ALTERNATE(GPIOA_RMII_REF_CLK) |\
                                      PIN_MODE_ALTERNATE(GPIOA_RMII_MDIO) |  \
                                      PIN_MODE_INPUT(GPIOA_IO1_P17_ADC1_IN3_IO) |   \
-                                     PIN_MODE_ALTERNATE(GPIOA_IO0_P6_ADC1_IN4_IO) |   \
+                                     PIN_MODE_ALTERNATE(GPIOA_IO0_P5_ADC1_IN4_IO) |   \
                                      PIN_MODE_ALTERNATE(GPIOA_FLASH_SPI1_SCK) |   \
                                      PIN_MODE_ALTERNATE(GPIOA_FLASH_SPI1_MISO) |  \
                                      PIN_MODE_ALTERNATE(GPIOA_RMII_CRS_DV) | \
@@ -467,7 +469,7 @@ The user should also disable the MCO pin of the clock output if not used.
                                      PIN_OTYPE_PUSHPULL(GPIOA_RMII_REF_CLK) |\
                                      PIN_OTYPE_PUSHPULL(GPIOA_RMII_MDIO) |  \
                                      PIN_OTYPE_PUSHPULL(GPIOA_IO1_P17_ADC1_IN3_IO) | \
-                                     PIN_OTYPE_PUSHPULL(GPIOA_IO0_P6_ADC1_IN4_IO) |  \
+                                     PIN_OTYPE_PUSHPULL(GPIOA_IO0_P5_ADC1_IN4_IO) |  \
                                      PIN_OTYPE_PUSHPULL(GPIOA_FLASH_SPI1_SCK) |   \
                                      PIN_OTYPE_PUSHPULL(GPIOA_FLASH_SPI1_MISO) |  \
                                      PIN_OTYPE_PUSHPULL(GPIOA_RMII_CRS_DV) |    \
@@ -483,7 +485,7 @@ The user should also disable the MCO pin of the clock output if not used.
                                      PIN_OSPEED_HIGH(GPIOA_RMII_REF_CLK) |  \
                                      PIN_OSPEED_HIGH(GPIOA_RMII_MDIO) |     \
                                      PIN_OSPEED_HIGH(GPIOA_IO1_P17_ADC1_IN3_IO) |   \
-                                     PIN_OSPEED_HIGH(GPIOA_IO0_P6_ADC1_IN4_IO) |     \
+                                     PIN_OSPEED_HIGH(GPIOA_IO0_P5_ADC1_IN4_IO) |     \
                                      PIN_OSPEED_HIGH(GPIOA_FLASH_SPI1_SCK) |      \
                                      PIN_OSPEED_HIGH(GPIOA_FLASH_SPI1_MISO) |     \
                                      PIN_OSPEED_VERYLOW(GPIOA_RMII_CRS_DV) |\
@@ -499,7 +501,7 @@ The user should also disable the MCO pin of the clock output if not used.
                                      PIN_PUPDR_FLOATING(GPIOA_RMII_REF_CLK) |\
                                      PIN_PUPDR_PULLUP(GPIOA_RMII_MDIO) |    \
                                      PIN_PUPDR_PULLUP(GPIOA_IO1_P17_ADC1_IN3_IO) | \
-                                     PIN_PUPDR_FLOATING(GPIOA_IO0_P6_ADC1_IN4_IO) |  \
+                                     PIN_PUPDR_FLOATING(GPIOA_IO0_P5_ADC1_IN4_IO) |  \
                                      PIN_PUPDR_FLOATING(GPIOA_FLASH_SPI1_SCK) |   \
                                      PIN_PUPDR_FLOATING(GPIOA_FLASH_SPI1_MISO) |  \
                                      PIN_PUPDR_FLOATING(GPIOA_RMII_CRS_DV) |\
@@ -515,7 +517,7 @@ The user should also disable the MCO pin of the clock output if not used.
                                      PIN_ODR_HIGH(GPIOA_RMII_REF_CLK) |     \
                                      PIN_ODR_HIGH(GPIOA_RMII_MDIO) |        \
                                      PIN_ODR_HIGH(GPIOA_IO1_P17_ADC1_IN3_IO) |      \
-                                     PIN_ODR_HIGH(GPIOA_IO0_P6_ADC1_IN4_IO) |        \
+                                     PIN_ODR_HIGH(GPIOA_IO0_P5_ADC1_IN4_IO) |        \
                                      PIN_ODR_HIGH(GPIOA_FLASH_SPI1_SCK) |        \
                                      PIN_ODR_HIGH(GPIOA_FLASH_SPI1_MISO) |       \
                                      PIN_ODR_HIGH(GPIOA_RMII_CRS_DV) |      \
@@ -531,7 +533,7 @@ The user should also disable the MCO pin of the clock output if not used.
                                      PIN_AFIO_AF(GPIOA_RMII_REF_CLK, 11U) | \
                                      PIN_AFIO_AF(GPIOA_RMII_MDIO, 11U) |    \
                                      PIN_AFIO_AF(GPIOA_IO1_P17_ADC1_IN3_IO, 0U) |   \
-                                     PIN_AFIO_AF(GPIOA_IO0_P6_ADC1_IN4_IO, 5U) |      \
+                                     PIN_AFIO_AF(GPIOA_IO0_P5_ADC1_IN4_IO, 5U) |      \
                                      PIN_AFIO_AF(GPIOA_FLASH_SPI1_SCK, 5U) |      \
                                      PIN_AFIO_AF(GPIOA_FLASH_SPI1_MISO, 5U) |     \
                                      PIN_AFIO_AF(GPIOA_RMII_CRS_DV, 11U))
@@ -1367,9 +1369,9 @@ The user should also disable the MCO pin of the clock output if not used.
 * GPIOI setup:
 *
 * PI0  - IO0_P20_ON_OFF            (output floating).
-* PI1  - SPI2_SCK                  (alternate 5).
-* PI2  - SPI2_MISO                 (alternate 5).
-* PI3  - SPI2_MOSI                 (alternate 5).
+* PI1  - IO0_SPI2_SCK              (alternate 5).
+* PI2  - IO0_SPI2_MISO             (alternate 5).
+* PI3  - IO0_SPI2_MOSI             (alternate 5).
 * PI4  - KEYPAD_2                  (input pullup).
 * PI5  - KEYPAD_1                  (input pullup).
 * PI6  - KEYPAD_4                  (input pullup).
@@ -1384,9 +1386,9 @@ The user should also disable the MCO pin of the clock output if not used.
 * PI15 - PIN15                     (output pullup).
 */
 #define VAL_GPIOI_MODER             (PIN_MODE_OUTPUT(GPIOI_IO0_P20_ON_OFF) |           \
-                                     PIN_MODE_ALTERNATE(GPIOH_IO0_P24_IO) |           \
-                                     PIN_MODE_ALTERNATE(GPIOH_IO0_P5_IO) |           \
-                                     PIN_MODE_ALTERNATE(GPIOH_IO0_P23_INT) |           \
+                                     PIN_MODE_ALTERNATE(GPIOI_IO0_SPI2_CLK) |           \
+                                     PIN_MODE_ALTERNATE(GPIOI_IO0_SPI2_MISO) |           \
+                                     PIN_MODE_ALTERNATE(GPIOI_IO0_SPI2_MOSI) |           \
                                      PIN_MODE_INPUT(GPIOI_KEYPAD_2) |           \
                                      PIN_MODE_INPUT(GPIOI_KEYPAD_1) |           \
                                      PIN_MODE_INPUT(GPIOI_KEYPAD_4) |           \
@@ -1400,9 +1402,9 @@ The user should also disable the MCO pin of the clock output if not used.
                                      PIN_MODE_OUTPUT(GPIOI_RS485_BUS_TERM) |          \
                                      PIN_MODE_OUTPUT(GPIOI_FLASH_SPI1_CS))
 #define VAL_GPIOI_OTYPER            (PIN_OTYPE_PUSHPULL(GPIOI_IO0_P20_ON_OFF) |       \
-                                     PIN_OTYPE_PUSHPULL(GPIOH_IO0_P24_IO) |       \
-                                     PIN_OTYPE_PUSHPULL(GPIOH_IO0_P5_IO) |       \
-                                     PIN_OTYPE_PUSHPULL(GPIOH_IO0_P23_INT) |       \
+                                     PIN_OTYPE_PUSHPULL(GPIOI_IO0_SPI2_CLK) |       \
+                                     PIN_OTYPE_PUSHPULL(GPIOI_IO0_SPI2_MISO) |       \
+                                     PIN_OTYPE_PUSHPULL(GPIOI_IO0_SPI2_MOSI) |       \
                                      PIN_OTYPE_PUSHPULL(GPIOI_KEYPAD_2) |       \
                                      PIN_OTYPE_PUSHPULL(GPIOI_KEYPAD_1) |       \
                                      PIN_OTYPE_PUSHPULL(GPIOI_KEYPAD_4) |       \
@@ -1416,9 +1418,9 @@ The user should also disable the MCO pin of the clock output if not used.
                                      PIN_OTYPE_PUSHPULL(GPIOI_RS485_BUS_TERM) |      \
                                      PIN_OTYPE_PUSHPULL(GPIOI_FLASH_SPI1_CS))
 #define VAL_GPIOI_OSPEEDR           (PIN_OSPEED_LOW(GPIOI_IO0_P20_ON_OFF) |       \
-                                     PIN_OSPEED_HIGH(GPIOH_IO0_P24_IO) |       \
-                                     PIN_OSPEED_HIGH(GPIOH_IO0_P5_IO) |       \
-                                     PIN_OSPEED_HIGH(GPIOH_IO0_P23_INT) |       \
+                                     PIN_OSPEED_HIGH(GPIOI_IO0_SPI2_CLK) |       \
+                                     PIN_OSPEED_HIGH(GPIOI_IO0_SPI2_MISO) |       \
+                                     PIN_OSPEED_HIGH(GPIOI_IO0_SPI2_MOSI) |       \
                                      PIN_OSPEED_MEDIUM(GPIOI_KEYPAD_2) |       \
                                      PIN_OSPEED_MEDIUM(GPIOI_KEYPAD_1) |       \
                                      PIN_OSPEED_MEDIUM(GPIOI_KEYPAD_4) |       \
@@ -1432,9 +1434,9 @@ The user should also disable the MCO pin of the clock output if not used.
                                      PIN_OSPEED_LOW(GPIOI_RS485_BUS_TERM) |      \
                                      PIN_OSPEED_HIGH(GPIOI_FLASH_SPI1_CS))
 #define VAL_GPIOI_PUPDR             (PIN_PUPDR_FLOATING(GPIOI_IO0_P20_ON_OFF) |         \
-                                     PIN_PUPDR_FLOATING(GPIOH_IO0_P24_IO) |         \
-                                     PIN_PUPDR_FLOATING(GPIOH_IO0_P5_IO) |         \
-                                     PIN_PUPDR_FLOATING(GPIOH_IO0_P23_INT) |         \
+                                     PIN_PUPDR_FLOATING(GPIOI_IO0_SPI2_CLK) |         \
+                                     PIN_PUPDR_FLOATING(GPIOI_IO0_SPI2_MISO) |         \
+                                     PIN_PUPDR_FLOATING(GPIOI_IO0_SPI2_MOSI) |         \
                                      PIN_PUPDR_PULLUP(GPIOI_KEYPAD_2) |         \
                                      PIN_PUPDR_PULLUP(GPIOI_KEYPAD_1) |         \
                                      PIN_PUPDR_PULLUP(GPIOI_KEYPAD_4) |         \
@@ -1448,9 +1450,9 @@ The user should also disable the MCO pin of the clock output if not used.
                                      PIN_PUPDR_FLOATING(GPIOI_RS485_BUS_TERM) |        \
                                      PIN_PUPDR_FLOATING(GPIOI_FLASH_SPI1_CS))
 #define VAL_GPIOI_ODR               (PIN_ODR_HIGH(GPIOI_IO0_P20_ON_OFF) |             \
-                                     PIN_ODR_HIGH(GPIOH_IO0_P24_IO) |             \
-                                     PIN_ODR_HIGH(GPIOH_IO0_P5_IO) |             \
-                                     PIN_ODR_HIGH(GPIOH_IO0_P23_INT) |             \
+                                     PIN_ODR_HIGH(GPIOI_IO0_SPI2_CLK) |             \
+                                     PIN_ODR_HIGH(GPIOI_IO0_SPI2_MISO) |             \
+                                     PIN_ODR_HIGH(GPIOI_IO0_SPI2_MOSI) |             \
                                      PIN_ODR_HIGH(GPIOI_KEYPAD_2) |             \
                                      PIN_ODR_HIGH(GPIOI_KEYPAD_1) |             \
                                      PIN_ODR_HIGH(GPIOI_KEYPAD_4) |             \
@@ -1464,9 +1466,9 @@ The user should also disable the MCO pin of the clock output if not used.
                                      PIN_ODR_HIGH(GPIOI_RS485_BUS_TERM) |            \
                                      PIN_ODR_HIGH(GPIOI_FLASH_SPI1_CS))
 #define VAL_GPIOI_AFRL              (PIN_AFIO_AF(GPIOI_IO0_P20_ON_OFF, 0U) |          \
-                                     PIN_AFIO_AF(GPIOH_IO0_P24_IO, 5U) |          \
-                                     PIN_AFIO_AF(GPIOH_IO0_P5_IO, 5U) |          \
-                                     PIN_AFIO_AF(GPIOH_IO0_P23_INT, 5U) |          \
+                                     PIN_AFIO_AF(GPIOI_IO0_SPI2_CLK, 5U) |          \
+                                     PIN_AFIO_AF(GPIOI_IO0_SPI2_MISO, 5U) |          \
+                                     PIN_AFIO_AF(GPIOI_IO0_SPI2_MOSI, 5U) |          \
                                      PIN_AFIO_AF(GPIOI_KEYPAD_2, 0U) |          \
                                      PIN_AFIO_AF(GPIOI_KEYPAD_1, 0U) |          \
                                      PIN_AFIO_AF(GPIOI_KEYPAD_4, 0U) |          \
@@ -1734,3 +1736,5 @@ extern "C" {
 #endif /* _FROM_ASM_ */
 
 #endif /* BOARD_H */
+
+// clang-format on

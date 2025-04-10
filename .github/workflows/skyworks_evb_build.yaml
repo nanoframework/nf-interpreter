@@ -25,6 +25,8 @@ jobs:
           submodules: true
 
       - uses: lukka/get-cmake@latest
+        with:
+          cmakeVersion: 3.31.6
 
       - name: Install SRecord
         run: |

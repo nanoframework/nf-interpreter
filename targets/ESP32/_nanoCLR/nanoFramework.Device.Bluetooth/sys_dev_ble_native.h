@@ -1004,13 +1004,6 @@ struct Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_Spp_NordicSpp
     //--//
 };
 
-struct Library_sys_dev_ble_native_ThisAssembly
-{
-    static const int FIELD_STATIC__GitCommitDate = 17;
-
-    //--//
-};
-
 extern const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_nanoFramework_Device_Bluetooth;
 
 #include "sys_ble.h"

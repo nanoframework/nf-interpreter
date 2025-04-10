@@ -33,6 +33,6 @@ void HAL_AssertEx()
     while (true)
     { 
         GPIO_PinOutToggle(gpioPortB, 12);
-        for(int i = 0; i < 100000; i++) { __NOP(); }
+        for(int i = 0; i < 250000; i++) { __NOP(); }
     }
 }

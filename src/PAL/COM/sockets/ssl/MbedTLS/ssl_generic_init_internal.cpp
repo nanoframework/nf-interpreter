@@ -32,7 +32,6 @@ bool ssl_generic_init_internal(
     int endpoint = 0;
     int ret = 0;
 
-    mbedtls_x509_crt *ownCertificate = NULL;
     HAL_Configuration_X509CaRootBundle *certStore = NULL;
     HAL_Configuration_X509DeviceCertificate *deviceCert = NULL;
 
@@ -64,6 +63,7 @@ bool ssl_generic_init_internal(
     memset(context, 0, sizeof(mbedTLS_NFContext));
 
     // allocate memory for net context
+    // this needs to be freed in ssl_exit_context_internal
     context->server_fd = (mbedtls_net_context *)platform_malloc(sizeof(mbedtls_net_context));
     if (context->server_fd == NULL)
     {
@@ -130,12 +130,12 @@ bool ssl_generic_init_internal(
 
     // create and init X509 CRT
     // this needs to be freed in ssl_exit_context_internal
-    context->x509_crt = (mbedtls_x509_crt *)platform_malloc(sizeof(mbedtls_x509_crt));
-    if (context->x509_crt == NULL)
+    context->ca_cert = (mbedtls_x509_crt *)platform_malloc(sizeof(mbedtls_x509_crt));
+    if (context->ca_cert == NULL)
     {
         goto error;
     }
-    mbedtls_x509_crt_init(context->x509_crt);
+    mbedtls_x509_crt_init(context->ca_cert);
 
     // TODO: review if we can add some instance-unique data to the custom argument below
     if (mbedtls_ctr_drbg_seed(context->ctr_drbg, mbedtls_entropy_func, context->entropy, NULL, 0) != 0)
@@ -207,11 +207,12 @@ bool ssl_generic_init_internal(
             // when the format is a string it has to include the terminator otherwise the parse will fail //
             /////////////////////////////////////////////////////////////////////////////////////////////////
             mbedtls_x509_crt_parse(
-                context->x509_crt,
+                context->ca_cert,
                 (const unsigned char *)certStore->Certificate,
                 certStore->CertificateSize);
 
             platform_free(certStore);
+            certStore = NULL;
         }
     }
 
@@ -260,21 +261,22 @@ bool ssl_generic_init_internal(
         }
 
         // parse certificate
-        ownCertificate = (mbedtls_x509_crt *)platform_malloc(sizeof(mbedtls_x509_crt));
-        if (ownCertificate == NULL)
+        // this needs to be freed in ssl_exit_context_internal
+        context->own_cert = (mbedtls_x509_crt *)platform_malloc(sizeof(mbedtls_x509_crt));
+        if (context->own_cert == NULL)
         {
             goto error;
         }
 
-        mbedtls_x509_crt_init(ownCertificate);
+        mbedtls_x509_crt_init(context->own_cert);
 
-        if (mbedtls_x509_crt_parse(ownCertificate, (const unsigned char *)certificate, certLength))
+        if (mbedtls_x509_crt_parse(context->own_cert, (const unsigned char *)certificate, certLength))
         {
             // failed parsing own certificate failed
             goto error;
         }
 
-        if (mbedtls_ssl_conf_own_cert(context->conf, ownCertificate, context->pk))
+        if (mbedtls_ssl_conf_own_cert(context->conf, context->own_cert, context->pk))
         {
             // configuring own certificate failed
             goto error;
@@ -284,6 +286,7 @@ bool ssl_generic_init_internal(
         if (deviceCert)
         {
             platform_free(deviceCert);
+            deviceCert = NULL;
         }
     }
     else
@@ -294,7 +297,7 @@ bool ssl_generic_init_internal(
         context->pk = NULL;
     }
 
-    mbedtls_ssl_conf_ca_chain(context->conf, context->x509_crt, NULL);
+    mbedtls_ssl_conf_ca_chain(context->conf, context->ca_cert, NULL);
 
     psa_crypto_init();
 
@@ -343,7 +346,8 @@ error:
 
     mbedtls_ctr_drbg_free(context->ctr_drbg);
     mbedtls_entropy_free(context->entropy);
-    mbedtls_x509_crt_free(context->x509_crt);
+    mbedtls_x509_crt_free(context->ca_cert);
+    mbedtls_x509_crt_free(context->own_cert);
     mbedtls_ssl_config_free(context->conf);
     mbedtls_ssl_free(context->ssl);
 
@@ -373,9 +377,14 @@ error:
         platform_free(context->server_fd);
     }
 
-    if (context->x509_crt)
+    if (context->ca_cert)
     {
-        platform_free(context->x509_crt);
+        platform_free(context->ca_cert);
+    }
+
+    if (context->own_cert)
+    {
+        platform_free(context->own_cert);
     }
 
     if (context->pk)
@@ -383,11 +392,6 @@ error:
         platform_free(context->pk);
     }
 
-    if (ownCertificate)
-    {
-        mbedtls_x509_crt_free(ownCertificate);
-        platform_free(ownCertificate);
-    }
     if (context)
     {
         platform_free(context);
