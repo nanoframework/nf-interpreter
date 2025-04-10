@@ -2727,7 +2727,7 @@ bool CLR_DBG_Debugger::Debugging_Value_GetStack(WP_Message *msg)
                 num = isInline ? md.target->argumentsCount : md.target->argumentsCount;
 #else
                 array = call->m_arguments;
-                num = call->m_call.m_target->ArgumentsCount;
+                num = call->m_call.target->argumentsCount;
 #endif
                 break;
 
@@ -2737,7 +2737,7 @@ bool CLR_DBG_Debugger::Debugging_Value_GetStack(WP_Message *msg)
                 num = isInline ? md.target->localsCount : md.target->localsCount;
 #else
                 array = call->m_locals;
-                num = call->m_call.m_target->LocalsCount;
+                num = call->m_call.target->localsCount;
 #endif
                 break;
 
