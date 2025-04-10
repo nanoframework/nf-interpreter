@@ -65,7 +65,7 @@ steps:
     condition: >-
       and(
         succeeded(),
-        eq(variables['DownloadNanoClrPreview'], true),
+        eq(variables['DownloadMDP'], true),
         ne(variables['MDP_BUILDID'], '')
       )
     displayName: Set MDP path
