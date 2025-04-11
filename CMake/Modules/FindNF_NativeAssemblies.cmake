@@ -118,6 +118,9 @@ macro(PerformSettingsForApiEntry apiNamespace)
     # list this option
     list(APPEND apiListing "${apiNamespace}")
 
+    # append to list of defines for Interop Assemblies include file
+    set(CLR_RT_NativeAssemblyPreprocessorDefines "${CLR_RT_NativeAssemblyPreprocessorDefines}\n#define API_${apiNamespaceWithoutDots}")
+
     # append to list of declaration for Interop Assemblies table
     list(APPEND CLR_RT_NativeAssemblyDataList "extern const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_${apiNamespaceWithoutDots};")
 
@@ -470,10 +473,14 @@ string(REPLACE ";" "\n    " CLR_RT_NativeAssemblyDataTableEntries "${CLR_RT_Nati
 list(LENGTH CLR_RT_NativeAssemblyDataTableEntriesList CLR_RT_NativeAssembliesCount)
 
 
+# configure header file with Interop Assemblies defines and...
+configure_file("${CMAKE_SOURCE_DIR}/InteropAssemblies/CLR_IncludedAPI.h.in"
+                "${CMAKE_CURRENT_BINARY_DIR}/CLR_IncludedAPI.h" @ONLY)
+
 # configure code file with Interop Assemblies table and...
 configure_file("${CMAKE_SOURCE_DIR}/InteropAssemblies/CLR_RT_InteropAssembliesTable.cpp.in"
                 "${CMAKE_CURRENT_BINARY_DIR}/CLR_RT_InteropAssembliesTable.cpp" @ONLY)
-# ... now add Interop Assemblies table to ChibiOS nanoCLR sources list
+# ... now add Interop Assemblies table to nanoCLR sources list
 list(APPEND NF_NativeAssemblies_SOURCES "${CMAKE_CURRENT_BINARY_DIR}/CLR_RT_InteropAssembliesTable.cpp")
 
 # create a .csv file with native assembly versions in the output directory
