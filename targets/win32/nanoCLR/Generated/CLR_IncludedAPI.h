@@ -19,4 +19,4 @@
 #define API_System_Device_Spi
 #define API_System_Runtime_Serialization
 
-#endif // !_CLR_INCLUDEDAPI_H_
+#endif // _CLR_INCLUDEDAPI_H_
