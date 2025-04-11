@@ -23,6 +23,16 @@ bool ssl_parse_certificate_internal(void *buf, size_t size, void *pwd, void *x50
     return true;
 }
 
+bool ssl_get_public_key_raw_internal(void *certificate, size_t size, void *x509RawData)
+{
+    (void)certificate;
+    (void)size;
+    (void)x509RawData;
+
+    // can't really do anything here, so just return false
+    return false;
+}
+
 int ssl_decode_private_key_internal(
     const unsigned char *key,
     size_t keyLength,
@@ -187,7 +197,7 @@ int ssl_connect_internal(int sd, const char *szTargetHost, int contextHandle)
     context->SocketIndex = sd;
 
     // at this point the socket must have been connected
-    
+
     //////////////////////////////////////////////////////////////////////
     // current firmware in ISM43362 does not support secure connections //
     // so we are faking it as if it would work                          //
@@ -221,7 +231,7 @@ int ssl_read_internal(int sd, char *data, size_t size)
 {
     (void)sd;
     (void)data;
-    (void)size; //SSL_RESULT__WOULD_BLOCK
+    (void)size; // SSL_RESULT__WOULD_BLOCK
 
     // ISM43362 takes care of everything for us, just call the recv API
     return SOCK_recv(sd, data, size, 0);
