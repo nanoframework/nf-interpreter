@@ -158,7 +158,7 @@ int mbedtls_net_recv_timeout(void *ctx, unsigned char *buf, size_t len, uint32_t
 
     ret = select(fd + 1, &read_fds, NULL, NULL, timeout == 0 ? NULL : &tv);
 
-    // Zero fds ready means we timed out 
+    // Zero fds ready means we timed out
     if (ret == 0)
         return (MBEDTLS_ERR_SSL_TIMEOUT);
 
@@ -175,7 +175,7 @@ int mbedtls_net_recv_timeout(void *ctx, unsigned char *buf, size_t len, uint32_t
         return (MBEDTLS_ERR_NET_RECV_FAILED);
     }
 
-    // This call will not block 
+    // This call will not block
     return (mbedtls_net_recv(ctx, buf, len));
 }
 
