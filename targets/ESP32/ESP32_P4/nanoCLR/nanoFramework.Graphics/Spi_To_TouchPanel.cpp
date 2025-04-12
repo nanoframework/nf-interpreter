@@ -5,9 +5,8 @@
 
 #define UNUSED(x) (void)x
 
-#ifndef SPI_TO_TOUCHPANEL_H
-#define SPI_TO_TOUCHPANEL_H
-
+#ifndef SPI_TO_TOUCHPANEL_CPP
+#define SPI_TO_TOUCHPANEL_CPP
 #include "nanoCLR_Types.h"
 #include <nanoPAL.h>
 #include <target_platform.h>
