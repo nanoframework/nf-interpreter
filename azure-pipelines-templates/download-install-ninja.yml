@@ -32,3 +32,7 @@ steps:
 
   - script: echo "##vso[task.prependpath]$(Agent.TempDirectory)\ninja"
     displayName: Tweak PATH with Ninja
+
+  - script: |
+      ninja --version
+    displayName: Ninja Version Check
