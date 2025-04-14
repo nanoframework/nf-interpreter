@@ -7,6 +7,7 @@
 
 #ifndef SPI_TO_TOUCHPANEL_CPP
 #define SPI_TO_TOUCHPANEL_CPP
+
 #include "nanoCLR_Types.h"
 #include <nanoPAL.h>
 #include <target_platform.h>
@@ -34,4 +35,4 @@ CLR_UINT8 *TouchInterface::Write_Read(
     return 0;
 }
 
-#endif // SPI_TO_TOUCHPANEL_H
+#endif // SPI_TO_TOUCHPANEL_CPP

@@ -45,8 +45,8 @@ void nf_debug(void *ctx, int level, const char *file, int line, const char *str)
     // this is a lightheight version with just the debug messages
     debug_printf("%s", str);
 }
-/*
-int net_would_block(const mbedtls_net_context *ctx)
+
+__nfweak int net_would_block(const mbedtls_net_context *ctx)
 {
     //
     // Never return 'WOULD BLOCK' on a non-blocking socket
@@ -70,7 +70,7 @@ int net_would_block(const mbedtls_net_context *ctx)
     return (0);
 }
 
-int mbedtls_net_recv(void *ctx, unsigned char *buf, size_t len)
+__nfweak int mbedtls_net_recv(void *ctx, unsigned char *buf, size_t len)
 {
     int32_t ret;
     int32_t fd = ((mbedtls_net_context *)ctx)->fd;
@@ -105,7 +105,7 @@ int mbedtls_net_recv(void *ctx, unsigned char *buf, size_t len)
     return ret;
 }
 
-int mbedtls_net_send(void *ctx, const unsigned char *buf, size_t len)
+__nfweak int mbedtls_net_send(void *ctx, const unsigned char *buf, size_t len)
 {
     int32_t ret;
     int fd = ((mbedtls_net_context *)ctx)->fd;
@@ -140,7 +140,7 @@ int mbedtls_net_send(void *ctx, const unsigned char *buf, size_t len)
     return ret;
 }
 
-int mbedtls_net_recv_timeout(void *ctx, unsigned char *buf, size_t len, uint32_t timeout)
+__nfweak int mbedtls_net_recv_timeout(void *ctx, unsigned char *buf, size_t len, uint32_t timeout)
 {
     int ret;
     struct timeval tv;
@@ -180,7 +180,7 @@ int mbedtls_net_recv_timeout(void *ctx, unsigned char *buf, size_t len, uint32_t
 }
 
 // Gracefully closes the connection
-void mbedtls_net_free(mbedtls_net_context *ctx)
+__nfweak void mbedtls_net_free(mbedtls_net_context *ctx)
 {
     if (ctx->fd == -1)
         return;
@@ -190,7 +190,6 @@ void mbedtls_net_free(mbedtls_net_context *ctx)
 
     ctx->fd = -1;
 }
-*/
 
 // get Unix Epoch time from HAL SystemTime
 time_t nf_get_unix_epoch()
