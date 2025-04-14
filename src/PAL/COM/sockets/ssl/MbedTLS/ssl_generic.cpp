@@ -190,7 +190,6 @@ __nfweak void mbedtls_net_free(mbedtls_net_context *ctx)
 
     ctx->fd = -1;
 }
-*/
 
 // get Unix Epoch time from HAL SystemTime
 time_t nf_get_unix_epoch()
