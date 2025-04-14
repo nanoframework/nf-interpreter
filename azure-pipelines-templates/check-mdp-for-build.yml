@@ -77,12 +77,12 @@ steps:
 
         Write-Output "VsWherePath is: $VsWherePath"
 
-        $VsInstance = $(&$VSWherePath -latest -property displayName)
+        $VsInstance = & $VsWherePath -latest -property displayName
 
         Write-Output "Latest VS is: $VsInstance"
 
         # copy MDP file to msbuild location
-        $VsPath = $(&$VsWherePath -latest -property installationPath)
+        $VsPath = & $VSWherePath -latest -property installationPath
 
         Write-Debug "Copy MDP DLL to msbuild location"
 
@@ -90,4 +90,4 @@ steps:
 
         $extensionPath = $msbuildPath + "\nanoFramework\v1.0"
 
-        Copy-Item -Path "$env:Pipeline_Workspace\mdp" -Destination $msbuildPath -Force -Verbose
+        Copy-Item -Path "$env:Pipeline_Workspace\mdp\*" -Destination $extensionPath -Force -Verbose
