@@ -90,4 +90,4 @@ steps:
 
         $extensionPath = $msbuildPath + "\nanoFramework\v1.0"
 
-        Copy-Item -Path "$env:Pipeline_Workspace\mdp" -Destination $msbuildPath -Recurse
+        Copy-Item -Path "$env:Pipeline_Workspace\mdp" -Destination $msbuildPath -Force -Verbose
