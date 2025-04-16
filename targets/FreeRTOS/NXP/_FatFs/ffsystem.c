@@ -1,6 +1,6 @@
 // clang-format off
 
-// This file aligns with compatibility with R0.15+
+// This file aligns with compatibility with R0.15a+
 // It currently includes commented out code which would allow a fully
 // platform independent solution.
 
