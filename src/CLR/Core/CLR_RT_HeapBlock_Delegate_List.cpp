@@ -73,7 +73,7 @@ HRESULT CLR_RT_HeapBlock_Delegate_List::Change(
 
     CLR_UINT32 num = 0;
 
-    reference.SetObjectReference(NULL);
+    reference.SetObjectReference(nullptr);
 
     if (delegateSrc.DataType() != DATATYPE_OBJECT || delegateTarget.DataType() != DATATYPE_OBJECT)
     {
@@ -82,7 +82,7 @@ HRESULT CLR_RT_HeapBlock_Delegate_List::Change(
 
     dlg = delegateTarget.DereferenceDelegate();
 
-    if (dlg == NULL)
+    if (dlg == nullptr)
     {
         reference.SetObjectReference(delegateSrc.DereferenceDelegate());
         NANOCLR_SET_AND_LEAVE(S_OK);
@@ -101,7 +101,7 @@ HRESULT CLR_RT_HeapBlock_Delegate_List::Change(
         for (num = 0; num < dlgListDst->m_length; num++, newDlgs++)
         {
             if (newDlgs->DataType() == DATATYPE_OBJECT &&
-                newDlgs->DereferenceDelegate() != NULL) // The delegate could have been GC'ed.
+                newDlgs->DereferenceDelegate() != nullptr) // The delegate could have been GC'ed.
             {
                 NANOCLR_CHECK_HRESULT(Change(reference, intermediate, *newDlgs, fCombine, fWeak));
 
@@ -112,9 +112,9 @@ HRESULT CLR_RT_HeapBlock_Delegate_List::Change(
     else
     {
         dlgListSrc = delegateSrc.DereferenceDelegateList();
-        if (dlgListSrc == NULL)
+        if (dlgListSrc == nullptr)
         {
-            oldDlgs = NULL;
+            oldDlgs = nullptr;
             oldNum = 0;
         }
         else
@@ -158,7 +158,7 @@ HRESULT CLR_RT_HeapBlock_Delegate_List::Change(
                 CLR_RT_HeapBlock_Delegate *ptr = newDlgs->DereferenceDelegate();
                 if (ptr)
                 {
-                    if (ptr->DelegateFtn().m_data == dlg->DelegateFtn().m_data &&
+                    if (ptr->DelegateFtn().data == dlg->DelegateFtn().data &&
                         ptr->m_object.Dereference() == dlg->m_object.Dereference())
                     {
                         break;
@@ -180,7 +180,7 @@ HRESULT CLR_RT_HeapBlock_Delegate_List::Change(
 
             if (oldNum == 1)
             {
-                reference.SetObjectReference(NULL); // Oops, empty delegate...
+                reference.SetObjectReference(nullptr); // Oops, empty delegate...
                 NANOCLR_SET_AND_LEAVE(S_OK);
             }
 

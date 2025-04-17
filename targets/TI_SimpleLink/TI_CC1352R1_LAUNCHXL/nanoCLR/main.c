@@ -108,3 +108,14 @@ int main(void)
 
     return (0);
 }
+
+///////////////////////////////////////////////////////////////////////
+// need this dummy implementation here (started with SDK 4.20.01.04) //
+///////////////////////////////////////////////////////////////////////
+void __attribute__((naked)) _exit(int code)
+{
+    (void)code;
+
+    for (;;)
+        ;
+}

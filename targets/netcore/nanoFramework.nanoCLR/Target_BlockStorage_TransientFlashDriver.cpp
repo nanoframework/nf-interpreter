@@ -7,7 +7,7 @@
 
 #include <Target_BlockStorage_TransientFlashDriver.h>
 
-CLR_RT_Buffer *storage = NULL;
+CLR_RT_Buffer *storage = nullptr;
 
 bool TransientFlashDriver_InitializeDevice(void *context)
 {
@@ -52,9 +52,9 @@ bool TransientFlashDriver_Write(
 
     auto *config = (MEMORY_MAPPED_NOR_BLOCK_CONFIG *)context;
     auto offset = startAddress - config->Memory.BaseAddress;
-    
+
     std::memcpy(&(*storage)[offset], buffer, numBytes);
-    
+
     return true;
 }
 

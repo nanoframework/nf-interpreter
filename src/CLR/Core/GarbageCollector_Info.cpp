@@ -270,8 +270,8 @@ bool CLR_RT_GarbageCollector::TestPointers_PopulateOld_Worker(void **ref)
         ptr->oldRef = ref;
         ptr->oldPtr = dst;
 
-        ptr->newRef = NULL;
-        ptr->newPtr = NULL;
+        ptr->newRef = nullptr;
+        ptr->newPtr = nullptr;
 
         ptr->data = *dst;
 

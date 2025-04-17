@@ -17,7 +17,7 @@ HRESULT Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_E
 {
     NANOCLR_HEADER();
     {
-        CLR_RT_HeapBlock *transmitter_channel_settings = NULL;
+        CLR_RT_HeapBlock *transmitter_channel_settings = nullptr;
         int32_t channel;
         int32_t pin_number;
 
@@ -110,7 +110,7 @@ HRESULT Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_E
 {
     NANOCLR_HEADER();
 
-    CLR_RT_HeapBlock *transmitter_channel_settings = NULL;
+    CLR_RT_HeapBlock *transmitter_channel_settings = nullptr;
     int32_t channel;
     bool retVal = 0;
     rmt_idle_level_t level;
@@ -139,7 +139,7 @@ HRESULT Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_E
 {
     NANOCLR_HEADER();
 
-    CLR_RT_HeapBlock *transmitter_channel_settings = NULL;
+    CLR_RT_HeapBlock *transmitter_channel_settings = nullptr;
     int32_t channel;
     bool enabled;
     esp_err_t err;
@@ -173,7 +173,7 @@ HRESULT Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_E
 
 #if SOC_RMT_SUPPORT_TX_LOOP_COUNT
 
-    CLR_RT_HeapBlock *transmitter_channel_settings = NULL;
+    CLR_RT_HeapBlock *transmitter_channel_settings = nullptr;
     int32_t channel;
     uint32_t count;
     esp_err_t err;
@@ -218,7 +218,7 @@ HRESULT Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_E
     bool carrier_level;
     esp_err_t err;
 
-    CLR_RT_HeapBlock *transmitter_channel_settings = NULL;
+    CLR_RT_HeapBlock *transmitter_channel_settings = nullptr;
 
     CLR_RT_HeapBlock *pThis = stack.This();
     FAULT_ON_NULL(pThis);
@@ -270,7 +270,7 @@ HRESULT Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_E
     bool idle_level;
     esp_err_t err;
 
-    CLR_RT_HeapBlock *transmitter_channel_settings = NULL;
+    CLR_RT_HeapBlock *transmitter_channel_settings = nullptr;
 
     CLR_RT_HeapBlock *pThis = stack.This();
     FAULT_ON_NULL(pThis);
@@ -301,7 +301,7 @@ HRESULT Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_E
 {
     NANOCLR_HEADER();
 
-    CLR_RT_HeapBlock *transmitter_channel_settings = NULL;
+    CLR_RT_HeapBlock *transmitter_channel_settings = nullptr;
     CLR_RT_HeapBlock *pThis = stack.This();
     FAULT_ON_NULL(pThis);
 
@@ -344,7 +344,7 @@ HRESULT Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_E
 {
     NANOCLR_HEADER();
 
-    CLR_RT_HeapBlock *transmitter_channel_settings = NULL;
+    CLR_RT_HeapBlock *transmitter_channel_settings = nullptr;
     int32_t channel;
 
     CLR_RT_HeapBlock *pThis = stack.This();

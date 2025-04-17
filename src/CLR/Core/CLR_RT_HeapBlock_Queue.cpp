@@ -25,7 +25,7 @@ HRESULT CLR_RT_HeapBlock_Queue::Dequeue(CLR_RT_HeapBlock *&value)
 
     value = removed->Dereference();
 
-    removed->SetObjectReference(NULL);
+    removed->SetObjectReference(nullptr);
 
     SetHead((head + 1) % array->m_numOfElements);
 
@@ -59,7 +59,7 @@ HRESULT CLR_RT_HeapBlock_Queue::Enqueue(CLR_RT_HeapBlock *value)
         capacity *= 2;
 
         NANOCLR_CHECK_HRESULT(
-            CLR_RT_HeapBlock_Array::CreateInstance(newArrayHB, capacity, g_CLR_RT_WellKnownTypes.m_Object));
+            CLR_RT_HeapBlock_Array::CreateInstance(newArrayHB, capacity, g_CLR_RT_WellKnownTypes.Object));
 
         array = newArrayHB.DereferenceArray();
 

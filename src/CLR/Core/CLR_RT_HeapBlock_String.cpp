@@ -15,7 +15,7 @@ CLR_RT_HeapBlock_String *CLR_RT_HeapBlock_String::CreateInstance(CLR_RT_HeapBloc
     CLR_UINT32 totLength = sizeof(CLR_RT_HeapBlock_String) + length + 1;
     CLR_RT_HeapBlock_String *str;
 
-    reference.SetObjectReference(NULL);
+    reference.SetObjectReference(nullptr);
 
     str = (CLR_RT_HeapBlock_String *)g_CLR_RT_ExecutionEngine.ExtractHeapBytesForObjects(DATATYPE_STRING, 0, totLength);
     if (str)
@@ -30,7 +30,7 @@ CLR_RT_HeapBlock_String *CLR_RT_HeapBlock_String::CreateInstance(CLR_RT_HeapBloc
 #if defined(NANOCLR_NO_ASSEMBLY_STRINGS)
         str->SetStringText(szText);
 #else
-        str->SetStringText(szText, NULL);
+        str->SetStringText(szText, nullptr);
 #endif
 
         // store reference to the storage area
@@ -88,7 +88,7 @@ HRESULT CLR_RT_HeapBlock_String::CreateInstance(CLR_RT_HeapBlock &reference, con
 
     CLR_RT_HeapBlock_String *str;
 
-    reference.SetObjectReference(NULL);
+    reference.SetObjectReference(nullptr);
 
     // get heap block for the string object
     // only the header is required as we're just pointing to the string stored in the assembly

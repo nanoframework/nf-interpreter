@@ -13,14 +13,14 @@ int ssl_available_internal(int sd)
     mbedtls_ssl_context *ssl = context->ssl;
 
     // sanity check
-    if (ssl == NULL)
+    if (ssl == nullptr)
     {
         return SOCK_SOCKET_ERROR;
     }
 
     // Developer note
-    // Ideally we should be making a call to read passing a NULL pointer and requesting 0 bytes
-    // Like this: mbedtls_ssl_read(ssl, NULL, 0)
+    // Ideally we should be making a call to read passing a nullptr pointer and requesting 0 bytes
+    // Like this: mbedtls_ssl_read(ssl, nullptr, 0)
     // It won't work because we are using blockign sockets.
     // Even if we unblock it temporarily, it will still won't return until there is something to be read.
     // That call will block the execution and the watchdog will eventually kick in.

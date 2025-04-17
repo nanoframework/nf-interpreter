@@ -9,7 +9,7 @@
 
 // HAL_DblLinkedList<BlockStorageDevice> BlockStorageList::s_deviceList;
 // BlockStorageDevice*                   BlockStorageList::s_primaryDevice = NULL;
-static BlockStorageDevice *s_primaryDevice = NULL;
+static BlockStorageDevice *s_primaryDevice = nullptr;
 
 //--//
 
@@ -71,7 +71,7 @@ unsigned int BlockStorageList_GetNumDevices()
 // bool BlockStorageList::FindDeviceForPhysicalAddress( BlockStorageDevice** pBSD, unsigned int PhysicalAddress,
 // ByteAddress &SectAddress)
 //{
-//    *pBSD = NULL;
+//    *pBSD = nullptr;
 //    return FALSE;
 //}
 bool BlockStorageList_FindDeviceForPhysicalAddress(

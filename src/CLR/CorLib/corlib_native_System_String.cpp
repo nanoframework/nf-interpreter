@@ -206,10 +206,10 @@ HRESULT Library_corlib_native_System_String::_ctor___VOID__CHAR__I4(CLR_RT_Stack
     {
         CLR_RT_HeapBlock tmp;
 
-        tmp.SetObjectReference(NULL);
+        tmp.SetObjectReference(nullptr);
         CLR_RT_ProtectFromGC gc(tmp);
 
-        NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance(tmp, len, g_CLR_RT_WellKnownTypes.m_Char));
+        NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance(tmp, len, g_CLR_RT_WellKnownTypes.Char));
 
         {
             CLR_RT_HeapBlock_Array *tmpArray = tmp.DereferenceArray();
@@ -450,7 +450,7 @@ HRESULT Library_corlib_native_System_String::Trim___STRING(CLR_RT_StackFrame &st
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
 
-    NANOCLR_SET_AND_LEAVE(Trim(stack, NULL, true, true));
+    NANOCLR_SET_AND_LEAVE(Trim(stack, nullptr, true, true));
 
     NANOCLR_NOCLEANUP();
 }
@@ -605,8 +605,8 @@ HRESULT Library_corlib_native_System_String::IndexOf(CLR_RT_StackFrame &stack, i
     if (!szText)
         szText = "";
     pos = -1;
-    pString = NULL;
-    pChars = NULL;
+    pString = nullptr;
+    pChars = nullptr;
 
     if (mode & c_IndexOf__SingleChar)
     {
@@ -864,7 +864,7 @@ HRESULT Library_corlib_native_System_String::ChangeCase(CLR_RT_StackFrame &stack
     CLR_RT_HeapBlock_Array *arrayTmp;
     CLR_RT_HeapBlock refTmp;
 
-    refTmp.SetObjectReference(NULL);
+    refTmp.SetObjectReference(nullptr);
     CLR_RT_ProtectFromGC gc(refTmp);
 
     NANOCLR_CHECK_HRESULT(ConvertToCharArray(stack, refTmp, arrayTmp, 0, -1));
@@ -905,7 +905,7 @@ HRESULT Library_corlib_native_System_String::Substring(CLR_RT_StackFrame &stack,
     CLR_RT_HeapBlock_Array *arrayTmp;
     CLR_RT_HeapBlock refTmp;
 
-    refTmp.SetObjectReference(NULL);
+    refTmp.SetObjectReference(nullptr);
     CLR_RT_ProtectFromGC gc(refTmp);
 
     NANOCLR_CHECK_HRESULT(ConvertToCharArray(stack, refTmp, arrayTmp, 0, -1));
@@ -946,7 +946,7 @@ HRESULT Library_corlib_native_System_String::Trim(
     CLR_RT_HeapBlock refTmp;
     CLR_RT_HeapBlock_Array *arrayTmp;
 
-    refTmp.SetObjectReference(NULL);
+    refTmp.SetObjectReference(nullptr);
     CLR_RT_ProtectFromGC gc(refTmp);
 
     NANOCLR_CHECK_HRESULT(ConvertToCharArray(stack, refTmp, arrayTmp, 0, -1));
@@ -1035,7 +1035,7 @@ HRESULT Library_corlib_native_System_String::Split(CLR_RT_StackFrame &stack, CLR
     {
         CLR_RT_HeapBlock &refTarget = stack.PushValue();
 
-        NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance(refTarget, 0, g_CLR_RT_WellKnownTypes.m_String));
+        NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance(refTarget, 0, g_CLR_RT_WellKnownTypes.String));
 
         arrayDst = refTarget.DereferenceArray();
     }
@@ -1043,7 +1043,7 @@ HRESULT Library_corlib_native_System_String::Split(CLR_RT_StackFrame &stack, CLR
     {
         arrayChars = chars.DereferenceArray();
 
-        if (arrayChars != NULL && arrayChars->m_numOfElements > 0)
+        if (arrayChars != nullptr && arrayChars->m_numOfElements > 0)
         {
             pChars = (CLR_UINT16 *)arrayChars->GetFirstElement();
             cChars = arrayChars->m_numOfElements;
@@ -1054,12 +1054,12 @@ HRESULT Library_corlib_native_System_String::Split(CLR_RT_StackFrame &stack, CLR
             cChars = ARRAYSIZE(c_WhiteSpaces);
         }
 
-        arrayDst = NULL;
+        arrayDst = nullptr;
 
         {
             CLR_RT_HeapBlock refSrc;
 
-            refSrc.SetObjectReference(NULL);
+            refSrc.SetObjectReference(nullptr);
             CLR_RT_ProtectFromGC gc(refSrc);
 
             NANOCLR_CHECK_HRESULT(ConvertToCharArray(stack, refSrc, arraySrc, 0, -1));
@@ -1120,7 +1120,7 @@ HRESULT Library_corlib_native_System_String::Split(CLR_RT_StackFrame &stack, CLR
                     CLR_RT_HeapBlock &refTarget = stack.PushValue();
 
                     NANOCLR_CHECK_HRESULT(
-                        CLR_RT_HeapBlock_Array::CreateInstance(refTarget, count, g_CLR_RT_WellKnownTypes.m_String));
+                        CLR_RT_HeapBlock_Array::CreateInstance(refTarget, count, g_CLR_RT_WellKnownTypes.String));
 
                     arrayDst = refTarget.DereferenceArray();
                 }
@@ -1140,7 +1140,7 @@ HRESULT Library_corlib_native_System_String::Concat(CLR_RT_StackFrame &stack, CL
 
     CLR_RT_HeapBlock *ptrSrc;
     const char *szTextSrc;
-    char *szTextDst = NULL;
+    char *szTextDst = nullptr;
     CLR_UINT32 totLen;
     CLR_UINT32 len;
 
@@ -1152,7 +1152,7 @@ HRESULT Library_corlib_native_System_String::Concat(CLR_RT_StackFrame &stack, CL
 
         for (int iStr = 0; iStr < num; iStr++)
         {
-            if (ptrSrc->Dereference() != NULL && ptrSrc->Dereference()->DataType() == DATATYPE_STRING)
+            if (ptrSrc->Dereference() != nullptr && ptrSrc->Dereference()->DataType() == DATATYPE_STRING)
             {
                 szTextSrc = ptrSrc->RecoverString();
 
@@ -1218,7 +1218,7 @@ HRESULT Library_corlib_native_System_String::ConvertToCharArray(
     if (CLR_RT_HeapBlock_Array::CheckRange(startIndex, length, totLength) == false)
         NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_RANGE);
 
-    NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance(ref, length, g_CLR_RT_WellKnownTypes.m_Char));
+    NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance(ref, length, g_CLR_RT_WellKnownTypes.Char));
 
     array = ref.DereferenceArray();
 

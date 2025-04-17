@@ -12,7 +12,7 @@ HRESULT Library_sys_dev_dac_native_System_Device_Dac_DacChannel::NativeWriteValu
 {
     NANOCLR_HEADER();
     {
-        CLR_RT_HeapBlock *dacController = NULL;
+        CLR_RT_HeapBlock *dacController = nullptr;
         int channelNumber;
         int controllerId;
         dac_channel_t dacChannel = DAC_CHAN_0;
@@ -20,7 +20,7 @@ HRESULT Library_sys_dev_dac_native_System_Device_Dac_DacChannel::NativeWriteValu
         // Get value argumant and mask to 0 - 255 range
         uint16_t value = (stack.Arg1().NumericByRefConst().u2 & 0xff);
 
-        // get a pointer to the managed object instance and check that it's not NULL
+        // get a pointer to the managed object instance and check that it's not nullptr
         CLR_RT_HeapBlock *pThis = stack.This();
         FAULT_ON_NULL(pThis);
 
@@ -69,7 +69,7 @@ HRESULT Library_sys_dev_dac_native_System_Device_Dac_DacChannel::NativeDispose__
     int dacChannel;
     bool disposeController = false;
 
-    // get a pointer to the managed object instance and check that it's not NULL
+    // get a pointer to the managed object instance and check that it's not nullptr
     CLR_RT_HeapBlock *pThis = stack.This();
     FAULT_ON_NULL(pThis);
 

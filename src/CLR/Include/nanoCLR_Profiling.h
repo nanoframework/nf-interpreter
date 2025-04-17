@@ -6,6 +6,8 @@
 #ifndef NANOCLR_PROFILING_H
 #define NANOCLR_PROFILING_H
 
+// clang-format off
+
 #if defined(NANOCLR_PROFILE_NEW)
 
 /*
@@ -19,9 +21,9 @@ int      = 32BIT
 long     = 64BIT
 pointer  = 32BIT
 datatype = 8BIT
-typedef-idx = 32BIT
-method-idx  = 32BIT
-    nanoCLR Method_Idx value for identifying a specific function
+typedef-index = 32BIT
+method-index  = 32BIT
+    nanoCLR Method_Index value for identifying a specific function
 
 stream-packet = sequence-id length stream-payload
     A chunk of data sent out over the WireProtocol.
@@ -65,7 +67,7 @@ heapdump-start-packet = heapdump-start-header
 heapdump-root-packet = heapdump-root-header ( heapdump-root-stack / heapdump-root-other )
 heapdump-root-header = "00000011"
 
-heapdump-root-stack = heapdump-root-stack-header method-idx
+heapdump-root-stack = heapdump-root-stack-header method-index
 heapdump-root-stack-header = "101"
 
 heapdump-root-other = heapdump-root-finalizer / heapdump-root-appdomain / heapdump-root-assembly / heapdump-root-thread
@@ -84,11 +86,11 @@ heapdump-object-type = heapdump-object-classvaluetype / heapdump-object-array / 
 
 heapdump-object-classvaluetype = heapdump-object-classvaluetype-header heapdump-object-classvaluetype-typedef
 heapdump-object-classvaluetype-header = "00010001" / "00010010"
-heapdump-object-classvaluetype-typedef = typedef-idx
+heapdump-object-classvaluetype-typedef = typedef-index
 
 heapdump-object-array = heapdump-object-array-header heapdump-object-array-datatype heapdump-object-array-levels
 heapdump-object-array-header = "00010011"
-heapdump-object-array-typedef = typedef-idx
+heapdump-object-array-typedef = typedef-index
 heapdump-object-array-levels = short
     Rank of the array
 
@@ -211,7 +213,7 @@ struct CLR_PRF_Profiler
     CLR_RT_HeapBlock_MemoryStream *m_stream;
     CLR_UINT16 m_packetSeqId;
     CLR_UINT32 m_lastTimestamp;
-    CLR_IDX m_currentAssembly;
+    CLR_INDEX m_currentAssembly;
     int m_currentThreadPID;
     bool m_initialized;
 };
@@ -219,4 +221,6 @@ struct CLR_PRF_Profiler
 extern CLR_PRF_Profiler g_CLR_PRF_Profiler;
 
 #endif // defined(NANOCLR_PROFILE_NEW)
+// clang-format on
+
 #endif // NANOCLR_PROFILING_H

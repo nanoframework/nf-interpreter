@@ -138,7 +138,7 @@ HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_DisplayControl::
     displayConfig.Screen.height = screenconfig[ScreenConfiguration::FIELD___height].NumericByRef().u2;
     graphicDriver = screenconfig[ScreenConfiguration::FIELD___graphicDriver].Dereference();
 
-    if (graphicDriver != NULL)
+    if (graphicDriver != nullptr)
     {
         displayConfig.GenericDriverCommands.Width = graphicDriver[GraphicDriver::FIELD___width].NumericByRef().u4;
         displayConfig.GenericDriverCommands.Height = graphicDriver[GraphicDriver::FIELD___height].NumericByRef().u4;

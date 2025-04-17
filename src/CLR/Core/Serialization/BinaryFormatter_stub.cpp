@@ -16,7 +16,7 @@ __nfweak CLR_RT_HeapBlock *CLR_RT_BinaryFormatter::TypeHandler::FixDereference(C
     (void)v;
 
     NATIVE_PROFILE_CLR_SERIALIZATION();
-    return NULL;
+    return nullptr;
 }
 
 __nfweak CLR_RT_HeapBlock *CLR_RT_BinaryFormatter::TypeHandler::FixNull(CLR_RT_HeapBlock *v)
@@ -24,7 +24,7 @@ __nfweak CLR_RT_HeapBlock *CLR_RT_BinaryFormatter::TypeHandler::FixNull(CLR_RT_H
     (void)v;
 
     NATIVE_PROFILE_CLR_SERIALIZATION();
-    return NULL;
+    return nullptr;
 }
 
 //--//
@@ -69,12 +69,12 @@ __nfweak bool CLR_RT_BinaryFormatter::TypeHandler::CompareTypes(
     return true;
 }
 
-__nfweak CLR_DataType CLR_RT_BinaryFormatter::TypeHandler::GetDataType(CLR_RT_TypeDescriptor *type)
+__nfweak NanoCLRDataType CLR_RT_BinaryFormatter::TypeHandler::GetDataType(CLR_RT_TypeDescriptor *type)
 {
     (void)type;
 
     NATIVE_PROFILE_CLR_SERIALIZATION();
-    return (CLR_DataType)0;
+    return (NanoCLRDataType)0;
 }
 
 __nfweak CLR_UINT32 CLR_RT_BinaryFormatter::TypeHandler::GetSizeOfType(CLR_RT_TypeDescriptor *type)
@@ -348,12 +348,12 @@ __nfweak CLR_UINT32 CLR_RT_BinaryFormatter::SearchDuplicate(CLR_RT_HeapBlock *ob
     return (CLR_UINT32)-1;
 }
 
-__nfweak CLR_RT_HeapBlock *CLR_RT_BinaryFormatter::GetDuplicate(CLR_UINT32 idx)
+__nfweak CLR_RT_HeapBlock *CLR_RT_BinaryFormatter::GetDuplicate(CLR_UINT32 index)
 {
-    (void)idx;
+    (void)index;
 
     NATIVE_PROFILE_CLR_SERIALIZATION();
-    return NULL;
+    return nullptr;
 }
 
 //--//--//

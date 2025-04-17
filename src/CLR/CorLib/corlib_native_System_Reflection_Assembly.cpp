@@ -19,23 +19,22 @@ HRESULT Library_corlib_native_System_Reflection_Assembly::get_FullName___STRING(
 
     NANOCLR_CHECK_HRESULT(GetTypeDescriptor(*hbAsm, instance));
 
-    assm = instance.m_assm;
-    header = assm->m_header;
+    assm = instance.assembly;
+    header = assm->header;
 
-    if (hal_strlen_s(assm->m_szName) > NANOCLR_MAX_ASSEMBLY_NAME)
+    if (hal_strlen_s(assm->name) > NANOCLR_MAX_ASSEMBLY_NAME)
     {
         NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
     }
 
-    snprintf(
+    sprintf(
         buffer,
-        ARRAYSIZE(buffer),
         "%s, Version=%d.%d.%d.%d",
-        assm->m_szName,
-        header->version.iMajorVersion,
-        header->version.iMinorVersion,
-        header->version.iBuildNumber,
-        header->version.iRevisionNumber);
+        assm->name,
+        header->version.majorVersion,
+        header->version.minorVersion,
+        header->version.buildNumber,
+        header->version.revisionNumber);
 
     stack.SetResult_String(buffer);
 
@@ -62,10 +61,9 @@ HRESULT Library_corlib_native_System_Reflection_Assembly::GetType___SystemType__
 
     hbRef = &stack.PushValueAndClear();
 
-    if (g_CLR_RT_TypeSystem.FindTypeDef(szClass, assm.m_assm, td))
+    if (g_CLR_RT_TypeSystem.FindTypeDef(szClass, assm.assembly, td))
     {
-        NANOCLR_CHECK_HRESULT(
-            g_CLR_RT_ExecutionEngine.NewObjectFromIndex(*hbRef, g_CLR_RT_WellKnownTypes.m_TypeStatic));
+        NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObjectFromIndex(*hbRef, g_CLR_RT_WellKnownTypes.TypeStatic));
 
         hbObj = hbRef->Dereference();
         hbObj->SetReflection(td);
@@ -85,27 +83,27 @@ HRESULT Library_corlib_native_System_Reflection_Assembly::GetTypes___SZARRAY_Sys
     NANOCLR_CHECK_HRESULT(GetTypeDescriptor(*hbAsm, assm));
 
     {
-        CLR_RT_Assembly *pASSM = assm.m_assm;
-        CLR_UINT32 num = pASSM->m_pTablesSize[TBL_TypeDef];
+        CLR_RT_Assembly *pASSM = assm.assembly;
+        CLR_UINT32 num = pASSM->tablesSize[TBL_TypeDef];
         CLR_RT_HeapBlock &top = stack.PushValue();
         CLR_RT_HeapBlock *hbObj;
 
-        NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance(top, num, g_CLR_RT_WellKnownTypes.m_TypeStatic));
+        NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance(top, num, g_CLR_RT_WellKnownTypes.TypeStatic));
 
         if (num)
         {
-            CLR_RT_HeapBlock *pArray = (CLR_RT_HeapBlock *)top.DereferenceArray()->GetFirstElement();
+            auto *pArray = (CLR_RT_HeapBlock *)top.DereferenceArray()->GetFirstElement();
 
             for (CLR_UINT32 i = 0; i < num; i++, pArray++)
             {
-                CLR_RT_TypeDef_Index idx;
-                idx.Set(pASSM->m_idx, i);
+                CLR_RT_TypeDef_Index index;
+                index.Set(pASSM->assemblyIndex, i);
 
                 NANOCLR_CHECK_HRESULT(
-                    g_CLR_RT_ExecutionEngine.NewObjectFromIndex(*pArray, g_CLR_RT_WellKnownTypes.m_TypeStatic));
+                    g_CLR_RT_ExecutionEngine.NewObjectFromIndex(*pArray, g_CLR_RT_WellKnownTypes.TypeStatic));
 
                 hbObj = pArray->Dereference();
-                hbObj->SetReflection(idx);
+                hbObj->SetReflection(index);
             }
         }
     }
@@ -120,7 +118,7 @@ HRESULT Library_corlib_native_System_Reflection_Assembly::GetVersion___VOID__BYR
     NANOCLR_HEADER();
 
     CLR_RT_StackFrame *caller = stack.Caller();
-    if (caller == NULL)
+    if (caller == nullptr)
     {
         NANOCLR_SET_AND_LEAVE(S_OK);
     }
@@ -131,13 +129,13 @@ HRESULT Library_corlib_native_System_Reflection_Assembly::GetVersion___VOID__BYR
 
         NANOCLR_CHECK_HRESULT(GetTypeDescriptor(*hbAsm, assm));
 
-        const CLR_RECORD_VERSION &version = assm.m_assm->m_header->version;
+        const CLR_RECORD_VERSION &version = assm.assembly->header->version;
 
-        // we do not check for the reference not to be NULL because this is an internal method
-        stack.Arg1().Dereference()->NumericByRef().s4 = version.iMajorVersion;
-        stack.Arg2().Dereference()->NumericByRef().s4 = version.iMinorVersion;
-        stack.Arg3().Dereference()->NumericByRef().s4 = version.iBuildNumber;
-        stack.Arg4().Dereference()->NumericByRef().s4 = version.iRevisionNumber;
+        // we do not check for the reference not to be nullptr because this is an internal method
+        stack.Arg1().Dereference()->NumericByRef().s4 = version.majorVersion;
+        stack.Arg2().Dereference()->NumericByRef().s4 = version.minorVersion;
+        stack.Arg3().Dereference()->NumericByRef().s4 = version.buildNumber;
+        stack.Arg4().Dereference()->NumericByRef().s4 = version.revisionNumber;
     }
     NANOCLR_NOCLEANUP();
 }
@@ -154,20 +152,21 @@ HRESULT Library_corlib_native_System_Reflection_Assembly::GetManifestResourceNam
     NANOCLR_CHECK_HRESULT(GetTypeDescriptor(*hbAsm, assm));
 
     {
-        CLR_RT_Assembly *pAssm = assm.m_assm;
+        CLR_RT_Assembly *pAssm = assm.assembly;
         CLR_RT_HeapBlock &result = stack.PushValue();
 
         NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance(
             result,
-            pAssm->m_pTablesSize[TBL_ResourcesFiles],
-            g_CLR_RT_WellKnownTypes.m_String));
+            pAssm->tablesSize[TBL_ResourcesFiles],
+            g_CLR_RT_WellKnownTypes.String));
 
         {
-            CLR_RT_HeapBlock *pArray = (CLR_RT_HeapBlock *)result.Array()->GetFirstElement();
+            auto *pArray = (CLR_RT_HeapBlock *)result.Array()->GetFirstElement();
 
-            for (int idxResourceFile = 0; idxResourceFile < pAssm->m_pTablesSize[TBL_ResourcesFiles]; idxResourceFile++)
+            for (int indexResourceFile = 0; indexResourceFile < pAssm->tablesSize[TBL_ResourcesFiles];
+                 indexResourceFile++)
             {
-                const CLR_RECORD_RESOURCE_FILE *resourceFile = pAssm->GetResourceFile(idxResourceFile);
+                const CLR_RECORD_RESOURCE_FILE *resourceFile = pAssm->GetResourceFile(indexResourceFile);
 
                 NANOCLR_CHECK_HRESULT(
                     CLR_RT_HeapBlock_String::CreateInstance(*pArray, pAssm->GetString(resourceFile->name)));
@@ -190,17 +189,17 @@ HRESULT Library_corlib_native_System_Reflection_Assembly::GetExecutingAssembly__
     CLR_RT_HeapBlock *hbObj;
 
     CLR_RT_StackFrame *caller = stack.Caller();
-    if (caller == NULL)
+    if (caller == nullptr)
         NANOCLR_SET_AND_LEAVE(S_OK);
 
     {
-        CLR_RT_Assembly_Index idx;
-        idx.Set(caller->MethodCall().m_assm->m_idx);
+        CLR_RT_Assembly_Index index;
+        index.Set(caller->MethodCall().assembly->assemblyIndex);
 
-        NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObjectFromIndex(top, g_CLR_RT_WellKnownTypes.m_Assembly));
+        NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObjectFromIndex(top, g_CLR_RT_WellKnownTypes.Assembly));
 
         hbObj = top.Dereference();
-        hbObj->SetReflection(idx);
+        hbObj->SetReflection(index);
     }
 
     NANOCLR_NOCLEANUP();
@@ -219,7 +218,7 @@ HRESULT Library_corlib_native_System_Reflection_Assembly::
     CLR_RT_HeapBlock *hbObj;
     CLR_RT_Assembly *assembly;
     const char *szAssembly;
-    CLR_RT_Assembly_Index idx;
+    CLR_RT_Assembly_Index index;
     bool fVersion;
     CLR_INT16 maj, min, build, rev;
     CLR_RT_HeapBlock &top = stack.PushValueAndClear();
@@ -241,33 +240,33 @@ HRESULT Library_corlib_native_System_Reflection_Assembly::
     {
         CLR_RECORD_VERSION ver;
 
-        ver.iMajorVersion = (CLR_UINT16)maj;
-        ver.iMinorVersion = (CLR_UINT16)min;
-        ver.iBuildNumber = (CLR_UINT16)build;
-        ver.iRevisionNumber = (CLR_UINT16)rev;
+        ver.majorVersion = (CLR_UINT16)maj;
+        ver.minorVersion = (CLR_UINT16)min;
+        ver.buildNumber = (CLR_UINT16)build;
+        ver.revisionNumber = (CLR_UINT16)rev;
 
         assembly = g_CLR_RT_TypeSystem.FindAssembly(szAssembly, &ver, true);
         FAULT_ON_NULL_HR(assembly, CLR_E_INVALID_PARAMETER);
     }
     else
     {
-        assembly = g_CLR_RT_TypeSystem.FindAssembly(szAssembly, NULL, false);
+        assembly = g_CLR_RT_TypeSystem.FindAssembly(szAssembly, nullptr, false);
         FAULT_ON_NULL_HR(assembly, CLR_E_INVALID_PARAMETER);
     }
 
 #if defined(NANOCLR_APPDOMAINS)
     NANOCLR_CHECK_HRESULT(appDomain->LoadAssembly(assembly));
 #endif
-    idx.Set(assembly->m_idx);
+    index.Set(assembly->assemblyIndex);
 
-    NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObjectFromIndex(top, g_CLR_RT_WellKnownTypes.m_Assembly));
+    NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObjectFromIndex(top, g_CLR_RT_WellKnownTypes.Assembly));
 
     hbObj = top.Dereference();
-    hbObj->SetReflection(idx);
+    hbObj->SetReflection(index);
 
     NANOCLR_CLEANUP();
 
-    // Avoid exception handling in common case.  Just return NULL on failure.
+    // Avoid exception handling in common case.  Just return nullptr on failure.
     // Managed code decides to throw the exception or not.
     hr = S_OK;
 
@@ -280,8 +279,8 @@ HRESULT Library_corlib_native_System_Reflection_Assembly::Load___STATIC__SystemR
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
 
-    CLR_RT_HeapBlock_Array *array = NULL;
-    CLR_RT_Assembly *assm = NULL;
+    CLR_RT_HeapBlock_Array *array = nullptr;
+    CLR_RT_Assembly *assm = nullptr;
     CLR_RT_HeapBlock *hbObj;
     CLR_RECORD_ASSEMBLY *header;
     CLR_RT_Assembly_Index assemblyIndex;
@@ -306,17 +305,9 @@ HRESULT Library_corlib_native_System_Reflection_Assembly::Load___STATIC__SystemR
     {
         if (header->GoodAssembly())
         {
-            //
-            // Sorry, you'll have to reboot to load this assembly.
-            //
-            if (header->flags & CLR_RECORD_ASSEMBLY::c_Flags_NeedReboot)
-            {
-                NANOCLR_SET_AND_LEAVE(CLR_E_BUSY);
-            }
-
             NANOCLR_CHECK_HRESULT(CLR_RT_Assembly::CreateInstance(header, assm));
 
-            assm->m_pFile = array;
+            assm->file = array;
 
             g_CLR_RT_TypeSystem.Link(assm);
 
@@ -324,7 +315,7 @@ HRESULT Library_corlib_native_System_Reflection_Assembly::Load___STATIC__SystemR
             NANOCLR_CHECK_HRESULT(g_CLR_RT_TypeSystem.PrepareForExecution());
 
             CLR_RT_MethodDef_Index idx;
-            idx.Set(assm->m_idx, 0);
+            idx.Set(assm->assemblyIndex, 0);
 
             if (assm->FindNextStaticConstructor(idx))
             {
@@ -341,7 +332,7 @@ HRESULT Library_corlib_native_System_Reflection_Assembly::Load___STATIC__SystemR
             }
 
             // push assembly index onto the eval stack
-            stack.PushValueU4(assm->m_idx);
+            stack.PushValueU4(assm->assemblyIndex);
         }
         else
         {
@@ -356,7 +347,7 @@ HRESULT Library_corlib_native_System_Reflection_Assembly::Load___STATIC__SystemR
 
     while (eventResult)
     {
-        if (assm->m_flags & CLR_RT_Assembly::StaticConstructorsExecuted)
+        if (assm->flags & CLR_RT_Assembly::StaticConstructorsExecuted)
         {
             // static constructors executed, we are good here
             break;
@@ -381,7 +372,7 @@ HRESULT Library_corlib_native_System_Reflection_Assembly::Load___STATIC__SystemR
     stack.PopValue();
 
     NANOCLR_CHECK_HRESULT(
-        g_CLR_RT_ExecutionEngine.NewObjectFromIndex(stack.PushValue(), g_CLR_RT_WellKnownTypes.m_Assembly));
+        g_CLR_RT_ExecutionEngine.NewObjectFromIndex(stack.PushValue(), g_CLR_RT_WellKnownTypes.Assembly));
 
     hbObj = stack.TopValue().Dereference();
     hbObj->SetReflection(assemblyIndex);

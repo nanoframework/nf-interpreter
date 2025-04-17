@@ -200,7 +200,7 @@ void HAL_COMPLETION::WaitForInterrupts(uint64_t expireTimeInTicks, uint32_t slee
     int state;
 
     // Any Completion events been Queued ?
-    if (ptr->Next() == NULL)
+    if (ptr->Next() == nullptr)
     {
         // No
         state = setCompare | nilCompare;

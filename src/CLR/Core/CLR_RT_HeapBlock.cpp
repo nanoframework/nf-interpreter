@@ -225,9 +225,9 @@ HRESULT CLR_RT_HeapBlock::SetReflection(const CLR_RT_Assembly_Index &assm)
     NANOCLR_HEADER();
 
     m_id.raw = CLR_RT_HEAPBLOCK_RAW_ID(DATATYPE_REFLECTION, 0, 1);
-    m_data.reflection.m_kind = REFLECTION_ASSEMBLY;
-    m_data.reflection.m_levels = 0;
-    m_data.reflection.m_data.m_assm = assm;
+    m_data.reflection.kind = REFLECTION_ASSEMBLY;
+    m_data.reflection.levels = 0;
+    m_data.reflection.data.assembly = assm;
 
     NANOCLR_NOCLEANUP_NOLABEL();
 }
@@ -253,9 +253,9 @@ HRESULT CLR_RT_HeapBlock::SetReflection(const CLR_RT_TypeDef_Index &cls)
     NANOCLR_HEADER();
 
     m_id.raw = CLR_RT_HEAPBLOCK_RAW_ID(DATATYPE_REFLECTION, 0, 1);
-    m_data.reflection.m_kind = REFLECTION_TYPE;
-    m_data.reflection.m_levels = 0;
-    m_data.reflection.m_data.m_type = cls;
+    m_data.reflection.kind = REFLECTION_TYPE;
+    m_data.reflection.levels = 0;
+    m_data.reflection.data.type = cls;
 
     NANOCLR_NOCLEANUP_NOLABEL();
 }
@@ -266,9 +266,9 @@ HRESULT CLR_RT_HeapBlock::SetReflection(const CLR_RT_FieldDef_Index &fd)
     NANOCLR_HEADER();
 
     m_id.raw = CLR_RT_HEAPBLOCK_RAW_ID(DATATYPE_REFLECTION, 0, 1);
-    m_data.reflection.m_kind = REFLECTION_FIELD;
-    m_data.reflection.m_levels = 0;
-    m_data.reflection.m_data.m_field = fd;
+    m_data.reflection.kind = REFLECTION_FIELD;
+    m_data.reflection.levels = 0;
+    m_data.reflection.data.field = fd;
 
     NANOCLR_NOCLEANUP_NOLABEL();
 }
@@ -286,10 +286,35 @@ HRESULT CLR_RT_HeapBlock::SetReflection(const CLR_RT_MethodDef_Index &md)
     }
 
     m_id.raw = CLR_RT_HEAPBLOCK_RAW_ID(DATATYPE_REFLECTION, 0, 1);
-    m_data.reflection.m_kind =
-        (inst.m_target->flags & CLR_RECORD_METHODDEF::MD_Constructor) ? REFLECTION_CONSTRUCTOR : REFLECTION_METHOD;
-    m_data.reflection.m_levels = 0;
-    m_data.reflection.m_data.m_method = md;
+    m_data.reflection.kind =
+        (inst.target->flags & CLR_RECORD_METHODDEF::MD_Constructor) ? REFLECTION_CONSTRUCTOR : REFLECTION_METHOD;
+    m_data.reflection.levels = 0;
+    m_data.reflection.data.method = md;
+
+    NANOCLR_NOCLEANUP();
+}
+
+HRESULT CLR_RT_HeapBlock::SetReflection(const CLR_RT_GenericParam_Index &gp)
+{
+    NATIVE_PROFILE_CLR_CORE();
+    NANOCLR_HEADER();
+
+    CLR_RT_GenericParam_Instance genericParam;
+    CLR_RT_TypeDef_Index typeDef;
+
+    if (genericParam.InitializeFromIndex(gp) == false)
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+    }
+
+    // grab the type definition from the generic param
+    typeDef = genericParam.CrossReference().classTypeDef;
+
+    m_id.raw = CLR_RT_HEAPBLOCK_RAW_ID(DATATYPE_REFLECTION, 0, 1);
+    m_data.reflection.levels = 0;
+    m_data.reflection.kind = REFLECTION_TYPE;
+    // set the type definition in the reflection block
+    m_data.reflection.data.type.Set(typeDef.Assembly(), typeDef.Type());
 
     NANOCLR_NOCLEANUP();
 }
@@ -307,8 +332,25 @@ HRESULT CLR_RT_HeapBlock::SetObjectCls(const CLR_RT_TypeDef_Index &cls)
     }
 
     m_data.objectHeader.cls = cls;
+    m_data.objectHeader.lock = nullptr;
 
-    m_data.objectHeader.lock = NULL;
+    NANOCLR_NOCLEANUP();
+}
+
+HRESULT CLR_RT_HeapBlock::SetGenericInstanceObject(const CLR_RT_TypeSpec_Index &genericType)
+{
+    NATIVE_PROFILE_CLR_CORE();
+    NANOCLR_HEADER();
+
+    CLR_RT_TypeSpec_Instance instance;
+
+    if (instance.InitializeFromIndex(genericType) == false)
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
+    }
+
+    m_data.genericInstance.genericType = genericType;
+    m_data.genericInstance.ptr = nullptr;
 
     NANOCLR_NOCLEANUP();
 }
@@ -386,7 +428,7 @@ HRESULT CLR_RT_HeapBlock::LoadFromReference(CLR_RT_HeapBlock &ref)
 
     CLR_RT_HeapBlock tmp;
     CLR_RT_HeapBlock *obj;
-    CLR_DataType dt = ref.DataType();
+    NanoCLRDataType dt = ref.DataType();
 
     if (dt == DATATYPE_ARRAY_BYREF)
     {
@@ -464,7 +506,7 @@ HRESULT CLR_RT_HeapBlock::LoadFromReference(CLR_RT_HeapBlock &ref)
                     NANOCLR_SET_AND_LEAVE(CLR_E_TYPE_UNAVAILABLE);
                 }
 
-                if (inst.m_target->dataType != DATATYPE_VALUETYPE) // It's a boxed primitive/enum type.
+                if (inst.target->dataType != DATATYPE_VALUETYPE) // It's a boxed primitive/enum type.
                 {
                     obj = &objT[1];
                 }
@@ -492,7 +534,7 @@ HRESULT CLR_RT_HeapBlock::StoreToReference(CLR_RT_HeapBlock &ref, int size)
     NANOCLR_HEADER();
 
     CLR_RT_HeapBlock *obj;
-    CLR_DataType dt = ref.DataType();
+    NanoCLRDataType dt = ref.DataType();
 
     if (dt == DATATYPE_ARRAY_BYREF)
     {
@@ -505,7 +547,7 @@ HRESULT CLR_RT_HeapBlock::StoreToReference(CLR_RT_HeapBlock &ref, int size)
             CLR_INT32 sizeArray = array->m_sizeOfElement;
 
             //
-            // Cannot copy NULL reference to a primitive type array.
+            // Cannot copy nullptr reference to a primitive type array.
             //
             obj = FixBoxingReference();
             FAULT_ON_NULL(obj);
@@ -528,7 +570,7 @@ HRESULT CLR_RT_HeapBlock::StoreToReference(CLR_RT_HeapBlock &ref, int size)
 
 #if defined(_DEBUG)
                 {
-                    CLR_DataType dtElem = (CLR_DataType)array->m_typeOfElement;
+                    NanoCLRDataType dtElem = (NanoCLRDataType)array->m_typeOfElement;
                     CLR_RT_HeapBlock blk;
 
                     blk.Assign(*this);
@@ -737,7 +779,7 @@ void CLR_RT_HeapBlock::AssignAndPinReferencedObject(const CLR_RT_HeapBlock &valu
     // This code is called only if "fixed" keyword is present in the managed code. Executed on assignment to "fixed"
     // pointer. First check if there is object referenced by the local var. We unpin it, since the reference is
     // replaced.
-    if ((m_data.objectReference.ptr != NULL && m_id.type.dataType == DATATYPE_ARRAY_BYREF) ||
+    if ((m_data.objectReference.ptr != nullptr && m_id.type.dataType == DATATYPE_ARRAY_BYREF) ||
         m_id.type.dataType == DATATYPE_BYREF)
     {
         // Unpin the object that has been pointed by local variable.
@@ -757,7 +799,7 @@ void CLR_RT_HeapBlock::AssignAndPinReferencedObject(const CLR_RT_HeapBlock &valu
     }
 
     // Pin the object referenced by local variable.
-    if ((m_data.objectReference.ptr != NULL && m_id.type.dataType == DATATYPE_ARRAY_BYREF) ||
+    if ((m_data.objectReference.ptr != nullptr && m_id.type.dataType == DATATYPE_ARRAY_BYREF) ||
         m_id.type.dataType == DATATYPE_BYREF)
     {
         m_data.objectReference.ptr->Pin();
@@ -802,7 +844,7 @@ HRESULT CLR_RT_HeapBlock::PerformBoxing(const CLR_RT_TypeDef_Instance &cls)
 
     CLR_RT_HeapBlock tmp;
     CLR_RT_HeapBlock *obj = this;
-    CLR_DataType dt = obj->DataType();
+    NanoCLRDataType dt = obj->DataType();
 
     //
     // System.DateTime and System.TimeSpan are real value types, so sometimes they are passed by reference.
@@ -826,7 +868,7 @@ HRESULT CLR_RT_HeapBlock::PerformBoxing(const CLR_RT_TypeDef_Instance &cls)
     }
 
     {
-        CLR_DataType dataType = (CLR_DataType)cls.m_target->dataType;
+        NanoCLRDataType dataType = (NanoCLRDataType)cls.target->dataType;
         const CLR_RT_DataTypeLookup &dtl = c_CLR_RT_DataTypeLookup[dataType];
 
         if (dtl.m_flags & CLR_RT_DataTypeLookup::c_OptimizedValueType)
@@ -898,7 +940,7 @@ HRESULT CLR_RT_HeapBlock::PerformUnboxing(const CLR_RT_TypeDef_Instance &cls)
 
     if (this->DataType() != DATATYPE_OBJECT)
     {
-        NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_CAST);
+        NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
     }
 
     // Finds the object that keeps the boxed type.
@@ -908,17 +950,17 @@ HRESULT CLR_RT_HeapBlock::PerformUnboxing(const CLR_RT_TypeDef_Instance &cls)
     // Validates that src keeps something boxed and the boxed value is VALUE type.
     if (src->IsBoxed() == false || src->DataType() != DATATYPE_VALUETYPE)
     {
-        NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_CAST);
+        NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
     }
 
     // Validates the type of data kept by object corresponds to type in cls.
     // If typedef indexes are the same, then skip and go to assigment of objects.
-    if (src->ObjectCls().m_data != cls.m_data)
+    if (src->ObjectCls().data != cls.data)
     {
         // The typedef indexes are different, but src and cls may have identical basic data type.
         // Need to check it. If identical - the unboxing is allowed.
         // This "if" compares underlying type in object and cls. Should be equal in order to continue.
-        if (!(src->DataSize() > 1 && (src[1].DataType() == cls.m_target->dataType)))
+        if (!(src->DataSize() > 1 && (src[1].DataType() == cls.target->dataType)))
         {
             // No luck. The types in src object and specified by cls are different. Need to throw exceptioin.
             NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_CAST);
@@ -933,14 +975,14 @@ HRESULT CLR_RT_HeapBlock::PerformUnboxing(const CLR_RT_TypeDef_Instance &cls)
 
         CLR_RT_TypeDef_Instance &inst = srcTypeDes.m_handlerCls;
 
-        if (inst.m_data == g_CLR_RT_WellKnownTypes.m_Guid.m_data)
+        if (inst.data == g_CLR_RT_WellKnownTypes.Guid.data)
         {
             // can't cast GUID class to anything else except another GUID
             NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_CAST);
         }
     }
 
-    if (cls.m_target->dataType == DATATYPE_VALUETYPE)
+    if (cls.target->dataType == DATATYPE_VALUETYPE)
     {
         NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.CloneObject(*this, *this));
 
@@ -950,7 +992,7 @@ HRESULT CLR_RT_HeapBlock::PerformUnboxing(const CLR_RT_TypeDef_Instance &cls)
     {
         this->Assign(src[1]);
 
-        this->ChangeDataType(cls.m_target->dataType);
+        this->ChangeDataType(cls.target->dataType);
     }
 
     NANOCLR_NOCLEANUP();
@@ -973,9 +1015,11 @@ CLR_RT_HeapBlock *CLR_RT_HeapBlock::FixBoxingReference()
             CLR_RT_TypeDef_Instance inst{};
 
             if (!inst.InitializeFromIndex(src->ObjectCls()))
-                return NULL;
+            {
+                return nullptr;
+            }
 
-            if (inst.m_target->dataType != DATATYPE_VALUETYPE) // It's a boxed primitive/enum type.
+            if (inst.target->dataType != DATATYPE_VALUETYPE) // It's a boxed primitive/enum type.
             {
                 return &src[1];
             }
@@ -993,7 +1037,7 @@ bool CLR_RT_HeapBlock::IsZero() const
     switch (DataType())
     {
         case DATATYPE_OBJECT:
-            return (m_data.objectReference.ptr == NULL);
+            return (m_data.objectReference.ptr == nullptr);
 
         case DATATYPE_I8:
         case DATATYPE_U8:
@@ -1161,7 +1205,7 @@ CLR_UINT32 CLR_RT_HeapBlock::GetHashCode(CLR_RT_HeapBlock *ptr, bool fRecurse, C
             // DATATYPE_I8
             // DATATYPE_U8
             // DATATYPE_R8
-            if (fRecurse && cls.m_target->dataType <= DATATYPE_R8)
+            if (fRecurse && cls.target->dataType <= DATATYPE_R8)
             {
                 // pass the 1st field which is the one holding the actual value
                 crc ^= GetHashCode(&ptr[CLR_RT_HeapBlock::HB_Object_Fields_Offset], false, crc);
@@ -1173,7 +1217,7 @@ CLR_UINT32 CLR_RT_HeapBlock::GetHashCode(CLR_RT_HeapBlock *ptr, bool fRecurse, C
 
                 if (fRecurse)
                 {
-                    int totFields = cls.CrossReference().m_totalFields;
+                    int totFields = cls.CrossReference().totalFields;
 
                     if (totFields > 0)
                     {
@@ -1266,13 +1310,13 @@ bool CLR_RT_HeapBlock::ObjectsEqual(
         return true;
     }
 
-    CLR_DataType leftDataType = pArgLeft.DataType();
-    CLR_DataType rightDataType = pArgRight.DataType();
+    NanoCLRDataType leftDataType = pArgLeft.DataType();
+    NanoCLRDataType rightDataType = pArgRight.DataType();
 
     switch (leftDataType)
     {
         case DATATYPE_VALUETYPE:
-            if (pArgLeft.ObjectCls().m_data == pArgRight.ObjectCls().m_data)
+            if (pArgLeft.ObjectCls().data == pArgRight.ObjectCls().data)
             {
                 const CLR_RT_HeapBlock *objLeft = &pArgLeft;
                 const CLR_RT_HeapBlock *objRight = &pArgRight;
@@ -1397,13 +1441,13 @@ bool CLR_RT_HeapBlock::ObjectsEqual(
                 if (rightObj->DataType() == DATATYPE_VALUETYPE)
                 {
                     CLR_RT_TypeDef_Instance inst{};
-                    CLR_RT_HeapBlock *obj = NULL;
+                    CLR_RT_HeapBlock *obj = nullptr;
 
                     if (!inst.InitializeFromIndex(rightObj->ObjectCls()))
                     {
                     }
 
-                    if (inst.m_target->dataType != DATATYPE_VALUETYPE)
+                    if (inst.target->dataType != DATATYPE_VALUETYPE)
                     {
                         // boxed primitive or enum type
                         obj = &rightObj[1];
@@ -1418,7 +1462,7 @@ bool CLR_RT_HeapBlock::ObjectsEqual(
                 }
                 else
                 {
-                    if (rightObj == NULL)
+                    if (rightObj == nullptr)
                     {
                         return false;
                     }
@@ -1463,7 +1507,7 @@ static const CLR_RT_HeapBlock *FixReflectionForType(const CLR_RT_HeapBlock &src,
     NATIVE_PROFILE_CLR_CORE();
     const CLR_RT_ReflectionDef_Index &rd = src.ReflectionDataConst();
 
-    if (rd.m_kind == REFLECTION_TYPE)
+    if (rd.kind == REFLECTION_TYPE)
     {
         CLR_RT_TypeDef_Instance inst{};
         CLR_UINT32 levels;
@@ -1474,7 +1518,7 @@ static const CLR_RT_HeapBlock *FixReflectionForType(const CLR_RT_HeapBlock &src,
 
             CLR_RT_ReflectionDef_Index &rd2 = tmp.ReflectionData();
 
-            rd2.InitializeFromHash(inst.CrossReference().m_hash);
+            rd2.InitializeFromHash(inst.CrossReference().hash);
 
             return &tmp;
         }
@@ -1590,8 +1634,8 @@ static inline int CompareValues_Pointers(const CLR_RT_HeapBlock *left, const CLR
 CLR_INT32 CLR_RT_HeapBlock::Compare_Values(const CLR_RT_HeapBlock &left, const CLR_RT_HeapBlock &right, bool fSigned)
 {
     NATIVE_PROFILE_CLR_CORE();
-    CLR_DataType leftDataType = left.DataType();
-    CLR_DataType rightDataType = right.DataType();
+    NanoCLRDataType leftDataType = left.DataType();
+    NanoCLRDataType rightDataType = right.DataType();
 
     if (leftDataType == rightDataType)
     {
@@ -1608,11 +1652,11 @@ CLR_INT32 CLR_RT_HeapBlock::Compare_Values(const CLR_RT_HeapBlock &left, const C
 
                 if (!leftObj)
                 {
-                    return !rightObj ? 0 : -1; // NULL references always compare smaller than non-NULL ones.
+                    return !rightObj ? 0 : -1; // nullptr references always compare smaller than non-nullptr ones.
                 }
                 else if (!rightObj)
                 {
-                    return 1; // NULL references always compare smaller than non-NULL ones.
+                    return 1; // nullptr references always compare smaller than non-nullptr ones.
                 }
 
                 return Compare_Values(*leftObj, *rightObj, fSigned);
@@ -1647,11 +1691,11 @@ CLR_INT32 CLR_RT_HeapBlock::Compare_Values(const CLR_RT_HeapBlock &left, const C
 
                 if (!leftLen)
                 {
-                    return !rightLen ? 0 : -1; // NULL references always compare smaller than non-NULL ones.
+                    return !rightLen ? 0 : -1; // nullptr references always compare smaller than non-nullptr ones.
                 }
                 else // rightLen != 0 for sure.
                 {
-                    return 1; // NULL references always compare smaller than non-NULL ones.
+                    return 1; // nullptr references always compare smaller than non-nullptr ones.
                 }
             }
 
@@ -1659,8 +1703,8 @@ CLR_INT32 CLR_RT_HeapBlock::Compare_Values(const CLR_RT_HeapBlock &left, const C
             {
                 CLR_RT_HeapBlock_Delegate *leftDlg = (CLR_RT_HeapBlock_Delegate *)&left;
                 CLR_RT_HeapBlock_Delegate *rightDlg = (CLR_RT_HeapBlock_Delegate *)&right;
-                CLR_UINT32 leftData = leftDlg->DelegateFtn().m_data;
-                CLR_UINT32 rightData = rightDlg->DelegateFtn().m_data;
+                CLR_UINT32 leftData = leftDlg->DelegateFtn().data;
+                CLR_UINT32 rightData = rightDlg->DelegateFtn().data;
 
                 if (leftData > rightData)
                     return 1;
@@ -1683,7 +1727,7 @@ CLR_INT32 CLR_RT_HeapBlock::Compare_Values(const CLR_RT_HeapBlock &left, const C
                 CLR_RT_HeapBlock hbLeft;
                 CLR_RT_HeapBlock hbRight;
 
-                if (left.ReflectionDataConst().m_kind != right.ReflectionDataConst().m_kind)
+                if (left.ReflectionDataConst().kind != right.ReflectionDataConst().kind)
                 {
                     ptrLeft = FixReflectionForType(left, hbLeft);
                     ptrRight = FixReflectionForType(right, hbRight);
@@ -1803,7 +1847,7 @@ CLR_INT32 CLR_RT_HeapBlock::Compare_Values(const CLR_RT_HeapBlock &left, const C
 
             if (!rightObj)
             {
-                return 1; // NULL references always compare smaller than non-NULL ones.
+                return 1; // nullptr references always compare smaller than non-nullptr ones.
             }
 
             return Compare_Values(left, *rightObj, fSigned);
@@ -1815,7 +1859,7 @@ CLR_INT32 CLR_RT_HeapBlock::Compare_Values(const CLR_RT_HeapBlock &left, const C
 
             if (!leftObj)
             {
-                return -1; // NULL references always compare smaller than non-NULL ones.
+                return -1; // nullptr references always compare smaller than non-nullptr ones.
             }
 
             return Compare_Values(*leftObj, right, fSigned);
@@ -1921,7 +1965,7 @@ HRESULT CLR_RT_HeapBlock::NumericAdd(const CLR_RT_HeapBlock &right)
         // Adding of value to array reference is like advancing the index in array.
         case DATATYPE_ARRAY_BYREF:
         {
-            // Retrieve refernced array. Test if it is not NULL
+            // Retrieve refernced array. Test if it is not nullptr
             CLR_RT_HeapBlock_Array *array = m_data.arrayReference.array;
             FAULT_ON_NULL(array);
             // Advance current index. C# on pointer operations multiplies the offset by object size. We need to reverse
@@ -2008,7 +2052,7 @@ HRESULT CLR_RT_HeapBlock::NumericSub(const CLR_RT_HeapBlock &right)
         // Substructing of value to array reference is like decreasing the index in array.
         case DATATYPE_ARRAY_BYREF:
         {
-            // Retrieve refernced array. Test if it is not NULL
+            // Retrieve refernced array. Test if it is not nullptr
             CLR_RT_HeapBlock_Array *array = m_data.arrayReference.array;
             FAULT_ON_NULL(array);
             // Advance current index. C# on pointer operations multiplies the offset by object size. We need to reverse
@@ -2445,7 +2489,7 @@ HRESULT CLR_RT_HeapBlock::TransparentProxyValidate() const
     CLR_RT_AppDomain *appDomain = TransparentProxyAppDomain();
     CLR_RT_HeapBlock *obj = TransparentProxyDereference();
 
-    if (appDomain == NULL || !appDomain->IsLoaded())
+    if (appDomain == nullptr || !appDomain->IsLoaded())
         NANOCLR_SET_AND_LEAVE(CLR_E_APPDOMAIN_EXITED);
 
     FAULT_ON_NULL(obj);

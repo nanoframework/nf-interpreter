@@ -39,8 +39,8 @@ HRESULT Library_nf_hardware_ti_native_nanoFramework_Hardware_TI_Power::
 
     int32_t configCount;
     int32_t index = 0;
-    PIN_Config *wakeupConfigurations = NULL;
-    CLR_RT_HeapBlock *pinWakeupConfig = NULL;
+    PIN_Config *wakeupConfigurations = nullptr;
+    CLR_RT_HeapBlock *pinWakeupConfig = nullptr;
 
     CLR_RT_HeapBlock_Array *configArray = stack.Arg0().DereferenceArray();
     FAULT_ON_NULL(configArray);
@@ -55,7 +55,7 @@ HRESULT Library_nf_hardware_ti_native_nanoFramework_Hardware_TI_Power::
         wakeupConfigurations = (PIN_Config *)platform_malloc((configCount + 1) * sizeof(PIN_Config));
 
         // check allocation
-        if (wakeupConfigurations != NULL)
+        if (wakeupConfigurations != nullptr)
         {
             // clear memory
             memset(wakeupConfigurations, 0, configCount * sizeof(PIN_Config));

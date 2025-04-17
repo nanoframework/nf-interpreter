@@ -36,7 +36,7 @@ CLR_RT_HeapBlock_EndPoint *CLR_RT_HeapBlock_EndPoint::FindEndPoint(const CLR_RT_
     }
     NANOCLR_FOREACH_NODE_END();
 
-    return NULL;
+    return nullptr;
 }
 
 bool CLR_RT_HeapBlock_EndPoint::Port::Compare(const CLR_RT_HeapBlock_EndPoint::Port &port)
@@ -53,7 +53,7 @@ HRESULT CLR_RT_HeapBlock_EndPoint::CreateInstance(
 {
     NANOCLR_HEADER();
 
-    CLR_RT_HeapBlock_EndPoint *endPoint = NULL;
+    CLR_RT_HeapBlock_EndPoint *endPoint = nullptr;
 
     //
     // Create a request and stop the calling thread.
@@ -134,5 +134,5 @@ CLR_RT_HeapBlock_EndPoint::Message *CLR_RT_HeapBlock_EndPoint::FindMessage(CLR_U
     }
     NANOCLR_FOREACH_NODE_END();
 
-    return NULL;
+    return nullptr;
 }

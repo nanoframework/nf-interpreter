@@ -8,7 +8,7 @@
 // using namespace Microsoft::SPOT::Emulator;
 
 // From minheap.cpp
-static unsigned char *s_Memory_Start = NULL;
+static unsigned char *s_Memory_Start = nullptr;
 static unsigned int s_Memory_Length = 1024 * 1024 * 10;
 
 void HeapLocation(unsigned char *&BaseAddress, unsigned int &SizeInBytes)
@@ -16,7 +16,7 @@ void HeapLocation(unsigned char *&BaseAddress, unsigned int &SizeInBytes)
     if (!s_Memory_Start)
     {
         s_Memory_Start =
-            (unsigned char *)::VirtualAlloc(NULL, s_Memory_Length, MEM_RESERVE | MEM_COMMIT, PAGE_READWRITE);
+            (unsigned char *)::VirtualAlloc(nullptr, s_Memory_Length, MEM_RESERVE | MEM_COMMIT, PAGE_READWRITE);
 
         if (s_Memory_Start)
         {
@@ -31,14 +31,14 @@ void HeapLocation(unsigned char *&BaseAddress, unsigned int &SizeInBytes)
     SizeInBytes = s_Memory_Length;
 }
 
-static unsigned char *s_CustomHeap_Start = NULL;
+static unsigned char *s_CustomHeap_Start = nullptr;
 
 void CustomHeapLocation(unsigned char *&BaseAddress, unsigned int &SizeInBytes)
 {
     if (!s_CustomHeap_Start)
     {
         s_CustomHeap_Start =
-            (unsigned char *)::VirtualAlloc(NULL, s_Memory_Length, MEM_RESERVE | MEM_COMMIT, PAGE_READWRITE);
+            (unsigned char *)::VirtualAlloc(nullptr, s_Memory_Length, MEM_RESERVE | MEM_COMMIT, PAGE_READWRITE);
 
         if (s_CustomHeap_Start)
         {

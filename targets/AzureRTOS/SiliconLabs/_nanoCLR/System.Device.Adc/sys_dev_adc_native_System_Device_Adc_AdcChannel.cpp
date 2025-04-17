@@ -17,9 +17,9 @@ HRESULT Library_sys_dev_adc_native_System_Device_Adc_AdcChannel::NativeReadValue
     // ADC related variables
     adcInitSingle = ADC_INITSINGLE_DEFAULT;
     uint32_t sample;
-    ADC_TypeDef *adcDriver = NULL;
+    ADC_TypeDef *adcDriver = nullptr;
 
-    // get a pointer to the managed object instance and check that it's not NULL
+    // get a pointer to the managed object instance and check that it's not nullptr
     CLR_RT_HeapBlock *pThis = stack.This();
     FAULT_ON_NULL(pThis);
 

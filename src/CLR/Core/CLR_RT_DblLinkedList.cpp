@@ -11,7 +11,7 @@ void CLR_RT_DblLinkedList::DblLinkedList_Initialize()
 {
     NATIVE_PROFILE_CLR_CORE();
     m_first = Tail();
-    m_null = NULL;
+    m_null = nullptr;
     m_last = Head();
 }
 
@@ -74,8 +74,10 @@ void CLR_RT_DblLinkedList::ValidateList()
 {
     NATIVE_PROFILE_CLR_CORE();
 
-    if (m_null != NULL)
+    if (m_null != nullptr)
+    {
         NANOCLR_DEBUG_STOP();
+    }
 
     CLR_RT_HeapBlock_Node *prev = Head();
     CLR_RT_HeapBlock_Node *node = prev->Next();

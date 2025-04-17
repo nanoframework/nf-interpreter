@@ -29,7 +29,7 @@ void CLR_RT_HeapBlock_MemoryStream::DeleteInstance(CLR_RT_HeapBlock_MemoryStream
 
         g_CLR_RT_EventCache.Append_Node(stream);
 
-        stream = NULL;
+        stream = nullptr;
     }
 }
 
@@ -95,7 +95,7 @@ HRESULT CLR_RT_HeapBlock_MemoryStream::ToArray(CLR_RT_HeapBlock &ref)
     }
     NANOCLR_FOREACH_NODE_END();
 
-    NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance(ref, tot, g_CLR_RT_WellKnownTypes.m_UInt8));
+    NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance(ref, tot, g_CLR_RT_WellKnownTypes.UInt8));
 
     array = ref.DereferenceArray();
     buf = array->GetFirstElement();
@@ -203,7 +203,7 @@ HRESULT CLR_RT_HeapBlock_MemoryStream::ReadBits(CLR_UINT32 &res, CLR_UINT32 bits
             {
                 m_current = (Buffer *)m_current->Next();
 
-                if (m_current->Next() == NULL)
+                if (m_current->Next() == nullptr)
                 {
                     NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_RANGE);
                 }

@@ -55,7 +55,7 @@ NF_PAL_UART *GetPalUartFromUartNum_sys(int uart_num)
             break;
     }
 
-    return NULL;
+    return nullptr;
 }
 
 void UninitializePalUart_sys(NF_PAL_UART *palUart)
@@ -66,14 +66,14 @@ void UninitializePalUart_sys(NF_PAL_UART *palUart)
         uart_event_t event;
         event.type = UART_EVENT_MAX;
         xQueueSend(palUart->UartEventQueue, &event, 0);
-        palUart->UartEventTask = NULL;
+        palUart->UartEventTask = nullptr;
 
         // free buffer memory
         platform_free(palUart->RxBuffer);
 
         // null all pointers
-        palUart->RxBuffer = NULL;
-        palUart->TxBuffer = NULL;
+        palUart->RxBuffer = nullptr;
+        palUart->TxBuffer = nullptr;
 
         // delete driver
         uart_driver_delete((uart_port_t)palUart->UartNum);
@@ -224,7 +224,7 @@ void uart_event_task_sys(void *pvParameters)
         }
     }
 
-    vTaskDelete(NULL);
+    vTaskDelete(nullptr);
 }
 
 void UartTxWorkerTask_sys(void *pvParameters)
@@ -240,17 +240,17 @@ void UartTxWorkerTask_sys(void *pvParameters)
     Events_Set(SYSTEM_EVENT_FLAG_COM_OUT);
 
     // delete task
-    vTaskDelete(NULL);
+    vTaskDelete(nullptr);
 }
 
 HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::get_BytesToRead___I4(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
-    NF_PAL_UART *palUart = NULL;
+    NF_PAL_UART *palUart = nullptr;
     uart_port_t uart_num;
 
-    // get a pointer to the managed object instance and check that it's not NULL
+    // get a pointer to the managed object instance and check that it's not nullptr
     CLR_RT_HeapBlock *pThis = stack.This();
     FAULT_ON_NULL(pThis);
 
@@ -264,7 +264,7 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::get_BytesToRead___
 
     // get pointer to PAL UART
     palUart = GetPalUartFromUartNum_sys(uart_num);
-    if (palUart == NULL)
+    if (palUart == nullptr)
     {
         NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
     }
@@ -279,10 +279,10 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::get_InvertSignalLe
 {
     NANOCLR_HEADER();
 
-    NF_PAL_UART *palUart = NULL;
+    NF_PAL_UART *palUart = nullptr;
     uart_port_t uart_num;
 
-    // get a pointer to the managed object instance and check that it's not NULL
+    // get a pointer to the managed object instance and check that it's not nullptr
     CLR_RT_HeapBlock *pThis = stack.This();
     FAULT_ON_NULL(pThis);
 
@@ -296,7 +296,7 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::get_InvertSignalLe
 
     // get pointer to PAL UART
     palUart = GetPalUartFromUartNum_sys(uart_num);
-    if (palUart == NULL)
+    if (palUart == nullptr)
     {
         NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
     }
@@ -311,10 +311,10 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::set_InvertSignalLe
 {
     NANOCLR_HEADER();
 
-    NF_PAL_UART *palUart = NULL;
+    NF_PAL_UART *palUart = nullptr;
     uart_port_t uart_num;
 
-    // get a pointer to the managed object instance and check that it's not NULL
+    // get a pointer to the managed object instance and check that it's not nullptr
     CLR_RT_HeapBlock *pThis = stack.This();
     FAULT_ON_NULL(pThis);
 
@@ -328,7 +328,7 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::set_InvertSignalLe
 
     // get pointer to PAL UART
     palUart = GetPalUartFromUartNum_sys(uart_num);
-    if (palUart == NULL)
+    if (palUart == nullptr)
     {
         NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
     }
@@ -351,7 +351,7 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::Read___I4__SZARRAY
 
     CLR_RT_HeapBlock hbTimeout;
     CLR_RT_HeapBlock_Array *dataBuffer;
-    NF_PAL_UART *palUart = NULL;
+    NF_PAL_UART *palUart = nullptr;
 
     uint8_t *data;
 
@@ -365,7 +365,7 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::Read___I4__SZARRAY
     int64_t *timeoutTicks;
     bool eventResult = true;
 
-    // get a pointer to the managed object instance and check that it's not NULL
+    // get a pointer to the managed object instance and check that it's not nullptr
     CLR_RT_HeapBlock *pThis = stack.This();
     FAULT_ON_NULL(pThis);
 
@@ -411,7 +411,7 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::Read___I4__SZARRAY
 
     // get pointer to PAL UART
     palUart = GetPalUartFromUartNum_sys(uart_num);
-    if (palUart == NULL)
+    if (palUart == nullptr)
     {
         NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
     }
@@ -493,15 +493,15 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::ReadExisting___STR
 {
     NANOCLR_HEADER();
 
-    NF_PAL_UART *palUart = NULL;
+    NF_PAL_UART *palUart = nullptr;
     uart_port_t uart_num;
 
-    uint8_t *buffer = NULL;
+    uint8_t *buffer = nullptr;
     uint32_t bufferLength;
 
     CLR_RT_HeapBlock &top = stack.PushValue();
 
-    // get a pointer to the managed object instance and check that it's not NULL
+    // get a pointer to the managed object instance and check that it's not nullptr
     CLR_RT_HeapBlock *pThis = stack.This();
     FAULT_ON_NULL(pThis);
 
@@ -515,7 +515,7 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::ReadExisting___STR
 
     // get pointer to PAL UART
     palUart = GetPalUartFromUartNum_sys(uart_num);
-    if (palUart == NULL)
+    if (palUart == nullptr)
     {
         NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
     }
@@ -529,7 +529,7 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::ReadExisting___STR
         buffer = (uint8_t *)platform_malloc(bufferLength);
 
         // sanity check
-        if (buffer == NULL)
+        if (buffer == nullptr)
         {
             NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
         }
@@ -542,12 +542,12 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::ReadExisting___STR
     else
     {
         // create an empty <string>
-        NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_String::CreateInstance(top, (const char *)NULL));
+        NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_String::CreateInstance(top, (const char *)nullptr));
     }
 
     NANOCLR_CLEANUP();
 
-    if (buffer != NULL)
+    if (buffer != nullptr)
     {
         platform_free(buffer);
     }
@@ -560,18 +560,18 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::ReadLine___STRING(
     NANOCLR_HEADER();
 
     CLR_RT_HeapBlock hbTimeout;
-    NF_PAL_UART *palUart = NULL;
+    NF_PAL_UART *palUart = nullptr;
     uart_port_t uart_num;
 
-    uint8_t *line = NULL;
-    const char *newLine = NULL;
+    uint8_t *line = nullptr;
+    const char *newLine = nullptr;
     uint32_t newLineLength;
 
     int64_t *timeoutTicks;
     bool eventResult = true;
     bool newLineFound = false;
 
-    // get a pointer to the managed object instance and check that it's not NULL
+    // get a pointer to the managed object instance and check that it's not nullptr
     CLR_RT_HeapBlock *pThis = stack.This();
     FAULT_ON_NULL(pThis);
 
@@ -589,7 +589,7 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::ReadLine___STRING(
 
     // get pointer to PAL UART
     palUart = GetPalUartFromUartNum_sys(uart_num);
-    if (palUart == NULL)
+    if (palUart == nullptr)
     {
         NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
     }
@@ -611,8 +611,8 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::ReadLine___STRING(
             // get new line from field
             newLine = pThis[FIELD___newLine].RecoverString();
 
-            // sanity check for NULL string
-            if (newLine == NULL)
+            // sanity check for nullptr string
+            if (newLine == nullptr)
             {
                 NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
             }
@@ -660,7 +660,7 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::ReadLine___STRING(
     stack.SetResult_String((const char *)line);
 
     // free memory, if needed
-    if (line != NULL)
+    if (line != nullptr)
     {
         platform_free(line);
     }
@@ -672,7 +672,7 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::Write___VOID__SZAR
 {
     NANOCLR_HEADER();
 
-    NF_PAL_UART *palUart = NULL;
+    NF_PAL_UART *palUart = nullptr;
 
     CLR_RT_HeapBlock_Array *dataBuffer;
     CLR_RT_HeapBlock hbTimeout;
@@ -687,7 +687,7 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::Write___VOID__SZAR
     int64_t *timeoutTicks;
     bool eventResult = true;
 
-    // get a pointer to the managed object instance and check that it's not NULL
+    // get a pointer to the managed object instance and check that it's not nullptr
     CLR_RT_HeapBlock *pThis = stack.This();
     FAULT_ON_NULL(pThis);
 
@@ -701,7 +701,7 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::Write___VOID__SZAR
 
     // get pointer to PAL UART
     palUart = GetPalUartFromUartNum_sys(uart_num);
-    if (palUart == NULL)
+    if (palUart == nullptr)
     {
         NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
     }
@@ -770,7 +770,7 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::Write___VOID__SZAR
             char task_name[16];
             snprintf(task_name, ARRAYSIZE(task_name), "uart%d_tx", uart_num);
 
-            if (xTaskCreate(UartTxWorkerTask_sys, task_name, 2048, palUart, 12, NULL) != pdPASS)
+            if (xTaskCreate(UartTxWorkerTask_sys, task_name, 2048, palUart, 12, nullptr) != pdPASS)
             {
                 ESP_LOGE(TAG, "Failed to start UART TX task");
                 NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
@@ -824,7 +824,7 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::Write___VOID__SZAR
     stack.SetResult_U4(length);
 
     // null pointers and vars
-    pThis = NULL;
+    pThis = nullptr;
 
     NANOCLR_NOCLEANUP();
 }
@@ -835,7 +835,7 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeDispose___VO
 
     uart_port_t uart_num;
 
-    // get a pointer to the managed object instance and check that it's not NULL
+    // get a pointer to the managed object instance and check that it's not nullptr
     CLR_RT_HeapBlock *pThis = stack.This();
     FAULT_ON_NULL(pThis);
 
@@ -859,7 +859,7 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeInit___VOID(
 
     NF_PAL_UART *palUart;
 
-    // get a pointer to the managed object instance and check that it's not NULL
+    // get a pointer to the managed object instance and check that it's not nullptr
     CLR_RT_HeapBlock *pThis = stack.This();
     FAULT_ON_NULL(pThis);
 
@@ -879,7 +879,7 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeInit___VOID(
 #endif
 
     palUart = GetPalUartFromUartNum_sys(uart_num);
-    if (palUart == NULL)
+    if (palUart == nullptr)
     {
         NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
     }
@@ -899,7 +899,7 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeInit___VOID(
     palUart->RxBuffer = (uint8_t *)platform_malloc(bufferSize);
 
     // sanity check
-    if (palUart->RxBuffer == NULL)
+    if (palUart->RxBuffer == nullptr)
     {
         NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
     }
@@ -964,7 +964,7 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeConfig___VOI
     {
         uart_config_t uart_config = {};
 
-        // get a pointer to the managed object instance and check that it's not NULL
+        // get a pointer to the managed object instance and check that it's not nullptr
         CLR_RT_HeapBlock *pThis = stack.This();
         FAULT_ON_NULL(pThis);
 
@@ -1114,7 +1114,7 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeConfig___VOI
 
             // get pointer to PAL UART
             NF_PAL_UART *palUart = GetPalUartFromUartNum_sys(uart_num);
-            if (palUart == NULL)
+            if (palUart == nullptr)
             {
                 NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
             }
@@ -1171,7 +1171,7 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeConfig___VOI
         }
 
         // null pointers and vars
-        pThis = NULL;
+        pThis = nullptr;
     }
     NANOCLR_NOCLEANUP();
 }
@@ -1183,7 +1183,7 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeSetWatchChar
     uart_port_t uart_num;
     uint8_t watchChar;
 
-    // get a pointer to the managed object instance and check that it's not NULL
+    // get a pointer to the managed object instance and check that it's not nullptr
     CLR_RT_HeapBlock *pThis = stack.This();
     FAULT_ON_NULL(pThis);
 
@@ -1211,7 +1211,7 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeWriteString_
 {
     NANOCLR_HEADER();
 
-    NF_PAL_UART *palUart = NULL;
+    NF_PAL_UART *palUart = nullptr;
     uart_port_t uart_num;
 
     CLR_RT_HeapBlock hbTimeout;
@@ -1219,12 +1219,12 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeWriteString_
     bool eventResult = true;
 
     bool isNewAllocation = false;
-    char *buffer = NULL;
-    const char *bufferPointer = NULL;
+    char *buffer = nullptr;
+    const char *bufferPointer = nullptr;
     uint32_t bufferLength;
     int32_t length = 0;
 
-    // get a pointer to the managed object instance and check that it's not NULL
+    // get a pointer to the managed object instance and check that it's not nullptr
     CLR_RT_HeapBlock *pThis = stack.This();
     FAULT_ON_NULL(pThis);
 
@@ -1238,12 +1238,12 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeWriteString_
 
     // get pointer to PAL UART
     palUart = GetPalUartFromUartNum_sys(uart_num);
-    if (palUart == NULL)
+    if (palUart == nullptr)
     {
         NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
     }
 
-    if (stack.Arg1().RecoverString() == NULL)
+    if (stack.Arg1().RecoverString() == nullptr)
     {
         // text string it's empty so there is noting to do here
         stack.SetResult_U4(0);
@@ -1303,7 +1303,7 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeWriteString_
             char task_name[16];
             snprintf(task_name, ARRAYSIZE(task_name), "uart%d_tx", uart_num);
 
-            if (xTaskCreate(UartTxWorkerTask_sys, task_name, 2048, palUart, 12, NULL) != pdPASS)
+            if (xTaskCreate(UartTxWorkerTask_sys, task_name, 2048, palUart, 12, nullptr) != pdPASS)
             {
                 ESP_LOGE(TAG, "Failed to start UART TX task");
                 NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
@@ -1369,13 +1369,13 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeWriteString_
     stack.SetResult_U4(length);
 
     // free memory, if it was allocated
-    if (isNewAllocation && buffer != NULL)
+    if (isNewAllocation && buffer != nullptr)
     {
         platform_free(buffer);
     }
 
     // null pointers and vars
-    pThis = NULL;
+    pThis = nullptr;
 
     NANOCLR_NOCLEANUP();
 }
@@ -1389,7 +1389,7 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeReceivedByte
     int32_t threshold;
     uart_port_t uart_num;
 
-    // get a pointer to the managed object instance and check that it's not NULL
+    // get a pointer to the managed object instance and check that it's not nullptr
     CLR_RT_HeapBlock *pThis = stack.This();
     FAULT_ON_NULL(pThis);
 
@@ -1406,7 +1406,7 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeReceivedByte
 
     // get pointer to PAL UART
     palUart = GetPalUartFromUartNum_sys(uart_num);
-    if (palUart == NULL)
+    if (palUart == nullptr)
     {
         NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
     }

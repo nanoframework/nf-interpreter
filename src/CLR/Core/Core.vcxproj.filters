@@ -141,6 +141,9 @@
     <ClCompile Include="GarbageCollector_Info.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="CLR_RT_HeapBlock_GenericInstance.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Core.h">

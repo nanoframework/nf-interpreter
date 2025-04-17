@@ -13,17 +13,17 @@ HRESULT Library_corlib_native_System_RuntimeType::get_Assembly___SystemReflectio
     CLR_RT_TypeDef_Instance td;
     CLR_RT_HeapBlock *hbType = stack.This();
 
-    NANOCLR_CHECK_HRESULT(GetTypeDescriptor(*hbType, td, NULL));
+    NANOCLR_CHECK_HRESULT(GetTypeDescriptor(*hbType, td, nullptr));
 
     {
-        CLR_RT_Assembly_Index idx{};
-        idx.Set(td.Assembly());
+        CLR_RT_Assembly_Index index{};
+        index.Set(td.Assembly());
         CLR_RT_HeapBlock &top = stack.PushValue();
         CLR_RT_HeapBlock *hbObj;
 
-        NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObjectFromIndex(top, g_CLR_RT_WellKnownTypes.m_Assembly));
+        NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObjectFromIndex(top, g_CLR_RT_WellKnownTypes.Assembly));
         hbObj = top.Dereference();
-        hbObj->SetReflection(idx);
+        hbObj->SetReflection(index);
     }
 
     NANOCLR_NOCLEANUP();
@@ -67,15 +67,15 @@ HRESULT Library_corlib_native_System_RuntimeType::get_BaseType___SystemType(CLR_
     {
         CLR_RT_HeapBlock *hbObj;
 
-        NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObjectFromIndex(top, g_CLR_RT_WellKnownTypes.m_TypeStatic));
+        NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObjectFromIndex(top, g_CLR_RT_WellKnownTypes.TypeStatic));
         hbObj = top.Dereference();
-        hbObj->SetReflection(g_CLR_RT_WellKnownTypes.m_Array);
+        hbObj->SetReflection(g_CLR_RT_WellKnownTypes.Array);
     }
     else if (td.SwitchToParent())
     {
         CLR_RT_HeapBlock *hbObj;
 
-        NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObjectFromIndex(top, g_CLR_RT_WellKnownTypes.m_TypeStatic));
+        NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObjectFromIndex(top, g_CLR_RT_WellKnownTypes.TypeStatic));
         hbObj = top.Dereference();
         hbObj->SetReflection(td);
     }
@@ -87,7 +87,13 @@ HRESULT Library_corlib_native_System_RuntimeType::
     GetMethods___SZARRAY_SystemReflectionMethodInfo__SystemReflectionBindingFlags(CLR_RT_StackFrame &stack)
 {
     NATIVE_PROFILE_CLR_CORE();
-    return Library_corlib_native_System_Type::GetMethods(stack, NULL, stack.Arg1().NumericByRef().s4, NULL, 0, true);
+    return Library_corlib_native_System_Type::GetMethods(
+        stack,
+        nullptr,
+        stack.Arg1().NumericByRef().s4,
+        nullptr,
+        0,
+        true);
 }
 
 HRESULT Library_corlib_native_System_RuntimeType::
@@ -105,7 +111,7 @@ HRESULT Library_corlib_native_System_RuntimeType::
     GetFields___SZARRAY_SystemReflectionFieldInfo__SystemReflectionBindingFlags(CLR_RT_StackFrame &stack)
 {
     NATIVE_PROFILE_CLR_CORE();
-    return Library_corlib_native_System_Type::GetFields(stack, NULL, stack.Arg1().NumericByRef().s4, true);
+    return Library_corlib_native_System_Type::GetFields(stack, nullptr, stack.Arg1().NumericByRef().s4, true);
 }
 
 HRESULT Library_corlib_native_System_RuntimeType::GetInterfaces___SZARRAY_SystemType(CLR_RT_StackFrame &stack)
@@ -115,7 +121,7 @@ HRESULT Library_corlib_native_System_RuntimeType::GetInterfaces___SZARRAY_System
 
     CLR_RT_TypeDef_Instance td;
     CLR_RT_HeapBlock &top = stack.PushValueAndClear();
-    CLR_RT_HeapBlock *ptr = NULL;
+    CLR_RT_HeapBlock *ptr = nullptr;
     CLR_RT_HeapBlock *hbType = stack.This();
     int count = 0;
 
@@ -128,7 +134,7 @@ HRESULT Library_corlib_native_System_RuntimeType::GetInterfaces___SZARRAY_System
         {
             // Scan the list of interfaces.
             CLR_RT_SignatureParser parser{};
-            parser.Initialize_Interfaces(td.m_assm, td.m_target);
+            parser.Initialize_Interfaces(td.assembly, td.target);
             CLR_RT_SignatureParser::Element res;
 
             // 1. pass count
@@ -146,9 +152,9 @@ HRESULT Library_corlib_native_System_RuntimeType::GetInterfaces___SZARRAY_System
                     NANOCLR_CHECK_HRESULT(parser.Advance(res));
 
                     NANOCLR_CHECK_HRESULT(
-                        g_CLR_RT_ExecutionEngine.NewObjectFromIndex(*ptr, g_CLR_RT_WellKnownTypes.m_TypeStatic));
+                        g_CLR_RT_ExecutionEngine.NewObjectFromIndex(*ptr, g_CLR_RT_WellKnownTypes.TypeStatic));
                     hbObj = ptr->Dereference();
-                    hbObj->SetReflection(res.m_cls);
+                    hbObj->SetReflection(res.Class);
 
                     ptr++;
                     count--;
@@ -166,7 +172,7 @@ HRESULT Library_corlib_native_System_RuntimeType::GetInterfaces___SZARRAY_System
         {
             // create the result array
             NANOCLR_CHECK_HRESULT(
-                CLR_RT_HeapBlock_Array::CreateInstance(top, count, g_CLR_RT_WellKnownTypes.m_TypeStatic));
+                CLR_RT_HeapBlock_Array::CreateInstance(top, count, g_CLR_RT_WellKnownTypes.TypeStatic));
             // don't need the second pass if nothing found
             if (count == 0)
                 break;
@@ -194,7 +200,7 @@ HRESULT Library_corlib_native_System_RuntimeType::GetElementType___SystemType(CL
     {
         CLR_RT_HeapBlock *hbObj;
 
-        NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObjectFromIndex(top, g_CLR_RT_WellKnownTypes.m_TypeStatic));
+        NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObjectFromIndex(top, g_CLR_RT_WellKnownTypes.TypeStatic));
         hbObj = top.Dereference();
         hbObj->SetReflection(descSub.m_reflex);
     }
@@ -226,7 +232,7 @@ HRESULT Library_corlib_native_System_RuntimeType::GetTypeDescriptor(
 
     if (levels > 0)
     {
-        inst.InitializeFromIndex(g_CLR_RT_WellKnownTypes.m_Array);
+        inst.InitializeFromIndex(g_CLR_RT_WellKnownTypes.Array);
     }
 
     NANOCLR_NOCLEANUP();
@@ -263,8 +269,8 @@ HRESULT Library_corlib_native_System_RuntimeType::GetCustomAttributesNative___SZ
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
 
-    CLR_RT_HeapBlock *returnArray = NULL;
-    CLR_RT_HeapBlock *callerType = NULL;
+    CLR_RT_HeapBlock *returnArray = nullptr;
+    CLR_RT_HeapBlock *callerType = nullptr;
     CLR_RT_TypeDef_Instance typeDefinition;
     int count = 0;
 
@@ -282,7 +288,7 @@ HRESULT Library_corlib_native_System_RuntimeType::GetCustomAttributesNative___SZ
 
     // the return array has two positions for each attribute:
     // 1st: the attribute type
-    // 2nd: the constructor parameters or NULL, if the attribute has no constructor
+    // 2nd: the constructor parameters or nullptr, if the attribute has no constructor
 
     // 1st pass: count attributes
     do
@@ -299,7 +305,7 @@ HRESULT Library_corlib_native_System_RuntimeType::GetCustomAttributesNative___SZ
             // create the result array
             // (2 positions for each attribute)
             NANOCLR_CHECK_HRESULT(
-                CLR_RT_HeapBlock_Array::CreateInstance(top, (count * 2), g_CLR_RT_WellKnownTypes.m_Object));
+                CLR_RT_HeapBlock_Array::CreateInstance(top, (count * 2), g_CLR_RT_WellKnownTypes.Object));
 
             // use this to skip the 2nd pass if no attribute was found
             if (count == 0)
@@ -352,7 +358,7 @@ HRESULT Library_corlib_native_System_RuntimeType::GetCustomAttributes(
                 // parse next attribute, if there is another
                 NANOCLR_CHECK_HRESULT(parser.Next(val));
 
-                if (val == NULL)
+                if (val == nullptr)
                 {
                     break;
                 }
@@ -369,8 +375,8 @@ HRESULT Library_corlib_native_System_RuntimeType::GetCustomAttributes(
                         // no parameters for the constructor
                         returnArray++;
 
-                        // set next position to NULL
-                        returnArray->SetObjectReference(NULL);
+                        // set next position to nullptr
+                        returnArray->SetObjectReference(nullptr);
                     }
                     else if (val->m_mode == CLR_RT_AttributeParser::Value::c_ConstructorArgument)
                     {
@@ -379,7 +385,7 @@ HRESULT Library_corlib_native_System_RuntimeType::GetCustomAttributes(
                         // get the type for the class object
                         // the assembly has to be the instance type
                         CLR_RT_MethodDef_Index md{};
-                        md.Set(instanceTypeDef.m_assm->m_idx, parser.m_mdIdx.Method());
+                        md.Set(instanceTypeDef.assembly->assemblyIndex, parser.m_mdIndex.Method());
                         CLR_RT_MethodDef_Instance mdInst{};
                         mdInst.InitializeFromIndex(md);
 

@@ -148,7 +148,7 @@ HRESULT CLR_RT_HeapBlock_ArrayList::RemoveAt(CLR_INT32 index)
 
     size--;
 
-    ((CLR_RT_HeapBlock *)items->GetElement(size))->SetObjectReference(NULL);
+    ((CLR_RT_HeapBlock *)items->GetElement(size))->SetObjectReference(nullptr);
 
     SetSize(size);
 
@@ -180,7 +180,7 @@ HRESULT CLR_RT_HeapBlock_ArrayList::SetCapacity(CLR_UINT32 newCapacity)
         }
 
         NANOCLR_CHECK_HRESULT(
-            CLR_RT_HeapBlock_Array::CreateInstance(newItemsHB, newCapacity, g_CLR_RT_WellKnownTypes.m_Object));
+            CLR_RT_HeapBlock_Array::CreateInstance(newItemsHB, newCapacity, g_CLR_RT_WellKnownTypes.Object));
 
         newItems = newItemsHB.DereferenceArray();
 

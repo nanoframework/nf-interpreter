@@ -110,7 +110,7 @@ HRESULT CLR_GFX_Bitmap::CreateInstance(
     NANOCLR_HEADER();
 
     CLR_RT_HeapBlock refUncompressed;
-    refUncompressed.SetObjectReference(NULL);
+    refUncompressed.SetObjectReference(nullptr);
     CLR_GFX_Bitmap *bitmap;
     CLR_GFX_Bitmap *bitmapNative;
     const CLR_GFX_BitmapDescription *bm;
@@ -126,10 +126,10 @@ HRESULT CLR_GFX_Bitmap::CreateInstance(
 
     if (bm->m_type == CLR_GFX_BitmapDescription::c_TypeJpeg || bm->m_type == CLR_GFX_BitmapDescription::c_TypeGif)
     {
-        if (assm->m_pFile)
+        if (assm->file)
         {
-            unpinAssm = !assm->m_pFile->IsPinned();
-            assm->m_pFile->Pin();
+            unpinAssm = !assm->file->IsPinned();
+            assm->file->Pin();
         }
 
         NANOCLR_CHECK_HRESULT(CLR_GFX_Bitmap::CreateInstance(ref, data, size, bm->m_type));
@@ -192,7 +192,7 @@ HRESULT CLR_GFX_Bitmap::CreateInstance(
     if (unpinAssm)
     {
         // Unpin the assembly if we pinned it earlier
-        assm->m_pFile->Unpin();
+        assm->file->Unpin();
     }
 
     NANOCLR_CLEANUP_END();
@@ -236,7 +236,7 @@ HRESULT CLR_GFX_Bitmap::CreateInstanceBmp(CLR_RT_HeapBlock &ref, const CLR_UINT8
 {
     NANOCLR_HEADER();
 
-    CLR_GFX_Bitmap *bitmap = NULL;
+    CLR_GFX_Bitmap *bitmap = nullptr;
     CLR_GFX_BitmapDescription bm;
     BmpDecoder decoder;
 
@@ -294,7 +294,7 @@ HRESULT CLR_GFX_Bitmap::DeleteInstance(CLR_RT_HeapBlock &ref)
             break;
     }
 
-    ref.SetObjectReference(NULL);
+    ref.SetObjectReference(nullptr);
 
     NANOCLR_NOCLEANUP();
 }

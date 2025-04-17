@@ -23,7 +23,7 @@ HRESULT CLR_RT_HeapBlock_BinaryBlob::CreateInstance(
     reference.SetObjectReference(obj);
 
     obj->SetBinaryBlobHandlers(mark, relocate);
-    obj->m_assembly = NULL;
+    obj->m_assembly = nullptr;
 
     NANOCLR_NOCLEANUP();
 }
@@ -52,7 +52,7 @@ CLR_RT_HeapBlock_BinaryBlob *CLR_RT_HeapBlock_BinaryBlob::Allocate(CLR_UINT32 le
 
     if (obj)
     {
-        obj->SetBinaryBlobHandlers(NULL, NULL);
+        obj->SetBinaryBlobHandlers(nullptr, nullptr);
     }
 
     return obj;
@@ -61,7 +61,7 @@ CLR_RT_HeapBlock_BinaryBlob *CLR_RT_HeapBlock_BinaryBlob::Allocate(CLR_UINT32 le
 void CLR_RT_HeapBlock_BinaryBlob::Release(bool fEvent)
 {
     NATIVE_PROFILE_CLR_CORE();
-    SetBinaryBlobHandlers(NULL, NULL);
+    SetBinaryBlobHandlers(nullptr, nullptr);
 
     if (fEvent)
         g_CLR_RT_EventCache.Append_Node(this);

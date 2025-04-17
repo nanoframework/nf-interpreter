@@ -550,6 +550,11 @@ struct CLR_DBG_Commands
 
     //--//
 
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    // !!! KEEP IN SYNC WITH nanoFramework.Tools.Debugger.WireProtocol.Commands.Debugging_Value (in managed code) !!! //
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
     struct Debugging_Value
     {
         // this is a CLR_RT_HeapBlock *
@@ -576,6 +581,11 @@ struct CLR_DBG_Commands
         // For DATATYPE_VALUETYPE or DATATYPE_CLASSTYPE
         //
         CLR_RT_TypeDef_Index    m_td;
+
+        //
+        // For DATATYPE_GENERICINST
+        //
+        CLR_RT_TypeSpec_Index    m_ts;
 
         //
         // For DATATYPE_SZARRAY
@@ -651,7 +661,7 @@ struct CLR_DBG_Commands
 
     struct Debugging_Value_GetScratchPad
     {
-        CLR_UINT32 m_idx;
+        CLR_UINT32 m_index;
 
 
         //
@@ -749,7 +759,7 @@ struct CLR_DBG_Commands
 
     struct Debugging_Resolve_Assembly
     {
-         CLR_RT_Assembly_Index m_idx;
+         CLR_RT_Assembly_Index m_index;
 
          struct Reply
          {
@@ -904,12 +914,12 @@ private:
     HRESULT            CreateListOfThreads(                 CLR_DBG_Commands::Debugging_Thread_List ::Reply*& cmdReply, int& totLen );
     HRESULT            CreateListOfCalls  ( CLR_INT32 pid, CLR_DBG_Commands::Debugging_Thread_Stack::Reply*& cmdReply, int& totLen );
 
-    CLR_RT_Assembly   *IsGoodAssembly( CLR_IDX                       idxAssm                                  );
+    CLR_RT_Assembly   *IsGoodAssembly( CLR_INDEX                       indexAssm                                  );
     bool               CheckTypeDef  ( const CLR_RT_TypeDef_Index&   td     , CLR_RT_TypeDef_Instance&   inst );
     bool               CheckFieldDef ( const CLR_RT_FieldDef_Index&  fd     , CLR_RT_FieldDef_Instance&  inst );
     bool               CheckMethodDef( const CLR_RT_MethodDef_Index& md     , CLR_RT_MethodDef_Instance& inst );
 
-    bool               GetValue( WP_Message *msg, CLR_RT_HeapBlock *ptr, CLR_RT_HeapBlock *reference, CLR_RT_TypeDef_Instance *pTD );
+    bool               GetValue( WP_Message *msg, CLR_RT_HeapBlock *ptr, CLR_RT_HeapBlock *reference, CLR_RT_TypeDef_Instance *pTD);
 
     bool AllocateAndQueueMessage( CLR_UINT32 cmd, unsigned int length, unsigned char *data, CLR_RT_HeapBlock_EndPoint::Port port, CLR_RT_HeapBlock_EndPoint::Address addr, CLR_UINT32 found );
 
@@ -998,8 +1008,8 @@ public:
 #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
     static bool Debugging_Info_SetJMC                   ( WP_Message *msg );
     
-    bool Debugging_Info_SetJMC_Type                     ( const CLR_RT_TypeDef_Index&   idx, bool fJMC );
-    bool Debugging_Info_SetJMC_Method                   ( const CLR_RT_MethodDef_Index& idx, bool fJMC );
+    bool Debugging_Info_SetJMC_Type                     ( const CLR_RT_TypeDef_Index&   index, bool fJMC );
+    bool Debugging_Info_SetJMC_Method                   ( const CLR_RT_MethodDef_Index& index, bool fJMC );
 #endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
 
     static bool Profiling_Command                       ( WP_Message *msg );

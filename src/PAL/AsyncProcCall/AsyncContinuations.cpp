@@ -26,7 +26,7 @@ void HAL_CONTINUATION::InitializeList()
 void HAL_CONTINUATION::Enqueue()
 {
     NATIVE_PROFILE_PAL_ASYNC_PROC_CALL();
-    if (this->GetEntryPoint() != NULL)
+    if (this->GetEntryPoint() != nullptr)
     {
         GLOBAL_LOCK();
 
@@ -54,12 +54,12 @@ bool HAL_CONTINUATION::Dequeue_And_Execute()
     // helpfull to make the call to release the global mutext happens
     bool result;
 
-    HAL_CONTINUATION *ptr = NULL;
+    HAL_CONTINUATION *ptr = nullptr;
     GLOBAL_LOCK();
     ptr = g_HAL_Continuation_List.ExtractFirstNode();
     GLOBAL_UNLOCK();
 
-    if (ptr == NULL)
+    if (ptr == nullptr)
     {
         result = false;
     }

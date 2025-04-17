@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (c) .NET Foundation and Contributors
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
@@ -46,8 +46,11 @@ void CLR_RT_SubThread::DestroyInstance(CLR_RT_Thread *th, CLR_RT_SubThread *sthB
     while (true)
     {
         CLR_RT_SubThread *sth = th->CurrentSubThread();
-        if (sth->Prev() == NULL)
+
+        if (sth->Prev() == nullptr)
+        {
             break;
+        }
 
         //
         // Release all the frames for this subthread.
@@ -55,11 +58,16 @@ void CLR_RT_SubThread::DestroyInstance(CLR_RT_Thread *th, CLR_RT_SubThread *sthB
         while (true)
         {
             CLR_RT_StackFrame *stack = th->CurrentFrame();
-            if (stack->Prev() == NULL)
+
+            if (stack->Prev() == nullptr)
+            {
                 break;
+            }
 
             if (stack == sth->m_owningStackFrame)
+            {
                 break;
+            }
 
             stack->Pop();
         }
@@ -76,7 +84,7 @@ void CLR_RT_SubThread::DestroyInstance(CLR_RT_Thread *th, CLR_RT_SubThread *sthB
         //
         // Release all the lock requests.
         //
-        g_CLR_RT_ExecutionEngine.DeleteLockRequests(NULL, sth);
+        g_CLR_RT_ExecutionEngine.DeleteLockRequests(nullptr, sth);
 
         if (sth == sthBase && (flags & CLR_RT_SubThread::MODE_IncludeSelf) == 0)
             break;
@@ -149,7 +157,7 @@ HRESULT CLR_RT_Thread::PushThreadProcDelegate(CLR_RT_HeapBlock_Delegate *pDelega
     CLR_RT_AppDomain *appDomainSav = g_CLR_RT_ExecutionEngine.SetCurrentAppDomain(pDelegate->m_appDomain);
 #endif
 
-    if (pDelegate == NULL || pDelegate->DataType() != DATATYPE_DELEGATE_HEAD ||
+    if (pDelegate == nullptr || pDelegate->DataType() != DATATYPE_DELEGATE_HEAD ||
         inst.InitializeFromIndex(pDelegate->DelegateFtn()) == false)
     {
         NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
@@ -171,9 +179,9 @@ HRESULT CLR_RT_Thread::PushThreadProcDelegate(CLR_RT_HeapBlock_Delegate *pDelega
     this->m_dlg = pDelegate;
     this->m_status = TH_S_Ready;
 
-    NANOCLR_CHECK_HRESULT(CLR_RT_StackFrame::Push(this, inst, inst.m_target->numArgs));
+    NANOCLR_CHECK_HRESULT(CLR_RT_StackFrame::Push(this, inst, inst.target->argumentsCount));
 
-    if ((inst.m_target->flags & CLR_RECORD_METHODDEF::MD_Static) == 0)
+    if ((inst.target->flags & CLR_RECORD_METHODDEF::MD_Static) == 0)
     {
         CLR_RT_StackFrame *stackTop = this->CurrentFrame();
 
@@ -208,22 +216,22 @@ HRESULT CLR_RT_Thread::CreateInstance(int pid, int priority, CLR_RT_Thread *&th,
 
         th->Initialize();
 
-        th->m_pid = pid;                                 // int                        m_pid;
-        th->m_status = TH_S_Unstarted;                   // CLR_UINT32                 m_status;
-        th->m_flags = flags;                             // CLR_UINT32                 m_flags;
-        th->m_executionCounter = 0;                      // int                        m_executionCounter;
-        th->m_timeQuantumExpired = false;                // bool                       m_timeQuantumExpired;
-                                                         //
-        th->m_dlg = NULL;                                // CLR_RT_HeapBlock_Delegate* m_dlg;
-        th->m_currentException.SetObjectReference(NULL); // CLR_RT_HeapBlock           m_currentException;
-                                                         // UnwindStack m_nestedExceptions[c_MaxStackUnwindDepth];
-        th->m_nestedExceptionsPos = 0;                   // int                        m_nestedExceptionsPos;
+        th->m_pid = pid;                                    // int                        m_pid;
+        th->m_status = TH_S_Unstarted;                      // CLR_UINT32                 m_status;
+        th->m_flags = flags;                                // CLR_UINT32                 m_flags;
+        th->m_executionCounter = 0;                         // int                        m_executionCounter;
+        th->m_timeQuantumExpired = false;                   // bool                       m_timeQuantumExpired;
+                                                            //
+        th->m_dlg = nullptr;                                // CLR_RT_HeapBlock_Delegate* m_dlg;
+        th->m_currentException.SetObjectReference(nullptr); // CLR_RT_HeapBlock           m_currentException;
+                                                            // UnwindStack m_nestedExceptions[c_MaxStackUnwindDepth];
+        th->m_nestedExceptionsPos = 0;                      // int                        m_nestedExceptionsPos;
 
         //
         // //--//
         //
-        th->m_terminationCallback = NULL;                    // ThreadTerminationCallback  m_terminationCallback;
-        th->m_terminationParameter = NULL;                   // void*                      m_terminationParameter;
+        th->m_terminationCallback = nullptr;                 // ThreadTerminationCallback  m_terminationCallback;
+        th->m_terminationParameter = nullptr;                // void*                      m_terminationParameter;
                                                              //
         th->m_waitForEvents = 0;                             // CLR_UINT32                 m_waitForEvents;
         th->m_waitForEvents_Timeout = TIMEOUT_INFINITE;      // CLR_INT64                  m_waitForEvents_Timeout;
@@ -231,7 +239,7 @@ HRESULT CLR_RT_Thread::CreateInstance(int pid, int priority, CLR_RT_Thread *&th,
                                                              //
         th->m_locks.DblLinkedList_Initialize();              // CLR_RT_DblLinkedList       m_locks;
         th->m_lockRequestsCount = 0;                         // CLR_UINT32                 m_lockRequestsCount;
-        th->m_waitForObject = NULL;
+        th->m_waitForObject = nullptr;
         //
         th->m_stackFrames.DblLinkedList_Initialize(); // CLR_RT_DblLinkedList       m_stackFrames;
                                                       //
@@ -249,11 +257,11 @@ HRESULT CLR_RT_Thread::CreateInstance(int pid, int priority, CLR_RT_Thread *&th,
         // If debugger creates managed thread for function evaluation, then m_realThread  points to the thread that has
         // focus in debugger
         th->m_realThread = th; // CLR_RT_Thread*             m_realThread
-#endif                         // #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
+#endif                         // NANOCLR_ENABLE_SOURCELEVELDEBUGGING
 
         //--//
 
-        NANOCLR_CHECK_HRESULT(CLR_RT_SubThread::CreateInstance(th, NULL, priority, sth));
+        NANOCLR_CHECK_HRESULT(CLR_RT_SubThread::CreateInstance(th, nullptr, priority, sth));
 
 #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
         if (g_CLR_RT_ExecutionEngine.m_breakpointsNum)
@@ -263,7 +271,7 @@ HRESULT CLR_RT_Thread::CreateInstance(int pid, int priority, CLR_RT_Thread *&th,
             //
             g_CLR_RT_ExecutionEngine.Breakpoint_Thread_Created(th);
         }
-#endif // #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
+#endif // NANOCLR_ENABLE_SOURCELEVELDEBUGGING
     }
 
     NANOCLR_NOCLEANUP();
@@ -318,13 +326,24 @@ bool CLR_RT_Thread::ReleaseWhenDeadEx()
         return false;
 
     if (this == g_CLR_RT_ExecutionEngine.m_finalizerThread)
-        g_CLR_RT_ExecutionEngine.m_finalizerThread = NULL;
+    {
+        g_CLR_RT_ExecutionEngine.m_finalizerThread = nullptr;
+    }
+
     if (this == g_CLR_RT_ExecutionEngine.m_interruptThread)
-        g_CLR_RT_ExecutionEngine.m_interruptThread = NULL;
+    {
+        g_CLR_RT_ExecutionEngine.m_interruptThread = nullptr;
+    }
+
     if (this == g_CLR_RT_ExecutionEngine.m_timerThread)
-        g_CLR_RT_ExecutionEngine.m_timerThread = NULL;
+    {
+        g_CLR_RT_ExecutionEngine.m_timerThread = nullptr;
+    }
+
     if (this == g_CLR_RT_ExecutionEngine.m_cctorThread)
-        g_CLR_RT_ExecutionEngine.m_cctorThread = NULL;
+    {
+        g_CLR_RT_ExecutionEngine.m_cctorThread = nullptr;
+    }
 
     return ReleaseWhenDead();
 }
@@ -384,7 +403,7 @@ HRESULT CLR_RT_Thread::Terminate()
     // between the start and end of killing the thread, a GC gets run.
     (void)Library_corlib_native_System_Exception::CreateInstance(
         m_currentException,
-        g_CLR_RT_WellKnownTypes.m_ThreadAbortException,
+        g_CLR_RT_WellKnownTypes.ThreadAbortException,
         S_OK,
         CurrentFrame());
 
@@ -405,7 +424,7 @@ HRESULT CLR_RT_Thread::Abort()
     {
         (void)Library_corlib_native_System_Exception::CreateInstance(
             m_currentException,
-            g_CLR_RT_WellKnownTypes.m_ThreadAbortException,
+            g_CLR_RT_WellKnownTypes.ThreadAbortException,
             S_OK,
             CurrentFrame());
 
@@ -442,14 +461,14 @@ void CLR_RT_Thread::OnThreadTerminated()
     //
     // Release all the subthreads.
     //
-    CLR_RT_SubThread::DestroyInstance(this, NULL, 0);
+    CLR_RT_SubThread::DestroyInstance(this, nullptr, 0);
 
 #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
     if (g_CLR_RT_ExecutionEngine.m_breakpointsNum)
     {
         g_CLR_RT_ExecutionEngine.Breakpoint_Thread_Terminated(this);
     }
-#endif // #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
+#endif // NANOCLR_ENABLE_SOURCELEVELDEBUGGING
 }
 
 void CLR_RT_Thread::Passivate()
@@ -465,10 +484,10 @@ void CLR_RT_Thread::Passivate()
 
     //--//
 
-    if (m_waitForObject != NULL)
+    if (m_waitForObject != nullptr)
     {
         g_CLR_RT_EventCache.Append_Node(m_waitForObject);
-        m_waitForObject = NULL;
+        m_waitForObject = nullptr;
     }
 
     //--//
@@ -483,7 +502,7 @@ void CLR_RT_Thread::Passivate()
         m_status = CLR_RT_Thread::TH_S_Unstarted;
     }
 
-    m_currentException.SetObjectReference(NULL); // Reset exception flag.
+    m_currentException.SetObjectReference(nullptr); // Reset exception flag.
 
     //
     // If the thread is associated with a timer, advance the state of the timer.
@@ -491,7 +510,7 @@ void CLR_RT_Thread::Passivate()
     if (m_terminationCallback)
     {
         ThreadTerminationCallback terminationCallback = m_terminationCallback;
-        m_terminationCallback = NULL;
+        m_terminationCallback = nullptr;
 
         terminationCallback(m_terminationParameter);
     }
@@ -499,7 +518,7 @@ void CLR_RT_Thread::Passivate()
     if (m_status == CLR_RT_Thread::TH_S_Terminated || m_status == CLR_RT_Thread::TH_S_Unstarted)
     {
         // This is used by Static constructor thread.
-        m_dlg = NULL;
+        m_dlg = nullptr;
     }
 
     ReleaseWhenDeadEx();
@@ -592,16 +611,16 @@ void CLR_RT_Thread::DumpStack()
 void CLR_RT_Thread::ProcessException_FilterPseudoFrameCopyVars(CLR_RT_StackFrame *to, CLR_RT_StackFrame *from)
 {
     NATIVE_PROFILE_CLR_CORE();
-    CLR_UINT8 numArgs = from->m_call.m_target->numArgs;
+    CLR_UINT8 ArgumentsCount = from->m_call.target->argumentsCount;
 
-    if (numArgs)
+    if (ArgumentsCount)
     {
-        memcpy(to->m_arguments, from->m_arguments, sizeof(struct CLR_RT_HeapBlock) * numArgs);
+        memcpy(to->m_arguments, from->m_arguments, sizeof(CLR_RT_HeapBlock) * ArgumentsCount);
     }
 
-    if (from->m_call.m_target->numLocals)
+    if (from->m_call.target->localsCount)
     {
-        memcpy(to->m_locals, from->m_locals, sizeof(struct CLR_RT_HeapBlock) * from->m_call.m_target->numLocals);
+        memcpy(to->m_locals, from->m_locals, sizeof(CLR_RT_HeapBlock) * from->m_call.target->localsCount);
     }
 }
 
@@ -622,7 +641,7 @@ HRESULT CLR_RT_Thread::ProcessException_EndFilter()
     ProcessException_FilterPseudoFrameCopyVars(us.m_handlerStack, stack);
 
     // Clear the stack variable so Pop doesn't remove us from the UnwindStack.
-    us.m_stack = NULL;
+    us.m_stack = nullptr;
 
 #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
     if (CLR_EE_DBG_IS_NOT(NoStackTraceInExceptions))
@@ -680,7 +699,7 @@ HRESULT CLR_RT_Thread::ProcessException_EndFilter()
 
     // Swap results around. ProcessException must return a success code in Thread::Execute and set m_currentException to
     // continue processing. Execute_IL must get a FAILED hr in order to break outside of the execution loop.
-    if (m_currentException.Dereference() == NULL)
+    if (m_currentException.Dereference() == nullptr)
     {
         // Return S_OK because exception handling is complete or handling is in-flight and needs to execute IL to
         // continue.
@@ -712,7 +731,7 @@ HRESULT CLR_RT_Thread::ProcessException_EndFinally()
         if (FindEhBlock(stack, stack->m_IP - 1, ipLeave, eh, true))
         {
             us.m_stack = stack;
-            us.m_exception = NULL;
+            us.m_exception = nullptr;
             us.m_ip = ipLeave;
             us.m_currentBlockStart = eh.m_handlerStart;
             us.m_currentBlockEnd = eh.m_handlerEnd;
@@ -747,7 +766,7 @@ HRESULT CLR_RT_Thread::ProcessException_EndFinally()
         // Similar to EndFilter, we need to swap the return codes around. Thread::Execute needs a success code or the
         // thread will be aborted. ExecuteIL needs a failure code or we'll continue to execute IL when we possibly
         // shouldn't.
-        if (m_currentException.Dereference() == NULL)
+        if (m_currentException.Dereference() == nullptr)
         {
             // Return S_OK because exception handling is complete or handling is in-flight and needs to execute IL to
             // continue.
@@ -794,7 +813,7 @@ HRESULT CLR_RT_Thread::ProcessException_Phase1()
     }
 
     // Search for a willing catch handler.
-    while (stack->Caller() != NULL)
+    while (stack->Caller() != nullptr)
     {
 
 #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
@@ -802,8 +821,8 @@ HRESULT CLR_RT_Thread::ProcessException_Phase1()
             us.GetPhase() < UnwindStack::p_1_SearchingForHandler_2_SentUsersChance && stack->m_IP)
         {
             // We have a debugger attached and we need to send some messages before we start searching.
-            // These messages should only get sent when the search reaches managed code. Stack::Push sets m_IP to NULL
-            // for native code, so therefore we need IP to be non-NULL
+            // These messages should only get sent when the search reaches managed code. Stack::Push sets m_IP to nullptr
+            // for native code, so therefore we need IP to be non-nullptr
 
             us.m_handlerStack = stack;
 
@@ -812,7 +831,7 @@ HRESULT CLR_RT_Thread::ProcessException_Phase1()
                 g_CLR_RT_ExecutionEngine.Breakpoint_Exception(
                     stack,
                     CLR_DBG_Commands::Debugging_Execution_BreakpointDef::c_DEPTH_EXCEPTION_FIRST_CHANCE,
-                    NULL);
+                    nullptr);
                 us.SetPhase(UnwindStack::p_1_SearchingForHandler_1_SentFirstChance);
 
                 // Break out here, because of synchronization issues (false positives) with JMC checking.
@@ -830,7 +849,7 @@ HRESULT CLR_RT_Thread::ProcessException_Phase1()
                 g_CLR_RT_ExecutionEngine.Breakpoint_Exception(
                     stack,
                     CLR_DBG_Commands::Debugging_Execution_BreakpointDef::c_DEPTH_EXCEPTION_USERS_CHANCE,
-                    NULL);
+                    nullptr);
                 us.SetPhase(UnwindStack::p_1_SearchingForHandler_2_SentUsersChance);
                 if (CLR_EE_DBG_IS(Stopped))
                 {
@@ -838,15 +857,15 @@ HRESULT CLR_RT_Thread::ProcessException_Phase1()
                 }
             }
         }
-#endif // #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
+#endif // NANOCLR_ENABLE_SOURCELEVELDEBUGGING
 
-        if (stack->m_call.m_target->flags & CLR_RECORD_METHODDEF::MD_HasExceptionHandlers)
+        if (stack->m_call.target->flags & CLR_RECORD_METHODDEF::MD_HasExceptionHandlers)
         {
             CLR_PMETADATA ip;
             if (us.m_ip)
             {
-                ip = us.m_ip;   // Use the IP set by endfilter
-                us.m_ip = NULL; // Reset to prevent catch block & PopEH issues via 'leave' or 'endfinally'
+                ip = us.m_ip;      // Use the IP set by endfilter
+                us.m_ip = nullptr; // Reset to prevent catch block & PopEH issues via 'leave' or 'endfinally'
             }
             else
             {
@@ -855,7 +874,7 @@ HRESULT CLR_RT_Thread::ProcessException_Phase1()
 
             if (ip) // No IP? Either out of memory during allocation of stack frame or native method.
             {
-                if (FindEhBlock(stack, ip, NULL, eh, false))
+                if (FindEhBlock(stack, ip, nullptr, eh, false))
                 { // There are two cases here:
                     // 1. We found a catch block... in this case, we want to break out and go to phase 2.
                     // 2. We found a filter... in this case, we want to duplicate the stack and execute the filter.
@@ -875,7 +894,7 @@ HRESULT CLR_RT_Thread::ProcessException_Phase1()
 
                     if (eh.IsFilter())
                     {
-                        CLR_RT_StackFrame *newStack = NULL;
+                        CLR_RT_StackFrame *newStack = nullptr;
 
                         // Store the IP range that we're currently executing so leave/PopEH doesn't accidentally pop the
                         // filter off.
@@ -883,7 +902,7 @@ HRESULT CLR_RT_Thread::ProcessException_Phase1()
                         us.m_currentBlockEnd = eh.m_handlerStart;
 
                         // Create a pseudo-frame at the top of the stack so the filter can call other functions.
-                        CLR_UINT8 numArgs = stack->m_call.m_target->numArgs;
+                        CLR_UINT8 ArgumentsCount = stack->m_call.target->argumentsCount;
 
 #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
                         if (CLR_EE_DBG_IS_NOT(NoStackTraceInExceptions))
@@ -894,7 +913,7 @@ HRESULT CLR_RT_Thread::ProcessException_Phase1()
                         }
 #endif
 
-                        hr = CLR_RT_StackFrame::Push(stack->m_owningThread, stack->m_call, numArgs);
+                        hr = CLR_RT_StackFrame::Push(stack->m_owningThread, stack->m_call, ArgumentsCount);
 
 #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
                         if (CLR_EE_DBG_IS_NOT(NoStackTraceInExceptions) && !fBreakpointsDisabledSav)
@@ -916,20 +935,20 @@ HRESULT CLR_RT_Thread::ProcessException_Phase1()
                         us.m_stack = newStack;
 
                         // Copy local variables and arguments so the filter has access to them.
-                        if (numArgs)
+                        if (ArgumentsCount)
                         {
                             memcpy(
                                 newStack->m_arguments,
                                 stack->m_arguments,
-                                sizeof(struct CLR_RT_HeapBlock) * numArgs);
+                                sizeof(CLR_RT_HeapBlock) * ArgumentsCount);
                         }
 
-                        if (stack->m_call.m_target->numLocals)
+                        if (stack->m_call.target->localsCount)
                         {
                             memcpy(
                                 newStack->m_locals,
                                 stack->m_locals,
-                                sizeof(struct CLR_RT_HeapBlock) * stack->m_call.m_target->numLocals);
+                                sizeof(CLR_RT_HeapBlock) * stack->m_call.target->localsCount);
                         }
 
                         newStack->PushValueAndAssign(m_currentException);
@@ -938,7 +957,7 @@ HRESULT CLR_RT_Thread::ProcessException_Phase1()
                         newStack->m_IP = eh.m_userFilterStart;
 
                         // We are willing to execute IL again so clear the m_currentException flag.
-                        m_currentException.SetObjectReference(NULL);
+                        m_currentException.SetObjectReference(nullptr);
 
 #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
                         if (CLR_EE_DBG_IS_NOT(NoStackTraceInExceptions))
@@ -984,7 +1003,7 @@ HRESULT CLR_RT_Thread::ProcessException_Phase1()
         // Both of these shouldn't be set at once because of the two-pass handling mechanism.
         if (stack->m_flags & CLR_RT_StackFrame::c_AppDomainTransition)
         {
-            us.m_handlerStack = NULL;
+            us.m_handlerStack = nullptr;
             us.SetPhase(UnwindStack::p_2_RunningFinallys_0);
 
 #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
@@ -1007,13 +1026,13 @@ HRESULT CLR_RT_Thread::ProcessException_Phase1()
         }
         if (stack->m_flags & CLR_RT_StackFrame::c_PseudoStackFrameForFilter)
         {
-            us.m_handlerStack = NULL;
+            us.m_handlerStack = nullptr;
             us.SetPhase(UnwindStack::p_2_RunningFinallys_0);
             NANOCLR_SET_AND_LEAVE(CLR_E_PROCESS_EXCEPTION);
         }
 
 #ifndef NANOCLR_NO_IL_INLINE
-        if (stack->m_inlineFrame != NULL && tmpInline.m_IP == NULL)
+        if (stack->m_inlineFrame != nullptr && tmpInline.m_IP == nullptr)
         {
             stack->SaveStack(tmpInline);
             stack->RestoreFromInlineStack();
@@ -1023,7 +1042,7 @@ HRESULT CLR_RT_Thread::ProcessException_Phase1()
             if (tmpInline.m_IP)
             {
                 stack->RestoreStack(tmpInline);
-                tmpInline.m_IP = NULL;
+                tmpInline.m_IP = nullptr;
             }
 #else
         {
@@ -1033,7 +1052,7 @@ HRESULT CLR_RT_Thread::ProcessException_Phase1()
         }
     }
 
-    us.m_handlerStack = NULL;
+    us.m_handlerStack = nullptr;
     us.SetPhase(UnwindStack::p_2_RunningFinallys_0);
 
 #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
@@ -1092,7 +1111,7 @@ HRESULT CLR_RT_Thread::ProcessException_Phase2()
     CLR_RT_ExceptionHandler eh;
 
     // Unwind the stack, running finally's as we go
-    while (iterStack->Caller() != NULL)
+    while (iterStack->Caller() != nullptr)
     {
 
 #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
@@ -1105,7 +1124,7 @@ HRESULT CLR_RT_Thread::ProcessException_Phase2()
             iterStack->ResetStack();
 
             // We are willing to execute IL again so clear the m_currentException flag.
-            m_currentException.SetObjectReference(NULL);
+            m_currentException.SetObjectReference(nullptr);
 
             // CPDE better reset the IP, or there are going to be issues.
             iterStack->m_flags |= CLR_RT_StackFrame::c_InvalidIP;
@@ -1119,30 +1138,30 @@ HRESULT CLR_RT_Thread::ProcessException_Phase2()
         else
 #endif
         {
-            if (iterStack->m_call.m_target->flags & CLR_RECORD_METHODDEF::MD_HasExceptionHandlers)
+            if (iterStack->m_call.target->flags & CLR_RECORD_METHODDEF::MD_HasExceptionHandlers)
             {
                 // No IP? Either out of memory during allocation of iterStack frame or native method.
                 if (iterStack->m_IP)
                 {
                     // handlerBlockStart is used to not execute finally's who's protected blocks contain the handler
-                    // itself. NULL is used when we're not in the handler stack frame to make it work in the case of
+                    // itself. nullptr is used when we're not in the handler stack frame to make it work in the case of
                     // recursive functions with filtered handlers.
                     if (FindEhBlock(
                             iterStack,
                             iterStack->m_IP,
-                            (us.m_handlerStack == iterStack) ? us.m_handlerBlockStart : NULL,
+                            (us.m_handlerStack == iterStack) ? us.m_handlerBlockStart : nullptr,
                             eh,
                             true))
                     {
                         // We have a finally block to process
 
                         us.m_stack = iterStack;
-                        us.m_ip = NULL;
+                        us.m_ip = nullptr;
                         us.m_currentBlockStart = eh.m_handlerStart;
                         us.m_currentBlockEnd = eh.m_handlerEnd;
                         us.SetPhase(UnwindStack::p_2_RunningFinallys_0);
 
-                        m_currentException.SetObjectReference(NULL); // Reset exception flag.
+                        m_currentException.SetObjectReference(nullptr); // Reset exception flag.
 
                         iterStack->ResetStack();
                         iterStack->m_IP = eh.m_handlerStart;
@@ -1152,7 +1171,7 @@ HRESULT CLR_RT_Thread::ProcessException_Phase2()
                         if (CLR_EE_DBG_IS_NOT(NoStackTraceInExceptions))
                         {
 #ifndef NANOCLR_NO_IL_INLINE
-                            if (iterStack->m_inlineFrame == NULL)
+                            if (iterStack->m_inlineFrame == nullptr)
 #endif
                             {
                                 g_CLR_RT_ExecutionEngine.Breakpoint_StackFrame_Pop(iterStack, true);
@@ -1166,7 +1185,8 @@ HRESULT CLR_RT_Thread::ProcessException_Phase2()
                     if (iterStack == us.m_handlerStack)
                     {
 #ifndef NANOCLR_NO_IL_INLINE
-                        if (iterStack->m_inlineFrame == NULL || 0 == (us.m_flags & UnwindStack::c_MagicCatchForInline))
+                        if (iterStack->m_inlineFrame == nullptr ||
+                            0 == (us.m_flags & UnwindStack::c_MagicCatchForInline))
 #endif
                         {
                             // We've popped off all stack frames above the target.
@@ -1186,13 +1206,13 @@ HRESULT CLR_RT_Thread::ProcessException_Phase2()
                             iterStack->PushValue().SetObjectReference(us.m_exception);
 
                             // We are willing to execute IL again so clear the m_currentException flag.
-                            m_currentException.SetObjectReference(NULL);
+                            m_currentException.SetObjectReference(nullptr);
 
 #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
                             if (CLR_EE_DBG_IS_NOT(NoStackTraceInExceptions))
                             {
 #ifndef NANOCLR_NO_IL_INLINE
-                                if (iterStack->m_inlineFrame == NULL)
+                                if (iterStack->m_inlineFrame == nullptr)
 #endif
                                 {
                                     g_CLR_RT_ExecutionEngine.Breakpoint_StackFrame_Pop(iterStack, true);
@@ -1229,7 +1249,7 @@ HRESULT CLR_RT_Thread::ProcessException_Phase2()
             // Set IP so we can resume looking for the next filter.
             otherUnwindStack.m_ip = otherUnwindStack.m_currentBlockStart;
 
-            otherUnwindStack.m_stack = NULL; // Prevent Pop from taking this handler off the stack.
+            otherUnwindStack.m_stack = nullptr; // Prevent Pop from taking this handler off the stack.
 
 #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
             if (CLR_EE_DBG_IS_NOT(NoStackTraceInExceptions))
@@ -1303,7 +1323,7 @@ HRESULT CLR_RT_Thread::ProcessException_Phase2()
         }
 #endif
 
-        us.m_stack = NULL; // Don't pop off the handler when we pop this stack frame
+        us.m_stack = nullptr; // Don't pop off the handler when we pop this stack frame
 
 #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
         if (CLR_EE_DBG_IS_NOT(NoStackTraceInExceptions))
@@ -1368,7 +1388,7 @@ HRESULT CLR_RT_Thread::ProcessException()
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
     CLR_RT_StackFrame *stack = CurrentFrame();
-    UnwindStack *us = NULL;
+    UnwindStack *us = nullptr;
 
     // If the exception was thrown in the middle of an IL instruction,
     // back up the pointer to point to the executing instruction, not the next one.
@@ -1394,11 +1414,11 @@ HRESULT CLR_RT_Thread::ProcessException()
         else
         {
             // Signal that we need a new handler pushed on the stack.
-            us = NULL;
+            us = nullptr;
         }
     }
 
-    if (us == NULL)
+    if (us == nullptr)
     {
         // Push a new handler on the unwind stack that will last until its handler gets executed or
         // something out-of-band forces the stack frame to get popped.

@@ -30,6 +30,7 @@
     <ClCompile Include="CLR_RT_HeapBlock_Delegate.cpp" />
     <ClCompile Include="CLR_RT_HeapBlock_Delegate_List.cpp" />
     <ClCompile Include="CLR_RT_HeapBlock_Finalizer.cpp" />
+    <ClCompile Include="CLR_RT_HeapBlock_GenericInstance.cpp" />
     <ClCompile Include="CLR_RT_HeapBlock_Lock.cpp" />
     <ClCompile Include="CLR_RT_HeapBlock_LockRequest.cpp" />
     <ClCompile Include="CLR_RT_HeapBlock_Node.cpp" />

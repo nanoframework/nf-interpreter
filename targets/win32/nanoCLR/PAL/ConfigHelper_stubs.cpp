@@ -24,12 +24,12 @@
 //
 // const HAL_CONFIG_BLOCK* HAL_CONFIG_BLOCK::Next() const
 //{
-//    return NULL;
+//    return nullptr;
 //}
 //
 // const void* HAL_CONFIG_BLOCK::Data() const
 //{
-//    return NULL;
+//    return nullptr;
 //}
 //
 ////--//
@@ -43,7 +43,7 @@
 //
 // const HAL_CONFIG_BLOCK* HAL_CONFIG_BLOCK::Find( const char* Name, bool fSkipCurrent, bool fAppend ) const
 //{
-//    return NULL;
+//    return nullptr;
 //}
 //
 ////--//

@@ -35,7 +35,7 @@ HRESULT Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_GenericAttribu
                 NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance(
                     stack.PushValueAndClear(),
                     om_len,
-                    g_CLR_RT_WellKnownTypes.m_UInt8));
+                    g_CLR_RT_WellKnownTypes.UInt8));
 
                 // get a pointer to the first object in the array
                 pReturnBuffer = stack.TopValue().DereferenceArray()->GetFirstElement();
@@ -53,7 +53,7 @@ HRESULT Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_GenericAttribu
         {
             // Error return empty array, event not found ?
             NANOCLR_CHECK_HRESULT(
-                CLR_RT_HeapBlock_Array::CreateInstance(stack.PushValueAndClear(), 0, g_CLR_RT_WellKnownTypes.m_UInt8));
+                CLR_RT_HeapBlock_Array::CreateInstance(stack.PushValueAndClear(), 0, g_CLR_RT_WellKnownTypes.UInt8));
         }
     }
     NANOCLR_NOCLEANUP();

@@ -35,7 +35,9 @@ CLR_RT_ObjectToEvent_Source *CLR_RT_ObjectToEvent_Source::ExtractInstance(CLR_RT
 {
     NATIVE_PROFILE_CLR_CORE();
     if (reference.IsAReferenceOfThisType(DATATYPE_OBJECT_TO_EVENT) == false)
-        return NULL;
+    {
+        return nullptr;
+    }
 
     return (CLR_RT_ObjectToEvent_Source *)reference.Dereference();
 }
@@ -54,7 +56,7 @@ void CLR_RT_ObjectToEvent_Source::Detach()
     NATIVE_PROFILE_CLR_CORE();
     if (m_referencePtr)
     {
-        m_referencePtr->SetObjectReference(NULL);
+        m_referencePtr->SetObjectReference(nullptr);
     }
 
     g_CLR_RT_EventCache.Append_Node(this);

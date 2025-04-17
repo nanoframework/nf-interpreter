@@ -22,7 +22,7 @@ HRESULT InkDriver::Initialize()
         g_InkDriver.m_InkCompletion.InitializeForUserMode(InkContinuationRoutine);
         m_initialized = true;
         m_InkingActive = false;
-        m_InkRegionInfo.Bmp = NULL;
+        m_InkRegionInfo.Bmp = nullptr;
         m_ScreenBmp.width = g_DisplayDriver.Attributes.Width;
         m_ScreenBmp.height = g_DisplayDriver.Attributes.Height;
         //   m_ScreenBmp.data = Display::GetFrameBuffer();
@@ -56,7 +56,7 @@ HRESULT InkDriver::SetRegion(InkRegionInfo *inkRegionInfo)
     m_ScreenBmp.clipping.top = m_InkRegionInfo.Y1 + m_InkRegionInfo.BorderWidth;
     m_ScreenBmp.clipping.bottom = m_InkRegionInfo.Y2 - m_InkRegionInfo.BorderWidth;
 
-    if (m_InkRegionInfo.Bmp == NULL)
+    if (m_InkRegionInfo.Bmp == nullptr)
     {
         m_InkRegionInfo.Bmp = &m_ScreenBmp;
     }
@@ -97,7 +97,7 @@ HRESULT InkDriver::ResetRegion()
         m_InkCompletion.Abort();
 
     m_InkingActive = false;
-    m_InkRegionInfo.Bmp = NULL;
+    m_InkRegionInfo.Bmp = nullptr;
 
     return S_OK;
 }
@@ -109,7 +109,7 @@ void InkDriver::InkContinuationRoutine(void *arg)
 
 void InkDriver::DrawInk(void *arg)
 {
-    if (arg == NULL)
+    if (arg == nullptr)
     {
     }; // Avoid unused parameter, maybe we need it in the future?
     HRESULT hr = S_OK;
@@ -132,7 +132,7 @@ void InkDriver::DrawInk(void *arg)
         if (m_lastx != 0xFFFF)
         {
             g_GraphicsDriver.DrawLineRaw(m_ScreenBmp, m_InkRegionInfo.Pen, m_lastx, m_lasty, x, y);
-            if (m_InkRegionInfo.Bmp != NULL)
+            if (m_InkRegionInfo.Bmp != nullptr)
             {
                 g_GraphicsDriver
                     .DrawLine(*(m_InkRegionInfo.Bmp), m_InkRegionInfo.Pen, m_lastx - dx, m_lasty - dy, x - dx, y - dy);

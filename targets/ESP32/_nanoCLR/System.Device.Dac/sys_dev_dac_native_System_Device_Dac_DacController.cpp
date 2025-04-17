@@ -17,7 +17,7 @@ HRESULT Library_sys_dev_dac_native_System_Device_Dac_DacController::NativeOpenCh
         int channelNumber;
         dac_channel_t dacChannel = DAC_CHAN_0;
 
-        // get a pointer to the managed object instance and check that it's not NULL
+        // get a pointer to the managed object instance and check that it's not nullptr
         CLR_RT_HeapBlock *pThis = stack.This();
         FAULT_ON_NULL(pThis);
 
@@ -105,7 +105,7 @@ HRESULT Library_sys_dev_dac_native_System_Device_Dac_DacController::NativeInit__
 
     int controllerId;
 
-    // get a pointer to the managed object instance and check that it's not NULL
+    // get a pointer to the managed object instance and check that it's not nullptr
     CLR_RT_HeapBlock *pThis = stack.This();
     FAULT_ON_NULL(pThis);
 

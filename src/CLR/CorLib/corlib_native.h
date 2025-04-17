@@ -595,9 +595,11 @@ struct Library_corlib_native_System_EventArgs
 
 struct Library_corlib_native_System_GC
 {
-    NANOCLR_NATIVE_DECLARE(AnyPendingFinalizers___STATIC__BOOLEAN);
-    NANOCLR_NATIVE_DECLARE(SuppressFinalize___STATIC__VOID__OBJECT);
+    NANOCLR_NATIVE_DECLARE(EnableGCMessages___STATIC__VOID__BOOLEAN);
     NANOCLR_NATIVE_DECLARE(ReRegisterForFinalize___STATIC__VOID__OBJECT);
+    NANOCLR_NATIVE_DECLARE(SuppressFinalize___STATIC__VOID__OBJECT);
+    NANOCLR_NATIVE_DECLARE(AnyPendingFinalizers___STATIC__BOOLEAN);
+    NANOCLR_NATIVE_DECLARE(Run___STATIC__U4__BOOLEAN);
 
     //--//
 };
@@ -605,13 +607,6 @@ struct Library_corlib_native_System_GC
 struct Library_corlib_native_System_Globalization_DateTimeFormat
 {
     NANOCLR_NATIVE_DECLARE(FormatDigits___STATIC__STRING__I4__I4);
-
-    //--//
-};
-
-struct Library_corlib_native_System_UInt32
-{
-    static const int FIELD__m_value = 1;
 
     //--//
 };
@@ -659,16 +654,16 @@ struct Library_corlib_native_System_Number
     static bool ValidateFormatChar(char *formatChar, bool isInteger);
     static bool GetFormatSpec(char *format, bool isInteger, char *formatChar, int *precision);
     static int DoPrintfOnDataType(char *buffer, char *formatStr, CLR_RT_HeapBlock *value);
-    static bool IsSignedIntegerDataType(CLR_DataType dataType);
-    static bool IsUnsignedIntegerDataType(CLR_DataType dataType);
-    static bool IsIntegerDataType(CLR_DataType dataType);
+    static bool IsSignedIntegerDataType(NanoCLRDataType dataType);
+    static bool IsUnsignedIntegerDataType(NanoCLRDataType dataType);
+    static bool IsIntegerDataType(NanoCLRDataType dataType);
     static int GetStrLen(char *buffer);
     static int GetDotIndex(char *buffer, int bufferContentLength);
     static void RoundUpNumStr(char *buffer, int *bufferContentLength);
     static int ReplaceNegativeSign(char *buffer, int bufferContentLength, char *negativeSign);
     static int ReplaceDecimalSeparator(char *buffer, int bufferContentLength, char *decimalSeparator);
     static int InsertGroupSeparators(char *buffer, int bufferContentLength, int groupSize, char *groupSep);
-    static const char *GetPrintfLengthModifier(CLR_DataType dataType);
+    static const char *GetPrintfLengthModifier(NanoCLRDataType dataType);
     static int Format_G(
         char *buffer,
         CLR_RT_HeapBlock *value,
@@ -791,20 +786,6 @@ struct Library_corlib_native_System_Reflection_RuntimeMethodInfo
 {
     NANOCLR_NATIVE_DECLARE(get_ReturnType___SystemType);
     NANOCLR_NATIVE_DECLARE(GetCustomAttributesNative___SZARRAY_OBJECT__BOOLEAN);
-
-    //--//
-};
-
-struct Library_corlib_native_System_Runtime_CompilerServices_NullableAttribute
-{
-    static const int FIELD__NullableFlags = 1;
-
-    //--//
-};
-
-struct Library_corlib_native_System_Runtime_CompilerServices_NullableContextAttribute
-{
-    static const int FIELD__Flag = 1;
 
     //--//
 };
@@ -1012,6 +993,13 @@ struct Library_corlib_native_System_Threading_WaitHandle
         CLR_RT_HeapBlock *objects,
         int cObjects,
         bool fWaitAll);
+};
+
+struct Library_corlib_native_System_UInt32
+{
+    static const int FIELD__m_value = 1;
+
+    //--//
 };
 
 struct Library_corlib_native_System_UInt64

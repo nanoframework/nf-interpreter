@@ -103,17 +103,17 @@ static void GpioEventCallback(void *arg)
 }
 
 // Get pointer to gpio_input_state for Gpio pin
-// return NULL if not found
+// return nullptr if not found
 gpio_input_state *GetInputState(GPIO_PIN pinNumber)
 {
     gpio_input_state *ptr = gpioInputList.FirstNode();
-    while (ptr->Next() != NULL)
+    while (ptr->Next() != nullptr)
     {
         if (ptr->pinNumber == pinNumber)
             return ptr;
         ptr = ptr->Next();
     }
-    return NULL;
+    return nullptr;
 }
 
 // Allocate a new gpio_input_state and add to end of list
@@ -122,12 +122,12 @@ gpio_input_state *AllocateGpioInputState(GPIO_PIN pinNumber)
 {
     gpio_input_state *ptr = GetInputState(pinNumber);
 
-    if (ptr == NULL)
+    if (ptr == nullptr)
     {
         ptr = (gpio_input_state *)platform_malloc(sizeof(gpio_input_state));
 
         // sanity check
-        if (ptr != NULL)
+        if (ptr != nullptr)
         {
             memset(ptr, 0, sizeof(gpio_input_state));
             ptr->pinNumber = pinNumber;
@@ -276,7 +276,7 @@ bool CPU_GPIO_EnableInputPin(
 
     // Link ISR ptr supplied and not already set up
     // CPU_GPIO_EnableInputPin could be called a 2nd time with changed parameters
-    if (pinISR != NULL && (pState->isrPtr == NULL))
+    if (pinISR != nullptr && (pState->isrPtr == nullptr))
     {
         // there are callbacks registered and...
         // the drive mode is input so need to setup the interrupt
@@ -313,7 +313,7 @@ bool CPU_GPIO_EnableInputPin(
                 break;
         }
     }
-    else if (pinISR == NULL && (pState->isrPtr != NULL))
+    else if (pinISR == nullptr && (pState->isrPtr != nullptr))
     {
         // there is no managed handler setup anymore
 
@@ -322,9 +322,9 @@ bool CPU_GPIO_EnableInputPin(
         palDisableLineEvent(GetIoLine(pState->pinNumber));
 
         // clear parameters & configs
-        pState->isrPtr = NULL;
+        pState->isrPtr = nullptr;
         pState->mode = GPIO_INT_NONE;
-        pState->param = NULL;
+        pState->param = nullptr;
         pState->debounceMs = 0;
     }
 

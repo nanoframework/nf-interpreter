@@ -216,7 +216,7 @@ HRESULT Library_nf_native_system_math_System_Math::Abs___STATIC__R8__R8(CLR_RT_S
 
 #else
 
-    float d = (float)stack.Arg0().NumericByRefConst().r8;
+    auto d = (float)stack.Arg0().NumericByRefConst().r8;
     float res = fabsf(d);
 
     stack.SetResult_R8(res);
@@ -257,7 +257,7 @@ HRESULT Library_nf_native_system_math_System_Math::Acos___STATIC__R8__R8(CLR_RT_
 
 #else
 
-    float d = (float)stack.Arg0().NumericByRefConst().r8;
+    auto d = (float)stack.Arg0().NumericByRefConst().r8;
     float res = acosf(d);
 
     stack.SetResult_R8(res);
@@ -287,7 +287,7 @@ HRESULT Library_nf_native_system_math_System_Math::Asin___STATIC__R8__R8(CLR_RT_
 
 #else
 
-    float d = (float)stack.Arg0().NumericByRefConst().r8;
+    auto d = (float)stack.Arg0().NumericByRefConst().r8;
     float res = asinf(d);
 
     stack.SetResult_R8(res);
@@ -317,7 +317,7 @@ HRESULT Library_nf_native_system_math_System_Math::Atan___STATIC__R8__R8(CLR_RT_
 
 #else
 
-    float d = (float)stack.Arg0().NumericByRefConst().r8;
+    auto d = (float)stack.Arg0().NumericByRefConst().r8;
     float res = atanf(d);
 
     stack.SetResult_R8(res);
@@ -348,8 +348,8 @@ HRESULT Library_nf_native_system_math_System_Math::Atan2___STATIC__R8__R8__R8(CL
 
 #else
 
-    float x = (float)stack.Arg0().NumericByRefConst().r8;
-    float y = (float)stack.Arg1().NumericByRefConst().r8;
+    auto x = (float)stack.Arg0().NumericByRefConst().r8;
+    auto y = (float)stack.Arg1().NumericByRefConst().r8;
     float res = atan2f(x, y);
 
     stack.SetResult_R8(res);
@@ -379,7 +379,7 @@ HRESULT Library_nf_native_system_math_System_Math::Cbrt___STATIC__R8__R8(CLR_RT_
 
 #else
 
-    float d = (float)stack.Arg0().NumericByRefConst().r8;
+    auto d = (float)stack.Arg0().NumericByRefConst().r8;
     float res = cbrt(d);
 
     stack.SetResult_R8(res);
@@ -409,7 +409,7 @@ HRESULT Library_nf_native_system_math_System_Math::Ceiling___STATIC__R8__R8(CLR_
 
 #else
 
-    float d = (float)stack.Arg0().NumericByRefConst().r8;
+    auto d = (float)stack.Arg0().NumericByRefConst().r8;
     float res = ceilf(d);
 
     stack.SetResult_R8(res);
@@ -439,7 +439,7 @@ HRESULT Library_nf_native_system_math_System_Math::Cos___STATIC__R8__R8(CLR_RT_S
 
 #else
 
-    float d = (float)stack.Arg0().NumericByRefConst().r8;
+    auto d = (float)stack.Arg0().NumericByRefConst().r8;
     float res = cosf(d);
 
     stack.SetResult_R8(res);
@@ -469,7 +469,7 @@ HRESULT Library_nf_native_system_math_System_Math::Cosh___STATIC__R8__R8(CLR_RT_
 
 #else
 
-    float d = (float)stack.Arg0().NumericByRefConst().r8;
+    auto d = (float)stack.Arg0().NumericByRefConst().r8;
     float res = coshf(d);
 
     stack.SetResult_R8(res);
@@ -500,8 +500,8 @@ HRESULT Library_nf_native_system_math_System_Math::IEEERemainder___STATIC__R8__R
 
 #else
 
-    float x = (float)stack.Arg0().NumericByRefConst().r8;
-    float y = (float)stack.Arg1().NumericByRefConst().r8;
+    auto x = (float)stack.Arg0().NumericByRefConst().r8;
+    auto y = (float)stack.Arg1().NumericByRefConst().r8;
     float res = remainderf(x, y);
 
     stack.SetResult_R8(res);
@@ -530,7 +530,7 @@ HRESULT Library_nf_native_system_math_System_Math::Exp___STATIC__R8__R8(CLR_RT_S
 
 #else
 
-    float d = (float)stack.Arg0().NumericByRefConst().r8;
+    auto d = (float)stack.Arg0().NumericByRefConst().r8;
     float res = expf(d);
 
     stack.SetResult_R8(res);
@@ -560,7 +560,7 @@ HRESULT Library_nf_native_system_math_System_Math::Floor___STATIC__R8__R8(CLR_RT
 
 #else
 
-    float d = (float)stack.Arg0().NumericByRefConst().r8;
+    auto d = (float)stack.Arg0().NumericByRefConst().r8;
     float res = floorf(d);
 
     stack.SetResult_R8(res);
@@ -590,7 +590,7 @@ HRESULT Library_nf_native_system_math_System_Math::Log___STATIC__R8__R8(CLR_RT_S
 
 #else
 
-    float d = (float)stack.Arg0().NumericByRefConst().r8;
+    auto d = (float)stack.Arg0().NumericByRefConst().r8;
     float res = logf(d);
 
     stack.SetResult_R8(res);
@@ -620,7 +620,7 @@ HRESULT Library_nf_native_system_math_System_Math::Log10___STATIC__R8__R8(CLR_RT
 
 #else
 
-    float d = (float)stack.Arg0().NumericByRefConst().r8;
+    auto d = (float)stack.Arg0().NumericByRefConst().r8;
     float res = log10f(d);
 
     stack.SetResult_R8(res);
@@ -648,8 +648,8 @@ HRESULT Library_nf_native_system_math_System_Math::Pow___STATIC__R8__R8__R8(CLR_
 
 #else
 
-    float x = (float)stack.Arg0().NumericByRefConst().r8;
-    float y = (float)stack.Arg1().NumericByRefConst().r8;
+    auto x = (float)stack.Arg0().NumericByRefConst().r8;
+    auto y = (float)stack.Arg1().NumericByRefConst().r8;
 
     float res = powf(x, y);
 
@@ -685,7 +685,7 @@ HRESULT Library_nf_native_system_math_System_Math::Round___STATIC__R8__R8(CLR_RT
 
 #else
 
-    float d = (float)stack.Arg0().NumericByRefConst().r8;
+    auto d = (float)stack.Arg0().NumericByRefConst().r8;
     float hi = d + 0.5;
     float res = floorf(hi);
 
@@ -731,7 +731,7 @@ HRESULT Library_nf_native_system_math_System_Math::Sign___STATIC__I4__R8(CLR_RT_
 
 #else
 
-    float d = (float)stack.Arg0().NumericByRefConst().r8;
+    auto d = (float)stack.Arg0().NumericByRefConst().r8;
     int32_t res;
 
     if (d < 0)
@@ -772,7 +772,7 @@ HRESULT Library_nf_native_system_math_System_Math::Sin___STATIC__R8__R8(CLR_RT_S
 
 #else
 
-    float d = (float)stack.Arg0().NumericByRefConst().r8;
+    auto d = (float)stack.Arg0().NumericByRefConst().r8;
     float res = sinf(d);
 
     stack.SetResult_R8(res);
@@ -802,7 +802,7 @@ HRESULT Library_nf_native_system_math_System_Math::Sinh___STATIC__R8__R8(CLR_RT_
 
 #else
 
-    float d = (float)stack.Arg0().NumericByRefConst().r8;
+    auto d = (float)stack.Arg0().NumericByRefConst().r8;
     float res = sinhf(d);
 
     stack.SetResult_R8(res);
@@ -832,7 +832,7 @@ HRESULT Library_nf_native_system_math_System_Math::Sqrt___STATIC__R8__R8(CLR_RT_
 
 #else
 
-    float d = (float)stack.Arg0().NumericByRefConst().r8;
+    auto d = (float)stack.Arg0().NumericByRefConst().r8;
     float res = sqrtf(d);
 
     stack.SetResult_R8(res);
@@ -862,7 +862,7 @@ HRESULT Library_nf_native_system_math_System_Math::Tan___STATIC__R8__R8(CLR_RT_S
 
 #else
 
-    float d = (float)stack.Arg0().NumericByRefConst().r8;
+    auto d = (float)stack.Arg0().NumericByRefConst().r8;
     float res = tanf(d);
 
     stack.SetResult_R8(res);
@@ -892,7 +892,7 @@ HRESULT Library_nf_native_system_math_System_Math::Tanh___STATIC__R8__R8(CLR_RT_
 
 #else
 
-    float d = (float)stack.Arg0().NumericByRefConst().r8;
+    auto d = (float)stack.Arg0().NumericByRefConst().r8;
     float res = tanhf(d);
 
     stack.SetResult_R8(res);
@@ -919,7 +919,7 @@ HRESULT Library_nf_native_system_math_System_Math::Truncate___STATIC__R8__R8(CLR
 
 #else
 
-    float d = (float)stack.Arg0().NumericByRefConst().r8;
+    auto d = (float)stack.Arg0().NumericByRefConst().r8;
     float res = 0.0;
     modff(d, &res);
 

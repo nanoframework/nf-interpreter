@@ -10,9 +10,9 @@ HRESULT Library_corlib_native_System_Threading_Monitor::Enter___STATIC__VOID__OB
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
 
-    CLR_RT_StackFrame *caller = NULL;
+    CLR_RT_StackFrame *caller = nullptr;
 
-    if (stack.Arg0().Dereference() == NULL)
+    if (stack.Arg0().Dereference() == nullptr)
     {
         NANOCLR_SET_AND_LEAVE(CLR_E_ARGUMENT_NULL);
     }
@@ -50,9 +50,9 @@ HRESULT Library_corlib_native_System_Threading_Monitor::Exit___STATIC__VOID__OBJ
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
 
-    CLR_RT_StackFrame *caller = NULL;
+    CLR_RT_StackFrame *caller = nullptr;
 
-    if (stack.Arg0().Dereference() == NULL)
+    if (stack.Arg0().Dereference() == nullptr)
     {
         NANOCLR_SET_AND_LEAVE(CLR_E_ARGUMENT_NULL);
     }

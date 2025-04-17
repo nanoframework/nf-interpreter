@@ -9,11 +9,11 @@
 
 #include "nf_rt_events_native.h"
 
-static CLR_RT_HeapBlock_NativeEventDispatcher *g_Context = NULL;
+static CLR_RT_HeapBlock_NativeEventDispatcher *g_Context = nullptr;
 
 void PostManagedEvent(uint8_t category, uint8_t subCategory, uint16_t data1, uint32_t data2)
 {
-    if(g_Context != NULL)
+    if(g_Context != nullptr)
     {
         uint32_t d = ((uint32_t)data1 << 16) | (category << 8) | subCategory;
 
@@ -42,7 +42,7 @@ static HRESULT CleanupEventSink( CLR_RT_HeapBlock_NativeEventDispatcher *pContex
 {
     (void)pContext;
 
-    g_Context = NULL;
+    g_Context = nullptr;
 
     CleanupNativeEventsFromHALQueue( pContext );
 

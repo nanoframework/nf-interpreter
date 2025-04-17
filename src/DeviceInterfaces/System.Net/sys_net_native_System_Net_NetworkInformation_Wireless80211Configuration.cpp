@@ -43,7 +43,7 @@ HRESULT Library_sys_net_native_System_Net_NetworkInformation_Wireless80211Config
 
     // create new object for configuration
     NANOCLR_CHECK_HRESULT(
-        g_CLR_RT_ExecutionEngine.NewObjectFromIndex(top, g_CLR_RT_WellKnownTypes.m_Wireless80211Configuration));
+        g_CLR_RT_ExecutionEngine.NewObjectFromIndex(top, g_CLR_RT_WellKnownTypes.Wireless80211Configuration));
 
     // load from stack
     pConfig = top.Dereference();
@@ -75,12 +75,12 @@ HRESULT Library_sys_net_native_System_Net_NetworkInformation_Wireless80211Config
 
     HAL_Configuration_Wireless80211 config;
     CLR_RT_HeapBlock *pConfig = stack.Arg0().Dereference();
-    _ASSERTE(pConfig != NULL);
+    _ASSERTE(pConfig != nullptr);
 
     CLR_UINT32 configurationIndex = pConfig[FIELD___configurationIndex].NumericByRefConst().u4;
 
-    CLR_RT_HeapBlock_String *hbPassword = NULL;
-    CLR_RT_HeapBlock_String *hbSsid = NULL;
+    CLR_RT_HeapBlock_String *hbPassword = nullptr;
+    CLR_RT_HeapBlock_String *hbSsid = nullptr;
     CLR_UINT32 ssidLength;
     CLR_UINT32 passwordLength;
 
@@ -89,6 +89,7 @@ HRESULT Library_sys_net_native_System_Net_NetworkInformation_Wireless80211Config
     config.Id = (CLR_UINT32)pConfig[FIELD___id].NumericByRef().u4;
     config.Authentication = (AuthenticationType)pConfig[FIELD___authentication].NumericByRef().u4;
     config.Encryption = (EncryptionType)pConfig[FIELD___encryption].NumericByRef().u4;
+
     config.Radio = (RadioType)pConfig[FIELD___radio].NumericByRef().u4;
     config.Options = (Wireless80211Configuration_ConfigurationOptions)pConfig[FIELD___options].NumericByRef().u1;
 
@@ -96,9 +97,14 @@ HRESULT Library_sys_net_native_System_Net_NetworkInformation_Wireless80211Config
     // make sure the terminators are there
     hbPassword = pConfig[FIELD___password].DereferenceString();
     FAULT_ON_NULL(hbPassword);
+
     passwordLength = hal_strlen_s(hbPassword->StringText());
+
     if (passwordLength >= sizeof(config.Password))
+    {
         NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+    }
+
     hal_strncpy_s(
         (char *)config.Password,
         WIRELESS82011_CONFIG_MAX_PASSWORD_LEN,
@@ -107,9 +113,14 @@ HRESULT Library_sys_net_native_System_Net_NetworkInformation_Wireless80211Config
 
     hbSsid = pConfig[FIELD___ssid].DereferenceString();
     FAULT_ON_NULL(hbSsid);
+
     ssidLength = hal_strlen_s(hbSsid->StringText());
+
     if (ssidLength >= sizeof(config.Ssid))
+    {
         NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+    }
+
     hal_strncpy_s((char *)config.Ssid, WIRELESS82011_CONFIG_MAX_SSID_LEN, hbSsid->StringText(), ssidLength);
 
     // store configuration

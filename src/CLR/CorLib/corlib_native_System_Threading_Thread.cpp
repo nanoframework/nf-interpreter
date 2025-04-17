@@ -48,7 +48,7 @@ HRESULT Library_corlib_native_System_Threading_Thread::Start___VOID(CLR_RT_Stack
     // Don't start twice...
     //
     NANOCLR_CHECK_HRESULT(GetThread(stack, th, false, false));
-    if (th != NULL)
+    if (th != nullptr)
     {
         NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
     }
@@ -168,7 +168,7 @@ HRESULT Library_corlib_native_System_Threading_Thread::get_Priority___SystemThre
     pri = pThis[FIELD___priority].NumericByRef().s4;
 
     // Here we check consistency of values stored in C# and internal thread objects.
-    // Get thread associated with C# thread object. It might be NULL if thread was not started.
+    // Get thread associated with C# thread object. It might be nullptr if thread was not started.
     NANOCLR_CHECK_HRESULT(GetThread(stack, th, false, false));
 
     // If thread was started, then we use priority from the CLR_RT_Thread.
@@ -177,7 +177,7 @@ HRESULT Library_corlib_native_System_Threading_Thread::get_Priority___SystemThre
     // 2. Sub-thread with different priority may have been created in
     // Library_spot_native_Microsoft_SPOT_ExecutionConstraint::Install___STATIC__VOID__I4__I4
 
-    if (th != NULL)
+    if (th != nullptr)
     {
         pri = th->GetThreadPriority();
 
@@ -272,7 +272,7 @@ HRESULT Library_corlib_native_System_Threading_Thread::get_IsAlive___BOOLEAN(CLR
 
     GetThread(stack, th, false, false);
 
-    stack.SetResult_Boolean(th != NULL && th->m_status != CLR_RT_Thread::TH_S_Terminated);
+    stack.SetResult_Boolean(th != nullptr && th->m_status != CLR_RT_Thread::TH_S_Terminated);
 
     NANOCLR_NOCLEANUP_NOLABEL();
 }
@@ -331,7 +331,7 @@ HRESULT Library_corlib_native_System_Threading_Thread::get_ThreadState___SystemT
 
     NANOCLR_CHECK_HRESULT(GetThread(stack, th, false, false));
 
-    if (th == NULL)
+    if (th == nullptr)
     {
         val = 8; // Unstarted
     }
@@ -449,7 +449,7 @@ HRESULT Library_corlib_native_System_Threading_Thread::get_CurrentThread___STATI
     // If we are a thread spawned by the debugger to perform evaluations,
     // return the thread object that correspond to thread that has focus in debugger.
     thread = thread->m_realThread;
-#endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
+#endif // #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
 
     // Find an existing managed thread, if it exists
     // making sure to only return the managed object association with the current appdomain
@@ -458,7 +458,7 @@ HRESULT Library_corlib_native_System_Threading_Thread::get_CurrentThread___STATI
     {
         CLR_RT_HeapBlock *pManagedThread = src->m_objectPtr;
         bool fFound = false;
-        _ASSERTE(pManagedThread != NULL);
+        _ASSERTE(pManagedThread != nullptr);
 
 #if defined(NANOCLR_APPDOMAINS)
         {
@@ -488,7 +488,7 @@ HRESULT Library_corlib_native_System_Threading_Thread::get_CurrentThread___STATI
     // for the data before the thread is started.  Once the thread is started, they are copied over to the unmanaged
     // thread object and no longer used.  The managed object is then used simply as a wrapper for the unmanaged thread.
     // Therefore, it is safe to simply make another managed thread here.
-    NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObjectFromIndex(top, g_CLR_RT_WellKnownTypes.m_Thread));
+    NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObjectFromIndex(top, g_CLR_RT_WellKnownTypes.Thread));
 
     pRes = top.Dereference();
 
@@ -567,8 +567,8 @@ HRESULT Library_corlib_native_System_Threading_Thread::GetThread(
     NANOCLR_HEADER();
     CLR_RT_ObjectToEvent_Source *src = GetThreadReference(stack);
 
-    th = (src == NULL) ? NULL : (CLR_RT_Thread *)src->m_eventPtr;
-    if (th == NULL)
+    th = (src == nullptr) ? nullptr : (CLR_RT_Thread *)src->m_eventPtr;
+    if (th == nullptr)
     {
         if (mustBeStarted)
         {

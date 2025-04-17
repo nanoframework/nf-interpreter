@@ -61,12 +61,12 @@ static HAL_DblLinkedList<gpio_input_state> gpioInputList;
 // static uint8_t pinReserved[TOTAL_GPIO_PORTS];
 
 // Get pointer to gpio_input_state for GPIO pin
-// return NULL if not found
+// return nullptr if not found
 gpio_input_state *GetInputState(GPIO_PIN pinNumber)
 {
     gpio_input_state *pState = gpioInputList.FirstNode();
 
-    while (pState->Next() != NULL)
+    while (pState->Next() != nullptr)
     {
         if (pState->pinNumber == pinNumber)
         {
@@ -76,16 +76,16 @@ gpio_input_state *GetInputState(GPIO_PIN pinNumber)
         pState = pState->Next();
     }
 
-    return NULL;
+    return nullptr;
 }
 
 // Get pointer to gpio_input_state for GPIO pin
-// return NULL if not found
+// return nullptr if not found
 gpio_input_state *GetInputStateByConfigIndex(uint8_t pinConfigIndex)
 {
     gpio_input_state *pState = gpioInputList.FirstNode();
 
-    while (pState->Next() != NULL)
+    while (pState->Next() != nullptr)
     {
         if (pState->pinConfigIndex == pinConfigIndex)
         {
@@ -95,7 +95,7 @@ gpio_input_state *GetInputStateByConfigIndex(uint8_t pinConfigIndex)
         pState = pState->Next();
     }
 
-    return NULL;
+    return nullptr;
 }
 
 // Allocate a new gpio_input_state and add to end of list
@@ -104,13 +104,13 @@ gpio_input_state *AllocateGpioInputState(GPIO_PIN pinNumber)
 {
     gpio_input_state *pState = GetInputState(pinNumber);
 
-    if (pState == NULL)
+    if (pState == nullptr)
     {
         // found a free slot!
         pState = (gpio_input_state *)platform_malloc(sizeof(gpio_input_state));
 
         // sanity check
-        if (pState != NULL)
+        if (pState != nullptr)
         {
             memset(pState, 0, sizeof(gpio_input_state));
 
@@ -190,7 +190,7 @@ static void GpioEventCallback(uint_least8_t index)
     gpio_input_state *pState = GetInputStateByConfigIndex(index);
 
     // Any pin set up here ?
-    if (pState != NULL)
+    if (pState != nullptr)
     {
         // Ignore any pin changes during debounce timeout
         if (!pState->waitingDebounce)
@@ -355,7 +355,7 @@ bool CPU_GPIO_EnableInputPin(
 
     // Link ISR ptr supplied and not already set up
     // CPU_GPIO_EnableInputPin could be called a 2nd time with changed parameters
-    if (pinISR != NULL && (pState->isrPtr == NULL))
+    if (pinISR != nullptr && (pState->isrPtr == nullptr))
     {
         // set callback
         GPIO_setCallback(pState->pinConfigIndex, GpioEventCallback);
@@ -370,7 +370,7 @@ bool CPU_GPIO_EnableInputPin(
         pState->debounceMs = debounceTimeMilliseconds;
 
         // create timer if not there yet
-        if (pState->debounceMs > 0 && pState->debounceTimer == NULL)
+        if (pState->debounceMs > 0 && pState->debounceTimer == nullptr)
         {
             // setup timer
             Clock_Params params;
@@ -411,7 +411,7 @@ bool CPU_GPIO_EnableInputPin(
                 break;
         }
     }
-    else if (pinISR == NULL && (pState->isrPtr != NULL))
+    else if (pinISR == nullptr && (pState->isrPtr != nullptr))
     {
         // there is no managed handler setup anymore
         // remove INT handler
@@ -419,12 +419,12 @@ bool CPU_GPIO_EnableInputPin(
         // disable interrupt
         GPIO_disableInt(pState->pinConfigIndex);
         // remove callback
-        GPIO_setCallback(pState->pinConfigIndex, NULL);
+        GPIO_setCallback(pState->pinConfigIndex, nullptr);
 
         // clear parameters & configs
-        pState->isrPtr = NULL;
+        pState->isrPtr = nullptr;
         pState->mode = GPIO_INT_NONE;
-        pState->param = NULL;
+        pState->param = nullptr;
         pState->debounceMs = 0;
     }
 
@@ -556,7 +556,7 @@ uint32_t CPU_GPIO_GetPinDebounce(GPIO_PIN pinNumber)
 {
     gpio_input_state *pState = GetInputState(pinNumber);
 
-    _ASSERTE(pState == NULL);
+    _ASSERTE(pState == nullptr);
 
     return pState->debounceMs;
 }
@@ -567,7 +567,7 @@ bool CPU_GPIO_SetPinDebounce(GPIO_PIN pinNumber, uint32_t debounceTimeMillisecon
 
     // can only change the debounce in pin state if the pin has already been configured as input
     // if not, doesn't matter, because the new debounce will be used next time it's required
-    if (pState != NULL)
+    if (pState != nullptr)
     {
         pState->debounceMs = debounceTimeMilliseconds;
     }

@@ -39,13 +39,13 @@ void CLR_RT_Assembly::InitString(std::map<std::string, CLR_OFFSET> &map)
     NATIVE_PROFILE_CLR_CORE();
     const CLR_STRING *array = c_CLR_StringTable_Lookup;
     size_t len = c_CLR_StringTable_Size;
-    CLR_STRING idx = 0xFFFF;
+    CLR_STRING index = 0xFFFF;
 
     map.clear();
 
     while (len-- > 0)
     {
-        map[&c_CLR_StringTable_Data[*array++]] = idx--;
+        map[&c_CLR_StringTable_Data[*array++]] = index--;
     }
 }
 

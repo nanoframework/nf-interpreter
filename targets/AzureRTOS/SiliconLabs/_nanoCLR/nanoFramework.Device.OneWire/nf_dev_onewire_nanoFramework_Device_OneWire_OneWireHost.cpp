@@ -447,7 +447,7 @@ HRESULT FindOneDevice(CLR_RT_StackFrame &stack, bool findFirst)
         // 1. allocate memory for thread stack
         workingThreadStack = (uint32_t *)platform_malloc(ONEWIRE_THREAD_STACK_SIZE);
 
-        if (workingThreadStack == NULL)
+        if (workingThreadStack == nullptr)
         {
             NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
         }
@@ -458,7 +458,7 @@ HRESULT FindOneDevice(CLR_RT_StackFrame &stack, bool findFirst)
 #if !defined(BUILD_RTM)
             (CHAR *)"1-Wire Thread",
 #else
-            NULL,
+            nullptr,
 #endif
             OneWireFindWorkingThread_entry,
             (uint32_t)&FindStruct,
@@ -506,7 +506,7 @@ HRESULT FindOneDevice(CLR_RT_StackFrame &stack, bool findFirst)
         {
             // update serialNumber field
 
-            // get a pointer to the managed object instance and check that it's not NULL
+            // get a pointer to the managed object instance and check that it's not nullptr
             CLR_RT_HeapBlock *pThis = stack.This();
             FAULT_ON_NULL(pThis);
 

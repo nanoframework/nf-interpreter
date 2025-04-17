@@ -45,7 +45,7 @@ HRESULT Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_E
 {
     NANOCLR_HEADER();
 
-    CLR_RT_HeapBlock *channel_settings = NULL;
+    CLR_RT_HeapBlock *channel_settings = nullptr;
     int32_t channel;
     uint8_t clockdiv = (uint8_t)stack.Arg1().NumericByRef().u1;
 
@@ -71,7 +71,7 @@ HRESULT Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_E
 {
     NANOCLR_HEADER();
     {
-        CLR_RT_HeapBlock *channel_settings = NULL;
+        CLR_RT_HeapBlock *channel_settings = nullptr;
         int32_t channel;
         uint8_t rmt_mem_num;
 

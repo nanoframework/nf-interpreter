@@ -30,13 +30,13 @@ extern void ibeacon_start();
 //  Reboot handlers clean up on reboot
 //
 static ON_SOFT_REBOOT_HANDLER s_rebootHandlers[16] =
-    {NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL};
+    {nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr};
 
 void HAL_AddSoftRebootHandler(ON_SOFT_REBOOT_HANDLER handler)
 {
     for (unsigned int i = 0; i < ARRAYSIZE(s_rebootHandlers); i++)
     {
-        if (s_rebootHandlers[i] == NULL)
+        if (s_rebootHandlers[i] == nullptr)
         {
             s_rebootHandlers[i] = handler;
             return;
@@ -87,7 +87,7 @@ void nanoHAL_Initialize()
     FileSystemVolumeList::InitializeVolumes();
 
     // allocate & clear managed heap region
-    unsigned char *heapStart = NULL;
+    unsigned char *heapStart = nullptr;
     unsigned int heapSize = 0;
 
     ::HeapLocation(heapStart, heapSize);
@@ -138,7 +138,7 @@ void nanoHAL_Uninitialize(bool isPoweringDown)
     // check for s_rebootHandlers
     for (unsigned int i = 0; i < ARRAYSIZE(s_rebootHandlers); i++)
     {
-        if (s_rebootHandlers[i] != NULL)
+        if (s_rebootHandlers[i] != nullptr)
         {
             s_rebootHandlers[i]();
         }

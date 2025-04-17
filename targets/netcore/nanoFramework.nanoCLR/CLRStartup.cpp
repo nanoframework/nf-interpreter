@@ -59,14 +59,14 @@ struct Settings
         NANOCLR_CHECK_HRESULT(CLR_RT_Assembly::CreateInstance(header, assm));
 
         // Get handlers for native functions in assembly
-        pNativeAssmData = GetAssemblyNativeData(assm->m_szName);
+        pNativeAssmData = GetAssemblyNativeData(assm->name);
 
-        // If pNativeAssmData not NULL- means this assembly has native calls and there is pointer to table with native
-        // calls.
-        if (pNativeAssmData != NULL)
+        // If pNativeAssmData not nullptr- means this assembly has native calls and there is pointer to table with
+        // native calls.
+        if (pNativeAssmData != nullptr)
         {
             // First verify that check sum in assembly object matches hardcoded check sum.
-            if (assm->m_header->nativeMethodsChecksum != pNativeAssmData->m_checkSum)
+            if (assm->header->nativeMethodsChecksum != pNativeAssmData->m_checkSum)
             {
                 CLR_Debug::Printf(
                     "\r\n\r\n***********************************************************************\r\n");
@@ -76,8 +76,8 @@ struct Settings
                 CLR_Debug::Printf("*                                                                     *\r\n");
                 CLR_Debug::Printf(
                     "* Invalid native checksum: %s 0x%08X!=0x%08X *\r\n",
-                    assm->m_szName,
-                    assm->m_header->nativeMethodsChecksum,
+                    assm->name,
+                    assm->header->nativeMethodsChecksum,
                     pNativeAssmData->m_checkSum);
                 CLR_Debug::Printf("*                                                                     *\r\n");
                 CLR_Debug::Printf("***********************************************************************\r\n");
@@ -86,7 +86,7 @@ struct Settings
             }
 
             // Assembly has valid pointer to table with native methods. Save it.
-            assm->m_nativeCode = (const CLR_RT_MethodHandler *)pNativeAssmData->m_pNativeMethods;
+            assm->nativeCode = (const CLR_RT_MethodHandler *)pNativeAssmData->m_pNativeMethods;
         }
         g_CLR_RT_TypeSystem.Link(assm);
         NANOCLR_NOCLEANUP();
@@ -114,7 +114,7 @@ struct Settings
         for (CLR_RT_ParseOptions::BufferMapIter it = m_assemblies.begin(); it != m_assemblies.end(); it++)
         {
             CLR_RT_Assembly *assm;
-            const CLR_RT_Buffer *buffer = (const CLR_RT_Buffer *)it->second;
+            auto *buffer = (const CLR_RT_Buffer *)it->second;
             const CLR_RECORD_ASSEMBLY *header = (CLR_RECORD_ASSEMBLY *)&(*buffer)[0];
 
             // Creates instance of assembly, sets pointer to native functions, links to g_CLR_RT_TypeSystem
@@ -169,13 +169,13 @@ struct Settings
         unsigned int datSize = ROUNDTOMULTIPLE((unsigned int)(*end) - (unsigned int)(*start), CLR_UINT32);
 
         if (BlockStorageList_FindDeviceForPhysicalAddress(&device, (unsigned int)(*start), &datByteAddress) &&
-            device != NULL)
+            device != nullptr)
         {
             const DeviceBlockInfo *deviceInfo = BlockStorageDevice_GetDeviceInfo(device);
 
             if (deviceInfo->Attribute & MediaAttribute_SupportsXIP)
             {
-                unsigned char *datAssembliesBuffer =
+                auto *datAssembliesBuffer =
                     (unsigned char *)CLR_RT_Memory::Allocate_And_Erase(datSize, CLR_RT_HeapBlock ::HB_Unmovable);
                 CHECK_ALLOCATION(datAssembliesBuffer);
 
@@ -199,7 +199,7 @@ struct Settings
         const CLR_RECORD_ASSEMBLY *header;
         unsigned char *assembliesBuffer;
         signed int headerInBytes = sizeof(CLR_RECORD_ASSEMBLY);
-        unsigned char *headerBuffer = NULL;
+        unsigned char *headerBuffer = nullptr;
 
         if (!isXIP)
         {
@@ -270,7 +270,7 @@ struct Settings
 
                 break;
             }
-            assm->m_flags |= CLR_RT_Assembly::Deployed;
+            assm->flags |= CLR_RT_Assembly::Deployed;
         }
         if (!isXIP)
             CLR_RT_Memory::Release(headerBuffer);
@@ -324,7 +324,7 @@ struct Settings
     {
         m_fInitialized = false;
 #if defined(VIRTUAL_DEVICE)
-        m_configureRuntimeCallback = NULL;
+        m_configureRuntimeCallback = nullptr;
         m_configured = false;
 #endif
     }
@@ -346,11 +346,14 @@ struct Settings
 
         if (header->GoodAssembly() == false)
         {
-            wprintf(L"Invalid assembly format for '%s': ", src);
-            for (int i = 0; i < sizeof(header->marker); i++)
+            wprintf(L"Invalid assembly format for assembly '%s'\n", src);
+
+            wprintf(L"Header is: ");
+            for (size_t i = 0; i < sizeof(header->marker); i++)
             {
-                wprintf(L"%02x", header->marker[i]);
+                wprintf(L"%c", header->marker[i]);
             }
+
             wprintf(L"\n");
 
             NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
@@ -363,7 +366,7 @@ struct Settings
     {
         NANOCLR_HEADER();
 
-        CLR_RT_Buffer *buffer = new CLR_RT_Buffer(data, data + size);
+        auto *buffer = new CLR_RT_Buffer(data, data + size);
         CLR_RECORD_ASSEMBLY *header;
 
         header = (CLR_RECORD_ASSEMBLY *)&(*buffer)[0];
@@ -401,7 +404,7 @@ struct Settings
 
             while (header + 1 <= headerEnd && header->GoodAssembly())
             {
-                CLR_RT_Buffer *bufferSub = new CLR_RT_Buffer();
+                auto *bufferSub = new CLR_RT_Buffer();
                 CLR_RECORD_ASSEMBLY *headerSub;
                 CLR_RT_Assembly *assm;
 
@@ -426,7 +429,7 @@ struct Settings
                     break;
                 }
 
-                CLR_RT_UnicodeHelper::ConvertFromUTF8(assm->m_szName, strName);
+                CLR_RT_UnicodeHelper::ConvertFromUTF8(assm->name, strName);
                 m_assemblies[strName] = bufferSub;
 
                 assm->DestroyInstance();
@@ -453,20 +456,20 @@ struct Settings
 
         NANOCLR_FOREACH_ASSEMBLY(g_CLR_RT_TypeSystem)
         {
-            const CLR_RECORD_ASSEMBLYREF *src = (const CLR_RECORD_ASSEMBLYREF *)pASSM->GetTable(TBL_AssemblyRef);
-            for (int i = 0; i < pASSM->m_pTablesSize[TBL_AssemblyRef]; i++, src++)
+            auto *src = (const CLR_RECORD_ASSEMBLYREF *)pASSM->GetTable(TBL_AssemblyRef);
+            for (int i = 0; i < pASSM->tablesSize[TBL_AssemblyRef]; i++, src++)
             {
                 const char *szName = pASSM->GetString(src->name);
 
-                if (g_CLR_RT_TypeSystem.FindAssembly(szName, &src->version, true) == NULL)
+                if (g_CLR_RT_TypeSystem.FindAssembly(szName, &src->version, true) == nullptr)
                 {
                     printf(
                         "Missing assembly: %s (%d.%d.%d.%d)\n",
                         szName,
-                        src->version.iMajorVersion,
-                        src->version.iMinorVersion,
-                        src->version.iBuildNumber,
-                        src->version.iRevisionNumber);
+                        src->version.majorVersion,
+                        src->version.minorVersion,
+                        src->version.buildNumber,
+                        src->version.revisionNumber);
 
                     fError = true;
                 }
@@ -540,7 +543,7 @@ void ClrStartup(CLR_SETTINGS params)
                 CLR_Debug::Printf("Ready.\r\n");
 #endif
 
-                (void)g_CLR_RT_ExecutionEngine.Execute(NULL, params.MaxContextSwitches);
+                (void)g_CLR_RT_ExecutionEngine.Execute(nullptr, params.MaxContextSwitches);
 
 #if !defined(BUILD_RTM)
                 CLR_Debug::Printf("Done.\r\n");
@@ -559,7 +562,7 @@ void ClrStartup(CLR_SETTINGS params)
         {
 #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
             CLR_EE_DBG_SET_MASK(StateProgramExited, StateMask);
-            CLR_EE_DBG_EVENT_BROADCAST(CLR_DBG_Commands::c_Monitor_ProgramExit, 0, NULL, WP_Flags_c_NonCritical);
+            CLR_EE_DBG_EVENT_BROADCAST(CLR_DBG_Commands::c_Monitor_ProgramExit, 0, nullptr, WP_Flags_c_NonCritical);
 #endif // #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
 
             if (params.EnterDebuggerLoopAfterExit)

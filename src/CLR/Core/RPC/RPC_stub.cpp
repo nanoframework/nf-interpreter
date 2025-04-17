@@ -23,7 +23,7 @@ __nfweak CLR_RT_HeapBlock_EndPoint *CLR_RT_HeapBlock_EndPoint::FindEndPoint(cons
 {
     (void)port;
 
-    return NULL;
+    return nullptr;
 }
 
 __nfweak bool CLR_RT_HeapBlock_EndPoint::Port::Compare(const CLR_RT_HeapBlock_EndPoint::Port &port)
@@ -75,5 +75,5 @@ __nfweak CLR_RT_HeapBlock_EndPoint::Message *CLR_RT_HeapBlock_EndPoint::FindMess
     (void)cmd;
     (void)seq;
 
-    return NULL;
+    return nullptr;
 }

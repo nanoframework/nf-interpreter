@@ -93,9 +93,9 @@ void CLR_RT_GarbageCollector::Heap_Compact()
 
     TestPointers_PopulateOld();
 
-    CLR_RT_HeapCluster *freeRegion_hc = NULL;
-
-    CLR_RT_HeapBlock_Node *freeRegion = NULL;
+    CLR_RT_HeapCluster *freeRegion_hc = nullptr;
+    ;
+    CLR_RT_HeapBlock_Node *freeRegion = nullptr;
 
     CLR_RT_HeapCluster *currentSource_hc = (CLR_RT_HeapCluster *)g_CLR_RT_ExecutionEngine.m_heap.FirstNode();
     while (currentSource_hc->Next())
@@ -126,7 +126,7 @@ void CLR_RT_GarbageCollector::Heap_Compact()
                     break;
                 }
 
-                freeRegion = NULL;
+                freeRegion = nullptr;
                 freeRegion_hc = freeRegion_hcNext;
             }
 
@@ -158,11 +158,11 @@ void CLR_RT_GarbageCollector::Heap_Compact()
                 break;
             }
 
-            //////////////////////////////////////////////////////
-            //
-            // At this point, we have at least ONE movable block.
-            //
-            //////////////////////////////////////////////////////
+                //////////////////////////////////////////////////////
+                //
+                // At this point, we have at least ONE movable block.
+                //
+                //////////////////////////////////////////////////////
 
 #if NANOCLR_VALIDATE_HEAP >= NANOCLR_VALIDATE_HEAP_4_CompactionPlus
             if (IsBlockInFreeList(g_CLR_RT_ExecutionEngine.m_heap, freeRegion, true) == false)
@@ -313,12 +313,11 @@ void CLR_RT_GarbageCollector::Heap_Compact()
                     freeRegion = freeRegion->Next();
                 }
 
-                if (freeRegion->Next() == NULL)
+                if (freeRegion->Next() == nullptr)
                 {
 
-                    freeRegion = NULL;
+                    freeRegion = nullptr;
                     freeRegion_hc = (CLR_RT_HeapCluster *)freeRegion_hc->Next();
-
                     while (true)
                     {
                         CLR_RT_HeapCluster *freeRegion_hcNext = (CLR_RT_HeapCluster *)freeRegion_hc->Next();
@@ -329,12 +328,12 @@ void CLR_RT_GarbageCollector::Heap_Compact()
 
                         freeRegion = freeRegion_hc->m_freeList.FirstNode();
 
-                        if (freeRegion != NULL && freeRegion->Next())
+                        if (freeRegion != nullptr && freeRegion->Next())
                         {
                             break;
                         }
 
-                        freeRegion = NULL;
+                        freeRegion = nullptr;
                         freeRegion_hc = freeRegion_hcNext;
                     }
 
@@ -447,7 +446,7 @@ void CLR_RT_GarbageCollector::Heap_Relocate()
 
         TestPointers_Remap();
 
-        Heap_Relocate_Pass(NULL);
+        Heap_Relocate_Pass(nullptr);
 
 #if defined(NANOCLR_PROFILE_NEW_ALLOCATIONS)
         g_CLR_PRF_Profiler.TrackObjectRelocation();
@@ -481,12 +480,19 @@ void CLR_RT_GarbageCollector::Heap_Relocate_Pass(RelocateFtn ftn)
     NANOCLR_FOREACH_NODE(CLR_RT_HeapCluster, hc, g_CLR_RT_ExecutionEngine.m_heap)
     {
         CLR_RT_HeapBlock_Node *ptr = hc->m_payloadStart;
-        CLR_RT_HeapBlock_Node const *end = hc->m_payloadEnd;
+        CLR_RT_HeapBlock_Node *end = hc->m_payloadEnd;
+
+        // check pointers
+        _ASSERTE(ptr >= (void *)s_CLR_RT_Heap.location);
+        _ASSERTE(ptr < (void *)(s_CLR_RT_Heap.location + s_CLR_RT_Heap.size));
+        _ASSERTE(end >= (void *)s_CLR_RT_Heap.location);
+        _ASSERTE(end <= (void *)(s_CLR_RT_Heap.location + s_CLR_RT_Heap.size));
 
         while (ptr < end)
         {
             // check pointer
-            _ASSERTE(ptr >= hc->m_payloadStart && ptr <= hc->m_payloadEnd);
+            _ASSERTE(ptr >= (void *)s_CLR_RT_Heap.location);
+            _ASSERTE(ptr < (void *)(s_CLR_RT_Heap.location + s_CLR_RT_Heap.size));
 
             CLR_RT_HEAPBLOCK_RELOCATE(ptr);
 
@@ -581,6 +587,8 @@ void CLR_RT_GarbageCollector::Heap_Relocate(void **ref)
                 else
                 {
                     destinationAddress = (void *)(dst + relocCurrent.m_offset);
+                    _ASSERTE(destinationAddress >= (void *)s_CLR_RT_Heap.location);
+                    _ASSERTE(destinationAddress < (void *)(s_CLR_RT_Heap.location + s_CLR_RT_Heap.size));
 
 #if defined(NANOCLR_PROFILE_NEW_ALLOCATIONS)
                     g_CLR_PRF_Profiler.TrackObjectRelocation(*ref, destinationAddress);

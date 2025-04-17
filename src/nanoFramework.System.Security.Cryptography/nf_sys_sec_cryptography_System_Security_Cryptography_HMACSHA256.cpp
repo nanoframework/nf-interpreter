@@ -32,7 +32,7 @@ HRESULT Library_nf_sys_sec_cryptography_System_Security_Cryptography_HMACSHA256:
     // create the return array (32 bytes length)
     stack.PushValueAndClear();
     NANOCLR_CHECK_HRESULT(
-        CLR_RT_HeapBlock_Array::CreateInstance(stack.TopValue(), 32, g_CLR_RT_WellKnownTypes.m_UInt8));
+        CLR_RT_HeapBlock_Array::CreateInstance(stack.TopValue(), 32, g_CLR_RT_WellKnownTypes.UInt8));
     outputArray = stack.TopValue().DereferenceArray();
 
     // better clear memory

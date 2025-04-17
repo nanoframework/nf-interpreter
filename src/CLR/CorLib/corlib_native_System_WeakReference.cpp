@@ -74,7 +74,7 @@ void CLR_RT_HeapBlock_WeakReference::RecoverObjects(CLR_RT_DblLinkedList &lstHea
 
                                         weak->InsertInPriorityOrder();
 
-                                        weak = NULL;
+                                        weak = nullptr;
                                     }
                                 }
 
@@ -111,9 +111,9 @@ HRESULT CLR_RT_HeapBlock_WeakReference::GetTarget(CLR_RT_HeapBlock &targetRefere
 
     if (CLR_RT_BinaryFormatter::SerializationEnabled())
     {
-        targetReference.SetObjectReference(NULL);
+        targetReference.SetObjectReference(nullptr);
 
-        if (m_targetDirect == NULL && m_targetSerialized != NULL)
+        if (m_targetDirect == nullptr && m_targetSerialized != nullptr)
         {
             if (m_identity.m_flags & CLR_RT_HeapBlock_WeakReference::WR_ArrayOfBytes)
             {
@@ -125,15 +125,15 @@ HRESULT CLR_RT_HeapBlock_WeakReference::GetTarget(CLR_RT_HeapBlock &targetRefere
                 CLR_RT_HeapBlock output;
 
                 input.SetObjectReference(m_targetSerialized);
-                output.SetObjectReference(NULL);
+                output.SetObjectReference(nullptr);
 
                 {
                     CLR_RT_ProtectFromGC gcInput(input);
                     CLR_RT_ProtectFromGC gcOutput(output);
 
-                    if (FAILED(CLR_RT_BinaryFormatter::Deserialize(output, input, NULL, 0)))
+                    if (FAILED(CLR_RT_BinaryFormatter::Deserialize(output, input, nullptr, 0)))
                     {
-                        output.SetObjectReference(NULL);
+                        output.SetObjectReference(nullptr);
                     }
                 }
 
@@ -175,7 +175,7 @@ HRESULT Library_corlib_native_System_WeakReference::get_IsAlive___BOOLEAN(CLR_RT
     weak = (CLR_RT_HeapBlock_WeakReference *)stack.This();
     FAULT_ON_NULL(weak);
 
-    stack.SetResult_Boolean(weak->m_targetDirect != NULL);
+    stack.SetResult_Boolean(weak->m_targetDirect != nullptr);
 
     NANOCLR_NOCLEANUP();
 }

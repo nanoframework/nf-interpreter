@@ -205,7 +205,7 @@ void InternalSendBytes(CLR_UINT8 *data, CLR_UINT32 length, bool sendAsync)
     wrc.DeviceChipSelect = spiChipSelect;
     wrc.ChipSelectActiveState = spiChipSelectActiveState;
 
-    nanoSPI_Write_Read(spiDeviceHandle, wrc, data, length, NULL, 0);
+    nanoSPI_Write_Read(spiDeviceHandle, wrc, data, length, nullptr, 0);
 
     return;
 }

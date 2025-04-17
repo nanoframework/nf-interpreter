@@ -102,21 +102,21 @@ void NFReleaseInfo::Init(
     NFReleaseInfo.PlatformName[0] = 0;
 
     // fill each one, if it was provided
-    if (NULL != info)
+    if (nullptr != info)
     {
         len = MIN(infoLen, sizeof(NFReleaseInfo.InfoString) - 1);
         memcpy(NFReleaseInfo.InfoString, info, len);
         NFReleaseInfo.InfoString[len] = 0;
     }
 
-    if (NULL != target)
+    if (nullptr != target)
     {
         len = MIN(targetLen, sizeof(NFReleaseInfo.TargetName) - 1);
         memcpy(NFReleaseInfo.TargetName, target, len);
         NFReleaseInfo.TargetName[len] = 0;
     }
 
-    if (NULL != platform)
+    if (nullptr != platform)
     {
         len = MIN(platformLen, sizeof(NFReleaseInfo.PlatformName) - 1);
         memcpy(NFReleaseInfo.PlatformName, platform, len);
@@ -126,13 +126,13 @@ void NFReleaseInfo::Init(
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static ON_SOFT_REBOOT_HANDLER s_rebootHandlers[5] = {NULL, NULL, NULL, NULL, NULL};
+static ON_SOFT_REBOOT_HANDLER s_rebootHandlers[5] = {nullptr, nullptr, nullptr, nullptr, nullptr};
 
 void __cdecl HAL_AddSoftRebootHandler(ON_SOFT_REBOOT_HANDLER handler)
 {
     for (int i = 0; i < ARRAYSIZE(s_rebootHandlers); i++)
     {
-        if (s_rebootHandlers[i] == NULL)
+        if (s_rebootHandlers[i] == nullptr)
         {
             s_rebootHandlers[i] = handler;
             return;
@@ -169,7 +169,7 @@ void nanoHAL_Uninitialize(bool isPoweringDown)
 
     for (int i = 0; i < ARRAYSIZE(s_rebootHandlers); i++)
     {
-        if (s_rebootHandlers[i] != NULL)
+        if (s_rebootHandlers[i] != nullptr)
         {
             s_rebootHandlers[i]();
             return;

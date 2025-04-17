@@ -516,13 +516,13 @@ void CLR_RT_UnicodeHelper::ConvertToUTF8(const std::wstring &src, std::string &d
         char *szBuf;
         int iSize;
 
-        iSize = ::WideCharToMultiByte(CP_UTF8, 0, src.c_str(), -1, NULL, 0, NULL, NULL);
+        iSize = ::WideCharToMultiByte(CP_UTF8, 0, src.c_str(), -1, nullptr, 0, nullptr, nullptr);
 
         if (iSize > 0)
         {
             szBuf = new char[iSize];
 
-            iSize = ::WideCharToMultiByte(CP_UTF8, 0, src.c_str(), -1, szBuf, iSize, NULL, NULL);
+            iSize = ::WideCharToMultiByte(CP_UTF8, 0, src.c_str(), -1, szBuf, iSize, nullptr, nullptr);
             if (iSize > 0)
             {
                 dst = szBuf;
@@ -544,7 +544,7 @@ void CLR_RT_UnicodeHelper::ConvertFromUTF8(const std::string &src, std::wstring 
         wchar_t *szBuf;
         int iSize;
 
-        iSize = ::MultiByteToWideChar(CP_UTF8, 0, src.c_str(), -1, NULL, 0);
+        iSize = ::MultiByteToWideChar(CP_UTF8, 0, src.c_str(), -1, nullptr, 0);
 
         if (iSize > 0)
         {
@@ -569,7 +569,7 @@ void CLR_RT_UnicodeHelper::ConvertFromUTF8(const std::string &src, std::wstring 
 
 UnicodeString::UnicodeString()
 {
-    m_wCharArray = NULL;
+    m_wCharArray = nullptr;
     m_length = 0;
 }
 
@@ -614,10 +614,10 @@ HRESULT UnicodeString::Assign(const char *string)
 
 void UnicodeString::Release()
 {
-    if (m_wCharArray != NULL)
+    if (m_wCharArray != nullptr)
     {
         CLR_RT_Memory::Release(m_wCharArray);
     }
 
-    m_wCharArray = NULL;
+    m_wCharArray = nullptr;
 }

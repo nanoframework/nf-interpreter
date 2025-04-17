@@ -26,7 +26,7 @@ HRESULT Library_corlib_native_System_Delegate::GetInvocationList___SZARRAY_Syste
     CLR_RT_HeapBlock_Delegate_List *lst = (CLR_RT_HeapBlock_Delegate_List *)dlg;
 
     int delegatesCount = 0;
-    CLR_RT_HeapBlock *returnArray = NULL;
+    CLR_RT_HeapBlock *returnArray = nullptr;
 
     // put the return array on the stack
     CLR_RT_HeapBlock &top = stack.PushValueAndClear();
@@ -45,7 +45,7 @@ HRESULT Library_corlib_native_System_Delegate::GetInvocationList___SZARRAY_Syste
 
     // create the result array
     NANOCLR_CHECK_HRESULT(
-        CLR_RT_HeapBlock_Array::CreateInstance(top, delegatesCount, g_CLR_RT_WellKnownTypes.m_Delegate));
+        CLR_RT_HeapBlock_Array::CreateInstance(top, delegatesCount, g_CLR_RT_WellKnownTypes.Delegate));
 
     if (delegatesCount > 0)
     {
@@ -62,7 +62,7 @@ HRESULT Library_corlib_native_System_Delegate::GetInvocationList___SZARRAY_Syste
 
                 // create an instance of delegate
                 NANOCLR_CHECK_HRESULT(
-                    g_CLR_RT_ExecutionEngine.NewObjectFromIndex(*returnArray, g_CLR_RT_WellKnownTypes.m_Delegate));
+                    g_CLR_RT_ExecutionEngine.NewObjectFromIndex(*returnArray, g_CLR_RT_WellKnownTypes.Delegate));
 
                 // fetch delegate from list
                 dlg = ptr[i].DereferenceDelegate();
@@ -76,7 +76,7 @@ HRESULT Library_corlib_native_System_Delegate::GetInvocationList___SZARRAY_Syste
         {
             // create an instance of delegate
             NANOCLR_CHECK_HRESULT(
-                g_CLR_RT_ExecutionEngine.NewObjectFromIndex(*returnArray, g_CLR_RT_WellKnownTypes.m_Delegate));
+                g_CLR_RT_ExecutionEngine.NewObjectFromIndex(*returnArray, g_CLR_RT_WellKnownTypes.Delegate));
             // set delegate reference to return element
             returnArray->SetObjectReference(dlg);
         }
@@ -100,7 +100,7 @@ HRESULT Library_corlib_native_System_Delegate::get_Method___SystemReflectionMeth
         CLR_RT_HeapBlock &top = stack.PushValue();
         CLR_RT_HeapBlock *hbObj;
 
-        NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObjectFromIndex(top, g_CLR_RT_WellKnownTypes.m_MethodInfo));
+        NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObjectFromIndex(top, g_CLR_RT_WellKnownTypes.MethodInfo));
         hbObj = top.Dereference();
 
         hbObj->SetReflection(dlg->DelegateFtn());
@@ -190,7 +190,7 @@ CLR_RT_HeapBlock_Delegate *Library_corlib_native_System_Delegate::GetLastDelegat
 
             if (lst->m_length == 0)
             {
-                dlg = NULL;
+                dlg = nullptr;
             }
             else
             {

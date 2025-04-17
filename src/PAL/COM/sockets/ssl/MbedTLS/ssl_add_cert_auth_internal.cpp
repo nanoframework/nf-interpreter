@@ -20,7 +20,7 @@ bool ssl_add_cert_auth_internal(int contextHandle, const char *certificate, int 
     // sd should already have been created
     context = (mbedTLS_NFContext *)g_SSL_Driver.ContextArray[contextHandle].Context;
 
-    if (context != NULL)
+    if (context != nullptr)
     {
         /////////////////////////////////////////////////////////////////////////////////////////////////
         // developer notes:                                                                            //
@@ -30,7 +30,7 @@ bool ssl_add_cert_auth_internal(int contextHandle, const char *certificate, int 
         if (mbedtls_x509_crt_parse(context->ca_cert, (const unsigned char *)certificate, certLength) == 0)
         {
             // add to CA chain
-            mbedtls_ssl_conf_ca_chain(context->conf, context->ca_cert, NULL);
+            mbedtls_ssl_conf_ca_chain(context->conf, context->ca_cert, nullptr);
 
             // done
             return true;

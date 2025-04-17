@@ -202,7 +202,7 @@ typedef struct __nfpack HAL_Configuration_NetworkInterface
 
     // Specific configuration Id
     // Id of the configuration block specific for this interface type
-    // NULL otherwise
+    // nullptr otherwise
     // currently in use:
     // - HAL_Configuration_Wireless80211 for NetworkInterfaceType_Wireless80211
     uint32_t SpecificConfigId;

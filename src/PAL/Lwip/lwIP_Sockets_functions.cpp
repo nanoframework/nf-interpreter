@@ -197,7 +197,7 @@ void HAL_SOCK_EventsSet(uint32_t events)
 void *HAL_SOCK_GlobalLockContext()
 {
     NATIVE_PROFILE_PAL_NETWORK();
-    return NULL;
+    return nullptr;
 }
 
 void HAL_SOCK_SetInterfaceNumber(uint32_t interfaceIndex, uint32_t interfaceNumber)

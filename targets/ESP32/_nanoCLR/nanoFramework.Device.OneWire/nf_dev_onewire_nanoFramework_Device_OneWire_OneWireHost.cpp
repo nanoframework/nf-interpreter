@@ -68,7 +68,7 @@ HRESULT oneWireInit()
         return CLR_E_INVALID_OPERATION;
     }
 
-    if (uart_driver_install(NF_ONEWIRE_ESP32_UART_NUM, 256, 256, 0, NULL, ESP_INTR_FLAG_IRAM) != ESP_OK)
+    if (uart_driver_install(NF_ONEWIRE_ESP32_UART_NUM, 256, 256, 0, nullptr, ESP_INTR_FLAG_IRAM) != ESP_OK)
     {
         return CLR_E_INVALID_OPERATION;
     }
@@ -439,7 +439,7 @@ static void OneWireFindWorkingThread(void *pvParameters)
 
     // fire event for 1-Wire operation completed
     xTaskNotifyGive(WaitingTask);
-    vTaskDelete(NULL);
+    vTaskDelete(nullptr);
 }
 
 HRESULT FindOneDevice(CLR_RT_StackFrame &stack, bool findFirst)
@@ -488,9 +488,9 @@ HRESULT FindOneDevice(CLR_RT_StackFrame &stack, bool findFirst)
     {
         // update serialNumber field
 
-        // get a pointer to the managed object instance and check that it's not NULL
+        // get a pointer to the managed object instance and check that it's not nullptr
         CLR_RT_HeapBlock *pThis = stack.This();
-        if (pThis == NULL)
+        if (pThis == nullptr)
         {
             return CLR_E_NULL_REFERENCE;
         }

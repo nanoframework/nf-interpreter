@@ -185,7 +185,7 @@ HRESULT OmBufferToStack(CLR_RT_StackFrame &stack, os_mbuf *om)
 
         // Create managed byte array of correct size as per OM buffer
         NANOCLR_CHECK_HRESULT(
-            CLR_RT_HeapBlock_Array::CreateInstance(stack.PushValueAndClear(), om_len, g_CLR_RT_WellKnownTypes.m_UInt8));
+            CLR_RT_HeapBlock_Array::CreateInstance(stack.PushValueAndClear(), om_len, g_CLR_RT_WellKnownTypes.UInt8));
 
         // get a pointer to the first object in the array
         pReturnBuffer = stack.TopValue().DereferenceArray()->GetFirstElement();
@@ -202,14 +202,14 @@ HRESULT PushEmptyBufferToStack(CLR_RT_StackFrame &stack)
     {
         // Error return empty array, event not found ?
         NANOCLR_CHECK_HRESULT(
-            CLR_RT_HeapBlock_Array::CreateInstance(stack.PushValueAndClear(), 0, g_CLR_RT_WellKnownTypes.m_UInt8));
+            CLR_RT_HeapBlock_Array::CreateInstance(stack.PushValueAndClear(), 0, g_CLR_RT_WellKnownTypes.UInt8));
     }
     NANOCLR_NOCLEANUP();
 }
 
 bool LockEventMutex()
 {
-    if (ble_event_data.mutex == NULL)
+    if (ble_event_data.mutex == nullptr)
     {
         return false;
     }
@@ -219,7 +219,7 @@ bool LockEventMutex()
 
 void ReleaseEventMutex()
 {
-    if (ble_event_data.mutex == NULL)
+    if (ble_event_data.mutex == nullptr)
     {
         return;
     }

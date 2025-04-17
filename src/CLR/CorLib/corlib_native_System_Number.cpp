@@ -16,7 +16,7 @@ bool Library_corlib_native_System_Number::ParseFormat(char *format, char *format
     bool ret = true;
 
     // parse received format
-    if (format != NULL && format[0] != 0)
+    if (format != nullptr && format[0] != 0)
     {
         *formatChar = format[0];
         *precision = -1;
@@ -83,7 +83,7 @@ int Library_corlib_native_System_Number::DoPrintfOnDataType(char *buffer, char *
 {
     int ret = -1;
 
-    CLR_DataType dataType = value->DataType();
+    NanoCLRDataType dataType = value->DataType();
 
     switch (dataType)
     {
@@ -133,7 +133,7 @@ int Library_corlib_native_System_Number::DoPrintfOnDataType(char *buffer, char *
     return ret;
 }
 
-const char *Library_corlib_native_System_Number::GetPrintfLengthModifier(CLR_DataType dataType)
+const char *Library_corlib_native_System_Number::GetPrintfLengthModifier(NanoCLRDataType dataType)
 {
     const char *ret = (dataType == DATATYPE_I1 || dataType == DATATYPE_U1)   ? ""
                       : (dataType == DATATYPE_I2 || dataType == DATATYPE_U2) ? ""
@@ -143,21 +143,21 @@ const char *Library_corlib_native_System_Number::GetPrintfLengthModifier(CLR_Dat
     return ret;
 }
 
-bool Library_corlib_native_System_Number::IsSignedIntegerDataType(CLR_DataType dataType)
+bool Library_corlib_native_System_Number::IsSignedIntegerDataType(NanoCLRDataType dataType)
 {
     bool ret =
         (dataType == DATATYPE_I1 || dataType == DATATYPE_I2 || dataType == DATATYPE_I4 || dataType == DATATYPE_I8);
     return ret;
 }
 
-bool Library_corlib_native_System_Number::IsUnsignedIntegerDataType(CLR_DataType dataType)
+bool Library_corlib_native_System_Number::IsUnsignedIntegerDataType(NanoCLRDataType dataType)
 {
     bool ret =
         (dataType == DATATYPE_U1 || dataType == DATATYPE_U2 || dataType == DATATYPE_U4 || dataType == DATATYPE_U8);
     return ret;
 }
 
-bool Library_corlib_native_System_Number::IsIntegerDataType(CLR_DataType dataType)
+bool Library_corlib_native_System_Number::IsIntegerDataType(NanoCLRDataType dataType)
 {
     bool ret = IsSignedIntegerDataType(dataType) || IsUnsignedIntegerDataType(dataType);
     return ret;
@@ -328,7 +328,7 @@ int Library_corlib_native_System_Number::Format_G(
 {
     int ret = -1;
 
-    CLR_DataType dataType = value->DataType();
+    NanoCLRDataType dataType = value->DataType();
 
     bool isIntegerDataType = IsIntegerDataType(dataType);
 
@@ -590,7 +590,7 @@ int Library_corlib_native_System_Number::Format_D(
 {
     int ret = -1;
 
-    CLR_DataType dataType = value->DataType();
+    NanoCLRDataType dataType = value->DataType();
 
     if (precision == -1)
     {
@@ -631,7 +631,7 @@ int Library_corlib_native_System_Number::Format_X(char *buffer, CLR_RT_HeapBlock
 {
     int ret = -1;
 
-    CLR_DataType dataType = value->DataType();
+    NanoCLRDataType dataType = value->DataType();
 
     // set max width for the conversion
     int maxWidth = 0;
@@ -701,7 +701,7 @@ int Library_corlib_native_System_Number::Format_F(
                        // NF at the moment
     }
 
-    CLR_DataType dataType = value->DataType();
+    NanoCLRDataType dataType = value->DataType();
 
     bool isIntegerDataType = IsIntegerDataType(dataType);
 
@@ -815,7 +815,7 @@ int Library_corlib_native_System_Number::Format_E(char *buffer, CLR_RT_HeapBlock
     // force extra precision to account for rounding errors
     precision = requestedPrecision + 1;
 
-    CLR_DataType dataType = value->DataType();
+    NanoCLRDataType dataType = value->DataType();
 
     char formatStr[FORMAT_FMTSTR_BUFFER_SIZE];
     double copyValue = 0.0;

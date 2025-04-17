@@ -15,13 +15,13 @@ HRESULT Library_nf_sys_io_hashing_System_IO_Hashing_Crc32::ComputeHash___STATIC_
 
     CLR_RT_HeapBlock *bufferSpanByte;
     CLR_RT_HeapBlock_Array *buffer;
-    uint8_t *bufferData = NULL;
+    uint8_t *bufferData = nullptr;
     int16_t bufferSize = 0;
     int16_t bufferOffset = 0;
     uint32_t crc32 = 0;
     uint32_t hash = 0;
 
-    // get a pointer to the managed object instance and check that it's not NULL
+    // get a pointer to the managed object instance and check that it's not nullptr
     bufferSpanByte = stack.Arg1().Dereference();
     FAULT_ON_NULL_ARG(bufferSpanByte);
 

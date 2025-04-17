@@ -15,7 +15,7 @@ HRESULT Library_corlib_native_System_Reflection_RuntimeFieldInfo::get_Name___STR
     if (GetFieldDescriptor(stack, *hbField, fd) == false)
         NANOCLR_SET_AND_LEAVE(CLR_E_NULL_REFERENCE);
 
-    NANOCLR_SET_AND_LEAVE(CLR_RT_HeapBlock_String::CreateInstance(stack.PushValue(), fd.m_target->name, fd.m_assm));
+    NANOCLR_SET_AND_LEAVE(CLR_RT_HeapBlock_String::CreateInstance(stack.PushValue(), fd.target->name, fd.assembly));
 
     NANOCLR_NOCLEANUP();
 }
@@ -40,7 +40,7 @@ HRESULT Library_corlib_native_System_Reflection_RuntimeFieldInfo::get_DeclaringT
         CLR_RT_HeapBlock &top = stack.PushValue();
         CLR_RT_HeapBlock *hbObj;
 
-        NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObjectFromIndex(top, g_CLR_RT_WellKnownTypes.m_TypeStatic));
+        NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObjectFromIndex(top, g_CLR_RT_WellKnownTypes.TypeStatic));
 
         hbObj = top.Dereference();
         hbObj->SetReflection(cls);
@@ -67,7 +67,7 @@ HRESULT Library_corlib_native_System_Reflection_RuntimeFieldInfo::get_FieldType_
         CLR_RT_HeapBlock &top = stack.PushValue();
         CLR_RT_HeapBlock *hbObj;
 
-        NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObjectFromIndex(top, g_CLR_RT_WellKnownTypes.m_TypeStatic));
+        NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObjectFromIndex(top, g_CLR_RT_WellKnownTypes.TypeStatic));
         hbObj = top.Dereference();
         hbObj->SetReflection(desc.m_handlerCls);
     }
@@ -88,7 +88,7 @@ HRESULT Library_corlib_native_System_Reflection_RuntimeFieldInfo::GetValue___OBJ
 
     NANOCLR_CHECK_HRESULT(Library_corlib_native_System_Reflection_FieldInfo::Initialize(stack, instFD, instTD, obj));
 
-    fd = instFD.m_target;
+    fd = instFD.target;
     if (fd->flags &
         CLR_RECORD_FIELDDEF::FD_NoReflection) // don't allow reflection for fields with NoReflection attribute
     {
@@ -108,7 +108,7 @@ HRESULT Library_corlib_native_System_Reflection_RuntimeFieldInfo::GetValue___OBJ
 
             argObj = argObj->Dereference();
 
-            _ASSERTE(argObj != NULL && argObj->DataType() == DATATYPE_TRANSPARENT_PROXY);
+            _ASSERTE(argObj != nullptr && argObj->DataType() == DATATYPE_TRANSPARENT_PROXY);
 
             NANOCLR_CHECK_HRESULT(argObj->TransparentProxyValidate());
 

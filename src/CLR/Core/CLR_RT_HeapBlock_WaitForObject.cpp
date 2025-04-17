@@ -29,9 +29,12 @@ HRESULT CLR_RT_HeapBlock_WaitForObject::CreateInstance(
 
     _ASSERTE(sizeof(CLR_RT_HeapBlock_WaitForObject) % 4 == 0);
 
+
     CLR_UINT32 totLength =
         (CLR_UINT32)(sizeof(CLR_RT_HeapBlock_WaitForObject) + cObjects * sizeof(struct CLR_RT_HeapBlock));
-
+    
+    _ASSERTE(sizeof(CLR_RT_HeapBlock_WaitForObject) % 4 == 0);
+    
     CLR_RT_HeapBlock_WaitForObject *wait = EVENTCACHE_EXTRACT_NODE_AS_BYTES(
         g_CLR_RT_EventCache,
         CLR_RT_HeapBlock_WaitForObject,
@@ -94,7 +97,7 @@ bool CLR_RT_HeapBlock_WaitForObject::TryWaitForSignal(
             for (CLR_UINT32 i = 0; i < cObjects; i++)
             {
                 obj = blk->Dereference();
-                _ASSERTE(obj != NULL);
+                _ASSERTE(obj != nullptr);
 
                 if (phase == 0)
                 {
@@ -124,7 +127,7 @@ bool CLR_RT_HeapBlock_WaitForObject::TryWaitForSignal(
         for (CLR_UINT32 i = 0; i < cObjects; i++)
         {
             obj = blk->Dereference();
-            _ASSERTE(obj != NULL);
+            _ASSERTE(obj != nullptr);
 
             if (obj->IsFlagSet(CLR_RT_HeapBlock::HB_Signaled))
             {

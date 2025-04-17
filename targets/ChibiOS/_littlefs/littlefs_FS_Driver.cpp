@@ -76,8 +76,8 @@ HRESULT LITTLEFS_FS_Driver::Format(const VOLUME_ID *volume, const char *volumeLa
     (void)volumeLabel;
     (void)parameters;
 
-    LITTLEFS_FileHandle *fileHandle = NULL;
-    uint8_t *index = NULL;
+    LITTLEFS_FileHandle *fileHandle = nullptr;
+    uint8_t *index = nullptr;
 
     // get littlefs instance
     fileHandle->fs = hal_lfs_get_fs_from_index(volume->volumeId);
@@ -100,7 +100,7 @@ HRESULT LITTLEFS_FS_Driver::GetSizeInfo(const VOLUME_ID *volume, int64_t *totalS
     NANOCLR_HEADER();
 
     lfs_ssize_t allocBlocks;
-    LITTLEFS_FileHandle *fileHandle = NULL;
+    LITTLEFS_FileHandle *fileHandle = nullptr;
 
     // get littlefs instance
     fileHandle->fs = hal_lfs_get_fs_from_index(volume->volumeId);
@@ -173,7 +173,7 @@ HRESULT LITTLEFS_FS_Driver::Open(const VOLUME_ID *volume, const char *path, void
     int32_t result;
 #endif
 
-    LITTLEFS_FileHandle *fileHandle = NULL;
+    LITTLEFS_FileHandle *fileHandle = nullptr;
     lfs_info info;
     int32_t flags;
     char normalizedPath[FS_MAX_DIRECTORY_LENGTH];
@@ -182,7 +182,7 @@ HRESULT LITTLEFS_FS_Driver::Open(const VOLUME_ID *volume, const char *path, void
     // allocate file handle
     fileHandle = (LITTLEFS_FileHandle *)platform_malloc(sizeof(LITTLEFS_FileHandle));
 
-    if (fileHandle == NULL)
+    if (fileHandle == nullptr)
     {
         NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
     }
@@ -225,7 +225,7 @@ HRESULT LITTLEFS_FS_Driver::Open(const VOLUME_ID *volume, const char *path, void
     fileHandle->nanoAttributes = FileAttributes_Normal;
     fileHandle->attr = {NANO_LITTLEFS_ATTRIBUTE, &fileHandle->nanoAttributes, NANO_LITTLEFS_ATTRIBUTE_SIZE};
     fileHandle->fileConfig = {
-        .buffer = NULL,
+        .buffer = nullptr,
         .attrs = &fileHandle->attr,
         .attr_count = 1,
     };
@@ -265,7 +265,7 @@ HRESULT LITTLEFS_FS_Driver::Open(const VOLUME_ID *volume, const char *path, void
 
     NANOCLR_CLEANUP();
 
-    if (fileHandle != NULL)
+    if (fileHandle != nullptr)
     {
         platform_free(fileHandle);
     }
@@ -541,12 +541,12 @@ HRESULT LITTLEFS_FS_Driver::FindOpen(const VOLUME_ID *volume, const char *path, 
     NANOCLR_HEADER();
 
     char normalizedPath[FS_MAX_DIRECTORY_LENGTH];
-    LITTLEFS_FindFileHandle *findHandle = NULL;
+    LITTLEFS_FindFileHandle *findHandle = nullptr;
 
     // allocate file handle
     findHandle = (LITTLEFS_FindFileHandle *)platform_malloc(sizeof(LITTLEFS_FindFileHandle));
 
-    if (findHandle == NULL)
+    if (findHandle == nullptr)
     {
         NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
     }
@@ -585,7 +585,7 @@ HRESULT LITTLEFS_FS_Driver::FindOpen(const VOLUME_ID *volume, const char *path, 
 
     NANOCLR_CLEANUP();
 
-    if (findHandle != NULL)
+    if (findHandle != nullptr)
     {
         platform_free(findHandle);
     }
@@ -646,7 +646,7 @@ HRESULT LITTLEFS_FS_Driver::FindNext(void *handle, FS_FILEINFO *fi, bool *fileFo
     fi->FileName = (char *)platform_malloc(fi->FileNameSize + 1);
 
     // sanity check for successfull malloc
-    if (fi->FileName == NULL)
+    if (fi->FileName == nullptr)
     {
         NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
     }
@@ -677,7 +677,7 @@ HRESULT LITTLEFS_FS_Driver::FindClose(void *handle)
     {
         findHandle = (LITTLEFS_FindFileHandle *)handle;
 
-        if (findHandle->fs != NULL)
+        if (findHandle->fs != nullptr)
         {
             lfs_dir_close(findHandle->fs, &findHandle->dir);
 
@@ -690,7 +690,7 @@ HRESULT LITTLEFS_FS_Driver::FindClose(void *handle)
 
 HRESULT LITTLEFS_FS_Driver::GetFileInfo(const VOLUME_ID *volume, const char *path, FS_FILEINFO *fileInfo, bool *found)
 {
-    lfs_t *fsDrive = NULL;
+    lfs_t *fsDrive = nullptr;
     lfs_info info;
     char normalizedPath[FS_MAX_DIRECTORY_LENGTH];
 
@@ -748,7 +748,7 @@ HRESULT LITTLEFS_FS_Driver::GetAttributes(const VOLUME_ID *volume, const char *p
 {
     NANOCLR_HEADER();
 
-    lfs_t *fsDrive = NULL;
+    lfs_t *fsDrive = nullptr;
     lfs_info info;
     int32_t result;
     char normalizedPath[FS_MAX_DIRECTORY_LENGTH];
@@ -835,7 +835,7 @@ HRESULT LITTLEFS_FS_Driver::GetAttributes(const VOLUME_ID *volume, const char *p
 
 HRESULT LITTLEFS_FS_Driver::SetAttributes(const VOLUME_ID *volume, const char *path, uint32_t attributes)
 {
-    lfs_t *fsDrive = NULL;
+    lfs_t *fsDrive = nullptr;
     lfs_info info;
     uint32_t currentAttributes;
     char normalizedPath[FS_MAX_DIRECTORY_LENGTH];
@@ -892,7 +892,7 @@ HRESULT LITTLEFS_FS_Driver::SetAttributes(const VOLUME_ID *volume, const char *p
 
 HRESULT LITTLEFS_FS_Driver::CreateDirectory(const VOLUME_ID *volume, const char *path)
 {
-    lfs_t *fsDrive = NULL;
+    lfs_t *fsDrive = nullptr;
     int32_t result = LFS_ERR_OK;
     char normalizedPath[FS_MAX_DIRECTORY_LENGTH];
     char tempPath[FS_MAX_DIRECTORY_LENGTH + 1];
@@ -932,7 +932,7 @@ HRESULT LITTLEFS_FS_Driver::CreateDirectory(const VOLUME_ID *volume, const char 
             // add back the '/' separator
             strcat(tempPath, "/");
 
-            segment = strtok(NULL, "/");
+            segment = strtok(nullptr, "/");
         }
 
         // remove trailing '/'
@@ -978,7 +978,7 @@ HRESULT LITTLEFS_FS_Driver::CreateDirectory(const VOLUME_ID *volume, const char 
 
 HRESULT LITTLEFS_FS_Driver::Move(const VOLUME_ID *volume, const char *oldPath, const char *newPath)
 {
-    lfs_t *fsDrive = NULL;
+    lfs_t *fsDrive = nullptr;
     char normalizedNewPath[FS_MAX_DIRECTORY_LENGTH];
     char normalizedOldPath[FS_MAX_DIRECTORY_LENGTH];
     int32_t result = LFS_ERR_OK;
@@ -1022,7 +1022,7 @@ HRESULT LITTLEFS_FS_Driver::Move(const VOLUME_ID *volume, const char *oldPath, c
 
 HRESULT LITTLEFS_FS_Driver::Delete(const VOLUME_ID *volume, const char *path, bool recursive)
 {
-    lfs_t *fsDrive = NULL;
+    lfs_t *fsDrive = nullptr;
     lfs_info info;
     char normalizedPath[FS_MAX_DIRECTORY_LENGTH];
     int32_t result;

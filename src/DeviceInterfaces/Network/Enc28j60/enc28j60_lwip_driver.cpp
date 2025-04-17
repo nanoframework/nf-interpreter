@@ -5,7 +5,7 @@
 //
 
 #include <nanohal.h>
-//#include "net_decl_lwip.h"
+// #include "net_decl_lwip.h"
 #include "enc28j60_lwip.h"
 
 extern "C"
@@ -221,15 +221,21 @@ int ENC28J60_LWIP_Driver::Open(ENC28J60_LWIP_DRIVER_CONFIG *config, int index)
     int len;
     HAL_Configuration_NetworkInterface *iface;
 
-    if (config == NULL)
+    if (config == nullptr)
+    {
         return -1;
+    }
+
     iface = g_TargetConfiguration.NetworkInterfaceConfigs->Configs[index];
     ;
 
     // Open SPI device
     HRESULT hr = nanoSPI_OpenDevice(config->SPI_Config, config->spiHandle);
+
     if (hr < 0)
+    {
         return -1;
+    }
 
     if (0 == (iface->StartupAddressMode & AddressMode_DHCP))
     {
@@ -263,7 +269,7 @@ int ENC28J60_LWIP_Driver::Open(ENC28J60_LWIP_DRIVER_CONFIG *config, int index)
         (const ip4_addr_t *)&ipaddr,
         &netmask,
         &gw,
-        NULL,
+        nullptr,
         enc28j60_ethhw_init,
         ethernet_input);
 
@@ -293,8 +299,10 @@ bool ENC28J60_LWIP_Driver::Close(ENC28J60_LWIP_DRIVER_CONFIG *config, int index)
 
     NATIVE_PROFILE_HAL_DRIVERS_ETHERNET();
 
-    if (config == NULL)
+    if (config == nullptr)
+    {
         return false;
+    }
 
     LwipUpTimeCompletion.Abort();
 
@@ -306,7 +314,7 @@ bool ENC28J60_LWIP_Driver::Close(ENC28J60_LWIP_DRIVER_CONFIG *config, int index)
     CPU_GPIO_EnableInputPin(
         config->INT_Pin,
         0,                    /* Glitch filter enable */
-        NULL,                 /* ISR                  */
+        nullptr,              /* ISR                  */
         0,                    /* minor number         */
         GPIO_INT_NONE,        /* Interrupt edge       */
         PinMode_InputPullUp); /* Resistor State / mode*/

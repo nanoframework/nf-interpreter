@@ -12,7 +12,7 @@
 #include <iostream>
 #include <nanoCLR_Win32.h>
 
-static std::string *s_redirectedString = NULL;
+static std::string *s_redirectedString = nullptr;
 
 void CLR_Debug::RedirectToString(std::string *str)
 {
@@ -116,7 +116,7 @@ void CLR_Debug::Emit(const char *text, int len)
 
     if (s_CLR_RT_fTrace_RedirectOutput.size())
     {
-        static HANDLE hFile = INVALID_HANDLE_VALUE;
+        static auto hFile = INVALID_HANDLE_VALUE;
         static int lines = 0;
         static int num = 0;
 
@@ -143,11 +143,11 @@ void CLR_Debug::Emit(const char *text, int len)
         {
             unsigned long dwWritten;
 
-            ::WriteFile(hFile, text, (unsigned long)len, &dwWritten, NULL);
+            ::WriteFile(hFile, text, (unsigned long)len, &dwWritten, nullptr);
 
             if (s_CLR_RT_fTrace_RedirectLinesPerFile)
             {
-                while ((text = strchr(text, '\n')) != NULL)
+                while ((text = strchr(text, '\n')) != nullptr)
                 {
                     lines++;
                     text++;
@@ -402,27 +402,27 @@ const CLR_UINT8 *CLR_SkipBodyOfOpcodeCompressed(const CLR_UINT8 *ip, CLR_OPCODE 
 
 #define LOOKUP_ELEMENT_REF(idx, tblName, tblNameUC, tblName2)                                                          \
     const CLR_RECORD_##tblNameUC *p = Get##tblName(idx);                                                               \
-    const CLR_RT_##tblName2##_Index *s = &m_pCrossReference_##tblName[idx].m_target;                                   \
-    if (s->m_data == 0)                                                                                                \
-    s = NULL
+    const CLR_RT_##tblName2##_Index *s = &crossReference##tblName[idx].target;                                         \
+    if (s->data == 0)                                                                                                  \
+    s = nullptr
 
 #define LOOKUP_ELEMENT_IDX(idx, tblName, tblNameUC)                                                                    \
     const CLR_RECORD_##tblNameUC *p = Get##tblName(idx);                                                               \
     CLR_RT_##tblName##_Index s;                                                                                        \
-    s.Set(m_idx, idx)
+    s.Set(assemblyIndex, idx)
 
 #if defined(NANOCLR_TRACE_INSTRUCTIONS)
 
-void CLR_RT_Assembly::DumpToken(CLR_UINT32 tk)
+void CLR_RT_Assembly::DumpToken(CLR_UINT32 token)
 {
     NATIVE_PROFILE_CLR_DIAGNOSTICS();
-    CLR_UINT32 idx = CLR_DataFromTk(tk);
+    CLR_UINT32 index = CLR_DataFromTk(token);
 
-    switch (CLR_TypeFromTk(tk))
+    switch (CLR_TypeFromTk(token))
     {
         case TBL_AssemblyRef:
         {
-            LOOKUP_ELEMENT(idx, AssemblyRef, ASSEMBLYREF);
+            LOOKUP_ELEMENT(index, AssemblyRef, ASSEMBLYREF);
             {
                 CLR_Debug::Printf("[%s]", GetString(p->name));
             }
@@ -430,7 +430,7 @@ void CLR_RT_Assembly::DumpToken(CLR_UINT32 tk)
         }
         case TBL_TypeRef:
         {
-            LOOKUP_ELEMENT_REF(idx, TypeRef, TYPEREF, TypeDef);
+            LOOKUP_ELEMENT_REF(index, TypeRef, TYPEREF, TypeDef);
             if (s)
             {
                 CLR_RT_DUMP::TYPE(*s);
@@ -443,7 +443,7 @@ void CLR_RT_Assembly::DumpToken(CLR_UINT32 tk)
         }
         case TBL_FieldRef:
         {
-            LOOKUP_ELEMENT_REF(idx, FieldRef, FIELDREF, FieldDef);
+            LOOKUP_ELEMENT_REF(index, FieldRef, FIELDREF, FieldDef);
             if (s)
             {
                 CLR_RT_DUMP::FIELD(*s);
@@ -456,44 +456,43 @@ void CLR_RT_Assembly::DumpToken(CLR_UINT32 tk)
         }
         case TBL_MethodRef:
         {
-            LOOKUP_ELEMENT_REF(idx, MethodRef, METHODREF, MethodDef);
-            if (s)
-            {
-                CLR_RT_DUMP::METHOD(*s);
-            }
-            else
-            {
-                CLR_Debug::Printf("%s", GetString(p->name));
-            }
+            LOOKUP_ELEMENT_IDX(index, MethodRef, METHODREF);
+            CLR_RT_DUMP::METHODREF(s);
             break;
         }
         case TBL_TypeDef:
         {
-            LOOKUP_ELEMENT_IDX(idx, TypeDef, TYPEDEF);
+            LOOKUP_ELEMENT_IDX(index, TypeDef, TYPEDEF);
             CLR_RT_DUMP::TYPE(s);
             break;
         }
         case TBL_FieldDef:
         {
-            LOOKUP_ELEMENT_IDX(idx, FieldDef, FIELDDEF);
+            LOOKUP_ELEMENT_IDX(index, FieldDef, FIELDDEF);
             CLR_RT_DUMP::FIELD(s);
             break;
         }
         case TBL_MethodDef:
         {
-            LOOKUP_ELEMENT_IDX(idx, MethodDef, METHODDEF);
-            CLR_RT_DUMP::METHOD(s);
+            LOOKUP_ELEMENT_IDX(index, MethodDef, METHODDEF);
+            CLR_RT_DUMP::METHOD(s, nullptr);
+            break;
+        }
+        case TBL_MethodSpec:
+        {
+            LOOKUP_ELEMENT_IDX(index, MethodSpec, METHODSPEC);
+            CLR_RT_DUMP::METHODSPEC(s);
             break;
         }
         case TBL_Strings:
         {
-            const char *p = GetString(idx);
+            const char *p = GetString(index);
             CLR_Debug::Printf("'%s'", p);
             break;
         }
 
         default:
-            CLR_Debug::Printf("[%08x]", tk);
+            CLR_Debug::Printf("[%08x]", token);
     }
 }
 
@@ -539,7 +538,7 @@ void CLR_RT_Assembly::DumpSignature(CLR_SIG sig)
 void CLR_RT_Assembly::DumpSignature(const CLR_UINT8 *&p)
 {
     NATIVE_PROFILE_CLR_DIAGNOSTICS();
-    CLR_DataType opt = CLR_UncompressElementType(p);
+    NanoCLRDataType opt = CLR_UncompressElementType(p);
 
     switch (opt)
     {
@@ -614,9 +613,9 @@ void CLR_RT_Assembly::DumpSignature(const CLR_UINT8 *&p)
 void CLR_RT_Assembly::DumpSignatureToken(const CLR_UINT8 *&p)
 {
     NATIVE_PROFILE_CLR_DIAGNOSTICS();
-    CLR_UINT32 tk = CLR_TkFromStream(p);
+    CLR_UINT32 token = CLR_TkFromStream(p);
 
-    CLR_Debug::Printf("[%08x]", tk);
+    CLR_Debug::Printf("[%08x]", token);
 }
 
 //--//
@@ -648,12 +647,12 @@ void CLR_RT_Assembly::DumpOpcodeDirect(
     int pid)
 {
     NATIVE_PROFILE_CLR_DIAGNOSTICS();
-    CLR_Debug::Printf("    [%04x:%04x:%08x", pid, (int)(ip - ipStart), (size_t)ip);
+    CLR_Debug::Printf("    [%04x:%04x", pid, (int)(ip - ipStart));
 
     if (NANOCLR_INDEX_IS_VALID(call))
     {
         CLR_Debug::Printf(":");
-        CLR_RT_DUMP::METHOD(call);
+        CLR_RT_DUMP::METHOD(call, call.genericType);
     }
 
     CLR_OPCODE op = CLR_ReadNextOpcodeCompressed(ip);
@@ -731,14 +730,14 @@ void CLR_RT_DUMP::TYPE(const CLR_RT_ReflectionDef_Index &reflex)
     }
 }
 
-void CLR_RT_DUMP::METHOD(const CLR_RT_MethodDef_Index &method)
+void CLR_RT_DUMP::METHOD(const CLR_RT_MethodDef_Index &method, const CLR_RT_TypeSpec_Index *genericType)
 {
     NATIVE_PROFILE_CLR_DIAGNOSTICS();
     char rgBuffer[512];
     char *szBuffer = rgBuffer;
     size_t iBuffer = MAXSTRLEN(rgBuffer);
 
-    g_CLR_RT_TypeSystem.BuildMethodName(method, szBuffer, iBuffer);
+    g_CLR_RT_TypeSystem.BuildMethodName(method, genericType, szBuffer, iBuffer);
 
     CLR_Debug::Printf("%s", rgBuffer);
 }
@@ -791,7 +790,7 @@ void CLR_RT_DUMP::OBJECT(CLR_RT_HeapBlock *ptr, const char *text)
 
         case DATATYPE_SZARRAY:
         {
-            CLR_RT_HeapBlock_Array *array = (CLR_RT_HeapBlock_Array *)ptr;
+            auto *array = (CLR_RT_HeapBlock_Array *)ptr;
 
             CLR_RT_DUMP::TYPE(array->ReflectionData());
         }
@@ -799,9 +798,9 @@ void CLR_RT_DUMP::OBJECT(CLR_RT_HeapBlock *ptr, const char *text)
 
         case DATATYPE_DELEGATE_HEAD:
         {
-            CLR_RT_HeapBlock_Delegate *dlg = (CLR_RT_HeapBlock_Delegate *)ptr;
+            auto *dlg = (CLR_RT_HeapBlock_Delegate *)ptr;
 
-            CLR_RT_DUMP::METHOD(dlg->DelegateFtn());
+            CLR_RT_DUMP::METHOD(dlg->DelegateFtn(), nullptr);
         }
         break;
 
@@ -850,6 +849,32 @@ void CLR_RT_DUMP::OBJECT(CLR_RT_HeapBlock *ptr, const char *text)
 #undef PELEMENT_TO_STRING
 }
 
+void CLR_RT_DUMP::METHODREF(const CLR_RT_MethodRef_Index &method)
+{
+    NATIVE_PROFILE_CLR_DIAGNOSTICS();
+
+    char rgBuffer[512];
+    char *szBuffer = rgBuffer;
+    size_t iBuffer = MAXSTRLEN(rgBuffer);
+
+    g_CLR_RT_TypeSystem.BuildMethodRefName(method, szBuffer, iBuffer);
+
+    CLR_Debug::Printf("%s", rgBuffer);
+}
+
+void CLR_RT_DUMP::METHODSPEC(const CLR_RT_MethodSpec_Index &method)
+{
+    NATIVE_PROFILE_CLR_DIAGNOSTICS();
+
+    char rgBuffer[512];
+    char *szBuffer = rgBuffer;
+    size_t iBuffer = MAXSTRLEN(rgBuffer);
+
+    g_CLR_RT_TypeSystem.BuildMethodSpecName(method, szBuffer, iBuffer);
+
+    CLR_Debug::Printf("%s", rgBuffer);
+}
+
 #endif // defined(NANOCLR_TRACE_ERRORS)
 
 //--//
@@ -876,7 +901,7 @@ void CLR_RT_DUMP::EXCEPTION(CLR_RT_StackFrame &stack, CLR_RT_HeapBlock &ref)
 
     msg = Library_corlib_native_System_Exception::GetMessage(obj);
 
-    CLR_Debug::Printf("    ++++ Message: %s\r\n", msg == NULL ? "" : msg);
+    CLR_Debug::Printf("    ++++ Message: %s\r\n", msg == nullptr ? "" : msg);
 
     CLR_UINT32 depth;
     Library_corlib_native_System_Exception::StackTrace *stackTrace =
@@ -887,7 +912,7 @@ void CLR_RT_DUMP::EXCEPTION(CLR_RT_StackFrame &stack, CLR_RT_HeapBlock &ref)
     while (depth-- > 0)
     {
         CLR_Debug::Printf("    ++++ ");
-        CLR_RT_DUMP::METHOD(stackTrace->m_md);
+        CLR_RT_DUMP::METHOD(stackTrace->m_md, nullptr);
         CLR_Debug::Printf(" [IP: %04x] ++++\r\n", stackTrace->m_IP);
 
         stackTrace++;

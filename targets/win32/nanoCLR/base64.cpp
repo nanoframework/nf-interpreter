@@ -163,7 +163,7 @@ __nfweak int mbedtls_base64_encode(unsigned char *dst, size_t dlen, size_t *olen
 
     n *= 4;
 
-    if ((dlen < n + 1) || (NULL == dst))
+    if ((dlen < n + 1) || (nullptr == dst))
     {
         *olen = n + 1;
         return MBEDTLS_ERR_BASE64_BUFFER_TOO_SMALL;
@@ -291,7 +291,7 @@ __nfweak int mbedtls_base64_decode(unsigned char *dst, size_t dlen, size_t *olen
     n = (6 * (n >> 3)) + ((6 * (n & 0x7) + 7) >> 3);
     n -= equals;
 
-    if (dst == NULL || dlen < n)
+    if (dst == nullptr || dlen < n)
     {
         *olen = n;
         return MBEDTLS_ERR_BASE64_BUFFER_TOO_SMALL;

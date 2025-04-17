@@ -23,7 +23,7 @@ int ssl_accept_internal(int sd, int contextHandle)
     ssl = context->ssl;
 
     // sanity check
-    if (ssl == NULL)
+    if (ssl == nullptr)
     {
         return SOCK_SOCKET_ERROR;
     }

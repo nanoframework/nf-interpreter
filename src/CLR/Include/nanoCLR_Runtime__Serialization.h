@@ -70,7 +70,7 @@ struct CLR_RT_BinaryFormatter : public CLR_RT_HeapBlock_Node // EVENT HEAP - NO 
         //
         // Type of signatures:
         //
-        // 1) NULL
+        // 1) nullptr
         //
         //      Invalid for NeverNull
         //
@@ -155,7 +155,7 @@ struct CLR_RT_BinaryFormatter : public CLR_RT_HeapBlock_Node // EVENT HEAP - NO 
 
          bool CompareTypes( CLR_RT_TypeDescriptor* left, CLR_RT_TypeDescriptor* right );
 
-         static CLR_DataType GetDataType  ( CLR_RT_TypeDescriptor* type );
+         static NanoCLRDataType GetDataType  ( CLR_RT_TypeDescriptor* type );
          static CLR_UINT32   GetSizeOfType( CLR_RT_TypeDescriptor* type );
          static bool         GetSignOfType( CLR_RT_TypeDescriptor* type );
 
@@ -220,13 +220,13 @@ struct CLR_RT_BinaryFormatter : public CLR_RT_HeapBlock_Node // EVENT HEAP - NO 
     struct DuplicateTracker : public CLR_RT_HeapBlock_Node // EVENT HEAP - NO RELOCATION -
     {
         CLR_RT_HeapBlock* m_ptr;
-        CLR_UINT32        m_idx;
+        CLR_UINT32        m_index;
     };
 
     //--//
 
     CLR_RT_HeapBlock_MemoryStream* m_stream;
-    CLR_UINT32                     m_idx;
+    CLR_UINT32                     m_index;
     CLR_UINT32                     m_lastTypeRead;
     CLR_RT_DblLinkedList           m_duplicates;            // EVENT HEAP - NO RELOCATION - list of CLR_RT_BinaryFormatter::DuplicateTracker
     CLR_RT_DblLinkedList           m_states;                // EVENT HEAP - NO RELOCATION - list of CLR_RT_BinaryFormatter::State
@@ -247,12 +247,12 @@ struct CLR_RT_BinaryFormatter : public CLR_RT_HeapBlock_Node // EVENT HEAP - NO 
      HRESULT Advance        ();
 
      static HRESULT Serialize  ( CLR_RT_HeapBlock& refData, CLR_RT_HeapBlock& object                                                                           );
-     static HRESULT Deserialize( CLR_RT_HeapBlock& refData, CLR_RT_HeapBlock& object        , CLR_UINT32* unknownType                       , CLR_UINT32 flags );
+     static HRESULT Deserialize( CLR_RT_HeapBlock& refData, CLR_RT_HeapBlock& object                               , CLR_UINT32* unknownType, CLR_UINT32 flags );
      static HRESULT Deserialize( CLR_RT_HeapBlock& refData, CLR_UINT8* data, CLR_UINT32 size, CLR_RT_HeapBlock* cls, CLR_UINT32* unknownType, CLR_UINT32 flags );
 
      HRESULT           TrackDuplicate ( CLR_RT_HeapBlock* object );
      CLR_UINT32        SearchDuplicate( CLR_RT_HeapBlock* object );
-     CLR_RT_HeapBlock* GetDuplicate   ( CLR_UINT32        idx    );
+     CLR_RT_HeapBlock* GetDuplicate   ( CLR_UINT32        index    );
 
     //--//
 

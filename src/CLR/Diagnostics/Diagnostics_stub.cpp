@@ -182,9 +182,10 @@ __nfweak void CLR_RT_DUMP::TYPE(const CLR_RT_ReflectionDef_Index &reflex)
     NATIVE_PROFILE_CLR_DIAGNOSTICS();
 }
 
-__nfweak void CLR_RT_DUMP::METHOD(const CLR_RT_MethodDef_Index &method)
+__nfweak void CLR_RT_DUMP::METHOD(const CLR_RT_MethodDef_Index &method, const CLR_RT_TypeSpec_Index *genericType)
 {
     (void)method;
+    (void)genericType;
 
     NATIVE_PROFILE_CLR_DIAGNOSTICS();
 }
@@ -234,7 +235,7 @@ __nfweak const char *CLR_RT_DUMP::GETERRORMESSAGE(HRESULT hrError)
     (void)hrError;
 
     NATIVE_PROFILE_CLR_DIAGNOSTICS();
-    return NULL;
+    return nullptr;
 }
 
 //--//
@@ -246,7 +247,7 @@ __nfweak void *CLR_PROF_CounterCallChain::Prepare(CLR_PROF_Handler *handler)
     (void)handler;
 
     NATIVE_PROFILE_CLR_DIAGNOSTICS();
-    return NULL;
+    return nullptr;
 }
 
 __nfweak void CLR_PROF_CounterCallChain::Complete(CLR_UINT64 &t, CLR_PROF_Handler *handler)
@@ -403,7 +404,7 @@ __nfweak CLR_RT_HeapBlock *CLR_PRF_Profiler::FindReferencedObject(CLR_RT_HeapBlo
     (void)ref;
 
     NATIVE_PROFILE_CLR_DIAGNOSTICS();
-    return NULL;
+    return nullptr;
 }
 
 __nfweak void CLR_PRF_Profiler::DumpEndOfRefsList()

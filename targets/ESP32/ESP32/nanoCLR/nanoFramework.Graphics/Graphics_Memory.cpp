@@ -70,7 +70,7 @@ bool GraphicsMemory::GraphicsHeapLocation(
 
     graphicsStartingAddress = (CLR_UINT8 *)heap_caps_malloc(graphicsMemoryBlockSize, memoryCaps);
 
-    ASSERT(graphicsStartingAddress != NULL);
+    ASSERT(graphicsStartingAddress != nullptr);
     graphicsEndingAddress = (CLR_UINT8 *)(graphicsStartingAddress + graphicsMemoryBlockSize);
 
     // Save where we allocated it for restarts

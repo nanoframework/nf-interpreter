@@ -45,9 +45,9 @@ HRESULT CLR_HW_Hardware::SpawnDispatcher()
 
     interrupt = (CLR_RT_ApplicationInterrupt *)m_interruptData.m_applicationQueue.FirstValidNode();
 
-    if ((interrupt == NULL) || !g_CLR_RT_ExecutionEngine.EnsureSystemThread(
-                                   g_CLR_RT_ExecutionEngine.m_interruptThread,
-                                   ThreadPriority::System_Highest))
+    if ((interrupt == nullptr) || !g_CLR_RT_ExecutionEngine.EnsureSystemThread(
+                                      g_CLR_RT_ExecutionEngine.m_interruptThread,
+                                      ThreadPriority::System_Highest))
     {
         return S_OK;
     }
@@ -91,7 +91,7 @@ HRESULT CLR_HW_Hardware::TransferAllInterruptsToApplicationQueue()
             GLOBAL_UNLOCK();
         }
 
-        if (rec == NULL)
+        if (rec == nullptr)
             break;
 
         CLR_RT_ApplicationInterrupt *queueRec = (CLR_RT_ApplicationInterrupt *)CLR_RT_Memory::Allocate_And_Erase(

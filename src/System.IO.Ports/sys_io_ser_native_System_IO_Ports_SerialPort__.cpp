@@ -29,8 +29,8 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::SetupWriteLine(
     // get pointer to string
     text = stack.Arg1().RecoverString();
 
-    // check for NULL string
-    if (text != NULL)
+    // check for nullptr string
+    if (text != nullptr)
     {
         // get length
         textLength = hal_strlen_s(text);
@@ -96,12 +96,12 @@ bool Library_sys_io_ser_native_System_IO_Ports_SerialPort::GetLineFromRxBuffer(
     uint32_t newLineIndex = 0;
     int32_t compareIndex = 0;
     uint8_t *buffer;
-    uint8_t *comparison = NULL;
+    uint8_t *comparison = nullptr;
     uint32_t matchCount = 0;
     uint32_t index = 0;
 
     // clear line
-    line = NULL;
+    line = nullptr;
 
     // check for anything in the buffer
     if (ringBuffer->Length() > 0)
@@ -109,7 +109,7 @@ bool Library_sys_io_ser_native_System_IO_Ports_SerialPort::GetLineFromRxBuffer(
         // get "new line" from field
         newLine = serialDevice[FIELD___newLine].RecoverString();
 
-        if (newLine != NULL)
+        if (newLine != nullptr)
         {
             newLineLength = hal_strlen_s(newLine);
         }
@@ -183,7 +183,7 @@ bool Library_sys_io_ser_native_System_IO_Ports_SerialPort::GetLineFromRxBuffer(
             // the new line char allow enough room in the buffer for for the terminator
             line = (uint8_t *)platform_malloc(index);
 
-            if (line != NULL)
+            if (line != nullptr)
             {
                 // pop string AND new line from buffer
                 ringBuffer->Pop(line, index);

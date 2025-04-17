@@ -122,9 +122,9 @@ extern NF_PAL_UART Uart5_PAL;
         Uart##num##_PAL.Usart = USART##num;                                                                            \
         USART##num->ROUTELOC0 = rx_location | tx_location;                                                             \
         USART##num->ROUTEPEN |= USART_ROUTEPEN_TXPEN | USART_ROUTEPEN_RXPEN;                                           \
-        Uart##num##_PAL.TxBuffer = NULL;                                                                               \
+        Uart##num##_PAL.TxBuffer = nullptr;                                                                               \
         Uart##num##_PAL.TxOngoingCount = 0;                                                                            \
-        Uart##num##_PAL.RxBuffer = NULL;                                                                               \
+        Uart##num##_PAL.RxBuffer = nullptr;                                                                               \
         Uart##num##_PAL.WatchChar = 0;                                                                                 \
         Uart##num##_PAL.NewLineChar = 0;                                                                               \
         Uart##num##_PAL.SignalLevelsInverted = false;                                                                  \
@@ -151,9 +151,9 @@ void InitConfig_USART5();
         GPIO_PinModeSet(gpio_port_tx, tx_pin, gpioModeDisabled, 0);                                                    \
         CMU_ClockEnable(cmuClock_USART##num, false);                                                                   \
         platform_free(Uart##num##_PAL.RxBuffer);                                                                       \
-        Uart##num##_PAL.TxBuffer = NULL;                                                                               \
-        Uart##num##_PAL.RxBuffer = NULL;                                                                               \
-        Uart##num##_PAL.Usart = NULL;                                                                                  \
+        Uart##num##_PAL.TxBuffer = nullptr;                                                                               \
+        Uart##num##_PAL.RxBuffer = nullptr;                                                                               \
+        Uart##num##_PAL.Usart = nullptr;                                                                                  \
         return;                                                                                                        \
     }
 

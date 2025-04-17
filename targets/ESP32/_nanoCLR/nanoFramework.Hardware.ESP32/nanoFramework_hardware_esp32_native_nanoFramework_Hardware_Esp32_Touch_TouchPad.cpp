@@ -14,7 +14,7 @@ static int numberInitialzed = 0;
 static bool isTouchInitialized = false;
 static bool isTouchPadUsed[TOUCH_PAD_MAX];
 static bool isFilterOn = false;
-static TaskHandle_t handleReadTask = NULL;
+static TaskHandle_t handleReadTask = nullptr;
 static bool isTouched[TOUCH_PAD_MAX];
 static uint32_t thresholds[TOUCH_PAD_MAX];
 static bool isTimeModeOn = false;
@@ -60,12 +60,12 @@ Resources need to be cleaned and the driver uninstalled in case of a soft reboot
 static void TouchPad_Uninitialize()
 {
     // stop the task
-    if (handleReadTask != NULL)
+    if (handleReadTask != nullptr)
     {
         vTaskDelete(handleReadTask);
     }
 
-    handleReadTask = NULL;
+    handleReadTask = nullptr;
     isTimeModeOn = false;
 
     // Clean the isr registration
@@ -75,7 +75,7 @@ static void TouchPad_Uninitialize()
     touch_pad_intr_disable((touch_pad_intr_mask_t)(TOUCH_PAD_INTR_MASK_ACTIVE | TOUCH_PAD_INTR_MASK_INACTIVE |
                                                    TOUCH_PAD_INTR_MASK_TIMEOUT));
 #endif
-    touch_pad_isr_deregister(IsrCallBack, NULL);
+    touch_pad_isr_deregister(IsrCallBack, nullptr);
     // Clean filter and uninstall the driver
 #if defined(CONFIG_IDF_TARGET_ESP32)
     touch_pad_filter_stop();
@@ -126,10 +126,10 @@ static void MakeSureTouchIsInitialized()
 #if defined(CONFIG_IDF_TARGET_ESP32)
         // and features will be added in the future.
         // touch_pad_intr_enable();
-        // touch_pad_isr_register(IsrCallBack, NULL);
+        // touch_pad_isr_register(IsrCallBack, nullptr);
 #else
         // touch_pad_intr_enable(TOUCH_PAD_INTR_MASK_ACTIVE | TOUCH_PAD_INTR_MASK_INACTIVE |
-        // TOUCH_PAD_INTR_MASK_TIMEOUT); touch_pad_isr_register(IsrCallBack, NULL, TOUCH_PAD_INTR_MASK_ALL);
+        // TOUCH_PAD_INTR_MASK_TIMEOUT); touch_pad_isr_register(IsrCallBack, nullptr, TOUCH_PAD_INTR_MASK_ALL);
 #endif
     }
 }
@@ -793,14 +793,14 @@ HRESULT Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32
         isTimeModeOn = false;
         // If we just switch mode, we have to wait for the task to exit
         // So killing it
-        if (handleReadTask != NULL)
+        if (handleReadTask != nullptr)
         {
             vTaskDelete(handleReadTask);
         }
 
         // Waiting a bit to make sure the task is properly deleted
         vTaskDelay(20 / portTICK_PERIOD_MS);
-        handleReadTask = NULL;
+        handleReadTask = nullptr;
     }
 
     // We are starting a task when on timer mode.
@@ -810,7 +810,7 @@ HRESULT Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32
         {
             isTimeModeOn = true;
             // Start a task to show what pads have been touched
-            xTaskCreate(&ReadTask, "ReadTask", 4096, NULL, 5, &handleReadTask);
+            xTaskCreate(&ReadTask, "ReadTask", 4096, nullptr, 5, &handleReadTask);
         }
     }
 

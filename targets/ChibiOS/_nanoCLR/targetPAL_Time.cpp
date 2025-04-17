@@ -11,7 +11,7 @@
 
 // timer for next event
 static virtual_timer_t nextEventTimer;
-void*  nextEventCallbackDummyArg = NULL;
+void*  nextEventCallbackDummyArg = nullptr;
 
 static void NextEventTimer_Callback(virtual_timer_t *vtp, void* arg )
 {

@@ -32,8 +32,8 @@ HRESULT OpenAdcChannel(int32_t channelNumber, CLR_RT_HeapBlock *adcConfiguration
 
     NF_PAL_ADC_PORT_PIN_CHANNEL adcChannelDefinition;
     CMU_Clock_TypeDef adcClock;
-    ADC_Init_TypeDef *adcInit = NULL;
-    bool *adcInitialized = NULL;
+    ADC_Init_TypeDef *adcInit = nullptr;
+    bool *adcInitialized = nullptr;
 
     // sanity check for existing configuration
     if (channelNumber >= AdcChannelCount)
@@ -145,7 +145,7 @@ HRESULT Library_nano_gg_adc_native_nanoFramework_GiantGecko_Adc_AdcController::N
     int32_t channelNumber;
     ADC_TypeDef *adcDriver;
 
-    // get a pointer to the managed object instance and check that it's not NULL
+    // get a pointer to the managed object instance and check that it's not nullptr
     CLR_RT_HeapBlock *pThis = stack.This();
     FAULT_ON_NULL(pThis);
 
@@ -192,7 +192,7 @@ HRESULT Library_nano_gg_adc_native_nanoFramework_GiantGecko_Adc_AdcController::
 
     CLR_RT_TypeDef_Index adcSampleResolutionTypeDef;
     CLR_RT_HeapBlock_Array *supportedResolutions;
-    CLR_INT32 *resolution = NULL;
+    CLR_INT32 *resolution = nullptr;
 
     uint16_t resolutionsCount = 0;
 
@@ -259,14 +259,14 @@ HRESULT Library_nano_gg_adc_native_nanoFramework_GiantGecko_Adc_AdcController::
     uint32_t channelIndex = 0;
     int32_t channelNumber;
     ADC_InitScan_TypeDef channelInitScan = ADC_INITSCAN_DEFAULT;
-    ADC_TypeDef *adcDriver = NULL;
+    ADC_TypeDef *adcDriver = nullptr;
 
     NF_PAL_ADC_PORT_PIN_CHANNEL adcChannelDefinition;
 
     CLR_RT_HeapBlock_Array *adcChannelsToScan;
     CLR_RT_HeapBlock *adcConfiguration;
 
-    // get a pointer to the managed object instance and check that it's not NULL
+    // get a pointer to the managed object instance and check that it's not nullptr
     CLR_RT_HeapBlock *pThis = stack.This();
     FAULT_ON_NULL(pThis);
 
@@ -301,7 +301,7 @@ HRESULT Library_nano_gg_adc_native_nanoFramework_GiantGecko_Adc_AdcController::
         (NF_PAL_GECKO_ADC_CONTINUOUS_SCAN *)platform_malloc(sizeof(NF_PAL_GECKO_ADC_CONTINUOUS_SCAN));
 
     // sanity check
-    if (ContinuousScanOperation == NULL)
+    if (ContinuousScanOperation == nullptr)
     {
         NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
     }
@@ -311,7 +311,7 @@ HRESULT Library_nano_gg_adc_native_nanoFramework_GiantGecko_Adc_AdcController::
         (uint32_t *)platform_malloc(adcChannelsToScan->m_numOfElements * averageCount * sizeof(uint32_t));
 
     // sanity check
-    if (ContinuousScanOperation->dataBuffer == NULL)
+    if (ContinuousScanOperation->dataBuffer == nullptr)
     {
         NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
     }
@@ -367,16 +367,16 @@ HRESULT Library_nano_gg_adc_native_nanoFramework_GiantGecko_Adc_AdcController::
     if (FAILED(hr))
     {
         // free memory for the scan operation
-        if (ContinuousScanOperation != NULL)
+        if (ContinuousScanOperation != nullptr)
         {
-            if (ContinuousScanOperation->dataBuffer != NULL)
+            if (ContinuousScanOperation->dataBuffer != nullptr)
             {
                 platform_free(ContinuousScanOperation->dataBuffer);
             }
 
             platform_free(ContinuousScanOperation);
 
-            ContinuousScanOperation = NULL;
+            ContinuousScanOperation = nullptr;
         }
     }
 
@@ -388,7 +388,7 @@ HRESULT Library_nano_gg_adc_native_nanoFramework_GiantGecko_Adc_AdcController::N
 {
     NANOCLR_HEADER();
 
-    // get a pointer to the managed object instance and check that it's not NULL
+    // get a pointer to the managed object instance and check that it's not nullptr
     CLR_RT_HeapBlock *pThis = stack.This();
     FAULT_ON_NULL(pThis);
 
@@ -398,7 +398,7 @@ HRESULT Library_nano_gg_adc_native_nanoFramework_GiantGecko_Adc_AdcController::N
     // clear memory for the scan operation
     platform_free(ContinuousScanOperation->dataBuffer);
     platform_free(ContinuousScanOperation);
-    ContinuousScanOperation = NULL;
+    ContinuousScanOperation = nullptr;
 
     // all good, update flag
     pThis[FIELD___continuousSamplingStarted].NumericByRef().u1 = (CLR_UINT8) false;
@@ -411,7 +411,7 @@ HRESULT Library_nano_gg_adc_native_nanoFramework_GiantGecko_Adc_AdcController::
 {
     NANOCLR_HEADER();
 
-    CLR_INT32 *sample = NULL;
+    CLR_INT32 *sample = nullptr;
     // assuming that, at 12 bits resolution, this will be enough to hold the average
     uint64_t samplesAccumulator = 0;
 
@@ -421,7 +421,7 @@ HRESULT Library_nano_gg_adc_native_nanoFramework_GiantGecko_Adc_AdcController::
     NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance(
         stack.PushValueAndClear(),
         ContinuousScanOperation->channelCount,
-        g_CLR_RT_WellKnownTypes.m_Int32));
+        g_CLR_RT_WellKnownTypes.Int32));
 
     sampleArray = stack.TopValue().DereferenceArray();
 

@@ -189,11 +189,11 @@ bool GetWirelessConfig(int index, HAL_Configuration_Wireless80211 **wirelessConf
 int Network_Interface_Start_Connect(int index, const char *ssid, const char *passphase, int options)
 {
     // need to free memory, if allocated in successful GetWirelessConfig
-    HAL_Configuration_Wireless80211 *wirelessConfig = NULL;
+    HAL_Configuration_Wireless80211 *wirelessConfig = nullptr;
 
     if (GetWirelessConfig(index, &wirelessConfig) == false)
     {
-        if (wirelessConfig != NULL)
+        if (wirelessConfig != nullptr)
         {
             platform_free(wirelessConfig);
         }

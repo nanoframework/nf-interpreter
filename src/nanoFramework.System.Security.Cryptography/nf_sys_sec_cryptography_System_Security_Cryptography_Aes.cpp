@@ -57,8 +57,8 @@ HRESULT Library_nf_sys_sec_cryptography_System_Security_Cryptography_Aes::Encryp
     size_t outputLength = 0;
     size_t ivLength = 0;
     uint16_t passCount = 0;
-    uint8_t *ivCopy = NULL;
-    uint8_t *workBuffer = NULL;
+    uint8_t *ivCopy = nullptr;
+    uint8_t *workBuffer = nullptr;
 
     CLR_RT_HeapBlock_Array *keyArray;
     CLR_RT_HeapBlock_Array *ivArray;
@@ -69,9 +69,9 @@ HRESULT Library_nf_sys_sec_cryptography_System_Security_Cryptography_Aes::Encryp
     pThis = (CLR_RT_HeapBlock *)stack.This();
     FAULT_ON_NULL(pThis);
 
-    // grab key and check for NULL
+    // grab key and check for nullptr
     keyArray = pThis[FIELD___key].DereferenceArray();
-    if (keyArray == NULL)
+    if (keyArray == nullptr)
     {
         NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_OPERATION);
     }
@@ -80,13 +80,13 @@ HRESULT Library_nf_sys_sec_cryptography_System_Security_Cryptography_Aes::Encryp
     // (expecting this to be filled with the IV from managed code)
     ivArray = pThis[FIELD___iv].DereferenceArray();
 
-    // need to check if IV is NULL (AES doesn't require an IV)
-    if (ivArray != NULL)
+    // need to check if IV is nullptr (AES doesn't require an IV)
+    if (ivArray != nullptr)
     {
         // need a copy of the IV because it will be modified by mbedtls
         ivCopy = (uint8_t *)platform_malloc(ivArray->m_numOfElements);
 
-        if (ivCopy == NULL)
+        if (ivCopy == nullptr)
         {
             NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
         }
@@ -96,7 +96,7 @@ HRESULT Library_nf_sys_sec_cryptography_System_Security_Cryptography_Aes::Encryp
         ivLength = ivArray->m_numOfElements;
     }
 
-    // grab plain text and check for NULL
+    // grab plain text and check for nullptr
     plainTextArray = stack.Arg1().DereferenceArray();
     FAULT_ON_NULL_ARG(plainTextArray);
 
@@ -112,7 +112,7 @@ HRESULT Library_nf_sys_sec_cryptography_System_Security_Cryptography_Aes::Encryp
     NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance(
         stack.TopValue(),
         plainTextArray->m_numOfElements,
-        g_CLR_RT_WellKnownTypes.m_UInt8));
+        g_CLR_RT_WellKnownTypes.UInt8));
 
     // get a reference to the array to return
     cipherTextArray = stack.TopValue().DereferenceArray();
@@ -127,7 +127,7 @@ HRESULT Library_nf_sys_sec_cryptography_System_Security_Cryptography_Aes::Encryp
     // need a work buffer to hold the encrypted data
     workBuffer = (uint8_t *)platform_malloc(plainTextArray->m_numOfElements + cipherInfo->private_block_size);
 
-    if (workBuffer == NULL)
+    if (workBuffer == nullptr)
     {
         NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
     }
@@ -178,12 +178,12 @@ HRESULT Library_nf_sys_sec_cryptography_System_Security_Cryptography_Aes::Encryp
 
     NANOCLR_CLEANUP();
 
-    if (ivCopy != NULL)
+    if (ivCopy != nullptr)
     {
         platform_free(ivCopy);
     }
 
-    if (workBuffer != NULL)
+    if (workBuffer != nullptr)
     {
         platform_free(workBuffer);
     }

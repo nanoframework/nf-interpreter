@@ -19,7 +19,7 @@ const CLR_RT_NativeAssemblyData *g_CLR_InteropAssembliesNativeData[] =
     &g_CLR_AssemblyNative_mscorlib,
     &g_CLR_AssemblyNative_nanoFramework_Runtime_Native,
     @CLR_RT_NativeAssemblyDataTableEntries@
-    NULL
+    nullptr
 };
 
 const uint16_t g_CLR_InteropAssembliesCount = (@CLR_RT_NativeAssembliesCount@ + 2);
