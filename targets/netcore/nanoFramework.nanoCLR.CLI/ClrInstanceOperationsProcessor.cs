@@ -54,8 +54,8 @@ namespace nanoFramework.nanoCLR.CLI
             {
                 return (int)UpdateNanoCLRAsync(
                     options.TargetVersion,
-                    options.CheckPreviewVersions,
                     hostBuilder.GetCLRVersion(),
+                    options.CheckPreviewVersions,
                     hostBuilder).Result;
             }
             else if (options.GetCLRVersion || options.GetNativeAssemblies)
@@ -113,14 +113,14 @@ namespace nanoFramework.nanoCLR.CLI
 
         private static async Task<ExitCode> UpdateNanoCLRAsync(
             string targetVersion,
-            bool previewVersion,
             string currentVersion,
+            bool usePreview,
             nanoCLRHostBuilder hostBuilder)
         {
             try
             {
                 // compose current version
-                // need to get rid of git hub has, in case it has one
+                // need to get rid of GitHub hash, in case it has one
                 if (string.IsNullOrEmpty(currentVersion))
                 {
                     currentVersion = "0.0.0.0";
@@ -132,7 +132,7 @@ namespace nanoFramework.nanoCLR.CLI
                         currentVersion.IndexOf("+") < 0 ? currentVersion.Length : currentVersion.IndexOf("+"));
                 }
 
-                Version version = Version.Parse(currentVersion);
+                Version installedVersion = Version.Parse(currentVersion);
 
                 string nanoClrDllLocation = Path.Combine(
                     Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location),
@@ -142,7 +142,7 @@ namespace nanoFramework.nanoCLR.CLI
                 _httpClient.BaseAddress = new Uri(_cloudSmithApiUrl);
                 _httpClient.DefaultRequestHeaders.Add("Accept", "*/*");
 
-                string repoName = previewVersion ? _refTargetsDevRepo : _refTargetsStableRepo;
+                string repoName = usePreview ? _refTargetsDevRepo : _refTargetsStableRepo;
 
                 // get latest version available for download
                 HttpResponseMessage response = await _httpClient.GetAsync($"{repoName}/?query=name:^WIN_DLL_nanoCLR version:^latest$");
@@ -150,7 +150,7 @@ namespace nanoFramework.nanoCLR.CLI
 
                 if (responseBody == "[]")
                 {
-                    Console.WriteLine($"Error getting latest nanoCLR version.");
+                    Console.WriteLine($"Error getting latest available nanoCLR package.");
                     return ExitCode.E9005;
                 }
 
@@ -158,21 +158,21 @@ namespace nanoFramework.nanoCLR.CLI
 
                 if (packageInfo.Count != 1)
                 {
-                    Console.WriteLine($"Error parsing latest nanoCLR version.");
+                    Console.WriteLine($"Error parsing nanoCLR version from package details.");
                     return ExitCode.E9005;
                 }
                 else
                 {
-                    Version latestFwVersion = Version.Parse(packageInfo[0].Version);
+                    Version availableFwVersion = Version.Parse(packageInfo[0].Version);
 
                     // only perform version check if preview wasn't requested
-                    if (!previewVersion && (latestFwVersion < version))
+                    if (!usePreview && (availableFwVersion < installedVersion))
                     {
-                        Console.WriteLine($"Current version {version} lower than available version {packageInfo[0].Version}");
+                        Console.WriteLine($"Current version {installedVersion} higher than available version {packageInfo[0].Version}");
                     }
 
-                    if (previewVersion
-                            || (latestFwVersion > version)
+                    if (usePreview
+                            || (availableFwVersion > installedVersion)
                             || (!string.IsNullOrEmpty(targetVersion)
                             && (Version.Parse(targetVersion) > Version.Parse(currentVersion))))
                     {
