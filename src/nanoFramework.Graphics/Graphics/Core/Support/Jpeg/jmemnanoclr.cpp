@@ -19,7 +19,7 @@ extern "C"
     // elimnate error due to redefinition of these in the targetHAL.h
 #undef TRUE  
 #undef FALSE 
-#undef nullptr 
+#undef NULL 
 
 
 }
