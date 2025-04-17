@@ -13,11 +13,12 @@
 //////////
 
 // USART1
-// SCK: PD2
-// MOSI: PD0
-// MISO: PD1
-// CS: PD3
+// SCK: PD2     1
+// MOSI: PD0    1
+// MISO: PD1    1
+// CS: PD3      1
 // EMC encoded "port location", see Alternate Functionality Overview table in MCU datasheet
+// sck_port_location, mosi_port_location, miso_port_location, cs_port_location
 
 INIT_SPI_CONFIG(1, 1, 1, 1, 1)
 

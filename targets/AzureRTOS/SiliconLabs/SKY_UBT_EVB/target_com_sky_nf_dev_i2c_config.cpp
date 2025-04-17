@@ -11,6 +11,7 @@
 
 // SCL: PA1
 // SDA: PA0
+//  gpio_port_scl, gpio_port_sda, scl_pin, sda_pin, scl_port_location, sda_port_location
 
 // GPIO alternate pin function is 0 for both pins (see alternate function mapping table in device datasheet)
 I2C_CONFIG_PINS(0, gpioPortA, gpioPortA, 1, 0, 0, 0)

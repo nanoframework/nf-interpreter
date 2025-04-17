@@ -5,5 +5,3 @@
 
 #define GECKO_USE_SPI1 TRUE
 #define GECKO_USE_SPI2 TRUE
-// #define GECKO_USE_SPI3 TRUE
-// #define GECKO_USE_SPI4 TRUE
