@@ -1303,6 +1303,7 @@ jobs:
         displayName: Install .NET nanoFramework MSBuild components
         inputs:
           GitHubToken: $(GitHubToken)
+          UsePreview: true
 
       - template: azure-pipelines-templates/check-mdp-for-build.yml
 
