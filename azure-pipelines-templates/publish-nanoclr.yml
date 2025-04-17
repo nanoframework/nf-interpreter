@@ -52,7 +52,10 @@ steps:
         or(
           eq(variables['ForceUpload'], true),
           and(
-            eq(variables['Build.SourceBranchName'], 'main'),
+            or(
+              eq(variables['Build.SourceBranchName'], 'develop'),
+              eq(variables['Build.SourceBranchName'], 'main')
+            ),
             eq(variables['System.PullRequest.PullRequestId'], '')
           )
         )
