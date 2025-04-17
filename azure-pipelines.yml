@@ -13,16 +13,12 @@ trigger:
       - .clang-format
       - .github_changelog_generator
       - .gitignore
-      - .typo-ci.yml
       - build.ps1
       - CHANGELOG.md
-      - CMakeSettings.json
-      - CMakeSettings.SAMPLE.json
       - LICENSE.md
       - nf.props
       - nfcore.vssettings
-      - README.md
-      - README.zh-cn.md
+      - README*.md
       - RunCmd.bat
       - startocd.bat
       - .github/*
