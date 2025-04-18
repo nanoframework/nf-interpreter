@@ -1003,7 +1003,7 @@ jobs:
           artifactName: nanoclr_win32
           artifactType: pipeline
 
-      # push NuGet packages to Azure Artifacts feed (always happens when building from main, except on PR builds)
+      # push NuGet packages to NuGet (always happens when building from main & develop, except on PR builds)
       - task: NuGetCommand@2
         condition: >-
           and(
@@ -1011,27 +1011,8 @@ jobs:
             eq(variables['System.PullRequest.PullRequestId'], ''),
             or(
               eq(variables['ForceUpload'], true),
-              eq(variables['Build.SourceBranchName'], 'main')
-            )
-          )
-        continueOnError: true
-        displayName: Push NuGet packages to Azure Artifacts
-        inputs:
-          command: push
-          nuGetFeedType: external
-          packagesToPush: "$(Build.ArtifactStagingDirectory)/*.nupkg"
-          publishFeedCredentials: "AzureArtifacts-nf-interpreter"
-          allowPackageConflicts: true
-
-      # push NuGet packages to NuGet (always happens when building from main, except on PR builds)
-      - task: NuGetCommand@2
-        condition: >-
-          and(
-            succeeded(),
-            eq(variables['System.PullRequest.PullRequestId'], ''),
-            or(
-              eq(variables['ForceUpload'], true),
-              eq(variables['Build.SourceBranchName'], 'main')
+              eq(variables['Build.SourceBranchName'], 'main'),
+              eq(variables['Build.SourceBranchName'], 'develop')
             )
           )
         continueOnError: true
@@ -1195,7 +1176,7 @@ jobs:
           artifactName: nanoclr_cli
           artifactType: pipeline
 
-      # push NuGet packages to Azure Artifacts feed (always happens when building from main, except on PR builds)
+      # push NuGet packages to NuGet (always happens when building from main & develop, except on PR builds)
       - task: NuGetCommand@2
         condition: >-
           and(
@@ -1203,27 +1184,8 @@ jobs:
             eq(variables['System.PullRequest.PullRequestId'], ''),
             or(
               eq(variables['ForceUpload'], true),
-              eq(variables['Build.SourceBranchName'], 'main')
-            )
-          )
-        continueOnError: true
-        displayName: Push NuGet packages to Azure Artifacts
-        inputs:
-          command: push
-          nuGetFeedType: external
-          packagesToPush: "$(Build.ArtifactStagingDirectory)/*.nupkg"
-          publishFeedCredentials: "AzureArtifacts-nf-interpreter"
-          allowPackageConflicts: true
-
-      # push NuGet packages to NuGet (always happens when building from main, except on PR builds)
-      - task: NuGetCommand@2
-        condition: >-
-          and(
-            succeeded(),
-            eq(variables['System.PullRequest.PullRequestId'], ''),
-            or(
-              eq(variables['ForceUpload'], true),
-              eq(variables['Build.SourceBranchName'], 'main')
+              eq(variables['Build.SourceBranchName'], 'main'),
+              eq(variables['Build.SourceBranchName'], 'develop')
             )
           )
         continueOnError: true
