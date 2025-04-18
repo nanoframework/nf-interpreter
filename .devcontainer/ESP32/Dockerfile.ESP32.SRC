@@ -61,12 +61,12 @@ ENV PATH=/usr/bin/cmake/bin:${PATH}
 
 # Install ESP-IDF
 ENV IDF_PATH=/sources/esp-idf
-ENV ESP_PATCH_VER=esp-13.2.0_20230928
+ENV ESP_PATCH_VER=esp-14.2.0_20241119
 # This is now taking care in the following line
 # RUN python -m pip install -r $IDF_PATH/requirements.txt
 RUN $IDF_PATH/install.sh
 
-ENV PATH=/root/.espressif/python_env/idf5.2_py3.11_env/bin:$PATH:\
+ENV PATH=/root/.espressif/python_env/idf5.4_py3.11_env/bin:$PATH:\
 $IDF_PATH/components/esptool_py/esptool:\
 $IDF_PATH/components/espcoredump:\ 
 $IDF_PATH/components/partition_table/:\
