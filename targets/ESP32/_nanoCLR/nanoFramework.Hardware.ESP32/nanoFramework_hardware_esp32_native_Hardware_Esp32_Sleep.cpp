@@ -109,10 +109,10 @@ HRESULT Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32
 
 #if CONFIG_SOC_PM_SUPPORT_TOUCH_SENSOR_WAKEUP
     esp_err_t err;
-    int pad1;
-    int coefficient;
 
 #if defined(CONFIG_IDF_TARGET_ESP32)
+    int pad1;
+    int coefficient;
     int pad2;
     // Setup the sleep mode
     touch_pad_init();
@@ -164,8 +164,12 @@ HRESULT Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32
             NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_OPERATION);
         }
     }
-
+#elif defined(CONFIG_IDF_TARGET_ESP32P4)
+    //TODO
+    NANOCLR_SET_AND_LEAVE(CLR_E_NOT_SUPPORTED);
 #else
+    int pad1;
+    int coefficient;
     touch_pad_denoise_t denoise;
     touch_filter_config_t filterInfo;
     uint32_t touchValue;

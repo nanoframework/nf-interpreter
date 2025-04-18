@@ -5,14 +5,14 @@
     ],
     "configurePresets": [
         {
-            "name": "xtensa-esp32c3-preset",
+            "name": "riscv-esp32c3-preset",
             "description": "Preset for ESP32-C3 series",
             "inherits": "general-preset",
             "hidden": true,
             "cacheVariables": {
                 "CMAKE_TOOLCHAIN_FILE": {
                     "type": "FILEPATH",
-                    "value": "${sourceDir}/CMake/toolchain.riscv32-esp-elf.cmake"
+                    "value": "${sourceDir}/CMake/toolchain.riscv32-esp32c3-elf.cmake"
                 },
                 "NF_INTEROP_ASSEMBLIES": null,
                 "NF_TARGET_HAS_NANOBOOTER": "OFF",
