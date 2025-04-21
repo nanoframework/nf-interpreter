@@ -129,7 +129,7 @@ set(NF_CoreCLR_SRCS
 
     # Runtime.Native
     nf_rt_native.cpp
-    nf_rt_native_nanoFramework_Runtime_Hardware_SystemInfo.cpp
+    nf_rt_native_nanoFramework_Runtime_Native_SystemInfo.cpp
     nf_rt_native_nanoFramework_Runtime_Native_ExecutionConstraint.cpp
     nf_rt_native_nanoFramework_Runtime_Native_Power.cpp
     nf_rt_native_nanoFramework_Runtime_Native_Rtc_stubs.cpp

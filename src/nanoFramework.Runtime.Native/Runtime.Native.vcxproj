@@ -19,10 +19,10 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="nf_rt_native_nanoFramework_Runtime_Hardware_SystemInfo.cpp" />
     <ClCompile Include="nf_rt_native_nanoFramework_Runtime_Native_ExecutionConstraint.cpp" />
     <ClCompile Include="nf_rt_native_nanoFramework_Runtime_Native_Power.cpp" />
     <ClCompile Include="nf_rt_native_nanoFramework_Runtime_Native_Rtc_stubs.cpp" />
+    <ClCompile Include="nf_rt_native_nanoFramework_Runtime_Native_SystemInfo.cpp" />
     <ClCompile Include="nf_rt_native_System_Environment.cpp" />
     <ClCompile Include="nf_rt_native.cpp" />
   </ItemGroup>
