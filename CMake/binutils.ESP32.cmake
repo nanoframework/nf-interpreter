@@ -1057,7 +1057,7 @@ macro(nf_add_idf_as_library)
         TARGET ${NANOCLR_PROJECT_NAME}.elf POST_BUILD
         COMMAND ${output_idf_size}
         --archives ${CMAKE_BINARY_DIR}/${CMAKE_PROJECT_NAME}.map
-        COMMENT "Ouptut IDF size summary")
+        COMMENT "Output IDF size summary")
 
 endmacro()
 
