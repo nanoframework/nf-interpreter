@@ -55,7 +55,8 @@ RUN apt-get update \
     ninja-build \
     srecord \
     nodejs \
-    libffi-dev
+    libffi-dev \
+    libusb-1.0
 
 # Create needed directories
 RUN mkdir -p /usr/local/bin/gcc \
