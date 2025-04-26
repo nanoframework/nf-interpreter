@@ -142,9 +142,6 @@ $IDF_PATH/components/app_update:\
 /root/.espressif/tools/xtensa-esp-elf/$ESP_PATCH_VER/xtensa-esp-elf/bin:\
 /root/.espressif/tools/riscv32-esp-elf/$ESP_PATCH_VER/riscv32-esp-elf/bin
 
-# FIXME: Work around for problem in IDF v5.4.1, must be removed for later releases when issue fixed
-ENV ESP_ROM_ELF_DIR=/root/.espressif/tools/esp-rom-elfs/20241011/
-
 # Clean up downloaded files
 RUN apt-get autoremove -y \
     && apt-get clean -y \
