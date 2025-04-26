@@ -974,10 +974,6 @@ macro(nf_add_idf_as_library)
             PROPERTY COMPILE_DEFINITIONS ${IDF_LWIP_COMPILE_DEFINITIONS}
         )
 
-        #Enable Smartconfig
-        set(ESP32_ENABLE_SMARTCONFIG "ON" CACHE INTERNAL "Enable support for Smartconfig")
-
-
     endif()
 
     # need to add include path to find our ffconfig.h and target_platform.h
