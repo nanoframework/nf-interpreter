@@ -459,16 +459,16 @@ struct CLR_RT_HeapBlock
                 R8 &operator+=(const R8 &num)
                 {
                     auto value = (double)*this; // uses conversion
-                    value += (double)num;         // uses conversion and then built-in type double
-                    *this = value;                // uses assignment operator (operator=)
+                    value += (double)num;       // uses conversion and then built-in type double
+                    *this = value;              // uses assignment operator (operator=)
                     return *this;
                 }
 
                 R8 &operator-=(const R8 &num)
                 {
                     auto value = (double)*this; // uses conversion
-                    value -= (double)num;         // uses conversion and then built-in type double
-                    *this = value;                // uses assignment operator (operator=)
+                    value -= (double)num;       // uses conversion and then built-in type double
+                    *this = value;              // uses assignment operator (operator=)
                     return *this;
                 }
 
