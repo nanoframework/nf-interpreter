@@ -1839,7 +1839,12 @@ struct CLR_RT_HeapBlock_Array : public CLR_RT_HeapBlock
         CLR_UINT32 length,
         const CLR_RT_ReflectionDef_Index &reflex);
     static HRESULT CreateInstance(CLR_RT_HeapBlock &reference, CLR_UINT32 length, const CLR_RT_TypeDef_Index &cls);
-    static HRESULT CreateInstance(CLR_RT_HeapBlock &reference, CLR_UINT32 length, CLR_RT_Assembly *assm, CLR_UINT32 tk);
+    static HRESULT CreateInstance(
+        CLR_RT_HeapBlock &reference,
+        CLR_UINT32 length,
+        CLR_RT_Assembly *assm,
+        CLR_UINT32 tk,
+        const CLR_RT_MethodDef_Instance *caller);
 
     CLR_UINT8 *GetFirstElement()
     {
