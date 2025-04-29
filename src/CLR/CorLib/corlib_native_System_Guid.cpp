@@ -24,12 +24,10 @@ HRESULT Library_corlib_native_System_Guid::GenerateNewGuid___STATIC__SZARRAY_U1(
     rand.NextBytes(buf, 16);
 
     // Set the version (version 4, bits 12-15 of time_hi_and_version)
-    // In a standard layout, the version nibble is in byte index 6 (0-based).
-    buf[6] = (buf[6] & 0x0F) | 0x40;
+    buf[7] = (buf[7] & 0x0F) | 0x40;
 
     // Set the variant (the two most significant bits of clock_seq_hi_and_reserved must be 10)
-    // In a standard layout, the variant byte is at index 8.
-    buf[8] = (buf[8] & 0x3F) | 0x80;
+    buf[9] = (buf[9] & 0x3F) | 0x80;
 
     NANOCLR_NOCLEANUP();
 }
