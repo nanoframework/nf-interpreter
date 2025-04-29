@@ -135,7 +135,10 @@ HRESULT Library_corlib_native_System_Reflection_MethodBase::Invoke___OBJECT__OBJ
     {
         if (mdR->retValDataType != DATATYPE_VOID)
         {
-            if (mdR->retValDataType < DATATYPE_I4)
+            // Types that need ChangeDataType: primitives and generic instances
+            bool needsTypeChange = (mdR->retValDataType < DATATYPE_I4 || mdR->retValDataType == DATATYPE_GENERICINST);
+
+            if (needsTypeChange)
             {
                 stack.TopValue().ChangeDataType(mdR->retValDataType);
             }
