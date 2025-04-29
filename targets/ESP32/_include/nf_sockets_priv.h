@@ -34,8 +34,8 @@
  * Author: Joel Cunningham <joel.cunningham@me.com>
  *
  */
-#ifndef LWIP_HDR_SOCKETS_PRIV_H
-#define LWIP_HDR_SOCKETS_PRIV_H
+#ifndef NF_LWIP_HDR_SOCKETS_PRIV_H
+#define NF_LWIP_HDR_SOCKETS_PRIV_H
 
 #include "lwip/opt.h"
 
@@ -179,4 +179,4 @@ struct lwip_select_cb {
 
 #endif /* LWIP_SOCKET */
 
-#endif /* LWIP_HDR_SOCKETS_PRIV_H */
+#endif /* NF_LWIP_HDR_SOCKETS_PRIV_H */

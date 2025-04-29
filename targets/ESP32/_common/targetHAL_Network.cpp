@@ -373,6 +373,15 @@ static void event_handler(void *arg, esp_event_base_t event_base, int32_t event_
 #ifdef PRINT_NET_EVENT
                 ets_printf("ETHERNET_EVENT_CONNECTED\n");
 #endif
+
+#if LWIP_IPV6
+                {
+                    // Create IPV6 link local address for ETH interface                
+                    struct netif *netif = esp_netif_get_handle_from_ifkey("ETH_DEF")->lwip_netif;
+                    netif_create_ip6_linklocal_address(netif, 1);
+                }
+#endif
+
                 PostAvailabilityOn(IDF_ETH_DEF);
                 break;
 
