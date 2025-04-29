@@ -1,4 +1,4 @@
-﻿//
+//
 // Copyright (c) .NET Foundation and Contributors
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
@@ -978,7 +978,8 @@ signed __int64 &Interop_Marshal_GetField_double(CLR_RT_HeapBlock *pThis, unsigne
 #endif
 UNSUPPORTED_TYPE &Interop_Marshal_GetField_UNSUPPORTED_TYPE(CLR_RT_HeapBlock *pThis, unsigned int fieldIndex)
 {
-    return (UNSUPPORTED_TYPE &)(*((UNSUPPORTED_TYPE *)nullptr));
+    static UNSUPPORTED_TYPE dummy;
+    return dummy;
 }
 #ifdef __GNUC__
 #pragma GCC diagnostic pop
