@@ -29,16 +29,6 @@ esp_eth_handle_t eth_handle = NULL;
 #define ETH_PHY_ADDR 0
 #endif
 
-#ifndef ETH_MDC_GPIO
-// GPIO number used by SMI MDC
-#define ETH_MDC_GPIO 23
-#endif
-
-#ifndef ETH_MDIO_GPIO
-// GPIO number used by SMI MDIO
-#define ETH_MDIO_GPIO 18
-#endif
-
 #if CONFIG_IDF_TARGET_ESP32
 #define NANO_ETH_ESP32_EMAC_DEFAULT_CONFIG()               \
     {                                                 \
@@ -156,18 +146,27 @@ esp_err_t NF_ESP32_InitialiseEthernet(uint8_t *pMacAdr)
     CPU_GPIO_ReservePin(esp32_emac_config.clock_config.rmii.clock_gpio, true); // REF_CLK IN
 #endif
 
+// If ETH_MDC_GPIO or ETH_MDIO_GPIO defined then use new values
+#ifdef ETH_MDC_GPIO
     esp32_emac_config.smi_gpio.mdc_num = ETH_MDC_GPIO;
+#endif
+
+#ifdef ETH_MDIO_GPIO
     esp32_emac_config.smi_gpio.mdio_num = ETH_MDIO_GPIO;
+#endif
+
+    ESP_LOGI(TAG, "Ethernet pins for MDC %d MDIO %d\n", esp32_emac_config.smi_gpio.mdc_num, esp32_emac_config.smi_gpio.mdio_num);
+
     esp_eth_mac_t *mac = esp_eth_mac_new_esp32(&esp32_emac_config, &mac_config);
 
     ESP_LOGI(TAG, "Ethernet mdio %d mdc %d\n", ETH_MDIO_GPIO, ETH_MDC_GPIO);
 
     // Reserve all pins used by ethernet interface
-    CPU_GPIO_ReservePin(ETH_MDIO_GPIO, true); // MDIO (18)
+    CPU_GPIO_ReservePin(esp32_emac_config.smi_gpio.mdio_num, true); // MDIO
     CPU_GPIO_ReservePin(19, true);            // TXD0
     CPU_GPIO_ReservePin(21, true);            // TX_EN
     CPU_GPIO_ReservePin(22, true);            // TXD1
-    CPU_GPIO_ReservePin(ETH_MDC_GPIO, true);  // MDC (23)
+    CPU_GPIO_ReservePin(esp32_emac_config.smi_gpio.mdc_num, true);  // MDC
     CPU_GPIO_ReservePin(25, true);            // RXD0
     CPU_GPIO_ReservePin(26, true);            // RXD1
     CPU_GPIO_ReservePin(27, true);            // CRS_DV
