@@ -595,6 +595,15 @@ jobs:
           PackageName: ESP_WROVER_KIT
           CMakePreset: ESP_WROVER_KIT
 
+        ESP32_P4_USB:
+          TargetBoard: ESP32_P4
+          TargetSeries: "esp32p4"
+          BuildOptions:
+          IDF_Target: esp32p4
+          TargetName: ESP32_P4_USB
+          PackageName: ESP32_P4_USB
+          CMakePreset: ESP32_P4_USB
+
     variables:
       DOTNET_NOLOGO: true
       # creates a counter and assigns it to the revision variable
