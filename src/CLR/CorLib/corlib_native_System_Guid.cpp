@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (c) .NET Foundation and Contributors
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
@@ -15,7 +15,7 @@ HRESULT Library_corlib_native_System_Guid::GenerateNewGuid___STATIC__SZARRAY_U1(
     CLR_RT_HeapBlock &top = stack.PushValueAndClear();
 
     // Create a array of 16 bytes on top of stack to return
-    NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance(top, 16, g_CLR_RT_WellKnownTypes.m_UInt8));
+    NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance(top, 16, g_CLR_RT_WellKnownTypes.UInt8));
     buf = top.DereferenceArray()->GetFirstElement();
 
     rand.Initialize();
