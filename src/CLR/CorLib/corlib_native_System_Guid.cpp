@@ -27,7 +27,7 @@ HRESULT Library_corlib_native_System_Guid::GenerateNewGuid___STATIC__SZARRAY_U1(
     buf[7] = (buf[7] & 0x0F) | 0x40;
 
     // Set the variant (the two most significant bits of clock_seq_hi_and_reserved must be 10)
-    buf[9] = (buf[9] & 0x3F) | 0x80;
+    buf[8] = (buf[8] & 0x3F) | 0x80;
 
     NANOCLR_NOCLEANUP();
 }
