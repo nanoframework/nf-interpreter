@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (c) .NET Foundation and Contributors
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
@@ -312,7 +312,7 @@ enum NanoCLRTable
     TBL_Signatures = 0x0000000E,
     TBL_ByteCode = 0x0000000F,
     TBL_ResourcesFiles = 0x00000010,
-    TBL_EndOfAssembly = 0x000000011,
+    TBL_EndOfAssembly = 0x00000011,
     TBL_Max = 0x00000012,
 };
 
