@@ -1700,4 +1700,6 @@ struct CLR_RECORD_RESOURCE
 #pragma pack(pop, __NANOCLR_TYPES_H__)
 #endif
 
+#pragma pack(pop)
+
 #endif // NANOCLR_TYPES_H
