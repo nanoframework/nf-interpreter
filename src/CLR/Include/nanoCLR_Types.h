@@ -1696,10 +1696,10 @@ struct CLR_RECORD_RESOURCE
     CLR_UINT32 offset;
 };
 
+#pragma pack(pop)
+
 #if defined(_MSC_VER)
 #pragma pack(pop, __NANOCLR_TYPES_H__)
 #endif
-
-#pragma pack(pop)
 
 #endif // NANOCLR_TYPES_H
