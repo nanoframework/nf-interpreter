@@ -2851,7 +2851,7 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
 
                     for (int pass = 0; pass < 2; pass++)
                     {
-                        hr = CLR_RT_HeapBlock_Array::CreateInstance(evalPos[0], size, assm, arg);
+                        hr = CLR_RT_HeapBlock_Array::CreateInstance(evalPos[0], size, assm, arg, &stack->m_call);
                         if (SUCCEEDED(hr))
                         {
                             break;

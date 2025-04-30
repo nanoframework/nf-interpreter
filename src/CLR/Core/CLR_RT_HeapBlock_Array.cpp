@@ -86,7 +86,8 @@ HRESULT CLR_RT_HeapBlock_Array::CreateInstance(
     CLR_RT_HeapBlock &reference,
     CLR_UINT32 length,
     CLR_RT_Assembly *assm,
-    CLR_UINT32 tk)
+    CLR_UINT32 tk,
+    const CLR_RT_MethodDef_Instance *caller)
 {
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
@@ -97,7 +98,7 @@ HRESULT CLR_RT_HeapBlock_Array::CreateInstance(
 
     memset(&ref, 0, sizeof(struct CLR_RT_HeapBlock));
 
-    if (cls.ResolveToken(tk, assm))
+    if (cls.ResolveToken(tk, assm, caller))
     {
         ref.SetReflection(cls);
     }
