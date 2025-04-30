@@ -91,7 +91,7 @@ HRESULT CLR_RT_ExecutionEngine::ExecutionEngine_Initialize()
                                                     // CLR_RT_Thread*                      m_cctorThread;
                                                     //
 #if !defined(NANOCLR_APPDOMAINS)
-    m_globalLock = nullptr;  // CLR_RT_HeapBlock*                  m_globalLock;
+    m_globalLock = nullptr;           // CLR_RT_HeapBlock*                  m_globalLock;
     m_outOfMemoryException = nullptr; // CLR_RT_HeapBlock*                   m_outOfMemoryException;
 #endif
 
@@ -2262,19 +2262,21 @@ HRESULT CLR_RT_ExecutionEngine::NewGenericInstanceObject(
     const CLR_RECORD_FIELDDEF *target = nullptr;
     CLR_RT_Assembly *assm = nullptr;
     CLR_RT_TypeDef_Instance instSub = instance;
+    CLR_RT_HeapBlock_GenericInstance *giHeader = nullptr;
+    CLR_RT_HeapBlock *fieldCursor = nullptr;
 
     reference.SetObjectReference(nullptr);
 
     int clsFields = instance.target->instanceFieldsCount;
     int totFields = instance.CrossReference().totalFields + CLR_RT_HeapBlock::HB_Object_Fields_Offset;
 
-    CLR_RT_HeapBlock_GenericInstance *genericInst;
+    giHeader = (CLR_RT_HeapBlock_GenericInstance *)ExtractHeapBlocksForGenericInstance(0, genericInstance, totFields);
+    CHECK_ALLOCATION(giHeader);
 
-    genericInst =
-        (CLR_RT_HeapBlock_GenericInstance *)ExtractHeapBlocksForGenericInstance(0, genericInstance, totFields);
-    CHECK_ALLOCATION(genericInst);
+    reference.SetObjectReference(giHeader);
 
-    reference.SetObjectReference(genericInst);
+    // Associate the instance with its declaring type for reflection & casting utilities.
+    giHeader->SetObjectCls(instance);
 
     //
     // Initialize field types, from last to first.
@@ -2282,7 +2284,9 @@ HRESULT CLR_RT_ExecutionEngine::NewGenericInstanceObject(
     // We do the decrement BEFORE the comparison because we want to stop short of the first field, the
     // object descriptor (already initialized).
     //
-    genericInst += totFields;
+
+    fieldCursor = reinterpret_cast<CLR_RT_HeapBlock *>(giHeader) + totFields;
+
     while (--totFields > 0)
     {
         while (clsFields == 0)
@@ -2302,11 +2306,11 @@ HRESULT CLR_RT_ExecutionEngine::NewGenericInstanceObject(
             target = assm->GetFieldDef(instSub.target->firstInstanceField + clsFields);
         }
 
-        genericInst--;
+        fieldCursor--;
         target--;
         clsFields--;
 
-        NANOCLR_CHECK_HRESULT(InitializeReference(*genericInst, target, assm));
+        NANOCLR_CHECK_HRESULT(InitializeReference(*fieldCursor, target, assm));
     }
 
     if (instance.HasFinalizer())

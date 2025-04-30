@@ -2548,6 +2548,7 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                     {
                         case DATATYPE_CLASS:
                         case DATATYPE_VALUETYPE:
+                        case DATATYPE_GENERICINST:
                             evalPos[0].Assign(obj[fieldInst.CrossReference().offset]);
                             goto Execute_LoadAndPromote;
                         case DATATYPE_DATETIME:
@@ -2600,13 +2601,17 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
 #if defined(NANOCLR_APPDOMAINS)
                     _ASSERTE(dt != DATATYPE_TRANSPARENT_PROXY);
 #endif
-                    if (dt == DATATYPE_CLASS || dt == DATATYPE_VALUETYPE)
+                    if (dt == DATATYPE_CLASS || dt == DATATYPE_VALUETYPE || dt == DATATYPE_GENERICINST)
                     {
+                        // This is a reference to the field.
+                        // We need to make sure that the object is not a transparent proxy.
                         evalPos[0].SetReference(obj[fieldInst.CrossReference().offset]);
                     }
-                    else if (dt == DATATYPE_DATETIME || dt == DATATYPE_TIMESPAN) // Special case.
+                    // Special case.
+                    else if (dt == DATATYPE_DATETIME || dt == DATATYPE_TIMESPAN)
                     {
-                        NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE); // NOT SUPPORTED.
+                        // NOT SUPPORTED.
+                        NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
                     }
                     else
                     {
@@ -3211,6 +3216,17 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                             evalPos[0].SetReflection(param);
                         }
                         break;
+
+                        case TBL_MethodSpec:
+                        {
+                            CLR_RT_MethodDef_Instance method{};
+                            if (!method.ResolveToken(arg, assm))
+                            {
+                                NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+                            }
+
+                            evalPos[0].SetReflection(method);
+                        }
 
                         default:
                             NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);

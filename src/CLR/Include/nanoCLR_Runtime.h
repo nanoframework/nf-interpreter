@@ -712,7 +712,7 @@ struct CLR_RT_MethodSpec_Index
 
     CLR_INDEX Method() const
     {
-        return (data & 0x7FFF);
+        return (CLR_INDEX)data;
     }
 };
 
