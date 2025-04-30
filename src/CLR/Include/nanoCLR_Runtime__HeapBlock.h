@@ -1187,6 +1187,7 @@ struct CLR_RT_HeapBlock
     {
         m_id.raw = CLR_RT_HEAPBLOCK_RAW_ID(DATATYPE_GENERICINST, 0, 1);
         m_data.genericInstance.genericType.data = genericType.data;
+        m_data.genericInstance.ptr = nullptr;
     }
 
     const CLR_RT_TypeSpec_Index &ObjectGenericType() const

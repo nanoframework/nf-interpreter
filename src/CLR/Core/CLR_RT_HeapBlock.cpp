@@ -351,6 +351,7 @@ HRESULT CLR_RT_HeapBlock::SetGenericInstanceObject(const CLR_RT_TypeSpec_Index &
 
     m_data.genericInstance.genericType = genericType;
     m_data.genericInstance.ptr = nullptr;
+    m_id.raw = CLR_RT_HEAPBLOCK_RAW_ID(DATATYPE_GENERICINST, 0, 1);
 
     NANOCLR_NOCLEANUP();
 }
