@@ -1,4 +1,4 @@
-﻿//
+//
 // Copyright (c) .NET Foundation and Contributors
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
@@ -1003,7 +1003,7 @@ bool CLR_DBG_Debugger::Monitor_WriteMemory(WP_Message *msg)
 
     g_CLR_DBG_Debugger->AccessMemory(cmd->address, cmd->length, cmd->data, AccessMemory_Write, &errorCode);
 
-    WP_ReplyToCommand(msg, errorCode == AccessMemoryErrorCode_NoError, false, &errorCode, sizeof(errorCode));
+    WP_ReplyToCommand(msg, true, false, &errorCode, sizeof(errorCode));
 
     return true;
 }
@@ -1030,9 +1030,9 @@ bool CLR_DBG_Debugger::Monitor_EraseMemory(WP_Message *msg)
     auto *cmd = (CLR_DBG_Commands_Monitor_EraseMemory *)msg->m_payload;
     CLR_DBG_Commands_Monitor_EraseMemory_Reply errorCode = AccessMemoryErrorCode_NoError;
 
-    g_CLR_DBG_Debugger->AccessMemory(cmd->address, cmd->length, nullptr, AccessMemory_Erase, &errorCode);
+    g_CLR_DBG_Debugger->AccessMemory(cmd->address, cmd->length, NULL, AccessMemory_Erase, &errorCode);
 
-    WP_ReplyToCommand(msg, errorCode == AccessMemoryErrorCode_NoError, false, &errorCode, sizeof(errorCode));
+    WP_ReplyToCommand(msg, true, false, &errorCode, sizeof(errorCode));
 
     return true;
 }
