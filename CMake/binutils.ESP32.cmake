@@ -634,16 +634,16 @@ macro(nf_add_idf_as_library)
     # Load any required Components from Component registry
     # Must be done before "tools/cmake/idf.cmake" 
     if(ESP32_USB_CDC)
-        nf_install_idf_component_from_registry(tinyusb 55142eec-a3a4-47a5-ad01-4ba3ef44444b) 
-        nf_install_idf_component_from_registry(esp_tinyusb 8115ffc9-366a-4340-94ab-e327aed20831) 
+        nf_install_idf_component_from_registry(tinyusb c384401d-144d-453d-a821-20f1ba0a7be1) 
+        nf_install_idf_component_from_registry(esp_tinyusb 47b2b1fc-fb7e-4acf-943b-a14125e0f1e7) 
     endif()
 
-    nf_install_idf_component_from_registry(littlefs 4831aa41-8b72-48ac-a534-910a985a5519) 
+    nf_install_idf_component_from_registry(littlefs 288ff2e7-dfd9-4833-9be5-6e9d37d29880) 
 
     if(${TARGET_SERIES_SHORT} STREQUAL "esp32p4")
-        nf_install_idf_component_from_registry(esp_wifi_remote af68cf54-0998-4681-b3b3-7776920067b5) 
-        nf_install_idf_component_from_registry(esp_hosted dd94b9d3-b756-41b1-be36-d3a4d0b0bde7) 
-    endif()
+       nf_install_idf_component_from_registry(esp_wifi_remote 754ca2ab-c4f5-4c81-834b-0aa460a84ae8) 
+       nf_install_idf_component_from_registry(esp_hosted b9a7198d-7257-4954-9380-5f9edb15028c) 
+       endif()
     
     include(${IDF_PATH_CMAKED}/tools/cmake/idf.cmake)
 
