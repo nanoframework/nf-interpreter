@@ -1186,6 +1186,18 @@
             "name": "ESP32_S2_UART",
             "displayName": "ESP32_S2_UART",
             "configurePreset": "ESP32_S2_UART"
+        },
+        {
+            "inherits": "base-user",
+            "name": "ESP32_P4_UART",
+            "displayName": "ESP32_P4_UART",
+            "configurePreset": "ESP32_P4_UART"
+        },
+        {
+            "inherits": "base-user",
+            "name": "ESP32_P4_USB",
+            "displayName": "ESP32_P4_USB",
+            "configurePreset": "ESP32_P4_USB"
         }
     ]
 }
