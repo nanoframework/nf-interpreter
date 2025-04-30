@@ -3227,6 +3227,7 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
 
                             evalPos[0].SetReflection(method);
                         }
+                        break;
 
                         default:
                             NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
