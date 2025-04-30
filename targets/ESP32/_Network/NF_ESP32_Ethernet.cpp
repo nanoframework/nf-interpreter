@@ -159,17 +159,28 @@ esp_err_t NF_ESP32_InitialiseEthernet(uint8_t *pMacAdr)
 
     esp_eth_mac_t *mac = esp_eth_mac_new_esp32(&esp32_emac_config, &mac_config);
 
-    ESP_LOGI(TAG, "Ethernet mdio %d mdc %d\n", ETH_MDIO_GPIO, ETH_MDC_GPIO);
-
     // Reserve all pins used by ethernet interface
     CPU_GPIO_ReservePin(esp32_emac_config.smi_gpio.mdio_num, true); // MDIO
+    CPU_GPIO_ReservePin(esp32_emac_config.smi_gpio.mdc_num, true);  // MDC
+
+#if SOC_EMAC_USE_MULTI_IO_MUX || SOC_EMAC_MII_USE_GPIO_MATRIX
+    // ESP32_P4 with Ethernet 
+    const eth_mac_rmii_gpio_config_t &rmii = esp32_emac_config.emac_dataif_gpio.rmii;
+    CPU_GPIO_ReservePin(rmii.txd0_num,  true);
+    CPU_GPIO_ReservePin(rmii.tx_en_num, true);
+    CPU_GPIO_ReservePin(rmii.txd1_num,  true);
+    CPU_GPIO_ReservePin(rmii.rxd0_num,  true);
+    CPU_GPIO_ReservePin(rmii.rxd1_num,  true);
+    CPU_GPIO_ReservePin(rmii.crs_dv_num,true);
+#else
+    // ESP32 with Ethernet 
     CPU_GPIO_ReservePin(19, true);            // TXD0
     CPU_GPIO_ReservePin(21, true);            // TX_EN
     CPU_GPIO_ReservePin(22, true);            // TXD1
-    CPU_GPIO_ReservePin(esp32_emac_config.smi_gpio.mdc_num, true);  // MDC
     CPU_GPIO_ReservePin(25, true);            // RXD0
     CPU_GPIO_ReservePin(26, true);            // RXD1
     CPU_GPIO_ReservePin(27, true);            // CRS_DV
+#endif
 
     // Define PHY to use with internal Ethernet
 #if defined(ESP32_ETHERNET_PHY_IP101)
