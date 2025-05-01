@@ -6,7 +6,7 @@
 #ifndef TARGETPAL_BLOCKSTORAGE_H
 #define TARGETPAL_BLOCKSTORAGE_H
 
-// this device has 1 block storage devices
+// this device has 1 block storage device
 #define TARGET_BLOCKSTORAGE_COUNT 1
 
 #endif // TARGETPAL_BLOCKSTORAGE_H
