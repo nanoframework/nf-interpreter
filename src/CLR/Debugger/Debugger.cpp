@@ -1,4 +1,4 @@
-﻿//
+//
 // Copyright (c) .NET Foundation and Contributors
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
@@ -998,12 +998,12 @@ bool CLR_DBG_Debugger::Monitor_WriteMemory(WP_Message *msg)
 {
     NATIVE_PROFILE_CLR_DEBUGGER();
 
-    CLR_DBG_Commands_Monitor_WriteMemory *cmd = (CLR_DBG_Commands_Monitor_WriteMemory *)msg->m_payload;
-    CLR_DBG_Commands_Monitor_WriteMemory_Reply cmdReply;
+    auto *cmd = (CLR_DBG_Commands_Monitor_WriteMemory *)msg->m_payload;
+    CLR_DBG_Commands_Monitor_WriteMemory_Reply errorCode = AccessMemoryErrorCode_NoError;
 
-    g_CLR_DBG_Debugger->AccessMemory(cmd->address, cmd->length, cmd->data, AccessMemory_Write, &cmdReply);
+    g_CLR_DBG_Debugger->AccessMemory(cmd->address, cmd->length, cmd->data, AccessMemory_Write, &errorCode);
 
-    WP_ReplyToCommand(msg, true, false, &cmdReply, sizeof(cmdReply));
+    WP_ReplyToCommand(msg, true, false, &errorCode, sizeof(errorCode));
 
     return true;
 }
@@ -1012,14 +1012,13 @@ bool CLR_DBG_Debugger::Monitor_CheckMemory(WP_Message *msg)
 {
     NATIVE_PROFILE_CLR_DEBUGGER();
 
-    CLR_DBG_Commands_Monitor_CheckMemory *cmd = (CLR_DBG_Commands_Monitor_CheckMemory *)msg->m_payload;
-    CLR_DBG_Commands_Monitor_CheckMemory_Reply cmdReply;
-    uint32_t errorCode;
+    auto *cmd = (CLR_DBG_Commands_Monitor_CheckMemory *)msg->m_payload;
+    CLR_DBG_Commands_Monitor_CheckMemory_Reply errorCode = AccessMemoryErrorCode_NoError;
 
     g_CLR_DBG_Debugger
-        ->AccessMemory(cmd->address, cmd->length, (unsigned char *)&cmdReply, AccessMemory_Check, &errorCode);
+        ->AccessMemory(cmd->address, cmd->length, (unsigned char *)&errorCode, AccessMemory_Check, &errorCode);
 
-    WP_ReplyToCommand(msg, errorCode == AccessMemoryErrorCode_NoError, false, &cmdReply, sizeof(cmdReply));
+    WP_ReplyToCommand(msg, errorCode == AccessMemoryErrorCode_NoError, false, &errorCode, sizeof(errorCode));
 
     return true;
 }
@@ -1028,12 +1027,12 @@ bool CLR_DBG_Debugger::Monitor_EraseMemory(WP_Message *msg)
 {
     NATIVE_PROFILE_CLR_DEBUGGER();
 
-    CLR_DBG_Commands_Monitor_EraseMemory *cmd = (CLR_DBG_Commands_Monitor_EraseMemory *)msg->m_payload;
-    CLR_DBG_Commands_Monitor_EraseMemory_Reply cmdReply;
+    auto *cmd = (CLR_DBG_Commands_Monitor_EraseMemory *)msg->m_payload;
+    CLR_DBG_Commands_Monitor_EraseMemory_Reply errorCode = AccessMemoryErrorCode_NoError;
 
-    g_CLR_DBG_Debugger->AccessMemory(cmd->address, cmd->length, NULL, AccessMemory_Erase, &cmdReply);
+    g_CLR_DBG_Debugger->AccessMemory(cmd->address, cmd->length, NULL, AccessMemory_Erase, &errorCode);
 
-    WP_ReplyToCommand(msg, true, false, &cmdReply, sizeof(cmdReply));
+    WP_ReplyToCommand(msg, true, false, &errorCode, sizeof(errorCode));
 
     return true;
 }

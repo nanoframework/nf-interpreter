@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -16,6 +16,9 @@ namespace nanoFramework.nanoCLR.CLI
     public static class ClrInstanceOperationsProcessor
     {
         private const string _cloudSmithApiUrl = "https://api.cloudsmith.io/v1/packages/net-nanoframework/";
+        private const string _refTargetsDevRepo = "nanoframework-images-dev";
+        private const string _refTargetsStableRepo = "nanoframework-images";
+
         private static HttpClient _httpClient = new HttpClient();
 
         public static int ProcessVerb(ClrInstanceOperationsOptions options)
@@ -52,6 +55,7 @@ namespace nanoFramework.nanoCLR.CLI
                 return (int)UpdateNanoCLRAsync(
                     options.TargetVersion,
                     hostBuilder.GetCLRVersion(),
+                    options.CheckPreviewVersions,
                     hostBuilder).Result;
             }
             else if (options.GetCLRVersion || options.GetNativeAssemblies)
@@ -110,12 +114,13 @@ namespace nanoFramework.nanoCLR.CLI
         private static async Task<ExitCode> UpdateNanoCLRAsync(
             string targetVersion,
             string currentVersion,
+            bool usePreview,
             nanoCLRHostBuilder hostBuilder)
         {
             try
             {
                 // compose current version
-                // need to get rid of git hub has, in case it has one
+                // need to get rid of GitHub hash, in case it has one
                 if (string.IsNullOrEmpty(currentVersion))
                 {
                     currentVersion = "0.0.0.0";
@@ -127,7 +132,7 @@ namespace nanoFramework.nanoCLR.CLI
                         currentVersion.IndexOf("+") < 0 ? currentVersion.Length : currentVersion.IndexOf("+"));
                 }
 
-                Version version = Version.Parse(currentVersion);
+                Version installedVersion = Version.Parse(currentVersion);
 
                 string nanoClrDllLocation = Path.Combine(
                     Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location),
@@ -137,13 +142,15 @@ namespace nanoFramework.nanoCLR.CLI
                 _httpClient.BaseAddress = new Uri(_cloudSmithApiUrl);
                 _httpClient.DefaultRequestHeaders.Add("Accept", "*/*");
 
+                string repoName = usePreview ? _refTargetsDevRepo : _refTargetsStableRepo;
+
                 // get latest version available for download
-                HttpResponseMessage response = await _httpClient.GetAsync($"nanoframework-images/?query=name:^WIN_DLL_nanoCLR version:^latest$");
+                HttpResponseMessage response = await _httpClient.GetAsync($"{repoName}/?query=name:^WIN_DLL_nanoCLR version:^latest$");
                 string responseBody = await response.Content.ReadAsStringAsync();
 
                 if (responseBody == "[]")
                 {
-                    Console.WriteLine($"Error getting latest nanoCLR version.");
+                    Console.WriteLine($"Error getting latest available nanoCLR package.");
                     return ExitCode.E9005;
                 }
 
@@ -151,18 +158,21 @@ namespace nanoFramework.nanoCLR.CLI
 
                 if (packageInfo.Count != 1)
                 {
-                    Console.WriteLine($"Error parsing latest nanoCLR version.");
+                    Console.WriteLine($"Error parsing nanoCLR version from package details.");
                     return ExitCode.E9005;
                 }
                 else
                 {
-                    Version latestFwVersion = Version.Parse(packageInfo[0].Version);
+                    Version availableFwVersion = Version.Parse(packageInfo[0].Version);
 
-                    if (latestFwVersion < version)
+                    // only perform version check if preview wasn't requested
+                    if (!usePreview && (availableFwVersion < installedVersion))
                     {
-                        Console.WriteLine($"Current version {version} lower than available version {packageInfo[0].Version}");
+                        Console.WriteLine($"Current version {installedVersion} higher than available version {packageInfo[0].Version}");
                     }
-                    else if (latestFwVersion > version
+
+                    if (usePreview
+                            || (availableFwVersion > installedVersion)
                             || (!string.IsNullOrEmpty(targetVersion)
                             && (Version.Parse(targetVersion) > Version.Parse(currentVersion))))
                     {
@@ -172,8 +182,8 @@ namespace nanoFramework.nanoCLR.CLI
                         // need to unload the DLL before updating it
                         hostBuilder.UnloadNanoClrDll();
 
-                        await using var ms = await response.Content.ReadAsStreamAsync();
-                        await using var fs = File.OpenWrite(nanoClrDllLocation);
+                        await using Stream ms = await response.Content.ReadAsStreamAsync();
+                        await using FileStream fs = File.OpenWrite(nanoClrDllLocation);
 
                         ms.Seek(0, SeekOrigin.Begin);
                         await ms.CopyToAsync(fs);
