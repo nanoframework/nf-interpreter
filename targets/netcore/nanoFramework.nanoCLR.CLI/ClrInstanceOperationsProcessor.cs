@@ -1,4 +1,4 @@
-// Licensed to the .NET Foundation under one or more agreements.
+﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -188,7 +188,7 @@ namespace nanoFramework.nanoCLR.CLI
                     // update if the version is different from the installed one (either the requested target version or the latest available in the repo)
                     if ((!string.IsNullOrEmpty(targetVersion)
                          && (Version.Parse(targetVersion) != installedVersion))
-                        || (availableFwVersion > installedVersion))
+                        || (availableFwVersion != installedVersion))
                     {
                         HttpResponseMessage response = await _httpClient.GetAsync(packageInfo[0].DownloadUrl);
                         response.EnsureSuccessStatusCode();
