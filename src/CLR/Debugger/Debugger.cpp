@@ -998,12 +998,18 @@ bool CLR_DBG_Debugger::Monitor_WriteMemory(WP_Message *msg)
 {
     NATIVE_PROFILE_CLR_DEBUGGER();
 
-    auto *cmd = (CLR_DBG_Commands_Monitor_WriteMemory *)msg->m_payload;
-    CLR_DBG_Commands_Monitor_WriteMemory_Reply errorCode = AccessMemoryErrorCode_NoError;
+    CLR_DBG_Commands_Monitor_WriteMemory *cmd = (CLR_DBG_Commands_Monitor_WriteMemory *)msg->m_payload;
+    CLR_DBG_Commands_Monitor_WriteMemory_Reply cmdReply;
+    uint32_t errorCode;
 
+    // command reply is to be loaded with the error code and sent back to the caller
     g_CLR_DBG_Debugger->AccessMemory(cmd->address, cmd->length, cmd->data, AccessMemory_Write, &errorCode);
 
-    WP_ReplyToCommand(msg, true, false, &errorCode, sizeof(errorCode));
+    // copy over the error code to the command reply
+    cmdReply = errorCode;
+
+    // the execution of this command is always successful, and the reply carries the error code
+    WP_ReplyToCommand(msg, true, false, &cmdReply, sizeof(cmdReply));
 
     return true;
 }
@@ -1012,13 +1018,17 @@ bool CLR_DBG_Debugger::Monitor_CheckMemory(WP_Message *msg)
 {
     NATIVE_PROFILE_CLR_DEBUGGER();
 
-    auto *cmd = (CLR_DBG_Commands_Monitor_CheckMemory *)msg->m_payload;
-    CLR_DBG_Commands_Monitor_CheckMemory_Reply errorCode = AccessMemoryErrorCode_NoError;
+    CLR_DBG_Commands_Monitor_CheckMemory *cmd = (CLR_DBG_Commands_Monitor_CheckMemory *)msg->m_payload;
+    CLR_DBG_Commands_Monitor_CheckMemory_Reply cmdReply;
+    uint32_t errorCode;
 
+    // access memory execution will load the command reply with the error code
     g_CLR_DBG_Debugger
-        ->AccessMemory(cmd->address, cmd->length, (unsigned char *)&errorCode, AccessMemory_Check, &errorCode);
+        ->AccessMemory(cmd->address, cmd->length, (unsigned char *)&cmdReply, AccessMemory_Check, &errorCode);
 
-    WP_ReplyToCommand(msg, errorCode == AccessMemoryErrorCode_NoError, false, &errorCode, sizeof(errorCode));
+    // the execution of this command will fail if there is an error code, never the less, the error code is returned to
+    // the caller
+    WP_ReplyToCommand(msg, errorCode == AccessMemoryErrorCode_NoError, false, &cmdReply, sizeof(cmdReply));
 
     return true;
 }
@@ -1027,12 +1037,18 @@ bool CLR_DBG_Debugger::Monitor_EraseMemory(WP_Message *msg)
 {
     NATIVE_PROFILE_CLR_DEBUGGER();
 
-    auto *cmd = (CLR_DBG_Commands_Monitor_EraseMemory *)msg->m_payload;
-    CLR_DBG_Commands_Monitor_EraseMemory_Reply errorCode = AccessMemoryErrorCode_NoError;
+    CLR_DBG_Commands_Monitor_EraseMemory *cmd = (CLR_DBG_Commands_Monitor_EraseMemory *)msg->m_payload;
+    CLR_DBG_Commands_Monitor_EraseMemory_Reply cmdReply;
+    uint32_t errorCode;
 
+    // command reply is to be loaded with the error code and sent back to the caller
     g_CLR_DBG_Debugger->AccessMemory(cmd->address, cmd->length, NULL, AccessMemory_Erase, &errorCode);
 
-    WP_ReplyToCommand(msg, true, false, &errorCode, sizeof(errorCode));
+    // copy over the error code to the command reply
+    cmdReply = errorCode;
+
+    // the execution of this command is always successful, and the reply carries the error code
+    WP_ReplyToCommand(msg, true, false, &cmdReply, sizeof(cmdReply));
 
     return true;
 }
