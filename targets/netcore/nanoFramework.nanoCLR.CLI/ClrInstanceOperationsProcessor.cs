@@ -143,18 +143,38 @@ namespace nanoFramework.nanoCLR.CLI
                 _httpClient.DefaultRequestHeaders.Add("Accept", "*/*");
 
                 string repoName = usePreview ? _refTargetsDevRepo : _refTargetsStableRepo;
+                List<CloudsmithPackageInfo> packageInfo;
+                string responseBody;
 
-                // get latest version available for download
-                HttpResponseMessage response = await _httpClient.GetAsync($"{repoName}/?query=name:^WIN_DLL_nanoCLR version:^latest$");
-                string responseBody = await response.Content.ReadAsStringAsync();
-
-                if (responseBody == "[]")
+                if (string.IsNullOrEmpty(targetVersion))
                 {
-                    Console.WriteLine($"Error getting latest available nanoCLR package.");
-                    return ExitCode.E9005;
+                    // no specific version requested, get latest version available for download
+                    HttpResponseMessage response = await _httpClient.GetAsync($"{repoName}/?query=name:^WIN_DLL_nanoCLR version:^latest$");
+
+                    responseBody = await response.Content.ReadAsStringAsync();
+
+                    if (responseBody == "[]")
+                    {
+                        Console.WriteLine($"Error getting latest available nanoCLR package.");
+                        return ExitCode.E9005;
+                    }
+                }
+                else
+                {
+                    // specific version requested, get details for that version
+                    HttpResponseMessage response = await _httpClient.GetAsync($"{repoName}/?query=name:^WIN_DLL_nanoCLR version:{targetVersion}");
+
+                    responseBody = await response.Content.ReadAsStringAsync();
+
+                    if (responseBody == "[]")
+                    {
+                        Console.WriteLine($"Error getting package details for v{targetVersion}.");
+                        return ExitCode.E9005;
+                    }
                 }
 
-                var packageInfo = JsonSerializer.Deserialize<List<CloudsmithPackageInfo>>(responseBody);
+                // parse the response
+                packageInfo = JsonSerializer.Deserialize<List<CloudsmithPackageInfo>>(responseBody);
 
                 if (packageInfo.Count != 1)
                 {
@@ -165,18 +185,12 @@ namespace nanoFramework.nanoCLR.CLI
                 {
                     Version availableFwVersion = Version.Parse(packageInfo[0].Version);
 
-                    // only perform version check if preview wasn't requested
-                    if (!usePreview && (availableFwVersion < installedVersion))
+                    // update if the version is different from the installed one (either the requested target version or the latest available in the repo)
+                    if ((!string.IsNullOrEmpty(targetVersion)
+                         && (Version.Parse(targetVersion) != installedVersion))
+                        || (availableFwVersion > installedVersion))
                     {
-                        Console.WriteLine($"Current version {installedVersion} higher than available version {packageInfo[0].Version}");
-                    }
-
-                    if (usePreview
-                            || (availableFwVersion > installedVersion)
-                            || (!string.IsNullOrEmpty(targetVersion)
-                            && (Version.Parse(targetVersion) > Version.Parse(currentVersion))))
-                    {
-                        response = await _httpClient.GetAsync(packageInfo[0].DownloadUrl);
+                        HttpResponseMessage response = await _httpClient.GetAsync(packageInfo[0].DownloadUrl);
                         response.EnsureSuccessStatusCode();
 
                         // need to unload the DLL before updating it
@@ -194,7 +208,7 @@ namespace nanoFramework.nanoCLR.CLI
                     }
                     else
                     {
-                        Console.WriteLine($"Already at v{packageInfo[0].Version}");
+                        Console.WriteLine($"At v{packageInfo[0].Version}, skipping update");
                     }
 
                     return ExitCode.OK;
