@@ -182,7 +182,7 @@ const char *nanoCLR_GetVersion()
 
         const std::string_view str{buffer, result.out};
 
-        std::memcpy(pszVersion, buffer, result.size);
+        std::memcpy(pszVersion, buffer, result.size + 1);
     }
 
     return pszVersion;
