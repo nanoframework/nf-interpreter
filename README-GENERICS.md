@@ -68,7 +68,7 @@ Developing with the generics preview requires a **preview version of the .NET na
 
 These links provide the `.vsix` installer for the extension. (You can also set up the VSIX gallery feed in Visual Studio to get preview updates (instructions on [this](https://nanoframework.net/setup-visual-studio-to-access-preview-versions-feed/#:~:text=3,along%20with%20the%20following%20URL) blog post, but direct download is simplest.)
 
-**2. Install the VSIX in Visual Studio:** After downloading the file, open Visual Studio and navigate to **Extensions > Manage Extensions**. In the Manage Extensions dialog, click the **⚙️** icon (Settings) and choose **“Install from VSIX…”**. Select the downloaded `.vsix` file and follow the prompts to install. You may need to restart Visual Studio after installation.
+**2. Install the VSIX in Visual Studio:** After downloading the file, double click on it and the extension installer will open. Just follow the workflow and confirm the options. Note that all Visual Studio instances have to be closed.
 
 Once the preview extension is installed, Visual Studio will be aware of generics support for .NET nanoFramework projects. This extension update is necessary – older versions of the extension (from the official VS Marketplace) do not understand generics and would flag errors or fail to deploy projects using generics.
 
