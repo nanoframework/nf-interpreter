@@ -4787,7 +4787,20 @@ bool CLR_RT_Assembly::FindNextStaticConstructor(CLR_RT_MethodDef_Index &index)
 
         index.Set(assemblyIndex, i);
 
-        if (md->flags & CLR_RECORD_METHODDEF::MD_StaticConstructor)
+        // turn the index into a MethodDef_Instance
+        CLR_RT_MethodDef_Instance methodDefInst;
+        methodDefInst.InitializeFromIndex(index);
+
+        CLR_RT_TypeDef_Instance typeDefInst;
+        typeDefInst.InitializeFromMethod(methodDefInst);
+
+        // check if this is a static constructor
+        // but skip it if:
+        // - references generic parameters
+        // - it lives on a generic type definition
+        if ((md->flags & CLR_RECORD_METHODDEF::MD_StaticConstructor) &&
+            ((md->flags & CLR_RECORD_METHODDEF::MD_ContainsGenericParameter) == 0) &&
+            typeDefInst.target->genericParamCount == 0)
         {
             return true;
         }
