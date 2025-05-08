@@ -1,4 +1,12 @@
-# Public Preview for CLR with support for generics
+# Generics Public Preview for .NET nanoFramework CLR
+
+## Table of Contents
+
+- [Generics in C# (Overview)](#generics-in-c-overview)
+- [Using Preview Firmware with Generics Support](#using-preview-firmware-with-generics-support)
+- [Installing the Preview Visual Studio Extension](#installing-the-preview-visual-studio-extension)
+- [Updating Project NuGet Packages to 2.0+ Preview](#updating-project-nuget-packages-to-20-preview)
+- [Feedback and Known Issues](#feedback-and-known-issues)
 
 ## Generics in C# (Overview)
 
@@ -24,7 +32,7 @@ int biggerInt = Max(10, 42);         // works with int
 string laterString = Max("apple", "zebra"); // works with string
 ```
 
-**Example – Generic Class:** You can also define generic classes. For instance, a minimal generic stack class could be defined as: 
+**Example – Generic Class:** You can also define generic classes. For instance, a minimal generic stack class could be defined as:
 
 ```csharp
 public class Stack<T>
@@ -39,7 +47,7 @@ public class Stack<T>
 
 This `Stack<T>` can be used as `Stack<int>` for an integer stack or `Stack<string>` for a string stack, etc., each providing compile-time type enforcement.
 
-*Generics have been a fundamental feature in desktop .NET for years. However, due to the constraints of embedded devices, previous versions of **.NET nanoFramework** did **not support generics**. With this preview, nanoFramework is introducing support for generics, closing the gap with standard C# capabilities.* Developers can now write more flexible and reusable code on microcontrollers, similarly to how they would on the full .NET runtime. Keep in mind that this is an initial **preview** – while most generic scenarios are expected to work, there may be limitations or bugs as this feature is brand new to constrained devices.
+*Generics have been a fundamental feature in desktop .NET for years. However, due to the constraints of embedded devices, previous versions of **.NET nanoFramework** did **not support generics**. With this preview, nanoFramework is introducing support for generics, closing the gap with standard C# capabilities.* Developers can now write more flexible and reusable code on microcontrollers, just as they would on the full .NET runtime. Keep in mind that this is an initial **preview** – while most generic scenarios are expected to work, there may be limitations or bugs as this feature is brand new to constrained devices.
 
 ## Using Preview Firmware with Generics Support
 
@@ -68,15 +76,15 @@ Developing with the generics preview requires a **preview version of the .NET na
 
 These links provide the `.vsix` installer for the extension. (You can also set up the VSIX gallery feed in Visual Studio to get preview updates (instructions on [this](https://nanoframework.net/setup-visual-studio-to-access-preview-versions-feed/#:~:text=3,along%20with%20the%20following%20URL) blog post, but direct download is simplest.)
 
-**2. Install the VSIX in Visual Studio:** After downloading the file, double click on it and the extension installer will open. Just follow the workflow and confirm the options. Note that all Visual Studio instances have to be closed.
+**2. Install the VSIX in Visual Studio:** After downloading the file, double-click on it and the extension installer will open. Just follow the workflow and confirm the options. Note that all Visual Studio instances have to be closed.
 
 Once the preview extension is installed, Visual Studio will be aware of generics support for .NET nanoFramework projects. This extension update is necessary – older versions of the extension (from the official VS Marketplace) do not understand generics and would flag errors or fail to deploy projects using generics.
 
-> **Warning:** Despite we've tried to make that possible using preview features in VS extension, it's not possible to support pre and post generics projects with the same extension. Therefore, you have to install the preview version for generics support or a stable one to work with the current stable versions. It is not an option to install pre and post generics extensions in VS2019 and VS2022, for example as both use the same msbuild components for the project system and builds.
+> **Warning:** Despite our efforts to make this possible using the VS extension preview, it’s not possible to support pre- and post-generics projects with the same extension. Therefore, you have to install the preview version for generics support or a stable one to work with the current stable versions. It is not an option to install pre- and post-generics extensions in VS2019 and VS2022, for example, as both use the same msbuild components for the project system and builds.
 
 ## Updating Project NuGet Packages to 2.0+ Preview
 
-In addition to firmware and the VS extension, your project’s NuGet packages (nanoFramework class libraries) must be updated to **preview versions (2.0.x or higher)** that include generics support. Core libraries are being been revved to **2.0.0-preview** (or later) for this feature. These preview NuGets are distributed through the public NuGet.org feed.
+In addition to firmware and the VS extension, your project’s NuGet packages (nanoFramework class libraries) must be updated to **preview versions (2.0.x or higher)** that include generics support. Core libraries have been revved to **2.0.0-preview** (or later) for this feature. These preview NuGets are distributed through the public NuGet.org feed.
 
 **Update NuGet Packages:** In your nanoFramework project, open **Manage NuGet Packages** and enable "Include prerelease" (if applicable) to see the preview versions. Update all relevant **.NET nanoFramework** packages (such as **nanoFramework.CoreLibrary**, **System.*** assemblies, etc.) to the latest 2.x preview versions available from NuGet feed. The **CoreLibrary** (mscorlib) is especially important to update, as generics support starts there.
 
