@@ -2468,7 +2468,7 @@ HRESULT CLR_RT_Assembly::CreateInstance(const CLR_RECORD_ASSEMBLY *header, CLR_R
             }
 #endif
             CLR_Debug::Printf("\r\n\r\n");
-            
+
             CLR_Debug::Printf(
                 "   AssemblyRef     = %6d bytes (%5d elements)\r\n",
                 offsets.assemblyRef,
@@ -3843,8 +3843,7 @@ HRESULT CLR_RT_AppDomain::GetAssemblies(CLR_RT_HeapBlock &ref)
 
         if (pass == 0)
         {
-            NANOCLR_CHECK_HRESULT(
-                CLR_RT_HeapBlock_Array::CreateInstance(ref, count, g_CLR_RT_WellKnownTypes.Assembly));
+            NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance(ref, count, g_CLR_RT_WellKnownTypes.Assembly));
 
             pArray = (CLR_RT_HeapBlock *)ref.DereferenceArray()->GetFirstElement();
         }
@@ -4787,7 +4786,20 @@ bool CLR_RT_Assembly::FindNextStaticConstructor(CLR_RT_MethodDef_Index &index)
 
         index.Set(assemblyIndex, i);
 
-        if (md->flags & CLR_RECORD_METHODDEF::MD_StaticConstructor)
+        // turn the index into a MethodDef_Instance
+        CLR_RT_MethodDef_Instance methodDefInst;
+        methodDefInst.InitializeFromIndex(index);
+
+        CLR_RT_TypeDef_Instance typeDefInst;
+        typeDefInst.InitializeFromMethod(methodDefInst);
+
+        // check if this is a static constructor
+        // but skip it if:
+        // - references generic parameters
+        // - it lives on a generic type definition
+        if ((md->flags & CLR_RECORD_METHODDEF::MD_StaticConstructor) &&
+            ((md->flags & CLR_RECORD_METHODDEF::MD_ContainsGenericParameter) == 0) &&
+            typeDefInst.target->genericParamCount == 0)
         {
             return true;
         }
