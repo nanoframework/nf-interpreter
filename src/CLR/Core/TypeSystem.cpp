@@ -2468,7 +2468,7 @@ HRESULT CLR_RT_Assembly::CreateInstance(const CLR_RECORD_ASSEMBLY *header, CLR_R
             }
 #endif
             CLR_Debug::Printf("\r\n\r\n");
-            
+
             CLR_Debug::Printf(
                 "   AssemblyRef     = %6d bytes (%5d elements)\r\n",
                 offsets.assemblyRef,
@@ -3843,8 +3843,7 @@ HRESULT CLR_RT_AppDomain::GetAssemblies(CLR_RT_HeapBlock &ref)
 
         if (pass == 0)
         {
-            NANOCLR_CHECK_HRESULT(
-                CLR_RT_HeapBlock_Array::CreateInstance(ref, count, g_CLR_RT_WellKnownTypes.Assembly));
+            NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance(ref, count, g_CLR_RT_WellKnownTypes.Assembly));
 
             pArray = (CLR_RT_HeapBlock *)ref.DereferenceArray()->GetFirstElement();
         }
