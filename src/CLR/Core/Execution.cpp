@@ -1971,10 +1971,26 @@ HRESULT CLR_RT_ExecutionEngine::InitializeLocals(
 
                 case DATATYPE_VAR:
                 {
+                    // type-level generic parameter in a locals signature (e.g. 'T' inside a generic type)
                     CLR_INT8 genericParamPosition = *sig++;
 
-                    methodDefInstance.assembly
-                        ->FindGenericParamAtTypeSpec(methodDefInstance, genericParamPosition, cls, dt);
+                    // parse the locals-signature to extract that T
+                    CLR_RT_SignatureParser parser;
+                    parser.Initialize_MethodLocals(assembly, methodDef);
+                    CLR_RT_SignatureParser::Element element;
+
+                    // advance into the VAR entry
+                    parser.Advance(element);
+
+                    // walk forward to the Nth generic-parameter
+                    for (int i = 0; i < genericParamPosition; i++)
+                    {
+                        parser.Advance(element);
+                    }
+
+                    // element.Class and element.DataType represent the T
+                    cls = element.Class;
+                    dt = element.DataType;
 
                     goto done;
                 }
