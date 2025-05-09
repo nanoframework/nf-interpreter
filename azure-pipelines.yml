@@ -866,6 +866,13 @@ jobs:
 
       - template: azure-pipelines-templates/install-nuget.yml@templates
 
+      - task: Cache@2
+        displayName: Cache NuGet packages
+        continueOnError: true
+        inputs:
+          key: 'nuget | **/targets/netcore/nanoFramework.nanoCLR.Host/packages.lock.json | **/targets/netcore/nanoFramework.nanoCLR.CLI/packages.lock.json'
+          path: $(UserProfile)/.nuget/packages
+
       - task: DotNetCoreCLI@2
         displayName: Restore NuGet packages
         inputs:
@@ -1069,6 +1076,13 @@ jobs:
 
       - template: azure-pipelines-templates/install-nuget.yml@templates
 
+      - task: Cache@2
+        displayName: Cache NuGet packages
+        continueOnError: true
+        inputs:
+          key: 'nuget | **/targets/netcore/nanoFramework.nanoCLR.Host/packages.lock.json | **/targets/netcore/nanoFramework.nanoCLR.CLI/packages.lock.json'
+          path: $(UserProfile)/.nuget/packages
+  
       - task: DotNetCoreCLI@2
         displayName: Restore NuGet packages
         inputs:
