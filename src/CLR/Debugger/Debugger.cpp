@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (c) .NET Foundation and Contributors
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
@@ -2821,10 +2821,51 @@ bool CLR_DBG_Debugger::Debugging_Value_GetStack(WP_Message *msg)
             // handle generic parameters
             if (res.DataType == DATATYPE_VAR)
             {
-                // Generic parameter in a generic TypeDef
-                md.assembly->FindGenericParamAtTypeSpec(md, res.GenericParamPosition, targetClass, targetDataType);
+                // type‐level generic parameter in a generic TypeDef: re‐parse the signature
+                CLR_RT_SignatureParser typeParser;
 
-                // isGenericInstance = true;
+                // for arguments, initialize over the method signature and skip the return slot
+                if (cmd->m_kind == CLR_DBG_Commands::Debugging_Value_GetStack::c_Argument)
+                {
+                    typeParser.Initialize_MethodSignature(&md);
+
+                    // skip the return value entry
+                    iElement++;
+
+                    // if there's an implicit 'this', adjust index
+                    if (typeParser.Flags & PIMAGE_CEE_CS_CALLCONV_HASTHIS)
+                    {
+                        if (iElement == 0)
+                        {
+                            // requested the 'this' argument – invalid for a primitive
+                            return false;
+                        }
+                        iElement--;
+                    }
+                }
+                else
+                {
+                    // for locals or eval‐stack, initialize over the locals signature
+                    typeParser.Initialize_MethodLocals(md.assembly, md.target);
+                }
+
+                // advance to the requested argument/local
+                CLR_RT_SignatureParser::Element elem;
+                do
+                {
+                    typeParser.Advance(elem);
+                } while (iElement-- > 0);
+
+                // now we've landed on a DATATYPE_VAR; walk to the Nth generic‐type parameter
+                typeParser.Advance(elem);
+                for (int i = 0; i < res.GenericParamPosition; i++)
+                {
+                    parser.Advance(elem);
+                }
+
+                // this element.Class is the TypeDef_Index for 'T'
+                targetClass = elem.Class;
+                targetDataType = elem.DataType;
             }
             else if (res.DataType == DATATYPE_MVAR)
             {
