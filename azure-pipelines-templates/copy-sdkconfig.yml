@@ -8,7 +8,6 @@ parameters:
 
 steps:
   - task: CopyFiles@2
-    condition: succeeded()
     displayName: Copying SDKCONFIG
     inputs:
       sourceFolder: "${{ parameters.repoDirectory }}"
