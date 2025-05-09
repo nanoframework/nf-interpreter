@@ -440,8 +440,6 @@ HRESULT CLR_RT_SignatureParser::Advance(Element &res)
 
     NANOCLR_HEADER();
 
-    _ASSERTE(ParamCount > 0);
-
     ParamCount--;
 
     res.IsByRef = false;
@@ -988,13 +986,37 @@ bool CLR_RT_TypeDef_Instance::ResolveToken(
                     case DATATYPE_VAR:
                     {
                         CLR_RT_TypeDef_Index typeDef;
-                        NanoCLRDataType dataType;
+                        CLR_RT_SignatureParser::Element genericElement;
 
-                        caller->assembly->FindGenericParamAtTypeSpec(*caller, genericParamPosition, typeDef, dataType);
+                        CLR_RT_SignatureParser varParser;
+                        varParser.Initialize_TypeSpec(assm, ts);
 
+                        // advance once to consume the GENERICINST or VAR entry
+                        varParser.Advance(genericElement);
+
+                        // now walk forward genericParameterPosition steps to land on the actual
+                        // argument in the signature stream.
+                        for (CLR_INT8 i = 0; i <= genericParamPosition; i++)
+                        {
+                            if (FAILED(varParser.Advance(genericElement)))
+                            {
+                                return false;
+                            }
+                        }
+
+                        // genericElement.Class now holds the TypeDef_Index of the T or U, etc.
+                        typeDef = genericElement.Class;
+
+
+                        // populate this instance from the resolved TypeDef
                         data = typeDef.data;
                         assembly = g_CLR_RT_TypeSystem.m_assemblies[typeDef.Assembly() - 1];
                         target = assembly->GetTypeDef(typeDef.Type());
+
+#if defined(NANOCLR_INSTANCE_NAMES)
+                        name = assembly->GetString(target->name);
+#endif
+                        return true;
                     }
                     break;
 

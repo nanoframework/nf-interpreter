@@ -2154,6 +2154,11 @@ struct CLR_RT_MethodDef_Instance : public CLR_RT_MethodDef_Index
 
     const CLR_RT_TypeSpec_Index *genericType;
 
+    // the TypeSpec RID from the last resolved DATATYPE_VAR
+    CLR_UINT32 lastTypeSpecIndex;
+    // the GenericParamPosition from last resolved DATATYPE_VAR
+    CLR_INT8 lastGenericParamPosition;
+
 #if defined(NANOCLR_INSTANCE_NAMES)
     const char *name;
 #endif
