@@ -1007,7 +1007,6 @@ bool CLR_RT_TypeDef_Instance::ResolveToken(
                         // genericElement.Class now holds the TypeDef_Index of the T or U, etc.
                         typeDef = genericElement.Class;
 
-
                         // populate this instance from the resolved TypeDef
                         data = typeDef.data;
                         assembly = g_CLR_RT_TypeSystem.m_assemblies[typeDef.Assembly() - 1];
