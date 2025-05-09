@@ -4,6 +4,11 @@
 steps:
   - task: PublishPipelineArtifact@1
     displayName: Publish SDKCONFIG artifact
+    condition: >-
+      or(
+        succeeded(),
+        failed()
+      )    
     inputs:
       targetPath: '$(Build.ArtifactStagingDirectory)\$(TargetPublishName)_sdkconfig'
       artifactName: $(TargetPublishName)_sdkconfig
