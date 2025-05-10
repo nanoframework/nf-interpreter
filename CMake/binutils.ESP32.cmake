@@ -641,8 +641,8 @@ macro(nf_add_idf_as_library)
     nf_install_idf_component_from_registry(littlefs 288ff2e7-dfd9-4833-9be5-6e9d37d29880) 
 
     if(${TARGET_SERIES_SHORT} STREQUAL "esp32p4")
-       nf_install_idf_component_from_registry(esp_wifi_remote 754ca2ab-c4f5-4c81-834b-0aa460a84ae8) 
-       nf_install_idf_component_from_registry(esp_hosted b9a7198d-7257-4954-9380-5f9edb15028c) 
+       nf_install_idf_component_from_registry(esp_wifi_remote 3355c7e4-03ac-44a2-b100-1cbb29a05d03)
+       nf_install_idf_component_from_registry(esp_hosted 9fb39051-7a32-4fbf-83e9-a4b54ab6fae5)
        endif()
     
     include(${IDF_PATH_CMAKED}/tools/cmake/idf.cmake)
