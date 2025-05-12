@@ -447,7 +447,7 @@ void CLR_RT_Assembly::DumpToken(CLR_UINT32 token, const CLR_RT_TypeSpec_Index *g
             const auto &xref = crossReferenceFieldRef[index];
 
             // If the caller passed in a closed‐generic TypeSpec, use that …
-            if (genericType->data != CLR_EmptyToken)
+            if (genericType != nullptr && genericType->data != CLR_EmptyToken)
             {
                 // Build the closed‐generic owner name
                 char rgType[256], *sz = rgType;
