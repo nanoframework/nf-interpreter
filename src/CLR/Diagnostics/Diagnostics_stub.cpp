@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (c) .NET Foundation and Contributors
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
@@ -112,7 +112,7 @@ __nfweak const CLR_UINT8 *CLR_SkipBodyOfOpcodeCompressed(const CLR_UINT8 *ip, CL
 
 #if defined(NANOCLR_TRACE_INSTRUCTIONS)
 
-__nfweak void CLR_RT_Assembly::DumpToken(CLR_UINT32 tk)
+__nfweak void CLR_RT_Assembly::DumpToken(CLR_UINT32 tk, const CLR_RT_TypeSpec_Index *genericType)
 {
     NATIVE_PROFILE_CLR_DIAGNOSTICS();
 }
