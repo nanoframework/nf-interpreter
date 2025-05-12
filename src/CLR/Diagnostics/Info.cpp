@@ -413,7 +413,7 @@ const CLR_UINT8 *CLR_SkipBodyOfOpcodeCompressed(const CLR_UINT8 *ip, CLR_OPCODE 
 
 #if defined(NANOCLR_TRACE_INSTRUCTIONS)
 
-void CLR_RT_Assembly::DumpToken(CLR_UINT32 token)
+void CLR_RT_Assembly::DumpToken(CLR_UINT32 token, const CLR_RT_TypeSpec_Index *genericType)
 {
     NATIVE_PROFILE_CLR_DIAGNOSTICS();
     CLR_UINT32 index = CLR_DataFromTk(token);
@@ -443,14 +443,27 @@ void CLR_RT_Assembly::DumpToken(CLR_UINT32 token)
         }
         case TBL_FieldRef:
         {
-            LOOKUP_ELEMENT_REF(index, FieldRef, FIELDREF, FieldDef);
-            if (s)
+            const CLR_RECORD_FIELDREF *fr = GetFieldRef(index);
+            const auto &xref = crossReferenceFieldRef[index];
+
+            // If the caller passed in a closed‐generic TypeSpec, use that …
+            if (genericType->data != CLR_EmptyToken)
             {
-                CLR_RT_DUMP::FIELD(*s);
+                // Build the closed‐generic owner name
+                char rgType[256], *sz = rgType;
+                size_t cb = sizeof(rgType);
+                g_CLR_RT_TypeSystem.BuildTypeName(*genericType, sz, cb);
+
+                // Append the field name
+                CLR_SafeSprintf(sz, cb, "::%s", GetString(fr->name));
+                CLR_Debug::Printf("%s", rgType);
             }
             else
             {
-                CLR_Debug::Printf("%s", GetString(p->name));
+                // Otherwise fall back to the old FieldDef path
+                CLR_RT_FieldDef_Index fd;
+                fd.Set(assemblyIndex, xref.target.data);
+                CLR_RT_DUMP::FIELD(fd);
             }
             break;
         }
@@ -662,7 +675,7 @@ void CLR_RT_Assembly::DumpOpcodeDirect(
 
     if (IsOpParamToken(opParam))
     {
-        DumpToken(CLR_ReadTokenCompressed(ip, op));
+        DumpToken(CLR_ReadTokenCompressed(ip, op), call.genericType);
     }
     else
     {
