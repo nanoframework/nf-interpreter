@@ -1983,7 +1983,7 @@ HRESULT CLR_RT_ExecutionEngine::InitializeLocals(
                     parser.Advance(element);
 
                     // walk forward to the Nth generic-parameter
-                    for (int i = 0; i < genericParamPosition; i++)
+                    for (int i = 0; i <= genericParamPosition; i++)
                     {
                         parser.Advance(element);
                     }
@@ -3215,6 +3215,85 @@ bool CLR_RT_ExecutionEngine::IsInstanceOf(
     }
 
     return IsInstanceOf(desc, descTarget, isInstInstruction);
+}
+
+/// <summary>
+/// Checks whether the heap-object 'obj' satisfies exactly the type encoded by
+/// the compressed token 'token' in the IL stream, under the current generic
+/// instantiation in 'caller'.  Supports DATATYPE_VAR slots and full GENERICINST.
+/// </summary>
+bool CLR_RT_ExecutionEngine::IsInstanceOfToken(
+    CLR_UINT32 token,
+    CLR_RT_HeapBlock &obj,
+    const CLR_RT_MethodDef_Instance &caller)
+{
+    // Resolve the *expected* signature into a TypeDescriptor
+    CLR_RT_TypeDescriptor expectedDesc;
+    HRESULT hr = expectedDesc.InitializeFromSignatureToken(caller.assembly, token, &caller);
+
+    if (FAILED(hr))
+    {
+        return false;
+    }
+
+    // Extract the *actual* runtime type of the object
+    CLR_RT_TypeDescriptor actualDesc;
+    hr = actualDesc.InitializeFromObject(obj);
+
+    if (FAILED(hr))
+    {
+        return false;
+    }
+
+    // Delegate to the CLR built-in type-compatibility test
+    return TypeDescriptorsMatch(expectedDesc, actualDesc);
+}
+
+bool CLR_RT_ExecutionEngine::TypeDescriptorsMatch(const CLR_RT_TypeDescriptor &exp, const CLR_RT_TypeDescriptor &act)
+{
+    // Quick check on the raw element kind
+    if (exp.GetDataType() != act.GetDataType())
+    {
+        return false;
+    }
+
+    switch (exp.GetDataType())
+    {
+        // Closed‐generic instantiation: compare the TypeSpec head
+        case DATATYPE_GENERICINST:
+        case DATATYPE_VAR:
+        {
+            auto &eSpec = exp.m_handlerGenericType;
+            auto &aSpec = act.m_handlerGenericType;
+            return eSpec.Assembly() == aSpec.Assembly() && eSpec.typeDefIndex == aSpec.typeDefIndex;
+        }
+
+        // Plain object or value‐type: compare the TypeDef_Index
+        case DATATYPE_CLASS:
+        case DATATYPE_VALUETYPE:
+        case DATATYPE_SZARRAY:
+        {
+            auto &eCls = exp.m_handlerCls;
+            auto &aCls = act.m_handlerCls;
+
+            if (eCls.data != aCls.data)
+            {
+                return false;
+            }
+
+            // for array we may need to compare element‐types
+            if (exp.GetDataType() == DATATYPE_SZARRAY)
+            {
+                // recurse into element descriptors
+                return TypeDescriptorsMatch(exp, act);
+            }
+            return true;
+        }
+
+        // All the primitives (I4, I8, R4, etc.) don't carry extra metadata
+        default:
+            return true;
+    }
 }
 
 HRESULT CLR_RT_ExecutionEngine::CastToType(

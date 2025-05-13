@@ -2644,9 +2644,9 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
 
                     switch (dt)
                     {
+                        case DATATYPE_GENERICINST:
                         case DATATYPE_CLASS:
                         case DATATYPE_VALUETYPE:
-                        case DATATYPE_GENERICINST:
                             obj[fieldInst.CrossReference().offset].AssignAndPreserveType(evalPos[2]);
                             break;
                         case DATATYPE_DATETIME: // Special case.
@@ -2969,7 +2969,7 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                     NANOCLR_CHECK_HRESULT(CLR_RT_TypeDescriptor::ExtractTypeIndexFromObject(evalPos[0], cls));
 
                     // Check this is an object of the requested type.
-                    if (type.data != cls.data)
+                    if (!g_CLR_RT_ExecutionEngine.IsInstanceOfToken(arg, evalPos[0], stack->m_call))
                     {
                         NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
                     }
@@ -3125,18 +3125,37 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                 OPDEF(CEE_STELEM, "stelem", PopRef + PopI + Pop1, Push0, InlineType, IObjModel, 1, 0xFF, 0xA4, NEXT)
                 // Stack: ... ... <obj> <index> <value> -> ...
                 {
-                    // Treat STELEM like ldelema + stobj
-                    ip += 2; // Skip type argument, not used...
+                    FETCH_ARG_COMPRESSED_TYPETOKEN(arg, ip);
 
-                    evalPos -= 3; // "pop" args from evaluation stack
+                    evalPos -= 3;
                     CHECKSTACK(stack, evalPos);
 
+                    // Build a by-ref to the array slot at [index]
                     NANOCLR_CHECK_HRESULT(
                         evalPos[1].InitializeArrayReference(evalPos[1], evalPos[2].NumericByRef().s4));
                     evalPos[1].FixArrayReferenceForValueTypes();
 
-                    // Reassign will make sure these are objects of the same type.
-                    NANOCLR_CHECK_HRESULT(evalPos[1].Reassign(evalPos[3]));
+                    // Resolve the IL's element type in the context of any generics
+                    CLR_RT_TypeDef_Instance expectedType;
+                    if (!expectedType.ResolveToken(arg, assm, &stack->m_call))
+                    {
+                        NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+                    }
+
+                    NanoCLRDataType elemDT = (NanoCLRDataType)expectedType.target->dataType;
+
+                    // Promote the value if it's a reference or boxed struct
+                    evalPos[3].Promote();
+
+                    // Compute the element‐size: 0 for refs (incl. genericinst), sizeInBytes for primitives
+                    size_t size = 0;
+                    if (elemDT <= DATATYPE_LAST_PRIMITIVE_TO_PRESERVE)
+                    {
+                        size = c_CLR_RT_DataTypeLookup[elemDT].m_sizeInBytes;
+                    }
+
+                    // Store the value into the actual array buffer
+                    NANOCLR_CHECK_HRESULT(evalPos[3].StoreToReference(evalPos[1], size));
 
                     break;
                 }

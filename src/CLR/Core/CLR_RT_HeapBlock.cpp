@@ -774,6 +774,137 @@ HRESULT CLR_RT_HeapBlock::Reassign(const CLR_RT_HeapBlock &value)
     NANOCLR_NOCLEANUP();
 }
 
+HRESULT CLR_RT_HeapBlock::Reassign(CLR_RT_HeapBlock &rhs, const CLR_RT_TypeDef_Instance &expectedType)
+{
+    NATIVE_PROFILE_CLR_CORE();
+    NANOCLR_HEADER();
+
+    // Build a TypeDescriptor for the *expected* type (the IL TypeSpec/TypeDef)
+    CLR_RT_TypeDescriptor descExpected;
+    NANOCLR_CHECK_HRESULT(descExpected.InitializeFromTypeDef(expectedType));
+
+    // Build a TypeDescriptor for the *actual* runtime object in rhs
+    CLR_RT_TypeDescriptor descActual;
+    NANOCLR_CHECK_HRESULT(descActual.InitializeFromObject(rhs));
+
+    // Compare them (including generics, arrays, value-types, etc.)
+    if (!TypeDescriptorsMatch(descExpected, descActual))
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+    }
+
+    // They match: now do the actual copy
+    // - reference types & arrays: copy the object reference
+    // - value-types & primitives: copy the raw data
+    switch (descActual.GetDataType())
+    {
+        case DATATYPE_CLASS:
+        case DATATYPE_SZARRAY:
+        {
+            // object reference or single-dim array
+            this->Assign(rhs);
+            break;
+        }
+
+        default:
+        {
+            // value-type, primitive, struct, etc.
+            // this->CopyFrom(rhs);
+            break;
+        }
+    }
+
+    NANOCLR_NOCLEANUP();
+}
+
+bool CLR_RT_HeapBlock::TypeDescriptorsMatch(
+    const CLR_RT_TypeDescriptor &expectedType,
+    const CLR_RT_TypeDescriptor &actualType)
+{
+    // Figure out logical DataTypes, promoting ACTUAL CLASS ---> GENERICINST
+    NanoCLRDataType expectedDataType = expectedType.GetDataType();
+    NanoCLRDataType actualDataType = actualType.GetDataType();
+
+    // If the *actual* object is a closed-generic (even though boxed as CLASS),
+    // it will have m_handlerGenericType set.  Promote it to GENERICINST.
+    if (actualDataType == DATATYPE_CLASS && actualType.m_handlerGenericType.data != CLR_EmptyToken)
+    {
+        actualDataType = DATATYPE_GENERICINST;
+    }
+
+    // If either side is GENERICINST, we do generic-inst matching
+    if (expectedDataType == DATATYPE_GENERICINST || actualDataType == DATATYPE_GENERICINST)
+    {
+        auto &eSpec = expectedType.m_handlerGenericType;
+        auto &aSpec = actualType.m_handlerGenericType;
+
+        return eSpec.Assembly() == aSpec.Assembly() && eSpec.typeDefIndex == aSpec.typeDefIndex;
+    }
+
+    if (actualDataType <= DATATYPE_LAST_PRIMITIVE_TO_PRESERVE)
+    {
+        // If they declared a true valuetype, match directly:
+        if (expectedDataType == DATATYPE_VALUETYPE)
+        {
+            const auto &dtl = c_CLR_RT_DataTypeLookup[actualDataType];
+            if (dtl.m_cls && dtl.m_cls->data == expectedType.m_handlerCls.data)
+            {
+                return true;
+            }
+        }
+        // if they declared a boxed struct (CLASS whose TypeDef is a struct),
+        // need to match that too:
+        else if (expectedDataType == DATATYPE_CLASS && expectedType.m_handlerGenericType.data == 0)
+        {
+            // Look up the TypeDef record flags to see if it's a VALUE-TYPE.
+            CLR_RT_TypeDef_Index clsIdx = expectedType.m_handlerCls;
+
+            // fetch the owning assembly
+            CLR_RT_Assembly *ownerAsm = g_CLR_RT_TypeSystem.m_assemblies[clsIdx.Assembly() - 1];
+            const CLR_RECORD_TYPEDEF *rec = ownerAsm->GetTypeDef(clsIdx.Type());
+
+            if (rec &&
+                ((rec->flags & CLR_RECORD_TYPEDEF::TD_Semantics_Mask) == CLR_RECORD_TYPEDEF::TD_Semantics_ValueType))
+            {
+                const auto &dtl = c_CLR_RT_DataTypeLookup[actualDataType];
+                if (dtl.m_cls && dtl.m_cls->data == clsIdx.data)
+                {
+                    return true;
+                }
+            }
+        }
+    }
+
+    // For everything else, DataTypes must line up exactly
+    if (expectedDataType != actualDataType)
+    {
+        return false;
+    }
+
+    // Dispatch on the remaining kinds
+    switch (expectedDataType)
+    {
+        case DATATYPE_CLASS:
+        case DATATYPE_VALUETYPE:
+        {
+            // compare TypeDef indices
+            auto &eCls = expectedType.m_handlerCls;
+            auto &aCls = actualType.m_handlerCls;
+            return eCls.data == aCls.data;
+        }
+
+        case DATATYPE_SZARRAY:
+        {
+            // compare outer dims (always 1) then element types
+            return TypeDescriptorsMatch(expectedType, actualType);
+        }
+
+        // primitives and other leaf types match on the DataType alone
+        default:
+            return true;
+    }
+}
+
 void CLR_RT_HeapBlock::AssignAndPinReferencedObject(const CLR_RT_HeapBlock &value)
 {
     // This is very special case that we have local variable with pinned attribute in metadata.
@@ -787,7 +918,7 @@ void CLR_RT_HeapBlock::AssignAndPinReferencedObject(const CLR_RT_HeapBlock &valu
         m_data.objectReference.ptr->Unpin();
     }
 
-    // Move the data.
+    // Move the data
     m_data = value.m_data;
 
     // Leave the same logic as in AssignAndPreserveType
