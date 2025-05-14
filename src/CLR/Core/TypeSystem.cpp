@@ -1019,6 +1019,11 @@ bool CLR_RT_TypeDef_Instance::ResolveToken(
                     int pos = elem.GenericParamPosition;
 
                     // Use the *caller's* bound genericType (Stack<Int32>, etc.)
+                    if (caller == nullptr || caller->genericType == nullptr)
+                    {
+                        return false;
+                    }
+
                     auto &tsi = *caller->genericType;
                     CLR_UINT32 closedTsRow = tsi.TypeSpec();
 
