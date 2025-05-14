@@ -3253,54 +3253,7 @@ bool CLR_RT_ExecutionEngine::IsInstanceOfToken(
     }
 
     // Delegate to the CLR built-in type-compatibility test
-    return TypeDescriptorsMatch(expectedDesc, actualDesc);
-}
-
-bool CLR_RT_ExecutionEngine::TypeDescriptorsMatch(const CLR_RT_TypeDescriptor &exp, const CLR_RT_TypeDescriptor &act)
-{
-    // Quick check on the raw element kind
-    if (exp.GetDataType() != act.GetDataType())
-    {
-        return false;
-    }
-
-    switch (exp.GetDataType())
-    {
-        // Closed‐generic instantiation: compare the TypeSpec head
-        case DATATYPE_GENERICINST:
-        case DATATYPE_VAR:
-        {
-            auto &eSpec = exp.m_handlerGenericType;
-            auto &aSpec = act.m_handlerGenericType;
-            return eSpec.Assembly() == aSpec.Assembly() && eSpec.typeDefIndex == aSpec.typeDefIndex;
-        }
-
-        // Plain object or value‐type: compare the TypeDef_Index
-        case DATATYPE_CLASS:
-        case DATATYPE_VALUETYPE:
-        case DATATYPE_SZARRAY:
-        {
-            auto &eCls = exp.m_handlerCls;
-            auto &aCls = act.m_handlerCls;
-
-            if (eCls.data != aCls.data)
-            {
-                return false;
-            }
-
-            // for array we may need to compare element‐types
-            if (exp.GetDataType() == DATATYPE_SZARRAY)
-            {
-                // recurse into element descriptors
-                return TypeDescriptorsMatch(exp, act);
-            }
-            return true;
-        }
-
-        // All the primitives (I4, I8, R4, etc.) don't carry extra metadata
-        default:
-            return true;
-    }
+    return CLR_RT_HeapBlock::TypeDescriptorsMatch(expectedDesc, actualDesc);
 }
 
 HRESULT CLR_RT_ExecutionEngine::CastToType(
