@@ -2858,7 +2858,7 @@ bool CLR_DBG_Debugger::Debugging_Value_GetStack(WP_Message *msg)
 
                 // now we've landed on a DATATYPE_VAR; walk to the Nth generic‐type parameter
                 typeParser.Advance(elem);
-                for (int i = 0; i <= res.GenericParamPosition; i++)
+                for (int i = 0; i < res.GenericParamPosition; i++)
                 {
                     parser.Advance(elem);
                 }

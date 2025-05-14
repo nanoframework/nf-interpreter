@@ -1981,7 +1981,7 @@ HRESULT CLR_RT_ExecutionEngine::InitializeLocals(
 
                      // ensure we don’t walk past the available generic parameters
                     const int maxParams = parser.GenParamCount;
-                    if (genericParamPosition < 0 || genericParamPosition >= maxParams)
+                    if (genericParamPosition < 0 || genericParamPosition > maxParams)
                     {
                         NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_RANGE);
                     }
@@ -1990,7 +1990,7 @@ HRESULT CLR_RT_ExecutionEngine::InitializeLocals(
                     parser.Advance(element);
 
                     // walk forward to the Nth generic-parameter
-                    for (int i = 0; i <= genericParamPosition; i++)
+                    for (int i = 0; i < genericParamPosition; i++)
                     {
                         parser.Advance(element);
                     }
