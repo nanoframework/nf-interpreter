@@ -3153,6 +3153,14 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                     {
                         size = c_CLR_RT_DataTypeLookup[elemDT].m_sizeInBytes;
                     }
+                    else if (
+                        (expectedType.target->flags & CLR_RECORD_TYPEDEF::TD_Semantics_Mask) ==
+                        CLR_RECORD_TYPEDEF::TD_Semantics_ValueType)
+                    {
+                        size =
+                            (CLR_RT_HeapBlock::HB_Object_Fields_Offset + +expectedType.CrossReference().totalFields) *
+                            sizeof(CLR_RT_HeapBlock);
+                    }
 
                     // Store the value into the actual array buffer
                     NANOCLR_CHECK_HRESULT(evalPos[3].StoreToReference(evalPos[1], size));
