@@ -978,7 +978,7 @@ bool CLR_RT_TypeDef_Instance::ResolveToken(
                 // Skip any leading SZARRAY or BYREF
                 do
                 {
-                    if (parser.Advance(elem) != S_OK)
+                    if (FAILED(parser.Advance(elem)))
                     {
                         return false;
                     }
@@ -988,17 +988,17 @@ bool CLR_RT_TypeDef_Instance::ResolveToken(
                 if (elem.DataType == DATATYPE_GENERICINST)
                 {
                     // consume the CLASS/VALUETYPE marker
-                    if (parser.Advance(elem) != S_OK)
+                    if (FAILED(parser.Advance(elem)))
                     {
                         return false;
                     }
                     // consume the generic‐definition token itself
-                    if (parser.Advance(elem) != S_OK)
+                    if (FAILED(parser.Advance(elem)))
                     {
                         return false;
                     }
                     // consume the count of generic arguments
-                    if (parser.Advance(elem) != S_OK)
+                    if (FAILED(parser.Advance(elem)))
                     {
                         return false;
                     }
@@ -1007,7 +1007,7 @@ bool CLR_RT_TypeDef_Instance::ResolveToken(
                 // walk forward until a VAR (type‐generic) or MVAR (method‐generic) is hit
                 while (elem.DataType != DATATYPE_VAR && elem.DataType != DATATYPE_MVAR)
                 {
-                    if (parser.Advance(elem) != S_OK)
+                    if (FAILED(parser.Advance(elem)))
                     {
                         return false;
                     }
