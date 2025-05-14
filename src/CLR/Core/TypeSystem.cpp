@@ -978,24 +978,39 @@ bool CLR_RT_TypeDef_Instance::ResolveToken(
                 // Skip any leading SZARRAY or BYREF
                 do
                 {
-                    (parser.Advance(elem));
+                    if (parser.Advance(elem) != S_OK)
+                    {
+                        return false;
+                    }
                 } while (elem.DataType == DATATYPE_SZARRAY || elem.DataType == DATATYPE_BYREF);
 
                 // If this is a closed‐generic instantiation header, peel off the wrapper
                 if (elem.DataType == DATATYPE_GENERICINST)
                 {
                     // consume the CLASS/VALUETYPE marker
-                    (parser.Advance(elem));
+                    if (parser.Advance(elem) != S_OK)
+                    {
+                        return false;
+                    }
                     // consume the generic‐definition token itself
-                    (parser.Advance(elem));
+                    if (parser.Advance(elem) != S_OK)
+                    {
+                        return false;
+                    }
                     // consume the count of generic arguments
-                    (parser.Advance(elem));
+                    if (parser.Advance(elem) != S_OK)
+                    {
+                        return false;
+                    }
                 }
 
                 // walk forward until a VAR (type‐generic) or MVAR (method‐generic) is hit
                 while (elem.DataType != DATATYPE_VAR && elem.DataType != DATATYPE_MVAR)
                 {
-                    (parser.Advance(elem));
+                    if (parser.Advance(elem) != S_OK)
+                    {
+                        return false;
+                    }
                 }
 
                 // If it's a type‐generic slot (!T), resolve against the caller's closed generic
