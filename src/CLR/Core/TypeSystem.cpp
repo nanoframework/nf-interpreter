@@ -4586,13 +4586,20 @@ bool CLR_RT_Assembly::FindGenericParamAtTypeSpec(
 
     CLR_RT_SignatureParser::Element element;
 
-    // first Advance() steps into the VAR signature…
+    // get into the GENERICINST
     if (FAILED(parser.Advance(element)))
     {
         return false;
     }
 
-    // walk to the Nth parameter
+    // sanity check for invalid parameter position
+    if (genericParameterPosition > parser.GenParamCount)
+    {
+        // not enough parameters!!
+        return false;
+    }
+
+    // walk to the requested parameter position
     for (uint32_t i = 0; i <= genericParameterPosition; i++)
     {
         if (FAILED(parser.Advance(element)))
