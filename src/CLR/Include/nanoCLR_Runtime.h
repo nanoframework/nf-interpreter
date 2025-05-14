@@ -4072,7 +4072,6 @@ struct CLR_RT_ExecutionEngine
     static bool IsInstanceOf(CLR_RT_HeapBlock &obj, const CLR_RT_TypeDef_Index &clsTarget);
     static bool IsInstanceOf(CLR_RT_HeapBlock &obj, CLR_RT_Assembly *assm, CLR_UINT32 token, bool isInstInstruction);
     bool IsInstanceOfToken(CLR_UINT32 token, CLR_RT_HeapBlock &obj, const CLR_RT_MethodDef_Instance &caller);
-    static bool TypeDescriptorsMatch(const CLR_RT_TypeDescriptor &exp, const CLR_RT_TypeDescriptor &act);
 
     static HRESULT CastToType(CLR_RT_HeapBlock &ref, CLR_UINT32 tk, CLR_RT_Assembly *assm, bool isInstInstruction);
 
