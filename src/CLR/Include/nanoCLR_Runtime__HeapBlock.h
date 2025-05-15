@@ -1360,6 +1360,7 @@ struct CLR_RT_HeapBlock
     HRESULT LoadFromReference(CLR_RT_HeapBlock &ref);
     HRESULT StoreToReference(CLR_RT_HeapBlock &ref, int size);
     HRESULT Reassign(const CLR_RT_HeapBlock &value);
+    HRESULT Reassign(CLR_RT_HeapBlock &rhs, const CLR_RT_TypeDef_Instance &expectedType);
     HRESULT PerformBoxingIfNeeded();
     HRESULT PerformBoxing(const CLR_RT_TypeDef_Instance &cls);
     HRESULT PerformUnboxing(const CLR_RT_TypeDef_Instance &cls);
@@ -1371,6 +1372,7 @@ struct CLR_RT_HeapBlock
     bool IsZero() const;
     void Promote();
 
+    static bool TypeDescriptorsMatch(const CLR_RT_TypeDescriptor &exp, const CLR_RT_TypeDescriptor &act);
     static CLR_UINT32 GetHashCode(CLR_RT_HeapBlock *ptr, bool fRecurse, CLR_UINT32 crc);
     static bool ObjectsEqual(const CLR_RT_HeapBlock &left, const CLR_RT_HeapBlock &right, bool fSameReference);
 

@@ -1979,6 +1979,13 @@ HRESULT CLR_RT_ExecutionEngine::InitializeLocals(
                     parser.Initialize_MethodLocals(assembly, methodDef);
                     CLR_RT_SignatureParser::Element element;
 
+                    // ensure we don’t walk past the available generic parameters
+                    const int maxParams = parser.GenParamCount;
+                    if (genericParamPosition < 0 || genericParamPosition > maxParams)
+                    {
+                        NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_RANGE);
+                    }
+
                     // advance into the VAR entry
                     parser.Advance(element);
 
@@ -3215,6 +3222,38 @@ bool CLR_RT_ExecutionEngine::IsInstanceOf(
     }
 
     return IsInstanceOf(desc, descTarget, isInstInstruction);
+}
+
+/// <summary>
+/// Checks whether the heap-object 'obj' satisfies exactly the type encoded by
+/// the compressed token 'token' in the IL stream, under the current generic
+/// instantiation in 'caller'.  Supports DATATYPE_VAR slots and full GENERICINST.
+/// </summary>
+bool CLR_RT_ExecutionEngine::IsInstanceOfToken(
+    CLR_UINT32 token,
+    CLR_RT_HeapBlock &obj,
+    const CLR_RT_MethodDef_Instance &caller)
+{
+    // Resolve the *expected* signature into a TypeDescriptor
+    CLR_RT_TypeDescriptor expectedDesc;
+    HRESULT hr = expectedDesc.InitializeFromSignatureToken(caller.assembly, token, &caller);
+
+    if (FAILED(hr))
+    {
+        return false;
+    }
+
+    // Extract the *actual* runtime type of the object
+    CLR_RT_TypeDescriptor actualDesc;
+    hr = actualDesc.InitializeFromObject(obj);
+
+    if (FAILED(hr))
+    {
+        return false;
+    }
+
+    // Delegate to the CLR built-in type-compatibility test
+    return CLR_RT_HeapBlock::TypeDescriptorsMatch(expectedDesc, actualDesc);
 }
 
 HRESULT CLR_RT_ExecutionEngine::CastToType(
