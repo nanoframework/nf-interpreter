@@ -1424,12 +1424,12 @@ struct CLR_RT_Assembly : public CLR_RT_HeapBlock_Node // EVENT HEAP - NO RELOCAT
     bool FindTypeSpec(const CLR_PMETADATA sig, CLR_RT_TypeSpec_Index &index);
     bool FindGenericParamAtTypeSpec(
         CLR_UINT32 typeSpecIndex,
-        CLR_UINT32 genericParameterPosition,
+        CLR_INT32 genericParameterPosition,
         CLR_RT_TypeDef_Index &typeDef,
         NanoCLRDataType &dataType);
     bool FindGenericParamAtMethodDef(
         CLR_RT_MethodDef_Instance md,
-        CLR_UINT32 genericParameterPosition,
+        CLR_INT32 genericParameterPosition,
         CLR_RT_GenericParam_Index &index);
     bool FindGenericParam(CLR_INDEX typeSpecIndex, CLR_RT_GenericParam_Index &index);
     bool FindMethodSpecFromTypeSpec(CLR_INDEX typeSpecIndex, CLR_RT_MethodSpec_Index &index);

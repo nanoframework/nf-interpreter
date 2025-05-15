@@ -4575,7 +4575,7 @@ bool CLR_RT_Assembly::FindGenericParam(CLR_INDEX typeSpecIndex, CLR_RT_GenericPa
 
 bool CLR_RT_Assembly::FindGenericParamAtTypeSpec(
     CLR_UINT32 typeSpecIndex,
-    CLR_UINT32 genericParameterPosition,
+    CLR_INT32 genericParameterPosition,
     CLR_RT_TypeDef_Index &typeDef,
     NanoCLRDataType &dataType)
 {
@@ -4600,7 +4600,7 @@ bool CLR_RT_Assembly::FindGenericParamAtTypeSpec(
     }
 
     // walk to the requested parameter position
-    for (uint32_t i = 0; i <= genericParameterPosition; i++)
+    for (int32_t i = 0; i <= genericParameterPosition; i++)
     {
         if (FAILED(parser.Advance(element)))
         {
@@ -4616,7 +4616,7 @@ bool CLR_RT_Assembly::FindGenericParamAtTypeSpec(
 
 bool CLR_RT_Assembly::FindGenericParamAtMethodDef(
     CLR_RT_MethodDef_Instance md,
-    CLR_UINT32 genericParameterPosition,
+    CLR_INT32 genericParameterPosition,
     CLR_RT_GenericParam_Index &index)
 {
     NATIVE_PROFILE_CLR_CORE();
