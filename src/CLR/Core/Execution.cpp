@@ -1979,7 +1979,7 @@ HRESULT CLR_RT_ExecutionEngine::InitializeLocals(
                     parser.Initialize_MethodLocals(assembly, methodDef);
                     CLR_RT_SignatureParser::Element element;
 
-                     // ensure we don’t walk past the available generic parameters
+                    // ensure we don’t walk past the available generic parameters
                     const int maxParams = parser.GenParamCount;
                     if (genericParamPosition < 0 || genericParamPosition > maxParams)
                     {
