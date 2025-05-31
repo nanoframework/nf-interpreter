@@ -41,6 +41,9 @@
                 "API_nanoFramework.ResourceManager": "ON",
                 "API_nanoFramework.System.Collections": "ON",
                 "API_nanoFramework.System.Text": "ON"
+            },
+            "environment": {
+                "ESP_IDF_VERSION": "5.4"
             }
         }
     ]
