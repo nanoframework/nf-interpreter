@@ -123,14 +123,12 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_Directory::NativeGetChildren___ST
         {
             // skip entries that are not directories when looking for directories
             // skip also directories with hidden and system attribute
-            if (isDirectory && !(
-                ((fileData.Attributes & FileAttributes::FileAttributes_Directory) ==
-                 FileAttributes::FileAttributes_Directory) &&
-                ((fileData.Attributes & FileAttributes::FileAttributes_Hidden) !=
-                 FileAttributes::FileAttributes_Hidden) &&
-                ((fileData.Attributes & FileAttributes::FileAttributes_System) !=
-                 FileAttributes::FileAttributes_System))
-			   )
+            if (isDirectory && !(((fileData.Attributes & FileAttributes::FileAttributes_Directory) ==
+                                  FileAttributes::FileAttributes_Directory) &&
+                                 ((fileData.Attributes & FileAttributes::FileAttributes_Hidden) !=
+                                  FileAttributes::FileAttributes_Hidden) &&
+                                 ((fileData.Attributes & FileAttributes::FileAttributes_System) !=
+                                  FileAttributes::FileAttributes_System)))
             {
                 continue;
             }
