@@ -1027,16 +1027,17 @@ bool CLR_RT_TypeDef_Instance::ResolveToken(
                     auto &tsi = *caller->genericType;
                     CLR_UINT32 closedTsRow = tsi.TypeSpec();
 
-                    CLR_RT_TypeDef_Index realTd;
-                    NanoCLRDataType realDt;
+                    CLR_RT_TypeDef_Index realTypeDef;
+                    NanoCLRDataType realDataType;
 
                     // Only call this once to map (e.g. !T→Int32)
-                    caller->assembly->FindGenericParamAtTypeSpec(closedTsRow, (CLR_UINT32)pos, realTd, realDt);
+                    caller->assembly
+                        ->FindGenericParamAtTypeSpec(closedTsRow, (CLR_UINT32)pos, realTypeDef, realDataType);
 
                     // populate this instance
-                    data = realTd.data;
-                    assembly = g_CLR_RT_TypeSystem.m_assemblies[realTd.Assembly() - 1];
-                    target = assembly->GetTypeDef(realTd.Type());
+                    data = realTypeDef.data;
+                    assembly = g_CLR_RT_TypeSystem.m_assemblies[realTypeDef.Assembly() - 1];
+                    target = assembly->GetTypeDef(realTypeDef.Type());
 
                     return true;
                 }
@@ -6256,7 +6257,31 @@ HRESULT CLR_RT_TypeSystem::BuildMethodRefName(const CLR_RT_MethodRef_Index &meth
 
     NANOCLR_NOCLEANUP();
 }
+HRESULT CLR_RT_TypeSystem::BuildMethodRefName(
+    const CLR_RT_MethodRef_Index &mri,
+    const CLR_RT_TypeSpec_Index *callerGeneric, // may be nullptr if none
+    char *&szBuffer,
+    size_t &iBuffer)
+{
+    NATIVE_PROFILE_CLR_CORE();
+    NANOCLR_HEADER();
 
+    // 1) Grab the assembly that owns this MethodRef
+    CLR_RT_Assembly *assembly = g_CLR_RT_TypeSystem.m_assemblies[mri.Assembly() - 1];
+
+    // 2) Pull the raw CLR_RECORD_METHODREF
+    const CLR_RECORD_METHODREF *mr = assembly->GetMethodRef(mri.Method());
+
+    // 3) Build the corresponding MethodDef_Index
+    //    (MethodRef.method is the metadata token for the definition)
+    CLR_RT_MethodDef_Index md;
+    md.Set(mri.Assembly(), mr->OwnerIndex());
+
+    // 4) Delegate to your existing BuildMethodName, passing the *declaring type’s* TypeSpec
+    NANOCLR_CHECK_HRESULT(BuildMethodName(md, callerGeneric, szBuffer, iBuffer));
+
+    NANOCLR_NOCLEANUP();
+}
 HRESULT CLR_RT_TypeSystem::BuildMethodSpecName(const CLR_RT_MethodSpec_Index &ms, char *&szBuffer, size_t &iBuffer)
 {
     NATIVE_PROFILE_CLR_CORE();
@@ -6344,7 +6369,31 @@ HRESULT CLR_RT_TypeSystem::BuildMethodSpecName(const CLR_RT_MethodSpec_Index &ms
 
     NANOCLR_NOCLEANUP();
 }
+HRESULT CLR_RT_TypeSystem::BuildMethodSpecName(
+    const CLR_RT_MethodSpec_Index &msi,
+    const CLR_RT_TypeSpec_Index *callerGeneric, // may be nullptr if none
+    char *&szBuffer,
+    size_t &iBuffer)
+{
+    NATIVE_PROFILE_CLR_CORE();
+    NANOCLR_HEADER();
 
+    // 1) Grab the assembly that owns this MethodSpec
+    CLR_RT_Assembly *assembly = g_CLR_RT_TypeSystem.m_assemblies[msi.Assembly() - 1];
+
+    // 2) Pull the raw CLR_RECORD_METHODSPEC
+    const CLR_RECORD_METHODSPEC *ms = assembly->GetMethodSpec(msi.Method());
+
+    // 3) Build the corresponding MethodDef_Index
+    //    (MethodSpec.method is the metadata token for the definition)
+    CLR_RT_MethodDef_Index md;
+    md.Set(msi.Assembly(), ms->MethodIndex());
+
+    // 4) Delegate to BuildMethodName, again passing the closed declaring‐type
+    NANOCLR_CHECK_HRESULT(BuildMethodName(md, callerGeneric, szBuffer, iBuffer));
+
+    NANOCLR_NOCLEANUP();
+}
 //--//
 
 bool CLR_RT_TypeSystem::FindVirtualMethodDef(

@@ -2013,7 +2013,17 @@ struct CLR_RT_TypeSystem // EVENT HEAP - NO RELOCATION -
         size_t &size);
     HRESULT BuildFieldName(const CLR_RT_FieldDef_Index &fd, char *&szBuffer, size_t &size);
     HRESULT BuildMethodRefName(const CLR_RT_MethodRef_Index &method, char *&szBuffer, size_t &iBuffer);
+    HRESULT BuildMethodRefName(
+        const CLR_RT_MethodRef_Index &mri,
+        const CLR_RT_TypeSpec_Index *callerGeneric, // may be nullptr if none
+        char *&szBuffer,
+        size_t &iBuffer);
     HRESULT BuildMethodSpecName(const CLR_RT_MethodSpec_Index &ms, char *&szBuffer, size_t &iBuffer);
+    HRESULT BuildMethodSpecName(
+        const CLR_RT_MethodSpec_Index &msi,
+        const CLR_RT_TypeSpec_Index *callerGeneric, // may be nullptr if none
+        char *&szBuffer,
+        size_t &iBuffer);
 
     HRESULT QueueStringToBuffer(char *&szBuffer, size_t &size, const char *szText);
 

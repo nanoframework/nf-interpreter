@@ -469,16 +469,177 @@ void CLR_RT_Assembly::DumpToken(CLR_UINT32 token, const CLR_RT_TypeSpec_Index *g
         }
         case TBL_MethodRef:
         {
-            LOOKUP_ELEMENT_IDX(index, MethodRef, METHODREF);
-            CLR_RT_DUMP::METHODREF(s);
+            CLR_UINT32 idx = CLR_DataFromTk(token);
+            auto &xref = crossReferenceMethodRef[idx];
+
+            // Build a MethodRef_Index so we can format the reference
+            CLR_RT_MethodRef_Index mri;
+            mri.Set(assemblyIndex, idx);
+
+            // Pass the *target* method’s closed genericType, not "callGeneric"!
+            char buf[256], *p = buf;
+            size_t cb = sizeof(buf);
+            g_CLR_RT_TypeSystem.BuildMethodRefName(
+                mri,
+                &xref.genericType, // THIS is the TypeSpec for SimpleList<I4>
+                p,
+                cb);
+            CLR_Debug::Printf("%s", buf);
             break;
         }
         case TBL_TypeDef:
         {
+            // A genuine TypeDef token—print its (possibly non‐generic) name.
             LOOKUP_ELEMENT_IDX(index, TypeDef, TYPEDEF);
             CLR_RT_DUMP::TYPE(s);
             break;
         }
+        case TBL_TypeSpec:
+        {
+            //
+            // The TypeSpec token can represent:
+            //  - a generic parameter (DATATYPE_VAR/ MVAR), e.g. !0
+            //  - a primitive or class (DATATYPE_CLASS / VALUETYPE), e.g. Int32
+            //  - an n-dimensional array (DATATYPE_ARRAY) or a single‐dim SZARRAY inside the signature
+            //  - a closed generic instantiation (DATATYPE_GENERICINST) like List`1<Int32>
+            //
+            // When DumpToken is called for “newarr”, often the token is the element‐type alone,
+            // so if that token is exactly “VAR0” (or “MVAR0”), we must substitute “!0→I4” right here.
+            // Only if it is not a plain VAR/MVAR do we then check for arrays or else fall
+            // back to BuildTypeName for the full concrete name.
+            //
+
+            CLR_RT_TypeSpec_Index tsIdx;
+            tsIdx.Set(assemblyIndex, index);
+
+            // bind to get the signature blob
+            CLR_RT_TypeSpec_Instance tsInst{};
+            if (!tsInst.InitializeFromIndex(tsIdx))
+            {
+                // unable to bind; dump raw RID
+                CLR_Debug::Printf("[TYPESPEC:%08x]", token);
+                break;
+            }
+
+            // start parsing the signature
+            CLR_RT_SignatureParser parser;
+            parser.Initialize_TypeSpec(tsInst.assembly, tsInst.target);
+
+            // read first element
+            CLR_RT_SignatureParser::Element elem;
+            if (FAILED(parser.Advance(elem)))
+            {
+                // corrupt signature: just fallback to full type name
+                char bufCorrupt[256];
+                char *pCorrupt = bufCorrupt;
+                size_t cbCorrupt = sizeof(bufCorrupt);
+                g_CLR_RT_TypeSystem.BuildTypeName(tsIdx, pCorrupt, cbCorrupt);
+                CLR_Debug::Printf("%s", bufCorrupt);
+                break;
+            }
+
+            if (elem.DataType == DATATYPE_VAR || elem.DataType == DATATYPE_MVAR)
+            {
+                int gpIndex = elem.GenericParamPosition;
+
+                // if the caller's genericType is non‐null, ask the CLR to map !n→actual argument:
+                if (genericType != nullptr && NANOCLR_INDEX_IS_VALID(*genericType))
+                {
+                    CLR_RT_TypeDef_Index tdArg{};
+                    NanoCLRDataType dtArg;
+
+                    bool ok =
+                        tsInst.assembly->FindGenericParamAtTypeSpec(genericType->TypeSpec(), gpIndex, tdArg, dtArg);
+                    if (ok)
+                    {
+                        // Print that bound argument (e.g. "I4" or full class name)
+                        char bufArg[256];
+                        char *pArg = bufArg;
+                        size_t cbArg = sizeof(bufArg);
+                        g_CLR_RT_TypeSystem.BuildTypeName(tdArg, pArg, cbArg);
+                        CLR_Debug::Printf("%s", bufArg);
+                        break;
+                    }
+                }
+
+                // Couldn't resolve or caller was not generic: print "!n" or "!!n" literally
+                if (elem.DataType == DATATYPE_VAR)
+                {
+                    CLR_Debug::Printf("!%d", gpIndex);
+                }
+                else
+                {
+                    CLR_Debug::Printf("!!%d", gpIndex);
+                }
+                break;
+            }
+
+            if (elem.DataType == DATATYPE_SZARRAY)
+            {
+                // advance to see what’s inside the array
+                if (FAILED(parser.Advance(elem)))
+                {
+                    // seems to be malformed: print SZARRAY and stop
+                    CLR_Debug::Printf("SZARRAY");
+                    break;
+                }
+
+                // inner element is a VAR/MVAR, it describes “!n[]”
+                if (elem.DataType == DATATYPE_VAR || elem.DataType == DATATYPE_MVAR)
+                {
+                    int gpIndex = elem.GenericParamPosition;
+
+                    if (genericType != nullptr && NANOCLR_INDEX_IS_VALID(*genericType))
+                    {
+                        CLR_RT_TypeDef_Index tdArg{};
+                        NanoCLRDataType dtArg;
+
+                        bool genericParamFound =
+                            tsInst.assembly->FindGenericParamAtTypeSpec(genericType->TypeSpec(), gpIndex, tdArg, dtArg);
+                        if (genericParamFound)
+                        {
+                            // print "I4[]" or the bound argument plus []
+                            char bufArg[256];
+                            char *pArg = bufArg;
+                            size_t cbArg = sizeof(bufArg);
+                            g_CLR_RT_TypeSystem.BuildTypeName(tdArg, pArg, cbArg);
+                            CLR_Debug::Printf("%s[]", bufArg);
+                            break;
+                        }
+                    }
+
+                    // Fallback if we couldn’t resolve: "!n[]" or "!!n[]"
+                    if (elem.DataType == DATATYPE_VAR)
+                    {
+                        CLR_Debug::Printf("!%d[]", gpIndex);
+                    }
+                    else
+                    {
+                        CLR_Debug::Printf("!!%d[]", gpIndex);
+                    }
+                    break;
+                }
+
+                // If it's SZARRAY of a primitive or class (e.g. "Int32[]"), just print full name:
+                {
+                    char bufArr[256];
+                    char *pArr = bufArr;
+                    size_t cbArr = sizeof(bufArr);
+                    g_CLR_RT_TypeSystem.BuildTypeName(tsIdx, pArr, cbArr);
+                    CLR_Debug::Printf("%s", bufArr);
+                    break;
+                }
+            }
+
+            // now all the rest: just print the full type name
+            char bufGeneric[256];
+            char *pGeneric = bufGeneric;
+            size_t cbGeneric = sizeof(bufGeneric);
+            g_CLR_RT_TypeSystem.BuildTypeName(tsIdx, pGeneric, cbGeneric);
+            CLR_Debug::Printf("%s", bufGeneric);
+            break;
+        }
+
         case TBL_FieldDef:
         {
             LOOKUP_ELEMENT_IDX(index, FieldDef, FIELDDEF);
@@ -493,8 +654,20 @@ void CLR_RT_Assembly::DumpToken(CLR_UINT32 token, const CLR_RT_TypeSpec_Index *g
         }
         case TBL_MethodSpec:
         {
-            LOOKUP_ELEMENT_IDX(index, MethodSpec, METHODSPEC);
-            CLR_RT_DUMP::METHODSPEC(s);
+            CLR_UINT32 idx = CLR_DataFromTk(token);
+            auto &xref = crossReferenceMethodSpec[idx];
+
+            CLR_RT_MethodSpec_Index msi;
+            msi.Set(assemblyIndex, idx);
+
+            char buf[256], *p = buf;
+            size_t cb = sizeof(buf);
+            g_CLR_RT_TypeSystem.BuildMethodSpecName(
+                msi,
+                &xref.genericType, // again: the closed declaring type
+                p,
+                cb);
+            CLR_Debug::Printf("%s", buf);
             break;
         }
         case TBL_Strings:
@@ -675,12 +848,34 @@ void CLR_RT_Assembly::DumpOpcodeDirect(
 
     if (IsOpParamToken(opParam))
     {
-        DumpToken(CLR_ReadTokenCompressed(ip, op), call.genericType);
+        // Read the raw 32-bit “token” out of the IL stream:
+        CLR_UINT32 token = CLR_ReadTokenCompressed(ip, op);
+
+        // If this is a CALL or CALLVIRT, force a MethodDef_Instance resolve and
+        // use CLR_RT_DUMP::METHOD to print “TypeName::MethodName”. Otherwise fall
+        // back to the existing DumpToken logic (fields, types, strings, etc.).
+        if (op == CEE_CALL || op == CEE_CALLVIRT)
+        {
+            CLR_RT_MethodDef_Instance mdInst{};
+            if (mdInst.ResolveToken(token, call.assembly))
+            {
+                // mdInst now holds the target MethodDef (or MethodSpec) plus any genericType.
+                CLR_RT_DUMP::METHOD(mdInst, mdInst.genericType);
+            }
+            else
+            {
+                // In the unlikely case ResolveToken fails, fall back to raw DumpToken:
+                DumpToken(token, call.genericType);
+            }
+        }
+        else
+        {
+            DumpToken(token, call.genericType);
+        }
     }
     else
     {
-        CLR_UINT32 argLo;
-        CLR_UINT32 argHi;
+        CLR_UINT32 argLo, argHi;
 
         switch (c_CLR_opParamSizeCompressed[opParam])
         {
