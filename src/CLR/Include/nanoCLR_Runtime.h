@@ -2172,7 +2172,7 @@ struct CLR_RT_MethodDef_Instance : public CLR_RT_MethodDef_Index
     bool InitializeFromIndex(const CLR_RT_MethodDef_Index &index);
     void ClearInstance();
 
-    bool ResolveToken(CLR_UINT32 tk, CLR_RT_Assembly *assm);
+    bool ResolveToken(CLR_UINT32 tk, CLR_RT_Assembly *assm, const CLR_RT_TypeSpec_Index *callerGeneric);
 
     //--//
 
