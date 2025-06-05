@@ -896,7 +896,10 @@ bool CLR_RT_HeapBlock::TypeDescriptorsMatch(
         case DATATYPE_SZARRAY:
         {
             // compare outer dims (always 1) then element types
-            return TypeDescriptorsMatch(expectedType, actualType);
+            CLR_RT_TypeDescriptor expectedElementType, actualElementType;
+            expectedElementType.GetElementType(expectedElementType);
+            actualElementType.GetElementType(actualElementType);
+            return TypeDescriptorsMatch(expectedElementType, actualElementType);
         }
 
         // primitives and other leaf types match on the DataType alone
