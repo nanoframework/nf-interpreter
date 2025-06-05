@@ -872,7 +872,7 @@ jobs:
           solution: "nf-interpreter/targets/netcore/nanoCLR.sln"
           platform: "Any CPU"
           maximumCpuCount: true
-          msbuildArgs: "/p:PublicRelease=true"
+          msbuildArgs: "/restore /p:PublicRelease=true /p:BuildWithNetFrameworkHostedCompiler=true"
           configuration: "Release"
 
       - task: DotNetCoreCLI@2
@@ -1094,7 +1094,7 @@ jobs:
           solution: "nf-interpreter/targets/netcore/nanoCLR.sln"
           platform: "Any CPU"
           maximumCpuCount: true
-          msbuildArgs: "/p:PublicRelease=true"
+          msbuildArgs: "/restore /p:PublicRelease=true /p:BuildWithNetFrameworkHostedCompiler=true"
           configuration: "Release"
 
       - task: DotNetCoreCLI@2
