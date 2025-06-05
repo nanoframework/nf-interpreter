@@ -968,98 +968,94 @@ bool CLR_RT_TypeDef_Instance::ResolveToken(
 
             case TBL_TypeSpec:
             {
+                // Grab the raw signature for the IL token (e.g. !T[], List`1<T>, etc.)
                 const CLR_RECORD_TYPESPEC *ts = assm->GetTypeSpec(index);
-
                 CLR_RT_SignatureParser parser;
                 parser.Initialize_TypeSpec(assm, ts);
 
-                CLR_RT_SignatureParser::Element element;
+                CLR_RT_SignatureParser::Element elem;
 
-                // advance signature: get parameter
-                parser.Advance(element);
-
-                // store parameter position
-                auto genericParamPosition = (CLR_INT8)element.GenericParamPosition;
-
-                switch (element.DataType)
+                // Skip any leading SZARRAY or BYREF
+                do
                 {
-                    case DATATYPE_VAR:
+                    if (FAILED(parser.Advance(elem)))
                     {
-                        CLR_RT_TypeDef_Index typeDef;
-                        CLR_RT_SignatureParser::Element genericElement;
-
-                        CLR_RT_SignatureParser varParser;
-                        varParser.Initialize_TypeSpec(assm, ts);
-
-                        // advance once to consume the GENERICINST or VAR entry
-                        varParser.Advance(genericElement);
-
-                        // now walk forward genericParameterPosition steps to land on the actual
-                        // argument in the signature stream.
-                        for (CLR_INT8 i = 0; i <= genericParamPosition; i++)
-                        {
-                            if (FAILED(varParser.Advance(genericElement)))
-                            {
-                                return false;
-                            }
-                        }
-
-                        // genericElement.Class now holds the TypeDef_Index of the T or U, etc.
-                        typeDef = genericElement.Class;
-
-                        // populate this instance from the resolved TypeDef
-                        data = typeDef.data;
-                        assembly = g_CLR_RT_TypeSystem.m_assemblies[typeDef.Assembly() - 1];
-                        target = assembly->GetTypeDef(typeDef.Type());
-
-#if defined(NANOCLR_INSTANCE_NAMES)
-                        name = assembly->GetString(target->name);
-#endif
-                        return true;
-                    }
-                    break;
-
-                    case DATATYPE_MVAR:
-                    {
-                        CLR_RT_GenericParam_Index gpIndex;
-
-                        caller->assembly->FindGenericParamAtMethodDef(*caller, genericParamPosition, gpIndex);
-
-                        CLR_RT_GenericParam_CrossReference gp =
-                            caller->assembly->crossReferenceGenericParam[gpIndex.GenericParam()];
-
-                        // get TypeDef instance from generic parameter index
-                        data = gp.classTypeDef.data;
-                        assembly = g_CLR_RT_TypeSystem.m_assemblies[gp.classTypeDef.Assembly() - 1];
-                        target = assembly->GetTypeDef(gp.classTypeDef.Type());
-                    }
-                    break;
-
-                    default:
                         return false;
+                    }
+                } while (elem.DataType == DATATYPE_SZARRAY || elem.DataType == DATATYPE_BYREF);
+
+                // If this is a closed‐generic instantiation header, peel off the wrapper
+                if (elem.DataType == DATATYPE_GENERICINST)
+                {
+                    // consume the CLASS/VALUETYPE marker
+                    if (FAILED(parser.Advance(elem)))
+                    {
+                        return false;
+                    }
+                    // consume the generic‐definition token itself
+                    if (FAILED(parser.Advance(elem)))
+                    {
+                        return false;
+                    }
+                    // consume the count of generic arguments
+                    if (FAILED(parser.Advance(elem)))
+                    {
+                        return false;
+                    }
                 }
 
-#if defined(NANOCLR_INSTANCE_NAMES)
-                name = assembly->GetString(target->name);
-#endif
+                // walk forward until a VAR (type‐generic) or MVAR (method‐generic) is hit
+                while (elem.DataType != DATATYPE_VAR && elem.DataType != DATATYPE_MVAR)
+                {
+                    if (FAILED(parser.Advance(elem)))
+                    {
+                        return false;
+                    }
+                }
 
-                return true;
+                // If it's a type‐generic slot (!T), resolve against the caller's closed generic
+                if (elem.DataType == DATATYPE_VAR)
+                {
+                    int pos = elem.GenericParamPosition;
+
+                    // Use the *caller's* bound genericType (Stack<Int32>, etc.)
+                    if (caller == nullptr || caller->genericType == nullptr)
+                    {
+                        return false;
+                    }
+
+                    auto &tsi = *caller->genericType;
+                    CLR_UINT32 closedTsRow = tsi.TypeSpec();
+
+                    CLR_RT_TypeDef_Index realTypeDef;
+                    NanoCLRDataType realDataType;
+
+                    // Only call this once to map (e.g. !T→Int32)
+                    caller->assembly
+                        ->FindGenericParamAtTypeSpec(closedTsRow, (CLR_UINT32)pos, realTypeDef, realDataType);
+
+                    // populate this instance
+                    data = realTypeDef.data;
+                    assembly = g_CLR_RT_TypeSystem.m_assemblies[realTypeDef.Assembly() - 1];
+                    target = assembly->GetTypeDef(realTypeDef.Type());
+
+                    return true;
+                }
+                else
+                {
+                    // elem.DataType == DATATYPE_MVAR
+                    CLR_RT_GenericParam_Index gpIdx;
+                    caller->assembly->FindGenericParamAtMethodDef(*caller, elem.GenericParamPosition, gpIdx);
+                    auto &gp = caller->assembly->crossReferenceGenericParam[gpIdx.GenericParam()];
+
+                    data = gp.classTypeDef.data;
+                    assembly = g_CLR_RT_TypeSystem.m_assemblies[gp.classTypeDef.Assembly() - 1];
+                    target = assembly->GetTypeDef(gp.classTypeDef.Type());
+                    return true;
+                }
             }
 
             default:
-                //// handle generic type from provided data
-                // if (sampleData != nullptr)
-                //{
-                //     CLR_RT_TypeDescriptor::ExtractTypeIndexFromObject(*sampleData, *this);
-                //     m_assm = g_CLR_RT_TypeSystem.m_assemblies[Assembly() - 1];
-                //     m_target = m_assm->GetTypeDef(Type());
-                // }
-                // else
-                //{
-                //     m_data = g_CLR_RT_WellKnownTypes.Object.m_data;
-                //     m_assm = g_CLR_RT_TypeSystem.m_assemblies[g_CLR_RT_WellKnownTypes.Object.Assembly() - 1];
-                //     m_target = m_assm->GetTypeDef(g_CLR_RT_WellKnownTypes.Object.Type());
-                // }
 
 #if defined(NANOCLR_INSTANCE_NAMES)
                 name = assembly->GetString(target->name);
@@ -1159,81 +1155,81 @@ void CLR_RT_FieldDef_Instance::ClearInstance()
 bool CLR_RT_FieldDef_Instance::ResolveToken(CLR_UINT32 tk, CLR_RT_Assembly *assm)
 {
     NATIVE_PROFILE_CLR_CORE();
-    if (assm)
+
+    if (!assm)
     {
-        CLR_UINT32 index = CLR_DataFromTk(tk);
-
-        switch (CLR_TypeFromTk(tk))
-        {
-            case TBL_FieldRef:
-            {
-                const CLR_RECORD_FIELDREF *fr = assm->GetFieldRef(index);
-
-                switch (fr->Owner())
-                {
-                    case TBL_TypeRef:
-                        data = assm->crossReferenceFieldRef[index].target.data;
-                        assembly = g_CLR_RT_TypeSystem.m_assemblies[Assembly() - 1];
-                        target = assembly->GetFieldDef(Field());
-
-                        // invalidate generic type
-                        genericType = nullptr;
-
-                        break;
-
-                    case TBL_TypeSpec:
-                    {
-                        genericType = &assm->crossReferenceFieldRef[index].genericType;
-
-                        const CLR_RECORD_TYPESPEC *ts = assm->GetTypeSpec(genericType->TypeSpec());
-
-                        CLR_RT_FieldDef_Index field;
-
-                        if (!assm->FindFieldDef(ts, assm->GetString(fr->name), assm, fr->signature, field))
-                        {
-                            return false;
-                        }
-
-                        Set(assm->assemblyIndex, field.Field());
-
-                        assembly = assm;
-                        target = assembly->GetFieldDef(Field());
-
-                        break;
-                    }
-                    default:
-                        // shouldn't be here
-                        return false;
-                }
-
-#if defined(NANOCLR_INSTANCE_NAMES)
-                name = assembly->GetString(target->name);
-#endif
-                return true;
-            }
-            case TBL_FieldDef:
-                Set(assm->assemblyIndex, index);
-
-                assembly = assm;
-                target = assembly->GetFieldDef(index);
-
-                // invalidate generic type
-                genericType = nullptr;
-
-#if defined(NANOCLR_INSTANCE_NAMES)
-                name = assembly->GetString(target->name);
-#endif
-                return true;
-
-            default:
-                // the remaining data types aren't to be handled
-                break;
-        }
+        return false;
     }
 
-    ClearInstance();
+    CLR_UINT32 index = CLR_DataFromTk(tk);
 
-    return false;
+    switch (CLR_TypeFromTk(tk))
+    {
+        case TBL_FieldRef:
+        {
+            // Find the raw FIELDREF record
+            const CLR_RECORD_FIELDREF *fr = assm->GetFieldRef(index);
+
+            switch (fr->Owner())
+            {
+                case TBL_TypeRef:
+                    // Simple (non‐generic) field on a TypeRef
+                    data = assm->crossReferenceFieldRef[index].target.data;
+                    assembly = g_CLR_RT_TypeSystem.m_assemblies[Assembly() - 1];
+                    target = assembly->GetFieldDef(Field());
+                    genericType = nullptr; // no TypeSpec
+                    break;
+
+                case TBL_TypeSpec:
+                {
+                    // Field on a generic‐instantiated type.
+                    // Use the MDP TypeSpec (which is already the closed generic),
+                    genericType = &assm->crossReferenceFieldRef[index].genericType;
+
+                    // Retrieve that closed‐generic TypeSpec blob
+                    const CLR_RECORD_TYPESPEC *ts = assm->GetTypeSpec(genericType->TypeSpec());
+
+                    // Look up the actual FieldDef within that closed type
+                    CLR_RT_FieldDef_Index resolvedField;
+                    if (!assm->FindFieldDef(ts, assm->GetString(fr->name), assm, fr->signature, resolvedField))
+                    {
+                        return false;
+                    }
+
+                    // Bind to that real FieldDef
+                    Set(assm->assemblyIndex, resolvedField.Field());
+                    assembly = assm;
+                    target = assembly->GetFieldDef(Field());
+                    break;
+                }
+
+                default:
+                    // should not happen
+                    return false;
+            }
+
+#if defined(NANOCLR_INSTANCE_NAMES)
+            name = assembly->GetString(target->name);
+#endif
+            return true;
+        }
+
+        case TBL_FieldDef:
+            // Direct FieldDef token
+            Set(assm->assemblyIndex, CLR_DataFromTk(tk));
+            assembly = assm;
+            target = assembly->GetFieldDef(Field());
+            genericType = nullptr;
+
+#if defined(NANOCLR_INSTANCE_NAMES)
+            name = assembly->GetString(target->name);
+#endif
+            return true;
+
+        default:
+            // Not a field token
+            return false;
+    }
 }
 
 //////////////////////////////
@@ -1680,6 +1676,25 @@ HRESULT CLR_RT_TypeDescriptor::InitializeFromType(const CLR_RT_TypeDef_Index &cl
     NANOCLR_NOCLEANUP();
 }
 
+HRESULT CLR_RT_TypeDescriptor::InitializeFromTypeDef(const CLR_RT_TypeDef_Index &cls)
+{
+    NATIVE_PROFILE_CLR_CORE();
+    NANOCLR_HEADER();
+    if (m_handlerCls.InitializeFromIndex(cls) == false)
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+    }
+    else
+    {
+        m_flags = CLR_RT_DataTypeLookup::c_ManagedType;
+        m_reflex.kind = REFLECTION_TYPE;
+        m_reflex.levels = 0;
+        m_reflex.data.type = m_handlerCls;
+    }
+    m_handlerGenericType.ClearInstance();
+    NANOCLR_NOCLEANUP();
+}
+
 HRESULT CLR_RT_TypeDescriptor::InitializeFromGenericType(const CLR_RT_TypeSpec_Index &genericType)
 {
     NATIVE_PROFILE_CLR_CORE();
@@ -1743,6 +1758,89 @@ HRESULT CLR_RT_TypeDescriptor::InitializeFromSignatureParser(CLR_RT_SignaturePar
         m_reflex.levels = res.Levels;
 
         ConvertToArray();
+    }
+
+    NANOCLR_NOCLEANUP();
+}
+
+HRESULT CLR_RT_TypeDescriptor::InitializeFromSignatureToken(
+    CLR_RT_Assembly *assm,
+    CLR_UINT32 token,
+    const CLR_RT_MethodDef_Instance *caller)
+{
+    NANOCLR_HEADER();
+
+    // Peel the compressed token to find out which table and index we're in
+    NanoCLRTable dataTable = CLR_TypeFromTk(token);
+    CLR_UINT32 idx = CLR_DataFromTk(token);
+
+    switch (dataTable)
+    {
+        case TBL_TypeRef:
+        case TBL_TypeDef:
+        {
+            CLR_RT_TypeDef_Instance tdInst;
+            if (!tdInst.ResolveToken(token, assm, caller))
+            {
+                NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+            }
+            this->InitializeFromTypeDef(tdInst);
+            break;
+        }
+
+        case TBL_TypeSpec:
+        {
+            // could be SZARRAY, VAR, MVAR or full GENERICINST
+            const CLR_RECORD_TYPESPEC *ts = assm->GetTypeSpec(idx);
+            CLR_RT_SignatureParser parser;
+            parser.Initialize_TypeSpec(assm, ts);
+
+            CLR_RT_SignatureParser::Element elem;
+            parser.Advance(elem);
+
+            if (elem.DataType == DATATYPE_VAR)
+            {
+                // !T: ask the CLR to map that slot into the *actual* argument
+                CLR_RT_TypeDef_Index td;
+                NanoCLRDataType dt;
+                assm->FindGenericParamAtTypeSpec(caller->genericType->TypeSpec(), elem.GenericParamPosition, td, dt);
+                this->InitializeFromTypeDef(td);
+            }
+            else if (elem.DataType == DATATYPE_MVAR)
+            {
+                // !!U: method-generic
+                CLR_RT_GenericParam_Index gp;
+                assm->FindGenericParamAtMethodDef(*caller, elem.GenericParamPosition, gp);
+                auto &info = assm->crossReferenceGenericParam[gp.GenericParam()];
+                this->InitializeFromTypeDef(info.classTypeDef);
+            }
+            else if (elem.DataType == DATATYPE_GENERICINST)
+            {
+                // full generic instantiation: read it out
+                // CLASS/VALUETYPE
+                parser.Advance(elem);
+                // generic-definition token
+                parser.Advance(elem);
+
+                CLR_RT_TypeSpec_Index tsInst{};
+                tsInst.Set(elem.Class.Assembly(), elem.Class.Type());
+
+                // argument count
+                parser.Advance(elem);
+
+                // now read each argument and record in tsInst.m_data.GenericArguments
+                this->InitializeFromTypeSpec(tsInst);
+            }
+            else
+            {
+                // e.g. SZARRAY, VALUETYPE, CLASS
+                this->InitializeFromSignatureParser(parser);
+            }
+            break;
+        }
+
+        default:
+            NANOCLR_SET_AND_LEAVE(CLR_E_NOTIMPL);
     }
 
     NANOCLR_NOCLEANUP();
@@ -4476,9 +4574,50 @@ bool CLR_RT_Assembly::FindGenericParam(CLR_INDEX typeSpecIndex, CLR_RT_GenericPa
     return false;
 }
 
+bool CLR_RT_Assembly::FindGenericParamAtTypeSpec(
+    CLR_UINT32 typeSpecIndex,
+    CLR_INT32 genericParameterPosition,
+    CLR_RT_TypeDef_Index &typeDef,
+    NanoCLRDataType &dataType)
+{
+    NATIVE_PROFILE_CLR_CORE();
+
+    CLR_RT_SignatureParser parser;
+    parser.Initialize_TypeSpec(this, GetTypeSpec(typeSpecIndex));
+
+    CLR_RT_SignatureParser::Element element;
+
+    // get into the GENERICINST
+    if (FAILED(parser.Advance(element)))
+    {
+        return false;
+    }
+
+    // sanity check for invalid parameter position
+    if (genericParameterPosition > parser.GenParamCount)
+    {
+        // not enough parameters!!
+        return false;
+    }
+
+    // walk to the requested parameter position
+    for (int32_t i = 0; i <= genericParameterPosition; i++)
+    {
+        if (FAILED(parser.Advance(element)))
+        {
+            return false;
+        }
+    }
+
+    // element.Class was filled from the VAR position
+    typeDef = element.Class;
+    dataType = element.DataType;
+    return true;
+}
+
 bool CLR_RT_Assembly::FindGenericParamAtMethodDef(
     CLR_RT_MethodDef_Instance md,
-    CLR_UINT32 genericParameterPosition,
+    CLR_INT32 genericParameterPosition,
     CLR_RT_GenericParam_Index &index)
 {
     NATIVE_PROFILE_CLR_CORE();
@@ -6118,7 +6257,31 @@ HRESULT CLR_RT_TypeSystem::BuildMethodRefName(const CLR_RT_MethodRef_Index &meth
 
     NANOCLR_NOCLEANUP();
 }
+HRESULT CLR_RT_TypeSystem::BuildMethodRefName(
+    const CLR_RT_MethodRef_Index &mri,
+    const CLR_RT_TypeSpec_Index *callerGeneric, // may be nullptr if none
+    char *&szBuffer,
+    size_t &iBuffer)
+{
+    NATIVE_PROFILE_CLR_CORE();
+    NANOCLR_HEADER();
 
+    // 1) Grab the assembly that owns this MethodRef
+    CLR_RT_Assembly *assembly = g_CLR_RT_TypeSystem.m_assemblies[mri.Assembly() - 1];
+
+    // 2) Pull the raw CLR_RECORD_METHODREF
+    const CLR_RECORD_METHODREF *mr = assembly->GetMethodRef(mri.Method());
+
+    // 3) Build the corresponding MethodDef_Index
+    //    (MethodRef.method is the metadata token for the definition)
+    CLR_RT_MethodDef_Index md;
+    md.Set(mri.Assembly(), mr->OwnerIndex());
+
+    // 4) Delegate to your existing BuildMethodName, passing the *declaring type’s* TypeSpec
+    NANOCLR_CHECK_HRESULT(BuildMethodName(md, callerGeneric, szBuffer, iBuffer));
+
+    NANOCLR_NOCLEANUP();
+}
 HRESULT CLR_RT_TypeSystem::BuildMethodSpecName(const CLR_RT_MethodSpec_Index &ms, char *&szBuffer, size_t &iBuffer)
 {
     NATIVE_PROFILE_CLR_CORE();
@@ -6206,7 +6369,31 @@ HRESULT CLR_RT_TypeSystem::BuildMethodSpecName(const CLR_RT_MethodSpec_Index &ms
 
     NANOCLR_NOCLEANUP();
 }
+HRESULT CLR_RT_TypeSystem::BuildMethodSpecName(
+    const CLR_RT_MethodSpec_Index &msi,
+    const CLR_RT_TypeSpec_Index *callerGeneric, // may be nullptr if none
+    char *&szBuffer,
+    size_t &iBuffer)
+{
+    NATIVE_PROFILE_CLR_CORE();
+    NANOCLR_HEADER();
 
+    // 1) Grab the assembly that owns this MethodSpec
+    CLR_RT_Assembly *assembly = g_CLR_RT_TypeSystem.m_assemblies[msi.Assembly() - 1];
+
+    // 2) Pull the raw CLR_RECORD_METHODSPEC
+    const CLR_RECORD_METHODSPEC *ms = assembly->GetMethodSpec(msi.Method());
+
+    // 3) Build the corresponding MethodDef_Index
+    //    (MethodSpec.method is the metadata token for the definition)
+    CLR_RT_MethodDef_Index md;
+    md.Set(msi.Assembly(), ms->MethodIndex());
+
+    // 4) Delegate to BuildMethodName, again passing the closed declaring‐type
+    NANOCLR_CHECK_HRESULT(BuildMethodName(md, callerGeneric, szBuffer, iBuffer));
+
+    NANOCLR_NOCLEANUP();
+}
 //--//
 
 bool CLR_RT_TypeSystem::FindVirtualMethodDef(

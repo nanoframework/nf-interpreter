@@ -1422,10 +1422,14 @@ struct CLR_RT_Assembly : public CLR_RT_HeapBlock_Node // EVENT HEAP - NO RELOCAT
     bool FindTypeDef(CLR_UINT32 hash, CLR_RT_TypeDef_Index &index);
 
     bool FindTypeSpec(const CLR_PMETADATA sig, CLR_RT_TypeSpec_Index &index);
-
+    bool FindGenericParamAtTypeSpec(
+        CLR_UINT32 typeSpecIndex,
+        CLR_INT32 genericParameterPosition,
+        CLR_RT_TypeDef_Index &typeDef,
+        NanoCLRDataType &dataType);
     bool FindGenericParamAtMethodDef(
         CLR_RT_MethodDef_Instance md,
-        CLR_UINT32 genericParameterPosition,
+        CLR_INT32 genericParameterPosition,
         CLR_RT_GenericParam_Index &index);
     bool FindGenericParam(CLR_INDEX typeSpecIndex, CLR_RT_GenericParam_Index &index);
     bool FindMethodSpecFromTypeSpec(CLR_INDEX typeSpecIndex, CLR_RT_MethodSpec_Index &index);
@@ -2009,7 +2013,17 @@ struct CLR_RT_TypeSystem // EVENT HEAP - NO RELOCATION -
         size_t &size);
     HRESULT BuildFieldName(const CLR_RT_FieldDef_Index &fd, char *&szBuffer, size_t &size);
     HRESULT BuildMethodRefName(const CLR_RT_MethodRef_Index &method, char *&szBuffer, size_t &iBuffer);
+    HRESULT BuildMethodRefName(
+        const CLR_RT_MethodRef_Index &mri,
+        const CLR_RT_TypeSpec_Index *callerGeneric, // may be nullptr if none
+        char *&szBuffer,
+        size_t &iBuffer);
     HRESULT BuildMethodSpecName(const CLR_RT_MethodSpec_Index &ms, char *&szBuffer, size_t &iBuffer);
+    HRESULT BuildMethodSpecName(
+        const CLR_RT_MethodSpec_Index &msi,
+        const CLR_RT_TypeSpec_Index *callerGeneric, // may be nullptr if none
+        char *&szBuffer,
+        size_t &iBuffer);
 
     HRESULT QueueStringToBuffer(char *&szBuffer, size_t &size, const char *szText);
 
@@ -2329,9 +2343,14 @@ struct CLR_RT_TypeDescriptor
     HRESULT InitializeFromReflection(const CLR_RT_ReflectionDef_Index &reflex);
     HRESULT InitializeFromTypeSpec(const CLR_RT_TypeSpec_Index &sig);
     HRESULT InitializeFromType(const CLR_RT_TypeDef_Index &cls);
+    HRESULT InitializeFromTypeDef(const CLR_RT_TypeDef_Index &cls);
     HRESULT InitializeFromGenericType(const CLR_RT_TypeSpec_Index &genericType);
     HRESULT InitializeFromFieldDefinition(const CLR_RT_FieldDef_Instance &fd);
     HRESULT InitializeFromSignatureParser(CLR_RT_SignatureParser &parser);
+    HRESULT InitializeFromSignatureToken(
+        CLR_RT_Assembly *assm,
+        CLR_UINT32 token,
+        const CLR_RT_MethodDef_Instance *caller);
     HRESULT InitializeFromObject(const CLR_RT_HeapBlock &ref);
 
     void ConvertToArray();
@@ -4062,6 +4081,7 @@ struct CLR_RT_ExecutionEngine
     static bool IsInstanceOf(const CLR_RT_TypeDef_Index &cls, const CLR_RT_TypeDef_Index &clsTarget);
     static bool IsInstanceOf(CLR_RT_HeapBlock &obj, const CLR_RT_TypeDef_Index &clsTarget);
     static bool IsInstanceOf(CLR_RT_HeapBlock &obj, CLR_RT_Assembly *assm, CLR_UINT32 token, bool isInstInstruction);
+    bool IsInstanceOfToken(CLR_UINT32 token, CLR_RT_HeapBlock &obj, const CLR_RT_MethodDef_Instance &caller);
 
     static HRESULT CastToType(CLR_RT_HeapBlock &ref, CLR_UINT32 tk, CLR_RT_Assembly *assm, bool isInstInstruction);
 
