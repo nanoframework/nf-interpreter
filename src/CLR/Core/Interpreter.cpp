@@ -2107,7 +2107,7 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                     FETCH_ARG_COMPRESSED_METHODTOKEN(arg, ip);
 
                     CLR_RT_MethodDef_Instance calleeInst{};
-                    if (calleeInst.ResolveToken(arg, assm) == false)
+                    if (calleeInst.ResolveToken(arg, assm, stack->m_call.genericType) == false)
                     {
                         NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
                     }
@@ -2345,7 +2345,7 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                     FETCH_ARG_COMPRESSED_METHODTOKEN(arg, ip);
 
                     CLR_RT_MethodDef_Instance calleeInst{};
-                    if (calleeInst.ResolveToken(arg, assm) == false)
+                    if (calleeInst.ResolveToken(arg, assm, stack->m_call.genericType) == false)
                     {
                         NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
                     }
@@ -3223,7 +3223,7 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                         case TBL_MethodDef:
                         {
                             CLR_RT_MethodDef_Instance method{};
-                            if (method.ResolveToken(arg, assm) == false)
+                            if (method.ResolveToken(arg, assm, stack->m_call.genericType) == false)
                             {
                                 NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
                             }
@@ -3247,7 +3247,7 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                         case TBL_MethodSpec:
                         {
                             CLR_RT_MethodDef_Instance method{};
-                            if (!method.ResolveToken(arg, assm))
+                            if (!method.ResolveToken(arg, assm, stack->m_call.genericType))
                             {
                                 NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
                             }
@@ -3403,7 +3403,7 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                     CHECKSTACK(stack, evalPos);
 
                     CLR_RT_MethodDef_Instance method{};
-                    if (method.ResolveToken(arg, assm) == false)
+                    if (method.ResolveToken(arg, assm, stack->m_call.genericType) == false)
                     {
                         NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
                     }
@@ -3421,7 +3421,7 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                     FETCH_ARG_COMPRESSED_METHODTOKEN(arg, ip);
 
                     CLR_RT_MethodDef_Instance callee{};
-                    if (callee.ResolveToken(arg, assm) == false)
+                    if (callee.ResolveToken(arg, assm, stack->m_call.genericType) == false)
                     {
                         NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
                     }

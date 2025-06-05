@@ -1268,7 +1268,10 @@ void CLR_RT_MethodDef_Instance::ClearInstance()
     genericType = nullptr;
 }
 
-bool CLR_RT_MethodDef_Instance::ResolveToken(CLR_UINT32 tk, CLR_RT_Assembly *assm)
+bool CLR_RT_MethodDef_Instance::ResolveToken(
+    CLR_UINT32 tk,
+    CLR_RT_Assembly *assm,
+    const CLR_RT_TypeSpec_Index *callerGeneric)
 {
     NATIVE_PROFILE_CLR_CORE();
     if (assm)
@@ -1285,21 +1288,73 @@ bool CLR_RT_MethodDef_Instance::ResolveToken(CLR_UINT32 tk, CLR_RT_Assembly *ass
                 {
                     // owner is TypeSpec
 
-                    genericType = &assm->crossReferenceMethodRef[index].genericType;
+                    // The raw MethodRef* says "Owner = a TypeSpec row".
+                    // That TypeSpec row might be either the *open* generic or a purely nested flavor.
+                    // Even if we know we are inside a closed instantiation of that same generic.
+                    // We want to prefer the calling method's closed TypeSpec (callerGeneric) ONLY if they refer to the
+                    // same TypeDef token.
+                    //
 
-                    const CLR_RECORD_TYPESPEC *ts = assm->GetTypeSpec(genericType->TypeSpec());
+                    // grab the MethodRef *declared* owner:
+                    const CLR_RT_TypeSpec_Index *methodOwnerTS = &assm->crossReferenceMethodRef[index].genericType;
 
-                    CLR_RT_MethodDef_Index method;
+                    // check if MethodRef TypeDef token is the same TypeDef as in that caller
+                    bool useCaller = false;
 
-                    if (!assm->FindMethodDef(ts, assm->GetString(mr->name), assm, mr->signature, method))
+                    if (callerGeneric != nullptr && NANOCLR_INDEX_IS_VALID(*callerGeneric))
+                    {
+                        CLR_RT_TypeSpec_Instance callerInst{};
+                        if (callerInst.InitializeFromIndex(*callerGeneric))
+                        {
+                            CLR_RT_SignatureParser parserCaller;
+                            parserCaller.Initialize_TypeSpec(callerInst.assembly, callerInst.target);
+
+                            CLR_RT_SignatureParser::Element elemCaller;
+
+                            // advance to the generic instance which will point to the class
+                            parserCaller.Advance(elemCaller);
+
+                            CLR_UINT32 callerTypeDefToken = elemCaller.Class.data;
+
+                            // parse the MethodRef declared TypeSpec
+                            CLR_RT_TypeSpec_Instance ownerInst{};
+                            if (ownerInst.InitializeFromIndex(*methodOwnerTS))
+                            {
+                                CLR_RT_SignatureParser parserOwner;
+                                parserOwner.Initialize_TypeSpec(ownerInst.assembly, ownerInst.target);
+
+                                CLR_RT_SignatureParser::Element elemOwner;
+
+                                // advance to the generic instance which will point to the class
+                                parserOwner.Advance(elemOwner);
+
+                                CLR_UINT32 ownerTypeDefToken = elemOwner.Class.data;
+
+                                if (callerTypeDefToken == ownerTypeDefToken)
+                                {
+                                    // we have a match on the typeDef, so they refer to the same type
+                                    // lets bind using the closed generic
+                                    useCaller = true;
+                                }
+                            }
+                        }
+                    }
+
+                    // Pick the “winner” between methodOwnerTS or callerGeneric:
+                    const CLR_RT_TypeSpec_Index *definitiveTypeSpec = useCaller ? callerGeneric : methodOwnerTS;
+                    genericType = (CLR_RT_TypeSpec_Index *)definitiveTypeSpec;
+
+                    const CLR_RECORD_TYPESPEC *ts = assm->GetTypeSpec(definitiveTypeSpec->TypeSpec());
+                    CLR_RT_MethodDef_Index methodIndex;
+
+                    if (!assm->FindMethodDef(ts, assm->GetString(mr->name), assm, mr->signature, methodIndex))
                     {
                         return false;
                     }
 
-                    Set(assm->assemblyIndex, method.Method());
-
+                    Set(assm->assemblyIndex, methodIndex.Method());
                     assembly = assm;
-                    target = assembly->GetMethodDef(method.Method());
+                    target = assembly->GetMethodDef(methodIndex.Method());
                 }
                 else
                 {
@@ -6594,7 +6649,7 @@ bool CLR_RT_AttributeEnumerator::Advance()
 
             // get the method definition, by resolving the token
             CLR_RT_MethodDef_Instance method{};
-            if (method.ResolveToken(token, m_assm) == false)
+            if (method.ResolveToken(token, m_assm, nullptr) == false)
             {
                 ASSERT(0);
             }
