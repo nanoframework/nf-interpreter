@@ -33,7 +33,7 @@
 #define ESP32_ETHERNET_SPI_CLOCK_MHZ 20
 #define ESP32_ETHERNET_SPI_CS        26
 #define ESP32_ETHERNET_SPI_INT_GPIO  34
-#define ETH_PHY_RST_GPIO             13
+// ETH_PHY_RST_GPIO is defined in the CMake file.
 
 // Define SPI pins to use
 #define ESP32_ETHERNET_SPI_MISO_GPIO 19
