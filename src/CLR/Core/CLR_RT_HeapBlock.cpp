@@ -294,31 +294,6 @@ HRESULT CLR_RT_HeapBlock::SetReflection(const CLR_RT_MethodDef_Index &md)
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT CLR_RT_HeapBlock::SetReflection(const CLR_RT_GenericParam_Index &gp)
-{
-    NATIVE_PROFILE_CLR_CORE();
-    NANOCLR_HEADER();
-
-    CLR_RT_GenericParam_Instance genericParam;
-    CLR_RT_TypeDef_Index typeDef;
-
-    if (genericParam.InitializeFromIndex(gp) == false)
-    {
-        NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
-    }
-
-    // grab the type definition from the generic param
-    typeDef = genericParam.CrossReference().classTypeDef;
-
-    m_id.raw = CLR_RT_HEAPBLOCK_RAW_ID(DATATYPE_REFLECTION, 0, 1);
-    m_data.reflection.levels = 0;
-    m_data.reflection.kind = REFLECTION_TYPE;
-    // set the type definition in the reflection block
-    m_data.reflection.data.type.Set(typeDef.Assembly(), typeDef.Type());
-
-    NANOCLR_NOCLEANUP();
-}
-
 HRESULT CLR_RT_HeapBlock::SetObjectCls(const CLR_RT_TypeDef_Index &cls)
 {
     NATIVE_PROFILE_CLR_CORE();
