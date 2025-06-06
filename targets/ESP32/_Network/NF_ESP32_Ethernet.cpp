@@ -131,10 +131,10 @@ esp_err_t NF_ESP32_InitialiseEthernet(uint8_t *pMacAdr)
 
 #elif ESP32_ETHERNET_SPI == TRUE
     // Or Use SPI ethernet module
- 
+
     // Install gpio isr service for spi interupts
     gpio_install_isr_service(0);
-    
+
     // Initialise SPI bus
     spi_bus_config_t buscfg = {0};
     buscfg.miso_io_num = ESP32_ETHERNET_SPI_MISO_GPIO;
