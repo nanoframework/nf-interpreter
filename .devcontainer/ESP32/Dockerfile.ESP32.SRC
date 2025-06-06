@@ -9,7 +9,7 @@ RUN apt-get update \
 
 RUN mkdir -p /tmp/dc-downloads /tmp/dc-extracted
 
-ARG CMAKE_VERSION=3.27.6
+ARG CMAKE_VERSION=3.31.6
 ARG CMAKE_SCRIPT=https://github.com/Kitware/CMake/releases/download/v$CMAKE_VERSION/cmake-$CMAKE_VERSION-linux-x86_64.sh
 RUN wget $CMAKE_SCRIPT \
     -q -O /tmp/dc-downloads/cmake-install.sh \
@@ -45,7 +45,7 @@ RUN apt-get update \
 RUN mkdir -p /usr/local/bin/gcc
 
 # Clone fatfs
-RUN git clone --branch R0.15 https://github.com/abbrev/fatfs.git --depth 1 ./sources/fatfs
+RUN git clone --branch R0.15a https://github.com/abbrev/fatfs.git --depth 1 ./sources/fatfs
 
 # Clone ESP-IDF
 RUN git clone --branch v5.2.3 https://github.com/espressif/esp-idf --depth 1 --recursive ./sources/esp-idf

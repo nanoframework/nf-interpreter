@@ -1,1 +1,1 @@
-FROM ghcr.io/nanoframework/dev-container-freertos-nxp:v1.05
+FROM ghcr.io/nanoframework/dev-container-freertos-nxp:v1.07

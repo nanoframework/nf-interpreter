@@ -505,8 +505,6 @@ static const CLR_RT_MethodHandler method_lookup[] =
     NULL,
     NULL,
     NULL,
-    NULL,
-    NULL,
     Library_corlib_native_System_Reflection_Assembly::get_FullName___STRING,
     Library_corlib_native_System_Reflection_Assembly::GetType___SystemType__STRING,
     NULL,
@@ -572,16 +570,11 @@ static const CLR_RT_MethodHandler method_lookup[] =
     NULL,
     NULL,
     NULL,
-    NULL,
-    NULL,
-    NULL,
-    NULL,
-    NULL,
-    NULL,
-    NULL,
-    NULL,
-    NULL,
     Library_corlib_native_System_Guid::GenerateNewGuid___STATIC__SZARRAY_U1,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
     NULL,
     NULL,
     NULL,
@@ -680,10 +673,6 @@ static const CLR_RT_MethodHandler method_lookup[] =
     NULL,
     NULL,
     Library_corlib_native_System_Reflection_RuntimeMethodInfo::GetCustomAttributesNative___SZARRAY_OBJECT__BOOLEAN,
-    NULL,
-    NULL,
-    NULL,
-    NULL,
     NULL,
     NULL,
     NULL,
@@ -794,6 +783,10 @@ static const CLR_RT_MethodHandler method_lookup[] =
     NULL,
     NULL,
     Library_corlib_native_System_Threading_WaitHandle::WaitMultiple___STATIC__I4__SZARRAY_SystemThreadingWaitHandle__I4__BOOLEAN__BOOLEAN,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
     NULL,
     NULL,
     NULL,
@@ -1262,8 +1255,6 @@ static const CLR_RT_MethodHandler method_lookup[] =
     Library_corlib_native_System_Diagnostics_Debugger::get_IsAttached___STATIC__BOOLEAN,
     Library_corlib_native_System_Diagnostics_Debugger::Break___STATIC__VOID,
     NULL,
-    NULL,
-    NULL,
     Library_corlib_native_System_Enum::HasFlag___BOOLEAN__SystemEnum,
     NULL,
     NULL,
@@ -1312,16 +1303,11 @@ static const CLR_RT_MethodHandler method_lookup[] =
     NULL,
     NULL,
     NULL,
-    NULL,
-    NULL,
-    NULL,
-    NULL,
-    NULL,
-    NULL,
-    NULL,
-    NULL,
-    NULL,
     Library_corlib_native_System_Guid::GenerateNewGuid___STATIC__SZARRAY_U1,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
     NULL,
     NULL,
     NULL,
@@ -1373,10 +1359,6 @@ static const CLR_RT_MethodHandler method_lookup[] =
     Library_corlib_native_System_Random::NextBytes___VOID__SZARRAY_U1,
     Library_corlib_native_System_Random::_ctor___VOID,
     Library_corlib_native_System_Random::_ctor___VOID__I4,
-    NULL,
-    NULL,
-    NULL,
-    NULL,
     NULL,
     NULL,
     NULL,
@@ -1484,6 +1466,10 @@ static const CLR_RT_MethodHandler method_lookup[] =
     NULL,
     NULL,
     NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
     Library_corlib_native_System_ValueType::Equals___BOOLEAN__OBJECT,
     NULL,
     NULL,
@@ -1511,18 +1497,18 @@ const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_mscorlib =
 
 #if (NANOCLR_REFLECTION == TRUE)
 
-    0xE76AC236,
+    0x1549C856,
 
 #elif (NANOCLR_REFLECTION == FALSE)
 
-    0xA0E4A156,
+    0xF0208DC0,
 
 #else
 #error "NANOCLR_REFLECTION has to be define either TRUE or FALSE. Check the build options."
 #endif
 
     method_lookup,
-    { 100, 5, 0, 22 }
+    { 100, 5, 0, 24 }
 };
 
 // clang-format on

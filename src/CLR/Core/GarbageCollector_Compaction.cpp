@@ -10,14 +10,25 @@
 CLR_UINT32 CLR_RT_GarbageCollector::ExecuteCompaction()
 {
     NATIVE_PROFILE_CLR_CORE();
+
+    // bump the number of heap compactions
+    m_numberOfCompactions++;
+
 #if defined(NANOCLR_PROFILE_NEW_ALLOCATIONS)
     g_CLR_PRF_Profiler.RecordHeapCompactionBegin();
 #endif
 
 #if defined(NANOCLR_TRACE_MEMORY_STATS)
+
+    CLR_UINT64 stats_start = HAL_Time_CurrentSysTicks();
+    int ellapsedTimeMilliSec = 0;
+
     if (s_CLR_RT_fTrace_MemoryStats >= c_CLR_RT_Trace_Info)
     {
-        CLR_Debug::Printf("\r\nGC: performing heap compaction\r\n");
+        CLR_Debug::Printf(
+            "\r\n\r\nGC: Relocation - performing heap compaction run #%d @ %s\r\n",
+            m_numberOfCompactions,
+            HAL_Time_CurrentDateTimeToString());
     }
 #endif
 
@@ -29,8 +40,6 @@ CLR_UINT32 CLR_RT_GarbageCollector::ExecuteCompaction()
 
     CLR_RT_ExecutionEngine::ExecutionConstraint_Resume();
 
-    m_numberOfCompactions++;
-
     ////////////////////////////////////////////////////////////////////////////////////////////////
 #if defined(NANOCLR_PROFILE_NEW_ALLOCATIONS)
     g_CLR_PRF_Profiler.RecordHeapCompactionEnd();
@@ -39,7 +48,14 @@ CLR_UINT32 CLR_RT_GarbageCollector::ExecuteCompaction()
 #if defined(NANOCLR_TRACE_MEMORY_STATS)
     if (s_CLR_RT_fTrace_MemoryStats >= c_CLR_RT_Trace_Info)
     {
-        CLR_Debug::Printf("\r\n\r\nGC: (Run %d) heap compaction completed\r\n", m_numberOfCompactions);
+        CLR_INT64 elapsed = HAL_Time_CurrentSysTicks() - stats_start;
+        ellapsedTimeMilliSec =
+            (int)((::HAL_Time_SysTicksToTime(elapsed) + TIME_CONVERSION__TICKUNITS - 1) / TIME_CONVERSION__TICKUNITS);
+
+        CLR_Debug::Printf(
+            "\r\n\r\nGC: Relocation - heap compaction run #%d completed (took %dmsec)\r\n",
+            m_numberOfCompactions,
+            ellapsedTimeMilliSec);
     }
 #endif
 
@@ -123,7 +139,7 @@ void CLR_RT_GarbageCollector::Heap_Compact()
         while (true)
         {
             //
-            // We can only move backward.
+            // We can only move backwards.
             //
             if (currentSource < freeRegion)
             {
@@ -186,14 +202,11 @@ void CLR_RT_GarbageCollector::Heap_Compact()
                 relocCurrent->m_destination = (CLR_UINT8 *)freeRegion;
                 relocCurrent->m_start = (CLR_UINT8 *)currentSource;
 
-                if (relocCurrent->m_destination < relocCurrent->m_start)
-                {
-                    relocCurrent->m_offset = -(CLR_INT32)(relocCurrent->m_start - relocCurrent->m_destination);
-                }
-                else
-                {
-                    relocCurrent->m_offset = (CLR_INT32)(relocCurrent->m_destination - relocCurrent->m_start);
-                }
+#ifdef _WIN64
+                relocCurrent->m_offset = (CLR_UINT64)(relocCurrent->m_destination - relocCurrent->m_start);
+#else
+                relocCurrent->m_offset = (CLR_UINT32)(relocCurrent->m_destination - relocCurrent->m_start);
+#endif
 
                 //
                 // Are the free block and the last moved block adjacent?
@@ -386,15 +399,11 @@ void CLR_RT_GarbageCollector::Heap_Relocate_AddBlock(CLR_UINT8 *dst, CLR_UINT8 *
     reloc->m_start = src;
     reloc->m_end = &src[length];
     reloc->m_destination = dst;
-
-    if (reloc->m_destination < reloc->m_start)
-    {
-        reloc->m_offset = -(CLR_INT32)(reloc->m_start - reloc->m_destination);
-    }
-    else
-    {
-        reloc->m_offset = (CLR_INT32)(reloc->m_destination - reloc->m_start);
-    }
+#ifdef _WIN64
+    reloc->m_offset = (CLR_UINT64)(dst - src);
+#else
+    reloc->m_offset = (CLR_UINT32)(dst - src);
+#endif
 
     if (++m_relocCount == m_relocTotal)
     {
@@ -572,6 +581,10 @@ void CLR_RT_GarbageCollector::Heap_Relocate(void **ref)
                 else
                 {
                     destinationAddress = (void *)(dst + relocCurrent.m_offset);
+
+#if defined(NANOCLR_PROFILE_NEW_ALLOCATIONS)
+                    g_CLR_PRF_Profiler.TrackObjectRelocation(*ref, destinationAddress);
+#endif
 
                     *ref = destinationAddress;
 

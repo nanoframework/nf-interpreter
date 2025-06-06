@@ -125,6 +125,16 @@ namespace nanoFramework.nanoCLR.CLI
                 hostBuilder.UsePortTrace();
             }
 
+            if (options.EnableProfiler)
+            {
+                hostBuilder.EnableProfiler();
+            }
+
+            if(options.DumpProfilerData)
+            {
+                hostBuilder.DumpProfilerLogData();
+            }
+
             hostBuilder.WaitForDebugger = options.WaitForDebugger;
             hostBuilder.EnterDebuggerLoopAfterExit = options.EnterDebuggerLoopAfterExit;
             hostBuilder.PerformGarbageCollection = options.PerformGarbageCollection;

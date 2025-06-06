@@ -131,8 +131,11 @@ esp_err_t NF_ESP32_InitialiseEthernet(uint8_t *pMacAdr)
 
 #elif ESP32_ETHERNET_SPI == TRUE
     // Or Use SPI ethernet module
-    // Initialise SPI bus
+
+    // Install gpio isr service for spi interupts
     gpio_install_isr_service(0);
+
+    // Initialise SPI bus
     spi_bus_config_t buscfg = {0};
     buscfg.miso_io_num = ESP32_ETHERNET_SPI_MISO_GPIO;
     buscfg.mosi_io_num = ESP32_ETHERNET_SPI_MOSI_GPIO;
@@ -140,7 +143,7 @@ esp_err_t NF_ESP32_InitialiseEthernet(uint8_t *pMacAdr)
     buscfg.quadwp_io_num = -1;
     buscfg.quadhd_io_num = -1;
 
-    ESP_ERROR_CHECK(spi_bus_initialize(SPI2_HOST, &buscfg, 1));
+    ESP_ERROR_CHECK(spi_bus_initialize(ESP32_ETHERNET_SPI_HOST, &buscfg, SPI_DMA_CH_AUTO));
 
 #pragma
     // Define SPI interface to use
@@ -154,7 +157,7 @@ esp_err_t NF_ESP32_InitialiseEthernet(uint8_t *pMacAdr)
         .queue_size = 20};
 
     /* dm9051 ethernet driver is based on spi driver */
-    eth_dm9051_config_t dm9051_config = ETH_DM9051_DEFAULT_CONFIG(CONFIG_EXAMPLE_ETH_SPI_HOST, &devcfg);
+    eth_dm9051_config_t dm9051_config = ETH_DM9051_DEFAULT_CONFIG(ESP32_ETHERNET_SPI_HOST, &devcfg);
     dm9051_config.int_gpio_num = ESP32_ETHERNET_SPI_INT_GPIO;
     esp_eth_mac_t *mac = esp_eth_mac_new_dm9051(&dm9051_config, &mac_config);
     esp_eth_phy_t *phy = esp_eth_phy_new_dm9051(&phy_config);
@@ -172,7 +175,7 @@ esp_err_t NF_ESP32_InitialiseEthernet(uint8_t *pMacAdr)
         .queue_size = 20};
 
     // w5500 ethernet driver is based on spi driver
-    eth_w5500_config_t w5500_config = ETH_W5500_DEFAULT_CONFIG(CONFIG_EXAMPLE_ETH_SPI_HOST, &devcfg);
+    eth_w5500_config_t w5500_config = ETH_W5500_DEFAULT_CONFIG(ESP32_ETHERNET_SPI_HOST, &devcfg);
     w5500_config.int_gpio_num = ESP32_ETHERNET_SPI_INT_GPIO;
     esp_eth_mac_t *mac = esp_eth_mac_new_w5500(&w5500_config, &mac_config);
     esp_eth_phy_t *phy = esp_eth_phy_new_w5500(&phy_config);
@@ -189,7 +192,7 @@ esp_err_t NF_ESP32_InitialiseEthernet(uint8_t *pMacAdr)
         .queue_size = 20};
 
     //  enj28j60 ethernet driver is based on spi driver
-    eth_dm9051_config_t enj28j60_config = ETH_ENJ28J60_DEFAULT_CONFIG(CONFIG_EXAMPLE_ETH_SPI_HOST, &devcfg);
+    eth_dm9051_config_t enj28j60_config = ETH_ENJ28J60_DEFAULT_CONFIG(ESP32_ETHERNET_SPI_HOST, &devcfg);
     enj28j60_config.int_gpio_num = ESP32_ETHERNET_SPI_INT_GPIO;
     esp_eth_mac_t *mac = esp_eth_mac_new_enj28j60(&enj28j60_config, &mac_config);
 

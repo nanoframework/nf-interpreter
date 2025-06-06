@@ -36,7 +36,7 @@
 
 #include <target_platform.h>
 
-#include <nanoHAL_Windows_Storage.h>
+#include <nanoHAL_System_IO_FileSystem.h>
 #include <Esp32_DeviceMapping.h>
 
 #if (HAL_USE_SDC == TRUE)

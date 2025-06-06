@@ -192,7 +192,7 @@ CLR_RT_HeapBlock *CLR_RT_HeapCluster::ExtractBlocks(CLR_UINT32 dataType, CLR_UIN
         }
         else
         {
-            res->Debug_ClearBlock(0xCB);
+            res->Debug_ClearBlock(SENTINEL_CLEAR_BLOCK);
         }
     }
 
@@ -243,7 +243,13 @@ void CLR_RT_HeapCluster::RecoverFromGC()
             } while (next < end && next->IsAlive() == false);
 
 #if defined(NANOCLR_PROFILE_NEW_ALLOCATIONS)
-            g_CLR_PRF_Profiler.TrackObjectDeletion(ptr);
+
+            // don't report free blocks, as they are not being deleted, rather grouped
+            if (ptr->DataType() != DATATYPE_FREEBLOCK)
+            {
+                g_CLR_PRF_Profiler.TrackObjectDeletion(ptr);
+            }
+
 #endif
             ptr->SetDataId(CLR_RT_HEAPBLOCK_RAW_ID(DATATYPE_FREEBLOCK, CLR_RT_HeapBlock::HB_Pinned, lenTot));
 
@@ -254,7 +260,7 @@ void CLR_RT_HeapCluster::RecoverFromGC()
             ptr->SetPrev(last);
             last = ptr;
 
-            ptr->Debug_ClearBlock(0xDF);
+            ptr->Debug_ClearBlock(SENTINEL_RECOVERED);
 
             ptr = next;
         }
@@ -321,7 +327,7 @@ CLR_RT_HeapBlock_Node *CLR_RT_HeapCluster::InsertInOrder(CLR_RT_HeapBlock_Node *
     }
 
     node->SetDataId(CLR_RT_HEAPBLOCK_RAW_ID(DATATYPE_FREEBLOCK, CLR_RT_HeapBlock::HB_Pinned, size));
-    node->Debug_ClearBlock(0xCF);
+    node->Debug_ClearBlock(SENTINEL_CLUSTER_INSERT);
 
     return node;
 }
