@@ -1351,7 +1351,6 @@ struct CLR_RT_HeapBlock
     HRESULT SetReflection(const CLR_RT_TypeDef_Index &cls);
     HRESULT SetReflection(const CLR_RT_FieldDef_Index &fd);
     HRESULT SetReflection(const CLR_RT_MethodDef_Index &md);
-    HRESULT SetReflection(const CLR_RT_GenericParam_Index &gp);
 
     HRESULT InitializeArrayReference(CLR_RT_HeapBlock &ref, int index);
     void InitializeArrayReferenceDirect(CLR_RT_HeapBlock_Array &array, int index);
