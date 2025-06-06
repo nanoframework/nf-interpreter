@@ -165,7 +165,7 @@ HRESULT Library_sys_net_native_System_Net_NetworkInformation_WirelessAPConfigura
     NativeGetConnectedClients___STATIC__SZARRAY_SystemNetNetworkInformationWirelessAPStation__I4(
         CLR_RT_StackFrame &stack)
 {
-#if defined(PLATFORM_ESP32) && !defined(CONFIG_IDF_TARGET_ESP32H2)
+#if defined(CONFIG_SOC_WIFI_SUPPORTED) || defined(CONFIG_SOC_WIRELESS_HOST_SUPPORTED)
     NANOCLR_HEADER();
 
     CLR_RT_TypeDef_Index apStationTypeDef;
@@ -263,7 +263,7 @@ HRESULT Library_sys_net_native_System_Net_NetworkInformation_WirelessAPConfigura
 HRESULT Library_sys_net_native_System_Net_NetworkInformation_WirelessAPConfiguration::
     NativeDeauthStation___STATIC__STRING__I4(CLR_RT_StackFrame &stack)
 {
-#if defined(PLATFORM_ESP32) && !defined(CONFIG_IDF_TARGET_ESP32H2)
+#if defined(CONFIG_SOC_WIFI_SUPPORTED) || defined(CONFIG_SOC_WIRELESS_HOST_SUPPORTED)
     NANOCLR_HEADER();
 
     uint16_t index = (uint16_t)stack.Arg0().NumericByRef().u4;
