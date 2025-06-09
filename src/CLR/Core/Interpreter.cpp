@@ -3242,22 +3242,74 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
 
                             if (stack->m_call.genericType != nullptr)
                             {
-                                // For a method in a generic type, caller->genericType points to the TypeSpec of the
-                                // closed type
-                                CLR_UINT32 closedTypeSpecRow = stack->m_call.genericType->TypeSpec();
+                                CLR_UINT32 rawGenericParamRow = CLR_DataFromTk(arg);
 
-                                CLR_RT_TypeDef_Index resolvedTypeDef;
-                                NanoCLRDataType resolvedDataType;
+                                CLR_RT_GenericParam_CrossReference gpCR =
+                                    stack->m_call.assembly->crossReferenceGenericParam[rawGenericParamRow];
 
-                                CLR_UINT32 index = CLR_DataFromTk(arg);
+                                if (gpCR.typeOrMethodDef == TBL_MethodDef)
+                                {
+                                    // Method generic parameter (!!T)
 
-                                assm->FindGenericParamAtTypeSpec(
-                                    closedTypeSpecRow,
-                                    index,
-                                    resolvedTypeDef,
-                                    resolvedDataType);
+                                    CLR_RT_MethodSpec_Index msIndex;
+                                    if (!assm->FindMethodSpecFromTypeSpec(
+                                            stack->m_call.genericType->TypeSpec(),
+                                            msIndex))
+                                    {
+                                        NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+                                    }
 
-                                evalPos[0].SetReflection(resolvedTypeDef);
+                                    CLR_RT_MethodSpec_Instance ms;
+                                    if (ms.InitializeFromIndex(msIndex) == false)
+                                    {
+                                        NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+                                    }
+
+                                    int genericParamPos = param.GenericParam();
+
+                                    CLR_RT_SignatureParser parser;
+                                    CLR_RT_SignatureParser::Element element;
+                                    parser.Initialize_MethodSignature(&ms);
+
+                                    for (int i = 0; i <= genericParamPos; i++)
+                                    {
+                                        NANOCLR_CHECK_HRESULT(parser.Advance(element));
+                                    }
+
+                                    evalPos[0].SetReflection(element.Class);
+                                }
+                                else
+                                {
+                                    // type generic parameter (!T)
+                                    if (stack->m_call.genericType == nullptr)
+                                    {
+                                        // No closed‐generic context available: fall back to returning the
+                                        // declaring TYPE itself as the reflection result (rarely correct, but at least
+                                        // safe).
+                                        CLR_RT_TypeDef_Index fallbackTypeDef = gpCR.classTypeDef;
+                                        NANOCLR_CHECK_HRESULT(evalPos[0].SetReflection(fallbackTypeDef));
+                                    }
+                                    else
+                                    {
+                                        // closed TypeSpec
+                                        const CLR_RT_TypeSpec_Index *callerTypeSpec = stack->m_call.genericType;
+                                        CLR_RT_TypeDef_Index resolvedTypeDef;
+                                        NanoCLRDataType resolvedDataType;
+
+                                        HRESULT hr2 = stack->m_call.assembly->FindGenericParamAtTypeSpec(
+                                            callerTypeSpec->TypeSpec(),
+                                            (CLR_UINT32)gpCR.m_target.GenericParam(),
+                                            resolvedTypeDef,
+                                            resolvedDataType);
+
+                                        if (FAILED(hr2))
+                                        {
+                                            NANOCLR_SET_AND_LEAVE(hr2);
+                                        }
+
+                                        evalPos[0].SetReflection(resolvedTypeDef);
+                                    }
+                                }
                             }
                             else
                             {
