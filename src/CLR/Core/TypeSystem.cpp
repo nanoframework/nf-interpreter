@@ -610,6 +610,8 @@ HRESULT CLR_RT_SignatureParser::Advance(Element &res)
                         // sanity check
                         if (dt == DATATYPE_CLASS || dt == DATATYPE_VALUETYPE)
                         {
+                            res.DataType = dt;
+
                             // parse type
                             goto parse_type;
                         }
@@ -1258,6 +1260,43 @@ bool CLR_RT_MethodDef_Instance::InitializeFromIndex(const CLR_RT_MethodDef_Index
     return false;
 }
 
+bool CLR_RT_MethodDef_Instance::InitializeFromIndex(
+    const CLR_RT_MethodDef_Index &md,
+    const CLR_RT_TypeSpec_Index &typeSpec)
+{
+    NATIVE_PROFILE_CLR_CORE();
+
+    // Look up the TypeSpec's cross‐reference to find the *open* generic definition and its assembly
+    CLR_INDEX tsAsmIdx = typeSpec.Assembly();
+    if (tsAsmIdx == 0 || tsAsmIdx > (int)g_CLR_RT_TypeSystem.c_MaxAssemblies)
+    {
+        return false;
+    }
+    CLR_RT_Assembly *tsAsm = g_CLR_RT_TypeSystem.m_assemblies[tsAsmIdx - 1];
+
+    int tsRow = (int)typeSpec.TypeSpec();
+    const auto &xref = tsAsm->crossReferenceTypeSpec[tsRow];
+
+    // xref.ownerType is the open‐generic TypeDef_Index of Span`1, List`1, etc.
+    CLR_RT_TypeDef_Index ownerType = xref.ownerType;
+
+    // Compute the MethodDef_Index bound to the owner’s assembly
+    CLR_RT_MethodDef_Index mdRebound;
+
+    // pack the new assembly index (ownerType.Assembly()) with the original row
+    mdRebound.data = (ownerType.Assembly() << 24) | md.Method();
+
+    if (!InitializeFromIndex(mdRebound))
+    {
+        return false;
+    }
+
+    // set the generic‐type context *before* we lose it
+    this->genericType = &typeSpec;
+
+    return true;
+}
+
 void CLR_RT_MethodDef_Instance::ClearInstance()
 {
     NATIVE_PROFILE_CLR_CORE();
@@ -1344,16 +1383,26 @@ bool CLR_RT_MethodDef_Instance::ResolveToken(
                     const CLR_RT_TypeSpec_Index *definitiveTypeSpec = useCaller ? callerGeneric : methodOwnerTS;
                     genericType = (CLR_RT_TypeSpec_Index *)definitiveTypeSpec;
 
-                    const CLR_RECORD_TYPESPEC *ts = assm->GetTypeSpec(definitiveTypeSpec->TypeSpec());
+                    CLR_INDEX tsAsmIdx = genericType->Assembly();
+                    CLR_RT_Assembly *genericTypeAssembly = g_CLR_RT_TypeSystem.m_assemblies[tsAsmIdx - 1];
+
+                    const CLR_RECORD_TYPESPEC *ts = genericTypeAssembly->GetTypeSpec(definitiveTypeSpec->TypeSpec());
+                    CLR_UINT32 assemblyIndex = 0xFFFF;
                     CLR_RT_MethodDef_Index methodIndex;
 
-                    if (!assm->FindMethodDef(ts, assm->GetString(mr->name), assm, mr->signature, methodIndex))
+                    if (!genericTypeAssembly->FindMethodDef(
+                            ts,
+                            genericTypeAssembly->GetString(mr->name),
+                            genericTypeAssembly,
+                            mr->signature,
+                            methodIndex,
+                            assemblyIndex))
                     {
                         return false;
                     }
 
-                    Set(assm->assemblyIndex, methodIndex.Method());
-                    assembly = assm;
+                    Set(assemblyIndex - 1, methodIndex.Method());
+                    assembly = g_CLR_RT_TypeSystem.m_assemblies[assemblyIndex - 1];
                     target = assembly->GetMethodDef(methodIndex.Method());
                 }
                 else
@@ -1482,6 +1531,32 @@ bool CLR_RT_MethodDef_Instance::ResolveToken(
     ClearInstance();
 
     return false;
+}
+
+bool CLR_RT_MethodDef_Instance::GetDeclaringType(CLR_RT_TypeDef_Instance &declType) const
+{
+    NATIVE_PROFILE_CLR_CORE();
+
+    if (genericType && NANOCLR_INDEX_IS_VALID(*genericType))
+    {
+        // Look up the assembly that actually owns that TypeSpec
+        auto tsAsm = g_CLR_RT_TypeSystem.m_assemblies[genericType->Assembly() - 1];
+        auto tsRec = tsAsm->GetTypeSpec(genericType->TypeSpec());
+
+        // Parse the signature so we can peel off [GENERICINST CLASS <type> <args>].
+        CLR_RT_SignatureParser parser;
+        parser.Initialize_TypeSpec(tsAsm, tsRec);
+
+        CLR_RT_SignatureParser::Element elem;
+        parser.Advance(elem);
+
+        return declType.InitializeFromIndex(elem.Class);
+    }
+    else
+    {
+        // Normal (non‐generic or open‐generic)
+        return declType.InitializeFromMethod(*this);
+    }
 }
 
 //////////////////////////////
@@ -3203,8 +3278,15 @@ HRESULT CLR_RT_Assembly::ResolveMethodRef()
 #endif
             }
 
-            if (typeSpecInstance.assembly
-                    ->FindMethodDef(typeSpecInstance.target, methodName, this, src->signature, dst->target))
+            CLR_UINT32 dummyAssemblyIndex = 0xffff;
+
+            if (typeSpecInstance.assembly->FindMethodDef(
+                    typeSpecInstance.target,
+                    methodName,
+                    this,
+                    src->signature,
+                    dst->target,
+                    dummyAssemblyIndex))
             {
                 fGot = true;
 
@@ -3376,6 +3458,27 @@ HRESULT CLR_RT_Assembly::ResolveTypeSpec()
             CLR_Debug::Printf("        [%04X]\r\n", i);
         }
 #endif
+
+        // parse the signature to find the defining type token
+        CLR_RT_SignatureParser parser;
+        parser.Initialize_TypeSpec(this, GetTypeSpec(i));
+
+        CLR_RT_SignatureParser::Element elem;
+
+        parser.Advance(elem);
+
+        if (elem.DataType == DATATYPE_VALUETYPE)
+        {
+            // now `elem.Class` is exactly the open Span`1 or List`1
+            // store the open‐generic’s token
+            dst->ownerType = elem.Class;
+        }
+        else
+        {
+            // if the first element is not a generic instantiation, then it must be a type token
+            // no open‐generic, so clear the token
+            dst->ownerType.Clear();
+        }
     }
 
     NANOCLR_NOCLEANUP();
@@ -4878,20 +4981,72 @@ bool CLR_RT_Assembly::FindMethodDef(
     const char *methodName,
     CLR_RT_Assembly *base,
     CLR_SIG sig,
-    CLR_RT_MethodDef_Index &index)
+    CLR_RT_MethodDef_Index &index,
+    CLR_UINT32 &assmIndex)
 {
     NATIVE_PROFILE_CLR_CORE();
 
     CLR_RT_TypeSpec_Index tsIndex;
-    base->FindTypeSpec(base->GetSignature(ts->signature), tsIndex);
+    if (!base->FindTypeSpec(base->GetSignature(ts->signature), tsIndex))
+    {
+        index.Clear();
+        return false;
+    }
 
     CLR_RT_TypeSpec_Instance tsInstance;
-    tsInstance.InitializeFromIndex(tsIndex);
+    if (!tsInstance.InitializeFromIndex(tsIndex))
+    {
+        index.Clear();
+        return false;
+    }
 
-    auto *td = (const CLR_RECORD_TYPEDEF *)base->GetTable(TBL_TypeDef);
-    td += tsInstance.typeDefIndex;
+    // switch to the assembly that declared this TypeSpec
+    CLR_RT_Assembly *declAssm = tsInstance.assembly;
+    const CLR_RECORD_TYPEDEF *td =
+        (const CLR_RECORD_TYPEDEF *)declAssm->GetTable(TBL_TypeDef) + tsInstance.typeDefIndex;
 
-    return CLR_RT_Assembly::FindMethodDef(td, methodName, base, sig, index);
+    if (declAssm->FindMethodDef(td, methodName, base, sig, index))
+    {
+        assmIndex = declAssm->assemblyIndex;
+        return true;
+    }
+
+    // parse the TypeSpec signature to get the *definition* token of the generic type:
+    CLR_RT_SignatureParser parser{};
+    parser.Initialize_TypeSpec(this, ts);
+    CLR_RT_SignatureParser::Element elem{};
+
+    // advance to get the actual CLASS/VALUETYPE token for the generic definition.
+    if (FAILED(parser.Advance(elem)))
+    {
+        return false;
+    }
+
+    CLR_UINT32 genericDefToken = elem.Class.data;
+
+    CLR_RT_TypeDef_Index typeDef;
+    typeDef.Clear();
+    typeDef.data = genericDefToken;
+
+    CLR_RT_TypeDef_Instance typeDefInstance;
+    if (typeDefInstance.InitializeFromIndex(typeDef) == false)
+    {
+        return false;
+    }
+
+    while (NANOCLR_INDEX_IS_VALID(typeDefInstance))
+    {
+        if (typeDefInstance.assembly->FindMethodDef(typeDefInstance.target, methodName, this, sig, index))
+        {
+            assmIndex = typeDefInstance.assembly->assemblyIndex;
+
+            return true;
+        }
+
+        typeDefInstance.SwitchToParent();
+    }
+
+    return false;
 }
 
 bool CLR_RT_Assembly::FindTypeSpec(CLR_PMETADATA sig, CLR_RT_TypeSpec_Index &index)
@@ -6166,28 +6321,31 @@ HRESULT CLR_RT_TypeSystem::BuildMethodName(
     NANOCLR_HEADER();
 
     CLR_RT_MethodDef_Instance inst{};
-    CLR_RT_TypeDef_Instance instOwner{};
-
-    if (inst.InitializeFromIndex(md) == false)
-    {
-        NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
-    }
-
-    if (instOwner.InitializeFromMethod(inst) == false)
-    {
-        NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
-    }
 
     if (genericType == nullptr)
     {
+        if (inst.InitializeFromIndex(md) == false)
+        {
+            NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+        }
+
+        CLR_RT_TypeDef_Instance instOwner{};
+        if (instOwner.InitializeFromMethod(inst) == false)
+        {
+            NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+        }
+
         NANOCLR_CHECK_HRESULT(BuildTypeName(instOwner, szBuffer, iBuffer));
 
         CLR_SafeSprintf(szBuffer, iBuffer, "::%s", inst.assembly->GetString(inst.target->name));
     }
     else
     {
+        CLR_INDEX tsAsmIdx = genericType->Assembly();
+        CLR_RT_Assembly *genericTypeAssembly = g_CLR_RT_TypeSystem.m_assemblies[tsAsmIdx - 1];
+
         CLR_RT_SignatureParser parser;
-        parser.Initialize_TypeSpec(inst.assembly, inst.assembly->GetTypeSpec(genericType->TypeSpec()));
+        parser.Initialize_TypeSpec(genericTypeAssembly, genericTypeAssembly->GetTypeSpec(genericType->TypeSpec()));
 
         CLR_RT_SignatureParser::Element element;
 
@@ -6215,7 +6373,14 @@ HRESULT CLR_RT_TypeSystem::BuildMethodName(
             }
         }
 
-        CLR_SafeSprintf(szBuffer, iBuffer, ">::%s", inst.assembly->GetString(inst.target->name));
+        if (inst.InitializeFromIndex(md, *genericType) == false)
+        {
+            // this is a MethodDef for a generic type, but the generic type is not bound to an assembly
+            // so we cannot build the name of the method.
+            NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+        }
+
+        CLR_SafeSprintf(szBuffer, iBuffer, ">::%s", genericTypeAssembly->GetString(inst.target->name));
     }
 
     NANOCLR_NOCLEANUP();
