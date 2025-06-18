@@ -2157,41 +2157,65 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                     }
                     else // Non delegate
                     {
+
                         CLR_RT_MethodDef_Index calleeReal;
 
-                        if ((calleeInst.target->flags & CLR_RECORD_METHODDEF::MD_Static) == 0)
+                        bool doInstanceResolution = true;
+
+                        if (calleeInst.target->flags & CLR_RECORD_METHODDEF::MD_Static)
                         {
-                            // Instance method, pThis[ 0 ] is valid
+                            doInstanceResolution = false;
+                        }
+                        else
+                        {
+                            CLR_RT_TypeDef_Instance declType;
+                            NANOCLR_CHECK_HRESULT(calleeInst.GetDeclaringType(declType));
 
-                            if (op == CEE_CALL && pThis[0].Dereference() == nullptr)
+                            if (declType.target->dataType == DATATYPE_VALUETYPE)
                             {
-                                // CALL on a null instance is allowed, and should not throw a NullReferenceException on
-                                // the call although a NullReferenceException is likely to be thrown soon thereafter if
-                                // the call tries to access any member variables.
+                                // any method on a value‐type is called via byref, so skip the object‐dereference path
+                                // altogether
+                                doInstanceResolution = false;
                             }
-                            else
-                            {
-                                NANOCLR_CHECK_HRESULT(CLR_RT_TypeDescriptor::ExtractTypeIndexFromObject(pThis[0], cls));
+                        }
 
-                                // This test is for performance reasons.  c# emits a callvirt on all instance methods to
-                                // make sure that a NullReferenceException is thrown if 'this' is nullptr.  However, if
-                                // the instance method isn't virtual we don't need to do the more expensive virtual
-                                // method lookup.
-                                if (op == CEE_CALLVIRT &&
-                                    (calleeInst.target->flags &
-                                     (CLR_RECORD_METHODDEF::MD_Abstract | CLR_RECORD_METHODDEF::MD_Virtual)))
+                        if (doInstanceResolution)
+                        {
+                            if ((calleeInst.target->flags & CLR_RECORD_METHODDEF::MD_Static) == 0)
+                            {
+                                // Instance method, pThis[ 0 ] is valid
+
+                                if (op == CEE_CALL && pThis[0].Dereference() == nullptr)
                                 {
-                                    if (g_CLR_RT_EventCache.FindVirtualMethod(cls, calleeInst, calleeReal) == false)
+                                    // CALL on a null instance is allowed, and should not throw a NullReferenceException
+                                    // on the call although a NullReferenceException is likely to be thrown soon
+                                    // thereafter if the call tries to access any member variables.
+                                }
+                                else
+                                {
+                                    NANOCLR_CHECK_HRESULT(
+                                        CLR_RT_TypeDescriptor::ExtractTypeIndexFromObject(pThis[0], cls));
+
+                                    // This test is for performance reasons.  c# emits a callvirt on all instance
+                                    // methods to make sure that a NullReferenceException is thrown if 'this' is
+                                    // nullptr.  However, if the instance method isn't virtual we don't need to do the
+                                    // more expensive virtual method lookup.
+                                    if (op == CEE_CALLVIRT &&
+                                        (calleeInst.target->flags &
+                                         (CLR_RECORD_METHODDEF::MD_Abstract | CLR_RECORD_METHODDEF::MD_Virtual)))
                                     {
-                                        NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+                                        if (g_CLR_RT_EventCache.FindVirtualMethod(cls, calleeInst, calleeReal) == false)
+                                        {
+                                            NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+                                        }
+
+                                        calleeInst.InitializeFromIndex(calleeReal);
                                     }
 
-                                    calleeInst.InitializeFromIndex(calleeReal);
-                                }
-
 #if defined(NANOCLR_APPDOMAINS)
-                                fAppDomainTransition = pThis[0].IsTransparentProxy();
+                                    fAppDomainTransition = pThis[0].IsTransparentProxy();
 #endif
+                                }
                             }
                         }
                     }

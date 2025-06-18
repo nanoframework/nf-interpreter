@@ -962,6 +962,7 @@ struct CLR_RT_MethodSpec_CrossReference
 struct CLR_RT_TypeSpec_CrossReference
 {
     CLR_RT_TypeSpec_Index genericType;
+    CLR_RT_TypeDef_Index ownerType;
 };
 
 struct CLR_RT_MethodDef_Patch
@@ -1457,7 +1458,8 @@ struct CLR_RT_Assembly : public CLR_RT_HeapBlock_Node // EVENT HEAP - NO RELOCAT
         const char *name,
         CLR_RT_Assembly *base,
         CLR_SIG sig,
-        CLR_RT_MethodDef_Index &index);
+        CLR_RT_MethodDef_Index &index,
+        CLR_UINT32 &assmIndex);
 
     bool FindNextStaticConstructor(CLR_RT_MethodDef_Index &index);
 
@@ -2170,9 +2172,12 @@ struct CLR_RT_MethodDef_Instance : public CLR_RT_MethodDef_Index
     //--//
 
     bool InitializeFromIndex(const CLR_RT_MethodDef_Index &index);
+    bool InitializeFromIndex(const CLR_RT_MethodDef_Index &index, const CLR_RT_TypeSpec_Index &typeSpec);
     void ClearInstance();
 
     bool ResolveToken(CLR_UINT32 tk, CLR_RT_Assembly *assm, const CLR_RT_TypeSpec_Index *callerGeneric);
+
+    bool GetDeclaringType(CLR_RT_TypeDef_Instance &declType) const;
 
     //--//
 
