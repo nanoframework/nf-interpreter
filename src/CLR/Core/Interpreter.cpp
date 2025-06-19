@@ -3330,7 +3330,6 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                                         // closed TypeSpec
                                         const CLR_RT_TypeSpec_Index *callerTypeSpec = stack->m_call.genericType;
                                         CLR_RT_TypeDef_Index resolvedTypeDef;
-
                                         NanoCLRDataType dummyDataType;
 
                                         if (!resolveAsm->FindGenericParamAtTypeSpec(
