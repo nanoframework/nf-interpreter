@@ -2378,7 +2378,10 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                     CLR_RT_HeapBlock *top;
                     CLR_INT32 changes;
 
-                    cls.InitializeFromMethod(calleeInst); // This is the class to create!
+                    if (!calleeInst.GetDeclaringType(cls))
+                    {
+                        NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+                    }
 
                     evalPos++;
 
