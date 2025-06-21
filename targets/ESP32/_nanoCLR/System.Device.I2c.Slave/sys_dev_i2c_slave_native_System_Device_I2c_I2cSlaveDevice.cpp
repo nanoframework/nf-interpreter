@@ -31,7 +31,7 @@ NF_PAL_I2CSLAVE *GetPalI2cSlaveFromBusIndex(int busIndex)
             return &I2cSlave0_PAL;
 #endif
 
-#if SOC_I2C_NUM > 1
+#if SOC_HP_I2C_NUM > 1
         case I2C_NUM_1:
             // set UART PAL
             return &I2cSlave1_PAL;
