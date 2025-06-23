@@ -2569,7 +2569,33 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                     CLR_RT_HeapBlock *obj = &evalPos[0];
                     NanoCLRDataType dt = obj->DataType();
 
-                    NANOCLR_CHECK_HRESULT(CLR_RT_TypeDescriptor::ExtractObjectAndDataType(obj, dt));
+                    // If it's a byref, it must be a struct instance on the stack/heap
+                    bool instanceIsByRef =
+                        (obj->DataType() == DATATYPE_BYREF) || (obj->DataType() == DATATYPE_ARRAY_BYREF);
+
+                    if (instanceIsByRef)
+                    {
+                        // extra check for DATATYPE_DATETIME and DATATYPE_TIMESPAN (special cases)
+                        if (obj->Dereference()->DataType() == DATATYPE_DATETIME ||
+                            obj->Dereference()->DataType() == DATATYPE_TIMESPAN)
+                        {
+                            NANOCLR_CHECK_HRESULT(CLR_RT_TypeDescriptor::ExtractObjectAndDataType(obj, dt));
+                        }
+                        else
+                        {
+                            // we already have a pointer to the raw struct
+                            dt = DATATYPE_VALUETYPE;
+
+                            obj = obj->Dereference();
+                            FAULT_ON_NULL(obj);
+                        }
+                    }
+                    else
+                    {
+                        // ordinary object/array
+                        FAULT_ON_NULL(obj);
+                        NANOCLR_CHECK_HRESULT(CLR_RT_TypeDescriptor::ExtractObjectAndDataType(obj, dt));
+                    }
 
                     switch (dt)
                     {
@@ -2665,9 +2691,35 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                     }
 
                     CLR_RT_HeapBlock *obj = &evalPos[1];
-                    NanoCLRDataType dt = obj->DataType();
+                    NanoCLRDataType dt;
 
-                    NANOCLR_CHECK_HRESULT(CLR_RT_TypeDescriptor::ExtractObjectAndDataType(obj, dt));
+                    // If it's a byref, it must be a struct instance on the stack/heap
+                    bool instanceIsByRef =
+                        (obj->DataType() == DATATYPE_BYREF) || (obj->DataType() == DATATYPE_ARRAY_BYREF);
+
+                    if (instanceIsByRef)
+                    {
+                        // extra check for DATATYPE_DATETIME and DATATYPE_TIMESPAN (special cases)
+                        if (obj->Dereference()->DataType() == DATATYPE_DATETIME ||
+                            obj->Dereference()->DataType() == DATATYPE_TIMESPAN)
+                        {
+                            NANOCLR_CHECK_HRESULT(CLR_RT_TypeDescriptor::ExtractObjectAndDataType(obj, dt));
+                        }
+                        else
+                        {
+                            // we already have a pointer to the raw struct
+                            dt = DATATYPE_VALUETYPE;
+
+                            // follow the byref so obj really points at the struct
+                            obj = obj->Dereference();
+                        }
+                    }
+                    else
+                    {
+                        // ordinary object/array
+                        FAULT_ON_NULL(obj);
+                        NANOCLR_CHECK_HRESULT(CLR_RT_TypeDescriptor::ExtractObjectAndDataType(obj, dt));
+                    }
 
                     switch (dt)
                     {
