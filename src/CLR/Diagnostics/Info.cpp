@@ -524,8 +524,14 @@ void CLR_RT_Assembly::DumpToken(CLR_UINT32 token, const CLR_RT_TypeSpec_Index *g
             // back to BuildTypeName for the full concrete name.
             //
 
+            CLR_UINT32 ownerAsm = assemblyIndex;
+            if (genericType != nullptr && NANOCLR_INDEX_IS_VALID(*genericType))
+            {
+                ownerAsm = genericType->Assembly();
+            }
+
             CLR_RT_TypeSpec_Index tsIdx;
-            tsIdx.Set(assemblyIndex, index);
+            tsIdx.Set(ownerAsm, index);
 
             // bind to get the signature blob
             CLR_RT_TypeSpec_Instance tsInst{};
