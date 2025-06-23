@@ -2568,7 +2568,7 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
 
                     CLR_RT_HeapBlock *obj = &evalPos[0];
                     NanoCLRDataType dt = obj->DataType();
-   
+
                     // If it's a byref, it must be a struct instance on the stack/heap
                     bool instanceIsByRef =
                         (obj->DataType() == DATATYPE_BYREF) || (obj->DataType() == DATATYPE_ARRAY_BYREF);
@@ -2597,12 +2597,12 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                         NANOCLR_CHECK_HRESULT(CLR_RT_TypeDescriptor::ExtractObjectAndDataType(obj, dt));
                     }
 
-                    //if ((dt == DATATYPE_OBJECT || dt == DATATYPE_BYREF) && obj->Dereference() == NULL)
+                    // if ((dt == DATATYPE_OBJECT || dt == DATATYPE_BYREF) && obj->Dereference() == NULL)
                     //{
-                    //    NANOCLR_SET_AND_LEAVE(CLR_E_NULL_REFERENCE); 
-                    //}
+                    //     NANOCLR_SET_AND_LEAVE(CLR_E_NULL_REFERENCE);
+                    // }
 
-                    //NANOCLR_CHECK_HRESULT(CLR_RT_TypeDescriptor::ExtractObjectAndDataType(obj, dt));
+                    // NANOCLR_CHECK_HRESULT(CLR_RT_TypeDescriptor::ExtractObjectAndDataType(obj, dt));
 
                     switch (dt)
                     {
