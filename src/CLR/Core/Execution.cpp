@@ -1915,7 +1915,6 @@ HRESULT CLR_RT_ExecutionEngine::InitializeLocals(
     {
         NanoCLRDataType dt = DATATYPE_VOID;
         CLR_RT_TypeDef_Index cls;
-        CLR_RT_TypeSpec_Index typeSpecIndex;
         CLR_UINT32 levels = 0;
         NanoCLRDataType dtModifier = DATATYPE_VOID;
 
@@ -1963,10 +1962,17 @@ HRESULT CLR_RT_ExecutionEngine::InitializeLocals(
                     // otherwise the comparison won't be possible
                     sig--;
 
-                    if (!assembly->FindTypeSpec(sig, typeSpecIndex))
-                    {
-                        NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
-                    }
+                    // Parse the TypeSpec signature to get the instantiated element
+                    CLR_RT_SignatureParser sp;
+                    sp.Initialize_TypeSpec(assembly, sig);
+
+                    CLR_RT_SignatureParser::Element element;
+                    NANOCLR_CHECK_HRESULT(sp.Advance(element));
+
+                    // element.Class and element.DataType represent the T
+                    cls = element.Class;
+                    dt = element.DataType;
+
                     goto done;
 
                 case DATATYPE_VAR:
@@ -1977,7 +1983,7 @@ HRESULT CLR_RT_ExecutionEngine::InitializeLocals(
                     // parse the locals-signature to extract that T
                     CLR_RT_SignatureParser parser;
                     parser.Initialize_MethodLocals(assembly, methodDef);
-                    CLR_RT_SignatureParser::Element element;
+                    CLR_RT_SignatureParser::Element sigElement;
 
                     // ensure we don’t walk past the available generic parameters
                     const int maxParams = methodDefInstance.target->genericParamCount;
@@ -1987,17 +1993,17 @@ HRESULT CLR_RT_ExecutionEngine::InitializeLocals(
                     }
 
                     // advance into the VAR entry
-                    parser.Advance(element);
+                    parser.Advance(sigElement);
 
                     // walk forward to the Nth generic-parameter
                     for (int i = 0; i < genericParamPosition; i++)
                     {
-                        parser.Advance(element);
+                        parser.Advance(sigElement);
                     }
 
                     // element.Class and element.DataType represent the T
-                    cls = element.Class;
-                    dt = element.DataType;
+                    cls = sigElement.Class;
+                    dt = sigElement.DataType;
 
                     goto done;
                 }
@@ -2080,13 +2086,6 @@ HRESULT CLR_RT_ExecutionEngine::InitializeLocals(
 
                     NANOCLR_CHECK_HRESULT(NewObject(*locals, inst));
                 }
-            }
-            else if (dt == DATATYPE_GENERICINST)
-            {
-                // locals for generic instances are always OBJECT type
-                dt = DATATYPE_OBJECT;
-                locals->SetDataId(CLR_RT_HEAPBLOCK_RAW_ID(dt, CLR_RT_HeapBlock::HB_Alive, 1));
-                locals->ClearData();
             }
             else
             {
