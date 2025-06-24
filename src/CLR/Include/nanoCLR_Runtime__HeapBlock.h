@@ -1347,7 +1347,7 @@ struct CLR_RT_HeapBlock
 
     HRESULT SetReflection(const CLR_RT_ReflectionDef_Index &reflex);
     HRESULT SetReflection(const CLR_RT_Assembly_Index &assm);
-    HRESULT SetReflection(const CLR_RT_TypeSpec_Index &sig);
+    HRESULT SetReflection(const CLR_RT_TypeSpec_Instance &tsInst, const CLR_RT_TypeSpec_Index *caller);
     HRESULT SetReflection(const CLR_RT_TypeDef_Index &cls);
     HRESULT SetReflection(const CLR_RT_FieldDef_Index &fd);
     HRESULT SetReflection(const CLR_RT_MethodDef_Index &md);

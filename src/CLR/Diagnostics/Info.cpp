@@ -531,7 +531,7 @@ void CLR_RT_Assembly::DumpToken(CLR_UINT32 token, const CLR_RT_TypeSpec_Index *g
             }
 
             CLR_RT_TypeSpec_Index tsIdx;
-            tsIdx.Set(ownerAsm, index);
+            tsIdx.Set(assemblyIndex, index);
 
             // bind to get the signature blob
             CLR_RT_TypeSpec_Instance tsInst{};
@@ -568,17 +568,19 @@ void CLR_RT_Assembly::DumpToken(CLR_UINT32 token, const CLR_RT_TypeSpec_Index *g
                 {
                     CLR_RT_TypeDef_Index tdArg{};
                     NanoCLRDataType dtArg;
-
-                    bool ok =
-                        tsInst.assembly->FindGenericParamAtTypeSpec(genericType->TypeSpec(), gpIndex, tdArg, dtArg);
+                    bool ok = g_CLR_RT_TypeSystem.m_assemblies[genericType->Assembly() - 1]
+                                  ->FindGenericParamAtTypeSpec(genericType->TypeSpec(), gpIndex, tdArg, dtArg);
                     if (ok)
                     {
-                        // Print that bound argument (e.g. "I4" or full class name)
-                        char bufArg[256];
+                        char bufArg[256]{};
                         char *pArg = bufArg;
                         size_t cbArg = sizeof(bufArg);
-                        g_CLR_RT_TypeSystem.BuildTypeName(tdArg, pArg, cbArg);
+
+                        g_CLR_RT_TypeSystem
+                            .BuildTypeName(tdArg, pArg, cbArg, CLR_RT_TypeSystem::TYPENAME_FLAGS_FULL, elem.Levels);
+
                         CLR_Debug::Printf("%s", bufArg);
+
                         break;
                     }
                 }
