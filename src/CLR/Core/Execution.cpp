@@ -2088,13 +2088,6 @@ HRESULT CLR_RT_ExecutionEngine::InitializeLocals(
                     NANOCLR_CHECK_HRESULT(NewObject(*locals, inst));
                 }
             }
-            else if (dt == DATATYPE_GENERICINST)
-            {
-                // locals for generic instances are always OBJECT type
-                dt = DATATYPE_OBJECT;
-                locals->SetDataId(CLR_RT_HEAPBLOCK_RAW_ID(dt, CLR_RT_HeapBlock::HB_Alive, 1));
-                locals->ClearData();
-            }
             else
             {
                 if (c_CLR_RT_DataTypeLookup[dt].m_flags & CLR_RT_DataTypeLookup::c_Reference)
