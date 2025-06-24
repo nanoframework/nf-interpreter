@@ -1915,7 +1915,6 @@ HRESULT CLR_RT_ExecutionEngine::InitializeLocals(
     {
         NanoCLRDataType dt = DATATYPE_VOID;
         CLR_RT_TypeDef_Index cls;
-        CLR_RT_TypeSpec_Index typeSpecIndex;
         CLR_UINT32 levels = 0;
         NanoCLRDataType dtModifier = DATATYPE_VOID;
 
@@ -1984,7 +1983,7 @@ HRESULT CLR_RT_ExecutionEngine::InitializeLocals(
                     // parse the locals-signature to extract that T
                     CLR_RT_SignatureParser parser;
                     parser.Initialize_MethodLocals(assembly, methodDef);
-                    CLR_RT_SignatureParser::Element element;
+                    CLR_RT_SignatureParser::Element sigElement;
 
                     // ensure we don’t walk past the available generic parameters
                     const int maxParams = methodDefInstance.target->genericParamCount;
@@ -1994,17 +1993,17 @@ HRESULT CLR_RT_ExecutionEngine::InitializeLocals(
                     }
 
                     // advance into the VAR entry
-                    parser.Advance(element);
+                    parser.Advance(sigElement);
 
                     // walk forward to the Nth generic-parameter
                     for (int i = 0; i < genericParamPosition; i++)
                     {
-                        parser.Advance(element);
+                        parser.Advance(sigElement);
                     }
 
                     // element.Class and element.DataType represent the T
-                    cls = element.Class;
-                    dt = element.DataType;
+                    cls = sigElement.Class;
+                    dt = sigElement.DataType;
 
                     goto done;
                 }
