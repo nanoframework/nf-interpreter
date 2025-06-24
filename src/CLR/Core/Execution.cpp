@@ -1963,10 +1963,17 @@ HRESULT CLR_RT_ExecutionEngine::InitializeLocals(
                     // otherwise the comparison won't be possible
                     sig--;
 
-                    if (!assembly->FindTypeSpec(sig, typeSpecIndex))
-                    {
-                        NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
-                    }
+                    // Parse the TypeSpec signature to get the instantiated element
+                    CLR_RT_SignatureParser sp;
+                    sp.Initialize_TypeSpec(assembly, sig);
+
+                    CLR_RT_SignatureParser::Element element;
+                    NANOCLR_CHECK_HRESULT(sp.Advance(element));
+
+                    // element.Class and element.DataType represent the T
+                    cls = element.Class;
+                    dt = element.DataType;
+
                     goto done;
 
                 case DATATYPE_VAR:
