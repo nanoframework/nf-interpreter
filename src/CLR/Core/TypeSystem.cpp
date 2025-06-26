@@ -7183,10 +7183,22 @@ HRESULT CLR_RT_AttributeParser::ReadString(CLR_RT_HeapBlock *&value)
 
     NANOCLR_READ_UNALIGNED_UINT16(tk, m_blob);
 
-    NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_String::CreateInstance(*value, CLR_TkFromType(TBL_Strings, tk), m_assm));
+    // check for invalid string ID (0xFFFF) meaning "null"
+    if (tk == 0xFFFF)
+    {
+        // create a string
+        NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_String::CreateInstance(*value, nullptr, m_assm));
 
-    // need to box this
-    value->PerformBoxing(desc.m_handlerCls);
+        // null the object so it's a real null
+        value->SetObjectReference(nullptr);
+    }
+    else
+    {
+        NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_String::CreateInstance(*value, CLR_TkFromType(TBL_Strings, tk), m_assm));
+
+        // need to box this
+        value->PerformBoxing(desc.m_handlerCls);
+    }
 
     NANOCLR_NOCLEANUP();
 }
