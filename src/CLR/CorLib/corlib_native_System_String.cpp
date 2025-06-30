@@ -627,6 +627,157 @@ static inline bool MatchString(CLR_RT_UnicodeHelper& inputIter, const char* sear
     return true;
 }
 
+HRESULT Library_corlib_native_System_String::IndexOf(CLR_RT_StackFrame &stack, int mode) {
+    NATIVE_PROFILE_CLR_CORE();
+    NANOCLR_HEADER();
+
+    const char *szText;
+    int startIndex;
+    int count;
+    int pos;
+    const char *pString = NULL;
+    const CLR_UINT16 *pChars = NULL;
+    int iChars = 0;
+    CLR_RT_UnicodeHelper inputIterator;
+    int inputLen;
+    int searchLen = 1;
+
+    szText = stack.Arg0().RecoverString();
+    if (!szText) szText = "";
+    pos = -1;
+
+    // Argument processing (unchanged)
+    if (mode & c_IndexOf__SingleChar) {
+        pChars = (CLR_UINT16 *)&stack.Arg1().NumericByRefConst().u2;
+        iChars = 1;
+    }
+    else if (mode & c_IndexOf__MultipleChars) {
+        CLR_RT_HeapBlock_Array *array = stack.Arg1().DereferenceArray();
+        FAULT_ON_NULL(array);
+        pChars = (const CLR_UINT16 *)array->GetFirstElement();
+        iChars = array->m_numOfElements;
+    }
+    else if (mode & c_IndexOf__String) {
+        pString = stack.Arg1().RecoverString();
+        FAULT_ON_NULL(pString);
+        inputIterator.SetInputUTF8(pString);
+        searchLen = inputIterator.CountNumberOfCharacters();
+    }
+
+    // Calculate input length
+    inputIterator.SetInputUTF8(szText);
+    inputLen = inputIterator.CountNumberOfCharacters();
+    if (0 == inputLen) {
+        pos = -1;
+        goto Exit;
+    }
+
+    // Start index handling (unchanged)
+    if (mode & c_IndexOf__StartIndex) {
+        startIndex = stack.Arg2().NumericByRefConst().s4;
+    }
+    else {
+        if (mode & c_IndexOf__Last) {
+            startIndex = inputLen - 1;
+        }
+        else {
+            startIndex = 0;
+        }
+    }
+
+    // Bounds checks (unchanged)
+    if (startIndex < 0 || startIndex > inputLen)
+        NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_RANGE);
+
+    // Adjust start index for reverse search
+    if ((mode & c_IndexOf__String_Last) == c_IndexOf__String_Last) {
+        startIndex -= searchLen - 1;
+        if (startIndex < 0 || startIndex > inputLen) goto Exit;
+    }
+
+    // Count calculation (unchanged)
+    if (mode & c_IndexOf__Count) {
+        count = stack.Arg3().NumericByRefConst().s4;
+    }
+    else {
+        if (mode & c_IndexOf__Last) {
+            count = startIndex + 1;
+        }
+        else {
+            count = inputLen - startIndex;
+        }
+    }
+
+    // Adjust count for forward search
+    if ((mode & c_IndexOf__String_Last) == c_IndexOf__String) {
+        count -= searchLen - 1;
+    }
+
+    // Validate count (unchanged)
+    if (mode & c_IndexOf__Last) {
+        if (count > startIndex + 1) goto Exit;
+    }
+    else {
+        if (startIndex + count > inputLen)
+            NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_RANGE);
+    }
+
+    // Position iterator at start position
+    if (inputIterator.ConvertFromUTF8(startIndex, true)) {
+        // String search mode - FIXED
+        if (pString) {
+            while (count-- > 0) {
+                // Use helper for proper UTF-8 comparison
+                if (MatchString(inputIterator, pString, searchLen)) {
+                    pos = startIndex;
+                    break;
+                }
+
+                // Move to next candidate position
+                if (mode & c_IndexOf__Last) {
+                    startIndex--;
+                    if (!inputIterator.MoveBackwardInUTF8(szText, 1)) break;
+                }
+                else {
+                    startIndex++;
+                    if (!inputIterator.ConvertFromUTF8(1, true)) break;
+                }
+            }
+        }
+        // Character search mode (unchanged)
+        else if (pChars) {
+            while (count-- > 0) {
+                CLR_UINT16 buf[3] = {0};
+                inputIterator.m_outputUTF16 = buf;
+                inputIterator.m_outputUTF16_size = MAXSTRLEN(buf);
+
+                if (!inputIterator.ConvertFromUTF8(1, false)) break;
+
+                for (int i = 0; i < iChars; i++) {
+                    if (buf[0] == pChars[i]) {
+                        pos = startIndex;
+                        break;
+                    }
+                }
+
+                if (pos != -1) break;
+
+                if (mode & c_IndexOf__Last) {
+                    startIndex--;
+                    if (!inputIterator.MoveBackwardInUTF8(szText, 2)) break;
+                }
+                else {
+                    startIndex++;
+                }
+            }
+        }
+    }
+
+Exit:
+    stack.SetResult_I4(pos);
+    NANOCLR_NOCLEANUP();
+}
+
 HRESULT Library_corlib_native_System_String::ChangeCase(CLR_RT_StackFrame &stack, bool fToUpper)
 {
     NATIVE_PROFILE_CLR_CORE();
