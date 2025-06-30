@@ -28,7 +28,7 @@ int CLR_RT_UnicodeHelper::CountNumberOfCharacters(int max)
     NATIVE_PROFILE_CLR_CORE();
     const CLR_UINT8 *pSrc = m_inputUTF8;
     int num = 0;
-    int remaining = (max < 0) ? INT_MAX : max;
+    int remaining = (max < 0) ? 0x7fffffff : max;
 
     while (remaining > 0 && *pSrc)
     {
