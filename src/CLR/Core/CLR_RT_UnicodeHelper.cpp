@@ -320,10 +320,11 @@ bool CLR_RT_UnicodeHelper::ConvertFromUTF8(int iMaxChars, bool fJustMove, int iM
             
             // Validate each continuation byte individually
             int validCount = 0;
+            // Validate each continuation byte individually
+            int validCount = 0;
             if (UTF8_VALID_CONTINUATION(ch2)) validCount++;
-            if (UTF8_VALID_CONTINUATION(ch2) && UTF8_VALID_CONTINUATION(ch3))  validCount++;
-            if (UTF8_VALID_CONTINUATION(ch2) &&UTF8_VALID_CONTINUATION(ch3) && 
-                UTF8_VALID_CONTINUATION(ch4))  validCount++;
+            if (validCount == 1 && UTF8_VALID_CONTINUATION(ch3)) validCount++;
+            if (validCount == 2 && UTF8_VALID_CONTINUATION(ch4)) validCount++;
             
             if (validCount < 3) {
                 // Not all continuation bytes are valid
