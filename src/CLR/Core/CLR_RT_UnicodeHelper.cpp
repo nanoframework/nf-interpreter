@@ -212,12 +212,11 @@ bool CLR_RT_UnicodeHelper::ConvertFromUTF8(int iMaxChars, bool fJustMove, int iM
     bool res = true;
 
     if (iMaxBytes == -1) {
-        iMaxBytes = INT_MAX;
+        iMaxBytes = 0x7FFFFFFF;
     }
 
     while (iMaxChars != 0 && iMaxBytes > 0)
     {
-        const CLR_UINT8* seqStart = inputUTF8;
         CLR_UINT32 ch = (CLR_UINT32)*inputUTF8++;
         iMaxBytes--;
 
