@@ -112,13 +112,12 @@ int CLR_RT_UnicodeHelper::CountNumberOfCharacters(int max)
             if (remaining >= 3 && pSrc[0] != 0 && pSrc[1] != 0 && pSrc[2] != 0)
             {
                 // Validate each continuation byte individually
+                // Validate each continuation byte individually
                 int validCount = 0;
                 
-                if (UTF8_VALID_CONTINUATION(pSrc[0]))  validCount++;
-                if (UTF8_VALID_CONTINUATION(pSrc[0]) && UTF8_VALID_CONTINUATION(pSrc[1]))  validCount++;
-                if (UTF8_VALID_CONTINUATION(pSrc[0]) && UTF8_VALID_CONTINUATION(pSrc[1]) && 
-                    UTF8_VALID_CONTINUATION(pSrc[2]))  validCount++;
-              
+                if (UTF8_VALID_CONTINUATION(pSrc[0]))                validCount++;
+                if (validCount == 1 && UTF8_VALID_CONTINUATION(pSrc[1])) validCount++;
+                if (validCount == 2 && UTF8_VALID_CONTINUATION(pSrc[2])) validCount++;
                 
                 if (validCount == 3)
                 {
