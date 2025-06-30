@@ -89,16 +89,6 @@ int CLR_RT_UnicodeHelper::CountNumberOfCharacters(int max)
                 else
                 {
                     // Advance over valid continuation bytes in invalid sequence
-                    // int advance = 0;
-                    // if (UTF8_VALID_CONTINUATION(pSrc[0])) {
-                    //     advance++;
-                    //     if (UTF8_VALID_CONTINUATION(pSrc[1])) {
-                    //         advance++;
-                    //     }
-                    // }
-                    // pSrc += advance;
-                    // remaining -= advance;
-
                     pSrc += validCount;
                     remaining -= validCount;
                 }
@@ -112,8 +102,7 @@ int CLR_RT_UnicodeHelper::CountNumberOfCharacters(int max)
             if (remaining >= 3 && pSrc[0] != 0 && pSrc[1] != 0 && pSrc[2] != 0)
             {
                 // Validate each continuation byte individually
-                // Validate each continuation byte individually
-                int validCount = 0;
+                 int validCount = 0;
                 
                 if (UTF8_VALID_CONTINUATION(pSrc[0]))                validCount++;
                 if (validCount == 1 && UTF8_VALID_CONTINUATION(pSrc[1])) validCount++;
@@ -278,9 +267,7 @@ bool CLR_RT_UnicodeHelper::ConvertFromUTF8(int iMaxChars, bool fJustMove, int iM
            
             
             if (validCount <2) {
-                //inputUTF8 += validCount;
-                //iMaxBytes -= validCount;
-                goto invalid_sequence;
+                    goto invalid_sequence;
             }
 
 
@@ -319,16 +306,13 @@ bool CLR_RT_UnicodeHelper::ConvertFromUTF8(int iMaxChars, bool fJustMove, int iM
             
             // Validate each continuation byte individually
             int validCount = 0;
-            // Validate each continuation byte individually
-            int validCount = 0;
+
             if (UTF8_VALID_CONTINUATION(ch2)) validCount++;
             if (validCount == 1 && UTF8_VALID_CONTINUATION(ch3)) validCount++;
             if (validCount == 2 && UTF8_VALID_CONTINUATION(ch4)) validCount++;
             
             if (validCount < 3) {
                 // Not all continuation bytes are valid
-                //inputUTF8 += validCount;
-                //iMaxBytes -= validCount;
                 goto invalid_sequence;
             }
             
