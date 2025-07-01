@@ -30,12 +30,14 @@ int CLR_RT_UnicodeHelper::CountNumberOfCharacters(int max)
     NATIVE_PROFILE_CLR_CORE();
     const CLR_UINT8 *pSrc = m_inputUTF8;
     int num = 0;
-    int remainingChar = (max < 0) ? 0x7fffffff : max;
+    // If 'max' is negative, treat it as unlimited by setting 'maxRemaining' to the maximum possible integer value.
+    // Otherwise, use the provided 'max' value.
+    int maxRemaining = (max < 0) ? MAX_INT : max;
 
-    while (remainingChar > 0 && *pSrc)
+    while (maxRemaining > 0 && *pSrc)
     {
         CLR_UINT32 ch = (CLR_UINT32)*pSrc++;
-        remainingChar--;
+        maxRemaining --;
         // Treat embedded null as null terminator        
         if (ch == 0) 
         {
@@ -51,7 +53,7 @@ int CLR_RT_UnicodeHelper::CountNumberOfCharacters(int max)
         else if ((ch & 0xE0) == 0xC0)
         {
             // 2-byte sequence
-            if (remainingChar >= 1 && pSrc[0] != 0)
+            if (maxRemaining >= 1 && pSrc[0] != 0)
             {
                 if (UTF8_VALID_CONTINUATION(pSrc[0]))
                 {
@@ -61,7 +63,7 @@ int CLR_RT_UnicodeHelper::CountNumberOfCharacters(int max)
                         // Valid
                         num++;
                         pSrc++;
-                        remainingChar--;
+                        maxRemaining--;
                         continue;
                     }
                 }
@@ -73,7 +75,7 @@ int CLR_RT_UnicodeHelper::CountNumberOfCharacters(int max)
         else if ((ch & 0xF0) == 0xE0)
         {
             // 3-byte sequence
-            if (remainingChar >= 2 && pSrc[0] != 0 && pSrc[1] != 0)
+            if (maxRemaining >= 2 && pSrc[0] != 0 && pSrc[1] != 0)
             {
                 int validCount = 0;
                 if (UTF8_VALID_CONTINUATION(pSrc[0]))
@@ -81,7 +83,7 @@ int CLR_RT_UnicodeHelper::CountNumberOfCharacters(int max)
                     validCount++;
                 }
 
-                if (UTF8_VALID_CONTINUATION(pSrc[0]) && UTF8_VALID_CONTINUATION(pSrc[1]))
+                if (validCount == 1 && UTF8_VALID_CONTINUATION(pSrc[1]))
                 {
                     validCount++;
                 }
@@ -94,7 +96,7 @@ int CLR_RT_UnicodeHelper::CountNumberOfCharacters(int max)
                         // Valid
                         num++;
                         pSrc += 2;
-                        remainingChar -= 2;
+                        maxRemaining -= 2;
                         continue;
                     }
                 }
@@ -102,7 +104,7 @@ int CLR_RT_UnicodeHelper::CountNumberOfCharacters(int max)
                 {
                     // Advance over valid continuation bytes in invalid sequence
                     pSrc += validCount;
-                    remainingChar -= validCount;
+                    maxRemaining -= validCount;
                 }
             }
             // Invalid sequence
@@ -112,7 +114,7 @@ int CLR_RT_UnicodeHelper::CountNumberOfCharacters(int max)
         else if ((ch & 0xF8) == 0xF0)
         {
             // 4-byte sequence
-            if (remainingChar >= 3 && pSrc[0] != 0 && pSrc[1] != 0 && pSrc[2] != 0)
+            if (maxRemaining >= 3 && pSrc[0] != 0 && pSrc[1] != 0 && pSrc[2] != 0)
             {
                 // Validate each continuation byte individually
                 int validCount = 0;
@@ -142,7 +144,7 @@ int CLR_RT_UnicodeHelper::CountNumberOfCharacters(int max)
                         // Valid supplementary character
                         num += 2;
                         pSrc += 3;
-                        remainingChar -= 3;
+                        maxRemaining -= 3;
                         continue;
                     }
                 }
@@ -150,7 +152,7 @@ int CLR_RT_UnicodeHelper::CountNumberOfCharacters(int max)
                 {
                     // Advance only over valid continuation bytes
                     pSrc += validCount;
-                    remainingChar -= validCount;
+                    maxRemaining -= validCount;
                 }
             }
             // Count invalid sequence
@@ -176,7 +178,9 @@ int CLR_RT_UnicodeHelper::CountNumberOfBytes(int max)
     {
         CLR_UINT16 ch = *pSrc++;
         if (max > 0)
+        {
             max--;
+        }
 
         if (ch < 0x0080)
         {
@@ -248,6 +252,7 @@ bool CLR_RT_UnicodeHelper::ConvertFromUTF8(int iMaxChars, bool fJustMove, int iM
             // Treat embedded null as null terminator
             break;
         }
+
         // ASCII
         if (ch < 0x80)
         {
@@ -262,6 +267,7 @@ bool CLR_RT_UnicodeHelper::ConvertFromUTF8(int iMaxChars, bool fJustMove, int iM
                 *outputUTF16++ = (CLR_UINT16)ch;
                 outputUTF16_size--;
             }
+
             if (iMaxChars > 0)
             {
                 iMaxChars--;
@@ -306,6 +312,7 @@ bool CLR_RT_UnicodeHelper::ConvertFromUTF8(int iMaxChars, bool fJustMove, int iM
                 *outputUTF16++ = (CLR_UINT16)fullCh;
                 outputUTF16_size--;
             }
+
             if (iMaxChars > 0)
             {
                 iMaxChars--;
@@ -318,16 +325,17 @@ bool CLR_RT_UnicodeHelper::ConvertFromUTF8(int iMaxChars, bool fJustMove, int iM
             {
                 goto invalid_sequence;
             }
+
             CLR_UINT32 ch2 = (CLR_UINT32)inputUTF8[0];
             CLR_UINT32 ch3 = (CLR_UINT32)inputUTF8[1];
-
             int validCount = 0;
+
             if (UTF8_VALID_CONTINUATION(ch2))
             {
                 validCount++;
             }
 
-            if (UTF8_VALID_CONTINUATION(ch3))
+            if (validCount == 1 && UTF8_VALID_CONTINUATION(ch3))
             {
                 validCount++;
             }
@@ -358,6 +366,7 @@ bool CLR_RT_UnicodeHelper::ConvertFromUTF8(int iMaxChars, bool fJustMove, int iM
                 *outputUTF16++ = (CLR_UINT16)fullCh;
                 outputUTF16_size--;
             }
+
             if (iMaxChars > 0)
             {
                 iMaxChars--;
@@ -428,6 +437,7 @@ bool CLR_RT_UnicodeHelper::ConvertFromUTF8(int iMaxChars, bool fJustMove, int iM
                 *outputUTF16++ = (CLR_UINT16)((temp & 0x3FF) + LOW_SURROGATE_START);
                 outputUTF16_size -= 2;
             }
+
             if (iMaxChars > 0)
             {
                 if (iMaxChars == 1)
@@ -457,6 +467,7 @@ bool CLR_RT_UnicodeHelper::ConvertFromUTF8(int iMaxChars, bool fJustMove, int iM
             *outputUTF16++ = 0xFFFD;
             outputUTF16_size--;
         }
+
         if (iMaxChars > 0)
         {
             iMaxChars--;
