@@ -75,9 +75,14 @@ int CLR_RT_UnicodeHelper::CountNumberOfCharacters(int max)
             {
                 int validCount = 0;
                 if (UTF8_VALID_CONTINUATION(pSrc[0]))
+                {
                     validCount++;
+                }
+
                 if (UTF8_VALID_CONTINUATION(pSrc[0]) && UTF8_VALID_CONTINUATION(pSrc[1]))
+                {
                     validCount++;
+                }
 
                 if (validCount == 2)
                 {
@@ -111,11 +116,19 @@ int CLR_RT_UnicodeHelper::CountNumberOfCharacters(int max)
                 int validCount = 0;
 
                 if (UTF8_VALID_CONTINUATION(pSrc[0]))
+                {
                     validCount++;
+                }
+
                 if (validCount == 1 && UTF8_VALID_CONTINUATION(pSrc[1]))
+                {
                     validCount++;
+                }
+
                 if (validCount == 2 && UTF8_VALID_CONTINUATION(pSrc[2]))
+                {
                     validCount++;
+                }
 
                 if (validCount == 3)
                 {
@@ -259,7 +272,9 @@ bool CLR_RT_UnicodeHelper::ConvertFromUTF8(int iMaxChars, bool fJustMove, int iM
             CLR_UINT32 ch2 = (CLR_UINT32)inputUTF8[0]; // Lookahead without advancing
             int validCount = 0;
             if (UTF8_VALID_CONTINUATION(ch2))
+            {
                 validCount = 1;
+            }
             if (validCount < 1)
                 goto invalid_sequence;
 
@@ -297,9 +312,14 @@ bool CLR_RT_UnicodeHelper::ConvertFromUTF8(int iMaxChars, bool fJustMove, int iM
 
             int validCount = 0;
             if (UTF8_VALID_CONTINUATION(ch2))
+            {
                 validCount++;
+            }
+
             if (UTF8_VALID_CONTINUATION(ch3))
+            {
                 validCount++;
+            }
 
             if (validCount < 2)
             {
@@ -349,11 +369,19 @@ bool CLR_RT_UnicodeHelper::ConvertFromUTF8(int iMaxChars, bool fJustMove, int iM
             int validCount = 0;
 
             if (UTF8_VALID_CONTINUATION(ch2))
+            {
                 validCount++;
+            }
+
             if (validCount == 1 && UTF8_VALID_CONTINUATION(ch3))
+            {
                 validCount++;
+            }
+
             if (validCount == 2 && UTF8_VALID_CONTINUATION(ch4))
+            {
                 validCount++;
+            }
 
             if (validCount < 3)
             {
