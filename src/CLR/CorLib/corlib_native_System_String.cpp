@@ -608,14 +608,14 @@ static inline bool MatchString(CLR_RT_UnicodeHelper &inputIter, const char *sear
         if (!inputCopy.ConvertFromUTF8(1, false))
         {
             // Input ended prematurely
-            return false; 
+            return false;
         }
 
         // Convert next character from search string
         if (!searchIter.ConvertFromUTF8(1, false))
         {
             // Shouldn't happen for valid search string
-            return false; 
+            return false;
         }
 
         // Compare first UTF-16 code unit
@@ -626,12 +626,12 @@ static inline bool MatchString(CLR_RT_UnicodeHelper &inputIter, const char *sear
 
         // Handle surrogate pairs (4-byte UTF-8 sequences)
         if (bufInput[0] >= 0xD800 && bufInput[0] <= 0xDBFF)
-        { 
+        {
             // High surrogate
             if (bufInput[1] != bufSearch[1])
             {
                 // Low surrogate mismatch
-                return false; 
+                return false;
             }
         }
     }
@@ -761,7 +761,7 @@ HRESULT Library_corlib_native_System_String::IndexOf(CLR_RT_StackFrame &stack, i
     // First move to the character, then read it.
     if (inputIterator.ConvertFromUTF8(startIndex, true))
     {
-        // String search mode 
+        // String search mode
         if (pString)
         {
             while (count-- > 0)
@@ -793,7 +793,7 @@ HRESULT Library_corlib_native_System_String::IndexOf(CLR_RT_StackFrame &stack, i
             }
         }
 
-        // Character search mode 
+        // Character search mode
         else if (pChars)
         {
             while (count-- > 0)
