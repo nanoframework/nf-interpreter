@@ -37,9 +37,9 @@ int CLR_RT_UnicodeHelper::CountNumberOfCharacters(int max)
     while (maxRemaining > 0 && *pSrc)
     {
         CLR_UINT32 ch = (CLR_UINT32)*pSrc++;
-        maxRemaining --;
-        // Treat embedded null as null terminator        
-        if (ch == 0) 
+        maxRemaining--;
+        // Treat embedded null as null terminator
+        if (ch == 0)
         {
             break;
         }
