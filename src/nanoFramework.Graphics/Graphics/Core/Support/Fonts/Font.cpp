@@ -325,6 +325,7 @@ void CLR_GFX_Font::CountCharactersInWidth(
     CLR_GFX_FontCharacterInfo chr;
     totWidth = 0;
     uh.SetInputUTF8(str);
+
     while (maxChars != 0)
     {
         uh.m_outputUTF16 = buf;
