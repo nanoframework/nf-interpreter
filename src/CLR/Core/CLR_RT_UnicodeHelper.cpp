@@ -10,7 +10,7 @@
 
 #define UTF8_VALID_CONTINUATION(ch) ((ch) >= 0x80 && (ch) <= 0xBF)
 
-#define UTF8_VALID_ASCII(ch)        ((ch) >= 0x00 && (ch) <= 0x7F)
+#define UTF8_VALID_ASCII(ch) ((ch) >= 0x00 && (ch) <= 0x7F)
 
 #define UTF8_CHECK_CONTINUATION(ch, src)                                                                               \
     ch = (CLR_UINT32) * src++;                                                                                         \
@@ -248,7 +248,7 @@ bool CLR_RT_UnicodeHelper::ConvertFromUTF8(int iMaxChars, bool fJustMove, int iM
         iMaxBytes--;
 
         if (ch == 0)
-        { 
+        {
             // Treat embedded null as null terminator
             break;
         }
