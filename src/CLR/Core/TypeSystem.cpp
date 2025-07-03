@@ -1046,6 +1046,13 @@ bool CLR_RT_TypeDef_Instance::ResolveToken(
                 else
                 {
                     // elem.DataType == DATATYPE_MVAR
+
+                    // Use the *caller's* bound genericType (Stack<Int32>, etc.)
+                    if (caller == nullptr || caller->genericType == nullptr)
+                    {
+                        return false;
+                    }
+
                     CLR_RT_GenericParam_Index gpIdx;
                     caller->assembly->FindGenericParamAtMethodDef(*caller, elem.GenericParamPosition, gpIdx);
                     auto &gp = caller->assembly->crossReferenceGenericParam[gpIdx.GenericParam()];
