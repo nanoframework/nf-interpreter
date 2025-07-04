@@ -6244,12 +6244,17 @@ HRESULT CLR_RT_TypeSystem::QueueStringToBuffer(char *&szBuffer, size_t &iBuffer,
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT CLR_RT_TypeSystem::BuildTypeName(const CLR_RT_TypeSpec_Index &typeIndex, char *&szBuffer, size_t &iBuffer)
+HRESULT CLR_RT_TypeSystem::BuildTypeName(
+    const CLR_RT_TypeSpec_Index &typeIndex,
+    char *&szBuffer,
+    size_t &iBuffer,
+    CLR_UINT32 levels)
 {
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
 
     CLR_RT_TypeSpec_Instance instance;
+    bool closeGenericSignature = false;
 
     if (instance.InitializeFromIndex(typeIndex) == false)
     {
@@ -6269,7 +6274,12 @@ HRESULT CLR_RT_TypeSystem::BuildTypeName(const CLR_RT_TypeSpec_Index &typeIndex,
 
     BuildTypeName(typeDef, szBuffer, iBuffer);
 
-    NANOCLR_CHECK_HRESULT(QueueStringToBuffer(szBuffer, iBuffer, "<"));
+    if (parser.GenParamCount > 0)
+    {
+        NANOCLR_CHECK_HRESULT(QueueStringToBuffer(szBuffer, iBuffer, "<"));
+
+        closeGenericSignature = true;
+    }
 
     for (int i = 0; i < parser.GenParamCount; i++)
     {
@@ -6307,7 +6317,15 @@ HRESULT CLR_RT_TypeSystem::BuildTypeName(const CLR_RT_TypeSpec_Index &typeIndex,
         }
     }
 
-    NANOCLR_CHECK_HRESULT(QueueStringToBuffer(szBuffer, iBuffer, ">"));
+    if (closeGenericSignature)
+    {
+        NANOCLR_CHECK_HRESULT(QueueStringToBuffer(szBuffer, iBuffer, ">"));
+    }
+
+    while (levels-- > 0)
+    {
+        NANOCLR_CHECK_HRESULT(QueueStringToBuffer(szBuffer, iBuffer, "[]"));
+    }
 
     NANOCLR_NOCLEANUP();
 }

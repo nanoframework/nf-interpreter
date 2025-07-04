@@ -452,7 +452,7 @@ void CLR_RT_Assembly::DumpToken(CLR_UINT32 token, const CLR_RT_TypeSpec_Index *g
                 // Build the closed‐generic owner name
                 char rgType[256], *sz = rgType;
                 size_t cb = sizeof(rgType);
-                g_CLR_RT_TypeSystem.BuildTypeName(*genericType, sz, cb);
+                g_CLR_RT_TypeSystem.BuildTypeName(*genericType, sz, cb, 0);
 
                 // Append the field name
                 CLR_SafeSprintf(sz, cb, "::%s", GetString(fr->name));
@@ -554,7 +554,7 @@ void CLR_RT_Assembly::DumpToken(CLR_UINT32 token, const CLR_RT_TypeSpec_Index *g
                 char bufCorrupt[256];
                 char *pCorrupt = bufCorrupt;
                 size_t cbCorrupt = sizeof(bufCorrupt);
-                g_CLR_RT_TypeSystem.BuildTypeName(tsIdx, pCorrupt, cbCorrupt);
+                g_CLR_RT_TypeSystem.BuildTypeName(tsIdx, pCorrupt, cbCorrupt, elem.Levels);
                 CLR_Debug::Printf("%s", bufCorrupt);
                 break;
             }
@@ -596,8 +596,7 @@ void CLR_RT_Assembly::DumpToken(CLR_UINT32 token, const CLR_RT_TypeSpec_Index *g
                 }
                 break;
             }
-
-            if (elem.DataType == DATATYPE_SZARRAY)
+            else if (elem.DataType == DATATYPE_SZARRAY)
             {
                 // advance to see what’s inside the array
                 if (FAILED(parser.Advance(elem)))
@@ -648,18 +647,18 @@ void CLR_RT_Assembly::DumpToken(CLR_UINT32 token, const CLR_RT_TypeSpec_Index *g
                     char bufArr[256];
                     char *pArr = bufArr;
                     size_t cbArr = sizeof(bufArr);
-                    g_CLR_RT_TypeSystem.BuildTypeName(tsIdx, pArr, cbArr);
+                    g_CLR_RT_TypeSystem.BuildTypeName(tsIdx, pArr, cbArr, elem.Levels);
                     CLR_Debug::Printf("%s", bufArr);
                     break;
                 }
             }
 
             // now all the rest: just print the full type name
-            char bufGeneric[256];
-            char *pGeneric = bufGeneric;
-            size_t cbGeneric = sizeof(bufGeneric);
-            g_CLR_RT_TypeSystem.BuildTypeName(tsIdx, pGeneric, cbGeneric);
-            CLR_Debug::Printf("%s", bufGeneric);
+            char bufTypeName[256];
+            char *pTypeName = bufTypeName;
+            size_t cbType = sizeof(bufTypeName);
+            g_CLR_RT_TypeSystem.BuildTypeName(tsIdx, pTypeName, cbType, elem.Levels);
+            CLR_Debug::Printf("%s", bufTypeName);
             break;
         }
 
