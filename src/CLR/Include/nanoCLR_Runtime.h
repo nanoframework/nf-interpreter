@@ -2000,7 +2000,7 @@ struct CLR_RT_TypeSystem // EVENT HEAP - NO RELOCATION -
         const CLR_RECORD_RESOURCE *&res,
         CLR_UINT32 &size);
 
-    HRESULT BuildTypeName(const CLR_RT_TypeSpec_Index &typeIndex, char *&szBuffer, size_t &iBuffer);
+    HRESULT BuildTypeName(const CLR_RT_TypeSpec_Index &typeIndex, char *&szBuffer, size_t &iBuffer, CLR_UINT32 levels);
     HRESULT BuildTypeName(
         const CLR_RT_TypeDef_Index &cls,
         char *&szBuffer,
