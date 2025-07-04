@@ -100,7 +100,7 @@ HRESULT CLR_RT_HeapBlock_Array::CreateInstance(
 
     if (cls.ResolveToken(tk, assm, caller))
     {
-        ref.SetReflection(cls);
+        NANOCLR_CHECK_HRESULT(ref.SetReflection(cls));
     }
     else if (def.ResolveToken(tk, assm))
     {
