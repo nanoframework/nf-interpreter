@@ -462,7 +462,7 @@ void CLR_RT_Assembly::DumpToken(CLR_UINT32 token, const CLR_RT_TypeSpec_Index *g
             {
                 // Otherwise fall back to the old FieldDef path
                 CLR_RT_FieldDef_Index fd;
-                fd.Set(assemblyIndex, xref.target.data);
+                fd.data = xref.target.data;
                 CLR_RT_DUMP::FIELD(fd);
             }
             break;
