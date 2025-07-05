@@ -84,9 +84,11 @@ RUN git clone --branch R0.15a https://github.com/abbrev/fatfs.git --depth 1 ./so
     && cd ./sources/mbedtls \
     && git submodule update --init --recursive
 
-# Clone FreeRTOS and what is needed for ESP32
-RUN git clone --branch V10.4.1-kernel-only https://github.com/FreeRTOS/FreeRTOS-Kernel.git --depth 1 ./sources/FreeRTOS \
-    && git clone --branch 5.5.1 https://github.com/ARM-software/CMSIS_5.git --depth 1 ./sources/CMSIS_5
+# Clone FreeRTOS
+RUN git clone --branch V10.4.1-kernel-only https://github.com/FreeRTOS/FreeRTOS-Kernel.git --depth 1 ./sources/FreeRTOS
+
+# Clone CMSIS
+RUN git clone --branch 5.5.1 https://github.com/ARM-software/CMSIS_5.git --depth 1 ./sources/CMSIS_5
 
 # Clone lwIP for STM32 and NXP
 RUN git clone --branch STABLE-2_1_3_RELEASE https://github.com/lwip-tcpip/lwip.git --depth 1 ./sources/lwip

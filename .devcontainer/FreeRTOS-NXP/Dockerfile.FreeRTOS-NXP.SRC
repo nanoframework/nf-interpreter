@@ -62,8 +62,10 @@ RUN git clone --branch R0.15a https://github.com/abbrev/fatfs.git --depth 1 ./so
     && git submodule update --init --recursive
     
 # Clone FreeRTOS
-RUN git clone --branch V10.4.1-kernel-only https://github.com/FreeRTOS/FreeRTOS-Kernel.git --depth 1 ./sources/FreeRTOS \
-    && git clone --branch 5.5.1 https://github.com/ARM-software/CMSIS_5.git --depth 1 ./sources/CMSIS_5
+RUN git clone --branch V10.4.1-kernel-only https://github.com/FreeRTOS/FreeRTOS-Kernel.git --depth 1 ./sources/FreeRTOS
+
+# Clone CMSIS
+RUN git clone --branch 5.5.1 https://github.com/ARM-software/CMSIS_5.git --depth 1 ./sources/CMSIS_5
 
 # set gcc location
 ARG TMP_GCC_PATH=/usr/local/bin/gcc
