@@ -57,7 +57,7 @@ RUN mkdir -p /usr/local/bin/gcc
 # Clone libs mbedtls and fatfs etc.
 RUN git clone --branch R0.15a https://github.com/abbrev/fatfs.git --depth 1 ./sources/fatfs \
     && git clone --branch STABLE-2_1_3_RELEASE https://github.com/lwip-tcpip/lwip.git --depth 1 ./sources/lwip \
-    && git clone --branch mbedtls-3.6.4 https://github.com/ARMmbed/mbedtls.git --depth 1 ./sources/mbedtls \
+    && git clone --branch mbedtls-3.6.0 https://github.com/ARMmbed/mbedtls.git --depth 1 ./sources/mbedtls \
     && cd ./sources/mbedtls \
     && git submodule update --init --recursive
     
