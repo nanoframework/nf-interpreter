@@ -333,6 +333,7 @@ jobs:
       - template: azure-pipelines-templates/build-preparations.yml
       - template: azure-pipelines-templates/nb-gitversioning.yml
       - template: azure-pipelines-templates/download-install-arm-gcc-toolchain.yml
+      - template: azure-pipelines-templates/download-install-ninja.yml
       - template: azure-pipelines-templates/download-srecord.yml
       - template: azure-pipelines-templates/download-hexdfu.yml
       - template: azure-pipelines-templates/install-kconfig-tools.yml
@@ -820,6 +821,7 @@ jobs:
       - template: azure-pipelines-templates/build-preparations.yml
       - template: azure-pipelines-templates/nb-gitversioning.yml
       - template: azure-pipelines-templates/download-install-arm-gcc-toolchain.yml
+      - template: azure-pipelines-templates/download-install-ninja.yml
       - template: azure-pipelines-templates/download-hexdfu.yml
       - template: azure-pipelines-templates/download-srecord.yml
       - template: azure-pipelines-templates/install-kconfig-tools.yml
