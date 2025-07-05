@@ -602,20 +602,33 @@ macro(nf_add_idf_as_library)
     
     include(${IDF_PATH_CMAKED}/tools/cmake/idf.cmake)
 
-    # "fix" the reported version so it doesn't show '-dirty' 
+    # if needed, "fix" the reported version so it doesn't show '-dirty'
     # this is because we could be deleting some files and tweaking others in the IDF
     get_property(MY_IDF_VER TARGET __idf_build_target PROPERTY IDF_VER)
-    string(REPLACE "-dirty" "" MY_IDF_VER_FIXED "${MY_IDF_VER}")
-    set_property(TARGET __idf_build_target PROPERTY IDF_VER ${MY_IDF_VER_FIXED})
-    set(IDF_VER_FIXED ${MY_IDF_VER_FIXED} CACHE INTERNAL "IDF version as CMake var")
 
-    # for COMPILE DEFINITIONS it's a bit more work
-    get_property(IDF_COMPILE_DEFINITIONS TARGET __idf_build_target PROPERTY COMPILE_DEFINITIONS )
+    # sanity check
+    if(${MY_IDF_VER} STREQUAL "")
+        message(FATAL_ERROR "Couldn't get IDF version from target __idf_build_target")
+    endif()
 
-    string(REPLACE "-dirty" "" IDF_COMPILE_DEFINITIONS_FIXED "${IDF_COMPILE_DEFINITIONS}")
-    set_property(TARGET __idf_build_target PROPERTY COMPILE_DEFINITIONS ${IDF_COMPILE_DEFINITIONS_FIXED})
-    
-    message(STATUS "Fixed IDF version. Is now: ${MY_IDF_VER_FIXED}")
+    message(STATUS "Current IDF version is: ${MY_IDF_VER}")
+
+    string(FIND ${MY_IDF_VER} "-dirty" MY_IDF_VER_DIRTY)
+    if(${MY_IDF_VER_DIRTY} GREATER -1)
+
+        # found '-dirty' in the version string
+        string(REPLACE "-dirty" "" MY_IDF_VER_FIXED "${MY_IDF_VER}")
+        set_property(TARGET __idf_build_target PROPERTY IDF_VER ${MY_IDF_VER_FIXED})
+        set(IDF_VER_FIXED ${MY_IDF_VER_FIXED} CACHE INTERNAL "IDF version as CMake var")
+
+        # for COMPILE DEFINITIONS it's a bit more work
+        get_property(IDF_COMPILE_DEFINITIONS TARGET __idf_build_target PROPERTY COMPILE_DEFINITIONS )
+
+        string(REPLACE "-dirty" "" IDF_COMPILE_DEFINITIONS_FIXED "${IDF_COMPILE_DEFINITIONS}")
+        set_property(TARGET __idf_build_target PROPERTY COMPILE_DEFINITIONS ${IDF_COMPILE_DEFINITIONS_FIXED})
+        
+        message(STATUS "Fixed IDF version. Is now: ${MY_IDF_VER_FIXED}")
+    endif()
 
     # check for SDK config from build options
     if(SDK_CONFIG_FILE)

@@ -245,8 +245,6 @@ HRESULT Library_nf_system_collections_System_Collections_Hashtable::InsertNative
             CLR_RT_TypeDef_Index bucketTypeDef;
             CLR_RT_HeapBlock newBucket;
 
-            memset(&newBucket, 0, sizeof(struct CLR_RT_HeapBlock));
-
             if (bucket == NULL)
             {
                 // find <Bucket> type, don't bother checking the result as it exists for sure
@@ -434,7 +432,6 @@ HRESULT Library_nf_system_collections_System_Collections_Hashtable::Expand(CLR_R
     g_CLR_RT_TypeSystem.FindTypeDef("Bucket", "System.Collections", bucketTypeDef);
 
     // create a new array of <Bucket>
-    memset(&newBucketsHB, 0, sizeof(struct CLR_RT_HeapBlock));
     CLR_RT_ProtectFromGC gc(newBucketsHB);
 
     if (i == lenghtOfPrimes)
@@ -469,8 +466,8 @@ HRESULT Library_nf_system_collections_System_Collections_Hashtable::Expand(CLR_R
                     // create a new <Bucket>
                     CLR_RT_HeapBlock newBucket;
 
-                    memset(&newBucket, 0, sizeof(struct CLR_RT_HeapBlock));
                     NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObjectFromIndex(newBucket, bucketTypeDef))
+
                     newBucketElement->LoadFromReference(newBucket);
                     bucket = newBucketElement->Dereference();
 

@@ -1079,7 +1079,14 @@ static printf_t doprnt(void *context, void (*func)(char c, void *context), size_
 #ifdef BASIC_PRINTF_ONLY
                 func(c);            // Basic output function.
 #else
-                func(c, context);   // Output function.
+// [NF_CHANGE]
+                // only print if there is space in the buffer
+                if (count < n)
+                {
+                    func(c, context);   // Output function.
+                }
+// [END NF_CHANGE]
+
 #endif
 #ifdef PRINTF_T
                 ++count;
@@ -1105,7 +1112,13 @@ static printf_t doprnt(void *context, void (*func)(char c, void *context), size_
 #ifdef BASIC_PRINTF_ONLY
             func(convert);              // Basic output function.
 #else
+// [NF_CHANGE]
+        // only print if there is space in the buffer
+        if (count < n)
+        {
             func(convert, context);     // Output function.
+        }
+// [END NF_CHANGE]
 #endif
 #ifdef PRINTF_T
             ++count;
@@ -1257,16 +1270,6 @@ printf_t vsnprintf_(char *buffer, size_t bufsz, char const *format, va_list vlis
 
     // Perform the actual formatting operation
     count = doprnt(&buffer, putbuf, bufsz, format, vlistCopy);
-
-    // append null terminator
-    if(count < bufsz)
-    {
-        buffer[count] = '\0';
-    }
-    else
-    {
-        buffer[bufsz - 1] = '\0';
-    }
 
     // Clean up the copied variable argument list
     va_end(vlistCopy);

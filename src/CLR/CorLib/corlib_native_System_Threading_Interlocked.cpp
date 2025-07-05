@@ -1,8 +1,9 @@
-//
+﻿//
 // Copyright (c) .NET Foundation and Contributors
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
 //
+
 #include "CorLib.h"
 
 HRESULT Library_corlib_native_System_Threading_Interlocked::Increment___STATIC__I4__BYREF_I4(CLR_RT_StackFrame &stack)
@@ -11,7 +12,6 @@ HRESULT Library_corlib_native_System_Threading_Interlocked::Increment___STATIC__
     NANOCLR_HEADER();
     {
         CLR_RT_HeapBlock heapLocation;
-        memset(&heapLocation, 0, sizeof(struct CLR_RT_HeapBlock));
 
         NANOCLR_CHECK_HRESULT(heapLocation.LoadFromReference(stack.Arg0()));
         signed int &location = heapLocation.NumericByRef().s4;
@@ -32,7 +32,6 @@ HRESULT Library_corlib_native_System_Threading_Interlocked::Decrement___STATIC__
     NANOCLR_HEADER();
     {
         CLR_RT_HeapBlock heapLocation;
-        memset(&heapLocation, 0, sizeof(struct CLR_RT_HeapBlock));
 
         NANOCLR_CHECK_HRESULT(heapLocation.LoadFromReference(stack.Arg0()));
         signed int &location = heapLocation.NumericByRef().s4;
@@ -54,7 +53,6 @@ HRESULT Library_corlib_native_System_Threading_Interlocked::Exchange___STATIC__I
     NANOCLR_HEADER();
     {
         CLR_RT_HeapBlock heapLocation;
-        memset(&heapLocation, 0, sizeof(struct CLR_RT_HeapBlock));
 
         NANOCLR_CHECK_HRESULT(heapLocation.LoadFromReference(stack.Arg0()));
         signed int &location = heapLocation.NumericByRef().s4;
@@ -78,7 +76,6 @@ HRESULT Library_corlib_native_System_Threading_Interlocked::CompareExchange___ST
     NANOCLR_HEADER();
     {
         CLR_RT_HeapBlock heapLocation;
-        memset(&heapLocation, 0, sizeof(struct CLR_RT_HeapBlock));
 
         NANOCLR_CHECK_HRESULT(heapLocation.LoadFromReference(stack.Arg0()));
         signed int &location = heapLocation.NumericByRef().s4;

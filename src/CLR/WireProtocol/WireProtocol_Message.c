@@ -1,10 +1,12 @@
-//
+﻿//
 // Copyright (c) .NET Foundation and Contributors
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
 //
 
+#if !defined(VIRTUAL_DEVICE)
 #include <nanoHAL_v2.h>
+#endif
 #include <nanoWeak.h>
 #include <nanoSupport.h>
 #include <targetHAL_Time.h>
@@ -316,7 +318,10 @@ void WP_Message_Process()
 
     while (true)
     {
+
+#if !defined(VIRTUAL_DEVICE)
         ASSERT(_rxState >= ReceiveState_Idle && _rxState <= ReceiveState_CompletePayload);
+#endif
 
 #ifdef DEBUG
         // store this here to debug issues with wrong sequence of state machine

@@ -18,7 +18,7 @@
 // extern FILESYSTEM_DRIVER_INTERFACE g_FATFS_FILE_SYSTEM_DriverInterface;
 
 // #if HAL_USE_SDC
-// #include <target_windows_storage_config.h>
+// #include <target_storage_config.h>
 // extern "C" void SdCardDetectCallback(void *arg);
 // #endif
 
@@ -65,8 +65,7 @@ void FS_AddVolumes()
 void FS_MountRemovableVolumes()
 {
 
-// #if HAL_USE_SDC
-//     SdCardDetectCallback(&SD_CARD_DRIVER);
-// #endif
-
+    // #if HAL_USE_SDC
+    //     SdCardDetectCallback(&SD_CARD_DRIVER);
+    // #endif
 }

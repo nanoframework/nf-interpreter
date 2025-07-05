@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (c) .NET Foundation and Contributors
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
@@ -322,7 +322,18 @@ struct Library_corlib_native_System_Exception
 
 struct Library_corlib_native_System_ArgumentException
 {
+    static const int FIELD_STATIC__Arg_ArgumentException = 3;
+    static const int FIELD_STATIC__Arg_ParamName_Name = 4;
+    static const int FIELD_STATIC__Argument_EmptyString = 5;
+
     static const int FIELD___paramName = 5;
+
+    //--//
+};
+
+struct Library_corlib_native_System_ArgumentNullException
+{
+    static const int FIELD_STATIC__ArgumentNull_Generic = 6;
 
     //--//
 };
@@ -404,7 +415,6 @@ struct Library_corlib_native_System_BitConverter
 
 struct Library_corlib_native_System_Byte
 {
-
     static const int FIELD__m_value = 1;
 
     //--//
@@ -427,16 +437,8 @@ struct Library_corlib_native_System_Collections_ArrayList
     //--//
 };
 
-struct Library_corlib_native_System_ComponentModel_EditorBrowsableState
-{
-
-    static const int FIELD__value__ = 1;
-
-    //--//
-};
 struct Library_corlib_native_System_Double
 {
-
     static const int FIELD__m_value = 1;
 
     NANOCLR_NATIVE_DECLARE(CompareTo___STATIC__I4__R8__R8);
@@ -450,9 +452,9 @@ struct Library_corlib_native_System_Double
 
 struct Library_corlib_native_System_TimeSpan
 {
-    static const int FIELD_STATIC__Zero = 3;
-    static const int FIELD_STATIC__MaxValue = 4;
-    static const int FIELD_STATIC__MinValue = 5;
+    static const int FIELD_STATIC__Zero = 7;
+    static const int FIELD_STATIC__MaxValue = 8;
+    static const int FIELD_STATIC__MinValue = 9;
 
     static const int FIELD___ticks = 1;
 
@@ -467,7 +469,7 @@ struct Library_corlib_native_System_TimeSpan
 
     //--//
 
-    static CLR_INT64 *NewObject(CLR_RT_HeapBlock &ref);
+    static CLR_INT64 *NewObject(CLR_RT_StackFrame &stack);
     static CLR_INT64 *GetValuePtr(CLR_RT_StackFrame &stack);
     static CLR_INT64 *GetValuePtr(CLR_RT_HeapBlock &ref);
 
@@ -482,21 +484,21 @@ struct Library_corlib_native_System_TimeSpan
 
 struct Library_corlib_native_System_DateTime
 {
-    static const int FIELD_STATIC__MinValue = 6;
-    static const int FIELD_STATIC__MaxValue = 7;
-    static const int FIELD_STATIC__UnixEpoch = 8;
+    static const int FIELD_STATIC__MinValue = 10;
+    static const int FIELD_STATIC__MaxValue = 11;
+    static const int FIELD_STATIC__UnixEpoch = 12;
 
     static const int FIELD___ticks = 1;
 
     NANOCLR_NATIVE_DECLARE(_ctor___VOID__I4__I4__I4__I4__I4__I4__I4);
     NANOCLR_NATIVE_DECLARE(GetDateTimePart___I4__SystemDateTimeDateTimePart);
     NANOCLR_NATIVE_DECLARE(DaysInMonth___STATIC__I4__I4__I4);
-    NANOCLR_NATIVE_DECLARE(get_UtcNow___STATIC__SystemDateTime);
-    NANOCLR_NATIVE_DECLARE(get_Today___STATIC__SystemDateTime);
+    NANOCLR_NATIVE_DECLARE(GetUtcNowAsTicks___STATIC__I8);
+    NANOCLR_NATIVE_DECLARE(GetTodayAsTicks___STATIC__I8);
 
     //--//
 
-    static CLR_INT64 *NewObject(CLR_RT_HeapBlock &ref);
+    static CLR_INT64 *NewObject(CLR_RT_StackFrame &stack);
     static CLR_INT64 *GetValuePtr(CLR_RT_StackFrame &stack);
     static CLR_INT64 *GetValuePtr(CLR_RT_HeapBlock &ref);
 
@@ -508,7 +510,7 @@ struct Library_corlib_native_System_Convert
 {
     NANOCLR_NATIVE_DECLARE(NativeToInt64___STATIC__I8__STRING__BOOLEAN__I8__I8__I4__BOOLEAN__BYREF_BOOLEAN);
     NANOCLR_NATIVE_DECLARE(NativeToDouble___STATIC__R8__STRING__BOOLEAN__BYREF_BOOLEAN);
-    NANOCLR_NATIVE_DECLARE(NativeToDateTime___STATIC__SystemDateTime__STRING__BOOLEAN__BYREF_BOOLEAN);
+    NANOCLR_NATIVE_DECLARE(NativeToDateTime___STATIC__VOID__STRING__BOOLEAN__BYREF_BOOLEAN__BYREF_SystemDateTime);
     NANOCLR_NATIVE_DECLARE(ToBase64String___STATIC__STRING__SZARRAY_U1__I4__I4__BOOLEAN);
     NANOCLR_NATIVE_DECLARE(FromBase64String___STATIC__SZARRAY_U1__STRING);
 
@@ -522,16 +524,15 @@ struct Library_corlib_native_System_Convert
 struct Library_corlib_native_System_Delegate
 {
     NANOCLR_NATIVE_DECLARE(Equals___BOOLEAN__OBJECT);
-    NANOCLR_NATIVE_DECLARE(Combine___STATIC__SystemDelegate__SystemDelegate__SystemDelegate);
-    NANOCLR_NATIVE_DECLARE(Remove___STATIC__SystemDelegate__SystemDelegate__SystemDelegate);
-    NANOCLR_NATIVE_DECLARE(op_Equality___STATIC__BOOLEAN__SystemDelegate__SystemDelegate);
-    NANOCLR_NATIVE_DECLARE(op_Inequality___STATIC__BOOLEAN__SystemDelegate__SystemDelegate);
-
 #if (NANOCLR_REFLECTION == TRUE)
     NANOCLR_NATIVE_DECLARE(GetInvocationList___SZARRAY_SystemDelegate);
     NANOCLR_NATIVE_DECLARE(get_Method___SystemReflectionMethodInfo);
     NANOCLR_NATIVE_DECLARE(get_Target___OBJECT);
 #endif // NANOCLR_REFLECTION
+    NANOCLR_NATIVE_DECLARE(Combine___STATIC__SystemDelegate__SystemDelegate__SystemDelegate);
+    NANOCLR_NATIVE_DECLARE(Remove___STATIC__SystemDelegate__SystemDelegate__SystemDelegate);
+    NANOCLR_NATIVE_DECLARE(op_Equality___STATIC__BOOLEAN__SystemDelegate__SystemDelegate);
+    NANOCLR_NATIVE_DECLARE(op_Inequality___STATIC__BOOLEAN__SystemDelegate__SystemDelegate);
 
     //--//
 
@@ -549,13 +550,6 @@ struct Library_corlib_native_System_Diagnostics_Debugger
 {
     NANOCLR_NATIVE_DECLARE(get_IsAttached___STATIC__BOOLEAN);
     NANOCLR_NATIVE_DECLARE(Break___STATIC__VOID);
-
-    //--//
-};
-
-struct Library_corlib_native_System_Diagnostics_DebuggerBrowsableAttribute
-{
-    static const int FIELD___state = 1;
 
     //--//
 };
@@ -594,7 +588,7 @@ struct Library_corlib_native_System_Enum
 
 struct Library_corlib_native_System_EventArgs
 {
-    static const int FIELD_STATIC__Empty = 9;
+    static const int FIELD_STATIC__Empty = 13;
 
     //--//
 };
@@ -631,19 +625,9 @@ struct Library_corlib_native_System_Int16
 
 struct Library_corlib_native_System_Guid
 {
-    static const int FIELD_STATIC__Empty = 10;
+    static const int FIELD_STATIC__Empty = 14;
 
-    static const int FIELD___a = 1;
-    static const int FIELD___b = 2;
-    static const int FIELD___c = 3;
-    static const int FIELD___d = 4;
-    static const int FIELD___e = 5;
-    static const int FIELD___f = 6;
-    static const int FIELD___g = 7;
-    static const int FIELD___h = 8;
-    static const int FIELD___i = 9;
-    static const int FIELD___j = 10;
-    static const int FIELD___k = 11;
+    static const int FIELD___data = 1;
 
     NANOCLR_NATIVE_DECLARE(GenerateNewGuid___STATIC__SZARRAY_U1);
 
@@ -811,9 +795,16 @@ struct Library_corlib_native_System_Reflection_RuntimeMethodInfo
     //--//
 };
 
-struct Library_corlib_native_System_Runtime_CompilerServices_AccessedThroughPropertyAttribute
+struct Library_corlib_native_System_Runtime_CompilerServices_NullableAttribute
 {
-    static const int FIELD___propertyName = 1;
+    static const int FIELD__NullableFlags = 1;
+
+    //--//
+};
+
+struct Library_corlib_native_System_Runtime_CompilerServices_NullableContextAttribute
+{
+    static const int FIELD__Flag = 1;
 
     //--//
 };
@@ -873,7 +864,6 @@ struct Library_corlib_native_System_RuntimeType
 
 struct Library_corlib_native_System_SByte
 {
-
     static const int FIELD__m_value = 1;
 
     //--//
@@ -982,7 +972,7 @@ struct Library_corlib_native_System_Threading_Thread
 
 struct Library_corlib_native_System_Threading_Timeout
 {
-    static const int FIELD_STATIC__InfiniteTimeSpan = 11;
+    static const int FIELD_STATIC__InfiniteTimeSpan = 15;
 
     //--//
 };

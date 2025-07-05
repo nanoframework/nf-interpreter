@@ -92,9 +92,9 @@ HRESULT Library_sys_dev_i2c_native_System_Device_I2c_I2cDevice::NativeInit___VOI
 
             // Ensure driver gets uninitialized during soft reboot
             HAL_AddSoftRebootHandler(Esp32_I2c_UnitializeAll);
-
-            Esp_I2C_Initialised_Flag[bus]++;
         }
+
+        Esp_I2C_Initialised_Flag[bus]++;
     }
     NANOCLR_NOCLEANUP();
 }

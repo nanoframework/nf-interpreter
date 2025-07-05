@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (c) .NET Foundation and Contributors
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
@@ -91,8 +91,9 @@ HRESULT CLR_RT_ExecutionEngine::ExecutionEngine_Initialize()
                                                     // CLR_RT_Thread*                      m_cctorThread;
                                                     //
 #if !defined(NANOCLR_APPDOMAINS)
-    m_globalLock = NULL; // CLR_RT_HeapBlock*                  m_globalLock;
-#endif                   //
+    m_globalLock = NULL;           // CLR_RT_HeapBlock*                  m_globalLock;
+    m_outOfMemoryException = NULL; // CLR_RT_HeapBlock*                   m_outOfMemoryException;
+#endif
 
     m_currentUICulture = NULL; // CLR_RT_HeapBlock*                   m_currentUICulture;
 
@@ -181,8 +182,8 @@ HRESULT CLR_RT_ExecutionEngine::AllocateHeaps()
         CLR_Debug::Printf("Heap Cluster information\r\n");
 
 #ifdef _WIN64
-        CLR_Debug::Printf("Start:       0x%" PRIx64 "\r\n", (uint64_t)heapFirstFree);
-        CLR_Debug::Printf("Free:        0x%" PRIx64 "\r\n", (uint64_t)heapFree);
+        CLR_Debug::Printf("Start:       0x%" PRIx64 "\r\n", heapFirstFree);
+        CLR_Debug::Printf("Free:        0x%" PRIx64 "\r\n", heapFree);
         CLR_Debug::Printf("Block size:  %d\r\n", sizeof(struct CLR_RT_HeapBlock));
 #else
         CLR_Debug::Printf("Start:       %08x\r\n", (size_t)heapFirstFree);
@@ -421,6 +422,7 @@ CLR_UINT32 CLR_RT_ExecutionEngine::PerformGarbageCollection()
 void CLR_RT_ExecutionEngine::PerformHeapCompaction()
 {
     NATIVE_PROFILE_CLR_CORE();
+
     if (CLR_EE_DBG_IS(NoCompaction))
         return;
 
@@ -448,6 +450,7 @@ void CLR_RT_ExecutionEngine::Relocate()
 
 #if !defined(NANOCLR_APPDOMAINS)
     CLR_RT_GarbageCollector::Heap_Relocate((void **)&m_globalLock);
+    CLR_RT_GarbageCollector::Heap_Relocate((void **)&m_outOfMemoryException);
 #endif
 
     CLR_RT_GarbageCollector::Heap_Relocate((void **)&m_currentUICulture);
@@ -624,8 +627,6 @@ HRESULT CLR_RT_ExecutionEngine::Execute(wchar_t *entryPointArgs, int maxContextS
 
     CLR_RT_HeapBlock ref;
     CLR_RT_Thread *thMain = NULL;
-
-    memset(&ref, 0, sizeof(struct CLR_RT_HeapBlock));
 
     if (NANOCLR_INDEX_IS_INVALID(g_CLR_RT_TypeSystem.m_entryPoint))
     {
@@ -946,7 +947,6 @@ bool CLR_RT_ExecutionEngine::SpawnStaticConstructorHelper(CLR_RT_Assembly *assem
         CLR_RT_HeapBlock_Delegate *dlg;
         CLR_RT_HeapBlock refDlg;
 
-        memset(&refDlg, 0, sizeof(struct CLR_RT_HeapBlock));
         refDlg.SetObjectReference(NULL);
         CLR_RT_ProtectFromGC gc(refDlg);
 
@@ -1044,7 +1044,6 @@ void CLR_RT_ExecutionEngine::SpawnFinalizer()
     {
         CLR_RT_HeapBlock delegate;
 
-        memset(&delegate, 0, sizeof(struct CLR_RT_HeapBlock));
         delegate.SetObjectReference(NULL);
         CLR_RT_ProtectFromGC gc(delegate);
 
@@ -2188,7 +2187,6 @@ HRESULT CLR_RT_ExecutionEngine::CloneObject(CLR_RT_HeapBlock &reference, const C
             //
             CLR_RT_HeapBlock safeSource;
 
-            memset(&safeSource, 0, sizeof(struct CLR_RT_HeapBlock));
             safeSource.SetObjectReference(obj);
             CLR_RT_ProtectFromGC gc(safeSource);
 

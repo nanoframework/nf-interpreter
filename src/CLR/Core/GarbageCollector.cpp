@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (c) .NET Foundation and Contributors
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
@@ -137,26 +137,34 @@ void CLR_RT_AssertEarlyCollection::CheckAll(CLR_RT_HeapBlock *ptr)
 CLR_UINT32 CLR_RT_GarbageCollector::ExecuteGarbageCollection()
 {
     NATIVE_PROFILE_CLR_CORE();
+
+    // bump the number of garbage collections
+    m_numberOfGarbageCollections++;
+
 #if defined(NANOCLR_PROFILE_NEW_ALLOCATIONS)
     g_CLR_PRF_Profiler.RecordGarbageCollectionBegin();
+#endif
+
+#if defined(NANOCLR_TRACE_MEMORY_STATS) || defined(NANOCLR_GC_VERBOSE)
+
+    CLR_UINT64 stats_start = HAL_Time_CurrentSysTicks();
+    int ellapsedTimeMilliSec = 0;
+
 #endif
 
 #if defined(NANOCLR_GC_VERBOSE)
     if (s_CLR_RT_fTrace_GC >= c_CLR_RT_Trace_Info)
     {
-        CLR_Debug::Printf("\r\n\r\n    Memory: Start %s\r\n", HAL_Time_CurrentDateTimeToString());
+        CLR_Debug::Printf(
+            "\r\n\r\nGC: Starting run #%d @ %s\r\n",
+            m_numberOfGarbageCollections,
+            HAL_Time_CurrentDateTimeToString());
     }
 #endif
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
     CLR_RT_ExecutionEngine::ExecutionConstraint_Suspend();
-
-#if defined(NANOCLR_TRACE_MEMORY_STATS)
-
-    CLR_UINT64 stats_start = HAL_Time_CurrentSysTicks();
-
-#endif
 
     g_CLR_RT_EventCache.EventCache_Cleanup();
 
@@ -171,13 +179,13 @@ CLR_UINT32 CLR_RT_GarbageCollector::ExecuteGarbageCollection()
 #if defined(NANOCLR_TRACE_MEMORY_STATS)
     if (s_CLR_RT_fTrace_MemoryStats >= c_CLR_RT_Trace_Info)
     {
-        int milliSec = ((int)::HAL_Time_SysTicksToTime(HAL_Time_CurrentSysTicks() - stats_start) +
-                        TIME_CONVERSION__TICKUNITS - 1) /
-                       TIME_CONVERSION__TICKUNITS;
+        CLR_INT64 elapsed = HAL_Time_CurrentSysTicks() - stats_start;
+        ellapsedTimeMilliSec =
+            (int)((::HAL_Time_SysTicksToTime(elapsed) + TIME_CONVERSION__TICKUNITS - 1) / TIME_CONVERSION__TICKUNITS);
 
         CLR_Debug::Printf(
             "\r\nGC: %dmsec %d bytes used, %d bytes available\r\n\r\n",
-            milliSec,
+            ellapsedTimeMilliSec,
             m_totalBytes - m_freeBytes,
             m_freeBytes);
     }
@@ -262,14 +270,23 @@ CLR_UINT32 CLR_RT_GarbageCollector::ExecuteGarbageCollection()
 
     CLR_RT_ExecutionEngine::ExecutionConstraint_Resume();
 
-    m_numberOfGarbageCollections++;
-
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
 #if defined(NANOCLR_GC_VERBOSE)
     if (s_CLR_RT_fTrace_GC >= c_CLR_RT_Trace_Info)
     {
-        CLR_Debug::Printf("\r\n\r\n    Memory: End %s\r\n", HAL_Time_CurrentDateTimeToString());
+        // compute ellapsed time if not done already
+        if (ellapsedTimeMilliSec == 0)
+        {
+            ellapsedTimeMilliSec = ((int)::HAL_Time_SysTicksToTime(HAL_Time_CurrentSysTicks() - stats_start) +
+                                    TIME_CONVERSION__TICKUNITS - 1) /
+                                   TIME_CONVERSION__TICKUNITS;
+        }
+
+        CLR_Debug::Printf(
+            "\r\n\r\nGC: Ended run #%d (took %dmsec)\r\n",
+            m_numberOfGarbageCollections,
+            ellapsedTimeMilliSec);
     }
 #endif
 
@@ -392,6 +409,7 @@ void CLR_RT_GarbageCollector::Mark()
 
 #if !defined(NANOCLR_APPDOMAINS)
         CheckSingleBlock_Force(g_CLR_RT_ExecutionEngine.m_globalLock);
+        CheckSingleBlock_Force(g_CLR_RT_ExecutionEngine.m_outOfMemoryException);
 #endif
 
         CheckSingleBlock_Force(g_CLR_RT_ExecutionEngine.m_currentUICulture);
@@ -669,6 +687,7 @@ void CLR_RT_GarbageCollector::AppDomain_Mark()
 
         CheckSingleBlock_Force(appDomain->m_globalLock);
         CheckSingleBlock_Force(appDomain->m_strName);
+        CheckSingleBlock_Force(appDomain->m_outOfMemoryException);
     }
     NANOCLR_FOREACH_NODE_END();
 }

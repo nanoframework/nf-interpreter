@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (c) .NET Foundation and Contributors
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
@@ -20,5 +20,7 @@
 // #include <SPOT_native.h>
 // #include <SPOT_hardware_native.h>
 #include <nanoCLR_Runtime__HeapBlock.h>
+
+#include <inttypes.h>
 
 #endif // NANOCLR_CORE_H

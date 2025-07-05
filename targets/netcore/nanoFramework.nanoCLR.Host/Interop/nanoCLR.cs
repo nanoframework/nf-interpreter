@@ -46,11 +46,17 @@ namespace nanoFramework.nanoCLR.Host.Interop
         internal delegate int WireReceiveDelegate(
             [MarshalAs(UnmanagedType.LPArray, SizeParamIndex = 1)][Out] byte[] data, int length);
 
-        /////////////////////////////////////////////////////////////////////////////////////////////////////////////
-        // The following declaration have the functions names exposed in the C++ DLL
-        // Keep their names in sync with the C++ code @ netcore\nanoFramework.nanoCLR\nanoCLR_native.cpp
-        // and netcore\nanoFramework.nanoCLR\nanoCLR_native.h
-        /////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        internal delegate void ProfilerMessageDelegate(
+            [MarshalAs(UnmanagedType.LPStr)] string message);
+
+        internal delegate void ProfilerDataDelegate(
+            [MarshalAs(UnmanagedType.LPArray, SizeParamIndex = 1)][In] byte[] data, int length);
+
+        ///////////////////////////////////////////////////////////////////////////////////////////////////
+        // The following declaration have the functions names exposed in the C++ DLL                     //
+        // Keep their names in sync with the C++ code @ netcore\nanoFramework.nanoCLR\nanoCLR_native.cpp //
+        // and netcore\nanoFramework.nanoCLR\nanoCLR_native.h                                            //
+        ///////////////////////////////////////////////////////////////////////////////////////////////////
 
         [DllImport(NativeLibraryName, CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl)]
         internal static extern void nanoCLR_Run(nanoCLRSettings nanoClrSettings);
@@ -88,6 +94,14 @@ namespace nanoFramework.nanoCLR.Host.Interop
         [DllImport(NativeLibraryName, CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl)]
         internal static extern void nanoCLR_SetWireProtocolTransmitCallback(
             [MarshalAs(UnmanagedType.FunctionPtr)] WireTransmitDelegate transmitCallback);
+
+        [DllImport(NativeLibraryName, CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl)]
+        internal static extern void nanoCLR_SetProfilerMessageCallback(
+            [MarshalAs(UnmanagedType.FunctionPtr)] ProfilerMessageDelegate profilerMessageCallback);
+
+        [DllImport(NativeLibraryName, CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl)]
+        internal static extern void nanoCLR_SetProfilerDataCallback(
+            [MarshalAs(UnmanagedType.FunctionPtr)] ProfilerDataDelegate profilerDataCallback);
 
         [DllImport(NativeLibraryName, CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl)]
         internal static extern void nanoCLR_WireProtocolProcess();

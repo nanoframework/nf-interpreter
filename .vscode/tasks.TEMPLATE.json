@@ -101,6 +101,23 @@
         }
       },
       "problemMatcher": []
+    },
+    {
+      "label": "Flash Silabs GG11",
+      "type": "shell",
+      "command": "${env:JLINK_PATH}/Jlink.exe -device default -si swd -CommandFile ${workspaceRoot}/.jlink/flash_gg11.jlink",
+      "windows": {
+        "options": {
+          "shell": {
+            "executable": "cmd.exe",
+            "args": [
+              "/c"
+            ]
+          },
+          "cwd": "${workspaceFolder}/Build"
+        }
+      },
+      "problemMatcher": []
     }
   ],
   "inputs": [
