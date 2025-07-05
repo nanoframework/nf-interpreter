@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (c) .NET Foundation and Contributors
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
@@ -14,8 +14,6 @@ HRESULT Library_corlib_native_System_Array::System_Collections_IList_get_Item___
     int index = stack.Arg1().NumericByRef().s4;
 
     CLR_RT_HeapBlock ref;
-
-    memset(&ref, 0, sizeof(struct CLR_RT_HeapBlock));
 
     NANOCLR_CHECK_HRESULT(ref.InitializeArrayReference(thisRef, index));
 
@@ -39,8 +37,6 @@ HRESULT Library_corlib_native_System_Array::System_Collections_IList_set_Item___
     int index = stack.Arg1().NumericByRef().s4;
 
     CLR_RT_HeapBlock ref;
-
-    memset(&ref, 0, sizeof(struct CLR_RT_HeapBlock));
 
     NANOCLR_CHECK_HRESULT(ref.InitializeArrayReference(thisRef, index));
 

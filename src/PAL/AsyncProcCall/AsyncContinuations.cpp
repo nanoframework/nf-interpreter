@@ -14,7 +14,7 @@ extern HAL_DblLinkedList<HAL_CONTINUATION> g_HAL_Completion_List;
 
 bool HAL_CONTINUATION::IsLinked()
 {
-    return ((HAL_DblLinkedNode<HAL_CONTINUATION>*)this)->IsLinked();
+    return ((HAL_DblLinkedNode<HAL_CONTINUATION> *)this)->IsLinked();
 }
 
 void HAL_CONTINUATION::InitializeList()
@@ -26,11 +26,11 @@ void HAL_CONTINUATION::InitializeList()
 void HAL_CONTINUATION::Enqueue()
 {
     NATIVE_PROFILE_PAL_ASYNC_PROC_CALL();
-    if(this->GetEntryPoint() != NULL)
+    if (this->GetEntryPoint() != NULL)
     {
         GLOBAL_LOCK();
 
-        g_HAL_Continuation_List.LinkAtBack( this );
+        g_HAL_Continuation_List.LinkAtBack(this);
 
         GLOBAL_UNLOCK();
     }
@@ -51,27 +51,27 @@ bool HAL_CONTINUATION::Dequeue_And_Execute()
     NATIVE_PROFILE_PAL_ASYNC_PROC_CALL();
 
     // use this as the return value
-    // helpfull to make the call to release the global mutext happens 
+    // helpfull to make the call to release the global mutext happens
     bool result;
 
-    HAL_CONTINUATION* ptr = NULL;
+    HAL_CONTINUATION *ptr = NULL;
     GLOBAL_LOCK();
     ptr = g_HAL_Continuation_List.ExtractFirstNode();
     GLOBAL_UNLOCK();
 
-    if(ptr == NULL )
+    if (ptr == NULL)
     {
         result = false;
     }
     else
     {
-        //SystemState_SetNoLock( SYSTEM_STATE_NO_CONTINUATIONS );
+        // SystemState_SetNoLock( SYSTEM_STATE_NO_CONTINUATIONS );
 
         HAL_CALLBACK call = ptr->Callback;
 
         call.Execute();
 
-        //SystemState_ClearNoLock( SYSTEM_STATE_NO_CONTINUATIONS );   // nestable
+        // SystemState_ClearNoLock( SYSTEM_STATE_NO_CONTINUATIONS );   // nestable
 
         result = true;
     }
@@ -79,30 +79,30 @@ bool HAL_CONTINUATION::Dequeue_And_Execute()
     return result;
 }
 
-void HAL_CONTINUATION::InitializeCallback( HAL_CALLBACK_FPN entryPoint, void* argument )
+void HAL_CONTINUATION::InitializeCallback(HAL_CALLBACK_FPN entryPoint, void *argument)
 {
     NATIVE_PROFILE_PAL_ASYNC_PROC_CALL();
     Initialize();
-    
-    Callback.Initialize( entryPoint, argument );
+
+    Callback.Initialize(entryPoint, argument);
 }
 
 void HAL_CONTINUATION::Uninitialize()
 {
     NATIVE_PROFILE_PAL_ASYNC_PROC_CALL();
     GLOBAL_LOCK();
-    
-    HAL_CONTINUATION* ptr;
 
-    while(TRUE)
+    HAL_CONTINUATION *ptr;
+
+    while (TRUE)
     {
-        ptr = (HAL_CONTINUATION*)g_HAL_Continuation_List.ExtractFirstNode();
-        
-        if(!ptr)
+        ptr = (HAL_CONTINUATION *)g_HAL_Continuation_List.ExtractFirstNode();
+
+        if (!ptr)
         {
             break;
         }
     }
-    
+
     GLOBAL_UNLOCK();
 }

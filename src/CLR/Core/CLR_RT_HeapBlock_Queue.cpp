@@ -50,12 +50,9 @@ HRESULT CLR_RT_HeapBlock_Queue::Enqueue(CLR_RT_HeapBlock *value)
         // Set new capacity
         CLR_RT_HeapBlock newArrayHB;
 
-        memset(&newArrayHB, 0, sizeof(struct CLR_RT_HeapBlock));
-
         // Protect value from GC, in case CreateInstance triggers one
         CLR_RT_HeapBlock valueHB;
 
-        memset(&valueHB, 0, sizeof(struct CLR_RT_HeapBlock));
         valueHB.SetObjectReference(value);
         CLR_RT_ProtectFromGC gc(valueHB);
 

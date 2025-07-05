@@ -13,16 +13,12 @@ trigger:
       - .clang-format
       - .github_changelog_generator
       - .gitignore
-      - .typo-ci.yml
       - build.ps1
       - CHANGELOG.md
-      - CMakeSettings.json
-      - CMakeSettings.SAMPLE.json
       - LICENSE.md
       - nf.props
       - nfcore.vssettings
-      - README.md
-      - README.zh-cn.md
+      - README*.md
       - RunCmd.bat
       - startocd.bat
       - .github/*
@@ -48,7 +44,7 @@ resources:
       type: github
       name: espressif/esp-idf
       endpoint: nanoframework
-      ref: 'refs/tags/v5.2.3'
+      ref: refs/tags/v5.2.3
     - repository: mscorlib
       type: github
       name: nanoframework/CoreLibrary
@@ -96,6 +92,7 @@ jobs:
 
               if( ($commit.commit.author.name -eq "nfbot") -and ($commit.commit.message -like "*[version update]*") )
               {
+                Write-Host "##[command] **version update commit, skipping build**"
                 echo "##vso[task.setvariable variable=SKIP_BUILD;isOutput=true]true"  
               }
               else
@@ -104,11 +101,11 @@ jobs:
               }
 
               # check if Unit Tests for mscorlib should be run
-              if($commit.commit.message -like "*[run mscorlib tests]*")
+              if(($commit.commit.message -like "*[run mscorlib tests]*") -or ($commit.commit.message -match "Tested against nanoframework/CoreLibrary#(\d+)"))
               {
+                Write-Host "##[command] **mscorlib tests are to be runned**"
                 echo "##vso[task.setvariable variable=RUN_MSCORLIB_TESTS;isOutput=true]true"
               }
-
             }
             else
             {
@@ -362,7 +359,7 @@ jobs:
       - template: azure-pipelines-templates/download-install-llvm.yml
       - template: azure-pipelines-templates/check-code-style.yml
 
-  ################
+  ###############
   # STM32
   - job: Build_STM32_targets
     condition: >-
@@ -412,7 +409,7 @@ jobs:
     variables:
       DOTNET_NOLOGO: true
       # creates a counter and assigns it to the revision variable
-      REVISION: $[counter('STM32_1_12_1_versioncounter', 0)]
+      REVISION: $[counter('STM32_1_12_4_versioncounter', 0)]
       HelperPackageVersion: $[counter('HelperPackageVersioncounter', 0)]
       TargetPlatform: "stm32"
 
@@ -420,7 +417,6 @@ jobs:
       - template: azure-pipelines-templates/build-preparations.yml
       - template: azure-pipelines-templates/nb-gitversioning.yml
       - template: azure-pipelines-templates/download-install-arm-gcc-toolchain.yml
-      - template: azure-pipelines-templates/download-install-ninja.yml
       - template: azure-pipelines-templates/download-srecord.yml
       - template: azure-pipelines-templates/download-hexdfu.yml
       - template: azure-pipelines-templates/build-chibios-stm32-targets.yml
@@ -478,24 +474,6 @@ jobs:
           PackageName: ESP32_BLE_REV0
           CMakePreset: ESP32_BLE_REV0
 
-        ESP_WROVER_KIT:
-          TargetBoard: ESP32
-          TargetSeries: "esp32"
-          BuildOptions:
-          IDF_Target: esp32
-          TargetName: ESP_WROVER_KIT
-          PackageName: ESP_WROVER_KIT
-          CMakePreset: ESP_WROVER_KIT
-
-        ESP32_LILYGO:
-          TargetBoard: ESP32
-          TargetSeries: "esp32"
-          BuildOptions:
-          IDF_Target: esp32
-          TargetName: ESP32_LILYGO
-          PackageName: ESP32_LILYGO
-          CMakePreset: ESP32_LILYGO
-
         ESP32_C3:
           TargetBoard: ESP32_C3
           TargetSeries: "esp32c3"
@@ -523,15 +501,6 @@ jobs:
           PackageName: ESP32_H2_THREAD
           CMakePreset: ESP32_H2_THREAD
 
-        ESP32_S3:
-          TargetBoard: ESP32_S3
-          TargetSeries: "esp32s3"
-          BuildOptions:
-          IDF_Target: esp32s3
-          TargetName: ESP32_S3
-          PackageName: ESP32_S3
-          CMakePreset: ESP32_S3
-
         ESP32_S3_ALL:
           TargetBoard: ESP32_S3
           TargetSeries: "esp32s3"
@@ -553,33 +522,38 @@ jobs:
     variables:
       DOTNET_NOLOGO: true
       # creates a counter and assigns it to the revision variable
-      REVISION: $[counter('ESP32_1_12_1_versioncounter', 0)]
+      REVISION: $[counter('ESP32_1_12_4_versioncounter', 0)]
       IDF_PATH: "D:/a/1/s/esp-idf"
       PIP_CACHE_DIR: $(Pipeline.Workspace)/.pip
       TargetPlatform: "esp32"
+      IDF_TAG: "v5.2.3"
 
     steps:
       - checkout: self
-      - checkout: esp32_idf
-        fetchDepth: 1
+        path: s/nf-interpreter
 
+      - template: azure-pipelines-templates/checkout-idf.yml
+        parameters:
+          repoDirectory: '$(Agent.BuildDirectory)/s'
       - template: azure-pipelines-templates/build-preparations.yml
         parameters:
-          repoDirectory: '$(Build.SourcesDirectory)\nf-interpreter'
+          repoDirectory: '$(Agent.BuildDirectory)/s/nf-interpreter'
       - template: azure-pipelines-templates/nb-gitversioning.yml
         parameters:
-          repoDirectory: '$(Build.SourcesDirectory)\nf-interpreter'
+          repoDirectory: '$(Agent.BuildDirectory)/s/nf-interpreter'
       - template: azure-pipelines-templates/download-install-esp32-build-components.yml
       - template: azure-pipelines-templates/download-install-ninja.yml
         parameters:
-          repoDirectory: '$(Build.SourcesDirectory)\nf-interpreter'
+          repoDirectory: '$(Agent.BuildDirectory)/s/nf-interpreter'
       - template: azure-pipelines-templates/build-espressif-esp32-targets.yml
-
+        parameters:
+          repoDirectory: '$(Agent.BuildDirectory)/s/nf-interpreter'
+          partitionsDirectory: '$(Agent.BuildDirectory)/s/nf-interpreter/targets/ESP32/_IDF/$(IDF_Target)'
       - task: CopyFiles@2
         condition: succeeded()
         displayName: Copying bootloader
         inputs:
-          sourceFolder: '$(Build.SourcesDirectory)\nf-interpreter\build\bootloader'
+          sourceFolder: '$(Agent.BuildDirectory)/s/nf-interpreter/build/bootloader'
           Contents: |
             bootloader.bin
           TargetFolder: '$(Build.ArtifactStagingDirectory)\$(TargetPublishName)'
@@ -587,9 +561,11 @@ jobs:
           ignoreMakeDirErrors: true
 
       - template: azure-pipelines-templates/copy-sdkconfig.yml
+        parameters:
+          repoDirectory: '$(Agent.BuildDirectory)/s/nf-interpreter'
       - template: azure-pipelines-templates/pack-publish-artifacts.yml
         parameters:
-          buildDirectory: '$(Build.SourcesDirectory)\nf-interpreter\build'
+          buildDirectory: '$(Agent.BuildDirectory)/s/nf-interpreter/build'
       - template: azure-pipelines-templates/publish-cloudsmith.yml
       - template: azure-pipelines-templates/publish-sdkconfig.yml
 
@@ -634,7 +610,7 @@ jobs:
     variables:
       DOTNET_NOLOGO: true
       # creates a counter and assigns it to the revision variable
-      REVISION: $[counter('NXP_1_12_1_versioncounter', 0)]
+      REVISION: $[counter('NXP_1_12_4_versioncounter', 0)]
       GIT_LFS_SKIP_SMUDGE: 1
       TargetPlatform: "freertos"
 
@@ -642,7 +618,6 @@ jobs:
       - template: azure-pipelines-templates/build-preparations.yml
       - template: azure-pipelines-templates/nb-gitversioning.yml
       - template: azure-pipelines-templates/download-install-arm-gcc-toolchain.yml
-      - template: azure-pipelines-templates/download-install-ninja.yml
       - template: azure-pipelines-templates/download-srecord.yml
       - template: azure-pipelines-templates/build-freertos-nxp-targets.yml
       - template: azure-pipelines-templates/pack-publish-artifacts.yml
@@ -712,13 +687,14 @@ jobs:
     variables:
       DOTNET_NOLOGO: true
       # creates a counter and assigns it to the revision variable
-      REVISION: $[counter('TI_1_12_1_versioncounter', 0)]
+      REVISION: $[counter('TI_1_12_4_versioncounter', 0)]
       HelperPackageVersion: $[counter('HelperPackageVersioncounter', 0)]
       TargetPlatform: "ti_simplelink"
 
     steps:
       - template: azure-pipelines-templates/build-preparations.yml
       - template: azure-pipelines-templates/nb-gitversioning.yml
+      - template: azure-pipelines-templates/download-install-cmake.yml
       - template: azure-pipelines-templates/download-install-arm-gcc-toolchain.yml
       - template: azure-pipelines-templates/download-install-ninja.yml
       - template: azure-pipelines-templates/build-ti-simplelink-targets.yml
@@ -775,7 +751,7 @@ jobs:
 
         SL_STK3701A:
           TargetBoard: SL_STK3701A
-          TargetSeries: "efm32gg11"
+          TargetSeries: "gg11"
           BuildOptions:
           NeedsDFU: false
           NeedsSRECORD: false
@@ -783,15 +759,14 @@ jobs:
 
     variables:
       # creates a counter and assigns it to the revision variable
-      REVISION: $[counter('AZURERTOS_1_12_1_versioncounter', 0)]
+      REVISION: $[counter('AZURERTOS_1_12_4_versioncounter', 0)]
       HelperPackageVersion: $[counter('HelperPackageVersioncounter', 0)]
-      TargetPlatform: "azure_rtos"
+      TargetPlatform: "efm32"
 
     steps:
       - template: azure-pipelines-templates/build-preparations.yml
       - template: azure-pipelines-templates/nb-gitversioning.yml
       - template: azure-pipelines-templates/download-install-arm-gcc-toolchain.yml
-      - template: azure-pipelines-templates/download-install-ninja.yml
       - template: azure-pipelines-templates/download-hexdfu.yml
       - template: azure-pipelines-templates/download-srecord.yml
       - template: azure-pipelines-templates/build-azurertos-targets.yml
@@ -834,7 +809,7 @@ jobs:
         value: true
       # creates a counter and assigns it to the revision variable
       - name: REVISION
-        value: $[counter('WIN32_1_12_1_versioncounter', 0)]
+        value: $[counter('WIN32_1_12_4_versioncounter', 0)]
       - name: LITTLEFS_PATH
         value: "D:/a/1/s/littlefs"
 
@@ -865,6 +840,13 @@ jobs:
 
       - template: azure-pipelines-templates/install-nuget.yml@templates
 
+      - task: Cache@2
+        displayName: Cache NuGet packages
+        continueOnError: true
+        inputs:
+          key: 'nuget | **/targets/netcore/nanoFramework.nanoCLR.Host/packages.lock.json | **/targets/netcore/nanoFramework.nanoCLR.CLI/packages.lock.json'
+          path: $(UserProfile)/.nuget/packages
+
       - task: DotNetCoreCLI@2
         displayName: Restore NuGet packages
         inputs:
@@ -890,7 +872,7 @@ jobs:
           solution: "nf-interpreter/targets/netcore/nanoCLR.sln"
           platform: "Any CPU"
           maximumCpuCount: true
-          msbuildArgs: "/p:PublicRelease=true"
+          msbuildArgs: "/restore /p:PublicRelease=true /p:BuildWithNetFrameworkHostedCompiler=true"
           configuration: "Release"
 
       - task: DotNetCoreCLI@2
@@ -1088,6 +1070,13 @@ jobs:
 
       - template: azure-pipelines-templates/install-nuget.yml@templates
 
+      - task: Cache@2
+        displayName: Cache NuGet packages
+        continueOnError: true
+        inputs:
+          key: 'nuget | **/targets/netcore/nanoFramework.nanoCLR.Host/packages.lock.json | **/targets/netcore/nanoFramework.nanoCLR.CLI/packages.lock.json'
+          path: $(UserProfile)/.nuget/packages
+  
       - task: DotNetCoreCLI@2
         displayName: Restore NuGet packages
         inputs:
@@ -1105,7 +1094,7 @@ jobs:
           solution: "nf-interpreter/targets/netcore/nanoCLR.sln"
           platform: "Any CPU"
           maximumCpuCount: true
-          msbuildArgs: "/p:PublicRelease=true"
+          msbuildArgs: "/restore /p:PublicRelease=true /p:BuildWithNetFrameworkHostedCompiler=true"
           configuration: "Release"
 
       - task: DotNetCoreCLI@2
@@ -1233,14 +1222,24 @@ jobs:
 
   - job: Run_UnitTests_mscorlib
     condition: >-
-      and(
-        succeeded('Build_nanoCLR_CLI'),
-        ne(dependencies.Check_Build_Options.outputs['BuildOptions.SKIP_BUILD'], true),
-        or(
-          eq(variables['BUILD_NANOCLR_CLI__'], true),
-          eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ALL'], true),
-          eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_NANOCLR_CLI'], true),
-          eq(dependencies.Check_Build_Options.outputs['BuildOptions.RUN_MSCORLIB_TESTS'], true)
+      or(
+        and(
+          succeeded('Build_nanoCLR_CLI'),
+          ne(dependencies.Check_Build_Options.outputs['BuildOptions.SKIP_BUILD'], true),
+          ne(variables['System.PullRequest.PullRequestId'], ''),
+          or(
+            eq(dependencies.Check_Build_Options.outputs['BuildOptions.RUN_MSCORLIB_TESTS'], true),
+            eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ALL'], true),
+            eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_NANOCLR_CLI'], true)
+          )
+        ),
+        and(
+          eq(variables['Build.Reason'], 'Manual'),
+          or(
+            eq(variables['BUILD_ALL__'], 'true'),
+            eq(variables['BUILD_NANOCLR_CLI__'], 'true')
+          ),
+          eq(variables['RUN_MSCORLIB_TESTS__'], 'true')
         )
       )
 
@@ -1262,6 +1261,9 @@ jobs:
       - checkout: mscorlib
         fetchDepth: 100
         submodules: true
+        persistCredentials: true
+
+      - template: azure-pipelines-templates/check-mscorlib-to-test.yml
 
       # Download nanoclr from build artifacts
       - task: DownloadBuildArtifacts@1
@@ -1279,6 +1281,14 @@ jobs:
           GitHubToken: $(GitHubToken)
 
       - template: azure-pipelines-templates/install-nuget.yml@templates
+
+      - task: Cache@2
+        displayName: Cache NuGet packages
+        condition: succeeded()
+        continueOnError: true
+        inputs:
+          key: 'nuget | **/packages.lock.json'
+          path: $(UserProfile)/.nuget/packages
 
       - task: NuGetCommand@2
         condition: succeeded()

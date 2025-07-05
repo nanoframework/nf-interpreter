@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (c) .NET Foundation and Contributors
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
@@ -1726,11 +1726,20 @@ HRESULT CLR_RT_Assembly::CreateInstance(const CLR_RECORD_ASSEMBLY *header, CLR_R
                                header->SizeOfTable(TBL_MethodDef) + header->SizeOfTable(TBL_Attributes) +
                                header->SizeOfTable(TBL_TypeSpec) + header->SizeOfTable(TBL_Signatures);
 
-            CLR_Debug::Printf(
-                " (%d RAM - %d ROM - %d METADATA)\r\n\r\n",
-                iTotalRamSize,
-                header->TotalSize(),
-                iMetaData);
+            CLR_Debug::Printf(" (%d RAM - %d ROM - %d METADATA)", iTotalRamSize, header->TotalSize(), iMetaData);
+
+#if defined(NANOCLR_GC_VERBOSE)
+            if (s_CLR_RT_fTrace_Memory >= c_CLR_RT_Trace_Info)
+            {
+#ifdef _WIN64
+
+                CLR_Debug::Printf(" @ 0x%016" PRIxPTR "", (uintptr_t)assm);
+#else
+                CLR_Debug::Printf(" @ 0x%08 PRIxPTR ", (uintptr_t)assm);
+#endif
+            }
+#endif
+            CLR_Debug::Printf("\r\n\r\n");
 
             CLR_Debug::Printf(
                 "   AssemblyRef    = %8d bytes (%8d elements)\r\n",
@@ -2237,6 +2246,7 @@ void CLR_RT_AppDomain::AppDomain_Initialize()
     m_id = g_CLR_RT_ExecutionEngine.m_appDomainIdNext++;
     m_globalLock = NULL;
     m_strName = NULL;
+    m_outOfMemoryException = NULL;
     m_appDomainAssemblyLastAccess = NULL;
 }
 
@@ -2291,12 +2301,17 @@ HRESULT CLR_RT_AppDomain::LoadAssembly(CLR_RT_Assembly *assm)
 
     // Preemptively allocate an out of memory exception.
     // We can never get into a case where an out of memory exception cannot be thrown.
+    if (m_outOfMemoryException == NULL)
+    {
+        _ASSERTE(!strcmp(assm->m_szName, "mscorlib")); // always the first assembly to be loaded
 
-    _ASSERTE(!strcmp(assm->m_szName, "mscorlib")); // always the first assembly to be loaded
+        CLR_RT_HeapBlock exception;
 
-    NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObjectFromIndex(
-        m_outOfMemoryException,
-        g_CLR_RT_WellKnownTypes.m_OutOfMemoryException));
+        NANOCLR_CHECK_HRESULT(
+            g_CLR_RT_ExecutionEngine.NewObjectFromIndex(exception, g_CLR_RT_WellKnownTypes.m_OutOfMemoryException));
+
+        m_outOfMemoryException = exception.Dereference();
+    }
 
     NANOCLR_CLEANUP();
 
@@ -2390,6 +2405,7 @@ void CLR_RT_AppDomain::Relocate()
     NATIVE_PROFILE_CLR_CORE();
     CLR_RT_GarbageCollector::Heap_Relocate((void **)&m_globalLock);
     CLR_RT_GarbageCollector::Heap_Relocate((void **)&m_strName);
+    CLR_RT_GarbageCollector::Heap_Relocate((void **)&m_outOfMemoryException);
 }
 
 HRESULT CLR_RT_AppDomain::VerifyTypeIsLoaded(const CLR_RT_TypeDef_Index &idx)
@@ -4103,9 +4119,16 @@ HRESULT CLR_RT_TypeSystem::PrepareForExecution()
 
     // Preemptively create an out of memory exception.
     // We can never get into a case where an out of memory exception cannot be thrown.
-    NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObjectFromIndex(
-        g_CLR_RT_ExecutionEngine.m_outOfMemoryException,
-        g_CLR_RT_WellKnownTypes.m_OutOfMemoryException));
+
+    if (g_CLR_RT_ExecutionEngine.m_outOfMemoryException == NULL)
+    {
+        CLR_RT_HeapBlock exception;
+
+        NANOCLR_CHECK_HRESULT(
+            g_CLR_RT_ExecutionEngine.NewObjectFromIndex(exception, g_CLR_RT_WellKnownTypes.m_OutOfMemoryException));
+
+        g_CLR_RT_ExecutionEngine.m_outOfMemoryException = exception.Dereference();
+    }
 #endif
 
     // Load Runtime.Events to setup EventSink for other assemblies using it
@@ -4644,7 +4667,6 @@ HRESULT CLR_RT_AttributeParser::Next(Value *&res)
 
         m_lastValue.m_mode = Value::c_DefaultConstructor;
         m_lastValue.m_name = NULL;
-        memset(&m_lastValue.m_value, 0, sizeof(struct CLR_RT_HeapBlock));
 
         NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObject(m_lastValue.m_value, m_td));
 
@@ -4660,7 +4682,6 @@ HRESULT CLR_RT_AttributeParser::Next(Value *&res)
 
         m_lastValue.m_mode = Value::c_ConstructorArgument;
         m_lastValue.m_name = NULL;
-        memset(&m_lastValue.m_value, 0, sizeof(struct CLR_RT_HeapBlock));
 
         // get type
         NANOCLR_CHECK_HRESULT(m_parser.Advance(m_res));

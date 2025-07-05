@@ -1,0 +1,54 @@
+# Copyright (c) .NET Foundation and Contributors
+# See LICENSE file in the project root for full license information.
+
+steps:
+  - task: PowerShell@2
+    name: Check_mscorlib_test
+    displayName: Check mscorlib to test
+    condition: ne(variables['System.PullRequest.PullRequestId'], '')
+    inputs:
+      failOnStderr: false
+      targetType: "inline"
+      script: |
+
+        # compute authorization header in format "AUTHORIZATION: basic 'encoded token'"
+        # 'encoded token' is the Base64 of the string "nfbot:personal-token"
+        $auth = "basic $([System.Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes("nfbot:$(GitHubToken)")))"
+
+        # find PR
+        "Getting PR#$env:System_PullRequest_PullRequestNumber details..." | Write-Host -ForegroundColor White -NoNewline
+        $pr = Invoke-WebRequest "https://api.github.com/repos/$env:Build_Repository_Name/pulls/$env:System_PullRequest_PullRequestNumber" | ConvertFrom-Json
+
+        if($($pr.number) -eq "$env:System_PullRequest_PullRequestNumber")
+        {
+          '##[command] OK' | Write-Host -ForegroundColor Green
+        }
+
+        # grab PR commit message
+        $prCommitMessage = $($pr.body)
+
+        # look for test prompt in PR commit message
+        # pattern is "Tested against nanoframework/CoreLibrary#NNNN"
+
+        if($prCommitMessage -match "Tested against nanoframework/CoreLibrary#(\d+)")
+        {
+          $testPR = $matches[1]
+          "Test PR found: $testPR" | Write-Host -ForegroundColor White
+
+          # move to the build sources directory
+          Set-Location -Path $(Agent.BuildDirectory)/s/CoreLibrary
+
+          # need to call this first to setup authentication
+          gh auth setup-git
+
+          # gh auth status
+          
+          Write-Host "Checking out mscorlib PR: #$testPR"
+          gh pr checkout $testPR
+        }
+        else
+        {
+          "No test PR found. Using main branch" | Write-Host -ForegroundColor White
+        }
+    env:
+      GITHUB_TOKEN: $(GitHubToken)

@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (c) .NET Foundation and Contributors
 // See LICENSE file in the project root for full license information.
 //
@@ -92,4 +92,17 @@ int _tmain(int argc, _TCHAR *argv[])
 #endif
 
     return 0;
+}
+
+typedef void(__stdcall *ProfilerMessageCallback)(const char *szText);
+typedef void(__stdcall *ProfilerDataCallback)(const CLR_UINT8 *data, size_t size);
+ProfilerMessageCallback g_ProfilerMessageCallback;
+ProfilerDataCallback g_ProfilerDataCallback;
+
+void nanoCLR_SetProfilerMessageCallback(ProfilerMessageCallback profilerMessageCallback)
+{
+}
+
+void nanoCLR_SetProfilerDataCallback(ProfilerDataCallback profilerDataCallback)
+{
 }

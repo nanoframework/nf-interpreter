@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (c) .NET Foundation and Contributors
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
@@ -14,6 +14,7 @@
 #include <float.h>
 
 #define __isnand    _isnan
+#define __isnanf    _isnan
 #define __isinfd(x) (!_finite(x))
 
 inline int __signbitd(double x)
@@ -23,7 +24,7 @@ inline int __signbitd(double x)
 }
 
 #define rint(x)         floor((x) + 0.5)
-#define remainder(x, y) ((x) - ((y)*rint((x) / (y))))
+#define remainder(x, y) ((x) - ((y) * rint((x) / (y))))
 
 #define isgreater(param0, param1) (param0 > param1)
 #define isless(param0, param1)    (param0 < param1)
