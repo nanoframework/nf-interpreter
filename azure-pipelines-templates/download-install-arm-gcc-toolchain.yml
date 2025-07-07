@@ -30,7 +30,7 @@ steps:
     condition: ne(variables.GCC_CACHE_RESTORED, 'true')
     inputs:
       archiveFilePatterns: '$(Agent.TempDirectory)\arm-gnu-toolchain-${{ parameters.gccArmVersion }}-mingw-w64-i686-arm-none-eabi.zip'
-      destinationFolder: "$(Agent.TempDirectory)"
+      destinationFolder: "$(Agent.TempDirectory)\\arm-gnu-toolchain-${{ parameters.gccArmVersion }}-mingw-w64-i686-arm-none-eabi"
       cleanDestinationFolder: false
 
   - script: echo "##vso[task.prependpath]$(Agent.TempDirectory)\arm-gnu-toolchain-${{ parameters.gccArmVersion }}-mingw-w64-i686-arm-none-eabi\bin"

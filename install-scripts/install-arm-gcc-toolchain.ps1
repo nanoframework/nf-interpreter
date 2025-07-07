@@ -70,11 +70,11 @@ If ($gnuGccPathExists -eq $False -or $force) {
 
         "Installing ARM GNU GCC toolchain..." | Write-Host -ForegroundColor White -NoNewline
 
-        # unzip toolchain
-        Expand-Archive $output -DestinationPath $toolPath > $null
-
         # update tool path to include versioned toolchain folder
         $toolPath = $toolPath + "\arm-gnu-toolchain-" + $Version + "-mingw-w64-i686-arm-none-eabi"
+
+        # unzip toolchain
+        Expand-Archive $output -DestinationPath $toolPath > $null
 
         "OK" | Write-Host -ForegroundColor Green
     }
