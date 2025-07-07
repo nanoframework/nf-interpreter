@@ -5,6 +5,8 @@
 //
 #include "Core.h"
 
+typedef Library_corlib_native_System_Nullable_1 Sys_Nullable;
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 #if defined(NANOCLR_TRACE_EXCEPTIONS) && defined(VIRTUAL_DEVICE)
@@ -2802,13 +2804,101 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
 
                     UPDATESTACK(stack, evalPos);
 
+                    // check if value is a nullable type
+                    bool hasValue = false;
+                    CLR_RT_HeapBlock *nullableValue = nullptr;
+                    bool valueIsNullableType = false;
+                    bool tokenIsNullableType = false;
+                    CLR_RT_TypeDef_Instance destinationType;
+
+                    valueIsNullableType =
+                        CLR_RT_ExecutionEngine::IsInstanceOf(evalPos[0], g_CLR_RT_WellKnownTypes.Nullable);
+                    tokenIsNullableType =
+                        CLR_RT_ExecutionEngine::IsInstanceOf(typeInst, g_CLR_RT_WellKnownTypes.Nullable);
+
+                    // resolve the T to box to / unbox from
+                    if (tokenIsNullableType && destinationType.ResolveNullableType(arg, assm, &stack->m_call) == false)
+                    {
+                        NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+                    }
+
+                    if (valueIsNullableType)
+                    {
+                        // check HasValue property
+                        nullableValue = evalPos[0].Dereference();
+                        hasValue = nullableValue[Library_corlib_native_System_Nullable_1::FIELD__hasValue]
+                                       .NumericByRefConst()
+                                       .u1;
+                    }
+
                     if (op == CEE_BOX)
                     {
-                        NANOCLR_CHECK_HRESULT(evalPos[0].PerformBoxing(typeInst));
+                        if (tokenIsNullableType)
+                        {
+                            if (!hasValue)
+                            {
+                                // box a null reference
+                                evalPos[0].SetObjectReference(nullptr);
+                            }
+                            else
+                            {
+                                // reach the value to box
+                                CLR_RT_HeapBlock &value =
+                                    nullableValue[Library_corlib_native_System_Nullable_1::FIELD__value];
+
+                                // box the value
+                                NANOCLR_CHECK_HRESULT(value.PerformBoxing(destinationType));
+
+                                // assign the boxed result back to the evaluation stack
+                                evalPos[0].Assign(value);
+                            }
+                        }
+                        else
+                        {
+                            NANOCLR_CHECK_HRESULT(evalPos[0].PerformBoxing(typeInst));
+                        }
                     }
                     else
                     {
-                        NANOCLR_CHECK_HRESULT(evalPos[0].PerformUnboxing(typeInst));
+                        if (tokenIsNullableType)
+                        {
+                            // create a Nullable<T>...
+                            CLR_RT_HeapBlock nullableObject;
+                            CLR_RT_TypeSpec_Index destinationTypeSpec;
+                            destinationTypeSpec.data = arg;
+
+                            NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewGenericInstanceObject(
+                                nullableObject,
+                                typeInst,
+                                destinationTypeSpec));
+
+                            CLR_RT_ProtectFromGC gc(nullableObject);
+
+                            if (evalPos[0].Dereference() == nullptr)
+                            {
+                                // assign a null reference (already carried out by NewObjectFromIndex)
+                                // set HasValue to false
+                                nullableObject.Dereference()[Sys_Nullable::FIELD__hasValue].SetBoolean(false);
+                            }
+                            else
+                            {
+                                // unbox the T value...
+                                NANOCLR_CHECK_HRESULT(evalPos[0].PerformUnboxing(destinationType));
+
+                                // assign the copied unboxed value
+                                nullableObject.Dereference()[Sys_Nullable::FIELD__value].Assign(evalPos[0]);
+
+                                // set HasValue to true
+                                nullableObject.Dereference()[Sys_Nullable::FIELD__hasValue].SetBoolean(true);
+                            }
+
+                            // assign the Nullable<T> object to the evaluation stack
+                            evalPos[0].SetObjectReference(nullableObject.Dereference());
+                        }
+                        else
+                        {
+                            NANOCLR_CHECK_HRESULT(evalPos[0].PerformUnboxing(typeInst));
+                        }
                     }
                     break;
                 }
@@ -2824,6 +2914,8 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                     // extracts the value contained within obj (of type O).  (It is equivalent to unbox followed by
                     // ldobj.) When applied to a reference type, the unbox.any instruction has the same effect as
                     // castclass typeTok.
+
+                    // TODO: still not handling Nullable<T> types here
 
                     CLR_RT_TypeDef_Instance typeInst{};
                     if (typeInst.ResolveToken(arg, assm, &stack->m_call) == false)

@@ -1691,6 +1691,7 @@ struct CLR_RT_WellKnownTypes
     CLR_RT_TypeDef_Index Object;
     CLR_RT_TypeDef_Index ValueType;
     CLR_RT_TypeDef_Index Enum;
+    CLR_RT_TypeDef_Index Nullable;
 
     CLR_RT_TypeDef_Index AppDomainUnloadedException;
     CLR_RT_TypeDef_Index ArgumentNullException;
@@ -2114,6 +2115,7 @@ struct CLR_RT_TypeDef_Instance : public CLR_RT_TypeDef_Index
     void ClearInstance();
 
     bool ResolveToken(CLR_UINT32 tk, CLR_RT_Assembly *assm, const CLR_RT_MethodDef_Instance *caller = nullptr);
+    bool ResolveNullableType(CLR_UINT32 tk, CLR_RT_Assembly *assm, const CLR_RT_MethodDef_Instance *caller = nullptr);
 
     //--//
 

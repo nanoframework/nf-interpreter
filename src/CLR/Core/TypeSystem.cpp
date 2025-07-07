@@ -976,34 +976,23 @@ bool CLR_RT_TypeDef_Instance::ResolveToken(
                 parser.Initialize_TypeSpec(assm, ts);
 
                 CLR_RT_SignatureParser::Element elem;
-
-                // Skip any leading SZARRAY or BYREF
-                do
+                if (FAILED(parser.Advance(elem)))
                 {
-                    if (FAILED(parser.Advance(elem)))
-                    {
-                        return false;
-                    }
-                } while (elem.DataType == DATATYPE_SZARRAY || elem.DataType == DATATYPE_BYREF);
+                    return false;
+                }
 
-                // If this is a closed‐generic instantiation header, peel off the wrapper
-                if (elem.DataType == DATATYPE_GENERICINST)
+                if (elem.DataType == DATATYPE_CLASS || elem.DataType == DATATYPE_VALUETYPE)
                 {
-                    // consume the CLASS/VALUETYPE marker
-                    if (FAILED(parser.Advance(elem)))
-                    {
-                        return false;
-                    }
-                    // consume the generic‐definition token itself
-                    if (FAILED(parser.Advance(elem)))
-                    {
-                        return false;
-                    }
-                    // consume the count of generic arguments
-                    if (FAILED(parser.Advance(elem)))
-                    {
-                        return false;
-                    }
+                    // If it's a class or value type, resolve the type
+                    data = elem.Class.data;
+                    assembly = g_CLR_RT_TypeSystem.m_assemblies[elem.Class.Assembly() - 1];
+                    target = assembly->GetTypeDef(elem.Class.Type());
+
+#if defined(NANOCLR_INSTANCE_NAMES)
+                    name = assembly->GetString(target->name);
+#endif
+
+                    return true;
                 }
 
                 // walk forward until a VAR (type‐generic) or MVAR (method‐generic) is hit
@@ -1045,8 +1034,6 @@ bool CLR_RT_TypeDef_Instance::ResolveToken(
                 }
                 else
                 {
-                    // elem.DataType == DATATYPE_MVAR
-
                     // Use the *caller's* bound genericType (Stack<Int32>, etc.)
                     if (caller == nullptr || caller->genericType == nullptr)
                     {
@@ -1060,6 +1047,7 @@ bool CLR_RT_TypeDef_Instance::ResolveToken(
                     data = gp.classTypeDef.data;
                     assembly = g_CLR_RT_TypeSystem.m_assemblies[gp.classTypeDef.Assembly() - 1];
                     target = assembly->GetTypeDef(gp.classTypeDef.Type());
+
                     return true;
                 }
             }
@@ -1073,6 +1061,109 @@ bool CLR_RT_TypeDef_Instance::ResolveToken(
                 return true;
                 // the remaining data types aren't to be handled
                 break;
+        }
+    }
+
+    ClearInstance();
+
+    return false;
+}
+
+bool CLR_RT_TypeDef_Instance::ResolveNullableType(
+    CLR_UINT32 tk,
+    CLR_RT_Assembly *assm,
+    const CLR_RT_MethodDef_Instance *caller)
+{
+    NATIVE_PROFILE_CLR_CORE();
+
+    if (assm)
+    {
+        CLR_UINT32 index = CLR_DataFromTk(tk);
+
+        if (CLR_TypeFromTk(tk) != TBL_TypeSpec)
+        {
+            // not a TypeSpec, so return false
+            ClearInstance();
+            return false;
+        }
+
+        // Grab the raw signature for the IL token (e.g. !T[], List`1<T>, etc.)
+        const CLR_RECORD_TYPESPEC *ts = assm->GetTypeSpec(index);
+        CLR_RT_SignatureParser parser;
+        parser.Initialize_TypeSpec(assm, ts);
+
+        CLR_RT_SignatureParser::Element elem;
+        if (FAILED(parser.Advance(elem)))
+        {
+            return false;
+        }
+
+        if (elem.DataType != DATATYPE_VALUETYPE)
+        {
+            // If it's not a value type, we can't resolve it as a nullable type
+            ClearInstance();
+            return false;
+        }
+
+        // move to the next element in the signature
+        if (FAILED(parser.Advance(elem)))
+        {
+            return false;
+        }
+
+        // If it's a type‐generic slot (!T), resolve against the caller's closed generic
+        if (elem.DataType == DATATYPE_VAR)
+        {
+            int pos = elem.GenericParamPosition;
+
+            // Use the *caller's* bound genericType (Stack<Int32>, etc.)
+            if (caller == nullptr || caller->genericType == nullptr)
+            {
+                return false;
+            }
+
+            auto &tsi = *caller->genericType;
+            CLR_UINT32 closedTsRow = tsi.TypeSpec();
+
+            CLR_RT_TypeDef_Index realTypeDef;
+            NanoCLRDataType realDataType;
+
+            // Only call this once to map (e.g. !T→Int32)
+            caller->assembly->FindGenericParamAtTypeSpec(closedTsRow, (CLR_UINT32)pos, realTypeDef, realDataType);
+
+            // populate this instance
+            data = realTypeDef.data;
+            assembly = g_CLR_RT_TypeSystem.m_assemblies[realTypeDef.Assembly() - 1];
+            target = assembly->GetTypeDef(realTypeDef.Type());
+
+            return true;
+        }
+        else if (elem.DataType == DATATYPE_MVAR)
+        {
+            // Use the *caller's* bound genericType (Stack<Int32>, etc.)
+            if (caller == nullptr || caller->genericType == nullptr)
+            {
+                return false;
+            }
+
+            CLR_RT_GenericParam_Index gpIdx;
+            caller->assembly->FindGenericParamAtMethodDef(*caller, elem.GenericParamPosition, gpIdx);
+            auto &gp = caller->assembly->crossReferenceGenericParam[gpIdx.GenericParam()];
+
+            data = gp.classTypeDef.data;
+            assembly = g_CLR_RT_TypeSystem.m_assemblies[gp.classTypeDef.Assembly() - 1];
+            target = assembly->GetTypeDef(gp.classTypeDef.Type());
+
+            return true;
+        }
+        else
+        {
+            // If it's a class or value type, resolve the type
+            data = elem.Class.data;
+            assembly = g_CLR_RT_TypeSystem.m_assemblies[elem.Class.Assembly() - 1];
+            target = assembly->GetTypeDef(elem.Class.Type());
+
+            return true;
         }
     }
 
@@ -4293,6 +4384,7 @@ static const TypeIndexLookup c_TypeIndexLookup[] = {
     TIL("System",                                   "Object",                           Object),
     TIL("System",                                   "ValueType",                        ValueType),
     TIL("System",                                   "Enum",                             Enum),
+    TIL("System",                                   "Nullable`1",                       Nullable),
 
     TIL("System",                                   "AppDomainUnloadedException",       AppDomainUnloadedException),
     TIL("System",                                   "ArgumentNullException",            ArgumentNullException),
