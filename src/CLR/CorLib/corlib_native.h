@@ -644,6 +644,14 @@ struct Library_corlib_native_System_MulticastDelegate
     //--//
 };
 
+struct Library_corlib_native_System_Nullable_1
+{
+    static const int FIELD__hasValue = 1;
+    static const int FIELD__value = 2;
+
+    //--//
+};
+
 struct Library_corlib_native_System_Number
 {
     NANOCLR_NATIVE_DECLARE(FormatNative___STATIC__STRING__OBJECT__BOOLEAN__STRING__STRING__STRING__STRING__SZARRAY_I4);
