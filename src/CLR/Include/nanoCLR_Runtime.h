@@ -1442,7 +1442,7 @@ struct CLR_RT_Assembly : public CLR_RT_HeapBlock_Node // EVENT HEAP - NO RELOCAT
         CLR_SIG sig,
         CLR_RT_FieldDef_Index &index);
     bool FindFieldDef(
-        const CLR_RECORD_TYPESPEC *ts,
+        const CLR_RT_TypeSpec_Index *tsIndex,
         const char *name,
         CLR_RT_Assembly *base,
         CLR_SIG sig,
