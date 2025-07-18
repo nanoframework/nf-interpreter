@@ -4945,6 +4945,8 @@ bool CLR_RT_Assembly::FindFieldDef(
     CLR_RT_TypeDef_Instance typeDefInstance;
     typeDefInstance.InitializeFromIndex(typeDef);
 
+    const char *typeName = GetString(typeDefInstance.target->name);
+
     const CLR_RECORD_FIELDDEF *fd = GetFieldDef(0);
 
     for (int i = 0; i < tablesSize[TBL_FieldDef]; i++, fd++)
@@ -4952,7 +4954,7 @@ bool CLR_RT_Assembly::FindFieldDef(
         const char *tempTypeName = GetString(fd->type);
         const char *tempFieldName = GetString(fd->name);
 
-        if (!strcmp(typeDefInstance.name, tempTypeName) && !strcmp(fieldName, tempFieldName))
+        if (!strcmp(typeName, tempTypeName) && !strcmp(fieldName, tempFieldName))
         {
             if (base)
             {
