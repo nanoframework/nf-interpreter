@@ -1195,12 +1195,9 @@ bool CLR_RT_FieldDef_Instance::ResolveToken(CLR_UINT32 tk, CLR_RT_Assembly *assm
                     // Use the MDP TypeSpec (which is already the closed generic),
                     genericType = &assm->crossReferenceFieldRef[index].genericType;
 
-                    // Retrieve that closed‐generic TypeSpec blob
-                    const CLR_RECORD_TYPESPEC *ts = assm->GetTypeSpec(genericType->TypeSpec());
-
                     // Look up the actual FieldDef within that closed type
                     CLR_RT_FieldDef_Index resolvedField;
-                    if (!assm->FindFieldDef(ts, assm->GetString(fr->name), assm, fr->signature, resolvedField))
+                    if (!assm->FindFieldDef(genericType, assm->GetString(fr->name), assm, fr->signature, resolvedField))
                     {
                         return false;
                     }
@@ -3122,8 +3119,7 @@ HRESULT CLR_RT_Assembly::ResolveFieldRef()
 #endif
             }
 
-            if (!typeSpecInstance.assembly
-                     ->FindFieldDef(typeSpecInstance.target, fieldName, this, src->signature, dst->target))
+            if (!typeSpecInstance.assembly->FindFieldDef(&typeSpec, fieldName, this, src->signature, dst->target))
             {
 #if !defined(BUILD_RTM)
                 CLR_Debug::Printf("Unknown FieldRef: %s.%s.%s\r\n", "???", "???", fieldName);
@@ -3835,10 +3831,11 @@ HRESULT CLR_RT_AppDomain::GetManagedObject(CLR_RT_HeapBlock &res)
 
         pRes = res.Dereference();
 
-        NANOCLR_CHECK_HRESULT(CLR_RT_ObjectToEvent_Source::CreateInstance(
-            this,
-            *pRes,
-            pRes[Library_corlib_native_System_AppDomain::FIELD___appDomain]));
+        NANOCLR_CHECK_HRESULT(
+            CLR_RT_ObjectToEvent_Source::CreateInstance(
+                this,
+                *pRes,
+                pRes[Library_corlib_native_System_AppDomain::FIELD___appDomain]));
 
         pRes[Library_corlib_native_System_AppDomain::FIELD___friendlyName].SetObjectReference(m_strName);
     }
@@ -4920,23 +4917,44 @@ bool CLR_RT_Assembly::FindFieldDef(
 }
 
 bool CLR_RT_Assembly::FindFieldDef(
-    const CLR_RECORD_TYPESPEC *ts,
+    const CLR_RT_TypeSpec_Index *tsIndex,
     const char *fieldName,
     CLR_RT_Assembly *base,
     CLR_SIG sig,
     CLR_RT_FieldDef_Index &index)
 {
-    (void)ts;
-
     NATIVE_PROFILE_CLR_CORE();
+
+    CLR_RT_SignatureParser parser;
+    parser.Initialize_TypeSpec(base, base->GetTypeSpec(tsIndex->TypeSpec()));
+
+    CLR_RT_SignatureParser::Element element;
+
+    // get type
+    parser.Advance(element);
+
+    // if this is a generic type, need to advance to get type
+    if (element.DataType == DATATYPE_GENERICINST)
+    {
+        parser.Advance(element);
+    }
+
+    CLR_RT_TypeDef_Index typeDef;
+    typeDef.data = element.Class.data;
+
+    CLR_RT_TypeDef_Instance typeDefInstance;
+    typeDefInstance.InitializeFromIndex(typeDef);
+
+    const char *typeName = GetString(typeDefInstance.target->name);
 
     const CLR_RECORD_FIELDDEF *fd = GetFieldDef(0);
 
     for (int i = 0; i < tablesSize[TBL_FieldDef]; i++, fd++)
     {
+        const char *tempTypeName = GetString(fd->type);
         const char *tempFieldName = GetString(fd->name);
 
-        if (!strcmp(fieldName, tempFieldName))
+        if (!strcmp(typeName, tempTypeName) && !strcmp(fieldName, tempFieldName))
         {
             if (base)
             {
@@ -7037,10 +7055,11 @@ HRESULT CLR_RT_AttributeParser::Next(Value *&res)
             }
 
             // instantiate array to hold parameters values
-            NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance(
-                m_lastValue.m_value,
-                paramCount,
-                g_CLR_RT_WellKnownTypes.Object));
+            NANOCLR_CHECK_HRESULT(
+                CLR_RT_HeapBlock_Array::CreateInstance(
+                    m_lastValue.m_value,
+                    paramCount,
+                    g_CLR_RT_WellKnownTypes.Object));
 
             // get a pointer to the first element
             auto *currentParam = (CLR_RT_HeapBlock *)m_lastValue.m_value.DereferenceArray()->GetFirstElement();
