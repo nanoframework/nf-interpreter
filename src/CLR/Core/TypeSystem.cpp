@@ -1195,12 +1195,9 @@ bool CLR_RT_FieldDef_Instance::ResolveToken(CLR_UINT32 tk, CLR_RT_Assembly *assm
                     // Use the MDP TypeSpec (which is already the closed generic),
                     genericType = &assm->crossReferenceFieldRef[index].genericType;
 
-                    // Retrieve that closed‐generic TypeSpec blob
-                    const CLR_RECORD_TYPESPEC *ts = assm->GetTypeSpec(genericType->TypeSpec());
-
                     // Look up the actual FieldDef within that closed type
                     CLR_RT_FieldDef_Index resolvedField;
-                    if (!assm->FindFieldDef(ts, assm->GetString(fr->name), assm, fr->signature, resolvedField))
+                    if (!assm->FindFieldDef(genericType, assm->GetString(fr->name), assm, fr->signature, resolvedField))
                     {
                         return false;
                     }
@@ -3122,8 +3119,7 @@ HRESULT CLR_RT_Assembly::ResolveFieldRef()
 #endif
             }
 
-            if (!typeSpecInstance.assembly
-                     ->FindFieldDef(typeSpecInstance.target, fieldName, this, src->signature, dst->target))
+            if (!typeSpecInstance.assembly->FindFieldDef(&typeSpec, fieldName, this, src->signature, dst->target))
             {
 #if !defined(BUILD_RTM)
                 CLR_Debug::Printf("Unknown FieldRef: %s.%s.%s\r\n", "???", "???", fieldName);
