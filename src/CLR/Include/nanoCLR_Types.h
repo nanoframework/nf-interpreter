@@ -1061,10 +1061,10 @@ struct CLR_RECORD_ASSEMBLY
 // when changing any of these structs need to update the constant in MDP
 #define sizeOf_CLR_RECORD_ASSEMBLYREF  10
 #define sizeOf_CLR_RECORD_TYPEREF      6
-#define sizeOf_CLR_RECORD_FIELDREF     6
+#define sizeOf_CLR_RECORD_FIELDREF     8
 #define sizeOf_CLR_RECORD_METHODREF    6
 #define sizeOf_CLR_RECORD_TYPEDEF      27
-#define sizeOf_CLR_RECORD_FIELDDEF     8
+#define sizeOf_CLR_RECORD_FIELDDEF     10
 #define sizeOf_CLR_RECORD_METHODDEF    19
 #define sizeOf_CLR_RECORD_TYPESPEC     2
 #define sizeOf_CLR_RECORD_GENERICPARAM 10
@@ -1106,6 +1106,10 @@ CT_ASSERT(sizeof(CLR_RECORD_TYPEREF) == sizeOf_CLR_RECORD_TYPEREF)
 
 struct CLR_RECORD_FIELDREF
 {
+    /// @brief Index into TBL_Strings
+    ///
+    CLR_STRING type;
+
     /// @brief Index into TBL_Strings
     ///
     CLR_STRING name;
@@ -1377,6 +1381,10 @@ struct CLR_RECORD_FIELDDEF
     static const CLR_UINT16 FD_NoReflection = 0x0800; // field does not allow reflection
 
     static const CLR_UINT16 FD_HasAttributes = 0x8000;
+
+    /// @brief Index into TBL_Strings
+    ///
+    CLR_STRING type;
 
     /// @brief Index into TBL_Strings
     ///

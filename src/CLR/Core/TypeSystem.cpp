@@ -4920,23 +4920,42 @@ bool CLR_RT_Assembly::FindFieldDef(
 }
 
 bool CLR_RT_Assembly::FindFieldDef(
-    const CLR_RECORD_TYPESPEC *ts,
+    const CLR_RT_TypeSpec_Index *tsIndex,
     const char *fieldName,
     CLR_RT_Assembly *base,
     CLR_SIG sig,
     CLR_RT_FieldDef_Index &index)
 {
-    (void)ts;
-
     NATIVE_PROFILE_CLR_CORE();
+
+    CLR_RT_SignatureParser parser;
+    parser.Initialize_TypeSpec(base, base->GetTypeSpec(tsIndex->TypeSpec()));
+
+    CLR_RT_SignatureParser::Element element;
+
+    // get type
+    parser.Advance(element);
+
+    // if this is a generic type, need to advance to get type
+    if (element.DataType == DATATYPE_GENERICINST)
+    {
+        parser.Advance(element);
+    }
+
+    CLR_RT_TypeDef_Index typeDef;
+    typeDef.data = element.Class.data;
+
+    CLR_RT_TypeDef_Instance typeDefInstance;
+    typeDefInstance.InitializeFromIndex(typeDef);
 
     const CLR_RECORD_FIELDDEF *fd = GetFieldDef(0);
 
     for (int i = 0; i < tablesSize[TBL_FieldDef]; i++, fd++)
     {
+        const char *tempTypeName = GetString(fd->type);
         const char *tempFieldName = GetString(fd->name);
 
-        if (!strcmp(fieldName, tempFieldName))
+        if (!strcmp(typeDefInstance.name, tempTypeName) && !strcmp(fieldName, tempFieldName))
         {
             if (base)
             {
