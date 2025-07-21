@@ -1416,7 +1416,6 @@ HRESULT LWIP_SOCKETS_Driver::UpdateAdapterConfiguration(
         return CLR_E_FAIL;
     }
 
-
 #if LWIP_DNS
     // when using DHCP do not use the static settings
     if (0 != (updateFlags & NetworkInterface_UpdateOperation_Dns))
@@ -1450,7 +1449,7 @@ HRESULT LWIP_SOCKETS_Driver::UpdateAdapterConfiguration(
     {
         if (enableDHCP)
         {
-            //Make sure DHCP option is enabled for esp_netif
+            // Make sure DHCP option is enabled for esp_netif
             espNetif->flags = (esp_netif_flags_t)(espNetif->flags | ESP_NETIF_DHCP_CLIENT);
 
             // Reset IP address on interface before enabling DHCP
@@ -1471,7 +1470,7 @@ HRESULT LWIP_SOCKETS_Driver::UpdateAdapterConfiguration(
         }
         else
         {
-            // stop DHCP 
+            // stop DHCP
             esp_err_t er = esp_netif_dhcpc_stop(espNetif);
 
             // Get static IPV4 address from config
