@@ -9,13 +9,12 @@
 #include "esp_netif_net_stack.h"
 #include "lwIP_Sockets.h"
 
-
 // This function retrives the esp_netif ptr from the lwip structure for use else where
 // This is a copy of internal funtion of ESP_NETIF
-esp_netif_t * NF_ESP32_GetEspNetif(struct netif *netif)
+esp_netif_t *NF_ESP32_GetEspNetif(struct netif *netif)
 {
 #if LWIP_ESP_NETIF_DATA
-    return (esp_netif*)netif_get_client_data(netif);
+    return (esp_netif *)netif_get_client_data(netif);
 #else
     return (esp_netif_t *)netif->state;
 #endif
@@ -103,9 +102,12 @@ esp_err_t NF_ESP32_ConfigureNetworkByConfigIndex(int index)
     {
         return ESP_FAIL;
     }
-    
+
     // Configure network interface
-    LWIP_SOCKETS_Driver::UpdateAdapterConfiguration(index, NetworkInterface_UpdateOperation_Dns | NetworkInterface_UpdateOperation_Dhcp, networkConfig);
+    LWIP_SOCKETS_Driver::UpdateAdapterConfiguration(
+        index,
+        NetworkInterface_UpdateOperation_Dns | NetworkInterface_UpdateOperation_Dhcp,
+        networkConfig);
 
     platform_free(networkConfig);
 
