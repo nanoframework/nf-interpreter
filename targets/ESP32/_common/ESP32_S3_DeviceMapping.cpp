@@ -11,7 +11,11 @@
 //  2 devices
 //  Map pins  mosi, miso, clock
 //
-int8_t Esp32_SPI_DevicePinMap[MAX_SPI_DEVICES][Esp32SpiPin_Max] = {{-1, -1, -1}, {-1, -1, -1}};
+int8_t Esp32_SPI_DevicePinMap[MAX_SPI_DEVICES][Esp32SpiPin_Max] ={
+    // SPI1
+    {GPIO_NUM_11, GPIO_NUM_13, GPIO_NUM_12},
+    // SPI2 - no pins assigned
+    {-1, -1, -1}};
 
 //  Serial
 //  2 devices COM1,COM2 ( UART_NUM_0, UART_NUM_1 )
