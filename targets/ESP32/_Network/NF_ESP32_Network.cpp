@@ -7,6 +7,19 @@
 
 #include "NF_ESP32_Network.h"
 #include "esp_netif_net_stack.h"
+#include "lwIP_Sockets.h"
+
+
+// This function retrives the esp_netif ptr from the lwip structure for use else where
+// This is a copy of internal funtion of ESP_NETIF
+esp_netif_t * NF_ESP32_GetEspNetif(struct netif *netif)
+{
+#if LWIP_ESP_NETIF_DATA
+    return (esp_netif*)netif_get_client_data(netif);
+#else
+    return (esp_netif_t *)netif->state;
+#endif
+}
 
 // Wait for the network interface to become available
 int NF_ESP32_Wait_NetNumber(int num)
@@ -58,6 +71,9 @@ int NF_ESP32_Wait_NetNumber(int num)
         return SOCK_SOCKET_ERROR;
     }
 
+    // Add a delay before picking up "lwip_netif->num" as not been filled in yet on slower processors
+    vTaskDelay(50 / portTICK_PERIOD_MS);
+
     return espNetif->lwip_netif->num;
 }
 
@@ -78,49 +94,18 @@ HAL_Configuration_NetworkInterface *NF_ESP32_GetNetworkConfigBlock(int index)
     return NULL;
 }
 
-//
-// Configure network settings for a espressif network interface
-//
-esp_err_t NF_ESP32_ConfigureNetwork(esp_netif_t *netIf, HAL_Configuration_NetworkInterface *config)
+esp_err_t NF_ESP32_ConfigureNetworkByConfigIndex(int index)
 {
-    esp_err_t ec;
-    esp_netif_ip_info_t ip_info;
-
-    ec = esp_netif_get_ip_info(netIf, &ip_info);
-    if (ec != ESP_OK)
-    {
-        return ec;
-    }
-
-    bool enableDHCP = (config->StartupAddressMode == AddressMode_DHCP);
-
-    // Set static addresses
-    if (config->IPv4Address != 0)
-    {
-        ip_info.ip.addr = config->IPv4Address;
-        ip_info.netmask.addr = config->IPv4NetMask;
-        ip_info.gw.addr = config->IPv4GatewayAddress;
-
-        ec = esp_netif_set_ip_info(netIf, &ip_info);
-
-        // Make sure DHCP client is disabled
-        netIf->flags = (esp_netif_flags_t)(netIf->flags & ~ESP_NETIF_DHCP_CLIENT);
-    }
-
-    return ec;
-}
-
-esp_err_t NF_ESP32_ConfigureNetworkByIndex(int index, esp_netif_t *netIf)
-{
-    esp_err_t ec;
+    esp_err_t ec = ESP_OK;
 
     HAL_Configuration_NetworkInterface *networkConfig = NF_ESP32_GetNetworkConfigBlock(index);
     if (networkConfig == NULL)
     {
         return ESP_FAIL;
     }
-
-    ec = NF_ESP32_ConfigureNetwork(netIf, networkConfig);
+    
+    // Configure network interface
+    LWIP_SOCKETS_Driver::UpdateAdapterConfiguration(index, NetworkInterface_UpdateOperation_Dns | NetworkInterface_UpdateOperation_Dhcp, networkConfig);
 
     platform_free(networkConfig);
 

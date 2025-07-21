@@ -373,6 +373,8 @@ static void event_handler(void *arg, esp_event_base_t event_base, int32_t event_
 #ifdef PRINT_NET_EVENT
                 ets_printf("ETHERNET_EVENT_CONNECTED\n");
 #endif
+                NF_ESP32_ConfigureNetworkByConfigIndex(IDF_ETH_DEF);
+
                 PostAvailabilityOn(IDF_ETH_DEF);
                 break;
 

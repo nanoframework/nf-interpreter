@@ -61,7 +61,6 @@ void NF_ESP32_Start_wifi_smart_config(void);
 // Helpers
 int NF_ESP32_Wait_NetNumber(int num);
 HAL_Configuration_NetworkInterface *NF_ESP32_GetNetworkConfigBlock(int index);
-esp_err_t NF_ESP32_ConfigureNetwork(esp_netif_t *netIf, HAL_Configuration_NetworkInterface *config);
-esp_err_t NF_ESP32_ConfigureNetworkByIndex(int index, esp_netif_t *netIf);
-
+esp_err_t NF_ESP32_ConfigureNetworkByConfigIndex(int index);
+esp_netif_t * NF_ESP32_GetEspNetif(struct netif *netif);
 #endif // NF_ESP32_NETWORK_H

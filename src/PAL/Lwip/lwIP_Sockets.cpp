@@ -20,6 +20,10 @@ extern "C"
 #include <lwip/apps/sntp.h>
 }
 
+#if defined(PLATFORM_ESP32)
+#include "NF_ESP32_Network.h"
+#endif
+
 int errorCode;
 
 //--//
@@ -1288,6 +1292,7 @@ struct dhcp_client_id
     uint8_t clientId[6];
 };
 
+#if !defined(PLATFORM_ESP32)
 HRESULT LWIP_SOCKETS_Driver::UpdateAdapterConfiguration(
     uint32_t interfaceIndex,
     uint32_t updateFlags,
@@ -1389,6 +1394,126 @@ HRESULT LWIP_SOCKETS_Driver::UpdateAdapterConfiguration(
 
     return S_OK;
 }
+#else
+HRESULT LWIP_SOCKETS_Driver::UpdateAdapterConfiguration(
+    uint32_t interfaceIndex,
+    uint32_t updateFlags,
+    HAL_Configuration_NetworkInterface *config)
+{
+    NATIVE_PROFILE_PAL_NETWORK();
+    bool enableDHCP = (config->StartupAddressMode == AddressMode_DHCP);
+
+    struct netif *networkInterface =
+        netif_find_interface(g_LWIP_SOCKETS_Driver.m_interfaces[interfaceIndex].m_interfaceNumber);
+    if (NULL == networkInterface)
+    {
+        return CLR_E_FAIL;
+    }
+
+    esp_netif_t *espNetif = NF_ESP32_GetEspNetif(networkInterface);
+    if (NULL == espNetif)
+    {
+        return CLR_E_FAIL;
+    }
+
+
+#if LWIP_DNS
+    // when using DHCP do not use the static settings
+    if (0 != (updateFlags & NetworkInterface_UpdateOperation_Dns))
+    {
+        if (config->AutomaticDNS == 0)
+        {
+            // user defined DNS addresses
+            if (config->IPv4DNSAddress1 != 0)
+            {
+                esp_netif_dns_info_t dnsServer;
+                dnsServer.ip.u_addr.ip4.addr = config->IPv4DNSAddress1;
+                dnsServer.ip.type = IPADDR_TYPE_V4;
+
+                esp_netif_set_dns_info(espNetif, ESP_NETIF_DNS_MAIN, &dnsServer);
+            }
+            if (config->IPv4DNSAddress2 != 0)
+            {
+                // need to convert this first
+                esp_netif_dns_info_t dnsServer;
+                dnsServer.ip.u_addr.ip4.addr = config->IPv4DNSAddress2;
+                dnsServer.ip.type = IPADDR_TYPE_V4;
+
+                esp_netif_set_dns_info(espNetif, ESP_NETIF_DNS_FALLBACK, &dnsServer);
+            }
+        }
+    }
+#endif
+
+#if LWIP_DHCP
+    if (0 != (updateFlags & NetworkInterface_UpdateOperation_Dhcp))
+    {
+        if (enableDHCP)
+        {
+            //Make sure DHCP option is enabled for esp_netif
+            espNetif->flags = (esp_netif_flags_t)(espNetif->flags | ESP_NETIF_DHCP_CLIENT);
+
+            // Reset IP address on interface before enabling DHCP
+            ip_addr_t ipAddress, mask, gateway;
+            ipAddress.addr = 0;
+            mask.addr = 0;
+            gateway.addr = 0;
+
+            netif_set_addr(
+                networkInterface,
+                (const ip4_addr_t *)&ipAddress,
+                (const ip4_addr_t *)&mask,
+                (const ip4_addr_t *)&gateway);
+
+            // Need to start DHCP
+            // No need to check for return value, even if it fails, it will retry
+            esp_netif_dhcpc_start(espNetif);
+        }
+        else
+        {
+            // stop DHCP 
+            esp_err_t er = esp_netif_dhcpc_stop(espNetif);
+
+            // Get static IPV4 address from config
+            esp_netif_ip_info_t ip_info;
+            ip_info.ip.addr = config->IPv4Address;
+            ip_info.gw.addr = config->IPv4GatewayAddress;
+            ip_info.netmask.addr = config->IPv4NetMask;
+
+            // set interface with our static IP configs
+            er = esp_netif_set_ip_info(espNetif, &ip_info);
+
+            // Make sure DHCP client is disabled in esp_netif
+            espNetif->flags = (esp_netif_flags_t)(espNetif->flags & ~ESP_NETIF_DHCP_CLIENT);
+        }
+    }
+
+    if (enableDHCP)
+    {
+        if (0 != (updateFlags & NetworkInterface_UpdateOperation_DhcpRelease))
+        {
+            esp_netif_dhcpc_stop(espNetif);
+        }
+        else if (0 != (updateFlags & NetworkInterface_UpdateOperation_DhcpRenew))
+        {
+            dhcp_renew(espNetif->lwip_netif);
+        }
+    }
+#endif
+
+    if (0 != (updateFlags & NetworkInterface_UpdateOperation_Mac))
+    {
+        memcpy(networkInterface->hwaddr, config->MacAddress, NETIF_MAX_HWADDR_LEN);
+        networkInterface->hwaddr_len = NETIF_MAX_HWADDR_LEN;
+
+        // mac address requires stack re-init
+        Network_Interface_Close(interfaceIndex);
+        g_LWIP_SOCKETS_Driver.m_interfaces[interfaceIndex].m_interfaceNumber = Network_Interface_Open(interfaceIndex);
+    }
+
+    return S_OK;
+}
+#endif
 
 int LWIP_SOCKETS_Driver::GetNativeTcpOption(int optname)
 {

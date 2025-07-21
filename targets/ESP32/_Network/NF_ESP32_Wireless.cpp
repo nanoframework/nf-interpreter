@@ -112,11 +112,6 @@ wifi_mode_t NF_ESP32_GetCurrentWifiMode()
     return current_wifi_mode;
 }
 
-esp_err_t NF_ESP32_ConfigureNetworkStation(esp_netif_t *netIf)
-{
-    return NF_ESP32_ConfigureNetworkByIndex(IDF_WIFI_STA_DEF, netIf);
-}
-
 void NF_ESP32_DeinitWifi()
 {
     // clear flags
@@ -162,7 +157,7 @@ esp_err_t NF_ESP32_InitaliseWifi()
 
         // Set static address if configured
         // ignore any errors
-        ec = NF_ESP32_ConfigureNetworkStation(wifiStaNetif);
+        ec = NF_ESP32_ConfigureNetworkByConfigIndex(IDF_WIFI_STA_DEF);
         if (ec != ESP_OK)
         {
             ESP_LOGE(TAG, "Unable to configure Wifi station - result %d", ec);
