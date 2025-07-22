@@ -1470,8 +1470,8 @@ HRESULT LWIP_SOCKETS_Driver::UpdateAdapterConfiguration(
         }
         else
         {
-            // stop DHCP
-            esp_err_t er = esp_netif_dhcpc_stop(espNetif);
+            // stop DHCP, ignore errors
+            esp_netif_dhcpc_stop(espNetif);
 
             // Get static IPV4 address from config
             esp_netif_ip_info_t ip_info;
@@ -1479,11 +1479,14 @@ HRESULT LWIP_SOCKETS_Driver::UpdateAdapterConfiguration(
             ip_info.gw.addr = config->IPv4GatewayAddress;
             ip_info.netmask.addr = config->IPv4NetMask;
 
-            // set interface with our static IP configs
-            er = esp_netif_set_ip_info(espNetif, &ip_info);
+            // set interface with our static IP configs, ignore error
+            esp_netif_set_ip_info(espNetif, &ip_info);
 
             // Make sure DHCP client is disabled in esp_netif
             espNetif->flags = (esp_netif_flags_t)(espNetif->flags & ~ESP_NETIF_DHCP_CLIENT);
+
+            // Inform DHCP server of change
+            dhcp_inform(networkInterface);
         }
     }
 
@@ -1495,7 +1498,8 @@ HRESULT LWIP_SOCKETS_Driver::UpdateAdapterConfiguration(
         }
         else if (0 != (updateFlags & NetworkInterface_UpdateOperation_DhcpRenew))
         {
-            dhcp_renew(espNetif->lwip_netif);
+            esp_netif_dhcpc_stop(espNetif);
+            esp_netif_dhcpc_start(espNetif);
         }
     }
 #endif
