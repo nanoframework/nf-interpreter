@@ -1454,9 +1454,15 @@ HRESULT LWIP_SOCKETS_Driver::UpdateAdapterConfiguration(
 
             // Reset IP address on interface before enabling DHCP
             ip_addr_t ipAddress, mask, gateway;
+#if LWIP_IPV6
+            ipAddress.u_addr.ip4.addr = 0;
+            mask.u_addr.ip4.addr = 0;
+            gateway.u_addr.ip4.addr = 0;
+#else
             ipAddress.addr = 0;
             mask.addr = 0;
             gateway.addr = 0;
+#endif
 
             netif_set_addr(
                 networkInterface,
