@@ -44,7 +44,7 @@ resources:
       type: github
       name: espressif/esp-idf
       endpoint: nanoframework
-      ref: refs/tags/v5.4.1
+      ref: refs/tags/v5.4.2
     - repository: mscorlib
       type: github
       name: nanoframework/CoreLibrary
@@ -535,7 +535,7 @@ jobs:
       IDF_PATH: "D:/a/1/s/esp-idf"
       PIP_CACHE_DIR: $(Pipeline.Workspace)/.pip
       TargetPlatform: "esp32"
-      IDF_TAG: "v5.4.1"
+      IDF_TAG: "v5.4.2"
 
     steps:
       - checkout: self

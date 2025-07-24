@@ -151,42 +151,6 @@ macro(nf_fix_esp32c3_rom_file)
     
 endmacro()
 
-# Fixes an issue with IDF 5.4.1 where we get an error cause by ESP_ROM_ELF_DIR environment variable missing
-# This patch removes need for variable. Offical patch added after IDF5.4.1 release
-macro(nf_patch_idf5_4_1)
-    file(READ
-    ${esp32_idf_SOURCE_DIR}/tools/cmake/gdbinit.cmake
-    ESP32_GBBINIT_CONTENT)
-
-    string(FIND ${ESP32_GBBINIT_CONTENT} "# set(gdbinit_rom_in_path " GBD_INIT_PATCH_INDEX)
-    message("-- Check IDF patch exists")
-    if(GBD_INIT_PATCH_INDEX EQUAL -1)
-
-        message("-- Patching IDF 5.4.1 gdbinit.cmake")
-
-        string(REPLACE
-            "set(gdbinit_rom_in_path "
-            "# set(gdbinit_rom_in_path "
-            ESP32_GBBINIT_NEW_CONTENT
-            "${ESP32_GBBINIT_CONTENT}")
-
-        string(REPLACE
-            "set(gdbinit_rom_path "
-            "# set(gdbinit_rom_path "
-            ESP32_GBBINIT_NEW_CONTENT
-            "${ESP32_GBBINIT_NEW_CONTENT}")
-
-        string(REPLACE
-            "file(TO_CMAKE_PATH "
-            "# file(TO_CMAKE_PATH "
-            ESP32_GBBINIT_NEW_CONTENT
-            "${ESP32_GBBINIT_NEW_CONTENT}")
-
-        file(WRITE 
-            ${esp32_idf_SOURCE_DIR}/tools/cmake/gdbinit.cmake
-            "${ESP32_GBBINIT_NEW_CONTENT}")
-    endif()
-endmacro()
 
 # setting compile definitions for a target based on general build options
 # TARGET parameter to set the target that's setting them for
@@ -1060,9 +1024,6 @@ macro(nf_add_idf_as_library)
     endif()
 
     nf_fix_esp32c3_rom_file()
-
-    # FIXME patch IDF 5.4.1 problem
-    nf_patch_idf5_4_1()
 
     # find out if there is support for BLE
     string(FIND ${SDKCONFIG_DEFAULT_CONTENTS} "CONFIG_BT_ENABLED=y" CONFIG_BT_ENABLED_POS)
