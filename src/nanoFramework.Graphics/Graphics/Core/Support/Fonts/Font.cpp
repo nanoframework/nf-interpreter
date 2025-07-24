@@ -97,12 +97,13 @@ HRESULT CLR_GFX_Font::CreateInstance(CLR_RT_HeapBlock &ref, const CLR_UINT8 *dat
     bm = (const CLR_GFX_BitmapDescription *)data;
     data += sizeof(CLR_GFX_BitmapDescription);
 
-    NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_BinaryBlob::CreateInstance(
-        ref,
-        sizeof(CLR_GFX_Font),
-        NULL,
-        CLR_GFX_Font::RelocationHandler,
-        CLR_RT_HeapBlock::HB_CompactOnFailure));
+    NANOCLR_CHECK_HRESULT(
+        CLR_RT_HeapBlock_BinaryBlob::CreateInstance(
+            ref,
+            sizeof(CLR_GFX_Font),
+            NULL,
+            CLR_GFX_Font::RelocationHandler,
+            CLR_RT_HeapBlock::HB_CompactOnFailure));
 
     blob = ref.DereferenceBinaryBlob();
     font = (CLR_GFX_Font *)blob->GetData();
@@ -325,6 +326,7 @@ void CLR_GFX_Font::CountCharactersInWidth(
     CLR_GFX_FontCharacterInfo chr;
     totWidth = 0;
     uh.SetInputUTF8(str);
+
     while (maxChars != 0)
     {
         uh.m_outputUTF16 = buf;
