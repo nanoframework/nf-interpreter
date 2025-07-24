@@ -143,7 +143,7 @@ esp_err_t NF_ESP32_InitialiseEthernet(uint8_t *pMacAdr)
     buscfg.quadwp_io_num = -1;
     buscfg.quadhd_io_num = -1;
 
-    ESP_ERROR_CHECK(spi_bus_initialize(ESP32_ETHERNET_SPI_HOST, &buscfg, SPI_DMA_CH_AUTO));
+    ESP_ERROR_CHECK_WITHOUT_ABORT(spi_bus_initialize(ESP32_ETHERNET_SPI_HOST, &buscfg, SPI_DMA_CH_AUTO));
 
 #pragma
     // Define SPI interface to use
@@ -216,14 +216,14 @@ esp_err_t NF_ESP32_InitialiseEthernet(uint8_t *pMacAdr)
 #ifdef ESP32_ETHERNET_SPI
     // The SPI Ethernet module doesn't have a burned factory MAC address, we have to set it manually.
     // Supplied in the config
-    ESP_ERROR_CHECK(esp_eth_ioctl(eth_handle, ETH_CMD_S_MAC_ADDR, pMacAdr));
+    ESP_ERROR_CHECK_WITHOUT_ABORT(esp_eth_ioctl(eth_handle, ETH_CMD_S_MAC_ADDR, pMacAdr));
 #endif
 
     // attach Ethernet driver to TCP/IP stack
-    ESP_ERROR_CHECK(esp_netif_attach(eth_netif, esp_eth_new_netif_glue(eth_handle)));
+    ESP_ERROR_CHECK_WITHOUT_ABORT(esp_netif_attach(eth_netif, esp_eth_new_netif_glue(eth_handle)));
 
     // start Ethernet driver state machine
-    ESP_ERROR_CHECK(esp_eth_start(eth_handle));
+    ESP_ERROR_CHECK_WITHOUT_ABORT(esp_eth_start(eth_handle));
 
 #endif // ESP32_ETHERNET_SUPPORT
 
