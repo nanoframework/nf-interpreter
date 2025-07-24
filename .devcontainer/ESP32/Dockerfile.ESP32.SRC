@@ -39,7 +39,8 @@ RUN apt-get update \
     ninja-build \
     srecord \
     nodejs \
-    libffi-dev
+    libffi-dev \
+    libusb-1.0
 
 # Create needed directories
 RUN mkdir -p /usr/local/bin/gcc
@@ -48,7 +49,7 @@ RUN mkdir -p /usr/local/bin/gcc
 RUN git clone --branch R0.15a https://github.com/abbrev/fatfs.git --depth 1 ./sources/fatfs
 
 # Clone ESP-IDF
-RUN git clone --branch v5.2.3 https://github.com/espressif/esp-idf --depth 1 --recursive ./sources/esp-idf
+RUN git clone --branch v5.4.2 https://github.com/espressif/esp-idf --depth 1 --recursive ./sources/esp-idf
 
 # Creating static link python for pyhton3
 RUN ln -fs /usr/bin/python3 /usr/bin/python \
@@ -61,12 +62,12 @@ ENV PATH=/usr/bin/cmake/bin:${PATH}
 
 # Install ESP-IDF
 ENV IDF_PATH=/sources/esp-idf
-ENV ESP_PATCH_VER=esp-13.2.0_20230928
+ENV ESP_PATCH_VER=esp-14.2.0_20241119
 # This is now taking care in the following line
 # RUN python -m pip install -r $IDF_PATH/requirements.txt
 RUN $IDF_PATH/install.sh
 
-ENV PATH=/root/.espressif/python_env/idf5.2_py3.11_env/bin:$PATH:\
+ENV PATH=/root/.espressif/python_env/idf5.4_py3.11_env/bin:$PATH:\
 $IDF_PATH/components/esptool_py/esptool:\
 $IDF_PATH/components/espcoredump:\ 
 $IDF_PATH/components/partition_table/:\
