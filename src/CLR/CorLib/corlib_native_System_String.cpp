@@ -799,6 +799,7 @@ HRESULT Library_corlib_native_System_String::IndexOf(CLR_RT_StackFrame &stack, i
             while (count-- > 0)
             {
                 CLR_UINT16 buf[3] = {0};
+                
                 inputIterator.m_outputUTF16 = buf;
                 inputIterator.m_outputUTF16_size = MAXSTRLEN(buf);
 
