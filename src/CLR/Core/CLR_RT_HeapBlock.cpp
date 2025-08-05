@@ -349,21 +349,12 @@ HRESULT CLR_RT_HeapBlock::SetObjectCls(const CLR_RT_TypeDef_Index &cls)
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT CLR_RT_HeapBlock::SetGenericInstanceObject(const CLR_RT_TypeSpec_Index &genericType)
+HRESULT CLR_RT_HeapBlock::SetGenericInstanceType(const CLR_RT_TypeSpec_Index &genericType)
 {
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
 
-    CLR_RT_TypeSpec_Instance instance;
-
-    if (instance.InitializeFromIndex(genericType) == false)
-    {
-        NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
-    }
-
-    m_data.genericInstance.genericType = genericType;
-    m_data.genericInstance.ptr = nullptr;
-    m_id.raw = CLR_RT_HEAPBLOCK_RAW_ID(DATATYPE_GENERICINST, 0, 1);
+    m_data.reflection.data.genericType = genericType;
 
     NANOCLR_NOCLEANUP();
 }

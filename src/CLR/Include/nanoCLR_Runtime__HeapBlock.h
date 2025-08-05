@@ -114,7 +114,7 @@ struct CLR_RT_HeapBlock
     static const CLR_UINT32 HB_Event = 0x04;
     static const CLR_UINT32 HB_Pinned = 0x08;
     static const CLR_UINT32 HB_Boxed = 0x10;
-    static const CLR_UINT32 HB_Unused20 = 0x20;
+    static const CLR_UINT32 HB_GenericInstance = 0x20;
     // If more bits are needed, HB_Signaled and HB_SignalAutoReset can be freed for use with a little work.
     // It is not necessary that any heapblock can be waited upon.  Currently, only Threads (Thread.Join),
     // ManualResetEvent, and AutoResetEvent are waitable objects.
@@ -1192,10 +1192,18 @@ struct CLR_RT_HeapBlock
 
     const CLR_RT_TypeSpec_Index &ObjectGenericType() const
     {
-        return m_data.genericInstance.genericType;
+        if ((m_id.type.flags & CLR_RT_HeapBlock::HB_GenericInstance) == CLR_RT_HeapBlock::HB_GenericInstance)
+        {
+            return m_data.reflection.data.genericType;
+        }
+        else
+        {
+            // Invalid index
+            return (CLR_RT_TypeSpec_Index)0x0; 
+        }
     }
 
-    HRESULT SetGenericInstanceObject(const CLR_RT_TypeSpec_Index &genericType);
+    HRESULT SetGenericInstanceType(const CLR_RT_TypeSpec_Index &genericType);
 
     //--//
 
