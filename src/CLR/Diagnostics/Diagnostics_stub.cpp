@@ -111,8 +111,8 @@ __nfweak const CLR_UINT8 *CLR_SkipBodyOfOpcodeCompressed(const CLR_UINT8 *ip, CL
 }
 
 #if defined(NANOCLR_TRACE_INSTRUCTIONS)
-
-__nfweak void CLR_RT_Assembly::DumpToken(CLR_UINT32 tk, const CLR_RT_TypeSpec_Index *genericType)
+ 
+__nfweak void CLR_RT_Assembly::DumpToken(CLR_UINT32 tk, const CLR_RT_MethodDef_Instance &methodDefInstance)
 {
     NATIVE_PROFILE_CLR_DIAGNOSTICS();
 }

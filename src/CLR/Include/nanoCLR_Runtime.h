@@ -1564,7 +1564,7 @@ struct CLR_RT_Assembly : public CLR_RT_HeapBlock_Node // EVENT HEAP - NO RELOCAT
         DECL_POSTFIX;
 
   private:
-    void DumpToken(CLR_UINT32 tk, const CLR_RT_TypeSpec_Index *genericType) DECL_POSTFIX;
+    void DumpToken(CLR_UINT32 tk, const CLR_RT_MethodDef_Instance &methodDefInstance) DECL_POSTFIX;
     void DumpSignature(CLR_SIG sig) DECL_POSTFIX;
     void DumpSignature(CLR_PMETADATA &p) DECL_POSTFIX;
     void DumpSignatureToken(CLR_PMETADATA &p) DECL_POSTFIX;
@@ -2148,7 +2148,7 @@ struct CLR_RT_FieldDef_Instance : public CLR_RT_FieldDef_Index
     bool InitializeFromIndex(const CLR_RT_FieldDef_Index &index);
     void ClearInstance();
 
-    bool ResolveToken(CLR_UINT32 tk, CLR_RT_Assembly *assm);
+    bool ResolveToken(CLR_UINT32 tk, CLR_RT_Assembly *assm, const CLR_RT_MethodDef_Instance *caller);
 
     //--//
 
@@ -4042,23 +4042,36 @@ struct CLR_RT_ExecutionEngine
     void PutInProperList(CLR_RT_Thread *th);
     CLR_INT32 GetNextThreadId();
 
-    HRESULT InitializeReference(CLR_RT_HeapBlock &ref, CLR_RT_SignatureParser &parser);
-    HRESULT InitializeReference(CLR_RT_HeapBlock &ref, const CLR_RECORD_FIELDDEF *target, CLR_RT_Assembly *assm);
+    HRESULT InitializeReference(
+        CLR_RT_HeapBlock &ref,
+        CLR_RT_SignatureParser &parser,
+        const CLR_RT_TypeSpec_Instance *genericInstance = nullptr);
+    HRESULT InitializeReference(
+        CLR_RT_HeapBlock &ref,
+        const CLR_RECORD_FIELDDEF *target,
+        CLR_RT_Assembly *assm,
+        const CLR_RT_TypeSpec_Instance *genericInstance = nullptr);
 
     HRESULT InitializeLocals(CLR_RT_HeapBlock *locals, const CLR_RT_MethodDef_Instance &methodDefInstance);
 
-    HRESULT NewObjectFromIndex(CLR_RT_HeapBlock &reference, const CLR_RT_TypeDef_Index &cls);
-    HRESULT NewObject(CLR_RT_HeapBlock &reference, const CLR_RT_TypeDef_Instance &inst);
+    HRESULT NewObjectFromIndex(
+        CLR_RT_HeapBlock &reference,
+        const CLR_RT_TypeDef_Index &cls,
+        const CLR_RT_TypeSpec_Instance *genericInstance = nullptr);
+    HRESULT NewObject(
+        CLR_RT_HeapBlock &reference,
+        const CLR_RT_TypeDef_Instance &inst,
+        const CLR_RT_TypeSpec_Instance *genericInstance = nullptr);
     HRESULT NewObject(CLR_RT_HeapBlock &reference, CLR_UINT32 token, CLR_RT_Assembly *assm);
 
     HRESULT NewGenericInstanceObject(
         CLR_RT_HeapBlock &reference,
         const CLR_RT_TypeDef_Instance &typeDef,
-        const CLR_RT_TypeSpec_Index &genericType);
+        const CLR_RT_TypeSpec_Index *genericType);
     HRESULT NewGenericInstanceObject(
         CLR_RT_HeapBlock &reference,
         const CLR_RT_TypeDef_Instance &typeDef,
-        CLR_RT_TypeSpec_Instance &genericInstance);
+        const CLR_RT_TypeSpec_Instance *genericInstance);
 
     HRESULT CloneObject(CLR_RT_HeapBlock &reference, const CLR_RT_HeapBlock &source);
     HRESULT CopyValueType(CLR_RT_HeapBlock *destination, const CLR_RT_HeapBlock *source);

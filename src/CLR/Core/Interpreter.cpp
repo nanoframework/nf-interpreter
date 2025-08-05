@@ -2463,8 +2463,11 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                         }
                         else
                         {
-                            NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine
-                                                      .NewGenericInstanceObject(top[0], cls, *calleeInst.genericType));
+                            CLR_RT_TypeSpec_Instance calleeInstGenericType;
+                            calleeInstGenericType.InitializeFromIndex(*calleeInst.genericType);
+
+                            NANOCLR_CHECK_HRESULT(
+                                g_CLR_RT_ExecutionEngine.NewObject(top[0], cls, &calleeInstGenericType));
                         }
 
                         //
@@ -2563,7 +2566,7 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                     FETCH_ARG_COMPRESSED_FIELDTOKEN(arg, ip);
 
                     CLR_RT_FieldDef_Instance fieldInst;
-                    if (fieldInst.ResolveToken(arg, assm) == false)
+                    if (fieldInst.ResolveToken(arg, assm, &stack->m_call) == false)
                     {
                         NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
                     }
@@ -2617,7 +2620,7 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                     FETCH_ARG_COMPRESSED_FIELDTOKEN(arg, ip);
 
                     CLR_RT_FieldDef_Instance fieldInst;
-                    if (fieldInst.ResolveToken(arg, assm) == false)
+                    if (fieldInst.ResolveToken(arg, assm, &stack->m_call) == false)
                     {
                         NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
                     }
@@ -2661,7 +2664,7 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                     CHECKSTACK(stack, evalPos);
 
                     CLR_RT_FieldDef_Instance fieldInst;
-                    if (fieldInst.ResolveToken(arg, assm) == false)
+                    if (fieldInst.ResolveToken(arg, assm, &stack->m_call) == false)
                     {
                         NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
                     }
@@ -2715,7 +2718,7 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                     FETCH_ARG_COMPRESSED_FIELDTOKEN(arg, ip);
 
                     CLR_RT_FieldDef_Instance field;
-                    if (field.ResolveToken(arg, assm) == false)
+                    if (field.ResolveToken(arg, assm, &stack->m_call) == false)
                     {
                         NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
                     }
@@ -2743,7 +2746,7 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                     FETCH_ARG_COMPRESSED_FIELDTOKEN(arg, ip);
 
                     CLR_RT_FieldDef_Instance field;
-                    if (field.ResolveToken(arg, assm) == false)
+                    if (field.ResolveToken(arg, assm, &stack->m_call) == false)
                     {
                         NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
                     }
@@ -2770,7 +2773,7 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                     FETCH_ARG_COMPRESSED_FIELDTOKEN(arg, ip);
 
                     CLR_RT_FieldDef_Instance field;
-                    if (field.ResolveToken(arg, assm) == false)
+                    if (field.ResolveToken(arg, assm, &stack->m_call) == false)
                     {
                         NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
                     }
@@ -2870,7 +2873,7 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                             NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewGenericInstanceObject(
                                 nullableObject,
                                 typeInst,
-                                destinationTypeSpec));
+                                &destinationTypeSpec));
 
                             CLR_RT_ProtectFromGC gc(nullableObject);
 
@@ -3329,7 +3332,7 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                         case TBL_FieldDef:
                         {
                             CLR_RT_FieldDef_Instance field;
-                            if (field.ResolveToken(arg, assm) == false)
+                            if (field.ResolveToken(arg, assm, &stack->m_call) == false)
                             {
                                 NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
                             }
@@ -3353,8 +3356,8 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
 
                         case TBL_GenericParam:
                         {
-                            CLR_RT_GenericParam_Instance param;
-                            if (param.ResolveToken(arg, assm) == false)
+                            CLR_RT_GenericParam_Instance genericParam;
+                            if (genericParam.ResolveToken(arg, assm) == false)
                             {
                                 NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
                             }
@@ -3378,37 +3381,12 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                                 if (gpCR.typeOrMethodDef == TBL_MethodDef)
                                 {
                                     // Method generic parameter (!!T)
-
-                                    CLR_RT_MethodSpec_Index msIndex;
-                                    if (!resolveAsm->FindMethodSpecFromTypeSpec(
-                                            stack->m_call.genericType->TypeSpec(),
-                                            msIndex))
-                                    {
-                                        NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
-                                    }
-
-                                    CLR_RT_MethodSpec_Instance ms;
-                                    if (ms.InitializeFromIndex(msIndex) == false)
-                                    {
-                                        NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
-                                    }
-
-                                    int genericParamPos = param.GenericParam();
-
-                                    CLR_RT_SignatureParser parser;
-                                    CLR_RT_SignatureParser::Element element;
-                                    parser.Initialize_MethodSignature(&ms);
-
-                                    for (int i = 0; i <= genericParamPos; i++)
-                                    {
-                                        NANOCLR_CHECK_HRESULT(parser.Advance(element));
-                                    }
-
-                                    evalPos[0].SetReflection(element.Class);
+                                    // already resolved
+                                    evalPos[0].SetReflection(gpCR.classTypeDef);
                                 }
                                 else
                                 {
-                                    // type generic parameter (!T)
+                                    // Type generic parameter (!T)
                                     if (stack->m_call.genericType == nullptr)
                                     {
                                         // No closed‐generic context available: fall back to returning the
@@ -3426,7 +3404,7 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
 
                                         if (!resolveAsm->FindGenericParamAtTypeSpec(
                                                 callerTypeSpec->TypeSpec(),
-                                                param.target->number,
+                                                genericParam.target->number,
                                                 resolvedTypeDef,
                                                 dummyDataType))
                                         {

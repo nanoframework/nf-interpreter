@@ -1567,9 +1567,11 @@ CLR_RT_HeapBlock *CLR_RT_ExecutionEngine::ExtractHeapBlocksForGenericInstance(
     flags = flags | CLR_RT_HeapBlock::HB_InitializeToZero;
     CLR_RT_HeapBlock *hb = ExtractHeapBlocks(m_heap, DATATYPE_GENERICINST, flags, length);
 
+    _ASSERT(true);
+
     if (hb)
     {
-        hb->SetGenericInstanceObject(genericType);
+        // hb->SetGenericInstanceObject(genericType);
 
 #if defined(NANOCLR_PROFILE_NEW_ALLOCATIONS)
         g_CLR_PRF_Profiler.TrackObjectCreation(hb);
@@ -1821,7 +1823,10 @@ CLR_RT_HeapBlock *CLR_RT_ExecutionEngine::AccessStaticField(const CLR_RT_FieldDe
     return nullptr;
 }
 
-HRESULT CLR_RT_ExecutionEngine::InitializeReference(CLR_RT_HeapBlock &ref, CLR_RT_SignatureParser &parser)
+HRESULT CLR_RT_ExecutionEngine::InitializeReference(
+    CLR_RT_HeapBlock &ref,
+    CLR_RT_SignatureParser &parser,
+    const CLR_RT_TypeSpec_Instance *genericInstance)
 {
     NATIVE_PROFILE_CLR_CORE();
     //
@@ -1834,10 +1839,12 @@ HRESULT CLR_RT_ExecutionEngine::InitializeReference(CLR_RT_HeapBlock &ref, CLR_R
 
     CLR_RT_SignatureParser::Element res;
     NanoCLRDataType dt;
+    CLR_RT_TypeDef_Index realTypeDef;
 
     NANOCLR_CHECK_HRESULT(parser.Advance(res));
 
     dt = res.DataType;
+    realTypeDef.data = res.Class.data;
 
     if (res.Levels > 0) // Array
     {
@@ -1845,10 +1852,59 @@ HRESULT CLR_RT_ExecutionEngine::InitializeReference(CLR_RT_HeapBlock &ref, CLR_R
     }
     else
     {
-        if (dt == DATATYPE_VALUETYPE)
+    process_datatype:
+
+        if (dt == DATATYPE_VAR)
+        {
+            genericInstance->assembly
+                ->FindGenericParamAtTypeSpec(genericInstance->data, res.GenericParamPosition, realTypeDef, dt);
+
+            goto process_datatype;
+        }
+        else if (dt == DATATYPE_MVAR)
+        {
+            _ASSERT(true);
+
+            goto process_datatype;
+        }
+        else if (dt == DATATYPE_GENERICINST)
+        {
+            // need to unwind one position in the signature to have the complete one to seach TypeSpecs
+            CLR_PMETADATA typeSpecSignature = parser.Signature;
+            typeSpecSignature--;
+
+            CLR_RT_TypeSpec_Index genericTSIndex = {};
+            if (!parser.Assembly->FindTypeSpec(typeSpecSignature, genericTSIndex))
+            {
+                NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+            }
+
+            // copy over to parameter
+            CLR_RT_TypeSpec_Instance genericTSInstance;
+            genericTSInstance.InitializeFromIndex(genericTSIndex);
+            genericInstance = &genericTSInstance;
+
+            CLR_RT_SignatureParser sp;
+            sp.Initialize_TypeSpec(parser.Assembly, parser.Assembly->GetTypeSpec(genericTSInstance.TypeSpec()));
+
+            CLR_RT_SignatureParser::Element element;
+            NANOCLR_CHECK_HRESULT(sp.Advance(element));
+
+            // if this is another generic instance, need to advance to get the type
+            if (dt == DATATYPE_GENERICINST)
+            {
+                NANOCLR_CHECK_HRESULT(sp.Advance(element));
+            }
+
+            dt = element.DataType;
+            realTypeDef.data = element.Class.data;
+
+            goto process_datatype;
+        }
+        else if (dt == DATATYPE_VALUETYPE)
         {
             CLR_RT_TypeDef_Instance inst{};
-            inst.InitializeFromIndex(res.Class);
+            inst.InitializeFromIndex(realTypeDef);
 
             if ((inst.target->flags & CLR_RECORD_TYPEDEF::TD_Semantics_Mask) == CLR_RECORD_TYPEDEF::TD_Semantics_Enum)
             {
@@ -1856,11 +1912,12 @@ HRESULT CLR_RT_ExecutionEngine::InitializeReference(CLR_RT_HeapBlock &ref, CLR_R
             }
             else
             {
-                NANOCLR_SET_AND_LEAVE(NewObject(ref, inst));
+                NANOCLR_SET_AND_LEAVE(NewObject(ref, inst, genericInstance));
             }
         }
         else
         {
+
             if (c_CLR_RT_DataTypeLookup[dt].m_flags & CLR_RT_DataTypeLookup::c_Reference)
             {
                 dt = DATATYPE_OBJECT;
@@ -1877,7 +1934,8 @@ HRESULT CLR_RT_ExecutionEngine::InitializeReference(CLR_RT_HeapBlock &ref, CLR_R
 HRESULT CLR_RT_ExecutionEngine::InitializeReference(
     CLR_RT_HeapBlock &ref,
     const CLR_RECORD_FIELDDEF *target,
-    CLR_RT_Assembly *assm)
+    CLR_RT_Assembly *assm,
+    const CLR_RT_TypeSpec_Instance *genericInstance)
 {
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
@@ -1885,7 +1943,7 @@ HRESULT CLR_RT_ExecutionEngine::InitializeReference(
     CLR_RT_SignatureParser parser{};
     parser.Initialize_FieldDef(assm, target);
 
-    NANOCLR_SET_AND_LEAVE(InitializeReference(ref, parser));
+    NANOCLR_SET_AND_LEAVE(InitializeReference(ref, parser, genericInstance));
 
     NANOCLR_NOCLEANUP();
 }
@@ -1897,11 +1955,13 @@ HRESULT CLR_RT_ExecutionEngine::InitializeLocals(
     const CLR_RT_MethodDef_Instance &methodDefInstance)
 {
     NATIVE_PROFILE_CLR_CORE();
-    //
-    // WARNING!!!
-    //
-    // This method is a shortcut for the following code:
-    //
+
+    //////////////////////////////////////////////////////////////////////
+    //                                                                  //
+    //                       ***** WARNING *****                        //
+    //                                                                  //
+    // Changes here must be ported to "CLR_RT_SignatureParser::Advance" //
+    //////////////////////////////////////////////////////////////////////
 
     NANOCLR_HEADER();
 
@@ -1910,6 +1970,8 @@ HRESULT CLR_RT_ExecutionEngine::InitializeLocals(
     CLR_PMETADATA sig = assembly->GetSignature(methodDef->locals);
     CLR_UINT32 count = methodDef->localsCount;
     bool fZeroed = false;
+    bool isGenericInstance = false;
+    CLR_RT_TypeSpec_Instance genericInstance = {};
 
     while (count)
     {
@@ -1958,52 +2020,76 @@ HRESULT CLR_RT_ExecutionEngine::InitializeLocals(
                 }
 
                 case DATATYPE_GENERICINST:
-                    // need to rewind the signature so that the ELEMENT_TYPE is present
-                    // otherwise the comparison won't be possible
-                    sig--;
+                {
+                    // set flag
+                    isGenericInstance = true;
 
-                    // Parse the TypeSpec signature to get the instantiated element
+                    // need to unwind one position in the signature to have the complete one to seach TypeSpecs
+                    CLR_PMETADATA typeSpecSignature = sig;
+                    typeSpecSignature--;
+
+                    CLR_RT_TypeSpec_Index genericTSIndex = {};
+                    if (!assembly->FindTypeSpec(typeSpecSignature, genericTSIndex))
+                    {
+                        NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+                    }
+
+                    // copy over to parameter
+                    genericInstance.InitializeFromIndex(genericTSIndex);
+
                     CLR_RT_SignatureParser sp;
-                    sp.Initialize_TypeSpec(assembly, sig);
+                    sp.Initialize_TypeSpec(assembly, assembly->GetTypeSpec(genericInstance.TypeSpec()));
 
                     CLR_RT_SignatureParser::Element element;
                     NANOCLR_CHECK_HRESULT(sp.Advance(element));
 
-                    // element.Class and element.DataType represent the T
+                    // if this is another generic instance, need to advance to get the type
+                    if (dt == DATATYPE_GENERICINST)
+                    {
+                        NANOCLR_CHECK_HRESULT(sp.Advance(element));
+                    }
+
                     cls = element.Class;
                     dt = element.DataType;
 
                     goto done;
+                }
 
                 case DATATYPE_VAR:
                 {
                     // type-level generic parameter in a locals signature (e.g. 'T' inside a generic type)
                     CLR_INT8 genericParamPosition = *sig++;
 
-                    // parse the locals-signature to extract that T
-                    CLR_RT_SignatureParser parser;
-                    parser.Initialize_MethodLocals(assembly, methodDef);
-                    CLR_RT_SignatureParser::Element sigElement;
+                    assembly->FindGenericParamAtTypeSpec(
+                        methodDefInstance.genericType->TypeSpec(),
+                        genericParamPosition,
+                        cls,
+                        dt);
 
-                    // ensure we don’t walk past the available generic parameters
-                    const int maxParams = methodDefInstance.target->genericParamCount;
-                    if (genericParamPosition < 0 || genericParamPosition > maxParams)
-                    {
-                        NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_RANGE);
-                    }
+                    //// parse the locals-signature to extract that T
+                    // CLR_RT_SignatureParser parser;
+                    // parser.Initialize_MethodLocals(assembly, methodDef);
+                    // CLR_RT_SignatureParser::Element sigElement;
 
-                    // advance into the VAR entry
-                    parser.Advance(sigElement);
+                    //// ensure we don’t walk past the available generic parameters
+                    // const int maxParams = methodDefInstance.target->genericParamCount;
+                    // if (genericParamPosition < 0 || genericParamPosition > maxParams)
+                    //{
+                    //     NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_RANGE);
+                    // }
 
-                    // walk forward to the Nth generic-parameter
-                    for (int i = 0; i < genericParamPosition; i++)
-                    {
-                        parser.Advance(sigElement);
-                    }
+                    //// advance into the VAR entry
+                    // parser.Advance(sigElement);
 
-                    // element.Class and element.DataType represent the T
-                    cls = sigElement.Class;
-                    dt = sigElement.DataType;
+                    //// walk forward to the Nth generic-parameter
+                    // for (int i = 0; i < genericParamPosition; i++)
+                    //{
+                    //     parser.Advance(sigElement);
+                    // }
+
+                    //// element.Class and element.DataType represent the T
+                    // cls = sigElement.Class;
+                    // dt = sigElement.DataType;
 
                     goto done;
                 }
@@ -2084,7 +2170,14 @@ HRESULT CLR_RT_ExecutionEngine::InitializeLocals(
                         } while (++ptr < ptrEnd);
                     }
 
-                    NANOCLR_CHECK_HRESULT(NewObject(*locals, inst));
+                    // if (isGenericInstance)
+                    //{
+                    //     NANOCLR_CHECK_HRESULT(NewGenericInstanceObject(*locals, inst, &genericInstance));
+                    // }
+                    // else
+                    {
+                        NANOCLR_CHECK_HRESULT(NewObject(*locals, inst, &genericInstance));
+                    }
                 }
             }
             else
@@ -2108,7 +2201,10 @@ HRESULT CLR_RT_ExecutionEngine::InitializeLocals(
 
 //--//
 
-HRESULT CLR_RT_ExecutionEngine::NewObjectFromIndex(CLR_RT_HeapBlock &reference, const CLR_RT_TypeDef_Index &cls)
+HRESULT CLR_RT_ExecutionEngine::NewObjectFromIndex(
+    CLR_RT_HeapBlock &reference,
+    const CLR_RT_TypeDef_Index &cls,
+    const CLR_RT_TypeSpec_Instance *genericInstance)
 {
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
@@ -2118,12 +2214,15 @@ HRESULT CLR_RT_ExecutionEngine::NewObjectFromIndex(CLR_RT_HeapBlock &reference, 
     if (inst.InitializeFromIndex(cls) == false)
         NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
 
-    NANOCLR_SET_AND_LEAVE(NewObject(reference, inst));
+    NANOCLR_SET_AND_LEAVE(NewObject(reference, inst, genericInstance));
 
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT CLR_RT_ExecutionEngine::NewObject(CLR_RT_HeapBlock &reference, const CLR_RT_TypeDef_Instance &inst)
+HRESULT CLR_RT_ExecutionEngine::NewObject(
+    CLR_RT_HeapBlock &reference,
+    const CLR_RT_TypeDef_Instance &inst,
+    const CLR_RT_TypeSpec_Instance *genericInstance)
 {
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
@@ -2174,7 +2273,15 @@ HRESULT CLR_RT_ExecutionEngine::NewObject(CLR_RT_HeapBlock &reference, const CLR
             {
                 int clsFields = inst.target->instanceFieldsCount;
                 int totFields = inst.CrossReference().totalFields + CLR_RT_HeapBlock::HB_Object_Fields_Offset;
-                CLR_RT_HeapBlock *obj = ExtractHeapBlocksForClassOrValueTypes(dt, 0, inst, totFields);
+
+                CLR_UINT32 flags = 0;
+
+                if (genericInstance != nullptr && NANOCLR_INDEX_IS_VALID(*genericInstance))
+                {
+                    flags |= CLR_RT_HeapBlock::HB_GenericInstance;
+                }
+
+                CLR_RT_HeapBlock *obj = ExtractHeapBlocksForClassOrValueTypes(dt, flags, inst, totFields);
                 CHECK_ALLOCATION(obj);
 
                 reference.SetObjectReference(obj);
@@ -2186,11 +2293,17 @@ HRESULT CLR_RT_ExecutionEngine::NewObject(CLR_RT_HeapBlock &reference, const CLR
 
                     NANOCLR_CHECK_HRESULT(obj->SetObjectCls(inst));
 
+                    if (genericInstance != nullptr && NANOCLR_INDEX_IS_VALID(*genericInstance))
+                    {
+                        // If we have a generic instance, we need to set the corresponding TypeSpec
+                        obj->SetGenericInstanceType(*genericInstance);
+                    }
+
                     //
                     // Initialize field types, from last to first.
                     //
-                    // We do the decrement BEFORE the comparison because we want to stop short of the first field, the
-                    // object descriptor (already initialized).
+                    // We do the decrement BEFORE the comparison because we want to stop short of the first field,
+                    // the object descriptor (already initialized).
                     //
                     obj += totFields;
                     while (--totFields > 0)
@@ -2208,13 +2321,18 @@ HRESULT CLR_RT_ExecutionEngine::NewObject(CLR_RT_HeapBlock &reference, const CLR
                         {
                             assm = instSub.assembly;
                             target = assm->GetFieldDef(instSub.target->firstInstanceField + clsFields);
+
+#if defined(NANOCLR_INSTANCE_NAMES)
+                            const char *typeName = assm->GetString(target->type);
+                            const char *fieldName = assm->GetString(target->name);
+#endif
                         }
 
                         obj--;
                         target--;
                         clsFields--;
 
-                        NANOCLR_CHECK_HRESULT(InitializeReference(*obj, target, assm));
+                        NANOCLR_CHECK_HRESULT(InitializeReference(*obj, target, assm, genericInstance));
                     }
                 }
 
@@ -2224,9 +2342,6 @@ HRESULT CLR_RT_ExecutionEngine::NewObject(CLR_RT_HeapBlock &reference, const CLR
                 }
             }
             break;
-
-            case DATATYPE_GENERICINST:
-                break;
 
             default:
                 NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
@@ -2256,19 +2371,19 @@ HRESULT CLR_RT_ExecutionEngine::NewObject(CLR_RT_HeapBlock &reference, CLR_UINT3
 HRESULT CLR_RT_ExecutionEngine::NewGenericInstanceObject(
     CLR_RT_HeapBlock &reference,
     const CLR_RT_TypeDef_Instance &typeDef,
-    const CLR_RT_TypeSpec_Index &genericType)
+    const CLR_RT_TypeSpec_Index *genericType)
 {
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
 
     CLR_RT_TypeSpec_Instance inst;
 
-    if (inst.InitializeFromIndex(genericType) == false)
+    if (inst.InitializeFromIndex(*genericType) == false)
     {
         NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
     }
 
-    NANOCLR_SET_AND_LEAVE(NewGenericInstanceObject(reference, typeDef, inst));
+    NANOCLR_SET_AND_LEAVE(NewGenericInstanceObject(reference, typeDef, &inst));
 
     NANOCLR_NOCLEANUP();
 }
@@ -2276,7 +2391,7 @@ HRESULT CLR_RT_ExecutionEngine::NewGenericInstanceObject(
 HRESULT CLR_RT_ExecutionEngine::NewGenericInstanceObject(
     CLR_RT_HeapBlock &reference,
     const CLR_RT_TypeDef_Instance &instance,
-    CLR_RT_TypeSpec_Instance &genericInstance)
+    const CLR_RT_TypeSpec_Instance *genericInstance)
 {
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
@@ -2292,7 +2407,7 @@ HRESULT CLR_RT_ExecutionEngine::NewGenericInstanceObject(
     int clsFields = instance.target->instanceFieldsCount;
     int totFields = instance.CrossReference().totalFields + CLR_RT_HeapBlock::HB_Object_Fields_Offset;
 
-    giHeader = (CLR_RT_HeapBlock_GenericInstance *)ExtractHeapBlocksForGenericInstance(0, genericInstance, totFields);
+    giHeader = (CLR_RT_HeapBlock_GenericInstance *)ExtractHeapBlocksForGenericInstance(0, *genericInstance, totFields);
     CHECK_ALLOCATION(giHeader);
 
     reference.SetObjectReference(giHeader);
@@ -2332,7 +2447,7 @@ HRESULT CLR_RT_ExecutionEngine::NewGenericInstanceObject(
         target--;
         clsFields--;
 
-        NANOCLR_CHECK_HRESULT(InitializeReference(*fieldCursor, target, assm));
+        NANOCLR_CHECK_HRESULT(InitializeReference(*fieldCursor, target, assm, genericInstance));
     }
 
     if (instance.HasFinalizer())
@@ -2378,11 +2493,18 @@ HRESULT CLR_RT_ExecutionEngine::CloneObject(CLR_RT_HeapBlock &reference, const C
             // Save the pointer to the object to clone, in case 'reference' and 'source' point to the same block.
             //
             CLR_RT_HeapBlock safeSource;
+            CLR_RT_TypeSpec_Instance genericInstance = {};
 
             safeSource.SetObjectReference(obj);
             CLR_RT_ProtectFromGC gc(safeSource);
 
-            NANOCLR_CHECK_HRESULT(NewObjectFromIndex(reference, obj->ObjectCls()));
+            if (NANOCLR_INDEX_IS_VALID(obj->ObjectGenericType()))
+            {
+                // instanciate the generic type
+                genericInstance.InitializeFromIndex(obj->ObjectGenericType());
+            }
+
+            NANOCLR_CHECK_HRESULT(NewObjectFromIndex(reference, obj->ObjectCls(), &genericInstance));
             NANOCLR_CHECK_HRESULT(CopyValueType(reference.Dereference(), obj));
         }
         break;
