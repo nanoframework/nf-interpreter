@@ -2078,31 +2078,6 @@ HRESULT CLR_RT_ExecutionEngine::InitializeLocals(
                         cls,
                         dt);
 
-                    //// parse the locals-signature to extract that T
-                    // CLR_RT_SignatureParser parser;
-                    // parser.Initialize_MethodLocals(assembly, methodDef);
-                    // CLR_RT_SignatureParser::Element sigElement;
-
-                    //// ensure we don’t walk past the available generic parameters
-                    // const int maxParams = methodDefInstance.target->genericParamCount;
-                    // if (genericParamPosition < 0 || genericParamPosition > maxParams)
-                    //{
-                    //     NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_RANGE);
-                    // }
-
-                    //// advance into the VAR entry
-                    // parser.Advance(sigElement);
-
-                    //// walk forward to the Nth generic-parameter
-                    // for (int i = 0; i < genericParamPosition; i++)
-                    //{
-                    //     parser.Advance(sigElement);
-                    // }
-
-                    //// element.Class and element.DataType represent the T
-                    // cls = sigElement.Class;
-                    // dt = sigElement.DataType;
-
                     goto done;
                 }
 
