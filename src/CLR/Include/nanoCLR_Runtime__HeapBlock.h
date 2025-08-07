@@ -1199,7 +1199,7 @@ struct CLR_RT_HeapBlock
         else
         {
             // Invalid index
-            return (CLR_RT_TypeSpec_Index)0x0; 
+            return (CLR_RT_TypeSpec_Index)0x0;
         }
     }
 
