@@ -2037,20 +2037,32 @@ HRESULT CLR_RT_ExecutionEngine::InitializeLocals(
                     // copy over to parameter
                     genericInstance.InitializeFromIndex(genericTSIndex);
 
-                    CLR_RT_SignatureParser sp;
-                    sp.Initialize_TypeSpec(assembly, assembly->GetTypeSpec(genericInstance.TypeSpec()));
+                    CLR_RT_SignatureParser parser;
+                    parser.Initialize_TypeSpec(assembly, assembly->GetTypeSpec(genericInstance.TypeSpec()));
 
                     CLR_RT_SignatureParser::Element element;
-                    NANOCLR_CHECK_HRESULT(sp.Advance(element));
+                    NANOCLR_CHECK_HRESULT(parser.Advance(element));
 
                     // if this is another generic instance, need to advance to get the type
                     if (dt == DATATYPE_GENERICINST)
                     {
-                        NANOCLR_CHECK_HRESULT(sp.Advance(element));
+                        NANOCLR_CHECK_HRESULT(parser.Advance(element));
                     }
 
                     cls = element.Class;
                     dt = element.DataType;
+
+                    // consume the generic parameters from the signature
+                    for (int paramIndex = 0; paramIndex < parser.GenParamCount; paramIndex++)
+                    {
+                        NANOCLR_CHECK_HRESULT(parser.Advance(element));
+                    }
+
+                    // need to advance the signature to consume it
+                    while (parser.Signature != sig)
+                    {
+                        sig++;
+                    }
 
                     goto done;
                 }
