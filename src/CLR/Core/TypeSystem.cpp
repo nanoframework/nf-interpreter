@@ -1301,79 +1301,47 @@ bool CLR_RT_FieldDef_Instance::ResolveToken(
 
                 case TBL_TypeSpec:
                 {
-                    const CLR_RECORD_FIELDREF *fr = assm->GetFieldRef(index);
+                    // the metadata own (possibly open) TypeSpec...
+                    const CLR_RT_TypeSpec_Index *mdTS = &assm->crossReferenceFieldRef[index].genericType;
 
-                    switch (fr->Owner())
+                    // decide whether to prefer the caller’s closed-generic
+                    const CLR_RT_TypeSpec_Index *effectiveTS = mdTS;
+                    if (caller && caller->genericType && NANOCLR_INDEX_IS_VALID(*caller->genericType))
                     {
-                        case TBL_TypeSpec:
+                        CLR_RT_TypeSpec_Instance instCaller, instMd;
+                        if (instCaller.InitializeFromIndex(*caller->genericType) && instMd.InitializeFromIndex(*mdTS))
                         {
-                            // the metadata’s own (possibly open) TypeSpec…
-                            const CLR_RT_TypeSpec_Index *mdTS = &assm->crossReferenceFieldRef[index].genericType;
+                            CLR_RT_SignatureParser pC, pM;
+                            CLR_RT_SignatureParser::Element eC, eM;
 
-                            // decide whether to prefer the caller’s closed-generic
-                            const CLR_RT_TypeSpec_Index *effectiveTS = mdTS;
-                            if (caller && caller->genericType && NANOCLR_INDEX_IS_VALID(*caller->genericType))
+                            pC.Initialize_TypeSpec(instCaller.assembly, instCaller.target);
+                            pM.Initialize_TypeSpec(instMd.assembly, instMd.target);
+
+                            if (SUCCEEDED(pC.Advance(eC)) && SUCCEEDED(pM.Advance(eM)) &&
+                                eC.Class.data == eM.Class.data)
                             {
-                                CLR_RT_TypeSpec_Instance instCaller, instMd;
-                                if (instCaller.InitializeFromIndex(*caller->genericType) &&
-                                    instMd.InitializeFromIndex(*mdTS))
-                                {
-                                    CLR_RT_SignatureParser pC, pM;
-                                    CLR_RT_SignatureParser::Element eC, eM;
-
-                                    pC.Initialize_TypeSpec(instCaller.assembly, instCaller.target);
-                                    pM.Initialize_TypeSpec(instMd.assembly, instMd.target);
-
-                                    if (SUCCEEDED(pC.Advance(eC)) && SUCCEEDED(pM.Advance(eM)) &&
-                                        eC.Class.data == eM.Class.data)
-                                    {
-                                        // same generic-definition token → use the caller’s closed TypeSpec
-                                        effectiveTS = caller->genericType;
-                                    }
-                                }
+                                // same generic-definition token → use the caller’s closed TypeSpec
+                                effectiveTS = caller->genericType;
                             }
-
-                            // now bind against effectiveTS
-                            genericType = effectiveTS;
-                            //CLR_RT_Assembly *tsAsm = g_CLR_RT_TypeSystem.m_assemblies[effectiveTS->Assembly() - 1];
-                            //const CLR_RECORD_TYPESPEC *tsRec = tsAsm->GetTypeSpec(effectiveTS->TypeSpec());
-
-                            //// if (!tsAsm->FindFieldDef(tsRec, tsAsm->GetString(fr->name), tsAsm, fr->signature,
-                            //// resolved))
-                            ////{
-                            ////     return false;
-                            //// }
-                            CLR_RT_FieldDef_Index resolved;
-
-                            if (!assm->FindFieldDef(
-                                    genericType,
-                                    assm->GetString(fr->name),
-                                    assm,
-                                    fr->signature,
-                                    resolved))
-                            {
-                                return false;
-                            }
-
-                            data = resolved.data;
-                            assembly = assm;
-                            target = assembly->GetFieldDef(Field());
-                            return true;
-                        }
-
-                        case TBL_TypeRef:
-                        {
-                            // non-generic
-                            data = assm->crossReferenceFieldRef[index].target.data;
-                            assembly = g_CLR_RT_TypeSystem.m_assemblies[Assembly() - 1];
-                            target = assembly->GetFieldDef(Field());
-                            genericType = nullptr;
-                            return true;
                         }
                     }
-                    return false; // unknown owner
-                }
 
+                    // now bind against effectiveTS
+                    genericType = effectiveTS;
+
+                    CLR_RT_FieldDef_Index resolved;
+
+                    if (!assm->FindFieldDef(genericType, assm->GetString(fr->name), assm, fr->signature, resolved))
+                    {
+                        return false;
+                    }
+
+                    data = resolved.data;
+                    assembly = assm;
+                    target = assembly->GetFieldDef(Field());
+
+                    break;
+                }
                 default:
                     // should not happen
                     return false;
