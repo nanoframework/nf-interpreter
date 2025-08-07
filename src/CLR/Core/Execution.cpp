@@ -2333,16 +2333,16 @@ HRESULT CLR_RT_ExecutionEngine::NewObject(
                         {
                             assm = instSub.assembly;
                             target = assm->GetFieldDef(instSub.target->firstInstanceField + clsFields);
-
-#if defined(NANOCLR_INSTANCE_NAMES)
-                            const char *typeName = assm->GetString(target->type);
-                            const char *fieldName = assm->GetString(target->name);
-#endif
                         }
 
                         obj--;
                         target--;
                         clsFields--;
+
+#if defined(NANOCLR_INSTANCE_NAMES)
+                        const char *typeName = assm->GetString(target->type);
+                        const char *fieldName = assm->GetString(target->name);
+#endif
 
                         NANOCLR_CHECK_HRESULT(InitializeReference(*obj, target, assm, genericInstance));
                     }
