@@ -1,13 +1,13 @@
-﻿﻿//
+﻿﻿ //
 // Copyright (c) .NET Foundation and Contributors
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
 //
 #include "CorLib.h"
 
-static const CLR_UINT16 c_WhiteSpaces[] = {
-    0x0009, 0x000A, 0x000B, 0x000C, 0x000D, 0x0020, 0x00A0, 0x2000, 0x2001, 0x2002, 0x2003,
-    0x2004, 0x2005, 0x2006, 0x2007, 0x2008, 0x2009, 0x200A, 0x200B, 0x3000, 0xFEFF,
+    static const CLR_UINT16 c_WhiteSpaces[] = {
+        0x0009, 0x000A, 0x000B, 0x000C, 0x000D, 0x0020, 0x00A0, 0x2000, 0x2001, 0x2002, 0x2003,
+        0x2004, 0x2005, 0x2006, 0x2007, 0x2008, 0x2009, 0x200A, 0x200B, 0x3000, 0xFEFF,
 };
 
 //--//
@@ -894,10 +894,11 @@ HRESULT Library_corlib_native_System_String::ChangeCase(CLR_RT_StackFrame &stack
         *ptr++ = c;
     }
 
-    NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_String::CreateInstance(
-        stack.PushValue(),
-        (CLR_UINT16 *)arrayTmp->GetFirstElement(),
-        arrayTmp->m_numOfElements));
+    NANOCLR_CHECK_HRESULT(
+        CLR_RT_HeapBlock_String::CreateInstance(
+            stack.PushValue(),
+            (CLR_UINT16 *)arrayTmp->GetFirstElement(),
+            arrayTmp->m_numOfElements));
 
     NANOCLR_NOCLEANUP();
 }
@@ -928,10 +929,11 @@ HRESULT Library_corlib_native_System_String::Substring(CLR_RT_StackFrame &stack,
             NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_RANGE);
     }
 
-    NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_String::CreateInstance(
-        stack.PushValue(),
-        (CLR_UINT16 *)arrayTmp->GetElement(startIndex),
-        length));
+    NANOCLR_CHECK_HRESULT(
+        CLR_RT_HeapBlock_String::CreateInstance(
+            stack.PushValue(),
+            (CLR_UINT16 *)arrayTmp->GetElement(startIndex),
+            length));
 
     NANOCLR_NOCLEANUP();
 }
@@ -1107,10 +1109,11 @@ HRESULT Library_corlib_native_System_String::Split(CLR_RT_StackFrame &stack, CLR
                         {
                             CLR_RT_HeapBlock *str = (CLR_RT_HeapBlock *)arrayDst->GetElement(count);
 
-                            NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_String::CreateInstance(
-                                *str,
-                                pSrcStart,
-                                (CLR_UINT32)(pSrc - pSrcStart)));
+                            NANOCLR_CHECK_HRESULT(
+                                CLR_RT_HeapBlock_String::CreateInstance(
+                                    *str,
+                                    pSrcStart,
+                                    (CLR_UINT32)(pSrc - pSrcStart)));
 
                             pSrcStart = pSrc + 1;
                         }
