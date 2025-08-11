@@ -70,6 +70,10 @@ jobs:
 
       # get commit message
       - powershell: |
+          git config --global user.email "nfbot"
+          git config --global user.name "nanoframework@outlook.com"
+
+          $auth = "basic $([System.Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes(":$(GitHubToken)")))"
 
           # set default values
           echo "##vso[task.setvariable variable=RUN_MSCORLIB_TESTS;isOutput=true]false"
@@ -88,7 +92,7 @@ jobs:
             {
               Write-Host "##[command] **This is a PR build**"
 
-              $commit = Invoke-RestMethod -Uri "https://api.github.com/repos/nanoframework/nf-interpreter/commits/$(Build.SourceVersion)" -ContentType "application/json" -Method GET
+              $commit = Invoke-RestMethod -Uri "https://api.github.com/repos/nanoframework/nf-interpreter/commits/$(Build.SourceVersion)" -Header @{"Authorization"="$auth"} -ContentType "application/json" -Method GET
 
               if( ($commit.commit.author.name -eq "nfbot") -and ($commit.commit.message -like "*[version update]*") )
               {
