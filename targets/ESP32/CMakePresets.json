@@ -707,7 +707,7 @@
             "hidden": false,
             "cacheVariables": {
                 "TARGET_NAME": "${presetName}",
-                "SDK_CONFIG_FILE": "",
+                "SDK_CONFIG_FILE": "sdkconfig.default_nopsram.esp32",
                 "NF_BUILD_RTM": "OFF",
                 "NF_FEATURE_DEBUGGER": "ON",
                 "NF_FEATURE_RTC": "ON",
@@ -729,7 +729,7 @@
             "hidden": false,
             "cacheVariables": {
                 "TARGET_NAME": "${presetName}",
-                "SDK_CONFIG_FILE": "",
+                "SDK_CONFIG_FILE": "sdkconfig.default_nopsram.esp32",
                 "NF_BUILD_RTM": "OFF",
                 "NF_FEATURE_DEBUGGER": "ON",
                 "NF_FEATURE_RTC": "ON",

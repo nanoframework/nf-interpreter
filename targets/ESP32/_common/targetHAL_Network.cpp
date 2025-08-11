@@ -378,7 +378,7 @@ static void event_handler(void *arg, esp_event_base_t event_base, int32_t event_
                 if (result != ESP_OK)
                 {
 #ifdef PRINT_NET_EVENT
-                    ets_printf("Failed to configure network for ethernet on connect: %d\n", err);
+                    ets_printf("Failed to configure network for ethernet on connect: %d\n", result);
 #endif
                 }
 
