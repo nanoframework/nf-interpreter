@@ -224,10 +224,12 @@ HRESULT Library_sys_net_native_System_Net_NetworkInformation_WirelessAPConfigura
                 // dereference the object in order to reach its fields
                 hbObj = apStation->Dereference();
 
-                NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance(
-                    hbObj[Library_sys_net_native_System_Net_NetworkInformation_WirelessAPStation::FIELD___macAddress],
-                    6,
-                    g_CLR_RT_WellKnownTypes.m_UInt8));
+                NANOCLR_CHECK_HRESULT(
+                    CLR_RT_HeapBlock_Array::CreateInstance(
+                        hbObj[Library_sys_net_native_System_Net_NetworkInformation_WirelessAPStation::
+                                  FIELD___macAddress],
+                        6,
+                        g_CLR_RT_WellKnownTypes.m_UInt8));
                 memcpy(
                     hbObj[Library_sys_net_native_System_Net_NetworkInformation_WirelessAPStation::FIELD___macAddress]
                         .DereferenceArray()
