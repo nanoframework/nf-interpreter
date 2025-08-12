@@ -586,7 +586,7 @@ HRESULT Library_corlib_native_System_String::ToCharArray(CLR_RT_StackFrame &stac
 }
 
 // Helper function for comparing UTF-8 substrings
-static bool MatchString(CLR_RT_UnicodeHelper &inputIter, const char *searchStr, int searchCharLen)
+bool MatchString(CLR_RT_UnicodeHelper &inputIter, const char *searchStr, int searchCharLen)
 {
     // Create copies to preserve original iterator state
     CLR_RT_UnicodeHelper inputCopy = inputIter;
