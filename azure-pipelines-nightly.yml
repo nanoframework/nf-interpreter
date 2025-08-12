@@ -532,6 +532,24 @@ jobs:
           PackageName: ESP32_S3_BLE
           CMakePreset: ESP32_S3_BLE
 
+        ESP32_S3_BLE_UART:
+          TargetBoard: ESP32_S3
+          TargetSeries: "esp32s3"
+          BuildOptions:
+          IDF_Target: esp32s3
+          TargetName: ESP32_S3_BLE_UART
+          PackageName: ESP32_S3_BLE_UART
+          CMakePreset: ESP32_S3_BLE_UART
+
+        ESP32_S3_ALL_UART:
+          TargetBoard: ESP32_S3
+          TargetSeries: "esp32s3"
+          BuildOptions:
+          IDF_Target: esp32s3
+          TargetName: ESP32_S3_ALL_UART
+          PackageName: ESP32_S3_ALL_UART
+          CMakePreset: ESP32_S3_ALL_UART
+
         ESP32_WESP32:
           TargetSeries: "esp32"
           TargetBoard: ESP32

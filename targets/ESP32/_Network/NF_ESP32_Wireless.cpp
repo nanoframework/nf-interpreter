@@ -155,6 +155,14 @@ esp_err_t NF_ESP32_InitaliseWifi()
         // create Wi-Fi STA (ignoring return)
         wifiStaNetif = esp_netif_create_default_wifi_sta();
 
+        // Set static address if configured
+        // ignore any errors
+        ec = NF_ESP32_ConfigureNetworkByConfigIndex(IDF_WIFI_STA_DEF);
+        if (ec != ESP_OK)
+        {
+            ESP_LOGE(TAG, "Unable to configure Wifi station - result %d", ec);
+        }
+
         // We need to start the WIFI stack before the station can Connect
         // Also we can only get the NetIf number used by ESP IDF after it has been started.
         // Starting will also start the Soft- AP (if we have enabled it).
@@ -514,47 +522,3 @@ bool NF_ESP32_WirelessAP_Close()
 }
 
 #endif
-
-// Wait for the network interface to become available
-int NF_ESP32_Wait_NetNumber(int num)
-{
-    int number = 0;
-
-    esp_netif_t *espNetif;
-
-    while (true)
-    {
-        switch (num)
-        {
-            case IDF_WIFI_STA_DEF:
-                espNetif = esp_netif_get_handle_from_ifkey("WIFI_STA_DEF");
-                break;
-
-            case IDF_WIFI_AP_DEF:
-                espNetif = esp_netif_get_handle_from_ifkey("WIFI_AP_DEF");
-                break;
-
-            case IDF_ETH_DEF:
-                espNetif = esp_netif_get_handle_from_ifkey("ETH_DEF");
-                break;
-
-            case IDF_OT_DEF:
-                espNetif = esp_netif_get_handle_from_ifkey("OT_DEF");
-                break;
-
-            default:
-                // can't reach here
-                HAL_AssertEx();
-                break;
-        }
-
-        if (espNetif != nullptr)
-        {
-            break;
-        }
-
-        vTaskDelay(20 / portTICK_PERIOD_MS);
-    }
-
-    return espNetif->lwip_netif->num;
-}
