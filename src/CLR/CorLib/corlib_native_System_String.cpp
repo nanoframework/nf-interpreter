@@ -894,10 +894,11 @@ HRESULT Library_corlib_native_System_String::ChangeCase(CLR_RT_StackFrame &stack
         *ptr++ = c;
     }
 
-    NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_String::CreateInstance(
-        stack.PushValue(),
-        (CLR_UINT16 *)arrayTmp->GetFirstElement(),
-        arrayTmp->m_numOfElements));
+    NANOCLR_CHECK_HRESULT(
+        CLR_RT_HeapBlock_String::CreateInstance(
+            stack.PushValue(),
+            (CLR_UINT16 *)arrayTmp->GetFirstElement(),
+            arrayTmp->m_numOfElements));
 
     NANOCLR_NOCLEANUP();
 }
@@ -928,10 +929,11 @@ HRESULT Library_corlib_native_System_String::Substring(CLR_RT_StackFrame &stack,
             NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_RANGE);
     }
 
-    NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_String::CreateInstance(
-        stack.PushValue(),
-        (CLR_UINT16 *)arrayTmp->GetElement(startIndex),
-        length));
+    NANOCLR_CHECK_HRESULT(
+        CLR_RT_HeapBlock_String::CreateInstance(
+            stack.PushValue(),
+            (CLR_UINT16 *)arrayTmp->GetElement(startIndex),
+            length));
 
     NANOCLR_NOCLEANUP();
 }
@@ -1107,10 +1109,11 @@ HRESULT Library_corlib_native_System_String::Split(CLR_RT_StackFrame &stack, CLR
                         {
                             CLR_RT_HeapBlock *str = (CLR_RT_HeapBlock *)arrayDst->GetElement(count);
 
-                            NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_String::CreateInstance(
-                                *str,
-                                pSrcStart,
-                                (CLR_UINT32)(pSrc - pSrcStart)));
+                            NANOCLR_CHECK_HRESULT(
+                                CLR_RT_HeapBlock_String::CreateInstance(
+                                    *str,
+                                    pSrcStart,
+                                    (CLR_UINT32)(pSrc - pSrcStart)));
 
                             pSrcStart = pSrc + 1;
                         }
