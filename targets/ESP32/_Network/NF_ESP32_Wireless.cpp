@@ -8,7 +8,7 @@
 #include "NF_ESP32_Network.h"
 #include "esp_netif_net_stack.h"
 
-#if defined(CONFIG_SOC_WIFI_SUPPORTED)
+#if defined(CONFIG_SOC_WIFI_SUPPORTED) || defined(CONFIG_SOC_WIRELESS_HOST_SUPPORTED)
 
 static const char *TAG = "wifi";
 
@@ -128,6 +128,8 @@ void NF_ESP32_DeinitWifi()
     esp_wifi_deinit();
 }
 
+extern "C" esp_err_t esp_hosted_init(void);
+
 esp_err_t NF_ESP32_InitaliseWifi()
 {
     esp_err_t ec = ESP_OK;
@@ -152,6 +154,9 @@ esp_err_t NF_ESP32_InitaliseWifi()
 
     if (!IsWifiInitialised)
     {
+#if defined(CONFIG_SOC_WIRELESS_HOST_SUPPORTED)
+        esp_hosted_init();
+#endif
         // create Wi-Fi STA (ignoring return)
         wifiStaNetif = esp_netif_create_default_wifi_sta();
 
@@ -348,6 +353,8 @@ int NF_ESP32_Wireless_Open(HAL_Configuration_NetworkInterface *config)
         NF_ESP32_IsToConnect = false;
     }
 
+// ESP32-P4 doesn't currently have smartconfig support so disable
+#if !defined(CONFIG_SOC_WIRELESS_HOST_SUPPORTED)
     if (okToStartSmartConnect &&
         (wirelessConfig->Options & Wireless80211Configuration_ConfigurationOptions_SmartConfig))
     {
@@ -357,6 +364,7 @@ int NF_ESP32_Wireless_Open(HAL_Configuration_NetworkInterface *config)
         // clear flag
         NF_ESP32_IsToConnect = false;
     }
+#endif
 
     return NF_ESP32_Wait_NetNumber(IDF_WIFI_STA_DEF);
 }

@@ -12,7 +12,7 @@
 //
 int8_t Esp32_SPI_DevicePinMap[MAX_SPI_DEVICES][Esp32SpiPin_Max] = {
     // SPI1 - use defaults from IDF sample
-    {SPI_IOMUX_PIN_NUM_MOSI, SPI_IOMUX_PIN_NUM_MISO, SPI_IOMUX_PIN_NUM_CLK},
+    {MSPI_IOMUX_PIN_NUM_MOSI, MSPI_IOMUX_PIN_NUM_MISO, MSPI_IOMUX_PIN_NUM_CLK},
     // SPI2 - no pins assigned
     {-1, -1, -1}};
 
