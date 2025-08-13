@@ -891,7 +891,7 @@ unsigned int &Interop_Marshal_GetField_UINT32(CLR_RT_HeapBlock *pThis, unsigned 
 
 unsigned __int64 &Interop_Marshal_GetField_UINT64(CLR_RT_HeapBlock *pThis, unsigned int fieldIndex)
 {
-    return (unsigned __int64 &)pThis[fieldIndex].NumericByRef().u8;
+    return *reinterpret_cast<unsigned __int64 *>(&pThis[fieldIndex].NumericByRef().u8);
 }
 
 #ifdef __GNUC__
@@ -925,7 +925,7 @@ signed int &Interop_Marshal_GetField_INT32(CLR_RT_HeapBlock *pThis, unsigned int
 
 signed __int64 &Interop_Marshal_GetField_INT64(CLR_RT_HeapBlock *pThis, unsigned int fieldIndex)
 {
-    return (signed __int64 &)pThis[fieldIndex].NumericByRef().s8;
+    return *reinterpret_cast<signed __int64 *>(&pThis[fieldIndex].NumericByRef().s8);
 }
 
 #ifdef __GNUC__
@@ -947,7 +947,7 @@ float &Interop_Marshal_GetField_float(CLR_RT_HeapBlock *pThis, unsigned int fiel
 
 double &Interop_Marshal_GetField_double(CLR_RT_HeapBlock *pThis, unsigned int fieldIndex)
 {
-    return (double &)pThis[fieldIndex].NumericByRef().r8;
+    return *reinterpret_cast<double *>(&pThis[fieldIndex].NumericByRef().r8);
 }
 
 #ifdef __GNUC__
