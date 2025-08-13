@@ -2083,7 +2083,7 @@ struct CLR_RT_TypeSpec_Instance : public CLR_RT_TypeSpec_Index
     CLR_RT_Assembly *assembly;
     const CLR_RECORD_TYPESPEC *target;
 
-    CLR_INDEX typeDefIndex;
+    CLR_RT_TypeDef_Index genericTypeDef;
 
     //--//
 

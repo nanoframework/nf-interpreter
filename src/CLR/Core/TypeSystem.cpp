@@ -686,7 +686,7 @@ bool CLR_RT_TypeSpec_Instance::InitializeFromIndex(const CLR_RT_TypeSpec_Index &
         // get type
         parser.Advance(element);
 
-        typeDefIndex = element.Class.Type();
+        genericTypeDef = element.Class;
 
         return true;
     }
@@ -2336,7 +2336,7 @@ HRESULT CLR_RT_TypeDescriptor::ExtractTypeIndexFromObject(const CLR_RT_HeapBlock
 
         if (desc.GetDataType() == DATATYPE_GENERICINST)
         {
-            res.Set(desc.m_handlerGenericType.Assembly(), desc.m_handlerGenericType.typeDefIndex);
+            res.Set(desc.m_handlerGenericType.Assembly(), desc.m_handlerGenericType.genericTypeDef.Type());
         }
         else
         {
@@ -5129,16 +5129,7 @@ bool CLR_RT_Assembly::FindMethodDef(
     // switch to the assembly that declared this TypeSpec
     CLR_RT_Assembly *declAssm = tsInstance.assembly;
 
-    CLR_INDEX typeDefIdx = tsInstance.typeDefIndex;
-
-    // validate that it really is in-range
-    if (typeDefIdx >= declAssm->tablesSize[TBL_TypeDef])
-    {
-        // doesn't seem to be, jump to TypeSpec parsing
-        goto try_typespec;
-    }
-
-    if (declAssm->FindMethodDef(declAssm->GetTypeDef(typeDefIdx), methodName, base, sig, index))
+    if (declAssm->FindMethodDef(declAssm->GetTypeDef(tsInstance.genericTypeDef.Type()), methodName, base, sig, index))
     {
         assmIndex = declAssm->assemblyIndex;
         return true;
@@ -6606,7 +6597,7 @@ HRESULT CLR_RT_TypeSystem::BuildMethodName(
 
         if (tsInst.InitializeFromIndex(*genericType))
         {
-            if (tsInst.typeDefIndex == declTypeIdx.Type())
+            if (tsInst.genericTypeDef.Type() == declTypeIdx.Type())
             {
                 useGeneric = true;
             }

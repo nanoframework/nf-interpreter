@@ -841,7 +841,7 @@ bool CLR_RT_HeapBlock::TypeDescriptorsMatch(
         auto &eSpec = expectedType.m_handlerGenericType;
         auto &aSpec = actualType.m_handlerGenericType;
 
-        return eSpec.Assembly() == aSpec.Assembly() && eSpec.typeDefIndex == aSpec.typeDefIndex;
+        return eSpec.Assembly() == aSpec.Assembly() && eSpec.genericTypeDef.data == aSpec.genericTypeDef.data;
     }
 
     if (actualDataType <= DATATYPE_LAST_PRIMITIVE_TO_PRESERVE)
