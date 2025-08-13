@@ -957,107 +957,19 @@ bool CLR_RT_TypeDef_Instance::ResolveToken(
 
             case TBL_TypeSpec:
             {
-                // Grab the raw signature for the IL token (e.g. !T[], List`1<T>, etc.)
-                const CLR_RECORD_TYPESPEC *ts = assm->GetTypeSpec(index);
-                CLR_RT_SignatureParser parser;
-                parser.Initialize_TypeSpec(assm, ts);
+                const CLR_RT_TypeSpec_Index typeSpecIdx = assm->crossReferenceTypeSpec[index].genericType;
+                CLR_RT_TypeSpec_Instance typeSpecInstance{};
+                typeSpecInstance.InitializeFromIndex(typeSpecIdx);
 
-                CLR_RT_SignatureParser::Element elem;
-                if (FAILED(parser.Advance(elem)))
-                {
-                    return false;
-                }
-
-                if (elem.DataType == DATATYPE_GENERICINST)
-                {
-                    if (FAILED(parser.Advance(elem)))
-                    {
-                        return false;
-                    }
-                }
-
-                if (elem.DataType == DATATYPE_CLASS || elem.DataType == DATATYPE_VALUETYPE)
-                {
-                    // consume the CLASS/VALUETYPE marker
-                    if (FAILED(parser.Advance(elem)))
-                    {
-                        return false;
-                    }
-                    // consume the generic‐definition token itself
-                    if (FAILED(parser.Advance(elem)))
-                    {
-                        return false;
-                    }
-                    // consume the count of generic arguments
-                    if (FAILED(parser.Advance(elem)))
-                    {
-                        return false;
-                    }
-                }
-
-                // walk forward until a VAR (type‐generic) or MVAR (method‐generic) is hit
-                while (elem.DataType != DATATYPE_VAR && elem.DataType != DATATYPE_MVAR)
-                {
-                    if (FAILED(parser.Advance(elem)))
-                    {
-                        return false;
-                    }
-                }
-
-                // If it's a type‐generic slot (!T), resolve against the caller's closed generic
-                if (elem.DataType == DATATYPE_VAR)
-                {
-                    int pos = elem.GenericParamPosition;
-
-                    // Use the *caller's* bound genericType (Stack<Int32>, etc.)
-                    if (caller == nullptr || caller->genericType == nullptr)
-                    {
-                        return false;
-                    }
-
-                    auto &tsi = *caller->genericType;
-                    CLR_UINT32 closedTsRow = tsi.TypeSpec();
-
-                    CLR_RT_TypeDef_Index realTypeDef;
-                    NanoCLRDataType realDataType;
-
-                    // Only call this once to map (e.g. !T→Int32)
-                    caller->assembly
-                        ->FindGenericParamAtTypeSpec(closedTsRow, (CLR_UINT32)pos, realTypeDef, realDataType);
-
-                    // populate this instance
-                    data = realTypeDef.data;
-                    assembly = g_CLR_RT_TypeSystem.m_assemblies[realTypeDef.Assembly() - 1];
-                    target = assembly->GetTypeDef(realTypeDef.Type());
+                data = typeSpecInstance.genericTypeDef.data;
+                assembly = g_CLR_RT_TypeSystem.m_assemblies[typeSpecInstance.genericTypeDef.Assembly() - 1];
+                target = assembly->GetTypeDef(typeSpecInstance.genericTypeDef.Type());
 
 #if defined(NANOCLR_INSTANCE_NAMES)
-                    name = assembly->GetString(target->name);
+                name = assembly->GetString(target->name);
 #endif
 
-                    return true;
-                }
-                else
-                {
-                    // Use the *caller's* bound genericType (Stack<Int32>, etc.)
-                    if (caller == nullptr || caller->genericType == nullptr)
-                    {
-                        return false;
-                    }
-
-                    CLR_RT_GenericParam_Index gpIdx;
-                    caller->assembly->FindGenericParamAtMethodDef(*caller, elem.GenericParamPosition, gpIdx);
-                    auto &gp = caller->assembly->crossReferenceGenericParam[gpIdx.GenericParam()];
-
-                    data = gp.classTypeDef.data;
-                    assembly = g_CLR_RT_TypeSystem.m_assemblies[gp.classTypeDef.Assembly() - 1];
-                    target = assembly->GetTypeDef(gp.classTypeDef.Type());
-
-#if defined(NANOCLR_INSTANCE_NAMES)
-                    name = assembly->GetString(target->name);
-#endif
-
-                    return true;
-                }
+                return true;
             }
 
             default:
