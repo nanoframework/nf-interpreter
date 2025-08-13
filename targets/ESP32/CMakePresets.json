@@ -294,7 +294,7 @@
                 "HAL_WP_USE_USB_CDC": "ON",
                 "API_nanoFramework.Device.OneWire": "OFF",
                 "API_nanoFramework.Device.Bluetooth": "ON",
-                "API_nanoFramework.Networking.Thread": "OFF",
+                "API_nanoFramework.Networking.Thread": "ON",
                 "THREAD_DEVICE_TYPE": "FTD",
                 "API_nanoFramework.Graphics": "ON",
                 "GRAPHICS_DISPLAY": "Generic_SPI.cpp",
