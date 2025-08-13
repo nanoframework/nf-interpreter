@@ -5000,19 +5000,29 @@ bool CLR_RT_Assembly::FindFieldDef(
     // get type
     parser.Advance(element);
 
+    CLR_RT_TypeDef_Index typeDef{};
+    CLR_RT_TypeDef_Instance typeDefInstance{};
+    const char *typeName;
+
     // if this is a generic type, need to advance to get type
     if (element.DataType == DATATYPE_GENERICINST)
     {
         parser.Advance(element);
+
+        // OK to set the data directly
+        typeDef.data = element.Class.data;
+    }
+    else if (element.DataType == DATATYPE_VAR)
+    {
+        // resolve the !T against the *closed* typeIndex
+        CLR_RT_TypeSpec_Instance typeSpecInstance;
+        typeSpecInstance.InitializeFromIndex(*tsIndex);
+
+        typeDef.data = typeSpecInstance.genericTypeDef.data;
     }
 
-    CLR_RT_TypeDef_Index typeDef;
-    typeDef.data = element.Class.data;
-
-    CLR_RT_TypeDef_Instance typeDefInstance;
     typeDefInstance.InitializeFromIndex(typeDef);
-
-    const char *typeName = GetString(typeDefInstance.target->name);
+    typeName = GetString(typeDefInstance.target->name);
 
     const CLR_RECORD_FIELDDEF *fd = GetFieldDef(0);
 
