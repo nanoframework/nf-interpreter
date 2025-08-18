@@ -5249,17 +5249,6 @@ bool CLR_RT_Assembly::FindMethodDef(
         return false;
     }
 
-    // switch to the assembly that declared this TypeSpec
-    CLR_RT_Assembly *declAssm = tsInstance.assembly;
-
-    if (declAssm->FindMethodDef(declAssm->GetTypeDef(tsInstance.genericTypeDef.Type()), methodName, base, sig, index))
-    {
-        assmIndex = declAssm->assemblyIndex;
-        return true;
-    }
-
-try_typespec:
-
     // parse the TypeSpec signature to get the *definition* token of the generic type:
     CLR_RT_SignatureParser parser{};
     parser.Initialize_TypeSpec(this, ts);
