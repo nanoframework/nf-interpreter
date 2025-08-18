@@ -1164,6 +1164,7 @@ struct CLR_RT_SignatureParser
     static const int c_Object = 5;
     static const int c_GenericParamType = 6;
     static const int c_MethodSpec = 7;
+    static const int c_LocalVar = 8;
 
     struct Element
     {
@@ -1206,6 +1207,7 @@ struct CLR_RT_SignatureParser
 
     void Initialize_Interfaces(CLR_RT_Assembly *assm, const CLR_RECORD_TYPEDEF *td);
     void Initialize_MethodLocals(CLR_RT_Assembly *assm, const CLR_RECORD_METHODDEF *md);
+    void Initialize_LocalVar(CLR_RT_Assembly *assm, const CLR_PMETADATA sig);
     bool Initialize_GenericParamTypeSignature(CLR_RT_Assembly *assm, const CLR_RECORD_GENERICPARAM *gp);
 
     void Initialize_FieldDef(CLR_RT_Assembly *assm, const CLR_RECORD_FIELDDEF *fd);

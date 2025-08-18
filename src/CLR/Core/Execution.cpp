@@ -2052,14 +2052,24 @@ HRESULT CLR_RT_ExecutionEngine::InitializeLocals(
                     cls = element.Class;
                     dt = element.DataType;
 
-                    // consume the generic parameters from the signature
-                    for (int paramIndex = 0; paramIndex < parser.GenParamCount; paramIndex++)
+                    // done, now consume the remaining of the local var signature
+                    CLR_RT_SignatureParser varParser;
+                    varParser.Initialize_LocalVar(assembly, typeSpecSignature);
+
+                    CLR_RT_SignatureParser::Element varElement;
+                    // consume GENERICINST
+                    varParser.Advance(varElement);
+                    // consume class|valuetype
+                    varParser.Advance(varElement);
+
+                    // consume parameters
+                    for (int paramIndex = 0; paramIndex < varParser.GenParamCount; paramIndex++)
                     {
-                        NANOCLR_CHECK_HRESULT(parser.Advance(element));
+                        NANOCLR_CHECK_HRESULT(varParser.Advance(varElement));
                     }
 
-                    // need to advance the signature to consume it
-                    while (parser.Signature != sig)
+                    // advance locals signature
+                    while (sig < varParser.Signature)
                     {
                         sig++;
                     }

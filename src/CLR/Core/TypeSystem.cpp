@@ -412,6 +412,21 @@ void CLR_RT_SignatureParser::Initialize_MethodLocals(CLR_RT_Assembly *assm, cons
     IsGenericInst = false;
 }
 
+void CLR_RT_SignatureParser::Initialize_LocalVar(CLR_RT_Assembly *assm, const CLR_PMETADATA sig)
+{
+    NATIVE_PROFILE_CLR_CORE();
+
+    Assembly = assm;
+    Signature = sig;
+
+    Type = CLR_RT_SignatureParser::c_Locals;
+    Flags = 0;
+    ParamCount = 1;
+
+    GenParamCount = 0;
+    IsGenericInst = false;
+}
+
 //--//
 
 void CLR_RT_SignatureParser::Initialize_Objects(CLR_RT_HeapBlock *lst, int count, bool fTypes)
