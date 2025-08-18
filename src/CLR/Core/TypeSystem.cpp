@@ -698,10 +698,13 @@ bool CLR_RT_TypeSpec_Instance::InitializeFromIndex(const CLR_RT_TypeSpec_Index &
         // if this is a generic, advance another one
         parser.Advance(element);
 
-        // get type
-        parser.Advance(element);
+        if (element.DataType == DATATYPE_GENERICINST)
+        {
+            // this is a generic instance, so we need to advance one more time
+            parser.Advance(element);
 
-        genericTypeDef = element.Class;
+            genericTypeDef = element.Class;
+        }
 
         return true;
     }
