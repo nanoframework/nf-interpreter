@@ -5112,8 +5112,11 @@ bool CLR_RT_Assembly::FindFieldDef(
 {
     NATIVE_PROFILE_CLR_CORE();
 
+    // find assembly of TypeSpec
+    CLR_RT_Assembly *assm = g_CLR_RT_TypeSystem.m_assemblies[tsIndex->Assembly() - 1];
+
     CLR_RT_SignatureParser parser;
-    parser.Initialize_TypeSpec(base, base->GetTypeSpec(tsIndex->TypeSpec()));
+    parser.Initialize_TypeSpec(assm, assm->GetTypeSpec(tsIndex->TypeSpec()));
 
     CLR_RT_SignatureParser::Element element;
 
