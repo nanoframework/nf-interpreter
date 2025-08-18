@@ -979,9 +979,117 @@ bool CLR_RT_TypeDef_Instance::ResolveToken(
                 CLR_RT_TypeSpec_Instance typeSpecInstance{};
                 typeSpecInstance.InitializeFromIndex(typeSpecIdx);
 
-                data = typeSpecInstance.genericTypeDef.data;
-                assembly = g_CLR_RT_TypeSystem.m_assemblies[typeSpecInstance.genericTypeDef.Assembly() - 1];
-                target = assembly->GetTypeDef(typeSpecInstance.genericTypeDef.Type());
+                if (NANOCLR_INDEX_IS_VALID(typeSpecInstance.genericTypeDef))
+                {
+                    // this is a generic type definition
+                    data = typeSpecInstance.genericTypeDef.data;
+                    assembly = g_CLR_RT_TypeSystem.m_assemblies[typeSpecInstance.genericTypeDef.Assembly() - 1];
+                    target = assembly->GetTypeDef(typeSpecInstance.genericTypeDef.Type());
+                }
+                else
+                {
+                    // this a generic parameter
+                    const CLR_RECORD_TYPESPEC *ts = assm->GetTypeSpec(index);
+                    CLR_RT_SignatureParser parser;
+                    parser.Initialize_TypeSpec(assm, ts);
+
+                    CLR_RT_SignatureParser::Element elem;
+                    if (FAILED(parser.Advance(elem)))
+                    {
+                        return false;
+                    }
+
+                    if (elem.Levels > 0)
+                    {
+                        // this is an array
+                        data = elem.Class.data;
+                        assembly = g_CLR_RT_TypeSystem.m_assemblies[elem.Class.Assembly() - 1];
+                        target = assembly->GetTypeDef(elem.Class.Type());
+                    }
+                    else
+                    {
+                        if (elem.DataType == DATATYPE_GENERICINST)
+                        {
+                            if (FAILED(parser.Advance(elem)))
+                            {
+                                return false;
+                            }
+
+                            if (elem.DataType == DATATYPE_CLASS || elem.DataType == DATATYPE_VALUETYPE)
+                            {
+                                // consume the CLASS/VALUETYPE marker
+                                if (FAILED(parser.Advance(elem)))
+                                {
+                                    return false;
+                                }
+                                // consume the generic‐definition token itself
+                                if (FAILED(parser.Advance(elem)))
+                                {
+                                    return false;
+                                }
+                                // consume the count of generic arguments
+                                if (FAILED(parser.Advance(elem)))
+                                {
+                                    return false;
+                                }
+                            }
+
+                            // walk forward until a VAR (type‐generic) or MVAR (method‐generic) is hit
+                            while (elem.DataType != DATATYPE_VAR && elem.DataType != DATATYPE_MVAR)
+                            {
+                                if (FAILED(parser.Advance(elem)))
+                                {
+                                    return false;
+                                }
+                            }
+                        }
+
+                        // If it's a type‐generic slot (!T), resolve against the caller's closed generic
+                        if (elem.DataType == DATATYPE_VAR)
+                        {
+                            int pos = elem.GenericParamPosition;
+
+                            // Use the *caller's* bound genericType (Stack<Int32>, etc.)
+                            if (caller == nullptr || caller->genericType == nullptr)
+                            {
+                                return false;
+                            }
+
+                            auto &tsi = *caller->genericType;
+                            CLR_UINT32 closedTsRow = tsi.TypeSpec();
+
+                            CLR_RT_TypeDef_Index realTypeDef;
+                            NanoCLRDataType realDataType;
+
+                            // Only call this once to map (e.g. !T→Int32)
+                            caller->assembly
+                                ->FindGenericParamAtTypeSpec(closedTsRow, (CLR_UINT32)pos, realTypeDef, realDataType);
+
+                            // populate this instance
+                            data = realTypeDef.data;
+                            assembly = g_CLR_RT_TypeSystem.m_assemblies[realTypeDef.Assembly() - 1];
+                            target = assembly->GetTypeDef(realTypeDef.Type());
+                        }
+
+                        else if (elem.DataType == DATATYPE_MVAR)
+                        {
+                            // Use the caller bound genericType (Stack<Int32>, etc.)
+                            if (caller == nullptr || caller->genericType == nullptr)
+                            {
+                                return false;
+                            }
+
+                            CLR_RT_GenericParam_Index gpIdx;
+                            caller->assembly->FindGenericParamAtMethodDef(*caller, elem.GenericParamPosition, gpIdx);
+
+                            auto &gp = caller->assembly->crossReferenceGenericParam[gpIdx.GenericParam()];
+
+                            data = gp.classTypeDef.data;
+                            assembly = g_CLR_RT_TypeSystem.m_assemblies[gp.classTypeDef.Assembly() - 1];
+                            target = assembly->GetTypeDef(gp.classTypeDef.Type());
+                        }
+                    }
+                }
 
 #if defined(NANOCLR_INSTANCE_NAMES)
                 name = assembly->GetString(target->name);
