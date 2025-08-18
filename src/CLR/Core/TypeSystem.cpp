@@ -1349,16 +1349,10 @@ bool CLR_RT_FieldDef_Instance::ResolveToken(
                         CLR_RT_TypeSpec_Instance instCaller, instMd;
                         if (instCaller.InitializeFromIndex(*caller->genericType) && instMd.InitializeFromIndex(*mdTS))
                         {
-                            CLR_RT_SignatureParser pC, pM;
-                            CLR_RT_SignatureParser::Element eC, eM;
-
-                            pC.Initialize_TypeSpec(instCaller.assembly, instCaller.target);
-                            pM.Initialize_TypeSpec(instMd.assembly, instMd.target);
-
-                            if (SUCCEEDED(pC.Advance(eC)) && SUCCEEDED(pM.Advance(eM)) &&
-                                eC.Class.data == eM.Class.data)
+                            // check if generic definition token is the same...
+                            if (instCaller.genericTypeDef.data == instMd.genericTypeDef.data)
                             {
-                                // same generic-definition token → use the caller’s closed TypeSpec
+                                // it is, therefore use the caller closed TypeSpec
                                 effectiveTS = caller->genericType;
                             }
                         }
