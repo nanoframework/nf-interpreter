@@ -3313,7 +3313,7 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                                 NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
                             }
 
-                            evalPos[0].SetReflection(tsInst, stack->m_call.genericType);
+                            evalPos[0].SetReflection((CLR_RT_TypeSpec_Index)tsInst.data);
                         }
                         break;
 

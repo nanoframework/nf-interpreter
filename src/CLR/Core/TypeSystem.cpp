@@ -737,6 +737,21 @@ bool CLR_RT_TypeSpec_Instance::ResolveToken(CLR_UINT32 token, CLR_RT_Assembly *a
         assembly = assm;
         target = assm->GetTypeSpec(index);
 
+        CLR_RT_SignatureParser parser;
+        parser.Initialize_TypeSpec(assembly, assembly->GetTypeSpec(index));
+
+        CLR_RT_SignatureParser::Element element;
+
+        // if this is a generic, advance another one
+        parser.Advance(element);
+
+        if (element.DataType == DATATYPE_GENERICINST)
+        {
+            // this is a generic instance, so we need to advance one more time
+            parser.Advance(element);
+
+            genericTypeDef = element.Class;
+        }
         return true;
     }
 
@@ -774,6 +789,29 @@ bool CLR_RT_TypeDef_Instance::InitializeFromReflection(const CLR_RT_ReflectionDe
             {
                 ptr = &cls;
             }
+            break;
+
+        case REFLECTION_TYPESPEC:
+            assembly = g_CLR_RT_TypeSystem.m_assemblies[reflex.data.typeSpec.Assembly() - 1];
+
+            const CLR_RECORD_TYPESPEC *ts = assembly->GetTypeSpec(reflex.data.typeSpec.TypeSpec());
+
+            CLR_RT_SignatureParser parser;
+            parser.Initialize_TypeSpec(assembly, ts);
+
+            CLR_RT_SignatureParser::Element element;
+            if (FAILED(parser.Advance(element)))
+            {
+                return false;
+            }
+
+            // if this is a generic type, need to advance to get type
+            if (element.DataType == DATATYPE_GENERICINST)
+            {
+                parser.Advance(element);
+            }
+
+            ptr = &element.Class;
             break;
     }
 
@@ -1751,13 +1789,28 @@ bool CLR_RT_MethodDef_Instance::GetDeclaringType(CLR_RT_TypeDef_Instance &declTy
         CLR_RT_SignatureParser::Element elem;
         parser.Advance(elem);
 
-        // if this a generic, advance again to get the type
         if (elem.DataType == DATATYPE_GENERICINST)
         {
+            // generic type, advance again to get the type
             parser.Advance(elem);
-        }
 
-        return declType.InitializeFromIndex(elem.Class);
+            return declType.InitializeFromIndex(elem.Class);
+        }
+        else if (elem.DataType == DATATYPE_VAR)
+        {
+            // generic type, advance to get the type
+            int pos = elem.GenericParamPosition;
+            // Use the *caller's* bound genericType (Stack<Int32>, etc.)
+            CLR_RT_TypeDef_Index td;
+            NanoCLRDataType dt;
+            if (tsAsm == nullptr ||
+                tsAsm->FindGenericParamAtTypeSpec(genericType->TypeSpec(), (CLR_UINT32)pos, td, dt) == false)
+            {
+                return false;
+            }
+
+            return declType.InitializeFromIndex(td);
+        }
     }
     else
     {
@@ -2046,7 +2099,7 @@ HRESULT CLR_RT_TypeDescriptor::InitializeFromGenericType(const CLR_RT_TypeSpec_I
         m_flags = CLR_RT_DataTypeLookup::c_ManagedType | CLR_RT_DataTypeLookup::c_GenericInstance;
 
         m_reflex.kind = REFLECTION_GENERICTYPE;
-        m_reflex.data.genericType = m_handlerGenericType;
+        m_reflex.data.typeSpec = m_handlerGenericType;
     }
 
     m_handlerCls.ClearInstance();
@@ -2280,6 +2333,12 @@ HRESULT CLR_RT_TypeDescriptor::InitializeFromObject(const CLR_RT_HeapBlock &ref)
                     case REFLECTION_FIELD:
                         cls = &g_CLR_RT_WellKnownTypes.FieldInfo;
                         break;
+                    case REFLECTION_GENERICTYPE:
+                        cls = &g_CLR_RT_WellKnownTypes.Type;
+                        break;
+                    case REFLECTION_TYPESPEC:
+                        genericType = &((CLR_RT_HeapBlock *)obj)->ReflectionData().data.typeSpec;
+                        break;
                 }
 
                 break;
@@ -2456,7 +2515,7 @@ HRESULT CLR_RT_TypeDescriptor::ExtractTypeIndexFromObject(const CLR_RT_HeapBlock
 
         if (desc.GetDataType() == DATATYPE_GENERICINST)
         {
-            res.Set(desc.m_handlerGenericType.Assembly(), desc.m_handlerGenericType.genericTypeDef.Type());
+            res.data = desc.m_handlerGenericType.data;
         }
         else
         {

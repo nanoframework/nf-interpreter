@@ -232,54 +232,15 @@ HRESULT CLR_RT_HeapBlock::SetReflection(const CLR_RT_Assembly_Index &assm)
     NANOCLR_NOCLEANUP_NOLABEL();
 }
 
-HRESULT CLR_RT_HeapBlock::SetReflection(const CLR_RT_TypeSpec_Instance &tsInst, const CLR_RT_TypeSpec_Index *caller)
+HRESULT CLR_RT_HeapBlock::SetReflection(const CLR_RT_TypeSpec_Index &typeSpec)
 {
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
 
     m_id.raw = CLR_RT_HEAPBLOCK_RAW_ID(DATATYPE_REFLECTION, 0, 1);
-    m_data.reflection.kind = REFLECTION_TYPE;
-
-    // start parsing the signature
-    CLR_RT_SignatureParser parser;
-    parser.Initialize_TypeSpec(tsInst.assembly, tsInst.target);
-
-    // read first element
-    CLR_RT_SignatureParser::Element elem;
-    if (FAILED(parser.Advance(elem)))
-    {
-        NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
-    }
-
-    if (elem.DataType == DATATYPE_VAR || elem.DataType == DATATYPE_MVAR)
-    {
-        int gpIndex = elem.GenericParamPosition;
-
-        // if the caller's genericType is non‐null, ask the CLR to map !n→actual argument:
-        if (caller != nullptr && NANOCLR_INDEX_IS_VALID(*caller))
-        {
-            CLR_RT_TypeDef_Index tdArg{};
-            NanoCLRDataType dtArg;
-
-            bool ok = g_CLR_RT_TypeSystem.m_assemblies[caller->Assembly() - 1]
-                          ->FindGenericParamAtTypeSpec(caller->TypeSpec(), gpIndex, tdArg, dtArg);
-            if (ok)
-            {
-                m_data.reflection.data.type = tdArg;
-                m_data.reflection.levels = elem.Levels;
-            }
-        }
-        else
-        {
-            // TODO
-            _ASSERTE(false);
-        }
-    }
-    else
-    {
-        m_data.reflection.data.type = elem.Class;
-        m_data.reflection.levels = elem.Levels;
-    }
+    m_data.reflection.kind = REFLECTION_TYPESPEC;
+    m_data.reflection.levels = 0;
+    m_data.reflection.data.typeSpec = typeSpec;
 
     NANOCLR_NOCLEANUP();
 }
@@ -354,7 +315,7 @@ HRESULT CLR_RT_HeapBlock::SetGenericInstanceType(const CLR_RT_TypeSpec_Index &ge
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
 
-    m_data.reflection.data.genericType = genericType;
+    m_data.reflection.data.typeSpec = genericType;
 
     NANOCLR_NOCLEANUP();
 }

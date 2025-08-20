@@ -843,7 +843,7 @@ struct CLR_RT_ReflectionDef_Index
         CLR_RT_TypeDef_Index type;
         CLR_RT_MethodDef_Index method;
         CLR_RT_FieldDef_Index field;
-        CLR_RT_TypeSpec_Index genericType;
+        CLR_RT_TypeSpec_Index typeSpec;
         CLR_UINT32 raw;
     } data;
 

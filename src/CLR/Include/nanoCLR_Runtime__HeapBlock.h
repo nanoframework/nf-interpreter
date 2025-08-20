@@ -1194,7 +1194,7 @@ struct CLR_RT_HeapBlock
     {
         if ((m_id.type.flags & CLR_RT_HeapBlock::HB_GenericInstance) == CLR_RT_HeapBlock::HB_GenericInstance)
         {
-            return m_data.reflection.data.genericType;
+            return m_data.reflection.data.typeSpec;
         }
         else
         {
@@ -1355,7 +1355,7 @@ struct CLR_RT_HeapBlock
 
     HRESULT SetReflection(const CLR_RT_ReflectionDef_Index &reflex);
     HRESULT SetReflection(const CLR_RT_Assembly_Index &assm);
-    HRESULT SetReflection(const CLR_RT_TypeSpec_Instance &tsInst, const CLR_RT_TypeSpec_Index *caller);
+    HRESULT SetReflection(const CLR_RT_TypeSpec_Index &typeSpec);
     HRESULT SetReflection(const CLR_RT_TypeDef_Index &cls);
     HRESULT SetReflection(const CLR_RT_FieldDef_Index &fd);
     HRESULT SetReflection(const CLR_RT_MethodDef_Index &md);
