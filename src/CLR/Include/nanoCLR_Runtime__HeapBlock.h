@@ -1084,6 +1084,11 @@ struct CLR_RT_HeapBlock
         return false;
     }
 
+    bool IsAGenericInstance() const
+    {
+        return ((DataFlags() & CLR_RT_HeapBlock::HB_GenericInstance) == CLR_RT_HeapBlock::HB_GenericInstance);
+    }
+
     bool SameHeader(const CLR_RT_HeapBlock &right) const
     {
         return this->m_data.numeric.u8 == right.m_data.numeric.u8;

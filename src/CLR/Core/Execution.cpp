@@ -2495,7 +2495,7 @@ HRESULT CLR_RT_ExecutionEngine::CloneObject(CLR_RT_HeapBlock &reference, const C
             safeSource.SetObjectReference(obj);
             CLR_RT_ProtectFromGC gc(safeSource);
 
-            if (NANOCLR_INDEX_IS_VALID(obj->ObjectGenericType()))
+            if (obj->IsAGenericInstance())
             {
                 // instanciate the generic type
                 genericInstance.InitializeFromIndex(obj->ObjectGenericType());
