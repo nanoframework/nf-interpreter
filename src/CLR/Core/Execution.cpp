@@ -1567,7 +1567,7 @@ CLR_RT_HeapBlock *CLR_RT_ExecutionEngine::ExtractHeapBlocksForGenericInstance(
     flags = flags | CLR_RT_HeapBlock::HB_InitializeToZero;
     CLR_RT_HeapBlock *hb = ExtractHeapBlocks(m_heap, DATATYPE_GENERICINST, flags, length);
 
-    _ASSERT(true);
+    _ASSERTE(true);
 
     if (hb)
     {
@@ -1863,7 +1863,7 @@ HRESULT CLR_RT_ExecutionEngine::InitializeReference(
         }
         else if (dt == DATATYPE_MVAR)
         {
-            _ASSERT(true);
+            _ASSERTE(true);
 
             goto process_datatype;
         }

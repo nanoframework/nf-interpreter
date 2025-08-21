@@ -242,7 +242,7 @@ HRESULT CLR_RT_HeapBlock::SetReflection(const CLR_RT_TypeSpec_Index &typeSpec)
     m_data.reflection.levels = 0;
     m_data.reflection.data.typeSpec = typeSpec;
 
-    NANOCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP_NOLABEL();
 }
 
 HRESULT CLR_RT_HeapBlock::SetReflection(const CLR_RT_TypeDef_Index &cls)
@@ -317,7 +317,7 @@ HRESULT CLR_RT_HeapBlock::SetGenericInstanceType(const CLR_RT_TypeSpec_Index &ge
 
     m_data.reflection.data.typeSpec = genericType;
 
-    NANOCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP_NOLABEL();
 }
 
 //--//
