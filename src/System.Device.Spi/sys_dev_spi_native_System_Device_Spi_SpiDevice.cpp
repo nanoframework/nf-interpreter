@@ -9,7 +9,7 @@
 
 // define this type here to make it shorter and improve code readability
 typedef Library_sys_dev_spi_native_System_Device_Spi_SpiConnectionSettings SpiConnectionSettings;
-typedef Library_corlib_native_System_SpanByte SpanByte;
+typedef Library_corlib_native_System_Span_1 Span;
 
 void System_Device_nano_spi_callback(int busIndex)
 {
@@ -139,15 +139,15 @@ HRESULT Library_sys_dev_spi_native_System_Device_Spi_SpiDevice::NativeTransfer(
             if (writeSpanByte != nullptr)
             {
                 // get buffer
-                writeBuffer = writeSpanByte[SpanByte::FIELD___array].DereferenceArray();
+                writeBuffer = writeSpanByte[Span::FIELD___array].DereferenceArray();
                 if (writeBuffer != nullptr)
                 {
                     // Get the write offset, only the elements defined by the span must be written, not the whole
                     // array
-                    writeOffset = writeSpanByte[SpanByte::FIELD___start].NumericByRef().s4;
+                    writeOffset = writeSpanByte[Span::FIELD___start].NumericByRef().s4;
 
                     // use the span length as write size, only the elements defined by the span must be written
-                    writeSize = writeSpanByte[SpanByte::FIELD___length].NumericByRef().s4;
+                    writeSize = writeSpanByte[Span::FIELD___length].NumericByRef().s4;
                     writeData = (unsigned char *)writeBuffer->GetElement(writeOffset);
 
                     // pin the buffer
@@ -165,14 +165,14 @@ HRESULT Library_sys_dev_spi_native_System_Device_Spi_SpiDevice::NativeTransfer(
             if (readSpanByte != nullptr)
             {
                 // get buffer
-                readBuffer = readSpanByte[SpanByte::FIELD___array].DereferenceArray();
+                readBuffer = readSpanByte[Span::FIELD___array].DereferenceArray();
                 if (readBuffer != nullptr)
                 {
                     // Get the read offset, only the elements defined by the span must be read, not the whole array
-                    readOffset = readSpanByte[SpanByte::FIELD___start].NumericByRef().s4;
+                    readOffset = readSpanByte[Span::FIELD___start].NumericByRef().s4;
 
                     // use the span length as read size, only the elements defined by the span must be read
-                    readSize = readSpanByte[SpanByte::FIELD___length].NumericByRef().s4;
+                    readSize = readSpanByte[Span::FIELD___length].NumericByRef().s4;
                     readData = (unsigned char *)readBuffer->GetElement(readOffset);
 
                     // pin the buffer

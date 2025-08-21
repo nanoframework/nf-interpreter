@@ -13,7 +13,7 @@
 
 typedef Library_sys_dev_i2c_native_System_Device_I2c_I2cConnectionSettings I2cConnectionSettings;
 typedef Library_sys_dev_i2c_native_System_Device_I2c_I2cTransferResult I2cTransferResult;
-typedef Library_corlib_native_System_SpanByte SpanByte;
+typedef Library_corlib_native_System_Span_1 Span;
 
 bool SetConfig(i2c_port_t bus, CLR_RT_HeapBlock *config)
 {
@@ -171,19 +171,19 @@ HRESULT Library_sys_dev_i2c_native_System_Device_I2c_I2cDevice::
 
     cmd = i2c_cmd_link_create();
 
-    // dereference the write and read SpanByte from the arguments
+    // dereference the write and read Span from the arguments
     writeSpanByte = stack.Arg1().Dereference();
     if (writeSpanByte != nullptr)
     {
-        writeData = writeSpanByte[SpanByte::FIELD___array].DereferenceArray();
+        writeData = writeSpanByte[Span::FIELD___array].DereferenceArray();
 
         if (writeData != nullptr)
         {
             // Get the write offset, only the elements defined by the span must be written, not the whole array
-            writeOffset = writeSpanByte[SpanByte::FIELD___start].NumericByRef().s4;
+            writeOffset = writeSpanByte[Span::FIELD___start].NumericByRef().s4;
 
             // use the span length as write size, only the elements defined by the span must be written
-            writeSize = writeSpanByte[SpanByte::FIELD___length].NumericByRef().s4;
+            writeSize = writeSpanByte[Span::FIELD___length].NumericByRef().s4;
 
             if (writeSize > 0)
             {
@@ -214,15 +214,15 @@ HRESULT Library_sys_dev_i2c_native_System_Device_I2c_I2cDevice::
     readSpanByte = stack.Arg2().Dereference();
     if (readSpanByte != 0)
     {
-        readData = readSpanByte[SpanByte::FIELD___array].DereferenceArray();
+        readData = readSpanByte[Span::FIELD___array].DereferenceArray();
 
         if (readData != nullptr)
         {
             // Get the read offset, only the elements defined by the span must be read, not the whole array
-            readOffset = readSpanByte[SpanByte::FIELD___start].NumericByRef().s4;
+            readOffset = readSpanByte[Span::FIELD___start].NumericByRef().s4;
 
             // use the span length as read size, only the elements defined by the span must be read
-            readSize = readSpanByte[SpanByte::FIELD___length].NumericByRef().s4;
+            readSize = readSpanByte[Span::FIELD___length].NumericByRef().s4;
 
             if (readSize > 0)
             {

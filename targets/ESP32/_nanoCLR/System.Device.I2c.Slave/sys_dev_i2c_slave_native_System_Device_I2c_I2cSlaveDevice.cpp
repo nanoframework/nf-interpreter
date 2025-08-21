@@ -11,7 +11,7 @@
 
 #define I2C_SLAVE_WORKER_TASK_STACK_SIZE 2048
 
-typedef Library_corlib_native_System_SpanByte SpanByte;
+typedef Library_corlib_native_System_Span_1 Span;
 
 #if SOC_I2C_NUM > 0
 NF_PAL_I2CSLAVE I2cSlave0_PAL;
@@ -264,7 +264,7 @@ HRESULT Library_sys_dev_i2c_slave_native_System_Device_I2c_I2cSlaveDevice::
         NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
     }
 
-    readBuffer = readSpanByte[SpanByte::FIELD___array].DereferenceArray();
+    readBuffer = readSpanByte[Span::FIELD___array].DereferenceArray();
 
     if (readBuffer != nullptr)
     {
@@ -272,23 +272,23 @@ HRESULT Library_sys_dev_i2c_slave_native_System_Device_I2c_I2cSlaveDevice::
         isRead = true;
 
         // Get the read offset, only the elements defined by the span must be read, not the whole array
-        bufferOffset = readSpanByte[SpanByte::FIELD___start].NumericByRef().s4;
+        bufferOffset = readSpanByte[Span::FIELD___start].NumericByRef().s4;
 
         // use the span length as read size, only the elements defined by the span must be read
-        requestedCount = readSpanByte[SpanByte::FIELD___length].NumericByRef().s4;
+        requestedCount = readSpanByte[Span::FIELD___length].NumericByRef().s4;
     }
 
     if (!isRead)
     {
-        writeBuffer = writeSpanByte[SpanByte::FIELD___array].DereferenceArray();
+        writeBuffer = writeSpanByte[Span::FIELD___array].DereferenceArray();
 
         if (writeBuffer != nullptr)
         {
             // Get the write offset, only the elements defined by the span must be written, not the whole array
-            bufferOffset = writeSpanByte[SpanByte::FIELD___start].NumericByRef().s4;
+            bufferOffset = writeSpanByte[Span::FIELD___start].NumericByRef().s4;
 
             // use the span length as write size, only the elements defined by the span must be written
-            requestedCount = writeSpanByte[SpanByte::FIELD___length].NumericByRef().s4;
+            requestedCount = writeSpanByte[Span::FIELD___length].NumericByRef().s4;
         }
     }
 

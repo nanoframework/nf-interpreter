@@ -21,7 +21,7 @@
 #define I2S_RX_FRAME_SIZE_IN_BYTES (8)
 
 typedef Library_sys_dev_i2s_native_System_Device_I2s_I2sConnectionSettings I2sConnectionSettings;
-typedef Library_corlib_native_System_SpanByte SpanByte;
+typedef Library_corlib_native_System_Span_1 Span;
 
 static char Esp_I2S_Initialised_Flag[I2S_NUM_MAX] = {
     0,
@@ -392,19 +392,19 @@ HRESULT Library_sys_dev_i2s_native_System_Device_I2s_I2sDevice::Read___VOID__Sys
             NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
         }
 
-        // dereference the SpanByte from the arguments
+        // dereference the Span from the arguments
         readSpanByte = stack.Arg1().Dereference();
         if (readSpanByte != nullptr)
         {
-            readBuffer = readSpanByte[SpanByte::FIELD___array].DereferenceArray();
+            readBuffer = readSpanByte[Span::FIELD___array].DereferenceArray();
 
             if (readBuffer != nullptr)
             {
                 // Get the read offset, only the elements defined by the span must be read, not the whole array
-                readOffset = readSpanByte[SpanByte::FIELD___start].NumericByRef().s4;
+                readOffset = readSpanByte[Span::FIELD___start].NumericByRef().s4;
 
                 // use the span length as read size, only the elements defined by the span must be read
-                readSize = readSpanByte[SpanByte::FIELD___length].NumericByRef().s4;
+                readSize = readSpanByte[Span::FIELD___length].NumericByRef().s4;
 
                 if (readSize > 0)
                 {
@@ -508,19 +508,19 @@ HRESULT Library_sys_dev_i2s_native_System_Device_I2s_I2sDevice::Write___VOID__Sy
             NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
         }
 
-        // dereference the write and read SpanByte from the arguments
+        // dereference the write and read Span from the arguments
         writeSpanByte = stack.Arg1().Dereference();
         if (writeSpanByte != nullptr)
         {
-            writeBuffer = writeSpanByte[SpanByte::FIELD___array].DereferenceArray();
+            writeBuffer = writeSpanByte[Span::FIELD___array].DereferenceArray();
 
             if (writeBuffer != nullptr)
             {
                 // Get the write offset, only the elements defined by the span must be written, not the whole array
-                writeOffset = writeSpanByte[SpanByte::FIELD___start].NumericByRef().s4;
+                writeOffset = writeSpanByte[Span::FIELD___start].NumericByRef().s4;
 
                 // use the span length as write size, only the elements defined by the span must be written
-                writeSize = writeSpanByte[SpanByte::FIELD___length].NumericByRef().s4;
+                writeSize = writeSpanByte[Span::FIELD___length].NumericByRef().s4;
 
                 if (writeSize > 0)
                 {

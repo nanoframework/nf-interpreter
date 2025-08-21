@@ -7,7 +7,7 @@
 
 typedef Library_sys_dev_i2c_native_System_Device_I2c_I2cConnectionSettings I2cConnectionSettings;
 typedef Library_sys_dev_i2c_native_System_Device_I2c_I2cTransferResult I2cTransferResult;
-typedef Library_corlib_native_System_SpanByte SpanByte;
+typedef Library_corlib_native_System_Span_1 Span;
 
 /////////////////////////////////////////////////////
 // I2C PAL structs declared in sys_dev_i2c_native.h //
@@ -178,12 +178,12 @@ HRESULT Library_sys_dev_i2c_native_System_Device_I2c_I2cDevice::
             break;
     }
 
-    // dereference the write and read SpanByte from the arguments
+    // dereference the write and read Span from the arguments
     writeSpanByte = stack.Arg1().Dereference();
     if (writeSpanByte != nullptr)
     {
         // get buffer
-        writeBuffer = writeSpanByte[SpanByte::FIELD___array].DereferenceArray();
+        writeBuffer = writeSpanByte[Span::FIELD___array].DereferenceArray();
         if (writeBuffer != nullptr)
         {
             // get the size of the buffer by reading the number of elements in the CLR_RT_HeapBlock_Array
@@ -201,7 +201,7 @@ HRESULT Library_sys_dev_i2c_native_System_Device_I2c_I2cDevice::
     if (readSpanByte != nullptr)
     {
         // get buffer
-        readBuffer = readSpanByte[SpanByte::FIELD___array].DereferenceArray();
+        readBuffer = readSpanByte[Span::FIELD___array].DereferenceArray();
         if (readBuffer != nullptr)
         {
             // get the size of the buffer by reading the number of elements in the CLR_RT_HeapBlock_Array
