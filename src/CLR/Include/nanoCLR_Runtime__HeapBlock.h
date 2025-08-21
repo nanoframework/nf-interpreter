@@ -114,7 +114,7 @@ struct CLR_RT_HeapBlock
     static const CLR_UINT32 HB_Event = 0x04;
     static const CLR_UINT32 HB_Pinned = 0x08;
     static const CLR_UINT32 HB_Boxed = 0x10;
-    static const CLR_UINT32 HB_Unused20 = 0x20;
+    static const CLR_UINT32 HB_GenericInstance = 0x20;
     // If more bits are needed, HB_Signaled and HB_SignalAutoReset can be freed for use with a little work.
     // It is not necessary that any heapblock can be waited upon.  Currently, only Threads (Thread.Join),
     // ManualResetEvent, and AutoResetEvent are waitable objects.
@@ -1084,6 +1084,11 @@ struct CLR_RT_HeapBlock
         return false;
     }
 
+    bool IsAGenericInstance() const
+    {
+        return ((DataFlags() & CLR_RT_HeapBlock::HB_GenericInstance) == CLR_RT_HeapBlock::HB_GenericInstance);
+    }
+
     bool SameHeader(const CLR_RT_HeapBlock &right) const
     {
         return this->m_data.numeric.u8 == right.m_data.numeric.u8;
@@ -1192,10 +1197,10 @@ struct CLR_RT_HeapBlock
 
     const CLR_RT_TypeSpec_Index &ObjectGenericType() const
     {
-        return m_data.genericInstance.genericType;
+        return m_data.reflection.data.typeSpec;
     }
 
-    HRESULT SetGenericInstanceObject(const CLR_RT_TypeSpec_Index &genericType);
+    HRESULT SetGenericInstanceType(const CLR_RT_TypeSpec_Index &genericType);
 
     //--//
 
@@ -1347,7 +1352,7 @@ struct CLR_RT_HeapBlock
 
     HRESULT SetReflection(const CLR_RT_ReflectionDef_Index &reflex);
     HRESULT SetReflection(const CLR_RT_Assembly_Index &assm);
-    HRESULT SetReflection(const CLR_RT_TypeSpec_Instance &tsInst, const CLR_RT_TypeSpec_Index *caller);
+    HRESULT SetReflection(const CLR_RT_TypeSpec_Index &typeSpec);
     HRESULT SetReflection(const CLR_RT_TypeDef_Index &cls);
     HRESULT SetReflection(const CLR_RT_FieldDef_Index &fd);
     HRESULT SetReflection(const CLR_RT_MethodDef_Index &md);

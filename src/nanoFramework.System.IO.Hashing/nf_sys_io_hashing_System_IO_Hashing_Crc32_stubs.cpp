@@ -5,7 +5,7 @@
 
 #include "nf_sys_io_hashing.h"
 
-typedef Library_corlib_native_System_SpanByte SpanByte;
+typedef Library_corlib_native_System_Span_1 Span;
 
 uint32_t ComputeCrc32(uint32_t crc, const uint8_t *buf, size_t len)
 {
@@ -70,13 +70,13 @@ HRESULT Library_nf_sys_io_hashing_System_IO_Hashing_Crc32::ComputeHash___STATIC_
     crc32 = stack.Arg0().NumericByRef().u4;
 
     // get buffer
-    buffer = bufferSpanByte[SpanByte::FIELD___array].DereferenceArray();
+    buffer = bufferSpanByte[Span::FIELD___array].DereferenceArray();
 
     // Get the write offset
-    bufferOffset = bufferSpanByte[SpanByte::FIELD___start].NumericByRef().s4;
+    bufferOffset = bufferSpanByte[Span::FIELD___start].NumericByRef().s4;
 
     // use the span length as write size, only the elements defined by the span must be written
-    bufferSize = bufferSpanByte[SpanByte::FIELD___length].NumericByRef().s4;
+    bufferSize = bufferSpanByte[Span::FIELD___length].NumericByRef().s4;
     bufferData = buffer->GetElement(bufferOffset);
 
     if (bufferSize == 0)

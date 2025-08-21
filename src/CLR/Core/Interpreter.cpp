@@ -5,6 +5,8 @@
 //
 #include "Core.h"
 
+typedef Library_corlib_native_System_Nullable_1 Sys_Nullable;
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 #if defined(NANOCLR_TRACE_EXCEPTIONS) && defined(VIRTUAL_DEVICE)
@@ -2394,10 +2396,11 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                         // check that...
                         //
                         changes = -calleeInst.target->argumentsCount;
-                        NANOCLR_CHECK_HRESULT(CLR_Checks::VerifyStackOK(
-                            *stack,
-                            stack->m_evalStackPos,
-                            changes)); // Check to see if we have enough parameters.
+                        NANOCLR_CHECK_HRESULT(
+                            CLR_Checks::VerifyStackOK(
+                                *stack,
+                                stack->m_evalStackPos,
+                                changes)); // Check to see if we have enough parameters.
                         stack->m_evalStackPos += changes;
 
                         top = stack->m_evalStackPos++; // Push back the result.
@@ -2433,10 +2436,11 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                     else
                     {
                         changes = calleeInst.target->argumentsCount;
-                        NANOCLR_CHECK_HRESULT(CLR_Checks::VerifyStackOK(
-                            *stack,
-                            stack->m_evalStackPos,
-                            -changes)); // Check to see if we have enough parameters.
+                        NANOCLR_CHECK_HRESULT(
+                            CLR_Checks::VerifyStackOK(
+                                *stack,
+                                stack->m_evalStackPos,
+                                -changes)); // Check to see if we have enough parameters.
                         top = stack->m_evalStackPos;
 
                         //
@@ -2461,8 +2465,11 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                         }
                         else
                         {
-                            NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine
-                                                      .NewGenericInstanceObject(top[0], cls, *calleeInst.genericType));
+                            CLR_RT_TypeSpec_Instance calleeInstGenericType;
+                            calleeInstGenericType.InitializeFromIndex(*calleeInst.genericType);
+
+                            NANOCLR_CHECK_HRESULT(
+                                g_CLR_RT_ExecutionEngine.NewObject(top[0], cls, &calleeInstGenericType));
                         }
 
                         //
@@ -2561,7 +2568,7 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                     FETCH_ARG_COMPRESSED_FIELDTOKEN(arg, ip);
 
                     CLR_RT_FieldDef_Instance fieldInst;
-                    if (fieldInst.ResolveToken(arg, assm) == false)
+                    if (fieldInst.ResolveToken(arg, assm, &stack->m_call) == false)
                     {
                         NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
                     }
@@ -2615,7 +2622,7 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                     FETCH_ARG_COMPRESSED_FIELDTOKEN(arg, ip);
 
                     CLR_RT_FieldDef_Instance fieldInst;
-                    if (fieldInst.ResolveToken(arg, assm) == false)
+                    if (fieldInst.ResolveToken(arg, assm, &stack->m_call) == false)
                     {
                         NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
                     }
@@ -2659,7 +2666,7 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                     CHECKSTACK(stack, evalPos);
 
                     CLR_RT_FieldDef_Instance fieldInst;
-                    if (fieldInst.ResolveToken(arg, assm) == false)
+                    if (fieldInst.ResolveToken(arg, assm, &stack->m_call) == false)
                     {
                         NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
                     }
@@ -2713,7 +2720,7 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                     FETCH_ARG_COMPRESSED_FIELDTOKEN(arg, ip);
 
                     CLR_RT_FieldDef_Instance field;
-                    if (field.ResolveToken(arg, assm) == false)
+                    if (field.ResolveToken(arg, assm, &stack->m_call) == false)
                     {
                         NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
                     }
@@ -2741,7 +2748,7 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                     FETCH_ARG_COMPRESSED_FIELDTOKEN(arg, ip);
 
                     CLR_RT_FieldDef_Instance field;
-                    if (field.ResolveToken(arg, assm) == false)
+                    if (field.ResolveToken(arg, assm, &stack->m_call) == false)
                     {
                         NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
                     }
@@ -2768,7 +2775,7 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                     FETCH_ARG_COMPRESSED_FIELDTOKEN(arg, ip);
 
                     CLR_RT_FieldDef_Instance field;
-                    if (field.ResolveToken(arg, assm) == false)
+                    if (field.ResolveToken(arg, assm, &stack->m_call) == false)
                     {
                         NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
                     }
@@ -2802,13 +2809,101 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
 
                     UPDATESTACK(stack, evalPos);
 
+                    // check if value is a nullable type
+                    bool hasValue = false;
+                    CLR_RT_HeapBlock *nullableValue = nullptr;
+                    bool valueIsNullableType = false;
+                    bool tokenIsNullableType = false;
+                    CLR_RT_TypeDef_Instance destinationType;
+
+                    valueIsNullableType =
+                        CLR_RT_ExecutionEngine::IsInstanceOf(evalPos[0], g_CLR_RT_WellKnownTypes.Nullable);
+                    tokenIsNullableType =
+                        CLR_RT_ExecutionEngine::IsInstanceOf(typeInst, g_CLR_RT_WellKnownTypes.Nullable);
+
+                    // resolve the T to box to / unbox from
+                    if (tokenIsNullableType && destinationType.ResolveNullableType(arg, assm, &stack->m_call) == false)
+                    {
+                        NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+                    }
+
+                    if (valueIsNullableType)
+                    {
+                        // check HasValue property
+                        nullableValue = evalPos[0].Dereference();
+                        hasValue = nullableValue[Library_corlib_native_System_Nullable_1::FIELD__hasValue]
+                                       .NumericByRefConst()
+                                       .u1;
+                    }
+
                     if (op == CEE_BOX)
                     {
-                        NANOCLR_CHECK_HRESULT(evalPos[0].PerformBoxing(typeInst));
+                        if (tokenIsNullableType)
+                        {
+                            if (!hasValue)
+                            {
+                                // box a null reference
+                                evalPos[0].SetObjectReference(nullptr);
+                            }
+                            else
+                            {
+                                // reach the value to box
+                                CLR_RT_HeapBlock &value =
+                                    nullableValue[Library_corlib_native_System_Nullable_1::FIELD__value];
+
+                                // box the value
+                                NANOCLR_CHECK_HRESULT(value.PerformBoxing(destinationType));
+
+                                // assign the boxed result back to the evaluation stack
+                                evalPos[0].Assign(value);
+                            }
+                        }
+                        else
+                        {
+                            NANOCLR_CHECK_HRESULT(evalPos[0].PerformBoxing(typeInst));
+                        }
                     }
                     else
                     {
-                        NANOCLR_CHECK_HRESULT(evalPos[0].PerformUnboxing(typeInst));
+                        if (tokenIsNullableType)
+                        {
+                            // create a Nullable<T>...
+                            CLR_RT_HeapBlock nullableObject;
+                            CLR_RT_TypeSpec_Index destinationTypeSpec;
+                            destinationTypeSpec.data = arg;
+
+                            NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewGenericInstanceObject(
+                                nullableObject,
+                                typeInst,
+                                &destinationTypeSpec));
+
+                            CLR_RT_ProtectFromGC gc(nullableObject);
+
+                            if (evalPos[0].Dereference() == nullptr)
+                            {
+                                // assign a null reference (already carried out by NewObjectFromIndex)
+                                // set HasValue to false
+                                nullableObject.Dereference()[Sys_Nullable::FIELD__hasValue].SetBoolean(false);
+                            }
+                            else
+                            {
+                                // unbox the T value...
+                                NANOCLR_CHECK_HRESULT(evalPos[0].PerformUnboxing(destinationType));
+
+                                // assign the copied unboxed value
+                                nullableObject.Dereference()[Sys_Nullable::FIELD__value].Assign(evalPos[0]);
+
+                                // set HasValue to true
+                                nullableObject.Dereference()[Sys_Nullable::FIELD__hasValue].SetBoolean(true);
+                            }
+
+                            // assign the Nullable<T> object to the evaluation stack
+                            evalPos[0].SetObjectReference(nullableObject.Dereference());
+                        }
+                        else
+                        {
+                            NANOCLR_CHECK_HRESULT(evalPos[0].PerformUnboxing(typeInst));
+                        }
                     }
                     break;
                 }
@@ -2824,6 +2919,8 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                     // extracts the value contained within obj (of type O).  (It is equivalent to unbox followed by
                     // ldobj.) When applied to a reference type, the unbox.any instruction has the same effect as
                     // castclass typeTok.
+
+                    // TODO: still not handling Nullable<T> types here
 
                     CLR_RT_TypeDef_Instance typeInst{};
                     if (typeInst.ResolveToken(arg, assm, &stack->m_call) == false)
@@ -3216,7 +3313,7 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                                 NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
                             }
 
-                            evalPos[0].SetReflection(tsInst, stack->m_call.genericType);
+                            evalPos[0].SetReflection((const CLR_RT_TypeSpec_Index &)tsInst.data);
                         }
                         break;
 
@@ -3237,7 +3334,7 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                         case TBL_FieldDef:
                         {
                             CLR_RT_FieldDef_Instance field;
-                            if (field.ResolveToken(arg, assm) == false)
+                            if (field.ResolveToken(arg, assm, &stack->m_call) == false)
                             {
                                 NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
                             }
@@ -3261,8 +3358,8 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
 
                         case TBL_GenericParam:
                         {
-                            CLR_RT_GenericParam_Instance param;
-                            if (param.ResolveToken(arg, assm) == false)
+                            CLR_RT_GenericParam_Instance genericParam;
+                            if (genericParam.ResolveToken(arg, assm) == false)
                             {
                                 NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
                             }
@@ -3286,37 +3383,12 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                                 if (gpCR.typeOrMethodDef == TBL_MethodDef)
                                 {
                                     // Method generic parameter (!!T)
-
-                                    CLR_RT_MethodSpec_Index msIndex;
-                                    if (!resolveAsm->FindMethodSpecFromTypeSpec(
-                                            stack->m_call.genericType->TypeSpec(),
-                                            msIndex))
-                                    {
-                                        NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
-                                    }
-
-                                    CLR_RT_MethodSpec_Instance ms;
-                                    if (ms.InitializeFromIndex(msIndex) == false)
-                                    {
-                                        NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
-                                    }
-
-                                    int genericParamPos = param.GenericParam();
-
-                                    CLR_RT_SignatureParser parser;
-                                    CLR_RT_SignatureParser::Element element;
-                                    parser.Initialize_MethodSignature(&ms);
-
-                                    for (int i = 0; i <= genericParamPos; i++)
-                                    {
-                                        NANOCLR_CHECK_HRESULT(parser.Advance(element));
-                                    }
-
-                                    evalPos[0].SetReflection(element.Class);
+                                    // already resolved
+                                    evalPos[0].SetReflection(gpCR.classTypeDef);
                                 }
                                 else
                                 {
-                                    // type generic parameter (!T)
+                                    // Type generic parameter (!T)
                                     if (stack->m_call.genericType == nullptr)
                                     {
                                         // No closed‐generic context available: fall back to returning the
@@ -3334,7 +3406,7 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
 
                                         if (!resolveAsm->FindGenericParamAtTypeSpec(
                                                 callerTypeSpec->TypeSpec(),
-                                                param.target->number,
+                                                genericParam.target->number,
                                                 resolvedTypeDef,
                                                 dummyDataType))
                                         {

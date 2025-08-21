@@ -104,7 +104,7 @@ HRESULT CLR_RT_HeapBlock_Array::CreateInstance(
     }
     else if (def.ResolveToken(tk, assm))
     {
-        NANOCLR_CHECK_HRESULT(ref.SetReflection(def, caller->genericType));
+        NANOCLR_CHECK_HRESULT(ref.SetReflection((CLR_RT_TypeSpec_Index)def));
     }
     else
     {

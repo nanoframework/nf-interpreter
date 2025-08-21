@@ -32,7 +32,7 @@ static LPI2C_Type *i2cBaseAddress[] = LPI2C_BASE_PTRS;
 
 typedef Library_sys_dev_i2c_native_System_Device_I2c_I2cConnectionSettings I2cConnectionSettings;
 typedef Library_sys_dev_i2c_native_System_Device_I2c_I2cTransferResult I2cTransferResult;
-typedef Library_corlib_native_System_SpanByte SpanByte;
+typedef Library_corlib_native_System_Span_1 Span;
 
 i2c_structure_t *I2C_ChoosePeripheralStructure(uint8_t busIndex)
 {
@@ -309,12 +309,12 @@ HRESULT Library_sys_dev_i2c_native_System_Device_I2c_I2cDevice::
 
         I2C_ClearBuffers(pI2Cx);
 
-        // dereference the write and read SpanByte from the arguments
+        // dereference the write and read Span from the arguments
         writeSpanByte = stack.Arg1().Dereference();
         if (writeSpanByte != nullptr)
         {
             // get buffer
-            writeBuffer = writeSpanByte[SpanByte::FIELD___array].DereferenceArray();
+            writeBuffer = writeSpanByte[Span::FIELD___array].DereferenceArray();
             if (writeBuffer != nullptr)
             {
                 pI2Cx->txBuffer = writeBuffer->GetFirstElement();
@@ -332,7 +332,7 @@ HRESULT Library_sys_dev_i2c_native_System_Device_I2c_I2cDevice::
         if (readSpanByte != nullptr)
         {
             // get buffer
-            readBuffer = readSpanByte[SpanByte::FIELD___array].DereferenceArray();
+            readBuffer = readSpanByte[Span::FIELD___array].DereferenceArray();
             if (readBuffer != nullptr)
             {
                 pI2Cx->rxBuffer = readBuffer->GetFirstElement();

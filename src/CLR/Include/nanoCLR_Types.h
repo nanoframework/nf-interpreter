@@ -530,6 +530,7 @@ enum CLR_ReflectionType
     REFLECTION_METHOD = 0x05,
     REFLECTION_FIELD = 0x06,
     REFLECTION_GENERICTYPE = 0x07,
+    REFLECTION_TYPESPEC = 0x08,
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
