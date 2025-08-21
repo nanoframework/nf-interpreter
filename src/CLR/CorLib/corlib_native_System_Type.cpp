@@ -354,11 +354,32 @@ HRESULT Library_corlib_native_System_Type::get_IsArray___BOOLEAN(CLR_RT_StackFra
     NANOCLR_HEADER();
 
     CLR_RT_TypeDef_Instance td;
+    CLR_RT_TypeSpec_Instance genericInstance = {};
+
     CLR_RT_HeapBlock *hbType = stack.This();
 
-    NANOCLR_CHECK_HRESULT(Library_corlib_native_System_RuntimeType::GetTypeDescriptor(*hbType, td));
+    if (hbType->ReflectionDataConst().kind == CLR_ReflectionType::REFLECTION_TYPESPEC)
+    {
+        // instanciate the generic type
+        genericInstance.InitializeFromIndex(hbType->ObjectGenericType());
 
-    stack.SetResult_Boolean(td.data == g_CLR_RT_WellKnownTypes.Array.data);
+        CLR_RT_SignatureParser parser{};
+        parser.Initialize_TypeSpec(genericInstance);
+
+        CLR_RT_SignatureParser::Element element;
+
+        // only need to consume the 1st element which has the level data we're looking for
+        parser.Advance(element);
+
+        // check if element has levels
+        stack.SetResult_Boolean(element.Levels > 0);
+    }
+    else
+    {
+        NANOCLR_CHECK_HRESULT(Library_corlib_native_System_RuntimeType::GetTypeDescriptor(*hbType, td));
+
+        stack.SetResult_Boolean(td.data == g_CLR_RT_WellKnownTypes.Array.data);
+    }
 
     NANOCLR_NOCLEANUP();
 }
