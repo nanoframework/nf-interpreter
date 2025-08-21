@@ -2109,9 +2109,9 @@ HRESULT CLR_RT_TypeDescriptor::InitializeFromGenericType(const CLR_RT_TypeSpec_I
     }
     else
     {
-        m_flags = CLR_RT_DataTypeLookup::c_ManagedType | CLR_RT_DataTypeLookup::c_GenericInstance;
+        m_flags = CLR_RT_DataTypeLookup::c_ManagedType;
 
-        m_reflex.kind = REFLECTION_GENERICTYPE;
+        m_reflex.kind = REFLECTION_TYPESPEC;
         m_reflex.data.typeSpec = m_handlerGenericType;
     }
 
