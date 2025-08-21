@@ -1972,7 +1972,6 @@ HRESULT CLR_RT_ExecutionEngine::InitializeLocals(
     CLR_PMETADATA sig = assembly->GetSignature(methodDef->locals);
     CLR_UINT32 count = methodDef->localsCount;
     bool fZeroed = false;
-    bool isGenericInstance = false;
     CLR_RT_TypeSpec_Instance genericInstance = {};
 
     while (count)
@@ -2023,9 +2022,6 @@ HRESULT CLR_RT_ExecutionEngine::InitializeLocals(
 
                 case DATATYPE_GENERICINST:
                 {
-                    // set flag
-                    isGenericInstance = true;
-
                     // need to unwind one position in the signature to have the complete one to seach TypeSpecs
                     CLR_PMETADATA typeSpecSignature = sig;
                     typeSpecSignature--;
