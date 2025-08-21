@@ -2350,6 +2350,7 @@ HRESULT CLR_RT_TypeDescriptor::InitializeFromObject(const CLR_RT_HeapBlock &ref)
                         cls = &g_CLR_RT_WellKnownTypes.Type;
                         break;
                     case REFLECTION_TYPESPEC:
+                        cls = &g_CLR_RT_WellKnownTypes.Type;
                         genericType = &((CLR_RT_HeapBlock *)obj)->ReflectionData().data.typeSpec;
                         break;
                 }
@@ -2393,11 +2394,6 @@ HRESULT CLR_RT_TypeDescriptor::InitializeFromObject(const CLR_RT_HeapBlock &ref)
         if (reflex)
         {
             m_reflex = *reflex;
-        }
-
-        if (genericType)
-        {
-            NANOCLR_CHECK_HRESULT(InitializeFromGenericType(*genericType));
         }
 
         if (dt == DATATYPE_SZARRAY)
