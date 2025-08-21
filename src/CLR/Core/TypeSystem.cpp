@@ -1830,6 +1830,8 @@ bool CLR_RT_MethodDef_Instance::GetDeclaringType(CLR_RT_TypeDef_Instance &declTy
         // Normal (non‐generic or open‐generic)
         return declType.InitializeFromMethod(*this);
     }
+
+    return false;
 }
 
 //////////////////////////////
@@ -2282,7 +2284,6 @@ HRESULT CLR_RT_TypeDescriptor::InitializeFromObject(const CLR_RT_HeapBlock &ref)
     {
         const CLR_RT_TypeDef_Index *cls = nullptr;
         const CLR_RT_ReflectionDef_Index *reflex = nullptr;
-        const CLR_RT_TypeSpec_Index *genericType = nullptr;
 
         switch (dt)
         {
@@ -2351,7 +2352,6 @@ HRESULT CLR_RT_TypeDescriptor::InitializeFromObject(const CLR_RT_HeapBlock &ref)
                         break;
                     case REFLECTION_TYPESPEC:
                         cls = &g_CLR_RT_WellKnownTypes.Type;
-                        genericType = &((CLR_RT_HeapBlock *)obj)->ReflectionData().data.typeSpec;
                         break;
                 }
 
@@ -2375,10 +2375,6 @@ HRESULT CLR_RT_TypeDescriptor::InitializeFromObject(const CLR_RT_HeapBlock &ref)
                 cls = &reflex->data.type;
             }
             break;
-
-            case DATATYPE_GENERICINST:
-                genericType = &obj->ObjectGenericType();
-                break;
 
                 //--//
 
