@@ -216,6 +216,19 @@ void CLR_RT_SignatureParser::Initialize_TypeSpec(CLR_RT_Assembly *assm, CLR_PMET
     IsGenericInst = false;
 }
 
+void CLR_RT_SignatureParser::Initialize_TypeSpec(CLR_RT_TypeSpec_Instance tsInstance)
+{
+    NATIVE_PROFILE_CLR_CORE();
+
+    Assembly = tsInstance.assembly;
+    Signature = Assembly->GetSignature(tsInstance.target->signature);
+
+    Type = CLR_RT_SignatureParser::c_TypeSpec;
+    Flags = 0;
+    ParamCount = 1;
+    GenParamCount = 0;
+    IsGenericInst = false;
+}
 //--//
 
 void CLR_RT_SignatureParser::Initialize_Interfaces(CLR_RT_Assembly *assm, const CLR_RECORD_TYPEDEF *td)
@@ -1585,7 +1598,7 @@ bool CLR_RT_MethodDef_Instance::ResolveToken(
                         if (callerInst.InitializeFromIndex(*callerGeneric))
                         {
                             CLR_RT_SignatureParser parserCaller;
-                            parserCaller.Initialize_TypeSpec(callerInst.assembly, callerInst.target);
+                            parserCaller.Initialize_TypeSpec(callerInst);
 
                             CLR_RT_SignatureParser::Element elemCaller;
 
@@ -1599,7 +1612,7 @@ bool CLR_RT_MethodDef_Instance::ResolveToken(
                             if (ownerInst.InitializeFromIndex(*methodOwnerTS))
                             {
                                 CLR_RT_SignatureParser parserOwner;
-                                parserOwner.Initialize_TypeSpec(ownerInst.assembly, ownerInst.target);
+                                parserOwner.Initialize_TypeSpec(ownerInst);
 
                                 CLR_RT_SignatureParser::Element elemOwner;
 
@@ -5301,7 +5314,7 @@ bool CLR_RT_Assembly::FindMethodDef(
         return false;
     }
 
-    CLR_RT_TypeSpec_Instance tsInstance;
+    CLR_RT_TypeSpec_Instance tsInstance{};
     if (!tsInstance.InitializeFromIndex(tsIndex))
     {
         index.Clear();
@@ -6587,16 +6600,16 @@ HRESULT CLR_RT_TypeSystem::BuildTypeName(
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
 
-    CLR_RT_TypeSpec_Instance instance;
+    CLR_RT_TypeSpec_Instance typeSpecInstance;
     bool closeGenericSignature = false;
 
-    if (instance.InitializeFromIndex(typeIndex) == false)
+    if (typeSpecInstance.InitializeFromIndex(typeIndex) == false)
     {
         NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
     }
 
     CLR_RT_SignatureParser parser;
-    parser.Initialize_TypeSpec(instance.assembly, instance.assembly->GetTypeSpec(typeIndex.TypeSpec()));
+    parser.Initialize_TypeSpec(typeSpecInstance);
 
     CLR_RT_SignatureParser::Element element;
 
@@ -6633,7 +6646,7 @@ HRESULT CLR_RT_TypeSystem::BuildTypeName(
             NanoCLRDataType realDt;
 
             // this will bind !T→System.Int32, etc.
-            instance.assembly->FindGenericParamAtTypeSpec(
+            typeSpecInstance.assembly->FindGenericParamAtTypeSpec(
                 typeIndex.TypeSpec(),         // closed instantiation row
                 element.GenericParamPosition, // the !N slot
                 realTd,

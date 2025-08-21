@@ -1204,6 +1204,7 @@ struct CLR_RT_SignatureParser
 
     void Initialize_TypeSpec(CLR_RT_Assembly *assm, CLR_PMETADATA ts);
     void Initialize_TypeSpec(CLR_RT_Assembly *assm, const CLR_RECORD_TYPESPEC *ts);
+    void Initialize_TypeSpec(CLR_RT_TypeSpec_Instance tsInstance);
 
     void Initialize_Interfaces(CLR_RT_Assembly *assm, const CLR_RECORD_TYPEDEF *td);
     void Initialize_MethodLocals(CLR_RT_Assembly *assm, const CLR_RECORD_METHODDEF *md);

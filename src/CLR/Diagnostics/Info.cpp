@@ -530,7 +530,7 @@ void CLR_RT_Assembly::DumpToken(CLR_UINT32 token, const CLR_RT_MethodDef_Instanc
                 ownerAsm = methodDefInstance.genericType->Assembly();
             }
 
-            CLR_RT_TypeSpec_Index tsIdx;
+            CLR_RT_TypeSpec_Index tsIdx{};
             tsIdx.Set(assemblyIndex, index);
 
             // bind to get the signature blob
@@ -543,8 +543,8 @@ void CLR_RT_Assembly::DumpToken(CLR_UINT32 token, const CLR_RT_MethodDef_Instanc
             }
 
             // start parsing the signature
-            CLR_RT_SignatureParser parser;
-            parser.Initialize_TypeSpec(tsInst.assembly, tsInst.target);
+            CLR_RT_SignatureParser parser{};
+            parser.Initialize_TypeSpec(tsInst);
 
             // read first element
             CLR_RT_SignatureParser::Element elem;

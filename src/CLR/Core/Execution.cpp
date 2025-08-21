@@ -2038,7 +2038,7 @@ HRESULT CLR_RT_ExecutionEngine::InitializeLocals(
                     genericInstance.InitializeFromIndex(genericTSIndex);
 
                     CLR_RT_SignatureParser parser;
-                    parser.Initialize_TypeSpec(assembly, assembly->GetTypeSpec(genericInstance.TypeSpec()));
+                    parser.Initialize_TypeSpec(genericInstance);
 
                     CLR_RT_SignatureParser::Element element;
                     NANOCLR_CHECK_HRESULT(parser.Advance(element));
