@@ -2524,7 +2524,7 @@ HRESULT CLR_RT_TypeDescriptor::ExtractTypeIndexFromObject(const CLR_RT_HeapBlock
 
         if (desc.GetDataType() == DATATYPE_GENERICINST)
         {
-            res.data = desc.m_handlerGenericType.data;
+            res.data = desc.m_handlerGenericType.genericTypeDef.data;
         }
         else
         {
