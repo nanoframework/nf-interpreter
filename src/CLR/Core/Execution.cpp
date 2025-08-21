@@ -1559,6 +1559,8 @@ CLR_RT_HeapBlock *CLR_RT_ExecutionEngine::ExtractHeapBlocksForGenericInstance(
 {
     NATIVE_PROFILE_CLR_CORE();
 
+    (void)genericType;
+
     if (length > CLR_RT_HeapBlock::HB_MaxSize)
     {
         return nullptr;
