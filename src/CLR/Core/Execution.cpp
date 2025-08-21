@@ -1884,7 +1884,6 @@ HRESULT CLR_RT_ExecutionEngine::InitializeReference(
             // copy over to parameter
             CLR_RT_TypeSpec_Instance genericTSInstance;
             genericTSInstance.InitializeFromIndex(genericTSIndex);
-            genericInstance = &genericTSInstance;
 
             CLR_RT_SignatureParser sp;
             sp.Initialize_TypeSpec(parser.Assembly, parser.Assembly->GetTypeSpec(genericTSInstance.TypeSpec()));
