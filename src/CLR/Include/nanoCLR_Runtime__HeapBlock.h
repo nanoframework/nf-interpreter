@@ -1197,15 +1197,7 @@ struct CLR_RT_HeapBlock
 
     const CLR_RT_TypeSpec_Index &ObjectGenericType() const
     {
-        if ((m_id.type.flags & CLR_RT_HeapBlock::HB_GenericInstance) == CLR_RT_HeapBlock::HB_GenericInstance)
-        {
-            return m_data.reflection.data.typeSpec;
-        }
-        else
-        {
-            // Invalid index
-            return (CLR_RT_TypeSpec_Index)0x0;
-        }
+        return m_data.reflection.data.typeSpec;
     }
 
     HRESULT SetGenericInstanceType(const CLR_RT_TypeSpec_Index &genericType);
