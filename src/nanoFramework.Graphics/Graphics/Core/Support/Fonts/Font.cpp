@@ -97,12 +97,13 @@ HRESULT CLR_GFX_Font::CreateInstance(CLR_RT_HeapBlock &ref, const CLR_UINT8 *dat
     bm = (const CLR_GFX_BitmapDescription *)data;
     data += sizeof(CLR_GFX_BitmapDescription);
 
-    NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_BinaryBlob::CreateInstance(
-        ref,
-        sizeof(CLR_GFX_Font),
-        NULL,
-        CLR_GFX_Font::RelocationHandler,
-        CLR_RT_HeapBlock::HB_CompactOnFailure));
+    NANOCLR_CHECK_HRESULT(
+        CLR_RT_HeapBlock_BinaryBlob::CreateInstance(
+            ref,
+            sizeof(CLR_GFX_Font),
+            NULL,
+            CLR_GFX_Font::RelocationHandler,
+            CLR_RT_HeapBlock::HB_CompactOnFailure));
 
     blob = ref.DereferenceBinaryBlob();
     font = (CLR_GFX_Font *)blob->GetData();
@@ -156,7 +157,7 @@ int CLR_GFX_Font::StringOut(
     CLR_UINT32 nTotWidth = 0;
     CLR_GFX_FontCharacterInfo chr;
     int charLimit = (maxChars < 0) ? uh.CountNumberOfCharacters() : maxChars;
-    
+
     yPos += m_font.m_metrics.m_offset;
 
     while (charLimit-- != 0)
