@@ -1839,9 +1839,11 @@ HRESULT CLR_RT_ExecutionEngine::InitializeReference(
 
     NANOCLR_HEADER();
 
+    CLR_RT_SignatureParser internalParser{};
     CLR_RT_SignatureParser::Element res;
     NanoCLRDataType dt;
-    CLR_RT_TypeDef_Index realTypeDef;
+    CLR_RT_TypeDef_Index realTypeDef{};
+    CLR_RT_TypeSpec_Instance internalGenericInstance{};
 
     NANOCLR_CHECK_HRESULT(parser.Advance(res));
 
@@ -1882,19 +1884,19 @@ HRESULT CLR_RT_ExecutionEngine::InitializeReference(
             }
 
             // copy over to parameter
-            CLR_RT_TypeSpec_Instance genericTSInstance;
-            genericTSInstance.InitializeFromIndex(genericTSIndex);
+            internalGenericInstance.InitializeFromIndex(genericTSIndex);
 
-            CLR_RT_SignatureParser sp;
-            sp.Initialize_TypeSpec(parser.Assembly, parser.Assembly->GetTypeSpec(genericTSInstance.TypeSpec()));
+            internalParser.Initialize_TypeSpec(
+                parser.Assembly,
+                parser.Assembly->GetTypeSpec(internalGenericInstance.TypeSpec()));
 
             CLR_RT_SignatureParser::Element element;
-            NANOCLR_CHECK_HRESULT(sp.Advance(element));
+            NANOCLR_CHECK_HRESULT(internalParser.Advance(element));
 
             // if this is another generic instance, need to advance to get the type
             if (dt == DATATYPE_GENERICINST)
             {
-                NANOCLR_CHECK_HRESULT(sp.Advance(element));
+                NANOCLR_CHECK_HRESULT(internalParser.Advance(element));
             }
 
             dt = element.DataType;
@@ -1913,12 +1915,15 @@ HRESULT CLR_RT_ExecutionEngine::InitializeReference(
             }
             else
             {
-                NANOCLR_SET_AND_LEAVE(NewObject(ref, inst, genericInstance));
+                // prefer the generic instance contained in the signature
+                NANOCLR_SET_AND_LEAVE(NewObject(
+                    ref,
+                    inst,
+                    NANOCLR_INDEX_IS_VALID(internalGenericInstance) ? &internalGenericInstance : genericInstance));
             }
         }
         else
         {
-
             if (c_CLR_RT_DataTypeLookup[dt].m_flags & CLR_RT_DataTypeLookup::c_Reference)
             {
                 dt = DATATYPE_OBJECT;
