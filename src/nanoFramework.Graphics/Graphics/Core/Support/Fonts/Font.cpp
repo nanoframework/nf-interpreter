@@ -156,7 +156,7 @@ int CLR_GFX_Font::StringOut(
     CLR_UINT16 buf[3];
     CLR_UINT32 nTotWidth = 0;
     CLR_GFX_FontCharacterInfo chr;
-    int charLimit = (maxChars < 0) ? uh.CountNumberOfCharacters() : maxChars;
+    CLR_UINT32 charLimit = (maxChars < 0) ? (CLR_UINT32) uh.CountNumberOfCharacters() : (CLR_UINT32) maxChars;
 
     yPos += m_font.m_metrics.m_offset;
 
@@ -166,7 +166,9 @@ int CLR_GFX_Font::StringOut(
         uh.m_outputUTF16_size = MAXSTRLEN(buf);
 
         if (uh.ConvertFromUTF8(1, false) == false)
+        {    
             break;
+        }
 
         CLR_UINT16 c = buf[0];
 
@@ -327,15 +329,17 @@ void CLR_GFX_Font::CountCharactersInWidth(
     CLR_GFX_FontCharacterInfo chr;
     totWidth = 0;
     uh.SetInputUTF8(str);
-    int charLimit = (maxChars < 0) ? uh.CountNumberOfCharacters() : maxChars;
+    CLR_UINT32 charLimit = (maxChars < 0) ? (CLR_UINT32) uh.CountNumberOfCharacters() : (CLR_UINT32) maxChars;
 
-    while (charLimit != 0)
+    while (charLimit-- > 0)
     {
         uh.m_outputUTF16 = buf;
         uh.m_outputUTF16_size = MAXSTRLEN(buf);
 
         if (uh.ConvertFromUTF8(1, false) == false)
+        {    
             break;
+        }
 
         CLR_UINT16 c = buf[0];
         bool fNewLine = (c == '\n');
@@ -389,7 +393,6 @@ void CLR_GFX_Font::CountCharactersInWidth(
         totWidth += chrWidth;
 
         str = (LPCSTR)uh.m_inputUTF8;
-        charLimit--;
         num++;
 
         // Break @ hyphens
