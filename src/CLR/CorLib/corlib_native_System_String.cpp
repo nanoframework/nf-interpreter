@@ -140,6 +140,15 @@ HRESULT Library_corlib_native_System_String::Substring___STRING__I4__I4(CLR_RT_S
     NANOCLR_NOCLEANUP();
 }
 
+HRESULT Library_corlib_native_System_String::Trim___STRING(CLR_RT_StackFrame &stack)
+{
+    NANOCLR_HEADER();
+
+    NANOCLR_SET_AND_LEAVE(Trim(stack, nullptr, true, true));
+
+    NANOCLR_NOCLEANUP();
+}
+
 HRESULT Library_corlib_native_System_String::Trim___STRING__SZARRAY_CHAR(CLR_RT_StackFrame &stack)
 {
     NATIVE_PROFILE_CLR_CORE();
@@ -150,6 +159,19 @@ HRESULT Library_corlib_native_System_String::Trim___STRING__SZARRAY_CHAR(CLR_RT_
     NANOCLR_NOCLEANUP();
 }
 
+#if (NANOCLR_REFLECTION == TRUE)
+
+HRESULT Library_corlib_native_System_String::TrimStart___STRING(CLR_RT_StackFrame &stack)
+{
+    NANOCLR_HEADER();
+
+    NANOCLR_SET_AND_LEAVE(Trim(stack, nullptr, true, false));
+
+    NANOCLR_NOCLEANUP();
+}
+
+#endif
+
 HRESULT Library_corlib_native_System_String::TrimStart___STRING__SZARRAY_CHAR(CLR_RT_StackFrame &stack)
 {
     NATIVE_PROFILE_CLR_CORE();
@@ -159,6 +181,19 @@ HRESULT Library_corlib_native_System_String::TrimStart___STRING__SZARRAY_CHAR(CL
 
     NANOCLR_NOCLEANUP();
 }
+
+#if (NANOCLR_REFLECTION == TRUE)
+
+HRESULT Library_corlib_native_System_String::TrimEnd___STRING(CLR_RT_StackFrame &stack)
+{
+    NANOCLR_HEADER();
+
+    NANOCLR_SET_AND_LEAVE(Trim(stack, nullptr, false, true));
+
+    NANOCLR_NOCLEANUP();
+}
+
+#endif
 
 HRESULT Library_corlib_native_System_String::TrimEnd___STRING__SZARRAY_CHAR(CLR_RT_StackFrame &stack)
 {
@@ -233,8 +268,10 @@ HRESULT Library_corlib_native_System_String::CompareTo___I4__STRING(CLR_RT_Stack
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
 
-    CLR_RT_HeapBlock &pThis = stack.Arg0(); // String references are special, they don't point to an object, they are
-                                            // the object. So use stack.Arg0() instead of stack.This()
+    // String references are special, they don't point to an object, they are
+    // the object. So use stack.Arg0() instead of stack.This()
+    CLR_RT_HeapBlock &pThis = stack.Arg0();
+
     CLR_RT_HeapBlock &pArg = stack.Arg1();
 
     stack.SetResult_I4(CLR_RT_HeapBlock::Compare_Unsigned_Values(pThis, pArg));
@@ -441,16 +478,6 @@ HRESULT Library_corlib_native_System_String::ToUpper___STRING(CLR_RT_StackFrame 
     NANOCLR_HEADER();
 
     NANOCLR_SET_AND_LEAVE(ChangeCase(stack, true));
-
-    NANOCLR_NOCLEANUP();
-}
-
-HRESULT Library_corlib_native_System_String::Trim___STRING(CLR_RT_StackFrame &stack)
-{
-    NATIVE_PROFILE_CLR_CORE();
-    NANOCLR_HEADER();
-
-    NANOCLR_SET_AND_LEAVE(Trim(stack, nullptr, true, true));
 
     NANOCLR_NOCLEANUP();
 }
