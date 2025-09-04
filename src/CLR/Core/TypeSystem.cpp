@@ -1621,7 +1621,7 @@ bool CLR_RT_MethodDef_Instance::ResolveToken(
 
                                 CLR_UINT32 ownerTypeDefToken = elemOwner.Class.data;
 
-                                if (callerTypeDefToken == ownerTypeDefToken)
+                                if ((callerTypeDefToken == ownerTypeDefToken) && callerTypeDefToken != 0x0)
                                 {
                                     // we have a match on the typeDef, so they refer to the same type
                                     // lets bind using the closed generic
