@@ -2031,13 +2031,22 @@ HRESULT CLR_RT_ExecutionEngine::InitializeLocals(
                     typeSpecSignature--;
 
                     CLR_RT_TypeSpec_Index genericTSIndex = {};
-                    if (!assembly->FindTypeSpec(typeSpecSignature, genericTSIndex))
-                    {
-                        NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
-                    }
 
-                    // copy over to parameter
-                    genericInstance.InitializeFromIndex(genericTSIndex);
+                    if (methodDefInstance.genericType && methodDefInstance.genericType->data != 0)
+                    {
+                        // method is generic, it can only use class from method's class generic parameters
+                        genericInstance.InitializeFromIndex(*methodDefInstance.genericType);
+                    }
+                    else
+                    {
+                        if (!assembly->FindTypeSpec(typeSpecSignature, genericTSIndex))
+                        {
+                            NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+                        }
+
+                        // copy over to parameter
+                        genericInstance.InitializeFromIndex(genericTSIndex);
+                    }
 
                     CLR_RT_SignatureParser parser;
                     parser.Initialize_TypeSpec(genericInstance);
