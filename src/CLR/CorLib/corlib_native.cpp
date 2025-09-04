@@ -1546,7 +1546,7 @@ const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_mscorlib =
 
 #if (NANOCLR_REFLECTION == TRUE)
 
-    0x6BB74C3A,
+    0x80786053,
 
 #elif (NANOCLR_REFLECTION == FALSE)
 
