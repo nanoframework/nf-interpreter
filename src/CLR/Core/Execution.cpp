@@ -2093,11 +2093,25 @@ HRESULT CLR_RT_ExecutionEngine::InitializeLocals(
                     // type-level generic parameter in a locals signature (e.g. 'T' inside a generic type)
                     CLR_INT8 genericParamPosition = *sig++;
 
-                    assembly->FindGenericParamAtTypeSpec(
-                        methodDefInstance.genericType->TypeSpec(),
-                        genericParamPosition,
-                        cls,
-                        dt);
+                    if (methodDefInstance.genericType && methodDefInstance.genericType->data != 0)
+                    {
+                        CLR_RT_TypeSpec_Instance typeSpec{};
+                        typeSpec.InitializeFromIndex((CLR_RT_TypeSpec_Index)methodDefInstance.genericType->data);
+
+                        typeSpec.assembly->FindGenericParamAtTypeSpec(
+                            methodDefInstance.genericType->TypeSpec(),
+                            genericParamPosition,
+                            cls,
+                            dt);
+                    }
+                    else
+                    {
+                        assembly->FindGenericParamAtTypeSpec(
+                            methodDefInstance.genericType->TypeSpec(),
+                            genericParamPosition,
+                            cls,
+                            dt);
+                    }
 
                     goto done;
                 }
