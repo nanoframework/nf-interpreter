@@ -1113,7 +1113,8 @@ bool CLR_RT_TypeDef_Instance::ResolveToken(
                             NanoCLRDataType realDataType;
 
                             // Only call this once to map (e.g. !T→Int32)
-                            caller->assembly
+
+                            g_CLR_RT_TypeSystem.m_assemblies[caller->genericType->Assembly() - 1]
                                 ->FindGenericParamAtTypeSpec(closedTsRow, (CLR_UINT32)pos, realTypeDef, realDataType);
 
                             // populate this instance
