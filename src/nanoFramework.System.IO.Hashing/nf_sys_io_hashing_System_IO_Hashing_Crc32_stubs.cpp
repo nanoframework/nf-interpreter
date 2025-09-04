@@ -58,7 +58,6 @@ HRESULT Library_nf_sys_io_hashing_System_IO_Hashing_Crc32::ComputeHash___STATIC_
     CLR_RT_HeapBlock_Array *buffer;
     uint8_t *bufferData = nullptr;
     int32_t bufferSize = 0;
-    int32_t bufferOffset = 0;
     uint32_t crc32 = 0;
     uint32_t hash = 0;
 
@@ -72,12 +71,9 @@ HRESULT Library_nf_sys_io_hashing_System_IO_Hashing_Crc32::ComputeHash___STATIC_
     // get buffer
     buffer = bufferSpanByte[Span::FIELD___array].DereferenceArray();
 
-    // Get the write offset
-    bufferOffset = bufferSpanByte[Span::FIELD___start].NumericByRef().s4;
-
     // use the span length as write size, only the elements defined by the span must be written
     bufferSize = bufferSpanByte[Span::FIELD___length].NumericByRef().s4;
-    bufferData = buffer->GetElement(bufferOffset);
+    bufferData = buffer->GetFirstElement();
 
     if (bufferSize == 0)
     {

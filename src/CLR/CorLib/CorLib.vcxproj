@@ -48,6 +48,7 @@
     <ClCompile Include="corlib_native_System_Number.cpp" />
     <ClCompile Include="corlib_native_System_Object.cpp" />
     <ClCompile Include="corlib_native_System_Random.cpp" />
+    <ClCompile Include="corlib_native_System_ReadOnlySpan_1.cpp" />
     <ClCompile Include="corlib_native_System_Reflection_Assembly.cpp" />
     <ClCompile Include="corlib_native_System_Reflection_Binder.cpp" />
     <ClCompile Include="corlib_native_System_Reflection_ConstructorInfo.cpp" />

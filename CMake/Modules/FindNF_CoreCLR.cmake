@@ -106,6 +106,7 @@ set(NF_CoreCLR_SRCS
     corlib_native_System_Number.cpp
     corlib_native_System_Object.cpp
     corlib_native_System_Random.cpp
+    corlib_native_System_ReadOnlySpan_1.cpp
     corlib_native_System_Reflection_Binder.cpp
     corlib_native_System_Reflection_MemberInfo.cpp
     corlib_native_System_Runtime_CompilerServices_RuntimeHelpers.cpp

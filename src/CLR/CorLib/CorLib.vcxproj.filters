@@ -176,5 +176,8 @@
     <ClCompile Include="corlib_native_System_Span_1.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="corlib_native_System_ReadOnlySpan_1.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

@@ -781,8 +781,9 @@ struct Library_corlib_native_System_Random
 struct Library_corlib_native_System_ReadOnlySpan_1
 {
     static const int FIELD___array = 1;
-    static const int FIELD___start = 2;
-    static const int FIELD___length = 3;
+    static const int FIELD___length = 2;
+
+    NANOCLR_NATIVE_DECLARE(NativeReadOnlySpanConstructor___VOID__SZARRAY_GENERICTYPE__I4__I4);
 
     //--//
 };
@@ -940,10 +941,10 @@ struct Library_corlib_native_System_Single
 struct Library_corlib_native_System_Span_1
 {
     static const int FIELD___array = 1;
-    static const int FIELD___start = 2;
-    static const int FIELD___length = 3;
+    static const int FIELD___length = 2;
 
     NANOCLR_NATIVE_DECLARE(CopyTo___VOID__SystemSpan_1);
+    NANOCLR_NATIVE_DECLARE(NativeSpanConstructor___VOID__SZARRAY_GENERICTYPE__I4__I4);
 
     //--//
 };

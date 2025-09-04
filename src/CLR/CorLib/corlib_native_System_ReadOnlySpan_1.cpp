@@ -6,29 +6,7 @@
 
 #include "CorLib.h"
 
-HRESULT Library_corlib_native_System_Span_1::CopyTo___VOID__SystemSpan_1(CLR_RT_StackFrame &stack)
-{
-    NANOCLR_HEADER();
-
-    CLR_RT_HeapBlock_Array *sourceArray;
-    CLR_RT_HeapBlock_Array *destinationArray;
-    CLR_RT_HeapBlock *sourceSpan = stack.This();
-    CLR_RT_HeapBlock *destinationSpan = stack.Arg1().Dereference();
-
-    // check lengths
-    if (sourceSpan[FIELD___length].NumericByRefConst().u4 > destinationSpan[FIELD___length].NumericByRefConst().u4)
-    {
-        NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
-    }
-
-    // get pointers to the arrays
-    sourceArray = sourceSpan[FIELD___array].DereferenceArray();
-    destinationArray = destinationSpan[FIELD___array].DereferenceArray();
-
-    {
-        // prevent GC from moving the arrays while we copy the data
-
-HRESULT Library_corlib_native_System_Span_1::NativeSpanConstructor___VOID__SZARRAY_GENERICTYPE__I4__I4(
+HRESULT Library_corlib_native_System_ReadOnlySpan_1::NativeReadOnlySpanConstructor___VOID__SZARRAY_GENERICTYPE__I4__I4(
     CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
