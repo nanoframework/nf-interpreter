@@ -27,6 +27,29 @@ HRESULT Library_corlib_native_System_Span_1::CopyTo___VOID__SystemSpan_1(CLR_RT_
 
     {
         // prevent GC from moving the arrays while we copy the data
+        if (sourceArray)
+        {
+            CLR_RT_ProtectFromGC gc1(*sourceArray);
+        }
+        if (destinationArray)
+        {
+            CLR_RT_ProtectFromGC gc2(*destinationArray);
+        }
+
+        // does the source array has a reference?
+        if (sourceArray && destinationArray)
+        {
+            // copy the data
+            memcpy(
+                destinationArray->GetFirstElement(),
+                sourceArray->GetFirstElement(),
+                sourceSpan[FIELD___length].NumericByRefConst().u4 *
+                    c_CLR_RT_DataTypeLookup[sourceArray->DataType()].m_sizeInBytes);
+        }
+    }
+
+    NANOCLR_NOCLEANUP();
+}
 
 HRESULT Library_corlib_native_System_Span_1::NativeSpanConstructor___VOID__SZARRAY_GENERICTYPE__I4__I4(
     CLR_RT_StackFrame &stack)
