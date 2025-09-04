@@ -39,12 +39,13 @@ HRESULT Library_corlib_native_System_Span_1::CopyTo___VOID__SystemSpan_1(CLR_RT_
         // does the source array has a reference?
         if (sourceArray && destinationArray)
         {
-            // copy the data
-            memcpy(
-                destinationArray->GetFirstElement(),
-                sourceArray->GetFirstElement(),
-                sourceSpan[FIELD___length].NumericByRefConst().u4 *
-                    c_CLR_RT_DataTypeLookup[sourceArray->DataType()].m_sizeInBytes);
+            // copy array
+            CLR_RT_HeapBlock_Array::Copy(
+                sourceArray,
+                0,
+                destinationArray,
+                0,
+                sourceSpan[FIELD___length].NumericByRefConst().s4);
         }
     }
 
