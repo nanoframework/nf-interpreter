@@ -818,6 +818,8 @@ bool CLR_RT_TypeDef_Instance::InitializeFromReflection(const CLR_RT_ReflectionDe
                 return false;
             }
 
+            *levels = element.Levels;
+
             // if this is a generic type, need to advance to get type
             if (element.DataType == DATATYPE_GENERICINST)
             {
