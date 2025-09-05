@@ -472,12 +472,12 @@ void CLR_RT_Assembly::DumpToken(CLR_UINT32 token, const CLR_RT_MethodDef_Instanc
             CLR_UINT32 idx = CLR_DataFromTk(token);
             auto &xref = crossReferenceMethodRef[idx];
 
-            // Build a MethodRef_Index so we can format the reference:
-            CLR_RT_MethodRef_Index mri;
-            mri.Set(assemblyIndex, idx);
+            // Build a MethodDef_Index so we can format the reference:
+            CLR_RT_MethodDef_Index mdi;
+            mdi.data = xref.target.data;
 
-            // Decide which TypeSpec to supply to BuildMethodRefName:
-            // 1) If the caller passed a non-null genericType (i.e. we’re inside SimpleList<I4>),
+            // Decide which TypeSpec to supply to BuildMethodName:
+            // 1) If the caller passed a non-null genericType (i.e. we're inside SimpleList<I4>),
             //    use that, so ResizeArray prints as SimpleList<I4>::ResizeArray.
             // 2) Otherwise, fall back to xref.genericType (the raw MethodRef own owner).
             const CLR_RT_TypeSpec_Index *ownerTypeSpec;
@@ -492,7 +492,9 @@ void CLR_RT_Assembly::DumpToken(CLR_UINT32 token, const CLR_RT_MethodDef_Instanc
 
             char buf[256], *p = buf;
             size_t cb = sizeof(buf);
-            g_CLR_RT_TypeSystem.BuildMethodRefName(mri, ownerTypeSpec, p, cb);
+
+            g_CLR_RT_TypeSystem.BuildMethodName(mdi, ownerTypeSpec, p, cb);
+
             CLR_Debug::Printf("%s", buf);
             break;
         }
