@@ -1627,9 +1627,9 @@ bool CLR_RT_MethodDef_Instance::ResolveToken(
                                 // advance to the generic instance which will point to the class
                                 parserOwner.Advance(elemOwner);
 
-                                  if (elemOwner.DataType == DATATYPE_GENERICINST)
+                                if (elemOwner.DataType == DATATYPE_GENERICINST)
                                 {
-                                      parserOwner.Advance(elemOwner);
+                                    parserOwner.Advance(elemOwner);
                                 }
 
                                 CLR_UINT32 ownerTypeDefToken = elemOwner.Class.data;
