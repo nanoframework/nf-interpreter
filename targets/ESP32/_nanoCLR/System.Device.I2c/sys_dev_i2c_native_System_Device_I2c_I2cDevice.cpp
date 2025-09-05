@@ -136,9 +136,7 @@ HRESULT Library_sys_dev_i2c_native_System_Device_I2c_I2cDevice::
 
     uint8_t *writeBuffer = nullptr;
     uint8_t *readBuffer = nullptr;
-    int writeOffset = 0;
     int writeSize = 0;
-    int readOffset = 0;
     int readSize = 0;
     esp_err_t opResult;
     uint32_t transferResult;
@@ -179,9 +177,6 @@ HRESULT Library_sys_dev_i2c_native_System_Device_I2c_I2cDevice::
 
         if (writeData != nullptr)
         {
-            // Get the write offset, only the elements defined by the span must be written, not the whole array
-            writeOffset = writeSpanByte[Span::FIELD___start].NumericByRef().s4;
-
             // use the span length as write size, only the elements defined by the span must be written
             writeSize = writeSpanByte[Span::FIELD___length].NumericByRef().s4;
 
@@ -196,7 +191,7 @@ HRESULT Library_sys_dev_i2c_native_System_Device_I2c_I2cDevice::
                 }
 
                 // copy buffer content
-                memcpy(writeBuffer, (uint8_t *)writeData->GetElement(writeOffset), writeSize);
+                memcpy(writeBuffer, (uint8_t *)writeData->GetFirstElement(), writeSize);
 
                 // setup write transaction
                 i2c_master_start(cmd);
@@ -218,9 +213,6 @@ HRESULT Library_sys_dev_i2c_native_System_Device_I2c_I2cDevice::
 
         if (readData != nullptr)
         {
-            // Get the read offset, only the elements defined by the span must be read, not the whole array
-            readOffset = readSpanByte[Span::FIELD___start].NumericByRef().s4;
-
             // use the span length as read size, only the elements defined by the span must be read
             readSize = readSpanByte[Span::FIELD___length].NumericByRef().s4;
 

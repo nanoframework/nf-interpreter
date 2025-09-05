@@ -364,7 +364,6 @@ HRESULT Library_sys_dev_i2s_native_System_Device_I2s_I2sDevice::Read___VOID__Sys
         CLR_RT_HeapBlock_Array *readBuffer = nullptr;
         uint8_t *readData = nullptr;
         int readSize = 0;
-        int readOffset = 0;
         uint8_t transform_buffer[SIZEOF_TRANSFORM_BUFFER_IN_BYTES];
         uint32_t a_index = 0;
 
@@ -400,15 +399,12 @@ HRESULT Library_sys_dev_i2s_native_System_Device_I2s_I2sDevice::Read___VOID__Sys
 
             if (readBuffer != nullptr)
             {
-                // Get the read offset, only the elements defined by the span must be read, not the whole array
-                readOffset = readSpanByte[Span::FIELD___start].NumericByRef().s4;
-
                 // use the span length as read size, only the elements defined by the span must be read
                 readSize = readSpanByte[Span::FIELD___length].NumericByRef().s4;
 
                 if (readSize > 0)
                 {
-                    readData = (uint8_t *)readBuffer->GetElement(readOffset);
+                    readData = (uint8_t *)readBuffer->GetFirstElement();
 
                     uint32_t num_bytes_needed_from_dma =
                         readSize * (I2S_RX_FRAME_SIZE_IN_BYTES / appbuf_sample_size_in_bytes);
@@ -485,7 +481,6 @@ HRESULT Library_sys_dev_i2s_native_System_Device_I2s_I2sDevice::Write___VOID__Sy
         CLR_RT_HeapBlock_Array *writeBuffer = nullptr;
         uint8_t *writeData = nullptr;
         int writeSize = 0;
-        int writeOffset = 0;
         size_t bytesWritten;
 
         esp_err_t opResult;
@@ -516,16 +511,13 @@ HRESULT Library_sys_dev_i2s_native_System_Device_I2s_I2sDevice::Write___VOID__Sy
 
             if (writeBuffer != nullptr)
             {
-                // Get the write offset, only the elements defined by the span must be written, not the whole array
-                writeOffset = writeSpanByte[Span::FIELD___start].NumericByRef().s4;
-
                 // use the span length as write size, only the elements defined by the span must be written
                 writeSize = writeSpanByte[Span::FIELD___length].NumericByRef().s4;
 
                 if (writeSize > 0)
                 {
                     CLR_RT_ProtectFromGC gcWriteBuffer(*writeBuffer);
-                    writeData = (unsigned char *)writeBuffer->GetElement(writeOffset);
+                    writeData = (unsigned char *)writeBuffer->GetFirstElement();
 
                     if (bitsPerSample == I2S_BITS_PER_SAMPLE_32BIT)
                     {

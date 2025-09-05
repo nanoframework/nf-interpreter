@@ -221,7 +221,6 @@ HRESULT Library_sys_dev_i2c_slave_native_System_Device_I2c_I2cSlaveDevice::
 
     NF_PAL_I2CSLAVE *palI2c = nullptr;
 
-    int32_t bufferOffset = 0;
     int32_t requestedCount = 0;
     uint32_t readCount = 0;
     uint32_t bytesTransfered = 0;
@@ -271,9 +270,6 @@ HRESULT Library_sys_dev_i2c_slave_native_System_Device_I2c_I2cSlaveDevice::
         // set flag to read operation
         isRead = true;
 
-        // Get the read offset, only the elements defined by the span must be read, not the whole array
-        bufferOffset = readSpanByte[Span::FIELD___start].NumericByRef().s4;
-
         // use the span length as read size, only the elements defined by the span must be read
         requestedCount = readSpanByte[Span::FIELD___length].NumericByRef().s4;
     }
@@ -284,9 +280,6 @@ HRESULT Library_sys_dev_i2c_slave_native_System_Device_I2c_I2cSlaveDevice::
 
         if (writeBuffer != nullptr)
         {
-            // Get the write offset, only the elements defined by the span must be written, not the whole array
-            bufferOffset = writeSpanByte[Span::FIELD___start].NumericByRef().s4;
-
             // use the span length as write size, only the elements defined by the span must be written
             requestedCount = writeSpanByte[Span::FIELD___length].NumericByRef().s4;
         }
@@ -384,7 +377,7 @@ HRESULT Library_sys_dev_i2c_slave_native_System_Device_I2c_I2cSlaveDevice::
             // write operation
 
             // copy buffer content to working buffer
-            memcpy(palI2c->Buffer, (uint8_t *)writeBuffer->GetElement(bufferOffset), requestedCount);
+            memcpy(palI2c->Buffer, (uint8_t *)writeBuffer->GetFirstElement(), requestedCount);
 
             if (requestedCount < I2C_SLAVE_TX_BUF_LEN)
             {

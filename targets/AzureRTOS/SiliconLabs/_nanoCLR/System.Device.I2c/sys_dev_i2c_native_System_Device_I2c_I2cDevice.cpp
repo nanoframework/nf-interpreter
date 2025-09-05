@@ -412,8 +412,6 @@ HRESULT Library_sys_dev_i2c_native_System_Device_I2c_I2cDevice::
     CLR_RT_HeapBlock *connectionSettings;
     CLR_RT_HeapBlock_Array *writeBuffer = nullptr;
     CLR_RT_HeapBlock_Array *readBuffer = nullptr;
-    int readOffset = 0;
-    int writeOffset = 0;
     I2C_TransferSeq_TypeDef i2cTransfer;
     I2C_TransferReturn_TypeDef transactionResult = i2cTransferInProgress;
 
@@ -468,9 +466,6 @@ HRESULT Library_sys_dev_i2c_native_System_Device_I2c_I2cDevice::
 
         if (writeBuffer != nullptr)
         {
-            // Get the write offset, only the elements defined by the span must be written, not the whole array
-            writeOffset = writeSpanByte[Span::FIELD___start].NumericByRef().s4;
-
             // use the span length as write size, only the elements defined by the span must be written
             palI2c->WriteSize = writeSpanByte[Span::FIELD___length].NumericByRef().s4;
 
@@ -494,9 +489,6 @@ HRESULT Library_sys_dev_i2c_native_System_Device_I2c_I2cDevice::
 
         if (readBuffer != nullptr)
         {
-            // Get the read offset, only the elements defined by the span must be read, not the whole array
-            readOffset = readSpanByte[Span::FIELD___start].NumericByRef().s4;
-
             // use the span length as read size, only the elements defined by the span must be read
             palI2c->ReadSize = readSpanByte[Span::FIELD___length].NumericByRef().s4;
 
@@ -538,13 +530,13 @@ HRESULT Library_sys_dev_i2c_native_System_Device_I2c_I2cDevice::
         if (writeBuffer != nullptr)
         {
             // grab the pointer to the array by starting and the offset specified in the span
-            palI2c->WriteBuffer = (uint8_t *)writeBuffer->GetElement(writeOffset);
+            palI2c->WriteBuffer = (uint8_t *)writeBuffer->GetFirstElement();
         }
 
         if (readBuffer != nullptr)
         {
             // grab the pointer to the array by starting and the offset specified in the span
-            palI2c->ReadBuffer = (uint8_t *)readBuffer->GetElement(readOffset);
+            palI2c->ReadBuffer = (uint8_t *)readBuffer->GetFirstElement();
         }
     }
 

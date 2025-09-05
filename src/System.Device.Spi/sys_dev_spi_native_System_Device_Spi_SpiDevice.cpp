@@ -82,8 +82,6 @@ HRESULT Library_sys_dev_spi_native_System_Device_Spi_SpiDevice::NativeTransfer(
     uint8_t *readData = nullptr;
     int16_t writeSize = 0;
     int16_t readSize = 0;
-    int16_t readOffset = 0;
-    int16_t writeOffset = 0;
     SPI_WRITE_READ_SETTINGS rws;
     uint32_t deviceId;
 
@@ -142,13 +140,9 @@ HRESULT Library_sys_dev_spi_native_System_Device_Spi_SpiDevice::NativeTransfer(
                 writeBuffer = writeSpanByte[Span::FIELD___array].DereferenceArray();
                 if (writeBuffer != nullptr)
                 {
-                    // Get the write offset, only the elements defined by the span must be written, not the whole
-                    // array
-                    writeOffset = writeSpanByte[Span::FIELD___start].NumericByRef().s4;
-
                     // use the span length as write size, only the elements defined by the span must be written
                     writeSize = writeSpanByte[Span::FIELD___length].NumericByRef().s4;
-                    writeData = (unsigned char *)writeBuffer->GetElement(writeOffset);
+                    writeData = (unsigned char *)writeBuffer->GetFirstElement();
 
                     // pin the buffer
                     writeBuffer->Pin();
@@ -168,12 +162,9 @@ HRESULT Library_sys_dev_spi_native_System_Device_Spi_SpiDevice::NativeTransfer(
                 readBuffer = readSpanByte[Span::FIELD___array].DereferenceArray();
                 if (readBuffer != nullptr)
                 {
-                    // Get the read offset, only the elements defined by the span must be read, not the whole array
-                    readOffset = readSpanByte[Span::FIELD___start].NumericByRef().s4;
-
-                    // use the span length as read size, only the elements defined by the span must be read
+                        // use the span length as read size, only the elements defined by the span must be read
                     readSize = readSpanByte[Span::FIELD___length].NumericByRef().s4;
-                    readData = (unsigned char *)readBuffer->GetElement(readOffset);
+                    readData = (unsigned char *)readBuffer->GetFirstElement();
 
                     // pin the buffer
                     readBuffer->Pin();
