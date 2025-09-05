@@ -162,7 +162,7 @@ HRESULT Library_sys_dev_spi_native_System_Device_Spi_SpiDevice::NativeTransfer(
                 readBuffer = readSpanByte[Span::FIELD___array].DereferenceArray();
                 if (readBuffer != nullptr)
                 {
-                        // use the span length as read size, only the elements defined by the span must be read
+                    // use the span length as read size, only the elements defined by the span must be read
                     readSize = readSpanByte[Span::FIELD___length].NumericByRef().s4;
                     readData = (unsigned char *)readBuffer->GetFirstElement();
 
