@@ -1606,6 +1606,11 @@ bool CLR_RT_MethodDef_Instance::ResolveToken(
                             // advance to the generic instance which will point to the class
                             parserCaller.Advance(elemCaller);
 
+                            if (elemCaller.DataType == DATATYPE_GENERICINST)
+                            {
+                                parserCaller.Advance(elemCaller);
+                            }
+
                             CLR_UINT32 callerTypeDefToken = elemCaller.Class.data;
 
                             // parse the MethodRef declared TypeSpec
@@ -1619,6 +1624,11 @@ bool CLR_RT_MethodDef_Instance::ResolveToken(
 
                                 // advance to the generic instance which will point to the class
                                 parserOwner.Advance(elemOwner);
+
+                                  if (elemOwner.DataType == DATATYPE_GENERICINST)
+                                {
+                                      parserOwner.Advance(elemOwner);
+                                }
 
                                 CLR_UINT32 ownerTypeDefToken = elemOwner.Class.data;
 
@@ -1636,17 +1646,17 @@ bool CLR_RT_MethodDef_Instance::ResolveToken(
                     const CLR_RT_TypeSpec_Index *definitiveTypeSpec = useCaller ? callerGeneric : methodOwnerTS;
                     genericType = (CLR_RT_TypeSpec_Index *)definitiveTypeSpec;
 
-                    CLR_INDEX tsAsmIdx = genericType->Assembly();
-                    CLR_RT_Assembly *genericTypeAssembly = g_CLR_RT_TypeSystem.m_assemblies[tsAsmIdx - 1];
+                    CLR_INDEX tsAsmIdx = methodOwnerTS->Assembly();
+                    CLR_RT_Assembly *methodAssembly = g_CLR_RT_TypeSystem.m_assemblies[methodOwnerTS->Assembly() - 1];
 
-                    const CLR_RECORD_TYPESPEC *ts = genericTypeAssembly->GetTypeSpec(definitiveTypeSpec->TypeSpec());
+                    const CLR_RECORD_TYPESPEC *ts = methodAssembly->GetTypeSpec(methodOwnerTS->TypeSpec());
                     CLR_UINT32 assemblyIndex = 0xFFFF;
                     CLR_RT_MethodDef_Index methodIndex;
 
-                    if (!genericTypeAssembly->FindMethodDef(
+                    if (!methodAssembly->FindMethodDef(
                             ts,
-                            genericTypeAssembly->GetString(mr->name),
-                            genericTypeAssembly,
+                            methodAssembly->GetString(mr->name),
+                            methodAssembly,
                             mr->signature,
                             methodIndex,
                             assemblyIndex))
