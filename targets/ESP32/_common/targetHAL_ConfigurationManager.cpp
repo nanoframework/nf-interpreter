@@ -308,11 +308,14 @@ void InitialiseWirelessDefaultConfig(HAL_Configuration_Wireless80211 *config, ui
     // Once smart config has run will start up automatically and reconnect of disconnected
     // Application will have to disable Wi-Fi to save power etc
     // if Ethernet enable then disable
+    // Disable Wi-Fi if Ethernet is enabled for all targets except esp32_p4 which by default will have both active at same time
+#if !defined(CONFIG_IDF_TARGET_ESP32P4)
     if (ethernetEnabled)
     {
         config->Options = Wireless80211Configuration_ConfigurationOptions_Disable;
     }
     else
+#endif
     {
         config->Options =
             (Wireless80211Configuration_ConfigurationOptions)(Wireless80211Configuration_ConfigurationOptions_AutoConnect |
