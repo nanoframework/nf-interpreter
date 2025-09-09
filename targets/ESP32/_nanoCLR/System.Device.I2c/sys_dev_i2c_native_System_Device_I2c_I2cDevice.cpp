@@ -287,7 +287,7 @@ HRESULT Library_sys_dev_i2c_native_System_Device_I2c_I2cDevice::
         if (readSize > 0)
         {
             // grab the pointer to the array by starting and the offset specified in the span
-            memcpy(readData->GetElement(readOffset), readBuffer, readSize);
+            memcpy(readData->GetFirstElement(), readBuffer, readSize);
         }
 
         result[I2cTransferResult::FIELD___status].SetInteger((CLR_UINT32)I2cTransferStatus_FullTransfer);

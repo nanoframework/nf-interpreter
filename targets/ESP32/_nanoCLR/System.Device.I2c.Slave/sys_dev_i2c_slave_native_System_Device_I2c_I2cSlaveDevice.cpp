@@ -471,7 +471,7 @@ HRESULT Library_sys_dev_i2c_slave_native_System_Device_I2c_I2cSlaveDevice::
     {
         // copy over to the managed buffer
         // grab the pointer to the array by starting and the offset specified in the span
-        memcpy(readBuffer->GetElement(bufferOffset), palI2c->Buffer, bytesTransfered);
+        memcpy(readBuffer->GetFirstElement(), palI2c->Buffer, bytesTransfered);
     }
 
     // pop read count from the stack
