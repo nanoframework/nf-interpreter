@@ -1054,10 +1054,8 @@ bool CLR_RT_TypeDef_Instance::ResolveToken(
 
                     if (elem.Levels > 0)
                     {
-                        // this is an array
-                        data = elem.Class.data;
-                        assembly = g_CLR_RT_TypeSystem.m_assemblies[elem.Class.Assembly() - 1];
-                        target = assembly->GetTypeDef(elem.Class.Type());
+                        // this is an array, can't init like this
+                        return false;
                     }
                     else
                     {
