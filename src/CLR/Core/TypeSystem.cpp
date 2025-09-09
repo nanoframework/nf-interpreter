@@ -1648,7 +1648,6 @@ bool CLR_RT_MethodDef_Instance::ResolveToken(
                     const CLR_RT_TypeSpec_Index *definitiveTypeSpec = useCaller ? callerGeneric : methodOwnerTS;
                     genericType = (CLR_RT_TypeSpec_Index *)definitiveTypeSpec;
 
-                    CLR_INDEX tsAsmIdx = methodOwnerTS->Assembly();
                     CLR_RT_Assembly *methodAssembly = g_CLR_RT_TypeSystem.m_assemblies[methodOwnerTS->Assembly() - 1];
 
                     const CLR_RECORD_TYPESPEC *ts = methodAssembly->GetTypeSpec(methodOwnerTS->TypeSpec());

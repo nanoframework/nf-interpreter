@@ -2096,7 +2096,7 @@ HRESULT CLR_RT_ExecutionEngine::InitializeLocals(
                     if (methodDefInstance.genericType && methodDefInstance.genericType->data != 0)
                     {
                         CLR_RT_TypeSpec_Instance typeSpec{};
-                        typeSpec.InitializeFromIndex((CLR_RT_TypeSpec_Index)methodDefInstance.genericType->data);
+                        typeSpec.InitializeFromIndex((const CLR_RT_TypeSpec_Index&)methodDefInstance.genericType->data);
 
                         typeSpec.assembly->FindGenericParamAtTypeSpec(
                             methodDefInstance.genericType->TypeSpec(),
