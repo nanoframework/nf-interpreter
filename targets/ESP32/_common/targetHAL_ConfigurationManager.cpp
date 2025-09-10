@@ -153,7 +153,12 @@ bool AppendConfigBlock(
 void ConfigurationManager_EnumerateConfigurationBlocks()
 {
     HAL_CONFIGURATION_NETWORK *networkConfigs = ConfigStorage_FindNetworkConfigurationBlocks();
-ESP_LOGI(TAG, "ConfigurationManager_EnumerateConfigurationBlocks %d",networkConfigs->Count);
+    if (networkConfigs == NULL)
+    {
+        ESP_LOGE(TAG, "FindNetworkConfigurationBlocks returned NULL(out of memory)");
+        return;
+    }
+
     // check network configs count
     if (networkConfigs->Count == 0)
     {
@@ -178,8 +183,6 @@ ESP_LOGI(TAG, "ConfigurationManager_EnumerateConfigurationBlocks %d",networkConf
 #if HAL_USE_THREAD == TRUE
         netTypes[networkCount++] = NetworkInterfaceType_Thread;
 #endif
-ESP_LOGI(TAG, "networkCount %d", networkCount);
-
         // allocate memory for ONE network configuration
         HAL_Configuration_NetworkInterface *networkConfig =
             (HAL_Configuration_NetworkInterface *)platform_malloc(sizeof(HAL_Configuration_NetworkInterface));
@@ -207,7 +210,7 @@ ESP_LOGI(TAG, "networkCount %d", networkCount);
 
         // have to enumerate again to pick it up
         networkConfigs = ConfigStorage_FindNetworkConfigurationBlocks();
-ESP_LOGI(TAG, "networkCount %d/%d", networkCount, networkConfigs->Count);
+        ESP_LOGI(TAG, "networkCount %d/%d", networkCount, networkConfigs->Count);
     }
 
     // find wireless 80211 network configuration blocks
@@ -353,6 +356,8 @@ void InitialiseWirelessAPDefaultConfig(HAL_Configuration_WirelessAP *config, uin
 //  Default initialisation of Network interface config blocks for ESP32 targets
 bool InitialiseNetworkDefaultConfig(HAL_Configuration_NetworkInterface *config, uint32_t configurationIndex)
 {
+    esp_err_t err = ESP_OK;
+
     // make sure the config block marker is set
     memcpy(config->Marker, c_MARKER_CONFIGURATION_NETWORK_V1, sizeof(c_MARKER_CONFIGURATION_NETWORK_V1));
 
@@ -364,7 +369,7 @@ bool InitialiseNetworkDefaultConfig(HAL_Configuration_NetworkInterface *config, 
             config->SpecificConfigId = 0;
 
             // get default MAC for interface
-            esp_read_mac(config->MacAddress, ESP_MAC_WIFI_STA);
+            err = esp_read_mac(config->MacAddress, ESP_MAC_WIFI_STA);
             break;
 
         case NetworkInterfaceType_WirelessAP: // Wireless AP
@@ -376,7 +381,7 @@ bool InitialiseNetworkDefaultConfig(HAL_Configuration_NetworkInterface *config, 
             // config->IPv4GatewayAddress
 
             // get default MAC for interface
-            esp_read_mac(config->MacAddress, ESP_MAC_WIFI_SOFTAP);
+            err = esp_read_mac(config->MacAddress, ESP_MAC_WIFI_SOFTAP);
             break;
 
         case NetworkInterfaceType_Ethernet: // Ethernet
@@ -384,7 +389,7 @@ bool InitialiseNetworkDefaultConfig(HAL_Configuration_NetworkInterface *config, 
             config->AutomaticDNS = 1;
 
             // get default MAC for interface
-            esp_read_mac(config->MacAddress, ESP_MAC_ETH);
+            err = esp_read_mac(config->MacAddress, ESP_MAC_ETH);
             break;
 
 #if HAL_USE_THREAD == TRUE
@@ -396,6 +401,12 @@ bool InitialiseNetworkDefaultConfig(HAL_Configuration_NetworkInterface *config, 
 
         default:
             break;
+    }
+
+    if (err != ESP_OK)
+    {
+        // On ESP32_P4 esp_read_mac can fail
+        esp_efuse_mac_get_default(config->MacAddress);
     }
 
     // always good
