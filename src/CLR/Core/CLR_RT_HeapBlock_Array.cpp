@@ -18,6 +18,8 @@ HRESULT CLR_RT_HeapBlock_Array::CreateInstance(
     CLR_RT_HeapBlock_Array *pArray;
     CLR_RT_TypeDef_Index cls;
     CLR_RT_TypeDef_Instance inst{};
+    CLR_RT_TypeDescriptor desc{};
+    CLR_RT_ReflectionDef_Index workingReflex = reflex;
 
     reference.SetObjectReference(nullptr);
 
@@ -26,12 +28,31 @@ HRESULT CLR_RT_HeapBlock_Array::CreateInstance(
 
     if (reflex.kind != REFLECTION_TYPE)
     {
-        NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+        // check for typespec
+        if (reflex.kind == REFLECTION_TYPESPEC)
+        {
+            // get the type descriptor for the typespec
+            (desc.InitializeFromTypeSpec(reflex.data.typeSpec));
+
+            // check that this ends up being a reflecion type
+            if (desc.m_reflex.kind != REFLECTION_TYPE)
+            {
+                NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+            }
+
+            // copy over to working reflex
+            workingReflex = desc.m_reflex;
+            workingReflex.levels++;
+        }
+        else
+        {
+            NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+        }
     }
 
-    if (reflex.levels == 1)
+    if (workingReflex.levels == 1)
     {
-        cls = reflex.data.type;
+        cls = workingReflex.data.type;
     }
     else
     {
@@ -104,7 +125,7 @@ HRESULT CLR_RT_HeapBlock_Array::CreateInstance(
     }
     else if (def.ResolveToken(tk, assm))
     {
-        NANOCLR_CHECK_HRESULT(ref.SetReflection(def, caller->genericType));
+        NANOCLR_CHECK_HRESULT(ref.SetReflection((CLR_RT_TypeSpec_Index)def));
     }
     else
     {

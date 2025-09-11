@@ -413,7 +413,7 @@ const CLR_UINT8 *CLR_SkipBodyOfOpcodeCompressed(const CLR_UINT8 *ip, CLR_OPCODE 
 
 #if defined(NANOCLR_TRACE_INSTRUCTIONS)
 
-void CLR_RT_Assembly::DumpToken(CLR_UINT32 token, const CLR_RT_TypeSpec_Index *genericType)
+void CLR_RT_Assembly::DumpToken(CLR_UINT32 token, const CLR_RT_MethodDef_Instance &methodDefInstance)
 {
     NATIVE_PROFILE_CLR_DIAGNOSTICS();
     CLR_UINT32 index = CLR_DataFromTk(token);
@@ -447,12 +447,12 @@ void CLR_RT_Assembly::DumpToken(CLR_UINT32 token, const CLR_RT_TypeSpec_Index *g
             const auto &xref = crossReferenceFieldRef[index];
 
             // If the caller passed in a closed‐generic TypeSpec, use that …
-            if (genericType != nullptr && genericType->data != CLR_EmptyToken)
+            if (methodDefInstance.genericType != nullptr && methodDefInstance.genericType->data != CLR_EmptyToken)
             {
                 // Build the closed‐generic owner name
                 char rgType[256], *sz = rgType;
                 size_t cb = sizeof(rgType);
-                g_CLR_RT_TypeSystem.BuildTypeName(*genericType, sz, cb, 0);
+                g_CLR_RT_TypeSystem.BuildTypeName(*methodDefInstance.genericType, sz, cb, 0);
 
                 // Append the field name
                 CLR_SafeSprintf(sz, cb, "::%s", GetString(fr->name));
@@ -472,18 +472,18 @@ void CLR_RT_Assembly::DumpToken(CLR_UINT32 token, const CLR_RT_TypeSpec_Index *g
             CLR_UINT32 idx = CLR_DataFromTk(token);
             auto &xref = crossReferenceMethodRef[idx];
 
-            // Build a MethodRef_Index so we can format the reference:
-            CLR_RT_MethodRef_Index mri;
-            mri.Set(assemblyIndex, idx);
+            // Build a MethodDef_Index so we can format the reference:
+            CLR_RT_MethodDef_Index mdi;
+            mdi.data = xref.target.data;
 
-            // Decide which TypeSpec to supply to BuildMethodRefName:
-            // 1) If the caller passed a non-null genericType (i.e. we’re inside SimpleList<I4>),
+            // Decide which TypeSpec to supply to BuildMethodName:
+            // 1) If the caller passed a non-null genericType (i.e. we're inside SimpleList<I4>),
             //    use that, so ResizeArray prints as SimpleList<I4>::ResizeArray.
             // 2) Otherwise, fall back to xref.genericType (the raw MethodRef own owner).
             const CLR_RT_TypeSpec_Index *ownerTypeSpec;
-            if (genericType != nullptr && NANOCLR_INDEX_IS_VALID(*genericType))
+            if (methodDefInstance.genericType != nullptr && NANOCLR_INDEX_IS_VALID(*methodDefInstance.genericType))
             {
-                ownerTypeSpec = genericType;
+                ownerTypeSpec = methodDefInstance.genericType;
             }
             else
             {
@@ -492,7 +492,9 @@ void CLR_RT_Assembly::DumpToken(CLR_UINT32 token, const CLR_RT_TypeSpec_Index *g
 
             char buf[256], *p = buf;
             size_t cb = sizeof(buf);
-            g_CLR_RT_TypeSystem.BuildMethodRefName(mri, ownerTypeSpec, p, cb);
+
+            g_CLR_RT_TypeSystem.BuildMethodName(mdi, ownerTypeSpec, p, cb);
+
             CLR_Debug::Printf("%s", buf);
             break;
         }
@@ -525,12 +527,12 @@ void CLR_RT_Assembly::DumpToken(CLR_UINT32 token, const CLR_RT_TypeSpec_Index *g
             //
 
             CLR_UINT32 ownerAsm = assemblyIndex;
-            if (genericType != nullptr && NANOCLR_INDEX_IS_VALID(*genericType))
+            if (methodDefInstance.genericType != nullptr && NANOCLR_INDEX_IS_VALID(*methodDefInstance.genericType))
             {
-                ownerAsm = genericType->Assembly();
+                ownerAsm = methodDefInstance.genericType->Assembly();
             }
 
-            CLR_RT_TypeSpec_Index tsIdx;
+            CLR_RT_TypeSpec_Index tsIdx{};
             tsIdx.Set(assemblyIndex, index);
 
             // bind to get the signature blob
@@ -543,8 +545,8 @@ void CLR_RT_Assembly::DumpToken(CLR_UINT32 token, const CLR_RT_TypeSpec_Index *g
             }
 
             // start parsing the signature
-            CLR_RT_SignatureParser parser;
-            parser.Initialize_TypeSpec(tsInst.assembly, tsInst.target);
+            CLR_RT_SignatureParser parser{};
+            parser.Initialize_TypeSpec(tsInst);
 
             // read first element
             CLR_RT_SignatureParser::Element elem;
@@ -559,17 +561,31 @@ void CLR_RT_Assembly::DumpToken(CLR_UINT32 token, const CLR_RT_TypeSpec_Index *g
                 break;
             }
 
-            if (elem.DataType == DATATYPE_VAR || elem.DataType == DATATYPE_MVAR)
+            if (elem.DataType == DATATYPE_GENERICINST)
             {
-                int gpIndex = elem.GenericParamPosition;
+                if (FAILED(parser.Advance(elem)))
+                {
+                    // unable to bind; dump raw RID
+                    CLR_Debug::Printf("[TYPESPEC:%08x]", token);
+                    break;
+                }
+            }
+
+            if (elem.DataType == DATATYPE_VAR)
+            {
+                int gpPosition = elem.GenericParamPosition;
 
                 // if the caller's genericType is non‐null, ask the CLR to map !n→actual argument:
-                if (genericType != nullptr && NANOCLR_INDEX_IS_VALID(*genericType))
+                if (methodDefInstance.genericType != nullptr && NANOCLR_INDEX_IS_VALID(*methodDefInstance.genericType))
                 {
                     CLR_RT_TypeDef_Index tdArg{};
                     NanoCLRDataType dtArg;
-                    bool ok = g_CLR_RT_TypeSystem.m_assemblies[genericType->Assembly() - 1]
-                                  ->FindGenericParamAtTypeSpec(genericType->TypeSpec(), gpIndex, tdArg, dtArg);
+                    bool ok = g_CLR_RT_TypeSystem.m_assemblies[methodDefInstance.genericType->Assembly() - 1]
+                                  ->FindGenericParamAtTypeSpec(
+                                      methodDefInstance.genericType->TypeSpec(),
+                                      gpPosition,
+                                      tdArg,
+                                      dtArg);
                     if (ok)
                     {
                         char bufArg[256]{};
@@ -585,15 +601,47 @@ void CLR_RT_Assembly::DumpToken(CLR_UINT32 token, const CLR_RT_TypeSpec_Index *g
                     }
                 }
 
-                // Couldn't resolve or caller was not generic: print "!n" or "!!n" literally
-                if (elem.DataType == DATATYPE_VAR)
+                // Couldn't resolve or caller was not generic: print "!n" literally
+                CLR_Debug::Printf("!%d", gpPosition);
+
+                break;
+            }
+            else if (elem.DataType == DATATYPE_MVAR)
+            {
+                int gpPosition = elem.GenericParamPosition;
+
+                // if the caller's genericType is non‐null, ask the CLR to map !n→actual argument:
+                if (methodDefInstance.genericType != nullptr && NANOCLR_INDEX_IS_VALID(*methodDefInstance.genericType))
                 {
-                    CLR_Debug::Printf("!%d", gpIndex);
+                    CLR_RT_GenericParam_Index gpIndex;
+
+                    bool ok = g_CLR_RT_TypeSystem.m_assemblies[methodDefInstance.genericType->Assembly() - 1]
+                                  ->FindGenericParamAtMethodDef(methodDefInstance, gpPosition, gpIndex);
+                    if (ok)
+                    {
+                        CLR_RT_GenericParam_CrossReference gp =
+                            g_CLR_RT_TypeSystem.m_assemblies[methodDefInstance.genericType->Assembly() - 1]
+                                ->crossReferenceGenericParam[gpIndex.GenericParam()];
+
+                        char bufArg[256]{};
+                        char *pArg = bufArg;
+                        size_t cbArg = sizeof(bufArg);
+
+                        g_CLR_RT_TypeSystem.BuildTypeName(
+                            gp.classTypeDef,
+                            pArg,
+                            cbArg,
+                            CLR_RT_TypeSystem::TYPENAME_FLAGS_FULL,
+                            elem.Levels);
+
+                        CLR_Debug::Printf("%s", bufArg);
+
+                        break;
+                    }
                 }
-                else
-                {
-                    CLR_Debug::Printf("!!%d", gpIndex);
-                }
+                // Couldn't resolve or caller was not generic: print "!!n" literally
+                CLR_Debug::Printf("!!%d", gpPosition);
+
                 break;
             }
             else if (elem.DataType == DATATYPE_SZARRAY)
@@ -611,13 +659,17 @@ void CLR_RT_Assembly::DumpToken(CLR_UINT32 token, const CLR_RT_TypeSpec_Index *g
                 {
                     int gpIndex = elem.GenericParamPosition;
 
-                    if (genericType != nullptr && NANOCLR_INDEX_IS_VALID(*genericType))
+                    if (methodDefInstance.genericType != nullptr &&
+                        NANOCLR_INDEX_IS_VALID(*methodDefInstance.genericType))
                     {
                         CLR_RT_TypeDef_Index tdArg{};
                         NanoCLRDataType dtArg;
 
-                        bool genericParamFound =
-                            tsInst.assembly->FindGenericParamAtTypeSpec(genericType->TypeSpec(), gpIndex, tdArg, dtArg);
+                        bool genericParamFound = tsInst.assembly->FindGenericParamAtTypeSpec(
+                            methodDefInstance.genericType->TypeSpec(),
+                            gpIndex,
+                            tdArg,
+                            dtArg);
                         if (genericParamFound)
                         {
                             // print "I4[]" or the bound argument plus []
@@ -887,12 +939,12 @@ void CLR_RT_Assembly::DumpOpcodeDirect(
             else
             {
                 // In the unlikely case ResolveToken fails, fall back to raw DumpToken:
-                DumpToken(token, call.genericType);
+                DumpToken(token, call);
             }
         }
         else
         {
-            DumpToken(token, call.genericType);
+            DumpToken(token, call);
         }
     }
     else

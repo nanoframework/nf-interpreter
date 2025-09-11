@@ -91,8 +91,10 @@ struct Library_corlib_native_System_Reflection_FieldInfo
 struct Library_corlib_native_System_Type
 {
     NANOCLR_NATIVE_DECLARE(get_DeclaringType___SystemType);
+    NANOCLR_NATIVE_DECLARE(GetGenericTypeDefinition___SystemType);
     NANOCLR_NATIVE_DECLARE(GetMethod___SystemReflectionMethodInfo__STRING__SystemReflectionBindingFlags);
     NANOCLR_NATIVE_DECLARE(IsInstanceOfType___BOOLEAN__OBJECT);
+    NANOCLR_NATIVE_DECLARE(GetGenericArguments___SZARRAY_SystemType);
     NANOCLR_NATIVE_DECLARE(
         InvokeMember___OBJECT__STRING__SystemReflectionBindingFlags__SystemReflectionBinder__OBJECT__SZARRAY_OBJECT);
     NANOCLR_NATIVE_DECLARE(GetConstructor___SystemReflectionConstructorInfo__SZARRAY_SystemType);
@@ -108,6 +110,8 @@ struct Library_corlib_native_System_Type
     NANOCLR_NATIVE_DECLARE(get_IsEnum___BOOLEAN);
     NANOCLR_NATIVE_DECLARE(get_IsSerializable___BOOLEAN);
     NANOCLR_NATIVE_DECLARE(get_IsArray___BOOLEAN);
+    NANOCLR_NATIVE_DECLARE(get_IsGenericType___BOOLEAN);
+    NANOCLR_NATIVE_DECLARE(get_IsGenericTypeDefinition___BOOLEAN);
     NANOCLR_NATIVE_DECLARE(GetTypeInternal___STATIC__SystemType__STRING__STRING__BOOLEAN__SZARRAY_I4);
     NANOCLR_NATIVE_DECLARE(GetTypeFromHandle___STATIC__SystemType__SystemRuntimeTypeHandle);
 
@@ -697,6 +701,14 @@ struct Library_corlib_native_System_MulticastDelegate
     //--//
 };
 
+struct Library_corlib_native_System_Nullable_1
+{
+    static const int FIELD__hasValue = 1;
+    static const int FIELD__value = 2;
+
+    //--//
+};
+
 struct Library_corlib_native_System_Number
 {
     NANOCLR_NATIVE_DECLARE(FormatNative___STATIC__STRING__OBJECT__BOOLEAN__STRING__STRING__STRING__STRING__SZARRAY_I4);
@@ -763,6 +775,20 @@ struct Library_corlib_native_System_Random
 
     static HRESULT GetRandom(CLR_RT_StackFrame &stack, CLR_RT_Random *&rand, bool create = false);
 };
+
+#if (NANOCLR_REFLECTION == TRUE)
+
+struct Library_corlib_native_System_ReadOnlySpan_1
+{
+    static const int FIELD___array = 1;
+    static const int FIELD___length = 2;
+
+    NANOCLR_NATIVE_DECLARE(NativeReadOnlySpanConstructor___VOID__SZARRAY_GENERICTYPE__I4__I4);
+
+    //--//
+};
+
+#endif // NANOCLR_REFLECTION
 
 struct Library_corlib_native_System_Reflection_AssemblyName
 {
@@ -910,6 +936,23 @@ struct Library_corlib_native_System_Single
     //--//
 };
 
+#if (NANOCLR_REFLECTION == TRUE)
+
+struct Library_corlib_native_System_Span_1
+{
+    static const int FIELD___array = 1;
+    static const int FIELD___length = 2;
+
+    NANOCLR_NATIVE_DECLARE(CopyTo___VOID__SystemSpan_1);
+    NANOCLR_NATIVE_DECLARE(NativeSpanConstructor___VOID__SZARRAY_GENERICTYPE__I4__I4);
+
+    //--//
+};
+
+#endif // NANOCLR_REFLECTION
+
+#if (NANOCLR_REFLECTION != TRUE)
+
 struct Library_corlib_native_System_SpanByte
 {
     static const int FIELD___array = 1;
@@ -918,6 +961,8 @@ struct Library_corlib_native_System_SpanByte
 
     //--//
 };
+
+#endif // NANOCLR_REFLECTION
 
 struct Library_corlib_native_System_Threading_AutoResetEvent
 {

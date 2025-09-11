@@ -7,7 +7,7 @@
 
 typedef Library_sys_dev_i2c_native_System_Device_I2c_I2cConnectionSettings I2cConnectionSettings;
 typedef Library_sys_dev_i2c_native_System_Device_I2c_I2cTransferResult I2cTransferResult;
-typedef Library_corlib_native_System_SpanByte SpanByte;
+typedef Library_corlib_native_System_Span_1 Span;
 
 ////////////////////////////////////////////
 // declaration of the the I2C PAL structs //
@@ -412,8 +412,6 @@ HRESULT Library_sys_dev_i2c_native_System_Device_I2c_I2cDevice::
     CLR_RT_HeapBlock *connectionSettings;
     CLR_RT_HeapBlock_Array *writeBuffer = nullptr;
     CLR_RT_HeapBlock_Array *readBuffer = nullptr;
-    int readOffset = 0;
-    int writeOffset = 0;
     I2C_TransferSeq_TypeDef i2cTransfer;
     I2C_TransferReturn_TypeDef transactionResult = i2cTransferInProgress;
 
@@ -458,21 +456,18 @@ HRESULT Library_sys_dev_i2c_native_System_Device_I2c_I2cDevice::
             break;
     }
 
-    // dereference the write and read SpanByte from the arguments
+    // dereference the write and read Span from the arguments
     writeSpanByte = stack.Arg1().Dereference();
 
     if (writeSpanByte != nullptr)
     {
         // get buffer
-        writeBuffer = writeSpanByte[SpanByte::FIELD___array].DereferenceArray();
+        writeBuffer = writeSpanByte[Span::FIELD___array].DereferenceArray();
 
         if (writeBuffer != nullptr)
         {
-            // Get the write offset, only the elements defined by the span must be written, not the whole array
-            writeOffset = writeSpanByte[SpanByte::FIELD___start].NumericByRef().s4;
-
             // use the span length as write size, only the elements defined by the span must be written
-            palI2c->WriteSize = writeSpanByte[SpanByte::FIELD___length].NumericByRef().s4;
+            palI2c->WriteSize = writeSpanByte[Span::FIELD___length].NumericByRef().s4;
 
             // pin the buffer so DMA can find it where its supposed to be
             writeBuffer->Pin();
@@ -490,15 +485,12 @@ HRESULT Library_sys_dev_i2c_native_System_Device_I2c_I2cDevice::
     if (readSpanByte != nullptr)
     {
         // get buffer
-        readBuffer = readSpanByte[SpanByte::FIELD___array].DereferenceArray();
+        readBuffer = readSpanByte[Span::FIELD___array].DereferenceArray();
 
         if (readBuffer != nullptr)
         {
-            // Get the read offset, only the elements defined by the span must be read, not the whole array
-            readOffset = readSpanByte[SpanByte::FIELD___start].NumericByRef().s4;
-
             // use the span length as read size, only the elements defined by the span must be read
-            palI2c->ReadSize = readSpanByte[SpanByte::FIELD___length].NumericByRef().s4;
+            palI2c->ReadSize = readSpanByte[Span::FIELD___length].NumericByRef().s4;
 
             // pin the buffer so DMA can find it where its supposed to be
             readBuffer->Pin();
@@ -538,13 +530,13 @@ HRESULT Library_sys_dev_i2c_native_System_Device_I2c_I2cDevice::
         if (writeBuffer != nullptr)
         {
             // grab the pointer to the array by starting and the offset specified in the span
-            palI2c->WriteBuffer = (uint8_t *)writeBuffer->GetElement(writeOffset);
+            palI2c->WriteBuffer = (uint8_t *)writeBuffer->GetFirstElement();
         }
 
         if (readBuffer != nullptr)
         {
             // grab the pointer to the array by starting and the offset specified in the span
-            palI2c->ReadBuffer = (uint8_t *)readBuffer->GetElement(readOffset);
+            palI2c->ReadBuffer = (uint8_t *)readBuffer->GetFirstElement();
         }
     }
 

@@ -232,56 +232,17 @@ HRESULT CLR_RT_HeapBlock::SetReflection(const CLR_RT_Assembly_Index &assm)
     NANOCLR_NOCLEANUP_NOLABEL();
 }
 
-HRESULT CLR_RT_HeapBlock::SetReflection(const CLR_RT_TypeSpec_Instance &tsInst, const CLR_RT_TypeSpec_Index *caller)
+HRESULT CLR_RT_HeapBlock::SetReflection(const CLR_RT_TypeSpec_Index &typeSpec)
 {
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
 
     m_id.raw = CLR_RT_HEAPBLOCK_RAW_ID(DATATYPE_REFLECTION, 0, 1);
-    m_data.reflection.kind = REFLECTION_TYPE;
+    m_data.reflection.kind = REFLECTION_TYPESPEC;
+    m_data.reflection.levels = 0;
+    m_data.reflection.data.typeSpec = typeSpec;
 
-    // start parsing the signature
-    CLR_RT_SignatureParser parser;
-    parser.Initialize_TypeSpec(tsInst.assembly, tsInst.target);
-
-    // read first element
-    CLR_RT_SignatureParser::Element elem;
-    if (FAILED(parser.Advance(elem)))
-    {
-        NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
-    }
-
-    if (elem.DataType == DATATYPE_VAR || elem.DataType == DATATYPE_MVAR)
-    {
-        int gpIndex = elem.GenericParamPosition;
-
-        // if the caller's genericType is non‐null, ask the CLR to map !n→actual argument:
-        if (caller != nullptr && NANOCLR_INDEX_IS_VALID(*caller))
-        {
-            CLR_RT_TypeDef_Index tdArg{};
-            NanoCLRDataType dtArg;
-
-            bool ok = g_CLR_RT_TypeSystem.m_assemblies[caller->Assembly() - 1]
-                          ->FindGenericParamAtTypeSpec(caller->TypeSpec(), gpIndex, tdArg, dtArg);
-            if (ok)
-            {
-                m_data.reflection.data.type = tdArg;
-                m_data.reflection.levels = elem.Levels;
-            }
-        }
-        else
-        {
-            // TODO
-            _ASSERTE(false);
-        }
-    }
-    else
-    {
-        m_data.reflection.data.type = elem.Class;
-        m_data.reflection.levels = elem.Levels;
-    }
-
-    NANOCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP_NOLABEL();
 }
 
 HRESULT CLR_RT_HeapBlock::SetReflection(const CLR_RT_TypeDef_Index &cls)
@@ -349,23 +310,14 @@ HRESULT CLR_RT_HeapBlock::SetObjectCls(const CLR_RT_TypeDef_Index &cls)
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT CLR_RT_HeapBlock::SetGenericInstanceObject(const CLR_RT_TypeSpec_Index &genericType)
+HRESULT CLR_RT_HeapBlock::SetGenericInstanceType(const CLR_RT_TypeSpec_Index &genericType)
 {
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
 
-    CLR_RT_TypeSpec_Instance instance;
+    m_data.reflection.data.typeSpec = genericType;
 
-    if (instance.InitializeFromIndex(genericType) == false)
-    {
-        NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
-    }
-
-    m_data.genericInstance.genericType = genericType;
-    m_data.genericInstance.ptr = nullptr;
-    m_id.raw = CLR_RT_HEAPBLOCK_RAW_ID(DATATYPE_GENERICINST, 0, 1);
-
-    NANOCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP_NOLABEL();
 }
 
 //--//
@@ -850,7 +802,7 @@ bool CLR_RT_HeapBlock::TypeDescriptorsMatch(
         auto &eSpec = expectedType.m_handlerGenericType;
         auto &aSpec = actualType.m_handlerGenericType;
 
-        return eSpec.Assembly() == aSpec.Assembly() && eSpec.typeDefIndex == aSpec.typeDefIndex;
+        return eSpec.Assembly() == aSpec.Assembly() && eSpec.genericTypeDef.data == aSpec.genericTypeDef.data;
     }
 
     if (actualDataType <= DATATYPE_LAST_PRIMITIVE_TO_PRESERVE)
@@ -1097,7 +1049,7 @@ HRESULT CLR_RT_HeapBlock::PerformUnboxing(const CLR_RT_TypeDef_Instance &cls)
     // Validates that src keeps something boxed and the boxed value is VALUE type.
     if (src->IsBoxed() == false || src->DataType() != DATATYPE_VALUETYPE)
     {
-        NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+        NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_CAST);
     }
 
     // Validates the type of data kept by object corresponds to type in cls.

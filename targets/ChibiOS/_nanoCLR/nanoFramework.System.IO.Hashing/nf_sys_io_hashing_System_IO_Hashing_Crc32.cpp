@@ -7,7 +7,7 @@
 #include <hal.h>
 #include <hal_nf_community.h>
 
-typedef Library_corlib_native_System_SpanByte SpanByte;
+typedef Library_corlib_native_System_Span_1 Span;
 
 // set config to use standard CRC32
 crcConfig crc32Config = {
@@ -27,7 +27,6 @@ HRESULT Library_nf_sys_io_hashing_System_IO_Hashing_Crc32::ComputeHash___STATIC_
     CLR_RT_HeapBlock_Array *buffer;
     uint8_t *bufferData = nullptr;
     int16_t bufferSize = 0;
-    int16_t bufferOffset = 0;
     uint32_t crc32 = 0;
     uint32_t hash = 0;
 
@@ -39,14 +38,11 @@ HRESULT Library_nf_sys_io_hashing_System_IO_Hashing_Crc32::ComputeHash___STATIC_
     crc32 = stack.Arg0().NumericByRef().u4;
 
     // get buffer
-    buffer = bufferSpanByte[SpanByte::FIELD___array].DereferenceArray();
-
-    // Get the write offset
-    bufferOffset = bufferSpanByte[SpanByte::FIELD___start].NumericByRef().s4;
+    buffer = bufferSpanByte[Span::FIELD___array].DereferenceArray();
 
     // use the span length as write size, only the elements defined by the span must be written
-    bufferSize = bufferSpanByte[SpanByte::FIELD___length].NumericByRef().s4;
-    bufferData = (unsigned char *)buffer->GetElement(bufferOffset);
+    bufferSize = bufferSpanByte[Span::FIELD___length].NumericByRef().s4;
+    bufferData = (unsigned char *)buffer->GetFirstElement();
 
     crcAquireModule();
 
