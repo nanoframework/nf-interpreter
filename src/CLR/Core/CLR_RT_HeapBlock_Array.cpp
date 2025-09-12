@@ -18,7 +18,6 @@ HRESULT CLR_RT_HeapBlock_Array::CreateInstance(
     CLR_RT_HeapBlock_Array *pArray;
     CLR_RT_TypeDef_Index cls;
     CLR_RT_TypeDef_Instance inst{};
-    CLR_RT_TypeDescriptor desc{};
 
     reference.SetObjectReference(nullptr);
 
