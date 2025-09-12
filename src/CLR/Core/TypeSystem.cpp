@@ -814,6 +814,8 @@ bool CLR_RT_TypeSpec_Instance::ResolveToken(
         }
         else
         {
+            cachedElementType = element.Class;
+
             genericTypeDef.Clear();
         }
 
