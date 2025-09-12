@@ -1033,6 +1033,7 @@ bool CLR_RT_TypeDef_Instance::ResolveToken(
     const CLR_RT_MethodDef_Instance *caller)
 {
     NATIVE_PROFILE_CLR_CORE();
+
     if (assm)
     {
         CLR_UINT32 index = CLR_DataFromTk(tk);
