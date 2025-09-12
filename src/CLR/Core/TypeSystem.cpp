@@ -615,6 +615,9 @@ HRESULT CLR_RT_SignatureParser::Advance(Element &res)
 
                             // need to update the parser counter too
                             ParamCount = GenParamCount;
+
+                            // reset the generic instance flag
+                            IsGenericInst = false;
                         }
 
                         NANOCLR_SET_AND_LEAVE(S_OK);
@@ -709,7 +712,14 @@ bool CLR_RT_TypeSpec_Instance::InitializeFromIndex(const CLR_RT_TypeSpec_Index &
         CLR_RT_SignatureParser::Element element;
 
         // if this is a generic, advance another one
-        parser.Advance(element);
+        if (FAILED(parser.Advance(element)))
+        {
+            ClearInstance();
+
+            return false;
+        }
+
+        levels = element.Levels;
 
         if (element.DataType == DATATYPE_GENERICINST)
         {
@@ -722,9 +732,7 @@ bool CLR_RT_TypeSpec_Instance::InitializeFromIndex(const CLR_RT_TypeSpec_Index &
         return true;
     }
 
-    data = 0;
-    assembly = nullptr;
-    target = nullptr;
+    ClearInstance();
 
     return false;
 }
@@ -736,9 +744,15 @@ void CLR_RT_TypeSpec_Instance::ClearInstance()
 
     assembly = nullptr;
     target = nullptr;
+    levels = 0;
+    genericTypeDef.Clear();
+    data = 0;
 }
 
-bool CLR_RT_TypeSpec_Instance::ResolveToken(CLR_UINT32 token, CLR_RT_Assembly *assm)
+bool CLR_RT_TypeSpec_Instance::ResolveToken(
+    CLR_UINT32 token,
+    CLR_RT_Assembly *assm,
+    const CLR_RT_MethodDef_Instance *caller)
 {
     NATIVE_PROFILE_CLR_CORE();
     if (assm && CLR_TypeFromTk(token) == TBL_TypeSpec)
@@ -758,6 +772,8 @@ bool CLR_RT_TypeSpec_Instance::ResolveToken(CLR_UINT32 token, CLR_RT_Assembly *a
         // if this is a generic, advance another one
         parser.Advance(element);
 
+        levels = element.Levels;
+
         if (element.DataType == DATATYPE_GENERICINST)
         {
             // this is a generic instance, so we need to advance one more time
@@ -765,6 +781,44 @@ bool CLR_RT_TypeSpec_Instance::ResolveToken(CLR_UINT32 token, CLR_RT_Assembly *a
 
             genericTypeDef = element.Class;
         }
+        else if (element.DataType == DATATYPE_VAR)
+        {
+            // this is type‐generic slot (!T), resolve against the caller's closed generic
+
+            int pos = element.GenericParamPosition;
+
+            // Use the *caller's* bound genericType (Stack<Int32>, etc.)
+            if (caller == nullptr || caller->genericType == nullptr)
+            {
+                ClearInstance();
+
+                return false;
+            }
+
+            auto &tsi = *caller->genericType;
+            CLR_UINT32 closedTsRow = tsi.TypeSpec();
+
+            Set(caller->genericType->Assembly(), closedTsRow);
+            assembly = g_CLR_RT_TypeSystem.m_assemblies[caller->genericType->Assembly() - 1];
+
+            target = assm->GetTypeSpec(closedTsRow);
+
+            NanoCLRDataType realDataType;
+
+            g_CLR_RT_TypeSystem.m_assemblies[caller->genericType->Assembly() - 1]
+                ->FindGenericParamAtTypeSpec(closedTsRow, (CLR_UINT32)pos, cachedElementType, realDataType);
+        }
+        else if (element.DataType == DATATYPE_MVAR)
+        {
+            ASSERT(false);
+        }
+        else
+        {
+            cachedElementType = element.Class;
+
+            genericTypeDef.Clear();
+        }
+
         return true;
     }
 
@@ -981,6 +1035,7 @@ bool CLR_RT_TypeDef_Instance::ResolveToken(
     const CLR_RT_MethodDef_Instance *caller)
 {
     NATIVE_PROFILE_CLR_CORE();
+
     if (assm)
     {
         CLR_UINT32 index = CLR_DataFromTk(tk);

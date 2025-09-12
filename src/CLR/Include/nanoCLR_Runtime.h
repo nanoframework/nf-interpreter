@@ -2087,13 +2087,16 @@ struct CLR_RT_TypeSpec_Instance : public CLR_RT_TypeSpec_Index
     const CLR_RECORD_TYPESPEC *target;
 
     CLR_RT_TypeDef_Index genericTypeDef;
+    CLR_UINT32 levels;
+
+    CLR_RT_TypeDef_Index cachedElementType;
 
     //--//
 
     bool InitializeFromIndex(const CLR_RT_TypeSpec_Index &index);
     void ClearInstance();
 
-    bool ResolveToken(CLR_UINT32 tk, CLR_RT_Assembly *assm);
+    bool ResolveToken(CLR_UINT32 tk, CLR_RT_Assembly *assm, const CLR_RT_MethodDef_Instance *caller = nullptr);
 };
 
 //--//
