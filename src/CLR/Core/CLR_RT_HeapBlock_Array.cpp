@@ -19,7 +19,6 @@ HRESULT CLR_RT_HeapBlock_Array::CreateInstance(
     CLR_RT_TypeDef_Index cls;
     CLR_RT_TypeDef_Instance inst{};
     CLR_RT_TypeDescriptor desc{};
-    CLR_RT_ReflectionDef_Index workingReflex = reflex;
 
     reference.SetObjectReference(nullptr);
 
@@ -28,31 +27,12 @@ HRESULT CLR_RT_HeapBlock_Array::CreateInstance(
 
     if (reflex.kind != REFLECTION_TYPE)
     {
-        // check for typespec
-        if (reflex.kind == REFLECTION_TYPESPEC)
-        {
-            // get the type descriptor for the typespec
-            (desc.InitializeFromTypeSpec(reflex.data.typeSpec));
-
-            // check that this ends up being a reflecion type
-            if (desc.m_reflex.kind != REFLECTION_TYPE)
-            {
-                NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
-            }
-
-            // copy over to working reflex
-            workingReflex = desc.m_reflex;
-            workingReflex.levels++;
-        }
-        else
-        {
-            NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
-        }
+        NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
     }
 
-    if (workingReflex.levels == 1)
+    if (reflex.levels == 1)
     {
-        cls = workingReflex.data.type;
+        cls = reflex.data.type;
     }
     else
     {
@@ -115,7 +95,7 @@ HRESULT CLR_RT_HeapBlock_Array::CreateInstance(
 
     CLR_RT_HeapBlock ref;
     CLR_RT_TypeDef_Instance cls{};
-    CLR_RT_TypeSpec_Instance def{};
+    CLR_RT_TypeSpec_Instance tsInst{};
 
     memset(&ref, 0, sizeof(struct CLR_RT_HeapBlock));
 
@@ -123,9 +103,15 @@ HRESULT CLR_RT_HeapBlock_Array::CreateInstance(
     {
         NANOCLR_CHECK_HRESULT(ref.SetReflection(cls));
     }
-    else if (def.ResolveToken(tk, assm))
+    else if (tsInst.ResolveToken(tk, assm))
     {
-        NANOCLR_CHECK_HRESULT(ref.SetReflection((CLR_RT_TypeSpec_Index)def));
+        // Create a fake reflection index to pass the element type and levels.
+        CLR_RT_ReflectionDef_Index reflex{};
+        reflex.kind = REFLECTION_TYPE;
+        reflex.levels = tsInst.levels;
+        reflex.data.type = tsInst.cachedElementType;
+
+        NANOCLR_CHECK_HRESULT(ref.SetReflection(reflex));
     }
     else
     {
