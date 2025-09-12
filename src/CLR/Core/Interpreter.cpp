@@ -3308,7 +3308,7 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                         case TBL_TypeSpec:
                         {
                             CLR_RT_TypeSpec_Instance tsInst{};
-                            if (tsInst.ResolveToken(arg, assm) == false)
+                            if (tsInst.ResolveToken(arg, assm, &stack->m_call) == false)
                             {
                                 NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
                             }
