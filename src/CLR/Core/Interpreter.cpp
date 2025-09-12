@@ -3344,7 +3344,8 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                             else
                             {
                                 // prefer generic type
-                                if (NANOCLR_INDEX_IS_VALID(tsInst.genericTypeDef) && NANOCLR_INDEX_IS_INVALID(tsInst.cachedElementType))
+                                if (NANOCLR_INDEX_IS_VALID(tsInst.genericTypeDef) &&
+                                    NANOCLR_INDEX_IS_INVALID(tsInst.cachedElementType))
                                 {
                                     evalPos[0].SetReflection((const CLR_RT_TypeSpec_Index &)tsInst.data);
                                 }
@@ -3360,7 +3361,6 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                                 {
                                     NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
                                 }
-
                             }
                         }
                         break;
