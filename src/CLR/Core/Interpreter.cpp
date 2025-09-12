@@ -3307,13 +3307,34 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                     {
                         case TBL_TypeSpec:
                         {
+                            // this has to provide the closed instance of the type in the context of the caller'sc
                             CLR_RT_TypeSpec_Instance tsInst{};
                             if (tsInst.ResolveToken(arg, assm, &stack->m_call) == false)
                             {
                                 NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
                             }
 
-                            evalPos[0].SetReflection((const CLR_RT_TypeSpec_Index &)tsInst.data);
+                            // Check if this is an array type
+                            if (tsInst.levels > 0)
+                            {
+                                // This is an array
+
+                                // Create a fake reflection index to pass the element type and levels.
+                                CLR_RT_ReflectionDef_Index reflex;
+                                reflex.kind = REFLECTION_TYPE;
+                                reflex.levels = tsInst.levels;
+                                reflex.data.type = tsInst.cachedElementType;
+
+                                evalPos[0].SetReflection(reflex);
+                            }
+                            else
+                            {
+                                // set reflection with TypeDef instance
+                                CLR_RT_TypeDef_Instance cls{};
+                                cls.InitializeFromIndex(tsInst.cachedElementType);
+
+                                evalPos[0].SetReflection(cls);
+                            }
                         }
                         break;
 
