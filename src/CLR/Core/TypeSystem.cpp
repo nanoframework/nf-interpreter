@@ -615,6 +615,9 @@ HRESULT CLR_RT_SignatureParser::Advance(Element &res)
 
                             // need to update the parser counter too
                             ParamCount = GenParamCount;
+
+                            // reset the generic instance flag
+                            IsGenericInst = false;
                         }
 
                         NANOCLR_SET_AND_LEAVE(S_OK);
