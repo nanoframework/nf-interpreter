@@ -3323,17 +3323,44 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                                 CLR_RT_ReflectionDef_Index reflex;
                                 reflex.kind = REFLECTION_TYPE;
                                 reflex.levels = tsInst.levels;
-                                reflex.data.type = tsInst.cachedElementType;
+
+                                // prefer generic type
+                                if (NANOCLR_INDEX_IS_VALID(tsInst.genericTypeDef) &&
+                                    NANOCLR_INDEX_IS_INVALID(tsInst.cachedElementType))
+                                {
+                                    reflex.data.type = tsInst.genericTypeDef;
+                                }
+                                else if (NANOCLR_INDEX_IS_VALID(tsInst.cachedElementType))
+                                {
+                                    reflex.data.type = tsInst.cachedElementType;
+                                }
+                                else
+                                {
+                                    NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+                                }
 
                                 evalPos[0].SetReflection(reflex);
                             }
                             else
                             {
-                                // set reflection with TypeDef instance
-                                CLR_RT_TypeDef_Instance cls{};
-                                cls.InitializeFromIndex(tsInst.cachedElementType);
+                                // prefer generic type
+                                if (NANOCLR_INDEX_IS_VALID(tsInst.genericTypeDef) && NANOCLR_INDEX_IS_INVALID(tsInst.cachedElementType))
+                                {
+                                    evalPos[0].SetReflection((const CLR_RT_TypeSpec_Index &)tsInst.data);
+                                }
+                                else if (NANOCLR_INDEX_IS_VALID(tsInst.cachedElementType))
+                                {
+                                    // set reflection with TypeDef instance
+                                    CLR_RT_TypeDef_Instance cls{};
+                                    cls.InitializeFromIndex(tsInst.cachedElementType);
 
-                                evalPos[0].SetReflection(cls);
+                                    evalPos[0].SetReflection(cls);
+                                }
+                                else
+                                {
+                                    NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+                                }
+
                             }
                         }
                         break;
