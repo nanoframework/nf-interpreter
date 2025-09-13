@@ -210,6 +210,10 @@ void ConfigurationManager_EnumerateConfigurationBlocks()
 
         // have to enumerate again to pick it up
         networkConfigs = ConfigStorage_FindNetworkConfigurationBlocks();
+        if (!networkConfigs) {
+            ESP_LOGE(TAG, "Re-enumeration of config returned NULL");
+            return;
+        }
         ESP_LOGI(TAG, "networkCount %d/%d", networkCount, networkConfigs->Count);
     }
 
@@ -356,7 +360,7 @@ void InitialiseWirelessAPDefaultConfig(HAL_Configuration_WirelessAP *config, uin
 //  Default initialisation of Network interface config blocks for ESP32 targets
 bool InitialiseNetworkDefaultConfig(HAL_Configuration_NetworkInterface *config, uint32_t configurationIndex)
 {
-    esp_err_t err = ESP_OK;
+    int macType = -1;
 
     // make sure the config block marker is set
     memcpy(config->Marker, c_MARKER_CONFIGURATION_NETWORK_V1, sizeof(c_MARKER_CONFIGURATION_NETWORK_V1));
@@ -367,29 +371,23 @@ bool InitialiseNetworkDefaultConfig(HAL_Configuration_NetworkInterface *config, 
             config->StartupAddressMode = AddressMode_DHCP;
             config->AutomaticDNS = 1;
             config->SpecificConfigId = 0;
-
-            // get default MAC for interface
-            err = esp_read_mac(config->MacAddress, ESP_MAC_WIFI_STA);
+            macType = ESP_MAC_WIFI_STA;
             break;
 
         case NetworkInterfaceType_WirelessAP: // Wireless AP
             config->StartupAddressMode = AddressMode_Static;
             config->SpecificConfigId = 0;
+            macType = ESP_MAC_WIFI_SOFTAP;
             // Set default address 192.168.1.1
             // config->IPv4Address
             // config->IPv4NetMask
             // config->IPv4GatewayAddress
-
-            // get default MAC for interface
-            err = esp_read_mac(config->MacAddress, ESP_MAC_WIFI_SOFTAP);
             break;
 
         case NetworkInterfaceType_Ethernet: // Ethernet
             config->StartupAddressMode = AddressMode_DHCP;
             config->AutomaticDNS = 1;
-
-            // get default MAC for interface
-            err = esp_read_mac(config->MacAddress, ESP_MAC_ETH);
+            macType = ESP_MAC_ETH;
             break;
 
 #if HAL_USE_THREAD == TRUE
@@ -403,10 +401,15 @@ bool InitialiseNetworkDefaultConfig(HAL_Configuration_NetworkInterface *config, 
             break;
     }
 
-    if (err != ESP_OK)
+    if (macType != -1)
     {
-        // On ESP32_P4 esp_read_mac can fail
-        esp_efuse_mac_get_default(config->MacAddress);
+        // get default MAC for interface
+        if (esp_read_mac(config->MacAddress, (esp_mac_type_t)macType) != ESP_OK)
+        {
+            // On ESP32_P4 esp_read_mac can fail with host wifi
+            esp_efuse_mac_get_default(config->MacAddress);
+            config->MacAddress[5] += macType; // make sure each interface has a different MAC
+        }
     }
 
     // always good
