@@ -70,6 +70,10 @@ jobs:
 
       # get commit message
       - powershell: |
+          git config --global user.email "nfbot"
+          git config --global user.name "nanoframework@outlook.com"
+
+          $auth = "basic $([System.Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes(":$(GitHubToken)")))"
 
           # set default values
           echo "##vso[task.setvariable variable=RUN_MSCORLIB_TESTS;isOutput=true]false"
@@ -88,7 +92,7 @@ jobs:
             {
               Write-Host "##[command] **This is a PR build**"
 
-              $commit = Invoke-RestMethod -Uri "https://api.github.com/repos/nanoframework/nf-interpreter/commits/$(Build.SourceVersion)" -ContentType "application/json" -Method GET
+              $commit = Invoke-RestMethod -Uri "https://api.github.com/repos/nanoframework/nf-interpreter/commits/$(Build.SourceVersion)" -Header @{"Authorization"="$auth"} -ContentType "application/json" -Method GET
 
               if( ($commit.commit.author.name -eq "nfbot") -and ($commit.commit.message -like "*[version update]*") )
               {
@@ -1347,109 +1351,6 @@ jobs:
           artifactName: VsTestCrashDumps
           artifactType: pipeline
 
-  ######################
-  # generate change log
-  - job: Generate_change_log
-    dependsOn:
-      - Build_STM32_targets
-      - Build_ESP32_targets
-      - Build_NXP_targets
-      - Build_TI_SimpleLink_targets
-      - Build_Azure_RTOS_targets
-    # skip build if this is a PR, submitted by nfbot and the commit message contains [version update]
-    condition: >-
-      and(
-        succeeded('Build_STM32_targets'),
-        succeeded('Build_ESP32_targets'),
-        succeeded('Build_NXP_targets'),
-        succeeded('Build_TI_SimpleLink_targets'),
-        succeeded('Build_Azure_RTOS_targets'),
-        not( eq(variables['Build.Reason'], 'PullRequest')
-      ),
-      or(
-        eq(variables['Build.SourceBranchName'], 'main'),
-        startsWith(variables['Build.SourceBranch'], 'refs/tags/v') ),
-        ne( variables['StartReleaseCandidate'], true )
-      )
-
-    pool:
-      vmImage: "windows-latest"
-
-    steps:
-      - task: DotNetCoreCLI@2
-        condition: succeeded()
-        displayName: Install NBGV tool
-        inputs:
-          command: custom
-          custom: tool
-          arguments: install --tool-path . nbgv
-
-      - script: nbgv cloud -a -c
-        condition: succeeded()
-        displayName: Set build number
-
-      - task: UseRubyVersion@0
-        condition: succeeded()
-        inputs:
-          versionSpec: "= 3.0"
-          addToPath: true
-
-      # Cache change log cache files
-      - task: Cache@2
-        displayName: Cache change log cache files
-        condition: >-
-          and(
-            succeeded(),
-            eq(variables['System.PullRequest.PullRequestId'], ''),
-            startsWith(variables['Build.SourceBranch'], 'refs/tags/v')
-          )
-        inputs:
-          key: "changeLogCacheFiles"
-          restoreKeys: 1_0
-          path: |
-            $(Agent.TempDirectory)/github-changelog-logger.log
-            $(Agent.TempDirectory)/github-changelog-http-cache
-
-      # generate change log including future version
-      - powershell: |
-          gem install github_changelog_generator --quiet --no-document
-          # need to call it passing both cache options with full path otherwise it won't work
-          github_changelog_generator --token $(GitHubToken) --cache-log  $env:AGENT_TEMPDIRECTORY\github-changelog-logger.log --cache-file $env:AGENT_TEMPDIRECTORY\github-changelog-http-cache --pr-wo-labels --future-release "v$env:NBGV_AssemblyVersion"
-        condition: >-
-          and(
-            succeeded(),
-            eq(variables['System.PullRequest.PullRequestId'], ''),
-            startsWith(variables['Build.SourceBranch'], 'refs/tags/v')
-          )
-        displayName: Generate change log
-
-      # push new changelog to GitHub repo
-      - powershell: |
-          git config --global gc.auto 0
-          git config --global user.name nfbot
-          git config --global user.email nanoframework@outlook.com
-          git config --global core.autocrlf true
-
-          git add CHANGELOG.md
-          git commit -m "Update CHANGELOG" -m"***NO_CI***"
-
-          # compute authorization header in format "AUTHORIZATION: basic 'encoded token'"
-          # 'encoded token' is the Base64 of the string "nfbot:personal-token"
-          $auth = "basic $([System.Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes("nfbot:$(GitHubToken)")))"
-
-          git -c http.extraheader="AUTHORIZATION: $auth" push origin "HEAD:$(Build.SourceBranchName)"
-        condition: >-
-          and(
-            succeeded(),
-            eq(variables['System.PullRequest.PullRequestId'], ''),
-            not(
-              startsWith(variables['Build.SourceBranch'], 'refs/tags/v')
-            ),
-            eq( variables['StartReleaseCandidate'], false )
-          )
-        continueOnError: true
-        displayName: Push changelog to GitHub
-
   #################################
   # report build failure to Discord
   - job: Report_Build_Failure
@@ -1461,7 +1362,6 @@ jobs:
       - Build_Azure_RTOS_targets
       - Build_WIN32_nanoCLR
       - Build_nanoCLR_CLI
-      - Generate_change_log
       - Check_Code_Style
     condition: >-
       and(
@@ -1473,8 +1373,7 @@ jobs:
           failed('Build_TI_SimpleLink_targets'),
           failed('Build_Azure_RTOS_targets'),
           failed('Build_WIN32_nanoCLR'),
-          failed('Build_nanoCLR_CLI'),
-          failed('Generate_change_log')
+          failed('Build_nanoCLR_CLI')
         )
       )
 
