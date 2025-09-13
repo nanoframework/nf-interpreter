@@ -63,7 +63,7 @@ int Esp32_GetMappedDevicePins(Esp32_MapDeviceType deviceType, int busIndex, int 
 #endif
             case DEV_TYPE_I2S:
                 return (int)Esp32_I2S_DevicePinMap[busIndex][pinIndex];
-             
+
             default:
                 break;
         };
