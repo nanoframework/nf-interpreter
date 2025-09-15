@@ -1061,6 +1061,12 @@
         },
         {
             "inherits": "base-user",
+            "name": "ESP32_C5_UART",
+            "displayName": "ESP32_C5_UART",
+            "configurePreset": "ESP32_C5_UART"
+        },        
+        {
+            "inherits": "base-user",
             "name": "ESP32_C6_THREAD",
             "displayName": "ESP32_C6_THREAD",
             "configurePreset": "ESP32_C6_THREAD"
