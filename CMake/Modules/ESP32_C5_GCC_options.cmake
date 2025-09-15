@@ -21,7 +21,7 @@ macro(nf_set_compile_options)
     target_compile_options(${NFSCO_TARGET} PUBLIC ${NFSCO_EXTRA_COMPILE_OPTIONS} -Wall -Wextra -Werror -Wno-sign-compare -Wno-unused-parameter -Wshadow -Wimplicit-fallthrough -fshort-wchar -fno-builtin -fno-common -fno-exceptions -fcheck-new )
 
     # this series has FPU 
-    target_compile_definitions(${NFSCO_TARGET} PUBLIC -DTARGET=esp32c6 -DUSE_FPU=TRUE -DPLATFORM_ESP32 -DESP_PLATFORM) 
+    target_compile_definitions(${NFSCO_TARGET} PUBLIC -DTARGET=esp32c5 -DUSE_FPU=TRUE -DPLATFORM_ESP32 -DESP_PLATFORM) 
 
 endmacro()
 
