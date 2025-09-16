@@ -81,7 +81,6 @@
                 "API_nanoFramework.ResourceManager": "ON",
                 "API_nanoFramework.System.Collections": "ON",
                 "API_nanoFramework.System.Text": "ON",
-                "API_nanoFramework.Networking.Thread": "ON",
                 "API_nanoFramework.Graphics": "ON",
                 "GRAPHICS_DISPLAY": "Generic_SPI.cpp",
                 "TOUCHPANEL_DEVICE": "XPT2046.cpp",
