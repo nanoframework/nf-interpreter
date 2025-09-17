@@ -44,8 +44,8 @@ find_program(
    xtensa-esp32-elf-size
    CMAKE_FIND_ROOT_PATH_BOTH)
 
-set(CMAKE_C_FLAGS "-mlongcalls -Wno-frame-address" CACHE STRING "C Compiler Base Flags")
-set(CMAKE_CXX_FLAGS "-mlongcalls -Wno-frame-address -Wno-literal-suffix" CACHE STRING "C++ Compiler Base Flags")
+set(CMAKE_C_FLAGS "-mlongcalls -Wno-frame-address -fno-builtin-memcpy -fno-builtin-memset -fno-builtin-bzero -fno-builtin-stpcpy -fno-builtin-strncpy" CACHE STRING "C Compiler Base Flags")
+set(CMAKE_CXX_FLAGS "-mlongcalls -Wno-frame-address -Wno-literal-suffix -fno-builtin-memcpy -fno-builtin-memset -fno-builtin-bzero -fno-builtin-stpcpy -fno-builtin-strncpy" CACHE STRING "C++ Compiler Base Flags")
 
 # root paths to search on the filesystem for cross-compiling
 get_filename_component(CMAKE_FIND_ROOT_PATH ${CMAKE_C_COMPILER} DIRECTORY CACHE)

@@ -84,6 +84,7 @@ We also have a [Community Targets](https://github.com/nanoframework/nf-Community
 | XIAO_ESP32C3 | USB jtag -> VS| [![Latest Version @ Cloudsmith](https://api-prd.cloudsmith.io/v1/badges/version/net-nanoframework/nanoframework-images/raw/XIAO_ESP32C3/latest/x/?render=true)](https://cloudsmith.io/~net-nanoframework/repos/nanoframework-images/packages/detail/raw/XIAO_ESP32C3/latest/) |
 | ESP32_C6_THREAD | USB jtag -> VS, OpenThread, Display | [![Latest Version @ Cloudsmith](https://api-prd.cloudsmith.io/v1/badges/version/net-nanoframework/nanoframework-images/raw/ESP32_C6_THREAD/latest/x/?render=true)](https://cloudsmith.io/~net-nanoframework/repos/nanoframework-images/packages/detail/raw/ESP32_C6_THREAD/latest/) |
 | ESP32_H2_THREAD | USB jtag -> VS, OpenThread | [![Latest Version @ Cloudsmith](https://api-prd.cloudsmith.io/v1/badges/version/net-nanoframework/nanoframework-images/raw/ESP32_H2_THREAD/latest/x/?render=true)](https://cloudsmith.io/~net-nanoframework/repos/nanoframework-images/packages/detail/raw/ESP32_H2_THREAD/latest/) |
+| ESP32_P4_UART | Beta, Uart -> VS, wifi ESP32_C6, No Display | [![Latest Version @ Cloudsmith](https://api-prd.cloudsmith.io/v1/badges/version/net-nanoframework/nanoframework-images/raw/ESP32_P4_UART/latest/x/?render=true)](https://cloudsmith.io/~net-nanoframework/repos/nanoframework-images/packages/detail/raw/ESP32_P4_UART/latest/) |
 
 ### M5Stack
 

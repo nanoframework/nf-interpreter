@@ -38,9 +38,11 @@ steps:
         succeeded(),
         or(
           eq(variables['TargetSeries'], 'esp32'),
+          eq(variables['TargetSeries'], 'esp32c5'),
           eq(variables['TargetSeries'], 'esp32c6'),
+          eq(variables['TargetSeries'], 'esp32p4'),
           eq(variables['TargetSeries'], 'esp32s2'),
-          eq(variables['TargetSeries'], 'esp32s3')       
+          eq(variables['TargetSeries'], 'esp32s3')
         )
       )
     displayName: Generate ESP32 Partition tables for 16MB flash
@@ -55,7 +57,11 @@ steps:
         succeeded(),
         or(
           eq(variables['TargetSeries'], 'esp32'),
-          eq(variables['TargetSeries'], 'esp32s2')
+          eq(variables['TargetSeries'], 'esp32c5'),
+          eq(variables['TargetSeries'], 'esp32c6'),
+          eq(variables['TargetSeries'], 'esp32p4'),
+          eq(variables['TargetSeries'], 'esp32s2'),
+          eq(variables['TargetSeries'], 'esp32s3')
         )
       )
     displayName: Generate ESP32 Partition tables for 8MB flash
@@ -65,7 +71,19 @@ steps:
       arguments: '--verify ${{ parameters.partitionsDirectory }}\partitions_nanoclr_8mb.csv ${{ parameters.repoDirectory }}\build\partitions_8mb.bin'
 
   - task: PythonScript@0
-    condition: succeeded()
+      and(
+        succeeded(),
+        or(
+          eq(variables['TargetSeries'], 'esp32'),
+          eq(variables['TargetSeries'], 'esp32c3'),
+          eq(variables['TargetSeries'], 'esp32c5'),
+          eq(variables['TargetSeries'], 'esp32c6'),
+          eq(variables['TargetSeries'], 'esp32h2'),
+          eq(variables['TargetSeries'], 'esp32p4'),
+          eq(variables['TargetSeries'], 'esp32s2'),
+          eq(variables['TargetSeries'], 'esp32s3')
+        )
+      )
     displayName: Generate ESP32 Partition tables for 4MB flash
     inputs:
       scriptSource: "filePath"
@@ -78,7 +96,8 @@ steps:
         succeeded(),
         or(
           eq(variables['TargetSeries'], 'esp32'),
-          eq(variables['TargetSeries'], 'esp32c3')
+          eq(variables['TargetSeries'], 'esp32c3'),
+          eq(variables['TargetSeries'], 'esp32h2')
         )
       )
     displayName: Generate ESP32 Partition tables for 2MB flash
@@ -86,6 +105,21 @@ steps:
       scriptSource: "filePath"
       scriptPath: '$(IDF_PATH)\components\partition_table\gen_esp32part.py'
       arguments: '--verify ${{ parameters.partitionsDirectory }}\partitions_nanoclr_2mb.csv ${{ parameters.repoDirectory }}\build\partitions_2mb.bin'
+
+  - task: PythonScript@0
+    condition: >-
+      and(
+        succeeded(),
+        or(
+          eq(variables['TargetSeries'], 'esp32s3'),
+          eq(variables['TargetSeries'], 'esp32p4')
+        )
+      )
+    displayName: Generate ESP32 Partition tables for 32MB flash
+    inputs:
+      scriptSource: "filePath"
+      scriptPath: '$(IDF_PATH)\components\partition_table\gen_esp32part.py'
+      arguments: '--verify ${{ parameters.partitionsDirectory }}\partitions_nanoclr_32mb.csv ${{ parameters.repoDirectory }}\build\partitions_32mb.bin'
 
   - task: CopyFiles@2
     condition: succeeded()
