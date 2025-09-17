@@ -71,6 +71,7 @@ steps:
       arguments: '--verify ${{ parameters.partitionsDirectory }}\partitions_nanoclr_8mb.csv ${{ parameters.repoDirectory }}\build\partitions_8mb.bin'
 
   - task: PythonScript@0
+    condition: >-  
       and(
         succeeded(),
         or(
