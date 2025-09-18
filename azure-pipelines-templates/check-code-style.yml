@@ -24,7 +24,7 @@ steps:
 
         # find PR
         "Getting PR#$env:System_PullRequest_PullRequestNumber details..." | Write-Host -ForegroundColor White -NoNewline
-        $pr = Invoke-WebRequest "https://api.github.com/repos/$env:Build_Repository_Name/pulls/$env:System_PullRequest_PullRequestNumber" | ConvertFrom-Json
+        $pr = Invoke-RestMethod -Uri "https://api.github.com/repos/$env:Build_Repository_Name/pulls/$env:System_PullRequest_PullRequestNumber" -Header @{"Authorization"="$auth"} -ContentType "application/json" -Method GET
 
         if($($pr.number) -eq "$env:System_PullRequest_PullRequestNumber")
         {
