@@ -17,7 +17,7 @@ resources:
       type: github
       name: espressif/esp-idf
       endpoint: nanoframework
-      ref: refs/tags/v5.2.3
+      ref: refs/tags/v5.4.2
 
 # scheduled build
 # the schedule is defined at the AZDO web interface because of inconsistencies with time zones
@@ -595,6 +595,15 @@ jobs:
           PackageName: ESP_WROVER_KIT
           CMakePreset: ESP_WROVER_KIT
 
+        ESP32_P4_USB:
+          TargetBoard: ESP32_P4
+          TargetSeries: "esp32p4"
+          BuildOptions:
+          IDF_Target: esp32p4
+          TargetName: ESP32_P4_USB
+          PackageName: ESP32_P4_USB
+          CMakePreset: ESP32_P4_USB
+
     variables:
       DOTNET_NOLOGO: true
       # creates a counter and assigns it to the revision variable
@@ -602,7 +611,7 @@ jobs:
       IDF_PATH: "D:/a/1/s/esp-idf"
       PIP_CACHE_DIR: $(Pipeline.Workspace)/.pip
       TargetPlatform: "esp32"
-      IDF_TAG: "v5.2.3"
+      IDF_TAG: "v5.4.2"
 
     steps:
       - checkout: self

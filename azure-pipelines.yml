@@ -44,7 +44,7 @@ resources:
       type: github
       name: espressif/esp-idf
       endpoint: nanoframework
-      ref: refs/tags/v5.2.3
+      ref: refs/tags/v5.4.2
     - repository: mscorlib
       type: github
       name: nanoframework/CoreLibrary
@@ -549,6 +549,15 @@ jobs:
           PackageName: ESP32_ETHERNET_KIT_1.2
           CMakePreset: ESP32_ETHERNET_KIT_1.2
 
+        ESP32_P4_UART:
+          TargetBoard: ESP32_P4
+          TargetSeries: "esp32p4"
+          BuildOptions:
+          IDF_Target: esp32p4
+          TargetName: ESP32_P4_UART
+          PackageName: ESP32_P4_UART
+          CMakePreset: ESP32_P4_UART
+
     variables:
       DOTNET_NOLOGO: true
       # creates a counter and assigns it to the revision variable
@@ -556,7 +565,7 @@ jobs:
       IDF_PATH: "D:/a/1/s/esp-idf"
       PIP_CACHE_DIR: $(Pipeline.Workspace)/.pip
       TargetPlatform: "esp32"
-      IDF_TAG: "v5.2.3"
+      IDF_TAG: "v5.4.2"
 
     steps:
       - checkout: self

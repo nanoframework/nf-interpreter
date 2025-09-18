@@ -3,6 +3,9 @@
 // See LICENSE file in the project root for full license information.
 //
 
+// ESP32-P4 doesn't currently have smartconfig support
+#if !defined(CONFIG_SOC_WIRELESS_HOST_SUPPORTED)
+
 #include <nanoHAL.h>
 #include <esp_smartconfig.h>
 
@@ -101,3 +104,5 @@ void NF_ESP32_Start_wifi_smart_config(void)
 {
     xTaskCreate(smartconfig_task, "smartconfig_task", 4096, nullptr, 3, nullptr);
 }
+
+#endif

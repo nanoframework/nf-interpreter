@@ -16,6 +16,8 @@ bool ethernetEnabled = false;
 // NVS parameters for Interface config
 #define NVS_NAMESPACE "nanoF"
 
+static const char *TAG = "cm";
+
 // #define DEBUG_CONFIG        1
 
 #ifdef DEBUG_CONFIG
@@ -151,6 +153,11 @@ bool AppendConfigBlock(
 void ConfigurationManager_EnumerateConfigurationBlocks()
 {
     HAL_CONFIGURATION_NETWORK *networkConfigs = ConfigStorage_FindNetworkConfigurationBlocks();
+    if (networkConfigs == NULL)
+    {
+        ESP_LOGE(TAG, "FindNetworkConfigurationBlocks returned NULL(out of memory)");
+        return;
+    }
 
     // check network configs count
     if (networkConfigs->Count == 0)
@@ -162,7 +169,7 @@ void ConfigurationManager_EnumerateConfigurationBlocks()
         // ESP32 can have have up to 4 network interfaces: Wireless Station, Wireless AP, Ethernet and OpenThread
 
         // Allocate count & types of network interfaces
-#if defined(CONFIG_SOC_WIFI_SUPPORTED)
+#if defined(CONFIG_SOC_WIFI_SUPPORTED) || defined(CONFIG_SOC_WIRELESS_HOST_SUPPORTED)
         // Wireless Support
         netTypes[networkCount++] = NetworkInterfaceType_Wireless80211;
         netTypes[networkCount++] = NetworkInterfaceType_WirelessAP;
@@ -203,6 +210,11 @@ void ConfigurationManager_EnumerateConfigurationBlocks()
 
         // have to enumerate again to pick it up
         networkConfigs = ConfigStorage_FindNetworkConfigurationBlocks();
+        if (!networkConfigs) {
+            ESP_LOGE(TAG, "Re-enumeration of config returned NULL");
+            return;
+        }
+        ESP_LOGI(TAG, "networkCount %d/%d", networkCount, networkConfigs->Count);
     }
 
     // find wireless 80211 network configuration blocks
@@ -303,11 +315,14 @@ void InitialiseWirelessDefaultConfig(HAL_Configuration_Wireless80211 *config, ui
     // Once smart config has run will start up automatically and reconnect of disconnected
     // Application will have to disable Wi-Fi to save power etc
     // if Ethernet enable then disable
+    // Disable Wi-Fi if Ethernet is enabled for all targets except esp32_p4 which by default will have both active at same time
+#if !defined(CONFIG_IDF_TARGET_ESP32P4)
     if (ethernetEnabled)
     {
         config->Options = Wireless80211Configuration_ConfigurationOptions_Disable;
     }
     else
+#endif
     {
         config->Options =
             (Wireless80211Configuration_ConfigurationOptions)(Wireless80211Configuration_ConfigurationOptions_AutoConnect |
@@ -345,6 +360,8 @@ void InitialiseWirelessAPDefaultConfig(HAL_Configuration_WirelessAP *config, uin
 //  Default initialisation of Network interface config blocks for ESP32 targets
 bool InitialiseNetworkDefaultConfig(HAL_Configuration_NetworkInterface *config, uint32_t configurationIndex)
 {
+    int macType = -1;
+
     // make sure the config block marker is set
     memcpy(config->Marker, c_MARKER_CONFIGURATION_NETWORK_V1, sizeof(c_MARKER_CONFIGURATION_NETWORK_V1));
 
@@ -354,29 +371,23 @@ bool InitialiseNetworkDefaultConfig(HAL_Configuration_NetworkInterface *config, 
             config->StartupAddressMode = AddressMode_DHCP;
             config->AutomaticDNS = 1;
             config->SpecificConfigId = 0;
-
-            // get default MAC for interface
-            esp_read_mac(config->MacAddress, ESP_MAC_WIFI_STA);
+            macType = ESP_MAC_WIFI_STA;
             break;
 
         case NetworkInterfaceType_WirelessAP: // Wireless AP
             config->StartupAddressMode = AddressMode_Static;
             config->SpecificConfigId = 0;
+            macType = ESP_MAC_WIFI_SOFTAP;
             // Set default address 192.168.1.1
             // config->IPv4Address
             // config->IPv4NetMask
             // config->IPv4GatewayAddress
-
-            // get default MAC for interface
-            esp_read_mac(config->MacAddress, ESP_MAC_WIFI_SOFTAP);
             break;
 
         case NetworkInterfaceType_Ethernet: // Ethernet
             config->StartupAddressMode = AddressMode_DHCP;
             config->AutomaticDNS = 1;
-
-            // get default MAC for interface
-            esp_read_mac(config->MacAddress, ESP_MAC_ETH);
+            macType = ESP_MAC_ETH;
             break;
 
 #if HAL_USE_THREAD == TRUE
@@ -388,6 +399,17 @@ bool InitialiseNetworkDefaultConfig(HAL_Configuration_NetworkInterface *config, 
 
         default:
             break;
+    }
+
+    if (macType != -1)
+    {
+        // get default MAC for interface
+        if (esp_read_mac(config->MacAddress, (esp_mac_type_t)macType) != ESP_OK)
+        {
+            // On ESP32_P4 esp_read_mac can fail with host wifi
+            esp_efuse_mac_get_default(config->MacAddress);
+            config->MacAddress[5] += macType; // make sure each interface has a different MAC
+        }
     }
 
     // always good

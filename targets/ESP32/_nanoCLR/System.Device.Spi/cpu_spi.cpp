@@ -170,6 +170,8 @@ bool CPU_SPI_Initialize(uint8_t busIndex, const SPI_DEVICE_CONFIGURATION &spiDev
         data6_io_num : -1,
         // GPIO pin for spi data7 signal in octal mode, //-1 if not used.
         data7_io_num : -1,
+        // Output data IO default level when no transaction
+        data_io_default_level : 0,
         // max transfer size
         max_transfer_sz : 16384,
         // SPICOMMON_BUSFLAG_* flags
@@ -179,9 +181,9 @@ bool CPU_SPI_Initialize(uint8_t busIndex, const SPI_DEVICE_CONFIGURATION &spiDev
     };
 
     // Try with DMA first
-#if defined(CONFIG_IDF_TARGET_ESP32C3) || defined(CONFIG_IDF_TARGET_ESP32S3) || defined(CONFIG_IDF_TARGET_ESP32C6) ||  \
-    defined(CONFIG_IDF_TARGET_ESP32H2)
-    // First available bus on ESP32_C3/S3 is SPI2_HOST
+#if defined(CONFIG_IDF_TARGET_ESP32C3) || defined(CONFIG_IDF_TARGET_ESP32S3) || defined(CONFIG_IDF_TARGET_ESP32C5) ||  \
+    defined(CONFIG_IDF_TARGET_ESP32C6) || defined(CONFIG_IDF_TARGET_ESP32H2) || defined(CONFIG_IDF_TARGET_ESP32P4)
+    // First available bus on ESP32_C3/S3/P4 is SPI2_HOST
     esp_err_t ret = spi_bus_initialize((spi_host_device_t)(busIndex + SPI2_HOST), &bus_config, SPI_DMA_CH_AUTO);
 #else
     // First available bus on ESP32 is HSPI_HOST(1)
@@ -190,8 +192,8 @@ bool CPU_SPI_Initialize(uint8_t busIndex, const SPI_DEVICE_CONFIGURATION &spiDev
 
     if (ret != ESP_OK)
     {
-#if defined(CONFIG_IDF_TARGET_ESP32C3) || defined(CONFIG_IDF_TARGET_ESP32S3) || defined(CONFIG_IDF_TARGET_ESP32C6) ||  \
-    defined(CONFIG_IDF_TARGET_ESP32H2)
+#if defined(CONFIG_IDF_TARGET_ESP32C3) || defined(CONFIG_IDF_TARGET_ESP32S3) || defined(CONFIG_IDF_TARGET_ESP32C5) ||  \
+    defined(CONFIG_IDF_TARGET_ESP32C6) || defined(CONFIG_IDF_TARGET_ESP32H2) || defined(CONFIG_IDF_TARGET_ESP32P4)
         // First available bus on ESP32_C3/S3/C6/H2 is SPI2_HOST
         ESP_LOGE(TAG, "Unable to init SPI bus %d esp_err %d", busIndex + SPI2_HOST, ret);
 #else
@@ -212,9 +214,9 @@ bool CPU_SPI_Initialize(uint8_t busIndex, const SPI_DEVICE_CONFIGURATION &spiDev
 // Uninitialise the bus
 bool CPU_SPI_Uninitialize(uint8_t busIndex)
 {
-#if defined(CONFIG_IDF_TARGET_ESP32C3) || defined(CONFIG_IDF_TARGET_ESP32S3) || defined(CONFIG_IDF_TARGET_ESP32C6) ||  \
-    defined(CONFIG_IDF_TARGET_ESP32H2)
-    // First available bus on ESP32_C3/S3/C6/H2 is SPI2_HOST
+#if defined(CONFIG_IDF_TARGET_ESP32C3) || defined(CONFIG_IDF_TARGET_ESP32S3) || defined(CONFIG_IDF_TARGET_ESP32C5) ||  \
+    defined(CONFIG_IDF_TARGET_ESP32C6) || defined(CONFIG_IDF_TARGET_ESP32H2) || defined(CONFIG_IDF_TARGET_ESP32P4)
+    // First available bus on ESP32_C3/S3/C6/H2/P4 is SPI2_HOST
     esp_err_t ret = spi_bus_free((spi_host_device_t)(busIndex + SPI2_HOST));
 #else
     // First available bus on ESP32 is HSPI_HOST(1)
@@ -223,9 +225,9 @@ bool CPU_SPI_Uninitialize(uint8_t busIndex)
 
     if (ret != ESP_OK)
     {
-#if defined(CONFIG_IDF_TARGET_ESP32C3) || defined(CONFIG_IDF_TARGET_ESP32S3) || defined(CONFIG_IDF_TARGET_ESP32C6) ||  \
-    defined(CONFIG_IDF_TARGET_ESP32H2)
-        // First available bus on ESP32_C3/S3/C6/H2 is SPI2_HOST
+#if defined(CONFIG_IDF_TARGET_ESP32C3) || defined(CONFIG_IDF_TARGET_ESP32S3) || defined(CONFIG_IDF_TARGET_ESP32C5) ||  \
+    defined(CONFIG_IDF_TARGET_ESP32C6) || defined(CONFIG_IDF_TARGET_ESP32H2) || defined(CONFIG_IDF_TARGET_ESP32P4)
+        // First available bus on ESP32_C3/S3/C6/H2/P4 is SPI2_HOST
         ESP_LOGE(TAG, "spi_bus_free bus %d esp_err %d", busIndex + SPI2_HOST, ret);
 #else
         // First available bus on ESP32 is HSPI_HOST(1)
@@ -317,6 +319,7 @@ spi_device_interface_config_t GetConfig(const SPI_DEVICE_CONFIGURATION &spiDevic
         0,                   // cs_ena_posttrans
         clockHz,             // Clock speed in Hz
         0,                   // Input_delay_ns
+        SPI_SAMPLING_POINT_PHASE_0, // Sampling point
         -1,                  // Chip select, we will use manual chip select
         flags,               // SPI_DEVICE flags
         1,                   // Queue size
@@ -361,9 +364,9 @@ HRESULT CPU_SPI_Add_Device(const SPI_DEVICE_CONFIGURATION &spiDeviceConfig, uint
         // Add device to bus
         spi_device_handle_t deviceHandle;
 
-#if defined(CONFIG_IDF_TARGET_ESP32C3) || defined(CONFIG_IDF_TARGET_ESP32S3) || defined(CONFIG_IDF_TARGET_ESP32C6) ||  \
-    defined(CONFIG_IDF_TARGET_ESP32H2)
-        // First available bus on ESP32_C3/S3 is SPI2_HOST
+#if defined(CONFIG_IDF_TARGET_ESP32C3) || defined(CONFIG_IDF_TARGET_ESP32S3) || defined(CONFIG_IDF_TARGET_ESP32C5) || defined(CONFIG_IDF_TARGET_ESP32C6) ||  \
+    defined(CONFIG_IDF_TARGET_ESP32H2) || defined(CONFIG_IDF_TARGET_ESP32P4)
+        // First available bus on ESP32_C3/S3/P4 is SPI2_HOST
         esp_err_t ret =
             spi_bus_add_device((spi_host_device_t)(spiDeviceConfig.Spi_Bus + SPI2_HOST), &dev_config, &deviceHandle);
 #else
