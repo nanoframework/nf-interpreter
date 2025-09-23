@@ -876,7 +876,17 @@ struct Library_corlib_native_System_Runtime_CompilerServices_RuntimeHelpers
     NANOCLR_NATIVE_DECLARE(RunClassConstructor___STATIC__VOID__SystemRuntimeTypeHandle);
     NANOCLR_NATIVE_DECLARE(get_OffsetToStringData___STATIC__I4);
 
+#if (NANOCLR_REFLECTION == TRUE)
+    NANOCLR_NATIVE_DECLARE(IsReferenceOrContainsReferences___STATIC__BOOLEAN);
+#endif
+
     //--//
+
+    static HRESULT CheckReferenceOrContainsReferences(
+        const CLR_RT_TypeDef_Index &cls,
+        NanoCLRDataType dt,
+        CLR_RT_SignatureParser *parserCaller,
+        bool &isRefContainsRefs);
 };
 
 struct Library_corlib_native_System_Runtime_Remoting_RemotingServices

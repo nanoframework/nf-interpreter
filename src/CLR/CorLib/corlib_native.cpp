@@ -744,6 +744,7 @@ static const CLR_RT_MethodHandler method_lookup[] =
     Library_corlib_native_System_Runtime_CompilerServices_RuntimeHelpers::GetObjectValue___STATIC__OBJECT__OBJECT,
     Library_corlib_native_System_Runtime_CompilerServices_RuntimeHelpers::RunClassConstructor___STATIC__VOID__SystemRuntimeTypeHandle,
     Library_corlib_native_System_Runtime_CompilerServices_RuntimeHelpers::get_OffsetToStringData___STATIC__I4,
+    Library_corlib_native_System_Runtime_CompilerServices_RuntimeHelpers::IsReferenceOrContainsReferences___STATIC__BOOLEAN,
     nullptr,
     Library_corlib_native_System_Runtime_Remoting_RemotingServices::IsTransparentProxy___STATIC__BOOLEAN__OBJECT,
     nullptr,
@@ -1572,7 +1573,7 @@ const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_mscorlib =
 
 #if (NANOCLR_REFLECTION == TRUE)
 
-    0xF9C8A1EA,
+    0xCF059C3B,
 
 #elif (NANOCLR_REFLECTION == FALSE)
 

@@ -2175,6 +2175,7 @@ struct CLR_RT_MethodDef_Instance : public CLR_RT_MethodDef_Index
     const CLR_RECORD_METHODDEF *target;
 
     const CLR_RT_TypeSpec_Index *genericType;
+    CLR_RT_MethodSpec_Index methodSpec;
 
 #if defined(NANOCLR_INSTANCE_NAMES)
     const char *name;
