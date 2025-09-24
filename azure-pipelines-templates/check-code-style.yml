@@ -52,7 +52,7 @@ steps:
         "Working branch is $branchName" | Write-Host -ForegroundColor White
 
         # list PR files
-        $prFiles = Invoke-WebRequest "https://api.github.com/repos/$env:Build_Repository_Name/pulls/$env:System_PullRequest_PullRequestNumber/files" | ConvertFrom-Json
+        $prFiles = Invoke-RestMethod -Uri "https://api.github.com/repos/$env:Build_Repository_Name/pulls/$env:System_PullRequest_PullRequestNumber/files" -Header @{"Authorization"="$auth"} -ContentType "application/json" -Method GET
 
         "Starting file check..." | Write-Host -ForegroundColor White
 
