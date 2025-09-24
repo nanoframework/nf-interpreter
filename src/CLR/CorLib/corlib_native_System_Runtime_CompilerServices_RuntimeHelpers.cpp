@@ -220,3 +220,157 @@ HRESULT Library_corlib_native_System_Runtime_CompilerServices_RuntimeHelpers::ge
 
     NANOCLR_NOCLEANUP();
 }
+
+#if (NANOCLR_REFLECTION == TRUE)
+
+HRESULT Library_corlib_native_System_Runtime_CompilerServices_RuntimeHelpers::
+    IsReferenceOrContainsReferences___STATIC__BOOLEAN(CLR_RT_StackFrame &stack)
+{
+    NANOCLR_HEADER();
+
+    bool isRefContainsRefs = false;
+
+    // exceptionally need to push the return value
+    CLR_RT_HeapBlock &top = stack.PushValueAndClear();
+
+    // grab caller
+    CLR_RT_MethodDef_Instance &caller = stack.MethodCall();
+
+    // parse the method signature to grab the generic argument
+    CLR_RT_MethodSpec_Instance thisMethodSpecInst;
+    thisMethodSpecInst.InitializeFromIndex(caller.methodSpec);
+
+    CLR_RT_SignatureParser parserCaller;
+    parserCaller.Initialize_MethodSignature(&thisMethodSpecInst);
+
+    CLR_RT_SignatureParser::Element element;
+
+    // advance to the 1st (and only parameter)
+    parserCaller.Advance(element);
+
+    if (element.DataType == DATATYPE_GENERICINST)
+    {
+        parserCaller.Advance(element);
+    }
+
+    NANOCLR_CHECK_HRESULT(
+        CheckReferenceOrContainsReferences(element.Class, element.DataType, &parserCaller, isRefContainsRefs));
+
+    top.SetBoolean(isRefContainsRefs);
+
+    NANOCLR_NOCLEANUP();
+}
+
+HRESULT Library_corlib_native_System_Runtime_CompilerServices_RuntimeHelpers::CheckReferenceOrContainsReferences(
+    const CLR_RT_TypeDef_Index &cls,
+    NanoCLRDataType dt,
+    CLR_RT_SignatureParser *parserCaller,
+    bool &isRefContainsRefs)
+{
+    NANOCLR_HEADER();
+
+    if (dt <= DATATYPE_LAST_NONPOINTER)
+    {
+        // primitive types aren't and don't contain references
+        isRefContainsRefs |= false;
+    }
+    else if (dt == DATATYPE_CLASS || dt == DATATYPE_VALUETYPE)
+    {
+        // for class and value types need to check the instance fields
+
+        // get the type definition
+        CLR_RT_TypeDef_Instance inst{};
+        inst.InitializeFromIndex(cls);
+
+        const CLR_RECORD_FIELDDEF *targetField = nullptr;
+        CLR_RT_Assembly *assm = nullptr;
+        CLR_RT_TypeDef_Instance instSub = inst;
+
+        int clsFields = instSub.target->instanceFieldsCount;
+        int totFields = inst.CrossReference().totalFields;
+
+        if (totFields == 0)
+        {
+            // this class has no fields, therefore doesn't contain references
+            isRefContainsRefs |= false;
+        }
+
+        // Crawl all instance fields from last to first
+        while (--totFields >= 0)
+        {
+            while (clsFields == 0)
+            {
+                if (instSub.SwitchToParent() == false)
+                {
+                    NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
+                }
+
+                clsFields = instSub.target->instanceFieldsCount;
+                targetField = nullptr;
+            }
+
+            if (targetField == nullptr)
+            {
+                assm = instSub.assembly;
+                targetField = assm->GetFieldDef(instSub.target->firstInstanceField + clsFields);
+            }
+
+            // move to the previous field (GetFieldDef returns a pointer one past the last when indexed this way)
+            targetField--;
+            clsFields--;
+
+#if defined(NANOCLR_INSTANCE_NAMES)
+            const char *typeName = assm->GetString(targetField->type);
+            const char *fieldName = assm->GetString(targetField->name);
+#endif
+            // parse the field signature to discover its element type/levels
+            CLR_RT_SignatureParser parser{};
+            parser.Initialize_FieldDef(assm, targetField);
+
+            CLR_RT_SignatureParser::Element element;
+            NANOCLR_CHECK_HRESULT(parser.Advance(element));
+
+            if (element.DataType == DATATYPE_MVAR)
+            {
+                NANOCLR_SET_AND_LEAVE(CLR_E_NOT_SUPPORTED);
+            }
+            else if (element.DataType == DATATYPE_VAR)
+            {
+                CLR_RT_SignatureParser::Element typeElement;
+
+                // get the type from the caller's generic type
+                for (int paramIndex = 0; paramIndex <= element.GenericParamPosition; paramIndex++)
+                {
+                    parserCaller->Advance(typeElement);
+                }
+
+                NANOCLR_CHECK_HRESULT(CheckReferenceOrContainsReferences(
+                    typeElement.Class,
+                    typeElement.DataType,
+                    parserCaller,
+                    isRefContainsRefs));
+
+                // has levels, therefore it's an array
+                isRefContainsRefs |= true;
+            }
+            else
+            {
+                // recurse using the element information
+                NANOCLR_CHECK_HRESULT(CheckReferenceOrContainsReferences(
+                    element.Class,
+                    element.DataType,
+                    parserCaller,
+                    isRefContainsRefs));
+            }
+        }
+    }
+    else
+    {
+        // everything else are or contain references
+        isRefContainsRefs |= true;
+    }
+
+    NANOCLR_NOCLEANUP();
+}
+
+#endif

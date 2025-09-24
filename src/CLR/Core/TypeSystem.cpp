@@ -1604,6 +1604,7 @@ void CLR_RT_MethodDef_Instance::ClearInstance()
 {
     NATIVE_PROFILE_CLR_CORE();
     CLR_RT_MethodDef_Index::Clear();
+    methodSpec.Clear();
 
     assembly = nullptr;
     target = nullptr;
@@ -1758,8 +1759,7 @@ bool CLR_RT_MethodDef_Instance::ResolveToken(
 
                 const CLR_RECORD_METHODSPEC *ms = assembly->GetMethodSpec(index);
 
-                CLR_RT_MethodSpec_Index msIndex;
-                msIndex.Set(assembly->assemblyIndex, index);
+                methodSpec.Set(assembly->assemblyIndex, index);
 
                 switch (ms->MethodKind())
                 {
@@ -1791,10 +1791,10 @@ bool CLR_RT_MethodDef_Instance::ResolveToken(
             }
             case TBL_TypeSpec:
             {
-                CLR_RT_MethodSpec_Index methodSpec;
-                assm->FindMethodSpecFromTypeSpec(index, methodSpec);
+                CLR_RT_MethodSpec_Index newMethodSpec;
+                assm->FindMethodSpecFromTypeSpec(index, newMethodSpec);
 
-                const CLR_RECORD_METHODSPEC *ms = assm->GetMethodSpec(index);
+                const CLR_RECORD_METHODSPEC *ms = assm->GetMethodSpec(newMethodSpec.Method());
 
                 switch (ms->MethodKind())
                 {
