@@ -1176,6 +1176,12 @@ struct CLR_RT_SignatureParser
 
         /// @brief Generic Parameter position
         CLR_INDEX GenericParamPosition;
+
+        /// @brief Signature is from a GenericInstance
+        bool IsGenericInst;
+
+        /// @brief Generic parameters count
+        int GenParamCount;
     };
 
     CLR_RT_HeapBlock *ObjectList;
@@ -1190,9 +1196,6 @@ struct CLR_RT_SignatureParser
 
     /// @brief Parameters count
     int ParamCount;
-
-    /// @brief Signature is from a GenericInstance
-    bool IsGenericInst;
 
     /// @brief Generic parameters count
     int GenParamCount;
