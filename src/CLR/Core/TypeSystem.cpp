@@ -213,7 +213,6 @@ void CLR_RT_SignatureParser::Initialize_TypeSpec(CLR_RT_Assembly *assm, CLR_PMET
     Flags = 0;
     ParamCount = 1;
     GenParamCount = 0;
-    IsGenericInst = false;
 }
 
 void CLR_RT_SignatureParser::Initialize_TypeSpec(CLR_RT_TypeSpec_Instance tsInstance)
@@ -227,7 +226,6 @@ void CLR_RT_SignatureParser::Initialize_TypeSpec(CLR_RT_TypeSpec_Instance tsInst
     Flags = 0;
     ParamCount = 1;
     GenParamCount = 0;
-    IsGenericInst = false;
 }
 //--//
 
@@ -253,7 +251,6 @@ void CLR_RT_SignatureParser::Initialize_Interfaces(CLR_RT_Assembly *assm, const 
     Assembly = assm;
 
     GenParamCount = 0;
-    IsGenericInst = false;
 }
 
 //--//
@@ -274,7 +271,6 @@ void CLR_RT_SignatureParser::Initialize_FieldSignature(CLR_RT_Assembly *assm, CL
     Signature = fd;
 
     GenParamCount = 0;
-    IsGenericInst = false;
 }
 
 void CLR_RT_SignatureParser::Initialize_FieldDef(CLR_RT_Assembly *assm, const CLR_RECORD_FIELDDEF *fd)
@@ -295,7 +291,6 @@ void CLR_RT_SignatureParser::Initialize_FieldDef(CLR_RT_Assembly *assm, CLR_PMET
     Signature = fd;
 
     GenParamCount = 0;
-    IsGenericInst = false;
 }
 
 //--//
@@ -339,8 +334,6 @@ void CLR_RT_SignatureParser::Initialize_MethodSignature(CLR_RT_Assembly *assm, C
 
     Assembly = assm;
     Signature = md;
-
-    IsGenericInst = false;
 }
 
 void CLR_RT_SignatureParser::Initialize_MethodSignature(CLR_RT_MethodSpec_Instance *ms)
@@ -366,8 +359,6 @@ void CLR_RT_SignatureParser::Initialize_MethodSignature(CLR_RT_MethodSpec_Instan
     Assembly = ms->assembly;
 
     GenParamCount = ParamCount;
-
-    IsGenericInst = false;
 }
 
 //--//
@@ -397,7 +388,6 @@ bool CLR_RT_SignatureParser::Initialize_GenericParamTypeSignature(
     Flags = 0;
 
     GenParamCount = 0;
-    IsGenericInst = false;
 
     // done here
     return true;
@@ -422,7 +412,6 @@ void CLR_RT_SignatureParser::Initialize_MethodLocals(CLR_RT_Assembly *assm, cons
     ParamCount = md->localsCount;
 
     GenParamCount = 0;
-    IsGenericInst = false;
 }
 
 void CLR_RT_SignatureParser::Initialize_LocalVar(CLR_RT_Assembly *assm, const CLR_PMETADATA sig)
@@ -437,7 +426,6 @@ void CLR_RT_SignatureParser::Initialize_LocalVar(CLR_RT_Assembly *assm, const CL
     ParamCount = 1;
 
     GenParamCount = 0;
-    IsGenericInst = false;
 }
 
 //--//
@@ -452,7 +440,6 @@ void CLR_RT_SignatureParser::Initialize_Objects(CLR_RT_HeapBlock *lst, int count
     ParamCount = count;
 
     GenParamCount = 0;
-    IsGenericInst = false;
 }
 
 //--//
@@ -608,16 +595,20 @@ HRESULT CLR_RT_SignatureParser::Advance(Element &res)
                                 NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
                         }
 
-                        if (IsGenericInst)
+                        // check if this type is a generic instance
+                        CLR_RT_TypeDef_Instance cls{};
+                        cls.InitializeFromIndex(res.Class);
+
+                        if (cls.target->genericParamCount > 0)
                         {
-                            // get generic arguments count
-                            GenParamCount = (int)*Signature++;
-
-                            // need to update the parser counter too
-                            ParamCount = GenParamCount;
-
                             // reset the generic instance flag
-                            IsGenericInst = false;
+                            res.IsGenericInst = false;
+
+                            // get generic arguments count
+                            res.GenParamCount = (int)*Signature++;
+
+                            // update parser param counter
+                            ParamCount += res.GenParamCount;
                         }
 
                         NANOCLR_SET_AND_LEAVE(S_OK);
@@ -634,7 +625,11 @@ HRESULT CLR_RT_SignatureParser::Advance(Element &res)
                     case DATATYPE_GENERICINST:
                     {
                         // set flag for GENERICINST
-                        IsGenericInst = true;
+                        res.IsGenericInst = true;
+
+                        // update parser param counter
+                        ParamCount++;
+
                         NANOCLR_SET_AND_LEAVE(S_OK);
                     }
 
@@ -6527,100 +6522,44 @@ bool CLR_RT_TypeSystem::MatchSignatureElement(
             }
             else
             {
-                if (parserLeft.IsGenericInst && parserRight.IsGenericInst)
-                {
-                    // TODO: we can do better here by checking the actual type of the generic parameters
-                    // CLR_RT_TypeDef_Index leftTypeDef;
-                    // NanoCLRDataType leftDT;
-                    // CLR_RT_TypeDef_Index rightTypeDef;
-                    // NanoCLRDataType rightDT;
-
-                    // parserLeft.Assembly->FindGenericParamAtTypeSpec(
-                    //     resLeft.TypeSpec.TypeSpec(),
-                    //     resLeft.GenericParamPosition,
-                    //     leftTypeDef,
-                    //     leftDT);
-
-                    // parserRight.Assembly->FindGenericParamAtTypeSpec(
-                    //     resRight.TypeSpec.TypeSpec(),
-                    //     resRight.GenericParamPosition,
-                    //     rightTypeDef,
-                    //     rightDT);
-
-                    // if (leftTypeDef.data != rightTypeDef.data || leftDT != rightDT)
-                    //{
-                    //     return false;
-                    // }
-                }
+                return true;
             }
         }
 
-        if (parserLeft.IsGenericInst != parserRight.IsGenericInst)
+        if (resLeft.DataType == DATATYPE_GENERICINST && resRight.DataType == DATATYPE_GENERICINST)
         {
-            return false;
-        }
+            // processing generic instance signature
+            // need to advance to get generic type and param count
+            if (FAILED(parserLeft.Advance(resLeft)) || FAILED(parserRight.Advance(resRight)))
+            {
+                return false;
+            }
 
-        if (parserLeft.IsGenericInst || parserRight.IsGenericInst)
+            // need to check if type of generic parameters match, if there are more
+            if (resLeft.GenParamCount > 0 && resRight.GenParamCount > 0)
+            {
+                if (resLeft.GenParamCount != resRight.GenParamCount)
+                {
+                    return false;
+                }
+
+                if (resLeft.DataType != resRight.DataType)
+                {
+                    return false;
+                }
+            }
+        }
+        else
         {
-            if (resLeft.DataType == DATATYPE_GENERICINST && resRight.DataType == DATATYPE_GENERICINST)
+            if (parserLeft.GenParamCount != parserRight.GenParamCount)
             {
-                // processing generic instance signature
-                // need to advance to get generic type and param count
-                if (FAILED(parserLeft.Advance(resLeft)) || FAILED(parserRight.Advance(resRight)))
-                {
-                    return false;
-                }
-
-                // need to check if type of generic parameters match, if there are more
-                if (parserLeft.ParamCount > 0 && parserRight.ParamCount > 0)
-                {
-                    if (parserLeft.ParamCount != parserRight.ParamCount)
-                    {
-                        return false;
-                    }
-
-                    if (resLeft.DataType != resRight.DataType)
-                    {
-                        return false;
-                    }
-                }
+                return false;
             }
-            else
+            else if (resLeft.GenericParamPosition != resRight.GenericParamPosition)
             {
-                if (parserLeft.GenParamCount != parserRight.GenParamCount)
-                {
-                    return false;
-                }
-                else if (resLeft.GenericParamPosition != resRight.GenericParamPosition)
-                {
-                    return false;
-                }
+                return false;
             }
         }
-
-        // if (parserLeft.IsGenericInst || parserRight.IsGenericInst)
-        //{
-        //     if (resLeft.GenericParamPosition == 0xFFFF && resRight.GenericParamPosition == 0xFFFF)
-        //     {
-        //         // need to check if type of generic parameters match, if there are more
-        //         if (parserLeft.ParamCount > 0 && parserRight.ParamCount > 0)
-        //         {
-        //             if (FAILED(parserLeft.Advance(resLeft)) || FAILED(parserRight.Advance(resRight)))
-        //             {
-        //                 return false;
-        //             }
-        //         }
-
-        //        if (resLeft.DataType != resRight.DataType)
-        //        {
-        //            return false;
-        //        }
-        //    }
-        //    else if (resLeft.GenericParamPosition != resRight.GenericParamPosition)
-        //    {
-        //        return false;
-        //    }
-        //}
     }
 
     return true;
