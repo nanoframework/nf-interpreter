@@ -2074,7 +2074,7 @@ HRESULT CLR_RT_ExecutionEngine::InitializeLocals(
                     varParser.Advance(varElement);
 
                     // consume parameters
-                    for (int paramIndex = 0; paramIndex < varParser.GenParamCount; paramIndex++)
+                    for (int paramIndex = 0; paramIndex < varElement.GenParamCount; paramIndex++)
                     {
                         NANOCLR_CHECK_HRESULT(varParser.Advance(varElement));
                     }
@@ -2100,7 +2100,7 @@ HRESULT CLR_RT_ExecutionEngine::InitializeLocals(
                             (const CLR_RT_TypeSpec_Index &)methodDefInstance.genericType->data);
 
                         typeSpec.assembly->FindGenericParamAtTypeSpec(
-                            methodDefInstance.genericType->TypeSpec(),
+                            methodDefInstance.genericType->data,
                             genericParamPosition,
                             cls,
                             dt);
@@ -2108,7 +2108,7 @@ HRESULT CLR_RT_ExecutionEngine::InitializeLocals(
                     else
                     {
                         assembly->FindGenericParamAtTypeSpec(
-                            methodDefInstance.genericType->TypeSpec(),
+                            methodDefInstance.genericType->data,
                             genericParamPosition,
                             cls,
                             dt);

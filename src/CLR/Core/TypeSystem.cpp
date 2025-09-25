@@ -801,7 +801,7 @@ bool CLR_RT_TypeSpec_Instance::ResolveToken(
             NanoCLRDataType realDataType;
 
             g_CLR_RT_TypeSystem.m_assemblies[caller->genericType->Assembly() - 1]
-                ->FindGenericParamAtTypeSpec(closedTsRow, (CLR_UINT32)pos, cachedElementType, realDataType);
+                ->FindGenericParamAtTypeSpec(caller->genericType->data, (CLR_UINT32)pos, cachedElementType, realDataType);
         }
         else if (element.DataType == DATATYPE_MVAR)
         {
@@ -1156,16 +1156,17 @@ bool CLR_RT_TypeDef_Instance::ResolveToken(
                                 return false;
                             }
 
-                            auto &tsi = *caller->genericType;
-                            CLR_UINT32 closedTsRow = tsi.TypeSpec();
-
                             CLR_RT_TypeDef_Index realTypeDef;
                             NanoCLRDataType realDataType;
 
                             // Only call this once to map (e.g. !T→Int32)
 
                             g_CLR_RT_TypeSystem.m_assemblies[caller->genericType->Assembly() - 1]
-                                ->FindGenericParamAtTypeSpec(closedTsRow, (CLR_UINT32)pos, realTypeDef, realDataType);
+                                ->FindGenericParamAtTypeSpec(
+                                    caller->genericType->data,
+                                    (CLR_UINT32)pos,
+                                    realTypeDef,
+                                    realDataType);
 
                             // populate this instance
                             data = realTypeDef.data;
@@ -1278,14 +1279,12 @@ bool CLR_RT_TypeDef_Instance::ResolveNullableType(
                 return false;
             }
 
-            auto &tsi = *caller->genericType;
-            CLR_UINT32 closedTsRow = tsi.TypeSpec();
-
             CLR_RT_TypeDef_Index realTypeDef;
             NanoCLRDataType realDataType;
 
             // Only call this once to map (e.g. !T→Int32)
-            caller->assembly->FindGenericParamAtTypeSpec(closedTsRow, (CLR_UINT32)pos, realTypeDef, realDataType);
+            caller->assembly
+                ->FindGenericParamAtTypeSpec(caller->genericType->data, (CLR_UINT32)pos, realTypeDef, realDataType);
 
             // populate this instance
             data = realTypeDef.data;
@@ -1573,7 +1572,7 @@ bool CLR_RT_MethodDef_Instance::InitializeFromIndex(
         CLR_RT_TypeDef_Index realOwner;
         NanoCLRDataType dummyDT;
 
-        if (!tsAsm->FindGenericParamAtTypeSpec(typeSpec.TypeSpec(), elem.GenericParamPosition, realOwner, dummyDT))
+        if (!tsAsm->FindGenericParamAtTypeSpec(typeSpec.data, elem.GenericParamPosition, realOwner, dummyDT))
         {
             return false;
         }
@@ -1877,7 +1876,7 @@ bool CLR_RT_MethodDef_Instance::GetDeclaringType(CLR_RT_TypeDef_Instance &declTy
             CLR_RT_TypeDef_Index td;
             NanoCLRDataType dt;
             if (tsAsm == nullptr ||
-                tsAsm->FindGenericParamAtTypeSpec(genericType->TypeSpec(), (CLR_UINT32)pos, td, dt) == false)
+                tsAsm->FindGenericParamAtTypeSpec(genericType->data, (CLR_UINT32)pos, td, dt) == false)
             {
                 return false;
             }
@@ -2268,7 +2267,7 @@ HRESULT CLR_RT_TypeDescriptor::InitializeFromSignatureToken(
                 // !T: ask the CLR to map that slot into the *actual* argument
                 CLR_RT_TypeDef_Index td;
                 NanoCLRDataType dt;
-                assm->FindGenericParamAtTypeSpec(caller->genericType->TypeSpec(), elem.GenericParamPosition, td, dt);
+                assm->FindGenericParamAtTypeSpec(caller->genericType->data, elem.GenericParamPosition, td, dt);
                 this->InitializeFromTypeDef(td);
             }
             else if (elem.DataType == DATATYPE_MVAR)
@@ -5090,7 +5089,7 @@ bool CLR_RT_Assembly::FindGenericParamAtTypeSpec(
     }
 
     // sanity check for invalid parameter position
-    if (genericParameterPosition > parser.GenParamCount)
+    if (genericParameterPosition > element.GenParamCount)
     {
         // not enough parameters!!
         return false;
@@ -6623,14 +6622,14 @@ HRESULT CLR_RT_TypeSystem::BuildTypeName(
 
     BuildTypeName(typeDef, szBuffer, iBuffer);
 
-    if (parser.GenParamCount > 0)
+    if (element.GenParamCount > 0)
     {
         NANOCLR_CHECK_HRESULT(QueueStringToBuffer(szBuffer, iBuffer, "<"));
 
         closeGenericSignature = true;
     }
 
-    for (int i = 0; i < parser.GenParamCount; i++)
+    for (int i = 0; i < element.GenParamCount; i++)
     {
         // read the next element (should be either VAR, MVAR, or a concrete type)
         parser.Advance(element);
@@ -6643,7 +6642,7 @@ HRESULT CLR_RT_TypeSystem::BuildTypeName(
 
             // this will bind !T→System.Int32, etc.
             typeSpecInstance.assembly->FindGenericParamAtTypeSpec(
-                typeIndex.TypeSpec(),         // closed instantiation row
+                typeIndex.data,
                 element.GenericParamPosition, // the !N slot
                 realTd,
                 realDt);
@@ -6660,7 +6659,7 @@ HRESULT CLR_RT_TypeSystem::BuildTypeName(
             BuildTypeName(td, szBuffer, iBuffer);
         }
 
-        if (i + 1 < parser.GenParamCount)
+        if (i + 1 < element.GenParamCount)
         {
             NANOCLR_CHECK_HRESULT(QueueStringToBuffer(szBuffer, iBuffer, ","));
         }
@@ -6895,7 +6894,7 @@ HRESULT CLR_RT_TypeSystem::BuildMethodRefName(const CLR_RT_MethodRef_Index &meth
             CLR_SafeSprintf(szBuffer, iBuffer, c_CLR_RT_DataTypeLookup[element.DataType].m_name);
 #endif
 
-            if (i + 1 < parser.GenParamCount)
+            if (i + 1 < element.GenParamCount)
             {
                 CLR_SafeSprintf(szBuffer, iBuffer, ",");
             }
@@ -6979,7 +6978,7 @@ HRESULT CLR_RT_TypeSystem::BuildMethodSpecName(const CLR_RT_MethodSpec_Index &ms
         NANOCLR_CHECK_HRESULT(QueueStringToBuffer(szBuffer, iBuffer, c_CLR_RT_DataTypeLookup[element.DataType].m_name));
 #endif
 
-        if (i + 1 < parser.GenParamCount)
+        if (i + 1 < element.GenParamCount)
         {
             NANOCLR_CHECK_HRESULT(QueueStringToBuffer(szBuffer, iBuffer, ","));
         }

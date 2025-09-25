@@ -145,7 +145,7 @@ HRESULT Library_corlib_native_System_Type::GetGenericArguments___SZARRAY_SystemT
         NANOCLR_CHECK_HRESULT(parser.Advance(elem));
 
         // get the number of generic parameters
-        count = parser.GenParamCount;
+        count = elem.GenParamCount;
 
         // allocate an array to hold the generic arguments
         NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance(top, count, g_CLR_RT_WellKnownTypes.TypeStatic));
@@ -432,14 +432,14 @@ HRESULT Library_corlib_native_System_Type::get_IsGenericTypeDefinition___BOOLEAN
         parser.Advance(element);
 
         // check if it has generic parameters
-        if (parser.GenParamCount == 0)
+        if (element.GenParamCount == 0)
         {
             isTypeDefinition = false;
         }
         else
         {
             // keep reading the generic parameters
-            for (int i = 0; i < parser.GenParamCount; i++)
+            for (int i = 0; i < element.GenParamCount; i++)
             {
                 if (SUCCEEDED(parser.Advance(element)))
                 {
