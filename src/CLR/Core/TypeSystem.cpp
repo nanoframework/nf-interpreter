@@ -800,8 +800,11 @@ bool CLR_RT_TypeSpec_Instance::ResolveToken(
 
             NanoCLRDataType realDataType;
 
-            g_CLR_RT_TypeSystem.m_assemblies[caller->genericType->Assembly() - 1]
-                ->FindGenericParamAtTypeSpec(caller->genericType->data, (CLR_UINT32)pos, cachedElementType, realDataType);
+            g_CLR_RT_TypeSystem.m_assemblies[caller->genericType->Assembly() - 1]->FindGenericParamAtTypeSpec(
+                caller->genericType->data,
+                (CLR_UINT32)pos,
+                cachedElementType,
+                realDataType);
         }
         else if (element.DataType == DATATYPE_MVAR)
         {
