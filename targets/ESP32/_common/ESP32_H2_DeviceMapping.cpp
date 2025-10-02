@@ -58,16 +58,12 @@ int8_t Esp32_LED_DevicePinMap[TARGET_LED_NUM_PINS] = {
     -1, // 8
  };
 
-// We use "ADC1" for 20 logical channels
-// Mapped to ESP32 controllers
-// ESP32 ADC1 channels 0 - 7
-//  "    ADC1 channel  8 - Internal Temperature sensor (VP)
-//  "    ADC1 channel  9 - Internal Hall Sensor (VN)
-//  "    ADC2 channels 10 - 19
-// TODO review ADC channels for ESP32_C3
+// We use "ADC1" for 5 logical channels
+// Mapped to ESP32_H2 controllers
+// ESP32_H2 ADC1 channels 1 - 5
 int8_t Esp32_ADC_DevicePinMap[TARGET_ADC_NUM_PINS] = {
-    // 0   1   2   3   4   5   
-    };
+        1, 2, 3, 4, 5   
+};
 
 //  I2S
 //  1 device I2S1
