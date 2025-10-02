@@ -6,7 +6,7 @@
 
 #include <sys_dev_adc_native_target.h>
 
-#if defined(IDF_TARGET_ESP32)
+#if defined(CONFIG_IDF_TARGET_ESP32)
 extern "C" uint8_t temprature_sens_read();
 #endif
 
@@ -33,13 +33,14 @@ HRESULT Library_sys_dev_adc_native_System_Device_Adc_AdcChannel::NativeReadValue
         switch (channelNumber)
         {
 
-#if defined(IDF_TARGET_ESP32)
+#if defined(CONFIG_IDF_TARGET_ESP32)
             case 8:
-                reading = temperature_sens_read();
+                reading = temprature_sens_read();
                 break;
 
             case 9:
-                reading = hall_sensor_read();
+                // Hall sensor no longer available in IDF 5.x
+                NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
                 break;
 #endif
 
