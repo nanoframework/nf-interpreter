@@ -24,10 +24,7 @@ int8_t Esp32_SPI_DevicePinMap[MAX_SPI_DEVICES][Esp32SpiPin_Max] = {
 // others assign as NONE because the default pins can be shared with serial flash and PSRAM
 int8_t Esp32_SERIAL_DevicePinMap[UART_NUM_MAX][Esp32SerialPin_Max] = {
     // COM 1 - pins 21, 20
-    {UART_NUM_0_TXD_DIRECT_GPIO_NUM,
-     UART_NUM_0_RXD_DIRECT_GPIO_NUM,
-     UART_PIN_NO_CHANGE,
-     UART_PIN_NO_CHANGE},
+    {UART_NUM_0_TXD_DIRECT_GPIO_NUM, UART_NUM_0_RXD_DIRECT_GPIO_NUM, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE},
 
 #if defined(UART_NUM_2)
     // COM 2 - all set to UART_PIN_NO_CHANGE
@@ -66,10 +63,21 @@ int8_t Esp32_LED_DevicePinMap[8] = {
 //         ADC2 channels 10 - 19
 int8_t Esp32_ADC_DevicePinMap[TARGET_ADC_NUM_PINS] = {
     // ADC1
-    16,17,18,19,20,21,22,23
+    16,
+    17,
+    18,
+    19,
+    20,
+    21,
+    22,
+    23
     // ADC2
-    49,50,51,52,53,54
-};
+    49,
+    50,
+    51,
+    52,
+    53,
+    54};
 
 //  I2S
 //  1 device I2S1

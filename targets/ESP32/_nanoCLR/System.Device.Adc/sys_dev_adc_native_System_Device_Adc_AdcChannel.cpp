@@ -30,7 +30,7 @@ HRESULT Library_sys_dev_adc_native_System_Device_Adc_AdcChannel::NativeReadValue
     if (channelNumber < 0 || channelNumber > TARGET_ADC_NUM_PINS)
     {
         NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
-    } 
+    }
 
     // Calculate internal ADC number based on channel number, 0->(CONFIG_SOC_ADC_MAX_CHANNEL_NUM - 1)
     adcNumber = channelNumber < CONFIG_SOC_ADC_MAX_CHANNEL_NUM ? ADC_UNIT_1 : ADC_UNIT_2;
@@ -41,18 +41,18 @@ HRESULT Library_sys_dev_adc_native_System_Device_Adc_AdcChannel::NativeReadValue
     {
         if (channelNumber == 8)
         {
-            //reading = temperature_sens_read();
+            // reading = temperature_sens_read();
             reading = 0;
         }
-        else 
+        else
         {
             // Hall sensor no longer available
             NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
         }
     }
     else
-#endif   
-    {    
+#endif
+    {
         if (adcNumber == ADC_UNIT_2)
         {
             // Adjust channel number for ADC2

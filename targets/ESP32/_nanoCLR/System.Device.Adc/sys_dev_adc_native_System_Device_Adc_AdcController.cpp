@@ -62,7 +62,7 @@ void AdcController_Initialize(adc_unit_t unit)
     {
         // already initialized
         return;
-    }   
+    }
 
     adc_oneshot_unit_init_cfg_t init_config1 = {};
     init_config1.unit_id = unit;
@@ -77,7 +77,7 @@ void AdcController_delete(adc_unit_t unit)
     {
         ESP_ERROR_CHECK(adc_oneshot_del_unit(adc_handles[unit]));
         adc_handles[unit] = NULL;
-    }   
+    }
 }
 
 HRESULT Library_sys_dev_adc_native_System_Device_Adc_AdcController::NativeOpenChannel___VOID__I4(
