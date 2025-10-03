@@ -346,4 +346,4 @@ HRESULT Library_sys_dev_adc_native_System_Device_Adc_AdcController::NativeInit__
 
     NANOCLR_NOCLEANUP_NOLABEL();
 }
-#endif // #if defined(CONFIG_IDF_TARGET_ESP32)  
+#endif // #if defined(CONFIG_IDF_TARGET_ESP32)
