@@ -17,7 +17,7 @@ list(APPEND System.Device.Adc_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/System.Device
 
 # source files
 # ESP32 uses legacy ADC driver for now as there is a dependency to legacy I2S due to internal DAC on ESP32
-if(${TARGET_SERIES_SHORT} STREQUAL "esp32")
+if(TARGET_SERIES_SHORT AND ${TARGET_SERIES_SHORT} STREQUAL "esp32")
 set(System.Device.Adc_SRCS
 
     sys_dev_adc_native.cpp
