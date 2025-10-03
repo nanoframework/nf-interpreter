@@ -70,7 +70,7 @@ int8_t Esp32_ADC_DevicePinMap[TARGET_ADC_NUM_PINS] = {
     20,
     21,
     22,
-    23
+    23,
     // ADC2
     49,
     50,
