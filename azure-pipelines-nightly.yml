@@ -26,7 +26,7 @@ jobs:
   ##############################
   - job: Check_Build_Options
     pool:
-      vmImage: "windows-latest"
+      vmImage: "windows-2022"
 
     variables:
       DOTNET_NOLOGO: true
@@ -263,7 +263,7 @@ jobs:
       - Check_Build_Options
 
     pool:
-      vmImage: "windows-latest"
+      vmImage: "windows-2022"
 
     strategy:
       matrix:
@@ -330,7 +330,7 @@ jobs:
       - Check_Build_Options
 
     pool:
-      vmImage: "windows-latest"
+      vmImage: "windows-2022"
 
     strategy:
       matrix:
@@ -675,7 +675,7 @@ jobs:
       - Check_Build_Options
 
     pool:
-      vmImage: "windows-latest"
+      vmImage: "windows-2022"
 
     strategy:
       matrix:
@@ -726,7 +726,7 @@ jobs:
       - Check_Build_Options
 
     pool:
-      vmImage: "windows-latest"
+      vmImage: "windows-2022"
 
     strategy:
       matrix:
@@ -774,7 +774,7 @@ jobs:
       )
 
     pool:
-      vmImage: "windows-latest"
+      vmImage: "windows-2022"
 
     steps:
       - checkout: self

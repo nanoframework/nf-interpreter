@@ -59,7 +59,7 @@ jobs:
   ##############################
   - job: Check_Build_Options
     pool:
-      vmImage: "windows-latest"
+      vmImage: "windows-2022"
 
     variables:
       DOTNET_NOLOGO: true
@@ -353,7 +353,7 @@ jobs:
       - Check_Build_Options
 
     pool:
-      vmImage: "windows-latest"
+      vmImage: "windows-2022"
 
     steps:
       - checkout: self
@@ -390,7 +390,7 @@ jobs:
       - Check_Code_Style
 
     pool:
-      vmImage: "windows-latest"
+      vmImage: "windows-2022"
 
     strategy:
       matrix:
@@ -455,7 +455,7 @@ jobs:
       - Check_Code_Style
 
     pool:
-      vmImage: "windows-latest"
+      vmImage: "windows-2022"
 
     # there is only a single ESP32 target, but this is already config as a matrix to make it easy to add new ones
     strategy:
@@ -609,7 +609,7 @@ jobs:
       - Check_Code_Style
 
     pool:
-      vmImage: "windows-latest"
+      vmImage: "windows-2022"
 
     strategy:
       matrix:
@@ -664,7 +664,7 @@ jobs:
       - Check_Code_Style
 
     pool:
-      vmImage: "windows-latest"
+      vmImage: "windows-2022"
 
     strategy:
       matrix:
@@ -742,7 +742,7 @@ jobs:
       - Check_Code_Style
 
     pool:
-      vmImage: "windows-latest"
+      vmImage: "windows-2022"
 
     strategy:
       matrix:
@@ -814,7 +814,7 @@ jobs:
       - Check_Code_Style
 
     pool:
-      vmImage: "windows-latest"
+      vmImage: "windows-2022"
 
     variables:
       - group: sign-client-credentials
@@ -1061,7 +1061,7 @@ jobs:
       - Build_WIN32_nanoCLR
 
     pool:
-      vmImage: "windows-latest"
+      vmImage: "windows-2022"
 
     variables:
       - group: sign-client-credentials
@@ -1260,7 +1260,7 @@ jobs:
       - Build_nanoCLR_CLI
 
     pool:
-      vmImage: "windows-latest"
+      vmImage: "windows-2022"
 
     variables:
       DOTNET_NOLOGO: true
@@ -1384,7 +1384,7 @@ jobs:
       )
 
     pool:
-      vmImage: "windows-latest"
+      vmImage: "windows-2022"
 
     steps:
       - checkout: self
