@@ -481,7 +481,8 @@ void CLR_RT_Assembly::DumpToken(CLR_UINT32 token, const CLR_RT_MethodDef_Instanc
             //    use that, so ResizeArray prints as SimpleList<I4>::ResizeArray.
             // 2) Otherwise, fall back to xref.genericType (the raw MethodRef own owner).
             const CLR_RT_TypeSpec_Index *ownerTypeSpec;
-            if (methodDefInstance.genericType != nullptr && NANOCLR_INDEX_IS_VALID(*methodDefInstance.genericType))
+            if (methodDefInstance.genericType != nullptr && NANOCLR_INDEX_IS_VALID(*methodDefInstance.genericType) &&
+                methodDefInstance.genericType->data != CLR_EmptyToken)
             {
                 ownerTypeSpec = methodDefInstance.genericType;
             }

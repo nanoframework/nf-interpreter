@@ -2032,7 +2032,8 @@ HRESULT CLR_RT_ExecutionEngine::InitializeLocals(
 
                     CLR_RT_TypeSpec_Index genericTSIndex = {};
 
-                    if (methodDefInstance.genericType && methodDefInstance.genericType->data != 0)
+                    if (methodDefInstance.genericType && NANOCLR_INDEX_IS_VALID(*methodDefInstance.genericType) &&
+                        methodDefInstance.genericType->data != CLR_EmptyToken)
                     {
                         // method is generic, it can only use class from method's class generic parameters
                         genericInstance.InitializeFromIndex(*methodDefInstance.genericType);
@@ -2093,7 +2094,8 @@ HRESULT CLR_RT_ExecutionEngine::InitializeLocals(
                     // type-level generic parameter in a locals signature (e.g. 'T' inside a generic type)
                     CLR_INT8 genericParamPosition = *sig++;
 
-                    if (methodDefInstance.genericType && methodDefInstance.genericType->data != 0)
+                    if (methodDefInstance.genericType && NANOCLR_INDEX_IS_VALID(*methodDefInstance.genericType) &&
+                        methodDefInstance.genericType->data != CLR_EmptyToken)
                     {
                         CLR_RT_TypeSpec_Instance typeSpec{};
                         typeSpec.InitializeFromIndex(

@@ -2211,7 +2211,16 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                                             NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
                                         }
 
-                                        calleeInst.InitializeFromIndex(calleeReal);
+                                        if (calleeInst.genericType && NANOCLR_INDEX_IS_VALID(*calleeInst.genericType) &&
+                                            calleeInst.genericType->data != CLR_EmptyToken)
+                                        {
+                                            // store the current generic context (if any)
+                                            calleeInst.InitializeFromIndex(calleeReal, *calleeInst.genericType);
+                                        }
+                                        else
+                                        {
+                                            calleeInst.InitializeFromIndex(calleeReal);
+                                        }
                                     }
 
 #if defined(NANOCLR_APPDOMAINS)

@@ -1597,7 +1597,7 @@ bool CLR_RT_MethodDef_Instance::InitializeFromIndex(
     }
 
     // remember the TypeSpec so this is available when needed
-    this->genericType = &typeSpec;
+    genericType = &typeSpec;
 
     return true;
 }
@@ -1695,9 +1695,8 @@ bool CLR_RT_MethodDef_Instance::ResolveToken(
                         }
                     }
 
-                    // Pick the “winner” between methodOwnerTS or callerGeneric:
-                    const CLR_RT_TypeSpec_Index *definitiveTypeSpec = useCaller ? callerGeneric : methodOwnerTS;
-                    genericType = (CLR_RT_TypeSpec_Index *)definitiveTypeSpec;
+                    // Pick the "winner" between methodOwnerTS or callerGeneric:
+                    genericType = useCaller ? callerGeneric : methodOwnerTS;
 
                     CLR_RT_Assembly *methodAssembly = g_CLR_RT_TypeSystem.m_assemblies[methodOwnerTS->Assembly() - 1];
 
@@ -6772,7 +6771,7 @@ HRESULT CLR_RT_TypeSystem::BuildMethodName(
 
     declTypeIdx.Set(md.Assembly(), declTypeInst.assembly->crossReferenceMethodDef[md.Method()].GetOwner());
 
-    if (genericType != nullptr && genericType->data != 0xffffffff)
+    if (genericType != nullptr && NANOCLR_INDEX_IS_VALID(*genericType) && genericType->data != CLR_EmptyToken)
     {
         // parse TypeSpec to get its TypeDef
         CLR_RT_TypeSpec_Instance tsInst = {};
