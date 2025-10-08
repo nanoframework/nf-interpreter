@@ -706,6 +706,17 @@ void CLR_RT_GarbageCollector::Assembly_Mark()
 
 #if !defined(NANOCLR_APPDOMAINS)
         CheckMultipleBlocks(pASSM->staticFields, pASSM->staticFieldsCount);
+
+        // Mark generic static fields for each TypeSpec
+        for (int i = 0; i < pASSM->tablesSize[TBL_TypeSpec]; i++)
+        {
+            CLR_RT_TypeSpec_CrossReference &ts = pASSM->crossReferenceTypeSpec[i];
+
+            if (ts.genericStaticFields != nullptr && ts.genericStaticFieldsCount > 0)
+            {
+                CheckMultipleBlocks(ts.genericStaticFields, ts.genericStaticFieldsCount);
+            }
+        }
 #endif
 
         CheckSingleBlock(&pASSM->file);
