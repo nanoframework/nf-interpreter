@@ -4995,55 +4995,7 @@ HRESULT CLR_RT_Assembly::ResolveAllocateGenericTypeStaticFields()
             // initialize the storage: call InitializeReference for that field def (ownerAsm context)
             const CLR_RECORD_FIELDDEF *pFd = ownerAsm->GetFieldDef(fieldIndex);
 
-            CLR_RT_SignatureParser parser{};
-            parser.Initialize_FieldDef(ownerAsm, pFd);
-
-            CLR_RT_SignatureParser::Element element{};
-
-            NANOCLR_CHECK_HRESULT(parser.Advance(element));
-
-            if (element.Levels > 0)
-            {
-                // this is an array
-                pHeap[staticField].SetDataId(CLR_RT_HEAPBLOCK_RAW_ID(DATATYPE_OBJECT, CLR_RT_HeapBlock::HB_Alive, 1));
-                pHeap[staticField].ClearData();
-
-                NanoCLRDataType dt;
-                CLR_RT_TypeDef_Index realTypeDef{};
-                dt = element.DataType;
-                realTypeDef.data = element.Class.data;
-
-                if (element.DataType == DATATYPE_CLASS || element.DataType == DATATYPE_VALUETYPE)
-                {
-                    realTypeDef = element.Class;
-                }
-                if (element.DataType == DATATYPE_VAR)
-                {
-                    genericTypeInstance.assembly->FindGenericParamAtTypeSpec(
-                        genericTypeInstance.data,
-                        element.GenericParamPosition,
-                        realTypeDef,
-                        dt);
-
-                    // goto process_datatype;
-                }
-                else if (element.DataType == DATATYPE_MVAR)
-                {
-                    _ASSERTE(true);
-
-                    // goto process_datatype;
-                }
-                else
-                {
-                    _ASSERTE(true);
-                }
-
-                CLR_RT_HeapBlock_Array::CreateInstance(pHeap[staticField], 0, realTypeDef);
-            }
-            else
-            {
-                g_CLR_RT_ExecutionEngine.InitializeReference(pHeap[staticField], pFd, ownerAsm, &genericTypeInstance);
-            }
+            g_CLR_RT_ExecutionEngine.InitializeReference(pHeap[staticField], pFd, ownerAsm, &genericTypeInstance);
         }
 
         // store in typespec crossref (this storage is per-assembly typespec)
