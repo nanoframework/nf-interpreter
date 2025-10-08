@@ -2740,15 +2740,7 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                     if (field.genericType && NANOCLR_INDEX_IS_VALID(*field.genericType))
                     {
                         // access static field of a generic instance
-                        CLR_RT_FieldDef_Index genericField{};
-                        genericField.data = field.data;
-
-                        // find the assembly where the generic type is instantiated
-                        CLR_RT_Assembly *typeSpecAsm =
-                            g_CLR_RT_TypeSystem.m_assemblies[field.genericType->Assembly() - 1];
-
-                        // now access the generic static field
-                        ptr = typeSpecAsm->GetGenericStaticField(*field.genericType, genericField);
+                        ptr = field.assembly->GetStaticFieldByFieldDef(field, field.genericType);
                     }
                     else
                     {
@@ -2788,15 +2780,7 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                     if (field.genericType && NANOCLR_INDEX_IS_VALID(*field.genericType))
                     {
                         // access static field of a generic instance
-                        CLR_RT_FieldDef_Index genericField{};
-                        genericField.data = field.data;
-
-                        // find the assembly where the generic type is instantiated
-                        CLR_RT_Assembly *typeSpecAsm =
-                            g_CLR_RT_TypeSystem.m_assemblies[field.genericType->Assembly() - 1];
-
-                        // now access the generic static field
-                        ptr = typeSpecAsm->GetGenericStaticField(*field.genericType, genericField);
+                        ptr = field.assembly->GetStaticFieldByFieldDef(field, field.genericType);
                     }
                     else
                     {
@@ -2835,15 +2819,7 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                     if (field.genericType && NANOCLR_INDEX_IS_VALID(*field.genericType))
                     {
                         // access static field of a generic instance
-                        CLR_RT_FieldDef_Index genericField{};
-                        genericField.data = field.data;
-
-                        // find the assembly where the generic type is instantiated
-                        CLR_RT_Assembly *typeSpecAsm =
-                            g_CLR_RT_TypeSystem.m_assemblies[field.genericType->Assembly() - 1];
-
-                        // now access the generic static field
-                        ptr = typeSpecAsm->GetGenericStaticField(*field.genericType, genericField);
+                        ptr = field.assembly->GetStaticFieldByFieldDef(field, field.genericType);
                     }
                     else
                     {
