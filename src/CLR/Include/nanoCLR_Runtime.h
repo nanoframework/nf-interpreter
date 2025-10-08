@@ -963,6 +963,18 @@ struct CLR_RT_TypeSpec_CrossReference
 {
     CLR_RT_TypeSpec_Index genericType;
     CLR_RT_TypeDef_Index ownerType;
+
+    /// @brief Array of static fields (one entry per bound static field)
+    ///
+    CLR_RT_HeapBlock *genericStaticFields;
+
+    /// @brief Array of indices (one entry per bound static field, parallel with genericStaticFields)
+    ///
+    CLR_RT_FieldDef_Index *genericStaticFieldDefs;
+
+    /// @brief Number of static fields
+    ///
+    CLR_UINT32 genericStaticFieldsCount;
 };
 
 struct CLR_RT_MethodDef_Patch
@@ -1418,7 +1430,13 @@ struct CLR_RT_Assembly : public CLR_RT_HeapBlock_Node // EVENT HEAP - NO RELOCAT
     void ResolveLink();
     HRESULT ResolveComputeHashes();
     HRESULT ResolveAllocateStaticFields(CLR_RT_HeapBlock *pStaticFields);
-
+    HRESULT ResolveAllocateGenericTypeStaticFields();
+    CLR_RT_HeapBlock *GetGenericStaticField(
+        const CLR_RT_TypeSpec_Index &typeSpecIndex,
+        const CLR_RT_FieldDef_Index &fdIndex);
+    CLR_RT_HeapBlock *GetStaticFieldByFieldDef(
+        const CLR_RT_FieldDef_Index &fdIndex,
+        const CLR_RT_TypeSpec_Index *genericType);
     HRESULT PrepareForExecution();
 
     CLR_UINT32 ComputeAssemblyHash();
@@ -2100,6 +2118,7 @@ struct CLR_RT_TypeSpec_Instance : public CLR_RT_TypeSpec_Index
     void ClearInstance();
 
     bool ResolveToken(CLR_UINT32 tk, CLR_RT_Assembly *assm, const CLR_RT_MethodDef_Instance *caller = nullptr);
+    bool IsClosedGenericType();
 };
 
 //--//
