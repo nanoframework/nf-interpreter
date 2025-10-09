@@ -791,7 +791,7 @@ bool CLR_RT_HeapBlock::TypeDescriptorsMatch(
 
     // If the *actual* object is a closed-generic (even though boxed as CLASS),
     // it will have m_handlerGenericType set.  Promote it to GENERICINST.
-    if (actualDataType == DATATYPE_CLASS && actualType.m_handlerGenericType.data != CLR_EmptyToken)
+    if (actualDataType == DATATYPE_CLASS && NANOCLR_INDEX_IS_VALID(actualType.m_handlerGenericType))
     {
         actualDataType = DATATYPE_GENERICINST;
     }
