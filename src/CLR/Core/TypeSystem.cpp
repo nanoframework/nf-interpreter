@@ -2269,7 +2269,9 @@ HRESULT CLR_RT_TypeDescriptor::InitializeFromSignatureToken(
                 // !T: ask the CLR to map that slot into the *actual* argument
                 CLR_RT_TypeDef_Index td;
                 NanoCLRDataType dt;
-                assm->FindGenericParamAtTypeSpec(caller->genericType->data, elem.GenericParamPosition, td, dt);
+
+                g_CLR_RT_TypeSystem.m_assemblies[caller->genericType->Assembly() - 1]
+                    ->FindGenericParamAtTypeSpec(caller->genericType->data, elem.GenericParamPosition, td, dt);
                 this->InitializeFromTypeDef(td);
             }
             else if (elem.DataType == DATATYPE_MVAR)
