@@ -1493,6 +1493,7 @@ struct CLR_RT_Assembly : public CLR_RT_HeapBlock_Node // EVENT HEAP - NO RELOCAT
 
     //--//
 
+    CLR_RT_TypeDef_Index GenericDefFromHash(CLR_UINT32 hash);
     CLR_RT_HeapBlock *GetStaticField(const int index);
 
     //--//
@@ -1970,6 +1971,23 @@ extern const CLR_RT_LogicalOpcodeLookup c_CLR_RT_LogicalOpcodeLookup[];
 
 //--//
 
+struct CLR_RT_GenericStaticFieldRecord
+{
+    // Unique identifier for this closed generic type
+    CLR_UINT32 m_hash;
+
+    // Storage for static fields
+    CLR_RT_HeapBlock *m_fields;
+
+    // Field definition mapping
+    CLR_RT_FieldDef_Index *m_fieldDefs;
+
+    // Number of static fields
+    CLR_UINT32 m_count;
+};
+
+//--//
+
 struct CLR_RT_TypeSystem // EVENT HEAP - NO RELOCATION -
 {
     struct CompatibilityLookup
@@ -1995,6 +2013,11 @@ struct CLR_RT_TypeSystem // EVENT HEAP - NO RELOCATION -
     CLR_RT_Assembly *m_assemblyNative;
 
     CLR_RT_MethodDef_Index m_entryPoint;
+
+    // Global registry for generic static fields
+    CLR_RT_GenericStaticFieldRecord *m_genericStaticFields;
+    CLR_UINT32 m_genericStaticFieldsCount;
+    CLR_UINT32 m_genericStaticFieldsMaxCount;
 
     //--//
 
@@ -2082,6 +2105,14 @@ struct CLR_RT_TypeSystem // EVENT HEAP - NO RELOCATION -
 #if defined(VIRTUAL_DEVICE)
     void Dump(const wchar_t *szFileName, bool fNoByteCode);
 #endif
+
+    CLR_RT_GenericStaticFieldRecord *FindOrCreateGenericStaticFields(
+        CLR_UINT32 hash,
+        CLR_RT_Assembly *ownerAssembly,
+        CLR_UINT32 staticFieldCount);
+
+    // Helper to compute hash for a closed generic type
+    static CLR_UINT32 ComputeHashForClosedGenericType(CLR_RT_TypeSpec_Instance &typeInstance);
 
     //--//
 
@@ -3003,6 +3034,21 @@ struct CLR_RT_GarbageCollector
 
     static void Heap_Relocate(CLR_RT_HeapBlock *lst, CLR_UINT32 len);
     static void Heap_Relocate(void **ref);
+
+    //--//
+
+    static void RelocateGenericStaticField(CLR_RT_GenericStaticFieldRecord *field)
+    {
+        if (field->m_fields)
+        {
+            CLR_RT_GarbageCollector::Heap_Relocate(field->m_fields, field->m_count);
+        }
+
+        if (field->m_fieldDefs)
+        {
+            CLR_RT_GarbageCollector::Heap_Relocate((void **)&field->m_fieldDefs);
+        }
+    }
 
     //--//
 

@@ -4020,6 +4020,32 @@ void CLR_RT_Assembly::ResolveLink()
     }
 }
 
+CLR_RT_TypeDef_Index CLR_RT_Assembly::GenericDefFromHash(CLR_UINT32 hash)
+{
+    NATIVE_PROFILE_CLR_CORE();
+
+    // Search through all TypeDefs in the assembly to find one with a matching hash
+    for (int i = 0; i < tablesSize[TBL_TypeDef]; i++)
+    {
+        CLR_RT_TypeDef_Index typeDef;
+        typeDef.Set(assemblyIndex, i);
+
+        CLR_RT_TypeDef_Instance inst;
+        if (inst.InitializeFromIndex(typeDef))
+        {
+            if (inst.CrossReference().hash == hash)
+            {
+                return typeDef;
+            }
+        }
+    }
+
+    // No match found
+    CLR_RT_TypeDef_Index emptyIndex;
+    emptyIndex.Clear();
+    return emptyIndex;
+}
+
 //--//
 
 #if defined(NANOCLR_APPDOMAINS)
@@ -4926,13 +4952,13 @@ HRESULT CLR_RT_Assembly::ResolveAllocateGenericTypeStaticFields()
     NANOCLR_HEADER();
 
     // For each TypeSpec that represents a closed generic instantiation, count the static fields bound to it,
-    // allocate CLR_RT_HeapBlock array and initialize references into it.
+    // and either allocate new CLR_RT_HeapBlock array or reuse existing global registry entry.
     CLR_RT_TypeSpec_CrossReference *tsCross = this->crossReferenceTypeSpec;
     int numTypeSpec = this->tablesSize[TBL_TypeSpec];
 
     for (int iTs = 0; iTs < numTypeSpec; iTs++, tsCross++)
     {
-        // skip if already allocated or if TypeSpec is not a generic instantiation
+        // Skip if already allocated
         if (tsCross->genericStaticFields != nullptr)
         {
             continue;
@@ -4945,7 +4971,7 @@ HRESULT CLR_RT_Assembly::ResolveAllocateGenericTypeStaticFields()
 
         if (!genericTypeInstance.InitializeFromIndex(tsIndex))
         {
-            // can't initialize, skip
+            // Can't initialize, skip
             continue;
         }
 
@@ -4964,44 +4990,125 @@ HRESULT CLR_RT_Assembly::ResolveAllocateGenericTypeStaticFields()
         const char *typeName = ownerAsm->GetString(ownerTd->name);
 #endif
 
-        // get how many static FieldDefs are bound to the generic type definition
-        int count = ownerTd->staticFieldsCount;
+        // Get how many static FieldDefs are bound to the generic type definition
+        uint8_t count = ownerTd->staticFieldsCount;
 
         if (count == 0)
         {
-            // no static fields in this generic type definition, nothing to do
+            // No static fields in this generic type definition, nothing to do
             continue;
         }
 
-        CLR_RT_HeapBlock *pHeap = g_CLR_RT_ExecutionEngine.ExtractHeapBlocksForObjects(
-            DATATYPE_OBJECT, // heapblock kind (object/value choice is OK; we just need heapblocks)
-            0,               // flags
-            count);          // number of CLR_RT_HeapBlock entries
-        CHECK_ALLOCATION(pHeap);
+        // Compute a hash for the closed generic type
+        CLR_UINT32 hash = g_CLR_RT_TypeSystem.ComputeHashForClosedGenericType(genericTypeInstance);
 
-        CLR_RT_FieldDef_Index *pFieldDefs =
-            (CLR_RT_FieldDef_Index *)g_CLR_RT_ExecutionEngine.ExtractHeapBytesForObjects(
-                DATATYPE_BOOLEAN,
-                0,
-                (sizeof(CLR_RT_FieldDef_Index) * count));
-        CHECK_ALLOCATION(pFieldDefs);
+        // Look for existing entry in the global registry
+        bool found = false;
 
-        // fill mapping and initialize each heap slot using the owner assembly's field defs
-        for (int staticField = 0; staticField < count; staticField++)
+        for (CLR_UINT32 i = 0; i < g_CLR_RT_TypeSystem.m_genericStaticFieldsCount; i++)
         {
-            CLR_INDEX fieldIndex = ownerTd->firstStaticField + staticField;
-            pFieldDefs[staticField].Set(ownerAsm->assemblyIndex, fieldIndex);
+            if (g_CLR_RT_TypeSystem.m_genericStaticFields[i].m_hash == hash)
+            {
+                // Found existing entry, reuse it
+                tsCross->genericStaticFields = g_CLR_RT_TypeSystem.m_genericStaticFields[i].m_fields;
+                tsCross->genericStaticFieldDefs = g_CLR_RT_TypeSystem.m_genericStaticFields[i].m_fieldDefs;
+                tsCross->genericStaticFieldsCount = g_CLR_RT_TypeSystem.m_genericStaticFields[i].m_count;
 
-            // initialize the storage: call InitializeReference for that field def (ownerAsm context)
-            const CLR_RECORD_FIELDDEF *pFd = ownerAsm->GetFieldDef(fieldIndex);
-
-            g_CLR_RT_ExecutionEngine.InitializeReference(pHeap[staticField], pFd, ownerAsm, &genericTypeInstance);
+                found = true;
+                break;
+            }
         }
 
-        // store in typespec crossref (this storage is per-assembly typespec)
-        tsCross->genericStaticFields = pHeap;
-        tsCross->genericStaticFieldDefs = pFieldDefs;
-        tsCross->genericStaticFieldsCount = (CLR_UINT32)count;
+        if (found)
+        {
+            // Already found and reused an existing entry
+            continue;
+        }
+
+        // Need to create a new entry
+
+        // Check if we need to expand the array
+        if (g_CLR_RT_TypeSystem.m_genericStaticFieldsCount >= g_CLR_RT_TypeSystem.m_genericStaticFieldsMaxCount)
+        {
+            // Expand the array
+            CLR_UINT32 newMax = g_CLR_RT_TypeSystem.m_genericStaticFieldsMaxCount * 2;
+
+            if (newMax == 0)
+            {
+                // use 4 as the initial minimum size to avoid too many reallocs
+                newMax = 4;
+            }
+
+            CLR_RT_GenericStaticFieldRecord *newArray =
+                (CLR_RT_GenericStaticFieldRecord *)platform_malloc(sizeof(CLR_RT_GenericStaticFieldRecord) * newMax);
+
+            if (newArray == nullptr)
+            {
+                NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
+            }
+
+            // Copy existing records
+            if (g_CLR_RT_TypeSystem.m_genericStaticFields != nullptr &&
+                g_CLR_RT_TypeSystem.m_genericStaticFieldsCount > 0)
+            {
+                memcpy(
+                    newArray,
+                    g_CLR_RT_TypeSystem.m_genericStaticFields,
+                    sizeof(CLR_RT_GenericStaticFieldRecord) * g_CLR_RT_TypeSystem.m_genericStaticFieldsCount);
+
+                platform_free(g_CLR_RT_TypeSystem.m_genericStaticFields);
+            }
+
+            g_CLR_RT_TypeSystem.m_genericStaticFields = newArray;
+            g_CLR_RT_TypeSystem.m_genericStaticFieldsMaxCount = newMax;
+        }
+
+        // Allocate storage for the static fields
+        CLR_RT_HeapBlock *fields = g_CLR_RT_ExecutionEngine.ExtractHeapBlocksForObjects(
+            DATATYPE_OBJECT, // heapblock kind
+            0,               // flags
+            count);          // number of CLR_RT_HeapBlock entries
+
+        if (fields == nullptr)
+        {
+            NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
+        }
+
+        // Allocate mapping for field definitions
+        CLR_RT_FieldDef_Index *fieldDefs =
+            (CLR_RT_FieldDef_Index *)platform_malloc(sizeof(CLR_RT_FieldDef_Index) * count);
+
+        if (fieldDefs == nullptr)
+        {
+            // Free already allocated fields
+            // Since we don't have a direct ReleaseHeapBlocksForObjects function,
+            // we'll need to have the GC clean it up later
+            NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
+        }
+
+        // Initialize the record
+        CLR_RT_GenericStaticFieldRecord *record =
+            &g_CLR_RT_TypeSystem.m_genericStaticFields[g_CLR_RT_TypeSystem.m_genericStaticFieldsCount++];
+        record->m_hash = hash;
+        record->m_fields = fields;
+        record->m_fieldDefs = fieldDefs;
+        record->m_count = count;
+
+        // Initialize field definitions and values
+        for (CLR_UINT32 i = 0; i < count; i++)
+        {
+            CLR_INDEX fieldIndex = ownerTd->firstStaticField + i;
+            fieldDefs[i].Set(ownerAsm->assemblyIndex, fieldIndex);
+
+            // Initialize the storage using the field definition
+            const CLR_RECORD_FIELDDEF *pFd = ownerAsm->GetFieldDef(fieldIndex);
+            g_CLR_RT_ExecutionEngine.InitializeReference(fields[i], pFd, ownerAsm);
+        }
+
+        // Link this assembly's cross-reference to the global registry entry
+        tsCross->genericStaticFields = record->m_fields;
+        tsCross->genericStaticFieldDefs = record->m_fieldDefs;
+        tsCross->genericStaticFieldsCount = record->m_count;
     }
 
     NANOCLR_NOCLEANUP();
@@ -5861,21 +5968,10 @@ void CLR_RT_Assembly::Relocate()
     CLR_RT_GarbageCollector::Heap_Relocate(staticFields, staticFieldsCount);
 #endif
 
-    // relocate per-TypeSpec generic statics if any
-    for (int i = 0; i < tablesSize[TBL_TypeSpec]; i++)
+    // Relocate all generic static field entries
+    for (CLR_UINT32 i = 0; i < g_CLR_RT_TypeSystem.m_genericStaticFieldsCount; i++)
     {
-        CLR_RT_TypeSpec_CrossReference &ts = crossReferenceTypeSpec[i];
-
-        if (ts.genericStaticFields)
-        {
-            CLR_RT_GarbageCollector::Heap_Relocate(ts.genericStaticFields, ts.genericStaticFieldsCount);
-        }
-
-        if (ts.genericStaticFieldDefs)
-        {
-            // pointer relocation for the indices array
-            CLR_RT_GarbageCollector::Heap_Relocate((void **)&ts.genericStaticFieldDefs);
-        }
+        CLR_RT_GarbageCollector::RelocateGenericStaticField(&g_CLR_RT_TypeSystem.m_genericStaticFields[i]);
     }
 
     CLR_RT_GarbageCollector::Heap_Relocate((void **)&header);
@@ -5891,6 +5987,11 @@ void CLR_RT_TypeSystem::TypeSystem_Initialize()
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_CLEAR(g_CLR_RT_TypeSystem);
     NANOCLR_CLEAR(g_CLR_RT_WellKnownTypes);
+
+    // Initialize generic static field registry
+    g_CLR_RT_TypeSystem.m_genericStaticFields = nullptr;
+    g_CLR_RT_TypeSystem.m_genericStaticFieldsCount = 0;
+    g_CLR_RT_TypeSystem.m_genericStaticFieldsMaxCount = 0;
 }
 
 void CLR_RT_TypeSystem::TypeSystem_Cleanup()
@@ -5905,6 +6006,25 @@ void CLR_RT_TypeSystem::TypeSystem_Cleanup()
     NANOCLR_FOREACH_ASSEMBLY_END();
 
     m_assembliesMax = 0;
+
+    // Clean up generic static field registry
+    if (m_genericStaticFields != nullptr)
+    {
+        // Free individual field definitions memory
+        for (CLR_UINT32 i = 0; i < m_genericStaticFieldsCount; i++)
+        {
+            if (m_genericStaticFields[i].m_fieldDefs != nullptr)
+            {
+                platform_free(m_genericStaticFields[i].m_fieldDefs);
+            }
+        }
+
+        // Free the entire array
+        platform_free(m_genericStaticFields);
+        m_genericStaticFields = nullptr;
+        m_genericStaticFieldsCount = 0;
+        m_genericStaticFieldsMaxCount = 0;
+    }
 }
 
 //--//
@@ -7420,6 +7540,166 @@ CLR_UINT32 CLR_RT_TypeSystem::MapDataTypeToElementType(NanoCLRDataType dt)
 {
     NATIVE_PROFILE_CLR_CORE();
     return c_CLR_RT_DataTypeLookup[dt].m_convertToElementType;
+}
+
+CLR_RT_GenericStaticFieldRecord *CLR_RT_TypeSystem::FindOrCreateGenericStaticFields(
+    CLR_UINT32 hash,
+    CLR_RT_Assembly *ownerAssembly,
+    CLR_UINT32 staticFieldCount)
+{
+    NATIVE_PROFILE_CLR_CORE();
+
+    // Check if we already have this hash in the registry
+    for (CLR_UINT32 i = 0; i < m_genericStaticFieldsCount; i++)
+    {
+        if (m_genericStaticFields[i].m_hash == hash)
+        {
+            return &m_genericStaticFields[i];
+        }
+    }
+
+    // Need to create a new entry
+
+    // First, ensure we have room in the registry
+    if (m_genericStaticFieldsCount >= m_genericStaticFieldsMaxCount)
+    {
+        // Need to grow the registry
+        CLR_UINT32 newMax = m_genericStaticFieldsMaxCount * 2;
+        if (newMax == 0)
+            newMax = 16; // Initial size
+
+        CLR_RT_GenericStaticFieldRecord *newArray =
+            (CLR_RT_GenericStaticFieldRecord *)platform_malloc(sizeof(CLR_RT_GenericStaticFieldRecord) * newMax);
+
+        if (newArray == nullptr)
+        {
+            return nullptr; // Out of memory
+        }
+
+        // Copy existing records
+        if (m_genericStaticFields != nullptr && m_genericStaticFieldsCount > 0)
+        {
+            memcpy(
+                newArray,
+                m_genericStaticFields,
+                sizeof(CLR_RT_GenericStaticFieldRecord) * m_genericStaticFieldsCount);
+
+            platform_free(m_genericStaticFields);
+        }
+
+        m_genericStaticFields = newArray;
+        m_genericStaticFieldsMaxCount = newMax;
+    }
+
+    // Find the generic type definition by hash
+    CLR_RT_TypeDef_Index typeDef = ownerAssembly->GenericDefFromHash(hash);
+    if (!NANOCLR_INDEX_IS_VALID(typeDef))
+    {
+        // Could not find the type definition
+        return nullptr;
+    }
+
+    // Get the type definition record
+    const CLR_RECORD_TYPEDEF *ownerTd = ownerAssembly->GetTypeDef(typeDef.Type());
+
+    // Allocate storage for the static fields
+    CLR_RT_HeapBlock *pFields = g_CLR_RT_ExecutionEngine.ExtractHeapBlocksForObjects(
+        DATATYPE_OBJECT, // Use OBJECT type for proper GC management
+        0,               // No special flags
+        staticFieldCount // Number of fields
+    );
+
+    if (pFields == nullptr)
+    {
+        return nullptr; // Out of memory
+    }
+
+    // Allocate mapping for field definitions using platform_malloc since we need to manage this memory separately
+    CLR_RT_FieldDef_Index *pFieldDefs =
+        (CLR_RT_FieldDef_Index *)platform_malloc(sizeof(CLR_RT_FieldDef_Index) * staticFieldCount);
+
+    if (pFieldDefs == nullptr)
+    {
+        // Unable to allocate field definitions, must clean up the fields we already allocated
+        // Since ExtractHeapBlocksForObjects allocates memory that's managed by the GC,
+        // we don't explicitly free it. The next GC cycle will reclaim it.
+
+        // Reset the allocated fields to null to ensure no dangling references
+        for (CLR_UINT32 i = 0; i < staticFieldCount; i++)
+        {
+            pFields[i].SetObjectReference(nullptr);
+        }
+
+        return nullptr; // Out of memory
+    }
+
+    // Initialize the record
+    CLR_RT_GenericStaticFieldRecord *record = &m_genericStaticFields[m_genericStaticFieldsCount++];
+    record->m_hash = hash;
+    record->m_fields = pFields;
+    record->m_fieldDefs = pFieldDefs;
+    record->m_count = staticFieldCount;
+
+    // Initialize field definitions and values
+    for (CLR_UINT32 i = 0; i < staticFieldCount; i++)
+    {
+        CLR_INDEX fieldIndex = ownerTd->firstStaticField + i;
+        pFieldDefs[i].Set(ownerAssembly->assemblyIndex, fieldIndex);
+
+        // Initialize the storage using the field definition
+        const CLR_RECORD_FIELDDEF *pFd = ownerAssembly->GetFieldDef(fieldIndex);
+        g_CLR_RT_ExecutionEngine.InitializeReference(pFields[i], pFd, ownerAssembly);
+    }
+
+    return record;
+}
+
+CLR_UINT32 CLR_RT_TypeSystem::ComputeHashForClosedGenericType(CLR_RT_TypeSpec_Instance &typeInstance)
+{
+    CLR_UINT32 hash = 0;
+
+    // Start with the generic type definition
+    hash = SUPPORT_ComputeCRC(&typeInstance.genericTypeDef.data, sizeof(CLR_UINT32), hash);
+
+    // Parse the TypeSpec signature to extract generic arguments
+    CLR_RT_SignatureParser parser;
+    parser.Initialize_TypeSpec(typeInstance);
+
+    CLR_RT_SignatureParser::Element elem;
+
+    // Advance to the generic instance marker
+    if (FAILED(parser.Advance(elem)) || elem.DataType != DATATYPE_GENERICINST)
+    {
+        return hash;
+    }
+
+    // Advance to the generic type definition
+    if (FAILED(parser.Advance(elem)))
+    {
+        return hash;
+    }
+
+    // Get argument count
+    int argCount = elem.GenParamCount;
+
+    // Process each generic argument
+    for (int i = 0; i < argCount; i++)
+    {
+        if (FAILED(parser.Advance(elem)))
+        {
+            break;
+        }
+
+        // Add each argument's type information to the hash
+        hash = SUPPORT_ComputeCRC(&elem.DataType, sizeof(elem.DataType), hash);
+
+        if (elem.DataType == DATATYPE_CLASS || elem.DataType == DATATYPE_VALUETYPE)
+        {
+            hash = SUPPORT_ComputeCRC(&elem.Class.data, sizeof(elem.Class.data), hash);
+        }
+    }
+
+    return hash ? hash : 0xFFFFFFFF; // Don't allow zero as a hash value
 }
 
 //--//
