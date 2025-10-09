@@ -55,8 +55,8 @@ set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
 set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
 
 # set required C and C++ standard for ALL targets
-set(CMAKE_C_STANDARD 11 CACHE INTERNAL "C standard for all targets")
-set(CMAKE_CXX_STANDARD 11 CACHE INTERNAL "C++ standard for all targets")
+set(CMAKE_C_STANDARD 17 CACHE INTERNAL "C standard for all targets")
+set(CMAKE_CXX_STANDARD 17 CACHE INTERNAL "C++ standard for all targets")
 
 # Perform compiler test with static library
 set(CMAKE_TRY_COMPILE_TARGET_TYPE STATIC_LIBRARY)
