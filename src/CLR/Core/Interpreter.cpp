@@ -2728,13 +2728,25 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                 {
                     FETCH_ARG_COMPRESSED_FIELDTOKEN(arg, ip);
 
-                    CLR_RT_FieldDef_Instance field;
+                    CLR_RT_FieldDef_Instance field{};
+                    CLR_RT_HeapBlock *ptr = nullptr;
+
+                    // resolve field token
                     if (field.ResolveToken(arg, assm, &stack->m_call) == false)
                     {
                         NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
                     }
 
-                    CLR_RT_HeapBlock *ptr = CLR_RT_ExecutionEngine::AccessStaticField(field);
+                    if (field.genericType && NANOCLR_INDEX_IS_VALID(*field.genericType))
+                    {
+                        // access static field of a generic instance
+                        ptr = field.assembly->GetStaticFieldByFieldDef(field, field.genericType);
+                    }
+                    else
+                    {
+                        // static field of a non-generic class
+                        ptr = CLR_RT_ExecutionEngine::AccessStaticField(field);
+                    }
 
                     if (ptr == nullptr)
                     {
@@ -2756,13 +2768,25 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                 {
                     FETCH_ARG_COMPRESSED_FIELDTOKEN(arg, ip);
 
-                    CLR_RT_FieldDef_Instance field;
+                    CLR_RT_FieldDef_Instance field{};
+                    CLR_RT_HeapBlock *ptr = nullptr;
+
+                    // resolve field token
                     if (field.ResolveToken(arg, assm, &stack->m_call) == false)
                     {
                         NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
                     }
 
-                    CLR_RT_HeapBlock *ptr = CLR_RT_ExecutionEngine::AccessStaticField(field);
+                    if (field.genericType && NANOCLR_INDEX_IS_VALID(*field.genericType))
+                    {
+                        // access static field of a generic instance
+                        ptr = field.assembly->GetStaticFieldByFieldDef(field, field.genericType);
+                    }
+                    else
+                    {
+                        // static field of a non-generic class
+                        ptr = CLR_RT_ExecutionEngine::AccessStaticField(field);
+                    }
 
                     if (ptr == nullptr)
                     {
@@ -2783,13 +2807,25 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                 {
                     FETCH_ARG_COMPRESSED_FIELDTOKEN(arg, ip);
 
-                    CLR_RT_FieldDef_Instance field;
+                    CLR_RT_FieldDef_Instance field{};
+                    CLR_RT_HeapBlock *ptr = nullptr;
+
+                    // resolve field token
                     if (field.ResolveToken(arg, assm, &stack->m_call) == false)
                     {
                         NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
                     }
 
-                    CLR_RT_HeapBlock *ptr = CLR_RT_ExecutionEngine::AccessStaticField(field);
+                    if (field.genericType && NANOCLR_INDEX_IS_VALID(*field.genericType))
+                    {
+                        // access static field of a generic instance
+                        ptr = field.assembly->GetStaticFieldByFieldDef(field, field.genericType);
+                    }
+                    else
+                    {
+                        // static field of a non-generic class
+                        ptr = CLR_RT_ExecutionEngine::AccessStaticField(field);
+                    }
 
                     if (ptr == nullptr)
                     {

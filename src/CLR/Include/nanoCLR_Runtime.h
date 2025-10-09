@@ -963,6 +963,18 @@ struct CLR_RT_TypeSpec_CrossReference
 {
     CLR_RT_TypeSpec_Index genericType;
     CLR_RT_TypeDef_Index ownerType;
+
+    /// @brief Array of static fields (one entry per bound static field)
+    ///
+    CLR_RT_HeapBlock *genericStaticFields;
+
+    /// @brief Array of indices (one entry per bound static field, parallel with genericStaticFields)
+    ///
+    CLR_RT_FieldDef_Index *genericStaticFieldDefs;
+
+    /// @brief Number of static fields
+    ///
+    CLR_UINT32 genericStaticFieldsCount;
 };
 
 struct CLR_RT_MethodDef_Patch
@@ -1418,7 +1430,13 @@ struct CLR_RT_Assembly : public CLR_RT_HeapBlock_Node // EVENT HEAP - NO RELOCAT
     void ResolveLink();
     HRESULT ResolveComputeHashes();
     HRESULT ResolveAllocateStaticFields(CLR_RT_HeapBlock *pStaticFields);
-
+    HRESULT ResolveAllocateGenericTypeStaticFields();
+    CLR_RT_HeapBlock *GetGenericStaticField(
+        const CLR_RT_TypeSpec_Index &typeSpecIndex,
+        const CLR_RT_FieldDef_Index &fdIndex);
+    CLR_RT_HeapBlock *GetStaticFieldByFieldDef(
+        const CLR_RT_FieldDef_Index &fdIndex,
+        const CLR_RT_TypeSpec_Index *genericType);
     HRESULT PrepareForExecution();
 
     CLR_UINT32 ComputeAssemblyHash();
@@ -1475,6 +1493,7 @@ struct CLR_RT_Assembly : public CLR_RT_HeapBlock_Node // EVENT HEAP - NO RELOCAT
 
     //--//
 
+    CLR_RT_TypeDef_Index GenericDefFromHash(CLR_UINT32 hash);
     CLR_RT_HeapBlock *GetStaticField(const int index);
 
     //--//
@@ -1952,6 +1971,23 @@ extern const CLR_RT_LogicalOpcodeLookup c_CLR_RT_LogicalOpcodeLookup[];
 
 //--//
 
+struct CLR_RT_GenericStaticFieldRecord
+{
+    // Unique identifier for this closed generic type
+    CLR_UINT32 m_hash;
+
+    // Storage for static fields
+    CLR_RT_HeapBlock *m_fields;
+
+    // Field definition mapping
+    CLR_RT_FieldDef_Index *m_fieldDefs;
+
+    // Number of static fields
+    CLR_UINT32 m_count;
+};
+
+//--//
+
 struct CLR_RT_TypeSystem // EVENT HEAP - NO RELOCATION -
 {
     struct CompatibilityLookup
@@ -1977,6 +2013,11 @@ struct CLR_RT_TypeSystem // EVENT HEAP - NO RELOCATION -
     CLR_RT_Assembly *m_assemblyNative;
 
     CLR_RT_MethodDef_Index m_entryPoint;
+
+    // Global registry for generic static fields
+    CLR_RT_GenericStaticFieldRecord *m_genericStaticFields;
+    CLR_UINT32 m_genericStaticFieldsCount;
+    CLR_UINT32 m_genericStaticFieldsMaxCount;
 
     //--//
 
@@ -2065,6 +2106,14 @@ struct CLR_RT_TypeSystem // EVENT HEAP - NO RELOCATION -
     void Dump(const wchar_t *szFileName, bool fNoByteCode);
 #endif
 
+    CLR_RT_GenericStaticFieldRecord *FindOrCreateGenericStaticFields(
+        CLR_UINT32 hash,
+        CLR_RT_Assembly *ownerAssembly,
+        CLR_UINT32 staticFieldCount);
+
+    // Helper to compute hash for a closed generic type
+    static CLR_UINT32 ComputeHashForClosedGenericType(CLR_RT_TypeSpec_Instance &typeInstance);
+
     //--//
 
     PROHIBIT_COPY_CONSTRUCTORS(CLR_RT_TypeSystem);
@@ -2100,6 +2149,7 @@ struct CLR_RT_TypeSpec_Instance : public CLR_RT_TypeSpec_Index
     void ClearInstance();
 
     bool ResolveToken(CLR_UINT32 tk, CLR_RT_Assembly *assm, const CLR_RT_MethodDef_Instance *caller = nullptr);
+    bool IsClosedGenericType();
 };
 
 //--//
@@ -2984,6 +3034,21 @@ struct CLR_RT_GarbageCollector
 
     static void Heap_Relocate(CLR_RT_HeapBlock *lst, CLR_UINT32 len);
     static void Heap_Relocate(void **ref);
+
+    //--//
+
+    static void RelocateGenericStaticField(CLR_RT_GenericStaticFieldRecord *field)
+    {
+        if (field->m_fields)
+        {
+            CLR_RT_GarbageCollector::Heap_Relocate(field->m_fields, field->m_count);
+        }
+
+        if (field->m_fieldDefs)
+        {
+            CLR_RT_GarbageCollector::Heap_Relocate((void **)&field->m_fieldDefs);
+        }
+    }
 
     //--//
 
