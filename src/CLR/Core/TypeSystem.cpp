@@ -1641,7 +1641,7 @@ bool CLR_RT_MethodDef_Instance::InitializeFromIndex(
     }
 
     CLR_RT_TypeDef_Index ownerTypeIdx;
-    CLR_RT_MethodDef_Index mdRebound;
+    CLR_RT_MethodDef_Index mdResolved;
 
     if (elem.DataType == DATATYPE_VAR)
     {
@@ -1661,10 +1661,52 @@ bool CLR_RT_MethodDef_Instance::InitializeFromIndex(
         ownerTypeIdx.data = elem.Class.data;
     }
 
-    // rebind the method onto the *declaring* assembly of the generic
-    mdRebound.data = (ownerTypeIdx.Assembly() << 24) | md.Method();
+    // try to find the correct method reference
+    if (ownerTypeIdx.Assembly() != md.Assembly())
+    {
+        // Cross-assembly case: need to find the corresponding MethodRef/MethodDef
+        CLR_RT_Assembly *originalAssm = g_CLR_RT_TypeSystem.m_assemblies[md.Assembly() - 1];
+        CLR_RT_Assembly *targetAssm = g_CLR_RT_TypeSystem.m_assemblies[ownerTypeIdx.Assembly() - 1];
 
-    if (!InitializeFromIndex(mdRebound))
+        // Get the original method information
+        const CLR_RECORD_METHODDEF *originalMD = originalAssm->GetMethodDef(md.Method());
+        const char *methodName = originalAssm->GetString(originalMD->name);
+
+        // Try to find the method in the target assembly by looking through MethodRefs
+        bool found = false;
+        for (int i = 0; i < targetAssm->tablesSize[TBL_MethodRef]; i++)
+        {
+            const CLR_RECORD_METHODREF *mr = targetAssm->GetMethodRef(i);
+            const char *refName = targetAssm->GetString(mr->name);
+
+            if (!strcmp(methodName, refName))
+            {
+                // Found a potential match, now check if it resolves to our original method
+                CLR_RT_MethodRef_CrossReference &crossRef = targetAssm->crossReferenceMethodRef[i];
+
+                if (crossRef.target.data == md.data)
+                {
+                    // This MethodRef points to our original method!
+                    mdResolved.data = md.data;
+                    found = true;
+                    break;
+                }
+            }
+        }
+
+        if (!found)
+        {
+            // Fallback: keep the original method reference
+            mdResolved.data = md.data;
+        }
+    }
+    else
+    {
+        // Same assembly case: no rebinding needed
+        mdResolved.data = md.data;
+    }
+
+    if (!InitializeFromIndex(mdResolved))
     {
         return false;
     }
