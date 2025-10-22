@@ -127,7 +127,10 @@ static uart_port_t ESP32_WP_UART = UART_NUM_0;
 #define ESP32_WP_TX_PIN UART_NUM_0_TXD_DIRECT_GPIO_NUM
 #endif
 
-#if (CONFIG_IDF_TARGET_ESP32C3 || CONFIG_IDF_TARGET_ESP32C6 || CONFIG_IDF_TARGET_ESP32H2 || CONFIG_IDF_TARGET_ESP32P4) && HAL_WP_USE_USB_CDC
+#if (                                                                                                                  \
+    CONFIG_IDF_TARGET_ESP32C3 || CONFIG_IDF_TARGET_ESP32C6 || CONFIG_IDF_TARGET_ESP32H2 ||                             \
+    CONFIG_IDF_TARGET_ESP32P4) &&                                                                                      \
+    HAL_WP_USE_USB_CDC
 
 #include <hal/usb_serial_jtag_ll.h>
 
