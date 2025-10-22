@@ -749,8 +749,7 @@ macro(nf_add_idf_as_library)
             list(APPEND IDF_LIBRARIES_TO_ADD idf::esp_tinyusb) 
             list(APPEND IDF_LIBRARIES_TO_ADD  idf::tinyusb) 
 
-            string(APPEND SDKCONFIG_DEFAULT_CONTENTS "\nCONFIG_TINYUSB_ENABLED=y\n")
-            string(APPEND SDKCONFIG_DEFAULT_CONTENTS "CONFIG_TINYUSB_CDC_ENABLED=y\n")
+            string(APPEND SDKCONFIG_DEFAULT_CONTENTS "\nCONFIG_TINYUSB_CDC_ENABLED=y\n")
             string(APPEND SDKCONFIG_DEFAULT_CONTENTS "CONFIG_TINYUSB_DESC_PRODUCT_STRING=\"nanoFramework device\"\n")
             string(APPEND SDKCONFIG_DEFAULT_CONTENTS "CONFIG_TINYUSB_DESC_CDC_STRING=\"nanoFramework device\"\n")
             string(APPEND SDKCONFIG_DEFAULT_CONTENTS "CONFIG_TINYUSB_CDC_RX_BUFSIZE=64\n")
@@ -760,7 +759,7 @@ macro(nf_add_idf_as_library)
         else()
             message(STATUS "Support for embedded USB CDC **IS NOT** enabled")
 
-            string(APPEND SDKCONFIG_DEFAULT_CONTENTS "\nCONFIG_TINYUSB_ENABLED=n\n")
+            string(APPEND SDKCONFIG_DEFAULT_CONTENTS "\nCONFIG_TINYUSB_CDC_ENABLED=n\n")
         endif()
 
         # need to temporarily allow changes in source files
