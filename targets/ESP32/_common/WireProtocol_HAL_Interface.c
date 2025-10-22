@@ -356,16 +356,17 @@ static bool WP_Initialise(COM_HANDLE port)
     // uninstall driver for console
     // ESP_ERROR_CHECK(uart_driver_delete(ESP32_WP_UART));
 
-    uart_config_t uart_config = {// baudrate
-                                 .baud_rate = TARGET_SERIAL_BAUDRATE,
-                                 // baudrate
-                                 .data_bits = UART_DATA_8_BITS,
-                                 // parity mode
-                                 .parity = UART_PARITY_DISABLE,
-                                 // stop bit mode
-                                 .stop_bits = UART_STOP_BITS_1,
-                                 // hardware flow control(cts/rts)
-                                 .flow_ctrl = UART_HW_FLOWCTRL_DISABLE};
+    uart_config_t uart_config = {
+        // baudrate
+        .baud_rate = TARGET_SERIAL_BAUDRATE,
+        // baudrate
+        .data_bits = UART_DATA_8_BITS,
+        // parity mode
+        .parity = UART_PARITY_DISABLE,
+        // stop bit mode
+        .stop_bits = UART_STOP_BITS_1,
+        // hardware flow control(cts/rts)
+        .flow_ctrl = UART_HW_FLOWCTRL_DISABLE};
 
     ESP_ERROR_CHECK(uart_param_config(ESP32_WP_UART, &uart_config));
 
