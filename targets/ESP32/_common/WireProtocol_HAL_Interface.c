@@ -339,9 +339,7 @@ uint8_t WP_TransmitMessage(WP_Message *message)
         }
     }
 
-    tinyusb_cdcacm_write_flush(TINYUSB_CDC_ACM_0, 0);
-
-    return true;
+    return tinyusb_cdcacm_write_flush(TINYUSB_CDC_ACM_0, configTICK_RATE_HZ) == ESP_OK;
 }
 
 #else
