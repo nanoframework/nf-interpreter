@@ -275,6 +275,7 @@ static bool WP_Initialise(COM_HANDLE port)
     tinyusb_config_cdcacm_t amc_cfg = {
         .usb_dev = TINYUSB_USBDEV_0,
         .cdc_port = TINYUSB_CDC_ACM_0,
+        // parameter deprecated, therefore it doesn't matter what we put here
         .rx_unread_buf_sz = 1056,
         .callback_rx = &WP_Cdc_Rx_Callback,
         .callback_rx_wanted_char = NULL,
@@ -339,7 +340,11 @@ uint8_t WP_TransmitMessage(WP_Message *message)
         }
     }
 
-    return tinyusb_cdcacm_write_flush(TINYUSB_CDC_ACM_0, configTICK_RATE_HZ) == ESP_OK;
+    // need to call flush with a timeout to have it behave cooperatively with the RTOS
+    // OK to silently ignore errors here
+    tinyusb_cdcacm_write_flush(TINYUSB_CDC_ACM_0, pdMS_TO_TICKS(250));
+
+    return true;
 }
 
 #else

@@ -757,7 +757,6 @@ macro(nf_add_idf_as_library)
             string(APPEND SDKCONFIG_DEFAULT_CONTENTS "CONFIG_TINYUSB_CDC_TX_BUFSIZE=1024\n")
             # better to assign the tinyUSB task to the same core as the ReceiverTask
             string(APPEND SDKCONFIG_DEFAULT_CONTENTS "CONFIG_TINYUSB_TASK_AFFINITY=TINYUSB_TASK_AFFINITY_CPU0\n")
-            string(APPEND SDKCONFIG_DEFAULT_CONTENTS "CONFIG_TINYUSB_MODE_SLAVE=y\n")
 
             message(STATUS "Support for embedded USB CDC enabled")
 
