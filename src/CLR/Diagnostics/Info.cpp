@@ -935,7 +935,7 @@ void CLR_RT_Assembly::DumpOpcodeDirect(
             if (mdInst.ResolveToken(token, call.assembly, call.genericType))
             {
                 // mdInst now holds the target MethodDef (or MethodSpec) plus any genericType.
-                CLR_RT_DUMP::METHOD(mdInst, mdInst.genericType);
+                CLR_RT_DUMP::METHOD(mdInst, call.genericType);
             }
             else
             {
