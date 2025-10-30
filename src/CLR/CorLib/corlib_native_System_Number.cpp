@@ -752,7 +752,11 @@ int Library_corlib_native_System_Number::Format_F(
             }
             buffer[ret] = 0;
         }
+    }
 
+    // apply negative sign and decimal separator replacements for all types
+    if (ret > 0)
+    {
         ret = ReplaceNegativeSign(buffer, ret, negativeSign);
         ret = ReplaceDecimalSeparator(buffer, ret, decimalSeparator);
     }
