@@ -65,10 +65,10 @@
 #define CH_CFG_ST_FREQUENCY 10000 // this is 2 milliseconds
 #endif
 
-/**
- * @brief   Time intervals data size.
- * @note    Allowed values are 16, 32 or 64 bits.
- */                                                                                                                   \
+/**                                                                                                                    \
+ * @brief   Time intervals data size.                                                                                  \
+ * @note    Allowed values are 16, 32 or 64 bits.                                                                      \
+ */                                                                                                                    \
 #if !defined(CH_CFG_INTERVALS_SIZE)
 #define CH_CFG_INTERVALS_SIZE 64
 #endif
@@ -816,4 +816,4 @@
 
 #endif /* CHCONF_H */
 
-    /** @} */
+/** @} */
