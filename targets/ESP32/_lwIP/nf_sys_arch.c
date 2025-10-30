@@ -1,9 +1,12 @@
 //
 // Copyright (c) .NET Foundation and Contributors
-// Portions Copyright (c) 2001-2004 Swedish Institute of Computer Science.  All rights reserved.
-// Portions Copyright (c) 2006..2015 Giovanni Di Sirio. All rights reserved.
-// See LICENSE file in the project root for full license information.
 //
+// SPDX-FileCopyrightText: 2001-2003 Swedish Institute of Computer Science
+// SPDX-License-Identifier: BSD-3-Clause
+// SPDX-FileContributor: 2018-2024 Espressif Systems (Shanghai) CO LTD
+//
+
+/* lwIP includes. */
 
 #include <pthread.h>
 #include "freertos/FreeRTOS.h"
@@ -218,10 +221,6 @@ sys_mbox_new(sys_mbox_t *mbox, int size)
     return ERR_MEM;
   }
 
-#if ESP_THREAD_SAFE
-  (*mbox)->owner = NULL;
-#endif
-
   LWIP_DEBUGF(ESP_THREAD_SAFE_DEBUG, ("new *mbox ok mbox=%p os_mbox=%p\n", *mbox, (*mbox)->os_mbox));
   return ERR_OK;
 }
@@ -351,15 +350,6 @@ sys_arch_mbox_tryfetch(sys_mbox_t *mbox, void **msg)
   return 0;
 }
 
-void
-sys_mbox_set_owner(sys_mbox_t *mbox, void* owner)
-{
-  if (mbox && *mbox) {
-    (*mbox)->owner = owner;
-    LWIP_DEBUGF(ESP_THREAD_SAFE_DEBUG, ("set mbox=%p owner=%p", *mbox, owner));
-  }
-}
-
 /**
  * @brief Delete a mailbox
  *
@@ -402,7 +392,7 @@ sys_thread_new(const char *name, lwip_thread_fn thread, void *arg, int stacksize
   ret = xTaskCreatePinnedToCore(thread, name, stacksize, arg, prio, &rtos_task,
           CONFIG_LWIP_TCPIP_TASK_AFFINITY);
 
-  LWIP_DEBUGF(TCPIP_DEBUG, ("new lwip task : %x, prio:%d,stack:%d\n",
+  LWIP_DEBUGF(TCPIP_DEBUG, ("new lwip task : %" U32_F ", prio:%d,stack:%d\n",
              (u32_t)rtos_task, prio, stacksize));
 
   if (ret != pdTRUE) {
@@ -421,7 +411,7 @@ sys_init(void)
 {
   if (!g_lwip_protect_mutex) {
     if (ERR_OK != sys_mutex_new(&g_lwip_protect_mutex)) {
-      ESP_LOGE(TAG, "sys_init: failed to init lwip protect mutex\n");
+      ESP_LOGE(TAG, "sys_init: failed to init lwip protect mutex");
     }
   }
 
@@ -443,7 +433,7 @@ sys_jiffies(void)
 }
 
 /**
- * @brief Get current time, in miliseconds
+ * @brief Get current time, in milliseconds
  *
  * @return current time
  */
