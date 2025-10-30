@@ -756,9 +756,25 @@ int Library_corlib_native_System_Number::Format_F(
         ret = ReplaceNegativeSign(buffer, ret, negativeSign);
         ret = ReplaceDecimalSeparator(buffer, ret, decimalSeparator);
     }
+    else if (isIntegerDataType && ret == 0)
+    {
+        // special case: when precision is 0 and value is 0, snprintf returns empty string
+        // we need to output "0" instead
+        buffer[0] = '0';
+        buffer[1] = 0;
+        ret = 1;
+    }
     // apply culture-specific replacements for floating-point types
     else if (!isIntegerDataType && ret > 0)
     {
+        // handle negative zero: -0.0 should be formatted as "0"
+        if (precision == 0 && ret >= 2 && buffer[0] == '-' && buffer[1] == '0')
+        {
+            // remove the negative sign for "-0"
+            memmove(buffer, &buffer[1], ret);
+            ret--;
+        }
+        
         ret = ReplaceNegativeSign(buffer, ret, negativeSign);
         ret = ReplaceDecimalSeparator(buffer, ret, decimalSeparator);
     }
