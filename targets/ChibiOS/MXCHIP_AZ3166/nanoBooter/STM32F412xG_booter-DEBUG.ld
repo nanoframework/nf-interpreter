@@ -23,7 +23,7 @@ MEMORY
     config     (rw) : org = 0x00000000, len = 0       /* space reserved for configuration block */
     deployment (rx) : org = 0x00000000, len = 0       /* space reserved for application deployment */
     ramvt      (wx) : org = 0x00000000, len = 0       /* initial RAM address is reserved for a copy of the vector table */
-    ram0       (wx) : org = 0x20000000, len = 256k-48 /* SRAM1 */
+    ram0       (wx) : org = 0x20000030, len = 256k-48 /* SRAM1 (excludes boot clipboard) */
     ram1       (wx) : org = 0x00000000, len = 0
     ram2       (wx) : org = 0x00000000, len = 0
     ram3       (wx) : org = 0x00000000, len = 0
