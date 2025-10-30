@@ -82,7 +82,7 @@ int main(void)
 #endif
 
     // need to override the default config block to set oversampling
-    SerialConfig serialConfig = {SERIAL_DEFAULT_BITRATE, 0, USART_CR2_STOP1_BITS, USART_CR1_OVER8};
+    SerialConfig serialConfig = {SERIAL_DEFAULT_BITRATE, USART_CR1_OVER8, USART_CR2_STOP1_BITS, 0};
 
     // starts the serial driver
     sdStart(&SERIAL_DRIVER, &serialConfig);
