@@ -426,7 +426,7 @@
     (PIN_AFIO_AF(GPIOA_ZIO_D32, 0U) | PIN_AFIO_AF(GPIOA_PIN1, 0U) | PIN_AFIO_AF(2, 0U) | PIN_AFIO_AF(3, 0U) |          \
      PIN_AFIO_AF(GPIOA_KEY_A, 0U) | PIN_AFIO_AF(5, 0U) | PIN_AFIO_AF(6, 0U) | PIN_AFIO_AF(7, 0U))
 #define VAL_GPIOA_AFRH                                                                                                 \
-    (PIN_AFIO_AF(GPIOA_MCO_1, 0U) | PIN_AFIO_AF(GPIOA_WWD_PIN_RESET, 0U) | PIN_AFIO_AF(GPIOA_USB_ID, 10U) |           \
+    (PIN_AFIO_AF(GPIOA_MCO_1, 0U) | PIN_AFIO_AF(GPIOA_WWD_PIN_RESET, 0U) | PIN_AFIO_AF(GPIOA_USB_ID, 10U) |            \
      PIN_AFIO_AF(GPIOA_USART6_TX, 8U) | PIN_AFIO_AF(GPIOA_USART6_RX, 8U) | PIN_AFIO_AF(GPIOA_SWDIO, 0U) |              \
      PIN_AFIO_AF(GPIOA_SWCLK, 0U) | PIN_AFIO_AF(GPIOA_LED3, 0U))
 
@@ -554,7 +554,7 @@
      PIN_AFIO_AF(GPIOC_ZIO_D16, 0U) | PIN_AFIO_AF(GPIOC_RBG_GREEN, 0U))
 #define VAL_GPIOC_AFRH                                                                                                 \
     (PIN_AFIO_AF(GPIOC_SDIO_D0, 12U) | PIN_AFIO_AF(GPIOC_SDIO_D1, 12U) | PIN_AFIO_AF(GPIOC_SDIO_D2, 12U) |             \
-     PIN_AFIO_AF(GPIOC_ZIO_D46, 12U) | PIN_AFIO_AF(GPIOC_SDIO_CK, 12U) | PIN_AFIO_AF(GPIOC_LED2, 0U) |                  \
+     PIN_AFIO_AF(GPIOC_ZIO_D46, 12U) | PIN_AFIO_AF(GPIOC_SDIO_CK, 12U) | PIN_AFIO_AF(GPIOC_LED2, 0U) |                 \
      PIN_AFIO_AF(GPIOC_OSC32_IN, 0U) | PIN_AFIO_AF(GPIOC_OSC32_OUT, 0U))
 
 /*
