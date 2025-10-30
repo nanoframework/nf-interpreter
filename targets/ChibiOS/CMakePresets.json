@@ -1,6 +1,7 @@
 {
     "version": 4,
     "include": [
+        "MXCHIP_AZ3166/CMakePresets.json",
         "ORGPAL_PALTHREE/CMakePresets.json",
         "ORGPAL_PALX/CMakePresets.json",
         "ST_NUCLEO64_F091RC/CMakePresets.json",

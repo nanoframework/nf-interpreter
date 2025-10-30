@@ -359,6 +359,17 @@ endmacro()
 # optional CLR_EXTRA_LINK_FLAGS extra nanoCLR link flags to pass to nf_set_link_options() 
 macro(nf_setup_target_build)
 
+    if(${TARGET_BOARD} STREQUAL "MXCHIP_AZ3166")
+
+        # # add WICED WWM library
+        # set(CLR_EXTRA_LIBRARIES
+        #     ${CMAKE_SOURCE_DIR}/targets/ChibiOS/MXCHIP_AZ3166/libwiced_sdk_bin.a
+        # )
+
+        # # add these to the ARGN list
+        # list(APPEND ARGN CLR_EXTRA_LIBRARIES ${CLR_EXTRA_LIBRARIES})
+    endif()
+
     # OK to pass ARGN, to have it perform it's parsings and validation 
     nf_setup_target_build_common(${ARGN})
 
