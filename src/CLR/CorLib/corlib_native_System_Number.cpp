@@ -752,18 +752,12 @@ int Library_corlib_native_System_Number::Format_F(
             }
             buffer[ret] = 0;
         }
-    }
-    else if (isIntegerDataType && ret == 0)
-    {
-        // special case: when precision is 0 and value is 0, snprintf returns empty string
-        // we need to output "0" instead
-        buffer[0] = '0';
-        buffer[1] = 0;
-        ret = 1;
-    }
 
-    // apply culture-specific replacements for all types when formatting is successful
-    if (ret > 0)
+        ret = ReplaceNegativeSign(buffer, ret, negativeSign);
+        ret = ReplaceDecimalSeparator(buffer, ret, decimalSeparator);
+    }
+    // apply culture-specific replacements for floating-point types
+    else if (!isIntegerDataType && ret > 0)
     {
         ret = ReplaceNegativeSign(buffer, ret, negativeSign);
         ret = ReplaceDecimalSeparator(buffer, ret, decimalSeparator);
