@@ -754,9 +754,18 @@ int Library_corlib_native_System_Number::Format_F(
         }
     }
 
-    // apply negative sign and decimal separator replacements for all data types when formatting is successful
+    // apply culture-specific replacements for all types when formatting is successful
     if (ret > 0)
     {
+        // for floating-point types, handle negative zero
+        if (!isIntegerDataType && ret == 2 && buffer[0] == '-' && buffer[1] == '0')
+        {
+            // convert "-0" to "0"
+            buffer[0] = '0';
+            buffer[1] = 0;
+            ret = 1;
+        }
+
         ret = ReplaceNegativeSign(buffer, ret, negativeSign);
         ret = ReplaceDecimalSeparator(buffer, ret, decimalSeparator);
     }
