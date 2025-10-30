@@ -27,9 +27,9 @@ int main(void)
     halInit();
 
     // turn off RGB LED
-    palClearLine(LINE_RBG_GREEN);
-    palClearLine(LINE_RBG_RED);
-    palClearLine(LINE_RBG_BLUE);
+    palClearLine(LINE_RGB_GREEN);
+    palClearLine(LINE_RGB_RED);
+    palClearLine(LINE_RGB_BLUE);
 
     // init boot clipboard
     InitBootClipboard();
