@@ -4,9 +4,9 @@ The MXChip IoT DevKit AZ3166 (AZ3166) is a compact development kit built around 
 
 ## References
 
-- EMW3166 datasheet (MXCHIP): https://www.mouser.com/datasheet/2/744/DS0047EN_EMW3166-1223059.pdf
-- Azure IoT DevKit docs: https://microsoft.github.io/azure-iot-developer-kit/
-- Seeed Studio AZ3166 product page: https://www.seeedstudio.com/AZ3166-IOT-Developer-Kit-p-2922.html
+- [EMW3166 datasheet (MXCHIP)](https://www.mouser.com/datasheet/2/744/DS0047EN_EMW3166-1223059.pdf)
+- [Azure IoT DevKit docs](https://microsoft.github.io/azure-iot-developer-kit/)
+- [Seeed Studio AZ3166 product page](https://www.seeedstudio.com/AZ3166-IOT-Developer-Kit-p-2922.html)
 
 ## Board specs
 
