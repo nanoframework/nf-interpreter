@@ -774,7 +774,7 @@ int Library_corlib_native_System_Number::Format_F(
             memmove(buffer, &buffer[1], ret);
             ret--;
         }
-        
+
         ret = ReplaceNegativeSign(buffer, ret, negativeSign);
         ret = ReplaceDecimalSeparator(buffer, ret, decimalSeparator);
     }
