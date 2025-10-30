@@ -187,7 +187,8 @@ jobs:
                         ($files.where{$_.Contains('targets/ChibiOS/_littlefs')}).Count -gt 0 -Or
                         ($files.where{$_.Contains('targets/ChibiOS/ORGPAL_PALTHREE')}).Count -gt 0 -Or
                         ($files.where{$_.Contains('targets/ChibiOS/ORGPAL_PALX')}).Count -gt 0 -Or
-                        ($files.where{$_.Contains('targets/ChibiOS/ST_NUCLEO64_F091RC')}).Count -gt 0
+                        ($files.where{$_.Contains('targets/ChibiOS/ST_NUCLEO64_F091RC')}).Count -gt 0 -Or
+                        ($files.where{$_.Contains('targets/ChibiOS/MXCHIP_AZ3166')}).Count -gt 0
                       )
                     {
                         # files at ChibiOS global folders or targets being built with this pipeline
@@ -290,6 +291,14 @@ jobs:
           NeedsDFU: false
           NeedsSRECORD: true
           CMakePreset: ST_NUCLEO64_F091RC
+
+        MXCHIP_AZ3166:
+          TargetBoard: MXCHIP_AZ3166
+          TargetSeries: "stm32f4xx"
+          BuildOptions: 
+          NeedsDFU: false
+          NeedsSRECORD: true
+          CMakePreset: MXCHIP_AZ3166
 
     variables:
       DOTNET_NOLOGO: true
