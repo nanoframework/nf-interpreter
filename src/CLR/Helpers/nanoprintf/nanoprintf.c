@@ -418,33 +418,38 @@ static char *format_float(double number, flt_width_t ndigits, flt_width_t width,
     {
         p -= (i - FLOAT_DIGITS);
     }
-    if (!(fflags & FF_NRND) && *p >= '5')
+    // Use the rounding digit at 'pend' (the extra generated digit)
+    if (!(fflags & FF_NRND) && *pend >= '5')
     {
-        for (;;)
+        char *start = buf +2; // first generated digit position
+        char *q = pend -1; // last significant digit
+
+        // Set rounding digit to zero; it will be dropped later
+        *pend = '0';
+
+        // Propagate carry leftwards
+        while (q >= start && *q == '9')
         {
-            if (i == 0)
+            *q = '0';
+            --q;
+        }
+
+        if (q < start)
+        {
+            // Rollover past the most significant digit, e.g.,9.999 ->10.000
+            *start = '1';
+            ++decpt;
+            // In fixed 'f' mode, this increases displayed digits
+            if ((fflags & (FF_FCVT | FF_GCVT)) == FF_FCVT)
             {
-                // The rounding has rippled all the way through to
-                // the first digit. i.e. 9.999..9 -> 10.0
-                // Just replace the first 0 with a 1 and shift the DP.
-                *p = '1';
-                ++decpt;
-                // This increases the displayed digits for 'f' only.
-                if ((fflags & (FF_FCVT|FF_GCVT)) == FF_FCVT)
-                {
-                    ++ndigits;
-                    ++pend;
-                }
-                break;
+                ++ndigits;
+                ++pend; // account for the added most significant digit
             }
-            // Previous digit was a rollover
-            *p-- = '0';
-            // Increment next digit and break out unless there is a rollover.
-            if (*p != '9')
-            {
-                (*p)++;
-                break;
-            }
+        }
+        else
+        {
+            // Normal increment without rollover
+            (*q)++;
         }
     }
 
@@ -910,6 +915,14 @@ static printf_t doprnt(void *context, void (*func)(char c, void *context), size_
                 }
 #endif
 #if FEATURE(USE_PRECISION)
+                // If precision explicitly set to 0 and value is 0, emit a single '0'
+                if (precision == 0 && uvalue == 0)
+                {
+                    *--p = '0';
+#if FEATURE(USE_ZERO_PAD)
+                    --fwidth;
+#endif
+                }
                 while (uvalue || precision > 0)
 #else
                 if (uvalue == 0)
