@@ -719,7 +719,7 @@ int Library_corlib_native_System_Number::Format_F(
         {
             val = (double)value->NumericByRef().r8;
         }
-        
+
         // Check if value is negative and would round to 0 with precision 0
         if (val < 0.0 && val > -0.5)
         {
