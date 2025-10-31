@@ -705,6 +705,28 @@ int Library_corlib_native_System_Number::Format_F(
 
     bool isIntegerDataType = IsIntegerDataType(dataType);
 
+    // For floating-point types with precision 0, check if we have negative zero case
+    // This happens when a small negative value (e.g., -0.099) rounds to 0
+    bool isNegativeZeroCase = false;
+    if (!isIntegerDataType && precision == 0)
+    {
+        double val = 0.0;
+        if (dataType == DATATYPE_R4)
+        {
+            val = (double)value->NumericByRef().r4;
+        }
+        else if (dataType == DATATYPE_R8)
+        {
+            val = (double)value->NumericByRef().r8;
+        }
+        
+        // Check if value is negative and would round to 0 with precision 0
+        if (val < 0.0 && val > -0.5)
+        {
+            isNegativeZeroCase = true;
+        }
+    }
+
     char formatStr[FORMAT_FMTSTR_BUFFER_SIZE];
     snprintf(
         formatStr,
@@ -767,10 +789,10 @@ int Library_corlib_native_System_Number::Format_F(
     // apply culture-specific replacements for floating-point types
     else if (!isIntegerDataType && ret > 0)
     {
-        // handle negative zero: -0.0 should be formatted as "0"
-        if (precision == 0 && ret >= 2 && buffer[0] == '-' && buffer[1] == '0')
+        // handle negative zero: if the value was negative but rounds to 0, remove the minus sign
+        if (isNegativeZeroCase && buffer[0] == '-')
         {
-            // remove the negative sign for "-0"
+            // remove the negative sign
             memmove(buffer, &buffer[1], ret);
             ret--;
         }
