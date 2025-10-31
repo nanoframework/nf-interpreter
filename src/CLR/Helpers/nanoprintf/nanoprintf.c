@@ -915,6 +915,14 @@ static printf_t doprnt(void *context, void (*func)(char c, void *context), size_
                 }
 #endif
 #if FEATURE(USE_PRECISION)
+                // If precision explicitly set to 0 and value is 0, emit a single '0'
+                if (precision == 0 && uvalue == 0)
+                {
+                    *--p = '0';
+#if FEATURE(USE_ZERO_PAD)
+                    --fwidth;
+#endif
+                }
                 while (uvalue || precision > 0)
 #else
                 if (uvalue == 0)
