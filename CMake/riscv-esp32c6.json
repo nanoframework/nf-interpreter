@@ -25,7 +25,7 @@
                 "SUPPORT_ANY_BASE_CONVERSION": "ON",
                 "API_System.Net": "ON",
                 "API_System.Math": "ON",
-                "API_System.Device.Adc": "OFF",
+                "API_System.Device.Adc": "ON",
                 "API_System.Device.Gpio": "ON",
                 "API_System.Device.I2c": "ON",
                 "API_System.Device.I2c.Slave": "ON",
