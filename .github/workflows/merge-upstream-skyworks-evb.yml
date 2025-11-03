@@ -11,13 +11,14 @@ jobs:
     runs-on: ubuntu-latest
     steps: 
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           ref: skyworks-evb
           fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Merge from upstream repo
+        id: sync
         uses: aormsby/Fork-Sync-With-Upstream-action@v3.4.1
         with:
           target_sync_branch: skyworks-evb
