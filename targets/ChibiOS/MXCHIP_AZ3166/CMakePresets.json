@@ -1,0 +1,50 @@
+{
+    "version": 4,
+    "include": [
+        "../../../CMake/arm-gcc.json",
+        "../../../config/user-tools-repos.json",
+        "../../../config/user-prefs.json"
+    ],
+    "configurePresets": [
+        {
+            "name": "MXCHIP_AZ3166",
+            "inherits": [
+                "arm-gcc-cortex-preset",
+                "user-tools-repos",
+                "user-prefs"
+            ],
+            "hidden": false,
+            "cacheVariables": {
+                "TARGET_BOARD": "MXCHIP_AZ3166",
+                "TARGET_SERIES": "STM32F4xx",
+                "RTOS": "ChibiOS",
+                "SUPPORT_ANY_BASE_CONVERSION": "ON",
+                "SWO_OUTPUT": "OFF",
+                "NF_BUILD_RTM": "OFF",
+                "NF_FEATURE_DEBUGGER": "ON",
+                "NF_FEATURE_RTC": "ON",
+                "NF_FEATURE_USE_FILESYSTEM": "OFF",
+                "NF_NETWORKING_SNTP": "OFF",
+                "API_Hardware.Stm32": "ON",
+                "API_System.Math": "ON",
+                "API_System.Net": "OFF",
+                "API_System.Device.Adc": "OFF",
+                "API_System.Device.Gpio": "ON",
+                "API_System.Device.I2c": "ON",
+                "API_System.Device.Pwm": "ON",
+                "API_System.IO.Ports": "ON",
+                "API_System.Device.Spi": "ON",
+                "API_nanoFramework.System.Collections": "ON",
+                "API_nanoFramework.System.Text": "ON"
+            }
+        }
+    ],
+    "buildPresets": [
+        {
+            "inherits": "base-user",
+            "name": "MXCHIP_AZ3166",
+            "displayName": "MXCHIP_AZ3166",
+            "configurePreset": "MXCHIP_AZ3166"
+        }
+    ]
+}

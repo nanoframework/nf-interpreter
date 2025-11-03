@@ -718,10 +718,11 @@ int Library_corlib_native_System_Number::Format_F(
 
     ret = DoPrintfOnDataType(buffer, formatStr, value);
 
+    bool isNegative = (buffer[0] == '-');
+
     // this extra processing is only required for integer types
     if (isIntegerDataType && ret > 0)
     {
-        bool isNegative = (buffer[0] == '-');
         int offsetBecauseOfNegativeSign = (isNegative ? 1 : 0);
 
         int dotIndex = GetDotIndex(buffer, ret);
@@ -755,6 +756,13 @@ int Library_corlib_native_System_Number::Format_F(
 
         ret = ReplaceNegativeSign(buffer, ret, negativeSign);
         ret = ReplaceDecimalSeparator(buffer, ret, decimalSeparator);
+    }
+    else if (isNegative && ret == 2 && buffer[1] == '0')
+    {
+        // handle negative zero: if the value was negative but rounds to 0, remove the minus sign
+        // remove the negative sign
+        memmove(buffer, &buffer[1], ret);
+        ret--;
     }
 
     return ret;

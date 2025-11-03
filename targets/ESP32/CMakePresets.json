@@ -645,7 +645,12 @@
                 "API_nanoFramework.Device.OneWire": "OFF",
                 "API_nanoFramework.Device.Bluetooth": "OFF",
                 "API_nanoFramework.Graphics": "OFF",
-                "API_System.Device.I2c.Slave": "OFF"
+                "API_System.Device.I2c.Slave": "OFF",
+                "API_System.Device.I2s": "OFF",
+                "API_nanoFramework.Hardware.Esp32.Rmt": "ON",
+                "API_nanoFramework.System.Security.Cryptography": "OFF",
+                "ESP32_SPIRAM_FOR_IDF_ALLOCATION": "0",
+                "ESP32_RESERVED_RAM_FOR_IDF_ALLOCATION": "125"
             }
         },
         {
@@ -795,7 +800,7 @@
             "hidden": false,
             "cacheVariables": {
                 "TARGET_NAME": "${presetName}",
-                "SDK_CONFIG_FILE": "sdkconfig.default_pico_ble_rev3",
+                "SDK_CONFIG_FILE": "sdkconfig.default_ble_rev3.esp32",
                 "TARGET_SERIAL_BAUDRATE": "115200",
                 "NF_BUILD_RTM": "OFF",
                 "NF_FEATURE_DEBUGGER": "ON",
