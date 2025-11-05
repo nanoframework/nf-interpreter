@@ -67,7 +67,9 @@ jobs:
           mv user-tools-repos.TEMPLATE.json user-tools-repos.json
 
           # Adjust the file content for a valid radio frequency (TI targets)
-          sed -i -- 's|"RADIO_FREQUENCY": "CHANGE_ME_TO_A_VALID_VALUE_868_OR_915"|"RADIO_FREQUENCY": "${{ matrix.radio-freq }}"|g' user-prefs.json
+          if [[ -n "${{ matrix.radio-freq }}" ]]; then
+            sed -i -- 's|"RADIO_FREQUENCY": "CHANGE_ME_TO_A_VALID_VALUE_868_OR_915"|"RADIO_FREQUENCY": "${{ matrix.radio-freq }}"|g' user-prefs.json
+          fi
 
           # Adjust the file content for a devcontainer
           sed -i -- 's|"name": "user-tools-repos-container"|"name": "user-tools-repos"|g' user-tools-repos.json
