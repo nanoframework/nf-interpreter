@@ -1,7 +1,9 @@
 name: Nightly container builds for selected targets
 
 on:
-  # pull_request:
+  pull_request:
+    paths:
+      - '.github/workflows/devcontainer-nightly-build.yaml'
   schedule:
     - cron: '0 3 * * *' # Runs at 03:00 UTC every day
 
