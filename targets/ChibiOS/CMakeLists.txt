@@ -186,7 +186,7 @@ if(NF_FEATURE_HAS_SDCARD OR NF_FEATURE_HAS_USB_MSD)
     else()
         # FatFS source was specified
 
-        message(STATUS "FatFS ${FATFS_VERSION_TAG} source from: ${FATFS_SOURCE}")
+        message(STATUS "FatFS ${FATFS_VERSION_TAG} (source from: ${FATFS_SOURCE})")
 
         FetchContent_Declare(
             fatfs
@@ -375,7 +375,7 @@ if(NF_FEATURE_USE_LITTLEFS_OPTION)
     else()
         # littlefs source was specified
 
-        message(STATUS "littlefs ${LITTLEFS_VERSION_TAG} source from: ${LITTLEFS_SOURCE}")
+        message(STATUS "littlefs ${LITTLEFS_VERSION_TAG} (source from: ${LITTLEFS_SOURCE})")
 
         FetchContent_Declare(
             littlefs
