@@ -32,8 +32,7 @@ bool GraphicsMemory::GraphicsHeapLocation(
     CLR_UINT8 *&graphicsStartingAddress,
     CLR_UINT8 *&graphicsEndingAddress)
 {
-    // requesting 2MB
-    CLR_INT32 graphicsMemoryBlockSize = 2 * 1024 * 1024;
+    CLR_UINT32 graphicsMemoryBlockSize = requested;
 
     CLR_INT32 memoryCaps = MALLOC_CAP_8BIT | MALLOC_CAP_32BIT | MALLOC_CAP_SPIRAM;
 
@@ -45,14 +44,15 @@ bool GraphicsMemory::GraphicsHeapLocation(
     }
 
     // We don't want to allocate upfront
-    if (requested == 0)
+    if (graphicsMemoryBlockSize == 0)
     {
         // We don't allocate anything here
         return false;
     }
 
     // Get Largest free block in SPIRam
-    CLR_INT32 spiramMaxSize = heap_caps_get_largest_free_block(memoryCaps);
+    CLR_UINT32 spiramMaxSize = heap_caps_get_largest_free_block(memoryCaps);
+
     if (spiramMaxSize == 0)
     {
         // No SPIRAM, try and allocate small block in normal ram to keep allocator happy for
@@ -60,14 +60,16 @@ bool GraphicsMemory::GraphicsHeapLocation(
         // Should be able to use with small screens
         memoryCaps ^= MALLOC_CAP_SPIRAM;
 
-        spiramMaxSize = requested;
+        spiramMaxSize = heap_caps_get_largest_free_block(memoryCaps);
     }
 
     if (spiramMaxSize < graphicsMemoryBlockSize) // limit the size to what is available
     {
         graphicsMemoryBlockSize = spiramMaxSize;
     }
+
     graphicsStartingAddress = (CLR_UINT8 *)heap_caps_malloc(graphicsMemoryBlockSize, memoryCaps);
+
     ASSERT(graphicsStartingAddress != NULL);
     graphicsEndingAddress = (CLR_UINT8 *)(graphicsStartingAddress + graphicsMemoryBlockSize);
 

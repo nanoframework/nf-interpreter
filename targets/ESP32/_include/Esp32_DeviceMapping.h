@@ -70,7 +70,7 @@ enum Esp32_MapDeviceType
 
 extern int8_t Esp32_SPI_DevicePinMap[MAX_SPI_DEVICES][Esp32SpiPin_Max];
 extern int8_t Esp32_I2C_DevicePinMap[I2C_NUM_MAX][2];
-extern int8_t Esp32_I2S_DevicePinMap[I2S_NUM_MAX][5];
+extern int8_t Esp32_I2S_DevicePinMap[CONFIG_SOC_I2S_NUM][5];
 extern int8_t Esp32_SERIAL_DevicePinMap[UART_NUM_MAX][Esp32SerialPin_Max];
 
 #if defined(CONFIG_IDF_TARGET_ESP32C3)
@@ -83,6 +83,9 @@ extern int8_t Esp32_SERIAL_DevicePinMap[UART_NUM_MAX][Esp32SerialPin_Max];
 #define TARGET_ADC_NUM_PINS CONFIG_SOC_ADC_MAX_CHANNEL_NUM
 #define TARGET_LED_NUM_PINS 8
 #elif defined(CONFIG_IDF_TARGET_ESP32S3)
+#define TARGET_ADC_NUM_PINS (CONFIG_SOC_ADC_MAX_CHANNEL_NUM * CONFIG_SOC_ADC_PERIPH_NUM)
+#define TARGET_LED_NUM_PINS 8
+#elif defined(CONFIG_IDF_TARGET_ESP32P4)
 #define TARGET_ADC_NUM_PINS (CONFIG_SOC_ADC_MAX_CHANNEL_NUM * CONFIG_SOC_ADC_PERIPH_NUM)
 #define TARGET_LED_NUM_PINS 8
 #else
