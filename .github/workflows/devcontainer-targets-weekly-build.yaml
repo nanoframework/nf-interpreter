@@ -1,11 +1,11 @@
-name: Nightly target builds [devcontainer]
+name: Weekly [devcontainer] target builds
 
 on:
   pull_request:
     paths:
-      - '.github/workflows/devcontainer-nightly-build.yaml'
+      - '.github/workflows/devcontainer-targets-weekly-build.yaml'
   schedule:
-    - cron: '0 3 * * *' # Runs at 03:00 UTC every day
+    - cron: '0 3 * * 0' # Runs at 03:00 UTC on sunday every week
 
 
 jobs:
@@ -15,24 +15,24 @@ jobs:
 
       matrix: # Add the target and build type you wish to generate firmware for:
         include: [
-          # { target: SL_STK3701A,             build-type: MinSizeRel, container: AzureRTOS},
-          # { target: SL_STK3701A_REVB,        build-type: MinSizeRel, container: AzureRTOS},
-          # { target: MXCHIP_AZ3166,           build-type: MinSizeRel, container: ChibiOS },
-          # { target: ST_STM32F429I_DISCOVERY, build-type: MinSizeRel, container: ChibiOS },
-          # { target: ST_STM32F769I_DISCOVERY, build-type: MinSizeRel, container: ChibiOS },
+          { target: SL_STK3701A,             build-type: MinSizeRel, container: AzureRTOS},
+          { target: SL_STK3701A_REVB,        build-type: MinSizeRel, container: AzureRTOS},
+          { target: MXCHIP_AZ3166,           build-type: MinSizeRel, container: ChibiOS },
+          { target: ST_STM32F429I_DISCOVERY, build-type: MinSizeRel, container: ChibiOS },
+          { target: ST_STM32F769I_DISCOVERY, build-type: MinSizeRel, container: ChibiOS },
           { target: ORGPAL_PALTHREE,         build-type: MinSizeRel, container: ChibiOS },
-          # { target: ORGPAL_PALX,             build-type: MinSizeRel, container: ChibiOS },
-          # { target: ST_NUCLEO64_F091RC,      build-type: MinSizeRel, container: ChibiOS },
-          # { target: M5Core2,                 build-type: MinSizeRel, container: ESP32 },
-          # { target: ESP_WROVER_KIT,          build-type: MinSizeRel, container: ESP32 },
-          # { target: ESP32_S2_USB,            build-type: MinSizeRel, container: ESP32 },
-          # { target: ESP32_S3,                build-type: MinSizeRel, container: ESP32 },
-          # { target: ESP32_C3,                build-type: MinSizeRel, container: ESP32 },
-          # { target: ESP32_C6_THREAD,         build-type: MinSizeRel, container: ESP32 },
-          # { target: ESP32_H2_THREAD,         build-type: MinSizeRel, container: ESP32 },
-          # { target: NXP_MIMXRT1060_EVK,      build-type: MinSizeRel, container: FreeRTOS-NXP },
-          # { target: TI_CC1352R1_LAUNCHXL,    build-type: MinSizeRel, container: TI, radio-freq: 868 },
-          # { target: TI_CC1352R1_LAUNCHXL,    build-type: MinSizeRel, container: TI, radio-freq: 915 },
+          { target: ORGPAL_PALX,             build-type: MinSizeRel, container: ChibiOS },
+          { target: ST_NUCLEO64_F091RC,      build-type: MinSizeRel, container: ChibiOS },
+          { target: M5Core2,                 build-type: MinSizeRel, container: ESP32 },
+          { target: ESP_WROVER_KIT,          build-type: MinSizeRel, container: ESP32 },
+          { target: ESP32_S2_USB,            build-type: MinSizeRel, container: ESP32 },
+          { target: ESP32_S3,                build-type: MinSizeRel, container: ESP32 },
+          { target: ESP32_C3,                build-type: MinSizeRel, container: ESP32 },
+          { target: ESP32_C6_THREAD,         build-type: MinSizeRel, container: ESP32 },
+          { target: ESP32_H2_THREAD,         build-type: MinSizeRel, container: ESP32 },
+          { target: NXP_MIMXRT1060_EVK,      build-type: MinSizeRel, container: FreeRTOS-NXP },
+          { target: TI_CC1352R1_LAUNCHXL,    build-type: MinSizeRel, container: TI, radio-freq: 868 },
+          { target: TI_CC1352R1_LAUNCHXL,    build-type: MinSizeRel, container: TI, radio-freq: 915 },
         ]
 
     runs-on: ubuntu-latest
