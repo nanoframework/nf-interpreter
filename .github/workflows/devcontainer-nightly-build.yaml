@@ -16,7 +16,9 @@ jobs:
       matrix: # Add the target and build type you wish to generate firmware for:
         include: [
           { target: SL_STK3701A,             build-type: MinSizeRel, container: AzureRTOS},
+          { target: SL_STK3701A_REVB,        build-type: MinSizeRel, container: AzureRTOS},
           { target: MXCHIP_AZ3166,           build-type: MinSizeRel, container: ChibiOS },
+          { target: ST_STM32F429I_DISCOVERY, build-type: MinSizeRel, container: ChibiOS },
           { target: ST_STM32F769I_DISCOVERY, build-type: MinSizeRel, container: ChibiOS },
           { target: ORGPAL_PALTHREE,         build-type: MinSizeRel, container: ChibiOS },
           { target: ORGPAL_PALX,             build-type: MinSizeRel, container: ChibiOS },
@@ -29,6 +31,7 @@ jobs:
           { target: ESP32_C6_THREAD,         build-type: MinSizeRel, container: ESP32 },
           { target: ESP32_H2_THREAD,         build-type: MinSizeRel, container: ESP32 },
           { target: NXP_MIMXRT1060_EVK,      build-type: MinSizeRel, container: FreeRTOS-NXP },
+          { target: TI_CC1352R1_LAUNCHXL,    build-type: MinSizeRel, container: TI, radio-freq: 868 },
           { target: TI_CC1352R1_LAUNCHXL,    build-type: MinSizeRel, container: TI, radio-freq: 915 },
         ]
 
