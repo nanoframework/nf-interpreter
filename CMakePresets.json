@@ -3,7 +3,7 @@
     "include": [
         "CMake/arm-gcc.json",
         "CMake/xtensa-esp32.json",
-        "CMake/xtensa-esp32c3.json",
+        "CMake/riscv-esp32c3.json",
         "CMake/xtensa-esp32s2.json",
         "CMake/xtensa-esp32s3.json",
         "targets/AzureRTOS/CMakePresets.json",
