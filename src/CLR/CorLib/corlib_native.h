@@ -889,6 +889,15 @@ struct Library_corlib_native_System_Runtime_CompilerServices_RuntimeHelpers
         bool &isRefContainsRefs);
 };
 
+#if (NANOCLR_REFLECTION == TRUE)
+struct Library_corlib_native_System_Runtime_CompilerServices_Unsafe
+{
+    NANOCLR_NATIVE_DECLARE(As___STATIC__GENERICTYPE__OBJECT);
+
+    //--//
+};
+#endif
+
 struct Library_corlib_native_System_Runtime_Remoting_RemotingServices
 {
     NANOCLR_NATIVE_DECLARE(IsTransparentProxy___STATIC__BOOLEAN__OBJECT);

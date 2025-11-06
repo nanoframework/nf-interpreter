@@ -278,6 +278,20 @@ static const CLR_RT_MethodHandler method_lookup[] =
     nullptr,
     nullptr,
     nullptr,
+    nullptr,
+    nullptr,
+    nullptr,
+    nullptr,
+    nullptr,
+    nullptr,
+    nullptr,
+    nullptr,
+    nullptr,
+    nullptr,
+    nullptr,
+    nullptr,
+    nullptr,
+    nullptr,
     Library_corlib_native_System_BitConverter::get_IsLittleEndian___STATIC__BOOLEAN,
     Library_corlib_native_System_BitConverter::DoubleToInt64Bits___STATIC__I8__R8,
     Library_corlib_native_System_BitConverter::GetBytes___STATIC__SZARRAY_U1__BOOLEAN,
@@ -745,6 +759,7 @@ static const CLR_RT_MethodHandler method_lookup[] =
     Library_corlib_native_System_Runtime_CompilerServices_RuntimeHelpers::RunClassConstructor___STATIC__VOID__SystemRuntimeTypeHandle,
     Library_corlib_native_System_Runtime_CompilerServices_RuntimeHelpers::get_OffsetToStringData___STATIC__I4,
     Library_corlib_native_System_Runtime_CompilerServices_RuntimeHelpers::IsReferenceOrContainsReferences___STATIC__BOOLEAN,
+    Library_corlib_native_System_Runtime_CompilerServices_Unsafe::As___STATIC__GENERICTYPE__OBJECT,
     nullptr,
     Library_corlib_native_System_Runtime_Remoting_RemotingServices::IsTransparentProxy___STATIC__BOOLEAN__OBJECT,
     nullptr,
@@ -1573,7 +1588,7 @@ const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_mscorlib =
 
 #if (NANOCLR_REFLECTION == TRUE)
 
-    0xCF059C3B,
+    0x559086F3,
 
 #elif (NANOCLR_REFLECTION == FALSE)
 
