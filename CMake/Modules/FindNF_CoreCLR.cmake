@@ -110,6 +110,7 @@ set(NF_CoreCLR_SRCS
     corlib_native_System_Reflection_Binder.cpp
     corlib_native_System_Reflection_MemberInfo.cpp
     corlib_native_System_Runtime_CompilerServices_RuntimeHelpers.cpp
+    corlib_native_System_Runtime_CompilerServices_Unsafe.cpp
     corlib_native_System_Runtime_Remoting_RemotingServices.cpp
     corlib_native_System_String.cpp
     corlib_native_System_Span_1.cpp
