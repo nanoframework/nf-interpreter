@@ -6,12 +6,13 @@
 
 #include "CorLib.h"
 
-HRESULT Library_corlib_native_System_Runtime_CompilerServices_Unsafe::As___STATIC__GENERICTYPE__OBJECT( CLR_RT_StackFrame &stack )
+HRESULT Library_corlib_native_System_Runtime_CompilerServices_Unsafe::As___STATIC__GENERICTYPE__OBJECT(
+    CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
     CLR_RT_HeapBlock &arg = stack.Arg0();
-  
+
     // Set the argument as the return value (ldarg.0; ret)
     stack.PushValueAndAssign(arg);
 
