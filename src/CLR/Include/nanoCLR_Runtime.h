@@ -1743,6 +1743,7 @@ struct CLR_RT_WellKnownTypes
     CLR_RT_TypeDef_Index MulticastDelegate;
 
     CLR_RT_TypeDef_Index Array;
+    CLR_RT_TypeDef_Index SZArrayHelper;
     CLR_RT_TypeDef_Index ArrayList;
     CLR_RT_TypeDef_Index ICloneable;
     CLR_RT_TypeDef_Index IList;

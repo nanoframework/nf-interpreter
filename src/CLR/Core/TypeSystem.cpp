@@ -4765,6 +4765,7 @@ static const TypeIndexLookup c_TypeIndexLookup[] = {
     TIL("System",                                   "MulticastDelegate",                MulticastDelegate),
 
     TIL("System",                                   "Array",                            Array),
+    TIL(nullptr,                                    "SZArrayHelper",                    SZArrayHelper),
     TIL("System.Collections",                       "ArrayList",                        ArrayList),
     TIL("System",                                   "ICloneable",                       ICloneable),
     TIL("System.Collections",                       "IList",                            IList),
@@ -7548,6 +7549,8 @@ bool CLR_RT_TypeSystem::FindVirtualMethodDef(
     CLR_RT_MethodDef_Instance calleeInst{};
     calleeInst.InitializeFromIndex(calleeMD);
 
+    const bool isArrayClass = (cls.data == g_CLR_RT_WellKnownTypes.Array.data);
+
     const CLR_RECORD_METHODDEF *calleeMDR = calleeInst.target;
     CLR_UINT8 calleeArgumentsCount = calleeMDR->argumentsCount;
 
@@ -7590,6 +7593,52 @@ bool CLR_RT_TypeSystem::FindVirtualMethodDef(
         }
 
         clsInst.SwitchToParent();
+    }
+
+    // SZ arrays expose IList generic interfaces through System.Array+SZArrayHelper, so fall back to that helper type
+    if (isArrayClass)
+    {
+        const CLR_RT_TypeDef_Index &arrayHelperIdx = g_CLR_RT_WellKnownTypes.SZArrayHelper;
+
+        if (NANOCLR_INDEX_IS_VALID(arrayHelperIdx))
+        {
+            CLR_RT_TypeDef_Instance helperInst{};
+            helperInst.InitializeFromIndex(arrayHelperIdx);
+
+            CLR_RT_Assembly *arrayHelperAssm = helperInst.assembly;
+            const CLR_RECORD_TYPEDEF *arrayHelperTypeDef = helperInst.target;
+
+            if (arrayHelperAssm != nullptr && arrayHelperTypeDef != nullptr)
+            {
+                int methodCount = arrayHelperTypeDef->virtualMethodCount + arrayHelperTypeDef->instanceMethodCount;
+
+                if (methodCount > 0 && arrayHelperTypeDef->firstMethod != CLR_EmptyIndex)
+                {
+                    const CLR_RECORD_METHODDEF *arrayHelperMethodDef =
+                        arrayHelperAssm->GetMethodDef(arrayHelperTypeDef->firstMethod);
+
+                    for (int i = 0; i < methodCount; i++, arrayHelperMethodDef++)
+                    {
+                        if ((arrayHelperMethodDef->flags & CLR_RECORD_METHODDEF::MD_Static) != 0)
+                        {
+                            continue;
+                        }
+
+                        if (arrayHelperMethodDef->argumentsCount != calleeArgumentsCount)
+                        {
+                            continue;
+                        }
+
+                        const char *methodNameAtHelper = arrayHelperAssm->GetString(arrayHelperMethodDef->name);
+                        if (methodNameAtHelper != nullptr && strcmp(methodNameAtHelper, calleeName) == 0)
+                        {
+                            index.Set(arrayHelperAssm->assemblyIndex, arrayHelperTypeDef->firstMethod + i);
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
     }
 
     index.Clear();
