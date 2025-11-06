@@ -38,6 +38,8 @@ struct gpio_input_state : public HAL_DblLinkedNode<gpio_input_state>
     void *param;
     // Expected state for debounce handler
     GPIO_PinState expected;
+    // Current pin state
+    GPIO_PinState current;
     // True if waiting for debounce timer to complete
     bool waitingDebounce;
 };
@@ -76,14 +78,15 @@ static void DebounceTimerCallback(uint32_t id)
     // get current pin state
     bool actual = HAL_GPIO_ReadPin(port, GPIO_PIN(pState->pinNumber));
 
-    if (actual == pState->expected)
+    if (actual == pState->current)
     {
         pState->isrPtr(pState->pinNumber, actual, pState->param);
+
         if (pState->mode == GPIO_INT_EDGE_BOTH)
         {
             // both edges
-            // update expected state
-            pState->expected = (GPIO_PinState)(pState->expected ^ GPIO_PIN_SET);
+            // update current state
+            pState->current = (GPIO_PinState)(pState->current ^ GPIO_PIN_SET);
         }
     }
 
@@ -123,10 +126,14 @@ void HAL_GPIO_EXTI_Callback(uint16_t gpioPin)
             {
                 TX_RESTORE
 
-                pGpio->isrPtr(
-                    pGpio->pinNumber,
-                    HAL_GPIO_ReadPin(GPIO_PORT(pGpio->pinNumber), GPIO_PIN(pGpio->pinNumber)),
-                    pGpio->param);
+                bool level = HAL_GPIO_ReadPin(GPIO_PORT(pGpio->pinNumber), GPIO_PIN(pGpio->pinNumber));
+
+                if (level != pGpio->current)
+                {
+                    pGpio->current = level;
+
+                    pGpio->isrPtr(pGpio->pinNumber, level, pGpio->param);
+                }
 
                 TX_DISABLE
             }
@@ -167,6 +174,7 @@ gpio_input_state *AllocateGpioInputState(GPIO_PIN pinNumber)
         {
             memset(ptr, 0, sizeof(gpio_input_state));
             ptr->pinNumber = pinNumber;
+            ptr->current = HAL_GPIO_ReadPin(GPIO_PORT(pGpio->pinNumber), GPIO_PIN(pGpio->pinNumber));
 
             tx_timer_create(
                 &ptr->debounceTimer,
@@ -490,7 +498,7 @@ void CPU_GPIO_DisablePin(GPIO_PIN pinNumber, GpioPinDriveMode driveMode, uint32_
 
     GPIO_TypeDef *port = GPIO_PORT(pinNumber);
     uint32_t pin = GPIO_PIN(pinNumber);
-    
+
     GPIO_InitTypeDef gpio_init_structure;
     gpio_init_structure.Pin = pin;
 
