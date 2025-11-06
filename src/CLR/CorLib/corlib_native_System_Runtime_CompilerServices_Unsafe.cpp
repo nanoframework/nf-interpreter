@@ -16,5 +16,5 @@ HRESULT Library_corlib_native_System_Runtime_CompilerServices_Unsafe::As___STATI
     // Set the argument as the return value (ldarg.0; ret)
     stack.PushValueAndAssign(arg);
 
-    NANOCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP_NOLABEL();
 }
