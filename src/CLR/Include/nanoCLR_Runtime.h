@@ -2251,6 +2251,9 @@ struct CLR_RT_MethodDef_Instance : public CLR_RT_MethodDef_Index
 
     const CLR_RT_TypeSpec_Index *genericType;
     CLR_RT_MethodSpec_Index methodSpec;
+    
+    // For SZArrayHelper rebind: stores the array element TypeDef when dispatching from arrays
+    CLR_RT_TypeDef_Index arrayElementType;
 
 #if defined(NANOCLR_INSTANCE_NAMES)
     const char *name;
