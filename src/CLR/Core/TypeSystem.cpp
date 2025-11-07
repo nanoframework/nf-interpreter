@@ -7082,19 +7082,29 @@ HRESULT CLR_RT_TypeSystem::BuildTypeName(
 
         if (element.DataType == DATATYPE_VAR)
         {
-            // resolve the !T against our *closed* typeIndex
-            CLR_RT_TypeDef_Index realTd;
-            NanoCLRDataType realDt;
+            // resolve the !T against our *closed* typeIndex, if possible
+            CLR_RT_TypeDef_Index paramTd;
+            NanoCLRDataType paramDt;
 
             // this will bind !T→System.Int32, etc.
             typeSpecInstance.assembly->FindGenericParamAtTypeSpec(
                 typeIndex.data,
                 element.GenericParamPosition, // the !N slot
-                realTd,
-                realDt);
+                paramTd,
+                paramDt);
 
-            // now print the *actual* type name
-            BuildTypeName(realTd, szBuffer, iBuffer);
+            if (paramDt == DATATYPE_VAR)
+            {
+                // couldn't be resolved, print encoded form (!N)
+                char encodedParam[6];
+                snprintf(encodedParam, ARRAYSIZE(encodedParam), "!%d", element.GenericParamPosition);
+                NANOCLR_CHECK_HRESULT(QueueStringToBuffer(szBuffer, iBuffer, encodedParam));
+            }
+            else
+            {
+                // now print the *actual* type name
+                BuildTypeName(paramTd, szBuffer, iBuffer);
+            }
         }
         else
         {
@@ -7376,6 +7386,7 @@ HRESULT CLR_RT_TypeSystem::BuildMethodRefName(
 
     NANOCLR_NOCLEANUP();
 }
+
 HRESULT CLR_RT_TypeSystem::BuildMethodSpecName(const CLR_RT_MethodSpec_Index &ms, char *&szBuffer, size_t &iBuffer)
 {
     NATIVE_PROFILE_CLR_CORE();
