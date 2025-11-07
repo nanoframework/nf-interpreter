@@ -2108,7 +2108,18 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                 {
                     FETCH_ARG_COMPRESSED_METHODTOKEN(arg, ip);
 
+                    // Save arrayElementType for propagation through the call chain
+                    // This will be used by ResolveToken and later restored after InitializeFromIndex calls
+                    CLR_RT_TypeDef_Index propagatedArrayElementType{};
+                    if (NANOCLR_INDEX_IS_VALID(stack->m_call.arrayElementType))
+                    {
+                        propagatedArrayElementType = stack->m_call.arrayElementType;
+                    }
+
                     CLR_RT_MethodDef_Instance calleeInst{};
+                    // Set arrayElementType before ResolveToken so generic type resolution can use it
+                    calleeInst.arrayElementType = propagatedArrayElementType;
+
                     if (calleeInst.ResolveToken(arg, assm, stack->m_call.genericType) == false)
                     {
                         NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
@@ -2131,6 +2142,12 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                         if (dlg->DataType() == DATATYPE_DELEGATE_HEAD)
                         {
                             calleeInst.InitializeFromIndex(dlg->DelegateFtn());
+
+                            // Restore propagated arrayElementType after InitializeFromIndex
+                            if (NANOCLR_INDEX_IS_VALID(propagatedArrayElementType))
+                            {
+                                calleeInst.arrayElementType = propagatedArrayElementType;
+                            }
 
                             if ((calleeInst.target->flags & CLR_RECORD_METHODDEF::MD_Static) == 0)
                             {
@@ -2211,6 +2228,36 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                                             NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
                                         }
 
+                                        // If this is an SZArrayHelper dispatch, populate arrayElementType from runtime
+                                        // array
+                                        CLR_RT_TypeDef_Index savedArrayElementType{};
+                                        CLR_RT_HeapBlock_Array *pArray =
+                                            (CLR_RT_HeapBlock_Array *)pThis[0].Dereference();
+                                        if (pArray && pArray->DataType() == DATATYPE_SZARRAY)
+                                        {
+                                            // Check if the dispatched method belongs to SZArrayHelper
+                                            CLR_RT_MethodDef_Instance calleeRealInst{};
+                                            calleeRealInst.InitializeFromIndex(calleeReal);
+
+                                            CLR_RT_TypeDef_Instance calleeType{};
+                                            if (calleeType.InitializeFromMethod(calleeRealInst))
+                                            {
+                                                if (calleeType.data == g_CLR_RT_WellKnownTypes.SZArrayHelper.data)
+                                                {
+                                                    // Map the runtime element type to a TypeDef
+                                                    NanoCLRDataType elemDataType =
+                                                        (NanoCLRDataType)pArray->m_typeOfElement;
+                                                    const CLR_RT_DataTypeLookup *lookup =
+                                                        &c_CLR_RT_DataTypeLookup[elemDataType];
+
+                                                    if (lookup->m_cls)
+                                                    {
+                                                        savedArrayElementType = *lookup->m_cls;
+                                                    }
+                                                }
+                                            }
+                                        }
+
                                         if (calleeInst.genericType && NANOCLR_INDEX_IS_VALID(*calleeInst.genericType) &&
                                             calleeInst.genericType->data != CLR_EmptyToken)
                                         {
@@ -2220,6 +2267,17 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                                         else
                                         {
                                             calleeInst.InitializeFromIndex(calleeReal);
+                                        }
+
+                                        // Restore the array element type after reinitializing calleeInst
+                                        if (NANOCLR_INDEX_IS_VALID(savedArrayElementType))
+                                        {
+                                            calleeInst.arrayElementType = savedArrayElementType;
+                                        }
+                                        else if (NANOCLR_INDEX_IS_VALID(propagatedArrayElementType))
+                                        {
+                                            // Restore propagated arrayElementType from parent frame
+                                            calleeInst.arrayElementType = propagatedArrayElementType;
                                         }
                                     }
 
@@ -2243,6 +2301,14 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                     else
 #endif // NANOCLR_APPDOMAINS
                     {
+                        // Restore propagated arrayElementType before any path (inline or push)
+                        // Only restore if not already set (e.g., by SZArrayHelper detection in virtual dispatch)
+                        if (!NANOCLR_INDEX_IS_VALID(calleeInst.arrayElementType) &&
+                            NANOCLR_INDEX_IS_VALID(propagatedArrayElementType))
+                        {
+                            calleeInst.arrayElementType = propagatedArrayElementType;
+                        }
+
 #ifndef NANOCLR_NO_IL_INLINE
                         if (stack->PushInline(ip, assm, evalPos, calleeInst, pThis))
                         {
@@ -2252,6 +2318,7 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
 #endif
 
                         WRITEBACK(stack, evalPos, ip, fDirty);
+
                         NANOCLR_CHECK_HRESULT(CLR_RT_StackFrame::Push(th, calleeInst, -1));
                     }
 
@@ -2280,12 +2347,19 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                     WRITEBACK(stack, evalPos, ip, fDirty);
 
                     //
+                    // Preserve arrayElementType from returning frame to caller frame
+                    //
+                    CLR_RT_StackFrame *stackNext = stack->Caller();
+                    if (stackNext && NANOCLR_INDEX_IS_VALID(stack->m_call.arrayElementType))
+                    {
+                        stackNext->m_call.arrayElementType = stack->m_call.arrayElementType;
+                    }
+
+                    //
                     // Same kind of handler, no need to pop back out, just restart execution in place.
                     //
                     if (stack->m_flags & CLR_RT_StackFrame::c_CallerIsCompatibleForRet)
                     {
-                        CLR_RT_StackFrame *stackNext = stack->Caller();
-
                         stack->Pop();
 
                         stack = stackNext;
@@ -2379,7 +2453,17 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                 {
                     FETCH_ARG_COMPRESSED_METHODTOKEN(arg, ip);
 
+                    // Save arrayElementType for propagation through the call chain
+                    CLR_RT_TypeDef_Index propagatedArrayElementType{};
+                    if (NANOCLR_INDEX_IS_VALID(stack->m_call.arrayElementType))
+                    {
+                        propagatedArrayElementType = stack->m_call.arrayElementType;
+                    }
+
                     CLR_RT_MethodDef_Instance calleeInst{};
+                    // Set arrayElementType before ResolveToken so generic type resolution can use it
+                    calleeInst.arrayElementType = propagatedArrayElementType;
+
                     if (calleeInst.ResolveToken(arg, assm, stack->m_call.genericType) == false)
                     {
                         NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
