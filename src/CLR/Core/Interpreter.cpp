@@ -2244,15 +2244,13 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                                             {
                                                 if (calleeType.data == g_CLR_RT_WellKnownTypes.SZArrayHelper.data)
                                                 {
-                                                    // Map the runtime element type to a TypeDef
-                                                    NanoCLRDataType elemDataType =
-                                                        (NanoCLRDataType)pArray->m_typeOfElement;
-                                                    const CLR_RT_DataTypeLookup *lookup =
-                                                        &c_CLR_RT_DataTypeLookup[elemDataType];
-
-                                                    if (lookup->m_cls)
+                                                    // Get the element type from the array's reflection data
+                                                    const CLR_RT_ReflectionDef_Index &reflex = pArray->ReflectionDataConst();
+                                                    
+                                                    // For a 1D array, levels == 1 and data.type is the element TypeDef
+                                                    if (reflex.levels == 1 && reflex.kind == REFLECTION_TYPE)
                                                     {
-                                                        savedArrayElementType = *lookup->m_cls;
+                                                        savedArrayElementType = reflex.data.type;
                                                     }
                                                 }
                                             }

@@ -33,7 +33,7 @@ int s_CLR_RT_fTrace_Exceptions = NANOCLR_TRACE_DEFAULT(c_CLR_RT_Trace_Info, c_CL
 #endif
 
 #if defined(NANOCLR_TRACE_INSTRUCTIONS)
-int s_CLR_RT_fTrace_Instructions = NANOCLR_TRACE_DEFAULT(c_CLR_RT_Trace_Info, c_CLR_RT_Trace_None);
+int s_CLR_RT_fTrace_Instructions = NANOCLR_TRACE_DEFAULT(c_CLR_RT_Trace_Verbose, c_CLR_RT_Trace_None);
 #endif
 
 #if defined(NANOCLR_GC_VERBOSE)
@@ -2417,22 +2417,25 @@ HRESULT CLR_RT_TypeDescriptor::InitializeFromSignatureToken(
                 CLR_RT_TypeDef_Index td;
                 NanoCLRDataType dt;
 
-                // Try to resolve from generic context first
-                if (caller && caller->genericType && NANOCLR_INDEX_IS_VALID(*caller->genericType))
+                // For SZArrayHelper scenarios, arrayElementType is authoritative for position 0
+                if (caller && NANOCLR_INDEX_IS_VALID(caller->arrayElementType) && elem.GenericParamPosition == 0)
+                {
+                    this->InitializeFromTypeDef(caller->arrayElementType);
+                }
+                // Otherwise try to resolve from generic context
+                else if (caller && caller->genericType && NANOCLR_INDEX_IS_VALID(*caller->genericType))
                 {
                     g_CLR_RT_TypeSystem.m_assemblies[caller->genericType->Assembly() - 1]
                         ->FindGenericParamAtTypeSpec(caller->genericType->data, elem.GenericParamPosition, td, dt);
-                }
-
-                // Check if resolution succeeded, otherwise try arrayElementType fallback
-                if (NANOCLR_INDEX_IS_VALID(td))
-                {
-                    this->InitializeFromTypeDef(td);
-                }
-                else if (caller && NANOCLR_INDEX_IS_VALID(caller->arrayElementType) && elem.GenericParamPosition == 0)
-                {
-                    // Fallback for SZArrayHelper scenarios where position 0 is the array element type
-                    this->InitializeFromTypeDef(caller->arrayElementType);
+                    
+                    if (NANOCLR_INDEX_IS_VALID(td))
+                    {
+                        this->InitializeFromTypeDef(td);
+                    }
+                    else
+                    {
+                        NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+                    }
                 }
                 else
                 {
