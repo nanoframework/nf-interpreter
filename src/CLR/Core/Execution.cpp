@@ -983,7 +983,7 @@ bool CLR_RT_ExecutionEngine::SpawnGenericTypeStaticConstructorsHelper(
 
     // Crawl TypeSpecs in this assembly to find closed generic instantiations that need .cctor execution
     int numTypeSpec = assembly->tablesSize[TBL_TypeSpec];
-    
+
     // Start from the specified TypeSpec index (to resume iteration after a .cctor completes)
     CLR_UINT32 startIndex = startTypeSpecIndex.TypeSpec();
     CLR_RT_TypeSpec_CrossReference *tsCross = assembly->crossReferenceTypeSpec + startIndex;
@@ -1008,7 +1008,7 @@ bool CLR_RT_ExecutionEngine::SpawnGenericTypeStaticConstructorsHelper(
 
         // Get the generic type definition
         CLR_RT_TypeDef_Index genericTypeDef = genericTypeInstance.genericTypeDef;
-        
+
         // Check if the generic type definition has a static constructor
         CLR_RT_Assembly *ownerAsm = g_CLR_RT_TypeSystem.m_assemblies[genericTypeDef.Assembly() - 1];
         if (!ownerAsm->HasStaticConstructor(genericTypeDef))
@@ -1019,13 +1019,13 @@ bool CLR_RT_ExecutionEngine::SpawnGenericTypeStaticConstructorsHelper(
         // Find the static constructor method for this generic type definition
         const CLR_RECORD_TYPEDEF *ownerTd = ownerAsm->GetTypeDef(genericTypeDef.Type());
         const CLR_RECORD_METHODDEF *md = ownerAsm->GetMethodDef(ownerTd->firstMethod);
-        
+
         // Calculate total method count for this type
         int methodCount = ownerTd->virtualMethodCount + ownerTd->instanceMethodCount + ownerTd->staticMethodCount;
-        
+
         CLR_RT_MethodDef_Index cctorIndex;
         bool foundCctor = false;
-        
+
         for (int i = 0; i < methodCount; i++, md++)
         {
             if (md->flags & CLR_RECORD_METHODDEF::MD_StaticConstructor)
@@ -1035,7 +1035,7 @@ bool CLR_RT_ExecutionEngine::SpawnGenericTypeStaticConstructorsHelper(
                 break;
             }
         }
-        
+
         if (!foundCctor)
         {
             continue;
@@ -1054,7 +1054,7 @@ bool CLR_RT_ExecutionEngine::SpawnGenericTypeStaticConstructorsHelper(
 
             // Store the TypeSpec index in the delegate (points to persistent assembly metadata)
             dlg->m_genericTypeSpec = tsCross->genericType;
-            
+
             if (SUCCEEDED(m_cctorThread->PushThreadProcDelegate(dlg)))
             {
                 m_cctorThread->m_terminationCallback = StaticConstructorTerminationCallback;
@@ -1093,10 +1093,10 @@ void CLR_RT_ExecutionEngine::SpawnStaticConstructor(CLR_RT_Thread *&pCctorThread
             // Extract the TypeSpec index from the delegate and increment to next TypeSpec
             CLR_RT_TypeSpec_Index tsIndex = dlg->m_genericTypeSpec;
             CLR_RT_Assembly *assembly = g_CLR_RT_TypeSystem.m_assemblies[tsIndex.Assembly() - 1];
-            
+
             // Increment to next TypeSpec (same pattern as regular .cctor)
             tsIndex.data++;
-            
+
             if (SpawnGenericTypeStaticConstructorsHelper(assembly, tsIndex))
             {
                 return;
@@ -1166,7 +1166,7 @@ void CLR_RT_ExecutionEngine::SpawnStaticConstructor(CLR_RT_Thread *&pCctorThread
                 // Run generic type static constructors for this assembly (starting from index 0)
                 CLR_RT_TypeSpec_Index startIndex;
                 startIndex.Set(pASSM->assemblyIndex, 0);
-                
+
                 if (SpawnGenericTypeStaticConstructorsHelper(pASSM, startIndex))
                 {
                     return;
