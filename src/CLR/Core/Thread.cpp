@@ -164,9 +164,15 @@ HRESULT CLR_RT_Thread::PushThreadProcDelegate(CLR_RT_HeapBlock_Delegate *pDelega
     }
 
     // Set generic context if the delegate has a TypeSpec stored (for generic type static constructors)
+    // Note: We temporarily set inst.genericType to the delegate's interior pointer here,
+    // but will copy it to stable storage in the stack frame after Push() below
+    CLR_RT_TypeSpec_Index delegateTypeSpec;
+    delegateTypeSpec.Clear();
+
     if (pDelegate->m_genericTypeSpec.data != 0)
     {
-        inst.genericType = &pDelegate->m_genericTypeSpec;
+        delegateTypeSpec = pDelegate->m_genericTypeSpec;
+        inst.genericType = &delegateTypeSpec;
     }
 
 #if defined(NANOCLR_APPDOMAINS)
@@ -186,6 +192,15 @@ HRESULT CLR_RT_Thread::PushThreadProcDelegate(CLR_RT_HeapBlock_Delegate *pDelega
     this->m_status = TH_S_Ready;
 
     NANOCLR_CHECK_HRESULT(CLR_RT_StackFrame::Push(this, inst, inst.target->argumentsCount));
+
+    // If we have a generic type context, copy it to stable storage in the stack frame
+    // and update the pointer to avoid GC relocation issues with the delegate object
+    if (delegateTypeSpec.data != 0)
+    {
+        CLR_RT_StackFrame *stackTop = this->CurrentFrame();
+        stackTop->m_genericTypeSpecStorage = delegateTypeSpec;
+        stackTop->m_call.genericType = &stackTop->m_genericTypeSpecStorage;
+    }
 
     if ((inst.target->flags & CLR_RECORD_METHODDEF::MD_Static) == 0)
     {
