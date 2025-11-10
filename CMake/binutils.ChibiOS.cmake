@@ -84,7 +84,7 @@ macro(nf_add_platform_packages)
     # littlefs
     if(NF_FEATURE_USE_LITTLEFS_OPTION)
         find_package(STM32F7_CubePackage REQUIRED QUIET)
-        find_package(littlefs REQUIRED QUIET)
+        find_package(LITTLEFS REQUIRED QUIET)
     endif()
 
     if(STM32_CUBE_PACKAGE_REQUIRED)
@@ -358,6 +358,17 @@ endmacro()
 # optional BOOTER_EXTRA_LINK_FLAGS extra nanoBooter link flags to pass to nf_set_link_options() 
 # optional CLR_EXTRA_LINK_FLAGS extra nanoCLR link flags to pass to nf_set_link_options() 
 macro(nf_setup_target_build)
+
+    if(${TARGET_BOARD} STREQUAL "MXCHIP_AZ3166")
+
+        # # add WICED WWM library
+        # set(CLR_EXTRA_LIBRARIES
+        #     ${CMAKE_SOURCE_DIR}/targets/ChibiOS/MXCHIP_AZ3166/libwiced_sdk_bin.a
+        # )
+
+        # # add these to the ARGN list
+        # list(APPEND ARGN CLR_EXTRA_LIBRARIES ${CLR_EXTRA_LIBRARIES})
+    endif()
 
     # OK to pass ARGN, to have it perform it's parsings and validation 
     nf_setup_target_build_common(${ARGN})

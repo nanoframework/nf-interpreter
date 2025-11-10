@@ -17,6 +17,7 @@ jobs:
           { target: SL_STK3701A,             build-type: Debug, container: All},
           { target: ST_STM32F769I_DISCOVERY, build-type: Debug, container: ChibiOS },
           { target: ST_STM32F769I_DISCOVERY, build-type: Debug, container: All },
+          { target: ORGPAL_PALTHREE,         build-type: Debug, container: ChibiOS },
           { target: M5Core2,                 build-type: Debug, container: ESP32 },
           { target: ESP_WROVER_KIT,          build-type: Debug, container: ESP32 },
           { target: ESP32_S2_USB,            build-type: Debug, container: ESP32 },
@@ -35,7 +36,7 @@ jobs:
       contents: read
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           submodules: true
 
@@ -47,10 +48,6 @@ jobs:
           tool-cache: true
           large-packages: false
 
-      - name: Update repo submodules
-        run: |
-          git submodule update --init
-
       - name: Adjust config templates for a devcontainer
         run: |
           # Move into the config directory
@@ -61,7 +58,9 @@ jobs:
           mv user-tools-repos.TEMPLATE.json user-tools-repos.json
 
           # Adjust the file content for a valid radio frequency (TI targets)
-          sed -i -- 's|"RADIO_FREQUENCY": "CHANGE_ME_TO_A_VALID_VALUE_868_OR_915"|"RADIO_FREQUENCY": "${{ matrix.radio-freq }}"|g' user-prefs.json
+          if [[ -n "${{ matrix.radio-freq }}" ]]; then
+            sed -i -- 's|"RADIO_FREQUENCY": "CHANGE_ME_TO_A_VALID_VALUE_868_OR_915"|"RADIO_FREQUENCY": "${{ matrix.radio-freq }}"|g' user-prefs.json
+          fi
 
           # Adjust the file content for a devcontainer
           sed -i -- 's|"name": "user-tools-repos-container"|"name": "user-tools-repos"|g' user-tools-repos.json
