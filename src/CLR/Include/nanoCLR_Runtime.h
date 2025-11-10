@@ -2602,6 +2602,11 @@ struct CLR_RT_StackFrame : public CLR_RT_HeapBlock_Node // EVENT HEAP - NO RELOC
     CLR_UINT32 m_flags;
 
     CLR_RT_MethodDef_Instance m_call;
+    
+    // Stable storage for generic type context (not GC-relocated)
+    // Used when m_call.genericType needs to point to a value that would otherwise
+    // be inside a GC-managed object (e.g., delegate's m_genericTypeSpec)
+    CLR_RT_TypeSpec_Index m_genericTypeSpecStorage;
 
     // Stable storage for generic type context (not GC-relocated)
     // Used when m_call.genericType needs to point to a value that would otherwise
