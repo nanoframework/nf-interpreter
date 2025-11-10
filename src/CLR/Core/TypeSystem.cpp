@@ -33,7 +33,7 @@ int s_CLR_RT_fTrace_Exceptions = NANOCLR_TRACE_DEFAULT(c_CLR_RT_Trace_Info, c_CL
 #endif
 
 #if defined(NANOCLR_TRACE_INSTRUCTIONS)
-int s_CLR_RT_fTrace_Instructions = NANOCLR_TRACE_DEFAULT(c_CLR_RT_Trace_Verbose, c_CLR_RT_Trace_None);
+int s_CLR_RT_fTrace_Instructions = NANOCLR_TRACE_DEFAULT(c_CLR_RT_Trace_Info, c_CLR_RT_Trace_None);
 #endif
 
 #if defined(NANOCLR_GC_VERBOSE)
