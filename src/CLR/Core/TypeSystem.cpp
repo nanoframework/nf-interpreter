@@ -2427,7 +2427,7 @@ HRESULT CLR_RT_TypeDescriptor::InitializeFromSignatureToken(
                 {
                     g_CLR_RT_TypeSystem.m_assemblies[caller->genericType->Assembly() - 1]
                         ->FindGenericParamAtTypeSpec(caller->genericType->data, elem.GenericParamPosition, td, dt);
-                    
+
                     if (NANOCLR_INDEX_IS_VALID(td))
                     {
                         this->InitializeFromTypeDef(td);
