@@ -5895,6 +5895,30 @@ bool CLR_RT_Assembly::FindNextStaticConstructor(CLR_RT_MethodDef_Index &index)
     return false;
 }
 
+bool CLR_RT_Assembly::HasStaticConstructor(const CLR_RT_TypeDef_Index &typeDef) const
+{
+    NATIVE_PROFILE_CLR_CORE();
+
+    CLR_RT_Assembly *ownerAsm = g_CLR_RT_TypeSystem.m_assemblies[typeDef.Assembly() - 1];
+    const CLR_RECORD_TYPEDEF *ownerTd = ownerAsm->GetTypeDef(typeDef.Type());
+
+    // Calculate total method count for this type
+    int methodCount = ownerTd->virtualMethodCount + ownerTd->instanceMethodCount + ownerTd->staticMethodCount;
+
+    // Iterate through all methods of the generic type definition
+    const CLR_RECORD_METHODDEF *md = ownerAsm->GetMethodDef(ownerTd->firstMethod);
+    for (int i = 0; i < methodCount; i++, md++)
+    {
+        // Check if this is a static constructor
+        if (md->flags & CLR_RECORD_METHODDEF::MD_StaticConstructor)
+        {
+            return true;
+        }
+    }
+
+    return false;
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 HRESULT CLR_RT_Assembly::ResolveComputeHashes()
@@ -6034,6 +6058,11 @@ void CLR_RT_TypeSystem::TypeSystem_Initialize()
     g_CLR_RT_TypeSystem.m_genericStaticFields = nullptr;
     g_CLR_RT_TypeSystem.m_genericStaticFieldsCount = 0;
     g_CLR_RT_TypeSystem.m_genericStaticFieldsMaxCount = 0;
+
+    // Initialize generic .cctor execution registry
+    g_CLR_RT_TypeSystem.m_genericCctorRegistry = nullptr;
+    g_CLR_RT_TypeSystem.m_genericCctorRegistryCount = 0;
+    g_CLR_RT_TypeSystem.m_genericCctorRegistryMaxCount = 0;
 }
 
 void CLR_RT_TypeSystem::TypeSystem_Cleanup()
@@ -6066,6 +6095,15 @@ void CLR_RT_TypeSystem::TypeSystem_Cleanup()
         m_genericStaticFields = nullptr;
         m_genericStaticFieldsCount = 0;
         m_genericStaticFieldsMaxCount = 0;
+    }
+
+    // Clean up generic .cctor execution registry
+    if (m_genericCctorRegistry != nullptr)
+    {
+        platform_free(m_genericCctorRegistry);
+        m_genericCctorRegistry = nullptr;
+        m_genericCctorRegistryCount = 0;
+        m_genericCctorRegistryMaxCount = 0;
     }
 }
 
@@ -7742,6 +7780,73 @@ CLR_UINT32 CLR_RT_TypeSystem::ComputeHashForClosedGenericType(CLR_RT_TypeSpec_In
     }
 
     return hash ? hash : 0xFFFFFFFF; // Don't allow zero as a hash value
+}
+
+//--//
+
+CLR_RT_GenericCctorExecutionRecord *CLR_RT_TypeSystem::FindOrCreateGenericCctorRecord(CLR_UINT32 hash, bool *created)
+{
+    if (created)
+    {
+        *created = false;
+    }
+
+    // Look for existing entry
+    for (CLR_UINT32 i = 0; i < g_CLR_RT_TypeSystem.m_genericCctorRegistryCount; i++)
+    {
+        if (g_CLR_RT_TypeSystem.m_genericCctorRegistry[i].m_hash == hash)
+        {
+            return &g_CLR_RT_TypeSystem.m_genericCctorRegistry[i];
+        }
+    }
+
+    // Need to create a new entry - check if we need to expand the array
+    if (g_CLR_RT_TypeSystem.m_genericCctorRegistryCount >= g_CLR_RT_TypeSystem.m_genericCctorRegistryMaxCount)
+    {
+        CLR_UINT32 newMax = g_CLR_RT_TypeSystem.m_genericCctorRegistryMaxCount * 2;
+
+        if (newMax == 0)
+        {
+            newMax = 4; // Initial minimum size
+        }
+
+        CLR_RT_GenericCctorExecutionRecord *newArray =
+            (CLR_RT_GenericCctorExecutionRecord *)platform_malloc(sizeof(CLR_RT_GenericCctorExecutionRecord) * newMax);
+
+        if (newArray == nullptr)
+        {
+            return nullptr; // Out of memory
+        }
+
+        // Copy existing records
+        if (g_CLR_RT_TypeSystem.m_genericCctorRegistry != nullptr &&
+            g_CLR_RT_TypeSystem.m_genericCctorRegistryCount > 0)
+        {
+            memcpy(
+                newArray,
+                g_CLR_RT_TypeSystem.m_genericCctorRegistry,
+                sizeof(CLR_RT_GenericCctorExecutionRecord) * g_CLR_RT_TypeSystem.m_genericCctorRegistryCount);
+
+            platform_free(g_CLR_RT_TypeSystem.m_genericCctorRegistry);
+        }
+
+        g_CLR_RT_TypeSystem.m_genericCctorRegistry = newArray;
+        g_CLR_RT_TypeSystem.m_genericCctorRegistryMaxCount = newMax;
+    }
+
+    // Create new record
+    CLR_RT_GenericCctorExecutionRecord *record =
+        &g_CLR_RT_TypeSystem.m_genericCctorRegistry[g_CLR_RT_TypeSystem.m_genericCctorRegistryCount++];
+
+    record->m_hash = hash;
+    record->m_flags = 0;
+
+    if (created)
+    {
+        *created = true;
+    }
+
+    return record;
 }
 
 //--//

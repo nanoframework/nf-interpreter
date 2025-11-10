@@ -56,6 +56,7 @@ HRESULT CLR_RT_HeapBlock_Delegate::CreateInstance(
 #endif
 
     dlg->m_object.SetObjectReference(nullptr);
+    dlg->m_genericTypeSpec.Clear();
 
 #if defined(NANOCLR_APPDOMAINS)
     dlg->m_appDomain = g_CLR_RT_ExecutionEngine.GetCurrentAppDomain();

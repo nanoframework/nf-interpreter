@@ -678,6 +678,7 @@ HRESULT CLR_RT_ExecutionEngine::Execute(wchar_t *entryPointArgs, int maxContextS
     NANOCLR_CHECK_HRESULT(WaitForDebugger());
 
     // m_cctorThread is nullptr before call and inialized by the SpawnStaticConstructor
+    // This will execute both non-generic and generic type static constructors
     SpawnStaticConstructor(m_cctorThread);
 
     while (true)
@@ -809,6 +810,28 @@ void CLR_RT_ExecutionEngine::StaticConstructorTerminationCallback(void *arg)
     (void)arg;
 
     NATIVE_PROFILE_CLR_CORE();
+
+    // If the completed .cctor was for a generic type, mark it as executed
+    CLR_RT_HeapBlock_Delegate *dlg = g_CLR_RT_ExecutionEngine.m_cctorThread->m_dlg;
+    if (dlg != nullptr && dlg->m_genericTypeSpec.data != 0)
+    {
+        // This was a generic type .cctor - compute hash and mark as executed
+        CLR_RT_TypeSpec_Instance genericTypeInstance{};
+        if (genericTypeInstance.InitializeFromIndex(dlg->m_genericTypeSpec))
+        {
+            CLR_UINT32 hash = g_CLR_RT_TypeSystem.ComputeHashForClosedGenericType(genericTypeInstance);
+            CLR_RT_GenericCctorExecutionRecord *record =
+                g_CLR_RT_TypeSystem.FindOrCreateGenericCctorRecord(hash, nullptr);
+
+            if (record != nullptr)
+            {
+                // Clear scheduled flag and set executed flag
+                record->m_flags &= ~CLR_RT_GenericCctorExecutionRecord::c_Scheduled;
+                record->m_flags |= CLR_RT_GenericCctorExecutionRecord::c_Executed;
+            }
+        }
+    }
+
     g_CLR_RT_ExecutionEngine.SpawnStaticConstructor(g_CLR_RT_ExecutionEngine.m_cctorThread);
 }
 
@@ -965,7 +988,133 @@ bool CLR_RT_ExecutionEngine::SpawnStaticConstructorHelper(
         }
     }
 
+    // Set flag to indicate regular static constructors have been processed
     assembly->flags |= CLR_RT_Assembly::StaticConstructorsExecuted;
+    return false;
+}
+
+bool CLR_RT_ExecutionEngine::SpawnGenericTypeStaticConstructorsHelper(
+    CLR_RT_Assembly *assembly,
+    const CLR_RT_TypeSpec_Index &startTypeSpecIndex)
+{
+    NATIVE_PROFILE_CLR_CORE();
+
+    _ASSERTE(m_cctorThread != nullptr);
+    _ASSERTE(m_cctorThread->CanThreadBeReused());
+    _ASSERTE(assembly != nullptr);
+
+    // Crawl TypeSpecs in this assembly to find closed generic instantiations that need .cctor execution
+    int numTypeSpec = assembly->tablesSize[TBL_TypeSpec];
+
+    // Start from the specified TypeSpec index (to resume iteration after a .cctor completes)
+    CLR_UINT32 startIndex = startTypeSpecIndex.TypeSpec();
+    CLR_RT_TypeSpec_CrossReference *tsCross = assembly->crossReferenceTypeSpec + startIndex;
+
+    for (int iTs = startIndex; iTs < numTypeSpec; iTs++, tsCross++)
+    {
+        // Build a TypeSpec_Instance to check if this is a closed generic instantiation
+        CLR_RT_TypeSpec_Instance genericTypeInstance{};
+        CLR_RT_TypeSpec_Index tsIndex;
+        tsIndex.Set(assembly->assemblyIndex, iTs);
+
+        if (!genericTypeInstance.InitializeFromIndex(tsIndex))
+        {
+            continue;
+        }
+
+        // Only for closed generic instantiations (have genericTypeDef)
+        if (!genericTypeInstance.IsClosedGenericType())
+        {
+            continue;
+        }
+
+        // Get the generic type definition
+        CLR_RT_TypeDef_Index typeDef = genericTypeInstance.genericTypeDef;
+
+        // Check if the generic type definition has a static constructor
+        CLR_RT_Assembly *ownerAsm = g_CLR_RT_TypeSystem.m_assemblies[typeDef.Assembly() - 1];
+        if (!ownerAsm->HasStaticConstructor(typeDef))
+        {
+            continue;
+        }
+
+        // Find the static constructor method for this generic type definition
+        const CLR_RECORD_TYPEDEF *ownerTd = ownerAsm->GetTypeDef(typeDef.Type());
+        const CLR_RECORD_METHODDEF *md = ownerAsm->GetMethodDef(ownerTd->firstMethod);
+
+        // Calculate total method count for this type
+        int methodCount = ownerTd->virtualMethodCount + ownerTd->instanceMethodCount + ownerTd->staticMethodCount;
+
+        CLR_RT_MethodDef_Index cctorIndex;
+        bool foundCctor = false;
+
+        for (int i = 0; i < methodCount; i++, md++)
+        {
+            if (md->flags & CLR_RECORD_METHODDEF::MD_StaticConstructor)
+            {
+                cctorIndex.Set(ownerAsm->assemblyIndex, ownerTd->firstMethod + i);
+                foundCctor = true;
+                break;
+            }
+        }
+
+        if (!foundCctor)
+        {
+            continue;
+        }
+
+        // Compute hash for the closed generic type to check if .cctor already scheduled/executed
+        CLR_UINT32 hash = g_CLR_RT_TypeSystem.ComputeHashForClosedGenericType(genericTypeInstance);
+
+        // Find or create the .cctor execution record for this closed type
+        bool recordCreated = false;
+        CLR_RT_GenericCctorExecutionRecord *record =
+            g_CLR_RT_TypeSystem.FindOrCreateGenericCctorRecord(hash, &recordCreated);
+
+        if (record == nullptr)
+        {
+            // Out of memory - skip this .cctor
+            continue;
+        }
+
+        // Check if .cctor already scheduled or executed
+        if (record->m_flags &
+            (CLR_RT_GenericCctorExecutionRecord::c_Scheduled | CLR_RT_GenericCctorExecutionRecord::c_Executed))
+        {
+            // Already handled - skip to next TypeSpec
+            continue;
+        }
+
+        // Mark as scheduled to prevent duplicate scheduling
+        record->m_flags |= CLR_RT_GenericCctorExecutionRecord::c_Scheduled;
+
+        // Create delegate for the generic type .cctor
+        CLR_RT_HeapBlock_Delegate *dlg;
+        CLR_RT_HeapBlock refDlg;
+
+        refDlg.SetObjectReference(nullptr);
+        CLR_RT_ProtectFromGC gc(refDlg);
+
+        if (SUCCEEDED(CLR_RT_HeapBlock_Delegate::CreateInstance(refDlg, cctorIndex, nullptr)))
+        {
+            dlg = refDlg.DereferenceDelegate();
+
+            // Store the current closed generic TypeSpec index for correct resumption
+            dlg->m_genericTypeSpec = tsIndex;
+
+            if (SUCCEEDED(m_cctorThread->PushThreadProcDelegate(dlg)))
+            {
+                m_cctorThread->m_terminationCallback = StaticConstructorTerminationCallback;
+                return true;
+            }
+        }
+
+        // If we failed to schedule, clear the scheduled flag
+        record->m_flags &= ~CLR_RT_GenericCctorExecutionRecord::c_Scheduled;
+    }
+
+    // No more generic type .cctors for this assembly - set flag
+    assembly->flags |= CLR_RT_Assembly::StaticGenericConstructorsExecuted;
     return false;
 }
 
@@ -988,37 +1137,91 @@ void CLR_RT_ExecutionEngine::SpawnStaticConstructor(CLR_RT_Thread *&pCctorThread
         _ASSERTE(NANOCLR_INDEX_IS_VALID(index));
         _SIDE_ASSERTE(inst.InitializeFromIndex(index));
 
-        // This is ok if index is no longer valid.  SpawnStaticConstructorHelper will call FindNextStaticConstructor
-        // which will fail
-        index.data++;
+        // Check if this is a generic type .cctor (has m_genericTypeSpec.data != 0 in the delegate)
+        if (dlg->m_genericTypeSpec.data != 0)
+        {
+            // Extract the TypeSpec index from the delegate and increment to next TypeSpec
+            CLR_RT_TypeSpec_Index tsIndex = dlg->m_genericTypeSpec;
+            CLR_RT_Assembly *assembly = g_CLR_RT_TypeSystem.m_assemblies[tsIndex.Assembly() - 1];
 
-        if (SpawnStaticConstructorHelper(inst.assembly, index))
-            return;
+            // Increment to next TypeSpec (same pattern as regular .cctor)
+            tsIndex.data++;
+
+            if (SpawnGenericTypeStaticConstructorsHelper(assembly, tsIndex))
+            {
+                return;
+            }
+        }
+        else
+        {
+            // Regular static constructor - increment to next method index
+            index.data++;
+
+            if (SpawnStaticConstructorHelper(inst.assembly, index))
+            {
+                return;
+            }
+        }
     }
 
     // first, find the AppDomainAssembly to run. (what about appdomains!!!)
     NANOCLR_FOREACH_ASSEMBLY(g_CLR_RT_TypeSystem)
     {
-        // Find an AppDomainAssembly that does not have it's static constructor bit set...
+        // Check if regular static constructors need to be executed
         if ((pASSM->flags & CLR_RT_Assembly::StaticConstructorsExecuted) == 0)
         {
             CLR_RT_MethodDef_Index index;
             index.Set(pASSM->assemblyIndex, 0);
-            bool fDepedenciesRun = true;
+            bool dependenciesSatisfied = true;
 
-            // Check that all dependent assemblies have had static constructors run.
+            // Check that all dependent assemblies have had regular static constructors run
             CLR_RT_AssemblyRef_CrossReference *ar = pASSM->crossReferenceAssemblyRef;
             for (int i = 0; i < pASSM->tablesSize[TBL_AssemblyRef]; i++, ar++)
             {
                 if ((ar->target->flags & CLR_RT_Assembly::StaticConstructorsExecuted) == 0)
                 {
-                    fDepedenciesRun = true;
+                    dependenciesSatisfied = false;
                     break;
                 }
             }
 
-            if (fDepedenciesRun && SpawnStaticConstructorHelper(pASSM, index))
-                return;
+            if (dependenciesSatisfied)
+            {
+                // Run regular static constructors for this assembly
+                if (SpawnStaticConstructorHelper(pASSM, index))
+                {
+                    return;
+                }
+            }
+        }
+
+        // Check if generic type static constructors need to be executed
+        if ((pASSM->flags & CLR_RT_Assembly::StaticGenericConstructorsExecuted) == 0)
+        {
+            bool dependenciesSatisfied = true;
+
+            // Check that all dependent assemblies have had regular static constructors run
+            CLR_RT_AssemblyRef_CrossReference *ar = pASSM->crossReferenceAssemblyRef;
+            for (int i = 0; i < pASSM->tablesSize[TBL_AssemblyRef]; i++, ar++)
+            {
+                if ((ar->target->flags & CLR_RT_Assembly::StaticConstructorsExecuted) == 0)
+                {
+                    dependenciesSatisfied = false;
+                    break;
+                }
+            }
+
+            if (dependenciesSatisfied)
+            {
+                // Run generic type static constructors for this assembly (starting from index 0)
+                CLR_RT_TypeSpec_Index startIndex;
+                startIndex.Set(pASSM->assemblyIndex, 0);
+
+                if (SpawnGenericTypeStaticConstructorsHelper(pASSM, startIndex))
+                {
+                    return;
+                }
+            }
         }
     }
     NANOCLR_FOREACH_ASSEMBLY_END();

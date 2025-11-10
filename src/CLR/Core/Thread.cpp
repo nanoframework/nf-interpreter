@@ -163,6 +163,18 @@ HRESULT CLR_RT_Thread::PushThreadProcDelegate(CLR_RT_HeapBlock_Delegate *pDelega
         NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
     }
 
+    // Set generic context if the delegate has a TypeSpec stored (for generic type static constructors)
+    // Note: We temporarily set inst.genericType to the delegate's interior pointer here,
+    // but will copy it to stable storage in the stack frame after Push() below
+    CLR_RT_TypeSpec_Index delegateTypeSpec;
+    delegateTypeSpec.Clear();
+
+    if (pDelegate->m_genericTypeSpec.data != 0)
+    {
+        delegateTypeSpec = pDelegate->m_genericTypeSpec;
+        inst.genericType = &delegateTypeSpec;
+    }
+
 #if defined(NANOCLR_APPDOMAINS)
 
     if (!pDelegate->m_appDomain->IsLoaded())
@@ -180,6 +192,15 @@ HRESULT CLR_RT_Thread::PushThreadProcDelegate(CLR_RT_HeapBlock_Delegate *pDelega
     this->m_status = TH_S_Ready;
 
     NANOCLR_CHECK_HRESULT(CLR_RT_StackFrame::Push(this, inst, inst.target->argumentsCount));
+
+    // If we have a generic type context, copy it to stable storage in the stack frame
+    // and update the pointer to avoid GC relocation issues with the delegate object
+    if (delegateTypeSpec.data != 0)
+    {
+        CLR_RT_StackFrame *stackTop = this->CurrentFrame();
+        stackTop->m_genericTypeSpecStorage = delegateTypeSpec;
+        stackTop->m_call.genericType = &stackTop->m_genericTypeSpecStorage;
+    }
 
     if ((inst.target->flags & CLR_RECORD_METHODDEF::MD_Static) == 0)
     {
@@ -821,8 +842,8 @@ HRESULT CLR_RT_Thread::ProcessException_Phase1()
             us.GetPhase() < UnwindStack::p_1_SearchingForHandler_2_SentUsersChance && stack->m_IP)
         {
             // We have a debugger attached and we need to send some messages before we start searching.
-            // These messages should only get sent when the search reaches managed code. Stack::Push sets m_IP to nullptr
-            // for native code, so therefore we need IP to be non-nullptr
+            // These messages should only get sent when the search reaches managed code. Stack::Push sets m_IP to
+            // nullptr for native code, so therefore we need IP to be non-nullptr
 
             us.m_handlerStack = stack;
 
