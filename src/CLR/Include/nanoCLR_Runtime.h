@@ -4233,7 +4233,9 @@ struct CLR_RT_ExecutionEngine
         const CLR_RT_MethodDef_Index &index);
 #else
     bool SpawnStaticConstructorHelper(CLR_RT_Assembly *assembly, const CLR_RT_MethodDef_Index &index);
-    bool SpawnGenericTypeStaticConstructorsHelper(CLR_RT_Assembly *assembly, const CLR_RT_TypeSpec_Index &startTypeSpecIndex);
+    bool SpawnGenericTypeStaticConstructorsHelper(
+        CLR_RT_Assembly *assembly,
+        const CLR_RT_TypeSpec_Index &startTypeSpecIndex);
 #endif
     static void FinalizerTerminationCallback(void *arg);
     static void StaticConstructorTerminationCallback(void *arg);

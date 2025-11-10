@@ -5898,13 +5898,13 @@ bool CLR_RT_Assembly::FindNextStaticConstructor(CLR_RT_MethodDef_Index &index)
 bool CLR_RT_Assembly::HasStaticConstructor(const CLR_RT_TypeDef_Index &genericTypeDef)
 {
     NATIVE_PROFILE_CLR_CORE();
-    
+
     CLR_RT_Assembly *ownerAsm = g_CLR_RT_TypeSystem.m_assemblies[genericTypeDef.Assembly() - 1];
     const CLR_RECORD_TYPEDEF *ownerTd = ownerAsm->GetTypeDef(genericTypeDef.Type());
-    
+
     // Calculate total method count for this type
     int methodCount = ownerTd->virtualMethodCount + ownerTd->instanceMethodCount + ownerTd->staticMethodCount;
-    
+
     // Iterate through all methods of the generic type definition
     const CLR_RECORD_METHODDEF *md = ownerAsm->GetMethodDef(ownerTd->firstMethod);
     for (int i = 0; i < methodCount; i++, md++)
@@ -5915,7 +5915,7 @@ bool CLR_RT_Assembly::HasStaticConstructor(const CLR_RT_TypeDef_Index &genericTy
             return true;
         }
     }
-    
+
     return false;
 }
 

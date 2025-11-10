@@ -827,8 +827,8 @@ HRESULT CLR_RT_Thread::ProcessException_Phase1()
             us.GetPhase() < UnwindStack::p_1_SearchingForHandler_2_SentUsersChance && stack->m_IP)
         {
             // We have a debugger attached and we need to send some messages before we start searching.
-            // These messages should only get sent when the search reaches managed code. Stack::Push sets m_IP to nullptr
-            // for native code, so therefore we need IP to be non-nullptr
+            // These messages should only get sent when the search reaches managed code. Stack::Push sets m_IP to
+            // nullptr for native code, so therefore we need IP to be non-nullptr
 
             us.m_handlerStack = stack;
 
