@@ -1007,17 +1007,17 @@ bool CLR_RT_ExecutionEngine::SpawnGenericTypeStaticConstructorsHelper(
         }
 
         // Get the generic type definition
-        CLR_RT_TypeDef_Index genericTypeDef = genericTypeInstance.genericTypeDef;
+        CLR_RT_TypeDef_Index typeDef = genericTypeInstance.genericTypeDef;
 
         // Check if the generic type definition has a static constructor
-        CLR_RT_Assembly *ownerAsm = g_CLR_RT_TypeSystem.m_assemblies[genericTypeDef.Assembly() - 1];
-        if (!ownerAsm->HasStaticConstructor(genericTypeDef))
+        CLR_RT_Assembly *ownerAsm = g_CLR_RT_TypeSystem.m_assemblies[typeDef.Assembly() - 1];
+        if (!ownerAsm->HasStaticConstructor(typeDef))
         {
             continue;
         }
 
         // Find the static constructor method for this generic type definition
-        const CLR_RECORD_TYPEDEF *ownerTd = ownerAsm->GetTypeDef(genericTypeDef.Type());
+        const CLR_RECORD_TYPEDEF *ownerTd = ownerAsm->GetTypeDef(typeDef.Type());
         const CLR_RECORD_METHODDEF *md = ownerAsm->GetMethodDef(ownerTd->firstMethod);
 
         // Calculate total method count for this type

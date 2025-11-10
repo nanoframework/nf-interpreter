@@ -1487,7 +1487,7 @@ struct CLR_RT_Assembly : public CLR_RT_HeapBlock_Node // EVENT HEAP - NO RELOCAT
         CLR_UINT32 &assmIndex);
 
     bool FindNextStaticConstructor(CLR_RT_MethodDef_Index &index);
-    bool HasStaticConstructor(const CLR_RT_TypeDef_Index &genericTypeDef);
+    bool HasStaticConstructor(const CLR_RT_TypeDef_Index &typeDef) const;
 
     bool FindMethodBoundaries(CLR_INDEX i, CLR_OFFSET &start, CLR_OFFSET &end);
 
