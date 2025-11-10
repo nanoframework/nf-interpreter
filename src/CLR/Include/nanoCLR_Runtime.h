@@ -1990,6 +1990,20 @@ struct CLR_RT_GenericStaticFieldRecord
 
 //--//
 
+struct CLR_RT_GenericCctorExecutionRecord
+{
+    // Unique hash identifier for the closed generic type
+    CLR_UINT32 m_hash;
+    
+    // Execution state flags
+    static const CLR_UINT8 c_Scheduled = 0x01;
+    static const CLR_UINT8 c_Executed = 0x02;
+    
+    CLR_UINT8 m_flags;
+};
+
+//--//
+
 struct CLR_RT_TypeSystem // EVENT HEAP - NO RELOCATION -
 {
     struct CompatibilityLookup
@@ -2020,6 +2034,11 @@ struct CLR_RT_TypeSystem // EVENT HEAP - NO RELOCATION -
     CLR_RT_GenericStaticFieldRecord *m_genericStaticFields;
     CLR_UINT32 m_genericStaticFieldsCount;
     CLR_UINT32 m_genericStaticFieldsMaxCount;
+    
+    // Global registry for generic .cctor execution tracking
+    CLR_RT_GenericCctorExecutionRecord *m_genericCctorRegistry;
+    CLR_UINT32 m_genericCctorRegistryCount;
+    CLR_UINT32 m_genericCctorRegistryMaxCount;
 
     //--//
 
@@ -2115,6 +2134,9 @@ struct CLR_RT_TypeSystem // EVENT HEAP - NO RELOCATION -
 
     // Helper to compute hash for a closed generic type
     static CLR_UINT32 ComputeHashForClosedGenericType(CLR_RT_TypeSpec_Instance &typeInstance);
+    
+    // Helper to find or create a generic .cctor execution record by hash
+    static CLR_RT_GenericCctorExecutionRecord *FindOrCreateGenericCctorRecord(CLR_UINT32 hash, bool *created);
 
     //--//
 

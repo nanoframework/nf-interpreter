@@ -810,6 +810,28 @@ void CLR_RT_ExecutionEngine::StaticConstructorTerminationCallback(void *arg)
     (void)arg;
 
     NATIVE_PROFILE_CLR_CORE();
+
+    // If the completed .cctor was for a generic type, mark it as executed
+    CLR_RT_HeapBlock_Delegate *dlg = g_CLR_RT_ExecutionEngine.m_cctorThread->m_dlg;
+    if (dlg != nullptr && dlg->m_genericTypeSpec.data != 0)
+    {
+        // This was a generic type .cctor - compute hash and mark as executed
+        CLR_RT_TypeSpec_Instance genericTypeInstance{};
+        if (genericTypeInstance.InitializeFromIndex(dlg->m_genericTypeSpec))
+        {
+            CLR_UINT32 hash = g_CLR_RT_TypeSystem.ComputeHashForClosedGenericType(genericTypeInstance);
+            CLR_RT_GenericCctorExecutionRecord *record =
+                g_CLR_RT_TypeSystem.FindOrCreateGenericCctorRecord(hash, nullptr);
+
+            if (record != nullptr)
+            {
+                // Clear scheduled flag and set executed flag
+                record->m_flags &= ~CLR_RT_GenericCctorExecutionRecord::c_Scheduled;
+                record->m_flags |= CLR_RT_GenericCctorExecutionRecord::c_Executed;
+            }
+        }
+    }
+
     g_CLR_RT_ExecutionEngine.SpawnStaticConstructor(g_CLR_RT_ExecutionEngine.m_cctorThread);
 }
 
@@ -1041,6 +1063,31 @@ bool CLR_RT_ExecutionEngine::SpawnGenericTypeStaticConstructorsHelper(
             continue;
         }
 
+        // Compute hash for the closed generic type to check if .cctor already scheduled/executed
+        CLR_UINT32 hash = g_CLR_RT_TypeSystem.ComputeHashForClosedGenericType(genericTypeInstance);
+
+        // Find or create the .cctor execution record for this closed type
+        bool recordCreated = false;
+        CLR_RT_GenericCctorExecutionRecord *record =
+            g_CLR_RT_TypeSystem.FindOrCreateGenericCctorRecord(hash, &recordCreated);
+
+        if (record == nullptr)
+        {
+            // Out of memory - skip this .cctor
+            continue;
+        }
+
+        // Check if .cctor already scheduled or executed
+        if (record->m_flags &
+            (CLR_RT_GenericCctorExecutionRecord::c_Scheduled | CLR_RT_GenericCctorExecutionRecord::c_Executed))
+        {
+            // Already handled - skip to next TypeSpec
+            continue;
+        }
+
+        // Mark as scheduled to prevent duplicate scheduling
+        record->m_flags |= CLR_RT_GenericCctorExecutionRecord::c_Scheduled;
+
         // Create delegate for the generic type .cctor
         CLR_RT_HeapBlock_Delegate *dlg;
         CLR_RT_HeapBlock refDlg;
@@ -1061,6 +1108,9 @@ bool CLR_RT_ExecutionEngine::SpawnGenericTypeStaticConstructorsHelper(
                 return true;
             }
         }
+
+        // If we failed to schedule, clear the scheduled flag
+        record->m_flags &= ~CLR_RT_GenericCctorExecutionRecord::c_Scheduled;
     }
 
     // No more generic type .cctors for this assembly - set flag
