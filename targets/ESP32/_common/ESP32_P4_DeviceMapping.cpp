@@ -56,9 +56,11 @@ int8_t Esp32_LED_DevicePinMap[8] = {
     -1  // 8
 };
 
+// Under nanoframework we treat all ADC channels as 1 logical ADC unit (ADC1)
 // ESP32_P4 ADC1 with 8 channels (GPIO 16,17,18,19,20,21,22,23)
 //               plus 6 channels (GPIO 49,50,51,52,53,54)
 
+// From IDF point of view there is ADC1 and ADC2
 // ESP32P4 ADC1 channels 0 - 9
 //         ADC2 channels 10 - 19
 int8_t Esp32_ADC_DevicePinMap[TARGET_ADC_NUM_PINS] = {
