@@ -163,6 +163,12 @@ HRESULT CLR_RT_Thread::PushThreadProcDelegate(CLR_RT_HeapBlock_Delegate *pDelega
         NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
     }
 
+    // Set generic context if the delegate has a TypeSpec stored (for generic type static constructors)
+    if (pDelegate->m_genericTypeSpec.data != 0)
+    {
+        inst.genericType = &pDelegate->m_genericTypeSpec;
+    }
+
 #if defined(NANOCLR_APPDOMAINS)
 
     if (!pDelegate->m_appDomain->IsLoaded())

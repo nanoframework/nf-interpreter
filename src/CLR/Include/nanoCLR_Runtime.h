@@ -1339,6 +1339,7 @@ struct CLR_RT_Assembly : public CLR_RT_HeapBlock_Node // EVENT HEAP - NO RELOCAT
     static const CLR_UINT32 Deployed = 0x00000008;
     static const CLR_UINT32 PreparingForExecution = 0x00000010;
     static const CLR_UINT32 StaticConstructorsExecuted = 0x00000020;
+    static const CLR_UINT32 StaticGenericConstructorsExecuted = 0x00000040;
     // this flag should be set when the m_header was malloc'ed
     static const CLR_UINT32 FreeOnDestroy = 0x00000100;
 
@@ -1486,6 +1487,7 @@ struct CLR_RT_Assembly : public CLR_RT_HeapBlock_Node // EVENT HEAP - NO RELOCAT
         CLR_UINT32 &assmIndex);
 
     bool FindNextStaticConstructor(CLR_RT_MethodDef_Index &index);
+    bool HasStaticConstructor(const CLR_RT_TypeDef_Index &genericTypeDef);
 
     bool FindMethodBoundaries(CLR_INDEX i, CLR_OFFSET &start, CLR_OFFSET &end);
 
@@ -4231,6 +4233,7 @@ struct CLR_RT_ExecutionEngine
         const CLR_RT_MethodDef_Index &index);
 #else
     bool SpawnStaticConstructorHelper(CLR_RT_Assembly *assembly, const CLR_RT_MethodDef_Index &index);
+    bool SpawnGenericTypeStaticConstructorsHelper(CLR_RT_Assembly *assembly, const CLR_RT_TypeSpec_Index &startTypeSpecIndex);
 #endif
     static void FinalizerTerminationCallback(void *arg);
     static void StaticConstructorTerminationCallback(void *arg);
