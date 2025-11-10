@@ -1052,8 +1052,8 @@ bool CLR_RT_ExecutionEngine::SpawnGenericTypeStaticConstructorsHelper(
         {
             dlg = refDlg.DereferenceDelegate();
 
-            // Store the TypeSpec index in the delegate (points to persistent assembly metadata)
-            dlg->m_genericTypeSpec = tsCross->genericType;
+            // Store the current closed generic TypeSpec index for correct resumption
+            dlg->m_genericTypeSpec = tsIndex;
 
             if (SUCCEEDED(m_cctorThread->PushThreadProcDelegate(dlg)))
             {
