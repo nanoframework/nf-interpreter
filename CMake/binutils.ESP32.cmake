@@ -687,6 +687,7 @@ macro(nf_add_idf_as_library)
         esp_netif
         esp_eth
         esp_psram
+        esp_adc
         littlefs
     )
 
@@ -702,6 +703,7 @@ macro(nf_add_idf_as_library)
         idf::esp_netif
         idf::esp_eth
         idf::esp_psram
+        idf::esp_adc
         idf::littlefs
     )
 
