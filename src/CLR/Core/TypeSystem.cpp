@@ -6058,7 +6058,7 @@ void CLR_RT_TypeSystem::TypeSystem_Initialize()
     g_CLR_RT_TypeSystem.m_genericStaticFields = nullptr;
     g_CLR_RT_TypeSystem.m_genericStaticFieldsCount = 0;
     g_CLR_RT_TypeSystem.m_genericStaticFieldsMaxCount = 0;
-    
+
     // Initialize generic .cctor execution registry
     g_CLR_RT_TypeSystem.m_genericCctorRegistry = nullptr;
     g_CLR_RT_TypeSystem.m_genericCctorRegistryCount = 0;
@@ -6096,7 +6096,7 @@ void CLR_RT_TypeSystem::TypeSystem_Cleanup()
         m_genericStaticFieldsCount = 0;
         m_genericStaticFieldsMaxCount = 0;
     }
-    
+
     // Clean up generic .cctor execution registry
     if (m_genericCctorRegistry != nullptr)
     {
@@ -7784,9 +7784,7 @@ CLR_UINT32 CLR_RT_TypeSystem::ComputeHashForClosedGenericType(CLR_RT_TypeSpec_In
 
 //--//
 
-CLR_RT_GenericCctorExecutionRecord *CLR_RT_TypeSystem::FindOrCreateGenericCctorRecord(
-    CLR_UINT32 hash,
-    bool *created)
+CLR_RT_GenericCctorExecutionRecord *CLR_RT_TypeSystem::FindOrCreateGenericCctorRecord(CLR_UINT32 hash, bool *created)
 {
     if (created)
     {
@@ -7813,8 +7811,7 @@ CLR_RT_GenericCctorExecutionRecord *CLR_RT_TypeSystem::FindOrCreateGenericCctorR
         }
 
         CLR_RT_GenericCctorExecutionRecord *newArray =
-            (CLR_RT_GenericCctorExecutionRecord *)platform_malloc(
-                sizeof(CLR_RT_GenericCctorExecutionRecord) * newMax);
+            (CLR_RT_GenericCctorExecutionRecord *)platform_malloc(sizeof(CLR_RT_GenericCctorExecutionRecord) * newMax);
 
         if (newArray == nullptr)
         {
@@ -7840,7 +7837,7 @@ CLR_RT_GenericCctorExecutionRecord *CLR_RT_TypeSystem::FindOrCreateGenericCctorR
     // Create new record
     CLR_RT_GenericCctorExecutionRecord *record =
         &g_CLR_RT_TypeSystem.m_genericCctorRegistry[g_CLR_RT_TypeSystem.m_genericCctorRegistryCount++];
-    
+
     record->m_hash = hash;
     record->m_flags = 0;
 

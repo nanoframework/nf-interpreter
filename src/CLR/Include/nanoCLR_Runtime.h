@@ -1994,11 +1994,11 @@ struct CLR_RT_GenericCctorExecutionRecord
 {
     // Unique hash identifier for the closed generic type
     CLR_UINT32 m_hash;
-    
+
     // Execution state flags
     static const CLR_UINT8 c_Scheduled = 0x01;
     static const CLR_UINT8 c_Executed = 0x02;
-    
+
     CLR_UINT8 m_flags;
 };
 
@@ -2034,7 +2034,7 @@ struct CLR_RT_TypeSystem // EVENT HEAP - NO RELOCATION -
     CLR_RT_GenericStaticFieldRecord *m_genericStaticFields;
     CLR_UINT32 m_genericStaticFieldsCount;
     CLR_UINT32 m_genericStaticFieldsMaxCount;
-    
+
     // Global registry for generic .cctor execution tracking
     CLR_RT_GenericCctorExecutionRecord *m_genericCctorRegistry;
     CLR_UINT32 m_genericCctorRegistryCount;
@@ -2134,7 +2134,7 @@ struct CLR_RT_TypeSystem // EVENT HEAP - NO RELOCATION -
 
     // Helper to compute hash for a closed generic type
     static CLR_UINT32 ComputeHashForClosedGenericType(CLR_RT_TypeSpec_Instance &typeInstance);
-    
+
     // Helper to find or create a generic .cctor execution record by hash
     static CLR_RT_GenericCctorExecutionRecord *FindOrCreateGenericCctorRecord(CLR_UINT32 hash, bool *created);
 
@@ -2598,7 +2598,7 @@ struct CLR_RT_StackFrame : public CLR_RT_HeapBlock_Node // EVENT HEAP - NO RELOC
     CLR_UINT32 m_flags;
 
     CLR_RT_MethodDef_Instance m_call;
-    
+
     // Stable storage for generic type context (not GC-relocated)
     // Used when m_call.genericType needs to point to a value that would otherwise
     // be inside a GC-managed object (e.g., delegate's m_genericTypeSpec)
