@@ -3060,7 +3060,7 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                                     NANOCLR_SET_AND_LEAVE(CLR_E_NULL_REFERENCE);
                                 }
                             }
-                            
+
                             NANOCLR_CHECK_HRESULT(evalPos[0].PerformUnboxing(typeInst));
                         }
                     }
