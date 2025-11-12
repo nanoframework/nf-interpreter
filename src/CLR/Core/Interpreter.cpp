@@ -2905,7 +2905,28 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                         }
                         else
                         {
-                            NANOCLR_CHECK_HRESULT(evalPos[0].PerformBoxing(typeInst));
+                            // Check if we're trying to box a null reference for a reference type
+                            // For generic types, the value might already be null (DATATYPE_OBJECT with null reference)
+                            if (evalPos[0].DataType() == DATATYPE_OBJECT)
+                            {
+                                CLR_RT_HeapBlock *ptr = evalPos[0].Dereference();
+                                if (ptr == nullptr)
+                                {
+                                    // Already a null reference, no need to box
+                                    // Just ensure it stays as a null object reference
+                                    evalPos[0].SetObjectReference(nullptr);
+                                }
+                                else
+                                {
+                                    // Non-null object reference, perform boxing
+                                    NANOCLR_CHECK_HRESULT(evalPos[0].PerformBoxing(typeInst));
+                                }
+                            }
+                            else
+                            {
+                                // Value type or other type, perform normal boxing
+                                NANOCLR_CHECK_HRESULT(evalPos[0].PerformBoxing(typeInst));
+                            }
                         }
                     }
                     else
@@ -2947,6 +2968,17 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                         }
                         else
                         {
+                            // Check if we're trying to unbox a null reference
+                            if (evalPos[0].DataType() == DATATYPE_OBJECT)
+                            {
+                                CLR_RT_HeapBlock *ptr = evalPos[0].Dereference();
+                                if (ptr == nullptr)
+                                {
+                                    // Attempting to unbox a null reference throws NullReferenceException
+                                    NANOCLR_SET_AND_LEAVE(CLR_E_NULL_REFERENCE);
+                                }
+                            }
+                            
                             NANOCLR_CHECK_HRESULT(evalPos[0].PerformUnboxing(typeInst));
                         }
                     }
