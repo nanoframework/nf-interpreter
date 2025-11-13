@@ -2464,21 +2464,34 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                         }
                         top->SetObjectReference(nullptr);
 
-                        // Stack: ... <null> <arg1> <arg2> ... <argN> -> ...
-                        //            ^
-                        //            Top points here.
+                        // For constructors on generic classes, we need to use the class's generic type
+                        // from the calling context, not the method's generic type.
+                        // The calleeInst.genericType might point to an open generic from the MethodRef,
+                        // but we need the closed generic from the caller's context (stack->m_call.genericType).
+                        const CLR_RT_TypeSpec_Index *genericTypeForContext = nullptr;
 
-                        if (calleeInst.genericType == nullptr)
+                        // Prefer the caller's generic type if available and valid
+                        if (stack->m_call.genericType != nullptr && NANOCLR_INDEX_IS_VALID(*stack->m_call.genericType))
+                        {
+                            genericTypeForContext = stack->m_call.genericType;
+                        }
+                        // Fallback to the callee's generic type if caller's is not available
+                        else if (calleeInst.genericType != nullptr && NANOCLR_INDEX_IS_VALID(*calleeInst.genericType))
+                        {
+                            genericTypeForContext = calleeInst.genericType;
+                        }
+
+                        if (genericTypeForContext == nullptr)
                         {
                             NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObject(top[0], cls));
                         }
                         else
                         {
-                            CLR_RT_TypeSpec_Instance calleeInstGenericType;
-                            calleeInstGenericType.InitializeFromIndex(*calleeInst.genericType);
+                            CLR_RT_TypeSpec_Instance genericTypeInstance;
+                            genericTypeInstance.InitializeFromIndex(*genericTypeForContext);
 
                             NANOCLR_CHECK_HRESULT(
-                                g_CLR_RT_ExecutionEngine.NewObject(top[0], cls, &calleeInstGenericType));
+                                g_CLR_RT_ExecutionEngine.NewObject(top[0], cls, &genericTypeInstance));
                         }
 
                         //
