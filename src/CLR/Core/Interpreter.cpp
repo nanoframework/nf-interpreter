@@ -3366,16 +3366,27 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                     CLR_RT_TypeDef_Instance type{};
                     CLR_RT_TypeDef_Index cls;
 
-                    if (!type.ResolveToken(arg, assm, &stack->m_call))
-                    {
-                        NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
-                    }
+                    // Propagate the array element type into the current call context so generic VAR can resolve
+                    // against a closed type (e.g., List<Int32>[] -> Int32). This mirrors the SZArrayHelper flow
+                    // used in method dispatch, but scoped to this instruction.
+                    CLR_RT_TypeDef_Index previousArrayElemType = stack->m_call.arrayElementType;
 
                     NANOCLR_CHECK_HRESULT(CLR_RT_TypeDescriptor::ExtractTypeIndexFromObject(evalPos[0], cls));
+
+                    stack->m_call.arrayElementType = cls;
+
+                    if (!type.ResolveToken(arg, assm, &stack->m_call))
+                    {
+                        // Restore previous context before bailing out
+                        stack->m_call.arrayElementType = previousArrayElemType;
+                        NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+                    }
 
                     // Check this is an object of the requested type.
                     if (!g_CLR_RT_ExecutionEngine.IsInstanceOfToken(arg, evalPos[0], stack->m_call))
                     {
+                        // Restore previous context before leaving
+                        stack->m_call.arrayElementType = previousArrayElemType;
                         NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
                     }
 
@@ -3388,6 +3399,9 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
 
                         NANOCLR_CHECK_HRESULT(evalPos[0].LoadFromReference(safeSource));
                     }
+
+                    // Restore previous arrayElementType context
+                    stack->m_call.arrayElementType = previousArrayElemType;
 
                     goto Execute_LoadAndPromote;
                     //<LDOBJ>
