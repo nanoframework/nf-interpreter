@@ -3051,10 +3051,30 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                     FETCH_ARG_COMPRESSED_TYPETOKEN(arg, ip);
 
                     CLR_RT_TypeDef_Instance typeInst{};
+                    CLR_RT_TypeDef_Index previousArrayElemType = stack->m_call.arrayElementType;
+
+                    // For BOXing a generic VAR (!0) inside an interface adapter (e.g., IList.get_Item)
+                    // we may lack a closed generic TypeSpec in stack->m_call.genericType. In that case
+                    // use the runtime type of the value being boxed to populate arrayElementType so
+                    // TypeDef::ResolveToken can fall back and close the VAR slot.
+                    if (!NANOCLR_INDEX_IS_VALID(stack->m_call.arrayElementType))
+                    {
+                        CLR_RT_TypeDef_Index valueTypeIdx;
+                        if (SUCCEEDED(CLR_RT_TypeDescriptor::ExtractTypeIndexFromObject(evalPos[0], valueTypeIdx)))
+                        {
+                            stack->m_call.arrayElementType = valueTypeIdx;
+                        }
+                    }
+
                     if (typeInst.ResolveToken(arg, assm, &stack->m_call) == false)
                     {
+                        // restore previous context before bailing
+                        stack->m_call.arrayElementType = previousArrayElemType;
                         NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
                     }
+
+                    // Restore previous arrayElementType (don't leak temporary inference)
+                    stack->m_call.arrayElementType = previousArrayElemType;
 
                     UPDATESTACK(stack, evalPos);
 
@@ -3204,10 +3224,30 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                     // TODO: still not handling Nullable<T> types here
 
                     CLR_RT_TypeDef_Instance typeInst{};
+                    CLR_RT_TypeDef_Index previousArrayElemType = stack->m_call.arrayElementType;
+
+                    // For UNBOX.ANY of a generic VAR (!0) inside an interface adapter (e.g., IList.set_Item)
+                    // we may lack a closed generic TypeSpec in stack->m_call.genericType. In that case
+                    // use the runtime type of the boxed value to populate arrayElementType so
+                    // TypeDef::ResolveToken can fall back and close the VAR slot.
+                    if (!NANOCLR_INDEX_IS_VALID(stack->m_call.arrayElementType))
+                    {
+                        CLR_RT_TypeDef_Index valueTypeIdx;
+                        if (SUCCEEDED(CLR_RT_TypeDescriptor::ExtractTypeIndexFromObject(evalPos[0], valueTypeIdx)))
+                        {
+                            stack->m_call.arrayElementType = valueTypeIdx;
+                        }
+                    }
+
                     if (typeInst.ResolveToken(arg, assm, &stack->m_call) == false)
                     {
+                        // restore previous context before bailing
+                        stack->m_call.arrayElementType = previousArrayElemType;
                         NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
                     }
+
+                    // Restore previous arrayElementType (don't leak temporary inference)
+                    stack->m_call.arrayElementType = previousArrayElemType;
 
                     UPDATESTACK(stack, evalPos);
 
@@ -3556,10 +3596,30 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
 
                     // Resolve the IL's element type in the context of any generics
                     CLR_RT_TypeDef_Instance expectedType;
+                    CLR_RT_TypeDef_Index previousArrayElemType = stack->m_call.arrayElementType;
+
+                    // For STELEM of a generic VAR (!0) inside an interface adapter (e.g., IList.set_Item)
+                    // we may lack a closed generic TypeSpec in stack->m_call.genericType. In that case
+                    // use the runtime type of the array element to populate arrayElementType so
+                    // TypeDef::ResolveToken can fall back and close the VAR slot.
+                    if (!NANOCLR_INDEX_IS_VALID(stack->m_call.arrayElementType))
+                    {
+                        CLR_RT_TypeDef_Index elemTypeIdx;
+                        if (SUCCEEDED(CLR_RT_TypeDescriptor::ExtractTypeIndexFromObject(evalPos[1], elemTypeIdx)))
+                        {
+                            stack->m_call.arrayElementType = elemTypeIdx;
+                        }
+                    }
+
                     if (!expectedType.ResolveToken(arg, assm, &stack->m_call))
                     {
+                        // restore previous context before bailing
+                        stack->m_call.arrayElementType = previousArrayElemType;
                         NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
                     }
+
+                    // Restore previous arrayElementType (don't leak temporary inference)
+                    stack->m_call.arrayElementType = previousArrayElemType;
 
                     NanoCLRDataType elemDT = (NanoCLRDataType)expectedType.target->dataType;
 
