@@ -1437,7 +1437,12 @@ struct CLR_RT_Assembly : public CLR_RT_HeapBlock_Node // EVENT HEAP - NO RELOCAT
         const CLR_RT_FieldDef_Index &fdIndex);
     CLR_RT_HeapBlock *GetStaticFieldByFieldDef(
         const CLR_RT_FieldDef_Index &fdIndex,
-        const CLR_RT_TypeSpec_Index *genericType);
+        const CLR_RT_TypeSpec_Index *genericType,
+        const CLR_RT_TypeSpec_Index *contextTypeSpec = nullptr);
+    HRESULT AllocateGenericStaticFieldsOnDemand(
+        const CLR_RT_TypeSpec_Index &typeSpecIndex,
+        const CLR_RT_TypeDef_Instance &genericTypeDef,
+        const CLR_RT_TypeSpec_Index *contextTypeSpec = nullptr);
     HRESULT PrepareForExecution();
 
     CLR_UINT32 ComputeAssemblyHash();
@@ -2134,7 +2139,9 @@ struct CLR_RT_TypeSystem // EVENT HEAP - NO RELOCATION -
         CLR_UINT32 staticFieldCount);
 
     // Helper to compute hash for a closed generic type
-    static CLR_UINT32 ComputeHashForClosedGenericType(CLR_RT_TypeSpec_Instance &typeInstance);
+    static CLR_UINT32 ComputeHashForClosedGenericType(
+        CLR_RT_TypeSpec_Instance &typeInstance,
+        const CLR_RT_TypeSpec_Index *contextTypeSpec = nullptr);
 
     // Helper to find or create a generic .cctor execution record by hash
     static CLR_RT_GenericCctorExecutionRecord *FindOrCreateGenericCctorRecord(CLR_UINT32 hash, bool *created);
@@ -2251,7 +2258,7 @@ struct CLR_RT_MethodDef_Instance : public CLR_RT_MethodDef_Index
 
     const CLR_RT_TypeSpec_Index *genericType;
     CLR_RT_MethodSpec_Index methodSpec;
-    
+
     // For SZArrayHelper rebind: stores the array element TypeDef when dispatching from arrays
     CLR_RT_TypeDef_Index arrayElementType;
 

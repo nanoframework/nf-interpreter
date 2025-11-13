@@ -5242,7 +5242,8 @@ CLR_RT_HeapBlock *CLR_RT_Assembly::GetGenericStaticField(
 
 CLR_RT_HeapBlock *CLR_RT_Assembly::GetStaticFieldByFieldDef(
     const CLR_RT_FieldDef_Index &fdIndex,
-    const CLR_RT_TypeSpec_Index *genericType)
+    const CLR_RT_TypeSpec_Index *genericType,
+    const CLR_RT_TypeSpec_Index *contextTypeSpec)
 {
     NATIVE_PROFILE_CLR_CORE();
 
@@ -5254,6 +5255,32 @@ CLR_RT_HeapBlock *CLR_RT_Assembly::GetStaticFieldByFieldDef(
         if (hb != nullptr)
         {
             return hb;
+        }
+
+        // On-demand allocation: if this is an open generic type that needs runtime binding,
+        // allocate static fields now (closed generics should already be allocated via metadata)
+        CLR_RT_TypeSpec_Instance tsInst;
+        if (tsInst.InitializeFromIndex(*genericType) && !tsInst.IsClosedGenericType())
+        {
+            // Get the generic type definition to check if it has static fields
+            CLR_RT_TypeDef_Instance genericTypeDef;
+            if (genericTypeDef.InitializeFromIndex(tsInst.genericTypeDef))
+            {
+                if (genericTypeDef.target->staticFieldsCount > 0)
+                {
+                    // Allocate static fields on-demand for this runtime-bound generic
+                    // Pass the caller context so we can resolve generic parameters
+                    if (SUCCEEDED(AllocateGenericStaticFieldsOnDemand(*genericType, genericTypeDef, contextTypeSpec)))
+                    {
+                        // Retry the lookup after allocation
+                        hb = GetGenericStaticField(*genericType, fdIndex);
+                        if (hb != nullptr)
+                        {
+                            return hb;
+                        }
+                    }
+                }
+            }
         }
     }
 
@@ -5267,6 +5294,239 @@ CLR_RT_HeapBlock *CLR_RT_Assembly::GetStaticFieldByFieldDef(
 #else
     return GetStaticField(fdCross.offset);
 #endif
+}
+
+HRESULT CLR_RT_Assembly::AllocateGenericStaticFieldsOnDemand(
+    const CLR_RT_TypeSpec_Index &typeSpecIndex,
+    const CLR_RT_TypeDef_Instance &genericTypeDef,
+    const CLR_RT_TypeSpec_Index *contextTypeSpec)
+{
+    NATIVE_PROFILE_CLR_CORE();
+    NANOCLR_HEADER();
+
+    CLR_UINT32 hash;
+    CLR_RT_TypeSpec_Instance tsInstance;
+    CLR_RT_Assembly *tsOwner;
+    CLR_RT_TypeSpec_CrossReference *tsCross;
+    CLR_RT_GenericStaticFieldRecord *record;
+    CLR_RT_Assembly *ownerAsm;
+    const CLR_RECORD_TYPEDEF *ownerTd;
+    CLR_UINT32 count;
+    CLR_UINT32 newMax;
+    CLR_RT_GenericStaticFieldRecord *newArray;
+    CLR_RT_HeapBlock *fields;
+    CLR_RT_FieldDef_Index *fieldDefs;
+    const CLR_RECORD_METHODDEF *md;
+    int methodCount;
+
+    // Initialize TypeSpec instance for hash computation
+    if (!tsInstance.InitializeFromIndex(typeSpecIndex))
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
+    }
+
+    // Compute hash for this closed generic type, using context to resolve VAR/MVAR if needed
+    hash = g_CLR_RT_TypeSystem.ComputeHashForClosedGenericType(tsInstance, contextTypeSpec);
+
+    // Check if already allocated (shouldn't happen if called from GetStaticFieldByFieldDef, but be safe)
+    for (CLR_UINT32 i = 0; i < g_CLR_RT_TypeSystem.m_genericStaticFieldsCount; i++)
+    {
+        if (g_CLR_RT_TypeSystem.m_genericStaticFields[i].m_hash == hash)
+        {
+            // Already exists, link to cross-reference if needed
+            tsOwner = g_CLR_RT_TypeSystem.m_assemblies[typeSpecIndex.Assembly() - 1];
+            tsCross = &tsOwner->crossReferenceTypeSpec[typeSpecIndex.TypeSpec()];
+
+            if (tsCross->genericStaticFields == nullptr)
+            {
+                record = &g_CLR_RT_TypeSystem.m_genericStaticFields[i];
+                tsCross->genericStaticFields = record->m_fields;
+                tsCross->genericStaticFieldDefs = record->m_fieldDefs;
+                tsCross->genericStaticFieldsCount = record->m_count;
+            }
+
+            NANOCLR_SET_AND_LEAVE(S_OK);
+        }
+    }
+
+    // Get owner assembly and typedef
+    ownerAsm = genericTypeDef.assembly;
+    ownerTd = genericTypeDef.target;
+    count = ownerTd->staticFieldsCount;
+
+    if (count == 0)
+    {
+        // No static fields to allocate
+        NANOCLR_SET_AND_LEAVE(S_OK);
+    }
+
+    // Grow global registry if needed
+    if (g_CLR_RT_TypeSystem.m_genericStaticFieldsCount >= g_CLR_RT_TypeSystem.m_genericStaticFieldsMaxCount)
+    {
+        newMax = g_CLR_RT_TypeSystem.m_genericStaticFieldsMaxCount + 10;
+        newArray = (CLR_RT_GenericStaticFieldRecord *)platform_malloc(sizeof(CLR_RT_GenericStaticFieldRecord) * newMax);
+
+        if (newArray == nullptr)
+        {
+            NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
+        }
+
+        // Copy existing records
+        if (g_CLR_RT_TypeSystem.m_genericStaticFields != nullptr && g_CLR_RT_TypeSystem.m_genericStaticFieldsCount > 0)
+        {
+            memcpy(
+                newArray,
+                g_CLR_RT_TypeSystem.m_genericStaticFields,
+                sizeof(CLR_RT_GenericStaticFieldRecord) * g_CLR_RT_TypeSystem.m_genericStaticFieldsCount);
+
+            platform_free(g_CLR_RT_TypeSystem.m_genericStaticFields);
+        }
+
+        g_CLR_RT_TypeSystem.m_genericStaticFields = newArray;
+        g_CLR_RT_TypeSystem.m_genericStaticFieldsMaxCount = newMax;
+    }
+
+    // Allocate storage for the static fields
+    fields = g_CLR_RT_ExecutionEngine.ExtractHeapBlocksForObjects(
+        DATATYPE_OBJECT, // heapblock kind
+        0,               // flags
+        count);          // number of CLR_RT_HeapBlock entries
+
+    if (fields == nullptr)
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
+    }
+
+    // Allocate mapping for field definitions
+    fieldDefs = (CLR_RT_FieldDef_Index *)platform_malloc(sizeof(CLR_RT_FieldDef_Index) * count);
+
+    if (fieldDefs == nullptr)
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
+    }
+
+    // Initialize the record in global registry
+    record = &g_CLR_RT_TypeSystem.m_genericStaticFields[g_CLR_RT_TypeSystem.m_genericStaticFieldsCount++];
+    record->m_hash = hash;
+    record->m_fields = fields;
+    record->m_fieldDefs = fieldDefs;
+    record->m_count = count;
+
+    // Initialize field definitions and values
+    for (CLR_UINT32 i = 0; i < count; i++)
+    {
+        CLR_INDEX fieldIndex = ownerTd->firstStaticField + i;
+        fieldDefs[i].Set(ownerAsm->assemblyIndex, fieldIndex);
+
+        // Initialize the storage using the field definition
+        const CLR_RECORD_FIELDDEF *pFd = ownerAsm->GetFieldDef(fieldIndex);
+        g_CLR_RT_ExecutionEngine.InitializeReference(fields[i], pFd, ownerAsm);
+    }
+
+    // Link this assembly's cross-reference to the global registry entry
+    tsOwner = g_CLR_RT_TypeSystem.m_assemblies[typeSpecIndex.Assembly() - 1];
+    tsCross = &tsOwner->crossReferenceTypeSpec[typeSpecIndex.TypeSpec()];
+
+    tsCross->genericStaticFields = record->m_fields;
+    tsCross->genericStaticFieldDefs = record->m_fieldDefs;
+    tsCross->genericStaticFieldsCount = record->m_count;
+
+    // Now that static fields are allocated, schedule the static constructor to initialize them
+    // Find the .cctor method for the generic type definition
+    md = ownerAsm->GetMethodDef(ownerTd->firstMethod);
+    methodCount = ownerTd->virtualMethodCount + ownerTd->instanceMethodCount + ownerTd->staticMethodCount;
+
+    for (int i = 0; i < methodCount; i++, md++)
+    {
+        if (md->flags & CLR_RECORD_METHODDEF::MD_StaticConstructor)
+        {
+            // Found the .cctor - check execution status
+            CLR_RT_GenericCctorExecutionRecord *cctorRecord =
+                g_CLR_RT_TypeSystem.FindOrCreateGenericCctorRecord(hash, nullptr);
+
+            if (cctorRecord != nullptr)
+            {
+                // Check if .cctor is already executed
+                if (cctorRecord->m_flags & CLR_RT_GenericCctorExecutionRecord::c_Executed)
+                {
+                    // .cctor already completed - fields should be initialized
+                    NANOCLR_SET_AND_LEAVE(S_OK);
+                }
+
+                // Check if .cctor is already scheduled
+                if (cctorRecord->m_flags & CLR_RT_GenericCctorExecutionRecord::c_Scheduled)
+                {
+                    // .cctor is already scheduled/running - nothing more to do
+                    // The caller will retry after the .cctor completes
+                    NANOCLR_SET_AND_LEAVE(S_OK);
+                }
+
+                // Need to schedule the .cctor - mark it as scheduled
+                cctorRecord->m_flags |= CLR_RT_GenericCctorExecutionRecord::c_Scheduled;
+            }
+
+            // Schedule the .cctor to run
+            CLR_RT_MethodDef_Index cctorIndex;
+            cctorIndex.Set(ownerAsm->assemblyIndex, ownerTd->firstMethod + i);
+
+            // Ensure the .cctor thread exists (it may have been destroyed after initial startup)
+            if (g_CLR_RT_ExecutionEngine.EnsureSystemThread(
+                    g_CLR_RT_ExecutionEngine.m_cctorThread,
+                    ThreadPriority::System_Highest))
+            {
+                // Create delegate for the static constructor
+                CLR_RT_HeapBlock refDlg;
+                refDlg.SetObjectReference(nullptr);
+                CLR_RT_ProtectFromGC gc(refDlg);
+
+                if (SUCCEEDED(CLR_RT_HeapBlock_Delegate::CreateInstance(refDlg, cctorIndex, nullptr)))
+                {
+                    CLR_RT_HeapBlock_Delegate *dlg = refDlg.DereferenceDelegate();
+
+                    // Store the TypeSpec index so the .cctor runs with the correct generic binding
+                    // If the TypeSpec has unresolved parameters (!0), also store the caller's context
+                    dlg->m_genericTypeSpec = typeSpecIndex;
+
+                    // Push to the .cctor thread and schedule for execution
+                    if (SUCCEEDED(g_CLR_RT_ExecutionEngine.m_cctorThread->PushThreadProcDelegate(dlg)))
+                    {
+                        g_CLR_RT_ExecutionEngine.m_cctorThread->m_terminationCallback =
+                            CLR_RT_ExecutionEngine::StaticConstructorTerminationCallback;
+
+                        // The .cctor is now scheduled and will run when this thread yields
+                        // The caller will get nullptr and should reschedule to allow .cctor to complete
+                    }
+                    else
+                    {
+                        // Failed to schedule - clear the flag
+                        if (cctorRecord != nullptr)
+                        {
+                            cctorRecord->m_flags &= ~CLR_RT_GenericCctorExecutionRecord::c_Scheduled;
+                        }
+                    }
+                }
+                else
+                {
+                    // Failed to create delegate - clear the flag
+                    if (cctorRecord != nullptr)
+                    {
+                        cctorRecord->m_flags &= ~CLR_RT_GenericCctorExecutionRecord::c_Scheduled;
+                    }
+                }
+            }
+            else
+            {
+                // Failed to ensure thread - clear the flag
+                if (cctorRecord != nullptr)
+                {
+                    cctorRecord->m_flags &= ~CLR_RT_GenericCctorExecutionRecord::c_Scheduled;
+                }
+            }
+            break;
+        }
+    }
+
+    NANOCLR_NOCLEANUP();
 }
 
 HRESULT CLR_RT_Assembly::PrepareForExecution()
@@ -7846,7 +8106,9 @@ CLR_RT_GenericStaticFieldRecord *CLR_RT_TypeSystem::FindOrCreateGenericStaticFie
     return record;
 }
 
-CLR_UINT32 CLR_RT_TypeSystem::ComputeHashForClosedGenericType(CLR_RT_TypeSpec_Instance &typeInstance)
+CLR_UINT32 CLR_RT_TypeSystem::ComputeHashForClosedGenericType(
+    CLR_RT_TypeSpec_Instance &typeInstance,
+    const CLR_RT_TypeSpec_Index *contextTypeSpec)
 {
     CLR_UINT32 hash = 0;
 
@@ -7882,12 +8144,45 @@ CLR_UINT32 CLR_RT_TypeSystem::ComputeHashForClosedGenericType(CLR_RT_TypeSpec_In
             break;
         }
 
-        // Add each argument's type information to the hash
-        hash = SUPPORT_ComputeCRC(&elem.DataType, sizeof(elem.DataType), hash);
-
-        if (elem.DataType == DATATYPE_CLASS || elem.DataType == DATATYPE_VALUETYPE)
+        // Check if this is an unresolved generic parameter (VAR or MVAR)
+        if ((elem.DataType == DATATYPE_VAR || elem.DataType == DATATYPE_MVAR) && contextTypeSpec &&
+            NANOCLR_INDEX_IS_VALID(*contextTypeSpec))
         {
-            hash = SUPPORT_ComputeCRC(&elem.Class.data, sizeof(elem.Class.data), hash);
+            // Resolve VAR from context TypeSpec using existing helper
+            CLR_RT_TypeDef_Index resolvedTypeDef;
+            NanoCLRDataType resolvedDataType;
+
+            CLR_RT_Assembly *contextAssm = g_CLR_RT_TypeSystem.m_assemblies[contextTypeSpec->Assembly() - 1];
+
+            if (contextAssm->FindGenericParamAtTypeSpec(
+                    contextTypeSpec->TypeSpec(),
+                    elem.GenericParamPosition,
+                    resolvedTypeDef,
+                    resolvedDataType))
+            {
+                // Use the resolved type from context
+                hash = SUPPORT_ComputeCRC(&resolvedDataType, sizeof(resolvedDataType), hash);
+
+                if (resolvedDataType == DATATYPE_CLASS || resolvedDataType == DATATYPE_VALUETYPE)
+                {
+                    hash = SUPPORT_ComputeCRC(&resolvedTypeDef.data, sizeof(resolvedTypeDef.data), hash);
+                }
+            }
+            else
+            {
+                // couldn't resolve, reset hash to indicate failure
+                hash = 0;
+            }
+        }
+        else
+        {
+            // Add each argument's type information to the hash
+            hash = SUPPORT_ComputeCRC(&elem.DataType, sizeof(elem.DataType), hash);
+
+            if (elem.DataType == DATATYPE_CLASS || elem.DataType == DATATYPE_VALUETYPE)
+            {
+                hash = SUPPORT_ComputeCRC(&elem.Class.data, sizeof(elem.Class.data), hash);
+            }
         }
     }
 

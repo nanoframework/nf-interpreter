@@ -118,6 +118,9 @@ HRESULT CLR_RT_StackFrame::Push(CLR_RT_Thread *th, const CLR_RT_MethodDef_Instan
                                       //    void*                  m_customPointer;
                                       // };
                                       //
+        // Initialize generic type context storage to invalid
+        stack->m_genericTypeSpecStorage.Clear();
+        //
 #ifndef NANOCLR_NO_IL_INLINE
         stack->m_inlineFrame = nullptr;
 #endif

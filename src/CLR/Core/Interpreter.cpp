@@ -2245,8 +2245,9 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                                                 if (calleeType.data == g_CLR_RT_WellKnownTypes.SZArrayHelper.data)
                                                 {
                                                     // Get the element type from the array's reflection data
-                                                    const CLR_RT_ReflectionDef_Index &reflex = pArray->ReflectionDataConst();
-                                                    
+                                                    const CLR_RT_ReflectionDef_Index &reflex =
+                                                        pArray->ReflectionDataConst();
+
                                                     // For a 1D array, levels == 1 and data.type is the element TypeDef
                                                     if (reflex.levels == 1 && reflex.kind == REFLECTION_TYPE)
                                                     {
@@ -2318,6 +2319,14 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                         WRITEBACK(stack, evalPos, ip, fDirty);
 
                         NANOCLR_CHECK_HRESULT(CLR_RT_StackFrame::Push(th, calleeInst, -1));
+
+                        // Store the caller's generic context in the new stack frame's m_genericTypeSpecStorage
+                        // This allows the callee to resolve open generic parameters (VAR/MVAR) in TypeSpecs
+                        if (stack->m_call.genericType && NANOCLR_INDEX_IS_VALID(*stack->m_call.genericType))
+                        {
+                            CLR_RT_StackFrame *newStack = th->CurrentFrame();
+                            newStack->m_genericTypeSpecStorage = *stack->m_call.genericType;
+                        }
                     }
 
                     goto Execute_Restart;
@@ -2822,7 +2831,10 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                     if (field.genericType && NANOCLR_INDEX_IS_VALID(*field.genericType))
                     {
                         // access static field of a generic instance
-                        ptr = field.assembly->GetStaticFieldByFieldDef(field, field.genericType);
+                        ptr = field.assembly->GetStaticFieldByFieldDef(
+                            field,
+                            field.genericType,
+                            &stack->m_genericTypeSpecStorage);
                     }
                     else
                     {
@@ -2833,6 +2845,41 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                     if (ptr == nullptr)
                     {
                         NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+                    }
+                    else if (field.genericType && NANOCLR_INDEX_IS_VALID(*field.genericType))
+                    {
+                        CLR_RT_HeapBlock *obj = ptr;
+                        NanoCLRDataType dt;
+
+                        CLR_RT_TypeDescriptor::ExtractObjectAndDataType(obj, dt);
+
+                        // Field not found - but if this is a generic type with
+                        // a .cctor that's scheduled,
+                        // reschedule to allow the .cctor to complete field initialization
+                        if (obj == nullptr)
+                        {
+                            // Check if there's a pending .cctor for this generic type
+                            CLR_RT_TypeSpec_Instance tsInst;
+                            if (tsInst.InitializeFromIndex(*field.genericType))
+                            {
+                                CLR_UINT32 hash = g_CLR_RT_TypeSystem.ComputeHashForClosedGenericType(
+                                    tsInst,
+                                    &stack->m_genericTypeSpecStorage);
+                                CLR_RT_GenericCctorExecutionRecord *cctorRecord =
+                                    g_CLR_RT_TypeSystem.FindOrCreateGenericCctorRecord(hash, nullptr);
+
+                                if (cctorRecord != nullptr &&
+                                    (cctorRecord->m_flags & CLR_RT_GenericCctorExecutionRecord::c_Scheduled) &&
+                                    !(cctorRecord->m_flags & CLR_RT_GenericCctorExecutionRecord::c_Executed))
+                                {
+                                    // .cctor is scheduled but not yet executed
+                                    // Rewind ip to before this instruction so it will be retried
+                                    // (1 byte for opcode + 2 bytes for compressed field token)
+                                    ip -= 3;
+                                    NANOCLR_SET_AND_LEAVE(CLR_E_RESCHEDULE);
+                                }
+                            }
+                        }
                     }
 
                     evalPos++;
@@ -2862,7 +2909,10 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                     if (field.genericType && NANOCLR_INDEX_IS_VALID(*field.genericType))
                     {
                         // access static field of a generic instance
-                        ptr = field.assembly->GetStaticFieldByFieldDef(field, field.genericType);
+                        ptr = field.assembly->GetStaticFieldByFieldDef(
+                            field,
+                            field.genericType,
+                            &stack->m_genericTypeSpecStorage);
                     }
                     else
                     {
@@ -2872,6 +2922,34 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
 
                     if (ptr == nullptr)
                     {
+                        // Field not found - but if this is a generic type with a .cctor that's scheduled,
+                        // reschedule to allow the .cctor to complete field initialization
+                        if (field.genericType && NANOCLR_INDEX_IS_VALID(*field.genericType))
+                        {
+                            // Check if there's a pending .cctor for this generic type
+                            CLR_RT_TypeSpec_Instance tsInst;
+                            if (tsInst.InitializeFromIndex(*field.genericType))
+                            {
+                                CLR_UINT32 hash = g_CLR_RT_TypeSystem.ComputeHashForClosedGenericType(
+                                    tsInst,
+                                    &stack->m_genericTypeSpecStorage);
+                                CLR_RT_GenericCctorExecutionRecord *cctorRecord =
+                                    g_CLR_RT_TypeSystem.FindOrCreateGenericCctorRecord(hash, nullptr);
+
+                                if (cctorRecord != nullptr &&
+                                    (cctorRecord->m_flags & CLR_RT_GenericCctorExecutionRecord::c_Scheduled) &&
+                                    !(cctorRecord->m_flags & CLR_RT_GenericCctorExecutionRecord::c_Executed))
+                                {
+                                    // .cctor is scheduled but not yet executed
+                                    // Rewind ip to before this instruction so it will be retried
+                                    // (1 byte for opcode + 2 bytes for compressed field token)
+                                    ip -= 3;
+                                    NANOCLR_SET_AND_LEAVE(CLR_E_RESCHEDULE);
+                                }
+                            }
+                        }
+
+                        // Not a pending .cctor case - this is a real error
                         NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
                     }
 
@@ -2901,7 +2979,10 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                     if (field.genericType && NANOCLR_INDEX_IS_VALID(*field.genericType))
                     {
                         // access static field of a generic instance
-                        ptr = field.assembly->GetStaticFieldByFieldDef(field, field.genericType);
+                        ptr = field.assembly->GetStaticFieldByFieldDef(
+                            field,
+                            field.genericType,
+                            &stack->m_genericTypeSpecStorage);
                     }
                     else
                     {
@@ -2911,6 +2992,34 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
 
                     if (ptr == nullptr)
                     {
+                        // Field not found - but if this is a generic type with a .cctor that's scheduled,
+                        // reschedule to allow the .cctor to complete field initialization
+                        if (field.genericType && NANOCLR_INDEX_IS_VALID(*field.genericType))
+                        {
+                            // Check if there's a pending .cctor for this generic type
+                            CLR_RT_TypeSpec_Instance tsInst;
+                            if (tsInst.InitializeFromIndex(*field.genericType))
+                            {
+                                CLR_UINT32 hash = g_CLR_RT_TypeSystem.ComputeHashForClosedGenericType(
+                                    tsInst,
+                                    &stack->m_genericTypeSpecStorage);
+                                CLR_RT_GenericCctorExecutionRecord *cctorRecord =
+                                    g_CLR_RT_TypeSystem.FindOrCreateGenericCctorRecord(hash, nullptr);
+
+                                if (cctorRecord != nullptr &&
+                                    (cctorRecord->m_flags & CLR_RT_GenericCctorExecutionRecord::c_Scheduled) &&
+                                    !(cctorRecord->m_flags & CLR_RT_GenericCctorExecutionRecord::c_Executed))
+                                {
+                                    // .cctor is scheduled but not yet executed
+                                    // Rewind ip to before this instruction so it will be retried
+                                    // (1 byte for opcode + 2 bytes for compressed field token)
+                                    ip -= 3;
+                                    NANOCLR_SET_AND_LEAVE(CLR_E_RESCHEDULE);
+                                }
+                            }
+                        }
+
+                        // Not a pending .cctor case - this is a real error
                         NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
                     }
 
