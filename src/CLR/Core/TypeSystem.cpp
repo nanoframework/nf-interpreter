@@ -2546,6 +2546,16 @@ HRESULT CLR_RT_TypeDescriptor::InitializeFromObject(const CLR_RT_HeapBlock &ref)
                 {
                     obj = (CLR_RT_HeapBlock *)array->GetElement(obj->ArrayIndex());
 
+                    // For reference arrays, if the element is null, we need to get the type from the array's element
+                    // type rather than trying to dereference a null object
+                    if (obj->Dereference() == nullptr)
+                    {
+                        // Use the array's element type.
+                        // Keep 'reflex' null to avoid carrying array levels when returning an element type.
+                        cls = &(array->ReflectionDataConst().data.type);
+                        break;
+                    }
+
                     NANOCLR_SET_AND_LEAVE(InitializeFromObject(*obj));
                 }
 
