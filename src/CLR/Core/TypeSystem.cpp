@@ -2220,7 +2220,7 @@ HRESULT CLR_RT_TypeDescriptor::InitializeFromTypeSpec(const CLR_RT_TypeSpec_Inde
         NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
     }
 
-    parser.Initialize_TypeSpec(inst.assembly, inst.target);
+    parser.Initialize_TypeSpec(inst.assembly, inst.assembly->GetTypeSpec(inst.TypeSpec()));
 
     NANOCLR_SET_AND_LEAVE(InitializeFromSignatureParser(parser));
 
