@@ -2120,7 +2120,71 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                     // Set arrayElementType before ResolveToken so generic type resolution can use it
                     calleeInst.arrayElementType = propagatedArrayElementType;
 
-                    if (calleeInst.ResolveToken(arg, assm, stack->m_call.genericType) == false)
+                    // For interface method calls on generic instances, try to extract the closed generic TypeSpec
+                    // from the caller's assembly by matching the object's TypeDef
+                    const CLR_RT_TypeSpec_Index *effectiveCallerGeneric = stack->m_call.genericType;
+
+                    // Only perform expensive TypeSpec search if ALL conditions are met:
+                    // 1. This is a virtual call (interfaces use CALLVIRT)
+                    // 2. No generic context exists yet
+                    // 3. The token is a MethodRef (not direct MethodDef)
+                    if (op == CEE_CALLVIRT && stack->m_call.genericType == nullptr &&
+                        CLR_TypeFromTk(arg) == TBL_MethodRef)
+                    {
+                        const CLR_RECORD_METHODREF *mr = assm->GetMethodRef(CLR_DataFromTk(arg));
+
+                        // 4. The method owner is a TypeRef (interface method)
+                        // 5. Not a static method (interfaces don't have static methods, but safety check)
+                        if (mr && mr->Owner() == TBL_TypeRef)
+                        {
+                            // Temporarily resolve to get argument count and check if instance method
+                            CLR_RT_MethodDef_Instance tempInst{};
+                            if (tempInst.ResolveToken(arg, assm, nullptr) &&
+                                (tempInst.target->flags & CLR_RECORD_METHODDEF::MD_Static) == 0)
+                            {
+                                CLR_RT_HeapBlock *pThisTemp = &evalPos[1 - tempInst.target->argumentsCount];
+
+                                // 6. 'this' is an object reference (not a value type byref)
+                                if (pThisTemp->DataType() == DATATYPE_OBJECT || pThisTemp->DataType() == DATATYPE_BYREF)
+                                {
+                                    CLR_RT_HeapBlock *obj = pThisTemp->Dereference();
+
+                                    // 7. Object is a class instance (generic or not)
+                                    if (obj && obj->DataType() == DATATYPE_CLASS)
+                                    {
+                                        CLR_RT_TypeDef_Index objCls = obj->ObjectCls();
+
+                                        // 8. Object has a valid TypeDef
+                                        if (NANOCLR_INDEX_IS_VALID(objCls))
+                                        {
+                                            // NOW search for a TypeSpec that matches this object's TypeDef
+                                            // This is only needed for closed generic instances like List<int>
+                                            for (int i = 0; i < assm->tablesSize[TBL_TypeSpec]; i++)
+                                            {
+                                                const CLR_RT_TypeSpec_Index *tsIdx =
+                                                    &assm->crossReferenceTypeSpec[i].genericType;
+                                                if (NANOCLR_INDEX_IS_VALID(*tsIdx))
+                                                {
+                                                    CLR_RT_TypeSpec_Instance tsInst{};
+                                                    if (tsInst.InitializeFromIndex(*tsIdx) &&
+                                                        NANOCLR_INDEX_IS_VALID(tsInst.genericTypeDef) &&
+                                                        tsInst.genericTypeDef.data == objCls.data)
+                                                    {
+                                                        // Found a TypeSpec in the caller's assembly that matches the
+                                                        // object's class
+                                                        effectiveCallerGeneric = tsIdx;
+                                                        break;
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    if (calleeInst.ResolveToken(arg, assm, effectiveCallerGeneric) == false)
                     {
                         NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
                     }
@@ -2257,10 +2321,11 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                                             }
                                         }
 
-                                        if (calleeInst.genericType && NANOCLR_INDEX_IS_VALID(*calleeInst.genericType) &&
-                                            calleeInst.genericType->data != CLR_EmptyToken)
+                                        // Initialize the dispatched method, preserving the generic context from
+                                        // calleeInst The genericType was set by ResolveToken from the MethodRef's owner
+                                        // TypeSpec
+                                        if (calleeInst.genericType && NANOCLR_INDEX_IS_VALID(*calleeInst.genericType))
                                         {
-                                            // store the current generic context (if any)
                                             calleeInst.InitializeFromIndex(calleeReal, *calleeInst.genericType);
                                         }
                                         else
@@ -2320,12 +2385,31 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
 
                         NANOCLR_CHECK_HRESULT(CLR_RT_StackFrame::Push(th, calleeInst, -1));
 
-                        // Store the caller's generic context in the new stack frame's m_genericTypeSpecStorage
-                        // This allows the callee to resolve open generic parameters (VAR/MVAR) in TypeSpecs
-                        if (stack->m_call.genericType && NANOCLR_INDEX_IS_VALID(*stack->m_call.genericType))
+                        // Set up the new stack frame's generic context
+                        // Prefer calleeInst.genericType (from MethodRef TypeSpec) over caller's generic context
+                        CLR_RT_StackFrame *newStack = th->CurrentFrame();
+                        const CLR_RT_TypeSpec_Index *effectiveGenericContext = nullptr;
+
+                        if (calleeInst.genericType && NANOCLR_INDEX_IS_VALID(*calleeInst.genericType))
                         {
-                            CLR_RT_StackFrame *newStack = th->CurrentFrame();
-                            newStack->m_genericTypeSpecStorage = *stack->m_call.genericType;
+                            effectiveGenericContext = calleeInst.genericType;
+                        }
+                        else if (stack->m_call.genericType && NANOCLR_INDEX_IS_VALID(*stack->m_call.genericType))
+                        {
+                            effectiveGenericContext = stack->m_call.genericType;
+                        }
+
+                        if (effectiveGenericContext)
+                        {
+                            // CRITICAL: Copy the value to stable storage and update the pointer ATOMICALLY
+                            // to prevent the pointer from pointing to stale/overwritten memory
+                            newStack->m_genericTypeSpecStorage = *effectiveGenericContext;
+                            newStack->m_call.genericType = &newStack->m_genericTypeSpecStorage;
+                        }
+                        else
+                        {
+                            // Ensure genericType doesn't point to garbage
+                            newStack->m_call.genericType = nullptr;
                         }
                     }
 
