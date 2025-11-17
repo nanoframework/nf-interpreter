@@ -2482,20 +2482,11 @@ HRESULT CLR_RT_TypeDescriptor::InitializeFromSignatureToken(
             }
             else if (elem.DataType == DATATYPE_GENERICINST)
             {
-                // full generic instantiation: read it out
-                // CLASS/VALUETYPE
-                parser.Advance(elem);
-                // generic-definition token
-                parser.Advance(elem);
-
-                CLR_RT_TypeSpec_Index tsInst{};
-                tsInst.Set(elem.Class.Assembly(), elem.Class.Type());
-
-                // argument count
-                parser.Advance(elem);
-
-                // now read each argument and record in tsInst.m_data.GenericArguments
-                this->InitializeFromTypeSpec(tsInst);
+                // full generic instantiation: parse it directly from the signature
+                // Pass caller's generic type as context to resolve VAR parameters in the generic arguments
+                const CLR_RT_TypeSpec_Index *contextTypeSpec =
+                    (caller && NANOCLR_INDEX_IS_VALID(*caller->genericType)) ? caller->genericType : nullptr;
+                this->InitializeFromSignatureParser(parser, contextTypeSpec);
             }
             else
             {
