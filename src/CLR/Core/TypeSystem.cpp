@@ -1999,7 +1999,17 @@ bool CLR_RT_MethodDef_Instance::GetDeclaringType(CLR_RT_TypeDef_Instance &declTy
 {
     NATIVE_PROFILE_CLR_CORE();
 
-    if (genericType && NANOCLR_INDEX_IS_VALID(*genericType))
+    // First, get the method's owner type to check if it's actually generic
+    CLR_RT_TypeDef_Instance ownerType{};
+    if (!ownerType.InitializeFromMethod(*this))
+    {
+        return false;
+    }
+
+    // Only use the generic type context if:
+    // 1. We have a generic type context available AND
+    // 2. The method's declaring type is actually generic
+    if (genericType && NANOCLR_INDEX_IS_VALID(*genericType) && ownerType.target->genericParamCount > 0)
     {
         // Look up the assembly that actually owns that TypeSpec
         auto tsAsm = g_CLR_RT_TypeSystem.m_assemblies[genericType->Assembly() - 1];
@@ -2035,13 +2045,10 @@ bool CLR_RT_MethodDef_Instance::GetDeclaringType(CLR_RT_TypeDef_Instance &declTy
             return declType.InitializeFromIndex(td);
         }
     }
-    else
-    {
-        // Normal (non‐generic or open‐generic)
-        return declType.InitializeFromMethod(*this);
-    }
 
-    return false;
+    // For non-generic types or when no generic context is available,
+    // just return the declaring type
+    return declType.InitializeFromMethod(*this);
 }
 
 //////////////////////////////
