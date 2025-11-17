@@ -3592,7 +3592,8 @@ HRESULT CLR_RT_ExecutionEngine::CastToType(
     CLR_RT_HeapBlock &ref,
     CLR_UINT32 tk,
     CLR_RT_Assembly *assm,
-    bool isInstInstruction)
+    bool isInstInstruction,
+    const CLR_RT_MethodDef_Instance *caller)
 {
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
@@ -3601,7 +3602,7 @@ HRESULT CLR_RT_ExecutionEngine::CastToType(
     {
         ;
     }
-    else if (g_CLR_RT_ExecutionEngine.IsInstanceOf(ref, assm, tk, isInstInstruction) == true)
+    else if (g_CLR_RT_ExecutionEngine.IsInstanceOf(ref, assm, tk, isInstInstruction, caller) == true)
     {
         ;
     }
