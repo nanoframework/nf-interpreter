@@ -2207,7 +2207,9 @@ HRESULT CLR_RT_TypeDescriptor::InitializeFromReflection(const CLR_RT_ReflectionD
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT CLR_RT_TypeDescriptor::InitializeFromTypeSpec(const CLR_RT_TypeSpec_Index &sig)
+HRESULT CLR_RT_TypeDescriptor::InitializeFromTypeSpec(
+    const CLR_RT_TypeSpec_Index &sig,
+    const CLR_RT_TypeSpec_Index *contextTypeSpec)
 {
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
@@ -2222,7 +2224,7 @@ HRESULT CLR_RT_TypeDescriptor::InitializeFromTypeSpec(const CLR_RT_TypeSpec_Inde
 
     parser.Initialize_TypeSpec(inst.assembly, inst.assembly->GetTypeSpec(inst.TypeSpec()));
 
-    NANOCLR_SET_AND_LEAVE(InitializeFromSignatureParser(parser));
+    NANOCLR_SET_AND_LEAVE(InitializeFromSignatureParser(parser, contextTypeSpec));
 
     NANOCLR_NOCLEANUP();
 }
