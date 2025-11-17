@@ -2443,12 +2443,14 @@ struct CLR_RT_TypeDescriptor
 
     HRESULT InitializeFromDataType(NanoCLRDataType dt);
     HRESULT InitializeFromReflection(const CLR_RT_ReflectionDef_Index &reflex);
-    HRESULT InitializeFromTypeSpec(const CLR_RT_TypeSpec_Index &sig);
+    HRESULT InitializeFromTypeSpec(const CLR_RT_TypeSpec_Index &sig, const CLR_RT_TypeSpec_Index *contextTypeSpec = nullptr);
     HRESULT InitializeFromType(const CLR_RT_TypeDef_Index &cls);
     HRESULT InitializeFromTypeDef(const CLR_RT_TypeDef_Index &cls);
     HRESULT InitializeFromGenericType(const CLR_RT_TypeSpec_Index &genericType);
     HRESULT InitializeFromFieldDefinition(const CLR_RT_FieldDef_Instance &fd);
-    HRESULT InitializeFromSignatureParser(CLR_RT_SignatureParser &parser);
+    HRESULT InitializeFromSignatureParser(
+        CLR_RT_SignatureParser &parser,
+        const CLR_RT_TypeSpec_Index *contextTypeSpec = nullptr);
     HRESULT InitializeFromSignatureToken(
         CLR_RT_Assembly *assm,
         CLR_UINT32 token,
@@ -4216,10 +4218,20 @@ struct CLR_RT_ExecutionEngine
     static bool IsInstanceOf(CLR_RT_TypeDescriptor &desc, CLR_RT_TypeDescriptor &descTarget, bool isInstInstruction);
     static bool IsInstanceOf(const CLR_RT_TypeDef_Index &cls, const CLR_RT_TypeDef_Index &clsTarget);
     static bool IsInstanceOf(CLR_RT_HeapBlock &obj, const CLR_RT_TypeDef_Index &clsTarget);
-    static bool IsInstanceOf(CLR_RT_HeapBlock &obj, CLR_RT_Assembly *assm, CLR_UINT32 token, bool isInstInstruction);
+    static bool IsInstanceOf(
+        CLR_RT_HeapBlock &obj,
+        CLR_RT_Assembly *assm,
+        CLR_UINT32 token,
+        bool isInstInstruction,
+        const CLR_RT_MethodDef_Instance *caller = nullptr);
     bool IsInstanceOfToken(CLR_UINT32 token, CLR_RT_HeapBlock &obj, const CLR_RT_MethodDef_Instance &caller);
 
-    static HRESULT CastToType(CLR_RT_HeapBlock &ref, CLR_UINT32 tk, CLR_RT_Assembly *assm, bool isInstInstruction);
+    static HRESULT CastToType(
+        CLR_RT_HeapBlock &ref,
+        CLR_UINT32 tk,
+        CLR_RT_Assembly *assm,
+        bool isInstInstruction,
+        const CLR_RT_MethodDef_Instance *caller);
 
     void DebuggerLoop();
 
