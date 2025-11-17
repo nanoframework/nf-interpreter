@@ -1868,7 +1868,7 @@ bool CLR_RT_MethodDef_Instance::ResolveToken(
                 }
                 else
                 {
-                    // owner is TypeRef
+                    // owner is TypeRef (e.g., interface method call)
 
                     // get data for MethodRef (from index)
                     data = assm->crossReferenceMethodRef[index].target.data;
@@ -1877,8 +1877,10 @@ bool CLR_RT_MethodDef_Instance::ResolveToken(
                     // grab the MethodDef
                     target = assembly->GetMethodDef(Method());
 
-                    // invalidate GenericType
-                    genericType = nullptr;
+                    // Preserve caller's generic context for interface method calls
+                    // When calling a interface method (e.g. IList<T>.Remove() on a List<int> object) we need the closed
+                    // generic context
+                    genericType = callerGeneric;
                 }
 
 #if defined(NANOCLR_INSTANCE_NAMES)
