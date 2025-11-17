@@ -3538,37 +3538,20 @@ bool CLR_RT_ExecutionEngine::IsInstanceOf(
     CLR_RT_HeapBlock &obj,
     CLR_RT_Assembly *assm,
     CLR_UINT32 token,
-    bool isInstInstruction)
+    bool isInstInstruction,
+    const CLR_RT_MethodDef_Instance *caller)
 {
     NATIVE_PROFILE_CLR_CORE();
+    
     CLR_RT_TypeDescriptor desc{};
     CLR_RT_TypeDescriptor descTarget{};
-    CLR_RT_TypeDef_Instance clsTarget{};
-    CLR_RT_TypeSpec_Instance defTarget{};
 
     if (FAILED(desc.InitializeFromObject(obj)))
         return false;
 
-    if (clsTarget.ResolveToken(token, assm))
-    {
-        //
-        // Shortcut for identity.
-        //
-        if (desc.m_handlerCls.data == clsTarget.data)
-            return true;
-
-        if (FAILED(descTarget.InitializeFromType(clsTarget)))
-            return false;
-    }
-    else if (defTarget.ResolveToken(token, assm))
-    {
-        if (FAILED(descTarget.InitializeFromTypeSpec(defTarget)))
-            return false;
-    }
-    else
-    {
+    // Use InitializeFromSignatureToken to properly resolve VAR/MVAR tokens
+    if (FAILED(descTarget.InitializeFromSignatureToken(assm, token, caller)))
         return false;
-    }
 
     return IsInstanceOf(desc, descTarget, isInstInstruction);
 }
