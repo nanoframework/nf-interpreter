@@ -2343,7 +2343,9 @@ HRESULT CLR_RT_TypeDescriptor::InitializeFromFieldDefinition(const CLR_RT_FieldD
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT CLR_RT_TypeDescriptor::InitializeFromSignatureParser(CLR_RT_SignatureParser &parser)
+HRESULT CLR_RT_TypeDescriptor::InitializeFromSignatureParser(
+    CLR_RT_SignatureParser &parser,
+    const CLR_RT_TypeSpec_Index *contextTypeSpec)
 {
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
@@ -2359,7 +2361,33 @@ HRESULT CLR_RT_TypeDescriptor::InitializeFromSignatureParser(CLR_RT_SignaturePar
 
     if (res.DataType == DATATYPE_GENERICINST)
     {
-        NANOCLR_CHECK_HRESULT(InitializeFromGenericType(res.TypeSpec));
+        // generic type, advance again to get the type
+        parser.Advance(res);
+    }
+
+    // Check if this is an unresolved generic parameter (VAR) and we have a context
+    if (res.DataType == DATATYPE_VAR && contextTypeSpec && NANOCLR_INDEX_IS_VALID(*contextTypeSpec))
+    {
+        // Resolve VAR from context TypeSpec using existing helper
+        CLR_RT_TypeDef_Index resolvedTypeDef;
+        NanoCLRDataType resolvedDataType;
+
+        CLR_RT_Assembly *contextAssm = g_CLR_RT_TypeSystem.m_assemblies[contextTypeSpec->Assembly() - 1];
+
+        if (contextAssm->FindGenericParamAtTypeSpec(
+                contextTypeSpec->TypeSpec(),
+                res.GenericParamPosition,
+                resolvedTypeDef,
+                resolvedDataType))
+        {
+            // Use the resolved type from context
+            NANOCLR_CHECK_HRESULT(InitializeFromType(resolvedTypeDef));
+        }
+        else
+        {
+            // Couldn't resolve, fall back to original behavior
+            NANOCLR_CHECK_HRESULT(InitializeFromType(res.Class));
+        }
     }
     else
     {
