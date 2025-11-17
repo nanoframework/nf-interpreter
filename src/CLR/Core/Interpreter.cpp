@@ -2386,11 +2386,19 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                         NANOCLR_CHECK_HRESULT(CLR_RT_StackFrame::Push(th, calleeInst, -1));
 
                         // Set up the new stack frame's generic context
-                        // Prefer calleeInst.genericType (from MethodRef TypeSpec) over caller's generic context
+                        // Priority order:
+                        // 1. effectiveCallerGeneric (extracted from TypeSpec search for interface calls) - HIGHEST PRIORITY
+                        //    This is the concrete closed generic type (e.g., List<int>) not the interface (e.g., IEnumerable<T>)
+                        // 2. calleeInst.genericType (from MethodRef TypeSpec or virtual dispatch)
+                        // 3. stack->m_call.genericType (inherited from caller)
                         CLR_RT_StackFrame *newStack = th->CurrentFrame();
                         const CLR_RT_TypeSpec_Index *effectiveGenericContext = nullptr;
 
-                        if (calleeInst.genericType && NANOCLR_INDEX_IS_VALID(*calleeInst.genericType))
+                        if (effectiveCallerGeneric && NANOCLR_INDEX_IS_VALID(*effectiveCallerGeneric))
+                        {
+                            effectiveGenericContext = effectiveCallerGeneric;
+                        }
+                        else if (calleeInst.genericType && NANOCLR_INDEX_IS_VALID(*calleeInst.genericType))
                         {
                             effectiveGenericContext = calleeInst.genericType;
                         }
