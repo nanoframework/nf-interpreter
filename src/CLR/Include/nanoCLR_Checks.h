@@ -27,6 +27,7 @@ struct CLR_RT_DUMP
      static void TYPE      (const CLR_RT_TypeDef_Index&       cls                                             ) DECL_POSTFIX;
      static void TYPE      (const CLR_RT_ReflectionDef_Index& reflex                                          ) DECL_POSTFIX;
      static void METHOD    (const CLR_RT_MethodDef_Index&     method, const CLR_RT_TypeSpec_Index *genericType) DECL_POSTFIX;
+     static void METHOD    (const CLR_RT_MethodDef_Instance&  mdInst, const CLR_RT_TypeSpec_Index *genericType) DECL_POSTFIX;
      static void FIELD     (const CLR_RT_FieldDef_Index&      field                                           ) DECL_POSTFIX;
      static void OBJECT    (      CLR_RT_HeapBlock*           ptr   , const char* text                        ) DECL_POSTFIX;
      static void METHODREF (const CLR_RT_MethodRef_Index&     method                                          ) DECL_POSTFIX;

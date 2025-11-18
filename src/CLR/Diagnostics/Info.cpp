@@ -1025,6 +1025,18 @@ void CLR_RT_DUMP::METHOD(const CLR_RT_MethodDef_Index &method, const CLR_RT_Type
     CLR_Debug::Printf("%s", rgBuffer);
 }
 
+void CLR_RT_DUMP::METHOD(const CLR_RT_MethodDef_Instance &mdInst, const CLR_RT_TypeSpec_Index *genericType)
+{
+    NATIVE_PROFILE_CLR_DIAGNOSTICS();
+    char rgBuffer[512];
+    char *szBuffer = rgBuffer;
+    size_t iBuffer = MAXSTRLEN(rgBuffer);
+
+    g_CLR_RT_TypeSystem.BuildMethodName(mdInst, genericType, szBuffer, iBuffer);
+
+    CLR_Debug::Printf("%s", rgBuffer);
+}
+
 void CLR_RT_DUMP::FIELD(const CLR_RT_FieldDef_Index &field)
 {
     NATIVE_PROFILE_CLR_DIAGNOSTICS();
