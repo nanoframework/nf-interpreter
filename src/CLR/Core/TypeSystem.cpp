@@ -8202,6 +8202,7 @@ CLR_UINT32 CLR_RT_TypeSystem::ComputeHashForClosedGenericType(
     const CLR_RT_MethodDef_Instance *contextMethod)
 {
     CLR_UINT32 hash = 0;
+    int argCount;
 
     // Start with the generic type definition
     hash = SUPPORT_ComputeCRC(&typeInstance.genericTypeDef.data, sizeof(CLR_UINT32), hash);
@@ -8215,17 +8216,17 @@ CLR_UINT32 CLR_RT_TypeSystem::ComputeHashForClosedGenericType(
     // Advance to the generic instance marker
     if (FAILED(parser.Advance(elem)) || elem.DataType != DATATYPE_GENERICINST)
     {
-        return hash;
+        goto ComputeHash_End;
     }
 
     // Advance to the generic type definition
     if (FAILED(parser.Advance(elem)))
     {
-        return hash;
+        goto ComputeHash_End;
     }
 
     // Get argument count
-    int argCount = elem.GenParamCount;
+    argCount = elem.GenParamCount;
 
     // Process each generic argument
     for (int i = 0; i < argCount; i++)
@@ -8236,10 +8237,9 @@ CLR_UINT32 CLR_RT_TypeSystem::ComputeHashForClosedGenericType(
         }
 
         // Check if this is an unresolved generic parameter (VAR or MVAR)
-        if ((elem.DataType == DATATYPE_VAR || elem.DataType == DATATYPE_MVAR) && contextTypeSpec &&
-            NANOCLR_INDEX_IS_VALID(*contextTypeSpec))
+        if (elem.DataType == DATATYPE_VAR && contextTypeSpec && NANOCLR_INDEX_IS_VALID(*contextTypeSpec))
         {
-            // Resolve VAR from context TypeSpec using existing helper
+            // Resolve VAR (type parameter) from context TypeSpec
             CLR_RT_TypeDef_Index resolvedTypeDef;
             NanoCLRDataType resolvedDataType;
 
@@ -8261,8 +8261,32 @@ CLR_UINT32 CLR_RT_TypeSystem::ComputeHashForClosedGenericType(
             }
             else
             {
-                // couldn't resolve, reset hash to indicate failure
+                // couldn't resolve VAR, return failure
                 hash = 0;
+                goto ComputeHash_End;
+            }
+        }
+        else if (elem.DataType == DATATYPE_MVAR && contextMethod && NANOCLR_INDEX_IS_VALID(contextMethod->methodSpec))
+        {
+            // Resolve MVAR (method parameter) from MethodSpec instance
+
+            CLR_RT_MethodSpec_Instance methodSpecInst{};
+            if (methodSpecInst.InitializeFromIndex(contextMethod->methodSpec))
+            {
+                CLR_RT_TypeDef_Index resolvedTypeDef;
+                NanoCLRDataType resolvedDataType;
+
+                if (methodSpecInst.GetGenericParameter(elem.GenericParamPosition, resolvedTypeDef, resolvedDataType))
+                {
+                    // Use the resolved type from MethodSpec
+                    hash = SUPPORT_ComputeCRC(&resolvedDataType, sizeof(resolvedDataType), hash);
+                }
+                else
+                {
+                    // couldn't resolve MVAR, return failure
+                    hash = 0;
+                    goto ComputeHash_End;
+                }
             }
         }
         else
@@ -8277,6 +8301,7 @@ CLR_UINT32 CLR_RT_TypeSystem::ComputeHashForClosedGenericType(
         }
     }
 
+ComputeHash_End:
     return hash ? hash : 0xFFFFFFFF; // Don't allow zero as a hash value
 }
 
