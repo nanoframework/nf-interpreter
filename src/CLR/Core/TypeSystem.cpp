@@ -1644,7 +1644,7 @@ bool CLR_RT_MethodDef_Instance::InitializeFromIndex(
 {
     NATIVE_PROFILE_CLR_CORE();
 
-     methodSpec.Clear();
+    methodSpec.Clear();
 
     CLR_RT_TypeSpec_Instance tsInst;
 
@@ -2151,8 +2151,8 @@ void CLR_RT_MethodSpec_Instance::ClearInstance()
 
 bool CLR_RT_MethodSpec_Instance::GetGenericParameter(
     CLR_INT32 genericParameterPosition,
-    CLR_RT_TypeDef_Index& typeDef,
-    NanoCLRDataType& dataType)
+    CLR_RT_TypeDef_Index &typeDef,
+    NanoCLRDataType &dataType)
 {
     CLR_RT_SignatureParser parser;
     parser.Initialize_MethodSignature(this);
