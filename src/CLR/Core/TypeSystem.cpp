@@ -2149,6 +2149,37 @@ void CLR_RT_MethodSpec_Instance::ClearInstance()
     target = nullptr;
 }
 
+bool CLR_RT_MethodSpec_Instance::GetGenericParameter(
+    CLR_INT32 genericParameterPosition,
+    CLR_RT_TypeDef_Index& typeDef,
+    NanoCLRDataType& dataType)
+{
+    CLR_RT_SignatureParser parser;
+    parser.Initialize_MethodSignature(this);
+
+    // sanity check
+    if (genericParameterPosition >= parser.ParamCount)
+    {
+        return false;
+    }
+
+    CLR_RT_SignatureParser::Element elem;
+
+    // loop through parameters to find the desired one
+    for (CLR_INT32 i = 0; i <= genericParameterPosition; i++)
+    {
+        if (FAILED(parser.Advance(elem)))
+        {
+            return false;
+        }
+    }
+
+    typeDef = elem.Class;
+    dataType = elem.DataType;
+
+    return true;
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void CLR_RT_TypeDescriptor::TypeDescriptor_Initialize()
