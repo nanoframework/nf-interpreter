@@ -2940,10 +2940,12 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                     if (field.genericType && NANOCLR_INDEX_IS_VALID(*field.genericType))
                     {
                         // access static field of a generic instance
+                        // Pass both TypeSpec context (for VAR resolution) and MethodDef context (for MVAR resolution)
                         ptr = field.assembly->GetStaticFieldByFieldDef(
                             field,
                             field.genericType,
-                            &stack->m_genericTypeSpecStorage);
+                            &stack->m_genericTypeSpecStorage,
+                            &stack->m_call);
                     }
                     else
                     {
@@ -2973,7 +2975,14 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                             {
                                 CLR_UINT32 hash = g_CLR_RT_TypeSystem.ComputeHashForClosedGenericType(
                                     tsInst,
-                                    &stack->m_genericTypeSpecStorage);
+                                    &stack->m_genericTypeSpecStorage,
+                                    &stack->m_call);
+
+                                if (hash == 0xFFFFFFFF)
+                                {
+                                    NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+                                }
+
                                 CLR_RT_GenericCctorExecutionRecord *cctorRecord =
                                     g_CLR_RT_TypeSystem.FindOrCreateGenericCctorRecord(hash, nullptr);
 
@@ -3018,10 +3027,12 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                     if (field.genericType && NANOCLR_INDEX_IS_VALID(*field.genericType))
                     {
                         // access static field of a generic instance
+                        // Pass both TypeSpec context (for VAR resolution) and MethodDef context (for MVAR resolution)
                         ptr = field.assembly->GetStaticFieldByFieldDef(
                             field,
                             field.genericType,
-                            &stack->m_genericTypeSpecStorage);
+                            &stack->m_genericTypeSpecStorage,
+                            &stack->m_call);
                     }
                     else
                     {
@@ -3041,7 +3052,8 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                             {
                                 CLR_UINT32 hash = g_CLR_RT_TypeSystem.ComputeHashForClosedGenericType(
                                     tsInst,
-                                    &stack->m_genericTypeSpecStorage);
+                                    &stack->m_genericTypeSpecStorage,
+                                    &stack->m_call);
                                 CLR_RT_GenericCctorExecutionRecord *cctorRecord =
                                     g_CLR_RT_TypeSystem.FindOrCreateGenericCctorRecord(hash, nullptr);
 
@@ -3088,10 +3100,12 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                     if (field.genericType && NANOCLR_INDEX_IS_VALID(*field.genericType))
                     {
                         // access static field of a generic instance
+                        // Pass both TypeSpec context (for VAR resolution) and MethodDef context (for MVAR resolution)
                         ptr = field.assembly->GetStaticFieldByFieldDef(
                             field,
                             field.genericType,
-                            &stack->m_genericTypeSpecStorage);
+                            &stack->m_genericTypeSpecStorage,
+                            &stack->m_call);
                     }
                     else
                     {
@@ -3111,7 +3125,8 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                             {
                                 CLR_UINT32 hash = g_CLR_RT_TypeSystem.ComputeHashForClosedGenericType(
                                     tsInst,
-                                    &stack->m_genericTypeSpecStorage);
+                                    &stack->m_genericTypeSpecStorage,
+                                    &stack->m_call);
                                 CLR_RT_GenericCctorExecutionRecord *cctorRecord =
                                     g_CLR_RT_TypeSystem.FindOrCreateGenericCctorRecord(hash, nullptr);
 

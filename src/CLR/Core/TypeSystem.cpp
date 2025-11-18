@@ -5320,7 +5320,8 @@ CLR_RT_HeapBlock *CLR_RT_Assembly::GetGenericStaticField(
 CLR_RT_HeapBlock *CLR_RT_Assembly::GetStaticFieldByFieldDef(
     const CLR_RT_FieldDef_Index &fdIndex,
     const CLR_RT_TypeSpec_Index *genericType,
-    const CLR_RT_TypeSpec_Index *contextTypeSpec)
+    const CLR_RT_TypeSpec_Index *contextTypeSpec,
+    const CLR_RT_MethodDef_Instance *contextMethod)
 {
     NATIVE_PROFILE_CLR_CORE();
 
@@ -5346,8 +5347,12 @@ CLR_RT_HeapBlock *CLR_RT_Assembly::GetStaticFieldByFieldDef(
                 if (genericTypeDef.target->staticFieldsCount > 0)
                 {
                     // Allocate static fields on-demand for this runtime-bound generic
-                    // Pass the caller context so we can resolve generic parameters
-                    if (SUCCEEDED(AllocateGenericStaticFieldsOnDemand(*genericType, genericTypeDef, contextTypeSpec)))
+                    // Pass both context parameters for proper VAR and MVAR resolution
+                    if (SUCCEEDED(AllocateGenericStaticFieldsOnDemand(
+                            *genericType,
+                            genericTypeDef,
+                            contextTypeSpec,
+                            contextMethod)))
                     {
                         // Retry the lookup after allocation
                         hb = GetGenericStaticField(*genericType, fdIndex);
@@ -5376,7 +5381,8 @@ CLR_RT_HeapBlock *CLR_RT_Assembly::GetStaticFieldByFieldDef(
 HRESULT CLR_RT_Assembly::AllocateGenericStaticFieldsOnDemand(
     const CLR_RT_TypeSpec_Index &typeSpecIndex,
     const CLR_RT_TypeDef_Instance &genericTypeDef,
-    const CLR_RT_TypeSpec_Index *contextTypeSpec)
+    const CLR_RT_TypeSpec_Index *contextTypeSpec,
+    const CLR_RT_MethodDef_Instance *contextMethod)
 {
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
@@ -5403,7 +5409,14 @@ HRESULT CLR_RT_Assembly::AllocateGenericStaticFieldsOnDemand(
     }
 
     // Compute hash for this closed generic type, using context to resolve VAR/MVAR if needed
-    hash = g_CLR_RT_TypeSystem.ComputeHashForClosedGenericType(tsInstance, contextTypeSpec);
+    // Pass both TypeSpec context (for VAR) and MethodDef context (for MVAR)
+    hash = g_CLR_RT_TypeSystem.ComputeHashForClosedGenericType(tsInstance, contextTypeSpec, contextMethod);
+
+    // If hash computation failed (returned 0), we can't create unique storage for this generic type
+    if (hash == 0)
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_NOT_SUPPORTED);
+    }
 
     // Check if already allocated (shouldn't happen if called from GetStaticFieldByFieldDef, but be safe)
     for (CLR_UINT32 i = 0; i < g_CLR_RT_TypeSystem.m_genericStaticFieldsCount; i++)
@@ -8185,7 +8198,8 @@ CLR_RT_GenericStaticFieldRecord *CLR_RT_TypeSystem::FindOrCreateGenericStaticFie
 
 CLR_UINT32 CLR_RT_TypeSystem::ComputeHashForClosedGenericType(
     CLR_RT_TypeSpec_Instance &typeInstance,
-    const CLR_RT_TypeSpec_Index *contextTypeSpec)
+    const CLR_RT_TypeSpec_Index *contextTypeSpec,
+    const CLR_RT_MethodDef_Instance *contextMethod)
 {
     CLR_UINT32 hash = 0;
 

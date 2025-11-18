@@ -1438,11 +1438,13 @@ struct CLR_RT_Assembly : public CLR_RT_HeapBlock_Node // EVENT HEAP - NO RELOCAT
     CLR_RT_HeapBlock *GetStaticFieldByFieldDef(
         const CLR_RT_FieldDef_Index &fdIndex,
         const CLR_RT_TypeSpec_Index *genericType,
-        const CLR_RT_TypeSpec_Index *contextTypeSpec = nullptr);
+        const CLR_RT_TypeSpec_Index *contextTypeSpec = nullptr,
+        const CLR_RT_MethodDef_Instance *contextMethod = nullptr);
     HRESULT AllocateGenericStaticFieldsOnDemand(
         const CLR_RT_TypeSpec_Index &typeSpecIndex,
         const CLR_RT_TypeDef_Instance &genericTypeDef,
-        const CLR_RT_TypeSpec_Index *contextTypeSpec = nullptr);
+        const CLR_RT_TypeSpec_Index *contextTypeSpec = nullptr,
+        const CLR_RT_MethodDef_Instance *contextMethod = nullptr);
     HRESULT PrepareForExecution();
 
     CLR_UINT32 ComputeAssemblyHash();
@@ -2141,7 +2143,8 @@ struct CLR_RT_TypeSystem // EVENT HEAP - NO RELOCATION -
     // Helper to compute hash for a closed generic type
     static CLR_UINT32 ComputeHashForClosedGenericType(
         CLR_RT_TypeSpec_Instance &typeInstance,
-        const CLR_RT_TypeSpec_Index *contextTypeSpec = nullptr);
+        const CLR_RT_TypeSpec_Index *contextTypeSpec = nullptr,
+        const CLR_RT_MethodDef_Instance *contextMethod = nullptr);
 
     // Helper to find or create a generic .cctor execution record by hash
     static CLR_RT_GenericCctorExecutionRecord *FindOrCreateGenericCctorRecord(CLR_UINT32 hash, bool *created);
