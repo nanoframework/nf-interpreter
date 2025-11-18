@@ -7438,7 +7438,9 @@ HRESULT CLR_RT_TypeSystem::BuildTypeName(
     const CLR_RT_TypeSpec_Index &typeIndex,
     char *&szBuffer,
     size_t &iBuffer,
-    CLR_UINT32 levels)
+    CLR_UINT32 levels,
+    const CLR_RT_TypeSpec_Index *contextTypeSpec,
+    const CLR_RT_MethodDef_Instance *contextMethodDef)
 {
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
@@ -7485,27 +7487,66 @@ HRESULT CLR_RT_TypeSystem::BuildTypeName(
         if (element.DataType == DATATYPE_VAR)
         {
             // resolve the !T against our *closed* typeIndex, if possible
-            CLR_RT_TypeDef_Index paramTd;
-            NanoCLRDataType paramDt;
+            if (contextTypeSpec != nullptr && NANOCLR_INDEX_IS_VALID(*contextTypeSpec))
+            {
+                // generic type parameter
 
-            // this will bind !T→System.Int32, etc.
-            typeSpecInstance.assembly->FindGenericParamAtTypeSpec(
-                typeIndex.data,
-                element.GenericParamPosition, // the !N slot
-                paramTd,
-                paramDt);
+                CLR_RT_TypeDef_Index paramTd;
+                NanoCLRDataType paramDt;
 
-            if (paramDt == DATATYPE_VAR)
+                CLR_RT_Assembly *typeContextAssm = g_CLR_RT_TypeSystem.m_assemblies[contextTypeSpec->Assembly() - 1];
+                // this will bind !T→System.Int32, etc.
+                typeContextAssm->FindGenericParamAtTypeSpec(
+                    contextTypeSpec->TypeSpec(),
+                    element.GenericParamPosition, // the !N slot
+                    paramTd,
+                    paramDt);
+
+                if (paramDt == DATATYPE_VAR)
+                {
+                    // couldn't be resolved, print encoded form (!N)
+                    char encodedParam[6];
+                    snprintf(encodedParam, ARRAYSIZE(encodedParam), "!%d", element.GenericParamPosition);
+                    NANOCLR_CHECK_HRESULT(QueueStringToBuffer(szBuffer, iBuffer, encodedParam));
+                }
+                else
+                {
+                    // now print the *actual* type name
+                    BuildTypeName(paramTd, szBuffer, iBuffer);
+                }
+            }
+            else
             {
                 // couldn't be resolved, print encoded form (!N)
                 char encodedParam[6];
                 snprintf(encodedParam, ARRAYSIZE(encodedParam), "!%d", element.GenericParamPosition);
                 NANOCLR_CHECK_HRESULT(QueueStringToBuffer(szBuffer, iBuffer, encodedParam));
             }
+        }
+        else if (element.DataType == DATATYPE_MVAR)
+        {
+            // method generic parameter
+            if (contextMethodDef != nullptr && NANOCLR_INDEX_IS_VALID(*contextMethodDef))
+            {
+                if (NANOCLR_INDEX_IS_VALID(contextMethodDef->methodSpec))
+                {
+                    CLR_RT_MethodSpec_Instance methodSpec{};
+                    methodSpec.InitializeFromIndex(contextMethodDef->methodSpec);
+
+                    if (!methodSpec.GetGenericParameter(element.GenericParamPosition, typeDef, element.DataType))
+                    {
+                        NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+                    }
+
+                    BuildTypeName(typeDef, szBuffer, iBuffer);
+                }
+            }
             else
             {
-                // now print the *actual* type name
-                BuildTypeName(paramTd, szBuffer, iBuffer);
+                // couldn't be resolved, print encoded form (!!N)
+                char encodedParam[7];
+                snprintf(encodedParam, ARRAYSIZE(encodedParam), "!!%d", element.GenericParamPosition);
+                NANOCLR_CHECK_HRESULT(QueueStringToBuffer(szBuffer, iBuffer, encodedParam));
             }
         }
         else
