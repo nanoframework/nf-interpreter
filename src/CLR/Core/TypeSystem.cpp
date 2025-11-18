@@ -7713,6 +7713,166 @@ HRESULT CLR_RT_TypeSystem::BuildMethodName(
     NANOCLR_NOCLEANUP();
 }
 
+HRESULT CLR_RT_TypeSystem::BuildMethodName(
+    const CLR_RT_MethodDef_Instance &mdInst,
+    const CLR_RT_TypeSpec_Index *genericType,
+    char *&szBuffer,
+    size_t &iBuffer)
+{
+    NATIVE_PROFILE_CLR_CORE();
+    NANOCLR_HEADER();
+
+    CLR_RT_TypeDef_Instance declTypeInst{};
+    CLR_RT_TypeDef_Index declTypeIdx;
+    CLR_RT_TypeDef_Instance instOwner{};
+    bool useGeneric = false;
+
+    if (!declTypeInst.InitializeFromMethod(mdInst))
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+    }
+
+    declTypeIdx.Set(mdInst.Assembly(), declTypeInst.assembly->crossReferenceMethodDef[mdInst.Method()].GetOwner());
+
+    if (genericType != nullptr && NANOCLR_INDEX_IS_VALID(*genericType) && genericType->data != CLR_EmptyToken)
+    {
+        // parse TypeSpec to get its TypeDef
+        CLR_RT_TypeSpec_Instance tsInst = {};
+
+        if (tsInst.InitializeFromIndex(*genericType))
+        {
+            if (tsInst.genericTypeDef.Type() == declTypeIdx.Type())
+            {
+                useGeneric = true;
+            }
+        }
+    }
+
+    if (!useGeneric)
+    {
+        if (instOwner.InitializeFromMethod(mdInst) == false)
+        {
+            NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+        }
+
+        NANOCLR_CHECK_HRESULT(BuildTypeName(instOwner, szBuffer, iBuffer));
+    }
+    else
+    {
+        // First, build the type name (either from genericType or from the method's declaring type)
+        if (genericType != nullptr && NANOCLR_INDEX_IS_VALID(*genericType) && genericType->data != CLR_EmptyToken)
+        {
+            // Use the provided generic type context
+            NANOCLR_CHECK_HRESULT(BuildTypeName(*genericType, szBuffer, iBuffer, 0));
+        }
+        else if (
+            mdInst.genericType != nullptr && NANOCLR_INDEX_IS_VALID(*mdInst.genericType) &&
+            mdInst.genericType->data != CLR_EmptyToken)
+        {
+            // Use the method instance's generic type
+            NANOCLR_CHECK_HRESULT(BuildTypeName(*mdInst.genericType, szBuffer, iBuffer, 0));
+        }
+        else
+        {
+            // Fall back to the declaring type
+            if (instOwner.InitializeFromMethod(mdInst) == false)
+            {
+                NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+            }
+            NANOCLR_CHECK_HRESULT(BuildTypeName(instOwner, szBuffer, iBuffer));
+        }
+
+        // Append the method name
+        CLR_SafeSprintf(szBuffer, iBuffer, "::%s", mdInst.assembly->GetString(mdInst.target->name));
+
+        // If this method has generic parameters (methodSpec is valid), append them
+        if (NANOCLR_INDEX_IS_VALID(mdInst.methodSpec))
+        {
+            CLR_RT_MethodSpec_Instance msInst{};
+            if (msInst.InitializeFromIndex(mdInst.methodSpec))
+            {
+                // Parse the methodSpec instantiation signature to get the generic arguments
+                CLR_RT_SignatureParser parser{};
+                parser.Initialize_MethodSignature(&msInst);
+
+                CLR_SafeSprintf(szBuffer, iBuffer, "<");
+
+                for (int i = 0; i < parser.ParamCount; i++)
+                {
+                    CLR_RT_SignatureParser::Element elem{};
+                    if (FAILED(parser.Advance(elem)))
+                    {
+                        break;
+                    }
+
+                    if (i > 0)
+                    {
+                        CLR_SafeSprintf(szBuffer, iBuffer, ", ");
+                    }
+
+                    // Build the type name for this generic argument
+                    // Use the method's declaring type as context for VAR resolution
+                    const CLR_RT_TypeSpec_Index *context =
+                        (mdInst.genericType && NANOCLR_INDEX_IS_VALID(*mdInst.genericType)) ? mdInst.genericType
+                                                                                            : nullptr;
+
+                    if (elem.DataType == DATATYPE_VAR || elem.DataType == DATATYPE_MVAR)
+                    {
+                        // Generic parameter - try to resolve it
+                        if (context != nullptr)
+                        {
+                            CLR_RT_TypeDef_Index resolvedType{};
+                            NanoCLRDataType resolvedDT;
+
+                            if (mdInst.assembly->FindGenericParamAtTypeSpec(
+                                    context->TypeSpec(),
+                                    elem.GenericParamPosition,
+                                    resolvedType,
+                                    resolvedDT))
+                            {
+                                NANOCLR_CHECK_HRESULT(BuildTypeName(resolvedType, szBuffer, iBuffer));
+                            }
+                            else
+                            {
+                                // Couldn't resolve - show as !n or !!n
+                                if (elem.DataType == DATATYPE_VAR)
+                                {
+                                    CLR_SafeSprintf(szBuffer, iBuffer, "!%d", elem.GenericParamPosition);
+                                }
+                                else
+                                {
+                                    CLR_SafeSprintf(szBuffer, iBuffer, "!!%d", elem.GenericParamPosition);
+                                }
+                            }
+                        }
+                        else
+                        {
+                            // No context - show as !n or !!n
+                            if (elem.DataType == DATATYPE_VAR)
+                            {
+                                CLR_SafeSprintf(szBuffer, iBuffer, "!%d", elem.GenericParamPosition);
+                            }
+                            else
+                            {
+                                CLR_SafeSprintf(szBuffer, iBuffer, "!!%d", elem.GenericParamPosition);
+                            }
+                        }
+                    }
+                    else if (NANOCLR_INDEX_IS_VALID(elem.Class))
+                    {
+                        // Concrete type
+                        NANOCLR_CHECK_HRESULT(BuildTypeName(elem.Class, szBuffer, iBuffer));
+                    }
+                }
+
+                CLR_SafeSprintf(szBuffer, iBuffer, ">");
+            }
+        }
+    }
+
+    NANOCLR_NOCLEANUP();
+}
+
 HRESULT CLR_RT_TypeSystem::BuildFieldName(const CLR_RT_FieldDef_Index &fd, char *&szBuffer, size_t &iBuffer)
 {
     NATIVE_PROFILE_CLR_CORE();
