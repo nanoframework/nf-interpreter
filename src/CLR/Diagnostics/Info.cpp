@@ -446,17 +446,38 @@ void CLR_RT_Assembly::DumpToken(CLR_UINT32 token, const CLR_RT_MethodDef_Instanc
             const CLR_RECORD_FIELDREF *fr = GetFieldRef(index);
             const auto &xref = crossReferenceFieldRef[index];
 
-            // If the caller passed in a closed‐generic TypeSpec, use that …
+            // If the caller passed in a closed‐generic TypeSpec, use that
             if (methodDefInstance.genericType != nullptr && methodDefInstance.genericType->data != CLR_EmptyToken)
             {
-                // Build the closed‐generic owner name
-                char rgType[256], *sz = rgType;
-                size_t cb = sizeof(rgType);
-                g_CLR_RT_TypeSystem.BuildTypeName(*methodDefInstance.genericType, sz, cb, 0);
+                // The field's encodedOwner points to the TypeSpec we want to build the name for (e.g., EmptyArray<!0>)
+                // and methodDefInstance.genericType is the closed generic type that provides context (e.g.,
+                // EmptyArray<int>)
+                if (fr->Owner() == TBL_TypeSpec)
+                {
+                    static CLR_RT_TypeSpec_Index s_ownerTypeSpec;
+                    s_ownerTypeSpec.Set(assemblyIndex, fr->OwnerIndex());
 
-                // Append the field name
-                CLR_SafeSprintf(sz, cb, "::%s", GetString(fr->name));
-                CLR_Debug::Printf("%s", rgType);
+                    // Build the type name using the closed generic as context to resolve VAR parameters
+                    char rgType[256], *sz = rgType;
+                    size_t cb = sizeof(rgType);
+                    g_CLR_RT_TypeSystem
+                        .BuildTypeName(s_ownerTypeSpec, sz, cb, 0, methodDefInstance.genericType, &methodDefInstance);
+
+                    // Append the field name
+                    CLR_SafeSprintf(sz, cb, "::%s", GetString(fr->name));
+                    CLR_Debug::Printf("%s", rgType);
+                }
+                else
+                {
+                    // TypeRef case - just use the existing genericType
+                    char rgType[256], *sz = rgType;
+                    size_t cb = sizeof(rgType);
+                    g_CLR_RT_TypeSystem.BuildTypeName(*methodDefInstance.genericType, sz, cb, 0, nullptr);
+
+                    // Append the field name
+                    CLR_SafeSprintf(sz, cb, "::%s", GetString(fr->name));
+                    CLR_Debug::Printf("%s", rgType);
+                }
             }
             else
             {
