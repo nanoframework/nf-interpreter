@@ -1621,6 +1621,7 @@ bool CLR_RT_MethodDef_Instance::InitializeFromIndex(const CLR_RT_MethodDef_Index
         target = assembly->GetMethodDef(Method());
         genericType = nullptr;
         arrayElementType.Clear();
+        methodSpec.Clear();
 
 #if defined(NANOCLR_INSTANCE_NAMES)
         name = assembly->GetString(target->name);
@@ -1642,6 +1643,8 @@ bool CLR_RT_MethodDef_Instance::InitializeFromIndex(
     const CLR_RT_TypeSpec_Index &typeSpec)
 {
     NATIVE_PROFILE_CLR_CORE();
+
+     methodSpec.Clear();
 
     CLR_RT_TypeSpec_Instance tsInst;
 
@@ -1766,6 +1769,9 @@ bool CLR_RT_MethodDef_Instance::ResolveToken(
     const CLR_RT_TypeSpec_Index *callerGeneric)
 {
     NATIVE_PROFILE_CLR_CORE();
+
+    ClearInstance();
+
     if (assm)
     {
         CLR_UINT32 index = CLR_DataFromTk(tk);
