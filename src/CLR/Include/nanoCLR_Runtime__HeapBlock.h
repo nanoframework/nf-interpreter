@@ -1910,8 +1910,13 @@ struct CLR_RT_HeapBlock_Delegate : public CLR_RT_HeapBlock_Node // OBJECT HEAP -
     CLR_RT_AppDomain *m_appDomain;
 #endif
 
-    // Optional TypeSpec index for generic type static constructors (data == 0 means not set)
+    // Optional TypeSpec index for resolving type generic parameter (VARs like !0)
+    // (data == 0 means not set)
     CLR_RT_TypeSpec_Index m_genericTypeSpec;
+    
+    // Optional MethodSpec index for resolving method generic parameters (MVAR like !!0)
+    // (data == 0 means not set)
+    CLR_RT_MethodSpec_Index m_genericMethodSpec;
 
     //--//
 

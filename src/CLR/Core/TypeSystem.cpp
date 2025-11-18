@@ -5573,9 +5573,11 @@ HRESULT CLR_RT_Assembly::AllocateGenericStaticFieldsOnDemand(
                 {
                     CLR_RT_HeapBlock_Delegate *dlg = refDlg.DereferenceDelegate();
 
-                    // Store the TypeSpec index so the .cctor runs with the correct generic binding
-                    // If the TypeSpec has unresolved parameters (!0), also store the caller's context
+                    // Store the TypeSpec index so the .cctor can resolve type generic parameters
                     dlg->m_genericTypeSpec = typeSpecIndex;
+                    
+                    // Store the caller's MethodSpec (if any) to enable reolution of method generic parameters
+                    dlg->m_genericMethodSpec = contextMethod->methodSpec;
 
                     // Push to the .cctor thread and schedule for execution
                     if (SUCCEEDED(g_CLR_RT_ExecutionEngine.m_cctorThread->PushThreadProcDelegate(dlg)))
