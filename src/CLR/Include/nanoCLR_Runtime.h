@@ -2459,7 +2459,9 @@ struct CLR_RT_TypeDescriptor
 
     HRESULT InitializeFromDataType(NanoCLRDataType dt);
     HRESULT InitializeFromReflection(const CLR_RT_ReflectionDef_Index &reflex);
-    HRESULT InitializeFromTypeSpec(const CLR_RT_TypeSpec_Index &sig, const CLR_RT_TypeSpec_Index *contextTypeSpec = nullptr);
+    HRESULT InitializeFromTypeSpec(
+        const CLR_RT_TypeSpec_Index &sig,
+        const CLR_RT_TypeSpec_Index *contextTypeSpec = nullptr);
     HRESULT InitializeFromType(const CLR_RT_TypeDef_Index &cls);
     HRESULT InitializeFromTypeDef(const CLR_RT_TypeDef_Index &cls);
     HRESULT InitializeFromGenericType(const CLR_RT_TypeSpec_Index &genericType);

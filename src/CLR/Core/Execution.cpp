@@ -3542,7 +3542,7 @@ bool CLR_RT_ExecutionEngine::IsInstanceOf(
     const CLR_RT_MethodDef_Instance *caller)
 {
     NATIVE_PROFILE_CLR_CORE();
-    
+
     CLR_RT_TypeDescriptor desc{};
     CLR_RT_TypeDescriptor descTarget{};
 

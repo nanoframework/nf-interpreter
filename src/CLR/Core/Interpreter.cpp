@@ -2746,12 +2746,8 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                 {
                     FETCH_ARG_COMPRESSED_TYPETOKEN(arg, ip);
 
-                    NANOCLR_CHECK_HRESULT(CLR_RT_ExecutionEngine::CastToType(
-                        evalPos[0],
-                        arg,
-                        assm,
-                        (op == CEE_ISINST),
-                        &stack->m_call));
+                    NANOCLR_CHECK_HRESULT(
+                        CLR_RT_ExecutionEngine::CastToType(evalPos[0], arg, assm, (op == CEE_ISINST), &stack->m_call));
                     break;
                 }
 
