@@ -7736,7 +7736,11 @@ HRESULT CLR_RT_TypeSystem::BuildMethodName(
 
     declTypeIdx.Set(mdInst.Assembly(), declTypeInst.assembly->crossReferenceMethodDef[mdInst.Method()].GetOwner());
 
-    if (genericType != nullptr && NANOCLR_INDEX_IS_VALID(*genericType) && genericType->data != CLR_EmptyToken)
+    if (mdInst.genericType && NANOCLR_INDEX_IS_VALID(*mdInst.genericType))
+    {
+        useGeneric = true;
+    }
+    else if (genericType && NANOCLR_INDEX_IS_VALID(*genericType))
     {
         // parse TypeSpec to get its TypeDef
         CLR_RT_TypeSpec_Instance tsInst = {};
