@@ -2149,8 +2149,8 @@ void CLR_RT_MethodSpec_Instance::ClearInstance()
     target = nullptr;
 }
 
-bool CLR_RT_MethodSpec_Instance::GetGenericParameter(
-    CLR_INT32 genericParameterPosition,
+bool CLR_RT_MethodSpec_Instance::GetGenericArgument(
+    CLR_INT32 argumentPosition,
     CLR_RT_TypeDef_Index &typeDef,
     NanoCLRDataType &dataType)
 {
@@ -2158,7 +2158,7 @@ bool CLR_RT_MethodSpec_Instance::GetGenericParameter(
     parser.Initialize_MethodSignature(this);
 
     // sanity check
-    if (genericParameterPosition >= parser.ParamCount)
+    if (argumentPosition >= parser.ParamCount)
     {
         return false;
     }
@@ -2166,7 +2166,7 @@ bool CLR_RT_MethodSpec_Instance::GetGenericParameter(
     CLR_RT_SignatureParser::Element elem;
 
     // loop through parameters to find the desired one
-    for (CLR_INT32 i = 0; i <= genericParameterPosition; i++)
+    for (CLR_INT32 i = 0; i <= argumentPosition; i++)
     {
         if (FAILED(parser.Advance(elem)))
         {
@@ -5575,7 +5575,7 @@ HRESULT CLR_RT_Assembly::AllocateGenericStaticFieldsOnDemand(
 
                     // Store the TypeSpec index so the .cctor can resolve type generic parameters
                     dlg->m_genericTypeSpec = typeSpecIndex;
-                    
+
                     // Store the caller's MethodSpec (if any) to enable reolution of method generic parameters
                     dlg->m_genericMethodSpec = contextMethod->methodSpec;
 
@@ -7535,7 +7535,7 @@ HRESULT CLR_RT_TypeSystem::BuildTypeName(
                     CLR_RT_MethodSpec_Instance methodSpec{};
                     methodSpec.InitializeFromIndex(contextMethodDef->methodSpec);
 
-                    if (!methodSpec.GetGenericParameter(element.GenericParamPosition, typeDef, element.DataType))
+                    if (!methodSpec.GetGenericArgument(element.GenericParamPosition, typeDef, element.DataType))
                     {
                         NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
                     }
@@ -8479,7 +8479,7 @@ CLR_UINT32 CLR_RT_TypeSystem::ComputeHashForClosedGenericType(
                 CLR_RT_TypeDef_Index resolvedTypeDef;
                 NanoCLRDataType resolvedDataType;
 
-                if (methodSpecInst.GetGenericParameter(elem.GenericParamPosition, resolvedTypeDef, resolvedDataType))
+                if (methodSpecInst.GetGenericArgument(elem.GenericParamPosition, resolvedTypeDef, resolvedDataType))
                 {
                     // Use the resolved type from MethodSpec
                     hash = SUPPORT_ComputeCRC(&resolvedDataType, sizeof(resolvedDataType), hash);
