@@ -722,6 +722,10 @@ bool CLR_RT_TypeSpec_Instance::InitializeFromIndex(const CLR_RT_TypeSpec_Index &
 
             genericTypeDef = element.Class;
         }
+        else
+        {
+            genericTypeDef.Clear();
+        }
 
         return true;
     }
@@ -789,6 +793,21 @@ bool CLR_RT_TypeSpec_Instance::ResolveToken(
                 return false;
             }
 
+            CLR_RT_TypeSpec_Instance callerTypeSpec;
+            if (!callerTypeSpec.InitializeFromIndex(*caller->genericType))
+            {
+                ClearInstance();
+                return false;
+            }
+
+            CLR_RT_SignatureParser::Element paramElement;
+            if (!callerTypeSpec.GetGenericParam((CLR_UINT32)pos, paramElement))
+            {
+                ClearInstance();
+                return false;
+            }
+
+            // Use the resolved parameter's type for this TypeSpec
             auto &tsi = *caller->genericType;
             CLR_UINT32 closedTsRow = tsi.TypeSpec();
 
