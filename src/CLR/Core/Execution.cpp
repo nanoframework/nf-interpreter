@@ -2338,17 +2338,36 @@ HRESULT CLR_RT_ExecutionEngine::InitializeLocals(
 
                 case DATATYPE_MVAR:
                 {
+                    // Method-level generic parameter (e.g., '!!T' in a generic method like Array.Empty<T>())
                     CLR_UINT8 genericParamPosition = *sig++;
 
-                    CLR_RT_GenericParam_Index gpIndex;
+                    // For generic methods, use the MethodSpec's signature to get the concrete type
+                    if (NANOCLR_INDEX_IS_VALID(methodDefInstance.methodSpec))
+                    {
+                        CLR_RT_MethodSpec_Instance methodSpec;
+                        if (!methodSpec.InitializeFromIndex(methodDefInstance.methodSpec))
+                        {
+                            NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
+                        }
 
-                    assembly->FindGenericParamAtMethodDef(methodDefInstance, genericParamPosition, gpIndex);
+                        // Use GetGenericArgument to get the concrete type from MethodSpec's signature
+                        if (!methodSpec.GetGenericArgument(genericParamPosition, cls, dt))
+                        {
+                            NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
+                        }
+                    }
+                    else
+                    {
+                        // Fallback: try to resolve using GenericParam table (for open generic methods)
+                        CLR_RT_GenericParam_Index gpIndex;
+                        assembly->FindGenericParamAtMethodDef(methodDefInstance, genericParamPosition, gpIndex);
 
-                    CLR_RT_GenericParam_CrossReference gp =
-                        assembly->crossReferenceGenericParam[gpIndex.GenericParam()];
+                        CLR_RT_GenericParam_CrossReference gp =
+                            assembly->crossReferenceGenericParam[gpIndex.GenericParam()];
 
-                    cls = gp.classTypeDef;
-                    dt = gp.dataType;
+                        cls = gp.classTypeDef;
+                        dt = gp.dataType;
+                    }
 
                     goto done;
                 }
