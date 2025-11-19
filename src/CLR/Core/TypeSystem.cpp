@@ -7497,7 +7497,7 @@ HRESULT CLR_RT_TypeSystem::BuildTypeName(
     CLR_RT_TypeDef_Index typeDef;
     typeDef.data = element.Class.data;
 
-    BuildTypeName(typeDef, szBuffer, iBuffer);
+    NANOCLR_CHECK_HRESULT(BuildTypeName(typeDef, szBuffer, iBuffer));
 
     if (element.GenParamCount > 0)
     {
@@ -7569,7 +7569,7 @@ HRESULT CLR_RT_TypeSystem::BuildTypeName(
                         NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
                     }
 
-                    BuildTypeName(typeDef, szBuffer, iBuffer);
+                    NANOCLR_CHECK_HRESULT(BuildTypeName(typeDef, szBuffer, iBuffer));
                 }
             }
             else
@@ -7586,7 +7586,7 @@ HRESULT CLR_RT_TypeSystem::BuildTypeName(
             CLR_RT_TypeDef_Index td;
             td.data = element.Class.data;
 
-            BuildTypeName(td, szBuffer, iBuffer);
+            NANOCLR_CHECK_HRESULT(BuildTypeName(td, szBuffer, iBuffer));
         }
 
         if (i + 1 < element.GenParamCount)
@@ -7798,14 +7798,28 @@ HRESULT CLR_RT_TypeSystem::BuildMethodName(
         if (genericType != nullptr && NANOCLR_INDEX_IS_VALID(*genericType) && genericType->data != CLR_EmptyToken)
         {
             // Use the provided generic type context
-            NANOCLR_CHECK_HRESULT(BuildTypeName(*genericType, szBuffer, iBuffer, 0));
+            if (!SUCCEEDED(BuildTypeName(*genericType, szBuffer, iBuffer, 0, nullptr, &mdInst)))
+            {
+                // Fall back to the declaring type
+                if (instOwner.InitializeFromMethod(mdInst) == false)
+                {
+                    NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+                }
+                NANOCLR_CHECK_HRESULT(BuildTypeName(instOwner, szBuffer, iBuffer));
+            }
         }
-        else if (
-            mdInst.genericType != nullptr && NANOCLR_INDEX_IS_VALID(*mdInst.genericType) &&
-            mdInst.genericType->data != CLR_EmptyToken)
+        else if (mdInst.genericType != nullptr && NANOCLR_INDEX_IS_VALID(*mdInst.genericType))
         {
             // Use the method instance's generic type
-            NANOCLR_CHECK_HRESULT(BuildTypeName(*mdInst.genericType, szBuffer, iBuffer, 0));
+            if (!SUCCEEDED(BuildTypeName(*mdInst.genericType, szBuffer, iBuffer, 0)))
+            {
+                // Fall back to the declaring type
+                if (instOwner.InitializeFromMethod(mdInst) == false)
+                {
+                    NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+                }
+                NANOCLR_CHECK_HRESULT(BuildTypeName(instOwner, szBuffer, iBuffer));
+            }
         }
         else
         {
@@ -8244,7 +8258,8 @@ bool CLR_RT_TypeSystem::FindVirtualMethodDef(
         clsInst.SwitchToParent();
     }
 
-    // SZ arrays expose IList generic interfaces through System.Array+SZArrayHelper, so fall back to that helper type
+    // SZ arrays expose IList generic interfaces through System.Array+SZArrayHelper, so fall back to that helper
+    // type
     if (isArrayClass)
     {
         const CLR_RT_TypeDef_Index &arrayHelperIdx = g_CLR_RT_WellKnownTypes.SZArrayHelper;
