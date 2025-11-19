@@ -794,16 +794,8 @@ bool CLR_RT_TypeSpec_Instance::ResolveToken(
 
             Set(caller->genericType->Assembly(), closedTsRow);
             assembly = g_CLR_RT_TypeSystem.m_assemblies[caller->genericType->Assembly() - 1];
-
             target = assm->GetTypeSpec(closedTsRow);
-
-            NanoCLRDataType realDataType;
-
-            g_CLR_RT_TypeSystem.m_assemblies[caller->genericType->Assembly() - 1]->FindGenericParamAtTypeSpec(
-                caller->genericType->data,
-                (CLR_UINT32)pos,
-                cachedElementType,
-                realDataType);
+            cachedElementType = paramElement.Class;
         }
         else if (element.DataType == DATATYPE_MVAR)
         {
@@ -895,6 +887,49 @@ bool CLR_RT_TypeSpec_Instance::IsClosedGenericType()
     }
 
     // all arguments are concrete types, this is a closed generic type
+    return true;
+}
+
+bool CLR_RT_TypeSpec_Instance::GetGenericParam(CLR_INT32 parameterPosition, CLR_RT_SignatureParser::Element &element)
+{
+    NATIVE_PROFILE_CLR_CORE();
+
+    CLR_RT_SignatureParser parser;
+    parser.Initialize_TypeSpec(assembly, target);
+
+    if (FAILED(parser.Advance(element)))
+    {
+        return false;
+    }
+
+    // sanity check for GENERICINST
+    if (element.DataType != DATATYPE_GENERICINST)
+    {
+        return false;
+    }
+
+    // move to type
+    if (FAILED(parser.Advance(element)))
+    {
+        return false;
+    }
+
+    // sanity check for invalid parameter position
+    if (parameterPosition >= element.GenParamCount)
+    {
+        // not enough parameters!!
+        return false;
+    }
+
+    // walk to the requested parameter position
+    for (int32_t i = 0; i <= parameterPosition; i++)
+    {
+        if (FAILED(parser.Advance(element)))
+        {
+            return false;
+        }
+    }
+
     return true;
 }
 
@@ -1245,24 +1280,28 @@ bool CLR_RT_TypeDef_Instance::ResolveToken(
                             }
                             else
                             {
-                                CLR_RT_TypeDef_Index realTypeDef;
-                                NanoCLRDataType realDataType;
+                                CLR_RT_TypeSpec_Instance callerTypeSpec;
+                                if (!callerTypeSpec.InitializeFromIndex(*caller->genericType))
+                                {
+                                    return false;
+                                }
+
+                                CLR_RT_SignatureParser::Element paramElement;
 
                                 // Try to map using the generic context (e.g. !T→Int32)
-                                g_CLR_RT_TypeSystem.m_assemblies[caller->genericType->Assembly() - 1]
-                                    ->FindGenericParamAtTypeSpec(
-                                        caller->genericType->data,
-                                        (CLR_UINT32)pos,
-                                        realTypeDef,
-                                        realDataType);
-
-                                // Check if FindGenericParamAtTypeSpec succeeded
-                                if (NANOCLR_INDEX_IS_VALID(realTypeDef))
+                                if (callerTypeSpec.GetGenericParam((CLR_UINT32)pos, paramElement))
                                 {
                                     // Successfully resolved from generic context
-                                    data = realTypeDef.data;
-                                    assembly = g_CLR_RT_TypeSystem.m_assemblies[realTypeDef.Assembly() - 1];
-                                    target = assembly->GetTypeDef(realTypeDef.Type());
+                                    if (NANOCLR_INDEX_IS_VALID(paramElement.Class))
+                                    {
+                                        data = paramElement.Class.data;
+                                        assembly = g_CLR_RT_TypeSystem.m_assemblies[paramElement.Class.Assembly() - 1];
+                                        target = assembly->GetTypeDef(paramElement.Class.Type());
+                                    }
+                                    else
+                                    {
+                                        return false;
+                                    }
                                 }
                                 else if (NANOCLR_INDEX_IS_VALID(caller->arrayElementType) && pos == 0)
                                 {
@@ -1384,17 +1423,22 @@ bool CLR_RT_TypeDef_Instance::ResolveNullableType(
                 return false;
             }
 
-            CLR_RT_TypeDef_Index realTypeDef;
-            NanoCLRDataType realDataType;
+            CLR_RT_TypeSpec_Instance callerTypeSpec;
+            if (!callerTypeSpec.InitializeFromIndex(*caller->genericType))
+            {
+                return false;
+            }
 
-            // Only call this once to map (e.g. !T→Int32)
-            caller->assembly
-                ->FindGenericParamAtTypeSpec(caller->genericType->data, (CLR_UINT32)pos, realTypeDef, realDataType);
+            CLR_RT_SignatureParser::Element paramElement;
+            if (!callerTypeSpec.GetGenericParam((CLR_UINT32)pos, paramElement))
+            {
+                return false;
+            }
 
             // populate this instance
-            data = realTypeDef.data;
-            assembly = g_CLR_RT_TypeSystem.m_assemblies[realTypeDef.Assembly() - 1];
-            target = assembly->GetTypeDef(realTypeDef.Type());
+            data = paramElement.Class.data;
+            assembly = g_CLR_RT_TypeSystem.m_assemblies[paramElement.Class.Assembly() - 1];
+            target = assembly->GetTypeDef(paramElement.Class.Type());
 
             return true;
         }
@@ -1679,15 +1723,14 @@ bool CLR_RT_MethodDef_Instance::InitializeFromIndex(
 
     if (elem.DataType == DATATYPE_VAR)
     {
-        CLR_RT_TypeDef_Index realOwner;
-        NanoCLRDataType dummyDT;
+        CLR_RT_SignatureParser::Element paramElement;
 
-        if (!tsAsm->FindGenericParamAtTypeSpec(typeSpec.data, elem.GenericParamPosition, realOwner, dummyDT))
+        if (!tsInst.GetGenericParam(elem.GenericParamPosition, paramElement))
         {
             return false;
         }
 
-        ownerTypeIdx = realOwner;
+        ownerTypeIdx = paramElement.Class;
     }
     else
     {
@@ -2040,15 +2083,19 @@ bool CLR_RT_MethodDef_Instance::GetDeclaringType(CLR_RT_TypeDef_Instance &declTy
             // generic type, advance to get the type
             int pos = elem.GenericParamPosition;
             // Use the *caller's* bound genericType (Stack<Int32>, etc.)
-            CLR_RT_TypeDef_Index td;
-            NanoCLRDataType dt;
-            if (tsAsm == nullptr ||
-                tsAsm->FindGenericParamAtTypeSpec(genericType->data, (CLR_UINT32)pos, td, dt) == false)
+            CLR_RT_TypeSpec_Instance callerTypeSpec;
+            if (!callerTypeSpec.InitializeFromIndex(*genericType))
             {
                 return false;
             }
 
-            return declType.InitializeFromIndex(td);
+            CLR_RT_SignatureParser::Element paramElement;
+            if (!callerTypeSpec.GetGenericParam((CLR_UINT32)pos, paramElement))
+            {
+                return false;
+            }
+
+            return declType.InitializeFromIndex(paramElement.Class);
         }
     }
 
@@ -2417,19 +2464,17 @@ HRESULT CLR_RT_TypeDescriptor::InitializeFromSignatureParser(
     if (res.DataType == DATATYPE_VAR && contextTypeSpec && NANOCLR_INDEX_IS_VALID(*contextTypeSpec))
     {
         // Resolve VAR from context TypeSpec using existing helper
-        CLR_RT_TypeDef_Index resolvedTypeDef;
-        NanoCLRDataType resolvedDataType;
+        CLR_RT_TypeSpec_Instance contextTs;
+        if (!contextTs.InitializeFromIndex(*contextTypeSpec))
+        {
+            NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
+        }
 
-        CLR_RT_Assembly *contextAssm = g_CLR_RT_TypeSystem.m_assemblies[contextTypeSpec->Assembly() - 1];
-
-        if (contextAssm->FindGenericParamAtTypeSpec(
-                contextTypeSpec->TypeSpec(),
-                res.GenericParamPosition,
-                resolvedTypeDef,
-                resolvedDataType))
+        CLR_RT_SignatureParser::Element paramElement;
+        if (contextTs.GetGenericParam(res.GenericParamPosition, paramElement))
         {
             // Use the resolved type from context
-            NANOCLR_CHECK_HRESULT(InitializeFromType(resolvedTypeDef));
+            NANOCLR_CHECK_HRESULT(InitializeFromType(paramElement.Class));
         }
         else
         {
@@ -2490,8 +2535,6 @@ HRESULT CLR_RT_TypeDescriptor::InitializeFromSignatureToken(
             if (elem.DataType == DATATYPE_VAR)
             {
                 // !T: ask the CLR to map that slot into the *actual* argument
-                CLR_RT_TypeDef_Index td;
-                NanoCLRDataType dt;
 
                 // For SZArrayHelper scenarios, arrayElementType is authoritative for position 0
                 if (caller && NANOCLR_INDEX_IS_VALID(caller->arrayElementType) && elem.GenericParamPosition == 0)
@@ -2501,12 +2544,23 @@ HRESULT CLR_RT_TypeDescriptor::InitializeFromSignatureToken(
                 // Otherwise try to resolve from generic context
                 else if (caller && caller->genericType && NANOCLR_INDEX_IS_VALID(*caller->genericType))
                 {
-                    g_CLR_RT_TypeSystem.m_assemblies[caller->genericType->Assembly() - 1]
-                        ->FindGenericParamAtTypeSpec(caller->genericType->data, elem.GenericParamPosition, td, dt);
-
-                    if (NANOCLR_INDEX_IS_VALID(td))
+                    CLR_RT_TypeSpec_Instance callerTypeSpec;
+                    if (!callerTypeSpec.InitializeFromIndex(*caller->genericType))
                     {
-                        this->InitializeFromTypeDef(td);
+                        return false;
+                    }
+
+                    CLR_RT_SignatureParser::Element paramElement;
+                    if (callerTypeSpec.GetGenericParam(elem.GenericParamPosition, paramElement))
+                    {
+                        if (NANOCLR_INDEX_IS_VALID(paramElement.Class))
+                        {
+                            this->InitializeFromTypeDef(paramElement.Class);
+                        }
+                        else
+                        {
+                            NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+                        }
                     }
                     else
                     {
@@ -5844,54 +5898,6 @@ bool CLR_RT_Assembly::FindGenericParam(CLR_INDEX typeSpecIndex, CLR_RT_GenericPa
     return false;
 }
 
-bool CLR_RT_Assembly::FindGenericParamAtTypeSpec(
-    CLR_UINT32 typeSpecIndex,
-    CLR_INT32 genericParameterPosition,
-    CLR_RT_TypeDef_Index &typeDef,
-    NanoCLRDataType &dataType)
-{
-    NATIVE_PROFILE_CLR_CORE();
-
-    CLR_RT_SignatureParser parser;
-    parser.Initialize_TypeSpec(this, GetTypeSpec(typeSpecIndex));
-
-    CLR_RT_SignatureParser::Element element;
-
-    // get into the GENERICINST
-    if (FAILED(parser.Advance(element)))
-    {
-        return false;
-    }
-
-    // move to type
-    if (FAILED(parser.Advance(element)))
-    {
-        return false;
-    }
-
-    // sanity check for invalid parameter position
-    if (genericParameterPosition > element.GenParamCount)
-    {
-        // not enough parameters!!
-        return false;
-    }
-
-    // walk to the requested parameter position
-    for (int32_t i = 0; i <= genericParameterPosition; i++)
-    {
-        if (FAILED(parser.Advance(element)))
-        {
-            return false;
-        }
-    }
-
-    // element.Class was filled from the VAR position
-    typeDef = element.Class;
-    dataType = element.DataType;
-
-    return true;
-}
-
 bool CLR_RT_Assembly::FindGenericParamAtMethodDef(
     CLR_RT_MethodDef_Instance md,
     CLR_INT32 genericParameterPosition,
@@ -7493,18 +7499,22 @@ HRESULT CLR_RT_TypeSystem::BuildTypeName(
             {
                 // generic type parameter
 
-                CLR_RT_TypeDef_Index paramTd;
-                NanoCLRDataType paramDt;
+                CLR_RT_TypeSpec_Instance typeContextTs;
+                if (!typeContextTs.InitializeFromIndex(*contextTypeSpec))
+                {
+                    NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
+                }
 
-                CLR_RT_Assembly *typeContextAssm = g_CLR_RT_TypeSystem.m_assemblies[contextTypeSpec->Assembly() - 1];
+                CLR_RT_SignatureParser::Element paramElement;
                 // this will bind !T→System.Int32, etc.
-                typeContextAssm->FindGenericParamAtTypeSpec(
-                    contextTypeSpec->TypeSpec(),
-                    element.GenericParamPosition, // the !N slot
-                    paramTd,
-                    paramDt);
-
-                if (paramDt == DATATYPE_VAR)
+                if (!typeContextTs.GetGenericParam(element.GenericParamPosition, paramElement))
+                {
+                    // couldn't be resolved, print encoded form (!N)
+                    char encodedParam[6];
+                    snprintf(encodedParam, ARRAYSIZE(encodedParam), "!%d", element.GenericParamPosition);
+                    NANOCLR_CHECK_HRESULT(QueueStringToBuffer(szBuffer, iBuffer, encodedParam));
+                }
+                else if (paramElement.DataType == DATATYPE_VAR)
                 {
                     // couldn't be resolved, print encoded form (!N)
                     char encodedParam[6];
@@ -7514,7 +7524,7 @@ HRESULT CLR_RT_TypeSystem::BuildTypeName(
                 else
                 {
                     // now print the *actual* type name
-                    BuildTypeName(paramTd, szBuffer, iBuffer);
+                    BuildTypeName(paramElement.Class, szBuffer, iBuffer);
                 }
             }
             else
@@ -7827,16 +7837,16 @@ HRESULT CLR_RT_TypeSystem::BuildMethodName(
                         // Generic parameter - try to resolve it
                         if (context != nullptr)
                         {
-                            CLR_RT_TypeDef_Index resolvedType{};
-                            NanoCLRDataType resolvedDT;
-
-                            if (mdInst.assembly->FindGenericParamAtTypeSpec(
-                                    context->TypeSpec(),
-                                    elem.GenericParamPosition,
-                                    resolvedType,
-                                    resolvedDT))
+                            CLR_RT_TypeSpec_Instance contextTs;
+                            if (!contextTs.InitializeFromIndex(*context))
                             {
-                                NANOCLR_CHECK_HRESULT(BuildTypeName(resolvedType, szBuffer, iBuffer));
+                                NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
+                            }
+
+                            CLR_RT_SignatureParser::Element paramElement;
+                            if (contextTs.GetGenericParam(elem.GenericParamPosition, paramElement))
+                            {
+                                NANOCLR_CHECK_HRESULT(BuildTypeName(paramElement.Class, szBuffer, iBuffer));
                             }
                             else
                             {
@@ -8447,23 +8457,22 @@ CLR_UINT32 CLR_RT_TypeSystem::ComputeHashForClosedGenericType(
         if (elem.DataType == DATATYPE_VAR && contextTypeSpec && NANOCLR_INDEX_IS_VALID(*contextTypeSpec))
         {
             // Resolve VAR (type parameter) from context TypeSpec
-            CLR_RT_TypeDef_Index resolvedTypeDef;
-            NanoCLRDataType resolvedDataType;
+            CLR_RT_TypeSpec_Instance contextTs;
+            if (!contextTs.InitializeFromIndex(*contextTypeSpec))
+            {
+                hash = 0;
+                goto ComputeHash_End;
+            }
 
-            CLR_RT_Assembly *contextAssm = g_CLR_RT_TypeSystem.m_assemblies[contextTypeSpec->Assembly() - 1];
-
-            if (contextAssm->FindGenericParamAtTypeSpec(
-                    contextTypeSpec->TypeSpec(),
-                    elem.GenericParamPosition,
-                    resolvedTypeDef,
-                    resolvedDataType))
+            CLR_RT_SignatureParser::Element paramElement;
+            if (contextTs.GetGenericParam(elem.GenericParamPosition, paramElement))
             {
                 // Use the resolved type from context
-                hash = SUPPORT_ComputeCRC(&resolvedDataType, sizeof(resolvedDataType), hash);
+                hash = SUPPORT_ComputeCRC(&paramElement.DataType, sizeof(paramElement.DataType), hash);
 
-                if (resolvedDataType == DATATYPE_CLASS || resolvedDataType == DATATYPE_VALUETYPE)
+                if (paramElement.DataType == DATATYPE_CLASS || paramElement.DataType == DATATYPE_VALUETYPE)
                 {
-                    hash = SUPPORT_ComputeCRC(&resolvedTypeDef.data, sizeof(resolvedTypeDef.data), hash);
+                    hash = SUPPORT_ComputeCRC(&paramElement.Class.data, sizeof(paramElement.Class.data), hash);
                 }
             }
             else

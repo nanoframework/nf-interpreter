@@ -3877,13 +3877,6 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
 
                             // resolve the generic parameter in the context of the caller's generic type, if different
                             // from the caller's assembly.
-                            CLR_RT_Assembly *resolveAsm = assm;
-                            if (stack->m_call.genericType && NANOCLR_INDEX_IS_VALID(*stack->m_call.genericType))
-                            {
-                                resolveAsm =
-                                    g_CLR_RT_TypeSystem.m_assemblies[stack->m_call.genericType->Assembly() - 1];
-                            }
-
                             if (stack->m_call.genericType != nullptr)
                             {
                                 CLR_UINT32 rawGenericParamRow = CLR_DataFromTk(arg);
@@ -3912,19 +3905,20 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                                     {
                                         // closed TypeSpec
                                         const CLR_RT_TypeSpec_Index *callerTypeSpec = stack->m_call.genericType;
-                                        CLR_RT_TypeDef_Index resolvedTypeDef;
-                                        NanoCLRDataType dummyDataType;
 
-                                        if (!resolveAsm->FindGenericParamAtTypeSpec(
-                                                callerTypeSpec->TypeSpec(),
-                                                genericParam.target->number,
-                                                resolvedTypeDef,
-                                                dummyDataType))
+                                        CLR_RT_TypeSpec_Instance typeSpec;
+                                        if (!typeSpec.InitializeFromIndex(*callerTypeSpec))
                                         {
                                             NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
                                         }
 
-                                        NANOCLR_CHECK_HRESULT(evalPos[0].SetReflection(resolvedTypeDef));
+                                        CLR_RT_SignatureParser::Element paramElement;
+                                        if (!typeSpec.GetGenericParam(genericParam.target->number, paramElement))
+                                        {
+                                            NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+                                        }
+
+                                        NANOCLR_CHECK_HRESULT(evalPos[0].SetReflection(paramElement.Class));
                                     }
                                 }
                             }

@@ -2063,8 +2063,20 @@ HRESULT CLR_RT_ExecutionEngine::InitializeReference(
 
         if (dt == DATATYPE_VAR)
         {
-            genericInstance->assembly
-                ->FindGenericParamAtTypeSpec(genericInstance->data, res.GenericParamPosition, realTypeDef, dt);
+            CLR_RT_TypeSpec_Instance genericTs;
+            if (!genericTs.InitializeFromIndex(*genericInstance))
+            {
+                NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
+            }
+
+            CLR_RT_SignatureParser::Element paramElement;
+            if (!genericTs.GetGenericParam(res.GenericParamPosition, paramElement))
+            {
+                NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
+            }
+
+            realTypeDef = paramElement.Class;
+            dt = paramElement.DataType;
 
             goto process_datatype;
         }
@@ -2297,26 +2309,28 @@ HRESULT CLR_RT_ExecutionEngine::InitializeLocals(
                     // type-level generic parameter in a locals signature (e.g. 'T' inside a generic type)
                     CLR_INT8 genericParamPosition = *sig++;
 
+                    // First, try to resolve using the method's generic type context
                     if (methodDefInstance.genericType && NANOCLR_INDEX_IS_VALID(*methodDefInstance.genericType) &&
                         methodDefInstance.genericType->data != CLR_EmptyToken)
                     {
-                        CLR_RT_TypeSpec_Instance typeSpec{};
-                        typeSpec.InitializeFromIndex(
-                            (const CLR_RT_TypeSpec_Index &)methodDefInstance.genericType->data);
+                        CLR_RT_TypeSpec_Instance typeSpec;
+                        if (!typeSpec.InitializeFromIndex(*methodDefInstance.genericType))
+                        {
+                            NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
+                        }
 
-                        typeSpec.assembly->FindGenericParamAtTypeSpec(
-                            methodDefInstance.genericType->data,
-                            genericParamPosition,
-                            cls,
-                            dt);
+                        CLR_RT_SignatureParser::Element paramElement;
+                        if (!typeSpec.GetGenericParam(genericParamPosition, paramElement))
+                        {
+                            NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
+                        }
+
+                        cls = paramElement.Class;
+                        dt = paramElement.DataType;
                     }
                     else
                     {
-                        assembly->FindGenericParamAtTypeSpec(
-                            methodDefInstance.genericType->data,
-                            genericParamPosition,
-                            cls,
-                            dt);
+                        NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
                     }
 
                     goto done;

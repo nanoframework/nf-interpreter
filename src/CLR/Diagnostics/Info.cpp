@@ -600,22 +600,26 @@ void CLR_RT_Assembly::DumpToken(CLR_UINT32 token, const CLR_RT_MethodDef_Instanc
                 // if the caller's genericType is non‐null, ask the CLR to map !n→actual argument:
                 if (methodDefInstance.genericType != nullptr && NANOCLR_INDEX_IS_VALID(*methodDefInstance.genericType))
                 {
-                    CLR_RT_TypeDef_Index tdArg{};
-                    NanoCLRDataType dtArg;
-                    bool ok = g_CLR_RT_TypeSystem.m_assemblies[methodDefInstance.genericType->Assembly() - 1]
-                                  ->FindGenericParamAtTypeSpec(
-                                      methodDefInstance.genericType->TypeSpec(),
-                                      gpPosition,
-                                      tdArg,
-                                      dtArg);
-                    if (ok)
+                    CLR_RT_TypeSpec_Instance typeSpec;
+                    if (!typeSpec.InitializeFromIndex(*methodDefInstance.genericType))
+                    {
+                        CLR_Debug::Printf("!%d", gpPosition);
+                        break;
+                    }
+
+                    CLR_RT_SignatureParser::Element paramElement;
+                    if (typeSpec.GetGenericParam(gpPosition, paramElement))
                     {
                         char bufArg[256]{};
                         char *pArg = bufArg;
                         size_t cbArg = sizeof(bufArg);
 
-                        g_CLR_RT_TypeSystem
-                            .BuildTypeName(tdArg, pArg, cbArg, CLR_RT_TypeSystem::TYPENAME_FLAGS_FULL, elem.Levels);
+                        g_CLR_RT_TypeSystem.BuildTypeName(
+                            paramElement.Class,
+                            pArg,
+                            cbArg,
+                            CLR_RT_TypeSystem::TYPENAME_FLAGS_FULL,
+                            elem.Levels);
 
                         CLR_Debug::Printf("%s", bufArg);
 
@@ -684,23 +688,20 @@ void CLR_RT_Assembly::DumpToken(CLR_UINT32 token, const CLR_RT_MethodDef_Instanc
                     if (methodDefInstance.genericType != nullptr &&
                         NANOCLR_INDEX_IS_VALID(*methodDefInstance.genericType))
                     {
-                        CLR_RT_TypeDef_Index tdArg{};
-                        NanoCLRDataType dtArg;
-
-                        bool genericParamFound = tsInst.assembly->FindGenericParamAtTypeSpec(
-                            methodDefInstance.genericType->TypeSpec(),
-                            gpIndex,
-                            tdArg,
-                            dtArg);
-                        if (genericParamFound)
+                        CLR_RT_TypeSpec_Instance typeSpec;
+                        if (typeSpec.InitializeFromIndex(*methodDefInstance.genericType))
                         {
-                            // print "I4[]" or the bound argument plus []
-                            char bufArg[256];
-                            char *pArg = bufArg;
-                            size_t cbArg = sizeof(bufArg);
-                            g_CLR_RT_TypeSystem.BuildTypeName(tdArg, pArg, cbArg);
-                            CLR_Debug::Printf("%s[]", bufArg);
-                            break;
+                            CLR_RT_SignatureParser::Element paramElement;
+                            if (typeSpec.GetGenericParam(gpIndex, paramElement))
+                            {
+                                // print "I4[]" or the bound argument plus []
+                                char bufArg[256];
+                                char *pArg = bufArg;
+                                size_t cbArg = sizeof(bufArg);
+                                g_CLR_RT_TypeSystem.BuildTypeName(paramElement.Class, pArg, cbArg);
+                                CLR_Debug::Printf("%s[]", bufArg);
+                                break;
+                            }
                         }
                     }
 
