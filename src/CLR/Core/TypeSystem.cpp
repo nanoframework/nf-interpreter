@@ -813,7 +813,7 @@ bool CLR_RT_TypeSpec_Instance::ResolveToken(
 
             Set(caller->genericType->Assembly(), closedTsRow);
             assembly = g_CLR_RT_TypeSystem.m_assemblies[caller->genericType->Assembly() - 1];
-            target = assm->GetTypeSpec(closedTsRow);
+            target = assembly->GetTypeSpec(closedTsRow);
             cachedElementType = paramElement.Class;
         }
         else if (element.DataType == DATATYPE_MVAR)
