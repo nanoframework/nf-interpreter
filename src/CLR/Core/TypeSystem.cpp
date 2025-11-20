@@ -5664,7 +5664,14 @@ HRESULT CLR_RT_Assembly::AllocateGenericStaticFieldsOnDemand(
                     dlg->m_genericTypeSpec = typeSpecIndex;
 
                     // Store the caller's MethodSpec (if any) to enable reolution of method generic parameters
-                    dlg->m_genericMethodSpec = contextMethod->methodSpec;
+                    if (contextMethod != nullptr)
+                    {
+                        dlg->m_genericMethodSpec = contextMethod->methodSpec;
+                    }
+                    else
+                    {
+                        dlg->m_genericMethodSpec.Clear();
+                    }
 
                     // Push to the .cctor thread and schedule for execution
                     if (SUCCEEDED(g_CLR_RT_ExecutionEngine.m_cctorThread->PushThreadProcDelegate(dlg)))
