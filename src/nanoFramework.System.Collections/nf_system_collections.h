@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (c) .NET Foundation and Contributors
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
@@ -20,9 +20,37 @@ struct Library_nf_system_collections_System_Collections_Bucket
     //--//
 };
 
+struct Library_nf_system_collections_System_Collections_Generic_ICollectionDebugView_1
+{
+    static const int FIELD___collection = 1;
+
+    //--//
+};
+
+struct Library_nf_system_collections_System_Collections_Generic_List_1__Enumerator
+{
+    static const int FIELD___list = 1;
+    static const int FIELD___version = 2;
+    static const int FIELD___index = 3;
+    static const int FIELD___current = 4;
+
+    //--//
+};
+
+struct Library_nf_system_collections_System_Collections_Generic_List_1
+{
+    static const int FIELD_STATIC__s_emptyArray = 0;
+
+    static const int FIELD___items = 1;
+    static const int FIELD___size = 2;
+    static const int FIELD___version = 3;
+
+    //--//
+};
+
 struct Library_nf_system_collections_System_Collections_Hashtable
 {
-    static const int FIELD_STATIC___syncLock = 0;
+    static const int FIELD_STATIC___syncLock = 1;
 
     static const int FIELD___buckets = 1;
     static const int FIELD___loadsize = 2;
