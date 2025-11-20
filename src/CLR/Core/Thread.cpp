@@ -167,9 +167,7 @@ HRESULT CLR_RT_Thread::PushThreadProcDelegate(CLR_RT_HeapBlock_Delegate *pDelega
     // Note: We temporarily set inst.genericType to the delegate's interior pointer here,
     // but will copy it to stable storage in the stack frame after Push() below
     CLR_RT_TypeSpec_Index delegateTypeSpec;
-    CLR_RT_MethodSpec_Index delegateMethodSpec;
     delegateTypeSpec.Clear();
-    delegateMethodSpec.Clear();
 
     if (pDelegate->m_genericTypeSpec.data != 0)
     {
@@ -179,8 +177,7 @@ HRESULT CLR_RT_Thread::PushThreadProcDelegate(CLR_RT_HeapBlock_Delegate *pDelega
 
     if (pDelegate->m_genericMethodSpec.data != 0)
     {
-        delegateMethodSpec = pDelegate->m_genericMethodSpec;
-        inst.methodSpec = delegateMethodSpec;
+        inst.methodSpec = pDelegate->m_genericMethodSpec;
     }
 
 #if defined(NANOCLR_APPDOMAINS)
@@ -212,10 +209,10 @@ HRESULT CLR_RT_Thread::PushThreadProcDelegate(CLR_RT_HeapBlock_Delegate *pDelega
 
     // If we have a generic method context, copy it to the stack frame
     // This enables MVAR resolution for .cctor triggered from generic methods
-    if (delegateMethodSpec.data != 0)
+    if (pDelegate->m_genericMethodSpec.data != 0)
     {
         CLR_RT_StackFrame *stackTop = this->CurrentFrame();
-        stackTop->m_call.methodSpec = delegateMethodSpec;
+        stackTop->m_call.methodSpec = pDelegate->m_genericMethodSpec;
     }
 
     if ((inst.target->flags & CLR_RECORD_METHODDEF::MD_Static) == 0)
