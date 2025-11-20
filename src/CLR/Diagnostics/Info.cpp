@@ -1118,7 +1118,19 @@ void CLR_RT_DUMP::OBJECT(CLR_RT_HeapBlock *ptr, const char *text)
         {
             auto *dlg = (CLR_RT_HeapBlock_Delegate *)ptr;
 
-            CLR_RT_DUMP::METHOD(dlg->DelegateFtn(), nullptr);
+            CLR_RT_MethodDef_Instance mdInst;
+            if (mdInst.InitializeFromIndex(dlg->DelegateFtn()))
+            {
+                // Use the delegate's stored generic context for more informative diagnostics
+                const CLR_RT_TypeSpec_Index *genericType =
+                    (dlg->m_genericTypeSpec.data != 0) ? &dlg->m_genericTypeSpec : nullptr;
+                CLR_RT_DUMP::METHOD(mdInst, genericType);
+            }
+            else
+            {
+                // Fallback if initialization fails
+                CLR_RT_DUMP::METHOD(dlg->DelegateFtn(), nullptr);
+            }
         }
         break;
 
