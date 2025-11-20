@@ -1002,6 +1002,37 @@ HRESULT CLR_RT_Thread::Execute_DelegateInvoke(CLR_RT_StackFrame &stackArg)
     NANOCLR_NOCLEANUP();
 }
 
+// Helper function to handle generic .cctor rescheduling for static field operations
+// Returns CLR_E_RESCHEDULE if rescheduling is needed, CLR_E_WRONG_TYPE if hash is invalid,
+// or S_OK if no rescheduling is needed.
+static HRESULT HandleGenericCctorReschedule(
+    CLR_RT_TypeSpec_Instance &tsInst,
+    CLR_RT_StackFrame *stack,
+    CLR_PMETADATA *pIp)
+{
+    CLR_UINT32 hash =
+        g_CLR_RT_TypeSystem.ComputeHashForClosedGenericType(tsInst, &stack->m_genericTypeSpecStorage, &stack->m_call);
+
+    if (hash == 0xFFFFFFFF)
+    {
+        return CLR_E_WRONG_TYPE;
+    }
+
+    CLR_RT_GenericCctorExecutionRecord *cctorRecord = g_CLR_RT_TypeSystem.FindOrCreateGenericCctorRecord(hash, nullptr);
+
+    if (cctorRecord != nullptr && (cctorRecord->m_flags & CLR_RT_GenericCctorExecutionRecord::c_Scheduled) &&
+        !(cctorRecord->m_flags & CLR_RT_GenericCctorExecutionRecord::c_Executed))
+    {
+        // .cctor is scheduled but not yet executed
+        // Rewind ip to before this instruction so it will be retried
+        // (1 byte for opcode + 2 bytes for compressed field token)
+        *pIp -= 3;
+        return CLR_E_RESCHEDULE;
+    }
+
+    return S_OK;
+}
+
 HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
 {
     NATIVE_PROFILE_CLR_CORE();
@@ -2971,29 +3002,7 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                             CLR_RT_TypeSpec_Instance tsInst;
                             if (tsInst.InitializeFromIndex(*field.genericType))
                             {
-                                CLR_UINT32 hash = g_CLR_RT_TypeSystem.ComputeHashForClosedGenericType(
-                                    tsInst,
-                                    &stack->m_genericTypeSpecStorage,
-                                    &stack->m_call);
-
-                                if (hash == 0xFFFFFFFF)
-                                {
-                                    NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
-                                }
-
-                                CLR_RT_GenericCctorExecutionRecord *cctorRecord =
-                                    g_CLR_RT_TypeSystem.FindOrCreateGenericCctorRecord(hash, nullptr);
-
-                                if (cctorRecord != nullptr &&
-                                    (cctorRecord->m_flags & CLR_RT_GenericCctorExecutionRecord::c_Scheduled) &&
-                                    !(cctorRecord->m_flags & CLR_RT_GenericCctorExecutionRecord::c_Executed))
-                                {
-                                    // .cctor is scheduled but not yet executed
-                                    // Rewind ip to before this instruction so it will be retried
-                                    // (1 byte for opcode + 2 bytes for compressed field token)
-                                    ip -= 3;
-                                    NANOCLR_SET_AND_LEAVE(CLR_E_RESCHEDULE);
-                                }
+                                NANOCLR_CHECK_HRESULT(HandleGenericCctorReschedule(tsInst, stack, &ip));
                             }
                         }
                     }
@@ -3048,23 +3057,7 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                             CLR_RT_TypeSpec_Instance tsInst;
                             if (tsInst.InitializeFromIndex(*field.genericType))
                             {
-                                CLR_UINT32 hash = g_CLR_RT_TypeSystem.ComputeHashForClosedGenericType(
-                                    tsInst,
-                                    &stack->m_genericTypeSpecStorage,
-                                    &stack->m_call);
-                                CLR_RT_GenericCctorExecutionRecord *cctorRecord =
-                                    g_CLR_RT_TypeSystem.FindOrCreateGenericCctorRecord(hash, nullptr);
-
-                                if (cctorRecord != nullptr &&
-                                    (cctorRecord->m_flags & CLR_RT_GenericCctorExecutionRecord::c_Scheduled) &&
-                                    !(cctorRecord->m_flags & CLR_RT_GenericCctorExecutionRecord::c_Executed))
-                                {
-                                    // .cctor is scheduled but not yet executed
-                                    // Rewind ip to before this instruction so it will be retried
-                                    // (1 byte for opcode + 2 bytes for compressed field token)
-                                    ip -= 3;
-                                    NANOCLR_SET_AND_LEAVE(CLR_E_RESCHEDULE);
-                                }
+                                NANOCLR_CHECK_HRESULT(HandleGenericCctorReschedule(tsInst, stack, &ip));
                             }
                         }
 
@@ -3121,23 +3114,7 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                             CLR_RT_TypeSpec_Instance tsInst;
                             if (tsInst.InitializeFromIndex(*field.genericType))
                             {
-                                CLR_UINT32 hash = g_CLR_RT_TypeSystem.ComputeHashForClosedGenericType(
-                                    tsInst,
-                                    &stack->m_genericTypeSpecStorage,
-                                    &stack->m_call);
-                                CLR_RT_GenericCctorExecutionRecord *cctorRecord =
-                                    g_CLR_RT_TypeSystem.FindOrCreateGenericCctorRecord(hash, nullptr);
-
-                                if (cctorRecord != nullptr &&
-                                    (cctorRecord->m_flags & CLR_RT_GenericCctorExecutionRecord::c_Scheduled) &&
-                                    !(cctorRecord->m_flags & CLR_RT_GenericCctorExecutionRecord::c_Executed))
-                                {
-                                    // .cctor is scheduled but not yet executed
-                                    // Rewind ip to before this instruction so it will be retried
-                                    // (1 byte for opcode + 2 bytes for compressed field token)
-                                    ip -= 3;
-                                    NANOCLR_SET_AND_LEAVE(CLR_E_RESCHEDULE);
-                                }
+                                NANOCLR_CHECK_HRESULT(HandleGenericCctorReschedule(tsInst, stack, &ip));
                             }
                         }
 
