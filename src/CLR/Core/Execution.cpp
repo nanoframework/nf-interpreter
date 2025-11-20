@@ -2028,6 +2028,40 @@ CLR_RT_HeapBlock *CLR_RT_ExecutionEngine::AccessStaticField(const CLR_RT_FieldDe
     return nullptr;
 }
 
+// Helper function to resolve generic type parameters (VAR/MVAR) to their concrete types
+// Used by both InitializeReference and InitializeLocals to reduce code duplication
+static HRESULT ResolveGenericTypeParameter(
+    const CLR_RT_TypeSpec_Index &genericTypeIndex,
+    CLR_UINT8 paramPosition,
+    CLR_RT_TypeDef_Index &outClass,
+    NanoCLRDataType &outDataType)
+{
+    NATIVE_PROFILE_CLR_CORE();
+    NANOCLR_HEADER();
+
+    if (!NANOCLR_INDEX_IS_VALID(genericTypeIndex))
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
+    }
+
+    CLR_RT_TypeSpec_Instance typeSpec;
+    if (!typeSpec.InitializeFromIndex(genericTypeIndex))
+        {
+        NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
+    }
+
+    CLR_RT_SignatureParser::Element paramElement;
+    if (!typeSpec.GetGenericParam(paramPosition, paramElement))
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
+    }
+
+    outClass = paramElement.Class;
+    outDataType = paramElement.DataType;
+
+    NANOCLR_NOCLEANUP();
+}
+
 HRESULT CLR_RT_ExecutionEngine::InitializeReference(
     CLR_RT_HeapBlock &ref,
     CLR_RT_SignatureParser &parser,
@@ -2068,20 +2102,11 @@ HRESULT CLR_RT_ExecutionEngine::InitializeReference(
                 NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
             }
 
-            CLR_RT_TypeSpec_Instance genericTs;
-            if (!genericTs.InitializeFromIndex(*genericInstance))
-            {
-                NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
-            }
-
-            CLR_RT_SignatureParser::Element paramElement;
-            if (!genericTs.GetGenericParam(res.GenericParamPosition, paramElement))
-            {
-                NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
-            }
-
-            realTypeDef = paramElement.Class;
-            dt = paramElement.DataType;
+            NANOCLR_CHECK_HRESULT(ResolveGenericTypeParameter(
+                *genericInstance,
+                res.GenericParamPosition,
+                realTypeDef,
+                dt));
 
             goto process_datatype;
         }
@@ -2318,20 +2343,11 @@ HRESULT CLR_RT_ExecutionEngine::InitializeLocals(
                     if (methodDefInstance.genericType && NANOCLR_INDEX_IS_VALID(*methodDefInstance.genericType) &&
                         methodDefInstance.genericType->data != CLR_EmptyToken)
                     {
-                        CLR_RT_TypeSpec_Instance typeSpec;
-                        if (!typeSpec.InitializeFromIndex(*methodDefInstance.genericType))
-                        {
-                            NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
-                        }
-
-                        CLR_RT_SignatureParser::Element paramElement;
-                        if (!typeSpec.GetGenericParam(genericParamPosition, paramElement))
-                        {
-                            NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
-                        }
-
-                        cls = paramElement.Class;
-                        dt = paramElement.DataType;
+                        NANOCLR_CHECK_HRESULT(ResolveGenericTypeParameter(
+                            *methodDefInstance.genericType,
+                            genericParamPosition,
+                            cls,
+                            dt));
                     }
                     else
                     {
