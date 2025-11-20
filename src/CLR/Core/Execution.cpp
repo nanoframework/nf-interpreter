@@ -2314,7 +2314,7 @@ HRESULT CLR_RT_ExecutionEngine::InitializeLocals(
                     // type-level generic parameter in a locals signature (e.g. 'T' inside a generic type)
                     CLR_INT8 genericParamPosition = *sig++;
 
-                    // First, try to resolve using the method's generic type context
+                    // Resolve type-level generic parameter (VAR) using the method's enclosing type context
                     if (methodDefInstance.genericType && NANOCLR_INDEX_IS_VALID(*methodDefInstance.genericType) &&
                         methodDefInstance.genericType->data != CLR_EmptyToken)
                     {
