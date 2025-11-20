@@ -954,8 +954,7 @@ void CLR_RT_Assembly::DumpOpcodeDirect(
         if (op == CEE_CALL || op == CEE_CALLVIRT)
         {
             CLR_RT_MethodDef_Instance mdInst{};
-            if (NANOCLR_INDEX_IS_VALID(call) &&
-                mdInst.ResolveToken(token, call.assembly, call.genericType))
+            if (NANOCLR_INDEX_IS_VALID(call) && mdInst.ResolveToken(token, call.assembly, call.genericType))
             {
                 // mdInst now holds the target MethodDef (or MethodSpec) plus any genericType.
                 CLR_RT_DUMP::METHOD(mdInst, call.genericType);
