@@ -176,7 +176,7 @@ HRESULT CLR_RT_Thread::PushThreadProcDelegate(CLR_RT_HeapBlock_Delegate *pDelega
         delegateTypeSpec = pDelegate->m_genericTypeSpec;
         inst.genericType = &delegateTypeSpec;
     }
-    
+
     if (pDelegate->m_genericMethodSpec.data != 0)
     {
         delegateMethodSpec = pDelegate->m_genericMethodSpec;
@@ -209,7 +209,7 @@ HRESULT CLR_RT_Thread::PushThreadProcDelegate(CLR_RT_HeapBlock_Delegate *pDelega
         stackTop->m_genericTypeSpecStorage = delegateTypeSpec;
         stackTop->m_call.genericType = &stackTop->m_genericTypeSpecStorage;
     }
-    
+
     // If we have a generic method context, copy it to the stack frame
     // This enables MVAR resolution for .cctor triggered from generic methods
     if (delegateMethodSpec.data != 0)

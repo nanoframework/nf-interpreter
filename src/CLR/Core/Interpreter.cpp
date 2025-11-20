@@ -2387,8 +2387,10 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
 
                         // Set up the new stack frame's generic context
                         // Priority order:
-                        // 1. effectiveCallerGeneric (extracted from TypeSpec search for interface calls) - HIGHEST PRIORITY
-                        //    This is the concrete closed generic type (e.g., List<int>) not the interface (e.g., IEnumerable<T>)
+                        // 1. effectiveCallerGeneric (extracted from TypeSpec search for interface calls) - HIGHEST
+                        // PRIORITY
+                        //    This is the concrete closed generic type (e.g., List<int>) not the interface (e.g.,
+                        //    IEnumerable<T>)
                         // 2. calleeInst.genericType (from MethodRef TypeSpec or virtual dispatch)
                         // 3. stack->m_call.genericType (inherited from caller)
                         CLR_RT_StackFrame *newStack = th->CurrentFrame();
