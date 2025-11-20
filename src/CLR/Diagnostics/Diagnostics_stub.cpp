@@ -190,6 +190,14 @@ __nfweak void CLR_RT_DUMP::METHOD(const CLR_RT_MethodDef_Index &method, const CL
     NATIVE_PROFILE_CLR_DIAGNOSTICS();
 }
 
+__nfweak void CLR_RT_DUMP::METHOD(const CLR_RT_MethodDef_Instance &mdInst, const CLR_RT_TypeSpec_Index *genericType)
+{
+    (void)mdInst;
+    (void)genericType;
+
+    NATIVE_PROFILE_CLR_DIAGNOSTICS();
+}
+
 __nfweak void CLR_RT_DUMP::FIELD(const CLR_RT_FieldDef_Index &field)
 {
     (void)field;

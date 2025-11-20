@@ -118,15 +118,18 @@ HRESULT CLR_RT_StackFrame::Push(CLR_RT_Thread *th, const CLR_RT_MethodDef_Instan
                                       //    void*                  m_customPointer;
                                       // };
                                       //
+        // Initialize generic type context storage to invalid
+        stack->m_genericTypeSpecStorage.Clear();
+        //
 #ifndef NANOCLR_NO_IL_INLINE
         stack->m_inlineFrame = nullptr;
 #endif
 #if defined(NANOCLR_PROFILE_NEW_CALLS)
         stack->m_callchain.Enter(stack); // CLR_PROF_CounterCallChain m_callchain;
 #endif
-                                         //
-                                         // CLR_RT_HeapBlock          m_extension[1];
-                                         //
+            //
+            // CLR_RT_HeapBlock          m_extension[1];
+            //
 #if defined(ENABLE_NATIVE_PROFILER)
         stack->m_fNativeProfiled = stack->m_owningThread->m_fNativeProfiled;
 #endif

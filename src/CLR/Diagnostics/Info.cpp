@@ -446,17 +446,38 @@ void CLR_RT_Assembly::DumpToken(CLR_UINT32 token, const CLR_RT_MethodDef_Instanc
             const CLR_RECORD_FIELDREF *fr = GetFieldRef(index);
             const auto &xref = crossReferenceFieldRef[index];
 
-            // If the caller passed in a closed‐generic TypeSpec, use that …
+            // If the caller passed in a closed‐generic TypeSpec, use that
             if (methodDefInstance.genericType != nullptr && methodDefInstance.genericType->data != CLR_EmptyToken)
             {
-                // Build the closed‐generic owner name
-                char rgType[256], *sz = rgType;
-                size_t cb = sizeof(rgType);
-                g_CLR_RT_TypeSystem.BuildTypeName(*methodDefInstance.genericType, sz, cb, 0);
+                // The field's encodedOwner points to the TypeSpec we want to build the name for (e.g., EmptyArray<!0>)
+                // and methodDefInstance.genericType is the closed generic type that provides context (e.g.,
+                // EmptyArray<int>)
+                if (fr->Owner() == TBL_TypeSpec)
+                {
+                    static CLR_RT_TypeSpec_Index s_ownerTypeSpec;
+                    s_ownerTypeSpec.Set(assemblyIndex, fr->OwnerIndex());
 
-                // Append the field name
-                CLR_SafeSprintf(sz, cb, "::%s", GetString(fr->name));
-                CLR_Debug::Printf("%s", rgType);
+                    // Build the type name using the closed generic as context to resolve VAR parameters
+                    char rgType[256], *sz = rgType;
+                    size_t cb = sizeof(rgType);
+                    g_CLR_RT_TypeSystem
+                        .BuildTypeName(s_ownerTypeSpec, sz, cb, 0, methodDefInstance.genericType, &methodDefInstance);
+
+                    // Append the field name
+                    CLR_SafeSprintf(sz, cb, "::%s", GetString(fr->name));
+                    CLR_Debug::Printf("%s", rgType);
+                }
+                else
+                {
+                    // TypeRef case - just use the existing genericType
+                    char rgType[256], *sz = rgType;
+                    size_t cb = sizeof(rgType);
+                    g_CLR_RT_TypeSystem.BuildTypeName(*methodDefInstance.genericType, sz, cb, 0, nullptr);
+
+                    // Append the field name
+                    CLR_SafeSprintf(sz, cb, "::%s", GetString(fr->name));
+                    CLR_Debug::Printf("%s", rgType);
+                }
             }
             else
             {
@@ -579,22 +600,26 @@ void CLR_RT_Assembly::DumpToken(CLR_UINT32 token, const CLR_RT_MethodDef_Instanc
                 // if the caller's genericType is non‐null, ask the CLR to map !n→actual argument:
                 if (methodDefInstance.genericType != nullptr && NANOCLR_INDEX_IS_VALID(*methodDefInstance.genericType))
                 {
-                    CLR_RT_TypeDef_Index tdArg{};
-                    NanoCLRDataType dtArg;
-                    bool ok = g_CLR_RT_TypeSystem.m_assemblies[methodDefInstance.genericType->Assembly() - 1]
-                                  ->FindGenericParamAtTypeSpec(
-                                      methodDefInstance.genericType->TypeSpec(),
-                                      gpPosition,
-                                      tdArg,
-                                      dtArg);
-                    if (ok)
+                    CLR_RT_TypeSpec_Instance typeSpec;
+                    if (!typeSpec.InitializeFromIndex(*methodDefInstance.genericType))
+                    {
+                        CLR_Debug::Printf("!%d", gpPosition);
+                        break;
+                    }
+
+                    CLR_RT_SignatureParser::Element paramElement;
+                    if (typeSpec.GetGenericParam(gpPosition, paramElement))
                     {
                         char bufArg[256]{};
                         char *pArg = bufArg;
                         size_t cbArg = sizeof(bufArg);
 
-                        g_CLR_RT_TypeSystem
-                            .BuildTypeName(tdArg, pArg, cbArg, CLR_RT_TypeSystem::TYPENAME_FLAGS_FULL, elem.Levels);
+                        g_CLR_RT_TypeSystem.BuildTypeName(
+                            paramElement.Class,
+                            pArg,
+                            cbArg,
+                            CLR_RT_TypeSystem::TYPENAME_FLAGS_FULL,
+                            elem.Levels);
 
                         CLR_Debug::Printf("%s", bufArg);
 
@@ -663,23 +688,20 @@ void CLR_RT_Assembly::DumpToken(CLR_UINT32 token, const CLR_RT_MethodDef_Instanc
                     if (methodDefInstance.genericType != nullptr &&
                         NANOCLR_INDEX_IS_VALID(*methodDefInstance.genericType))
                     {
-                        CLR_RT_TypeDef_Index tdArg{};
-                        NanoCLRDataType dtArg;
-
-                        bool genericParamFound = tsInst.assembly->FindGenericParamAtTypeSpec(
-                            methodDefInstance.genericType->TypeSpec(),
-                            gpIndex,
-                            tdArg,
-                            dtArg);
-                        if (genericParamFound)
+                        CLR_RT_TypeSpec_Instance typeSpec;
+                        if (typeSpec.InitializeFromIndex(*methodDefInstance.genericType))
                         {
-                            // print "I4[]" or the bound argument plus []
-                            char bufArg[256];
-                            char *pArg = bufArg;
-                            size_t cbArg = sizeof(bufArg);
-                            g_CLR_RT_TypeSystem.BuildTypeName(tdArg, pArg, cbArg);
-                            CLR_Debug::Printf("%s[]", bufArg);
-                            break;
+                            CLR_RT_SignatureParser::Element paramElement;
+                            if (typeSpec.GetGenericParam(gpIndex, paramElement))
+                            {
+                                // print "I4[]" or the bound argument plus []
+                                char bufArg[256];
+                                char *pArg = bufArg;
+                                size_t cbArg = sizeof(bufArg);
+                                g_CLR_RT_TypeSystem.BuildTypeName(paramElement.Class, pArg, cbArg);
+                                CLR_Debug::Printf("%s[]", bufArg);
+                                break;
+                            }
                         }
                     }
 
@@ -932,7 +954,7 @@ void CLR_RT_Assembly::DumpOpcodeDirect(
         if (op == CEE_CALL || op == CEE_CALLVIRT)
         {
             CLR_RT_MethodDef_Instance mdInst{};
-            if (mdInst.ResolveToken(token, call.assembly, call.genericType))
+            if (NANOCLR_INDEX_IS_VALID(call) && mdInst.ResolveToken(token, call.assembly, call.genericType))
             {
                 // mdInst now holds the target MethodDef (or MethodSpec) plus any genericType.
                 CLR_RT_DUMP::METHOD(mdInst, call.genericType);
@@ -1025,6 +1047,18 @@ void CLR_RT_DUMP::METHOD(const CLR_RT_MethodDef_Index &method, const CLR_RT_Type
     CLR_Debug::Printf("%s", rgBuffer);
 }
 
+void CLR_RT_DUMP::METHOD(const CLR_RT_MethodDef_Instance &mdInst, const CLR_RT_TypeSpec_Index *genericType)
+{
+    NATIVE_PROFILE_CLR_DIAGNOSTICS();
+    char rgBuffer[512];
+    char *szBuffer = rgBuffer;
+    size_t iBuffer = MAXSTRLEN(rgBuffer);
+
+    g_CLR_RT_TypeSystem.BuildMethodName(mdInst, genericType, szBuffer, iBuffer);
+
+    CLR_Debug::Printf("%s", rgBuffer);
+}
+
 void CLR_RT_DUMP::FIELD(const CLR_RT_FieldDef_Index &field)
 {
     NATIVE_PROFILE_CLR_DIAGNOSTICS();
@@ -1083,7 +1117,19 @@ void CLR_RT_DUMP::OBJECT(CLR_RT_HeapBlock *ptr, const char *text)
         {
             auto *dlg = (CLR_RT_HeapBlock_Delegate *)ptr;
 
-            CLR_RT_DUMP::METHOD(dlg->DelegateFtn(), nullptr);
+            CLR_RT_MethodDef_Instance mdInst;
+            if (mdInst.InitializeFromIndex(dlg->DelegateFtn()))
+            {
+                // Use the delegate's stored generic context for more informative diagnostics
+                const CLR_RT_TypeSpec_Index *genericType =
+                    (dlg->m_genericTypeSpec.data != 0) ? &dlg->m_genericTypeSpec : nullptr;
+                CLR_RT_DUMP::METHOD(mdInst, genericType);
+            }
+            else
+            {
+                // Fallback if initialization fails
+                CLR_RT_DUMP::METHOD(dlg->DelegateFtn(), nullptr);
+            }
         }
         break;
 

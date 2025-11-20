@@ -1002,6 +1002,37 @@ HRESULT CLR_RT_Thread::Execute_DelegateInvoke(CLR_RT_StackFrame &stackArg)
     NANOCLR_NOCLEANUP();
 }
 
+// Helper function to handle generic .cctor rescheduling for static field operations
+// Returns CLR_E_RESCHEDULE if rescheduling is needed, CLR_E_WRONG_TYPE if hash is invalid,
+// or S_OK if no rescheduling is needed.
+static HRESULT HandleGenericCctorReschedule(
+    CLR_RT_TypeSpec_Instance &tsInst,
+    CLR_RT_StackFrame *stack,
+    CLR_PMETADATA *pIp)
+{
+    CLR_UINT32 hash =
+        g_CLR_RT_TypeSystem.ComputeHashForClosedGenericType(tsInst, &stack->m_genericTypeSpecStorage, &stack->m_call);
+
+    if (hash == 0xFFFFFFFF)
+    {
+        return CLR_E_WRONG_TYPE;
+    }
+
+    CLR_RT_GenericCctorExecutionRecord *cctorRecord = g_CLR_RT_TypeSystem.FindOrCreateGenericCctorRecord(hash, nullptr);
+
+    if (cctorRecord != nullptr && (cctorRecord->m_flags & CLR_RT_GenericCctorExecutionRecord::c_Scheduled) &&
+        !(cctorRecord->m_flags & CLR_RT_GenericCctorExecutionRecord::c_Executed))
+    {
+        // .cctor is scheduled but not yet executed
+        // Rewind ip to before this instruction so it will be retried
+        // (1 byte for opcode + 2 bytes for compressed field token)
+        *pIp -= 3;
+        return CLR_E_RESCHEDULE;
+    }
+
+    return S_OK;
+}
+
 HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
 {
     NATIVE_PROFILE_CLR_CORE();
@@ -2108,8 +2139,83 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                 {
                     FETCH_ARG_COMPRESSED_METHODTOKEN(arg, ip);
 
+                    // Save arrayElementType for propagation through the call chain
+                    // This will be used by ResolveToken and later restored after InitializeFromIndex calls
+                    CLR_RT_TypeDef_Index propagatedArrayElementType{};
+                    if (NANOCLR_INDEX_IS_VALID(stack->m_call.arrayElementType))
+                    {
+                        propagatedArrayElementType = stack->m_call.arrayElementType;
+                    }
+
                     CLR_RT_MethodDef_Instance calleeInst{};
-                    if (calleeInst.ResolveToken(arg, assm, stack->m_call.genericType) == false)
+                    // Set arrayElementType before ResolveToken so generic type resolution can use it
+                    calleeInst.arrayElementType = propagatedArrayElementType;
+
+                    // For interface method calls on generic instances, try to extract the closed generic TypeSpec
+                    // from the caller's assembly by matching the object's TypeDef
+                    const CLR_RT_TypeSpec_Index *effectiveCallerGeneric = stack->m_call.genericType;
+
+                    // Only perform expensive TypeSpec search if ALL conditions are met:
+                    // 1. This is a virtual call (interfaces use CALLVIRT)
+                    // 2. No generic context exists yet
+                    // 3. The token is a MethodRef (not direct MethodDef)
+                    if (op == CEE_CALLVIRT && stack->m_call.genericType == nullptr &&
+                        CLR_TypeFromTk(arg) == TBL_MethodRef)
+                    {
+                        const CLR_RECORD_METHODREF *mr = assm->GetMethodRef(CLR_DataFromTk(arg));
+
+                        // 4. The method owner is a TypeRef (interface method)
+                        // 5. Not a static method (interfaces don't have static methods, but safety check)
+                        if (mr && mr->Owner() == TBL_TypeRef)
+                        {
+                            // Temporarily resolve to get argument count and check if instance method
+                            CLR_RT_MethodDef_Instance tempInst{};
+                            if (tempInst.ResolveToken(arg, assm, nullptr) &&
+                                (tempInst.target->flags & CLR_RECORD_METHODDEF::MD_Static) == 0)
+                            {
+                                CLR_RT_HeapBlock *pThisTemp = &evalPos[1 - tempInst.target->argumentsCount];
+
+                                // 6. 'this' is an object reference (not a value type byref)
+                                if (pThisTemp->DataType() == DATATYPE_OBJECT || pThisTemp->DataType() == DATATYPE_BYREF)
+                                {
+                                    CLR_RT_HeapBlock *obj = pThisTemp->Dereference();
+
+                                    // 7. Object is a class instance (generic or not)
+                                    if (obj && obj->DataType() == DATATYPE_CLASS)
+                                    {
+                                        CLR_RT_TypeDef_Index objCls = obj->ObjectCls();
+
+                                        // 8. Object has a valid TypeDef
+                                        if (NANOCLR_INDEX_IS_VALID(objCls))
+                                        {
+                                            // NOW search for a TypeSpec that matches this object's TypeDef
+                                            // This is only needed for closed generic instances like List<int>
+                                            for (int i = 0; i < assm->tablesSize[TBL_TypeSpec]; i++)
+                                            {
+                                                const CLR_RT_TypeSpec_Index *tsIdx =
+                                                    &assm->crossReferenceTypeSpec[i].genericType;
+                                                if (NANOCLR_INDEX_IS_VALID(*tsIdx))
+                                                {
+                                                    CLR_RT_TypeSpec_Instance tsInst{};
+                                                    if (tsInst.InitializeFromIndex(*tsIdx) &&
+                                                        NANOCLR_INDEX_IS_VALID(tsInst.genericTypeDef) &&
+                                                        tsInst.genericTypeDef.data == objCls.data)
+                                                    {
+                                                        // Found a TypeSpec in the caller's assembly that matches the
+                                                        // object's class
+                                                        effectiveCallerGeneric = tsIdx;
+                                                        break;
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    if (calleeInst.ResolveToken(arg, assm, effectiveCallerGeneric) == false)
                     {
                         NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
                     }
@@ -2131,6 +2237,12 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                         if (dlg->DataType() == DATATYPE_DELEGATE_HEAD)
                         {
                             calleeInst.InitializeFromIndex(dlg->DelegateFtn());
+
+                            // Restore propagated arrayElementType after InitializeFromIndex
+                            if (NANOCLR_INDEX_IS_VALID(propagatedArrayElementType))
+                            {
+                                calleeInst.arrayElementType = propagatedArrayElementType;
+                            }
 
                             if ((calleeInst.target->flags & CLR_RECORD_METHODDEF::MD_Static) == 0)
                             {
@@ -2211,15 +2323,56 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                                             NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
                                         }
 
-                                        if (calleeInst.genericType && NANOCLR_INDEX_IS_VALID(*calleeInst.genericType) &&
-                                            calleeInst.genericType->data != CLR_EmptyToken)
+                                        // If this is an SZArrayHelper dispatch, populate arrayElementType from runtime
+                                        // array
+                                        CLR_RT_TypeDef_Index savedArrayElementType{};
+                                        CLR_RT_HeapBlock_Array *pArray =
+                                            (CLR_RT_HeapBlock_Array *)pThis[0].Dereference();
+                                        if (pArray && pArray->DataType() == DATATYPE_SZARRAY)
                                         {
-                                            // store the current generic context (if any)
+                                            // Check if the dispatched method belongs to SZArrayHelper
+                                            CLR_RT_MethodDef_Instance calleeRealInst{};
+                                            calleeRealInst.InitializeFromIndex(calleeReal);
+
+                                            CLR_RT_TypeDef_Instance calleeType{};
+                                            if (calleeType.InitializeFromMethod(calleeRealInst))
+                                            {
+                                                if (calleeType.data == g_CLR_RT_WellKnownTypes.SZArrayHelper.data)
+                                                {
+                                                    // Get the element type from the array's reflection data
+                                                    const CLR_RT_ReflectionDef_Index &reflex =
+                                                        pArray->ReflectionDataConst();
+
+                                                    // For a 1D array, levels == 1 and data.type is the element TypeDef
+                                                    if (reflex.levels == 1 && reflex.kind == REFLECTION_TYPE)
+                                                    {
+                                                        savedArrayElementType = reflex.data.type;
+                                                    }
+                                                }
+                                            }
+                                        }
+
+                                        // Initialize the dispatched method, preserving the generic context from
+                                        // calleeInst The genericType was set by ResolveToken from the MethodRef's owner
+                                        // TypeSpec
+                                        if (calleeInst.genericType && NANOCLR_INDEX_IS_VALID(*calleeInst.genericType))
+                                        {
                                             calleeInst.InitializeFromIndex(calleeReal, *calleeInst.genericType);
                                         }
                                         else
                                         {
                                             calleeInst.InitializeFromIndex(calleeReal);
+                                        }
+
+                                        // Restore the array element type after reinitializing calleeInst
+                                        if (NANOCLR_INDEX_IS_VALID(savedArrayElementType))
+                                        {
+                                            calleeInst.arrayElementType = savedArrayElementType;
+                                        }
+                                        else if (NANOCLR_INDEX_IS_VALID(propagatedArrayElementType))
+                                        {
+                                            // Restore propagated arrayElementType from parent frame
+                                            calleeInst.arrayElementType = propagatedArrayElementType;
                                         }
                                     }
 
@@ -2243,6 +2396,14 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                     else
 #endif // NANOCLR_APPDOMAINS
                     {
+                        // Restore propagated arrayElementType before any path (inline or push)
+                        // Only restore if not already set (e.g., by SZArrayHelper detection in virtual dispatch)
+                        if (!NANOCLR_INDEX_IS_VALID(calleeInst.arrayElementType) &&
+                            NANOCLR_INDEX_IS_VALID(propagatedArrayElementType))
+                        {
+                            calleeInst.arrayElementType = propagatedArrayElementType;
+                        }
+
 #ifndef NANOCLR_NO_IL_INLINE
                         if (stack->PushInline(ip, assm, evalPos, calleeInst, pThis))
                         {
@@ -2252,7 +2413,45 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
 #endif
 
                         WRITEBACK(stack, evalPos, ip, fDirty);
+
                         NANOCLR_CHECK_HRESULT(CLR_RT_StackFrame::Push(th, calleeInst, -1));
+
+                        // Set up the new stack frame's generic context
+                        // Priority order:
+                        // 1. effectiveCallerGeneric (extracted from TypeSpec search for interface calls) - HIGHEST
+                        // PRIORITY
+                        //    This is the concrete closed generic type (e.g., List<int>) not the interface (e.g.,
+                        //    IEnumerable<T>)
+                        // 2. calleeInst.genericType (from MethodRef TypeSpec or virtual dispatch)
+                        // 3. stack->m_call.genericType (inherited from caller)
+                        CLR_RT_StackFrame *newStack = th->CurrentFrame();
+                        const CLR_RT_TypeSpec_Index *effectiveGenericContext = nullptr;
+
+                        if (effectiveCallerGeneric && NANOCLR_INDEX_IS_VALID(*effectiveCallerGeneric))
+                        {
+                            effectiveGenericContext = effectiveCallerGeneric;
+                        }
+                        else if (calleeInst.genericType && NANOCLR_INDEX_IS_VALID(*calleeInst.genericType))
+                        {
+                            effectiveGenericContext = calleeInst.genericType;
+                        }
+                        else if (stack->m_call.genericType && NANOCLR_INDEX_IS_VALID(*stack->m_call.genericType))
+                        {
+                            effectiveGenericContext = stack->m_call.genericType;
+                        }
+
+                        if (effectiveGenericContext)
+                        {
+                            // CRITICAL: Copy the value to stable storage and update the pointer ATOMICALLY
+                            // to prevent the pointer from pointing to stale/overwritten memory
+                            newStack->m_genericTypeSpecStorage = *effectiveGenericContext;
+                            newStack->m_call.genericType = &newStack->m_genericTypeSpecStorage;
+                        }
+                        else
+                        {
+                            // Ensure genericType doesn't point to garbage
+                            newStack->m_call.genericType = nullptr;
+                        }
                     }
 
                     goto Execute_Restart;
@@ -2280,12 +2479,19 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                     WRITEBACK(stack, evalPos, ip, fDirty);
 
                     //
+                    // Preserve arrayElementType from returning frame to caller frame
+                    //
+                    CLR_RT_StackFrame *stackNext = stack->Caller();
+                    if (stackNext && NANOCLR_INDEX_IS_VALID(stack->m_call.arrayElementType))
+                    {
+                        stackNext->m_call.arrayElementType = stack->m_call.arrayElementType;
+                    }
+
+                    //
                     // Same kind of handler, no need to pop back out, just restart execution in place.
                     //
                     if (stack->m_flags & CLR_RT_StackFrame::c_CallerIsCompatibleForRet)
                     {
-                        CLR_RT_StackFrame *stackNext = stack->Caller();
-
                         stack->Pop();
 
                         stack = stackNext;
@@ -2379,7 +2585,17 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                 {
                     FETCH_ARG_COMPRESSED_METHODTOKEN(arg, ip);
 
+                    // Save arrayElementType for propagation through the call chain
+                    CLR_RT_TypeDef_Index propagatedArrayElementType{};
+                    if (NANOCLR_INDEX_IS_VALID(stack->m_call.arrayElementType))
+                    {
+                        propagatedArrayElementType = stack->m_call.arrayElementType;
+                    }
+
                     CLR_RT_MethodDef_Instance calleeInst{};
+                    // Set arrayElementType before ResolveToken so generic type resolution can use it
+                    calleeInst.arrayElementType = propagatedArrayElementType;
+
                     if (calleeInst.ResolveToken(arg, assm, stack->m_call.genericType) == false)
                     {
                         NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
@@ -2564,7 +2780,7 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                     FETCH_ARG_COMPRESSED_TYPETOKEN(arg, ip);
 
                     NANOCLR_CHECK_HRESULT(
-                        CLR_RT_ExecutionEngine::CastToType(evalPos[0], arg, assm, (op == CEE_ISINST)));
+                        CLR_RT_ExecutionEngine::CastToType(evalPos[0], arg, assm, (op == CEE_ISINST), &stack->m_call));
                     break;
                 }
 
@@ -2753,7 +2969,12 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                     if (field.genericType && NANOCLR_INDEX_IS_VALID(*field.genericType))
                     {
                         // access static field of a generic instance
-                        ptr = field.assembly->GetStaticFieldByFieldDef(field, field.genericType);
+                        // Pass both TypeSpec context (for VAR resolution) and MethodDef context (for MVAR resolution)
+                        ptr = field.assembly->GetStaticFieldByFieldDef(
+                            field,
+                            field.genericType,
+                            &stack->m_genericTypeSpecStorage,
+                            &stack->m_call);
                     }
                     else
                     {
@@ -2764,6 +2985,26 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                     if (ptr == nullptr)
                     {
                         NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+                    }
+                    else if (field.genericType && NANOCLR_INDEX_IS_VALID(*field.genericType))
+                    {
+                        CLR_RT_HeapBlock *obj = ptr;
+                        NanoCLRDataType dt;
+
+                        CLR_RT_TypeDescriptor::ExtractObjectAndDataType(obj, dt);
+
+                        // Field not found - but if this is a generic type with
+                        // a .cctor that's scheduled,
+                        // reschedule to allow the .cctor to complete field initialization
+                        if (obj == nullptr)
+                        {
+                            // Check if there's a pending .cctor for this generic type
+                            CLR_RT_TypeSpec_Instance tsInst;
+                            if (tsInst.InitializeFromIndex(*field.genericType))
+                            {
+                                NANOCLR_CHECK_HRESULT(HandleGenericCctorReschedule(tsInst, stack, &ip));
+                            }
+                        }
                     }
 
                     evalPos++;
@@ -2793,7 +3034,12 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                     if (field.genericType && NANOCLR_INDEX_IS_VALID(*field.genericType))
                     {
                         // access static field of a generic instance
-                        ptr = field.assembly->GetStaticFieldByFieldDef(field, field.genericType);
+                        // Pass both TypeSpec context (for VAR resolution) and MethodDef context (for MVAR resolution)
+                        ptr = field.assembly->GetStaticFieldByFieldDef(
+                            field,
+                            field.genericType,
+                            &stack->m_genericTypeSpecStorage,
+                            &stack->m_call);
                     }
                     else
                     {
@@ -2803,6 +3049,19 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
 
                     if (ptr == nullptr)
                     {
+                        // Field not found - but if this is a generic type with a .cctor that's scheduled,
+                        // reschedule to allow the .cctor to complete field initialization
+                        if (field.genericType && NANOCLR_INDEX_IS_VALID(*field.genericType))
+                        {
+                            // Check if there's a pending .cctor for this generic type
+                            CLR_RT_TypeSpec_Instance tsInst;
+                            if (tsInst.InitializeFromIndex(*field.genericType))
+                            {
+                                NANOCLR_CHECK_HRESULT(HandleGenericCctorReschedule(tsInst, stack, &ip));
+                            }
+                        }
+
+                        // Not a pending .cctor case - this is a real error
                         NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
                     }
 
@@ -2832,7 +3091,12 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                     if (field.genericType && NANOCLR_INDEX_IS_VALID(*field.genericType))
                     {
                         // access static field of a generic instance
-                        ptr = field.assembly->GetStaticFieldByFieldDef(field, field.genericType);
+                        // Pass both TypeSpec context (for VAR resolution) and MethodDef context (for MVAR resolution)
+                        ptr = field.assembly->GetStaticFieldByFieldDef(
+                            field,
+                            field.genericType,
+                            &stack->m_genericTypeSpecStorage,
+                            &stack->m_call);
                     }
                     else
                     {
@@ -2842,6 +3106,19 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
 
                     if (ptr == nullptr)
                     {
+                        // Field not found - but if this is a generic type with a .cctor that's scheduled,
+                        // reschedule to allow the .cctor to complete field initialization
+                        if (field.genericType && NANOCLR_INDEX_IS_VALID(*field.genericType))
+                        {
+                            // Check if there's a pending .cctor for this generic type
+                            CLR_RT_TypeSpec_Instance tsInst;
+                            if (tsInst.InitializeFromIndex(*field.genericType))
+                            {
+                                NANOCLR_CHECK_HRESULT(HandleGenericCctorReschedule(tsInst, stack, &ip));
+                            }
+                        }
+
+                        // Not a pending .cctor case - this is a real error
                         NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
                     }
 
@@ -2860,10 +3137,30 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                     FETCH_ARG_COMPRESSED_TYPETOKEN(arg, ip);
 
                     CLR_RT_TypeDef_Instance typeInst{};
+                    CLR_RT_TypeDef_Index previousArrayElemType = stack->m_call.arrayElementType;
+
+                    // For BOXing a generic VAR (!0) inside an interface adapter (e.g., IList.get_Item)
+                    // we may lack a closed generic TypeSpec in stack->m_call.genericType. In that case
+                    // use the runtime type of the value being boxed to populate arrayElementType so
+                    // TypeDef::ResolveToken can fall back and close the VAR slot.
+                    if (!NANOCLR_INDEX_IS_VALID(stack->m_call.arrayElementType))
+                    {
+                        CLR_RT_TypeDef_Index valueTypeIdx;
+                        if (SUCCEEDED(CLR_RT_TypeDescriptor::ExtractTypeIndexFromObject(evalPos[0], valueTypeIdx)))
+                        {
+                            stack->m_call.arrayElementType = valueTypeIdx;
+                        }
+                    }
+
                     if (typeInst.ResolveToken(arg, assm, &stack->m_call) == false)
                     {
+                        // restore previous context before bailing
+                        stack->m_call.arrayElementType = previousArrayElemType;
                         NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
                     }
+
+                    // Restore previous arrayElementType (don't leak temporary inference)
+                    stack->m_call.arrayElementType = previousArrayElemType;
 
                     UPDATESTACK(stack, evalPos);
 
@@ -3013,10 +3310,30 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                     // TODO: still not handling Nullable<T> types here
 
                     CLR_RT_TypeDef_Instance typeInst{};
+                    CLR_RT_TypeDef_Index previousArrayElemType = stack->m_call.arrayElementType;
+
+                    // For UNBOX.ANY of a generic VAR (!0) inside an interface adapter (e.g., IList.set_Item)
+                    // we may lack a closed generic TypeSpec in stack->m_call.genericType. In that case
+                    // use the runtime type of the boxed value to populate arrayElementType so
+                    // TypeDef::ResolveToken can fall back and close the VAR slot.
+                    if (!NANOCLR_INDEX_IS_VALID(stack->m_call.arrayElementType))
+                    {
+                        CLR_RT_TypeDef_Index valueTypeIdx;
+                        if (SUCCEEDED(CLR_RT_TypeDescriptor::ExtractTypeIndexFromObject(evalPos[0], valueTypeIdx)))
+                        {
+                            stack->m_call.arrayElementType = valueTypeIdx;
+                        }
+                    }
+
                     if (typeInst.ResolveToken(arg, assm, &stack->m_call) == false)
                     {
+                        // restore previous context before bailing
+                        stack->m_call.arrayElementType = previousArrayElemType;
                         NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
                     }
+
+                    // Restore previous arrayElementType (don't leak temporary inference)
+                    stack->m_call.arrayElementType = previousArrayElemType;
 
                     UPDATESTACK(stack, evalPos);
 
@@ -3043,7 +3360,8 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                     else
                     {
                         //"castclass"
-                        NANOCLR_CHECK_HRESULT(CLR_RT_ExecutionEngine::CastToType(evalPos[0], arg, assm, false));
+                        NANOCLR_CHECK_HRESULT(
+                            CLR_RT_ExecutionEngine::CastToType(evalPos[0], arg, assm, false, &stack->m_call));
                     }
 
                     break;
@@ -3175,16 +3493,27 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                     CLR_RT_TypeDef_Instance type{};
                     CLR_RT_TypeDef_Index cls;
 
-                    if (!type.ResolveToken(arg, assm, &stack->m_call))
-                    {
-                        NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
-                    }
+                    // Propagate the array element type into the current call context so generic VAR can resolve
+                    // against a closed type (e.g., List<Int32>[] -> Int32). This mirrors the SZArrayHelper flow
+                    // used in method dispatch, but scoped to this instruction.
+                    CLR_RT_TypeDef_Index previousArrayElemType = stack->m_call.arrayElementType;
 
                     NANOCLR_CHECK_HRESULT(CLR_RT_TypeDescriptor::ExtractTypeIndexFromObject(evalPos[0], cls));
+
+                    stack->m_call.arrayElementType = cls;
+
+                    if (!type.ResolveToken(arg, assm, &stack->m_call))
+                    {
+                        // Restore previous context before bailing out
+                        stack->m_call.arrayElementType = previousArrayElemType;
+                        NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+                    }
 
                     // Check this is an object of the requested type.
                     if (!g_CLR_RT_ExecutionEngine.IsInstanceOfToken(arg, evalPos[0], stack->m_call))
                     {
+                        // Restore previous context before leaving
+                        stack->m_call.arrayElementType = previousArrayElemType;
                         NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
                     }
 
@@ -3197,6 +3526,9 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
 
                         NANOCLR_CHECK_HRESULT(evalPos[0].LoadFromReference(safeSource));
                     }
+
+                    // Restore previous arrayElementType context
+                    stack->m_call.arrayElementType = previousArrayElemType;
 
                     goto Execute_LoadAndPromote;
                     //<LDOBJ>
@@ -3351,10 +3683,30 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
 
                     // Resolve the IL's element type in the context of any generics
                     CLR_RT_TypeDef_Instance expectedType;
+                    CLR_RT_TypeDef_Index previousArrayElemType = stack->m_call.arrayElementType;
+
+                    // For STELEM of a generic VAR (!0) inside an interface adapter (e.g., IList.set_Item)
+                    // we may lack a closed generic TypeSpec in stack->m_call.genericType. In that case
+                    // use the runtime type of the array element to populate arrayElementType so
+                    // TypeDef::ResolveToken can fall back and close the VAR slot.
+                    if (!NANOCLR_INDEX_IS_VALID(stack->m_call.arrayElementType))
+                    {
+                        CLR_RT_TypeDef_Index elemTypeIdx;
+                        if (SUCCEEDED(CLR_RT_TypeDescriptor::ExtractTypeIndexFromObject(evalPos[1], elemTypeIdx)))
+                        {
+                            stack->m_call.arrayElementType = elemTypeIdx;
+                        }
+                    }
+
                     if (!expectedType.ResolveToken(arg, assm, &stack->m_call))
                     {
+                        // restore previous context before bailing
+                        stack->m_call.arrayElementType = previousArrayElemType;
                         NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
                     }
+
+                    // Restore previous arrayElementType (don't leak temporary inference)
+                    stack->m_call.arrayElementType = previousArrayElemType;
 
                     NanoCLRDataType elemDT = (NanoCLRDataType)expectedType.target->dataType;
 
@@ -3504,13 +3856,6 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
 
                             // resolve the generic parameter in the context of the caller's generic type, if different
                             // from the caller's assembly.
-                            CLR_RT_Assembly *resolveAsm = assm;
-                            if (stack->m_call.genericType && NANOCLR_INDEX_IS_VALID(*stack->m_call.genericType))
-                            {
-                                resolveAsm =
-                                    g_CLR_RT_TypeSystem.m_assemblies[stack->m_call.genericType->Assembly() - 1];
-                            }
-
                             if (stack->m_call.genericType != nullptr)
                             {
                                 CLR_UINT32 rawGenericParamRow = CLR_DataFromTk(arg);
@@ -3539,19 +3884,20 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                                     {
                                         // closed TypeSpec
                                         const CLR_RT_TypeSpec_Index *callerTypeSpec = stack->m_call.genericType;
-                                        CLR_RT_TypeDef_Index resolvedTypeDef;
-                                        NanoCLRDataType dummyDataType;
 
-                                        if (!resolveAsm->FindGenericParamAtTypeSpec(
-                                                callerTypeSpec->TypeSpec(),
-                                                genericParam.target->number,
-                                                resolvedTypeDef,
-                                                dummyDataType))
+                                        CLR_RT_TypeSpec_Instance typeSpec;
+                                        if (!typeSpec.InitializeFromIndex(*callerTypeSpec))
                                         {
                                             NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
                                         }
 
-                                        NANOCLR_CHECK_HRESULT(evalPos[0].SetReflection(resolvedTypeDef));
+                                        CLR_RT_SignatureParser::Element paramElement;
+                                        if (!typeSpec.GetGenericParam(genericParam.target->number, paramElement))
+                                        {
+                                            NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+                                        }
+
+                                        NANOCLR_CHECK_HRESULT(evalPos[0].SetReflection(paramElement.Class));
                                     }
                                 }
                             }

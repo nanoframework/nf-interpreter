@@ -175,6 +175,11 @@ HRESULT CLR_RT_Thread::PushThreadProcDelegate(CLR_RT_HeapBlock_Delegate *pDelega
         inst.genericType = &delegateTypeSpec;
     }
 
+    if (pDelegate->m_genericMethodSpec.data != 0)
+    {
+        inst.methodSpec = pDelegate->m_genericMethodSpec;
+    }
+
 #if defined(NANOCLR_APPDOMAINS)
 
     if (!pDelegate->m_appDomain->IsLoaded())
@@ -200,6 +205,14 @@ HRESULT CLR_RT_Thread::PushThreadProcDelegate(CLR_RT_HeapBlock_Delegate *pDelega
         CLR_RT_StackFrame *stackTop = this->CurrentFrame();
         stackTop->m_genericTypeSpecStorage = delegateTypeSpec;
         stackTop->m_call.genericType = &stackTop->m_genericTypeSpecStorage;
+    }
+
+    // If we have a generic method context, copy it to the stack frame
+    // This enables MVAR resolution for .cctor triggered from generic methods
+    if (pDelegate->m_genericMethodSpec.data != 0)
+    {
+        CLR_RT_StackFrame *stackTop = this->CurrentFrame();
+        stackTop->m_call.methodSpec = pDelegate->m_genericMethodSpec;
     }
 
     if ((inst.target->flags & CLR_RECORD_METHODDEF::MD_Static) == 0)

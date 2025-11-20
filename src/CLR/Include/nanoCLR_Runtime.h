@@ -1437,7 +1437,14 @@ struct CLR_RT_Assembly : public CLR_RT_HeapBlock_Node // EVENT HEAP - NO RELOCAT
         const CLR_RT_FieldDef_Index &fdIndex);
     CLR_RT_HeapBlock *GetStaticFieldByFieldDef(
         const CLR_RT_FieldDef_Index &fdIndex,
-        const CLR_RT_TypeSpec_Index *genericType);
+        const CLR_RT_TypeSpec_Index *genericType,
+        const CLR_RT_TypeSpec_Index *contextTypeSpec = nullptr,
+        const CLR_RT_MethodDef_Instance *contextMethod = nullptr);
+    HRESULT AllocateGenericStaticFieldsOnDemand(
+        const CLR_RT_TypeSpec_Index &typeSpecIndex,
+        const CLR_RT_TypeDef_Instance &genericTypeDef,
+        const CLR_RT_TypeSpec_Index *contextTypeSpec = nullptr,
+        const CLR_RT_MethodDef_Instance *contextMethod = nullptr);
     HRESULT PrepareForExecution();
 
     CLR_UINT32 ComputeAssemblyHash();
@@ -1448,11 +1455,6 @@ struct CLR_RT_Assembly : public CLR_RT_HeapBlock_Node // EVENT HEAP - NO RELOCAT
     bool FindTypeDef(CLR_UINT32 hash, CLR_RT_TypeDef_Index &index);
 
     bool FindTypeSpec(const CLR_PMETADATA sig, CLR_RT_TypeSpec_Index &index);
-    bool FindGenericParamAtTypeSpec(
-        CLR_UINT32 typeSpecIndex,
-        CLR_INT32 genericParameterPosition,
-        CLR_RT_TypeDef_Index &typeDef,
-        NanoCLRDataType &dataType);
     bool FindGenericParamAtMethodDef(
         CLR_RT_MethodDef_Instance md,
         CLR_INT32 genericParameterPosition,
@@ -1743,6 +1745,7 @@ struct CLR_RT_WellKnownTypes
     CLR_RT_TypeDef_Index MulticastDelegate;
 
     CLR_RT_TypeDef_Index Array;
+    CLR_RT_TypeDef_Index SZArrayHelper;
     CLR_RT_TypeDef_Index ArrayList;
     CLR_RT_TypeDef_Index ICloneable;
     CLR_RT_TypeDef_Index IList;
@@ -2069,7 +2072,13 @@ struct CLR_RT_TypeSystem // EVENT HEAP - NO RELOCATION -
         const CLR_RECORD_RESOURCE *&res,
         CLR_UINT32 &size);
 
-    HRESULT BuildTypeName(const CLR_RT_TypeSpec_Index &typeIndex, char *&szBuffer, size_t &iBuffer, CLR_UINT32 levels);
+    HRESULT BuildTypeName(
+        const CLR_RT_TypeSpec_Index &typeIndex,
+        char *&szBuffer,
+        size_t &iBuffer,
+        CLR_UINT32 levels,
+        const CLR_RT_TypeSpec_Index *contextTypeSpec = nullptr,
+        const CLR_RT_MethodDef_Instance *contextMethodDef = nullptr);
     HRESULT BuildTypeName(
         const CLR_RT_TypeDef_Index &cls,
         char *&szBuffer,
@@ -2079,6 +2088,11 @@ struct CLR_RT_TypeSystem // EVENT HEAP - NO RELOCATION -
     HRESULT BuildTypeName(const CLR_RT_TypeDef_Index &cls, char *&szBuffer, size_t &size);
     HRESULT BuildMethodName(
         const CLR_RT_MethodDef_Index &md,
+        const CLR_RT_TypeSpec_Index *genericType,
+        char *&szBuffer,
+        size_t &size);
+    HRESULT BuildMethodName(
+        const CLR_RT_MethodDef_Instance &mdInst,
         const CLR_RT_TypeSpec_Index *genericType,
         char *&szBuffer,
         size_t &size);
@@ -2133,7 +2147,10 @@ struct CLR_RT_TypeSystem // EVENT HEAP - NO RELOCATION -
         CLR_UINT32 staticFieldCount);
 
     // Helper to compute hash for a closed generic type
-    static CLR_UINT32 ComputeHashForClosedGenericType(CLR_RT_TypeSpec_Instance &typeInstance);
+    static CLR_UINT32 ComputeHashForClosedGenericType(
+        CLR_RT_TypeSpec_Instance &typeInstance,
+        const CLR_RT_TypeSpec_Index *contextTypeSpec = nullptr,
+        const CLR_RT_MethodDef_Instance *contextMethod = nullptr);
 
     // Helper to find or create a generic .cctor execution record by hash
     static CLR_RT_GenericCctorExecutionRecord *FindOrCreateGenericCctorRecord(CLR_UINT32 hash, bool *created);
@@ -2174,6 +2191,8 @@ struct CLR_RT_TypeSpec_Instance : public CLR_RT_TypeSpec_Index
 
     bool ResolveToken(CLR_UINT32 tk, CLR_RT_Assembly *assm, const CLR_RT_MethodDef_Instance *caller = nullptr);
     bool IsClosedGenericType();
+
+    bool GetGenericParam(CLR_INT32 parameterPosition, CLR_RT_SignatureParser::Element &element);
 };
 
 //--//
@@ -2251,6 +2270,9 @@ struct CLR_RT_MethodDef_Instance : public CLR_RT_MethodDef_Index
     const CLR_RT_TypeSpec_Index *genericType;
     CLR_RT_MethodSpec_Index methodSpec;
 
+    // For SZArrayHelper rebind: stores the array element TypeDef when dispatching from arrays
+    CLR_RT_TypeDef_Index arrayElementType;
+
 #if defined(NANOCLR_INSTANCE_NAMES)
     const char *name;
 #endif
@@ -2326,6 +2348,8 @@ struct CLR_RT_MethodSpec_Instance : public CLR_RT_MethodSpec_Index
     }
 
     CLR_EncodedMethodDefOrRef InstanceOfMethod;
+
+    bool GetGenericArgument(CLR_INT32 argumentPosition, CLR_RT_TypeDef_Index &typeDef, NanoCLRDataType &dataType);
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -2432,12 +2456,16 @@ struct CLR_RT_TypeDescriptor
 
     HRESULT InitializeFromDataType(NanoCLRDataType dt);
     HRESULT InitializeFromReflection(const CLR_RT_ReflectionDef_Index &reflex);
-    HRESULT InitializeFromTypeSpec(const CLR_RT_TypeSpec_Index &sig);
+    HRESULT InitializeFromTypeSpec(
+        const CLR_RT_TypeSpec_Index &sig,
+        const CLR_RT_TypeSpec_Index *contextTypeSpec = nullptr);
     HRESULT InitializeFromType(const CLR_RT_TypeDef_Index &cls);
     HRESULT InitializeFromTypeDef(const CLR_RT_TypeDef_Index &cls);
     HRESULT InitializeFromGenericType(const CLR_RT_TypeSpec_Index &genericType);
     HRESULT InitializeFromFieldDefinition(const CLR_RT_FieldDef_Instance &fd);
-    HRESULT InitializeFromSignatureParser(CLR_RT_SignatureParser &parser);
+    HRESULT InitializeFromSignatureParser(
+        CLR_RT_SignatureParser &parser,
+        const CLR_RT_TypeSpec_Index *contextTypeSpec = nullptr);
     HRESULT InitializeFromSignatureToken(
         CLR_RT_Assembly *assm,
         CLR_UINT32 token,
@@ -4204,10 +4232,20 @@ struct CLR_RT_ExecutionEngine
     static bool IsInstanceOf(CLR_RT_TypeDescriptor &desc, CLR_RT_TypeDescriptor &descTarget, bool isInstInstruction);
     static bool IsInstanceOf(const CLR_RT_TypeDef_Index &cls, const CLR_RT_TypeDef_Index &clsTarget);
     static bool IsInstanceOf(CLR_RT_HeapBlock &obj, const CLR_RT_TypeDef_Index &clsTarget);
-    static bool IsInstanceOf(CLR_RT_HeapBlock &obj, CLR_RT_Assembly *assm, CLR_UINT32 token, bool isInstInstruction);
+    static bool IsInstanceOf(
+        CLR_RT_HeapBlock &obj,
+        CLR_RT_Assembly *assm,
+        CLR_UINT32 token,
+        bool isInstInstruction,
+        const CLR_RT_MethodDef_Instance *caller = nullptr);
     bool IsInstanceOfToken(CLR_UINT32 token, CLR_RT_HeapBlock &obj, const CLR_RT_MethodDef_Instance &caller);
 
-    static HRESULT CastToType(CLR_RT_HeapBlock &ref, CLR_UINT32 tk, CLR_RT_Assembly *assm, bool isInstInstruction);
+    static HRESULT CastToType(
+        CLR_RT_HeapBlock &ref,
+        CLR_UINT32 tk,
+        CLR_RT_Assembly *assm,
+        bool isInstInstruction,
+        const CLR_RT_MethodDef_Instance *caller);
 
     void DebuggerLoop();
 

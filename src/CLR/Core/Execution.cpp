@@ -2028,6 +2028,40 @@ CLR_RT_HeapBlock *CLR_RT_ExecutionEngine::AccessStaticField(const CLR_RT_FieldDe
     return nullptr;
 }
 
+// Helper function to resolve generic type parameters (VAR/MVAR) to their concrete types
+// Used by both InitializeReference and InitializeLocals to reduce code duplication
+static HRESULT ResolveGenericTypeParameter(
+    const CLR_RT_TypeSpec_Index &genericTypeIndex,
+    CLR_UINT8 paramPosition,
+    CLR_RT_TypeDef_Index &outClass,
+    NanoCLRDataType &outDataType)
+{
+    NATIVE_PROFILE_CLR_CORE();
+    NANOCLR_HEADER();
+
+    if (!NANOCLR_INDEX_IS_VALID(genericTypeIndex))
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
+    }
+
+    CLR_RT_TypeSpec_Instance typeSpec;
+    if (!typeSpec.InitializeFromIndex(genericTypeIndex))
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
+    }
+
+    CLR_RT_SignatureParser::Element paramElement;
+    if (!typeSpec.GetGenericParam(paramPosition, paramElement))
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
+    }
+
+    outClass = paramElement.Class;
+    outDataType = paramElement.DataType;
+
+    NANOCLR_NOCLEANUP();
+}
+
 HRESULT CLR_RT_ExecutionEngine::InitializeReference(
     CLR_RT_HeapBlock &ref,
     CLR_RT_SignatureParser &parser,
@@ -2063,8 +2097,13 @@ HRESULT CLR_RT_ExecutionEngine::InitializeReference(
 
         if (dt == DATATYPE_VAR)
         {
-            genericInstance->assembly
-                ->FindGenericParamAtTypeSpec(genericInstance->data, res.GenericParamPosition, realTypeDef, dt);
+            if (genericInstance == nullptr || !NANOCLR_INDEX_IS_VALID(*genericInstance))
+            {
+                NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
+            }
+
+            NANOCLR_CHECK_HRESULT(
+                ResolveGenericTypeParameter(*genericInstance, res.GenericParamPosition, realTypeDef, dt));
 
             goto process_datatype;
         }
@@ -2297,26 +2336,16 @@ HRESULT CLR_RT_ExecutionEngine::InitializeLocals(
                     // type-level generic parameter in a locals signature (e.g. 'T' inside a generic type)
                     CLR_INT8 genericParamPosition = *sig++;
 
+                    // Resolve type-level generic parameter (VAR) using the method's enclosing type context
                     if (methodDefInstance.genericType && NANOCLR_INDEX_IS_VALID(*methodDefInstance.genericType) &&
                         methodDefInstance.genericType->data != CLR_EmptyToken)
                     {
-                        CLR_RT_TypeSpec_Instance typeSpec{};
-                        typeSpec.InitializeFromIndex(
-                            (const CLR_RT_TypeSpec_Index &)methodDefInstance.genericType->data);
-
-                        typeSpec.assembly->FindGenericParamAtTypeSpec(
-                            methodDefInstance.genericType->data,
-                            genericParamPosition,
-                            cls,
-                            dt);
+                        NANOCLR_CHECK_HRESULT(
+                            ResolveGenericTypeParameter(*methodDefInstance.genericType, genericParamPosition, cls, dt));
                     }
                     else
                     {
-                        assembly->FindGenericParamAtTypeSpec(
-                            methodDefInstance.genericType->data,
-                            genericParamPosition,
-                            cls,
-                            dt);
+                        NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
                     }
 
                     goto done;
@@ -2324,17 +2353,36 @@ HRESULT CLR_RT_ExecutionEngine::InitializeLocals(
 
                 case DATATYPE_MVAR:
                 {
+                    // Method-level generic parameter (e.g., '!!T' in a generic method like Array.Empty<T>())
                     CLR_UINT8 genericParamPosition = *sig++;
 
-                    CLR_RT_GenericParam_Index gpIndex;
+                    // For generic methods, use the MethodSpec's signature to get the concrete type
+                    if (NANOCLR_INDEX_IS_VALID(methodDefInstance.methodSpec))
+                    {
+                        CLR_RT_MethodSpec_Instance methodSpec;
+                        if (!methodSpec.InitializeFromIndex(methodDefInstance.methodSpec))
+                        {
+                            NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
+                        }
 
-                    assembly->FindGenericParamAtMethodDef(methodDefInstance, genericParamPosition, gpIndex);
+                        // Use GetGenericArgument to get the concrete type from MethodSpec's signature
+                        if (!methodSpec.GetGenericArgument(genericParamPosition, cls, dt))
+                        {
+                            NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
+                        }
+                    }
+                    else
+                    {
+                        // Fallback: try to resolve using GenericParam table (for open generic methods)
+                        CLR_RT_GenericParam_Index gpIndex;
+                        assembly->FindGenericParamAtMethodDef(methodDefInstance, genericParamPosition, gpIndex);
 
-                    CLR_RT_GenericParam_CrossReference gp =
-                        assembly->crossReferenceGenericParam[gpIndex.GenericParam()];
+                        CLR_RT_GenericParam_CrossReference gp =
+                            assembly->crossReferenceGenericParam[gpIndex.GenericParam()];
 
-                    cls = gp.classTypeDef;
-                    dt = gp.dataType;
+                        cls = gp.classTypeDef;
+                        dt = gp.dataType;
+                    }
 
                     goto done;
                 }
@@ -3538,37 +3586,20 @@ bool CLR_RT_ExecutionEngine::IsInstanceOf(
     CLR_RT_HeapBlock &obj,
     CLR_RT_Assembly *assm,
     CLR_UINT32 token,
-    bool isInstInstruction)
+    bool isInstInstruction,
+    const CLR_RT_MethodDef_Instance *caller)
 {
     NATIVE_PROFILE_CLR_CORE();
+
     CLR_RT_TypeDescriptor desc{};
     CLR_RT_TypeDescriptor descTarget{};
-    CLR_RT_TypeDef_Instance clsTarget{};
-    CLR_RT_TypeSpec_Instance defTarget{};
 
     if (FAILED(desc.InitializeFromObject(obj)))
         return false;
 
-    if (clsTarget.ResolveToken(token, assm))
-    {
-        //
-        // Shortcut for identity.
-        //
-        if (desc.m_handlerCls.data == clsTarget.data)
-            return true;
-
-        if (FAILED(descTarget.InitializeFromType(clsTarget)))
-            return false;
-    }
-    else if (defTarget.ResolveToken(token, assm))
-    {
-        if (FAILED(descTarget.InitializeFromTypeSpec(defTarget)))
-            return false;
-    }
-    else
-    {
+    // Use InitializeFromSignatureToken to properly resolve VAR/MVAR tokens
+    if (FAILED(descTarget.InitializeFromSignatureToken(assm, token, caller)))
         return false;
-    }
 
     return IsInstanceOf(desc, descTarget, isInstInstruction);
 }
@@ -3609,7 +3640,8 @@ HRESULT CLR_RT_ExecutionEngine::CastToType(
     CLR_RT_HeapBlock &ref,
     CLR_UINT32 tk,
     CLR_RT_Assembly *assm,
-    bool isInstInstruction)
+    bool isInstInstruction,
+    const CLR_RT_MethodDef_Instance *caller)
 {
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
@@ -3618,7 +3650,7 @@ HRESULT CLR_RT_ExecutionEngine::CastToType(
     {
         ;
     }
-    else if (g_CLR_RT_ExecutionEngine.IsInstanceOf(ref, assm, tk, isInstInstruction) == true)
+    else if (g_CLR_RT_ExecutionEngine.IsInstanceOf(ref, assm, tk, isInstInstruction, caller) == true)
     {
         ;
     }
