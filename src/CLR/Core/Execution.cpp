@@ -2046,7 +2046,7 @@ static HRESULT ResolveGenericTypeParameter(
 
     CLR_RT_TypeSpec_Instance typeSpec;
     if (!typeSpec.InitializeFromIndex(genericTypeIndex))
-        {
+    {
         NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
     }
 
@@ -2102,11 +2102,8 @@ HRESULT CLR_RT_ExecutionEngine::InitializeReference(
                 NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
             }
 
-            NANOCLR_CHECK_HRESULT(ResolveGenericTypeParameter(
-                *genericInstance,
-                res.GenericParamPosition,
-                realTypeDef,
-                dt));
+            NANOCLR_CHECK_HRESULT(
+                ResolveGenericTypeParameter(*genericInstance, res.GenericParamPosition, realTypeDef, dt));
 
             goto process_datatype;
         }
@@ -2343,11 +2340,8 @@ HRESULT CLR_RT_ExecutionEngine::InitializeLocals(
                     if (methodDefInstance.genericType && NANOCLR_INDEX_IS_VALID(*methodDefInstance.genericType) &&
                         methodDefInstance.genericType->data != CLR_EmptyToken)
                     {
-                        NANOCLR_CHECK_HRESULT(ResolveGenericTypeParameter(
-                            *methodDefInstance.genericType,
-                            genericParamPosition,
-                            cls,
-                            dt));
+                        NANOCLR_CHECK_HRESULT(
+                            ResolveGenericTypeParameter(*methodDefInstance.genericType, genericParamPosition, cls, dt));
                     }
                     else
                     {
