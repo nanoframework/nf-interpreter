@@ -2063,6 +2063,11 @@ HRESULT CLR_RT_ExecutionEngine::InitializeReference(
 
         if (dt == DATATYPE_VAR)
         {
+            if (genericInstance == nullptr || !NANOCLR_INDEX_IS_VALID(*genericInstance))
+            {
+                NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
+            }
+
             CLR_RT_TypeSpec_Instance genericTs;
             if (!genericTs.InitializeFromIndex(*genericInstance))
             {
