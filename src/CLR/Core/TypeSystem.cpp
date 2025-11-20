@@ -1280,63 +1280,76 @@ bool CLR_RT_TypeDef_Instance::ResolveToken(
                         {
                             int pos = elem.GenericParamPosition;
 
-                            // Use the *caller's* bound genericType (Stack<Int32>, etc.)
-                            if (caller == nullptr || caller->genericType == nullptr)
+                            CLR_RT_TypeSpec_Instance callerTypeSpec;
+                            if (!callerTypeSpec.InitializeFromIndex(*caller->genericType))
                             {
-                                // No generic context available, try arrayElementType fallback
-                                if (caller && NANOCLR_INDEX_IS_VALID(caller->arrayElementType) && pos == 0)
-                                {
-                                    // For SZArrayHelper<T>, position 0 is the array element type
-                                    data = caller->arrayElementType.data;
-                                    assembly =
-                                        g_CLR_RT_TypeSystem.m_assemblies[caller->arrayElementType.Assembly() - 1];
-                                    target = assembly->GetTypeDef(caller->arrayElementType.Type());
-                                }
-                                else
-                                {
-                                    return false;
-                                }
+                                return false;
                             }
-                            else
+
+                            CLR_RT_SignatureParser::Element paramElement;
+
+                            // Try to map using the generic context (e.g. !T→Int32)
+                            if (callerTypeSpec.GetGenericParam((CLR_UINT32)pos, paramElement))
                             {
-                                CLR_RT_TypeSpec_Instance callerTypeSpec;
-                                if (!callerTypeSpec.InitializeFromIndex(*caller->genericType))
+                                // Successfully resolved from generic context
+                                if (NANOCLR_INDEX_IS_VALID(paramElement.Class))
                                 {
-                                    return false;
+                                    data = paramElement.Class.data;
+                                    assembly = g_CLR_RT_TypeSystem.m_assemblies[paramElement.Class.Assembly() - 1];
+                                    target = assembly->GetTypeDef(paramElement.Class.Type());
                                 }
-
-                                CLR_RT_SignatureParser::Element paramElement;
-
-                                // Try to map using the generic context (e.g. !T→Int32)
-                                if (callerTypeSpec.GetGenericParam((CLR_UINT32)pos, paramElement))
+                                else if (paramElement.DataType == DATATYPE_MVAR)
                                 {
-                                    // Successfully resolved from generic context
-                                    if (NANOCLR_INDEX_IS_VALID(paramElement.Class))
+                                    // resolve from methodspec context
+                                    if (NANOCLR_INDEX_IS_VALID(caller->methodSpec))
                                     {
-                                        data = paramElement.Class.data;
-                                        assembly = g_CLR_RT_TypeSystem.m_assemblies[paramElement.Class.Assembly() - 1];
-                                        target = assembly->GetTypeDef(paramElement.Class.Type());
+                                        CLR_RT_MethodSpec_Instance methodSpecInstance;
+                                        if (methodSpecInstance.InitializeFromIndex(caller->methodSpec))
+                                        {
+                                            NanoCLRDataType dataType;
+                                            CLR_RT_TypeDef_Index typeDef;
+                                            methodSpecInstance.GetGenericArgument(
+                                                paramElement.GenericParamPosition,
+                                                typeDef,
+                                                dataType);
+
+                                            data = typeDef.data;
+                                            assembly = g_CLR_RT_TypeSystem.m_assemblies[typeDef.Assembly() - 1];
+                                            target = assembly->GetTypeDef(typeDef.Type());
+                                        }
+                                        else
+                                        {
+                                            return false;
+                                        }
                                     }
                                     else
                                     {
                                         return false;
                                     }
                                 }
-                                else if (NANOCLR_INDEX_IS_VALID(caller->arrayElementType) && pos == 0)
+                                else if (paramElement.DataType == DATATYPE_VAR)
                                 {
-                                    // Fallback to arrayElementType for SZArrayHelper scenarios
-                                    data = caller->arrayElementType.data;
-                                    assembly =
-                                        g_CLR_RT_TypeSystem.m_assemblies[caller->arrayElementType.Assembly() - 1];
-                                    target = assembly->GetTypeDef(caller->arrayElementType.Type());
+                                    // nested VAR not implemented
+                                    _ASSERT(false);
+                                    return false;
                                 }
                                 else
                                 {
                                     return false;
                                 }
                             }
+                            else if (NANOCLR_INDEX_IS_VALID(caller->arrayElementType) && pos == 0)
+                            {
+                                // Fallback to arrayElementType for SZArrayHelper scenarios
+                                data = caller->arrayElementType.data;
+                                assembly = g_CLR_RT_TypeSystem.m_assemblies[caller->arrayElementType.Assembly() - 1];
+                                target = assembly->GetTypeDef(caller->arrayElementType.Type());
+                            }
+                            else
+                            {
+                                return false;
+                            }
                         }
-
                         else if (elem.DataType == DATATYPE_MVAR)
                         {
                             // Use the caller bound genericType (Stack<Int32>, etc.)
