@@ -18,12 +18,12 @@ static const CLR_RT_MethodHandler method_lookup[] =
     NULL,
     NULL,
     NULL,
-    Library_Com_SkyworksInc_NanoFramework_Devices_C1_Com_SkyworksInc_NanoFramework_Devices_C1_C1Bus::NativeTransmitWriteWithAddress___VOID__U1__U1__SZARRAY_U1,
-    Library_Com_SkyworksInc_NanoFramework_Devices_C1_Com_SkyworksInc_NanoFramework_Devices_C1_C1Bus::NativeTransmitReadWithAddress___VOID__U1__SZARRAY_U1,
-    Library_Com_SkyworksInc_NanoFramework_Devices_C1_Com_SkyworksInc_NanoFramework_Devices_C1_C1Bus::NativeTransmitRead___VOID__SZARRAY_U1,
-    Library_Com_SkyworksInc_NanoFramework_Devices_C1_Com_SkyworksInc_NanoFramework_Devices_C1_C1Bus::NativeTransmitWrite___VOID__U1__SZARRAY_U1,
-    Library_Com_SkyworksInc_NanoFramework_Devices_C1_Com_SkyworksInc_NanoFramework_Devices_C1_C1Bus::NativeTransmitWriteAddress___VOID__U1__SZARRAY_U1,
-    Library_Com_SkyworksInc_NanoFramework_Devices_C1_Com_SkyworksInc_NanoFramework_Devices_C1_C1Bus::NativeTransmitReadAddress___VOID__SZARRAY_U1,
+    Library_Com_SkyworksInc_NanoFramework_Devices_C1_Com_SkyworksInc_NanoFramework_Devices_C1_C1Bus::NativeTransmitWriteWithAddress___VOID__U2__U1__U1__SZARRAY_U1,
+    Library_Com_SkyworksInc_NanoFramework_Devices_C1_Com_SkyworksInc_NanoFramework_Devices_C1_C1Bus::NativeTransmitReadWithAddress___VOID__U2__U1__SZARRAY_U1,
+    Library_Com_SkyworksInc_NanoFramework_Devices_C1_Com_SkyworksInc_NanoFramework_Devices_C1_C1Bus::NativeTransmitRead___VOID__U2__SZARRAY_U1,
+    Library_Com_SkyworksInc_NanoFramework_Devices_C1_Com_SkyworksInc_NanoFramework_Devices_C1_C1Bus::NativeTransmitWrite___VOID__U2__U1__SZARRAY_U1,
+    Library_Com_SkyworksInc_NanoFramework_Devices_C1_Com_SkyworksInc_NanoFramework_Devices_C1_C1Bus::NativeTransmitWriteAddress___VOID__U2__U1__SZARRAY_U1,
+    Library_Com_SkyworksInc_NanoFramework_Devices_C1_Com_SkyworksInc_NanoFramework_Devices_C1_C1Bus::NativeTransmitReadAddress___VOID__U2__SZARRAY_U1,
     NULL,
     NULL,
     NULL,
@@ -33,8 +33,7 @@ static const CLR_RT_MethodHandler method_lookup[] =
 const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_Com_SkyworksInc_NanoFramework_Devices_C1 =
 {
     "Com.SkyworksInc.NanoFramework.Devices.C1",
-    // 0x3CD033AA,
-    0x3FCDA50E,
+    0xE4DE3D1F,
     method_lookup,
     { 2, 0, 0, 0 }
 };

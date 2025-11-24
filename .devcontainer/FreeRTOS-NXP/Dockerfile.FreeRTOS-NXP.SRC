@@ -17,7 +17,7 @@ RUN mkdir -p /tmp/dc-downloads /tmp/dc-extracted/gcc \
     && tar -xvf /tmp/dc-downloads/gcc-arm.tar -C /tmp/dc-extracted/gcc --strip-components 1 \
     && rm -rf /tmp/dc-extracted/gcc/share/doc/ /tmp/dc-extracted/gcc/share/gcc-arm-none-eabi/samples/
 
-ARG CMAKE_VERSION=3.27.6
+ARG CMAKE_VERSION=3.31.6
 ARG CMAKE_SCRIPT=https://github.com/Kitware/CMake/releases/download/v$CMAKE_VERSION/cmake-$CMAKE_VERSION-linux-x86_64.sh
 RUN wget $CMAKE_SCRIPT \
     -q -O /tmp/dc-downloads/cmake-install.sh \
@@ -55,7 +55,7 @@ RUN apt-get update \
 RUN mkdir -p /usr/local/bin/gcc
 
 # Clone libs mbedtls and fatfs etc.
-RUN git clone --branch R0.15 https://github.com/abbrev/fatfs.git --depth 1 ./sources/fatfs \
+RUN git clone --branch R0.15a https://github.com/abbrev/fatfs.git --depth 1 ./sources/fatfs \
     && git clone --branch STABLE-2_1_3_RELEASE https://github.com/lwip-tcpip/lwip.git --depth 1 ./sources/lwip \
     && git clone --branch mbedtls-3.6.0 https://github.com/ARMmbed/mbedtls.git --depth 1 ./sources/mbedtls \
     && cd ./sources/mbedtls \

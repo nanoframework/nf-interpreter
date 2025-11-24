@@ -1,1 +1,1 @@
-FROM ghcr.io/nanoframework/dev-container-esp32:v2.35
+FROM ghcr.io/nanoframework/dev-container-esp32:v2.37

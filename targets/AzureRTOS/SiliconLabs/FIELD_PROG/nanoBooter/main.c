@@ -8,8 +8,11 @@
 
 #include <sl_system_init.h>
 #include <sl_system_kernel.h>
+#include <sl_device_init_dcdc_config.h>
 #include <em_gpio.h>
+#include <em_device.h>
 #include <em_cmu.h>
+#include <em_emu.h>
 
 #include <tx_api.h>
 
@@ -143,7 +146,20 @@ void tx_application_define(void *first_unused_memory)
 int main(void)
 {
     // Initialize the board
-    sl_system_init();
+    sl_system_init();    
+
+    /* Set DCDC output voltage to 3.0V */
+    if (!EMU_DCDCOutputVoltageSet(3000, true, true)) {
+        EFM_ASSERT(false);
+        /* Return when assertions are disabled. */
+        return false;
+    }
+
+    EMU_DCDCModeSet(emuDcdcMode_LowNoise);       // Enable DCDC regulation
+
+    // Set VREGO to 3.5
+    EMU->R5VOUTLEVEL = (11 << _EMU_R5VOUTLEVEL_OUTLEVEL_SHIFT);
+
 
     // configure LED READY for output
     GPIO_PinModeSet(gpioPortB, 12, gpioModePushPull, 0);

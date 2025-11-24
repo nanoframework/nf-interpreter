@@ -11,19 +11,47 @@ jobs:
     runs-on: ubuntu-latest
     steps: 
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           ref: main
           fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Merge from upstream repo
-        uses: aormsby/Fork-Sync-With-Upstream-action@v3.4.1
-        with:
-          target_sync_branch: main
-          upstream_sync_branch: main
-          upstream_sync_repo: nanoframework/nf-interpreter
-          target_repo_token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Fetch upstream and merge if needed
+        id: sync
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # configure upstream remote (ignore if already present)
+          git remote add upstream https://github.com/nanoframework/nf-interpreter.git 2>/dev/null || true
+
+          # fetch both refs
+          git fetch origin main --quiet
+          git fetch upstream main --quiet
+
+          # resolve SHAs
+          UPSTREAM_HEAD=$(git rev-parse upstream/main)
+          TARGET_HEAD=$(git rev-parse origin/main || true)
+
+          echo "Upstream: $UPSTREAM_HEAD"
+          echo "Target:   $TARGET_HEAD"
+
+          if [ "$UPSTREAM_HEAD" = "$TARGET_HEAD" ]; then
+            echo "has_new_commits=false" >> $GITHUB_OUTPUT
+          else
+            # merge upstream into current main branch and push
+            git checkout main
+            # ensure local main is updated from origin
+            git reset --hard origin/main || true
+
+            # merge allowing unrelated histories if necessary
+            git pull upstream main --allow-unrelated-histories --no-edit
+
+            # push merged changes back to the fork
+            git push origin main
+
+            echo "has_new_commits=true" >> $GITHUB_OUTPUT
+          fi
 
       - name: New commits found
         if: steps.sync.outputs.has_new_commits == 'true'
@@ -32,6 +60,6 @@ jobs:
       - name: No new commits
         if: steps.sync.outputs.has_new_commits == 'false'
         run: echo "There were no new commits."
-        
+
       - name: Show value of 'has_new_commits'
-        run: echo ${{ steps.sync.outputs.has_new_commits }}
+        run: echo "${{ steps.sync.outputs.has_new_commits }}"

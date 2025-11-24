@@ -18,7 +18,7 @@ cd /sources/mbedtls
 git pull origin mbedtls-3.6.0
 git submodule update --init
 cd /sources/fatfs
-git pull origin R0.15
+git pull origin R0.15a
 cd /sources/FreeRTOS
 git pull origin V10.4.1-kernel-only
 cd /sources/CMSIS_5

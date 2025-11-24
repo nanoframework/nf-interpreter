@@ -17,7 +17,7 @@ RUN mkdir -p /tmp/dc-downloads /tmp/dc-extracted/gcc \
     && tar -xvf /tmp/dc-downloads/gcc-arm.tar -C /tmp/dc-extracted/gcc --strip-components 1 \
     && rm -rf /tmp/dc-extracted/gcc/share/doc/ /tmp/dc-extracted/gcc/share/gcc-arm-none-eabi/samples/
 
-ARG CMAKE_VERSION=3.27.6
+ARG CMAKE_VERSION=3.31.6
 ARG CMAKE_SCRIPT=https://github.com/Kitware/CMake/releases/download/v$CMAKE_VERSION/cmake-$CMAKE_VERSION-linux-x86_64.sh
 RUN wget $CMAKE_SCRIPT \
     -q -O /tmp/dc-downloads/cmake-install.sh \
@@ -26,7 +26,7 @@ RUN wget $CMAKE_SCRIPT \
     && /tmp/dc-downloads/cmake-install.sh --skip-license --prefix=/tmp/dc-extracted/cmake \
     && rm /tmp/dc-downloads/cmake-install.sh
 
-# This is TI XDC tools for linux. Cheack all versions here: https://software-dl.ti.com/dsps/dsps_public_sw/sdo_sb/targetcontent/rtsc/index.html
+# This is TI XDC tools for linux. Check all versions here: https://software-dl.ti.com/dsps/dsps_public_sw/sdo_sb/targetcontent/rtsc/index.html
 ARG TI_TOOL_URL=https://software-dl.ti.com/dsps/dsps_public_sw/sdo_sb/targetcontent/rtsc/3_62_00_08/exports/xdccore/xdctools_3_62_00_08_core_linux.zip
 RUN  mkdir -p /tmp/dc-extracted/titools \
     && curl -o /tmp/dc-downloads/titools.zip $TI_TOOL_URL -L \
@@ -66,19 +66,19 @@ RUN mkdir -p /usr/local/bin/gcc \
 # Alternative source for those having issues with git svn downloads:
 RUN git clone --branch stable_21.11.x https://github.com/ArduPilot/ChibiOS.svn.git --depth 1 ./sources/ChibiOs
 
-# Clone support repos for STM32 including AzureRTOS
+# Clone support repos for STM32 including Eclipse ThreadX (a.k.a. Azure RTOS)
 RUN git clone --branch nf-build https://github.com/nanoframework/STM32CubeL4.git --depth 1 ./sources/STM32CubeL4 \
     && git clone --branch nf-build https://github.com/nanoframework/STM32CubeF7.git --depth 1 ./sources/STM32CubeF7 \
     && git clone --branch nf-build https://github.com/nanoframework/STM32CubeF4.git --depth 1 ./sources/STM32CubeF4 \
     && git clone --branch nf-build https://github.com/nanoframework/STM32CubeH7.git --depth 1 ./sources/STM32CubeH7 \
     && git clone --branch chibios-21.11.x https://github.com/ChibiOS/ChibiOS-Contrib.git --depth 1 ./sources/ChibiOs-Contrib
 
-# Clone repos for AzureRTOS
+# Clone repos for Eclipse ThreadX (a.k.a. Azure RTOS)
 RUN git clone --branch v6.4.0_rel --recursive https://github.com/eclipse-threadx/threadx.git --depth 1 ./sources/AzureRTOS \
     && git clone --branch v6.3.0_rel --recursive https://github.com/eclipse-threadx/netxduo.git --depth 1 ./sources/NetxDuo
 
 # Clone dependent repos (mbedtls, fatfs and littlefs)
-RUN git clone --branch R0.15 https://github.com/abbrev/fatfs.git --depth 1 ./sources/fatfs \
+RUN git clone --branch R0.15a https://github.com/abbrev/fatfs.git --depth 1 ./sources/fatfs \
     && git clone --branch v2.9.3 https://github.com/littlefs-project/littlefs --depth 1 ./sources/littlefs \
     && git clone --branch mbedtls-3.6.0 https://github.com/ARMmbed/mbedtls.git --depth 1 ./sources/mbedtls \
     && cd ./sources/mbedtls \

@@ -22,12 +22,12 @@ struct Library_Com_SkyworksInc_NanoFramework_Devices_C1_Com_SkyworksInc_NanoFram
 {
     static const int FIELD___syncLock = 1;
 
-    NANOCLR_NATIVE_DECLARE(NativeTransmitWriteWithAddress___VOID__U1__U1__SZARRAY_U1);
-    NANOCLR_NATIVE_DECLARE(NativeTransmitReadWithAddress___VOID__U1__SZARRAY_U1);
-    NANOCLR_NATIVE_DECLARE(NativeTransmitRead___VOID__SZARRAY_U1);
-    NANOCLR_NATIVE_DECLARE(NativeTransmitWrite___VOID__U1__SZARRAY_U1);
-    NANOCLR_NATIVE_DECLARE(NativeTransmitWriteAddress___VOID__U1__SZARRAY_U1);
-    NANOCLR_NATIVE_DECLARE(NativeTransmitReadAddress___VOID__SZARRAY_U1);
+    NANOCLR_NATIVE_DECLARE(NativeTransmitWriteWithAddress___VOID__U2__U1__U1__SZARRAY_U1);
+    NANOCLR_NATIVE_DECLARE(NativeTransmitReadWithAddress___VOID__U2__U1__SZARRAY_U1);
+    NANOCLR_NATIVE_DECLARE(NativeTransmitRead___VOID__U2__SZARRAY_U1);
+    NANOCLR_NATIVE_DECLARE(NativeTransmitWrite___VOID__U2__U1__SZARRAY_U1);
+    NANOCLR_NATIVE_DECLARE(NativeTransmitWriteAddress___VOID__U2__U1__SZARRAY_U1);
+    NANOCLR_NATIVE_DECLARE(NativeTransmitReadAddress___VOID__U2__SZARRAY_U1);
 
     //--//
 };

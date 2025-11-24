@@ -375,6 +375,32 @@
             }
         },
         {
+            "name": "ESP32_S3_BLE_UART",
+            "inherits": [
+                "xtensa-esp32s3-preset",
+                "user-tools-repos",
+                "user-prefs"
+            ],
+            "hidden": false,
+            "cacheVariables": {
+                "TARGET_NAME": "${presetName}",
+                "SDK_CONFIG_FILE": "sdkconfig.default_ble.esp32s3",
+                "NF_BUILD_RTM": "OFF",
+                "NF_FEATURE_DEBUGGER": "ON",
+                "NF_FEATURE_RTC": "ON",
+                "NF_FEATURE_HAS_SDCARD": "ON",
+                "API_nanoFramework.Device.OneWire": "ON",
+                "API_nanoFramework.Device.Bluetooth": "ON",
+                "API_System.Device.I2c.Slave": "ON",
+                "API_nanoFramework.Graphics": "ON",
+                "GRAPHICS_DISPLAY": "Generic_SPI.cpp",
+                "TOUCHPANEL_DEVICE": "XPT2046.cpp",
+                "GRAPHICS_DISPLAY_INTERFACE": "Spi_To_Display.cpp",
+                "TOUCHPANEL_INTERFACE": "Spi_To_TouchPanel.cpp",
+                "ESP32_SPIRAM_FOR_IDF_ALLOCATION": "1024 * 1024"
+            }
+        },
+        {
             "name": "ESP32_S3_ALL",
             "inherits": [
                 "xtensa-esp32s3-preset",
@@ -390,6 +416,32 @@
                 "NF_FEATURE_RTC": "ON",
                 "NF_FEATURE_HAS_SDCARD": "ON",
                 "ESP32_USB_CDC": "ON",
+                "API_nanoFramework.Device.OneWire": "ON",
+                "API_nanoFramework.Device.Bluetooth": "ON",
+                "API_System.Device.I2c.Slave": "ON",
+                "API_nanoFramework.Graphics": "ON",
+                "GRAPHICS_DISPLAY": "Generic_SPI.cpp",
+                "TOUCHPANEL_DEVICE": "XPT2046.cpp",
+                "GRAPHICS_DISPLAY_INTERFACE": "Spi_To_Display.cpp",
+                "TOUCHPANEL_INTERFACE": "Spi_To_TouchPanel.cpp",
+                "ESP32_SPIRAM_FOR_IDF_ALLOCATION": "1024 * 1024"
+            }
+        },
+        {
+            "name": "ESP32_S3_ALL_UART",
+            "inherits": [
+                "xtensa-esp32s3-preset",
+                "user-tools-repos",
+                "user-prefs"
+            ],
+            "hidden": false,
+            "cacheVariables": {
+                "TARGET_NAME": "${presetName}",
+                "SDK_CONFIG_FILE": "sdkconfig.default_octal_ble.esp32s3",
+                "NF_BUILD_RTM": "OFF",
+                "NF_FEATURE_DEBUGGER": "ON",
+                "NF_FEATURE_RTC": "ON",
+                "NF_FEATURE_HAS_SDCARD": "ON",
                 "API_nanoFramework.Device.OneWire": "ON",
                 "API_nanoFramework.Device.Bluetooth": "ON",
                 "API_System.Device.I2c.Slave": "ON",
@@ -952,9 +1004,21 @@
         },
         {
             "inherits": "base-user",
+            "name": "ESP32_S3_BLE_UART",
+            "displayName": "ESP32_S3_BLE_UART",
+            "configurePreset": "ESP32_S3_BLE_UART"
+        },
+        {
+            "inherits": "base-user",
             "name": "ESP32_S3_ALL",
             "displayName": "ESP32_S3_ALL",
             "configurePreset": "ESP32_S3_ALL"
+        },
+        {
+            "inherits": "base-user",
+            "name": "ESP32_S3_ALL_UART",
+            "displayName": "ESP32_S3_ALL_UART",
+            "configurePreset": "ESP32_S3_ALL_UART"
         },
         {
             "inherits": "base-user",
