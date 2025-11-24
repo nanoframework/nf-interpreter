@@ -620,7 +620,11 @@ static const CLR_RT_MethodHandler method_lookup[] =
     nullptr,
     nullptr,
     nullptr,
+    nullptr,
+    nullptr,
     Library_corlib_native_System_Guid::GenerateNewGuid___STATIC__SZARRAY_U1,
+    nullptr,
+    nullptr,
     nullptr,
     nullptr,
     nullptr,
@@ -1398,7 +1402,11 @@ static const CLR_RT_MethodHandler method_lookup[] =
     nullptr,
     nullptr,
     nullptr,
+    nullptr,
+    nullptr,
     Library_corlib_native_System_Guid::GenerateNewGuid___STATIC__SZARRAY_U1,
+    nullptr,
+    nullptr,
     nullptr,
     nullptr,
     nullptr,
@@ -1588,11 +1596,11 @@ const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_mscorlib =
 
 #if (NANOCLR_REFLECTION == TRUE)
 
-    0x559086F3,
+    0x3C34952A,
 
 #elif (NANOCLR_REFLECTION == FALSE)
 
-    0x3184D138,
+    0xAA0B5756,
 ,
 
 #else
