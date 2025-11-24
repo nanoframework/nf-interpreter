@@ -7812,6 +7812,9 @@ HRESULT CLR_RT_TypeSystem::BuildMethodName(
         }
 
         NANOCLR_CHECK_HRESULT(BuildTypeName(instOwner, szBuffer, iBuffer));
+
+        CLR_SafeSprintf(szBuffer, iBuffer, "::%s", mdInst.assembly->GetString(mdInst.target->name));
+
     }
     else
     {
@@ -7939,8 +7942,6 @@ HRESULT CLR_RT_TypeSystem::BuildMethodName(
             }
         }
     }
-
-    CLR_SafeSprintf(szBuffer, iBuffer, "::%s", mdInst.assembly->GetString(mdInst.target->name));
 
     NANOCLR_NOCLEANUP();
 }
