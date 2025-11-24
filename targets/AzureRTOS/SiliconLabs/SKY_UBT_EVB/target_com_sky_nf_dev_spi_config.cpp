@@ -46,7 +46,7 @@ INIT_SPI_CONFIG(2, 2, 2, 2, 2)
 // CS: PA3      0
 // EMC encoded "port location", see Alternate Functionality Overview table in MCU datasheet
 
-// INIT_SPI_CONFIG(3, 0, 0, 0, 0)
+INIT_SPI_CONFIG(3, 0, 0, 0, 0)
 
 //////////
 // SPI4 //
@@ -59,4 +59,4 @@ INIT_SPI_CONFIG(2, 2, 2, 2, 2)
 // CS: PC5      0
 // EMC encoded "port location", see Alternate Functionality Overview table in MCU datasheet
 
-// INIT_SPI_CONFIG(4, 0, 0, 0, 0)
+INIT_SPI_CONFIG(4, 0, 0, 0, 0)
