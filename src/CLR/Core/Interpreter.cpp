@@ -4204,6 +4204,41 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
 
                 //----------------------------------------------------------------------------------------------------------//
 
+                OPDEF(CEE_LOCALLOC, "localloc", PopI, PushI, InlineNone, IPrimitive, 2, 0xFE, 0x0F, NEXT)
+                {
+                    CLR_UINT32 size = evalPos[0].NumericByRef().u4;
+
+                    evalPos--;
+                    CHECKSTACK(stack, evalPos);
+
+                    // Create the byte array
+                    CLR_RT_HeapBlock tempArray;
+                    CLR_RT_TypeDef_Index byteType = g_CLR_RT_WellKnownTypes.UInt8;
+
+                    NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance(tempArray, size, byteType));
+      
+                    CLR_RT_ProtectFromGC gc(tempArray);
+                    CLR_RT_HeapBlock_Array *array = tempArray.DereferenceArray();
+
+                    // store pointer for allocated array, if enough room
+                    // In localloc:
+                    if (stack->m_localAllocCount >= CLR_RT_StackFrame::c_Max_Localloc_Count)
+                    {
+                        NANOCLR_SET_AND_LEAVE(CLR_E_STACK_OVERFLOW);
+                    }
+
+                    stack->m_localAllocs[stack->m_localAllocCount++] = array;
+
+                    evalPos++;
+                    CHECKSTACK(stack, evalPos);
+
+                    // deviating from ECMA-335: we return the array reference instead of a raw pointer
+                    evalPos[0].SetObjectReference(array);
+                    break;
+                }
+
+                //----------------------------------------------------------------------------------------------------------//
+
                 //////////////////////////////////////////////////////////////////////////////////////////
                 //
                 // These opcodes do nothing...
@@ -4224,7 +4259,6 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                 OPDEF(CEE_INITBLK, "initblk", PopI + PopI + PopI, Push0, InlineNone, IPrimitive, 2, 0xFE, 0x18, NEXT)
                 OPDEF(CEE_CALLI, "calli", VarPop, VarPush, InlineSig, IPrimitive, 1, 0xFF, 0x29, CALL)
                 OPDEF(CEE_CKFINITE, "ckfinite", Pop1, PushR8, InlineNone, IPrimitive, 1, 0xFF, 0xC3, NEXT)
-                OPDEF(CEE_LOCALLOC, "localloc", PopI, PushI, InlineNone, IPrimitive, 2, 0xFE, 0x0F, NEXT)
                 OPDEF(CEE_MKREFANY, "mkrefany", PopI, Push1, InlineType, IPrimitive, 1, 0xFF, 0xC6, NEXT)
                 OPDEF(CEE_REFANYTYPE, "refanytype", Pop1, PushI, InlineNone, IPrimitive, 2, 0xFE, 0x1D, NEXT)
                 OPDEF(CEE_REFANYVAL, "refanyval", Pop1, PushI, InlineType, IPrimitive, 1, 0xFF, 0xC2, NEXT)

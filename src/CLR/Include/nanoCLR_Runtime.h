@@ -2529,6 +2529,9 @@ struct CLR_RT_HeapCluster : public CLR_RT_HeapBlock_Node // EVENT HEAP - NO RELO
 
 //--//
 
+// maximum number of local allocations per stack frame
+#define MAX_LOCALALLOC_COUNT 4
+
 #ifndef NANOCLR_NO_IL_INLINE
 struct CLR_RT_InlineFrame
 {
@@ -2539,6 +2542,8 @@ struct CLR_RT_InlineFrame
     CLR_RT_MethodDef_Instance m_call;
     CLR_PMETADATA m_IP;
     CLR_PMETADATA m_IPStart;
+    CLR_UINT8 m_localAllocCount;
+    CLR_RT_HeapBlock_Array *m_localAllocs[MAX_LOCALALLOC_COUNT];
 };
 
 struct CLR_RT_InlineBuffer
@@ -2561,6 +2566,9 @@ struct CLR_RT_StackFrame : public CLR_RT_HeapBlock_Node // EVENT HEAP - NO RELOC
     // We need to have more slots in the stack to process a 'newobj' opcode.
     static const int c_OverheadForNewObjOrInteropMethod = 2;
     static const int c_MinimumStack = 10;
+
+    // max mumber of local allocations per stack frame
+    static const int c_Max_Localloc_Count = MAX_LOCALALLOC_COUNT;
 
     static const CLR_UINT32 c_MethodKind_Native = 0x00000000;
     static const CLR_UINT32 c_MethodKind_Interpreted = 0x00000001;
@@ -2662,6 +2670,9 @@ struct CLR_RT_StackFrame : public CLR_RT_HeapBlock_Node // EVENT HEAP - NO RELOC
 #if defined(ENABLE_NATIVE_PROFILER)
     bool m_fNativeProfiled;
 #endif
+
+    CLR_UINT8 m_localAllocCount;
+    CLR_RT_HeapBlock_Array *m_localAllocs[c_Max_Localloc_Count];
 
     CLR_RT_HeapBlock m_extension[1];
 
