@@ -696,12 +696,24 @@ static const CLR_RT_MethodHandler method_lookup[] =
     Library_corlib_native_System_Random::_ctor___VOID,
     Library_corlib_native_System_Random::_ctor___VOID__I4,
     nullptr,
+    Library_corlib_native_System_ReadOnlySpan_1::_ctor___VOID__VOIDptr__I4,
+    nullptr,
+    nullptr,
+    nullptr,
     nullptr,
     nullptr,
     nullptr,
     nullptr,
     nullptr,
     Library_corlib_native_System_ReadOnlySpan_1::NativeReadOnlySpanConstructor___VOID__SZARRAY_GENERICTYPE__I4__I4,
+    nullptr,
+    nullptr,
+    nullptr,
+    nullptr,
+    nullptr,
+    nullptr,
+    nullptr,
+    nullptr,
     nullptr,
     nullptr,
     nullptr,
@@ -798,6 +810,7 @@ static const CLR_RT_MethodHandler method_lookup[] =
     nullptr,
     nullptr,
     nullptr,
+    Library_corlib_native_System_Span_1::_ctor___VOID__VOIDptr__I4,
     nullptr,
     nullptr,
     nullptr,
@@ -809,6 +822,10 @@ static const CLR_RT_MethodHandler method_lookup[] =
     nullptr,
     nullptr,
     Library_corlib_native_System_Span_1::NativeSpanConstructor___VOID__SZARRAY_GENERICTYPE__I4__I4,
+    nullptr,
+    nullptr,
+    nullptr,
+    nullptr,
     nullptr,
     nullptr,
     nullptr,
@@ -1596,7 +1613,7 @@ const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_mscorlib =
 
 #if (NANOCLR_REFLECTION == TRUE)
 
-    0x3C34952A,
+    0xCECAB752,
 
 #elif (NANOCLR_REFLECTION == FALSE)
 

@@ -6,6 +6,149 @@
 
 #include "CorLib.h"
 
+typedef Library_corlib_native_System_Runtime_CompilerServices_RuntimeHelpers RuntimeHelpers;
+
+HRESULT Library_corlib_native_System_ReadOnlySpan_1::_ctor___VOID__VOIDptr__I4(CLR_RT_StackFrame &stack)
+{
+    NANOCLR_HEADER();
+
+    int32_t length;
+    bool isRefContainsRefs = false;
+
+    CLR_RT_HeapBlock_Array *sourceArray;
+
+    CLR_RT_HeapBlock *thisSpan = stack.This();
+
+    // grab caller to get the generic type
+    CLR_RT_MethodDef_Instance &caller = stack.MethodCall();
+
+    if (caller.genericType == nullptr || !NANOCLR_INDEX_IS_VALID(*caller.genericType))
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+    }
+
+    CLR_RT_TypeSpec_Instance typeSpec;
+    if (!typeSpec.InitializeFromIndex(*caller.genericType))
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+    }
+
+    CLR_RT_SignatureParser parser;
+    parser.Initialize_TypeSpec(typeSpec);
+
+    CLR_RT_SignatureParser::Element element;
+
+    if (FAILED(parser.Advance(element)))
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+    }
+
+    // The first element should be the generic type instantiation
+    if (element.DataType != DATATYPE_GENERICINST)
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+    }
+
+    // Advance to get the generic argument (T)
+    if (FAILED(parser.Advance(element)))
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+    }
+
+    if (element.DataType == DATATYPE_VALUETYPE)
+    {
+        // For value types we need to advance again
+        if (FAILED(parser.Advance(element)))
+        {
+            NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+        }
+    }
+
+    // check if T is a reference type or contains references
+    NANOCLR_CHECK_HRESULT(RuntimeHelpers::CheckReferenceOrContainsReferences(
+        element.Class,
+        element.DataType,
+        &parser,
+        isRefContainsRefs));
+
+    if (isRefContainsRefs)
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+    }
+
+    // validate length parameter
+    length = stack.Arg2().NumericByRefConst().s4;
+
+    if (length < 0)
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_RANGE);
+    }
+
+    // get the pointer to the array
+    // assuming the pointer its an array allocated by a previous call to localloc
+    sourceArray = stack.Arg1().DereferenceArray();
+
+    // check the element being UInt8
+    if (sourceArray->m_typeOfElement != DATATYPE_U1)
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+    }
+
+    {
+        // set reference to the pointer to the array
+        thisSpan[FIELD___array].SetObjectReference(sourceArray);
+
+        // adjust the element type and size to match the generic type T
+        // The sourceArray was allocated as byte[], but we're going to re-shaping it as T[]
+
+        // Get the TypeDef instance for the element type
+        CLR_RT_TypeDef_Instance inst{};
+        if (!inst.InitializeFromIndex(element.Class))
+        {
+            NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+        }
+
+        // Get the element data type and lookup table
+        NanoCLRDataType dt = (NanoCLRDataType)inst.target->dataType;
+        const CLR_RT_DataTypeLookup &dtl = c_CLR_RT_DataTypeLookup[dt];
+
+        CLR_UINT32 elementSize = dtl.m_sizeInBytes;
+
+        if (elementSize == CLR_RT_DataTypeLookup::c_NA)
+        {
+            NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+        }
+
+        CLR_UINT32 newNumElements = sourceArray->m_numOfElements / elementSize;
+
+        // Validate that length doesn't exceed available space
+        if ((CLR_UINT32)length > newNumElements)
+        {
+            NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_RANGE);
+        }
+
+        // Update the reflection data type to the new element type
+        sourceArray->ReflectionData().data.type = element.Class;
+
+        // Now re-shape the array to make it T[]
+        sourceArray->m_typeOfElement = dt;
+        sourceArray->m_sizeOfElement = (CLR_UINT8)elementSize;
+        sourceArray->m_numOfElements = (CLR_UINT32)length;
+
+        // Set fReference flag based on whether element type is numeric
+        // (same logic as ExtractHeapBlocksForArray)
+        sourceArray->m_fReference = (dtl.m_flags & CLR_RT_DataTypeLookup::c_Numeric) == 0;
+
+        // need to call this in order to have the individual elements cleared
+        sourceArray->ClearElements(0, length);
+    }
+
+    // set length
+    thisSpan[FIELD___length].NumericByRef().s4 = length;
+
+    NANOCLR_NOCLEANUP();
+}
+
 HRESULT Library_corlib_native_System_ReadOnlySpan_1::NativeReadOnlySpanConstructor___VOID__SZARRAY_GENERICTYPE__I4__I4(
     CLR_RT_StackFrame &stack)
 {
