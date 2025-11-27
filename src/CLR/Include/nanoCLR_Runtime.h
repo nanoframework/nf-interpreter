@@ -2543,7 +2543,7 @@ struct CLR_RT_InlineFrame
     CLR_PMETADATA m_IP;
     CLR_PMETADATA m_IPStart;
     CLR_UINT8 m_localAllocCount;
-    CLR_RT_HeapBlock_Array *m_localAllocs[MAX_LOCALALLOC_COUNT];
+    uintptr_t m_localAllocs[MAX_LOCALALLOC_COUNT];
 };
 
 struct CLR_RT_InlineBuffer
@@ -2672,7 +2672,7 @@ struct CLR_RT_StackFrame : public CLR_RT_HeapBlock_Node // EVENT HEAP - NO RELOC
 #endif
 
     CLR_UINT8 m_localAllocCount;
-    CLR_RT_HeapBlock_Array *m_localAllocs[c_Max_Localloc_Count];
+    uintptr_t m_localAllocs[c_Max_Localloc_Count];
 
     CLR_RT_HeapBlock m_extension[1];
 

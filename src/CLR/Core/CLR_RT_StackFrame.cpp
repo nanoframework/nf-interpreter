@@ -125,7 +125,7 @@ HRESULT CLR_RT_StackFrame::Push(CLR_RT_Thread *th, const CLR_RT_MethodDef_Instan
         stack->m_localAllocCount = 0;
         for (CLR_INT32 i = 0; i < CLR_RT_StackFrame::c_Max_Localloc_Count; i++)
         {
-            stack->m_localAllocs[i] = nullptr;
+            stack->m_localAllocs[i] = 0;
         }
 
         //
@@ -355,7 +355,7 @@ bool CLR_RT_StackFrame::PushInline(
     m_localAllocCount = 0;
     for (CLR_INT32 i = 0; i < c_Max_Localloc_Count; i++)
     {
-        m_localAllocs[i] = nullptr;
+        m_localAllocs[i] = 0;
     }
 
     if (md->localsCount)
@@ -858,11 +858,12 @@ void CLR_RT_StackFrame::Pop()
     NATIVE_PROFILE_CLR_CORE();
 
     // Clear localloc references before popping
-    m_localAllocCount = 0;
-    for (CLR_INT32 i = 0; i < c_Max_Localloc_Count; i++)
+    for (CLR_INT32 i = 0; i < m_localAllocCount; i++)
     {
-        m_localAllocs[i] = nullptr;
+        platform_free((void *)m_localAllocs[i]);
+        m_localAllocs[i] = 0;
     }
+    m_localAllocCount = 0;
 
 #if defined(NANOCLR_PROFILE_NEW_CALLS)
     {
