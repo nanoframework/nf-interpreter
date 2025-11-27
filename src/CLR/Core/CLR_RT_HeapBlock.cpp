@@ -2079,6 +2079,20 @@ HRESULT CLR_RT_HeapBlock::NumericAdd(const CLR_RT_HeapBlock &right)
         }
         break;
 
+        case DATATYPE_PTR:
+            if (right.DataType() == DATATYPE_I4)
+            {
+                // binary numeric add (byte wise) (ECMA-335 Table III.2)
+                uint8_t *unmanagedPtr = (uint8_t *)m_data.objectReference.ptr;
+                unmanagedPtr += right.NumericByRefConst().s4;
+
+                m_data.objectReference.ptr = (CLR_RT_HeapBlock *)unmanagedPtr;
+
+                break;
+            }
+            // fall through, can't add other types to a PTR
+            [[fallthrough]];
+
         default:
             NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
     }
@@ -2165,6 +2179,21 @@ HRESULT CLR_RT_HeapBlock::NumericSub(const CLR_RT_HeapBlock &right)
             m_data.arrayReference.index -= right.m_data.numeric.s4 / array->m_sizeOfElement;
         }
         break;
+
+        case DATATYPE_PTR:
+            if (right.DataType() == DATATYPE_I4)
+            {
+                // binary numeric sub (byte wise) (ECMA-335 Table III.2)
+                uint8_t *unmanagedPtr = (uint8_t *)m_data.objectReference.ptr;
+                unmanagedPtr -= right.NumericByRefConst().s4;
+
+                m_data.objectReference.ptr = (CLR_RT_HeapBlock *)unmanagedPtr;
+
+                break;
+            }
+            // fall through, can't subtract other types to a PTR
+            [[fallthrough]];
+
         default:
             NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
     }
