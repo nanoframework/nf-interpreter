@@ -4234,6 +4234,38 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
 
                     // deviating from ECMA-335: we return the array reference instead of a raw pointer
                     evalPos[0].SetObjectReference(array);
+
+                //----------------------------------------------------------------------------------------------------------//
+
+                OPDEF(CEE_CPBLK, "cpblk", PopI + PopI + PopI, Push0, InlineNone, IPrimitive, 2, 0xFE, 0x17, NEXT)
+                {
+                    // Stack: ... ... <destination> <source> <size> -> ...
+
+                    // get size
+                    CLR_UINT32 size = evalPos[0].NumericByRef().u4;
+                    evalPos--;
+
+                    // get source address
+#ifdef _WIN64
+                    uintptr_t sourceAddress = evalPos[0].NumericByRef().s8;
+#else
+                    uintptr_t sourceAddress = evalPos[0].NumericByRef().s4;
+#endif
+                    evalPos--;
+
+                    // get destination address
+#ifdef _WIN64
+                    uintptr_t destinationAddress = evalPos[0].NumericByRef().s8;
+#else
+                    uintptr_t destinationAddress = evalPos[0].NumericByRef().s4;
+#endif
+                    evalPos--;
+
+                    CHECKSTACK(stack, evalPos);
+
+                    // perform memory copy
+                    memmove((void *)destinationAddress, (const void *)sourceAddress, size);
+
                     break;
                 }
 
@@ -4254,7 +4286,6 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                 // Unsupported opcodes...
                 //
                 OPDEF(CEE_ARGLIST, "arglist", Pop0, PushI, InlineNone, IPrimitive, 2, 0xFE, 0x00, NEXT)
-                OPDEF(CEE_CPBLK, "cpblk", PopI + PopI + PopI, Push0, InlineNone, IPrimitive, 2, 0xFE, 0x17, NEXT)
                 OPDEF(CEE_JMP, "jmp", Pop0, Push0, InlineMethod, IPrimitive, 1, 0xFF, 0x27, CALL)
                 OPDEF(CEE_INITBLK, "initblk", PopI + PopI + PopI, Push0, InlineNone, IPrimitive, 2, 0xFE, 0x18, NEXT)
                 OPDEF(CEE_CALLI, "calli", VarPop, VarPush, InlineSig, IPrimitive, 1, 0xFF, 0x29, CALL)
