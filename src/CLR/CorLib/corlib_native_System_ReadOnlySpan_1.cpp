@@ -14,9 +14,9 @@ HRESULT Library_corlib_native_System_ReadOnlySpan_1::_ctor___VOID__VOIDptr__I4(C
 
     int32_t length;
     bool isRefContainsRefs = false;
+    uintptr_t objectRawPointer;
 
-    CLR_RT_HeapBlock_Array *sourceArray;
-
+    CLR_RT_HeapBlock_Array *destinationArray;
     CLR_RT_HeapBlock *thisSpan = stack.This();
 
     // grab caller to get the generic type
@@ -85,62 +85,24 @@ HRESULT Library_corlib_native_System_ReadOnlySpan_1::_ctor___VOID__VOIDptr__I4(C
     }
 
     // get the pointer to the array
-    // assuming the pointer its an array allocated by a previous call to localloc
-    sourceArray = stack.Arg1().DereferenceArray();
-
-    // check the element being UInt8
-    if (sourceArray->m_typeOfElement != DATATYPE_U1)
+    // validate data type as being an unmanaged pointer
+    if (stack.Arg1().DataType() != DATATYPE_PTR)
     {
         NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
     }
 
+    objectRawPointer = (uintptr_t)stack.Arg1().Dereference();
+
     {
-        // set reference to the pointer to the array
-        thisSpan[FIELD___array].SetObjectReference(sourceArray);
+        CLR_RT_HeapBlock &refArray = thisSpan[FIELD___array];
+        CLR_RT_HeapBlock_Array::CreateInstance(refArray, length, element.Class);
 
-        // adjust the element type and size to match the generic type T
-        // The sourceArray was allocated as byte[], but we're going to re-shaping it as T[]
+        destinationArray = thisSpan[FIELD___array].DereferenceArray();
+        CLR_UINT32 elementSize = destinationArray->m_sizeOfElement;
+        CLR_UINT8 *elementPtr = destinationArray->GetFirstElement();
 
-        // Get the TypeDef instance for the element type
-        CLR_RT_TypeDef_Instance inst{};
-        if (!inst.InitializeFromIndex(element.Class))
-        {
-            NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
-        }
-
-        // Get the element data type and lookup table
-        NanoCLRDataType dt = (NanoCLRDataType)inst.target->dataType;
-        const CLR_RT_DataTypeLookup &dtl = c_CLR_RT_DataTypeLookup[dt];
-
-        CLR_UINT32 elementSize = dtl.m_sizeInBytes;
-
-        if (elementSize == CLR_RT_DataTypeLookup::c_NA)
-        {
-            NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
-        }
-
-        CLR_UINT32 newNumElements = sourceArray->m_numOfElements / elementSize;
-
-        // Validate that length doesn't exceed available space
-        if ((CLR_UINT32)length > newNumElements)
-        {
-            NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_RANGE);
-        }
-
-        // Update the reflection data type to the new element type
-        sourceArray->ReflectionData().data.type = element.Class;
-
-        // Now re-shape the array to make it T[]
-        sourceArray->m_typeOfElement = dt;
-        sourceArray->m_sizeOfElement = (CLR_UINT8)elementSize;
-        sourceArray->m_numOfElements = (CLR_UINT32)length;
-
-        // Set fReference flag based on whether element type is numeric
-        // (same logic as ExtractHeapBlocksForArray)
-        sourceArray->m_fReference = (dtl.m_flags & CLR_RT_DataTypeLookup::c_Numeric) == 0;
-
-        // need to call this in order to have the individual elements cleared
-        sourceArray->ClearElements(0, length);
+        // copy data from the raw pointer to the newly created array
+        memcpy(elementPtr, (void *)objectRawPointer, elementSize * length);
     }
 
     // set length
