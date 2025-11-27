@@ -4253,7 +4253,7 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                     CHECKSTACK(stack, evalPos);
 
                     // store the pointer of the local allocated memory
-                    evalPos[0].SetUnmangedPointer(allocPointer);
+                    evalPos[0].SetUnmanagedPointer(allocPointer);
 
                     break;
                 }
