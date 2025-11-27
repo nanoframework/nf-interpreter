@@ -1012,6 +1012,12 @@ struct CLR_RT_HeapBlock
         m_data.objectReference.ptr = (CLR_RT_HeapBlock *)ptr;
     }
 
+    void SetUnmangedPointer(const uintptr_t ptr)
+    {
+        m_id.raw = CLR_RT_HEAPBLOCK_RAW_ID(DATATYPE_PTR, 0, 1);
+        m_data.objectReference.ptr = (CLR_RT_HeapBlock *)ptr;
+    }
+
 #if defined(NANOCLR_APPDOMAINS)
     CLR_RT_AppDomain *TransparentProxyAppDomain() const
     {
