@@ -3075,8 +3075,8 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
 
                         // Get the data from the Signatures table (this contains the raw byte array)
                         ptrSrc = inst.assembly->GetSignature(inst.target->defaultValue);
-                        CLR_UINT32 elementCount;
-                        NANOCLR_READ_UNALIGNED_UINT16(elementCount, ptrSrc);
+                        CLR_UINT32 dummyVar;
+                        NANOCLR_READ_UNALIGNED_UINT16(dummyVar, ptrSrc);
 
                         // ptrSrc is now pointing to the raw byte data
                         ptr = (CLR_RT_HeapBlock *)ptrSrc;
