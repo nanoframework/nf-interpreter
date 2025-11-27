@@ -96,7 +96,9 @@ HRESULT Library_corlib_native_System_Span_1::_ctor___VOID__VOIDptr__I4(CLR_RT_St
 
     {
         CLR_RT_HeapBlock &refArray = thisSpan[FIELD___array];
-        CLR_RT_HeapBlock_Array::CreateInstance(refArray, length, element.Class);
+        NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance(refArray, length, element.Class));
+
+        CLR_RT_ProtectFromGC gc(refArray);
 
         destinationArray = thisSpan[FIELD___array].DereferenceArray();
         CLR_UINT32 elementSize = destinationArray->m_sizeOfElement;
