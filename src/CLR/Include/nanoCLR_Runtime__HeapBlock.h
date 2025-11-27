@@ -764,7 +764,7 @@ struct CLR_RT_HeapBlock
         {
             uintptr_t ptr;
         } unmanagedPointer;
-        
+
         //--//
 
     } m_data;
@@ -1102,7 +1102,7 @@ struct CLR_RT_HeapBlock
     }
 
     //--//
-    
+
     void SetUnmanagedPointer(const uintptr_t ptr)
     {
         m_id.raw = CLR_RT_HEAPBLOCK_RAW_ID(DATATYPE_PTR, 0, 1);
