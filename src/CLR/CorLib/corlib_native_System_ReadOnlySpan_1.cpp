@@ -92,7 +92,7 @@ HRESULT Library_corlib_native_System_ReadOnlySpan_1::_ctor___VOID__VOIDptr__I4(C
         NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
     }
 
-    objectRawPointer = (uintptr_t)stack.Arg1().Dereference();
+    objectRawPointer = (uintptr_t)stack.Arg1().UnmanagedPointer();
 
     {
         CLR_RT_HeapBlock &refArray = thisSpan[FIELD___array];

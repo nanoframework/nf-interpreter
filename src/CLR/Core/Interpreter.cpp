@@ -4286,7 +4286,7 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
 
                     CHECKSTACK(stack, evalPos);
 
-                    // perform memory copy
+                    // perform memory move as addresses may overlap
                     memmove((void *)destinationAddress, (const void *)sourceAddress, size);
 
                     break;

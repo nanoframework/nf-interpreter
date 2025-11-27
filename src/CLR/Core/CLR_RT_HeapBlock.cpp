@@ -644,8 +644,7 @@ HRESULT CLR_RT_HeapBlock::StoreToReference(CLR_RT_HeapBlock &ref, int size)
     else if (dt == DATATYPE_PTR)
     {
         // unmanaged pointer, perform a direct memory copy
-        obj = ref.Dereference();
-        memcpy((void *)obj, (void *)&NumericByRef(), size);
+        memcpy((void *)ref.UnmanagedPointer(), (void *)&NumericByRef(), size);
     }
     else
     {
@@ -2083,10 +2082,10 @@ HRESULT CLR_RT_HeapBlock::NumericAdd(const CLR_RT_HeapBlock &right)
             if (right.DataType() == DATATYPE_I4)
             {
                 // binary numeric add (byte wise) (ECMA-335 Table III.2)
-                uint8_t *unmanagedPtr = (uint8_t *)m_data.objectReference.ptr;
+                uint8_t *unmanagedPtr = (uint8_t *)UnmanagedPointer();
                 unmanagedPtr += right.NumericByRefConst().s4;
 
-                m_data.objectReference.ptr = (CLR_RT_HeapBlock *)unmanagedPtr;
+                SetUnmanagedPointer((uintptr_t)unmanagedPtr);
 
                 break;
             }
@@ -2184,10 +2183,10 @@ HRESULT CLR_RT_HeapBlock::NumericSub(const CLR_RT_HeapBlock &right)
             if (right.DataType() == DATATYPE_I4)
             {
                 // binary numeric sub (byte wise) (ECMA-335 Table III.2)
-                uint8_t *unmanagedPtr = (uint8_t *)m_data.objectReference.ptr;
+                uint8_t *unmanagedPtr = (uint8_t *)UnmanagedPointer();
                 unmanagedPtr -= right.NumericByRefConst().s4;
 
-                m_data.objectReference.ptr = (CLR_RT_HeapBlock *)unmanagedPtr;
+                SetUnmanagedPointer((uintptr_t)unmanagedPtr);
 
                 break;
             }

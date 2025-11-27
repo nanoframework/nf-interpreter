@@ -760,6 +760,13 @@ struct CLR_RT_HeapBlock
 
         //--//
 
+        struct UnmanagedPointer
+        {
+            uintptr_t ptr;
+        } unmanagedPointer;
+        
+        //--//
+
     } m_data;
 
   public:
@@ -1012,12 +1019,6 @@ struct CLR_RT_HeapBlock
         m_data.objectReference.ptr = (CLR_RT_HeapBlock *)ptr;
     }
 
-    void SetUnmanagedPointer(const uintptr_t ptr)
-    {
-        m_id.raw = CLR_RT_HEAPBLOCK_RAW_ID(DATATYPE_PTR, 0, 1);
-        m_data.objectReference.ptr = (CLR_RT_HeapBlock *)ptr;
-    }
-
 #if defined(NANOCLR_APPDOMAINS)
     CLR_RT_AppDomain *TransparentProxyAppDomain() const
     {
@@ -1098,6 +1099,19 @@ struct CLR_RT_HeapBlock
     bool SameHeader(const CLR_RT_HeapBlock &right) const
     {
         return this->m_data.numeric.u8 == right.m_data.numeric.u8;
+    }
+
+    //--//
+    
+    void SetUnmanagedPointer(const uintptr_t ptr)
+    {
+        m_id.raw = CLR_RT_HEAPBLOCK_RAW_ID(DATATYPE_PTR, 0, 1);
+        m_data.unmanagedPointer.ptr = ptr;
+    }
+
+    uintptr_t UnmanagedPointer() const
+    {
+        return (DataType() == DATATYPE_PTR) ? m_data.unmanagedPointer.ptr : 0;
     }
 
     //--//
