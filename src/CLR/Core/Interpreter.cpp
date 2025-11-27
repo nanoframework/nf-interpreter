@@ -1813,6 +1813,7 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                     evalPos[2].Promote();
 
                     NANOCLR_CHECK_HRESULT(evalPos[2].StoreToReference(evalPos[1], size));
+
                     break;
                 }
 
@@ -3063,6 +3064,22 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
 
                         // Not a pending .cctor case - this is a real error
                         NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+                    }
+
+                    // check if field has RVA
+                    CLR_RT_FieldDef_Instance inst;
+                    if (inst.InitializeFromIndex(field) && (inst.target->flags & CLR_RECORD_FIELDDEF::FD_HasFieldRVA) &&
+                        inst.target->defaultValue != CLR_EmptyIndex)
+                    {
+                        CLR_PMETADATA ptrSrc;
+
+                        // Get the data from the Signatures table (this contains the raw byte array)
+                        ptrSrc = inst.assembly->GetSignature(inst.target->defaultValue);
+                        CLR_UINT32 elementCount;
+                        NANOCLR_READ_UNALIGNED_UINT16(elementCount, ptrSrc);
+
+                        // ptrSrc is now pointing to the raw byte data
+                        ptr = (CLR_RT_HeapBlock *)ptrSrc;
                     }
 
                     evalPos++;
