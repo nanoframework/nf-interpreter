@@ -4272,7 +4272,7 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
 #ifdef _WIN64
                     uintptr_t sourceAddress = evalPos[0].NumericByRef().s8;
 #else
-                    uintptr_t sourceAddress = evalPos[0].NumericByRef().s4;
+                uintptr_t sourceAddress = evalPos[0].NumericByRef().s4;
 #endif
                     evalPos--;
 
@@ -4280,7 +4280,7 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
 #ifdef _WIN64
                     uintptr_t destinationAddress = evalPos[0].NumericByRef().s8;
 #else
-                    uintptr_t destinationAddress = evalPos[0].NumericByRef().s4;
+                uintptr_t destinationAddress = evalPos[0].NumericByRef().s4;
 #endif
                     evalPos--;
 
