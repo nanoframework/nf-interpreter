@@ -4211,29 +4211,35 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                     evalPos--;
                     CHECKSTACK(stack, evalPos);
 
-                    // Create the byte array
-                    CLR_RT_HeapBlock tempArray;
-                    CLR_RT_TypeDef_Index byteType = g_CLR_RT_WellKnownTypes.UInt8;
-
-                    NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance(tempArray, size, byteType));
-      
-                    CLR_RT_ProtectFromGC gc(tempArray);
-                    CLR_RT_HeapBlock_Array *array = tempArray.DereferenceArray();
-
-                    // store pointer for allocated array, if enough room
-                    // In localloc:
+                    // check if we have room for another localloc
                     if (stack->m_localAllocCount >= CLR_RT_StackFrame::c_Max_Localloc_Count)
                     {
                         NANOCLR_SET_AND_LEAVE(CLR_E_STACK_OVERFLOW);
                     }
 
-                    stack->m_localAllocs[stack->m_localAllocCount++] = array;
+                    // allocate from platform heap
+                    uintptr_t allocPointer = (uintptr_t)platform_malloc(size);
+
+                    // sanity check
+                    if (allocPointer == 0)
+                    {
+                        NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
+                    }
+
+                    // per ECMA-335 zero-initialize the memory
+                    memset((void *)allocPointer, 0, size);
+
+                    // store the pointer to the local allocated memory
+                    stack->m_localAllocs[stack->m_localAllocCount++] = allocPointer;
 
                     evalPos++;
                     CHECKSTACK(stack, evalPos);
 
-                    // deviating from ECMA-335: we return the array reference instead of a raw pointer
-                    evalPos[0].SetObjectReference(array);
+                    // store the pointer of the local allocated memory
+                    evalPos[0].SetUnmangedPointer(allocPointer);
+
+                    break;
+                }
 
                 //----------------------------------------------------------------------------------------------------------//
 

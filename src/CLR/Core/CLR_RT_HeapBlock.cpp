@@ -641,6 +641,12 @@ HRESULT CLR_RT_HeapBlock::StoreToReference(CLR_RT_HeapBlock &ref, int size)
     {
         obj = &ref;
     }
+    else if (dt == DATATYPE_PTR)
+    {
+        // unmanaged pointer, perform a direct memory copy
+        obj = ref.Dereference();
+        memcpy((void *)obj, (void *)&NumericByRef(), size);
+    }
     else
     {
         NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
