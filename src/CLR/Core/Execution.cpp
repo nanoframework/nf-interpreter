@@ -1716,6 +1716,7 @@ CLR_RT_HeapBlock *CLR_RT_ExecutionEngine::ExtractHeapBlocksForArray(
         pArray->m_typeOfElement = dt;
         pArray->m_sizeOfElement = dtl.m_sizeInBytes;
         pArray->m_fReference = (dtl.m_flags & CLR_RT_DataTypeLookup::c_Numeric) == 0;
+        pArray->m_StoragePointer = 0;
 
 #if defined(NANOCLR_PROFILE_NEW_ALLOCATIONS)
         g_CLR_PRF_Profiler.TrackObjectCreation(pArray);

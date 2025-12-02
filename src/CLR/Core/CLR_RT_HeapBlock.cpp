@@ -1471,6 +1471,9 @@ bool CLR_RT_HeapBlock::ObjectsEqual(
                     objLeft->m_sizeOfElement == objRight->m_sizeOfElement &&
                     objLeft->m_typeOfElement == objRight->m_typeOfElement)
                 {
+                    // check that array is not stored in stack
+                    ASSERT(objLeft->m_StoragePointer == 0);
+
                     if (!objLeft->m_fReference)
                     {
                         if (memcmp(

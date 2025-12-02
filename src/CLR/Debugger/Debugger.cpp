@@ -3065,6 +3065,11 @@ bool CLR_DBG_Debugger::Debugging_Value_GetArray(WP_Message *msg)
         {
             blk = (CLR_RT_HeapBlock *)array->GetElement(cmd->m_index);
         }
+        else if (array->m_StoragePointer != 0)
+        {
+            // TODO need to handle this case properly
+            ASSERT(FALSE);
+        }
         else
         {
             if (FAILED(tmp.LoadFromReference(ref)))

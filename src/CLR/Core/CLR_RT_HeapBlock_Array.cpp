@@ -24,7 +24,7 @@ HRESULT CLR_RT_HeapBlock_Array::CreateInstance(
     if ((CLR_INT32)length < 0)
         NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_RANGE);
 
-    if (reflex.kind != REFLECTION_TYPE)
+    if (reflex.kind != REFLECTION_TYPE && reflex.kind != REFLECTION_STORAGE_PTR)
     {
         NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
     }
@@ -57,7 +57,12 @@ HRESULT CLR_RT_HeapBlock_Array::CreateInstance(
 
         reference.SetObjectReference(pArray);
 
-        NANOCLR_SET_AND_LEAVE(pArray->ClearElements(0, length));
+        // only clear elements if they belong to the array
+        // don't do it when they are stored elsewhere
+        if (reflex.kind != REFLECTION_STORAGE_PTR)
+        {
+            NANOCLR_SET_AND_LEAVE(pArray->ClearElements(0, length));
+        }
     }
 
     NANOCLR_NOCLEANUP();
@@ -78,6 +83,37 @@ HRESULT CLR_RT_HeapBlock_Array::CreateInstance(
     reflex.data.type = cls;
 
     NANOCLR_SET_AND_LEAVE(CreateInstance(reference, length, reflex));
+
+    NANOCLR_NOCLEANUP();
+}
+
+
+HRESULT CLR_RT_HeapBlock_Array::CreateInstanceWithStorage(
+    CLR_RT_HeapBlock &reference,
+    CLR_UINT32 length,
+    const uintptr_t storageAddress,
+    const CLR_RT_TypeDef_Index &cls)
+{
+    NATIVE_PROFILE_CLR_CORE();
+    NANOCLR_HEADER();
+
+    CLR_RT_HeapBlock_Array *thisArray;
+    CLR_RT_ReflectionDef_Index reflex;
+
+    reflex.kind = REFLECTION_STORAGE_PTR;
+    reflex.levels = 1;
+    reflex.data.type = cls;
+
+    // create an instance with ZERO length because there is no need to allocate storage
+    NANOCLR_CHECK_HRESULT(CreateInstance(reference, 0, reflex));
+
+    thisArray = reference.DereferenceArray();
+
+    // set the storage
+    thisArray->m_StoragePointer = storageAddress;
+
+    // adjust the number of elements with the provided length
+    thisArray->m_numOfElements = length;
 
     NANOCLR_NOCLEANUP();
 }
@@ -131,6 +167,12 @@ HRESULT CLR_RT_HeapBlock_Array::ClearElements(int index, int length)
 
     const CLR_RT_ReflectionDef_Index &reflex = ReflectionDataConst();
     CLR_UINT8 *data = GetElement(index);
+
+    // sanity check
+    if (IsStoragePointer())
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+    }
 
     CLR_RT_Memory::ZeroFill(data, length * m_sizeOfElement);
 
@@ -345,6 +387,9 @@ HRESULT CLR_RT_HeapBlock_Array::Copy(
 
             if (!arraySrc->m_fReference)
             {
+                // check that array is not stored in stack
+                ASSERT(arraySrc->m_StoragePointer == 0);
+
                 memmove(dataDst, dataSrc, length * sizeElem);
             }
             else

@@ -1085,7 +1085,9 @@ struct CLR_RT_HeapBlock
             CLR_RT_HeapBlock *obj = Dereference();
 
             if (obj && obj->DataType() == DATATYPE_VALUETYPE && obj->IsBoxed() == false)
+            {
                 return true;
+            }
         }
 
         return false;
@@ -1857,6 +1859,7 @@ struct CLR_RT_HeapBlock_Array : public CLR_RT_HeapBlock
     CLR_UINT8 m_sizeOfElement;
     CLR_UINT8 m_fReference;
     CLR_UINT8 m_pad;
+    uintptr_t m_StoragePointer;
 
     //--//
 
@@ -1871,10 +1874,22 @@ struct CLR_RT_HeapBlock_Array : public CLR_RT_HeapBlock
         CLR_RT_Assembly *assm,
         CLR_UINT32 tk,
         const CLR_RT_MethodDef_Instance *caller);
+    static HRESULT CreateInstanceWithStorage(
+        CLR_RT_HeapBlock &reference,
+        CLR_UINT32 length,
+        const uintptr_t storageAddress,
+        const CLR_RT_TypeDef_Index &cls);
 
     CLR_UINT8 *GetFirstElement()
     {
-        return ((CLR_UINT8 *)&this[1]);
+        if (ReflectionData().kind == REFLECTION_STORAGE_PTR)
+        {
+            return ((CLR_UINT8 *)this->m_StoragePointer);
+        }
+        else
+        {
+            return ((CLR_UINT8 *)&this[1]);
+        }
     }
 
     CLR_UINT8 *GetElement(CLR_UINT32 index)
@@ -1884,12 +1899,24 @@ struct CLR_RT_HeapBlock_Array : public CLR_RT_HeapBlock
 
     CLR_UINT16 *GetFirstElementUInt16()
     {
-        return ((CLR_UINT16 *)&this[1]);
+        if (ReflectionData().kind == REFLECTION_STORAGE_PTR)
+        {
+            return ((CLR_UINT16 *)this->m_StoragePointer);
+        }
+        else
+        {
+            return ((CLR_UINT16 *)&this[1]);
+        }
     }
 
     CLR_UINT16 *GetElementUInt16(CLR_UINT32 index)
     {
         return GetFirstElementUInt16() + m_sizeOfElement * index;
+    }
+
+    bool IsStoragePointer()
+    {
+        return (ReflectionData().kind == REFLECTION_STORAGE_PTR);
     }
 
     HRESULT ClearElements(int index, int length);
