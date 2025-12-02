@@ -65,12 +65,11 @@ HRESULT Library_corlib_native_System_ReadOnlySpan_1::_ctor___VOID__VOIDptr__I4(C
     }
 
     // check if T is a reference type or contains references
-    NANOCLR_CHECK_HRESULT(
-        RuntimeHelpers::CheckReferenceOrContainsReferences(
-            element.Class,
-            element.DataType,
-            &parser,
-            isRefContainsRefs));
+    NANOCLR_CHECK_HRESULT(RuntimeHelpers::CheckReferenceOrContainsReferences(
+        element.Class,
+        element.DataType,
+        &parser,
+        isRefContainsRefs));
 
     if (isRefContainsRefs)
     {
@@ -96,16 +95,8 @@ HRESULT Library_corlib_native_System_ReadOnlySpan_1::_ctor___VOID__VOIDptr__I4(C
 
     {
         CLR_RT_HeapBlock &refArray = thisSpan[FIELD___array];
-        NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance(refArray, length, element.Class));
-
-        CLR_RT_ProtectFromGC gc(refArray);
-
-        destinationArray = thisSpan[FIELD___array].DereferenceArray();
-        CLR_UINT32 elementSize = destinationArray->m_sizeOfElement;
-        CLR_UINT8 *elementPtr = destinationArray->GetFirstElement();
-
-        // copy data from the raw pointer to the newly created array
-        memcpy(elementPtr, (void *)objectRawPointer, elementSize * length);
+        NANOCLR_CHECK_HRESULT(
+            CLR_RT_HeapBlock_Array::CreateInstanceWithStorage(refArray, length, objectRawPointer, element.Class));
     }
 
     // set length
@@ -132,29 +123,23 @@ HRESULT Library_corlib_native_System_ReadOnlySpan_1::NativeReadOnlySpanConstruct
     start = stack.Arg2().NumericByRefConst().s4;
     length = stack.Arg3().NumericByRefConst().s4;
 
-    {
-        // get type of the source array
-        NANOCLR_CHECK_HRESULT(descDst.InitializeFromObject(*sourceArray));
-        descDst.GetElementType(descDst);
+    // get type of the source array
+    NANOCLR_CHECK_HRESULT(descDst.InitializeFromObject(*sourceArray));
+    descDst.GetElementType(descDst);
 
-        sourceType.data = descDst.m_handlerCls.data;
+    sourceType.data = descDst.m_handlerCls.data;
+
+    {
+        // get the pointer to the element at start address
+        uintptr_t ptrToStartElement = (uintptr_t)sourceArray->GetElement(start);
 
         CLR_RT_HeapBlock &refArray = thisSpan[FIELD___array];
-        CLR_RT_HeapBlock_Array::CreateInstance(refArray, length, sourceType);
-
-        // get pointer to the array
-        destinationArray = thisSpan[FIELD___array].DereferenceArray();
-
-        // protect from GC
-        CLR_RT_ProtectFromGC gc1(*sourceArray);
-        CLR_RT_ProtectFromGC gc2(refArray);
-
-        // copy array
-        CLR_RT_HeapBlock_Array::Copy(sourceArray, start, destinationArray, 0, length);
-
-        // set length
-        thisSpan[FIELD___length].NumericByRef().s4 = length;
+        NANOCLR_CHECK_HRESULT(
+            CLR_RT_HeapBlock_Array::CreateInstanceWithStorage(refArray, length, ptrToStartElement, sourceType));
     }
+
+    // set length
+    thisSpan[FIELD___length].NumericByRef().s4 = length;
 
     NANOCLR_NOCLEANUP();
 }
