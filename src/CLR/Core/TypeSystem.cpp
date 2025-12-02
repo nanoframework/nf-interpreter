@@ -7866,28 +7866,14 @@ HRESULT CLR_RT_TypeSystem::BuildMethodName(
         NANOCLR_CHECK_HRESULT(BuildTypeName(instOwner, szBuffer, iBuffer));
 
         CLR_SafeSprintf(szBuffer, iBuffer, "::%s", mdInst.assembly->GetString(mdInst.target->name));
-
     }
     else
     {
         // First, build the type name (either from genericType or from the method's declaring type)
-        if (genericType != nullptr && NANOCLR_INDEX_IS_VALID(*genericType) && genericType->data != CLR_EmptyToken)
+        if (mdInst.genericType != nullptr && NANOCLR_INDEX_IS_VALID(*mdInst.genericType))
         {
             // Use the provided generic type context
-            if (!SUCCEEDED(BuildTypeName(*genericType, szBuffer, iBuffer, 0, nullptr, &mdInst)))
-            {
-                // Fall back to the declaring type
-                if (instOwner.InitializeFromMethod(mdInst) == false)
-                {
-                    NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
-                }
-                NANOCLR_CHECK_HRESULT(BuildTypeName(instOwner, szBuffer, iBuffer));
-            }
-        }
-        else if (mdInst.genericType != nullptr && NANOCLR_INDEX_IS_VALID(*mdInst.genericType))
-        {
-            // Use the method instance's generic type
-            if (!SUCCEEDED(BuildTypeName(*mdInst.genericType, szBuffer, iBuffer, 0)))
+            if (FAILED(BuildTypeName(*mdInst.genericType, szBuffer, iBuffer, 0, genericType)))
             {
                 // Fall back to the declaring type
                 if (instOwner.InitializeFromMethod(mdInst) == false)
@@ -7935,53 +7921,31 @@ HRESULT CLR_RT_TypeSystem::BuildMethodName(
                         CLR_SafeSprintf(szBuffer, iBuffer, ", ");
                     }
 
-                    // Build the type name for this generic argument
-                    // Use the method's declaring type as context for VAR resolution
-                    const CLR_RT_TypeSpec_Index *context =
-                        (mdInst.genericType && NANOCLR_INDEX_IS_VALID(*mdInst.genericType)) ? mdInst.genericType
-                                                                                            : nullptr;
-
-                    if (elem.DataType == DATATYPE_VAR || elem.DataType == DATATYPE_MVAR)
+                    if (elem.DataType == DATATYPE_VAR)
                     {
-                        // Generic parameter - try to resolve it
-                        if (context != nullptr)
-                        {
-                            CLR_RT_TypeSpec_Instance contextTs;
-                            if (!contextTs.InitializeFromIndex(*context))
-                            {
-                                NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
-                            }
+                        // Build the type name for this generic argument
+                        // Use the method's declaring type as context for VAR resolution
 
-                            CLR_RT_SignatureParser::Element paramElement;
-                            if (contextTs.GetGenericParam(elem.GenericParamPosition, paramElement))
-                            {
-                                NANOCLR_CHECK_HRESULT(BuildTypeName(paramElement.Class, szBuffer, iBuffer));
-                            }
-                            else
-                            {
-                                // Couldn't resolve - show as !n or !!n
-                                if (elem.DataType == DATATYPE_VAR)
-                                {
-                                    CLR_SafeSprintf(szBuffer, iBuffer, "!%d", elem.GenericParamPosition);
-                                }
-                                else
-                                {
-                                    CLR_SafeSprintf(szBuffer, iBuffer, "!!%d", elem.GenericParamPosition);
-                                }
-                            }
-                        }
-                        else
+                        CLR_RT_TypeSpec_Instance contextTs;
+                        CLR_RT_SignatureParser::Element paramElement;
+
+                        // try to resolve from method context
+                        if (!contextTs.InitializeFromIndex(*genericType))
                         {
-                            // No context - show as !n or !!n
-                            if (elem.DataType == DATATYPE_VAR)
-                            {
-                                CLR_SafeSprintf(szBuffer, iBuffer, "!%d", elem.GenericParamPosition);
-                            }
-                            else
-                            {
-                                CLR_SafeSprintf(szBuffer, iBuffer, "!!%d", elem.GenericParamPosition);
-                            }
+                            NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
                         }
+
+                        if (!contextTs.GetGenericParam(elem.GenericParamPosition, paramElement))
+                        {
+                            // Couldn't resolve
+                            CLR_SafeSprintf(szBuffer, iBuffer, "!%d", elem.GenericParamPosition);
+                        }
+
+                        NANOCLR_CHECK_HRESULT(BuildTypeName(paramElement.Class, szBuffer, iBuffer));
+                    }
+                    else if (elem.DataType == DATATYPE_MVAR)
+                    {
+                        CLR_SafeSprintf(szBuffer, iBuffer, "!!%d", elem.GenericParamPosition);
                     }
                     else if (NANOCLR_INDEX_IS_VALID(elem.Class))
                     {
