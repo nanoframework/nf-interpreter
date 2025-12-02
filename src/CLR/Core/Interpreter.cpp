@@ -3066,6 +3066,9 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                         NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
                     }
 
+                    evalPos++;
+                    CHECKSTACK(stack, evalPos);
+
                     // check if field has RVA
                     CLR_RT_FieldDef_Instance inst;
                     if (inst.InitializeFromIndex(field) && (inst.target->flags & CLR_RECORD_FIELDDEF::FD_HasFieldRVA) &&
@@ -3078,14 +3081,13 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                         CLR_UINT32 dummyVar;
                         NANOCLR_READ_UNALIGNED_UINT16(dummyVar, ptrSrc);
 
-                        // ptrSrc is now pointing to the raw byte data
-                        ptr = (CLR_RT_HeapBlock *)ptrSrc;
+                        evalPos[0].SetUnmanagedPointer((uintptr_t)ptrSrc);
+                    }
+                    else
+                    {
+                        evalPos[0].SetReference(*ptr);
                     }
 
-                    evalPos++;
-                    CHECKSTACK(stack, evalPos);
-
-                    evalPos[0].SetReference(*ptr);
                     break;
                 }
 
