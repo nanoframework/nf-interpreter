@@ -7608,7 +7608,41 @@ HRESULT CLR_RT_TypeSystem::BuildTypeName(
                         NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
                     }
 
-                    NANOCLR_CHECK_HRESULT(BuildTypeName(typeDef, szBuffer, iBuffer));
+                    paramTypeDef = paramElement.Class;
+
+                    if (paramElement.DataType == DATATYPE_VAR)
+                    {
+                        // Build the type name for this generic argument
+                        // Use the method's declaring type as context for VAR resolution
+
+                        CLR_RT_TypeSpec_Instance contextTs;
+                        CLR_RT_SignatureParser::Element argElement;
+
+                        // try to resolve from method context
+                        if (!contextTs.InitializeFromIndex(*contextMethodDef->genericType))
+                        {
+                            NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
+                        }
+
+                        if (contextTs.GetGenericParam(paramElement.GenericParamPosition, argElement))
+                        {
+                            paramTypeDef = argElement.Class;
+
+                            goto output_type;
+                        }
+                        else
+                        {
+                            // Couldn't resolve
+                            char encodedParam[7];
+                            snprintf(encodedParam, ARRAYSIZE(encodedParam), "!%d", argElement.GenericParamPosition);
+                            NANOCLR_CHECK_HRESULT(QueueStringToBuffer(szBuffer, iBuffer, encodedParam));
+                        }
+                    }
+                    else
+                    {
+                    output_type:
+                        NANOCLR_CHECK_HRESULT(BuildTypeName(paramTypeDef, szBuffer, iBuffer));
+                    }
                 }
             }
             else
