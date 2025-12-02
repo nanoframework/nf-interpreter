@@ -578,7 +578,13 @@ void CLR_RT_Assembly::DumpToken(CLR_UINT32 token, const CLR_RT_MethodDef_Instanc
                 char bufCorrupt[256];
                 char *pCorrupt = bufCorrupt;
                 size_t cbCorrupt = sizeof(bufCorrupt);
-                g_CLR_RT_TypeSystem.BuildTypeName(tsIdx, pCorrupt, cbCorrupt, elem.Levels);
+                g_CLR_RT_TypeSystem.BuildTypeName(
+                    tsIdx,
+                    pCorrupt,
+                    cbCorrupt,
+                    elem.Levels,
+                    methodDefInstance.genericType,
+                    &methodDefInstance);
                 CLR_Debug::Printf("%s", bufCorrupt);
                 break;
             }
@@ -722,7 +728,13 @@ void CLR_RT_Assembly::DumpToken(CLR_UINT32 token, const CLR_RT_MethodDef_Instanc
                     char bufArr[256];
                     char *pArr = bufArr;
                     size_t cbArr = sizeof(bufArr);
-                    g_CLR_RT_TypeSystem.BuildTypeName(tsIdx, pArr, cbArr, elem.Levels);
+                    g_CLR_RT_TypeSystem.BuildTypeName(
+                        tsIdx,
+                        pArr,
+                        cbArr,
+                        elem.Levels,
+                        methodDefInstance.genericType,
+                        &methodDefInstance);
                     CLR_Debug::Printf("%s", bufArr);
                     break;
                 }
@@ -732,7 +744,13 @@ void CLR_RT_Assembly::DumpToken(CLR_UINT32 token, const CLR_RT_MethodDef_Instanc
             char bufTypeName[256];
             char *pTypeName = bufTypeName;
             size_t cbType = sizeof(bufTypeName);
-            g_CLR_RT_TypeSystem.BuildTypeName(tsIdx, pTypeName, cbType, elem.Levels);
+            g_CLR_RT_TypeSystem.BuildTypeName(
+                tsIdx,
+                pTypeName,
+                cbType,
+                elem.Levels,
+                methodDefInstance.genericType,
+                &methodDefInstance);
             CLR_Debug::Printf("%s", bufTypeName);
             break;
         }
