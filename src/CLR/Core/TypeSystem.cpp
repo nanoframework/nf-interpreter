@@ -1157,7 +1157,8 @@ void CLR_RT_TypeDef_Instance::ClearInstance()
 bool CLR_RT_TypeDef_Instance::ResolveToken(
     CLR_UINT32 tk,
     CLR_RT_Assembly *assm,
-    const CLR_RT_MethodDef_Instance *caller)
+    const CLR_RT_MethodDef_Instance *caller,
+    const CLR_RT_TypeSpec_Index *contextTypeSpec)
 {
     NATIVE_PROFILE_CLR_CORE();
 
@@ -1226,6 +1227,8 @@ bool CLR_RT_TypeDef_Instance::ResolveToken(
                     CLR_RT_SignatureParser parser;
                     parser.Initialize_TypeSpec(assm, ts);
 
+                    CLR_INDEX genericPosition;
+
                     CLR_RT_SignatureParser::Element elem;
                     if (FAILED(parser.Advance(elem)))
                     {
@@ -1275,11 +1278,11 @@ bool CLR_RT_TypeDef_Instance::ResolveToken(
                             }
                         }
 
+                        genericPosition = elem.GenericParamPosition;
+
                         // If it's a type‐generic slot (!T), resolve against the caller's closed generic
                         if (elem.DataType == DATATYPE_VAR)
                         {
-                            int pos = elem.GenericParamPosition;
-
                             CLR_RT_TypeSpec_Instance callerTypeSpec;
                             if (!callerTypeSpec.InitializeFromIndex(*caller->genericType))
                             {
@@ -1289,7 +1292,7 @@ bool CLR_RT_TypeDef_Instance::ResolveToken(
                             CLR_RT_SignatureParser::Element paramElement;
 
                             // Try to map using the generic context (e.g. !T→Int32)
-                            if (callerTypeSpec.GetGenericParam((CLR_UINT32)pos, paramElement))
+                            if (callerTypeSpec.GetGenericParam(genericPosition, paramElement))
                             {
                                 // Successfully resolved from generic context
                                 if (NANOCLR_INDEX_IS_VALID(paramElement.Class))
@@ -1300,34 +1303,10 @@ bool CLR_RT_TypeDef_Instance::ResolveToken(
                                 }
                                 else if (paramElement.DataType == DATATYPE_MVAR)
                                 {
-                                    // resolve from methodspec context
-                                    if (NANOCLR_INDEX_IS_VALID(caller->methodSpec))
-                                    {
-                                        CLR_RT_MethodSpec_Instance methodSpecInstance;
-                                        if (methodSpecInstance.InitializeFromIndex(caller->methodSpec))
-                                        {
-                                            CLR_RT_SignatureParser::Element element;
+                                    // need to defer to generic method argument
+                                    genericPosition = paramElement.GenericParamPosition;
 
-                                            if (!methodSpecInstance.GetGenericArgument(
-                                                paramElement.GenericParamPosition,
-                                                element))
-                                            {
-                                                return false;
-                                            }
-
-                                            data = element.Class.data;
-                                            assembly = g_CLR_RT_TypeSystem.m_assemblies[element.Class.Assembly() - 1];
-                                            target = assembly->GetTypeDef(element.Class.Type());
-                                        }
-                                        else
-                                        {
-                                            return false;
-                                        }
-                                    }
-                                    else
-                                    {
-                                        return false;
-                                    }
+                                    goto resolve_generic_argument;
                                 }
                                 else if (paramElement.DataType == DATATYPE_VAR)
                                 {
@@ -1340,7 +1319,7 @@ bool CLR_RT_TypeDef_Instance::ResolveToken(
                                     return false;
                                 }
                             }
-                            else if (NANOCLR_INDEX_IS_VALID(caller->arrayElementType) && pos == 0)
+                            else if (NANOCLR_INDEX_IS_VALID(caller->arrayElementType) && genericPosition == 0)
                             {
                                 // Fallback to arrayElementType for SZArrayHelper scenarios
                                 data = caller->arrayElementType.data;
@@ -1354,20 +1333,61 @@ bool CLR_RT_TypeDef_Instance::ResolveToken(
                         }
                         else if (elem.DataType == DATATYPE_MVAR)
                         {
+                        resolve_generic_argument:
+
                             // Use the caller bound genericType (Stack<Int32>, etc.)
                             if (caller == nullptr || caller->genericType == nullptr)
                             {
                                 return false;
                             }
 
-                            CLR_RT_GenericParam_Index gpIdx;
-                            caller->assembly->FindGenericParamAtMethodDef(*caller, elem.GenericParamPosition, gpIdx);
+                            // resolve from methodspec context
+                            if (NANOCLR_INDEX_IS_VALID(caller->methodSpec))
+                            {
+                                CLR_RT_MethodSpec_Instance methodSpecInstance;
+                                if (methodSpecInstance.InitializeFromIndex(caller->methodSpec))
+                                {
+                                    CLR_RT_SignatureParser::Element element;
 
-                            auto &gp = caller->assembly->crossReferenceGenericParam[gpIdx.GenericParam()];
+                                    if (!methodSpecInstance.GetGenericArgument(genericPosition, element))
+                                    {
+                                        return false;
+                                    }
 
-                            data = gp.classTypeDef.data;
-                            assembly = g_CLR_RT_TypeSystem.m_assemblies[gp.classTypeDef.Assembly() - 1];
-                            target = assembly->GetTypeDef(gp.classTypeDef.Type());
+                                    if (element.DataType == DATATYPE_VAR)
+                                    {
+                                        // need to defer to generic type parameter
+                                        CLR_RT_TypeSpec_Instance contextTs;
+                                        if (!contextTypeSpec || !contextTs.InitializeFromIndex(*contextTypeSpec))
+                                        {
+                                            return false;
+                                        }
+
+                                        if (!contextTs.GetGenericParam(element.GenericParamPosition, element))
+                                        {
+                                            return false;
+                                        }
+                                    }
+                                    else if (element.DataType == DATATYPE_MVAR)
+                                    {
+                                        // nested MVAR not implemented
+                                        ASSERT(false);
+                                        return false;
+                                    }
+
+                                    data = element.Class.data;
+                                    assembly = g_CLR_RT_TypeSystem.m_assemblies[element.Class.Assembly() - 1];
+                                    target = assembly->GetTypeDef(element.Class.Type());
+                                }
+                                else
+                                {
+                                    return false;
+                                }
+                            }
+                            else
+                            {
+                                return false;
+                            }
                         }
                     }
                 }

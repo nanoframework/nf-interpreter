@@ -2216,7 +2216,11 @@ struct CLR_RT_TypeDef_Instance : public CLR_RT_TypeDef_Index
 
     void ClearInstance();
 
-    bool ResolveToken(CLR_UINT32 tk, CLR_RT_Assembly *assm, const CLR_RT_MethodDef_Instance *caller = nullptr);
+    bool ResolveToken(
+        CLR_UINT32 tk,
+        CLR_RT_Assembly *assm,
+        const CLR_RT_MethodDef_Instance *caller = nullptr,
+        const CLR_RT_TypeSpec_Index *contextTypeSpec = nullptr);
     bool ResolveNullableType(CLR_UINT32 tk, CLR_RT_Assembly *assm, const CLR_RT_MethodDef_Instance *caller = nullptr);
 
     //--//
