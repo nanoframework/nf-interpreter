@@ -8476,6 +8476,7 @@ CLR_UINT32 CLR_RT_TypeSystem::ComputeHashForClosedGenericType(
 {
     CLR_UINT32 hash = 0;
     int argCount;
+    CLR_INDEX genericPosition;
 
     // Start with the generic type definition
     hash = SUPPORT_ComputeCRC(&typeInstance.genericTypeDef.data, sizeof(CLR_UINT32), hash);
@@ -8509,9 +8510,14 @@ CLR_UINT32 CLR_RT_TypeSystem::ComputeHashForClosedGenericType(
             break;
         }
 
+        // copy generic position
+        genericPosition = elem.GenericParamPosition;
+
         // Check if this is an unresolved generic parameter (VAR or MVAR)
         if (elem.DataType == DATATYPE_VAR && contextTypeSpec && NANOCLR_INDEX_IS_VALID(*contextTypeSpec))
         {
+resolve_type_param:
+
             // Resolve VAR (type parameter) from context TypeSpec
             CLR_RT_TypeSpec_Instance contextTs;
             if (!contextTs.InitializeFromIndex(*contextTypeSpec))
@@ -8521,7 +8527,7 @@ CLR_UINT32 CLR_RT_TypeSystem::ComputeHashForClosedGenericType(
             }
 
             CLR_RT_SignatureParser::Element paramElement;
-            if (contextTs.GetGenericParam(elem.GenericParamPosition, paramElement))
+            if (contextTs.GetGenericParam(genericPosition, paramElement))
             {
                 // Use the resolved type from context
                 hash = SUPPORT_ComputeCRC(&paramElement.DataType, sizeof(paramElement.DataType), hash);
@@ -8545,13 +8551,22 @@ CLR_UINT32 CLR_RT_TypeSystem::ComputeHashForClosedGenericType(
             CLR_RT_MethodSpec_Instance methodSpecInst{};
             if (methodSpecInst.InitializeFromIndex(contextMethod->methodSpec))
             {
-                CLR_RT_TypeDef_Index resolvedTypeDef;
-                NanoCLRDataType resolvedDataType;
+                CLR_RT_SignatureParser::Element argElement;
 
-                if (methodSpecInst.GetGenericArgument(elem.GenericParamPosition, resolvedTypeDef, resolvedDataType))
+                if (methodSpecInst.GetGenericArgument(genericPosition, argElement))
                 {
+                    if (argElement.DataType == DATATYPE_VAR)
+                    {
+                        // need another pass to resolve a generic type parameter
+
+                        // copy generic parameter position
+                        genericPosition = argElement.GenericParamPosition;
+
+                        goto resolve_type_param;
+                    }
+
                     // Use the resolved type from MethodSpec
-                    hash = SUPPORT_ComputeCRC(&resolvedDataType, sizeof(resolvedDataType), hash);
+                    hash = SUPPORT_ComputeCRC(&argElement.DataType, sizeof(argElement.DataType), hash);
                 }
                 else
                 {
