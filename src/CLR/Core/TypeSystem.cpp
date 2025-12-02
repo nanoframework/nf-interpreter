@@ -5677,7 +5677,7 @@ HRESULT CLR_RT_Assembly::AllocateGenericStaticFieldsOnDemand(
                     CLR_RT_HeapBlock_Delegate *dlg = refDlg.DereferenceDelegate();
 
                     // Store the TypeSpec index so the .cctor can resolve type generic parameters
-                    dlg->m_genericTypeSpec = typeSpecIndex;
+                    dlg->m_genericTypeSpec = *contextTypeSpec;
 
                     // Store the caller's MethodSpec (if any) to enable reolution of method generic parameters
                     if (contextMethod != nullptr)
