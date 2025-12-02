@@ -8534,7 +8534,7 @@ CLR_UINT32 CLR_RT_TypeSystem::ComputeHashForClosedGenericType(
         // Check if this is an unresolved generic parameter (VAR or MVAR)
         if (elem.DataType == DATATYPE_VAR && contextTypeSpec && NANOCLR_INDEX_IS_VALID(*contextTypeSpec))
         {
-resolve_type_param:
+        resolve_type_param:
 
             // Resolve VAR (type parameter) from context TypeSpec
             CLR_RT_TypeSpec_Instance contextTs;
