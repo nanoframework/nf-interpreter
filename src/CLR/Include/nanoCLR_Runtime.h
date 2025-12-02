@@ -2349,7 +2349,7 @@ struct CLR_RT_MethodSpec_Instance : public CLR_RT_MethodSpec_Index
 
     CLR_EncodedMethodDefOrRef InstanceOfMethod;
 
-    bool GetGenericArgument(CLR_INT32 argumentPosition, CLR_RT_TypeDef_Index &typeDef, NanoCLRDataType &dataType);
+    bool GetGenericArgument(CLR_INT32 argumentPosition, CLR_RT_SignatureParser::Element &element);
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////

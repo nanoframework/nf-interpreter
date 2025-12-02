@@ -1306,16 +1306,18 @@ bool CLR_RT_TypeDef_Instance::ResolveToken(
                                         CLR_RT_MethodSpec_Instance methodSpecInstance;
                                         if (methodSpecInstance.InitializeFromIndex(caller->methodSpec))
                                         {
-                                            NanoCLRDataType dataType;
-                                            CLR_RT_TypeDef_Index typeDef;
-                                            methodSpecInstance.GetGenericArgument(
-                                                paramElement.GenericParamPosition,
-                                                typeDef,
-                                                dataType);
+                                            CLR_RT_SignatureParser::Element element;
 
-                                            data = typeDef.data;
-                                            assembly = g_CLR_RT_TypeSystem.m_assemblies[typeDef.Assembly() - 1];
-                                            target = assembly->GetTypeDef(typeDef.Type());
+                                            if (!methodSpecInstance.GetGenericArgument(
+                                                paramElement.GenericParamPosition,
+                                                element))
+                                            {
+                                                return false;
+                                            }
+
+                                            data = element.Class.data;
+                                            assembly = g_CLR_RT_TypeSystem.m_assemblies[element.Class.Assembly() - 1];
+                                            target = assembly->GetTypeDef(element.Class.Type());
                                         }
                                         else
                                         {
@@ -2230,8 +2232,7 @@ void CLR_RT_MethodSpec_Instance::ClearInstance()
 
 bool CLR_RT_MethodSpec_Instance::GetGenericArgument(
     CLR_INT32 argumentPosition,
-    CLR_RT_TypeDef_Index &typeDef,
-    NanoCLRDataType &dataType)
+    CLR_RT_SignatureParser::Element &element)
 {
     CLR_RT_SignatureParser parser;
     parser.Initialize_MethodSignature(this);
@@ -2242,19 +2243,14 @@ bool CLR_RT_MethodSpec_Instance::GetGenericArgument(
         return false;
     }
 
-    CLR_RT_SignatureParser::Element elem;
-
     // loop through parameters to find the desired one
     for (CLR_INT32 i = 0; i <= argumentPosition; i++)
     {
-        if (FAILED(parser.Advance(elem)))
+        if (FAILED(parser.Advance(element)))
         {
             return false;
         }
     }
-
-    typeDef = elem.Class;
-    dataType = elem.DataType;
 
     return true;
 }
@@ -7583,9 +7579,11 @@ HRESULT CLR_RT_TypeSystem::BuildTypeName(
                 if (NANOCLR_INDEX_IS_VALID(contextMethodDef->methodSpec))
                 {
                     CLR_RT_MethodSpec_Instance methodSpec{};
+                    CLR_RT_SignatureParser::Element paramElement;
+                    CLR_RT_TypeDef_Index paramTypeDef;
                     methodSpec.InitializeFromIndex(contextMethodDef->methodSpec);
 
-                    if (!methodSpec.GetGenericArgument(element.GenericParamPosition, typeDef, element.DataType))
+                    if (!methodSpec.GetGenericArgument(element.GenericParamPosition, paramElement))
                     {
                         NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
                     }
