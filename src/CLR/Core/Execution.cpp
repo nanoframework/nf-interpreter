@@ -2361,13 +2361,20 @@ HRESULT CLR_RT_ExecutionEngine::InitializeLocals(
                     if (NANOCLR_INDEX_IS_VALID(methodDefInstance.methodSpec))
                     {
                         CLR_RT_MethodSpec_Instance methodSpec;
+                        CLR_RT_SignatureParser::Element element;
+
                         if (!methodSpec.InitializeFromIndex(methodDefInstance.methodSpec))
                         {
                             NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
                         }
 
                         // Use GetGenericArgument to get the concrete type from MethodSpec's signature
-                        if (!methodSpec.GetGenericArgument(genericParamPosition, cls, dt))
+                        if (methodSpec.GetGenericArgument(genericParamPosition, element))
+                        {
+                            cls = element.Class;
+                            dt = element.DataType;
+                        }
+                        else
                         {
                             NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
                         }
