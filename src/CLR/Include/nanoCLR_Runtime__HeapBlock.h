@@ -1873,7 +1873,8 @@ struct CLR_RT_HeapBlock_Array : public CLR_RT_HeapBlock
         CLR_UINT32 length,
         CLR_RT_Assembly *assm,
         CLR_UINT32 tk,
-        const CLR_RT_MethodDef_Instance *caller);
+        const CLR_RT_MethodDef_Instance *caller,
+        const CLR_RT_TypeSpec_Index *contextTypeSpec);
     static HRESULT CreateInstanceWithStorage(
         CLR_RT_HeapBlock &reference,
         CLR_UINT32 length,

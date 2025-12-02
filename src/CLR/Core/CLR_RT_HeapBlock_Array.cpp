@@ -123,7 +123,8 @@ HRESULT CLR_RT_HeapBlock_Array::CreateInstance(
     CLR_UINT32 length,
     CLR_RT_Assembly *assm,
     CLR_UINT32 tk,
-    const CLR_RT_MethodDef_Instance *caller)
+    const CLR_RT_MethodDef_Instance *caller,
+    const CLR_RT_TypeSpec_Index *contextTypeSpec)
 {
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
@@ -134,7 +135,7 @@ HRESULT CLR_RT_HeapBlock_Array::CreateInstance(
 
     memset(&ref, 0, sizeof(struct CLR_RT_HeapBlock));
 
-    if (cls.ResolveToken(tk, assm, caller))
+    if (cls.ResolveToken(tk, assm, caller, contextTypeSpec))
     {
         NANOCLR_CHECK_HRESULT(ref.SetReflection(cls));
     }
