@@ -1109,7 +1109,8 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
             // Skip validation for opcodes with variable stack behavior (VarPop/VarPush)
             // These include CEE_CALL, CEE_CALLVIRT, CEE_RET, CEE_NEWOBJ which have stack
             // changes that depend on method signatures and cannot be validated statically
-            bool isVariableStackOp = (stackPop == 0 && stackPush == 0);
+            // Note: VarPop and VarPush are both encoded as 0, so check if EITHER is 0
+            bool isVariableStackOp = (stackPop == 0 || stackPush == 0);
             
             if (!isVariableStackOp)
             {
