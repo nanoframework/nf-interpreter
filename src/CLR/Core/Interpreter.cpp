@@ -1047,6 +1047,11 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
     bool fCondition;
     bool fDirty = false;
 
+#if defined(NANOCLR_OPCODE_STACKCHANGES)
+    // Track stack depth for validation
+    CLR_RT_HeapBlock *evalPosBeforeOp = nullptr;
+#endif
+
     READCACHE(stack, evalPos, ip, fDirty);
 
     while (true)
@@ -1093,8 +1098,61 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
 #if defined(NANOCLR_OPCODE_STACKCHANGES)
         if (op != CEE_PREFIX1)
         {
-            NANOCLR_CHECK_HRESULT(
-                CLR_Checks::VerifyStackOK(*stack, &evalPos[1], c_CLR_RT_OpcodeLookup[op].StackChanges()));
+            // Capture stack position before opcode execution
+            evalPosBeforeOp = evalPos;
+            
+            const CLR_RT_OpcodeLookup &opcodeInfo = c_CLR_RT_OpcodeLookup[op];
+            CLR_INT32 stackPop = opcodeInfo.StackPop();
+            CLR_INT32 stackPush = opcodeInfo.StackPush();
+            CLR_INT32 stackChange = opcodeInfo.StackChanges();
+            
+            // Skip validation for opcodes with variable stack behavior (VarPop/VarPush)
+            // These include CEE_CALL, CEE_CALLVIRT, CEE_RET, CEE_NEWOBJ which have stack
+            // changes that depend on method signatures and cannot be validated statically
+            bool isVariableStackOp = (stackPop == 0 && stackPush == 0);
+            
+            if (!isVariableStackOp)
+            {
+                // Validate we have enough items on stack for this opcode to pop
+                // evalPos points to the slot AFTER the top item, so &evalPos[0] is top item
+                // stack->m_evalStack is the base, so (evalPos - stack->m_evalStack) is current depth
+                CLR_INT32 currentDepth = (CLR_INT32)(evalPos - stack->m_evalStack) + 1;
+                
+                if (stackPop > 0 && currentDepth < (CLR_INT32)stackPop)
+                {
+                    // Stack underflow: trying to pop more items than available
+                    CLR_Debug::Printf(
+                        "STACK UNDERFLOW PRE-CHECK: Opcode %s (0x%X) needs %d items but only %d available\r\n",
+                        opcodeInfo.Name(),
+                        (int)op,
+                        (int)stackPop,
+                        (int)currentDepth);
+                    NANOCLR_SET_AND_LEAVE(CLR_E_STACK_UNDERFLOW);
+                }
+                
+                // Validate we have enough space for items this opcode will push
+                // After popping stackPop items and pushing stackPush items, new depth will be:
+                // currentDepth - stackPop + stackPush = currentDepth + stackChange
+                CLR_INT32 projectedDepth = currentDepth + stackChange;
+                CLR_INT32 maxDepth = (CLR_INT32)(stack->m_evalStackEnd - stack->m_evalStack);
+                
+                if (projectedDepth > maxDepth)
+                {
+                    // Stack overflow: would exceed maximum stack depth
+                    CLR_Debug::Printf(
+                        "STACK OVERFLOW PRE-CHECK: Opcode %s (0x%X) would result in depth %d, max is %d\r\n",
+                        opcodeInfo.Name(),
+                        (int)op,
+                        (int)projectedDepth,
+                        (int)maxDepth);
+                    NANOCLR_SET_AND_LEAVE(CLR_E_STACK_OVERFLOW);
+                }
+            }
+            else
+            {
+                // For variable stack opcodes, set evalPosBeforeOp to nullptr to skip post-validation
+                evalPosBeforeOp = nullptr;
+            }
         }
 #endif
 
@@ -2464,6 +2522,10 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
 #ifndef NANOCLR_NO_IL_INLINE
                     if (stack->m_inlineFrame)
                     {
+                        // Inline return - skip stack validation as the context is restored by PopInline()
+#if defined(NANOCLR_OPCODE_STACKCHANGES)
+                        evalPosBeforeOp = nullptr;  // Disable post-validation for inline return
+#endif
                         stack->m_evalStackPos = evalPos;
 
                         stack->PopInline();
@@ -4336,6 +4398,36 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                     break;
 #undef OPDEF
             }
+
+#if defined(NANOCLR_OPCODE_STACKCHANGES)
+        // Post-execution validation: verify stack depth changed by expected amount
+        if (op != CEE_PREFIX1 && evalPosBeforeOp != nullptr)
+        {
+            const CLR_RT_OpcodeLookup &opcodeInfo = c_CLR_RT_OpcodeLookup[op];
+            CLR_INT32 expectedChange = opcodeInfo.StackChanges();
+            CLR_INT32 actualChange = (CLR_INT32)(evalPos - evalPosBeforeOp);
+            
+            if (actualChange != expectedChange)
+            {
+                // Stack depth mismatch: opcode didn't change stack as expected
+                CLR_Debug::Printf(
+                    "STACK DEPTH MISMATCH POST-CHECK: Opcode %s (0x%X) expected change %d but actual change was %d\r\n",
+                    opcodeInfo.Name(),
+                    (int)op,
+                    (int)expectedChange,
+                    (int)actualChange);
+                CLR_Debug::Printf(
+                    "  Stack before: %d items, after: %d items\r\n",
+                    (int)(evalPosBeforeOp - stack->m_evalStack) + 1,
+                    (int)(evalPos - stack->m_evalStack) + 1);
+                
+                // This is a critical error indicating a bug in the opcode implementation
+                NANOCLR_SET_AND_LEAVE(CLR_E_STACK_UNDERFLOW);
+            }
+            
+            evalPosBeforeOp = nullptr;
+        }
+#endif
 
 #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
             if (stack->m_flags & CLR_RT_StackFrame::c_HasBreakpoint)
