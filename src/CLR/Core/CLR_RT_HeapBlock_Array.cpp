@@ -87,7 +87,6 @@ HRESULT CLR_RT_HeapBlock_Array::CreateInstance(
     NANOCLR_NOCLEANUP();
 }
 
-
 HRESULT CLR_RT_HeapBlock_Array::CreateInstanceWithStorage(
     CLR_RT_HeapBlock &reference,
     CLR_UINT32 length,
