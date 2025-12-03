@@ -154,7 +154,6 @@ HRESULT Library_corlib_native_System_Span_1::NativeSpanConstructor___VOID__SZARR
 
     CLR_RT_TypeDescriptor descDst{};
     CLR_RT_TypeDef_Index sourceType{};
-    CLR_RT_HeapBlock_Array *destinationArray;
     CLR_RT_HeapBlock_Array *sourceArray = stack.Arg1().DereferenceArray();
     CLR_RT_HeapBlock *thisSpan = stack.This();
 
