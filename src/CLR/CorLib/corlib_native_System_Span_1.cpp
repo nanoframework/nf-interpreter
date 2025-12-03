@@ -131,7 +131,7 @@ HRESULT Library_corlib_native_System_Span_1::CopyTo___VOID__SystemSpan_1(CLR_RT_
         {
             NANOCLR_SET_AND_LEAVE(S_OK);
         }
-        
+
         // prevent GC from moving the arrays while we copy the data
         CLR_RT_ProtectFromGC gc1(*sourceArray);
         CLR_RT_ProtectFromGC gc2(*destinationArray);

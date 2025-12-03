@@ -65,11 +65,12 @@ HRESULT Library_corlib_native_System_ReadOnlySpan_1::_ctor___VOID__VOIDptr__I4(C
     }
 
     // check if T is a reference type or contains references
-    NANOCLR_CHECK_HRESULT(RuntimeHelpers::CheckReferenceOrContainsReferences(
-        element.Class,
-        element.DataType,
-        &parser,
-        isRefContainsRefs));
+    NANOCLR_CHECK_HRESULT(
+        RuntimeHelpers::CheckReferenceOrContainsReferences(
+            element.Class,
+            element.DataType,
+            &parser,
+            isRefContainsRefs));
 
     if (isRefContainsRefs)
     {
