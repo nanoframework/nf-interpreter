@@ -540,6 +540,16 @@ HRESULT CLR_RT_SignatureParser::Advance(Element &res)
 
                 switch (res.DataType)
                 {
+                    case ELEMENT_TYPE_CMOD_REQD:
+                    case ELEMENT_TYPE_CMOD_OPT:
+                        // Consume the modifier type token (TypeDefOrRef coded index)
+                        // Format: CMOD_REQD/OPT + token + actual_type
+                        // We don't need to do anything with the modifier itself,
+                        // just skip it to get to the actual type
+                        CLR_TkFromStream(Signature);
+                        // Continue loop to read the actual element type
+                        break;
+
                     case DATATYPE_BYREF:
                         if (res.IsByRef)
                         {
