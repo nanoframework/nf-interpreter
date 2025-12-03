@@ -16,7 +16,6 @@ HRESULT Library_corlib_native_System_Span_1::_ctor___VOID__VOIDptr__I4(CLR_RT_St
     bool isRefContainsRefs = false;
     uintptr_t objectRawPointer;
 
-    CLR_RT_HeapBlock_Array *destinationArray;
     CLR_RT_HeapBlock *thisSpan = stack.This();
 
     // grab caller to get the generic type
