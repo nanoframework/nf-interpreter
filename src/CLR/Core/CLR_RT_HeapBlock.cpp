@@ -643,8 +643,11 @@ HRESULT CLR_RT_HeapBlock::StoreToReference(CLR_RT_HeapBlock &ref, int size)
     }
     else if (dt == DATATYPE_PTR)
     {
-        // unmanaged pointer, perform a direct memory copy
-        memcpy((void *)ref.UnmanagedPointer(), (void *)&NumericByRef(), size);
+        // unmanaged pointer, perform a direct memory move as the addresses can overlap
+        memmove((void *)ref.UnmanagedPointer(), (void *)&NumericByRef(), size);
+
+        // Nothing to assign back to a HeapBlock in this case
+        NANOCLR_SET_AND_LEAVE(S_OK);
     }
     else
     {

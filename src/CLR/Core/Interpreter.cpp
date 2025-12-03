@@ -4294,7 +4294,14 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
 
                 OPDEF(CEE_LOCALLOC, "localloc", PopI, PushI, InlineNone, IPrimitive, 2, 0xFE, 0x0F, NEXT)
                 {
-                    CLR_UINT32 size = evalPos[0].NumericByRef().u4;
+                    CLR_INT32 sizeRaw = evalPos[0].NumericByRef().s4;
+
+                    if (sizeRaw < 0)
+                    {
+                        NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_RANGE);
+                    }
+
+                    CLR_UINT32 size = (CLR_UINT32)sizeRaw;
 
                     evalPos--;
                     CHECKSTACK(stack, evalPos);

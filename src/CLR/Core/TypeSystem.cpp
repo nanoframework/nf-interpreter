@@ -1293,6 +1293,12 @@ bool CLR_RT_TypeDef_Instance::ResolveToken(
                         // If it's a type‐generic slot (!T), resolve against the caller's closed generic
                         if (elem.DataType == DATATYPE_VAR)
                         {
+                            // sanity check
+                            if (caller == nullptr || NANOCLR_INDEX_IS_INVALID(*caller->genericType))
+                            {
+                                return false;
+                            }
+
                             CLR_RT_TypeSpec_Instance callerTypeSpec;
                             if (!callerTypeSpec.InitializeFromIndex(*caller->genericType))
                             {
@@ -1346,7 +1352,7 @@ bool CLR_RT_TypeDef_Instance::ResolveToken(
                         resolve_generic_argument:
 
                             // Use the caller bound genericType (Stack<Int32>, etc.)
-                            if (caller == nullptr || caller->genericType == nullptr)
+                            if (caller == nullptr || NANOCLR_INDEX_IS_INVALID(*caller->genericType))
                             {
                                 return false;
                             }
@@ -5687,7 +5693,14 @@ HRESULT CLR_RT_Assembly::AllocateGenericStaticFieldsOnDemand(
                     CLR_RT_HeapBlock_Delegate *dlg = refDlg.DereferenceDelegate();
 
                     // Store the TypeSpec index so the .cctor can resolve type generic parameters
-                    dlg->m_genericTypeSpec = *contextTypeSpec;
+                    if (contextTypeSpec != nullptr && NANOCLR_INDEX_IS_VALID(*contextTypeSpec))
+                    {
+                        dlg->m_genericTypeSpec = *contextTypeSpec;
+                    }
+                    else
+                    {
+                        dlg->m_genericTypeSpec = typeSpecIndex;
+                    }
 
                     // Store the caller's MethodSpec (if any) to enable reolution of method generic parameters
                     if (contextMethod != nullptr)
@@ -7949,6 +7962,7 @@ HRESULT CLR_RT_TypeSystem::BuildMethodName(
                         {
                             // Couldn't resolve
                             CLR_SafeSprintf(szBuffer, iBuffer, "!%d", elem.GenericParamPosition);
+                            continue;
                         }
 
                         NANOCLR_CHECK_HRESULT(BuildTypeName(paramElement.Class, szBuffer, iBuffer));
