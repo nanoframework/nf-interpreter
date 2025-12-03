@@ -4373,6 +4373,7 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                 OPDEF(CEE_UNALIGNED, "unaligned.", Pop0, Push0, ShortInlineI, IPrefix, 2, 0xFE, 0x12, META)
                 OPDEF(CEE_VOLATILE, "volatile.", Pop0, Push0, InlineNone, IPrefix, 2, 0xFE, 0x13, META)
                 OPDEF(CEE_TAILCALL, "tail.", Pop0, Push0, InlineNone, IPrefix, 2, 0xFE, 0x14, META)
+                OPDEF(CEE_READONLY, "readonly.", Pop0, Push0, InlineNone, IPrefix, 2, 0xFE, 0x1E, META)
                 break;
 
                 //////////////////////////////////////////////////////////////////////////////////////////
@@ -4387,7 +4388,6 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                 OPDEF(CEE_MKREFANY, "mkrefany", PopI, Push1, InlineType, IPrimitive, 1, 0xFF, 0xC6, NEXT)
                 OPDEF(CEE_REFANYTYPE, "refanytype", Pop1, PushI, InlineNone, IPrimitive, 2, 0xFE, 0x1D, NEXT)
                 OPDEF(CEE_REFANYVAL, "refanyval", Pop1, PushI, InlineType, IPrimitive, 1, 0xFF, 0xC2, NEXT)
-                OPDEF(CEE_READONLY, "readonly.", Pop0, Push0, InlineNone, IPrefix, 2, 0xFE, 0x1E, META)
 
                 NANOCLR_CHECK_HRESULT(CLR_Checks::VerifyUnsupportedInstruction(op));
                 break;
