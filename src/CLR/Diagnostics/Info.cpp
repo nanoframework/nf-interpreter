@@ -413,7 +413,10 @@ const CLR_UINT8 *CLR_SkipBodyOfOpcodeCompressed(const CLR_UINT8 *ip, CLR_OPCODE 
 
 #if defined(NANOCLR_TRACE_INSTRUCTIONS)
 
-void CLR_RT_Assembly::DumpToken(CLR_UINT32 token, const CLR_RT_MethodDef_Instance &methodDefInstance)
+void CLR_RT_Assembly::DumpToken(
+    CLR_UINT32 token,
+    const CLR_RT_MethodDef_Instance &methodDefInstance,
+    const CLR_RT_TypeSpec_Index *contextTypeSpec)
 {
     NATIVE_PROFILE_CLR_DIAGNOSTICS();
     CLR_UINT32 index = CLR_DataFromTk(token);
@@ -547,6 +550,7 @@ void CLR_RT_Assembly::DumpToken(CLR_UINT32 token, const CLR_RT_MethodDef_Instanc
             // Only if it is not a plain VAR/MVAR do we then check for arrays or else fall
             // back to BuildTypeName for the full concrete name.
             //
+            CLR_INDEX genericPosition;
 
             CLR_UINT32 ownerAsm = assemblyIndex;
             if (methodDefInstance.genericType != nullptr && NANOCLR_INDEX_IS_VALID(*methodDefInstance.genericType))
@@ -599,80 +603,116 @@ void CLR_RT_Assembly::DumpToken(CLR_UINT32 token, const CLR_RT_MethodDef_Instanc
                 }
             }
 
+            genericPosition = elem.GenericParamPosition;
+
             if (elem.DataType == DATATYPE_VAR)
             {
-                int gpPosition = elem.GenericParamPosition;
+                // Use contextTypeSpec if provided, otherwise fall back to methodDefInstance.genericType
+                const CLR_RT_TypeSpec_Index *effectiveContext =
+                    (contextTypeSpec && NANOCLR_INDEX_IS_VALID(*contextTypeSpec)) ? contextTypeSpec
+                                                                                  : methodDefInstance.genericType;
 
-                // if the caller's genericType is non‐null, ask the CLR to map !n→actual argument:
-                if (methodDefInstance.genericType != nullptr && NANOCLR_INDEX_IS_VALID(*methodDefInstance.genericType))
+                if (effectiveContext != nullptr && NANOCLR_INDEX_IS_VALID(*effectiveContext))
                 {
                     CLR_RT_TypeSpec_Instance typeSpec;
-                    if (!typeSpec.InitializeFromIndex(*methodDefInstance.genericType))
+                    if (!typeSpec.InitializeFromIndex(*effectiveContext))
                     {
-                        CLR_Debug::Printf("!%d", gpPosition);
+                        CLR_Debug::Printf("!%d", genericPosition);
                         break;
                     }
 
                     CLR_RT_SignatureParser::Element paramElement;
-                    if (typeSpec.GetGenericParam(gpPosition, paramElement))
+                    if (typeSpec.GetGenericParam(genericPosition, paramElement))
                     {
-                        char bufArg[256]{};
-                        char *pArg = bufArg;
-                        size_t cbArg = sizeof(bufArg);
+                        // Successfully resolved from generic context
+                        if (NANOCLR_INDEX_IS_VALID(paramElement.Class))
+                        {
+                            char bufArg[256]{};
+                            char *pArg = bufArg;
+                            size_t cbArg = sizeof(bufArg);
 
-                        g_CLR_RT_TypeSystem.BuildTypeName(
-                            paramElement.Class,
-                            pArg,
-                            cbArg,
-                            CLR_RT_TypeSystem::TYPENAME_FLAGS_FULL,
-                            elem.Levels);
+                            g_CLR_RT_TypeSystem.BuildTypeName(
+                                paramElement.Class,
+                                pArg,
+                                cbArg,
+                                CLR_RT_TypeSystem::TYPENAME_FLAGS_FULL,
+                                elem.Levels);
 
-                        CLR_Debug::Printf("%s", bufArg);
+                            CLR_Debug::Printf("%s", bufArg);
+                        }
+                        else if (paramElement.DataType == DATATYPE_MVAR)
+                        {
+                            // need to defer to generic method argument
+                            genericPosition = paramElement.GenericParamPosition;
 
-                        break;
+                            goto resolve_generic_argument;
+                        }
+                        else if (paramElement.DataType == DATATYPE_VAR)
+                        {
+                            // nested VAR not implemented
+                            ASSERT(false);
+                        }
                     }
                 }
 
                 // Couldn't resolve or caller was not generic: print "!n" literally
-                CLR_Debug::Printf("!%d", gpPosition);
+                CLR_Debug::Printf("!%d", genericPosition);
 
                 break;
             }
             else if (elem.DataType == DATATYPE_MVAR)
             {
-                int gpPosition = elem.GenericParamPosition;
+            resolve_generic_argument:
 
-                // if the caller's genericType is non‐null, ask the CLR to map !n→actual argument:
-                if (methodDefInstance.genericType != nullptr && NANOCLR_INDEX_IS_VALID(*methodDefInstance.genericType))
+                if (NANOCLR_INDEX_IS_VALID(methodDefInstance.methodSpec))
                 {
-                    CLR_RT_GenericParam_Index gpIndex;
-
-                    bool ok = g_CLR_RT_TypeSystem.m_assemblies[methodDefInstance.genericType->Assembly() - 1]
-                                  ->FindGenericParamAtMethodDef(methodDefInstance, gpPosition, gpIndex);
-                    if (ok)
+                    CLR_RT_MethodSpec_Instance methodSpecInstance;
+                    if (methodSpecInstance.InitializeFromIndex(methodDefInstance.methodSpec))
                     {
-                        CLR_RT_GenericParam_CrossReference gp =
-                            g_CLR_RT_TypeSystem.m_assemblies[methodDefInstance.genericType->Assembly() - 1]
-                                ->crossReferenceGenericParam[gpIndex.GenericParam()];
+                        CLR_RT_SignatureParser::Element element;
 
-                        char bufArg[256]{};
-                        char *pArg = bufArg;
-                        size_t cbArg = sizeof(bufArg);
+                        if (methodSpecInstance.GetGenericArgument(genericPosition, element))
+                        {
+                            if (element.DataType == DATATYPE_VAR)
+                            {
+                                // need to defer to generic type parameter
+                                CLR_RT_TypeSpec_Instance contextTs;
+                                if (contextTypeSpec && contextTs.InitializeFromIndex(*contextTypeSpec))
+                                {
+                                    if (!contextTs.GetGenericParam(element.GenericParamPosition, element))
+                                    {
+                                        CLR_Debug::Printf("!!%d", genericPosition);
 
-                        g_CLR_RT_TypeSystem.BuildTypeName(
-                            gp.classTypeDef,
-                            pArg,
-                            cbArg,
-                            CLR_RT_TypeSystem::TYPENAME_FLAGS_FULL,
-                            elem.Levels);
+                                        break;
+                                    }
+                                }
+                            }
+                            else if (element.DataType == DATATYPE_MVAR)
+                            {
+                                // nested MVAR not implemented
+                                ASSERT(false);
+                            }
 
-                        CLR_Debug::Printf("%s", bufArg);
+                            char bufArg[256]{};
+                            char *pArg = bufArg;
+                            size_t cbArg = sizeof(bufArg);
 
-                        break;
+                            g_CLR_RT_TypeSystem.BuildTypeName(
+                                element.Class,
+                                pArg,
+                                cbArg,
+                                CLR_RT_TypeSystem::TYPENAME_FLAGS_FULL,
+                                elem.Levels);
+
+                            CLR_Debug::Printf("%s", bufArg);
+
+                            break;
+                        }
                     }
                 }
+
                 // Couldn't resolve or caller was not generic: print "!!n" literally
-                CLR_Debug::Printf("!!%d", gpPosition);
+                CLR_Debug::Printf("!!%d", genericPosition);
 
                 break;
             }
@@ -980,12 +1020,17 @@ void CLR_RT_Assembly::DumpOpcodeDirect(
             else
             {
                 // In the unlikely case ResolveToken fails, fall back to raw DumpToken:
-                DumpToken(token, call);
+                DumpToken(token, call, nullptr);
             }
         }
         else
         {
-            DumpToken(token, call);
+            // Pass the stack's generic type storage as context for VAR resolution
+            const CLR_RT_TypeSpec_Index *context =
+                (NANOCLR_INDEX_IS_VALID(call) && call.genericType && NANOCLR_INDEX_IS_VALID(*call.genericType))
+                    ? call.genericType
+                    : nullptr;
+            DumpToken(token, call, context);
         }
     }
     else

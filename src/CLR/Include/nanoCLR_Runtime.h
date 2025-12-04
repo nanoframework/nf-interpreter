@@ -1593,7 +1593,7 @@ struct CLR_RT_Assembly : public CLR_RT_HeapBlock_Node // EVENT HEAP - NO RELOCAT
         DECL_POSTFIX;
 
   private:
-    void DumpToken(CLR_UINT32 tk, const CLR_RT_MethodDef_Instance &methodDefInstance) DECL_POSTFIX;
+    void DumpToken(CLR_UINT32 tk, const CLR_RT_MethodDef_Instance &methodDefInstance, const CLR_RT_TypeSpec_Index *contextTypeSpec) DECL_POSTFIX;
     void DumpSignature(CLR_SIG sig) DECL_POSTFIX;
     void DumpSignature(CLR_PMETADATA &p) DECL_POSTFIX;
     void DumpSignatureToken(CLR_PMETADATA &p) DECL_POSTFIX;

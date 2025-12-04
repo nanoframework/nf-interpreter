@@ -7902,8 +7902,8 @@ HRESULT CLR_RT_TypeSystem::BuildMethodName(
         // First, build the type name (either from genericType or from the method's declaring type)
         if (mdInst.genericType != nullptr && NANOCLR_INDEX_IS_VALID(*mdInst.genericType))
         {
-            // Use the provided generic type context
-            if (FAILED(BuildTypeName(*mdInst.genericType, szBuffer, iBuffer, 0, genericType)))
+            // Use the method's genericType and pass itself as context to resolve VAR parameters
+            if (FAILED(BuildTypeName(*mdInst.genericType, szBuffer, iBuffer, 0, mdInst.genericType, &mdInst)))
             {
                 // Fall back to the declaring type
                 if (instOwner.InitializeFromMethod(mdInst) == false)
