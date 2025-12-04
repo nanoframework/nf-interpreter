@@ -1293,14 +1293,25 @@ bool CLR_RT_TypeDef_Instance::ResolveToken(
                         // If it's a type‐generic slot (!T), resolve against the caller's closed generic
                         if (elem.DataType == DATATYPE_VAR)
                         {
-                            // sanity check
-                            if (caller == nullptr || NANOCLR_INDEX_IS_INVALID(*caller->genericType))
+                            // Determine the effective generic type context
+                            // Prefer explicit contextTypeSpec over caller->genericType
+                            const CLR_RT_TypeSpec_Index *effectiveContext = nullptr;
+
+                            if (contextTypeSpec != nullptr && NANOCLR_INDEX_IS_VALID(*contextTypeSpec))
+                            {
+                                effectiveContext = contextTypeSpec;
+                            }
+                            else if (caller != nullptr && NANOCLR_INDEX_IS_VALID(*caller->genericType))
+                            {
+                                effectiveContext = caller->genericType;
+                            }
+                            else
                             {
                                 return false;
                             }
 
                             CLR_RT_TypeSpec_Instance callerTypeSpec;
-                            if (!callerTypeSpec.InitializeFromIndex(*caller->genericType))
+                            if (!callerTypeSpec.InitializeFromIndex(*effectiveContext))
                             {
                                 return false;
                             }
