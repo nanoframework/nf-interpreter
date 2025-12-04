@@ -5692,15 +5692,11 @@ HRESULT CLR_RT_Assembly::AllocateGenericStaticFieldsOnDemand(
                 {
                     CLR_RT_HeapBlock_Delegate *dlg = refDlg.DereferenceDelegate();
 
-                    // Store the TypeSpec index so the .cctor can resolve type generic parameters
-                    if (contextTypeSpec != nullptr && NANOCLR_INDEX_IS_VALID(*contextTypeSpec))
-                    {
-                        dlg->m_genericTypeSpec = *contextTypeSpec;
-                    }
-                    else
-                    {
-                        dlg->m_genericTypeSpec = typeSpecIndex;
-                    }
+                    // Developer notes:
+                    // - Store the TypeSpec index so the .cctor can resolve type generic parameters
+                    // - Use the typeSpecIndex which represents the closed generic type being initialized
+                    // NOT the caller's context which may be non-generic
+                    dlg->m_genericTypeSpec = typeSpecIndex;
 
                     // Store the caller's MethodSpec (if any) to enable reolution of method generic parameters
                     if (contextMethod != nullptr)
