@@ -129,13 +129,6 @@ jobs:
                 Write-Host "##[command] >> mscorlib tests are to be run"
                 echo "##vso[task.setvariable variable=RUN_MSCORLIB_TESTS;isOutput=true]true"
               }
-
-              # check if should use specific MDP for mscorlib
-              if($prCommitMessage  -match "\[build with MDP buildId (\d+)\]")
-              {
-                Write-Host "##[command] >> Using specific MDP for mscorlib build"
-                echo "##vso[task.setvariable variable=USE_SPECIFIC_MDP;isOutput=true]true"
-              }
             }
             else
             {
@@ -1254,7 +1247,6 @@ jobs:
       solution: "nanoFramework.CoreLibrary.sln"
       buildPlatform: "Any CPU"
       buildConfiguration: "Release"
-      DownloadMDP: $[ dependencies.Check_Build_Options.outputs['BuildOptions.USE_SPECIFIC_MDP'] ]
 
     steps:
       - checkout: self

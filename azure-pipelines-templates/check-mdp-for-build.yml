@@ -44,11 +44,7 @@ steps:
       GITHUB_TOKEN: $(GitHubToken)
 
   - task: DownloadPipelineArtifact@2
-    condition: >-
-      and(
-        eq(variables['DownloadMDP'], true),
-        ne(variables['MDP_BUILDID'], '')
-      )
+    condition: ne(variables['MDP_BUILDID'], '')
     displayName: Download MDP
     inputs:
       buildType: specific
@@ -65,7 +61,6 @@ steps:
     condition: >-
       and(
         succeeded(),
-        eq(variables['DownloadMDP'], true),
         ne(variables['MDP_BUILDID'], '')
       )
     displayName: Copy MDP to build tool
