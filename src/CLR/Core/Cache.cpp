@@ -196,6 +196,81 @@ void CLR_RT_EventCache::VirtualMethodTable::Initialize()
     m_entriesMRU = (Link *)&g_scratchVirtualMethodTableLinkMRU[0];
     m_payloads = (Payload *)&g_scratchVirtualMethodPayload[0];
 
+#ifdef DEBUG
+
+    // DIAGNOSTIC: Verify structure sizes and alignment
+    CLR_Debug::Printf("\r\n========== VirtualMethodTable::Initialize DIAGNOSTICS ==========\r\n");
+    CLR_Debug::Printf("sizeof(Link) = %u, alignof(Link) = %u\r\n", sizeof(Link), alignof(Link));
+    CLR_Debug::Printf("sizeof(Payload) = %u, alignof(Payload) = %u\r\n", sizeof(Payload), alignof(Payload));
+    CLR_Debug::Printf("sizeof(Payload::Key) = %u\r\n", sizeof(Payload::Key));
+    CLR_Debug::Printf("LinkArraySize() = %u (expected: 641)\r\n", LinkArraySize());
+    CLR_Debug::Printf("LinkMRUArraySize() = %u (expected: 513)\r\n", LinkMRUArraySize());
+    CLR_Debug::Printf("PayloadArraySize() = %u (expected: 512)\r\n", PayloadArraySize());
+
+    // Verify array base addresses don't overlap
+    uintptr_t entries_start = (uintptr_t)m_entries;
+    uintptr_t entries_end = entries_start + (LinkArraySize() * sizeof(Link));
+    uintptr_t entriesMRU_start = (uintptr_t)m_entriesMRU;
+    uintptr_t entriesMRU_end = entriesMRU_start + (LinkMRUArraySize() * sizeof(Link));
+    uintptr_t payloads_start = (uintptr_t)m_payloads;
+    uintptr_t payloads_end = payloads_start + (PayloadArraySize() * sizeof(Payload));
+
+#ifdef _WIN64
+
+    CLR_Debug::Printf(
+        "m_entries: 0x%" PRIx64 " - 0x% " PRIx64 " (%u bytes)\r\n",
+        entries_start,
+        entries_end,
+        (unsigned int)(entries_end - entries_start));
+    CLR_Debug::Printf(
+        "m_entriesMRU: 0x%" PRIx64 " - 0x% " PRIx64 " (%u bytes)\r\n",
+        entriesMRU_start,
+        entriesMRU_end,
+        (unsigned int)(entriesMRU_end - entriesMRU_start));
+    CLR_Debug::Printf(
+        "m_payloads:   0x% " PRIx64 " - 0x% " PRIx64 " (%u bytes)\r\n",
+        payloads_start,
+        payloads_end,
+        (unsigned int)(payloads_end - payloads_start));
+
+#else
+
+    CLR_Debug::Printf(
+        "m_entries: 0x%08X - 0x%08X (%u bytes)\r\n",
+        entries_start,
+        entries_end,
+        (unsigned int)(entries_end - entries_start));
+    CLR_Debug::Printf(
+        "m_entriesMRU: 0x%08X - 0x%08X (%u bytes)\r\n",
+        entriesMRU_start,
+        entriesMRU_end,
+        (unsigned int)(entriesMRU_end - entriesMRU_start));
+    CLR_Debug::Printf(
+        "m_payloads:   0x%08X - 0x%08X (%u bytes)\r\n",
+        payloads_start,
+        payloads_end,
+        (unsigned int)(payloads_end - payloads_start));
+
+#endif
+
+    // Check for overlaps
+    if (entries_end > entriesMRU_start && entries_start < entriesMRU_end)
+    {
+        CLR_Debug::Printf("*** WARNING: m_entries and m_entriesMRU OVERLAP! ***\r\n");
+    }
+    if (entries_end > payloads_start && entries_start < payloads_end)
+    {
+        CLR_Debug::Printf("*** WARNING: m_entries and m_payloads OVERLAP! ***\r\n");
+    }
+    if (entriesMRU_end > payloads_start && entriesMRU_start < payloads_end)
+    {
+        CLR_Debug::Printf("*** WARNING: m_entriesMRU and m_payloads OVERLAP! ***\r\n");
+    }
+
+    CLR_Debug::Printf("================================================================\r\n\r\n");
+
+#endif
+
     //
     // Link all the entries to themselves => no elements in the lists.
     //
@@ -211,6 +286,7 @@ void CLR_RT_EventCache::VirtualMethodTable::Initialize()
     // Link all the entries to the following one => all the elements are in the MRU list.
     //
     _ASSERTE(LinkMRUArraySize() < 0xFFFF);
+
     for (index = 0; index < LinkMRUArraySize(); index++)
     {
         Link &lnk = m_entriesMRU[index];
@@ -301,14 +377,36 @@ bool CLR_RT_EventCache::VirtualMethodTable::FindVirtualMethod(
 
     for (index = m_entries[indexHead].m_next;; index = m_entries[index].m_next)
     {
+#if defined(DEBUG) && defined(_WIN64)
+        CLR_Debug::Printf("  Loop: index=%u, indexHead=%u\r\n", index, indexHead);
+#endif
+
+        // validate index before using it to prevent crashes from corrupted data
+        if (index >= LinkArraySize())
+        {
+            // !! corrupted index detected !!
+            // // repair the hash chain and treat as cache miss
+            m_entries[indexHead].m_next = indexHead;
+            m_entries[indexHead].m_prev = indexHead;
+
+            index = indexHead;
+        }
+
         if (index != indexHead)
         {
+            _ASSERTE(index < PayloadArraySize());
+
             Payload &res = m_payloads[index];
 
             if (res.m_key.m_mdVirtual.data != mdVirtualData)
+            {
                 continue;
+            }
+
             if (res.m_key.m_cls.data != clsData)
+            {
                 continue;
+            }
 
             md = res.m_md;
 
@@ -317,9 +415,19 @@ bool CLR_RT_EventCache::VirtualMethodTable::FindVirtualMethod(
         else
         {
             if (g_CLR_RT_TypeSystem.FindVirtualMethodDef(cls, mdVirtual, md) == false)
+            {
                 return false;
+            }
 
             index = GetNewEntry();
+
+#if defined(DEBUG) && defined(_WIN64)
+            CLR_Debug::Printf("  GetNewEntry returned: %u\r\n", index);
+#endif
+
+            // initialize the entry's links before use to prevent corruption
+            m_entries[index].m_next = index;
+            m_entries[index].m_prev = index;
 
             Payload &res = m_payloads[index];
 
