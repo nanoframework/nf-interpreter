@@ -176,7 +176,7 @@ static const CLR_RT_MethodHandler method_lookup[] =
     Library_corlib_native_System_String::Concat___STATIC__STRING__SZARRAY_STRING,
     nullptr,
     nullptr,
-    nullptr,
+    Library_corlib_native_System_String::Format___STATIC__STRING__STRING__SZARRAY_OBJECT,
     nullptr,
     nullptr,
     nullptr,
@@ -1038,7 +1038,7 @@ static const CLR_RT_MethodHandler method_lookup[] =
     Library_corlib_native_System_String::Concat___STATIC__STRING__SZARRAY_STRING,
     nullptr,
     nullptr,
-    nullptr,
+    Library_corlib_native_System_String::Format___STATIC__STRING__STRING__SZARRAY_OBJECT,
     nullptr,
     nullptr,
     nullptr,
@@ -1613,11 +1613,11 @@ const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_mscorlib =
 
 #if (NANOCLR_REFLECTION == TRUE)
 
-    0xCECAB752,
+    0xF1828DE7,
 
 #elif (NANOCLR_REFLECTION == FALSE)
 
-    0xAA0B5756,
+    0xF4009752,
 ,
 
 #else
