@@ -518,6 +518,9 @@ enum NanoCLRDataType // KEEP IN SYNC WITH nanoCLR_DataType enum in nanoFramework
     DATATYPE_TYPE_PINNED = 0x05 | DATATYPE_TYPE_MODIFIER,
     DATATYPE_TYPE_R4_HFA = 0x06 | DATATYPE_TYPE_MODIFIER, // used only internally for R4 HFA types
     DATATYPE_TYPE_R8_HFA = 0x07 | DATATYPE_TYPE_MODIFIER, // used only internally for R8 HFA types
+
+    // unamaged pointer
+    DATATYPE_PTR
 };
 
 enum CLR_ReflectionType
@@ -531,6 +534,7 @@ enum CLR_ReflectionType
     REFLECTION_FIELD = 0x06,
     REFLECTION_GENERICTYPE = 0x07,
     REFLECTION_TYPESPEC = 0x08,
+    REFLECTION_STORAGE_PTR = 0x09,
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////

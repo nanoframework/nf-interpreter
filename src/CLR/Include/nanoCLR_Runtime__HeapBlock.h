@@ -760,6 +760,13 @@ struct CLR_RT_HeapBlock
 
         //--//
 
+        struct UnmanagedPointer
+        {
+            uintptr_t ptr;
+        } unmanagedPointer;
+
+        //--//
+
     } m_data;
 
   public:
@@ -1078,7 +1085,9 @@ struct CLR_RT_HeapBlock
             CLR_RT_HeapBlock *obj = Dereference();
 
             if (obj && obj->DataType() == DATATYPE_VALUETYPE && obj->IsBoxed() == false)
+            {
                 return true;
+            }
         }
 
         return false;
@@ -1092,6 +1101,19 @@ struct CLR_RT_HeapBlock
     bool SameHeader(const CLR_RT_HeapBlock &right) const
     {
         return this->m_data.numeric.u8 == right.m_data.numeric.u8;
+    }
+
+    //--//
+
+    void SetUnmanagedPointer(const uintptr_t ptr)
+    {
+        m_id.raw = CLR_RT_HEAPBLOCK_RAW_ID(DATATYPE_PTR, 0, 1);
+        m_data.unmanagedPointer.ptr = ptr;
+    }
+
+    uintptr_t UnmanagedPointer() const
+    {
+        return (DataType() == DATATYPE_PTR) ? m_data.unmanagedPointer.ptr : 0;
     }
 
     //--//
@@ -1837,6 +1859,7 @@ struct CLR_RT_HeapBlock_Array : public CLR_RT_HeapBlock
     CLR_UINT8 m_sizeOfElement;
     CLR_UINT8 m_fReference;
     CLR_UINT8 m_pad;
+    uintptr_t m_StoragePointer;
 
     //--//
 
@@ -1850,11 +1873,24 @@ struct CLR_RT_HeapBlock_Array : public CLR_RT_HeapBlock
         CLR_UINT32 length,
         CLR_RT_Assembly *assm,
         CLR_UINT32 tk,
-        const CLR_RT_MethodDef_Instance *caller);
+        const CLR_RT_MethodDef_Instance *caller,
+        const CLR_RT_TypeSpec_Index *contextTypeSpec);
+    static HRESULT CreateInstanceWithStorage(
+        CLR_RT_HeapBlock &reference,
+        CLR_UINT32 length,
+        const uintptr_t storageAddress,
+        const CLR_RT_TypeDef_Index &cls);
 
     CLR_UINT8 *GetFirstElement()
     {
-        return ((CLR_UINT8 *)&this[1]);
+        if (ReflectionData().kind == REFLECTION_STORAGE_PTR)
+        {
+            return ((CLR_UINT8 *)this->m_StoragePointer);
+        }
+        else
+        {
+            return ((CLR_UINT8 *)&this[1]);
+        }
     }
 
     CLR_UINT8 *GetElement(CLR_UINT32 index)
@@ -1864,12 +1900,24 @@ struct CLR_RT_HeapBlock_Array : public CLR_RT_HeapBlock
 
     CLR_UINT16 *GetFirstElementUInt16()
     {
-        return ((CLR_UINT16 *)&this[1]);
+        if (ReflectionData().kind == REFLECTION_STORAGE_PTR)
+        {
+            return ((CLR_UINT16 *)this->m_StoragePointer);
+        }
+        else
+        {
+            return ((CLR_UINT16 *)&this[1]);
+        }
     }
 
     CLR_UINT16 *GetElementUInt16(CLR_UINT32 index)
     {
         return GetFirstElementUInt16() + m_sizeOfElement * index;
+    }
+
+    bool IsStoragePointer()
+    {
+        return (ReflectionData().kind == REFLECTION_STORAGE_PTR);
     }
 
     HRESULT ClearElements(int index, int length);

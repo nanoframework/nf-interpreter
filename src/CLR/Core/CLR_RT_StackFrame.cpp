@@ -120,6 +120,14 @@ HRESULT CLR_RT_StackFrame::Push(CLR_RT_Thread *th, const CLR_RT_MethodDef_Instan
                                       //
         // Initialize generic type context storage to invalid
         stack->m_genericTypeSpecStorage.Clear();
+
+        // initialize localloc elements
+        stack->m_localAllocCount = 0;
+        for (CLR_INT32 i = 0; i < CLR_RT_StackFrame::c_Max_Localloc_Count; i++)
+        {
+            stack->m_localAllocs[i] = 0;
+        }
+
         //
 #ifndef NANOCLR_NO_IL_INLINE
         stack->m_inlineFrame = nullptr;
@@ -323,6 +331,11 @@ bool CLR_RT_StackFrame::PushInline(
     m_inlineFrame->m_frame.m_call = m_call;
     m_inlineFrame->m_frame.m_evalStack = m_evalStack;
     m_inlineFrame->m_frame.m_evalPos = pThis;
+    m_inlineFrame->m_frame.m_localAllocCount = m_localAllocCount;
+    for (CLR_INT32 i = 0; i < c_Max_Localloc_Count; i++)
+    {
+        m_inlineFrame->m_frame.m_localAllocs[i] = m_localAllocs[i];
+    }
 
     // increment the evalPos pointer so that we don't corrupt the real stack
     evalPos++;
@@ -337,6 +350,13 @@ bool CLR_RT_StackFrame::PushInline(
     m_evalStackPos = evalPos + 1;
     m_IPstart = ip;
     m_IP = ip;
+
+    // initialize localloc for the inline frame
+    m_localAllocCount = 0;
+    for (CLR_INT32 i = 0; i < c_Max_Localloc_Count; i++)
+    {
+        m_localAllocs[i] = 0;
+    }
 
     if (md->localsCount)
     {
@@ -412,6 +432,11 @@ void CLR_RT_StackFrame::RestoreFromInlineStack()
     m_IPstart = m_inlineFrame->m_frame.m_IPStart;
     m_evalStack = m_inlineFrame->m_frame.m_evalStack;
     m_evalStackPos = m_inlineFrame->m_frame.m_evalPos;
+    m_localAllocCount = m_inlineFrame->m_frame.m_localAllocCount;
+    for (CLR_INT32 i = 0; i < c_Max_Localloc_Count; i++)
+    {
+        m_localAllocs[i] = m_inlineFrame->m_frame.m_localAllocs[i];
+    }
 }
 
 void CLR_RT_StackFrame::RestoreStack(CLR_RT_InlineFrame &frame)
@@ -424,6 +449,11 @@ void CLR_RT_StackFrame::RestoreStack(CLR_RT_InlineFrame &frame)
     m_evalStack = frame.m_evalStack;
     m_evalStackPos = frame.m_evalPos;
     m_evalStackEnd -= m_call.target->localsCount;
+    m_localAllocCount = frame.m_localAllocCount;
+    for (CLR_INT32 i = 0; i < c_Max_Localloc_Count; i++)
+    {
+        m_localAllocs[i] = frame.m_localAllocs[i];
+    }
 }
 
 void CLR_RT_StackFrame::SaveStack(CLR_RT_InlineFrame &frame)
@@ -435,6 +465,11 @@ void CLR_RT_StackFrame::SaveStack(CLR_RT_InlineFrame &frame)
     frame.m_IPStart = m_IPstart;
     frame.m_evalPos = m_evalStackPos;
     frame.m_evalStack = m_evalStack;
+    frame.m_localAllocCount = m_localAllocCount;
+    for (CLR_INT32 i = 0; i < c_Max_Localloc_Count; i++)
+    {
+        frame.m_localAllocs[i] = m_localAllocs[i];
+    }
 }
 #endif
 
@@ -821,6 +856,14 @@ HRESULT CLR_RT_StackFrame::HandleSynchronized(bool fAcquire, bool fGlobal)
 void CLR_RT_StackFrame::Pop()
 {
     NATIVE_PROFILE_CLR_CORE();
+
+    // Clear localloc references before popping
+    for (CLR_INT32 i = 0; i < m_localAllocCount; i++)
+    {
+        platform_free((void *)m_localAllocs[i]);
+        m_localAllocs[i] = 0;
+    }
+    m_localAllocCount = 0;
 
 #if defined(NANOCLR_PROFILE_NEW_CALLS)
     {

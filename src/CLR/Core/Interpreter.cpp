@@ -1100,25 +1100,25 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
         {
             // Capture stack position before opcode execution
             evalPosBeforeOp = evalPos;
-            
+
             const CLR_RT_OpcodeLookup &opcodeInfo = c_CLR_RT_OpcodeLookup[op];
             CLR_INT32 stackPop = opcodeInfo.StackPop();
             CLR_INT32 stackPush = opcodeInfo.StackPush();
             CLR_INT32 stackChange = opcodeInfo.StackChanges();
-            
+
             // Skip validation for opcodes with variable stack behavior (VarPop/VarPush)
             // These include CEE_CALL, CEE_CALLVIRT, CEE_RET, CEE_NEWOBJ which have stack
             // changes that depend on method signatures and cannot be validated statically
             // Note: VarPop and VarPush are both encoded as 0, so check if EITHER is 0
             bool isVariableStackOp = (stackPop == 0 || stackPush == 0);
-            
+
             if (!isVariableStackOp)
             {
                 // Validate we have enough items on stack for this opcode to pop
                 // evalPos points to the slot AFTER the top item, so &evalPos[0] is top item
                 // stack->m_evalStack is the base, so (evalPos - stack->m_evalStack) is current depth
                 CLR_INT32 currentDepth = (CLR_INT32)(evalPos - stack->m_evalStack) + 1;
-                
+
                 if (stackPop > 0 && currentDepth < (CLR_INT32)stackPop)
                 {
                     // Stack underflow: trying to pop more items than available
@@ -1130,13 +1130,13 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                         (int)currentDepth);
                     NANOCLR_SET_AND_LEAVE(CLR_E_STACK_UNDERFLOW);
                 }
-                
+
                 // Validate we have enough space for items this opcode will push
                 // After popping stackPop items and pushing stackPush items, new depth will be:
                 // currentDepth - stackPop + stackPush = currentDepth + stackChange
                 CLR_INT32 projectedDepth = currentDepth + stackChange;
                 CLR_INT32 maxDepth = (CLR_INT32)(stack->m_evalStackEnd - stack->m_evalStack);
-                
+
                 if (projectedDepth > maxDepth)
                 {
                     // Stack overflow: would exceed maximum stack depth
@@ -1872,6 +1872,7 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                     evalPos[2].Promote();
 
                     NANOCLR_CHECK_HRESULT(evalPos[2].StoreToReference(evalPos[1], size));
+
                     break;
                 }
 
@@ -2524,7 +2525,7 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                     {
                         // Inline return - skip stack validation as the context is restored by PopInline()
 #if defined(NANOCLR_OPCODE_STACKCHANGES)
-                        evalPosBeforeOp = nullptr;  // Disable post-validation for inline return
+                        evalPosBeforeOp = nullptr; // Disable post-validation for inline return
 #endif
                         stack->m_evalStackPos = evalPos;
 
@@ -3131,7 +3132,25 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                     evalPos++;
                     CHECKSTACK(stack, evalPos);
 
-                    evalPos[0].SetReference(*ptr);
+                    // check if field has RVA
+                    CLR_RT_FieldDef_Instance inst;
+                    if (inst.InitializeFromIndex(field) && (inst.target->flags & CLR_RECORD_FIELDDEF::FD_HasFieldRVA) &&
+                        inst.target->defaultValue != CLR_EmptyIndex)
+                    {
+                        CLR_PMETADATA ptrSrc;
+
+                        // Get the data from the Signatures table (this contains the raw byte array)
+                        ptrSrc = inst.assembly->GetSignature(inst.target->defaultValue);
+                        CLR_UINT32 dummyVar;
+                        NANOCLR_READ_UNALIGNED_UINT16(dummyVar, ptrSrc);
+
+                        evalPos[0].SetUnmanagedPointer((uintptr_t)ptrSrc);
+                    }
+                    else
+                    {
+                        evalPos[0].SetReference(*ptr);
+                    }
+
                     break;
                 }
 
@@ -3446,7 +3465,13 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
 
                     for (int pass = 0; pass < 2; pass++)
                     {
-                        hr = CLR_RT_HeapBlock_Array::CreateInstance(evalPos[0], size, assm, arg, &stack->m_call);
+                        hr = CLR_RT_HeapBlock_Array::CreateInstance(
+                            evalPos[0],
+                            size,
+                            assm,
+                            arg,
+                            &stack->m_call,
+                            &stack->m_genericTypeSpecStorage);
                         if (SUCCEEDED(hr))
                         {
                             break;
@@ -4267,6 +4292,86 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
 
                 //----------------------------------------------------------------------------------------------------------//
 
+                OPDEF(CEE_LOCALLOC, "localloc", PopI, PushI, InlineNone, IPrimitive, 2, 0xFE, 0x0F, NEXT)
+                {
+                    CLR_INT32 sizeRaw = evalPos[0].NumericByRef().s4;
+
+                    if (sizeRaw < 0)
+                    {
+                        NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_RANGE);
+                    }
+
+                    CLR_UINT32 size = (CLR_UINT32)sizeRaw;
+
+                    evalPos--;
+                    CHECKSTACK(stack, evalPos);
+
+                    // check if we have room for another localloc
+                    if (stack->m_localAllocCount >= CLR_RT_StackFrame::c_Max_Localloc_Count)
+                    {
+                        NANOCLR_SET_AND_LEAVE(CLR_E_STACK_OVERFLOW);
+                    }
+
+                    // allocate from platform heap
+                    uintptr_t allocPointer = (uintptr_t)platform_malloc(size);
+
+                    // sanity check
+                    if (allocPointer == 0)
+                    {
+                        NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
+                    }
+
+                    // per ECMA-335 zero-initialize the memory
+                    memset((void *)allocPointer, 0, size);
+
+                    // store the pointer to the local allocated memory
+                    stack->m_localAllocs[stack->m_localAllocCount++] = allocPointer;
+
+                    evalPos++;
+                    CHECKSTACK(stack, evalPos);
+
+                    // store the pointer of the local allocated memory
+                    evalPos[0].SetUnmanagedPointer(allocPointer);
+
+                    break;
+                }
+
+                //----------------------------------------------------------------------------------------------------------//
+
+                OPDEF(CEE_CPBLK, "cpblk", PopI + PopI + PopI, Push0, InlineNone, IPrimitive, 2, 0xFE, 0x17, NEXT)
+                {
+                    // Stack: ... ... <destination> <source> <size> -> ...
+
+                    // get size
+                    CLR_UINT32 size = evalPos[0].NumericByRef().u4;
+                    evalPos--;
+
+                    // get source address
+#ifdef _WIN64
+                    uintptr_t sourceAddress = evalPos[0].NumericByRef().s8;
+#else
+                uintptr_t sourceAddress = evalPos[0].NumericByRef().s4;
+#endif
+                    evalPos--;
+
+                    // get destination address
+#ifdef _WIN64
+                    uintptr_t destinationAddress = evalPos[0].NumericByRef().s8;
+#else
+                uintptr_t destinationAddress = evalPos[0].NumericByRef().s4;
+#endif
+                    evalPos--;
+
+                    CHECKSTACK(stack, evalPos);
+
+                    // perform memory move as addresses may overlap
+                    memmove((void *)destinationAddress, (const void *)sourceAddress, size);
+
+                    break;
+                }
+
+                //----------------------------------------------------------------------------------------------------------//
+
                 //////////////////////////////////////////////////////////////////////////////////////////
                 //
                 // These opcodes do nothing...
@@ -4275,6 +4380,7 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                 OPDEF(CEE_UNALIGNED, "unaligned.", Pop0, Push0, ShortInlineI, IPrefix, 2, 0xFE, 0x12, META)
                 OPDEF(CEE_VOLATILE, "volatile.", Pop0, Push0, InlineNone, IPrefix, 2, 0xFE, 0x13, META)
                 OPDEF(CEE_TAILCALL, "tail.", Pop0, Push0, InlineNone, IPrefix, 2, 0xFE, 0x14, META)
+                OPDEF(CEE_READONLY, "readonly.", Pop0, Push0, InlineNone, IPrefix, 2, 0xFE, 0x1E, META)
                 break;
 
                 //////////////////////////////////////////////////////////////////////////////////////////
@@ -4282,16 +4388,13 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                 // Unsupported opcodes...
                 //
                 OPDEF(CEE_ARGLIST, "arglist", Pop0, PushI, InlineNone, IPrimitive, 2, 0xFE, 0x00, NEXT)
-                OPDEF(CEE_CPBLK, "cpblk", PopI + PopI + PopI, Push0, InlineNone, IPrimitive, 2, 0xFE, 0x17, NEXT)
                 OPDEF(CEE_JMP, "jmp", Pop0, Push0, InlineMethod, IPrimitive, 1, 0xFF, 0x27, CALL)
                 OPDEF(CEE_INITBLK, "initblk", PopI + PopI + PopI, Push0, InlineNone, IPrimitive, 2, 0xFE, 0x18, NEXT)
                 OPDEF(CEE_CALLI, "calli", VarPop, VarPush, InlineSig, IPrimitive, 1, 0xFF, 0x29, CALL)
                 OPDEF(CEE_CKFINITE, "ckfinite", Pop1, PushR8, InlineNone, IPrimitive, 1, 0xFF, 0xC3, NEXT)
-                OPDEF(CEE_LOCALLOC, "localloc", PopI, PushI, InlineNone, IPrimitive, 2, 0xFE, 0x0F, NEXT)
                 OPDEF(CEE_MKREFANY, "mkrefany", PopI, Push1, InlineType, IPrimitive, 1, 0xFF, 0xC6, NEXT)
                 OPDEF(CEE_REFANYTYPE, "refanytype", Pop1, PushI, InlineNone, IPrimitive, 2, 0xFE, 0x1D, NEXT)
                 OPDEF(CEE_REFANYVAL, "refanyval", Pop1, PushI, InlineType, IPrimitive, 1, 0xFF, 0xC2, NEXT)
-                OPDEF(CEE_READONLY, "readonly.", Pop0, Push0, InlineNone, IPrefix, 2, 0xFE, 0x1E, META)
 
                 NANOCLR_CHECK_HRESULT(CLR_Checks::VerifyUnsupportedInstruction(op));
                 break;
@@ -4305,33 +4408,34 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
             }
 
 #if defined(NANOCLR_OPCODE_STACKCHANGES)
-        // Post-execution validation: verify stack depth changed by expected amount
-        if (op != CEE_PREFIX1 && evalPosBeforeOp != nullptr)
-        {
-            const CLR_RT_OpcodeLookup &opcodeInfo = c_CLR_RT_OpcodeLookup[op];
-            CLR_INT32 expectedChange = opcodeInfo.StackChanges();
-            CLR_INT32 actualChange = (CLR_INT32)(evalPos - evalPosBeforeOp);
-            
-            if (actualChange != expectedChange)
+            // Post-execution validation: verify stack depth changed by expected amount
+            if (op != CEE_PREFIX1 && evalPosBeforeOp != nullptr)
             {
-                // Stack depth mismatch: opcode didn't change stack as expected
-                CLR_Debug::Printf(
-                    "STACK DEPTH MISMATCH POST-CHECK: Opcode %s (0x%X) expected change %d but actual change was %d\r\n",
-                    opcodeInfo.Name(),
-                    (int)op,
-                    (int)expectedChange,
-                    (int)actualChange);
-                CLR_Debug::Printf(
-                    "  Stack before: %d items, after: %d items\r\n",
-                    (int)(evalPosBeforeOp - stack->m_evalStack) + 1,
-                    (int)(evalPos - stack->m_evalStack) + 1);
-                
-                // This is a critical error indicating a bug in the opcode implementation
-                NANOCLR_SET_AND_LEAVE(CLR_E_STACK_UNDERFLOW);
+                const CLR_RT_OpcodeLookup &opcodeInfo = c_CLR_RT_OpcodeLookup[op];
+                CLR_INT32 expectedChange = opcodeInfo.StackChanges();
+                CLR_INT32 actualChange = (CLR_INT32)(evalPos - evalPosBeforeOp);
+
+                if (actualChange != expectedChange)
+                {
+                    // Stack depth mismatch: opcode didn't change stack as expected
+                    CLR_Debug::Printf(
+                        "STACK DEPTH MISMATCH POST-CHECK: Opcode %s (0x%X) expected change %d but actual change was "
+                        "%d\r\n",
+                        opcodeInfo.Name(),
+                        (int)op,
+                        (int)expectedChange,
+                        (int)actualChange);
+                    CLR_Debug::Printf(
+                        "  Stack before: %d items, after: %d items\r\n",
+                        (int)(evalPosBeforeOp - stack->m_evalStack) + 1,
+                        (int)(evalPos - stack->m_evalStack) + 1);
+
+                    // This is a critical error indicating a bug in the opcode implementation
+                    NANOCLR_SET_AND_LEAVE(CLR_E_STACK_UNDERFLOW);
+                }
+
+                evalPosBeforeOp = nullptr;
             }
-            
-            evalPosBeforeOp = nullptr;
-        }
 #endif
 
 #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)

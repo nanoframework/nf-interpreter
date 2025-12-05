@@ -1593,7 +1593,10 @@ struct CLR_RT_Assembly : public CLR_RT_HeapBlock_Node // EVENT HEAP - NO RELOCAT
         DECL_POSTFIX;
 
   private:
-    void DumpToken(CLR_UINT32 tk, const CLR_RT_MethodDef_Instance &methodDefInstance) DECL_POSTFIX;
+    void DumpToken(
+        CLR_UINT32 tk,
+        const CLR_RT_MethodDef_Instance &methodDefInstance,
+        const CLR_RT_TypeSpec_Index *contextTypeSpec) DECL_POSTFIX;
     void DumpSignature(CLR_SIG sig) DECL_POSTFIX;
     void DumpSignature(CLR_PMETADATA &p) DECL_POSTFIX;
     void DumpSignatureToken(CLR_PMETADATA &p) DECL_POSTFIX;
@@ -2216,7 +2219,11 @@ struct CLR_RT_TypeDef_Instance : public CLR_RT_TypeDef_Index
 
     void ClearInstance();
 
-    bool ResolveToken(CLR_UINT32 tk, CLR_RT_Assembly *assm, const CLR_RT_MethodDef_Instance *caller = nullptr);
+    bool ResolveToken(
+        CLR_UINT32 tk,
+        CLR_RT_Assembly *assm,
+        const CLR_RT_MethodDef_Instance *caller = nullptr,
+        const CLR_RT_TypeSpec_Index *contextTypeSpec = nullptr);
     bool ResolveNullableType(CLR_UINT32 tk, CLR_RT_Assembly *assm, const CLR_RT_MethodDef_Instance *caller = nullptr);
 
     //--//
@@ -2349,7 +2356,7 @@ struct CLR_RT_MethodSpec_Instance : public CLR_RT_MethodSpec_Index
 
     CLR_EncodedMethodDefOrRef InstanceOfMethod;
 
-    bool GetGenericArgument(CLR_INT32 argumentPosition, CLR_RT_TypeDef_Index &typeDef, NanoCLRDataType &dataType);
+    bool GetGenericArgument(CLR_INT32 argumentPosition, CLR_RT_SignatureParser::Element &element);
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -2529,6 +2536,9 @@ struct CLR_RT_HeapCluster : public CLR_RT_HeapBlock_Node // EVENT HEAP - NO RELO
 
 //--//
 
+// maximum number of local allocations per stack frame
+#define MAX_LOCALALLOC_COUNT 4
+
 #ifndef NANOCLR_NO_IL_INLINE
 struct CLR_RT_InlineFrame
 {
@@ -2539,6 +2549,8 @@ struct CLR_RT_InlineFrame
     CLR_RT_MethodDef_Instance m_call;
     CLR_PMETADATA m_IP;
     CLR_PMETADATA m_IPStart;
+    CLR_UINT8 m_localAllocCount;
+    uintptr_t m_localAllocs[MAX_LOCALALLOC_COUNT];
 };
 
 struct CLR_RT_InlineBuffer
@@ -2561,6 +2573,9 @@ struct CLR_RT_StackFrame : public CLR_RT_HeapBlock_Node // EVENT HEAP - NO RELOC
     // We need to have more slots in the stack to process a 'newobj' opcode.
     static const int c_OverheadForNewObjOrInteropMethod = 2;
     static const int c_MinimumStack = 10;
+
+    // max mumber of local allocations per stack frame
+    static const int c_Max_Localloc_Count = MAX_LOCALALLOC_COUNT;
 
     static const CLR_UINT32 c_MethodKind_Native = 0x00000000;
     static const CLR_UINT32 c_MethodKind_Interpreted = 0x00000001;
@@ -2662,6 +2677,9 @@ struct CLR_RT_StackFrame : public CLR_RT_HeapBlock_Node // EVENT HEAP - NO RELOC
 #if defined(ENABLE_NATIVE_PROFILER)
     bool m_fNativeProfiled;
 #endif
+
+    CLR_UINT8 m_localAllocCount;
+    uintptr_t m_localAllocs[c_Max_Localloc_Count];
 
     CLR_RT_HeapBlock m_extension[1];
 

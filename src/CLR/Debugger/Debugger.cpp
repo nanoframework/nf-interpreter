@@ -2429,10 +2429,11 @@ bool CLR_DBG_Debugger::Debugging_Thread_Get(WP_Message *msg)
 
             pRes[Library_corlib_native_System_Threading_Thread::FIELD___priority].NumericByRef().s4 = pri;
 
-            if (SUCCEEDED(CLR_RT_ObjectToEvent_Source::CreateInstance(
-                    th,
-                    *pRes,
-                    pRes[Library_corlib_native_System_Threading_Thread::FIELD___thread])))
+            if (SUCCEEDED(
+                    CLR_RT_ObjectToEvent_Source::CreateInstance(
+                        th,
+                        *pRes,
+                        pRes[Library_corlib_native_System_Threading_Thread::FIELD___thread])))
             {
 #if defined(NANOCLR_APPDOMAINS)
                 CLR_RT_ObjectToEvent_Source::CreateInstance(
@@ -3064,6 +3065,11 @@ bool CLR_DBG_Debugger::Debugging_Value_GetArray(WP_Message *msg)
         if (array->m_fReference)
         {
             blk = (CLR_RT_HeapBlock *)array->GetElement(cmd->m_index);
+        }
+        else if (array->m_StoragePointer != 0)
+        {
+            // TODO need to handle this case properly
+            ASSERT(FALSE);
         }
         else
         {

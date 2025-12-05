@@ -641,6 +641,14 @@ HRESULT CLR_RT_HeapBlock::StoreToReference(CLR_RT_HeapBlock &ref, int size)
     {
         obj = &ref;
     }
+    else if (dt == DATATYPE_PTR)
+    {
+        // unmanaged pointer, perform a direct memory move as the addresses can overlap
+        memmove((void *)ref.UnmanagedPointer(), (void *)&NumericByRef(), size);
+
+        // Nothing to assign back to a HeapBlock in this case
+        NANOCLR_SET_AND_LEAVE(S_OK);
+    }
     else
     {
         NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
@@ -1466,6 +1474,9 @@ bool CLR_RT_HeapBlock::ObjectsEqual(
                     objLeft->m_sizeOfElement == objRight->m_sizeOfElement &&
                     objLeft->m_typeOfElement == objRight->m_typeOfElement)
                 {
+                    // check that array is not stored in stack
+                    ASSERT(objLeft->m_StoragePointer == 0);
+
                     if (!objLeft->m_fReference)
                     {
                         if (memcmp(
@@ -2073,6 +2084,20 @@ HRESULT CLR_RT_HeapBlock::NumericAdd(const CLR_RT_HeapBlock &right)
         }
         break;
 
+        case DATATYPE_PTR:
+            if (right.DataType() == DATATYPE_I4)
+            {
+                // binary numeric add (byte wise) (ECMA-335 Table III.2)
+                uint8_t *unmanagedPtr = (uint8_t *)UnmanagedPointer();
+                unmanagedPtr += right.NumericByRefConst().s4;
+
+                SetUnmanagedPointer((uintptr_t)unmanagedPtr);
+
+                break;
+            }
+            // fall through, can't add other types to a PTR
+            [[fallthrough]];
+
         default:
             NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
     }
@@ -2159,6 +2184,21 @@ HRESULT CLR_RT_HeapBlock::NumericSub(const CLR_RT_HeapBlock &right)
             m_data.arrayReference.index -= right.m_data.numeric.s4 / array->m_sizeOfElement;
         }
         break;
+
+        case DATATYPE_PTR:
+            if (right.DataType() == DATATYPE_I4)
+            {
+                // binary numeric sub (byte wise) (ECMA-335 Table III.2)
+                uint8_t *unmanagedPtr = (uint8_t *)UnmanagedPointer();
+                unmanagedPtr -= right.NumericByRefConst().s4;
+
+                SetUnmanagedPointer((uintptr_t)unmanagedPtr);
+
+                break;
+            }
+            // fall through, can't subtract other types to a PTR
+            [[fallthrough]];
+
         default:
             NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
     }
