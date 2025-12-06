@@ -8,6 +8,7 @@
 
 // must be big enough to fit the biggest number
 // decorated with negative signs, group separators, etc.
+// matching declaration in Library_corlib_native_String.cpp
 #define FORMAT_RESULT_BUFFER_SIZE 128
 #define FORMAT_FMTSTR_BUFFER_SIZE 10
 
@@ -943,11 +944,11 @@ int Library_corlib_native_System_Number::Format_E(char *buffer, CLR_RT_HeapBlock
         // now the exponent
         if (formatChar == 'e')
         {
-            snprintf(&buffer[ret], FORMAT_RESULT_BUFFER_SIZE, "e%+.3d", exponent);
+            ret += snprintf(&buffer[ret], FORMAT_RESULT_BUFFER_SIZE - ret, "e%+.3d", exponent);
         }
         else
         {
-            snprintf(&buffer[ret], FORMAT_RESULT_BUFFER_SIZE, "E%+.3d", exponent);
+            ret += snprintf(&buffer[ret], FORMAT_RESULT_BUFFER_SIZE - ret, "E%+.3d", exponent);
         }
     }
 

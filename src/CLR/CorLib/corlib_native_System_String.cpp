@@ -10,6 +10,9 @@ static const CLR_UINT16 c_WhiteSpaces[] = {
     0x2004, 0x2005, 0x2006, 0x2007, 0x2008, 0x2009, 0x200A, 0x200B, 0x3000, 0xFEFF,
 };
 
+// matching declaration in Library_corlib_native_System_Number.cpp
+#define FORMAT_RESULT_BUFFER_SIZE 128
+
 //--//
 
 HRESULT Library_corlib_native_System_String::CompareTo___I4__OBJECT(CLR_RT_StackFrame &stack)
@@ -1278,4 +1281,383 @@ HRESULT Library_corlib_native_System_String::ConvertToCharArray(
 {
     NATIVE_PROFILE_CLR_CORE();
     return ConvertToCharArray(stack.Arg0().RecoverString(), ref, array, startIndex, length);
+}
+
+HRESULT Library_corlib_native_System_String::Format___STATIC__STRING__STRING__SZARRAY_OBJECT(CLR_RT_StackFrame &stack)
+{
+    NANOCLR_HEADER();
+
+    const char *format;
+    CLR_RT_HeapBlock_Array *args;
+    char *output = nullptr;
+    const char *p;
+    char negSign[] = "-";
+    char decSep[] = ".";
+
+    // Get format string
+    format = stack.Arg0().RecoverString();
+    FAULT_ON_NULL_ARG(format);
+
+    // Get arguments array
+    args = stack.Arg1().DereferenceArray();
+    FAULT_ON_NULL(args);
+
+    // loop twice: first to calculate length, second to format
+    for (int pass = 0; pass < 2; pass++)
+    {
+        int length = 0;
+        p = format;
+
+        while (*p)
+        {
+            if (*p == '{')
+            {
+                if (p[1] == '{')
+                {
+                    // Escaped brace
+                    if (pass == 1)
+                    {
+                        output[length] = '{';
+                    }
+
+                    length++;
+                    p += 2;
+
+                    continue;
+                }
+
+                // Parse placeholder
+                // Skip '{'
+                p++;
+
+                // Parse index
+                int index = 0;
+                bool hasIndex = false;
+                while (*p >= '0' && *p <= '9')
+                {
+                    index = index * 10 + (*p - '0');
+                    hasIndex = true;
+                    p++;
+                }
+
+                if (!hasIndex)
+                {
+                    NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+                }
+
+                if (index < 0 || index >= (int)args->m_numOfElements)
+                {
+                    NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_RANGE);
+                }
+
+                // Parse optional alignment
+                int alignment = 0;
+                if (*p == ',')
+                {
+                    // Skip ','
+                    p++;
+                    bool negative = false;
+
+                    if (*p == '-')
+                    {
+                        negative = true;
+                        p++;
+                    }
+
+                    while (*p >= '0' && *p <= '9')
+                    {
+                        alignment = alignment * 10 + (*p - '0');
+                        p++;
+                    }
+
+                    if (negative)
+                    {
+                        alignment = -alignment;
+                    }
+                }
+
+                // Parse optional format specifier
+                char formatSpec[64] = {0};
+                if (*p == ':')
+                {
+                    // Skip ':'
+                    p++;
+                    int formatSpecLen = 0;
+
+                    while (*p && *p != '}' && formatSpecLen < 63)
+                    {
+                        formatSpec[formatSpecLen++] = *p++;
+                    }
+
+                    formatSpec[formatSpecLen] = '\0';
+                }
+
+                if (*p != '}')
+                {
+                    NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+                }
+
+                // Skip '}'
+                p++;
+
+                // Get and process the argument
+                CLR_RT_HeapBlock *arg = (CLR_RT_HeapBlock *)args->GetElement(index);
+                CLR_RT_HeapBlock *deref = arg->Dereference();
+
+                if (deref == nullptr)
+                {
+                    // this is a NULL object, get the argument itself
+                    deref = arg;
+                }
+
+                NanoCLRDataType dt = deref->DataType();
+
+                if (pass == 0)
+                {
+                    // Pass 0: Calculate length
+                    int argLength = 0;
+
+                    if (dt == DATATYPE_STRING)
+                    {
+                        const char *str = deref->StringText();
+                        argLength = str ? (int)hal_strlen_s(str) : 0;
+                    }
+                    else if (dt == DATATYPE_VALUETYPE)
+                    {
+                        deref = arg->FixBoxingReference();
+                        dt = deref->DataType();
+
+                        if (dt >= DATATYPE_I1 && dt <= DATATYPE_R8)
+                        {
+                            // Conservative estimate
+                            argLength = FORMAT_RESULT_BUFFER_SIZE / 2;
+                        }
+                    }
+                    else if (dt >= DATATYPE_I1 && dt <= DATATYPE_R8)
+                    {
+                        argLength = 64;
+                    }
+
+                    // Account for alignment
+                    int absAlignment = (alignment < 0) ? -alignment : alignment;
+                    if (absAlignment > argLength)
+                    {
+                        argLength = absAlignment;
+                    }
+
+                    length += argLength;
+                }
+                else
+                {
+                    // Pass 1: Format the argument
+                    char argBuffer[FORMAT_RESULT_BUFFER_SIZE] = {0};
+                    const char *argStr = nullptr;
+
+                    if (dt == DATATYPE_STRING)
+                    {
+                        argStr = deref->StringText();
+                        if (!argStr)
+                        {
+                            argStr = "";
+                        }
+                    }
+                    else if (dt == DATATYPE_VALUETYPE)
+                    {
+                        deref = arg->FixBoxingReference();
+                        dt = deref->DataType();
+
+                    process_numeric:
+                        if (dt >= DATATYPE_I1 && dt <= DATATYPE_R8)
+                        {
+                            bool isInteger = (dt >= DATATYPE_I1 && dt <= DATATYPE_U8);
+                            int len = -1;
+
+                            if (formatSpec[0] != '\0')
+                            {
+                                char fmtChar;
+                                int precision;
+
+                                if (Library_corlib_native_System_Number::GetFormatSpec(
+                                        formatSpec,
+                                        isInteger,
+                                        &fmtChar,
+                                        &precision))
+                                {
+                                    switch (fmtChar)
+                                    {
+                                        case 'g':
+                                        case 'G':
+                                            len = Library_corlib_native_System_Number::Format_G(
+                                                argBuffer,
+                                                deref,
+                                                fmtChar,
+                                                precision,
+                                                negSign,
+                                                decSep);
+                                            break;
+
+                                        case 'x':
+                                        case 'X':
+                                            len = Library_corlib_native_System_Number::Format_X(
+                                                argBuffer,
+                                                deref,
+                                                fmtChar,
+                                                precision);
+                                            break;
+
+                                        case 'f':
+                                        case 'F':
+                                        case 'n':
+                                        case 'N':
+                                            // N format is like F but with thousand separators
+                                            // For now, we just use F format since we don't have NumberFormatInfo
+                                            len = Library_corlib_native_System_Number::Format_F(
+                                                argBuffer,
+                                                deref,
+                                                precision,
+                                                negSign,
+                                                decSep);
+                                            break;
+
+                                        case 'd':
+                                        case 'D':
+                                            len = Library_corlib_native_System_Number::Format_D(
+                                                argBuffer,
+                                                deref,
+                                                precision,
+                                                negSign,
+                                                decSep);
+                                            break;
+
+                                        case 'e':
+                                        case 'E':
+                                            len = Library_corlib_native_System_Number::Format_E(
+                                                argBuffer,
+                                                deref,
+                                                precision,
+                                                fmtChar);
+                                            break;
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                len = Library_corlib_native_System_Number::Format_G(
+                                    argBuffer,
+                                    deref,
+                                    'G',
+                                    -1,
+                                    negSign,
+                                    decSep);
+                            }
+
+                            if (len > 0)
+                            {
+                                argBuffer[len] = '\0';
+                                argStr = argBuffer;
+                            }
+                            else
+                            {
+                                argStr = "";
+                            }
+                        }
+                        else
+                        {
+                            argStr = "";
+                        }
+                    }
+                    else if (dt >= DATATYPE_I1 && dt <= DATATYPE_R8)
+                    {
+                        goto process_numeric;
+                    }
+                    else
+                    {
+                        argStr = "";
+                    }
+
+                    // apply alignment and write to output
+                    int argLen = (int)hal_strlen_s(argStr);
+                    int absAlignment = (alignment < 0) ? -alignment : alignment;
+
+                    if (absAlignment > argLen)
+                    {
+                        int padding = absAlignment - argLen;
+                        if (alignment > 0)
+                        {
+                            // Right align - pad left
+                            for (int i = 0; i < padding; i++)
+                            {
+                                output[length++] = ' ';
+                            }
+
+                            memcpy(&output[length], argStr, argLen);
+                            length += argLen;
+                        }
+                        else
+                        {
+                            // Left align - pad right
+                            memcpy(&output[length], argStr, argLen);
+                            length += argLen;
+
+                            for (int i = 0; i < padding; i++)
+                            {
+                                output[length++] = ' ';
+                            }
+                        }
+                    }
+                    else
+                    {
+                        memcpy(&output[length], argStr, argLen);
+                        length += argLen;
+                    }
+                }
+            }
+            else if (*p == '}')
+            {
+                if (p[1] == '}')
+                {
+                    // Escaped brace
+                    if (pass == 1)
+                    {
+                        output[length] = '}';
+                    }
+
+                    length++;
+                    p += 2;
+                    continue;
+                }
+                else
+                {
+                    NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+                }
+            }
+            else
+            {
+                // Regular character
+                if (pass == 1)
+                {
+                    output[length] = *p;
+                }
+
+                length++;
+                p++;
+            }
+        }
+
+        if (pass == 0)
+        {
+            // after pass 0: allocate string and get pointer
+            CLR_RT_HeapBlock &blkResult = stack.PushValue();
+            CLR_RT_HeapBlock_String *str = CLR_RT_HeapBlock_String::CreateInstance(blkResult, length);
+            CHECK_ALLOCATION(str);
+            output = (char *)str->StringText();
+        }
+        else
+        {
+            // after pass 1: null terminate the string
+            output[length] = '\0';
+        }
+    }
+
+    NANOCLR_NOCLEANUP();
 }
