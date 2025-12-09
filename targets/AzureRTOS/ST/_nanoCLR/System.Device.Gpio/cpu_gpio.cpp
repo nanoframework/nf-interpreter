@@ -79,6 +79,12 @@ static void DebounceTimerCallback(ULONG pinState)
     {
         // call ISR
         pState->isrPtr(pState->pinNumber, actual, pState->param);
+
+        if (pState->mode == GPIO_INT_EDGE_BOTH)
+        {
+            // update expected state
+            pState->expected ^= 1;
+        }
     }
 
     // reset flag

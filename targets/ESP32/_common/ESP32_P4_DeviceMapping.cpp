@@ -24,10 +24,7 @@ int8_t Esp32_SPI_DevicePinMap[MAX_SPI_DEVICES][Esp32SpiPin_Max] = {
 // others assign as NONE because the default pins can be shared with serial flash and PSRAM
 int8_t Esp32_SERIAL_DevicePinMap[UART_NUM_MAX][Esp32SerialPin_Max] = {
     // COM 1 - pins 21, 20
-    {UART_NUM_0_TXD_DIRECT_GPIO_NUM,
-     UART_NUM_0_RXD_DIRECT_GPIO_NUM,
-     UART_PIN_NO_CHANGE,
-     UART_PIN_NO_CHANGE},
+    {UART_NUM_0_TXD_DIRECT_GPIO_NUM, UART_NUM_0_RXD_DIRECT_GPIO_NUM, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE},
 
 #if defined(UART_NUM_2)
     // COM 2 - all set to UART_PIN_NO_CHANGE
@@ -59,15 +56,30 @@ int8_t Esp32_LED_DevicePinMap[8] = {
     -1  // 8
 };
 
+// Under nanoframework we treat all ADC channels as 1 logical ADC unit (ADC1)
+// ESP32_P4 ADC1 with 8 channels (GPIO 16,17,18,19,20,21,22,23)
+//               plus 6 channels (GPIO 49,50,51,52,53,54)
+
+// From IDF point of view there is ADC1 and ADC2
 // ESP32P4 ADC1 channels 0 - 9
 //         ADC2 channels 10 - 19
 int8_t Esp32_ADC_DevicePinMap[TARGET_ADC_NUM_PINS] = {
     // ADC1
-    ADC1_CHANNEL_0_GPIO_NUM, ADC1_CHANNEL_1_GPIO_NUM, ADC1_CHANNEL_2_GPIO_NUM, ADC1_CHANNEL_3_GPIO_NUM,
-    ADC1_CHANNEL_4_GPIO_NUM, ADC1_CHANNEL_5_GPIO_NUM, ADC1_CHANNEL_6_GPIO_NUM, ADC1_CHANNEL_7_GPIO_NUM,
+    16,
+    17,
+    18,
+    19,
+    20,
+    21,
+    22,
+    23,
     // ADC2
-    ADC2_CHANNEL_0_GPIO_NUM, ADC2_CHANNEL_1_GPIO_NUM, ADC2_CHANNEL_2_GPIO_NUM, ADC2_CHANNEL_3_GPIO_NUM,
-    ADC2_CHANNEL_4_GPIO_NUM, ADC2_CHANNEL_5_GPIO_NUM};
+    49,
+    50,
+    51,
+    52,
+    53,
+    54};
 
 //  I2S
 //  1 device I2S1

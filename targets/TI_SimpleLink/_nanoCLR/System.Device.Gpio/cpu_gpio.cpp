@@ -49,6 +49,9 @@ struct gpio_input_state : public HAL_DblLinkedNode<gpio_input_state>
     // expected state for debounce handler
     uint_fast8_t expected;
 
+    // current pin state
+    uint_fast8_t current;
+
     // flag for waiting for debounce timer to complete
     bool waitingDebounce;
 };
@@ -117,6 +120,8 @@ gpio_input_state *AllocateGpioInputState(GPIO_PIN pinNumber)
             // store the pin number
             pState->pinNumber = pinNumber;
 
+            pState->current = GPIO_read(pinNumber);
+
             gpioInputList.LinkAtBack(pState);
         }
     }
@@ -174,8 +179,13 @@ static void DebounceTimerCallback(UArg arg)
 
         if (pinState == pState->expected)
         {
-            // post a managed event with the current pin reading
             pState->isrPtr(pState->pinNumber, pinState, pState->param);
+
+            if (pState->mode == GPIO_INT_EDGE_BOTH)
+            {
+                // update expected state
+                pState->expected ^= 1;
+            }
         }
 
         pState->waitingDebounce = false;
@@ -215,8 +225,12 @@ static void GpioEventCallback(uint_least8_t index)
             }
             else
             {
-                // No debounce so just post a managed event with the current pin reading
-                pState->isrPtr(pState->pinNumber, pinState, pState->param);
+                if (pinState != pState->current)
+                {
+                    pState->current = pinState;
+
+                    pState->isrPtr(pState->pinNumber, pinState, pState->param);
+                }
             }
         }
     }
@@ -368,6 +382,7 @@ bool CPU_GPIO_EnableInputPin(
         pState->mode = intEdge;
         pState->param = isrParam;
         pState->debounceMs = debounceTimeMilliseconds;
+        pState->current = CPU_GPIO_GetPinState(pState->pinConfigIndex);
 
         // create timer if not there yet
         if (pState->debounceMs > 0 && pState->debounceTimer == nullptr)

@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (c) .NET Foundation and Contributors
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
@@ -150,7 +150,7 @@ int CLR_RT_UnicodeHelper::CountNumberOfCharacters(int max)
                 }
                 else
                 {
-                    // Advance only over valid continuation bytes
+                    // Advance past all continuation bytes in invalid sequence
                     pSrc += validCount;
                     maxRemaining -= validCount;
                 }
@@ -278,15 +278,15 @@ bool CLR_RT_UnicodeHelper::ConvertFromUTF8(int iMaxChars, bool fJustMove, int iM
         {
             if (iMaxBytes < 1)
             {
+                // Not enough bytes remaining - output replacement and don't advance
+                inputUTF8--;
+                iMaxBytes++;
                 goto invalid_sequence;
             }
+
             CLR_UINT32 ch2 = (CLR_UINT32)inputUTF8[0]; // Lookahead without advancing
-            int validCount = 0;
-            if (UTF8_VALID_CONTINUATION(ch2))
-            {
-                validCount = 1;
-            }
-            if (validCount < 1)
+
+            if (!UTF8_VALID_CONTINUATION(ch2))
             {
                 goto invalid_sequence;
             }
@@ -295,6 +295,9 @@ bool CLR_RT_UnicodeHelper::ConvertFromUTF8(int iMaxChars, bool fJustMove, int iM
 
             if (fullCh < 0x80)
             {
+                // Overlong encoding - advance past the continuation byte
+                inputUTF8++;
+                iMaxBytes--;
                 goto invalid_sequence;
             }
 
@@ -306,6 +309,8 @@ bool CLR_RT_UnicodeHelper::ConvertFromUTF8(int iMaxChars, bool fJustMove, int iM
             {
                 if (outputUTF16_size < 1)
                 {
+                    inputUTF8 -= 2;
+                    iMaxBytes += 2;
                     res = false;
                     break;
                 }
@@ -323,6 +328,9 @@ bool CLR_RT_UnicodeHelper::ConvertFromUTF8(int iMaxChars, bool fJustMove, int iM
         {
             if (iMaxBytes < 2)
             {
+                // Not enough bytes remaining
+                inputUTF8--;
+                iMaxBytes++;
                 goto invalid_sequence;
             }
 
@@ -342,6 +350,9 @@ bool CLR_RT_UnicodeHelper::ConvertFromUTF8(int iMaxChars, bool fJustMove, int iM
 
             if (validCount < 2)
             {
+                // Advance only over valid continuation bytes before outputting replacement
+                inputUTF8 += validCount;
+                iMaxBytes -= validCount;
                 goto invalid_sequence;
             }
 
@@ -350,6 +361,9 @@ bool CLR_RT_UnicodeHelper::ConvertFromUTF8(int iMaxChars, bool fJustMove, int iM
             // Check for valid range and surrogates
             if (fullCh < 0x0800 || (fullCh >= 0xD800 && fullCh <= 0xDFFF))
             {
+                // Invalid - advance past all continuation bytes
+                inputUTF8 += 2;
+                iMaxBytes -= 2;
                 goto invalid_sequence;
             }
 
@@ -360,6 +374,8 @@ bool CLR_RT_UnicodeHelper::ConvertFromUTF8(int iMaxChars, bool fJustMove, int iM
             {
                 if (outputUTF16_size < 1)
                 {
+                    inputUTF8 -= 3;
+                    iMaxBytes += 3;
                     res = false;
                     break;
                 }
@@ -378,7 +394,9 @@ bool CLR_RT_UnicodeHelper::ConvertFromUTF8(int iMaxChars, bool fJustMove, int iM
             // Check if we have at least 3 continuation bytes
             if (iMaxBytes < 3)
             {
-                // Not enough bytes, treat as invalid sequence
+                // Not enough bytes remaining
+                inputUTF8--;
+                iMaxBytes++;
                 goto invalid_sequence;
             }
 
@@ -407,7 +425,9 @@ bool CLR_RT_UnicodeHelper::ConvertFromUTF8(int iMaxChars, bool fJustMove, int iM
 
             if (validCount < 3)
             {
-                // Not all continuation bytes are valid
+                // Advance only over valid continuation bytes
+                inputUTF8 += validCount;
+                iMaxBytes -= validCount;
                 goto invalid_sequence;
             }
 
@@ -417,6 +437,9 @@ bool CLR_RT_UnicodeHelper::ConvertFromUTF8(int iMaxChars, bool fJustMove, int iM
             // Strict range check
             if (fullCh < 0x10000 || fullCh > 0x10FFFF)
             {
+                // Invalid - advance past all continuation bytes
+                inputUTF8 += 3;
+                iMaxBytes -= 3;
                 goto invalid_sequence;
             }
 
@@ -428,6 +451,8 @@ bool CLR_RT_UnicodeHelper::ConvertFromUTF8(int iMaxChars, bool fJustMove, int iM
             {
                 if (outputUTF16_size < 2)
                 {
+                    inputUTF8 -= 4;
+                    iMaxBytes += 4;
                     res = false;
                     break;
                 }
@@ -442,6 +467,8 @@ bool CLR_RT_UnicodeHelper::ConvertFromUTF8(int iMaxChars, bool fJustMove, int iM
             {
                 if (iMaxChars == 1)
                 {
+                    inputUTF8 -= 4;
+                    iMaxBytes += 4;
                     res = false;
                     break;
                 }
@@ -473,17 +500,15 @@ bool CLR_RT_UnicodeHelper::ConvertFromUTF8(int iMaxChars, bool fJustMove, int iM
             iMaxChars--;
         }
 
-        // Pointer remains at current position for next byte
+        // Pointer has already been advanced appropriately before jumping here
     }
 
     if (!fJustMove)
     {
-        if (outputUTF16_size < 1)
+        if (outputUTF16_size >= 1)
         {
-            return false;
+            outputUTF16[0] = 0;
         }
-
-        outputUTF16[0] = 0;
     }
 
     m_inputUTF8 = inputUTF8;
@@ -654,6 +679,7 @@ bool CLR_RT_UnicodeHelper::ConvertToUTF8(int iMaxChars, bool fJustMove)
                     *outputUTF8++ = 0xBD; // U+FFFD
                     outputUTF8_size -= 3;
                 }
+                // iMaxChars is already 0, so loop will exit
                 continue;
             }
 
@@ -662,6 +688,7 @@ bool CLR_RT_UnicodeHelper::ConvertToUTF8(int iMaxChars, bool fJustMove)
 
             if (ch2 < LOW_SURROGATE_START || ch2 > LOW_SURROGATE_END)
             {
+                // Invalid surrogate pair - high surrogate followed by non-low surrogate
                 if (!fJustMove)
                 {
                     if (outputUTF8_size < 3)
@@ -675,6 +702,9 @@ bool CLR_RT_UnicodeHelper::ConvertToUTF8(int iMaxChars, bool fJustMove)
                     *outputUTF8++ = 0xBD; // U+FFFD
                     outputUTF8_size -= 3;
                 }
+                // Put back the second character for next iteration
+                inputUTF16--;
+                iMaxChars++;
                 continue;
             }
 

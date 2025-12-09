@@ -484,6 +484,7 @@ macro(nf_setup_partition_tables_generator)
     endif()
 
     if(${TARGET_SERIES_SHORT} STREQUAL "esp32" OR 
+       ${TARGET_SERIES_SHORT} STREQUAL "esp32c3" OR 
        ${TARGET_SERIES_SHORT} STREQUAL "esp32c5" OR 
        ${TARGET_SERIES_SHORT} STREQUAL "esp32c6" OR 
        ${TARGET_SERIES_SHORT} STREQUAL "esp32p4" OR 
@@ -687,6 +688,7 @@ macro(nf_add_idf_as_library)
         esp_netif
         esp_eth
         esp_psram
+        esp_adc
         littlefs
     )
 
@@ -702,6 +704,7 @@ macro(nf_add_idf_as_library)
         idf::esp_netif
         idf::esp_eth
         idf::esp_psram
+        idf::esp_adc
         idf::littlefs
     )
 
