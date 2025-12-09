@@ -1,6 +1,5 @@
 #ifndef COM_SKYWORKSINC_NANOFRAMEWORK_DEVICES_C1_NATIVE_TARGET_H
 #define COM_SKYWORKSINC_NANOFRAMEWORK_DEVICES_C1_NATIVE_TARGET_H
-
 #include <em_device.h>
 #include "em_timer.h"
 #include "target_com_sky_nf_dev_c1_config.h"

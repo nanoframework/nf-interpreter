@@ -8,6 +8,7 @@
         "SiliconLabs/STB_Interposer/CMakePresets.json",
         "SiliconLabs/FIELD_PROG/CMakePresets.json",
         "ST/ORGPAL_PALTHREE/CMakePresets.json",
-        "ST/ST_B_L475E_IOT01A/CMakePresets.json"
+        "ST/ST_B_L475E_IOT01A/CMakePresets.json",
+        "SiliconLabs/SKY_UBT_EVB/CMakePresets.json"
     ]
 }
