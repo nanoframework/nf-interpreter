@@ -187,6 +187,9 @@ void CLR_RT_EventCache::VirtualMethodTable::Callback_Reassign(
 
 #else
 
+// uncomment the following line to enable diagnostics for VMT structure sizes and alignment
+// #define DEBUG_VMT_DIAGNOSTICS
+
 void CLR_RT_EventCache::VirtualMethodTable::Initialize()
 {
     NATIVE_PROFILE_CLR_CORE();
@@ -196,7 +199,7 @@ void CLR_RT_EventCache::VirtualMethodTable::Initialize()
     m_entriesMRU = (Link *)&g_scratchVirtualMethodTableLinkMRU[0];
     m_payloads = (Payload *)&g_scratchVirtualMethodPayload[0];
 
-#ifdef DEBUG
+#ifdef DEBUG_VMT_DIAGNOSTICS
 
     // DIAGNOSTIC: Verify structure sizes and alignment
     CLR_Debug::Printf("\r\n========== VirtualMethodTable::Initialize DIAGNOSTICS ==========\r\n");
@@ -377,7 +380,7 @@ bool CLR_RT_EventCache::VirtualMethodTable::FindVirtualMethod(
 
     for (index = m_entries[indexHead].m_next;; index = m_entries[index].m_next)
     {
-#if defined(DEBUG) && defined(_WIN64)
+#if defined(DEBUG_VMT_DIAGNOSTICS) && defined(_WIN64)
         CLR_Debug::Printf("  Loop: index=%u, indexHead=%u\r\n", index, indexHead);
 #endif
 
@@ -421,7 +424,7 @@ bool CLR_RT_EventCache::VirtualMethodTable::FindVirtualMethod(
 
             index = GetNewEntry();
 
-#if defined(DEBUG) && defined(_WIN64)
+#if defined(DEBUG_VMT_DIAGNOSTICS) && defined(_WIN64)
             CLR_Debug::Printf("  GetNewEntry returned: %u\r\n", index);
 #endif
 
