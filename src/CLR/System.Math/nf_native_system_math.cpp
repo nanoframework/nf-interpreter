@@ -50,9 +50,9 @@ static const CLR_RT_MethodHandler method_lookup[] =
 const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_System_Math =
 {
     "System.Math",
-    0x9F9E2A7E,
+    0x3DFD3D37,
     method_lookup,
-    { 100, 0, 5, 5 }
+    { 100, 2, 0, 0 }
 };
 
 // clang-format on

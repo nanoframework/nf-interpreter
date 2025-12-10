@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (c) .NET Foundation and Contributors
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
@@ -13,6 +13,25 @@
 #include <nanoCLR_Interop.h>
 #include <nanoCLR_Runtime.h>
 #include <nanoCLR_Checks.h>
+
+typedef enum __nfpack EventCategory
+{
+    EventCategory_Unknown = 0,
+    EventCategory_Custom = 10,
+    EventCategory_Gpio = 20,
+    EventCategory_SerialDevice = 30,
+    EventCategory_Network = 40,
+    EventCategory_WiFi = 50,
+    EventCategory_Can = 60,
+    EventCategory_Storage = 70,
+    EventCategory_Radio = 80,
+    EventCategory_HighResolutionTimer = 90,
+    EventCategory_Bluetooth = 100,
+    EventCategory_Usb = 110,
+    EventCategory_Touch = 120,
+    EventCategory_Gesture = 130,
+    EventCategory_OpenThread = 140,
+} EventCategory;
 
 struct Library_nf_rt_events_native_nanoFramework_Runtime_Events_BaseEvent
 {
@@ -58,8 +77,8 @@ struct Library_nf_rt_events_native_nanoFramework_Runtime_Events_EventSink__Event
 
 struct Library_nf_rt_events_native_nanoFramework_Runtime_Events_EventSink
 {
-    static const int FIELD_STATIC__s_eventSink = 2;
-    static const int FIELD_STATIC__s_eventInfoTable = 3;
+    static const int FIELD_STATIC__s_eventSink = 1;
+    static const int FIELD_STATIC__s_eventInfoTable = 2;
 
     NANOCLR_NATIVE_DECLARE(EventConfig___VOID);
 

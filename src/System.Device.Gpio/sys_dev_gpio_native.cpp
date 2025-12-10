@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (c) .NET Foundation and Contributors
 // See LICENSE file in the project root for full license information.
 //
@@ -103,9 +103,9 @@ static const CLR_RT_MethodHandler method_lookup[] =
 const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_System_Device_Gpio =
 {
     "System.Device.Gpio",
-    0x097E7BC5,
+    0x62452053,
     method_lookup,
-    { 100, 1, 0, 6 }
+    { 100, 2, 0, 0 }
 };
 
 // clang-format on

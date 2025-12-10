@@ -42,7 +42,7 @@ const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_nanoFramework_Runtime_Nativ
     "nanoFramework.Runtime.Native",
     0xAD1ECE38,
     method_lookup,
-    { 100, 0, 11, 0 }
+    { 100, 2, 0, 0 }
 };
 
 // clang-format on

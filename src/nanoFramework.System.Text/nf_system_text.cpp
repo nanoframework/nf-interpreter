@@ -1,10 +1,11 @@
-//
+﻿//
 // Copyright (c) .NET Foundation and Contributors
 // See LICENSE file in the project root for full license information.
 //
 
 #include "nf_system_text.h"
 
+// clang-format off
 
 static const CLR_RT_MethodHandler method_lookup[] =
 {
@@ -87,7 +88,9 @@ static const CLR_RT_MethodHandler method_lookup[] =
 const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_nanoFramework_System_Text =
 {
     "nanoFramework.System.Text",
-    0x8E6EB73D,
+    0x55F7ABBE,
     method_lookup,
-    { 100, 0, 0, 1 }
+    { 100, 2, 0, 0 }
 };
+
+// clang-format on

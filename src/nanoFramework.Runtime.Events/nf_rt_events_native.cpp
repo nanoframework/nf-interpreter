@@ -70,9 +70,9 @@ static const CLR_RT_MethodHandler method_lookup[] =
 const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_nanoFramework_Runtime_Events =
 {
     "nanoFramework.Runtime.Events",
-    0x0EAB00C9,
+    0x1E70ADD7,
     method_lookup,
-    { 100, 0, 8, 0 }
+    { 100, 2, 0, 0 }
 };
 
 // clang-format on
