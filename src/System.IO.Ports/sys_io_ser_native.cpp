@@ -103,9 +103,9 @@ static const CLR_RT_MethodHandler method_lookup[] =
 const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_System_IO_Ports =
 {
     "System.IO.Ports",
-    0xB798CE30,
+    0x26931685,
     method_lookup,
-    { 100, 1, 6, 1 }
+    { 100, 2, 0, 0 }
 };
 
 // clang-format on

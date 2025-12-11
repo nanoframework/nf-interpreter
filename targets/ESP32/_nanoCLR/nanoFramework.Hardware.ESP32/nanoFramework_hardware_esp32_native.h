@@ -62,6 +62,10 @@ typedef enum __nfpack Sleep_WakeupCause
     Sleep_WakeupCause_Ulp = 6,
     Sleep_WakeupCause_Gpio = 7,
     Sleep_WakeupCause_Uart = 8,
+    Sleep_WakeupCause_Wifi = 9,
+    Sleep_WakeupCause_CoCpu = 10,
+    Sleep_WakeupCause_CoCpuTrapTrig = 11,
+    Sleep_WakeupCause_Bt = 12,
 } Sleep_WakeupCause;
 
 typedef enum __nfpack Sleep_WakeupGpioPin
@@ -342,8 +346,10 @@ struct Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32_
 /*
 struct Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32_Touch_MeasurementTime
 {
-    static const int FIELD__<SleepCycles>k__BackingField = 1;
-    static const int FIELD__<MeasurementCycles>k__BackingField = 2;
+    // renamed backing field '<SleepCycles>k__BackingField'
+    static const int FIELD__SleepCycles = 1;
+    // renamed backing field '<MeasurementCycles>k__BackingField'
+    static const int FIELD__MeasurementCycles = 2;
 
     //--//
 };
@@ -361,16 +367,20 @@ struct Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32_
 /*
 struct Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32_Touch_TouchChargeSpeed
 {
-    static const int FIELD__<Speed>k__BackingField = 1;
-    static const int FIELD__<Charge>k__BackingField = 2;
+    // renamed backing field '<Speed>k__BackingField'
+    static const int FIELD__Speed = 1;
+    // renamed backing field '<Charge>k__BackingField'
+    static const int FIELD__Charge = 2;
 
     //--//
 };
 
 struct Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32_Touch_TouchPadEventArgs
 {
-    static const int FIELD__<PadNumber>k__BackingField = 3;
-    static const int FIELD__<Touched>k__BackingField = 4;
+    // renamed backing field '<PadNumber>k__BackingField'
+    static const int FIELD__PadNumber = 3;
+    // renamed backing field '<Touched>k__BackingField'
+    static const int FIELD__Touched = 4;
 
     //--//
 };
