@@ -1113,7 +1113,7 @@ bool CLR_RT_ExecutionEngine::SpawnGenericTypeStaticConstructorsHelper(
         record->m_flags &= ~CLR_RT_GenericCctorExecutionRecord::c_Scheduled;
     }
 
-    // No more generic type .cctors for this assembly - set flag
+    // no more generic type .cctors for this assembly - set flag
     assembly->flags |= CLR_RT_Assembly::StaticGenericConstructorsExecuted;
     return false;
 }
@@ -1164,69 +1164,86 @@ void CLR_RT_ExecutionEngine::SpawnStaticConstructor(CLR_RT_Thread *&pCctorThread
         }
     }
 
-    // first, find the AppDomainAssembly to run. (what about appdomains!!!)
-    NANOCLR_FOREACH_ASSEMBLY(g_CLR_RT_TypeSystem)
+    // keep iterating until no more static constructors can be spawned
+    // note that multiple passes may be needed to satisfy all dependencies
+    bool anySpawned;
+
+    do
     {
-        // Check if regular static constructors need to be executed
-        if ((pASSM->flags & CLR_RT_Assembly::StaticConstructorsExecuted) == 0)
-        {
-            CLR_RT_MethodDef_Index index;
-            index.Set(pASSM->assemblyIndex, 0);
-            bool dependenciesSatisfied = true;
+        anySpawned = false;
 
-            // Check that all dependent assemblies have had regular static constructors run
-            CLR_RT_AssemblyRef_CrossReference *ar = pASSM->crossReferenceAssemblyRef;
-            for (int i = 0; i < pASSM->tablesSize[TBL_AssemblyRef]; i++, ar++)
+        NANOCLR_FOREACH_ASSEMBLY(g_CLR_RT_TypeSystem)
+        {
+            // Check if regular static constructors need to be executed
+            if ((pASSM->flags & CLR_RT_Assembly::StaticConstructorsExecuted) == 0)
             {
-                if ((ar->target->flags & CLR_RT_Assembly::StaticConstructorsExecuted) == 0)
+                CLR_RT_MethodDef_Index index;
+                index.Set(pASSM->assemblyIndex, 0);
+                bool dependenciesSatisfied = true;
+
+                // Check that all dependent assemblies have had regular static constructors run
+                CLR_RT_AssemblyRef_CrossReference *ar = pASSM->crossReferenceAssemblyRef;
+                for (int i = 0; i < pASSM->tablesSize[TBL_AssemblyRef]; i++, ar++)
                 {
-                    dependenciesSatisfied = false;
-                    break;
+                    if ((ar->target->flags & CLR_RT_Assembly::StaticConstructorsExecuted) == 0)
+                    {
+                        dependenciesSatisfied = false;
+                        break;
+                    }
                 }
+
+                if (dependenciesSatisfied)
+                {
+                    if (SpawnStaticConstructorHelper(pASSM, index))
+                    {
+                        return;
+                    }
+
+                    // returned false, meaning it set the flag and there are no more cctors for this assembly.
+                    // flag that progress was made and we should re-iterate
+                    anySpawned = true;
+                }
+
+                // if there are dependencies not satisfied, just continue to next assembly
+                continue;
             }
 
-            if (dependenciesSatisfied)
+            // Check if generic type static constructors need to be executed
+            if ((pASSM->flags & CLR_RT_Assembly::StaticGenericConstructorsExecuted) == 0)
             {
-                // Run regular static constructors for this assembly
-                if (SpawnStaticConstructorHelper(pASSM, index))
+                bool dependenciesSatisfied = true;
+
+                // Check that all dependent assemblies have had regular static constructors run
+                CLR_RT_AssemblyRef_CrossReference *ar = pASSM->crossReferenceAssemblyRef;
+                for (int i = 0; i < pASSM->tablesSize[TBL_AssemblyRef]; i++, ar++)
                 {
-                    return;
+                    if ((ar->target->flags & CLR_RT_Assembly::StaticConstructorsExecuted) == 0)
+                    {
+                        dependenciesSatisfied = false;
+                        break;
+                    }
+                }
+
+                if (dependenciesSatisfied)
+                {
+                    CLR_RT_TypeSpec_Index startIndex;
+                    startIndex.Set(pASSM->assemblyIndex, 0);
+
+                    if (SpawnGenericTypeStaticConstructorsHelper(pASSM, startIndex))
+                    {
+                        return;
+                    }
+
+                    // returned false, meaning it set the flag and there are no more generic cctors for this assembly.
+                    // flag that progress was made and we should re-iterate
+                    anySpawned = true;
                 }
             }
         }
+        NANOCLR_FOREACH_ASSEMBLY_END();
 
-        // Check if generic type static constructors need to be executed
-        if ((pASSM->flags & CLR_RT_Assembly::StaticGenericConstructorsExecuted) == 0)
-        {
-            bool dependenciesSatisfied = true;
+    } while (anySpawned);
 
-            // Check that all dependent assemblies have had regular static constructors run
-            CLR_RT_AssemblyRef_CrossReference *ar = pASSM->crossReferenceAssemblyRef;
-            for (int i = 0; i < pASSM->tablesSize[TBL_AssemblyRef]; i++, ar++)
-            {
-                if ((ar->target->flags & CLR_RT_Assembly::StaticConstructorsExecuted) == 0)
-                {
-                    dependenciesSatisfied = false;
-                    break;
-                }
-            }
-
-            if (dependenciesSatisfied)
-            {
-                // Run generic type static constructors for this assembly (starting from index 0)
-                CLR_RT_TypeSpec_Index startIndex;
-                startIndex.Set(pASSM->assemblyIndex, 0);
-
-                if (SpawnGenericTypeStaticConstructorsHelper(pASSM, startIndex))
-                {
-                    return;
-                }
-            }
-        }
-    }
-    NANOCLR_FOREACH_ASSEMBLY_END();
-
-    // no more static constructors needed...
     pCctorThread->DestroyInstance();
 }
 #endif // NANOCLR_APPDOMAINS
