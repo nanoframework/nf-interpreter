@@ -12,7 +12,7 @@
 //
 int8_t Esp32_SPI_DevicePinMap[MAX_SPI_DEVICES][Esp32SpiPin_Max] = {
     // SPI1 - use defaults from IDF sample
-    {SPI_IOMUX_PIN_NUM_MOSI, SPI_IOMUX_PIN_NUM_MISO, SPI_IOMUX_PIN_NUM_CLK},
+    {MSPI_IOMUX_PIN_NUM_MOSI, MSPI_IOMUX_PIN_NUM_MISO, MSPI_IOMUX_PIN_NUM_CLK},
     // SPI2 - no pins assigned
     {-1, -1, -1}};
 
@@ -23,10 +23,7 @@ int8_t Esp32_SPI_DevicePinMap[MAX_SPI_DEVICES][Esp32SpiPin_Max] = {
 // others assign as NONE because the default pins can be shared with serial flash and PSRAM
 int8_t Esp32_SERIAL_DevicePinMap[UART_NUM_MAX][Esp32SerialPin_Max] = {
     // COM 1 - pins 21, 20
-    {UART_NUM_0_TXD_DIRECT_GPIO_NUM,
-     UART_NUM_0_RXD_DIRECT_GPIO_NUM,
-     UART_PIN_NO_CHANGE,
-     UART_PIN_NO_CHANGE},
+    {UART_NUM_0_TXD_DIRECT_GPIO_NUM, UART_NUM_0_RXD_DIRECT_GPIO_NUM, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE},
 
 #if defined(UART_NUM_2)
     // COM 2 - all set to UART_PIN_NO_CHANGE
@@ -56,18 +53,12 @@ int8_t Esp32_LED_DevicePinMap[TARGET_LED_NUM_PINS] = {
     -1, // 6
     -1, // 7
     -1, // 8
- };
+};
 
-// We use "ADC1" for 20 logical channels
-// Mapped to ESP32 controllers
-// ESP32 ADC1 channels 0 - 7
-//  "    ADC1 channel  8 - Internal Temperature sensor (VP)
-//  "    ADC1 channel  9 - Internal Hall Sensor (VN)
-//  "    ADC2 channels 10 - 19
-// TODO review ADC channels for ESP32_C3
-int8_t Esp32_ADC_DevicePinMap[TARGET_ADC_NUM_PINS] = {
-    // 0   1   2   3   4   5   
-    };
+// We use "ADC1" for 5 logical channels
+// Mapped to ESP32_H2 controllers
+// ESP32_H2 ADC1 channels 1 - 5
+int8_t Esp32_ADC_DevicePinMap[TARGET_ADC_NUM_PINS] = {1, 2, 3, 4, 5};
 
 //  I2S
 //  1 device I2S1

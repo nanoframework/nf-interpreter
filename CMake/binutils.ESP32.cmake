@@ -151,6 +151,7 @@ macro(nf_fix_esp32c3_rom_file)
     
 endmacro()
 
+
 # setting compile definitions for a target based on general build options
 # TARGET parameter to set the target that's setting them for
 # optional EXTRA_COMPILE_DEFINITIONS with compiler definitions to be added to the library
@@ -184,7 +185,7 @@ function(nf_set_esp32_target_series)
     set(TARGET_SERIES_SHORT ${TARGET_SERIES_2} CACHE INTERNAL "ESP32 target series lower case, short version")
 
     # set the CPU type
-    if(${TARGET_SERIES_SHORT} STREQUAL "esp32c3" OR ${TARGET_SERIES_SHORT} STREQUAL "esp32c6" OR ${TARGET_SERIES_SHORT} STREQUAL "esp32h2" )
+    if(${TARGET_SERIES_SHORT} STREQUAL "esp32c3" OR ${TARGET_SERIES_SHORT} STREQUAL "esp32c5" OR ${TARGET_SERIES_SHORT} STREQUAL "esp32c6" OR ${TARGET_SERIES_SHORT} STREQUAL "esp32h2" OR ${TARGET_SERIES_SHORT} STREQUAL "esp32p4")
         set(ESP32_CPU_TYPE "riscv" CACHE INTERNAL "Setting CPU type")
     else()
         set(ESP32_CPU_TYPE "xtensa" CACHE INTERNAL "Setting CPU type")
@@ -466,8 +467,10 @@ macro(nf_setup_partition_tables_generator)
 
     if(${TARGET_SERIES_SHORT} STREQUAL "esp32" OR 
        ${TARGET_SERIES_SHORT} STREQUAL "esp32c3" OR 
+       ${TARGET_SERIES_SHORT} STREQUAL "esp32c5" OR 
        ${TARGET_SERIES_SHORT} STREQUAL "esp32c6" OR 
        ${TARGET_SERIES_SHORT} STREQUAL "esp32h2" OR 
+       ${TARGET_SERIES_SHORT} STREQUAL "esp32p4" OR 
        ${TARGET_SERIES_SHORT} STREQUAL "esp32s2" OR 
        ${TARGET_SERIES_SHORT} STREQUAL "esp32s3")
 
@@ -481,7 +484,10 @@ macro(nf_setup_partition_tables_generator)
     endif()
 
     if(${TARGET_SERIES_SHORT} STREQUAL "esp32" OR 
+       ${TARGET_SERIES_SHORT} STREQUAL "esp32c3" OR 
+       ${TARGET_SERIES_SHORT} STREQUAL "esp32c5" OR 
        ${TARGET_SERIES_SHORT} STREQUAL "esp32c6" OR 
+       ${TARGET_SERIES_SHORT} STREQUAL "esp32p4" OR 
        ${TARGET_SERIES_SHORT} STREQUAL "esp32s2" OR 
        ${TARGET_SERIES_SHORT} STREQUAL "esp32s3")
 
@@ -501,7 +507,8 @@ macro(nf_setup_partition_tables_generator)
 
     endif()
 
-    if(${TARGET_SERIES_SHORT} STREQUAL "esp32s3")
+    if(${TARGET_SERIES_SHORT} STREQUAL "esp32s3" OR 
+       ${TARGET_SERIES_SHORT} STREQUAL "esp32p4")
 
         # 32MB partition table for ESP32_S3
         add_custom_command( TARGET ${NANOCLR_PROJECT_NAME}.elf POST_BUILD
@@ -594,11 +601,16 @@ macro(nf_add_idf_as_library)
     # Load any required Components from Component registry
     # Must be done before "tools/cmake/idf.cmake" 
     if(ESP32_USB_CDC)
-        nf_install_idf_component_from_registry(tinyusb 55142eec-a3a4-47a5-ad01-4ba3ef44444b) 
-        nf_install_idf_component_from_registry(esp_tinyusb 8115ffc9-366a-4340-94ab-e327aed20831) 
+        nf_install_idf_component_from_registry(tinyusb c384401d-144d-453d-a821-20f1ba0a7be1) 
+        nf_install_idf_component_from_registry(esp_tinyusb 47b2b1fc-fb7e-4acf-943b-a14125e0f1e7) 
     endif()
 
-    nf_install_idf_component_from_registry(littlefs 4831aa41-8b72-48ac-a534-910a985a5519) 
+    nf_install_idf_component_from_registry(littlefs 288ff2e7-dfd9-4833-9be5-6e9d37d29880) 
+
+    if(${TARGET_SERIES_SHORT} STREQUAL "esp32p4")
+       nf_install_idf_component_from_registry(esp_wifi_remote 3355c7e4-03ac-44a2-b100-1cbb29a05d03)
+       nf_install_idf_component_from_registry(esp_hosted 9fb39051-7a32-4fbf-83e9-a4b54ab6fae5)
+       endif()
     
     include(${IDF_PATH_CMAKED}/tools/cmake/idf.cmake)
 
@@ -611,6 +623,7 @@ macro(nf_add_idf_as_library)
         message(FATAL_ERROR "Couldn't get IDF version from target __idf_build_target")
     endif()
 
+    message(STATUS "ESP_IDF_VERSION: $ENV{ESP_IDF_VERSION}")
     message(STATUS "Current IDF version is: ${MY_IDF_VER}")
 
     string(FIND ${MY_IDF_VER} "-dirty" MY_IDF_VER_DIRTY)
@@ -670,12 +683,12 @@ macro(nf_add_idf_as_library)
         freertos
         esptool_py
         fatfs
-        esp_wifi
         esp_event
         vfs
         esp_netif
         esp_eth
         esp_psram
+        esp_adc
         littlefs
     )
 
@@ -686,14 +699,25 @@ macro(nf_add_idf_as_library)
         idf::freertos
         idf::esptool_py
         idf::fatfs
-        idf::esp_wifi
         idf::esp_event
         idf::vfs
         idf::esp_netif
         idf::esp_eth
         idf::esp_psram
+        idf::esp_adc
         idf::littlefs
     )
+
+    # Needed for remote Wifi module on P4 boards
+    if(${TARGET_SERIES_SHORT} STREQUAL "esp32p4")
+        list(APPEND IDF_COMPONENTS_TO_ADD esp_wifi_remote)
+        list(APPEND IDF_COMPONENTS_TO_ADD esp_hosted)
+        list(APPEND IDF_LIBRARIES_TO_ADD idf::esp_hosted)
+        list(APPEND IDF_LIBRARIES_TO_ADD idf::esp_wifi_remote)
+    else()
+        list(APPEND IDF_COMPONENTS_TO_ADD esp_wifi)
+        list(APPEND IDF_LIBRARIES_TO_ADD idf::esp_wifi)
+    endif()
 
     if(HAL_USE_BLE_OPTION)
         list(APPEND IDF_COMPONENTS_TO_ADD bt)
@@ -728,18 +752,21 @@ macro(nf_add_idf_as_library)
             list(APPEND IDF_LIBRARIES_TO_ADD idf::esp_tinyusb) 
             list(APPEND IDF_LIBRARIES_TO_ADD  idf::tinyusb) 
 
-            string(APPEND SDKCONFIG_DEFAULT_CONTENTS "\nCONFIG_TINYUSB_ENABLED=y\n")
-            string(APPEND SDKCONFIG_DEFAULT_CONTENTS "CONFIG_TINYUSB_CDC_ENABLED=y\n")
+            string(APPEND SDKCONFIG_DEFAULT_CONTENTS "\nCONFIG_TINYUSB_CDC_ENABLED=y\n")
             string(APPEND SDKCONFIG_DEFAULT_CONTENTS "CONFIG_TINYUSB_DESC_PRODUCT_STRING=\"nanoFramework device\"\n")
             string(APPEND SDKCONFIG_DEFAULT_CONTENTS "CONFIG_TINYUSB_DESC_CDC_STRING=\"nanoFramework device\"\n")
-            string(APPEND SDKCONFIG_DEFAULT_CONTENTS "CONFIG_TINYUSB_CDC_RX_BUFSIZE=64\n")
+            # set the TX buffer as large as the WireProtocol packet size
+            # no worries about the RX buffer
             string(APPEND SDKCONFIG_DEFAULT_CONTENTS "CONFIG_TINYUSB_CDC_TX_BUFSIZE=1024\n")
+            # better to assign the tinyUSB task to the same core as the ReceiverTask
+            string(APPEND SDKCONFIG_DEFAULT_CONTENTS "CONFIG_TINYUSB_TASK_AFFINITY=TINYUSB_TASK_AFFINITY_CPU0\n")
 
             message(STATUS "Support for embedded USB CDC enabled")
+
         else()
             message(STATUS "Support for embedded USB CDC **IS NOT** enabled")
 
-            string(APPEND SDKCONFIG_DEFAULT_CONTENTS "\nCONFIG_TINYUSB_ENABLED=n\n")
+            string(APPEND SDKCONFIG_DEFAULT_CONTENTS "\nCONFIG_TINYUSB_CDC_ENABLED=n\n")
         endif()
 
         # need to temporarily allow changes in source files
@@ -1035,8 +1062,8 @@ macro(nf_add_idf_as_library)
     add_custom_command(
         TARGET ${NANOCLR_PROJECT_NAME}.elf POST_BUILD
         COMMAND ${output_idf_size}
-        --archives --target ${TARGET_SERIES_SHORT} ${CMAKE_BINARY_DIR}/${CMAKE_PROJECT_NAME}.map
-        COMMENT "Ouptut IDF size summary")
+        --archives ${CMAKE_BINARY_DIR}/${CMAKE_PROJECT_NAME}.map
+        COMMENT "Output IDF size summary")
 
 endmacro()
 

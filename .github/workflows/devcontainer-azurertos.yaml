@@ -21,10 +21,12 @@ jobs:
   build:
     if: ${{ vars.PUBLISH_DOCKER_IMAGE == 'true' }}
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
     
     - name: Checkout Repository
-      uses: actions/checkout@v4
+      uses: actions/checkout@v5
 
     - name: Free Disk Space (Ubuntu)
       uses: jlumbroso/free-disk-space@main
@@ -53,7 +55,7 @@ jobs:
         password: ${{ secrets.CONTAINER_BUILD_TOKEN }}
 
     - name: Build and Push Docker Image
-      uses: docker/build-push-action@v5
+      uses: docker/build-push-action@v6
       with:
         file: ${{ env.CONTAINER_SRC_FILE }}
         push: true # Will only build if this is not here

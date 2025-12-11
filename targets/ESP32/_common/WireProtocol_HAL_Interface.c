@@ -78,6 +78,18 @@ static uart_port_t ESP32_WP_UART = UART_NUM_0;
 #define ESP32_WP_RX_PIN UART_NUM_0_RXD_DIRECT_GPIO_NUM
 #define ESP32_WP_TX_PIN UART_NUM_0_TXD_DIRECT_GPIO_NUM
 
+#elif CONFIG_IDF_TARGET_ESP32C5
+
+// WP uses UART0
+static uart_port_t ESP32_WP_UART = UART_NUM_0;
+
+// UART pins for ESP32-C5
+// U0RXD 16
+// U0TXD 17
+
+#define ESP32_WP_RX_PIN UART_NUM_0_RXD_DIRECT_GPIO_NUM
+#define ESP32_WP_TX_PIN UART_NUM_0_TXD_DIRECT_GPIO_NUM
+
 #elif CONFIG_IDF_TARGET_ESP32C6
 
 // WP uses UART0
@@ -102,9 +114,23 @@ static uart_port_t ESP32_WP_UART = UART_NUM_0;
 #define ESP32_WP_RX_PIN UART_NUM_0_RXD_DIRECT_GPIO_NUM
 #define ESP32_WP_TX_PIN UART_NUM_0_TXD_DIRECT_GPIO_NUM
 
+#elif CONFIG_IDF_TARGET_ESP32P4
+
+// WP uses UART0
+static uart_port_t ESP32_WP_UART = UART_NUM_0;
+
+// UART pins for ESP32-P4
+// U0RXD 23
+// U0TXD 24
+
+#define ESP32_WP_RX_PIN UART_NUM_0_RXD_DIRECT_GPIO_NUM
+#define ESP32_WP_TX_PIN UART_NUM_0_TXD_DIRECT_GPIO_NUM
 #endif
 
-#if (CONFIG_IDF_TARGET_ESP32C3 || CONFIG_IDF_TARGET_ESP32C6 || CONFIG_IDF_TARGET_ESP32H2) && HAL_WP_USE_USB_CDC
+#if (                                                                                                                  \
+    CONFIG_IDF_TARGET_ESP32C3 || CONFIG_IDF_TARGET_ESP32C6 || CONFIG_IDF_TARGET_ESP32H2 ||                             \
+    CONFIG_IDF_TARGET_ESP32P4) &&                                                                                      \
+    HAL_WP_USE_USB_CDC
 
 #include <hal/usb_serial_jtag_ll.h>
 
@@ -249,6 +275,7 @@ static bool WP_Initialise(COM_HANDLE port)
     tinyusb_config_cdcacm_t amc_cfg = {
         .usb_dev = TINYUSB_USBDEV_0,
         .cdc_port = TINYUSB_CDC_ACM_0,
+        // parameter deprecated, therefore it doesn't matter what we put here
         .rx_unread_buf_sz = 1056,
         .callback_rx = &WP_Cdc_Rx_Callback,
         .callback_rx_wanted_char = NULL,
@@ -313,7 +340,9 @@ uint8_t WP_TransmitMessage(WP_Message *message)
         }
     }
 
-    tinyusb_cdcacm_write_flush(TINYUSB_CDC_ACM_0, 0);
+    // need to call flush with a timeout to have it behave cooperatively with the RTOS
+    // OK to silently ignore errors here
+    tinyusb_cdcacm_write_flush(TINYUSB_CDC_ACM_0, pdMS_TO_TICKS(250));
 
     return true;
 }
@@ -332,16 +361,17 @@ static bool WP_Initialise(COM_HANDLE port)
     // uninstall driver for console
     // ESP_ERROR_CHECK(uart_driver_delete(ESP32_WP_UART));
 
-    uart_config_t uart_config = {// baudrate
-                                 .baud_rate = TARGET_SERIAL_BAUDRATE,
-                                 // baudrate
-                                 .data_bits = UART_DATA_8_BITS,
-                                 // parity mode
-                                 .parity = UART_PARITY_DISABLE,
-                                 // stop bit mode
-                                 .stop_bits = UART_STOP_BITS_1,
-                                 // hardware flow control(cts/rts)
-                                 .flow_ctrl = UART_HW_FLOWCTRL_DISABLE};
+    uart_config_t uart_config = {
+        // baudrate
+        .baud_rate = TARGET_SERIAL_BAUDRATE,
+        // baudrate
+        .data_bits = UART_DATA_8_BITS,
+        // parity mode
+        .parity = UART_PARITY_DISABLE,
+        // stop bit mode
+        .stop_bits = UART_STOP_BITS_1,
+        // hardware flow control(cts/rts)
+        .flow_ctrl = UART_HW_FLOWCTRL_DISABLE};
 
     ESP_ERROR_CHECK(uart_param_config(ESP32_WP_UART, &uart_config));
 

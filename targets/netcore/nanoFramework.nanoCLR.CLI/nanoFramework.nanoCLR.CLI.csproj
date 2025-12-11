@@ -4,8 +4,6 @@
     <OutputType>Exe</OutputType>
     <TargetFramework>net8.0</TargetFramework>
     <Platforms>AnyCPU</Platforms>
-    <RuntimeIdentifiers>any</RuntimeIdentifiers>
-    <PlatformTarget>AnyCPU</PlatformTarget>
     <OutputPath>..\..\..\build\bin\$(Configuration)</OutputPath>
 		<RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
 		<RestoreLockedMode>true</RestoreLockedMode>
@@ -22,14 +20,13 @@
     <RepositoryType>git</RepositoryType>
     <RepositoryUrl>https://github.com/nanoframework/nf-interpreter</RepositoryUrl>
     <PackageProjectUrl>https://github.com/nanoframework/nf-interpreter</PackageProjectUrl>
-    <Description>.NET nanoFramework CLR as a .NET tool. Allows runing nanoCLR as a virtual device.</Description>
+    <Description>.NET nanoFramework CLR as a .NET tool. Allows running nanoCLR as a virtual device.</Description>
     <!-- disable NuGet warning for DLLs outside the lib folder and for SemVer 2 package reference -->
     <NoWarn>$(NoWarn);NU5100;NU5105;NU5118</NoWarn>
     <PackageLicenseFile>LICENSE.md</PackageLicenseFile>
     <PackageIcon>images\nf-logo.png</PackageIcon>
     <PackageTags>nanoFramework, nano Framework, NETNF, NETMF, Micro Framework, .net</PackageTags>
     <PackageReadmeFile>docs\README.md</PackageReadmeFile>
-    <PackageIconUrl />
   </PropertyGroup>
 
   <!-- NuGet package files -->
@@ -69,7 +66,7 @@
 
   <ItemGroup>
     <PackageReference Include="CommandLineParser" Version="2.9.1" />
-    <PackageReference Include="Nerdbank.GitVersioning" Version="3.7.115" PrivateAssets="All" />
+    <PackageReference Include="Nerdbank.GitVersioning" Version="3.9.50" PrivateAssets="All" />
     <PackageReference Include="System.Runtime.Serialization.Json" Version="4.3.0" />
     <PackageReference Include="System.Security.Principal.Windows" Version="5.0.0" />
   </ItemGroup>

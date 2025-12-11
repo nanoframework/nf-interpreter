@@ -17,7 +17,6 @@ list(APPEND System.Device.Adc_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/System.Device
 
 # source files
 set(System.Device.Adc_SRCS
-
     sys_dev_adc_native.cpp
 
     sys_dev_adc_native_System_Device_Adc_AdcChannel.cpp

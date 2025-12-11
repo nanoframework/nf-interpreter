@@ -1,0 +1,111 @@
+//
+// Copyright (c) .NET Foundation and Contributors
+// See LICENSE file in the project root for full license information.
+//
+
+#include <ch.h>
+#include <hal.h>
+#include <hal_nf_community.h>
+#include <cmsis_os.h>
+
+#include <serialcfg.h>
+#include <swo.h>
+#include <targetHAL.h>
+#include <CLR_Startup_Thread.h>
+#include <WireProtocol_ReceiverThread.h>
+#include <nanoCLR_Application.h>
+#include <nanoPAL_BlockStorage.h>
+#include <nanoHAL_v2.h>
+#include <targetPAL.h>
+
+// need to declare the Receiver thread here
+osThreadDef(ReceiverThread, osPriorityHigh, 2048, "ReceiverThread");
+// declare CLRStartup thread here
+osThreadDef(CLRStartupThread, osPriorityNormal, 4096, "CLRStartupThread");
+
+//  Application entry point.
+int main(void)
+{
+    // find out wakeup reason
+    if ((RTC->ISR & RTC_ISR_ALRAF) == RTC_ISR_ALRAF)
+    {
+        // standby, match WakeupReason_FromStandby enum
+        WakeupReasonStore = 1;
+    }
+    else if ((PWR->CSR & PWR_CSR_WUF) == PWR_CSR_WUF)
+    {
+        // wake from pin, match WakeupReason_FromPin enum
+        WakeupReasonStore = 2;
+    }
+    else
+    {
+        // undetermined reason, match WakeupReason_Undetermined enum
+        WakeupReasonStore = 0;
+    }
+
+    // first things first: need to clear any possible wakeup flags
+    // if this is not done here the next standby -> wakeup sequence won't work
+    CLEAR_BIT(RTC->CR, RTC_CR_ALRAIE);
+    CLEAR_BIT(RTC->ISR, RTC_ISR_ALRAF);
+    SET_BIT(PWR->CR, PWR_CR_CWUF);
+
+    // HAL initialization, this also initializes the configured device drivers
+    // and performs the board-specific initializations.
+    halInit();
+
+    // turn off RGB LED
+    palClearLine(LINE_RGB_GREEN);
+    palClearLine(LINE_RGB_RED);
+    palClearLine(LINE_RGB_BLUE);
+
+    // init boot clipboard
+    InitBootClipboard();
+
+// init SWO as soon as possible to make it available to output ASAP
+#if (SWO_OUTPUT == TRUE)
+    SwoInit();
+#endif
+
+    // The kernel is initialized but not started yet, this means that
+    // main() is executing with absolute priority but interrupts are already enabled.
+    osKernelInitialize();
+
+    // start watchdog
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////
+    // for STM32F4 family if watchdog is enabled can't use standby mode because the IWDG can't be stoped //
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////
+    Watchdog_Init();
+
+#if (HAL_NF_USE_STM32_CRC == TRUE)
+    // startup crc
+    crcStart(NULL);
+#endif
+
+    // need to override the default config block to set oversampling
+    SerialConfig serialConfig = {SERIAL_DEFAULT_BITRATE, USART_CR1_OVER8, USART_CR2_STOP1_BITS, 0};
+
+    // starts the serial driver
+    sdStart(&SERIAL_DRIVER, &serialConfig);
+
+    // create the receiver thread
+    osThreadCreate(osThread(ReceiverThread), NULL);
+
+    // CLR settings to launch CLR thread
+    CLR_SETTINGS clrSettings;
+    (void)memset(&clrSettings, 0, sizeof(CLR_SETTINGS));
+
+    clrSettings.MaxContextSwitches = 50;
+    clrSettings.WaitForDebugger = false;
+    clrSettings.EnterDebuggerLoopAfterExit = true;
+
+    // create the CLR Startup thread
+    osThreadCreate(osThread(CLRStartupThread), &clrSettings);
+
+    // start kernel, after this main() will behave like a thread with priority osPriorityNormal
+    osKernelStart();
+
+    while (true)
+    {
+        osDelay(100);
+    }
+}
