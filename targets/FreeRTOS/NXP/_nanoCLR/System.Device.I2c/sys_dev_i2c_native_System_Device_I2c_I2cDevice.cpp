@@ -33,6 +33,7 @@ static LPI2C_Type *i2cBaseAddress[] = LPI2C_BASE_PTRS;
 typedef Library_sys_dev_i2c_native_System_Device_I2c_I2cConnectionSettings I2cConnectionSettings;
 typedef Library_sys_dev_i2c_native_System_Device_I2c_I2cTransferResult I2cTransferResult;
 typedef Library_corlib_native_System_Span_1 Span;
+typedef Library_corlib_native_System_ReadOnlySpan_1 ReadOnlySpan;
 
 i2c_structure_t *I2C_ChoosePeripheralStructure(uint8_t busIndex)
 {
@@ -279,7 +280,7 @@ HRESULT Library_sys_dev_i2c_native_System_Device_I2c_I2cDevice::NativeDispose___
 }
 
 HRESULT Library_sys_dev_i2c_native_System_Device_I2c_I2cDevice::
-    NativeTransmit___SystemDeviceI2cI2cTransferResult__SystemSpanByte__SystemSpanByte(CLR_RT_StackFrame &stack)
+    NativeTransmit___SystemDeviceI2cI2cTransferResult__SystemReadOnlySpan_1__SystemSpan_1(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
     {
@@ -287,7 +288,7 @@ HRESULT Library_sys_dev_i2c_native_System_Device_I2c_I2cDevice::
         i2c_structure_t *pI2Cx;
         status_t i2cStatus = kStatus_Fail;
 
-        CLR_RT_HeapBlock *writeSpanByte;
+        CLR_RT_HeapBlock *writeReadOnlySpanByte;
         CLR_RT_HeapBlock *readSpanByte;
         CLR_RT_HeapBlock_Array *writeBuffer = nullptr;
         CLR_RT_HeapBlock_Array *readBuffer = nullptr;
@@ -309,12 +310,14 @@ HRESULT Library_sys_dev_i2c_native_System_Device_I2c_I2cDevice::
 
         I2C_ClearBuffers(pI2Cx);
 
-        // dereference the write and read Span from the arguments
-        writeSpanByte = stack.Arg1().Dereference();
-        if (writeSpanByte != nullptr)
+        // dereference the write ReadOnlySpan and read Span from the arguments
+        writeReadOnlySpanByte = stack.Arg1().Dereference();
+
+        if (writeReadOnlySpanByte != nullptr)
         {
             // get buffer
-            writeBuffer = writeSpanByte[Span::FIELD___array].DereferenceArray();
+            writeBuffer = writeReadOnlySpanByte[ReadOnlySpan::FIELD___array].DereferenceArray();
+
             if (writeBuffer != nullptr)
             {
                 pI2Cx->txBuffer = writeBuffer->GetFirstElement();

@@ -9,27 +9,27 @@
 
 static const CLR_RT_MethodHandler method_lookup[] =
 {
-    NULL,
-    NULL,
-    NULL,
-    NULL,
-    NULL,
-    NULL,
-    NULL,
-    NULL,
-    NULL,
-    NULL,
+    nullptr,
+    nullptr,
+    nullptr,
+    nullptr,
+    nullptr,
+    nullptr,
+    nullptr,
+    nullptr,
+    nullptr,
+    nullptr,
     Library_sys_dev_i2c_slave_native_System_Device_I2c_I2cSlaveDevice::NativeInit___VOID,
     Library_sys_dev_i2c_slave_native_System_Device_I2c_I2cSlaveDevice::NativeDispose___VOID,
-    Library_sys_dev_i2c_slave_native_System_Device_I2c_I2cSlaveDevice::NativeTransmit___I4__SystemSpanByte__SystemSpanByte__I4,
+    Library_sys_dev_i2c_slave_native_System_Device_I2c_I2cSlaveDevice::NativeTransmit___I4__SystemSpan_1__SystemReadOnlySpan_1__I4,
 };
 
 const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_System_Device_I2c_Slave =
 {
     "System.Device.I2c.Slave",
-    0x4238164B,
+    0x984281A1,
     method_lookup,
-    { 1, 0, 0, 0 }
+    { 100, 2, 0, 0 }
 };
 
 // clang-format on

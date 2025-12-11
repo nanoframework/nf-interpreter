@@ -12,6 +12,7 @@
 #define I2C_SLAVE_WORKER_TASK_STACK_SIZE 2048
 
 typedef Library_corlib_native_System_Span_1 Span;
+typedef Library_corlib_native_System_ReadOnlySpan_1 ReadOnlySpan;
 
 #if SOC_I2C_NUM > 0
 NF_PAL_I2CSLAVE I2cSlave0_PAL;
@@ -215,7 +216,7 @@ HRESULT Library_sys_dev_i2c_slave_native_System_Device_I2c_I2cSlaveDevice::Nativ
 }
 
 HRESULT Library_sys_dev_i2c_slave_native_System_Device_I2c_I2cSlaveDevice::
-    NativeTransmit___I4__SystemSpanByte__SystemSpanByte__I4(CLR_RT_StackFrame &stack)
+    NativeTransmit___I4__SystemSpan_1__SystemReadOnlySpan_1__I4(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
@@ -232,7 +233,7 @@ HRESULT Library_sys_dev_i2c_slave_native_System_Device_I2c_I2cSlaveDevice::
 
     CLR_RT_HeapBlock hbTimeout;
     CLR_RT_HeapBlock *readSpanByte;
-    CLR_RT_HeapBlock *writeSpanByte;
+    CLR_RT_HeapBlock *writeReadOnlySpanByte;
     CLR_RT_HeapBlock_Array *readBuffer = nullptr;
     CLR_RT_HeapBlock_Array *writeBuffer = nullptr;
 
@@ -255,10 +256,10 @@ HRESULT Library_sys_dev_i2c_slave_native_System_Device_I2c_I2cSlaveDevice::
     readSpanByte = stack.Arg1().Dereference();
 
     // get write buffer
-    writeSpanByte = stack.Arg2().Dereference();
+    writeReadOnlySpanByte = stack.Arg2().Dereference();
 
     // both parameters can't be null
-    if (!(readSpanByte) && !(writeSpanByte))
+    if (!(readSpanByte) && !(writeReadOnlySpanByte))
     {
         NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
     }
@@ -276,12 +277,12 @@ HRESULT Library_sys_dev_i2c_slave_native_System_Device_I2c_I2cSlaveDevice::
 
     if (!isRead)
     {
-        writeBuffer = writeSpanByte[Span::FIELD___array].DereferenceArray();
+        writeBuffer = writeReadOnlySpanByte[ReadOnlySpan::FIELD___array].DereferenceArray();
 
         if (writeBuffer != nullptr)
         {
             // use the span length as write size, only the elements defined by the span must be written
-            requestedCount = writeSpanByte[Span::FIELD___length].NumericByRef().s4;
+            requestedCount = writeReadOnlySpanByte[ReadOnlySpan::FIELD___length].NumericByRef().s4;
         }
     }
 

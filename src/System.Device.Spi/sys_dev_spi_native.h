@@ -67,8 +67,8 @@ struct Library_sys_dev_spi_native_System_Device_Spi_SpiDevice
     static const int FIELD___bufferSingleOperation = 5;
 
     NANOCLR_NATIVE_DECLARE(DisposeNative___VOID);
-    NANOCLR_NATIVE_DECLARE(NativeTransfer___VOID__SystemSpanByte__SystemSpanByte__BOOLEAN);
     NANOCLR_NATIVE_DECLARE(NativeTransfer___VOID__SZARRAY_U2__SZARRAY_U2__BOOLEAN);
+    NANOCLR_NATIVE_DECLARE(NativeTransfer___VOID__SystemReadOnlySpan_1__SystemSpan_1__BOOLEAN);
     NANOCLR_NATIVE_DECLARE(NativeInit___VOID);
     NANOCLR_NATIVE_DECLARE(NativeOpenDevice___I4);
 

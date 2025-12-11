@@ -8,6 +8,7 @@
 typedef Library_sys_dev_i2c_native_System_Device_I2c_I2cConnectionSettings I2cConnectionSettings;
 typedef Library_sys_dev_i2c_native_System_Device_I2c_I2cTransferResult I2cTransferResult;
 typedef Library_corlib_native_System_Span_1 Span;
+typedef Library_corlib_native_System_ReadOnlySpan_1 ReadOnlySpan;
 
 ////////////////////////////////////////////
 // declaration of the the I2C PAL structs //
@@ -345,7 +346,7 @@ HRESULT Library_sys_dev_i2c_native_System_Device_I2c_I2cDevice::NativeDispose___
 }
 
 HRESULT Library_sys_dev_i2c_native_System_Device_I2c_I2cDevice::
-    NativeTransmit___SystemDeviceI2cI2cTransferResult__SystemSpanByte__SystemSpanByte(CLR_RT_StackFrame &stack)
+    NativeTransmit___SystemDeviceI2cI2cTransferResult__SystemReadOnlySpan_1__SystemSpan_1(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
@@ -360,7 +361,7 @@ HRESULT Library_sys_dev_i2c_native_System_Device_I2c_I2cDevice::
     uint32_t estimatedDurationMiliseconds;
 
     CLR_RT_HeapBlock *result;
-    CLR_RT_HeapBlock *writeSpanByte;
+    CLR_RT_HeapBlock *writeReadOnlySpanByte;
     CLR_RT_HeapBlock *readSpanByte;
     CLR_RT_HeapBlock *connectionSettings;
     CLR_RT_HeapBlock_Array *writeBuffer = nullptr;
@@ -405,17 +406,16 @@ HRESULT Library_sys_dev_i2c_native_System_Device_I2c_I2cDevice::
             break;
     }
 
-    // dereference the write and read Span from the arguments
-    writeSpanByte = stack.Arg1().Dereference();
-    if (writeSpanByte != nullptr)
+    // dereference the write ReadOnlySpan and read Span from the arguments
+    writeReadOnlySpanByte = stack.Arg1().Dereference();
+    if (writeReadOnlySpanByte != nullptr)
     {
         // get buffer
-        writeBuffer = writeSpanByte[Span::FIELD___array].DereferenceArray();
+        writeBuffer = writeReadOnlySpanByte[ReadOnlySpan::FIELD___array].DereferenceArray();
         if (writeBuffer != nullptr)
         {
             // use the span length as write size, only the elements defined by the span must be written
-            palI2c->WriteSize = writeSpanByte[Span::FIELD___length].NumericByRef().s4;
-
+            palI2c->WriteSize = writeReadOnlySpanByte[ReadOnlySpan::FIELD___length].NumericByRef().s4;
             // pin the buffer so DMA can find it where its supposed to be
             writeBuffer->Pin();
         }

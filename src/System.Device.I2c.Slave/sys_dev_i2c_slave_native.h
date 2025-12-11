@@ -21,7 +21,7 @@ struct Library_sys_dev_i2c_slave_native_System_Device_I2c_I2cSlaveDevice
 
     NANOCLR_NATIVE_DECLARE(NativeInit___VOID);
     NANOCLR_NATIVE_DECLARE(NativeDispose___VOID);
-    NANOCLR_NATIVE_DECLARE(NativeTransmit___I4__SystemSpanByte__SystemSpanByte__I4);
+    NANOCLR_NATIVE_DECLARE(NativeTransmit___I4__SystemSpan_1__SystemReadOnlySpan_1__I4);
 
     //--//
 };
