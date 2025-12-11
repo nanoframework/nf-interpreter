@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (c) .NET Foundation and Contributors
 // See LICENSE file in the project root for full license information.
 //
@@ -46,13 +46,13 @@ typedef enum __nfpack RemovableDriveEventArgs_RemovableDeviceEvent
     RemovableDriveEventArgs_RemovableDeviceEvent_Removed = 1,
 } RemovableDriveEventArgs_RemovableDeviceEvent;
 
-typedef enum __nfpack StorageEventManager_StorageEventType
+typedef enum __nfpack StorageEventManager_StorageEventTypes
 {
-    StorageEventManager_StorageEventType_Invalid = 0,
-    StorageEventManager_StorageEventType_RemovableDeviceInsertion = 1,
-    StorageEventManager_StorageEventType_RemovableDeviceRemoval = 2,
-    StorageEventManager_StorageEventType_CardDetectChanged = 3,
-} StorageEventManager_StorageEventType;
+    StorageEventManager_StorageEventTypes_None = 0,
+    StorageEventManager_StorageEventTypes_RemovableDeviceInsertion = 1,
+    StorageEventManager_StorageEventTypes_RemovableDeviceRemoval = 2,
+    StorageEventManager_StorageEventTypes_CardDetectChanged = 3,
+} StorageEventManager_StorageEventTypes;
 
 typedef enum __nfpack DriveType
 {
@@ -98,10 +98,28 @@ typedef enum __nfpack FileShare
     FileShare_ReadWrite = 3,
 } FileShare;
 
+struct Library_nf_sys_io_filesystem_
+{
+    static const int FIELD_STATIC__5D131A830E806C1552E5315B8F9654DBD5662F7812DC379C8C6D3BEE67A3B216 = 0;
+    static const int FIELD_STATIC__EB7FB554F3F0CE36DF067E364509515FF60CF4D315ADCFECA76B6B5D3E0B510A = 1;
+
+    //--//
+};
+
 struct Library_nf_sys_io_filesystem_nanoFramework_System_IO_CardDetectChangedEventArgs
 {
     static const int FIELD___cardState = 1;
     static const int FIELD___slotIndex = 2;
+
+    //--//
+};
+
+struct Library_nf_sys_io_filesystem_nanoFramework_System_IO_FileSystem_CardDetectParameters
+{
+    static const int FIELD__enableCardDetectPin = 1;
+    static const int FIELD__cardDetectedState = 2;
+    static const int FIELD__cardDetectPin = 3;
+    static const int FIELD__autoMount = 4;
 
     //--//
 };
@@ -175,10 +193,10 @@ struct Library_nf_sys_io_filesystem_System_IO_DriveInfo
 
 struct Library_nf_sys_io_filesystem_nanoFramework_System_IO_StorageEventManager
 {
-    static const int FIELD_STATIC__RemovableDeviceInserted = 0;
-    static const int FIELD_STATIC__RemovableDeviceRemoved = 1;
-    static const int FIELD_STATIC___drives = 2;
-    static const int FIELD_STATIC___sdCardList = 3;
+    static const int FIELD_STATIC__RemovableDeviceInserted = 2;
+    static const int FIELD_STATIC__RemovableDeviceRemoved = 3;
+    static const int FIELD_STATIC___drives = 4;
+    static const int FIELD_STATIC___sdCardList = 5;
 
     //--//
 };
@@ -187,8 +205,9 @@ struct Library_nf_sys_io_filesystem_nanoFramework_System_IO_StorageEventManager_
 {
     static const int FIELD__EventType = 3;
     static const int FIELD__VolumeIndex = 4;
-    static const int FIELD__Time = 5;
-    static const int FIELD__state = 6;
+    static const int FIELD__SlotIndex = 5;
+    static const int FIELD__Time = 6;
+    static const int FIELD__state = 7;
 
     //--//
 };
@@ -213,31 +232,31 @@ struct Library_nf_sys_io_filesystem_System_IO_FileSystemManager__FileRecord
 
 struct Library_nf_sys_io_filesystem_System_IO_FileSystemManager
 {
-    static const int FIELD_STATIC___openFiles = 4;
-    static const int FIELD_STATIC___lockedDirs = 5;
-    static const int FIELD_STATIC___currentDirectoryRecord = 6;
-    static const int FIELD_STATIC__CurrentDirectory = 7;
+    static const int FIELD_STATIC___openFiles = 6;
+    static const int FIELD_STATIC___lockedDirs = 7;
+    static const int FIELD_STATIC___currentDirectoryRecord = 8;
+    static const int FIELD_STATIC__CurrentDirectory = 9;
 
     //--//
 };
 
 struct Library_nf_sys_io_filesystem_System_IO_FileStream
 {
-    static const int FIELD___canRead = 1;
-    static const int FIELD___canWrite = 2;
-    static const int FIELD___canSeek = 3;
-    static const int FIELD___seekLimit = 4;
-    static const int FIELD___disposed = 5;
-    static const int FIELD___fileName = 6;
-    static const int FIELD___nativeFileStream = 7;
-    static const int FIELD___fileRecord = 8;
+    static const int FIELD___canRead = 2;
+    static const int FIELD___canWrite = 3;
+    static const int FIELD___canSeek = 4;
+    static const int FIELD___seekLimit = 5;
+    static const int FIELD___disposed = 6;
+    static const int FIELD___fileName = 7;
+    static const int FIELD___nativeFileStream = 8;
+    static const int FIELD___fileRecord = 9;
 
     //--//
 };
 
 struct Library_nf_sys_io_filesystem_System_IO_File
 {
-    static const int FIELD_STATIC__EmptyBytes = 8;
+    static const int FIELD_STATIC__EmptyBytes = 10;
 
     //--//
 };
@@ -301,10 +320,10 @@ struct Library_nf_sys_io_filesystem_System_IO_NativeIO
 
 struct Library_nf_sys_io_filesystem_System_IO_Path
 {
-    static const int FIELD_STATIC__DirectorySeparatorChar = 9;
-    static const int FIELD_STATIC__AltDirectorySeparatorChar = 10;
-    static const int FIELD_STATIC__VolumeSeparatorChar = 11;
-    static const int FIELD_STATIC__PathSeparator = 12;
+    static const int FIELD_STATIC__DirectorySeparatorChar = 11;
+    static const int FIELD_STATIC__AltDirectorySeparatorChar = 12;
+    static const int FIELD_STATIC__VolumeSeparatorChar = 13;
+    static const int FIELD_STATIC__PathSeparator = 14;
 
     //--//
 };
