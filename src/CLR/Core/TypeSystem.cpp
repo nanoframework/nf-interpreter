@@ -728,7 +728,12 @@ bool CLR_RT_TypeSpec_Instance::InitializeFromIndex(const CLR_RT_TypeSpec_Index &
         if (element.DataType == DATATYPE_GENERICINST)
         {
             // this is a generic instance, advance one more time to get the generic type definition
-            parser.Advance(element);
+            if (FAILED(parser.Advance(element)))
+            {
+                ClearInstance();
+
+                return false;
+            }
 
             genericTypeDef = element.Class;
         }
@@ -778,14 +783,24 @@ bool CLR_RT_TypeSpec_Instance::ResolveToken(
         CLR_RT_SignatureParser::Element element;
 
         // if this is a generic, advance another one
-        parser.Advance(element);
+        if (FAILED(parser.Advance(element)))
+        {
+            ClearInstance();
+
+            return false;
+        }
 
         levels = element.Levels;
 
         if (element.DataType == DATATYPE_GENERICINST)
         {
             // this is a generic instance, so we need to advance one more time
-            parser.Advance(element);
+            if (FAILED(parser.Advance(element)))
+            {
+                ClearInstance();
+
+                return false;
+            }
 
             genericTypeDef = element.Class;
         }

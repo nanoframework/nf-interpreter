@@ -94,7 +94,7 @@ void CLR_RT_GarbageCollector::Heap_Compact()
     TestPointers_PopulateOld();
 
     CLR_RT_HeapCluster *freeRegion_hc = nullptr;
-    ;
+
     CLR_RT_HeapBlock_Node *freeRegion = nullptr;
 
     CLR_RT_HeapCluster *currentSource_hc = (CLR_RT_HeapCluster *)g_CLR_RT_ExecutionEngine.m_heap.FirstNode();
