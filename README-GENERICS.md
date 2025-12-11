@@ -5,7 +5,7 @@
 - [Generics in C# (Overview)](#generics-in-c-overview)
 - [Using Preview Firmware with Generics Support](#using-preview-firmware-with-generics-support)
 - [Installing the Preview Visual Studio Extension](#installing-the-preview-visual-studio-extension)
-- [Updating Project NuGet Packages to 2.0+ Preview](#updating-project-nuget-packages-to-20-preview)
+- [Updating NuGet Packages to 2.0+ Preview](#updating-nuget-packages-to-20-preview)
 - [Feedback and Known Issues](#feedback-and-known-issues)
 
 ## Generics in C# (Overview)
