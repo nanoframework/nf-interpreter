@@ -14,6 +14,7 @@
 typedef Library_sys_dev_i2c_native_System_Device_I2c_I2cConnectionSettings I2cConnectionSettings;
 typedef Library_sys_dev_i2c_native_System_Device_I2c_I2cTransferResult I2cTransferResult;
 typedef Library_corlib_native_System_Span_1 Span;
+typedef Library_corlib_native_System_ReadOnlySpan_1 ReadOnlySpan;
 
 bool SetConfig(i2c_port_t bus, CLR_RT_HeapBlock *config)
 {
@@ -130,7 +131,7 @@ HRESULT Library_sys_dev_i2c_native_System_Device_I2c_I2cDevice::NativeDispose___
 }
 
 HRESULT Library_sys_dev_i2c_native_System_Device_I2c_I2cDevice::
-    NativeTransmit___SystemDeviceI2cI2cTransferResult__SystemSpanByte__SystemSpanByte(CLR_RT_StackFrame &stack)
+    NativeTransmit___SystemDeviceI2cI2cTransferResult__SystemReadOnlySpan_1__SystemSpan_1(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
@@ -145,7 +146,7 @@ HRESULT Library_sys_dev_i2c_native_System_Device_I2c_I2cDevice::
     i2c_cmd_handle_t cmd;
 
     CLR_RT_HeapBlock *result;
-    CLR_RT_HeapBlock *writeSpanByte;
+    CLR_RT_HeapBlock *writeReadOnlySpanByte;
     CLR_RT_HeapBlock *readSpanByte;
     CLR_RT_HeapBlock_Array *writeData = nullptr;
     CLR_RT_HeapBlock_Array *readData = nullptr;
@@ -169,16 +170,17 @@ HRESULT Library_sys_dev_i2c_native_System_Device_I2c_I2cDevice::
 
     cmd = i2c_cmd_link_create();
 
-    // dereference the write and read Span from the arguments
-    writeSpanByte = stack.Arg1().Dereference();
-    if (writeSpanByte != nullptr)
+    // dereference the write ReadOnlySpan and read Span from the arguments
+    writeReadOnlySpanByte = stack.Arg1().Dereference();
+
+    if (writeReadOnlySpanByte != nullptr)
     {
-        writeData = writeSpanByte[Span::FIELD___array].DereferenceArray();
+        writeData = writeReadOnlySpanByte[ReadOnlySpan::FIELD___array].DereferenceArray();
 
         if (writeData != nullptr)
         {
             // use the span length as write size, only the elements defined by the span must be written
-            writeSize = writeSpanByte[Span::FIELD___length].NumericByRef().s4;
+            writeSize = writeReadOnlySpanByte[ReadOnlySpan::FIELD___length].NumericByRef().s4;
 
             if (writeSize > 0)
             {

@@ -393,7 +393,7 @@ HRESULT Library_sys_dev_i2c_native_System_Device_I2c_I2cDevice::NativeDispose___
 }
 
 HRESULT Library_sys_dev_i2c_native_System_Device_I2c_I2cDevice::
-    NativeTransmit___SystemDeviceI2cI2cTransferResult__SystemSpanByte__SystemSpanByte(CLR_RT_StackFrame &stack)
+    NativeTransmit___SystemDeviceI2cI2cTransferResult__SystemReadOnlySpan_1__SystemSpan_1(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 

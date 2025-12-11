@@ -22,6 +22,7 @@
 
 typedef Library_sys_dev_i2s_native_System_Device_I2s_I2sConnectionSettings I2sConnectionSettings;
 typedef Library_corlib_native_System_Span_1 Span;
+typedef Library_corlib_native_System_ReadOnlySpan_1 ReadOnlySpan;
 
 static char Esp_I2S_Initialised_Flag[I2S_NUM_MAX] = {
     0,
@@ -191,7 +192,7 @@ HRESULT SetI2sConfig(i2s_port_t bus, CLR_RT_HeapBlock *config)
 
     // Important: this will have to be adjusted for IDF5
     i2s_config_t conf;
-    
+
     int commformat = config[I2sConnectionSettings::FIELD___i2sConnectionFormat].NumericByRef().s4;
     i2s_mode_t mode = (i2s_mode_t)config[I2sConnectionSettings::FIELD___i2sMode].NumericByRef().s4;
     i2s_bits_per_sample_t bits =
@@ -319,7 +320,8 @@ HRESULT SetI2sConfig(i2s_port_t bus, CLR_RT_HeapBlock *config)
 #endif
     }
 
-#if !defined(CONFIG_IDF_TARGET_ESP32C3) && !defined(CONFIG_IDF_TARGET_ESP32C5) && !defined(CONFIG_IDF_TARGET_ESP32C6) && !defined(CONFIG_IDF_TARGET_ESP32H2)  
+#if !defined(CONFIG_IDF_TARGET_ESP32C3) && !defined(CONFIG_IDF_TARGET_ESP32C5) &&                                      \
+    !defined(CONFIG_IDF_TARGET_ESP32C6) && !defined(CONFIG_IDF_TARGET_ESP32H2)
 // apply low-level workaround for bug in some ESP-IDF versions that swap
 // the left and right channels
 // https://github.com/espressif/esp-idf/issues/6625
@@ -349,7 +351,7 @@ HRESULT SetI2sConfig(i2s_port_t bus, CLR_RT_HeapBlock *config)
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_sys_dev_i2s_native_System_Device_I2s_I2sDevice::Read___VOID__SystemSpanByte(CLR_RT_StackFrame &stack)
+HRESULT Library_sys_dev_i2s_native_System_Device_I2s_I2sDevice::Read___VOID__SystemSpan_1(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
@@ -393,6 +395,7 @@ HRESULT Library_sys_dev_i2s_native_System_Device_I2s_I2sDevice::Read___VOID__Sys
 
         // dereference the Span from the arguments
         readSpanByte = stack.Arg1().Dereference();
+
         if (readSpanByte != nullptr)
         {
             readBuffer = readSpanByte[Span::FIELD___array].DereferenceArray();
@@ -466,7 +469,8 @@ HRESULT Library_sys_dev_i2s_native_System_Device_I2s_I2sDevice::Read___VOID__Sys
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_sys_dev_i2s_native_System_Device_I2s_I2sDevice::Write___VOID__SystemSpanByte(CLR_RT_StackFrame &stack)
+HRESULT Library_sys_dev_i2s_native_System_Device_I2s_I2sDevice::Write___VOID__SystemReadOnlySpan_1(
+    CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
@@ -477,7 +481,7 @@ HRESULT Library_sys_dev_i2s_native_System_Device_I2s_I2sDevice::Write___VOID__Sy
         CLR_RT_HeapBlock *pThis = stack.This();
         FAULT_ON_NULL(pThis);
 
-        CLR_RT_HeapBlock *writeSpanByte = nullptr;
+        CLR_RT_HeapBlock *writeReadOnlySpanByte = nullptr;
         CLR_RT_HeapBlock_Array *writeBuffer = nullptr;
         uint8_t *writeData = nullptr;
         int writeSize = 0;
@@ -503,16 +507,17 @@ HRESULT Library_sys_dev_i2s_native_System_Device_I2s_I2sDevice::Write___VOID__Sy
             NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
         }
 
-        // dereference the write and read Span from the arguments
-        writeSpanByte = stack.Arg1().Dereference();
-        if (writeSpanByte != nullptr)
+        // dereference the write ReadOnlySpan from the arguments
+        writeReadOnlySpanByte = stack.Arg1().Dereference();
+
+        if (writeReadOnlySpanByte != nullptr)
         {
-            writeBuffer = writeSpanByte[Span::FIELD___array].DereferenceArray();
+            writeBuffer = writeReadOnlySpanByte[ReadOnlySpan::FIELD___array].DereferenceArray();
 
             if (writeBuffer != nullptr)
             {
                 // use the span length as write size, only the elements defined by the span must be written
-                writeSize = writeSpanByte[Span::FIELD___length].NumericByRef().s4;
+                writeSize = writeReadOnlySpanByte[ReadOnlySpan::FIELD___length].NumericByRef().s4;
 
                 if (writeSize > 0)
                 {

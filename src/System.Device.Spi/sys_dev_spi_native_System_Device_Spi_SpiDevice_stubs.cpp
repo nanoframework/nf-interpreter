@@ -15,7 +15,7 @@ HRESULT Library_sys_dev_spi_native_System_Device_Spi_SpiDevice::DisposeNative___
 }
 
 HRESULT Library_sys_dev_spi_native_System_Device_Spi_SpiDevice::
-    NativeTransfer___VOID__SystemSpanByte__SystemSpanByte__BOOLEAN(CLR_RT_StackFrame &stack)
+    NativeTransfer___VOID__SystemReadOnlySpan_1__SystemSpan_1__BOOLEAN(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 

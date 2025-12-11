@@ -10,6 +10,7 @@
 // define this type here to make it shorter and improve code readability
 typedef Library_sys_dev_spi_native_System_Device_Spi_SpiConnectionSettings SpiConnectionSettings;
 typedef Library_corlib_native_System_Span_1 Span;
+typedef Library_corlib_native_System_ReadOnlySpan_1 ReadOnlySpan;
 
 void System_Device_nano_spi_callback(int busIndex)
 {
@@ -57,7 +58,7 @@ bool System_Device_IsLongRunningOperation(
 }
 
 HRESULT Library_sys_dev_spi_native_System_Device_Spi_SpiDevice::
-    NativeTransfer___VOID__SystemSpanByte__SystemSpanByte__BOOLEAN(CLR_RT_StackFrame &stack)
+    NativeTransfer___VOID__SystemReadOnlySpan_1__SystemSpan_1__BOOLEAN(CLR_RT_StackFrame &stack)
 {
     return NativeTransfer(stack, false);
 }
@@ -74,7 +75,7 @@ HRESULT Library_sys_dev_spi_native_System_Device_Spi_SpiDevice::NativeTransfer(
 {
     NANOCLR_HEADER();
 
-    CLR_RT_HeapBlock *writeSpanByte;
+    CLR_RT_HeapBlock *writeReadOnlySpanByte;
     CLR_RT_HeapBlock *readSpanByte;
     CLR_RT_HeapBlock_Array *writeBuffer = nullptr;
     CLR_RT_HeapBlock_Array *readBuffer = nullptr;
@@ -132,20 +133,29 @@ HRESULT Library_sys_dev_spi_native_System_Device_Spi_SpiDevice::NativeTransfer(
         }
         else
         {
-            // dereference the write and read SpanByte from the arguments
-            writeSpanByte = stack.Arg1().Dereference();
-            if (writeSpanByte != nullptr)
+            // dereference the write ReadOnlySpan and read Span from the arguments
+            writeReadOnlySpanByte = stack.Arg1().Dereference();
+            if (writeReadOnlySpanByte != nullptr)
             {
                 // get buffer
-                writeBuffer = writeSpanByte[Span::FIELD___array].DereferenceArray();
+                writeBuffer = writeReadOnlySpanByte[ReadOnlySpan::FIELD___array].DereferenceArray();
                 if (writeBuffer != nullptr)
                 {
                     // use the span length as write size, only the elements defined by the span must be written
-                    writeSize = writeSpanByte[Span::FIELD___length].NumericByRef().s4;
-                    writeData = (unsigned char *)writeBuffer->GetFirstElement();
+                    writeSize = writeReadOnlySpanByte[ReadOnlySpan::FIELD___length].NumericByRef().s4;
 
-                    // pin the buffer
-                    writeBuffer->Pin();
+                    if (writeSize == 0)
+                    {
+                        // nothing to write
+                        writeData = nullptr;
+                    }
+                    else
+                    {
+                        writeData = (unsigned char *)writeBuffer->GetFirstElement();
+
+                        // pin the buffer
+                        writeBuffer->Pin();
+                    }
                 }
             }
 
@@ -164,10 +174,19 @@ HRESULT Library_sys_dev_spi_native_System_Device_Spi_SpiDevice::NativeTransfer(
                 {
                     // use the span length as read size, only the elements defined by the span must be read
                     readSize = readSpanByte[Span::FIELD___length].NumericByRef().s4;
-                    readData = (unsigned char *)readBuffer->GetFirstElement();
 
-                    // pin the buffer
-                    readBuffer->Pin();
+                    if (readSize == 0)
+                    {
+                        // nothing to read
+                        readData = nullptr;
+                    }
+                    else
+                    {
+                        readData = (unsigned char *)readBuffer->GetFirstElement();
+
+                        // pin the buffer
+                        readBuffer->Pin();
+                    }
                 }
             }
 
@@ -183,17 +202,13 @@ HRESULT Library_sys_dev_spi_native_System_Device_Spi_SpiDevice::NativeTransfer(
 
         // Set up read/write settings for SPI_Write_Read call
         // Gets the CS and active state
-        connectionSettings =
-            pThis[Library_sys_dev_spi_native_System_Device_Spi_SpiDevice::FIELD___connectionSettings].Dereference();
-        int32_t chipSelect =
-            connectionSettings[Library_sys_dev_spi_native_System_Device_Spi_SpiConnectionSettings::FIELD___csLine]
-                .NumericByRef()
-                .s4;
+        connectionSettings = pThis[FIELD___connectionSettings].Dereference();
+
+        int32_t chipSelect = connectionSettings[SpiConnectionSettings::FIELD___csLine].NumericByRef().s4;
+
         bool chipSelectActiveState =
-            (bool)connectionSettings
-                [Library_sys_dev_spi_native_System_Device_Spi_SpiConnectionSettings::FIELD___chipSelectLineActiveState]
-                    .NumericByRef()
-                    .u1;
+            (bool)connectionSettings[SpiConnectionSettings::FIELD___chipSelectLineActiveState].NumericByRef().u1;
+
         rws = {fullDuplex, 0, data16Bits, 0, chipSelect, chipSelectActiveState};
 
         // Check to see if we should run async so as not to hold up other tasks

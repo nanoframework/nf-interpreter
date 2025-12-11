@@ -66,8 +66,8 @@ struct Library_sys_dev_i2s_native_System_Device_I2s_I2sDevice
     static const int FIELD___disposed = 1;
     static const int FIELD___connectionSettings = 2;
 
-    NANOCLR_NATIVE_DECLARE(Read___VOID__SystemSpanByte);
-    NANOCLR_NATIVE_DECLARE(Write___VOID__SystemSpanByte);
+    NANOCLR_NATIVE_DECLARE(Read___VOID__SystemSpan_1);
+    NANOCLR_NATIVE_DECLARE(Write___VOID__SystemReadOnlySpan_1);
     NANOCLR_NATIVE_DECLARE(NativeInit___VOID);
     NANOCLR_NATIVE_DECLARE(NativeDispose___VOID);
 
