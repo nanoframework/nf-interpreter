@@ -28,7 +28,6 @@ struct Library_nf_system_resourcemanager_System_Resources_ResourceManager
     //--//
 
     NANOCLR_NATIVE_DECLARE(GetObject___STATIC__OBJECT__SystemResourcesResourceManager__SystemEnum__I4__I4);
-
 };
 
 struct Library_nf_system_resourcemanager_nanoFramework_Runtime_Native_ResourceUtility
@@ -37,7 +36,6 @@ struct Library_nf_system_resourcemanager_nanoFramework_Runtime_Native_ResourceUt
     NANOCLR_NATIVE_DECLARE(GetObject___STATIC__OBJECT__SystemResourcesResourceManager__SystemEnum__I4__I4);
 
     //--//
-
 };
 
 extern const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_nanoFramework_ResourceManager;

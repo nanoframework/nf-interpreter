@@ -6,6 +6,7 @@
 
 #include "nf_system_resourcemanager.h"
 
+// clang-format off
 
 static const CLR_RT_MethodHandler method_lookup[] =
 {
@@ -31,7 +32,9 @@ static const CLR_RT_MethodHandler method_lookup[] =
 const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_nanoFramework_ResourceManager =
 {
     "nanoFramework.ResourceManager",
-    0xDCD7DF4D,
+    0x874533DF,
     method_lookup,
-    { 100, 0, 0, 1 }
+    { 100, 2, 0, 0 }
 };
+
+// clang-format on

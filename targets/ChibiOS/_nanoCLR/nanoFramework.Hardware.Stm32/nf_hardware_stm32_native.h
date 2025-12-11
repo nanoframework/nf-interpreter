@@ -15,14 +15,14 @@ typedef enum __nfpack GpioConfiguration_IOMode
     GpioConfiguration_IOMode_Input = 0,
     GpioConfiguration_IOMode_Output = 1,
     GpioConfiguration_IOMode_AlternateFunction = 2,
-    GpioConfiguration_IOMode_Analog = 4,
+    GpioConfiguration_IOMode_Analog = 3,
     GpioConfiguration_IOMode_OutputPushPull = 1,
     GpioConfiguration_IOMode_OutputOpenDrain = 17,
 } GpioConfiguration_IOMode;
 
 typedef enum __nfpack GpioConfiguration_PullUpDownActivation
 {
-    GpioConfiguration_PullUpDownActivation_None = 0,
+    GpioConfiguration_PullUpDownActivation_Floating = 0,
     GpioConfiguration_PullUpDownActivation_PullUp = 1,
     GpioConfiguration_PullUpDownActivation_PullDown = 2,
 } GpioConfiguration_PullUpDownActivation;
@@ -34,6 +34,20 @@ typedef enum __nfpack GpioConfiguration_Speed
     GpioConfiguration_Speed_High = 2,
     GpioConfiguration_Speed_VeryHigh = 3,
 } GpioConfiguration_Speed;
+
+typedef enum __nfpack Power_WakeupPin
+{
+    Power_WakeupPin_Pin1 = 1,
+    Power_WakeupPin_Pin2 = 2,
+    Power_WakeupPin_Pin3 = 3,
+} Power_WakeupPin;
+
+typedef enum __nfpack Power_WakeupReasonType
+{
+    Power_WakeupReasonType_Undetermined = 0,
+    Power_WakeupReasonType_FromStandby = 1,
+    Power_WakeupReasonType_FromPin = 2,
+} Power_WakeupReasonType;
 
 struct Library_nf_hardware_stm32_native_nanoFramework_Hardware_Stm32_BackupMemory
 {
