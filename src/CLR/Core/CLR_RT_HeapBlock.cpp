@@ -1656,7 +1656,8 @@ static inline int CompareValues_Numeric(CLR_UINT32 left, CLR_UINT32 right)
         return 1;
     if (left < right)
         return -1;
-    /**************/ return 0;
+    /**************/
+    return 0;
 }
 
 static int CompareValues_Numeric(const CLR_INT64 left, const CLR_INT64 right)
@@ -1734,11 +1735,58 @@ static int CompareValues_Numeric(const CLR_RT_HeapBlock &left, const CLR_RT_Heap
 static inline int CompareValues_Pointers(const CLR_RT_HeapBlock *left, const CLR_RT_HeapBlock *right)
 {
     NATIVE_PROFILE_CLR_CORE();
-    if (left > right)
+
+    // let's save time and check up front for equality
+    if (left == right)
+    {
+        return 0;
+    }
+
+    // edge case when comparing arrays with storage pointers
+    if (left && right && left->DataType() == DATATYPE_SZARRAY && right->DataType() == DATATYPE_SZARRAY)
+    {
+        const CLR_RT_HeapBlock_Array *leftArray = (const CLR_RT_HeapBlock_Array *)left;
+        const CLR_RT_HeapBlock_Array *rightArray = (const CLR_RT_HeapBlock_Array *)right;
+
+        if (leftArray->ReflectionDataConst().kind == REFLECTION_STORAGE_PTR &&
+            rightArray->ReflectionDataConst().kind == REFLECTION_STORAGE_PTR)
+        {
+            // compare the storage pointers only if both are valid (non-zero)
+            uintptr_t leftStorage = leftArray->m_StoragePointer;
+            uintptr_t rightStorage = rightArray->m_StoragePointer;
+
+            if (leftStorage != 0 && rightStorage != 0)
+            {
+                if (leftStorage > rightStorage)
+                {
+                    return 1;
+                }
+                if (leftStorage < rightStorage)
+                {
+                    return -1;
+                }
+
+                // they are equal
+                return 0;
+            }
+        }
+    }
+
+    // default pointer comparison using uintptr_t to avoid undefined behavior
+    uintptr_t leftPtr = (uintptr_t)left;
+    uintptr_t rightPtr = (uintptr_t)right;
+
+    if (leftPtr > rightPtr)
+    {
         return 1;
-    if (left < right)
+    }
+    if (leftPtr < rightPtr)
+    {
         return -1;
-    /**************/ return 0;
+    }
+
+    // they are equal
+    return 0;
 }
 
 CLR_INT32 CLR_RT_HeapBlock::Compare_Values(const CLR_RT_HeapBlock &left, const CLR_RT_HeapBlock &right, bool fSigned)
