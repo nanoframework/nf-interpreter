@@ -2368,7 +2368,6 @@ HRESULT CLR_RT_ExecutionEngine::InitializeLocals(
 
                     goto done;
                 }
-
                 case DATATYPE_MVAR:
                 {
                     // Method-level generic parameter (e.g., '!!T' in a generic method like Array.Empty<T>())
@@ -2606,13 +2605,16 @@ HRESULT CLR_RT_ExecutionEngine::NewObject(
                     // We do the decrement BEFORE the comparison because we want to stop short of the first field,
                     // the object descriptor (already initialized).
                     //
+
                     obj += totFields;
                     while (--totFields > 0)
                     {
                         while (clsFields == 0)
                         {
                             if (instSub.SwitchToParent() == false)
+                            {
                                 NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
+                            }
 
                             clsFields = instSub.target->instanceFieldsCount;
                             target = nullptr;
