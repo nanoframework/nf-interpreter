@@ -47,7 +47,7 @@ public class Stack<T>
 
 This `Stack<T>` can be used as `Stack<int>` for an integer stack or `Stack<string>` for a string stack, etc., each providing compile-time type enforcement.
 
-*Generics have been a fundamental feature in desktop .NET for years. However, due to the constraints of embedded devices, previous versions of **.NET nanoFramework** did **not had support for generics**. With this preview, .NET nanoFramework is introducing support for generics, closing the gap with standard C# capabilities.* Developers can now write more flexible and reusable code on microcontrollers, just as they would on the full .NET runtime. Keep in mind that this is a public **preview** following a closed preview with intensive testing quietly happening in the background. While most generic scenarios are expected to work, there may be limitations or bugs as this feature is brand new to constrained devices.
+*Generics have been a fundamental feature in desktop .NET for years. However, due to the constraints of embedded devices, previous versions of **.NET nanoFramework** did **not have support for generics**. With this preview, .NET nanoFramework is introducing support for generics, closing the gap with standard C# capabilities.* Developers can now write more flexible and reusable code on microcontrollers, just as they would on the full .NET runtime. Keep in mind that this is a public **preview** following a closed preview with intensive testing quietly happening in the background. While most generic scenarios are expected to work, there may be limitations or bugs as this feature is brand new to constrained devices.
 
 ## Using Preview Firmware with Generics Support
 
@@ -72,7 +72,7 @@ Developing with the generics preview requires a **preview version of the .NET na
 
 **1. Download the Preview Extension:** The nanoFramework extension previews are published on the Open VSIX Gallery. Choose the version matching your Visual Studio edition:  
     - **Visual Studio 2019** – [Download .NET nanoFramework Extension (VS2019 preview)](https://www.vsixgallery.com/extension/455f2be5-bb07-451e-b351-a9faf3018dc9)  
-    - **Visual Studio 2022** – [Download .NET nanoFramework Extension (VS2022 preview)](https://www.vsixgallery.com/extension/bf694e17-fa5f-4877-9317-6d3664b2689a)  
+    - **Visual Studio 2022/2026** – [Download .NET nanoFramework Extension (VS2022 preview)](https://www.vsixgallery.com/extension/bf694e17-fa5f-4877-9317-6d3664b2689a)  
 
 These links provide the `.vsix` installer for the extension. (You can also set up the VSIX gallery feed in Visual Studio to get preview updates (instructions on [this](https://nanoframework.net/setup-visual-studio-to-access-preview-versions-feed/#:~:text=3,along%20with%20the%20following%20URL) blog post, but direct download is simplest.)
 
