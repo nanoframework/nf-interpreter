@@ -118,13 +118,13 @@ jobs:
               }
 
               # grab PR commit message
-              $prCommitMessage = $($pr.body)
+              # $prCommitMessage = $($pr.body)
 
               # debug output
               # echo "=====`r`n$($prCommitMessage)`r`n====="
 
               # check if Unit Tests for mscorlib should be run
-              if(($prCommitMessage  -like "*[run mscorlib tests]*") -or ($prCommitMessage -match "Tested against nanoframework/CoreLibrary#(\d+)"))
+              if(($prCommitMessage -match "\[run mscorlib tests\]") -or ($prCommitMessage -match "\[tested against nanoframework/CoreLibrary#\d+\]"))
               {
                 Write-Host "##[command] >> mscorlib tests are to be run"
                 echo "##vso[task.setvariable variable=RUN_MSCORLIB_TESTS;isOutput=true]true"
@@ -190,14 +190,14 @@ jobs:
               Write-host "##[endgroup]"
 
               # set default values 
-              echo "##vso[task.setvariable variable=BUILD_CHIBIOS;isOutput=true]false"  
-              echo "##vso[task.setvariable variable=BUILD_FREERTOS;isOutput=true]false"  
-              echo "##vso[task.setvariable variable=BUILD_ESP32;isOutput=true]false"  
+              echo "##vso[task.setvariable variable=BUILD_CHIBIOS;isOutput=true]false" 
+              echo "##vso[task.setvariable variable=BUILD_FREERTOS;isOutput=true]false"
+              echo "##vso[task.setvariable variable=BUILD_ESP32;isOutput=true]false"
               echo "##vso[task.setvariable variable=BUILD_TI;isOutput=true]false"
               echo "##vso[task.setvariable variable=BUILD_AZURERTOS;isOutput=true]false"
-              echo "##vso[task.setvariable variable=BUILD_WIN32;isOutput=true]false"  
-              echo "##vso[task.setvariable variable=BUILD_NANOCLR_CLI;isOutput=true]false"  
-              echo "##vso[task.setvariable variable=BUILD_ALL;isOutput=true]false"  
+              echo "##vso[task.setvariable variable=BUILD_WIN32;isOutput=true]false"
+              echo "##vso[task.setvariable variable=BUILD_NANOCLR_CLI;isOutput=true]false"
+              echo "##vso[task.setvariable variable=BUILD_CORE;isOutput=true]false"
 
               if( 
                   (($files.where{$_.Contains('/')}).Count -eq 0) -Or
@@ -212,9 +212,9 @@ jobs:
                   # - CMake
                   # - src
 
-                  echo "##vso[task.setvariable variable=BUILD_ALL;isOutput=true]true"
+                  echo "##vso[task.setvariable variable=BUILD_CORE;isOutput=true]true"
                   
-                  Write-host "##[command] Building ALL targets"
+                  Write-host "##[command] Minimal build required, changes at core folders"
               }
 
               if( ($files.where{$_.Contains('targets/ChibiOS')}).Count -gt 0)
@@ -358,7 +358,7 @@ jobs:
       and(
         ne(dependencies.Check_Build_Options.outputs['BuildOptions.SKIP_BUILD'], true),
         or(
-          eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ALL'], true),
+          eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_CORE'], true),
           eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_CHIBIOS'], true),
           eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ESP32'], true),
           eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_FREERTOS'], true),
@@ -391,7 +391,7 @@ jobs:
           succeeded('Check_Code_Style'),
           ne( dependencies.Check_Build_Options.outputs['BuildOptions.SKIP_BUILD'], true ),
           or(
-            eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ALL'], true),
+            eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_CORE'], true),
             eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_CHIBIOS'], true)
           )
         ),
@@ -413,13 +413,14 @@ jobs:
 
     strategy:
       matrix:
-        ST_STM32F429I_DISCOVERY:
-          TargetBoard: ST_STM32F429I_DISCOVERY
-          TargetSeries: "stm32f4xx"
-          BuildOptions:
-          NeedsDFU: false
-          NeedsSRECORD: false
-          CMakePreset: ST_STM32F429I_DISCOVERY
+        ${{ if eq(variables['TargetsToBuild.BUILD_CHIBIOS'], true) }}:
+          ST_STM32F429I_DISCOVERY:
+            TargetBoard: ST_STM32F429I_DISCOVERY
+            TargetSeries: "stm32f4xx"
+            BuildOptions:
+            NeedsDFU: false
+            NeedsSRECORD: false
+            CMakePreset: ST_STM32F429I_DISCOVERY
 
         ST_STM32F769I_DISCOVERY:
           TargetBoard: ST_STM32F769I_DISCOVERY
@@ -456,7 +457,7 @@ jobs:
           succeeded('Check_Code_Style'),
           ne( dependencies.Check_Build_Options.outputs['BuildOptions.SKIP_BUILD'], true ),
           or(
-            eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ALL'], true),
+            eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_CORE'], true),
             eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ESP32'], true)
           )
         ),
@@ -488,68 +489,75 @@ jobs:
           PackageName: ESP32_PSRAM_REV0
           CMakePreset: ESP32_PSRAM_REV0
 
-        ESP32_BLE_REV0:
-          TargetBoard: ESP32
-          TargetSeries: "esp32"
-          BuildOptions:
-          IDF_Target: esp32
-          TargetName: ESP32
-          PackageName: ESP32_BLE_REV0
-          CMakePreset: ESP32_BLE_REV0
+        ${{ if eq(variables['TargetsToBuild.BUILD_ESP32'], true) }}:
+          ESP32_BLE_REV0:
+            TargetBoard: ESP32
+            TargetSeries: "esp32"
+            BuildOptions:
+            IDF_Target: esp32
+            TargetName: ESP32
+            PackageName: ESP32_BLE_REV0
+            CMakePreset: ESP32_BLE_REV0
 
-        ESP32_C3:
-          TargetBoard: ESP32_C3
-          TargetSeries: "esp32c3"
-          BuildOptions:
-          IDF_Target: esp32c3
-          TargetName: ESP32_C3
-          PackageName: ESP32_C3
-          CMakePreset: ESP32_C3
+        ${{ if eq(variables['TargetsToBuild.BUILD_ESP32'], true) }}:
+          ESP32_C3:
+            TargetBoard: ESP32_C3
+            TargetSeries: "esp32c3"
+            BuildOptions:
+            IDF_Target: esp32c3
+            TargetName: ESP32_C3
+            PackageName: ESP32_C3
+            CMakePreset: ESP32_C3
 
-        ESP32_C6_THREAD:
-          TargetBoard: ESP32_C6
-          TargetSeries: "esp32c6"
-          BuildOptions:
-          IDF_Target: esp32c6
-          TargetName: ESP32_C6_THREAD
-          PackageName: ESP32_C6_THREAD
-          CMakePreset: ESP32_C6_THREAD
+        ${{ if eq(variables['TargetsToBuild.BUILD_ESP32'], true) }}:
+          ESP32_C6_THREAD:
+            TargetBoard: ESP32_C6
+            TargetSeries: "esp32c6"
+            BuildOptions:
+            IDF_Target: esp32c6
+            TargetName: ESP32_C6_THREAD
+            PackageName: ESP32_C6_THREAD
+            CMakePreset: ESP32_C6_THREAD
 
-        ESP32_H2_THREAD:
-          TargetBoard: ESP32_H2
-          TargetSeries: "esp32h2"
-          BuildOptions:
-          IDF_Target: esp32h2
-          TargetName: ESP32_H2_THREAD
-          PackageName: ESP32_H2_THREAD
-          CMakePreset: ESP32_H2_THREAD
+        ${{ if eq(variables['TargetsToBuild.BUILD_ESP32'], true) }}:
+          ESP32_H2_THREAD:
+            TargetBoard: ESP32_H2
+            TargetSeries: "esp32h2"
+            BuildOptions:
+            IDF_Target: esp32h2
+            TargetName: ESP32_H2_THREAD
+            PackageName: ESP32_H2_THREAD
+            CMakePreset: ESP32_H2_THREAD
 
-        ESP32_S3_ALL:
-          TargetBoard: ESP32_S3
-          TargetSeries: "esp32s3"
-          BuildOptions:
-          IDF_Target: esp32s3
-          TargetName: ESP32_S3_ALL
-          PackageName: ESP32_S3_ALL
-          CMakePreset: ESP32_S3_ALL
+        ${{ if eq(variables['TargetsToBuild.BUILD_ESP32'], true) }}:
+          ESP32_S3_ALL:
+            TargetBoard: ESP32_S3
+            TargetSeries: "esp32s3"
+            BuildOptions:
+            IDF_Target: esp32s3
+            TargetName: ESP32_S3_ALL
+            PackageName: ESP32_S3_ALL
+            CMakePreset: ESP32_S3_ALL
 
-        ESP32_ETHERNET_KIT_1.2:
-          TargetBoard: ESP32
-          TargetSeries: "esp32"
-          BuildOptions:
-          IDF_Target: esp32
-          TargetName: ESP32_ETHERNET_KIT_1.2
-          PackageName: ESP32_ETHERNET_KIT_1.2
-          CMakePreset: ESP32_ETHERNET_KIT_1.2
+        ${{ if eq(variables['TargetsToBuild.BUILD_ESP32'], true) }}:
+          ESP32_ETHERNET_KIT_1.2:
+            TargetBoard: ESP32
+            TargetSeries: "esp32"
+            BuildOptions:
+            IDF_Target: esp32
+            TargetName: ESP32_ETHERNET_KIT_1.2
+            PackageName: ESP32_ETHERNET_KIT_1.2
+            CMakePreset: ESP32_ETHERNET_KIT_1.2
 
-        ESP32_P4_UART:
-          TargetBoard: ESP32_P4
-          TargetSeries: "esp32p4"
-          BuildOptions:
-          IDF_Target: esp32p4
-          TargetName: ESP32_P4_UART
-          PackageName: ESP32_P4_UART
-          CMakePreset: ESP32_P4_UART
+        ${{ if eq(variables['TargetsToBuild.BUILD_ESP32'], true) }}:            
+          ESP32_P4_UART:
+            TargetBoard: ESP32_P4
+            TargetSeries: "esp32p4"
+            BuildOptions:
+            IDF_Target: esp32p4
+            TargetName: ESP32_P4_UART
+            PackageName: ESP32_P4_UART
+            CMakePreset: ESP32_P4_UART
 
     variables:
       DOTNET_NOLOGO: true
@@ -610,7 +618,7 @@ jobs:
           succeeded('Check_Code_Style'),
           ne( dependencies.Check_Build_Options.outputs['BuildOptions.SKIP_BUILD'], true ),
           or(
-            eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ALL'], true),
+            eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_CORE'], true),
             eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_FREERTOS'], true)
           )
         ),
@@ -665,7 +673,7 @@ jobs:
           succeeded('Check_Code_Style'),
           ne( dependencies.Check_Build_Options.outputs['BuildOptions.SKIP_BUILD'], true ),
           or(
-            eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ALL'], true),
+            eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_CORE'], true),
             eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_TI'], true)
           )
         ),
@@ -743,7 +751,7 @@ jobs:
           succeeded('Check_Code_Style'),
           ne( dependencies.Check_Build_Options.outputs['BuildOptions.SKIP_BUILD'], true ),
           or(
-            eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ALL'], true),
+            eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_CORE'], true),
             eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_AZURERTOS'], true)
           )
         ),
@@ -815,7 +823,7 @@ jobs:
           succeeded('Check_Code_Style'),
           ne( dependencies.Check_Build_Options.outputs['BuildOptions.SKIP_BUILD'], true ),
           or(
-            eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ALL'], true),
+            eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_CORE'], true),
             eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_WIN32'], true)
           )
         ),
@@ -1040,11 +1048,18 @@ jobs:
         and(
           succeeded('Check_Code_Style'),
           ne(dependencies.Check_Build_Options.outputs['BuildOptions.SKIP_BUILD'], true),
+          ne(variables['System.PullRequest.PullRequestId'], ''),
           or(
-            eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ALL'], true),
+            eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.RUN_MSCORLIB_TESTS'], true),
             eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_NANOCLR_CLI'], true)
           )
         ),
+        and(
+          succeeded('Check_Code_Style'),
+          ne(dependencies.Check_Build_Options.outputs['BuildOptions.SKIP_BUILD'], true),
+          eq(variables['System.PullRequest.PullRequestId'], ''),
+          eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_NANOCLR_CLI'], true)
+        ),        
         and(
           eq(variables['Build.Reason'], 'Manual'),
           or(
@@ -1219,11 +1234,7 @@ jobs:
           succeeded('Build_nanoCLR_CLI'),
           ne(dependencies.Check_Build_Options.outputs['BuildOptions.SKIP_BUILD'], true),
           ne(variables['System.PullRequest.PullRequestId'], ''),
-          or(
-            eq(dependencies.Check_Build_Options.outputs['BuildOptions.RUN_MSCORLIB_TESTS'], true),
-            eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ALL'], true),
-            eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_NANOCLR_CLI'], true)
-          )
+          eq(dependencies.Check_Build_Options.outputs['BuildOptions.RUN_MSCORLIB_TESTS'], true)
         ),
         and(
           eq(variables['Build.Reason'], 'Manual'),
