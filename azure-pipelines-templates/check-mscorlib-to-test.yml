@@ -31,7 +31,7 @@ steps:
         # look for test prompt in PR commit message
         # pattern is "Tested against nanoframework/CoreLibrary#NNNN"
 
-        if($prCommitMessage -match "Tested against nanoframework/CoreLibrary#(\d+)")
+        if($prCommitMessage -match "\[tested against nanoframework/CoreLibrary#(\d+)\]\.?")
         {
           $testPR = $matches[1]
           "Test PR found: $testPR" | Write-Host -ForegroundColor White

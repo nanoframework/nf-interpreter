@@ -103,7 +103,7 @@ jobs:
           echo "##vso[task.setvariable variable=BUILD_ESP32;isOutput=true]false"  
           echo "##vso[task.setvariable variable=BUILD_TI;isOutput=true]false"  
           echo "##vso[task.setvariable variable=BUILD_AZURERTOS;isOutput=true]false"
-          echo "##vso[task.setvariable variable=BUILD_ALL;isOutput=true]false"  
+          echo "##vso[task.setvariable variable=BUILD_ALL;isOutput=true]false"
 
           if($env:StartReleaseCandidate -like "true")
           {
@@ -162,9 +162,8 @@ jobs:
 
                     if($buildingPr)
                     {
-                        # ChibiOS targets are the only ones needing to be build on a global change
-                        echo "##vso[task.setvariable variable=BUILD_CHIBIOS;isOutput=true]true"
-                        Write-host "##[command] Building ChibiOS targets"
+                        # PR build, and only changes at global folders, no need to build all targets
+                        Write-host "##[command] Changes at global folders, therefore no need to build all targets"
                     }
                     else
                     {
