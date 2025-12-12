@@ -786,6 +786,7 @@ struct Library_corlib_native_System_ReadOnlySpan_1
     static const int FIELD___length = 2;
 
     NANOCLR_NATIVE_DECLARE(_ctor___VOID__VOIDptr__I4);
+    NANOCLR_NATIVE_DECLARE(CopyTo___VOID__SystemSpan_1);
     NANOCLR_NATIVE_DECLARE(NativeReadOnlySpanConstructor___VOID__SZARRAY_GENERICTYPE__I4__I4);
 
     //--//

@@ -7,6 +7,7 @@
 #include "CorLib.h"
 
 typedef Library_corlib_native_System_Runtime_CompilerServices_RuntimeHelpers RuntimeHelpers;
+typedef Library_corlib_native_System_Span_1 Span_1;
 
 HRESULT Library_corlib_native_System_ReadOnlySpan_1::_ctor___VOID__VOIDptr__I4(CLR_RT_StackFrame &stack)
 {
@@ -64,12 +65,11 @@ HRESULT Library_corlib_native_System_ReadOnlySpan_1::_ctor___VOID__VOIDptr__I4(C
     }
 
     // check if T is a reference type or contains references
-    NANOCLR_CHECK_HRESULT(
-        RuntimeHelpers::CheckReferenceOrContainsReferences(
-            element.Class,
-            element.DataType,
-            &parser,
-            isRefContainsRefs));
+    NANOCLR_CHECK_HRESULT(RuntimeHelpers::CheckReferenceOrContainsReferences(
+        element.Class,
+        element.DataType,
+        &parser,
+        isRefContainsRefs));
 
     if (isRefContainsRefs)
     {
@@ -101,6 +101,47 @@ HRESULT Library_corlib_native_System_ReadOnlySpan_1::_ctor___VOID__VOIDptr__I4(C
 
     // set length
     thisSpan[FIELD___length].NumericByRef().s4 = length;
+
+    NANOCLR_NOCLEANUP();
+}
+
+HRESULT Library_corlib_native_System_ReadOnlySpan_1::CopyTo___VOID__SystemSpan_1(CLR_RT_StackFrame &stack)
+{
+    NANOCLR_HEADER();
+
+    CLR_RT_HeapBlock_Array *sourceArray;
+    CLR_RT_HeapBlock_Array *destinationArray;
+    CLR_RT_HeapBlock *thisSpan = stack.This();
+    CLR_RT_HeapBlock *destinationSpan = stack.Arg1().Dereference();
+
+    // check lengths - destination must be at least as large as source
+    if (thisSpan[FIELD___length].NumericByRefConst().u4 >
+        destinationSpan[Span_1::FIELD___length].NumericByRefConst().u4)
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+    }
+
+    // get pointers to the arrays
+    sourceArray = thisSpan[FIELD___array].DereferenceArray();
+    destinationArray = destinationSpan[Span_1::FIELD___array].DereferenceArray();
+
+    {
+        // sanity check for empty source array
+        if (thisSpan[FIELD___length].NumericByRefConst().s4 == 0)
+        {
+            NANOCLR_SET_AND_LEAVE(S_OK);
+        }
+
+        // prevent GC from moving the arrays while we copy the data
+        CLR_RT_ProtectFromGC gc1(*sourceArray);
+        CLR_RT_ProtectFromGC gc2(*destinationArray);
+
+        // use memmove to safely handle potential overlapping memory regions
+        memmove(
+            destinationArray->GetElement(0),
+            sourceArray->GetElement(0),
+            thisSpan[FIELD___length].NumericByRefConst().s4 * sourceArray->m_sizeOfElement);
+    }
 
     NANOCLR_NOCLEANUP();
 }
