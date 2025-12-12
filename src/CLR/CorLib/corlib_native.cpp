@@ -702,6 +702,7 @@ static const CLR_RT_MethodHandler method_lookup[] =
     nullptr,
     nullptr,
     nullptr,
+    Library_corlib_native_System_ReadOnlySpan_1::CopyTo___VOID__SystemSpan_1,
     nullptr,
     nullptr,
     nullptr,
@@ -1613,7 +1614,7 @@ const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_mscorlib =
 
 #if (NANOCLR_REFLECTION == TRUE)
 
-    0xF1828DE7,
+    0x4619DD1E,
 
 #elif (NANOCLR_REFLECTION == FALSE)
 
@@ -1624,7 +1625,7 @@ const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_mscorlib =
 #endif
 
     method_lookup,
-    { 100, 22, 0, 0 }
+    { 100, 22, 0, 1 }
 };
 
 // clang-format on
