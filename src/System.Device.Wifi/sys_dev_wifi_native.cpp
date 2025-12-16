@@ -85,7 +85,7 @@ const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_System_Device_Wifi =
     "System.Device.Wifi",
     0x030E2768,
     method_lookup,
-    { 100, 0, 6, 4 }
+    { 100, 0, 6, 5 }
 };
 
 // clang-format on
