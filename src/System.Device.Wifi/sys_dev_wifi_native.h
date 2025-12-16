@@ -66,6 +66,7 @@ struct Library_sys_dev_wifi_native_System_Device_Wifi_WifiAdapter
     NANOCLR_NATIVE_DECLARE(NativeDisconnect___VOID);
     NANOCLR_NATIVE_DECLARE(NativeScanAsync___VOID);
     NANOCLR_NATIVE_DECLARE(GetNativeScanReport___SZARRAY_U1);
+    NANOCLR_NATIVE_DECLARE(NativeSetDeviceName___VOID__STRING);
     NANOCLR_NATIVE_DECLARE(NativeFindWirelessAdapters___STATIC__SZARRAY_U1);
 
     //--//
