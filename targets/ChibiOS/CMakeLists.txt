@@ -186,7 +186,7 @@ if(NF_FEATURE_HAS_SDCARD OR NF_FEATURE_HAS_USB_MSD)
     else()
         # FatFS source was specified
 
-        message(STATUS "FatFS ${FATFS_VERSION_TAG} source from: ${FATFS_SOURCE})")
+        message(STATUS "FatFS ${FATFS_VERSION_TAG} (source from: ${FATFS_SOURCE})")
 
         FetchContent_Declare(
             fatfs
@@ -337,30 +337,45 @@ if(NF_FEATURE_USE_LITTLEFS_OPTION)
 
     # check if LITTLEFS_SOURCE was specified or if it's empty (default is empty)
     set(NO_LITTLEFS_SOURCE TRUE)
-
-    # WHEN CHANGING THIS MAKE SURE TO UPDATE THE DEV CONTAINERS AND PIPELINE YAML
-    set(LITTLEFS_VERSION_TAG "v2.9.3")
-
     if(LITTLEFS_SOURCE)
         if(NOT ${LITTLEFS_SOURCE} STREQUAL "")
             set(NO_LITTLEFS_SOURCE FALSE)
         endif()
     endif()
 
+    # LITTLEFS version
+    set(LITTLEFS_VERSION_EMPTY TRUE)
+
+    # check if build was requested with a specifc littlefs version
+    if(DEFINED LITTLEFS_VERSION)
+        if(NOT ${LITTLEFS_VERSION} STREQUAL "")
+            set(LITTLEFS_VERSION_EMPTY FALSE)
+        endif()
+    endif()
+
+    # check if build was requested with a specifc littlefs version
+    if(LITTLEFS_VERSION_EMPTY)
+        # no littlefs version actualy specified, must be empty which is fine, we'll default to a known good version
+        # WHEN CHANGING THIS MAKE SURE TO UPDATE THE DEV CONTAINERS AND PIPELINE YAML
+        set(LITTLEFS_VERSION_TAG "v2.9.3")
+    else()
+        # set version 
+        set(LITTLEFS_VERSION_TAG ${LITTLEFS_VERSION})
+    endif()
+
     if(NO_LITTLEFS_SOURCE)
-        # no littlefs source specified, download it from it's repo
-        message(STATUS "littlefs source from from GitHub repo")
+        message(STATUS "littlefs ${LITTLEFS_VERSION_TAG} from GitHub repo")
 
         FetchContent_Declare(
             littlefs
-            GIT_REPOSITORY https://github.com/littlefs-project/littlefs
+            GIT_REPOSITORY https://github.com/littlefs-project/littlefs.git
             GIT_TAG ${LITTLEFS_VERSION_TAG}
         )
 
     else()
         # littlefs source was specified
 
-        message(STATUS "littlefs source from: ${LITTLEFS_SOURCE}")
+        message(STATUS "littlefs ${LITTLEFS_VERSION_TAG} (source from: ${LITTLEFS_SOURCE})")
 
         FetchContent_Declare(
             littlefs
