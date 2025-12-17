@@ -196,6 +196,7 @@ static const CLR_RT_MethodHandler method_lookup[] =
     nullptr,
     nullptr,
     nullptr,
+    nullptr,
     Library_nf_sys_io_filesystem_System_IO_NativeFileStream::_ctor___VOID__STRING__I4,
     Library_nf_sys_io_filesystem_System_IO_NativeFileStream::Read___I4__SZARRAY_U1__I4__I4__I4,
     Library_nf_sys_io_filesystem_System_IO_NativeFileStream::Write___I4__SZARRAY_U1__I4__I4__I4,
@@ -239,9 +240,9 @@ static const CLR_RT_MethodHandler method_lookup[] =
 const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_System_IO_FileSystem =
 {
     "System.IO.FileSystem",
-    0x3A7788A1,
+    0x8F26D4E8,
     method_lookup,
-    { 100, 2, 0, 0 }
+    { 100, 2, 0, 1 }
 };
 
 // clang-format on
