@@ -160,17 +160,24 @@ jobs:
           {
               # this is a manual build, no need to check anything 
               Write-host "##[command] Manual build"
+
+              exit 0
           }      
           else
           {
+              $isMergeBuild = $false
+
               # check if this build was triggered by the pipeline itself
               if($env:Build_Reason -eq "Manual")
               {
                   # this is a manual build, no need to check anything 
                   Write-host "##[command] Manual build"
               }
+
               if($env:System_PullRequest_PullRequestId -ne $null)
               {
+                  $isMergeBuild = $false
+
                   # get files changed in PR, if this is a PR
                   $commit = Invoke-RestMethod -Uri "https://api.github.com/repos/nanoframework/nf-interpreter/pulls/$env:System_PullRequest_PullRequestNumber/files" -Header @{"Authorization"="$auth"} -ContentType "application/json" -Method GET
 
@@ -179,6 +186,8 @@ jobs:
               }
               else
               {
+                  $isMergeBuild = $true
+
                   # get files changed in the commit, if this is NOT a PR
                   $commit = Invoke-RestMethod -Uri "https://api.github.com/repos/nanoframework/nf-interpreter/commits/$(Build.SourceVersion)" -Header @{"Authorization"="$auth"} -ContentType "application/json" -Method GET
 
@@ -218,7 +227,23 @@ jobs:
 
                   echo "##vso[task.setvariable variable=BUILD_CORE;isOutput=true]true"
                   
-                  Write-host "##[command] Minimal build required, changes at core folders"
+                  if($isMergeBuild)
+                  {
+                    Write-host "##[command] Full build required, changes at core folders"
+
+                    echo "##vso[task.setvariable variable=BUILD_CHIBIOS;isOutput=true]true" 
+                    echo "##vso[task.setvariable variable=BUILD_FREERTOS;isOutput=true]true"
+                    echo "##vso[task.setvariable variable=BUILD_ESP32;isOutput=true]true"
+                    echo "##vso[task.setvariable variable=BUILD_TI;isOutput=true]true"
+                    echo "##vso[task.setvariable variable=BUILD_AZURERTOS;isOutput=true]true"
+                    echo "##vso[task.setvariable variable=BUILD_WIN32;isOutput=true]true"
+
+                    exit 0
+                  }
+                  else
+                  {
+                    Write-host "##[command] Minimal build required, changes at core folders"
+                  }
               }
 
               if( ($files.where{$_.Contains('targets/ChibiOS')}).Count -gt 0)
