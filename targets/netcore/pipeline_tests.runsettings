@@ -11,6 +11,6 @@
    <nanoFrameworkAdapter>
        <Logging>Verbose</Logging>
        <IsRealHardware>False</IsRealHardware>
-	   <PathToLocalCLRInstance>D:\a\_temp\nanoclr_cli\nanoFramework.nanoCLR.dll</PathToLocalCLRInstance>	   
+	   <PathToLocalCLRInstance>D:\a\_temp\nanoclr_dll\nanoFramework.nanoCLR.dll</PathToLocalCLRInstance>	   
    </nanoFrameworkAdapter>
 </RunSettings>

@@ -1021,12 +1021,19 @@ jobs:
         condition: succeeded()
         displayName: Adding nanoCLR DLL to deployable artifacts
         inputs:
-          sourceFolder: $(Build.SourcesDirectory)
-          Contents: |
-            **\nanoFramework.nanoCLR.dll
-          TargetFolder: '$(Build.ArtifactStagingDirectory)\WIN_DLL_nanoCLR'
+          SourceFolder: "nf-interpreter/build/bin/Release"
+          Contents: "nanoFramework.nanoCLR.dll"
+          TargetFolder: "$(Build.ArtifactStagingDirectory)/nanoclr"
           flattenFolders: true
           ignoreMakeDirErrors: true
+
+      - task: PublishPipelineArtifact@1
+        condition: succeeded()
+        displayName: Publish nanoclr
+        inputs:
+          targetPath: "$(Build.ArtifactStagingDirectory)/nanoclr"
+          artifactName: nanoclr_dll
+          artifactType: pipeline
 
       - pwsh: |
           .\sign code azure-key-vault `
@@ -1228,22 +1235,6 @@ jobs:
             eq(variables['System.PullRequest.PullRequestId'], '')
           )
 
-      - task: CopyFiles@2
-        condition: succeeded()
-        displayName: Copy nanoclr
-        inputs:
-          SourceFolder: "nf-interpreter/build/bin/Release"
-          Contents: "nanoFramework.nanoCLR.dll"
-          TargetFolder: "$(Build.ArtifactStagingDirectory)/nanoclr"
-
-      - task: PublishPipelineArtifact@1
-        condition: succeeded()
-        displayName: Publish nanoclr
-        inputs:
-          targetPath: "$(Build.ArtifactStagingDirectory)/nanoclr"
-          artifactName: nanoclr_cli
-          artifactType: pipeline
-
       # push NuGet packages to NuGet (always happens when building from main, except on PR builds)
       - task: NuGetCommand@2
         condition: >-
@@ -1313,8 +1304,8 @@ jobs:
       - task: DownloadBuildArtifacts@1
         inputs:
           buildType: "current"
-          artifactName: "nanoclr_cli"
-          downloadPath: "$(Agent.TempDirectory)/nanoclr_cli"
+          artifactName: "nanoclr_dll"
+          downloadPath: "$(Agent.TempDirectory)/nanoclr_dll"
 
       # build mscorlib
 
