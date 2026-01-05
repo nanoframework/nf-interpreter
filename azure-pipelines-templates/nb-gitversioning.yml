@@ -35,4 +35,8 @@ steps:
 
         Write-Host "$("##vso[task.setvariable variable=TARGET_BUILD_COUNTER]")$version"
         Write-Host "$("##vso[task.setvariable variable=NBGV_NuGetPackageVersion]")$(NBGV_VersionMajor).$(NBGV_VersionMinor).$(NBGV_BuildNumber).$version"
-        Write-Host "*** BUILD NUMBER IS: $(NBGV_VersionMajor).$(NBGV_VersionMinor).$(NBGV_BuildNumber).$version ***"
+        
+        $newBuildNumber = "$(NBGV_VersionMajor).$(NBGV_VersionMinor).$(NBGV_BuildNumber).$version"
+        
+        Write-Host "$("##vso[build.updatebuildnumber]")$newBuildNumber"
+        Write-Host "*** BUILD NUMBER IS: $newBuildNumber ***"
