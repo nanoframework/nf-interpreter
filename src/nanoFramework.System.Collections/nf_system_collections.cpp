@@ -172,7 +172,7 @@ const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_nanoFramework_System_Collec
     "nanoFramework.System.Collections",
     0xECAABF30,
     method_lookup,
-    { 100, 0, 3, 0 }
+    { 100, 2, 0, 1 }
 };
 
 // clang-format on
