@@ -385,15 +385,15 @@ jobs:
   - job: Check_Code_Style
     condition: >-
       and(
-        ne(dependencies.Check_Build_Options.outputs['BuildOptions.SKIP_BUILD'], true),
+        ne(dependencies.Check_Build_Options.outputs['BuildOptions.SKIP_BUILD'], 'true'),
         or(
-          eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_CORE'], true),
-          eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_CHIBIOS'], true),
-          eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ESP32'], true),
-          eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_FREERTOS'], true),
-          eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_TI'], true),
-          eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_AZURERTOS'], true),
-          eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_WIN32'], true)
+          eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_CORE'], 'true'),
+          eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_CHIBIOS'], 'true'),
+          eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ESP32'], 'true'),
+          eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_FREERTOS'], 'true'),
+          eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_TI'], 'true'),
+          eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_AZURERTOS'], 'true'),
+          eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_WIN32'], 'true')
         )
       )
 
@@ -656,10 +656,10 @@ jobs:
       or(
         and(
           succeeded('Check_Code_Style'),
-          ne( dependencies.Check_Build_Options.outputs['BuildOptions.SKIP_BUILD'], true ),
+          ne( dependencies.Check_Build_Options.outputs['BuildOptions.SKIP_BUILD'], 'true' ),
           or(
-            eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_CORE'], true),
-            eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_FREERTOS'], true)
+            eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_CORE'], 'true'),
+            eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_FREERTOS'], 'true')
           )
         ),
         and(
@@ -711,10 +711,10 @@ jobs:
       or(
         and(
           succeeded('Check_Code_Style'),
-          ne( dependencies.Check_Build_Options.outputs['BuildOptions.SKIP_BUILD'], true ),
+          ne( dependencies.Check_Build_Options.outputs['BuildOptions.SKIP_BUILD'], 'true' ),
           or(
-            eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_CORE'], true),
-            eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_TI'], true)
+            eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_CORE'], 'true'),
+            eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_TI'], 'true')
           )
         ),
         and(
@@ -789,10 +789,10 @@ jobs:
       or(
         and(
           succeeded('Check_Code_Style'),
-          ne( dependencies.Check_Build_Options.outputs['BuildOptions.SKIP_BUILD'], true ),
+          ne( dependencies.Check_Build_Options.outputs['BuildOptions.SKIP_BUILD'], 'true' ),
           or(
-            eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_CORE'], true),
-            eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_AZURERTOS'], true)
+            eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_CORE'], 'true'),
+            eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_AZURERTOS'], 'true')
           )
         ),
         and(
@@ -861,10 +861,10 @@ jobs:
       or(
         and(
           succeeded('Check_Code_Style'),
-          ne( dependencies.Check_Build_Options.outputs['BuildOptions.SKIP_BUILD'], true ),
+          ne( dependencies.Check_Build_Options.outputs['BuildOptions.SKIP_BUILD'], 'true' ),
           or(
-            eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_CORE'], true),
-            eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_WIN32'], true)
+            eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_CORE'], 'true'),
+            eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_WIN32'], 'true')
           )
         ),
         and(
@@ -1087,18 +1087,18 @@ jobs:
       or(
         and(
           succeeded('Check_Code_Style'),
-          ne(dependencies.Check_Build_Options.outputs['BuildOptions.SKIP_BUILD'], true),
+          ne(dependencies.Check_Build_Options.outputs['BuildOptions.SKIP_BUILD'], 'true'),
           ne(variables['System.PullRequest.PullRequestId'], ''),
           or(
-            eq(dependencies.Check_Build_Options.outputs['BuildOptions.RUN_MSCORLIB_TESTS'], true),
-            eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_NANOCLR_CLI'], true)
+            eq(dependencies.Check_Build_Options.outputs['BuildOptions.RUN_MSCORLIB_TESTS'], 'true'),
+            eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_NANOCLR_CLI'], 'true')
           )
         ),
         and(
           succeeded('Check_Code_Style'),
-          ne(dependencies.Check_Build_Options.outputs['BuildOptions.SKIP_BUILD'], true),
+          ne(dependencies.Check_Build_Options.outputs['BuildOptions.SKIP_BUILD'], 'true'),
           eq(variables['System.PullRequest.PullRequestId'], ''),
-          eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_NANOCLR_CLI'], true)
+          eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_NANOCLR_CLI'], 'true')
         ),        
         and(
           eq(variables['Build.Reason'], 'Manual'),
@@ -1272,9 +1272,9 @@ jobs:
       or(
         and(
           succeeded('Build_nanoCLR_CLI'),
-          ne(dependencies.Check_Build_Options.outputs['BuildOptions.SKIP_BUILD'], true),
+          ne(dependencies.Check_Build_Options.outputs['BuildOptions.SKIP_BUILD'], 'true'),
           ne(variables['System.PullRequest.PullRequestId'], ''),
-          eq(dependencies.Check_Build_Options.outputs['BuildOptions.RUN_MSCORLIB_TESTS'], true)
+          eq(dependencies.Check_Build_Options.outputs['BuildOptions.RUN_MSCORLIB_TESTS'], 'true')
         ),
         and(
           eq(variables['Build.Reason'], 'Manual'),
@@ -1405,7 +1405,7 @@ jobs:
       - Check_Code_Style
     condition: >-
       and(
-        ne( dependencies.Check_Code_Style.outputs['Check_Code_Style.CODE_STYLE_CHECK_FAILED'], true),
+        ne( dependencies.Check_Code_Style.outputs['Check_Code_Style.CODE_STYLE_CHECK_FAILED'], 'true'),
         or(
           failed('Build_STM32_targets'),
           failed('Build_ESP32_targets'),
