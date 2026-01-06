@@ -43,6 +43,16 @@ typedef enum __nfpack WifiReconnectionKind
     WifiReconnectionKind_Manual = 1,
 } WifiReconnectionKind;
 
+struct Library_sys_dev_wifi_native_System_Device_Wifi_WifiAvailableNetwork
+{
+    static const int FIELD___bsid = 1;
+    static const int FIELD___ssid = 2;
+    static const int FIELD___rssi = 3;
+    static const int FIELD___networkKind = 4;
+
+    //--//
+};
+
 struct Library_sys_dev_wifi_native_System_Device_Wifi_WifiConnectionResult
 {
     static const int FIELD___ConnectionStatus = 1;
@@ -66,6 +76,7 @@ struct Library_sys_dev_wifi_native_System_Device_Wifi_WifiAdapter
     NANOCLR_NATIVE_DECLARE(NativeDisconnect___VOID);
     NANOCLR_NATIVE_DECLARE(NativeScanAsync___VOID);
     NANOCLR_NATIVE_DECLARE(GetNativeScanReport___SZARRAY_U1);
+    NANOCLR_NATIVE_DECLARE(NativeSetDeviceName___VOID__STRING);
     NANOCLR_NATIVE_DECLARE(NativeFindWirelessAdapters___STATIC__SZARRAY_U1);
 
     //--//
@@ -79,7 +90,7 @@ struct Library_sys_dev_wifi_native_System_Device_Wifi_WifiNetworkReport
     //--//
 };
 
-struct Library_sys_dev_Wifi_native_nanoFramework_Networking_WifiNetworkHelper
+struct Library_sys_dev_wifi_native_nanoFramework_Networking_WifiNetworkHelper
 {
     static const int FIELD_STATIC___ipAddressAvailable = 1;
     static const int FIELD_STATIC___networkReady = 2;
