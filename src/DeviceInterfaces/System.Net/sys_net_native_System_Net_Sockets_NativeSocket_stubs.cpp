@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (c) .NET Foundation and Contributors
 // See LICENSE file in the project root for full license information.
 //
@@ -45,7 +45,27 @@ HRESULT Library_sys_net_native_System_Net_Sockets_NativeSocket::send___STATIC__I
     NANOCLR_NOCLEANUP();
 }
 
+HRESULT Library_sys_net_native_System_Net_Sockets_NativeSocket::Send___STATIC__I4__OBJECT__SystemReadOnlySpan_1__I4__I4__I4__I4(
+    CLR_RT_StackFrame &stack)
+{
+    NANOCLR_HEADER();
+
+    NANOCLR_SET_AND_LEAVE(stack.NotImplementedStub());
+
+    NANOCLR_NOCLEANUP();
+}
+
 HRESULT Library_sys_net_native_System_Net_Sockets_NativeSocket::recv___STATIC__I4__OBJECT__SZARRAY_U1__I4__I4__I4__I4(
+    CLR_RT_StackFrame &stack)
+{
+    NANOCLR_HEADER();
+
+    NANOCLR_SET_AND_LEAVE(stack.NotImplementedStub());
+
+    NANOCLR_NOCLEANUP();
+}
+
+HRESULT Library_sys_net_native_System_Net_Sockets_NativeSocket::Recv___STATIC__I4__OBJECT__SystemSpan_1__I4__I4__I4__I4(
     CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
@@ -114,7 +134,27 @@ HRESULT Library_sys_net_native_System_Net_Sockets_NativeSocket::
 }
 
 HRESULT Library_sys_net_native_System_Net_Sockets_NativeSocket::
+    SendTo___STATIC__I4__OBJECT__SystemReadOnlySpan_1__I4__I4__I4__I4__SystemNetEndPoint(CLR_RT_StackFrame &stack)
+{
+    NANOCLR_HEADER();
+
+    NANOCLR_SET_AND_LEAVE(stack.NotImplementedStub());
+
+    NANOCLR_NOCLEANUP();
+}
+
+HRESULT Library_sys_net_native_System_Net_Sockets_NativeSocket::
     recvfrom___STATIC__I4__OBJECT__SZARRAY_U1__I4__I4__I4__I4__BYREF_SystemNetEndPoint(CLR_RT_StackFrame &stack)
+{
+    NANOCLR_HEADER();
+
+    NANOCLR_SET_AND_LEAVE(stack.NotImplementedStub());
+
+    NANOCLR_NOCLEANUP();
+}
+
+HRESULT Library_sys_net_native_System_Net_Sockets_NativeSocket::
+    RecvFrom___STATIC__I4__OBJECT__SystemSpan_1__I4__I4__I4__I4__BYREF_SystemNetEndPoint(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 

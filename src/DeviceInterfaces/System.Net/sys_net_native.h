@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (c) .NET Foundation and Contributors
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
@@ -155,26 +155,26 @@ struct Library_sys_net_native_System_Net_NetworkInformation_NetworkInterface
 
 struct Library_sys_net_native_nanoFramework_Networking_NetworkHelper
 {
-    static const int FIELD_STATIC___ipAddressAvailable = 0;
-    static const int FIELD_STATIC___networkReady = 1;
-    static const int FIELD_STATIC___requiresDateTime = 2;
-    static const int FIELD_STATIC___networkHelperStatus = 3;
-    static const int FIELD_STATIC___helperException = 4;
-    static const int FIELD_STATIC___workingNetworkInterface = 5;
-    static const int FIELD_STATIC___ipConfiguration = 6;
-    static const int FIELD_STATIC___helperInstanciated = 7;
+    static const int FIELD_STATIC___ipAddressAvailable = 1;
+    static const int FIELD_STATIC___networkReady = 2;
+    static const int FIELD_STATIC___requiresDateTime = 3;
+    static const int FIELD_STATIC___networkHelperStatus = 4;
+    static const int FIELD_STATIC___helperException = 5;
+    static const int FIELD_STATIC___workingNetworkInterface = 6;
+    static const int FIELD_STATIC___ipConfiguration = 7;
+    static const int FIELD_STATIC___helperInstanciated = 8;
 
     //--//
 };
 
 struct Library_sys_net_native_System_Net_IPAddress
 {
-    static const int FIELD_STATIC__Any = 8;
-    static const int FIELD_STATIC__Loopback = 9;
-    static const int FIELD_STATIC__Broadcast = 10;
-    static const int FIELD_STATIC__None = 11;
-    static const int FIELD_STATIC__IPv6Any = 12;
-    static const int FIELD_STATIC__IPv6Loopback = 13;
+    static const int FIELD_STATIC__Any = 10;
+    static const int FIELD_STATIC__Loopback = 11;
+    static const int FIELD_STATIC__Broadcast = 12;
+    static const int FIELD_STATIC__None = 13;
+    static const int FIELD_STATIC__IPv6Any = 14;
+    static const int FIELD_STATIC__IPv6Loopback = 15;
 
     static const int FIELD__Address = 1;
     static const int FIELD___family = 2;
@@ -227,9 +227,9 @@ struct Library_sys_net_native_System_Net_NetworkInformation_NetworkAvailabilityE
 
 struct Library_sys_net_native_System_Net_NetworkInformation_NetworkChange
 {
-    static const int FIELD_STATIC__NetworkAddressChanged = 14;
-    static const int FIELD_STATIC__NetworkAvailabilityChanged = 15;
-    static const int FIELD_STATIC__NetworkAPStationChanged = 16;
+    static const int FIELD_STATIC__NetworkAddressChanged = 16;
+    static const int FIELD_STATIC__NetworkAvailabilityChanged = 17;
+    static const int FIELD_STATIC__NetworkAPStationChanged = 18;
 
     //--//
 };
@@ -358,10 +358,10 @@ struct Library_sys_net_native_System_Security_Cryptography_X509Certificates_X509
 
 struct Library_sys_net_native_System_Net_Security_SslStream
 {
-    static const int FIELD___sslVerification = 6;
-    static const int FIELD___useStoredDeviceCertificate = 7;
-    static const int FIELD___sslContext = 8;
-    static const int FIELD___isServer = 9;
+    static const int FIELD___sslVerification = 7;
+    static const int FIELD___useStoredDeviceCertificate = 8;
+    static const int FIELD___sslContext = 9;
+    static const int FIELD___isServer = 10;
 
     //--//
 };
@@ -380,14 +380,18 @@ struct Library_sys_net_native_System_Net_Sockets_NativeSocket
     NANOCLR_NATIVE_DECLARE(bind___STATIC__VOID__OBJECT__SystemNetEndPoint);
     NANOCLR_NATIVE_DECLARE(connect___STATIC__VOID__OBJECT__SystemNetEndPoint__BOOLEAN);
     NANOCLR_NATIVE_DECLARE(send___STATIC__I4__OBJECT__SZARRAY_U1__I4__I4__I4__I4);
+    NANOCLR_NATIVE_DECLARE(Send___STATIC__I4__OBJECT__SystemReadOnlySpan_1__I4__I4__I4__I4);
     NANOCLR_NATIVE_DECLARE(recv___STATIC__I4__OBJECT__SZARRAY_U1__I4__I4__I4__I4);
+    NANOCLR_NATIVE_DECLARE(Recv___STATIC__I4__OBJECT__SystemSpan_1__I4__I4__I4__I4);
     NANOCLR_NATIVE_DECLARE(close___STATIC__I4__OBJECT);
     NANOCLR_NATIVE_DECLARE(listen___STATIC__VOID__OBJECT__I4);
     NANOCLR_NATIVE_DECLARE(accept___STATIC__I4__OBJECT);
     NANOCLR_NATIVE_DECLARE(getaddrinfo___STATIC__VOID__STRING__BYREF_STRING__BYREF_SZARRAY_SZARRAY_U1);
     NANOCLR_NATIVE_DECLARE(shutdown___STATIC__VOID__OBJECT__I4__BYREF_I4);
     NANOCLR_NATIVE_DECLARE(sendto___STATIC__I4__OBJECT__SZARRAY_U1__I4__I4__I4__I4__SystemNetEndPoint);
+    NANOCLR_NATIVE_DECLARE(SendTo___STATIC__I4__OBJECT__SystemReadOnlySpan_1__I4__I4__I4__I4__SystemNetEndPoint);
     NANOCLR_NATIVE_DECLARE(recvfrom___STATIC__I4__OBJECT__SZARRAY_U1__I4__I4__I4__I4__BYREF_SystemNetEndPoint);
+    NANOCLR_NATIVE_DECLARE(RecvFrom___STATIC__I4__OBJECT__SystemSpan_1__I4__I4__I4__I4__BYREF_SystemNetEndPoint);
     NANOCLR_NATIVE_DECLARE(getpeername___STATIC__VOID__OBJECT__BYREF_SystemNetEndPoint);
     NANOCLR_NATIVE_DECLARE(getsockname___STATIC__VOID__OBJECT__BYREF_SystemNetEndPoint);
     NANOCLR_NATIVE_DECLARE(getsockopt___STATIC__VOID__OBJECT__I4__I4__SZARRAY_U1);
@@ -424,11 +428,11 @@ struct Library_sys_net_native_System_Net_Sockets_NativeSocket
 
 struct Library_sys_net_native_System_Net_Sockets_NetworkStream
 {
-    static const int FIELD___socket = 1;
-    static const int FIELD___socketType = 2;
-    static const int FIELD___remoteEndPoint = 3;
-    static const int FIELD___ownsSocket = 4;
-    static const int FIELD___disposed = 5;
+    static const int FIELD___socket = 2;
+    static const int FIELD___socketType = 3;
+    static const int FIELD___remoteEndPoint = 4;
+    static const int FIELD___ownsSocket = 5;
+    static const int FIELD___disposed = 6;
 
     //--//
 };

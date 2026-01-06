@@ -50,8 +50,19 @@ HRESULT Library_sys_net_native_System_Net_Sockets_NativeSocket::send___STATIC__I
     return SendRecvHelper(stack, true, false);
 }
 
+HRESULT Library_sys_net_native_System_Net_Sockets_NativeSocket::Send___STATIC__I4__OBJECT__SystemReadOnlySpan_1__I4__I4__I4__I4( CLR_RT_StackFrame &stack )
+{
+    NATIVE_PROFILE_CLR_NETWORK();
+    return SendRecvHelper(stack, true, false);
+}
+
 HRESULT Library_sys_net_native_System_Net_Sockets_NativeSocket::recv___STATIC__I4__OBJECT__SZARRAY_U1__I4__I4__I4__I4(
     CLR_RT_StackFrame &stack)
+{
+    NATIVE_PROFILE_CLR_NETWORK();
+    return SendRecvHelper(stack, false, false);
+}
+HRESULT Library_sys_net_native_System_Net_Sockets_NativeSocket::Recv___STATIC__I4__OBJECT__SystemSpan_1__I4__I4__I4__I4( CLR_RT_StackFrame &stack )
 {
     NATIVE_PROFILE_CLR_NETWORK();
     return SendRecvHelper(stack, false, false);
@@ -307,8 +318,20 @@ HRESULT Library_sys_net_native_System_Net_Sockets_NativeSocket::
     return SendRecvHelper(stack, true, true);
 }
 
+HRESULT Library_sys_net_native_System_Net_Sockets_NativeSocket::SendTo___STATIC__I4__OBJECT__SystemReadOnlySpan_1__I4__I4__I4__I4__SystemNetEndPoint( CLR_RT_StackFrame &stack )
+{
+    NATIVE_PROFILE_CLR_NETWORK();
+    return SendRecvHelper(stack, true, true);
+}
+
 HRESULT Library_sys_net_native_System_Net_Sockets_NativeSocket::
     recvfrom___STATIC__I4__OBJECT__SZARRAY_U1__I4__I4__I4__I4__BYREF_SystemNetEndPoint(CLR_RT_StackFrame &stack)
+{
+    NATIVE_PROFILE_CLR_NETWORK();
+    return SendRecvHelper(stack, false, true);
+}
+
+HRESULT Library_sys_net_native_System_Net_Sockets_NativeSocket::RecvFrom___STATIC__I4__OBJECT__SystemSpan_1__I4__I4__I4__I4__BYREF_SystemNetEndPoint( CLR_RT_StackFrame &stack )
 {
     NATIVE_PROFILE_CLR_NETWORK();
     return SendRecvHelper(stack, false, true);
