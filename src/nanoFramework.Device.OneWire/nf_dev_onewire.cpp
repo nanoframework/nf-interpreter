@@ -9,10 +9,11 @@
 
 static const CLR_RT_MethodHandler method_lookup[] =
 {
-    NULL,
-    NULL,
-    NULL,
-    NULL,
+    nullptr,
+    nullptr,
+    nullptr,
+    nullptr,
+    nullptr,
     Library_nf_dev_onewire_nanoFramework_Device_OneWire_OneWireHost::TouchReset___BOOLEAN,
     Library_nf_dev_onewire_nanoFramework_Device_OneWire_OneWireHost::TouchBit___BOOLEAN__BOOLEAN,
     Library_nf_dev_onewire_nanoFramework_Device_OneWire_OneWireHost::TouchByte___U1__U1,
@@ -20,9 +21,9 @@ static const CLR_RT_MethodHandler method_lookup[] =
     Library_nf_dev_onewire_nanoFramework_Device_OneWire_OneWireHost::ReadByte___U1,
     Library_nf_dev_onewire_nanoFramework_Device_OneWire_OneWireHost::FindFirstDevice___BOOLEAN__BOOLEAN__BOOLEAN,
     Library_nf_dev_onewire_nanoFramework_Device_OneWire_OneWireHost::FindNextDevice___BOOLEAN__BOOLEAN__BOOLEAN,
-    NULL,
-    NULL,
-    NULL,
+    nullptr,
+    nullptr,
+    nullptr,
     Library_nf_dev_onewire_nanoFramework_Device_OneWire_OneWireHost::NativeDispose___VOID,
     Library_nf_dev_onewire_nanoFramework_Device_OneWire_OneWireHost::NativeInit___VOID,
 };
@@ -30,9 +31,9 @@ static const CLR_RT_MethodHandler method_lookup[] =
 const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_nanoFramework_Device_OneWire =
 {
     "nanoFramework.Device.OneWire",
-    0xB95C43B4,
+    0xF530DE31,
     method_lookup,
-    { 100, 0, 4, 0 }
+    { 100, 2, 0, 0 }
 };
 
 // clang-format on

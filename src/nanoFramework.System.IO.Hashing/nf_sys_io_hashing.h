@@ -14,7 +14,7 @@ struct Library_nf_sys_io_hashing_System_IO_Hashing_Crc32
 {
     static const int FIELD___crc = 1;
 
-    NANOCLR_NATIVE_DECLARE(ComputeHash___STATIC__U4__U4__SystemSpanByte);
+    NANOCLR_NATIVE_DECLARE(ComputeHash___STATIC__U4__U4__SystemSpan_1);
 
     //--//
 };

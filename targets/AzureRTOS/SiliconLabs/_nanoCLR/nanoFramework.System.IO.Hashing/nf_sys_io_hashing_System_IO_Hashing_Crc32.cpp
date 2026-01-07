@@ -12,7 +12,7 @@
 
 typedef Library_corlib_native_System_Span_1 Span;
 
-HRESULT Library_nf_sys_io_hashing_System_IO_Hashing_Crc32::ComputeHash___STATIC__U4__U4__SystemSpanByte(
+HRESULT Library_nf_sys_io_hashing_System_IO_Hashing_Crc32::ComputeHash___STATIC__U4__U4__SystemSpan_1(
     CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();

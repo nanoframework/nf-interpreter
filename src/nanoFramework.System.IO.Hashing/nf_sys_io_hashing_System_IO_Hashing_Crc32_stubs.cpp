@@ -49,7 +49,7 @@ uint32_t ComputeCrc32(uint32_t crc, const uint8_t *buf, size_t len)
     return crc;
 }
 
-HRESULT Library_nf_sys_io_hashing_System_IO_Hashing_Crc32::ComputeHash___STATIC__U4__U4__SystemSpanByte(
+HRESULT Library_nf_sys_io_hashing_System_IO_Hashing_Crc32::ComputeHash___STATIC__U4__U4__SystemSpan_1(
     CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();

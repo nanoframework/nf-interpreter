@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (c) .NET Foundation and Contributors
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
@@ -10,6 +10,7 @@
 
 static const CLR_RT_MethodHandler method_lookup[] =
 {
+    nullptr,
     nullptr,
     nullptr,
     nullptr,
@@ -98,12 +99,13 @@ static const CLR_RT_MethodHandler method_lookup[] =
     nullptr,
     nullptr,
     nullptr,
+    nullptr,
 };
 
 const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_System_IO_Ports =
 {
     "System.IO.Ports",
-    0x26931685,
+    0xAE5C5296,
     method_lookup,
     { 100, 2, 0, 0 }
 };

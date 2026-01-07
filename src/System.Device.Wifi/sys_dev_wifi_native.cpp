@@ -84,7 +84,7 @@ static const CLR_RT_MethodHandler method_lookup[] =
 const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_System_Device_Wifi =
 {
     "System.Device.Wifi",
-    0x3D0D06BD,
+    0x441BBD71,
     method_lookup,
     { 100, 2, 0, 0 }
 };

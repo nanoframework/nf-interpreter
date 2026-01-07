@@ -48,4 +48,4 @@ struct Library_sys_dev_dac_native_System_Device_Dac_DacControllerManager
 
 extern const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_System_Device_Dac;
 
-#endif //SYS_DEV_DAC_NATIVE_H
+#endif // SYS_DEV_DAC_NATIVE_H

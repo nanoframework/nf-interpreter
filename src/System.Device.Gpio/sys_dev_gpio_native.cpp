@@ -103,7 +103,7 @@ static const CLR_RT_MethodHandler method_lookup[] =
 const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_System_Device_Gpio =
 {
     "System.Device.Gpio",
-    0x62452053,
+    0x664120C2,
     method_lookup,
     { 100, 2, 0, 0 }
 };

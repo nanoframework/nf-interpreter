@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (c) .NET Foundation and Contributors
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
@@ -10,6 +10,7 @@
 
 static const CLR_RT_MethodHandler method_lookup[] =
 {
+    nullptr,
     Library_nf_system_resourcemanager_System_Resources_ResourceManager::GetObjectInternal___OBJECT__I2,
     Library_nf_system_resourcemanager_System_Resources_ResourceManager::GetObjectInternal___OBJECT__I2__I4__I4,
     nullptr,
@@ -32,7 +33,7 @@ static const CLR_RT_MethodHandler method_lookup[] =
 const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_nanoFramework_ResourceManager =
 {
     "nanoFramework.ResourceManager",
-    0x874533DF,
+    0xB27D4793,
     method_lookup,
     { 100, 2, 0, 0 }
 };
