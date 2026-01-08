@@ -90,15 +90,6 @@ static const CLR_RT_MethodHandler method_lookup[] =
     nullptr,
     nullptr,
     nullptr,
-    nullptr,
-    nullptr,
-    nullptr,
-    nullptr,
-    nullptr,
-    nullptr,
-    nullptr,
-    nullptr,
-    nullptr,
     Library_nf_system_collections_System_Collections_Hashtable::Clear___VOID,
     nullptr,
     nullptr,
@@ -170,9 +161,9 @@ static const CLR_RT_MethodHandler method_lookup[] =
 const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_nanoFramework_System_Collections =
 {
     "nanoFramework.System.Collections",
-    0xDDDD285C,
+    0x4F82592A,
     method_lookup,
-    { 100, 2, 0, 1 }
+    { 100, 2, 0, 2 }
 };
 
 // clang-format on
