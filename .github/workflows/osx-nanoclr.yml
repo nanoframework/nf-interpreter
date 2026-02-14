@@ -1,0 +1,47 @@
+name: osx-nanoclr
+
+on:
+  push:
+    paths:
+      - "targets/osx/**"
+      - ".github/workflows/osx-nanoclr.yml"
+  pull_request:
+    paths:
+      - "targets/osx/**"
+      - ".github/workflows/osx-nanoclr.yml"
+
+jobs:
+  build-osx-nanoclr:
+    runs-on: macos-14
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Ninja (if missing)
+        run: |
+          if ! command -v ninja >/dev/null 2>&1; then
+            brew install ninja
+          fi
+
+      - name: Configure
+        run: |
+          cmake -S targets/osx -B build/osx -G Ninja \
+            -DNANO_OSX_ARCH=arm64 \
+            -DNANO_OSX_ENABLE_SMOKE=ON
+
+      - name: Build
+        run: cmake --build build/osx --verbose
+
+      - name: Smoke Run
+        run: |
+          ./build/osx/bin/nanoFramework.nanoCLR --version | tee build/osx/smoke.log
+
+      - name: Upload Artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: osx-nanoclr
+          path: |
+            build/osx/bin/nanoFramework.nanoCLR
+            build/osx/smoke.log
