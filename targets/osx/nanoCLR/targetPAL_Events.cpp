@@ -6,6 +6,7 @@
 #include <chrono>
 #include <condition_variable>
 #include <cstdint>
+#include <atomic>
 #include <mutex>
 #include <thread>
 
@@ -14,6 +15,8 @@ namespace
 std::mutex s_eventsMutex;
 std::condition_variable s_eventsCondition;
 uint32_t s_systemEvents = 0;
+std::atomic<uint64_t> s_boolTimerGeneration{0};
+bool *s_savedTimerCompleteFlag = nullptr;
 } // namespace
 
 bool Events_Initialize_Platform()
@@ -29,11 +32,23 @@ void Events_SetBoolTimer(bool *timerCompleteFlag, uint32_t millisecondsFromNow)
         return;
     }
 
+    s_savedTimerCompleteFlag = timerCompleteFlag;
     *timerCompleteFlag = false;
+    const uint64_t myGen = s_boolTimerGeneration.fetch_add(1, std::memory_order_acq_rel) + 1;
 
-    std::thread([timerCompleteFlag, millisecondsFromNow]() {
+    std::thread([millisecondsFromNow, myGen]() {
         std::this_thread::sleep_for(std::chrono::milliseconds(millisecondsFromNow));
-        *timerCompleteFlag = true;
+
+        if (s_boolTimerGeneration.load(std::memory_order_acquire) != myGen)
+        {
+            return;
+        }
+
+        if (s_savedTimerCompleteFlag != nullptr)
+        {
+            // TODO: Scaffold placeholder until this is wired into a proper completion/event path.
+            *s_savedTimerCompleteFlag = true;
+        }
     }).detach();
 }
 
