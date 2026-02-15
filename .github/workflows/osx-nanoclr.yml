@@ -35,6 +35,7 @@ jobs:
 
       - name: Smoke Run
         run: |
+          set -euo pipefail
           ./build/osx/bin/nanoFramework.nanoCLR --version | tee build/osx/smoke.log
 
       - name: Upload Artifacts

@@ -20,6 +20,14 @@ bool nanoCLR_OSX_LoadFile(const std::string &path, std::vector<unsigned char> &c
     }
 
     content.assign(std::istreambuf_iterator<char>(in), std::istreambuf_iterator<char>());
+
+    if (in.bad() || (in.fail() && !in.eof()))
+    {
+        error = "Failed reading file: " + path;
+        content.clear();
+        return false;
+    }
+
     return true;
 }
 

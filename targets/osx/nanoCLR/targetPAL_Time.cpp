@@ -5,13 +5,14 @@
 
 #include <atomic>
 #include <cstdint>
+#include "targetPAL_time.h"
 
 namespace
 {
 std::atomic<uint64_t> s_nextCompareValue{0};
 } // namespace
 
-void Time_SetCompare(uint64_t compareValue)
+extern "C" void Time_SetCompare(uint64_t compareValue)
 {
     // TODO: replace with a real completion timer queue wired into HAL_COMPLETION.
     s_nextCompareValue.store(compareValue, std::memory_order_relaxed);

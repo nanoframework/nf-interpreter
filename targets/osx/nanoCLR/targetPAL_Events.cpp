@@ -23,6 +23,7 @@ bool Events_Initialize_Platform()
 
 void Events_SetBoolTimer(bool *timerCompleteFlag, uint32_t millisecondsFromNow)
 {
+    // TODO: Placeholder timer implementation. Make this path thread-safe when runtime integration is wired.
     if (timerCompleteFlag == nullptr)
     {
         return;

@@ -30,7 +30,7 @@ void HeapLocation(unsigned char *&BaseAddress, unsigned int &SizeInBytes)
     });
 
     BaseAddress = s_MemoryStart;
-    SizeInBytes = static_cast<unsigned int>(c_DefaultHeapSizeBytes);
+    SizeInBytes = (s_MemoryStart != nullptr) ? static_cast<unsigned int>(c_DefaultHeapSizeBytes) : 0;
 }
 
 void CustomHeapLocation(unsigned char *&BaseAddress, unsigned int &SizeInBytes)
@@ -46,5 +46,5 @@ void CustomHeapLocation(unsigned char *&BaseAddress, unsigned int &SizeInBytes)
     });
 
     BaseAddress = s_CustomHeapStart;
-    SizeInBytes = static_cast<unsigned int>(c_DefaultHeapSizeBytes);
+    SizeInBytes = (s_CustomHeapStart != nullptr) ? static_cast<unsigned int>(c_DefaultHeapSizeBytes) : 0;
 }

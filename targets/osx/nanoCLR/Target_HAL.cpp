@@ -6,7 +6,7 @@
 #include <iostream>
 #include <string>
 
-void HAL_Windows_Debug_Print(char *szText)
+void HAL_Windows_Debug_Print(const char *szText)
 {
     if (szText == nullptr)
     {

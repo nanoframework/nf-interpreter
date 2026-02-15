@@ -8,6 +8,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstdint>
+#include <strings.h>
 #include <thread>
 
 bool HAL_Windows_IsShutdownPending()
@@ -17,6 +18,8 @@ bool HAL_Windows_IsShutdownPending()
 
 void HAL_Windows_AcquireGlobalLock()
 {
+    // TODO: This lock is currently a stub and can be inconsistent with HasGlobalLock().
+    // Replace with a real host lock when shared runtime threading is wired for macOS.
 }
 
 void HAL_Windows_ReleaseGlobalLock()
@@ -76,26 +79,7 @@ int hal_snprintf(char *buffer, size_t len, const char *format, ...)
 
 int hal_stricmp(const char *dst, const char *src)
 {
-    int f = 0;
-    int l = 0;
-
-    do
-    {
-        f = static_cast<unsigned char>(*(dst++));
-        l = static_cast<unsigned char>(*(src++));
-
-        if (f >= 'A' && f <= 'Z')
-        {
-            f -= 'A' - 'a';
-        }
-
-        if (l >= 'A' && l <= 'Z')
-        {
-            l -= 'A' - 'a';
-        }
-    } while (f && (f == l));
-
-    return f - l;
+    return strcasecmp(dst, src);
 }
 
 void CPU_Hibernate()

@@ -21,7 +21,7 @@ void HAL_Time_Sleep_MicroSeconds_InterruptEnabled(unsigned int uSec)
 uint64_t HAL_Time_CurrentSysTicks()
 {
     struct timespec ts;
-    clock_gettime(CLOCK_REALTIME, &ts);
+    clock_gettime(CLOCK_MONOTONIC, &ts);
 
     // Convert to .NET ticks (100ns units).
     return (static_cast<uint64_t>(ts.tv_sec) * 10000000ULL) + (static_cast<uint64_t>(ts.tv_nsec) / 100ULL);

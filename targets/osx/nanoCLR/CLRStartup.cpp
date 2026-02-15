@@ -16,8 +16,10 @@ extern "C"
         bool WaitForDebugger;
         bool EnterDebuggerLoopAfterExit;
         bool RevertToBooterOnFault;
+#if defined(VIRTUAL_DEVICE)
         bool PerformGarbageCollection;
         bool PerformHeapCompaction;
+#endif
     } CLR_SETTINGS;
 
     void ClrExit()

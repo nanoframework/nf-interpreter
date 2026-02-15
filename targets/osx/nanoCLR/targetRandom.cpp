@@ -15,7 +15,7 @@ uint32_t nanoCLR_OSX_NextRandomU32()
 double nanoCLR_OSX_NextRandomDouble()
 {
     static std::random_device randomDevice;
-    return static_cast<double>(randomDevice()) / static_cast<double>(0xFFFFFFFFU);
+    return static_cast<double>(randomDevice()) / static_cast<double>(0x100000000ULL);
 }
 
 void nanoCLR_OSX_FillRandomBytes(uint8_t *buffer, unsigned int count)
