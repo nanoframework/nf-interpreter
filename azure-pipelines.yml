@@ -177,6 +177,7 @@ jobs:
               echo "##vso[task.setvariable variable=BUILD_TI;isOutput=true]false"
               echo "##vso[task.setvariable variable=BUILD_AZURERTOS;isOutput=true]false"
               echo "##vso[task.setvariable variable=BUILD_WIN32;isOutput=true]false"  
+              echo "##vso[task.setvariable variable=BUILD_OSX;isOutput=true]false"  
               echo "##vso[task.setvariable variable=BUILD_NANOCLR_CLI;isOutput=true]false"  
               echo "##vso[task.setvariable variable=BUILD_ALL;isOutput=true]false"  
 
@@ -249,6 +250,14 @@ jobs:
                   echo "##vso[task.setvariable variable=BUILD_WIN32;isOutput=true]true"
 
                   Write-host "##[command] Building nanoCLR target"
+              }
+
+              if( ($files.where{$_.Contains('targets/osx')}).Count -gt 0)
+              {
+                  # files at OSX folder
+                  echo "##vso[task.setvariable variable=BUILD_OSX;isOutput=true]true"
+
+                  Write-host "##[command] Building OSX nanoCLR target"
               }
               
               if( 
@@ -1034,6 +1043,36 @@ jobs:
       - template: azure-pipelines-templates/publish-nanoclr.yml
 
   #################
+  # OSX host target
+  - job: Build_OSX_nanoCLR
+    dependsOn:
+      - Check_Build_Options
+
+    condition: >-
+      and(
+        succeeded(),
+        eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_OSX'], true)
+      )
+
+    pool:
+      vmImage: "macos-14"
+
+    steps:
+      - checkout: self
+
+      - bash: |
+          set -euo pipefail
+
+          if ! command -v ninja >/dev/null; then
+            brew install ninja
+          fi
+
+          cmake -S targets/osx -B build/osx -G Ninja -DNANO_OSX_ARCH=arm64 -DNANO_OSX_ENABLE_SMOKE=ON
+          cmake --build build/osx
+          ./build/osx/bin/nanoFramework.nanoCLR --version | tee build/osx/smoke.log
+        displayName: Build and smoke run OSX nanoCLR
+
+  #################
   # nanoCLR CLI tool
   - job: Build_nanoCLR_CLI
     condition: >-
@@ -1367,6 +1406,7 @@ jobs:
       - Build_TI_SimpleLink_targets
       - Build_Azure_RTOS_targets
       - Build_WIN32_nanoCLR
+      - Build_OSX_nanoCLR
       - Build_nanoCLR_CLI
       - Check_Code_Style
     condition: >-
@@ -1379,6 +1419,7 @@ jobs:
           failed('Build_TI_SimpleLink_targets'),
           failed('Build_Azure_RTOS_targets'),
           failed('Build_WIN32_nanoCLR'),
+          failed('Build_OSX_nanoCLR'),
           failed('Build_nanoCLR_CLI')
         )
       )
