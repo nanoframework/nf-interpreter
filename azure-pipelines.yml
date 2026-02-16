@@ -354,7 +354,8 @@ jobs:
           eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_FREERTOS'], true),
           eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_TI'], true),
           eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_AZURERTOS'], true),
-          eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_WIN32'], true)
+          eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_WIN32'], true),
+          eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_OSX'], true)
         )
       )
 
@@ -1045,14 +1046,28 @@ jobs:
   #################
   # OSX host target
   - job: Build_OSX_nanoCLR
+    condition: >-
+      or(
+        and(
+          succeeded('Check_Code_Style'),
+          ne( dependencies.Check_Build_Options.outputs['BuildOptions.SKIP_BUILD'], true ),
+          or(
+            eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ALL'], true),
+            eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_OSX'], true)
+          )
+        ),
+        and(
+          eq(variables['Build.Reason'], 'Manual'),
+          or(
+            eq(variables['BUILD_ALL__'], 'true'),
+            eq(variables['BUILD_OSX__'], 'true')
+          )
+        )
+      )
+
     dependsOn:
       - Check_Build_Options
-
-    condition: >-
-      and(
-        succeeded(),
-        eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_OSX'], true)
-      )
+      - Check_Code_Style
 
     pool:
       vmImage: "macos-14"
@@ -1063,13 +1078,13 @@ jobs:
       - bash: |
           set -euo pipefail
 
-          if ! command -v ninja >/dev/null; then
-            brew install ninja
-          fi
-
           cmake -S targets/osx -B build/osx -G Ninja -DNANO_OSX_ARCH=arm64 -DNANO_OSX_ENABLE_SMOKE=ON
           cmake --build build/osx
           ./build/osx/bin/nanoFramework.nanoCLR --version | tee build/osx/smoke.log
+          if ! grep -Eq '[0-9]+\.[0-9]+\.[0-9]+' build/osx/smoke.log; then
+            echo "ERROR: smoke output validation failed, expected semantic version in --version output."
+            exit 1
+          fi
         displayName: Build and smoke run OSX nanoCLR
 
   #################
