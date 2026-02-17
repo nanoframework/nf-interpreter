@@ -1078,7 +1078,17 @@ jobs:
       - bash: |
           set -euo pipefail
 
-          cmake -S targets/osx -B build/osx -G Ninja -DNANO_OSX_ARCH=arm64 -DNANO_OSX_ENABLE_SMOKE=ON
+          AGENT_ARCH="$(uname -m)"
+          if [ "${AGENT_ARCH}" = "arm64" ]; then
+            NANO_OSX_ARCH="arm64"
+          else
+            NANO_OSX_ARCH="x86_64"
+          fi
+
+          echo "Agent architecture: ${AGENT_ARCH}"
+          echo "Using NANO_OSX_ARCH=${NANO_OSX_ARCH}"
+
+          cmake -S targets/osx -B build/osx -G Ninja -DNANO_OSX_ARCH="${NANO_OSX_ARCH}" -DNANO_OSX_ENABLE_SMOKE=ON
           cmake --build build/osx
           ./build/osx/bin/nanoFramework.nanoCLR --version | tee build/osx/smoke.log
           if ! grep -Eq '[0-9]+\.[0-9]+\.[0-9]+' build/osx/smoke.log; then
