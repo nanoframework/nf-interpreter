@@ -418,6 +418,29 @@ jobs:
       TargetPlatform: "stm32"
 
     steps:
+      
+      - script: |
+          echo Checking Ninja installation...
+          if exist "C:\ProgramData\Chocolatey\bin\ninja.exe" (
+            echo [OK] Ninja.exe found at C:\ProgramData\Chocolatey\bin\ninja.exe
+          ) else (
+            echo [ERROR] Ninja.exe NOT found at C:\ProgramData\Chocolatey\bin\ninja.exe
+          )
+          echo.
+          echo Checking PATH variable...
+          echo %PATH%
+          echo.
+          echo Checking if Chocolatey bin is in PATH...
+          echo %PATH% | findstr /C:"C:\ProgramData\Chocolatey\bin" >nul && (
+            echo [OK] C:\ProgramData\Chocolatey\bin is in PATH
+          ) || (
+            echo [ERROR] C:\ProgramData\Chocolatey\bin is NOT in PATH
+          )
+          echo.
+          echo Checking Ninja availability...
+          ninja --version
+        displayName: Tests for Ninja presence and version
+
       - template: azure-pipelines-templates/build-preparations.yml
       - template: azure-pipelines-templates/nb-gitversioning.yml
       - template: azure-pipelines-templates/download-install-arm-gcc-toolchain.yml
@@ -707,6 +730,29 @@ jobs:
       TargetPlatform: "ti_simplelink"
 
     steps:
+
+      - script: |
+          echo Checking Ninja installation...
+          if exist "C:\ProgramData\Chocolatey\bin\ninja.exe" (
+            echo [OK] Ninja.exe found at C:\ProgramData\Chocolatey\bin\ninja.exe
+          ) else (
+            echo [ERROR] Ninja.exe NOT found at C:\ProgramData\Chocolatey\bin\ninja.exe
+          )
+          echo.
+          echo Checking PATH variable...
+          echo %PATH%
+          echo.
+          echo Checking if Chocolatey bin is in PATH...
+          echo %PATH% | findstr /C:"C:\ProgramData\Chocolatey\bin" >nul && (
+            echo [OK] C:\ProgramData\Chocolatey\bin is in PATH
+          ) || (
+            echo [ERROR] C:\ProgramData\Chocolatey\bin is NOT in PATH
+          )
+          echo.
+          echo Checking Ninja availability...
+          ninja --version
+        displayName: Tests for Ninja presence and version
+
       - template: azure-pipelines-templates/build-preparations.yml
       - template: azure-pipelines-templates/nb-gitversioning.yml
       - template: azure-pipelines-templates/download-install-arm-gcc-toolchain.yml
