@@ -7,7 +7,12 @@ parameters:
     default: $(Build.SourcesDirectory)
 
 steps:
+  - script: |
+      echo Checking PATH variable...
+      echo %PATH%
+      echo.
 
+    displayName: Check path
   - script: |
       dir
     displayName: dummy step
