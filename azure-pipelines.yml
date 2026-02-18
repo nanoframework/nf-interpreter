@@ -447,6 +447,34 @@ jobs:
       - template: azure-pipelines-templates/download-install-ninja.yml
       - template: azure-pipelines-templates/download-srecord.yml
       - template: azure-pipelines-templates/download-hexdfu.yml
+
+      - script: |
+          echo ============================================
+          echo Diagnostic: Verifying tools before CMake
+          echo ============================================
+          echo.
+          echo Current PATH:
+          echo %PATH%
+          echo.
+          echo Checking for arm-none-eabi-gcc in PATH...
+          where arm-none-eabi-gcc.exe
+          echo.
+          echo Checking for ninja in PATH...
+          where ninja.exe
+          echo.
+          echo Checking Agent.TempDirectory contents:
+          dir "%AGENT_TEMPDIRECTORY%" /b
+          echo.
+          echo Checking for GCC toolchain directories:
+          dir "%AGENT_TEMPDIRECTORY%\arm-gnu-toolchain*" /b /s | findstr "bin"
+          echo.
+          echo Testing arm-none-eabi-gcc:
+          arm-none-eabi-gcc --version
+          echo.
+          echo Testing ninja:
+          ninja --version
+        displayName: Verify ARM GCC and Ninja availability
+
       - template: azure-pipelines-templates/build-chibios-stm32-targets.yml
       - template: azure-pipelines-templates/pack-publish-artifacts.yml
       - template: azure-pipelines-templates/publish-cloudsmith.yml
@@ -757,6 +785,34 @@ jobs:
       - template: azure-pipelines-templates/nb-gitversioning.yml
       - template: azure-pipelines-templates/download-install-arm-gcc-toolchain.yml
       - template: azure-pipelines-templates/download-install-ninja.yml
+
+      - script: |
+          echo ============================================
+          echo Diagnostic: Verifying tools before CMake
+          echo ============================================
+          echo.
+          echo Current PATH:
+          echo %PATH%
+          echo.
+          echo Checking for arm-none-eabi-gcc in PATH...
+          where arm-none-eabi-gcc.exe
+          echo.
+          echo Checking for ninja in PATH...
+          where ninja.exe
+          echo.
+          echo Checking Agent.TempDirectory contents:
+          dir "%AGENT_TEMPDIRECTORY%" /b
+          echo.
+          echo Checking for GCC toolchain directories:
+          dir "%AGENT_TEMPDIRECTORY%\arm-gnu-toolchain*" /b /s | findstr "bin"
+          echo.
+          echo Testing arm-none-eabi-gcc:
+          arm-none-eabi-gcc --version
+          echo.
+          echo Testing ninja:
+          ninja --version
+        displayName: Verify ARM GCC and Ninja availability
+
       - template: azure-pipelines-templates/build-ti-simplelink-targets.yml
       - template: azure-pipelines-templates/pack-publish-artifacts.yml
       - template: azure-pipelines-templates/publish-cloudsmith.yml
