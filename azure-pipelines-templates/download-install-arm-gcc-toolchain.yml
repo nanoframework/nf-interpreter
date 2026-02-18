@@ -35,9 +35,9 @@ steps:
 
   - script: |
       echo Adding ARM GCC toolchain to PATH...
-      echo GCC path is: $(Agent.TempDirectory)\arm-gnu-toolchain-${{ parameters.gccArmVersion }}-mingw-w64-i686-arm-none-eabi\arm-gnu-toolchain-${{ parameters.gccArmVersion }}-mingw-w64-i686-arm-none-eabi\arm-none-eabi\bin
-      echo ##vso[task.prependpath]$(Agent.TempDirectory)\arm-gnu-toolchain-${{ parameters.gccArmVersion }}-mingw-w64-i686-arm-none-eabi\arm-gnu-toolchain-${{ parameters.gccArmVersion }}-mingw-w64-i686-arm-none-eabi\arm-none-eabi\bin
-      echo ##vso[task.prependpath]$(Agent.TempDirectory)\arm-gnu-toolchain-${{ parameters.gccArmVersion }}-mingw-w64-i686-arm-none-eabi\arm-none-eabi\bin
+      echo GCC path is: $(Agent.TempDirectory)\arm-gnu-toolchain-${{ parameters.gccArmVersion }}-mingw-w64-i686-arm-none-eabi\arm-gnu-toolchain-${{ parameters.gccArmVersion }}-mingw-w64-i686-arm-none-eabi\bin
+      echo ##vso[task.prependpath]$(Agent.TempDirectory)\arm-gnu-toolchain-${{ parameters.gccArmVersion }}-mingw-w64-i686-arm-none-eabi\arm-gnu-toolchain-${{ parameters.gccArmVersion }}-mingw-w64-i686-arm-none-eabi\bin
+      echo ##vso[task.prependpath]$(Agent.TempDirectory)\arm-gnu-toolchain-${{ parameters.gccArmVersion }}-mingw-w64-i686-arm-none-eabi\bin
     displayName: Add GCC to PATH
 
   - script: |
