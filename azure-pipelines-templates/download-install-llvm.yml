@@ -38,6 +38,7 @@ steps:
       archiveFilePatterns: '$(Agent.TempDirectory)\LLVM-18.1.7-win64.exe'
       destinationFolder: '$(Agent.TempDirectory)\llvm'
 
-  - script: echo ##vso[task.prependpath]$(Agent.TempDirectory)\llvm\bin
+  - script: |
+      echo ##vso[task.prependpath]$(Agent.TempDirectory)\llvm\bin
     displayName: Add LLVM to PATH
     condition: ne(variables['System.PullRequest.PullRequestId'], '')

@@ -311,7 +311,6 @@ jobs:
       - template: azure-pipelines-templates/build-preparations.yml
       - template: azure-pipelines-templates/nb-gitversioning.yml
       - template: azure-pipelines-templates/download-install-arm-gcc-toolchain.yml
-      - template: azure-pipelines-templates/download-install-ninja.yml
       - template: azure-pipelines-templates/download-srecord.yml
       - template: azure-pipelines-templates/download-hexdfu.yml
       - template: azure-pipelines-templates/build-chibios-stm32-targets.yml
@@ -637,9 +636,6 @@ jobs:
         parameters:
           repoDirectory: '$(Agent.BuildDirectory)/s/nf-interpreter'
       - template: azure-pipelines-templates/download-install-esp32-build-components.yml
-      - template: azure-pipelines-templates/download-install-ninja.yml
-        parameters:
-          repoDirectory: '$(Agent.BuildDirectory)/s/nf-interpreter'
       - template: azure-pipelines-templates/build-espressif-esp32-targets.yml
         parameters:
           repoDirectory: '$(Agent.BuildDirectory)/s/nf-interpreter'
@@ -708,7 +704,6 @@ jobs:
       - template: azure-pipelines-templates/build-preparations.yml
       - template: azure-pipelines-templates/nb-gitversioning.yml
       - template: azure-pipelines-templates/download-install-arm-gcc-toolchain.yml
-      - template: azure-pipelines-templates/download-install-ninja.yml
       - template: azure-pipelines-templates/build-ti-simplelink-targets.yml
       - template: azure-pipelines-templates/pack-publish-artifacts.yml
       - template: azure-pipelines-templates/publish-cloudsmith.yml
