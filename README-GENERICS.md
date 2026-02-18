@@ -80,7 +80,11 @@ These links provide the `.vsix` installer for the extension. (You can also set u
 
 Once the preview extension is installed, Visual Studio will be aware of generics support for .NET nanoFramework projects. This extension update is necessary – older versions of the extension (from the official VS Marketplace) do not understand generics and would flag errors or fail to deploy projects using generics.
 
-> **Warning:** Despite our efforts to make this possible using the VS extension preview, it’s not possible to support pre and post-generics projects with the same extension. Therefore, you have to install the preview version for generics support or a stable one to work with the current stable versions. It is not an option to install pre and post-generics extensions in VS2019 and VS2022, for example, as both use the same msbuild components for the project system and builds.
+> **Warning:** Pre- and post-generics projects cannot be supported by the same Visual Studio extension instance. To use both flavors:
+>
+> - Install each flavor into a different Visual Studio major version.
+> - Supported on the same machine starting with VS2022 (for example, pre-generics in VS2022 and post-generics in VS2026).
+> - Not supported on a machine with VS2019 and VS2022 together because they share the same MSBuild components.
 
 ## Updating NuGet Packages to 2.0+ Preview
 
