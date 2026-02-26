@@ -42,7 +42,8 @@
                 "API_System.IO.FileSystem": "ON",
                 "API_nanoFramework.ResourceManager": "ON",
                 "API_nanoFramework.System.Collections": "ON",
-                "API_nanoFramework.System.Text": "ON"
+                "API_nanoFramework.System.Text": "ON",
+                "API_nanoFramework.System.Security.Cryptography": "ON"
             }
         }
     ],

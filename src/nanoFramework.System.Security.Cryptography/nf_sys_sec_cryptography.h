@@ -60,6 +60,17 @@ struct Library_nf_sys_sec_cryptography_System_Security_Cryptography_HMACSHA256
     //--//
 };
 
+struct Library_nf_sys_sec_cryptography_System_Security_Cryptography_HMACSHA512
+{
+    static const int FIELD___disposed = 1;
+    static const int FIELD___keyValue = 2;
+    static const int FIELD___hashValue = 3;
+
+    NANOCLR_NATIVE_DECLARE(HashCore___STATIC__SZARRAY_U1__SZARRAY_U1__SZARRAY_U1);
+
+    //--//
+};
+
 extern const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_nanoFramework_System_Security_Cryptography;
 
 #endif // NF_SYS_SEC_CRYPTOGRAPHY_H
