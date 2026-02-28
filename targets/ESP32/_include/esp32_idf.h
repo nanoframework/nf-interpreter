@@ -63,8 +63,13 @@
 #include <driver/uart.h>
 #include <driver/ledc.h>
 
+#if defined(CONFIG_IDF_TARGET_ESP32)
+// Use legacy ADC driver for ESP32 for now as the new one also requires the new I2S driver due to dependency because of
+// internal DAC other ESP32 variants don't have DAC so use the new ADC driver
 #include <driver/adc.h>
-// #include <esp_adc/adc_oneshot.h>
+#else
+#include <esp_adc/adc_oneshot.h>
+#endif
 
 #if defined(CONFIG_IDF_TARGET_ESP32) || defined(CONFIG_IDF_TARGET_ESP32S2)
 #include <driver/dac_oneshot.h>
