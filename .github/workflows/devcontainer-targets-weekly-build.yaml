@@ -5,7 +5,7 @@ on:
     paths:
       - '.github/workflows/devcontainer-targets-weekly-build.yaml'
   schedule:
-    - cron: '0 3 * * 0' # Runs at 03:00 UTC on sunday every week
+    - cron: '20 3 * * 0' # Runs at 03:20 UTC on sunday every week
 
 
 jobs:
