@@ -50,7 +50,7 @@ jobs:
           submodules: true
 
       - name: Free Disk Space (Ubuntu)
-        uses: jlumbroso/free-disk-space@main
+        uses: jlumbroso/free-disk-space@v1.3.1
         with:
           # this might remove tools that are actually needed,
           # when set to "true" but frees about 6 GB
