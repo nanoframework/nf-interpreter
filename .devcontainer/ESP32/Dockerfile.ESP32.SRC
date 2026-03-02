@@ -62,7 +62,7 @@ ENV PATH=/usr/bin/cmake/bin:${PATH}
 
 # Install ESP-IDF
 ENV IDF_PATH=/sources/esp-idf
-ENV ESP_PATCH_VER=esp-14.2.0_20241119
+ENV ESP_PATCH_VER=esp-14.2.0_20251107
 # This is now taking care in the following line
 # RUN python -m pip install -r $IDF_PATH/requirements.txt
 RUN $IDF_PATH/install.sh
