@@ -455,12 +455,59 @@ HRESULT Library_sys_net_native_System_Net_Sockets_NativeSocket::BindConnectHelpe
     }
     else
     {
+        CLR_RT_HeapBlock hbTimeout;
+        CLR_INT64 *timeout;
+        bool fRes = true;
+
         ret = SOCK_connect(handle, &addr, addrLen);
 
         fThrowOnWouldBlock = (stack.Arg2().NumericByRefConst().s4 != 0);
 
         if (!fThrowOnWouldBlock && SOCK_getsocklasterror(handle) == SOCK_EWOULDBLOCK)
         {
+            // Non-blocking connect: wait for connection to complete before returning
+            // so that subsequent send/recv calls don't hit an unconnected socket.
+            // Use a reasonable timeout for connection establishment.
+            // !! need to cast to CLR_INT64 otherwise it wont setup a proper timeout infinite
+            hbTimeout.SetInteger((CLR_INT64)30000 * TIME_CONVERSION__TO_MILLISECONDS);
+
+            NANOCLR_CHECK_HRESULT(stack.SetupTimeoutFromTicks(hbTimeout, timeout));
+
+            while (fRes)
+            {
+                // Check if the socket is writable (connection complete) or in exception state (connection
+                // failed)
+                CLR_INT32 selectResult = Helper__SelectSocket(handle, 1);
+
+                if (selectResult != 0)
+                {
+                    if (selectResult == SOCK_SOCKET_ERROR)
+                    {
+                        // Connection failed, get the actual error
+                        stack.PopValue(); // Timeout
+
+                        NANOCLR_CHECK_HRESULT(ThrowOnError(stack, SOCK_SOCKET_ERROR));
+                    }
+
+                    // Socket is writable, connection completed successfully
+                    break;
+                }
+
+                // Clear stale events and yield
+                g_CLR_RT_ExecutionEngine.m_raisedEvents &= ~Event_Socket;
+
+                NANOCLR_CHECK_HRESULT(
+                    g_CLR_RT_ExecutionEngine.WaitEvents(stack.m_owningThread, *timeout, Event_Socket, fRes));
+            }
+
+            stack.PopValue(); // Timeout
+
+            if (!fRes)
+            {
+                ThrowError(stack, SOCK_ETIMEDOUT);
+                NANOCLR_SET_AND_LEAVE(CLR_E_PROCESS_EXCEPTION);
+            }
+
             NANOCLR_SET_AND_LEAVE(S_OK);
         }
     }
@@ -794,6 +841,10 @@ HRESULT Library_sys_net_native_System_Net_Sockets_NativeSocket::SendRecvHelper(
             if (ret != 0)
                 break;
 
+            // Clear any stale socket events so the thread truly suspends
+            // rather than busy-spinning on events from unrelated socket activity
+            g_CLR_RT_ExecutionEngine.m_raisedEvents &= ~Event_Socket;
+
             // non-blocking - allow other threads to run while we wait for handle activity
             NANOCLR_CHECK_HRESULT(
                 g_CLR_RT_ExecutionEngine.WaitEvents(stack.m_owningThread, *timeout, Event_Socket, fRes));
@@ -862,6 +913,23 @@ HRESULT Library_sys_net_native_System_Net_Sockets_NativeSocket::SendRecvHelper(
             {
                 ret = SOCK_SOCKET_ERROR;
                 break;
+            }
+
+            // Clear stale event and yield to allow network stack to process
+            // Without this, the loop busy-spins burning CPU and starving the
+            // network stack, which prevents the socket from becoming ready
+            g_CLR_RT_ExecutionEngine.m_raisedEvents &= ~Event_Socket;
+
+            NANOCLR_CHECK_HRESULT(
+                g_CLR_RT_ExecutionEngine.WaitEvents(stack.m_owningThread, *timeout, Event_Socket, fRes));
+
+            if (!fRes)
+            {
+                ret = SOCK_SOCKET_ERROR;
+
+                ThrowError(stack, SOCK_ETIMEDOUT);
+
+                NANOCLR_SET_AND_LEAVE(CLR_E_PROCESS_EXCEPTION);
             }
 
             continue;
