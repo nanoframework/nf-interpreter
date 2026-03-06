@@ -14,3 +14,13 @@ HRESULT Library_sys_net_native_System_Net_Security_CertificateManager::
 
     NANOCLR_NOCLEANUP();
 }
+
+HRESULT Library_sys_net_native_System_Net_Security_CertificateManager::GetDevicePublicKeyRaw___STATIC__SZARRAY_U1(
+    CLR_RT_StackFrame &stack)
+{
+    NANOCLR_HEADER();
+
+    NANOCLR_SET_AND_LEAVE(stack.NotImplementedStub());
+
+    NANOCLR_NOCLEANUP();
+}
