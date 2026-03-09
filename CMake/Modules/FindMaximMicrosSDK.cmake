@@ -21,9 +21,9 @@ if(TARGET_SERIES_NAME_INDEX EQUAL -1)
 endif()
 
 # including here the CMake files for the source files specific to the target series
-include(AzureRTOS_${TARGET_SERIES}_sources)
+include(ThreadX_${TARGET_SERIES}_sources)
 # and here the GCC options tuned for the target series 
-include(AzureRTOS_${TARGET_SERIES}_GCC_options)
+include(ThreadX_${TARGET_SERIES}_GCC_options)
 
 list(APPEND MaximMicrosSDK_INCLUDE_DIRS ${maxim_micros_sdk_SOURCE_DIR}/Libraries)
 list(APPEND MaximMicrosSDK_INCLUDE_DIRS ${maxim_micros_sdk_SOURCE_DIR}/Libraries/PeriphDrivers)

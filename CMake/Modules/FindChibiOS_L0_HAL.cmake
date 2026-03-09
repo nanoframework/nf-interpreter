@@ -80,12 +80,12 @@ list(APPEND CHIBIOS_HAL_SOURCES ${CMAKE_SOURCE_DIR}/targets/ChibiOS/_nf-overlay/
 # list(APPEND CHIBIOS_SOURCES ${CMAKE_SOURCE_DIR}/targets/ChibiOS/_nf-overlay/os/hal/src/<path-here>)
 ##########################################################################################################################
 
-# OSHAL sources need to be added for ChibiOS RT-NIL or Azure RTOS depending on build
+# OSHAL sources need to be added for ChibiOS RT-NIL or ThreadX depending on build
 # adjust search path here
 if(RTOS_CHIBIOS_CHECK)
     set(OSHAL_PATH ${chibios_SOURCE_DIR}/os/hal/osal/rt-nil)
-elseif(RTOS_AZURERTOS_CHECK)
-    set(OSHAL_PATH ${CMAKE_SOURCE_DIR}/targets/AzureRTOS/ChibiOS/HAL)
+elseif(RTOS_THREADX_CHECK)
+    set(OSHAL_PATH ${CMAKE_SOURCE_DIR}/targets/ThreadX/ChibiOS/HAL)
 else()
     message(FATAL_ERROR "RTOS not configured to use ChibiOS HAL")
 endif()

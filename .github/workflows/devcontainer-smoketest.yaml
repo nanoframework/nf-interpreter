@@ -13,7 +13,7 @@ jobs:
 
       matrix: # Add the target and build type you wish to generate firmware for:
         include: [
-          { target: SL_STK3701A,             build-type: Debug, container: AzureRTOS},
+          { target: SL_STK3701A,             build-type: Debug, container: ThreadX},
           { target: SL_STK3701A,             build-type: Debug, container: All},
           { target: ST_STM32F769I_DISCOVERY, build-type: Debug, container: ChibiOS },
           { target: ST_STM32F769I_DISCOVERY, build-type: Debug, container: All },

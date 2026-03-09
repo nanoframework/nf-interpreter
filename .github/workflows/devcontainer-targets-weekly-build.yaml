@@ -15,8 +15,8 @@ jobs:
 
       matrix: # Add the target and build type you wish to generate firmware for:
         include: [
-          { target: SL_STK3701A,             build-type: MinSizeRel, container: AzureRTOS},
-          { target: SL_STK3701A_REVB,        build-type: MinSizeRel, container: AzureRTOS},
+          { target: SL_STK3701A,             build-type: MinSizeRel, container: ThreadX},
+          { target: SL_STK3701A_REVB,        build-type: MinSizeRel, container: ThreadX},
           { target: MXCHIP_AZ3166,           build-type: MinSizeRel, container: ChibiOS },
           { target: ST_STM32F429I_DISCOVERY, build-type: MinSizeRel, container: ChibiOS },
           { target: ST_STM32F769I_DISCOVERY, build-type: MinSizeRel, container: ChibiOS },

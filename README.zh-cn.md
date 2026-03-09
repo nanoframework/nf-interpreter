@@ -164,8 +164,8 @@
   * FreeRTOS 移植
     * [ESP32_REV0](targets/ESP32/ESP32_REV0)
     * [NXP_MIMXRT1060_EVK](targets/FreeRTOS/NXP/NXP_MIMXRT1060_EVK)
-  * Azure RTOS 移植
-    * [Silabs Giant Gecko EVB](targets/AzureRTOS/Silabs/SL_STK3701A)
+  * ThreadX 移植
+    * [Silabs Giant Gecko EVB](targets/ThreadX/Silabs/SL_STK3701A)
   * TI SimpleLink 移植
     * [TI CC1352R1_LAUNCHXL](targets/TI_SimpleLink/TI_CC1352R1_LAUNCHXL)
     * [TI CC3220SF_LAUNCHXL](targets/TI_SimpleLink/TI_CC3220SF_LAUNCHXL)
