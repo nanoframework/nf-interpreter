@@ -21,10 +21,17 @@
 #define HALCONF_H
 
 #define _CHIBIOS_HAL_CONF_
-#define _CHIBIOS_HAL_CONF_VER_9_0_
+#define _CHIBIOS_HAL_CONF_VER_9_1_
 
 #include <target_platform.h>
 #include "mcuconf.h"
+
+/**
+ * @brief   Enables the HAL safety subsystem.
+ */
+#if !defined(HAL_USE_SAFETY) || defined(__DOXYGEN__)
+#define HAL_USE_SAFETY                      FALSE
+#endif
 
 /**
  * @brief   Enables the PAL subsystem.
@@ -308,6 +315,14 @@
 /*===========================================================================*/
 /* I2C driver related settings.                                              */
 /*===========================================================================*/
+
+/**
+ * @brief   Slave mode API enable switch.
+ * @note    The low level driver must support this capability.
+ */
+#if !defined(I2C_ENABLE_SLAVE_MODE)
+#define I2C_ENABLE_SLAVE_MODE               FALSE
+#endif
 
 /**
  * @brief   Enables the mutual exclusion APIs on the I2C bus.
