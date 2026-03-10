@@ -11,7 +11,7 @@ HRESULT Library_nf_networking_sntp_nanoFramework_Networking_Sntp::Start___STATIC
 
     NANOCLR_HEADER();
 
-#if defined(AZURE_RTOS_THREADX)
+#if defined(THREADX_RTOS)
 #else
     sntp_init();
 #endif
@@ -25,7 +25,7 @@ HRESULT Library_nf_networking_sntp_nanoFramework_Networking_Sntp::Stop___STATIC_
 
     NANOCLR_HEADER();
 
-#if defined(AZURE_RTOS_THREADX)
+#if defined(THREADX_RTOS)
 #else
     sntp_stop();
 #endif
@@ -39,7 +39,7 @@ HRESULT Library_nf_networking_sntp_nanoFramework_Networking_Sntp::UpdateNow___ST
 
     NANOCLR_HEADER();
 
-#if defined(AZURE_RTOS_THREADX)
+#if defined(THREADX_RTOS)
 #else
 
     // this is just a stop and start of the SNTP client
@@ -58,7 +58,7 @@ HRESULT Library_nf_networking_sntp_nanoFramework_Networking_Sntp::get_IsStarted_
         CLR_RT_HeapBlock *pThis = stack.This();
         FAULT_ON_NULL(pThis);
 
-#if defined(AZURE_RTOS_THREADX)
+#if defined(THREADX_RTOS)
 #else
         stack.SetResult_Boolean(sntp_enabled());
 #endif
@@ -73,7 +73,7 @@ HRESULT Library_nf_networking_sntp_nanoFramework_Networking_Sntp::get_Server1___
         CLR_RT_HeapBlock *pThis = stack.This();
         FAULT_ON_NULL(pThis);
 
-#if defined(AZURE_RTOS_THREADX)
+#if defined(THREADX_RTOS)
 #else
         stack.SetResult_String(sntp_getservername(0));
 #endif
@@ -93,7 +93,7 @@ HRESULT Library_nf_networking_sntp_nanoFramework_Networking_Sntp::set_Server1___
         char *serverName = (char *)stack.Arg0().RecoverString();
         FAULT_ON_NULL(serverName);
 
-#if defined(AZURE_RTOS_THREADX)
+#if defined(THREADX_RTOS)
 #else
         sntp_setservername(0, serverName);
 #endif
@@ -108,7 +108,7 @@ HRESULT Library_nf_networking_sntp_nanoFramework_Networking_Sntp::get_Server2___
         CLR_RT_HeapBlock *pThis = stack.This();
         FAULT_ON_NULL(pThis);
 
-#if defined(AZURE_RTOS_THREADX)
+#if defined(THREADX_RTOS)
 #else
         stack.SetResult_String(sntp_getservername(1));
 #endif
@@ -128,7 +128,7 @@ HRESULT Library_nf_networking_sntp_nanoFramework_Networking_Sntp::set_Server2___
         char *serverName = (char *)stack.Arg0().RecoverString();
         FAULT_ON_NULL(serverName);
 
-#if defined(AZURE_RTOS_THREADX)
+#if defined(THREADX_RTOS)
 #else
         sntp_setservername(1, serverName);
 #endif

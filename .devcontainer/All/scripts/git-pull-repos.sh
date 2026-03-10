@@ -7,7 +7,7 @@ cd /sources/STM32CubeF4
 git pull origin nf-build
 cd /sources/STM32CubeH7
 git pull origin nf-build
-cd /sources/AzureRTOS
+cd /sources/ThreadX
 git pull
 cd /
 rm -rf /sources/ChibiOs

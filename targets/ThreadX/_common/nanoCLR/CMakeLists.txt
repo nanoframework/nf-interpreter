@@ -1,0 +1,14 @@
+#
+# Copyright (c) .NET Foundation and Contributors
+# See LICENSE file in the project root for full license information.
+#
+
+# append target ThreadX nanoCLR source files 
+list(APPEND TARGET_THREADX_NANOCLR_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/CLR_Startup_Thread.c)
+list(APPEND TARGET_THREADX_NANOCLR_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/Memory.cpp)
+list(APPEND TARGET_THREADX_NANOCLR_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/targetPAL_Events.cpp)
+list(APPEND TARGET_THREADX_NANOCLR_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/targetPAL_Time.cpp)
+list(APPEND TARGET_THREADX_NANOCLR_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/nanoCRT.cpp)
+
+# make var global
+set(TARGET_THREADX_NANOCLR_SOURCES ${TARGET_THREADX_NANOCLR_SOURCES} CACHE INTERNAL "make global")

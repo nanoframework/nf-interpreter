@@ -203,8 +203,8 @@ The above .NET nanoFramework interpreter builds include support for the class li
   * Target reference for FreeRTOS
     * [ESP32_REV0](targets/ESP32/ESP32_REV0)
     * [NXP_MIMXRT1060_EVK](targets/FreeRTOS/NXP/NXP_MIMXRT1060_EVK)
-  * Target references for Azure RTOS
-    * [Silabs Giant Gecko EVB](targets/AzureRTOS/Silabs/SL_STK3701A)
+  * Target references for ThreadX
+    * [Silabs Giant Gecko EVB](targets/ThreadX/Silabs/SL_STK3701A)
   * Target references for TI SimpleLink
     * [TI CC1352R1_LAUNCHXL](targets/TI_SimpleLink/TI_CC1352R1_LAUNCHXL)
     * [TI CC3220SF_LAUNCHXL](targets/TI_SimpleLink/TI_CC3220SF_LAUNCHXL)
