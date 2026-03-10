@@ -12,7 +12,7 @@
 
 #if CONFIG_TINYUSB_CDC_ENABLED
 #include <tinyusb.h>
-#include <tinyusb_cdc_acm.h>
+#include <tusb_cdc_acm.h>
 #endif
 
 ////////////////////////////////////////////////////////////////////
@@ -279,7 +279,7 @@ static bool WP_Initialise(COM_HANDLE port)
         .callback_line_state_changed = NULL,
         .callback_line_coding_changed = NULL};
 
-    ESP_ERROR_CHECK(tinyusb_cdcacm_init(&amc_cfg));
+    ESP_ERROR_CHECK(tusb_cdc_acm_init(&amc_cfg));
 
     WP_Port_Intitialised = true;
 
