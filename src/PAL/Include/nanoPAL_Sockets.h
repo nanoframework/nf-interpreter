@@ -38,6 +38,12 @@ typedef struct _X509CertData
     DATE_TIME_INFO ExpirationDate;
 } X509CertData;
 
+typedef struct _X509RawData
+{
+    size_t len;
+    unsigned char *p;
+} X509RawData;
+
 // Avoid including windows socket definitions
 
 #ifndef NANOCLR_SOCK_STRUCTURES
@@ -714,6 +720,7 @@ int SSL_Write(int socket, const char *Data, size_t size);
 int SSL_Read(int socket, char *Data, size_t size);
 int SSL_CloseSocket(int socket);
 bool SSL_ParseCertificate(const char *certificate, size_t certLength, X509CertData *certData);
+bool SSL_GetPublicKeyRaw(const char *certificate, size_t certLength, X509RawData *rawData);
 int SSL_DecodePrivateKey(
     const unsigned char *key,
     size_t keyLength,
