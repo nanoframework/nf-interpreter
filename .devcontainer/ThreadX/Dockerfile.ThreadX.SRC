@@ -63,8 +63,8 @@ RUN git clone --branch nf-build https://github.com/nanoframework/STM32CubeL4.git
     && git clone --branch nf-build https://github.com/nanoframework/STM32CubeH7.git --depth 1 ./sources/STM32CubeH7
 
 # Clone repos for Eclipse ThreadX (used to be Azure RTOS)
-RUN git clone --branch v6.5.0.202601 --recursive https://github.com/eclipse-threadx/threadx.git --depth 1 ./sources/ThreadX \
-    && git clone --branch v6.5.0.202601 --recursive https://github.com/eclipse-threadx/netxduo.git --depth 1 ./sources/NetxDuo
+RUN git clone --branch v6.5.0.202601_rel --recursive https://github.com/eclipse-threadx/threadx.git --depth 1 ./sources/ThreadX \
+    && git clone --branch v6.5.0.202601_rel --recursive https://github.com/eclipse-threadx/netxduo.git --depth 1 ./sources/NetxDuo
 
 # Clone dependent repos (mbedtls, fatfs and littlefs)
 RUN git clone --branch R0.15a https://github.com/abbrev/fatfs.git --depth 1 ./sources/fatfs \
