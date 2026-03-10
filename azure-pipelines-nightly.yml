@@ -17,7 +17,7 @@ resources:
       type: github
       name: espressif/esp-idf
       endpoint: nanoframework
-      ref: refs/tags/v5.4.2
+      ref: refs/tags/v5.5.3
 
 # scheduled build
 # the schedule is defined at the AZDO web interface because of inconsistencies with time zones
@@ -102,7 +102,7 @@ jobs:
           echo "##vso[task.setvariable variable=BUILD_CHIBIOS;isOutput=true]false"  
           echo "##vso[task.setvariable variable=BUILD_ESP32;isOutput=true]false"  
           echo "##vso[task.setvariable variable=BUILD_TI;isOutput=true]false"  
-          echo "##vso[task.setvariable variable=BUILD_AZURERTOS;isOutput=true]false"
+          echo "##vso[task.setvariable variable=BUILD_THREADX;isOutput=true]false"
           echo "##vso[task.setvariable variable=BUILD_ALL;isOutput=true]false"
 
           if($env:StartReleaseCandidate -like "true")
@@ -229,12 +229,12 @@ jobs:
 
                 if( 
                   !$buildingPr -And
-                  ($files.where{$_.Contains('targets/AzureRTOS')}).Count -gt 0)
+                  ($files.where{$_.Contains('targets/ThreadX')}).Count -gt 0)
                 {
-                    # files at AzureRTOS folder
-                    echo "##vso[task.setvariable variable=BUILD_AZURERTOS;isOutput=true]true"
+                    # files at ThreadX folder
+                    echo "##vso[task.setvariable variable=BUILD_THREADX;isOutput=true]true"
 
-                    Write-host "##[command] Building Azure RTOS targets"
+                    Write-host "##[command] Building ThreadX targets"
                 }
               }
           }
@@ -619,7 +619,7 @@ jobs:
       IDF_PATH: "D:/a/1/s/esp-idf"
       PIP_CACHE_DIR: $(Pipeline.Workspace)/.pip
       TargetPlatform: "esp32"
-      IDF_TAG: "v5.4.2"
+      IDF_TAG: "v5.5.3"
 
     steps:
       - checkout: self
@@ -709,18 +709,18 @@ jobs:
       - template: azure-pipelines-templates/pack-publish-ti-sl-managed-helpers.yml
 
   #################
-  # Azure RTOS
-  - job: Build_Azure_RTOS_targets
+  # ThreadX
+  - job: Build_ThreadX_targets
     condition: >-
       or(
         eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ALL'], 'true'),
-        eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_AZURERTOS'], 'true'),
+        eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_THREADX'], 'true'),
         contains(dependencies.Check_Build_Options.outputs['GetCommitDetails.COMMIT_MESSAGE'], '***BUILD_ALL***'),
         and(
           eq(variables['Build.Reason'], 'Manual'),
           or(
             eq(variables['BUILD_ALL__'], 'true'),
-            eq(variables['BUILD_AZURERTOS__'], 'true')
+            eq(variables['BUILD_THREADX__'], 'true')
           )
         )
       )
@@ -745,7 +745,7 @@ jobs:
 
     variables:
       # creates a counter and assigns it to the revision variable
-      REVISION: $[counter('AZURERTOS_2_0_0_versioncounter', 0)]
+      REVISION: $[counter('THREADX_2_0_0_versioncounter', 0)]
       HelperPackageVersion: $[counter('HelperPackageVersioncounter', 0)]
       TargetPlatform: "efm32"
 
@@ -755,7 +755,7 @@ jobs:
       - template: azure-pipelines-templates/download-install-arm-gcc-toolchain.yml
       - template: azure-pipelines-templates/download-hexdfu.yml
       - template: azure-pipelines-templates/download-srecord.yml
-      - template: azure-pipelines-templates/build-azurertos-targets.yml
+      - template: azure-pipelines-templates/build-threadx-targets.yml
       - template: azure-pipelines-templates/pack-publish-artifacts.yml
       - template: azure-pipelines-templates/publish-cloudsmith.yml
       - template: azure-pipelines-templates/pack-publish-managed-helpers.yml
@@ -767,13 +767,13 @@ jobs:
       - Build_STM32_targets
       - Build_ESP32_targets
       - Build_TI_SimpleLink_targets
-      - Build_Azure_RTOS_targets
+      - Build_ThreadX_targets
     condition: >-
       or(
         failed('Build_STM32_targets'),
         failed('Build_ESP32_targets'),
         failed('Build_TI_SimpleLink_targets'),
-        failed('Build_Azure_RTOS_targets')
+        failed('Build_ThreadX_targets')
       )
 
     pool:

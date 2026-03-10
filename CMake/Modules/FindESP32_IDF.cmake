@@ -9,7 +9,7 @@ FetchContent_GetProperties(esp32_idf)
 include(binutils.ESP32)
 
 list(APPEND ESP32_IDF_INCLUDE_DIRS ${CMAKE_BINARY_DIR}/config)
-list(APPEND ESP32_IDF_INCLUDE_DIRS ${esp32_idf_SOURCE_DIR}/components/${TARGET_SERIES_SHORT}/esp_rom/include)
+list(APPEND ESP32_IDF_INCLUDE_DIRS ${esp32_idf_SOURCE_DIR}/components/esp_rom/${TARGET_SERIES_SHORT}/include/${TARGET_SERIES_SHORT})
 list(APPEND ESP32_IDF_INCLUDE_DIRS ${esp32_idf_SOURCE_DIR}/components/${ESP32_CPU_TYPE}/include)
 list(APPEND ESP32_IDF_INCLUDE_DIRS ${esp32_idf_SOURCE_DIR}/components/${ESP32_CPU_TYPE}/${TARGET_SERIES_SHORT}/include)
 
@@ -98,6 +98,12 @@ if(${TARGET_SERIES_SHORT} STREQUAL "esp32s2" OR ${TARGET_SERIES_SHORT} STREQUAL 
     list(APPEND ESP32_IDF_INCLUDE_DIRS ${esp32_idf_SOURCE_DIR}/components/esp_tinyusb/include)
     list(APPEND ESP32_IDF_INCLUDE_DIRS ${esp32_idf_SOURCE_DIR}/components/tinyusb/src)
     list(APPEND ESP32_IDF_INCLUDE_DIRS ${esp32_idf_SOURCE_DIR}/components/freertos/FreeRTOS-Kernel/include/freertos)
+endif()
+
+# includes specific to ESP32P4
+if(${TARGET_SERIES_SHORT} STREQUAL "esp32p4")
+    # defaulting to hardware v3, if v1 version is needed, need to use hw_ver1 instead of hw_ver3 in the path below
+    list(APPEND ESP32_IDF_INCLUDE_DIRS ${esp32_idf_SOURCE_DIR}/components/soc/esp32p4/register/hw_ver3)
 endif()
 
 # includes specific to Thread, native only for ESP32C6 and ESP32H2. Other mcu as attached network chip (EPS32-H2 etc)
