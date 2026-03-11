@@ -492,12 +492,7 @@ HRESULT Library_sys_net_native_System_Net_Sockets_NativeSocket::BindConnectHelpe
                     // the global SOCK_getlasterror() which can be stale if other threads ran
                     CLR_INT32 sockError = 0;
                     CLR_INT32 sockErrorLen = sizeof(sockError);
-                    SOCK_getsockopt(
-                        handle,
-                        SOCK_SOL_SOCKET,
-                        SOCK_SOCKO_ERROR,
-                        (char *)&sockError,
-                        &sockErrorLen);
+                    SOCK_getsockopt(handle, SOCK_SOL_SOCKET, SOCK_SOCKO_ERROR, (char *)&sockError, &sockErrorLen);
 
                     stack.PopValue(); // Timeout
 
