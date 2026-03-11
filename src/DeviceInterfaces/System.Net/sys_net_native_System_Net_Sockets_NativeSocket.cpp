@@ -479,25 +479,39 @@ HRESULT Library_sys_net_native_System_Net_Sockets_NativeSocket::BindConnectHelpe
                 stack.m_customState = 2;
             }
 
-            // Poll writability - if already ready, skip the wait
-            CLR_INT32 selectResult = Helper__SelectSocket(handle, 1);
-            if (selectResult == SOCK_SOCKET_ERROR)
+            // Poll writability in a loop: Event_Socket is a global per-process
+            // bitmask shared by all sockets/threads, so a wakeup must be
+            // revalidated against this socket's actual state.
+            while (true)
             {
-                // Read the actual socket error via SO_ERROR rather than relying on
-                // the global SOCK_getlasterror() which can be stale if other threads ran
-                CLR_INT32 sockError = 0;
-                CLR_INT32 sockErrorLen = sizeof(sockError);
-                SOCK_getsockopt(handle, SOCK_SOL_SOCKET, SOCK_SOCKO_ERROR, (char *)&sockError, &sockErrorLen);
+                CLR_INT32 selectResult = Helper__SelectSocket(handle, 1);
 
-                stack.PopValue(); // Timeout
+                if (selectResult == SOCK_SOCKET_ERROR)
+                {
+                    // Read the actual socket error via SO_ERROR rather than relying on
+                    // the global SOCK_getlasterror() which can be stale if other threads ran
+                    CLR_INT32 sockError = 0;
+                    CLR_INT32 sockErrorLen = sizeof(sockError);
+                    SOCK_getsockopt(
+                        handle,
+                        SOCK_SOL_SOCKET,
+                        SOCK_SOCKO_ERROR,
+                        (char *)&sockError,
+                        &sockErrorLen);
 
-                ThrowError(stack, sockError != 0 ? sockError : SOCK_getsocklasterror(handle));
-                NANOCLR_SET_AND_LEAVE(CLR_E_PROCESS_EXCEPTION);
-            }
+                    stack.PopValue(); // Timeout
 
-            if (selectResult == 0)
-            {
-                // Not ready yet: yield and let the scheduler re-enter this function
+                    ThrowError(stack, sockError != 0 ? sockError : SOCK_getsocklasterror(handle));
+                    NANOCLR_SET_AND_LEAVE(CLR_E_PROCESS_EXCEPTION);
+                }
+
+                if (selectResult > 0)
+                {
+                    // Socket is writable — connection completed successfully
+                    break;
+                }
+
+                // selectResult == 0: not ready yet, yield
                 NANOCLR_CHECK_HRESULT(
                     g_CLR_RT_ExecutionEngine.WaitEvents(stack.m_owningThread, *timeout, Event_Socket, fRes));
 
@@ -508,7 +522,7 @@ HRESULT Library_sys_net_native_System_Net_Sockets_NativeSocket::BindConnectHelpe
                     NANOCLR_SET_AND_LEAVE(CLR_E_PROCESS_EXCEPTION);
                 }
 
-                // We've been rescheduled — re-read handle in case the socket was
+                // We've been woken — re-read handle in case the socket was
                 // disposed while we were waiting
                 handle = socket[FIELD__m_Handle].NumericByRef().s4;
 
@@ -519,9 +533,8 @@ HRESULT Library_sys_net_native_System_Net_Sockets_NativeSocket::BindConnectHelpe
                     NANOCLR_SET_AND_LEAVE(CLR_E_PROCESS_EXCEPTION);
                 }
 
-                // Re-entered after event; fall through and let the scheduler
-                // re-enter this function to re-poll writability.
-                NANOCLR_SET_AND_LEAVE(S_OK);
+                // Loop back to re-poll: the wake may have been for a
+                // different socket sharing the global Event_Socket flag
             }
 
             stack.PopValue(); // Timeout
