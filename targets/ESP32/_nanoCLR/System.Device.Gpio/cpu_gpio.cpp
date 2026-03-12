@@ -35,6 +35,9 @@ static const int spiReservedFinalGpio = 32;
 #elif defined(CONFIG_IDF_TARGET_ESP32C3)
 static const int spiReservedInitialGpio = 12;
 static const int spiReservedFinalGpio = 17;
+#elif defined(CONFIG_IDF_TARGET_ESP32C5)
+static const int spiReservedInitialGpio = 15;
+static const int spiReservedFinalGpio = 22;
 #elif defined(CONFIG_IDF_TARGET_ESP32C6)
 static const int spiReservedInitialGpio = 24;
 static const int spiReservedFinalGpio = 30;

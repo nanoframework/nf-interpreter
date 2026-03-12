@@ -613,6 +613,24 @@ jobs:
           PackageName: ESP32_P4_USB
           CMakePreset: ESP32_P4_USB
 
+        ESP32_C5_THREAD_USB:
+          TargetBoard: ESP32_C5
+          TargetSeries: "esp32c5"
+          BuildOptions:
+          IDF_Target: esp32c5
+          TargetName: ESP32_C5_THREAD_USB 
+          PackageName: ESP32_C5_THREAD_USB
+          CMakePreset: ESP32_C5_THREAD_USB
+
+        ESP32_C5_THREAD_UART:
+          TargetBoard: ESP32_C5
+          TargetSeries: "esp32c5"
+          BuildOptions:
+          IDF_Target: esp32c5
+          TargetName: ESP32_C5_THREAD_UART
+          PackageName: ESP32_C5_THREAD_UART
+          CMakePreset: ESP32_C5_THREAD_UART
+
     variables:
       DOTNET_NOLOGO: true
       # creates a counter and assigns it to the revision variable
