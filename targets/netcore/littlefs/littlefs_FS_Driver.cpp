@@ -419,7 +419,7 @@ HRESULT LITTLEFS_FS_Driver::Seek(void *handle, int64_t offset, uint32_t origin, 
     }
 
     // seek to the position
-    *position = lfs_file_seek(fileHandle->fs, &fileHandle->file, offset, whence);
+    *position = lfs_file_seek(fileHandle->fs, &fileHandle->file, (lfs_soff_t)offset, whence);
 
     if (*position < LFS_ERR_OK)
     {
@@ -480,7 +480,7 @@ HRESULT LITTLEFS_FS_Driver::SetLength(void *handle, int64_t length)
     if (currentLength > length)
     {
         // truncate the file
-        if (lfs_file_truncate(fileHandle->fs, &fileHandle->file, length) != LFS_ERR_OK)
+        if (lfs_file_truncate(fileHandle->fs, &fileHandle->file, (lfs_off_t)length) != LFS_ERR_OK)
         {
             return CLR_E_FILE_IO;
         }
@@ -493,7 +493,7 @@ HRESULT LITTLEFS_FS_Driver::SetLength(void *handle, int64_t length)
         int64_t currentPosition = lfs_file_tell(fileHandle->fs, &fileHandle->file);
 
         // grow the file to the required size
-        if (lfs_file_seek(fileHandle->fs, &fileHandle->file, length, LFS_SEEK_END) < LFS_ERR_OK)
+        if (lfs_file_seek(fileHandle->fs, &fileHandle->file, (lfs_soff_t)length, LFS_SEEK_END) < LFS_ERR_OK)
         {
             return CLR_E_FILE_IO;
         }
@@ -505,7 +505,7 @@ HRESULT LITTLEFS_FS_Driver::SetLength(void *handle, int64_t length)
         }
 
         // restore the position
-        if (lfs_file_seek(fileHandle->fs, &fileHandle->file, currentPosition, LFS_SEEK_SET) < LFS_ERR_OK)
+        if (lfs_file_seek(fileHandle->fs, &fileHandle->file, (lfs_soff_t)currentPosition, LFS_SEEK_SET) < LFS_ERR_OK)
         {
             return CLR_E_FILE_IO;
         }
@@ -619,7 +619,7 @@ HRESULT LITTLEFS_FS_Driver::FindNext(void *handle, FS_FILEINFO *fi, bool *fileFo
     *fileFound = true;
 
     // set file name size
-    fi->FileNameSize = hal_strlen_s(info.name);
+    fi->FileNameSize = (uint32_t)hal_strlen_s(info.name);
 
     // allocate memory for the file name
     // MUST BE FREED BY THE CALLER
@@ -879,6 +879,7 @@ HRESULT LITTLEFS_FS_Driver::CreateDirectory(const VOLUME_ID *volume, const char 
     char normalizedPath[FS_MAX_DIRECTORY_LENGTH];
     char tempPath[FS_MAX_DIRECTORY_LENGTH + 1];
     char *segment;
+    char *strtokContext = NULL;
     int32_t dirExists;
 
     (void)dirExists;
@@ -897,7 +898,7 @@ HRESULT LITTLEFS_FS_Driver::CreateDirectory(const VOLUME_ID *volume, const char 
         memset(tempPath, 0, sizeof(tempPath));
 
         // iterate over the path segments and create the directories
-        segment = strtok(normalizedPath, "/");
+        segment = strtok_s(normalizedPath, "/", &strtokContext);
 
         while (segment && (result == LFS_ERR_OK || result == LFS_ERR_EXIST))
         {
@@ -911,9 +912,9 @@ HRESULT LITTLEFS_FS_Driver::CreateDirectory(const VOLUME_ID *volume, const char 
             }
 
             // add back the '/' separator
-            strcat(tempPath, "/");
+            strcat_s(tempPath, sizeof(tempPath), "/");
 
-            segment = strtok(nullptr, "/");
+            segment = strtok_s(nullptr, "/", &strtokContext);
         }
 
         // remove trailing '/'
@@ -1140,7 +1141,8 @@ static int NormalizePath(const char *path, char *buffer, size_t bufferSize)
     *bufferP = '\0';
 
     // remove trailing slash, if any
-    if (bufferP[-1] == '/')
+    // guard against undefined behavior: only check bufferP[-1] when buffer is non-empty
+    if (bufferP > buffer && bufferP[-1] == '/')
     {
         bufferP--;
         *bufferP = '\0';
@@ -1150,6 +1152,13 @@ static int NormalizePath(const char *path, char *buffer, size_t bufferSize)
     {
         // remove leading slash
         memmove(buffer, buffer + 1, hal_strlen_s(buffer));
+    }
+
+    // use "/" instead to reference the root
+    if (buffer[0] == '\0')
+    {
+        buffer[0] = '/';
+        buffer[1] = '\0';
     }
 
     return 0;

@@ -12,7 +12,8 @@
 
 #if CONFIG_TINYUSB_CDC_ENABLED
 #include <tinyusb.h>
-#include <tusb_cdc_acm.h>
+#include <tinyusb_default_config.h>
+#include <tinyusb_cdc_acm.h>
 #endif
 
 ////////////////////////////////////////////////////////////////////
@@ -268,7 +269,7 @@ static bool WP_Initialise(COM_HANDLE port)
     (void)port;
 
     // get configuration with default values
-    tinyusb_config_t tusb_cfg = {};
+    tinyusb_config_t tusb_cfg = TINYUSB_DEFAULT_CONFIG();
 
     ESP_ERROR_CHECK(tinyusb_driver_install(&tusb_cfg));
 
@@ -279,7 +280,7 @@ static bool WP_Initialise(COM_HANDLE port)
         .callback_line_state_changed = NULL,
         .callback_line_coding_changed = NULL};
 
-    ESP_ERROR_CHECK(tusb_cdc_acm_init(&amc_cfg));
+    ESP_ERROR_CHECK(tinyusb_cdcacm_init(&amc_cfg));
 
     WP_Port_Intitialised = true;
 
