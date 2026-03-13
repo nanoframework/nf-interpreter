@@ -357,7 +357,7 @@ if(NF_FEATURE_USE_LITTLEFS_OPTION)
     if(LITTLEFS_VERSION_EMPTY)
         # no littlefs version actualy specified, must be empty which is fine, we'll default to a known good version
         # WHEN CHANGING THIS MAKE SURE TO UPDATE THE DEV CONTAINERS AND PIPELINE YAML
-        set(LITTLEFS_VERSION_TAG "v2.9.3")
+        set(LITTLEFS_VERSION_TAG "v2.11.2")
     else()
         # set version 
         set(LITTLEFS_VERSION_TAG ${LITTLEFS_VERSION})
