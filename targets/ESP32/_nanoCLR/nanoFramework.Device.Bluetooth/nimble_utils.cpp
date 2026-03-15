@@ -285,7 +285,7 @@ bool StopBleStack()
     Device_ble_dispose();
 
     bleStackStarted = false;
-    
+
     return true;
 }
 
