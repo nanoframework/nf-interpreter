@@ -42,6 +42,7 @@ void ReleaseEventMutex();
 bool StartBleStack(char *devicename, uint16_t appearance);
 bool StopBleStack();
 bool WaitForBleStackStart(int waitMs);
+bool IsBleStackStarted();
 
 DevicePairingResultStatus MapNimbleErrorToStatus(int errorCode);
 DevicePairingKinds PairingActionToDevicePairingKinds(int action);
