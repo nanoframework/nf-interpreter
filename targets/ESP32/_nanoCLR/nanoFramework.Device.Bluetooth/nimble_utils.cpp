@@ -8,6 +8,8 @@
 
 uint8_t blueSig[16] = {0, 0, 0, 0, 0, 0, 0, 0x10, 0x80, 0, 0, 0x80, 0x5f, 0x9b, 0x34, 0xfb};
 
+static bool bleStackStarted = false;
+
 void NimbleUUID16ToGuid(ble_uuid16_t *b16, uint8_t *guid)
 {
     memcpy(guid, blueSig, sizeof(blueSig));
@@ -245,10 +247,15 @@ bool WaitForBleStackStart(int waitMs)
     return false;
 }
 
+bool IsBleStackStarted()
+{
+    return bleStackStarted;
+}
+
 bool StartBleStack(char *devicename, uint16_t appearance)
 {
     // Ignore if already started
-    if (ble_hs_is_enabled())
+    if (IsBleStackStarted())
     {
         return false;
     }
@@ -262,18 +269,23 @@ bool StartBleStack(char *devicename, uint16_t appearance)
     // Wait for stack to be ready (Sync fired)
     WaitForBleStackStart(10000);
 
+    bleStackStarted = true;
+
     return true;
 }
 
 bool StopBleStack()
 {
     // Not running
-    if (!ble_hs_is_enabled())
+    if (!IsBleStackStarted())
     {
         return false;
     }
 
     Device_ble_dispose();
+
+    bleStackStarted = false;
+
     return true;
 }
 

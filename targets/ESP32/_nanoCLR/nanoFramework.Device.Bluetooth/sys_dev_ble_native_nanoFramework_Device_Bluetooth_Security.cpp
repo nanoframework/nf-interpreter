@@ -160,7 +160,7 @@ HRESULT Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_Security_Devic
     uint64_t myaddr = stack.Arg0().NumericByRef().u8;
     int mytype = stack.Arg1().NumericByRef().s4;
 
-    if (!ble_hs_is_enabled())
+    if (!IsBleStackStarted())
     {
         NANOCLR_SET_AND_LEAVE(CLR_E_NOT_SUPPORTED);
     }
@@ -192,7 +192,7 @@ HRESULT Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_Security_Devic
 {
     NANOCLR_HEADER();
 
-    if (!ble_hs_is_enabled())
+    if (!IsBleStackStarted())
     {
         NANOCLR_SET_AND_LEAVE(CLR_E_NOT_SUPPORTED);
     }
@@ -213,7 +213,7 @@ HRESULT Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_Security_Devic
     uint64_t addr = stack.Arg0().NumericByRef().u8;
     UlongToBleAddress(addr, 0, bleDelAddr);
 
-    if (!ble_hs_is_enabled())
+    if (!IsBleStackStarted())
     {
         NANOCLR_SET_AND_LEAVE(CLR_E_NOT_SUPPORTED);
     }
@@ -234,7 +234,7 @@ HRESULT Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_Security_Devic
 
     int outCount = 0;
 
-    if (!ble_hs_is_enabled())
+    if (!IsBleStackStarted())
     {
         NANOCLR_SET_AND_LEAVE(CLR_E_NOT_SUPPORTED);
     }
@@ -259,7 +259,7 @@ HRESULT Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_Security_Devic
 
     int index = stack.Arg0().NumericByRef().s4;
 
-    if (!ble_hs_is_enabled())
+    if (!IsBleStackStarted())
     {
         NANOCLR_SET_AND_LEAVE(CLR_E_NOT_SUPPORTED);
     }
