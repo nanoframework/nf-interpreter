@@ -213,7 +213,7 @@ esp_err_t NF_ESP32_InitaliseWifi()
 
 #if CONFIG_SOC_WIFI_SUPPORT_5G
         wifi_band_mode_t band_mode;
-        ec= esp_wifi_get_band_mode(&band_mode);
+        ec = esp_wifi_get_band_mode(&band_mode);
         if (ec == ESP_OK)
         {
             ESP_LOGI(TAG, "Current Wi-Fi band mode: %d\n", band_mode);
