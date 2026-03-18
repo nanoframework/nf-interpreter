@@ -36,6 +36,7 @@ list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/CMake)
 
 include(binutils.common)
 include(binutils.ESP32)
+include(NF_Kconfig)
 
 nf_check_path_limits()
 
@@ -64,6 +65,16 @@ add_compile_options("$<$<CONFIG:DEBUG>:-DDEBUG>")
 # set time stamp of build
 string(TIMESTAMP BUILD_TIMESTAMP UTC)
 ######################################################
+
+#################################################################
+# Load Kconfig configuration if a defconfig is specified.
+# Must happen before TARGET_BOARD / RTOS checks because those
+# variables are populated from the defconfig when the new
+# Kconfig-based workflow is used.
+if(DEFINED NF_TARGET_DEFCONFIG)
+    nf_load_kconfig()
+endif()
+#################################################################
 
 #######################
 # check for TARGET_BOARD definition
@@ -116,10 +127,13 @@ include(ClrProfilerOptions)
 #####################################
 
 #################################################################
-# ouput RTM build option
-# Build RTM version of firmware (default is OFF so the build is not RTM and the CLR outputs some debug informations)
-option(NF_BUILD_RTM "option to build with RTM definition")
+# Target configuration variables are loaded from Kconfig via
+# nf_load_kconfig() above. The if()/else() blocks below derive
+# internal build variables and print status messages.
+#################################################################
 
+#################################################################
+# RTM build option
 if(NF_BUILD_RTM)
     message(STATUS "***************************")
     message(STATUS "** Building RTM firmware **")
@@ -163,10 +177,7 @@ if(RTOS_CHIBIOS_CHECK OR RTOS_TI_SIMPLELINK_CHECK)
 endif()
 
 #################################################################################
-# chooses if double-point float point support is provided by the platform
-# (default is OFF which means that single-precision floating point is effective)
-option(DP_FLOATINGPOINT "option to enable support for double-precision floating point")
-
+# double-precision floating point support
 if(DP_FLOATINGPOINT)
     set(TARGET_DP_FLOATINGPOINT TRUE CACHE INTERNAL "DP FP support")
     message(STATUS "Double-precision floating point is effective")
@@ -176,10 +187,7 @@ else()
 endif()
 
 #################################################################################
-# chooses if build without complex math functions
-# (default is OFF which means that all floating point math functions are available)
-option(NF_FEATURE_LIGHT_MATH "option to build without complex math functions")
-
+# complex math functions
 if(NF_FEATURE_LIGHT_MATH)
     set(TARGET_LIGHT_MATH TRUE CACHE INTERNAL "Complex Math functions disabled")
     message(STATUS "Complex math functions available")
@@ -189,10 +197,7 @@ else()
 endif()
 
 ###################################################################################
-# chooses if platform provides support for converting string to values on any base
-# (default is OFF which means that conversion to value from base 10 and 16 (partial) is effective)
-option(SUPPORT_ANY_BASE_CONVERSION "option to enable support for converting strings to value on any base")
-
+# string conversion to any base support
 if(SUPPORT_ANY_BASE_CONVERSION)
     set(TARGET_SUPPORT_ANY_BASE_CONVERSION TRUE CACHE INTERNAL "Option for string conversion to value from any base")
     message(STATUS "String conversion to value on any base is effective")
@@ -202,9 +207,7 @@ else()
 endif()
 
 #################################################################
-# true random number generation option supported by hardware
-option(USE_RNG "option to enable use of true random generator hardware block" ON)
-
+# hardware true random number generation
 if(USE_RNG)
     message(STATUS "Random Number Generation by target MCU is activated")
 else()
@@ -216,9 +219,7 @@ endif()
 #################################################################
 
 ###################################################################
-# debugger (default is OFF so no support for debugging is included
-option(NF_FEATURE_DEBUGGER "option to enable support for debugging")
-
+# managed application debugging support
 if(NF_FEATURE_DEBUGGER)
     message(STATUS "Support for debugging managed applications is included.")
 else()
@@ -230,9 +231,7 @@ endif()
 #################################################################
 
 ###################################################################
-# native send trace to stdio (default is OFF so no support for sending stdio to serial port)
-option(NF_TRACE_TO_STDIO  "option to enable sending trace data to stdio. Requires spare SERIAL device")
-
+# native send trace to stdio
 if(NF_TRACE_TO_STDIO)
     set(TARGET_TRACE_TO_STDIO TRUE CACHE INTERNAL "Option for stdio TRACE implementation")
     message(STATUS "Support for sending TRACE to stdio is included.")
@@ -242,10 +241,7 @@ else()
 endif()
 
 #################################################################
-# enables Application Domains support in nanoCLR
-# (default is OFF so Application Domains is NOT supported)
-option(NF_FEATURE_USE_APPDOMAINS "option to enable Application Domains")
-
+# Application Domains support
 if(NF_FEATURE_USE_APPDOMAINS)
     message(STATUS "Application Domains support is included")
 else()
@@ -253,10 +249,7 @@ else()
 endif()
 
 #################################################################
-# disable all trace messages and checks on CLR
-# (default is OFF so all traces and checks are enabled)
-option(NF_PLATFORM_NO_CLR_TRACE "option to disable all trace stuff in CLR")
-
+# CLR trace control
 if(NF_PLATFORM_NO_CLR_TRACE)
     message(STATUS "CLR has all trace messages and checks DISABLED")
 else()
@@ -264,10 +257,7 @@ else()
 endif()
 
 #################################################################
-# disable CLR IL inlining
-# (default is OFF so CLR IL inline is enabled)
-option(NF_CLR_NO_IL_INLINE "option to disable CLR IL inlining")
-
+# CLR IL inlining control
 if(NF_CLR_NO_IL_INLINE)
     message(STATUS "CLR IL inlining is DISABLED")
 else()
@@ -275,10 +265,7 @@ else()
 endif()
 
 #################################################################
-# enables configuration block storage support
-# (default is OFF so Configuration block storage is NOT supported)
-option(NF_FEATURE_HAS_CONFIG_BLOCK "option to enable configuration block storage")
-
+# configuration block storage support
 if(NF_FEATURE_HAS_CONFIG_BLOCK)
     set(TARGET_HAS_CONFIG_BLOCK TRUE CACHE INTERNAL "Option for config block")
     message(STATUS "Configuration block storage is included")
@@ -288,10 +275,7 @@ else()
 endif()
 
 #################################################################
-# enables internal storage support
-# (default is OFF so Accessible Storage Feature is NOT supported)
-option(NF_FEATURE_HAS_ACCESSIBLE_STORAGE "option to enable accessible storage")
-
+# accessible storage support
 if(NF_FEATURE_HAS_ACCESSIBLE_STORAGE)
     set(TARGET_HAS_ACCESSIBLE_STORAGE TRUE CACHE INTERNAL "Option for accessible storage")
     message(STATUS "Accessible Storage feature is included")
@@ -301,19 +285,13 @@ else()
 endif()
 
 #################################################################
-# enables support for SD Card
-# (default is OFF so SD Card is NOT supported)
-option(NF_FEATURE_HAS_SDCARD "option to enable support for SD Card")
-
+# SD Card support
 if(NF_FEATURE_HAS_SDCARD)
 
     # this feature currently is supported only on ChibiOS, iMX.RT FreeRTOS and ESP32 FreeRTOS
     if(NOT RTOS_CHIBIOS_CHECK AND NOT RTOS_FREERTOS_CHECK AND NOT RTOS_ESP32_CHECK)
         message(FATAL_ERROR "Support for SD Card is only available for ChibiOS Cortex-M targets, iMX.RT FreeRTOS and ESP32 targets.")
     endif()
-
-    # all RTOSes: force inclusion of System.IO.FileSystem API
-    set(API_System.IO.FileSystem ON CACHE INTERNAL "Forcing System.IO.FileSystem API option to ON")
 
     message(STATUS "Support for SD Card is included")
 
@@ -324,10 +302,7 @@ endif()
 #################################################################
 
 #################################################################
-# enables USB Mass Storage support
-# (default is OFF so USB Mass Storage is NOT supported)
-option(NF_FEATURE_HAS_USB_MSD "option to enable USB Mass Storage")
-
+# USB Mass Storage support
 if(NF_FEATURE_HAS_USB_MSD)
 
     # this feature currently is supported only on ChibiOS
@@ -337,9 +312,6 @@ if(NF_FEATURE_HAS_USB_MSD)
 
     # this feature requires inclusion of ChibiOS contribution repository
     set(CHIBIOS_CONTRIB_REQUIRED ON CACHE INTERNAL "Forcing ChibiOS contribution repo option to ON")
-
-    # force inclusion of System.IO.FileSystem API
-    set(API_System.IO.FileSystem ON CACHE INTERNAL "Forcing System.IO.FileSystem API option to ON")
 
     if(RTOS_ESP32_CHECK)
         # can't System.IO.FileSystem API because of lack of suppporting configuration for FATFS. See issue #668
@@ -357,19 +329,13 @@ endif()
 #################################################################
 
 #################################################################
-# enables support for littlefs file system
-# (default is OFF so littlefs is NOT supported)
-option(NF_FEATURE_USE_LITTLEFS "option to enable support for SPI file system")
-
+# littlefs file system support
 if(NF_FEATURE_USE_LITTLEFS)
 
     # this feature currently is supported only on ChibiOS
     if(NOT RTOS_CHIBIOS_CHECK AND NOT RTOS_ESP32_CHECK)
         message(FATAL_ERROR "Support for littlefs is only available for ChibiOS Cortex-M and ESP32 targets.")
     endif()
-
-    # force inclusion of System.IO.FileSystem API
-    set(API_System.IO.FileSystem ON CACHE INTERNAL "Forcing System.IO.FileSystem API option to ON")
 
     set(NF_FEATURE_USE_LITTLEFS_OPTION TRUE CACHE INTERNAL "Set nF littlefs feature TRUE")
 
@@ -380,10 +346,7 @@ else()
 endif()
 
 #################################################################
-# target has nanoBooter 
-# (default is ON so target device HAS nanoBooter)
-option(NF_TARGET_HAS_NANOBOOTER "option to signal if target implements nanoBooter" ON)
-
+# nanoBooter implementation
 if(NF_TARGET_HAS_NANOBOOTER)
     set(TARGET_HAS_NANOBOOTER TRUE CACHE INTERNAL "Option for nanoBooter implementation")
     message(STATUS "Target implements nanoBooter")
@@ -398,10 +361,6 @@ if(RTOS_CHIBIOS_CHECK)
 
     #################################################################
     # ARM Cortex-M Single Wire Output (SWO)
-    # (default is OFF so no SWO output)
-
-    option(SWO_OUTPUT "option to enable SWO")
-
     if(SWO_OUTPUT)
         set(SWO_OUTPUT_OPTION TRUE CACHE INTERNAL "Single Wire Output Option")
         message(STATUS "Single Wire Output (SWO) enabled")
@@ -410,26 +369,13 @@ if(RTOS_CHIBIOS_CHECK)
     endif()
 
     #################################################################
-        
-    #################################################################
-    # enables use of ChibiOS Community contribution
-    # (default is OFF so ChibiOS Community is NOT included)
-    option(CHIBIOS_CONTRIB_REQUIRED "option to include ChibiOS Community contributions repository")
+    # ChibiOS Community contribution repository
     #################################################################
 
 endif()
 
 #################################################################
 # Wire Protocol options
-option(NF_WP_IMPLEMENTS_CRC32 "option to report if target implements CRC32 in Wire Protocol")
-
-# handle Wire Protocol _TRACE_ preferences, if any
-option(NF_WP_TRACE_ERRORS "option to Trace errors with Wire Protocol")
-option(NF_WP_TRACE_HEADERS "option to Trace headers with Wire Protocol")
-option(NF_WP_TRACE_STATE "option to Trace state with Wire Protocol")
-option(NF_WP_TRACE_NODATA "option to Trace empty packets with Wire Protocol")
-option(NF_WP_TRACE_VERBOSE "option to Trace more detailed state with Wire Protocol. ")
-option(NF_WP_TRACE_ALL "option to Trace ALL information with Wire Protocol.")
 
 # reports Wire Protocol CRC32 implementation
 if(NF_WP_IMPLEMENTS_CRC32)
@@ -438,42 +384,17 @@ else()
     message(STATUS "Wire Protocol does NOT implement CRC32")
 endif()
 
-#################################################################
-# enables Networking support in nanoCLR
-# declares Networking option
-# needs to show before the API namespaces processing because it's used there
-# (default is OFF so Networking is NOT supported)
-option(USE_NETWORKING_OPTION "option to use networking")
-
-# (default is OFF so Mbed TLS is NOT used)
-option(NF_SECURITY_MBEDTLS "option to use Mbed TLS as the network security provider" ON)
-
-# set default option for SNTP to ON
-option(NF_NETWORKING_SNTP "option to use add SNTP support, requires networking otherwise has no effect" ON)
-
-# (default is OFF so driver is NOT used)
-option(NF_NETWORKING_ENC28J60 "option to use ENC28J60 network driver")
-
-#################################################################
-
 #############################################
 # handles inclusion of System.Reflection API
 #############################################
-
-# set default option for Reflection API to ON
-option(NF_FEATURE_SUPPORT_REFLECTION "option to add support for System.Reflection API" ON)
-# set default option for Serialization API to ON
-option(NF_FEATURE_BINARY_SERIALIZATION "option to add support for binary serialization" ON)
 
 if(NF_FEATURE_SUPPORT_REFLECTION)
     set(TARGET_NANOCLR_REFLECTION TRUE CACHE INTERNAL "enable support for System.Reflection API")
     message(STATUS "Support for System.Reflection API enabled")
     
     if(NF_FEATURE_BINARY_SERIALIZATION)
-        set(API_System.Runtime.Serialization TRUE CACHE INTERNAL "enable support for System.Runtime.Serialization API")
         message(STATUS "Support for binary serialization enabled")
     else()
-        set(API_System.Runtime.Serialization FALSE CACHE INTERNAL "disable support for System.Runtime.Serialization API")
         message(STATUS "Support for binary serialization **IS NOT** enabled")
     endif()
 
@@ -481,14 +402,11 @@ else()
     set(TARGET_NANOCLR_REFLECTION FALSE CACHE INTERNAL "DISABLE support for System.Reflection API")
     message(STATUS "Support for System.Reflection API **IS NOT** enabled")
 
-    # disable binary serialization if Reflection is disabled
-    set(API_System.Runtime.Serialization FALSE CACHE INTERNAL "disable support for System.Runtime.Serialization API")
     message(STATUS "Support for binary serialization **IS NOT** enabled")
 endif()
 
 #################################################################
 
-#################################################################
 
 #############################################
 # handles inclusion of System.Collections API
@@ -657,36 +575,6 @@ endif()
 # manage dependent APIs required for some API namespaces
 #################################################################
 
-# include nanoFramework.Runtime.Events API
-if( API_nanoFramework.Device.OneWire OR 
-    API_System.Net OR
-    API_System.Device.Gpio OR
-    API_System.IO.Ports OR
-    API_nanoFramework.Device.Can OR
-    API_System.IO.FileSystem)
-
-    # these APIs requires nanoFramework.Runtime.Events
-    set(API_nanoFramework.Runtime.Events ON CACHE INTERNAL "enable of API_nanoFramework.Runtime.Events")
-
-endif()
-
-if(API_System.Net)
-    # manage inclusion of SNTP
-    if(NF_NETWORKING_SNTP)
-        set(API_nanoFramework.Networking.Sntp ON CACHE INTERNAL "enable API_nanoFramework.Networking.Sntp")
-    else()
-        set(API_nanoFramework.Networking.Sntp OFF CACHE INTERNAL "disable API_nanoFramework.Networking.Sntp")
-    endif()
-endif()
-
-# include nanoFramework.System.Text because of IO.Ports
-if( API_System.IO.Ports)
-
-    # thi API requires nanoFramework.System.Text
-    set(API_nanoFramework.System.Text ON CACHE INTERNAL "enable of API_nanoFramework.System.Text")
-
-endif()
-
 #################################################################
 # handles Networking support at HAL level
 
@@ -745,9 +633,7 @@ endif()
 
 
 #################################################################
-# RTC (real time clock) (default is OFF so RTC is NOT included)
-option(NF_FEATURE_RTC "option to use hardware RTC")
-
+# RTC (real time clock)
 if(NF_FEATURE_RTC)
     set(HAL_USE_RTC_OPTION TRUE CACHE INTERNAL "NF feature RTC")
 else()
@@ -757,9 +643,7 @@ endif()
 #################################################################
 
 #################################################################
-# CPU watchdog (default is ON so watchdog is included)
-option(NF_FEATURE_WATCHDOG "option to use hardware watchdog" ON)
-
+# CPU watchdog
 if(NF_FEATURE_WATCHDOG)
 
     message(STATUS "Support for watchdog enabled")

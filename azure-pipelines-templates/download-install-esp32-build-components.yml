@@ -53,6 +53,13 @@ steps:
         python -m pip install -r requirements.core.txt
 
   - task: PowerShell@2
+    displayName: Install nF Kconfig tools
+    inputs:
+      targetType: "inline"
+      script: |
+        python -m pip install --quiet -r "$(Build.SourcesDirectory)/nf-interpreter/requirements.txt"
+
+  - task: PowerShell@2
     displayName: Install IDF (step 3)
     inputs:
       targetType: "filePath"
