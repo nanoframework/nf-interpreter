@@ -1159,6 +1159,15 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeConfig___VOI
             NANOCLR_SET_AND_LEAVE(CLR_E_PIN_UNAVAILABLE);
         }
 
+        // Validate RTS/CTS pins are available when flow control is enabled
+        if ((uart_config.flow_ctrl != UART_HW_FLOWCTRL_DISABLE) && !rs485Mode)
+        {
+            if (rtsPin == UART_PIN_NO_CHANGE || ctsPin == UART_PIN_NO_CHANGE)
+            {
+                NANOCLR_SET_AND_LEAVE(CLR_E_PIN_UNAVAILABLE);
+            }
+        }
+
         // Don't use RTS/CTS pins if no hardware handshake enabled unless in RS485 mode
         if (rs485Mode)
         {
