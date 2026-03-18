@@ -147,7 +147,7 @@
  * @note    The default is @p TRUE.
  */
 #if !defined(CH_CFG_OPTIMIZE_SPEED)
-#define CH_CFG_OPTIMIZE_SPEED TRUE
+#define CH_CFG_OPTIMIZE_SPEED FALSE
 #endif
 
 /** @} */
@@ -178,7 +178,7 @@
  * @note    The default is @p TRUE.
  */
 #if !defined(CH_CFG_USE_TIMESTAMP)
-#define CH_CFG_USE_TIMESTAMP TRUE
+#define CH_CFG_USE_TIMESTAMP FALSE
 #endif
 
 /**
@@ -327,7 +327,7 @@
  * @note    Requires @p CH_CFG_USE_HEAP and/or @p CH_CFG_USE_MEMPOOLS.
  */
 #if !defined(CH_CFG_USE_DYNAMIC)
-#define CH_CFG_USE_DYNAMIC TRUE
+#define CH_CFG_USE_DYNAMIC FALSE
 #endif
 
 /** @} */
@@ -359,7 +359,7 @@
  * @note    The default is @p TRUE.
  */
 #if !defined(CH_CFG_USE_MEMCORE)
-#define CH_CFG_USE_MEMCORE TRUE
+#define CH_CFG_USE_MEMCORE FALSE
 #endif
 
 /**
@@ -388,7 +388,7 @@
  * @note    Mutexes are recommended.
  */
 #if !defined(CH_CFG_USE_HEAP)
-#define CH_CFG_USE_HEAP TRUE
+#define CH_CFG_USE_HEAP FALSE
 #endif
 
 /**
@@ -399,7 +399,7 @@
  * @note    The default is @p TRUE.
  */
 #if !defined(CH_CFG_USE_MEMPOOLS)
-#define CH_CFG_USE_MEMPOOLS TRUE
+#define CH_CFG_USE_MEMPOOLS FALSE
 #endif
 
 /**
@@ -410,7 +410,7 @@
  * @note    The default is @p TRUE.
  */
 #if !defined(CH_CFG_USE_OBJ_FIFOS)
-#define CH_CFG_USE_OBJ_FIFOS TRUE
+#define CH_CFG_USE_OBJ_FIFOS FALSE
 #endif
 
 /**

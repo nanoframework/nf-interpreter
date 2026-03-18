@@ -1,7 +1,8 @@
-# Copyright (c) .NET Foundation and Contributors
+#!/usr/bin/env python3
+
+# # Copyright (c) .NET Foundation and Contributors
 # See LICENSE file in the project root for full license information.
 
-#!/usr/bin/env python3
 """
 Merge a board defconfig with an optional user config overlay into a full .config.
 

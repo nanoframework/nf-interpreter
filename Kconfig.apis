@@ -13,7 +13,6 @@ config API_SYSTEM_NET
     bool "System.Net"
     default n
     select NF_FEATURE_HAS_CONFIG_BLOCK
-    select NF_SECURITY_MBEDTLS
 
 config API_SYSTEM_DEVICE_GPIO
     bool "System.Device.Gpio"
@@ -63,7 +62,7 @@ config API_SYSTEM_IO_PORTS
 
 config API_SYSTEM_IO_FILESYSTEM
     bool "System.IO.FileSystem"
-    depends on NF_FEATURE_HAS_SDCARD || NF_FEATURE_USE_LITTLEFS
+    depends on NF_FEATURE_HAS_SDCARD || NF_FEATURE_USE_LITTLEFS || NF_FEATURE_HAS_USB_MSD
     default n
 
 config API_NANOFRAMEWORK_DEVICE_ONEWIRE

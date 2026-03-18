@@ -189,10 +189,10 @@ endif()
 #################################################################################
 # complex math functions
 if(NF_FEATURE_LIGHT_MATH)
-    set(TARGET_LIGHT_MATH TRUE CACHE INTERNAL "Complex Math functions disabled")
+    set(TARGET_LIGHT_MATH TRUE CACHE INTERNAL "Complex Math functions enabled")
     message(STATUS "Complex math functions available")
 else()
-    set(TARGET_LIGHT_MATH FALSE CACHE INTERNAL "Complex Math functions enabled")
+    set(TARGET_LIGHT_MATH FALSE CACHE INTERNAL "Complex Math functions disabled")
     message(STATUS "Complex math functions not available")
 endif()
 
@@ -312,14 +312,6 @@ if(NF_FEATURE_HAS_USB_MSD)
 
     # this feature requires inclusion of ChibiOS contribution repository
     set(CHIBIOS_CONTRIB_REQUIRED ON CACHE INTERNAL "Forcing ChibiOS contribution repo option to ON")
-
-    if(RTOS_ESP32_CHECK)
-        # can't System.IO.FileSystem API because of lack of suppporting configuration for FATFS. See issue #668
-        message(WARNING "Can't use System.IO.FileSystem API in ESP32 targets because of FATFS config. See issue #668.")
-        
-        # force **REMOVAL** of System.IO.FileSystem API
-        set(API_System.IO.FileSystem OFF CACHE INTERNAL "Forcing **REMOVAL** of System.IO.FileSystem API option")
-    endif()
 
     message(STATUS "Support for USB Mass Storage is included")
 else()
@@ -670,7 +662,7 @@ endif()
 ########################################################
 # check availability of hex2dfu tool if specified
 # only required for CHIBIOS and ThreadX
-if(DEFINED TOOL_HEX2DFU_PREFIX AND RTOS_THREADX_CHECK AND RTOS_CHIBIOS_CHECK)
+if(DEFINED TOOL_HEX2DFU_PREFIX AND (RTOS_THREADX_CHECK OR RTOS_CHIBIOS_CHECK))
     if(NOT EXISTS ${TOOL_HEX2DFU_PREFIX}/hex2dfu.exe AND NOT EXISTS ${TOOL_HEX2DFU_PREFIX}/hex2dfu)
         message(STATUS "")
         message(STATUS "Couldn't find the hex2dfu tool at the specified path: ${TOOL_HEX2DFU_PREFIX}/hex2dfu.exe or ${TOOL_HEX2DFU_PREFIX}/hex2dfu")
