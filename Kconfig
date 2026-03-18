@@ -1,0 +1,28 @@
+#
+# Copyright (c) .NET Foundation and Contributors
+# See LICENSE file in the project root for full license information.
+#
+
+mainmenu ".NET nanoFramework Configuration"
+
+config TARGET_BOARD
+    string "Target board name"
+
+config TARGET_SERIES
+    string "Target MCU series"
+
+source "Kconfig.rtos"
+source "Kconfig.build"
+source "Kconfig.features"
+source "Kconfig.apis"
+source "Kconfig.graphics"
+source "Kconfig.networking"
+source "Kconfig.serial"
+source "Kconfig.wireprotocol"
+
+# Platform-specific Kconfig files
+source "targets/ESP32/Kconfig"
+source "targets/ChibiOS/Kconfig"
+source "targets/FreeRTOS/Kconfig"
+source "targets/TI_SimpleLink/Kconfig"
+source "targets/ThreadX/Kconfig"

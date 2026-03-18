@@ -313,6 +313,10 @@ jobs:
       - template: azure-pipelines-templates/download-install-arm-gcc-toolchain.yml
       - template: azure-pipelines-templates/download-srecord.yml
       - template: azure-pipelines-templates/download-hexdfu.yml
+      - template: azure-pipelines-templates/install-kconfig-tools.yml
+      - template: azure-pipelines-templates/validate-kconfig.yml
+        parameters:
+          targetPreset: $(CMakePreset)
       - template: azure-pipelines-templates/build-chibios-stm32-targets.yml
       - template: azure-pipelines-templates/pack-publish-artifacts.yml
       - template: azure-pipelines-templates/publish-cloudsmith.yml
@@ -722,6 +726,10 @@ jobs:
       - template: azure-pipelines-templates/build-preparations.yml
       - template: azure-pipelines-templates/nb-gitversioning.yml
       - template: azure-pipelines-templates/download-install-arm-gcc-toolchain.yml
+      - template: azure-pipelines-templates/install-kconfig-tools.yml
+      - template: azure-pipelines-templates/validate-kconfig.yml
+        parameters:
+          targetPreset: $(CMakePreset)
       - template: azure-pipelines-templates/build-ti-simplelink-targets.yml
       - template: azure-pipelines-templates/pack-publish-artifacts.yml
       - template: azure-pipelines-templates/publish-cloudsmith.yml
@@ -774,6 +782,10 @@ jobs:
       - template: azure-pipelines-templates/download-install-arm-gcc-toolchain.yml
       - template: azure-pipelines-templates/download-hexdfu.yml
       - template: azure-pipelines-templates/download-srecord.yml
+      - template: azure-pipelines-templates/install-kconfig-tools.yml
+      - template: azure-pipelines-templates/validate-kconfig.yml
+        parameters:
+          targetPreset: $(CMakePreset)
       - template: azure-pipelines-templates/build-threadx-targets.yml
       - template: azure-pipelines-templates/pack-publish-artifacts.yml
       - template: azure-pipelines-templates/publish-cloudsmith.yml
