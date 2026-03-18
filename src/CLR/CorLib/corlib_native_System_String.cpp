@@ -924,11 +924,10 @@ HRESULT Library_corlib_native_System_String::ChangeCase(CLR_RT_StackFrame &stack
         *ptr++ = c;
     }
 
-    NANOCLR_CHECK_HRESULT(
-        CLR_RT_HeapBlock_String::CreateInstance(
-            stack.PushValue(),
-            (CLR_UINT16 *)arrayTmp->GetFirstElement(),
-            arrayTmp->m_numOfElements));
+    NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_String::CreateInstance(
+        stack.PushValue(),
+        (CLR_UINT16 *)arrayTmp->GetFirstElement(),
+        arrayTmp->m_numOfElements));
 
     NANOCLR_NOCLEANUP();
 }
@@ -959,11 +958,10 @@ HRESULT Library_corlib_native_System_String::Substring(CLR_RT_StackFrame &stack,
             NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_RANGE);
     }
 
-    NANOCLR_CHECK_HRESULT(
-        CLR_RT_HeapBlock_String::CreateInstance(
-            stack.PushValue(),
-            (CLR_UINT16 *)arrayTmp->GetElement(startIndex),
-            length));
+    NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_String::CreateInstance(
+        stack.PushValue(),
+        (CLR_UINT16 *)arrayTmp->GetElement(startIndex),
+        length));
 
     NANOCLR_NOCLEANUP();
 }
@@ -1139,11 +1137,10 @@ HRESULT Library_corlib_native_System_String::Split(CLR_RT_StackFrame &stack, CLR
                         {
                             CLR_RT_HeapBlock *str = (CLR_RT_HeapBlock *)arrayDst->GetElement(count);
 
-                            NANOCLR_CHECK_HRESULT(
-                                CLR_RT_HeapBlock_String::CreateInstance(
-                                    *str,
-                                    pSrcStart,
-                                    (CLR_UINT32)(pSrc - pSrcStart)));
+                            NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_String::CreateInstance(
+                                *str,
+                                pSrcStart,
+                                (CLR_UINT32)(pSrc - pSrcStart)));
 
                             pSrcStart = pSrc + 1;
                         }
@@ -1427,15 +1424,38 @@ HRESULT Library_corlib_native_System_String::Format___STATIC__STRING__STRING__SZ
                         deref = arg->FixBoxingReference();
                         dt = deref->DataType();
 
-                        if (dt >= DATATYPE_I1 && dt <= DATATYPE_R8)
+                        if (dt == DATATYPE_BOOLEAN)
+                        {
+                            // "False" is 5 chars
+                            argLength = 5;
+                        }
+                        else if (dt == DATATYPE_CHAR)
+                        {
+                            // single char, up to 4 bytes in UTF-8
+                            argLength = 4;
+                        }
+                        else if (dt >= DATATYPE_I1 && dt <= DATATYPE_R8)
                         {
                             // Conservative estimate
                             argLength = FORMAT_RESULT_BUFFER_SIZE / 2;
                         }
                     }
+                    else if (dt == DATATYPE_BOOLEAN)
+                    {
+                        argLength = 5;
+                    }
+                    else if (dt == DATATYPE_CHAR)
+                    {
+                        argLength = 4;
+                    }
                     else if (dt >= DATATYPE_I1 && dt <= DATATYPE_R8)
                     {
                         argLength = 64;
+                    }
+                    else
+                    {
+                        // non-primitive object: conservative estimate for type name
+                        argLength = 256;
                     }
 
                     // Account for alignment
@@ -1465,9 +1485,28 @@ HRESULT Library_corlib_native_System_String::Format___STATIC__STRING__STRING__SZ
                     {
                         deref = arg->FixBoxingReference();
                         dt = deref->DataType();
+                    }
 
-                    process_numeric:
-                        if (dt >= DATATYPE_I1 && dt <= DATATYPE_R8)
+                    // after unboxing VALUETYPE, or for direct primitive types, dispatch by data type
+                    if (argStr == nullptr)
+                    {
+                        if (dt == DATATYPE_BOOLEAN)
+                        {
+                            argStr = deref->NumericByRef().u1 ? "True" : "False";
+                        }
+                        else if (dt == DATATYPE_CHAR)
+                        {
+                            CLR_UINT16 ch = deref->NumericByRef().u2;
+                            CLR_RT_UnicodeHelper uh{};
+                            uh.m_outputUTF8 = (CLR_UINT8 *)argBuffer;
+                            uh.m_outputUTF8_size = FORMAT_RESULT_BUFFER_SIZE - 1;
+                            uh.m_inputUTF16 = &ch;
+                            uh.ConvertToUTF8(1, false);
+                            int chLen = (int)((CLR_UINT8 *)uh.m_outputUTF8 - (CLR_UINT8 *)argBuffer);
+                            argBuffer[chLen] = '\0';
+                            argStr = argBuffer;
+                        }
+                        else if (dt >= DATATYPE_I1 && dt <= DATATYPE_R8)
                         {
                             bool isInteger = (dt >= DATATYPE_I1 && dt <= DATATYPE_U8);
                             int len = -1;
@@ -1563,16 +1602,59 @@ HRESULT Library_corlib_native_System_String::Format___STATIC__STRING__STRING__SZ
                         }
                         else
                         {
-                            argStr = "";
+                            // check if this is a Type/reflection object (Type.ToString() returns the
+                            // represented type's full name, not "System.RuntimeType")
+                            if (deref->DataType() == DATATYPE_REFLECTION)
+                            {
+                                CLR_RT_TypeDef_Instance td{};
+                                CLR_UINT32 levels = 0;
+
+                                if (CLR_RT_ReflectionDef_Index::Convert(*deref, td, &levels))
+                                {
+                                    char *szBuffer = argBuffer;
+                                    size_t iBuffer = FORMAT_RESULT_BUFFER_SIZE - 1;
+
+                                    if (SUCCEEDED(g_CLR_RT_TypeSystem.BuildTypeName(
+                                            td,
+                                            szBuffer,
+                                            iBuffer,
+                                            CLR_RT_TypeSystem::TYPENAME_FLAGS_FULL,
+                                            levels)))
+                                    {
+                                        *szBuffer = '\0';
+                                        argStr = argBuffer;
+                                    }
+                                }
+                            }
+
+                            // fallback: get object's own type name (Object.ToString() default behavior)
+                            if (argStr == nullptr)
+                            {
+                                CLR_RT_TypeDescriptor desc{};
+
+                                if (SUCCEEDED(desc.InitializeFromObject(*arg)))
+                                {
+                                    char *szBuffer = argBuffer;
+                                    size_t iBuffer = FORMAT_RESULT_BUFFER_SIZE - 1;
+
+                                    if (SUCCEEDED(g_CLR_RT_TypeSystem.BuildTypeName(
+                                            desc.m_handlerCls,
+                                            szBuffer,
+                                            iBuffer,
+                                            CLR_RT_TypeSystem::TYPENAME_FLAGS_FULL,
+                                            0)))
+                                    {
+                                        *szBuffer = '\0';
+                                        argStr = argBuffer;
+                                    }
+                                }
+                            }
+
+                            if (argStr == nullptr)
+                            {
+                                argStr = "";
+                            }
                         }
-                    }
-                    else if (dt >= DATATYPE_I1 && dt <= DATATYPE_R8)
-                    {
-                        goto process_numeric;
-                    }
-                    else
-                    {
-                        argStr = "";
                     }
 
                     // apply alignment and write to output
