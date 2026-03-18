@@ -1,7 +1,8 @@
+#!/usr/bin/env python3
+ 
 # Copyright (c) .NET Foundation and Contributors
 # See LICENSE file in the project root for full license information.
 
-#!/usr/bin/env python3
 """
 Validate defconfig files in the nanoFramework repository.
 
@@ -90,13 +91,25 @@ def validate_defconfig(
         return False
 
     # Check for undefined symbols referenced in the defconfig
-    with open(defconfig_path, "r", encoding="utf-8") as f:
-        lines = f.readlines()
+    try:
+        with open(defconfig_path, "r", encoding="utf-8") as f:
+            lines = f.readlines()
+    except OSError as exc:
+        print(f"  FAIL  {rel}: read error: {exc}")
+        return False
 
     undefined = []
     for line in lines:
         line = line.strip()
-        if not line or line.startswith("#"):
+        if not line:
+            continue
+        # Handle "# CONFIG_FOO is not set" lines (disabled symbols)
+        if line.startswith("# CONFIG_") and line.endswith(" is not set"):
+            sym_name = line[len("# CONFIG_"):-len(" is not set")]
+            if sym_name not in kconf.syms:
+                undefined.append(sym_name)
+            continue
+        if line.startswith("#"):
             continue
         if "=" in line:
             sym_name = line.split("=", 1)[0]
@@ -111,6 +124,7 @@ def validate_defconfig(
 
     if check_canonical:
         # Save to a temp file in minimal (savedefconfig) form and compare
+        tmp_path = None
         try:
             with tempfile.NamedTemporaryFile(
                 mode="w", suffix="_defconfig", delete=False
@@ -136,8 +150,10 @@ def validate_defconfig(
                     if added:
                         print(f"         + missing lines: {len(added)}")
                 # Non-canonical form is a warning, not a failure
+        except Exception as exc:
+            print(f"  WARN  {rel}: canonical check failed: {exc}")
         finally:
-            if os.path.exists(tmp_path):
+            if tmp_path is not None and os.path.exists(tmp_path):
                 os.unlink(tmp_path)
 
     if verbose:

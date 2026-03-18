@@ -57,7 +57,7 @@ steps:
     inputs:
       targetType: "inline"
       script: |
-        python -m pip install --quiet -r "$(Build.SourcesDirectory)/nf-interpreter/requirements.txt"
+        python -m pip install --quiet -r "$(Agent.BuildDirectory)\s\nf-interpreter\requirements.txt"
 
   - task: PowerShell@2
     displayName: Install IDF (step 3)
@@ -91,6 +91,13 @@ steps:
 
         # append to path
         Write-Host "##vso[task.prependpath]$newPath"
+
+  - task: PowerShell@2
+    displayName: Install kconfiglib in IDF Python
+    inputs:
+      targetType: "inline"
+      script: |
+        python -m pip install --quiet -r "$(Agent.BuildDirectory)\s\nf-interpreter\requirements.txt"
 
   - script: |
       echo ##vso[task.prependpath]C:\Windows\System32

@@ -114,10 +114,17 @@ function(nf_load_kconfig)
     endif()
 
     # Find Python
+    # Use PATH-order (LOCATION) strategy instead of the default VERSION strategy,
+    # and skip the Windows registry, so we find the same interpreter that the CI
+    # pipeline's UsePythonVersion task (which also installs kconfiglib) places
+    # at the front of PATH — rather than the newest Python on the machine.
+    set(Python3_FIND_STRATEGY LOCATION)
+    set(Python3_FIND_REGISTRY NEVER)
     find_package(Python3 COMPONENTS Interpreter REQUIRED)
 
     # Step 1: Merge the board defconfig (plus optional user overlay) into .config.
-    # Re-run whenever the defconfig or the user overlay is newer than .config.
+    # Re-run whenever the defconfig, user overlay, or any Kconfig schema file is
+    # newer than .config.
     set(_needs_regen FALSE)
     if(NOT EXISTS "${_dot_config}")
         set(_needs_regen TRUE)
@@ -125,6 +132,15 @@ function(nf_load_kconfig)
         set(_needs_regen TRUE)
     elseif(EXISTS "${_user_overlay}" AND "${_user_overlay}" IS_NEWER_THAN "${_dot_config}")
         set(_needs_regen TRUE)
+    else()
+        # Check whether any Kconfig schema file is newer than .config
+        file(GLOB_RECURSE _kconfig_files "${CMAKE_SOURCE_DIR}/Kconfig*")
+        foreach(_kfile IN LISTS _kconfig_files)
+            if("${_kfile}" IS_NEWER_THAN "${_dot_config}")
+                set(_needs_regen TRUE)
+                break()
+            endif()
+        endforeach()
     endif()
 
     if(_needs_regen)

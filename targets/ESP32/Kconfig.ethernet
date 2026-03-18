@@ -35,6 +35,7 @@ config ESP32_ETHERNET_INTERFACE
 
 config ETH_PHY_ADDR
     int "Ethernet PHY address"
+    range 0 31
     default 1
 
 config ETH_MDC_GPIO

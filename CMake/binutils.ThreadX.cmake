@@ -28,7 +28,7 @@ endfunction()
 macro(nf_set_network_connectivity_options)
 
     ############################
-    if(DEFINED WIFI_DRIVER)
+    if(WIFI_DRIVER)
 
         # list of supported Wi-Fi drivers
         set(WIFI_DRIVER_SUPPORTED_OPTIONS "ISM43362")
@@ -47,7 +47,7 @@ macro(nf_set_network_connectivity_options)
     endif()
 
     ################################
-    if(DEFINED ETHERNET_DRIVER)
+    if(ETHERNET_DRIVER)
 
         # list of supported Ethernet drivers
         set(ETHERNET_DRIVER_SUPPORTED_OPTIONS "LAN8742")

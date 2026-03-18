@@ -3,7 +3,7 @@
     "configurePresets": [
         {
             "name": "user-prefs",
-            "description": "CMake-level user preferences (build system, tool paths). Kconfig-owned options (NF_BUILD_RTM, NF_PLATFORM_NO_CLR_TRACE, NF_CLR_NO_IL_INLINE, NF_FEATURE_WATCHDOG, NF_WP_TRACE_*, NF_WP_IMPLEMENTS_CRC32) have moved — see config/user-kconfig.conf.TEMPLATE.",
+            "description": "CMake-level user preferences (build system, tool paths). Kconfig-owned options are now in config/user-kconfig.conf (the file the build reads for local Kconfig overrides) — copy config/user-kconfig.conf.TEMPLATE to create it.",
             "hidden": true,
             "cacheVariables": {
                 "CMAKE_BUILD_TYPE": "Debug",
