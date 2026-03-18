@@ -1059,12 +1059,12 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeConfig___VOI
                 break;
 
             case Handshake_RequestToSend:
-                uart_config.flow_ctrl = UART_HW_FLOWCTRL_RTS;
+                uart_config.flow_ctrl = UART_HW_FLOWCTRL_CTS_RTS;
                 uart_config.rx_flow_ctrl_thresh = 122;
                 break;
 
             case Handshake_RequestToSendXOnXOff:
-                uart_config.flow_ctrl = UART_HW_FLOWCTRL_RTS;
+                uart_config.flow_ctrl = UART_HW_FLOWCTRL_CTS_RTS;
                 uart_config.rx_flow_ctrl_thresh = 122;
                 EnableXonXoff = true;
                 break;
