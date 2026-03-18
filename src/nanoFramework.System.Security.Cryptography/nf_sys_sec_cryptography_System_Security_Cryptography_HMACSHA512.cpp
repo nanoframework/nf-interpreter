@@ -61,7 +61,7 @@ HRESULT Library_nf_sys_sec_cryptography_System_Security_Cryptography_HMACSHA512:
     NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance(
         stack.TopValue(),
         HASHED_KEY_BUFFER_SIZE,
-        g_CLR_RT_WellKnownTypes.m_UInt8));
+        g_CLR_RT_WellKnownTypes.UInt8));
     outputArray = stack.TopValue().DereferenceArray();
 
     // better clear memory
