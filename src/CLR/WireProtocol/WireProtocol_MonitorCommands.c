@@ -33,7 +33,7 @@ int Monitor_Ping(WP_Message *message)
         cmdReply.Flags = 0;
 
         // fill in the flags
-#if defined(WP_IMPLEMENTS_CRC32)
+#if CONFIG_NF_WP_IMPLEMENTS_CRC32
         cmdReply.Flags |= Monitor_Ping_c_Ping_WPFlag_SupportsCRC32;
 #endif
 
@@ -144,7 +144,7 @@ int Monitor_QueryConfiguration(WP_Message *message)
     bool success = false;
 
     // include handling of configuration block only if feature is available
-#if (HAS_CONFIG_BLOCK == TRUE)
+#if CONFIG_NF_FEATURE_HAS_CONFIG_BLOCK
 
     Monitor_QueryConfiguration_Command *cmd = (Monitor_QueryConfiguration_Command *)message->m_payload;
     int size = 0;
@@ -199,7 +199,7 @@ int Monitor_QueryConfiguration(WP_Message *message)
 
     (void)message;
 
-#endif // (HAS_CONFIG_BLOCK == TRUE)
+#endif // CONFIG_NF_FEATURE_HAS_CONFIG_BLOCK
 
     return success;
 }
@@ -209,7 +209,7 @@ int Monitor_UpdateConfiguration(WP_Message *message)
     bool success = false;
 
     // include handling of configuration block only if feature is available
-#if (HAS_CONFIG_BLOCK == TRUE)
+#if CONFIG_NF_FEATURE_HAS_CONFIG_BLOCK
 
     Monitor_UpdateConfiguration_Command *cmd = (Monitor_UpdateConfiguration_Command *)message->m_payload;
     Monitor_UpdateConfiguration_Reply cmdReply;
@@ -248,7 +248,7 @@ int Monitor_UpdateConfiguration(WP_Message *message)
 
     (void)message;
 
-#endif // (HAS_CONFIG_BLOCK == TRUE)
+#endif // CONFIG_NF_FEATURE_HAS_CONFIG_BLOCK
 
     return success;
 }
@@ -373,7 +373,7 @@ int Monitor_TargetInfo(WP_Message *message)
 
 int nanoBooter_GetTargetInfo(TargetInfo *targetInfo)
 {
-#if (TARGET_HAS_NANOBOOTER == TRUE)
+#if CONFIG_NF_TARGET_HAS_NANOBOOTER
 
     BootClipboard *data = &g_BootClipboard;
 

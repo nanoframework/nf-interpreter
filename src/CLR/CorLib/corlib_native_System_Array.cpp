@@ -1,4 +1,4 @@
-﻿//
+//
 // Copyright (c) .NET Foundation and Contributors
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
@@ -57,7 +57,7 @@ HRESULT Library_corlib_native_System_Array::get_Length___I4(CLR_RT_StackFrame &s
     NANOCLR_NOCLEANUP();
 }
 
-#if (NANOCLR_REFLECTION == TRUE)
+#if CONFIG_NF_FEATURE_SUPPORT_REFLECTION
 
 HRESULT Library_corlib_native_System_Array::CreateInstance___STATIC__SystemArray__SystemType__I4(
     CLR_RT_StackFrame &stack)
@@ -76,7 +76,7 @@ HRESULT Library_corlib_native_System_Array::CreateInstance___STATIC__SystemArray
     NANOCLR_NOCLEANUP();
 }
 
-#endif // NANOCLR_REFLECTION
+#endif // CONFIG_NF_FEATURE_SUPPORT_REFLECTION
 
 HRESULT Library_corlib_native_System_Array::Copy___STATIC__VOID__SystemArray__I4__SystemArray__I4__I4(
     CLR_RT_StackFrame &stack)

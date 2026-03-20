@@ -194,7 +194,7 @@ sl_status_t sli_usbd_vendor_winusb_init()
         token = strtok(NULL, ", ");
     }
 
-#if HAL_WP_USE_USB_CDC == FALSE
+#if !CONFIG_HAL_WP_USE_USB_CDC
     // no USB CDC so this won't be a composite device
     // need to set the description here from USB Class vendor description
     sl_usbd_vendor_update_device_product_string((const char *)UsbClassVendorDescription);
