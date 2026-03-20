@@ -12,6 +12,7 @@ list(APPEND System.Device.I2c_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/CLR/Core)
 list(APPEND System.Device.I2c_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/CLR/Include)
 list(APPEND System.Device.I2c_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/HAL/Include)
 list(APPEND System.Device.I2c_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/PAL/Include)
+list(APPEND System.Device.I2c_INCLUDE_DIRS ${TARGET_BASE_LOCATION})
 list(APPEND System.Device.I2c_INCLUDE_DIRS ${BASE_PATH_FOR_THIS_MODULE})
 list(APPEND System.Device.I2c_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/System.Device.I2c)
 
@@ -30,8 +31,8 @@ foreach(SRC_FILE ${System.Device.I2c_SRCS})
 
     find_file(System.Device.I2c_SRC_FILE ${SRC_FILE}
         PATHS
-	        ${BASE_PATH_FOR_THIS_MODULE}
 	        ${TARGET_BASE_LOCATION}
+	        ${BASE_PATH_FOR_THIS_MODULE}
             ${CMAKE_SOURCE_DIR}/src/System.Device.I2c
 
 	    CMAKE_FIND_ROOT_PATH_BOTH

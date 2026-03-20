@@ -434,6 +434,63 @@ jobs:
       - template: azure-pipelines-templates/publish-cloudsmith.yml
       - template: azure-pipelines-templates/pack-publish-managed-helpers.yml
 
+  ######################
+  # ChibiOS RP targets
+  - job: Build_ChibiOS_RP_targets
+    condition: >-
+      or(
+        and(
+          succeeded('Check_Code_Style'),
+          ne( dependencies.Check_Build_Options.outputs['BuildOptions.SKIP_BUILD'], true ),
+          or(
+            eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ALL'], true),
+            eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_CHIBIOS'], true)
+          )
+        ),
+        and(
+          eq(variables['Build.Reason'], 'Manual'),
+          or(
+            eq(variables['BUILD_ALL__'], 'true'),
+            eq(variables['BUILD_CHIBIOS__'], 'true')
+          )
+        )
+      )
+
+    dependsOn:
+      - Check_Build_Options
+      - Check_Code_Style
+
+    pool:
+      vmImage: "windows-2022"
+
+    strategy:
+      matrix:
+        RP_PICO_RP2040:
+          TargetBoard: RP_PICO_RP2040
+          TargetSeries: "RP2040"
+          BuildOptions:
+          CMakePreset: RP_PICO_RP2040
+        RP_PICO_W_RP2040:
+          TargetBoard: RP_PICO_W_RP2040
+          TargetSeries: "RP2040"
+          BuildOptions:
+          CMakePreset: RP_PICO_W_RP2040
+
+    variables:
+      DOTNET_NOLOGO: true
+      # creates a counter and assigns it to the revision variable
+      REVISION: $[counter('RP_1_0_0_versioncounter', 0)]
+      HelperPackageVersion: $[counter('HelperPackageVersioncounter', 0)]
+      TargetPlatform: "rp"
+
+    steps:
+      - template: azure-pipelines-templates/build-preparations.yml
+      - template: azure-pipelines-templates/nb-gitversioning.yml
+      - template: azure-pipelines-templates/download-install-arm-gcc-toolchain.yml
+      - template: azure-pipelines-templates/build-chibios-rp-targets.yml
+      - template: azure-pipelines-templates/pack-publish-artifacts.yml
+      - template: azure-pipelines-templates/publish-cloudsmith.yml
+
   #################
   # ESP32 targets
   - job: Build_ESP32_targets

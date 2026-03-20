@@ -6,7 +6,17 @@
 #include <nanoHAL.h>
 #include <nanoHAL_v2.h>
 #include <nanoWeak.h>
+
+// Include the appropriate flash driver header based on target vendor
+#if defined(RP2040) || defined(RP2350)
+#include <Target_BlockStorage_RP2040FlashDriver.h>
+// Map STM32 flash function names to RP2040 equivalents for shared code
+#define STM32FlashDriver_IsBlockErased  RP2040FlashDriver_IsBlockErased
+#define STM32FlashDriver_Write          RP2040FlashDriver_Write
+#define STM32FlashDriver_EraseBlock     RP2040FlashDriver_EraseBlock
+#else
 #include <Target_BlockStorage_STM32FlashDriver.h>
+#endif
 
 uint32_t GetExistingConfigSize()
 {
@@ -648,9 +658,12 @@ __nfweak void ConfigurationManager_GetSystemSerialNumber(char *serialNumber, siz
 {
     // do the thing to get unique device ID
     memset(serialNumber, 0, serialNumberSize);
+
+#if defined(UID_BASE)
     // Use the 96 bit unique device ID => 12 bytes
     // memory copy from the address pointed by UID_BASE define (from STM32 HAL)
     memcpy(&serialNumber[serialNumberSize - 12], ((uint8_t *)UID_BASE), 12);
+#endif
 
     // Disambiguation is needed because the hardware-specific identifier used to create the
     // default serial number on other platforms may be in the same range.

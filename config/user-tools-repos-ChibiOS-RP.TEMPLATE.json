@@ -1,0 +1,18 @@
+{
+    "version": 4,
+    "configurePresets": [
+        {
+            "name": "user-tools-repos",
+            "description": "Cache variables with paths to tools and repos inside the ChibiOS-RP dev container. Copy this file to config/user-tools-repos.json when working in the container.",
+            "hidden": true,
+            "cacheVariables": {
+                "TOOL_SRECORD_PREFIX": "/usr/bin",
+                "CHIBIOS_SOURCE_FOLDER": "/sources/ChibiOs",
+                "LWIP_SOURCE": "/sources/lwip",
+                "MBEDTLS_SOURCE": "/sources/mbedtls",
+                "FATFS_SOURCE": "/sources/fatfs",
+                "LITTLEFS_SOURCE": "/sources/littlefs"
+            }
+        }
+    ]
+}

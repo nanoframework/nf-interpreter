@@ -59,6 +59,11 @@ function(nf_set_stm32_target_series)
 
 endfunction()
 
+function(nf_set_rp_target_series)
+    # RP series names are simple (e.g. "RP2040", "RP2350") — use as-is for the short name
+    set(TARGET_SERIES_SHORT ${TARGET_SERIES} CACHE INTERNAL "RP target series short name")
+endfunction()
+
 # Add platform packages specific to ChibiOS
 # To be called from target CMakeList.txt
 # optional TARGET argument with target name
@@ -81,14 +86,17 @@ macro(nf_add_platform_packages)
         find_package(CHIBIOS_FATFS REQUIRED QUIET)
     endif()
 
-    # littlefs
-    if(NF_FEATURE_USE_LITTLEFS_OPTION)
-        find_package(STM32F7_CubePackage REQUIRED QUIET)
-        find_package(LITTLEFS REQUIRED QUIET)
-    endif()
+    # STM32-specific packages (not needed for RP targets)
+    if(TARGET_VENDOR STREQUAL "ST")
+        # littlefs
+        if(NF_FEATURE_USE_LITTLEFS_OPTION)
+            find_package(STM32F7_CubePackage REQUIRED QUIET)
+            find_package(LITTLEFS REQUIRED QUIET)
+        endif()
 
-    if(STM32_CUBE_PACKAGE_REQUIRED)
-        find_package(${TARGET_STM32_CUBE_PACKAGE}_CubePackage REQUIRED QUIET)
+        if(STM32_CUBE_PACKAGE_REQUIRED)
+            find_package(${TARGET_STM32_CUBE_PACKAGE}_CubePackage REQUIRED QUIET)
+        endif()
     endif()
     
     # packages specific for nanoBooter
@@ -191,6 +199,13 @@ macro(nf_add_platform_dependencies target)
         # nF feature: networking
         if(USE_NETWORKING_OPTION)
 
+            # WiFi targets don't use the ChibiOS MAC HAL driver
+            if(TARGET_HAS_WIFI)
+                set(NF_NETWORK_EXTRA_DEFS "")
+            else()
+                set(NF_NETWORK_EXTRA_DEFS -DHAL_USE_MAC=TRUE)
+            endif()
+
             nf_add_lib_network(
                 BUILD_TARGET
                     ${target}
@@ -206,7 +221,7 @@ macro(nf_add_platform_dependencies target)
                     ${CHIBIOS_FATFS_INCLUDE_DIRS}
                     ${CHIBIOS_CONTRIB_INCLUDE_DIRS}
                     ${${TARGET_STM32_CUBE_PACKAGE}_CubePackage_INCLUDE_DIRS}
-                EXTRA_COMPILE_DEFINITIONS -DHAL_USE_MAC=TRUE)
+                EXTRA_COMPILE_DEFINITIONS ${NF_NETWORK_EXTRA_DEFS})
 
             add_dependencies(${target}.elf nano::NF_Network)
 
@@ -293,12 +308,17 @@ macro(nf_add_platform_sources target)
     
         ${TARGET_CHIBIOS_COMMON_SOURCES}
 
-        ${${TARGET_STM32_CUBE_PACKAGE}_CubePackage_SOURCES}
-
         ${CHIBIOS_HAL_SOURCES}
         ${CHIBIOS_SOURCES}
         ${ChibiOSnfOverlay_SOURCES}
     )
+
+    # STM32 Cube package sources (only for ST vendor)
+    if(TARGET_VENDOR STREQUAL "ST")
+        target_sources(${target}.elf PUBLIC
+            ${${TARGET_STM32_CUBE_PACKAGE}_CubePackage_SOURCES}
+        )
+    endif()
 
     # sources specific to nanoBooter
     if(${target} STREQUAL ${NANOBOOTER_PROJECT_NAME})
