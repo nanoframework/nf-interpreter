@@ -78,7 +78,7 @@ int main(void)
     palClearLine(LINE_LCD_ENABLE);
 
 // init SWO as soon as possible to make it available to output ASAP
-#if (SWO_OUTPUT == TRUE)
+#if CONFIG_SWO_OUTPUT
     SwoInit();
 #endif
 
@@ -112,7 +112,7 @@ int main(void)
     usbStart(serusbcfg.usbp, &usbcfg);
     usbConnectBus(serusbcfg.usbp);
 
-#if (NF_FEATURE_USE_LITTLEFS == TRUE)
+#if CONFIG_NF_FEATURE_USE_LITTLEFS
     // config and init littlefs
     hal_lfs_config();
     hal_lfs_mount();

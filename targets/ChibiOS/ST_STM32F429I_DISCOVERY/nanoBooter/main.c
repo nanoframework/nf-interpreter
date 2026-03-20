@@ -29,7 +29,7 @@ int main(void)
     InitBootClipboard();
 
 // init SWO as soon as possible to make it available to output ASAP
-#if (SWO_OUTPUT == TRUE)
+#if CONFIG_SWO_OUTPUT
     SwoInit();
 #endif
 
