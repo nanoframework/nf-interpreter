@@ -11,7 +11,7 @@
 #include <target_platform.h>
 
 // Include instance config
-#if HAL_WP_USE_SERIAL == TRUE
+#if CONFIG_HAL_WP_USE_SERIAL
 #include "sl_iostream_usart_vcom_config.h"
 #endif
 #if HAL_USE_ONEWIRE == TRUE
@@ -27,9 +27,9 @@
 // Baudrate for the serial port                               //
 // Override default setting from board if build option is set //
 ////////////////////////////////////////////////////////////////
-#ifdef TARGET_SERIAL_BAUDRATE
+#ifdef CONFIG_TARGET_SERIAL_BAUDRATE
 #undef SL_IOSTREAM_USART_VCOM_BAUDRATE
-#define SL_IOSTREAM_USART_VCOM_BAUDRATE TARGET_SERIAL_BAUDRATE
+#define SL_IOSTREAM_USART_VCOM_BAUDRATE CONFIG_TARGET_SERIAL_BAUDRATE
 #endif
 
 // MACROs for generating name and IRQ handler function
@@ -65,7 +65,7 @@ static sl_power_manager_em_transition_event_handle_t events_handle;
 
 // Instance(s) handle and context variable
 
-#if HAL_WP_USE_SERIAL == TRUE
+#if CONFIG_HAL_WP_USE_SERIAL
 
 sl_status_t sl_iostream_usart_init_vcom(void);
 static sl_iostream_uart_t sl_iostream_vcom;
@@ -147,7 +147,7 @@ sl_status_t sl_iostream_usart_init_vcom(void)
     return status;
 }
 
-#endif // HAL_WP_USE_SERIAL
+#endif // CONFIG_HAL_WP_USE_SERIAL
 
 #if HAL_USE_ONEWIRE == TRUE
 
@@ -246,13 +246,13 @@ void sl_iostream_usart_init_instances(void)
 #endif
 
 // Instantiate usart instance(s)
-#if HAL_WP_USE_SERIAL == TRUE
+#if CONFIG_HAL_WP_USE_SERIAL
     sl_status_t status = sl_iostream_usart_init_vcom();
     EFM_ASSERT(status == SL_STATUS_OK);
 #endif
 }
 
-#if HAL_WP_USE_SERIAL == TRUE
+#if CONFIG_HAL_WP_USE_SERIAL
 
 // VCOM IRQ Handler
 void SL_IOSTREAM_USART_TX_IRQ_HANDLER(SL_IOSTREAM_USART_VCOM_PERIPHERAL_NO)(void)
@@ -265,7 +265,7 @@ void SL_IOSTREAM_USART_RX_IRQ_HANDLER(SL_IOSTREAM_USART_VCOM_PERIPHERAL_NO)(void
     sl_iostream_usart_irq_handler(&sl_iostream_vcom);
 }
 
-#endif // HAL_WP_USE_SERIAL
+#endif // CONFIG_HAL_WP_USE_SERIAL
 
 #if HAL_USE_ONEWIRE == TRUE
 

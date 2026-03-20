@@ -5,7 +5,7 @@
 
 const sl_iostream_instance_info_t *sl_iostream_instances_info[] = {
 
-#if HAL_WP_USE_SERIAL == TRUE
+#if CONFIG_HAL_WP_USE_SERIAL
     &sl_iostream_instance_vcom_info,
 #endif
 

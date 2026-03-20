@@ -1,0 +1,57 @@
+#
+# Copyright (c) .NET Foundation and Contributors
+# See LICENSE file in the project root for full license information.
+#
+
+menu "Wire Protocol"
+
+config NF_WP_IMPLEMENTS_CRC32
+    bool "Implement CRC32 for Wire Protocol"
+    default n
+    help
+      Enable CRC32 integrity checking on Wire Protocol packets.
+      Slightly increases communication overhead but improves reliability
+      on noisy links.
+
+menu "Wire Protocol Trace"
+
+config NF_WP_TRACE_ERRORS
+    bool "Trace errors"
+    default n
+    help
+      Log Wire Protocol error conditions. Useful during host-device
+      communication debugging.
+
+config NF_WP_TRACE_HEADERS
+    bool "Trace packet headers"
+    default n
+    help
+      Log Wire Protocol packet headers.
+
+config NF_WP_TRACE_STATE
+    bool "Trace state machine transitions"
+    default n
+
+config NF_WP_TRACE_NODATA
+    bool "Trace packets with no payload"
+    default n
+
+config NF_WP_TRACE_VERBOSE
+    bool "Verbose trace (all packets)"
+    default n
+
+config NF_WP_TRACE_ALL
+    bool "Enable all trace flags"
+    default n
+    imply NF_WP_TRACE_ERRORS
+    imply NF_WP_TRACE_HEADERS
+    imply NF_WP_TRACE_STATE
+    imply NF_WP_TRACE_NODATA
+    imply NF_WP_TRACE_VERBOSE
+    help
+      Convenience option: enables all individual trace flags above via
+      imply. Individual flags can still be overridden independently.
+
+endmenu # Wire Protocol Trace
+
+endmenu # Wire Protocol

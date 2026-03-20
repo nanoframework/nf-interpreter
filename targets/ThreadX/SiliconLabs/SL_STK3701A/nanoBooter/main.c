@@ -164,7 +164,7 @@ void tx_application_define(void *first_unused_memory)
         }
     }
 
-#if HAL_WP_USE_USB_CDC == TRUE
+#if CONFIG_HAL_WP_USE_USB_CDC
     sli_usbd_init();
     sli_usbd_configuration_config0_init();
     sli_usbd_cdc_acm_acm0_init();

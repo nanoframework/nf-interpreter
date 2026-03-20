@@ -1,0 +1,74 @@
+#
+# nanoFramework user Kconfig preferences
+#
+# HOW TO USE
+# ----------
+# Copy this file to config/user-kconfig.conf (remove the .TEMPLATE suffix) and
+# adjust the values to your liking. That file is git-ignored so your changes
+# will never be accidentally committed.
+#
+# This file is loaded on top of the board defconfig each time CMake configures
+# the project. Any symbol you uncomment (or change) here overrides the value
+# that came from the board defconfig, letting you apply developer-local
+# preferences without touching the shared per-board configuration.
+#
+# FORMAT
+# ------
+# Kconfig fragment format (same as Linux kernel config fragments):
+#   CONFIG_SYMBOL=y        enable a bool
+#   CONFIG_SYMBOL=n        disable a bool   (or: # CONFIG_SYMBOL is not set)
+#   CONFIG_SYMBOL=42       set an integer
+#   CONFIG_SYMBOL="text"   set a string
+#
+# WHAT STAYS IN user-prefs.json (CMake-level variables)
+# -------------------------------------------------------
+# The following variables are not Kconfig symbols and thus remain in the
+# CMakePresets user-prefs file (config/user-prefs.json):
+#
+#   CMAKE_BUILD_TYPE          - Debug / MinSizeRel / Release
+#   BUILD_VERSION             - Firmware version string
+#   BUILD_VERBOSE             - Verbose CMake build output
+#   Tool and SDK source paths (ESP32_IDF_PATH, CHIBIOS_SOURCE_FOLDER, …)
+#
+
+# ── Build mode ────────────────────────────────────────────────────────────────
+# Build RTM (Release-to-Manufacturing) firmware — suppresses all debug output.
+# Default: n (debug build)
+CONFIG_NF_BUILD_RTM=n
+
+# ── CLR diagnostics ───────────────────────────────────────────────────────────
+# Disable all CLR trace messages and assertions.
+# Default: n
+CONFIG_NF_PLATFORM_NO_CLR_TRACE=n
+
+# Disable CLR IL inlining (useful when debugging managed code).
+# Default: n
+CONFIG_NF_CLR_NO_IL_INLINE=n
+
+# ── Hardware watchdog ─────────────────────────────────────────────────────────
+# Most boards enable the watchdog by default; uncomment to override.
+# CONFIG_NF_FEATURE_WATCHDOG=y
+
+# ── Wire Protocol ─────────────────────────────────────────────────────────────
+# CRC32 integrity checking on Wire Protocol packets.
+# Default: n
+CONFIG_NF_WP_IMPLEMENTS_CRC32=n
+
+# Wire Protocol trace flags — enable individually or use NF_WP_TRACE_ALL.
+# Default: all n
+CONFIG_NF_WP_TRACE_ERRORS=n
+CONFIG_NF_WP_TRACE_HEADERS=n
+CONFIG_NF_WP_TRACE_STATE=n
+CONFIG_NF_WP_TRACE_NODATA=n
+CONFIG_NF_WP_TRACE_VERBOSE=n
+CONFIG_NF_WP_TRACE_ALL=n
+
+# ── ChibiOS / STM32 ──────────────────────────────────────────────────────
+# ARM Cortex-M Single Wire Output (SWO) debug tracing.
+# Only relevant when building a ChibiOS target. Default is n.
+# CONFIG_SWO_OUTPUT=y
+
+# ── TI SimpleLink ─────────────────────────────────────────────────────────────
+# Radio frequency for TI CC13xx devices (868 or 915 MHz).
+# Only relevant when building a TI SimpleLink target. Default is 915.
+# CONFIG_RADIO_FREQUENCY=915

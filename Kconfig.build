@@ -1,0 +1,44 @@
+#
+# Copyright (c) .NET Foundation and Contributors
+# See LICENSE file in the project root for full license information.
+#
+
+menu "Build Options"
+
+config NF_BUILD_RTM
+    bool "Build RTM firmware (suppresses debug output)"
+    default n
+
+config NF_TARGET_HAS_NANOBOOTER
+    bool "Target includes nanoBooter"
+    default y
+
+config DP_FLOATINGPOINT
+    bool "Double-precision floating point"
+    default n
+
+config NF_FEATURE_LIGHT_MATH
+    bool "Light math (exclude complex math functions)"
+    default n
+
+config SUPPORT_ANY_BASE_CONVERSION
+    bool "String conversion to any numeric base"
+    default n
+
+config USE_RNG
+    bool "Hardware true random number generator"
+    default y
+
+config NF_SECURITY_MBEDTLS
+    bool "Mbed TLS support"
+    default y
+
+config NF_PLATFORM_NO_CLR_TRACE
+    bool "Disable all CLR trace messages and checks"
+    default n
+
+config NF_CLR_NO_IL_INLINE
+    bool "Disable CLR IL inlining"
+    default n
+
+endmenu

@@ -14,9 +14,9 @@
 #include <target_os.h>
 #include <targetHAL_StorageOperation.h>
 
-#if HAS_ACCESSIBLE_STORAGE
+#if CONFIG_NF_FEATURE_HAS_ACCESSIBLE_STORAGE
 
-#if defined(NF_FEATURE_USE_LITTLEFS) && (NF_FEATURE_USE_LITTLEFS == TRUE)
+#if CONFIG_NF_FEATURE_USE_LITTLEFS
 
 #include <hal_littlefs.h>
 
@@ -189,7 +189,7 @@ done:
     return errorCode;
 }
 
-#endif // NF_FEATURE_USE_LITTLEFS
+#endif // CONFIG_NF_FEATURE_USE_LITTLEFS
 
-#endif // HAS_ACCESSIBLE_STORAGE
+#endif // CONFIG_NF_FEATURE_HAS_ACCESSIBLE_STORAGE
 #endif // I_AM_NANOCLR

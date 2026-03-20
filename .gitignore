@@ -381,3 +381,4 @@ sdkconfig
 CMakeUserPresets.json
 config/user-tools-repos.json
 config/user-prefs.json
+config/user-kconfig.conf
