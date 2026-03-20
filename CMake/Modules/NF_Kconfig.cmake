@@ -168,24 +168,34 @@ function(nf_load_kconfig)
         endif()
     endif()
 
-    # Step 2: Run genconfig to produce the C header
-    # genconfig takes the Kconfig file as a positional arg and reads the
-    # config from the KCONFIG_CONFIG environment variable.
+    # Step 2: Run nf_genconfig.py to produce nf_config.h.
+    # This script wraps kconfiglib's write_autoconf() and additionally emits
+    # '#define CONFIG_X 0' for every disabled bool/tristate symbol so that
+    # '#if CONFIG_X' is always well-defined under -Werror=undef.
     set(ENV{srctree} "${CMAKE_SOURCE_DIR}")
-    set(ENV{KCONFIG_CONFIG} "${_dot_config}")
     execute_process(
-        COMMAND ${Python3_EXECUTABLE} -m genconfig
+        COMMAND ${Python3_EXECUTABLE} "${CMAKE_SOURCE_DIR}/scripts/nf_genconfig.py"
             "${_kconfig_root}"
-            "--header-path=${_header_file}"
+            "${_dot_config}"
+            "${_header_file}"
         WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
         RESULT_VARIABLE _genconfig_result
-        OUTPUT_VARIABLE _genconfig_output
         ERROR_VARIABLE _genconfig_error
     )
 
     if(NOT _genconfig_result EQUAL 0)
-        message(FATAL_ERROR "kconfiglib genconfig failed:\n${_genconfig_error}")
+        message(FATAL_ERROR "nf_genconfig.py failed:\n${_genconfig_error}")
     endif()
+
+    # Make nf_config.h available to all compilation units without an explicit
+    # include path.  The file lives directly in CMAKE_BINARY_DIR, so adding that
+    # directory to the global include search path is enough for every target.
+    include_directories(${CMAKE_BINARY_DIR})
+
+    # Force-include nf_config.h in every translation unit so that CONFIG_*
+    # symbols are always defined regardless of the inclusion chain.
+    # This mirrors how the Linux kernel handles autoconf.h.
+    add_compile_options(-include "${CMAKE_BINARY_DIR}/nf_config.h")
 
     # Build the symbol name mapping
     _nf_build_symbol_map()
