@@ -60,7 +60,7 @@ __nfweak void sl_driver_init(void)
 {
     sl_i2cspm_init_instances();
 
-#if HAL_WP_USE_SERIAL == TRUE
+#if CONFIG_HAL_WP_USE_SERIAL
     sl_uartdrv_init_instances();
 #endif
 
@@ -73,7 +73,7 @@ __nfweak void sl_service_init(void)
     sl_board_configure_vcom();
     sl_sleeptimer_init();
 
-#if HAL_WP_USE_SERIAL == TRUE
+#if CONFIG_HAL_WP_USE_SERIAL
     sl_iostream_init_instances();
 #endif
 }
@@ -111,7 +111,7 @@ __nfweak void sl_internal_app_process_action(void)
 // implemented as weak function to allow overriding at platform level
 __nfweak void sl_iostream_init_instances(void)
 {
-#if HAL_WP_USE_SERIAL == TRUE
+#if CONFIG_HAL_WP_USE_SERIAL
     sl_iostream_usart_init_instances();
 #endif
 }

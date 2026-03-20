@@ -63,11 +63,6 @@ macro(nf_common_compiler_definitions)
         target_compile_definitions(${NFCCF_TARGET} PUBLIC -DNANOCLR_USE_APPDOMAINS)
     endif()
 
-    # set compiler definition for implementing (or not) CRC32 in Wire Protocol
-    if(NF_WP_IMPLEMENTS_CRC32)
-        target_compile_definitions(${NFCCF_TARGET} PUBLIC -DWP_IMPLEMENTS_CRC32)
-    endif()
-
     # set definition for Wire Protocol trace mask
     target_compile_definitions(${NFCCF_TARGET} PUBLIC -DTRACE_MASK=${WP_TRACE_MASK})
 

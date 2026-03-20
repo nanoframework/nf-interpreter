@@ -18,10 +18,10 @@
 
 ////////////////////////////////////////////////////////////////////
 // Baudrate for the serial port                                   //
-// Can be overriden by the build parameter TARGET_SERIAL_BAUDRATE //
+// Can be overriden by the build parameter CONFIG_TARGET_SERIAL_BAUDRATE //
 ////////////////////////////////////////////////////////////////////
-#ifndef TARGET_SERIAL_BAUDRATE
-#define TARGET_SERIAL_BAUDRATE 921600
+#ifndef CONFIG_TARGET_SERIAL_BAUDRATE
+#define CONFIG_TARGET_SERIAL_BAUDRATE 921600
 #endif
 
 #ifdef CONFIG_IDF_TARGET_ESP32
@@ -357,7 +357,7 @@ static bool WP_Initialise(COM_HANDLE port)
     // ESP_ERROR_CHECK(uart_driver_delete(ESP32_WP_UART));
 
     uart_config_t uart_config = {// baudrate
-                                 .baud_rate = TARGET_SERIAL_BAUDRATE,
+                                 .baud_rate = CONFIG_TARGET_SERIAL_BAUDRATE,
                                  // baudrate
                                  .data_bits = UART_DATA_8_BITS,
                                  // parity mode

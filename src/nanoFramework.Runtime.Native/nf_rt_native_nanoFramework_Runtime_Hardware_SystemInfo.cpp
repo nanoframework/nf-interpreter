@@ -141,7 +141,7 @@ HRESULT Library_nf_rt_native_nanoFramework_Runtime_Native_SystemInfo::GetNativeF
 
 #if (USE_FPU == TRUE)
 
-#if (DP_FLOATINGPOINT == TRUE)
+#if CONFIG_DP_FLOATINGPOINT
         floatingPointOption = SystemInfo_FloatingPoint_DoublePrecisionHardware;
 #else
         floatingPointOption = SystemInfo_FloatingPoint_SinglePrecisionHardware;
@@ -149,7 +149,7 @@ HRESULT Library_nf_rt_native_nanoFramework_Runtime_Native_SystemInfo::GetNativeF
 
 #else
 
-#if (DP_FLOATINGPOINT == TRUE)
+#if CONFIG_DP_FLOATINGPOINT
         floatingPointOption = SystemInfo_FloatingPoint_DoublePrecisionSoftware;
 #else
         floatingPointOption = SystemInfo_FloatingPoint_SinglePrecisionSoftware;

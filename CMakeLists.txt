@@ -179,30 +179,24 @@ endif()
 #################################################################################
 # double-precision floating point support
 if(DP_FLOATINGPOINT)
-    set(TARGET_DP_FLOATINGPOINT TRUE CACHE INTERNAL "DP FP support")
     message(STATUS "Double-precision floating point is effective")
 else()
-    set(TARGET_DP_FLOATINGPOINT FALSE CACHE INTERNAL "DP FP support")
     message(STATUS "Single-precision floating point is effective")
 endif()
 
 #################################################################################
 # complex math functions
 if(NF_FEATURE_LIGHT_MATH)
-    set(TARGET_LIGHT_MATH TRUE CACHE INTERNAL "Complex Math functions enabled")
     message(STATUS "Complex math functions available")
 else()
-    set(TARGET_LIGHT_MATH FALSE CACHE INTERNAL "Complex Math functions disabled")
     message(STATUS "Complex math functions not available")
 endif()
 
 ###################################################################################
 # string conversion to any base support
 if(SUPPORT_ANY_BASE_CONVERSION)
-    set(TARGET_SUPPORT_ANY_BASE_CONVERSION TRUE CACHE INTERNAL "Option for string conversion to value from any base")
     message(STATUS "String conversion to value on any base is effective")
 else()
-    set(TARGET_SUPPORT_ANY_BASE_CONVERSION FALSE CACHE INTERNAL "Option for string conversion to value from base 10 and partial for 16")
     message(STATUS "String conversion to value from base 10 and 16 (partial) is effective")
 endif()
 
@@ -233,10 +227,8 @@ endif()
 ###################################################################
 # native send trace to stdio
 if(NF_TRACE_TO_STDIO)
-    set(TARGET_TRACE_TO_STDIO TRUE CACHE INTERNAL "Option for stdio TRACE implementation")
     message(STATUS "Support for sending TRACE to stdio is included.")
 else()
-    set(TARGET_TRACE_TO_STDIO FALSE CACHE INTERNAL "Option for stdio TRACE implementation")
     message(STATUS "Support for sending TRACE to stdio **IS NOT** included.")
 endif()
 
@@ -267,20 +259,16 @@ endif()
 #################################################################
 # configuration block storage support
 if(NF_FEATURE_HAS_CONFIG_BLOCK)
-    set(TARGET_HAS_CONFIG_BLOCK TRUE CACHE INTERNAL "Option for config block")
     message(STATUS "Configuration block storage is included")
 else()
-    set(TARGET_HAS_CONFIG_BLOCK FALSE CACHE INTERNAL "Option for config block")
     message(STATUS "Configuration block storage **IS NOT** included")
 endif()
 
 #################################################################
 # accessible storage support
 if(NF_FEATURE_HAS_ACCESSIBLE_STORAGE)
-    set(TARGET_HAS_ACCESSIBLE_STORAGE TRUE CACHE INTERNAL "Option for accessible storage")
     message(STATUS "Accessible Storage feature is included")
 else()
-    set(TARGET_HAS_ACCESSIBLE_STORAGE FALSE CACHE INTERNAL "Option for accessible storage")
     message(STATUS "Accessible Storage feature **IS NOT** included")
 endif()
 
@@ -340,10 +328,8 @@ endif()
 #################################################################
 # nanoBooter implementation
 if(NF_TARGET_HAS_NANOBOOTER)
-    set(TARGET_HAS_NANOBOOTER TRUE CACHE INTERNAL "Option for nanoBooter implementation")
     message(STATUS "Target implements nanoBooter")
 else()
-    set(TARGET_HAS_NANOBOOTER FALSE CACHE INTERNAL "Option for nanoBooter implementation")
     message(STATUS "Target DOES NOT implement nanoBooter")
 endif()
 
@@ -381,7 +367,6 @@ endif()
 #############################################
 
 if(NF_FEATURE_SUPPORT_REFLECTION)
-    set(TARGET_NANOCLR_REFLECTION TRUE CACHE INTERNAL "enable support for System.Reflection API")
     message(STATUS "Support for System.Reflection API enabled")
     
     if(NF_FEATURE_BINARY_SERIALIZATION)
@@ -391,7 +376,6 @@ if(NF_FEATURE_SUPPORT_REFLECTION)
     endif()
 
 else()
-    set(TARGET_NANOCLR_REFLECTION FALSE CACHE INTERNAL "DISABLE support for System.Reflection API")
     message(STATUS "Support for System.Reflection API **IS NOT** enabled")
 
     message(STATUS "Support for binary serialization **IS NOT** enabled")
@@ -405,10 +389,8 @@ endif()
 #############################################
 
 if(API_nanoFramework.System.Collections)
-    set(TARGET_SYSTEM_COLLECTIONS TRUE CACHE INTERNAL "enable support for System.Collections API")
     message(STATUS "Support for System.Collections API enabled")
 else()
-    set(TARGET_SYSTEM_COLLECTIONS FALSE CACHE INTERNAL "DISABLE support for System.Collections API")
     message(STATUS "Support for System.Collections API **IS NOT** enabled")
 endif()
 
@@ -419,10 +401,8 @@ endif()
 #############################################
 
 if(API_nanoFramework.System.Text)
-    set(TARGET_SYSTEM_TEXT TRUE CACHE INTERNAL "enable support for System.Text API")
     message(STATUS "Support for System.Text API enabled")
 else()
-    set(TARGET_SYSTEM_TEXT FALSE CACHE INTERNAL "DISABLE support for System.Text API")
     message(STATUS "Support for System.Text API **IS NOT** enabled")
 endif()
 
@@ -653,8 +633,8 @@ endif()
 #################################################################
 # Baudrate for serial communication 
 
-if(TARGET_SERIAL_BAUDRATE)
-    message(STATUS "Baudrate for serial communication was set to ${TARGET_SERIAL_BAUDRATE}.")
+if(NF_TARGET_SERIAL_BAUDRATE)
+    message(STATUS "Baudrate for serial communication was set to ${NF_TARGET_SERIAL_BAUDRATE}.")
 endif()
 
 #################################################################

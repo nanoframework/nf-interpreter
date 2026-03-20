@@ -15,8 +15,6 @@
 #define HAL_USE_UART                          @HAL_USE_UART_OPTION@
 #define HAL_USE_SDC                           @HAL_USE_SDC_OPTION@
 #define HAL_USE_BLE                           @HAL_USE_BLE_OPTION@
-#define HAL_WP_USE_SERIAL                     @HAL_WP_USE_SERIAL_OPTION@
-#define HAL_WP_USE_USB_CDC                    @HAL_WP_USE_USB_CDC_OPTION@
 
 #define HAL_USE_THREAD                        @HAL_USE_THREAD_OPTION@
 
