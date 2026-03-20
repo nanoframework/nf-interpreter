@@ -25,6 +25,7 @@ foreach(SRC_FILE ${System.Device.Wifi_SRCS})
 
     find_file(System.Device.Wifi_SRC_FILE ${SRC_FILE}
         PATHS 
+            ${TARGET_BASE_LOCATION}
             ${BASE_PATH_FOR_THIS_MODULE}
             ${CMAKE_SOURCE_DIR}/src/System.Device.Wifi
 

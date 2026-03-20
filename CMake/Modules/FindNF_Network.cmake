@@ -404,6 +404,7 @@ else()
         find_file(NF_Network_SRC_FILE ${SRC_FILE}
             PATHS
 
+                ${TARGET_BASE_LOCATION}
                 ${CMAKE_SOURCE_DIR}/src/PAL/COM/sockets
                 ${CMAKE_SOURCE_DIR}/src/PAL/COM/sockets/ssl
                 ${CMAKE_SOURCE_DIR}/src/PAL/COM/sockets/ssl/MbedTLS

@@ -16,6 +16,7 @@ steps:
         *.bin
         *.hex
         *.dfu
+        *.uf2
         *.csv
       TargetFolder: '$(Build.ArtifactStagingDirectory)\$(TargetPublishName)'
       flattenFolders: true

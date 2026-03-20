@@ -246,6 +246,28 @@ macro(nf_add_common_sources)
 
 endmacro()
 
+# generates a UF2 image from a binary file for RP2040/RP2350 targets
+# uses the bin2uf2 C# tool (requires dotnet SDK)
+function(nf_generate_uf2_package file1 address1 file2 address2 familyid outputfilename)
+
+    add_custom_command(
+
+        TARGET ${NANOCLR_PROJECT_NAME}.elf POST_BUILD
+
+        # merge both binaries into a single UF2 with unified block numbering
+        COMMAND dotnet run --project ${CMAKE_SOURCE_DIR}/CMake/Scripts/bin2uf2
+            -- --merge "${outputfilename}" "${familyid}"
+            "${file1}" "${address1}"
+            "${file2}" "${address2}"
+
+        COMMENT "Generating combined UF2 image for RP2040/RP2350"
+    )
+
+    # need to add a dependency of NANOCLR to NANOBOOTER because UF2 gen needs bin outputs of both targets
+    add_dependencies(${NANOCLR_PROJECT_NAME}.elf ${NANOBOOTER_PROJECT_NAME}.elf)
+
+endfunction()
+
 function(nf_generate_dfu_package file1 address1 file2 address2 outputfilename)
 
     add_custom_command(
@@ -609,6 +631,7 @@ macro(nf_setup_target_build_common)
             ${TARGET_BASE_LOCATION}/nanoCLR
             ${TARGET_BASE_LOCATION}
             ${CMAKE_BINARY_DIR}/targets/${RTOS}/${TARGET_BOARD}
+            ${CMAKE_BINARY_DIR}/targets/${RTOS}/${TARGET_VENDOR}/${TARGET_BOARD}
         )
 
         # need to add extra include directories for MbedTLS
@@ -638,7 +661,11 @@ macro(nf_setup_target_build_common)
         )
 
         # platform implementation of hardware random provider
-        target_sources(mbedcrypto PRIVATE ${BASE_PATH_FOR_CLASS_LIBRARIES_MODULES}/mbedtls_entropy_hardware_pool.c)
+        if(EXISTS ${TARGET_BASE_LOCATION}/mbedtls_entropy_hardware_pool.c)
+            target_sources(mbedcrypto PRIVATE ${TARGET_BASE_LOCATION}/mbedtls_entropy_hardware_pool.c)
+        else()
+            target_sources(mbedcrypto PRIVATE ${BASE_PATH_FOR_CLASS_LIBRARIES_MODULES}/mbedtls_entropy_hardware_pool.c)
+        endif()
 
         nf_set_compile_options(TARGET mbedcrypto)
         nf_set_compile_options(TARGET mbedx509)
@@ -857,5 +884,50 @@ function(nf_add_lwip_library)
     # after moving to a more recent lwIP versions this is not needed anymore
     add_custom_target(lwipdocs)
     ########################################################################
+
+endfunction()
+
+# CYW43 driver for WiFi targets (Pico W, etc.)
+function(nf_add_cyw43_driver_library)
+
+    # check if CYW43_DRIVER_SOURCE was specified or if it's empty (default is empty)
+    set(NO_CYW43_SOURCE TRUE)
+
+    if(CYW43_DRIVER_SOURCE)
+        if(NOT ${CYW43_DRIVER_SOURCE} STREQUAL "")
+            set(NO_CYW43_SOURCE FALSE)
+        endif()
+    endif()
+
+    # set tag for currently supported version
+    set(CYW43_DRIVER_GIT_TAG "main")
+
+    if(NO_CYW43_SOURCE)
+        # no CYW43 source specified, download it from its repo
+        message(STATUS "CYW43 driver from GitHub repo")
+
+        FetchContent_Declare(
+            cyw43_driver
+            GIT_REPOSITORY https://github.com/georgerobotics/cyw43-driver.git
+            GIT_TAG ${CYW43_DRIVER_GIT_TAG}
+        )
+
+    else()
+        # CYW43 source was specified
+        message(STATUS "CYW43 driver (source from: ${CYW43_DRIVER_SOURCE})")
+
+        FetchContent_Declare(
+            cyw43_driver
+            SOURCE_DIR ${CYW43_DRIVER_SOURCE}
+        )
+
+    endif()
+
+    # Check if population has already been performed
+    FetchContent_GetProperties(cyw43_driver)
+
+    if(NOT cyw43_driver_POPULATED)
+        FetchContent_MakeAvailable(cyw43_driver)
+    endif()
 
 endfunction()
