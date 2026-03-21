@@ -1,4 +1,1 @@
-## Floating point
-
-The current build is set to add support for single-precision floating point.
-Meaning that `System.Math` API supports only the `float` overloads. The `double` ones will throw a `NotImplementedException`.
+## :warning: There is no active development on this target. The migration to ThreadX (started with Azure RTOS) was halted because of lack of support with several required building blocks. Active development remains on ChibiOS/ORGPAL_PALTHREE.
