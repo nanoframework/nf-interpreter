@@ -198,9 +198,7 @@ esp_err_t NF_ESP32_InitaliseWifi()
             cfg.feature_caps &= ~CONFIG_FEATURE_CACHE_TX_BUF_BIT;
         }
 #endif
-
         ec = esp_wifi_init(&cfg);
-
         if (ec != ESP_OK)
         {
             return ec;
@@ -212,6 +210,15 @@ esp_err_t NF_ESP32_InitaliseWifi()
         {
             return ec;
         }
+
+#if CONFIG_SOC_WIFI_SUPPORT_5G
+        wifi_band_mode_t band_mode;
+        ec = esp_wifi_get_band_mode(&band_mode);
+        if (ec == ESP_OK)
+        {
+            ESP_LOGI(TAG, "Current Wi-Fi band mode: %d\n", band_mode);
+        }
+#endif
 
         // start Wi-Fi
         ec = esp_wifi_start();
