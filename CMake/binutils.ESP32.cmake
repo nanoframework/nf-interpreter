@@ -155,7 +155,7 @@ endmacro()
 function(nf_fix_nimble_idf553)
 
     # Check we are running on IDF v5.5.3, if not, no need to do anything
-    string(FIND "${MY_IDF_VER_FIXED}" "v5.5.3" ESP32_IDF_VERSION_INDEX)
+    string(FIND "${MY_IDF_VER}" "v5.5.3" ESP32_IDF_VERSION_INDEX)
     if(ESP32_IDF_VERSION_INDEX EQUAL -1)
         return()
     endif()
