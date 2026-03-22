@@ -461,6 +461,78 @@ HRESULT Library_sys_net_native_System_Net_Sockets_NativeSocket::BindConnectHelpe
 
         if (!fThrowOnWouldBlock && SOCK_getsocklasterror(handle) == SOCK_EWOULDBLOCK)
         {
+            CLR_RT_HeapBlock hbTimeout;
+            CLR_INT64 *timeout;
+            bool fRes = true;
+
+            // !! need to cast to CLR_INT64 otherwise it wont setup a proper timeout infinite
+            hbTimeout.SetInteger((CLR_INT64)30000 * TIME_CONVERSION__TO_MILLISECONDS);
+
+            // SetupTimeoutFromTicks advances m_customState 0->1 on first entry;
+            // on re-entry (m_customState != 0) it simply reads the existing timeout
+            // from the eval stack without pushing again.
+            NANOCLR_CHECK_HRESULT(stack.SetupTimeoutFromTicks(hbTimeout, timeout));
+
+            // First-call-only: bump state so SOCK_connect isn't called again on re-entry
+            if (stack.m_customState == 1)
+            {
+                stack.m_customState = 2;
+            }
+
+            // Poll writability in a loop: Event_Socket is a global per-process
+            // bitmask shared by all sockets/threads, so a wakeup must be
+            // revalidated against this socket's actual state.
+            while (true)
+            {
+                CLR_INT32 selectResult = Helper__SelectSocket(handle, 1);
+
+                if (selectResult == SOCK_SOCKET_ERROR)
+                {
+                    // Read the actual socket error via SO_ERROR rather than relying on
+                    // the global SOCK_getlasterror() which can be stale if other threads ran
+                    CLR_INT32 sockError = 0;
+                    CLR_INT32 sockErrorLen = sizeof(sockError);
+                    SOCK_getsockopt(handle, SOCK_SOL_SOCKET, SOCK_SOCKO_ERROR, (char *)&sockError, &sockErrorLen);
+
+                    stack.PopValue(); // Timeout
+
+                    ThrowError(stack, sockError != 0 ? sockError : SOCK_getsocklasterror(handle));
+                    NANOCLR_SET_AND_LEAVE(CLR_E_PROCESS_EXCEPTION);
+                }
+
+                if (selectResult > 0)
+                {
+                    // Socket is writable — connection completed successfully
+                    break;
+                }
+
+                // selectResult == 0: not ready yet, yield
+                NANOCLR_CHECK_HRESULT(
+                    g_CLR_RT_ExecutionEngine.WaitEvents(stack.m_owningThread, *timeout, Event_Socket, fRes));
+
+                if (!fRes)
+                {
+                    stack.PopValue(); // Timeout
+                    ThrowError(stack, SOCK_ETIMEDOUT);
+                    NANOCLR_SET_AND_LEAVE(CLR_E_PROCESS_EXCEPTION);
+                }
+
+                // We've been woken — re-read handle in case the socket was
+                // disposed while we were waiting
+                handle = socket[FIELD__m_Handle].NumericByRef().s4;
+
+                if (handle == DISPOSED_HANDLE)
+                {
+                    stack.PopValue(); // Timeout
+                    ThrowError(stack, CLR_E_OBJECT_DISPOSED);
+                    NANOCLR_SET_AND_LEAVE(CLR_E_PROCESS_EXCEPTION);
+                }
+
+                // Loop back to re-poll: the wake may have been for a
+                // different socket sharing the global Event_Socket flag
+            }
+
+            stack.PopValue(); // Timeout
             NANOCLR_SET_AND_LEAVE(S_OK);
         }
     }
@@ -862,6 +934,19 @@ HRESULT Library_sys_net_native_System_Net_Sockets_NativeSocket::SendRecvHelper(
             {
                 ret = SOCK_SOCKET_ERROR;
                 break;
+            }
+
+            // Yield to allow network stack to process data
+            NANOCLR_CHECK_HRESULT(
+                g_CLR_RT_ExecutionEngine.WaitEvents(stack.m_owningThread, *timeout, Event_Socket, fRes));
+
+            if (!fRes)
+            {
+                ret = SOCK_SOCKET_ERROR;
+
+                ThrowError(stack, SOCK_ETIMEDOUT);
+
+                NANOCLR_SET_AND_LEAVE(CLR_E_PROCESS_EXCEPTION);
             }
 
             continue;
