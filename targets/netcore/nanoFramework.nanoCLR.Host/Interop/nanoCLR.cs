@@ -2,9 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.Runtime.InteropServices;
 
 namespace nanoFramework.nanoCLR.Host.Interop
@@ -14,8 +12,12 @@ namespace nanoFramework.nanoCLR.Host.Interop
         internal const uint ClrOk = 0;
         internal const uint ClrErrorFail = 0xFF000000;
         private const string NativeLibraryName = "nanoFramework.nanoCLR";
-        private const string _nanoClrDllName = "nanoFramework.nanoCLR.dll";
         private static string _dllPath;
+
+        static nanoCLR()
+        {
+            NativeNanoClrLoader.EnsureInitialized();
+        }
 
         internal static string DllPath
         {
@@ -31,8 +33,8 @@ namespace nanoFramework.nanoCLR.Host.Interop
 
                 _dllPath = value;
 
-                // set path to search nanoCLR DLL
-                _ = SetDllDirectory(_dllPath);
+                // set path to search nanoCLR native image
+                NativeNanoClrLoader.ConfigureSearchDirectory(_dllPath);
             }
         }
 
@@ -116,38 +118,9 @@ namespace nanoFramework.nanoCLR.Host.Interop
         [DllImport(NativeLibraryName, CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl)]
         internal static extern bool nanoCLR_GetNativeAssemblyInformation(byte[] buffer, int size);
 
-        [DllImport("kernel32", SetLastError = true)]
-        private static extern bool FreeLibrary(IntPtr hModule);
-
         public static void UnloadNanoClrImageDll()
         {
-            string nanoClrDllLocation = Path.Combine(DllPath, _nanoClrDllName);
-
-            var modules = Process.GetCurrentProcess().Modules.Cast<ProcessModule>()
-                .Where(mod => mod.FileName.Equals(nanoClrDllLocation, StringComparison.OrdinalIgnoreCase));
-
-            foreach (var mod in modules)
-            {
-                try
-                {
-                    if (FreeLibrary(mod.BaseAddress))
-                    {
-                        // Successfully unloaded the DLL
-                        break;
-                    }
-                    else
-                    {
-                        // Handle the error if FreeLibrary fails
-                        int errorCode = Marshal.GetLastWin32Error();
-                        Console.WriteLine($"Failed to unload nanoCLR DLL. Error code: {errorCode}");
-                    }
-                }
-                catch (Exception ex)
-                {
-                    // Handle any exceptions that occur during the unload process
-                    Console.WriteLine($"Exception occurred while unloading nanoCLR DLL: {ex.Message}");
-                }
-            }
+            _ = NativeNanoClrLoader.TryUnload();
         }
 
         public static string FindNanoClrDll()
@@ -157,11 +130,7 @@ namespace nanoFramework.nanoCLR.Host.Interop
                 // Perform dummy call to load DLL, in case it's not loaded
                 _ = nanoCLR_GetVersion();
 
-                // Sweep processes and look for a DLL with the nanoCLR name
-                var module = Process.GetCurrentProcess().Modules.Cast<ProcessModule>()
-                    .FirstOrDefault(mod => mod.FileName.EndsWith(_nanoClrDllName, StringComparison.OrdinalIgnoreCase));
-
-                return module?.FileName ?? string.Empty;
+                return NativeNanoClrLoader.GetLoadedPath();
             }
             catch (Exception ex)
             {
@@ -170,8 +139,5 @@ namespace nanoFramework.nanoCLR.Host.Interop
                 return string.Empty;
             }
         }
-
-        [DllImport("kernel32.dll", CharSet = CharSet.Auto, SetLastError = true)]
-        public static extern bool SetDllDirectory(string lpPathName);
     }
 }
