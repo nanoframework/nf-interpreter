@@ -8,7 +8,7 @@ set(NANOCLR_OSX_SOURCES
     FileStore_OSX.cpp
     main.cpp
     Memory.cpp
-    ParseOptions_OSX.cpp
+
     platform_heap.cpp
     targetHAL_Time.cpp
     targetPAL_Events.cpp
