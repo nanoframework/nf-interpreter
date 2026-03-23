@@ -12,7 +12,8 @@
 
 #if CONFIG_TINYUSB_CDC_ENABLED
 #include <tinyusb.h>
-#include <tusb_cdc_acm.h>
+#include <tinyusb_default_config.h>
+#include <tinyusb_cdc_acm.h>
 #endif
 
 ////////////////////////////////////////////////////////////////////
@@ -127,10 +128,7 @@ static uart_port_t ESP32_WP_UART = UART_NUM_0;
 #define ESP32_WP_TX_PIN UART_NUM_0_TXD_DIRECT_GPIO_NUM
 #endif
 
-#if (                                                                                                                  \
-    CONFIG_IDF_TARGET_ESP32C3 || CONFIG_IDF_TARGET_ESP32C6 || CONFIG_IDF_TARGET_ESP32H2 ||                             \
-    CONFIG_IDF_TARGET_ESP32P4) &&                                                                                      \
-    HAL_WP_USE_USB_CDC
+#if CONFIG_SOC_USB_SERIAL_JTAG_SUPPORTED && HAL_WP_USE_USB_CDC
 
 #include <hal/usb_serial_jtag_ll.h>
 
@@ -268,21 +266,18 @@ static bool WP_Initialise(COM_HANDLE port)
     (void)port;
 
     // get configuration with default values
-    tinyusb_config_t tusb_cfg = {};
+    tinyusb_config_t tusb_cfg = TINYUSB_DEFAULT_CONFIG();
 
     ESP_ERROR_CHECK(tinyusb_driver_install(&tusb_cfg));
 
     tinyusb_config_cdcacm_t amc_cfg = {
-        .usb_dev = TINYUSB_USBDEV_0,
         .cdc_port = TINYUSB_CDC_ACM_0,
-        // parameter deprecated, therefore it doesn't matter what we put here
-        .rx_unread_buf_sz = 1056,
         .callback_rx = &WP_Cdc_Rx_Callback,
         .callback_rx_wanted_char = NULL,
         .callback_line_state_changed = NULL,
         .callback_line_coding_changed = NULL};
 
-    ESP_ERROR_CHECK(tusb_cdc_acm_init(&amc_cfg));
+    ESP_ERROR_CHECK(tinyusb_cdcacm_init(&amc_cfg));
 
     WP_Port_Intitialised = true;
 
@@ -361,17 +356,16 @@ static bool WP_Initialise(COM_HANDLE port)
     // uninstall driver for console
     // ESP_ERROR_CHECK(uart_driver_delete(ESP32_WP_UART));
 
-    uart_config_t uart_config = {
-        // baudrate
-        .baud_rate = TARGET_SERIAL_BAUDRATE,
-        // baudrate
-        .data_bits = UART_DATA_8_BITS,
-        // parity mode
-        .parity = UART_PARITY_DISABLE,
-        // stop bit mode
-        .stop_bits = UART_STOP_BITS_1,
-        // hardware flow control(cts/rts)
-        .flow_ctrl = UART_HW_FLOWCTRL_DISABLE};
+    uart_config_t uart_config = {// baudrate
+                                 .baud_rate = TARGET_SERIAL_BAUDRATE,
+                                 // baudrate
+                                 .data_bits = UART_DATA_8_BITS,
+                                 // parity mode
+                                 .parity = UART_PARITY_DISABLE,
+                                 // stop bit mode
+                                 .stop_bits = UART_STOP_BITS_1,
+                                 // hardware flow control(cts/rts)
+                                 .flow_ctrl = UART_HW_FLOWCTRL_DISABLE};
 
     ESP_ERROR_CHECK(uart_param_config(ESP32_WP_UART, &uart_config));
 

@@ -1059,12 +1059,12 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeConfig___VOI
                 break;
 
             case Handshake_RequestToSend:
-                uart_config.flow_ctrl = UART_HW_FLOWCTRL_RTS;
+                uart_config.flow_ctrl = UART_HW_FLOWCTRL_CTS_RTS;
                 uart_config.rx_flow_ctrl_thresh = 122;
                 break;
 
             case Handshake_RequestToSendXOnXOff:
-                uart_config.flow_ctrl = UART_HW_FLOWCTRL_RTS;
+                uart_config.flow_ctrl = UART_HW_FLOWCTRL_CTS_RTS;
                 uart_config.rx_flow_ctrl_thresh = 122;
                 EnableXonXoff = true;
                 break;
@@ -1157,6 +1157,15 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeConfig___VOI
         if (txPin == UART_PIN_NO_CHANGE || rxPin == UART_PIN_NO_CHANGE)
         {
             NANOCLR_SET_AND_LEAVE(CLR_E_PIN_UNAVAILABLE);
+        }
+
+        // Validate RTS/CTS pins are available when flow control is enabled
+        if ((uart_config.flow_ctrl != UART_HW_FLOWCTRL_DISABLE) && !rs485Mode)
+        {
+            if (rtsPin == UART_PIN_NO_CHANGE || ctsPin == UART_PIN_NO_CHANGE)
+            {
+                NANOCLR_SET_AND_LEAVE(CLR_E_PIN_UNAVAILABLE);
+            }
         }
 
         // Don't use RTS/CTS pins if no hardware handshake enabled unless in RS485 mode

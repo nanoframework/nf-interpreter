@@ -23,6 +23,7 @@ set(nanoFramework.System.Security.Cryptography_SRCS
     
     nf_sys_sec_cryptography_System_Security_Cryptography_Aes.cpp
     nf_sys_sec_cryptography_System_Security_Cryptography_HMACSHA256.cpp
+    nf_sys_sec_cryptography_System_Security_Cryptography_HMACSHA512.cpp
 
 )
 

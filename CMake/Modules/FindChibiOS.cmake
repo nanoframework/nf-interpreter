@@ -110,6 +110,7 @@ foreach(SRC_FILE ${CHIBIOS_SRCS})
             ${chibios_SOURCE_DIR}/os/oslib/src
             ${chibios_SOURCE_DIR}/os/common/abstractions/cmsis_os
             ${chibios_SOURCE_DIR}/os/various
+            ${chibios_SOURCE_DIR}/os/various/newlib_bindings
 
         CMAKE_FIND_ROOT_PATH_BOTH
     )

@@ -13,7 +13,7 @@
         "showReuseMessage": true,
         "clear": false
       },
-      "command": "install-scripts\\install-nf-tools.ps1 -TargetSeries ${input:targetSeries} -Path '${input:toolsPath}' "
+      "command": "install-scripts/install-nf-tools.ps1 -TargetSeries ${input:targetSeries} -Path '${input:toolsPath}' "
     },
     {
       "label": "Flash nanoCLR to ESP32 | ESP32-S2",
@@ -56,7 +56,7 @@
       "problemMatcher": []
     },
     {
-      "label": "Decode ESP32 backtrace",
+      "label": "Decode ESP32/S2/S3 backtrace",
       "type": "shell",
       "command": "xtensa-${input:esp32series}-elf-addr2line -apsfCire \"${input:espBacktraceElfFile}\" \"${input:espBacktrace}\"",
       "presentation": {
@@ -66,7 +66,7 @@
       "problemMatcher": []
     },
     {
-      "label": "Decode ESP32 (riscv32 series) backtrace",
+      "label": "Decode ESP32-C3 backtrace",
       "type": "shell",
       "command": "riscv32-esp-elf-addr2line -apsfCire \"${input:espBacktraceElfFile}\" \"${input:espBacktrace}\"",
       "presentation": {

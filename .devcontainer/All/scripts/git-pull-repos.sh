@@ -7,7 +7,7 @@ cd /sources/STM32CubeF4
 git pull origin nf-build
 cd /sources/STM32CubeH7
 git pull origin nf-build
-cd /sources/AzureRTOS
+cd /sources/ThreadX
 git pull
 cd /
 rm -rf /sources/ChibiOs
@@ -15,7 +15,8 @@ git svn clone http://svn.code.sf.net/p/chibios/code/branches/stable_21.11.x -rHE
 cd /sources/ChibiOs-Contrib
 git pull origin chibios-21.11.x
 cd /sources/mbedtls
-git pull origin mbedtls-3.6.0
+git fetch --depth=1 origin tag mbedtls-3.6.5
+git checkout tags/mbedtls-3.6.5
 git submodule update --init
 cd /sources/fatfs
 git pull origin R0.15a
@@ -26,7 +27,7 @@ git pull origin 5.5.1
 cd /sources/lwip
 git pull origin STABLE-2_1_3_RELEASE
 cd /sources/littlefs
-git pull origin v2.9.3
+git pull origin v2.11.2
 cd /sources/SimpleLinkCC32
 git pull origin 4.10.00.07
 cd /sources/SimpleLinkCC13

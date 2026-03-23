@@ -79,3 +79,6 @@ CONFIG_LITTLEFS_MAX_PARTITIONS=1
 CONFIG_LITTLEFS_OBJ_NAME_LEN=256
 CONFIG_LITTLEFS_OPEN_DIR=y
 CONFIG_LITTLEFS_FCNTL_GET_PATH=y
+
+# remove this following the migration to the new API, but for now we need to suppress the warning
+CONFIG_TOUCH_SUPPRESS_DEPRECATE_WARN=y

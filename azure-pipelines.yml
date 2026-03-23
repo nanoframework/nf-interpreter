@@ -44,7 +44,7 @@ resources:
       type: github
       name: espressif/esp-idf
       endpoint: nanoframework
-      ref: refs/tags/v5.4.2
+      ref: refs/tags/v5.5.3
     - repository: mscorlib
       type: github
       name: nanoframework/CoreLibrary
@@ -53,7 +53,7 @@ resources:
       type: github
       name: littlefs-project/littlefs
       endpoint: nanoframework
-      ref: refs/tags/v2.9.3
+      ref: refs/tags/v2.11.2
 
 jobs:
   ##############################
@@ -175,7 +175,7 @@ jobs:
               echo "##vso[task.setvariable variable=BUILD_FREERTOS;isOutput=true]false"  
               echo "##vso[task.setvariable variable=BUILD_ESP32;isOutput=true]false"  
               echo "##vso[task.setvariable variable=BUILD_TI;isOutput=true]false"
-              echo "##vso[task.setvariable variable=BUILD_AZURERTOS;isOutput=true]false"
+              echo "##vso[task.setvariable variable=BUILD_THREADX;isOutput=true]false"
               echo "##vso[task.setvariable variable=BUILD_WIN32;isOutput=true]false"  
               echo "##vso[task.setvariable variable=BUILD_OSX;isOutput=true]false"  
               echo "##vso[task.setvariable variable=BUILD_NANOCLR_CLI;isOutput=true]false"  
@@ -231,12 +231,12 @@ jobs:
                   Write-host "##[command] Building TI SimpleLink targets"
               }
 
-              if( ($files.where{$_.Contains('targets/AzureRTOS')}).Count -gt 0)
+              if( ($files.where{$_.Contains('targets/ThreadX')}).Count -gt 0)
               {
-                  # files at AzureRTOS folder
-                  echo "##vso[task.setvariable variable=BUILD_AZURERTOS;isOutput=true]true"
+                  # files at ThreadX folder
+                  echo "##vso[task.setvariable variable=BUILD_THREADX;isOutput=true]true"
 
-                  Write-host "##[command] Building Azure RTOS targets"
+                  Write-host "##[command] Building ThreadX targets"
               }
 
               if( 
@@ -353,7 +353,7 @@ jobs:
           eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ESP32'], true),
           eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_FREERTOS'], true),
           eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_TI'], true),
-          eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_AZURERTOS'], true),
+          eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_THREADX'], true),
           eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_WIN32'], true),
           eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_OSX'], true)
         )
@@ -549,7 +549,7 @@ jobs:
       IDF_PATH: "D:/a/1/s/esp-idf"
       PIP_CACHE_DIR: $(Pipeline.Workspace)/.pip
       TargetPlatform: "esp32"
-      IDF_TAG: "v5.4.2"
+      IDF_TAG: "v5.5.3"
 
     steps:
       - checkout: self
@@ -565,9 +565,6 @@ jobs:
         parameters:
           repoDirectory: '$(Agent.BuildDirectory)/s/nf-interpreter'
       - template: azure-pipelines-templates/download-install-esp32-build-components.yml
-      - template: azure-pipelines-templates/download-install-ninja.yml
-        parameters:
-          repoDirectory: '$(Agent.BuildDirectory)/s/nf-interpreter'
       - template: azure-pipelines-templates/build-espressif-esp32-targets.yml
         parameters:
           repoDirectory: '$(Agent.BuildDirectory)/s/nf-interpreter'
@@ -717,17 +714,15 @@ jobs:
     steps:
       - template: azure-pipelines-templates/build-preparations.yml
       - template: azure-pipelines-templates/nb-gitversioning.yml
-      - template: azure-pipelines-templates/download-install-cmake.yml
       - template: azure-pipelines-templates/download-install-arm-gcc-toolchain.yml
-      - template: azure-pipelines-templates/download-install-ninja.yml
       - template: azure-pipelines-templates/build-ti-simplelink-targets.yml
       - template: azure-pipelines-templates/pack-publish-artifacts.yml
       - template: azure-pipelines-templates/publish-cloudsmith.yml
       - template: azure-pipelines-templates/pack-publish-ti-sl-managed-helpers.yml
 
   #################
-  # Azure RTOS
-  - job: Build_Azure_RTOS_targets
+  # ThreadX
+  - job: Build_ThreadX_targets
     condition: >-
       or(
         and(
@@ -735,14 +730,14 @@ jobs:
           ne( dependencies.Check_Build_Options.outputs['BuildOptions.SKIP_BUILD'], true ),
           or(
             eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ALL'], true),
-            eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_AZURERTOS'], true)
+            eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_THREADX'], true)
           )
         ),
         and(
           eq(variables['Build.Reason'], 'Manual'),
           or(
             eq(variables['BUILD_ALL__'], 'true'),
-            eq(variables['BUILD_AZURERTOS__'], 'true')
+            eq(variables['BUILD_THREADX__'], 'true')
           )
         )
       )
@@ -782,7 +777,7 @@ jobs:
 
     variables:
       # creates a counter and assigns it to the revision variable
-      REVISION: $[counter('AZURERTOS_1_14_0_versioncounter', 0)]
+      REVISION: $[counter('THREADX_1_14_0_versioncounter', 0)]
       HelperPackageVersion: $[counter('HelperPackageVersioncounter', 0)]
       TargetPlatform: "efm32"
 
@@ -792,7 +787,7 @@ jobs:
       - template: azure-pipelines-templates/download-install-arm-gcc-toolchain.yml
       - template: azure-pipelines-templates/download-hexdfu.yml
       - template: azure-pipelines-templates/download-srecord.yml
-      - template: azure-pipelines-templates/build-azurertos-targets.yml
+      - template: azure-pipelines-templates/build-threadx-targets.yml
       - template: azure-pipelines-templates/pack-publish-artifacts.yml
       - template: azure-pipelines-templates/publish-cloudsmith.yml
       - template: azure-pipelines-templates/pack-publish-managed-helpers.yml
@@ -1000,26 +995,6 @@ jobs:
           targetPath: "$(Build.ArtifactStagingDirectory)"
           artifactName: nanoclr_win32
           artifactType: pipeline
-
-      # push NuGet packages to Azure Artifacts feed (always happens when building from main, except on PR builds)
-      - task: NuGetCommand@2
-        condition: >-
-          and(
-            succeeded(),
-            eq(variables['System.PullRequest.PullRequestId'], ''),
-            or(
-              eq(variables['ForceUpload'], true),
-              eq(variables['Build.SourceBranchName'], 'main')
-            )
-          )
-        continueOnError: true
-        displayName: Push NuGet packages to Azure Artifacts
-        inputs:
-          command: push
-          nuGetFeedType: external
-          packagesToPush: "$(Build.ArtifactStagingDirectory)/*.nupkg"
-          publishFeedCredentials: "AzureArtifacts-nf-interpreter"
-          allowPackageConflicts: true
 
       # push NuGet packages to NuGet (always happens when building from main, except on PR builds)
       - task: NuGetCommand@2
@@ -1254,26 +1229,6 @@ jobs:
           artifactName: nanoclr_cli
           artifactType: pipeline
 
-      # push NuGet packages to Azure Artifacts feed (always happens when building from main, except on PR builds)
-      - task: NuGetCommand@2
-        condition: >-
-          and(
-            succeeded(),
-            eq(variables['System.PullRequest.PullRequestId'], ''),
-            or(
-              eq(variables['ForceUpload'], true),
-              eq(variables['Build.SourceBranchName'], 'main')
-            )
-          )
-        continueOnError: true
-        displayName: Push NuGet packages to Azure Artifacts
-        inputs:
-          command: push
-          nuGetFeedType: external
-          packagesToPush: "$(Build.ArtifactStagingDirectory)/*.nupkg"
-          publishFeedCredentials: "AzureArtifacts-nf-interpreter"
-          allowPackageConflicts: true
-
       # push NuGet packages to NuGet (always happens when building from main, except on PR builds)
       - task: NuGetCommand@2
         condition: >-
@@ -1429,7 +1384,7 @@ jobs:
       - Build_ESP32_targets
       - Build_NXP_targets
       - Build_TI_SimpleLink_targets
-      - Build_Azure_RTOS_targets
+      - Build_ThreadX_targets
       - Build_WIN32_nanoCLR
       - Build_OSX_nanoCLR
       - Build_nanoCLR_CLI
@@ -1442,7 +1397,7 @@ jobs:
           failed('Build_ESP32_targets'),
           failed('Build_NXP_targets'),
           failed('Build_TI_SimpleLink_targets'),
-          failed('Build_Azure_RTOS_targets'),
+          failed('Build_ThreadX_targets'),
           failed('Build_WIN32_nanoCLR'),
           failed('Build_OSX_nanoCLR'),
           failed('Build_nanoCLR_CLI')

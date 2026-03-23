@@ -52,7 +52,7 @@ foreach(SRC_FILE ${STM32L4_CubePackage_SRCS})
 
         ${stm32l4_hal_driver_SOURCE_DIR}/Src
 
-        ${CMAKE_SOURCE_DIR}/targets/AzureRTOS/ST/_common/CubeMX
+        ${CMAKE_SOURCE_DIR}/targets/ThreadX/ST/_common/CubeMX
 
         CMAKE_FIND_ROOT_PATH_BOTH
     )

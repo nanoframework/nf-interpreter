@@ -165,7 +165,7 @@ HRESULT Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32
         }
     }
 #elif defined(CONFIG_IDF_TARGET_ESP32P4)
-    //TODO
+    // TODO
     NANOCLR_SET_AND_LEAVE(CLR_E_NOT_SUPPORTED);
 #else
     int pad1;
@@ -342,10 +342,10 @@ HRESULT Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32
 
 #if CONFIG_SOC_PM_SUPPORT_TOUCH_SENSOR_WAKEUP
 
-    touch_pad_t touch_pad = esp_sleep_get_touchpad_wakeup_status();
-    int retValue = (int)touch_pad;
+    int retValue = esp_sleep_get_touchpad_wakeup_status();
+
     // We have to remap this enum.
-    if (touch_pad == TOUCH_PAD_MAX)
+    if (retValue == TOUCH_PAD_MAX)
     {
         retValue = -1;
     }

@@ -18,9 +18,9 @@ extern "C"
 #include <targetSimpleLinkCC32xx_Sntp.h>
 #elif defined(VIRTUAL_DEVICE)
 // empty on purpose
-#elif defined(AZURE_RTOS_NETXDUO)
+#elif defined(THREADX_RTOS_NETXDUO)
 #include <nxd_sntp_client.h>
-#elif defined(AZURE_RTOS_THREADX)
+#elif defined(THREADX_RTOS)
 // TODO
 // #include <nxd_sntp_client.h>
 #else

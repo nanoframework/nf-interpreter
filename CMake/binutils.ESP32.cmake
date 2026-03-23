@@ -151,6 +151,65 @@ macro(nf_fix_esp32c3_rom_file)
     
 endmacro()
 
+# fixes the NimBLE version for IDF 5.5.3 which causes connection issues
+function(nf_fix_nimble_idf553)
+
+    # Check we are running on IDF v5.5.3, if not, no need to do anything
+    string(FIND "${MY_IDF_VER}" "v5.5.3" ESP32_IDF_VERSION_INDEX)
+    if(ESP32_IDF_VERSION_INDEX EQUAL -1)
+        return()
+    endif()
+
+    set(TRANSPORT_PATH ${esp32_idf_SOURCE_DIR}/components/bt/host/nimble/nimble/nimble/transport/src/transport.c)
+    file(READ
+        ${TRANSPORT_PATH}
+        ESP32_NIMBLE_TRANSPORT_CONTENT)
+
+    message(STATUS "Check if Nimble on IDF v5.5.3 needs patching")
+    
+    # Check if the file already has the correct include to avoid doing the replacement multiple times
+    string(FIND "${ESP32_NIMBLE_TRANSPORT_CONTENT}" "#include <nimble/nimble_opt.h>" ESP32_NIMBLE_TRANSPORT_FOUND_INDEX)
+    if(NOT ${ESP32_NIMBLE_TRANSPORT_FOUND_INDEX} EQUAL -1)
+            # the file already has the correct include, no need to do anything
+            message(STATUS "Nimble on IDF v5.5.3 already patched")
+            return()
+    endif()
+        
+    message(STATUS "Patching Nimble on IDF v5.5.3 - transport.c")
+
+    string(REPLACE
+        "#include <nimble/hci_common.h>"
+        "#include <nimble/hci_common.h>
+#include <nimble/nimble_opt.h>"
+        ESP32_NIMBLE_TRANSPORT_NEW_CONTENT
+        "${ESP32_NIMBLE_TRANSPORT_CONTENT}")
+        
+    file(WRITE 
+        ${TRANSPORT_PATH}
+        "${ESP32_NIMBLE_TRANSPORT_NEW_CONTENT}")
+
+    set(HCI_UART_PATH ${esp32_idf_SOURCE_DIR}/components/bt/host/nimble/nimble/nimble/transport/uart/src/hci_uart.c)
+
+    message(STATUS "Patching Nimble on IDF v5.5.3 - hci_uart.c")
+
+    file(READ
+        ${HCI_UART_PATH}
+        ESP32_NIMBLE_HCI_UART_CONTENT)
+        
+    string(REPLACE
+        "#include \"hal/hal_uart.h\""
+        "#include \"hal/hal_uart.h\"
+#include \"nimble/nimble_opt.h\""
+        ESP32_NIMBLE_HCI_UART_NEW_CONTENT
+        "${ESP32_NIMBLE_HCI_UART_CONTENT}")
+        
+    file(WRITE 
+        ${HCI_UART_PATH}
+        "${ESP32_NIMBLE_HCI_UART_NEW_CONTENT}")
+
+    message(STATUS "Patching Nimble on IDF v5.5.3 - complete")
+
+endfunction()
 
 # setting compile definitions for a target based on general build options
 # TARGET parameter to set the target that's setting them for
@@ -601,15 +660,17 @@ macro(nf_add_idf_as_library)
     # Load any required Components from Component registry
     # Must be done before "tools/cmake/idf.cmake" 
     if(ESP32_USB_CDC)
-        nf_install_idf_component_from_registry(tinyusb c384401d-144d-453d-a821-20f1ba0a7be1) 
-        nf_install_idf_component_from_registry(esp_tinyusb 47b2b1fc-fb7e-4acf-943b-a14125e0f1e7) 
+        # v0.19.0~2
+        nf_install_idf_component_from_registry(tinyusb dda61643-82de-40f9-86f4-4f3d9b1cb008) 
+        # v2.1.1
+        nf_install_idf_component_from_registry(esp_tinyusb 694410b3-6302-4cec-8a66-1ba0649b6809) 
     endif()
 
-    nf_install_idf_component_from_registry(littlefs 288ff2e7-dfd9-4833-9be5-6e9d37d29880) 
+    nf_install_idf_component_from_registry(littlefs 97bf51ce-1daa-4369-81ec-eacbd8102815) 
 
     if(${TARGET_SERIES_SHORT} STREQUAL "esp32p4")
-       nf_install_idf_component_from_registry(esp_wifi_remote 3355c7e4-03ac-44a2-b100-1cbb29a05d03)
-       nf_install_idf_component_from_registry(esp_hosted 9fb39051-7a32-4fbf-83e9-a4b54ab6fae5)
+       nf_install_idf_component_from_registry(esp_wifi_remote c90c182f-b7fc-4a59-a445-96f712e36bb2)
+       nf_install_idf_component_from_registry(esp_hosted 2c2bb417-ac4a-415a-8bd8-d2437701bb5e)
        endif()
     
     include(${IDF_PATH_CMAKED}/tools/cmake/idf.cmake)
@@ -1030,6 +1091,9 @@ macro(nf_add_idf_as_library)
     endif()
 
     nf_fix_esp32c3_rom_file()
+
+    # Check if nimble needs patching, only relevant for IDF v5.5.3
+    nf_fix_nimble_idf553()
 
     # find out if there is support for BLE
     string(FIND ${SDKCONFIG_DEFAULT_CONTENTS} "CONFIG_BT_ENABLED=y" CONFIG_BT_ENABLED_POS)

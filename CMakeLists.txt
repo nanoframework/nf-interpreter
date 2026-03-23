@@ -538,12 +538,12 @@ if(API_System.Net)
     # set NETWORKING option to true
     set(USE_NETWORKING_OPTION TRUE CACHE INTERNAL "NF feature NETWORKING")
 
-    # set Security module to use (not applicable for Azure RTOS)
-    if(NOT RTOS_AZURERTOS_CHECK AND NF_SECURITY_MBEDTLS)
+    # set Security module to use (not applicable for ThreadX)
+    if(NOT RTOS_THREADX_CHECK AND NF_SECURITY_MBEDTLS)
         set(USE_SECURITY_MBEDTLS_OPTION TRUE CACHE INTERNAL "NF security MBEDTLS")
     endif()
 
-    if(RTOS_AZURERTOS_CHECK AND CHIBIOS_HAL_REQUIRED AND "${WIFI_DRIVER}" STREQUAL "ISM43362")
+    if(RTOS_THREADX_CHECK AND CHIBIOS_HAL_REQUIRED AND "${WIFI_DRIVER}" STREQUAL "ISM43362")
         set(API_Windows.Devices.Spi ON CACHE INTERNAL "SPI required for ISM43362 & ChibiOS HAL")
         set(API_System.Device.Spi ON CACHE INTERNAL "SPI required for ISM43362 & ChibiOS HAL")
     endif()
@@ -698,7 +698,7 @@ if(USE_NETWORKING_OPTION)
 
     if(NF_SECURITY_MBEDTLS)
         message(STATUS "Support for networking enabled with security from MbedTLS")
-    elseif(RTOS_TI_SIMPLELINK_CHECK OR RTOS_AZURE_CHECK)
+    elseif(RTOS_TI_SIMPLELINK_CHECK OR RTOS_THREADX_CHECK)
         # these platforms include their own TLS implementation, no need to add any build option
         message(STATUS "Support for networking enabled with security")
     else()
@@ -785,8 +785,8 @@ endif()
 
 ########################################################
 # check availability of hex2dfu tool if specified
-# only required for CHIBIOS and Azure RTOS
-if(DEFINED TOOL_HEX2DFU_PREFIX AND RTOS_AZURERTOS_CHECK AND RTOS_CHIBIOS_CHECK)
+# only required for CHIBIOS and ThreadX
+if(DEFINED TOOL_HEX2DFU_PREFIX AND RTOS_THREADX_CHECK AND RTOS_CHIBIOS_CHECK)
     if(NOT EXISTS ${TOOL_HEX2DFU_PREFIX}/hex2dfu.exe AND NOT EXISTS ${TOOL_HEX2DFU_PREFIX}/hex2dfu)
         message(STATUS "")
         message(STATUS "Couldn't find the hex2dfu tool at the specified path: ${TOOL_HEX2DFU_PREFIX}/hex2dfu.exe or ${TOOL_HEX2DFU_PREFIX}/hex2dfu")
@@ -834,8 +834,8 @@ set(IS_COMMUNITY_TARGET FALSE CACHE INTERNAL "Community target flag")
 set(BASE_PATH_FOR_PLATFORM ${CMAKE_CURRENT_SOURCE_DIR}/targets/${RTOS})
 
 #######################
-# FreeRTOS or AzureRTOS
-if(RTOS_FREERTOS_CHECK OR RTOS_AZURERTOS_CHECK)
+# FreeRTOS or ThreadX
+if(RTOS_FREERTOS_CHECK OR RTOS_THREADX_CHECK)
 
     add_subdirectory(${BASE_PATH_FOR_PLATFORM})
 

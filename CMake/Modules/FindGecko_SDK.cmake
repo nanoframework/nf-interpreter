@@ -15,12 +15,12 @@ FetchContent_GetProperties(gecko_sdk)
 list(APPEND Gecko_SDK_INCLUDE_DIRS ${TARGET_BASE_LOCATION}/autogen)
 list(APPEND Gecko_SDK_INCLUDE_DIRS ${TARGET_BASE_LOCATION}/config)
 # now the locations for the generic one (to be used in case there are none for the target)
-list(APPEND Gecko_SDK_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/targets/AzureRTOS/SiliconLabs/_common/autogen)
-list(APPEND Gecko_SDK_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/targets/AzureRTOS/SiliconLabs/_common/config)
+list(APPEND Gecko_SDK_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/targets/ThreadX/SiliconLabs/_common/autogen)
+list(APPEND Gecko_SDK_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/targets/ThreadX/SiliconLabs/_common/config)
 
 # now all the rest
-list(APPEND Gecko_SDK_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/targets/AzureRTOS/SiliconLabs/_include)
-list(APPEND Gecko_SDK_INCLUDE_DIRS ${CMAKE_BINARY_DIR}/targets/AzureRTOS)
+list(APPEND Gecko_SDK_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/targets/ThreadX/SiliconLabs/_include)
+list(APPEND Gecko_SDK_INCLUDE_DIRS ${CMAKE_BINARY_DIR}/targets/ThreadX)
 
 # include path to Gecko SDK BSP only if required
 # to include Gecko BSP, set the variable GECKO_SDK_BSP in the target CMakeLists.txt
@@ -57,8 +57,8 @@ if(GECKO_FEATURE_USBD_HID OR
     list(APPEND Gecko_SDK_INCLUDE_DIRS ${gecko_sdk_SOURCE_DIR}/protocol/usb/inc)
     list(APPEND Gecko_SDK_INCLUDE_DIRS ${gecko_sdk_SOURCE_DIR}/protocol/usb/src)
     list(APPEND Gecko_SDK_INCLUDE_DIRS ${gecko_sdk_SOURCE_DIR}/util/silicon_labs/silabs_core/memory_manager)
-    list(APPEND Gecko_SDK_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/targets/AzureRTOS/SiliconLabs/_include)
-    list(APPEND Gecko_SDK_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/targets/AzureRTOS/_common/include)
+    list(APPEND Gecko_SDK_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/targets/ThreadX/SiliconLabs/_include)
+    list(APPEND Gecko_SDK_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/targets/ThreadX/_common/include)
 
 endif()
 
@@ -151,11 +151,11 @@ if("${TARGET_SERIES}" STREQUAL "EFM32GG11")
 
     if(GECKO_FEATURE_USBD_HID)
 
-        list(APPEND gecko_sdk_srcs sl_usbd_class_hid_azurertos.c)
+        list(APPEND gecko_sdk_srcs sl_usbd_class_hid_threadx.c)
         list(APPEND gecko_sdk_srcs sl_usbd_class_hid_report.c)
         list(APPEND gecko_sdk_srcs sl_usbd_class_hid.c)
         list(APPEND gecko_sdk_srcs sl_usbd_core_ep.c)
-        list(APPEND gecko_sdk_srcs sl_usbd_core_azuretos.c)
+        list(APPEND gecko_sdk_srcs sl_usbd_core_threadx.c)
         list(APPEND gecko_sdk_srcs nano_sl_usbd_core.c)
         list(APPEND gecko_sdk_srcs sl_usbd_driver_dwc_otg_fs.c)
         list(APPEND gecko_sdk_srcs sl_usbd_class_hid_instances.c)
@@ -183,7 +183,7 @@ if("${TARGET_SERIES}" STREQUAL "EFM32GG11")
         list(APPEND gecko_sdk_srcs sl_usbd_class_cdc_acm.c)
         list(APPEND gecko_sdk_srcs sl_usbd_class_cdc.c)
         list(APPEND gecko_sdk_srcs sl_usbd_core_ep.c)
-        list(APPEND gecko_sdk_srcs sl_usbd_core_azuretos.c)
+        list(APPEND gecko_sdk_srcs sl_usbd_core_threadx.c)
         list(APPEND gecko_sdk_srcs nano_sl_usbd_core.c)
         list(APPEND gecko_sdk_srcs sl_usbd_configuration_instances.c)
         list(APPEND gecko_sdk_srcs sl_usbd_init.c)
@@ -198,7 +198,7 @@ if("${TARGET_SERIES}" STREQUAL "EFM32GG11")
         list(APPEND gecko_sdk_srcs sl_usbd_driver_dwc_otg_fs.c)
         list(APPEND gecko_sdk_srcs nano_sl_usbd_core.c)
         list(APPEND gecko_sdk_srcs sl_usbd_core_ep.c)
-        list(APPEND gecko_sdk_srcs sl_usbd_core_azuretos.c)
+        list(APPEND gecko_sdk_srcs sl_usbd_core_threadx.c)
         list(APPEND gecko_sdk_srcs nano_sl_usbd_class_vendor.c)
         list(APPEND gecko_sdk_srcs sl_usbd_configuration_instances.c) 
         list(APPEND gecko_sdk_srcs sl_usbd_init.c)
@@ -233,10 +233,10 @@ if("${TARGET_SERIES}" STREQUAL "EFM32GG11")
             
             # USBD HID
             ${gecko_sdk_SOURCE_DIR}/protocol/usb/src
-            ${CMAKE_SOURCE_DIR}/targets/AzureRTOS/SiliconLabs/_common
+            ${CMAKE_SOURCE_DIR}/targets/ThreadX/SiliconLabs/_common
 
             # device specific paths
-            ${CMAKE_SOURCE_DIR}/targets/AzureRTOS/SiliconLabs/_common/autogen
+            ${CMAKE_SOURCE_DIR}/targets/ThreadX/SiliconLabs/_common/autogen
 
             # target series specific 
             ${gecko_sdk_SOURCE_DIR}/platform/Device/SiliconLabs/EFM32GG11B/Source
@@ -246,8 +246,8 @@ if("${TARGET_SERIES}" STREQUAL "EFM32GG11")
             ${TARGET_BASE_LOCATION}/config
 
             # nanoFramework implementations
-            ${CMAKE_SOURCE_DIR}/targets/AzureRTOS/SiliconLabs/_nanoCLR/System.Device.I2c
-            ${CMAKE_SOURCE_DIR}/targets/AzureRTOS/SiliconLabs/_nanoCLR/System.Device.Spi
+            ${CMAKE_SOURCE_DIR}/targets/ThreadX/SiliconLabs/_nanoCLR/System.Device.I2c
+            ${CMAKE_SOURCE_DIR}/targets/ThreadX/SiliconLabs/_nanoCLR/System.Device.Spi
 
             CMAKE_FIND_ROOT_PATH_BOTH
         )

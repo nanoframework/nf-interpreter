@@ -85,5 +85,6 @@ steps:
         # append to path
         Write-Host "##vso[task.prependpath]$newPath"
 
-  - script: echo "##vso[task.prependpath]C:\Windows\System32"
+  - script: |
+      echo ##vso[task.prependpath]C:\Windows\System32
     displayName: Tweak PATH to reach cmd

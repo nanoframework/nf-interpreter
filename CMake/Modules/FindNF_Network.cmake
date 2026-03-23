@@ -6,17 +6,17 @@
 include(FetchContent)
 
 ############################################
-# network layer from Azure RTOS and NetX Duo
-if(RTOS_AZURERTOS_CHECK)
+# network layer from ThreadX and NetX Duo
+if(RTOS_THREADX_CHECK)
 
-    FetchContent_GetProperties(azure_rtos_netxduo)
+    FetchContent_GetProperties(threadx_netxduo)
 
     # set include directories for nanoFramework network
     list(APPEND NF_Network_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/PAL/COM/sockets/ssl)
-    list(APPEND NF_Network_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/targets/AzureRTOS/_common/NetX)
-    list(APPEND NF_Network_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/targets/AzureRTOS/_common/include)
-    list(APPEND NF_Network_INCLUDE_DIRS ${CMAKE_BINARY_DIR}/targets/AzureRTOS/${TARGET_BOARD})
-    list(APPEND NF_Network_INCLUDE_DIRS ${CMAKE_BINARY_DIR}/targets/AzureRTOS)
+    list(APPEND NF_Network_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/targets/ThreadX/_common/NetX)
+    list(APPEND NF_Network_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/targets/ThreadX/_common/include)
+    list(APPEND NF_Network_INCLUDE_DIRS ${CMAKE_BINARY_DIR}/targets/ThreadX/${TARGET_BOARD})
+    list(APPEND NF_Network_INCLUDE_DIRS ${CMAKE_BINARY_DIR}/targets/ThreadX)
     
     # source files for nanoFramework Networking
     set(NF_Network_SRCS
@@ -26,7 +26,7 @@ if(RTOS_AZURERTOS_CHECK)
         targetHAL_network.cpp
     )
 
-    if(AZURERTOS_NETXDUO_REQUIRED)
+    if(THREADX_NETXDUO_REQUIRED)
         #NetX Duo
         list(APPEND NF_Network_SRCS sockets_netx.cpp)
         list(APPEND NF_Network_SRCS nf_netxduo.c)
@@ -63,22 +63,22 @@ if(RTOS_AZURERTOS_CHECK)
         string(TOLOWER "${ETHERNET_DRIVER}" ETHERNET_DRIVER_1)
 
         # add includes too
-        list(APPEND NF_Network_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/targets/AzureRTOS/ST/_common/netxduo/drivers/ethernet)
-        # list(APPEND NF_Network_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/targets/AzureRTOS/ST/_common/netxduo/drivers/ethernet/lan8742)
+        list(APPEND NF_Network_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/targets/ThreadX/ST/_common/netxduo/drivers/ethernet)
+        # list(APPEND NF_Network_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/targets/ThreadX/ST/_common/netxduo/drivers/ethernet/lan8742)
         list(APPEND NF_Network_INCLUDE_DIRS ${CHIBIOS_HAL_INCLUDE_DIRS})
 
-        SET(NETWORK_DRIVER_LOCATION ${CMAKE_SOURCE_DIR}/targets/AzureRTOS/ST/_common/netxduo/drivers/chibios)
-        SET(NX_THREAD_LOCATION ${CMAKE_SOURCE_DIR}/targets/AzureRTOS/ST/_common/netxduo)
+        SET(NETWORK_DRIVER_LOCATION ${CMAKE_SOURCE_DIR}/targets/ThreadX/ST/_common/netxduo/drivers/chibios)
+        SET(NX_THREAD_LOCATION ${CMAKE_SOURCE_DIR}/targets/ThreadX/ST/_common/netxduo)
 
         # add exception to compiler warnings as errors
-        SET_SOURCE_FILES_PROPERTIES( ${CMAKE_SOURCE_DIR}/targets/AzureRTOS/ST/_common/netxduo/drivers/ethernet/lan8742/lan8742.c PROPERTIES COMPILE_FLAGS -Wno-unused-parameter)
-        SET_SOURCE_FILES_PROPERTIES( ${CMAKE_SOURCE_DIR}/targets/AzureRTOS/ST/_common/netxduo/drivers/ethernet/nx_stm32_eth_driver.c PROPERTIES COMPILE_FLAGS "-Wno-unused-parameter -Wno-shadow")
-        SET_SOURCE_FILES_PROPERTIES( ${CMAKE_SOURCE_DIR}/targets/AzureRTOS/ST/_common/netxduo/drivers/ethernet/lan8742/nx_stm32_phy_driver.c PROPERTIES COMPILE_FLAGS -Wno-int-conversion)
+        SET_SOURCE_FILES_PROPERTIES( ${CMAKE_SOURCE_DIR}/targets/ThreadX/ST/_common/netxduo/drivers/ethernet/lan8742/lan8742.c PROPERTIES COMPILE_FLAGS -Wno-unused-parameter)
+        SET_SOURCE_FILES_PROPERTIES( ${CMAKE_SOURCE_DIR}/targets/ThreadX/ST/_common/netxduo/drivers/ethernet/nx_stm32_eth_driver.c PROPERTIES COMPILE_FLAGS "-Wno-unused-parameter -Wno-shadow")
+        SET_SOURCE_FILES_PROPERTIES( ${CMAKE_SOURCE_DIR}/targets/ThreadX/ST/_common/netxduo/drivers/ethernet/lan8742/nx_stm32_phy_driver.c PROPERTIES COMPILE_FLAGS -Wno-int-conversion)
 
-        FetchContent_GetProperties(azure_rtos)
+        FetchContent_GetProperties(threadx)
 
         # need to replace some declarations and functions in STM32F4 HAL Cube package because they have a newer implementation 
-        # in Azure RTOS package
+        # in ThreadX package
         if("${TARGET_SERIES}" STREQUAL "STM32F7xx")
 
             FetchContent_GetProperties(stm32f7_hal_driver)
@@ -168,12 +168,12 @@ if(RTOS_AZURERTOS_CHECK)
         # need this name in lower case
         string(TOLOWER "${WIFI_DRIVER}" WIFI_DRIVER_1)
 
-        SET(NETWORK_DRIVER_LOCATION ${CMAKE_SOURCE_DIR}/targets/AzureRTOS/ST/_common/drivers/wifi/inventek)
+        SET(NETWORK_DRIVER_LOCATION ${CMAKE_SOURCE_DIR}/targets/ThreadX/ST/_common/drivers/wifi/inventek)
 
         # add includes too
-        list(APPEND NF_Network_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/targets/AzureRTOS/ST/_common/drivers/wifi/inventek)
-        list(APPEND NF_Network_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/targets/AzureRTOS/ST/_nanoCLR/System.Device.Spi)
-        list(APPEND NF_Network_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/targets/AzureRTOS/ST/_nanoCLR/Windows.Devices.Spi)
+        list(APPEND NF_Network_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/targets/ThreadX/ST/_common/drivers/wifi/inventek)
+        list(APPEND NF_Network_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/targets/ThreadX/ST/_nanoCLR/System.Device.Spi)
+        list(APPEND NF_Network_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/targets/ThreadX/ST/_nanoCLR/Windows.Devices.Spi)
         list(APPEND NF_Network_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/System.Device.Spi)
 
     endif()
@@ -191,26 +191,26 @@ if(RTOS_AZURERTOS_CHECK)
                 # ${CMAKE_SOURCE_DIR}/src/PAL/COM/sockets/ssl/MbedTLS
                 
                 ${NX_THREAD_LOCATION}
-                ${CMAKE_SOURCE_DIR}/targets/AzureRTOS/_common
-                ${CMAKE_SOURCE_DIR}/targets/AzureRTOS/_common/NetX
+                ${CMAKE_SOURCE_DIR}/targets/ThreadX/_common
+                ${CMAKE_SOURCE_DIR}/targets/ThreadX/_common/NetX
 
-                ${CMAKE_SOURCE_DIR}/targets/AzureRTOS/ST/_common/CubeMX
-                ${CMAKE_SOURCE_DIR}/targets/AzureRTOS/ST/_common/netxduo
+                ${CMAKE_SOURCE_DIR}/targets/ThreadX/ST/_common/CubeMX
+                ${CMAKE_SOURCE_DIR}/targets/ThreadX/ST/_common/netxduo
 
                 # drivers
                 ${NETWORK_DRIVER_LOCATION}
                 ${NETWORK_DRIVER_LOCATION}/..
 
                 # ST LAN8742
-                ${CMAKE_SOURCE_DIR}/targets/AzureRTOS/ST/_common/netxduo/drivers/ethernet
-                ${CMAKE_SOURCE_DIR}/targets/AzureRTOS/ST/_common/netxduo/drivers/ethernet/${ETHERNET_DRIVER_1}
+                ${CMAKE_SOURCE_DIR}/targets/ThreadX/ST/_common/netxduo/drivers/ethernet
+                ${CMAKE_SOURCE_DIR}/targets/ThreadX/ST/_common/netxduo/drivers/ethernet/${ETHERNET_DRIVER_1}
                 ${TARGET_BASE_LOCATION}/common/CubeMX
 
                 # ISM43362
-                # ${CMAKE_SOURCE_DIR}/targets/AzureRTOS/ST/_common/netxduo/drivers/wifi/inventek
+                # ${CMAKE_SOURCE_DIR}/targets/ThreadX/ST/_common/netxduo/drivers/wifi/inventek
 
-                # ${azure_rtos_netxduo_SOURCE_DIR}/addons/dns
-                # ${azure_rtos_netxduo_SOURCE_DIR}/addons/sntp
+                # ${threadx_netxduo_SOURCE_DIR}/addons/dns
+                # ${threadx_netxduo_SOURCE_DIR}/addons/sntp
 
                 ${BASE_PATH_FOR_CLASS_LIBRARIES_MODULES}
     
@@ -275,7 +275,7 @@ if(RTOS_AZURERTOS_CHECK)
     # endif()
 
     # need to replace this define here which is conflicting with another from STM32 HAL
-    set(BSD_INCLUDE_FILE ${azure_rtos_netxduo_SOURCE_DIR}/addons/BSD/nxd_bsd.h)
+    set(BSD_INCLUDE_FILE ${threadx_netxduo_SOURCE_DIR}/addons/BSD/nxd_bsd.h)
 
     # need to read the supplied files and rename the call
     file(READ
@@ -293,7 +293,7 @@ if(RTOS_AZURERTOS_CHECK)
         "${BSD_INCLUDE_FILE_FINAL_CONTENTS}")
 
     # this requires also replacing it in nxd_bsd.c
-    set(BSD_SOURCE_FILE ${azure_rtos_netxduo_SOURCE_DIR}/addons/BSD/nxd_bsd.c)
+    set(BSD_SOURCE_FILE ${threadx_netxduo_SOURCE_DIR}/addons/BSD/nxd_bsd.c)
 
     file(READ
         "${BSD_SOURCE_FILE}"
