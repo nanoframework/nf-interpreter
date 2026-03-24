@@ -79,7 +79,7 @@ static void AddBlocks(List<(uint addr, byte[] data, int len)> blocks, byte[] bin
         int chunkLen = Math.Min(UF2_DATA_SIZE, bin.Length - offset);
         byte[] chunk = new byte[UF2_DATA_SIZE]; // zero-padded to 256
         Buffer.BlockCopy(bin, offset, chunk, 0, chunkLen);
-        blocks.Add((baseAddr + (uint)offset, chunk, chunkLen));
+        blocks.Add((baseAddr + (uint)offset, chunk, UF2_DATA_SIZE));
         offset += UF2_DATA_SIZE;
     }
 }

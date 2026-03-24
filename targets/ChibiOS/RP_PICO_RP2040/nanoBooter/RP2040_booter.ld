@@ -11,12 +11,12 @@ __vectors_align__ = 256;
 
 /*
  * RP2040 nanoBooter memory setup.
- * nanoBooter occupies the first 32KB of XIP flash.
+ * nanoBooter occupies the first 64KB of XIP flash.
  *
  * Flash layout:
- *   0x10000000 - 0x10007FFF : nanoBooter   (32KB)
- *   0x10008000 - 0x1000FFFF : Config block (32KB)
- *   0x10010000 - 0x100FFFFF : nanoCLR      (960KB)
+ *   0x10000000 - 0x1000FFFF : nanoBooter   (64KB)
+ *   0x10010000 - 0x10017FFF : Config block (32KB)
+ *   0x10018000 - 0x100FFFFF : nanoCLR      (928KB)
  *   0x10100000 - 0x101FFFFF : Deployment   (1MB)
  */
 MEMORY

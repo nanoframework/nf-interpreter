@@ -26,6 +26,10 @@ int main(void)
     // init boot clipboard
     InitBootClipboard();
 
+    // The kernel is initialized but not started yet, this means that
+    // main() is executing with absolute priority but interrupts are already enabled.
+    osKernelInitialize();
+
     // the following IF is not mandatory, it's just providing a way for a user to 'force'
     // the board to remain in nanoBooter and not launching nanoCLR
 
@@ -41,10 +45,6 @@ int main(void)
             LaunchCLR((uint32_t)&__nanoImage_end__);
         }
     }
-
-    // The kernel is initialized but not started yet, this means that
-    // main() is executing with absolute priority but interrupts are already enabled.
-    osKernelInitialize();
 
     // starts the serial driver (SIO driver for RP2040)
     sioStart(&SERIAL_DRIVER, NULL);

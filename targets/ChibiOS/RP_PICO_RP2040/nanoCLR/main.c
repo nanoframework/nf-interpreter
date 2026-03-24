@@ -17,9 +17,9 @@
 #include <targetPAL.h>
 
 // need to declare the Receiver thread here
-osThreadDef(ReceiverThread, osPriorityHigh, 1024, "ReceiverThread");
+osThreadDef(ReceiverThread, osPriorityHigh, 2048, "ReceiverThread");
 // declare CLRStartup thread here
-osThreadDef(CLRStartupThread, osPriorityNormal, 2048, "CLRStartupThread");
+osThreadDef(CLRStartupThread, osPriorityNormal, 4096, "CLRStartupThread");
 
 //  Application entry point.
 int main(void)
@@ -35,15 +35,12 @@ int main(void)
     // main() is executing with absolute priority but interrupts are already enabled.
     osKernelInitialize();
 
-    // start watchdog
-    Watchdog_Init();
-
-    // Initializes a serial-over-USB CDC driver.
+    //  Initializes a serial-over-USB CDC driver.
     sduObjectInit(&SERIAL_DRIVER);
     sduStart(&SERIAL_DRIVER, &serusbcfg);
 
     // Activates the USB driver and then the USB bus pull-up on D+.
-    // A delay is inserted in order to not have to disconnect the cable after a reset.
+    // Note, a delay is inserted in order to not have to disconnect the cable after a reset.
     usbDisconnectBus(serusbcfg.usbp);
     chThdSleepMilliseconds(100);
     usbStart(serusbcfg.usbp, &usbcfg);

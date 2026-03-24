@@ -7,7 +7,6 @@
 #include <nanoPAL_BlockStorage.h>
 
 // RP2040 Pico flash layout for DEBUG builds (2MB external QSPI flash, 4KB sectors)
-// Same layout as release — nanoBooter has plenty of room in 64KB even for debug.
 // 0x10000000 - 0x1000FFFF : nanoBooter   (64KB  = 16 sectors)
 // 0x10010000 - 0x10017FFF : Config block (32KB  = 8 sectors)
 // 0x10018000 - 0x100FFFFF : nanoCLR      (928KB = 232 sectors)

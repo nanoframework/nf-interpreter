@@ -14,9 +14,9 @@
 #include <LaunchCLR.h>
 
 // need to declare the Receiver thread here
-osThreadDef(ReceiverThread, osPriorityHigh, 1024, "ReceiverThread");
+osThreadDef(ReceiverThread, osPriorityHigh, 2048, "ReceiverThread");
 
-// Application entry point.
+//  Application entry point.
 int main(void)
 {
     // HAL initialization, this also initializes the configured device drivers
@@ -26,15 +26,22 @@ int main(void)
     // init boot clipboard
     InitBootClipboard();
 
-    // the following IF is not mandatory, it's just providing a way for a user to 'force'
-    // the board to remain in nanoBooter and not launching nanoCLR
+    // The kernel is initialized but not started yet, this means that
+    // main() is executing with absolute priority but interrupts are already enabled.
+    osKernelInitialize();
 
     // check if there is a request to remain on nanoBooter
     if (!IsToRemainInBooter())
     {
         // check for valid CLR image at address contiguous to nanoBooter
-        // this target DOES NOT have configuration block, so we need to use the __nanoImage_end__ address here
-        if (CheckValidCLRImage((uint32_t)&__nanoImage_end__))
+        // NOTE: The standard CheckValidCLRImage() opcode check fails on RP2040 due to XIP flash read
+        // behavior. Use a simple vector table validation instead.
+        volatile uint32_t *clrVector = (volatile uint32_t *)(uint32_t)&__nanoImage_end__;
+        uint32_t msp = clrVector[0];
+        uint32_t resetHandler = clrVector[1];
+
+        if (msp != 0xFFFFFFFF && msp != 0x00000000 &&
+            resetHandler > 0x10000000 && resetHandler < 0x10200000)
         {
             // there seems to be a valid CLR image
             // launch nanoCLR
@@ -42,15 +49,12 @@ int main(void)
         }
     }
 
-    // The kernel is initialized but not started yet, this means that
-    // main() is executing with absolute priority but interrupts are already enabled.
-    osKernelInitialize();
-
-    // starts the serial-over-USB CDC driver
+    //  Initializes a serial-over-USB CDC driver.
     sduObjectInit(&SERIAL_DRIVER);
     sduStart(&SERIAL_DRIVER, &serusbcfg);
 
     // Activates the USB driver and then the USB bus pull-up on D+.
+    // Note, a delay is inserted in order to not have to disconnect the cable after a reset.
     usbDisconnectBus(serusbcfg.usbp);
     chThdSleepMilliseconds(100);
     usbStart(serusbcfg.usbp, &usbcfg);
@@ -67,6 +71,7 @@ int main(void)
     // for nanoBooter we have to init it in order to provide the flash map for Monitor_FlashSectorMap command
     BlockStorageList_Initialize();
     BlockStorage_AddDevices();
+    BlockStorageList_InitializeDevices();
 
     // report successful nanoBooter execution
     ReportSuccessfullNanoBooter();

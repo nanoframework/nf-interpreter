@@ -15,7 +15,7 @@ __vectors_align__ = 256;
  */
 MEMORY
 {
-    flash0     (rx) : org = 0x00000000, len = 16k
+    flash0     (rx) : org = 0x10018000, len = 928k      /* nanoCLR (also used for __nanoImage_start__) */
     flash1     (rx) : org = 0x10018000, len = 928k
     flash2     (rx) : org = 0x00000000, len = 0
     flash3     (rx) : org = 0x00000000, len = 0
