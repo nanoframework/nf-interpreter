@@ -13,6 +13,9 @@
 // RP2040 flash sector size (4KB)
 #define RP2040_FLASH_SECTOR_SIZE 4096U
 
+// RP2040 flash page size (256B) - minimum write unit
+#define RP2040_FLASH_PAGE_SIZE 256U
+
 // Reference to ChibiOS EFL driver instance
 extern EFlashDriver EFLD1;
 
@@ -62,9 +65,10 @@ bool RP2040FlashDriver_Write(
     (void)context;
     (void)readModifyWrite;
 
-    // Convert absolute address to flash offset for EFL driver
     flash_offset_t offset = (flash_offset_t)(startAddress - RP2040_XIP_BASE);
 
+    // flashProgram handles page-boundary splitting and atomic
+    // exit_xip → program → busy-wait → enter_xip per page internally.
     flash_error_t err = flashProgram(&EFLD1, offset, numBytes, buffer);
 
     return (err == FLASH_NO_ERROR);

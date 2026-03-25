@@ -244,21 +244,17 @@ endmacro()
 # generates a UF2 image from a binary file for RP2040/RP2350 targets
 # uses the bin2uf2 C# tool (requires dotnet SDK)
 # NOTE: The RP2040 ROM UF2 bootloader does not flash data after address gaps.
-# To work around this, we create a single padded binary (file1 padded with 0xFF
-# to reach file2's base address, then file2 appended) and convert that to UF2.
+# bin2uf2 --merge automatically pads gaps with 0xFF to produce a continuous image.
 function(nf_generate_uf2_package file1 address1 file2 address2 familyid outputfilename)
 
     add_custom_command(
 
         TARGET ${NANOCLR_PROJECT_NAME}.elf POST_BUILD
 
-        # create a padded combined binary with no gap, then convert to UF2
-        COMMAND ${CMAKE_COMMAND} -E echo "Creating padded combined binary..."
-        COMMAND python3 "${CMAKE_SOURCE_DIR}/CMake/Scripts/pad_and_combine.py"
-            "${file1}" "${file2}" "${address2}" "${address1}" "${CMAKE_BINARY_DIR}/combined.bin"
         COMMAND dotnet run --project ${CMAKE_SOURCE_DIR}/CMake/Scripts/bin2uf2
             -- --merge "${outputfilename}" "${familyid}"
-            "${CMAKE_BINARY_DIR}/combined.bin" "${address1}"
+            "${file1}" "${address1}"
+            "${file2}" "${address2}"
 
         COMMENT "Generating combined UF2 image for RP2040/RP2350 (gap-free)"
     )

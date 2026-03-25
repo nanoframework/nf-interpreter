@@ -30,9 +30,6 @@ nf_setup_target_build(
         -DRUNTIME_MEMORY_PROFILE__small=1
         -DTARGET_XIP_FLASH_BLOCKS_USB=1
 
-    BOOTER_EXTRA_COMPILE_DEFINITIONS
-        -DTARGET_XIP_FLASH_BLOCKS_USB=1
-
     BOOTER_EXTRA_LINKMAP_PROPERTIES
         ",--library-path=${CMAKE_SOURCE_DIR}/targets/ChibiOS/_common,--library-path=${CHIBIOS_SOURCE_FOLDER}/os/common/startup/ARMCMx/compilers/GCC/ld,--defsym=__main_stack_size__=0x400,--defsym=__process_stack_size__=0x400,--defsym=__crt_heap_size__=0x1000"
 

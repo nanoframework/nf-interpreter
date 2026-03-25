@@ -41,6 +41,28 @@ if (args.Length >= 5 && args[0] == "--merge")
     {
         byte[] bin = File.ReadAllBytes(pairs[i]);
         uint baseAddr = ParseHex(pairs[i + 1]);
+
+        // Pad gap between previous segment and this one with 0xFF
+        if (allBlocks.Count > 0)
+        {
+            var last = allBlocks[^1];
+            uint nextExpected = last.addr + UF2_DATA_SIZE;
+
+            if (baseAddr > nextExpected)
+            {
+                uint gapSize = baseAddr - nextExpected;
+                byte[] pad = new byte[UF2_DATA_SIZE];
+                Array.Fill(pad, (byte)0xFF);
+
+                for (uint off = 0; off < gapSize; off += UF2_DATA_SIZE)
+                {
+                    allBlocks.Add((nextExpected + off, (byte[])pad.Clone(), UF2_DATA_SIZE));
+                }
+
+                Console.WriteLine($"  Padded {gapSize} byte gap (0x{nextExpected:X8} -> 0x{baseAddr:X8})");
+            }
+        }
+
         AddBlocks(allBlocks, bin, baseAddr);
     }
 

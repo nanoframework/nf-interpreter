@@ -998,13 +998,6 @@ bool CLR_DBG_Debugger::Monitor_WriteMemory(WP_Message *msg)
 {
     NATIVE_PROFILE_CLR_DEBUGGER();
 
-    (void)msg;
-
-#if defined(TARGET_XIP_FLASH_BLOCKS_USB)
-    // NO-OP: pretend write succeeded without touching flash
-    CLR_DBG_Commands_Monitor_WriteMemory_Reply cmdReply = AccessMemoryErrorCode_NoError;
-    WP_ReplyToCommand(msg, true, false, &cmdReply, sizeof(cmdReply));
-#else
     CLR_DBG_Commands_Monitor_WriteMemory *cmd = (CLR_DBG_Commands_Monitor_WriteMemory *)msg->m_payload;
     CLR_DBG_Commands_Monitor_WriteMemory_Reply cmdReply;
     uint32_t errorCode;
@@ -1012,7 +1005,6 @@ bool CLR_DBG_Debugger::Monitor_WriteMemory(WP_Message *msg)
     g_CLR_DBG_Debugger->AccessMemory(cmd->address, cmd->length, cmd->data, AccessMemory_Write, &errorCode);
     cmdReply = errorCode;
     WP_ReplyToCommand(msg, true, false, &cmdReply, sizeof(cmdReply));
-#endif
 
     return true;
 }
@@ -1039,11 +1031,6 @@ bool CLR_DBG_Debugger::Monitor_EraseMemory(WP_Message *msg)
 
     (void)msg;
 
-#if defined(TARGET_XIP_FLASH_BLOCKS_USB)
-    // NO-OP: pretend erase succeeded without touching flash
-    CLR_DBG_Commands_Monitor_EraseMemory_Reply cmdReply = AccessMemoryErrorCode_NoError;
-    WP_ReplyToCommand(msg, true, false, &cmdReply, sizeof(cmdReply));
-#else
     CLR_DBG_Commands_Monitor_EraseMemory *cmd = (CLR_DBG_Commands_Monitor_EraseMemory *)msg->m_payload;
     CLR_DBG_Commands_Monitor_EraseMemory_Reply cmdReply;
     uint32_t errorCode;
@@ -1051,7 +1038,6 @@ bool CLR_DBG_Debugger::Monitor_EraseMemory(WP_Message *msg)
     g_CLR_DBG_Debugger->AccessMemory(cmd->address, cmd->length, NULL, AccessMemory_Erase, &errorCode);
     cmdReply = errorCode;
     WP_ReplyToCommand(msg, true, false, &cmdReply, sizeof(cmdReply));
-#endif
 
     return true;
 }

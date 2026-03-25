@@ -28,7 +28,8 @@ endif()
 
 # RP-specific overlay components
 if(TARGET_VENDOR STREQUAL "RP")
-    # (RP overlay components will be added in later phases, e.g. rp_flash)
+    # component RP_EFL (Embedded Flash driver using ROM functions)
+    list(APPEND ChibiOSnfOverlay_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/targets/ChibiOS/_nf-overlay/os/hal/ports/RP/LLD/EFLv1)
 endif()
 
 ##################################################################################################################################
@@ -69,7 +70,8 @@ endif()
 
 # RP-specific overlay sources
 if(TARGET_VENDOR STREQUAL "RP")
-    # (RP overlay sources will be added in later phases, e.g. rp_flash)
+    # component RP_EFL — hal_efl_lld.c is picked up via find_file() override in FindChibiOS_RP2040_HAL.cmake
+    # (no additional sources needed here; the override is resolved by search path priority)
 endif()
 
 #########################################################################################################################
