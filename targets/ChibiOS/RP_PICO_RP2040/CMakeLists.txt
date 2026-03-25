@@ -43,7 +43,7 @@ nf_setup_target_build(
 
 nf_generate_uf2_package(
     ${CMAKE_BINARY_DIR}/${NANOBOOTER_PROJECT_NAME}.bin 0x10000000
-    ${CMAKE_BINARY_DIR}/${NANOCLR_PROJECT_NAME}.bin 0x10018000
+    ${CMAKE_BINARY_DIR}/${NANOCLR_PROJECT_NAME}.bin 0x10014000
     0xe48bff56
     ${CMAKE_BINARY_DIR}/nanoCLR.uf2
 )
