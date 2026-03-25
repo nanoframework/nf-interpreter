@@ -16,7 +16,8 @@ __vectors_align__ = 256;
  *   0x10000000 - 0x1000FFFF : nanoBooter   (64KB)   - not used by CLR
  *   0x10010000 - 0x10017FFF : Config block (32KB)   - read-only from CLR
  *   0x10018000 - 0x100FFFFF : nanoCLR      (928KB)
- *   0x10100000 - 0x101FFFFF : Deployment   (1MB)
+ *   0x10100000 - 0x101F7FFF : Deployment   (992KB)
+ *   0x101F8000 - 0x101FFFFF : littlefs     (32KB)
  *
  * When updating the flash1 address below make sure to update the address
  * in nf_generate_bin_package if applicable.
@@ -32,7 +33,7 @@ MEMORY
     flash6     (rx) : org = 0x00000000, len = 0
     flash7     (rx) : org = 0x00000000, len = 0
     config     (rw) : org = 0x10010000, len = 32k       /* configuration block */
-    deployment (rx) : org = 0x10100000, len = 1024k     /* deployment area */
+    deployment (rx) : org = 0x10100000, len = 992k      /* deployment area */
     ramvt      (wx) : org = 0x00000000, len = 0         /* no RAM vector table needed on M0+ */
     ram0       (wx) : org = 0x20000000, len = 256k-48   /* SRAM0 striped */
     ram1       (wx) : org = 0x00000000, len = 0

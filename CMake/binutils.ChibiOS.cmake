@@ -98,6 +98,11 @@ macro(nf_add_platform_packages)
             find_package(${TARGET_STM32_CUBE_PACKAGE}_CubePackage REQUIRED QUIET)
         endif()
     endif()
+
+    # littlefs for non-STM32 targets (e.g. RP2040)
+    if(NOT TARGET_VENDOR STREQUAL "ST" AND NF_FEATURE_USE_LITTLEFS_OPTION)
+        find_package(LITTLEFS REQUIRED QUIET)
+    endif()
     
     # packages specific for nanoBooter
     if("${NFAPP_TARGET}" STREQUAL "${NANOBOOTER_PROJECT_NAME}")

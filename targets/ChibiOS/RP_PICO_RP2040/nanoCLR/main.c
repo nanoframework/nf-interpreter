@@ -16,6 +16,11 @@
 #include <nanoHAL_v2.h>
 #include <targetPAL.h>
 
+#if (NF_FEATURE_USE_LITTLEFS == TRUE)
+extern void hal_lfs_config(void);
+extern void hal_lfs_mount(void);
+#endif
+
 // need to declare the Receiver thread here
 osThreadDef(ReceiverThread, osPriorityHigh, 2048, "ReceiverThread");
 // declare CLRStartup thread here
@@ -45,6 +50,11 @@ int main(void)
     chThdSleepMilliseconds(100);
     usbStart(serusbcfg.usbp, &usbcfg);
     usbConnectBus(serusbcfg.usbp);
+
+#if (NF_FEATURE_USE_LITTLEFS == TRUE)
+    hal_lfs_config();
+    hal_lfs_mount();
+#endif
 
     // create the receiver thread
     osThreadCreate(osThread(ReceiverThread), NULL);

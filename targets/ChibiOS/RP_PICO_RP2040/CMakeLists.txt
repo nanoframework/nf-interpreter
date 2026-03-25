@@ -11,9 +11,6 @@ list(APPEND TARGET_CHIBIOS_COMMON_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/Target_Bl
 list(APPEND TARGET_CHIBIOS_COMMON_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/platform_BlockStorage.c")
 list(APPEND TARGET_CHIBIOS_COMMON_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/target_stubs.cpp")
 
-# Async stubs (HAL_CONTINUATION) when nanoFramework.Runtime.Events is not enabled
-list(APPEND TARGET_CHIBIOS_NANOCLR_SOURCES "${CMAKE_SOURCE_DIR}/src/PAL/AsyncProcCall/Async_stubs.cpp")
-
 # target include directories (for the RP2040 flash driver header)
 list(APPEND TARGET_CHIBIOS_COMMON_INCLUDE_DIRS "${CMAKE_CURRENT_SOURCE_DIR}")
 
@@ -29,6 +26,7 @@ nf_setup_target_build(
     CLR_EXTRA_COMPILE_DEFINITIONS
         -DRUNTIME_MEMORY_PROFILE__small=1
         -DTARGET_XIP_FLASH_BLOCKS_USB=1
+        LFS_CONFIG=lfs_config.h
 
     BOOTER_EXTRA_LINKMAP_PROPERTIES
         ",--library-path=${CMAKE_SOURCE_DIR}/targets/ChibiOS/_common,--library-path=${CHIBIOS_SOURCE_FOLDER}/os/common/startup/ARMCMx/compilers/GCC/ld,--defsym=__main_stack_size__=0x400,--defsym=__process_stack_size__=0x400,--defsym=__crt_heap_size__=0x1000"
