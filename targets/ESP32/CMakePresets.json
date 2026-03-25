@@ -5,6 +5,7 @@
         "../../CMake/riscv-esp32c3.json",
         "../../CMake/riscv-esp32c5.json",
         "../../CMake/riscv-esp32c6.json",
+        "../../CMake/riscv-esp32c61.json",
         "../../CMake/riscv-esp32h2.json",
         "../../CMake/riscv-esp32p4.json",
         "../../CMake/xtensa-esp32s2.json",
@@ -191,7 +192,7 @@
             "hidden": false,
             "cacheVariables": {
                 "TARGET_NAME": "${presetName}",
-                "NF_TARGET_DEFCONFIG": "targets/ESP32/defconfig/ESP32_C5_UART_defconfig"
+                "NF_TARGET_DEFCONFIG": "targets/ESP32/defconfig/ESP32_C5_THREAD_USB_defconfig"
             }
         },
         {
@@ -205,6 +206,32 @@
             "cacheVariables": {
                 "TARGET_NAME": "${presetName}",
                 "NF_TARGET_DEFCONFIG": "targets/ESP32/defconfig/ESP32_C6_THREAD_defconfig"
+            }
+        },
+        {
+            "name": "ESP32_C61_UART",
+            "inherits": [
+                "riscv-esp32c61-preset",
+                "user-tools-repos",
+                "user-prefs"
+            ],
+            "hidden": false,
+            "cacheVariables": {
+                "TARGET_NAME": "${presetName}",
+                "NF_TARGET_DEFCONFIG": "targets/ESP32/defconfig/ESP32_C61_UART_defconfig"
+            }
+        },
+        {
+            "name": "ESP32_C61_USB",
+            "inherits": [
+                "riscv-esp32c61-preset",
+                "user-tools-repos",
+                "user-prefs"
+            ],
+            "hidden": false,
+            "cacheVariables": {
+                "TARGET_NAME": "${presetName}",
+                "NF_TARGET_DEFCONFIG": "targets/ESP32/defconfig/ESP32_C61_USB_defconfig"
             }
         },
         {
@@ -676,6 +703,18 @@
             "displayName": "ESP32_C6_THREAD",
             "configurePreset": "ESP32_C6_THREAD"
         },
+        {
+            "inherits": "base-user",
+            "name": "ESP32_C61_UART",
+            "displayName": "ESP32_C61_UART",
+            "configurePreset": "ESP32_C61_UART"
+        },        
+        {
+            "inherits": "base-user",
+            "name": "ESP32_C61_USB",
+            "displayName": "ESP32_C61_USB",
+            "configurePreset": "ESP32_C61_USB"
+        },        
         {
             "inherits": "base-user",
             "name": "ESP32_H2_THREAD",

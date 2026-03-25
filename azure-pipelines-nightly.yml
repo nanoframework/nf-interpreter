@@ -657,15 +657,6 @@ jobs:
           PackageName: ESP32_P4_UART_REV_LESS3
           CMakePreset: ESP32_P4_UART_REV_LESS3
 
-        ESP32_C5_THREAD_USB:
-          TargetBoard: ESP32_C5
-          TargetSeries: "esp32c5"
-          BuildOptions:
-          IDF_Target: esp32c5
-          TargetName: ESP32_C5_THREAD_USB 
-          PackageName: ESP32_C5_THREAD_USB
-          CMakePreset: ESP32_C5_THREAD_USB
-
         ESP32_C5_THREAD_UART:
           TargetBoard: ESP32_C5
           TargetSeries: "esp32c5"
@@ -674,6 +665,15 @@ jobs:
           TargetName: ESP32_C5_THREAD_UART
           PackageName: ESP32_C5_THREAD_UART
           CMakePreset: ESP32_C5_THREAD_UART
+
+        ESP32_C61_UART:
+          TargetBoard: ESP32_C61
+          TargetSeries: "esp32c61"
+          BuildOptions:
+          IDF_Target: esp32c61
+          TargetName: ESP32_C61_UART
+          PackageName: ESP32_C61_UART
+          CMakePreset: ESP32_C61_UART
 
     variables:
       DOTNET_NOLOGO: true
