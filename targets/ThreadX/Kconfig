@@ -10,10 +10,6 @@ config GECKO_FEATURE_USBD_HID
     bool "Gecko USB HID device support"
     default n
 
-config STM32_CUBE_PACKAGE_REQUIRED
-    bool "STM32 Cube package required"
-    default n
-
 config CHIBIOS_HAL_REQUIRED
     bool "ChibiOS HAL required (for STM32 WiFi targets)"
     default n

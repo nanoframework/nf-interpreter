@@ -41,4 +41,9 @@ config NF_CLR_NO_IL_INLINE
     bool "Disable CLR IL inlining"
     default n
 
+config STM32_CUBE_PACKAGE_REQUIRED
+    bool "STM32 Cube package required"
+    depends on RTOS_CHIBIOS || RTOS_THREADX
+    default n
+
 endmenu

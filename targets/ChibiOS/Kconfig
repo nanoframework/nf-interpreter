@@ -6,10 +6,6 @@
 menu "ChibiOS Platform"
     depends on RTOS_CHIBIOS
 
-config STM32_CUBE_PACKAGE_REQUIRED
-    bool "STM32 Cube package required"
-    default n
-
 config CHIBIOS_CONTRIB_REQUIRED
     bool "ChibiOS Community contributions repository required"
     default n
