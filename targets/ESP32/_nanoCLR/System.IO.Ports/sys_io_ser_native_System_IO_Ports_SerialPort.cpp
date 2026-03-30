@@ -977,6 +977,7 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeInit___VOID(
     if (palUart->StartTx == NULL)
     {
         ESP_LOGE(TAG, "Failed to create UART TX semaphore");
+        UninitializePalUart_sys(palUart);
         NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
     }
 
@@ -984,6 +985,7 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeInit___VOID(
     if (xTaskCreate(UartTxWorkerTask_sys, task_name, 2048, palUart, 12, &(palUart->TxWorkerTask)) != pdPASS)
     {
         ESP_LOGE(TAG, "Failed to start UART TX task");
+        UninitializePalUart_sys(palUart);
         NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
     }
 
