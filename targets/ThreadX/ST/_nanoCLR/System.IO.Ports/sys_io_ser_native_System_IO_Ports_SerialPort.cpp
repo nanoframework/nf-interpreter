@@ -803,6 +803,15 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeDispose___VO
     CLR_RT_HeapBlock *pThis = stack.This();
     FAULT_ON_NULL(pThis);
 
+    // if there is a TX ongoing, unblock any managed thread waiting for TX completion
+    {
+        NF_PAL_UART *palUart = GetUartPAL((int)pThis[FIELD___portIndex].NumericByRef().s4);
+        if (palUart != NULL && palUart->TxOngoingCount > 0)
+        {
+            Events_Set(SYSTEM_EVENT_FLAG_COM_OUT);
+        }
+    }
+
     // Choose the driver for this SerialDevice
     switch ((int)pThis[FIELD___portIndex].NumericByRef().s4)
     {

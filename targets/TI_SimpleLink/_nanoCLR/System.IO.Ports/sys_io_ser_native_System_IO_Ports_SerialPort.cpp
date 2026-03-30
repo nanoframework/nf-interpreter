@@ -60,6 +60,9 @@ void UnitializePalUart(NF_PAL_UART *palUart)
             Task_destruct(&SerialRxTaskStruct);
         }
 
+        // unblock any managed thread that is waiting for TX completion
+        Events_Set(SYSTEM_EVENT_FLAG_COM_OUT);
+
         UART2_close(palUart->UartDriver);
 
         // free buffers memory
@@ -621,35 +624,30 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::Write___VOID__SZAR
         data = dataBuffer->GetElement(offset);
 
         // check if this is a long running operation
-        palUart->IsLongRunning = IsLongRunningOperation(
+        bool isLongRunning = IsLongRunningOperation(
             count,
             (uint32_t)pThis[FIELD___baudRate].NumericByRef().s4,
             (uint32_t &)estimatedDurationMiliseconds);
 
-        if (palUart->IsLongRunning)
+        if (isLongRunning)
         {
             // setup timeout
             hbTimeout.SetInteger(
                 (CLR_INT64)pThis[FIELD___writeTimeout].NumericByRef().s4 * TIME_CONVERSION__TO_MILLISECONDS);
             NANOCLR_CHECK_HRESULT(stack.SetupTimeoutFromTicks(hbTimeout, timeoutTicks));
 
-            // this is a long running operation and hasn't started yet
-            // perform operation by launching a thread to
-            if (stack.m_customState == 1)
-            {
-                // push to the stack how many bytes bytes where buffered for TX
-                stack.PushValueI4(count);
+            // push to the stack how many bytes bytes where buffered for TX
+            stack.PushValueI4(count);
 
-                // set TX count
-                palUart->TxOngoingCount = count;
+            // set TX count
+            palUart->TxOngoingCount = count;
 
-                // Write data to start sending
-                // by design: don't bother checking the return value
-                UART2_write(palUart->UartDriver, (const void *)data, count, NULL);
+            // Write data to start sending
+            // by design: don't bother checking the return value
+            UART2_write(palUart->UartDriver, (const void *)data, count, NULL);
 
-                // bump custom state so the read value above is pushed only once
-                stack.m_customState = 2;
-            }
+            // bump custom state so the read value above is pushed only once
+            stack.m_customState = 2;
         }
         else
         {
@@ -664,7 +662,7 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::Write___VOID__SZAR
 
     while (eventResult)
     {
-        if (!palUart->IsLongRunning)
+        if (stack.m_customState != 2)
         {
             // this is not a long running operation so nothing to do here
             break;
@@ -692,7 +690,7 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::Write___VOID__SZAR
         }
     }
 
-    if (palUart->IsLongRunning)
+    if (stack.m_customState == 2)
     {
         // pop "count" heap block from stack
         stack.PopValue();
