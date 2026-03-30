@@ -15,7 +15,7 @@ NF_PAL_UART Uart1_PAL;
 
 // in UWP the COM ports are named COM1, COM2, COM3. But TI SimpleLink uses internally UART0, UART1, UART2. This maps the
 // port index 1, 2 or 3 to the UART number 0, 1, etc
-#define PORT_INDEX_TO_UART_NUM(portIndex) ((portIndex)-1)
+#define PORT_INDEX_TO_UART_NUM(portIndex) ((portIndex) - 1)
 
 // in UWP the COM ports are named COM1, COM2, COM3. But TI SimpleLink uses internally UART0, UART1, etc. This maps the
 // UART number 0, 1 (..) to the port index 1, 2, etc
