@@ -20,7 +20,6 @@
 
 #define IDF_VER_FIXED    "@IDF_VER_FIXED@"
 
-// Kconfig-generated header - single source of truth for all feature/API symbols.
 #include "nf_config.h"
 
 #cmakedefine NANOCLR_PROFILE_NEW_CALLS           @NANOCLR_PROFILE_NEW_CALLS@

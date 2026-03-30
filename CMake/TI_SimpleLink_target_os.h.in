@@ -16,7 +16,6 @@
 #define VERSION_BUILD    @nanoFramework_VERSION_PATCH@U
 #define VERSION_REVISION @nanoFramework_VERSION_TWEAK@U
 
-// Kconfig-generated header - single source of truth for all feature/API symbols.
 #include "nf_config.h"
 
 #cmakedefine NANOCLR_PROFILE_NEW_CALLS           @NANOCLR_PROFILE_NEW_CALLS@

@@ -21,7 +21,6 @@
 
 #define TARGETINFOSTRING "@CMAKE_BUILD_TYPE@ build with FREERTOS @RTOS_VERSION@"
 
-// Kconfig-generated header - single source of truth for all feature/API symbols.
 #include "nf_config.h"
 
 #cmakedefine NANOCLR_PROFILE_NEW_CALLS           @NANOCLR_PROFILE_NEW_CALLS@

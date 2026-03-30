@@ -23,7 +23,6 @@
 
 #define TARGETINFOSTRING "@CMAKE_BUILD_TYPE@ build with ThreadX v" STR(THREADX_MAJOR_VERSION) "." STR(THREADX_MINOR_VERSION) "." STR(THREADX_PATCH_VERSION)
 
-// Kconfig-generated header - single source of truth for all feature/API symbols.
 #include "nf_config.h"
 
 #cmakedefine NANOCLR_PROFILE_NEW_CALLS           @NANOCLR_PROFILE_NEW_CALLS@
