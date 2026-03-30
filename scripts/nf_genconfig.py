@@ -20,6 +20,21 @@ import sys
 import os
 import kconfiglib
 
+# Resolve type constants — esp_kconfiglib (used inside ESP-IDF virtualenvs)
+# exposes them under esp_kconfiglib.core rather than at the package top level.
+try:
+    _BOOL     = kconfiglib.BOOL
+    _TRISTATE = kconfiglib.TRISTATE
+except AttributeError:
+    try:
+        import esp_kconfiglib.core as _kcore
+        _BOOL     = _kcore.BOOL
+        _TRISTATE = _kcore.TRISTATE
+    except (ImportError, AttributeError):
+        # Fallback to numeric values (stable across kconfiglib v12+)
+        _BOOL     = 3
+        _TRISTATE = 4
+
 def main():
     if len(sys.argv) != 4:
         print(f"Usage: {sys.argv[0]} <Kconfig-root> <.config> <output-header>", file=sys.stderr)
@@ -53,7 +68,7 @@ def main():
 
     disabled = []
     for sym in kconf.unique_defined_syms:
-        if sym.type in (kconfiglib.BOOL, kconfiglib.TRISTATE):
+        if sym.type in (_BOOL, _TRISTATE):
             name = "CONFIG_" + sym.name
             if name not in defined:
                 disabled.append(name)
