@@ -80,6 +80,8 @@ void UninitializePalUart_sys(NF_PAL_UART *palUart)
         // delete the TX worker task and its semaphore
         if (palUart->TxWorkerTask != NULL)
         {
+            // unblock any managed thread that is waiting for TX completion
+            Events_Set(SYSTEM_EVENT_FLAG_COM_OUT);
             vTaskDelete(palUart->TxWorkerTask);
             palUart->TxWorkerTask = NULL;
         }
@@ -760,11 +762,11 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::Write___VOID__SZAR
 
         // Try to send buffer to fifo first.
         // if not all data written then use long running operation to complete.
-        palUart->IsLongRunning = false;
+        bool isLongRunning = false;
         int txCount = uart_tx_chars(uart_num, (const char *)data, count);
         if (txCount < count)
         {
-            palUart->IsLongRunning = true;
+            isLongRunning = true;
             if (txCount >= 0)
             {
                 // Any written then update ptr / count
@@ -773,7 +775,7 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::Write___VOID__SZAR
             }
         }
 
-        if (palUart->IsLongRunning)
+        if (isLongRunning)
         {
             hbTimeout.SetInteger(
                 (CLR_INT64)pThis[FIELD___writeTimeout].NumericByRef().s4 * TIME_CONVERSION__TO_MILLISECONDS);
@@ -802,7 +804,7 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::Write___VOID__SZAR
     /////////////////////////////
     while (eventResult)
     {
-        if (!palUart->IsLongRunning)
+        if (stack.m_customState != 2)
         {
             // this is not a long running operation so nothing to do here
             break;
@@ -830,7 +832,7 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::Write___VOID__SZAR
         }
     }
 
-    if (palUart->IsLongRunning)
+    if (stack.m_customState == 2)
     {
         // pop length heap block from stack
         stack.PopValue();
@@ -1300,7 +1302,7 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeWriteString_
 
         // Try to send buffer to fifo first.
         // if not all data written then use long running operation to complete.
-        palUart->IsLongRunning = false;
+        bool isLongRunning = false;
 
         // store pointer because it will be changed after this call
         bufferPointer = buffer;
@@ -1309,7 +1311,7 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeWriteString_
 
         if (txCount < (int)bufferLength)
         {
-            palUart->IsLongRunning = true;
+            isLongRunning = true;
             if (txCount >= 0)
             {
                 // Any written then update ptr / count
@@ -1318,7 +1320,7 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeWriteString_
             }
         }
 
-        if (palUart->IsLongRunning)
+        if (isLongRunning)
         {
             // setup timeout
             hbTimeout.SetInteger(
@@ -1351,7 +1353,7 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeWriteString_
 
     while (eventResult)
     {
-        if (!palUart->IsLongRunning)
+        if (stack.m_customState != 2)
         {
             // this is not a long running operation so nothing to do here
             break;
@@ -1386,7 +1388,7 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeWriteString_
         }
     }
 
-    if (palUart->IsLongRunning)
+    if (stack.m_customState == 2)
     {
         // pop "length" heap block from stack
         stack.PopValue();

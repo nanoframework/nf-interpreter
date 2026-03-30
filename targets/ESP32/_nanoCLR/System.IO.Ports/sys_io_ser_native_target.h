@@ -24,7 +24,6 @@ typedef struct
     uint8_t *RxBuffer;
     uint16_t RxBytesToRead;
 
-    bool IsLongRunning;
     bool SignalLevelsInverted;
 
     uint8_t NewLineChar;
