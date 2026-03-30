@@ -13,7 +13,9 @@ typedef struct
 {
     uart_port_t UartNum;
     TaskHandle_t UartEventTask;
+    TaskHandle_t TxWorkerTask;
     QueueHandle_t UartEventQueue;
+    SemaphoreHandle_t StartTx;
 
     uint8_t *TxBuffer;
     uint16_t TxOngoingCount;

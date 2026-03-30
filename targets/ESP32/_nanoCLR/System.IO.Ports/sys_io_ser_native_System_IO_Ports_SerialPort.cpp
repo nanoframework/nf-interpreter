@@ -77,6 +77,19 @@ void UninitializePalUart_sys(NF_PAL_UART *palUart)
         xQueueSend(palUart->UartEventQueue, &event, 0);
         palUart->UartEventTask = NULL;
 
+        // delete the TX worker task and its semaphore
+        if (palUart->TxWorkerTask != NULL)
+        {
+            vTaskDelete(palUart->TxWorkerTask);
+            palUart->TxWorkerTask = NULL;
+        }
+
+        if (palUart->StartTx != NULL)
+        {
+            vSemaphoreDelete(palUart->StartTx);
+            palUart->StartTx = NULL;
+        }
+
         // free buffer memory
         platform_free(palUart->RxBuffer);
 
@@ -241,15 +254,18 @@ void UartTxWorkerTask_sys(void *pvParameters)
     // get PAL UART from task parameters
     NF_PAL_UART *palUart = (NF_PAL_UART *)pvParameters;
 
-    // Write data directly to UART FIFO
-    // by design: don't bother checking the return value
-    uart_write_bytes(palUart->UartNum, (const char *)palUart->TxBuffer, palUart->TxOngoingCount);
+    while (true)
+    {
+        // wait for work to be triggered
+        xSemaphoreTake(palUart->StartTx, portMAX_DELAY);
 
-    // set event flag for COM OUT
-    Events_Set(SYSTEM_EVENT_FLAG_COM_OUT);
+        // Write data directly to UART FIFO
+        // by design: don't bother checking the return value
+        uart_write_bytes(palUart->UartNum, (const char *)palUart->TxBuffer, palUart->TxOngoingCount);
 
-    // delete task
-    vTaskDelete(NULL);
+        // set event flag for COM OUT
+        Events_Set(SYSTEM_EVENT_FLAG_COM_OUT);
+    }
 }
 
 HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::get_BytesToRead___I4(CLR_RT_StackFrame &stack)
@@ -775,15 +791,8 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::Write___VOID__SZAR
             // set TX count
             palUart->TxOngoingCount = count;
 
-            // Create a task to handle UART event from ISR
-            char task_name[16];
-            snprintf(task_name, ARRAYSIZE(task_name), "uart%d_tx", uart_num);
-
-            if (xTaskCreate(UartTxWorkerTask_sys, task_name, 2048, palUart, 12, NULL) != pdPASS)
-            {
-                ESP_LOGE(TAG, "Failed to start UART TX task");
-                NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
-            }
+            // trigger the persistent TX worker task
+            xSemaphoreGive(palUart->StartTx);
 
             // bump custom state so the read value above is pushed only once
             stack.m_customState = 2;
@@ -958,6 +967,21 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeInit___VOID(
     if (xTaskCreate(uart_event_task_sys, task_name, 2048, palUart, 12, &(palUart->UartEventTask)) != pdPASS)
     {
         ESP_LOGE(TAG, "Failed to start UART events task");
+        NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
+    }
+
+    // Create semaphore and persistent task to handle UART TX
+    palUart->StartTx = xSemaphoreCreateBinary();
+    if (palUart->StartTx == NULL)
+    {
+        ESP_LOGE(TAG, "Failed to create UART TX semaphore");
+        NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
+    }
+
+    snprintf(task_name, ARRAYSIZE(task_name), "uart%d_tx", uart_num);
+    if (xTaskCreate(UartTxWorkerTask_sys, task_name, 2048, palUart, 12, &(palUart->TxWorkerTask)) != pdPASS)
+    {
+        ESP_LOGE(TAG, "Failed to start UART TX task");
         NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
     }
 
@@ -1317,15 +1341,8 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeWriteString_
             // need this to release the buffer later, because the pointer is changed
             stack.PushValueU4((CLR_UINT32)&bufferPointer);
 
-            // Create a task to handle UART event from ISR
-            char task_name[16];
-            snprintf(task_name, ARRAYSIZE(task_name), "uart%d_tx", uart_num);
-
-            if (xTaskCreate(UartTxWorkerTask_sys, task_name, 2048, palUart, 12, NULL) != pdPASS)
-            {
-                ESP_LOGE(TAG, "Failed to start UART TX task");
-                NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
-            }
+            // trigger the persistent TX worker task
+            xSemaphoreGive(palUart->StartTx);
 
             // bump custom state so the read value above is pushed only once
             stack.m_customState = 2;
