@@ -35,6 +35,13 @@ if (BUILD_VERBOSE)
     message(STATUS "Wire Protocol TRACE_MASK is '${WP_TRACE_MASK}'")
 endif()
 
+# report Wire Protocol transport channel
+if(HAL_WP_USE_USB_CDC)
+    message(STATUS "Wire Protocol transport: USB CDC")
+else()
+    message(STATUS "Wire Protocol transport: serial port (UART)")
+endif()
+
 # set include directories for Wire Protocol
 list(APPEND WireProtocol_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/CLR/Include)
 
