@@ -56,7 +56,7 @@ if(NO_ESP32_IDF_PATH)
 
     message(STATUS "ESP32 IDF v${ESP32_IDF_TAG} from official repo")
 
-    FetchContent_Declare(
+    FetchContent_Populate(
         esp32_idf
         GIT_REPOSITORY https://github.com/espressif/esp-idf
         GIT_TAG v${ESP32_IDF_TAG}
@@ -67,17 +67,8 @@ else()
 
     message(STATUS "ESP32 IDF v${ESP32_IDF_TAG} source from: ${ESP32_IDF_PATH}")
 
-    FetchContent_Declare(
-        esp32_idf
-        SOURCE_DIR ${ESP32_IDF_PATH}
-    )
+    set(esp32_idf_SOURCE_DIR ${ESP32_IDF_PATH})
 
-endif()
-
-FetchContent_GetProperties(esp32_idf)
-if(NOT esp32_idf_POPULATED)
-    # Fetch the content using previously declared details
-    FetchContent_Populate(esp32_idf)
 endif()
 
 # add IDF CMake dir to modules path

@@ -781,18 +781,11 @@ function(nf_add_mbedtls_library)
 
     cmake_policy(SET CMP0048 NEW)
 
-    # Check if population has already been performed
-    FetchContent_GetProperties(mbedtls)
-    if(NOT mbedtls_POPULATED)
-        # Fetch the content using previously declared details
-        FetchContent_Populate(mbedtls)
-    endif()
-
     set(MBEDTLS_AS_SUBPROJECT TRUE)
     set(DISABLE_PACKAGE_CONFIG_AND_INSTALL OFF)
 
-    # add the MbedTLS library
-    add_subdirectory(${mbedtls_SOURCE_DIR} MbedTLS_Source)
+    # Fetch and add the MbedTLS library
+    FetchContent_MakeAvailable(mbedtls)
 
 endfunction()
 
