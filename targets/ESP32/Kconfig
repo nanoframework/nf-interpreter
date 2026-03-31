@@ -1,0 +1,55 @@
+#
+# Copyright (c) .NET Foundation and Contributors
+# See LICENSE file in the project root for full license information.
+#
+
+menu "ESP32 Platform"
+    depends on RTOS_ESP32
+
+config SDK_CONFIG_FILE
+    string "ESP-IDF sdkconfig defaults file"
+    default ""
+    help
+      Relative path to the IDF sdkconfig defaults file.
+      Leave empty to use targets/ESP32/_IDF/sdkconfig.default.
+
+config ESP32_RESERVE_SPIRAM_IDF_ALLOCATION_BYTES
+    int "SPIRAM reserved for IDF allocation (bytes)"
+    default 262144
+    help
+      Amount of SPIRAM to reserve for ESP-IDF internal allocations.
+      Typical values: 262144 (256KB), 1048576 (1MB).
+
+config ESP32_RESERVE_IRAM_IDF_ALLOCATION_KB
+    int "Internal RAM reserved for IDF allocation (kB)"
+    default 0
+    help
+      Amount of internal RAM (in kB) to reserve for ESP-IDF allocations.
+      Used on boards with limited memory (e.g., ESP32-PICO, M5StickC).
+
+config ESP32_USB_CDC
+    bool "USB CDC for Wire Protocol"
+    default n
+
+config ESP32_XTAL_FREQ_26
+    bool "26 MHz crystal (instead of 40 MHz default)"
+    default n
+
+config ESP32_THREAD_DEVICE_TYPE
+    string "Thread device type"
+    default ""
+    depends on API_NANOFRAMEWORK_NETWORKING_THREAD
+    help
+      Thread device type identifier (e.g., "FTD" for Full Thread Device).
+
+config ESP32_ETHERNET_PHY_CLOCK_MODE
+    string "Ethernet PHY clock mode override"
+    default ""
+
+config ESP32_ETHERNET_PHY_POWER_PIN
+    string "Ethernet PHY power pin override"
+    default ""
+
+source "targets/ESP32/Kconfig.ethernet"
+
+endmenu

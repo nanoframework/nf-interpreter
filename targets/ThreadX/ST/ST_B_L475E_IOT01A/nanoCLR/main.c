@@ -68,7 +68,7 @@ void tx_application_define(void *first_unused_memory)
     // starts the serial driver
     sdStart(&SERIAL_DRIVER, NULL);
 
-#if (TRACE_TO_STDIO == TRUE)
+#if CONFIG_NF_TRACE_TO_STDIO
     StdioPort_Init();
 #endif
 

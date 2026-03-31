@@ -42,7 +42,7 @@ __nfweak bool Target_IFUCapable()
 
 inline bool Target_HasNanoBooter()
 {
-#if (TARGET_HAS_NANOBOOTER == TRUE)
+#if CONFIG_NF_TARGET_HAS_NANOBOOTER
     return true;
 #else
     return false;

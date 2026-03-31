@@ -19,7 +19,7 @@
 
 #include <network_options.h>
 
-#if defined(WIFI_DRIVER_ISM43362)
+#if defined(THREADX_WIFI_DRIVER_ISM43362)
 #include <wifi.h>
 #endif
 

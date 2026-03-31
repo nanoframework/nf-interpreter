@@ -1,0 +1,160 @@
+#
+# Copyright (c) .NET Foundation and Contributors
+# See LICENSE file in the project root for full license information.
+#
+
+menu "nanoFramework APIs"
+
+config API_SYSTEM_MATH
+    bool "System.Math"
+    default y
+
+config API_SYSTEM_NET
+    bool "System.Net"
+    default n
+    select NF_FEATURE_HAS_CONFIG_BLOCK
+
+config API_SYSTEM_DEVICE_GPIO
+    bool "System.Device.Gpio"
+    default y
+
+config API_SYSTEM_DEVICE_SPI
+    bool "System.Device.Spi"
+    default n
+
+config API_SYSTEM_DEVICE_I2C
+    bool "System.Device.I2c"
+    default n
+
+config API_SYSTEM_DEVICE_I2C_SLAVE
+    bool "System.Device.I2c.Slave"
+    depends on API_SYSTEM_DEVICE_I2C
+    default n
+
+config API_SYSTEM_DEVICE_PWM
+    bool "System.Device.Pwm"
+    default n
+
+config API_SYSTEM_DEVICE_ADC
+    bool "System.Device.Adc"
+    default n
+
+config API_SYSTEM_DEVICE_DAC
+    bool "System.Device.Dac"
+    default n
+
+config API_SYSTEM_DEVICE_I2S
+    bool "System.Device.I2s"
+    default n
+
+config API_SYSTEM_DEVICE_WIFI
+    bool "System.Device.Wifi"
+    default n
+
+config API_SYSTEM_DEVICE_USBSTREAM
+    bool "System.Device.UsbStream"
+    default n
+
+config API_SYSTEM_IO_PORTS
+    bool "System.IO.Ports"
+    default n
+    select API_NANOFRAMEWORK_SYSTEM_TEXT
+
+config API_SYSTEM_IO_FILESYSTEM
+    bool "System.IO.FileSystem"
+    depends on NF_FEATURE_HAS_SDCARD || NF_FEATURE_USE_LITTLEFS || NF_FEATURE_HAS_USB_MSD
+    default n
+
+config API_NANOFRAMEWORK_DEVICE_ONEWIRE
+    bool "nanoFramework.Device.OneWire"
+    default n
+
+config API_NANOFRAMEWORK_DEVICE_CAN
+    bool "nanoFramework.Device.Can"
+    default n
+
+config API_NANOFRAMEWORK_DEVICE_BLUETOOTH
+    bool "nanoFramework.Device.Bluetooth"
+    default n
+
+config API_NANOFRAMEWORK_GRAPHICS
+    bool "nanoFramework.Graphics"
+    default n
+
+config API_NANOFRAMEWORK_RESOURCEMANAGER
+    bool "nanoFramework.ResourceManager"
+    default n
+
+config API_NANOFRAMEWORK_SYSTEM_COLLECTIONS
+    bool "nanoFramework.System.Collections"
+    default n
+
+config API_NANOFRAMEWORK_SYSTEM_TEXT
+    bool "nanoFramework.System.Text"
+    default n
+
+config API_NANOFRAMEWORK_SYSTEM_SECURITY_CRYPTOGRAPHY
+    bool "nanoFramework.System.Security.Cryptography"
+    depends on NF_SECURITY_MBEDTLS
+    default n
+
+config API_NANOFRAMEWORK_SYSTEM_IO_HASHING
+    bool "nanoFramework.System.IO.Hashing"
+    default n
+
+config API_NANOFRAMEWORK_NETWORKING_THREAD
+    bool "nanoFramework.Networking.Thread"
+    default n
+
+# Platform-specific APIs — visible only when the relevant RTOS is selected
+
+config API_HARDWARE_STM32
+    bool "Hardware.Stm32"
+    depends on RTOS_CHIBIOS
+    default n
+
+config API_HARDWARE_ESP32
+    bool "Hardware.Esp32"
+    depends on RTOS_ESP32
+    default y if RTOS_ESP32
+
+config API_NANOFRAMEWORK_HARDWARE_ESP32_RMT
+    bool "nanoFramework.Hardware.Esp32.Rmt"
+    depends on RTOS_ESP32
+    default n
+
+config API_NANOFRAMEWORK_HARDWARE_TI
+    bool "nanoFramework.Hardware.TI"
+    depends on RTOS_TI_SIMPLELINK
+    default n
+
+config API_NANOFRAMEWORK_TI_EASYLINK
+    bool "nanoFramework.TI.EasyLink"
+    depends on RTOS_TI_SIMPLELINK
+    default n
+
+config API_HARDWARE_GIANTGECKO
+    bool "Hardware.GiantGecko"
+    depends on RTOS_THREADX
+    default n
+
+config API_NANOFRAMEWORK_GIANTGECKO_ADC
+    bool "nanoFramework.GiantGecko.Adc"
+    depends on RTOS_THREADX
+    default n
+
+# Internal (hidden) API symbols — auto-selected by dependency rules
+
+config API_NANOFRAMEWORK_RUNTIME_EVENTS
+    bool
+    default y if API_SYSTEM_DEVICE_GPIO || API_SYSTEM_NET || API_SYSTEM_IO_PORTS || API_NANOFRAMEWORK_DEVICE_ONEWIRE || API_NANOFRAMEWORK_DEVICE_CAN || API_SYSTEM_IO_FILESYSTEM
+
+config API_NANOFRAMEWORK_NETWORKING_SNTP
+    bool
+    default y if API_SYSTEM_NET && NF_NETWORKING_SNTP
+
+config API_SYSTEM_RUNTIME_SERIALIZATION
+    bool
+    default y if NF_FEATURE_SUPPORT_REFLECTION && NF_FEATURE_BINARY_SERIALIZATION
+
+endmenu
