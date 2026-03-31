@@ -13,18 +13,18 @@ config SDK_CONFIG_FILE
       Relative path to the IDF sdkconfig defaults file.
       Leave empty to use targets/ESP32/_IDF/sdkconfig.default.
 
-config ESP32_SPIRAM_FOR_IDF_ALLOCATION
+config ESP32_RESERVE_SPIRAM_IDF_ALLOCATION_BYTES
     int "SPIRAM reserved for IDF allocation (bytes)"
     default 262144
     help
       Amount of SPIRAM to reserve for ESP-IDF internal allocations.
       Typical values: 262144 (256KB), 1048576 (1MB).
 
-config ESP32_RESERVED_RAM_FOR_IDF_ALLOCATION
-    int "RAM reserved for IDF allocation (kB)"
+config ESP32_RESERVE_IRAM_IDF_ALLOCATION_KB
+    int "Internal RAM reserved for IDF allocation (kB)"
     default 0
     help
-      Amount of internal RAM to reserve for ESP-IDF allocations.
+      Amount of internal RAM (in kB) to reserve for ESP-IDF allocations.
       Used on boards with limited memory (e.g., ESP32-PICO, M5StickC).
 
 config ESP32_USB_CDC
