@@ -7,7 +7,7 @@
 
 #include <nanoHAL.h>
 #include <nf_netxduo.h>
-#if defined(WIFI_DRIVER_ISM43362) && defined(I_AM_NANOCLR)
+#if defined(THREADX_WIFI_DRIVER_ISM43362) && defined(I_AM_NANOCLR)
 #include <wifi.h>
 #endif
 
@@ -77,7 +77,7 @@ void nanoHAL_Network_Initialize()
         // Start lwIP thread in ChibiOS bindings using the above options
         // lwipInit(&lwipOptions);
 
-#if defined(WIFI_DRIVER_ISM43362) && defined(I_AM_NANOCLR)
+#if defined(THREADX_WIFI_DRIVER_ISM43362) && defined(I_AM_NANOCLR)
 
         // // check if we have the MAC address stored in the configuration block
         // if (networkConfig.MacAddress[0] == 0xFF)

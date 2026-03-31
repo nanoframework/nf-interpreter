@@ -22,11 +22,11 @@
 
 // ── Build options ────────────────────────────────────────────────────────────
 // Windows uses native double-precision floating point.
-#define CONFIG_DP_FLOATINGPOINT 1
+#define CONFIG_NF_DOUBLE_PRECISION_FP 1
 // Full math library — do not exclude complex math functions.
 #define CONFIG_NF_FEATURE_LIGHT_MATH 0
-// String conversion to any numeric base (was SUPPORT_ANY_BASE_CONVERSION).
-#define CONFIG_SUPPORT_ANY_BASE_CONVERSION 1
+// String conversion to any numeric base.
+#define CONFIG_NF_SUPPORT_ANY_BASE_CONVERSION 1
 
 // ── nanoFramework features ────────────────────────────────────────────────────
 // Managed application debugging (debug transport is always present).

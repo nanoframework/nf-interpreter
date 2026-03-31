@@ -19,7 +19,7 @@ HRESULT Library_nf_native_system_math_System_Math::Max___STATIC__R8__R8__R8(CLR_
     // otherwise returns the greater of the inputs. It
     // treats +0 as greater than -0 as per the specification.
 
-#if CONFIG_DP_FLOATINGPOINT
+#if CONFIG_NF_DOUBLE_PRECISION_FP
 
     double val1 = stack.Arg0().NumericByRefConst().r8;
     double val2 = stack.Arg1().NumericByRefConst().r8;
@@ -116,7 +116,7 @@ HRESULT Library_nf_native_system_math_System_Math::Min___STATIC__R8__R8__R8(CLR_
     // otherwise returns the lesser of the inputs. It
     // treats +0 as lesser than -0 as per the specification.
 
-#if CONFIG_DP_FLOATINGPOINT
+#if CONFIG_NF_DOUBLE_PRECISION_FP
 
     double val1 = stack.Arg0().NumericByRefConst().r8;
     double val2 = stack.Arg1().NumericByRefConst().r8;
@@ -207,7 +207,7 @@ HRESULT Library_nf_native_system_math_System_Math::Abs___STATIC__R8__R8(CLR_RT_S
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
 
-#if CONFIG_DP_FLOATINGPOINT
+#if CONFIG_NF_DOUBLE_PRECISION_FP
 
     double d = stack.Arg0().NumericByRefConst().r8;
     double res = fabs(d);
@@ -248,7 +248,7 @@ HRESULT Library_nf_native_system_math_System_Math::Acos___STATIC__R8__R8(CLR_RT_
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
 
-#if CONFIG_DP_FLOATINGPOINT
+#if CONFIG_NF_DOUBLE_PRECISION_FP
 
     double d = stack.Arg0().NumericByRefConst().r8;
     double res = acos(d);
@@ -278,7 +278,7 @@ HRESULT Library_nf_native_system_math_System_Math::Asin___STATIC__R8__R8(CLR_RT_
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
 
-#if CONFIG_DP_FLOATINGPOINT
+#if CONFIG_NF_DOUBLE_PRECISION_FP
 
     double d = stack.Arg0().NumericByRefConst().r8;
     double res = asin(d);
@@ -308,7 +308,7 @@ HRESULT Library_nf_native_system_math_System_Math::Atan___STATIC__R8__R8(CLR_RT_
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
 
-#if CONFIG_DP_FLOATINGPOINT
+#if CONFIG_NF_DOUBLE_PRECISION_FP
 
     double d = stack.Arg0().NumericByRefConst().r8;
     double res = atan(d);
@@ -338,7 +338,7 @@ HRESULT Library_nf_native_system_math_System_Math::Atan2___STATIC__R8__R8__R8(CL
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
 
-#if CONFIG_DP_FLOATINGPOINT
+#if CONFIG_NF_DOUBLE_PRECISION_FP
 
     double x = stack.Arg0().NumericByRefConst().r8;
     double y = stack.Arg1().NumericByRefConst().r8;
@@ -370,7 +370,7 @@ HRESULT Library_nf_native_system_math_System_Math::Cbrt___STATIC__R8__R8(CLR_RT_
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
 
-#if CONFIG_DP_FLOATINGPOINT
+#if CONFIG_NF_DOUBLE_PRECISION_FP
 
     double d = stack.Arg0().NumericByRefConst().r8;
     double res = cbrt(d);
@@ -400,7 +400,7 @@ HRESULT Library_nf_native_system_math_System_Math::Ceiling___STATIC__R8__R8(CLR_
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
 
-#if CONFIG_DP_FLOATINGPOINT
+#if CONFIG_NF_DOUBLE_PRECISION_FP
 
     double d = stack.Arg0().NumericByRefConst().r8;
     double res = ceil(d);
@@ -430,7 +430,7 @@ HRESULT Library_nf_native_system_math_System_Math::Cos___STATIC__R8__R8(CLR_RT_S
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
 
-#if CONFIG_DP_FLOATINGPOINT
+#if CONFIG_NF_DOUBLE_PRECISION_FP
 
     double d = stack.Arg0().NumericByRefConst().r8;
     double res = cos(d);
@@ -460,7 +460,7 @@ HRESULT Library_nf_native_system_math_System_Math::Cosh___STATIC__R8__R8(CLR_RT_
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
 
-#if CONFIG_DP_FLOATINGPOINT
+#if CONFIG_NF_DOUBLE_PRECISION_FP
 
     double d = stack.Arg0().NumericByRefConst().r8;
     double res = cosh(d);
@@ -490,7 +490,7 @@ HRESULT Library_nf_native_system_math_System_Math::IEEERemainder___STATIC__R8__R
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
 
-#if CONFIG_DP_FLOATINGPOINT
+#if CONFIG_NF_DOUBLE_PRECISION_FP
 
     double x = stack.Arg0().NumericByRefConst().r8;
     double y = stack.Arg1().NumericByRefConst().r8;
@@ -521,7 +521,7 @@ HRESULT Library_nf_native_system_math_System_Math::Exp___STATIC__R8__R8(CLR_RT_S
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
 
-#if CONFIG_DP_FLOATINGPOINT
+#if CONFIG_NF_DOUBLE_PRECISION_FP
 
     double d = stack.Arg0().NumericByRefConst().r8;
     double res = exp(d);
@@ -551,7 +551,7 @@ HRESULT Library_nf_native_system_math_System_Math::Floor___STATIC__R8__R8(CLR_RT
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
 
-#if CONFIG_DP_FLOATINGPOINT
+#if CONFIG_NF_DOUBLE_PRECISION_FP
 
     double d = stack.Arg0().NumericByRefConst().r8;
     double res = floor(d);
@@ -581,7 +581,7 @@ HRESULT Library_nf_native_system_math_System_Math::Log___STATIC__R8__R8(CLR_RT_S
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
 
-#if CONFIG_DP_FLOATINGPOINT
+#if CONFIG_NF_DOUBLE_PRECISION_FP
 
     double d = stack.Arg0().NumericByRefConst().r8;
     double res = log(d);
@@ -611,7 +611,7 @@ HRESULT Library_nf_native_system_math_System_Math::Log10___STATIC__R8__R8(CLR_RT
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
 
-#if CONFIG_DP_FLOATINGPOINT
+#if CONFIG_NF_DOUBLE_PRECISION_FP
 
     double d = stack.Arg0().NumericByRefConst().r8;
     double res = log10(d);
@@ -637,7 +637,7 @@ HRESULT Library_nf_native_system_math_System_Math::Pow___STATIC__R8__R8__R8(CLR_
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
 
-#if CONFIG_DP_FLOATINGPOINT
+#if CONFIG_NF_DOUBLE_PRECISION_FP
 
     double x = stack.Arg0().NumericByRefConst().r8;
     double y = stack.Arg1().NumericByRefConst().r8;
@@ -665,7 +665,7 @@ HRESULT Library_nf_native_system_math_System_Math::Round___STATIC__R8__R8(CLR_RT
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
 
-#if CONFIG_DP_FLOATINGPOINT
+#if CONFIG_NF_DOUBLE_PRECISION_FP
 
     double d = stack.Arg0().NumericByRefConst().r8;
     double hi = d + 0.5;
@@ -710,7 +710,7 @@ HRESULT Library_nf_native_system_math_System_Math::Sign___STATIC__I4__R8(CLR_RT_
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
 
-#if CONFIG_DP_FLOATINGPOINT
+#if CONFIG_NF_DOUBLE_PRECISION_FP
 
     double d = stack.Arg0().NumericByRefConst().r8;
     int32_t res;
@@ -763,7 +763,7 @@ HRESULT Library_nf_native_system_math_System_Math::Sin___STATIC__R8__R8(CLR_RT_S
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
 
-#if CONFIG_DP_FLOATINGPOINT
+#if CONFIG_NF_DOUBLE_PRECISION_FP
 
     double d = stack.Arg0().NumericByRefConst().r8;
     double res = sin(d);
@@ -793,7 +793,7 @@ HRESULT Library_nf_native_system_math_System_Math::Sinh___STATIC__R8__R8(CLR_RT_
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
 
-#if CONFIG_DP_FLOATINGPOINT
+#if CONFIG_NF_DOUBLE_PRECISION_FP
 
     double d = stack.Arg0().NumericByRefConst().r8;
     double res = sinh(d);
@@ -823,7 +823,7 @@ HRESULT Library_nf_native_system_math_System_Math::Sqrt___STATIC__R8__R8(CLR_RT_
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
 
-#if CONFIG_DP_FLOATINGPOINT
+#if CONFIG_NF_DOUBLE_PRECISION_FP
 
     double d = stack.Arg0().NumericByRefConst().r8;
     double res = sqrt(d);
@@ -853,7 +853,7 @@ HRESULT Library_nf_native_system_math_System_Math::Tan___STATIC__R8__R8(CLR_RT_S
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
 
-#if CONFIG_DP_FLOATINGPOINT
+#if CONFIG_NF_DOUBLE_PRECISION_FP
 
     double d = stack.Arg0().NumericByRefConst().r8;
     double res = tan(d);
@@ -883,7 +883,7 @@ HRESULT Library_nf_native_system_math_System_Math::Tanh___STATIC__R8__R8(CLR_RT_
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
 
-#if CONFIG_DP_FLOATINGPOINT
+#if CONFIG_NF_DOUBLE_PRECISION_FP
 
     double d = stack.Arg0().NumericByRefConst().r8;
     double res = tanh(d);
@@ -909,7 +909,7 @@ HRESULT Library_nf_native_system_math_System_Math::Truncate___STATIC__R8__R8(CLR
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
 
-#if CONFIG_DP_FLOATINGPOINT
+#if CONFIG_NF_DOUBLE_PRECISION_FP
 
     double d = stack.Arg0().NumericByRefConst().r8;
     double res = 0.0;

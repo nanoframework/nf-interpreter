@@ -13,7 +13,7 @@ config NF_TARGET_HAS_NANOBOOTER
     bool "Target includes nanoBooter"
     default y
 
-config DP_FLOATINGPOINT
+config NF_DOUBLE_PRECISION_FP
     bool "Double-precision floating point"
     default n
 
@@ -21,11 +21,11 @@ config NF_FEATURE_LIGHT_MATH
     bool "Light math (exclude complex math functions)"
     default n
 
-config SUPPORT_ANY_BASE_CONVERSION
+config NF_SUPPORT_ANY_BASE_CONVERSION
     bool "String conversion to any numeric base"
     default n
 
-config USE_RNG
+config NF_FEATURE_USE_RNG
     bool "Hardware true random number generator"
     default y
 

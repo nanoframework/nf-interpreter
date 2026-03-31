@@ -842,7 +842,7 @@ macro(nf_add_idf_as_library)
     endif()
 
     option(HAL_USE_THREAD_OPTION "option to enable OpenThread support")
-    option(THREAD_DEVICE_TYPE "option to specify OpenThread device type (FTD or MTD")
+    option(ESP32_THREAD_DEVICE_TYPE "option to specify OpenThread device type (FTD or MTD")
 
     if(HAL_USE_THREAD_OPTION)
         message(DEBUG "Reading SDK config from '${SDKCONFIG_DEFAULTS_FILE}' to set Thread options")
@@ -863,16 +863,16 @@ macro(nf_add_idf_as_library)
         string(APPEND SDKCONFIG_DEFAULT_CONTENTS "CONFIG_MBEDTLS_KEY_EXCHANGE_ECJPAKE=y\n")
         string(APPEND SDKCONFIG_DEFAULT_CONTENTS "CONFIG_MBEDTLS_ECJPAKE_C=y\n")
         
-        # THREAD_DEVICE_TYPE
-        set(THREAD_DEVICE_TYPE_SUPPORTED "FTD" "MTD" CACHE INTERNAL "supported THREAD device types")
-        list(FIND THREAD_DEVICE_TYPE_SUPPORTED ${THREAD_DEVICE_TYPE} THREAD_DEVICE_TYPE_INDEX)
+        # ESP32_THREAD_DEVICE_TYPE
+        set(ESP32_THREAD_DEVICE_TYPE_SUPPORTED "FTD" "MTD" CACHE INTERNAL "supported THREAD device types")
+        list(FIND ESP32_THREAD_DEVICE_TYPE_SUPPORTED ${ESP32_THREAD_DEVICE_TYPE} ESP32_THREAD_DEVICE_TYPE_INDEX)
 
-        if(THREAD_DEVICE_TYPE_INDEX EQUAL -1)
+        if(ESP32_THREAD_DEVICE_TYPE_INDEX EQUAL -1)
             # Default FTD if not specified
-            set(THREAD_DEVICE_TYPE_INDEX 0)
+            set(ESP32_THREAD_DEVICE_TYPE_INDEX 0)
         endif()
         
-        if (${THREAD_DEVICE_TYPE_INDEX} EQUAL 0)
+        if (${ESP32_THREAD_DEVICE_TYPE_INDEX} EQUAL 0)
             string(APPEND SDKCONFIG_DEFAULT_CONTENTS "CONFIG_OPENTHREAD_FTD=y\n")
             message(STATUS "OpenThread configured as full thread device (FTD)")
         else()

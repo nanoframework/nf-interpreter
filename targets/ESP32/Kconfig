@@ -35,7 +35,7 @@ config ESP32_XTAL_FREQ_26
     bool "26 MHz crystal (instead of 40 MHz default)"
     default n
 
-config THREAD_DEVICE_TYPE
+config ESP32_THREAD_DEVICE_TYPE
     string "Thread device type"
     default ""
     depends on API_NANOFRAMEWORK_NETWORKING_THREAD

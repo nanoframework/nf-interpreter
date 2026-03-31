@@ -24,7 +24,7 @@ HRESULT Library_corlib_native_System_Convert::
     char *endptr;
     int64_t result = 0;
 
-#if CONFIG_SUPPORT_ANY_BASE_CONVERSION
+#if CONFIG_NF_SUPPORT_ANY_BASE_CONVERSION
     // convert via strtoll / strtoull
     int error_code;
 #else
@@ -60,7 +60,7 @@ HRESULT Library_corlib_native_System_Convert::
     }
     endptr = NULL;
 
-#if CONFIG_SUPPORT_ANY_BASE_CONVERSION
+#if CONFIG_NF_SUPPORT_ANY_BASE_CONVERSION
     // support for conversion from any base
 
     if (*str == '-')
@@ -246,7 +246,7 @@ HRESULT Library_corlib_native_System_Convert::
 
     stack.SetResult_I8(result);
 
-#endif // CONFIG_SUPPORT_ANY_BASE_CONVERSION
+#endif // CONFIG_NF_SUPPORT_ANY_BASE_CONVERSION
 
     NANOCLR_CLEANUP();
 
@@ -273,7 +273,7 @@ HRESULT Library_corlib_native_System_Convert::NativeToDouble___STATIC__R8__STRIN
 
     double returnValue = 0;
 
-#if CONFIG_SUPPORT_ANY_BASE_CONVERSION
+#if CONFIG_NF_SUPPORT_ANY_BASE_CONVERSION
 
     char *endptr;
 
@@ -307,7 +307,7 @@ HRESULT Library_corlib_native_System_Convert::NativeToDouble___STATIC__R8__STRIN
         str++;
     }
 
-#if CONFIG_SUPPORT_ANY_BASE_CONVERSION
+#if CONFIG_NF_SUPPORT_ANY_BASE_CONVERSION
     // support for conversion from any base
 
     endptr = str;
@@ -498,7 +498,7 @@ HRESULT Library_corlib_native_System_Convert::NativeToDouble___STATIC__R8__STRIN
 
     stack.SetResult_R8(returnValue);
 
-#endif // CONFIG_SUPPORT_ANY_BASE_CONVERSION
+#endif // CONFIG_NF_SUPPORT_ANY_BASE_CONVERSION
 
     NANOCLR_CLEANUP();
 
@@ -589,7 +589,7 @@ HRESULT Library_corlib_native_System_Convert::ToBase64String___STATIC__STRING__S
 {
     NANOCLR_HEADER();
 
-#if CONFIG_SUPPORT_ANY_BASE_CONVERSION
+#if CONFIG_NF_SUPPORT_ANY_BASE_CONVERSION
 
     size_t outputLength;
     unsigned char *outArray = NULL;
@@ -714,7 +714,7 @@ HRESULT Library_corlib_native_System_Convert::FromBase64String___STATIC__SZARRAY
 {
     NANOCLR_HEADER();
 
-#if CONFIG_SUPPORT_ANY_BASE_CONVERSION
+#if CONFIG_NF_SUPPORT_ANY_BASE_CONVERSION
 
     CLR_RT_HeapBlock_String *inString = NULL;
     size_t outputLength;

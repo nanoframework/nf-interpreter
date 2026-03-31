@@ -5,7 +5,7 @@
 
 menu "Wire Protocol Transport"
 
-choice WP_TRANSPORT
+choice NF_WP_TRANSPORT
     prompt "Wire Protocol transport"
     default HAL_WP_USE_SERIAL
 

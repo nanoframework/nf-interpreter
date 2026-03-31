@@ -10,7 +10,7 @@ config CHIBIOS_CONTRIB_REQUIRED
     bool "ChibiOS Community contributions repository required"
     default n
 
-config SWO_OUTPUT
+config CHIBIOS_SWO_OUTPUT
     bool "ARM Cortex-M Single Wire Output (SWO)"
     default n
 

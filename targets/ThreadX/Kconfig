@@ -14,7 +14,7 @@ config CHIBIOS_HAL_REQUIRED
     bool "ChibiOS HAL required (for STM32 WiFi targets)"
     default n
 
-config WIFI_DRIVER
+config THREADX_WIFI_DRIVER
     string "WiFi driver name"
     default ""
 

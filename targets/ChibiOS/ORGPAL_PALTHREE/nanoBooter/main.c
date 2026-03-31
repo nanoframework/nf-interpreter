@@ -37,7 +37,7 @@ int main(void)
     palClearLine(LINE_LCD_ENABLE);
 
 // init SWO as soon as possible to make it available to output ASAP
-#if CONFIG_SWO_OUTPUT
+#if CONFIG_CHIBIOS_SWO_OUTPUT
     SwoInit();
 #endif
 

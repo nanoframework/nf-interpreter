@@ -24,24 +24,24 @@ function(nf_set_linker_file target linker_file_name)
 
 endfunction()
 
-# sets network connectivity options according to the NetX driver choosen in build options WIFI_DRIVER and ETHERNET_DRIVER
+# sets network connectivity options according to the NetX driver choosen in build options THREADX_WIFI_DRIVER and ETHERNET_DRIVER
 macro(nf_set_network_connectivity_options)
 
     ############################
-    if(WIFI_DRIVER)
+    if(THREADX_WIFI_DRIVER)
 
         # list of supported Wi-Fi drivers
-        set(WIFI_DRIVER_SUPPORTED_OPTIONS "ISM43362")
+        set(THREADX_WIFI_DRIVER_SUPPORTED_OPTIONS "ISM43362")
         # try to find the driver in the list
-        list(FIND WIFI_DRIVER_SUPPORTED_OPTIONS ${WIFI_DRIVER} WIFI_DRIVER_NAME_INDEX)
+        list(FIND THREADX_WIFI_DRIVER_SUPPORTED_OPTIONS ${THREADX_WIFI_DRIVER} THREADX_WIFI_DRIVER_NAME_INDEX)
 
-        if(WIFI_DRIVER_NAME_INDEX EQUAL -1)
+        if(THREADX_WIFI_DRIVER_NAME_INDEX EQUAL -1)
             # driver is NOT supported 
-            message(FATAL_ERROR "\n\nSorry but '${WIFI_DRIVER}' provided in WIFI_DRIVER build option is not supported at this time...\nYou can wait for it to be added, or you might want to contribute by working on a PR for it.\n\n")
-        elseif(WIFI_DRIVER_NAME_INDEX EQUAL 0)
+            message(FATAL_ERROR "\n\nSorry but '${THREADX_WIFI_DRIVER}' provided in THREADX_WIFI_DRIVER build option is not supported at this time...\nYou can wait for it to be added, or you might want to contribute by working on a PR for it.\n\n")
+        elseif(THREADX_WIFI_DRIVER_NAME_INDEX EQUAL 0)
             set(TARGET_HAS_WIFI_SUPPORT TRUE BOOL)
         else()
-            message(FATAL_ERROR "invalid index for WIFI_DRIVER_NAME_INDEX")
+            message(FATAL_ERROR "invalid index for THREADX_WIFI_DRIVER_NAME_INDEX")
         endif()
 
     endif()

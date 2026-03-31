@@ -178,7 +178,7 @@ endif()
 
 #################################################################################
 # double-precision floating point support
-if(DP_FLOATINGPOINT)
+if(NF_DOUBLE_PRECISION_FP)
     message(STATUS "Double-precision floating point is effective")
 else()
     message(STATUS "Single-precision floating point is effective")
@@ -194,7 +194,7 @@ endif()
 
 ###################################################################################
 # string conversion to any base support
-if(SUPPORT_ANY_BASE_CONVERSION)
+if(NF_SUPPORT_ANY_BASE_CONVERSION)
     message(STATUS "String conversion to value on any base is effective")
 else()
     message(STATUS "String conversion to value from base 10 and 16 (partial) is effective")
@@ -202,7 +202,7 @@ endif()
 
 #################################################################
 # hardware true random number generation
-if(USE_RNG)
+if(NF_FEATURE_USE_RNG)
     message(STATUS "Random Number Generation by target MCU is activated")
 else()
     message(STATUS "Random Number Generation by target MCU **IS NOT** activated")
@@ -339,7 +339,7 @@ if(RTOS_CHIBIOS_CHECK)
 
     #################################################################
     # ARM Cortex-M Single Wire Output (SWO)
-    if(SWO_OUTPUT)
+    if(CHIBIOS_SWO_OUTPUT)
         set(SWO_OUTPUT_OPTION TRUE CACHE INTERNAL "Single Wire Output Option")
         message(STATUS "Single Wire Output (SWO) enabled")
     else()
@@ -433,7 +433,7 @@ if(API_System.Net)
         set(USE_SECURITY_MBEDTLS_OPTION TRUE CACHE INTERNAL "NF security MBEDTLS")
     endif()
 
-    if(RTOS_THREADX_CHECK AND CHIBIOS_HAL_REQUIRED AND "${WIFI_DRIVER}" STREQUAL "ISM43362")
+    if(RTOS_THREADX_CHECK AND CHIBIOS_HAL_REQUIRED AND "${THREADX_WIFI_DRIVER}" STREQUAL "ISM43362")
         set(API_Windows.Devices.Spi ON CACHE INTERNAL "SPI required for ISM43362 & ChibiOS HAL")
         set(API_System.Device.Spi ON CACHE INTERNAL "SPI required for ISM43362 & ChibiOS HAL")
     endif()
@@ -569,8 +569,8 @@ if(USE_NETWORKING_OPTION)
         message(STATUS "Support for ENC28j60 network driver enabled")
     endif()
 
-    if(WIFI_DRIVER)
-        message(STATUS "Using '${WIFI_DRIVER}' driver for Wi-Fi")
+    if(THREADX_WIFI_DRIVER)
+        message(STATUS "Using '${THREADX_WIFI_DRIVER}' driver for Wi-Fi")
     endif()
 
     if(ETHERNET_DRIVER)

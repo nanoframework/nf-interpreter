@@ -6,7 +6,7 @@
 menu "TI SimpleLink Platform"
     depends on RTOS_TI_SIMPLELINK
 
-config RADIO_FREQUENCY
+config TI_SIMPLELINK_RADIO_FREQ_MHZ
     int "Radio frequency (868 or 915 MHz)"
     default 915
     help
