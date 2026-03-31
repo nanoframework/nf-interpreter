@@ -13,7 +13,7 @@ config NF_TARGET_HAS_NANOBOOTER
     bool "Target includes nanoBooter"
     default y
 
-config NF_DOUBLE_PRECISION_FP
+config NF_ENABLE_DOUBLE_PRECISION_FP
     bool "Double-precision floating point"
     default n
 

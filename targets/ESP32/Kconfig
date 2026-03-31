@@ -42,11 +42,11 @@ config ESP32_THREAD_DEVICE_TYPE
     help
       Thread device type identifier (e.g., "FTD" for Full Thread Device).
 
-config ESP32_CONFIG_PHY_CLOCK_MODE
+config ESP32_ETHERNET_PHY_CLOCK_MODE
     string "Ethernet PHY clock mode override"
     default ""
 
-config ESP32_CONFIG_PIN_PHY_POWER
+config ESP32_ETHERNET_PHY_POWER_PIN
     string "Ethernet PHY power pin override"
     default ""
 

@@ -178,7 +178,7 @@ endif()
 
 #################################################################################
 # double-precision floating point support
-if(NF_DOUBLE_PRECISION_FP)
+if(NF_ENABLE_DOUBLE_PRECISION_FP)
     message(STATUS "Double-precision floating point is effective")
 else()
     message(STATUS "Single-precision floating point is effective")
@@ -356,7 +356,7 @@ endif()
 # Wire Protocol options
 
 # reports Wire Protocol CRC32 implementation
-if(NF_WP_IMPLEMENTS_CRC32)
+if(NF_WP_ENABLE_CRC32)
     message(STATUS "Wire Protocol implements CRC32")
 else()
     message(STATUS "Wire Protocol does NOT implement CRC32")
@@ -433,7 +433,7 @@ if(API_System.Net)
         set(USE_SECURITY_MBEDTLS_OPTION TRUE CACHE INTERNAL "NF security MBEDTLS")
     endif()
 
-    if(RTOS_THREADX_CHECK AND CHIBIOS_HAL_REQUIRED AND "${THREADX_WIFI_DRIVER}" STREQUAL "ISM43362")
+    if(RTOS_THREADX_CHECK AND THREADX_CHIBIOS_HAL_REQUIRED AND "${THREADX_WIFI_DRIVER}" STREQUAL "ISM43362")
         set(API_Windows.Devices.Spi ON CACHE INTERNAL "SPI required for ISM43362 & ChibiOS HAL")
         set(API_System.Device.Spi ON CACHE INTERNAL "SPI required for ISM43362 & ChibiOS HAL")
     endif()

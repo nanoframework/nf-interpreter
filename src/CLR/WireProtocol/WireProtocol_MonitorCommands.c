@@ -33,7 +33,7 @@ int Monitor_Ping(WP_Message *message)
         cmdReply.Flags = 0;
 
         // fill in the flags
-#if CONFIG_NF_WP_IMPLEMENTS_CRC32
+#if CONFIG_NF_WP_ENABLE_CRC32
         cmdReply.Flags |= Monitor_Ping_c_Ping_WPFlag_SupportsCRC32;
 #endif
 

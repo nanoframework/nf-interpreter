@@ -81,7 +81,7 @@ macro(nf_set_compile_definitions)
     endif()
 
     # definition for platform 
-    if(CHIBIOS_HAL_REQUIRED)
+    if(THREADX_CHIBIOS_HAL_REQUIRED)
         # ChibiOS HAL community always include (nanoFramework overlay and official community contributions optionally)
         target_compile_definitions(${NFSCD_TARGET} PUBLIC -DHAL_USE_COMMUNITY)
     endif()
@@ -115,7 +115,7 @@ macro(nf_add_platform_packages)
     #     find_package(CHIBIOS_FATFS REQUIRED QUIET)
     # endif()
    
-    if(CHIBIOS_HAL_REQUIRED)
+    if(THREADX_CHIBIOS_HAL_REQUIRED)
         find_package(ChibiOS_${TARGET_SERIES_SHORT}_HAL REQUIRED QUIET)
         find_package(ChibiOSnfOverlay REQUIRED QUIET)
     endif()
@@ -303,7 +303,7 @@ macro(nf_add_platform_include_directories target)
 
     endif()
 
-    if(CHIBIOS_HAL_REQUIRED)
+    if(THREADX_CHIBIOS_HAL_REQUIRED)
         target_include_directories(${target}.elf PUBLIC
             ${CHIBIOS_HAL_INCLUDE_DIRS}
             ${ChibiOSnfOverlay_INCLUDE_DIRS}
@@ -364,7 +364,7 @@ macro(nf_add_platform_sources target)
     FetchContent_GetProperties(threadx)
     get_target_property(AZRTOS_INCLUDES azrtos::threadx INCLUDE_DIRECTORIES)
 
-    if(CHIBIOS_HAL_REQUIRED)
+    if(THREADX_CHIBIOS_HAL_REQUIRED)
         target_sources(${target}.elf PUBLIC
             ${CHIBIOS_HAL_SOURCES}
             ${ChibiOSnfOverlay_SOURCES}

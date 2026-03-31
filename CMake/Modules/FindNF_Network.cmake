@@ -151,7 +151,7 @@ if(RTOS_THREADX_CHECK)
             wifi.c
         )
 
-        if(${CHIBIOS_HAL_REQUIRED})
+        if(${THREADX_CHIBIOS_HAL_REQUIRED})
             # driver specific to ChibiOS HAL
             list(APPEND
                 NF_Network_SRCS

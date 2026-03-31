@@ -52,7 +52,7 @@ CONFIG_NF_CLR_NO_IL_INLINE=n
 # ── Wire Protocol ─────────────────────────────────────────────────────────────
 # CRC32 integrity checking on Wire Protocol packets.
 # Default: n
-CONFIG_NF_WP_IMPLEMENTS_CRC32=n
+CONFIG_NF_WP_ENABLE_CRC32=n
 
 # Wire Protocol trace flags — enable individually or use NF_WP_TRACE_ALL.
 # Default: all n

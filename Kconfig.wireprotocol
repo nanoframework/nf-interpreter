@@ -5,8 +5,8 @@
 
 menu "Wire Protocol"
 
-config NF_WP_IMPLEMENTS_CRC32
-    bool "Implement CRC32 for Wire Protocol"
+config NF_WP_ENABLE_CRC32
+    bool "Enable CRC32 for Wire Protocol"
     default n
     help
       Enable CRC32 integrity checking on Wire Protocol packets.

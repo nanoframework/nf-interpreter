@@ -22,7 +22,7 @@
 
 // ── Build options ────────────────────────────────────────────────────────────
 // Windows uses native double-precision floating point.
-#define CONFIG_NF_DOUBLE_PRECISION_FP 1
+#define CONFIG_NF_ENABLE_DOUBLE_PRECISION_FP 1
 // Full math library — do not exclude complex math functions.
 #define CONFIG_NF_FEATURE_LIGHT_MATH 0
 // String conversion to any numeric base.

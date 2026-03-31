@@ -5,7 +5,7 @@
 
 #include <network_options.h>
 
-#if defined(CHIBIOS_HAL_REQUIRED)
+#if defined(THREADX_CHIBIOS_HAL_REQUIRED)
 #include "es_wifi_io_chibios.h"
 #else
 #include "es_wifi_io_stm.h"

@@ -387,7 +387,7 @@ bool CLR_DBG_Debugger::Monitor_Ping(WP_Message *msg)
         // now fill in the flags
         cmdReply.Flags = CLR_EE_DBG_IS(StateProgramExited) != 0 ? Monitor_Ping_c_Ping_DbgFlag_AppExit : 0;
 
-#if CONFIG_NF_WP_IMPLEMENTS_CRC32
+#if CONFIG_NF_WP_ENABLE_CRC32
         cmdReply.Flags |= Monitor_Ping_c_Ping_WPFlag_SupportsCRC32;
 #endif
 

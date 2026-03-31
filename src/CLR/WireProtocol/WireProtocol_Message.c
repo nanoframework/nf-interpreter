@@ -189,7 +189,7 @@ void WP_Message_PrepareRequest(
 {
     memcpy(&message->m_header.m_signature, (uint8_t *)MARKER_PACKET_V1, sizeof(message->m_header.m_signature));
 
-#if CONFIG_NF_WP_IMPLEMENTS_CRC32
+#if CONFIG_NF_WP_ENABLE_CRC32
     message->m_header.m_crcData = SUPPORT_ComputeCRC(payload, payloadSize, 0);
 #else
     message->m_header.m_crcData = 0;
@@ -205,7 +205,7 @@ void WP_Message_PrepareRequest(
     // The CRC for the header is computed setting the CRC field to zero and then running the CRC algorithm.
     //
     message->m_header.m_crcHeader = 0;
-#if CONFIG_NF_WP_IMPLEMENTS_CRC32
+#if CONFIG_NF_WP_ENABLE_CRC32
     message->m_header.m_crcHeader = SUPPORT_ComputeCRC((uint8_t *)&message->m_header, sizeof(message->m_header), 0);
 #endif
 }
@@ -219,7 +219,7 @@ void WP_Message_PrepareReply(
 {
     memcpy(&message->m_header.m_signature, (uint8_t *)MARKER_PACKET_V1, sizeof(message->m_header.m_signature));
 
-#if CONFIG_NF_WP_IMPLEMENTS_CRC32
+#if CONFIG_NF_WP_ENABLE_CRC32
     message->m_header.m_crcData = SUPPORT_ComputeCRC(payload, payloadSize, 0);
 #else
     message->m_header.m_crcData = 0;
@@ -235,14 +235,14 @@ void WP_Message_PrepareReply(
     // The CRC for the header is computed setting the CRC field to zero and then running the CRC algorithm.
     //
     message->m_header.m_crcHeader = 0;
-#if CONFIG_NF_WP_IMPLEMENTS_CRC32
+#if CONFIG_NF_WP_ENABLE_CRC32
     message->m_header.m_crcHeader = SUPPORT_ComputeCRC((uint8_t *)&message->m_header, sizeof(message->m_header), 0);
 #endif
 }
 
 uint8_t WP_Message_VerifyHeader(WP_Message *message)
 {
-#if CONFIG_NF_WP_IMPLEMENTS_CRC32
+#if CONFIG_NF_WP_ENABLE_CRC32
 
     uint32_t incommingCrc = message->m_header.m_crcHeader;
     message->m_header.m_crcHeader = 0;
@@ -282,7 +282,7 @@ uint8_t WP_Message_VerifyPayload(WP_Message *message)
         return false;
     }
 
-#if CONFIG_NF_WP_IMPLEMENTS_CRC32
+#if CONFIG_NF_WP_ENABLE_CRC32
 
     uint32_t computedCrc = SUPPORT_ComputeCRC(message->m_payload, message->m_header.m_size, 0);
     if (computedCrc != message->m_header.m_crcData)

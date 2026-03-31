@@ -51,7 +51,7 @@ endforeach()
 list(REMOVE_DUPLICATES STM32F7_CubePackage_INCLUDE_DIRS)
 
 # remove duplicated defines that clash with ChibiOS defines (when used along with)
-if(${CHIBIOS_HAL_REQUIRED})
+if(${THREADX_CHIBIOS_HAL_REQUIRED})
 
     set(HAL_INCLUDE_FILE ${stm32f7_hal_driver_SOURCE_DIR}/Inc/Legacy/stm32_hal_legacy.h)
 
