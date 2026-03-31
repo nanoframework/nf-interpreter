@@ -6,7 +6,7 @@
 # 2. ESP_PATCH_VER: the GCC toolchain patch version installed by IDF.
 #    After running install.sh in the new IDF, check the toolchain version at:
 #      ~/.espressif/tools/xtensa-esp-elf/ and ~/.espressif/tools/riscv32-esp-elf/
-#    Look for the folder name (e.g. esp-14.2.0_20251107) and update ESP_PATCH_VER.
+#    Look for the folder name (e.g. esp-14.2.0_20260121) and update ESP_PATCH_VER.
 # 3. Python venv path: IDF creates a Python virtual environment whose name
 #    includes the IDF major.minor version (e.g. idf5.5_py3.11_env).
 #    Update the PATH entry for the venv when the IDF major/minor changes.
@@ -155,7 +155,7 @@ ENV IDF_PATH=/sources/esp-idf
 # >>> IDF MIGRATION: ESP_PATCH_VER is the GCC toolchain version installed by IDF.
 #     After install.sh completes, check ~/.espressif/tools/xtensa-esp-elf/ for
 #     the actual folder name and update this value accordingly. <<<
-ENV ESP_PATCH_VER=esp-14.2.0_20251107
+ENV ESP_PATCH_VER=esp-14.2.0_20260121
 # This is now taking care in the following line
 # RUN python -m pip install -r $IDF_PATH/requirements.txt
 RUN $IDF_PATH/install.sh
