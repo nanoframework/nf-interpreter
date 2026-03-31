@@ -332,7 +332,7 @@ if(EXISTS ${PROJECT_SOURCE_DIR}/targets/ThreadX/ST/${TARGET_BOARD})
     # set target base location
     set(TARGET_BASE_LOCATION ${PROJECT_SOURCE_DIR}/targets/ThreadX/ST/${TARGET_BOARD})
 
-    if(CHIBIOS_HAL_REQUIRED)
+    if(THREADX_CHIBIOS_HAL_REQUIRED)
         set(CHIBIOS_BOARD_DEFINITIONS_PATH ${PROJECT_SOURCE_DIR}/targets/ThreadX/ST/${TARGET_BOARD} CACHE INTERNAL "Path of board definition files")
     endif()
 
@@ -422,7 +422,7 @@ else()
         # set target base location
         set(TARGET_BASE_LOCATION ${PROJECT_SOURCE_DIR}/targets-community/ThreadX/ST/${TARGET_BOARD})
 
-        if(CHIBIOS_HAL_REQUIRED)
+        if(THREADX_CHIBIOS_HAL_REQUIRED)
             set(CHIBIOS_BOARD_DEFINITIONS_PATH ${PROJECT_SOURCE_DIR}/targets-community/ThreadX/ST/${TARGET_BOARD} CACHE INTERNAL "Path of board definition files")
         endif()
 

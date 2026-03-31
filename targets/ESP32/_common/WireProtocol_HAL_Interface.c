@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (c) .NET Foundation and Contributors
 // See LICENSE file in the project root for full license information.
 //
@@ -16,12 +16,12 @@
 #include <tinyusb_cdc_acm.h>
 #endif
 
-////////////////////////////////////////////////////////////////////
-// Baudrate for the serial port                                   //
-// Can be overriden by the build parameter TARGET_SERIAL_BAUDRATE //
-////////////////////////////////////////////////////////////////////
-#ifndef TARGET_SERIAL_BAUDRATE
-#define TARGET_SERIAL_BAUDRATE 921600
+///////////////////////////////////////////////////////////////////////////
+// Baudrate for the serial port                                          //
+// Can be overriden by the build parameter CONFIG_TARGET_SERIAL_BAUDRATE //
+///////////////////////////////////////////////////////////////////////////
+#ifndef CONFIG_TARGET_SERIAL_BAUDRATE
+#define CONFIG_TARGET_SERIAL_BAUDRATE 921600
 #endif
 
 #ifdef CONFIG_IDF_TARGET_ESP32
@@ -128,7 +128,7 @@ static uart_port_t ESP32_WP_UART = UART_NUM_0;
 #define ESP32_WP_TX_PIN UART_NUM_0_TXD_DIRECT_GPIO_NUM
 #endif
 
-#if CONFIG_SOC_USB_SERIAL_JTAG_SUPPORTED && HAL_WP_USE_USB_CDC
+#if CONFIG_SOC_USB_SERIAL_JTAG_SUPPORTED && CONFIG_NF_WP_TRANSPORT_USB_CDC
 
 #include <hal/usb_serial_jtag_ll.h>
 
@@ -357,7 +357,7 @@ static bool WP_Initialise(COM_HANDLE port)
     // ESP_ERROR_CHECK(uart_driver_delete(ESP32_WP_UART));
 
     uart_config_t uart_config = {// baudrate
-                                 .baud_rate = TARGET_SERIAL_BAUDRATE,
+                                 .baud_rate = CONFIG_TARGET_SERIAL_BAUDRATE,
                                  // baudrate
                                  .data_bits = UART_DATA_8_BITS,
                                  // parity mode

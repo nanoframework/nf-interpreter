@@ -1,4 +1,4 @@
-﻿//
+//
 // Copyright (c) .NET Foundation and Contributors
 // See LICENSE file in the project root for full license information.
 //
@@ -6,7 +6,7 @@
 
 // clang-format off
 
-#if (NANOCLR_REFLECTION == TRUE)
+#if CONFIG_NF_FEATURE_SUPPORT_REFLECTION
 
 static const CLR_RT_MethodHandler method_lookup[] =
 {
@@ -815,7 +815,7 @@ static const CLR_RT_MethodHandler method_lookup[] =
     Library_corlib_native_System_WeakReference::_ctor___VOID__OBJECT,
 };
 
-#elif (NANOCLR_REFLECTION == FALSE)
+#elif !CONFIG_NF_FEATURE_SUPPORT_REFLECTION
 
 static const CLR_RT_MethodHandler method_lookup[] =
 {
@@ -1488,23 +1488,23 @@ static const CLR_RT_MethodHandler method_lookup[] =
 };
 
 #else
-#error "NANOCLR_REFLECTION has to be define either TRUE or FALSE. Check the build options."
+#error "CONFIG_NF_FEATURE_SUPPORT_REFLECTION has to be define either TRUE or FALSE. Check the build options."
 #endif
 
 const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_mscorlib =
 {
     "mscorlib",
 
-#if (NANOCLR_REFLECTION == TRUE)
+#if CONFIG_NF_FEATURE_SUPPORT_REFLECTION
 
     0x1549C856,
 
-#elif (NANOCLR_REFLECTION == FALSE)
+#elif !CONFIG_NF_FEATURE_SUPPORT_REFLECTION
 
     0xF0208DC0,
 
 #else
-#error "NANOCLR_REFLECTION has to be define either TRUE or FALSE. Check the build options."
+#error "CONFIG_NF_FEATURE_SUPPORT_REFLECTION has to be define either TRUE or FALSE. Check the build options."
 #endif
 
     method_lookup,

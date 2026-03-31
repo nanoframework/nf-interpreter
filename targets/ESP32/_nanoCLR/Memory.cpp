@@ -37,7 +37,7 @@ static const char *TAG = "Memory";
 #define THREAD_EXTRA_IDF_MEMORY_RESERVE (20 * 1024)
 
 // Space to leave free in internal RAM for allocation by IDF malloc
-#define INTERNAL_RAM_LEAVE_FREE_FOR_ALLOCATION (ESP32_RESERVED_RAM_FOR_IDF_ALLOCATION * 1024)
+#define INTERNAL_RAM_LEAVE_FREE_FOR_ALLOCATION (ESP32_RESERVE_IRAM_IDF_ALLOCATION_KB * 1024)
 
 //////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////
@@ -131,7 +131,7 @@ void HeapLocation(unsigned char *&baseAddress, unsigned int &sizeInBytes)
             largestFreeBlock = spiramMaxSize;
 
             // get heap size to allocate
-            managedHeapSize = spiramMaxSize - ESP32_SPIRAM_FOR_IDF_ALLOCATION;
+            managedHeapSize = spiramMaxSize - ESP32_RESERVE_SPIRAM_IDF_ALLOCATION_BYTES;
 
             ESP_LOGI(TAG, "Allocating managed heap from SPIRAM");
         }
@@ -148,7 +148,7 @@ void HeapLocation(unsigned char *&baseAddress, unsigned int &sizeInBytes)
 #endif
 
             // Calculate extra IDF memory to reserve, at least minimum memory
-            // if ESP32_RESERVED_RAM_FOR_IDF_ALLOCATION specified then use it if bigger then minIdfMemory
+            // if ESP32_RESERVE_IRAM_IDF_ALLOCATION_KB specified then use it if bigger then minIdfMemory
             size_t IdfToReserve =
                 (INTERNAL_RAM_LEAVE_FREE_FOR_ALLOCATION > 0) ? INTERNAL_RAM_LEAVE_FREE_FOR_ALLOCATION : minIdfMemory;
 

@@ -1,0 +1,21 @@
+#
+# Copyright (c) .NET Foundation and Contributors
+# See LICENSE file in the project root for full license information.
+#
+
+menu "ChibiOS Platform"
+    depends on RTOS_CHIBIOS
+
+config CHIBIOS_CONTRIB_REQUIRED
+    bool "ChibiOS Community contributions repository required"
+    default n
+
+config CHIBIOS_SWO_OUTPUT
+    bool "ARM Cortex-M Single Wire Output (SWO)"
+    default n
+
+config STM32_CUBE_PACKAGE_REQUIRED
+    bool "STM32 Cube package required"
+    default n
+
+endmenu

@@ -453,7 +453,7 @@ HRESULT NETX_SOCKETS_Driver::UpdateAdapterConfiguration(
 {
     (void)interfaceIndex;
 
-#if defined(WIFI_DRIVER_ISM43362)
+#if defined(THREADX_WIFI_DRIVER_ISM43362)
 
     (void)updateFlags;
     (void)config;

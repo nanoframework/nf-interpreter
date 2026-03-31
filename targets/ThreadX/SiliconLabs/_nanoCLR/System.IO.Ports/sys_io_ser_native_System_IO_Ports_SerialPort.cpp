@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (c) .NET Foundation and Contributors
 // See LICENSE file in the project root for full license information.
 //
@@ -18,7 +18,7 @@ NF_PAL_UART Uart2_PAL;
 #if defined(GECKO_USE_USART3) && (GECKO_USE_USART3 == TRUE)
 NF_PAL_UART Uart3_PAL;
 #endif
-#if (HAL_WP_USE_SERIAL == FALSE) && defined(GECKO_USE_USART4) && (GECKO_USE_USART4 == TRUE)
+#if (!CONFIG_NF_WP_TRANSPORT_SERIAL) && defined(GECKO_USE_USART4) && (GECKO_USE_USART4 == TRUE)
 NF_PAL_UART Uart4_PAL;
 #endif
 #if defined(GECKO_USE_USART5) && (GECKO_USE_USART5 == TRUE)
@@ -54,7 +54,7 @@ static NF_PAL_UART *GetUartPAL(uint8_t index)
             return &Uart3_PAL;
 #endif
 
-#if (HAL_WP_USE_SERIAL == FALSE) && defined(GECKO_USE_USART4) && (GECKO_USE_USART4 == TRUE)
+#if (!CONFIG_NF_WP_TRANSPORT_SERIAL) && defined(GECKO_USE_USART4) && (GECKO_USE_USART4 == TRUE)
         case 5:
             return &Uart4_PAL;
 #endif
@@ -667,7 +667,7 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeDispose___VO
             break;
 #endif
 
-#if (HAL_WP_USE_SERIAL == FALSE) && defined(GECKO_USE_USART4) && (GECKO_USE_USART4 == TRUE)
+#if (!CONFIG_NF_WP_TRANSPORT_SERIAL) && defined(GECKO_USE_USART4) && (GECKO_USE_USART4 == TRUE)
         case 5:
             UnInit_UART4();
             break;
@@ -728,7 +728,7 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeInit___VOID(
             palUart = &Uart3_PAL;
             break;
 #endif
-#if (HAL_WP_USE_SERIAL == FALSE) && defined(GECKO_USE_USART4) && (GECKO_USE_USART4 == TRUE)
+#if (!CONFIG_NF_WP_TRANSPORT_SERIAL) && defined(GECKO_USE_USART4) && (GECKO_USE_USART4 == TRUE)
         case 5:
             palUart = &Uart4_PAL;
             break;
@@ -861,7 +861,7 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeConfig___VOI
 
             break;
 #endif
-#if (HAL_WP_USE_SERIAL == FALSE) && defined(GECKO_USE_USART4) && (GECKO_USE_USART4 == TRUE)
+#if (!CONFIG_NF_WP_TRANSPORT_SERIAL) && defined(GECKO_USE_USART4) && (GECKO_USE_USART4 == TRUE)
         case 5:
             InitConfig_USART4();
             break;
@@ -1096,7 +1096,7 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::GetDeviceSelector_
         "COM4,"
 #endif
 
-#if (HAL_WP_USE_SERIAL == FALSE) && defined(GECKO_USE_USART4) && (GECKO_USE_USART4 == TRUE)
+#if (!CONFIG_NF_WP_TRANSPORT_SERIAL) && defined(GECKO_USE_USART4) && (GECKO_USE_USART4 == TRUE)
         "COM5,"
 #endif
 
@@ -1179,7 +1179,7 @@ void USART3_TX_IRQHandler(void)
 }
 #endif
 
-#if (HAL_WP_USE_SERIAL == FALSE) && defined(GECKO_USE_USART4) && (GECKO_USE_USART4 == TRUE)
+#if (!CONFIG_NF_WP_TRANSPORT_SERIAL) && defined(GECKO_USE_USART4) && (GECKO_USE_USART4 == TRUE)
 void USART4_RX_IRQHandler(void)
 {
     // Gecko USART index is 0 based

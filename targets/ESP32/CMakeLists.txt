@@ -9,40 +9,23 @@ include(binutils.ESP32)
 # Set target series in lower case
 nf_set_esp32_target_series()
 
-# Options for Wire Protocol channel
-option(HAL_WP_USE_SERIAL "option to use serial port (UART) to route Wire Protocol")
-option(HAL_WP_USE_USB_CDC "option to use USB CDC to route Wire Protocol")
+# option to reserve internal RAM for IDF allocator (kB)
+option(ESP32_RESERVE_IRAM_IDF_ALLOCATION_KB "Reserved internal RAM for IDF allocation (kB)")
 
-if(HAL_WP_USE_SERIAL)
-    message(STATUS "Wire Protocol will use serial port (UART).")
-    set(HAL_WP_USE_SERIAL_OPTION TRUE CACHE INTERNAL "set HAL_WP_USE_SERIAL")
-    set(HAL_WP_USE_USB_CDC_OPTION FALSE CACHE INTERNAL "set HAL_WP_USE_USB_CDC")
-elseif(HAL_WP_USE_USB_CDC)
-    message(STATUS "Wire Protocol will use USB CDC.")
-    set(HAL_WP_USE_SERIAL_OPTION FALSE CACHE INTERNAL "set HAL_WP_USE_SERIAL")
-    set(HAL_WP_USE_USB_CDC_OPTION TRUE CACHE INTERNAL "set HAL_WP_USE_USB_CDC")
-else()
-    set(HAL_WP_USE_SERIAL_OPTION FALSE CACHE INTERNAL "set HAL_WP_USE_SERIAL")
-    set(HAL_WP_USE_USB_CDC_OPTION FALSE CACHE INTERNAL "set HAL_WP_USE_USB_CDC")
+if(NOT ESP32_RESERVE_IRAM_IDF_ALLOCATION_KB)
+    unset(ESP32_RESERVE_IRAM_IDF_ALLOCATION_KB CACHE)
+    set(ESP32_RESERVE_IRAM_IDF_ALLOCATION_KB "0" CACHE STRING "Setting default value for ESP32_RESERVE_IRAM_IDF_ALLOCATION_KB")
 endif()
+message(STATUS "Reserved internal RAM for allocation by IDF: ${ESP32_RESERVE_IRAM_IDF_ALLOCATION_KB} kB")
 
-# option to reserve RAM for IDF allocator
-option(ESP32_RESERVED_RAM_FOR_IDF_ALLOCATION "Reserved RAM for IDF allocation (in kBytes)")
+# option to reserve SPI RAM for IDF allocator (bytes)
+option(ESP32_RESERVE_SPIRAM_IDF_ALLOCATION_BYTES "Reserved SPI RAM for IDF allocation (bytes)")
 
-if(NOT ESP32_RESERVED_RAM_FOR_IDF_ALLOCATION)
-    unset(ESP32_RESERVED_RAM_FOR_IDF_ALLOCATION CACHE)
-    set(ESP32_RESERVED_RAM_FOR_IDF_ALLOCATION "0" CACHE STRING "Setting default value for ESP32_RESERVED_RAM_FOR_IDF_ALLOCATION")
+if(NOT ESP32_RESERVE_SPIRAM_IDF_ALLOCATION_BYTES)
+    unset(ESP32_RESERVE_SPIRAM_IDF_ALLOCATION_BYTES CACHE)
+    set(ESP32_RESERVE_SPIRAM_IDF_ALLOCATION_BYTES "0" CACHE STRING "Setting default value for ESP32_RESERVE_SPIRAM_IDF_ALLOCATION_BYTES")
 endif()
-message(STATUS "Reserved RAM for allocation by IDF: ${ESP32_RESERVED_RAM_FOR_IDF_ALLOCATION}k")
-
-# option to reserve SPI RAM for IDF allocator
-option(ESP32_SPIRAM_FOR_IDF_ALLOCATION "Reserved SPI RAM for IDF allocation (in kBytes)")
-
-if(NOT ESP32_SPIRAM_FOR_IDF_ALLOCATION)
-    unset(ESP32_SPIRAM_FOR_IDF_ALLOCATION CACHE)
-    set(ESP32_SPIRAM_FOR_IDF_ALLOCATION "0" CACHE STRING "Setting default value for ESP32_SPIRAM_FOR_IDF_ALLOCATION")
-endif()
-message(STATUS "Reserved SPI RAM for allocation by IDF: ${ESP32_SPIRAM_FOR_IDF_ALLOCATION}k")
+message(STATUS "Reserved SPI RAM for allocation by IDF: ${ESP32_RESERVE_SPIRAM_IDF_ALLOCATION_BYTES} bytes")
 
 # Define PLATFORM base path
 set(BASE_PATH_FOR_PLATFORM ${CMAKE_CURRENT_SOURCE_DIR} PARENT_SCOPE)

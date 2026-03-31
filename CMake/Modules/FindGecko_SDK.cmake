@@ -1,4 +1,4 @@
-#
+﻿#
 # Copyright (c) .NET Foundation and Contributors
 # See LICENSE file in the project root for full license information.
 #
@@ -51,7 +51,7 @@ list(APPEND Gecko_SDK_INCLUDE_DIRS ${gecko_sdk_SOURCE_DIR}/platform/security/sl_
 list(APPEND Gecko_SDK_INCLUDE_DIRS ${gecko_sdk_SOURCE_DIR}/util/third_party/mbedtls/include)
 
 if(GECKO_FEATURE_USBD_HID OR 
-   HAL_WP_USE_USB_CDC OR
+   NF_WP_TRANSPORT_USB_CDC OR
    GECKO_FEATURE_USBD_WINUSB)
 
     list(APPEND Gecko_SDK_INCLUDE_DIRS ${gecko_sdk_SOURCE_DIR}/protocol/usb/inc)
@@ -165,7 +165,7 @@ if("${TARGET_SERIES}" STREQUAL "EFM32GG11")
 
     endif()
 
-    if(HAL_WP_USE_SERIAL OR HAL_USE_ONEWIRE_OPTION)
+    if(NF_WP_TRANSPORT_SERIAL OR HAL_USE_ONEWIRE_OPTION)
 
         list(APPEND gecko_sdk_srcs sl_iostream_usart.c)
         list(APPEND gecko_sdk_srcs sl_iostream_uart.c)
@@ -175,7 +175,7 @@ if("${TARGET_SERIES}" STREQUAL "EFM32GG11")
 
     endif()
 
-    if(HAL_WP_USE_USB_CDC)
+    if(NF_WP_TRANSPORT_USB_CDC)
 
         list(APPEND gecko_sdk_srcs sl_usbd_class_cdc_acm_instances.c)
         list(APPEND gecko_sdk_srcs sl_usbd_configuration_instances.c)

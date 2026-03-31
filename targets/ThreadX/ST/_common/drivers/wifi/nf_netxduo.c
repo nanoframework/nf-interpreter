@@ -35,7 +35,7 @@ NX_PACKET_POOL pool_0;
 NX_IP IpInstance;
 NX_DNS DnsInstance;
 
-#if !defined(WIFI_DRIVER_ISM43362)
+#if !defined(THREADX_WIFI_DRIVER_ISM43362)
 // ISM43362 handles DHCP
 NX_DHCP DhcpInstance;
 #endif
@@ -173,7 +173,7 @@ uint32_t NF_NetXDuo_Init(HAL_Configuration_NetworkInterface *networkConfig)
         }
     }
 
-#if !defined(WIFI_DRIVER_ISM43362)
+#if !defined(THREADX_WIFI_DRIVER_ISM43362)
 
     // Create a DHCP instance
     if (nx_dhcp_create(&DhcpInstance, &IpInstance, "My DHCP") != NX_SUCCESS)
@@ -187,7 +187,7 @@ uint32_t NF_NetXDuo_Init(HAL_Configuration_NetworkInterface *networkConfig)
        networkConfig->AutomaticDNS == 1)
     {
 
-#if !defined(WIFI_DRIVER_ISM43362)
+#if !defined(THREADX_WIFI_DRIVER_ISM43362)
 
         // Start the DHCP Client
         if (nx_dhcp_start(&DhcpInstance) != NX_SUCCESS)
@@ -206,7 +206,7 @@ uint32_t NF_NetXDuo_Init(HAL_Configuration_NetworkInterface *networkConfig)
 static uint8_t wifi_init()
 {
 
-#if defined(WIFI_DRIVER_ISM43362)
+#if defined(THREADX_WIFI_DRIVER_ISM43362)
 
     if (WIFI_Init() != WIFI_STATUS_OK)
     {

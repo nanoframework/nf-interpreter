@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (c) .NET Foundation and Contributors
 // See LICENSE file in the project root for full license information.
 //
@@ -9,14 +9,12 @@
 #include "esp32_ethernet_options.h"
 
 #define NANOCLR_GRAPHICS                      @NANOCLR_GRAPHICS@
-#define ESP32_SPIRAM_FOR_IDF_ALLOCATION       @ESP32_SPIRAM_FOR_IDF_ALLOCATION@
-#define ESP32_RESERVED_RAM_FOR_IDF_ALLOCATION @ESP32_RESERVED_RAM_FOR_IDF_ALLOCATION@
+#define ESP32_RESERVE_SPIRAM_IDF_ALLOCATION_BYTES @ESP32_RESERVE_SPIRAM_IDF_ALLOCATION_BYTES@
+#define ESP32_RESERVE_IRAM_IDF_ALLOCATION_KB      @ESP32_RESERVE_IRAM_IDF_ALLOCATION_KB@
 #define HAL_USE_SPI                           @HAL_USE_SPI_OPTION@
 #define HAL_USE_UART                          @HAL_USE_UART_OPTION@
 #define HAL_USE_SDC                           @HAL_USE_SDC_OPTION@
 #define HAL_USE_BLE                           @HAL_USE_BLE_OPTION@
-#define HAL_WP_USE_SERIAL                     @HAL_WP_USE_SERIAL_OPTION@
-#define HAL_WP_USE_USB_CDC                    @HAL_WP_USE_USB_CDC_OPTION@
 
 #define HAL_USE_THREAD                        @HAL_USE_THREAD_OPTION@
 

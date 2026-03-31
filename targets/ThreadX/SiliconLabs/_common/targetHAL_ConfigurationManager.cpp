@@ -9,7 +9,7 @@
 // #include <network_options.h>
 #include <em_device.h>
 
-#if defined(WIFI_DRIVER_ISM43362) && defined(I_AM_NANOCLR)
+#if defined(THREADX_WIFI_DRIVER_ISM43362) && defined(I_AM_NANOCLR)
 #include <wifi.h>
 #endif
 
@@ -743,7 +743,7 @@ __nfweak bool InitialiseNetworkDefaultConfig(HAL_Configuration_NetworkInterface 
     //     memset(config->MacAddress, 0xFF, sizeof(config->MacAddress));
 
     // // get default MAC
-    // #if defined(WIFI_DRIVER_ISM43362) && defined(I_AM_NANOCLR)
+    // #if defined(THREADX_WIFI_DRIVER_ISM43362) && defined(I_AM_NANOCLR)
     //     // OK to ignore the return value, no harm done if it fails
     //     WIFI_GetMAC_Address(config->MacAddress);
     // #endif
