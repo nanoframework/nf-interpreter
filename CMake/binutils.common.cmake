@@ -1,4 +1,4 @@
-#
+﻿#
 # Copyright (c) .NET Foundation and Contributors
 # See LICENSE file in the project root for full license information.
 #
@@ -67,7 +67,7 @@ macro(nf_common_compiler_definitions)
     target_compile_definitions(${NFCCF_TARGET} PUBLIC -DTRACE_MASK=${WP_TRACE_MASK})
 
     # set compiler definition regarding inclusion of trace messages and checks on CLR
-    if(NF_PLATFORM_NO_CLR_TRACE)
+    if(NF_CLR_NO_TRACE)
         target_compile_definitions(${NFCCF_TARGET} PUBLIC -DPLATFORM_NO_CLR_TRACE=1)
     endif()
 

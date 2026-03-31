@@ -1,4 +1,4 @@
-#
+﻿#
 # nanoFramework user Kconfig preferences
 #
 # HOW TO USE
@@ -39,7 +39,7 @@ CONFIG_NF_BUILD_RTM=n
 # ── CLR diagnostics ───────────────────────────────────────────────────────────
 # Disable all CLR trace messages and assertions.
 # Default: n
-CONFIG_NF_PLATFORM_NO_CLR_TRACE=n
+CONFIG_NF_CLR_NO_TRACE=n
 
 # Disable CLR IL inlining (useful when debugging managed code).
 # Default: n

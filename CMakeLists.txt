@@ -1,4 +1,4 @@
-#
+﻿#
 # Copyright (c) .NET Foundation and Contributors
 # See LICENSE file in the project root for full license information.
 #
@@ -242,7 +242,7 @@ endif()
 
 #################################################################
 # CLR trace control
-if(NF_PLATFORM_NO_CLR_TRACE)
+if(NF_CLR_NO_TRACE)
     message(STATUS "CLR has all trace messages and checks DISABLED")
 else()
     message(STATUS "CLR has all trace messages and checks enabled")

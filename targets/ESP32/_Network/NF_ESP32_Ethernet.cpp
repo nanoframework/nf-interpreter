@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (c) .NET Foundation and Contributors
 // See LICENSE file in the project root for full license information.
 //
@@ -13,20 +13,20 @@ static const char *TAG = "ETH";
 esp_eth_handle_t eth_handle = NULL;
 
 // OLIMEX ESP32-EVB Rev B, OLIMEX ESP32-Gateway, Generic Lan8270
-// ESP32_ETH_PHY_ADDR  0
-// ESP32_ETH_MDC_GPIO  23
-// ESP32_ETH_MDIO_GPIO 18
+// ESP32_ETHERNET_PHY_ADDR  0
+// ESP32_ETHERNET_MDC_GPIO  23
+// ESP32_ETHERNET_MDIO_GPIO 18
 
-// OLIMEX POE and LILYGO use ESP32_ETH_RMII_CLK_OUT_GPIO 17
-// OLIMEX POE use ESP32_ETH_PHY_RST_GPIO 12
-// OLIMEX gateway revs newer than C use ESP32_ETH_PHY_RST_GPIO 5
+// OLIMEX POE and LILYGO use ESP32_ETHERNET_RMII_CLK_OUT_GPIO 17
+// OLIMEX POE use ESP32_ETHERNET_PHY_RST_GPIO 12
+// OLIMEX gateway revs newer than C use ESP32_ETHERNET_PHY_RST_GPIO 5
 
 // default values for ESP32 boards
 // values taken from IDF CONFIG files
 
-#ifndef ESP32_ETH_PHY_ADDR
+#ifndef ESP32_ETHERNET_PHY_ADDR
 // PHY address
-#define ESP32_ETH_PHY_ADDR 0
+#define ESP32_ETHERNET_PHY_ADDR 0
 #endif
 
 #if CONFIG_IDF_TARGET_ESP32
@@ -173,11 +173,11 @@ esp_err_t NF_ESP32_InitialiseEthernet(uint8_t *pMacAdr)
     eth_mac_config_t mac_config = ETH_MAC_DEFAULT_CONFIG();
     eth_esp32_emac_config_t esp32_emac_config = NANO_ETH_ESP32_EMAC_DEFAULT_CONFIG();
     eth_phy_config_t phy_config = ETH_PHY_DEFAULT_CONFIG();
-    phy_config.phy_addr = ESP32_ETH_PHY_ADDR;
+    phy_config.phy_addr = ESP32_ETHERNET_PHY_ADDR;
 
-#ifdef ESP32_ETH_PHY_RST_GPIO
-    phy_config.reset_gpio_num = ESP32_ETH_PHY_RST_GPIO;
-    CPU_GPIO_ReservePin(ESP32_ETH_PHY_RST_GPIO, true); // Reset_N
+#ifdef ESP32_ETHERNET_PHY_RST_GPIO
+    phy_config.reset_gpio_num = ESP32_ETHERNET_PHY_RST_GPIO;
+    CPU_GPIO_ReservePin(ESP32_ETHERNET_PHY_RST_GPIO, true); // Reset_N
 #else
     phy_config.reset_gpio_num = -1;
 #endif
@@ -195,13 +195,13 @@ esp_err_t NF_ESP32_InitialiseEthernet(uint8_t *pMacAdr)
     // Internal Ethernet
 
     // Set Clock modes to override whats in sdkconfig
-#ifdef ESP32_ETH_RMII_CLK_OUT_GPIO
+#ifdef ESP32_ETHERNET_RMII_CLK_OUT_GPIO
     esp32_emac_config.clock_config.rmii.clock_mode = EMAC_CLK_OUT;
-    esp32_emac_config.clock_config.rmii.clock_gpio = (emac_rmii_clock_gpio_t)ESP32_ETH_RMII_CLK_OUT_GPIO; // always 16 or 17
-    ESP_LOGI(TAG, "Ethernet clock_config OUT gpio %d\n", ESP32_ETH_RMII_CLK_OUT_GPIO);
+    esp32_emac_config.clock_config.rmii.clock_gpio = (emac_rmii_clock_gpio_t)ESP32_ETHERNET_RMII_CLK_OUT_GPIO; // always 16 or 17
+    ESP_LOGI(TAG, "Ethernet clock_config OUT gpio %d\n", ESP32_ETHERNET_RMII_CLK_OUT_GPIO);
 
     CPU_GPIO_ReservePin(EMAC_CLK_OUT, true);          // REF_CLK OUT
-    CPU_GPIO_ReservePin(ESP32_ETH_RMII_CLK_OUT_GPIO, true); // REF_CLK OUT
+    CPU_GPIO_ReservePin(ESP32_ETHERNET_RMII_CLK_OUT_GPIO, true); // REF_CLK OUT
 #else
     ESP_LOGI(TAG, "Ethernet clock_config IN gpio %d\n", esp32_emac_config.clock_config.rmii.clock_gpio);
 
@@ -209,13 +209,13 @@ esp_err_t NF_ESP32_InitialiseEthernet(uint8_t *pMacAdr)
     CPU_GPIO_ReservePin(esp32_emac_config.clock_config.rmii.clock_gpio, true); // REF_CLK IN
 #endif
 
-// If ESP32_ETH_MDC_GPIO or ESP32_ETH_MDIO_GPIO defined then use new values
-#ifdef ESP32_ETH_MDC_GPIO
-    esp32_emac_config.smi_gpio.mdc_num = ESP32_ETH_MDC_GPIO;
+// If ESP32_ETHERNET_MDC_GPIO or ESP32_ETHERNET_MDIO_GPIO defined then use new values
+#ifdef ESP32_ETHERNET_MDC_GPIO
+    esp32_emac_config.smi_gpio.mdc_num = ESP32_ETHERNET_MDC_GPIO;
 #endif
 
-#ifdef ESP32_ETH_MDIO_GPIO
-    esp32_emac_config.smi_gpio.mdio_num = ESP32_ETH_MDIO_GPIO;
+#ifdef ESP32_ETHERNET_MDIO_GPIO
+    esp32_emac_config.smi_gpio.mdio_num = ESP32_ETHERNET_MDIO_GPIO;
 #endif
 
     ESP_LOGI(TAG, "Ethernet pins for MDC %d MDIO %d\n", esp32_emac_config.smi_gpio.mdc_num, esp32_emac_config.smi_gpio.mdio_num);

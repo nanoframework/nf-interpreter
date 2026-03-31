@@ -1,4 +1,4 @@
-#
+﻿#
 # Copyright (c) .NET Foundation and Contributors
 # See LICENSE file in the project root for full license information.
 #
@@ -31,9 +31,9 @@ macro(nf_process_esp32_ethernet_options)
             # can't find this under supported PHYs
         
             # try with SPIs
-            list(FIND ESP32_SUPPORTED_ETH_SPI ${ESP32_ETHERNET_INTERFACE} ESP32_ETH_SPI_INDEX)
+            list(FIND ESP32_SUPPORTED_ETH_SPI ${ESP32_ETHERNET_INTERFACE} ESP32_ETHERNET_SPI_INDEX)
             
-            if(ESP32_ETH_SPI_INDEX EQUAL -1)
+            if(ESP32_ETHERNET_SPI_INDEX EQUAL -1)
                 # can't find it under SPIs either
                 message(FATAL_ERROR "\n\nSomething wrong happening: can't find support for Ethernet interface ${ESP32_ETHERNET_INTERFACE}!\n\n")
             else()

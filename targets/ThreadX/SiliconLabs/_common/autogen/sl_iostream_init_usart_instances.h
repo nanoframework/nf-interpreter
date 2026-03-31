@@ -1,4 +1,4 @@
-#ifndef SL_IOSTREAM_INIT_USART_INSTANCES_H
+﻿#ifndef SL_IOSTREAM_INIT_USART_INSTANCES_H
 #define SL_IOSTREAM_INIT_USART_INSTANCES_H
 #if defined(SL_COMPONENT_CATALOG_PRESENT)
 #include "sl_component_catalog.h"
@@ -15,7 +15,7 @@ extern "C"
 {
 #endif
 
-#if CONFIG_HAL_WP_USE_SERIAL
+#if CONFIG_NF_WP_TRANSPORT_SERIAL
     extern sl_iostream_t *sl_iostream_vcom_handle;
     extern sl_iostream_uart_t *sl_iostream_uart_vcom_handle;
     extern sl_iostream_instance_info_t sl_iostream_instance_vcom_info;
@@ -31,7 +31,7 @@ extern "C"
 
 #if defined(SL_CATALOG_POWER_MANAGER_PRESENT)
 
-#if CONFIG_HAL_WP_USE_SERIAL
+#if CONFIG_NF_WP_TRANSPORT_SERIAL
     sl_power_manager_on_isr_exit_t sl_iostream_usart_vcom_sleep_on_isr_exit(void);
     bool sl_iostream_usart_vcom_is_ok_to_sleep(void);
 #endif

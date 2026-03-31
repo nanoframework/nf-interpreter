@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (c) .NET Foundation and Contributors
 // See LICENSE file in the project root for full license information.
 //
@@ -12,10 +12,10 @@
 #include <platform.h>
 #include <tx_api.h>
 
-#if CONFIG_HAL_WP_USE_SERIAL
+#if CONFIG_NF_WP_TRANSPORT_SERIAL
 #include <sl_iostream_init_instances.h>
 #include <sl_iostream_handles.h>
-#elif CONFIG_HAL_WP_USE_USB_CDC
+#elif CONFIG_NF_WP_TRANSPORT_USB_CDC
 
 #include <sl_usbd_core.h>
 #include <sl_usbd_class_cdc.h>
@@ -34,9 +34,9 @@ void WP_ReceiveBytes(uint8_t **ptr, uint32_t *size)
     uint32_t requestedSize = *size;
     sl_status_t requestResult;
 
-#if CONFIG_HAL_WP_USE_SERIAL
+#if CONFIG_NF_WP_TRANSPORT_SERIAL
     size_t bytesRead;
-#elif CONFIG_HAL_WP_USE_USB_CDC
+#elif CONFIG_NF_WP_TRANSPORT_USB_CDC
     bool conn = false;
     uint32_t bytesRead;
 #endif
@@ -44,7 +44,7 @@ void WP_ReceiveBytes(uint8_t **ptr, uint32_t *size)
     // check for requests with 0 size
     if (*size)
     {
-#if CONFIG_HAL_WP_USE_USB_CDC
+#if CONFIG_NF_WP_TRANSPORT_USB_CDC
         // check if device is connected
         sl_usbd_cdc_acm_is_enabled(sl_usbd_cdc_acm_acm0_number, &conn);
 
@@ -55,10 +55,10 @@ void WP_ReceiveBytes(uint8_t **ptr, uint32_t *size)
         }
 #endif
 
-#if CONFIG_HAL_WP_USE_SERIAL
+#if CONFIG_NF_WP_TRANSPORT_SERIAL
         // blocking receive as SL API does not support non-blocking
         requestResult = sl_iostream_read(sl_iostream_vcom_handle, *ptr, requestedSize, &bytesRead);
-#elif CONFIG_HAL_WP_USE_USB_CDC
+#elif CONFIG_NF_WP_TRANSPORT_USB_CDC
         requestResult = sl_usbd_cdc_acm_read(sl_usbd_cdc_acm_acm0_number, *ptr, requestedSize, 200, &bytesRead);
 #endif
 
@@ -66,7 +66,7 @@ void WP_ReceiveBytes(uint8_t **ptr, uint32_t *size)
         // avoid flooding the trace.
         TRACE_LIMIT(TRACE_VERBOSE, 100, "RXMSG: Expecting %d bytes, received %d.\n", requestedSize, read);
 
-#if CONFIG_HAL_WP_USE_SERIAL
+#if CONFIG_NF_WP_TRANSPORT_SERIAL
         if (requestResult == SL_STATUS_EMPTY)
         {
             // hang here for a bit
@@ -87,14 +87,14 @@ void WP_ReceiveBytes(uint8_t **ptr, uint32_t *size)
 
 uint8_t WP_TransmitMessage(WP_Message *message)
 {
-#if CONFIG_HAL_WP_USE_USB_CDC
+#if CONFIG_NF_WP_TRANSPORT_USB_CDC
     bool conn = false;
     uint32_t dummy = 0;
 #endif
 
     TRACE_WP_HEADER(WP_TXMSG, message);
 
-#if CONFIG_HAL_WP_USE_USB_CDC
+#if CONFIG_NF_WP_TRANSPORT_USB_CDC
     // check if device is connected
     sl_usbd_cdc_acm_is_enabled(sl_usbd_cdc_acm_acm0_number, &conn);
 
@@ -105,11 +105,11 @@ uint8_t WP_TransmitMessage(WP_Message *message)
     }
 #endif
 
-#if CONFIG_HAL_WP_USE_SERIAL
+#if CONFIG_NF_WP_TRANSPORT_SERIAL
     // non-blocking transmit
     if (sl_iostream_write(sl_iostream_vcom_handle, (uint8_t *)&message->m_header, sizeof(message->m_header)) !=
         SL_STATUS_OK)
-#elif CONFIG_HAL_WP_USE_USB_CDC
+#elif CONFIG_NF_WP_TRANSPORT_USB_CDC
     if (sl_usbd_cdc_acm_write(
             sl_usbd_cdc_acm_acm0_number,
             (uint8_t *)&message->m_header,
@@ -125,10 +125,10 @@ uint8_t WP_TransmitMessage(WP_Message *message)
     // if there is anything on the payload send it to the output stream
     if (message->m_header.m_size && message->m_payload)
     {
-#if CONFIG_HAL_WP_USE_SERIAL
+#if CONFIG_NF_WP_TRANSPORT_SERIAL
         // non-blocking transmit
         if (sl_iostream_write(sl_iostream_vcom_handle, message->m_payload, message->m_header.m_size) != SL_STATUS_OK)
-#elif CONFIG_HAL_WP_USE_USB_CDC
+#elif CONFIG_NF_WP_TRANSPORT_USB_CDC
         if (sl_usbd_cdc_acm_write(
                 sl_usbd_cdc_acm_acm0_number,
                 message->m_payload,

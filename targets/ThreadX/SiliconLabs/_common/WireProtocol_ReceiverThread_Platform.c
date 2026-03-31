@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (c) .NET Foundation and Contributors
 // See LICENSE file in the project root for full license information.
 //
@@ -21,7 +21,7 @@ __attribute__((noreturn)) void ReceiverThread_entry(uint32_t parameter)
 {
     (void)parameter;
 
-#if CONFIG_HAL_WP_USE_USB_CDC
+#if CONFIG_NF_WP_TRANSPORT_USB_CDC
 
 #if !defined(BUILD_RTM)
     sl_status_t status = SL_STATUS_OK;
@@ -40,7 +40,7 @@ __attribute__((noreturn)) void ReceiverThread_entry(uint32_t parameter)
     while (1)
     {
 
-#if CONFIG_HAL_WP_USE_USB_CDC
+#if CONFIG_NF_WP_TRANSPORT_USB_CDC
 
         // Wait until device is in configured state
 #if !defined(BUILD_RTM)

@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (c) .NET Foundation and Contributors
 // See LICENSE file in the project root for full license information.
 //
@@ -128,7 +128,7 @@ static uart_port_t ESP32_WP_UART = UART_NUM_0;
 #define ESP32_WP_TX_PIN UART_NUM_0_TXD_DIRECT_GPIO_NUM
 #endif
 
-#if CONFIG_SOC_USB_SERIAL_JTAG_SUPPORTED && CONFIG_HAL_WP_USE_USB_CDC
+#if CONFIG_SOC_USB_SERIAL_JTAG_SUPPORTED && CONFIG_NF_WP_TRANSPORT_USB_CDC
 
 #include <hal/usb_serial_jtag_ll.h>
 

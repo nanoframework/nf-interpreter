@@ -1,4 +1,4 @@
-#
+﻿#
 # Copyright (c) .NET Foundation and Contributors
 # See LICENSE file in the project root for full license information.
 #
@@ -33,7 +33,7 @@ config NF_SECURITY_MBEDTLS
     bool "Mbed TLS support"
     default y
 
-config NF_PLATFORM_NO_CLR_TRACE
+config NF_CLR_NO_TRACE
     bool "Disable all CLR trace messages and checks"
     default n
 

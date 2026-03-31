@@ -1,4 +1,4 @@
-#
+﻿#
 # Copyright (c) .NET Foundation and Contributors
 # See LICENSE file in the project root for full license information.
 #
@@ -36,7 +36,7 @@ if (BUILD_VERBOSE)
 endif()
 
 # report Wire Protocol transport channel
-if(HAL_WP_USE_USB_CDC)
+if(NF_WP_TRANSPORT_USB_CDC)
     message(STATUS "Wire Protocol transport: USB CDC")
 else()
     message(STATUS "Wire Protocol transport: serial port (UART)")

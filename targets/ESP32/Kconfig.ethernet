@@ -1,4 +1,4 @@
-#
+﻿#
 # Copyright (c) .NET Foundation and Contributors
 # See LICENSE file in the project root for full license information.
 #
@@ -14,47 +14,47 @@ if ESP32_ETHERNET_SUPPORT
 
 choice ESP32_ETHERNET_INTERFACE_CHOICE
     prompt "Ethernet PHY interface"
-    default ESP32_ETH_PHY_IP101
+    default ESP32_ETHERNET_PHY_IP101
 
-config ESP32_ETH_PHY_IP101
+config ESP32_ETHERNET_PHY_IP101
     bool "IP101"
 
-config ESP32_ETH_PHY_LAN8720
+config ESP32_ETHERNET_PHY_LAN8720
     bool "LAN8720"
 
-config ESP32_ETH_PHY_RTL8201
+config ESP32_ETHERNET_PHY_RTL8201
     bool "RTL8201"
 
 endchoice
 
 config ESP32_ETHERNET_INTERFACE
     string
-    default "IP101"   if ESP32_ETH_PHY_IP101
-    default "LAN8720" if ESP32_ETH_PHY_LAN8720
-    default "RTL8201" if ESP32_ETH_PHY_RTL8201
+    default "IP101"   if ESP32_ETHERNET_PHY_IP101
+    default "LAN8720" if ESP32_ETHERNET_PHY_LAN8720
+    default "RTL8201" if ESP32_ETHERNET_PHY_RTL8201
 
-config ESP32_ETH_PHY_ADDR
+config ESP32_ETHERNET_PHY_ADDR
     int "Ethernet PHY address"
     range 0 31
     default 1
 
-config ESP32_ETH_MDC_GPIO
+config ESP32_ETHERNET_MDC_GPIO
     int "MDC GPIO pin"
     default 23
 
-config ESP32_ETH_MDIO_GPIO
+config ESP32_ETHERNET_MDIO_GPIO
     int "MDIO GPIO pin"
     default 18
 
-config ESP32_ETH_RMII_CLK_OUT_GPIO
+config ESP32_ETHERNET_RMII_CLK_OUT_GPIO
     int "RMII clock output GPIO pin (-1 to disable)"
     default -1
 
-config ESP32_ETH_RMII_CLK_IN_GPIO
+config ESP32_ETHERNET_RMII_CLK_IN_GPIO
     int "RMII clock input GPIO pin (-1 to disable)"
     default -1
 
-config ESP32_ETH_PHY_RST_GPIO
+config ESP32_ETHERNET_PHY_RST_GPIO
     int "Ethernet PHY reset GPIO pin (-1 to disable)"
     default -1
 
