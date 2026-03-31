@@ -2,7 +2,7 @@
 # IDF MIGRATION CHECKLIST
 # When upgrading ESP-IDF to a new version, review and update the following:
 #
-# 1. ESP-IDF version: search for the git clone --branch tag below (currently v5.5.3)
+# 1. ESP-IDF version: search for the git clone --branch tag below (currently v5.5.4)
 # 2. ESP_PATCH_VER: the GCC toolchain patch version installed by IDF.
 #    After running install.sh in the new IDF, check the toolchain version at:
 #      ~/.espressif/tools/xtensa-esp-elf/ and ~/.espressif/tools/riscv32-esp-elf/
@@ -71,7 +71,7 @@ RUN git clone --branch R0.15a https://github.com/abbrev/fatfs.git --depth 1 ./so
 
 # Clone ESP-IDF
 # >>> IDF MIGRATION: update the branch tag to the new IDF version <<<
-RUN git clone --branch v5.5.3 https://github.com/espressif/esp-idf --depth 1 --recursive ./sources/esp-idf
+RUN git clone --branch v5.5.4 https://github.com/espressif/esp-idf --depth 1 --recursive ./sources/esp-idf
 
 # Creating static link python for pyhton3
 RUN ln -fs /usr/bin/python3 /usr/bin/python \
