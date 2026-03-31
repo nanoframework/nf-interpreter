@@ -18,4 +18,8 @@ config THREADX_WIFI_DRIVER
     string "WiFi driver name"
     default ""
 
+config STM32_CUBE_PACKAGE_REQUIRED
+    bool "STM32 Cube package required"
+    default n
+
 endmenu

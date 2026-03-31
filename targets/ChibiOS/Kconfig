@@ -14,4 +14,8 @@ config CHIBIOS_SWO_OUTPUT
     bool "ARM Cortex-M Single Wire Output (SWO)"
     default n
 
+config STM32_CUBE_PACKAGE_REQUIRED
+    bool "STM32 Cube package required"
+    default n
+
 endmenu

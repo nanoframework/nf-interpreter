@@ -17,10 +17,6 @@ config NF_ENABLE_DOUBLE_PRECISION_FP
     bool "Double-precision floating point"
     default n
 
-config NF_FEATURE_LIGHT_MATH
-    bool "Light math (exclude complex math functions)"
-    default n
-
 config NF_SUPPORT_ANY_BASE_CONVERSION
     bool "String conversion to any numeric base"
     default n
@@ -39,11 +35,6 @@ config NF_CLR_NO_TRACE
 
 config NF_CLR_NO_IL_INLINE
     bool "Disable CLR IL inlining"
-    default n
-
-config STM32_CUBE_PACKAGE_REQUIRED
-    bool "STM32 Cube package required"
-    depends on RTOS_CHIBIOS || RTOS_THREADX
     default n
 
 endmenu
