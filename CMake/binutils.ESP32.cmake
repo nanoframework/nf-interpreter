@@ -112,7 +112,7 @@ macro(nf_fix_esp32c3_rom_file)
         if(${ESP32_REVISION} LESS_EQUAL 2)
             # need to UNcomment the rom_temp_to_power symbol
             file(READ
-                ${esp32_idf_SOURCE_DIR}/components/esp_rom/esp32c3/ld/esp32c3.rom.ld
+                ${IDF_PATH_CMAKED}/components/esp_rom/esp32c3/ld/esp32c3.rom.ld
                 ESP32_C3_ROM_LD_CONTENT)
         
             string(REPLACE
@@ -122,12 +122,12 @@ macro(nf_fix_esp32c3_rom_file)
                     "${ESP32_C3_ROM_LD_CONTENT}")
         
             file(WRITE 
-                ${esp32_idf_SOURCE_DIR}/components/esp_rom/esp32c3/ld/esp32c3.rom.ld
+                ${IDF_PATH_CMAKED}/components/esp_rom/esp32c3/ld/esp32c3.rom.ld
                 "${ESP32_C3_ROM_LD_NEW_CONTENT}")
         else()
             # need to COMMENT the rom_temp_to_power symbol
             file(READ
-                ${esp32_idf_SOURCE_DIR}/components/esp_rom/esp32c3/ld/esp32c3.rom.ld
+                ${IDF_PATH_CMAKED}/components/esp_rom/esp32c3/ld/esp32c3.rom.ld
                 ESP32_C3_ROM_LD_CONTENT)
 
             string(FIND "${ESP32_C3_ROM_LD_CONTENT}" "/* rom_temp_to_power = 0x40001ab4; */" ROM_TEMP_SYMBOL_INDEX)
@@ -141,7 +141,7 @@ macro(nf_fix_esp32c3_rom_file)
                         "${ESP32_C3_ROM_LD_CONTENT}")
             
                 file(WRITE 
-                    ${esp32_idf_SOURCE_DIR}/components/esp_rom/esp32c3/ld/esp32c3.rom.ld
+                    ${IDF_PATH_CMAKED}/components/esp_rom/esp32c3/ld/esp32c3.rom.ld
                     "${ESP32_C3_ROM_LD_NEW_CONTENT}")
             endif()
 
@@ -280,7 +280,7 @@ macro(nf_add_platform_dependencies target)
                 ${ESP32_IDF_INCLUDE_DIRS}
                 ${TARGET_ESP32_IDF_INCLUDES}
                 ${CMAKE_BINARY_DIR}/targets/${RTOS}
-                ${esp32_idf_SOURCE_DIR}/components/mbedtls/mbedtls/include
+                ${IDF_PATH_CMAKED}/components/mbedtls/mbedtls/include
         )
 
         add_dependencies(${target}.elf nano::NF_Network)
@@ -543,7 +543,7 @@ macro(nf_add_tinyusb_component)
     # get the esp_tinyusb target library name
     idf_component_get_property(etusb_lib esp_tinyusb COMPONENT_LIB)
     # add the tinyusb src directory as include path to esp_tinyusb library project
-    target_include_directories(${etusb_lib} PRIVATE ${esp32_idf_SOURCE_DIR}/components/tinyusb/src)
+    target_include_directories(${etusb_lib} PRIVATE ${IDF_PATH_CMAKED}/components/tinyusb/src)
 
     # also add the freertos directory as include path
     idf_component_get_property(freertos_include freertos ORIG_INCLUDE_PATH)
@@ -895,9 +895,9 @@ macro(nf_add_idf_as_library)
         # remove the ones we'll be replacing
         list(REMOVE_ITEM 
             IDF_LWIP_SOURCES
-                ${esp32_idf_SOURCE_DIR}/components/lwip/lwip/src/api/api_msg.c
-                ${esp32_idf_SOURCE_DIR}/components/lwip/lwip/src/api/sockets.c
-                ${esp32_idf_SOURCE_DIR}/components/lwip/port/freertos/sys_arch.c
+                ${IDF_PATH_CMAKED}/components/lwip/lwip/src/api/api_msg.c
+                ${IDF_PATH_CMAKED}/components/lwip/lwip/src/api/sockets.c
+                ${IDF_PATH_CMAKED}/components/lwip/port/freertos/sys_arch.c
         )
 
         # add our modified sources
