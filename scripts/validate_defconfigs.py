@@ -62,7 +62,7 @@ def find_defconfig_for_preset(repo_root: str, preset_name: str) -> str | None:
         os.path.join(repo_root, "targets*/**/CMakePresets.json"), recursive=True
     ):
         try:
-            with open(preset_file, "r", encoding="utf-8") as f:
+            with open(preset_file, "r", encoding="utf-8-sig") as f:
                 data = json.load(f)
         except (json.JSONDecodeError, OSError):
             continue
