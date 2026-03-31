@@ -5,6 +5,23 @@
 
 menu "nanoFramework Features"
 
+# Naming convention for NF_FEATURE_* symbols
+# -------------------------------------------
+# NF_FEATURE_HAS_*  — declares that a hardware capability is present on the
+#                     target board (e.g. an SD-card slot, a config-block flash
+#                     partition, accessible storage).  Selecting the symbol does
+#                     not imply any particular software stack; it merely tells
+#                     the build system that the hardware resource exists.
+#
+# NF_FEATURE_USE_*  — selects a software feature or stack that the firmware
+#                     should include (e.g. LittleFS, Application Domains).
+#                     The hardware required by the feature is assumed to be
+#                     present independently (often gated by a HAS_ symbol).
+#
+# Other NF_FEATURE_* symbols (no HAS_/USE_ infix) represent features that are
+# neither purely hardware-presence flags nor pure software choices (e.g.
+# DEBUGGER, WATCHDOG, SUPPORT_REFLECTION).
+
 config NF_FEATURE_DEBUGGER
     bool "Managed application debugging support"
     default y
