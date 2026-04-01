@@ -4,7 +4,6 @@
 #
 
 include(FetchContent)
-FetchContent_GetProperties(esp32_idf)
 
 include(binutils.ESP32)
 
@@ -67,7 +66,6 @@ list(APPEND ESP32_IDF_INCLUDE_DIRS ${IDF_PATH_CMAKED}/components/lwip/include)
 list(APPEND ESP32_IDF_INCLUDE_DIRS ${IDF_PATH_CMAKED}/components/lwip/include/apps)
 list(APPEND ESP32_IDF_INCLUDE_DIRS ${IDF_PATH_CMAKED}/components/lwip/port/include)
 list(APPEND ESP32_IDF_INCLUDE_DIRS ${IDF_PATH_CMAKED}/components/lwip/port/esp32xx/include)
-list(APPEND ESP32_IDF_INCLUDE_DIRS ${IDF_PATH_CMAKED}/components/lwip/port/freertos/include)
 list(APPEND ESP32_IDF_INCLUDE_DIRS ${IDF_PATH_CMAKED}/components/lwip/port/freertos/include)
 list(APPEND ESP32_IDF_INCLUDE_DIRS ${IDF_PATH_CMAKED}/components/lwip/lwip/src/include)
 list(APPEND ESP32_IDF_INCLUDE_DIRS ${IDF_PATH_CMAKED}/components/lwip/lwip/src/include/lwip)
