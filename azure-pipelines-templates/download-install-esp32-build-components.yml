@@ -87,7 +87,7 @@ steps:
 
         # go through the output and grab what has to be appended to the PATH
         # remove the IDF-bundled CMake entry so the system-installed CMake is used instead
-        $newPath = $envars_raw[$pathElement].ToString().Replace('PATH=', '').Replace(';%PATH%', '') -replace '[^;]*\.espressif\\tools\\cmake\\[^;]+;', ''
+        $newPath = $envars_raw[$pathElement].ToString().Replace('PATH=', '').Replace(';%PATH%', '') -replace '[^;]*\.espressif\\tools\\cmake\\[^;]+;?', ''
 
         # append to path
         Write-Host "##vso[task.prependpath]$newPath"
