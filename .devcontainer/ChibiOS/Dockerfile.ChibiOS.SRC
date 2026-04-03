@@ -92,7 +92,7 @@ RUN mkdir -p  $HEX2DFU_PATH \
 
 # Creating static link python for pyhton3 and installing python dependencies for the container
 RUN ln -fs /usr/bin/python3 /usr/bin/python \
-    && python -m pip install --quiet -r "./nf-interpreter/requirements.txt"
+    && python -m pip install --quiet -r "./requirements.txt"
 
 # Clean up downloaded files
 RUN apt-get autoremove -y \
