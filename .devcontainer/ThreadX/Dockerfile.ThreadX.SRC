@@ -91,6 +91,9 @@ RUN mkdir -p  $HEX2DFU_PATH \
     && curl -o  $HEX2DFU_PATH/hex2dfu $HEX2DFU -L \
     && chmod +x  $HEX2DFU_PATH/hex2dfu
 
+# Installing python dependencies for the container
+RUN python3 -m pip install --quiet "kconfiglib>=14.1.0"
+
 # Clean up downloaded files
 RUN apt-get autoremove -y \
     && apt-get clean -y \
