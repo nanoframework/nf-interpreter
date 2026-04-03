@@ -19,7 +19,7 @@ git fetch --depth=1 origin tag mbedtls-3.6.5
 git checkout tags/mbedtls-3.6.5
 git submodule update --init
 cd /sources/fatfs
-git pull origin R0.15a
+git pull origin R0.16
 cd /sources/FreeRTOS
 git pull origin V10.4.1-kernel-only
 cd /sources/CMSIS_5
