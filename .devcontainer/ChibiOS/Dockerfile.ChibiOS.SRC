@@ -90,8 +90,9 @@ RUN mkdir -p  $HEX2DFU_PATH \
     && curl -o  $HEX2DFU_PATH/hex2dfu $HEX2DFU -L \
     && chmod +x  $HEX2DFU_PATH/hex2dfu
 
-# Creating static link python for pyhton3
-RUN ln -fs /usr/bin/python3 /usr/bin/python
+# Creating static link python for pyhton3 and installing python dependencies for the container
+RUN ln -fs /usr/bin/python3 /usr/bin/python \
+    && python -m pip install --quiet -r "./nf-interpreter/requirements.txt"
 
 # Clean up downloaded files
 RUN apt-get autoremove -y \
