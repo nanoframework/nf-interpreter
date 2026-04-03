@@ -192,7 +192,6 @@
 /  arbitrary physical drive and partition listed in the VolToPart[]. Also f_fdisk()
 /  will be available. */
 
-
 #define FF_MIN_SS 512
 #define FF_MAX_SS 512
 /* This set of options configures the range of sector size to be supported. (512,
@@ -207,14 +206,13 @@
 /  To enable the 64-bit LBA, also exFAT needs to be enabled. (FF_FS_EXFAT == 1) */
 
 #define FF_MIN_GPT 0x10000000
-/* Minimum number of sectors to switch GPT as partitioning format in f_mkfs() and 
+/* Minimum number of sectors to switch GPT as partitioning format in f_mkfs() and
 /  f_fdisk(). 2^32 sectors maximum. This option has no effect when FF_LBA64 == 0. */
 
-#define FF_USE_TRIM	0
+#define FF_USE_TRIM 0
 /* This option switches support for ATA-TRIM. (0:Disable or 1:Enable)
 /  To enable this feature, also CTRL_TRIM command should be implemented to
 /  the disk_ioctl(). */
-
 
 /*---------------------------------------------------------------------------/
 / System Configurations
