@@ -76,11 +76,11 @@ COPY --from=downloader /tmp/dc-extracted/cmake /usr/bin/cmake
 ENV PATH=/usr/bin/cmake/bin:${PATH}
 
 # Creating static link python for pyhton3
-RUN ln -fs /usr/bin/python3 /usr/bin/python \
-    && pip3 install pyserial
+RUN ln -fs /usr/bin/python3 /usr/bin/python
 
 # Installing python dependencies for the container
-RUN python3 -m pip install --quiet "kconfiglib>=14.1.0"
+RUN pip3 install pyserial \
+    && pip3 install --quiet "kconfiglib>=14.1.0"
 
 # Clean up downloaded files
 RUN apt-get autoremove -y \
