@@ -40,7 +40,6 @@
 #define FF_USE_FASTSEEK 0
 /* This option switches fast seek feature. (0:Disable or 1:Enable) */
 
-
 #define FF_USE_EXPAND 0
 /* This option switches f_expand(). (0:Disable or 1:Enable) */
 
@@ -48,14 +47,12 @@
 /* This option switches attribute control API functions, f_chmod() and f_utime().
 /  (0:Disable or 1:Enable) Also FF_FS_READONLY needs to be 0 to enable this option. */
 
-
 #define FF_USE_LABEL 1
 /* This option switches volume label API functions, f_getlabel() and f_setlabel().
 /  (0:Disable or 1:Enable) */
 
 #define FF_USE_FORWARD 0
 /* This option switches f_forward(). (0:Disable or 1:Enable) */
-
 
 #define FF_USE_STRFUNC 1
 #define FF_PRINT_LLI   0
@@ -212,7 +209,6 @@
 /  arbitrary physical drive and partition listed in the VolToPart[]. Also f_fdisk()
 /  will be available. */
 
-
 #define FF_MIN_SS 512
 #define FF_MAX_SS 512
 /* This set of options configures the range of sector size to be supported. (512,
@@ -226,18 +222,14 @@
 /* This option switches support for 64-bit LBA. (0:Disable or 1:Enable)
 /  To enable the 64-bit LBA, also exFAT needs to be enabled. (FF_FS_EXFAT == 1) */
 
-
 #define FF_MIN_GPT 0x10000000
-/* Minimum number of sectors to switch GPT as partitioning format in f_mkfs() and 
+/* Minimum number of sectors to switch GPT as partitioning format in f_mkfs() and
 /  f_fdisk(). 2^32 sectors maximum. This option has no effect when FF_LBA64 == 0. */
 
-
-#define FF_USE_TRIM	0
+#define FF_USE_TRIM 0
 /* This option switches support for ATA-TRIM. (0:Disable or 1:Enable)
 /  To enable this feature, also CTRL_TRIM command should be implemented to
 /  the disk_ioctl(). */
-
-
 
 /*---------------------------------------------------------------------------/
 / System Configurations
@@ -267,11 +259,9 @@
 /  FF_NORTC_MDAY and FF_NORTC_YEAR have no effect.
 /  These options have no effect in read-only configuration (FF_FS_READONLY = 1). */
 
-
 #define FF_FS_CRTIME 1
 /* This option enables(1)/disables(0) the timestamp of the file created. When
 /  set 1, the file created time is available in FILINFO structure. */
-
 
 #define FF_FS_NOFSINFO 0
 /* If you need to know the correct free space on the FAT32 volume, set bit 0 of
