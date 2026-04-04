@@ -14,8 +14,9 @@ set(CYW43_DRIVER_SRCS
     cyw43_ll.c
     cyw43_ctrl.c
     cyw43_stats.c
-    cyw43_spi.c
 )
+# Note: cyw43_spi.c is intentionally excluded — our cyw43_bus_pio_spi.c
+# provides all SPI protocol functions (half-duplex PIO, not full-duplex).
 # Note: cyw43_lwip.c is intentionally excluded — nf_lwipthread_wifi.c provides
 # the lwIP integration with nanoFramework-specific network interface management.
 

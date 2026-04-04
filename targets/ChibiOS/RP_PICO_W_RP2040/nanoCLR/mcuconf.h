@@ -64,6 +64,12 @@
 #define RP_SIO_USE_UART1                    TRUE
 
 /*
+ * USB driver system settings.
+ */
+#define RP_USB_USE_USB1                     TRUE
+#define RP_IRQ_USB0_PRIORITY                2
+
+/*
  * SPI driver system settings.
  */
 #define RP_SPI_USE_SPI0                     TRUE

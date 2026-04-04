@@ -40,7 +40,9 @@
                 "API_nanoFramework.System.Text": "ON",
                 "API_nanoFramework.ResourceManager": "ON",
                 "API_nanoFramework.System.Collections": "ON",
-                "TARGET_HAS_WIFI": "ON"
+                "TARGET_HAS_WIFI": "ON",
+                "NF_FEATURE_USE_LITTLEFS": "ON",
+                "API_System.IO.FileSystem": "ON"
             }
         }
     ],

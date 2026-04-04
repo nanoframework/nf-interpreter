@@ -23,9 +23,15 @@ bool ssl_generic_init_internal(
     bool isServer)
 {
     // set default values for min and max protocol versions
+#ifdef MBEDTLS_SSL_PROTO_TLS1_3
     // aiming for TLS 1.3 which is the most secure
     mbedtls_ssl_protocol_version minVersion = MBEDTLS_SSL_VERSION_TLS1_3;
     mbedtls_ssl_protocol_version maxVersion = MBEDTLS_SSL_VERSION_TLS1_3;
+#else
+    // TLS 1.3 not available, default to TLS 1.2
+    mbedtls_ssl_protocol_version minVersion = MBEDTLS_SSL_VERSION_TLS1_2;
+    mbedtls_ssl_protocol_version maxVersion = MBEDTLS_SSL_VERSION_TLS1_2;
+#endif
 
     int sslContexIndex = -1;
     int authMode = MBEDTLS_SSL_VERIFY_NONE;
@@ -183,6 +189,9 @@ bool ssl_generic_init_internal(
 
     mbedtls_ssl_conf_max_tls_version(context->conf, maxVersion);
     mbedtls_ssl_conf_min_tls_version(context->conf, minVersion);
+
+    // set read timeout to prevent infinite blocking during handshake
+    mbedtls_ssl_conf_read_timeout(context->conf, 60000);
 
     // configure random generator
     mbedtls_ssl_conf_rng(context->conf, mbedtls_ctr_drbg_random, context->ctr_drbg);

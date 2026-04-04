@@ -11,6 +11,9 @@
 #ifndef TARGET_COMMON_H
 #define TARGET_COMMON_H
 
+#include <target_lwipopts.h>
+#include <nf_lwipopts_sntp.h>
+
 /////////////////////////////////////////////////////////////////////////////////////////
 // The following addresses and sizes should be filled in according to the SoC data-sheet
 // they also must be coherent with what's in the linker file for nanoBooter and nanoCLR
@@ -44,6 +47,29 @@
 // set define to signal build system that this target is RAM constrained
 #define TARGET_RAM_CONSTRAINED
 //////////////////////////////////////////////
+
+/////////////////////////////////////
+// RP2040 has an ROSC-based entropy source (not a true TRNG, but sufficient
+// for mbedTLS seeding).  This enables MBEDTLS_ENTROPY_HARDWARE_ALT so that
+// mbedtls_hardware_poll() in mbedtls_entropy_hardware_pool.c is called.
+#define PLATFORM_HAS_RNG       TRUE
+/////////////////////////////////////
+
+/////////////////////////////////////
+// Reduce mbedTLS SSL record buffers for RAM-constrained RP2040.
+// Default is 16384 each (33 KB total) which exhausts the CLR heap.
+// Input needs 6144 to handle typical server certificate chains.
+// Output can stay smaller (client sends are small).
+#define MBEDTLS_SSL_IN_CONTENT_LEN   6144
+#define MBEDTLS_SSL_OUT_CONTENT_LEN  4096
+/////////////////////////////////////
+
+/////////////////////////////////////
+// Disable TLS 1.3 for RP2040 - Cortex-M0+ is too slow for TLS 1.3
+// crypto without hardware acceleration, and 6 KB SSL input buffer
+// is too small for TLS 1.3 encrypted handshake messages.
+#define NF_MBEDTLS_DISABLE_TLS_1_3
+/////////////////////////////////////
 
 /////////////////////////////////////
 // LED blink heartbeat (GP25 is the onboard LED on Pico)

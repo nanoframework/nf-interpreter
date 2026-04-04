@@ -8,10 +8,12 @@
 
 #include <sys_dev_wifi_native.h>
 #include <nf_rt_events_native.h>
+#include <nanoPAL_Events.h>
+#include <nanoHAL_v2.h>
+#include <nanoPAL_Sockets.h>
 
 extern "C" {
 #include <nf_lwipthread_wifi.h>
-#include <cyw43_configport.h>
 }
 
 ////////////////////////////////////////////////////////////////////////////////////
@@ -97,49 +99,62 @@ HRESULT Library_sys_dev_wifi_native_System_Device_Wifi_WifiAdapter::
         const char *szSsid;
         const char *szPassPhrase;
         int netIndex;
+        CLR_RT_HeapBlock hbTimeout;
+        CLR_INT64 *timeout;
+        bool eventResult = true;
         WifiConnectionStatus status = WifiConnectionStatus_UnspecifiedFailure;
 
         NANOCLR_CHECK_HRESULT(GetNetInterfaceIndex(stack, &netIndex));
 
-        szSsid = stack.Arg1().RecoverString();
-        FAULT_ON_NULL(szSsid);
-
-        szPassPhrase = stack.Arg2().RecoverString();
-        // password can be NULL for open networks
-
-        // Initiate WiFi connection via CYW43 driver
-        int result = Network_Interface_Start_Connect(
-            netIndex, szSsid, szPassPhrase ? szPassPhrase : "", 0);
-
-        if (result == 0)
+        if (stack.m_customState == 0)
         {
-            // Wait for connection to complete (poll with timeout)
-            int timeout_ms = 15000;
-            int poll_ms = 100;
-            int elapsed = 0;
+            szSsid = stack.Arg1().RecoverString();
+            FAULT_ON_NULL(szSsid);
 
-            while (elapsed < timeout_ms)
+            szPassPhrase = stack.Arg2().RecoverString();
+            // password can be NULL for open networks
+
+            // Initiate WiFi connection via CYW43 driver (non-blocking)
+            int result = Network_Interface_Start_Connect(
+                netIndex, szSsid, szPassPhrase ? szPassPhrase : "", 0);
+
+            if (result != 0)
             {
-                int connectResult = Network_Interface_Connect_Result(netIndex);
-                if (connectResult >= 0)
-                {
-                    status = (connectResult == 0)
-                                 ? WifiConnectionStatus_Success
-                                 : WifiConnectionStatus_UnspecifiedFailure;
-                    break;
-                }
-                chThdSleepMilliseconds(poll_ms);
-                elapsed += poll_ms;
+                status = WifiConnectionStatus_NetworkNotAvailable;
+                eventResult = false;
             }
 
-            if (elapsed >= timeout_ms)
+            // Set 20-second timeout for connect
+            hbTimeout.SetInteger((CLR_INT64)20000 * TIME_CONVERSION__TO_MILLISECONDS);
+        }
+
+        while (eventResult)
+        {
+            int connectResult = Network_Interface_Connect_Result(netIndex);
+            if (connectResult >= 0)
+            {
+                status = (connectResult == 0)
+                             ? WifiConnectionStatus_Success
+                             : WifiConnectionStatus_UnspecifiedFailure;
+                break;
+            }
+
+            // Do a direct SPI poll from this thread context to help drain packets
+            cyw43_wifi_direct_poll();
+
+            // Wait for Event_Wifi_Station OR 500ms poll timeout
+            NANOCLR_CHECK_HRESULT(stack.SetupTimeoutFromTicks(hbTimeout, timeout));
+
+            bool woke = true;
+            NANOCLR_CHECK_HRESULT(
+                g_CLR_RT_ExecutionEngine.WaitEvents(
+                    stack.m_owningThread, *timeout, Event_Wifi_Station, woke));
+
+            if (!woke)
             {
                 status = WifiConnectionStatus_Timeout;
+                break;
             }
-        }
-        else
-        {
-            status = WifiConnectionStatus_NetworkNotAvailable;
         }
 
         stack.SetResult_I4(status);
@@ -173,10 +188,14 @@ HRESULT Library_sys_dev_wifi_native_System_Device_Wifi_WifiAdapter::NativeScanAs
 
         int startScanResult = Network_Interface_Start_Scan(netIndex);
 
-        if (startScanResult != 0) // StartScanOutcome_Success
+        if (startScanResult != 0)
         {
             NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_OPERATION);
         }
+
+        // Signal the managed layer that the scan is complete.
+        // The managed WiFi API waits for this event before calling GetNativeScanReport.
+        PostManagedEvent(EVENT_WIFI, WiFiEventType_ScanComplete, 0, 0);
     }
     NANOCLR_NOCLEANUP();
 }
@@ -191,16 +210,42 @@ HRESULT Library_sys_dev_wifi_native_System_Device_Wifi_WifiAdapter::GetNativeSca
     {
         CLR_RT_HeapBlock &top = stack.PushValueAndClear();
 
-        // WiFi scan results are not yet available in the CYW43 driver integration.
-        // Return empty result for now.
-        uint16_t number = 0;
-        int rlen = sizeof(uint16_t);
+        uint16_t number = (uint16_t)cyw43_wifi_scan_get_count();
+        const wifi_scan_record_t *results = cyw43_wifi_scan_get_results();
 
-        NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance(top, rlen, g_CLR_RT_WellKnownTypes.m_UInt8));
+        if (number == 0)
+        {
+            // Return empty array with count = 0
+            int rlen = sizeof(uint16_t);
+            NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance(top, rlen, g_CLR_RT_WellKnownTypes.m_UInt8));
+            CLR_RT_HeapBlock_Array *array = top.DereferenceArray();
+            CLR_UINT8 *buf = array->GetFirstElement();
+            *buf = 0;
+        }
+        else
+        {
+            int rlen = sizeof(uint16_t) + (number * sizeof(ScanRecord));
+            NANOCLR_CHECK_HRESULT(
+                CLR_RT_HeapBlock_Array::CreateInstance(top, rlen, g_CLR_RT_WellKnownTypes.m_UInt8));
+            CLR_RT_HeapBlock_Array *array = top.DereferenceArray();
+            CLR_UINT8 *buf = array->GetFirstElement();
 
-        CLR_RT_HeapBlock_Array *array = top.DereferenceArray();
-        CLR_UINT8 *buf = array->GetFirstElement();
-        *buf = (uint8_t)number;
+            // Store record count as first byte (matches ESP32 format)
+            *buf++ = (uint8_t)number;
+
+            ScanRecord *pScanRec = (ScanRecord *)buf;
+
+            for (int i = 0; i < number; i++)
+            {
+                memcpy(pScanRec->bssid, results[i].bssid, 6);
+                memset(pScanRec->ssid, 0, 33);
+                memcpy(pScanRec->ssid, results[i].ssid, 33);
+                pScanRec->rssi = (uint8_t)(results[i].rssi & 0xFF);
+                pScanRec->authMode = results[i].auth_mode;
+                pScanRec->cypherType = 0;
+                pScanRec++;
+            }
+        }
     }
     NANOCLR_NOCLEANUP();
 }

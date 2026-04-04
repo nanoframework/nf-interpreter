@@ -11,25 +11,26 @@ __vectors_align__ = 256;
 
 /*
  * RP2040 nanoBooter memory setup.
- * nanoBooter occupies the first 32KB of XIP flash.
+ * nanoBooter occupies the first 48KB of XIP flash.
  *
  * Flash layout:
- *   0x10000000 - 0x10007FFF : nanoBooter   (32KB)
- *   0x10008000 - 0x1000FFFF : Config block (32KB)
- *   0x10010000 - 0x100FFFFF : nanoCLR      (960KB)
- *   0x10100000 - 0x101FFFFF : Deployment   (1MB)
+ *   0x10000000 - 0x1000BFFF : nanoBooter   (48KB)
+ *   0x1000C000 - 0x10013FFF : Config block (32KB)
+ *   0x10014000 - 0x10153FFF : nanoCLR      (1280KB)
+ *   0x10154000 - 0x101F7FFF : Deployment   (656KB)
+ *   0x101F8000 - 0x101FFFFF : littlefs     (32KB)
  */
 MEMORY
 {
-    flash0     (rx) : org = 0x10000000, len = 96k     /* nanoBooter + config (for __nanoImage_end__) */
-    flash1     (rx) : org = 0x10000000, len = 64k     /* XIP: nanoBooter */
+    flash0     (rx) : org = 0x10000000, len = 80k     /* nanoBooter + config (for __nanoImage_end__) */
+    flash1     (rx) : org = 0x10000000, len = 48k     /* XIP: nanoBooter */
     flash2     (rx) : org = 0x00000000, len = 0
     flash3     (rx) : org = 0x00000000, len = 0
     flash4     (rx) : org = 0x00000000, len = 0
     flash5     (rx) : org = 0x00000000, len = 0
     flash6     (rx) : org = 0x00000000, len = 0
     flash7     (rx) : org = 0x00000000, len = 0
-    config     (rw) : org = 0x10010000, len = 32k     /* configuration block */
+    config     (rw) : org = 0x1000C000, len = 32k     /* configuration block */
     deployment (rx) : org = 0x00000000, len = 0       /* not used in booter */
     ramvt      (wx) : org = 0x00000000, len = 0       /* no RAM vector table in booter */
     ram0       (wx) : org = 0x20000000, len = 256k-48 /* SRAM0 striped */

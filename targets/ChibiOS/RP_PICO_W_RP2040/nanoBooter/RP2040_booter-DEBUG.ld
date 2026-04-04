@@ -15,15 +15,15 @@ __vectors_align__ = 256;
  */
 MEMORY
 {
-    flash0     (rx) : org = 0x10000000, len = 96k     /* nanoBooter + config (for __nanoImage_end__) */
-    flash1     (rx) : org = 0x10000000, len = 64k     /* XIP: nanoBooter */
+    flash0     (rx) : org = 0x10000000, len = 80k     /* nanoBooter + config (for __nanoImage_end__) */
+    flash1     (rx) : org = 0x10000000, len = 48k     /* XIP: nanoBooter */
     flash2     (rx) : org = 0x00000000, len = 0
     flash3     (rx) : org = 0x00000000, len = 0
     flash4     (rx) : org = 0x00000000, len = 0
     flash5     (rx) : org = 0x00000000, len = 0
     flash6     (rx) : org = 0x00000000, len = 0
     flash7     (rx) : org = 0x00000000, len = 0
-    config     (rw) : org = 0x10010000, len = 32k
+    config     (rw) : org = 0x1000C000, len = 32k
     deployment (rx) : org = 0x00000000, len = 0
     ramvt      (wx) : org = 0x00000000, len = 0
     ram0       (wx) : org = 0x20000000, len = 256k-48

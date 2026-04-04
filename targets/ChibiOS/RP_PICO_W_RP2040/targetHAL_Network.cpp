@@ -88,6 +88,23 @@ void nanoHAL_Network_Initialize()
 
         // Start WiFi lwIP thread
         lwIPInit(&lwipOptions);
+
+        // Pre-initialize CYW43 hardware so connect/scan don't block the CLR.
+        // This loads ~250KB firmware over SPI (~500ms) and enables the STA interface.
+        cyw43_ensure_wifi_up_impl();
+
+        // Now that the CYW43 chip is initialized, copy its real MAC address
+        // to the lwIP netif. The chip's OTP MAC was read during firmware load
+        // but thisif.hwaddr was still all-zeros (chicken-and-egg: we need the
+        // chip up to read the MAC, but lwIPInit needs a MAC for the netif).
+        {
+            uint8_t chipMac[6];
+            cyw43_wifi_get_mac_addr(chipMac);
+            if (chipMac[0] != 0 || chipMac[1] != 0 || chipMac[2] != 0)
+            {
+                cyw43_wifi_set_netif_mac(chipMac);
+            }
+        }
     }
 }
 

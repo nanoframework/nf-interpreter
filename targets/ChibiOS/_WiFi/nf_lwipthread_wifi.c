@@ -15,6 +15,11 @@
 #include "cyw43_configport.h"
 #include "cyw43.h"
 #include "cyw43_ll.h"
+#include "cyw43_internal.h"
+
+// CLR event system — fire SYSTEM_EVENT_FLAG_WIFI_STATION on link change
+extern void Events_Set(uint32_t events);
+#define SYSTEM_EVENT_FLAG_WIFI_STATION 0x01000000
 
 #include <lwip/opt.h>
 #include <lwip/def.h>
@@ -63,6 +68,62 @@ static struct netif thisif = {0};
 static net_addr_mode_t addressMode;
 static ip4_addr_t ip, gateway, netmask;
 
+// ---------------------------------------------------------------------------
+// Scan results storage
+// ---------------------------------------------------------------------------
+#define MAX_SCAN_RESULTS 32
+
+static wifi_scan_record_t scan_results[MAX_SCAN_RESULTS];
+static volatile int scan_result_count = 0;
+static volatile int scan_complete = 0;
+
+// Callback invoked by cyw43_wifi_scan for each AP found
+static int wifi_scan_result_cb(void *env, const cyw43_ev_scan_result_t *result)
+{
+    (void)env;
+
+    if (result == NULL)
+    {
+        return 0;
+    }
+    // Deduplicate: if an AP with the same SSID and BSSID already exists,
+    // update it only if the new result has a stronger (less negative) RSSI.
+    uint8_t ssid_len = result->ssid_len < 32 ? result->ssid_len : 32;
+    for (int i = 0; i < scan_result_count; i++)
+    {
+        if (memcmp(scan_results[i].bssid, result->bssid, 6) == 0 &&
+            memcmp(scan_results[i].ssid, result->ssid, ssid_len) == 0 &&
+            scan_results[i].ssid[ssid_len] == 0)
+        {
+            // Duplicate found — keep the stronger signal
+            if (result->rssi > scan_results[i].rssi)
+            {
+                scan_results[i].rssi = result->rssi;
+                scan_results[i].auth_mode = result->auth_mode;
+                scan_results[i].channel = result->channel;
+            }
+            return 0;
+        }
+    }
+
+    if (scan_result_count >= MAX_SCAN_RESULTS)
+    {
+        return 0; // buffer full, ignore
+    }
+
+    wifi_scan_record_t *rec = &scan_results[scan_result_count];
+    memcpy(rec->bssid, result->bssid, 6);
+    memset(rec->ssid, 0, sizeof(rec->ssid));
+
+    memcpy(rec->ssid, result->ssid, ssid_len);
+    rec->rssi = result->rssi;
+    rec->auth_mode = result->auth_mode;
+    rec->channel = result->channel;
+    scan_result_count++;
+
+    return 0;
+}
+
 struct netif *nf_getNetif(void)
 {
     return &thisif;
@@ -73,20 +134,22 @@ struct netif *nf_getNetif(void)
 // ---------------------------------------------------------------------------
 
 // Called to initialize the WiFi network interface
+// Matches SDK cyw43_netif_init — sets flags, MAC, MTU.
 static void wifi_low_level_init(struct netif *netif)
 {
-    // Set MAC hardware address length
+    // Set MAC hardware address from the CYW43 chip (read during firmware init).
+    // Must be done here (inside netif_add callback) because netif_add may
+    // zero the struct before calling the init function.
+    cyw43_wifi_get_mac(&cyw43_state, CYW43_ITF_STA, netif->hwaddr);
     netif->hwaddr_len = ETHARP_HWADDR_LEN;
 
     // Maximum transfer unit for WiFi
     netif->mtu = 1500;
 
-    // WiFi device capabilities
-    netif->flags = NETIF_FLAG_BROADCAST | NETIF_FLAG_ETHARP | NETIF_FLAG_IGMP;
+    // Flags match the SDK exactly: BROADCAST | ETHARP | ETHERNET | IGMP
+    netif->flags = NETIF_FLAG_BROADCAST | NETIF_FLAG_ETHARP | NETIF_FLAG_ETHERNET | NETIF_FLAG_IGMP;
 }
 
-// Called by lwIP to transmit a packet over WiFi.
-// The packet data is in the pbuf chain.
 static err_t wifi_low_level_output(struct netif *netif, struct pbuf *p)
 {
     (void)netif;
@@ -193,11 +256,61 @@ static err_t wifiif_init(struct netif *netif)
 // lwIP callbacks for CYW43
 // ---------------------------------------------------------------------------
 
+// Netif status callback — fires when IP address changes (e.g., DHCP completes).
+// Signal the CLR so NativeConnect's WaitEvents loop wakes up, and start SNTP.
+static void wifi_netif_status_cb(struct netif *nif)
+{
+    Events_Set(SYSTEM_EVENT_FLAG_WIFI_STATION);
+
+#if SNTP_SERVER_DNS
+    // Start SNTP once we have an IP address
+    if (nif->ip_addr.addr != 0)
+    {
+        sntp_stop();
+        sntp_setoperatingmode(SNTP_OPMODE_POLL);
+        sntp_setservername(0, SNTP_SERVER0_DEFAULT_ADDRESS);
+        sntp_setservername(1, SNTP_SERVER1_DEFAULT_ADDRESS);
+        sntp_init();
+    }
+#endif
+}
+
+// Callback scheduled on tcpip thread from cyw43_cb_tcpip_init.
+// At this point the CYW43 firmware is loaded and cyw43_state.mac is valid.
+static void wifi_tcpip_init_done(void *arg)
+{
+    struct netif *ifc = (struct netif *)arg;
+
+    // Copy the real OTP MAC from the CYW43 chip to the netif
+    cyw43_wifi_get_mac(&cyw43_state, CYW43_ITF_STA, ifc->hwaddr);
+
+#if SNTP_SERVER_DNS
+    // Pre-configure SNTP server names early, before the CLR's
+    // LWIP_SOCKETS_Driver replaces our netif status callback.
+    // Server names persist across sntp_stop()/sntp_init() cycles,
+    // so when the CLR callback later calls sntp_init(), it will
+    // use these servers.
+    sntp_setoperatingmode(SNTP_OPMODE_POLL);
+    sntp_setservername(0, SNTP_SERVER0_DEFAULT_ADDRESS);
+    sntp_setservername(1, SNTP_SERVER1_DEFAULT_ADDRESS);
+#endif
+
+#if LWIP_DHCP
+    // Start DHCP — matches SDK flow (dhcp_start in cyw43_cb_tcpip_init).
+    // DHCP DISCOVER will be sent immediately, but won't reach the AP until
+    // the WPA handshake completes.  When netif_set_link_up fires,
+    // dhcp_network_changed() restarts DHCP discovery automatically.
+    dhcp_start(ifc);
+#endif
+}
+
 void cyw43_cb_tcpip_init(cyw43_t *self, int itf)
 {
     (void)self;
     (void)itf;
-    // netif already added in lwip_thread
+    // CYW43 firmware is loaded — schedule MAC copy + DHCP start on tcpip thread.
+    // Can't call lwIP APIs directly here (CYW43 mutex is held).
+    tcpip_callback_with_block(wifi_tcpip_init_done, &thisif, 0);
 }
 
 void cyw43_cb_tcpip_deinit(cyw43_t *self, int itf)
@@ -206,18 +319,69 @@ void cyw43_cb_tcpip_deinit(cyw43_t *self, int itf)
     (void)itf;
 }
 
+// Forward declaration — defined below
+void lwipDefaultLinkUpCB(void *p);
+
+// Callback queued to tcpip thread for non-blocking link-up.
+// Matches SDK: cyw43_cb_tcpip_set_link_up just calls netif_set_link_up.
+// lwIP internally fires dhcp_network_changed() which restarts DHCP
+// discovery if it is already running.
+// Only called from cyw43_cb_tcpip_set_link_up (after WIFI_JOIN_STATE_ALL).
+static void wifi_link_up_and_dhcp(void *arg)
+{
+    struct netif *ifc = (struct netif *)arg;
+
+    // Refresh the chip's real MAC on the netif (should already be set from
+    // wifiif_init, but re-copy in case of reconnect after MAC change).
+    cyw43_wifi_get_mac(&cyw43_state, CYW43_ITF_STA, ifc->hwaddr);
+
+    // Set link up flag — lwIP fires dhcp_network_changed() automatically
+    // which restarts DHCP discovery.  This matches the Pico SDK exactly.
+    netif_set_link_up(ifc);
+}
+
 void cyw43_cb_tcpip_set_link_up(cyw43_t *self, int itf)
 {
     (void)self;
     (void)itf;
-    netifapi_netif_set_link_up(&thisif);
+
+    // Queue link-up to the tcpip thread (NON-BLOCKING).
+    // Matches SDK: link-up fires when WIFI_JOIN_STATE_ALL
+    // (auth + link + keyed) is reached.  DHCP restart is handled
+    // by lwIP internally via dhcp_network_changed().
+    tcpip_callback_with_block(wifi_link_up_and_dhcp, &thisif, 0);
+
+    // Signal the CLR that WiFi station state changed (link up / connect complete)
+    Events_Set(SYSTEM_EVENT_FLAG_WIFI_STATION);
+}
+
+// Callback queued to tcpip thread for non-blocking link-down + DHCP stop
+static void wifi_link_down_and_dhcp_stop(void *arg)
+{
+    struct netif *ifc = (struct netif *)arg;
+
+    netif_set_link_down(ifc);
+
+#if LWIP_DHCP
+    // Stop DHCP, then immediately re-start so that dhcp_network_changed()
+    // (fired by the next netif_set_link_up) has an active DHCP session
+    // to restart discovery on.  This matches the Pico SDK where DHCP is
+    // started once during init and left running forever.
+    dhcp_release_and_stop(ifc);
+    dhcp_start(ifc);
+#endif
 }
 
 void cyw43_cb_tcpip_set_link_down(cyw43_t *self, int itf)
 {
     (void)self;
     (void)itf;
-    netifapi_netif_set_link_down(&thisif);
+
+    // Non-blocking — same reasoning as cyw43_cb_tcpip_set_link_up
+    tcpip_callback_with_block(wifi_link_down_and_dhcp_stop, &thisif, 0);
+
+    // Signal the CLR that WiFi station state changed (link down / disconnect)
+    Events_Set(SYSTEM_EVENT_FLAG_WIFI_STATION);
 }
 
 // ---------------------------------------------------------------------------
@@ -356,6 +520,16 @@ static THD_FUNCTION(lwip_thread, p)
     netifapi_netif_set_default(&thisif);
     netifapi_netif_set_up(&thisif);
 
+    // NOTE: DHCP is NOT started here — the netif MAC is still a placeholder
+    // because the CYW43 firmware hasn't been loaded yet (lazy init).
+    // DHCP is started later from cyw43_cb_tcpip_init, which fires during
+    // cyw43_wifi_set_up (first ensure_wifi_up call), when the real OTP MAC
+    // is available.  This matches the Pico SDK flow.
+
+    // Register status callback so that DHCP IP assignment fires Event_Wifi_Station,
+    // waking NativeConnect's WaitEvents loop.
+    netif_set_status_callback(&thisif, wifi_netif_status_cb);
+
     // Set up periodic timer for link status polling
     evtObjectInit(&evt, LWIP_LINK_POLL_INTERVAL);
     evtStart(&evt);
@@ -366,14 +540,9 @@ static THD_FUNCTION(lwip_thread, p)
     chThdResume(&lwip_trp, MSG_OK);
     chThdSetPriority(LWIP_THREAD_PRIORITY);
 
-    // Setup SNTP
-#if SNTP_SERVER_DNS
-    sntp_stop();
-    sntp_setoperatingmode(SNTP_OPMODE_POLL);
-    sntp_setservername(0, SNTP_SERVER0_DEFAULT_ADDRESS);
-    sntp_setservername(1, SNTP_SERVER1_DEFAULT_ADDRESS);
-    sntp_init();
-#endif
+    // Setup SNTP — only after WiFi is connected and DHCP has IP.
+    // SNTP is started from wifi_netif_status_cb when IP becomes non-zero.
+    // Starting it here at boot causes ARP/DNS probes on a non-connected interface.
 
     // Main event loop
     while (true)
@@ -382,22 +551,23 @@ static THD_FUNCTION(lwip_thread, p)
 
         if (mask & PERIODIC_TIMER_ID)
         {
-            // Check WiFi link status (CYW43 connection state)
+            // Check WiFi link status (CYW43 connection state).
+            // IMPORTANT: Only handle link-DOWN here.  Link-UP is handled
+            // exclusively by the driver's cyw43_cb_tcpip_set_link_up callback,
+            // which fires when WIFI_JOIN_STATE_ALL (auth+link+keyed) is reached.
+            // The Pico SDK does NOT have a periodic link-up check.  Starting
+            // DHCP before the WPA 4-way handshake completes sends unencrypted
+            // frames that the AP drops, poisoning the DHCP server state.
             bool current_link_status = (cyw43_wifi_link_status(&cyw43_state, CYW43_ITF_STA) == CYW43_LINK_JOIN);
 
-            if (current_link_status != prev_link_status)
+            if (prev_link_status && !current_link_status)
             {
-                prev_link_status = current_link_status;
-                if (current_link_status)
-                {
-                    tcpip_callback_with_block((tcpip_callback_fn)netif_set_link_up, &thisif, 0);
-                    tcpip_callback_with_block(link_up_cb, &thisif, 0);
-                }
-                else
-                {
-                    tcpip_callback_with_block((tcpip_callback_fn)netif_set_link_down, &thisif, 0);
-                    tcpip_callback_with_block(link_down_cb, &thisif, 0);
-                }
+                prev_link_status = false;
+                tcpip_callback_with_block(wifi_link_down_and_dhcp_stop, &thisif, 0);
+            }
+            else if (current_link_status)
+            {
+                prev_link_status = true;
             }
         }
     }
@@ -547,6 +717,12 @@ int cyw43_wifi_connect(const char *ssid, const char *password, uint32_t auth_typ
     if (ssid == NULL)
         return -1;
 
+    // Ensure WiFi hardware is initialized
+    if (cyw43_ensure_wifi_up_impl() != 0)
+    {
+        return -1;
+    }
+
     cyw43_t *state = &cyw43_state;
 
     size_t ssid_len = strlen(ssid);
@@ -555,10 +731,33 @@ int cyw43_wifi_connect(const char *ssid, const char *password, uint32_t auth_typ
     // WPA2_AES_PSK = 0x00400004
     uint32_t auth = key_len > 0 ? 0x00400004 : 0; // Open or WPA2
 
+    // Clean disconnect first — ensures AP doesn't see stale association state
+    // and prevents BADAUTH on rapid re-join.  EV_DISASSOC will fire link_down
+    // callback to stop any running DHCP.
+    CYW43_THREAD_ENTER;
+    cyw43_wifi_leave(state, CYW43_ITF_STA);
+    CYW43_THREAD_EXIT;
+    chThdSleepMilliseconds(100);
+
+    // Disable power management during connect — PM2 may cause the radio
+    // to sleep and miss the DHCP OFFER response from the AP.
+    cyw43_wifi_pm(state, CYW43_NONE_PM);
+
     CYW43_THREAD_ENTER;
     int result = cyw43_wifi_join(state, ssid_len, (const uint8_t *)ssid, key_len, (const uint8_t *)password, auth, NULL,
                                  0);
     CYW43_THREAD_EXIT;
+
+    // After successful join, issue an ioctl to kick inline packet processing.
+    // The ioctl's inline polling may process pending DATA_HEADER packets
+    // (e.g., DHCP OFFER) that arrived during the join process.
+    if (result == 0)
+    {
+        CYW43_THREAD_ENTER;
+        uint8_t rssi_buf[4] = {0};
+        cyw43_ll_ioctl(&state->cyw43_ll, 127 << 1, 4, rssi_buf, 0);
+        CYW43_THREAD_EXIT;
+    }
 
     return result;
 }
@@ -574,15 +773,67 @@ int cyw43_wifi_disconnect(void)
     return result;
 }
 
+// ---------------------------------------------------------------------------
+// WiFi scan
+// ---------------------------------------------------------------------------
+
 int cyw43_wifi_scan_start(void)
 {
+    // Ensure WiFi hardware is initialized
+    if (cyw43_ensure_wifi_up_impl() != 0)
+    {
+        return -1;
+    }
+
     cyw43_t *state = &cyw43_state;
 
+    // Reset scan results
+    scan_result_count = 0;
+    scan_complete = 0;
+
+    cyw43_wifi_scan_options_t scan_opts = {0};
     CYW43_THREAD_ENTER;
-    int result = cyw43_wifi_scan(state, NULL, NULL, NULL);
+    int result = cyw43_wifi_scan(state, &scan_opts, NULL, wifi_scan_result_cb);
     CYW43_THREAD_EXIT;
 
-    return result;
+    if (result != 0)
+    {
+        return result;
+    }
+
+    // Wait for scan to complete (wifi_scan_state goes from 1 to 2)
+    // Timeout after 10 seconds
+    int timeout_ms = 10000;
+    int elapsed = 0;
+
+    while (elapsed < timeout_ms)
+    {
+        CYW43_THREAD_ENTER;
+        int scanning = cyw43_wifi_scan_active(state);
+        CYW43_THREAD_EXIT;
+
+        if (!scanning)
+        {
+            scan_complete = 1;
+            break;
+        }
+
+        chThdSleepMilliseconds(100);
+        elapsed += 100;
+    }
+
+    scan_complete = 1;
+    return 0;
+}
+
+int cyw43_wifi_scan_get_count(void)
+{
+    return scan_result_count;
+}
+
+const wifi_scan_record_t *cyw43_wifi_scan_get_results(void)
+{
+    return scan_results;
 }
 
 int cyw43_wifi_is_connected(void)
@@ -590,8 +841,41 @@ int cyw43_wifi_is_connected(void)
     return cyw43_wifi_link_status(&cyw43_state, CYW43_ITF_STA) == CYW43_LINK_JOIN;
 }
 
+int cyw43_wifi_get_link_status(void)
+{
+    return cyw43_wifi_link_status(&cyw43_state, CYW43_ITF_STA);
+}
+
+int cyw43_wifi_get_join_state(void)
+{
+    return (int)cyw43_state.wifi_join_state;
+}
+
 void cyw43_wifi_get_mac_addr(uint8_t *mac)
 {
     // Copy from the netif (set during initialization)
     memcpy(mac, thisif.hwaddr, 6);
+}
+
+void cyw43_wifi_set_netif_mac(const uint8_t *mac)
+{
+    memcpy(thisif.hwaddr, mac, 6);
+}
+
+uint32_t cyw43_wifi_get_ip4_address(void)
+{
+    return thisif.ip_addr.addr;
+}
+
+// Direct poll from NativeConnect — calls cyw43_poll to drain SPI packets.
+uint32_t cyw43_wifi_direct_poll(void)
+{
+    CYW43_THREAD_ENTER;
+
+    if (cyw43_poll)
+        cyw43_poll();
+
+    CYW43_THREAD_EXIT;
+
+    return 0;
 }

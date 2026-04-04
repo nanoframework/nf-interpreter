@@ -11,6 +11,7 @@
 
 extern "C" {
 #include <nf_lwipthread_wifi.h>
+void debug_printf(const char *format, ...);
 }
 
 // Start scan outcome codes (must match nanoPAL_Sockets.h)
@@ -84,28 +85,24 @@ int Network_Interface_Start_Connect(int index, const char *ssid, const char *pas
 int Network_Interface_Connect_Result(int configIndex)
 {
     (void)configIndex;
-    return cyw43_wifi_is_connected() ? 0 : -1;
+
+    // Not associated yet
+    if (!cyw43_wifi_is_connected())
+        return -1;
+
+    // Associated but no IP — DHCP still in progress
+    if (cyw43_wifi_get_ip4_address() == 0)
+        return -1;
+
+    return 0;
 }
 
 int Network_Interface_Start_Scan(int index)
 {
     (void)index;
 
-    HAL_Configuration_NetworkInterface networkConfiguration;
-
-    if (!ConfigurationManager_GetConfigurationBlock(
-            (void *)&networkConfiguration,
-            DeviceConfigurationOption_Network,
-            0))
-    {
-        return StartScanOutcome_FailedToGetConfiguration;
-    }
-
-    if (networkConfiguration.InterfaceType != NetworkInterfaceType_Wireless80211)
-    {
-        return StartScanOutcome_WrongInterfaceType;
-    }
-
-    int result = cyw43_wifi_scan_start();
-    return result == 0 ? StartScanOutcome_Success : result;
+    // Always return success — diagnostic info is encoded in the scan results
+    // via GetNativeScanReport so the user can see what happened.
+    cyw43_wifi_scan_start();
+    return StartScanOutcome_Success;
 }

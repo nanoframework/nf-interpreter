@@ -9,8 +9,10 @@ FetchContent_GetProperties(chibios)
 # set include directories for ChibiOS HAL (RP2040)
 list(APPEND CHIBIOS_HAL_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/hal/ports/common/ARMCMx)
 list(APPEND CHIBIOS_HAL_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/hal/include)
-# nanoFramework overlay for RP EFL driver (must appear before ChibiOS RP2040 so overrides take precedence)
-list(APPEND CHIBIOS_HAL_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/targets/ChibiOS/_nf-overlay/os/hal/ports/RP/LLD/EFLv1)
+# >>> To use nanoFramework overlay EFL driver, uncomment the next line and comment the one after <<<
+# list(APPEND CHIBIOS_HAL_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/targets/ChibiOS/_nf-overlay/os/hal/ports/RP/LLD/EFLv1)
+list(APPEND CHIBIOS_HAL_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/hal/ports/RP/LLD/EFLv1)
+list(APPEND CHIBIOS_HAL_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/hal/ports/RP)
 list(APPEND CHIBIOS_HAL_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/hal/ports/RP/RP2040)
 
 list(APPEND CHIBIOS_HAL_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/common/portability/GCC)
@@ -122,6 +124,7 @@ set(CHIBIOS_HAL_SRCS
     hal_usb_lld.c
     hal_wdg_lld.c
     hal_efl_lld.c
+    rp_efl_lld.c
     hal_rtc_lld.c
 
     # OSAL
@@ -137,15 +140,16 @@ foreach(SRC_FILE ${CHIBIOS_HAL_SRCS})
     find_file(CHIBIOS_HAL_SRC_FILE ${SRC_FILE}
         PATHS 
 
-            # nanoFramework overlay (checked first so overrides take precedence)
-            ${CMAKE_SOURCE_DIR}/targets/ChibiOS/_nf-overlay/os/hal/ports/RP/LLD/EFLv1
-
             ${chibios_SOURCE_DIR}/os/common/ports/ARMv6-M/compilers/GCC
             ${chibios_SOURCE_DIR}/os/common/startup/ARMCMx/compilers/GCC
             ${chibios_SOURCE_DIR}/os/common/startup/ARMCMx/devices/RP2040
 
             ${chibios_SOURCE_DIR}/os/hal/src
             ${chibios_SOURCE_DIR}/os/hal/ports/common/ARMCMx
+
+            # >>> To use nanoFramework overlay, uncomment next line and comment the one after <<<
+            # ${CMAKE_SOURCE_DIR}/targets/ChibiOS/_nf-overlay/os/hal/ports/RP/LLD/EFLv1
+            ${chibios_SOURCE_DIR}/os/hal/ports/RP/LLD/EFLv1
 
             ${chibios_SOURCE_DIR}/os/hal/ports/RP/RP2040
 

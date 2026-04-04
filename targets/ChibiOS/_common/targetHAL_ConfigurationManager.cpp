@@ -7,6 +7,9 @@
 #include <nanoHAL_v2.h>
 #include <nanoWeak.h>
 
+// Diagnostic output macro — disabled (was used for debugging config updates)
+#define CFGDBG(...) ((void)0)
+
 // Include the appropriate flash driver header based on target vendor
 #if defined(RP2040) || defined(RP2350)
 #include <Target_BlockStorage_RP2040FlashDriver.h>
@@ -87,6 +90,35 @@ __nfweak void ConfigurationManager_EnumerateConfigurationBlocks()
             (HAL_CONFIGURATION_NETWORK_WIRELESS80211 *)ConfigurationManager_FindNetworkWireless80211ConfigurationBlocks(
                 (uint32_t)&__nanoConfig_start__,
                 (uint32_t)&__nanoConfig_end__);
+
+        // check wireless configs count — create a default if none exist
+        if (networkWirelessConfigs->Count == 0)
+        {
+            HAL_Configuration_Wireless80211 *wirelessConfig =
+                (HAL_Configuration_Wireless80211 *)platform_malloc(sizeof(HAL_Configuration_Wireless80211));
+
+            if (wirelessConfig != NULL)
+            {
+                InitialiseWirelessDefaultConfig(wirelessConfig, 0);
+
+                ConfigurationManager_StoreConfigurationBlock(
+                    wirelessConfig,
+                    DeviceConfigurationOption_Wireless80211Network,
+                    0,
+                    sizeof(HAL_Configuration_Wireless80211),
+                    0,
+                    false);
+
+                // re-enumerate to pick it up
+                networkWirelessConfigs =
+                    (HAL_CONFIGURATION_NETWORK_WIRELESS80211 *)
+                        ConfigurationManager_FindNetworkWireless80211ConfigurationBlocks(
+                            (uint32_t)&__nanoConfig_start__,
+                            (uint32_t)&__nanoConfig_end__);
+
+                platform_free(wirelessConfig);
+            }
+        }
 
         // find X509 CA certificate blocks
         HAL_CONFIGURATION_X509_CERTIFICATE *certificateStore =
@@ -285,16 +317,29 @@ __nfweak bool ConfigurationManager_StoreConfigurationBlock(
     else if (configuration == DeviceConfigurationOption_Wireless80211Network)
     {
         if (g_TargetConfiguration.Wireless80211Configs == NULL ||
-            (g_TargetConfiguration.Wireless80211Configs->Count == 0 ||
-             (configurationIndex + 1) > g_TargetConfiguration.Wireless80211Configs->Count))
+            (g_TargetConfiguration.Wireless80211Configs->Count == 0 && configurationIndex == 0))
         {
-            // there is no room for this block, or there are no blocks stored at all
-            // failing the operation
+            // no wireless config block exists yet, storing the first one
+            // scan flash to find the end of existing config data (network configs come first)
+            HAL_CONFIGURATION_NETWORK *existingNet =
+                (HAL_CONFIGURATION_NETWORK *)ConfigurationManager_FindNetworkConfigurationBlocks(
+                    (uint32_t)&__nanoConfig_start__,
+                    (uint32_t)&__nanoConfig_end__);
+            uint32_t existingSize = existingNet->Count * sizeof(HAL_Configuration_NetworkInterface);
+            platform_free(existingNet);
+            storageAddress = (uint32_t)&__nanoConfig_start__ + existingSize;
+        }
+        else if (g_TargetConfiguration.Wireless80211Configs->Count == 0 ||
+                 (configurationIndex + 1) > g_TargetConfiguration.Wireless80211Configs->Count)
+        {
             return FALSE;
         }
-
-        // set storage address from block address, plus the requested offset
-        storageAddress = (ByteAddress)g_TargetConfiguration.Wireless80211Configs->Configs[configurationIndex] + offset;
+        else
+        {
+            // set storage address from block address, plus the requested offset
+            storageAddress =
+                (ByteAddress)g_TargetConfiguration.Wireless80211Configs->Configs[configurationIndex] + offset;
+        }
 
         // set block size, in case it's not already set
         blockSize = sizeof(HAL_Configuration_Wireless80211);
@@ -458,6 +503,11 @@ __nfweak UpdateConfigurationResult ConfigurationManager_UpdateConfigurationBlock
     // config sector size
     int sizeOfConfigSector = (uint32_t)&__nanoConfig_end__ - (uint32_t)&__nanoConfig_start__;
 
+    CFGDBG("CFGUPD: opt=%d idx=%d secSize=%d\r\n", (int)configuration, (int)configurationIndex, sizeOfConfigSector);
+    CFGDBG("CFGUPD: W80211=0x%08X cnt=%d\r\n",
+        (unsigned)(uintptr_t)g_TargetConfiguration.Wireless80211Configs,
+        g_TargetConfiguration.Wireless80211Configs ? g_TargetConfiguration.Wireless80211Configs->Count : -1);
+
     // allocate memory from CRT heap
     uint8_t *configSectorCopy = (uint8_t *)platform_malloc(sizeOfConfigSector);
 
@@ -500,6 +550,38 @@ __nfweak UpdateConfigurationResult ConfigurationManager_UpdateConfigurationBlock
         }
         else if (configuration == DeviceConfigurationOption_Wireless80211Network)
         {
+            // If no Wireless80211 config exists yet, delegate to StoreConfigurationBlock
+            // to create the initial block (like ESP32 does), then re-enumerate.
+            if (g_TargetConfiguration.Wireless80211Configs == NULL ||
+                g_TargetConfiguration.Wireless80211Configs->Count == 0)
+            {
+                CFGDBG("CFGUPD: W80211 Count==0, delegating to Store\r\n");
+                platform_free(configSectorCopy);
+
+                // set marker before storing
+                memcpy(
+                    configurationBlock,
+                    c_MARKER_CONFIGURATION_WIRELESS80211_V1,
+                    sizeof(c_MARKER_CONFIGURATION_WIRELESS80211_V1));
+
+                bool storeRc = ConfigurationManager_StoreConfigurationBlock(
+                        configurationBlock,
+                        configuration,
+                        configurationIndex,
+                        sizeof(HAL_Configuration_Wireless80211),
+                        0,
+                        true);
+                CFGDBG("CFGUPD: Store rc=%d\r\n", (int)storeRc);
+                if (storeRc)
+                {
+                    return UpdateConfigurationResult_Success;
+                }
+                else
+                {
+                    return UpdateConfigurationResult_Failed;
+                }
+            }
+
             // make sure the config block marker is set
             memcpy(
                 configurationBlock,
@@ -523,6 +605,7 @@ __nfweak UpdateConfigurationResult ConfigurationManager_UpdateConfigurationBlock
 
             // storage address from block address
             storageAddress = (ByteAddress)g_TargetConfiguration.Wireless80211Configs->Configs[configurationIndex];
+            CFGDBG("CFGUPD: W80211 update addr=0x%08X blkSz=%d\r\n", (unsigned)storageAddress, (int)sizeof(HAL_Configuration_Wireless80211));
 
             // set block size, in case it's not already set
             blockSize = sizeof(HAL_Configuration_Wireless80211);
@@ -599,35 +682,65 @@ __nfweak UpdateConfigurationResult ConfigurationManager_UpdateConfigurationBlock
         }
 
         // erase config sector
-        if (STM32FlashDriver_EraseBlock(NULL, (uint32_t)&__nanoConfig_start__) == TRUE)
+        CFGDBG("CFGUPD: erasing 0x%08X\r\n", (unsigned)(uint32_t)&__nanoConfig_start__);
         {
-            // flash block is erased
-
-            // subtract the start address of config sector to get the offset
-            blockOffset = storageAddress - (uint32_t)&__nanoConfig_start__;
-
-            // set pointer to block to udpate
-            blockAddressInCopy = configSectorCopy + blockOffset;
-
-            // replace config block with new content by replacing memory
-            memcpy(blockAddressInCopy, configurationBlock, blockSize);
-
-            // copy the config block copy back to the config block storage
-            if (STM32FlashDriver_Write(
-                    NULL,
-                    (uint32_t)&__nanoConfig_start__,
-                    sizeOfConfigSector,
-                    (unsigned char *)configSectorCopy,
-                    true))
+#if defined(RP2040) || defined(RP2350)
+            // RP2040 has 4KB erase sectors — need to erase all sectors in the config region
+            bool eraseOk = TRUE;
+            for (uint32_t eraseAddr = (uint32_t)&__nanoConfig_start__;
+                 eraseAddr < (uint32_t)&__nanoConfig_end__ && eraseOk;
+                 eraseAddr += 4096)
             {
-                success = UpdateConfigurationResult_Success;
+                eraseOk = STM32FlashDriver_EraseBlock(NULL, eraseAddr);
+            }
+#else
+            bool eraseOk = (STM32FlashDriver_EraseBlock(NULL, (uint32_t)&__nanoConfig_start__) == TRUE);
+#endif
+            if (eraseOk)
+            {
+                // flash block is erased
+
+                // subtract the start address of config sector to get the offset
+                blockOffset = storageAddress - (uint32_t)&__nanoConfig_start__;
+                CFGDBG("CFGUPD: writing offset=%d blkSz=%d secSz=%d\r\n", (int)blockOffset, (int)blockSize, sizeOfConfigSector);
+
+                // set pointer to block to udpate
+                blockAddressInCopy = configSectorCopy + blockOffset;
+
+                // replace config block with new content by replacing memory
+                memcpy(blockAddressInCopy, configurationBlock, blockSize);
+
+                // copy the config block copy back to the config block storage
+                if (STM32FlashDriver_Write(
+                        NULL,
+                        (uint32_t)&__nanoConfig_start__,
+                        sizeOfConfigSector,
+                        (unsigned char *)configSectorCopy,
+                        true))
+                {
+                    CFGDBG("CFGUPD: write OK\r\n");
+                    success = UpdateConfigurationResult_Success;
+                }
+                else
+                {
+                    CFGDBG("CFGUPD: write FAILED\r\n");
+                }
+            }
+            else
+            {
+                CFGDBG("CFGUPD: erase FAILED\r\n");
             }
         }
 
         // free memory
         platform_free(configSectorCopy);
     }
+    else
+    {
+        CFGDBG("CFGUPD: malloc(%d) FAILED\r\n", sizeOfConfigSector);
+    }
 
+    CFGDBG("CFGUPD: result=%d\r\n", (int)success);
     return success;
 }
 

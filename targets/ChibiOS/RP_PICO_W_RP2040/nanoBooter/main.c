@@ -7,14 +7,14 @@
 #include <hal.h>
 #include <cmsis_os.h>
 
-#include <serialcfg.h>
+#include <usbcfg.h>
 #include <targetHAL.h>
 #include <WireProtocol_ReceiverThread.h>
 #include <nanoPAL_BlockStorage.h>
 #include <LaunchCLR.h>
 
 // need to declare the Receiver thread here
-osThreadDef(ReceiverThread, osPriorityHigh, 1024, "ReceiverThread");
+osThreadDef(ReceiverThread, osPriorityHigh, 2048, "ReceiverThread");
 
 // Application entry point.
 int main(void)
@@ -37,8 +37,12 @@ int main(void)
     if (!IsToRemainInBooter())
     {
         // check for valid CLR image at address contiguous to nanoBooter
-        // this target DOES NOT have configuration block, so we need to use the __nanoImage_end__ address here
-        if (CheckValidCLRImage((uint32_t)&__nanoImage_end__))
+        volatile uint32_t *clrVector = (volatile uint32_t *)(uint32_t)&__nanoImage_end__;
+        uint32_t msp = clrVector[0];
+        uint32_t resetHandler = clrVector[1];
+
+        if (msp != 0xFFFFFFFF && msp != 0x00000000 &&
+            resetHandler > 0x10000000 && resetHandler < 0x10200000)
         {
             // there seems to be a valid CLR image
             // launch nanoCLR
@@ -46,8 +50,16 @@ int main(void)
         }
     }
 
-    // starts the serial driver (SIO driver for RP2040)
-    sioStart(&SERIAL_DRIVER, NULL);
+    //  Initializes a serial-over-USB CDC driver.
+    sduObjectInit(&SERIAL_DRIVER);
+    sduStart(&SERIAL_DRIVER, &serusbcfg);
+
+    // Activates the USB driver and then the USB bus pull-up on D+.
+    // Note, a delay is inserted in order to not have to disconnect the cable after a reset.
+    usbDisconnectBus(serusbcfg.usbp);
+    chThdSleepMilliseconds(100);
+    usbStart(serusbcfg.usbp, &usbcfg);
+    usbConnectBus(serusbcfg.usbp);
 
     // create the receiver thread
     osThreadCreate(osThread(ReceiverThread), NULL);
@@ -60,15 +72,15 @@ int main(void)
     // for nanoBooter we have to init it in order to provide the flash map for Monitor_FlashSectorMap command
     BlockStorageList_Initialize();
     BlockStorage_AddDevices();
+    BlockStorageList_InitializeDevices();
 
     // report successful nanoBooter execution
     ReportSuccessfullNanoBooter();
 
-    //  Normal main() thread — blink the on-board LED (GP25)
-    palSetPadMode(IOPORT1, 25U, PAL_MODE_OUTPUT_PUSHPULL);
+    //  Normal main() thread
+    //  NOTE: On Pico W, GP25 is the CYW43 WiFi SPI CS — do NOT toggle it as LED.
     while (true)
     {
-        palTogglePad(IOPORT1, 25U);
         osDelay(500);
     }
 }

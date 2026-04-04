@@ -7,7 +7,7 @@
 #include <hal.h>
 #include <cmsis_os.h>
 
-#include <serialcfg.h>
+#include <usbcfg.h>
 #include <targetHAL.h>
 #include <CLR_Startup_Thread.h>
 #include <WireProtocol_ReceiverThread.h>
@@ -17,9 +17,11 @@
 #include <targetPAL.h>
 
 // need to declare the Receiver thread here
-osThreadDef(ReceiverThread, osPriorityHigh, 1024, "ReceiverThread");
+osThreadDef(ReceiverThread, osPriorityHigh, 2048, "ReceiverThread");
 // declare CLRStartup thread here
-osThreadDef(CLRStartupThread, osPriorityNormal, 4096, "CLRStartupThread");
+// 8192 bytes: software TLS on Cortex-M0+ (no hardware crypto) needs ~4KB
+// for mbedTLS bignum operations, on top of the CLR interpreter stack.
+osThreadDef(CLRStartupThread, osPriorityNormal, 8192, "CLRStartupThread");
 
 //  Application entry point.
 int main(void)
@@ -35,11 +37,16 @@ int main(void)
     // main() is executing with absolute priority but interrupts are already enabled.
     osKernelInitialize();
 
-    // start watchdog
-    Watchdog_Init();
+    //  Initializes a serial-over-USB CDC driver.
+    sduObjectInit(&SERIAL_DRIVER);
+    sduStart(&SERIAL_DRIVER, &serusbcfg);
 
-    // starts the serial driver (SIO driver for RP2040)
-    sioStart(&SERIAL_DRIVER, NULL);
+    // Activates the USB driver and then the USB bus pull-up on D+.
+    // Note, a delay is inserted in order to not have to disconnect the cable after a reset.
+    usbDisconnectBus(serusbcfg.usbp);
+    chThdSleepMilliseconds(100);
+    usbStart(serusbcfg.usbp, &usbcfg);
+    usbConnectBus(serusbcfg.usbp);
 
     // create the receiver thread
     osThreadCreate(osThread(ReceiverThread), NULL);

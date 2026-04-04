@@ -8,26 +8,24 @@
 
 // RP2040 Pico W flash layout (2MB external QSPI flash, 4KB sectors)
 // WiFi variant: nanoCLR expanded for CYW43 firmware blob
-// 0x10000000 - 0x1000FFFF : nanoBooter   (64KB  = 16 sectors)
-// 0x10010000 - 0x10017FFF : Config block (32KB  = 8 sectors)
-// 0x10018000 - 0x101AFFFF : nanoCLR      (1600KB = 400 sectors)
-// 0x101B0000 - 0x101FFFFF : Deployment   (320KB  = 80 sectors)
+// 0x10000000 - 0x1000BFFF : nanoBooter   (48KB  = 12 sectors)
+// 0x1000C000 - 0x10013FFF : Config block (32KB  = 8 sectors)
+// 0x10014000 - 0x10153FFF : nanoCLR      (1280KB = 320 sectors)
+// 0x10154000 - 0x101FFFFF : Deployment   (688KB  = 172 sectors)
 
 // 4KB sectors
 const BlockRange BlockRange1[] = {
-    // 0x10000000 nanoBooter (sectors 0-15)
-    {BlockRange_BLOCKTYPE_BOOTSTRAP, 0, 15},
+    // 0x10000000 nanoBooter (sectors 0-11)
+    {BlockRange_BLOCKTYPE_BOOTSTRAP, 0, 11},
 
-    // 0x10010000 configuration block (sectors 16-23)
-    {BlockRange_BLOCKTYPE_CONFIG, 16, 23},
+    // 0x1000C000 configuration block (sectors 12-19)
+    {BlockRange_BLOCKTYPE_CONFIG, 12, 19},
 
-    // 0x10018000 nanoCLR (sectors 24-423)
-    {BlockRange_BLOCKTYPE_CODE, 24, 423},
+    // 0x10014000 nanoCLR (sectors 20-339)
+    {BlockRange_BLOCKTYPE_CODE, 20, 339},
 
-    // 0x101B0000 deployment (sectors 424-503)
-    {BlockRange_BLOCKTYPE_DEPLOYMENT, 424, 503},
-
-    // sectors 504-511 reserved (8 sectors = 32KB guard)
+    // 0x10154000 deployment (sectors 340-511)
+    {BlockRange_BLOCKTYPE_DEPLOYMENT, 340, 511},
 };
 
 const BlockRegionInfo BlockRegions[] = {

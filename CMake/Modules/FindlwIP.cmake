@@ -8,7 +8,6 @@ FetchContent_GetProperties(lwip)
 
 # List of the required lwIp include files.
 list(APPEND lWIP_INCLUDE_DIRS ${lwip_SOURCE_DIR}/src/include/)
-list(APPEND lWIP_INCLUDE_DIRS ${lwip_SOURCE_DIR}/src/include/lwip)
 list(APPEND lWIP_INCLUDE_DIRS ${lwip_SOURCE_DIR}/src/include/netif)
 list(APPEND lWIP_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/DeviceInterfaces/Networking.Sntp)
 

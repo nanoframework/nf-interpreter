@@ -11,6 +11,10 @@
 #include <hal.h>
 #include <ch.h>
 
+// Software UTC offset for targets without hardware RTC (e.g. RP2040).
+// Set by HAL_Time_SetUtcTime() when SNTP delivers wall-clock time.
+uint64_t g_HAL_Time_UtcOffset = 0;
+
 // Returns the current date time from the system tick or from the RTC if it's available (this depends on the respective configuration option)
 uint64_t  HAL_Time_CurrentDateTime(bool datePartOnly)
 {
@@ -52,10 +56,13 @@ uint64_t  HAL_Time_CurrentDateTime(bool datePartOnly)
 
   #else
 
+    // No hardware RTC — add software offset (set by SNTP via HAL_Time_SetUtcTime)
+    uint64_t now = HAL_Time_CurrentTime() + g_HAL_Time_UtcOffset;
+
 	if (datePartOnly)
 	{
 		SYSTEMTIME st;
-		HAL_Time_ToSystemTime(HAL_Time_CurrentTime(), &st);
+		HAL_Time_ToSystemTime(now, &st);
 
 		st.wHour = 0;
 		st.wMinute = 0;
@@ -66,7 +73,7 @@ uint64_t  HAL_Time_CurrentDateTime(bool datePartOnly)
 	}
 	else
     {
-        return HAL_Time_CurrentTime();
+        return now;
     }
 
   #endif
@@ -96,9 +103,8 @@ void HAL_Time_SetUtcTime(uint64_t utcTime)
 
   #else
 
-    // TODO FIXME
-    // need to add implementation when RTC is not being used
-    // can't mess with the systicks because the scheduling can fail
+    // No hardware RTC — store offset so HAL_Time_CurrentDateTime() returns wall-clock time
+    g_HAL_Time_UtcOffset = utcTime - HAL_Time_CurrentTime();
 
   #endif
 }

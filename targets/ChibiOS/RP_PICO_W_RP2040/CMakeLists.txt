@@ -11,9 +11,6 @@ list(APPEND TARGET_CHIBIOS_COMMON_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/Target_Bl
 list(APPEND TARGET_CHIBIOS_COMMON_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/platform_BlockStorage.c")
 list(APPEND TARGET_CHIBIOS_COMMON_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/target_stubs.cpp")
 
-# Async stubs (HAL_CONTINUATION) when nanoFramework.Runtime.Events is not enabled
-list(APPEND TARGET_CHIBIOS_NANOCLR_SOURCES "${CMAKE_SOURCE_DIR}/src/PAL/AsyncProcCall/Async_stubs.cpp")
-
 # RP2040 RNG stub (ROSC-based, replaces STM32 RNG)
 list(APPEND TARGET_CHIBIOS_NANOCLR_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/target_rng.c")
 
@@ -46,12 +43,13 @@ nf_setup_target_build(
         -DRUNTIME_MEMORY_PROFILE__small=1
         -DTARGET_HAS_WIFI=1
         -DRP_PIO_REQUIRED=1
+        LFS_CONFIG=lfs_config.h
 
     BOOTER_EXTRA_LINKMAP_PROPERTIES
         ",--library-path=${CMAKE_SOURCE_DIR}/targets/ChibiOS/_common,--library-path=${CHIBIOS_SOURCE_FOLDER}/os/common/startup/ARMCMx/compilers/GCC/ld,--defsym=__main_stack_size__=0x400,--defsym=__process_stack_size__=0x400,--defsym=__crt_heap_size__=0x1000"
 
     CLR_EXTRA_LINKMAP_PROPERTIES
-        ",--library-path=${CMAKE_SOURCE_DIR}/targets/ChibiOS/_common,--library-path=${CHIBIOS_SOURCE_FOLDER}/os/common/startup/ARMCMx/compilers/GCC/ld,--defsym=__main_stack_size__=0x400,--defsym=__process_stack_size__=0x400,--defsym=__crt_heap_size__=0x4000"
+        ",--library-path=${CMAKE_SOURCE_DIR}/targets/ChibiOS/_common,--library-path=${CHIBIOS_SOURCE_FOLDER}/os/common/startup/ARMCMx/compilers/GCC/ld,--defsym=__main_stack_size__=0x400,--defsym=__process_stack_size__=0x800,--defsym=__crt_heap_size__=0x14000"
 )
 
 # Relax warnings for external CYW43 driver sources (we cannot modify them)
@@ -73,7 +71,7 @@ endif()
 
 nf_generate_uf2_package(
     ${CMAKE_BINARY_DIR}/${NANOBOOTER_PROJECT_NAME}.bin 0x10000000
-    ${CMAKE_BINARY_DIR}/${NANOCLR_PROJECT_NAME}.bin 0x10018000
+    ${CMAKE_BINARY_DIR}/${NANOCLR_PROJECT_NAME}.bin 0x10014000
     0xe48bff56
     ${CMAKE_BINARY_DIR}/nanoCLR.uf2
 )

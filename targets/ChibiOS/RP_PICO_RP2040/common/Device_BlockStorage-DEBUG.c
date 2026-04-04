@@ -7,25 +7,24 @@
 #include <nanoPAL_BlockStorage.h>
 
 // RP2040 Pico flash layout for DEBUG builds (2MB external QSPI flash, 4KB sectors)
-// 0x10000000 - 0x1000BFFF : nanoBooter   (48KB  = 12 sectors)
-// 0x1000C000 - 0x10013FFF : Config block (32KB  = 8 sectors)
-// 0x10014000 - 0x100FBFFF : nanoCLR      (928KB = 232 sectors)
-// 0x100FC000 - 0x101F7FFF : Deployment   (1008KB = 252 sectors)
-// 0x101F8000 - 0x101FFFFF : littlefs     (32KB  = 8 sectors)
+// 0x10000000 - 0x1000FFFF : nanoBooter   (64KB  = 16 sectors)
+// 0x10010000 - 0x10017FFF : Config block (32KB  = 8 sectors)
+// 0x10018000 - 0x100FFFFF : nanoCLR      (928KB = 232 sectors)
+// 0x10100000 - 0x101FFFFF : Deployment   (1MB   = 256 sectors)
 
 // 4KB sectors
 const BlockRange BlockRange1[] = {
-    // 0x10000000 nanoBooter (sectors 0-11)
-    {BlockRange_BLOCKTYPE_BOOTSTRAP, 0, 11},
+    // 0x10000000 nanoBooter (sectors 0-15)
+    {BlockRange_BLOCKTYPE_BOOTSTRAP, 0, 15},
 
-    // 0x1000C000 configuration block (sectors 12-19)
-    {BlockRange_BLOCKTYPE_CONFIG, 12, 19},
+    // 0x10010000 configuration block (sectors 16-23)
+    {BlockRange_BLOCKTYPE_CONFIG, 16, 23},
 
-    // 0x10014000 nanoCLR (sectors 20-251)
-    {BlockRange_BLOCKTYPE_CODE, 20, 251},
+    // 0x10018000 nanoCLR (sectors 24-255)
+    {BlockRange_BLOCKTYPE_CODE, 24, 255},
 
-    // 0x100FC000 deployment (sectors 252-503)
-    {BlockRange_BLOCKTYPE_DEPLOYMENT, 252, 503}};
+    // 0x10100000 deployment (sectors 256-511)
+    {BlockRange_BLOCKTYPE_DEPLOYMENT, 256, 511}};
 
 const BlockRegionInfo BlockRegions[] = {
     {
