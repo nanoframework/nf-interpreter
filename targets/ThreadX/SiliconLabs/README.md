@@ -10,9 +10,9 @@ As an alternative it can be generated from the device unique ID. For this the de
 
 ### WinUSB devices
 
-In order to add a WinUSB device configuration, the follow is required:
+In order to add a WinUSB device configuration, the following is required:
 
-1. Set build option `GECKO_FEATURE_USBD_WINUSB` to `ON`. As an alternative, if you plan to use the UsbStream # class, the latter is not required. Just set to `ON` the respective build option `API_System.Device.UsbStream`.
+1. Set the Kconfig option `CONFIG_GECKO_FEATURE_USBD_WINUSB=y` in the target defconfig. As an alternative, enabling the `System.Device.UsbStream` API (`CONFIG_API_SYSTEM_DEVICE_USBSTREAM=y`) automatically implies WinUSB support — no explicit `CONFIG_GECKO_FEATURE_USBD_WINUSB` entry is then required in the defconfig.
 
 1. Add the following files to the target folder (mind the location)
     [sl_usbd_class_vendor_instances.c](SL_STK3701A/autogen/sl_usbd_class_vendor_instances.c)

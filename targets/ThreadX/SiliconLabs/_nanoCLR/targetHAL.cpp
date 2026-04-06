@@ -34,7 +34,7 @@ extern void DeInitPwm();
 #include <sys_dev_adc_native_target.h>
 #endif
 
-#if GECKO_FEATURE_USBD_WINUSB == TRUE
+#if CONFIG_GECKO_FEATURE_USBD_WINUSB
 #include <sys_dev_usbstream_native_target.h>
 #endif
 
@@ -160,7 +160,7 @@ void nanoHAL_Initialize()
     adc1Initialized = false;
 #endif
 
-#if GECKO_FEATURE_USBD_WINUSB == TRUE
+#if CONFIG_GECKO_FEATURE_USBD_WINUSB
     memset(&UsbStream_PAL, 0, sizeof(UsbStream_PAL));
 #endif
 
@@ -288,7 +288,7 @@ void nanoHAL_Uninitialize(bool isPoweringDown)
     adc1Initialized = false;
 #endif
 
-#if GECKO_FEATURE_USBD_WINUSB == TRUE
+#if CONFIG_GECKO_FEATURE_USBD_WINUSB
 
     // abort any transfer in progress, just in case
     sl_usbd_vendor_abort_write_bulk(sl_usbd_vendor_winusb_number);
