@@ -151,7 +151,7 @@ RUN ln -fs /usr/bin/python3 /usr/bin/python
 
 # Installing python dependencies for the container
 RUN pip3 install pyserial \
-    && pip3 install --quiet install --quiet -r requirements.txt
+    && pip3 install --quiet "kconfiglib>=14.1.0"
 
 # Install ESP-IDF
 ENV IDF_PATH=/sources/esp-idf
