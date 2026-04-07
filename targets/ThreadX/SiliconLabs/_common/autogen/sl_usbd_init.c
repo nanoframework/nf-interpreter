@@ -6,11 +6,11 @@
 #include "sl_status.h"
 #include <sl_usbd_core.h>
 
-#if GECKO_FEATURE_USBD_HID == TRUE
+#if CONFIG_GECKO_FEATURE_USBD_HID
 #include "sl_usbd_class_hid.h"
 #endif
 
-#if GECKO_FEATURE_USBD_WINUSB == TRUE
+#if CONFIG_GECKO_FEATURE_USBD_WINUSB
 #include "sl_usbd_class_vendor.h"
 #endif
 
@@ -63,7 +63,7 @@ void sli_usbd_init(void)
 
     sl_usbd_core_init();
 
-#if GECKO_FEATURE_USBD_HID == TRUE
+#if CONFIG_GECKO_FEATURE_USBD_HID
     sl_usbd_hid_init();
 #endif
 
@@ -72,7 +72,7 @@ void sli_usbd_init(void)
     sl_usbd_cdc_acm_init();
 #endif
 
-#if GECKO_FEATURE_USBD_WINUSB == TRUE
+#if CONFIG_GECKO_FEATURE_USBD_WINUSB
     sl_usbd_vendor_init();
 #endif
 }
