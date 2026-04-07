@@ -67,7 +67,7 @@ RUN apt-get update \
 RUN mkdir -p /usr/local/bin/gcc
 
 # Clone fatfs
-RUN git clone --branch R0.15a https://github.com/abbrev/fatfs.git --depth 1 ./sources/fatfs
+RUN git clone --branch R0.16 https://github.com/abbrev/fatfs.git --depth 1 ./sources/fatfs
 
 # Clone ESP-IDF
 # >>> IDF MIGRATION: update the branch tag to the new IDF version <<<
