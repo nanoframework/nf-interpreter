@@ -54,6 +54,11 @@ resources:
       name: littlefs-project/littlefs
       endpoint: nanoframework
       ref: refs/tags/v2.11.2
+    - repository: freertos
+      type: github
+      name: FreeRTOS/FreeRTOS
+      endpoint: nanoframework
+      ref: refs/tags/V10.6.2
 
 jobs:
   ##############################
@@ -836,10 +841,14 @@ jobs:
         value: $[counter('WIN32_1_14_0_versioncounter', 0)]
       - name: LITTLEFS_PATH
         value: "D:/a/1/s/littlefs"
+      - name: FREERTOS_PATH
+        value: 'D:/a/1/s/FreeRTOS'
 
     steps:
       - checkout: self
       - checkout: littlefs
+        fetchDepth: 1
+      - checkout: freertos
         fetchDepth: 1
 
       - template: azure-pipelines-templates/nb-gitversioning.yml
