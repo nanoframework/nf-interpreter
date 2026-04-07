@@ -254,6 +254,7 @@ static const CLR_RT_MethodHandler method_lookup[] =
     NULL,
     NULL,
     NULL,
+    NULL,
     Library_sys_net_native_System_Security_Cryptography_X509Certificates_X509Certificate::ParseCertificate___STATIC__VOID__SZARRAY_U1__BYREF_STRING__BYREF_STRING__BYREF_SystemDateTime__BYREF_SystemDateTime,
     NULL,
     NULL,
@@ -345,9 +346,9 @@ static const CLR_RT_MethodHandler method_lookup[] =
 const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_System_Net =
 {
     "System.Net",
-    0xD82C1452,
+    0x6DFA71D6,
     method_lookup,
-    { 100, 2, 0, 11 }
+    { 100, 2, 0, 12 }
 };
 
 // clang-format on

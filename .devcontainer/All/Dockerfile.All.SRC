@@ -146,12 +146,8 @@ RUN mkdir -p  $HEX2DFU_PATH \
     && curl -o  $HEX2DFU_PATH/hex2dfu $HEX2DFU -L \
     && chmod +x  $HEX2DFU_PATH/hex2dfu
 
-# Creating static link python for python3
-RUN ln -fs /usr/bin/python3 /usr/bin/python
-
 # Installing python dependencies for the container
-RUN pip3 install pyserial \
-    && pip3 install --quiet "kconfiglib>=14.1.0"
+RUN pip3 install --no-cache-dir pyserial "kconfiglib>=14.1.0"
 
 # Install ESP-IDF
 ENV IDF_PATH=/sources/esp-idf

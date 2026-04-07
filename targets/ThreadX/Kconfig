@@ -6,10 +6,6 @@
 menu "ThreadX Platform"
     depends on RTOS_THREADX
 
-config GECKO_FEATURE_USBD_HID
-    bool "Gecko USB HID device support"
-    default n
-
 config THREADX_CHIBIOS_HAL_REQUIRED
     bool "ChibiOS HAL required (for STM32 WiFi targets)"
     default n
@@ -23,3 +19,5 @@ config STM32_CUBE_PACKAGE_REQUIRED
     default n
 
 endmenu
+
+source "targets/ThreadX/SiliconLabs/Kconfig"
