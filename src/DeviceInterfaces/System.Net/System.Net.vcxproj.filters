@@ -48,6 +48,9 @@
     <ClCompile Include="sys_net_native_System_Security_Cryptography_X509Certificates_X509Certificate2.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\PAL\COM\sockets\sockets_lwip.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="sys_net_native.h">

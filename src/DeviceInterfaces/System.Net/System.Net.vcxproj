@@ -35,6 +35,11 @@
   <ItemGroup>
     <ClInclude Include="sys_net_native.h" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\nanoFramework.Runtime.Events\nanoFramework.Runtime.Events.vcxproj">
+      <Project>{1396642e-0801-4341-9ad9-4fe2edd0b7d5}</Project>
+    </ProjectReference>
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{0d4bda47-09ab-4332-8fa4-ef12ef16d357}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
