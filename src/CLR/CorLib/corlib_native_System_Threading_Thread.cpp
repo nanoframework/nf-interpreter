@@ -504,7 +504,7 @@ HRESULT Library_corlib_native_System_Threading_Thread::get_CurrentThread___STATI
     NANOCLR_NOCLEANUP();
 }
 
-#if (NANOCLR_REFLECTION == TRUE)
+#if CONFIG_NF_FEATURE_SUPPORT_REFLECTION
 
 HRESULT Library_corlib_native_System_Threading_Thread::GetDomain___STATIC__SystemAppDomain(CLR_RT_StackFrame &stack)
 {
@@ -521,7 +521,7 @@ HRESULT Library_corlib_native_System_Threading_Thread::GetDomain___STATIC__Syste
 
     NANOCLR_NOCLEANUP();
 }
-#endif // NANOCLR_REFLECTION
+#endif // CONFIG_NF_FEATURE_SUPPORT_REFLECTION
 
 //--//
 

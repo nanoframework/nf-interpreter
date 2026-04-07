@@ -1,4 +1,4 @@
-#
+﻿#
 # Copyright (c) .NET Foundation and Contributors
 # See LICENSE file in the project root for full license information.
 #
@@ -23,7 +23,7 @@ if(NF_FEATURE_HAS_ACCESSIBLE_STORAGE)
     list(APPEND TARGET_THREADX_COMMON_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/targetHAL_StorageOperation.cpp)
 endif()
 
-if(HAL_WP_USE_USB_CDC)
+if(NF_WP_TRANSPORT_USB_CDC)
     list(APPEND TARGET_THREADX_COMMON_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/usb_cdc_acm_app.c)
     list(APPEND TARGET_THREADX_COMMON_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/WireProtocol_ReceiverThread_Platform.c)
 endif()

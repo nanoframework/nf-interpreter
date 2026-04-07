@@ -1,4 +1,4 @@
-//****************************************************************************
+﻿//****************************************************************************
 // Includes.
 
 #include <target_platform.h>
@@ -6,15 +6,15 @@
 #include "sl_status.h"
 #include <sl_usbd_core.h>
 
-#if GECKO_FEATURE_USBD_HID == TRUE
+#if CONFIG_GECKO_FEATURE_USBD_HID
 #include "sl_usbd_class_hid.h"
 #endif
 
-#if GECKO_FEATURE_USBD_WINUSB == TRUE
+#if CONFIG_GECKO_FEATURE_USBD_WINUSB
 #include "sl_usbd_class_vendor.h"
 #endif
 
-#if HAL_WP_USE_USB_CDC == TRUE
+#if CONFIG_NF_WP_TRANSPORT_USB_CDC
 #include "sl_usbd_class_cdc.h"
 #include "sl_usbd_class_cdc_acm.h"
 #endif
@@ -63,16 +63,16 @@ void sli_usbd_init(void)
 
     sl_usbd_core_init();
 
-#if GECKO_FEATURE_USBD_HID == TRUE
+#if CONFIG_GECKO_FEATURE_USBD_HID
     sl_usbd_hid_init();
 #endif
 
-#if HAL_WP_USE_USB_CDC == TRUE
+#if CONFIG_NF_WP_TRANSPORT_USB_CDC
     sl_usbd_cdc_init();
     sl_usbd_cdc_acm_init();
 #endif
 
-#if GECKO_FEATURE_USBD_WINUSB == TRUE
+#if CONFIG_GECKO_FEATURE_USBD_WINUSB
     sl_usbd_vendor_init();
 #endif
 }

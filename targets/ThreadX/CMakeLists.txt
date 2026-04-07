@@ -85,7 +85,7 @@ if(NO_THREADX_SOURCE_FOLDER)
 
     message(STATUS "RTOS is: ThreadX ${RTOS_VERSION} from GitHub repo")
 
-    FetchContent_Declare(
+    FetchContent_Populate(
         threadx
         GIT_REPOSITORY https://github.com/eclipse-threadx/threadx.git
         GIT_TAG ${RTOS_VERSION}
@@ -98,7 +98,7 @@ else()
     if(EXISTS "${THREADX_SOURCE_FOLDER}/")
         message(STATUS "RTOS is: ThreadX ${RTOS_VERSION} (source from: ${THREADX_SOURCE_FOLDER})")
 
-        FetchContent_Declare(
+        FetchContent_Populate(
             threadx
             SOURCE_DIR ${THREADX_SOURCE_FOLDER}
         )
@@ -107,12 +107,6 @@ else()
         message(FATAL_ERROR "Couldn't find ThreadX source at ${THREADX_SOURCE_FOLDER}/")
     endif()
 
-endif()
-
-FetchContent_GetProperties(threadx)
-if(NOT threadx_POPULATED)
-    # Fetch the content using previously declared details
-    FetchContent_Populate(threadx)
 endif()
 
 ###########################
@@ -148,7 +142,7 @@ if(THREADX_USBX_REQUIRED)
 
         message(STATUS "ThreadX USBX ${USBX_VERSION} from GitHub repo")
 
-        FetchContent_Declare(
+        FetchContent_Populate(
             threadx_usbx
             GIT_REPOSITORY https://github.com/eclipse-threadx/usbx.git
             GIT_TAG ${RTOS_VERSION}
@@ -161,7 +155,7 @@ if(THREADX_USBX_REQUIRED)
         if(EXISTS "${USBX_SOURCE_FOLDER}/")
             message(STATUS "ThreadX USBX ${USBX_VERSION} (source from: ${USBX_SOURCE_FOLDER})")
 
-            FetchContent_Declare(
+            FetchContent_Populate(
                 threadx_usbx
                 SOURCE_DIR ${USBX_SOURCE_FOLDER}
             )
@@ -170,12 +164,6 @@ if(THREADX_USBX_REQUIRED)
             message(FATAL_ERROR "Couldn't find ThreadX USBX source at ${USBX_SOURCE_FOLDER}/")
         endif()
 
-    endif()
-
-    FetchContent_GetProperties(threadx_usbx)
-    if(NOT threadx_usbx_POPULATED)
-        # Fetch the content using previously declared details
-        FetchContent_Populate(threadx_usbx)
     endif()
 
 endif()
@@ -213,7 +201,7 @@ if(THREADX_FILEX_REQUIRED)
 
         message(STATUS "ThreadX FileX ${FILEX_VERSION} from GitHub repo")
 
-        FetchContent_Declare(
+        FetchContent_Populate(
             threadx_filex
             GIT_REPOSITORY https://github.com/eclipse-threadx/filex.git
             GIT_TAG ${FILEX_VERSION}
@@ -226,7 +214,7 @@ if(THREADX_FILEX_REQUIRED)
         if(EXISTS "${FILEX_SOURCE_FOLDER}/")
             message(STATUS "ThreadX FileX ${FILEX_VERSION} (source from: ${FILEX_SOURCE_FOLDER})")
 
-            FetchContent_Declare(
+            FetchContent_Populate(
                 threadx_filex
                 SOURCE_DIR ${FILEX_SOURCE_FOLDER}
             )
@@ -235,12 +223,6 @@ if(THREADX_FILEX_REQUIRED)
             message(FATAL_ERROR "Couldn't find ThreadX FileX source at ${FILEX_SOURCE_FOLDER}/")
         endif()
 
-    endif()
-
-    FetchContent_GetProperties(threadx_filex)
-    if(NOT threadx_filex_POPULATED)
-        # Fetch the content using previously declared details
-        FetchContent_Populate(threadx_filex)
     endif()
 
 endif()
@@ -278,7 +260,7 @@ if(THREADX_NETXDUO_REQUIRED)
 
         message(STATUS "ThreadX NetX Duo ${NETXDUO_VERSION} from GitHub repo")
 
-        FetchContent_Declare(
+        FetchContent_Populate(
             threadx_netxduo
             GIT_REPOSITORY https://github.com/eclipse-threadx/netxduo.git
             GIT_TAG ${NETXDUO_VERSION}
@@ -291,7 +273,7 @@ if(THREADX_NETXDUO_REQUIRED)
         if(EXISTS "${NETXDUO_SOURCE_FOLDER}/")
             message(STATUS "ThreadX NetX Duo ${NETXDUO_VERSION} (source from: ${NETXDUO_SOURCE_FOLDER})")
 
-            FetchContent_Declare(
+            FetchContent_Populate(
                 threadx_netxduo
                 SOURCE_DIR ${NETXDUO_SOURCE_FOLDER}
             )
@@ -304,12 +286,6 @@ if(THREADX_NETXDUO_REQUIRED)
 
     # enable BSD layer in NetX Duo
     set(NXD_ENABLE_BSD TRUE)
-
-    FetchContent_GetProperties(threadx_netxduo)
-    if(NOT threadx_netxduo_POPULATED)
-        # Fetch the content using previously declared details
-        FetchContent_Populate(threadx_netxduo)
-    endif()
 
 endif()
 
@@ -332,7 +308,7 @@ if(EXISTS ${PROJECT_SOURCE_DIR}/targets/ThreadX/ST/${TARGET_BOARD})
     # set target base location
     set(TARGET_BASE_LOCATION ${PROJECT_SOURCE_DIR}/targets/ThreadX/ST/${TARGET_BOARD})
 
-    if(CHIBIOS_HAL_REQUIRED)
+    if(THREADX_CHIBIOS_HAL_REQUIRED)
         set(CHIBIOS_BOARD_DEFINITIONS_PATH ${PROJECT_SOURCE_DIR}/targets/ThreadX/ST/${TARGET_BOARD} CACHE INTERNAL "Path of board definition files")
     endif()
 
@@ -422,7 +398,7 @@ else()
         # set target base location
         set(TARGET_BASE_LOCATION ${PROJECT_SOURCE_DIR}/targets-community/ThreadX/ST/${TARGET_BOARD})
 
-        if(CHIBIOS_HAL_REQUIRED)
+        if(THREADX_CHIBIOS_HAL_REQUIRED)
             set(CHIBIOS_BOARD_DEFINITIONS_PATH ${PROJECT_SOURCE_DIR}/targets-community/ThreadX/ST/${TARGET_BOARD} CACHE INTERNAL "Path of board definition files")
         endif()
 

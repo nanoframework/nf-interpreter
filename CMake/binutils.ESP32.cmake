@@ -1,4 +1,4 @@
-#
+﻿#
 # Copyright (c) .NET Foundation and Contributors
 # See LICENSE file in the project root for full license information.
 #
@@ -31,9 +31,9 @@ macro(nf_process_esp32_ethernet_options)
             # can't find this under supported PHYs
         
             # try with SPIs
-            list(FIND ESP32_SUPPORTED_ETH_SPI ${ESP32_ETHERNET_INTERFACE} ESP32_ETH_SPI_INDEX)
+            list(FIND ESP32_SUPPORTED_ETH_SPI ${ESP32_ETHERNET_INTERFACE} ESP32_ETHERNET_SPI_INDEX)
             
-            if(ESP32_ETH_SPI_INDEX EQUAL -1)
+            if(ESP32_ETHERNET_SPI_INDEX EQUAL -1)
                 # can't find it under SPIs either
                 message(FATAL_ERROR "\n\nSomething wrong happening: can't find support for Ethernet interface ${ESP32_ETHERNET_INTERFACE}!\n\n")
             else()
@@ -112,7 +112,7 @@ macro(nf_fix_esp32c3_rom_file)
         if(${ESP32_REVISION} LESS_EQUAL 2)
             # need to UNcomment the rom_temp_to_power symbol
             file(READ
-                ${esp32_idf_SOURCE_DIR}/components/esp_rom/esp32c3/ld/esp32c3.rom.ld
+                ${IDF_PATH_CMAKED}/components/esp_rom/esp32c3/ld/esp32c3.rom.ld
                 ESP32_C3_ROM_LD_CONTENT)
         
             string(REPLACE
@@ -122,12 +122,12 @@ macro(nf_fix_esp32c3_rom_file)
                     "${ESP32_C3_ROM_LD_CONTENT}")
         
             file(WRITE 
-                ${esp32_idf_SOURCE_DIR}/components/esp_rom/esp32c3/ld/esp32c3.rom.ld
+                ${IDF_PATH_CMAKED}/components/esp_rom/esp32c3/ld/esp32c3.rom.ld
                 "${ESP32_C3_ROM_LD_NEW_CONTENT}")
         else()
             # need to COMMENT the rom_temp_to_power symbol
             file(READ
-                ${esp32_idf_SOURCE_DIR}/components/esp_rom/esp32c3/ld/esp32c3.rom.ld
+                ${IDF_PATH_CMAKED}/components/esp_rom/esp32c3/ld/esp32c3.rom.ld
                 ESP32_C3_ROM_LD_CONTENT)
 
             string(FIND "${ESP32_C3_ROM_LD_CONTENT}" "/* rom_temp_to_power = 0x40001ab4; */" ROM_TEMP_SYMBOL_INDEX)
@@ -141,7 +141,7 @@ macro(nf_fix_esp32c3_rom_file)
                         "${ESP32_C3_ROM_LD_CONTENT}")
             
                 file(WRITE 
-                    ${esp32_idf_SOURCE_DIR}/components/esp_rom/esp32c3/ld/esp32c3.rom.ld
+                    ${IDF_PATH_CMAKED}/components/esp_rom/esp32c3/ld/esp32c3.rom.ld
                     "${ESP32_C3_ROM_LD_NEW_CONTENT}")
             endif()
 
@@ -280,7 +280,7 @@ macro(nf_add_platform_dependencies target)
                 ${ESP32_IDF_INCLUDE_DIRS}
                 ${TARGET_ESP32_IDF_INCLUDES}
                 ${CMAKE_BINARY_DIR}/targets/${RTOS}
-                ${esp32_idf_SOURCE_DIR}/components/mbedtls/mbedtls/include
+                ${IDF_PATH_CMAKED}/components/mbedtls/mbedtls/include
         )
 
         add_dependencies(${target}.elf nano::NF_Network)
@@ -543,7 +543,7 @@ macro(nf_add_tinyusb_component)
     # get the esp_tinyusb target library name
     idf_component_get_property(etusb_lib esp_tinyusb COMPONENT_LIB)
     # add the tinyusb src directory as include path to esp_tinyusb library project
-    target_include_directories(${etusb_lib} PRIVATE ${esp32_idf_SOURCE_DIR}/components/tinyusb/src)
+    target_include_directories(${etusb_lib} PRIVATE ${IDF_PATH_CMAKED}/components/tinyusb/src)
 
     # also add the freertos directory as include path
     idf_component_get_property(freertos_include freertos ORIG_INCLUDE_PATH)
@@ -783,7 +783,7 @@ macro(nf_add_idf_as_library)
     endif()
 
     option(HAL_USE_THREAD_OPTION "option to enable OpenThread support")
-    option(THREAD_DEVICE_TYPE "option to specify OpenThread device type (FTD or MTD")
+    option(ESP32_THREAD_DEVICE_TYPE "option to specify OpenThread device type (FTD or MTD")
 
     if(HAL_USE_THREAD_OPTION)
         message(DEBUG "Reading SDK config from '${SDKCONFIG_DEFAULTS_FILE}' to set Thread options")
@@ -804,16 +804,16 @@ macro(nf_add_idf_as_library)
         string(APPEND SDKCONFIG_DEFAULT_CONTENTS "CONFIG_MBEDTLS_KEY_EXCHANGE_ECJPAKE=y\n")
         string(APPEND SDKCONFIG_DEFAULT_CONTENTS "CONFIG_MBEDTLS_ECJPAKE_C=y\n")
         
-        # THREAD_DEVICE_TYPE
-        set(THREAD_DEVICE_TYPE_SUPPORTED "FTD" "MTD" CACHE INTERNAL "supported THREAD device types")
-        list(FIND THREAD_DEVICE_TYPE_SUPPORTED ${THREAD_DEVICE_TYPE} THREAD_DEVICE_TYPE_INDEX)
+        # ESP32_THREAD_DEVICE_TYPE
+        set(ESP32_THREAD_DEVICE_TYPE_SUPPORTED "FTD" "MTD" CACHE INTERNAL "supported THREAD device types")
+        list(FIND ESP32_THREAD_DEVICE_TYPE_SUPPORTED ${ESP32_THREAD_DEVICE_TYPE} ESP32_THREAD_DEVICE_TYPE_INDEX)
 
-        if(THREAD_DEVICE_TYPE_INDEX EQUAL -1)
+        if(ESP32_THREAD_DEVICE_TYPE_INDEX EQUAL -1)
             # Default FTD if not specified
-            set(THREAD_DEVICE_TYPE_INDEX 0)
+            set(ESP32_THREAD_DEVICE_TYPE_INDEX 0)
         endif()
         
-        if (${THREAD_DEVICE_TYPE_INDEX} EQUAL 0)
+        if (${ESP32_THREAD_DEVICE_TYPE_INDEX} EQUAL 0)
             string(APPEND SDKCONFIG_DEFAULT_CONTENTS "CONFIG_OPENTHREAD_FTD=y\n")
             message(STATUS "OpenThread configured as full thread device (FTD)")
         else()
@@ -895,9 +895,9 @@ macro(nf_add_idf_as_library)
         # remove the ones we'll be replacing
         list(REMOVE_ITEM 
             IDF_LWIP_SOURCES
-                ${esp32_idf_SOURCE_DIR}/components/lwip/lwip/src/api/api_msg.c
-                ${esp32_idf_SOURCE_DIR}/components/lwip/lwip/src/api/sockets.c
-                ${esp32_idf_SOURCE_DIR}/components/lwip/port/freertos/sys_arch.c
+                ${IDF_PATH_CMAKED}/components/lwip/lwip/src/api/api_msg.c
+                ${IDF_PATH_CMAKED}/components/lwip/lwip/src/api/sockets.c
+                ${IDF_PATH_CMAKED}/components/lwip/port/freertos/sys_arch.c
         )
 
         # add our modified sources

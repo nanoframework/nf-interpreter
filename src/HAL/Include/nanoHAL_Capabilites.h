@@ -9,8 +9,8 @@
 #include <nanoCLR_Headers.h>
 #include <target_os.h>
 
-#ifndef TARGET_HAS_NANOBOOTER
-#error "Can't find definition for TARGET_HAS_NANOBOOTER. Check the inclusion of 'target_os.h'"
+#ifndef CONFIG_RTOS
+#error "nf_config.h not included. Check that target_os.h is properly generated and included."
 #endif
 
 // ready to use default implementations to be used at platform level

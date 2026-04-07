@@ -333,9 +333,7 @@ struct Library_sys_net_native_System_Net_Sockets_Socket
     static const int FIELD__m_recvTimeout = 4;
     static const int FIELD__m_sendTimeout = 5;
     static const int FIELD___socketType = 6;
-    static const int FIELD___nonBlockingConnectInProgress = 7;
-    static const int FIELD___nonBlockingConnectRightEndPoint = 8;
-    static const int FIELD___rightEndPoint = 9;
+    static const int FIELD___rightEndPoint = 7;
 
     //--//
 };

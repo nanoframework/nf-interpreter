@@ -23,30 +23,30 @@ function(nf_set_linker_file target linker_file_name)
 
 endfunction()
 
-# sets network connectivity options according to the NetX driver choosen in build options WIFI_DRIVER and ETHERNET_DRIVER
+# sets network connectivity options according to the NetX driver choosen in build options THREADX_WIFI_DRIVER and ETHERNET_DRIVER
 macro(nf_set_network_connectivity_options)
 
     ############################
-    if(DEFINED WIFI_DRIVER)
+    if(THREADX_WIFI_DRIVER)
 
         # list of supported Wi-Fi drivers
-        set(WIFI_DRIVER_SUPPORTED_OPTIONS "ISM43362")
+        set(THREADX_WIFI_DRIVER_SUPPORTED_OPTIONS "ISM43362")
         # try to find the driver in the list
-        list(FIND WIFI_DRIVER_SUPPORTED_OPTIONS ${WIFI_DRIVER} WIFI_DRIVER_NAME_INDEX)
+        list(FIND THREADX_WIFI_DRIVER_SUPPORTED_OPTIONS ${THREADX_WIFI_DRIVER} THREADX_WIFI_DRIVER_NAME_INDEX)
 
-        if(WIFI_DRIVER_NAME_INDEX EQUAL -1)
+        if(THREADX_WIFI_DRIVER_NAME_INDEX EQUAL -1)
             # driver is NOT supported 
-            message(FATAL_ERROR "\n\nSorry but '${WIFI_DRIVER}' provided in WIFI_DRIVER build option is not supported at this time...\nYou can wait for it to be added, or you might want to contribute by working on a PR for it.\n\n")
-        elseif(WIFI_DRIVER_NAME_INDEX EQUAL 0)
+            message(FATAL_ERROR "\n\nSorry but '${THREADX_WIFI_DRIVER}' provided in THREADX_WIFI_DRIVER build option is not supported at this time...\nYou can wait for it to be added, or you might want to contribute by working on a PR for it.\n\n")
+        elseif(THREADX_WIFI_DRIVER_NAME_INDEX EQUAL 0)
             set(TARGET_HAS_WIFI_SUPPORT TRUE BOOL)
         else()
-            message(FATAL_ERROR "invalid index for WIFI_DRIVER_NAME_INDEX")
+            message(FATAL_ERROR "invalid index for THREADX_WIFI_DRIVER_NAME_INDEX")
         endif()
 
     endif()
 
     ################################
-    if(DEFINED ETHERNET_DRIVER)
+    if(ETHERNET_DRIVER)
 
         # list of supported Ethernet drivers
         set(ETHERNET_DRIVER_SUPPORTED_OPTIONS "LAN8742")
@@ -80,7 +80,7 @@ macro(nf_set_compile_definitions)
     endif()
 
     # definition for platform 
-    if(CHIBIOS_HAL_REQUIRED)
+    if(THREADX_CHIBIOS_HAL_REQUIRED)
         # ChibiOS HAL community always include (nanoFramework overlay and official community contributions optionally)
         target_compile_definitions(${NFSCD_TARGET} PUBLIC -DHAL_USE_COMMUNITY)
     endif()
@@ -114,7 +114,7 @@ macro(nf_add_platform_packages)
     #     find_package(CHIBIOS_FATFS REQUIRED QUIET)
     # endif()
    
-    if(CHIBIOS_HAL_REQUIRED)
+    if(THREADX_CHIBIOS_HAL_REQUIRED)
         find_package(ChibiOS_${TARGET_SERIES_SHORT}_HAL REQUIRED QUIET)
         find_package(ChibiOSnfOverlay REQUIRED QUIET)
     endif()
@@ -302,7 +302,7 @@ macro(nf_add_platform_include_directories target)
 
     endif()
 
-    if(CHIBIOS_HAL_REQUIRED)
+    if(THREADX_CHIBIOS_HAL_REQUIRED)
         target_include_directories(${target}.elf PUBLIC
             ${CHIBIOS_HAL_INCLUDE_DIRS}
             ${ChibiOSnfOverlay_INCLUDE_DIRS}
@@ -363,7 +363,7 @@ macro(nf_add_platform_sources target)
     FetchContent_GetProperties(threadx)
     get_target_property(AZRTOS_INCLUDES azrtos::threadx INCLUDE_DIRECTORIES)
 
-    if(CHIBIOS_HAL_REQUIRED)
+    if(THREADX_CHIBIOS_HAL_REQUIRED)
         target_sources(${target}.elf PUBLIC
             ${CHIBIOS_HAL_SOURCES}
             ${ChibiOSnfOverlay_SOURCES}

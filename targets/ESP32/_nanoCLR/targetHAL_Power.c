@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (c) .NET Foundation and Contributors
 // See LICENSE file in the project root for full license information.
 //
@@ -13,7 +13,7 @@
 
 inline void CPU_Reset()
 {
-#if CONFIG_IDF_TARGET_ESP32C3 && HAL_WP_USE_USB_CDC
+#if CONFIG_IDF_TARGET_ESP32C3 && CONFIG_NF_WP_TRANSPORT_USB_CDC
     SET_PERI_REG_MASK(RTC_CNTL_OPTIONS0_REG, RTC_CNTL_SW_SYS_RST);
     while (true)
     {

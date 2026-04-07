@@ -15,7 +15,7 @@ HRESULT Library_corlib_native_System_Delegate::Equals___BOOLEAN__OBJECT(CLR_RT_S
     NANOCLR_NOCLEANUP_NOLABEL();
 }
 
-#if (NANOCLR_REFLECTION == TRUE)
+#if CONFIG_NF_FEATURE_SUPPORT_REFLECTION
 
 HRESULT Library_corlib_native_System_Delegate::GetInvocationList___SZARRAY_SystemDelegate(CLR_RT_StackFrame &stack)
 {
@@ -127,7 +127,7 @@ HRESULT Library_corlib_native_System_Delegate::get_Target___OBJECT(CLR_RT_StackF
     NANOCLR_NOCLEANUP();
 }
 
-#endif // NANOCLR_REFLECTION
+#endif // CONFIG_NF_FEATURE_SUPPORT_REFLECTION
 
 HRESULT Library_corlib_native_System_Delegate::Combine___STATIC__SystemDelegate__SystemDelegate__SystemDelegate(
     CLR_RT_StackFrame &stack)

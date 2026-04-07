@@ -11,9 +11,10 @@
 #include <nanoVersion.h>
 #include <target_os.h>
 
-#ifndef TARGET_HAS_NANOBOOTER
-#error "Can't find definition for TARGET_HAS_NANOBOOTER. Check the inclusion of 'target_os.h'"
+#ifndef CONFIG_RTOS
+#error "nf_config.h not included. Check that target_os.h is properly generated and included."
 #endif
+
 
 // magic value to mark the limits of the boot clipboard data area
 #define BOOTCLIPBOARD_MAGIC_MARKER 0x4F41A583

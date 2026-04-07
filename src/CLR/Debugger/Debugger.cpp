@@ -366,7 +366,7 @@ bool CLR_DBG_Debugger::Monitor_Ping(WP_Message *msg)
     NATIVE_PROFILE_CLR_DEBUGGER();
     bool fStopOnBoot = true;
 
-#if !defined(BUILD_RTM) && defined(TRACE_TO_STDIO) && (TRACE_TO_STDIO == TRUE)
+#if !defined(BUILD_RTM) && CONFIG_NF_TRACE_TO_STDIO
     CLR_Debug::Printf("CLR_DBG_Debugger::Monitor_Ping...\r\n");
 #endif
     //
@@ -387,7 +387,7 @@ bool CLR_DBG_Debugger::Monitor_Ping(WP_Message *msg)
         // now fill in the flags
         cmdReply.Flags = CLR_EE_DBG_IS(StateProgramExited) != 0 ? Monitor_Ping_c_Ping_DbgFlag_AppExit : 0;
 
-#if defined(WP_IMPLEMENTS_CRC32)
+#if CONFIG_NF_WP_ENABLE_CRC32
         cmdReply.Flags |= Monitor_Ping_c_Ping_WPFlag_SupportsCRC32;
 #endif
 
@@ -1137,7 +1137,7 @@ bool CLR_DBG_Debugger::Monitor_QueryConfiguration(WP_Message *message)
     NATIVE_PROFILE_CLR_DEBUGGER();
 
     // include handling of configuration block only if feature is available
-#if (HAS_CONFIG_BLOCK == TRUE)
+#if CONFIG_NF_FEATURE_HAS_CONFIG_BLOCK
 
     Monitor_QueryConfiguration_Command *cmd = (Monitor_QueryConfiguration_Command *)message->m_payload;
     int size = 0;
@@ -1321,7 +1321,7 @@ bool CLR_DBG_Debugger::Monitor_QueryConfiguration(WP_Message *message)
 
     (void)message;
 
-#endif // (HAS_CONFIG_BLOCK == TRUE)
+#endif // CONFIG_NF_FEATURE_HAS_CONFIG_BLOCK
 
     // got here, something wrong
     return false;
@@ -1332,7 +1332,7 @@ bool CLR_DBG_Debugger::Monitor_UpdateConfiguration(WP_Message *message)
     NATIVE_PROFILE_CLR_DEBUGGER();
 
     // include handling of configuration block only if feature is available
-#if (HAS_CONFIG_BLOCK == TRUE)
+#if CONFIG_NF_FEATURE_HAS_CONFIG_BLOCK
 
     Monitor_UpdateConfiguration_Command *cmd = (Monitor_UpdateConfiguration_Command *)message->m_payload;
     Monitor_UpdateConfiguration_Reply cmdReply;
@@ -1381,7 +1381,7 @@ bool CLR_DBG_Debugger::Monitor_StorageOperation(WP_Message *message)
 {
     NATIVE_PROFILE_CLR_DEBUGGER();
 
-#if (HAS_ACCESSIBLE_STORAGE == TRUE)
+#if CONFIG_NF_FEATURE_HAS_ACCESSIBLE_STORAGE
 
     Monitor_StorageOperation_Command *cmd = (Monitor_StorageOperation_Command *)message->m_payload;
     Monitor_StorageOperation_Reply cmdReply;

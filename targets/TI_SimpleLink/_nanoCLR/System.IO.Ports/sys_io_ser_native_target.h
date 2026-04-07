@@ -28,8 +28,6 @@ typedef struct
     uint8_t *RxBuffer;
     uint16_t RxBytesToRead;
 
-    bool IsLongRunning;
-
     uint8_t WatchChar;
     uint8_t NewLineChar;
     uint32_t ReceivedBytesThreshold;

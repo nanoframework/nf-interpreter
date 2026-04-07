@@ -248,7 +248,7 @@ HRESULT Library_corlib_native_System_AppDomain::GetAppDomain(
 
 #else // #if defined(NANOCLR_APPDOMAINS)
 
-#if (NANOCLR_REFLECTION == TRUE)
+#if CONFIG_NF_FEATURE_SUPPORT_REFLECTION
 
 HRESULT Library_corlib_native_System_AppDomain::GetAssemblies___SZARRAY_SystemReflectionAssembly(
     CLR_RT_StackFrame &stack)
@@ -328,6 +328,6 @@ HRESULT Library_corlib_native_System_AppDomain::Unload___STATIC__VOID__SystemApp
     NANOCLR_NOCLEANUP();
 }
 
-#endif // NANOCLR_REFLECTION
+#endif // CONFIG_NF_FEATURE_SUPPORT_REFLECTION
 
 #endif // #if defined(NANOCLR_APPDOMAINS)

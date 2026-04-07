@@ -49,4 +49,4 @@ set_source_files_properties(${littlefs_SOURCE_DIR}/lfs.c PROPERTIES COMPILE_FLAG
 
 include(FindPackageHandleStandardArgs)
 
-FIND_PACKAGE_HANDLE_STANDARD_ARGS(littlefs DEFAULT_MSG littlefs_INCLUDE_DIRS littlefs_SOURCES)
+FIND_PACKAGE_HANDLE_STANDARD_ARGS(LITTLEFS DEFAULT_MSG littlefs_INCLUDE_DIRS littlefs_SOURCES)

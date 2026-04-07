@@ -1,0 +1,25 @@
+#
+# Copyright (c) .NET Foundation and Contributors
+# See LICENSE file in the project root for full license information.
+#
+
+menu "Wire Protocol Transport"
+
+choice NF_WP_TRANSPORT
+    prompt "Wire Protocol transport"
+    default NF_WP_TRANSPORT_SERIAL
+
+config NF_WP_TRANSPORT_SERIAL
+    bool "UART serial"
+
+config NF_WP_TRANSPORT_USB_CDC
+    bool "USB CDC"
+
+endchoice
+
+config TARGET_SERIAL_BAUDRATE
+    int "Serial baudrate for Wire Protocol"
+    depends on NF_WP_TRANSPORT_SERIAL
+    default 921600
+
+endmenu

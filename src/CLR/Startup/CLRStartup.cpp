@@ -430,11 +430,11 @@ void ClrStartup(CLR_SETTINGS params)
                 {
                     // no proprietary bootloader available, launch nanoBooter
 
-#if (TARGET_HAS_NANOBOOTER == TRUE)
+#if CONFIG_NF_TARGET_HAS_NANOBOOTER
 
                     RequestToLaunchNanoBooter(hr);
                     CPU_Reset();
-#endif // TARGET_HAS_NANOBOOTER
+#endif // CONFIG_NF_TARGET_HAS_NANOBOOTER
                 }
             }
 #endif

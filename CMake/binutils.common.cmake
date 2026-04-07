@@ -1,4 +1,4 @@
-#
+﻿#
 # Copyright (c) .NET Foundation and Contributors
 # See LICENSE file in the project root for full license information.
 #
@@ -63,16 +63,11 @@ macro(nf_common_compiler_definitions)
         target_compile_definitions(${NFCCF_TARGET} PUBLIC -DNANOCLR_USE_APPDOMAINS)
     endif()
 
-    # set compiler definition for implementing (or not) CRC32 in Wire Protocol
-    if(NF_WP_IMPLEMENTS_CRC32)
-        target_compile_definitions(${NFCCF_TARGET} PUBLIC -DWP_IMPLEMENTS_CRC32)
-    endif()
-
     # set definition for Wire Protocol trace mask
     target_compile_definitions(${NFCCF_TARGET} PUBLIC -DTRACE_MASK=${WP_TRACE_MASK})
 
     # set compiler definition regarding inclusion of trace messages and checks on CLR
-    if(NF_PLATFORM_NO_CLR_TRACE)
+    if(NF_CLR_NO_TRACE)
         target_compile_definitions(${NFCCF_TARGET} PUBLIC -DPLATFORM_NO_CLR_TRACE=1)
     endif()
 
@@ -786,18 +781,11 @@ function(nf_add_mbedtls_library)
 
     cmake_policy(SET CMP0048 NEW)
 
-    # Check if population has already been performed
-    FetchContent_GetProperties(mbedtls)
-    if(NOT mbedtls_POPULATED)
-        # Fetch the content using previously declared details
-        FetchContent_Populate(mbedtls)
-    endif()
-
     set(MBEDTLS_AS_SUBPROJECT TRUE)
     set(DISABLE_PACKAGE_CONFIG_AND_INSTALL OFF)
 
-    # add the MbedTLS library
-    add_subdirectory(${mbedtls_SOURCE_DIR} MbedTLS_Source)
+    # Fetch and add the MbedTLS library
+    FetchContent_MakeAvailable(mbedtls)
 
 endfunction()
 

@@ -44,7 +44,7 @@ resources:
       type: github
       name: espressif/esp-idf
       endpoint: nanoframework
-      ref: refs/tags/v5.5.3
+      ref: refs/tags/v5.5.4
     - repository: mscorlib
       type: github
       name: nanoframework/CoreLibrary
@@ -477,6 +477,10 @@ jobs:
       - template: azure-pipelines-templates/download-install-arm-gcc-toolchain.yml
       - template: azure-pipelines-templates/download-srecord.yml
       - template: azure-pipelines-templates/download-hexdfu.yml
+      - template: azure-pipelines-templates/install-kconfig-tools.yml
+      - template: azure-pipelines-templates/validate-kconfig.yml
+        parameters:
+          targetPreset: $(CMakePreset)
       - template: azure-pipelines-templates/build-chibios-stm32-targets.yml
       - template: azure-pipelines-templates/pack-publish-artifacts.yml
       - template: azure-pipelines-templates/publish-cloudsmith.yml
@@ -606,7 +610,7 @@ jobs:
       IDF_PATH: "D:/a/1/s/esp-idf"
       PIP_CACHE_DIR: $(Pipeline.Workspace)/.pip
       TargetPlatform: "esp32"
-      IDF_TAG: "v5.5.3"
+      IDF_TAG: "v5.5.4"
 
     steps:
       - checkout: self
@@ -696,6 +700,10 @@ jobs:
       - template: azure-pipelines-templates/nb-gitversioning.yml
       - template: azure-pipelines-templates/download-install-arm-gcc-toolchain.yml
       - template: azure-pipelines-templates/download-srecord.yml
+      - template: azure-pipelines-templates/install-kconfig-tools.yml
+      - template: azure-pipelines-templates/validate-kconfig.yml
+        parameters:
+          targetPreset: $(CMakePreset)
       - template: azure-pipelines-templates/build-freertos-nxp-targets.yml
       - template: azure-pipelines-templates/pack-publish-artifacts.yml
       - template: azure-pipelines-templates/publish-cloudsmith.yml
@@ -739,7 +747,7 @@ jobs:
         #   BuildOptions: >-
         #  -DTARGET_SERIES=CC32xx
         #  -DRTOS=TI_SimpleLink
-        #  -DSUPPORT_ANY_BASE_CONVERSION=OFF
+        #  -DNF_SUPPORT_ANY_BASE_CONVERSION=OFF
         #  -DNF_FEATURE_DEBUGGER=ON
         #  -DNF_FEATURE_RTC=ON
         #  -DNF_FEATURE_WATCHDOG=OFF
@@ -758,7 +766,7 @@ jobs:
           PackageName: TI_CC1352R1_LAUNCHXL_915
           TargetSeries: "CC13X2"
           BuildOptions: >-
-            -DRADIO_FREQUENCY=915
+            -DTI_SIMPLELINK_RADIO_FREQ_MHZ=915
           CMakePreset: TI_CC1352R1_LAUNCHXL
 
     variables:
@@ -772,6 +780,10 @@ jobs:
       - template: azure-pipelines-templates/build-preparations.yml
       - template: azure-pipelines-templates/nb-gitversioning.yml
       - template: azure-pipelines-templates/download-install-arm-gcc-toolchain.yml
+      - template: azure-pipelines-templates/install-kconfig-tools.yml
+      - template: azure-pipelines-templates/validate-kconfig.yml
+        parameters:
+          targetPreset: $(CMakePreset)
       - template: azure-pipelines-templates/build-ti-simplelink-targets.yml
       - template: azure-pipelines-templates/pack-publish-artifacts.yml
       - template: azure-pipelines-templates/publish-cloudsmith.yml
@@ -844,6 +856,10 @@ jobs:
       - template: azure-pipelines-templates/download-install-arm-gcc-toolchain.yml
       - template: azure-pipelines-templates/download-hexdfu.yml
       - template: azure-pipelines-templates/download-srecord.yml
+      - template: azure-pipelines-templates/install-kconfig-tools.yml
+      - template: azure-pipelines-templates/validate-kconfig.yml
+        parameters:
+          targetPreset: $(CMakePreset)
       - template: azure-pipelines-templates/build-threadx-targets.yml
       - template: azure-pipelines-templates/pack-publish-artifacts.yml
       - template: azure-pipelines-templates/publish-cloudsmith.yml

@@ -129,7 +129,7 @@ if(RTOS_THREADX_CHECK)
             ${ETH_SOURCE_FILE} 
             "${ETH_SOURCE_FILE_FINAL_CONTENTS_2}")
 
-    elseif("${WIFI_DRIVER}" STREQUAL "ISM43362")
+    elseif("${THREADX_WIFI_DRIVER}" STREQUAL "ISM43362")
 
         # add driver files to network sources
         list(APPEND
@@ -151,7 +151,7 @@ if(RTOS_THREADX_CHECK)
             wifi.c
         )
 
-        if(${CHIBIOS_HAL_REQUIRED})
+        if(${THREADX_CHIBIOS_HAL_REQUIRED})
             # driver specific to ChibiOS HAL
             list(APPEND
                 NF_Network_SRCS
@@ -166,7 +166,7 @@ if(RTOS_THREADX_CHECK)
         endif()
 
         # need this name in lower case
-        string(TOLOWER "${WIFI_DRIVER}" WIFI_DRIVER_1)
+        string(TOLOWER "${THREADX_WIFI_DRIVER}" THREADX_WIFI_DRIVER_1)
 
         SET(NETWORK_DRIVER_LOCATION ${CMAKE_SOURCE_DIR}/targets/ThreadX/ST/_common/drivers/wifi/inventek)
 

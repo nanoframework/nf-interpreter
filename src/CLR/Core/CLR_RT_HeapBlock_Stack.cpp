@@ -6,7 +6,7 @@
 
 #include "Core.h"
 
-#if (NANOCLR_SYSTEM_COLLECTIONS == TRUE)
+#if CONFIG_API_NANOFRAMEWORK_SYSTEM_COLLECTIONS
 #include <nf_system_collections.h>
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////

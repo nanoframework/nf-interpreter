@@ -14,6 +14,11 @@ steps:
     parameters:
       repoDirectory: ${{ parameters.repoDirectory }}
 
+  - template: validate-kconfig.yml
+    parameters:
+      repoDirectory: ${{ parameters.repoDirectory }}
+      targetPreset: $(CMakePreset)
+
   - task: CMake@1
     condition: succeeded()
     displayName: Setup build with CMake

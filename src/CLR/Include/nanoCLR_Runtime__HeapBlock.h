@@ -1,4 +1,4 @@
-﻿//
+//
 // Copyright (c) .NET Foundation and Contributors
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
@@ -2842,7 +2842,7 @@ struct CLR_RT_HeapBlock_ArrayList : public CLR_RT_HeapBlock
     }
 };
 
-#if (NANOCLR_SYSTEM_COLLECTIONS == TRUE)
+#if CONFIG_API_NANOFRAMEWORK_SYSTEM_COLLECTIONS
 
 #define Library_nf_system_collections_System_Collections_Queue__FIELD___array 1
 #define Library_nf_system_collections_System_Collections_Queue__FIELD___head  2
@@ -2963,7 +2963,7 @@ struct CLR_RT_HeapBlock_Stack : public CLR_RT_HeapBlock
     }
 };
 
-#endif // (NANOCLR_SYSTEM_COLLECTIONS == TRUE)
+#endif // CONFIG_API_NANOFRAMEWORK_SYSTEM_COLLECTIONS
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
