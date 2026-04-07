@@ -96,7 +96,7 @@ RUN ln -fs /usr/bin/python3 /usr/bin/python
 
 # Installing python dependencies for the container
 RUN pip3 install pyserial \
-    && pip3 install --quiet "kconfiglib>=14.1.0"
+    && pip3 install --quiet install --quiet -r requirements.txt
 
 # Clean up downloaded files
 RUN apt-get autoremove -y \
