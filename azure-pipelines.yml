@@ -22,6 +22,8 @@ trigger:
       - RunCmd.bat
       - startocd.bat
       - .github/*
+      - .github/copilot-instructions.md
+      - .github/instructions/*
       - .devcontainer/*
       - .vscode/*
       - .vs/*
