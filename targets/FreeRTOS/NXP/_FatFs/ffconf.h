@@ -110,7 +110,7 @@
 /     0 - Include all code pages above and configured by f_setcp()
 */
 
-#define FF_USE_LFN 2
+#define FF_USE_LFN 3
 #define FF_MAX_LFN 255
 /* The FF_USE_LFN switches the support for LFN (long file name).
 /
@@ -147,7 +147,7 @@
 /  the file names to read. The maximum possible length of the read file name depends
 /  on character encoding. When LFN is not enabled, these options have no effect. */
 
-#define FF_FS_RPATH 2
+#define FF_FS_RPATH 1
 /* This option configures support for relative path feature.
 /
 /   0: Disable relative path and remove related API functions.
