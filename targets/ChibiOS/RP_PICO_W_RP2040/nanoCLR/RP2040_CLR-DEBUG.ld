@@ -24,7 +24,7 @@ MEMORY
     flash6     (rx) : org = 0x00000000, len = 0
     flash7     (rx) : org = 0x00000000, len = 0
     config     (rw) : org = 0x1000C000, len = 32k
-    deployment (rx) : org = 0x10154000, len = 688k
+    deployment (rx) : org = 0x10154000, len = 656k
     ramvt      (wx) : org = 0x00000000, len = 0
     ram0       (wx) : org = 0x20000000, len = 256k-48
     ram1       (wx) : org = 0x00000000, len = 0

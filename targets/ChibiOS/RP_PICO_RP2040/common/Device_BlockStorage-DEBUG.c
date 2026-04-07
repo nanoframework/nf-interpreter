@@ -11,6 +11,7 @@
 // 0x10010000 - 0x10017FFF : Config block (32KB  = 8 sectors)
 // 0x10018000 - 0x100FFFFF : nanoCLR      (928KB = 232 sectors)
 // 0x10100000 - 0x101FFFFF : Deployment   (1MB   = 256 sectors)
+// 0x101F8000 - 0x101FFFFF : LittleFS     (32KB  = 8 sectors)
 
 // 4KB sectors
 const BlockRange BlockRange1[] = {
@@ -20,11 +21,14 @@ const BlockRange BlockRange1[] = {
     // 0x10010000 configuration block (sectors 16-23)
     {BlockRange_BLOCKTYPE_CONFIG, 16, 23},
 
-    // 0x10018000 nanoCLR (sectors 24-255)
-    {BlockRange_BLOCKTYPE_CODE, 24, 255},
+    // 0x10018000 nanoCLR (sectors 24-251)
+    {BlockRange_BLOCKTYPE_CODE, 24, 251},
 
-    // 0x10100000 deployment (sectors 256-511)
-    {BlockRange_BLOCKTYPE_DEPLOYMENT, 256, 511}};
+    // 0x10100000 deployment (sectors 252-503)
+    {BlockRange_BLOCKTYPE_DEPLOYMENT, 252, 503},
+
+    // 0x101F8000 littlefs (sectors 504-511)
+    {BlockRange_BLOCKTYPE_FILESYSTEM, 504, 511}};
 
 const BlockRegionInfo BlockRegions[] = {
     {
