@@ -1,0 +1,25 @@
+# Copyright (c) .NET Foundation and Contributors
+# See LICENSE file in the project root for full license information.
+
+# Validates that all defconfig files parse correctly against the Kconfig schema.
+# Run as a pre-build check to catch configuration errors early.
+
+parameters:
+  - name: repoDirectory
+    type: string
+    default: $(Build.SourcesDirectory)
+  - name: targetPreset
+    type: string
+    default: ''
+
+steps:
+  - task: PythonScript@0
+    displayName: Validate Kconfig defconfigs
+    inputs:
+      scriptSource: "filePath"
+      scriptPath: "${{ parameters.repoDirectory }}/scripts/validate_defconfigs.py"
+      ${{ if eq(parameters.targetPreset, '') }}:
+        arguments: "--check-canonical --verbose"
+      ${{ else }}:
+        arguments: '--check-canonical --verbose --target "${{ parameters.targetPreset }}"'
+      workingDirectory: ${{ parameters.repoDirectory }}

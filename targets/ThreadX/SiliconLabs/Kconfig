@@ -1,0 +1,18 @@
+#
+# Copyright (c) .NET Foundation and Contributors
+# See LICENSE file in the project root for full license information.
+#
+
+menu "Silicon Labs / Gecko SDK"
+    depends on RTOS_THREADX
+
+config GECKO_FEATURE_USBD_HID
+    bool "Gecko USB HID device class support"
+    default n
+
+config GECKO_FEATURE_USBD_WINUSB
+    bool "Gecko USB WinUSB (vendor class) device support"
+    default y if API_SYSTEM_DEVICE_USBSTREAM
+    default n
+
+endmenu

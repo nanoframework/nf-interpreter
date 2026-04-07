@@ -1,0 +1,1 @@
+## :warning: There is no active development on this target. The migration to ThreadX (started with Azure RTOS) was halted because of lack of support with several required building blocks. Active development remains on ChibiOS/ORGPAL_PALTHREE.

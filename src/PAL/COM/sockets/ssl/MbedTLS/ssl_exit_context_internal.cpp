@@ -30,24 +30,58 @@ bool ssl_exit_context_internal(int contextHandle)
     mbedtls_ctr_drbg_free(context->ctr_drbg);
     mbedtls_entropy_free(context->entropy);
     mbedtls_ssl_config_free(context->conf);
-    mbedtls_x509_crt_free(context->x509_crt);
+    mbedtls_x509_crt_free(context->ca_cert);
+    mbedtls_x509_crt_free(context->own_cert);
     mbedtls_ssl_free(context->ssl);
 
     // zero memory to wipe any security critical info in RAM
     memset(context->ssl, 0, sizeof(mbedtls_ssl_context));
 
     // free memory
-    if (context->pk != NULL)
+    if (context->pk)
     {
         platform_free(context->pk);
     }
-    platform_free(context->server_fd);
-    platform_free(context->entropy);
-    platform_free(context->ctr_drbg);
-    platform_free(context->conf);
-    platform_free(context->x509_crt);
-    platform_free(context->ssl);
-    platform_free(context);
+
+    if (context->server_fd)
+    {
+        platform_free(context->server_fd);
+    }
+
+    if (context->entropy)
+    {
+        platform_free(context->entropy);
+    }
+
+    if (context->ctr_drbg)
+    {
+        platform_free(context->ctr_drbg);
+    }
+
+    if (context->conf)
+    {
+        platform_free(context->conf);
+    }
+
+    if (context->ca_cert)
+    {
+        platform_free(context->ca_cert);
+    }
+
+    if (context->own_cert)
+    {
+        platform_free(context->own_cert);
+    }
+
+    if (context->ssl)
+    {
+        platform_free(context->ssl);
+    }
+
+    if (context)
+    {
+        platform_free(context);
+    }
 
     memset(&g_SSL_Driver.ContextArray[contextHandle], 0, sizeof(g_SSL_Driver.ContextArray[contextHandle]));
 

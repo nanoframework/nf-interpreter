@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (c) .NET Foundation and Contributors
 // See LICENSE file in the project root for full license information.
 //
@@ -8,7 +8,6 @@
 
 #include <nanoCLR_Interop.h>
 #include <nanoCLR_Runtime.h>
-#include <nanoPackStruct.h>
 #include <corlib_native.h>
 
 struct Library_nf_sys_io_hashing_System_IO_Hashing_Crc32

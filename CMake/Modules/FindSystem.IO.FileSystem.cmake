@@ -8,6 +8,7 @@ set(BASE_PATH_FOR_THIS_MODULE ${BASE_PATH_FOR_CLASS_LIBRARIES_MODULES}/System.IO
 
 if(RTOS_FREERTOS_CHECK)
     set(PROJECT_COMMON_PATH ${PROJECT_SOURCE_DIR}/targets/FreeRTOS/NXP/_common)
+    set(FATFS_PLATFORM ${PROJECT_SOURCE_DIR}/targets/FreeRTOS/NXP/_FatFs)
 else()
     set(PROJECT_COMMON_PATH ${PROJECT_SOURCE_DIR}/targets/${RTOS}/_common)
 endif()
@@ -75,6 +76,7 @@ foreach(SRC_FILE ${System.IO.FileSystem_SRCS})
 
             # FatFs
             ${CMAKE_SOURCE_DIR}/targets/${RTOS}/_FatFs
+            ${FATFS_PLATFORM}
 
 	    CMAKE_FIND_ROOT_PATH_BOTH
     )

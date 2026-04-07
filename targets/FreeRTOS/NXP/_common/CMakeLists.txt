@@ -83,11 +83,6 @@ if(NF_FEATURE_HAS_ACCESSIBLE_STORAGE)
     list(APPEND TARGET_NXP_COMMON_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/targetHAL_StorageOperation.cpp)
 endif()
 
-# have to include the Win.Storage target for NXP until it's completely migrated to the new file system
-list(APPEND TARGET_NXP_COMMON_SOURCES
-    ${CMAKE_CURRENT_SOURCE_DIR}/Target_Windows_Storage.c
-)
-
 # List of the required FatFs include files.
 list(APPEND TARGET_NXP_COMMON_INCLUDE_DIRS ${fatfs_SOURCE_DIR}/source)
 list(APPEND TARGET_NXP_COMMON_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/targets/FreeRTOS/NXP/_fatfs)

@@ -170,9 +170,6 @@
     <ClInclude Include="..\Include\netmf_errors.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\Include\nanoHAL.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\Include\nanoCLR_Messaging.h">
       <Filter>Header Files</Filter>
     </ClInclude>

@@ -36,13 +36,14 @@
 				"xaver.clang-format"
 			]
 		}
-	}
+	},
 	// You can pull all the repos with the latest changes, this is only valid if you are using the ./sources/Dockerfile.All containers
 	// "postAttachCommand": "/usr/local/git-pull-repos.sh"
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
-	// "forwardPorts": [],
+	// "forwardPorts": [],	
 	// Use 'postCreateCommand' to run commands after the container is created.
-	// "postCreateCommand": "terraform --version",
+	// This is needed to allow cloning repositories like the STM32 hal driver ones
+	"postCreateCommand": "git config --global safe.directory '*'"
 	// Uncomment to connect as a non-root user. See https: //aka.ms/vscode-remote/containers/non-root.
 	// ,"remoteUser": "vscode"
 }

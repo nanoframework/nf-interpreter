@@ -20,7 +20,7 @@
 
 #define GetBusFromHandle(handle)    ((handle >> 8) & 0x00ff);
 #define GetTypeFromHandle(handle)   ((handle >> 16) & 0x00ff);
-#define GetDeviceFromHandle(handle) ((handle)&0x00ff);
+#define GetDeviceFromHandle(handle) ((handle) & 0x00ff);
 
 // Saved config for each available SPI bus
 nanoSPI_BusConfig spiconfig[NUM_SPI_BUSES];
@@ -349,6 +349,12 @@ HRESULT nanoSPI_OpenDeviceEx(
 
             return CLR_E_FAIL;
         }
+
+        // Set CS pin to output and inactive
+        CPU_GPIO_EnableOutputPin(
+            (GPIO_PIN)spiDeviceConfig.DeviceChipSelect,
+            (GpioPinValue)!spiDeviceConfig.ChipSelectActiveState,
+            PinMode_Output);
     }
 
     // Compute rough estimate on the time to tx/rx a byte (in milliseconds)
@@ -365,6 +371,17 @@ HRESULT nanoSPI_OpenDeviceEx(
 
     // Return unique generated device handle
     handle = CreateSpiHandle(spiDeviceConfig.Spi_Bus, deviceIndex);
+
+    // perform dummy SPI transaction to ensure that the device is ready and leaving signals in a known state
+    SPI_WRITE_READ_SETTINGS wrc{
+        false,
+        0,
+        spiDeviceConfig.DataIs16bits,
+        NULL,
+        spiDeviceConfig.DeviceChipSelect,
+        spiDeviceConfig.ChipSelectActiveState};
+    uint8_t buffer[2] = {0, 0};
+    nanoSPI_Write_Read(handle, wrc, buffer, 2, buffer, 2);
 
     return S_OK;
 }
@@ -463,4 +480,20 @@ HRESULT nanoSPI_Write_Read(
         wsize,
         readPtr,
         readSize);
+}
+
+//
+// Get the SPI handle from the device handle
+//
+uint32_t CPU_SPI_GetSpiHandle(uint32_t deviceHandle)
+{
+    uint8_t spiBus;
+    int deviceIndex;
+
+    if (!getDevice(deviceHandle, spiBus, deviceIndex))
+    {
+        return 0;
+    }
+
+    return spiconfig[spiBus].deviceHandles[deviceIndex];
 }

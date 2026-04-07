@@ -805,6 +805,15 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeDispose___VO
     CLR_RT_HeapBlock *pThis = stack.This();
     FAULT_ON_NULL(pThis);
 
+    // if there is a TX ongoing, unblock any managed thread waiting for TX completion
+    {
+        NF_PAL_UART *palUart = GetUartPAL((int)pThis[FIELD___portIndex].NumericByRef().s4);
+        if (palUart != NULL && palUart->TxOngoingCount > 0)
+        {
+            Events_Set(SYSTEM_EVENT_FLAG_COM_OUT);
+        }
+    }
+
     // Choose the driver for this SerialDevice
     switch ((int)pThis[FIELD___portIndex].NumericByRef().s4)
     {
@@ -1070,16 +1079,46 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeConfig___VOI
             break;
 
         case SerialMode_RS485:
+
 #ifdef USART_CR3_DEM
+            // target has support for RS485 DE pin control
             // Set Driver Enable Mode
             palUart->Uart_cfg.cr3 |= USART_CR3_DEM;
+
             // Set Driver Enable Polarity
+
+#if defined(NF_SERIAL_RS485_DE_POLARITY_HIGH) || !defined(NF_SERIAL_RS485_DE_POLARITY_LOW)
+            // DEP is active high or not defined, therefore default is high, clear DEP bit
+            palUart->Uart_cfg.cr3 &= ~USART_CR3_DEP;
+#elif defined(NF_SERIAL_RS485_DE_POLARITY_LOW)
+            // set DEP bit
             palUart->Uart_cfg.cr3 |= USART_CR3_DEP;
-            // Auto-RTS delay - set to maximum
-            palUart->Uart_cfg.cr1 |= USART_CR1_DEDT;
-            // Auto-RTS delay - set to maximum
-            palUart->Uart_cfg.cr1 |= USART_CR1_DEAT;
+#endif
+
+            // Auto-DE deassertion delay
+            // clear bits
+            palUart->Uart_cfg.cr1 &= ~USART_CR1_DEDT;
+
+#if defined(NF_SERIAL_RS485_DE_DEASSERTION_DELAY)
+            palUart->Uart_cfg.cr1 |= NF_SERIAL_RS485_DE_DEASSERTION_DELAY;
 #else
+            // set to default value, being 2 bit periods
+            palUart->Uart_cfg.cr1 |= USART_CR1_DEDT_1;
+#endif
+
+            // Auto-DE assetion delay
+            // clear bits
+            palUart->Uart_cfg.cr1 &= ~USART_CR1_DEAT;
+
+#if defined(NF_SERIAL_RS485_DE_ASSERTION_DELAY)
+            palUart->Uart_cfg.cr1 |= NF_SERIAL_RS485_DE_ASSERTION_DELAY;
+#else
+            // set to default value, being 2 bit periods
+            palUart->Uart_cfg.cr1 |= USART_CR1_DEAT_1;
+#endif
+
+#else
+            // target doesn't have support for RS485 DE pin control
             NANOCLR_SET_AND_LEAVE(CLR_E_NOT_SUPPORTED);
 #endif
             break;

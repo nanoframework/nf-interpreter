@@ -1,0 +1,28 @@
+# Copyright (c) .NET Foundation and Contributors
+# See LICENSE file in the project root for full license information.
+
+parameters:
+  - name: repoDirectory
+    type: string
+    default: $(Agent.BuildDirectory)/s
+
+steps:
+
+  - task: Cache@2
+    displayName: Cache IDF repository
+    inputs:
+      key: 'esp-idf | "$(IDF_TAG)"'
+      path: $(Agent.BuildDirectory)/s/esp-idf
+      cacheHitVar: ESP32_IDF_REPO_RESTORED
+
+  - task: PowerShell@2
+    displayName: Checkout IDF repository
+    condition: ne(variables.ESP32_IDF_REPO_RESTORED, 'true')
+    inputs:
+      targetType: "inline"
+      script: |
+        # create directory for IDF, ignore if it already exists
+        New-Item -Path ${{ parameters.repoDirectory }} -ItemType "directory" -ErrorAction SilentlyContinue
+        # move to the build sources directory
+        Set-Location -Path ${{ parameters.repoDirectory }}
+        git clone --recurse-submodules --shallow-submodules --single-branch --depth 1 --branch $(IDF_TAG)  https://github.com/espressif/esp-idf

@@ -16,6 +16,7 @@ namespace nanoFramework.nanoCLR.Host
 
         internal List<Action> PreInitConfigureSteps { get; } = new();
         internal List<Action> ConfigureSteps { get; } = new();
+        internal List<Action> CleanupSteps { get; } = new();
         internal nanoCLRSettings nanoCLRSettings { get; set; } = nanoCLRSettings.Default;
         internal IPort WireProtocolPort { get; set; }
 
@@ -48,7 +49,23 @@ namespace nanoFramework.nanoCLR.Host
 
         private void Cleanup()
         {
-            _wireProtocolChannel?.Disconnect();
+            try
+            {
+                _wireProtocolChannel?.Disconnect();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error during wire protocol cleanup: {ex.Message}");
+            }
+
+            try
+            {
+                CleanupRuntime();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error during runtime cleanup: {ex.Message}");
+            }
         }
 
         private void InitWireProtocol(IPort wireProtocolPort)
@@ -65,6 +82,8 @@ namespace nanoFramework.nanoCLR.Host
             ConfigureSteps.ForEach(s => s());
             return Interop.nanoCLR.ClrOk;
         }
+
+        private void CleanupRuntime() => CleanupSteps.ForEach(s => s());
 
         public static nanoCLRHostBuilder CreateBuilder() => new nanoCLRHostBuilder() { };
 

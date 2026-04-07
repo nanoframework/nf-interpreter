@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (c) .NET Foundation and Contributors
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
@@ -6,18 +6,22 @@
 #include "Core.h"
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
+#define MAX_INT 0x7fffffff
 
-#define UTF8_BAD_LOWPART(ch) (ch < 0x80 || ch > 0xBF)
+#define UTF8_VALID_CONTINUATION(ch) ((ch) >= 0x80 && (ch) <= 0xBF)
 
-#define UTF8_CHECK_LOWPART(ch, src)                                                                                    \
-    ch = (CLR_UINT32)*src++;                                                                                           \
-    if (UTF8_BAD_LOWPART(ch))                                                                                          \
+#define UTF8_VALID_ASCII(ch) ((ch) >= 0x00 && (ch) <= 0x7F)
+
+#define UTF8_CHECK_CONTINUATION(ch, src)                                                                               \
+    ch = (CLR_UINT32) * src++;                                                                                         \
+    if (!UTF8_VALID_CONTINUATION(ch))                                                                                  \
     return -1
 
-#define UTF8_LOAD_LOWPART(ch, ch2, src)                                                                                \
-    ch = (CLR_UINT32)*src++;                                                                                           \
-    ch2 <<= 6;                                                                                                         \
-    ch2 |= (ch & 0x3F)
+#define UTF8_LOAD_CONTINUATION(ch, ch2, src)                                                                           \
+    ch = (CLR_UINT32) * src++;                                                                                         \
+    if (!UTF8_VALID_CONTINUATION(ch))                                                                                  \
+        return -1;                                                                                                     \
+    ch2 = (ch2 << 6) | (ch & 0x3F)
 
 //--//
 
@@ -26,56 +30,138 @@ int CLR_RT_UnicodeHelper::CountNumberOfCharacters(int max)
     NATIVE_PROFILE_CLR_CORE();
     const CLR_UINT8 *pSrc = m_inputUTF8;
     int num = 0;
+    // If 'max' is negative, treat it as unlimited by setting 'maxRemaining' to the maximum possible integer value.
+    // Otherwise, use the provided 'max' value.
+    int maxRemaining = (max < 0) ? MAX_INT : max;
 
-    while (true)
+    while (maxRemaining > 0 && *pSrc)
     {
         CLR_UINT32 ch = (CLR_UINT32)*pSrc++;
-        if (!ch)
-            break;
-
-        if (max-- == 0)
-            break; // This works even if you pass -1 as argument (it will walk through the whole string).
-
-        switch (ch & 0xF0)
+        maxRemaining--;
+        // Treat embedded null as null terminator
+        if (ch == 0)
         {
-            case 0x00:
-            case 0x10:
-            case 0x20:
-            case 0x30:
-            case 0x40:
-            case 0x50:
-            case 0x60:
-            case 0x70:
-                num += 1;
-                break;
+            break;
+        }
 
-            case 0x80:
-            case 0x90:
-            case 0xA0:
-            case 0xB0:
-                return -1; // Illegal characters.
+        // ASCII
+        if (ch < 0x80)
+        {
+            num++;
+        }
+        // UTF-8 two bytes
+        else if ((ch & 0xE0) == 0xC0)
+        {
+            // 2-byte sequence
+            if (maxRemaining >= 1 && pSrc[0] != 0)
+            {
+                if (UTF8_VALID_CONTINUATION(pSrc[0]))
+                {
+                    CLR_UINT32 fullCh = ((ch & 0x1F) << 6) | (pSrc[0] & 0x3F);
+                    if (fullCh >= 0x80)
+                    {
+                        // Valid
+                        num++;
+                        pSrc++;
+                        maxRemaining--;
+                        continue;
+                    }
+                }
+            }
+            // Invalid sequence
+            num++;
+        }
+        // UTF-8 three bytes
+        else if ((ch & 0xF0) == 0xE0)
+        {
+            // 3-byte sequence
+            if (maxRemaining >= 2 && pSrc[0] != 0 && pSrc[1] != 0)
+            {
+                int validCount = 0;
+                if (UTF8_VALID_CONTINUATION(pSrc[0]))
+                {
+                    validCount++;
+                }
 
-            case 0xC0:
-            case 0xD0:
-                UTF8_CHECK_LOWPART(ch, pSrc);
+                if (validCount == 1 && UTF8_VALID_CONTINUATION(pSrc[1]))
+                {
+                    validCount++;
+                }
 
-                num += 1;
-                break;
+                if (validCount == 2)
+                {
+                    CLR_UINT32 fullCh = ((ch & 0x0F) << 12) | ((pSrc[0] & 0x3F) << 6) | (pSrc[1] & 0x3F);
+                    if (fullCh >= 0x0800 && !(fullCh >= 0xD800 && fullCh <= 0xDFFF))
+                    {
+                        // Valid
+                        num++;
+                        pSrc += 2;
+                        maxRemaining -= 2;
+                        continue;
+                    }
+                }
+                else
+                {
+                    // Advance over valid continuation bytes in invalid sequence
+                    pSrc += validCount;
+                    maxRemaining -= validCount;
+                }
+            }
+            // Invalid sequence
+            num++;
+        }
+        // UTF-8 four bytes
+        else if ((ch & 0xF8) == 0xF0)
+        {
+            // 4-byte sequence
+            if (maxRemaining >= 3 && pSrc[0] != 0 && pSrc[1] != 0 && pSrc[2] != 0)
+            {
+                // Validate each continuation byte individually
+                int validCount = 0;
 
-            case 0xE0:
-                UTF8_CHECK_LOWPART(ch, pSrc);
-                UTF8_CHECK_LOWPART(ch, pSrc);
+                if (UTF8_VALID_CONTINUATION(pSrc[0]))
+                {
+                    validCount++;
+                }
 
-                num += 1;
-                break;
+                if (validCount == 1 && UTF8_VALID_CONTINUATION(pSrc[1]))
+                {
+                    validCount++;
+                }
 
-            case 0xF0:
-                UTF8_CHECK_LOWPART(ch, pSrc);
-                UTF8_CHECK_LOWPART(ch, pSrc);
-                UTF8_CHECK_LOWPART(ch, pSrc);
+                if (validCount == 2 && UTF8_VALID_CONTINUATION(pSrc[2]))
+                {
+                    validCount++;
+                }
 
-                num += 2;
-                break;
+                if (validCount == 3)
+                {
+                    CLR_UINT32 fullCh =
+                        ((ch & 0x07) << 18) | ((pSrc[0] & 0x3F) << 12) | ((pSrc[1] & 0x3F) << 6) | (pSrc[2] & 0x3F);
+                    // Strict range check
+                    if (fullCh >= 0x10000 && fullCh <= 0x10FFFF)
+                    {
+                        // Valid supplementary character
+                        num += 2;
+                        pSrc += 3;
+                        maxRemaining -= 3;
+                        continue;
+                    }
+                }
+                else
+                {
+                    // Advance past all continuation bytes in invalid sequence
+                    pSrc += validCount;
+                    maxRemaining -= validCount;
+                }
+            }
+            // Count invalid sequence
+            num++;
+        }
+        else
+        {
+            // Invalid starter byte
+            num++;
         }
     }
 
@@ -88,14 +174,13 @@ int CLR_RT_UnicodeHelper::CountNumberOfBytes(int max)
     const CLR_UINT16 *pSrc = m_inputUTF16;
     int num = 0;
 
-    while (true)
+    while (max != 0 && *pSrc)
     {
         CLR_UINT16 ch = *pSrc++;
-        if (!ch)
-            break;
-
-        if (max-- == 0)
-            break; // This works even if you pass -1 as argument (it will walk through the whole string).
+        if (max > 0)
+        {
+            max--;
+        }
 
         if (ch < 0x0080)
         {
@@ -105,23 +190,23 @@ int CLR_RT_UnicodeHelper::CountNumberOfBytes(int max)
         {
             num += 2;
         }
-        else if (ch >= LOW_SURROGATE_START && ch <= LOW_SURROGATE_END)
-        {
-            return -1; // Invalid string: Low surrogate should only follow a high surrogate.
-        }
         else if (ch >= HIGH_SURROGATE_START && ch <= HIGH_SURROGATE_END)
         {
-            ch = *pSrc++;
-
-            if (ch >= LOW_SURROGATE_START && ch <= LOW_SURROGATE_END)
+            if (*pSrc >= LOW_SURROGATE_START && *pSrc <= LOW_SURROGATE_END)
             {
                 num += 4;
-                max--;
+                pSrc++;
+                if (max > 0)
+                    max--;
             }
             else
             {
-                return -1; // Invalid string: Low surrogate should follow a high surrogate.
+                num += 3;
             }
+        }
+        else if (ch >= LOW_SURROGATE_START && ch <= LOW_SURROGATE_END)
+        {
+            num += 3;
         }
         else
         {
@@ -150,200 +235,282 @@ bool CLR_RT_UnicodeHelper::ConvertFromUTF8(int iMaxChars, bool fJustMove, int iM
     const CLR_UINT8 *inputUTF8 = m_inputUTF8;
     CLR_UINT16 *outputUTF16 = m_outputUTF16;
     int outputUTF16_size = m_outputUTF16_size;
-    CLR_UINT32 ch;
-    CLR_UINT32 ch2;
-    bool res;
+    bool res = true;
 
     if (iMaxBytes == -1)
     {
-        iMaxBytes = iMaxChars *
-                    3; // the max number of bytes it can have based on iMaxChars -- if all characters are of 3 bytes.
+        iMaxBytes = 0x7FFFFFFF;
     }
 
-    while (iMaxChars > 0 && iMaxBytes > 0)
+    while (iMaxChars != 0 && iMaxBytes > 0)
     {
-        ch = (CLR_UINT32)*inputUTF8++;
+        CLR_UINT32 ch = (CLR_UINT32)*inputUTF8++;
+        iMaxBytes--;
 
-        switch (ch & 0xF0)
+        if (ch == 0)
         {
-            case 0x00:
-                if (ch == 0)
+            // Treat embedded null as null terminator
+            break;
+        }
+
+        // ASCII
+        if (ch < 0x80)
+        {
+            if (!fJustMove)
+            {
+                if (outputUTF16_size < 1)
                 {
                     inputUTF8--;
-                    goto ExitFalse;
+                    res = false;
+                    break;
                 }
-            case 0x10:
-            case 0x20:
-            case 0x30:
-            case 0x40:
-            case 0x50:
-            case 0x60:
-            case 0x70:
-                if (fJustMove == false)
+                *outputUTF16++ = (CLR_UINT16)ch;
+                outputUTF16_size--;
+            }
+
+            if (iMaxChars > 0)
+            {
+                iMaxChars--;
+            }
+        }
+        // UTF-8 two bytes
+        else if ((ch & 0xE0) == 0xC0)
+        {
+            if (iMaxBytes < 1)
+            {
+                // Not enough bytes remaining - output replacement and don't advance
+                inputUTF8--;
+                iMaxBytes++;
+                goto invalid_sequence;
+            }
+
+            CLR_UINT32 ch2 = (CLR_UINT32)inputUTF8[0]; // Lookahead without advancing
+
+            if (!UTF8_VALID_CONTINUATION(ch2))
+            {
+                goto invalid_sequence;
+            }
+
+            CLR_UINT32 fullCh = ((ch & 0x1F) << 6) | (ch2 & 0x3F);
+
+            if (fullCh < 0x80)
+            {
+                // Overlong encoding - advance past the continuation byte
+                inputUTF8++;
+                iMaxBytes--;
+                goto invalid_sequence;
+            }
+
+            // Valid sequence: advance and process
+            inputUTF8++;
+            iMaxBytes--;
+
+            if (!fJustMove)
+            {
+                if (outputUTF16_size < 1)
                 {
-                    if (outputUTF16_size < 1)
-                    {
-                        // un-read the byte before exiting
-                        inputUTF8--;
-                        goto ExitFalse;
-                    }
+                    inputUTF8 -= 2;
+                    iMaxBytes += 2;
+                    res = false;
+                    break;
+                }
+                *outputUTF16++ = (CLR_UINT16)fullCh;
+                outputUTF16_size--;
+            }
 
-                    outputUTF16[0] = ch;
+            if (iMaxChars > 0)
+            {
+                iMaxChars--;
+            }
+        }
+        // UTF-8 three bytes
+        else if ((ch & 0xF0) == 0xE0)
+        {
+            if (iMaxBytes < 2)
+            {
+                // Not enough bytes remaining
+                inputUTF8--;
+                iMaxBytes++;
+                goto invalid_sequence;
+            }
 
-                    outputUTF16 += 1;
-                    outputUTF16_size -= 1;
+            CLR_UINT32 ch2 = (CLR_UINT32)inputUTF8[0];
+            CLR_UINT32 ch3 = (CLR_UINT32)inputUTF8[1];
+            int validCount = 0;
+
+            if (UTF8_VALID_CONTINUATION(ch2))
+            {
+                validCount++;
+            }
+
+            if (validCount == 1 && UTF8_VALID_CONTINUATION(ch3))
+            {
+                validCount++;
+            }
+
+            if (validCount < 2)
+            {
+                // Advance only over valid continuation bytes before outputting replacement
+                inputUTF8 += validCount;
+                iMaxBytes -= validCount;
+                goto invalid_sequence;
+            }
+
+            CLR_UINT32 fullCh = ((ch & 0x0F) << 12) | ((ch2 & 0x3F) << 6) | (ch3 & 0x3F);
+
+            // Check for valid range and surrogates
+            if (fullCh < 0x0800 || (fullCh >= 0xD800 && fullCh <= 0xDFFF))
+            {
+                // Invalid - advance past all continuation bytes
+                inputUTF8 += 2;
+                iMaxBytes -= 2;
+                goto invalid_sequence;
+            }
+
+            inputUTF8 += 2;
+            iMaxBytes -= 2;
+
+            if (!fJustMove)
+            {
+                if (outputUTF16_size < 1)
+                {
+                    inputUTF8 -= 3;
+                    iMaxBytes += 3;
+                    res = false;
+                    break;
+                }
+                *outputUTF16++ = (CLR_UINT16)fullCh;
+                outputUTF16_size--;
+            }
+
+            if (iMaxChars > 0)
+            {
+                iMaxChars--;
+            }
+        }
+        // UTF-8 four bytes
+        else if ((ch & 0xF8) == 0xF0)
+        {
+            // Check if we have at least 3 continuation bytes
+            if (iMaxBytes < 3)
+            {
+                // Not enough bytes remaining
+                inputUTF8--;
+                iMaxBytes++;
+                goto invalid_sequence;
+            }
+
+            // Look ahead at continuation bytes
+            CLR_UINT32 ch2 = (CLR_UINT32)inputUTF8[0];
+            CLR_UINT32 ch3 = (CLR_UINT32)inputUTF8[1];
+            CLR_UINT32 ch4 = (CLR_UINT32)inputUTF8[2];
+
+            // Validate each continuation byte individually
+            int validCount = 0;
+
+            if (UTF8_VALID_CONTINUATION(ch2))
+            {
+                validCount++;
+            }
+
+            if (validCount == 1 && UTF8_VALID_CONTINUATION(ch3))
+            {
+                validCount++;
+            }
+
+            if (validCount == 2 && UTF8_VALID_CONTINUATION(ch4))
+            {
+                validCount++;
+            }
+
+            if (validCount < 3)
+            {
+                // Advance only over valid continuation bytes
+                inputUTF8 += validCount;
+                iMaxBytes -= validCount;
+                goto invalid_sequence;
+            }
+
+            // All continuation bytes are valid, check range
+            CLR_UINT32 fullCh = ((ch & 0x07) << 18) | ((ch2 & 0x3F) << 12) | ((ch3 & 0x3F) << 6) | (ch4 & 0x3F);
+
+            // Strict range check
+            if (fullCh < 0x10000 || fullCh > 0x10FFFF)
+            {
+                // Invalid - advance past all continuation bytes
+                inputUTF8 += 3;
+                iMaxBytes -= 3;
+                goto invalid_sequence;
+            }
+
+            // Valid sequence: advance pointer
+            inputUTF8 += 3;
+            iMaxBytes -= 3;
+
+            if (!fJustMove)
+            {
+                if (outputUTF16_size < 2)
+                {
+                    inputUTF8 -= 4;
+                    iMaxBytes += 4;
+                    res = false;
+                    break;
                 }
 
-                iMaxChars -= 1;
-                iMaxBytes -= 1;
+                CLR_UINT32 temp = fullCh - 0x10000;
+                *outputUTF16++ = (CLR_UINT16)((temp >> 10) + HIGH_SURROGATE_START);
+                *outputUTF16++ = (CLR_UINT16)((temp & 0x3FF) + LOW_SURROGATE_START);
+                outputUTF16_size -= 2;
+            }
+
+            if (iMaxChars > 0)
+            {
+                if (iMaxChars == 1)
+                {
+                    inputUTF8 -= 4;
+                    iMaxBytes += 4;
+                    res = false;
+                    break;
+                }
+                iMaxChars -= 2;
+            }
+        }
+        else
+        {
+            goto invalid_sequence;
+        }
+
+        continue;
+
+    invalid_sequence:
+        // Output replacement character
+        if (!fJustMove)
+        {
+            if (outputUTF16_size < 1)
+            {
+                res = false;
                 break;
+            }
+            *outputUTF16++ = 0xFFFD;
+            outputUTF16_size--;
+        }
 
-            case 0x80:
-            case 0x90:
-            case 0xA0:
-            case 0xB0:
-                goto ExitFalse; // Illegal characters.
+        if (iMaxChars > 0)
+        {
+            iMaxChars--;
+        }
 
-            case 0xC0:
-            case 0xD0:
-                if ((ch & 0xFF) < 0xC2)
-                {
-                    inputUTF8--;
-                    goto ExitFalse;
-                } // illegal - overlong encoding
+        // Pointer has already been advanced appropriately before jumping here
+    }
 
-                if (iMaxBytes >= 2)
-                {
-                    if (fJustMove)
-                    {
-                        inputUTF8++;
-                    }
-                    else
-                    {
-                        if (outputUTF16_size < 1)
-                        {
-                            // un-read the byte before exiting
-                            inputUTF8--;
-                            goto ExitFalse;
-                        }
-                        ch2 = (ch & 0x1F);
-                        UTF8_LOAD_LOWPART(ch, ch2, inputUTF8);
-
-                        outputUTF16[0] = ch2;
-
-                        outputUTF16 += 1;
-                        outputUTF16_size -= 1;
-                    }
-
-                    iMaxChars -= 1;
-                    iMaxBytes -= 2;
-                }
-                else
-                {
-                    // un-read the byte before exiting
-                    inputUTF8--;
-                    goto ExitFalse;
-                }
-                break;
-
-            case 0xE0:
-                if (iMaxBytes >= 3)
-                {
-                    if (fJustMove)
-                    {
-                        inputUTF8 += 2;
-                    }
-                    else
-                    {
-                        if (outputUTF16_size < 1)
-                        {
-                            // un-read the byte before exiting
-                            inputUTF8--;
-                            goto ExitFalse;
-                        }
-                        ch2 = (ch & 0x0F);
-                        UTF8_LOAD_LOWPART(ch, ch2, inputUTF8);
-                        UTF8_LOAD_LOWPART(ch, ch2, inputUTF8);
-
-                        outputUTF16[0] = ch2;
-
-                        outputUTF16 += 1;
-                        outputUTF16_size -= 1;
-                    }
-
-                    iMaxChars -= 1;
-                    iMaxBytes -= 3;
-                }
-                else
-                {
-                    // un-read the byte before exiting
-                    inputUTF8--;
-                    goto ExitFalse;
-                }
-                break;
-
-            case 0xF0:
-                if ((ch & 0xFF) >= 0xF5)
-                {
-                    inputUTF8--;
-                    goto ExitFalse;
-                } // restricted by RFC 3629
-
-                if (iMaxBytes >= 4)
-                {
-                    if (fJustMove)
-                    {
-                        inputUTF8 += 3;
-                    }
-                    else
-                    {
-                        if (outputUTF16_size < 2)
-                        {
-                            // un-read the byte before exiting
-                            inputUTF8--;
-                            goto ExitFalse;
-                        }
-
-                        ch2 = (ch & 0x07);
-                        UTF8_LOAD_LOWPART(ch, ch2, inputUTF8);
-                        UTF8_LOAD_LOWPART(ch, ch2, inputUTF8);
-                        UTF8_LOAD_LOWPART(ch, ch2, inputUTF8);
-
-                        outputUTF16[0] = (ch2 >> SURROGATE_HALFSHIFT) + HIGH_SURROGATE_START;
-                        outputUTF16[1] = (ch2 & SURROGATE_HALFMASK) + LOW_SURROGATE_START;
-
-                        outputUTF16 += 2;
-                        outputUTF16_size -= 2;
-                    }
-
-                    iMaxChars -= 2;
-                    iMaxBytes -= 4;
-                }
-                else
-                {
-                    // un-read the byte before exiting
-                    inputUTF8--;
-                    goto ExitFalse;
-                }
-                break;
+    if (!fJustMove)
+    {
+        if (outputUTF16_size >= 1)
+        {
+            outputUTF16[0] = 0;
         }
     }
 
-    if (fJustMove == false)
-    {
-        if (outputUTF16_size < 1)
-            goto ExitFalse;
-
-        outputUTF16[0] = 0;
-    }
-
-    res = true;
-    goto Exit;
-
-ExitFalse:
-    res = false;
-
-Exit:
     m_inputUTF8 = inputUTF8;
     m_outputUTF16 = outputUTF16;
     m_outputUTF16_size = outputUTF16_size;
@@ -358,34 +525,96 @@ Exit:
 // move backward in the UTF8 input
 bool CLR_RT_UnicodeHelper::MoveBackwardInUTF8(const char *utf8StringStart, int iMaxChars)
 {
-    // already at the beginning or iMaxChars < 1?
-    if (m_inputUTF8 <= (const CLR_UINT8 *)utf8StringStart || iMaxChars < 1)
+    // Validate input parameters
+    const CLR_UINT8 *startBoundary = (const CLR_UINT8 *)utf8StringStart;
+    if (m_inputUTF8 <= startBoundary || iMaxChars < 1)
     {
         return false;
     }
 
-    while (true)
+    const CLR_UINT8 *currentPos = m_inputUTF8;
+    int movedChars = 0;
+
+    while (movedChars < iMaxChars && currentPos > startBoundary)
     {
-        // move back one byte and test if it's 0xxxxxxx or 11xxxxxx, because that are start bytes
-        m_inputUTF8--;
-        char current = m_inputUTF8[0];
-        if ((current & 0x10000000) == 0x00000000 || (current & 0x11000000) == 0x11000000)
+        // Move back one byte
+        currentPos--;
+        movedChars++;
+
+        // Find start of UTF-8 sequence
+        const CLR_UINT8 *sequenceStart = currentPos;
+        while (sequenceStart > startBoundary && (*(sequenceStart - 1) & 0xC0) == 0x80) // Previous byte is continuation
         {
-            iMaxChars--;
+            sequenceStart--;
         }
 
-        // moved back enough?
-        if (iMaxChars == 0)
+        // Validate sequence start byte
+        CLR_UINT8 leadByte = *sequenceStart;
+        int expectedLength = 0;
+
+        if ((leadByte & 0x80) == 0x00)
         {
-            return true;
+            expectedLength = 1; // ASCII
+        }
+        else if ((leadByte & 0xE0) == 0xC0)
+        {
+            expectedLength = 2; // 2-byte sequence
+        }
+        else if ((leadByte & 0xF0) == 0xE0)
+        {
+            expectedLength = 3; // 3-byte sequence
+        }
+        else if ((leadByte & 0xF8) == 0xF0)
+        {
+            expectedLength = 4; // 4-byte sequence
+        }
+        else
+        {
+            // Invalid lead byte - treat as single byte character
+            currentPos = sequenceStart;
+            continue;
         }
 
-        // reached the beginning?
-        if (m_inputUTF8 == (const CLR_UINT8 *)utf8StringStart)
+        // Check if we have a complete sequence
+        bool validSequence = true;
+        for (int i = 1; i < expectedLength; i++)
         {
-            return false;
+            if (sequenceStart + i >= m_inputUTF8)
+            {
+                // Sequence extends beyond original position
+                validSequence = false;
+                break;
+            }
+            if ((sequenceStart[i] & 0xC0) != 0x80)
+            {
+                // Invalid continuation byte
+                validSequence = false;
+                break;
+            }
+        }
+
+        if (validSequence)
+        {
+            // Valid sequence - move to its start
+            currentPos = sequenceStart;
+        }
+        else
+        {
+            // Invalid sequence - treat lead byte as single character
+            currentPos = sequenceStart;
         }
     }
+
+    // Only update position if we moved full count
+    if (movedChars == iMaxChars)
+    {
+        m_inputUTF8 = currentPos;
+        return true;
+    }
+
+    // Partial move - update position but return failure
+    m_inputUTF8 = currentPos;
+    return false;
 }
 
 bool CLR_RT_UnicodeHelper::ConvertToUTF8(int iMaxChars, bool fJustMove)
@@ -395,109 +624,147 @@ bool CLR_RT_UnicodeHelper::ConvertToUTF8(int iMaxChars, bool fJustMove)
     CLR_UINT8 *outputUTF8 = m_outputUTF8;
     int outputUTF8_size = m_outputUTF8_size;
     CLR_UINT32 ch;
-    bool res;
+    bool res = true;
 
     while (iMaxChars > 0)
     {
         ch = (CLR_UINT32)*inputUTF16++;
+        // Removed break on null to handle embedded nulls
+        iMaxChars--;
 
         if (ch < 0x0080)
         {
-            if (ch == 0)
-            {
-                break;
-            }
-
-            if (fJustMove == false)
+            if (!fJustMove)
             {
                 if (outputUTF8_size < 1)
-                    goto ExitFalse;
-
-                outputUTF8[0] = ch;
-
-                outputUTF8 += 1;
-                outputUTF8_size -= 1;
+                {
+                    inputUTF16--;
+                    res = false;
+                    break;
+                }
+                *outputUTF8++ = (CLR_UINT8)ch;
+                outputUTF8_size--;
             }
-
-            iMaxChars -= 1;
         }
         else if (ch < 0x0800)
         {
-            if (fJustMove == false)
+            if (!fJustMove)
             {
                 if (outputUTF8_size < 2)
-                    goto ExitFalse;
-
-                outputUTF8[1] = 0x80 | (ch & 0x3F);
-                ch >>= 6;
-                outputUTF8[0] = 0xC0 | (ch & 0x1F);
-
-                outputUTF8 += 2;
+                {
+                    inputUTF16--;
+                    res = false;
+                    break;
+                }
+                *outputUTF8++ = 0xC0 | (ch >> 6);
+                *outputUTF8++ = 0x80 | (ch & 0x3F);
                 outputUTF8_size -= 2;
             }
-
-            iMaxChars -= 1;
         }
         else if (ch >= HIGH_SURROGATE_START && ch <= HIGH_SURROGATE_END)
         {
-            ch = SURROGATE_HALFBASE + ((ch - HIGH_SURROGATE_START) << SURROGATE_HALFSHIFT) +
-                 (*inputUTF16++ - LOW_SURROGATE_START);
-
-            if (fJustMove == false)
+            if (iMaxChars < 1)
             {
-                if (outputUTF8_size < 4)
-                    goto ExitFalse;
-
-                outputUTF8[3] = 0x80 | (ch & 0x3F);
-                ch >>= 6;
-                outputUTF8[2] = 0x80 | (ch & 0x3F);
-                ch >>= 6;
-                outputUTF8[1] = 0x80 | (ch & 0x3F);
-                ch >>= 6;
-                outputUTF8[0] = 0xF0 | (ch & 0x07);
-
-                outputUTF8 += 4;
-                outputUTF8_size -= 4;
+                // Unpaired high surrogate
+                if (!fJustMove)
+                {
+                    if (outputUTF8_size < 3)
+                    {
+                        inputUTF16--;
+                        res = false;
+                        break;
+                    }
+                    *outputUTF8++ = 0xEF;
+                    *outputUTF8++ = 0xBF;
+                    *outputUTF8++ = 0xBD; // U+FFFD
+                    outputUTF8_size -= 3;
+                }
+                // iMaxChars is already 0, so loop will exit
+                continue;
             }
 
-            iMaxChars -= 2;
+            CLR_UINT16 ch2 = *inputUTF16++;
+            iMaxChars--;
+
+            if (ch2 < LOW_SURROGATE_START || ch2 > LOW_SURROGATE_END)
+            {
+                // Invalid surrogate pair - high surrogate followed by non-low surrogate
+                if (!fJustMove)
+                {
+                    if (outputUTF8_size < 3)
+                    {
+                        inputUTF16 -= 2;
+                        res = false;
+                        break;
+                    }
+                    *outputUTF8++ = 0xEF;
+                    *outputUTF8++ = 0xBF;
+                    *outputUTF8++ = 0xBD; // U+FFFD
+                    outputUTF8_size -= 3;
+                }
+                // Put back the second character for next iteration
+                inputUTF16--;
+                iMaxChars++;
+                continue;
+            }
+
+            ch = 0x10000 + (((ch - HIGH_SURROGATE_START) << 10) | (ch2 - LOW_SURROGATE_START));
+
+            if (!fJustMove)
+            {
+                if (outputUTF8_size < 4)
+                {
+                    inputUTF16 -= 2;
+                    res = false;
+                    break;
+                }
+                *outputUTF8++ = 0xF0 | (ch >> 18);
+                *outputUTF8++ = 0x80 | ((ch >> 12) & 0x3F);
+                *outputUTF8++ = 0x80 | ((ch >> 6) & 0x3F);
+                *outputUTF8++ = 0x80 | (ch & 0x3F);
+                outputUTF8_size -= 4;
+            }
+        }
+        else if (ch >= LOW_SURROGATE_START && ch <= LOW_SURROGATE_END)
+        {
+            // Unpaired low surrogate
+            if (!fJustMove)
+            {
+                if (outputUTF8_size < 3)
+                {
+                    inputUTF16--;
+                    res = false;
+                    break;
+                }
+                *outputUTF8++ = 0xEF;
+                *outputUTF8++ = 0xBF;
+                *outputUTF8++ = 0xBD; // U+FFFD
+                outputUTF8_size -= 3;
+            }
         }
         else
         {
-            if (fJustMove == false)
+            if (!fJustMove)
             {
                 if (outputUTF8_size < 3)
-                    goto ExitFalse;
-
-                outputUTF8[2] = 0x80 | (ch & 0x3F);
-                ch >>= 6;
-                outputUTF8[1] = 0x80 | (ch & 0x3F);
-                ch >>= 6;
-                outputUTF8[0] = 0xE0 | (ch & 0x0F);
-
-                outputUTF8 += 3;
+                {
+                    inputUTF16--;
+                    res = false;
+                    break;
+                }
+                *outputUTF8++ = 0xE0 | (ch >> 12);
+                *outputUTF8++ = 0x80 | ((ch >> 6) & 0x3F);
+                *outputUTF8++ = 0x80 | (ch & 0x3F);
                 outputUTF8_size -= 3;
             }
-
-            iMaxChars -= 1;
         }
     }
 
-    if (fJustMove == false)
+    if (res && !fJustMove && outputUTF8_size > 0)
     {
-        if (outputUTF8_size < 1)
-            goto ExitFalse;
-
-        outputUTF8[0] = 0;
+        *outputUTF8 = 0;
     }
 
-    res = true;
-    goto Exit;
-
-ExitFalse:
-    res = false;
-
-Exit:
     m_inputUTF16 = inputUTF16;
     m_outputUTF8 = outputUTF8;
     m_outputUTF8_size = outputUTF8_size;
@@ -585,16 +852,13 @@ HRESULT UnicodeString::Assign(const char *string)
 
     int byteLength = 0;
 
-    /// Before we start assigning remove existing stuff.
     Release();
 
     m_unicodeHelper.SetInputUTF8(string);
 
     m_length = m_unicodeHelper.CountNumberOfCharacters();
-
     if (m_length < 0)
         NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
-    /// We have m_length >=0 now.
 
     byteLength = (m_length + 1) * sizeof(CLR_UINT16);
 
@@ -603,10 +867,16 @@ HRESULT UnicodeString::Assign(const char *string)
 
     m_unicodeHelper.m_outputUTF16 = m_wCharArray;
     m_unicodeHelper.m_outputUTF16_size = m_length + 1;
+    m_unicodeHelper.SetInputUTF8(string); // Reset
 
-    m_unicodeHelper.ConvertFromUTF8(m_length, false);
+    if (!m_unicodeHelper.ConvertFromUTF8(-1, false))
+    {
+        CLR_RT_Memory::Release(m_wCharArray);
+        m_wCharArray = NULL;
+        m_length = 0;
+        NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+    }
 
-    /// Note m_length > 0 already (see above), hence m_length >= 0 or a valid index.
     m_wCharArray[m_length] = 0;
 
     NANOCLR_NOCLEANUP();
@@ -617,7 +887,7 @@ void UnicodeString::Release()
     if (m_wCharArray != NULL)
     {
         CLR_RT_Memory::Release(m_wCharArray);
+        m_wCharArray = NULL;
     }
-
-    m_wCharArray = NULL;
+    m_length = 0;
 }

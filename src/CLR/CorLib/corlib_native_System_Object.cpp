@@ -27,7 +27,7 @@ HRESULT Library_corlib_native_System_Object::GetHashCode___I4(CLR_RT_StackFrame 
     NANOCLR_NOCLEANUP_NOLABEL();
 }
 
-#if (NANOCLR_REFLECTION == TRUE)
+#if CONFIG_NF_FEATURE_SUPPORT_REFLECTION
 
 HRESULT Library_corlib_native_System_Object::GetType___SystemType(CLR_RT_StackFrame &stack)
 {
@@ -67,7 +67,7 @@ HRESULT Library_corlib_native_System_Object::GetType___SystemType(CLR_RT_StackFr
     NANOCLR_NOCLEANUP();
 }
 
-#endif // NANOCLR_REFLECTION
+#endif // CONFIG_NF_FEATURE_SUPPORT_REFLECTION
 
 HRESULT Library_corlib_native_System_Object::MemberwiseClone___OBJECT(CLR_RT_StackFrame &stack)
 {

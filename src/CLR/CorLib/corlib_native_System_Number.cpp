@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (c) .NET Foundation and Contributors
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
@@ -361,11 +361,22 @@ int Library_corlib_native_System_Number::Format_G(
             defaultPrecision = 9;
             break;
         case DATATYPE_R8:
+        {
             // from .NET documentation:
             // When used with a Double value, the "G17" format specifier ensures that the original Double value
             // successfully round-trips.
             defaultPrecision = 17;
+
+            CLR_DOUBLE_TEMP_CAST number = (CLR_DOUBLE_TEMP_CAST)value->NumericByRef().r8;
+
+            // check if number is an integer
+            if (number == (CLR_INT64_TEMP_CAST)number)
+            {
+                // this is an integer, set precision to a value achievable by the library
+                defaultPrecision = 15;
+            }
             break;
+        }
         default:
             break;
     }
@@ -707,10 +718,11 @@ int Library_corlib_native_System_Number::Format_F(
 
     ret = DoPrintfOnDataType(buffer, formatStr, value);
 
+    bool isNegative = (buffer[0] == '-');
+
     // this extra processing is only required for integer types
     if (isIntegerDataType && ret > 0)
     {
-        bool isNegative = (buffer[0] == '-');
         int offsetBecauseOfNegativeSign = (isNegative ? 1 : 0);
 
         int dotIndex = GetDotIndex(buffer, ret);
@@ -744,6 +756,13 @@ int Library_corlib_native_System_Number::Format_F(
 
         ret = ReplaceNegativeSign(buffer, ret, negativeSign);
         ret = ReplaceDecimalSeparator(buffer, ret, decimalSeparator);
+    }
+    else if (isNegative && ret == 2 && buffer[1] == '0')
+    {
+        // handle negative zero: if the value was negative but rounds to 0, remove the minus sign
+        // remove the negative sign
+        memmove(buffer, &buffer[1], ret);
+        ret--;
     }
 
     return ret;

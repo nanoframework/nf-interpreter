@@ -7,7 +7,6 @@
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-
 __nfweak void CLR_RT_HeapBlock_EndPoint::HandlerMethod_Initialize()
 {
 }
@@ -20,14 +19,14 @@ __nfweak void CLR_RT_HeapBlock_EndPoint::HandlerMethod_CleanUp()
 {
 }
 
-__nfweak CLR_RT_HeapBlock_EndPoint* CLR_RT_HeapBlock_EndPoint::FindEndPoint( const CLR_RT_HeapBlock_EndPoint::Port& port )
+__nfweak CLR_RT_HeapBlock_EndPoint *CLR_RT_HeapBlock_EndPoint::FindEndPoint(const CLR_RT_HeapBlock_EndPoint::Port &port)
 {
     (void)port;
 
     return NULL;
 }
 
-__nfweak bool CLR_RT_HeapBlock_EndPoint::Port::Compare( const CLR_RT_HeapBlock_EndPoint::Port& port )
+__nfweak bool CLR_RT_HeapBlock_EndPoint::Port::Compare(const CLR_RT_HeapBlock_EndPoint::Port &port)
 {
     (void)port;
 
@@ -36,7 +35,10 @@ __nfweak bool CLR_RT_HeapBlock_EndPoint::Port::Compare( const CLR_RT_HeapBlock_E
 
 //--//
 
-__nfweak HRESULT CLR_RT_HeapBlock_EndPoint::CreateInstance( const CLR_RT_HeapBlock_EndPoint::Port& port, CLR_RT_HeapBlock& owner, CLR_RT_HeapBlock& epRef )
+__nfweak HRESULT CLR_RT_HeapBlock_EndPoint::CreateInstance(
+    const CLR_RT_HeapBlock_EndPoint::Port &port,
+    CLR_RT_HeapBlock &owner,
+    CLR_RT_HeapBlock &epRef)
 {
     (void)port;
     (void)owner;
@@ -45,7 +47,7 @@ __nfweak HRESULT CLR_RT_HeapBlock_EndPoint::CreateInstance( const CLR_RT_HeapBlo
     NANOCLR_FEATURE_STUB_RETURN();
 }
 
-__nfweak HRESULT CLR_RT_HeapBlock_EndPoint::ExtractInstance( CLR_RT_HeapBlock& ref, CLR_RT_HeapBlock_EndPoint*& endPoint )
+__nfweak HRESULT CLR_RT_HeapBlock_EndPoint::ExtractInstance(CLR_RT_HeapBlock &ref, CLR_RT_HeapBlock_EndPoint *&endPoint)
 {
     (void)ref;
     (void)endPoint;
@@ -66,10 +68,12 @@ __nfweak void CLR_RT_HeapBlock_EndPoint::RecoverFromGC()
 
 //--//
 
-__nfweak CLR_RT_HeapBlock_EndPoint::Message* CLR_RT_HeapBlock_EndPoint::FindMessage( CLR_UINT32 cmd, const CLR_UINT32* seq )
+__nfweak CLR_RT_HeapBlock_EndPoint::Message *CLR_RT_HeapBlock_EndPoint::FindMessage(
+    CLR_UINT32 cmd,
+    const CLR_UINT32 *seq)
 {
     (void)cmd;
     (void)seq;
-    
+
     return NULL;
 }

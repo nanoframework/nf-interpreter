@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (c) .NET Foundation and Contributors
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
@@ -13,7 +13,7 @@ HRESULT Library_corlib_native_System_Reflection_RuntimeMethodInfo::get_ReturnTyp
     CLR_RT_MethodDef_Instance md;
     CLR_RT_SignatureParser parser{};
     CLR_RT_TypeDescriptor desc{};
-    CLR_RT_HeapBlock *hbMeth = stack.Arg0().Dereference();
+    CLR_RT_HeapBlock *hbMeth = stack.This();
 
     NANOCLR_CHECK_HRESULT(Library_corlib_native_System_Reflection_MethodBase::GetMethodDescriptor(stack, *hbMeth, md));
 
@@ -48,7 +48,7 @@ HRESULT Library_corlib_native_System_Reflection_RuntimeMethodInfo::GetCustomAttr
     CLR_RT_HeapBlock &top = stack.PushValueAndClear();
 
     // get the caller method
-    callerMethod = stack.Arg0().Dereference();
+    callerMethod = stack.This();
 
     NANOCLR_CHECK_HRESULT(Library_corlib_native_System_Reflection_MethodBase::GetMethodDescriptor(
         stack,

@@ -52,15 +52,15 @@ macro(nf_set_compile_definitions)
 endmacro()
 
 # check valid frequency and if configuration file exists 
-function(nf_check_radio_frequency)
+function(nf_check_TI_SIMPLELINK_RADIO_FREQ_MHZ)
 
-    if(NOT DEFINED RADIO_FREQUENCY)
-        message(FATAL_ERROR "\nRadio frequency NOT defined!!\nPlease set the build option 'RADIO_FREQUENCY' in 'config\\user-prefs.json' or in the user CMake preset. Valid values are 868 and 915.\n")
+    if(NOT DEFINED TI_SIMPLELINK_RADIO_FREQ_MHZ)
+        message(FATAL_ERROR "\nRadio frequency NOT defined!!\nPlease set the build option 'TI_SIMPLELINK_RADIO_FREQ_MHZ' in 'config\\user-prefs.json' or in the user CMake preset. Valid values are 868 and 915.\n")
     endif()
 
     # check if file exists
-    if(NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/${TARGET_BOARD}_${RADIO_FREQUENCY}.syscfg")
-        message(FATAL_ERROR "\nCouldn't find a sysconfig file for radio frequency ${RADIO_FREQUENCY}.\n")
+    if(NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/${TARGET_BOARD}_${TI_SIMPLELINK_RADIO_FREQ_MHZ}.syscfg")
+        message(FATAL_ERROR "\nCouldn't find a sysconfig file for radio frequency ${TI_SIMPLELINK_RADIO_FREQ_MHZ}.\n")
     endif()
 
 endfunction()
@@ -238,10 +238,10 @@ macro(nf_add_platform_sysconfig_steps ti_device ti_device_family)
         set(SYS_CONFIG_FILENAME ${TARGET_BOARD}.syscfg)
     else()
         # check for valid frequency setting
-        nf_check_radio_frequency()
+        nf_check_TI_SIMPLELINK_RADIO_FREQ_MHZ()
 
         # compose sys config file name 
-        set(SYS_CONFIG_FILENAME ${TARGET_BOARD}_${RADIO_FREQUENCY}.syscfg)
+        set(SYS_CONFIG_FILENAME ${TARGET_BOARD}_${TI_SIMPLELINK_RADIO_FREQ_MHZ}.syscfg)
     endif()
 
     message(STATUS "Using sysconfig file: ${CMAKE_CURRENT_SOURCE_DIR}/${SYS_CONFIG_FILENAME}.")

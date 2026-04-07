@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (c) .NET Foundation and Contributors
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
@@ -11,7 +11,7 @@ HRESULT Library_corlib_native_System_RuntimeType::get_Assembly___SystemReflectio
     NANOCLR_HEADER();
 
     CLR_RT_TypeDef_Instance td;
-    CLR_RT_HeapBlock *hbType = stack.Arg0().Dereference();
+    CLR_RT_HeapBlock *hbType = stack.This();
 
     NANOCLR_CHECK_HRESULT(GetTypeDescriptor(*hbType, td, NULL));
 
@@ -33,7 +33,7 @@ HRESULT Library_corlib_native_System_RuntimeType::get_Name___STRING(CLR_RT_Stack
 {
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
-    CLR_RT_HeapBlock *hbType = stack.Arg0().Dereference();
+    CLR_RT_HeapBlock *hbType = stack.This();
 
     NANOCLR_CHECK_HRESULT(GetName(*hbType, false, stack.PushValueAndClear()));
 
@@ -44,7 +44,7 @@ HRESULT Library_corlib_native_System_RuntimeType::get_FullName___STRING(CLR_RT_S
 {
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
-    CLR_RT_HeapBlock *hbType = stack.Arg0().Dereference();
+    CLR_RT_HeapBlock *hbType = stack.This();
 
     NANOCLR_CHECK_HRESULT(GetName(*hbType, true, stack.PushValueAndClear()));
 
@@ -59,7 +59,7 @@ HRESULT Library_corlib_native_System_RuntimeType::get_BaseType___SystemType(CLR_
     CLR_RT_TypeDef_Instance td;
     CLR_UINT32 levels;
     CLR_RT_HeapBlock &top = stack.PushValueAndClear();
-    CLR_RT_HeapBlock *hbType = stack.Arg0().Dereference();
+    CLR_RT_HeapBlock *hbType = stack.This();
 
     NANOCLR_CHECK_HRESULT(GetTypeDescriptor(*hbType, td, &levels));
 
@@ -116,7 +116,7 @@ HRESULT Library_corlib_native_System_RuntimeType::GetInterfaces___SZARRAY_System
     CLR_RT_TypeDef_Instance td;
     CLR_RT_HeapBlock &top = stack.PushValueAndClear();
     CLR_RT_HeapBlock *ptr = NULL;
-    CLR_RT_HeapBlock *hbType = stack.Arg0().Dereference();
+    CLR_RT_HeapBlock *hbType = stack.This();
     int count = 0;
 
     // 2-pass algorithm. 1. count the interfaces; 2. store the interfaces in an array
@@ -186,7 +186,7 @@ HRESULT Library_corlib_native_System_RuntimeType::GetElementType___SystemType(CL
     CLR_RT_TypeDescriptor desc{};
     CLR_RT_TypeDescriptor descSub;
     CLR_RT_HeapBlock &top = stack.PushValueAndClear();
-    CLR_RT_HeapBlock *hbType = stack.Arg0().Dereference();
+    CLR_RT_HeapBlock *hbType = stack.This();
 
     NANOCLR_CHECK_HRESULT(desc.InitializeFromReflection(hbType->ReflectionDataConst()));
 
@@ -272,7 +272,7 @@ HRESULT Library_corlib_native_System_RuntimeType::GetCustomAttributesNative___SZ
     CLR_RT_HeapBlock &top = stack.PushValueAndClear();
 
     // get the caller type
-    callerType = stack.Arg0().Dereference();
+    callerType = stack.This();
 
     NANOCLR_CHECK_HRESULT(GetTypeDescriptor(*callerType, typeDefinition));
 

@@ -1,0 +1,17 @@
+#
+# Copyright (c) .NET Foundation and Contributors
+# See LICENSE file in the project root for full license information.
+#
+
+menu "Networking"
+    depends on API_SYSTEM_NET
+
+config NF_NETWORKING_SNTP
+    bool "SNTP support"
+    default y
+
+config NF_NETWORKING_ENC28J60
+    bool "ENC28J60 SPI Ethernet driver"
+    default n
+
+endmenu

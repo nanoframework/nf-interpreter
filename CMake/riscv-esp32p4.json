@@ -1,0 +1,24 @@
+{
+    "version": 4,
+    "include": [
+        "base.json"
+    ],
+    "configurePresets": [
+        {
+            "name": "riscv-esp32p4-preset",
+            "description": "Preset for ESP32-P4 series",
+            "inherits": "general-preset",
+            "hidden": true,
+            "cacheVariables": {
+                "CMAKE_TOOLCHAIN_FILE": {
+                    "type": "FILEPATH",
+                    "value": "${sourceDir}/CMake/toolchain.riscv32-esp32p4-elf.cmake"
+                },
+                "NF_INTEROP_ASSEMBLIES": null
+            },
+            "environment": {
+                "ESP_IDF_VERSION": "5.4"
+            }
+        }
+    ]
+}

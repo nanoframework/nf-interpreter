@@ -26,6 +26,9 @@ NF_PAL_UART Uart2_PAL;
 #if SOC_UART_HP_NUM > 3
 NF_PAL_UART Uart3_PAL;
 #endif
+#if SOC_UART_HP_NUM > 4
+NF_PAL_UART Uart4_PAL;
+#endif
 
 NF_PAL_UART *GetPalUartFromUartNum_sys(int uart_num)
 {
@@ -46,9 +49,15 @@ NF_PAL_UART *GetPalUartFromUartNum_sys(int uart_num)
 #endif
 
 #if SOC_UART_HP_NUM > 3
-        case UART_NUM_2:
+        case UART_NUM_3:
             // set UART PAL
             return &Uart3_PAL;
+#endif
+
+#if SOC_UART_HP_NUM > 4
+        case UART_NUM_4:
+            // set UART PAL
+            return &Uart4_PAL;
 #endif
 
         default:
@@ -67,6 +76,21 @@ void UninitializePalUart_sys(NF_PAL_UART *palUart)
         event.type = UART_EVENT_MAX;
         xQueueSend(palUart->UartEventQueue, &event, 0);
         palUart->UartEventTask = NULL;
+
+        // delete the TX worker task and its semaphore
+        if (palUart->TxWorkerTask != NULL)
+        {
+            // unblock any managed thread that is waiting for TX completion
+            Events_Set(SYSTEM_EVENT_FLAG_COM_OUT);
+            vTaskDelete(palUart->TxWorkerTask);
+            palUart->TxWorkerTask = NULL;
+        }
+
+        if (palUart->StartTx != NULL)
+        {
+            vSemaphoreDelete(palUart->StartTx);
+            palUart->StartTx = NULL;
+        }
 
         // free buffer memory
         platform_free(palUart->RxBuffer);
@@ -232,15 +256,18 @@ void UartTxWorkerTask_sys(void *pvParameters)
     // get PAL UART from task parameters
     NF_PAL_UART *palUart = (NF_PAL_UART *)pvParameters;
 
-    // Write data directly to UART FIFO
-    // by design: don't bother checking the return value
-    uart_write_bytes(palUart->UartNum, (const char *)palUart->TxBuffer, palUart->TxOngoingCount);
+    while (true)
+    {
+        // wait for work to be triggered
+        xSemaphoreTake(palUart->StartTx, portMAX_DELAY);
 
-    // set event flag for COM OUT
-    Events_Set(SYSTEM_EVENT_FLAG_COM_OUT);
+        // Write data directly to UART FIFO
+        // by design: don't bother checking the return value
+        uart_write_bytes(palUart->UartNum, (const char *)palUart->TxBuffer, palUart->TxOngoingCount);
 
-    // delete task
-    vTaskDelete(NULL);
+        // set event flag for COM OUT
+        Events_Set(SYSTEM_EVENT_FLAG_COM_OUT);
+    }
 }
 
 HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::get_BytesToRead___I4(CLR_RT_StackFrame &stack)
@@ -735,11 +762,11 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::Write___VOID__SZAR
 
         // Try to send buffer to fifo first.
         // if not all data written then use long running operation to complete.
-        palUart->IsLongRunning = false;
+        bool isLongRunning = false;
         int txCount = uart_tx_chars(uart_num, (const char *)data, count);
         if (txCount < count)
         {
-            palUart->IsLongRunning = true;
+            isLongRunning = true;
             if (txCount >= 0)
             {
                 // Any written then update ptr / count
@@ -748,7 +775,7 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::Write___VOID__SZAR
             }
         }
 
-        if (palUart->IsLongRunning)
+        if (isLongRunning)
         {
             hbTimeout.SetInteger(
                 (CLR_INT64)pThis[FIELD___writeTimeout].NumericByRef().s4 * TIME_CONVERSION__TO_MILLISECONDS);
@@ -766,15 +793,8 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::Write___VOID__SZAR
             // set TX count
             palUart->TxOngoingCount = count;
 
-            // Create a task to handle UART event from ISR
-            char task_name[16];
-            snprintf(task_name, ARRAYSIZE(task_name), "uart%d_tx", uart_num);
-
-            if (xTaskCreate(UartTxWorkerTask_sys, task_name, 2048, palUart, 12, NULL) != pdPASS)
-            {
-                ESP_LOGE(TAG, "Failed to start UART TX task");
-                NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
-            }
+            // trigger the persistent TX worker task
+            xSemaphoreGive(palUart->StartTx);
 
             // bump custom state so the read value above is pushed only once
             stack.m_customState = 2;
@@ -784,7 +804,7 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::Write___VOID__SZAR
     /////////////////////////////
     while (eventResult)
     {
-        if (!palUart->IsLongRunning)
+        if (stack.m_customState != 2)
         {
             // this is not a long running operation so nothing to do here
             break;
@@ -812,7 +832,7 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::Write___VOID__SZAR
         }
     }
 
-    if (palUart->IsLongRunning)
+    if (stack.m_customState == 2)
     {
         // pop length heap block from stack
         stack.PopValue();
@@ -946,10 +966,26 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeInit___VOID(
 
     // Create a task to handle UART event from ISR
     snprintf(task_name, ARRAYSIZE(task_name), "uart%d_events", uart_num);
-    if (xTaskCreatePinnedToCore(uart_event_task_sys, task_name, 2048, palUart, 12, &(palUart->UartEventTask), 1) !=
-        pdPASS)
+    if (xTaskCreate(uart_event_task_sys, task_name, 2048, palUart, 12, &(palUart->UartEventTask)) != pdPASS)
     {
         ESP_LOGE(TAG, "Failed to start UART events task");
+        NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
+    }
+
+    // Create semaphore and persistent task to handle UART TX
+    palUart->StartTx = xSemaphoreCreateBinary();
+    if (palUart->StartTx == NULL)
+    {
+        ESP_LOGE(TAG, "Failed to create UART TX semaphore");
+        UninitializePalUart_sys(palUart);
+        NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
+    }
+
+    snprintf(task_name, ARRAYSIZE(task_name), "uart%d_tx", uart_num);
+    if (xTaskCreate(UartTxWorkerTask_sys, task_name, 2048, palUart, 12, &(palUart->TxWorkerTask)) != pdPASS)
+    {
+        ESP_LOGE(TAG, "Failed to start UART TX task");
+        UninitializePalUart_sys(palUart);
         NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
     }
 
@@ -963,7 +999,7 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeConfig___VOI
 {
     NANOCLR_HEADER();
     {
-        uart_config_t uart_config;
+        uart_config_t uart_config = {};
 
         // get a pointer to the managed object instance and check that it's not NULL
         CLR_RT_HeapBlock *pThis = stack.This();
@@ -1051,12 +1087,12 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeConfig___VOI
                 break;
 
             case Handshake_RequestToSend:
-                uart_config.flow_ctrl = UART_HW_FLOWCTRL_RTS;
+                uart_config.flow_ctrl = UART_HW_FLOWCTRL_CTS_RTS;
                 uart_config.rx_flow_ctrl_thresh = 122;
                 break;
 
             case Handshake_RequestToSendXOnXOff:
-                uart_config.flow_ctrl = UART_HW_FLOWCTRL_RTS;
+                uart_config.flow_ctrl = UART_HW_FLOWCTRL_CTS_RTS;
                 uart_config.rx_flow_ctrl_thresh = 122;
                 EnableXonXoff = true;
                 break;
@@ -1149,6 +1185,15 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeConfig___VOI
         if (txPin == UART_PIN_NO_CHANGE || rxPin == UART_PIN_NO_CHANGE)
         {
             NANOCLR_SET_AND_LEAVE(CLR_E_PIN_UNAVAILABLE);
+        }
+
+        // Validate RTS/CTS pins are available when flow control is enabled
+        if ((uart_config.flow_ctrl != UART_HW_FLOWCTRL_DISABLE) && !rs485Mode)
+        {
+            if (rtsPin == UART_PIN_NO_CHANGE || ctsPin == UART_PIN_NO_CHANGE)
+            {
+                NANOCLR_SET_AND_LEAVE(CLR_E_PIN_UNAVAILABLE);
+            }
         }
 
         // Don't use RTS/CTS pins if no hardware handshake enabled unless in RS485 mode
@@ -1259,7 +1304,7 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeWriteString_
 
         // Try to send buffer to fifo first.
         // if not all data written then use long running operation to complete.
-        palUart->IsLongRunning = false;
+        bool isLongRunning = false;
 
         // store pointer because it will be changed after this call
         bufferPointer = buffer;
@@ -1268,7 +1313,7 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeWriteString_
 
         if (txCount < (int)bufferLength)
         {
-            palUart->IsLongRunning = true;
+            isLongRunning = true;
             if (txCount >= 0)
             {
                 // Any written then update ptr / count
@@ -1277,7 +1322,7 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeWriteString_
             }
         }
 
-        if (palUart->IsLongRunning)
+        if (isLongRunning)
         {
             // setup timeout
             hbTimeout.SetInteger(
@@ -1300,15 +1345,8 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeWriteString_
             // need this to release the buffer later, because the pointer is changed
             stack.PushValueU4((CLR_UINT32)&bufferPointer);
 
-            // Create a task to handle UART event from ISR
-            char task_name[16];
-            snprintf(task_name, ARRAYSIZE(task_name), "uart%d_tx", uart_num);
-
-            if (xTaskCreate(UartTxWorkerTask_sys, task_name, 2048, palUart, 12, NULL) != pdPASS)
-            {
-                ESP_LOGE(TAG, "Failed to start UART TX task");
-                NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
-            }
+            // trigger the persistent TX worker task
+            xSemaphoreGive(palUart->StartTx);
 
             // bump custom state so the read value above is pushed only once
             stack.m_customState = 2;
@@ -1317,7 +1355,7 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeWriteString_
 
     while (eventResult)
     {
-        if (!palUart->IsLongRunning)
+        if (stack.m_customState != 2)
         {
             // this is not a long running operation so nothing to do here
             break;
@@ -1352,7 +1390,7 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeWriteString_
         }
     }
 
-    if (palUart->IsLongRunning)
+    if (stack.m_customState == 2)
     {
         // pop "length" heap block from stack
         stack.PopValue();

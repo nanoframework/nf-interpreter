@@ -13,7 +13,7 @@ In _mcuconf.h_ (in both nanoBooter and nanoCLR folders), when compared with a de
 - STM32_SERIAL_USE_USART2 to TRUE
 - STM32_USB_USE_OTG1 to TRUE
 
-NOTE: this configuration was successfully tested in an ST_STM32F769I_DISCOVERY board using the Serial over USB connection on USB port 1 that creates a virtual COM port.
+NOTE: this configuration was successfully tested on an ORGPAL_PALTHREE board using the Serial over USB connection on USB port 1 that creates a virtual COM port.
 
 ## ADC configurations
 

@@ -7,24 +7,26 @@
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-HRESULT CLR_Checks::VerifyObject( CLR_RT_HeapBlock& top )
+HRESULT CLR_Checks::VerifyObject(CLR_RT_HeapBlock &top)
 {
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
 
-    switch(top.DataType())
+    switch (top.DataType())
     {
-    case DATATYPE_OBJECT:
-    case DATATYPE_BYREF:
-        if(top.Dereference() != NULL) NANOCLR_SET_AND_LEAVE(S_OK);
-        break;
+        case DATATYPE_OBJECT:
+        case DATATYPE_BYREF:
+            if (top.Dereference() != NULL)
+                NANOCLR_SET_AND_LEAVE(S_OK);
+            break;
 
-    case DATATYPE_ARRAY_BYREF:
-        if(top.DereferenceArray() != NULL) NANOCLR_SET_AND_LEAVE(S_OK);
-        break;
+        case DATATYPE_ARRAY_BYREF:
+            if (top.DereferenceArray() != NULL)
+                NANOCLR_SET_AND_LEAVE(S_OK);
+            break;
 
-    default:
-        NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+        default:
+            NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
     }
 
     NANOCLR_SET_AND_LEAVE(CLR_E_NULL_REFERENCE);
@@ -32,25 +34,25 @@ HRESULT CLR_Checks::VerifyObject( CLR_RT_HeapBlock& top )
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT CLR_Checks::VerifyArrayReference( CLR_RT_HeapBlock& ref )
+HRESULT CLR_Checks::VerifyArrayReference(CLR_RT_HeapBlock &ref)
 {
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
 
-    CLR_RT_HeapBlock_Array* array;
+    CLR_RT_HeapBlock_Array *array;
 
-    if(ref.DataType() != DATATYPE_OBJECT)
+    if (ref.DataType() != DATATYPE_OBJECT)
     {
         NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
     }
 
     array = ref.DereferenceArray();
-    if(array == NULL)
+    if (array == NULL)
     {
         NANOCLR_SET_AND_LEAVE(CLR_E_NULL_REFERENCE);
     }
 
-    if(array->DataType() != DATATYPE_SZARRAY)
+    if (array->DataType() != DATATYPE_SZARRAY)
     {
         NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
     }
@@ -58,7 +60,7 @@ HRESULT CLR_Checks::VerifyArrayReference( CLR_RT_HeapBlock& ref )
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT CLR_Checks::VerifyUnknownInstruction( CLR_OPCODE op )
+HRESULT CLR_Checks::VerifyUnknownInstruction(CLR_OPCODE op)
 {
     (void)op;
 
@@ -70,7 +72,7 @@ HRESULT CLR_Checks::VerifyUnknownInstruction( CLR_OPCODE op )
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT CLR_Checks::VerifyUnsupportedInstruction( CLR_OPCODE op )
+HRESULT CLR_Checks::VerifyUnsupportedInstruction(CLR_OPCODE op)
 {
     (void)op;
 

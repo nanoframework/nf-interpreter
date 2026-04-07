@@ -100,8 +100,12 @@ void CLR_RT_HeapBlock_Timer::SpawnTimer(CLR_RT_Thread *th)
     CLR_RT_ProtectFromGC gc(*managedTimer);
 
     _ASSERTE(delegate != NULL);
+
     if (delegate == NULL)
+    {
         return;
+    }
+
     _ASSERTE(delegate->DataType() == DATATYPE_DELEGATE_HEAD);
 
     m_ticksLastExpiration = HAL_Time_CurrentTime();

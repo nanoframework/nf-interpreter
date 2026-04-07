@@ -6,6 +6,7 @@
 
 #include <nanoHAL.h>
 #include <esp32_idf.h>
+#include <nanoprintf.h>
 
 //--//
 /* STDIO stubs                                                              */

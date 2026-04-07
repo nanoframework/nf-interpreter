@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (c) .NET Foundation and Contributors
 // See LICENSE file in the project root for full license information.
 //
@@ -12,15 +12,16 @@
 
 #if CONFIG_TINYUSB_CDC_ENABLED
 #include <tinyusb.h>
-#include <tusb_cdc_acm.h>
+#include <tinyusb_default_config.h>
+#include <tinyusb_cdc_acm.h>
 #endif
 
-////////////////////////////////////////////////////////////////////
-// Baudrate for the serial port                                   //
-// Can be overriden by the build parameter TARGET_SERIAL_BAUDRATE //
-////////////////////////////////////////////////////////////////////
-#ifndef TARGET_SERIAL_BAUDRATE
-#define TARGET_SERIAL_BAUDRATE 921600
+///////////////////////////////////////////////////////////////////////////
+// Baudrate for the serial port                                          //
+// Can be overriden by the build parameter CONFIG_TARGET_SERIAL_BAUDRATE //
+///////////////////////////////////////////////////////////////////////////
+#ifndef CONFIG_TARGET_SERIAL_BAUDRATE
+#define CONFIG_TARGET_SERIAL_BAUDRATE 921600
 #endif
 
 #ifdef CONFIG_IDF_TARGET_ESP32
@@ -78,6 +79,18 @@ static uart_port_t ESP32_WP_UART = UART_NUM_0;
 #define ESP32_WP_RX_PIN UART_NUM_0_RXD_DIRECT_GPIO_NUM
 #define ESP32_WP_TX_PIN UART_NUM_0_TXD_DIRECT_GPIO_NUM
 
+#elif CONFIG_IDF_TARGET_ESP32C5
+
+// WP uses UART0
+static uart_port_t ESP32_WP_UART = UART_NUM_0;
+
+// UART pins for ESP32-C5
+// U0RXD 16
+// U0TXD 17
+
+#define ESP32_WP_RX_PIN UART_NUM_0_RXD_DIRECT_GPIO_NUM
+#define ESP32_WP_TX_PIN UART_NUM_0_TXD_DIRECT_GPIO_NUM
+
 #elif CONFIG_IDF_TARGET_ESP32C6
 
 // WP uses UART0
@@ -102,9 +115,20 @@ static uart_port_t ESP32_WP_UART = UART_NUM_0;
 #define ESP32_WP_RX_PIN UART_NUM_0_RXD_DIRECT_GPIO_NUM
 #define ESP32_WP_TX_PIN UART_NUM_0_TXD_DIRECT_GPIO_NUM
 
+#elif CONFIG_IDF_TARGET_ESP32P4
+
+// WP uses UART0
+static uart_port_t ESP32_WP_UART = UART_NUM_0;
+
+// UART pins for ESP32-P4
+// U0RXD 23
+// U0TXD 24
+
+#define ESP32_WP_RX_PIN UART_NUM_0_RXD_DIRECT_GPIO_NUM
+#define ESP32_WP_TX_PIN UART_NUM_0_TXD_DIRECT_GPIO_NUM
 #endif
 
-#if (CONFIG_IDF_TARGET_ESP32C3 || CONFIG_IDF_TARGET_ESP32C6 || CONFIG_IDF_TARGET_ESP32H2) && HAL_WP_USE_USB_CDC
+#if CONFIG_SOC_USB_SERIAL_JTAG_SUPPORTED && CONFIG_NF_WP_TRANSPORT_USB_CDC
 
 #include <hal/usb_serial_jtag_ll.h>
 
@@ -242,20 +266,18 @@ static bool WP_Initialise(COM_HANDLE port)
     (void)port;
 
     // get configuration with default values
-    tinyusb_config_t tusb_cfg = {};
+    tinyusb_config_t tusb_cfg = TINYUSB_DEFAULT_CONFIG();
 
     ESP_ERROR_CHECK(tinyusb_driver_install(&tusb_cfg));
 
     tinyusb_config_cdcacm_t amc_cfg = {
-        .usb_dev = TINYUSB_USBDEV_0,
         .cdc_port = TINYUSB_CDC_ACM_0,
-        .rx_unread_buf_sz = 1056,
         .callback_rx = &WP_Cdc_Rx_Callback,
         .callback_rx_wanted_char = NULL,
         .callback_line_state_changed = NULL,
         .callback_line_coding_changed = NULL};
 
-    ESP_ERROR_CHECK(tusb_cdc_acm_init(&amc_cfg));
+    ESP_ERROR_CHECK(tinyusb_cdcacm_init(&amc_cfg));
 
     WP_Port_Intitialised = true;
 
@@ -313,7 +335,9 @@ uint8_t WP_TransmitMessage(WP_Message *message)
         }
     }
 
-    tinyusb_cdcacm_write_flush(TINYUSB_CDC_ACM_0, 0);
+    // need to call flush with a timeout to have it behave cooperatively with the RTOS
+    // OK to silently ignore errors here
+    tinyusb_cdcacm_write_flush(TINYUSB_CDC_ACM_0, pdMS_TO_TICKS(250));
 
     return true;
 }
@@ -333,7 +357,7 @@ static bool WP_Initialise(COM_HANDLE port)
     // ESP_ERROR_CHECK(uart_driver_delete(ESP32_WP_UART));
 
     uart_config_t uart_config = {// baudrate
-                                 .baud_rate = TARGET_SERIAL_BAUDRATE,
+                                 .baud_rate = CONFIG_TARGET_SERIAL_BAUDRATE,
                                  // baudrate
                                  .data_bits = UART_DATA_8_BITS,
                                  // parity mode

@@ -1160,7 +1160,8 @@ static int NormalizePath(const char *path, char *buffer, size_t bufferSize)
     *bufferP = '\0';
 
     // remove trailing slash, if any
-    if (bufferP[-1] == '/')
+    // guard against undefined behavior: only check bufferP[-1] when buffer is non-empty
+    if (bufferP > buffer && bufferP[-1] == '/')
     {
         bufferP--;
         *bufferP = '\0';
@@ -1170,6 +1171,13 @@ static int NormalizePath(const char *path, char *buffer, size_t bufferSize)
     {
         // remove leading slash
         memmove(buffer, buffer + 1, hal_strlen_s(buffer));
+    }
+
+    // use "/" instead to reference the root
+    if (buffer[0] == '\0')
+    {
+        buffer[0] = '/';
+        buffer[1] = '\0';
     }
 
     return 0;

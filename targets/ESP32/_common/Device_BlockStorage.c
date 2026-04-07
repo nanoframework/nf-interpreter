@@ -61,7 +61,7 @@ BlockRegionInfo BlockRegions[] = {
         BlockRange2,
     },
 
-    // Config, SPIFS partition
+    // Config, littlefs partition
     {
         // no attributes for this region
         (0),
@@ -157,7 +157,7 @@ void FixUpBlockRegionInfo()
 
     // Config
     const esp_partition_t *part_config =
-        esp_partition_find_first(ESP_PARTITION_TYPE_DATA, ESP_PARTITION_SUBTYPE_DATA_SPIFFS, 0);
+        esp_partition_find_first(ESP_PARTITION_TYPE_DATA, ESP_PARTITION_SUBTYPE_DATA_LITTLEFS, 0);
     if (part_config)
     {
         BlockRegions[2].Start = part_config->address;

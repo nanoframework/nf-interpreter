@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (c) .NET Foundation and Contributors
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
@@ -21,10 +21,11 @@ CLR_RT_HeapBlock_String *CLR_RT_HeapBlock_String::CreateInstance(CLR_RT_HeapBloc
     if (str)
     {
         // grab a pointer to the string storage area (after the CLR_RT_HeapBlock_String header)
-        char *szText = (char *)&str[1];
+        char const *szText = (char const *)&str[1];
 
-        // zero out the string storage area
-        memset(szText, 0, CONVERTFROMSIZETOHEAPBLOCKS(totLength - sizeof(CLR_RT_HeapBlock_String)));
+        // zero out the string storage area (remove size of one CLR_RT_HeapBlock)
+        totLength -= sizeof(CLR_RT_HeapBlock);
+        memset((void *)szText, 0, totLength);
 
 #if defined(NANOCLR_NO_ASSEMBLY_STRINGS)
         str->SetStringText(szText);
@@ -32,6 +33,7 @@ CLR_RT_HeapBlock_String *CLR_RT_HeapBlock_String::CreateInstance(CLR_RT_HeapBloc
         str->SetStringText(szText, NULL);
 #endif
 
+        // store reference to the storage area
         reference.SetObjectReference(str);
     }
 
@@ -58,18 +60,17 @@ HRESULT CLR_RT_HeapBlock_String::CreateInstance(CLR_RT_HeapBlock &reference, con
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
 
-    CLR_RT_HeapBlock_String *str;
-    char *szTextDst;
+    CLR_RT_HeapBlock_String const *str;
+    char const *szTextDst;
 
     str = CreateInstance(reference, length);
     CHECK_ALLOCATION(str);
 
     // grab a pointer to the string storage area (after the CLR_RT_HeapBlock_String header)
-    szTextDst = (char *)str->StringText();
+    szTextDst = str->StringText();
 
     // copy the string to the storage area
-    memcpy(szTextDst, szText, length);
-    szTextDst[length] = 0;
+    memcpy((void *)szTextDst, szText, length);
 
     NANOCLR_NOCLEANUP();
 }
@@ -119,7 +120,7 @@ HRESULT CLR_RT_HeapBlock_String::CreateInstance(CLR_RT_HeapBlock &reference, CLR
     CLR_RT_UnicodeHelper uh;
     uh.SetInputUTF16(szText);
     CLR_UINT32 lengthInBytes = uh.CountNumberOfBytes(length);
-    CLR_RT_HeapBlock_String *str = CreateInstance(reference, lengthInBytes);
+    CLR_RT_HeapBlock_String const *str = CreateInstance(reference, lengthInBytes);
     CHECK_ALLOCATION(str);
 
     uh.m_outputUTF8 = (CLR_UINT8 *)str->StringText();

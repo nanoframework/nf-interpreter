@@ -31,6 +31,18 @@ typedef enum __nfpack SourceClock
     SourceClock_REF = 1,
 } SourceClock;
 
+struct Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_Esp32_Rmt_RmtChannelSettings
+{
+    static const int FIELD___channel = 1;
+    static const int FIELD___pinNumber = 2;
+    static const int FIELD___clockDivider = 3;
+    static const int FIELD___numberOfMemoryBlocks = 4;
+    static const int FIELD___bufferSize = 5;
+    static const int FIELD___signalInverterEnabled = 6;
+
+    //--//
+};
+
 struct Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_Esp32_Rmt_RmtCommand
 {
     static const int FIELD___level0 = 1;
@@ -99,18 +111,6 @@ struct Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_Es
 
     static bool CheckChannel(int channel);
     static CLR_INT32 FindNextChannel();
-};
-
-struct Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_Esp32_Rmt_RmtChannelSettings
-{
-    static const int FIELD___channel = 1;
-    static const int FIELD___pinNumber = 2;
-    static const int FIELD___clockDivider = 3;
-    static const int FIELD___numberOfMemoryBlocks = 4;
-    static const int FIELD___bufferSize = 5;
-    static const int FIELD___signalInverterEnabled = 6;
-
-    //--//
 };
 
 struct Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_Esp32_Rmt_TransmitChannelSettings

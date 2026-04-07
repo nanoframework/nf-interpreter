@@ -1,0 +1,48 @@
+{
+    "version": 4,
+    "include": [
+        "../../../../CMake/arm-gcc.json",
+        "../../../../config/user-tools-repos.json",
+        "../../../../config/user-prefs.json"
+    ],
+    "configurePresets": [
+        {
+            "name": "SL_STK3701A",
+            "inherits": [
+                "arm-gcc-cortex-preset",
+                "user-tools-repos",
+                "user-prefs"
+            ],
+            "hidden": false,
+            "cacheVariables": {
+                "NF_TARGET_DEFCONFIG": "targets/ThreadX/SiliconLabs/SL_STK3701A/defconfig"
+            }
+        },
+        {
+            "name": "SL_STK3701A_REVB",
+            "inherits": [
+                "arm-gcc-cortex-preset",
+                "user-tools-repos",
+                "user-prefs"
+            ],
+            "hidden": false,
+            "cacheVariables": {
+                "NF_TARGET_DEFCONFIG": "targets/ThreadX/SiliconLabs/SL_STK3701A/defconfig_REVB"
+            }
+        }
+    ],
+    "buildPresets": [
+        {
+            "inherits": "base-user",
+            "name": "SL_STK3701A",
+            "displayName": "SL_STK3701A",
+            "configurePreset": "SL_STK3701A"
+        },
+        {
+            "inherits": "base-user",
+            "name": "SL_STK3701A_REVB",
+            "displayName": "SL_STK3701A_REVB",
+            "configurePreset": "SL_STK3701A_REVB"
+        }
+    ]
+}

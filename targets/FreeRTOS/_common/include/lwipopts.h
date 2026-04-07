@@ -239,6 +239,13 @@
 #endif
 
 /**
+ * TCP_SYNMAXRTX: Maximum number of retransmissions of SYN segments.
+ */
+#ifndef TCP_SYNMAXRTX
+#define TCP_SYNMAXRTX 4
+#endif
+
+/**
  * TCP_SND_BUF: TCP sender buffer space (bytes).
  * To achieve good performance, this should be at least 2 * TCP_MSS.
  */

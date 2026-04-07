@@ -15,8 +15,6 @@ HRESULT Library_corlib_native_System_Array::System_Collections_IList_get_Item___
 
     CLR_RT_HeapBlock ref;
 
-    memset(&ref, 0, sizeof(struct CLR_RT_HeapBlock));
-
     NANOCLR_CHECK_HRESULT(ref.InitializeArrayReference(thisRef, index));
 
     {
@@ -40,8 +38,6 @@ HRESULT Library_corlib_native_System_Array::System_Collections_IList_set_Item___
 
     CLR_RT_HeapBlock ref;
 
-    memset(&ref, 0, sizeof(struct CLR_RT_HeapBlock));
-
     NANOCLR_CHECK_HRESULT(ref.InitializeArrayReference(thisRef, index));
 
     NANOCLR_SET_AND_LEAVE(stack.Arg2().StoreToReference(ref, 0));
@@ -61,7 +57,7 @@ HRESULT Library_corlib_native_System_Array::get_Length___I4(CLR_RT_StackFrame &s
     NANOCLR_NOCLEANUP();
 }
 
-#if (NANOCLR_REFLECTION == TRUE)
+#if CONFIG_NF_FEATURE_SUPPORT_REFLECTION
 
 HRESULT Library_corlib_native_System_Array::CreateInstance___STATIC__SystemArray__SystemType__I4(
     CLR_RT_StackFrame &stack)
@@ -80,7 +76,7 @@ HRESULT Library_corlib_native_System_Array::CreateInstance___STATIC__SystemArray
     NANOCLR_NOCLEANUP();
 }
 
-#endif // NANOCLR_REFLECTION
+#endif // CONFIG_NF_FEATURE_SUPPORT_REFLECTION
 
 HRESULT Library_corlib_native_System_Array::Copy___STATIC__VOID__SystemArray__I4__SystemArray__I4__I4(
     CLR_RT_StackFrame &stack)

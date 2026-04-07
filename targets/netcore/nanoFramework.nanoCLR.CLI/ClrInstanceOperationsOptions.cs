@@ -1,7 +1,5 @@
-﻿//
-// Copyright (c) .NET Foundation and Contributors
-// See LICENSE file in the project root for full license information.
-//
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using CommandLine;
 
@@ -10,13 +8,19 @@ namespace nanoFramework.nanoCLR.CLI
     [Verb(
         "instance",
         HelpText = "Operations with the current nanoCLR instance.")]
-    public class ClrInstanceOperationsOptions
+    public class ClrInstanceOperationsOptions : CommonOptions
     {
         [Option(
             "getversion",
             Required = false,
             HelpText = "Gets the version of the current nanoCLR instance.")]
         public bool GetCLRVersion { get; set; }
+
+        [Option(
+            "getnativeassemblies",
+            Required = false,
+            HelpText = "Gets the names and versions of the native assemblies.")]
+        public bool GetNativeAssemblies { get; set; }
 
         [Option(
             "update",
@@ -37,21 +41,5 @@ namespace nanoFramework.nanoCLR.CLI
             Default = null,
             HelpText = "Specify a version of nanoCRL to install.")]
         public string TargetVersion { get; set; }
-
-        /// <summary>
-        /// Allowed values:
-        /// q[uiet]
-        /// m[inimal]
-        /// n[ormal]
-        /// d[etailed]
-        /// diag[nostic]
-        /// </summary>
-        [Option(
-            'v',
-            "verbosity",
-            Required = false,
-            Default = "n",
-            HelpText = "Sets the verbosity level of the command. Allowed values are q[uiet], m[inimal], n[ormal], d[etailed], and diag[nostic]. Not supported in every command; see specific command page to determine if this option is available.")]
-        public string Verbosity { get; set; }
     }
 }

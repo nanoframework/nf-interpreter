@@ -52,7 +52,7 @@ foreach(SRC_FILE ${STM32L4_CubePackage_SRCS})
 
         ${stm32l4_hal_driver_SOURCE_DIR}/Src
 
-        ${CMAKE_SOURCE_DIR}/targets/AzureRTOS/ST/_common/CubeMX
+        ${CMAKE_SOURCE_DIR}/targets/ThreadX/ST/_common/CubeMX
 
         CMAKE_FIND_ROOT_PATH_BOTH
     )
@@ -68,7 +68,7 @@ endforeach()
 list(REMOVE_DUPLICATES STM32L4_CubePackage_INCLUDE_DIRS)
 
 # remove duplicated defines that clash with ChibiOS defines (when used along with)
-if(${CHIBIOS_HAL_REQUIRED})
+if(${THREADX_CHIBIOS_HAL_REQUIRED})
 
     set(HAL_INCLUDE_FILE ${stm32l4_hal_driver_SOURCE_DIR}/Inc/Legacy/stm32_hal_legacy.h)
 

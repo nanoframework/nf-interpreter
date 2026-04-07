@@ -8,7 +8,7 @@
 #include "target_board.h"
 #include "target_common.h"
 
-#include <esp32c3/rom/spi_flash.h>
+#include <esp32h2/rom/spi_flash.h>
 
 HAL_SYSTEM_CONFIG HalSystemConfig = {
     {true}, // HAL_DRIVER_CONFIG_HEADER Header;

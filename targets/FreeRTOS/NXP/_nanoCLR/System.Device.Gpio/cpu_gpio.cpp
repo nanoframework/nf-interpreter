@@ -28,6 +28,7 @@ struct gpio_input_state
     uint8_t mode;                          // Interrupt mode
     void *param;                           // Param to user isr call
     bool expected;                         // Expected state for debounce handler
+    bool current;                          // Current pin state
     bool waitingDebounce;                  // True if waiting for debounce timer to complete
 };
 
@@ -60,8 +61,9 @@ void Gpio_DebounceHandler(TimerHandle_t xTimer)
         pState->isrPtr(pState->pinNumber, actual, pState->param);
 
         if (pState->mode == GPIO_INT_EDGE_BOTH)
-        {                          // both edges
-            pState->expected ^= 1; // update expected state
+        {
+            // update expected state
+            pState->expected ^= 1;
         }
     }
 
@@ -121,13 +123,19 @@ void GPIO_Main_IRQHandler(int portIndex, GPIO_Type *portBase)
                         }
                         else
                         {
-                            GpioPinValue PinState =
-                                (GpioPinValue)GPIO_PinRead(GPIO_BASE(pState->pinNumber), GPIO_PIN(pState->pinNumber));
-                            pState->isrPtr(pState->pinNumber, PinState, pState->param);
+                            bool pinState =
+                                GPIO_PinRead(GPIO_BASE(pState->pinNumber), GPIO_PIN(pState->pinNumber)) != 0;
+
+                            if (pinState != pState->current)
+                            {
+                                pState->current = pinState;
+
+                                pState->isrPtr(pState->pinNumber, pinState, pState->param);
+                            }
                         }
                     }
                 } // if pin setup in nanoFramework
-            }     // if interrupt
+            } // if interrupt
 
             intPins >>= 1;
             bitNumber++;
@@ -237,6 +245,7 @@ gpio_input_state *AllocateGpioInputState(GPIO_PIN pinNumber)
         pState = (gpio_input_state *)platform_malloc(sizeof(gpio_input_state));
         memset(pState, 0, sizeof(gpio_input_state));
         pState->pinNumber = pinNumber;
+        pState->current = GPIO_PinRead(GPIO_BASE(pinNumber), GPIO_PIN(pinNumber));
         (*inputStates)[bit] = pState;
     }
     return pState;

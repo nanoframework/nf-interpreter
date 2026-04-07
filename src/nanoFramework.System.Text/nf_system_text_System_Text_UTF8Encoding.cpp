@@ -105,7 +105,6 @@ HRESULT Library_nf_system_text_System_Text_UTF8Encoding::Helper__GetChars(CLR_RT
     CLR_RT_HeapBlock_Array *pArrayBytesCopy;
     CLR_RT_HeapBlock_Array *arrTmp;
 
-    memset(&ref, 0, sizeof(struct CLR_RT_HeapBlock));
     ref.SetObjectReference(NULL);
     CLR_RT_ProtectFromGC gc(ref);
 

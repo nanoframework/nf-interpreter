@@ -13,6 +13,7 @@
 
 # ignore any content inside the Interop assemblies folder
 InteropAssemblies/*
+!InteropAssemblies/CLR_IncludedAPI.h.in
 !InteropAssemblies/CLR_RT_InteropAssembliesTable.cpp.in
 !InteropAssemblies/README.md
 
@@ -380,3 +381,4 @@ sdkconfig
 CMakeUserPresets.json
 config/user-tools-repos.json
 config/user-prefs.json
+config/user-kconfig.conf

@@ -260,11 +260,6 @@ void hal_lfs_config()
         lfsConfig[i].erase = hal_lfs_getEraseHandler(i);
         lfsConfig[i].sync = hal_lfs_getSyncHandler(i);
 
-        // #ifdef LFS_THREADSAFE
-        //         lfsConfig[i].lock = &hal_lfs_lock;
-        //         lfsConfig[i].unlock = &hal_lfs_unlock;
-        // #endif
-
         // setup littlefs configurations
         lfsConfig[i].read_size = hal_lfs_getReadSize(i);
         lfsConfig[i].prog_size = hal_lfs_getProgSize(i);
@@ -315,26 +310,21 @@ void hal_lfs_mount()
 
 int32_t hal_lfs_mount_partition(int32_t index, bool forceFormat)
 {
+    // not used
+    (void)forceFormat;
+
     int32_t operationResult = 0;
+
+    operationResult = lfs_format(&lfs[index], &lfsConfig[index]);
+
+    if (operationResult != LFS_ERR_OK)
+    {
+        // failed to format
+        return operationResult;
+    }
 
     // mount the file system
     operationResult = lfs_mount(&lfs[index], &lfsConfig[index]);
-
-    if (operationResult != 0)
-    {
-        // looks like littlefs is not formated (occuring at 1st boot)
-
-        if (forceFormat)
-        {
-            // wipe out the chip
-            hal_lfs_erase_chip(index);
-        }
-
-        lfs_format(&lfs[index], &lfsConfig[index]);
-
-        // mount the file system again
-        operationResult = lfs_mount(&lfs[index], &lfsConfig[index]);
-    }
 
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     // code block to assist testing littlefs

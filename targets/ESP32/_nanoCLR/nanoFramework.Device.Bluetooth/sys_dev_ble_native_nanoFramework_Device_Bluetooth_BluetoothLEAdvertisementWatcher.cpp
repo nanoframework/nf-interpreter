@@ -34,8 +34,6 @@ void BleCentralStartScan()
     // Perform an active or passive scan
     disc_params.passive = bleScanActive ? 0 : 1;
 
-    disc_params.passive = 0;
-
     // Use defaults for the rest of the parameters.
     disc_params.itvl = 0;   // defaults to BLE_GAP_SCAN_FAST_INTERVAL_MIN(30ms)
     disc_params.window = 0; // defaults to BLE_GAP_SCAN_FAST_WINDOW(30ms)

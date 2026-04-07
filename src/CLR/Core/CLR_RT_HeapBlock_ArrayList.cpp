@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (c) .NET Foundation and Contributors
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
@@ -46,7 +46,6 @@ HRESULT CLR_RT_HeapBlock_ArrayList::Add(CLR_RT_HeapBlock *value, CLR_INT32 &inde
         // Protect value from GC, in case EnsureCapacity triggers one
         CLR_RT_HeapBlock valueHB;
 
-        memset(&valueHB, 0, sizeof(struct CLR_RT_HeapBlock));
         valueHB.SetObjectReference(value);
         CLR_RT_ProtectFromGC gc(valueHB);
 
@@ -95,7 +94,6 @@ HRESULT CLR_RT_HeapBlock_ArrayList::Insert(CLR_INT32 index, CLR_RT_HeapBlock *va
         // Protect value from GC, in case EnsureCapacity triggers one
         CLR_RT_HeapBlock valueHB;
 
-        memset(&valueHB, 0, sizeof(struct CLR_RT_HeapBlock));
         valueHB.SetObjectReference(value);
         CLR_RT_ProtectFromGC gc(valueHB);
 
@@ -171,7 +169,6 @@ HRESULT CLR_RT_HeapBlock_ArrayList::SetCapacity(CLR_UINT32 newCapacity)
         CLR_RT_HeapBlock newItemsHB;
         CLR_RT_HeapBlock_Array *newItems;
 
-        memset(&newItemsHB, 0, sizeof(struct CLR_RT_HeapBlock));
         CLR_RT_ProtectFromGC gc(newItemsHB);
 
         if (newCapacity < size)

@@ -124,9 +124,6 @@ HRESULT CLR_RT_HeapBlock_WeakReference::GetTarget(CLR_RT_HeapBlock &targetRefere
                 CLR_RT_HeapBlock input;
                 CLR_RT_HeapBlock output;
 
-                memset(&input, 0, sizeof(struct CLR_RT_HeapBlock));
-                memset(&output, 0, sizeof(struct CLR_RT_HeapBlock));
-
                 input.SetObjectReference(m_targetSerialized);
                 output.SetObjectReference(NULL);
 

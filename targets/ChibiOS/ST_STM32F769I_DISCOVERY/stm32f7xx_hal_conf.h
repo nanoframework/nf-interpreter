@@ -10,47 +10,69 @@
 #define STM32F769xx
 
 #ifdef __cplusplus
- extern "C" {
+extern "C"
+{
 #endif
 
 #define HAL_DMA_MODULE_ENABLED
+#define HAL_SDRAM_MODULE_ENABLED
 #define HAL_QSPI_MODULE_ENABLED
 #define HAL_RCC_MODULE_ENABLED
+#define HAL_CORTEX_MODULE_ENABLED
 
-#define  USE_HAL_DMA2D_REGISTER_CALLBACKS       0U /* DMA2D register callback disabled     */
-#define  USE_HAL_QSPI_REGISTER_CALLBACKS        0U /* QSPI register callback disabled      */
+// ########################### System Configuration #########################
+// This is the HAL system configuration section
+
+// Value of VDD in mv
+#define VDD_VALUE (3300U)
+// tick interrupt priority
+#define TICK_INT_PRIORITY (0x0FU)
+#define USE_RTOS          0U
+#define PREFETCH_ENABLE   1U
+// To enable instruction cache and prefetch
+#define ART_ACCELERATOR_ENABLE 1U
+
+#define USE_HAL_DMA2D_REGISTER_CALLBACKS 0U /* DMA2D register callback disabled     */
+#define USE_HAL_QSPI_REGISTER_CALLBACKS  0U /* QSPI register callback disabled      */
+#define USE_HAL_SDRAM_REGISTER_CALLBACKS 0U /* SDRAM register callback disabled     */
 
 #ifdef HAL_RCC_MODULE_ENABLED
-  #include "stm32f7xx_hal_rcc.h"
+#include "stm32f7xx_hal_rcc.h"
 #endif /* HAL_RCC_MODULE_ENABLED */
 
 #ifdef HAL_DMA_MODULE_ENABLED
-  #include "stm32f7xx_hal_dma.h"
+#include "stm32f7xx_hal_dma.h"
 #endif /* HAL_DMA_MODULE_ENABLED */
 
 #ifdef HAL_QSPI_MODULE_ENABLED
- #include "stm32f7xx_hal_qspi.h"
+#include "stm32f7xx_hal_qspi.h"
 #endif /* HAL_QSPI_MODULE_ENABLED */
 
+#ifdef HAL_SDRAM_MODULE_ENABLED
+#include "stm32f7xx_hal_sdram.h"
+#endif /* HAL_SDRAM_MODULE_ENABLED */
 
-#ifdef  USE_FULL_ASSERT
-/**
-  * @brief  The assert_param macro is used for function's parameters check.
-  * @param  expr: If expr is false, it calls assert_failed function
-  *         which reports the name of the source file and the source
-  *         line number of the call that failed. 
-  *         If expr is true, it returns no value.
-  * @retval None
-  */
-  #define assert_param(expr) ((expr) ? (void)0 : assert_failed((uint8_t *)__FILE__, __LINE__))
-  void assert_failed(uint8_t* file, uint32_t line);
+#ifdef HAL_CORTEX_MODULE_ENABLED
+#include "stm32f7xx_hal_cortex.h"
+#endif /* HAL_CORTEX_MODULE_ENABLED */
+
+#ifdef USE_FULL_ASSERT
+    /**
+     * @brief  The assert_param macro is used for function's parameters check.
+     * @param  expr: If expr is false, it calls assert_failed function
+     *         which reports the name of the source file and the source
+     *         line number of the call that failed.
+     *         If expr is true, it returns no value.
+     * @retval None
+     */
+#define assert_param(expr) ((expr) ? (void)0 : assert_failed((uint8_t *)__FILE__, __LINE__))
+    void assert_failed(uint8_t *file, uint32_t line);
 #else
-  #define assert_param(expr) ((void)0U)
+#define assert_param(expr) ((void)0U)
 #endif /* USE_FULL_ASSERT */
-
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif  // __STM32F7xx_HAL_CONF_H
+#endif // __STM32F7xx_HAL_CONF_H

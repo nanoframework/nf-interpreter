@@ -39,23 +39,14 @@ typedef enum StorageEventType
     // removable device removed
     StorageEventType_RemovableDeviceRemoval = 0x02,
 
+    // Card detect changed
+    StorageEventType_CardDetectChanged = 0x03
+
 } StorageEventType;
 
 // constants to be used throughout the code
 #define DRIVE_LETTER_LENGTH sizeof(INDEX0_DRIVE_LETTER)
 #define DRIVE_PATH_LENGTH   sizeof(INDEX0_DRIVE_PATH)
-
-/////////////////////////////////////////////////////////////////////////////////////////
-// !!! KEEP IN SYNC WITH Windows.Storage.CreationCollisionOption (in managed code) !!! //
-/////////////////////////////////////////////////////////////////////////////////////////
-
-enum CreationCollisionOption
-{
-    CreationCollisionOption_GenerateUniqueName = 0,
-    CreationCollisionOption_ReplaceExisting,
-    CreationCollisionOption_FailIfExists,
-    CreationCollisionOption_OpenIfExists
-};
 
 #ifdef __cplusplus
 extern "C"

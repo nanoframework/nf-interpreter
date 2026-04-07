@@ -34,7 +34,8 @@ extern "C"
         mbedtls_ssl_config *conf;
         mbedtls_ssl_context *ssl;
         mbedtls_net_context *server_fd;
-        mbedtls_x509_crt *x509_crt;
+        mbedtls_x509_crt *ca_cert;
+        mbedtls_x509_crt *own_cert;
         mbedtls_pk_context *pk;
     } mbedTLS_NFContext;
 

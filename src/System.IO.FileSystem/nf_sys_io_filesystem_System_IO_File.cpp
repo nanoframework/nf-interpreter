@@ -6,7 +6,6 @@
 #include "nf_sys_io_filesystem.h"
 
 #include <ff.h>
-#include <nanoHAL_Windows_Storage.h>
 
 extern SYSTEMTIME GetDateTime(uint16_t date, uint16_t time);
 extern void CombinePathAndName(char *outpath, const char *path1, const char *path2);

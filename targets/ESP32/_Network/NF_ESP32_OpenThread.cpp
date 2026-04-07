@@ -10,6 +10,7 @@
 
 #include <NF_ESP32_Network.h>
 #include <esp32_idf.h>
+#include <nanoprintf.h>
 
 #include "esp_openthread.h"
 #include "esp_openthread_cli.h"
@@ -234,7 +235,7 @@ void ResetLineBuffer()
 int cliOutputCallback(void *aContext, const char *aFormat, va_list aArguments)
 {
     // Find length of string with args
-    int length = std::vsnprintf(nullptr, 0, aFormat, aArguments);
+    int length = vsnprintf(nullptr, 0, aFormat, aArguments);
 
     if (((cliLineBufferCount + length) > cliBufferSize) || cliIgnoreLine > 0)
     {
@@ -245,7 +246,7 @@ int cliOutputCallback(void *aContext, const char *aFormat, va_list aArguments)
     }
 
     // format into buffer
-    std::vsnprintf(&cliLineBuffer[cliLineBufferCount], cliBufferSize - length, aFormat, aArguments);
+    vsnprintf(&cliLineBuffer[cliLineBufferCount], cliBufferSize - length, aFormat, aArguments);
 
     // Update count
     cliLineBufferCount += length;

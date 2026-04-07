@@ -3,15 +3,15 @@
 // See LICENSE file in the project root for full license information.
 //
 
-using CommandLine;
 using System.Collections.Generic;
+using CommandLine;
 
 namespace nanoFramework.nanoCLR.CLI
 {
     [Verb(
         "run",
         HelpText = "Run nanoCLR assembly.")]
-    public class ExecuteCommandLineOptions
+    public class ExecuteCommandLineOptions : CommonOptions
     {
         [Option(
             'a',
@@ -64,6 +64,20 @@ namespace nanoFramework.nanoCLR.CLI
             Hidden = true,
             HelpText = "Trace wire protocol packets.")]
         public bool TraceWireProtocol { get; set; }
+
+        [Option(
+            "profiler",
+            Required = false,
+            Default = false,
+            HelpText = "Enable profiler.")]
+        public bool EnableProfiler { get; set; }
+
+        [Option(
+            "dumpprofilerdata",
+            Required = false,
+            Default = false,
+            HelpText = "Dump profiler raw data to a file.")]
+        public bool DumpProfilerData { get; set; }
 
         [Option(
             'r',

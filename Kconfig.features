@@ -1,0 +1,80 @@
+#
+# Copyright (c) .NET Foundation and Contributors
+# See LICENSE file in the project root for full license information.
+#
+
+menu "nanoFramework Features"
+
+# Naming convention for NF_FEATURE_* symbols
+# -------------------------------------------
+# NF_FEATURE_HAS_*  — declares that a hardware capability is present on the
+#                     target board (e.g. an SD-card slot, a config-block flash
+#                     partition, accessible storage).  Selecting the symbol does
+#                     not imply any particular software stack; it merely tells
+#                     the build system that the hardware resource exists.
+#
+# NF_FEATURE_USE_*  — selects a software feature or stack that the firmware
+#                     should include (e.g. LittleFS, Application Domains).
+#                     The hardware required by the feature is assumed to be
+#                     present independently (often gated by a HAS_ symbol).
+#
+# Other NF_FEATURE_* symbols (no HAS_/USE_ infix) represent features that are
+# neither purely hardware-presence flags nor pure software choices (e.g.
+# DEBUGGER, WATCHDOG, SUPPORT_REFLECTION).
+
+config NF_FEATURE_DEBUGGER
+    bool "Managed application debugging support"
+    default y
+
+config NF_FEATURE_RTC
+    bool "Hardware RTC support"
+    default n
+
+config NF_FEATURE_HAS_SDCARD
+    bool "SD Card support"
+    default n
+    select API_SYSTEM_IO_FILESYSTEM
+
+config NF_FEATURE_HAS_CONFIG_BLOCK
+    bool "Configuration block storage"
+    default n
+
+config NF_FEATURE_USE_LITTLEFS
+    bool "LittleFS file system"
+    default n
+    select API_SYSTEM_IO_FILESYSTEM
+
+config NF_FEATURE_HAS_ACCESSIBLE_STORAGE
+    bool "Accessible storage (internal storage)"
+    default n
+
+config NF_FEATURE_HAS_USB_MSD
+    bool "USB Mass Storage"
+    default n
+    select API_SYSTEM_IO_FILESYSTEM
+
+config NF_FEATURE_WATCHDOG
+    bool "Hardware watchdog"
+    default y
+
+config NF_FEATURE_SUPPORT_REFLECTION
+    bool "System.Reflection API support"
+    default y
+
+config NF_FEATURE_BINARY_SERIALIZATION
+    bool "Binary serialization support"
+    default y
+
+config NF_FEATURE_USE_APPDOMAINS
+    bool "Application Domains support"
+    default n
+
+config NF_FEATURE_LIGHT_MATH
+    bool "Light math (exclude complex math functions)"
+    default n
+
+config NF_TRACE_TO_STDIO
+    bool "Send trace data to stdio (requires spare SERIAL device)"
+    default n
+
+endmenu

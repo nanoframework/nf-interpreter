@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (c) .NET Foundation and Contributors
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
@@ -574,7 +574,6 @@ HRESULT CLR_RT_StackFrame::MakeCall(
     CLR_RT_StackFrame *stackSub;
     CLR_RT_HeapBlock tmp;
 
-    memset(&tmp, 0, sizeof(struct CLR_RT_HeapBlock));
     tmp.SetObjectReference(NULL);
     CLR_RT_ProtectFromGC gc(tmp);
 
@@ -755,10 +754,7 @@ HRESULT CLR_RT_StackFrame::HandleSynchronized(bool fAcquire, bool fGlobal)
     CLR_RT_HeapBlock *obj;
     CLR_RT_HeapBlock ref;
     CLR_RT_HeapBlock **ppGlobalLock;
-    CLR_RT_HeapBlock *pGlobalLock;
-
-    memset(&refType, 0, sizeof(struct CLR_RT_HeapBlock));
-    memset(&ref, 0, sizeof(struct CLR_RT_HeapBlock));
+    CLR_RT_HeapBlock const *pGlobalLock;
 
     if (fGlobal)
     {

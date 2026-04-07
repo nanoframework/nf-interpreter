@@ -412,6 +412,7 @@ HRESULT LITTLEFS_FS_Driver::Seek(void *handle, int64_t offset, uint32_t origin, 
 HRESULT LITTLEFS_FS_Driver::GetLength(void *handle, int64_t *length)
 {
     LITTLEFS_FileHandle *fileHandle;
+    long currentPosition;
 
     if (handle == 0)
     {
@@ -419,6 +420,13 @@ HRESULT LITTLEFS_FS_Driver::GetLength(void *handle, int64_t *length)
     }
 
     fileHandle = (LITTLEFS_FileHandle *)handle;
+
+    // Store current position
+    currentPosition = ftell(fileHandle->file);
+    if (currentPosition == -1L)
+    {
+        return CLR_E_FILE_IO;
+    }
 
     // Move to the end of the file to determine its size
     if (fseek(fileHandle->file, 0, SEEK_END) != 0)
@@ -430,8 +438,12 @@ HRESULT LITTLEFS_FS_Driver::GetLength(void *handle, int64_t *length)
     // Get the current position, which is the size of the file
     *length = ftell(fileHandle->file);
 
-    // rewind to the start of the file if you need to read from it next
-    rewind(fileHandle->file);
+    // Restore file position
+    if (fseek(fileHandle->file, currentPosition, SEEK_SET) != 0)
+    {
+        // Handle error
+        return CLR_E_FILE_IO;
+    }
 
     return S_OK;
 }

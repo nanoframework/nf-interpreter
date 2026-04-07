@@ -8,8 +8,8 @@
 
 #include <nanoCLR_Runtime.h>
 #include <nanoCLR_Checks.h>
-//#include <nanoCLR_Diagnostics.h>
-//#include <nanoCLR_Hardware.h>
+// #include <nanoCLR_Diagnostics.h>
+// #include <nanoCLR_Hardware.h>
 
 #include "corlib_native.h"
 #include "nanoCRT.h"

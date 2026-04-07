@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (c) .NET Foundation and Contributors
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
@@ -145,8 +145,6 @@ HRESULT Library_corlib_native_System_Runtime_CompilerServices_RuntimeHelpers::
                 CLR_RT_HeapBlock tmp;
                 CLR_UINT32 *ptr = (CLR_UINT32 *)ptrDst;
 
-                memset(&tmp, 0, sizeof(struct CLR_RT_HeapBlock));
-
                 for (; lenSrc; lenSrc--, ptr++)
                 {
                     NANOCLR_CHECK_HRESULT(tmp.SetFloatIEEE754(*ptr));
@@ -160,8 +158,6 @@ HRESULT Library_corlib_native_System_Runtime_CompilerServices_RuntimeHelpers::
             {
                 CLR_RT_HeapBlock tmp;
                 CLR_UINT64 *ptr = (CLR_UINT64 *)ptrDst;
-
-                memset(&tmp, 0, sizeof(struct CLR_RT_HeapBlock));
 
                 for (; lenSrc; lenSrc--, ptr++)
                 {

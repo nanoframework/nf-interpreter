@@ -22,6 +22,8 @@
 #ifndef BOARD_H
 #define BOARD_H
 
+// clang-format off
+
 /*===========================================================================*/
 /* Driver constants.                                                         */
 /*===========================================================================*/
@@ -414,7 +416,7 @@
 #define LINE_ULPI_DIR               PAL_LINE(GPIOI, 11U)
 #define LINE_LCD_INT                PAL_LINE(GPIOI, 13U)
 #define LINE_LCD_BL_CTRL            PAL_LINE(GPIOI, 14U)
-#define LINE_SD_DETECT              PAL_LINE(GPIOI, 15U)
+#define LINE_SD_CARD_DETECT         PAL_LINE(GPIOI, 15U)
 #define LINE_ARD_D4                 PAL_LINE(GPIOJ, 0U)
 #define LINE_ARD_D2                 PAL_LINE(GPIOJ, 1U)
 #define LINE_DSI_TE                 PAL_LINE(GPIOJ, 2U)
@@ -1766,3 +1768,5 @@ extern "C" {
 #endif /* _FROM_ASM_ */
 
 #endif /* BOARD_H */
+
+// clang-format on

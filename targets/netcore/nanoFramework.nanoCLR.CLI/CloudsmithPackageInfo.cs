@@ -3,24 +3,24 @@
 // See LICENSE file in the project root for full license information.
 //
 
-using Newtonsoft.Json;
 using System;
+using System.Text.Json.Serialization;
 
 namespace nanoFramework.nanoCLR.CLI
 {
     [Serializable]
     internal class CloudsmithPackageInfo
     {
-        [JsonProperty("version")]
+        [JsonPropertyName("version")]
         public string Version { get; set; }
 
-        [JsonProperty("cdn_url")]
+        [JsonPropertyName("cdn_url")]
         public string DownloadUrl { get; set; }
 
-        [JsonProperty("name")]
+        [JsonPropertyName("name")]
         public string TargetName { get; set; }
 
-        [JsonProperty("uploaded_at")]
+        [JsonPropertyName("uploaded_at")]
         public DateTime PackageDate { get; set; }
     }
 }

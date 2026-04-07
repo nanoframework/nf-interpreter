@@ -22,7 +22,7 @@
                 "TI_SL_CC13xx_26xx_SDK_SOURCE": "<path-to-local-TI_SimpleLink-CC13xx_26xx-SDK-source-mind-the-forward-slash>",
                 "TI_XDCTOOLS_SOURCE": "<path-to-local-TI-XDC-Tools-source-mind-the-forward-slash>",
                 "TI_SYSCONFIG_SOURCE": "<path-to-local-TI-SYSCONFIG-Tool-source-mind-the-forward-slash>",
-                "AZURERTOS_SOURCE_FOLDER": "<path-to-local-AzureRTOS-source-mind-the-forward-slash>",
+                "THREADX_SOURCE_FOLDER": "<path-to-local-ThreadX-source-mind-the-forward-slash>",
                 "NETXDUO_SOURCE_FOLDER": "<path-to-local-NetxDuo-source-mind-the-forward-slash>"
             }
         },
@@ -47,7 +47,7 @@
                 "TI_SL_CC13xx_26xx_SDK_SOURCE": "/sources/SimpleLinkCC13",
                 "TI_XDCTOOLS_SOURCE": "/usr/local/bin/titools",
                 "TI_SYSCONFIG_SOURCE": "/sources/TI_SysConfig",
-                "AZURERTOS_SOURCE_FOLDER": "/sources/AzureRTOS",
+                "THREADX_SOURCE_FOLDER": "/sources/ThreadX",
                 "NETXDUO_SOURCE_FOLDER": "/sources/NetxDuo"
             }
         },

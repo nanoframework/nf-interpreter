@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (c) .NET Foundation and Contributors
 // Portions Copyright (c) 2006 - 2021 Skirrid Systems. All rights reserved.
 // See LICENSE file in the project root for full license information.
@@ -93,7 +93,7 @@ Floating point
   #define DP_LIMIT      310
   #define MAX_POWER     256
 // [NF_CHANGE]
-  #define FLOAT_DIGITS  18
+  #define FLOAT_DIGITS  19
 // [END_NF_CHANGE]
 #else
   #define DP_LIMIT      40
@@ -271,6 +271,8 @@ static char *format_float(double number, flt_width_t ndigits, flt_width_t width,
              * to the answer in the fastest time, with the minimum number of
              * operations to introduce rounding errors.
              */
+
+            // Normalise the number such that it lies in the range 1 <= n < 10.
             // First make small numbers bigger.
 
             i = 0;
@@ -416,33 +418,38 @@ static char *format_float(double number, flt_width_t ndigits, flt_width_t width,
     {
         p -= (i - FLOAT_DIGITS);
     }
-    if (!(fflags & FF_NRND) && *p >= '5')
+    // Use the rounding digit at 'pend' (the extra generated digit)
+    if (!(fflags & FF_NRND) && *pend >= '5')
     {
-        for (;;)
+        char *start = buf +2; // first generated digit position
+        char *q = pend -1; // last significant digit
+
+        // Set rounding digit to zero; it will be dropped later
+        *pend = '0';
+
+        // Propagate carry leftwards
+        while (q >= start && *q == '9')
         {
-            if (i == 0)
+            *q = '0';
+            --q;
+        }
+
+        if (q < start)
+        {
+            // Rollover past the most significant digit, e.g.,9.999 ->10.000
+            *start = '1';
+            ++decpt;
+            // In fixed 'f' mode, this increases displayed digits
+            if ((fflags & (FF_FCVT | FF_GCVT)) == FF_FCVT)
             {
-                // The rounding has rippled all the way through to
-                // the first digit. i.e. 9.999..9 -> 10.0
-                // Just replace the first 0 with a 1 and shift the DP.
-                *p = '1';
-                ++decpt;
-                // This increases the displayed digits for 'f' only.
-                if ((fflags & (FF_FCVT|FF_GCVT)) == FF_FCVT)
-                {
-                    ++ndigits;
-                    ++pend;
-                }
-                break;
+                ++ndigits;
+                ++pend; // account for the added most significant digit
             }
-            // Previous digit was a rollover
-            *p-- = '0';
-            // Increment next digit and break out unless there is a rollover.
-            if (*p != '9')
-            {
-                (*p)++;
-                break;
-            }
+        }
+        else
+        {
+            // Normal increment without rollover
+            (*q)++;
         }
     }
 
@@ -908,6 +915,14 @@ static printf_t doprnt(void *context, void (*func)(char c, void *context), size_
                 }
 #endif
 #if FEATURE(USE_PRECISION)
+                // If precision explicitly set to 0 and value is 0, emit a single '0'
+                if (precision == 0 && uvalue == 0)
+                {
+                    *--p = '0';
+#if FEATURE(USE_ZERO_PAD)
+                    --fwidth;
+#endif
+                }
                 while (uvalue || precision > 0)
 #else
                 if (uvalue == 0)
@@ -1077,7 +1092,14 @@ static printf_t doprnt(void *context, void (*func)(char c, void *context), size_
 #ifdef BASIC_PRINTF_ONLY
                 func(c);            // Basic output function.
 #else
-                func(c, context);   // Output function.
+// [NF_CHANGE]
+                // only print if there is space in the buffer
+                if (count < n)
+                {
+                    func(c, context);   // Output function.
+                }
+// [END NF_CHANGE]
+
 #endif
 #ifdef PRINTF_T
                 ++count;
@@ -1103,7 +1125,13 @@ static printf_t doprnt(void *context, void (*func)(char c, void *context), size_
 #ifdef BASIC_PRINTF_ONLY
             func(convert);              // Basic output function.
 #else
+// [NF_CHANGE]
+        // only print if there is space in the buffer
+        if (count < n)
+        {
             func(convert, context);     // Output function.
+        }
+// [END NF_CHANGE]
 #endif
 #ifdef PRINTF_T
             ++count;
@@ -1221,15 +1249,19 @@ printf_t sprintf_(char *buf, const char *fmt, ... )
 printf_t snprintf_(char *buf, size_t n,const char *fmt, ... )
 {
     va_list ap;
-    int Count;
+    int count;
 
     va_start(ap, fmt);
-    Count = doprnt(&buf, putbuf, n, fmt, ap);
+    count = doprnt(&buf, putbuf, n - 1, fmt, ap);
     va_end(ap);
-    // Append null terminator.
-    *buf = '\0';
+
+    // Append null terminator if there's space.
+    if (n > 0)
+    {
+        *buf = '\0';
+    }
     
-   return Count;
+   return count;
 }
 // [END_NF_CHANGE]
 
@@ -1237,6 +1269,25 @@ printf_t snprintf_(char *buf, size_t n,const char *fmt, ... )
 void putchar_(char character)
 {
     (void)character;
+}
+// [END_NF_CHANGE]
+
+// [NF_CHANGE]
+printf_t vsnprintf_(char *buffer, size_t bufsz, char const *format, va_list vlist)
+{
+    size_t count;
+    va_list vlistCopy;
+
+    // Create a copy of the variable argument list
+    va_copy(vlistCopy, vlist);
+
+    // Perform the actual formatting operation
+    count = doprnt(&buffer, putbuf, bufsz, format, vlistCopy);
+
+    // Clean up the copied variable argument list
+    va_end(vlistCopy);
+
+    return count;
 }
 // [END_NF_CHANGE]
 

@@ -23,6 +23,7 @@ struct gpio_input_state : public HAL_DblLinkedNode<gpio_input_state>
     uint8_t mode;                          // Interrupt mode
     void *param;                           // Param to user isr call
     bool expected;                         // Expected state for debounce handler
+    bool current;                          // Current pin state
     bool waitingDebounce;                  // True if waiting for debounce timer to complete
 };
 
@@ -53,10 +54,11 @@ static void DebounceTimerCallback(virtual_timer_t *vtp, void *arg)
     if (actual == pState->expected)
     {
         pState->isrPtr(pState->pinNumber, actual, pState->param);
+
         if (pState->mode == GPIO_INT_EDGE_BOTH)
         {
-            // both edges
-            pState->expected ^= 1; // update expected state
+            // update expected state
+            pState->expected ^= 1;
         }
     }
 
@@ -92,9 +94,14 @@ static void GpioEventCallback(void *arg)
         // get IoLine from pin number
         ioline_t ioLine = GetIoLine(pGpio->pinNumber);
 
-        chSysUnlockFromISR();
-        pGpio->isrPtr(pGpio->pinNumber, palReadLine(ioLine), pGpio->param);
-        chSysLockFromISR();
+        bool level = palReadLine(ioLine);
+
+        if (level != pGpio->current)
+        {
+            pGpio->current = level;
+
+            pGpio->isrPtr(pGpio->pinNumber, level, pGpio->param);
+        }
     }
 
     chSysUnlockFromISR();
@@ -131,6 +138,7 @@ gpio_input_state *AllocateGpioInputState(GPIO_PIN pinNumber)
         {
             memset(ptr, 0, sizeof(gpio_input_state));
             ptr->pinNumber = pinNumber;
+            ptr->current = palReadLine(GetIoLine(pinNumber));
 
             chVTObjectInit(&ptr->debounceTimer);
 

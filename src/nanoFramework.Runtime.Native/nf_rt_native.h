@@ -10,6 +10,14 @@
 #include <nanoCLR_Interop.h>
 #include <nanoCLR_Runtime.h>
 
+typedef enum __nfpack RebootOption
+{
+    RebootOption_NormalReboot = 0,
+    RebootOption_EnterNanoBooter = 1,
+    RebootOption_ClrOnly = 2,
+    RebootOption_EnterProprietaryBooter = 8,
+} RebootOption;
+
 typedef enum __nfpack SystemInfo_FloatingPoint
 {
     SystemInfo_FloatingPoint_None = 0,
@@ -38,7 +46,7 @@ struct Library_nf_rt_native_nanoFramework_Runtime_Native_Power
 {
     static const int FIELD_STATIC__OnRebootEvent = 0;
 
-    NANOCLR_NATIVE_DECLARE(NativeReboot___STATIC__VOID);
+    NANOCLR_NATIVE_DECLARE(NativeReboot___STATIC__VOID__nanoFrameworkRuntimeNativeRebootOption);
 
     //--//
 };

@@ -5,7 +5,9 @@
 
 idf_component_register(
     SRCS "boot_msg.c"
-    INCLUDE_DIRS ${CMAKE_BINARY_DIR}/../targets/ESP32
+    INCLUDE_DIRS
+        ${CMAKE_BINARY_DIR}/../targets/ESP32
+        ${CMAKE_BINARY_DIR}/..
 )
 
 target_link_libraries(${COMPONENT_LIB} INTERFACE "-Wl,--whole-archive"

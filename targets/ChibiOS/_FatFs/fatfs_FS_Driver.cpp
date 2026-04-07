@@ -178,21 +178,21 @@ HRESULT FATFS_FS_Driver::GetSizeInfo(const VOLUME_ID *volume, int64_t *totalSize
 
     f_chdrive(currentVolume->m_rootName);
 
-    // // this call is prone to take a long time, thus hitting the watchdog, therefore we are skipping this for now
-    // //     // get free clusters
-    // //     f_getfree(buffer, &freeClusters, &fsPtr);
+    // this call is prone to take a long time, thus hitting the watchdog, therefore we are skipping this for now
+    //     // get free clusters
+    //     f_getfree(buffer, &freeClusters, &fsPtr);
 
-    // //     // Get total sectors and free sectors
-    // //     totalSectors = (fs.n_fatent - 2) * fs.csize;
-    // //     freeSectors = freeClusters * fs.csize;
+    //     // Get total sectors and free sectors
+    //     totalSectors = (fs.n_fatent - 2) * fs.csize;
+    //     freeSectors = freeClusters * fs.csize;
 
-    // // #if FF_MAX_SS != FF_MIN_SS
-    // //     *totalSize = (int64_t)totalSectors * fs.ssize;
-    // //     *totalFreeSpace = (int64_t)freeSectors * fs.ssize;
-    // // #else
-    // //     *totalSize = (int64_t)totalSectors * FF_MAX_SS;
-    // //     *totalFreeSpace = (int64_t)freeSectors * FF_MAX_SS;
-    // // #endif
+    // #if FF_MAX_SS != FF_MIN_SS
+    //     *totalSize = (int64_t)totalSectors * fs.ssize;
+    //     *totalFreeSpace = (int64_t)freeSectors * fs.ssize;
+    // #else
+    //     *totalSize = (int64_t)totalSectors * FF_MAX_SS;
+    //     *totalFreeSpace = (int64_t)freeSectors * FF_MAX_SS;
+    // #endif
 
     *totalSize = -1;
     *totalFreeSpace = -1;

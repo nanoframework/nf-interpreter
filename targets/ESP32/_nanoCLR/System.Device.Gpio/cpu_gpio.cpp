@@ -35,6 +35,9 @@ static const int spiReservedFinalGpio = 32;
 #elif defined(CONFIG_IDF_TARGET_ESP32C3)
 static const int spiReservedInitialGpio = 12;
 static const int spiReservedFinalGpio = 17;
+#elif defined(CONFIG_IDF_TARGET_ESP32C5)
+static const int spiReservedInitialGpio = 15;
+static const int spiReservedFinalGpio = 22;
 #elif defined(CONFIG_IDF_TARGET_ESP32C6)
 static const int spiReservedInitialGpio = 24;
 static const int spiReservedFinalGpio = 30;
@@ -58,6 +61,7 @@ struct gpio_input_state : public HAL_DblLinkedNode<gpio_input_state>
     uint32_t debounceMs;                   // debounce Millsecs, no debonce=0
     uint8_t mode;                          // Interrupt mode
     void *param;                           // Param to user isr call
+    bool current;                          // Current state
     bool expected;                         // Expected state for debounce handler
     bool waitingDebounce;                  // True if waiting for debounce timer to complete
 };
@@ -140,10 +144,11 @@ static void Esp_Gpio_DebounceHandler(TimerHandle_t timer)
     if (state != NULL)
     {
         // get current pin state
-        bool actual = CPU_GPIO_GetPinState(state->pinNumber);
+        GpioPinValue actual = CPU_GPIO_GetPinState(state->pinNumber);
 
         if (actual == state->expected)
         {
+            state->current = actual;
             state->isrPtr(state->pinNumber, actual, state->param);
 
             if (state->mode == GPIO_INT_EDGE_BOTH)
@@ -315,16 +320,13 @@ static void gpio_isr(void *arg)
         return;
     }
 
-    // get current pin state
-    bool actual = CPU_GPIO_GetPinState(state->pinNumber);
-
     if (state->debounceMs > 0)
     {
         // flag waiting for debounce timeout
         state->waitingDebounce = true;
 
-        // store current state
-        state->expected = actual;
+        // store expected new state
+        state->expected = !state->current;
 
         // start timer
         xTimerStartFromISR(state->debounceTimer, &xHigherPriorityTaskWoken);
@@ -336,8 +338,15 @@ static void gpio_isr(void *arg)
     }
     else
     {
-        // just fire event
-        state->isrPtr(state->pinNumber, actual, state->param);
+        // get current pin state
+        GpioPinValue actual = gpio_get_level((gpio_num_t)state->pinNumber) ? GpioPinValue_High : GpioPinValue_Low;
+
+        if (actual != state->current)
+        {
+            state->current = actual;
+
+            state->isrPtr(state->pinNumber, actual, state->param);
+        }
     }
 
     NATIVE_INTERRUPT_END
@@ -357,6 +366,8 @@ bool CPU_GPIO_EnableInputPin(
     // Check Input drive mode
     if (driveMode >= (int)PinMode_Output)
         return false;
+
+    gpio_reset_pin((gpio_num_t)pinNumber);
 
     // Set as Input GPIO_INT_EDGE intEdge, GPIO_RESISTOR ResistorState
     if (!CPU_GPIO_SetDriveMode(pinNumber, driveMode))
@@ -397,6 +408,7 @@ bool CPU_GPIO_EnableInputPin(
         state->mode = intEdge;
         state->param = (void *)isr_Param;
         state->debounceMs = debounceTimeMilliseconds;
+        state->current = CPU_GPIO_GetPinState(pinNumber);
 
         switch (intEdge)
         {
@@ -411,7 +423,7 @@ bool CPU_GPIO_EnableInputPin(
                 break;
 
             case GPIO_INT_EDGE_BOTH:
-                state->expected = !CPU_GPIO_GetPinState(pinNumber); // Use not current state
+                state->expected = !state->current; // Use not current state
                 break;
 
             default:
@@ -451,6 +463,8 @@ bool CPU_GPIO_EnableOutputPin(GPIO_PIN pinNumber, GpioPinValue InitialState, Pin
 
     // If this is currently an input pin then clean up
     DeleteInputState(pinNumber);
+
+    gpio_reset_pin((gpio_num_t)pinNumber);
 
     if (CPU_GPIO_SetDriveMode(pinNumber, driveMode) == false)
     {

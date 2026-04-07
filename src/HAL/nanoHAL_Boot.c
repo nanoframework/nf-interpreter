@@ -6,7 +6,7 @@
 #include <nanoHAL_Boot.h>
 #include <nanoHAL_Capabilites.h>
 
-#if (TARGET_HAS_NANOBOOTER == TRUE)
+#if CONFIG_NF_TARGET_HAS_NANOBOOTER
 BootClipboard __attribute__((section(".boot_clipboard"))) g_BootClipboard;
 #endif
 
@@ -14,7 +14,7 @@ BootClipboard __attribute__((section(".boot_clipboard"))) g_BootClipboard;
 void InitBootClipboard()
 {
 
-#if (TARGET_HAS_NANOBOOTER == TRUE)
+#if CONFIG_NF_TARGET_HAS_NANOBOOTER
 
     BootClipboard *data = &g_BootClipboard;
 
@@ -48,13 +48,13 @@ void InitBootClipboard()
     data->CLRVersion.usRevision = VERSION_REVISION;
 #endif
 
-#endif // TARGET_HAS_NANOBOOTER
+#endif // CONFIG_NF_TARGET_HAS_NANOBOOTER
 }
 
 // Returns true if the there is a request to remain in nanoBooter
 inline bool IsToRemainInBooter()
 {
-#if (TARGET_HAS_NANOBOOTER == TRUE)
+#if CONFIG_NF_TARGET_HAS_NANOBOOTER
     return (g_BootClipboard.BootRequest == BootRequest_NanoBooter);
 #else
     return false;
@@ -65,7 +65,7 @@ inline bool IsToRemainInBooter()
 // Returns false in case it's not supported (which is considered the default).
 inline bool RequestToLaunchNanoBooter(int32_t errorCode)
 {
-#if (TARGET_HAS_NANOBOOTER == TRUE)
+#if CONFIG_NF_TARGET_HAS_NANOBOOTER
     if (Target_HasNanoBooter())
     {
         g_BootClipboard.BootRequest = BootRequest_NanoBooter;
@@ -81,7 +81,7 @@ inline bool RequestToLaunchNanoBooter(int32_t errorCode)
 // Returns false in case it's not supported (which is considered the default).
 inline bool RequestToLaunchProprietaryBootloader()
 {
-#if (TARGET_HAS_NANOBOOTER == TRUE)
+#if CONFIG_NF_TARGET_HAS_NANOBOOTER
     if (Target_HasProprietaryBooter())
     {
         g_BootClipboard.BootRequest = BootRequest_ProprietaryBootloader;
@@ -95,7 +95,7 @@ inline bool RequestToLaunchProprietaryBootloader()
 // Report successful nanoBooter execution
 void ReportSuccessfullNanoBooter()
 {
-#if (TARGET_HAS_NANOBOOTER == TRUE)
+#if CONFIG_NF_TARGET_HAS_NANOBOOTER
     // clear boot request
     g_BootClipboard.BootRequest = BootRequest_Invalid;
     // set execution code

@@ -6,6 +6,6 @@
 #ifndef TARGET_OS_H
 #define TARGET_OS_H
 
-#define TARGET_HAS_NANOBOOTER FALSE
+#include "nf_config.h"
 
 #endif // TARGET_OS_H

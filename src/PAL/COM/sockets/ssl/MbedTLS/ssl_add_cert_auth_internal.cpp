@@ -25,12 +25,12 @@ bool ssl_add_cert_auth_internal(int contextHandle, const char *certificate, int 
         /////////////////////////////////////////////////////////////////////////////////////////////////
         // developer notes:                                                                            //
         // this call parses certificates in both string and binary formats                             //
-        // when the formart is a string it has to include the terminator otherwise the parse will fail //
+        // when the format is a string it has to include the terminator otherwise the parse will fail //
         /////////////////////////////////////////////////////////////////////////////////////////////////
-        if (mbedtls_x509_crt_parse(context->x509_crt, (const unsigned char *)certificate, certLength) == 0)
+        if (mbedtls_x509_crt_parse(context->ca_cert, (const unsigned char *)certificate, certLength) == 0)
         {
             // add to CA chain
-            mbedtls_ssl_conf_ca_chain(context->conf, context->x509_crt, NULL);
+            mbedtls_ssl_conf_ca_chain(context->conf, context->ca_cert, NULL);
 
             // done
             return true;

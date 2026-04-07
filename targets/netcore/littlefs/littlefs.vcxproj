@@ -104,7 +104,7 @@
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>LFS_CONFIG=lfs_config.h;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>LFS_CONFIG=lfs_config.h;_DEBUG;DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(LITTLEFS_PATH);..\..\..\src\System.IO.FileSystem;..\..\..\targets\netcore\littlefs;..\..\..\targets\win32\Include;..\Include;..\CLR\Include;..\CorLib;..\..\..\src\PAL\Include;..\..\..\src\CLR\Include;..\..\..\..\src\CLR\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
@@ -117,7 +117,7 @@
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>LFS_CONFIG=lfs_config.h;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>LFS_CONFIG=lfs_config.h;_DEBUG;DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(LITTLEFS_PATH);..\..\..\src\System.IO.FileSystem;..\..\..\targets\netcore\littlefs;..\..\..\targets\win32\Include;..\Include;..\CLR\Include;..\CorLib;..\..\..\src\PAL\Include;..\..\..\src\CLR\Include;..\..\..\..\src\CLR\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
@@ -161,4 +161,7 @@
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
+  <Target Name="LITTLEFS_PATH_verification" Condition=" '$(LITTLEFS_PATH)' == '' " BeforeTargets="ClCompile">
+	<Error Text="Assign the path of a clone of the littlefs repository to the LITTLEFS_PATH environment variable."/>
+  </Target>
 </Project>

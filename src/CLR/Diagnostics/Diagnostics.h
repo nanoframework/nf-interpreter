@@ -5,13 +5,13 @@
 //
 #include <nanoCLR_Runtime.h>
 #include <nanoCLR_Checks.h>
-//#include <nanoCLR_Diagnostics.h>
-//#include <nanoCLR_Graphics.h>
-//#include <nanoCLR_Hardware.h>
-//#include <core.h>
+// #include <nanoCLR_Diagnostics.h>
+// #include <nanoCLR_Graphics.h>
+// #include <nanoCLR_Hardware.h>
+// #include <core.h>
 
 #include <corlib_native.h>
 #ifndef VIRTUAL_DEVICE
 #include <nanoprintf.h>
 #endif // VIRTUAL_DEVICE
-//#include <spot_net_native.h>
+// #include <spot_net_native.h>

@@ -17,7 +17,7 @@ resources:
       type: github
       name: espressif/esp-idf
       endpoint: nanoframework
-      ref: refs/tags/v5.2.2
+      ref: refs/tags/v5.5.4
 
 # scheduled build
 # the schedule is defined at the AZDO web interface because of inconsistencies with time zones
@@ -26,7 +26,7 @@ jobs:
   ##############################
   - job: Check_Build_Options
     pool:
-      vmImage: "windows-latest"
+      vmImage: "windows-2022"
 
     variables:
       DOTNET_NOLOGO: true
@@ -102,7 +102,7 @@ jobs:
           echo "##vso[task.setvariable variable=BUILD_CHIBIOS;isOutput=true]false"  
           echo "##vso[task.setvariable variable=BUILD_ESP32;isOutput=true]false"  
           echo "##vso[task.setvariable variable=BUILD_TI;isOutput=true]false"  
-          echo "##vso[task.setvariable variable=BUILD_AZURERTOS;isOutput=true]false"
+          echo "##vso[task.setvariable variable=BUILD_THREADX;isOutput=true]false"
           echo "##vso[task.setvariable variable=BUILD_ALL;isOutput=true]false"  
 
           if($env:StartReleaseCandidate -like "true")
@@ -186,7 +186,9 @@ jobs:
                         ($files.where{$_.Contains('targets/ChibiOS/_nf-overlay')}).Count -gt 0 -Or
                         ($files.where{$_.Contains('targets/ChibiOS/_littlefs')}).Count -gt 0 -Or
                         ($files.where{$_.Contains('targets/ChibiOS/ORGPAL_PALTHREE')}).Count -gt 0 -Or
-                        ($files.where{$_.Contains('targets/ChibiOS/ST_NUCLEO64_F091RC')}).Count -gt 0
+                        ($files.where{$_.Contains('targets/ChibiOS/ORGPAL_PALX')}).Count -gt 0 -Or
+                        ($files.where{$_.Contains('targets/ChibiOS/ST_NUCLEO64_F091RC')}).Count -gt 0 -Or
+                        ($files.where{$_.Contains('targets/ChibiOS/MXCHIP_AZ3166')}).Count -gt 0
                       )
                     {
                         # files at ChibiOS global folders or targets being built with this pipeline
@@ -228,12 +230,12 @@ jobs:
 
                 if( 
                   !$buildingPr -And
-                  ($files.where{$_.Contains('targets/AzureRTOS')}).Count -gt 0)
+                  ($files.where{$_.Contains('targets/ThreadX')}).Count -gt 0)
                 {
-                    # files at AzureRTOS folder
-                    echo "##vso[task.setvariable variable=BUILD_AZURERTOS;isOutput=true]true"
+                    # files at ThreadX folder
+                    echo "##vso[task.setvariable variable=BUILD_THREADX;isOutput=true]true"
 
-                    Write-host "##[command] Building Azure RTOS targets"
+                    Write-host "##[command] Building ThreadX targets"
                 }
               }
           }
@@ -262,7 +264,7 @@ jobs:
       - Check_Build_Options
 
     pool:
-      vmImage: "windows-latest"
+      vmImage: "windows-2022"
 
     strategy:
       matrix:
@@ -290,10 +292,18 @@ jobs:
           NeedsSRECORD: true
           CMakePreset: ST_NUCLEO64_F091RC
 
+        MXCHIP_AZ3166:
+          TargetBoard: MXCHIP_AZ3166
+          TargetSeries: "stm32f4xx"
+          BuildOptions: 
+          NeedsDFU: false
+          NeedsSRECORD: true
+          CMakePreset: MXCHIP_AZ3166
+
     variables:
       DOTNET_NOLOGO: true
       # creates a counter and assigns it to the revision variable
-      REVISION: $[counter('STM32_1_12_0_versioncounter', 0)]
+      REVISION: $[counter('STM32_1_14_0_versioncounter', 0)]
       HelperPackageVersion: $[counter('HelperPackageVersioncounter', 0)]
       TargetPlatform: "stm32"
 
@@ -301,9 +311,12 @@ jobs:
       - template: azure-pipelines-templates/build-preparations.yml
       - template: azure-pipelines-templates/nb-gitversioning.yml
       - template: azure-pipelines-templates/download-install-arm-gcc-toolchain.yml
-      - template: azure-pipelines-templates/download-install-ninja.yml
       - template: azure-pipelines-templates/download-srecord.yml
       - template: azure-pipelines-templates/download-hexdfu.yml
+      - template: azure-pipelines-templates/install-kconfig-tools.yml
+      - template: azure-pipelines-templates/validate-kconfig.yml
+        parameters:
+          targetPreset: $(CMakePreset)
       - template: azure-pipelines-templates/build-chibios-stm32-targets.yml
       - template: azure-pipelines-templates/pack-publish-artifacts.yml
       - template: azure-pipelines-templates/publish-cloudsmith.yml
@@ -330,7 +343,7 @@ jobs:
       - Check_Build_Options
 
     pool:
-      vmImage: "windows-latest"
+      vmImage: "windows-2022"
 
     strategy:
       matrix:
@@ -380,14 +393,23 @@ jobs:
           PackageName: ESP32_PICO
           CMakePreset: ESP32_PICO
 
-        KALUGA_1:
+        ESP32_S2_UART:
           TargetBoard: ESP32_S2
           TargetSeries: "esp32_s2"
           BuildOptions:
           IDF_Target: esp32s2
-          TargetName: KALUGA_1
-          PackageName: KALUGA_1
-          CMakePreset: KALUGA_1
+          TargetName: ESP32_S2_UART
+          PackageName: ESP32_S2_UART
+          CMakePreset: ESP32_S2_UART
+
+        ESP32_S2_USB:
+          TargetBoard: ESP32_S2
+          TargetSeries: "esp32_s2"
+          BuildOptions:
+          IDF_Target: esp32s2
+          TargetName: ESP32_S2_USB
+          PackageName: ESP32_S2_USB
+          CMakePreset: ESP32_S2_USB
 
         ESP32_BLE_REV3:
           TargetBoard: ESP32
@@ -523,6 +545,24 @@ jobs:
           PackageName: ESP32_S3_BLE
           CMakePreset: ESP32_S3_BLE
 
+        ESP32_S3_BLE_UART:
+          TargetBoard: ESP32_S3
+          TargetSeries: "esp32s3"
+          BuildOptions:
+          IDF_Target: esp32s3
+          TargetName: ESP32_S3_BLE_UART
+          PackageName: ESP32_S3_BLE_UART
+          CMakePreset: ESP32_S3_BLE_UART
+
+        ESP32_S3_ALL_UART:
+          TargetBoard: ESP32_S3
+          TargetSeries: "esp32s3"
+          BuildOptions:
+          IDF_Target: esp32s3
+          TargetName: ESP32_S3_ALL_UART
+          PackageName: ESP32_S3_ALL_UART
+          CMakePreset: ESP32_S3_ALL_UART
+
         ESP32_WESP32:
           TargetSeries: "esp32"
           TargetBoard: ESP32
@@ -541,36 +581,92 @@ jobs:
           PackageName: ESP32_WT32_ETH01
           CMakePreset: ESP32_WT32_ETH01
 
+        ESP32_LILYGO:
+          TargetBoard: ESP32
+          TargetSeries: "esp32"
+          BuildOptions:
+          IDF_Target: esp32
+          TargetName: ESP32_LILYGO
+          PackageName: ESP32_LILYGO
+          CMakePreset: ESP32_LILYGO
+
+        ESP32_S3:
+          TargetBoard: ESP32_S3
+          TargetSeries: "esp32s3"
+          BuildOptions:
+          IDF_Target: esp32s3
+          TargetName: ESP32_S3
+          PackageName: ESP32_S3
+          CMakePreset: ESP32_S3
+
+        ESP_WROVER_KIT:
+          TargetBoard: ESP32
+          TargetSeries: "esp32"
+          BuildOptions:
+          IDF_Target: esp32
+          TargetName: ESP_WROVER_KIT
+          PackageName: ESP_WROVER_KIT
+          CMakePreset: ESP_WROVER_KIT
+
+        ESP32_P4_USB:
+          TargetBoard: ESP32_P4
+          TargetSeries: "esp32p4"
+          BuildOptions:
+          IDF_Target: esp32p4
+          TargetName: ESP32_P4_USB
+          PackageName: ESP32_P4_USB
+          CMakePreset: ESP32_P4_USB
+
+        ESP32_C5_THREAD_USB:
+          TargetBoard: ESP32_C5
+          TargetSeries: "esp32c5"
+          BuildOptions:
+          IDF_Target: esp32c5
+          TargetName: ESP32_C5_THREAD_USB 
+          PackageName: ESP32_C5_THREAD_USB
+          CMakePreset: ESP32_C5_THREAD_USB
+
+        ESP32_C5_THREAD_UART:
+          TargetBoard: ESP32_C5
+          TargetSeries: "esp32c5"
+          BuildOptions:
+          IDF_Target: esp32c5
+          TargetName: ESP32_C5_THREAD_UART
+          PackageName: ESP32_C5_THREAD_UART
+          CMakePreset: ESP32_C5_THREAD_UART
+
     variables:
       DOTNET_NOLOGO: true
       # creates a counter and assigns it to the revision variable
-      REVISION: $[counter('ESP32_1_12_0_versioncounter', 0)]
+      REVISION: $[counter('ESP32_1_14_0_versioncounter', 0)]
       IDF_PATH: "D:/a/1/s/esp-idf"
       PIP_CACHE_DIR: $(Pipeline.Workspace)/.pip
       TargetPlatform: "esp32"
+      IDF_TAG: "v5.5.4"
 
     steps:
       - checkout: self
-      - checkout: esp32_idf
-        fetchDepth: 1
+        path: s/nf-interpreter
 
+      - template: azure-pipelines-templates/checkout-idf.yml
+        parameters:
+          repoDirectory: '$(Agent.BuildDirectory)/s'
       - template: azure-pipelines-templates/build-preparations.yml
         parameters:
-          repoDirectory: '$(Build.SourcesDirectory)\nf-interpreter'
+          repoDirectory: '$(Agent.BuildDirectory)/s/nf-interpreter'
       - template: azure-pipelines-templates/nb-gitversioning.yml
         parameters:
-          repoDirectory: '$(Build.SourcesDirectory)\nf-interpreter'
+          repoDirectory: '$(Agent.BuildDirectory)/s/nf-interpreter'
       - template: azure-pipelines-templates/download-install-esp32-build-components.yml
-      - template: azure-pipelines-templates/download-install-ninja.yml
-        parameters:
-          repoDirectory: '$(Build.SourcesDirectory)\nf-interpreter'
       - template: azure-pipelines-templates/build-espressif-esp32-targets.yml
-
+        parameters:
+          repoDirectory: '$(Agent.BuildDirectory)/s/nf-interpreter'
+          partitionsDirectory: '$(Agent.BuildDirectory)/s/nf-interpreter/targets/ESP32/_IDF/$(IDF_Target)'
       - task: CopyFiles@2
         condition: succeeded()
         displayName: Copying bootloader
         inputs:
-          sourceFolder: '$(Build.SourcesDirectory)\nf-interpreter\build\bootloader'
+          sourceFolder: '$(Agent.BuildDirectory)/s/nf-interpreter/build/bootloader'
           Contents: |
             bootloader.bin
           TargetFolder: '$(Build.ArtifactStagingDirectory)\$(TargetPublishName)'
@@ -578,9 +674,11 @@ jobs:
           ignoreMakeDirErrors: true
 
       - template: azure-pipelines-templates/copy-sdkconfig.yml
+        parameters:
+          repoDirectory: '$(Agent.BuildDirectory)/s/nf-interpreter'
       - template: azure-pipelines-templates/pack-publish-artifacts.yml
         parameters:
-          buildDirectory: '$(Build.SourcesDirectory)\nf-interpreter\build'
+          buildDirectory: '$(Agent.BuildDirectory)/s/nf-interpreter/build'
       - template: azure-pipelines-templates/publish-cloudsmith.yml
       - template: azure-pipelines-templates/publish-sdkconfig.yml
 
@@ -605,7 +703,7 @@ jobs:
       - Check_Build_Options
 
     pool:
-      vmImage: "windows-latest"
+      vmImage: "windows-2022"
 
     strategy:
       matrix:
@@ -614,13 +712,13 @@ jobs:
           PackageName: TI_CC1352R1_LAUNCHXL_868
           TargetSeries: "CC13X2"
           BuildOptions: >-
-            -DRADIO_FREQUENCY=868
+            -DTI_SIMPLELINK_RADIO_FREQ_MHZ=868
           CMakePreset: TI_CC1352R1_LAUNCHXL
 
     variables:
       DOTNET_NOLOGO: true
       # creates a counter and assigns it to the revision variable
-      REVISION: $[counter('TI_1_12_0_versioncounter', 0)]
+      REVISION: $[counter('TI_1_14_0_versioncounter', 0)]
       HelperPackageVersion: $[counter('HelperPackageVersioncounter', 0)]
       TargetPlatform: "ti_simplelink"
 
@@ -628,25 +726,28 @@ jobs:
       - template: azure-pipelines-templates/build-preparations.yml
       - template: azure-pipelines-templates/nb-gitversioning.yml
       - template: azure-pipelines-templates/download-install-arm-gcc-toolchain.yml
-      - template: azure-pipelines-templates/download-install-ninja.yml
+      - template: azure-pipelines-templates/install-kconfig-tools.yml
+      - template: azure-pipelines-templates/validate-kconfig.yml
+        parameters:
+          targetPreset: $(CMakePreset)
       - template: azure-pipelines-templates/build-ti-simplelink-targets.yml
       - template: azure-pipelines-templates/pack-publish-artifacts.yml
       - template: azure-pipelines-templates/publish-cloudsmith.yml
       - template: azure-pipelines-templates/pack-publish-ti-sl-managed-helpers.yml
 
   #################
-  # Azure RTOS
-  - job: Build_Azure_RTOS_targets
+  # ThreadX
+  - job: Build_ThreadX_targets
     condition: >-
       or(
         eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ALL'], true),
-        eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_AZURERTOS'], true),
+        eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_THREADX'], true),
         contains(dependencies.Check_Build_Options.outputs['GetCommitDetails.COMMIT_MESSAGE'], '***BUILD_ALL***'),
         and(
           eq(variables['Build.Reason'], 'Manual'),
           or(
             eq(variables['BUILD_ALL__'], 'true'),
-            eq(variables['BUILD_AZURERTOS__'], 'true')
+            eq(variables['BUILD_THREADX__'], 'true')
           )
         )
       )
@@ -655,13 +756,13 @@ jobs:
       - Check_Build_Options
 
     pool:
-      vmImage: "windows-latest"
+      vmImage: "windows-2022"
 
     strategy:
       matrix:
         SL_STK3701A_REVB:
           TargetBoard: SL_STK3701A_REVB
-          TargetSeries: "efm32gg11"
+          TargetSeries: "gg11"
           BuildOptions:
           NeedsDFU: false
           NeedsSRECORD: false
@@ -671,18 +772,21 @@ jobs:
 
     variables:
       # creates a counter and assigns it to the revision variable
-      REVISION: $[counter('AZURERTOS_1_12_0_versioncounter', 0)]
+      REVISION: $[counter('THREADX_1_14_0_versioncounter', 0)]
       HelperPackageVersion: $[counter('HelperPackageVersioncounter', 0)]
-      TargetPlatform: "azure_rtos"
+      TargetPlatform: "efm32"
 
     steps:
       - template: azure-pipelines-templates/build-preparations.yml
       - template: azure-pipelines-templates/nb-gitversioning.yml
       - template: azure-pipelines-templates/download-install-arm-gcc-toolchain.yml
-      - template: azure-pipelines-templates/download-install-ninja.yml
       - template: azure-pipelines-templates/download-hexdfu.yml
       - template: azure-pipelines-templates/download-srecord.yml
-      - template: azure-pipelines-templates/build-azurertos-targets.yml
+      - template: azure-pipelines-templates/install-kconfig-tools.yml
+      - template: azure-pipelines-templates/validate-kconfig.yml
+        parameters:
+          targetPreset: $(CMakePreset)
+      - template: azure-pipelines-templates/build-threadx-targets.yml
       - template: azure-pipelines-templates/pack-publish-artifacts.yml
       - template: azure-pipelines-templates/publish-cloudsmith.yml
       - template: azure-pipelines-templates/pack-publish-managed-helpers.yml
@@ -694,17 +798,17 @@ jobs:
       - Build_STM32_targets
       - Build_ESP32_targets
       - Build_TI_SimpleLink_targets
-      - Build_Azure_RTOS_targets
+      - Build_ThreadX_targets
     condition: >-
       or(
         failed('Build_STM32_targets'),
         failed('Build_ESP32_targets'),
         failed('Build_TI_SimpleLink_targets'),
-        failed('Build_Azure_RTOS_targets')
+        failed('Build_ThreadX_targets')
       )
 
     pool:
-      vmImage: "windows-latest"
+      vmImage: "windows-2022"
 
     steps:
       - checkout: self

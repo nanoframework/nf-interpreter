@@ -227,6 +227,7 @@ extern "C"
     // target specific handler for power mode changes (may be empty)
     void CPU_SetPowerModeTarget(PowerLevel_type powerLevel);
     bool DebuggerIsConnected();
+    bool DebugSessionIsActive();
 
 #ifdef __cplusplus
 }
@@ -413,10 +414,6 @@ extern "C"
 #include <nanoHAL_Watchdog.h>
 #include <nanoHAL_Rtos.h>
 
-#ifdef INCLUDE_WINDOWS_STORAGE
-#include <nanoHAL_Windows_Storage.h>
-#else
 #include <nanoHAL_System_IO_FileSystem.h>
-#endif
 
 #endif // NANOHAL_V2_H

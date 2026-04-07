@@ -309,7 +309,7 @@ HRESULT Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_E
     {
         if (length > 0)
         {
-            CLR_RT_HeapBlock *arrayDataPtr;
+            CLR_RT_HeapBlock *arrayDataPtr = NULL;
             CLR_RT_TypeDef_Index rmtCommandTypeDef;
 
             int numItems = length / sizeof(rmt_item32_t);

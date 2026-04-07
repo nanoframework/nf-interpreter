@@ -864,6 +864,11 @@ HRESULT Library_sys_net_native_System_Net_Sockets_NativeSocket::SendRecvHelper(
                 break;
             }
 
+            // yield to the CLR scheduler to prevent a tight loop when select reports ready
+            // but the actual send/recv returns EWOULDBLOCK (race with lwIP stack)
+            NANOCLR_CHECK_HRESULT(
+                g_CLR_RT_ExecutionEngine.WaitEvents(stack.m_owningThread, *timeout, Event_Socket, fRes));
+
             continue;
         }
         // zero recv bytes indicates the handle has been closed.

@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (c) .NET Foundation and Contributors
 // See LICENSE file in the project root for full license information.
 //
@@ -217,6 +217,18 @@ extern "C"
 
     // gets the HAL_Configuration_NetworkInterface configuration block that has the SpecificConfig Id, if that exists
     int32_t ConfigurationManager_FindNetworkConfigurationMatchingWirelessConfigurationFromId(uint32_t configurationId);
+
+    // Gets the OEM model SKU.
+    // This is defined as weak to allow the target/platform to provide the implementation.
+    void ConfigurationManager_GetOemModelSku(char *model, size_t modelSkuSize);
+
+    // Gets the module serial number.
+    // This is defined as weak to allow the target/platform to provide the implementation.
+    void ConfigurationManager_GetModuleSerialNumber(char *serialNumber, size_t serialNumberSize);
+
+    // Gets the system serial number.
+    // This is defined as weak to allow the target/platform to provide the implementation.
+    void ConfigurationManager_GetSystemSerialNumber(char *serialNumber, size_t serialNumberSize);
 
 #ifdef __cplusplus
 }
