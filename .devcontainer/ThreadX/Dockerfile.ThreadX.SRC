@@ -26,7 +26,7 @@ RUN wget $CMAKE_SCRIPT \
     && /tmp/dc-downloads/cmake-install.sh --skip-license --prefix=/tmp/dc-extracted/cmake \
     && rm /tmp/dc-downloads/cmake-install.sh
 
-FROM ubuntu:latest AS devcontainer
+FROM python:3.11 AS devcontainer
 
 # Avoid warnings by switching to noninteractive
 ENV DEBIAN_FRONTEND=noninteractive
@@ -90,6 +90,13 @@ ARG HEX2DFU=https://github.com/nanoframework/hex2dfu/releases/latest/download/he
 RUN mkdir -p  $HEX2DFU_PATH \
     && curl -o  $HEX2DFU_PATH/hex2dfu $HEX2DFU -L \
     && chmod +x  $HEX2DFU_PATH/hex2dfu
+
+# Creating static link python for python3
+RUN ln -fs /usr/bin/python3 /usr/bin/python
+
+# Installing python dependencies for the container
+RUN pip3 install pyserial \
+    && pip3 install --quiet "kconfiglib>=14.1.0"
 
 # Clean up downloaded files
 RUN apt-get autoremove -y \
