@@ -8,6 +8,7 @@
 #define DRIVERS_SOCKETS_DECL_H
 
 #if defined(VIRTUAL_DEVICE)
+#include <windows.h>
 #define GLOBAL_LOCK_SOCKETS(x)
 #endif
 //--//

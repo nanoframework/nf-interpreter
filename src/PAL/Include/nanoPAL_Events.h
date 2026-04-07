@@ -6,6 +6,10 @@
 #ifndef NANOPAL_EVENTS_H
 #define NANOPAL_EVENTS_H
 
+#if defined(VIRTUAL_DEVICE)
+#include <windows.h>
+#endif
+
 #include <nanoHAL.h>
 #include <nanoWeak.h>
 

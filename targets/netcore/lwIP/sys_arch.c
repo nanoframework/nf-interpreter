@@ -1,4 +1,4 @@
-/*
+﻿/*
  * Copyright (c) 2001-2003 Swedish Institute of Computer Science.
  * All rights reserved.
  *
@@ -779,4 +779,12 @@ lwip_win32_platform_diag(const char *format, ...)
      vsnprintf here */
   vprintf(format, ap);
   va_end(ap);
+}
+
+void
+lwip_example_app_platform_assert(const char *msg, int line, const char *file)
+{
+  printf("Assertion \"%s\" failed at line %d in %s\n", msg, line, file);
+  fflush(NULL);
+  abort();
 }
