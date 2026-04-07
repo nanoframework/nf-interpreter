@@ -221,7 +221,7 @@ HRESULT Library_corlib_native_System_Runtime_CompilerServices_RuntimeHelpers::ge
     NANOCLR_NOCLEANUP();
 }
 
-#if (NANOCLR_REFLECTION == TRUE)
+#if (CONFIG_NF_FEATURE_SUPPORT_REFLECTION == TRUE)
 
 HRESULT Library_corlib_native_System_Runtime_CompilerServices_RuntimeHelpers::
     IsReferenceOrContainsReferences___STATIC__BOOLEAN(CLR_RT_StackFrame &stack)

@@ -200,7 +200,7 @@ struct Library_corlib_native_System_String
 {
     static const int FIELD_STATIC__Empty = 2;
 
-#if (NANOCLR_REFLECTION == TRUE)
+#if (CONFIG_NF_FEATURE_SUPPORT_REFLECTION == TRUE)
 
     NANOCLR_NATIVE_DECLARE(CompareTo___I4__OBJECT);
     NANOCLR_NATIVE_DECLARE(get_Chars___CHAR__I4);
@@ -778,7 +778,7 @@ struct Library_corlib_native_System_Random
     static HRESULT GetRandom(CLR_RT_StackFrame &stack, CLR_RT_Random *&rand, bool create = false);
 };
 
-#if (NANOCLR_REFLECTION == TRUE)
+#if (CONFIG_NF_FEATURE_SUPPORT_REFLECTION == TRUE)
 
 struct Library_corlib_native_System_ReadOnlySpan_1
 {
@@ -792,7 +792,7 @@ struct Library_corlib_native_System_ReadOnlySpan_1
     //--//
 };
 
-#endif // NANOCLR_REFLECTION
+#endif // CONFIG_NF_FEATURE_SUPPORT_REFLECTION
 
 struct Library_corlib_native_System_Reflection_AssemblyName
 {
@@ -880,7 +880,7 @@ struct Library_corlib_native_System_Runtime_CompilerServices_RuntimeHelpers
     NANOCLR_NATIVE_DECLARE(RunClassConstructor___STATIC__VOID__SystemRuntimeTypeHandle);
     NANOCLR_NATIVE_DECLARE(get_OffsetToStringData___STATIC__I4);
 
-#if (NANOCLR_REFLECTION == TRUE)
+#if (CONFIG_NF_FEATURE_SUPPORT_REFLECTION == TRUE)
     NANOCLR_NATIVE_DECLARE(IsReferenceOrContainsReferences___STATIC__BOOLEAN);
 #endif
 
@@ -893,7 +893,7 @@ struct Library_corlib_native_System_Runtime_CompilerServices_RuntimeHelpers
         bool &isRefContainsRefs);
 };
 
-#if (NANOCLR_REFLECTION == TRUE)
+#if (CONFIG_NF_FEATURE_SUPPORT_REFLECTION == TRUE)
 struct Library_corlib_native_System_Runtime_CompilerServices_Unsafe
 {
     NANOCLR_NATIVE_DECLARE(As___STATIC__GENERICTYPE__OBJECT);
@@ -959,7 +959,7 @@ struct Library_corlib_native_System_Single
     //--//
 };
 
-#if (NANOCLR_REFLECTION == TRUE)
+#if (CONFIG_NF_FEATURE_SUPPORT_REFLECTION == TRUE)
 
 struct Library_corlib_native_System_Span_1
 {
@@ -973,9 +973,9 @@ struct Library_corlib_native_System_Span_1
     //--//
 };
 
-#endif // NANOCLR_REFLECTION
+#endif // CONFIG_NF_FEATURE_SUPPORT_REFLECTION
 
-#if (NANOCLR_REFLECTION != TRUE)
+#if (CONFIG_NF_FEATURE_SUPPORT_REFLECTION != TRUE)
 
 struct Library_corlib_native_System_SpanByte
 {
@@ -986,7 +986,7 @@ struct Library_corlib_native_System_SpanByte
     //--//
 };
 
-#endif // NANOCLR_REFLECTION
+#endif // CONFIG_NF_FEATURE_SUPPORT_REFLECTION
 
 struct Library_corlib_native_System_Threading_AutoResetEvent
 {

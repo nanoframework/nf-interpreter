@@ -162,7 +162,7 @@ HRESULT Library_corlib_native_System_String::Trim___STRING__SZARRAY_CHAR(CLR_RT_
     NANOCLR_NOCLEANUP();
 }
 
-#if (NANOCLR_REFLECTION == TRUE)
+#if (CONFIG_NF_FEATURE_SUPPORT_REFLECTION == TRUE)
 
 HRESULT Library_corlib_native_System_String::TrimStart___STRING(CLR_RT_StackFrame &stack)
 {
@@ -185,7 +185,7 @@ HRESULT Library_corlib_native_System_String::TrimStart___STRING__SZARRAY_CHAR(CL
     NANOCLR_NOCLEANUP();
 }
 
-#if (NANOCLR_REFLECTION == TRUE)
+#if (CONFIG_NF_FEATURE_SUPPORT_REFLECTION == TRUE)
 
 HRESULT Library_corlib_native_System_String::TrimEnd___STRING(CLR_RT_StackFrame &stack)
 {
