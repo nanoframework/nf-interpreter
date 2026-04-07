@@ -26,7 +26,7 @@ RUN wget $CMAKE_SCRIPT \
     && /tmp/dc-downloads/cmake-install.sh --skip-license --prefix=/tmp/dc-extracted/cmake \
     && rm /tmp/dc-downloads/cmake-install.sh
 
-FROM python:3.10 AS devcontainer
+FROM python:3.11 AS devcontainer
 
 # Avoid warnings by switching to noninteractive
 ENV DEBIAN_FRONTEND=noninteractive
@@ -75,9 +75,8 @@ COPY --from=downloader /tmp/dc-extracted/cmake /usr/bin/cmake
 
 ENV PATH=/usr/bin/cmake/bin:${PATH}
 
-# Creating static link python for pyhton3
-RUN ln -fs /usr/bin/python3 /usr/bin/python \
-    && pip3 install pyserial
+# Installing python dependencies for the container
+RUN pip3 install --no-cache-dir pyserial "kconfiglib>=14.1.0"
 
 # Clean up downloaded files
 RUN apt-get autoremove -y \

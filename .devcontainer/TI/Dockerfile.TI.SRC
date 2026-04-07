@@ -32,7 +32,7 @@ RUN  mkdir -p /tmp/dc-extracted/titools \
     && curl -o /tmp/dc-downloads/titools.zip $TI_TOOL_URL -L \
     && unzip -d /tmp/dc-extracted/titools /tmp/dc-downloads/titools.zip
 
-FROM ubuntu:latest AS devcontainer
+FROM python:3.11 AS devcontainer
 
 # Avoid warnings by switching to noninteractive
 ENV DEBIAN_FRONTEND=noninteractive
@@ -75,6 +75,9 @@ COPY --from=downloader /tmp/dc-extracted/titools/xdctools_3_62_00_08_core /usr/l
 COPY --from=downloader /tmp/dc-extracted/cmake /usr/bin/cmake
 
 ENV PATH=/usr/bin/cmake/bin:${PATH}
+
+# Installing python dependencies for the container
+RUN pip3 install --no-cache-dir pyserial "kconfiglib>=14.1.0"
 
 # Clean up downloaded files
 RUN apt-get autoremove -y \
