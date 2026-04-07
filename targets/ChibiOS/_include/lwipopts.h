@@ -486,6 +486,13 @@
 #endif
 
 /**
+ * TCP_SYNMAXRTX: Maximum number of retransmissions of SYN segments.
+ */
+#ifndef TCP_SYNMAXRTX
+#define TCP_SYNMAXRTX 4
+#endif
+
+/**
  * TCP_LISTEN_BACKLOG: Enable the backlog option for tcp listen pcb.
  */
 #ifndef TCP_LISTEN_BACKLOG

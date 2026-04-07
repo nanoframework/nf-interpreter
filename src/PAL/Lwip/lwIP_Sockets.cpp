@@ -1820,7 +1820,7 @@ int LWIP_SOCKETS_Driver::GetNativeError(int error)
             break;
 
         case ENOTCONN:
-            ret = SOCK_EISCONN;
+            ret = SOCK_ENOTCONN;
             break;
 
 #if !defined(__GNUC__) // same as ENOTSOCK for GCC
