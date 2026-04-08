@@ -1,12 +1,37 @@
 echo "Pulling all the repos"
-cd /sources/STM32CubeL4
-git pull origin nf-build
-cd /sources/STM32CubeF7
-git pull origin nf-build
-cd /sources/STM32CubeF4
-git pull origin nf-build
-cd /sources/STM32CubeH7
-git pull origin nf-build
+cd /sources/stm32f0xx_hal_driver
+git fetch --depth=1 origin tag v1.7.8
+git checkout tags/v1.7.8
+cd /sources/stm32f4xx_hal_driver
+git fetch --depth=1 origin tag v1.8.2
+git checkout tags/v1.8.2
+cd /sources/stm32f7xx_hal_driver
+git fetch --depth=1 origin tag v1.3.1
+git checkout tags/v1.3.1
+cd /sources/stm32h7xx_hal_driver
+git fetch --depth=1 origin tag v1.11.3
+git checkout tags/v1.11.3
+cd /sources/stm32l4xx_hal_driver
+git fetch --depth=1 origin tag v1.13.4
+git checkout tags/v1.13.4
+cd /sources/cmsis_device_f0
+git fetch --depth=1 origin tag v2.3.7
+git checkout tags/v2.3.7
+cd /sources/cmsis_device_f4
+git fetch --depth=1 origin tag v2.6.9
+git checkout tags/v2.6.9
+cd /sources/cmsis_device_f7
+git fetch --depth=1 origin tag v1.2.9
+git checkout tags/v1.2.9
+cd /sources/cmsis_device_h7
+git fetch --depth=1 origin tag v1.10.4
+git checkout tags/v1.10.4
+cd /sources/cmsis_device_l4
+git fetch --depth=1 origin tag v1.7.3
+git checkout tags/v1.7.3
+cd /sources/cmsis_core
+git fetch --depth=1 origin tag v5.6.0
+git checkout tags/v5.6.0
 cd /sources/ThreadX
 git pull
 cd /

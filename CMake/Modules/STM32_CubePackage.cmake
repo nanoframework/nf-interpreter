@@ -55,7 +55,7 @@ macro(ProcessSTM32CubePackage)
     endif()
 
     if(NO_STM32_HAL_DRIVER_SOURCE)
-        # no STM HAL driver source specified, download it from nanoFramework fork
+        # no STM HAL driver source specified, download it from official ST repo
         message(STATUS "STM32${TARGET_SERIES_SHORT} HAL driver from GitHub repo")
 
         FetchContent_Declare(
@@ -90,7 +90,7 @@ macro(ProcessSTM32CubePackage)
     endif()
 
     if(NO_STM32_CMSIS_DEVICE_SOURCE)
-        # no STM Device CMSIS source specified, download it from nanoFramework fork
+        # no STM Device CMSIS source specified, download it from official ST repo
         message(STATUS "STM32${TARGET_SERIES_SHORT} Device CMSIS from GitHub repo")
 
         FetchContent_Declare(
@@ -125,7 +125,7 @@ macro(ProcessSTM32CubePackage)
     endif()
 
     if(NO_STM32_CMSIS_CORE_SOURCE)
-        # no STM CMSIS Core source specified, download it from nanoFramework fork
+        # no STM CMSIS Core source specified, download it from official ST repo
         message(STATUS "STM32${TARGET_SERIES_SHORT} CMSIS Core from GitHub repo")
                 
         FetchContent_Declare(
