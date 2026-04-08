@@ -1,1 +1,1 @@
-FROM ghcr.io/nanoframework/dev-container-chibios:v1.40
+FROM ghcr.io/nanoframework/dev-container-chibios:v1.41
