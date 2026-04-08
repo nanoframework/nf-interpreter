@@ -91,7 +91,7 @@ RUN mkdir -p /usr/local/bin/gcc \
 RUN git clone --branch stable_21.11.x https://github.com/ArduPilot/ChibiOS.svn.git --depth 1 ./sources/ChibiOs
 
 # Clone support repos for STM32 - HAL drivers (official ST repositories)
-# WHEN CHANGING THESE MAKE SURE TO UPDATE git-pull-repos.sh AND CMake/Modules/STM32_CubePackage.cmake
+# WHEN CHANGING THESE MAKE SURE TO UPDATE git-pull-repos.sh
 RUN git clone --branch v1.7.8 https://github.com/STMicroelectronics/stm32f0xx_hal_driver.git --depth 1 ./sources/stm32f0xx_hal_driver \
     && git clone --branch v1.8.2 https://github.com/STMicroelectronics/stm32f4xx_hal_driver.git --depth 1 ./sources/stm32f4xx_hal_driver \
     && git clone --branch v1.3.1 https://github.com/STMicroelectronics/stm32f7xx_hal_driver.git --depth 1 ./sources/stm32f7xx_hal_driver \
@@ -99,7 +99,7 @@ RUN git clone --branch v1.7.8 https://github.com/STMicroelectronics/stm32f0xx_ha
     && git clone --branch v1.13.4 https://github.com/STMicroelectronics/stm32l4xx_hal_driver.git --depth 1 ./sources/stm32l4xx_hal_driver
 
 # Clone support repos for STM32 - CMSIS device packages (official ST repositories)
-# WHEN CHANGING THESE MAKE SURE TO UPDATE git-pull-repos.sh AND CMake/Modules/STM32_CubePackage.cmake
+# WHEN CHANGING THESE MAKE SURE TO UPDATE git-pull-repos.sh
 RUN git clone --branch v2.3.7 https://github.com/STMicroelectronics/cmsis_device_f0.git --depth 1 ./sources/cmsis_device_f0 \
     && git clone --branch v2.6.9 https://github.com/STMicroelectronics/cmsis_device_f4.git --depth 1 ./sources/cmsis_device_f4 \
     && git clone --branch v1.2.9 https://github.com/STMicroelectronics/cmsis_device_f7.git --depth 1 ./sources/cmsis_device_f7 \
