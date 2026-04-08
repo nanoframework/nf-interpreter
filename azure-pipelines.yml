@@ -32,6 +32,7 @@ trigger:
 
 pr:
   autoCancel: true
+  drafts: false
 
 # add nf-tools repo to resources (for Azure Pipelines templates)
 resources:
