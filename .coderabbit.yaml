@@ -1,0 +1,16 @@
+# yaml-language-server: $schema=https://coderabbit.ai/integrations/schema.v2.json
+inheritance: true
+reviews:
+  labeling_instructions: [
+    {
+      label: "Area: Dev-Containers",
+      instructions: "Apply when PR includes changes related with Dev Containers, such as Dockerfiles, devcontainer.json, and other files inside .devcontainers directory."
+    },
+    {
+      label: "Type: dependencies",
+      instructions: "Apply when PR update dependencies and changes associated with. Also for assembly declarations."
+    },
+    {
+      label: "Type: documentation",
+      instructions: "Apply when PR includes changes or updates related with documentation: repository README files, docs or instructions, and other files that are not code but provide information about the project."}
+  ]

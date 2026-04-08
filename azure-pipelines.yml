@@ -11,6 +11,7 @@ trigger:
   paths:
     exclude:
       - .clang-format
+      - .coderabbit.yaml
       - .github_changelog_generator
       - .gitignore
       - build.ps1
