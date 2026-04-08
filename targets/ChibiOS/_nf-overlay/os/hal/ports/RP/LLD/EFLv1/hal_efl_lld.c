@@ -123,9 +123,9 @@
  * @name    XIP control register offsets
  * @{
  */
-#define XIP_CTRL                            0x00U
-#define XIP_FLUSH                           0x04U
-#define XIP_STAT                            0x08U
+#define XIP_CTRL_OFF                        0x00U
+#define XIP_FLUSH_OFF                       0x04U
+#define XIP_STAT_OFF                        0x08U
 /** @} */
 
 /**
@@ -315,14 +315,14 @@ RAMFUNC static void rp_flash_flush_cache(void) {
   volatile uint32_t *xip = (volatile uint32_t *)RP_XIP_CTRL_BASE;
 
   /* Write to flush register to trigger cache flush. */
-  xip[XIP_FLUSH / 4U] = 1U;
+  xip[XIP_FLUSH_OFF / 4U] = 1U;
 
   /* Read back to block until flush completes (RP2040 stalls the bus
      read until the cache has been fully invalidated). */
-  (void)xip[XIP_FLUSH / 4U];
+  (void)xip[XIP_FLUSH_OFF / 4U];
 
   /* Enable the cache */
-  xip[XIP_CTRL / 4U] = 1U;
+  xip[XIP_CTRL_OFF / 4U] = 1U;
 }
 
 /**

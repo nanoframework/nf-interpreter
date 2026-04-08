@@ -33,8 +33,8 @@
 #define LWIP_THREAD_STACK_SIZE 2048
 
 // Increase tcpip thread stack — netconn/socket calls execute here,
-// and TLS handshake callbacks need headroom on Cortex-M0+.
-#define TCPIP_THREAD_STACKSIZE 2048
+// and TLS record processing via mbedtls needs significant headroom on Cortex-M0+.
+#define TCPIP_THREAD_STACKSIZE 4096
 
 // WiFi interface name
 #undef LWIP_IFNAME0
