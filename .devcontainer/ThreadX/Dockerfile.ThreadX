@@ -1,1 +1,1 @@
-FROM ghcr.io/nanoframework/dev-container-threadx:v1.39
+FROM ghcr.io/nanoframework/dev-container-threadx:v1.40
