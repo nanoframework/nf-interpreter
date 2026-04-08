@@ -6,6 +6,6 @@
 #ifndef _TARGET_STORAGE_CONFIG_H_
 #define _TARGET_STORAGE_CONFIG_H_
 
-// RP2040 Pico W has no SD card or USB mass storage
+// RP2040 has no SD card or USB mass storage
 
 #endif // _TARGET_STORAGE_CONFIG_H_

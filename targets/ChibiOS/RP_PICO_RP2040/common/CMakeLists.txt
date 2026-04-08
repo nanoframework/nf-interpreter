@@ -3,8 +3,8 @@
 # See LICENSE file in the project root for full license information.
 #
 
-# append common source files
-list(APPEND COMMON_PROJECT_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/usbcfg.c")
+# append common source files (usbcfg.c from shared _RP2040)
+list(APPEND COMMON_PROJECT_SOURCES "${CMAKE_SOURCE_DIR}/targets/ChibiOS/_RP2040/common/usbcfg.c")
 list(APPEND COMMON_PROJECT_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/Device_BlockStorage$<$<OR:$<CONFIG:Debug>,$<CONFIG:RelWithDebInfo>>:-DEBUG>.c")
 
 # make var global

@@ -42,5 +42,5 @@ void FS_AddVolumes()
 
 void FS_MountRemovableVolumes()
 {
-    // No removable volumes on RP2040 Pico W
+    // No removable volumes on RP2040
 }

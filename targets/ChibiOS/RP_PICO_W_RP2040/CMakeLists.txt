@@ -6,10 +6,16 @@
 include(binutils.common)
 include(binutils.ChibiOS)
 
-# RP2040 flash driver sources from target directory
-list(APPEND TARGET_CHIBIOS_COMMON_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/Target_BlockStorage_RP2040FlashDriver.c")
-list(APPEND TARGET_CHIBIOS_COMMON_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/platform_BlockStorage.c")
-list(APPEND TARGET_CHIBIOS_COMMON_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/target_stubs.cpp")
+# shared RP2040 sources and include directory
+set(RP2040_COMMON "${CMAKE_SOURCE_DIR}/targets/ChibiOS/_RP2040")
+list(APPEND CMAKE_PREFIX_PATH "${RP2040_COMMON}")
+list(APPEND TARGET_CHIBIOS_COMMON_INCLUDE_DIRS "${RP2040_COMMON}")
+list(APPEND TARGET_CHIBIOS_COMMON_INCLUDE_DIRS "${RP2040_COMMON}/common")
+
+# RP2040 flash driver and common sources from shared directory
+list(APPEND TARGET_CHIBIOS_COMMON_SOURCES "${RP2040_COMMON}/Target_BlockStorage_RP2040FlashDriver.c")
+list(APPEND TARGET_CHIBIOS_COMMON_SOURCES "${RP2040_COMMON}/platform_BlockStorage.c")
+list(APPEND TARGET_CHIBIOS_COMMON_SOURCES "${RP2040_COMMON}/target_stubs.cpp")
 
 # RP2040 RNG stub (ROSC-based, replaces STM32 RNG)
 list(APPEND TARGET_CHIBIOS_NANOCLR_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/target_rng.c")

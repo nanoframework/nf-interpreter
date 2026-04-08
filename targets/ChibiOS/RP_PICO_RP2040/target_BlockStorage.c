@@ -3,18 +3,5 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#include <nanoPAL_BlockStorage.h>
-#include <Target_BlockStorage_RP2040FlashDriver.h>
-
-extern struct BlockStorageDevice Device_BlockStorage;
-extern struct MEMORY_MAPPED_NOR_BLOCK_CONFIG Device_BlockStorageConfig;
-extern IBlockStorageDevice RP2040Flash_BlockStorageInterface;
-
-void BlockStorage_AddDevices()
-{
-    BlockStorageList_AddDevice(
-        (BlockStorageDevice *)&Device_BlockStorage,
-        &RP2040Flash_BlockStorageInterface,
-        &Device_BlockStorageConfig,
-        false);
-}
+// Shared RP2040 implementation
+#include "../_RP2040/target_BlockStorage.c"
