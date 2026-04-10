@@ -7,10 +7,10 @@ MCUboot replaces the ESP-IDF second-stage bootloader binary. The partition table
 
 ## Available MCUboot partition tables
 
-| File                                  | Flash | Strategy        | Slots      | Swap status | Config | Deploy   |
-|---------------------------------------|-------|-----------------|-----------|-------------|--------|----------|
-| `partitions_nanoclr_mcuboot_8mb.csv`  | 8 MB  | swap-using-move | 2× 2240k  | 32k         | 24k    | ~3.3 MB  |
-| `partitions_nanoclr_mcuboot_16mb.csv` | 16 MB | swap-using-move | 2× 2240k  | 32k         | 24k    | ~11.3 MB |
+| File                                  | Flash | Strategy        | Slots      | Swap status | Config | deploy_0+1 each |
+|---------------------------------------|-------|-----------------|-----------|-------------|--------|-----------------|
+| `partitions_nanoclr_mcuboot_8mb.csv`  | 8 MB  | swap-using-move | 2× 2240k  | 32k         | 24k    | ~1.7 MB         |
+| `partitions_nanoclr_mcuboot_16mb.csv` | 16 MB | swap-using-move | 2× 2240k  | 32k         | 24k    | ~5.7 MB         |
 
 ## Layout details
 
@@ -26,8 +26,13 @@ MCUboot replaces the ESP-IDF second-stage bootloader binary. The partition table
 | secondary    | app  | ota_1    | 0x260000  | 2240k  |
 | swap_status  | data | 0x85     | 0x4A0000  | 32k    |
 | config       | data | littlefs | 0x4A8000  | 24k    |
-| deploy       | data | 0x84     | 0x4AE000  | ~3.3MB |
+| deploy_0     | data | 0x84     | 0x4AE000  | ~1.7MB |
+| deploy_1     | data | 0x84     | 0x657000  | ~1.7MB |
 
 ### 16 MB
 
-Same structure as 8 MB; deploy size extends to ~11.3 MB (0xB52000).
+Same structure as 8 MB; deploy_0+1 each increase to ~5.7 MB (0x5A9000).
+
+## Notes
+
+- **IMAGE_NUMBER=2**: Image 0 = nanoCLR (primary/secondary OTA slots); Image 1 = deployment area (deploy_0 primary + deploy_1 secondary). Both images are MCUboot-signed and managed independently.
