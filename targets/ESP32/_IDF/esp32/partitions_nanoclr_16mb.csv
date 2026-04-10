@@ -18,8 +18,10 @@ swap_status,data, 0x85,     0x420000, 0x8000,
 # Config data for Network, Wireless, certificates, user data  24k
 config,     data, littlefs, 0x428000, 0x6000,
 # Deployment area for Managed code — Image 1 primary+secondary (IMAGE_NUMBER=2)  ~5.9MB each
-deploy_0,   data, 0x84,     0x42E000, 0x5E9000,  # ~5.9MB Image 1 primary (active deployment)
-deploy_1,   data, 0x84,     0xA17000, 0x5E9000,  # ~5.9MB Image 1 secondary (MCUboot staging)
+# ~5.9MB Image 1 primary (active deployment)
+deploy_0,   data, 0x84,     0x42E000, 0x5E9000
+# ~5.9MB Image 1 secondary (MCUboot staging)
+deploy_1,   data, 0x84,     0xA17000, 0x5E9000
 ##########################################
 # total size has to be 0x1000000 or less #
 ##########################################

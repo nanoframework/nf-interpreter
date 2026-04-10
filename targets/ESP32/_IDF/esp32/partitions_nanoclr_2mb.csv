@@ -16,8 +16,10 @@ secondary, app,  ota_1,    0xD0000,  0xC0000,
 # Config data for Network, Wireless, certificates, user data  24k
 config,    data, littlefs, 0x190000, 0x6000,
 # Deployment area for Managed code — Image 1 primary+secondary (IMAGE_NUMBER=2)  212k each
-deploy_0,  data, 0x84,     0x196000, 0x35000,  # 212k Image 1 primary (active deployment)
-deploy_1,  data, 0x84,     0x1CB000, 0x35000,  # 212k Image 1 secondary (MCUboot staging)
+# 212k Image 1 primary (active deployment)
+deploy_0,  data, 0x84,     0x196000, 0x35000
+# 212k Image 1 secondary (MCUboot staging)
+deploy_1,  data, 0x84,     0x1CB000, 0x35000
 #################################
 # total size has to be 0x200000 #
 #################################
