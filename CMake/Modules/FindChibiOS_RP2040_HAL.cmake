@@ -124,6 +124,7 @@ set(CHIBIOS_HAL_SRCS
     hal_usb_lld.c
     hal_wdg_lld.c
     hal_efl_lld.c
+    rp_efl_lld.c
     hal_rtc_lld.c
 
     # OSAL

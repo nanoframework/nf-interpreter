@@ -61,7 +61,7 @@ void __early_init(void) {
      the system is executing from flash via XIP and needs clock sources to
      remain active. PLLs are handled by rp_clock_init() after switching to
      safe sources.*/
-  hal_lld_peripheral_reset(~(RESETS_ALLREG_IO_QSPI  | RESETS_ALLREG_PADS_QSPI |
+  rp_peripheral_reset(~(RESETS_ALLREG_IO_QSPI  | RESETS_ALLREG_PADS_QSPI |
                          RESETS_ALLREG_PLL_SYS  | RESETS_ALLREG_PLL_USB));
 
   rp_clock_init();
