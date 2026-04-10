@@ -17,7 +17,5 @@ Both release and debug builds are identical (corrected in commit 51c42210 — re
 
 ## MCUboot configuration
 
-- **Upgrade strategy**: overwrite-only
-- **Primary slot (image_0)**: internal STM32F429xI flash
-- **Secondary slot (image_1)**: NONE — 2 MB internal flash is fully occupied; no external NVM on the discovery board
-- **IFU support status**: overwrite-only update only; OR excluded from IFU — decision pending Phase 1
+- **IFU support**: **EXCLUDED** — 2 MB internal flash is fully allocated (MCUboot 32k + CLR 608k + deployment 1408k = 2048k), and there is no external NVM on the discovery board.
+- No secondary slot is possible without hardware modification.
