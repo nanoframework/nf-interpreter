@@ -14,15 +14,18 @@
 //   - MCUboot/port/stm32/mcuboot_stm32_config.h
 //   - MCUboot/port/esp32/mcuboot_esp32_config.h
 //
-// Upgrade strategy is selected at CMake configure time via one of:
-//   -DNF_MCUBOOT_SWAP_USING_OFFSET=ON   (STM32: primary internal, secondary external)
-//   -DNF_MCUBOOT_SWAP_USING_MOVE=ON     (ESP32: both slots in internal flash)
-//   -DNF_MCUBOOT_OVERWRITE_ONLY=ON      (fallback: no rollback)
-//
-// IMAGE_NUMBER and SERIAL_RECOVERY are similarly controlled via CMake.
+// Upgrade strategy and other options are selected via Kconfig (nf_config.h).
+// The relevant symbols are:
+//   CONFIG_NF_MCUBOOT_SWAP_USING_OFFSET   (STM32: primary internal, secondary external)
+//   CONFIG_NF_MCUBOOT_SWAP_USING_MOVE     (ESP32: both slots in internal flash)
+//   CONFIG_NF_MCUBOOT_OVERWRITE_ONLY      (fallback: no rollback)
+//   CONFIG_NF_MCUBOOT_IMAGE_NUMBER        (defaults to 2)
+//   CONFIG_NF_MCUBOOT_SERIAL_RECOVERY     (optional UART recovery)
 
 #ifndef __MCUBOOT_CONFIG_H__
 #define __MCUBOOT_CONFIG_H__
+
+#include "nf_config.h"
 
 //
 // Signature algorithm — ECDSA P-256 (secp256r1).
@@ -32,33 +35,33 @@
 #define MCUBOOT_SIGN_EC256
 
 //
-// Upgrade strategy — exactly one of the following is defined at CMake configure time.
+// Upgrade strategy — exactly one of the following is set via Kconfig.
 //
-// NF_MCUBOOT_SWAP_USING_OFFSET: STM32 primary platform.
+// CONFIG_NF_MCUBOOT_SWAP_USING_OFFSET: STM32 primary platform.
 //   Primary slot: internal STM32 flash (nanoCLR code area).
 //   Secondary slot: external (Q)SPI flash, SD card, or USB MSD.
 //   MCUboot copies the new image from secondary to primary in-place, sector by sector,
 //   using the "offset" variant that does not require a separate scratch area.
 //
-// NF_MCUBOOT_SWAP_USING_MOVE: ESP32.
+// CONFIG_NF_MCUBOOT_SWAP_USING_MOVE: ESP32.
 //   Both slots reside in internal SPI flash.
 //   MCUboot moves sectors without a dedicated scratch area (requires aligned slot sizes).
 //
-// NF_MCUBOOT_OVERWRITE_ONLY: fallback for targets with no secondary NVM.
+// CONFIG_NF_MCUBOOT_OVERWRITE_ONLY: fallback for targets with no secondary NVM.
 //   No rollback support — new image overwrites primary slot directly.
 //
-#if defined(NF_MCUBOOT_SWAP_USING_OFFSET)
+#if defined(CONFIG_NF_MCUBOOT_SWAP_USING_OFFSET)
 #define MCUBOOT_SWAP_USING_OFFSET 1
-#elif defined(NF_MCUBOOT_SWAP_USING_MOVE)
+#elif defined(CONFIG_NF_MCUBOOT_SWAP_USING_MOVE)
 #define MCUBOOT_SWAP_USING_MOVE 1
-#elif defined(NF_MCUBOOT_OVERWRITE_ONLY)
+#elif defined(CONFIG_NF_MCUBOOT_OVERWRITE_ONLY)
 #define MCUBOOT_OVERWRITE_ONLY
 #endif
 
 //
 // Primary slot validation policy — build-type gated.
 //
-// Debug builds (NF_BUILD_RTM not defined):
+// Debug builds (CONFIG_NF_BUILD_RTM not set):
 //   MCUBOOT_VALIDATE_PRIMARY_SLOT is NOT defined.
 //   Wire Protocol writes raw .NET assemblies directly to Image 1 primary slot
 //   (deploy_0) without MCUboot image headers.  MCUboot must not validate Image 1
@@ -66,12 +69,12 @@
 //   MCUboot only validates Image 1 at OTA upgrade time (when deploy_1 contains
 //   a staged, signed OTA package).
 //
-// RTM builds (NF_BUILD_RTM defined):
+// RTM builds (CONFIG_NF_BUILD_RTM=y):
 //   MCUBOOT_VALIDATE_PRIMARY_SLOT is defined — every boot validates the signature
 //   of the primary slot image.  Wire Protocol is disabled in RTM firmware, so
 //   direct writes to deploy_0 never occur.
 //
-#if defined(NF_BUILD_RTM)
+#if defined(CONFIG_NF_BUILD_RTM)
 #define MCUBOOT_VALIDATE_PRIMARY_SLOT
 #endif
 
@@ -98,8 +101,8 @@
 //   Image 1 — deployment area   (primary = deploy_0, secondary = deploy_1)
 // Both images are independently managed and can be upgraded/rolled back independently.
 //
-#if defined(NF_MCUBOOT_IMAGE_NUMBER)
-#define MCUBOOT_IMAGE_NUMBER NF_MCUBOOT_IMAGE_NUMBER
+#if defined(CONFIG_NF_MCUBOOT_IMAGE_NUMBER)
+#define MCUBOOT_IMAGE_NUMBER CONFIG_NF_MCUBOOT_IMAGE_NUMBER
 #else
 #define MCUBOOT_IMAGE_NUMBER 2
 #endif
@@ -114,9 +117,9 @@
 
 //
 // Serial recovery — optional bootloader recovery mode over UART.
-// Enabled per target via -DNF_MCUBOOT_SERIAL_RECOVERY=ON at CMake configure time.
+// Enabled per target via CONFIG_NF_MCUBOOT_SERIAL_RECOVERY=y in Kconfig.
 //
-#if defined(NF_MCUBOOT_SERIAL_RECOVERY)
+#if defined(CONFIG_NF_MCUBOOT_SERIAL_RECOVERY)
 #define MCUBOOT_SERIAL 1
 #endif
 
