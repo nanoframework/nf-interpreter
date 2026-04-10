@@ -90,19 +90,31 @@ RUN mkdir -p /usr/local/bin/gcc \
 # Alternative source for those having issues with git svn downloads:
 RUN git clone --branch stable_21.11.x https://github.com/ArduPilot/ChibiOS.svn.git --depth 1 ./sources/ChibiOs
 
-# Clone support repos for STM32 including Eclipse ThreadX (used to be Azure RTOS)
-RUN git clone --branch nf-build https://github.com/nanoframework/STM32CubeL4.git --depth 1 ./sources/STM32CubeL4 \
-    && git clone --branch nf-build https://github.com/nanoframework/STM32CubeF7.git --depth 1 ./sources/STM32CubeF7 \
-    && git clone --branch nf-build https://github.com/nanoframework/STM32CubeF4.git --depth 1 ./sources/STM32CubeF4 \
-    && git clone --branch nf-build https://github.com/nanoframework/STM32CubeH7.git --depth 1 ./sources/STM32CubeH7 \
-    && git clone --branch chibios-21.11.x https://github.com/ChibiOS/ChibiOS-Contrib.git --depth 1 ./sources/ChibiOs-Contrib
+# Clone support repos for STM32 - HAL drivers (official ST repositories)
+# WHEN CHANGING THESE MAKE SURE TO UPDATE git-pull-repos.sh
+RUN git clone --branch v1.7.8 https://github.com/STMicroelectronics/stm32f0xx_hal_driver.git --depth 1 ./sources/stm32f0xx_hal_driver \
+    && git clone --branch v1.8.5 https://github.com/STMicroelectronics/stm32f4xx_hal_driver.git --depth 1 ./sources/stm32f4xx_hal_driver \
+    && git clone --branch v1.3.3 https://github.com/STMicroelectronics/stm32f7xx_hal_driver.git --depth 1 ./sources/stm32f7xx_hal_driver \
+    && git clone --branch v1.11.6 https://github.com/STMicroelectronics/stm32h7xx_hal_driver.git --depth 1 ./sources/stm32h7xx_hal_driver \
+    && git clone --branch v1.13.6 https://github.com/STMicroelectronics/stm32l4xx_hal_driver.git --depth 1 ./sources/stm32l4xx_hal_driver
+
+# Clone support repos for STM32 - CMSIS device packages (official ST repositories)
+# WHEN CHANGING THESE MAKE SURE TO UPDATE git-pull-repos.sh
+RUN git clone --branch v2.3.7 https://github.com/STMicroelectronics/cmsis_device_f0.git --depth 1 ./sources/cmsis_device_f0 \
+    && git clone --branch v2.6.11 https://github.com/STMicroelectronics/cmsis_device_f4.git --depth 1 ./sources/cmsis_device_f4 \
+    && git clone --branch v1.2.10 https://github.com/STMicroelectronics/cmsis_device_f7.git --depth 1 ./sources/cmsis_device_f7 \
+    && git clone --branch v1.10.7 https://github.com/STMicroelectronics/cmsis_device_h7.git --depth 1 ./sources/cmsis_device_h7 \
+    && git clone --branch v1.7.5 https://github.com/STMicroelectronics/cmsis_device_l4.git --depth 1 ./sources/cmsis_device_l4 \
+    && git clone --branch v5.9.0_20250520 https://github.com/STMicroelectronics/cmsis_core.git --depth 1 ./sources/cmsis_core
+
+RUN git clone --branch chibios-21.11.x https://github.com/ChibiOS/ChibiOS-Contrib.git --depth 1 ./sources/ChibiOs-Contrib
 
 # Clone repos for Eclipse ThreadX (used to be Azure RTOS)
 RUN git clone --branch v6.5.0.202601_rel --recursive https://github.com/eclipse-threadx/threadx.git --depth 1 ./sources/ThreadX \
     && git clone --branch v6.5.0.202601_rel --recursive https://github.com/eclipse-threadx/netxduo.git --depth 1 ./sources/NetxDuo
 
 # Clone dependent repos (mbedtls, fatfs and littlefs)
-RUN git clone --branch R0.15a https://github.com/abbrev/fatfs.git --depth 1 ./sources/fatfs \
+RUN git clone --branch R0.16 https://github.com/abbrev/fatfs.git --depth 1 ./sources/fatfs \
     && git clone --branch v2.11.2 https://github.com/littlefs-project/littlefs --depth 1 ./sources/littlefs \
     && git clone --branch mbedtls-3.6.5 https://github.com/ARMmbed/mbedtls.git --depth 1 ./sources/mbedtls \
     && cd ./sources/mbedtls \
