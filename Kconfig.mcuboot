@@ -4,15 +4,17 @@
 #
 
 menu "MCUboot"
-    depends on NF_TARGET_HAS_NANOBOOTER
 
 config NF_FEATURE_HAS_MCUBOOT
     bool "Enable MCUboot bootloader integration"
     default n
+    select NF_TARGET_HAS_NANOBOOTER
     help
-        Enable MCUboot as the nanoFramework bootloader for In-Field Update (IFU).
-        When enabled, the firmware is built with signed MCUboot image headers and
-        the flash area backend is wired to the MCUboot porting layer.
+        Enable MCUboot as the bootloader for this target. MCUboot replaces
+        nanoBooter and provides signed-image verification and In-Field Update
+        (IFU) with rollback support. When enabled, the firmware is built with
+        MCUboot image headers and the flash area backend is wired to the MCUboot
+        porting layer.
 
 choice NF_MCUBOOT_UPGRADE_STRATEGY
     prompt "Upgrade strategy"
