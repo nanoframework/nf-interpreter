@@ -13,7 +13,11 @@
 
 // Software UTC offset for targets without hardware RTC (e.g. RP2040).
 // Set by HAL_Time_SetUtcTime() when SNTP delivers wall-clock time.
-uint64_t g_HAL_Time_UtcOffset = 0;
+// Initialized to Jan 1, 2025 00:00:00 UTC (as 100ns ticks since 1601-01-01)
+// so the system starts with a plausible date instead of 1601.
+// SNTP will overwrite this with the correct offset once it synchronizes.
+#define FALLBACK_UTC_UNIX_EPOCH 1735689600ULL
+uint64_t g_HAL_Time_UtcOffset = (FALLBACK_UTC_UNIX_EPOCH * TIME_CONVERSION__TO_SECONDS) + TIME_UNIX_EPOCH_AS_TICKS;
 
 // Returns the current date time from the system tick or from the RTC if it's available (this depends on the respective configuration option)
 uint64_t  HAL_Time_CurrentDateTime(bool datePartOnly)

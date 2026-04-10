@@ -3,6 +3,7 @@
 // See LICENSE file in the project root for full license information.
 //
 
-//////////////////////////////////////////////////////////////////////////////////////////////
-// THIS FILE IS BLANK ON PURPOSE BECAUSE THIS TARGET DOESN'T OVERRIDE ANY lwIP SNTP OPTIONS //
-//////////////////////////////////////////////////////////////////////////////////////////////
+// RP2040 has no RTC so time is bogus until SNTP syncs.
+// Send the first NTP request immediately (no startup delay).
+#undef SNTP_STARTUP_DELAY
+#define SNTP_STARTUP_DELAY 0
