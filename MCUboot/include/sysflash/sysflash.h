@@ -42,7 +42,8 @@
 #define FLASH_AREA_IMAGE_SCRATCH     3 // Scratch area (swap-using-scratch strategy only; unused by nanoFramework)
 
 #if (MCUBOOT_IMAGE_NUMBER == 2)
-#define FLASH_AREA_IMAGE_1_PRIMARY   4 // Deployment primary slot   (deploy_0; Wire Protocol writes here directly in debug)
+#define FLASH_AREA_IMAGE_1_PRIMARY                                                                                     \
+    4 // Deployment primary slot   (deploy_0; Wire Protocol writes here directly in debug)
 #define FLASH_AREA_IMAGE_1_SECONDARY 5 // Deployment secondary slot (deploy_1; OTA staging area)
 #endif
 
@@ -53,20 +54,17 @@
 //
 #if (MCUBOOT_IMAGE_NUMBER == 1)
 
-#define FLASH_AREA_IMAGE_PRIMARY(x)                                                                                    \
-    (((x) == 0) ? FLASH_AREA_IMAGE_0_PRIMARY : FLASH_SLOT_DOES_NOT_EXIST)
+#define FLASH_AREA_IMAGE_PRIMARY(x) (((x) == 0) ? FLASH_AREA_IMAGE_0_PRIMARY : FLASH_SLOT_DOES_NOT_EXIST)
 
-#define FLASH_AREA_IMAGE_SECONDARY(x)                                                                                  \
-    (((x) == 0) ? FLASH_AREA_IMAGE_0_SECONDARY : FLASH_SLOT_DOES_NOT_EXIST)
+#define FLASH_AREA_IMAGE_SECONDARY(x) (((x) == 0) ? FLASH_AREA_IMAGE_0_SECONDARY : FLASH_SLOT_DOES_NOT_EXIST)
 
 #elif (MCUBOOT_IMAGE_NUMBER == 2)
 
 #define FLASH_AREA_IMAGE_PRIMARY(x)                                                                                    \
-    (((x) == 0) ? FLASH_AREA_IMAGE_0_PRIMARY                                                                          \
-                : (((x) == 1) ? FLASH_AREA_IMAGE_1_PRIMARY : FLASH_SLOT_DOES_NOT_EXIST))
+    (((x) == 0) ? FLASH_AREA_IMAGE_0_PRIMARY : (((x) == 1) ? FLASH_AREA_IMAGE_1_PRIMARY : FLASH_SLOT_DOES_NOT_EXIST))
 
 #define FLASH_AREA_IMAGE_SECONDARY(x)                                                                                  \
-    (((x) == 0) ? FLASH_AREA_IMAGE_0_SECONDARY                                                                        \
+    (((x) == 0) ? FLASH_AREA_IMAGE_0_SECONDARY                                                                         \
                 : (((x) == 1) ? FLASH_AREA_IMAGE_1_SECONDARY : FLASH_SLOT_DOES_NOT_EXIST))
 
 #endif
