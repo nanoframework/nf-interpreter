@@ -6,13 +6,10 @@
 
 #include <ssl.h>
 #include "mbedtls.h"
-#include <nanoCLR_Types.h>
 
 int ssl_write_internal(int sd, const char *data, size_t req_len)
 {
     int ret;
-
-    CLR_Debug::Printf("SSL_W: enter sd=%d len=%d\r\n", sd, (int)req_len);
 
     mbedTLS_NFContext *context = (mbedTLS_NFContext *)SOCKET_DRIVER.GetSocketSslData(sd);
     mbedtls_ssl_context *ssl = context->ssl;
@@ -37,10 +34,8 @@ int ssl_write_internal(int sd, const char *data, size_t req_len)
 
     if (ret < 0)
     {
-        CLR_Debug::Printf("SSL_W: fail ret=-0x%04X\r\n", (unsigned)-ret);
         return 0;
     }
 
-    CLR_Debug::Printf("SSL_W: ok wrote=%d\r\n", (int)req_len);
     return req_len;
 }
