@@ -1,0 +1,24 @@
+################################################
+# ESP-IDF Partition Table for .NET nanoFramework
+# MCUboot variant — dual-slot (swap-using-move)
+# Name,   Type, SubType, Offset,  Size,
+###############################################################################################################################
+# if you change the partitions here, make sure to update the BlockRegions array in the device BlockStorage configuration file #
+###############################################################################################################################
+# NOTE: this layout requires CONFIG_BOOTLOADER_OFFSET_IN_FLASH=0x1000 and CONFIG_PARTITION_TABLE_OFFSET=0x10000
+# MCUboot binary is at 0x1000; primary slot begins at 0x20000 to accommodate the MCUboot binary (128 KB reservation)
+nvs,        data, nvs,      0x9000,   0x6000,
+phy_init,   data, phy,      0xf000,   0x1000,
+# Primary slot — active nanoCLR image  1664k
+primary,    app,  ota_0,    0x20000,  0x1A0000,
+# Secondary slot — MCUboot upgrade candidate (same size as primary)
+secondary,  app,  ota_1,    0x1C0000, 0x1A0000,
+# Swap status area for MCUboot state persistence across power loss  32k
+swap_status,data, 0x85,     0x360000, 0x8000,
+# Config data for Network, Wireless, certificates, user data  24k
+config,     data, littlefs, 0x368000, 0x6000,
+# Deployment area for Managed code  ~4.6MB
+deploy,     data, 0x84,     0x36E000, 0x492000,
+##########################################
+# total size has to be 0x800000 or less  #
+##########################################
