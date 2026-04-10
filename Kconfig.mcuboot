@@ -1,0 +1,83 @@
+#
+# Copyright (c) .NET Foundation and Contributors
+# See LICENSE file in the project root for full license information.
+#
+
+menu "MCUboot"
+
+config NF_FEATURE_HAS_MCUBOOT
+    bool "Enable MCUboot bootloader integration"
+    default n
+    select NF_TARGET_HAS_NANOBOOTER
+    help
+        Enable MCUboot as the bootloader for this target. MCUboot replaces
+        nanoBooter and provides signed-image verification and In-Field Update
+        (IFU) with rollback support. When enabled, the firmware is built with
+        MCUboot image headers and the flash area backend is wired to the MCUboot
+        porting layer.
+
+choice NF_MCUBOOT_UPGRADE_STRATEGY
+    prompt "Upgrade strategy"
+    depends on NF_FEATURE_HAS_MCUBOOT
+    default NF_MCUBOOT_SWAP_USING_MOVE
+    help
+        Selects the MCUboot image upgrade algorithm. Exactly one strategy must
+        be chosen per target. The correct choice depends on whether the secondary
+        slot resides in internal or external flash.
+
+config NF_MCUBOOT_SWAP_USING_OFFSET
+    bool "Swap using offset"
+    help
+        Primary slot is in internal flash; secondary slot is on external storage
+        (QSPI flash, SD card, or USB MSD). MCUboot copies the new image sector
+        by sector from secondary to primary using the offset variant, which does
+        not require a separate scratch partition. Recommended for STM32 targets.
+
+config NF_MCUBOOT_SWAP_USING_MOVE
+    bool "Swap using move"
+    help
+        Both slots reside in internal flash. MCUboot moves sectors without a
+        dedicated scratch partition (slot sizes must be equal and aligned).
+        Recommended for ESP32 targets.
+
+config NF_MCUBOOT_OVERWRITE_ONLY
+    bool "Overwrite only (no rollback)"
+    help
+        The new image overwrites the primary slot directly. No rollback is
+        possible after a successful upgrade. Use only on targets with no
+        secondary storage.
+
+endchoice # NF_MCUBOOT_UPGRADE_STRATEGY
+
+config NF_MCUBOOT_IMAGE_NUMBER
+    int "Number of managed images"
+    depends on NF_FEATURE_HAS_MCUBOOT
+    range 1 2
+    default 2
+    help
+        Number of independently managed MCUboot images.
+        2 (default): Image 0 = nanoCLR firmware, Image 1 = deployment area.
+        Both images can be upgraded and rolled back independently.
+
+config NF_MCUBOOT_SERIAL_RECOVERY
+    bool "Enable serial recovery mode"
+    depends on NF_FEATURE_HAS_MCUBOOT
+    default n
+    help
+        Enable MCUboot serial recovery (mcumgr/UART). When triggered at boot
+        (e.g. via a GPIO pin), MCUboot enters a recovery shell that accepts new
+        images over UART without requiring network access.
+
+config NF_MCUBOOT_HEADER_SIZE
+    hex "MCUboot image header size (bytes)"
+    depends on NF_FEATURE_HAS_MCUBOOT
+    default 0x200
+    help
+        Size in bytes reserved for the MCUboot image header at the start of
+        each firmware slot. This value must match both the flash layout
+        (reserved header area) and the imgtool sign --header-size argument.
+        0x200 (512 bytes) is the standard value for all current nanoFramework
+        targets. Override only if a specific target's flash layout requires a
+        different alignment.
+
+endmenu # MCUboot
