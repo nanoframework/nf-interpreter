@@ -21,6 +21,7 @@
 //   CONFIG_NF_MCUBOOT_OVERWRITE_ONLY      (fallback: no rollback)
 //   CONFIG_NF_MCUBOOT_IMAGE_NUMBER        (defaults to 2)
 //   CONFIG_NF_MCUBOOT_SERIAL_RECOVERY     (optional UART recovery)
+//   CONFIG_NF_MCUBOOT_HEADER_SIZE         (image header size in bytes, defaults to 0x200)
 
 #ifndef __MCUBOOT_CONFIG_H__
 #define __MCUBOOT_CONFIG_H__
@@ -121,6 +122,17 @@
 //
 #if defined(CONFIG_NF_MCUBOOT_SERIAL_RECOVERY)
 #define MCUBOOT_SERIAL 1
+#endif
+
+//
+// Image header size — must match the flash layout reserved header area and
+// the imgtool sign --header-size argument.
+// Configured via CONFIG_NF_MCUBOOT_HEADER_SIZE in Kconfig (default 0x200 = 512 bytes).
+//
+#if defined(CONFIG_NF_MCUBOOT_HEADER_SIZE)
+#define MCUBOOT_HEADER_SIZE CONFIG_NF_MCUBOOT_HEADER_SIZE
+#else
+#define MCUBOOT_HEADER_SIZE 0x200
 #endif
 
 //

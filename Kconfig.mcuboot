@@ -68,4 +68,16 @@ config NF_MCUBOOT_SERIAL_RECOVERY
         (e.g. via a GPIO pin), MCUboot enters a recovery shell that accepts new
         images over UART without requiring network access.
 
+config NF_MCUBOOT_HEADER_SIZE
+    hex "MCUboot image header size (bytes)"
+    depends on NF_FEATURE_HAS_MCUBOOT
+    default 0x200
+    help
+        Size in bytes reserved for the MCUboot image header at the start of
+        each firmware slot. This value must match both the flash layout
+        (reserved header area) and the imgtool sign --header-size argument.
+        0x200 (512 bytes) is the standard value for all current nanoFramework
+        targets. Override only if a specific target's flash layout requires a
+        different alignment.
+
 endmenu # MCUboot
