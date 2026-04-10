@@ -55,7 +55,7 @@
 //
 typedef struct
 {
-    struct flash_area base;                    // Must be first — returned as const struct flash_area *
+    struct flash_area base;               // Must be first — returned as const struct flash_area *
     const esp_partition_t *esp_partition; // Resolved by flash_area_open(); NULL until opened
 } nf_esp32_flash_area_t;
 
