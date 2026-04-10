@@ -11,6 +11,7 @@ trigger:
   paths:
     exclude:
       - .clang-format
+      - .coderabbit.yaml
       - .github_changelog_generator
       - .gitignore
       - build.ps1
@@ -32,6 +33,7 @@ trigger:
 
 pr:
   autoCancel: true
+  drafts: false
 
 # add nf-tools repo to resources (for Azure Pipelines templates)
 resources:

@@ -16,7 +16,7 @@ macro(ProcessSTM32CubePackage)
     string(TOLOWER "${TARGET_SERIES_SHORT}" TARGET_SERIES_SHORT_LOWER)
 
     # store the series name for later use
-    set(TARGET_SERIES_SHORT_LOWER ${TARGET_SERIES_SHORT_LOWER} CACHE INTERNAL "STM32 series short name lower canse")
+    set(TARGET_SERIES_SHORT_LOWER ${TARGET_SERIES_SHORT_LOWER} CACHE INTERNAL "STM32 series short name lower case")
 
     # store the package name for later use
     set(TARGET_STM32_CUBE_PACKAGE STM32${TARGET_SERIES_SHORT} CACHE INTERNAL "name for STM32 Cube package")
@@ -25,26 +25,32 @@ macro(ProcessSTM32CubePackage)
         # WHEN CHANGING THESE MAKE SURE TO UPDATE THE DEV CONTAINERS
         set(HAL_DRIVER_GIT_TAG v1.7.8)
         set(CMSIS_DEVICE_GIT_TAG v2.3.7)
+        set(CMSIS_CORE_GIT_TAG v5.6.0)
     elseif("${TARGET_SERIES}" STREQUAL "STM32F4xx")
         # WHEN CHANGING THESE MAKE SURE TO UPDATE THE DEV CONTAINERS
-        set(HAL_DRIVER_GIT_TAG v1.8.2)
-        set(CMSIS_DEVICE_GIT_TAG v2.6.9)
+        set(HAL_DRIVER_GIT_TAG v1.8.5)
+        set(CMSIS_DEVICE_GIT_TAG v2.6.11)
+        set(CMSIS_CORE_GIT_TAG v5.9.0_20250520)
     elseif("${TARGET_SERIES}" STREQUAL "STM32F7xx")
         # WHEN CHANGING THESE MAKE SURE TO UPDATE THE DEV CONTAINERS
-        set(HAL_DRIVER_GIT_TAG v1.3.1)
-        set(CMSIS_DEVICE_GIT_TAG v1.2.9)
+        set(HAL_DRIVER_GIT_TAG v1.3.3)
+        set(CMSIS_DEVICE_GIT_TAG v1.2.10)
+        set(CMSIS_CORE_GIT_TAG v5.6.0)
     elseif("${TARGET_SERIES}" STREQUAL "STM32H7xx")
         # WHEN CHANGING THESE MAKE SURE TO UPDATE THE DEV CONTAINERS
-        set(HAL_DRIVER_GIT_TAG v1.11.3)
-        set(CMSIS_DEVICE_GIT_TAG v1.10.4)
+        set(HAL_DRIVER_GIT_TAG v1.11.6)
+        set(CMSIS_DEVICE_GIT_TAG v1.10.7)
+        set(CMSIS_CORE_GIT_TAG v5.9.0_20250520)
     elseif("${TARGET_SERIES}" STREQUAL "STM32L0xx")
         # WHEN CHANGING THESE MAKE SURE TO UPDATE THE DEV CONTAINERS
-        set(HAL_DRIVER_GIT_TAG v1.10.6)
-        set(CMSIS_DEVICE_GIT_TAG v1.9.3)
+        set(HAL_DRIVER_GIT_TAG v1.10.7)
+        set(CMSIS_DEVICE_GIT_TAG v1.9.4)
+        set(CMSIS_CORE_GIT_TAG v5.6.0)
     elseif("${TARGET_SERIES}" STREQUAL "STM32L4xx")
         # WHEN CHANGING THESE MAKE SURE TO UPDATE THE DEV CONTAINERS
-        set(HAL_DRIVER_GIT_TAG v1.13.4)
-        set(CMSIS_DEVICE_GIT_TAG v1.7.3)
+        set(HAL_DRIVER_GIT_TAG v1.13.6)
+        set(CMSIS_DEVICE_GIT_TAG v1.7.5)
+        set(CMSIS_CORE_GIT_TAG v5.6.0)
     endif()
 
     set(NO_STM32_HAL_DRIVER_SOURCE TRUE)
@@ -55,7 +61,7 @@ macro(ProcessSTM32CubePackage)
     endif()
 
     if(NO_STM32_HAL_DRIVER_SOURCE)
-        # no STM HAL driver source specified, download it from nanoFramework fork
+        # no STM HAL driver source specified, download it from official ST repo
         message(STATUS "STM32${TARGET_SERIES_SHORT} HAL driver from GitHub repo")
 
         FetchContent_Declare(
@@ -90,7 +96,7 @@ macro(ProcessSTM32CubePackage)
     endif()
 
     if(NO_STM32_CMSIS_DEVICE_SOURCE)
-        # no STM Device CMSIS source specified, download it from nanoFramework fork
+        # no STM Device CMSIS source specified, download it from official ST repo
         message(STATUS "STM32${TARGET_SERIES_SHORT} Device CMSIS from GitHub repo")
 
         FetchContent_Declare(
@@ -125,13 +131,13 @@ macro(ProcessSTM32CubePackage)
     endif()
 
     if(NO_STM32_CMSIS_CORE_SOURCE)
-        # no STM CMSIS Core source specified, download it from nanoFramework fork
+        # no STM CMSIS Core source specified, download it from official ST repo
         message(STATUS "STM32${TARGET_SERIES_SHORT} CMSIS Core from GitHub repo")
                 
         FetchContent_Declare(
             cmsis_core
             GIT_REPOSITORY https://github.com/STMicroelectronics/cmsis_core
-            GIT_TAG v5.6.0
+            GIT_TAG ${CMSIS_CORE_GIT_TAG}
         )       
 
     else()
