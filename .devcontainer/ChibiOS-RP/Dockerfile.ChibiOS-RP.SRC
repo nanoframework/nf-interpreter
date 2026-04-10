@@ -91,6 +91,9 @@ ENV PATH=/usr/bin/cmake/bin:${PATH}
 # hex2dfu is NOT included — RP targets use UF2 format, not DFU
 # srecord is still useful for bin packaging
 
+# Install Python dependencies for Kconfig configuration system
+RUN pip3 install --no-cache-dir --break-system-packages pyserial "kconfiglib>=14.1.0"
+
 # Clean up downloaded files
 RUN apt-get autoremove -y \
     && apt-get clean -y \

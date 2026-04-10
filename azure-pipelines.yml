@@ -487,6 +487,10 @@ jobs:
       - template: azure-pipelines-templates/build-preparations.yml
       - template: azure-pipelines-templates/nb-gitversioning.yml
       - template: azure-pipelines-templates/download-install-arm-gcc-toolchain.yml
+      - template: azure-pipelines-templates/install-kconfig-tools.yml
+      - template: azure-pipelines-templates/validate-kconfig.yml
+        parameters:
+          targetPreset: $(CMakePreset)
       - template: azure-pipelines-templates/build-chibios-rp-targets.yml
       - template: azure-pipelines-templates/pack-publish-artifacts.yml
       - template: azure-pipelines-templates/publish-cloudsmith.yml
