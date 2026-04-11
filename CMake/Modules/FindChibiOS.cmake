@@ -112,7 +112,7 @@ set(CHIBIOS_SRCS
 
     chmboxes.c
     chmemcore.c
-    chmemchecks.c
+    # chmemheap.c # this file is not used in ChibiOS RT-NIL and ThreadX builds, but it is required for ChibiOS-Contrib builds, so we need to include it in the sources list
     chmemheaps.c
     chmempools.c
     chpipes.c
