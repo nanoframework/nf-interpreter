@@ -190,9 +190,6 @@ bool ssl_generic_init_internal(
     mbedtls_ssl_conf_max_tls_version(context->conf, maxVersion);
     mbedtls_ssl_conf_min_tls_version(context->conf, minVersion);
 
-    // set read timeout to prevent infinite blocking during handshake
-    mbedtls_ssl_conf_read_timeout(context->conf, 60000);
-
     // configure random generator
     mbedtls_ssl_conf_rng(context->conf, mbedtls_ctr_drbg_random, context->ctr_drbg);
 

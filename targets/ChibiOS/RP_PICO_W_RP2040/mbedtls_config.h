@@ -17,7 +17,7 @@
 // Reduce SSL record buffers for RAM-constrained RP2040.
 // Default is 16384 each (33 KB total) which exhausts the 64 KB CLR heap.
 // 4096 is sufficient for TLS 1.2 with most servers.
-#define MBEDTLS_SSL_IN_CONTENT_LEN   4096
+#define MBEDTLS_SSL_IN_CONTENT_LEN   6144 
 #define MBEDTLS_SSL_OUT_CONTENT_LEN  4096
 
 #endif // MBEDTLS_CONFIG_H
