@@ -15,7 +15,9 @@
             ],
             "hidden": false,
             "cacheVariables": {
-                "NF_TARGET_DEFCONFIG": "targets/ChibiOS/RP_PICO_RP2040/defconfig"
+                "NF_TARGET_DEFCONFIG": "targets/ChibiOS/RP_PICO_RP2040/defconfig",
+                "CHIBIOS_GIT_REPOSITORY": "https://github.com/ChibiOS/ChibiOS.git",
+                "CHIBIOS_GIT_TAG": "master"
             }
         }
     ],

@@ -95,7 +95,32 @@ if(RTOS_VERSION_EMPTY)
     set(RTOS_VERSION "stable_21.11.x")
 endif()
 
-if(NO_CHIBIOS_SOURCE_FOLDER)
+if(NOT NO_CHIBIOS_SOURCE_FOLDER)
+    # ChibiOS source was specified
+
+    message(STATUS "RTOS is: ChibiOS ${RTOS_VERSION} (source from: ${CHIBIOS_SOURCE_FOLDER})")
+    FetchContent_Declare(
+        chibios
+        SOURCE_DIR ${CHIBIOS_SOURCE_FOLDER}
+    )
+
+elseif(CHIBIOS_GIT_REPOSITORY)
+    # ChibiOS from Git repository (used for RP targets that need master branch)
+
+    if(NOT CHIBIOS_GIT_TAG)
+        set(CHIBIOS_GIT_TAG "master")
+    endif()
+
+    message(STATUS "RTOS is: ChibiOS ${CHIBIOS_GIT_TAG} from GitHub (${CHIBIOS_GIT_REPOSITORY})")
+
+    FetchContent_Declare(
+        chibios
+        GIT_REPOSITORY ${CHIBIOS_GIT_REPOSITORY}
+        GIT_TAG ${CHIBIOS_GIT_TAG}
+        GIT_SHALLOW ON
+    )
+
+else()
     # no CHIBIOS source specified, download it from it's repo
     message(STATUS "RTOS is: ChibiOS ${RTOS_VERSION} from SVN official repo")
 
@@ -104,17 +129,6 @@ if(NO_CHIBIOS_SOURCE_FOLDER)
         SVN_REPOSITORY http://svn.code.sf.net/p/chibios/code/branches/${RTOS_VERSION}
         SVN_REVISION -rHEAD
     )
-
-else()
-    # ChibiOS source was specified
-
-
-    message(STATUS "RTOS is: ChibiOS ${RTOS_VERSION} (source from: ${CHIBIOS_SOURCE_FOLDER})")
-    FetchContent_Declare(
-        chibios
-        SOURCE_DIR ${CHIBIOS_SOURCE_FOLDER}
-    )
-
 
 endif()
 
