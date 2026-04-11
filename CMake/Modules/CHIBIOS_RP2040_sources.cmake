@@ -14,9 +14,6 @@ set(CHIBIOS_PORT_SRCS
     # RT port for ARMv6-M
     chcore.c
     chcoreasm.S
-
-    # SMP support for RP2040 dual-core
-    chcoresmp.c
 )
 
 foreach(SRC_FILE ${CHIBIOS_PORT_SRCS})
@@ -27,7 +24,6 @@ foreach(SRC_FILE ${CHIBIOS_PORT_SRCS})
         PATHS 
             ${chibios_SOURCE_DIR}/os/common/ports/ARMv6-M/compilers/GCC
             ${chibios_SOURCE_DIR}/os/common/ports/ARMv6-M
-            ${chibios_SOURCE_DIR}/os/common/ports/ARMv6-M/smp/rp2
             ${chibios_SOURCE_DIR}/os/hal/ports/common/ARMCMx
 
         CMAKE_FIND_ROOT_PATH_BOTH

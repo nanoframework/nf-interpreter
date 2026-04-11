@@ -7,7 +7,7 @@ This target supports the **Raspberry Pi Pico** board with the RP2040 microcontro
 - **MCU:** RP2040 — Dual-core ARM Cortex-M0+ @ 125 MHz
 - **RAM:** 264 KB SRAM
 - **Flash:** 2 MB XIP (execute-in-place)
-- **RTOS:** ChibiOS/RT (SMP dual-core)
+- **RTOS:** ChibiOS/RT (single-core)
 
 ## Flashing
 

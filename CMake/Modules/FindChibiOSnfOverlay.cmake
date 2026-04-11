@@ -26,13 +26,6 @@ if(TARGET_VENDOR STREQUAL "ST")
     list(APPEND ChibiOSnfOverlay_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/targets/ChibiOS/_nf-overlay/os/hal/include/stm32_qspi)
 endif()
 
-# RP-specific overlay components
-if(TARGET_VENDOR STREQUAL "RP")
-    # component RP_EFL (Embedded Flash driver using ROM functions)
-    # >>> Uncomment to use nanoFramework overlay EFL driver instead of upstream ChibiOS <<<
-    # list(APPEND ChibiOSnfOverlay_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/targets/ChibiOS/_nf-overlay/os/hal/ports/RP/LLD/EFLv1)
-endif()
-
 ##################################################################################################################################
 # Add above the required include directory(ies) for a new nanoFramework overlay component that you are adding
 # following the template below. 
@@ -69,11 +62,6 @@ if(TARGET_VENDOR STREQUAL "ST")
     list(APPEND ChibiOSnfOverlay_SOURCES ${CMAKE_SOURCE_DIR}/targets/ChibiOS/_nf-overlay/os/hal/src/stm32_qspi/hal_stm32_qspi.c)
 endif()
 
-# RP-specific overlay sources
-if(TARGET_VENDOR STREQUAL "RP")
-    # component RP_EFL — hal_efl_lld.c is picked up via find_file() override in FindChibiOS_RP2040_HAL.cmake
-    # (no additional sources needed here; the override is resolved by search path priority)
-endif()
 
 #########################################################################################################################
 # Add above ALL the source code file(s) required for a new nanoFramework overlay component that you are adding

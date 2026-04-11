@@ -46,7 +46,7 @@
  *          direct interactions are handled by the OS.
  */
 #if !defined(CH_CFG_SMP_MODE)
-#define CH_CFG_SMP_MODE                     TRUE
+#define CH_CFG_SMP_MODE                     FALSE
 #endif
 
 /**
@@ -194,7 +194,7 @@
  * @note    The default is @p TRUE.
  */
 #if !defined(CH_CFG_USE_TM)
-#define CH_CFG_USE_TM                       TRUE
+#define CH_CFG_USE_TM                       FALSE
 #endif
 
 /**

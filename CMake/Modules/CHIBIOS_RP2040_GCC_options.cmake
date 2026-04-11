@@ -28,7 +28,7 @@ macro(nf_set_compile_options)
     endif()
 
     # include any extra options coming from any extra args?
-    target_compile_options(${NFSCO_TARGET} PUBLIC  ${NFSCO_EXTRA_COMPILE_OPTIONS} -mthumb -mcpu=cortex-m0plus -mabi=aapcs -nostdlib -Wall -Wextra -Werror -Wundef -Wshadow -Wimplicit-fallthrough -fshort-wchar -fno-builtin -fno-common -mno-long-calls -fno-exceptions -fcheck-new )
+    target_compile_options(${NFSCO_TARGET} PUBLIC  ${NFSCO_EXTRA_COMPILE_OPTIONS} -mthumb -mcpu=cortex-m0plus -mabi=aapcs -nostdlib -Wall -Wextra -Werror -Wundef -Wshadow -Wimplicit-fallthrough $<$<COMPILE_LANGUAGE:CXX>:-Wno-cast-user-defined> -fshort-wchar -fno-builtin -fno-common -mno-long-calls -fno-exceptions -fcheck-new )
 
     # RP2040 has no FPU (Cortex-M0+)
     # Note: RP2040 is defined by ChibiOS board.h, no need to add it here
