@@ -3,6 +3,9 @@
 # See LICENSE file in the project root for full license information.
 #
 
+include(FetchContent)
+FetchContent_GetProperties(chibios)
+
 include(binutils.common)
 include(binutils.ChibiOS)
 
@@ -15,6 +18,9 @@ list(APPEND TARGET_CHIBIOS_COMMON_INCLUDE_DIRS "${RP2040_COMMON}/common")
 # RP2040 flash driver and common sources from shared directory
 list(APPEND TARGET_CHIBIOS_COMMON_SOURCES "${RP2040_COMMON}/Target_BlockStorage_RP2040FlashDriver.c")
 list(APPEND TARGET_CHIBIOS_COMMON_SOURCES "${RP2040_COMMON}/platform_BlockStorage.c")
+
+# SMP support source (Pico W uses dual-core SMP)
+list(APPEND TARGET_CHIBIOS_COMMON_SOURCES "${chibios_SOURCE_DIR}/os/common/ports/ARMv6-M/smp/rp2/chcoresmp.c")
 list(APPEND TARGET_CHIBIOS_COMMON_SOURCES "${RP2040_COMMON}/target_stubs.cpp")
 
 # RP2040 RNG stub (ROSC-based, replaces STM32 RNG)
@@ -33,8 +39,8 @@ if(USE_NETWORKING_OPTION AND TARGET_HAS_WIFI)
 endif()
 
 # PIO LLD sources for CYW43 SPI bus
-list(APPEND TARGET_CHIBIOS_NANOCLR_INCLUDE_DIRS "${CHIBIOS_SOURCE_FOLDER}/os/hal/ports/RP/LLD/PIOv1")
-list(APPEND TARGET_CHIBIOS_NANOCLR_SOURCES "${CHIBIOS_SOURCE_FOLDER}/os/hal/ports/RP/LLD/PIOv1/rp_pio.c")
+list(APPEND TARGET_CHIBIOS_NANOCLR_INCLUDE_DIRS "${chibios_SOURCE_DIR}/os/hal/ports/RP/LLD/PIOv1")
+list(APPEND TARGET_CHIBIOS_NANOCLR_SOURCES "${chibios_SOURCE_DIR}/os/hal/ports/RP/LLD/PIOv1/rp_pio.c")
 
 nf_setup_target_build(
     HAS_NANOBOOTER
@@ -52,10 +58,10 @@ nf_setup_target_build(
         LFS_CONFIG=lfs_config.h
 
     BOOTER_EXTRA_LINKMAP_PROPERTIES
-        ",--library-path=${CMAKE_SOURCE_DIR}/targets/ChibiOS/_common,--library-path=${CHIBIOS_SOURCE_FOLDER}/os/common/startup/ARMCMx/compilers/GCC/ld,--defsym=__main_stack_size__=0x400,--defsym=__process_stack_size__=0x400,--defsym=__crt_heap_size__=0x1000"
+        ",--library-path=${CMAKE_SOURCE_DIR}/targets/ChibiOS/_common,--library-path=${chibios_SOURCE_DIR}/os/common/startup/ARMCMx/compilers/GCC/ld,--defsym=__main_stack_size__=0x400,--defsym=__process_stack_size__=0x400,--defsym=__crt_heap_size__=0x1000"
 
     CLR_EXTRA_LINKMAP_PROPERTIES
-        ",--library-path=${CMAKE_SOURCE_DIR}/targets/ChibiOS/_common,--library-path=${CHIBIOS_SOURCE_FOLDER}/os/common/startup/ARMCMx/compilers/GCC/ld,--defsym=__main_stack_size__=0x400,--defsym=__process_stack_size__=0x800,--defsym=__crt_heap_size__=0x14000"
+        ",--library-path=${CMAKE_SOURCE_DIR}/targets/ChibiOS/_common,--library-path=${chibios_SOURCE_DIR}/os/common/startup/ARMCMx/compilers/GCC/ld,--defsym=__main_stack_size__=0x400,--defsym=__process_stack_size__=0x800,--defsym=__crt_heap_size__=0x14000"
 )
 
 # Relax warnings for external CYW43 driver sources (we cannot modify them)

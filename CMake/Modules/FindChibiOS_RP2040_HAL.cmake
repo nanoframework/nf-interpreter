@@ -16,6 +16,7 @@ list(APPEND CHIBIOS_HAL_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/common/portability
 list(APPEND CHIBIOS_HAL_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/common/ports/ARM-common)
 list(APPEND CHIBIOS_HAL_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/common/ports/ARMv6-M)
 list(APPEND CHIBIOS_HAL_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/common/ports/ARMv6-M/compilers/GCC)
+list(APPEND CHIBIOS_HAL_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/common/ports/ARMv6-M/smp/rp2)
 list(APPEND CHIBIOS_HAL_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/common/startup/ARMCMx/compilers/GCC)
 list(APPEND CHIBIOS_HAL_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/common/startup/ARMCMx/devices/RP2040)
 list(APPEND CHIBIOS_HAL_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/common/ext/ARM/CMSIS/Core/Include)
@@ -139,6 +140,7 @@ foreach(SRC_FILE ${CHIBIOS_HAL_SRCS})
         PATHS 
 
             ${chibios_SOURCE_DIR}/os/common/ports/ARMv6-M/compilers/GCC
+            ${chibios_SOURCE_DIR}/os/common/ports/ARMv6-M/smp/rp2
             ${chibios_SOURCE_DIR}/os/common/startup/ARMCMx/compilers/GCC
             ${chibios_SOURCE_DIR}/os/common/startup/ARMCMx/devices/RP2040
 
