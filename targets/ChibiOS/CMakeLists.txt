@@ -364,7 +364,7 @@ endif()
 # (default is OFF so STM Cube package is NOT included)
 # Only applicable to ST vendor targets
 option(STM32_CUBE_PACKAGE_REQUIRED "option to include STM Cube pcakge in the build")
-if(STM32_CUBE_PACKAGE_REQUIRED AND TARGET_VENDOR STREQUAL "ST")
+if(STM32_CUBE_PACKAGE_REQUIRED AND "${TARGET_VENDOR}" STREQUAL "ST")
     ProcessSTM32CubePackage()
 endif()
 
