@@ -7,8 +7,6 @@ include(binutils.common)
 include(binutils.ChibiOS)
 
 nf_setup_target_build(
-    BOOTER_LINKER_FILE 
-        STM32F76xx_booter
 
     CLR_LINKER_FILE 
         STM32F76xx_CLR
