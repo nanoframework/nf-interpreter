@@ -15,7 +15,6 @@
 #error "nf_config.h not included. Check that target_os.h is properly generated and included."
 #endif
 
-
 // magic value to mark the limits of the boot clipboard data area
 #define BOOTCLIPBOARD_MAGIC_MARKER 0x4F41A583
 
