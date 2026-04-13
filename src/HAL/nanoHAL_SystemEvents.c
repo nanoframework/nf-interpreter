@@ -52,5 +52,9 @@ __nfweak void SystemState_Clear(SYSTEM_STATE_type state)
 
 __nfweak bool SystemState_Query(SYSTEM_STATE_type state)
 {
-    return __atomic_load_n(&state, __ATOMIC_RELAXED) ? true : false;
+#if defined(__CM0_CMSIS_VERSION)
+    return (SystemStates[state] > 0) ? true : false;
+#else
+    return (__atomic_load_n(&SystemStates[state], __ATOMIC_RELAXED) > 0) ? true : false;
+#endif
 }
