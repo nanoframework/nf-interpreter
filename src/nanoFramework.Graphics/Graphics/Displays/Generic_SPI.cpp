@@ -268,7 +268,7 @@ void DisplayDriver::Clear()
         else
         {
             // 3 bytes per pixel
-            g_DisplayInterface.FillData16(0, Attributes.Width * Attributes.Height * 3 / 2);
+            g_DisplayInterface.FillData16(0, (Attributes.Width * Attributes.Height * 3 + 1) / 2);
         }
     }
     else

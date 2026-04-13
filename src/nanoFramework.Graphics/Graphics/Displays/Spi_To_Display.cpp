@@ -338,19 +338,18 @@ void DisplayInterface::SendData18Windowed(
             g = (g << 2) | (g >> 4);
             r = (r << 3) | (r >> 2);
 
-            byteBuffer[bytesWritten++] = b;
-            byteBuffer[bytesWritten++] = g;
-            byteBuffer[bytesWritten++] = r;
-
-            // Flush when buffer is full
+            // Ensure there is room for a full pixel
             if (bytesWritten + 3 > SPI_MAX_TRANSFER_SIZE)
             {
                 InternalSendBytes((CLR_UINT8 *)currentBuffer, bytesWritten, true);
-
                 SwapBuffers();
                 byteBuffer = (CLR_UINT8 *)currentBuffer;
                 bytesWritten = 0;
             }
+
+            byteBuffer[bytesWritten++] = b;
+            byteBuffer[bytesWritten++] = g;
+            byteBuffer[bytesWritten++] = r;
         }
 
         startOfLine += stride;
