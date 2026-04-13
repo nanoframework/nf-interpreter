@@ -2688,11 +2688,10 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                         // check that...
                         //
                         changes = -calleeInst.target->argumentsCount;
-                        NANOCLR_CHECK_HRESULT(
-                            CLR_Checks::VerifyStackOK(
-                                *stack,
-                                stack->m_evalStackPos,
-                                changes)); // Check to see if we have enough parameters.
+                        NANOCLR_CHECK_HRESULT(CLR_Checks::VerifyStackOK(
+                            *stack,
+                            stack->m_evalStackPos,
+                            changes)); // Check to see if we have enough parameters.
                         stack->m_evalStackPos += changes;
 
                         top = stack->m_evalStackPos++; // Push back the result.
@@ -2728,11 +2727,10 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                     else
                     {
                         changes = calleeInst.target->argumentsCount;
-                        NANOCLR_CHECK_HRESULT(
-                            CLR_Checks::VerifyStackOK(
-                                *stack,
-                                stack->m_evalStackPos,
-                                -changes)); // Check to see if we have enough parameters.
+                        NANOCLR_CHECK_HRESULT(CLR_Checks::VerifyStackOK(
+                            *stack,
+                            stack->m_evalStackPos,
+                            -changes)); // Check to see if we have enough parameters.
                         top = stack->m_evalStackPos;
 
                         //
