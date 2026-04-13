@@ -7,8 +7,6 @@ include(binutils.common)
 include(binutils.ChibiOS)
 
 nf_setup_target_build(
-    HAS_NANOBOOTER
-
     BOOTER_LINKER_FILE 
         STM32F76xx_booter
 
