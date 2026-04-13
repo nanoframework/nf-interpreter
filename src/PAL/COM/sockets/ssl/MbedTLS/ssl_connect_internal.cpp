@@ -58,6 +58,7 @@ int ssl_connect_internal(int sd, const char *szTargetHost, int contextHandle)
     {
         if (ret != MBEDTLS_ERR_SSL_WANT_READ && ret != MBEDTLS_ERR_SSL_WANT_WRITE)
         {
+            // SSL handshake failed
             goto error;
         }
     }

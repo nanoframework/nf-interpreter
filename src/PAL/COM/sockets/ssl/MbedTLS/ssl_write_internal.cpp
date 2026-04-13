@@ -34,6 +34,7 @@ int ssl_write_internal(int sd, const char *data, size_t req_len)
 
     if (ret < 0)
     {
+        // mbedtls_printf("mbedtls_ssl_write() returned -0x%04X\n", -ret);
         return 0;
     }
 
