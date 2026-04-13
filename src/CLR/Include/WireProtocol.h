@@ -160,8 +160,8 @@ typedef enum Monitor_Ping_Source_Flags
     // This flag indicates that the device has a proprietary bootloader.
     Monitor_Ping_c_HasProprietaryBooter =       0x00010000,
 
-    // This flag indicates that the target device is IFU capable.
-    Monitor_Ping_c_IFUCapable =                 0x00020000,
+    // This flag indicates that the device uses MCUboot as its bootloader.
+    Monitor_Ping_c_HasMCUboot =                 0x00020000,
 
     // This flag indicates that the device requires that the configuration block to be erased before updating it.
     Monitor_Ping_c_ConfigBlockRequiresErase =   0x00040000,
@@ -170,6 +170,13 @@ typedef enum Monitor_Ping_Source_Flags
     Monitor_Ping_c_HasNanoBooter =              0x00080000,
 
 }Monitor_Ping_Source_Flags;
+
+// Default capability flags reported in Monitor_Ping reply for MCUboot targets.
+#if CONFIG_NF_FEATURE_HAS_MCUBOOT
+#define NF_DEFAULT_CAPABILITY_FLAGS (Monitor_Ping_c_HasMCUboot)
+#else
+#define NF_DEFAULT_CAPABILITY_FLAGS (Monitor_Ping_c_HasNanoBooter)
+#endif
 
 // structure to hold nanoFramework release information
 // equivalent with .NETMF MfReleaseInfo

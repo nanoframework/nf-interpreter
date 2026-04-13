@@ -403,6 +403,10 @@ bool CLR_DBG_Debugger::Monitor_Ping(WP_Message *msg)
 #endif
 
         // capability flags
+#if CONFIG_NF_FEATURE_HAS_MCUBOOT
+        // MCUboot target: MCUboot is the bootloader
+        cmdReply.Flags |= Monitor_Ping_c_HasMCUboot;
+#else
         if (::Target_HasNanoBooter())
         {
             cmdReply.Flags |= Monitor_Ping_c_HasNanoBooter;
@@ -412,11 +416,7 @@ bool CLR_DBG_Debugger::Monitor_Ping(WP_Message *msg)
         {
             cmdReply.Flags |= Monitor_Ping_c_HasProprietaryBooter;
         }
-
-        if (::Target_IFUCapable())
-        {
-            cmdReply.Flags |= Monitor_Ping_c_IFUCapable;
-        }
+#endif
 
         if (::Target_ConfigUpdateRequiresErase())
         {
@@ -1640,11 +1640,13 @@ bool CLR_DBG_Debugger::Debugging_Execution_QueryCLRCapabilities(WP_Message *msg)
                     c_CapabilityFlags_ConfigBlockRequiresErase;
             }
 
+#if CONFIG_NF_TARGET_HAS_NANOBOOTER
             if (::Target_HasNanoBooter())
             {
                 reply.u_capsFlags |=
                     CLR_DBG_Commands::Debugging_Execution_QueryCLRCapabilities::c_CapabilityFlags_HasNanoBooter;
             }
+#endif
 
             if (::Target_CanChangeMacAddress())
             {

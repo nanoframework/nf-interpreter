@@ -33,13 +33,6 @@ __nfweak bool Target_HasProprietaryBooter()
     return false;
 }
 
-// Information on whether the target is capable of IFU
-// Implemented as "weak" to allow it to be replaced with "hard" implementation at target level.
-__nfweak bool Target_IFUCapable()
-{
-    return false;
-}
-
 inline bool Target_HasNanoBooter()
 {
 #if CONFIG_NF_TARGET_HAS_NANOBOOTER

@@ -58,11 +58,6 @@ inline bool Target_CanChangeMacAddress()
     return false;
 };
 
-inline bool Target_IFUCapable()
-{
-    return false;
-};
-
 inline bool Target_HasProprietaryBooter()
 {
     return false;
