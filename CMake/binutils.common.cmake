@@ -475,6 +475,16 @@ macro(nf_setup_target_build_common)
         message(FATAL_ERROR "Add files/options for booter without setting HAS_NANOBOOTER argument when calling nf_setup_target_build()")
     endif()
 
+    # MCUboot and nanoBooter are mutually exclusive bootloaders.
+    # If both are enabled, the configuration is invalid — stop the build with a clear message.
+    if(NF_FEATURE_HAS_MCUBOOT AND NFSTBC_HAS_NANOBOOTER)
+        message(FATAL_ERROR
+            "\nConfiguration error: MCUboot (CONFIG_NF_FEATURE_HAS_MCUBOOT) and nanoBooter (HAS_NANOBOOTER) "
+            "cannot both be active for the same target. They are mutually exclusive bootloaders.\n"
+            "Fix: either disable CONFIG_NF_FEATURE_HAS_MCUBOOT in the target's defconfig, "
+            "or remove HAS_NANOBOOTER from the nf_setup_target_build() call in the target's CMakeLists.txt.\n")
+    endif()
+
     if(NFSTBC_HAS_NANOBOOTER AND (NOT NFSTBC_BOOTER_LINKER_FILE OR "${NFSTBC_BOOTER_LINKER_FILE}" STREQUAL ""))
         message(FATAL_ERROR "Need to provide BOOTER_LINKER_FILE argument when target has HAS_NANOBOOTER defined")
     endif()

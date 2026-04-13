@@ -10,7 +10,7 @@
 BootClipboard __attribute__((section(".boot_clipboard"))) g_BootClipboard;
 #endif
 
-// Performs check and initialization (if required) of the boot clipboard area
+// Performs check and initialization (if required) of the boot clipboard area.
 void InitBootClipboard()
 {
 

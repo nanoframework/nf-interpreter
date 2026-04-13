@@ -35,6 +35,8 @@ typedef enum BootExecution_Options
 
 // This struct holds the information to be passed to and from nanoCLR and nanoBooter
 // It's placed at a known fixed RAM address so both apps know where to look for it.
+// Only present when nanoBooter is the bootloader.
+#if CONFIG_NF_TARGET_HAS_NANOBOOTER
 typedef struct __nfpack BootClipboard
 {
     // to be hold the magic marker value
@@ -57,6 +59,7 @@ typedef struct __nfpack BootClipboard
 } BootClipboard;
 
 extern BootClipboard g_BootClipboard;
+#endif // CONFIG_NF_TARGET_HAS_NANOBOOTER
 
 #ifdef __cplusplus
 extern "C"
