@@ -12,7 +12,6 @@ config NF_BUILD_RTM
 config NF_TARGET_HAS_NANOBOOTER
     bool "Target includes nanoBooter"
     default y
-    depends on !NF_FEATURE_HAS_MCUBOOT
 
 config NF_ENABLE_DOUBLE_PRECISION_FP
     bool "Double-precision floating point"
