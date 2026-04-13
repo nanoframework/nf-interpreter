@@ -33,8 +33,6 @@ inline TARGET_CONFIG_UPDATE_REQUIRES_ERASE(false);
 // If a target has something to declare it has to provide a 'strong' implementation of this.
 __nfweak GET_TARGET_CAPABILITIES(0);
 
-inline TARGET_IFU_CAPABLE(false);
-
 // SimpleLink targets can't change MAC Address
 // Implemented as "weak" to allow it to be replaced with "hard" implementation at target level.
 __nfweak bool Target_CanChangeMacAddress()

@@ -58,11 +58,6 @@ int Monitor_Ping(WP_Message *message)
             cmdReply.Flags |= Monitor_Ping_c_HasProprietaryBooter;
         }
 
-        if (Target_IFUCapable())
-        {
-            cmdReply.Flags |= Monitor_Ping_c_IFUCapable;
-        }
-
         if (Target_ConfigUpdateRequiresErase())
         {
             cmdReply.Flags |= Monitor_Ping_c_ConfigBlockRequiresErase;

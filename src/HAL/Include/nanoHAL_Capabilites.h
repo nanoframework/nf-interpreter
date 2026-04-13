@@ -39,12 +39,6 @@
         return option;                                                                                                 \
     }
 
-#define TARGET_IFU_CAPABLE(option)                                                                                     \
-    bool Target_IFUCapable()                                                                                           \
-    {                                                                                                                  \
-        return option;                                                                                                 \
-    }
-
 #ifdef __cplusplus
 extern "C"
 {
@@ -68,9 +62,6 @@ extern "C"
 
     // Information on whether the target has a proprietary bootloader
     bool Target_HasProprietaryBooter();
-
-    // Information on whether the target is capable of IFU
-    bool Target_IFUCapable();
 
     // Information on whether the MAC address of the the device can be changed by the user
     // No default implementation provided to make sure the platform/target esplicitly declares it

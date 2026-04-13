@@ -370,7 +370,7 @@ macro(nf_setup_target_build)
         # list(APPEND ARGN CLR_EXTRA_LIBRARIES ${CLR_EXTRA_LIBRARIES})
     endif()
 
-    # OK to pass ARGN, to have it perform it's parsings and validation 
+    # OK to pass ARGN, to have it perform it's parsings and validation.
     nf_setup_target_build_common(${ARGN})
 
 endmacro()

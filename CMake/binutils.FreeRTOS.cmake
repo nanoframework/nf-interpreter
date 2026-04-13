@@ -281,7 +281,7 @@ endmacro()
 # optional CLR_EXTRA_LINK_FLAGS extra nanoCLR link flags to pass to nf_set_link_options() 
 macro(nf_setup_target_build)
 
-    # OK to pass ARGN, to have it perform it's parsings and validation 
+    # OK to pass ARGN, to have it perform it's parsings and validation.
     nf_setup_target_build_common(${ARGN})
 
 endmacro()

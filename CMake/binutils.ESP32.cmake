@@ -535,6 +535,87 @@ macro(nf_setup_partition_tables_generator)
 
 endmacro()
 
+# macro that sets up the calls to the partition tool to generate MCUboot partition table binaries.
+# The MCUboot partition layout is stored in the CSV files.
+# Output .bin files use a "mcuboot_" prefix to distinguish them from builds without IFU support.
+# Only call this macro when NF_FEATURE_HAS_MCUBOOT is ON.
+macro(nf_setup_mcuboot_partition_tables_generator)
+
+    # create partition tables for other memory sizes
+    set(ESP32_PARTITION_TABLE_UTILITY ${IDF_PATH_CMAKED}/components/partition_table/gen_esp32part.py )
+
+    # create command line for partition table generator
+    set(gen_partition_table "python" "${ESP32_PARTITION_TABLE_UTILITY}")
+
+    if(${TARGET_SERIES_SHORT} STREQUAL "esp32" OR 
+       ${TARGET_SERIES_SHORT} STREQUAL "esp32c3" OR 
+       ${TARGET_SERIES_SHORT} STREQUAL "esp32c5" OR 
+       ${TARGET_SERIES_SHORT} STREQUAL "esp32c6" OR 
+       ${TARGET_SERIES_SHORT} STREQUAL "esp32h2" OR 
+       ${TARGET_SERIES_SHORT} STREQUAL "esp32p4" OR 
+       ${TARGET_SERIES_SHORT} STREQUAL "esp32s2" OR 
+       ${TARGET_SERIES_SHORT} STREQUAL "esp32s3")
+
+        add_custom_command( TARGET ${NANOCLR_PROJECT_NAME}.elf POST_BUILD
+            COMMAND ${gen_partition_table} 
+            --flash-size 4MB 
+            ${CMAKE_SOURCE_DIR}/targets/ESP32/_IDF/${TARGET_SERIES_SHORT}/partitions_nanoclr_4mb.csv
+            ${CMAKE_BINARY_DIR}/mcuboot_partitions_4mb.bin
+            COMMENT "Generate MCUboot partition table for 4MB flash" )
+
+    endif()
+
+    if(${TARGET_SERIES_SHORT} STREQUAL "esp32" OR 
+       ${TARGET_SERIES_SHORT} STREQUAL "esp32c3" OR 
+       ${TARGET_SERIES_SHORT} STREQUAL "esp32c5" OR 
+       ${TARGET_SERIES_SHORT} STREQUAL "esp32c6" OR 
+       ${TARGET_SERIES_SHORT} STREQUAL "esp32p4" OR 
+       ${TARGET_SERIES_SHORT} STREQUAL "esp32s2" OR 
+       ${TARGET_SERIES_SHORT} STREQUAL "esp32s3")
+
+        add_custom_command( TARGET ${NANOCLR_PROJECT_NAME}.elf POST_BUILD
+            COMMAND ${gen_partition_table} 
+            --flash-size 8MB 
+            ${CMAKE_SOURCE_DIR}/targets/ESP32/_IDF/${TARGET_SERIES_SHORT}/partitions_nanoclr_8mb.csv
+            ${CMAKE_BINARY_DIR}/mcuboot_partitions_8mb.bin
+            COMMENT "Generate MCUboot partition table for 8MB flash" )
+
+        add_custom_command( TARGET ${NANOCLR_PROJECT_NAME}.elf POST_BUILD
+            COMMAND ${gen_partition_table} 
+            --flash-size 16MB 
+            ${CMAKE_SOURCE_DIR}/targets/ESP32/_IDF/${TARGET_SERIES_SHORT}/partitions_nanoclr_16mb.csv
+            ${CMAKE_BINARY_DIR}/mcuboot_partitions_16mb.bin
+            COMMENT "Generate MCUboot partition table for 16MB flash" )
+
+    endif()
+
+    if(${TARGET_SERIES_SHORT} STREQUAL "esp32s3" OR 
+       ${TARGET_SERIES_SHORT} STREQUAL "esp32p4")
+
+        add_custom_command( TARGET ${NANOCLR_PROJECT_NAME}.elf POST_BUILD
+            COMMAND ${gen_partition_table} 
+            --flash-size 32MB 
+            ${CMAKE_SOURCE_DIR}/targets/ESP32/_IDF/${TARGET_SERIES_SHORT}/partitions_nanoclr_32mb.csv
+            ${CMAKE_BINARY_DIR}/mcuboot_partitions_32mb.bin
+            COMMENT "Generate MCUboot partition table for 32MB flash" )
+
+    endif()
+
+    if(${TARGET_SERIES_SHORT} STREQUAL "esp32" OR 
+       ${TARGET_SERIES_SHORT} STREQUAL "esp32c3" OR
+       ${TARGET_SERIES_SHORT} STREQUAL "esp32h2" )
+
+        add_custom_command( TARGET ${NANOCLR_PROJECT_NAME}.elf POST_BUILD
+            COMMAND ${gen_partition_table}  
+            --flash-size 2MB 
+            ${CMAKE_SOURCE_DIR}/targets/ESP32/_IDF/esp32/partitions_nanoclr_2mb.csv
+            ${CMAKE_BINARY_DIR}/mcuboot_partitions_2mb.bin
+            COMMENT "Generate MCUboot partition table for 2MB flash" )
+
+    endif()
+
+endmacro()
+
 # macro to add the tinyusb component which has been downloaded from component registry to IDF components directory
 # As the Component Manager is not available for IDF as Library projects we need to set up environment manually for the 
 # esp_tinyusb to tinyusb dependency.

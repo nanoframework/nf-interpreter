@@ -357,6 +357,43 @@ function(nf_generate_build_output_files target)
     # add this to print the size of the output targets
     nf_print_target_size(${target})
 
+    # MCUboot targets: sign the nanoCLR binary with imgtool after it is built.
+    # Only applies to the nanoCLR target (nanoBooter is excluded from MCUboot builds).
+    # Requires NF_MCUBOOT_SLOT_SIZE and NF_MCUBOOT_SIGNING_KEY to be set by the caller
+    # (they are CMake-only parameters, not Kconfig symbols).
+    if(NF_FEATURE_HAS_MCUBOOT AND ("${TARGET_SHORT}" STREQUAL "${NANOCLR_PROJECT_NAME}"))
+
+        if(NOT DEFINED NF_MCUBOOT_SLOT_SIZE OR "${NF_MCUBOOT_SLOT_SIZE}" STREQUAL "")
+            message(FATAL_ERROR "NF_MCUBOOT_SLOT_SIZE must be set when NF_FEATURE_HAS_MCUBOOT is enabled")
+        endif()
+
+        if(NOT DEFINED NF_MCUBOOT_SIGNING_KEY OR "${NF_MCUBOOT_SIGNING_KEY}" STREQUAL "")
+            message(FATAL_ERROR "NF_MCUBOOT_SIGNING_KEY must be set when NF_FEATURE_HAS_MCUBOOT is enabled")
+        endif()
+
+        set(TARGET_SIGNED_BIN_FILE ${CMAKE_BINARY_DIR}/${TARGET_SHORT}-signed.bin)
+
+        find_program(IMGTOOL imgtool)
+        if(NOT IMGTOOL)
+            message(FATAL_ERROR "imgtool not found. Install it with: pip install imgtool==2.1.0")
+        endif()
+
+        add_custom_command(TARGET ${TARGET_SHORT}.elf POST_BUILD
+            COMMAND ${IMGTOOL} sign
+                --key "${NF_MCUBOOT_SIGNING_KEY}"
+                --align 4
+                --version "1.0.0"
+                --header-size "${NF_MCUBOOT_HEADER_SIZE}"
+                --pad-header
+                --slot-size "${NF_MCUBOOT_SLOT_SIZE}"
+                "${TARGET_BIN_FILE}"
+                "${TARGET_SIGNED_BIN_FILE}"
+
+            BYPRODUCTS ${TARGET_SIGNED_BIN_FILE}
+
+            COMMENT "Sign nanoCLR binary with imgtool (MCUboot)")
+    endif()
+
 endfunction()
 
 
@@ -473,6 +510,16 @@ macro(nf_setup_target_build_common)
     if(NOT NFSTBC_HAS_NANOBOOTER 
         AND (BOOTER_EXTRA_SOURCE_FILES OR BOOTER_EXTRA_COMPILE_DEFINITIONS OR BOOTER_EXTRA_LINKMAP_PROPERTIES))
         message(FATAL_ERROR "Add files/options for booter without setting HAS_NANOBOOTER argument when calling nf_setup_target_build()")
+    endif()
+
+    # MCUboot and nanoBooter are mutually exclusive bootloaders.
+    # If both are enabled, the configuration is invalid — stop the build with a clear message.
+    if(NF_FEATURE_HAS_MCUBOOT AND NFSTBC_HAS_NANOBOOTER)
+        message(FATAL_ERROR
+            "\nConfiguration error: MCUboot (CONFIG_NF_FEATURE_HAS_MCUBOOT) and nanoBooter (HAS_NANOBOOTER) "
+            "cannot both be active for the same target. They are mutually exclusive bootloaders.\n"
+            "Fix: either disable CONFIG_NF_FEATURE_HAS_MCUBOOT in the target's defconfig, "
+            "or remove HAS_NANOBOOTER from the nf_setup_target_build() call in the target's CMakeLists.txt.\n")
     endif()
 
     if(NFSTBC_HAS_NANOBOOTER AND (NOT NFSTBC_BOOTER_LINKER_FILE OR "${NFSTBC_BOOTER_LINKER_FILE}" STREQUAL ""))

@@ -46,8 +46,6 @@ inline GET_TARGET_CAPABILITIES(0);
 // ESP32 has a proprietatry bootloader
 inline TARGET_HAS_PROPRIETARY_BOOTER(true);
 
-inline TARGET_IFU_CAPABLE(false);
-
 // Mutex for GLOBAL_LOCK / GLOBAL_UNLOCK
 portMUX_TYPE globalLockMutex = portMUX_INITIALIZER_UNLOCKED;
 
