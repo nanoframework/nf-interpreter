@@ -259,7 +259,10 @@ function(nf_generate_dfu_package file1 address1 file2 address2 outputfilename)
     )
 
     # need to add a dependency of NANOCLR to NANOBOOTER because DFU util needs bin outputs of both targets
-    add_dependencies(${NANOCLR_PROJECT_NAME}.elf ${NANOBOOTER_PROJECT_NAME}.elf)
+    # unless the target has MCUboot enabled
+    if(NOT NF_FEATURE_HAS_MCUBOOT)
+        add_dependencies(${NANOCLR_PROJECT_NAME}.elf ${NANOBOOTER_PROJECT_NAME}.elf)
+    endif()
 
 endfunction()
 
