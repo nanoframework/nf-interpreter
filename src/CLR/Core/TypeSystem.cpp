@@ -1780,7 +1780,8 @@ bool CLR_RT_MethodDef_Instance::InitializeFromIndex(const CLR_RT_MethodDef_Index
 
 bool CLR_RT_MethodDef_Instance::InitializeFromIndex(
     const CLR_RT_MethodDef_Index &md,
-    const CLR_RT_TypeSpec_Index &typeSpec)
+    const CLR_RT_TypeSpec_Index &typeSpec,
+    const CLR_RT_MethodDef_Instance *caller)
 {
     NATIVE_PROFILE_CLR_CORE();
 
@@ -1827,6 +1828,52 @@ bool CLR_RT_MethodDef_Instance::InitializeFromIndex(
         }
 
         ownerTypeIdx = paramElement.Class;
+    }
+    else if (elem.DataType == DATATYPE_MVAR)
+    {
+        // Method-level generic parameter (!!U): resolve from the caller's MethodSpec context
+        if (caller != nullptr && NANOCLR_INDEX_IS_VALID(caller->methodSpec))
+        {
+            CLR_RT_MethodSpec_Instance msInst;
+            if (!msInst.InitializeFromIndex(caller->methodSpec))
+            {
+                return false;
+            }
+
+            CLR_RT_SignatureParser::Element argElement;
+            if (!msInst.GetGenericArgument(elem.GenericParamPosition, argElement))
+            {
+                return false;
+            }
+
+            if (argElement.DataType == DATATYPE_VAR && caller->genericType &&
+                NANOCLR_INDEX_IS_VALID(*caller->genericType))
+            {
+                // MVAR resolved to a VAR, chain-resolve from the caller's type context
+                CLR_RT_TypeSpec_Instance callerTs;
+                if (!callerTs.InitializeFromIndex(*caller->genericType))
+                {
+                    return false;
+                }
+
+                CLR_RT_SignatureParser::Element paramElement;
+                if (!callerTs.GetGenericParam(argElement.GenericParamPosition, paramElement))
+                {
+                    return false;
+                }
+
+                ownerTypeIdx = paramElement.Class;
+            }
+            else
+            {
+                ownerTypeIdx = argElement.Class;
+            }
+        }
+        else
+        {
+            // No caller context available, cannot resolve MVAR
+            return false;
+        }
     }
     else
     {
