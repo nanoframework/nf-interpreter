@@ -285,7 +285,10 @@ function(nf_generate_hex_package file1 file2 outputfilename)
     )
 
     # need to add a dependency of NANOCLR to NANOBOOTER because SRECORD util needs hex outputs of both targets
-    add_dependencies(${NANOCLR_PROJECT_NAME}.elf ${NANOBOOTER_PROJECT_NAME}.elf)
+    # MCUboot targets have no nanoBooter, so skip this dependency
+    if(NOT NF_FEATURE_HAS_MCUBOOT)
+        add_dependencies(${NANOCLR_PROJECT_NAME}.elf ${NANOBOOTER_PROJECT_NAME}.elf)
+    endif()
 
 endfunction()
 
@@ -311,7 +314,10 @@ function(nf_generate_bin_package file1 file2 offset outputfilename)
     )
 
     # need to add a dependency of NANOCLR to NANOBOOTER because SRECORD util needs hex outputs of both targets
-    add_dependencies(${NANOCLR_PROJECT_NAME}.elf ${NANOBOOTER_PROJECT_NAME}.elf)
+    # MCUboot targets have no nanoBooter, so skip this dependency
+    if(NOT NF_FEATURE_HAS_MCUBOOT)
+        add_dependencies(${NANOCLR_PROJECT_NAME}.elf ${NANOBOOTER_PROJECT_NAME}.elf)
+    endif()
 
 endfunction()
 
