@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>net8.0</TargetFramework>
+    <TargetFramework>net10.0</TargetFramework>
     <Platforms>AnyCPU</Platforms>
     <OutputPath>..\..\..\build\bin\$(Configuration)</OutputPath>
 		<RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
@@ -29,11 +29,22 @@
     <PackageReadmeFile>docs\README.md</PackageReadmeFile>
   </PropertyGroup>
 
-  <!-- NuGet package files -->
+  <!-- NuGet package files - native nanoCLR shared library, platform-conditional -->
   <ItemGroup>
-    <None Include="..\..\..\build\bin\$(Configuration)\nanoFramework.nanoCLR.dll" Link="NanoCLR\nanoFramework.nanoCLR.dll">
+    <!-- Windows: DLL is produced by the WIN32 build under build/bin/$(Configuration)/ -->
+    <None Condition="$([MSBuild]::IsOSPlatform('Windows'))" Include="..\..\..\build\bin\$(Configuration)\nanoFramework.nanoCLR.dll" Link="NanoCLR\nanoFramework.nanoCLR.dll">
       <Pack>True</Pack>
       <PackagePath>tools\net8.0\any\NanoCLR</PackagePath>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <!-- macOS: dylib is produced by the POSIX build under build/posix/lib/ -->
+    <None Condition="$([MSBuild]::IsOSPlatform('OSX'))" Include="..\..\..\build\posix\lib\nanoFramework.nanoCLR.dylib" Link="NanoCLR\nanoFramework.nanoCLR.dylib">
+      <Pack>False</Pack>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <!-- Linux: .so is produced by the POSIX build under build/posix/lib/ -->
+    <None Condition="$([MSBuild]::IsOSPlatform('Linux'))" Include="..\..\..\build\posix\lib\nanoFramework.nanoCLR.so" Link="NanoCLR\nanoFramework.nanoCLR.so">
+      <Pack>False</Pack>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="..\..\..\assets\nf-logo.png">

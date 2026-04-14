@@ -5,6 +5,7 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
 using nanoFramework.nanoCLR.Host;
 using nanoFramework.nanoCLR.Host.Port.TcpIp;
@@ -13,7 +14,6 @@ namespace nanoFramework.nanoCLR.CLI
 {
     internal static class ExecuteCommandProcessor
     {
-        [SupportedOSPlatform("windows")]
         public static int ProcessVerb(
             ExecuteCommandLineOptions options,
             VirtualSerialDeviceManager virtualBridgeManager)
@@ -40,11 +40,17 @@ namespace nanoFramework.nanoCLR.CLI
 
             hostBuilder.UseConsoleDebugPrint();
 
-            // flag to signal that the intenal serial port has already been configured
+            // flag to signal that the internal serial port has already been configured
             bool internalSerialPortConfig = false;
 
             if (options.ExposedSerialPort != null)
             {
+                if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                {
+                    Console.WriteLine("Warning: --serialport is only supported on Windows. Ignoring.");
+                }
+                else
+                {
                 // a serial port was requested 
 
                 // validate serial port
@@ -87,6 +93,7 @@ namespace nanoFramework.nanoCLR.CLI
                 {
                     return -1;
                 }
+                } // end Windows-only serial port block
             }
 
             if (Program.VerbosityLevel > VerbosityLevel.Normal)
@@ -105,7 +112,8 @@ namespace nanoFramework.nanoCLR.CLI
             }
 
             if (!internalSerialPortConfig
-                && options.ExposedSerialPort != null)
+                && options.ExposedSerialPort != null
+                && RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
                 hostBuilder.UseSerialPortWireProtocol(options.ExposedSerialPort);
             }
@@ -117,7 +125,14 @@ namespace nanoFramework.nanoCLR.CLI
 
             if (options.ExposedNamedPipe != null)
             {
-                hostBuilder.UseNamedPipeWireProtocol(options.ExposedNamedPipe);
+                if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                {
+                    hostBuilder.UseNamedPipeWireProtocol(options.ExposedNamedPipe);
+                }
+                else
+                {
+                    Console.WriteLine("Warning: --namedpipe is only supported on Windows. Ignoring.");
+                }
             }
 
             if (options.TraceWireProtocol)

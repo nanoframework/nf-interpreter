@@ -888,8 +888,14 @@ extern bool g_fDoNotUninitializeDebuggerPort;
 #define ASSERT_IRQ_MUST_BE_ON()
 #endif
 
-#elif defined(__arm__) | defined(PLATFORM_ESP32)
+#elif defined(__arm__) || defined(PLATFORM_ESP32) || defined(PLATFORM_POSIX_HOST)
 // nothing to define here just to help the nanoCLR VS project to build hapilly
+// for POSIX: GLOBAL_LOCK/UNLOCK will be provided by the platform HAL layer
+#ifndef GLOBAL_LOCK
+#define GLOBAL_LOCK()
+#define GLOBAL_UNLOCK()
+#define ASSERT_IRQ_MUST_BE_ON()
+#endif
 #else
 #error Unsupported platform
 #endif

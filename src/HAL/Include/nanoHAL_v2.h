@@ -7,7 +7,7 @@
 #ifndef NANOHAL_V2_H
 #define NANOHAL_V2_H
 
-#ifndef VIRTUAL_DEVICE
+#if !defined(VIRTUAL_DEVICE) && !defined(PLATFORM_POSIX_HOST)
 
 // need to include stdlib.h **BEFORE** redefining malloc/free/realloc otherwise bad things happen
 #include <stdlib.h>
@@ -304,7 +304,7 @@ extern "C"
 }
 #endif
 
-#if defined(PLATFORM_ARM) || defined(PLATFORM_ESP32)
+#if defined(PLATFORM_ARM) || defined(PLATFORM_ESP32) || defined(PLATFORM_POSIX_HOST)
 #if !defined(BUILD_RTM)
 #define ASSERT(i)                                                                                                      \
     {                                                                                                                  \

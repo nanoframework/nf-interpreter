@@ -161,10 +161,10 @@ struct Settings
         const CLR_RECORD_ASSEMBLY *header;
 
 #if !defined(BUILD_RTM)
-        CLR_Debug::Printf(" Loading start at %x, end %x\r\n", (unsigned int)assStart, (unsigned int)assEnd);
+        CLR_Debug::Printf(" Loading start at %x, end %x\r\n", (unsigned int)(uintptr_t)assStart, (unsigned int)(uintptr_t)assEnd);
 #endif
 
-        g_buildCRC = SUPPORT_ComputeCRC(assStart, (unsigned int)assEnd - (unsigned int)assStart, 0);
+        g_buildCRC = SUPPORT_ComputeCRC(assStart, (unsigned int)((uintptr_t)assEnd - (uintptr_t)assStart), 0);
 
         header = (const CLR_RECORD_ASSEMBLY *)assStart;
 

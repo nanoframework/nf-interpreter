@@ -1,0 +1,82 @@
+name: posix-nanoclr
+
+on:
+  push:
+    paths:
+      - "targets/posix/**"
+      - "src/CLR/**"
+      - "src/HAL/**"
+      - "src/PAL/**"
+      - ".github/workflows/posix-nanoclr.yml"
+  pull_request:
+    paths:
+      - "targets/posix/**"
+      - "src/CLR/**"
+      - "src/HAL/**"
+      - "src/PAL/**"
+      - ".github/workflows/posix-nanoclr.yml"
+
+jobs:
+  build-posix-nanoclr:
+    strategy:
+      matrix:
+        include:
+          - os: macos-14
+            label: macOS
+          - os: ubuntu-22.04
+            label: Linux
+      fail-fast: false
+
+    runs-on: ${{ matrix.os }}
+    name: Build (${{ matrix.label }})
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Ninja (if missing)
+        run: |
+          if ! command -v ninja >/dev/null 2>&1; then
+            if command -v apt-get >/dev/null 2>&1; then
+              sudo apt-get install -y ninja-build
+            else
+              brew install ninja
+            fi
+          fi
+
+      - name: Configure
+        run: |
+          AGENT_ARCH="$(uname -m)"
+          # NANO_POSIX_ARCH is only used on macOS to set CMAKE_OSX_ARCHITECTURES.
+          # On Linux the host toolchain architecture is used automatically.
+          if [ "${AGENT_ARCH}" = "arm64" ]; then
+            ARCH_FLAG="-DNANO_POSIX_ARCH=arm64"
+          else
+            ARCH_FLAG="-DNANO_POSIX_ARCH=x86_64"
+          fi
+          cmake -S targets/posix -B build/posix -G Ninja \
+            ${ARCH_FLAG} \
+            -DNANO_POSIX_ENABLE_SMOKE=ON
+
+      - name: Build
+        run: cmake --build build/posix --verbose
+
+      - name: Smoke Run
+        run: |
+          set -euo pipefail
+          ./build/posix/bin/nanoFramework.nanoCLR | tee build/posix/smoke.log
+          if ! grep -Eq '[0-9]+\.[0-9]+\.[0-9]+' build/posix/smoke.log; then
+            echo "ERROR: smoke output validation failed."
+            exit 1
+          fi
+
+      - name: Upload Artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: posix-nanoclr-${{ matrix.label }}
+          path: |
+            build/posix/lib/nanoFramework.nanoCLR.*
+            build/posix/bin/nanoFramework.nanoCLR.test
+            build/posix/bin/nanoFramework.nanoCLR
+            build/posix/smoke.log

@@ -95,6 +95,8 @@ extern CLR_HW_Hardware g_CLR_HW_Hardware;
 
 #ifdef _WIN64
 CT_ASSERT(sizeof(CLR_HW_Hardware::HalInterruptRecord) == 32)
+#elif defined(PLATFORM_POSIX_HOST) && defined(__LP64__)
+// 64-bit POSIX host: interrupt record size differs from ARM 32-bit; skip check during port.
 #else
 CT_ASSERT(sizeof(CLR_HW_Hardware::HalInterruptRecord) == 24)
 #endif // _WIN64

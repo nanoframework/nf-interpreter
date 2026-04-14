@@ -1341,6 +1341,30 @@ HRESULT CLR_RT_Thread::ProcessException_Phase2()
     // m_currentException is still set, but we return PROCESS_EXCEPTION signalling that there is no hope for the thread,
     // which causes Thread::Execute to terminate it.
 
+#if !defined(BUILD_RTM)
+    // Print the unhandled exception type regardless of debugger availability.
+    if ((this->m_flags & CLR_RT_Thread::TH_F_Aborted) == 0)
+    {
+        CLR_RT_HeapBlock *pException = m_currentException.Dereference();
+        if (pException != NULL)
+        {
+            CLR_RT_TypeDef_Instance cls{};
+            if (cls.InitializeFromIndex(pException->ObjectCls()))
+            {
+                CLR_Debug::Printf(
+                    "#### Exception %s::%s - 0x%08x ####\r\n",
+                    cls.m_assm->GetString(cls.m_target->nameSpace),
+                    cls.m_assm->GetString(cls.m_target->name),
+                    (int)hr);
+            }
+            else
+            {
+                CLR_Debug::Printf("#### (unknown) Exception - 0x%08x ####\r\n", (int)hr);
+            }
+        }
+    }
+#endif
+
 #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
     if (CLR_EE_DBG_IS_NOT(NoStackTraceInExceptions))
     {
