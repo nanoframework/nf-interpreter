@@ -47,35 +47,9 @@ static const SPIConfig spiConfig = {
     // transfer length to 8bit
     .cr2 = SPI_CR2_DS_2 | SPI_CR2_DS_1 | SPI_CR2_DS_0};
 
-#if CACHE_LINE_SIZE > 0
-CC_ALIGN_DATA(CACHE_LINE_SIZE)
-uint8_t dataBuffer_0[CACHE_SIZE_ALIGN(uint8_t, AT25SF641_PAGE_SIZE)] __attribute__((section(".nocache")));
-#else
-uint8_t dataBuffer_0[AT25SF641_PAGE_SIZE];
-#endif
-
 #ifdef DEBUG
-#if CACHE_LINE_SIZE > 0
-CC_ALIGN_DATA(CACHE_LINE_SIZE)
-uint8_t tempBuffer[CACHE_SIZE_ALIGN(uint8_t, AT25SF641_PAGE_SIZE)] __attribute__((section(".nocache")));
-#else
 uint8_t tempBuffer[AT25SF641_PAGE_SIZE];
 #endif
-#endif
-
-///////////////
-// Definitions
-#define CS_SELECT   palClearPad(PAL_PORT(LINE_FLASH_SPI1_CS), PAL_PAD(LINE_FLASH_SPI1_CS))
-#define CS_UNSELECT palSetPad(PAL_PORT(LINE_FLASH_SPI1_CS), PAL_PAD(LINE_FLASH_SPI1_CS))
-
-///////////////
-// declarations
-static bool SPI_Erase_Block(uint32_t addr, bool largeBlock);
-static bool SPI_Read(uint8_t *pData, uint32_t readAddr, uint32_t size);
-static bool SPI_Write(const uint8_t *pData, uint32_t writeAddr, uint32_t size);
-static bool SPI_WaitOnBusy();
-
-extern uint32_t HAL_GetTick(void);
 
 // target specific implementation of hal_lfs_erase
 int32_t hal_lfs_erase_0(const struct lfs_config *c, lfs_block_t block)
@@ -84,7 +58,7 @@ int32_t hal_lfs_erase_0(const struct lfs_config *c, lfs_block_t block)
 
     uint32_t addr = block * c->block_size;
 
-    if (!SPI_Erase_Block(addr, false))
+    if (!AT25SF641_Erase(addr, false))
     {
         return LFS_ERR_IO;
     }
@@ -97,7 +71,7 @@ int32_t hal_lfs_read_0(const struct lfs_config *c, lfs_block_t block, lfs_off_t 
 {
     uint32_t addr = block * c->block_size + off;
 
-    if (!SPI_Read(buffer, addr, size))
+    if (!AT25SF641_Read(buffer, addr, size))
     {
         return LFS_ERR_IO;
     }
@@ -115,7 +89,7 @@ int32_t hal_lfs_prog_0(
 {
     uint32_t addr = block * c->block_size + off;
 
-    if (!SPI_Write(buffer, addr, size))
+    if (!AT25SF641_Write(buffer, addr, size))
     {
         return LFS_ERR_IO;
     }
@@ -125,7 +99,7 @@ int32_t hal_lfs_prog_0(
     memset(tempBuffer, 0xBB, size);
 
     // read back and compare
-    SPI_Read(tempBuffer, addr, size);
+    AT25SF641_Read(tempBuffer, addr, size);
     ASSERT(memcmp(buffer, tempBuffer, size) == 0);
 
 #endif
@@ -136,175 +110,7 @@ int32_t hal_lfs_prog_0(
 // target specific implementation of chip erase
 bool hal_lfs_erase_chip_0()
 {
-    // need to do this one one block at a time to avoid watchdog reset
-    for (uint32_t i = 0; i < AT25SF641_FLASH_SIZE / AT25SF641_SECTOR_SIZE; i++)
-    {
-        if (!SPI_Erase_Block(i * AT25SF641_SECTOR_SIZE, true))
-        {
-            return false;
-        }
-
-        // reset watchdog
-        Watchdog_Reset();
-    }
-
-    return true;
-}
-
-static bool SPI_WaitOnBusy()
-{
-    uint32_t tickstart = HAL_GetTick();
-
-    // clear read buffer
-    memset(dataBuffer_0, 0xFF, 1);
-
-    dataBuffer_0[0] = READ_STATUS_REG1_CMD;
-    cacheBufferFlush(dataBuffer_0, sizeof(dataBuffer_0));
-
-    CS_SELECT;
-
-    // send read status register 1
-    spiSend(&SPID1, 1, dataBuffer_0);
-
-    while (true)
-    {
-        // read register value
-        spiReceive(&SPID1, 1, dataBuffer_0);
-        cacheBufferInvalidate(dataBuffer_0, sizeof(dataBuffer_0));
-
-        if (!(dataBuffer_0[0] & AT25SF641_SR_BUSY))
-        {
-            // BuSY bit is cleared
-            break;
-        }
-
-        if ((HAL_GetTick() - tickstart) > HAL_SPI_TIMEOUT_DEFAULT_VALUE)
-        {
-            // operation timeout
-
-            // unselect SPI
-            CS_UNSELECT;
-
-            return false;
-        }
-    }
-
-    CS_UNSELECT;
-
-    return true;
-}
-
-static bool SPI_Erase_Block(uint32_t addr, bool largeBlock)
-{
-    // send write enable
-    dataBuffer_0[0] = WRITE_ENABLE_CMD;
-    cacheBufferFlush(dataBuffer_0, sizeof(dataBuffer_0));
-
-    CS_SELECT;
-    spiSend(&SPID1, 1, dataBuffer_0);
-    CS_UNSELECT;
-
-    // send block erase
-    dataBuffer_0[0] = largeBlock ? BLOCK_ERASE_CMD : SECTOR_ERASE_CMD;
-    dataBuffer_0[1] = (uint8_t)(addr >> 16);
-    dataBuffer_0[2] = (uint8_t)(addr >> 8);
-    dataBuffer_0[3] = (uint8_t)addr;
-
-    // // flush DMA buffer to ensure cache coherency
-    // // (only required for Cortex-M7)
-    // cacheBufferFlush(dataBuffer_0, sizeof(dataBuffer_0));
-
-    CS_SELECT;
-    spiSend(&SPID1, 4, dataBuffer_0);
-    CS_UNSELECT;
-
-    // wait for erase operation to complete
-    return SPI_WaitOnBusy();
-}
-
-static bool SPI_Read(uint8_t *pData, uint32_t readAddr, uint32_t size)
-{
-    // send read page command
-    dataBuffer_0[0] = READ_CMD;
-    dataBuffer_0[1] = (uint8_t)(readAddr >> 16);
-    dataBuffer_0[2] = (uint8_t)(readAddr >> 8);
-    dataBuffer_0[3] = (uint8_t)readAddr;
-
-    // // flush DMA buffer to ensure cache coherency
-    // // (only required for Cortex-M7)
-    // cacheBufferFlush(dataBuffer_0, sizeof(dataBuffer_0));
-
-    CS_SELECT;
-    spiSend(&SPID1, 4, dataBuffer_0);
-
-    // clear read buffer
-    memset(dataBuffer_0, 0xDD, size);
-
-    spiReceive(&SPID1, size, dataBuffer_0);
-    CS_UNSELECT;
-
-    // invalidate cache
-    // (only required for Cortex-M7)
-    cacheBufferInvalidate(dataBuffer_0, sizeof(dataBuffer_0));
-
-    // copy to pointer
-    memcpy(pData, dataBuffer_0, size);
-
-    return true;
-}
-
-static bool SPI_Write(const uint8_t *pData, uint32_t writeAddr, uint32_t size)
-{
-    uint32_t writeSize;
-    uint32_t address = writeAddr;
-
-    // perform paged program
-    while (size > 0)
-    {
-        // send write enable
-        dataBuffer_0[0] = WRITE_ENABLE_CMD;
-        cacheBufferFlush(dataBuffer_0, sizeof(dataBuffer_0));
-
-        CS_SELECT;
-        spiSend(&SPID1, 1, dataBuffer_0);
-        CS_UNSELECT;
-
-        // calculate write size
-        writeSize = __builtin_fmin(AT25SF641_PAGE_SIZE - (address % AT25SF641_PAGE_SIZE), size);
-
-        // send write page
-        dataBuffer_0[0] = PAGE_PROG_CMD;
-        dataBuffer_0[1] = (uint8_t)(address >> 16);
-        dataBuffer_0[2] = (uint8_t)(address >> 8);
-        // adjust address if writeSize is the full page
-        dataBuffer_0[3] = (uint8_t)(writeSize == W25Q128_PAGE_SIZE ? address & 0xFFFFFFF0 : address);
-
-        // // flush DMA buffer to ensure cache coherency
-        // // (only required for Cortex-M7)
-        // cacheBufferFlush(dataBuffer_0, sizeof(dataBuffer_0));
-
-        CS_SELECT;
-        spiSend(&SPID1, 4, dataBuffer_0);
-
-        // copy from buffer
-        memcpy(dataBuffer_0, pData, writeSize);
-
-        // // flush DMA buffer to ensure cache coherency
-        // // (only required for Cortex-M7)
-        // cacheBufferFlush(dataBuffer_0, sizeof(dataBuffer_0));
-
-        spiSend(&SPID1, writeSize, dataBuffer_0);
-        CS_UNSELECT;
-
-        // wait for operation to complete
-        SPI_WaitOnBusy();
-
-        address += writeSize;
-        pData += writeSize;
-        size -= writeSize;
-    }
-
-    return true;
+    return AT25SF641_EraseChip();
 }
 
 #endif // LFS_SPI1
@@ -810,7 +616,7 @@ int8_t target_lfs_init()
 {
 #ifdef LFS_SPI1
 
-    // init driver
+    // init SPI driver
     spiAcquireBus(&SPID1);
     spiStart(&SPID1, &spiConfig);
 
@@ -818,29 +624,7 @@ int8_t target_lfs_init()
     // no need to worry with cache issues at this early stage of the boot //
     ////////////////////////////////////////////////////////////////////////
 
-    // resume from deep power down
-    // have to send this to make sure device is functional after sleep
-    dataBuffer_0[0] = RESUME_DEEP_PD_CMD;
-
-    CS_SELECT;
-    spiSend(&SPID1, 1, dataBuffer_0);
-    CS_UNSELECT;
-
-    // sanity check: read device ID and unique ID
-    dataBuffer_0[0] = READ_ID_CMD2;
-
-    // from AT25SF641 datasheet: need time for chip to become fully responsive
-    chThdSleepMilliseconds(10);
-
-    CS_SELECT;
-    spiSend(&SPID1, 1, dataBuffer_0);
-    spiReceive(&SPID1, 3, dataBuffer_0);
-    CS_UNSELECT;
-
-    // constants from ID Definitions table in AT25SF641 datasheet
-    ASSERT(dataBuffer_0[0] == AT25SF641_MANUFACTURER_ID);
-    ASSERT(dataBuffer_0[1] == AT25SF641_DEVICE_ID1);
-    ASSERT(dataBuffer_0[2] == AT25SF641_DEVICE_ID2);
+    AT25SF641_Init();
 
 #endif // LFS_SPI1
 
