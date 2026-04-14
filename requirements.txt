@@ -1,3 +1,4 @@
 # Python dependencies for nanoFramework Kconfig configuration system
 kconfiglib>=14.1.0
 imgtool==2.1.0
+PyYAML>=5.1
