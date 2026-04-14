@@ -2417,14 +2417,20 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                                         // TypeSpec
                                         if (calleeInst.genericType && NANOCLR_INDEX_IS_VALID(*calleeInst.genericType))
                                         {
-                                            calleeInst.InitializeFromIndex(
-                                                calleeReal,
-                                                *calleeInst.genericType,
-                                                &stack->m_call);
+                                            if (calleeInst.InitializeFromIndex(
+                                                    calleeReal,
+                                                    *calleeInst.genericType,
+                                                    &stack->m_call) == false)
+                                            {
+                                                NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+                                            }
                                         }
                                         else
                                         {
-                                            calleeInst.InitializeFromIndex(calleeReal);
+                                            if (calleeInst.InitializeFromIndex(calleeReal) == false)
+                                            {
+                                                NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+                                            }
                                         }
 
                                         // Restore the array element type after reinitializing calleeInst
