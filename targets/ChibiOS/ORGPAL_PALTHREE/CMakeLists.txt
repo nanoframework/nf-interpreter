@@ -7,10 +7,6 @@ include(binutils.common)
 include(binutils.ChibiOS)
 
 nf_setup_target_build(
-    HAS_NANOBOOTER
-
-    BOOTER_LINKER_FILE 
-        STM32F76xx_booter
 
     CLR_LINKER_FILE 
         STM32F76xx_CLR
@@ -35,7 +31,8 @@ nf_setup_target_build(
 )
 
 # if HEX2DFU tool is available pack the binaries into a DFU package
-if(HEX2DFU_TOOL_AVAILABLE)
+# not applicable for MCUboot targets (no nanoBooter)
+if(HEX2DFU_TOOL_AVAILABLE AND NOT NF_FEATURE_HAS_MCUBOOT)
 
     ####################################################################################################
     ## when changing the linker file make sure to update the new addresses for the image files below  ##

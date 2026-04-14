@@ -72,6 +72,8 @@ inline bool RequestToLaunchNanoBooter(int32_t errorCode)
         g_BootClipboard.ErrorCode = errorCode;
         return true;
     }
+#else
+    (void)errorCode;
 #endif
 
     return false;

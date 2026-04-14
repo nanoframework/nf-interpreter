@@ -259,7 +259,10 @@ function(nf_generate_dfu_package file1 address1 file2 address2 outputfilename)
     )
 
     # need to add a dependency of NANOCLR to NANOBOOTER because DFU util needs bin outputs of both targets
-    add_dependencies(${NANOCLR_PROJECT_NAME}.elf ${NANOBOOTER_PROJECT_NAME}.elf)
+    # unless the target has MCUboot enabled
+    if(NOT NF_FEATURE_HAS_MCUBOOT)
+        add_dependencies(${NANOCLR_PROJECT_NAME}.elf ${NANOBOOTER_PROJECT_NAME}.elf)
+    endif()
 
 endfunction()
 
@@ -282,7 +285,10 @@ function(nf_generate_hex_package file1 file2 outputfilename)
     )
 
     # need to add a dependency of NANOCLR to NANOBOOTER because SRECORD util needs hex outputs of both targets
-    add_dependencies(${NANOCLR_PROJECT_NAME}.elf ${NANOBOOTER_PROJECT_NAME}.elf)
+    # MCUboot targets have no nanoBooter, so skip this dependency
+    if(NOT NF_FEATURE_HAS_MCUBOOT)
+        add_dependencies(${NANOCLR_PROJECT_NAME}.elf ${NANOBOOTER_PROJECT_NAME}.elf)
+    endif()
 
 endfunction()
 
@@ -308,7 +314,10 @@ function(nf_generate_bin_package file1 file2 offset outputfilename)
     )
 
     # need to add a dependency of NANOCLR to NANOBOOTER because SRECORD util needs hex outputs of both targets
-    add_dependencies(${NANOCLR_PROJECT_NAME}.elf ${NANOBOOTER_PROJECT_NAME}.elf)
+    # MCUboot targets have no nanoBooter, so skip this dependency
+    if(NOT NF_FEATURE_HAS_MCUBOOT)
+        add_dependencies(${NANOCLR_PROJECT_NAME}.elf ${NANOBOOTER_PROJECT_NAME}.elf)
+    endif()
 
 endfunction()
 
@@ -378,6 +387,8 @@ function(nf_generate_build_output_files target)
             message(FATAL_ERROR "imgtool not found. Install it with: pip install imgtool==2.1.0")
         endif()
 
+        # Sign the binary into a temp file then replace the original so that
+        # nanoCLR.bin is always the signed image, preserving tool compatibility.
         add_custom_command(TARGET ${TARGET_SHORT}.elf POST_BUILD
             COMMAND ${IMGTOOL} sign
                 --key "${NF_MCUBOOT_SIGNING_KEY}"
@@ -388,8 +399,7 @@ function(nf_generate_build_output_files target)
                 --slot-size "${NF_MCUBOOT_SLOT_SIZE}"
                 "${TARGET_BIN_FILE}"
                 "${TARGET_SIGNED_BIN_FILE}"
-
-            BYPRODUCTS ${TARGET_SIGNED_BIN_FILE}
+            COMMAND ${CMAKE_COMMAND} -E rename "${TARGET_SIGNED_BIN_FILE}" "${TARGET_BIN_FILE}"
 
             COMMENT "Sign nanoCLR binary with imgtool (MCUboot)")
     endif()

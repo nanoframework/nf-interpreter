@@ -14,7 +14,9 @@
                     "type": "FILEPATH",
                     "value": "${sourceDir}/CMake/toolchain.xtensa-esp32s2-elf.cmake"
                 },
-                "NF_INTEROP_ASSEMBLIES": null
+                "NF_INTEROP_ASSEMBLIES": null,
+                "NF_MCUBOOT_SLOT_SIZE": "0x190000",
+                "NF_MCUBOOT_SIGNING_KEY": "AM_A_DUMMY_KEY"
             }
         }
     ]
