@@ -51,10 +51,11 @@ static const struct flash_area s_flash_areas[] = {
 #define FLASH_AREA_TABLE_COUNT (sizeof(s_flash_areas) / sizeof(s_flash_areas[0]))
 
 // Boundary checks — catches layout mistakes at compile time.
-static_assert(0x08010000U + (704U  * 1024U) <= 0x080C0000U, "CLR primary overflows into deploy primary");
-static_assert(0x000000U   + (704U  * 1024U) <= 0x0B0000U,   "CLR secondary overflows into deploy secondary");
-static_assert((1280U * 1024U) / MCUBOOT_EXTERNAL_FLASH_SECTOR_SIZE <= MCUBOOT_MAX_IMG_SECTORS,
-              "Deploy secondary sector count exceeds MCUBOOT_MAX_IMG_SECTORS");
+static_assert(0x08010000U + (704U * 1024U) <= 0x080C0000U, "CLR primary overflows into deploy primary");
+static_assert(0x000000U + (704U * 1024U) <= 0x0B0000U, "CLR secondary overflows into deploy secondary");
+static_assert(
+    (1280U * 1024U) / MCUBOOT_EXTERNAL_FLASH_SECTOR_SIZE <= MCUBOOT_MAX_IMG_SECTORS,
+    "Deploy secondary sector count exceeds MCUBOOT_MAX_IMG_SECTORS");
 
 int flash_area_open(uint8_t id, const struct flash_area **area_outp)
 {

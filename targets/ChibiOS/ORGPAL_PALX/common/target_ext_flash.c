@@ -266,8 +266,7 @@ bool W25Q512_Write(uint8_t *pData, uint32_t writeAddr, uint32_t size)
 
         current_addr += current_size;
         pData += current_size;
-        current_size =
-            ((current_addr + W25Q512_PAGE_SIZE) > end_addr) ? (end_addr - current_addr) : W25Q512_PAGE_SIZE;
+        current_size = ((current_addr + W25Q512_PAGE_SIZE) > end_addr) ? (end_addr - current_addr) : W25Q512_PAGE_SIZE;
     } while (current_addr < end_addr);
 
     return true;

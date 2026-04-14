@@ -21,13 +21,13 @@
 
 // W25Q512 geometry
 // 512 Mbits => 64 MBytes
-#define W25Q512_FLASH_SIZE   0x4000000U
+#define W25Q512_FLASH_SIZE 0x4000000U
 // 1024 blocks of 64 kBytes (block-erase unit used by MCUboot)
-#define W25Q512_BLOCK_SIZE   0x10000U
+#define W25Q512_BLOCK_SIZE 0x10000U
 // 16384 sectors of 4 kBytes (minimum erase size, used by littlefs)
-#define W25Q512_SECTOR_SIZE  0x1000U
+#define W25Q512_SECTOR_SIZE 0x1000U
 // 262144 pages of 256 bytes (page-program unit)
-#define W25Q512_PAGE_SIZE    0x100U
+#define W25Q512_PAGE_SIZE 0x100U
 
 #ifdef __cplusplus
 extern "C"

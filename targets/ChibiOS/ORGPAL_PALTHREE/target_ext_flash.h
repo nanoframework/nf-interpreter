@@ -25,13 +25,13 @@
 
 // AT25SF641 geometry
 // 64 Mbits => 8 MByte
-#define AT25SF641_FLASH_SIZE     0x800000U
+#define AT25SF641_FLASH_SIZE 0x800000U
 // 128 sectors of 64 kBytes (block-erase unit used by MCUboot)
-#define AT25SF641_SECTOR_SIZE    0x10000U
+#define AT25SF641_SECTOR_SIZE 0x10000U
 // 2048 subsectors of 4 kBytes (minimum erase size, used by littlefs)
 #define AT25SF641_SUBSECTOR_SIZE 0x1000U
 // 32768 pages of 256 bytes (page-program unit)
-#define AT25SF641_PAGE_SIZE      0x100U
+#define AT25SF641_PAGE_SIZE 0x100U
 
 // AT25SF641 device IDs (from AT25SF641 datasheet, ID Definitions table)
 #define AT25SF641_MANUFACTURER_ID ((uint8_t)0x1F)
