@@ -1827,7 +1827,34 @@ bool CLR_RT_MethodDef_Instance::InitializeFromIndex(
             return false;
         }
 
-        ownerTypeIdx = paramElement.Class;
+        if (paramElement.DataType == DATATYPE_GENERICINST)
+        {
+            // The resolved parameter is itself a constructed generic instance.
+            // Its Class field is not valid; re-parse the TypeSpec to get the underlying generic definition.
+            CLR_RT_SignatureParser subParser{};
+            subParser.Initialize_TypeSpec(tsInst.assembly, tsInst.target);
+
+            CLR_RT_SignatureParser::Element subElem{};
+            if (FAILED(subParser.Advance(subElem)))
+            {
+                return false;
+            }
+
+            // skip GENERICINST marker
+            if (subElem.DataType == DATATYPE_GENERICINST)
+            {
+                if (FAILED(subParser.Advance(subElem)))
+                {
+                    return false;
+                }
+            }
+
+            ownerTypeIdx = subElem.Class;
+        }
+        else
+        {
+            ownerTypeIdx = paramElement.Class;
+        }
     }
     else if (elem.DataType == DATATYPE_MVAR)
     {
@@ -1862,7 +1889,51 @@ bool CLR_RT_MethodDef_Instance::InitializeFromIndex(
                     return false;
                 }
 
-                ownerTypeIdx = paramElement.Class;
+                if (paramElement.DataType == DATATYPE_GENERICINST)
+                {
+                    // The resolved parameter is a constructed generic instance.
+                    // Extract the underlying generic definition from the caller's TypeSpec.
+                    if (NANOCLR_INDEX_IS_VALID(callerTs.genericTypeDef))
+                    {
+                        ownerTypeIdx = callerTs.genericTypeDef;
+                    }
+                    else
+                    {
+                        return false;
+                    }
+                }
+                else
+                {
+                    ownerTypeIdx = paramElement.Class;
+                }
+            }
+            else if (argElement.DataType == DATATYPE_GENERICINST)
+            {
+                // The MVAR resolved directly to a constructed generic instance.
+                // Re-resolve via the caller's MethodSpec to find the generic definition token.
+                CLR_RT_SignatureParser reParser{};
+                reParser.Initialize_MethodSignature(&msInst);
+
+                // walk to the correct argument position
+                CLR_RT_SignatureParser::Element reElem{};
+                for (int gi = 0; gi <= elem.GenericParamPosition; gi++)
+                {
+                    if (FAILED(reParser.Advance(reElem)))
+                    {
+                        return false;
+                    }
+                }
+
+                // reElem should be GENERICINST; advance once more for the type definition
+                if (reElem.DataType == DATATYPE_GENERICINST)
+                {
+                    if (FAILED(reParser.Advance(reElem)))
+                    {
+                        return false;
+                    }
+                }
+
+                ownerTypeIdx = reElem.Class;
             }
             else
             {
