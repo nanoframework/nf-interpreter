@@ -2162,9 +2162,7 @@ bool CLR_RT_MethodDef_Instance::ResolveToken(
                                                     continue;
                                                 }
 
-                                                for (int tsIdx = 0;
-                                                     tsIdx < pASSM->tablesSize[TBL_TypeSpec];
-                                                     tsIdx++)
+                                                for (int tsIdx = 0; tsIdx < pASSM->tablesSize[TBL_TypeSpec]; tsIdx++)
                                                 {
                                                     const CLR_RT_TypeSpec_Index *candidateIdx =
                                                         &pASSM->crossReferenceTypeSpec[tsIdx].genericType;
