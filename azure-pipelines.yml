@@ -1396,6 +1396,7 @@ jobs:
   - job: Report_Build_Failure
     dependsOn:
       - Build_STM32_targets
+      - Build_ChibiOS_RP_targets
       - Build_ESP32_targets
       - Build_NXP_targets
       - Build_TI_SimpleLink_targets
@@ -1408,6 +1409,7 @@ jobs:
         ne( dependencies.Check_Code_Style.outputs['Check_Code_Style.CODE_STYLE_CHECK_FAILED'], true),
         or(
           failed('Build_STM32_targets'),
+          failed('Build_ChibiOS_RP_targets'),
           failed('Build_ESP32_targets'),
           failed('Build_NXP_targets'),
           failed('Build_TI_SimpleLink_targets'),
