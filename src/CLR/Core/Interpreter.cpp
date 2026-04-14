@@ -2275,7 +2275,7 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                         }
                     }
 
-                    if (calleeInst.ResolveToken(arg, assm, effectiveCallerGeneric) == false)
+                    if (calleeInst.ResolveToken(arg, assm, effectiveCallerGeneric, &stack->m_call) == false)
                     {
                         NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
                     }
@@ -2663,7 +2663,7 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                     // Set arrayElementType before ResolveToken so generic type resolution can use it
                     calleeInst.arrayElementType = propagatedArrayElementType;
 
-                    if (calleeInst.ResolveToken(arg, assm, stack->m_call.genericType) == false)
+                    if (calleeInst.ResolveToken(arg, assm, stack->m_call.genericType, &stack->m_call) == false)
                     {
                         NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
                     }

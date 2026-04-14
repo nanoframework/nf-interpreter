@@ -1952,7 +1952,8 @@ void CLR_RT_MethodDef_Instance::ClearInstance()
 bool CLR_RT_MethodDef_Instance::ResolveToken(
     CLR_UINT32 tk,
     CLR_RT_Assembly *assm,
-    const CLR_RT_TypeSpec_Index *callerGeneric)
+    const CLR_RT_TypeSpec_Index *callerGeneric,
+    const CLR_RT_MethodDef_Instance *caller)
 {
     NATIVE_PROFILE_CLR_CORE();
 
@@ -2036,6 +2037,190 @@ bool CLR_RT_MethodDef_Instance::ResolveToken(
 
                     // Pick the "winner" between methodOwnerTS or callerGeneric:
                     genericType = useCaller ? callerGeneric : methodOwnerTS;
+
+                    // When the chosen TypeSpec is open (contains MVAR) and the caller has a MethodSpec,
+                    // resolve the MVAR to find a matching closed TypeSpec.
+                    if (!useCaller && caller != nullptr && NANOCLR_INDEX_IS_VALID(caller->methodSpec))
+                    {
+                        CLR_RT_TypeSpec_Instance openTsInst{};
+                        if (openTsInst.InitializeFromIndex(*methodOwnerTS) &&
+                            NANOCLR_INDEX_IS_VALID(openTsInst.genericTypeDef) && !openTsInst.IsClosedGenericType())
+                        {
+                            CLR_RT_MethodSpec_Instance msInst{};
+                            if (msInst.InitializeFromIndex(caller->methodSpec))
+                            {
+                                // Parse the open TypeSpec to get arg count and resolve each MVAR
+                                CLR_RT_SignatureParser openParser{};
+                                openParser.Initialize_TypeSpec(openTsInst);
+
+                                CLR_RT_SignatureParser::Element openElem{};
+                                if (SUCCEEDED(openParser.Advance(openElem)) &&
+                                    openElem.DataType == DATATYPE_GENERICINST &&
+                                    SUCCEEDED(openParser.Advance(openElem)))
+                                {
+                                    int argCount = openElem.GenParamCount;
+                                    CLR_RT_TypeDef_Index resolvedArgs[8];
+                                    bool allResolved = (argCount > 0 && argCount <= 8);
+
+                                    for (int a = 0; a < argCount && allResolved; a++)
+                                    {
+                                        CLR_RT_SignatureParser::Element argElem{};
+                                        if (FAILED(openParser.Advance(argElem)))
+                                        {
+                                            allResolved = false;
+                                            break;
+                                        }
+
+                                        if (argElem.DataType == DATATYPE_MVAR)
+                                        {
+                                            CLR_RT_SignatureParser::Element msArgElem{};
+                                            if (msInst.GetGenericArgument(argElem.GenericParamPosition, msArgElem))
+                                            {
+                                                if (msArgElem.DataType == DATATYPE_VAR &&
+                                                    caller->genericType != nullptr &&
+                                                    NANOCLR_INDEX_IS_VALID(*caller->genericType))
+                                                {
+                                                    CLR_RT_TypeSpec_Instance callerTsInst{};
+                                                    CLR_RT_SignatureParser::Element paramElem{};
+                                                    if (callerTsInst.InitializeFromIndex(*caller->genericType) &&
+                                                        callerTsInst.GetGenericParam(
+                                                            msArgElem.GenericParamPosition,
+                                                            paramElem))
+                                                    {
+                                                        resolvedArgs[a] = paramElem.Class;
+                                                    }
+                                                    else
+                                                    {
+                                                        allResolved = false;
+                                                    }
+                                                }
+                                                else
+                                                {
+                                                    resolvedArgs[a] = msArgElem.Class;
+                                                }
+                                            }
+                                            else
+                                            {
+                                                allResolved = false;
+                                            }
+                                        }
+                                        else if (argElem.DataType == DATATYPE_VAR)
+                                        {
+                                            if (caller->genericType != nullptr &&
+                                                NANOCLR_INDEX_IS_VALID(*caller->genericType))
+                                            {
+                                                CLR_RT_TypeSpec_Instance callerTsInst{};
+                                                CLR_RT_SignatureParser::Element paramElem{};
+                                                if (callerTsInst.InitializeFromIndex(*caller->genericType) &&
+                                                    callerTsInst.GetGenericParam(
+                                                        argElem.GenericParamPosition,
+                                                        paramElem))
+                                                {
+                                                    resolvedArgs[a] = paramElem.Class;
+                                                }
+                                                else
+                                                {
+                                                    allResolved = false;
+                                                }
+                                            }
+                                            else
+                                            {
+                                                allResolved = false;
+                                            }
+                                        }
+                                        else
+                                        {
+                                            resolvedArgs[a] = argElem.Class;
+                                        }
+                                    }
+
+                                    if (allResolved)
+                                    {
+                                        CLR_RT_TypeDef_Index targetGenericDef = openTsInst.genericTypeDef;
+
+                                        // Search caller's assembly first, then all assemblies
+                                        for (int pass = 0; pass < 2; pass++)
+                                        {
+                                            CLR_RT_Assembly **ppASSM = g_CLR_RT_TypeSystem.m_assemblies;
+                                            size_t count = g_CLR_RT_TypeSystem.m_assembliesMax;
+
+                                            for (size_t ai = 0; ai < count; ai++, ppASSM++)
+                                            {
+                                                CLR_RT_Assembly *pASSM = *ppASSM;
+                                                if (!pASSM)
+                                                    continue;
+
+                                                // First pass: only caller's assembly
+                                                if (pass == 0 && pASSM != assm)
+                                                {
+                                                    continue;
+                                                }
+
+                                                // Second pass: skip already-checked assembly
+                                                if (pass == 1 && pASSM == assm)
+                                                {
+                                                    continue;
+                                                }
+
+                                                for (int tsIdx = 0;
+                                                     tsIdx < pASSM->tablesSize[TBL_TypeSpec];
+                                                     tsIdx++)
+                                                {
+                                                    const CLR_RT_TypeSpec_Index *candidateIdx =
+                                                        &pASSM->crossReferenceTypeSpec[tsIdx].genericType;
+
+                                                    if (!NANOCLR_INDEX_IS_VALID(*candidateIdx))
+                                                    {
+                                                        continue;
+                                                    }
+
+                                                    CLR_RT_TypeSpec_Instance candidateInst{};
+                                                    if (!candidateInst.InitializeFromIndex(*candidateIdx))
+                                                    {
+                                                        continue;
+                                                    }
+
+                                                    if (candidateInst.genericTypeDef.data != targetGenericDef.data)
+                                                    {
+                                                        continue;
+                                                    }
+
+                                                    if (!candidateInst.IsClosedGenericType())
+                                                    {
+                                                        continue;
+                                                    }
+
+                                                    bool argsMatch = true;
+                                                    for (int a = 0; a < argCount && argsMatch; a++)
+                                                    {
+                                                        CLR_RT_SignatureParser::Element candidateArg{};
+                                                        if (candidateInst.GetGenericParam(a, candidateArg))
+                                                        {
+                                                            if (candidateArg.Class.data != resolvedArgs[a].data)
+                                                            {
+                                                                argsMatch = false;
+                                                            }
+                                                        }
+                                                        else
+                                                        {
+                                                            argsMatch = false;
+                                                        }
+                                                    }
+
+                                                    if (argsMatch)
+                                                    {
+                                                        genericType = candidateIdx;
+                                                        goto mvarResolved;
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    mvarResolved:;
+                                    }
+                                }
+                            }
+                        }
+                    }
 
                     CLR_RT_Assembly *methodAssembly = g_CLR_RT_TypeSystem.m_assemblies[methodOwnerTS->Assembly() - 1];
 
