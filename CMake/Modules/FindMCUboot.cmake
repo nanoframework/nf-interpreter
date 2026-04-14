@@ -43,18 +43,38 @@ list(APPEND MCUboot_INCLUDE_DIRS
     ${CMAKE_SOURCE_DIR}/MCUboot/include
 )
 
-# Platform port source files — selected by NF_RTOS / target family.
-# Only one platform port is compiled per target build.
-if(RTOS STREQUAL "CHIBIOS")
-    list(APPEND MCUboot_SOURCES
-        ${CMAKE_SOURCE_DIR}/MCUboot/port/stm32/flash_map_stm32.c
+# Platform port source files — discovered using find_file() so that:
+#   a) BUILD_VERBOSE prints the resolved path for debugging (same pattern as FindLITTLEFS.cmake).
+#   b) A missing file produces a clear CMake error rather than a silent linker failure.
+#
+# Convention: each MCUboot-enabled board must provide
+#   <board>/common/mcuboot_flash_map.c
+# implementing the flash_area_* porting layer declared in flash_map_backend/flash_map_backend.h.
+# The file is located under ${TARGET_BASE_LOCATION}/common/ regardless of RTOS.
+
+set(src_MCUBOOT_PORT
+    mcuboot_flash_map.c
+)
+
+foreach(SRC_FILE ${src_MCUBOOT_PORT})
+
+    set(MCUBOOT_SRC_FILE SRC_FILE-NOTFOUND)
+
+    find_file(MCUBOOT_SRC_FILE ${SRC_FILE}
+        PATHS
+            ${TARGET_BASE_LOCATION}/common
+
+        CMAKE_FIND_ROOT_PATH_BOTH
     )
-elseif(RTOS STREQUAL "ESP32")
-    list(APPEND MCUboot_SOURCES
-        ${CMAKE_SOURCE_DIR}/MCUboot/port/esp32/flash_map_esp32.c
-    )
-endif()
+
+    if(BUILD_VERBOSE)
+        message("${SRC_FILE} >> ${MCUBOOT_SRC_FILE}")
+    endif()
+
+    list(APPEND MCUboot_SOURCES ${MCUBOOT_SRC_FILE})
+
+endforeach()
 
 include(FindPackageHandleStandardArgs)
 
-FIND_PACKAGE_HANDLE_STANDARD_ARGS(MCUboot DEFAULT_MSG MCUboot_INCLUDE_DIRS)
+FIND_PACKAGE_HANDLE_STANDARD_ARGS(MCUboot DEFAULT_MSG MCUboot_INCLUDE_DIRS MCUboot_SOURCES)

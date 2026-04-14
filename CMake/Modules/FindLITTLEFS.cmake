@@ -21,6 +21,9 @@ set(src_LITTLEFS
     hal_littlefs.c
 
     target_littlefs.c
+
+    # external flash driver shared between littlefs and MCUboot
+    target_ext_flash.c
 )
 
 foreach(SRC_FILE ${src_LITTLEFS})
@@ -33,6 +36,7 @@ foreach(SRC_FILE ${src_LITTLEFS})
             ${littlefs_SOURCE_DIR}
             ${CMAKE_SOURCE_DIR}/targets/${RTOS}/_littlefs
             ${TARGET_BASE_LOCATION}
+            ${TARGET_BASE_LOCATION}/common
 
         CMAKE_FIND_ROOT_PATH_BOTH
     )
