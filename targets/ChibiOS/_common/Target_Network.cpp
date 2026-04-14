@@ -7,7 +7,13 @@
 #include <nanoHAL.h>
 #include <lwip/netifapi.h>
 
+#if defined(RP2040) || defined(RP2350)
+extern "C" {
+#include <nf_lwipthread_wifi.h>
+}
+#else
 extern "C" struct netif *nf_getNetif();
+#endif
 
 //
 // Works with the Target_NetworkConfig to map the Network_Interface_XXXXX calls to the correct driver
@@ -59,8 +65,57 @@ bool Network_Interface_Close(int index)
     switch (index)
     {
         case 0:
+#if defined(RP2040) || defined(RP2350)
+            cyw43_wifi_disconnect();
+#else
             macStop(&ETHD1);
+#endif
             return true;
     }
     return false;
 }
+
+#if defined(RP2040) || defined(RP2350)
+
+int Network_Interface_Disconnect(int index)
+{
+    (void)index;
+    return cyw43_wifi_disconnect();
+}
+
+int Network_Interface_Start_Connect(int index, const char *ssid, const char *passphrase, int options)
+{
+    (void)index;
+    (void)options;
+
+    uint32_t auth_type = 0;
+    if (passphrase != NULL && passphrase[0] != '\0')
+    {
+        auth_type = 0x00400004; // WPA2_AES_PSK
+    }
+
+    return cyw43_wifi_connect(ssid, passphrase, auth_type);
+}
+
+int Network_Interface_Connect_Result(int configIndex)
+{
+    (void)configIndex;
+
+    if (!cyw43_wifi_is_connected())
+        return -1;
+
+    if (cyw43_wifi_get_ip4_address() == 0)
+        return -1;
+
+    return 0;
+}
+
+int Network_Interface_Start_Scan(int index)
+{
+    (void)index;
+
+    cyw43_wifi_scan_start();
+    return 0;
+}
+
+#endif
