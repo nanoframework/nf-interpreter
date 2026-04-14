@@ -31,7 +31,8 @@ nf_setup_target_build(
 )
 
 # if HEX2DFU tool is available pack the binaries into a DFU package
-if(HEX2DFU_TOOL_AVAILABLE)
+# not applicable for MCUboot targets (no nanoBooter)
+if(HEX2DFU_TOOL_AVAILABLE AND NOT NF_FEATURE_HAS_MCUBOOT)
 
     ####################################################################################################
     ## when changing the linker file make sure to update the new addresses for the image files below  ##

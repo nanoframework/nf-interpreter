@@ -22,8 +22,9 @@ nf_setup_target_build(
         ",--library-path=${CMAKE_SOURCE_DIR}/targets/ChibiOS/_common,--defsym=__main_stack_size__=0x400,--defsym=__process_stack_size__=0x800,--defsym=__crt_heap_size__=0x3B000"
 )
 
-# generate bin file for deployment
-if(SRECORD_TOOL_AVAILABLE)
+# generate combined nanoBooter + nanoCLR bin file for DAPLink drag & drop
+# not applicable for MCUboot targets (no nanoBooter)
+if(SRECORD_TOOL_AVAILABLE AND NOT NF_FEATURE_HAS_MCUBOOT)
 
     ############################################################################################################
     ## when changing the linker file make sure to update the addresses below with the offset of the CLR image ##
