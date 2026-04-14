@@ -17,7 +17,6 @@ list(APPEND TARGET_CHIBIOS_COMMON_INCLUDE_DIRS "${RP2040_COMMON}/common")
 
 # RP2040 flash driver and common sources from shared directory
 list(APPEND TARGET_CHIBIOS_COMMON_SOURCES "${RP2040_COMMON}/Target_BlockStorage_RP2040FlashDriver.c")
-list(APPEND TARGET_CHIBIOS_COMMON_SOURCES "${RP2040_COMMON}/platform_BlockStorage.c")
 list(APPEND TARGET_CHIBIOS_COMMON_SOURCES "${RP2040_COMMON}/target_stubs.cpp")
 
 # target include directories

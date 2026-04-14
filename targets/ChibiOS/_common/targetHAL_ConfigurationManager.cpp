@@ -10,15 +10,13 @@
 // Diagnostic output macro — disabled (was used for debugging config updates)
 #define CFGDBG(...) ((void)0)
 
-// Include the appropriate flash driver header based on target vendor
+// Use the block storage interface for flash operations (vendor-neutral)
 #if defined(RP2040) || defined(RP2350)
-#include <Target_BlockStorage_RP2040FlashDriver.h>
-// Map STM32 flash function names to RP2040 equivalents for shared code
-#define STM32FlashDriver_IsBlockErased  RP2040FlashDriver_IsBlockErased
-#define STM32FlashDriver_Write          RP2040FlashDriver_Write
-#define STM32FlashDriver_EraseBlock     RP2040FlashDriver_EraseBlock
+extern IBlockStorageDevice RP2040Flash_BlockStorageInterface;
+#define g_ConfigFlashDriver RP2040Flash_BlockStorageInterface
 #else
-#include <Target_BlockStorage_STM32FlashDriver.h>
+extern IBlockStorageDevice STM32Flash_BlockStorageInterface;
+#define g_ConfigFlashDriver STM32Flash_BlockStorageInterface
 #endif
 
 uint32_t GetExistingConfigSize()
@@ -384,7 +382,7 @@ __nfweak bool ConfigurationManager_StoreConfigurationBlock(
             }
 
             // now check if memory is erase, so the block can be stored
-            if (!STM32FlashDriver_IsBlockErased(NULL, storageAddress, blockSize))
+            if (!g_ConfigFlashDriver.IsBlockErased(NULL, storageAddress, blockSize))
             {
                 // memory not erased, can't store
                 return FALSE;
@@ -434,7 +432,7 @@ __nfweak bool ConfigurationManager_StoreConfigurationBlock(
             }
 
             // now check if memory is erase, so the block can be stored
-            if (!STM32FlashDriver_IsBlockErased(NULL, storageAddress, blockSize))
+            if (!g_ConfigFlashDriver.IsBlockErased(NULL, storageAddress, blockSize))
             {
                 // memory not erased, can't store
                 return FALSE;
@@ -465,7 +463,7 @@ __nfweak bool ConfigurationManager_StoreConfigurationBlock(
     }
 
     // copy the config block content to the config block storage
-    success = STM32FlashDriver_Write(NULL, storageAddress, blockSize, (unsigned char *)configurationBlock, true);
+    success = g_ConfigFlashDriver.Write(NULL, storageAddress, blockSize, (unsigned char *)configurationBlock, true);
 
     // enumeration is required after we are DONE with SUCCESSFULLY storing all the config chunks
     requiresEnumeration = (success && done);
@@ -691,10 +689,10 @@ __nfweak UpdateConfigurationResult ConfigurationManager_UpdateConfigurationBlock
                  eraseAddr < (uint32_t)&__nanoConfig_end__ && eraseOk;
                  eraseAddr += 4096)
             {
-                eraseOk = STM32FlashDriver_EraseBlock(NULL, eraseAddr);
+                eraseOk = g_ConfigFlashDriver.EraseBlock(NULL, eraseAddr);
             }
 #else
-            bool eraseOk = (STM32FlashDriver_EraseBlock(NULL, (uint32_t)&__nanoConfig_start__) == TRUE);
+            bool eraseOk = (g_ConfigFlashDriver.EraseBlock(NULL, (uint32_t)&__nanoConfig_start__) == TRUE);
 #endif
             if (eraseOk)
             {
@@ -711,7 +709,7 @@ __nfweak UpdateConfigurationResult ConfigurationManager_UpdateConfigurationBlock
                 memcpy(blockAddressInCopy, configurationBlock, blockSize);
 
                 // copy the config block copy back to the config block storage
-                if (STM32FlashDriver_Write(
+                if (g_ConfigFlashDriver.Write(
                         NULL,
                         (uint32_t)&__nanoConfig_start__,
                         sizeOfConfigSector,

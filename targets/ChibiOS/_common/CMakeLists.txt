@@ -17,12 +17,8 @@ elseif(TARGET_VENDOR STREQUAL "RP")
     # RP block storage driver will be added in Phase 2
 endif()
 
-# append Target files (vendor-specific block storage platform)
-if(TARGET_VENDOR STREQUAL "ST")
-    list(APPEND TARGET_CHIBIOS_COMMON_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/platform_BlockStorage.c)
-elseif(TARGET_VENDOR STREQUAL "RP")
-    # RP platform_BlockStorage will be provided by the target board directory in Phase 2
-endif()
+# append Target files (block storage platform interface)
+list(APPEND TARGET_CHIBIOS_COMMON_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/platform_BlockStorage.c)
 
 # include configuration manager file, if feature is enabled
 if(NF_FEATURE_HAS_CONFIG_BLOCK)
