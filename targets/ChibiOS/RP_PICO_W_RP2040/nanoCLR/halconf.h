@@ -462,19 +462,22 @@
  * @brief   Serial over USB buffers size.
  * @details Configuration parameter, the buffer size must be a multiple of
  *          the USB data endpoint maximum packet size.
- * @note    The default is 256 bytes for both the transmission and receive
- *          buffers.
+* @note    The default is 256 bytes for both transmission and receive
+ *          buffers; set to 64 to match every other ChibiOS nanoFramework
+ *          target. This is sufficient for Wire Protocol traffic.
  */
 #if !defined(SERIAL_USB_BUFFERS_SIZE) || defined(__DOXYGEN__)
-#define SERIAL_USB_BUFFERS_SIZE             512
+#define SERIAL_USB_BUFFERS_SIZE             64
 #endif
 
 /**
  * @brief   Serial over USB number of buffers.
- * @note    The default is 2 buffers.
+  * @note    The default is 2 buffers; set to 1 to match every other ChibiOS
+ *          nanoFramework target, which is sufficient for Wire Protocol
+ *          traffic.
  */
 #if !defined(SERIAL_USB_BUFFERS_NUMBER) || defined(__DOXYGEN__)
-#define SERIAL_USB_BUFFERS_NUMBER           2
+#define SERIAL_USB_BUFFERS_NUMBER           1
 #endif
 
 /*===========================================================================*/
