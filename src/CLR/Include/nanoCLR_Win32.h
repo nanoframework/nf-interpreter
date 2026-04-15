@@ -26,7 +26,7 @@ class HAL_Mutex
 {
     CRITICAL_SECTION m_data;
 
-public:
+  public:
     HAL_Mutex();
     ~HAL_Mutex();
 
