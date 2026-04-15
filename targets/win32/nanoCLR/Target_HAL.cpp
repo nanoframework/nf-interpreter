@@ -9,7 +9,7 @@
 
 void HAL_Windows_Debug_Print(const char *szText)
 {
-    std::string str = (std::string)szText;
+    std::string str(szText);
 
     // clear trailing LR & CR
     int pos;
@@ -22,5 +22,5 @@ void HAL_Windows_Debug_Print(const char *szText)
         str.erase(pos);
     }
 
-    std::cout << (std::string)str + "\n" << std::flush;
+    std::cout << str + "\n" << std::flush;
 }

@@ -293,6 +293,14 @@ target_compile_definitions(
 # Hide all symbols by default; only NANOCLRNATIVE_API-marked symbols are exported.
 target_compile_options(nanoFramework.nanoCLR PRIVATE -fvisibility=hidden)
 
+# GCC (Linux) enables -Wmaybe-uninitialized with optimizations on CLR core code that
+# is intentionally written to rely on NANOCLR_HEADER/NANOCLR_SET_AND_LEAVE macros.
+# Suppress this warning to avoid false-positive errors, matching the pattern used by
+# other embedded targets (e.g. ThreadX_EFM32GG11_GCC_options.cmake).
+if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+    target_compile_options(nanoFramework.nanoCLR PRIVATE -Wno-maybe-uninitialized)
+endif()
+
 set_target_properties(
     nanoFramework.nanoCLR
     PROPERTIES
