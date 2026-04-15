@@ -30,7 +30,7 @@ jobs:
           - os: ubuntu-22.04
             label: Linux-x64
             posix_rid: linux-x64
-          - os: ubuntu-22.04-arm
+          - os: ubuntu-22.04
             label: Linux-arm64
             posix_rid: linux-arm64
       fail-fast: false
@@ -41,6 +41,10 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Install arm64 cross-toolchain
+        if: matrix.posix_rid == 'linux-arm64'
+        run: sudo apt-get install -y gcc-aarch64-linux-gnu g++-aarch64-linux-gnu
 
       - name: Install Ninja (if missing)
         run: |
@@ -59,9 +63,15 @@ jobs:
             osx-arm64|linux-arm64) NANO_ARCH=arm64  ;;
             osx-x64|linux-x64)     NANO_ARCH=x86_64 ;;
           esac
+          # For linux-arm64, cross-compile via the aarch64-linux-gnu toolchain.
+          TOOLCHAIN_ARG=""
+          if [ "${{ matrix.posix_rid }}" = "linux-arm64" ]; then
+            TOOLCHAIN_ARG="-DCMAKE_TOOLCHAIN_FILE=$(pwd)/targets/posix/toolchain-aarch64-linux-gnu.cmake"
+          fi
           cmake -S targets/posix -B build/posix -G Ninja \
             -DNANO_POSIX_ARCH=${NANO_ARCH} \
-            -DNANO_POSIX_ENABLE_SMOKE=ON
+            -DNANO_POSIX_ENABLE_SMOKE=ON \
+            ${TOOLCHAIN_ARG}
 
       - name: Build
         run: cmake --build build/posix --verbose

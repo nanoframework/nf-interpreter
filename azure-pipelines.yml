@@ -1058,7 +1058,7 @@ jobs:
           vmImage: 'ubuntu-22.04'
           POSIX_RID: linux-x64
         Linux_arm64:
-          vmImage: 'ubuntu-22.04-arm'
+          vmImage: 'ubuntu-22.04'
           POSIX_RID: linux-arm64
       maxParallel: 4
     condition: >-
@@ -1122,11 +1122,19 @@ jobs:
             sudo apt-get install -y ninja-build
           fi
 
+          # Install arm64 cross-compiler when building linux-arm64 on an x86_64 agent.
+          TOOLCHAIN_ARG=""
+          if [ "$(POSIX_RID)" = "linux-arm64" ]; then
+            sudo apt-get install -y gcc-aarch64-linux-gnu g++-aarch64-linux-gnu
+            TOOLCHAIN_ARG="-DCMAKE_TOOLCHAIN_FILE=$(pwd)/targets/posix/toolchain-aarch64-linux-gnu.cmake"
+          fi
+
           echo "RID=$(POSIX_RID)  ARCH=${NANO_ARCH}  LIB_EXT=${LIB_EXT}"
 
           cmake -S targets/posix -B build/posix -G Ninja \
             -DNANO_POSIX_ARCH=${NANO_ARCH} \
-            -DNANO_POSIX_ENABLE_SMOKE=ON
+            -DNANO_POSIX_ENABLE_SMOKE=ON \
+            ${TOOLCHAIN_ARG}
           cmake --build build/posix
           # Smoke-run the test binary only when its architecture matches the runner.
           # For cross-compiled builds (e.g. osx-x64 on an arm64 agent) we skip the run
