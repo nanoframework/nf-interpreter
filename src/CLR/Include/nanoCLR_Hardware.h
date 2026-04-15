@@ -95,8 +95,7 @@ extern CLR_HW_Hardware g_CLR_HW_Hardware;
 
 #ifdef _WIN64
 CT_ASSERT(sizeof(CLR_HW_Hardware::HalInterruptRecord) == 32)
-`#elif` defined(PLATFORM_POSIX_HOST) && defined(__LP64__)
-CT_ASSERT(sizeof(CLR_HW_Hardware::HalInterruptRecord) == 40)
+`#elif ` defined(PLATFORM_POSIX_HOST) && defined(__LP64__) CT_ASSERT(sizeof(CLR_HW_Hardware::HalInterruptRecord) == 40)
 #else
 CT_ASSERT(sizeof(CLR_HW_Hardware::HalInterruptRecord) == 24)
 #endif // _WIN64
