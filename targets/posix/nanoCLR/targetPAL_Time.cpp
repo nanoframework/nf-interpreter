@@ -5,7 +5,7 @@
 
 #include <atomic>
 #include <cstdint>
-#include "targetPAL_time.h"
+#include "targetPAL_Time.h"
 
 namespace
 {
