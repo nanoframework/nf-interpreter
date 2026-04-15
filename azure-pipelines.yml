@@ -1052,7 +1052,7 @@ jobs:
           vmImage: 'macos-14'
           POSIX_RID: osx-arm64
         macOS_x64:
-          vmImage: 'macos-13'
+          vmImage: 'macOS-latest'
           POSIX_RID: osx-x64
         Linux_x64:
           vmImage: 'ubuntu-22.04'

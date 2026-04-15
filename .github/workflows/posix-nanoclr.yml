@@ -24,7 +24,7 @@ jobs:
           - os: macos-14
             label: macOS-arm64
             posix_rid: osx-arm64
-          - os: macos-13
+          - os: macos-latest
             label: macOS-x64
             posix_rid: osx-x64
           - os: ubuntu-22.04
