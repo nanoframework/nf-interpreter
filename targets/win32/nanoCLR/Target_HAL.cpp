@@ -7,7 +7,7 @@
 #include "stdafx.h"
 #include <iostream>
 
-void HAL_Windows_Debug_Print(char *szText)
+void HAL_Windows_Debug_Print(const char *szText)
 {
     std::string str = (std::string)szText;
 

@@ -18,7 +18,7 @@ bool HAL_Windows_HasGlobalLock();
 
 unsigned __int64 HAL_Windows_GetPerformanceTicks();
 
-void HAL_Windows_Debug_Print( char* szText );
+void HAL_Windows_Debug_Print( const char* szText );
                         
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 

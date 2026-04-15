@@ -179,6 +179,9 @@ struct Settings
 
             if (FAILED(hr = CLR_RT_Assembly::CreateInstance(headerSub, assm)))
             {
+#if !defined(BUILD_RTM)
+                CLR_Debug::Printf("LoadAssembliesSet: CreateInstance failed (hr=0x%08X) — stopping parse.\r\n", hr);
+#endif
                 delete bufferSub;
                 break;
             }

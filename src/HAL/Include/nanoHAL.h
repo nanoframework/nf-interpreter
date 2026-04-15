@@ -889,7 +889,7 @@ extern bool g_fDoNotUninitializeDebuggerPort;
 #endif
 
 #elif defined(__arm__) || defined(PLATFORM_ESP32) || defined(PLATFORM_POSIX_HOST)
-// nothing to define here just to help the nanoCLR VS project to build hapilly
+// nothing to define here just to help the nanoCLR VS project to build happily
 // for POSIX: GLOBAL_LOCK/UNLOCK will be provided by the platform HAL layer
 #ifndef GLOBAL_LOCK
 #define GLOBAL_LOCK()

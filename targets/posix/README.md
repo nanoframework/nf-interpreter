@@ -8,7 +8,7 @@ The target is fully functional as a managed-code execution host:
 
 - Produces `nanoFramework.nanoCLR.dylib` (macOS) / `.so` (Linux) and a thin test harness `nanoFramework.nanoCLR.test`, matching the architecture of the win32 virtual-device target.
 - The full CLR core (`src/CLR/Core/`), CoreLib (`src/CLR/CorLib/`), GC, type system, execution engine, and thread scheduler are compiled and linked.
-- Managed PE assemblies are loaded from memory buffers and executed end-to-end; the nanoFramework.Json test suite passes 249/249 tests.
+- Managed PE assemblies are loaded from memory buffers and executed end-to-end; the nanoFramework.Json test suite passes all tests (see the CI job for the current count).
 - All native assemblies from the win32 target that are applicable to a software host are registered (see [Native Assembly Table](#native-assembly-table) below).
 - CMake + Ninja build tested on macOS 14 arm64 and Ubuntu 22.04 x86_64 via GitHub Actions.
 

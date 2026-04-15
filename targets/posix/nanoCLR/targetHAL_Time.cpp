@@ -6,8 +6,8 @@
 #include <chrono>
 #include <cstdint>
 #include <cstdio>
+#include <ctime>
 #include <thread>
-#include <time.h>
 
 #include <nanoCLR_Types.h>
 #include <nanoHAL_Time.h>
@@ -33,7 +33,7 @@ uint64_t HAL_Time_CurrentSysTicks()
 
 // Offset between Windows FILETIME epoch (1601-01-01) and Unix epoch (1970-01-01)
 // in 100-nanosecond units.
-static constexpr uint64_t k_epochOffset100ns = 116444736000000000ULL;
+static constexpr uint64_t c_epochOffset100ns = 116444736000000000ULL;
 
 // Converts CMSIS/monotonic sysTicks to .NET ticks (100 nanoseconds).
 // For the POSIX host, sysTicks are already 100ns units so we pass through.
@@ -46,7 +46,7 @@ uint64_t HAL_Time_CurrentDateTime(bool datePartOnly)
 {
     struct timespec ts;
     clock_gettime(CLOCK_REALTIME, &ts);
-    uint64_t ticks = k_epochOffset100ns + static_cast<uint64_t>(ts.tv_sec) * 10000000ULL +
+    uint64_t ticks = c_epochOffset100ns + static_cast<uint64_t>(ts.tv_sec) * 10000000ULL +
                      static_cast<uint64_t>(ts.tv_nsec) / 100ULL;
 
     if (datePartOnly)
@@ -96,15 +96,17 @@ bool HAL_Time_TimeSpanToStringEx(const int64_t &ticks, char *&buf, size_t &len)
 
 const char *HAL_Time_CurrentDateTimeToString()
 {
-    static char buf[128];
+    // thread_local: each thread has its own buffer so concurrent callers don't corrupt each other.
+    thread_local char buf[128];
     char *p = buf;
     size_t remaining = sizeof(buf);
     uint64_t ticks = HAL_Time_CurrentDateTime(false);
 
     // Convert back to unix time
-    uint64_t unixTicks = ticks - k_epochOffset100ns;
+    uint64_t unixTicks = ticks - c_epochOffset100ns;
     time_t sec = static_cast<time_t>(unixTicks / 10000000ULL);
-    struct tm *t = gmtime(&sec);
+    struct tm tmBuf{};
+    struct tm *t = gmtime_r(&sec, &tmBuf); // reentrant: no shared static internal buffer
     if (t)
     {
         CLR_SafeSprintf(p, remaining, "%04d/%02d/%02d %02d:%02d:%02d", t->tm_year + 1900, t->tm_mon + 1, t->tm_mday,
