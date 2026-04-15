@@ -39,12 +39,14 @@
     </None>
     <!-- macOS: dylib is produced by the POSIX build under build/posix/lib/ -->
     <None Condition="$([MSBuild]::IsOSPlatform('OSX'))" Include="..\..\..\build\posix\lib\nanoFramework.nanoCLR.dylib" Link="NanoCLR\nanoFramework.nanoCLR.dylib">
-      <Pack>False</Pack>
+      <Pack>True</Pack>
+      <PackagePath>tools\net8.0\any\NanoCLR</PackagePath>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <!-- Linux: .so is produced by the POSIX build under build/posix/lib/ -->
     <None Condition="$([MSBuild]::IsOSPlatform('Linux'))" Include="..\..\..\build\posix\lib\nanoFramework.nanoCLR.so" Link="NanoCLR\nanoFramework.nanoCLR.so">
-      <Pack>False</Pack>
+      <Pack>True</Pack>
+      <PackagePath>tools\net8.0\any\NanoCLR</PackagePath>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="..\..\..\assets\nf-logo.png">

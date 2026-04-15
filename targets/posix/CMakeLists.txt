@@ -26,4 +26,8 @@ endif()
 
 option(NANO_POSIX_ENABLE_SMOKE "Build smoke behavior (banner/version output)." ON)
 
+# Note: the standard embedded-target layout (nanoBooter/ + nanoCLR/ + common/) applies to
+# board targets (ChibiOS, ThreadX, ESP32, etc.).  Host/virtual targets (targets/win32,
+# targets/posix) intentionally omit nanoBooter/ and common/ — there is no bootloader
+# stage on a POSIX host, and platform glue lives directly in the nanoCLR/ tree.
 add_subdirectory(nanoCLR)

@@ -64,7 +64,7 @@ jobs:
       - name: Smoke Run
         run: |
           set -euo pipefail
-          ./build/posix/bin/nanoFramework.nanoCLR | tee build/posix/smoke.log
+          ./build/posix/bin/nanoFramework.nanoCLR.test | tee build/posix/smoke.log
           if ! grep -Eq '[0-9]+\.[0-9]+\.[0-9]+' build/posix/smoke.log; then
             echo "ERROR: smoke output validation failed."
             exit 1
@@ -78,5 +78,4 @@ jobs:
           path: |
             build/posix/lib/nanoFramework.nanoCLR.*
             build/posix/bin/nanoFramework.nanoCLR.test
-            build/posix/bin/nanoFramework.nanoCLR
             build/posix/smoke.log

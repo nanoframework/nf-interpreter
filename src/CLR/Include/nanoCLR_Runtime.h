@@ -3909,7 +3909,7 @@ CT_ASSERT(sizeof(struct CLR_RT_HeapBlock) == 20)
 CT_ASSERT(sizeof(struct CLR_RT_HeapBlock) == 12)
 #endif // _WIN64
 
-#if !defined(PLATFORM_POSIX_HOST)
+#if !defined(PLATFORM_POSIX_HOST) || !defined(__LP64__)
 CT_ASSERT(sizeof(CLR_RT_HeapBlock_Raw) == sizeof(struct CLR_RT_HeapBlock))
 #endif
 
@@ -3940,7 +3940,7 @@ CT_ASSERT(sizeof(CLR_RT_DataTypeLookup) == 16 + NANOCLR_TRACE_MEMORY_STATS_EXTRA
 
 #else
 
-#if defined(PLATFORM_POSIX_HOST)
+#if defined(PLATFORM_POSIX_HOST) && defined(__LP64__)
 // 64-bit POSIX host: structure sizes will differ from embedded ARM; skip checks during port.
 #else
 !ERROR
