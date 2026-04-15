@@ -1128,14 +1128,25 @@ jobs:
             -DNANO_POSIX_ARCH=${NANO_ARCH} \
             -DNANO_POSIX_ENABLE_SMOKE=ON
           cmake --build build/posix
-          ./build/posix/bin/nanoFramework.nanoCLR.test | tee build/posix/smoke.log
-          if ! grep -Eq '[0-9]+\.[0-9]+\.[0-9]+' build/posix/smoke.log; then
-            echo "ERROR: smoke output validation failed, expected semantic version in output."
-            exit 1
+          # Smoke-run the test binary only when its architecture matches the runner.
+          # For cross-compiled builds (e.g. osx-x64 on an arm64 agent) we skip the run
+          # but the library artifact is still staged and published.
+          case "$(uname -m)" in
+            arm64|aarch64) HOST_CANONICAL=arm64  ;;
+            x86_64)        HOST_CANONICAL=x86_64 ;;
+            *)             HOST_CANONICAL="$(uname -m)" ;;
+          esac
+          if [ "${HOST_CANONICAL}" = "${NANO_ARCH}" ]; then
+            ./build/posix/bin/nanoFramework.nanoCLR.test | tee build/posix/smoke.log
+            if ! grep -Eq '[0-9]+\.[0-9]+\.[0-9]+' build/posix/smoke.log; then
+              echo "ERROR: smoke output validation failed, expected semantic version in output."
+              exit 1
+            fi
+            CLR_VERSION=$(grep -oE '[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+' build/posix/smoke.log | head -1)
+          else
+            echo "Skipping smoke run: host=$(uname -m) (${HOST_CANONICAL}), target=${NANO_ARCH} (cross-compiled binary)."
+            CLR_VERSION="0.0.0.0"
           fi
-
-          # Extract CLR version for Cloudsmith artifact naming.
-          CLR_VERSION=$(grep -oE '[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+' build/posix/smoke.log | head -1)
           echo "Detected CLR version: ${CLR_VERSION}"
           echo "##vso[task.setvariable variable=POSIX_CLR_VERSION]${CLR_VERSION}"
           echo "##vso[task.setvariable variable=POSIX_LIB_EXT]${LIB_EXT}"

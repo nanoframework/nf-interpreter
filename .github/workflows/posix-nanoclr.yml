@@ -69,10 +69,24 @@ jobs:
       - name: Smoke Run
         run: |
           set -euo pipefail
-          ./build/posix/bin/nanoFramework.nanoCLR.test | tee build/posix/smoke.log
-          if ! grep -Eq '[0-9]+\.[0-9]+\.[0-9]+' build/posix/smoke.log; then
-            echo "ERROR: smoke output validation failed."
-            exit 1
+          # Normalise host CPU name: Linux arm64 reports 'aarch64'; macOS reports 'arm64'.
+          case "$(uname -m)" in
+            arm64|aarch64) HOST_CANONICAL=arm64  ;;
+            x86_64)        HOST_CANONICAL=x86_64 ;;
+            *)             HOST_CANONICAL="$(uname -m)" ;;
+          esac
+          case "${{ matrix.posix_rid }}" in
+            *-arm64) TARGET_ARCH=arm64  ;;
+            *-x64)   TARGET_ARCH=x86_64 ;;
+          esac
+          if [ "${HOST_CANONICAL}" = "${TARGET_ARCH}" ]; then
+            ./build/posix/bin/nanoFramework.nanoCLR.test | tee build/posix/smoke.log
+            if ! grep -Eq '[0-9]+\.[0-9]+\.[0-9]+' build/posix/smoke.log; then
+              echo "ERROR: smoke output validation failed."
+              exit 1
+            fi
+          else
+            echo "Skipping smoke run: host=$(uname -m) (${HOST_CANONICAL}), target=${TARGET_ARCH} (cross-compiled binary cannot execute on this runner)."
           fi
 
       - name: Upload Artifacts
