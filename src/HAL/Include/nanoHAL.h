@@ -80,7 +80,7 @@
 #define PORT_NUMBER_MASK 0x00FF
 
 // Macro to extract the transport type from a COM_HANDLE
-#define ExtractTransport(x) ((unsigned int)(x)&TRANSPORT_MASK)
+#define ExtractTransport(x) ((unsigned int)(x) & TRANSPORT_MASK)
 
 // Macro to extract well-known system event flag ids from a COM_HANDLE
 #define ExtractEventFromTransport(x)                                                                                   \
@@ -113,7 +113,7 @@
 #define ConvertCOM_DebugHandle(x) ((COM_HANDLE)((x) + DEBUG_TRANSPORT + 1))
 
 // Extracts a Socket transport port id from a SOCKET_TRASNPORT COM_HANDLE
-#define ConvertCOM_SockPort(x) (((x)&PORT_NUMBER_MASK) - 1)
+#define ConvertCOM_SockPort(x) (((x) & PORT_NUMBER_MASK) - 1)
 
 typedef unsigned int FLASH_WORD;
 
