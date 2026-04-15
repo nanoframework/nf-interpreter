@@ -86,7 +86,11 @@ Each target preset is defined in `targets/<RTOS>/CMakePresets.json` and referenc
 - **defconfig files** are Kconfig fragments specifying board features (e.g., `targets/ESP32/defconfig/ESP_WROVER_KIT_defconfig`).
 - **User local config**: Copy `config/user-prefs.TEMPLATE.json` → `config/user-prefs.json` and `config/user-tools-repos.TEMPLATE.json` → `config/user-tools-repos.json`, then `config/user-kconfig.conf.TEMPLATE` → `config/user-kconfig.conf` for local overrides. These are git-ignored.
 - **Out-of-source builds are mandatory** — building in the source tree is a fatal error.
-- The build does **not** run inside this repository's cloud agent environment because it requires embedded cross-compilers and RTOS SDKs. CI builds run in Azure Pipelines and GitHub Actions dev container workflows.
+- **Local builds are supported** when the developer machine has the required toolchains (ARM GCC, Xtensa GCC, RISC-V GCC) and RTOS SDKs installed. The dev containers are the easiest path, but not the only one.
+- **Before initiating a build**, check with the user whether they want to build locally (assuming tools are installed) or use a dev container. Do not assume one approach — ask first.
+- The cloud agent environment itself does not have embedded cross-compilers pre-installed, so CI builds run in Azure Pipelines and GitHub Actions dev container workflows.
+- **Switching targets**: When switching to a different target, the build folder must be cleaned (deleted or emptied) before reconfiguring. Exception: the `_deps` subdirectory inside the build folder may be preserved — it caches downloaded SDKs and repositories and can safely be reused across builds to avoid redundant downloads.
+- **ESP32 `sdkconfig` at repo root**: The ESP-IDF build system generates and reads a `sdkconfig` file at the repository root. When building an ESP32 target for the first time, or switching to a different ESP32 target, delete this file if it already exists so the new target's defconfig is applied cleanly. This is not required for non-ESP32 platforms.
 
 ### No In-Repo Unit Tests
 
@@ -182,14 +186,20 @@ Each target board has:
 
 Follow the PR template at `.github/PULL_REQUEST_TEMPLATE.md`:
 - Provide a description, motivation/context, and testing details.
-- Link related issues using `Fixes/Closes/Resolves nanoFramework/Home#NNNN`.
-- Categorize the change type (improvement, bug fix, new feature, breaking change, config/build, dev containers, dependencies, documentation).
+- **Linking issues**: Use exactly one of the accepted verbs `Fixes`, `Closes`, or `Resolves` followed by the issue reference. All issues are tracked in the **Home** repository, so the pattern is always `Fixes/Closes/Resolves nanoFramework/Home#NNNN`. The template lists all three verbs — remove the ones that don't apply, leaving only the one verb and the correct issue number.
+- **Change type checkboxes**: Tick **only** the boxes that genuinely describe the change. Each checkbox has a description of what it covers. The categories are mutually exclusive in intent:
+  - `Improvement`, `Bug fix`, `New feature`, `Breaking change` — for changes to **source code and algorithms only**.
+  - `Config and build` — for changes to the build system, CMake, pipelines, or Kconfig; **not** for source code bugs or features.
+  - `Dev Containers` — for changes to dev container definitions only.
+  - `Dependencies/declarations` — for dependency updates or assembly declaration changes only.
+  - `Documentation` — for documentation-only changes.
+  - Do **not** tick multiple categories from different groups (e.g., do not tick both `Bug fix` and `Config and build` for a pipeline fix — only `Config and build` applies).
 - Ensure code follows the project style (`.clang-format`).
 - Contributing guidelines are at `https://github.com/nanoframework/.github/blob/main/CONTRIBUTING.md`.
 
 ## Common Pitfalls and Workarounds
 
-1. **Cannot build locally without toolchains**: This repo requires embedded cross-compilers (ARM GCC, Xtensa, RISC-V) and RTOS SDKs. Use the dev containers for building. The cloud agent environment does not have these tools pre-installed.
+1. **Local builds require toolchains**: This repo requires embedded cross-compilers (ARM GCC, Xtensa, RISC-V) and RTOS SDKs. Local builds are possible when these tools are installed on the developer machine. If the tools are not available, the dev containers provide a ready-to-use environment. The cloud agent environment itself does not have these tools pre-installed. When a build is needed, **ask the user** whether to build locally or use a dev container before proceeding.
 2. **Out-of-source builds only**: Never run CMake in the source root; always use a separate build directory.
 3. **No test runner**: There is no `make test` or `ctest` to run. Validation happens through CI builds and on-target testing.
 4. **Kconfig Python dependency**: The Kconfig system requires `kconfiglib` (`pip install kconfiglib`). This is needed for `cmake --preset` to work.
