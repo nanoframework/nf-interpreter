@@ -1377,6 +1377,14 @@ jobs:
 
       - task: PublishPipelineArtifact@1
         condition: succeeded()
+        displayName: Publish nanoclr NuGet package
+        inputs:
+          targetPath: "$(Build.ArtifactStagingDirectory)"
+          artifactName: nanoclr_nuget
+          artifactType: pipeline
+
+      - task: PublishPipelineArtifact@1
+        condition: succeeded()
         displayName: Publish nanoclr
         inputs:
           targetPath: "$(Build.ArtifactStagingDirectory)/nanoclr"
