@@ -19,7 +19,9 @@ int ssl_read_internal(int sd, char *data, size_t size)
 
     int ret = mbedtls_ssl_read(ssl, (unsigned char *)(data), size);
 
-    if (ret == MBEDTLS_ERR_SSL_WANT_READ || ret == MBEDTLS_ERR_SSL_WANT_WRITE)
+    const bool isNonBlockingRetry = ret == MBEDTLS_ERR_SSL_WANT_READ || ret == MBEDTLS_ERR_SSL_WANT_WRITE;
+
+    if (isNonBlockingRetry)
     {
         // Non-blocking socket has no data yet — tell caller to retry via select/poll
         return SSL_RESULT__WOULD_BLOCK;
