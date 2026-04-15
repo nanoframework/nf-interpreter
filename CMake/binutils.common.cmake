@@ -899,6 +899,8 @@ function(nf_add_cyw43_driver_library)
             cyw43_driver
             GIT_REPOSITORY https://github.com/georgerobotics/cyw43-driver.git
             GIT_TAG ${CYW43_DRIVER_GIT_TAG}
+            GIT_SHALLOW TRUE
+            GIT_CONFIG "core.fileMode=false"
         )
 
     else()
