@@ -110,7 +110,7 @@ namespace nanoFramework.nanoCLR.CLI
                         (VirtualSerialDeviceCommandLineOptions opts) =>
                             RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
                                 ? VirtualSerialDeviceCommandProcessor.ProcessVerb(opts, virtualSerialBridgeManager)
-                                : throw new CLIException(ExitCode.E9000),
+                                : throw new CLIException(ExitCode.E9000, "Virtual serial bridge is only supported on Windows."),
                         (IEnumerable<Error> errors) => HandleErrors(errors));
 
                 // do we need to show version?

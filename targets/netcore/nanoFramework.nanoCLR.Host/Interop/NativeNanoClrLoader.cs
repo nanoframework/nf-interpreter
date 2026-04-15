@@ -187,7 +187,7 @@ namespace nanoFramework.nanoCLR.Host.Interop
 
             foreach (string probeDirectory in probeDirectories)
             {
-                if (string.Equals(probeDirectory, normalizedPath, StringComparison.Ordinal))
+                if (string.Equals(probeDirectory, normalizedPath, StringComparison.OrdinalIgnoreCase))
                 {
                     return;
                 }

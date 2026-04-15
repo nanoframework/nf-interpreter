@@ -415,9 +415,7 @@ struct Settings
 
     ~Settings()
     {
-        for (auto &it : m_assemblies)
-            delete it.second;
-        m_assemblies.clear();
+        Cleanup();
     }
 };
 

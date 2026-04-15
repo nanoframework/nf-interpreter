@@ -84,7 +84,14 @@ int main(int argc, char **argv)
         if (std::strcmp(argv[i], "--assemblies") == 0)
             continue; // skip the flag itself
 
-        peFiles.push_back(argv[i]);
+        std::string arg(argv[i]);
+        if (arg.size() < 3 || arg.compare(arg.size() - 3, 3, ".pe") != 0)
+        {
+            std::cerr << "error: unexpected argument '" << arg << "' (expected a .pe file)\n";
+            return 1;
+        }
+
+        peFiles.push_back(arg);
     }
 
     // ── Load assemblies into the CLR before starting ─────────────────────────

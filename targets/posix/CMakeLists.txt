@@ -14,7 +14,19 @@ endif()
 # Architecture selection is only meaningful on macOS (Apple Silicon vs Intel).
 # On Linux the build uses the host toolchain architecture by default.
 if(APPLE)
-    set(NANO_POSIX_ARCH "arm64" CACHE STRING "Target architecture for macOS host build (arm64 or x86_64)")
+    # Default to the host processor so a plain cmake configure works correctly on
+    # both Apple Silicon (arm64) and Intel (x86_64) Macs without extra flags.
+    # Pass -DNANO_POSIX_ARCH=arm64 explicitly when cross-building (e.g. on a CI
+    # x86_64 runner producing an arm64 artifact).
+    cmake_host_system_information(RESULT _host_processor QUERY OS_PLATFORM)
+    if(NOT DEFINED NANO_POSIX_ARCH)
+        if(_host_processor MATCHES "arm64|aarch64")
+            set(_default_arch "arm64")
+        else()
+            set(_default_arch "x86_64")
+        endif()
+    endif()
+    set(NANO_POSIX_ARCH "${_default_arch}" CACHE STRING "Target architecture for macOS host build (arm64 or x86_64)")
     set_property(CACHE NANO_POSIX_ARCH PROPERTY STRINGS arm64 x86_64)
 
     if(NOT NANO_POSIX_ARCH STREQUAL "arm64" AND NOT NANO_POSIX_ARCH STREQUAL "x86_64")

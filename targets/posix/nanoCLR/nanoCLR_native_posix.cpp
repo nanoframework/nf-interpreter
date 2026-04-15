@@ -15,6 +15,7 @@
 #include <nanoCLR_Hardware.h>
 #include <nanoPAL_BlockStorage.h>
 
+#include <atomic>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
@@ -33,8 +34,8 @@ ProfilerDataCallback g_ProfilerDataCallback = nullptr;
 WireTransmitCallback g_WireProtocolTransmitCallback = nullptr;
 WireReceiveCallback g_WireProtocolReceiveCallback = nullptr;
 
-// flag requesting stopping of WP processing
-static bool g_wireProtocolStopProcess = false;
+// flag requesting stopping of WP processing (written by Close, read by Process — must be atomic)
+static std::atomic<bool> g_wireProtocolStopProcess{false};
 
 // ── nanoCLR_Run ─────────────────────────────────────────────────────────────
 
@@ -159,7 +160,8 @@ bool nanoCLR_GetNativeAssemblyInformation(const uint8_t *data, size_t size)
     if (data == nullptr)
         return false;
 
-    const size_t requiredSize = g_CLR_InteropAssembliesCount * (5 * sizeof(uint16_t) + 128);
+    // Per-assembly layout: uint32_t checksum + 4 × uint16_t version fields + 128-byte name.
+    const size_t requiredSize = g_CLR_InteropAssembliesCount * (sizeof(uint32_t) + 4 * sizeof(uint16_t) + 128);
     if (size < requiredSize)
         return false;
 

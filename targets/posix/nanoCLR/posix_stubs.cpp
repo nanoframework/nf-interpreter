@@ -7,6 +7,7 @@
 // implementation on a development host but must be present to link.
 
 #include <cstdint>
+#include <cstdlib>
 #include <cstring>
 #include <cstdio>
 
@@ -34,12 +35,36 @@ void CLR_Debug::Emit(const char *text, int len)
         }
         else
         {
-            // Null-terminate a temporary copy for the callback.
-            char buf[512];
-            size_t copyLen = (size_t)len < sizeof(buf) - 1 ? (size_t)len : sizeof(buf) - 1;
-            memcpy(buf, text, copyLen);
-            buf[copyLen] = '\0';
-            g_DebugPrintCallback(buf);
+            // Null-terminate a copy for the callback.
+            // Use a stack buffer for short messages; fall back to heap for longer ones.
+            const size_t msgLen = (size_t)len;
+            if (msgLen < 512)
+            {
+                char buf[512];
+                memcpy(buf, text, msgLen);
+                buf[msgLen] = '\0';
+                g_DebugPrintCallback(buf);
+            }
+            else
+            {
+                // Heap allocation avoids silent truncation for large debug payloads.
+                char *buf = static_cast<char *>(malloc(msgLen + 1));
+                if (buf != nullptr)
+                {
+                    memcpy(buf, text, msgLen);
+                    buf[msgLen] = '\0';
+                    g_DebugPrintCallback(buf);
+                    free(buf);
+                }
+                else
+                {
+                    // Allocation failed: deliver what fits on the stack rather than dropping the message.
+                    char fallback[512];
+                    memcpy(fallback, text, sizeof(fallback) - 1);
+                    fallback[sizeof(fallback) - 1] = '\0';
+                    g_DebugPrintCallback(fallback);
+                }
+            }
         }
         return;
     }
