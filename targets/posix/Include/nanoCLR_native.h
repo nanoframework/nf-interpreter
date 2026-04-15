@@ -54,9 +54,9 @@ extern "C"
     // ---------------------------------------------------------------------------
     // Globals (defined in nanoCLR_native_posix.cpp / CLRStartup.cpp)
     // ---------------------------------------------------------------------------
-    extern DebugPrintCallback gDebugPrintCallback;
-    extern WireTransmitCallback WireProtocolTransmitCallback;
-    extern WireReceiveCallback WireProtocolReceiveCallback;
+    extern DebugPrintCallback g_DebugPrintCallback;
+    extern WireTransmitCallback g_WireProtocolTransmitCallback;
+    extern WireReceiveCallback g_WireProtocolReceiveCallback;
     extern ProfilerMessageCallback g_ProfilerMessageCallback;
     extern ProfilerDataCallback g_ProfilerDataCallback;
 

@@ -27,14 +27,14 @@ void nanoCLR_SetConfigureCallbackImpl(ConfigureRuntimeCallback cb);
 
 // ── Callback globals ────────────────────────────────────────────────────────
 
-DebugPrintCallback gDebugPrintCallback = nullptr;
+DebugPrintCallback g_DebugPrintCallback = nullptr;
 ProfilerMessageCallback g_ProfilerMessageCallback = nullptr;
 ProfilerDataCallback g_ProfilerDataCallback = nullptr;
-WireTransmitCallback WireProtocolTransmitCallback = nullptr;
-WireReceiveCallback WireProtocolReceiveCallback = nullptr;
+WireTransmitCallback g_WireProtocolTransmitCallback = nullptr;
+WireReceiveCallback g_WireProtocolReceiveCallback = nullptr;
 
 // flag requesting stopping of WP processing
-static bool _wireProtocolStopProcess = false;
+static bool g_wireProtocolStopProcess = false;
 
 // ── nanoCLR_Run ─────────────────────────────────────────────────────────────
 
@@ -95,24 +95,24 @@ void nanoCLR_SetConfigureCallback(ConfigureRuntimeCallback configureRuntimeCallb
 
 void nanoCLR_SetDebugPrintCallback(DebugPrintCallback debugPrintCallback)
 {
-    gDebugPrintCallback = debugPrintCallback;
+    g_DebugPrintCallback = debugPrintCallback;
 }
 
 // ── Wire protocol ───────────────────────────────────────────────────────────
 
 void nanoCLR_SetWireProtocolReceiveCallback(WireReceiveCallback receiveCallback)
 {
-    WireProtocolReceiveCallback = receiveCallback;
+    g_WireProtocolReceiveCallback = receiveCallback;
 }
 
 void nanoCLR_SetWireProtocolTransmitCallback(WireTransmitCallback transmitCallback)
 {
-    WireProtocolTransmitCallback = transmitCallback;
+    g_WireProtocolTransmitCallback = transmitCallback;
 }
 
 void nanoCLR_WireProtocolProcess()
 {
-    while (!_wireProtocolStopProcess)
+    while (!g_wireProtocolStopProcess)
     {
         WP_Message_Process();
     }
@@ -121,12 +121,12 @@ void nanoCLR_WireProtocolProcess()
 void nanoCLR_WireProtocolOpen()
 {
     WP_Message_PrepareReception();
-    _wireProtocolStopProcess = false;
+    g_wireProtocolStopProcess = false;
 }
 
 void nanoCLR_WireProtocolClose()
 {
-    _wireProtocolStopProcess = true;
+    g_wireProtocolStopProcess = true;
 }
 
 // ── Version ─────────────────────────────────────────────────────────────────

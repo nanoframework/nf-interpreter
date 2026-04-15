@@ -139,15 +139,17 @@ struct Settings
         if (!header->GoodAssembly())
         {
             delete buffer;
+            buffer = nullptr;
             NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
         }
 
         key = WcharToString(name);
         m_assemblies[key] = buffer;
+        buffer = nullptr; // ownership transferred
 
         NANOCLR_CLEANUP();
 
-        if (FAILED(hr))
+        if (FAILED(hr) && buffer != nullptr)
         {
             delete buffer;
         }
@@ -433,6 +435,13 @@ static std::string WcharToString(const wchar_t *w)
     std::string s;
     while (*w)
     {
+#if !defined(BUILD_RTM)
+        // Assembly names should be ASCII only
+        if ((*w & ~0x7F) != 0)
+        {
+            CLR_Debug::Printf("Warning: non-ASCII character in assembly name\r\n");
+        }
+#endif
         s += (char)(*w & 0xFF);
         ++w;
     }

@@ -50,9 +50,8 @@ namespace
 
         in.seekg(0);
         out.resize(static_cast<size_t>(size));
-        in.read(reinterpret_cast<char *>(out.data()), size);
-
-        if (!in && !in.eof())
+        const auto bytesToRead = static_cast<std::streamsize>(out.size());
+        if (!in.read(reinterpret_cast<char *>(out.data()), bytesToRead))
         {
             std::cerr << "error: failed to read '" << path << "'\n";
             return false;

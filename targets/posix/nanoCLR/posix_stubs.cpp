@@ -26,11 +26,11 @@ void CLR_Debug::Emit(const char *text, int len)
     if (text == nullptr)
         return;
 
-    if (gDebugPrintCallback != nullptr)
+    if (g_DebugPrintCallback != nullptr)
     {
         if (len < 0)
         {
-            gDebugPrintCallback(text);
+            g_DebugPrintCallback(text);
         }
         else
         {
@@ -39,7 +39,7 @@ void CLR_Debug::Emit(const char *text, int len)
             size_t copyLen = (size_t)len < sizeof(buf) - 1 ? (size_t)len : sizeof(buf) - 1;
             memcpy(buf, text, copyLen);
             buf[copyLen] = '\0';
-            gDebugPrintCallback(buf);
+            g_DebugPrintCallback(buf);
         }
         return;
     }
