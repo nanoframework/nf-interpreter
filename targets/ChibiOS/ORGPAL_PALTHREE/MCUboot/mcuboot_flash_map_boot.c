@@ -3,26 +3,12 @@
 // See LICENSE file in the project root for full license information.
 //
 
-// MCUboot flash_area_* porting layer for ORGPAL_PALX (STM32F769).
+// MCUboot flash_area_* porting layer for the standalone MCUboot bootloader
+// binary on ORGPAL_PALTHREE (STM32F769ZI).
 //
-// PRIMARY SLOTS (FLASH_DEVICE_INTERNAL_FLASH):
-//   Uses the STM32 HAL flash driver (stm32FlashWrite / stm32FlashErase).
-//   Internal flash is memory-mapped (XIP); reads use direct memcpy.
+// This file is the bootloader-context counterpart to:
+//   targets/ChibiOS/ORGPAL_PALTHREE/common/mcuboot_flash_map.c
 //
-// SECONDARY SLOTS (FLASH_DEVICE_EXTERNAL_FLASH):
-//   W25Q512 64 MB QSPI flash.
-//   Accessed via W25Q512_Read / W25Q512_Write / W25Q512_Erase from
-//   targets/ChibiOS/ORGPAL_PALX/common/target_ext_flash.c.
-//
-// Flash layout (from targets/ChibiOS/ORGPAL_PALX/MCUboot-flash-layout.md):
-//   FLASH_AREA_BOOTLOADER        (0): 0x08000000, 32 kB  (sector 0)
-//   FLASH_AREA_IMAGE_0_PRIMARY   (1): 0x08010000, 704 kB (sectors 2-6, bank 1)
-//   FLASH_AREA_IMAGE_0_SECONDARY (2): W25Q512 @ 0x000000, 704 kB  (11 × 64 kB)
-//   FLASH_AREA_IMAGE_1_PRIMARY   (4): 0x080C0000, 1280 kB (sector 7 + bank 2)
-//   FLASH_AREA_IMAGE_1_SECONDARY (5): W25Q512 @ 0x0B0000, 1280 kB (20 × 64 kB)
-//
-// Sector geometry: STM32F76xx non-uniform sectors — see stm32_f7xx_flash.h.
-// Write alignment: 4 bytes (FLASH_CR_PSIZE_WORD).
 
 #include <stdint.h>
 #include <stddef.h>
@@ -33,11 +19,11 @@
 #include "sysflash/sysflash.h"
 #include "mcuboot_config.h"
 
-#include <hal_nf_community.h>
 #include "stm32_f7xx_flash.h"
-
-#include "target_ext_flash.h"
+#include "stm32f7_flash_bare.h"
+#include "at25sf641_spi_bare.h"
 #include "mcuboot_flash_layout.h"
+#include "mcuboot_board_iface.h"
 
 // clang-format off
 static const struct flash_area s_flash_areas[] = {
@@ -53,6 +39,12 @@ static const struct flash_area s_flash_areas[] = {
 
 static_assert(NF_MCUBOOT_SLOT_IMG1_SEC_SIZE / MCUBOOT_EXTERNAL_FLASH_SECTOR_SIZE <= MCUBOOT_MAX_IMG_SECTORS,
               "Deploy secondary sector count exceeds MCUBOOT_MAX_IMG_SECTORS");
+
+// Board interface: initialise AT25SF641 via bare-metal SPI1.
+int mcuboot_ext_flash_init(void)
+{
+    return at25sf641_bare_init() ? 0 : -1;
+}
 
 int flash_area_open(uint8_t id, const struct flash_area **area_outp)
 {
@@ -76,12 +68,12 @@ int flash_area_read(const struct flash_area *area, uint32_t off, void *dst, uint
 {
     if (area->fa_device_id == FLASH_DEVICE_INTERNAL_FLASH)
     {
-        memcpy(dst, (const void *)(area->fa_off + off), len);
+        memcpy(dst, (const void *)(uintptr_t)(area->fa_off + off), len);
         return 0;
     }
     else
     {
-        return W25Q512_Read((uint8_t *)dst, area->fa_off + off, len) ? 0 : -1;
+        return at25sf641_bare_read((uint8_t *)dst, area->fa_off + off, len) ? 0 : -1;
     }
 }
 
@@ -89,11 +81,11 @@ int flash_area_write(const struct flash_area *area, uint32_t off, const void *sr
 {
     if (area->fa_device_id == FLASH_DEVICE_INTERNAL_FLASH)
     {
-        return stm32FlashWrite(area->fa_off + off, len, (const uint8_t *)src);
+        return stm32f7_flash_write(area->fa_off + off, len, (const uint8_t *)src);
     }
     else
     {
-        return W25Q512_Write((uint8_t *)src, area->fa_off + off, len) ? 0 : -1;
+        return at25sf641_bare_write((const uint8_t *)src, area->fa_off + off, len) ? 0 : -1;
     }
 }
 
@@ -106,7 +98,7 @@ int flash_area_erase(const struct flash_area *area, uint32_t off, uint32_t len)
 
         while (erase_addr < end)
         {
-            if (stm32FlashErase(erase_addr) != 0)
+            if (stm32f7_flash_erase(erase_addr) != 0)
             {
                 return -1;
             }
@@ -120,7 +112,7 @@ int flash_area_erase(const struct flash_area *area, uint32_t off, uint32_t len)
 
         while (erase_addr < end)
         {
-            if (!W25Q512_Erase(erase_addr, true))
+            if (!at25sf641_bare_erase(erase_addr, true))
             {
                 return -1;
             }
@@ -135,12 +127,10 @@ uint32_t flash_area_align(const struct flash_area *area)
 {
     if (area->fa_device_id == FLASH_DEVICE_INTERNAL_FLASH)
     {
-        // STM32F76xx FLASHv2: minimum write unit is 4 bytes (FLASH_CR_PSIZE_WORD).
         return 4U;
     }
     else
     {
-        // W25Q512: byte-granular page-program.
         return 1U;
     }
 }
@@ -148,7 +138,7 @@ uint32_t flash_area_align(const struct flash_area *area)
 uint8_t flash_area_erased_val(const struct flash_area *area)
 {
     (void)area;
-    return 0xFF;
+    return 0xFFU;
 }
 
 int flash_area_get_sectors(int fa_id, uint32_t *count, struct flash_sector *sectors)

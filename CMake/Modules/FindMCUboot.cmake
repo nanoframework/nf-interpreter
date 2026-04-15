@@ -3,37 +3,42 @@
 # See LICENSE file in the project root for full license information.
 #
 
-# FindMCUboot.cmake — FetchContent declaration for MCUboot upstream.
-#
-# This module downloads the MCUboot source tree at configure time using CMake
-# FetchContent.  Only the porting layer header include paths and the nanoFramework
-# port sources are compiled; MCUboot's own bootloader application is built as an
-# independent CMake target (MCUboot/CMakeLists.txt), not as part of nanoCLR.
-#
-# Usage in a target CMakeLists.txt (when NF_FEATURE_USE_MCUBOOT is ON):
-#   find_package(MCUboot REQUIRED)
-#
-# To use a local checkout instead of downloading (e.g. for offline builds or
-# local development), pass FETCHCONTENT_SOURCE_DIR_MCUBOOT at configure time:
-#   cmake -DFETCHCONTENT_SOURCE_DIR_MCUBOOT=/path/to/local/mcuboot ...
-#
-# This follows the existing nf-interpreter FetchContent conventions
-# (see FindChibiOS.cmake, FindNF_LittleFS.cmake, FindFATFS.cmake).
-
 include(FetchContent)
 
-FetchContent_Declare(
-    mcuboot
-    GIT_REPOSITORY https://github.com/mcu-tools/mcuboot.git
-    GIT_TAG        v2.1.0
-    GIT_SHALLOW    ON
-)
+# check if MCUBOOT_SOURCE was specified or if it's empty (default is empty)
+set(NO_MCUBOOT_SOURCE TRUE)
 
-FetchContent_GetProperties(mcuboot)
-
-if(NOT mcuboot_POPULATED)
-    FetchContent_MakeAvailable(mcuboot)
+if(MCUBOOT_SOURCE)
+    if(NOT ${MCUBOOT_SOURCE} STREQUAL "")
+        set(NO_MCUBOOT_SOURCE FALSE)
+    endif()
 endif()
+
+# set tag for currently supported version
+# WHEN CHANGING THIS MAKE SURE TO UPDATE THE DEV CONTAINERS
+set(MCUBOOT_GIT_TAG "v2.1.0")
+
+if(NO_MCUBOOT_SOURCE)
+    message(STATUS "MCUboot ${MCUBOOT_GIT_TAG} from GitHub repo")
+
+    FetchContent_Declare(
+        mcuboot
+        GIT_REPOSITORY https://github.com/mcu-tools/mcuboot.git
+        GIT_TAG        ${MCUBOOT_GIT_TAG}
+        GIT_SHALLOW    ON
+    )
+
+else()
+    message(STATUS "MCUboot ${MCUBOOT_GIT_TAG} (source from: ${MCUBOOT_SOURCE})")
+
+    FetchContent_Declare(
+        mcuboot
+        SOURCE_DIR ${MCUBOOT_SOURCE}
+    )
+
+endif()
+
+FetchContent_MakeAvailable(mcuboot)
 
 # MCUboot upstream include paths required by the porting layer.
 # These are the standard MCUboot header locations within the upstream tree.
@@ -43,10 +48,6 @@ list(APPEND MCUboot_INCLUDE_DIRS
     ${CMAKE_SOURCE_DIR}/MCUboot/include
 )
 
-# Platform port source files — discovered using find_file() so that:
-#   a) BUILD_VERBOSE prints the resolved path for debugging (same pattern as FindLITTLEFS.cmake).
-#   b) A missing file produces a clear CMake error rather than a silent linker failure.
-#
 # Convention: each MCUboot-enabled board must provide
 #   <board>/common/mcuboot_flash_map.c
 # implementing the flash_area_* porting layer declared in flash_map_backend/flash_map_backend.h.

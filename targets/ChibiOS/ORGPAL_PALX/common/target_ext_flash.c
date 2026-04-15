@@ -9,9 +9,7 @@
 // Used by both the littlefs driver (target_littlefs.c) and the MCUboot
 // flash map porting layer (mcuboot_flash_map.c).
 //
-// Extracted from target_littlefs.c.  The public QSPI_Read / QSPI_Write /
-// QSPI_Erase_Block functions that were previously in that file are replaced
-// by the W25Q512_* API.  W25Q512_Erase() unifies 4 kB sector erase (littlefs)
+// W25Q512_Erase() unifies 4 kB sector erase (littlefs)
 // and 64 kB block erase (MCUboot) behind a single entry point.
 
 #include <ch.h>

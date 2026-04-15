@@ -14,7 +14,7 @@
 //   Accessed via AT25SF641_Read / AT25SF641_Write / AT25SF641_Erase from
 //   targets/ChibiOS/ORGPAL_PALTHREE/common/target_ext_flash.c.
 //
-// Flash layout (from targets/ChibiOS/ORGPAL_PALTHREE/MCUboot-flash-layout.md):
+// Flash layout (from mcuboot_flash_layout.h — single source of truth):
 //   FLASH_AREA_BOOTLOADER        (0): 0x08000000, 32 kB  (sector 0)
 //   FLASH_AREA_IMAGE_0_PRIMARY   (1): 0x08010000, 960 kB (sectors 2-7, bank 1)
 //   FLASH_AREA_IMAGE_0_SECONDARY (2): AT25SF641 @ 0x000000, 960 kB (15 × 64 kB)
@@ -37,23 +37,21 @@
 #include "stm32_f7xx_flash.h"
 
 #include "target_ext_flash.h"
+#include "mcuboot_flash_layout.h"
 
+// clang-format off
 static const struct flash_area s_flash_areas[] = {
-    // clang-format off
-    { .fa_id = FLASH_AREA_BOOTLOADER,        .fa_device_id = FLASH_DEVICE_INTERNAL_FLASH, .fa_off = 0x08000000U, .fa_size = (32U   * 1024U) },
-    { .fa_id = FLASH_AREA_IMAGE_0_PRIMARY,   .fa_device_id = FLASH_DEVICE_INTERNAL_FLASH, .fa_off = 0x08010000U, .fa_size = (960U  * 1024U) },
-    { .fa_id = FLASH_AREA_IMAGE_0_SECONDARY, .fa_device_id = FLASH_DEVICE_EXTERNAL_FLASH, .fa_off = 0x000000U,   .fa_size = (960U  * 1024U) },
-    { .fa_id = FLASH_AREA_IMAGE_1_PRIMARY,   .fa_device_id = FLASH_DEVICE_INTERNAL_FLASH, .fa_off = 0x08100000U, .fa_size = (1024U * 1024U) },
-    { .fa_id = FLASH_AREA_IMAGE_1_SECONDARY, .fa_device_id = FLASH_DEVICE_EXTERNAL_FLASH, .fa_off = 0x0F0000U,   .fa_size = (1024U * 1024U) },
-    // clang-format on
+    { .fa_id = FLASH_AREA_BOOTLOADER,        .fa_device_id = FLASH_DEVICE_INTERNAL_FLASH, .fa_off = NF_MCUBOOT_SLOT_BOOTLOADER_OFF, .fa_size = NF_MCUBOOT_SLOT_BOOTLOADER_SIZE },
+    { .fa_id = FLASH_AREA_IMAGE_0_PRIMARY,   .fa_device_id = FLASH_DEVICE_INTERNAL_FLASH, .fa_off = NF_MCUBOOT_SLOT_IMG0_PRI_OFF,   .fa_size = NF_MCUBOOT_SLOT_IMG0_PRI_SIZE   },
+    { .fa_id = FLASH_AREA_IMAGE_0_SECONDARY, .fa_device_id = FLASH_DEVICE_EXTERNAL_FLASH, .fa_off = NF_MCUBOOT_SLOT_IMG0_SEC_OFF,   .fa_size = NF_MCUBOOT_SLOT_IMG0_SEC_SIZE   },
+    { .fa_id = FLASH_AREA_IMAGE_1_PRIMARY,   .fa_device_id = FLASH_DEVICE_INTERNAL_FLASH, .fa_off = NF_MCUBOOT_SLOT_IMG1_PRI_OFF,   .fa_size = NF_MCUBOOT_SLOT_IMG1_PRI_SIZE   },
+    { .fa_id = FLASH_AREA_IMAGE_1_SECONDARY, .fa_device_id = FLASH_DEVICE_EXTERNAL_FLASH, .fa_off = NF_MCUBOOT_SLOT_IMG1_SEC_OFF,   .fa_size = NF_MCUBOOT_SLOT_IMG1_SEC_SIZE   },
 };
+// clang-format on
 
 #define FLASH_AREA_TABLE_COUNT (sizeof(s_flash_areas) / sizeof(s_flash_areas[0]))
 
-// Boundary checks — catches layout mistakes at compile time.
-static_assert(0x08010000U + (960U  * 1024U) <= 0x08100000U, "CLR primary overflows into deploy primary");
-static_assert(0x000000U   + (960U  * 1024U) <= 0x0F0000U,   "CLR secondary overflows into deploy secondary");
-static_assert((1024U * 1024U) / MCUBOOT_EXTERNAL_FLASH_SECTOR_SIZE <= MCUBOOT_MAX_IMG_SECTORS,
+static_assert(NF_MCUBOOT_SLOT_IMG1_SEC_SIZE / MCUBOOT_EXTERNAL_FLASH_SECTOR_SIZE <= MCUBOOT_MAX_IMG_SECTORS,
               "Deploy secondary sector count exceeds MCUBOOT_MAX_IMG_SECTORS");
 
 int flash_area_open(uint8_t id, const struct flash_area **area_outp)

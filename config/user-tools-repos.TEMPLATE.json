@@ -25,7 +25,8 @@
                 "TI_XDCTOOLS_SOURCE": "<path-to-local-TI-XDC-Tools-source-mind-the-forward-slash>",
                 "TI_SYSCONFIG_SOURCE": "<path-to-local-TI-SYSCONFIG-Tool-source-mind-the-forward-slash>",
                 "THREADX_SOURCE_FOLDER": "<path-to-local-ThreadX-source-mind-the-forward-slash>",
-                "NETXDUO_SOURCE_FOLDER": "<path-to-local-NetxDuo-source-mind-the-forward-slash>"
+                "NETXDUO_SOURCE_FOLDER": "<path-to-local-NetxDuo-source-mind-the-forward-slash>",
+                "MCUBOOT_SOURCE": "<path-to-local-mcuboot-source-mind-the-forward-slash>"
             }
         },
         {
@@ -52,7 +53,8 @@
                 "TI_XDCTOOLS_SOURCE": "/usr/local/bin/titools",
                 "TI_SYSCONFIG_SOURCE": "/sources/TI_SysConfig",
                 "THREADX_SOURCE_FOLDER": "/sources/ThreadX",
-                "NETXDUO_SOURCE_FOLDER": "/sources/NetxDuo"
+                "NETXDUO_SOURCE_FOLDER": "/sources/NetxDuo",
+                "MCUBOOT_SOURCE": "/sources/mcuboot"
             }
         },
         {
