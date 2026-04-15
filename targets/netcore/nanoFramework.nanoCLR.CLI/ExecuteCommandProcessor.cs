@@ -45,55 +45,60 @@ namespace nanoFramework.nanoCLR.CLI
 
             if (options.ExposedSerialPort != null)
             {
-                if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
                 {
-                    Console.WriteLine("Warning: --serialport is only supported on Windows. Ignoring.");
+                    // On Windows: validate as a COM port and use the virtual serial bridge if available.
+                    if (!Utilities.ValidateSerialPortName(options.ExposedSerialPort))
+                    {
+                        throw new CLIException(ExitCode.E9001);
+                    }
+
+                    // check if Virtual Serial Port Tools are available 
+                    if (VirtualSerialDeviceCommandProcessor.CheckIfFunctional(virtualBridgeManager))
+                    {
+                        VirtualSerialBridge bridge;
+
+                        // check if the requested port it's a valid Virtual Device
+                        if (VirtualSerialDeviceCommandProcessor.CheckIfPortIsValid(virtualBridgeManager, options.ExposedSerialPort))
+                        {
+                            // get the virtual bridge that contains the request port
+                            bridge = virtualBridgeManager.GetVirtualBridgeContainingPort(options.ExposedSerialPort);
+                        }
+                        else
+                        {
+                            // no Virtual Device for that index, create a new virtual bridge
+                            bridge = VirtualSerialDeviceCommandProcessor.CreateVirtualBridge(virtualBridgeManager, options.ExposedSerialPort);
+                        }
+
+                        if (bridge == null)
+                        {
+                            throw new CLIException(ExitCode.E1003);
+                        }
+
+                        // need to set debugger serial port to the _other_ port so it shows at the expected end
+                        var internalSerialPort = $"COM{bridge.GetOtherPort(options.ExposedSerialPort)}";
+
+                        hostBuilder.UseSerialPortWireProtocol(internalSerialPort);
+
+                        // set flag
+                        internalSerialPortConfig = true;
+                    }
+
+                    // if virtual bridge was not available, fall through to use the port directly
                 }
                 else
                 {
-                // a serial port was requested 
-
-                // validate serial port
-                if (!Utilities.ValidateSerialPortName(options.ExposedSerialPort))
-                {
-                    throw new CLIException(ExitCode.E9001);
-                }
-
-                // check if Virtual Serial Port Tools are available 
-                if (VirtualSerialDeviceCommandProcessor.CheckIfFunctional(virtualBridgeManager))
-                {
-                    VirtualSerialBridge bridge;
-
-                    // check if the requested port it's a valid Virtual Device
-                    if (VirtualSerialDeviceCommandProcessor.CheckIfPortIsValid(virtualBridgeManager, options.ExposedSerialPort))
+                    // On Linux/macOS: accept /dev/ttyUSB0, /dev/tty.usbserial-*, /dev/ttyS0, etc.
+                    if (!Utilities.ValidatePosixSerialPortName(options.ExposedSerialPort))
                     {
-                        // get the virtual bridge that contains the request port
-                        bridge = virtualBridgeManager.GetVirtualBridgeContainingPort(options.ExposedSerialPort);
-                    }
-                    else
-                    {
-                        // no Virtual Device for that index, create a new virtual bridge
-                        bridge = VirtualSerialDeviceCommandProcessor.CreateVirtualBridge(virtualBridgeManager, options.ExposedSerialPort);
+                        throw new CLIException(ExitCode.E9001,
+                            $"Invalid serial port name '{options.ExposedSerialPort}'. " +
+                            "On Linux/macOS use a /dev/ path, e.g. /dev/ttyUSB0, /dev/ttyACM0, /dev/cu.usbserial-XXXX.");
                     }
 
-                    if (bridge == null)
-                    {
-                        throw new CLIException(ExitCode.E1003);
-                    }
-
-                    // need to set debugger serial port to the _other_ port so it shows at the expected end
-                    var internalSerialPort = $"COM{bridge.GetOtherPort(options.ExposedSerialPort)}";
-
-                    hostBuilder.UseSerialPortWireProtocol(internalSerialPort);
-
-                    // set flag
+                    hostBuilder.UseSerialPortWireProtocol(options.ExposedSerialPort);
                     internalSerialPortConfig = true;
                 }
-                else
-                {
-                    return -1;
-                }
-                } // end Windows-only serial port block
             }
 
             if (Program.VerbosityLevel > VerbosityLevel.Normal)
@@ -131,7 +136,7 @@ namespace nanoFramework.nanoCLR.CLI
                 }
                 else
                 {
-                    Console.WriteLine("Warning: --namedpipe is only supported on Windows. Ignoring.");
+                    throw new CLIException(ExitCode.E9000, "--namedpipe is only supported on Windows.");
                 }
             }
 

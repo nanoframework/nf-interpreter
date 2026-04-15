@@ -21,7 +21,7 @@ void PostManagedEvent(uint8_t category, uint8_t subCategory, uint16_t data1, uin
     }
 }
 
-static HRESULT InitializeEventSink( CLR_RT_HeapBlock_NativeEventDispatcher *pContext, uint64_t userData )
+static HRESULT InitializeEventSink( CLR_RT_HeapBlock_NativeEventDispatcher *pContext, CLR_UINT64 userData )
 {
     (void)userData;
 
