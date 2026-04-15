@@ -29,7 +29,17 @@
     <PackageReadmeFile>docs\README.md</PackageReadmeFile>
   </PropertyGroup>
 
-  <!-- NuGet package files - native nanoCLR shared library, platform-conditional -->
+  <!-- Root directory that holds pre-staged POSIX native libraries laid out as
+       runtimes/{rid}/native/nanoFramework.nanoCLR.{ext}
+       In CI, NativeBinRoot is passed as an MSBuild property pointing to the
+       directory where all POSIX artifacts were downloaded and merged.
+       For local developer builds this defaults to the POSIX build output so
+       that a single-platform lib (if present) is still picked up. -->
+  <PropertyGroup>
+    <NativeBinRoot Condition="'$(NativeBinRoot)' == ''">$(MSBuildThisFileDirectory)..\..\..\build\posix\</NativeBinRoot>
+  </PropertyGroup>
+
+  <!-- NuGet package files - native nanoCLR shared library, RID-specific paths -->
   <ItemGroup>
     <!-- Windows: DLL is produced by the WIN32 build under build/bin/$(Configuration)/ -->
     <None Condition="$([MSBuild]::IsOSPlatform('Windows'))" Include="..\..\..\build\bin\$(Configuration)\nanoFramework.nanoCLR.dll" Link="NanoCLR\nanoFramework.nanoCLR.dll">
@@ -37,17 +47,33 @@
       <PackagePath>tools\net8.0\any\NanoCLR</PackagePath>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <!-- macOS: dylib is produced by the POSIX build under build/posix/lib/ -->
-    <None Condition="$([MSBuild]::IsOSPlatform('OSX'))" Include="..\..\..\build\posix\lib\nanoFramework.nanoCLR.dylib" Link="NanoCLR\nanoFramework.nanoCLR.dylib">
+    <!-- macOS arm64 -->
+    <None Condition="Exists('$(NativeBinRoot)runtimes\osx-arm64\native\nanoFramework.nanoCLR.dylib')"
+          Include="$(NativeBinRoot)runtimes\osx-arm64\native\nanoFramework.nanoCLR.dylib"
+          Link="NanoCLR\runtimes\osx-arm64\native\nanoFramework.nanoCLR.dylib">
       <Pack>True</Pack>
-      <PackagePath>tools\net8.0\any\NanoCLR</PackagePath>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <PackagePath>tools\net8.0\any\NanoCLR\runtimes\osx-arm64\native</PackagePath>
     </None>
-    <!-- Linux: .so is produced by the POSIX build under build/posix/lib/ -->
-    <None Condition="$([MSBuild]::IsOSPlatform('Linux'))" Include="..\..\..\build\posix\lib\nanoFramework.nanoCLR.so" Link="NanoCLR\nanoFramework.nanoCLR.so">
+    <!-- macOS x86_64 -->
+    <None Condition="Exists('$(NativeBinRoot)runtimes\osx-x64\native\nanoFramework.nanoCLR.dylib')"
+          Include="$(NativeBinRoot)runtimes\osx-x64\native\nanoFramework.nanoCLR.dylib"
+          Link="NanoCLR\runtimes\osx-x64\native\nanoFramework.nanoCLR.dylib">
       <Pack>True</Pack>
-      <PackagePath>tools\net8.0\any\NanoCLR</PackagePath>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <PackagePath>tools\net8.0\any\NanoCLR\runtimes\osx-x64\native</PackagePath>
+    </None>
+    <!-- Linux x86_64 -->
+    <None Condition="Exists('$(NativeBinRoot)runtimes\linux-x64\native\nanoFramework.nanoCLR.so')"
+          Include="$(NativeBinRoot)runtimes\linux-x64\native\nanoFramework.nanoCLR.so"
+          Link="NanoCLR\runtimes\linux-x64\native\nanoFramework.nanoCLR.so">
+      <Pack>True</Pack>
+      <PackagePath>tools\net8.0\any\NanoCLR\runtimes\linux-x64\native</PackagePath>
+    </None>
+    <!-- Linux arm64 -->
+    <None Condition="Exists('$(NativeBinRoot)runtimes\linux-arm64\native\nanoFramework.nanoCLR.so')"
+          Include="$(NativeBinRoot)runtimes\linux-arm64\native\nanoFramework.nanoCLR.so"
+          Link="NanoCLR\runtimes\linux-arm64\native\nanoFramework.nanoCLR.so">
+      <Pack>True</Pack>
+      <PackagePath>tools\net8.0\any\NanoCLR\runtimes\linux-arm64\native</PackagePath>
     </None>
     <None Include="..\..\..\assets\nf-logo.png">
       <Pack>True</Pack>

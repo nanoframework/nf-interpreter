@@ -1048,11 +1048,19 @@ jobs:
   - job: Build_POSIX_nanoCLR
     strategy:
       matrix:
-        macOS:
+        macOS_arm64:
           vmImage: 'macos-14'
-        Linux:
+          POSIX_RID: osx-arm64
+        macOS_x64:
+          vmImage: 'macos-13'
+          POSIX_RID: osx-x64
+        Linux_x64:
           vmImage: 'ubuntu-22.04'
-      maxParallel: 2
+          POSIX_RID: linux-x64
+        Linux_arm64:
+          vmImage: 'ubuntu-22.04-arm'
+          POSIX_RID: linux-arm64
+      maxParallel: 4
     condition: >-
       or(
         and(
@@ -1100,21 +1108,25 @@ jobs:
       - bash: |
           set -euo pipefail
 
-          AGENT_ARCH="$(uname -m)"
-          if [ "${AGENT_ARCH}" = "arm64" ]; then
-            ARCH_FLAG="-DNANO_POSIX_ARCH=arm64"
-          else
-            ARCH_FLAG="-DNANO_POSIX_ARCH=x86_64"
-          fi
+          # Derive cmake arch and library extension from the POSIX_RID matrix variable.
+          case "$(POSIX_RID)" in
+            osx-arm64|linux-arm64) NANO_ARCH=arm64  ; LIB_EXT=dylib ;;
+            osx-x64)               NANO_ARCH=x86_64 ; LIB_EXT=dylib ;;
+            linux-x64)             NANO_ARCH=x86_64 ; LIB_EXT=so    ;;
+          esac
+          # Correct extension for Linux regardless of arch.
+          [[ "$(POSIX_RID)" == linux-* ]] && LIB_EXT=so
 
-          # Install ninja if not present (Linux agents)
+          # Install ninja if not present (Linux agents).
           if ! command -v ninja >/dev/null 2>&1; then
             sudo apt-get install -y ninja-build
           fi
 
-          echo "Agent architecture: ${AGENT_ARCH}"
+          echo "RID=$(POSIX_RID)  ARCH=${NANO_ARCH}  LIB_EXT=${LIB_EXT}"
 
-          cmake -S targets/posix -B build/posix -G Ninja ${ARCH_FLAG} -DNANO_POSIX_ENABLE_SMOKE=ON
+          cmake -S targets/posix -B build/posix -G Ninja \
+            -DNANO_POSIX_ARCH=${NANO_ARCH} \
+            -DNANO_POSIX_ENABLE_SMOKE=ON
           cmake --build build/posix
           ./build/posix/bin/nanoFramework.nanoCLR.test | tee build/posix/smoke.log
           if ! grep -Eq '[0-9]+\.[0-9]+\.[0-9]+' build/posix/smoke.log; then
@@ -1122,24 +1134,16 @@ jobs:
             exit 1
           fi
 
-          # Extract CLR version (e.g. "1.16.0.0") from the smoke output for use in artifact naming.
+          # Extract CLR version for Cloudsmith artifact naming.
           CLR_VERSION=$(grep -oE '[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+' build/posix/smoke.log | head -1)
           echo "Detected CLR version: ${CLR_VERSION}"
           echo "##vso[task.setvariable variable=POSIX_CLR_VERSION]${CLR_VERSION}"
-
-          # Stage the native shared library for artifact publish and Cloudsmith upload.
-          if [[ "$(uname)" == "Darwin" ]]; then
-            LIB_EXT="dylib"
-            PKG_NAME="MACOS_DYLIB_nanoCLR"
-          else
-            LIB_EXT="so"
-            PKG_NAME="LINUX_SO_nanoCLR"
-          fi
-          mkdir -p "$(Build.ArtifactStagingDirectory)/${PKG_NAME}"
-          cp "build/posix/lib/nanoFramework.nanoCLR.${LIB_EXT}" \
-             "$(Build.ArtifactStagingDirectory)/${PKG_NAME}/"
-          echo "##vso[task.setvariable variable=POSIX_PKG_NAME]${PKG_NAME}"
           echo "##vso[task.setvariable variable=POSIX_LIB_EXT]${LIB_EXT}"
+
+          # Stage under runtimes/{rid}/native/ so the CLI pack job can collect all RIDs.
+          STAGING="$(Build.ArtifactStagingDirectory)/runtimes/$(POSIX_RID)/native"
+          mkdir -p "${STAGING}"
+          cp "build/posix/lib/nanoFramework.nanoCLR.${LIB_EXT}" "${STAGING}/"
         displayName: Build and smoke run POSIX nanoCLR
 
       - task: PublishPipelineArtifact@1
@@ -1147,15 +1151,15 @@ jobs:
         displayName: Publish POSIX nanoCLR artifact
         inputs:
           targetPath: "$(Build.ArtifactStagingDirectory)"
-          artifactName: nanoclr_posix_$(Agent.OS)
+          artifactName: nanoclr_posix_$(POSIX_RID)
           artifactType: pipeline
 
       - bash: |
           set -euo pipefail
           pip install --upgrade cloudsmith-cli --quiet
           cloudsmith push raw net-nanoframework/$(CLOUDSMITH_REPO) \
-            "$(Build.ArtifactStagingDirectory)/$(POSIX_PKG_NAME)/nanoFramework.nanoCLR.$(POSIX_LIB_EXT)" \
-            --name "$(POSIX_PKG_NAME)" \
+            "$(Build.ArtifactStagingDirectory)/runtimes/$(POSIX_RID)/native/nanoFramework.nanoCLR.$(POSIX_LIB_EXT)" \
+            --name "nanoCLR_$(POSIX_RID)" \
             --version "$(POSIX_CLR_VERSION)" \
             -k "$(CLOUDSMITH_KEY)"
         condition: >-
@@ -1197,6 +1201,7 @@ jobs:
       - Check_Build_Options
       - Check_Code_Style
       - Build_WIN32_nanoCLR
+      - Build_POSIX_nanoCLR
 
     pool:
       vmImage: "windows-2022"
@@ -1281,13 +1286,44 @@ jobs:
             eq(variables['System.PullRequest.PullRequestId'], '')
           )
 
+      # Download all four POSIX native libraries and merge them into a single
+      # runtimes/{rid}/native/ staging tree that the pack step will consume.
+      # continueOnError=true so a skipped POSIX leg doesn't block the CLI pack.
+      - task: DownloadPipelineArtifact@2
+        displayName: 'Download POSIX artifact: osx-arm64'
+        continueOnError: true
+        inputs:
+          artifact: nanoclr_posix_osx-arm64
+          path: "$(Build.SourcesDirectory)/native-libs"
+
+      - task: DownloadPipelineArtifact@2
+        displayName: 'Download POSIX artifact: osx-x64'
+        continueOnError: true
+        inputs:
+          artifact: nanoclr_posix_osx-x64
+          path: "$(Build.SourcesDirectory)/native-libs"
+
+      - task: DownloadPipelineArtifact@2
+        displayName: 'Download POSIX artifact: linux-x64'
+        continueOnError: true
+        inputs:
+          artifact: nanoclr_posix_linux-x64
+          path: "$(Build.SourcesDirectory)/native-libs"
+
+      - task: DownloadPipelineArtifact@2
+        displayName: 'Download POSIX artifact: linux-arm64'
+        continueOnError: true
+        inputs:
+          artifact: nanoclr_posix_linux-arm64
+          path: "$(Build.SourcesDirectory)/native-libs"
+
       - task: MSBuild@1
         condition: succeeded()
         displayName: Pack nanoCLR CLI
         inputs:
           solution: "nf-interpreter/targets/netcore/nanoFramework.nanoCLR.CLI/nanoFramework.nanoCLR.CLI.csproj"
           platform: "Any CPU"
-          msbuildArguments: "/p:PublicRelease=true /t:pack /p:PackageOutputPath=$(Build.ArtifactStagingDirectory) "
+          msbuildArguments: "/p:PublicRelease=true /t:pack /p:PackageOutputPath=$(Build.ArtifactStagingDirectory) /p:NativeBinRoot=$(Build.SourcesDirectory)/native-libs/"
           configuration: "Release"
           maximumCpuCount: true
 

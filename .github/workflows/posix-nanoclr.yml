@@ -22,9 +22,17 @@ jobs:
       matrix:
         include:
           - os: macos-14
-            label: macOS
+            label: macOS-arm64
+            posix_rid: osx-arm64
+          - os: macos-13
+            label: macOS-x64
+            posix_rid: osx-x64
           - os: ubuntu-22.04
-            label: Linux
+            label: Linux-x64
+            posix_rid: linux-x64
+          - os: ubuntu-22.04-arm
+            label: Linux-arm64
+            posix_rid: linux-arm64
       fail-fast: false
 
     runs-on: ${{ matrix.os }}
@@ -46,16 +54,13 @@ jobs:
 
       - name: Configure
         run: |
-          AGENT_ARCH="$(uname -m)"
-          # NANO_POSIX_ARCH is only used on macOS to set CMAKE_OSX_ARCHITECTURES.
-          # On Linux the host toolchain architecture is used automatically.
-          if [ "${AGENT_ARCH}" = "arm64" ]; then
-            ARCH_FLAG="-DNANO_POSIX_ARCH=arm64"
-          else
-            ARCH_FLAG="-DNANO_POSIX_ARCH=x86_64"
-          fi
+          # Derive cmake arch from the RID matrix variable.
+          case "${{ matrix.posix_rid }}" in
+            osx-arm64|linux-arm64) NANO_ARCH=arm64  ;;
+            osx-x64|linux-x64)     NANO_ARCH=x86_64 ;;
+          esac
           cmake -S targets/posix -B build/posix -G Ninja \
-            ${ARCH_FLAG} \
+            -DNANO_POSIX_ARCH=${NANO_ARCH} \
             -DNANO_POSIX_ENABLE_SMOKE=ON
 
       - name: Build
