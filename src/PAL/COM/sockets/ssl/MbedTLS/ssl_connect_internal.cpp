@@ -42,14 +42,8 @@ int ssl_connect_internal(int sd, const char *szTargetHost, int contextHandle)
         }
     }
 
-    // setup internal SSL context and calls to transport layer send and receive
-    // NOTE: pass NULL for f_recv_timeout to avoid mbedtls_net_recv_timeout() calling select() with
-    // infinite timeout (when read_timeout==0), which blocks the entire device after the HTTP response
-    // is fully received and the server keeps the connection alive (HTTP/1.1 keep-alive).
-    // With blocking socket (during handshake), mbedtls_net_recv() blocks in read() as needed.
-    // With non-blocking socket (after handshake), mbedtls_net_recv() returns WANT_READ immediately,
-    // letting the managed WaitEvents loop handle waiting with proper timeouts.
-    mbedtls_ssl_set_bio(context->ssl, context->server_fd, mbedtls_net_send, mbedtls_net_recv, NULL);
+    // setup internal SSL context and calls to transport layer send, receive and receive with timeout
+    mbedtls_ssl_set_bio(context->ssl, context->server_fd, mbedtls_net_send, mbedtls_net_recv, mbedtls_net_recv_timeout);
 
     SOCK_ioctl(sd, SOCK_FIONBIO, &nonblock);
 
@@ -59,6 +53,7 @@ int ssl_connect_internal(int sd, const char *szTargetHost, int contextHandle)
         if (ret != MBEDTLS_ERR_SSL_WANT_READ && ret != MBEDTLS_ERR_SSL_WANT_WRITE)
         {
             // SSL handshake failed
+            // mbedtls_printf( " failed\n  ! mbedtls_ssl_handshake returned -0x%x\n\n", -ret );
             goto error;
         }
     }

@@ -23,15 +23,9 @@ bool ssl_generic_init_internal(
     bool isServer)
 {
     // set default values for min and max protocol versions
-#ifdef MBEDTLS_SSL_PROTO_TLS1_3
     // aiming for TLS 1.3 which is the most secure
     mbedtls_ssl_protocol_version minVersion = MBEDTLS_SSL_VERSION_TLS1_3;
     mbedtls_ssl_protocol_version maxVersion = MBEDTLS_SSL_VERSION_TLS1_3;
-#else
-    // TLS 1.3 not available, default to TLS 1.2
-    mbedtls_ssl_protocol_version minVersion = MBEDTLS_SSL_VERSION_TLS1_2;
-    mbedtls_ssl_protocol_version maxVersion = MBEDTLS_SSL_VERSION_TLS1_2;
-#endif
 
     int sslContexIndex = -1;
     int authMode = MBEDTLS_SSL_VERIFY_NONE;
