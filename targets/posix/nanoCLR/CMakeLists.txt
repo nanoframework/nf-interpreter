@@ -277,17 +277,22 @@ else()
     set(NANOCLR_PLATFORM_NAME "Linux")
 endif()
 
-target_compile_definitions(
-    nanoFramework.nanoCLR
-    PRIVATE
+# Shared compile definitions used by both the library and the test harness.
+set(NANOCLR_POSIX_COMMON_DEFINITIONS
     PLATFORM_POSIX_HOST=1
     NANOCLR_HOST_POSIX=1
     NANOCLR_HOST_APPLE=${NANOCLR_HOST_APPLE}
     NANOCLR_HOST_LINUX=${NANOCLR_HOST_LINUX}
     NANOCLR_HOST_WINDOWS=0
-    NANO_POSIX_ENABLE_SMOKE=$<BOOL:${NANO_POSIX_ENABLE_SMOKE}>
     NANOCLR_POSIX_VERSION_STRING="${PROJECT_VERSION}"
     NANOCLR_PLATFORM_NAME="${NANOCLR_PLATFORM_NAME}"
+)
+
+target_compile_definitions(
+    nanoFramework.nanoCLR
+    PRIVATE
+    ${NANOCLR_POSIX_COMMON_DEFINITIONS}
+    NANO_POSIX_ENABLE_SMOKE=$<BOOL:${NANO_POSIX_ENABLE_SMOKE}>
 )
 
 # Hide all symbols by default; only NANOCLRNATIVE_API-marked symbols are exported.
@@ -311,6 +316,7 @@ set_target_properties(
 )
 
 # ─── Thin test harness (links against the shared library) ────────────────────
+if(NANO_POSIX_ENABLE_SMOKE)
 add_executable(nanoFramework.nanoCLR.test main.cpp)
 target_compile_features(nanoFramework.nanoCLR.test PRIVATE cxx_std_20)
 target_link_libraries(nanoFramework.nanoCLR.test PRIVATE nanoFramework.nanoCLR)
@@ -325,16 +331,11 @@ target_include_directories(
 target_compile_definitions(
     nanoFramework.nanoCLR.test
     PRIVATE
-    PLATFORM_POSIX_HOST=1
-    NANOCLR_HOST_POSIX=1
-    NANOCLR_HOST_APPLE=${NANOCLR_HOST_APPLE}
-    NANOCLR_HOST_LINUX=${NANOCLR_HOST_LINUX}
-    NANOCLR_HOST_WINDOWS=0
-    NANOCLR_POSIX_VERSION_STRING="${PROJECT_VERSION}"
-    NANOCLR_PLATFORM_NAME="${NANOCLR_PLATFORM_NAME}"
+    ${NANOCLR_POSIX_COMMON_DEFINITIONS}
 )
 set_target_properties(
     nanoFramework.nanoCLR.test
     PROPERTIES
     RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin"
 )
+endif()
