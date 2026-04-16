@@ -60,12 +60,12 @@ namespace
         return true;
     }
 
-    // Convert a narrow (ASCII) path to a wchar_t string.
-    // nanoCLR_LoadAssembly uses the name only as a map key; actual assembly
-    // identity comes from the PE header, so ASCII-only conversion is sufficient.
-    std::wstring ToWide(const char *s)
+    // Convert a narrow (ASCII) path to a char16_t string.
+    // char16_t matches the 2-byte UTF-16 LE units that nanoCLR_LoadAssembly expects
+    // (same layout as CharSet.Unicode marshalling from the C# host).
+    std::u16string ToChar16(const char *s)
     {
-        return std::wstring(s, s + std::strlen(s));
+        return std::u16string(s, s + std::strlen(s));
     }
 
 } // namespace
@@ -101,7 +101,7 @@ int main(int argc, char **argv)
         if (!ReadFile(path.c_str(), data))
             return 1;
 
-        std::wstring wname = ToWide(path.c_str());
+        std::u16string wname = ToChar16(path.c_str());
         int hr = nanoCLR_LoadAssembly(wname.c_str(), data.data(), data.size());
         if (hr != 0)
         {

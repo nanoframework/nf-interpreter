@@ -66,10 +66,9 @@ extern "C"
 
     NANOCLRNATIVE_API void nanoCLR_Run(NANO_CLR_SETTINGS nanoClrSettings);
 
-    // name is passed as UTF-16 LE from the managed host (LPWStr marshal).
-    // On POSIX wchar_t is 4 bytes; we receive char16_t data – the name is used
-    // only as an opaque map key, so the mismatch is harmless in practice.
-    NANOCLRNATIVE_API int nanoCLR_LoadAssembly(const wchar_t *name, const uint8_t *data, size_t size);
+    // name is passed as UTF-16 LE (2-byte chars) from the managed host via CharSet.Unicode.
+    // char16_t is guaranteed to be 2 bytes on all platforms, matching what the C# marshaller sends.
+    NANOCLRNATIVE_API int nanoCLR_LoadAssembly(const char16_t *name, const uint8_t *data, size_t size);
     NANOCLRNATIVE_API int nanoCLR_LoadAssembliesSet(const uint8_t *data, size_t size);
     NANOCLRNATIVE_API int nanoCLR_Resolve();
 

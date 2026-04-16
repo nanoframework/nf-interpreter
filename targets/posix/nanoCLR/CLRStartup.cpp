@@ -424,11 +424,9 @@ struct Settings
 
 static Settings s_ClrSettings;
 
-// ── Helper: wchar_t* → std::string ─────────────────────────────────────────
-// Assembly names are always ASCII; just mask the high bits.
-// On POSIX wchar_t is 4-byte; on Windows the caller passes UTF-16 (2-byte)
-// data into a wchar_t* parameter.  Either way the low byte gives us ASCII.
-static std::string WcharToString(const wchar_t *w)
+// ── Helper: char16_t* (UTF-16 LE from C# CharSet.Unicode) → std::string ────
+// Assembly names are always ASCII; just take the low byte of each code unit.
+static std::string Char16ToString(const char16_t *w)
 {
     if (!w)
         return std::string();

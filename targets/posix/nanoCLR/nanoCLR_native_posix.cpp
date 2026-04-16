@@ -21,7 +21,7 @@
 #include <cstring>
 
 // ── Forward declarations of impls that live in CLRStartup.cpp ───────────────
-HRESULT nanoCLR_LoadAssemblyImpl(const wchar_t *name, const uint8_t *data, size_t size);
+HRESULT nanoCLR_LoadAssemblyImpl(const char16_t *name, const uint8_t *data, size_t size);
 HRESULT nanoCLR_LoadAssembliesSetImpl(const uint8_t *data, size_t size);
 HRESULT nanoCLR_ResolveImpl();
 void nanoCLR_SetConfigureCallbackImpl(ConfigureRuntimeCallback cb);
@@ -72,7 +72,7 @@ void nanoCLR_Run(NANO_CLR_SETTINGS nanoClrSettings)
 
 // ── Assembly-loading API ─────────────────────────────────────────────────────
 
-int nanoCLR_LoadAssembly(const wchar_t *name, const uint8_t *data, size_t size)
+int nanoCLR_LoadAssembly(const char16_t *name, const uint8_t *data, size_t size)
 {
     return (int)nanoCLR_LoadAssemblyImpl(name, data, size);
 }
