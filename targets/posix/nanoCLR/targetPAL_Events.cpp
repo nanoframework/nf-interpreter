@@ -18,7 +18,6 @@ namespace
     std::condition_variable s_eventsCondition;
     uint32_t s_systemEvents = 0;
     std::atomic<uint64_t> s_boolTimerGeneration{0};
-    bool *s_savedTimerCompleteFlag = nullptr;
 } // namespace
 
 bool Events_Initialize_Platform()
@@ -36,17 +35,19 @@ void Events_Set(uint32_t events);
 
 void Events_SetBoolTimer(bool *timerCompleteFlag, uint32_t millisecondsFromNow)
 {
-    // TODO: Placeholder timer implementation. Make this path thread-safe when runtime integration is wired.
     if (timerCompleteFlag == nullptr)
     {
         return;
     }
 
-    s_savedTimerCompleteFlag = timerCompleteFlag;
     *timerCompleteFlag = false;
     const uint64_t myGen = s_boolTimerGeneration.fetch_add(1, std::memory_order_acq_rel) + 1;
 
-    std::thread([millisecondsFromNow, myGen]() {
+    // Capture timerCompleteFlag directly in the lambda — never store it in a shared global.
+    // A shared global causes a data race: concurrent calls from different threads (each thread
+    // sets its own quantum timer) would overwrite the pointer before the previous timer fires,
+    // so the old timer writes 'true' to the wrong memory location and the quantum never expires.
+    std::thread([timerCompleteFlag, millisecondsFromNow, myGen]() {
         std::this_thread::sleep_for(std::chrono::milliseconds(millisecondsFromNow));
 
         if (s_boolTimerGeneration.load(std::memory_order_acquire) != myGen)
@@ -54,10 +55,7 @@ void Events_SetBoolTimer(bool *timerCompleteFlag, uint32_t millisecondsFromNow)
             return;
         }
 
-        if (s_savedTimerCompleteFlag != nullptr)
-        {
-            *s_savedTimerCompleteFlag = true;
-        }
+        *timerCompleteFlag = true;
 
         // Wake up any Events_WaitForEvents call so the CLR can process the timer.
         Events_Set(SYSTEM_EVENT_FLAG_SYSTEM_TIMER);
