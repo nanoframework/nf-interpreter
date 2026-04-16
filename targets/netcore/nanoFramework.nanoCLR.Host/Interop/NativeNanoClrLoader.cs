@@ -155,11 +155,60 @@ namespace nanoFramework.nanoCLR.Host.Interop
 
             if (!string.IsNullOrWhiteSpace(runtimeIdentifier))
             {
+                // Probe the exact RID first (e.g. "ubuntu.24.04-x64").
                 foreach (string directory in probeDirectories)
                 {
                     yield return Path.Combine(directory, "runtimes", runtimeIdentifier, "native", nativeFileName);
                 }
+
+                // Also probe the portable RID (e.g. "linux-x64", "osx-arm64") so that packages
+                // that ship under the portable RID are found on distro-specific runtimes such as
+                // "ubuntu.24.04-x64" where RuntimeInformation.RuntimeIdentifier does not match.
+                string portableRid = GetPortableRuntimeIdentifier();
+
+                if (!string.IsNullOrWhiteSpace(portableRid) &&
+                    !string.Equals(portableRid, runtimeIdentifier, StringComparison.OrdinalIgnoreCase))
+                {
+                    foreach (string directory in probeDirectories)
+                    {
+                        yield return Path.Combine(directory, "runtimes", portableRid, "native", nativeFileName);
+                    }
+                }
             }
+        }
+
+        private static string GetPortableRuntimeIdentifier()
+        {
+            string arch = RuntimeInformation.ProcessArchitecture switch
+            {
+                Architecture.X64   => "x64",
+                Architecture.Arm64 => "arm64",
+                Architecture.X86   => "x86",
+                Architecture.Arm   => "arm",
+                _                  => string.Empty,
+            };
+
+            if (string.IsNullOrEmpty(arch))
+            {
+                return string.Empty;
+            }
+
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                return $"win-{arch}";
+            }
+
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+            {
+                return $"osx-{arch}";
+            }
+
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+            {
+                return $"linux-{arch}";
+            }
+
+            return string.Empty;
         }
 
         private static List<string> BuildBaseProbeDirectories()
