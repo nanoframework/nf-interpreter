@@ -26,8 +26,9 @@ target_include_directories(nf_mcuboot_port PUBLIC
 set(MCUBOOT_BOOTUTIL_SOURCES
     ${mcuboot_SOURCE_DIR}/boot/bootutil/src/loader.c
     ${mcuboot_SOURCE_DIR}/boot/bootutil/src/bootutil_misc.c
+    ${mcuboot_SOURCE_DIR}/boot/bootutil/src/bootutil_public.c
     ${mcuboot_SOURCE_DIR}/boot/bootutil/src/image_validate.c
-    ${mcuboot_SOURCE_DIR}/boot/bootutil/src/image_ec256.c
+    ${mcuboot_SOURCE_DIR}/boot/bootutil/src/image_ecdsa.c
     ${mcuboot_SOURCE_DIR}/boot/bootutil/src/swap_misc.c
     ${mcuboot_SOURCE_DIR}/boot/bootutil/src/swap_offset.c
     ${mcuboot_SOURCE_DIR}/boot/bootutil/src/fault_injection_hardening.c
@@ -45,7 +46,7 @@ set(MCUBOOT_TINYCRYPT_SOURCES
     ${mcuboot_SOURCE_DIR}/ext/tinycrypt/lib/source/utils.c
 )
 
-# mbedTLS ASN.1 decoder — bundled in MCUboot; used by image_ec256.c.
+# mbedTLS ASN.1 decoder — bundled in MCUboot; used by image_ecdsa.c.
 set(MCUBOOT_MBEDTLS_ASN1_SOURCES
     ${mcuboot_SOURCE_DIR}/ext/mbedtls-asn1/src/asn1parse.c
     ${mcuboot_SOURCE_DIR}/ext/mbedtls-asn1/src/platform_util.c
