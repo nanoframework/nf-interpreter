@@ -18,8 +18,4 @@ extern "C" {
 }
 #endif
 
-// Returns the last compare value set via Time_SetCompare.
-// Used internally to drive the HAL completion timer on the POSIX host.
-uint64_t nanoCLR_POSIX_GetNextCompareValue();
-
 #endif // TARGET_PAL_TIME_H
