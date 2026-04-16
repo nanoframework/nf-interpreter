@@ -55,6 +55,10 @@ void Events_SetBoolTimer(bool *timerCompleteFlag, uint32_t millisecondsFromNow)
             return;
         }
 
+        fprintf(stderr, "[POSIX] Events_SetBoolTimer firing: gen=%llu, flag=%p\n",
+                (unsigned long long)myGen, (void *)timerCompleteFlag);
+        fflush(stderr);
+
         *timerCompleteFlag = true;
 
         // Wake up any Events_WaitForEvents call so the CLR can process the timer.
@@ -113,6 +117,12 @@ uint32_t Events_MaskedRead(uint32_t events)
 uint32_t Events_WaitForEvents(uint32_t powerLevel, uint32_t wakeupSystemEvents, uint32_t timeoutMilliseconds)
 {
     (void)powerLevel;
+
+    // Diagnostic: log every call so we can see what timeout Linux uses (stderr to avoid
+    // interfering with managed output on stdout/g_DebugPrintCallback).
+    fprintf(stderr, "[POSIX] Events_WaitForEvents: timeout=%u ms, events=0x%08X\n",
+            timeoutMilliseconds, wakeupSystemEvents);
+    fflush(stderr);
 
     std::unique_lock<std::mutex> lock(s_eventsMutex);
 
