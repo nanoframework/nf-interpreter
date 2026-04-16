@@ -44,7 +44,7 @@
     <!-- Windows: DLL is produced by the WIN32 build under build/bin/$(Configuration)/ -->
     <None Condition="$([MSBuild]::IsOSPlatform('Windows'))" Include="..\..\..\build\bin\$(Configuration)\nanoFramework.nanoCLR.dll" Link="NanoCLR\nanoFramework.nanoCLR.dll">
       <Pack>True</Pack>
-      <PackagePath>tools\net8.0\any\NanoCLR</PackagePath>
+      <PackagePath>tools\$(PackageTfmSubFolder)any\NanoCLR</PackagePath>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <!-- macOS arm64 -->
@@ -52,28 +52,28 @@
           Include="$(NativeBinRoot)runtimes\osx-arm64\native\nanoFramework.nanoCLR.dylib"
           Link="NanoCLR\runtimes\osx-arm64\native\nanoFramework.nanoCLR.dylib">
       <Pack>True</Pack>
-      <PackagePath>tools\net8.0\any\NanoCLR\runtimes\osx-arm64\native</PackagePath>
+      <PackagePath>tools\$(PackageTfmSubFolder)any\NanoCLR\runtimes\osx-arm64\native</PackagePath>
     </None>
     <!-- macOS x86_64 -->
     <None Condition="Exists('$(NativeBinRoot)runtimes\osx-x64\native\nanoFramework.nanoCLR.dylib')"
           Include="$(NativeBinRoot)runtimes\osx-x64\native\nanoFramework.nanoCLR.dylib"
           Link="NanoCLR\runtimes\osx-x64\native\nanoFramework.nanoCLR.dylib">
       <Pack>True</Pack>
-      <PackagePath>tools\net8.0\any\NanoCLR\runtimes\osx-x64\native</PackagePath>
+      <PackagePath>tools\$(PackageTfmSubFolder)any\NanoCLR\runtimes\osx-x64\native</PackagePath>
     </None>
     <!-- Linux x86_64 -->
     <None Condition="Exists('$(NativeBinRoot)runtimes\linux-x64\native\nanoFramework.nanoCLR.so')"
           Include="$(NativeBinRoot)runtimes\linux-x64\native\nanoFramework.nanoCLR.so"
           Link="NanoCLR\runtimes\linux-x64\native\nanoFramework.nanoCLR.so">
       <Pack>True</Pack>
-      <PackagePath>tools\net8.0\any\NanoCLR\runtimes\linux-x64\native</PackagePath>
+      <PackagePath>tools\$(PackageTfmSubFolder)any\NanoCLR\runtimes\linux-x64\native</PackagePath>
     </None>
     <!-- Linux arm64 -->
     <None Condition="Exists('$(NativeBinRoot)runtimes\linux-arm64\native\nanoFramework.nanoCLR.so')"
           Include="$(NativeBinRoot)runtimes\linux-arm64\native\nanoFramework.nanoCLR.so"
           Link="NanoCLR\runtimes\linux-arm64\native\nanoFramework.nanoCLR.so">
       <Pack>True</Pack>
-      <PackagePath>tools\net8.0\any\NanoCLR\runtimes\linux-arm64\native</PackagePath>
+      <PackagePath>tools\$(PackageTfmSubFolder)any\NanoCLR\runtimes\linux-arm64\native</PackagePath>
     </None>
     <None Include="..\..\..\assets\nf-logo.png">
       <Pack>True</Pack>
@@ -99,8 +99,8 @@
   </ItemGroup>
 
 	<PropertyGroup>
-		<!-- set this to 'net8.0\' to package contents in this TFM folder  -->
-		<PackageTfmSubFolder>net8.0\</PackageTfmSubFolder>
+		<!-- Track the TargetFramework so all PackagePath values stay in sync automatically. -->
+		<PackageTfmSubFolder>$(TargetFramework)\</PackageTfmSubFolder>
 	</PropertyGroup>
 
   <ItemGroup>
