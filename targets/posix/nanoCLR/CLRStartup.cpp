@@ -45,14 +45,14 @@ extern "C" void ClrReboot()
 
 // ── Forward declarations ────────────────────────────────────────────────────
 
-static std::string WcharToString(const wchar_t *w);
+static std::string Char16ToString(const char16_t *w);
 
 // ── Settings struct ──────────────────────────────────────────────────────────
 
 struct Settings
 {
     CLR_SETTINGS m_clrOptions;
-    // Map keyed by assembly name (char* from binary header, or converted wchar_t)
+    // Map keyed by assembly name (ASCII string from binary header, or converted from char16_t name)
     std::map<std::string, CLR_RT_Buffer *> m_assemblies;
     ConfigureRuntimeCallback m_configureRuntimeCallback;
     bool m_fInitialized;
@@ -128,7 +128,7 @@ struct Settings
     }
 
     // Called by nanoCLR_LoadAssembly – validates header and adds buffer to map.
-    HRESULT LoadAssembly(const wchar_t *name, const uint8_t *data, size_t size)
+    HRESULT LoadAssembly(const char16_t *name, const uint8_t *data, size_t size)
     {
         NANOCLR_HEADER();
 
@@ -143,7 +143,7 @@ struct Settings
             NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
         }
 
-        key = WcharToString(name);
+        key = Char16ToString(name);
         m_assemblies[key] = buffer;
         buffer = nullptr; // ownership transferred
 
@@ -449,7 +449,7 @@ static std::string Char16ToString(const char16_t *w)
 
 // ── Public assembly-loading API (called from nanoCLR_native_posix.cpp) ──────
 
-HRESULT nanoCLR_LoadAssemblyImpl(const wchar_t *name, const uint8_t *data, size_t size)
+HRESULT nanoCLR_LoadAssemblyImpl(const char16_t *name, const uint8_t *data, size_t size)
 {
     return s_ClrSettings.LoadAssembly(name, data, size);
 }
