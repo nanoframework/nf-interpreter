@@ -76,9 +76,7 @@ inline uint64_t CPU_MicrosecondsToTicks(uint64_t uSec)
 
 inline uint64_t CPU_MillisecondsToTicks(uint64_t mSec)
 {
-    // Despite the name, this function takes MICROSECONDS (matching Win32 semantics).
-    // EnqueueDelta64 passes (uSecFromNow * 1000) — so 1 µs input → 10 100ns ticks.
-    return mSec * 10ULL;
+    return mSec * 10000ULL;
 }
 
 #endif // TARGET_HAL_H
