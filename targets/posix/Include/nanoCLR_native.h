@@ -30,14 +30,22 @@ extern "C"
 
     // ---------------------------------------------------------------------------
     // Settings struct  (must be ABI-compatible with the managed NANO_CLR_SETTINGS)
+    //
+    // The managed host (nanoFramework.nanoCLR.Host.dll) marshals C# bool as
+    // 4-byte BOOL (UnmanagedType.Bool) by default.  The Windows nanoCLR_native.h
+    // uses BOOL (= int) for these fields, so we must use int32_t here to match
+    // the managed struct layout exactly.  Using C++ bool (1 byte) causes an ABI
+    // mismatch: the managed marshaler produces a 20-byte struct (passed by
+    // hidden pointer on x86-64), while the native side expects 6 bytes (passed
+    // in a register), leading to the struct contents being misinterpreted.
     // ---------------------------------------------------------------------------
     typedef struct NANO_CLR_SETTINGS
     {
         unsigned short MaxContextSwitches;
-        bool WaitForDebugger;
-        bool EnterDebuggerLoopAfterExit;
-        bool PerformGarbageCollection;
-        bool PerformHeapCompaction;
+        int32_t WaitForDebugger;
+        int32_t EnterDebuggerLoopAfterExit;
+        int32_t PerformGarbageCollection;
+        int32_t PerformHeapCompaction;
     } NANO_CLR_SETTINGS;
 
     // ---------------------------------------------------------------------------
