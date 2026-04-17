@@ -498,7 +498,7 @@ extern "C" void ClrStartup(CLR_SETTINGS params)
                 hr = g_CLR_RT_ExecutionEngine.Execute(NULL, params.MaxContextSwitches);
 
 #if !defined(BUILD_RTM)
-                CLR_Debug::Printf("Done. hr=0x%08X\r\n", hr);
+                CLR_Debug::Printf("Done.\r\n");
                 fflush(stdout);
 #endif
             }

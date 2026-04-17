@@ -155,15 +155,15 @@ uint16_t nanoCLR_GetNativeAssemblyCount()
     return (uint16_t)g_CLR_InteropAssembliesCount;
 }
 
-bool nanoCLR_GetNativeAssemblyInformation(const uint8_t *data, size_t size)
+int32_t nanoCLR_GetNativeAssemblyInformation(const uint8_t *data, size_t size)
 {
     if (data == nullptr)
-        return false;
+        return 0;
 
     // Per-assembly layout: uint32_t checksum + 4 × uint16_t version fields + 128-byte name.
     const size_t requiredSize = g_CLR_InteropAssembliesCount * (sizeof(uint32_t) + 4 * sizeof(uint16_t) + 128);
     if (size < requiredSize)
-        return false;
+        return 0;
 
     memset((void *)data, 0, size);
 
@@ -191,7 +191,7 @@ bool nanoCLR_GetNativeAssemblyInformation(const uint8_t *data, size_t size)
         data += 128;
     }
 
-    return true;
+    return 1;
 }
 
 // ── Profiler callbacks ───────────────────────────────────────────────────────
