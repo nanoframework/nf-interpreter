@@ -13,13 +13,16 @@ namespace
 
     unsigned char *g_MemoryStart = nullptr;
     unsigned char *g_CustomHeapStart = nullptr;
-    std::once_flag g_DefaultHeapOnce;
-    std::once_flag g_CustomHeapOnce;
+    std::mutex g_DefaultHeapMutex;
+    std::mutex g_CustomHeapMutex;
 } // namespace
 
 void HeapLocation(unsigned char *&BaseAddress, unsigned int &SizeInBytes)
 {
-    std::call_once(g_DefaultHeapOnce, []() {
+    std::lock_guard<std::mutex> lock(g_DefaultHeapMutex);
+
+    if (g_MemoryStart == nullptr)
+    {
         // TODO: evaluate mmap() if we need stronger parity with win32 VirtualAlloc behavior.
         g_MemoryStart = static_cast<unsigned char *>(std::malloc(c_DefaultHeapSizeBytes));
 
@@ -27,7 +30,7 @@ void HeapLocation(unsigned char *&BaseAddress, unsigned int &SizeInBytes)
         {
             std::memset(g_MemoryStart, 0xEA, c_DefaultHeapSizeBytes);
         }
-    });
+    }
 
     BaseAddress = g_MemoryStart;
     SizeInBytes = (g_MemoryStart != nullptr) ? static_cast<unsigned int>(c_DefaultHeapSizeBytes) : 0;
@@ -35,7 +38,10 @@ void HeapLocation(unsigned char *&BaseAddress, unsigned int &SizeInBytes)
 
 void CustomHeapLocation(unsigned char *&BaseAddress, unsigned int &SizeInBytes)
 {
-    std::call_once(g_CustomHeapOnce, []() {
+    std::lock_guard<std::mutex> lock(g_CustomHeapMutex);
+
+    if (g_CustomHeapStart == nullptr)
+    {
         // TODO: revisit custom heap ownership model when CLR runtime is wired.
         g_CustomHeapStart = static_cast<unsigned char *>(std::malloc(c_DefaultHeapSizeBytes));
 
@@ -43,7 +49,7 @@ void CustomHeapLocation(unsigned char *&BaseAddress, unsigned int &SizeInBytes)
         {
             std::memset(g_CustomHeapStart, 0xEA, c_DefaultHeapSizeBytes);
         }
-    });
+    }
 
     BaseAddress = g_CustomHeapStart;
     SizeInBytes = (g_CustomHeapStart != nullptr) ? static_cast<unsigned int>(c_DefaultHeapSizeBytes) : 0;

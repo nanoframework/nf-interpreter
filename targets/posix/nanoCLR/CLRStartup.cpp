@@ -207,37 +207,80 @@ struct Settings
     {
         NANOCLR_HEADER();
 
-        bool fError = false;
+        // The public nanoCLR_Resolve() API can be called before Load()/ClrStartup().
+        // Staged assemblies (m_assemblies) are not yet linked into g_CLR_RT_TypeSystem
+        // at that point, so the reference walk below would see an empty type system
+        // and incorrectly return success.  Create a temporary execution engine if
+        // needed and link the staged assemblies before checking references.
+        bool createdTempEE = false;
 
-        NANOCLR_FOREACH_ASSEMBLY(g_CLR_RT_TypeSystem)
+        if (!m_fInitialized)
         {
-            const CLR_RECORD_ASSEMBLYREF *src = (const CLR_RECORD_ASSEMBLYREF *)pASSM->GetTable(TBL_AssemblyRef);
-            for (int i = 0; i < pASSM->m_pTablesSize[TBL_AssemblyRef]; i++, src++)
+            NANOCLR_CHECK_HRESULT(CLR_RT_ExecutionEngine::CreateInstance());
+            createdTempEE = true;
+        }
+
+        for (auto &it : m_assemblies)
+        {
+            const CLR_RT_Buffer *buf = it.second;
+            const CLR_RECORD_ASSEMBLY *header = (const CLR_RECORD_ASSEMBLY *)&(*buf)[0];
+            CLR_RT_Assembly *assm;
+
+            // CreateInstance resolves the name; check for duplicates before linking.
+            if (FAILED(CLR_RT_Assembly::CreateInstance(header, assm)))
             {
-                const char *szName = pASSM->GetString(src->name);
-                if (g_CLR_RT_TypeSystem.FindAssembly(szName, &src->version, true) == NULL)
+                continue;
+            }
+
+            if (g_CLR_RT_TypeSystem.FindAssembly(assm->m_szName, &assm->m_header->version, true) != NULL)
+            {
+                assm->DestroyInstance();
+                continue;
+            }
+
+            g_CLR_RT_TypeSystem.Link(assm);
+        }
+
+        {
+            bool fError = false;
+
+            NANOCLR_FOREACH_ASSEMBLY(g_CLR_RT_TypeSystem)
+            {
+                const CLR_RECORD_ASSEMBLYREF *src = (const CLR_RECORD_ASSEMBLYREF *)pASSM->GetTable(TBL_AssemblyRef);
+                for (int i = 0; i < pASSM->m_pTablesSize[TBL_AssemblyRef]; i++, src++)
                 {
-                    printf(
-                        "Missing assembly: %s (%d.%d.%d.%d)\n",
-                        szName,
-                        src->version.iMajorVersion,
-                        src->version.iMinorVersion,
-                        src->version.iBuildNumber,
-                        src->version.iRevisionNumber);
-                    fError = true;
+                    const char *szName = pASSM->GetString(src->name);
+                    if (g_CLR_RT_TypeSystem.FindAssembly(szName, &src->version, true) == NULL)
+                    {
+                        printf(
+                            "Missing assembly: %s (%d.%d.%d.%d)\n",
+                            szName,
+                            src->version.iMajorVersion,
+                            src->version.iMinorVersion,
+                            src->version.iBuildNumber,
+                            src->version.iRevisionNumber);
+                        fError = true;
+                    }
                 }
             }
-        }
-        NANOCLR_FOREACH_ASSEMBLY_END();
+            NANOCLR_FOREACH_ASSEMBLY_END();
 
-        if (fError)
-        {
-            NANOCLR_SET_AND_LEAVE(CLR_E_ENTRY_NOT_FOUND);
+            if (fError)
+            {
+                NANOCLR_SET_AND_LEAVE(CLR_E_ENTRY_NOT_FOUND);
+            }
         }
 
         NANOCLR_CHECK_HRESULT(g_CLR_RT_TypeSystem.ResolveAll());
 
-        NANOCLR_NOCLEANUP();
+        NANOCLR_CLEANUP();
+
+        if (createdTempEE)
+        {
+            CLR_RT_ExecutionEngine::DeleteInstance();
+        }
+
+        NANOCLR_CLEANUP_END();
     }
 
     // Load assemblies from block storage (deployment).  Allowed to fail.
@@ -474,7 +517,9 @@ void nanoCLR_SetConfigureCallbackImpl(ConfigureRuntimeCallback cb)
 extern "C" void ClrStartup(CLR_SETTINGS params)
 {
     NATIVE_PROFILE_CLR_STARTUP();
+#if !defined(PLATFORM_POSIX_HOST) || !defined(__LP64__)
     ASSERT(sizeof(CLR_RT_HeapBlock_Raw) == sizeof(struct CLR_RT_HeapBlock));
+#endif
     bool softReboot;
 
     do

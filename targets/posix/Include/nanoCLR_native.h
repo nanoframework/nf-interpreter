@@ -97,7 +97,7 @@ extern "C"
     NANOCLRNATIVE_API const char *nanoCLR_GetVersion();
 
     NANOCLRNATIVE_API uint16_t nanoCLR_GetNativeAssemblyCount();
-    NANOCLRNATIVE_API int32_t nanoCLR_GetNativeAssemblyInformation(const uint8_t *data, size_t size);
+    NANOCLRNATIVE_API int32_t nanoCLR_GetNativeAssemblyInformation(uint8_t *data, size_t size);
 
 #ifdef __cplusplus
 }

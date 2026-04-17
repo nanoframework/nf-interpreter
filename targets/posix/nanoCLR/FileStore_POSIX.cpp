@@ -10,7 +10,7 @@
 #include <sys/stat.h>
 
 // Maximum .pe file size accepted (64 MiB — well above any realistic managed assembly).
-static constexpr std::streamoff k_MaxFileBytes = 64LL * 1024 * 1024;
+static constexpr std::streamoff c_MaxFileBytes = 64LL * 1024 * 1024;
 
 // TODO: replace with CLR_RT_FileStore integration once shared runtime code is enabled.
 
@@ -28,7 +28,7 @@ bool nanoCLR_POSIX_LoadFile(const std::string &path, std::vector<unsigned char> 
         error = "Not a regular file: " + path;
         return false;
     }
-    if (st.st_size > k_MaxFileBytes)
+    if (st.st_size > c_MaxFileBytes)
     {
         error = "File too large (> 64 MiB): " + path;
         return false;

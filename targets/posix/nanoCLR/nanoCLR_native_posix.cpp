@@ -155,7 +155,7 @@ uint16_t nanoCLR_GetNativeAssemblyCount()
     return (uint16_t)g_CLR_InteropAssembliesCount;
 }
 
-int32_t nanoCLR_GetNativeAssemblyInformation(const uint8_t *data, size_t size)
+int32_t nanoCLR_GetNativeAssemblyInformation(uint8_t *data, size_t size)
 {
     if (data == nullptr)
         return 0;
@@ -165,24 +165,24 @@ int32_t nanoCLR_GetNativeAssemblyInformation(const uint8_t *data, size_t size)
     if (size < requiredSize)
         return 0;
 
-    memset((void *)data, 0, size);
+    memset(data, 0, size);
 
     for (uint32_t i = 0; i < g_CLR_InteropAssembliesCount; i++)
     {
-        memcpy((void *)data, &g_CLR_InteropAssembliesNativeData[i]->m_checkSum, sizeof(uint32_t));
+        memcpy(data, &g_CLR_InteropAssembliesNativeData[i]->m_checkSum, sizeof(uint32_t));
         data += sizeof(uint32_t);
 
-        memcpy((void *)data, &g_CLR_InteropAssembliesNativeData[i]->m_Version.iMajorVersion, sizeof(uint16_t));
+        memcpy(data, &g_CLR_InteropAssembliesNativeData[i]->m_Version.iMajorVersion, sizeof(uint16_t));
         data += sizeof(uint16_t);
 
-        memcpy((void *)data, &g_CLR_InteropAssembliesNativeData[i]->m_Version.iMinorVersion, sizeof(uint16_t));
+        memcpy(data, &g_CLR_InteropAssembliesNativeData[i]->m_Version.iMinorVersion, sizeof(uint16_t));
         data += sizeof(uint16_t);
 
-        memcpy((void *)data, &g_CLR_InteropAssembliesNativeData[i]->m_Version.iBuildNumber, sizeof(uint16_t));
+        memcpy(data, &g_CLR_InteropAssembliesNativeData[i]->m_Version.iBuildNumber, sizeof(uint16_t));
         data += sizeof(uint16_t);
 
         memcpy(
-            (void *)data,
+            data,
             &g_CLR_InteropAssembliesNativeData[i]->m_Version.iRevisionNumber,
             sizeof(uint16_t));
         data += sizeof(uint16_t);

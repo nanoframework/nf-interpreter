@@ -257,7 +257,7 @@ namespace nanoFramework.nanoCLR.Host.Interop
                 string fullPath = Path.GetFullPath(path);
                 string rootPath = Path.GetPathRoot(fullPath) ?? string.Empty;
 
-                if (string.Equals(fullPath, rootPath, StringComparison.Ordinal))
+                if (string.Equals(fullPath, rootPath, StringComparison.OrdinalIgnoreCase))
                 {
                     return fullPath;
                 }

@@ -31,10 +31,6 @@ uint64_t HAL_Time_CurrentSysTicks()
     return (static_cast<uint64_t>(ts.tv_sec) * 10000000ULL) + (static_cast<uint64_t>(ts.tv_nsec) / 100ULL);
 }
 
-// Offset between Windows FILETIME epoch (1601-01-01) and Unix epoch (1970-01-01)
-// in 100-nanosecond units.
-static constexpr uint64_t c_epochOffset100ns = 116444736000000000ULL;
-
 // Converts CMSIS/monotonic sysTicks to .NET ticks (100 nanoseconds).
 // For the POSIX host, sysTicks are already 100ns units so we pass through.
 uint64_t HAL_Time_SysTicksToTime(uint64_t sysTicks)
@@ -46,7 +42,10 @@ uint64_t HAL_Time_CurrentDateTime(bool datePartOnly)
 {
     struct timespec ts;
     clock_gettime(CLOCK_REALTIME, &ts);
-    uint64_t ticks = c_epochOffset100ns + static_cast<uint64_t>(ts.tv_sec) * 10000000ULL +
+    
+    // Offset between Windows FILETIME epoch (1601-01-01) and Unix epoch (1970-01-01)
+    // in 100-nanosecond units. TIME_UNIX_EPOCH_AS_TICKS is defined in nanoHAL_Time.h.
+    uint64_t ticks = TIME_UNIX_EPOCH_AS_TICKS + static_cast<uint64_t>(ts.tv_sec) * 10000000ULL +
                      static_cast<uint64_t>(ts.tv_nsec) / 100ULL;
 
     if (datePartOnly)
@@ -103,7 +102,7 @@ const char *HAL_Time_CurrentDateTimeToString()
     uint64_t ticks = HAL_Time_CurrentDateTime(false);
 
     // Convert back to unix time
-    uint64_t unixTicks = ticks - c_epochOffset100ns;
+    uint64_t unixTicks = ticks - TIME_UNIX_EPOCH_AS_TICKS;
     time_t sec = static_cast<time_t>(unixTicks / 10000000ULL);
     struct tm tmBuf{};
     struct tm *t = gmtime_r(&sec, &tmBuf); // reentrant: no shared static internal buffer
