@@ -10,6 +10,7 @@
 #include <mutex>
 #include <thread>
 
+#include <nanoCLR_Runtime.h>
 #include <nanoHAL_v2.h>
 
 namespace
@@ -35,13 +36,19 @@ void Events_Set(uint32_t events);
 
 void Events_SetBoolTimer(bool *timerCompleteFlag, uint32_t millisecondsFromNow)
 {
+    // Always invalidate any previously spawned timer thread by bumping the generation,
+    // even when timerCompleteFlag is NULL (cancellation).  The Win32 implementation
+    // explicitly cancels the old timer in this case; we achieve the same by making the
+    // old thread's generation stale so it exits without firing.
+    s_boolTimerGeneration.fetch_add(1, std::memory_order_acq_rel);
+
     if (timerCompleteFlag == nullptr)
     {
         return;
     }
 
     *timerCompleteFlag = false;
-    const uint64_t myGen = s_boolTimerGeneration.fetch_add(1, std::memory_order_acq_rel) + 1;
+    const uint64_t myGen = s_boolTimerGeneration.load(std::memory_order_acquire);
 
     // Capture timerCompleteFlag directly in the lambda — never store it in a shared global.
     // A shared global causes a data race: concurrent calls from different threads (each thread
@@ -54,10 +61,6 @@ void Events_SetBoolTimer(bool *timerCompleteFlag, uint32_t millisecondsFromNow)
         {
             return;
         }
-
-        fprintf(stderr, "[POSIX] Events_SetBoolTimer firing: gen=%llu, flag=%p\n",
-                (unsigned long long)myGen, (void *)timerCompleteFlag);
-        fflush(stderr);
 
         *timerCompleteFlag = true;
 
@@ -118,12 +121,6 @@ uint32_t Events_WaitForEvents(uint32_t powerLevel, uint32_t wakeupSystemEvents, 
 {
     (void)powerLevel;
 
-    // Diagnostic: log every call so we can see what timeout Linux uses (stderr to avoid
-    // interfering with managed output on stdout/g_DebugPrintCallback).
-    fprintf(stderr, "[POSIX] Events_WaitForEvents: timeout=%u ms, events=0x%08X\n",
-            timeoutMilliseconds, wakeupSystemEvents);
-    fflush(stderr);
-
     std::unique_lock<std::mutex> lock(s_eventsMutex);
 
     if (timeoutMilliseconds == 0)
@@ -131,18 +128,40 @@ uint32_t Events_WaitForEvents(uint32_t powerLevel, uint32_t wakeupSystemEvents, 
         return s_systemEvents & wakeupSystemEvents;
     }
 
-    if (timeoutMilliseconds == static_cast<uint32_t>(-1))
+    // Use a polling approach similar to the Win32 implementation: wait in short
+    // slices (10 ms) so we periodically re-check the event flags and the
+    // RebootPending / ExitPending conditions.  This avoids relying solely on
+    // condition_variable::notify_all() which, on some Linux libstdc++ versions,
+    // can exhibit missed-wakeup behaviour when detached timer threads race with
+    // the main CLR thread.
+    auto startTime = std::chrono::steady_clock::now();
+    auto endTime = (timeoutMilliseconds == static_cast<uint32_t>(-1))
+                       ? std::chrono::steady_clock::time_point::max()
+                       : startTime + std::chrono::milliseconds(timeoutMilliseconds);
+
+    while (true)
     {
-        s_eventsCondition.wait(lock, [wakeupSystemEvents]() { return (s_systemEvents & wakeupSystemEvents) != 0; });
-        return s_systemEvents & wakeupSystemEvents;
+        // Check if requested events are already set.
+        if ((s_systemEvents & wakeupSystemEvents) != 0)
+        {
+            return s_systemEvents & wakeupSystemEvents;
+        }
+
+        // Check if the CLR is shutting down — matches the Win32 implementation.
+        if (CLR_EE_DBG_IS(RebootPending) || CLR_EE_DBG_IS(ExitPending))
+        {
+            return s_systemEvents & wakeupSystemEvents;
+        }
+
+        // Check for timeout expiry.
+        if (std::chrono::steady_clock::now() >= endTime)
+        {
+            return 0;
+        }
+
+        // Wait for at most 10 ms before re-checking.
+        s_eventsCondition.wait_for(lock, std::chrono::milliseconds(10));
     }
-
-    const bool signaled =
-        s_eventsCondition.wait_for(lock, std::chrono::milliseconds(timeoutMilliseconds), [wakeupSystemEvents]() {
-            return (s_systemEvents & wakeupSystemEvents) != 0;
-        });
-
-    return signaled ? (s_systemEvents & wakeupSystemEvents) : 0;
 }
 
 // set_Event_Callback matches the typedef in nanoPAL_Events.h: void (*)(void *)
