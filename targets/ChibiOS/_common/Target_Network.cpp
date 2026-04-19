@@ -6,6 +6,7 @@
 
 #include <nanoHAL.h>
 #include <lwip/netifapi.h>
+#include <lwip/dns.h>
 
 #if defined(RP2040) || defined(RP2350)
 extern "C" {
@@ -106,6 +107,29 @@ int Network_Interface_Connect_Result(int configIndex)
 
     if (cyw43_wifi_get_ip4_address() == 0)
         return -1;
+
+    // DHCP has completed — sync the live netif values (IP, gateway, netmask,
+    // DNS) into the in-memory config block so that managed code reads the
+    // correct addresses via ConfigurationManager_GetConfigurationBlock.
+    if (g_TargetConfiguration.NetworkInterfaceConfigs != NULL &&
+        g_TargetConfiguration.NetworkInterfaceConfigs->Count > 0)
+    {
+        HAL_Configuration_NetworkInterface *cfg =
+            g_TargetConfiguration.NetworkInterfaceConfigs->Configs[0];
+
+        struct netif *nif = nf_getNetif();
+        if (nif != NULL)
+        {
+            cfg->IPv4Address = nif->ip_addr.addr;
+            cfg->IPv4NetMask = nif->netmask.addr;
+            cfg->IPv4GatewayAddress = nif->gw.addr;
+
+#if LWIP_DNS
+            cfg->IPv4DNSAddress1 = dns_getserver(0)->addr;
+            cfg->IPv4DNSAddress2 = dns_getserver(1)->addr;
+#endif
+        }
+    }
 
     return 0;
 }

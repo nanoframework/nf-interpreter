@@ -16,6 +16,7 @@
 #include "cyw43.h"
 #include "cyw43_ll.h"
 #include "cyw43_internal.h"
+#include <nanoHAL_ConfigurationManager.h>
 
 // CLR event system — fire SYSTEM_EVENT_FLAG_WIFI_STATION on link change
 extern void Events_Set(uint32_t events);
@@ -283,6 +284,17 @@ static void wifi_tcpip_init_done(void *arg)
 
     // Copy the real OTP MAC from the CYW43 chip to the netif
     cyw43_wifi_get_mac(&cyw43_state, CYW43_ITF_STA, ifc->hwaddr);
+
+    // Update the in-memory network config block so managed code reads
+    // the real hardware MAC (the stored default is all zeros).
+    if (g_TargetConfiguration.NetworkInterfaceConfigs != NULL &&
+        g_TargetConfiguration.NetworkInterfaceConfigs->Count > 0)
+    {
+        memcpy(
+            g_TargetConfiguration.NetworkInterfaceConfigs->Configs[0]->MacAddress,
+            ifc->hwaddr,
+            NETIF_MAX_HWADDR_LEN);
+    }
 
 #if SNTP_SERVER_DNS
     // Pre-configure SNTP server names early, before the CLR's
