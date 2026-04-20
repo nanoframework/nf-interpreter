@@ -33,11 +33,12 @@
 #include "sysflash/sysflash.h"
 #include "mcuboot_config.h"
 
-// Forward declarations for STM32 flash driver (avoids pulling in the full ChibiOS HAL chain).
+// stm32_f7xx_flash.h provides sector geometry helpers (stm32_f7xx_get_sector_size,
+// stm32_f7xx_next_sector_boundary). Forward-declare the HAL flash driver functions
+// rather than including the full ChibiOS HAL chain (not available in nf_mcuboot_port scope).
+#include "stm32_f7xx_flash.h"
 int stm32FlashWrite(uint32_t startAddress, uint32_t length, const uint8_t *buffer);
 int stm32FlashErase(uint32_t address);
-
-#include "stm32_f7xx_flash.h"
 
 #include "target_ext_flash.h"
 #include "mcuboot_flash_layout.h"
