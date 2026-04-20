@@ -33,7 +33,10 @@
 #include "sysflash/sysflash.h"
 #include "mcuboot_config.h"
 
-#include <hal_nf_community.h>
+// Forward declarations for STM32 flash driver (avoids pulling in the full ChibiOS HAL chain).
+int stm32FlashWrite(uint32_t startAddress, uint32_t length, const uint8_t *buffer);
+int stm32FlashErase(uint32_t address);
+
 #include "stm32_f7xx_flash.h"
 
 #include "target_ext_flash.h"
