@@ -82,6 +82,9 @@ RUN git clone --branch R0.16 https://github.com/abbrev/fatfs.git --depth 1 ./sou
     && cd ./sources/mbedtls \
     && git submodule update --init --recursive
 
+# Clone MCUboot
+RUN git clone --branch v2.3.0 https://github.com/mcu-tools/mcuboot.git --depth 1 ./sources/mcuboot
+
 # set gcc location
 ARG TMP_GCC_PATH=/usr/local/bin/gcc
 ENV ARM_GCC_PATH=$TMP_GCC_PATH/bin
@@ -101,7 +104,7 @@ RUN mkdir -p  $HEX2DFU_PATH \
     && chmod +x  $HEX2DFU_PATH/hex2dfu
 
 # Installing python dependencies for the container
-RUN pip3 install --no-cache-dir pyserial "kconfiglib>=14.1.0"
+RUN pip3 install --no-cache-dir pyserial "kconfiglib>=14.1.0" imgtool
 
 # Clean up downloaded files
 RUN apt-get autoremove -y \

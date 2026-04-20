@@ -384,7 +384,7 @@ function(nf_generate_build_output_files target)
 
         find_program(IMGTOOL imgtool)
         if(NOT IMGTOOL)
-            message(FATAL_ERROR "imgtool not found. Install it with: pip install imgtool==2.1.0")
+            message(FATAL_ERROR "imgtool not found. Install it with: pip install imgtool")
         endif()
 
         # Sign the binary into a temp file then replace the original so that

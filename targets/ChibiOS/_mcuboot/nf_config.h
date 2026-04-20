@@ -17,7 +17,7 @@
 #ifndef NF_CONFIG_MCUBOOT_STUB_H
 #define NF_CONFIG_MCUBOOT_STUB_H
 
-// ORGPAL_PALTHREE uses swap-using-offset (internal primary, external secondary).
+// STM32 targets use swap-using-offset: primary slot in internal flash, secondary slot on external storage.
 #define CONFIG_NF_MCUBOOT_SWAP_USING_OFFSET 1
 
 // Two images: Image 0 = nanoCLR firmware, Image 1 = deployment area.
