@@ -53,6 +53,10 @@ config NF_FEATURE_HAS_USB_MSD
     default n
     select API_SYSTEM_IO_FILESYSTEM
 
+config TARGET_HAS_WIFI
+    bool "Target has WiFi hardware"
+    default n
+
 config NF_FEATURE_WATCHDOG
     bool "Hardware watchdog"
     default y
