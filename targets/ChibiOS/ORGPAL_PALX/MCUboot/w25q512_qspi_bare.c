@@ -37,22 +37,22 @@
 // ----------------------------------------------------------------------- //
 // W25Q512 command set                                                      //
 // ----------------------------------------------------------------------- //
-#define CMD_RESET_ENABLE      0x66U
-#define CMD_RESET_MEMORY      0x99U
-#define CMD_JEDEC_ID          0x9FU
-#define CMD_READ              0x03U  // Slow read (max 50 MHz, no dummy cycles)
-#define CMD_WRITE_ENABLE      0x06U
-#define CMD_READ_STATUS_REG1  0x05U
-#define CMD_PAGE_PROGRAM      0x02U
-#define CMD_BLOCK_ERASE_64K   0xD8U
+#define CMD_RESET_ENABLE     0x66U
+#define CMD_RESET_MEMORY     0x99U
+#define CMD_JEDEC_ID         0x9FU
+#define CMD_READ             0x03U // Slow read (max 50 MHz, no dummy cycles)
+#define CMD_WRITE_ENABLE     0x06U
+#define CMD_READ_STATUS_REG1 0x05U
+#define CMD_PAGE_PROGRAM     0x02U
+#define CMD_BLOCK_ERASE_64K  0xD8U
 
-#define W25Q512_MANUFACTURER  0xEFU
-#define W25Q512_DEVICE_ID1    0x40U
-#define W25Q512_DEVICE_ID2    0x20U
+#define W25Q512_MANUFACTURER 0xEFU
+#define W25Q512_DEVICE_ID1   0x40U
+#define W25Q512_DEVICE_ID2   0x20U
 
-#define W25Q512_PAGE_SIZE     256U
-#define W25Q512_SR1_WIP       0x01U   // Write In Progress
-#define W25Q512_SR1_WREN      0x02U   // Write Enable Latch
+#define W25Q512_PAGE_SIZE 256U
+#define W25Q512_SR1_WIP   0x01U // Write In Progress
+#define W25Q512_SR1_WREN  0x02U // Write Enable Latch
 
 // ----------------------------------------------------------------------- //
 // QUADSPI CCR field helpers                                                //
@@ -153,8 +153,7 @@ static bool qspi_read_no_addr(uint8_t cmd, uint8_t *buf, uint32_t len)
     }
 
     QUADSPI->DLR = len - 1U;
-    QUADSPI->CCR =
-        QSPI_FMODE_INDIRECT_READ | QSPI_DMODE_1_LINE | QSPI_ADMODE_NONE | QSPI_IMODE_1_LINE | (uint32_t)cmd;
+    QUADSPI->CCR = QSPI_FMODE_INDIRECT_READ | QSPI_DMODE_1_LINE | QSPI_ADMODE_NONE | QSPI_IMODE_1_LINE | (uint32_t)cmd;
 
     // Read byte by byte from DR (8-bit access).
     for (uint32_t i = 0; i < len; i++)
@@ -261,8 +260,7 @@ bool w25q512_bare_init(void)
     QUADSPI->DCR = (25U << QUADSPI_DCR_FSIZE_Pos) | (1U << QUADSPI_DCR_CSHT_Pos);
 
     //    CR: PRESCALER=1 (HCLK/2), FTHRES=3 (4-byte FIFO threshold), SSHIFT=1, EN=1.
-    QUADSPI->CR = (1U << QUADSPI_CR_PRESCALER_Pos) | (3U << QUADSPI_CR_FTHRES_Pos) |
-                  QUADSPI_CR_SSHIFT | QUADSPI_CR_EN;
+    QUADSPI->CR = (1U << QUADSPI_CR_PRESCALER_Pos) | (3U << QUADSPI_CR_FTHRES_Pos) | QUADSPI_CR_SSHIFT | QUADSPI_CR_EN;
     __DSB();
 
     // 5. Software reset sequence (in case the device is in an unknown state).
@@ -311,9 +309,8 @@ bool w25q512_bare_read(uint8_t *dst, uint32_t addr, uint32_t len)
     }
 
     QUADSPI->DLR = len - 1U;
-    QUADSPI->CCR =
-        QSPI_FMODE_INDIRECT_READ | QSPI_DMODE_1_LINE | QSPI_ADSIZE_24BIT | QSPI_ADMODE_1_LINE |
-        QSPI_IMODE_1_LINE | CMD_READ;
+    QUADSPI->CCR = QSPI_FMODE_INDIRECT_READ | QSPI_DMODE_1_LINE | QSPI_ADSIZE_24BIT | QSPI_ADMODE_1_LINE |
+                   QSPI_IMODE_1_LINE | CMD_READ;
     // Writing AR triggers the transfer.
     QUADSPI->AR = addr;
 
@@ -377,9 +374,8 @@ bool w25q512_bare_write(const uint8_t *src, uint32_t addr, uint32_t len)
         }
 
         QUADSPI->DLR = chunk - 1U;
-        QUADSPI->CCR =
-            QSPI_FMODE_INDIRECT_WRITE | QSPI_DMODE_1_LINE | QSPI_ADSIZE_24BIT | QSPI_ADMODE_1_LINE |
-            QSPI_IMODE_1_LINE | CMD_PAGE_PROGRAM;
+        QUADSPI->CCR = QSPI_FMODE_INDIRECT_WRITE | QSPI_DMODE_1_LINE | QSPI_ADSIZE_24BIT | QSPI_ADMODE_1_LINE |
+                       QSPI_IMODE_1_LINE | CMD_PAGE_PROGRAM;
         QUADSPI->AR = current_addr;
 
         for (uint32_t i = 0; i < chunk; i++)

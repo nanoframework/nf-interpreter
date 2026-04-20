@@ -35,14 +35,14 @@
 #include "at25sf641_spi_bare.h"
 
 // AT25SF641 command bytes.
-#define CMD_READ              0x03U
-#define CMD_PAGE_PROG         0x02U
-#define CMD_BLOCK_ERASE_64K   0xD8U
-#define CMD_SECTOR_ERASE_4K   0x20U
-#define CMD_WRITE_ENABLE      0x06U
-#define CMD_READ_STATUS1      0x05U
-#define CMD_RESUME_DEEP_PD    0xABU
-#define CMD_READ_JEDEC_ID     0x9FU
+#define CMD_READ            0x03U
+#define CMD_PAGE_PROG       0x02U
+#define CMD_BLOCK_ERASE_64K 0xD8U
+#define CMD_SECTOR_ERASE_4K 0x20U
+#define CMD_WRITE_ENABLE    0x06U
+#define CMD_READ_STATUS1    0x05U
+#define CMD_RESUME_DEEP_PD  0xABU
+#define CMD_READ_JEDEC_ID   0x9FU
 
 // Timeout: large enough to cover the worst-case flash erase at 16 MHz HSI.
 // SysTick is not configured in the bootloader; use a simple iteration counter.
@@ -50,8 +50,8 @@
 #define BUSY_TIMEOUT_LOOPS 0x08000000U
 
 // CS pin manipulation (GPIOI, pin 15).
-#define CS_SELECT()   (GPIOI->BSRR = (uint32_t)(1U << (15U + 16U)))  // reset = drive low
-#define CS_DESELECT() (GPIOI->BSRR = (uint32_t)(1U << 15U))          // set   = drive high
+#define CS_SELECT()   (GPIOI->BSRR = (uint32_t)(1U << (15U + 16U))) // reset = drive low
+#define CS_DESELECT() (GPIOI->BSRR = (uint32_t)(1U << 15U))         // set   = drive high
 
 // ----------------------------------------------------------------------- //
 // SPI polling helpers                                                      //
@@ -107,21 +107,21 @@ static void spi1_gpio_init(void)
     __DSB();
 
     // PA5 (SCK) — AF5, push-pull, medium speed.
-    GPIOA->MODER = (GPIOA->MODER & ~(3U << 10U)) | (2U << 10U);   // AF
+    GPIOA->MODER = (GPIOA->MODER & ~(3U << 10U)) | (2U << 10U);     // AF
     GPIOA->OSPEEDR = (GPIOA->OSPEEDR & ~(3U << 10U)) | (2U << 10U); // fast
     GPIOA->AFR[0] = (GPIOA->AFR[0] & ~(0xFU << 20U)) | (5U << 20U); // AF5
 
     // PA6 (MISO) — AF5, push-pull.
-    GPIOA->MODER = (GPIOA->MODER & ~(3U << 12U)) | (2U << 12U);   // AF
+    GPIOA->MODER = (GPIOA->MODER & ~(3U << 12U)) | (2U << 12U);     // AF
     GPIOA->AFR[0] = (GPIOA->AFR[0] & ~(0xFU << 24U)) | (5U << 24U); // AF5
 
     // PB5 (MOSI) — AF5, push-pull, medium speed.
-    GPIOB->MODER = (GPIOB->MODER & ~(3U << 10U)) | (2U << 10U);   // AF
+    GPIOB->MODER = (GPIOB->MODER & ~(3U << 10U)) | (2U << 10U);     // AF
     GPIOB->OSPEEDR = (GPIOB->OSPEEDR & ~(3U << 10U)) | (2U << 10U); // fast
     GPIOB->AFR[0] = (GPIOB->AFR[0] & ~(0xFU << 20U)) | (5U << 20U); // AF5
 
     // PI15 (CS) — GPIO output, push-pull, default high (deselected).
-    GPIOI->BSRR = (uint32_t)(1U << 15U); // set high first
+    GPIOI->BSRR = (uint32_t)(1U << 15U);                        // set high first
     GPIOI->MODER = (GPIOI->MODER & ~(3U << 30U)) | (1U << 30U); // output
 
     // PJ3 (WP#) — GPIO output, high (write-protect disabled).

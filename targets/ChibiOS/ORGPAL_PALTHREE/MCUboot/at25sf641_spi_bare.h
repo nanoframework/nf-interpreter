@@ -34,10 +34,10 @@
 #include <stdint.h>
 
 // AT25SF641 geometry constants (matches target_ext_flash.h from the ChibiOS driver).
-#define AT25SF641_FLASH_SIZE     0x800000U  // 8 MB
-#define AT25SF641_SECTOR_SIZE    0x10000U   // 64 kB block (MCUboot erase unit)
-#define AT25SF641_SUBSECTOR_SIZE 0x1000U    // 4 kB sub-sector (littlefs erase unit)
-#define AT25SF641_PAGE_SIZE      0x100U     // 256 bytes (page-program unit)
+#define AT25SF641_FLASH_SIZE     0x800000U // 8 MB
+#define AT25SF641_SECTOR_SIZE    0x10000U  // 64 kB block (MCUboot erase unit)
+#define AT25SF641_SUBSECTOR_SIZE 0x1000U   // 4 kB sub-sector (littlefs erase unit)
+#define AT25SF641_PAGE_SIZE      0x100U    // 256 bytes (page-program unit)
 
 // JEDEC ID bytes (AT25SF641 datasheet, ID Definitions table).
 #define AT25SF641_MANUFACTURER_ID ((uint8_t)0x1F)

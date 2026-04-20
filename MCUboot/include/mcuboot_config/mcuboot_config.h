@@ -146,9 +146,9 @@
 // Watchdog — no watchdog in the bare-metal STM32 bootloader.
 // Define as a no-op; platform ports that use a watchdog should replace this.
 //
-#define MCUBOOT_WATCHDOG_FEED() \
-    do                          \
-    {                           \
+#define MCUBOOT_WATCHDOG_FEED()                                                                                        \
+    do                                                                                                                 \
+    {                                                                                                                  \
     } while (0)
 
 #endif // __MCUBOOT_CONFIG_H__

@@ -51,9 +51,11 @@
 // clang-format on
 
 // Boundary assertions — evaluated in every translation unit that includes this header.
-static_assert(NF_MCUBOOT_SLOT_IMG0_PRI_OFF + NF_MCUBOOT_SLOT_IMG0_PRI_SIZE <= NF_MCUBOOT_SLOT_IMG1_PRI_OFF,
-              "PALX: CLR primary overflows into deploy primary");
-static_assert(NF_MCUBOOT_SLOT_IMG0_SEC_OFF + NF_MCUBOOT_SLOT_IMG0_SEC_SIZE <= NF_MCUBOOT_SLOT_IMG1_SEC_OFF,
-              "PALX: CLR secondary overflows into deploy secondary");
+static_assert(
+    NF_MCUBOOT_SLOT_IMG0_PRI_OFF + NF_MCUBOOT_SLOT_IMG0_PRI_SIZE <= NF_MCUBOOT_SLOT_IMG1_PRI_OFF,
+    "PALX: CLR primary overflows into deploy primary");
+static_assert(
+    NF_MCUBOOT_SLOT_IMG0_SEC_OFF + NF_MCUBOOT_SLOT_IMG0_SEC_SIZE <= NF_MCUBOOT_SLOT_IMG1_SEC_OFF,
+    "PALX: CLR secondary overflows into deploy secondary");
 
 #endif // MCUBOOT_FLASH_LAYOUT_ORGPAL_PALX_H

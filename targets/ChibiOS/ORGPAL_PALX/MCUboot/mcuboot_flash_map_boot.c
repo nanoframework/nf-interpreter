@@ -3,7 +3,7 @@
 // See LICENSE file in the project root for full license information.
 //
 
-// MCUboot flash_area_* porting layer for the standalone MCUboot bootloader binary 
+// MCUboot flash_area_* porting layer for the standalone MCUboot bootloader binary
 //
 // This file is the bootloader-context counterpart to:
 //   targets/ChibiOS/ORGPAL_PALX/common/mcuboot_flash_map.c
@@ -39,8 +39,9 @@ static const struct flash_area s_flash_areas[] = {
 
 #define FLASH_AREA_TABLE_COUNT (sizeof(s_flash_areas) / sizeof(s_flash_areas[0]))
 
-static_assert(NF_MCUBOOT_SLOT_IMG1_SEC_SIZE / MCUBOOT_EXTERNAL_FLASH_SECTOR_SIZE <= MCUBOOT_MAX_IMG_SECTORS,
-              "Deploy secondary sector count exceeds MCUBOOT_MAX_IMG_SECTORS");
+static_assert(
+    NF_MCUBOOT_SLOT_IMG1_SEC_SIZE / MCUBOOT_EXTERNAL_FLASH_SECTOR_SIZE <= MCUBOOT_MAX_IMG_SECTORS,
+    "Deploy secondary sector count exceeds MCUBOOT_MAX_IMG_SECTORS");
 
 // Board interface: initialise W25Q512 via bare-metal QUADSPI.
 int mcuboot_ext_flash_init(void)
