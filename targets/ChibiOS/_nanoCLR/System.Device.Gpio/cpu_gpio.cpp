@@ -10,7 +10,20 @@
 #include <targetPAL.h>
 #include "sys_dev_gpio_native_target.h"
 
+#if defined(RP_GPIO_NUM_LINES)
+// RP2040/RP2350: single GPIO bank, pin number IS the pad number
+#define GPIO_MAX_PIN     RP_GPIO_NUM_LINES
+
+// RP2040 PAL doesn't define PAL_MODE_OUTPUT_OPENDRAIN; compose it from RP-specific flags
+#if !defined(PAL_MODE_OUTPUT_OPENDRAIN)
+#define PAL_MODE_OUTPUT_OPENDRAIN (PAL_RP_IOCTRL_FUNCSEL_SIO | PAL_RP_GPIO_OE | PAL_RP_PAD_IE | PAL_RP_PAD_OD)
+#endif
+
+#else
+// STM32: multiple GPIO ports, 16 pins per port
 #define GPIO_MAX_PIN     256
+#endif
+
 #define TOTAL_GPIO_PORTS ((GPIO_MAX_PIN + 15) / 16)
 
 // Double linkedlist to hold the state of each Input pin
@@ -33,10 +46,16 @@ static uint16_t pinReserved[TOTAL_GPIO_PORTS];            //  reserved - 1 bit p
 // this is an utility function to get a ChibiOS PAL IoLine from our "encoded" pin number
 static ioline_t GetIoLine(int16_t pinNumber)
 {
+#if defined(RP_GPIO_NUM_LINES)
+    // RP2040/RP2350: single GPIO bank, ioline_t is just the pad number
+    return (ioline_t)pinNumber;
+#else
+    // STM32: port/pad encoding (16 pins per port)
     stm32_gpio_t *port = GPIO_PORT(pinNumber);
     int16_t pad = pinNumber % 16;
 
     return PAL_LINE(port, pad);
+#endif
 }
 
 bool IsValidGpioPin(GPIO_PIN pinNumber)

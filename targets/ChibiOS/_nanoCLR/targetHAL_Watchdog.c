@@ -8,6 +8,35 @@
 #include <targetHAL_Watchdog.h>
 #include <target_common.h>
 
+#if defined(RP2040) || defined(RP2350)
+
+// RP2040/RP2350 watchdog implementation
+// The RP2040 watchdog timer counts down and resets the chip when it reaches zero.
+// A tick rate of 1 MHz gives 1 microsecond per tick.
+
+static WDGConfig wdgConfig = {0};
+
+void Watchdog_Init()
+{
+    // RP2040 watchdog reload value is in microseconds at 1 MHz tick rate
+    // Set to IWATCHDOG_TIMEOUT_MILLIS converted to microseconds
+#if defined(IWATCHDOG_TIMEOUT_MILLIS)
+    wdgConfig.rlr = IWATCHDOG_TIMEOUT_MILLIS * 1000U;
+#else
+    // Default 10 second timeout
+    wdgConfig.rlr = 10000U * 1000U;
+#endif
+
+    wdgStart(&WDGD1, &wdgConfig);
+}
+
+void Watchdog_Reset()
+{
+    wdgReset(&WDGD1);
+}
+
+#else // STM32 targets
+
 // Watchdog configuration structure required by ChibiOS
 #if (STM32_IWDG_IS_WINDOWED == TRUE)
 static WDGConfig wdgConfig = {STM32_IWDG_PR_256, STM32_IWDG_RL(0xFFF), 0x0FFF}; // default is max
@@ -79,3 +108,5 @@ void Watchdog_Reset()
 {
     wdgReset(&WDGD1);
 }
+
+#endif // RP2040 || RP2350
