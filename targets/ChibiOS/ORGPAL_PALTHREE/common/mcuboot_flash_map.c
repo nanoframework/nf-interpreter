@@ -54,8 +54,9 @@ static const struct flash_area s_flash_areas[] = {
 
 #define FLASH_AREA_TABLE_COUNT (sizeof(s_flash_areas) / sizeof(s_flash_areas[0]))
 
-static_assert(NF_MCUBOOT_SLOT_IMG1_SEC_SIZE / MCUBOOT_EXTERNAL_FLASH_SECTOR_SIZE <= MCUBOOT_MAX_IMG_SECTORS,
-              "Deploy secondary sector count exceeds MCUBOOT_MAX_IMG_SECTORS");
+static_assert(
+    NF_MCUBOOT_SLOT_IMG1_SEC_SIZE / MCUBOOT_EXTERNAL_FLASH_SECTOR_SIZE <= MCUBOOT_MAX_IMG_SECTORS,
+    "Deploy secondary sector count exceeds MCUBOOT_MAX_IMG_SECTORS");
 
 int flash_area_open(uint8_t id, const struct flash_area **area_outp)
 {
