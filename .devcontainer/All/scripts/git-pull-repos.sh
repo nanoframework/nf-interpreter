@@ -57,6 +57,10 @@ cd /sources/lwip || exit 1
 git pull origin STABLE-2_1_3_RELEASE
 cd /sources/littlefs || exit 1
 git pull origin v2.11.2
+# WHEN CHANGING THIS MAKE SURE TO UPDATE MCUBOOT_GIT_TAG IN CMake/Modules/FindMCUboot.cmake
+cd /sources/mcuboot || exit 1
+git fetch --depth=1 origin tag v2.3.0
+git checkout tags/v2.3.0
 cd /sources/SimpleLinkCC32 || exit 1
 git pull origin 4.10.00.07
 cd /sources/SimpleLinkCC13 || exit 1
