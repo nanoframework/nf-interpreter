@@ -82,6 +82,9 @@ RUN git clone --branch R0.16 https://github.com/abbrev/fatfs.git --depth 1 ./sou
     && cd ./sources/mbedtls \
     && git submodule update --init --recursive
 
+# Clone MCUboot (WHEN CHANGING VERSION, UPDATE CMake/Modules/FindMCUboot.cmake MCUBOOT_GIT_TAG)
+RUN git clone --branch v2.3.0 https://github.com/mcu-tools/mcuboot.git --depth 1 ./sources/mcuboot
+
 # set gcc location
 ARG TMP_GCC_PATH=/usr/local/bin/gcc
 ENV ARM_GCC_PATH=$TMP_GCC_PATH/bin

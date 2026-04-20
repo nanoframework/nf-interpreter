@@ -120,6 +120,9 @@ RUN git clone --branch R0.16 https://github.com/abbrev/fatfs.git --depth 1 ./sou
     && cd ./sources/mbedtls \
     && git submodule update --init --recursive
 
+# Clone MCUboot (WHEN CHANGING VERSION, UPDATE CMake/Modules/FindMCUboot.cmake MCUBOOT_GIT_TAG)
+RUN git clone --branch v2.3.0 https://github.com/mcu-tools/mcuboot.git --depth 1 ./sources/mcuboot
+
 # Clone FreeRTOS and what is needed for ESP32
 RUN git clone --branch V10.4.1-kernel-only https://github.com/FreeRTOS/FreeRTOS-Kernel.git --depth 1 ./sources/FreeRTOS \
     && git clone --branch 5.5.1 https://github.com/ARM-software/CMSIS_5.git --depth 1 ./sources/CMSIS_5
