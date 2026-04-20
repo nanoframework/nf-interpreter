@@ -147,6 +147,7 @@ if(${TARGET_SERIES} STREQUAL "STM32F7xx")
         ${CMAKE_SOURCE_DIR}/targets/ChibiOS/_mcuboot/startup_stm32f7.s
         ${CMAKE_SOURCE_DIR}/targets/ChibiOS/_mcuboot/system_stm32f7xx.c
         ${CMAKE_SOURCE_DIR}/targets/ChibiOS/_mcuboot/stm32f7_flash_bare.c
+        ${CMAKE_SOURCE_DIR}/targets/ChibiOS/_mcuboot/mcuboot_serial_port.c
     )
 
     # Include directories shared by all STM32F7xx bootloader targets.
@@ -162,16 +163,20 @@ if(${TARGET_SERIES} STREQUAL "STM32F7xx")
         # 3. MCUboot upstream bootutil public headers.
         ${mcuboot_SOURCE_DIR}/boot/bootutil/include
 
-        # 4. mbedTLS ASN.1 decoder headers.
+        # 4. MCUboot boot_serial include — provides boot_serial.h with the
+        #    boot_uart_funcs type used in boot_serial_start().
+        ${mcuboot_SOURCE_DIR}/boot/boot_serial/include
+
+        # 5. mbedTLS ASN.1 decoder headers.
         ${mcuboot_SOURCE_DIR}/ext/mbedtls-asn1/include
 
-        # 5. Tinycrypt headers.
+        # 6. Tinycrypt headers.
         ${mcuboot_SOURCE_DIR}/ext/tinycrypt/lib/include
 
-        # 6. CMSIS Device F7 headers (stm32f769xx.h, stm32f7xx.h, system_stm32f7xx.h).
+        # 7. CMSIS Device F7 headers (stm32f769xx.h, stm32f7xx.h, system_stm32f7xx.h).
         ${cmsis_device_f7_SOURCE_DIR}/Include
 
-        # 7. CMSIS Core headers (core_cm7.h, cmsis_gcc.h).
+        # 8. CMSIS Core headers (core_cm7.h, cmsis_gcc.h).
         ${cmsis_core_SOURCE_DIR}/Include
     )
 

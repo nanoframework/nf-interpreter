@@ -3,14 +3,16 @@
 // See LICENSE file in the project root for full license information.
 //
 
-// MCUboot flash_area_* porting layer for the standalone MCUboot bootloader binary
+// MCUboot flash_area_* porting layer for the standalone MCUboot bootloader
+// binary on ST_STM32F769I_DISCOVERY (STM32F769NI).
 //
 // This file is the bootloader-context counterpart to:
-//   targets/ChibiOS/ORGPAL_PALX/common/mcuboot_flash_map.c
+//   targets/ChibiOS/ST_STM32F769I_DISCOVERY/common/mcuboot_flash_map.c
 //
-// Key differences from the nanoCLR version:
-//   - Internal flash ops use stm32f7_flash_bare.c  (no ChibiOS STM32 flash HAL)
-//   - External flash ops use w25q512_qspi_bare.c   (no ChibiOS QSPI / QSPID1)
+// Secondary slots (SD card via FatFs) are stubbed out: mcuboot_ext_flash_init()
+// returns -1, and all external flash operations return an error. MCUboot treats
+// the secondary slots as unavailable and boots the primary slot directly.
+// Full FatFs integration is deferred to a later implementation step.
 
 #include <stdint.h>
 #include <stddef.h>
@@ -24,7 +26,6 @@
 
 #include "stm32_f7xx_flash.h"
 #include "stm32f7_flash_bare.h"
-#include "w25q512_qspi_bare.h"
 #include "mcuboot_flash_layout.h"
 #include "mcuboot_board_iface.h"
 
@@ -44,10 +45,11 @@ static_assert(
     NF_MCUBOOT_SLOT_IMG1_SEC_SIZE / MCUBOOT_EXTERNAL_FLASH_SECTOR_SIZE <= MCUBOOT_MAX_IMG_SECTORS,
     "Deploy secondary sector count exceeds MCUBOOT_MAX_IMG_SECTORS");
 
-// Board interface: initialise W25Q512 via bare-metal QUADSPI.
+// Board interface: SD card FatFs secondary slots — not yet integrated.
+// Returns -1 (non-fatal); MCUboot continues and boots the primary slot.
 int mcuboot_ext_flash_init(void)
 {
-    return w25q512_bare_init() ? 0 : -1;
+    return -1;
 }
 
 int flash_area_open(uint8_t id, const struct flash_area **area_outp)
@@ -77,7 +79,8 @@ int flash_area_read(const struct flash_area *area, uint32_t off, void *dst, uint
     }
     else
     {
-        return w25q512_bare_read((uint8_t *)dst, area->fa_off + off, len) ? 0 : -1;
+        // SD card FatFs not yet integrated.
+        return -1;
     }
 }
 
@@ -89,7 +92,8 @@ int flash_area_write(const struct flash_area *area, uint32_t off, const void *sr
     }
     else
     {
-        return w25q512_bare_write((const uint8_t *)src, area->fa_off + off, len) ? 0 : -1;
+        // SD card FatFs not yet integrated.
+        return -1;
     }
 }
 
@@ -111,17 +115,8 @@ int flash_area_erase(const struct flash_area *area, uint32_t off, uint32_t len)
     }
     else
     {
-        uint32_t erase_addr = area->fa_off + off;
-        uint32_t end = erase_addr + len;
-
-        while (erase_addr < end)
-        {
-            if (!w25q512_bare_erase(erase_addr))
-            {
-                return -1;
-            }
-            erase_addr += MCUBOOT_EXTERNAL_FLASH_SECTOR_SIZE;
-        }
+        // SD card FatFs not yet integrated.
+        return -1;
     }
 
     return 0;
