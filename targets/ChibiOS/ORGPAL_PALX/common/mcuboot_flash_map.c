@@ -30,8 +30,8 @@
 #include <assert.h>
 
 #include "flash_map_backend/flash_map_backend.h"
-#include "sysflash/sysflash.h"
 #include "mcuboot_config.h"
+#include "sysflash/sysflash.h"
 
 // stm32_f7xx_flash.h provides sector geometry helpers (stm32_f7xx_get_sector_size,
 // stm32_f7xx_next_sector_boundary). Forward-declare the HAL flash driver functions
