@@ -159,7 +159,7 @@ RUN mkdir -p  $HEX2DFU_PATH \
     && chmod +x  $HEX2DFU_PATH/hex2dfu
 
 # Installing python dependencies for the container
-RUN pip3 install --no-cache-dir pyserial "kconfiglib>=14.1.0"
+RUN pip3 install --no-cache-dir pyserial "kconfiglib>=14.1.0" imgtool
 
 # Install ESP-IDF
 ENV IDF_PATH=/sources/esp-idf
