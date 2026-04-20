@@ -45,6 +45,45 @@ extern "C"
     };
 
     //
+    // v2.3.0 accessor inlines — MCUboot internals use these instead of direct struct member access.
+    //
+
+    static inline uint8_t flash_area_get_id(const struct flash_area *fa)
+    {
+        return fa->fa_id;
+    }
+
+    static inline uint8_t flash_area_get_device_id(const struct flash_area *fa)
+    {
+        return fa->fa_device_id;
+    }
+
+    static inline uint32_t flash_area_get_off(const struct flash_area *fa)
+    {
+        return fa->fa_off;
+    }
+
+    static inline uint32_t flash_area_get_size(const struct flash_area *fa)
+    {
+        return fa->fa_size;
+    }
+
+    static inline uint32_t flash_sector_get_off(const struct flash_sector *fs)
+    {
+        return fs->fs_off;
+    }
+
+    static inline uint32_t flash_sector_get_size(const struct flash_sector *fs)
+    {
+        return fs->fs_size;
+    }
+
+    // Retrieve the flash sector within a flash area at a given byte offset.
+    // The nanoFramework porting layer populates sector geometry via flash_area_get_sectors();
+    // this entry point is required by bootutil_area.c in v2.3.0 for the SWAP_USING_OFFSET path.
+    int flash_area_get_sector(const struct flash_area *area, uint32_t off, struct flash_sector *sector);
+
+    //
     // Open a flash area by ID for subsequent read/write/erase operations.
     // Returns 0 on success, negative errno on failure.
     //

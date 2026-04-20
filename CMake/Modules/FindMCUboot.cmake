@@ -46,6 +46,7 @@ list(APPEND MCUboot_INCLUDE_DIRS
     ${mcuboot_SOURCE_DIR}/boot/bootutil/include
     ${mcuboot_SOURCE_DIR}/ext/mbedtls-asn1/include
     ${CMAKE_SOURCE_DIR}/MCUboot/include
+    ${CMAKE_SOURCE_DIR}/targets/ChibiOS/_common/mcuboot
 )
 
 # Convention: each MCUboot-enabled board must provide

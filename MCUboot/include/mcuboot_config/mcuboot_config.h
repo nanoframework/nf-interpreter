@@ -93,7 +93,9 @@
 //   - STM32F76xx 128kB sectors: 960kB / 128kB = 7.5 → 8 sectors
 //   - ESP32 4kB sectors: 1664kB / 4kB = 416 sectors  (< 512 ✓)
 //
+#ifndef MCUBOOT_MAX_IMG_SECTORS
 #define MCUBOOT_MAX_IMG_SECTORS 512
+#endif
 
 //
 // Multi-image configuration.
@@ -146,9 +148,9 @@
 // Watchdog — no watchdog in the bare-metal STM32 bootloader.
 // Define as a no-op; platform ports that use a watchdog should replace this.
 //
-#define MCUBOOT_WATCHDOG_FEED() \
-    do                          \
-    {                           \
+#define MCUBOOT_WATCHDOG_FEED()                                                                                        \
+    do                                                                                                                 \
+    {                                                                                                                  \
     } while (0)
 
 #endif // __MCUBOOT_CONFIG_H__

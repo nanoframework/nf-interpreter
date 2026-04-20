@@ -23,9 +23,6 @@ target_include_directories(nf_mcuboot_port PUBLIC
 # ---------------------------------------------------------------------- #
 
 # bootutil sources required for SWAP_USING_OFFSET + SIGN_EC256.
-# In v2.3.0 several functions that were in loader.c were moved into
-# dedicated compilation units (bootutil_loader.c, bootutil_area.c,
-# bootutil_img_hash.c, bootutil_find_key.c, bootutil_img_security_cnt.c).
 set(MCUBOOT_BOOTUTIL_SOURCES
     ${mcuboot_SOURCE_DIR}/boot/bootutil/src/loader.c
     ${mcuboot_SOURCE_DIR}/boot/bootutil/src/bootutil_misc.c
@@ -123,7 +120,7 @@ macro(nf_setup_mcuboot_target_build)
         COMMENT "Generating ${NANOMCUBOOTER_PROJECT_NAME}.bin and ${NANOMCUBOOTER_PROJECT_NAME}.hex"
     )
     add_custom_command(TARGET ${NANOMCUBOOTER_PROJECT_NAME}.elf POST_BUILD
-        COMMAND ${CMAKE_SIZE} --format=berkeley $<TARGET_FILE:${NANOMCUBOOTER_PROJECT_NAME}.elf>
+        COMMAND ${CMAKE_SIZE_UTIL} --format=berkeley $<TARGET_FILE:${NANOMCUBOOTER_PROJECT_NAME}.elf>
         COMMENT "MCUboot memory usage:"
     )
 

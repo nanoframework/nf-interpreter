@@ -27,6 +27,12 @@
 #include <stm32f769xx.h>
 #include <core_cm7.h>
 
+// Stub required by newlib-nano's __libc_init_array when -nostartfiles is used.
+// The bare-metal bootloader has no C++ static constructors, so this is a no-op.
+void __attribute__((weak)) _init(void)
+{
+}
+
 void SystemInit(void)
 {
     // 1. Enable the FPU.
