@@ -112,6 +112,7 @@ project(nanoFramework VERSION ${BUILD_VERSION} LANGUAGES C CXX ASM)
 
 set(NANOBOOTER_PROJECT_NAME "nanoBooter")
 set(NANOCLR_PROJECT_NAME "nanoCLR")
+set(NANOMCUBOOTER_PROJECT_NAME "nanoMcubooter")
 
 #######################
 message(STATUS "")
@@ -831,5 +832,11 @@ else()
     
     # add TARGET board directory
     add_subdirectory(${TARGET_BASE_LOCATION})
+
+    # Build the standalone MCUboot bootloader binary when enabled.
+    if(NF_FEATURE_HAS_MCUBOOT)
+        find_package(MCUboot REQUIRED)
+        add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/MCUboot)
+    endif()
 
 endif()
