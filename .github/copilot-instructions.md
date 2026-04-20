@@ -186,7 +186,8 @@ Each target board has:
 
 Follow the PR template at `.github/PULL_REQUEST_TEMPLATE.md`:
 - Provide a description, motivation/context, and testing details.
-- **Linking issues**: Use exactly one of the accepted verbs `Fixes`, `Closes`, or `Resolves` followed by the issue reference. All issues are tracked in the **Home** repository, so the pattern is always `Fixes/Closes/Resolves nanoFramework/Home#NNNN`. The template lists all three verbs — remove the ones that don't apply, leaving only the one verb and the correct issue number.
+- **Linking issues**: Use exactly one of the accepted verbs for GitHub mapping (`Fixes`, `Closes`, or `Resolves`) followed by the issue reference. All issues are tracked in the **Home** repository, so the pattern is always `Fixes/Closes/Resolves nanoFramework/Home#NNNN`. The template lists all three verbs — remove the ones that don't apply, leaving only the one verb and the correct issue number.
+- Sometimes a PR may not fully resolve an issue but only addresses part of it. In that case, link the issue in the description but do not use the closing verbs in the issue reference (e.g., "Progress towards nanoFramework/REPO-NAME#NNNN" or "Related to nanoFramework/REPO-NAME#NNNN") so the issue remains open until fully resolved.
 - **Change type checkboxes**: Tick **only** the boxes that genuinely describe the change. Each checkbox has a description of what it covers. The categories are mutually exclusive in intent:
   - `Improvement`, `Bug fix`, `New feature`, `Breaking change` — for changes to **source code and algorithms only**.
   - `Config and build` — for changes to the build system, CMake, pipelines, or Kconfig; **not** for source code bugs or features.
@@ -194,6 +195,7 @@ Follow the PR template at `.github/PULL_REQUEST_TEMPLATE.md`:
   - `Dependencies/declarations` — for dependency updates or assembly declaration changes only.
   - `Documentation` — for documentation-only changes.
   - Do **not** tick multiple categories from different groups (e.g., do not tick both `Bug fix` and `Config and build` for a pipeline fix — only `Config and build` applies).
+  - Do **not** remove check box that aren't ticked — the template is designed to cover all change types, so if a box doesn't apply, simply leave it unticked but do not delete it.
 - Ensure code follows the project style (`.clang-format`).
 - Contributing guidelines are at `https://github.com/nanoframework/.github/blob/main/CONTRIBUTING.md`.
 
