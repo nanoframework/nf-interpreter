@@ -2287,10 +2287,17 @@ struct CLR_RT_MethodDef_Instance : public CLR_RT_MethodDef_Index
     //--//
 
     bool InitializeFromIndex(const CLR_RT_MethodDef_Index &index);
-    bool InitializeFromIndex(const CLR_RT_MethodDef_Index &index, const CLR_RT_TypeSpec_Index &typeSpec);
+    bool InitializeFromIndex(
+        const CLR_RT_MethodDef_Index &index,
+        const CLR_RT_TypeSpec_Index &typeSpec,
+        const CLR_RT_MethodDef_Instance *caller = nullptr);
     void ClearInstance();
 
-    bool ResolveToken(CLR_UINT32 tk, CLR_RT_Assembly *assm, const CLR_RT_TypeSpec_Index *callerGeneric);
+    bool ResolveToken(
+        CLR_UINT32 tk,
+        CLR_RT_Assembly *assm,
+        const CLR_RT_TypeSpec_Index *callerGeneric,
+        const CLR_RT_MethodDef_Instance *caller = nullptr);
 
     bool GetDeclaringType(CLR_RT_TypeDef_Instance &declType) const;
 

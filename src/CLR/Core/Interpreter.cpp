@@ -2275,7 +2275,7 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                         }
                     }
 
-                    if (calleeInst.ResolveToken(arg, assm, effectiveCallerGeneric) == false)
+                    if (calleeInst.ResolveToken(arg, assm, effectiveCallerGeneric, &stack->m_call) == false)
                     {
                         NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
                     }
@@ -2417,11 +2417,20 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                                         // TypeSpec
                                         if (calleeInst.genericType && NANOCLR_INDEX_IS_VALID(*calleeInst.genericType))
                                         {
-                                            calleeInst.InitializeFromIndex(calleeReal, *calleeInst.genericType);
+                                            if (calleeInst.InitializeFromIndex(
+                                                    calleeReal,
+                                                    *calleeInst.genericType,
+                                                    &stack->m_call) == false)
+                                            {
+                                                NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+                                            }
                                         }
                                         else
                                         {
-                                            calleeInst.InitializeFromIndex(calleeReal);
+                                            if (calleeInst.InitializeFromIndex(calleeReal) == false)
+                                            {
+                                                NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+                                            }
                                         }
 
                                         // Restore the array element type after reinitializing calleeInst
@@ -2660,7 +2669,7 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                     // Set arrayElementType before ResolveToken so generic type resolution can use it
                     calleeInst.arrayElementType = propagatedArrayElementType;
 
-                    if (calleeInst.ResolveToken(arg, assm, stack->m_call.genericType) == false)
+                    if (calleeInst.ResolveToken(arg, assm, stack->m_call.genericType, &stack->m_call) == false)
                     {
                         NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
                     }
@@ -2685,11 +2694,10 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                         // check that...
                         //
                         changes = -calleeInst.target->argumentsCount;
-                        NANOCLR_CHECK_HRESULT(
-                            CLR_Checks::VerifyStackOK(
-                                *stack,
-                                stack->m_evalStackPos,
-                                changes)); // Check to see if we have enough parameters.
+                        NANOCLR_CHECK_HRESULT(CLR_Checks::VerifyStackOK(
+                            *stack,
+                            stack->m_evalStackPos,
+                            changes)); // Check to see if we have enough parameters.
                         stack->m_evalStackPos += changes;
 
                         top = stack->m_evalStackPos++; // Push back the result.
@@ -2725,11 +2733,10 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                     else
                     {
                         changes = calleeInst.target->argumentsCount;
-                        NANOCLR_CHECK_HRESULT(
-                            CLR_Checks::VerifyStackOK(
-                                *stack,
-                                stack->m_evalStackPos,
-                                -changes)); // Check to see if we have enough parameters.
+                        NANOCLR_CHECK_HRESULT(CLR_Checks::VerifyStackOK(
+                            *stack,
+                            stack->m_evalStackPos,
+                            -changes)); // Check to see if we have enough parameters.
                         top = stack->m_evalStackPos;
 
                         //
