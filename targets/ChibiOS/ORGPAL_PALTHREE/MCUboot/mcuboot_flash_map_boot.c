@@ -37,8 +37,9 @@ static const struct flash_area s_flash_areas[] = {
 
 #define FLASH_AREA_TABLE_COUNT (sizeof(s_flash_areas) / sizeof(s_flash_areas[0]))
 
-static_assert(NF_MCUBOOT_SLOT_IMG1_SEC_SIZE / MCUBOOT_EXTERNAL_FLASH_SECTOR_SIZE <= MCUBOOT_MAX_IMG_SECTORS,
-              "Deploy secondary sector count exceeds MCUBOOT_MAX_IMG_SECTORS");
+static_assert(
+    NF_MCUBOOT_SLOT_IMG1_SEC_SIZE / MCUBOOT_EXTERNAL_FLASH_SECTOR_SIZE <= MCUBOOT_MAX_IMG_SECTORS,
+    "Deploy secondary sector count exceeds MCUBOOT_MAX_IMG_SECTORS");
 
 // Board interface: initialise AT25SF641 via bare-metal SPI1.
 int mcuboot_ext_flash_init(void)

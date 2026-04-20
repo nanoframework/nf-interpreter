@@ -12,9 +12,10 @@ const unsigned char ecdsa_pub_key[] = {
 const unsigned int ecdsa_pub_key_len = 91;
 
 const struct bootutil_key bootutil_keys[] = {
-    [0] = {
-        .key = ecdsa_pub_key,
-        .len = &ecdsa_pub_key_len,
-    },
+    [0] =
+        {
+            .key = ecdsa_pub_key,
+            .len = &ecdsa_pub_key_len,
+        },
 };
 const int bootutil_key_cnt = 1;
