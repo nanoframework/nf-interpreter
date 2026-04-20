@@ -30,6 +30,13 @@ nf_setup_target_build(
         ",--library-path=${CMAKE_SOURCE_DIR}/targets/ChibiOS/_common,--defsym=__main_stack_size__=0x400,--defsym=__process_stack_size__=0x800,--defsym=__crt_heap_size__=0x3B000"
 )
 
+# MCUboot: add bootutil include path so nanoCLR can call boot_set_confirmed()
+if(NF_FEATURE_HAS_MCUBOOT)
+    target_include_directories(${NANOCLR_PROJECT_NAME}.elf PRIVATE
+        ${mcuboot_SOURCE_DIR}/boot/bootutil/include
+    )
+endif()
+
 # if HEX2DFU tool is available pack the binaries into a DFU package
 # not applicable for MCUboot targets (no nanoBooter)
 if(HEX2DFU_TOOL_AVAILABLE AND NOT NF_FEATURE_HAS_MCUBOOT)

@@ -16,7 +16,7 @@
             "hidden": false,
             "cacheVariables": {
                 "NF_TARGET_DEFCONFIG": "targets/ChibiOS/ORGPAL_PALX/defconfig",
-                "NF_MCUBOOT_SLOT_SIZE": "0x190000",
+                "NF_MCUBOOT_SLOT_SIZE": "0xB0000",
                 "NF_MCUBOOT_SIGNING_KEY": "${sourceDir}/MCUboot/keys/dev-signing-key.pem"
             }
         }
