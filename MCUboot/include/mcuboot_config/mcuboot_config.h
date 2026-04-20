@@ -123,7 +123,10 @@
 // Enabled per target via CONFIG_NF_MCUBOOT_SERIAL_RECOVERY=y in Kconfig.
 //
 #if defined(CONFIG_NF_MCUBOOT_SERIAL_RECOVERY)
-#define MCUBOOT_SERIAL 1
+#define MCUBOOT_SERIAL              1
+#define MCUBOOT_SERIAL_DETECT_DELAY 100
+// Disable the LED status pin — avoids os_cputime dependency in boot_serial.c.
+#define BOOT_SERIAL_REPORT_PIN -1
 #endif
 
 //

@@ -30,4 +30,9 @@
 // In the bootloader context this allows boot even when primary slot signature
 // validation is skipped (debug/development builds).
 
+// Serial recovery mode: detect BUTTON_BOOT pin and enter recovery if pressed.
+// Enables MCUBOOT_SERIAL=1 in mcuboot_config.h. boot_serial_start() is currently
+// a stub — full SMP serial stack is deferred to a later step.
+#define CONFIG_NF_MCUBOOT_SERIAL_RECOVERY 1
+
 #endif // NF_CONFIG_MCUBOOT_STUB_H

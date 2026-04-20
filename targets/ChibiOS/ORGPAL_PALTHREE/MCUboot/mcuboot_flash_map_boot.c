@@ -15,9 +15,10 @@
 #include <string.h>
 #include <assert.h>
 
+#include "mcuboot_config.h"
+
 #include "flash_map_backend/flash_map_backend.h"
 #include "sysflash/sysflash.h"
-#include "mcuboot_config.h"
 
 #include "stm32_f7xx_flash.h"
 #include "stm32f7_flash_bare.h"
