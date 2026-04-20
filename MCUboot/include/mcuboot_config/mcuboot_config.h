@@ -136,10 +136,19 @@
 #endif
 
 //
-// Logging — enable MCUboot's internal log output.
-// The platform port must provide MCUBOOT_LOG_MODULE_DECLARE / MCUBOOT_LOG_ERR etc.
-// wrappers redirecting to the nanoFramework trace infrastructure.
+// Logging — disabled for the bare-metal STM32 bootloader.
+// There is no UART or semihosting infrastructure in the bare-metal build.
+// Define MCUBOOT_HAVE_LOGGING and provide mcuboot_logging.h when adding a log backend.
 //
-#define MCUBOOT_HAVE_LOGGING 1
+// #define MCUBOOT_HAVE_LOGGING 1
+
+//
+// Watchdog — no watchdog in the bare-metal STM32 bootloader.
+// Define as a no-op; platform ports that use a watchdog should replace this.
+//
+#define MCUBOOT_WATCHDOG_FEED() \
+    do                          \
+    {                           \
+    } while (0)
 
 #endif // __MCUBOOT_CONFIG_H__

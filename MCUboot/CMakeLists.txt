@@ -23,10 +23,18 @@ target_include_directories(nf_mcuboot_port PUBLIC
 # ---------------------------------------------------------------------- #
 
 # bootutil sources required for SWAP_USING_OFFSET + SIGN_EC256.
+# In v2.3.0 several functions that were in loader.c were moved into
+# dedicated compilation units (bootutil_loader.c, bootutil_area.c,
+# bootutil_img_hash.c, bootutil_find_key.c, bootutil_img_security_cnt.c).
 set(MCUBOOT_BOOTUTIL_SOURCES
     ${mcuboot_SOURCE_DIR}/boot/bootutil/src/loader.c
     ${mcuboot_SOURCE_DIR}/boot/bootutil/src/bootutil_misc.c
     ${mcuboot_SOURCE_DIR}/boot/bootutil/src/bootutil_public.c
+    ${mcuboot_SOURCE_DIR}/boot/bootutil/src/bootutil_loader.c
+    ${mcuboot_SOURCE_DIR}/boot/bootutil/src/bootutil_area.c
+    ${mcuboot_SOURCE_DIR}/boot/bootutil/src/bootutil_img_hash.c
+    ${mcuboot_SOURCE_DIR}/boot/bootutil/src/bootutil_find_key.c
+    ${mcuboot_SOURCE_DIR}/boot/bootutil/src/bootutil_img_security_cnt.c
     ${mcuboot_SOURCE_DIR}/boot/bootutil/src/image_validate.c
     ${mcuboot_SOURCE_DIR}/boot/bootutil/src/image_ecdsa.c
     ${mcuboot_SOURCE_DIR}/boot/bootutil/src/swap_misc.c
@@ -126,6 +134,13 @@ endmacro()
 # ---------------------------------------------------------------------- #
 
 if(${TARGET_SERIES} STREQUAL "STM32F7xx")
+
+    # Fetch the CMSIS source-dir variables — they are set as internal non-cache variables by
+    # FetchContent_MakeAvailable in sibling subdirectories and are therefore not in scope here.
+    # Calling FetchContent_GetProperties locally makes them visible in this CMakeLists.txt scope.
+    include(FetchContent)
+    FetchContent_GetProperties(cmsis_device_f7)
+    FetchContent_GetProperties(cmsis_core)
 
     # Bare-metal port sources shared by all STM32F7xx boards.
     # Order matters: _mcuboot must be first so the stub nf_config.h is found

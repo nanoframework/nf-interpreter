@@ -39,8 +39,10 @@
 #define FLASH_CR_PSIZE_MASK (~(3U << 8U))
 
 // FLASH_SR error bits (RM0410 Table 4).
+// Note: RM0410 uses ERSERR (bit 7, erase sequence error) — CMSIS uses ERSERR_Msk.
+// There is no RDERR bit in STM32F769 FLASH_SR.
 #define FLASH_SR_ERRORS                                                                                                    \
-    (FLASH_SR_PGSERR | FLASH_SR_PGPERR | FLASH_SR_PGAERR | FLASH_SR_WRPERR | FLASH_SR_RDERR | FLASH_SR_OPERR)
+    (FLASH_SR_ERSERR | FLASH_SR_PGPERR | FLASH_SR_PGAERR | FLASH_SR_WRPERR | FLASH_SR_OPERR)
 
 // ----------------------------------------------------------------------- //
 // Internal helpers                                                         //
