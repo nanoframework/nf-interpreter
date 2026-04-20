@@ -227,3 +227,45 @@ int flash_area_id_from_image_slot(int slot)
 {
     return flash_area_id_from_multi_image_slot(0, slot);
 }
+
+int flash_area_get_sector(const struct flash_area *area, uint32_t off, struct flash_sector *sector)
+{
+    if (off >= area->fa_size)
+    {
+        return -1;
+    }
+
+    if (area->fa_device_id == FLASH_DEVICE_INTERNAL_FLASH)
+    {
+        uint32_t addr = area->fa_off;
+        uint32_t end = area->fa_off + area->fa_size;
+        uint32_t target = area->fa_off + off;
+
+        while (addr < end)
+        {
+            uint32_t sz = stm32_f7xx_get_sector_size(addr);
+            if (sz == 0U)
+            {
+                return -1;
+            }
+
+            if (target >= addr && target < addr + sz)
+            {
+                sector->fs_off = addr - area->fa_off;
+                sector->fs_size = sz;
+                return 0;
+            }
+
+            addr += sz;
+        }
+
+        return -1;
+    }
+    else
+    {
+        uint32_t idx = off / MCUBOOT_EXTERNAL_FLASH_SECTOR_SIZE;
+        sector->fs_off = idx * MCUBOOT_EXTERNAL_FLASH_SECTOR_SIZE;
+        sector->fs_size = MCUBOOT_EXTERNAL_FLASH_SECTOR_SIZE;
+        return 0;
+    }
+}
