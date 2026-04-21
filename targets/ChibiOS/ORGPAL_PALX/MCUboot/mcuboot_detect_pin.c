@@ -22,20 +22,14 @@
 
 #if defined(MCUBOOT_SERIAL)
 
-#include <stm32f7xx.h>
-#include <core_cm7.h>
+#include "hal.h"
 
 bool boot_serial_detect_pin(void)
 {
-    // Enable GPIOK clock (matches board.h: input floating, external pull-up).
-    RCC->AHB1ENR |= RCC_AHB1ENR_GPIOKEN;
-    __DSB();
-
-    // Ensure PK7 is in input mode (MODER bits [15:14] = 00).
-    GPIOK->MODER &= ~(3U << (7U * 2U));
-
-    // Active-LOW: return true when button is pressed (line pulled LOW).
-    return (GPIOK->IDR & (1U << 7U)) == 0U;
+    // GPIOK7: input with external pull-up, active-LOW.
+    // board.c / boardInit() already configures this pin as input.
+    // palReadPad() returns 0 when the button is pressed (line pulled LOW).
+    return palReadPad(GPIOK, GPIOK_BUTTON_BOOT) == 0U;
 }
 
 #endif // MCUBOOT_SERIAL

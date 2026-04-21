@@ -3,7 +3,7 @@
 // See LICENSE file in the project root for full license information.
 //
 
-// MCUboot flash_area_* porting layer for the standalone MCUboot bootloader
+// MCUboot flash_area_* porting layer for the ChibiOS MCUboot bootloader
 // binary on ORGPAL_PALTHREE (STM32F769ZI).
 //
 // This file is the bootloader-context counterpart to:
@@ -21,10 +21,13 @@
 #include "sysflash/sysflash.h"
 
 #include "stm32_f7xx_flash.h"
-#include "stm32f7_flash_bare.h"
-#include "at25sf641_spi_bare.h"
+#include "at25sf641_spi_chibios.h"
 #include "mcuboot_flash_layout.h"
 #include "mcuboot_board_iface.h"
+
+// Forward declarations for nf-overlay internal flash API (hal_stm32_flash.h).
+int stm32FlashWrite(uint32_t startAddress, uint32_t length, const uint8_t *buffer);
+int stm32FlashErase(uint32_t address);
 
 // clang-format off
 static const struct flash_area s_flash_areas[] = {
@@ -42,7 +45,7 @@ static_assert(
     NF_MCUBOOT_SLOT_IMG1_SEC_SIZE / MCUBOOT_EXTERNAL_FLASH_SECTOR_SIZE <= MCUBOOT_MAX_IMG_SECTORS,
     "Deploy secondary sector count exceeds MCUBOOT_MAX_IMG_SECTORS");
 
-// Board interface: initialise AT25SF641 via bare-metal SPI1.
+// Board interface: initialise AT25SF641 via ChibiOS SPI1 HAL.
 int mcuboot_ext_flash_init(void)
 {
     return at25sf641_bare_init() ? 0 : -1;
@@ -83,7 +86,7 @@ int flash_area_write(const struct flash_area *area, uint32_t off, const void *sr
 {
     if (area->fa_device_id == FLASH_DEVICE_INTERNAL_FLASH)
     {
-        return stm32f7_flash_write(area->fa_off + off, len, (const uint8_t *)src);
+        return stm32FlashWrite(area->fa_off + off, len, (const uint8_t *)src);
     }
     else
     {
@@ -100,7 +103,7 @@ int flash_area_erase(const struct flash_area *area, uint32_t off, uint32_t len)
 
         while (erase_addr < end)
         {
-            if (stm32f7_flash_erase(erase_addr) != 0)
+            if (stm32FlashErase(erase_addr) != 0)
             {
                 return -1;
             }

@@ -1,158 +1,128 @@
 /*
- * Copyright (c) .NET Foundation and Contributors
- * See LICENSE file in the project root for full license information.
- *
- * Linker script for the standalone MCUboot bootloader on STM32F769ZI.
- *
- * Memory map:
- *   flash (32 kB) — MCUboot bootloader code + read-only data
- *   ram   (128 kB) — DTCM-RAM: stack, .data, .bss, heap
- *                    DTCM is directly connected to the Cortex-M7 core and
- *                    does not require D-cache management, which simplifies
- *                    bare-metal operation.
- *
- * The bootloader occupies flash sector 0 (32 kB).
- * It must not overlap the config sector 1 at 0x08008000 or the nanoCLR
- * primary slot at 0x08010000.
- *
- * Stack and heap sizing:
- *   _Min_Stack_Size = 4 kB  — adequate for MCUboot + ECDSA verification.
- *   _Min_Heap_Size  = 8 kB  — required by MCUboot's os_heap.h (stdlib malloc).
- */
+//
+// Copyright (c) .NET Foundation and Contributors
+// Portions Copyright (c) 2006..2015 Giovanni Di Sirio. All rights reserved.
+// See LICENSE file in the project root for full license information.
+//
+*/
 
+/*
+ * STM32F76xx MCUboot bootloader linker script for ORGPAL_PALTHREE (STM32F769ZI).
+ *
+ * Based on the nanoBooter STM32F76xx_booter.ld for this board, with the
+ * following changes:
+ *   - bootclpbrd region removed (no boot clipboard in the MCUboot bootloader)
+ *   - INCLUDE rules_bootclipboard.ld removed
+ *   - ram3 expanded back to full 128 kB (org = 0x20000000)
+ *
+ * RAM0 - Data, Heap.
+ * RAM3 - Main Stack, Process Stack, BSS, NOCACHE, ETH.
+ */
 MEMORY
 {
-    flash (rx)  : ORIGIN = 0x08000000, LENGTH = 32K
-    ram   (rwx) : ORIGIN = 0x20000000, LENGTH = 128K
+    flash0     (rx) : org = 0x08000000, len = 32k     /* MCUboot bootloader (sector 0) */
+    flash1     (rx) : org = 0x00200000, len = 32k     /* ITCM alias of flash0 */
+    flash2     (rx) : org = 0x00000000, len = 0
+    flash3     (rx) : org = 0x00000000, len = 0
+    flash4     (rx) : org = 0x00000000, len = 0
+    flash5     (rx) : org = 0x00000000, len = 0
+    flash6     (rx) : org = 0x00000000, len = 0
+    flash7     (rx) : org = 0x00000000, len = 0
+    config     (rw) : org = 0x08008000, len = 32k     /* configuration block */
+    deployment (rx) : org = 0x00000000, len = 0
+    ramvt      (wx) : org = 0x00000000, len = 0
+    ram0       (wx) : org = 0x20020000, len = 384k    /* SRAM1 + SRAM2 */
+    ram1       (wx) : org = 0x20020000, len = 368k    /* SRAM1 */
+    ram2       (wx) : org = 0x2007C000, len = 16k     /* SRAM2 */
+    ram3       (wx) : org = 0x20000000, len = 128k    /* DTCM-RAM (full — no boot clipboard) */
+    ram4       (wx) : org = 0x00000000, len = 16k     /* ITCM-RAM */
+    ram5       (wx) : org = 0x40024000, len = 4k      /* BCKP SRAM */
+    ram6       (wx) : org = 0x00000000, len = 0
+    ram7       (wx) : org = 0x00000000, len = 0
 }
 
-_Min_Stack_Size = 0x1000;   /* 4 kB minimum stack   */
-_Min_Heap_Size  = 0x2000;   /* 8 kB minimum heap    */
+/* Flash region to be used for exception vectors.*/
+REGION_ALIAS("VECTORS_FLASH", flash1);
+REGION_ALIAS("VECTORS_FLASH_LMA", flash0);
 
-ENTRY(Reset_Handler)
+/* Flash region to be used for constructors and destructors.*/
+REGION_ALIAS("XTORS_FLASH", flash1);
+REGION_ALIAS("XTORS_FLASH_LMA", flash0);
+
+/* Flash region to be used for code text.*/
+REGION_ALIAS("TEXT_FLASH", flash1);
+REGION_ALIAS("TEXT_FLASH_LMA", flash0);
+
+/* Flash region to be used for read only data.*/
+REGION_ALIAS("RODATA_FLASH", flash0);
+REGION_ALIAS("RODATA_FLASH_LMA", flash0);
+
+/* Flash region to be used for various.*/
+REGION_ALIAS("VARIOUS_FLASH", flash1);
+REGION_ALIAS("VARIOUS_FLASH_LMA", flash0);
+
+/* Flash region to be used for RAM(n) initialization data.*/
+REGION_ALIAS("RAM_INIT_FLASH_LMA", flash0);
+
+/* RAM region for the main stack.*/
+REGION_ALIAS("MAIN_STACK_RAM", ram3);
+
+/* RAM region for the process stack.*/
+REGION_ALIAS("PROCESS_STACK_RAM", ram3);
+
+/* RAM region for .data segment.*/
+REGION_ALIAS("DATA_RAM", ram0);
+REGION_ALIAS("DATA_RAM_LMA", flash0);
+
+/* RAM region for .bss segment.*/
+REGION_ALIAS("BSS_RAM", ram3);
+
+/* RAM region for the default heap.*/
+REGION_ALIAS("HEAP_RAM", ram0);
+
+/* rules inclusion.*/
+INCLUDE rules_stacks.ld
+
+/*===========================================================================*/
+/* Custom sections for STM32F7xx.                                            */
+/*===========================================================================*/
+
+/* RAM region for nocache segment.*/
+REGION_ALIAS("NOCACHE_RAM", ram3);
+
+/* RAM region for eth segment.*/
+REGION_ALIAS("ETH_RAM", ram3);
 
 SECTIONS
 {
-    /* Interrupt vector table — must be at the start of flash. */
-    .isr_vector :
+    /* Special section for non cache-able areas.*/
+    .nocache (NOLOAD) : ALIGN(4)
     {
-        . = ALIGN(512);
-        KEEP(*(.isr_vector))
+        __nocache_base__ = .;
+        *(.nocache)
+        *(.nocache.*)
+        *(.bss.__nocache_*)
         . = ALIGN(4);
-    } > flash
+        __nocache_end__ = .;
+    } > NOCACHE_RAM
 
-    /* Code and read-only data. */
-    .text :
+    /* Special section for Ethernet DMA non cache-able areas.*/
+    .eth (NOLOAD) : ALIGN(4)
     {
+        __eth_base__ = .;
+        *(.eth)
+        *(.eth.*)
+        *(.bss.__eth_*)
         . = ALIGN(4);
-        *(.text)
-        *(.text*)
-        *(.glue_7)
-        *(.glue_7t)
-        *(.eh_frame)
-
-        KEEP(*(.init))
-        KEEP(*(.fini))
-
-        . = ALIGN(4);
-        _etext = .;
-    } > flash
-
-    /* Read-only data. */
-    .rodata :
-    {
-        . = ALIGN(4);
-        *(.rodata)
-        *(.rodata*)
-        . = ALIGN(4);
-    } > flash
-
-    /* ARM exception unwind tables (required for C++ and newlib). */
-    .ARM.extab :
-    {
-        *(.ARM.extab* .gnu.linkonce.armextab.*)
-    } > flash
-
-    .ARM :
-    {
-        __exidx_start = .;
-        *(.ARM.exidx*)
-        __exidx_end = .;
-    } > flash
-
-    /* C++ constructor/destructor lists. */
-    .preinit_array :
-    {
-        PROVIDE_HIDDEN(__preinit_array_start = .);
-        KEEP(*(.preinit_array*))
-        PROVIDE_HIDDEN(__preinit_array_end = .);
-    } > flash
-
-    .init_array :
-    {
-        PROVIDE_HIDDEN(__init_array_start = .);
-        KEEP(*(SORT(.init_array.*)))
-        KEEP(*(.init_array*))
-        PROVIDE_HIDDEN(__init_array_end = .);
-    } > flash
-
-    .fini_array :
-    {
-        PROVIDE_HIDDEN(__fini_array_start = .);
-        KEEP(*(SORT(.fini_array.*)))
-        KEEP(*(.fini_array*))
-        PROVIDE_HIDDEN(__fini_array_end = .);
-    } > flash
-
-    /* Initialised data: LMA in flash, VMA in RAM. */
-    /* _sidata is the load address (LMA) used by Reset_Handler. */
-    _sidata = LOADADDR(.data);
-
-    .data :
-    {
-        . = ALIGN(4);
-        _sdata = .;
-        *(.data)
-        *(.data*)
-        . = ALIGN(4);
-        _edata = .;
-    } > ram AT > flash
-
-    /* Zero-initialised data. */
-    .bss :
-    {
-        . = ALIGN(4);
-        _sbss = .;
-        __bss_start__ = _sbss;
-        *(.bss)
-        *(.bss*)
-        *(COMMON)
-        . = ALIGN(4);
-        _ebss = .;
-        __bss_end__ = _ebss;
-    } > ram
-
-    /* Heap — grows upward from _end toward the stack. */
-    ._user_heap_stack :
-    {
-        . = ALIGN(8);
-        PROVIDE(end = .);
-        PROVIDE(_end = .);
-        . = . + _Min_Heap_Size;
-        . = . + _Min_Stack_Size;
-        . = ALIGN(8);
-    } > ram
-
-    /* _estack — initial Main Stack Pointer (top of RAM region). */
-    _estack = ORIGIN(ram) + LENGTH(ram);
-
-    /* Discard C++ exception unwind info (not needed in bare-metal bootloader). */
-    /DISCARD/ :
-    {
-        libc.a   (*)
-        libm.a   (*)
-        libgcc.a (*)
-    }
-
-    .ARM.attributes 0 : { *(.ARM.attributes) }
+        __eth_end__ = .;
+    } > ETH_RAM
 }
+
+/* Code rules inclusion.*/
+INCLUDE rules_code.ld
+
+/* Data rules inclusion.*/
+INCLUDE rules_data.ld
+
+/* Data rules inclusion.*/
+INCLUDE rules_memory.ld
