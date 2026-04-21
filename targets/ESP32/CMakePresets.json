@@ -247,6 +247,32 @@
             }
         },
         {
+            "name": "ESP32_P4_UART_REV_LESS3",
+            "inherits": [
+                "riscv-esp32p4-preset",
+                "user-tools-repos",
+                "user-prefs"
+            ],
+            "hidden": false,
+            "cacheVariables": {
+                "TARGET_NAME": "${presetName}",
+                "NF_TARGET_DEFCONFIG": "targets/ESP32/defconfig/ESP32_P4_UART_REV_LESS3_defconfig"
+            }
+        },
+        {
+            "name": "ESP32_P4_USB_REV_LESS3",
+            "inherits": [
+                "riscv-esp32p4-preset",
+                "user-tools-repos",
+                "user-prefs"
+            ],
+            "hidden": false,
+            "cacheVariables": {
+                "TARGET_NAME": "${presetName}",
+                "NF_TARGET_DEFCONFIG": "targets/ESP32/defconfig/ESP32_P4_USB_REV_LESS3_defconfig"
+            }
+        },
+        {
             "name": "ESP32_S3",
             "inherits": [
                 "xtensa-esp32s3-preset",
@@ -811,6 +837,18 @@
             "name": "ESP32_P4_USB",
             "displayName": "ESP32_P4_USB",
             "configurePreset": "ESP32_P4_USB"
+        },
+        {
+            "inherits": "base-user",
+            "name": "ESP32_P4_UART_REV_LESS3",
+            "displayName": "ESP32_P4_UART_REV_LESS3",
+            "configurePreset": "ESP32_P4_UART_REV_LESS3"
+        },
+        {
+            "inherits": "base-user",
+            "name": "ESP32_P4_USB_REV_LESS3",
+            "displayName": "ESP32_P4_USB_REV_LESS3",
+            "configurePreset": "ESP32_P4_USB_REV_LESS3"
         }
     ]
 }

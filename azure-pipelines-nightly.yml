@@ -639,6 +639,24 @@ jobs:
           PackageName: ESP32_P4_USB
           CMakePreset: ESP32_P4_USB
 
+        ESP32_P4_USB_REV_LESS3:
+          TargetBoard: ESP32_P4
+          TargetSeries: "esp32p4"
+          BuildOptions:
+          IDF_Target: esp32p4
+          TargetName: ESP32_P4_USB_REV_LESS3
+          PackageName: ESP32_P4_USB_REV_LESS3
+          CMakePreset: ESP32_P4_USB_REV_LESS3
+
+        ESP32_P4_UART_REV_LESS3:
+          TargetBoard: ESP32_P4
+          TargetSeries: "esp32p4"
+          BuildOptions:
+          IDF_Target: esp32p4
+          TargetName: ESP32_P4_UART_REV_LESS3
+          PackageName: ESP32_P4_UART_REV_LESS3
+          CMakePreset: ESP32_P4_UART_REV_LESS3
+
         ESP32_C5_THREAD_USB:
           TargetBoard: ESP32_C5
           TargetSeries: "esp32c5"
