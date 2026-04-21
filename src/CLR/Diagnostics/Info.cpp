@@ -972,6 +972,19 @@ void CLR_RT_Assembly::DumpOpcode(CLR_RT_StackFrame *stack, CLR_PMETADATA ip)
     if (s_CLR_RT_fTrace_Instructions >= c_CLR_RT_Trace_Verbose)
     {
         inst = stack->m_call;
+
+        // When the current frame has an open generic type (contains MVAR) but no MethodSpec,
+        // inherit the caller frame's MethodSpec so BuildTypeName can resolve the MVAR to its
+        // concrete type (e.g. List<MVAR_0> + caller MethodSpec<String> -> List<String>).
+        if (!NANOCLR_INDEX_IS_VALID(inst.methodSpec) && inst.genericType != nullptr &&
+            NANOCLR_INDEX_IS_VALID(*inst.genericType))
+        {
+            CLR_RT_StackFrame *caller = stack->Caller();
+            if (caller != nullptr && NANOCLR_INDEX_IS_VALID(caller->m_call.methodSpec))
+            {
+                inst.methodSpec = caller->m_call.methodSpec;
+            }
+        }
     }
     else
     {
@@ -1012,10 +1025,40 @@ void CLR_RT_Assembly::DumpOpcodeDirect(
         if (op == CEE_CALL || op == CEE_CALLVIRT)
         {
             CLR_RT_MethodDef_Instance mdInst{};
-            if (NANOCLR_INDEX_IS_VALID(call) && mdInst.ResolveToken(token, call.assembly, call.genericType))
+            // Resolve the call token using the caller's assembly and generic context.
+            // Pass null for genericType on the first attempt (avoids mismatching an open TypeSpec
+            // against a non-generic declaring type such as System.Object::.ctor).
+            if (NANOCLR_INDEX_IS_VALID(call) && mdInst.ResolveToken(token, call.assembly, nullptr, &call))
             {
+                // If the first resolve found that the method's declaring type is generic (open TypeSpec),
+                // retry with call.genericType to get the closed form for display (e.g. List<String>::Add).
+                // Do NOT retry for non-generic declaring types (e.g. Object::.ctor) where genericType is null.
+                if (mdInst.genericType != nullptr && NANOCLR_INDEX_IS_VALID(*mdInst.genericType) &&
+                    call.genericType != nullptr && NANOCLR_INDEX_IS_VALID(*call.genericType))
+                {
+                    CLR_RT_MethodDef_Instance mdInstWithGeneric{};
+                    if (mdInstWithGeneric.ResolveToken(token, call.assembly, call.genericType, &call))
+                    {
+                        mdInst = mdInstWithGeneric;
+                    }
+                }
+
+                // If the resolved method's genericType is still open (has MVAR) but the calling frame
+                // has an inherited methodSpec, propagate it so BuildMethodName can close the MVAR args.
+                if (!NANOCLR_INDEX_IS_VALID(mdInst.methodSpec) &&
+                    mdInst.genericType != nullptr &&
+                    NANOCLR_INDEX_IS_VALID(*mdInst.genericType) &&
+                    NANOCLR_INDEX_IS_VALID(call.methodSpec))
+                {
+                    CLR_RT_TypeSpec_Instance tsCheck;
+                    if (tsCheck.InitializeFromIndex(*mdInst.genericType) && !tsCheck.IsClosedGenericType())
+                    {
+                        mdInst.methodSpec = call.methodSpec;
+                    }
+                }
+
                 // mdInst now holds the target MethodDef (or MethodSpec) plus any genericType.
-                CLR_RT_DUMP::METHOD(mdInst, call.genericType);
+                CLR_RT_DUMP::METHOD(mdInst, mdInst.genericType);
             }
             else
             {
