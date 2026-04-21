@@ -3,7 +3,7 @@
 # See LICENSE file in the project root for full license information.
 #
 
-cmake_minimum_required(VERSION 3.31)
+cmake_minimum_required(VERSION 3.30)
 
 include(CMakeToolsHelpers OPTIONAL)
 include(ExternalProject)
@@ -552,8 +552,10 @@ endif()
 
 if(USE_NETWORKING_OPTION)
 
-    if(RTOS_CHIBIOS_CHECK)
+    if(RTOS_CHIBIOS_CHECK AND NOT TARGET_HAS_WIFI)
         set(HAL_USE_MAC_OPTION TRUE CACHE INTERNAL "HAL MAC for USE_NETWORKING_OPTION, ChibiOS only")
+    else()
+        set(HAL_USE_MAC_OPTION FALSE CACHE INTERNAL "HAL MAC disabled for WiFi targets")
     endif()
 
     if(NF_SECURITY_MBEDTLS)
@@ -642,7 +644,8 @@ endif()
 ########################################################
 # check availability of hex2dfu tool if specified
 # only required for CHIBIOS and ThreadX
-if(DEFINED TOOL_HEX2DFU_PREFIX AND (RTOS_THREADX_CHECK OR RTOS_CHIBIOS_CHECK))
+# hex2dfu is only needed for ChibiOS STM32/ThreadX targets; RP2040 uses UF2
+if(DEFINED TOOL_HEX2DFU_PREFIX AND (RTOS_THREADX_CHECK OR (RTOS_CHIBIOS_CHECK AND NOT TARGET_SERIES STREQUAL "RP2040")))
     if(NOT EXISTS ${TOOL_HEX2DFU_PREFIX}/hex2dfu.exe AND NOT EXISTS ${TOOL_HEX2DFU_PREFIX}/hex2dfu)
         message(STATUS "")
         message(STATUS "Couldn't find the hex2dfu tool at the specified path: ${TOOL_HEX2DFU_PREFIX}/hex2dfu.exe or ${TOOL_HEX2DFU_PREFIX}/hex2dfu")

@@ -27,6 +27,7 @@ jobs:
           # { target: ESP32_H2_THREAD,         build-type: Debug, container: ESP32 },
           { target: NXP_MIMXRT1060_EVK,      build-type: Debug, container: FreeRTOS-NXP },
           { target: NXP_MIMXRT1060_EVK,      build-type: Debug, container: All },
+          { target: RP_PICO_W_RP2040,        build-type: Debug, container: ChibiOS-RP },
           { target: TI_CC1352R1_LAUNCHXL,    build-type: Debug, container: TI, radio-freq: 915 },
           { target: TI_CC1352R1_LAUNCHXL,    build-type: Debug, container: All, radio-freq: 915 },
           { target: TI_CC1352R1_LAUNCHXL,    build-type: Debug, container: TI, radio-freq: 868 },

@@ -7,28 +7,44 @@ include(FetchContent)
 include(binutils.common)
 include(binutils.arm-none-eabi)
 include(binutils.ChibiOS)
-include(STM32_CubePackage)
 
-# Set target series
-nf_set_stm32_target_series()
+# Set target series based on vendor
+# TARGET_SERIES is set by the board preset (e.g., "STM32F4xx" or "RP2040")
+# Detect vendor from TARGET_SERIES before calling series-specific setup
+string(SUBSTRING "${TARGET_SERIES}" 0 3 _TARGET_SERIES_PREFIX)
+
+if("${_TARGET_SERIES_PREFIX}" STREQUAL "STM")
+    set(TARGET_VENDOR "ST" CACHE INTERNAL "target vendor is ST")
+    set(HAL_NF_USE_STM32_CRC_OPTION TRUE CACHE INTERNAL "STM32 CRC hardware available")
+    include(STM32_CubePackage)
+    nf_set_stm32_target_series()
+elseif("${_TARGET_SERIES_PREFIX}" STREQUAL "RP2")
+    set(TARGET_VENDOR "RP" CACHE INTERNAL "target vendor is Raspberry Pi")
+    set(HAL_NF_USE_STM32_CRC_OPTION FALSE CACHE INTERNAL "STM32 CRC hardware not available")
+    nf_set_rp_target_series()
+else()
+    message(FATAL_ERROR "Unsupported TARGET_SERIES prefix: ${TARGET_SERIES}")
+endif()
 
 # Define PLATFORM base path
 set(BASE_PATH_FOR_PLATFORM ${CMAKE_CURRENT_SOURCE_DIR} PARENT_SCOPE)
 
 ########################################################
-# check availability of hex2dfu tool if specified
-if(DEFINED TOOL_HEX2DFU_PREFIX)
-    if(NOT EXISTS ${TOOL_HEX2DFU_PREFIX}/hex2dfu.exe AND NOT EXISTS ${TOOL_HEX2DFU_PREFIX}/hex2dfu)
-        message(STATUS "")
-        message(STATUS "Couldn't find the hex2dfu tool at the specified path: ${TOOL_HEX2DFU_PREFIX}/hex2dfu.exe or ${TOOL_HEX2DFU_PREFIX}/hex2dfu")
-        message(STATUS "Make sure that the CMake option TOOL_HEX2DFU_PREFIX has the correct path.")
-        message(STATUS "If you don't have this tool download it from https://github.com/nanoframework/nf-tools/releases")
-        message(STATUS "")
-        message(FATAL_ERROR "hex2dfu tool not found")
-    else()
-        set(HEX2DFU_TOOL_AVAILABLE TRUE CACHE INTERNAL "hex2dfu tool available")
+# check availability of hex2dfu tool if specified (STM32 only — RP targets use UF2 format)
+if("${TARGET_VENDOR}" STREQUAL "ST")
+    if(DEFINED TOOL_HEX2DFU_PREFIX)
+        if(NOT EXISTS ${TOOL_HEX2DFU_PREFIX}/hex2dfu.exe AND NOT EXISTS ${TOOL_HEX2DFU_PREFIX}/hex2dfu)
+            message(STATUS "")
+            message(STATUS "Couldn't find the hex2dfu tool at the specified path: ${TOOL_HEX2DFU_PREFIX}/hex2dfu.exe or ${TOOL_HEX2DFU_PREFIX}/hex2dfu")
+            message(STATUS "Make sure that the CMake option TOOL_HEX2DFU_PREFIX has the correct path.")
+            message(STATUS "If you don't have this tool download it from https://github.com/nanoframework/nf-tools/releases")
+            message(STATUS "")
+            message(FATAL_ERROR "hex2dfu tool not found")
+        else()
+            set(HEX2DFU_TOOL_AVAILABLE TRUE CACHE INTERNAL "hex2dfu tool available")
+        endif() # hex2dfu tool check
     endif()
-endif()
+endif() # TARGET_VENDOR STREQUAL "ST"
 
 ########################################################
 # check availability of SRecord tool, if specified
@@ -79,7 +95,32 @@ if(RTOS_VERSION_EMPTY)
     set(RTOS_VERSION "stable_21.11.x")
 endif()
 
-if(NO_CHIBIOS_SOURCE_FOLDER)
+if(NOT NO_CHIBIOS_SOURCE_FOLDER)
+    # ChibiOS source was specified
+
+    message(STATUS "RTOS is: ChibiOS ${RTOS_VERSION} (source from: ${CHIBIOS_SOURCE_FOLDER})")
+    FetchContent_Declare(
+        chibios
+        SOURCE_DIR ${CHIBIOS_SOURCE_FOLDER}
+    )
+
+elseif(CHIBIOS_GIT_REPOSITORY)
+    # ChibiOS from Git repository (used for RP targets that need master branch)
+
+    if(NOT CHIBIOS_GIT_TAG)
+        set(CHIBIOS_GIT_TAG "master")
+    endif()
+
+    message(STATUS "RTOS is: ChibiOS ${CHIBIOS_GIT_TAG} from GitHub (${CHIBIOS_GIT_REPOSITORY})")
+
+    FetchContent_Declare(
+        chibios
+        GIT_REPOSITORY ${CHIBIOS_GIT_REPOSITORY}
+        GIT_TAG ${CHIBIOS_GIT_TAG}
+        GIT_SHALLOW ON
+    )
+
+else()
     # no CHIBIOS source specified, download it from it's repo
     message(STATUS "RTOS is: ChibiOS ${RTOS_VERSION} from SVN official repo")
 
@@ -88,17 +129,6 @@ if(NO_CHIBIOS_SOURCE_FOLDER)
         SVN_REPOSITORY http://svn.code.sf.net/p/chibios/code/branches/${RTOS_VERSION}
         SVN_REVISION -rHEAD
     )
-
-else()
-    # ChibiOS source was specified
-
-
-    message(STATUS "RTOS is: ChibiOS ${RTOS_VERSION} (source from: ${CHIBIOS_SOURCE_FOLDER})")
-    FetchContent_Declare(
-        chibios
-        SOURCE_DIR ${CHIBIOS_SOURCE_FOLDER}
-    )
-
 
 endif()
 
@@ -214,6 +244,11 @@ if(USE_NETWORKING_OPTION)
 
     nf_add_lwip_library()
 
+    # if this is a WiFi target (e.g. Pico W), also fetch the CYW43 driver
+    if(TARGET_HAS_WIFI)
+        nf_add_cyw43_driver_library()
+    endif()
+
 endif()
 
 
@@ -327,8 +362,9 @@ else()
 endif()
 
 # (default is OFF so STM Cube package is NOT included)
+# Only applicable to ST vendor targets
 option(STM32_CUBE_PACKAGE_REQUIRED "option to include STM Cube pcakge in the build")
-if(STM32_CUBE_PACKAGE_REQUIRED)
+if(STM32_CUBE_PACKAGE_REQUIRED AND "${TARGET_VENDOR}" STREQUAL "ST")
     ProcessSTM32CubePackage()
 endif()
 
