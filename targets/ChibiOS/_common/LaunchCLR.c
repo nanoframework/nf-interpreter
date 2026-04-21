@@ -30,6 +30,14 @@ void LaunchCLR(uint32_t address)
     // clear any pending interrupts to make sure we are jumping straight to nanoCLR ResetHandler
     SCB->ICSR &= SCB_ICSR_PENDSVCLR_Msk;
 
+    // set VTOR to point to nanoCLR vector table so interrupts use the correct handlers
+#if (__CORTEX_M >= 3U) || (defined(__VTOR_PRESENT) && (__VTOR_PRESENT == 1U))
+    SCB->VTOR = address;
+#elif defined(RP2040) || defined(RP2350)
+    // RP2040/RP2350 have VTOR but CMSIS header doesn't define __VTOR_PRESENT
+    *((volatile uint32_t *)0xE000ED08U) = address;
+#endif
+
     // need to set stack pointer from CLR vector table
     __set_MSP((uint32_t)nanoCLRVectorTable->init_stack);
 

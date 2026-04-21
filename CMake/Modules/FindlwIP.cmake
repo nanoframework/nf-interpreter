@@ -8,7 +8,6 @@ FetchContent_GetProperties(lwip)
 
 # List of the required lwIp include files.
 list(APPEND lWIP_INCLUDE_DIRS ${lwip_SOURCE_DIR}/src/include/)
-list(APPEND lWIP_INCLUDE_DIRS ${lwip_SOURCE_DIR}/src/include/lwip)
 list(APPEND lWIP_INCLUDE_DIRS ${lwip_SOURCE_DIR}/src/include/netif)
 list(APPEND lWIP_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/DeviceInterfaces/Networking.Sntp)
 
@@ -18,6 +17,12 @@ if(RTOS_CHIBIOS_CHECK)
 
 	list(APPEND lWIP_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/targets/ChibiOS/_lwIP)
 	list(APPEND lWIP_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/various)
+
+	# WiFi targets need additional includes
+	if(TARGET_HAS_WIFI)
+		list(APPEND lWIP_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/targets/ChibiOS/_WiFi)
+		list(APPEND lWIP_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/targets/ChibiOS/_WiFi/cyw43)
+	endif()
 	
 elseif(RTOS_FREERTOS_CHECK)
 	
@@ -91,10 +96,14 @@ set(LWIP_SRCS
 	nf_sockets.c
 	nf_sys_arch.c
 
-	# bindings
-	nf_lwipthread.c
-
 )
+
+# WiFi targets use a WiFi-specific lwIP thread; Ethernet targets use the standard one
+if(TARGET_HAS_WIFI)
+	list(APPEND LWIP_SRCS nf_lwipthread_wifi.c)
+else()
+	list(APPEND LWIP_SRCS nf_lwipthread.c)
+endif()
 
 if(NF_NETWORKING_SNTP)
     
@@ -109,6 +118,11 @@ if(RTOS_CHIBIOS_CHECK)
 	# platform specific locations
 	list(APPEND LWIP_PLATFORM_LOCATION ${CMAKE_SOURCE_DIR}/targets/ChibiOS/_lwIP)
 	list(APPEND LWIP_PLATFORM_LOCATION ${chibios_SOURCE_DIR}/os/various)
+
+	# WiFi targets also need the _WiFi directory in the search path
+	if(TARGET_HAS_WIFI)
+		list(APPEND LWIP_PLATFORM_LOCATION ${CMAKE_SOURCE_DIR}/targets/ChibiOS/_WiFi)
+	endif()
 
 elseif(RTOS_FREERTOS_CHECK)
 

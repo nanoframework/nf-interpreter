@@ -124,9 +124,9 @@ void HardFault_Handler(void)
     NVIC_SystemReset();
 }
 
-#elif defined(STM32F0XX) || defined(STM32L0XX)
+#elif defined(STM32F0XX) || defined(STM32L0XX) || defined(RP2040)
 
-// hard fault handler for Cortex-M0
+// hard fault handler for Cortex-M0/M0+
 
 __attribute__((used)) void HardFaultHandler_C(unsigned int *hardfault_args)
 {
@@ -181,7 +181,7 @@ void __attribute__((naked)) HardFault_Handler(void)
 }
 
 #else
-#error "No hard fault handler implemented??? Check STM32 series"
+#error "No hard fault handler implemented??? Check target series define."
 #endif
 
 void BusFault_Handler(void) __attribute__((alias("HardFault_Handler")));
