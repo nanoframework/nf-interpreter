@@ -1356,7 +1356,9 @@ bool CLR_RT_TypeDef_Instance::ResolveToken(
                                     return false;
                                 }
                             }
-                            else if (NANOCLR_INDEX_IS_VALID(caller->arrayElementType) && genericPosition == 0)
+                            else if (
+                                caller != nullptr && NANOCLR_INDEX_IS_VALID(caller->arrayElementType) &&
+                                genericPosition == 0)
                             {
                                 // Fallback to arrayElementType: covers SZArrayHelper scenarios and
                                 // the nested-VAR case where the context TypeSpec is still open.
@@ -8305,8 +8307,25 @@ HRESULT CLR_RT_TypeSystem::BuildMethodName(
                         CLR_RT_TypeSpec_Instance contextTs;
                         CLR_RT_SignatureParser::Element paramElement;
 
+                        // Compute effective generic context: prefer the explicit genericType parameter,
+                        // fall back to the method instance own genericType to avoid null dereference.
+                        CLR_RT_TypeSpec_Index effectiveGenericIndex;
+                        if (genericType != nullptr && NANOCLR_INDEX_IS_VALID(*genericType))
+                        {
+                            effectiveGenericIndex = *genericType;
+                        }
+                        else if (mdInst.genericType != nullptr && NANOCLR_INDEX_IS_VALID(*mdInst.genericType))
+                        {
+                            effectiveGenericIndex = *mdInst.genericType;
+                        }
+                        else
+                        {
+                            CLR_SafeSprintf(szBuffer, iBuffer, "!%d", elem.GenericParamPosition);
+                            continue;
+                        }
+
                         // try to resolve from method context
-                        if (!contextTs.InitializeFromIndex(*genericType))
+                        if (!contextTs.InitializeFromIndex(effectiveGenericIndex))
                         {
                             NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
                         }
