@@ -8223,8 +8223,9 @@ HRESULT CLR_RT_TypeSystem::BuildMethodName(
         // Append the method name
         CLR_SafeSprintf(szBuffer, iBuffer, "::%s", mdInst.assembly->GetString(mdInst.target->name));
 
-        // If this method has generic parameters (methodSpec is valid), append them
-        if (NANOCLR_INDEX_IS_VALID(mdInst.methodSpec))
+        // If this method itself is generic (has its own generic parameters) and has a methodSpec, append them.
+        // Do NOT append when methodSpec was merely inherited from the caller for MVAR resolution (e.g. .ctor).
+        if (NANOCLR_INDEX_IS_VALID(mdInst.methodSpec) && mdInst.target->genericParamCount > 0)
         {
             CLR_RT_MethodSpec_Instance msInst{};
             if (msInst.InitializeFromIndex(mdInst.methodSpec))
