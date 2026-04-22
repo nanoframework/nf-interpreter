@@ -7935,61 +7935,46 @@ HRESULT CLR_RT_TypeSystem::BuildTypeName(
         }
         else if (element.DataType == DATATYPE_MVAR)
         {
-            // method generic parameter
-            if (contextMethodDef != nullptr && NANOCLR_INDEX_IS_VALID(*contextMethodDef))
+            // method generic parameter -- try to resolve via MethodSpec; fall back to !!N only on failure
+            bool mvarResolved = false;
+
+            if (contextMethodDef != nullptr &&
+                NANOCLR_INDEX_IS_VALID(*contextMethodDef) &&
+                NANOCLR_INDEX_IS_VALID(contextMethodDef->methodSpec))
             {
-                if (NANOCLR_INDEX_IS_VALID(contextMethodDef->methodSpec))
+                CLR_RT_MethodSpec_Instance methodSpec{};
+                CLR_RT_SignatureParser::Element paramElement;
+                methodSpec.InitializeFromIndex(contextMethodDef->methodSpec);
+
+                if (methodSpec.GetGenericArgument(element.GenericParamPosition, paramElement))
                 {
-                    CLR_RT_MethodSpec_Instance methodSpec{};
-                    CLR_RT_SignatureParser::Element paramElement;
-                    CLR_RT_TypeDef_Index paramTypeDef;
-                    methodSpec.InitializeFromIndex(contextMethodDef->methodSpec);
-
-                    if (!methodSpec.GetGenericArgument(element.GenericParamPosition, paramElement))
-                    {
-                        NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
-                    }
-
-                    paramTypeDef = paramElement.Class;
+                    CLR_RT_TypeDef_Index paramTypeDef = paramElement.Class;
 
                     if (paramElement.DataType == DATATYPE_VAR)
                     {
-                        // Build the type name for this generic argument
-                        // Use the method's declaring type as context for VAR resolution
-
+                        // VAR inside a MethodSpec arg -- resolve against the declaring type's closed TypeSpec
                         CLR_RT_TypeSpec_Instance contextTs;
                         CLR_RT_SignatureParser::Element argElement;
 
-                        // try to resolve from method context
-                        if (!contextTs.InitializeFromIndex(*contextMethodDef->genericType))
-                        {
-                            NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
-                        }
-
-                        if (contextTs.GetGenericParam(paramElement.GenericParamPosition, argElement))
+                        if (contextMethodDef->genericType != nullptr &&
+                            contextTs.InitializeFromIndex(*contextMethodDef->genericType) &&
+                            contextTs.GetGenericParam(paramElement.GenericParamPosition, argElement))
                         {
                             paramTypeDef = argElement.Class;
-
-                            goto output_type;
-                        }
-                        else
-                        {
-                            // Couldn't resolve
-                            char encodedParam[7];
-                            snprintf(encodedParam, ARRAYSIZE(encodedParam), "!%d", argElement.GenericParamPosition);
-                            NANOCLR_CHECK_HRESULT(QueueStringToBuffer(szBuffer, iBuffer, encodedParam));
                         }
                     }
-                    else
+
+                    if (paramTypeDef.data != 0)
                     {
-                    output_type:
                         NANOCLR_CHECK_HRESULT(BuildTypeName(paramTypeDef, szBuffer, iBuffer));
+                        mvarResolved = true;
                     }
                 }
             }
-            else
+
+            if (!mvarResolved)
             {
-                // couldn't be resolved, print encoded form (!!N)
+                // resolution failed (no MethodSpec, GetGenericArgument returned false, etc.) -- print !!N
                 char encodedParam[7];
                 snprintf(encodedParam, ARRAYSIZE(encodedParam), "!!%d", element.GenericParamPosition);
                 NANOCLR_CHECK_HRESULT(QueueStringToBuffer(szBuffer, iBuffer, encodedParam));
