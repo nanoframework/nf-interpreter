@@ -2505,6 +2505,82 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
 #ifndef NANOCLR_NO_IL_INLINE
                         if (stack->PushInline(ip, assm, evalPos, calleeInst, pThis))
                         {
+                            // PushInline switches stack->m_call to the callee but does NOT apply the
+                            // generic context or methodSpec inheritance.  Mirror the same logic used
+                            // by the regular Push path below.
+                            //
+                            // Determine the callee's declaring TypeDef so we only honor
+                            // effectiveCallerGeneric when it actually refers to the same generic
+                            // type as the callee's owner. Otherwise (e.g. a generic method calling
+                            // List<!!0>::GetEnumerator) the caller's genericType is unrelated and
+                            // would clobber the closed TypeSpec that ResolveToken already produced.
+                            CLR_UINT32 calleeOwnerTypeDefDataInline = 0;
+                            {
+                                CLR_RT_TypeDef_Instance calleeDeclTypeInline{};
+                                if (calleeInst.GetDeclaringType(calleeDeclTypeInline))
+                                {
+                                    calleeOwnerTypeDefDataInline = calleeDeclTypeInline.data;
+                                }
+                            }
+
+                            auto matchesCalleeOwner = [&](const CLR_RT_TypeSpec_Index *tsIdx) -> bool {
+                                if (calleeOwnerTypeDefDataInline == 0)
+                                    return true; // unknown owner: don't filter
+                                if (!tsIdx || !NANOCLR_INDEX_IS_VALID(*tsIdx))
+                                    return false;
+                                CLR_RT_TypeSpec_Instance tsInst{};
+                                if (!tsInst.InitializeFromIndex(*tsIdx))
+                                    return false;
+                                return NANOCLR_INDEX_IS_VALID(tsInst.genericTypeDef) &&
+                                       tsInst.genericTypeDef.data == calleeOwnerTypeDefDataInline;
+                            };
+
+                            const CLR_RT_TypeSpec_Index *inlineCtx = nullptr;
+
+                            if (effectiveCallerGeneric && NANOCLR_INDEX_IS_VALID(*effectiveCallerGeneric) &&
+                                matchesCalleeOwner(effectiveCallerGeneric))
+                            {
+                                inlineCtx = effectiveCallerGeneric;
+                            }
+                            else if (calleeInst.genericType && NANOCLR_INDEX_IS_VALID(*calleeInst.genericType))
+                            {
+                                inlineCtx = calleeInst.genericType;
+                            }
+                            else if (effectiveCallerGeneric && NANOCLR_INDEX_IS_VALID(*effectiveCallerGeneric))
+                            {
+                                // Fall back to caller's context even if TypeDef doesn't match.
+                                inlineCtx = effectiveCallerGeneric;
+                            }
+                            else if (stack->m_inlineFrame->m_frame.m_call.genericType &&
+                                     NANOCLR_INDEX_IS_VALID(*stack->m_inlineFrame->m_frame.m_call.genericType))
+                            {
+                                inlineCtx = stack->m_inlineFrame->m_frame.m_call.genericType;
+                            }
+
+                            if (inlineCtx)
+                            {
+                                stack->m_genericTypeSpecStorage = *inlineCtx;
+                                stack->m_call.genericType = &stack->m_genericTypeSpecStorage;
+                            }
+                            else
+                            {
+                                stack->m_call.genericType = nullptr;
+                            }
+
+// Inherit caller's methodSpec when callee's genericType is open
+                            if (!NANOCLR_INDEX_IS_VALID(stack->m_call.methodSpec) &&
+                                stack->m_call.genericType != nullptr &&
+                                NANOCLR_INDEX_IS_VALID(*stack->m_call.genericType) &&
+                                NANOCLR_INDEX_IS_VALID(stack->m_inlineFrame->m_frame.m_call.methodSpec))
+                            {
+                                CLR_RT_TypeSpec_Instance tsCheck;
+                                if (tsCheck.InitializeFromIndex(*stack->m_call.genericType) &&
+                                    !tsCheck.IsClosedGenericType())
+                                {
+                                    stack->m_call.methodSpec = stack->m_inlineFrame->m_frame.m_call.methodSpec;
+                                }
+                            }
+
                             fDirty = true;
                             break;
                         }
@@ -2514,24 +2590,64 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
 
                         NANOCLR_CHECK_HRESULT(CLR_RT_StackFrame::Push(th, calleeInst, -1));
 
-                        // Set up the new stack frame's generic context
-                        // Priority order:
-                        // 1. effectiveCallerGeneric (extracted from TypeSpec search for interface calls) - HIGHEST
-                        // PRIORITY
-                        //    This is the concrete closed generic type (e.g., List<int>) not the interface (e.g.,
-                        //    IEnumerable<T>)
-                        // 2. calleeInst.genericType (from MethodRef TypeSpec or virtual dispatch)
-                        // 3. stack->m_call.genericType (inherited from caller)
+                        // Set up the new stack frame's generic context.
+                        //
+                        // Priority:
+                        //   1. effectiveCallerGeneric ONLY when it refers to the same generic
+                        //      TypeDef as the callee's declaring type. This covers interface
+                        //      callvirt cases (e.g. List<int> calling IEnumerable<T>::GetEnumerator)
+                        //      where we already extracted the concrete closed TypeSpec.
+                        //   2. calleeInst.genericType - already refined by ResolveToken's MVAR
+                        //      resolution against the caller's MethodSpec, so it is the closed
+                        //      TypeSpec when one exists.
+                        //   3. effectiveCallerGeneric as a fallback (TypeDef mismatch case).
+                        //   4. stack->m_call.genericType inherited from caller.
                         CLR_RT_StackFrame *newStack = th->CurrentFrame();
                         const CLR_RT_TypeSpec_Index *effectiveGenericContext = nullptr;
 
-                        if (effectiveCallerGeneric && NANOCLR_INDEX_IS_VALID(*effectiveCallerGeneric))
+                        CLR_UINT32 calleeOwnerTypeDefData = 0;
+                        {
+                            CLR_RT_TypeDef_Instance calleeDeclType{};
+                            if (calleeInst.GetDeclaringType(calleeDeclType))
+                            {
+                                calleeOwnerTypeDefData = calleeDeclType.data;
+                            }
+                        }
+
+                        auto refersToCalleeOwner = [&](const CLR_RT_TypeSpec_Index *tsIdx) -> bool {
+                            if (calleeOwnerTypeDefData == 0)
+                            {
+                                // unknown owner: don't filter
+                                return true;
+                            }
+
+                            if (!tsIdx || !NANOCLR_INDEX_IS_VALID(*tsIdx))
+                            {
+                                return false;
+                            }
+
+                            CLR_RT_TypeSpec_Instance tsInst{};
+                            if (!tsInst.InitializeFromIndex(*tsIdx))
+                            {
+                                return false;
+                            }
+
+                            return NANOCLR_INDEX_IS_VALID(tsInst.genericTypeDef) &&
+                                   tsInst.genericTypeDef.data == calleeOwnerTypeDefData;
+                        };
+
+                        if (effectiveCallerGeneric && NANOCLR_INDEX_IS_VALID(*effectiveCallerGeneric) &&
+                            refersToCalleeOwner(effectiveCallerGeneric))
                         {
                             effectiveGenericContext = effectiveCallerGeneric;
                         }
                         else if (calleeInst.genericType && NANOCLR_INDEX_IS_VALID(*calleeInst.genericType))
                         {
                             effectiveGenericContext = calleeInst.genericType;
+                        }
+                        else if (effectiveCallerGeneric && NANOCLR_INDEX_IS_VALID(*effectiveCallerGeneric))
+                        {
+                            effectiveGenericContext = effectiveCallerGeneric;
                         }
                         else if (stack->m_call.genericType && NANOCLR_INDEX_IS_VALID(*stack->m_call.genericType))
                         {
@@ -2549,6 +2665,21 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                         {
                             // Ensure genericType doesn't point to garbage
                             newStack->m_call.genericType = nullptr;
+                        }
+
+                        // If the callee operates on an open generic type (MVAR-based) and has no MethodSpec,
+                        // inherit the caller's MethodSpec for MVAR resolution (e.g. static/instance field access).
+                        if (!NANOCLR_INDEX_IS_VALID(newStack->m_call.methodSpec) &&
+                            newStack->m_call.genericType != nullptr &&
+                            NANOCLR_INDEX_IS_VALID(*newStack->m_call.genericType) &&
+                            NANOCLR_INDEX_IS_VALID(stack->m_call.methodSpec))
+                        {
+                            CLR_RT_TypeSpec_Instance tsCheck;
+                            if (tsCheck.InitializeFromIndex(*newStack->m_call.genericType) &&
+                                !tsCheck.IsClosedGenericType())
+                            {
+                                newStack->m_call.methodSpec = stack->m_call.methodSpec;
+                            }
                         }
                     }
 
