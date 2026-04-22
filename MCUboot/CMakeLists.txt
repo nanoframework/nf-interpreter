@@ -132,8 +132,10 @@ endmacro()
 
 if(${TARGET_SERIES} STREQUAL "STM32F7xx")
 
-    # ChibiOS-bundled CMSIS replaces the separately-fetched cmsis_device_f7 / cmsis_core.
-    # All ChibiOS source dirs are already available via FetchContent (chibios).
+    # Retrieve chibios_SOURCE_DIR — it was populated in targets/ChibiOS/CMakeLists.txt
+    # but CMake FetchContent variables don't cross subdirectory scopes automatically.
+    include(FetchContent)
+    FetchContent_GetProperties(chibios)
 
     # Sources shared by all STM32F7xx MCUboot boards (ChibiOS RT + HAL + nf-overlay).
     set(MCUBOOT_SERIES_COMMON_SOURCES
@@ -142,21 +144,32 @@ if(${TARGET_SERIES} STREQUAL "STM32F7xx")
         ${CMAKE_SOURCE_DIR}/targets/ChibiOS/_mcuboot/mcuboot_serial_port.c
 
         # ChibiOS RT startup (Cortex-M7, ARMCMx).
-        ${chibios_SOURCE_DIR}/os/common/startup/ARMCMx/compilers/GCC/crt0_v7m.s
-        ${chibios_SOURCE_DIR}/os/common/startup/ARMCMx/compilers/GCC/vectors.c
+        # crt0_v7m.S: reset handler, stack init, calls __cpu_init / __init_ram_areas / __late_init.
+        # crt1.c: provides the weak default implementations of those hooks.
+        # vectors.S: vector table.
+        ${chibios_SOURCE_DIR}/os/common/startup/ARMCMx/compilers/GCC/crt0_v7m.S
+        ${chibios_SOURCE_DIR}/os/common/startup/ARMCMx/compilers/GCC/crt1.c
+        ${chibios_SOURCE_DIR}/os/common/startup/ARMCMx/compilers/GCC/vectors.S
 
-        # ChibiOS RT minimal kernel (chSysInit / SysTick / scheduler).
+        # ChibiOS RT port (ARMv7-M).
+        # chcore.c: C port code (IRQ epilogue, idle loop).
+        # chcoreasm.S: assembly context-switch (__port_switch, __port_switch_from_isr, __port_exit_from_isr).
+        ${chibios_SOURCE_DIR}/os/common/ports/ARMv7-M/chcore.c
+        ${chibios_SOURCE_DIR}/os/common/ports/ARMv7-M/compilers/GCC/chcoreasm.S
+
+        # ChibiOS RT minimal kernel.
         ${chibios_SOURCE_DIR}/os/rt/src/chsys.c
         ${chibios_SOURCE_DIR}/os/rt/src/chvt.c
         ${chibios_SOURCE_DIR}/os/rt/src/chschd.c
         ${chibios_SOURCE_DIR}/os/rt/src/chthreads.c
-        ${chibios_SOURCE_DIR}/os/rt/src/chmem.c
-
-        # ChibiOS RT port (ARMv7-M).
-        ${chibios_SOURCE_DIR}/os/common/ports/ARMv7-M/chcore.c
+        # ChibiOS 21.11.x additions required by chSysInit.
+        ${chibios_SOURCE_DIR}/os/rt/src/chinstances.c
+        ${chibios_SOURCE_DIR}/os/rt/src/chrfcu.c
+        ${chibios_SOURCE_DIR}/os/oslib/src/chmemcore.c
 
         # ChibiOS HAL core.
         ${chibios_SOURCE_DIR}/os/hal/src/hal.c
+        ${chibios_SOURCE_DIR}/os/hal/src/hal_st.c
         ${chibios_SOURCE_DIR}/os/hal/src/hal_pal.c
         ${chibios_SOURCE_DIR}/os/hal/src/hal_spi.c
         ${chibios_SOURCE_DIR}/os/hal/src/hal_wspi.c
@@ -164,17 +177,33 @@ if(${TARGET_SERIES} STREQUAL "STM32F7xx")
 
         # ChibiOS HAL STM32F7xx platform.
         ${chibios_SOURCE_DIR}/os/hal/ports/STM32/STM32F7xx/hal_lld.c
+        # stm32_isr.c is NOT included: it requires mcuconf.h IRQ priority definitions for all
+        # TIM/USART peripherals, which MCUboot does not use. irqInit() is provided as a no-op
+        # stub in hal_stubs.c — MCUboot does not use EXTI-based external interrupts.
+
+        # ChibiOS HAL common ARMCMx support (nvicEnableVector / nvicDisableVector).
+        ${chibios_SOURCE_DIR}/os/hal/ports/common/ARMCMx/nvic.c
 
         # ChibiOS HAL LLD (STM32 shared drivers).
         ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/GPIOv2/hal_pal_lld.c
         ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/DMAv2/stm32_dma.c
-        ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/SPIv2/hal_spi_lld.c
+        ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/SPIv2/hal_spi_v2_lld.c
         ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/QUADSPIv1/hal_wspi_lld.c
         ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/USARTv2/hal_serial_lld.c
+        # SYSTICKv1: system timer LLD (stInit / stGetCounter / stStartAlarm / etc.).
+        ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/SYSTICKv1/hal_st_lld.c
 
         # nf-overlay: STM32 internal flash driver (FLASHv2 LLD — same as nanoBooter).
         ${CMAKE_SOURCE_DIR}/targets/ChibiOS/_nf-overlay/os/hal/src/stm32_flash/hal_stm32_flash.c
         ${CMAKE_SOURCE_DIR}/targets/ChibiOS/_nf-overlay/os/hal/ports/STM32/LLD/FLASHv2/flash_lld.c
+
+        # Stub: halCommunityInit() no-op — MCUboot does not use ChibiOS-Contrib.
+        # hal.c calls halCommunityInit() when HAL_USE_COMMUNITY is TRUE; this stub
+        # satisfies the linker without pulling in the full ChibiOS-Contrib library.
+        # Also provides irqInit()/irqDeinit() stubs — MCUboot does not use EXTI interrupts;
+        # including stm32_isr.c would require mcuconf.h priority definitions for all
+        # TIM/USART peripherals, which are unnecessary for a minimal bootloader.
+        ${CMAKE_SOURCE_DIR}/targets/ChibiOS/_mcuboot/hal_community_stub.c
     )
 
     # Include directories shared by all STM32F7xx bootloader targets.
@@ -216,23 +245,43 @@ if(${TARGET_SERIES} STREQUAL "STM32F7xx")
         ${chibios_SOURCE_DIR}/os/hal/include
         ${chibios_SOURCE_DIR}/os/hal/osal/rt-nil
 
-        # 11. ChibiOS HAL STM32F7xx platform.
+        # 11. ChibiOS HAL STM32F7xx platform + common ARMCMx (nvic.h).
         ${chibios_SOURCE_DIR}/os/hal/ports/STM32/STM32F7xx
+        ${chibios_SOURCE_DIR}/os/hal/ports/common/ARMCMx
 
         # 12. ChibiOS HAL LLD (peripheral drivers).
         ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/GPIOv2
         ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/DMAv2
+        ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/EXTIv1
+        ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/TIMv1
+        ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/SYSTICKv1
         ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/SPIv2
         ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/QUADSPIv1
+        # USART: generic .inc dispatcher files for stm32_isr.c + USARTv2: driver implementation.
+        ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/USART
         ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/USARTv2
 
         # 13. ChibiOS-bundled CMSIS (replaces separately-fetched cmsis_device_f7 + cmsis_core).
-        ${chibios_SOURCE_DIR}/os/common/ext/CMSIS/include
-        ${chibios_SOURCE_DIR}/os/common/ext/CMSIS/ST/STM32F7xx
+        ${chibios_SOURCE_DIR}/os/common/ext/ARM/CMSIS/Core/Include
+        ${chibios_SOURCE_DIR}/os/common/ext/ST/STM32F7xx
 
-        # 14. nf-overlay community HAL include + FLASHv2 LLD.
+        # 14. ChibiOS compiler portability layer (GCC), ARM-common port types, and license header.
+        ${chibios_SOURCE_DIR}/os/common/portability/GCC
+        ${chibios_SOURCE_DIR}/os/common/ports/ARM-common
+        ${chibios_SOURCE_DIR}/os/license
+
+        # 15. nf-overlay community HAL includes.
+        #     dummy_includes provides a stub hal_community.h (MCUboot doesn't use ChibiOS-Contrib).
+        #     All nf-overlay LLD paths are required because hal_nf_community.h unconditionally
+        #     includes all overlay driver headers (flash, crc, rng, fsmc, onewire, qspi).
         ${CMAKE_SOURCE_DIR}/targets/ChibiOS/_nf-overlay/os/hal/include
+        ${CMAKE_SOURCE_DIR}/targets/ChibiOS/_nf-overlay/os/hal/include/dummy_includes
         ${CMAKE_SOURCE_DIR}/targets/ChibiOS/_nf-overlay/os/hal/ports/STM32/LLD/FLASHv2
+        ${CMAKE_SOURCE_DIR}/targets/ChibiOS/_nf-overlay/os/hal/ports/STM32/LLD/CRCv1
+        ${CMAKE_SOURCE_DIR}/targets/ChibiOS/_nf-overlay/os/hal/ports/STM32/LLD/RNGv1
+        ${CMAKE_SOURCE_DIR}/targets/ChibiOS/_nf-overlay/os/hal/ports/STM32/LLD/FSMCv1
+        ${CMAKE_SOURCE_DIR}/targets/ChibiOS/_nf-overlay/os/hal/ports/STM32/LLD/ONEWIREv1
+        ${CMAKE_SOURCE_DIR}/targets/ChibiOS/_nf-overlay/os/hal/ports/STM32/LLD/QSPIv1
     )
 
     # Compile options shared by all STM32F7xx bootloader targets.
@@ -256,13 +305,19 @@ if(${TARGET_SERIES} STREQUAL "STM32F7xx")
     # Link flags shared by all STM32F7xx bootloader targets.
     # -nostartfiles is removed: ChibiOS provides crt0_v7m.s + vectors.c.
     # The linker script is board-specific and supplied by nf_setup_mcuboot_target_build.
+    # -L adds the ChibiOS GCC ld directory so INCLUDE directives in the linker script
+    # can resolve rules_stacks.ld, rules_code.ld, rules_data.ld, rules_memory.ld.
+    # --defsym provides the stack/heap sizes expected by rules_stacks.ld.
     set(MCUBOOT_SERIES_COMMON_LINK_FLAGS
         "-mthumb -mcpu=cortex-m7 -mfpu=fpv5-sp-d16 -mfloat-abi=hard -mabi=aapcs \
          -Wl,--gc-sections \
          -Wl,--print-memory-usage \
          -Wl,--no-warn-rwx-segments \
          --specs=nano.specs \
-         --specs=nosys.specs")
+         --specs=nosys.specs \
+         -L${chibios_SOURCE_DIR}/os/common/startup/ARMCMx/compilers/GCC/ld \
+         -Wl,--defsym=__main_stack_size__=0x400 \
+         -Wl,--defsym=__process_stack_size__=0x800")
 
     # Board-specific build rules live in each board's MCUboot folder.
     include(${TARGET_BASE_LOCATION}/MCUboot/mcuboot_target.cmake)
