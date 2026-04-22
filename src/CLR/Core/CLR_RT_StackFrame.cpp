@@ -95,6 +95,7 @@ HRESULT CLR_RT_StackFrame::Push(CLR_RT_Thread *th, const CLR_RT_MethodDef_Instan
                                       // CLR_UINT32                m_flags;
                                       //
         stack->m_call = *callInstPtr; // CLR_RT_MethodDef_Instance m_call;
+        stack->m_call.Normalize(*callInstPtr);
                                       //
                                       // CLR_RT_MethodHandler      m_nativeMethod;
                                       // CLR_PMETADATA             m_IPstart;          // ANY   HEAP - DO RELOCATION -
@@ -329,6 +330,7 @@ bool CLR_RT_StackFrame::PushInline(
     m_inlineFrame->m_frame.m_locals = m_locals;
     m_inlineFrame->m_frame.m_args = m_arguments;
     m_inlineFrame->m_frame.m_call = m_call;
+    m_inlineFrame->m_frame.m_call.Normalize(m_call);
     m_inlineFrame->m_frame.m_evalStack = m_evalStack;
     m_inlineFrame->m_frame.m_evalPos = pThis;
     m_inlineFrame->m_frame.m_localAllocCount = m_localAllocCount;
@@ -346,6 +348,7 @@ bool CLR_RT_StackFrame::PushInline(
     m_arguments = pThis;
     m_locals = &m_evalStackEnd[-md->localsCount];
     m_call = calleeInst;
+    m_call.Normalize(calleeInst);
     m_evalStackEnd = m_locals;
     m_evalStack = evalPos;
     m_evalStackPos = evalPos + 1;
@@ -429,6 +432,7 @@ void CLR_RT_StackFrame::RestoreFromInlineStack()
     m_locals = m_inlineFrame->m_frame.m_locals;
     m_evalStackEnd += m_call.target->localsCount;
     m_call = m_inlineFrame->m_frame.m_call;
+    m_call.Normalize(m_inlineFrame->m_frame.m_call);
     m_IP = m_inlineFrame->m_frame.m_IP;
     m_IPstart = m_inlineFrame->m_frame.m_IPStart;
     m_evalStack = m_inlineFrame->m_frame.m_evalStack;
@@ -451,6 +455,7 @@ void CLR_RT_StackFrame::RestoreStack(CLR_RT_InlineFrame &frame)
     m_arguments = frame.m_args;
     m_locals = frame.m_locals;
     m_call = frame.m_call;
+    m_call.Normalize(frame.m_call);
     m_IP = frame.m_IP;
     m_IPstart = frame.m_IPStart;
     m_evalStack = frame.m_evalStack;
@@ -468,6 +473,7 @@ void CLR_RT_StackFrame::SaveStack(CLR_RT_InlineFrame &frame)
     frame.m_args = m_arguments;
     frame.m_locals = m_locals;
     frame.m_call = m_call;
+    frame.m_call.Normalize(m_call);
     frame.m_IP = m_IP;
     frame.m_IPStart = m_IPstart;
     frame.m_evalPos = m_evalStackPos;

@@ -2290,6 +2290,21 @@ struct CLR_RT_MethodDef_Instance : public CLR_RT_MethodDef_Index
 
     //--//
 
+    // After any plain by-value copy of a CLR_RT_MethodDef_Instance, call
+    // Normalize(src) to re-anchor the self-referential genericType pointer.
+    // InitializeFromIndex (typeSpec overload) sets genericType = &m_typeSpecStorage;
+    // a plain copy leaves genericType pointing at the source's m_typeSpecStorage,
+    // which dangles when the source goes out of scope.  Call Normalize(src)
+    // immediately after every  dst = src  where src may have had
+    // genericType == &src.m_typeSpecStorage.
+    inline void Normalize(const CLR_RT_MethodDef_Instance &src)
+    {
+        if (src.genericType == &src.m_typeSpecStorage)
+        {
+            genericType = &m_typeSpecStorage;
+        }
+    }
+
     bool InitializeFromIndex(const CLR_RT_MethodDef_Index &index);
     bool InitializeFromIndex(
         const CLR_RT_MethodDef_Index &index,
