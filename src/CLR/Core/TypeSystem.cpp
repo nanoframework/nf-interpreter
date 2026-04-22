@@ -2971,21 +2971,44 @@ HRESULT CLR_RT_TypeDescriptor::InitializeFromSignatureToken(
                     if (msInst.InitializeFromIndex(caller->methodSpec))
                     {
                         CLR_RT_SignatureParser::Element msElem;
-                        if (msInst.GetGenericArgument(elem.GenericParamPosition, msElem) &&
-                            NANOCLR_INDEX_IS_VALID(msElem.Class))
+                        if (msInst.GetGenericArgument(elem.GenericParamPosition, msElem))
                         {
-                            this->InitializeFromTypeDef(msElem.Class);
-                            break;
+                            if (NANOCLR_INDEX_IS_VALID(msElem.Class))
+                            {
+                                // Concrete type argument: use it directly.
+                                this->InitializeFromTypeDef(msElem.Class);
+                                break;
+                            }
+                            else if (msElem.DataType == DATATYPE_VAR && caller->genericType != nullptr &&
+                                     NANOCLR_INDEX_IS_VALID(*caller->genericType))
+                            {
+                                // !!U -> !T: the MethodSpec maps a method-generic to a type-generic;
+                                // resolve the type-generic slot from the caller's closed TypeSpec.
+                                CLR_RT_TypeSpec_Instance callerTypeSpec;
+                                if (callerTypeSpec.InitializeFromIndex(*caller->genericType))
+                                {
+                                    CLR_RT_SignatureParser::Element paramElement;
+                                    if (callerTypeSpec.GetGenericParam(msElem.GenericParamPosition, paramElement) &&
+                                        NANOCLR_INDEX_IS_VALID(paramElement.Class))
+                                    {
+                                        this->InitializeFromTypeDef(paramElement.Class);
+                                        break;
+                                    }
+                                }
+                            }
                         }
                     }
                 }
 
-                // Fallback: use the GenericParam table (gives the declared constraint, e.g. object).
+                // Fallback: use the GenericParam table on the caller's assembly (gives the declared
+                // constraint, e.g. object).  Use caller->assembly rather than assm so that cross-assembly
+                // calls look up the GenericParam table in the assembly that actually declares the method,
+                // avoiding picking up the wrong table from a different assembly.
                 if (caller != nullptr)
                 {
                     CLR_RT_GenericParam_Index gp;
-                    assm->FindGenericParamAtMethodDef(*caller, elem.GenericParamPosition, gp);
-                    auto &info = assm->crossReferenceGenericParam[gp.GenericParam()];
+                    caller->assembly->FindGenericParamAtMethodDef(*caller, elem.GenericParamPosition, gp);
+                    auto &info = caller->assembly->crossReferenceGenericParam[gp.GenericParam()];
                     this->InitializeFromTypeDef(info.classTypeDef);
                 }
                 else
