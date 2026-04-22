@@ -2415,8 +2415,9 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                                         }
 
                                         // Initialize the dispatched method, preserving the generic context from
-                                        // calleeInst The genericType was set by ResolveToken from the MethodRef's owner
-                                        // TypeSpec
+                                        // calleeInst. The genericType was set by ResolveToken from the MethodRef's
+                                        // owner TypeSpec. InitializeFromIndex stores the TypeSpec in stable member
+                                        // storage (m_typeSpecStorage), so genericType remains valid after the call.
                                         if (calleeInst.genericType && NANOCLR_INDEX_IS_VALID(*calleeInst.genericType))
                                         {
                                             if (calleeInst.InitializeFromIndex(
