@@ -2480,23 +2480,26 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                         // When constrained. T precedes callvirt and T is a reference type, the managed
                         // pointer on the stack (from ldloca) must be dereferenced to the actual object
                         // reference. For value types the BYREF is kept — the callee receives it as 'this'.
-                        if (constrainedTypeToken != 0 && pThis[0].DataType() == DATATYPE_BYREF)
+                        if (constrainedTypeToken != 0)
                         {
-                            CLR_RT_TypeDef_Instance constrainedType{};
-                            if (constrainedType.ResolveToken(constrainedTypeToken, assm, &stack->m_call))
+                            if (op == CEE_CALLVIRT && pThis[0].DataType() == DATATYPE_BYREF)
                             {
-                                bool isValueType =
-                                    ((constrainedType.target->flags & CLR_RECORD_TYPEDEF::TD_Semantics_Mask) ==
-                                     CLR_RECORD_TYPEDEF::TD_Semantics_ValueType) ||
-                                    ((constrainedType.target->flags & CLR_RECORD_TYPEDEF::TD_Semantics_Mask) ==
-                                     CLR_RECORD_TYPEDEF::TD_Semantics_Enum);
-
-                                if (!isValueType)
+                                CLR_RT_TypeDef_Instance constrainedType{};
+                                if (constrainedType.ResolveToken(constrainedTypeToken, assm, &stack->m_call))
                                 {
-                                    CLR_RT_HeapBlock *derefThis = pThis[0].Dereference();
-                                    if (derefThis != nullptr)
+                                    bool isValueType =
+                                        ((constrainedType.target->flags & CLR_RECORD_TYPEDEF::TD_Semantics_Mask) ==
+                                         CLR_RECORD_TYPEDEF::TD_Semantics_ValueType) ||
+                                        ((constrainedType.target->flags & CLR_RECORD_TYPEDEF::TD_Semantics_Mask) ==
+                                         CLR_RECORD_TYPEDEF::TD_Semantics_Enum);
+
+                                    if (!isValueType)
                                     {
-                                        pThis[0].Assign(*derefThis);
+                                        CLR_RT_HeapBlock *derefThis = pThis[0].Dereference();
+                                        if (derefThis != nullptr)
+                                        {
+                                            pThis[0].Assign(*derefThis);
+                                        }
                                     }
                                 }
                             }
