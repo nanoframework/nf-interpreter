@@ -39,8 +39,10 @@
 // Master mode, SSM+SSI (software slave management), CPOL=0, CPHA=0.
 // BR=001 → fPCLK2/4 = 108/4 = 27 MHz.
 // DS=0111 (8-bit), RXFIFO threshold = 1 byte.
+// SPIv2 API: end_cb was split into data_cb (transfer done) and error_cb.
 static const SPIConfig s_spi1cfg = {
-    .end_cb  = NULL,
+    .data_cb = NULL,
+    .error_cb = NULL,
     .cr1     = SPI_CR1_SSM | SPI_CR1_SSI | SPI_CR1_BR_0,
     .cr2     = (7U << SPI_CR2_DS_Pos) | SPI_CR2_FRXTH,
 };
