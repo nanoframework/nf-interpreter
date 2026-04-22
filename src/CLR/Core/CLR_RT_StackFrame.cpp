@@ -1090,7 +1090,7 @@ void CLR_RT_StackFrame::SetResult_I4(CLR_INT32 val)
     top.SetInteger(val);
 }
 
-void CLR_RT_StackFrame::SetResult_I8(CLR_INT64 &val)
+void CLR_RT_StackFrame::SetResult_I8(const CLR_INT64 &val)
 {
     NATIVE_PROFILE_CLR_CORE();
     CLR_RT_HeapBlock &top = PushValue();

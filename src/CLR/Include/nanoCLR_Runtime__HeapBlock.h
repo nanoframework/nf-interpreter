@@ -69,6 +69,13 @@ struct CLR_RT_HeapBlock_Raw
 {
     CLR_UINT32 data[5];
 };
+#elif defined(__LP64__)
+// 64-bit POSIX hosts (macOS/Linux arm64/x86-64):
+// CLR_RT_HeapBlock = 4 (m_id) + 4 (align pad) + 16 (m_data with 2x 8-byte ptrs) = 24 bytes.
+struct CLR_RT_HeapBlock_Raw
+{
+    CLR_UINT32 data[6];
+};
 #else
 struct CLR_RT_HeapBlock_Raw
 {
