@@ -1334,7 +1334,8 @@ bool CLR_RT_TypeDef_Instance::ResolveToken(
                             CLR_RT_SignatureParser::Element paramElement;
 
                             // Try to map using the generic context (e.g. !T→Int32)
-                            if (callerTypeSpec.GetGenericParam(genericPosition, paramElement))
+                            if (callerTypeSpec.GetGenericParam(genericPosition, paramElement) &&
+                                paramElement.DataType != DATATYPE_VAR)
                             {
                                 // Successfully resolved from generic context
                                 if (NANOCLR_INDEX_IS_VALID(paramElement.Class))
@@ -1357,7 +1358,8 @@ bool CLR_RT_TypeDef_Instance::ResolveToken(
                             }
                             else if (NANOCLR_INDEX_IS_VALID(caller->arrayElementType) && genericPosition == 0)
                             {
-                                // Fallback to arrayElementType for SZArrayHelper scenarios
+                                // Fallback to arrayElementType: covers SZArrayHelper scenarios and
+                                // the nested-VAR case where the context TypeSpec is still open.
                                 data = caller->arrayElementType.data;
                                 assembly = g_CLR_RT_TypeSystem.m_assemblies[caller->arrayElementType.Assembly() - 1];
                                 target = assembly->GetTypeDef(caller->arrayElementType.Type());
