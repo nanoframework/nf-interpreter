@@ -1996,8 +1996,10 @@ bool CLR_RT_MethodDef_Instance::InitializeFromIndex(
         return false;
     }
 
-    // remember the TypeSpec so this is available when needed
-    genericType = &typeSpec;
+    // Store the TypeSpec in stable member storage so that genericType doesn't point
+    // to the caller's stack (the 'typeSpec' parameter would be freed after return).
+    m_typeSpecStorage = typeSpec;
+    genericType = &m_typeSpecStorage;
 
     return true;
 }
@@ -2007,6 +2009,7 @@ void CLR_RT_MethodDef_Instance::ClearInstance()
     NATIVE_PROFILE_CLR_CORE();
     CLR_RT_MethodDef_Index::Clear();
     methodSpec.Clear();
+    m_typeSpecStorage.Clear();
 
     assembly = nullptr;
     target = nullptr;

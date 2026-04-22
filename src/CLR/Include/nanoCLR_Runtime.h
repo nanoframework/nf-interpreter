@@ -2277,6 +2277,10 @@ struct CLR_RT_MethodDef_Instance : public CLR_RT_MethodDef_Index
     const CLR_RT_TypeSpec_Index *genericType;
     CLR_RT_MethodSpec_Index methodSpec;
 
+    // Stable storage for the TypeSpec when set by InitializeFromIndex(md, typeSpec, caller).
+    // Prevents genericType from pointing to a caller's stack-local parameter.
+    CLR_RT_TypeSpec_Index m_typeSpecStorage;
+
     // For SZArrayHelper rebind: stores the array element TypeDef when dispatching from arrays
     CLR_RT_TypeDef_Index arrayElementType;
 
@@ -2558,6 +2562,7 @@ struct CLR_RT_InlineFrame
     CLR_PMETADATA m_IPStart;
     CLR_UINT8 m_localAllocCount;
     uintptr_t m_localAllocs[MAX_LOCALALLOC_COUNT];
+    CLR_RT_TypeSpec_Index m_genericTypeSpecStorage;
 };
 
 struct CLR_RT_InlineBuffer

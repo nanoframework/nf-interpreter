@@ -336,6 +336,7 @@ bool CLR_RT_StackFrame::PushInline(
     {
         m_inlineFrame->m_frame.m_localAllocs[i] = m_localAllocs[i];
     }
+    m_inlineFrame->m_frame.m_genericTypeSpecStorage = m_genericTypeSpecStorage;
 
     // increment the evalPos pointer so that we don't corrupt the real stack
     evalPos++;
@@ -436,6 +437,12 @@ void CLR_RT_StackFrame::RestoreFromInlineStack()
     for (CLR_INT32 i = 0; i < c_Max_Localloc_Count; i++)
     {
         m_localAllocs[i] = m_inlineFrame->m_frame.m_localAllocs[i];
+    }
+    m_genericTypeSpecStorage = m_inlineFrame->m_frame.m_genericTypeSpecStorage;
+    // If the restored m_call.genericType pointed into m_genericTypeSpecStorage, fix the pointer.
+    if (m_call.genericType == &m_inlineFrame->m_frame.m_genericTypeSpecStorage)
+    {
+        m_call.genericType = &m_genericTypeSpecStorage;
     }
 }
 
