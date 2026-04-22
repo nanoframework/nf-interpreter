@@ -1046,6 +1046,8 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
     CLR_PMETADATA ip;
     bool fCondition;
     bool fDirty = false;
+    // set by CEE_CONSTRAINED prefix, consumed by CEE_CALLVIRT
+    CLR_UINT32 constrainedTypeToken = 0;
 
 #if defined(NANOCLR_OPCODE_STACKCHANGES)
     // Track stack depth for validation
@@ -2471,6 +2473,33 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                             NANOCLR_INDEX_IS_VALID(propagatedArrayElementType))
                         {
                             calleeInst.arrayElementType = propagatedArrayElementType;
+                        }
+
+                        // ECMA-335 §III.2.1 constrained. prefix semantics:
+                        // When constrained. T precedes callvirt and T is a reference type, the managed
+                        // pointer on the stack (from ldloca) must be dereferenced to the actual object
+                        // reference. For value types the BYREF is kept — the callee receives it as 'this'.
+                        if (constrainedTypeToken != 0 && pThis[0].DataType() == DATATYPE_BYREF)
+                        {
+                            CLR_RT_TypeDef_Instance constrainedType{};
+                            if (constrainedType.ResolveToken(constrainedTypeToken, assm, &stack->m_call))
+                            {
+                                bool isValueType =
+                                    ((constrainedType.target->flags & CLR_RECORD_TYPEDEF::TD_Semantics_Mask) ==
+                                     CLR_RECORD_TYPEDEF::TD_Semantics_ValueType) ||
+                                    ((constrainedType.target->flags & CLR_RECORD_TYPEDEF::TD_Semantics_Mask) ==
+                                     CLR_RECORD_TYPEDEF::TD_Semantics_Enum);
+
+                                if (!isValueType)
+                                {
+                                    CLR_RT_HeapBlock *derefThis = pThis[0].Dereference();
+                                    if (derefThis != nullptr)
+                                    {
+                                        pThis[0].Assign(*derefThis);
+                                    }
+                                }
+                            }
+                            constrainedTypeToken = 0;
                         }
 
 #ifndef NANOCLR_NO_IL_INLINE
@@ -4279,7 +4308,8 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                 {
                     FETCH_ARG_COMPRESSED_TYPETOKEN(arg, ip);
 
-                    // nop
+                    // Store the constrained type token; CEE_CALLVIRT will consume it.
+                    constrainedTypeToken = arg;
                     break;
                 }
 
