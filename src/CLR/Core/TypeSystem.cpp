@@ -2979,8 +2979,9 @@ HRESULT CLR_RT_TypeDescriptor::InitializeFromSignatureToken(
                                 this->InitializeFromTypeDef(msElem.Class);
                                 break;
                             }
-                            else if (msElem.DataType == DATATYPE_VAR && caller->genericType != nullptr &&
-                                     NANOCLR_INDEX_IS_VALID(*caller->genericType))
+                            else if (
+                                msElem.DataType == DATATYPE_VAR && caller->genericType != nullptr &&
+                                NANOCLR_INDEX_IS_VALID(*caller->genericType))
                             {
                                 // !!U -> !T: the MethodSpec maps a method-generic to a type-generic;
                                 // resolve the type-generic slot from the caller's closed TypeSpec.

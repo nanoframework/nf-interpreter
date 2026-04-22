@@ -96,11 +96,11 @@ HRESULT CLR_RT_StackFrame::Push(CLR_RT_Thread *th, const CLR_RT_MethodDef_Instan
                                       //
         stack->m_call = *callInstPtr; // CLR_RT_MethodDef_Instance m_call;
         stack->m_call.Normalize(*callInstPtr);
-                                      //
-                                      // CLR_RT_MethodHandler      m_nativeMethod;
-                                      // CLR_PMETADATA             m_IPstart;          // ANY   HEAP - DO RELOCATION -
-                                      // CLR_PMETADATA             m_IP;               // ANY   HEAP - DO RELOCATION -
-                                      //
+        //
+        // CLR_RT_MethodHandler      m_nativeMethod;
+        // CLR_PMETADATA             m_IPstart;          // ANY   HEAP - DO RELOCATION -
+        // CLR_PMETADATA             m_IP;               // ANY   HEAP - DO RELOCATION -
+        //
         stack->m_locals =
             stack->m_extension; // CLR_RT_HeapBlock*         m_locals;           // EVENT HEAP - NO RELOCATION -
         stack->m_evalStack =
