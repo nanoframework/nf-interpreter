@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (c) .NET Foundation and Contributors
 // See LICENSE file in the project root for full license information.
 //
@@ -303,6 +303,65 @@ void DisplayInterface::SendData16Windowed(
     }
 
     FlushData();
+
+    return;
+}
+
+void DisplayInterface::SendData18Windowed(
+    CLR_UINT16 *data,
+    CLR_UINT32 startX,
+    CLR_UINT32 startY,
+    CLR_UINT32 width,
+    CLR_UINT32 height,
+    CLR_UINT32 stride)
+{
+    // Offset for window start
+    CLR_UINT16 *startOfLine = data + (startY * stride) + startX;
+
+    CLR_UINT8 *byteBuffer = (CLR_UINT8 *)currentBuffer;
+    CLR_UINT32 bytesWritten = 0;
+
+    while (height--)
+    {
+        CLR_UINT16 *pixel = startOfLine;
+
+        for (CLR_UINT32 x = 0; x < width; x++)
+        {
+            CLR_UINT16 color = *pixel++;
+
+            // Extract RGB565 components and bit-widen to 8-bit
+            CLR_UINT8 b = color & 0x1F;
+            CLR_UINT8 g = (color >> 5) & 0x3F;
+            CLR_UINT8 r = (color >> 11) & 0x1F;
+
+            b = (b << 3) | (b >> 2);
+            g = (g << 2) | (g >> 4);
+            r = (r << 3) | (r >> 2);
+
+            // Ensure there is room for a full pixel
+            if (bytesWritten + 3 > SPI_MAX_TRANSFER_SIZE)
+            {
+                InternalSendBytes((CLR_UINT8 *)currentBuffer, bytesWritten, true);
+                SwapBuffers();
+                byteBuffer = (CLR_UINT8 *)currentBuffer;
+                bytesWritten = 0;
+            }
+
+            byteBuffer[bytesWritten++] = b;
+            byteBuffer[bytesWritten++] = g;
+            byteBuffer[bytesWritten++] = r;
+        }
+
+        startOfLine += stride;
+    }
+
+    // Flush remaining bytes
+    if (bytesWritten > 0)
+    {
+        InternalSendBytes((CLR_UINT8 *)currentBuffer, bytesWritten, true);
+
+        SwapBuffers();
+    }
 
     return;
 }
