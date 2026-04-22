@@ -7940,8 +7940,7 @@ HRESULT CLR_RT_TypeSystem::BuildTypeName(
             // method generic parameter -- try to resolve via MethodSpec; fall back to !!N only on failure
             bool mvarResolved = false;
 
-            if (contextMethodDef != nullptr &&
-                NANOCLR_INDEX_IS_VALID(*contextMethodDef) &&
+            if (contextMethodDef != nullptr && NANOCLR_INDEX_IS_VALID(*contextMethodDef) &&
                 NANOCLR_INDEX_IS_VALID(contextMethodDef->methodSpec))
             {
                 CLR_RT_MethodSpec_Instance methodSpec{};
