@@ -1045,10 +1045,8 @@ void CLR_RT_Assembly::DumpOpcodeDirect(
 
                 // If the resolved method's genericType is still open (has MVAR) but the calling frame
                 // has an inherited methodSpec, propagate it so BuildMethodName can close the MVAR args.
-                if (!NANOCLR_INDEX_IS_VALID(mdInst.methodSpec) &&
-                    mdInst.genericType != nullptr &&
-                    NANOCLR_INDEX_IS_VALID(*mdInst.genericType) &&
-                    NANOCLR_INDEX_IS_VALID(call.methodSpec))
+                if (!NANOCLR_INDEX_IS_VALID(mdInst.methodSpec) && mdInst.genericType != nullptr &&
+                    NANOCLR_INDEX_IS_VALID(*mdInst.genericType) && NANOCLR_INDEX_IS_VALID(call.methodSpec))
                 {
                     CLR_RT_TypeSpec_Instance tsCheck;
                     if (tsCheck.InitializeFromIndex(*mdInst.genericType) && !tsCheck.IsClosedGenericType())

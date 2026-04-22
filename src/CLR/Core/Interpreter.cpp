@@ -2552,8 +2552,9 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                                 // Fall back to caller's context even if TypeDef doesn't match.
                                 inlineCtx = effectiveCallerGeneric;
                             }
-                            else if (stack->m_inlineFrame->m_frame.m_call.genericType &&
-                                     NANOCLR_INDEX_IS_VALID(*stack->m_inlineFrame->m_frame.m_call.genericType))
+                            else if (
+                                stack->m_inlineFrame->m_frame.m_call.genericType &&
+                                NANOCLR_INDEX_IS_VALID(*stack->m_inlineFrame->m_frame.m_call.genericType))
                             {
                                 inlineCtx = stack->m_inlineFrame->m_frame.m_call.genericType;
                             }
@@ -2568,7 +2569,7 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                                 stack->m_call.genericType = nullptr;
                             }
 
-// Inherit caller's methodSpec when callee's genericType is open
+                            // Inherit caller's methodSpec when callee's genericType is open
                             if (!NANOCLR_INDEX_IS_VALID(stack->m_call.methodSpec) &&
                                 stack->m_call.genericType != nullptr &&
                                 NANOCLR_INDEX_IS_VALID(*stack->m_call.genericType) &&
@@ -2989,14 +2990,12 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                         // If the constructor operates on an open generic type (MVAR-based) and has no
                         // MethodSpec of its own, inherit the caller's MethodSpec so that MVAR resolution
                         // succeeds inside the callee (e.g. for ldsfld s_emptyArray on List<!!0>).
-                        if (!NANOCLR_INDEX_IS_VALID(calleeInst.methodSpec) &&
-                            calleeInst.genericType != nullptr &&
+                        if (!NANOCLR_INDEX_IS_VALID(calleeInst.methodSpec) && calleeInst.genericType != nullptr &&
                             NANOCLR_INDEX_IS_VALID(*calleeInst.genericType) &&
                             NANOCLR_INDEX_IS_VALID(stack->m_call.methodSpec))
                         {
                             CLR_RT_TypeSpec_Instance tsCheck;
-                            if (tsCheck.InitializeFromIndex(*calleeInst.genericType) &&
-                                !tsCheck.IsClosedGenericType())
+                            if (tsCheck.InitializeFromIndex(*calleeInst.genericType) && !tsCheck.IsClosedGenericType())
                             {
                                 calleeInst.methodSpec = stack->m_call.methodSpec;
                             }
