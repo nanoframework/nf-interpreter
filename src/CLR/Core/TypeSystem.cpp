@@ -1373,13 +1373,12 @@ bool CLR_RT_TypeDef_Instance::ResolveToken(
                         {
                         resolve_generic_argument:
 
-                            // Use the caller bound genericType (Stack<Int32>, etc.)
-                            if (caller == nullptr || NANOCLR_INDEX_IS_INVALID(*caller->genericType))
+                            if (caller == nullptr)
                             {
                                 return false;
                             }
 
-                            // resolve from methodspec context
+                            // resolve from methodspec context (MVAR = method-level generic parameter)
                             if (NANOCLR_INDEX_IS_VALID(caller->methodSpec))
                             {
                                 CLR_RT_MethodSpec_Instance methodSpecInstance;
@@ -2964,11 +2963,35 @@ HRESULT CLR_RT_TypeDescriptor::InitializeFromSignatureToken(
             }
             else if (elem.DataType == DATATYPE_MVAR)
             {
-                // !!U: method-generic
-                CLR_RT_GenericParam_Index gp;
-                assm->FindGenericParamAtMethodDef(*caller, elem.GenericParamPosition, gp);
-                auto &info = assm->crossReferenceGenericParam[gp.GenericParam()];
-                this->InitializeFromTypeDef(info.classTypeDef);
+                // !!U: method-generic parameter — resolve from the caller's MethodSpec if available,
+                // which gives the concrete closed type (e.g. String for BuildListAndCount<String>).
+                if (caller != nullptr && NANOCLR_INDEX_IS_VALID(caller->methodSpec))
+                {
+                    CLR_RT_MethodSpec_Instance msInst;
+                    if (msInst.InitializeFromIndex(caller->methodSpec))
+                    {
+                        CLR_RT_SignatureParser::Element msElem;
+                        if (msInst.GetGenericArgument(elem.GenericParamPosition, msElem) &&
+                            NANOCLR_INDEX_IS_VALID(msElem.Class))
+                        {
+                            this->InitializeFromTypeDef(msElem.Class);
+                            break;
+                        }
+                    }
+                }
+
+                // Fallback: use the GenericParam table (gives the declared constraint, e.g. object).
+                if (caller != nullptr)
+                {
+                    CLR_RT_GenericParam_Index gp;
+                    assm->FindGenericParamAtMethodDef(*caller, elem.GenericParamPosition, gp);
+                    auto &info = assm->crossReferenceGenericParam[gp.GenericParam()];
+                    this->InitializeFromTypeDef(info.classTypeDef);
+                }
+                else
+                {
+                    NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+                }
             }
             else if (elem.DataType == DATATYPE_GENERICINST)
             {
