@@ -649,8 +649,8 @@ void CLR_RT_Assembly::DumpToken(
                         }
                         else if (paramElement.DataType == DATATYPE_VAR)
                         {
-                            // nested VAR not implemented
-                            ASSERT(false);
+                            // Nested VAR: the contextTypeSpec is itself open (unresolved VAR).
+                            // Fall through to print "!n" as a literal below.
                         }
                     }
                 }

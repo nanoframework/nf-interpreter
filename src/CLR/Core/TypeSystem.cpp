@@ -1350,12 +1350,6 @@ bool CLR_RT_TypeDef_Instance::ResolveToken(
 
                                     goto resolve_generic_argument;
                                 }
-                                else if (paramElement.DataType == DATATYPE_VAR)
-                                {
-                                    // nested VAR not implemented
-                                    ASSERT(false);
-                                    return false;
-                                }
                                 else
                                 {
                                     return false;
