@@ -1316,7 +1316,8 @@ bool CLR_RT_TypeDef_Instance::ResolveToken(
                             {
                                 effectiveContext = contextTypeSpec;
                             }
-                            else if (caller != nullptr && NANOCLR_INDEX_IS_VALID(*caller->genericType))
+                            else if (caller != nullptr && caller->genericType != nullptr &&
+                                     NANOCLR_INDEX_IS_VALID(*caller->genericType))
                             {
                                 effectiveContext = caller->genericType;
                             }
