@@ -8004,11 +8004,23 @@ HRESULT CLR_RT_TypeSystem::BuildTypeName(
                     if (paramElement.DataType == DATATYPE_VAR)
                     {
                         // VAR inside a MethodSpec arg -- resolve against the declaring type's closed TypeSpec
+                        const CLR_RT_TypeSpec_Index *effectiveContext = nullptr;
                         CLR_RT_TypeSpec_Instance contextTs;
                         CLR_RT_SignatureParser::Element argElement;
 
-                        if (contextMethodDef->genericType != nullptr &&
-                            contextTs.InitializeFromIndex(*contextMethodDef->genericType) &&
+                        if (contextTypeSpec != nullptr && NANOCLR_INDEX_IS_VALID(*contextTypeSpec))
+                        {
+                            effectiveContext = contextTypeSpec;
+                        }
+                        else if (
+                            contextMethodDef->genericType != nullptr &&
+                            NANOCLR_INDEX_IS_VALID(*contextMethodDef->genericType))
+                        {
+                            effectiveContext = contextMethodDef->genericType;
+                        }
+
+                        if (effectiveContext != nullptr &&
+                            contextTs.InitializeFromIndex(*effectiveContext) &&
                             contextTs.GetGenericParam(paramElement.GenericParamPosition, argElement))
                         {
                             paramTypeDef = argElement.Class;
