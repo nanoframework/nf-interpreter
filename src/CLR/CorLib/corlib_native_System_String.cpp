@@ -1361,10 +1361,17 @@ HRESULT Library_corlib_native_System_String::Format___STATIC__STRING__STRING__SZ
                         p++;
                     }
 
+                    bool hasAlignmentDigits = false;
                     while (*p >= '0' && *p <= '9')
                     {
                         alignment = alignment * 10 + (*p - '0');
+                        hasAlignmentDigits = true;
                         p++;
+                    }
+
+                    if (!hasAlignmentDigits)
+                    {
+                        NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
                     }
 
                     if (negative)
@@ -1387,6 +1394,11 @@ HRESULT Library_corlib_native_System_String::Format___STATIC__STRING__STRING__SZ
                     }
 
                     formatSpec[formatSpecLen] = '\0';
+
+                    if (formatSpecLen == 0)
+                    {
+                        NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+                    }
                 }
 
                 if (*p != '}')
