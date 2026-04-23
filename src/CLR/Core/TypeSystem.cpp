@@ -1316,8 +1316,9 @@ bool CLR_RT_TypeDef_Instance::ResolveToken(
                             {
                                 effectiveContext = contextTypeSpec;
                             }
-                            else if (caller != nullptr && caller->genericType != nullptr &&
-                                     NANOCLR_INDEX_IS_VALID(*caller->genericType))
+                            else if (
+                                caller != nullptr && caller->genericType != nullptr &&
+                                NANOCLR_INDEX_IS_VALID(*caller->genericType))
                             {
                                 effectiveContext = caller->genericType;
                             }
@@ -8019,8 +8020,7 @@ HRESULT CLR_RT_TypeSystem::BuildTypeName(
                             effectiveContext = contextMethodDef->genericType;
                         }
 
-                        if (effectiveContext != nullptr &&
-                            contextTs.InitializeFromIndex(*effectiveContext) &&
+                        if (effectiveContext != nullptr && contextTs.InitializeFromIndex(*effectiveContext) &&
                             contextTs.GetGenericParam(paramElement.GenericParamPosition, argElement))
                         {
                             paramTypeDef = argElement.Class;
