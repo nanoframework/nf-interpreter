@@ -2127,9 +2127,9 @@ HRESULT CLR_RT_ExecutionEngine::InitializeReference(
         }
         else if (dt == DATATYPE_MVAR)
         {
-            _ASSERTE(true);
-
-            goto process_datatype;
+            // MVAR cannot be resolved without method-spec context in InitializeReference.
+            // Treat as an object reference (null) so local initialization can proceed.
+            dt = DATATYPE_OBJECT;
         }
         else if (dt == DATATYPE_GENERICINST)
         {

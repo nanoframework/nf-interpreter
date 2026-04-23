@@ -1,4 +1,4 @@
-﻿//
+//
 // Copyright (c) .NET Foundation and Contributors
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
@@ -95,11 +95,12 @@ HRESULT CLR_RT_StackFrame::Push(CLR_RT_Thread *th, const CLR_RT_MethodDef_Instan
                                       // CLR_UINT32                m_flags;
                                       //
         stack->m_call = *callInstPtr; // CLR_RT_MethodDef_Instance m_call;
-                                      //
-                                      // CLR_RT_MethodHandler      m_nativeMethod;
-                                      // CLR_PMETADATA             m_IPstart;          // ANY   HEAP - DO RELOCATION -
-                                      // CLR_PMETADATA             m_IP;               // ANY   HEAP - DO RELOCATION -
-                                      //
+        stack->m_call.Normalize(*callInstPtr);
+        //
+        // CLR_RT_MethodHandler      m_nativeMethod;
+        // CLR_PMETADATA             m_IPstart;          // ANY   HEAP - DO RELOCATION -
+        // CLR_PMETADATA             m_IP;               // ANY   HEAP - DO RELOCATION -
+        //
         stack->m_locals =
             stack->m_extension; // CLR_RT_HeapBlock*         m_locals;           // EVENT HEAP - NO RELOCATION -
         stack->m_evalStack =
@@ -329,12 +330,20 @@ bool CLR_RT_StackFrame::PushInline(
     m_inlineFrame->m_frame.m_locals = m_locals;
     m_inlineFrame->m_frame.m_args = m_arguments;
     m_inlineFrame->m_frame.m_call = m_call;
+    m_inlineFrame->m_frame.m_call.Normalize(m_call);
     m_inlineFrame->m_frame.m_evalStack = m_evalStack;
     m_inlineFrame->m_frame.m_evalPos = pThis;
     m_inlineFrame->m_frame.m_localAllocCount = m_localAllocCount;
     for (CLR_INT32 i = 0; i < c_Max_Localloc_Count; i++)
     {
         m_inlineFrame->m_frame.m_localAllocs[i] = m_localAllocs[i];
+    }
+    m_inlineFrame->m_frame.m_genericTypeSpecStorage = m_genericTypeSpecStorage;
+    // Normalize: if the saved m_call.genericType was pointing at the live frame's storage,
+    // redirect it to the copy inside the inline frame so the saved context is self-contained.
+    if (m_call.genericType == &m_genericTypeSpecStorage)
+    {
+        m_inlineFrame->m_frame.m_call.genericType = &m_inlineFrame->m_frame.m_genericTypeSpecStorage;
     }
 
     // increment the evalPos pointer so that we don't corrupt the real stack
@@ -345,6 +354,7 @@ bool CLR_RT_StackFrame::PushInline(
     m_arguments = pThis;
     m_locals = &m_evalStackEnd[-md->localsCount];
     m_call = calleeInst;
+    m_call.Normalize(calleeInst);
     m_evalStackEnd = m_locals;
     m_evalStack = evalPos;
     m_evalStackPos = evalPos + 1;
@@ -428,6 +438,7 @@ void CLR_RT_StackFrame::RestoreFromInlineStack()
     m_locals = m_inlineFrame->m_frame.m_locals;
     m_evalStackEnd += m_call.target->localsCount;
     m_call = m_inlineFrame->m_frame.m_call;
+    m_call.Normalize(m_inlineFrame->m_frame.m_call);
     m_IP = m_inlineFrame->m_frame.m_IP;
     m_IPstart = m_inlineFrame->m_frame.m_IPStart;
     m_evalStack = m_inlineFrame->m_frame.m_evalStack;
@@ -437,6 +448,12 @@ void CLR_RT_StackFrame::RestoreFromInlineStack()
     {
         m_localAllocs[i] = m_inlineFrame->m_frame.m_localAllocs[i];
     }
+    m_genericTypeSpecStorage = m_inlineFrame->m_frame.m_genericTypeSpecStorage;
+    // If the restored m_call.genericType pointed into m_genericTypeSpecStorage, fix the pointer.
+    if (m_call.genericType == &m_inlineFrame->m_frame.m_genericTypeSpecStorage)
+    {
+        m_call.genericType = &m_genericTypeSpecStorage;
+    }
 }
 
 void CLR_RT_StackFrame::RestoreStack(CLR_RT_InlineFrame &frame)
@@ -444,6 +461,7 @@ void CLR_RT_StackFrame::RestoreStack(CLR_RT_InlineFrame &frame)
     m_arguments = frame.m_args;
     m_locals = frame.m_locals;
     m_call = frame.m_call;
+    m_call.Normalize(frame.m_call);
     m_IP = frame.m_IP;
     m_IPstart = frame.m_IPStart;
     m_evalStack = frame.m_evalStack;
@@ -454,6 +472,12 @@ void CLR_RT_StackFrame::RestoreStack(CLR_RT_InlineFrame &frame)
     {
         m_localAllocs[i] = frame.m_localAllocs[i];
     }
+    m_genericTypeSpecStorage = frame.m_genericTypeSpecStorage;
+    // Normalize: if the restored m_call.genericType pointed at the saved frame storage, fix it up.
+    if (m_call.genericType == &frame.m_genericTypeSpecStorage)
+    {
+        m_call.genericType = &m_genericTypeSpecStorage;
+    }
 }
 
 void CLR_RT_StackFrame::SaveStack(CLR_RT_InlineFrame &frame)
@@ -461,6 +485,7 @@ void CLR_RT_StackFrame::SaveStack(CLR_RT_InlineFrame &frame)
     frame.m_args = m_arguments;
     frame.m_locals = m_locals;
     frame.m_call = m_call;
+    frame.m_call.Normalize(m_call);
     frame.m_IP = m_IP;
     frame.m_IPStart = m_IPstart;
     frame.m_evalPos = m_evalStackPos;
@@ -469,6 +494,12 @@ void CLR_RT_StackFrame::SaveStack(CLR_RT_InlineFrame &frame)
     for (CLR_INT32 i = 0; i < c_Max_Localloc_Count; i++)
     {
         frame.m_localAllocs[i] = m_localAllocs[i];
+    }
+    frame.m_genericTypeSpecStorage = m_genericTypeSpecStorage;
+    // Normalize: redirect saved genericType pointer to the frame's own storage copy.
+    if (m_call.genericType == &m_genericTypeSpecStorage)
+    {
+        frame.m_call.genericType = &frame.m_genericTypeSpecStorage;
     }
 }
 #endif

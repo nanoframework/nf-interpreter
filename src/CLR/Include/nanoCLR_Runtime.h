@@ -2277,6 +2277,10 @@ struct CLR_RT_MethodDef_Instance : public CLR_RT_MethodDef_Index
     const CLR_RT_TypeSpec_Index *genericType;
     CLR_RT_MethodSpec_Index methodSpec;
 
+    // Stable storage for the TypeSpec when set by InitializeFromIndex(md, typeSpec, caller).
+    // Prevents genericType from pointing to a caller's stack-local parameter.
+    CLR_RT_TypeSpec_Index m_typeSpecStorage;
+
     // For SZArrayHelper rebind: stores the array element TypeDef when dispatching from arrays
     CLR_RT_TypeDef_Index arrayElementType;
 
@@ -2285,6 +2289,21 @@ struct CLR_RT_MethodDef_Instance : public CLR_RT_MethodDef_Index
 #endif
 
     //--//
+
+    // After any plain by-value copy of a CLR_RT_MethodDef_Instance, call
+    // Normalize(src) to re-anchor the self-referential genericType pointer.
+    // InitializeFromIndex (typeSpec overload) sets genericType = &m_typeSpecStorage;
+    // a plain copy leaves genericType pointing at the source's m_typeSpecStorage,
+    // which dangles when the source goes out of scope.  Call Normalize(src)
+    // immediately after every  dst = src  where src may have had
+    // genericType == &src.m_typeSpecStorage.
+    inline void Normalize(const CLR_RT_MethodDef_Instance &src)
+    {
+        if (src.genericType == &src.m_typeSpecStorage)
+        {
+            genericType = &m_typeSpecStorage;
+        }
+    }
 
     bool InitializeFromIndex(const CLR_RT_MethodDef_Index &index);
     bool InitializeFromIndex(
@@ -2558,6 +2577,7 @@ struct CLR_RT_InlineFrame
     CLR_PMETADATA m_IPStart;
     CLR_UINT8 m_localAllocCount;
     uintptr_t m_localAllocs[MAX_LOCALALLOC_COUNT];
+    CLR_RT_TypeSpec_Index m_genericTypeSpecStorage;
 };
 
 struct CLR_RT_InlineBuffer

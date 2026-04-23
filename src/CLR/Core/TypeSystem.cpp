@@ -1316,7 +1316,9 @@ bool CLR_RT_TypeDef_Instance::ResolveToken(
                             {
                                 effectiveContext = contextTypeSpec;
                             }
-                            else if (caller != nullptr && NANOCLR_INDEX_IS_VALID(*caller->genericType))
+                            else if (
+                                caller != nullptr && caller->genericType != nullptr &&
+                                NANOCLR_INDEX_IS_VALID(*caller->genericType))
                             {
                                 effectiveContext = caller->genericType;
                             }
@@ -1334,7 +1336,8 @@ bool CLR_RT_TypeDef_Instance::ResolveToken(
                             CLR_RT_SignatureParser::Element paramElement;
 
                             // Try to map using the generic context (e.g. !T→Int32)
-                            if (callerTypeSpec.GetGenericParam(genericPosition, paramElement))
+                            if (callerTypeSpec.GetGenericParam(genericPosition, paramElement) &&
+                                paramElement.DataType != DATATYPE_VAR)
                             {
                                 // Successfully resolved from generic context
                                 if (NANOCLR_INDEX_IS_VALID(paramElement.Class))
@@ -1350,20 +1353,17 @@ bool CLR_RT_TypeDef_Instance::ResolveToken(
 
                                     goto resolve_generic_argument;
                                 }
-                                else if (paramElement.DataType == DATATYPE_VAR)
-                                {
-                                    // nested VAR not implemented
-                                    ASSERT(false);
-                                    return false;
-                                }
                                 else
                                 {
                                     return false;
                                 }
                             }
-                            else if (NANOCLR_INDEX_IS_VALID(caller->arrayElementType) && genericPosition == 0)
+                            else if (
+                                caller != nullptr && NANOCLR_INDEX_IS_VALID(caller->arrayElementType) &&
+                                genericPosition == 0)
                             {
-                                // Fallback to arrayElementType for SZArrayHelper scenarios
+                                // Fallback to arrayElementType: covers SZArrayHelper scenarios and
+                                // the nested-VAR case where the context TypeSpec is still open.
                                 data = caller->arrayElementType.data;
                                 assembly = g_CLR_RT_TypeSystem.m_assemblies[caller->arrayElementType.Assembly() - 1];
                                 target = assembly->GetTypeDef(caller->arrayElementType.Type());
@@ -1377,13 +1377,12 @@ bool CLR_RT_TypeDef_Instance::ResolveToken(
                         {
                         resolve_generic_argument:
 
-                            // Use the caller bound genericType (Stack<Int32>, etc.)
-                            if (caller == nullptr || NANOCLR_INDEX_IS_INVALID(*caller->genericType))
+                            if (caller == nullptr)
                             {
                                 return false;
                             }
 
-                            // resolve from methodspec context
+                            // resolve from methodspec context (MVAR = method-level generic parameter)
                             if (NANOCLR_INDEX_IS_VALID(caller->methodSpec))
                             {
                                 CLR_RT_MethodSpec_Instance methodSpecInstance;
@@ -2002,8 +2001,10 @@ bool CLR_RT_MethodDef_Instance::InitializeFromIndex(
         return false;
     }
 
-    // remember the TypeSpec so this is available when needed
-    genericType = &typeSpec;
+    // Store the TypeSpec in stable member storage so that genericType doesn't point
+    // to the caller's stack (the 'typeSpec' parameter would be freed after return).
+    m_typeSpecStorage = typeSpec;
+    genericType = &m_typeSpecStorage;
 
     return true;
 }
@@ -2013,6 +2014,7 @@ void CLR_RT_MethodDef_Instance::ClearInstance()
     NATIVE_PROFILE_CLR_CORE();
     CLR_RT_MethodDef_Index::Clear();
     methodSpec.Clear();
+    m_typeSpecStorage.Clear();
 
     assembly = nullptr;
     target = nullptr;
@@ -2965,11 +2967,59 @@ HRESULT CLR_RT_TypeDescriptor::InitializeFromSignatureToken(
             }
             else if (elem.DataType == DATATYPE_MVAR)
             {
-                // !!U: method-generic
-                CLR_RT_GenericParam_Index gp;
-                assm->FindGenericParamAtMethodDef(*caller, elem.GenericParamPosition, gp);
-                auto &info = assm->crossReferenceGenericParam[gp.GenericParam()];
-                this->InitializeFromTypeDef(info.classTypeDef);
+                // !!U: method-generic parameter — resolve from the caller's MethodSpec if available,
+                // which gives the concrete closed type (e.g. String for BuildListAndCount<String>).
+                if (caller != nullptr && NANOCLR_INDEX_IS_VALID(caller->methodSpec))
+                {
+                    CLR_RT_MethodSpec_Instance msInst;
+                    if (msInst.InitializeFromIndex(caller->methodSpec))
+                    {
+                        CLR_RT_SignatureParser::Element msElem;
+                        if (msInst.GetGenericArgument(elem.GenericParamPosition, msElem))
+                        {
+                            if (NANOCLR_INDEX_IS_VALID(msElem.Class))
+                            {
+                                // Concrete type argument: use it directly.
+                                this->InitializeFromTypeDef(msElem.Class);
+                                break;
+                            }
+                            else if (
+                                msElem.DataType == DATATYPE_VAR && caller->genericType != nullptr &&
+                                NANOCLR_INDEX_IS_VALID(*caller->genericType))
+                            {
+                                // !!U -> !T: the MethodSpec maps a method-generic to a type-generic;
+                                // resolve the type-generic slot from the caller's closed TypeSpec.
+                                CLR_RT_TypeSpec_Instance callerTypeSpec;
+                                if (callerTypeSpec.InitializeFromIndex(*caller->genericType))
+                                {
+                                    CLR_RT_SignatureParser::Element paramElement;
+                                    if (callerTypeSpec.GetGenericParam(msElem.GenericParamPosition, paramElement) &&
+                                        NANOCLR_INDEX_IS_VALID(paramElement.Class))
+                                    {
+                                        this->InitializeFromTypeDef(paramElement.Class);
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // Fallback: use the GenericParam table on the caller's assembly (gives the declared
+                // constraint, e.g. object).  Use caller->assembly rather than assm so that cross-assembly
+                // calls look up the GenericParam table in the assembly that actually declares the method,
+                // avoiding picking up the wrong table from a different assembly.
+                if (caller != nullptr)
+                {
+                    CLR_RT_GenericParam_Index gp;
+                    caller->assembly->FindGenericParamAtMethodDef(*caller, elem.GenericParamPosition, gp);
+                    auto &info = caller->assembly->crossReferenceGenericParam[gp.GenericParam()];
+                    this->InitializeFromTypeDef(info.classTypeDef);
+                }
+                else
+                {
+                    NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+                }
             }
             else if (elem.DataType == DATATYPE_GENERICINST)
             {
@@ -7938,61 +7988,56 @@ HRESULT CLR_RT_TypeSystem::BuildTypeName(
         }
         else if (element.DataType == DATATYPE_MVAR)
         {
-            // method generic parameter
-            if (contextMethodDef != nullptr && NANOCLR_INDEX_IS_VALID(*contextMethodDef))
+            // method generic parameter -- try to resolve via MethodSpec; fall back to !!N only on failure
+            bool mvarResolved = false;
+
+            if (contextMethodDef != nullptr && NANOCLR_INDEX_IS_VALID(*contextMethodDef) &&
+                NANOCLR_INDEX_IS_VALID(contextMethodDef->methodSpec))
             {
-                if (NANOCLR_INDEX_IS_VALID(contextMethodDef->methodSpec))
+                CLR_RT_MethodSpec_Instance methodSpec{};
+                CLR_RT_SignatureParser::Element paramElement;
+                methodSpec.InitializeFromIndex(contextMethodDef->methodSpec);
+
+                if (methodSpec.GetGenericArgument(element.GenericParamPosition, paramElement))
                 {
-                    CLR_RT_MethodSpec_Instance methodSpec{};
-                    CLR_RT_SignatureParser::Element paramElement;
-                    CLR_RT_TypeDef_Index paramTypeDef;
-                    methodSpec.InitializeFromIndex(contextMethodDef->methodSpec);
-
-                    if (!methodSpec.GetGenericArgument(element.GenericParamPosition, paramElement))
-                    {
-                        NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
-                    }
-
-                    paramTypeDef = paramElement.Class;
+                    CLR_RT_TypeDef_Index paramTypeDef = paramElement.Class;
 
                     if (paramElement.DataType == DATATYPE_VAR)
                     {
-                        // Build the type name for this generic argument
-                        // Use the method's declaring type as context for VAR resolution
-
+                        // VAR inside a MethodSpec arg -- resolve against the declaring type's closed TypeSpec
+                        const CLR_RT_TypeSpec_Index *effectiveContext = nullptr;
                         CLR_RT_TypeSpec_Instance contextTs;
                         CLR_RT_SignatureParser::Element argElement;
 
-                        // try to resolve from method context
-                        if (!contextTs.InitializeFromIndex(*contextMethodDef->genericType))
+                        if (contextTypeSpec != nullptr && NANOCLR_INDEX_IS_VALID(*contextTypeSpec))
                         {
-                            NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
+                            effectiveContext = contextTypeSpec;
+                        }
+                        else if (
+                            contextMethodDef->genericType != nullptr &&
+                            NANOCLR_INDEX_IS_VALID(*contextMethodDef->genericType))
+                        {
+                            effectiveContext = contextMethodDef->genericType;
                         }
 
-                        if (contextTs.GetGenericParam(paramElement.GenericParamPosition, argElement))
+                        if (effectiveContext != nullptr && contextTs.InitializeFromIndex(*effectiveContext) &&
+                            contextTs.GetGenericParam(paramElement.GenericParamPosition, argElement))
                         {
                             paramTypeDef = argElement.Class;
-
-                            goto output_type;
-                        }
-                        else
-                        {
-                            // Couldn't resolve
-                            char encodedParam[7];
-                            snprintf(encodedParam, ARRAYSIZE(encodedParam), "!%d", argElement.GenericParamPosition);
-                            NANOCLR_CHECK_HRESULT(QueueStringToBuffer(szBuffer, iBuffer, encodedParam));
                         }
                     }
-                    else
+
+                    if (paramTypeDef.data != 0)
                     {
-                    output_type:
                         NANOCLR_CHECK_HRESULT(BuildTypeName(paramTypeDef, szBuffer, iBuffer));
+                        mvarResolved = true;
                     }
                 }
             }
-            else
+
+            if (!mvarResolved)
             {
-                // couldn't be resolved, print encoded form (!!N)
+                // resolution failed (no MethodSpec, GetGenericArgument returned false, etc.) -- print !!N
                 char encodedParam[7];
                 snprintf(encodedParam, ARRAYSIZE(encodedParam), "!!%d", element.GenericParamPosition);
                 NANOCLR_CHECK_HRESULT(QueueStringToBuffer(szBuffer, iBuffer, encodedParam));
@@ -8241,8 +8286,9 @@ HRESULT CLR_RT_TypeSystem::BuildMethodName(
         // Append the method name
         CLR_SafeSprintf(szBuffer, iBuffer, "::%s", mdInst.assembly->GetString(mdInst.target->name));
 
-        // If this method has generic parameters (methodSpec is valid), append them
-        if (NANOCLR_INDEX_IS_VALID(mdInst.methodSpec))
+        // If this method itself is generic (has its own generic parameters) and has a methodSpec, append them.
+        // Do NOT append when methodSpec was merely inherited from the caller for MVAR resolution (e.g. .ctor).
+        if (NANOCLR_INDEX_IS_VALID(mdInst.methodSpec) && mdInst.target->genericParamCount > 0)
         {
             CLR_RT_MethodSpec_Instance msInst{};
             if (msInst.InitializeFromIndex(mdInst.methodSpec))
@@ -8274,8 +8320,25 @@ HRESULT CLR_RT_TypeSystem::BuildMethodName(
                         CLR_RT_TypeSpec_Instance contextTs;
                         CLR_RT_SignatureParser::Element paramElement;
 
+                        // Compute effective generic context: prefer the explicit genericType parameter,
+                        // fall back to the method instance own genericType to avoid null dereference.
+                        CLR_RT_TypeSpec_Index effectiveGenericIndex;
+                        if (genericType != nullptr && NANOCLR_INDEX_IS_VALID(*genericType))
+                        {
+                            effectiveGenericIndex = *genericType;
+                        }
+                        else if (mdInst.genericType != nullptr && NANOCLR_INDEX_IS_VALID(*mdInst.genericType))
+                        {
+                            effectiveGenericIndex = *mdInst.genericType;
+                        }
+                        else
+                        {
+                            CLR_SafeSprintf(szBuffer, iBuffer, "!%d", elem.GenericParamPosition);
+                            continue;
+                        }
+
                         // try to resolve from method context
-                        if (!contextTs.InitializeFromIndex(*genericType))
+                        if (!contextTs.InitializeFromIndex(effectiveGenericIndex))
                         {
                             NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
                         }
