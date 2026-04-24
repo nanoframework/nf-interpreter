@@ -1,4 +1,4 @@
-﻿//
+//
 // Copyright (c) .NET Foundation and Contributors
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
@@ -144,7 +144,18 @@ HRESULT CLR_RT_HeapBlock_Array::CreateInstance(
         CLR_RT_ReflectionDef_Index reflex{};
         reflex.kind = REFLECTION_TYPE;
         reflex.levels = tsInst.levels;
-        reflex.data.type = tsInst.cachedElementType;
+
+        // For generic instantiation TypeSpecs (e.g. Pair<TKey,TValue>), genericTypeDef holds
+        // the open generic typedef (e.g. Pair<,>).  cachedElementType is only set for
+        // non-generic TypeSpecs resolved via VAR/MVAR, so prefer genericTypeDef when valid.
+        if (NANOCLR_INDEX_IS_VALID(tsInst.genericTypeDef))
+        {
+            reflex.data.type = tsInst.genericTypeDef;
+        }
+        else
+        {
+            reflex.data.type = tsInst.cachedElementType;
+        }
 
         NANOCLR_CHECK_HRESULT(ref.SetReflection(reflex));
     }

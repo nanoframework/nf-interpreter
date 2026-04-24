@@ -2117,13 +2117,18 @@ HRESULT CLR_RT_ExecutionEngine::InitializeReference(
         {
             if (genericInstance == nullptr || !NANOCLR_INDEX_IS_VALID(*genericInstance))
             {
-                NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
+                // VAR cannot be resolved without a closed generic context (e.g. when
+                // pre-allocating array element structs for an open generic type).
+                // Treat as an object reference (null) so field initialization proceeds.
+                dt = DATATYPE_OBJECT;
             }
+            else
+            {
+                NANOCLR_CHECK_HRESULT(
+                    ResolveGenericTypeParameter(*genericInstance, res.GenericParamPosition, realTypeDef, dt));
 
-            NANOCLR_CHECK_HRESULT(
-                ResolveGenericTypeParameter(*genericInstance, res.GenericParamPosition, realTypeDef, dt));
-
-            goto process_datatype;
+                goto process_datatype;
+            }
         }
         else if (dt == DATATYPE_MVAR)
         {
