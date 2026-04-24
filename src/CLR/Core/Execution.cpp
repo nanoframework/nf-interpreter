@@ -2083,7 +2083,8 @@ static HRESULT ResolveGenericTypeParameter(
 HRESULT CLR_RT_ExecutionEngine::InitializeReference(
     CLR_RT_HeapBlock &ref,
     CLR_RT_SignatureParser &parser,
-    const CLR_RT_TypeSpec_Instance *genericInstance)
+    const CLR_RT_TypeSpec_Instance *genericInstance,
+    bool allowUnresolvedVarFallback)
 {
     NATIVE_PROFILE_CLR_CORE();
     //
@@ -2117,13 +2118,26 @@ HRESULT CLR_RT_ExecutionEngine::InitializeReference(
         {
             if (genericInstance == nullptr || !NANOCLR_INDEX_IS_VALID(*genericInstance))
             {
-                NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
+                if (allowUnresolvedVarFallback)
+                {
+                    // VAR cannot be resolved without a closed generic context (e.g. when
+                    // pre-allocating array element structs for an open generic type).
+                    // Treat as an object reference (null) so field initialization proceeds;
+                    // subsequent stfld instructions will overwrite with the correct type.
+                    dt = DATATYPE_OBJECT;
+                }
+                else
+                {
+                    NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
+                }
             }
+            else
+            {
+                NANOCLR_CHECK_HRESULT(
+                    ResolveGenericTypeParameter(*genericInstance, res.GenericParamPosition, realTypeDef, dt));
 
-            NANOCLR_CHECK_HRESULT(
-                ResolveGenericTypeParameter(*genericInstance, res.GenericParamPosition, realTypeDef, dt));
-
-            goto process_datatype;
+                goto process_datatype;
+            }
         }
         else if (dt == DATATYPE_MVAR)
         {
@@ -2201,7 +2215,8 @@ HRESULT CLR_RT_ExecutionEngine::InitializeReference(
     CLR_RT_HeapBlock &ref,
     const CLR_RECORD_FIELDDEF *target,
     CLR_RT_Assembly *assm,
-    const CLR_RT_TypeSpec_Instance *genericInstance)
+    const CLR_RT_TypeSpec_Instance *genericInstance,
+    bool allowUnresolvedVarFallback)
 {
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
@@ -2209,7 +2224,7 @@ HRESULT CLR_RT_ExecutionEngine::InitializeReference(
     CLR_RT_SignatureParser parser{};
     parser.Initialize_FieldDef(assm, target);
 
-    NANOCLR_SET_AND_LEAVE(InitializeReference(ref, parser, genericInstance));
+    NANOCLR_SET_AND_LEAVE(InitializeReference(ref, parser, genericInstance, allowUnresolvedVarFallback));
 
     NANOCLR_NOCLEANUP();
 }
@@ -2635,7 +2650,7 @@ HRESULT CLR_RT_ExecutionEngine::NewObject(
                         const char *fieldName = assm->GetString(target->name);
 #endif
 
-                        NANOCLR_CHECK_HRESULT(InitializeReference(*obj, target, assm, genericInstance));
+                        NANOCLR_CHECK_HRESULT(InitializeReference(*obj, target, assm, genericInstance, true));
                     }
                 }
 

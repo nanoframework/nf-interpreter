@@ -1,4 +1,4 @@
-﻿//
+//
 // Copyright (c) .NET Foundation and Contributors
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
@@ -1269,38 +1269,29 @@ bool CLR_RT_TypeDef_Instance::ResolveToken(
                     {
                         if (elem.DataType == DATATYPE_GENERICINST)
                         {
+                            // Advance past the open generic type token.
+                            // After this call elem.Class holds the open generic typedef (e.g. Pair<,>).
+                            // The parser has already consumed the arg-count byte inside Advance,
+                            // so there is no further element to skip.  Return the typedef directly
+                            // for NEWARR / STELEM / ISINST / CASTCLASS with a GENERICINST token.
                             if (FAILED(parser.Advance(elem)))
                             {
                                 return false;
                             }
 
-                            if (elem.DataType == DATATYPE_CLASS || elem.DataType == DATATYPE_VALUETYPE)
+                            if ((elem.DataType == DATATYPE_CLASS || elem.DataType == DATATYPE_VALUETYPE) &&
+                                NANOCLR_INDEX_IS_VALID(elem.Class))
                             {
-                                // consume the CLASS/VALUETYPE marker
-                                if (FAILED(parser.Advance(elem)))
-                                {
-                                    return false;
-                                }
-                                // consume the generic‐definition token itself
-                                if (FAILED(parser.Advance(elem)))
-                                {
-                                    return false;
-                                }
-                                // consume the count of generic arguments
-                                if (FAILED(parser.Advance(elem)))
-                                {
-                                    return false;
-                                }
+                                data = elem.Class.data;
+                                assembly = g_CLR_RT_TypeSystem.m_assemblies[elem.Class.Assembly() - 1];
+                                target = assembly->GetTypeDef(elem.Class.Type());
+#if defined(NANOCLR_INSTANCE_NAMES)
+                                name = assembly->GetString(target->name);
+#endif
+                                return true;
                             }
 
-                            // walk forward until a VAR (type‐generic) or MVAR (method‐generic) is hit
-                            while (elem.DataType != DATATYPE_VAR && elem.DataType != DATATYPE_MVAR)
-                            {
-                                if (FAILED(parser.Advance(elem)))
-                                {
-                                    return false;
-                                }
-                            }
+                            return false;
                         }
 
                         genericPosition = elem.GenericParamPosition;

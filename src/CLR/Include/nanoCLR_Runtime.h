@@ -4222,12 +4222,14 @@ struct CLR_RT_ExecutionEngine
     HRESULT InitializeReference(
         CLR_RT_HeapBlock &ref,
         CLR_RT_SignatureParser &parser,
-        const CLR_RT_TypeSpec_Instance *genericInstance = nullptr);
+        const CLR_RT_TypeSpec_Instance *genericInstance = nullptr,
+        bool allowUnresolvedVarFallback = false);
     HRESULT InitializeReference(
         CLR_RT_HeapBlock &ref,
         const CLR_RECORD_FIELDDEF *target,
         CLR_RT_Assembly *assm,
-        const CLR_RT_TypeSpec_Instance *genericInstance = nullptr);
+        const CLR_RT_TypeSpec_Instance *genericInstance = nullptr,
+        bool allowUnresolvedVarFallback = false);
 
     HRESULT InitializeLocals(CLR_RT_HeapBlock *locals, const CLR_RT_MethodDef_Instance &methodDefInstance);
 
