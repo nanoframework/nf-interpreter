@@ -1279,11 +1279,12 @@ bool CLR_RT_TypeDef_Instance::ResolveToken(
                                 return false;
                             }
 
-                            if ((elem.DataType == DATATYPE_CLASS || elem.DataType == DATATYPE_VALUETYPE) && NANOCLR_INDEX_IS_VALID(elem.Class))
+                            if ((elem.DataType == DATATYPE_CLASS || elem.DataType == DATATYPE_VALUETYPE) &&
+                                NANOCLR_INDEX_IS_VALID(elem.Class))
                             {
-                                data     = elem.Class.data;
+                                data = elem.Class.data;
                                 assembly = g_CLR_RT_TypeSystem.m_assemblies[elem.Class.Assembly() - 1];
-                                target   = assembly->GetTypeDef(elem.Class.Type());
+                                target = assembly->GetTypeDef(elem.Class.Type());
 #if defined(NANOCLR_INSTANCE_NAMES)
                                 name = assembly->GetString(target->name);
 #endif
