@@ -3,8 +3,6 @@
 // See LICENSE file in the project root for full license information.
 //
 
-// clang-format off
-
 /**
  * @file    halconf_nf.h
  * @brief   nanoFramework community HAL configuration for the MCUboot bootloader
@@ -17,7 +15,14 @@
 #ifndef HALCONF_NF_H
 #define HALCONF_NF_H
 
-#define HAL_USE_COMMUNITY                   TRUE
-#define HAL_NF_USE_STM32_FLASH              TRUE
+// Enables the ChibiOS community overlay.
+#if !defined(HAL_USE_COMMUNITY) 
+#define HAL_USE_COMMUNITY           TRUE
+#endif
 
-#endif /* HALCONF_NF_H */
+// enables STM32 Flash driver
+#if !defined(HAL_NF_USE_STM32_FLASH) 
+#define HAL_NF_USE_STM32_FLASH         TRUE
+#endif
+
+#endif // HALCONF_NF_H
