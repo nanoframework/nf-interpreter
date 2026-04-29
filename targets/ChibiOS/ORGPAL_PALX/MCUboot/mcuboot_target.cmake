@@ -37,7 +37,6 @@ nf_setup_mcuboot_target_build(
         ${stm32f7_hal_driver_SOURCE_DIR}/Inc
 
     COMPILE_DEFINITIONS
-        STM32F769xx
         MCUBOOT_USE_TINYCRYPT=1
 
     EXTRA_COMPILE_OPTIONS

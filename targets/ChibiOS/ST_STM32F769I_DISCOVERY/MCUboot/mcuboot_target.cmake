@@ -30,7 +30,6 @@ nf_setup_mcuboot_target_build(
         ${CMAKE_SOURCE_DIR}/targets/ChibiOS/ST_STM32F769I_DISCOVERY/MCUboot
 
     COMPILE_DEFINITIONS
-        STM32F769xx
         MCUBOOT_USE_TINYCRYPT=1
 
     EXTRA_COMPILE_OPTIONS
