@@ -2,6 +2,8 @@
 
 MCUboot replaces nanoBooter at the same base address. PALX uses identical linker scripts for debug and release builds. The MCUboot internal flash layout is identical to the current nanoBooter release layout — **no linker script changes are required**.
 
+> **Note:** PALX was not expanded to 64 kB. The FatFs stack is not needed in the PALX MCUboot bootloader because secondary slots use the W25Q512 QSPI driver directly (not SD card FatFs). The 32 kB bootloader partition (sector 0 only) is sufficient.
+
 ## Internal flash map (STM32F76xx, 2 MB)
 
 | Region | Address | Size | Sector(s) | Notes |
@@ -23,11 +25,29 @@ MCUboot replaces nanoBooter at the same base address. PALX uses identical linker
 
 ## MCUboot configuration
 
-- **Upgrade strategy**: swap-using-offset (primary in internal flash, secondary on W25Q512 external QSPI)
-- **IMAGE_NUMBER**: 2 — Image 0 = nanoCLR, Image 1 = deployment
-- **Primary slots**: internal STM32F76xx flash (as above)
-- **Secondary slots**: W25Q512 64 MB QSPI (`hal_lfs_read_0 / hal_lfs_prog_0 / hal_lfs_erase_0`)
-  - Erase unit for MCUboot: 64 kB blocks (`W25Q512_BLOCK_SIZE = 0x10000`)
-  - Page size: 256 B
-- **`MCUBOOT_MAX_IMG_SECTORS`**: 20 (largest slot = Image 1 secondary = 20 × 64 kB blocks)
-- **Scratch area**: not required for swap-using-offset
+| Parameter | Value | Notes |
+|---|---|---|
+| Upgrade strategy | `MCUBOOT_SWAP_USING_OFFSET` | no scratch area required |
+| `MCUBOOT_IMAGE_NUMBER` | 2 | Image 0 = nanoCLR, Image 1 = deployment |
+| `MCUBOOT_FLASH_WRITE_ALIGNMENT` | 4 bytes | STM32F7 FLASHv2 word-write minimum |
+| `MCUBOOT_IMAGE_HEADER_SIZE` | `0x200` (512 B) | must match `--header-size` in `imgtool sign` |
+| `MCUBOOT_EXTERNAL_FLASH_SECTOR_SIZE` | 64 kB | W25Q512 block erase (0xD8) |
+| `MCUBOOT_MAX_IMG_SECTORS` | 20 | Image 1 secondary: 1280 kB ÷ 64 kB = 20 blocks |
+
+## Serial recovery
+
+| Item | Value |
+|---|---|
+| Detection pin | GPIOK7 (active-LOW, external pull-up) |
+| Detection delay | 100 ms (`MCUBOOT_SERIAL_DETECT_DELAY`) |
+| UART | None — wire protocol uses USB CDC (SDU1); USART1 pins occupied by USB OTG |
+
+## Legacy nanoBooter comparison
+
+| | nanoBooter (release) | MCUboot |
+|---|---|---|
+| Bootloader | 32 kB (sector 0) | 32 kB (sector 0) — **unchanged** |
+| Config | 32 kB @ `0x08008000` | 32 kB @ `0x08008000` — **unchanged** |
+| CLR code start | `0x08010000` | `0x08010000` — **unchanged** |
+| Deploy slot | 1280 kB @ `0x080C0000` | 1280 kB @ `0x080C0000` — **unchanged** |
+| Upgrade mechanism | manual flash | MCUboot swap-using-offset |

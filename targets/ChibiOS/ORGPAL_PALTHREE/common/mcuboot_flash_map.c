@@ -15,11 +15,12 @@
 //   targets/ChibiOS/ORGPAL_PALTHREE/common/target_ext_flash.c.
 //
 // Flash layout (from mcuboot_flash_layout.h — single source of truth):
-//   FLASH_AREA_BOOTLOADER        (0): 0x08000000, 32 kB  (sector 0)
-//   FLASH_AREA_IMAGE_0_PRIMARY   (1): 0x08010000, 960 kB (sectors 2-7, bank 1)
-//   FLASH_AREA_IMAGE_0_SECONDARY (2): AT25SF641 @ 0x000000, 960 kB (15 × 64 kB)
+//   FLASH_AREA_BOOTLOADER        (0): 0x08000000, 64 kB  (sectors 0-1)
+//   [config block]                  : 0x08010000, 32 kB  (sector 2 — HAL-managed, not a MCUboot slot)
+//   FLASH_AREA_IMAGE_0_PRIMARY   (1): 0x08018000, 928 kB (sectors 3-7, bank 1)
+//   FLASH_AREA_IMAGE_0_SECONDARY (2): AT25SF641 @ 0x000000, 928 kB (232 × 4 kB)
 //   FLASH_AREA_IMAGE_1_PRIMARY   (4): 0x08100000, 1024 kB (bank 2)
-//   FLASH_AREA_IMAGE_1_SECONDARY (5): AT25SF641 @ 0x0F0000, 1024 kB (16 × 64 kB)
+//   FLASH_AREA_IMAGE_1_SECONDARY (5): AT25SF641 @ 0x0E8000, 1024 kB (256 × 4 kB)
 //
 // Sector geometry: STM32F76xx non-uniform sectors — see stm32_f7xx_flash.h.
 // Write alignment: 4 bytes (FLASH_CR_PSIZE_WORD).
@@ -125,7 +126,7 @@ int flash_area_erase(const struct flash_area *area, uint32_t off, uint32_t len)
 
         while (erase_addr < end)
         {
-            if (!AT25SF641_Erase(erase_addr, true))
+            if (!AT25SF641_Erase(erase_addr, false))
             {
                 return -1;
             }

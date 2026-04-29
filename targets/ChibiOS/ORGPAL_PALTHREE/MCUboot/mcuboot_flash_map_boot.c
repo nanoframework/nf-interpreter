@@ -11,7 +11,7 @@
 //
 // Secondary slots are backed by:
 //   - FatFs files on the SD card (SDMMC1) when NF_FEATURE_MCUBOOT_HAS_SDCARD
-//     is enabled:  img0_sec.bin (960 kB), img1_sec.bin (1024 kB)
+//     is enabled:  img0_sec.bin (928 kB), img1_sec.bin (1024 kB)
 //   - AT25SF641 8 MB SPI1 flash when NF_FEATURE_MCUBOOT_HAS_SDCARD is not set
 //
 // SD card access is routed through fatfs_flash_area_read/write/erase
@@ -167,7 +167,7 @@ int flash_area_erase(const struct flash_area *area, uint32_t off, uint32_t len)
 
         while (erase_addr < end)
         {
-            if (!AT25SF641_Erase(erase_addr, true))
+            if (!AT25SF641_Erase(erase_addr, false))
             {
                 return -1;
             }

@@ -10,7 +10,7 @@
 //   targets/ChibiOS/ST_STM32F769I_DISCOVERY/common/mcuboot_flash_map.c
 //
 // Secondary slots are backed by FatFs files on the SD card:
-//   Image 0 secondary: img0_sec.bin (960 kB)
+//   Image 0 secondary: img0_sec.bin (928 kB)
 //   Image 1 secondary: img1_sec.bin (1024 kB)
 // SD card access is routed through fatfs_flash_area_read/write/erase
 // (targets/ChibiOS/_mcuboot/mcuboot_fatfs_flash_area.c) when
