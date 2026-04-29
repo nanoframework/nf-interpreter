@@ -2074,6 +2074,12 @@ static HRESULT ResolveGenericTypeParameter(
         NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
     }
 
+    // Fail here so the caller's allowUnresolvedVarFallback path handles it.
+    if (paramElement.DataType == DATATYPE_VAR || paramElement.DataType == DATATYPE_MVAR)
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
+    }
+
     outClass = paramElement.Class;
     outDataType = paramElement.DataType;
 
@@ -2133,10 +2139,23 @@ HRESULT CLR_RT_ExecutionEngine::InitializeReference(
             }
             else
             {
-                NANOCLR_CHECK_HRESULT(
-                    ResolveGenericTypeParameter(*genericInstance, res.GenericParamPosition, realTypeDef, dt));
-
-                goto process_datatype;
+                HRESULT hrParam =
+                    ResolveGenericTypeParameter(*genericInstance, res.GenericParamPosition, realTypeDef, dt);
+                if (FAILED(hrParam))
+                {
+                    if (allowUnresolvedVarFallback)
+                    {
+                        dt = DATATYPE_OBJECT;
+                    }
+                    else
+                    {
+                        NANOCLR_CHECK_HRESULT(hrParam);
+                    }
+                }
+                else
+                {
+                    goto process_datatype;
+                }
             }
         }
         else if (dt == DATATYPE_MVAR)

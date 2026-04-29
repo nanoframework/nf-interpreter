@@ -2279,6 +2279,16 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
 
                     if (calleeInst.ResolveToken(arg, assm, effectiveCallerGeneric, &stack->m_call) == false)
                     {
+#if !defined(BUILD_RTM)
+                        CLR_Debug::Printf(
+                            "CALL resolve failed: op=%u token=%08x type=%u index=%u caller=%s callerTs=%08x callerMs=%08x effTs=%08x callerArr=%08x\r\n",
+                            op, arg, CLR_TypeFromTk(arg), CLR_DataFromTk(arg),
+                            stack->m_call.assembly->GetString(stack->m_call.target->name),
+                            stack->m_call.genericType ? stack->m_call.genericType->data : 0,
+                            stack->m_call.methodSpec.data,
+                            effectiveCallerGeneric ? effectiveCallerGeneric->data : 0,
+                            stack->m_call.arrayElementType.data);
+#endif
                         NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
                     }
 
@@ -2648,7 +2658,16 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                         }
                         else if (calleeInst.genericType && NANOCLR_INDEX_IS_VALID(*calleeInst.genericType))
                         {
-                            effectiveGenericContext = calleeInst.genericType;
+                            // Only use calleeInst's genericType when it is a CLOSED generic (all VAR/MVAR
+                            // parameters already resolved to concrete types). An open TypeSpec (e.g.
+                            // KeyValuePair<TKey,TValue>) cannot resolve VAR indices and causes
+                            // CLR_E_WRONG_TYPE in the callee. Fall through to Priority 3 instead.
+                            CLR_RT_TypeSpec_Instance calleeTs{};
+                            if (calleeTs.InitializeFromIndex(*calleeInst.genericType) &&
+                                calleeTs.IsClosedGenericType())
+                            {
+                                effectiveGenericContext = calleeInst.genericType;
+                            }
                         }
                         else if (effectiveCallerGeneric && NANOCLR_INDEX_IS_VALID(*effectiveCallerGeneric))
                         {
@@ -2836,6 +2855,15 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
 
                     if (calleeInst.ResolveToken(arg, assm, stack->m_call.genericType, &stack->m_call) == false)
                     {
+#if !defined(BUILD_RTM)
+                        CLR_Debug::Printf(
+                            "NEWOBJ resolve failed: token=%08x type=%u index=%u caller=%s callerTs=%08x callerMs=%08x callerArr=%08x\r\n",
+                            arg, CLR_TypeFromTk(arg), CLR_DataFromTk(arg),
+                            stack->m_call.assembly->GetString(stack->m_call.target->name),
+                            stack->m_call.genericType ? stack->m_call.genericType->data : 0,
+                            stack->m_call.methodSpec.data,
+                            stack->m_call.arrayElementType.data);
+#endif
                         NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
                     }
 
@@ -2845,6 +2873,19 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
 
                     if (!calleeInst.GetDeclaringType(cls))
                     {
+#if !defined(BUILD_RTM)
+                        CLR_Debug::Printf(
+                            "NEWOBJ declaring type failed: token=%08x callee=%s calleeTs=%08x calleeMs=%08x caller=%s callerTs=%08x callerMs=%08x callerArr=%08x\r\n",
+                            arg,
+                            calleeInst.assembly && calleeInst.target
+                                ? calleeInst.assembly->GetString(calleeInst.target->name) : "<null>",
+                            calleeInst.genericType ? calleeInst.genericType->data : 0,
+                            calleeInst.methodSpec.data,
+                            stack->m_call.assembly->GetString(stack->m_call.target->name),
+                            stack->m_call.genericType ? stack->m_call.genericType->data : 0,
+                            stack->m_call.methodSpec.data,
+                            stack->m_call.arrayElementType.data);
+#endif
                         NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
                     }
 

@@ -961,6 +961,27 @@ void CLR_RT_Assembly::DumpSignatureToken(const CLR_UINT8 *&p)
 
 //--//
 
+//
+// Returns true only when 'p' is a non-null pointer that lies within the process's
+// user-mode address space.  On 64-bit Windows/Linux user-mode addresses are always
+// below 2^47 (0x0000_8000_0000_0000); anything at or above that range (e.g. the
+// all-ones 0xFFFF_FFFF_FFFF_FFFF from a dangling calleeInst.m_typeSpecStorage) is a
+// kernel / guard / garbage address and must not be dereferenced.
+//
+static inline bool IsUserModePtr(const void *p)
+{
+    if (p == nullptr)
+        return false;
+
+#if defined(_WIN64) || (defined(__GNUC__) && defined(__x86_64__))
+    // On 64-bit: user-space tops out at canonical address boundary 0x00007FFF_FFFF_FFFF
+    return (reinterpret_cast<uintptr_t>(p) < 0x0000800000000000ULL);
+#else
+    // On 32-bit: any non-null pointer is potentially valid; let the OS fault on a bad one.
+    return true;
+#endif
+}
+
 void CLR_RT_Assembly::DumpOpcode(CLR_RT_StackFrame *stack, CLR_PMETADATA ip)
 {
     NATIVE_PROFILE_CLR_DIAGNOSTICS();
@@ -976,7 +997,7 @@ void CLR_RT_Assembly::DumpOpcode(CLR_RT_StackFrame *stack, CLR_PMETADATA ip)
         // When the current frame has an open generic type (contains MVAR) but no MethodSpec,
         // inherit the caller frame's MethodSpec so BuildTypeName can resolve the MVAR to its
         // concrete type (e.g. List<MVAR_0> + caller MethodSpec<String> -> List<String>).
-        if (!NANOCLR_INDEX_IS_VALID(inst.methodSpec) && inst.genericType != nullptr &&
+        if (!NANOCLR_INDEX_IS_VALID(inst.methodSpec) && IsUserModePtr(inst.genericType) &&
             NANOCLR_INDEX_IS_VALID(*inst.genericType))
         {
             CLR_RT_StackFrame *caller = stack->Caller();
@@ -988,7 +1009,7 @@ void CLR_RT_Assembly::DumpOpcode(CLR_RT_StackFrame *stack, CLR_PMETADATA ip)
     }
     else
     {
-        inst.Clear();
+        inst.ClearInstance();
     }
 
     DumpOpcodeDirect(inst, ip, stack->m_IPstart, stack->m_owningThread->m_pid);

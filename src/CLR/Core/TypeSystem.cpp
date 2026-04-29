@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (c) .NET Foundation and Contributors
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
@@ -37,7 +37,7 @@ int s_CLR_RT_fTrace_Instructions = NANOCLR_TRACE_DEFAULT(c_CLR_RT_Trace_Info, c_
 #endif
 
 #if defined(NANOCLR_GC_VERBOSE)
-int s_CLR_RT_fTrace_Memory = NANOCLR_TRACE_DEFAULT(c_CLR_RT_Trace_Info, c_CLR_RT_Trace_None);
+int s_CLR_RT_fTrace_Memory = NANOCLR_TRACE_DEFAULT(c_CLR_RT_Trace_Verbose, c_CLR_RT_Trace_None);
 #endif
 
 #if defined(NANOCLR_TRACE_MEMORY_STATS)
@@ -2284,26 +2284,16 @@ bool CLR_RT_MethodDef_Instance::ResolveToken(
                         }
                     }
 
-                    CLR_RT_Assembly *methodAssembly = g_CLR_RT_TypeSystem.m_assemblies[methodOwnerTS->Assembly() - 1];
-
-                    const CLR_RECORD_TYPESPEC *ts = methodAssembly->GetTypeSpec(methodOwnerTS->TypeSpec());
-                    CLR_UINT32 assemblyIndex = 0xFFFF;
-                    CLR_RT_MethodDef_Index methodIndex;
-
-                    if (!methodAssembly->FindMethodDef(
-                            ts,
-                            methodAssembly->GetString(mr->name),
-                            methodAssembly,
-                            mr->signature,
-                            methodIndex,
-                            assemblyIndex))
+                    // Use the pre-resolved method target from startup instead of a fresh
+                    // signature-based FindMethodDef call.
+                    data = assm->crossReferenceMethodRef[index].target.data;
+                    if (!data)
                     {
                         return false;
                     }
 
-                    Set(assemblyIndex, methodIndex.Method());
-                    assembly = g_CLR_RT_TypeSystem.m_assemblies[assemblyIndex - 1];
-                    target = assembly->GetMethodDef(methodIndex.Method());
+                    assembly = g_CLR_RT_TypeSystem.m_assemblies[Assembly() - 1];
+                    target = assembly->GetMethodDef(Method());
                 }
                 else
                 {
@@ -2370,8 +2360,16 @@ bool CLR_RT_MethodDef_Instance::ResolveToken(
                         return false;
                 }
 
-                // get generic type
-                genericType = &assembly->crossReferenceTypeSpec[ms->container].genericType;
+                // get generic type - guard against invalid container index (CLR_EmptyIndex == 65535)
+                if (ms->container != CLR_EmptyIndex &&
+                    ms->container < (CLR_UINT16)assembly->tablesSize[TBL_TypeSpec])
+                {
+                    genericType = &assembly->crossReferenceTypeSpec[ms->container].genericType;
+                }
+                else
+                {
+                    genericType = nullptr;
+                }
 
 #if defined(NANOCLR_INSTANCE_NAMES)
                 name = assembly->GetString(target->name);
@@ -2415,8 +2413,16 @@ bool CLR_RT_MethodDef_Instance::ResolveToken(
                 }
                 break;
 
-                // get generic type
-                genericType = &assembly->crossReferenceTypeSpec[ms->container].genericType;
+                // get generic type (dead code: all paths above return, but kept for clarity)
+                if (ms->container != CLR_EmptyIndex &&
+                    ms->container < (CLR_UINT16)assembly->tablesSize[TBL_TypeSpec])
+                {
+                    genericType = &assembly->crossReferenceTypeSpec[ms->container].genericType;
+                }
+                else
+                {
+                    genericType = nullptr;
+                }
 
 #if defined(NANOCLR_INSTANCE_NAMES)
                 name = assembly->GetString(target->name);
@@ -4359,6 +4365,54 @@ HRESULT CLR_RT_Assembly::ResolveMethodRef()
 
                 // set TypeSpec
                 dst->genericType.data = typeSpec.data;
+            }
+
+            if (!fGot && NANOCLR_INDEX_IS_VALID(typeSpecInstance.genericTypeDef))
+            {
+                CLR_RT_TypeDef_Instance typeDefInst{};
+                if (typeDefInst.InitializeFromIndex(typeSpecInstance.genericTypeDef))
+                {
+                    while (NANOCLR_INDEX_IS_VALID(typeDefInst))
+                    {
+                        if (typeDefInst.assembly->FindMethodDef(
+                                typeDefInst.target,
+                                methodName,
+                                this,
+                                src->signature,
+                                dst->target))
+                        {
+                            fGot = true;
+                            dst->genericType.data = typeSpec.data;
+                            break;
+                        }
+
+                        typeDefInst.SwitchToParent();
+                    }
+                }
+            }
+
+            if (!fGot && NANOCLR_INDEX_IS_VALID(typeSpecInstance.genericTypeDef))
+            {
+                CLR_RT_TypeDef_Instance typeDefInst{};
+                if (typeDefInst.InitializeFromIndex(typeSpecInstance.genericTypeDef))
+                {
+                    while (NANOCLR_INDEX_IS_VALID(typeDefInst))
+                    {
+                        if (typeDefInst.assembly->FindMethodDef(
+                                typeDefInst.target,
+                                methodName,
+                                this,
+                                CLR_SIG_INVALID,
+                                dst->target))
+                        {
+                            fGot = true;
+                            dst->genericType.data = typeSpec.data;
+                            break;
+                        }
+
+                        typeDefInst.SwitchToParent();
+                    }
+                }
             }
 
             if (fGot == false)
@@ -8640,6 +8694,75 @@ bool CLR_RT_TypeSystem::FindVirtualMethodDef(
     return false;
 }
 
+// Signature matching for virtual method dispatch.  Identical to MatchSignatureDirect
+// except that it accepts a DATATYPE_VAR on one side against DATATYPE_GENERICINST on
+// the other.  This covers interface explicit-implementation lookup where the interface
+// method uses generic type parameter T (VAR N) while the concrete implementation uses
+// a closed generic instance (e.g. KeyValuePair<TKey,TValue>).  The inner sub-elements
+// of the GENERICINST are drained from the parser so Available() stays consistent.
+static bool MatchSignatureForVirtualDispatch(
+    CLR_RT_SignatureParser &parserLeft,
+    CLR_RT_SignatureParser &parserRight)
+{
+    if (parserLeft.Type != parserRight.Type)
+        return false;
+    if (parserLeft.Flags != parserRight.Flags)
+        return false;
+
+    while (true)
+    {
+        int iAvailLeft  = parserLeft.Available();
+        int iAvailRight = parserRight.Available();
+
+        if (iAvailLeft != iAvailRight)
+            return false;
+        if (!iAvailLeft)
+            return true;
+
+        CLR_RT_SignatureParser::Element resLeft;
+        if (FAILED(parserLeft.Advance(resLeft)))
+            return false;
+
+        CLR_RT_SignatureParser::Element resRight;
+        if (FAILED(parserRight.Advance(resRight)))
+            return false;
+
+        // Relaxed VAR <-> GENERICINST matching for interface virtual dispatch:
+        // the interface method may use a type parameter (VAR N) while the concrete
+        // implementation uses the expanded generic type (GENERICINST ...).  Drain the
+        // GENERICINST inner elements so the parser position stays consistent.
+        if (resLeft.DataType == DATATYPE_VAR && resRight.DataType == DATATYPE_GENERICINST)
+        {
+            CLR_RT_SignatureParser::Element inner{};
+            if (FAILED(parserRight.Advance(inner)))
+                return false; // type element (CLASS/VALUETYPE + TypeRef)
+            for (int i = 0; i < inner.GenParamCount; i++)
+            {
+                if (FAILED(parserRight.Advance(inner)))
+                    return false;
+            }
+            continue;
+        }
+
+        if (resLeft.DataType == DATATYPE_GENERICINST && resRight.DataType == DATATYPE_VAR)
+        {
+            CLR_RT_SignatureParser::Element inner{};
+            if (FAILED(parserLeft.Advance(inner)))
+                return false;
+            for (int i = 0; i < inner.GenParamCount; i++)
+            {
+                if (FAILED(parserLeft.Advance(inner)))
+                    return false;
+            }
+            continue;
+        }
+
+        // Fall back to the standard element matcher for everything else.
+        if (!CLR_RT_TypeSystem::MatchSignatureElement(resLeft, resRight, parserLeft, parserRight, false))
+            return false;
+    }
+}
+
 bool CLR_RT_TypeSystem::FindVirtualMethodDef(
     const CLR_RT_TypeDef_Index &cls,
     const CLR_RT_MethodDef_Index &calleeMD,
@@ -8685,7 +8808,7 @@ bool CLR_RT_TypeSystem::FindVirtualMethodDef(
                     CLR_RT_SignatureParser parserRight{};
                     parserRight.Initialize_MethodSignature(targetAssm, targetMDR);
 
-                    if (CLR_RT_TypeSystem::MatchSignature(parserLeft, parserRight))
+                    if (MatchSignatureForVirtualDispatch(parserLeft, parserRight))
                     {
                         index.Set(targetAssm->assemblyIndex, i + targetTDR->firstMethod);
 
