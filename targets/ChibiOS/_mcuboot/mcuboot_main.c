@@ -10,7 +10,7 @@
 //   2. main():
 //        a. halInit()  — clock, GPIO, enabled peripheral drivers, board.c
 //        b. chSysInit() — start the ChibiOS RT kernel (OSAL for SPI/WSPI/SERIAL)
-//        c. Initialise board external flash (mcuboot_ext_flash_init)
+//        c. Initialise external storage (mcuboot_ext_flash_init or mcuboot_sdcard_init)
 //        d. Run MCUboot (boot_go)
 //        e. Launch the selected image (do_boot)
 //
@@ -113,6 +113,13 @@ int main(void)
     // Non-fatal: if the external device fails to initialise the boot will still
     // proceed, but any upgrade requiring the secondary slot will fail gracefully
     (void)mcuboot_ext_flash_init();
+
+#if defined(NF_FEATURE_MCUBOOT_HAS_SDCARD)
+    // Initialise the SD card and mount the FatFs filesystem for the secondary slot.
+    // Non-fatal: a failed SD card init causes boot_go() to skip external slots
+    // and boot the primary slot directly.
+    (void)mcuboot_sdcard_init();
+#endif
 
     // Run MCUboot image validation and upgrade logic
     struct boot_rsp rsp;

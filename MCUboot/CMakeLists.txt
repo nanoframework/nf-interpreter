@@ -163,7 +163,6 @@ if(${TARGET_SERIES} STREQUAL "STM32F7xx")
         ${chibios_SOURCE_DIR}/os/rt/src/chvt.c
         ${chibios_SOURCE_DIR}/os/rt/src/chschd.c
         ${chibios_SOURCE_DIR}/os/rt/src/chthreads.c
-        # ChibiOS 21.11.x additions required by chSysInit.
         ${chibios_SOURCE_DIR}/os/rt/src/chinstances.c
         ${chibios_SOURCE_DIR}/os/rt/src/chrfcu.c
         ${chibios_SOURCE_DIR}/os/oslib/src/chmemcore.c
@@ -191,13 +190,15 @@ if(${TARGET_SERIES} STREQUAL "STM32F7xx")
         ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/SPIv2/hal_spi_v2_lld.c
         ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/QUADSPIv1/hal_wspi_lld.c
         ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/USARTv2/hal_serial_lld.c
-        # SYSTICKv1: system timer LLD (stInit / stGetCounter / stStartAlarm / etc.).
         ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/SYSTICKv1/hal_st_lld.c
+        ${chibios_SOURCE_DIR}/os/hal/src/hal_mmcsd.c
+        ${chibios_SOURCE_DIR}/os/hal/src/hal_sdc.c
+        ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/SDMMCv1/hal_sdc_lld.c
 
         # ChibiOS HAL OSAL (RT).
         ${chibios_SOURCE_DIR}/os/hal/osal/rt-nil/osal.c
 
-        # nf-overlay: STM32 internal flash driver (FLASHv2 LLD — same as nanoBooter).
+        # nf-overlay: STM32 internal flash driver (FLASHv2 LLD).
         ${CMAKE_SOURCE_DIR}/targets/ChibiOS/_nf-overlay/os/hal/src/stm32_flash/hal_stm32_flash.c
         ${CMAKE_SOURCE_DIR}/targets/ChibiOS/_nf-overlay/os/hal/ports/STM32/LLD/FLASHv2/flash_lld.c
 
@@ -258,9 +259,9 @@ if(${TARGET_SERIES} STREQUAL "STM32F7xx")
         ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/SYSTICKv1
         ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/SPIv2
         ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/QUADSPIv1
-        # USART: generic .inc dispatcher files for stm32_isr.c + USARTv2: driver implementation.
         ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/USART
         ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/USARTv2
+        ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/SDMMCv1
 
         # 13. ChibiOS-bundled CMSIS (replaces separately-fetched cmsis_device_f7 + cmsis_core).
         ${chibios_SOURCE_DIR}/os/common/ext/ARM/CMSIS/Core/Include
@@ -330,6 +331,29 @@ if(${TARGET_SERIES} STREQUAL "STM32F7xx")
          -L${chibios_SOURCE_DIR}/os/common/startup/ARMCMx/compilers/GCC/ld \
          -Wl,--defsym=__main_stack_size__=0x400 \
          -Wl,--defsym=__process_stack_size__=0x800")
+
+    # FatFs core + ChibiOS platform diskio for targets using SD card as secondary slot storage.
+    # SDC HAL driver stack (hal_sdc.c, hal_mmcsd.c, hal_sdc_lld.c) and their headers are
+    # included unconditionally above, gated at compile time by HAL_USE_SDC in halconf.h.
+    # This block adds only the FatFs library files and the ChibiOS-platform diskio glue.
+    # Must come BEFORE include(mcuboot_target.cmake) because the macro calls add_executable()
+    # with ${MCUBOOT_SERIES_COMMON_SOURCES} immediately.
+    if(NF_FEATURE_MCUBOOT_HAS_SDCARD)
+
+        # Propagate the Kconfig option into C preprocessor so mcuboot_main.c
+        # and other common MCUboot sources can gate SD card code with
+        # #if defined(NF_FEATURE_MCUBOOT_HAS_SDCARD).
+        list(APPEND MCUBOOT_SERIES_COMMON_COMPILE_DEFINITIONS NF_FEATURE_MCUBOOT_HAS_SDCARD)
+
+        # MCUBOOT_FATFS_SOURCES and MCUBOOT_FATFS_INCLUDE_DIRS are populated by
+        # find_package(FATFS) in targets/ChibiOS/CMakeLists.txt (ff.c, ffunicode.c + fatfs_SOURCE_DIR/source).
+        list(APPEND MCUBOOT_SERIES_COMMON_SOURCES
+            ${MCUBOOT_FATFS_SOURCES}
+            ${CMAKE_SOURCE_DIR}/targets/ChibiOS/_mcuboot/fatfs_diskio_boot.c
+        )
+        list(APPEND MCUBOOT_SERIES_COMMON_INCLUDES ${MCUBOOT_FATFS_INCLUDE_DIRS})
+
+    endif() # NF_FEATURE_MCUBOOT_HAS_SDCARD
 
     # Board-specific build rules live in each board's MCUboot folder.
     include(${TARGET_BASE_LOCATION}/MCUboot/mcuboot_target.cmake)

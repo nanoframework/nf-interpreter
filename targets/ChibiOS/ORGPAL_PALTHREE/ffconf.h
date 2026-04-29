@@ -285,7 +285,7 @@
 /      can be opened simultaneously under file lock control. Note that the file
 /      lock control is independent of re-entrancy. */
 
-#define FF_FS_REENTRANT 1
+#define FF_FS_REENTRANT 0
 #define FF_FS_TIMEOUT   TIME_MS2I(1000)
 /* The option FF_FS_REENTRANT switches the re-entrancy (thread safe) of the FatFs
 /  module itself. Note that regardless of this option, file access to different
