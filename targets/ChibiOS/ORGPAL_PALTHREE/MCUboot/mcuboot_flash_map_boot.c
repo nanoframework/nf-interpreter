@@ -58,11 +58,11 @@ uint32_t HAL_GetTick(void)
 // DS=0111 → 8-bit transfers.
 static const SPIConfig s_spi1cfg = {
     .circular = false,
-    .slave    = false,
-    .data_cb  = NULL,
+    .slave = false,
+    .data_cb = NULL,
     .error_cb = NULL,
-    .cr1      = 0U,
-    .cr2      = SPI_CR2_DS_2 | SPI_CR2_DS_1 | SPI_CR2_DS_0,
+    .cr1 = 0U,
+    .cr2 = SPI_CR2_DS_2 | SPI_CR2_DS_1 | SPI_CR2_DS_0,
 };
 
 // clang-format off
