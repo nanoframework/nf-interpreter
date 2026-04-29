@@ -3,42 +3,35 @@
 // See LICENSE file in the project root for full license information.
 //
 
-// MCUboot standalone bootloader entry point for STM32 ChibiOS targets
+// MCUboot bootloader entry point for STM32 ChibiOS targets
 //
-// Execution sequence after Reset_Handler:
-//   1. startup_stm32f7.s: initialise stack, copy .data, zero .bss, call SystemInit
-//   2. SystemInit() (system_stm32f7xx.c): enable FPU, set VTOR, enable caches
-//   3. main():
-//        a. Initialise internal flash driver
-//        b. Initialise board external flash (mcuboot_ext_flash_init)
-//        c. Run MCUboot (boot_go)
-//        d. Launch the selected image (do_boot)
+// Execution sequence after Reset_Handler (ChibiOS crt0_v7m.s):
+//   1. crt0_v7m.s: set up stacks, copy .data, zero .bss, call __early_init
+//   2. main():
+//        a. halInit()  — clock, GPIO, enabled peripheral drivers, board.c
+//        b. chSysInit() — start the ChibiOS RT kernel (OSAL for SPI/WSPI/SERIAL)
+//        c. Initialise external storage (mcuboot_ext_flash_init or mcuboot_sdcard_init)
+//        d. Run MCUboot (boot_go)
+//        e. Launch the selected image (do_boot)
 //
 // do_boot() performs the low-level Cortex-M7 image launch:
+//   - Stop SysTick so it cannot fire during handoff
 //   - Set SCB->VTOR to the application vector table address
 //   - Load the application's initial MSP from the vector table
 //   - Disable all interrupts and clear pending flags
 //   - Jump to the application's reset handler
 //
 // The bootloader never returns from do_boot().  If boot_go() fails (no valid
-// image found), the system enters a safe infinite loop
+// image found), the system enters a safe infinite loop.
 
 #include <stdint.h>
 #include <string.h>
 
-// clang-format off
-// Series-specific device header, core header and internal flash driver.
-// Add a new elif block when porting to a new STM32 series.
-#if defined(STM32F745xx) || defined(STM32F746xx) || defined(STM32F756xx) || \
-    defined(STM32F765xx) || defined(STM32F767xx) || defined(STM32F769xx) || \
-    defined(STM32F777xx) || defined(STM32F779xx)
-#include <stm32f7xx.h>
-#include <core_cm7.h>
-#include "stm32f7_flash_bare.h"
-#else
-#error "mcuboot_main.c: unsupported STM32 series — add device header includes for the new series"
-#endif
-// clang-format on
+// ChibiOS HAL and RT kernel headers.
+// The series device header (stm32f7xx.h / stm32f769xx.h) and CMSIS core
+// header (core_cm7.h) are included transitively by hal.h.
+#include "hal.h"
+#include "ch.h"
 
 #include "bootutil/bootutil.h"
 #include "bootutil/image.h"
@@ -56,35 +49,31 @@ typedef struct
     uint32_t reset;  // Reset Handler address
 } VectorTable_t;
 
-// clang-format off
-// do_boot is series-specific: VTOR relocation, cache disable and interrupt
-// clearing differ between Cortex-M cores. Add an elif block for each new series.
-#if defined(STM32F745xx) || defined(STM32F746xx) || defined(STM32F756xx) || \
-    defined(STM32F765xx) || defined(STM32F767xx) || defined(STM32F769xx) || \
-    defined(STM32F777xx) || defined(STM32F779xx)
-// clang-format on
-
 __attribute__((noreturn)) static void do_boot(struct boot_rsp *rsp)
 {
-    // Compute the absolute address of the application vector table
-    // boot_rsp.br_hdr is a pointer to the MCUboot image header at the start
-    // of the primary slot — the vector table follows the header
+    // Compute the absolute address of the application vector table.
+    // boot_rsp.br_hdr points to the MCUboot image header; the vector table
+    // follows immediately after the header.
     uint32_t img_base = (uint32_t)(uintptr_t)rsp->br_hdr;
     uint32_t vtor_addr = img_base + rsp->br_hdr->ih_hdr_size;
 
     const VectorTable_t *vt = (const VectorTable_t *)vtor_addr;
 
-    // Relocate the vector table to the application's location
+    // Stop the SysTick timer before tearing down the ChibiOS RT state so
+    // no SysTick interrupt fires during the handoff sequence.
+    SysTick->CTRL = 0U;
+
+    // Relocate the vector table to the application's location.
     SCB->VTOR = vtor_addr;
     __DSB();
     __ISB();
 
-    // Load the application's initial MSP
+    // Load the application's initial MSP.
     __set_MSP(vt->msp);
     __DSB();
 
     // Disable all interrupts and clear any pending NVIC flags so the
-    // application starts with a clean interrupt state
+    // application starts with a clean interrupt state.
     __disable_irq();
     for (uint32_t i = 0; i < (sizeof(NVIC->ICER) / sizeof(NVIC->ICER[0])); i++)
     {
@@ -94,7 +83,7 @@ __attribute__((noreturn)) static void do_boot(struct boot_rsp *rsp)
     __DSB();
     __ISB();
 
-    // Cast reset handler address to a function pointer and jump
+    // Cast reset handler address to a function pointer and jump.
     void (*reset_handler)(void) = (void (*)(void))(vt->reset);
     reset_handler();
 
@@ -104,29 +93,33 @@ __attribute__((noreturn)) static void do_boot(struct boot_rsp *rsp)
     }
 }
 
-// clang-format off
-#endif
-// clang-format on
-
 // ----------------------------------------------------------------------- //
 // main                                                                     //
 // ----------------------------------------------------------------------- //
 
 int main(void)
 {
-    // Initialise the internal flash driver (series-specific)
-    // clang-format off
-#if defined(STM32F745xx) || defined(STM32F746xx) || defined(STM32F756xx) || \
-    defined(STM32F765xx) || defined(STM32F767xx) || defined(STM32F769xx) || \
-    defined(STM32F777xx) || defined(STM32F779xx)
-    stm32f7_flash_init();
-#endif
-    // clang-format on
+    // Initialise the ChibiOS HAL: configures clocks (via mcuconf.h PLL settings),
+    // enables GPIO clocks, initialises each enabled peripheral driver, and calls
+    // boardInit() (board.c) to apply the full pin-mux configuration.
+    halInit();
+
+    // Start the ChibiOS RT kernel.  The SPI/WSPI/SERIAL HAL drivers rely on the
+    // RT OSAL (hal_osal_rt_nil.h) for mutexes and condition-variable primitives;
+    // those are available only after chSysInit().
+    chSysInit();
 
     // Initialise the board's external flash device
     // Non-fatal: if the external device fails to initialise the boot will still
     // proceed, but any upgrade requiring the secondary slot will fail gracefully
     (void)mcuboot_ext_flash_init();
+
+#if defined(NF_FEATURE_MCUBOOT_HAS_SDCARD)
+    // Initialise the SD card and mount the FatFs filesystem for the secondary slot.
+    // Non-fatal: a failed SD card init causes boot_go() to skip external slots
+    // and boot the primary slot directly.
+    (void)mcuboot_sdcard_init();
+#endif
 
     // Run MCUboot image validation and upgrade logic
     struct boot_rsp rsp;

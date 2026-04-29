@@ -84,4 +84,15 @@ config NF_MCUBOOT_HEADER_SIZE
         targets. Override only if a specific target's flash layout requires a
         different alignment.
 
+config NF_FEATURE_MCUBOOT_HAS_SDCARD
+    bool "Enable SD card (FatFs) support in MCUboot"
+    depends on NF_FEATURE_HAS_MCUBOOT
+    default n
+    help
+        Include the ChibiOS SDC driver and FatFs library in the MCUboot
+        bootloader build. Required when the secondary image slot(s) reside
+        on an SD card accessed via FatFs files. The target's existing
+        ffconf.h is reused so that the same FatFs configuration applies
+        to both the bootloader and the nanoCLR runtime.
+
 endmenu # MCUboot

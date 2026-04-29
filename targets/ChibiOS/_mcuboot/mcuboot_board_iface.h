@@ -22,6 +22,12 @@ extern "C"
     // but may fail later if the external secondary slot is needed).
     int mcuboot_ext_flash_init(void);
 
+    // Initialise the SD card and mount the FatFs filesystem for the secondary slot.
+    // Called once from main() before boot_go().
+    // Should return 0 on success, negative on error (non-fatal: boot continues
+    // but any upgrade using the SD card secondary slot will fail gracefully).
+    int mcuboot_sdcard_init(void);
+
 #ifdef __cplusplus
 }
 #endif

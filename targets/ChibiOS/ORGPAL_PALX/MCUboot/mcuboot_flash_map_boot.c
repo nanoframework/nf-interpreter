@@ -3,14 +3,12 @@
 // See LICENSE file in the project root for full license information.
 //
 
-// MCUboot flash_area_* porting layer for the standalone MCUboot bootloader binary
+// MCUboot flash_area_* porting layer for the ChibiOS MCUboot bootloader
+// binary on ORGPAL_PALX (STM32F769NI).
 //
 // This file is the bootloader-context counterpart to:
 //   targets/ChibiOS/ORGPAL_PALX/common/mcuboot_flash_map.c
 //
-// Key differences from the nanoCLR version:
-//   - Internal flash ops use stm32f7_flash_bare.c  (no ChibiOS STM32 flash HAL)
-//   - External flash ops use w25q512_qspi_bare.c   (no ChibiOS QSPI / QSPID1)
 
 #include <stdint.h>
 #include <stddef.h>
@@ -23,10 +21,13 @@
 #include "sysflash/sysflash.h"
 
 #include "stm32_f7xx_flash.h"
-#include "stm32f7_flash_bare.h"
-#include "w25q512_qspi_bare.h"
+#include "target_ext_flash.h"
 #include "mcuboot_flash_layout.h"
 #include "mcuboot_board_iface.h"
+
+// Forward declarations for nf-overlay internal flash API (hal_stm32_flash.h).
+int stm32FlashWrite(uint32_t startAddress, uint32_t length, const uint8_t *buffer);
+int stm32FlashErase(uint32_t address);
 
 // clang-format off
 static const struct flash_area s_flash_areas[] = {
@@ -44,10 +45,10 @@ static_assert(
     NF_MCUBOOT_SLOT_IMG1_SEC_SIZE / MCUBOOT_EXTERNAL_FLASH_SECTOR_SIZE <= MCUBOOT_MAX_IMG_SECTORS,
     "Deploy secondary sector count exceeds MCUBOOT_MAX_IMG_SECTORS");
 
-// Board interface: initialise W25Q512 via bare-metal QUADSPI.
+// Board interface: initialise W25Q512 via STM32 HAL QSPI bridge.
 int mcuboot_ext_flash_init(void)
 {
-    return w25q512_bare_init() ? 0 : -1;
+    return W25Q512_Init() ? 0 : -1;
 }
 
 int flash_area_open(uint8_t id, const struct flash_area **area_outp)
@@ -77,7 +78,7 @@ int flash_area_read(const struct flash_area *area, uint32_t off, void *dst, uint
     }
     else
     {
-        return w25q512_bare_read((uint8_t *)dst, area->fa_off + off, len) ? 0 : -1;
+        return W25Q512_Read((uint8_t *)dst, area->fa_off + off, len) ? 0 : -1;
     }
 }
 
@@ -85,11 +86,11 @@ int flash_area_write(const struct flash_area *area, uint32_t off, const void *sr
 {
     if (area->fa_device_id == FLASH_DEVICE_INTERNAL_FLASH)
     {
-        return stm32f7_flash_write(area->fa_off + off, len, (const uint8_t *)src);
+        return stm32FlashWrite(area->fa_off + off, len, (const uint8_t *)src);
     }
     else
     {
-        return w25q512_bare_write((const uint8_t *)src, area->fa_off + off, len) ? 0 : -1;
+        return W25Q512_Write((uint8_t *)src, area->fa_off + off, len) ? 0 : -1;
     }
 }
 
@@ -102,7 +103,7 @@ int flash_area_erase(const struct flash_area *area, uint32_t off, uint32_t len)
 
         while (erase_addr < end)
         {
-            if (stm32f7_flash_erase(erase_addr) != 0)
+            if (stm32FlashErase(erase_addr) != 0)
             {
                 return -1;
             }
@@ -116,7 +117,7 @@ int flash_area_erase(const struct flash_area *area, uint32_t off, uint32_t len)
 
         while (erase_addr < end)
         {
-            if (!w25q512_bare_erase(erase_addr))
+            if (!W25Q512_Erase(erase_addr, true))
             {
                 return -1;
             }

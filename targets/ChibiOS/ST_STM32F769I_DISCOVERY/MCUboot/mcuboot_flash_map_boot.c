@@ -3,16 +3,19 @@
 // See LICENSE file in the project root for full license information.
 //
 
-// MCUboot flash_area_* porting layer for the standalone MCUboot bootloader
+// MCUboot flash_area_* porting layer for the ChibiOS MCUboot bootloader
 // binary on ST_STM32F769I_DISCOVERY (STM32F769NI).
 //
 // This file is the bootloader-context counterpart to:
 //   targets/ChibiOS/ST_STM32F769I_DISCOVERY/common/mcuboot_flash_map.c
 //
-// Secondary slots (SD card via FatFs) are stubbed out: mcuboot_ext_flash_init()
-// returns -1, and all external flash operations return an error. MCUboot treats
-// the secondary slots as unavailable and boots the primary slot directly.
-// Full FatFs integration is deferred to a later implementation step.
+// Secondary slots are backed by FatFs files on the SD card:
+//   Image 0 secondary: img0_sec.bin (960 kB)
+//   Image 1 secondary: img1_sec.bin (1024 kB)
+// SD card access is routed through fatfs_flash_area_read/write/erase
+// (targets/ChibiOS/_mcuboot/mcuboot_fatfs_flash_area.c) when
+// NF_FEATURE_MCUBOOT_HAS_SDCARD is enabled.
+// Discovery has no external SPI/QSPI flash; mcuboot_ext_flash_init() returns -1.
 
 #include <stdint.h>
 #include <stddef.h>
@@ -25,9 +28,16 @@
 #include "sysflash/sysflash.h"
 
 #include "stm32_f7xx_flash.h"
-#include "stm32f7_flash_bare.h"
 #include "mcuboot_flash_layout.h"
 #include "mcuboot_board_iface.h"
+
+#if defined(NF_FEATURE_MCUBOOT_HAS_SDCARD)
+#include "mcuboot_fatfs_flash_area.h"
+#endif
+
+// Forward declarations for nf-overlay internal flash API (hal_stm32_flash.h).
+int stm32FlashWrite(uint32_t startAddress, uint32_t length, const uint8_t *buffer);
+int stm32FlashErase(uint32_t address);
 
 // clang-format off
 static const struct flash_area s_flash_areas[] = {
@@ -45,8 +55,9 @@ static_assert(
     NF_MCUBOOT_SLOT_IMG1_SEC_SIZE / MCUBOOT_EXTERNAL_FLASH_SECTOR_SIZE <= MCUBOOT_MAX_IMG_SECTORS,
     "Deploy secondary sector count exceeds MCUBOOT_MAX_IMG_SECTORS");
 
-// Board interface: SD card FatFs secondary slots — not yet integrated.
-// Returns -1 (non-fatal); MCUboot continues and boots the primary slot.
+// Discovery has no external SPI/QSPI flash device.
+// Secondary slots use the SD card (via FatFs); SD card init is handled
+// separately by mcuboot_sdcard_init() in mcuboot_sdcard_boot.c.
 int mcuboot_ext_flash_init(void)
 {
     return -1;
@@ -79,8 +90,11 @@ int flash_area_read(const struct flash_area *area, uint32_t off, void *dst, uint
     }
     else
     {
-        // SD card FatFs not yet integrated.
+#if defined(NF_FEATURE_MCUBOOT_HAS_SDCARD)
+        return fatfs_flash_area_read(area, off, dst, len);
+#else
         return -1;
+#endif
     }
 }
 
@@ -88,12 +102,15 @@ int flash_area_write(const struct flash_area *area, uint32_t off, const void *sr
 {
     if (area->fa_device_id == FLASH_DEVICE_INTERNAL_FLASH)
     {
-        return stm32f7_flash_write(area->fa_off + off, len, (const uint8_t *)src);
+        return stm32FlashWrite(area->fa_off + off, len, (const uint8_t *)src);
     }
     else
     {
-        // SD card FatFs not yet integrated.
+#if defined(NF_FEATURE_MCUBOOT_HAS_SDCARD)
+        return fatfs_flash_area_write(area, off, src, len);
+#else
         return -1;
+#endif
     }
 }
 
@@ -106,7 +123,7 @@ int flash_area_erase(const struct flash_area *area, uint32_t off, uint32_t len)
 
         while (erase_addr < end)
         {
-            if (stm32f7_flash_erase(erase_addr) != 0)
+            if (stm32FlashErase(erase_addr) != 0)
             {
                 return -1;
             }
@@ -115,8 +132,11 @@ int flash_area_erase(const struct flash_area *area, uint32_t off, uint32_t len)
     }
     else
     {
-        // SD card FatFs not yet integrated.
+#if defined(NF_FEATURE_MCUBOOT_HAS_SDCARD)
+        return fatfs_flash_area_erase(area, off, len);
+#else
         return -1;
+#endif
     }
 
     return 0;

@@ -26,9 +26,9 @@
 
 // clang-format off
 
-// MCUboot bootloader slot (sector 0, 32 kB)
+// MCUboot bootloader slot (sectors 0-1, 64 kB)
 #define NF_MCUBOOT_SLOT_BOOTLOADER_OFF      0x08000000U
-#define NF_MCUBOOT_SLOT_BOOTLOADER_SIZE     (32U * 1024U)
+#define NF_MCUBOOT_SLOT_BOOTLOADER_SIZE     (64U * 1024U)
 
 // Image 0 primary — nanoCLR (sectors 2-7, bank 1, 960 kB)
 #define NF_MCUBOOT_SLOT_IMG0_PRI_OFF        0x08010000U
@@ -49,9 +49,11 @@
 // clang-format on
 
 // Boundary assertions — evaluated in every translation unit that includes this header.
-static_assert(NF_MCUBOOT_SLOT_IMG0_PRI_OFF + NF_MCUBOOT_SLOT_IMG0_PRI_SIZE <= NF_MCUBOOT_SLOT_IMG1_PRI_OFF,
-              "PALTHREE: CLR primary overflows into deploy primary");
-static_assert(NF_MCUBOOT_SLOT_IMG0_SEC_OFF + NF_MCUBOOT_SLOT_IMG0_SEC_SIZE <= NF_MCUBOOT_SLOT_IMG1_SEC_OFF,
-              "PALTHREE: CLR secondary overflows into deploy secondary");
+static_assert(
+    NF_MCUBOOT_SLOT_IMG0_PRI_OFF + NF_MCUBOOT_SLOT_IMG0_PRI_SIZE <= NF_MCUBOOT_SLOT_IMG1_PRI_OFF,
+    "PALTHREE: CLR primary overflows into deploy primary");
+static_assert(
+    NF_MCUBOOT_SLOT_IMG0_SEC_OFF + NF_MCUBOOT_SLOT_IMG0_SEC_SIZE <= NF_MCUBOOT_SLOT_IMG1_SEC_OFF,
+    "PALTHREE: CLR secondary overflows into deploy secondary");
 
 #endif // MCUBOOT_FLASH_LAYOUT_ORGPAL_PALTHREE_H
