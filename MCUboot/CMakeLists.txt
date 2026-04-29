@@ -98,6 +98,7 @@ macro(nf_setup_mcuboot_target_build)
     )
 
     target_compile_definitions(${NANOMCUBOOTER_PROJECT_NAME}.elf PRIVATE
+        ${MCUBOOT_SERIES_COMMON_COMPILE_DEFINITIONS}
         ${NFSMTB_COMPILE_DEFINITIONS}
     )
 
@@ -177,9 +178,7 @@ if(${TARGET_SERIES} STREQUAL "STM32F7xx")
 
         # ChibiOS HAL STM32F7xx platform.
         ${chibios_SOURCE_DIR}/os/hal/ports/STM32/STM32F7xx/hal_lld.c
-        # stm32_isr.c is NOT included: it requires mcuconf.h IRQ priority definitions for all
-        # TIM/USART peripherals, which MCUboot does not use. irqInit() is provided as a no-op
-        # stub in hal_stubs.c — MCUboot does not use EXTI-based external interrupts.
+        ${chibios_SOURCE_DIR}/os/hal/ports/STM32/STM32F7xx/stm32_isr.c
 
         # ChibiOS HAL common ARMCMx support (nvicEnableVector / nvicDisableVector).
         ${chibios_SOURCE_DIR}/os/hal/ports/common/ARMCMx/nvic.c
@@ -187,11 +186,15 @@ if(${TARGET_SERIES} STREQUAL "STM32F7xx")
         # ChibiOS HAL LLD (STM32 shared drivers).
         ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/GPIOv2/hal_pal_lld.c
         ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/DMAv2/stm32_dma.c
+        ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/EXTIv1/stm32_exti.c
         ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/SPIv2/hal_spi_v2_lld.c
         ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/QUADSPIv1/hal_wspi_lld.c
         ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/USARTv2/hal_serial_lld.c
         # SYSTICKv1: system timer LLD (stInit / stGetCounter / stStartAlarm / etc.).
         ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/SYSTICKv1/hal_st_lld.c
+
+        # ChibiOS HAL OSAL (RT).
+        ${chibios_SOURCE_DIR}/os/hal/osal/rt-nil/osal.c
 
         # nf-overlay: STM32 internal flash driver (FLASHv2 LLD — same as nanoBooter).
         ${CMAKE_SOURCE_DIR}/targets/ChibiOS/_nf-overlay/os/hal/src/stm32_flash/hal_stm32_flash.c
@@ -200,9 +203,6 @@ if(${TARGET_SERIES} STREQUAL "STM32F7xx")
         # Stub: halCommunityInit() no-op — MCUboot does not use ChibiOS-Contrib.
         # hal.c calls halCommunityInit() when HAL_USE_COMMUNITY is TRUE; this stub
         # satisfies the linker without pulling in the full ChibiOS-Contrib library.
-        # Also provides irqInit()/irqDeinit() stubs — MCUboot does not use EXTI interrupts;
-        # including stm32_isr.c would require mcuconf.h priority definitions for all
-        # TIM/USART peripherals, which are unnecessary for a minimal bootloader.
         ${CMAKE_SOURCE_DIR}/targets/ChibiOS/_mcuboot/hal_community_stub.c
     )
 
@@ -300,6 +300,17 @@ if(${TARGET_SERIES} STREQUAL "STM32F7xx")
         -Wno-unused-parameter
         -Wno-sign-compare
         -Wno-missing-field-initializers
+    )
+
+    # Compile definitions shared by all STM32F7xx bootloader targets.
+    # CORTEX_USE_FPU must be passed explicitly: crt0_v7m.S is assembled (not compiled),
+    # so chcore.h is never included and CRT0_INIT_FPU defaults to FALSE, leaving the
+    # FPU un-enabled. With -mfloat-abi=hard the compiler emits FPU instructions,
+    # causing a UsageFault (NOCP) -> HardFault on the first FPU access.
+    set(MCUBOOT_SERIES_COMMON_COMPILE_DEFINITIONS
+        CORTEX_USE_FPU=TRUE
+        PLATFORM_ARM
+        USE_FPU=TRUE
     )
 
     # Link flags shared by all STM32F7xx bootloader targets.
