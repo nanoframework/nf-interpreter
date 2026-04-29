@@ -9,6 +9,15 @@
 // This file is the bootloader-context counterpart to:
 //   targets/ChibiOS/ORGPAL_PALTHREE/common/mcuboot_flash_map.c
 //
+// Secondary slots are backed by:
+//   - FatFs files on the SD card (SDMMC1) when NF_FEATURE_MCUBOOT_HAS_SDCARD
+//     is enabled:  img0_sec.bin (960 kB), img1_sec.bin (1024 kB)
+//   - AT25SF641 8 MB SPI1 flash when NF_FEATURE_MCUBOOT_HAS_SDCARD is not set
+//
+// SD card access is routed through fatfs_flash_area_read/write/erase
+// (targets/ChibiOS/_mcuboot/mcuboot_fatfs_flash_area.c).
+// SD card initialisation is handled separately by mcuboot_sdcard_init()
+// in mcuboot_sdcard_boot.c; mcuboot_ext_flash_init() returns -1 in that case.
 
 #include <stdint.h>
 #include <stddef.h>
@@ -27,6 +36,10 @@
 #include "target_ext_flash.h"
 #include "mcuboot_flash_layout.h"
 #include "mcuboot_board_iface.h"
+
+#if defined(NF_FEATURE_MCUBOOT_HAS_SDCARD)
+#include "mcuboot_fatfs_flash_area.h"
+#endif
 
 // Forward declarations for nf-overlay internal flash API (hal_stm32_flash.h).
 int stm32FlashWrite(uint32_t startAddress, uint32_t length, const uint8_t *buffer);
@@ -69,6 +82,8 @@ static_assert(
     "Deploy secondary sector count exceeds MCUBOOT_MAX_IMG_SECTORS");
 
 // Board interface: initialise AT25SF641 via ChibiOS SPI1 HAL.
+// When NF_FEATURE_MCUBOOT_HAS_SDCARD is enabled, SD card initialisation is
+// handled separately by mcuboot_sdcard_init() in mcuboot_sdcard_boot.c.
 int mcuboot_ext_flash_init(void)
 {
     spiStart(&SPID1, &s_spi1cfg);
@@ -102,7 +117,11 @@ int flash_area_read(const struct flash_area *area, uint32_t off, void *dst, uint
     }
     else
     {
+#if defined(NF_FEATURE_MCUBOOT_HAS_SDCARD)
+        return fatfs_flash_area_read(area, off, dst, len);
+#else
         return AT25SF641_Read((uint8_t *)dst, area->fa_off + off, len) ? 0 : -1;
+#endif
     }
 }
 
@@ -114,7 +133,11 @@ int flash_area_write(const struct flash_area *area, uint32_t off, const void *sr
     }
     else
     {
+#if defined(NF_FEATURE_MCUBOOT_HAS_SDCARD)
+        return fatfs_flash_area_write(area, off, src, len);
+#else
         return AT25SF641_Write((const uint8_t *)src, area->fa_off + off, len) ? 0 : -1;
+#endif
     }
 }
 
@@ -136,6 +159,9 @@ int flash_area_erase(const struct flash_area *area, uint32_t off, uint32_t len)
     }
     else
     {
+#if defined(NF_FEATURE_MCUBOOT_HAS_SDCARD)
+        return fatfs_flash_area_erase(area, off, len);
+#else
         uint32_t erase_addr = area->fa_off + off;
         uint32_t end = erase_addr + len;
 
@@ -147,6 +173,7 @@ int flash_area_erase(const struct flash_area *area, uint32_t off, uint32_t len)
             }
             erase_addr += MCUBOOT_EXTERNAL_FLASH_SECTOR_SIZE;
         }
+#endif
     }
 
     return 0;

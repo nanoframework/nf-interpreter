@@ -350,6 +350,7 @@ if(${TARGET_SERIES} STREQUAL "STM32F7xx")
         list(APPEND MCUBOOT_SERIES_COMMON_SOURCES
             ${MCUBOOT_FATFS_SOURCES}
             ${CMAKE_SOURCE_DIR}/targets/ChibiOS/_mcuboot/fatfs_diskio_boot.c
+            ${CMAKE_SOURCE_DIR}/targets/ChibiOS/_mcuboot/mcuboot_fatfs_flash_area.c
         )
         list(APPEND MCUBOOT_SERIES_COMMON_INCLUDES ${MCUBOOT_FATFS_INCLUDE_DIRS})
 

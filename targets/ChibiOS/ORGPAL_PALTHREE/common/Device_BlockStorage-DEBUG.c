@@ -9,7 +9,7 @@
 // 32kB blocks
 const BlockRange BlockRange1[] =
 {
-    { BlockRange_BLOCKTYPE_BOOTSTRAP ,   0, 1 },            // 08000000 nanoBooter
+    { BlockRange_BLOCKTYPE_BOOTSTRAP ,   0, 1 },            // 08000000 MCUboot (sectors 0-1, 64 kB)
 
     ///////////////////////////////////////////////////////////////////////////////////////
     // because this target is using a configuration block need to add the
@@ -18,7 +18,7 @@ const BlockRange BlockRange1[] =
     ///////////////////////////////////////////////////////////////////////////////////////
     { BlockRange_BLOCKTYPE_CONFIG    ,   2, 2 },            // 08010000 configuration block
     ///////////////////////////////////////////////////////////////////////////////////////
-    
+
     { BlockRange_BLOCKTYPE_CODE      ,   3, 3 }             // 08018000 nanoCLR
 };
 

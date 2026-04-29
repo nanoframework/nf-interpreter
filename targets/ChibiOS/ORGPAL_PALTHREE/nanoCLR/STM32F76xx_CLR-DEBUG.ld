@@ -17,7 +17,7 @@
  */
 MEMORY
 {
-    flash0     (rx) : org = 0x08018000, len = 2M - 64k - 32k - 768k     /* flash size less the space reserved for nanoBooter, configuration block and application deployment*/
+    flash0     (rx) : org = 0x08018000, len = 2M - 64k - 32k - 768k     /* flash size less the space reserved for MCUboot, configuration block and application deployment */
     flash1     (rx) : org = 0x00218000, len = 2M - 64k - 32k - 768k
     flash2     (rx) : org = 0x00000000, len = 0
     flash3     (rx) : org = 0x00000000, len = 0

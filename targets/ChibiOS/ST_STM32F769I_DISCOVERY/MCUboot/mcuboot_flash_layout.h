@@ -30,9 +30,9 @@
 
 // clang-format off
 
-// MCUboot bootloader slot (sector 0, 32 kB)
+// MCUboot bootloader slot (sectors 0-1, 64 kB)
 #define NF_MCUBOOT_SLOT_BOOTLOADER_OFF      0x08000000U
-#define NF_MCUBOOT_SLOT_BOOTLOADER_SIZE     (32U * 1024U)
+#define NF_MCUBOOT_SLOT_BOOTLOADER_SIZE     (64U * 1024U)
 
 // Image 0 primary — nanoCLR (sectors 2-7, bank 1, 960 kB)
 #define NF_MCUBOOT_SLOT_IMG0_PRI_OFF        0x08010000U
