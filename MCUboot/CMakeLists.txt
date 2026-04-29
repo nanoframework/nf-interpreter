@@ -175,6 +175,7 @@ if(${TARGET_SERIES} STREQUAL "STM32F7xx")
         ${chibios_SOURCE_DIR}/os/hal/src/hal_spi.c
         ${chibios_SOURCE_DIR}/os/hal/src/hal_wspi.c
         ${chibios_SOURCE_DIR}/os/hal/src/hal_serial.c
+        ${chibios_SOURCE_DIR}/os/hal/src/hal_queues.c
 
         # ChibiOS HAL STM32F7xx platform.
         ${chibios_SOURCE_DIR}/os/hal/ports/STM32/STM32F7xx/hal_lld.c
