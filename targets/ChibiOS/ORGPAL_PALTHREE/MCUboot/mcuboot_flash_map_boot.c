@@ -15,19 +15,42 @@
 #include <string.h>
 #include <assert.h>
 
+#include <ch.h>
+#include <hal.h>
+
 #include "mcuboot_config.h"
 
 #include "flash_map_backend/flash_map_backend.h"
 #include "sysflash/sysflash.h"
 
 #include "stm32_f7xx_flash.h"
-#include "at25sf641_spi_chibios.h"
+#include "target_ext_flash.h"
 #include "mcuboot_flash_layout.h"
 #include "mcuboot_board_iface.h"
 
 // Forward declarations for nf-overlay internal flash API (hal_stm32_flash.h).
 int stm32FlashWrite(uint32_t startAddress, uint32_t length, const uint8_t *buffer);
 int stm32FlashErase(uint32_t address);
+
+// HAL_GetTick() is declared extern in target_ext_flash.c for the wait-ready
+// timeout. Implemented here using the ChibiOS system tick counter.
+uint32_t HAL_GetTick(void)
+{
+    return (uint32_t)(chVTGetSystemTimeX() / (CH_CFG_ST_FREQUENCY / 1000UL));
+}
+
+// SPI1 configuration for AT25SF641.
+// Master mode, hardware NSS (SSOE added by ChibiOS LLD), CPOL=0, CPHA=0.
+// BR=000 → fPCLK2/2 = 108/2 = 54 MHz (AT25SF641 max is 104 MHz — within spec).
+// DS=0111 → 8-bit transfers.
+static const SPIConfig s_spi1cfg = {
+    .circular = false,
+    .slave    = false,
+    .data_cb  = NULL,
+    .error_cb = NULL,
+    .cr1      = 0U,
+    .cr2      = SPI_CR2_DS_2 | SPI_CR2_DS_1 | SPI_CR2_DS_0,
+};
 
 // clang-format off
 static const struct flash_area s_flash_areas[] = {
@@ -48,7 +71,8 @@ static_assert(
 // Board interface: initialise AT25SF641 via ChibiOS SPI1 HAL.
 int mcuboot_ext_flash_init(void)
 {
-    return at25sf641_bare_init() ? 0 : -1;
+    spiStart(&SPID1, &s_spi1cfg);
+    return AT25SF641_Init() ? 0 : -1;
 }
 
 int flash_area_open(uint8_t id, const struct flash_area **area_outp)
@@ -78,7 +102,7 @@ int flash_area_read(const struct flash_area *area, uint32_t off, void *dst, uint
     }
     else
     {
-        return at25sf641_bare_read((uint8_t *)dst, area->fa_off + off, len) ? 0 : -1;
+        return AT25SF641_Read((uint8_t *)dst, area->fa_off + off, len) ? 0 : -1;
     }
 }
 
@@ -90,7 +114,7 @@ int flash_area_write(const struct flash_area *area, uint32_t off, const void *sr
     }
     else
     {
-        return at25sf641_bare_write((const uint8_t *)src, area->fa_off + off, len) ? 0 : -1;
+        return AT25SF641_Write((const uint8_t *)src, area->fa_off + off, len) ? 0 : -1;
     }
 }
 
@@ -117,7 +141,7 @@ int flash_area_erase(const struct flash_area *area, uint32_t off, uint32_t len)
 
         while (erase_addr < end)
         {
-            if (!at25sf641_bare_erase(erase_addr, true))
+            if (!AT25SF641_Erase(erase_addr, true))
             {
                 return -1;
             }

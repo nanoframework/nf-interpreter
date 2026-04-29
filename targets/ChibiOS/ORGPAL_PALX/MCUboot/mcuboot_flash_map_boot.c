@@ -21,7 +21,7 @@
 #include "sysflash/sysflash.h"
 
 #include "stm32_f7xx_flash.h"
-#include "w25q512_qspi_chibios.h"
+#include "target_ext_flash.h"
 #include "mcuboot_flash_layout.h"
 #include "mcuboot_board_iface.h"
 
@@ -45,10 +45,10 @@ static_assert(
     NF_MCUBOOT_SLOT_IMG1_SEC_SIZE / MCUBOOT_EXTERNAL_FLASH_SECTOR_SIZE <= MCUBOOT_MAX_IMG_SECTORS,
     "Deploy secondary sector count exceeds MCUBOOT_MAX_IMG_SECTORS");
 
-// Board interface: initialise W25Q512 via ChibiOS WSPI HAL.
+// Board interface: initialise W25Q512 via STM32 HAL QSPI bridge.
 int mcuboot_ext_flash_init(void)
 {
-    return w25q512_chibios_init() ? 0 : -1;
+    return W25Q512_Init() ? 0 : -1;
 }
 
 int flash_area_open(uint8_t id, const struct flash_area **area_outp)
@@ -78,7 +78,7 @@ int flash_area_read(const struct flash_area *area, uint32_t off, void *dst, uint
     }
     else
     {
-        return w25q512_chibios_read((uint8_t *)dst, area->fa_off + off, len) ? 0 : -1;
+        return W25Q512_Read((uint8_t *)dst, area->fa_off + off, len) ? 0 : -1;
     }
 }
 
@@ -90,7 +90,7 @@ int flash_area_write(const struct flash_area *area, uint32_t off, const void *sr
     }
     else
     {
-        return w25q512_chibios_write((const uint8_t *)src, area->fa_off + off, len) ? 0 : -1;
+        return W25Q512_Write((uint8_t *)src, area->fa_off + off, len) ? 0 : -1;
     }
 }
 
@@ -117,7 +117,7 @@ int flash_area_erase(const struct flash_area *area, uint32_t off, uint32_t len)
 
         while (erase_addr < end)
         {
-            if (!w25q512_chibios_erase(erase_addr))
+            if (!W25Q512_Erase(erase_addr, true))
             {
                 return -1;
             }

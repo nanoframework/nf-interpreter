@@ -18,7 +18,7 @@ nf_setup_mcuboot_target_build(
 
     EXTRA_SOURCES
         ${CMAKE_SOURCE_DIR}/targets/ChibiOS/ORGPAL_PALTHREE/board.c
-        ${CMAKE_SOURCE_DIR}/targets/ChibiOS/ORGPAL_PALTHREE/MCUboot/at25sf641_spi_chibios.c
+        ${CMAKE_SOURCE_DIR}/targets/ChibiOS/ORGPAL_PALTHREE/common/target_ext_flash.c
         ${CMAKE_SOURCE_DIR}/targets/ChibiOS/ORGPAL_PALTHREE/MCUboot/mcuboot_flash_map_boot.c
         ${CMAKE_SOURCE_DIR}/targets/ChibiOS/ORGPAL_PALTHREE/MCUboot/mcuboot_detect_pin.c
 

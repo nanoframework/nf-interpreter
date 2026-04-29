@@ -156,7 +156,11 @@ bool AT25SF641_Write(const uint8_t *buf, uint32_t addr, uint32_t size)
         CS_UNSELECT;
 
         // clamp to the remaining space in the current page
-        writeSize = (uint32_t)__builtin_fmin(AT25SF641_PAGE_SIZE - (address % AT25SF641_PAGE_SIZE), size);
+        writeSize = AT25SF641_PAGE_SIZE - (address % AT25SF641_PAGE_SIZE);
+        if (writeSize > size)
+        {
+            writeSize = size;
+        }
 
         dataBuffer_0[0] = PAGE_PROG_CMD;
         dataBuffer_0[1] = (uint8_t)(address >> 16);

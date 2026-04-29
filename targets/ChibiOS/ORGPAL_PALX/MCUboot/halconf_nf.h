@@ -10,5 +10,6 @@
 
 #define HAL_USE_COMMUNITY                   TRUE
 #define HAL_NF_USE_STM32_FLASH              TRUE
+#define HAL_NF_USE_STM32_QSPI               TRUE
 
 #endif /* HALCONF_NF_H */
