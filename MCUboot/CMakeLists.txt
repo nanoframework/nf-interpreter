@@ -356,6 +356,19 @@ if(${TARGET_SERIES} STREQUAL "STM32F7xx")
 
     endif() # NF_FEATURE_MCUBOOT_HAS_SDCARD
 
+    # When serial recovery is enabled, define MCUBOOT_SERIAL=1 for the MCUboot
+    # bootutil library and add the OTGv1 include path (needed by boards that use
+    # USB CDC as the serial transport).
+    if(NF_MCUBOOT_SERIAL_RECOVERY)
+
+        list(APPEND MCUBOOT_SERIES_COMMON_COMPILE_DEFINITIONS MCUBOOT_SERIAL=1)
+
+        list(APPEND MCUBOOT_SERIES_COMMON_INCLUDES
+            ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/OTGv1
+        )
+
+    endif() # NF_MCUBOOT_SERIAL_RECOVERY
+
     # Board-specific build rules live in each board's MCUboot folder.
     include(${TARGET_BASE_LOCATION}/MCUboot/mcuboot_target.cmake)
 

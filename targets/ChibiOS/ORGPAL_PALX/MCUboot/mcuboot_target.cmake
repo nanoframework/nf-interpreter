@@ -27,6 +27,13 @@ nf_setup_mcuboot_target_build(
         ${CMAKE_SOURCE_DIR}/targets/ChibiOS/_mcuboot/mcuboot_hal_stubs.c
         ${CMAKE_SOURCE_DIR}/targets/ChibiOS/ORGPAL_PALX/MCUboot/mcuboot_flash_map_boot.c
         ${CMAKE_SOURCE_DIR}/targets/ChibiOS/ORGPAL_PALX/MCUboot/mcuboot_detect_pin.c
+        ${CMAKE_SOURCE_DIR}/targets/ChibiOS/ORGPAL_PALX/common/usbcfg.c
+        ${CMAKE_SOURCE_DIR}/targets/ChibiOS/ORGPAL_PALX/MCUboot/mcuboot_target_init.c
+        # ChibiOS USB HAL sources for USB CDC transport.
+        ${chibios_SOURCE_DIR}/os/hal/src/hal_usb.c
+        ${chibios_SOURCE_DIR}/os/hal/src/hal_serial_usb.c
+        ${chibios_SOURCE_DIR}/os/hal/src/hal_buffers.c
+        ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/OTGv1/hal_usb_lld.c
 
     EXTRA_INCLUDES
         ${CMAKE_SOURCE_DIR}/targets/ChibiOS/ORGPAL_PALX
@@ -35,6 +42,7 @@ nf_setup_mcuboot_target_build(
         ${CMAKE_SOURCE_DIR}/targets/ChibiOS/_nf-overlay/os/hal/include/stm32_qspi
         ${CMAKE_SOURCE_DIR}/targets/ChibiOS/_nf-overlay/os/hal/ports/STM32/LLD/QSPIv1
         ${stm32f7_hal_driver_SOURCE_DIR}/Inc
+        ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/OTGv1
 
     COMPILE_DEFINITIONS
         MCUBOOT_USE_TINYCRYPT=1

@@ -12,6 +12,13 @@ set(MCUBOOT_EXTRA_SOURCES
     ${CMAKE_SOURCE_DIR}/targets/ChibiOS/ORGPAL_PALTHREE/common/target_ext_flash.c
     ${CMAKE_SOURCE_DIR}/targets/ChibiOS/ORGPAL_PALTHREE/MCUboot/mcuboot_flash_map_boot.c
     ${CMAKE_SOURCE_DIR}/targets/ChibiOS/ORGPAL_PALTHREE/MCUboot/mcuboot_detect_pin.c
+    ${CMAKE_SOURCE_DIR}/targets/ChibiOS/ORGPAL_PALTHREE/common/usbcfg.c
+    ${CMAKE_SOURCE_DIR}/targets/ChibiOS/ORGPAL_PALTHREE/MCUboot/mcuboot_target_init.c
+    # ChibiOS USB HAL sources for USB CDC transport.
+    ${chibios_SOURCE_DIR}/os/hal/src/hal_usb.c
+    ${chibios_SOURCE_DIR}/os/hal/src/hal_serial_usb.c
+    ${chibios_SOURCE_DIR}/os/hal/src/hal_buffers.c
+    ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/OTGv1/hal_usb_lld.c
 )
 
 if(NF_FEATURE_MCUBOOT_HAS_SDCARD)
@@ -31,6 +38,8 @@ nf_setup_mcuboot_target_build(
     EXTRA_INCLUDES
         ${CMAKE_SOURCE_DIR}/targets/ChibiOS/ORGPAL_PALTHREE
         ${CMAKE_SOURCE_DIR}/targets/ChibiOS/ORGPAL_PALTHREE/MCUboot
+        ${CMAKE_SOURCE_DIR}/targets/ChibiOS/ORGPAL_PALTHREE/common
+        ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/OTGv1
 
     COMPILE_DEFINITIONS
         MCUBOOT_USE_TINYCRYPT=1

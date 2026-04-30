@@ -16,6 +16,11 @@ extern "C"
 {
 #endif
 
+    // Board-specific hardware initialisation called once from main() after chSysInit()
+    // and before mcuboot_ext_flash_init(). Boards with nothing extra to do provide
+    // an empty implementation.
+    void mcuboot_target_init(void);
+
     // Initialise the external flash device.
     // Called once from main() before boot_go().
     // Should return 0 on success, negative on error (non-fatal: boot continues

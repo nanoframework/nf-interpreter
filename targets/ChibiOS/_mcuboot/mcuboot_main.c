@@ -109,6 +109,10 @@ int main(void)
     // those are available only after chSysInit().
     chSysInit();
 
+    // Board-specific hardware initialisation (e.g. USB CDC, UART).
+    // Called before external storage init so the port is available from the start.
+    mcuboot_target_init();
+
     // Initialise the board's external flash device
     // Non-fatal: if the external device fails to initialise the boot will still
     // proceed, but any upgrade requiring the secondary slot will fail gracefully
