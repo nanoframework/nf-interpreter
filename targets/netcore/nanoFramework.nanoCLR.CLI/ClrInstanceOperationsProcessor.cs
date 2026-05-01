@@ -7,6 +7,7 @@ using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Text.Json;
 using System.Threading.Tasks;
 using nanoFramework.nanoCLR.Host;
@@ -95,6 +96,30 @@ namespace nanoFramework.nanoCLR.CLI
             return (int)ExitCode.OK;
         }
 
+        /// <summary>
+        /// Returns the Cloudsmith package name for the native nanoCLR library on the current OS.
+        /// </summary>
+        private static string GetCloudsmithPackageName()
+        {
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+                return "MACOS_DYLIB_nanoCLR";
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+                return "LINUX_SO_nanoCLR";
+            return "WIN_DLL_nanoCLR";
+        }
+
+        /// <summary>
+        /// Returns the platform-specific filename of the native nanoCLR shared library.
+        /// </summary>
+        private static string GetNativeLibraryFilename()
+        {
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+                return "nanoFramework.nanoCLR.dylib";
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+                return "nanoFramework.nanoCLR.so";
+            return "nanoFramework.nanoCLR.dll";
+        }
+
         private static void OutputNativeAssembliesList(List<NativeAssemblyDetails> nativeAssemblies)
         {
             Console.WriteLine("Native assemblies:");
@@ -137,7 +162,7 @@ namespace nanoFramework.nanoCLR.CLI
                 string nanoClrDllLocation = Path.Combine(
                     Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location),
                     "NanoCLR",
-                    "nanoFramework.nanoCLR.dll");
+                    GetNativeLibraryFilename());
 
                 _httpClient.BaseAddress = new Uri(_cloudSmithApiUrl);
                 _httpClient.DefaultRequestHeaders.Add("Accept", "*/*");
@@ -149,7 +174,7 @@ namespace nanoFramework.nanoCLR.CLI
                 if (string.IsNullOrEmpty(targetVersion))
                 {
                     // no specific version requested, get latest version available for download
-                    HttpResponseMessage response = await _httpClient.GetAsync($"{repoName}/?query=name:^WIN_DLL_nanoCLR version:^latest$");
+                    HttpResponseMessage response = await _httpClient.GetAsync($"{repoName}/?query=name:^{GetCloudsmithPackageName()} version:^latest$");
 
                     responseBody = await response.Content.ReadAsStringAsync();
 
@@ -162,7 +187,7 @@ namespace nanoFramework.nanoCLR.CLI
                 else
                 {
                     // specific version requested, get details for that version
-                    HttpResponseMessage response = await _httpClient.GetAsync($"{repoName}/?query=name:^WIN_DLL_nanoCLR version:{targetVersion}");
+                    HttpResponseMessage response = await _httpClient.GetAsync($"{repoName}/?query=name:^{GetCloudsmithPackageName()} version:{targetVersion}");
 
                     responseBody = await response.Content.ReadAsStringAsync();
 

@@ -32,6 +32,16 @@ namespace nanoFramework.nanoCLR.CLI
             return Regex.Match(portName, "(?:^COM[1-9]{1}[0-9]{0,2}$)").Success;
         }
 
+        /// <summary>
+        /// Validates a POSIX serial port name (e.g. /dev/ttyUSB0, /dev/ttyACM0,
+        /// /dev/cu.usbserial-XXXX, /dev/tty.usbmodem-XXXX, /dev/rfcomm0).
+        /// Accepts any /dev/ path without whitespace.
+        /// </summary>
+        public static bool ValidatePosixSerialPortName(string portName)
+        {
+            return Regex.IsMatch(portName, @"^/dev/\S+$");
+        }
+
         [SupportedOSPlatform("windows")]
         public static void ExecuteElevated(
             Action action,
