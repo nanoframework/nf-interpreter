@@ -39,18 +39,25 @@ jobs:
     runs-on: ${{ matrix.os }}
     name: Build (${{ matrix.label }})
 
-    env:
-      LITTLEFS_PATH: ${{ github.workspace }}\build\littlefs
-
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Checkout littlefs
         uses: actions/checkout@v4
         with:
           repository: littlefs-project/littlefs
           path: build/littlefs
+          fetch-depth: 1
+
+      - name: Normalize littlefs path
+        shell: pwsh
+        run: |
+          $littlefs = (Resolve-Path build/littlefs).Path.Replace('\', '/')
+          "LITTLEFS_PATH=$littlefs" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+          Write-Host "LITTLEFS_PATH=$littlefs"
 
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
