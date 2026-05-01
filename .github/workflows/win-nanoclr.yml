@@ -103,9 +103,10 @@ jobs:
         shell: pwsh
         run: |
           $dll = Join-Path "${{ matrix.build_dir }}" "lib\nanoFramework.nanoCLR.dll"
-          dumpbin /headers $dll | Tee-Object -FilePath dumpbin-headers.txt
+          $dumpbinOutput = "dumpbin-headers-${{ matrix.label }}.txt"
+          dumpbin /headers $dll | Tee-Object -FilePath $dumpbinOutput
 
-          $headers = Get-Content dumpbin-headers.txt -Raw
+          $headers = Get-Content $dumpbinOutput -Raw
           if ("${{ matrix.expected_machine }}" -eq "arm64") {
             if ($headers -notmatch "(?i)(AA64 machine|ARM64)") {
               Write-Error "Expected ARM64 DLL, but dumpbin headers did not match."
@@ -127,6 +128,23 @@ jobs:
         shell: pwsh
         run: dotnet build\bin\Release\net10.0\nanoFramework.nanoCLR.CLI.dll instance --getversion
 
+      - name: Package CLI artifact
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force build\artifacts | Out-Null
+          Compress-Archive `
+            -Path build\bin\Release\net10.0\* `
+            -DestinationPath "build\artifacts\nanoclr-cli-${{ matrix.label }}.zip" `
+            -Force
+
+      - name: Pack CLI
+        shell: pwsh
+        run: |
+          dotnet pack targets\netcore\nanoFramework.nanoCLR.CLI\nanoFramework.nanoCLR.CLI.csproj `
+            -c Release `
+            --no-build `
+            -o build\artifacts\nuget
+
       - name: Upload Artifacts
         if: always()
         uses: actions/upload-artifact@v4
@@ -134,4 +152,6 @@ jobs:
           name: win-nanoclr-${{ matrix.label }}
           path: |
             ${{ matrix.build_dir }}/lib/nanoFramework.nanoCLR.dll
-            dumpbin-headers.txt
+            build/artifacts/nanoclr-cli-${{ matrix.label }}.zip
+            build/artifacts/nuget/*.nupkg
+            dumpbin-headers-${{ matrix.label }}.txt
