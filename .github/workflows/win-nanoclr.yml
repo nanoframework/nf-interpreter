@@ -1,0 +1,130 @@
+name: win-nanoclr
+
+on:
+  push:
+    paths:
+      - "targets/netcore/nanoFramework.nanoCLR/**"
+      - "targets/netcore/nanoFramework.nanoCLR.CLI/**"
+      - "src/CLR/**"
+      - "src/HAL/**"
+      - "src/PAL/**"
+      - ".github/workflows/win-nanoclr.yml"
+  pull_request:
+    paths:
+      - "targets/netcore/nanoFramework.nanoCLR/**"
+      - "targets/netcore/nanoFramework.nanoCLR.CLI/**"
+      - "src/CLR/**"
+      - "src/HAL/**"
+      - "src/PAL/**"
+      - ".github/workflows/win-nanoclr.yml"
+  workflow_dispatch:
+
+jobs:
+  build-win-nanoclr:
+    strategy:
+      matrix:
+        include:
+          - os: windows-latest
+            label: Windows-x64
+            build_dir: build/netcore-x64
+            expected_machine: x64
+            msvc_arch: x64
+          - os: windows-11-arm
+            label: Windows-arm64
+            build_dir: build/netcore-arm64
+            expected_machine: arm64
+            msvc_arch: arm64
+      fail-fast: false
+
+    runs-on: ${{ matrix.os }}
+    name: Build (${{ matrix.label }})
+
+    env:
+      LITTLEFS_PATH: ${{ github.workspace }}\build\littlefs
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Checkout littlefs
+        uses: actions/checkout@v4
+        with:
+          repository: littlefs-project/littlefs
+          path: build/littlefs
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Setup MSVC
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: ${{ matrix.msvc_arch }}
+
+      - name: Install Ninja (if missing)
+        shell: pwsh
+        run: |
+          if (-not (Get-Command ninja -ErrorAction SilentlyContinue)) {
+            choco install ninja -y
+          }
+          ninja --version
+
+      - name: Configure
+        shell: pwsh
+        run: |
+          cmake -S targets\netcore\nanoFramework.nanoCLR `
+                -B ${{ matrix.build_dir }} `
+                -G Ninja `
+                -DCMAKE_BUILD_TYPE=Release `
+                -DBUILD_VERSION="1.0.0.0"
+
+      - name: Build
+        shell: pwsh
+        run: cmake --build ${{ matrix.build_dir }} --verbose
+
+      - name: Verify output
+        shell: pwsh
+        run: |
+          $dll = Join-Path "${{ matrix.build_dir }}" "lib\nanoFramework.nanoCLR.dll"
+          if (-not (Test-Path $dll)) {
+            Write-Error "Missing nanoCLR DLL: $dll"
+          }
+          Get-Item $dll
+
+      - name: Verify architecture
+        shell: pwsh
+        run: |
+          $dll = Join-Path "${{ matrix.build_dir }}" "lib\nanoFramework.nanoCLR.dll"
+          dumpbin /headers $dll | Tee-Object -FilePath dumpbin-headers.txt
+
+          $headers = Get-Content dumpbin-headers.txt -Raw
+          if ("${{ matrix.expected_machine }}" -eq "arm64") {
+            if ($headers -notmatch "(?i)(AA64 machine|ARM64)") {
+              Write-Error "Expected ARM64 DLL, but dumpbin headers did not match."
+            }
+          } else {
+            if ($headers -notmatch "(?i)(8664 machine|x64)") {
+              Write-Error "Expected x64 DLL, but dumpbin headers did not match."
+            }
+          }
+
+      - name: Build CLI
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force build\bin\Release | Out-Null
+          Copy-Item "${{ matrix.build_dir }}\lib\nanoFramework.nanoCLR.dll" build\bin\Release\nanoFramework.nanoCLR.dll -Force
+          dotnet build targets\netcore\nanoFramework.nanoCLR.CLI\nanoFramework.nanoCLR.CLI.csproj -c Release
+
+      - name: Smoke Run
+        shell: pwsh
+        run: dotnet build\bin\Release\net10.0\nanoFramework.nanoCLR.CLI.dll instance --getversion
+
+      - name: Upload Artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: win-nanoclr-${{ matrix.label }}
+          path: |
+            ${{ matrix.build_dir }}/lib/nanoFramework.nanoCLR.dll
+            dumpbin-headers.txt
