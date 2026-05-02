@@ -284,9 +284,7 @@ namespace nanoFramework.nanoCLR.CLI
         private static async Task<ExitCode> InstallVirtualSerialPortTools()
         {
             string hhdsoftwareUrl = "https://www.hhdsoftware.com";
-            string installerName = "virtual-serial-port-tools-redist.exe";
             HttpClient httpClient = new HttpClient();
-            var installerLocation = Path.Combine(Path.GetTempPath(), installerName);
 
             // check if this is running on Windows Platform
             if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
@@ -295,6 +293,11 @@ namespace nanoFramework.nanoCLR.CLI
 
                 return ExitCode.E9006;
             }
+
+            string installerName = RuntimeInformation.OSArchitecture == Architecture.Arm64
+                ? "virtual-serial-port-tools-redist-arm64.exe"
+                : "virtual-serial-port-tools-redist.exe";
+            var installerLocation = Path.Combine(Path.GetTempPath(), installerName);
 
             try
             {
