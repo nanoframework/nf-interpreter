@@ -33,7 +33,7 @@ int s_CLR_RT_fTrace_Exceptions = NANOCLR_TRACE_DEFAULT(c_CLR_RT_Trace_Info, c_CL
 #endif
 
 #if defined(NANOCLR_TRACE_INSTRUCTIONS)
-int s_CLR_RT_fTrace_Instructions = NANOCLR_TRACE_DEFAULT(c_CLR_RT_Trace_Info, c_CLR_RT_Trace_None);
+int s_CLR_RT_fTrace_Instructions = NANOCLR_TRACE_DEFAULT(c_CLR_RT_Trace_Verbose, c_CLR_RT_Trace_None);
 #endif
 
 #if defined(NANOCLR_GC_VERBOSE)
@@ -54,6 +54,10 @@ int s_CLR_RT_fTrace_SimulateSpeed = NANOCLR_TRACE_DEFAULT(c_CLR_RT_Trace_Info, c
 
 #if !defined(BUILD_RTM)
 int s_CLR_RT_fTrace_AssemblyOverhead = NANOCLR_TRACE_DEFAULT(c_CLR_RT_Trace_Info, c_CLR_RT_Trace_Info);
+#endif
+
+#if defined(NANOCLR_TRACE_GENERICS)
+int s_CLR_RT_fTrace_GenericFields = NANOCLR_TRACE_DEFAULT(c_CLR_RT_Trace_Verbose, c_CLR_RT_Trace_Info);
 #endif
 
 #if defined(VIRTUAL_DEVICE)
@@ -1675,43 +1679,61 @@ bool CLR_RT_FieldDef_Instance::ResolveToken(
 
                 case TBL_TypeSpec:
                 {
-                    // the metadata own (possibly open) TypeSpec...
-                    const CLR_RT_TypeSpec_Index *mdTS = &assm->crossReferenceFieldRef[index].genericType;
+                    // Use the pre-resolved FieldDef from the cross-reference (set during ResolveFieldRef).
+                    // FindFieldDef with assm (caller assembly) searches the wrong assembly field-def
+                    // table when the owning type is in a different assembly, giving wrong results.
+                    data = assm->crossReferenceFieldRef[index].target.data;
 
-                    // decide whether to prefer the caller’s closed-generic
+                    if (!NANOCLR_INDEX_IS_VALID(*this))
+                    {
+#if defined(NANOCLR_TRACE_GENERICS)
+                        if (s_CLR_RT_fTrace_GenericFields >= c_CLR_RT_Trace_Info)
+                        {
+                            CLR_Debug::Printf(
+                                "GenericFields: FieldDef ResolveToken TBL_TypeSpec invalid cross-ref idx=%u assm='%s'\r\n",
+                                index,
+                                assm->name);
+                        }
+#endif
+                        return false;
+                    }
+
+                    assembly = g_CLR_RT_TypeSystem.m_assemblies[Assembly() - 1];
+                    target = assembly->GetFieldDef(Field());
+
+                    // Resolve the best TypeSpec context for type-printing and generic validation.
+                    const CLR_RT_TypeSpec_Index *mdTS = &assm->crossReferenceFieldRef[index].genericType;
                     const CLR_RT_TypeSpec_Index *effectiveTS = mdTS;
+
                     if (caller && caller->genericType && NANOCLR_INDEX_IS_VALID(*caller->genericType))
                     {
                         CLR_RT_TypeSpec_Instance instCaller, instMd;
-                        if (instCaller.InitializeFromIndex(*caller->genericType) && instMd.InitializeFromIndex(*mdTS))
+                        if (instCaller.InitializeFromIndex(*caller->genericType) &&
+                            instMd.InitializeFromIndex(*mdTS))
                         {
-                            // check if generic definition token is the same...
                             if (instCaller.genericTypeDef.data == instMd.genericTypeDef.data)
                             {
-                                // it is, therefore use the caller closed TypeSpec
                                 effectiveTS = caller->genericType;
                             }
                         }
                     }
 
-                    // now bind against effectiveTS
                     genericType = effectiveTS;
-
-                    CLR_RT_FieldDef_Index resolved;
-
-                    if (!assm->FindFieldDef(genericType, assm->GetString(fr->name), assm, fr->signature, resolved))
-                    {
-                        return false;
-                    }
-
-                    data = resolved.data;
-                    assembly = assm;
-                    target = assembly->GetFieldDef(Field());
 
                     break;
                 }
                 default:
                     // should not happen
+#if defined(NANOCLR_TRACE_GENERICS)
+                    if (s_CLR_RT_fTrace_GenericFields >= c_CLR_RT_Trace_Info)
+                    {
+                        CLR_Debug::Printf(
+                        "GenericFields: FieldDef ResolveToken unexpected owner table=%u idx=%u assm='%s'\r\n",
+                        (unsigned)fr->Owner(),
+                        index,
+                        assm->name);
+                    }
+#endif
                     return false;
             }
 
@@ -1735,6 +1757,16 @@ bool CLR_RT_FieldDef_Instance::ResolveToken(
 
         default:
             // Not a field token
+#if defined(NANOCLR_TRACE_GENERICS)
+            if (s_CLR_RT_fTrace_GenericFields >= c_CLR_RT_Trace_Info)
+            {
+                CLR_Debug::Printf(
+                    "GenericFields: FieldDef ResolveToken unrecognised token table=%u tk=%08X assm='%s'\r\n",
+                    (unsigned)CLR_TypeFromTk(tk),
+                    tk,
+                    assm->name);
+            }
+#endif
             return false;
     }
 }
@@ -2301,6 +2333,11 @@ bool CLR_RT_MethodDef_Instance::ResolveToken(
 
                     // get data for MethodRef (from index)
                     data = assm->crossReferenceMethodRef[index].target.data;
+                    if (!data)
+                    {
+                        return false;
+                    }
+
                     // get assembly for this type ref
                     assembly = g_CLR_RT_TypeSystem.m_assemblies[Assembly() - 1];
                     // grab the MethodDef
@@ -5870,6 +5907,19 @@ CLR_RT_HeapBlock *CLR_RT_Assembly::GetStaticFieldByFieldDef(
     {
         CLR_RT_HeapBlock *hb = GetGenericStaticField(*genericType, fdIndex);
 
+#if defined(NANOCLR_TRACE_GENERICS)
+        if (s_CLR_RT_fTrace_GenericFields >= c_CLR_RT_Trace_Verbose)
+        {
+            CLR_Debug::Printf(
+                "GenericStatic: GetStaticFieldByFieldDef ts=[%04X:%04X] fd=[%04X:%04X] hb=%08X\r\n",
+                genericType->Assembly(),
+                genericType->TypeSpec(),
+                fdIndex.Assembly(),
+                fdIndex.Field(),
+                (uintptr_t)hb);
+        }
+#endif
+
         if (hb != nullptr)
         {
             return hb;
@@ -5910,6 +5960,15 @@ CLR_RT_HeapBlock *CLR_RT_Assembly::GetStaticFieldByFieldDef(
     const CLR_RT_FieldDef_CrossReference &fdCross = crossReferenceFieldDef[fdIndex.Field()];
 
     _ASSERTE(fdCross.offset != CLR_EmptyIndex);
+
+#if defined(NANOCLR_TRACE_GENERICS)
+    if (s_CLR_RT_fTrace_GenericFields >= c_CLR_RT_Trace_Info)
+    {
+        CLR_Debug::Printf(
+            "GenericStatic: GetStaticFieldByFieldDef fallback to assembly static offset=%u\r\n",
+            fdCross.offset);
+    }
+#endif
 
 #if defined(NANOCLR_APPDOMAINS)
     return GetStaticField(fdCross.offset); // existing method that uses current AppDomain's m_pStaticFields
@@ -6050,7 +6109,19 @@ HRESULT CLR_RT_Assembly::AllocateGenericStaticFieldsOnDemand(
 
         // Initialize the storage using the field definition
         const CLR_RECORD_FIELDDEF *pFd = ownerAsm->GetFieldDef(fieldIndex);
-        g_CLR_RT_ExecutionEngine.InitializeReference(fields[i], pFd, ownerAsm);
+
+        #if defined(NANOCLR_TRACE_GENERICS)
+                if (s_CLR_RT_fTrace_GenericFields >= c_CLR_RT_Trace_Verbose)
+                {
+                    CLR_Debug::Printf(
+                        "GenericStatic: AllocateGenericStaticFieldsOnDemand field[%u]='%s' ptr=%08X\r\n",
+                        i,
+                        ownerAsm->GetString(pFd->name),
+                        (uintptr_t)&fields[i]);
+                }
+        #endif
+
+                g_CLR_RT_ExecutionEngine.InitializeReference(fields[i], pFd, ownerAsm);
     }
 
     // Link this assembly's cross-reference to the global registry entry
@@ -6945,6 +7016,33 @@ void CLR_RT_Assembly::Relocate()
     for (CLR_UINT32 i = 0; i < g_CLR_RT_TypeSystem.m_genericStaticFieldsCount; i++)
     {
         CLR_RT_GarbageCollector::RelocateGenericStaticField(&g_CLR_RT_TypeSystem.m_genericStaticFields[i]);
+    }
+
+    // Sync all TypeSpec cross-reference caches that point into generic static field arrays.
+    // These caches (tsCross->genericStaticFields) are raw copies of record->m_fields stored in
+    // platform_malloc'd memory, so they are NOT updated by the GC relocation above.  Refresh them
+    // from the now-updated m_genericStaticFields records.
+    for (CLR_UINT32 i = 0; i < g_CLR_RT_TypeSystem.m_genericStaticFieldsCount; i++)
+    {
+        const CLR_RT_GenericStaticFieldRecord &record = g_CLR_RT_TypeSystem.m_genericStaticFields[i];
+
+        // Walk every assembly, every TypeSpec cross-reference, and update the cache if it was
+        // pointing at this record's old field block.
+        NANOCLR_FOREACH_ASSEMBLY(g_CLR_RT_TypeSystem)
+        {
+            for (int tsIdx = 0; tsIdx < pASSM->tablesSize[TBL_TypeSpec]; tsIdx++)
+            {
+                CLR_RT_TypeSpec_CrossReference &tsCross = pASSM->crossReferenceTypeSpec[tsIdx];
+
+                if (tsCross.genericStaticFields != nullptr &&
+                    tsCross.genericStaticFieldsCount == record.m_count &&
+                    tsCross.genericStaticFieldDefs == record.m_fieldDefs)
+                {
+                    tsCross.genericStaticFields = record.m_fields;
+                }
+            }
+        }
+        NANOCLR_FOREACH_ASSEMBLY_END();
     }
 
     CLR_RT_GarbageCollector::Heap_Relocate((void **)&header);
@@ -8740,6 +8838,16 @@ bool CLR_RT_TypeSystem::FindVirtualMethodDef(
 
             if (FindVirtualMethodDef(cls, calleeMD, rgBuffer, index))
                 return true;
+
+            // For generic interfaces BuildTypeName() produces the backtick form
+            // (e.g. "ICollection`1.Remove") which never matches the stored explicit
+            // implementation name (e.g. "ICollection<KeyValuePair<TKey,TValue>>.Remove").
+            // Do a suffix-only pass: this accepts only methods whose name ends with
+            // ".<calleeName>" (explicit interface implementations) while rejecting
+            // regular virtual methods whose name is exactly calleeName.  This ensures
+            // ICollection<KVP<TKey,TValue>>.Remove is chosen over Dictionary.Remove(TKey).
+            if (FindVirtualMethodDef(cls, calleeMD, calleeName, index, /*suffixMatchOnly=*/true))
+                return true;
         }
 
         if (FindVirtualMethodDef(cls, calleeMD, calleeName, index))
@@ -8824,7 +8932,8 @@ bool CLR_RT_TypeSystem::FindVirtualMethodDef(
     const CLR_RT_TypeDef_Index &cls,
     const CLR_RT_MethodDef_Index &calleeMD,
     const char *calleeName,
-    CLR_RT_MethodDef_Index &index)
+    CLR_RT_MethodDef_Index &index,
+    bool suffixMatchOnly)
 {
     NATIVE_PROFILE_CLR_CORE();
     CLR_RT_TypeDef_Instance clsInst{};
@@ -8858,7 +8967,27 @@ bool CLR_RT_TypeSystem::FindVirtualMethodDef(
             {
                 const char *targetName = targetAssm->GetString(targetMDR->name);
 
-                if (!strcmp(targetName, calleeName))
+                // Match by exact name OR by suffix ".<calleeName>" (explicit interface implementation).
+                // Explicit implementations store the full qualified interface name, e.g.
+                //   "System.Collections.Generic.IEnumerable<KeyValuePair<TKey,TValue>>.GetEnumerator"
+                // while the runtime looks up the short name "GetEnumerator" or a backtick-form
+                // "System.Collections.Generic.IEnumerable`1.GetEnumerator".  The suffix check
+                // handles both forms uniformly.
+                size_t targetLen = hal_strlen_s(targetName);
+                size_t calleeLen = hal_strlen_s(calleeName);
+                // When suffixMatchOnly=true only explicit interface implementations are
+                // considered.  Exact short-name matches (e.g. "Remove" == "Remove") are
+                // skipped so that Dictionary.Remove(TKey) does not shadow the explicit
+                // impl ICollection<KeyValuePair<TKey,TValue>>.Remove.
+                bool nameMatch = (!suffixMatchOnly && !strcmp(targetName, calleeName));
+                if (!nameMatch && targetLen > calleeLen + 1)
+                {
+                    // Check whether targetName ends with "." + calleeName
+                    const char *suffix = targetName + targetLen - calleeLen;
+                    nameMatch = (suffix[-1] == '.' && !strcmp(suffix, calleeName));
+                }
+
+                if (nameMatch)
                 {
                     CLR_RT_SignatureParser parserLeft{};
                     parserLeft.Initialize_MethodSignature(&calleeInst);

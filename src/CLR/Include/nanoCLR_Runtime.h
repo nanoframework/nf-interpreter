@@ -575,6 +575,10 @@ extern int s_CLR_RT_fTrace_GC_Depth;
 extern int s_CLR_RT_fTrace_SimulateSpeed;
 extern int s_CLR_RT_fTrace_AssemblyOverhead;
 
+#if defined(NANOCLR_TRACE_GENERICS)
+extern int s_CLR_RT_fTrace_GenericFields;
+#endif
+
 #if defined(VIRTUAL_DEVICE)
 extern int s_CLR_RT_fTrace_ARM_Execution;
 
@@ -2133,7 +2137,8 @@ struct CLR_RT_TypeSystem // EVENT HEAP - NO RELOCATION -
         const CLR_RT_TypeDef_Index &cls,
         const CLR_RT_MethodDef_Index &calleeMD,
         const char *calleeName,
-        CLR_RT_MethodDef_Index &index);
+        CLR_RT_MethodDef_Index &index,
+        bool suffixMatchOnly = false);
 
     static bool MatchSignature(CLR_RT_SignatureParser &parserLeft, CLR_RT_SignatureParser &parserRight);
     static bool MatchSignatureDirect(
@@ -3153,7 +3158,13 @@ struct CLR_RT_GarbageCollector
     {
         if (field->m_fields)
         {
+            // Relocate the internal pointers within each HeapBlock in the array
+            // (must be done before updating m_fields, while it still points to the old location)
             CLR_RT_GarbageCollector::Heap_Relocate(field->m_fields, field->m_count);
+
+            // Update m_fields pointer itself to wherever the block array moved after compaction.
+            // Without this, m_fields becomes a dangling pointer after any GC compaction.
+            CLR_RT_GarbageCollector::Heap_Relocate((void **)&field->m_fields);
         }
 
         if (field->m_fieldDefs)

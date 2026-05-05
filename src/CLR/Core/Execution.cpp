@@ -2363,13 +2363,16 @@ HRESULT CLR_RT_ExecutionEngine::InitializeLocals(
                     varParser.Initialize_LocalVar(assembly, typeSpecSignature);
 
                     CLR_RT_SignatureParser::Element varElement;
-                    // consume GENERICINST
-                    varParser.Advance(varElement);
-                    // consume class|valuetype
+                    // consume GENERICINST (first element) - this sets ParamCount to 1 for
+                    // the class/valuetype that follows, plus all nested generic arguments.
                     varParser.Advance(varElement);
 
-                    // consume parameters
-                    for (int paramIndex = 0; paramIndex < varElement.GenParamCount; paramIndex++)
+                    // Drain all remaining elements (class/valuetype token, generic argument count, and
+                    // all nested arguments recursively). Using Available() handles nested GENERICINSTs
+                    // such as ICollection<KeyValuePair<TKey,TValue>> where KVP itself has inner bytes
+                    // (VALUETYPE + TypeRef + count + I4 + STRING) that a fixed GenParamCount loop
+                    // would leave unread, corrupting `sig` for subsequent locals.
+                    while (varParser.Available() > 0)
                     {
                         NANOCLR_CHECK_HRESULT(varParser.Advance(varElement));
                     }
@@ -2761,6 +2764,12 @@ HRESULT CLR_RT_ExecutionEngine::NewGenericInstanceObject(
 
     fieldCursor = reinterpret_cast<CLR_RT_HeapBlock *>(giHeader) + totFields;
 
+    CLR_Debug::Printf(
+        "DBG GenericInst: NewGenericInstanceObject type='%s' totFields=%d giHeader=%08X\r\n",
+        instance.assembly->GetString(instance.target->name),
+        totFields,
+        (uintptr_t)giHeader);
+
     while (--totFields > 0)
     {
         while (clsFields == 0)
@@ -2784,7 +2793,17 @@ HRESULT CLR_RT_ExecutionEngine::NewGenericInstanceObject(
         target--;
         clsFields--;
 
+        CLR_Debug::Printf(
+            "DBG GenericInst:   InitField field='%s' type='%s' cursor=%08X\r\n",
+            assm->GetString(target->name),
+            assm->GetString(target->type),
+            (uintptr_t)fieldCursor);
+
         NANOCLR_CHECK_HRESULT(InitializeReference(*fieldCursor, target, assm, genericInstance));
+
+        CLR_Debug::Printf(
+            "DBG GenericInst:   InitField done dt=%d\r\n",
+            (int)fieldCursor->DataType());
     }
 
     if (instance.HasFinalizer())

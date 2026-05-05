@@ -2359,7 +2359,7 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
 
                             if (declType.target->dataType == DATATYPE_VALUETYPE)
                             {
-                                // any method on a value‐type is called via byref, so skip the object‐dereference path
+                                // any method on a value-type is called via byref, so skip the object-dereference path
                                 // altogether
                                 doInstanceResolution = false;
                             }
@@ -2437,6 +2437,55 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                                             {
                                                 NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
                                             }
+
+                                            // The TypeSpec from the MethodRef's owner might belong to an interface
+                                            // (e.g. ICollection<KVP<int,string>>) while the dispatched method belongs
+                                            // to the concrete type (e.g. Dictionary<TKey,TValue>). Using a mismatched
+                                            // TypeSpec corrupts generic-param resolution inside the callee.
+                                            // Detect this and try to recover the correct TypeSpec from the 'this'
+                                            // object, which stores its closed TypeSpec via HB_GenericInstance.
+                                            if (calleeInst.genericType && NANOCLR_INDEX_IS_VALID(*calleeInst.genericType))
+                                            {
+                                                CLR_RT_TypeSpec_Instance tsCheck{};
+                                                CLR_RT_TypeDef_Instance declCheck{};
+                                                if (tsCheck.InitializeFromIndex(*calleeInst.genericType) &&
+                                                    declCheck.InitializeFromMethod(calleeInst) &&
+                                                    tsCheck.genericTypeDef.data != declCheck.data)
+                                                {
+                                                    // Interface TypeSpec doesn't match the callee's declaring type.
+                                                    // Attempt to recover the correct closed TypeSpec from 'this'.
+                                                    bool recovered = false;
+                                                    CLR_RT_HeapBlock *thisHeap = pThis[0].Dereference();
+                                                    if (thisHeap != nullptr && thisHeap->IsAGenericInstance())
+                                                    {
+                                                        const CLR_RT_TypeSpec_Index &objTS =
+                                                            thisHeap->ObjectGenericType();
+                                                        if (NANOCLR_INDEX_IS_VALID(objTS))
+                                                        {
+                                                            CLR_RT_TypeSpec_Instance tsObj{};
+                                                            if (tsObj.InitializeFromIndex(objTS) &&
+                                                                tsObj.genericTypeDef.data == declCheck.data)
+                                                            {
+                                                                // The object's TypeSpec matches the callee's declaring
+                                                                // type — reinitialize with the correct closed TypeSpec.
+                                                                if (calleeInst.InitializeFromIndex(
+                                                                        calleeReal,
+                                                                        objTS,
+                                                                        &stack->m_call))
+                                                                {
+                                                                    recovered = true;
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+
+                                                    if (!recovered)
+                                                    {
+                                                        // Cannot recover — null is safer than a mismatched TypeSpec.
+                                                        calleeInst.genericType = nullptr;
+                                                    }
+                                                }
+                                            }
                                         }
                                         else
                                         {
@@ -2495,7 +2544,14 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                             if (op == CEE_CALLVIRT && pThis[0].DataType() == DATATYPE_BYREF)
                             {
                                 CLR_RT_TypeDef_Instance constrainedType{};
-                                if (constrainedType.ResolveToken(constrainedTypeToken, assm, &stack->m_call))
+                                // Pass genericType as contextTypeSpec to enable MVAR→VAR→concrete
+                                // two-level resolution (e.g. constrained.!!T inside Equals<TValue>
+                                // where TValue is a VAR in the enclosing Dictionary<TKey,TValue>).
+                                if (constrainedType.ResolveToken(
+                                        constrainedTypeToken,
+                                        assm,
+                                        &stack->m_call,
+                                        stack->m_call.genericType))
                                 {
                                     bool isValueType =
                                         ((constrainedType.target->flags & CLR_RECORD_TYPEDEF::TD_Semantics_Mask) ==
@@ -3099,6 +3155,16 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                     CLR_RT_FieldDef_Instance fieldInst;
                     if (fieldInst.ResolveToken(arg, assm, &stack->m_call) == false)
                     {
+#if defined(NANOCLR_TRACE_GENERICS)
+                        if (s_CLR_RT_fTrace_GenericFields >= c_CLR_RT_Trace_Info)
+                        {
+                            CLR_Debug::Printf(
+                                "GenericFields: LDFLD ResolveToken failed tk=%08X assm='%s' caller='%s'\r\n",
+                                arg,
+                                assm ? assm->name : "<null>",
+                                stack->m_call.assembly ? stack->m_call.assembly->GetString(stack->m_call.target->name) : "<null>");
+                        }
+#endif
                         NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
                     }
 
@@ -3111,9 +3177,49 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                     {
                         case DATATYPE_CLASS:
                         case DATATYPE_VALUETYPE:
-                        case DATATYPE_GENERICINST:
-                            evalPos[0].Assign(obj[fieldInst.CrossReference().offset]);
+                        {
+                            CLR_RT_HeapBlock &field = obj[fieldInst.CrossReference().offset];
+                            if (field.DataSize() > 1)
+                            {
+                                // Embedded value type field spanning multiple heap blocks.
+                                // Mirror the LDOBJ pattern: BYREF + LoadFromReference clones
+                                // the full struct in a GC-safe way. Do NOT goto Execute_LoadAndPromote
+                                // since LoadFromReference already places the clone in evalPos[0].
+                                UPDATESTACK(stack, evalPos);
+                                CLR_RT_HeapBlock safeRef;
+                                safeRef.SetReference(field);
+                                CLR_RT_ProtectFromGC gc(safeRef);
+                                NANOCLR_CHECK_HRESULT(evalPos[0].LoadFromReference(safeRef));
+                                break;
+                            }
+                            evalPos[0].Assign(field);
                             goto Execute_LoadAndPromote;
+                        }
+                        case DATATYPE_GENERICINST:
+                        {
+#if defined(NANOCLR_TRACE_GENERICS)
+                            if (s_CLR_RT_fTrace_GenericFields >= c_CLR_RT_Trace_Verbose)
+                            {
+                                CLR_Debug::Printf(
+                                    "GenericFields: LDFLD GENERICINST field='%s' offset=%d dt=%d\r\n",
+                                    fieldInst.assembly ? fieldInst.assembly->GetString(fieldInst.target->name) : "<null>",
+                                    fieldInst.CrossReference().offset,
+                                    (int)obj[fieldInst.CrossReference().offset].DataType());
+                            }
+#endif
+                            CLR_RT_HeapBlock &field2 = obj[fieldInst.CrossReference().offset];
+                            if (field2.DataSize() > 1)
+                            {
+                                UPDATESTACK(stack, evalPos);
+                                CLR_RT_HeapBlock safeRef2;
+                                safeRef2.SetReference(field2);
+                                CLR_RT_ProtectFromGC gc(safeRef2);
+                                NANOCLR_CHECK_HRESULT(evalPos[0].LoadFromReference(safeRef2));
+                                break;
+                            }
+                            evalPos[0].Assign(field2);
+                            goto Execute_LoadAndPromote;
+                        }
                         case DATATYPE_DATETIME:
                         case DATATYPE_TIMESPAN:
                             evalPos[0].SetInteger((CLR_INT64)obj->NumericByRefConst().s8);
@@ -3153,6 +3259,16 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                     CLR_RT_FieldDef_Instance fieldInst;
                     if (fieldInst.ResolveToken(arg, assm, &stack->m_call) == false)
                     {
+#if defined(NANOCLR_TRACE_GENERICS)
+                        if (s_CLR_RT_fTrace_GenericFields >= c_CLR_RT_Trace_Info)
+                        {
+                            CLR_Debug::Printf(
+                                "GenericFields: LDFLDA ResolveToken failed tk=%08X assm='%s' caller='%s'\r\n",
+                                arg,
+                                assm ? assm->name : "<null>",
+                                stack->m_call.assembly ? stack->m_call.assembly->GetString(stack->m_call.target->name) : "<null>");
+                        }
+#endif
                         NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
                     }
 
@@ -3197,6 +3313,16 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                     CLR_RT_FieldDef_Instance fieldInst;
                     if (fieldInst.ResolveToken(arg, assm, &stack->m_call) == false)
                     {
+#if defined(NANOCLR_TRACE_GENERICS)
+                        if (s_CLR_RT_fTrace_GenericFields >= c_CLR_RT_Trace_Info)
+                        {
+                            CLR_Debug::Printf(
+                                "GenericFields: STFLD ResolveToken failed tk=%08X assm='%s' caller='%s'\r\n",
+                                arg,
+                                assm ? assm->name : "<null>",
+                                stack->m_call.assembly ? stack->m_call.assembly->GetString(stack->m_call.target->name) : "<null>");
+                        }
+#endif
                         NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
                     }
 
@@ -3207,9 +3333,21 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
 
                     switch (dt)
                     {
-                        case DATATYPE_GENERICINST:
                         case DATATYPE_CLASS:
                         case DATATYPE_VALUETYPE:
+                            obj[fieldInst.CrossReference().offset].AssignAndPreserveType(evalPos[2]);
+                            break;
+                        case DATATYPE_GENERICINST:
+#if defined(NANOCLR_TRACE_GENERICS)
+                            if (s_CLR_RT_fTrace_GenericFields >= c_CLR_RT_Trace_Verbose)
+                            {
+                                CLR_Debug::Printf(
+                                    "GenericFields: STFLD GENERICINST field='%s' offset=%d src_dt=%d\r\n",
+                                    fieldInst.assembly ? fieldInst.assembly->GetString(fieldInst.target->name) : "<null>",
+                                    fieldInst.CrossReference().offset,
+                                    (int)evalPos[2].DataType());
+                            }
+#endif
                             obj[fieldInst.CrossReference().offset].AssignAndPreserveType(evalPos[2]);
                             break;
                         case DATATYPE_DATETIME: // Special case.
@@ -3266,6 +3404,18 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                             field.genericType,
                             &stack->m_genericTypeSpecStorage,
                             &stack->m_call);
+
+#if defined(NANOCLR_TRACE_GENERICS)
+                        if (s_CLR_RT_fTrace_GenericFields >= c_CLR_RT_Trace_Verbose)
+                        {
+                            CLR_Debug::Printf(
+                                "GenericStatic: LDSFLD field='%s' ts=[%04X:%04X] ptr=%08X\r\n",
+                                field.assembly ? field.assembly->GetString(field.target->name) : "<null>",
+                                field.genericType->Assembly(),
+                                field.genericType->TypeSpec(),
+                                (uintptr_t)ptr);
+                        }
+#endif
                     }
                     else
                     {
@@ -3288,14 +3438,24 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                         // a .cctor that's scheduled,
                         // reschedule to allow the .cctor to complete field initialization
                         if (obj == nullptr)
-                        {
-                            // Check if there's a pending .cctor for this generic type
-                            CLR_RT_TypeSpec_Instance tsInst;
-                            if (tsInst.InitializeFromIndex(*field.genericType))
                             {
-                                NANOCLR_CHECK_HRESULT(HandleGenericCctorReschedule(tsInst, stack, &ip));
+                                // Check if there's a pending .cctor for this generic type
+                                CLR_RT_TypeSpec_Instance tsInst;
+                                if (tsInst.InitializeFromIndex(*field.genericType))
+                                {
+                                    NANOCLR_CHECK_HRESULT(HandleGenericCctorReschedule(tsInst, stack, &ip));
+                                }
                             }
+
+#if defined(NANOCLR_TRACE_GENERICS)
+                        if (s_CLR_RT_fTrace_GenericFields >= c_CLR_RT_Trace_Verbose)
+                        {
+                            CLR_Debug::Printf(
+                                "GenericStatic: LDSFLD resolved ptr=%08X dt=%d\r\n",
+                                (uintptr_t)ptr,
+                                (int)ptr->DataType());
                         }
+#endif
                     }
 
                     evalPos++;
@@ -3406,6 +3566,14 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                             field.genericType,
                             &stack->m_genericTypeSpecStorage,
                             &stack->m_call);
+
+                        CLR_Debug::Printf(
+                            "DBG STSFLD: generic field='%s' ts=[%04X:%04X] ptr=%p src_dt=%d\r\n",
+                            field.assembly ? field.assembly->GetString(field.target->name) : "<null-assm>",
+                            field.genericType->Assembly(),
+                            field.genericType->TypeSpec(),
+                            (void *)ptr,
+                            (int)evalPos[0].DataType());
                     }
                     else
                     {
@@ -3461,7 +3629,10 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                         }
                     }
 
-                    if (typeInst.ResolveToken(arg, assm, &stack->m_call) == false)
+                    // Pass genericType as contextTypeSpec so that two-level MVAR→VAR→concrete
+                    // resolution succeeds (e.g. box !!T inside Equals<TValue> where TValue is a
+                    // VAR in the enclosing generic type like Dictionary<TKey,TValue>).
+                    if (typeInst.ResolveToken(arg, assm, &stack->m_call, stack->m_call.genericType) == false)
                     {
                         // restore previous context before bailing
                         stack->m_call.arrayElementType = previousArrayElemType;
@@ -3634,7 +3805,9 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                         }
                     }
 
-                    if (typeInst.ResolveToken(arg, assm, &stack->m_call) == false)
+                    // Pass genericType as contextTypeSpec for the same MVAR→VAR→concrete
+                    // two-level resolution needed by the BOX path.
+                    if (typeInst.ResolveToken(arg, assm, &stack->m_call, stack->m_call.genericType) == false)
                     {
                         // restore previous context before bailing
                         stack->m_call.arrayElementType = previousArrayElemType;
@@ -4028,7 +4201,7 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                     // Promote the value if it's a reference or boxed struct
                     evalPos[3].Promote();
 
-                    // Compute the element‐size: 0 for refs (incl. genericinst), sizeInBytes for primitives
+                    // Compute the element-size: 0 for refs (incl. genericinst), sizeInBytes for primitives
                     size_t size = 0;
                     if (elemDT <= DATATYPE_LAST_PRIMITIVE_TO_PRESERVE)
                     {
@@ -4189,7 +4362,7 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                                     // Type generic parameter (!T)
                                     if (stack->m_call.genericType == nullptr)
                                     {
-                                        // No closed‐generic context available: fall back to returning the
+                                        // No closed-generic context available: fall back to returning the
                                         // declaring TYPE itself as the reflection result (rarely correct, but at least
                                         // safe).
                                         CLR_RT_TypeDef_Index fallbackTypeDef = gpCR.classTypeDef;
