@@ -8416,6 +8416,63 @@ HRESULT CLR_RT_TypeSystem::BuildMethodName(
     NANOCLR_NOCLEANUP();
 }
 
+// Overload that accepts an explicit parent context TypeSpec for resolving open VAR parameters
+// in mdInst.genericType.  When the method's declaring type has open generic params (e.g.
+// List`1+Enumerator<!0>), parentCtx supplies the closed type (e.g. List<String>) so that
+// !0 is printed as "String" rather than "!0".
+HRESULT CLR_RT_TypeSystem::BuildMethodName(
+    const CLR_RT_MethodDef_Instance &mdInst,
+    const CLR_RT_TypeSpec_Index *genericType,
+    const CLR_RT_TypeSpec_Index *parentCtx,
+    char *&szBuffer,
+    size_t &iBuffer)
+{
+    NATIVE_PROFILE_CLR_CORE();
+    NANOCLR_HEADER();
+
+    CLR_RT_TypeDef_Instance instOwner{};
+    bool useGeneric = (mdInst.genericType != nullptr && NANOCLR_INDEX_IS_VALID(*mdInst.genericType));
+
+    // If there is no useful parent context, fall back to the two-arg overload.
+    if (parentCtx == nullptr || !NANOCLR_INDEX_IS_VALID(*parentCtx))
+    {
+        NANOCLR_CHECK_HRESULT(BuildMethodName(mdInst, genericType, szBuffer, iBuffer));
+        NANOCLR_NOCLEANUP_NOLABEL();
+    }
+
+    if (!useGeneric)
+    {
+        // Non-generic method: print owning type name + method name the standard way.
+        if (!instOwner.InitializeFromMethod(mdInst))
+        {
+            NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+        }
+        NANOCLR_CHECK_HRESULT(BuildTypeName(instOwner, szBuffer, iBuffer));
+        CLR_SafeSprintf(szBuffer, iBuffer, "::%s", mdInst.assembly->GetString(mdInst.target->name));
+        NANOCLR_NOCLEANUP_NOLABEL();
+    }
+
+    // Generic method: build the declaring type name using parentCtx to resolve open VARs.
+    // e.g. mdInst.genericType = List+Enumerator<VAR0>, parentCtx = List<String>
+    //   → BuildTypeName resolves VAR0 via parentCtx → "List+Enumerator<String>"
+    if (FAILED(BuildTypeName(*mdInst.genericType, szBuffer, iBuffer, 0, parentCtx, &mdInst)))
+    {
+        // Fall back: render without parent context.
+        if (FAILED(BuildTypeName(*mdInst.genericType, szBuffer, iBuffer, 0, mdInst.genericType, &mdInst)))
+        {
+            if (!instOwner.InitializeFromMethod(mdInst))
+            {
+                NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+            }
+            NANOCLR_CHECK_HRESULT(BuildTypeName(instOwner, szBuffer, iBuffer));
+        }
+    }
+
+    CLR_SafeSprintf(szBuffer, iBuffer, "::%s", mdInst.assembly->GetString(mdInst.target->name));
+
+    NANOCLR_NOCLEANUP();
+}
+
 HRESULT CLR_RT_TypeSystem::BuildFieldName(const CLR_RT_FieldDef_Index &fd, char *&szBuffer, size_t &iBuffer)
 {
     NATIVE_PROFILE_CLR_CORE();

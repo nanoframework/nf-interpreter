@@ -1589,8 +1589,12 @@ struct CLR_RT_Assembly : public CLR_RT_HeapBlock_Node // EVENT HEAP - NO RELOCAT
 
   public:
     void DumpOpcode(CLR_RT_StackFrame *stack, CLR_PMETADATA ip) DECL_POSTFIX;
-    void DumpOpcodeDirect(CLR_RT_MethodDef_Instance &call, CLR_PMETADATA ip, CLR_PMETADATA ipStart, int pid)
-        DECL_POSTFIX;
+    void DumpOpcodeDirect(
+        CLR_RT_MethodDef_Instance &call,
+        CLR_PMETADATA ip,
+        CLR_PMETADATA ipStart,
+        int pid,
+        const CLR_RT_TypeSpec_Index *parentCtx = nullptr) DECL_POSTFIX;
 
   private:
     void DumpToken(
@@ -2097,6 +2101,12 @@ struct CLR_RT_TypeSystem // EVENT HEAP - NO RELOCATION -
     HRESULT BuildMethodName(
         const CLR_RT_MethodDef_Instance &mdInst,
         const CLR_RT_TypeSpec_Index *genericType,
+        char *&szBuffer,
+        size_t &size);
+    HRESULT BuildMethodName(
+        const CLR_RT_MethodDef_Instance &mdInst,
+        const CLR_RT_TypeSpec_Index *genericType,
+        const CLR_RT_TypeSpec_Index *parentCtx,
         char *&szBuffer,
         size_t &size);
     HRESULT BuildFieldName(const CLR_RT_FieldDef_Index &fd, char *&szBuffer, size_t &size);
