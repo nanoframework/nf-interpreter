@@ -3567,15 +3567,8 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                             &stack->m_genericTypeSpecStorage,
                             &stack->m_call);
 
-                        CLR_Debug::Printf(
-                            "DBG STSFLD: generic field='%s' ts=[%04X:%04X] ptr=%p src_dt=%d\r\n",
-                            field.assembly ? field.assembly->GetString(field.target->name) : "<null-assm>",
-                            field.genericType->Assembly(),
-                            field.genericType->TypeSpec(),
-                            (void *)ptr,
-                            (int)evalPos[0].DataType());
-                    }
-                    else
+                        }
+                        else
                     {
                         // static field of a non-generic class
                         ptr = CLR_RT_ExecutionEngine::AccessStaticField(field);

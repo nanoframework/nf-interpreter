@@ -5954,6 +5954,12 @@ CLR_RT_HeapBlock *CLR_RT_Assembly::GetStaticFieldByFieldDef(
                 }
             }
         }
+
+        // Generic field not found in the per-TypeSpec store (even after on-demand allocation).
+        // Do NOT fall through to the assembly static field offset: generic static fields have no
+        // assembly-level storage slot (fdCross.offset == CLR_EmptyIndex), so the fallback would
+        // hit the assert below.  Return nullptr and let the caller handle the miss.
+        return nullptr;
     }
 
     // fallback to assembly static fields (use offset stored on crossReferenceFieldDef)

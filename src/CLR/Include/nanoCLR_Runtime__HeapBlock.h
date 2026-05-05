@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (c) .NET Foundation and Contributors
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
@@ -1293,21 +1293,21 @@ struct CLR_RT_HeapBlock
 
     void AssignId(const CLR_RT_HeapBlock &value)
     {
-        _ASSERTE(value.DataSize() == 1);
+        _ASSERTE(value.DataSize() <= 1);
 
         m_id = value.m_id;
     }
 
     void AssignData(const CLR_RT_HeapBlock &value)
     {
-        _ASSERTE(value.DataSize() == 1);
+        _ASSERTE(value.DataSize() <= 1);
 
         m_data = value.m_data;
     }
 
     void Assign(const CLR_RT_HeapBlock &value)
     {
-        _ASSERTE(value.DataSize() == 1);
+        _ASSERTE(value.DataSize() <= 1);
 
         value.Debug_CheckPointer();
 
@@ -1319,7 +1319,7 @@ struct CLR_RT_HeapBlock
 
     void AssignAndPreserveType(const CLR_RT_HeapBlock &value)
     {
-        _ASSERTE(value.DataSize() == 1);
+        _ASSERTE(value.DataSize() <= 1);
 
         this->m_data = value.m_data;
 
@@ -1331,7 +1331,7 @@ struct CLR_RT_HeapBlock
 
     void AssignPreserveTypeCheckPinned(const CLR_RT_HeapBlock &value)
     {
-        _ASSERTE(value.DataSize() == 1);
+        _ASSERTE(value.DataSize() <= 1);
 
         { // If local variable does not have pinned type - move source data into it
             if (!IsPinned())

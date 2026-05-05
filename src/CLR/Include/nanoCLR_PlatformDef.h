@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (c) .NET Foundation and Contributors
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
@@ -109,6 +109,7 @@
 #undef NANOCLR_TRACE_EXCEPTIONS
 #undef NANOCLR_TRACE_ERRORS
 #undef NANOCLR_TRACE_EARLYCOLLECTION
+#undef NANOCLR_TRACE_GENERICS
 #undef NANOCLR_VALIDATE_HEAP
 #undef NANOCLR_FILL_MEMORY_WITH_DIRTY_PATTERN
 #endif
