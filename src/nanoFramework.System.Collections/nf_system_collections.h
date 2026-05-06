@@ -20,9 +20,116 @@ struct Library_nf_system_collections_System_Collections_Bucket
     //--//
 };
 
-struct Library_nf_system_collections_System_Collections_Generic_ICollectionDebugView_1
+struct Library_nf_system_collections_System_Collections_Generic_DebugViewDictionaryItem_2
+{
+    // renamed backing field '<Key>k__BackingField'
+    static const int FIELD__Key = 1;
+    // renamed backing field '<Value>k__BackingField'
+    static const int FIELD__Value = 2;
+
+    //--//
+};
+
+struct Library_nf_system_collections_System_Collections_Generic_Dictionary_2__KeyCollectionEnumerator
+{
+    static const int FIELD___dictionary = 1;
+    static const int FIELD___version = 2;
+    static const int FIELD___index = 3;
+    static const int FIELD___current = 4;
+
+    //--//
+};
+
+struct Library_nf_system_collections_System_Collections_Generic_Dictionary_2__KeyCollection
+{
+    static const int FIELD___dictionary = 1;
+
+    //--//
+};
+
+struct Library_nf_system_collections_System_Collections_Generic_Dictionary_2__ValueCollectionEnumerator
+{
+    static const int FIELD___dictionary = 1;
+    static const int FIELD___version = 2;
+    static const int FIELD___index = 3;
+    static const int FIELD___current = 4;
+
+    //--//
+};
+
+struct Library_nf_system_collections_System_Collections_Generic_Dictionary_2__ValueCollection
+{
+    static const int FIELD___dictionary = 1;
+
+    //--//
+};
+
+struct Library_nf_system_collections_System_Collections_Generic_Dictionary_2__Enumerator
+{
+    static const int FIELD___dictionary = 1;
+    static const int FIELD___version = 2;
+    static const int FIELD___index = 3;
+    static const int FIELD___current = 4;
+
+    //--//
+};
+
+struct Library_nf_system_collections_System_Collections_Generic_Dictionary_2
+{
+    static const int FIELD___buckets = 1;
+    static const int FIELD___entries = 2;
+    static const int FIELD___count = 3;
+    static const int FIELD___freeList = 4;
+    static const int FIELD___freeCount = 5;
+    static const int FIELD___version = 6;
+    static const int FIELD___keys = 7;
+    static const int FIELD___values = 8;
+
+    //--//
+};
+
+struct Library_nf_system_collections_System_Collections_Generic_Dictionary_2__Entry
+{
+    static const int FIELD__hashCode = 1;
+    static const int FIELD__next = 2;
+    static const int FIELD__key = 3;
+    static const int FIELD__value = 4;
+
+    //--//
+};
+
+struct Library_nf_system_collections_System_Collections_Generic_DictionaryKeyCollectionDebugView_2
 {
     static const int FIELD___collection = 1;
+
+    //--//
+};
+
+struct Library_nf_system_collections_System_Collections_Generic_DictionaryValueCollectionDebugView_2
+{
+    static const int FIELD___collection = 1;
+
+    //--//
+};
+
+struct Library_nf_system_collections_System_Collections_Generic_HashHelpers
+{
+    static const int FIELD_STATIC__s_primes = 0;
+
+    //--//
+};
+
+struct Library_nf_system_collections_System_Collections_Generic_KeyValuePair_2
+{
+    static const int FIELD__key = 1;
+    static const int FIELD__value = 2;
+
+    //--//
+};
+
+struct Library_nf_system_collections_System_Collections_Generic_IDictionaryDebugView_2
+{
+    static const int FIELD___dict = 1;
 
     //--//
 };
@@ -39,7 +146,7 @@ struct Library_nf_system_collections_System_Collections_Generic_List_1__Enumerat
 
 struct Library_nf_system_collections_System_Collections_Generic_List_1
 {
-    static const int FIELD_STATIC__s_emptyArray = 0;
+    static const int FIELD_STATIC__s_emptyArray = 1;
 
     static const int FIELD___items = 1;
     static const int FIELD___size = 2;
@@ -50,7 +157,7 @@ struct Library_nf_system_collections_System_Collections_Generic_List_1
 
 struct Library_nf_system_collections_System_Collections_Hashtable
 {
-    static const int FIELD_STATIC___syncLock = 1;
+    static const int FIELD_STATIC___syncLock = 2;
 
     static const int FIELD___buckets = 1;
     static const int FIELD___loadsize = 2;
