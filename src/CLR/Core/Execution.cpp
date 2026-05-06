@@ -2801,9 +2801,7 @@ HRESULT CLR_RT_ExecutionEngine::NewGenericInstanceObject(
 
         NANOCLR_CHECK_HRESULT(InitializeReference(*fieldCursor, target, assm, genericInstance));
 
-        CLR_Debug::Printf(
-            "DBG GenericInst:   InitField done dt=%d\r\n",
-            (int)fieldCursor->DataType());
+        CLR_Debug::Printf("DBG GenericInst:   InitField done dt=%d\r\n", (int)fieldCursor->DataType());
     }
 
     if (instance.HasFinalizer())

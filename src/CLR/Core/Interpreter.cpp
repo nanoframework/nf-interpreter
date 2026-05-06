@@ -2281,8 +2281,12 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                     {
 #if !defined(BUILD_RTM)
                         CLR_Debug::Printf(
-                            "CALL resolve failed: op=%u token=%08x type=%u index=%u caller=%s callerTs=%08x callerMs=%08x effTs=%08x callerArr=%08x\r\n",
-                            op, arg, CLR_TypeFromTk(arg), CLR_DataFromTk(arg),
+                            "CALL resolve failed: op=%u token=%08x type=%u index=%u caller=%s callerTs=%08x "
+                            "callerMs=%08x effTs=%08x callerArr=%08x\r\n",
+                            op,
+                            arg,
+                            CLR_TypeFromTk(arg),
+                            CLR_DataFromTk(arg),
                             stack->m_call.assembly->GetString(stack->m_call.target->name),
                             stack->m_call.genericType ? stack->m_call.genericType->data : 0,
                             stack->m_call.methodSpec.data,
@@ -2444,7 +2448,8 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                                             // TypeSpec corrupts generic-param resolution inside the callee.
                                             // Detect this and try to recover the correct TypeSpec from the 'this'
                                             // object, which stores its closed TypeSpec via HB_GenericInstance.
-                                            if (calleeInst.genericType && NANOCLR_INDEX_IS_VALID(*calleeInst.genericType))
+                                            if (calleeInst.genericType &&
+                                                NANOCLR_INDEX_IS_VALID(*calleeInst.genericType))
                                             {
                                                 CLR_RT_TypeSpec_Instance tsCheck{};
                                                 CLR_RT_TypeDef_Instance declCheck{};
@@ -2719,8 +2724,7 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                             // KeyValuePair<TKey,TValue>) cannot resolve VAR indices and causes
                             // CLR_E_WRONG_TYPE in the callee. Fall through to Priority 3 instead.
                             CLR_RT_TypeSpec_Instance calleeTs{};
-                            if (calleeTs.InitializeFromIndex(*calleeInst.genericType) &&
-                                calleeTs.IsClosedGenericType())
+                            if (calleeTs.InitializeFromIndex(*calleeInst.genericType) && calleeTs.IsClosedGenericType())
                             {
                                 effectiveGenericContext = calleeInst.genericType;
                             }
@@ -2913,8 +2917,11 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                     {
 #if !defined(BUILD_RTM)
                         CLR_Debug::Printf(
-                            "NEWOBJ resolve failed: token=%08x type=%u index=%u caller=%s callerTs=%08x callerMs=%08x callerArr=%08x\r\n",
-                            arg, CLR_TypeFromTk(arg), CLR_DataFromTk(arg),
+                            "NEWOBJ resolve failed: token=%08x type=%u index=%u caller=%s callerTs=%08x callerMs=%08x "
+                            "callerArr=%08x\r\n",
+                            arg,
+                            CLR_TypeFromTk(arg),
+                            CLR_DataFromTk(arg),
                             stack->m_call.assembly->GetString(stack->m_call.target->name),
                             stack->m_call.genericType ? stack->m_call.genericType->data : 0,
                             stack->m_call.methodSpec.data,
@@ -2931,10 +2938,12 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                     {
 #if !defined(BUILD_RTM)
                         CLR_Debug::Printf(
-                            "NEWOBJ declaring type failed: token=%08x callee=%s calleeTs=%08x calleeMs=%08x caller=%s callerTs=%08x callerMs=%08x callerArr=%08x\r\n",
+                            "NEWOBJ declaring type failed: token=%08x callee=%s calleeTs=%08x calleeMs=%08x caller=%s "
+                            "callerTs=%08x callerMs=%08x callerArr=%08x\r\n",
                             arg,
                             calleeInst.assembly && calleeInst.target
-                                ? calleeInst.assembly->GetString(calleeInst.target->name) : "<null>",
+                                ? calleeInst.assembly->GetString(calleeInst.target->name)
+                                : "<null>",
                             calleeInst.genericType ? calleeInst.genericType->data : 0,
                             calleeInst.methodSpec.data,
                             stack->m_call.assembly->GetString(stack->m_call.target->name),
@@ -3162,7 +3171,8 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                                 "GenericFields: LDFLD ResolveToken failed tk=%08X assm='%s' caller='%s'\r\n",
                                 arg,
                                 assm ? assm->name : "<null>",
-                                stack->m_call.assembly ? stack->m_call.assembly->GetString(stack->m_call.target->name) : "<null>");
+                                stack->m_call.assembly ? stack->m_call.assembly->GetString(stack->m_call.target->name)
+                                                       : "<null>");
                         }
 #endif
                         NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
@@ -3202,7 +3212,8 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                             {
                                 CLR_Debug::Printf(
                                     "GenericFields: LDFLD GENERICINST field='%s' offset=%d dt=%d\r\n",
-                                    fieldInst.assembly ? fieldInst.assembly->GetString(fieldInst.target->name) : "<null>",
+                                    fieldInst.assembly ? fieldInst.assembly->GetString(fieldInst.target->name)
+                                                       : "<null>",
                                     fieldInst.CrossReference().offset,
                                     (int)obj[fieldInst.CrossReference().offset].DataType());
                             }
@@ -3266,7 +3277,8 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                                 "GenericFields: LDFLDA ResolveToken failed tk=%08X assm='%s' caller='%s'\r\n",
                                 arg,
                                 assm ? assm->name : "<null>",
-                                stack->m_call.assembly ? stack->m_call.assembly->GetString(stack->m_call.target->name) : "<null>");
+                                stack->m_call.assembly ? stack->m_call.assembly->GetString(stack->m_call.target->name)
+                                                       : "<null>");
                         }
 #endif
                         NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
@@ -3320,7 +3332,8 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                                 "GenericFields: STFLD ResolveToken failed tk=%08X assm='%s' caller='%s'\r\n",
                                 arg,
                                 assm ? assm->name : "<null>",
-                                stack->m_call.assembly ? stack->m_call.assembly->GetString(stack->m_call.target->name) : "<null>");
+                                stack->m_call.assembly ? stack->m_call.assembly->GetString(stack->m_call.target->name)
+                                                       : "<null>");
                         }
 #endif
                         NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
@@ -3343,7 +3356,8 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                             {
                                 CLR_Debug::Printf(
                                     "GenericFields: STFLD GENERICINST field='%s' offset=%d src_dt=%d\r\n",
-                                    fieldInst.assembly ? fieldInst.assembly->GetString(fieldInst.target->name) : "<null>",
+                                    fieldInst.assembly ? fieldInst.assembly->GetString(fieldInst.target->name)
+                                                       : "<null>",
                                     fieldInst.CrossReference().offset,
                                     (int)evalPos[2].DataType());
                             }
@@ -3438,14 +3452,14 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                         // a .cctor that's scheduled,
                         // reschedule to allow the .cctor to complete field initialization
                         if (obj == nullptr)
+                        {
+                            // Check if there's a pending .cctor for this generic type
+                            CLR_RT_TypeSpec_Instance tsInst;
+                            if (tsInst.InitializeFromIndex(*field.genericType))
                             {
-                                // Check if there's a pending .cctor for this generic type
-                                CLR_RT_TypeSpec_Instance tsInst;
-                                if (tsInst.InitializeFromIndex(*field.genericType))
-                                {
-                                    NANOCLR_CHECK_HRESULT(HandleGenericCctorReschedule(tsInst, stack, &ip));
-                                }
+                                NANOCLR_CHECK_HRESULT(HandleGenericCctorReschedule(tsInst, stack, &ip));
                             }
+                        }
 
 #if defined(NANOCLR_TRACE_GENERICS)
                         if (s_CLR_RT_fTrace_GenericFields >= c_CLR_RT_Trace_Verbose)
@@ -3566,9 +3580,8 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                             field.genericType,
                             &stack->m_genericTypeSpecStorage,
                             &stack->m_call);
-
-                        }
-                        else
+                    }
+                    else
                     {
                         // static field of a non-generic class
                         ptr = CLR_RT_ExecutionEngine::AccessStaticField(field);

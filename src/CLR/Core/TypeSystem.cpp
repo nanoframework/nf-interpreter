@@ -1716,7 +1716,8 @@ bool CLR_RT_FieldDef_Instance::ResolveToken(
                         if (s_CLR_RT_fTrace_GenericFields >= c_CLR_RT_Trace_Info)
                         {
                             CLR_Debug::Printf(
-                                "GenericFields: FieldDef ResolveToken TBL_TypeSpec invalid cross-ref idx=%u assm='%s'\r\n",
+                                "GenericFields: FieldDef ResolveToken TBL_TypeSpec invalid cross-ref idx=%u "
+                                "assm='%s'\r\n",
                                 index,
                                 assm->name);
                         }
@@ -1734,8 +1735,7 @@ bool CLR_RT_FieldDef_Instance::ResolveToken(
                     if (caller && caller->genericType && NANOCLR_INDEX_IS_VALID(*caller->genericType))
                     {
                         CLR_RT_TypeSpec_Instance instCaller, instMd;
-                        if (instCaller.InitializeFromIndex(*caller->genericType) &&
-                            instMd.InitializeFromIndex(*mdTS))
+                        if (instCaller.InitializeFromIndex(*caller->genericType) && instMd.InitializeFromIndex(*mdTS))
                         {
                             if (instCaller.genericTypeDef.data == instMd.genericTypeDef.data)
                             {
@@ -1754,10 +1754,10 @@ bool CLR_RT_FieldDef_Instance::ResolveToken(
                     if (s_CLR_RT_fTrace_GenericFields >= c_CLR_RT_Trace_Info)
                     {
                         CLR_Debug::Printf(
-                        "GenericFields: FieldDef ResolveToken unexpected owner table=%u idx=%u assm='%s'\r\n",
-                        (unsigned)fr->Owner(),
-                        index,
-                        assm->name);
+                            "GenericFields: FieldDef ResolveToken unexpected owner table=%u idx=%u assm='%s'\r\n",
+                            (unsigned)fr->Owner(),
+                            index,
+                            assm->name);
                     }
 #endif
                     return false;
@@ -2424,8 +2424,7 @@ bool CLR_RT_MethodDef_Instance::ResolveToken(
                 }
 
                 // get generic type - guard against invalid container index (CLR_EmptyIndex == 65535)
-                if (ms->container != CLR_EmptyIndex &&
-                    ms->container < (CLR_UINT16)assembly->tablesSize[TBL_TypeSpec])
+                if (ms->container != CLR_EmptyIndex && ms->container < (CLR_UINT16)assembly->tablesSize[TBL_TypeSpec])
                 {
                     genericType = &assembly->crossReferenceTypeSpec[ms->container].genericType;
                 }
@@ -2477,8 +2476,7 @@ bool CLR_RT_MethodDef_Instance::ResolveToken(
                 break;
 
                 // get generic type (dead code: all paths above return, but kept for clarity)
-                if (ms->container != CLR_EmptyIndex &&
-                    ms->container < (CLR_UINT16)assembly->tablesSize[TBL_TypeSpec])
+                if (ms->container != CLR_EmptyIndex && ms->container < (CLR_UINT16)assembly->tablesSize[TBL_TypeSpec])
                 {
                     genericType = &assembly->crossReferenceTypeSpec[ms->container].genericType;
                 }
@@ -4437,12 +4435,8 @@ HRESULT CLR_RT_Assembly::ResolveMethodRef()
                 {
                     while (NANOCLR_INDEX_IS_VALID(typeDefInst))
                     {
-                        if (typeDefInst.assembly->FindMethodDef(
-                                typeDefInst.target,
-                                methodName,
-                                this,
-                                src->signature,
-                                dst->target))
+                        if (typeDefInst.assembly
+                                ->FindMethodDef(typeDefInst.target, methodName, this, src->signature, dst->target))
                         {
                             fGot = true;
                             dst->genericType.data = typeSpec.data;
@@ -4461,12 +4455,8 @@ HRESULT CLR_RT_Assembly::ResolveMethodRef()
                 {
                     while (NANOCLR_INDEX_IS_VALID(typeDefInst))
                     {
-                        if (typeDefInst.assembly->FindMethodDef(
-                                typeDefInst.target,
-                                methodName,
-                                this,
-                                CLR_SIG_INVALID,
-                                dst->target))
+                        if (typeDefInst.assembly
+                                ->FindMethodDef(typeDefInst.target, methodName, this, CLR_SIG_INVALID, dst->target))
                         {
                             fGot = true;
                             dst->genericType.data = typeSpec.data;
@@ -6142,18 +6132,18 @@ HRESULT CLR_RT_Assembly::AllocateGenericStaticFieldsOnDemand(
         // Initialize the storage using the field definition
         const CLR_RECORD_FIELDDEF *pFd = ownerAsm->GetFieldDef(fieldIndex);
 
-        #if defined(NANOCLR_TRACE_GENERICS)
-                if (s_CLR_RT_fTrace_GenericFields >= c_CLR_RT_Trace_Verbose)
-                {
-                    CLR_Debug::Printf(
-                        "GenericStatic: AllocateGenericStaticFieldsOnDemand field[%u]='%s' ptr=%08X\r\n",
-                        i,
-                        ownerAsm->GetString(pFd->name),
-                        (uintptr_t)&fields[i]);
-                }
-        #endif
+#if defined(NANOCLR_TRACE_GENERICS)
+        if (s_CLR_RT_fTrace_GenericFields >= c_CLR_RT_Trace_Verbose)
+        {
+            CLR_Debug::Printf(
+                "GenericStatic: AllocateGenericStaticFieldsOnDemand field[%u]='%s' ptr=%08X\r\n",
+                i,
+                ownerAsm->GetString(pFd->name),
+                (uintptr_t)&fields[i]);
+        }
+#endif
 
-                g_CLR_RT_ExecutionEngine.InitializeReference(fields[i], pFd, ownerAsm);
+        g_CLR_RT_ExecutionEngine.InitializeReference(fields[i], pFd, ownerAsm);
     }
 
     // Link this assembly's cross-reference to the global registry entry
@@ -7091,8 +7081,7 @@ void CLR_RT_Assembly::Relocate()
             {
                 CLR_RT_TypeSpec_CrossReference &tsCross = pASSM->crossReferenceTypeSpec[tsIdx];
 
-                if (tsCross.genericStaticFields != nullptr &&
-                    tsCross.genericStaticFieldsCount == record.m_count &&
+                if (tsCross.genericStaticFields != nullptr && tsCross.genericStaticFieldsCount == record.m_count &&
                     tsCross.genericStaticFieldDefs == record.m_fieldDefs)
                 {
                     tsCross.genericStaticFields = record.m_fields;
@@ -8930,9 +8919,7 @@ bool CLR_RT_TypeSystem::FindVirtualMethodDef(
 // method uses generic type parameter T (VAR N) while the concrete implementation uses
 // a closed generic instance (e.g. KeyValuePair<TKey,TValue>).  The inner sub-elements
 // of the GENERICINST are drained from the parser so Available() stays consistent.
-static bool MatchSignatureForVirtualDispatch(
-    CLR_RT_SignatureParser &parserLeft,
-    CLR_RT_SignatureParser &parserRight)
+static bool MatchSignatureForVirtualDispatch(CLR_RT_SignatureParser &parserLeft, CLR_RT_SignatureParser &parserRight)
 {
     if (parserLeft.Type != parserRight.Type)
         return false;
@@ -8941,7 +8928,7 @@ static bool MatchSignatureForVirtualDispatch(
 
     while (true)
     {
-        int iAvailLeft  = parserLeft.Available();
+        int iAvailLeft = parserLeft.Available();
         int iAvailRight = parserRight.Available();
 
         if (iAvailLeft != iAvailRight)
