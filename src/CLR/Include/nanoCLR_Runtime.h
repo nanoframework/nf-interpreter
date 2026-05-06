@@ -1219,6 +1219,14 @@ struct CLR_RT_SignatureParser
     /// @brief Index into MetodDef table
     CLR_INDEX Method;
 
+    /// @brief When true the next CLASS/VALUETYPE element must read its arg-count byte unconditionally.
+    /// Set by DATATYPE_GENERICINST and cleared after the following class element is consumed.
+    /// This is required for nested generic types (e.g. List<T>.Enumerator) whose TypeDef has
+    /// genericParamCount == 0 (no own generic params) even though the metadata processor writes
+    /// cumulative enclosing-type arg counts into the signature.
+    /// Always reset to false by every Initialize_* function.
+    bool m_pendingGenericInst;
+
     //--//
 
     void Initialize_TypeSpec(CLR_RT_Assembly *assm, CLR_PMETADATA ts);

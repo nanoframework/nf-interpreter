@@ -217,6 +217,7 @@ void CLR_RT_SignatureParser::Initialize_TypeSpec(CLR_RT_Assembly *assm, CLR_PMET
     Flags = 0;
     ParamCount = 1;
     GenParamCount = 0;
+    m_pendingGenericInst = false;
 }
 
 void CLR_RT_SignatureParser::Initialize_TypeSpec(CLR_RT_TypeSpec_Instance tsInstance)
@@ -230,6 +231,7 @@ void CLR_RT_SignatureParser::Initialize_TypeSpec(CLR_RT_TypeSpec_Instance tsInst
     Flags = 0;
     ParamCount = 1;
     GenParamCount = 0;
+    m_pendingGenericInst = false;
 }
 //--//
 
@@ -255,6 +257,7 @@ void CLR_RT_SignatureParser::Initialize_Interfaces(CLR_RT_Assembly *assm, const 
     Assembly = assm;
 
     GenParamCount = 0;
+    m_pendingGenericInst = false;
 }
 
 //--//
@@ -275,6 +278,7 @@ void CLR_RT_SignatureParser::Initialize_FieldSignature(CLR_RT_Assembly *assm, CL
     Signature = fd;
 
     GenParamCount = 0;
+    m_pendingGenericInst = false;
 }
 
 void CLR_RT_SignatureParser::Initialize_FieldDef(CLR_RT_Assembly *assm, const CLR_RECORD_FIELDDEF *fd)
@@ -295,6 +299,7 @@ void CLR_RT_SignatureParser::Initialize_FieldDef(CLR_RT_Assembly *assm, CLR_PMET
     Signature = fd;
 
     GenParamCount = 0;
+    m_pendingGenericInst = false;
 }
 
 //--//
@@ -338,6 +343,7 @@ void CLR_RT_SignatureParser::Initialize_MethodSignature(CLR_RT_Assembly *assm, C
 
     Assembly = assm;
     Signature = md;
+    m_pendingGenericInst = false;
 }
 
 void CLR_RT_SignatureParser::Initialize_MethodSignature(CLR_RT_MethodSpec_Instance *ms)
@@ -363,6 +369,7 @@ void CLR_RT_SignatureParser::Initialize_MethodSignature(CLR_RT_MethodSpec_Instan
     Assembly = ms->assembly;
 
     GenParamCount = ParamCount;
+    m_pendingGenericInst = false;
 }
 
 //--//
@@ -392,6 +399,7 @@ bool CLR_RT_SignatureParser::Initialize_GenericParamTypeSignature(
     Flags = 0;
 
     GenParamCount = 0;
+    m_pendingGenericInst = false;
 
     // done here
     return true;
@@ -416,6 +424,7 @@ void CLR_RT_SignatureParser::Initialize_MethodLocals(CLR_RT_Assembly *assm, cons
     ParamCount = md->localsCount;
 
     GenParamCount = 0;
+    m_pendingGenericInst = false;
 }
 
 void CLR_RT_SignatureParser::Initialize_LocalVar(CLR_RT_Assembly *assm, const CLR_PMETADATA sig)
@@ -430,6 +439,7 @@ void CLR_RT_SignatureParser::Initialize_LocalVar(CLR_RT_Assembly *assm, const CL
     ParamCount = 1;
 
     GenParamCount = 0;
+    m_pendingGenericInst = false;
 }
 
 //--//
@@ -444,6 +454,7 @@ void CLR_RT_SignatureParser::Initialize_Objects(CLR_RT_HeapBlock *lst, int count
     ParamCount = count;
 
     GenParamCount = 0;
+    m_pendingGenericInst = false;
 }
 
 //--//
@@ -613,7 +624,15 @@ HRESULT CLR_RT_SignatureParser::Advance(Element &res)
                         CLR_RT_TypeDef_Instance cls{};
                         cls.InitializeFromIndex(res.Class);
 
-                        if (cls.target->genericParamCount > 0)
+                        // Read arg_count when:
+                        //  a) this CLASS/VALUETYPE immediately follows a GENERICINST marker
+                        //     (covers nested types whose TypeDef has genericParamCount == 0 but
+                        //      whose GENERICINST TypeSpec still carries enclosing-type args), OR
+                        //  b) the TypeDef declares its own generic parameters.
+                        // m_pendingGenericInst is checked FIRST so we never dereference cls.target
+                        // when InitializeFromIndex returned false (e.g. TBL_TypeSpec sub-case where
+                        // res.Class was not populated).
+                        if (m_pendingGenericInst || (cls.target != nullptr && cls.target->genericParamCount > 0))
                         {
                             // reset the generic instance flag
                             res.IsGenericInst = false;
@@ -624,6 +643,9 @@ HRESULT CLR_RT_SignatureParser::Advance(Element &res)
                             // update parser param counter
                             ParamCount += res.GenParamCount;
                         }
+
+                        // consumed — clear for subsequent elements
+                        m_pendingGenericInst = false;
 
                         NANOCLR_SET_AND_LEAVE(S_OK);
                     }
@@ -640,6 +662,10 @@ HRESULT CLR_RT_SignatureParser::Advance(Element &res)
                     {
                         // set flag for GENERICINST
                         res.IsGenericInst = true;
+
+                        // Signal that the very next CLASS/VALUETYPE element must consume its
+                        // arg-count byte unconditionally (even for nested types with 0 own params).
+                        m_pendingGenericInst = true;
 
                         // update parser param counter
                         ParamCount++;
@@ -6318,6 +6344,7 @@ bool CLR_RT_Assembly::FindTypeDef(const char *typeName, const char *nameSpace, C
     int tblSize = tablesSize[TBL_TypeDef];
     bool isNestedType = false;
     std::string extractedNamespace;
+    std::string enclosedTypeName;
 
     // Check if typeName contains '/'
     const char *slashPos = strchr(typeName, '/');
@@ -6328,7 +6355,6 @@ bool CLR_RT_Assembly::FindTypeDef(const char *typeName, const char *nameSpace, C
 
         // Extract the enclosed type name from the '/' backwards to the '.' before
         const char *dotPos = strrchr(typeName, '.');
-        std::string enclosedTypeName;
 
         if (dotPos != nullptr)
         {
@@ -6359,10 +6385,24 @@ bool CLR_RT_Assembly::FindTypeDef(const char *typeName, const char *nameSpace, C
             {
                 const char *szName = GetString(target->name);
 
-                // for nested types, there is no namespace encoded in the type
-                // looking at the type name only, does look a bit flaky but it will have to work for now
                 if (!strcmp(szName, typeName))
                 {
+                    // When the caller encoded the full path as "Namespace.OuterType/NestedType",
+                    // we extracted enclosedTypeName (e.g. "List`1"). Verify the enclosing type's
+                    // name matches so that two generic types with identically-named nested types
+                    // (e.g. List`1/Enumerator vs Dictionary`2/Enumerator) are correctly
+                    // distinguished.
+                    if (!enclosedTypeName.empty() && target->EnclosingType() == TBL_TypeDef)
+                    {
+                        CLR_INDEX enclosingIdx = target->EnclosingTypeIndex();
+                        const CLR_RECORD_TYPEDEF *enclosingTD = GetTypeDef(enclosingIdx);
+                        const char *enclosingName = GetString(enclosingTD->name);
+                        if (strcmp(enclosingName, enclosedTypeName.c_str()) != 0)
+                        {
+                            continue;
+                        }
+                    }
+
                     index.Set(assemblyIndex, i);
                     return true;
                 }
@@ -6394,6 +6434,17 @@ bool CLR_RT_Assembly::FindTypeDef(const char *typeName, CLR_INDEX scope, CLR_RT_
     for (int i = 0; i < tblSize; i++, target++)
     {
         if (!target->HasValidEnclosingType())
+        {
+            continue;
+        }
+
+        // The caller passes a TypeDef index for the enclosing type. Make sure we only
+        // compare against nested types whose EnclosingType token also points to the
+        // TypeDef table. Ignoring the table kind allows accidental matches against
+        // nested types encoded with a TypeRef parent whose row number happens to equal
+        // the requested TypeDef index, which can resolve to the wrong nested generic
+        // type (for example List`1/Enumerator vs Dictionary`2/Enumerator).
+        if (target->EnclosingType() != TBL_TypeDef)
         {
             continue;
         }
@@ -7983,25 +8034,33 @@ bool CLR_RT_TypeSystem::MatchSignatureElement(
 
         if (resLeft.DataType == DATATYPE_GENERICINST && resRight.DataType == DATATYPE_GENERICINST)
         {
-            // processing generic instance signature
-            // need to advance to get generic type and param count
+            // Advance past GENERICINST to read the actual generic type definition (CLASS/VALUETYPE
+            // token) and the total generic argument count.
             if (FAILED(parserLeft.Advance(resLeft)) || FAILED(parserRight.Advance(resRight)))
             {
                 return false;
             }
 
-            // need to check if type of generic parameters match, if there are more
-            if (resLeft.GenParamCount > 0 && resRight.GenParamCount > 0)
+            // The generic type definitions must be identical.  Without this check two distinct
+            // nested types that happen to share the same argument count and argument types (e.g.
+            // List<int>.Enumerator vs Stack<int>.Enumerator) would be incorrectly treated as the
+            // same TypeSpec, causing FindTypeSpec to return the wrong entry.
+            if (resLeft.Class.data != resRight.Class.data)
             {
-                if (resLeft.GenParamCount != resRight.GenParamCount)
-                {
-                    return false;
-                }
+                return false;
+            }
 
-                if (resLeft.DataType != resRight.DataType)
-                {
-                    return false;
-                }
+            // Argument counts must match unconditionally (not only when both are > 0, which would
+            // silently skip the check when one side has zero arguments).
+            if (resLeft.GenParamCount != resRight.GenParamCount)
+            {
+                return false;
+            }
+
+            // CLASS vs VALUETYPE must also agree.
+            if (resLeft.DataType != resRight.DataType)
+            {
+                return false;
             }
         }
         else
