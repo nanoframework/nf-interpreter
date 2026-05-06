@@ -245,7 +245,7 @@ HRESULT CLR_RT_HeapBlock_Timer::ConfigureObject(CLR_RT_StackFrame &stack, CLR_UI
 
     if (flags & CLR_RT_HeapBlock_Timer::c_ACTION_Create)
     {
-        FAULT_ON_NULL(args[0].DereferenceDelegate());
+        FAULT_ON_NULL_ARG(args[0].DereferenceDelegate());
 
         NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Timer::CreateInstance(
             0,
