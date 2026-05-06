@@ -1297,7 +1297,7 @@ HRESULT Library_corlib_native_System_String::Format___STATIC__STRING__STRING__SZ
 
     // Get arguments array
     args = stack.Arg1().DereferenceArray();
-    FAULT_ON_NULL(args);
+    FAULT_ON_NULL_ARG(args);
 
     // loop twice: first to calculate length, second to format
     for (int pass = 0; pass < 2; pass++)
@@ -1558,16 +1558,67 @@ HRESULT Library_corlib_native_System_String::Format___STATIC__STRING__STRING__SZ
 
                                         case 'f':
                                         case 'F':
-                                        case 'n':
-                                        case 'N':
-                                            // N format is like F but with thousand separators
-                                            // For now, we just use F format since we don't have NumberFormatInfo
                                             len = Library_corlib_native_System_Number::Format_F(
                                                 argBuffer,
                                                 deref,
                                                 precision,
                                                 negSign,
                                                 decSep);
+                                            break;
+
+                                        case 'n':
+                                        case 'N':
+                                            // N format is like F but with thousands separators
+                                            len = Library_corlib_native_System_Number::Format_F(
+                                                argBuffer,
+                                                deref,
+                                                precision,
+                                                negSign,
+                                                decSep);
+
+                                            if (len > 0)
+                                            {
+                                                // Insert thousands separators into the integer part.
+                                                // Strategy: build result in tempBuffer, then copy back.
+                                                char tempBuffer[FORMAT_RESULT_BUFFER_SIZE] = {0};
+                                                int srcIdx = 0;
+                                                int dstIdx = 0;
+
+                                                argBuffer[len] = '\0';
+
+                                                // Preserve leading negative sign
+                                                if (argBuffer[srcIdx] == '-')
+                                                {
+                                                    tempBuffer[dstIdx++] = argBuffer[srcIdx++];
+                                                }
+
+                                                // Locate end of integer part (decimal point or end of string)
+                                                int intEnd = srcIdx;
+                                                while (intEnd < len && argBuffer[intEnd] != '.')
+                                                {
+                                                    intEnd++;
+                                                }
+
+                                                // Copy integer digits, inserting ',' every 3 digits from the right
+                                                for (int i = srcIdx; i < intEnd; i++)
+                                                {
+                                                    if (i > srcIdx && (intEnd - i) % 3 == 0)
+                                                    {
+                                                        tempBuffer[dstIdx++] = ',';
+                                                    }
+                                                    tempBuffer[dstIdx++] = argBuffer[i];
+                                                }
+
+                                                // Copy decimal part (decimal point and fractional digits)
+                                                while (intEnd < len)
+                                                {
+                                                    tempBuffer[dstIdx++] = argBuffer[intEnd++];
+                                                }
+
+                                                tempBuffer[dstIdx] = '\0';
+                                                memcpy(argBuffer, tempBuffer, dstIdx + 1);
+                                                len = dstIdx;
+                                            }
                                             break;
 
                                         case 'd':
