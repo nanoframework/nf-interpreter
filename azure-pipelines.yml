@@ -1467,12 +1467,17 @@ jobs:
               $fileCount = (Get-ChildItem $dumpPath -File | Measure-Object).Count
               $hasFiles = $fileCount -gt 0
           }
-          echo "##vso[task.setvariable variable=hasFiles;isOutput=true]$hasFiles"
+          echo "##vso[task.setvariable variable=hasFiles]$hasFiles"
+        condition: succeededOrFailed()
         displayName: "Check for dump files"
         name: checkFiles
 
       - task: PublishPipelineArtifact@1
-        condition: eq(variables['hasFiles'], 'true')
+        condition: >-
+          and(
+            succeededOrFailed(), 
+            eq(variables['hasFiles'], 'true')
+          )
         displayName: Publish vstest dump files
         inputs:
           targetPath: "$(Build.ArtifactStagingDirectory)/vstest_dumps"
