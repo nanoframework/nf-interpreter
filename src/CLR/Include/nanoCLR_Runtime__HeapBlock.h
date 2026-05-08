@@ -1293,6 +1293,29 @@ struct CLR_RT_HeapBlock
         //
         // For V1, we don't throw on overflow.
         //
+        // For conv.r.un, the source must be treated as unsigned regardless of its
+        // declared DataType (which is always a signed type on the eval stack).
+        // Remap to the unsigned equivalent so Convert_Internal selects scaleIn = -1.
+        if (fUnsigned)
+        {
+            switch (DataType())
+            {
+                case DATATYPE_I1:
+                    ChangeDataType(DATATYPE_U1);
+                    break;
+                case DATATYPE_I2:
+                    ChangeDataType(DATATYPE_U2);
+                    break;
+                case DATATYPE_I4:
+                    ChangeDataType(DATATYPE_U4);
+                    break;
+                case DATATYPE_I8:
+                    ChangeDataType(DATATYPE_U8);
+                    break;
+                default:
+                    break;
+            }
+        }
         return Convert_Internal(et);
     }
 
