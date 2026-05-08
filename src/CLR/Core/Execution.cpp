@@ -2436,7 +2436,8 @@ HRESULT CLR_RT_ExecutionEngine::InitializeLocals(
                         dt = (NanoCLRDataType)td.target->dataType;
                     }
                     // Resolve type-level generic parameter (VAR) using the method's enclosing type context
-                    else if (methodDefInstance.genericType && NANOCLR_INDEX_IS_VALID(*methodDefInstance.genericType) &&
+                    else if (
+                        methodDefInstance.genericType && NANOCLR_INDEX_IS_VALID(*methodDefInstance.genericType) &&
                         methodDefInstance.genericType->data != CLR_EmptyToken)
                     {
                         NANOCLR_CHECK_HRESULT(

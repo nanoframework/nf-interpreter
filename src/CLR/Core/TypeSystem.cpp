@@ -1605,8 +1605,7 @@ bool CLR_RT_TypeDef_Instance::ResolveNullableType(
         {
             // Some rebound generic methods bind their first method generic parameter from the
             // runtime element type.
-            if (caller != nullptr && NANOCLR_INDEX_IS_VALID(caller->arrayElementType) &&
-                elem.GenericParamPosition == 0)
+            if (caller != nullptr && NANOCLR_INDEX_IS_VALID(caller->arrayElementType) && elem.GenericParamPosition == 0)
             {
                 data = caller->arrayElementType.data;
                 assembly = g_CLR_RT_TypeSystem.m_assemblies[caller->arrayElementType.Assembly() - 1];
