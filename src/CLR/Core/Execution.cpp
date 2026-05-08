@@ -2325,38 +2325,69 @@ HRESULT CLR_RT_ExecutionEngine::InitializeLocals(
                     typeSpecSignature--;
 
                     CLR_RT_TypeSpec_Index genericTSIndex = {};
+                    bool foundGenericTypeSpec = false;
 
                     if (methodDefInstance.genericType && NANOCLR_INDEX_IS_VALID(*methodDefInstance.genericType) &&
                         methodDefInstance.genericType->data != CLR_EmptyToken)
                     {
                         // method is generic, it can only use class from method's class generic parameters
                         genericInstance.InitializeFromIndex(*methodDefInstance.genericType);
+                        foundGenericTypeSpec = true;
                     }
                     else
                     {
-                        if (!assembly->FindTypeSpec(typeSpecSignature, genericTSIndex))
+                        if (assembly->FindTypeSpec(typeSpecSignature, genericTSIndex))
+                        {
+                            // copy over to parameter
+                            genericInstance.InitializeFromIndex(genericTSIndex);
+                            foundGenericTypeSpec = true;
+                        }
+                    }
+
+                    if (foundGenericTypeSpec)
+                    {
+                        CLR_RT_SignatureParser parser;
+                        parser.Initialize_TypeSpec(genericInstance);
+
+                        CLR_RT_SignatureParser::Element element;
+                        NANOCLR_CHECK_HRESULT(parser.Advance(element));
+
+                        // if this is another generic instance, need to advance to get the type
+                        if (dt == DATATYPE_GENERICINST)
+                        {
+                            NANOCLR_CHECK_HRESULT(parser.Advance(element));
+                        }
+
+                        cls = element.Class;
+                        dt = element.DataType;
+                    }
+                    else
+                    {
+                        // Some generic method locals are open instantiations, such as IEnumerator<!!T>.
+                        // A reference-type local only needs a null object slot, so parse the local signature
+                        // directly instead of requiring a closed TypeSpec row.
+                        CLR_RT_SignatureParser ownerParser;
+                        ownerParser.Initialize_LocalVar(assembly, typeSpecSignature);
+
+                        CLR_RT_SignatureParser::Element ownerElement;
+                        NANOCLR_CHECK_HRESULT(ownerParser.Advance(ownerElement));
+
+                        if (ownerElement.DataType != DATATYPE_GENERICINST)
                         {
                             NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
                         }
 
-                        // copy over to parameter
-                        genericInstance.InitializeFromIndex(genericTSIndex);
+                        NANOCLR_CHECK_HRESULT(ownerParser.Advance(ownerElement));
+
+                        cls = ownerElement.Class;
+                        dt = ownerElement.DataType;
+
+                        if (dt == DATATYPE_VALUETYPE)
+                        {
+                            // Value-type generic locals need a closed generic instance for allocation.
+                            NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+                        }
                     }
-
-                    CLR_RT_SignatureParser parser;
-                    parser.Initialize_TypeSpec(genericInstance);
-
-                    CLR_RT_SignatureParser::Element element;
-                    NANOCLR_CHECK_HRESULT(parser.Advance(element));
-
-                    // if this is another generic instance, need to advance to get the type
-                    if (dt == DATATYPE_GENERICINST)
-                    {
-                        NANOCLR_CHECK_HRESULT(parser.Advance(element));
-                    }
-
-                    cls = element.Class;
-                    dt = element.DataType;
 
                     // done, now consume the remaining of the local var signature
                     CLR_RT_SignatureParser varParser;
@@ -2391,8 +2422,21 @@ HRESULT CLR_RT_ExecutionEngine::InitializeLocals(
                     // type-level generic parameter in a locals signature (e.g. 'T' inside a generic type)
                     CLR_INT8 genericParamPosition = *sig++;
 
+                    // A propagated runtime element type can also bind the first type generic parameter
+                    // on helper objects whose closed generic context is inferred at runtime.
+                    if (NANOCLR_INDEX_IS_VALID(methodDefInstance.arrayElementType) && genericParamPosition == 0)
+                    {
+                        CLR_RT_TypeDef_Instance td;
+                        if (!td.InitializeFromIndex(methodDefInstance.arrayElementType))
+                        {
+                            NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+                        }
+
+                        cls = methodDefInstance.arrayElementType;
+                        dt = (NanoCLRDataType)td.target->dataType;
+                    }
                     // Resolve type-level generic parameter (VAR) using the method's enclosing type context
-                    if (methodDefInstance.genericType && NANOCLR_INDEX_IS_VALID(*methodDefInstance.genericType) &&
+                    else if (methodDefInstance.genericType && NANOCLR_INDEX_IS_VALID(*methodDefInstance.genericType) &&
                         methodDefInstance.genericType->data != CLR_EmptyToken)
                     {
                         NANOCLR_CHECK_HRESULT(
@@ -2410,8 +2454,21 @@ HRESULT CLR_RT_ExecutionEngine::InitializeLocals(
                     // Method-level generic parameter (e.g., '!!T' in a generic method like Array.Empty<T>())
                     CLR_UINT8 genericParamPosition = *sig++;
 
+                    // Some rebound generic methods receive their method-generic argument from the
+                    // runtime element type rather than from a MethodSpec.
+                    if (NANOCLR_INDEX_IS_VALID(methodDefInstance.arrayElementType) && genericParamPosition == 0)
+                    {
+                        CLR_RT_TypeDef_Instance td;
+                        if (!td.InitializeFromIndex(methodDefInstance.arrayElementType))
+                        {
+                            NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+                        }
+
+                        cls = methodDefInstance.arrayElementType;
+                        dt = (NanoCLRDataType)td.target->dataType;
+                    }
                     // For generic methods, use the MethodSpec's signature to get the concrete type
-                    if (NANOCLR_INDEX_IS_VALID(methodDefInstance.methodSpec))
+                    else if (NANOCLR_INDEX_IS_VALID(methodDefInstance.methodSpec))
                     {
                         CLR_RT_MethodSpec_Instance methodSpec;
                         CLR_RT_SignatureParser::Element element;
