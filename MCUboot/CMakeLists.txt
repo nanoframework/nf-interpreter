@@ -303,6 +303,10 @@ if(${TARGET_SERIES} STREQUAL "STM32F7xx")
         -ffunction-sections
         -fdata-sections
         -fno-common
+        # wchar_t must be 2 bytes (UTF-16) for USB string descriptors to be laid out
+        # correctly. Without this flag the default 4-byte wchar_t adds alignment
+        # padding inside the USB descriptor structs, corrupting every string descriptor.
+        -fshort-wchar
         # Suppress warnings from MCUboot upstream code that we do not own.
         -Wno-unused-parameter
         -Wno-sign-compare
