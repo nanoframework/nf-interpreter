@@ -186,6 +186,7 @@ jobs:
               echo "##vso[task.setvariable variable=BUILD_TI;isOutput=true]false"
               echo "##vso[task.setvariable variable=BUILD_THREADX;isOutput=true]false"
               echo "##vso[task.setvariable variable=BUILD_WIN32;isOutput=true]false"  
+              echo "##vso[task.setvariable variable=BUILD_POSIX;isOutput=true]false"  
               echo "##vso[task.setvariable variable=BUILD_NANOCLR_CLI;isOutput=true]false"  
               echo "##vso[task.setvariable variable=BUILD_ALL;isOutput=true]false"  
 
@@ -258,6 +259,14 @@ jobs:
                   echo "##vso[task.setvariable variable=BUILD_WIN32;isOutput=true]true"
 
                   Write-host "##[command] Building nanoCLR target"
+              }
+
+              if( ($files.where{$_.Contains('targets/posix')}).Count -gt 0)
+              {
+                  # files at POSIX folder
+                  echo "##vso[task.setvariable variable=BUILD_POSIX;isOutput=true]true"
+
+                  Write-host "##[command] Building POSIX nanoCLR target"
               }
               
               if( 
@@ -354,7 +363,8 @@ jobs:
           eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_FREERTOS'], true),
           eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_TI'], true),
           eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_THREADX'], true),
-          eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_WIN32'], true)
+          eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_WIN32'], true),
+          eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_POSIX'], true)
         )
       )
 
@@ -1095,6 +1105,157 @@ jobs:
       - template: azure-pipelines-templates/publish-nanoclr.yml
 
   #################
+  # POSIX host target (macOS + Linux)
+  - job: Build_POSIX_nanoCLR
+    strategy:
+      matrix:
+        macOS_arm64:
+          vmImage: 'macos-14'
+          POSIX_RID: osx-arm64
+        macOS_x64:
+          vmImage: 'macOS-latest'
+          POSIX_RID: osx-x64
+        Linux_x64:
+          vmImage: 'ubuntu-22.04'
+          POSIX_RID: linux-x64
+        Linux_arm64:
+          vmImage: 'ubuntu-22.04'
+          POSIX_RID: linux-arm64
+      maxParallel: 4
+    condition: >-
+      or(
+        and(
+          succeeded('Check_Code_Style'),
+          ne( dependencies.Check_Build_Options.outputs['BuildOptions.SKIP_BUILD'], true ),
+          or(
+            eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ALL'], true),
+            eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_POSIX'], true)
+          )
+        ),
+        and(
+          eq(variables['Build.Reason'], 'Manual'),
+          or(
+            eq(variables['BUILD_ALL__'], 'true'),
+            eq(variables['BUILD_POSIX__'], 'true')
+          )
+        )
+      )
+
+    dependsOn:
+      - Check_Build_Options
+      - Check_Code_Style
+
+    pool:
+      vmImage: $(vmImage)
+
+    variables:
+      - group: sign-client-credentials
+
+    steps:
+      - checkout: self
+
+      - bash: |
+          set -euo pipefail
+          if [[ "${BUILD_SOURCEBRANCH}" == *"develop"* || "${BUILD_SOURCEBRANCH}" == *"release"* || "${FORCEUPLOAD}" == "true" ]]; then
+            echo "##vso[task.setvariable variable=CLOUDSMITH_REPO]nanoframework-images-dev"
+          else
+            echo "##vso[task.setvariable variable=CLOUDSMITH_REPO]nanoframework-images"
+          fi
+        displayName: Set Cloudsmith repo path
+        env:
+          BUILD_SOURCEBRANCH: $(Build.SourceBranch)
+          FORCEUPLOAD: $(ForceUpload)
+
+      - bash: |
+          set -euo pipefail
+
+          # Derive cmake arch and library extension from the POSIX_RID matrix variable.
+          case "$(POSIX_RID)" in
+            osx-arm64|linux-arm64) NANO_ARCH=arm64  ; LIB_EXT=dylib ;;
+            osx-x64)               NANO_ARCH=x86_64 ; LIB_EXT=dylib ;;
+            linux-x64)             NANO_ARCH=x86_64 ; LIB_EXT=so    ;;
+          esac
+          # Correct extension for Linux regardless of arch.
+          [[ "$(POSIX_RID)" == linux-* ]] && LIB_EXT=so
+
+          # Install ninja if not present (Linux agents).
+          if ! command -v ninja >/dev/null 2>&1; then
+            sudo apt-get install -y ninja-build
+          fi
+
+          # Install arm64 cross-compiler when building linux-arm64 on an x86_64 agent.
+          TOOLCHAIN_ARG=""
+          if [ "$(POSIX_RID)" = "linux-arm64" ]; then
+            sudo apt-get install -y gcc-aarch64-linux-gnu g++-aarch64-linux-gnu
+            TOOLCHAIN_ARG="-DCMAKE_TOOLCHAIN_FILE=$(pwd)/targets/posix/toolchain-aarch64-linux-gnu.cmake"
+          fi
+
+          echo "RID=$(POSIX_RID)  ARCH=${NANO_ARCH}  LIB_EXT=${LIB_EXT}"
+
+          cmake -S targets/posix -B build/posix -G Ninja \
+            -DNANO_POSIX_ARCH=${NANO_ARCH} \
+            -DNANO_POSIX_ENABLE_SMOKE=ON \
+            ${TOOLCHAIN_ARG}
+          cmake --build build/posix
+          # Smoke-run the test binary only when its architecture matches the runner.
+          # For cross-compiled builds (e.g. osx-x64 on an arm64 agent) we skip the run
+          # but the library artifact is still staged and published.
+          case "$(uname -m)" in
+            arm64|aarch64) HOST_CANONICAL=arm64  ;;
+            x86_64)        HOST_CANONICAL=x86_64 ;;
+            *)             HOST_CANONICAL="$(uname -m)" ;;
+          esac
+          if [ "${HOST_CANONICAL}" = "${NANO_ARCH}" ]; then
+            ./build/posix/bin/nanoFramework.nanoCLR.test | tee build/posix/smoke.log
+            if ! grep -Eq '[0-9]+\.[0-9]+\.[0-9]+' build/posix/smoke.log; then
+              echo "ERROR: smoke output validation failed, expected semantic version in output."
+              exit 1
+            fi
+            CLR_VERSION=$(grep -oE '[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+' build/posix/smoke.log | head -1)
+          else
+            echo "Skipping smoke run: host=$(uname -m) (${HOST_CANONICAL}), target=${NANO_ARCH} (cross-compiled binary)."
+            CLR_VERSION="0.0.0.0"
+          fi
+          echo "Detected CLR version: ${CLR_VERSION}"
+          echo "##vso[task.setvariable variable=POSIX_CLR_VERSION]${CLR_VERSION}"
+          echo "##vso[task.setvariable variable=POSIX_LIB_EXT]${LIB_EXT}"
+
+          # Stage under runtimes/{rid}/native/ so the CLI pack job can collect all RIDs.
+          STAGING="$(Build.ArtifactStagingDirectory)/runtimes/$(POSIX_RID)/native"
+          mkdir -p "${STAGING}"
+          cp "build/posix/lib/nanoFramework.nanoCLR.${LIB_EXT}" "${STAGING}/"
+        displayName: Build and smoke run POSIX nanoCLR
+
+      - task: PublishPipelineArtifact@1
+        condition: succeeded()
+        displayName: Publish POSIX nanoCLR artifact
+        inputs:
+          targetPath: "$(Build.ArtifactStagingDirectory)"
+          artifactName: nanoclr_posix_$(POSIX_RID)
+          artifactType: pipeline
+
+      - bash: |
+          set -euo pipefail
+          pip install --upgrade cloudsmith-cli --quiet
+          cloudsmith push raw net-nanoframework/$(CLOUDSMITH_REPO) \
+            "$(Build.ArtifactStagingDirectory)/runtimes/$(POSIX_RID)/native/nanoFramework.nanoCLR.$(POSIX_LIB_EXT)" \
+            --name "nanoCLR_$(POSIX_RID)" \
+            --version "$(POSIX_CLR_VERSION)" \
+            -k "$(CLOUDSMITH_KEY)"
+        condition: >-
+          and(
+            succeeded(),
+            or(
+              eq(variables['ForceUpload'], true),
+              and(
+                eq(variables['Build.SourceBranchName'], 'main'),
+                eq(variables['System.PullRequest.PullRequestId'], '')
+              )
+            )
+          )
+        displayName: Upload POSIX nanoCLR to Cloudsmith
+
+  #################
   # nanoCLR CLI tool
   - job: Build_nanoCLR_CLI
     condition: >-
@@ -1120,6 +1281,7 @@ jobs:
       - Check_Build_Options
       - Check_Code_Style
       - Build_WIN32_nanoCLR
+      - Build_POSIX_nanoCLR
 
     pool:
       vmImage: "windows-2022"
@@ -1204,13 +1366,44 @@ jobs:
             eq(variables['System.PullRequest.PullRequestId'], '')
           )
 
+      # Download all four POSIX native libraries and merge them into a single
+      # runtimes/{rid}/native/ staging tree that the pack step will consume.
+      # continueOnError=true so a skipped POSIX leg doesn't block the CLI pack.
+      - task: DownloadPipelineArtifact@2
+        displayName: 'Download POSIX artifact: osx-arm64'
+        continueOnError: true
+        inputs:
+          artifact: nanoclr_posix_osx-arm64
+          path: "$(Build.SourcesDirectory)/native-libs"
+
+      - task: DownloadPipelineArtifact@2
+        displayName: 'Download POSIX artifact: osx-x64'
+        continueOnError: true
+        inputs:
+          artifact: nanoclr_posix_osx-x64
+          path: "$(Build.SourcesDirectory)/native-libs"
+
+      - task: DownloadPipelineArtifact@2
+        displayName: 'Download POSIX artifact: linux-x64'
+        continueOnError: true
+        inputs:
+          artifact: nanoclr_posix_linux-x64
+          path: "$(Build.SourcesDirectory)/native-libs"
+
+      - task: DownloadPipelineArtifact@2
+        displayName: 'Download POSIX artifact: linux-arm64'
+        continueOnError: true
+        inputs:
+          artifact: nanoclr_posix_linux-arm64
+          path: "$(Build.SourcesDirectory)/native-libs"
+
       - task: MSBuild@1
         condition: succeeded()
         displayName: Pack nanoCLR CLI
         inputs:
           solution: "nf-interpreter/targets/netcore/nanoFramework.nanoCLR.CLI/nanoFramework.nanoCLR.CLI.csproj"
           platform: "Any CPU"
-          msbuildArguments: "/p:PublicRelease=true /t:pack /p:PackageOutputPath=$(Build.ArtifactStagingDirectory) "
+          msbuildArguments: "/p:PublicRelease=true /t:pack /p:PackageOutputPath=$(Build.ArtifactStagingDirectory) /p:NativeBinRoot=$(Build.SourcesDirectory)/native-libs/"
           configuration: "Release"
           maximumCpuCount: true
 
@@ -1242,6 +1435,14 @@ jobs:
           SourceFolder: "nf-interpreter/build/bin/Release"
           Contents: "nanoFramework.nanoCLR.dll"
           TargetFolder: "$(Build.ArtifactStagingDirectory)/nanoclr"
+
+      - task: PublishPipelineArtifact@1
+        condition: succeeded()
+        displayName: Publish nanoclr NuGet package
+        inputs:
+          targetPath: "$(Build.ArtifactStagingDirectory)"
+          artifactName: nanoclr_nuget
+          artifactType: pipeline
 
       - task: PublishPipelineArtifact@1
         condition: succeeded()
@@ -1409,6 +1610,7 @@ jobs:
       - Build_TI_SimpleLink_targets
       - Build_ThreadX_targets
       - Build_WIN32_nanoCLR
+      - Build_POSIX_nanoCLR
       - Build_nanoCLR_CLI
       - Check_Code_Style
     condition: >-
@@ -1422,6 +1624,7 @@ jobs:
           failed('Build_TI_SimpleLink_targets'),
           failed('Build_ThreadX_targets'),
           failed('Build_WIN32_nanoCLR'),
+          failed('Build_POSIX_nanoCLR'),
           failed('Build_nanoCLR_CLI')
         )
       )

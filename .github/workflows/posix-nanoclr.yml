@@ -1,0 +1,110 @@
+name: posix-nanoclr
+
+on:
+  push:
+    paths:
+      - "targets/posix/**"
+      - "src/CLR/**"
+      - "src/HAL/**"
+      - "src/PAL/**"
+      - ".github/workflows/posix-nanoclr.yml"
+  pull_request:
+    paths:
+      - "targets/posix/**"
+      - "src/CLR/**"
+      - "src/HAL/**"
+      - "src/PAL/**"
+      - ".github/workflows/posix-nanoclr.yml"
+
+jobs:
+  build-posix-nanoclr:
+    strategy:
+      matrix:
+        include:
+          - os: macos-14
+            label: macOS-arm64
+            posix_rid: osx-arm64
+          - os: macos-latest
+            label: macOS-x64
+            posix_rid: osx-x64
+          - os: ubuntu-22.04
+            label: Linux-x64
+            posix_rid: linux-x64
+          - os: ubuntu-22.04
+            label: Linux-arm64
+            posix_rid: linux-arm64
+      fail-fast: false
+
+    runs-on: ${{ matrix.os }}
+    name: Build (${{ matrix.label }})
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install arm64 cross-toolchain
+        if: matrix.posix_rid == 'linux-arm64'
+        run: sudo apt-get install -y gcc-aarch64-linux-gnu g++-aarch64-linux-gnu
+
+      - name: Install Ninja (if missing)
+        run: |
+          if ! command -v ninja >/dev/null 2>&1; then
+            if command -v apt-get >/dev/null 2>&1; then
+              sudo apt-get install -y ninja-build
+            else
+              brew install ninja
+            fi
+          fi
+
+      - name: Configure
+        run: |
+          # Derive cmake arch from the RID matrix variable.
+          case "${{ matrix.posix_rid }}" in
+            osx-arm64|linux-arm64) NANO_ARCH=arm64  ;;
+            osx-x64|linux-x64)     NANO_ARCH=x86_64 ;;
+          esac
+          # For linux-arm64, cross-compile via the aarch64-linux-gnu toolchain.
+          TOOLCHAIN_ARG=""
+          if [ "${{ matrix.posix_rid }}" = "linux-arm64" ]; then
+            TOOLCHAIN_ARG="-DCMAKE_TOOLCHAIN_FILE=$(pwd)/targets/posix/toolchain-aarch64-linux-gnu.cmake"
+          fi
+          cmake -S targets/posix -B build/posix -G Ninja \
+            -DNANO_POSIX_ARCH=${NANO_ARCH} \
+            -DNANO_POSIX_ENABLE_SMOKE=ON \
+            ${TOOLCHAIN_ARG}
+
+      - name: Build
+        run: cmake --build build/posix --verbose
+
+      - name: Smoke Run
+        run: |
+          set -euo pipefail
+          # Normalise host CPU name: Linux arm64 reports 'aarch64'; macOS reports 'arm64'.
+          case "$(uname -m)" in
+            arm64|aarch64) HOST_CANONICAL=arm64  ;;
+            x86_64)        HOST_CANONICAL=x86_64 ;;
+            *)             HOST_CANONICAL="$(uname -m)" ;;
+          esac
+          case "${{ matrix.posix_rid }}" in
+            *-arm64) TARGET_ARCH=arm64  ;;
+            *-x64)   TARGET_ARCH=x86_64 ;;
+          esac
+          if [ "${HOST_CANONICAL}" = "${TARGET_ARCH}" ]; then
+            ./build/posix/bin/nanoFramework.nanoCLR.test | tee build/posix/smoke.log
+            if ! grep -Eq '[0-9]+\.[0-9]+\.[0-9]+' build/posix/smoke.log; then
+              echo "ERROR: smoke output validation failed."
+              exit 1
+            fi
+          else
+            echo "Skipping smoke run: host=$(uname -m) (${HOST_CANONICAL}), target=${TARGET_ARCH} (cross-compiled binary cannot execute on this runner)."
+          fi
+
+      - name: Upload Artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: posix-nanoclr-${{ matrix.label }}
+          path: |
+            build/posix/lib/nanoFramework.nanoCLR.*
+            build/posix/bin/nanoFramework.nanoCLR.test
+            build/posix/smoke.log
