@@ -123,10 +123,33 @@
 // Enabled per target via CONFIG_NF_MCUBOOT_SERIAL_RECOVERY=y in Kconfig.
 //
 #if defined(CONFIG_NF_MCUBOOT_SERIAL_RECOVERY)
-#define MCUBOOT_SERIAL              1
+#define MCUBOOT_SERIAL 1
+// Use snprintf() for version string formatting (smaller code with newlib-nano).
+#define MCUBOOT_USE_SNPRINTF 1
+// Boot button detect delay (ms); board debounce before reading the GPIO.
+#if defined(CONFIG_NF_MCUBOOT_SERIAL_DETECT_DELAY_MS)
+#define MCUBOOT_SERIAL_DETECT_DELAY CONFIG_NF_MCUBOOT_SERIAL_DETECT_DELAY_MS
+#else
 #define MCUBOOT_SERIAL_DETECT_DELAY 100
+#endif
 // Disable the LED status pin — avoids os_cputime dependency in boot_serial.c.
 #define BOOT_SERIAL_REPORT_PIN -1
+// Disable optional image info groups to minimise flash usage.
+// Only the image upload group (group 1, cmd 1) is required for OTA recovery.
+// MCUBOOT_SERIAL_IMG_GRP_IMAGE_STATE not defined → disabled
+// MCUBOOT_SERIAL_IMG_GRP_HASH         not defined → disabled
+// MCUBOOT_SERIAL_IMG_GRP_SLOT_INFO    not defined → disabled
+
+// Disable per-user management group extension.
+// Set to 0 (not 1) to skip bs_peruser_system_specific() call in boot_serial_input().
+#define MCUBOOT_PERUSER_MGMT_GROUP_ENABLED 0
+
+// CPU idle hook — called in boot_serial_read_console() when the read returns
+// no data. Must relinquish the CPU so ChibiOS can service the USB ISR and
+// allow the device to enumerate before any data arrives.
+// Implemented in targets/ChibiOS/_mcuboot/mcuboot_serial_port.c.
+extern void nf_mcuboot_cpu_idle(void);
+#define MCUBOOT_CPU_IDLE() nf_mcuboot_cpu_idle()
 #endif
 
 //

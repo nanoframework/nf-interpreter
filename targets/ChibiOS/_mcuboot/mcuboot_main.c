@@ -37,6 +37,7 @@
 #include "bootutil/image.h"
 
 #include "mcuboot_board_iface.h"
+#include "mcuboot_serial_port.h"
 
 // ----------------------------------------------------------------------- //
 // do_boot — hand off to the application image selected by MCUboot          //
@@ -109,9 +110,11 @@ int main(void)
     // those are available only after chSysInit().
     chSysInit();
 
-    // Board-specific hardware initialisation (e.g. USB CDC, UART).
-    // Called before external storage init so the port is available from the start.
-    mcuboot_target_init();
+#if defined(MCUBOOT_SERIAL)
+    // Check recovery button and — if held — run the SMP serial recovery loop.
+    // If the button is not pressed, returns immediately and normal boot continues.
+    mcuboot_serial_recovery_try();
+#endif
 
     // Initialise the board's external flash device
     // Non-fatal: if the external device fails to initialise the boot will still

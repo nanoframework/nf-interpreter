@@ -165,6 +165,10 @@ if(${TARGET_SERIES} STREQUAL "STM32F7xx")
         ${chibios_SOURCE_DIR}/os/rt/src/chthreads.c
         ${chibios_SOURCE_DIR}/os/rt/src/chinstances.c
         ${chibios_SOURCE_DIR}/os/rt/src/chrfcu.c
+        ${chibios_SOURCE_DIR}/os/rt/src/chevents.c
+        ${chibios_SOURCE_DIR}/os/rt/src/chsem.c
+        ${chibios_SOURCE_DIR}/os/rt/src/chregistry.c
+        ${chibios_SOURCE_DIR}/os/rt/src/chdebug.c
         ${chibios_SOURCE_DIR}/os/oslib/src/chmemcore.c
 
         # ChibiOS HAL core.
@@ -197,6 +201,7 @@ if(${TARGET_SERIES} STREQUAL "STM32F7xx")
 
         # ChibiOS HAL OSAL (RT).
         ${chibios_SOURCE_DIR}/os/hal/osal/rt-nil/osal.c
+        
 
         # nf-overlay: STM32 internal flash driver (FLASHv2 LLD).
         ${CMAKE_SOURCE_DIR}/targets/ChibiOS/_nf-overlay/os/hal/src/stm32_flash/hal_stm32_flash.c
@@ -356,14 +361,27 @@ if(${TARGET_SERIES} STREQUAL "STM32F7xx")
 
     endif() # NF_FEATURE_MCUBOOT_HAS_SDCARD
 
-    # When serial recovery is enabled, define MCUBOOT_SERIAL=1 for the MCUboot
-    # bootutil library and add the OTGv1 include path (needed by boards that use
-    # USB CDC as the serial transport).
+    # When serial recovery is enabled, add the full SMP/mcumgr serial stack:
+    # boot_serial.c (NLIP framing + mcumgr protocol), zcbor CBOR codec,
+    # CRC-16/CCITT, and Base64 encode/decode. Also add the OTGv1 include
+    # path for boards that use USB CDC as the serial transport.
     if(NF_MCUBOOT_SERIAL_RECOVERY)
 
         list(APPEND MCUBOOT_SERIES_COMMON_COMPILE_DEFINITIONS MCUBOOT_SERIAL=1)
 
+        list(APPEND MCUBOOT_SERIES_COMMON_SOURCES
+            ${mcuboot_SOURCE_DIR}/boot/boot_serial/src/boot_serial.c
+            ${mcuboot_SOURCE_DIR}/boot/zcbor/src/zcbor_common.c
+            ${mcuboot_SOURCE_DIR}/boot/zcbor/src/zcbor_decode.c
+            ${mcuboot_SOURCE_DIR}/boot/zcbor/src/zcbor_encode.c
+            ${mcuboot_SOURCE_DIR}/boot/boot_serial/src/zcbor_bulk.c
+            ${CMAKE_SOURCE_DIR}/targets/ChibiOS/_mcuboot/crc16_ccitt.c
+            ${CMAKE_SOURCE_DIR}/targets/ChibiOS/_mcuboot/base64_impl.c
+        )
+
         list(APPEND MCUBOOT_SERIES_COMMON_INCLUDES
+            ${mcuboot_SOURCE_DIR}/boot/zcbor/include
+            ${mcuboot_SOURCE_DIR}/boot/boot_serial/src
             ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/OTGv1
         )
 

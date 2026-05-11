@@ -68,9 +68,25 @@ config NF_MCUBOOT_SERIAL_RECOVERY
     depends on NF_FEATURE_HAS_MCUBOOT
     default n
     help
-        Enable MCUboot serial recovery (mcumgr/UART). When triggered at boot
-        (e.g. via a GPIO pin), MCUboot enters a recovery shell that accepts new
-        images over UART without requiring network access.
+        Enable MCUboot serial recovery (SMP/mcumgr over ChibiOS stream). When
+        triggered at boot by asserting the board's recovery GPIO, MCUboot enters
+        a receive loop that accepts new images via the mcumgr image upload command
+        (group 1, cmd 1) over UART or USB CDC.
+
+        The transport channel is board-specific: USB CDC boards return &SDU1
+        from mcuboot_serial_get_channel(); UART boards return &SD1 (or similar).
+        Only the image upload group is compiled in; image-state, hash, and
+        slot-info groups are disabled to minimise flash usage.
+
+config NF_MCUBOOT_SERIAL_DETECT_DELAY_MS
+    int "Serial recovery detect delay (ms)"
+    depends on NF_MCUBOOT_SERIAL_RECOVERY
+    default 100
+    range 1 5000
+    help
+        Time in milliseconds to wait after reset before sampling the recovery
+        GPIO. This provides hardware debounce for the detect pin. The default
+        100 ms is sufficient for most push-buttons.
 
 config NF_MCUBOOT_HEADER_SIZE
     hex "MCUboot image header size (bytes)"
