@@ -2478,6 +2478,7 @@ struct CLR_RT_AttributeParser
         const NanoCLRDataType dt,
         const CLR_RT_TypeDef_Index *m_cls,
         const CLR_UINT32 size);
+    HRESULT ReadArrayValue(CLR_RT_HeapBlock *&value);
     HRESULT ReadString(CLR_RT_HeapBlock *&value);
 
   private:

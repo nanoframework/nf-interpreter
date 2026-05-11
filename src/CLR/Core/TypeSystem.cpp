@@ -9754,6 +9754,11 @@ HRESULT CLR_RT_AttributeParser::Next(Value *&res)
 
                 NanoCLRDataType dt = CLR_RT_TypeSystem::MapElementTypeToDataType(elementType);
 
+                if (dt >= DATATYPE_FIRST_INVALID)
+                {
+                    NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+                }
+
                 dtl = c_CLR_RT_DataTypeLookup[dt];
 
                 if (dtl.m_flags & CLR_RT_DataTypeLookup::c_Numeric)
@@ -9765,6 +9770,10 @@ HRESULT CLR_RT_AttributeParser::Next(Value *&res)
                 else if (dt == DATATYPE_STRING)
                 {
                     NANOCLR_CHECK_HRESULT(ReadString(currentParam));
+                }
+                else if (dt == DATATYPE_SZARRAY)
+                {
+                    NANOCLR_CHECK_HRESULT(ReadArrayValue(currentParam));
                 }
                 else
                 {
@@ -9796,6 +9805,15 @@ HRESULT CLR_RT_AttributeParser::Next(Value *&res)
 
             CLR_RT_HeapBlock *currentParam = &m_lastValue.m_value;
             NANOCLR_CHECK_HRESULT(ReadString(currentParam));
+        }
+        else if (m_res.DataType == DATATYPE_SZARRAY)
+        {
+            // single parameter of array type
+            // OK to skip element type
+            m_blob += sizeof(CLR_UINT8);
+
+            CLR_RT_HeapBlock *currentParam = &m_lastValue.m_value;
+            NANOCLR_CHECK_HRESULT(ReadArrayValue(currentParam));
         }
         else
         {
@@ -9887,6 +9905,11 @@ HRESULT CLR_RT_AttributeParser::Next(Value *&res)
             CLR_RT_HeapBlock *currentParam = &m_lastValue.m_value;
             NANOCLR_CHECK_HRESULT(ReadString(currentParam));
         }
+        else if (m_res.DataType == DATATYPE_SZARRAY)
+        {
+            CLR_RT_HeapBlock *currentParam = &m_lastValue.m_value;
+            NANOCLR_CHECK_HRESULT(ReadArrayValue(currentParam));
+        }
         else
         {
             NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
@@ -9894,6 +9917,71 @@ HRESULT CLR_RT_AttributeParser::Next(Value *&res)
     }
 
     m_lastValue.m_pos = m_currentPos++;
+
+    NANOCLR_NOCLEANUP();
+}
+
+HRESULT CLR_RT_AttributeParser::ReadArrayValue(CLR_RT_HeapBlock *&value)
+{
+    NANOCLR_HEADER();
+
+    CLR_UINT8 elementType;
+    CLR_UINT8 elementCount;
+    const CLR_RT_DataTypeLookup *dtl;
+
+    NANOCLR_READ_UNALIGNED_UINT8(elementType, m_blob);
+    NANOCLR_READ_UNALIGNED_UINT8(elementCount, m_blob);
+
+    NanoCLRDataType dt = CLR_RT_TypeSystem::MapElementTypeToDataType(elementType);
+
+    if (dt >= DATATYPE_FIRST_INVALID)
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+    }
+
+    dtl = &c_CLR_RT_DataTypeLookup[dt];
+
+    if (dtl->m_flags & CLR_RT_DataTypeLookup::c_Numeric)
+    {
+        CLR_UINT32 size = dtl->m_sizeInBytes;
+
+        NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance(*value, elementCount, *dtl->m_cls));
+
+        CLR_UINT8 *arrayData = value->DereferenceArray()->GetFirstElement();
+
+        if (dt == DATATYPE_BOOLEAN)
+        {
+            for (CLR_UINT8 i = 0; i < elementCount; i++)
+            {
+                CLR_UINT8 boolValue;
+                NANOCLR_READ_UNALIGNED_UINT8(boolValue, m_blob);
+
+                arrayData[i] = boolValue ? 1 : 0;
+            }
+        }
+        else
+        {
+            memcpy(arrayData, m_blob, size * elementCount);
+            m_blob += size * elementCount;
+        }
+    }
+    else if (dt == DATATYPE_STRING)
+    {
+        NANOCLR_CHECK_HRESULT(
+            CLR_RT_HeapBlock_Array::CreateInstance(*value, elementCount, g_CLR_RT_WellKnownTypes.String));
+
+        auto *currentElement = (CLR_RT_HeapBlock *)value->DereferenceArray()->GetFirstElement();
+
+        for (CLR_UINT8 i = 0; i < elementCount; i++)
+        {
+            NANOCLR_CHECK_HRESULT(ReadString(currentElement));
+            currentElement++;
+        }
+    }
+    else
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+    }
 
     NANOCLR_NOCLEANUP();
 }
