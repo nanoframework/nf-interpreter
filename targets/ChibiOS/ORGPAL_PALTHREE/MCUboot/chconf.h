@@ -60,7 +60,7 @@
  *          setting also defines the system tick time unit.
  */
 #if !defined(CH_CFG_ST_FREQUENCY)
-#define CH_CFG_ST_FREQUENCY 1000
+#define CH_CFG_ST_FREQUENCY 10000
 #endif
 
 /**
@@ -68,7 +68,7 @@
  * @note    Allowed values are 16, 32 or 64 bits.
  */
 #if !defined(CH_CFG_INTERVALS_SIZE)
-#define CH_CFG_INTERVALS_SIZE 32
+#define CH_CFG_INTERVALS_SIZE 64
 #endif
 
 /**
@@ -145,7 +145,7 @@
  * @note    The default is @p TRUE.
  */
 #if !defined(CH_CFG_OPTIMIZE_SPEED)
-#define CH_CFG_OPTIMIZE_SPEED FALSE
+#define CH_CFG_OPTIMIZE_SPEED TRUE
 #endif
 
 /** @} */
@@ -176,7 +176,7 @@
  * @note    The default is @p TRUE.
  */
 #if !defined(CH_CFG_USE_TIMESTAMP)
-#define CH_CFG_USE_TIMESTAMP FALSE
+#define CH_CFG_USE_TIMESTAMP TRUE
 #endif
 
 /**
@@ -186,7 +186,7 @@
  * @note    The default is @p TRUE.
  */
 #if !defined(CH_CFG_USE_REGISTRY)
-#define CH_CFG_USE_REGISTRY FALSE
+#define CH_CFG_USE_REGISTRY TRUE
 #endif
 
 /**
@@ -197,7 +197,7 @@
  * @note    The default is @p TRUE.
  */
 #if !defined(CH_CFG_USE_WAITEXIT)
-#define CH_CFG_USE_WAITEXIT FALSE
+#define CH_CFG_USE_WAITEXIT TRUE
 #endif
 
 /**
@@ -207,7 +207,7 @@
  * @note    The default is @p TRUE.
  */
 #if !defined(CH_CFG_USE_SEMAPHORES)
-#define CH_CFG_USE_SEMAPHORES FALSE
+#define CH_CFG_USE_SEMAPHORES TRUE
 #endif
 
 /**
@@ -276,7 +276,7 @@
  * @note    The default is @p TRUE.
  */
 #if !defined(CH_CFG_USE_EVENTS)
-#define CH_CFG_USE_EVENTS FALSE
+#define CH_CFG_USE_EVENTS TRUE
 #endif
 
 /**
@@ -288,7 +288,7 @@
  * @note    Requires @p CH_CFG_USE_EVENTS.
  */
 #if !defined(CH_CFG_USE_EVENTS_TIMEOUT)
-#define CH_CFG_USE_EVENTS_TIMEOUT FALSE
+#define CH_CFG_USE_EVENTS_TIMEOUT TRUE
 #endif
 
 /**
@@ -346,7 +346,7 @@
  * @note    Requires @p CH_CFG_USE_SEMAPHORES.
  */
 #if !defined(CH_CFG_USE_MAILBOXES)
-#define CH_CFG_USE_MAILBOXES FALSE
+#define CH_CFG_USE_MAILBOXES TRUE
 #endif
 
 /**
@@ -488,42 +488,42 @@
  * @brief   Enables the registry of generic objects.
  */
 #if !defined(CH_CFG_FACTORY_OBJECTS_REGISTRY)
-#define CH_CFG_FACTORY_OBJECTS_REGISTRY FALSE
+#define CH_CFG_FACTORY_OBJECTS_REGISTRY TRUE
 #endif
 
 /**
  * @brief   Enables factory for generic buffers.
  */
 #if !defined(CH_CFG_FACTORY_GENERIC_BUFFERS)
-#define CH_CFG_FACTORY_GENERIC_BUFFERS FALSE
+#define CH_CFG_FACTORY_GENERIC_BUFFERS TRUE
 #endif
 
 /**
  * @brief   Enables factory for semaphores.
  */
 #if !defined(CH_CFG_FACTORY_SEMAPHORES)
-#define CH_CFG_FACTORY_SEMAPHORES FALSE
+#define CH_CFG_FACTORY_SEMAPHORES TRUE
 #endif
 
 /**
  * @brief   Enables factory for mailboxes.
  */
 #if !defined(CH_CFG_FACTORY_MAILBOXES)
-#define CH_CFG_FACTORY_MAILBOXES FALSE
+#define CH_CFG_FACTORY_MAILBOXES TRUE
 #endif
 
 /**
  * @brief   Enables factory for objects FIFOs.
  */
 #if !defined(CH_CFG_FACTORY_OBJ_FIFOS)
-#define CH_CFG_FACTORY_OBJ_FIFOS FALSE
+#define CH_CFG_FACTORY_OBJ_FIFOS TRUE
 #endif
 
 /**
  * @brief   Enables factory for Pipes.
  */
 #if !defined(CH_CFG_FACTORY_PIPES) || defined(__DOXYGEN__)
-#define CH_CFG_FACTORY_PIPES FALSE
+#define CH_CFG_FACTORY_PIPES TRUE
 #endif
 
 /** @} */

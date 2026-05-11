@@ -23,6 +23,7 @@
 #if defined(MCUBOOT_SERIAL)
 
 #include "hal.h"
+#include "usbcfg.h"
 
 bool boot_serial_detect_pin(void)
 {
@@ -30,6 +31,13 @@ bool boot_serial_detect_pin(void)
     // board.c / boardInit() already configures this pin as input.
     // palReadPad() returns 0 when the button is pressed (line pulled LOW).
     return palReadPad(GPIOK, GPIOK_BUTTON_BOOT) == 0U;
+}
+
+// Return the USB CDC channel used for serial recovery transport.
+// SDU1 is declared in usbcfg.h / usbcfg.c and started by mcuboot_target_init().
+BaseChannel *mcuboot_serial_get_channel(void)
+{
+    return (BaseChannel *)&SDU1;
 }
 
 #endif // MCUBOOT_SERIAL
