@@ -6,7 +6,7 @@
 // base64/base64.h — Mynewt base64 stub for MCUboot boot_serial.c.
 // Provides Mynewt-compatible signatures matching the usage in boot_serial.c
 // (non-Zephyr, non-ESP32 path). Implementations are in
-// targets/ChibiOS/_mcuboot/base64_impl.c.
+// MCUboot/common/base64_impl.c.
 
 #ifndef BASE64_BASE64_H
 #define BASE64_BASE64_H

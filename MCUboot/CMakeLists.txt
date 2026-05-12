@@ -379,8 +379,8 @@ if(${TARGET_SERIES} STREQUAL "STM32F7xx")
             ${mcuboot_SOURCE_DIR}/boot/zcbor/src/zcbor_decode.c
             ${mcuboot_SOURCE_DIR}/boot/zcbor/src/zcbor_encode.c
             ${mcuboot_SOURCE_DIR}/boot/boot_serial/src/zcbor_bulk.c
-            ${CMAKE_SOURCE_DIR}/targets/ChibiOS/_mcuboot/crc16_ccitt.c
-            ${CMAKE_SOURCE_DIR}/targets/ChibiOS/_mcuboot/base64_impl.c
+            ${CMAKE_SOURCE_DIR}/MCUboot/common/crc16_ccitt.c
+            ${CMAKE_SOURCE_DIR}/MCUboot/common/base64_impl.c
         )
 
         list(APPEND MCUBOOT_SERIES_COMMON_INCLUDES

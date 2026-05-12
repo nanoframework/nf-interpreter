@@ -5,7 +5,7 @@
 
 // crc/crc16.h — Mynewt CRC-16 stub for MCUboot boot_serial.c.
 // Declares the Mynewt-compatible crc16_ccitt() function implemented in
-// targets/ChibiOS/_mcuboot/crc16_ccitt.c.
+// MCUboot/common/crc16_ccitt.c.
 
 #ifndef CRC_CRC16_H
 #define CRC_CRC16_H
