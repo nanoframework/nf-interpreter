@@ -3,7 +3,7 @@
 // See LICENSE file in the project root for full license information.
 //
 
-// os/os.h — Mynewt OS stub for MCUboot boot_serial.c.
+// Mynewt OS stub for MCUboot boot_serial.c.
 // boot_serial.c includes this in the non-Zephyr path. No OS-level types
 // from this header are actually used by boot_serial.c — os_malloc.h
 // provides the heap functions and is included separately.

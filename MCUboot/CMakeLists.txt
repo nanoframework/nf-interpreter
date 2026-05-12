@@ -145,16 +145,11 @@ if(${TARGET_SERIES} STREQUAL "STM32F7xx")
         ${CMAKE_SOURCE_DIR}/targets/ChibiOS/_mcuboot/mcuboot_serial_port.c
 
         # ChibiOS RT startup (Cortex-M7, ARMCMx).
-        # crt0_v7m.S: reset handler, stack init, calls __cpu_init / __init_ram_areas / __late_init.
-        # crt1.c: provides the weak default implementations of those hooks.
-        # vectors.S: vector table.
         ${chibios_SOURCE_DIR}/os/common/startup/ARMCMx/compilers/GCC/crt0_v7m.S
         ${chibios_SOURCE_DIR}/os/common/startup/ARMCMx/compilers/GCC/crt1.c
         ${chibios_SOURCE_DIR}/os/common/startup/ARMCMx/compilers/GCC/vectors.S
 
         # ChibiOS RT port (ARMv7-M).
-        # chcore.c: C port code (IRQ epilogue, idle loop).
-        # chcoreasm.S: assembly context-switch (__port_switch, __port_switch_from_isr, __port_exit_from_isr).
         ${chibios_SOURCE_DIR}/os/common/ports/ARMv7-M/chcore.c
         ${chibios_SOURCE_DIR}/os/common/ports/ARMv7-M/compilers/GCC/chcoreasm.S
 
@@ -184,7 +179,7 @@ if(${TARGET_SERIES} STREQUAL "STM32F7xx")
         ${chibios_SOURCE_DIR}/os/hal/ports/STM32/STM32F7xx/hal_lld.c
         ${chibios_SOURCE_DIR}/os/hal/ports/STM32/STM32F7xx/stm32_isr.c
 
-        # ChibiOS HAL common ARMCMx support (nvicEnableVector / nvicDisableVector).
+        # ChibiOS HAL common ARMCMx support.
         ${chibios_SOURCE_DIR}/os/hal/ports/common/ARMCMx/nvic.c
 
         # ChibiOS HAL LLD (STM32 shared drivers).
@@ -202,61 +197,34 @@ if(${TARGET_SERIES} STREQUAL "STM32F7xx")
         # ChibiOS HAL OSAL (RT).
         ${chibios_SOURCE_DIR}/os/hal/osal/rt-nil/osal.c
         
-
         # nf-overlay: STM32 internal flash driver (FLASHv2 LLD).
         ${CMAKE_SOURCE_DIR}/targets/ChibiOS/_nf-overlay/os/hal/src/stm32_flash/hal_stm32_flash.c
         ${CMAKE_SOURCE_DIR}/targets/ChibiOS/_nf-overlay/os/hal/ports/STM32/LLD/FLASHv2/flash_lld.c
 
         # Stub: halCommunityInit() no-op — MCUboot does not use ChibiOS-Contrib.
-        # hal.c calls halCommunityInit() when HAL_USE_COMMUNITY is TRUE; this stub
-        # satisfies the linker without pulling in the full ChibiOS-Contrib library.
         ${CMAKE_SOURCE_DIR}/targets/ChibiOS/_mcuboot/hal_community_stub.c
     )
 
     # Include directories shared by all STM32F7xx bootloader targets.
     set(MCUBOOT_SERIES_COMMON_INCLUDES
-        # 1. Stub nf_config.h + shared port headers (mcuboot_board_iface.h,
-        #    stm32_f7xx_flash.h).
         ${CMAKE_SOURCE_DIR}/targets/ChibiOS/_mcuboot
-
-        # 2. Global MCUboot nanoFramework headers (mcuboot_config/mcuboot_config.h,
-        #    sysflash/sysflash.h, flash_map_backend/flash_map_backend.h).
         ${CMAKE_CURRENT_SOURCE_DIR}/include
 
-        # 3. MCUboot upstream bootutil public headers.
         ${mcuboot_SOURCE_DIR}/boot/bootutil/include
-
-        # 4. MCUboot boot_serial include — provides boot_serial.h with the
-        #    boot_uart_funcs type used in boot_serial_start().
         ${mcuboot_SOURCE_DIR}/boot/boot_serial/include
-
-        # 5. mbedTLS ASN.1 decoder headers.
         ${mcuboot_SOURCE_DIR}/ext/mbedtls-asn1/include
-
-        # 6. Tinycrypt headers.
         ${mcuboot_SOURCE_DIR}/ext/tinycrypt/lib/include
 
-        # 7. ChibiOS RT startup headers.
         ${chibios_SOURCE_DIR}/os/common/startup/ARMCMx/compilers/GCC
         ${chibios_SOURCE_DIR}/os/common/startup/ARMCMx/devices/STM32F7xx
-
-        # 8. ChibiOS RT kernel headers.
         ${chibios_SOURCE_DIR}/os/rt/include
         ${chibios_SOURCE_DIR}/os/oslib/include
-
-        # 9. ChibiOS RT port headers (ARMv7-M).
         ${chibios_SOURCE_DIR}/os/common/ports/ARMv7-M
         ${chibios_SOURCE_DIR}/os/common/ports/ARMv7-M/compilers/GCC
-
-        # 10. ChibiOS HAL core + OSAL (RT).
         ${chibios_SOURCE_DIR}/os/hal/include
         ${chibios_SOURCE_DIR}/os/hal/osal/rt-nil
-
-        # 11. ChibiOS HAL STM32F7xx platform + common ARMCMx (nvic.h).
         ${chibios_SOURCE_DIR}/os/hal/ports/STM32/STM32F7xx
         ${chibios_SOURCE_DIR}/os/hal/ports/common/ARMCMx
-
-        # 12. ChibiOS HAL LLD (peripheral drivers).
         ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/GPIOv2
         ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/DMAv2
         ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/EXTIv1
@@ -267,20 +235,12 @@ if(${TARGET_SERIES} STREQUAL "STM32F7xx")
         ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/USART
         ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/USARTv2
         ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/SDMMCv1
-
-        # 13. ChibiOS-bundled CMSIS (replaces separately-fetched cmsis_device_f7 + cmsis_core).
         ${chibios_SOURCE_DIR}/os/common/ext/ARM/CMSIS/Core/Include
         ${chibios_SOURCE_DIR}/os/common/ext/ST/STM32F7xx
-
-        # 14. ChibiOS compiler portability layer (GCC), ARM-common port types, and license header.
         ${chibios_SOURCE_DIR}/os/common/portability/GCC
         ${chibios_SOURCE_DIR}/os/common/ports/ARM-common
         ${chibios_SOURCE_DIR}/os/license
 
-        # 15. nf-overlay community HAL includes.
-        #     dummy_includes provides a stub hal_community.h (MCUboot doesn't use ChibiOS-Contrib).
-        #     All nf-overlay LLD paths are required because hal_nf_community.h unconditionally
-        #     includes all overlay driver headers (flash, crc, rng, fsmc, onewire, qspi).
         ${CMAKE_SOURCE_DIR}/targets/ChibiOS/_nf-overlay/os/hal/include
         ${CMAKE_SOURCE_DIR}/targets/ChibiOS/_nf-overlay/os/hal/include/dummy_includes
         ${CMAKE_SOURCE_DIR}/targets/ChibiOS/_nf-overlay/os/hal/ports/STM32/LLD/FLASHv2
@@ -349,26 +309,20 @@ if(${TARGET_SERIES} STREQUAL "STM32F7xx")
     # with ${MCUBOOT_SERIES_COMMON_SOURCES} immediately.
     if(NF_FEATURE_MCUBOOT_HAS_SDCARD)
 
-        # Propagate the Kconfig option into C preprocessor so mcuboot_main.c
-        # and other common MCUboot sources can gate SD card code with
-        # #if defined(NF_FEATURE_MCUBOOT_HAS_SDCARD).
+        # Propagate the Kconfig option into C preprocessor
         list(APPEND MCUBOOT_SERIES_COMMON_COMPILE_DEFINITIONS NF_FEATURE_MCUBOOT_HAS_SDCARD)
 
-        # MCUBOOT_FATFS_SOURCES and MCUBOOT_FATFS_INCLUDE_DIRS are populated by
-        # find_package(FATFS) in targets/ChibiOS/CMakeLists.txt (ff.c, ffunicode.c + fatfs_SOURCE_DIR/source).
         list(APPEND MCUBOOT_SERIES_COMMON_SOURCES
             ${MCUBOOT_FATFS_SOURCES}
             ${CMAKE_SOURCE_DIR}/targets/ChibiOS/_mcuboot/fatfs_diskio_boot.c
             ${CMAKE_SOURCE_DIR}/targets/ChibiOS/_mcuboot/mcuboot_fatfs_flash_area.c
         )
+
         list(APPEND MCUBOOT_SERIES_COMMON_INCLUDES ${MCUBOOT_FATFS_INCLUDE_DIRS})
 
     endif() # NF_FEATURE_MCUBOOT_HAS_SDCARD
 
     # When serial recovery is enabled, add the full SMP/mcumgr serial stack:
-    # boot_serial.c (NLIP framing + mcumgr protocol), zcbor CBOR codec,
-    # CRC-16/CCITT, and Base64 encode/decode. Also add the OTGv1 include
-    # path for boards that use USB CDC as the serial transport.
     if(NF_MCUBOOT_SERIAL_RECOVERY)
 
         list(APPEND MCUBOOT_SERIES_COMMON_COMPILE_DEFINITIONS MCUBOOT_SERIAL=1)
@@ -379,6 +333,7 @@ if(${TARGET_SERIES} STREQUAL "STM32F7xx")
             ${mcuboot_SOURCE_DIR}/boot/zcbor/src/zcbor_decode.c
             ${mcuboot_SOURCE_DIR}/boot/zcbor/src/zcbor_encode.c
             ${mcuboot_SOURCE_DIR}/boot/boot_serial/src/zcbor_bulk.c
+
             ${CMAKE_SOURCE_DIR}/MCUboot/common/crc16_ccitt.c
             ${CMAKE_SOURCE_DIR}/MCUboot/common/base64_impl.c
         )
@@ -386,6 +341,7 @@ if(${TARGET_SERIES} STREQUAL "STM32F7xx")
         list(APPEND MCUBOOT_SERIES_COMMON_INCLUDES
             ${mcuboot_SOURCE_DIR}/boot/zcbor/include
             ${mcuboot_SOURCE_DIR}/boot/boot_serial/src
+
             ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/OTGv1
         )
 

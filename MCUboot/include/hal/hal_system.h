@@ -3,7 +3,7 @@
 // See LICENSE file in the project root for full license information.
 //
 
-// hal/hal_system.h — Mynewt HAL system stub for MCUboot boot_serial.c.
+// Mynewt HAL system stub for MCUboot boot_serial.c.
 // Maps hal_system_reset() → CMSIS NVIC_SystemReset() equivalent.
 //
 // We inline the Cortex-M reset sequence directly to avoid pulling in

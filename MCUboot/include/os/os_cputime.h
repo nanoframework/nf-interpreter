@@ -3,7 +3,7 @@
 // See LICENSE file in the project root for full license information.
 //
 
-// os/os_cputime.h — Mynewt CPU-timer stub for MCUboot boot_serial.c.
+// Mynewt CPU-timer stub for MCUboot boot_serial.c.
 //
 // boot_serial.c calls os_cputime_delay_usecs(250000) in bs_reset() before
 // hal_system_reset() to allow any pending serial output to flush. On our

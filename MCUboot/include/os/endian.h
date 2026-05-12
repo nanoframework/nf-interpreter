@@ -3,7 +3,7 @@
 // See LICENSE file in the project root for full license information.
 //
 
-// os/endian.h — Mynewt byte-order stub for MCUboot boot_serial.c.
+// Mynewt byte-order stub for MCUboot boot_serial.c.
 // STM32 is little-endian; SMP/mcumgr protocol uses big-endian (network order).
 // ntohs/htons swap bytes on little-endian hosts.
 

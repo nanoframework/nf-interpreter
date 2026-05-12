@@ -6,7 +6,7 @@
 // MCUboot compile-time configuration for nanoFramework.
 //
 // This header is the single authoritative compile-time configuration for the MCUboot
-// bootloader integration in nanoFramework.  It is included by all MCUboot source files
+// bootloader integration in nanoFramework. It is included by all MCUboot source files
 // via the include path MCUboot/include/mcuboot_config/.
 //
 // Per-platform overrides (alignment, sector size, etc.) are applied by including the
