@@ -15,10 +15,10 @@ extern "C"
 {
 #endif
 
-// CRC-16/CCITT (polynomial 0x1021). Returns the CRC of buf[0..len-1],
-// seeded with initial_crc. To compute a CRC over multiple segments,
-// pass the result of the previous call as initial_crc.
-uint16_t crc16_ccitt(uint16_t initial_crc, const void *buf, int len);
+    // CRC-16/CCITT (polynomial 0x1021). Returns the CRC of buf[0..len-1],
+    // seeded with initial_crc. To compute a CRC over multiple segments,
+    // pass the result of the previous call as initial_crc.
+    uint16_t crc16_ccitt(uint16_t initial_crc, const void *buf, int len);
 
 // Initial CRC seed value used by MCUboot's NLIP framing in boot_serial.c.
 // CRC-16/CCITT starts with an all-zeros register.

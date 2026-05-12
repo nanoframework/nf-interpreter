@@ -3,7 +3,7 @@
 // See LICENSE file in the project root for full license information.
 //
 
-// Implements the Mynewt-compatible crc16_ccitt() function 
+// Implements the Mynewt-compatible crc16_ccitt() function
 //
 // Algorithm: CRC-16/CCITT
 //   Polynomial : 0x1021
