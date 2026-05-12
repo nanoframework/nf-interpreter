@@ -31,9 +31,9 @@ void mcuboot_serial_init(void)
     // USART1 PA9(TX)/PA10(RX) AF7, 115 200 baud, 8N1.
     static const SerialConfig serialConfig = {
         .speed = 115200U,
-        .cr1   = 0U,
-        .cr2   = USART_CR2_STOP1_BITS,
-        .cr3   = 0U,
+        .cr1 = 0U,
+        .cr2 = USART_CR2_STOP1_BITS,
+        .cr3 = 0U,
     };
     sdStart(&SD1, &serialConfig);
 }
