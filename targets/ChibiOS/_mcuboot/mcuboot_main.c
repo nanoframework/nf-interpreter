@@ -46,8 +46,8 @@
 // Structure of the Cortex-M ARM vector table (first two entries)
 typedef struct
 {
-    uint32_t msp;    // Initial Main Stack Pointer
-    uint32_t reset;  // Reset Handler address
+    uint32_t msp;   // Initial Main Stack Pointer
+    uint32_t reset; // Reset Handler address
 } VectorTable_t;
 
 __attribute__((noreturn)) static void do_boot(struct boot_rsp *rsp)
