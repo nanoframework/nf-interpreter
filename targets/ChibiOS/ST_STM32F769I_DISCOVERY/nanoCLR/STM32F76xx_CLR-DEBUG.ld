@@ -18,8 +18,8 @@
  */
 MEMORY
 {
-    flash0       (rx) : org = 0x08018000, len = 2M - 64k - 32k - 1024k    /* flash size less the space reserved for MCUboot, configuration block and application deployment*/
-    flash1       (rx) : org = 0x00218000, len = 2M - 64k - 32k - 1024k
+    flash0       (rx) : org = 0x08018000, len = 2M - 64k - 32k - 992k     /* flash size less the space reserved for MCUboot, configuration block and application deployment*/
+    flash1       (rx) : org = 0x00218000, len = 2M - 64k - 32k - 992k
     flash2       (rx) : org = 0x00000000, len = 0
     flash3       (rx) : org = 0x00000000, len = 0
     flash4       (rx) : org = 0x00000000, len = 0
@@ -27,7 +27,7 @@ MEMORY
     flash6       (rx) : org = 0x00000000, len = 0
     flash7       (rx) : org = 0x00000000, len = 0
     config       (rw) : org = 0x08010000, len = 32k                       /* space reserved for configuration block */
-    deployment   (rx) : org = 0x08100000, len = 1024k                     /* space reserved for application deployment */
+    deployment   (rx) : org = 0x08120000, len = 992k                      /* space reserved for application deployment */
     ramvt        (wx) : org = 0x00000000, len = 0                         /* initial RAM address is reserved for a copy of the vector table */
     ram0         (wx) : org = 0x20020000, len = 384k                      /* SRAM1 + SRAM2 */
     ram1         (wx) : org = 0x20020000, len = 368k                      /* SRAM1 */
