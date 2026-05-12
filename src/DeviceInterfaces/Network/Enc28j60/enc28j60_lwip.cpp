@@ -242,6 +242,7 @@ void enc28j60_lwip_interrupt(struct netif *pNetIF)
 
     if (!pNetIF)
     {
+        GLOBAL_UNLOCK();
         return;
     }
 
@@ -399,6 +400,7 @@ int enc28j60_lwip_recv(struct netif *pNetIF)
         {
             enc28j60_handle_recv_error(pNetIF, spiHandle);
             packetsLeft = 0;
+            GLOBAL_UNLOCK();
             break;
         }
         else
@@ -488,6 +490,7 @@ int enc28j60_lwip_recv(struct netif *pNetIF)
 
         if ((++numPacketsProcessed > CFG_MAX_PACKETS_PROCESSED) && packetsLeft)
         {
+            GLOBAL_UNLOCK();
             break;
         }
 
@@ -524,6 +527,7 @@ err_t enc28j60_lwip_xmit(struct netif *pNetIF, struct pbuf *pPBuf)
 
     if (!pNetIF)
     {
+        GLOBAL_UNLOCK();
         return ERR_ARG;
     }
 
@@ -593,7 +597,10 @@ err_t enc28j60_lwip_xmit(struct netif *pNetIF, struct pbuf *pPBuf)
     // irq.Acquire();
 
     if (!pTmp)
+    {
+        GLOBAL_UNLOCK();
         return ERR_MEM;
+    }
 
     pTx = (uint8_t *)pTmp->payload;
 
