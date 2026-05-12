@@ -3,10 +3,7 @@
 // See LICENSE file in the project root for full license information.
 //
 
-// base64/base64.h — Mynewt base64 stub for MCUboot boot_serial.c.
-// Provides Mynewt-compatible signatures matching the usage in boot_serial.c
-// (non-Zephyr, non-ESP32 path). Implementations are in
-// MCUboot/common/base64_impl.c.
+// Provides Mynewt-compatible signatures
 
 #ifndef BASE64_BASE64_H
 #define BASE64_BASE64_H

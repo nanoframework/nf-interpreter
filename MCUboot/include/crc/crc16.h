@@ -3,9 +3,7 @@
 // See LICENSE file in the project root for full license information.
 //
 
-// crc/crc16.h — Mynewt CRC-16 stub for MCUboot boot_serial.c.
-// Declares the Mynewt-compatible crc16_ccitt() function implemented in
-// MCUboot/common/crc16_ccitt.c.
+// Declares the Mynewt-compatible crc16_ccitt() function
 
 #ifndef CRC_CRC16_H
 #define CRC_CRC16_H

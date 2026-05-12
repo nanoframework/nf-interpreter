@@ -3,10 +3,7 @@
 // See LICENSE file in the project root for full license information.
 //
 
-// crc16_ccitt.c — CRC-16/CCITT implementation for MCUboot serial recovery.
-//
-// Implements the Mynewt-compatible crc16_ccitt() function declared in
-// MCUboot/include/crc/crc16.h.
+// Implements the Mynewt-compatible crc16_ccitt() function 
 //
 // Algorithm: CRC-16/CCITT
 //   Polynomial : 0x1021
