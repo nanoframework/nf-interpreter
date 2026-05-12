@@ -606,6 +606,13 @@ err_t enc28j60_lwip_xmit(struct netif *pNetIF, struct pbuf *pPBuf)
 
     while (pPBuf)
     {
+        if ((idx + pPBuf->len) > (length + 2))
+        {
+            GLOBAL_UNLOCK();
+            pbuf_free(pTmp);
+            return ERR_BUF;
+        }
+
         memcpy(&pTx[idx], pPBuf->payload, pPBuf->len);
 
         idx += pPBuf->len;
