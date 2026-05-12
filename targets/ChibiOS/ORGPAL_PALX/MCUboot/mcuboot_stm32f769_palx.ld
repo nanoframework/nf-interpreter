@@ -20,15 +20,15 @@
  */
 MEMORY
 {
-    flash0     (rx) : org = 0x08000000, len = 32k     /* MCUboot bootloader (sector 0) */
-    flash1     (rx) : org = 0x00200000, len = 32k     /* ITCM alias of flash0 */
+    flash0     (rx) : org = 0x08000000, len = 64k     /* MCUboot bootloader (sectors 0-1) */
+    flash1     (rx) : org = 0x00200000, len = 64k     /* ITCM alias of flash0 */
     flash2     (rx) : org = 0x00000000, len = 0
     flash3     (rx) : org = 0x00000000, len = 0
     flash4     (rx) : org = 0x00000000, len = 0
     flash5     (rx) : org = 0x00000000, len = 0
     flash6     (rx) : org = 0x00000000, len = 0
     flash7     (rx) : org = 0x00000000, len = 0
-    config     (rw) : org = 0x08008000, len = 32k     /* configuration block */
+    config     (rw) : org = 0x08010000, len = 32k     /* configuration block */
     deployment (rx) : org = 0x00000000, len = 0
     ramvt      (wx) : org = 0x00000000, len = 0
     ram0       (wx) : org = 0x20020000, len = 384k    /* SRAM1 + SRAM2 */
