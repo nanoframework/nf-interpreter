@@ -5,16 +5,18 @@
 
 // MCUboot bootloader entry point for STM32 ChibiOS targets
 //
-// Execution sequence after Reset_Handler (ChibiOS crt0_v7m.s):
-//   1. crt0_v7m.s: set up stacks, copy .data, zero .bss, call __early_init
+// Execution sequence after Reset_Handler:
+//   1. set up stacks, copy .data, zero .bss, call __early_init, etc.
 //   2. main():
 //        a. halInit()  — clock, GPIO, enabled peripheral drivers, board.c
 //        b. chSysInit() — start the ChibiOS RT kernel (OSAL for SPI/WSPI/SERIAL)
 //        c. Initialise external storage (mcuboot_ext_flash_init or mcuboot_sdcard_init)
-//        d. Run MCUboot (boot_go)
-//        e. Launch the selected image (do_boot)
+//        d. Check recovery button and run SMP serial recovery if pressed (mcuboot_serial_recovery_try)
+//           If recovery is triggered, this never returns (device resets after image upload)
+//        e. Run MCUboot (boot_go) — only if recovery was not triggered
+//        f. Launch the selected image (do_boot)
 //
-// do_boot() performs the low-level Cortex-M7 image launch:
+// do_boot() performs the low-level Cortex image launch:
 //   - Stop SysTick so it cannot fire during handoff
 //   - Set SCB->VTOR to the application vector table address
 //   - Load the application's initial MSP from the vector table
@@ -28,8 +30,6 @@
 #include <string.h>
 
 // ChibiOS HAL and RT kernel headers.
-// The series device header (stm32f7xx.h / stm32f769xx.h) and CMSIS core
-// header (core_cm7.h) are included transitively by hal.h.
 #include "hal.h"
 #include "ch.h"
 
@@ -100,21 +100,11 @@ __attribute__((noreturn)) static void do_boot(struct boot_rsp *rsp)
 
 int main(void)
 {
-    // Initialise the ChibiOS HAL: configures clocks (via mcuconf.h PLL settings),
-    // enables GPIO clocks, initialises each enabled peripheral driver, and calls
-    // boardInit() (board.c) to apply the full pin-mux configuration.
+    // Initialise the ChibiOS HAL
     halInit();
 
-    // Start the ChibiOS RT kernel.  The SPI/WSPI/SERIAL HAL drivers rely on the
-    // RT OSAL (hal_osal_rt_nil.h) for mutexes and condition-variable primitives;
-    // those are available only after chSysInit().
+    // Start the ChibiOS RT kernel.
     chSysInit();
-
-#if defined(MCUBOOT_SERIAL)
-    // Check recovery button and — if held — run the SMP serial recovery loop.
-    // If the button is not pressed, returns immediately and normal boot continues.
-    mcuboot_serial_recovery_try();
-#endif
 
     // Initialise the board's external flash device
     // Non-fatal: if the external device fails to initialise the boot will still

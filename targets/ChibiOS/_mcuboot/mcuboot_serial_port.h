@@ -3,7 +3,7 @@
 // See LICENSE file in the project root for full license information.
 //
 
-// mcuboot_serial_port.h — Serial recovery port declarations for the bare-metal
+// Serial recovery port declarations for the bare-metal
 // MCUboot bootloader (STM32 ChibiOS targets).
 //
 // boot_serial_detect_pin() is board-specific and lives in each board's
@@ -19,11 +19,20 @@
 // USB CDC boards don't need to override it (transport is started by
 // mcuboot_target_init()). UART boards override it in mcuboot_detect_pin.c.
 //
-// mcuboot_serial_recovery_try() is called from mcuboot_main() after hardware
-// init. It delays MCUBOOT_SERIAL_DETECT_DELAY ms, reads boot_serial_detect_pin(),
-// and — if the pin is asserted — calls boot_serial_start() from MCUboot
-// (boot/boot_serial/src/boot_serial.c). boot_serial_start() runs the full
-// SMP/mcumgr receive loop and resets the device when recovery is complete.
+// mcuboot_serial_recovery_try() is called from mcuboot_main() after:
+//   - halInit() and chSysInit() have set up hardware and the ChibiOS kernel.
+//   - mcuboot_ext_flash_init() and mcuboot_sdcard_init() have initialized storage.
+//   - But BEFORE boot_go() so recovery is available even if no valid image exists.
+//
+// It checks the recovery button; if asserted, it calls boot_serial_start() from
+// MCUboot (boot/boot_serial/src/boot_serial.c). boot_serial_start() runs the full
+// SMP/mcumgr receive loop, allowing the host to upload a new firmware image to the
+// secondary slot. When recovery is complete, it resets the device via
+// hal_system_reset() (= NVIC_SystemReset()), and the device reboots. On the next
+// boot cycle, boot_go() will find the newly-uploaded image ready to boot.
+//
+// If the recovery button is not asserted, mcuboot_serial_recovery_try() returns
+// immediately and boot_go() is called to validate and boot the current image.
 
 #ifndef MCUBOOT_SERIAL_PORT_H
 #define MCUBOOT_SERIAL_PORT_H

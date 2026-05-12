@@ -3,29 +3,34 @@
 // See LICENSE file in the project root for full license information.
 //
 
-// mcuboot_serial_port.c — ChibiOS stream callbacks for MCUboot SMP serial recovery.
+// ChibiOS stream callbacks for MCUboot SMP serial recovery.
 //
 // Provides the two boot_uart_funcs function pointers (read/write) that
 // MCUboot's boot_serial.c needs. The actual transport driver is returned by
 // the board-specific mcuboot_serial_get_channel() (declared in
 // mcuboot_serial_port.h and implemented in each board's mcuboot_detect_pin.c).
 //
-// mcuboot_serial_recovery_try() is called from mcuboot_main() after hardware
-// init. It:
+// mcuboot_serial_recovery_try() is called from mcuboot_main() after:
+//   - halInit() and chSysInit() have set up the hardware and kernel.
+//   - mcuboot_ext_flash_init() and mcuboot_sdcard_init() have initialized storage.
+//   - But BEFORE boot_go() so recovery is available even if no valid image exists.
+//
+// It:
 //   1. Sleeps MCUBOOT_SERIAL_DETECT_DELAY ms (hardware debounce).
 //   2. Calls boot_serial_detect_pin() (board-specific, e.g. holds BOOT button).
 //   3. If triggered:
-//      a. Raises main thread to HIGHPRIO (mirrors osKernelInitialize() in nanoBooter).
+//      a. Raises main thread to HIGHPRIO.
 //      b. Calls mcuboot_target_init() — board USB/UART init from main at HIGHPRIO.
 //      c. Spawns a dedicated NORMALPRIO thread that runs boot_serial_start().
-//      d. Drops main back to NORMALPRIO (mirrors osKernelStart() in nanoBooter).
+//      d. Drops main back to NORMALPRIO.
 //      e. Main enters infinite sleep loop.
 //
 //   boot_serial_start() never returns; it resets the device via hal_system_reset()
-//   (= NVIC_SystemReset()) when recovery is complete.
+//   (= NVIC_SystemReset()) when recovery is complete. The device then restarts
+//   and runs boot_go() with the newly-uploaded image ready in the secondary slot.
 //
 // If the button is not pressed, mcuboot_serial_recovery_try() returns immediately
-// and the normal MCUboot boot flow continues.
+// and boot_go() is called to validate the current image.
 
 #include "mcuboot_serial_port.h"
 #include "mcuboot_board_iface.h"
