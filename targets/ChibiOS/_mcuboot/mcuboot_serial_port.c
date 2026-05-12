@@ -1,4 +1,3 @@
-﻿//
 // Copyright (c) .NET Foundation and Contributors
 // See LICENSE file in the project root for full license information.
 //
@@ -87,7 +86,7 @@ void nf_mcuboot_cpu_idle(void)
 
 // Stack for the serial recovery thread. boot_serial.c has two 1 KB internal
 // buffers (in_buf / dec_buf) plus zcbor/CBOR state — 4 KB is sufficient.
-static THD_WORKING_AREA(wa_serial_recovery, 2048);
+static THD_WORKING_AREA(wa_serial_recovery, 4096);
 
 static THD_FUNCTION(serial_recovery_thd, arg)
 {
