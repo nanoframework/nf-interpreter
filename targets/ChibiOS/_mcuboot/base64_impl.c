@@ -88,9 +88,14 @@ static int b64_char_value(char c)
 
 int base64_decode_len(const char *src)
 {
-    int len = (int)strlen(src);
+    int raw_len = (int)strlen(src);
+
+    // Strip trailing whitespace (\n, \r) before counting padding
+    while (raw_len > 0 && (src[raw_len - 1] == '\n' || src[raw_len - 1] == '\r'))
+        raw_len--;
 
     // Strip trailing padding
+    int len = raw_len;
     while (len > 0 && src[len - 1] == '=')
         len--;
 
@@ -106,6 +111,12 @@ int base64_decode(const char *src, void *dst)
 
     for (int i = 0; i < src_len;)
     {
+        // Skip whitespace (\n, \r) between groups — NLIP frames end with \n
+        while (i < src_len && (src[i] == '\n' || src[i] == '\r'))
+            i++;
+        if (i >= src_len)
+            break;
+
         // Consume up to 4 characters
         int vals[4] = {0, 0, 0, 0};
         int padding = 0;
