@@ -63,6 +63,9 @@ extern "C"
     // Returns only if the button was not pressed. Resets via NVIC on recovery completion.
     void mcuboot_serial_recovery_try(void);
 
+    // Start the SMP serial recovery loop unconditionally (never returns).
+    __attribute__((noreturn)) void mcuboot_serial_recovery_start(void);
+
 #endif // MCUBOOT_SERIAL
 
 #ifdef __cplusplus

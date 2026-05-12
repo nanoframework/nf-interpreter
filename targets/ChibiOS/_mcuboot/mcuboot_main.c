@@ -24,7 +24,9 @@
 //   - Jump to the application's reset handler
 //
 // The bootloader never returns from do_boot().  If boot_go() fails (no valid
-// image found), the system enters a safe infinite loop.
+// image found), the system enters SMP serial recovery (when MCUBOOT_SERIAL is
+// defined) so firmware can be uploaded over SMP, or halts if serial recovery
+// is unavailable.
 
 #include <stdint.h>
 #include <string.h>
@@ -46,8 +48,8 @@
 // Structure of the Cortex-M ARM vector table (first two entries)
 typedef struct
 {
-    uint32_t msp;    // Initial Main Stack Pointer
-    uint32_t reset;  // Reset Handler address
+    uint32_t msp;   // Initial Main Stack Pointer
+    uint32_t reset; // Reset Handler address
 } VectorTable_t;
 
 __attribute__((noreturn)) static void do_boot(struct boot_rsp *rsp)
@@ -118,17 +120,27 @@ int main(void)
     (void)mcuboot_sdcard_init();
 #endif
 
+#if defined(MCUBOOT_SERIAL)
+    // Check recovery button and - if held - run the SMP serial recovery loop.
+    // If the button is not pressed, returns immediately and boot continues.
+    mcuboot_serial_recovery_try();
+#endif
+
     // Run MCUboot image validation and upgrade logic
     struct boot_rsp rsp;
     if (boot_go(&rsp) != 0)
     {
-        // No valid image found — enter a safe infinite loop
-        // A debugger or JTAG reset is required to recover
+#if defined(MCUBOOT_SERIAL)
+        // No valid image found - enter SMP serial recovery
+        mcuboot_serial_recovery_start();
+#else
+        // No valid image and no serial recovery available: halt.
         while (1)
         {
             __BKPT(0);
             __NOP();
         }
+#endif
     }
 
     // Launch the selected image

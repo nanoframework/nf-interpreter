@@ -120,7 +120,36 @@ __attribute__((weak)) void mcuboot_uart_init(void)
 }
 
 // ---------------------------------------------------------------------------
-// Serial recovery entry point
+// Serial recovery launch
+// ---------------------------------------------------------------------------
+
+// Start the SMP serial recovery loop unconditionally.
+// Called either from mcuboot_serial_recovery_try() when the recovery button
+// is detected, or directly from main() when boot_go() finds no valid image.
+// This function never returns: the SMP thread handles device reset after upload.
+__attribute__((noreturn)) void mcuboot_serial_recovery_start(void)
+{
+    chThdSetPriority(HIGHPRIO);
+
+    // Initialise board hardware (USB CDC, UART, etc.) from the main thread
+    mcuboot_target_init();
+
+    // Spawn the SMP receive thread now that the transport is up.
+    chThdCreateStatic(wa_serial_recovery, sizeof(wa_serial_recovery), NORMALPRIO, serial_recovery_thd, NULL);
+
+    // Drop main back to NORMALPRIO.
+    chThdSetPriority(NORMALPRIO);
+
+    // Main thread idle loop - the SMP thread owns recovery from here.
+    // boot_serial_start() resets the device via NVIC_SystemReset() when done.
+    while (1)
+    {
+        chThdSleepMilliseconds(500);
+    }
+}
+
+// ---------------------------------------------------------------------------
+// Serial recovery entry point (button-triggered)
 // ---------------------------------------------------------------------------
 
 void mcuboot_serial_recovery_try(void)
@@ -130,31 +159,11 @@ void mcuboot_serial_recovery_try(void)
 
     if (!boot_serial_detect_pin())
     {
-        return; // Button not pressed — proceed with normal boot
+        // Button not pressed - proceed with normal boot
+        return;
     }
 
-    // Mirror nanoBooter's USB init sequence exactly:
-    //   osKernelInitialize() raises main to HIGHPRIO before USB init,
-    //   then osKernelStart() drops it back to NORMALPRIO after thread creation.
-    // This ensures USB init runs uncontested (no peer threads exist yet) and
-    // at elevated priority, matching the working nanoBooter behaviour.
-    chThdSetPriority(HIGHPRIO);
-
-    // Initialise board hardware (USB CDC, UART, etc.) from the main thread
-    // at HIGHPRIO — identical to nanoBooter doing USB init before osKernelStart().
-    mcuboot_target_init();
-
-    // Spawn the SMP receive thread now that the transport is up.
-    chThdCreateStatic(wa_serial_recovery, sizeof(wa_serial_recovery), NORMALPRIO, serial_recovery_thd, NULL);
-
-    // Drop main back to NORMALPRIO (mirrors osKernelStart() in nanoBooter).
-    chThdSetPriority(NORMALPRIO);
-
-    // Main thread idle loop.
-    while (1)
-    {
-        chThdSleepMilliseconds(500);
-    }
+    mcuboot_serial_recovery_start();
 }
 
 #endif // MCUBOOT_SERIAL
