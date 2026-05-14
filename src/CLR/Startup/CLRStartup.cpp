@@ -7,6 +7,11 @@
 #include "CLRStartup.h"
 #include <nanoCLR_Hardware.h>
 
+#ifdef NF_FEATURE_HAS_MCUBOOT
+#include <MCUboot_RuntimeInterface.h>
+#include <MCUboot_StartupPolicy.h>
+#endif
+
 void ClrExit()
 {
     NATIVE_PROFILE_CLR_STARTUP();
@@ -71,8 +76,8 @@ struct Settings
         // Get handlers for native functions in assembly
         pNativeAssmData = GetAssemblyNativeData(assm->name);
 
-        // If pNativeAssmData not nullptr - means this assembly has native calls and there is pointer to table with native
-        // calls.
+        // If pNativeAssmData not nullptr - means this assembly has native calls and there is pointer to table with
+        // native calls.
         if (pNativeAssmData != nullptr)
         {
             // First verify that check sum in assembly object matches hardcoded check sum.
@@ -368,6 +373,12 @@ void ClrStartup(CLR_SETTINGS params)
     ASSERT(sizeof(CLR_RT_HeapBlock_Raw) == sizeof(struct CLR_RT_HeapBlock));
     bool softReboot;
 
+#ifdef NF_FEATURE_HAS_MCUBOOT
+    // Guard flag: confirm CLR image only once per power cycle,
+    // even if ClrStartup loops for a soft reboot.
+    static bool s_mcubootStartupConfirmed = false;
+#endif
+
     do
     {
         softReboot = false;
@@ -394,10 +405,29 @@ void ClrStartup(CLR_SETTINGS params)
 
         if (SUCCEEDED(hr = s_ClrSettings.Initialize(params)))
         {
+#ifdef NF_FEATURE_HAS_MCUBOOT
+            if (!s_mcubootStartupConfirmed)
+            {
+                nf_mcuboot_startup_ok();
+                s_mcubootStartupConfirmed = true;
+            }
+#endif
             if (SUCCEEDED(hr = s_ClrSettings.Load()))
             {
 #if !defined(BUILD_RTM)
                 CLR_Debug::Printf("Ready.\r\n");
+#endif
+
+#ifdef NF_FEATURE_HAS_MCUBOOT
+                const bool hasManagedEntryPoint = !NANOCLR_INDEX_IS_INVALID(g_CLR_RT_TypeSystem.m_entryPoint);
+                if (!hasManagedEntryPoint)
+                {
+                    (void)nf_mcuboot_deploy_failed();
+                }
+                else
+                {
+                    (void)nf_mcuboot_deploy_ok();
+                }
 #endif
 
                 hr = g_CLR_RT_ExecutionEngine.Execute(nullptr, params.MaxContextSwitches);
@@ -406,6 +436,13 @@ void ClrStartup(CLR_SETTINGS params)
                 CLR_Debug::Printf("Done.\r\n");
 #endif
             }
+#ifdef NF_FEATURE_HAS_MCUBOOT
+            else
+            {
+                // Type load/resolve failure means validation of deployment image did not succeed.
+                (void)nf_mcuboot_deploy_failed();
+            }
+#endif
         }
 
         // process setting of power mode, if reboot was requested along with a power mode "higher" then

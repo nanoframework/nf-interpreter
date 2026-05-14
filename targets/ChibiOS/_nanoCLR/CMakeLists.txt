@@ -53,6 +53,13 @@ if(NF_FEATURE_USE_RNG)
 
 endif()
 
+# append MCUboot runtime integration only if MCUboot is enabled
+if(NF_FEATURE_HAS_MCUBOOT)
+    list(APPEND TARGET_CHIBIOS_NANOCLR_SOURCES ${CMAKE_SOURCE_DIR}/MCUboot/common/MCUboot_Runtime.c)
+    list(APPEND TARGET_CHIBIOS_NANOCLR_SOURCES ${CMAKE_SOURCE_DIR}/MCUboot/common/MCUboot_StartupPolicy.c)
+    list(APPEND TARGET_CHIBIOS_NANOCLR_SOURCES ${CMAKE_SOURCE_DIR}/MCUboot/common/MCUboot_Image.c)
+endif()
+
 # make var global
 set(TARGET_CHIBIOS_NANOCLR_SOURCES ${TARGET_CHIBIOS_NANOCLR_SOURCES} CACHE INTERNAL "make global")
 
@@ -69,6 +76,11 @@ list(APPEND TARGET_CHIBIOS_NANOCLR_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/CLR/Runt
 
 # append nano API includes
 list(APPEND TARGET_CHIBIOS_NANOCLR_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src)
+
+# append MCUboot includes if MCUboot is enabled
+if(NF_FEATURE_HAS_MCUBOOT)
+    list(APPEND TARGET_CHIBIOS_NANOCLR_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/MCUboot/include)
+endif()
 
 # make var global
 set(TARGET_CHIBIOS_NANOCLR_INCLUDE_DIRS ${TARGET_CHIBIOS_NANOCLR_INCLUDE_DIRS} CACHE INTERNAL "make global")
