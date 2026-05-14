@@ -11,14 +11,11 @@
 
 /**
  * @brief Query the current image state and boot swap type.
- * 
+ *
  * Wrapper around MCUboot's boot_swap_type_multi() API.
  * Provides stable error interface for cross-platform integration.
  */
-nf_mcuboot_error_t nf_mcuboot_image_state(
-    int image_index,
-    int *out_swap_type
-)
+nf_mcuboot_error_t nf_mcuboot_image_state(int image_index, int *out_swap_type)
 {
     // Validate image index (only 0 and 1 are supported)
     if (image_index != NF_MCUBOOT_IMAGE_CLR && image_index != NF_MCUBOOT_IMAGE_DEPLOY)
@@ -46,7 +43,7 @@ nf_mcuboot_error_t nf_mcuboot_image_state(
 
 /**
  * @brief Confirm (finalize) an image upgrade for the given image.
- * 
+ *
  * Wrapper around MCUboot's boot_set_confirmed_multi() API.
  * Per-image confirmation: confirming image 0 does not affect image 1.
  */
@@ -72,14 +69,11 @@ nf_mcuboot_error_t nf_mcuboot_confirm_image(int image_index)
 
 /**
  * @brief Set an image to pending (test) state without confirming it.
- * 
+ *
  * Wrapper around MCUboot's boot_set_pending_multi() API.
  * Per-image operation: setting image 0 pending does not affect image 1.
  */
-nf_mcuboot_error_t nf_mcuboot_set_image_pending(
-    int image_index,
-    int permanent
-)
+nf_mcuboot_error_t nf_mcuboot_set_image_pending(int image_index, int permanent)
 {
     // Validate image index
     if (image_index != NF_MCUBOOT_IMAGE_CLR && image_index != NF_MCUBOOT_IMAGE_DEPLOY)

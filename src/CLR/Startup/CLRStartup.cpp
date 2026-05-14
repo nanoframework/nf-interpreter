@@ -76,8 +76,8 @@ struct Settings
         // Get handlers for native functions in assembly
         pNativeAssmData = GetAssemblyNativeData(assm->name);
 
-        // If pNativeAssmData not nullptr - means this assembly has native calls and there is pointer to table with native
-        // calls.
+        // If pNativeAssmData not nullptr - means this assembly has native calls and there is pointer to table with
+        // native calls.
         if (pNativeAssmData != nullptr)
         {
             // First verify that check sum in assembly object matches hardcoded check sum.
