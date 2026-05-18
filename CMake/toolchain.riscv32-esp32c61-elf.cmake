@@ -3,7 +3,6 @@
 # See LICENSE file in the project root for full license information.
 #
 
-include(CMakeForceCompiler)
 
 # the name of the operating system for which CMake is to build
 set(CMAKE_SYSTEM_NAME Generic)
