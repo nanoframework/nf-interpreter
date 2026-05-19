@@ -155,26 +155,26 @@ struct Library_sys_net_native_System_Net_NetworkInformation_NetworkInterface
 
 struct Library_sys_net_native_nanoFramework_Networking_NetworkHelper
 {
-    static const int FIELD_STATIC___ipAddressAvailable = 1;
-    static const int FIELD_STATIC___networkReady = 2;
-    static const int FIELD_STATIC___requiresDateTime = 3;
-    static const int FIELD_STATIC___networkHelperStatus = 4;
-    static const int FIELD_STATIC___helperException = 5;
-    static const int FIELD_STATIC___workingNetworkInterface = 6;
-    static const int FIELD_STATIC___ipConfiguration = 7;
-    static const int FIELD_STATIC___helperInstanciated = 8;
+    static const int FIELD_STATIC___ipAddressAvailable = 0;
+    static const int FIELD_STATIC___networkReady = 1;
+    static const int FIELD_STATIC___requiresDateTime = 2;
+    static const int FIELD_STATIC___networkHelperStatus = 3;
+    static const int FIELD_STATIC___helperException = 4;
+    static const int FIELD_STATIC___workingNetworkInterface = 5;
+    static const int FIELD_STATIC___ipConfiguration = 6;
+    static const int FIELD_STATIC___helperInstanciated = 7;
 
     //--//
 };
 
 struct Library_sys_net_native_System_Net_IPAddress
 {
-    static const int FIELD_STATIC__Any = 10;
-    static const int FIELD_STATIC__Loopback = 11;
-    static const int FIELD_STATIC__Broadcast = 12;
-    static const int FIELD_STATIC__None = 13;
-    static const int FIELD_STATIC__IPv6Any = 14;
-    static const int FIELD_STATIC__IPv6Loopback = 15;
+    static const int FIELD_STATIC__Any = 8;
+    static const int FIELD_STATIC__Loopback = 9;
+    static const int FIELD_STATIC__Broadcast = 10;
+    static const int FIELD_STATIC__None = 11;
+    static const int FIELD_STATIC__IPv6Any = 12;
+    static const int FIELD_STATIC__IPv6Loopback = 13;
 
     static const int FIELD__Address = 1;
     static const int FIELD___family = 2;
@@ -227,9 +227,9 @@ struct Library_sys_net_native_System_Net_NetworkInformation_NetworkAvailabilityE
 
 struct Library_sys_net_native_System_Net_NetworkInformation_NetworkChange
 {
-    static const int FIELD_STATIC__NetworkAddressChanged = 16;
-    static const int FIELD_STATIC__NetworkAvailabilityChanged = 17;
-    static const int FIELD_STATIC__NetworkAPStationChanged = 18;
+    static const int FIELD_STATIC__NetworkAddressChanged = 14;
+    static const int FIELD_STATIC__NetworkAvailabilityChanged = 15;
+    static const int FIELD_STATIC__NetworkAPStationChanged = 16;
 
     //--//
 };
