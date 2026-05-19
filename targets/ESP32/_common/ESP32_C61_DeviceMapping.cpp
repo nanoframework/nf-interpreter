@@ -29,8 +29,7 @@ int8_t Esp32_SERIAL_DevicePinMap[UART_NUM_MAX][Esp32SerialPin_Max] = {
     {UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE},
 
     // COM 3 - all set to UART_PIN_NO_CHANGE
-    {UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE}
-};
+    {UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE}};
 
 // =============================================
 //  I2C
@@ -68,11 +67,11 @@ int8_t Esp32_LED_DevicePinMap[16] = {
 // Mapped to ESP32_C61 controllers
 // ESP32 ADC1 channels 0 - 3
 int8_t Esp32_ADC_DevicePinMap[4] = {
-    // 0   1   2   3  
+    // 0   1   2   3
     0,
     1,
     2,
-    3 };
+    3};
 
 //  I2S
 //  1 device I2S1

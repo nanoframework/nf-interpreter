@@ -23,10 +23,7 @@ int8_t Esp32_SPI_DevicePinMap[MAX_SPI_DEVICES][Esp32SpiPin_Max] = {
 // others assign as NONE because the default pins can be shared with serial flash and PSRAM
 int8_t Esp32_SERIAL_DevicePinMap[UART_NUM_MAX][Esp32SerialPin_Max] = {
     // COM 1 - pins 21, 20
-    {UART_NUM_0_TXD_DIRECT_GPIO_NUM,
-     UART_NUM_0_RXD_DIRECT_GPIO_NUM,
-     UART_PIN_NO_CHANGE,
-     UART_PIN_NO_CHANGE},
+    {UART_NUM_0_TXD_DIRECT_GPIO_NUM, UART_NUM_0_RXD_DIRECT_GPIO_NUM, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE},
 
 #if defined(UART_NUM_2)
     // COM 2 - all set to UART_PIN_NO_CHANGE
@@ -47,7 +44,7 @@ int8_t Esp32_I2C_DevicePinMap[I2C_NUM_MAX][2] = {
 //  16 channels LED1 to LED16  or PWM1 to PWM16
 //  Map pins Data & Clock
 //  Channels ( non assigned )
-int8_t Esp32_LED_DevicePinMap[TARGET_LED_NUM_PINS] = { -1 };
+int8_t Esp32_LED_DevicePinMap[TARGET_LED_NUM_PINS] = {-1};
 
 // We use "ADC1" for 20 logical channels
 // Mapped to ESP32 controllers
@@ -56,8 +53,13 @@ int8_t Esp32_LED_DevicePinMap[TARGET_LED_NUM_PINS] = { -1 };
 //  "    ADC1 channel  8 - vdd33 ?
 // TODO review ADC channels for ESP32_C5 , Internal Temperature sensor (VP) & Vdd33
 int8_t Esp32_ADC_DevicePinMap[TARGET_ADC_NUM_PINS] = {
-    // 0   1   2   3   4   5   
-    0, 1, 2, 3, 4, 5};
+    // 0   1   2   3   4   5
+    0,
+    1,
+    2,
+    3,
+    4,
+    5};
 
 //  I2S
 //  1 device I2S1
