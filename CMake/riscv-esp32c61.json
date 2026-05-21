@@ -13,7 +13,8 @@
                 "CMAKE_TOOLCHAIN_FILE": {
                     "type": "FILEPATH",
                     "value": "${sourceDir}/CMake/toolchain.riscv32-esp32c61-elf.cmake"
-                }
+                },
+                "NF_INTEROP_ASSEMBLIES": null
             }
         }
     ]
