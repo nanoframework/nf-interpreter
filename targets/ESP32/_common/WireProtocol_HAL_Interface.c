@@ -140,127 +140,35 @@ static uart_port_t ESP32_WP_UART = UART_NUM_0;
 #define ESP32_WP_TX_PIN UART_NUM_0_TXD_DIRECT_GPIO_NUM
 #endif
 
-#if CONFIG_SOC_USB_SERIAL_JTAG_SUPPORTED && CONFIG_NF_WP_TRANSPORT_USB_CDC
+#if (CONFIG_IDF_TARGET_ESP32S2 || CONFIG_IDF_TARGET_ESP32S3) && CONFIG_TINYUSB_CDC_ENABLED
+#define WP_USE_TINYUSB
+#endif
 
-#include <hal/usb_serial_jtag_ll.h>
+#if CONFIG_SOC_USB_SERIAL_JTAG_SUPPORTED
+#define WP_USE_USB_JTAG
+#endif
 
-static size_t UsbSerialWrite(const uint8_t *data, size_t dataSize, TickType_t xTicksToWait)
-{
-    ASSERT(data);
-    ASSERT(dataSize >= 1);
+// Select between USB Jtag or UART based WP transport based on where connected and configuration
+#if (CONFIG_IDF_TARGET_ESP32S2 || CONFIG_IDF_TARGET_ESP32S3) && CONFIG_TINYUSB_CDC_ENABLED
+#define WP_USE_TINYUSB
+#endif
 
-    const TickType_t startTicks = xTaskGetTickCount();
+#if CONFIG_SOC_USB_SERIAL_JTAG_SUPPORTED
+#define WP_USE_USB_JTAG
+#endif
 
-    size_t writtenTotalSize = 0;
-    do
-    {
-        if (usb_serial_jtag_ll_txfifo_writable())
-        {
-            const size_t writtenSize = usb_serial_jtag_ll_write_txfifo(data, dataSize);
-            usb_serial_jtag_ll_txfifo_flush();
-            ASSERT(writtenSize <= dataSize);
-
-            data += writtenSize;
-            dataSize -= writtenSize;
-            writtenTotalSize += writtenSize;
-
-            if (dataSize <= 0)
-            {
-                break;
-            }
-        }
-        else
-        {
-            taskYIELD();
-        }
-
-    } while (xTaskGetTickCount() - startTicks < xTicksToWait);
-
-    return writtenTotalSize;
-}
-
-static size_t UsbSerialRead(uint8_t *data, size_t dataSize, TickType_t xTicksToWait)
-{
-    ASSERT(data);
-    ASSERT(dataSize >= 1);
-
-    const TickType_t startTicks = xTaskGetTickCount();
-
-    size_t readTotalSize = 0;
-    do
-    {
-        if (usb_serial_jtag_ll_rxfifo_data_available())
-        {
-            const size_t readSize = usb_serial_jtag_ll_read_rxfifo(data, dataSize);
-            ASSERT(readSize <= dataSize);
-
-            data += readSize;
-            dataSize -= readSize;
-            readTotalSize += readSize;
-
-            if (dataSize <= 0)
-            {
-                break;
-            }
-        }
-        else
-        {
-            taskYIELD();
-        }
-
-    } while (xTaskGetTickCount() - startTicks < xTicksToWait);
-
-    return readTotalSize;
-}
-
-void WP_ReceiveBytes(uint8_t **ptr, uint32_t *size)
-{
-    (void)ESP32_WP_UART;
-
-    ASSERT(size);
-    ASSERT(ptr);
-    ASSERT(*ptr);
-
-    if (*size == 0)
-    {
-        return;
-    }
-
-    const size_t read = UsbSerialRead(*ptr, *size, pdMS_TO_TICKS(250));
-    ASSERT(read <= *size);
-
-    *ptr += read;
-    *size -= read;
-}
-
-uint8_t WP_TransmitMessage(WP_Message *message)
-{
-    (void)ESP32_WP_UART;
-
-    ASSERT(message);
-
-    if (UsbSerialWrite((const uint8_t *)&message->m_header, sizeof(message->m_header), pdMS_TO_TICKS(250)) !=
-        sizeof(message->m_header))
-    {
-        return false;
-    }
-
-    if (message->m_header.m_size && message->m_payload)
-    {
-        if (UsbSerialWrite(message->m_payload, message->m_header.m_size, pdMS_TO_TICKS(250)) !=
-            message->m_header.m_size)
-        {
-            return false;
-        }
-    }
-
-    return true;
-}
-
-#elif (CONFIG_IDF_TARGET_ESP32S2 || CONFIG_IDF_TARGET_ESP32S3) && CONFIG_TINYUSB_CDC_ENABLED
-
+// Select between USB Jtag or UART based WP transport based on where connected and configuration
 static bool WP_Port_Intitialised = false;
+static enum { WP_TRANSPORT_UART, WP_TRANSPORT_USB_JTAG, WP_TRANSPORT_TINY_USB } WP_Transport = WP_TRANSPORT_UART;
 
+// Disable TinyUSB on ESP32S3 so we can use USB/JTag instead for testing without changing Konfig config.
+// Also haven't found a way yet to detect if USB cable is connected.
+#if (CONFIG_IDF_TARGET_ESP32S3)
+#undef WP_USE_TINYUSB
+#endif
+
+// WP using TinyUSB CDC
+#if defined(WP_USE_TINYUSB)
 static void WP_Cdc_Rx_Callback(int itf, cdcacm_event_t *event)
 {
     BaseType_t shouldWakeHigherPriorityTask = pdFALSE;
@@ -273,7 +181,7 @@ static void WP_Cdc_Rx_Callback(int itf, cdcacm_event_t *event)
 }
 
 // WP using embedded USB CDC
-static bool WP_Initialise(COM_HANDLE port)
+static bool WP_InitialiseTinyUsb(COM_HANDLE port)
 {
     (void)port;
 
@@ -291,19 +199,14 @@ static bool WP_Initialise(COM_HANDLE port)
 
     ESP_ERROR_CHECK(tinyusb_cdcacm_init(&amc_cfg));
 
+    // TinyUSB CDC ACM is connected and ready to use
     WP_Port_Intitialised = true;
 
     return true;
 }
 
-void WP_ReceiveBytes(uint8_t **ptr, uint32_t *size)
+void WP_ReceiveBytesTinyUsb(uint8_t **ptr, uint32_t *size)
 {
-    // TODO: Initialise Port if not already done, Wire Protocol should be calling this directly at startup
-    if (!WP_Port_Intitialised)
-    {
-        WP_Initialise(ESP32_WP_UART);
-    }
-
     // save for later comparison
     uint32_t requestedSize = *size;
 
@@ -323,13 +226,8 @@ void WP_ReceiveBytes(uint8_t **ptr, uint32_t *size)
     }
 }
 
-uint8_t WP_TransmitMessage(WP_Message *message)
+uint8_t WP_TransmitMessageTinyUsb(WP_Message *message)
 {
-    if (!WP_Port_Intitialised)
-    {
-        WP_Initialise(ESP32_WP_UART);
-    }
-
     // write header to output stream
     if (tinyusb_cdcacm_write_queue(TINYUSB_CDC_ACM_0, (uint8_t *)&message->m_header, sizeof(message->m_header)) !=
         sizeof(message->m_header))
@@ -353,13 +251,160 @@ uint8_t WP_TransmitMessage(WP_Message *message)
 
     return true;
 }
+#endif // WP_USE_TINYUSB
 
-#else
+#if defined(WP_USE_USB_JTAG)
 
-static bool WP_Port_Intitialised = false;
+#include "driver/usb_serial_jtag.h"
 
-// WP using UART
-static bool WP_Initialise(COM_HANDLE port)
+#define USB_JTAG_BUFFER_SIZE 256
+
+static size_t UsbSerialWrite(const uint8_t *data, size_t dataSize, TickType_t xTicksToWait);
+static size_t UsbSerialRead(uint8_t *data, size_t dataSize, TickType_t xTicksToWait);
+
+static bool WP_InitialiseUsbJtag(COM_HANDLE port)
+{
+    (void)port;
+
+    // Configure USB SERIAL JTAG
+    usb_serial_jtag_driver_config_t usb_serial_jtag_config = {
+        .rx_buffer_size = USB_JTAG_BUFFER_SIZE,
+        .tx_buffer_size = USB_JTAG_BUFFER_SIZE,
+    };
+
+    if (usb_serial_jtag_driver_install(&usb_serial_jtag_config) != ESP_OK)
+    {
+        return false;
+    }
+
+    if (usb_serial_jtag_is_connected())
+    {
+        WP_Port_Intitialised = true;
+    }
+    else
+    {
+        usb_serial_jtag_driver_uninstall();
+        return false;
+    }
+
+    return true;
+}
+
+static size_t UsbSerialWrite(const uint8_t *data, size_t dataSize, TickType_t xTicksToWait)
+{
+    ASSERT(data);
+    ASSERT(dataSize >= 1);
+
+    const TickType_t startTicks = xTaskGetTickCount();
+
+    size_t writtenTotalSize = 0;
+
+    do
+    {
+        size_t sizeToWrite = dataSize;
+
+        // Make sure no bigger then buffer size, otherwise the write will fail. The rest of the data will be sent in the
+        // next loop.
+        if (sizeToWrite > USB_JTAG_BUFFER_SIZE)
+        {
+            sizeToWrite = USB_JTAG_BUFFER_SIZE;
+        }
+
+        const size_t writtenSize = usb_serial_jtag_write_bytes(data, sizeToWrite, xTicksToWait);
+        ASSERT(writtenSize <= dataSize);
+
+        data += writtenSize;
+        dataSize -= writtenSize;
+        writtenTotalSize += writtenSize;
+
+        if (dataSize <= 0)
+        {
+            break;
+        }
+    } while (xTaskGetTickCount() - startTicks < xTicksToWait);
+
+    // Flush to ensure data is sent in a timely manner
+    // usb_serial_jtag_wait_tx_done(pdMS_TO_TICKS(250));
+
+    return writtenTotalSize;
+}
+
+static size_t UsbSerialRead(uint8_t *data, size_t dataSize, TickType_t xTicksToWait)
+{
+    ASSERT(data);
+    ASSERT(dataSize >= 1);
+
+    const TickType_t startTicks = xTaskGetTickCount();
+
+    size_t readTotalSize = 0;
+    do
+    {
+        const size_t readSize = usb_serial_jtag_read_bytes(data, dataSize, xTicksToWait);
+        ASSERT(readSize <= dataSize);
+
+        data += readSize;
+        dataSize -= readSize;
+        readTotalSize += readSize;
+
+        if (dataSize <= 0)
+        {
+            break;
+        }
+    } while (xTaskGetTickCount() - startTicks < xTicksToWait);
+
+    return readTotalSize;
+}
+
+void WP_ReceiveBytesUsbJtag(uint8_t **ptr, uint32_t *size)
+{
+    ASSERT(size);
+    ASSERT(ptr);
+    ASSERT(*ptr);
+
+    if (*size == 0)
+    {
+        return;
+    }
+
+    const size_t read = UsbSerialRead(*ptr, *size, pdMS_TO_TICKS(250));
+    ASSERT(read <= *size);
+
+    *ptr += read;
+    *size -= read;
+}
+
+uint8_t WP_TransmitMessageUsbJtag(WP_Message *message)
+{
+    ASSERT(message);
+
+    if (UsbSerialWrite((const uint8_t *)&message->m_header, sizeof(message->m_header), pdMS_TO_TICKS(250)) !=
+        sizeof(message->m_header))
+    {
+        return false;
+    }
+
+    if (message->m_header.m_size && message->m_payload)
+    {
+        if (UsbSerialWrite(message->m_payload, message->m_header.m_size, pdMS_TO_TICKS(250)) !=
+            message->m_header.m_size)
+        {
+            return false;
+        }
+    }
+
+    // Flush to ensure data is sent in a timely manner
+    //   if (usb_serial_jtag_wait_tx_done(pdMS_TO_TICKS(250)) != ESP_OK)
+    //   {
+    //       return false;
+    //   }
+
+    return true;
+}
+#endif // WP_USE_USB_JTAG
+
+#pragma region WP uart
+// WP using UART (default)
+static bool WP_InitialiseUart(COM_HANDLE port)
 {
     (void)port;
 
@@ -392,14 +437,8 @@ static bool WP_Initialise(COM_HANDLE port)
     return true;
 }
 
-void WP_ReceiveBytes(uint8_t **ptr, uint32_t *size)
+void WP_ReceiveBytesUart(uint8_t **ptr, uint32_t *size)
 {
-    // TODO: Initialise Port if not already done, Wire Protocol should be calling this directly at startup
-    if (!WP_Port_Intitialised)
-    {
-        WP_Initialise(ESP32_WP_UART);
-    }
-
     // save for later comparison
     uint32_t requestedSize = *size;
 
@@ -414,13 +453,8 @@ void WP_ReceiveBytes(uint8_t **ptr, uint32_t *size)
     }
 }
 
-uint8_t WP_TransmitMessage(WP_Message *message)
+uint8_t WP_TransmitMessageUart(WP_Message *message)
 {
-    if (!WP_Port_Intitialised)
-    {
-        WP_Initialise(ESP32_WP_UART);
-    }
-
     // TODO Check if timeout required
     // write header to output stream
     if (uart_write_bytes(ESP32_WP_UART, (const char *)&message->m_header, sizeof(message->m_header)) !=
@@ -441,5 +475,83 @@ uint8_t WP_TransmitMessage(WP_Message *message)
 
     return true;
 }
+#pragma endregion WP uart
+
+#pragma region WP main interface
+static bool WP_Initialise(COM_HANDLE port)
+{
+#if defined(WP_USE_TINYUSB)
+    if (WP_InitialiseTinyUsb(port))
+    {
+        WP_Transport = WP_TRANSPORT_TINY_USB;
+        return true;
+    }
+#endif
+
+#if defined(WP_USE_USB_JTAG)
+    if (WP_InitialiseUsbJtag(port))
+    {
+        WP_Transport = WP_TRANSPORT_USB_JTAG;
+        return true;
+    }
 
 #endif
+
+    WP_Transport = WP_TRANSPORT_UART;
+    return WP_InitialiseUart(port);
+}
+
+void WP_ReceiveBytes(uint8_t **ptr, uint32_t *size)
+{
+    // TODO: Initialise Port if not already done, Wire Protocol should be calling this directly at startup
+    if (!WP_Port_Intitialised)
+    {
+        WP_Initialise(ESP32_WP_UART);
+    }
+
+    switch (WP_Transport)
+    {
+        default:
+        case WP_TRANSPORT_UART:
+            WP_ReceiveBytesUart(ptr, size);
+            break;
+
+#if defined(WP_USE_USB_JTAG)
+        case WP_TRANSPORT_USB_JTAG:
+            WP_ReceiveBytesUsbJtag(ptr, size);
+            break;
+#endif
+
+#if defined(WP_USE_TINYUSB)
+        case WP_TRANSPORT_TINY_USB:
+            WP_ReceiveBytesTinyUsb(ptr, size);
+            break;
+#endif
+    }
+}
+
+uint8_t WP_TransmitMessage(WP_Message *message)
+{
+    if (!WP_Port_Intitialised)
+    {
+        WP_Initialise(ESP32_WP_UART);
+    }
+
+    switch (WP_Transport)
+    {
+        default:
+        case WP_TRANSPORT_UART:
+            return WP_TransmitMessageUart(message);
+
+#if defined(WP_USE_USB_JTAG)
+        case WP_TRANSPORT_USB_JTAG:
+            return WP_TransmitMessageUsbJtag(message);
+#endif
+
+#if defined(WP_USE_TINYUSB)
+        case WP_TRANSPORT_TINY_USB:
+            return WP_TransmitMessageTinyUsb(message);
+#endif
+    }
+}
+#pragma endregion WP main interface
