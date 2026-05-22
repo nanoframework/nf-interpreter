@@ -140,14 +140,6 @@ static uart_port_t ESP32_WP_UART = UART_NUM_0;
 #define ESP32_WP_TX_PIN UART_NUM_0_TXD_DIRECT_GPIO_NUM
 #endif
 
-#if (CONFIG_IDF_TARGET_ESP32S2 || CONFIG_IDF_TARGET_ESP32S3) && CONFIG_TINYUSB_CDC_ENABLED
-#define WP_USE_TINYUSB
-#endif
-
-#if CONFIG_SOC_USB_SERIAL_JTAG_SUPPORTED
-#define WP_USE_USB_JTAG
-#endif
-
 // Select between USB Jtag or UART based WP transport based on where connected and configuration
 #if (CONFIG_IDF_TARGET_ESP32S2 || CONFIG_IDF_TARGET_ESP32S3) && CONFIG_TINYUSB_CDC_ENABLED
 #define WP_USE_TINYUSB
@@ -158,7 +150,7 @@ static uart_port_t ESP32_WP_UART = UART_NUM_0;
 #endif
 
 // Select between USB Jtag or UART based WP transport based on where connected and configuration
-static bool WP_Port_Intitialised = false;
+static bool WP_Port_Initialised = false;
 static enum { WP_TRANSPORT_UART, WP_TRANSPORT_USB_JTAG, WP_TRANSPORT_TINY_USB } WP_Transport = WP_TRANSPORT_UART;
 
 // Disable TinyUSB on ESP32S3 so we can use USB/JTag instead for testing without changing Konfig config.
@@ -205,7 +197,7 @@ static bool WP_InitialiseTinyUsb(COM_HANDLE port)
     return true;
 }
 
-void WP_ReceiveBytesTinyUsb(uint8_t **ptr, uint32_t *size)
+static void WP_ReceiveBytesTinyUsb(uint8_t **ptr, uint32_t *size)
 {
     // save for later comparison
     uint32_t requestedSize = *size;
@@ -226,7 +218,7 @@ void WP_ReceiveBytesTinyUsb(uint8_t **ptr, uint32_t *size)
     }
 }
 
-uint8_t WP_TransmitMessageTinyUsb(WP_Message *message)
+static uint8_t WP_TransmitMessageTinyUsb(WP_Message *message)
 {
     // write header to output stream
     if (tinyusb_cdcacm_write_queue(TINYUSB_CDC_ACM_0, (uint8_t *)&message->m_header, sizeof(message->m_header)) !=
@@ -279,7 +271,7 @@ static bool WP_InitialiseUsbJtag(COM_HANDLE port)
 
     if (usb_serial_jtag_is_connected())
     {
-        WP_Port_Intitialised = true;
+        WP_Port_Initialised = true;
     }
     else
     {
@@ -317,7 +309,7 @@ static size_t UsbSerialWrite(const uint8_t *data, size_t dataSize, TickType_t xT
         dataSize -= writtenSize;
         writtenTotalSize += writtenSize;
 
-        if (dataSize <= 0)
+        if (dataSize == 0)
         {
             break;
         }
@@ -346,7 +338,7 @@ static size_t UsbSerialRead(uint8_t *data, size_t dataSize, TickType_t xTicksToW
         dataSize -= readSize;
         readTotalSize += readSize;
 
-        if (dataSize <= 0)
+        if (dataSize == 0)
         {
             break;
         }
@@ -355,7 +347,7 @@ static size_t UsbSerialRead(uint8_t *data, size_t dataSize, TickType_t xTicksToW
     return readTotalSize;
 }
 
-void WP_ReceiveBytesUsbJtag(uint8_t **ptr, uint32_t *size)
+static void WP_ReceiveBytesUsbJtag(uint8_t **ptr, uint32_t *size)
 {
     ASSERT(size);
     ASSERT(ptr);
@@ -373,7 +365,7 @@ void WP_ReceiveBytesUsbJtag(uint8_t **ptr, uint32_t *size)
     *size -= read;
 }
 
-uint8_t WP_TransmitMessageUsbJtag(WP_Message *message)
+static uint8_t WP_TransmitMessageUsbJtag(WP_Message *message)
 {
     ASSERT(message);
 
@@ -391,12 +383,6 @@ uint8_t WP_TransmitMessageUsbJtag(WP_Message *message)
             return false;
         }
     }
-
-    // Flush to ensure data is sent in a timely manner
-    //   if (usb_serial_jtag_wait_tx_done(pdMS_TO_TICKS(250)) != ESP_OK)
-    //   {
-    //       return false;
-    //   }
 
     return true;
 }
@@ -432,12 +418,12 @@ static bool WP_InitialiseUart(COM_HANDLE port)
     // setup UART driver with UART queue
     ESP_ERROR_CHECK(uart_driver_install(ESP32_WP_UART, 256, 256, 0, NULL, ESP_INTR_FLAG_IRAM));
 
-    WP_Port_Intitialised = true;
+    WP_Port_Initialised = true;
 
     return true;
 }
 
-void WP_ReceiveBytesUart(uint8_t **ptr, uint32_t *size)
+static void WP_ReceiveBytesUart(uint8_t **ptr, uint32_t *size)
 {
     // save for later comparison
     uint32_t requestedSize = *size;
@@ -453,7 +439,7 @@ void WP_ReceiveBytesUart(uint8_t **ptr, uint32_t *size)
     }
 }
 
-uint8_t WP_TransmitMessageUart(WP_Message *message)
+static uint8_t WP_TransmitMessageUart(WP_Message *message)
 {
     // TODO Check if timeout required
     // write header to output stream
@@ -504,7 +490,7 @@ static bool WP_Initialise(COM_HANDLE port)
 void WP_ReceiveBytes(uint8_t **ptr, uint32_t *size)
 {
     // TODO: Initialise Port if not already done, Wire Protocol should be calling this directly at startup
-    if (!WP_Port_Intitialised)
+    if (!WP_Port_Initialised)
     {
         WP_Initialise(ESP32_WP_UART);
     }
@@ -532,7 +518,7 @@ void WP_ReceiveBytes(uint8_t **ptr, uint32_t *size)
 
 uint8_t WP_TransmitMessage(WP_Message *message)
 {
-    if (!WP_Port_Intitialised)
+    if (!WP_Port_Initialised)
     {
         WP_Initialise(ESP32_WP_UART);
     }
