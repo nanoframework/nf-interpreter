@@ -44,7 +44,26 @@ int8_t Esp32_I2C_DevicePinMap[I2C_NUM_MAX][2] = {
 //  16 channels LED1 to LED16  or PWM1 to PWM16
 //  Map pins Data & Clock
 //  Channels ( non assigned )
-int8_t Esp32_LED_DevicePinMap[TARGET_LED_NUM_PINS] = {-1};
+int8_t Esp32_LED_DevicePinMap[TARGET_LED_NUM_PINS] = 
+{
+    // Channels ( non assigned )
+    -1, // 1
+    -1, // 2
+    -1, // 3
+    -1, // 4
+    -1, // 5
+    -1, // 6
+    -1, // 7
+    -1, // 8
+    -1, // 9
+    -1, // 10
+    -1, // 11
+    -1, // 12
+    -1, // 13
+    -1, // 14
+    -1, // 15
+    -1, // 16
+};
 
 // We use "ADC1" for 20 logical channels
 // Mapped to ESP32 controllers
