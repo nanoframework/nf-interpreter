@@ -2475,9 +2475,21 @@ CT_ASSERT(
 #endif
 
 CT_ASSERT(
+    offsetof(CLR_RT_StackFrame, CLR_RT_StackFrame::m_owningThread) + sizeof(CLR_RT_Thread *) ==
+    offsetof(CLR_RT_StackFrame, CLR_RT_StackFrame::m_evalStack))
+CT_ASSERT(
+    offsetof(CLR_RT_StackFrame, CLR_RT_StackFrame::m_evalStack) + sizeof(CLR_RT_HeapBlock *) ==
+    offsetof(CLR_RT_StackFrame, CLR_RT_StackFrame::m_arguments))
+CT_ASSERT(
     offsetof(CLR_RT_StackFrame, m_owningThread) + sizeof(CLR_RT_Thread *) == offsetof(CLR_RT_StackFrame, m_evalStack))
 CT_ASSERT(
+    offsetof(CLR_RT_StackFrame, CLR_RT_StackFrame::m_arguments) + sizeof(CLR_RT_HeapBlock *) ==
+    offsetof(CLR_RT_StackFrame, CLR_RT_StackFrame::m_locals))
+CT_ASSERT(
     offsetof(CLR_RT_StackFrame, m_evalStack) + sizeof(CLR_RT_HeapBlock *) == offsetof(CLR_RT_StackFrame, m_arguments))
+CT_ASSERT(
+    offsetof(CLR_RT_StackFrame, CLR_RT_StackFrame::m_locals) + sizeof(CLR_RT_HeapBlock *) ==
+    offsetof(CLR_RT_StackFrame, CLR_RT_StackFrame::m_IP))
 CT_ASSERT(
     offsetof(CLR_RT_StackFrame, m_arguments) + sizeof(CLR_RT_HeapBlock *) == offsetof(CLR_RT_StackFrame, m_locals))
 CT_ASSERT(offsetof(CLR_RT_StackFrame, m_locals) + sizeof(CLR_RT_HeapBlock *) == offsetof(CLR_RT_StackFrame, m_IP))
