@@ -571,6 +571,15 @@ jobs:
           PackageName: ESP32_C3
           CMakePreset: ESP32_C3
 
+        ESP32_C5_THREAD_USB:
+          TargetBoard: ESP32_C5
+          TargetSeries: "esp32c5"
+          BuildOptions:
+          IDF_Target: esp32c5
+          TargetName: ESP32_C5_THREAD_USB
+          PackageName: ESP32_C5_THREAD_USB
+          CMakePreset: ESP32_C5_THREAD_USB
+
         ESP32_C6_THREAD:
           TargetBoard: ESP32_C6
           TargetSeries: "esp32c6"
@@ -579,6 +588,15 @@ jobs:
           TargetName: ESP32_C6_THREAD
           PackageName: ESP32_C6_THREAD
           CMakePreset: ESP32_C6_THREAD
+
+        ESP32_C61_USB:
+          TargetBoard: ESP32_C61
+          TargetSeries: "esp32c61"
+          BuildOptions:
+          IDF_Target: esp32c61
+          TargetName: ESP32_C61_USB
+          PackageName: ESP32_C61_USB
+          CMakePreset: ESP32_C61_USB
 
         ESP32_H2_THREAD:
           TargetBoard: ESP32_H2
