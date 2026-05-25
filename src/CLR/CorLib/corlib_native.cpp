@@ -33,7 +33,6 @@ static const CLR_RT_MethodHandler method_lookup[] =
     nullptr,
     nullptr,
     nullptr,
-    nullptr,
     Library_corlib_native_System_Globalization_CultureInfo::get_CurrentUICultureInternal___STATIC__SystemGlobalizationCultureInfo,
     Library_corlib_native_System_Globalization_CultureInfo::set_CurrentUICultureInternal___STATIC__VOID__SystemGlobalizationCultureInfo,
     nullptr,
@@ -964,7 +963,6 @@ static const CLR_RT_MethodHandler method_lookup[] =
     nullptr,
     nullptr,
     nullptr,
-    nullptr,
     Library_corlib_native_System_Globalization_CultureInfo::get_CurrentUICultureInternal___STATIC__SystemGlobalizationCultureInfo,
     Library_corlib_native_System_Globalization_CultureInfo::set_CurrentUICultureInternal___STATIC__VOID__SystemGlobalizationCultureInfo,
     nullptr,
@@ -1629,11 +1627,11 @@ const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_mscorlib =
 
 #if CONFIG_NF_FEATURE_SUPPORT_REFLECTION
 
-    0xE3176D8B,
+    0x2D5CA905,
 
 #elif !CONFIG_NF_FEATURE_SUPPORT_REFLECTION
 
-    0x3B9E9678,
+    0xCB139DD2,
 
 #else
 #error "CONFIG_NF_FEATURE_SUPPORT_REFLECTION has to be define either TRUE or FALSE. Check the build options."
