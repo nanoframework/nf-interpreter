@@ -3,26 +3,23 @@
 # See LICENSE file in the project root for full license information.
 #
 
+
 # native code directory
 set(BASE_PATH_FOR_THIS_MODULE "${BASE_PATH_FOR_CLASS_LIBRARIES_MODULES}/nanoFramework.Device.Can")
 
 
 # set include directories
-list(APPEND nanoFramework.Device.Can_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/src/CLR/Core)
-list(APPEND nanoFramework.Device.Can_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/src/CLR/Include)
-list(APPEND nanoFramework.Device.Can_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/src/HAL/Include)
-list(APPEND nanoFramework.Device.Can_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/src/PAL/Include)
 list(APPEND nanoFramework.Device.Can_INCLUDE_DIRS ${BASE_PATH_FOR_THIS_MODULE})
-list(APPEND nanoFramework.Device.Can_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/src/nanoFramework.Device.Can)
+list(APPEND nanoFramework.Device.Can_INCLUDE_DIRS ${TARGET_BASE_LOCATION})
+list(APPEND nanoFramework.Device.Can_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/nanoFramework.Device.Can)
 
 # source files
 set(nanoFramework.Device.Can_SRCS
 
+    nf_device_can_native_nanoFramework_Device_Can_CanController.cpp
     nf_device_can_native.cpp
 
-
-    nf_device_can_native_nanoFramework_Device_Can_CanController.cpp
-
+    target_nf_device_can_config.cpp
 )
 
 foreach(SRC_FILE ${nanoFramework.Device.Can_SRCS})
@@ -30,10 +27,10 @@ foreach(SRC_FILE ${nanoFramework.Device.Can_SRCS})
     set(nanoFramework.Device.Can_SRC_FILE SRC_FILE-NOTFOUND)
 
     find_file(nanoFramework.Device.Can_SRC_FILE ${SRC_FILE}
-        PATHS
+        PATHS 
             ${BASE_PATH_FOR_THIS_MODULE}
             ${TARGET_BASE_LOCATION}
-            ${PROJECT_SOURCE_DIR}/src/nanoFramework.Device.Can
+            ${CMAKE_SOURCE_DIR}/src/nanoFramework.Device.Can
 
         CMAKE_FIND_ROOT_PATH_BOTH
     )
@@ -41,10 +38,11 @@ foreach(SRC_FILE ${nanoFramework.Device.Can_SRCS})
     if (BUILD_VERBOSE)
         message("${SRC_FILE} >> ${nanoFramework.Device.Can_SRC_FILE}")
     endif()
-
+    
     list(APPEND nanoFramework.Device.Can_SOURCES ${nanoFramework.Device.Can_SRC_FILE})
 
 endforeach()
+
 
 include(FindPackageHandleStandardArgs)
 
