@@ -3,8 +3,8 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#ifndef _NF_DEVICE_CAN_NATIVE_H_
-#define _NF_DEVICE_CAN_NATIVE_H_
+#ifndef NF_DEVICE_CAN_NATIVE_H
+#define NF_DEVICE_CAN_NATIVE_H
 
 #include <nanoCLR_Interop.h>
 #include <nanoCLR_Runtime.h>
@@ -96,4 +96,4 @@ struct Library_nf_device_can_native_nanoFramework_Device_Can_CanMessageEvent
 
 extern const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_nanoFramework_Device_Can;
 
-#endif //_NF_DEVICE_CAN_NATIVE_H_
+#endif // NF_DEVICE_CAN_NATIVE_H
