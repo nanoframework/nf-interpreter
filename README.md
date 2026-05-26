@@ -34,6 +34,7 @@ We also have a [Community Targets](https://github.com/nanoframework/nf-Community
 | [ESP32 riscv (C3,C5,C6,P4 & H2)](#user-content-esp32-risc-v-boards) | [ESP32 M5STACK](#user-content-m5stack) | |
 | [STM32 boards](#user-content-stm32-boards-and-chip-based) | | | |
 | [Silicon Labs Giant Gecko](#user-content-silicon-labs-giant-gecko-boards) | | | |
+| [Raspberry Pi boards](#user-content-raspberry-pi-boards) | | | |
 | [NXP boards](#user-content-nxp-boards) | | | |
 | [TI boards](#user-content-ti-boards) | | | |
 
@@ -129,6 +130,13 @@ We also have a [Community Targets](https://github.com/nanoframework/nf-Community
 |:---|---|---|
 | NXP_MIMXRT1060_EVK | [![Latest Version @ Cloudsmith](https://api-prd.cloudsmith.io/v1/badges/version/net-nanoframework/nanoframework-images/raw/NXP_MIMXRT1060_EVK/latest/x/?render=true)](https://cloudsmith.io/~net-nanoframework/repos/nanoframework-images/packages/detail/raw/NXP_MIMXRT1060_EVK/latest/) | [![Latest Version @ Cloudsmith](https://api-prd.cloudsmith.io/v1/badges/version/net-nanoframework/nanoframework-images-dev/raw/NXP_MIMXRT1060_EVK/latest/x/?render=true)](https://cloudsmith.io/~net-nanoframework/repos/nanoframework-images-dev/packages/detail/raw/NXP_MIMXRT1060_EVK/latest/) |
 
+### Raspberry Pi boards
+
+| Target | Note | Stable | Preview |
+|:---|---|---|---|
+| RP_PICO_RP2040 | Raspberry Pi Pico | [![Latest Version @ Cloudsmith](https://api-prd.cloudsmith.io/v1/badges/version/net-nanoframework/nanoframework-images/raw/RP_PICO_RP2040/latest/x/?render=true)](https://cloudsmith.io/~net-nanoframework/repos/nanoframework-images/packages/detail/raw/RP_PICO_RP2040/latest/) | [![Latest Version @ Cloudsmith](https://api-prd.cloudsmith.io/v1/badges/version/net-nanoframework/nanoframework-images-dev/raw/RP_PICO_RP2040/latest/x/?render=true)](https://cloudsmith.io/~net-nanoframework/repos/nanoframework-images-dev/packages/detail/raw/RP_PICO_RP2040/latest/) |
+| RP_PICO_W_RP2040 | Raspberry Pi Pico W with WiFi | [![Latest Version @ Cloudsmith](https://api-prd.cloudsmith.io/v1/badges/version/net-nanoframework/nanoframework-images/raw/RP_PICO_W_RP2040/latest/x/?render=true)](https://cloudsmith.io/~net-nanoframework/repos/nanoframework-images/packages/detail/raw/RP_PICO_W_RP2040/latest/) | [![Latest Version @ Cloudsmith](https://api-prd.cloudsmith.io/v1/badges/version/net-nanoframework/nanoframework-images-dev/raw/RP_PICO_W_RP2040/latest/x/?render=true)](https://cloudsmith.io/~net-nanoframework/repos/nanoframework-images-dev/packages/detail/raw/RP_PICO_W_RP2040/latest/) |
+
 ### TI boards
 
 | Target | Stable | Preview |
@@ -181,6 +189,8 @@ The above .NET nanoFramework interpreter builds include support for the class li
   | TI_CC1352R1_LAUNCHXL    | :heavy_check_mark: |  |  |  |  |                    |                    |                    |  |                    |  |                    |                    |                    |
   | TI_CC3220SF_LAUNCHXL    | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |                    |                    |                    | :heavy_check_mark: |                    | :heavy_check_mark: |                    |                    |                    |
   | NXP_MIMXRT1060_EVK           | :heavy_check_mark: |  |  |  |  |  | :heavy_check_mark:  |                    | :heavy_check_mark: |                    | :heavy_check_mark: |                    | :heavy_check_mark: |                    |
+  | RP_PICO_RP2040 | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |  |  |  |  |  |  |  |  |  |
+  | RP_PICO_W_RP2040 | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |  |  |  |  |  | :heavy_check_mark: Wi-Fi |  |  |  |
 
 </details>
 
@@ -213,6 +223,9 @@ The above .NET nanoFramework interpreter builds include support for the class li
   * Target references for TI SimpleLink
     * [TI CC1352R1_LAUNCHXL](targets/TI_SimpleLink/TI_CC1352R1_LAUNCHXL)
     * [TI CC3220SF_LAUNCHXL](targets/TI_SimpleLink/TI_CC3220SF_LAUNCHXL)
+  * Target reference for Raspberry Pi (ChibiOS)
+    * [RP_PICO_RP2040](targets/ChibiOS/RP_PICO_RP2040)
+    * [RP_PICO_W_RP2040](targets/ChibiOS/RP_PICO_W_RP2040)
   * Target reference for other OSes
     * [Win32 OS (test project only at this time)](targets/os/win32)
   * [CMake files for the build system](CMake)
