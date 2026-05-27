@@ -29,7 +29,6 @@ static const CLR_RT_MethodHandler method_lookup[] =
     nullptr,
     nullptr,
     nullptr,
-    nullptr,
     Library_sys_dev_i2c_native_System_Device_I2c_I2cDevice::NativeInit___VOID,
     Library_sys_dev_i2c_native_System_Device_I2c_I2cDevice::NativeDispose___VOID,
     Library_sys_dev_i2c_native_System_Device_I2c_I2cDevice::NativeTransmit___SystemDeviceI2cI2cTransferResult__SystemReadOnlySpan_1__SystemSpan_1,
@@ -39,9 +38,9 @@ static const CLR_RT_MethodHandler method_lookup[] =
 const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_System_Device_I2c =
 {
     "System.Device.I2c",
-    0x163B8243,
+    0xACDDB100,
     method_lookup,
-    { 100, 2, 0, 0 }
+    { 100, 2, 0, 1 }
 };
 
 // clang-format on
