@@ -179,14 +179,22 @@ struct Library_sys_net_native_nanoFramework_Networking_NetworkHelper
     //--//
 };
 
+struct Library_sys_net_native_nanoFramework_Networking_NetworkHelper__O
+{
+    static const int FIELD_STATIC__WorkingThread = 8;
+
+    //--//
+
+};
+
 struct Library_sys_net_native_System_Net_IPAddress
 {
-    static const int FIELD_STATIC__Any = 8;
-    static const int FIELD_STATIC__Loopback = 9;
-    static const int FIELD_STATIC__Broadcast = 10;
-    static const int FIELD_STATIC__None = 11;
-    static const int FIELD_STATIC__IPv6Any = 12;
-    static const int FIELD_STATIC__IPv6Loopback = 13;
+    static const int FIELD_STATIC__Any = 9;
+    static const int FIELD_STATIC__Loopback = 10;
+    static const int FIELD_STATIC__Broadcast = 11;
+    static const int FIELD_STATIC__None = 12;
+    static const int FIELD_STATIC__IPv6Any = 13;
+    static const int FIELD_STATIC__IPv6Loopback = 14;
 
     static const int FIELD__Address = 1;
     static const int FIELD___family = 2;
@@ -247,9 +255,9 @@ struct Library_sys_net_native_System_Net_NetworkInformation_NetworkAvailabilityE
 
 struct Library_sys_net_native_System_Net_NetworkInformation_NetworkChange
 {
-    static const int FIELD_STATIC__NetworkAddressChanged = 14;
-    static const int FIELD_STATIC__NetworkAvailabilityChanged = 15;
-    static const int FIELD_STATIC__NetworkAPStationChanged = 16;
+    static const int FIELD_STATIC__NetworkAddressChanged = 15;
+    static const int FIELD_STATIC__NetworkAvailabilityChanged = 16;
+    static const int FIELD_STATIC__NetworkAPStationChanged = 17;
 
     //--//
 };
