@@ -1,16 +1,9 @@
-﻿//
-// Copyright (c) .NET Foundation and Contributors
-// Portions Copyright (c) Microsoft Corporation.  All rights reserved.
-// See LICENSE file in the project root for full license information.
-//
-
 #include "sys_dev_i2c_native.h"
 
 // clang-format off
 
 static const CLR_RT_MethodHandler method_lookup[] =
 {
-    nullptr,
     nullptr,
     nullptr,
     nullptr,
@@ -39,9 +32,9 @@ static const CLR_RT_MethodHandler method_lookup[] =
 const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_System_Device_I2c =
 {
     "System.Device.I2c",
-    0x163B8243,
+    0xACDDB100,
     method_lookup,
-    { 100, 2, 0, 0 }
+    { 100, 2, 0, 1 }
 };
 
 // clang-format on

@@ -8,21 +8,21 @@ set(BASE_PATH_FOR_THIS_MODULE ${BASE_PATH_FOR_CLASS_LIBRARIES_MODULES}/System.De
 
 
 # set include directories
-list(APPEND System.Device.I2c_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/CLR/Core)
-list(APPEND System.Device.I2c_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/CLR/Include)
-list(APPEND System.Device.I2c_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/HAL/Include)
-list(APPEND System.Device.I2c_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/PAL/Include)
-list(APPEND System.Device.I2c_INCLUDE_DIRS ${TARGET_BASE_LOCATION})
+list(APPEND System.Device.I2c_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/src/CLR/Core)
+list(APPEND System.Device.I2c_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/src/CLR/Include)
+list(APPEND System.Device.I2c_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/src/HAL/Include)
+list(APPEND System.Device.I2c_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/src/PAL/Include)
 list(APPEND System.Device.I2c_INCLUDE_DIRS ${BASE_PATH_FOR_THIS_MODULE})
-list(APPEND System.Device.I2c_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/System.Device.I2c)
+list(APPEND System.Device.I2c_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/src/System.Device.I2c)
 
 # source files
 set(System.Device.I2c_SRCS
 
     sys_dev_i2c_native.cpp
 
+
     sys_dev_i2c_native_System_Device_I2c_I2cDevice.cpp
-    target_system_device_i2c_config.cpp
+
 )
 
 foreach(SRC_FILE ${System.Device.I2c_SRCS})
@@ -31,9 +31,9 @@ foreach(SRC_FILE ${System.Device.I2c_SRCS})
 
     find_file(System.Device.I2c_SRC_FILE ${SRC_FILE}
         PATHS
-	        ${TARGET_BASE_LOCATION}
 	        ${BASE_PATH_FOR_THIS_MODULE}
-            ${CMAKE_SOURCE_DIR}/src/System.Device.I2c
+	        ${TARGET_BASE_LOCATION}
+            ${PROJECT_SOURCE_DIR}/src/System.Device.I2c
 
 	    CMAKE_FIND_ROOT_PATH_BOTH
     )
@@ -43,7 +43,7 @@ foreach(SRC_FILE ${System.Device.I2c_SRCS})
     endif()
 
     list(APPEND System.Device.I2c_SOURCES ${System.Device.I2c_SRC_FILE})
-    
+
 endforeach()
 
 include(FindPackageHandleStandardArgs)
