@@ -27,7 +27,7 @@ The stubs artifact ZIP contains the authoritative `.cpp`, `.h`, and `.cmake` fil
 
 ```bash
 # Download and extract
-curl -L -o /tmp/stubs.zip "<direct zip URL from issue body>"
+curl -L -o /tmp/stubs.zip "{direct-zip-url-from-issue-body}"
 unzip /tmp/stubs.zip -d /tmp/stubs
 ```
 
@@ -116,7 +116,7 @@ For each **removed** named function entry (in nf-interpreter but not in artifact
 - Add any new struct blocks, enums, or typedefs that exist in the artifact but not in nf-interpreter
 
 ### What NOT to change:
-- **Do NOT uncomment code** that is intentionally commented out. Comments such as `// moved to src\PAL\...` indicate deliberate decisions — if code is commented out in nf-interpreter but appears active in the artifact, preserve the commented-out form in nf-interpreter.
+- **Do NOT uncomment code** that is intentionally commented out. Comments such as `// moved to src/PAL/...` indicate deliberate decisions — if code is commented out in nf-interpreter but appears active in the artifact, preserve the commented-out form in nf-interpreter.
 - **Do NOT remove helper method declarations** (e.g. `static HRESULT NativeTransfer(CLR_RT_StackFrame &stack, bool bufferIs16bits);`) that exist in nf-interpreter but not in the artifact. These declarations support real implementations in the `.cpp` file.
 - **Do NOT remove** `#include` directives, `extern` references, or any other local additions that are absent from the artifact. They exist to support platform-specific implementations.
 - **Do NOT remove** commented-out blocks or documentation comments.
