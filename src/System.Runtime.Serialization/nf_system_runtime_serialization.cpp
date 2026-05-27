@@ -9,7 +9,6 @@
 
 static const CLR_RT_MethodHandler method_lookup[] =
 {
-    nullptr,
     Library_nf_system_runtime_serialization_System_Runtime_Serialization_Formatters_Binary_BinaryFormatter::Serialize___STATIC__SZARRAY_U1__OBJECT,
     Library_nf_system_runtime_serialization_System_Runtime_Serialization_Formatters_Binary_BinaryFormatter::Deserialize___STATIC__OBJECT__SZARRAY_U1,
     nullptr,
@@ -19,9 +18,9 @@ static const CLR_RT_MethodHandler method_lookup[] =
 const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_System_Runtime_Serialization =
 {
     "System.Runtime.Serialization",
-    0x33AD7648,
+    0xFAF07D96,
     method_lookup,
-    { 100, 2, 0, 0 }
+    { 100, 2, 0, 1 }
 };
 
 // clang-format on
