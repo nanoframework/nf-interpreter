@@ -34,6 +34,7 @@ nf_setup_target_build(
 if(NF_FEATURE_HAS_MCUBOOT)
     target_include_directories(${NANOCLR_PROJECT_NAME}.elf PRIVATE
         ${mcuboot_SOURCE_DIR}/boot/bootutil/include
+        ${CMAKE_SOURCE_DIR}/MCUboot/include
     )
 endif()
 

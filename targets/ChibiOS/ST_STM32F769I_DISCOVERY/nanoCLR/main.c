@@ -18,6 +18,10 @@
 #include <nanoHAL_v2.h>
 #include <targetPAL.h>
 
+#ifdef NF_FEATURE_HAS_MCUBOOT
+#include <MCUboot_StartupPolicy.h>
+#endif
+
 // need to declare the Receiver thread here
 osThreadDef(ReceiverThread, osPriorityHigh, 2048, "ReceiverThread");
 // declare CLRStartup thread here
@@ -38,6 +42,11 @@ int main(void)
     // HAL initialization, this also initializes the configured device drivers
     // and performs the board-specific initializations.
     halInit();
+
+#ifdef NF_FEATURE_HAS_MCUBOOT
+    // Initialize MCUboot startup policies for both CLR and deploy images
+    nf_mcuboot_startup_init();
+#endif
 
     // init boot clipboard
     InitBootClipboard();

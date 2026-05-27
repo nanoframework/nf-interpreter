@@ -17,6 +17,10 @@
 #include <nanoHAL_v2.h>
 #include <targetPAL.h>
 
+#ifdef NF_FEATURE_HAS_MCUBOOT
+#include <MCUboot_StartupPolicy.h>
+#endif
+
 extern int32_t hal_lfs_config();
 extern void hal_lfs_mount();
 extern void Target_ConfigMPU();
@@ -66,6 +70,11 @@ int main(void)
     // HAL initialization, this also initializes the configured device drivers
     // and performs the board-specific initializations.
     halInit();
+
+#ifdef NF_FEATURE_HAS_MCUBOOT
+    // Initialize MCUboot startup policies for both CLR and deploy images
+    nf_mcuboot_startup_init();
+#endif
 
     // init boot clipboard
     InitBootClipboard();
