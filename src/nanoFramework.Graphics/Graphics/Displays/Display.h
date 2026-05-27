@@ -1,48 +1,62 @@
 //
-// Copyright (c) 2019 The nanoFramework project contributors
+// Copyright (c) .NET Foundation and Contributors
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the
 
-#ifndef _DISPLAY_H_
-#define _DISPLAY_H_ 1
+#ifndef DISPLAY_H
+#define DISPLAY_H
 
 #include "nanoCLR_Types.h"
 
-#define LCD_COLOUR_RGB(R,G,B) ((CLR_UINT16)((((R) / 8) << 11) + (((G) / 4) << 5) + ((B) / 8)))
-
 enum DisplayOrientation : CLR_INT16
 {
-    PORTRAIT,
-    PORTRAIT180,
-    LANDSCAPE,
-    LANDSCAPE180
+    DisplayOrientation_Portrait = 0,
+    DisplayOrientation_Portrait180 = 1,
+    DisplayOrientation_Landscape = 2,
+    DisplayOrientation_Landscape180 = 3,
 };
-enum PixelFormat : CLR_UINT8 {
-    FORMAT_RGB888 = 0,         // Pixel format chosen is RGB888 : 24 bpp
-    FORMAT_RBG565 = 2,         // Pixel format chosen is RGB565 : 16 bpp
+
+enum GraphicDriverCommandType : CLR_UINT8
+{
+    GraphicDriverCommandType_Sleep = 0,
+    GraphicDriverCommandType_Command = 1,
 };
-enum PowerSaveState : CLR_UINT8 {
+
+enum SetWindowType : CLR_UINT8
+{
+    SetWindowType_NoWindowing = 0,
+    SetWindowType_X8bitsY1Bit = 1,
+    SetWindowType_X8bitsY8Bits = 2,
+    SetWindowType_X16bitsY16Bit = 3,
+};
+
+enum PixelFormat : CLR_UINT8
+{
+    FORMAT_RGB888 = 0, // Pixel format chosen is RGB888 : 24 bpp
+    FORMAT_RBG565 = 2, // Pixel format chosen is RGB565 : 16 bpp
+};
+
+enum PowerSaveState : CLR_UINT8
+{
     NORMAL = 0,
     SLEEP = 1
 };
+
 struct DisplayAttributes
 {
-    CLR_UINT8* TransferBuffer = NULL;
+    CLR_UINT8 *TransferBuffer = NULL;
     CLR_UINT32 TransferBufferSize;
     PowerSaveState PowerSave;
-    DisplayOrientation Orientation;  //Future
+    DisplayOrientation Orientation; // Future
     CLR_INT16 Height;
     CLR_INT16 Width;
     CLR_INT16 BitsPerPixel;
     CLR_INT16 LongerSide;  // Pixels
     CLR_INT16 ShorterSide; // Pixels
 };
+
 struct DisplayDriver
 {
-    //CLR_UINT32* g_FrameBuffer;         // = NULL   -- copied from netmg ( not sure it is needed based on new implementation)
-    //CLR_UINT32 g_FrameBufferSize;      // = 0;      -- copied from netmg ( not sure it is needed)
-    //bool   g_LcdInitialized;           // = false;  ---copied from netmg ( not sure it is needed)
-
     DisplayAttributes Attributes;
 
     void SetupDisplayAttributes();
@@ -50,12 +64,16 @@ struct DisplayDriver
     bool Uninitialize();
     void Clear();
     void DisplayBrightness(CLR_INT16 brightness);
-    void BitBlt(int x, int y, int width, int height, CLR_UINT32 data[]);
+    bool SetWindow(CLR_INT16 x1, CLR_INT16 y1, CLR_INT16 x2, CLR_INT16 y2);
+    void BitBlt(int srcX, int srcY, int width, int height, int stride, int screenX, int screenY, CLR_UINT32 data[]);
     void PowerSave(PowerSaveState powerState);
     void SetDefaultOrientation();
+    bool ChangeOrientation(DisplayOrientation orientation);
+
     CLR_UINT32 PixelsPerWord();
     CLR_UINT32 WidthInWords();
     CLR_UINT32 SizeInWords();
     CLR_UINT32 SizeInBytes();
 };
-#endif 
+
+#endif // DISPLAY_H

@@ -1,0 +1,21 @@
+{
+    "version": 4,
+    "include": [
+        "base.json"
+    ],
+    "configurePresets": [
+        {
+            "name": "xtensa-esp32-preset",
+            "description": "Preset for ESP32 series",
+            "hidden": true,
+            "inherits": "general-preset",
+            "cacheVariables": {
+                "CMAKE_TOOLCHAIN_FILE": {
+                    "type": "FILEPATH",
+                    "value": "${sourceDir}/CMake/toolchain.xtensa-esp32-elf.cmake"
+                },
+                "NF_INTEROP_ASSEMBLIES": null
+            }
+        }
+    ]
+}

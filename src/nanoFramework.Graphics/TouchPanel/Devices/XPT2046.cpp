@@ -1,11 +1,11 @@
 //
-// Copyright (c) 2019 The nanoFramework project contributors
+// Copyright (c) .NET Foundation and Contributors
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
 //
 
-#ifndef _XPT2046_H_
-#define _XPT2046_H_ 1
+#ifndef XPT2046_H
+#define XPT2046_H
 
 #include "TouchDevice.h"
 #include "TouchInterface.h"
@@ -15,16 +15,17 @@ extern TouchInterface g_TouchInterface;
 
 bool TouchDevice::Initialize()
 {
-    g_TouchDevice.Initialize();
     ReadsToIgnore = 1;
     ReadsPerSample = 1;
-    MaxFilterDistance = 1;   // This is actually squared value of the max distance allowed between two points.
+    MaxFilterDistance = 1; // This is actually squared value of the max distance allowed between two points.
     return true;
 }
 
 bool TouchDevice::Enable(GPIO_INTERRUPT_SERVICE_ROUTINE touchIsrProc)
 {
-    if (touchIsrProc == NULL) {};
+    if (touchIsrProc == nullptr)
+    {
+    };
     return TRUE;
 }
 
@@ -44,4 +45,4 @@ TouchPointDevice TouchDevice::GetPoint()
 
     return TouchValue;
 }
-#endif // _XPT2046_H_
+#endif // XPT2046_H

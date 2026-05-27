@@ -1,13 +1,16 @@
 ﻿//
-// Copyright (c) 2018 The nanoFramework project contributors
+// Copyright (c) .NET Foundation and Contributors
 // See LICENSE file in the project root for full license information.
 //
 
 #include "nf_networking_sntp.h"
 
+// clang-format off
+
 static const CLR_RT_MethodHandler method_lookup[] =
 {
-    NULL,
+    nullptr,
+    nullptr,
     Library_nf_networking_sntp_nanoFramework_Networking_Sntp::Start___STATIC__VOID,
     Library_nf_networking_sntp_nanoFramework_Networking_Sntp::Stop___STATIC__VOID,
     Library_nf_networking_sntp_nanoFramework_Networking_Sntp::UpdateNow___STATIC__VOID,
@@ -21,7 +24,9 @@ static const CLR_RT_MethodHandler method_lookup[] =
 const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_nanoFramework_Networking_Sntp =
 {
     "nanoFramework.Networking.Sntp",
-    0xE2D9BDED,
+    0x2D222508,
     method_lookup,
-    { 100, 0, 4, 4 }
+    { 100, 2, 0, 0 }
 };
+
+// clang-format on

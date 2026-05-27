@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2017 The nanoFramework project contributors
+// Copyright (c) .NET Foundation and Contributors
 // See LICENSE file in the project root for full license information.
 //
 
@@ -16,17 +16,14 @@
 /////////////////////////////////////////////////////////////////////////////////////////////////
 
 // provided as weak to be replaced by actual implementation by HAL interface
-__nfweak int WP_ReceiveBytes(uint8_t* ptr, unsigned short* size)
+__nfweak void WP_ReceiveBytes(uint8_t **ptr, uint32_t *size)
 {
     (void)(ptr);
     (void)(size);
-
-    // default to false
-    return false;
 }
 
 // provided as weak to be replaced by actual implementation by HAL interface
-__nfweak int WP_TransmitMessage(WP_Message* message)
+__nfweak uint8_t WP_TransmitMessage(WP_Message *message)
 {
     (void)(message);
 

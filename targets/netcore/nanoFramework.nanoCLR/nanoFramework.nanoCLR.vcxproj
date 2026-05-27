@@ -1,0 +1,342 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <VCProjectVersion>16.0</VCProjectVersion>
+    <Keyword>Win32Proj</Keyword>
+    <ProjectGuid>{06700522-0275-4149-ac58-93445add1d32}</ProjectGuid>
+    <RootNamespace>nanoCLRNative</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+    <ProjectName>nanoFramework.nanoCLR</ProjectName>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="..\..\..\nf.props" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="..\..\..\nf.props" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="..\..\..\nf.props" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="..\..\..\nf.props" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <LinkIncremental>true</LinkIncremental>
+    <OutDir>$(BinDir)</OutDir>
+    <IntDir>$(IntDir)</IntDir>
+    <TargetName>nanoFramework.nanoCLR</TargetName>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <LinkIncremental>true</LinkIncremental>
+    <OutDir>$(BinDir)</OutDir>
+    <IntDir>$(IntDir)</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <LinkIncremental>false</LinkIncremental>
+    <OutDir>$(BinDir)</OutDir>
+    <IntDir>$(IntDir)</IntDir>
+    <TargetName>nanoFramework.nanoCLR</TargetName>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <LinkIncremental>false</LinkIncremental>
+    <OutDir>$(BinDir)</OutDir>
+    <IntDir>$(IntDir)</IntDir>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>NANOCLRNATIVE_EXPORTS;_DEBUG;DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\..\..\src\CLR\Core;..\..\..\src\CLR\CorLib;..\..\..\src\CLR\Helpers\Base64;.;..\..\win32\Include;..\..\..\src\CLR\Include;..\..\..\src\HAL\Include;..\..\..\src\PAL\Include;..\..\..\src\nanoFramework.Runtime.Events;..\littlefs;$(LITTLEFS_PATH);</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <AdditionalLibraryDirectories>$(BinDir)</AdditionalLibraryDirectories>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>NANOCLRNATIVE_EXPORTS;_DEBUG;DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\..\..\src\CLR\Core;..\..\..\src\CLR\CorLib;..\..\..\src\CLR\Helpers\Base64;.;..\..\win32\Include;..\..\..\src\CLR\Include;..\..\..\src\HAL\Include;..\..\..\src\PAL\Include;..\..\..\src\nanoFramework.Runtime.Events;..\littlefs;$(LITTLEFS_PATH);</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <AdditionalLibraryDirectories>$(BinDir)</AdditionalLibraryDirectories>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>NANOCLRNATIVE_EXPORTS;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\..\..\src\CLR\Core;..\..\..\src\CLR\CorLib;..\..\..\src\CLR\Helpers\Base64;.;..\..\win32\Include;..\..\..\src\CLR\Include;..\..\..\src\HAL\Include;..\..\..\src\PAL\Include;..\..\..\src\nanoFramework.Runtime.Events;..\littlefs;$(LITTLEFS_PATH);</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalLibraryDirectories>$(BinDir)</AdditionalLibraryDirectories>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>NANOCLRNATIVE_EXPORTS;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\..\..\src\CLR\Core;..\..\..\src\CLR\CorLib;..\..\..\src\CLR\Helpers\Base64;.;..\..\win32\Include;..\..\..\src\CLR\Include;..\..\..\src\HAL\Include;..\..\..\src\PAL\Include;..\..\..\src\nanoFramework.Runtime.Events;..\littlefs;$(LITTLEFS_PATH);</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalLibraryDirectories>$(BinDir)</AdditionalLibraryDirectories>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClInclude Include="..\Include\targetHAL_Time.h" />
+    <ClInclude Include="..\Include\targetPAL_time.h" />
+    <ClInclude Include="..\Include\target_platform.h" />
+    <ClInclude Include="lfs_config.h" />
+    <ClInclude Include="stdafx.h" />
+    <ClInclude Include="nanoCLR_native.h" />
+    <ClInclude Include="platform_selector.h" />
+    <ClInclude Include="targetver.h" />
+    <ClInclude Include="target_BlockStorage.h" />
+    <ClInclude Include="Target_BlockStorage_TransientFlashDriver.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\..\src\PAL\FileSystem\nanoPAL_FileSystem.cpp" />
+    <ClCompile Include="..\..\win32\nanoCLR\Various.cpp" />
+    <ClCompile Include="Device_BlockStorage.cpp" />
+    <ClCompile Include="dllmain.cpp" />
+    <ClCompile Include="..\..\..\src\CLR\Core\NativeEventDispatcher\NativeEventDispatcher.cpp" />
+    <ClCompile Include="..\..\..\src\HAL\nanoHAL_Time.cpp" />
+    <ClCompile Include="..\..\..\src\nanoFramework.Runtime.Events\nf_rt_events_native.cpp" />
+    <ClCompile Include="..\..\..\src\nanoFramework.Runtime.Events\nf_rt_events_native_nanoFramework_Runtime_Events_EventSink.cpp" />
+    <ClCompile Include="..\..\..\src\nanoFramework.Runtime.Events\nf_rt_events_native_nanoFramework_Runtime_Events_NativeEventDispatcher.cpp" />
+    <ClCompile Include="..\..\..\src\nanoFramework.Runtime.Events\nf_rt_events_native_nanoFramework_Runtime_Events_WeakDelegate.cpp" />
+    <ClCompile Include="..\..\..\src\PAL\AsyncProcCall\AsyncCompletions.cpp" />
+    <ClCompile Include="..\..\..\src\PAL\AsyncProcCall\AsyncContinuations.cpp" />
+    <ClCompile Include="..\..\..\src\PAL\Double\nanoPAL_NativeDouble.cpp" />
+    <ClCompile Include="..\..\win32\nanoCLR\base64.cpp" />
+    <ClCompile Include="CLRStartup.cpp" />
+    <ClCompile Include="nanoCLR_native.cpp" />
+    <ClCompile Include="platform_BlockStorage.cpp" />
+    <ClCompile Include="..\..\win32\nanoCLR\targetPAL_Events.cpp" />
+    <ClCompile Include="..\..\win32\nanoCLR\FileStore_Win32.cpp" />
+    <ClCompile Include="..\..\win32\nanoCLR\Generated\CLR_RT_InteropAssembliesTable.cpp" />
+    <ClCompile Include="..\..\win32\nanoCLR\Memory.cpp" />
+    <ClCompile Include="..\..\win32\nanoCLR\PAL\COMDirector_stubs.cpp" />
+    <ClCompile Include="..\..\win32\nanoCLR\PAL\ConfigHelper_stubs.cpp" />
+    <ClCompile Include="..\..\win32\nanoCLR\PAL\time_stubs.cpp" />
+    <ClCompile Include="..\..\win32\nanoCLR\PAL\Watchdog_stubs.cpp" />
+    <ClCompile Include="..\..\win32\nanoCLR\platform_heap.cpp" />
+    <ClCompile Include="stdafx.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="..\..\win32\nanoCLR\targetPAL_Time.cpp" />
+    <ClCompile Include="..\..\win32\nanoCLR\targetRandom.cpp" />
+    <ClCompile Include="Target_BlockStorage.cpp" />
+    <ClCompile Include="..\..\win32\nanoCLR\targetHAL_Time.cpp" />
+    <ClCompile Include="Target_BlockStorage_TransientFlashDriver.cpp" />
+    <ClCompile Include="target_FileSystem.cpp" />
+    <ClCompile Include="Target_HAL.cpp" />
+    <ClCompile Include="..\..\win32\nanoCLR\WatchDog.cpp" />
+    <ClCompile Include="target_littlefs.cpp" />
+    <ClCompile Include="WireProtocol_HAL_Interface.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\src\CLR\Core\Core.vcxproj">
+      <Project>{89cf8bdb-9c8a-4d18-bc3e-4312c5bd34b1}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\src\CLR\Core\FileStream\FileStream.vcxproj">
+      <Project>{abfe159e-84d5-489e-bfe6-8a7f4b597a44}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\src\CLR\Core\Hardware\Hardware.vcxproj">
+      <Project>{5d50772e-dac8-407d-972f-37deb4450b72}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\src\CLR\Core\InterruptHandler\InterruptHandler.vcxproj">
+      <Project>{d32ee397-7e49-452d-ac95-afcb3c962e3d}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\src\CLR\Core\InterruptHandler\InterruptHandler_stub.vcxproj">
+      <Project>{5772d362-7277-49cf-9b49-42335a3154bd}</Project>
+      <LinkLibraryDependencies>false</LinkLibraryDependencies>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <Private>false</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\src\CLR\Core\NativeEventDispatcher\NativeEventDispatcher_stub.vcxproj">
+      <Project>{5406eb0c-2243-47e1-9f21-f2d7ca277092}</Project>
+      <LinkLibraryDependencies>false</LinkLibraryDependencies>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <Private>false</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\src\CLR\Core\RPC\RPC.vcxproj">
+      <Project>{ed4c887a-ec09-465b-b5d9-075450adc52d}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\src\CLR\Core\RPC\RPC_stub.vcxproj">
+      <Project>{d0b2adfe-3347-4d73-9364-9c36935d12f8}</Project>
+      <LinkLibraryDependencies>false</LinkLibraryDependencies>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <Private>false</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\src\CLR\Core\Serialization\Serialization.vcxproj">
+      <Project>{16bf6131-a3b8-4b97-b867-e45669fb48bd}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\src\CLR\CorLib\CorLib.vcxproj">
+      <Project>{58e950cc-2ff6-423c-b006-a70a19272f20}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\src\CLR\Debugger\Debugger.vcxproj">
+      <Project>{dd397ec4-844b-4b59-a67b-cad6b46f1f00}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\src\CLR\Debugger\Debugger_stub.vcxproj">
+      <Project>{6dabcbf1-245a-4e76-bd36-8bc300c7dd82}</Project>
+      <LinkLibraryDependencies>false</LinkLibraryDependencies>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <Private>false</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\src\CLR\Diagnostics\Diagnostics.vcxproj">
+      <Project>{a5e9ae41-f4fa-40ce-ad82-a7861eba007b}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\src\CLR\Diagnostics\Diagnostics_stub.vcxproj">
+      <Project>{c97a9845-02dc-46e4-b219-bf5ea8fb28e3}</Project>
+      <LinkLibraryDependencies>false</LinkLibraryDependencies>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <Private>false</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\src\CLR\Messaging\Messaging.vcxproj">
+      <Project>{131001e3-0201-451f-a87b-951d1c5c3eee}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\src\CLR\Messaging\Messaging_stub.vcxproj">
+      <Project>{8acd05e8-42fb-4a49-9d8b-79239f0eed25}</Project>
+      <LinkLibraryDependencies>false</LinkLibraryDependencies>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <Private>false</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\src\CLR\StartUp\StartUp.vcxproj">
+      <Project>{2a840dc3-ffa8-4562-bd13-ab2b0ba02cb6}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\src\CLR\System.Math\System.Math.vcxproj">
+      <Project>{d3f92f34-63db-446f-bd0b-851ad0069805}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\src\CLR\WireProtocol\WireProtocol.vcxproj">
+      <Project>{2337c4a4-3ab4-4014-9c29-9ebe32f4510e}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\src\DeviceInterfaces\Networking.Sntp\Networking.Sntp.vcxproj">
+      <Project>{84c62efc-dba2-4d47-bb81-322e8902c6d6}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\src\DeviceInterfaces\System.Net\System.Net.vcxproj">
+      <Project>{87b3b6fb-ae1f-4777-abbf-3e42e0deb336}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\src\nanoFramework.ResourceManager\nanoFramework.ResourceManager.vcxproj">
+      <Project>{4f6dd35b-a0c8-47ee-880a-1224fade9276}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\src\nanoFramework.Runtime.Native\Runtime.Native.vcxproj">
+      <Project>{b829e436-91ea-46b3-949b-3273211c8f56}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\src\nanoFramework.System.Collections\System.Collections.vcxproj">
+      <Project>{091562a5-5c72-4115-a053-daf183a3b45b}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\src\nanoFramework.System.IO.Hashing\System.IO.Hashing.vcxproj">
+      <Project>{856fbb90-ae1d-4f23-a919-53727e0e9bc6}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\src\nanoFramework.System.Text\System.Text.vcxproj">
+      <Project>{70922447-ebf0-4473-b014-776f8c9426e7}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\src\System.Device.Gpio\System.Device.Gpio.vcxproj">
+      <Project>{830a7e28-7b2b-4be6-8888-a39775a0092a}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\src\System.Device.I2c\System.Device.I2c.vcxproj">
+      <Project>{e9ae1af4-6b6a-4e10-b136-7a8affc5b910}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\src\System.Device.Spi\System.Device.Spi.vcxproj">
+      <Project>{197c5bb5-72d2-4634-a5f8-8443dbf39985}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\src\System.IO.FileSystem\System.IO.FileSystem.vcxproj">
+      <Project>{8fd84749-23ec-491c-9c21-41dbd72ba9f4}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\src\System.IO.Ports\System.IO.Ports.vcxproj">
+      <Project>{46556afc-c248-4082-abe6-9b07f4e57579}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\src\System.Runtime.Serialization\System.Runtime.Serialization.vcxproj">
+      <Project>{c9264d0a-ac25-46b0-bd08-4a3252427f19}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\littlefs\littlefs.vcxproj">
+      <Project>{5b70a795-a6f2-44df-8566-5d68d9e892db}</Project>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+  <Target Name="LITTLEFS_PATH_verification" Condition=" '$(LITTLEFS_PATH)' == '' " BeforeTargets="ClCompile">
+    <Error Text="Assign the path of a clone of the littlefs repository to the LITTLEFS_PATH environment variable." />
+  </Target>
+</Project>

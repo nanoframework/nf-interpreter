@@ -1,0 +1,146 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "ESP32_S2",
+            "type": "cppdbg",
+            "request": "launch",
+            "MIMode": "gdb",
+            "miDebuggerPath": "<absolute-path-to-the-esp32-toolchain-folder-mind-the-forward-slashes>/xtensa-esp32s2-elf/bin/xtensa-esp32-elf-gdb.exe",
+            "stopAtEntry": true,
+            "program": "${workspaceFolder}/build/nanoCLR.elf",
+            "setupCommands": [
+                {
+                    "description": "",
+                    "text": "set logging on"
+                },
+                {
+                    "description": "",
+                    "text": "target extended-remote localhost:3333"
+                },
+                {
+                    "description": "",
+                    "text": "file ${workspaceFolder}/build/nanoCLR.elf"
+                },
+                {
+                    "description": "",
+                    "text": "monitor reset halt"
+                },
+                {
+                    "description": "",
+                    "text": "thb app_main"
+                },
+                {
+                    "description": "",
+                    "text": "x $a1=0"
+                }
+            ],
+            "launchCompleteCommand": "exec-run",
+            "debugServerPath": "<absolute-path-to-esp32-openocd-mind-the-forward-slashes>/bin/openocd.exe",
+            "debugServerArgs": "-s \"<absolute-path-to-esp32-openocd-mind-the-forward-slashes>/share/openocd/scripts/\" -f board/esp32-solo-1.cfg",
+            "serverStarted": "Info : .*Tensilica.*0x1.",
+            "filterStderr": true,
+            "externalConsole": true,
+            "cwd": "${cwd}",
+            "logging": {
+                "trace": true,
+                "traceResponse": true,
+                "engineLogging": true,
+                "programOutput": true,
+                "exceptions": true,
+                "moduleLoad": true
+            }
+        },
+        {
+            "name": "ESP32_WROOM_32 - OLimex OCD-H",
+            "type": "cppdbg",
+            "request": "launch",
+            "MIMode": "gdb",
+            "miDebuggerPath": "<absolute-path-to-the-esp32-toolchain-folder-mind-the-forward-slashes>/xtensa-esp32-elf/bin/xtensa-esp32-elf-gdb.exe",
+            "stopAtEntry": true,
+            "program": "${workspaceFolder}/build/nanoCLR.elf",
+            "setupCommands": [
+                {
+                    "description": "",
+                    "text": "set logging on"
+                },
+                {
+                    "description": "",
+                    "text": "target extended-remote localhost:3333"
+                },
+                {
+                    "description": "",
+                    "text": "file ${workspaceFolder}/build/nanoCLR.elf"
+                },
+                {
+                    "description": "",
+                    "text": "monitor reset halt"
+                },
+                {
+                    "description": "",
+                    "text": "thb app_main"
+                },
+                {
+                    "description": "",
+                    "text": "x $a1=0"
+                }
+            ],
+            "launchCompleteCommand": "exec-run",
+            "debugServerPath": "<absolute-path-to-esp32-openocd-mind-the-forward-slashes>/bin/openocd.exe",
+            "debugServerArgs": "-s \"<absolute-path-to-esp32-openocd-mind-the-forward-slashes>/share/openocd/scripts/\" -f interface/ftdi/olimex-arm-usb-ocd-h.cfg -f target/esp32.cfg -c \"adapter_khz 3000\" ",
+            "serverStarted": "Info : .*Tensilica.*0x1.",
+            "filterStderr": true,
+            "externalConsole": true,
+            "cwd": "${cwd}",
+            "logging": {
+                "trace": false,
+                "traceResponse": false,
+                "engineLogging": false,
+                "programOutput": true,
+                "exceptions": true,
+                "moduleLoad": false
+            }
+        },
+        {
+            "name": "ESP32_WROOM_32 - Segger JLink",
+            "type": "cppdbg",
+            "request": "launch",
+            "MIMode": "gdb",
+            "miDebuggerPath": "<absolute-path-to-the-esp32-toolchain-folder-mind-the-forward-slashes>/xtensa-esp32-elf/bin/xtensa-esp32-elf-gdb.exe",
+            "stopAtEntry": true,
+            "program": "${workspaceFolder}/build/nanoCLR.elf",
+            "setupCommands": [
+                {
+                    "text": "set logging on"
+                },
+                {
+                    "text": "target extended-remote localhost:3333"
+                },
+                {
+                    "text": "file ${workspaceFolder}/build/nanoCLR.elf"
+                },
+                {
+                    "text": "monitor reset halt"
+                },
+                {
+                    "text": "x $a1=0"
+                }
+            ],
+            "launchCompleteCommand": "exec-run",
+            "debugServerPath": "<absolute-path-to-esp32-openocd-mind-the-forward-slashes>/bin/openocd.exe",
+            "debugServerArgs": "-s \"<absolute-path-to-esp32-openocd-mind-the-forward-slashes>/share/openocd/scripts/\" -f interface/jlink.cfg -f target/esp32.cfg -c \"adapter_khz 3000\" ",
+            "serverStarted": "Info : .*Tensilica.*0x1.",
+            "filterStderr": true,
+            "externalConsole": true,
+            "cwd": "${cwd}",
+            "logging": {
+                "trace": false,
+                "traceResponse": false,
+                "engineLogging": false,
+                "programOutput": true,
+                "exceptions": true,
+                "moduleLoad": false
+            }
+        }
+    ]
+}

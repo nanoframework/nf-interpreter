@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project DefaultTargets="Build" ToolsVersion="Current" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
       <Configuration>Debug</Configuration>
@@ -19,7 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\..\targets\os\win32\Include\target_os.h" />
+    <ClInclude Include="..\..\..\targets\win32\Include\target_os.h" />
     <ClInclude Include="CorLib.h" />
     <ClInclude Include="corlib_native.h" />
   </ItemGroup>
@@ -30,7 +30,6 @@
     <ClCompile Include="corlib_native_System_Attribute.cpp" />
     <ClCompile Include="corlib_native_System_BitConverter.cpp" />
     <ClCompile Include="corlib_native_System_Collections_ArrayList.cpp" />
-    <ClCompile Include="corlib_native_System_Console.cpp" />
     <ClCompile Include="corlib_native_System_Convert.cpp" />
     <ClCompile Include="corlib_native_System_DateTime.cpp" />
     <ClCompile Include="corlib_native_System_Delegate.cpp" />
@@ -49,6 +48,7 @@
     <ClCompile Include="corlib_native_System_Number.cpp" />
     <ClCompile Include="corlib_native_System_Object.cpp" />
     <ClCompile Include="corlib_native_System_Random.cpp" />
+    <ClCompile Include="corlib_native_System_ReadOnlySpan_1.cpp" />
     <ClCompile Include="corlib_native_System_Reflection_Assembly.cpp" />
     <ClCompile Include="corlib_native_System_Reflection_Binder.cpp" />
     <ClCompile Include="corlib_native_System_Reflection_ConstructorInfo.cpp" />
@@ -60,12 +60,15 @@
     <ClCompile Include="corlib_native_System_Reflection_RuntimeMethodInfo.cpp" />
     <ClCompile Include="corlib_native_System_RuntimeType.cpp" />
     <ClCompile Include="corlib_native_System_Runtime_CompilerServices_RuntimeHelpers.cpp" />
+    <ClCompile Include="corlib_native_System_Runtime_CompilerServices_Unsafe.cpp" />
     <ClCompile Include="corlib_native_System_Runtime_Remoting_RemotingServices.cpp" />
+    <ClCompile Include="corlib_native_System_Span_1.cpp" />
     <ClCompile Include="corlib_native_System_String.cpp" />
     <ClCompile Include="corlib_native_System_Threading_AutoResetEvent.cpp" />
     <ClCompile Include="corlib_native_System_Threading_Interlocked.cpp" />
     <ClCompile Include="corlib_native_System_Threading_ManualResetEvent.cpp" />
     <ClCompile Include="corlib_native_System_Threading_Monitor.cpp" />
+    <ClCompile Include="corlib_native_System_Threading_SpinWait.cpp" />
     <ClCompile Include="corlib_native_System_Threading_Thread.cpp" />
     <ClCompile Include="corlib_native_System_Threading_Timer.cpp" />
     <ClCompile Include="corlib_native_System_Threading_WaitHandle.cpp" />
@@ -78,32 +81,32 @@
     <ProjectGuid>{58E950CC-2FF6-423C-B006-A70A19272F20}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>CorLib</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0.17763.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
@@ -151,8 +154,8 @@
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>NANOCLR_REFLECTION=TRUE;WIN32;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\..\targets\os\win32\Include;..\Include;..\..\HAL\Include;..\..\PAL\Include;..\..\CLR\Helpers\Base64</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_DEBUG;DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\..\..\targets\win32\Include;..\..\CLR\Helpers\nanoprintf;..\Include;..\..\HAL\Include;..\..\PAL\Include;..\..\CLR\Helpers\Base64;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -164,7 +167,8 @@
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>NANOCLR_REFLECTION=TRUE;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_DEBUG;DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\..\..\targets\win32\Include;..\..\CLR\Helpers\nanoprintf;..\Include;..\..\HAL\Include;..\..\PAL\Include;..\..\CLR\Helpers\Base64;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -178,8 +182,8 @@
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>NANOCLR_REFLECTION=TRUE;WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\..\targets\os\win32\Include;..\Include;..\..\HAL\Include;..\..\PAL\Include;..\..\CLR\Helpers\Base64</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\..\..\targets\win32\Include;..\..\CLR\Helpers\nanoprintf;..\Include;..\..\HAL\Include;..\..\PAL\Include;..\..\CLR\Helpers\Base64;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -195,7 +199,8 @@
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>NANOCLR_REFLECTION=TRUE;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\..\..\targets\win32\Include;..\..\CLR\Helpers\nanoprintf;..\Include;..\..\HAL\Include;..\..\PAL\Include;..\..\CLR\Helpers\Base64;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>

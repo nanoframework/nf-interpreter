@@ -1,0 +1,24 @@
+# Copyright (c) .NET Foundation and Contributors
+# See LICENSE file in the project root for full license information.
+
+# Installs Python and kconfiglib for Kconfig-based target configuration.
+# Used by non-ESP32 platforms. ESP32 builds get kconfiglib from IDF's esp_kconfiglib.
+
+parameters:
+  - name: repoDirectory
+    type: string
+    default: $(Build.SourcesDirectory)
+
+steps:
+  - task: UsePythonVersion@0
+    displayName: Set Python to v3.11
+    inputs:
+      versionSpec: "3.11"
+      addToPath: true
+
+  - task: PowerShell@2
+    displayName: Install kconfiglib
+    inputs:
+      targetType: "inline"
+      script: |
+        python -m pip install --quiet -r "${{ parameters.repoDirectory }}/requirements.txt"

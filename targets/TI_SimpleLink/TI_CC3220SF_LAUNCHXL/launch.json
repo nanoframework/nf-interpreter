@@ -1,0 +1,50 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "TI_CC3220SF_LAUNCHXL nanoCLR",
+            "type": "cppdbg",
+            "request": "launch",
+            "MIMode": "gdb",
+            "miDebuggerPath": "<absolute-path-to-the-toolchain-folder-mind-the-forward-slashes>/bin/arm-none-eabi-gdb.exe",
+            "program": "${workspaceRoot}/build/nanoCLR.elf",
+            "setupCommands": [
+                {
+                    "text": "-target-select remote localhost:3333"
+                },
+                {
+                    "text": "-file-exec-and-symbols <path-to-the-repo-root-mind-the-forward-slash>/build/nanoCLR.elf"
+                },
+                {
+                    "text": "-interpreter-exec console \"monitor endian little\""
+                },
+                {
+                    "text": "-interpreter-exec console \"monitor reset\""
+                },
+                {
+                    "text": "-interpreter-exec console \"monitor halt\""
+                },
+                {
+                    "text": "-interpreter-exec console \"monitor arm semihosting enable\""
+                },
+                {
+                    "text": "-target-download"
+                }
+            ],
+            "logging": {
+                "moduleLoad": false,
+                "trace": false,
+                "engineLogging": false,
+                "programOutput": true,
+                "exceptions": true
+            },
+            "debugServerPath": "<absolute-path-to-openocd-mind-the-forward-slashes>/bin/openocd.exe",
+            "debugServerArgs": "-s \"<absolute-path-to-openocd-mind-the-forward-slashes>/share/openocd/scripts/\" -f board/ti_cc3220sf_launchpad.cfg",
+            "serverStarted": "Listening on port 3333 for gdb connections",
+            "filterStderr": true,
+            "externalConsole": false,
+            "stopAtEntry": true,
+            "cwd": "${cwd}"
+        }
+    ]
+}

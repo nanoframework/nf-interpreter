@@ -1,0 +1,2 @@
+# Python dependencies for nanoFramework Kconfig configuration system
+kconfiglib>=14.1.0

@@ -1,5 +1,5 @@
-//
-// Copyright (c) 2018 The nanoFramework project contributors
+﻿//
+// Copyright (c) .NET Foundation and Contributors
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
 //
@@ -10,6 +10,11 @@
 
 static const CLR_RT_MethodHandler method_lookup[] =
 {
+    nullptr,
+    nullptr,
+    nullptr,
+    nullptr,
+    nullptr,
     nullptr,
     nullptr,
     nullptr,
@@ -355,9 +360,9 @@ static const CLR_RT_MethodHandler method_lookup[] =
 const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_System_Net =
 {
     "System.Net",
-    0xFD3B5E5F,
+    0x48CC063D,
     method_lookup,
-    { 100, 20, 0, 2 }
+    { 100, 20, 0, 1 }
 };
 
 // clang-format on

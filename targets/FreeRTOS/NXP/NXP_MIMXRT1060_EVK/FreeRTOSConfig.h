@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2019 The nanoFramework project contributors
+// Copyright (c) .NET Foundation and Contributors
 // Portions Copyright (C) 2017 Amazon.com, Inc. or its affiliates. All rights reserved.
 // See LICENSE file in the project root for full license information.
 //

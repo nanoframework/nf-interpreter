@@ -1,7 +1,10 @@
 #
-# Copyright (c) 2019 The nanoFramework project contributors
+# Copyright (c) .NET Foundation and Contributors
 # See LICENSE file in the project root for full license information.
 #
+
+include(FetchContent)
+FetchContent_GetProperties(simplelinkcc13xx_26xxsdk)
 
 ###################################################################################################################################
 # WHEN ADDING A NEW series add the respective name to the list below along with the CMake files with GCC options and source files
@@ -9,7 +12,7 @@
 
 # check if the series name is supported 
 
-set(TI_SIMPLELINK_SUPPORTED_SERIES "CC13x2_26x2" "CC32xx" CACHE INTERNAL "supported TI series names")
+set(TI_SIMPLELINK_SUPPORTED_SERIES "CC13X2" "CC32xx" CACHE INTERNAL "supported TI series names")
 
 list(FIND TI_SIMPLELINK_SUPPORTED_SERIES ${TARGET_SERIES} TARGET_SERIES_NAME_INDEX)
 if(TI_SIMPLELINK_SUPPORTED_SERIES EQUAL -1)
@@ -28,9 +31,5 @@ include(TI_SimpleLink_${TARGET_SERIES}_sources)
 include(TI_SimpleLink_${TARGET_SERIES}_GCC_options)
 
 # includes for TI_RTOS
-list(APPEND TI_SimpleLink_INCLUDE_DIRS "${PROJECT_BINARY_DIR}/SimpleLinkCC32xxSdk_Source/kernel/tirtos/packages")
-list(APPEND TI_SimpleLink_INCLUDE_DIRS "${PROJECT_BINARY_DIR}/SimpleLinkCC32xxSdk_Source/kernel/tirtos/packages/ti/sysbios")
-
-# include(FindPackageHandleStandardArgs)
-
-# FIND_PACKAGE_HANDLE_STANDARD_ARGS(TI_SimpleLink DEFAULT_MSG TI_SimpleLink_INCLUDE_DIRS TI_SimpleLink_SOURCES)
+list(APPEND TI_SimpleLink_INCLUDE_DIRS ${simplelinkcc13xx_26xxsdk_SOURCE_DIR}/kernel/tirtos/packages)
+list(APPEND TI_SimpleLink_INCLUDE_DIRS ${simplelinkcc13xx_26xxsdk_SOURCE_DIR}/kernel/tirtos/packages/ti/sysbios)

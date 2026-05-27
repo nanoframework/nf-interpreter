@@ -1,21 +1,22 @@
 //
-// Copyright (c) 2017 The nanoFramework project contributors
+// Copyright (c) .NET Foundation and Contributors
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
 //
-#ifndef _SUPPORT_NANOSUPPORT_H_
-#define _SUPPORT_NANOSUPPORT_H_
+#ifndef SUPPORT_NANOSUPPORT_H
+#define SUPPORT_NANOSUPPORT_H
 
-#include <stdint.h>
+#include <nanoCLR_Headers.h>
 
 #if defined(__cplusplus)
-extern "C" {
+extern "C"
+{
 #endif
 
-uint32_t SUPPORT_ComputeCRC(const void* rgBlock, const uint32_t nLength, const uint32_t crc);
+    uint32_t SUPPORT_ComputeCRC(const void *rgBlock, const uint32_t nLength, const uint32_t crc);
 
 #if defined(__cplusplus)
 }
 #endif
 
-#endif // _SUPPORT_NANOSUPPORT_H_
+#endif // SUPPORT_NANOSUPPORT_H

@@ -1,3 +1,9 @@
+//
+// Copyright (c) .NET Foundation and Contributors
+// Original work Copyright (c) 1994-1998, Thomas G. Lane
+// See LICENSE file in the project root for full license information.
+//
+
 /*
  * transupp.h
  *
@@ -17,8 +23,8 @@
  * jpegtran.c for an example of correct usage.
  */
 
-#ifndef _TRANSUPP_H
-#define _TRANSUPP_H
+#ifndef TRANSUPP_H
+#define TRANSUPP_H
 
  /* If you happen not to want the image transform support, disable it here */
 #ifndef TRANSFORMS_SUPPORTED
@@ -136,4 +142,5 @@ JPP((j_decompress_ptr srcinfo, JCOPY_OPTION option));
 EXTERN(void) jcopy_markers_execute
 JPP((j_decompress_ptr srcinfo, j_compress_ptr dstinfo,
     JCOPY_OPTION option));
-#endif
+
+#endif // TRANSUPP_H

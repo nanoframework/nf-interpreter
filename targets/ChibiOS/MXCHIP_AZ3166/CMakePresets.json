@@ -1,0 +1,30 @@
+{
+    "version": 4,
+    "include": [
+        "../../../CMake/arm-gcc.json",
+        "../../../config/user-tools-repos.json",
+        "../../../config/user-prefs.json"
+    ],
+    "configurePresets": [
+        {
+            "name": "MXCHIP_AZ3166",
+            "inherits": [
+                "arm-gcc-cortex-preset",
+                "user-tools-repos",
+                "user-prefs"
+            ],
+            "hidden": false,
+            "cacheVariables": {
+                "NF_TARGET_DEFCONFIG": "targets/ChibiOS/MXCHIP_AZ3166/defconfig"
+            }
+        }
+    ],
+    "buildPresets": [
+        {
+            "inherits": "base-user",
+            "name": "MXCHIP_AZ3166",
+            "displayName": "MXCHIP_AZ3166",
+            "configurePreset": "MXCHIP_AZ3166"
+        }
+    ]
+}

@@ -1,10 +1,10 @@
 //
-// Copyright (c) 2017 The nanoFramework project contributors
+// Copyright (c) .NET Foundation and Contributors
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
 //
-#ifndef _NANOCLR_WIN32_H_
-#define _NANOCLR_WIN32_H_
+#ifndef NANOCLR_WIN32_H
+#define NANOCLR_WIN32_H
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -38,5 +38,5 @@ public:
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#endif // _NANOCLR_WIN32_H_
+#endif // NANOCLR_WIN32_H
 

@@ -1,0 +1,23 @@
+#
+# Copyright (c) .NET Foundation and Contributors
+# See LICENSE file in the project root for full license information.
+#
+
+menu "ThreadX Platform"
+    depends on RTOS_THREADX
+
+config THREADX_CHIBIOS_HAL_REQUIRED
+    bool "ChibiOS HAL required (for STM32 WiFi targets)"
+    default n
+
+config THREADX_WIFI_DRIVER
+    string "WiFi driver name"
+    default ""
+
+config STM32_CUBE_PACKAGE_REQUIRED
+    bool "STM32 Cube package required"
+    default n
+
+endmenu
+
+source "targets/ThreadX/SiliconLabs/Kconfig"

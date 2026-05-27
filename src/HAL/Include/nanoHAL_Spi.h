@@ -1,11 +1,11 @@
 //
-// Copyright (c) 2020 The nanoFramework project contributors
+// Copyright (c) .NET Foundation and Contributors
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
 //
 
-#ifndef _NANOHAL_SPI_H_
-#define _NANOHAL_SPI_H_ 1
+#ifndef NANOHAL_SPI_H
+#define NANOHAL_SPI_H
 
 #include "TargetHAL_Spi.h"
 
@@ -18,9 +18,8 @@ struct nanoSPI_BusConfig
 {
     bool spiBusInited;
     int8_t devicesInUse;
-    SPI_DEVICE_CONFIGURATION deviceCongfig[MAX_SPI_DEVICES];
+    SPI_DEVICE_CONFIGURATION deviceConfig[MAX_SPI_DEVICES];
     uint32_t deviceHandles[MAX_SPI_DEVICES];
-    float byteTime[MAX_SPI_DEVICES];
     SPI_OP_STATUS spiStatus;
 };
 
@@ -53,6 +52,8 @@ HRESULT nanoSPI_CloseDevice(uint32_t handle);
 // Return the time in ms for a byte transfer
 float nanoSPI_GetByteTime(uint32_t handle);
 
+void nanoSPI_Wait_Busy(uint32_t handle);
+
 // Execute a SPI write/read operation
 // if callback is null the operation will completed as part of the call
 // if callback is not null then the job will be queued and the callback called when completed
@@ -83,4 +84,4 @@ HRESULT nanoSPI_start_nWrite_nRead(
     uint8_t *readData,
     int32_t readSize);
 
-#endif // _NANOHAL_SPI_H_
+#endif // NANOHAL_SPI_H

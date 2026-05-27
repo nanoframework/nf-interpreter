@@ -1,0 +1,26 @@
+<?xml version="1.0"?>
+<package >
+  <metadata>
+    <id>nanoFramework.Targets.ORGPAL_PALX</id>
+    <title>nanoFramework.Targets.ORGPAL_PALX</title>
+    <version>1.0.1</version>
+    <authors>nanoframework</authors>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>
+      Helper classes to use ORGPAL_PALX target in C# applications.
+    </description>
+    <releaseNotes>
+    </releaseNotes>
+    <projectUrl>https://github.com/nanoframework</projectUrl>
+    <icon>images\nf-logo.png</icon>
+    <license type="file">LICENSE.md</license>
+    <copyright>Copyright (c) .NET Foundation and Contributors</copyright>
+    <references></references>
+    <tags>nanoFramework, nano Framework, NETNF, NETMF, Micro Framework, STM32, .net, STM32F769I </tags>
+  </metadata>
+  <files>
+    <file src="ORGPAL_PALX.Adc.cs" target="content" />
+    <file src="..\..\..\..\..\assets\nf-logo.png" target="images" />
+    <file src="LICENSE.md" target="" />
+  </files>
+</package>

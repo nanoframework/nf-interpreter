@@ -1,17 +1,13 @@
 //
-// Copyright (c) 2017 The nanoFramework project contributors
+// Copyright (c) .NET Foundation and Contributors
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
 //
 
-#ifndef _NANOHAL_H_
-#define _NANOHAL_H_ 1
+#ifndef NANOHAL_H
+#define NANOHAL_H
 
-#include <stdio.h>
-#include <stdint.h>
-#include <string.h>
-#include <stdarg.h>
-#include <nanoWeak.h>
+#include <nanoCLR_Headers.h>
 #include <nanoHAL_v2.h>
 
 #if defined(PLATFORM_EMULATED_FLOATINGPOINT)
@@ -35,11 +31,11 @@
 #include <nanoHAL_Types.h>
 #include <nanoHAL_ReleaseInfo.h>
 
-//#if !defined(_WIN32) && !defined(FIQ_SAMPLING_PROFILER) && !defined(HAL_REDUCESIZE) && defined(PROFILE_BUILD)
-//#define ENABLE_NATIVE_PROFILER
-//#endif
+// #if !defined(_WIN32) && !defined(FIQ_SAMPLING_PROFILER) && !defined(HAL_REDUCESIZE) && defined(PROFILE_BUILD)
+// #define ENABLE_NATIVE_PROFILER
+// #endif
 
-//#include "..\pal\Diagnostics\Native_Profiler.h"
+// #include "..\pal\Diagnostics\Native_Profiler.h"
 
 #define NATIVE_PROFILE_CLR_DEBUGGER()
 #define NATIVE_PROFILE_CLR_UTF8_DECODER()
@@ -55,6 +51,9 @@
 #define NATIVE_PROFILE_CLR_HEAP_PERSISTENCE()
 #define NATIVE_PROFILE_CLR_IOPORT()
 #define NATIVE_PROFILE_CLR_IO()
+
+#define NATIVE_PROFILE_PAL_ASYNC_PROC_CALL()
+#define NATIVE_PROFILE_PAL_EVENTS()
 
 #if defined(_MSC_VER)
 
@@ -85,24 +84,21 @@
 
 // Macro to extract well-known system event flag ids from a COM_HANDLE
 #define ExtractEventFromTransport(x)                                                                                   \
-    (ExtractTransport(x) == USART_TRANSPORT                                                                            \
-         ? SYSTEM_EVENT_FLAG_COM_IN                                                                                    \
-         : ExtractTransport(x) == SOCKET_TRANSPORT                                                                     \
-               ? SYSTEM_EVENT_FLAG_SOCKET                                                                              \
-               : ExtractTransport(x) == GENERIC_TRANSPORT                                                              \
-                     ? SYSTEM_EVENT_FLAG_GENERIC_PORT                                                                  \
-                     : ExtractTransport(x) == DEBUG_TRANSPORT                                                          \
-                           ? SYSTEM_EVENT_FLAG_DEBUGGER_ACTIVITY                                                       \
-                           : ExtractTransport(x) == MESSAGING_TRANSPORT ? SYSTEM_EVENT_FLAG_MESSAGING_ACTIVITY : 0)
+    (ExtractTransport(x) == USART_TRANSPORT       ? SYSTEM_EVENT_FLAG_COM_IN                                           \
+     : ExtractTransport(x) == SOCKET_TRANSPORT    ? SYSTEM_EVENT_FLAG_SOCKET                                           \
+     : ExtractTransport(x) == GENERIC_TRANSPORT   ? SYSTEM_EVENT_FLAG_GENERIC_PORT                                     \
+     : ExtractTransport(x) == DEBUG_TRANSPORT     ? SYSTEM_EVENT_FLAG_DEBUGGER_ACTIVITY                                \
+     : ExtractTransport(x) == MESSAGING_TRANSPORT ? SYSTEM_EVENT_FLAG_MESSAGING_ACTIVITY                               \
+                                                  : 0)
 
 #define USART_TRANSPORT (1 << TRANSPORT_SHIFT)
-//#define COM_NULL                    ((COM_HANDLE)(USART_TRANSPORT))
+// #define COM_NULL                    ((COM_HANDLE)(USART_TRANSPORT))
 
 #define USB_TRANSPORT (2 << TRANSPORT_SHIFT)
-//#define USB_CONTROLLER_SHIFT        5
-//#define USB_CONTROLLER_MASK         0xE0
-//#define USB_STREAM_MASK             0x00FF
-//#define USB_STREAM_INDEX_MASK       0x001F
+// #define USB_CONTROLLER_SHIFT        5
+// #define USB_CONTROLLER_MASK         0xE0
+// #define USB_STREAM_MASK             0x00FF
+// #define USB_STREAM_INDEX_MASK       0x001F
 
 #define SOCKET_TRANSPORT (3 << TRANSPORT_SHIFT)
 #define COM_SOCKET_DBG   ((COM_HANDLE)(SOCKET_TRANSPORT + 1))
@@ -145,8 +141,8 @@ template <class T> class HAL_DblLinkedNode
   public:
     void Initialize()
     {
-        m_nextNode = NULL;
-        m_prevNode = NULL;
+        m_nextNode = nullptr;
+        m_prevNode = nullptr;
     }
 
     T *Next() const
@@ -169,7 +165,7 @@ template <class T> class HAL_DblLinkedNode
 
     bool IsLinked() const
     {
-        return m_nextNode != NULL;
+        return m_nextNode != nullptr;
     }
 
     //--//
@@ -195,8 +191,8 @@ template <class T> class HAL_DblLinkedNode
         if (next)
             next->m_prevNode = prev;
 
-        m_nextNode = NULL;
-        m_prevNode = NULL;
+        m_nextNode = nullptr;
+        m_prevNode = nullptr;
     }
 };
 
@@ -226,7 +222,7 @@ template <class T> class HAL_DblLinkedList
     void Initialize()
     {
         m_first = Tail();
-        m_null = NULL;
+        m_null = nullptr;
         m_last = Head();
     }
 
@@ -236,7 +232,7 @@ template <class T> class HAL_DblLinkedList
         T *ptrNext;
         int num = 0;
 
-        for (ptr = FirstNode(); (ptrNext = ptr->Next()) != NULL; ptr = ptrNext)
+        for (ptr = FirstNode(); (ptrNext = ptr->Next()) != nullptr; ptr = ptrNext)
         {
             num++;
         }
@@ -262,12 +258,12 @@ template <class T> class HAL_DblLinkedList
     T *FirstValidNode() const
     {
         T *res = m_first;
-        return res->Next() ? res : NULL;
+        return res->Next() ? res : nullptr;
     }
     T *LastValidNode() const
     {
         T *res = m_last;
-        return res->Prev() ? res : NULL;
+        return res->Prev() ? res : nullptr;
     }
 
     T *Head() const
@@ -296,7 +292,7 @@ template <class T> class HAL_DblLinkedList
     bool Exists(T *searchNode)
     {
         T *node = FirstValidNode();
-        while (node != NULL && node != searchNode)
+        while (node != nullptr && node != searchNode)
         {
             if (node == node->Next())
             {
@@ -304,7 +300,7 @@ template <class T> class HAL_DblLinkedList
             }
             node = node->Next();
         }
-        return (node == NULL ? false : true);
+        return (node == nullptr ? false : true);
     }
 #endif
 
@@ -406,7 +402,7 @@ template <typename T> class Hal_Queue_UnknownSize
     T *operator[](int index)
     {
         if (index < 0 || index >= NumberOfElements())
-            return NULL;
+            return nullptr;
 
         return &m_data[(m_reader + index) % m_size];
     }
@@ -416,7 +412,7 @@ template <typename T> class Hal_Queue_UnknownSize
         size_t oldWriter = m_writer;
 
         if (m_full)
-            return NULL;
+            return nullptr;
 
         m_writer++;
         if (m_writer == m_size)
@@ -431,7 +427,7 @@ template <typename T> class Hal_Queue_UnknownSize
     T *Peek()
     {
         if (m_writer == m_reader && !m_full)
-            return NULL;
+            return nullptr;
 
         return &m_data[m_reader];
     }
@@ -441,7 +437,7 @@ template <typename T> class Hal_Queue_UnknownSize
         size_t oldReader = m_reader;
 
         if (m_reader == m_writer && !m_full)
-            return (T *)NULL;
+            return (T *)nullptr;
 
         m_reader++;
         if (m_reader == m_size)
@@ -460,7 +456,7 @@ template <typename T> class Hal_Queue_UnknownSize
         if (m_full || (nElements == 0))
         {
             nElements = 0;
-            return NULL;
+            return nullptr;
         }
 
         if (m_writer < m_reader)
@@ -486,7 +482,7 @@ template <typename T> class Hal_Queue_UnknownSize
         size_t max = 0;
 
         if (nElements == 0)
-            return NULL;
+            return nullptr;
 
         if ((m_reader == m_writer) && !m_full)
         {
@@ -494,7 +490,7 @@ template <typename T> class Hal_Queue_UnknownSize
             // reset the reader/writer to maximize push potential
             m_reader = 0;
             m_writer = 0;
-            return NULL;
+            return nullptr;
         }
 
         if (m_writer <= m_reader)
@@ -757,12 +753,16 @@ template <typename T> class HAL_RingBuffer
             // |xxxx......xxxxxx|
 
             // store size of tail
-            size_t tailSize = _write_index - (1 * _dataSize);
+            size_t tailSize = _write_index;
+            T *tempBuffer = nullptr;
 
-            // 1st move tail to temp buffer (need to malloc first)
-            T *tempBuffer = (T *)platform_malloc(tailSize);
+            if (tailSize > 0)
+            {
+                // 1st move tail to temp buffer (need to malloc first)
+                tempBuffer = (T *)platform_malloc(tailSize);
 
-            memcpy(tempBuffer, _buffer, tailSize);
+                memcpy(tempBuffer, _buffer, tailSize);
+            }
 
             // store size of remaining buffer
             size_t headSize = _capacity - _read_index;
@@ -770,11 +770,14 @@ template <typename T> class HAL_RingBuffer
             // 2nd move head to start of buffer
             memcpy(_buffer, _buffer + _read_index, headSize);
 
-            // 3rd move temp buffer after head
-            memcpy(_buffer + headSize, tempBuffer, tailSize);
+            if (tailSize > 0)
+            {
+                // 3rd move temp buffer after head
+                memcpy(_buffer + headSize, tempBuffer, tailSize);
 
-            // free memory
-            platform_free(tempBuffer);
+                // free memory
+                platform_free(tempBuffer);
+            }
         }
 
         // adjust indexes
@@ -790,16 +793,14 @@ template <typename T> class HAL_RingBuffer
 
 //--//
 
-//#include <..\Initialization\MasterConfig.h>
+// #include <..\Initialization\MasterConfig.h>
 
 //--//
 
 // hal cleanup for CLR reboot
 
 void nanoHAL_Initialize();
-void nanoHAL_Uninitialize();
-
-void HAL_EnterBooterMode();
+void nanoHAL_Uninitialize(bool isPoweringDown);
 
 typedef void (*ON_SOFT_REBOOT_HANDLER)(void);
 
@@ -819,7 +820,7 @@ extern bool g_fDoNotUninitializeDebuggerPort;
 
 #include <nanoPAL_Network.h>
 #include <nanoPAL.h>
-//#include <drivers.h>
+// #include <drivers.h>
 
 /////////////////////////////////////////////////////////////////////
 //
@@ -827,18 +828,18 @@ extern bool g_fDoNotUninitializeDebuggerPort;
 //
 
 //// boot
-//#include <CPU_BOOT_decl.h>
+// #include <CPU_BOOT_decl.h>
 //
 //// Cache driver
-//#include <CPU_MMU_decl.h>
+// #include <CPU_MMU_decl.h>
 //
 //// Cache driver
-//#include <CPU_CACHE_decl.h>
+// #include <CPU_CACHE_decl.h>
 //
 //// Gp I/O driver
-//#include <CPU_INTC_decl.h>
+// #include <CPU_INTC_decl.h>
 //
-// Gp I/O driver
+//  Gp I/O driver
 #include <CPU_GPIO_decl.h>
 
 //
@@ -847,32 +848,32 @@ extern bool g_fDoNotUninitializeDebuggerPort;
 
 //
 //// External bus interface driver
-//#include <CPU_EBIU_decl.h>
+// #include <CPU_EBIU_decl.h>
 //
 //// Power control unit
-//#include <CPU_PCU_decl.h>
+// #include <CPU_PCU_decl.h>
 //
 //// Clock management unit driver
-//#include <CPU_CMU_decl.h>
+// #include <CPU_CMU_decl.h>
 //
 //// DMA driver
-//#include <CPU_DMA_decl.h>
+// #include <CPU_DMA_decl.h>
 //
-//#include <PerformanceCounters_decl.h>
+// #include <PerformanceCounters_decl.h>
 //
 //// Virtual Key
-//#include <VirtualKey_decl.h>
+// #include <VirtualKey_decl.h>
 //
 
 //// Power API
-//#include <Power_decl.h>
+// #include <Power_decl.h>
 
 //
 // Chipset
 //
 /////////////////////////////////////////////////////////////////////
 
-//#include <drivers.h>
+// #include <drivers.h>
 
 // platform_selector.h (from MasterConfig.h)
 
@@ -893,4 +894,4 @@ extern bool g_fDoNotUninitializeDebuggerPort;
 #error Unsupported platform
 #endif
 
-#endif // _NANOHAL_H_
+#endif // NANOHAL_H

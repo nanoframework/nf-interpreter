@@ -1,0 +1,21 @@
+{
+    "version": 4,
+    "include": [
+        "base.json"
+    ],
+    "configurePresets": [
+        {
+            "name": "xtensa-esp32s3-preset",
+            "description": "Preset for ESP32-S3 series",
+            "inherits": "general-preset",
+            "hidden": true,
+            "cacheVariables": {
+                "CMAKE_TOOLCHAIN_FILE": {
+                    "type": "FILEPATH",
+                    "value": "${sourceDir}/CMake/toolchain.xtensa-esp32s3-elf.cmake"
+                },
+                "NF_INTEROP_ASSEMBLIES": null
+            }
+        }
+    ]
+}

@@ -1,0 +1,33 @@
+#
+# Copyright (c) .NET Foundation and Contributors
+# See LICENSE file in the project root for full license information.
+#
+
+choice RTOS_CHOICE
+    prompt "RTOS"
+
+config RTOS_ESP32
+    bool "ESP32 (ESP-IDF FreeRTOS)"
+
+config RTOS_CHIBIOS
+    bool "ChibiOS"
+
+config RTOS_FREERTOS
+    bool "FreeRTOS"
+
+config RTOS_TI_SIMPLELINK
+    bool "TI SimpleLink"
+
+config RTOS_THREADX
+    bool "ThreadX"
+
+endchoice
+
+# String variable consumed by CMake
+config RTOS
+    string
+    default "ESP32"        if RTOS_ESP32
+    default "ChibiOS"      if RTOS_CHIBIOS
+    default "FreeRTOS"     if RTOS_FREERTOS
+    default "TI_SimpleLink" if RTOS_TI_SIMPLELINK
+    default "ThreadX"      if RTOS_THREADX

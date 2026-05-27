@@ -1,16 +1,13 @@
 //
-// Copyright (c) 2019 The nanoFramework project contributors
+// Copyright (c) .NET Foundation and Contributors
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
 //
 
-#ifndef _DRIVERS_GPIO_DECL_H_
-#define _DRIVERS_GPIO_DECL_H_ 1
+#ifndef DRIVERS_GPIO_DECL_H
+#define DRIVERS_GPIO_DECL_H
 
-#if defined(__GNUC__)
-#define __int64 long long
-#endif
-typedef unsigned __int64 CLR_UINT64;
+#include <nanoPackStruct.h>
 
 #define GPIO_PIN_NONE 0xFFFFFFFF
 
@@ -20,20 +17,20 @@ typedef unsigned __int64 CLR_UINT64;
 #define GPIO_ATTRIBUTE_ALTERNATE_A 0x04
 #define GPIO_ATTRIBUTE_ALTERNATE_B 0x08
 
-// from declaration at src\Windows.Devices.Gpio\win_dev_gpio_native.h
-typedef enum __nfpack GpioPinDriveMode
+// from declaration at src\System.Device.Gpio\sys_dev_gpio_native.h
+typedef enum __nfpack PinMode
 {
-    GpioPinDriveMode_Input = 0,
-    GpioPinDriveMode_InputPullDown = 1,
-    GpioPinDriveMode_InputPullUp = 2,
-    GpioPinDriveMode_Output = 3,
-    GpioPinDriveMode_OutputOpenDrain = 4,
-    GpioPinDriveMode_OutputOpenDrainPullUp = 5,
-    GpioPinDriveMode_OutputOpenSource = 6,
-    GpioPinDriveMode_OutputOpenSourcePullDown = 7,
-} GpioPinDriveMode;
+    PinMode_Input = 0,
+    PinMode_InputPullDown = 1,
+    PinMode_InputPullUp = 2,
+    PinMode_Output = 3,
+    PinMode_OutputOpenDrain = 4,
+    PinMode_OutputOpenDrainPullUp = 5,
+    PinMode_OutputOpenSource = 6,
+    PinMode_OutputOpenSourcePullDown = 7,
+} PinMode;
 
-// from declaration at src\Windows.Devices.Gpio\win_dev_gpio_native.h
+// from declaration at src\System.Device.Gpio\sys_dev_gpio_native.h
 typedef enum __nfpack GpioPinValue
 {
     GpioPinValue_Low = 0,
@@ -57,12 +54,12 @@ enum GPIO_INT_EDGE
 //     GPIO_RESISTOR Resistor;
 // };
 
-typedef void (*GPIO_INTERRUPT_SERVICE_ROUTINE)(GPIO_PIN pin, bool pinState);
+typedef void (*GPIO_INTERRUPT_SERVICE_ROUTINE)(GPIO_PIN pin, bool pinState, void *pArg);
 
 bool CPU_GPIO_Initialize();
 bool CPU_GPIO_Uninitialize();
 
-void CPU_GPIO_DisablePin(GPIO_PIN Pin, GpioPinDriveMode driveMode, uint32_t alternateFunction);
+void CPU_GPIO_DisablePin(GPIO_PIN Pin, PinMode driveMode, uint32_t alternateFunction);
 
 //
 // CPU_GPIO_EnableOutputPin
@@ -73,13 +70,13 @@ void CPU_GPIO_DisablePin(GPIO_PIN Pin, GpioPinDriveMode driveMode, uint32_t alte
 //   The number of the input pin to be enabled.
 // InitialState
 //   Inial value of pin
-// GpioPinDriveMode
+// PinMode
 //   Pin resistor driver mode
 //
 // Return Value
 //   true if the specified pin was successfully enabled as output; otherwise, false.
 //
-bool CPU_GPIO_EnableOutputPin(GPIO_PIN Pin, GpioPinValue InitialState, GpioPinDriveMode driveMode);
+bool CPU_GPIO_EnableOutputPin(GPIO_PIN Pin, GpioPinValue InitialState, PinMode driveMode);
 
 //
 // CPU_GPIO_EnableInputPin
@@ -103,17 +100,28 @@ bool CPU_GPIO_EnableOutputPin(GPIO_PIN Pin, GpioPinValue InitialState, GpioPinDr
 //
 bool CPU_GPIO_EnableInputPin(
     GPIO_PIN pinNumber,
-    CLR_UINT64 debounceTimeMilliseconds,
+    uint32_t debounceTimeMilliseconds,
     GPIO_INTERRUPT_SERVICE_ROUTINE pin_ISR,
     void *isr_Param,
     GPIO_INT_EDGE intEdge,
-    GpioPinDriveMode driveMode);
+    PinMode driveMode);
 
 //  Return current gpio pin state
 GpioPinValue CPU_GPIO_GetPinState(GPIO_PIN Pin);
 
 //  Set state of output gpio pin
 void CPU_GPIO_SetPinState(GPIO_PIN Pin, GpioPinValue PinState);
+
+//
+// CPU_GPIO_TogglePinState
+//
+// Parameters :-
+//
+// pinNumber
+//   The number of the output pin for which the state is to be toggled.
+// Return Value
+//
+void CPU_GPIO_TogglePinState(GPIO_PIN pinNumber);
 
 //  Check if pin is already reserved
 //  Returns true if pin is already reserved
@@ -129,15 +137,15 @@ int32_t CPU_GPIO_GetPinCount();
 
 // Get / Set the pin debounce time in millisecs
 uint32_t CPU_GPIO_GetPinDebounce(GPIO_PIN Pin);
-bool CPU_GPIO_SetPinDebounce(GPIO_PIN pinNumber, CLR_UINT64 debounceTimeMilliseconds);
+bool CPU_GPIO_SetPinDebounce(GPIO_PIN pinNumber, uint32_t debounceTimeMilliseconds);
 
 // Validate pin and set drive mode
 // return true if pin ok
-bool CPU_GPIO_SetDriveMode(GPIO_PIN pinNumber, GpioPinDriveMode driveMode);
+bool CPU_GPIO_SetDriveMode(GPIO_PIN pinNumber, PinMode driveMode);
 
 // Check if drive mode supported
 // return true if drive mode supported
-bool CPU_GPIO_DriveModeSupported(GPIO_PIN pinNumber, GpioPinDriveMode driveMode);
+bool CPU_GPIO_DriveModeSupported(GPIO_PIN pinNumber, PinMode driveMode);
 
 //  ==== Not implemented/used ====
 // Retrieves an array containing the attributes of all the GPIO pins.
@@ -152,4 +160,4 @@ bool CPU_GPIO_DriveModeSupported(GPIO_PIN pinNumber, GpioPinDriveMode driveMode)
 // Retrieves the GPIO attributes of a specified pin. ( none=0, input=1, output=2, altA=4, altB=8 etc )
 // uint32_t CPU_GPIO_Attributes(GPIO_PIN Pin);
 
-#endif // _DRIVERS_GPIO_DECL_H_
+#endif // DRIVERS_GPIO_DECL_H

@@ -1,28 +1,39 @@
 #
-# Copyright (c) 2017 The nanoFramework project contributors
+# Copyright (c) .NET Foundation and Contributors
 # See LICENSE file in the project root for full license information.
 #
 
 # set include directories for nanoFramework Core, CoreLib and CLR startup
 
 # include directories for Core
-list(APPEND NF_CoreCLR_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/src/CLR/Core)
-list(APPEND NF_CoreCLR_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/src/CLR/Include)
-list(APPEND NF_CoreCLR_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/src/HAL/Include)
-list(APPEND NF_CoreCLR_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/src/PAL/Include)
+list(APPEND NF_CoreCLR_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/CLR/Core)
+list(APPEND NF_CoreCLR_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/CLR/Include)
+list(APPEND NF_CoreCLR_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/HAL/Include)
+list(APPEND NF_CoreCLR_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/PAL/Include)
 
 # include directories for CoreLib
-list(APPEND NF_CoreCLR_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/src/CLR/CorLib)
+list(APPEND NF_CoreCLR_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/CLR/CorLib)
 
 # CLR startup
-list(APPEND NF_CoreCLR_INCLUDE_DIRS  ${PROJECT_SOURCE_DIR}/src/CLR/Startup)
+list(APPEND NF_CoreCLR_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/CLR/Startup)
 
 # others
-list(APPEND NF_CoreCLR_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/src/CLR/Diagnostics)
-list(APPEND NF_CoreCLR_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/src/CLR/Debugger)
-list(APPEND NF_CoreCLR_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/src/CLR/Helpers/TinyPrintf)
-list(APPEND NF_CoreCLR_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/src/CLR/Helpers/Base64)
-list(APPEND NF_CoreCLR_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/src/nanoFramework.Runtime.Native)
+list(APPEND NF_CoreCLR_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/targets/${RTOS}/_include)
+list(APPEND NF_CoreCLR_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/CLR/Diagnostics)
+list(APPEND NF_CoreCLR_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/CLR/Debugger)
+list(APPEND NF_CoreCLR_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/CLR/Helpers/NanoRingBuffer)
+list(APPEND NF_CoreCLR_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/CLR/Helpers/nanoprintf)
+list(APPEND NF_CoreCLR_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/CLR/Helpers/Base64)
+list(APPEND NF_CoreCLR_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/nanoFramework.Runtime.Events)
+list(APPEND NF_CoreCLR_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/nanoFramework.Runtime.Native)
+list(APPEND NF_CoreCLR_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/nanoFramework.System.Collections)
+list(APPEND NF_CoreCLR_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/DeviceInterfaces/Networking.Sntp)
+
+list(APPEND NF_CoreCLR_INCLUDE_DIRS ${TARGET_BASE_LOCATION})
+list(APPEND NF_CoreCLR_INCLUDE_DIRS ${TARGET_BASE_LOCATION}/nanoCLR)
+list(APPEND NF_CoreCLR_INCLUDE_DIRS ${CMAKE_BINARY_DIR}/targets/${RTOS}/${TARGET_VENDOR})
+list(APPEND NF_CoreCLR_INCLUDE_DIRS ${CMAKE_BINARY_DIR}/targets/${RTOS}/${TARGET_VENDOR}/${TARGET_BOARD})
+list(APPEND NF_CoreCLR_INCLUDE_DIRS ${CMAKE_BINARY_DIR}/targets/${RTOS}/${TARGET_VENDOR}/${TARGET_BOARD}/nanoCLR)
 
 # source files for nanoFramework Core, CoreLib and CLR startup
 set(NF_CoreCLR_SRCS
@@ -38,6 +49,7 @@ set(NF_CoreCLR_SRCS
     CLR_RT_HeapBlock_Delegate.cpp
     CLR_RT_HeapBlock_Delegate_List.cpp
     CLR_RT_HeapBlock_Finalizer.cpp
+    CLR_RT_HeapBlock_GenericInstance.cpp
     CLR_RT_HeapBlock_Lock.cpp
     CLR_RT_HeapBlock_LockRequest.cpp
     CLR_RT_HeapBlock_Node.cpp
@@ -67,7 +79,6 @@ set(NF_CoreCLR_SRCS
     TypeSystemLookup.cpp
     StringTableData.cpp
     TypeSystem.cpp
-    nanoSupport_CRC32.c
     nanoHAL_SystemInformation.cpp
     Various.cpp
 
@@ -77,7 +88,6 @@ set(NF_CoreCLR_SRCS
     corlib_native_System_Attribute.cpp
     corlib_native_System_BitConverter.cpp
     corlib_native_System_Collections_ArrayList.cpp
-    corlib_native_System_Console.cpp
     corlib_native_System_Convert.cpp
     corlib_native_System_DateTime.cpp
     corlib_native_System_Delegate.cpp
@@ -96,15 +106,19 @@ set(NF_CoreCLR_SRCS
     corlib_native_System_Number.cpp
     corlib_native_System_Object.cpp
     corlib_native_System_Random.cpp
+    corlib_native_System_ReadOnlySpan_1.cpp
     corlib_native_System_Reflection_Binder.cpp
     corlib_native_System_Reflection_MemberInfo.cpp
     corlib_native_System_Runtime_CompilerServices_RuntimeHelpers.cpp
+    corlib_native_System_Runtime_CompilerServices_Unsafe.cpp
     corlib_native_System_Runtime_Remoting_RemotingServices.cpp
     corlib_native_System_String.cpp
+    corlib_native_System_Span_1.cpp
     corlib_native_System_Threading_AutoResetEvent.cpp
     corlib_native_System_Threading_Interlocked.cpp
     corlib_native_System_Threading_ManualResetEvent.cpp
     corlib_native_System_Threading_Monitor.cpp
+    corlib_native_System_Threading_SpinWait.cpp
     corlib_native_System_Threading_Thread.cpp
     corlib_native_System_Threading_Timer.cpp
     corlib_native_System_Threading_WaitHandle.cpp
@@ -116,50 +130,57 @@ set(NF_CoreCLR_SRCS
     # CLR startup
     CLRStartup.cpp
 
-    # Messaging
-    Messaging.cpp
-
     # Runtime.Native
     nf_rt_native.cpp
-    nf_rt_native_nanoFramework_Runtime_Hardware_SystemInfo.cpp
-    nf_rt_native_nanoFramework_Runtime_Native_GC.cpp
+    nf_rt_native_nanoFramework_Runtime_Native_SystemInfo.cpp
     nf_rt_native_nanoFramework_Runtime_Native_ExecutionConstraint.cpp
     nf_rt_native_nanoFramework_Runtime_Native_Power.cpp
     nf_rt_native_nanoFramework_Runtime_Native_Rtc_stubs.cpp
-    
+    nf_rt_native_System_Environment.cpp
+
     # Core stubs
-    Hardware_stub.cpp
-    InterruptHandler_stub.cpp
-    NativeEventDispatcher_stub.cpp
     RPC_stub.cpp
-    BinaryFormatter_stub.cpp
 
     # CLR stubs
     Debugger_stub.cpp
-    Diagnostics_stub.cpp
     Messaging_stub.cpp
-    
+
     # Helpers
-    printf.c
+    nanoprintf.c
+    nanoRingBuffer.c
+    Info_Safeprintf.cpp
 
     # HAL
     nanoHAL_Time.cpp
     nanoHAL_Watchdog.c
-    
+    nanoHAL_SystemEvents.c
+
     # PAL
-    nanoPAL_BlockStorage.c
+    nanoPAL_Events.cpp
+    nanoPAL_FileSystem_stubs.cpp
     nanoPAL_NativeDouble.cpp
     nanoPAL_Network_stubs.cpp
     nanoPAL_PerformanceCounters_stubs.cpp
 
     # PAL stubs
-    Async_stubs.cpp
     COM_stubs.c
     GenericPort_stubs.c
 
-    # target specifics
-    target_BlockStorage.c
+    # other features
+    AsyncCompletions.cpp
+    NativeEventDispatcher.cpp
+    InterruptHandler.cpp
+    Hardware.cpp
 )
+
+# append CRC32, if not already included with Wire Protocol
+if(NOT WireProtocol_FOUND)
+    list(APPEND NF_CoreCLR_SRCS nanoSupport_CRC32.c)
+endif()
+
+if(NF_TRACE_TO_STDIO)
+    list(APPEND NF_CoreCLR_SRCS GenericPort_stdio.c)
+endif()
 
 # include System.Reflection API files depending on build option
 if(NF_FEATURE_SUPPORT_REFLECTION)
@@ -172,6 +193,18 @@ if(NF_FEATURE_SUPPORT_REFLECTION)
     list(APPEND NF_CoreCLR_SRCS corlib_native_System_Reflection_RuntimeMethodInfo.cpp)
     list(APPEND NF_CoreCLR_SRCS corlib_native_System_RuntimeType.cpp)
     list(APPEND NF_CoreCLR_SRCS corlib_native_System_Type.cpp)
+
+    # should we include binary serialization support?
+    if(NF_FEATURE_BINARY_SERIALIZATION)
+        list(APPEND NF_CoreCLR_SRCS BinaryFormatter.cpp)
+    else()
+        # binary serialization stubs because we're not supporting reflection
+        list(APPEND NF_CoreCLR_SRCS BinaryFormatter_stub.cpp)
+    endif()
+
+else()
+    # binary serialization stubs because we're not supporting reflection
+    list(APPEND NF_CoreCLR_SRCS BinaryFormatter_stub.cpp)
 endif()
 
 # include Collection support files depending on build option
@@ -180,7 +213,14 @@ if(API_nanoFramework.System.Collections)
     list(APPEND NF_CoreCLR_SRCS CLR_RT_HeapBlock_Stack.cpp)
 endif()
 
-# need a conditional include because of ESP32 building network as a library 
+# file system support?
+if(API_System.IO.FileSystem)
+    list(APPEND NF_CoreCLR_SRCS FileStream.cpp)
+else()
+    list(APPEND NF_CoreCLR_SRCS FileStream_stub.cpp)
+endif()
+
+# need a conditional include because of ESP32 building network as a library
 if(NOT USE_SECURITY_MBEDTLS_OPTION)
     list(APPEND NF_CoreCLR_SRCS base64.c)
 endif()
@@ -194,62 +234,121 @@ else()
     list(APPEND NF_CoreCLR_SRCS nanoHAL_ConfigurationManager_stubs.c)
 endif()
 
+# include platform implementation for Runtime_Native_Rtc
+if(EXISTS ${BASE_PATH_FOR_CLASS_LIBRARIES_MODULES}/nanoFramework.Runtime.Native/nf_rt_native_nanoFramework_Runtime_Native_Rtc.cpp)
+    list(APPEND NF_CoreCLR_SRCS nf_rt_native_nanoFramework_Runtime_Native_Rtc.cpp)
+endif()
+
 foreach(SRC_FILE ${NF_CoreCLR_SRCS})
     set(NF_CoreCLR_SRC_FILE SRC_FILE-NOTFOUND)
+
     find_file(NF_CoreCLR_SRC_FILE ${SRC_FILE}
-        PATHS 
-            
-            # Core
-            ${PROJECT_SOURCE_DIR}/src/CLR/Core
+        PATHS
 
-            # CoreLib
-            ${PROJECT_SOURCE_DIR}/src/CLR/CorLib
+        # Core
+        ${CMAKE_SOURCE_DIR}/src/CLR/Core
 
-            # CLR startup
-            ${PROJECT_SOURCE_DIR}/src/CLR/Startup
+        # CoreLib
+        ${CMAKE_SOURCE_DIR}/src/CLR/CorLib
 
-            # Runtime.Native
-            ${PROJECT_SOURCE_DIR}/src/nanoFramework.Runtime.Native
+        # CLR startup
+        ${CMAKE_SOURCE_DIR}/src/CLR/Startup
 
-            # Core stubs
-            ${PROJECT_SOURCE_DIR}/src/CLR/Core/Hardware
-            ${PROJECT_SOURCE_DIR}/src/CLR/Core/InterruptHandler
-            ${PROJECT_SOURCE_DIR}/src/CLR/Core/NativeEventDispatcher
-            ${PROJECT_SOURCE_DIR}/src/CLR/Core/RPC
-            ${PROJECT_SOURCE_DIR}/src/CLR/Core/Serialization
+        # Runtime.Native
+        ${CMAKE_SOURCE_DIR}/src/nanoFramework.Runtime.Native
 
-            # CLR stubs
-            ${PROJECT_SOURCE_DIR}/src/CLR/Debugger
-            ${PROJECT_SOURCE_DIR}/src/CLR/Diagnostics
-            ${PROJECT_SOURCE_DIR}/src/CLR/Messaging
-            
-            # Helpers
-            ${PROJECT_SOURCE_DIR}/src/CLR/Helpers/TinyPrintf
-            ${PROJECT_SOURCE_DIR}/src/CLR/Helpers/Base64
+        # Core stubs
+        ${CMAKE_SOURCE_DIR}/src/CLR/Core/Hardware
+        ${CMAKE_SOURCE_DIR}/src/CLR/Core/InterruptHandler
+        ${CMAKE_SOURCE_DIR}/src/CLR/Core/NativeEventDispatcher
+        ${CMAKE_SOURCE_DIR}/src/CLR/Core/RPC
+        ${CMAKE_SOURCE_DIR}/src/CLR/Core/Serialization
+        ${CMAKE_SOURCE_DIR}/src/CLR/Core/FileStream
 
-            # HAL
-            ${PROJECT_SOURCE_DIR}/src/HAL
+        # CLR stubs
+        ${CMAKE_SOURCE_DIR}/src/CLR/Debugger
+        ${CMAKE_SOURCE_DIR}/src/CLR/Diagnostics
+        ${CMAKE_SOURCE_DIR}/src/CLR/Messaging
 
-            # PAL
-            ${PROJECT_SOURCE_DIR}/src/PAL
-            ${PROJECT_SOURCE_DIR}/src/PAL/BlockStorage
-            ${PROJECT_SOURCE_DIR}/src/PAL/Double
+        # Helpers
+        ${CMAKE_SOURCE_DIR}/src/CLR/Helpers/nanoprintf
+        ${CMAKE_SOURCE_DIR}/src/CLR/Helpers/NanoRingBuffer
+        ${CMAKE_SOURCE_DIR}/src/CLR/Helpers/Base64
+        ${CMAKE_SOURCE_DIR}/src/CLR/Diagnostics
 
-            # PAL stubs
-            ${PROJECT_SOURCE_DIR}/src/PAL/AsyncProcCall
-            ${PROJECT_SOURCE_DIR}/src/PAL/COM
-            ${PROJECT_SOURCE_DIR}/src/PAL/Profiler
+        # HAL
+        ${CMAKE_SOURCE_DIR}/src/HAL
 
-            # target
-            "${TARGET_BASE_LOCATION}"
+        # PAL
+        ${CMAKE_SOURCE_DIR}/src/PAL
+        ${CMAKE_SOURCE_DIR}/src/PAL/BlockStorage
+        ${CMAKE_SOURCE_DIR}/src/PAL/Double
+        ${CMAKE_SOURCE_DIR}/src/PAL/Events
+        ${CMAKE_SOURCE_DIR}/src/PAL/FileSystem
+
+        # PAL stubs
+        ${CMAKE_SOURCE_DIR}/src/PAL/AsyncProcCall
+        ${CMAKE_SOURCE_DIR}/src/PAL/COM
+        ${CMAKE_SOURCE_DIR}/src/PAL/Profiler
+
+        # platform specific implementations
+        ${BASE_PATH_FOR_CLASS_LIBRARIES_MODULES}/nanoFramework.Runtime.Native
+
+        # target
+        ${TARGET_BASE_LOCATION}
 
         CMAKE_FIND_ROOT_PATH_BOTH
     )
-    # message("${SRC_FILE} >> ${NF_CoreCLR_SRC_FILE}") # debug helper
+
+    if(BUILD_VERBOSE)
+        message("${SRC_FILE} >> ${NF_CoreCLR_SRC_FILE}")
+    endif()
+
     list(APPEND NF_CoreCLR_SOURCES ${NF_CoreCLR_SRC_FILE})
 endforeach()
-
 
 include(FindPackageHandleStandardArgs)
 
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(NF_CoreCLR DEFAULT_MSG NF_CoreCLR_INCLUDE_DIRS NF_CoreCLR_SOURCES)
+
+# macro to be called from binutils to add Core CLR library
+# optional EXTRA_INCLUDES with include paths to be added to the library
+# optional EXTRA_COMPILE_DEFINITIONS with compiler definitions to be added to the library
+macro(nf_add_lib_coreclr)
+    # parse arguments
+    cmake_parse_arguments(NFALC "" "" "EXTRA_INCLUDES;EXTRA_COMPILE_DEFINITIONS" ${ARGN})
+
+    # add this has a library
+    set(LIB_NAME NF_CoreCLR)
+
+    add_library(
+        ${LIB_NAME} STATIC
+        ${NF_CoreCLR_SOURCES}
+        ${NF_Diagnostics_SOURCES})
+
+    target_include_directories(
+        ${LIB_NAME}
+        PUBLIC
+        ${NF_CoreCLR_INCLUDE_DIRS}
+        ${NFALC_EXTRA_INCLUDES})
+
+    # TODO can be removed later
+    if(RTOS_ESP32_CHECK)
+        nf_common_compiler_definitions(TARGET ${LIB_NAME} BUILD_TARGET ${NANOCLR_PROJECT_NAME})
+
+        # this is the only one different
+        target_compile_definitions(
+            ${LIB_NAME} PUBLIC
+            -DPLATFORM_ESP32
+            ${NFALC_EXTRA_COMPILER_DEFINITIONS}
+        )
+
+    else()
+        nf_set_compile_options(TARGET ${LIB_NAME})
+        nf_set_compile_definitions(TARGET ${LIB_NAME} EXTRA_COMPILE_DEFINITIONS ${NFALC_EXTRA_COMPILE_DEFINITIONS} BUILD_TARGET ${NANOCLR_PROJECT_NAME})
+        nf_set_link_options(TARGET ${LIB_NAME})
+    endif()
+
+    # add alias
+    add_library("nano::${LIB_NAME}" ALIAS ${LIB_NAME})
+endmacro()

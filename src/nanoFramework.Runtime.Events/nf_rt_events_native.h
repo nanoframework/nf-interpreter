@@ -1,18 +1,37 @@
-//
-// Copyright (c) 2017 The nanoFramework project contributors
+﻿//
+// Copyright (c) .NET Foundation and Contributors
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
 //
 
+#ifndef NF_RT_EVENTS_NATIVE_H
+#define NF_RT_EVENTS_NATIVE_H
 
-#ifndef _NF_RT_EVENTS_NATIVE_H_
-#define _NF_RT_EVENTS_NATIVE_H_
-
+// need this include here to use this in nanoCLR WIN32 project
+#include <stdafx.h>
 
 #include <nanoCLR_Interop.h>
 #include <nanoCLR_Runtime.h>
 #include <nanoCLR_Checks.h>
 
+typedef enum __nfpack EventCategory
+{
+    EventCategory_Unknown = 0,
+    EventCategory_Custom = 10,
+    EventCategory_Gpio = 20,
+    EventCategory_SerialDevice = 30,
+    EventCategory_Network = 40,
+    EventCategory_WiFi = 50,
+    EventCategory_Can = 60,
+    EventCategory_Storage = 70,
+    EventCategory_Radio = 80,
+    EventCategory_HighResolutionTimer = 90,
+    EventCategory_Bluetooth = 100,
+    EventCategory_Usb = 110,
+    EventCategory_Touch = 120,
+    EventCategory_Gesture = 130,
+    EventCategory_OpenThread = 140,
+} EventCategory;
 
 struct Library_nf_rt_events_native_nanoFramework_Runtime_Events_BaseEvent
 {
@@ -20,7 +39,6 @@ struct Library_nf_rt_events_native_nanoFramework_Runtime_Events_BaseEvent
     static const int FIELD__Message = 2;
 
     //--//
-
 };
 
 struct Library_nf_rt_events_native_nanoFramework_Runtime_Events_CustomEventArgs
@@ -29,7 +47,6 @@ struct Library_nf_rt_events_native_nanoFramework_Runtime_Events_CustomEventArgs
     static const int FIELD___data2 = 2;
 
     //--//
-
 };
 
 struct Library_nf_rt_events_native_nanoFramework_Runtime_Events_CustomEvent
@@ -37,7 +54,6 @@ struct Library_nf_rt_events_native_nanoFramework_Runtime_Events_CustomEvent
     static const int FIELD_STATIC__CustomEventPosted = 0;
 
     //--//
-
 };
 
 struct Library_nf_rt_events_native_nanoFramework_Runtime_Events_CustomEvent__CustomEventInternal
@@ -47,15 +63,6 @@ struct Library_nf_rt_events_native_nanoFramework_Runtime_Events_CustomEvent__Cus
     static const int FIELD__Time = 5;
 
     //--//
-
-};
-
-struct Library_nf_rt_events_native_nanoFramework_Runtime_Events_EventArgs
-{
-    static const int FIELD_STATIC__Empty = 1;
-
-    //--//
-
 };
 
 struct Library_nf_rt_events_native_nanoFramework_Runtime_Events_EventSink__EventInfo
@@ -66,18 +73,16 @@ struct Library_nf_rt_events_native_nanoFramework_Runtime_Events_EventSink__Event
     static const int FIELD__Category = 4;
 
     //--//
-
 };
 
 struct Library_nf_rt_events_native_nanoFramework_Runtime_Events_EventSink
 {
-    static const int FIELD_STATIC__s_eventSink = 2;
-    static const int FIELD_STATIC__s_eventInfoTable = 3;
+    static const int FIELD_STATIC__s_eventSink = 1;
+    static const int FIELD_STATIC__s_eventInfoTable = 2;
 
     NANOCLR_NATIVE_DECLARE(EventConfig___VOID);
 
     //--//
-
 };
 
 struct Library_nf_rt_events_native_nanoFramework_Runtime_Events_GenericEvent
@@ -87,7 +92,6 @@ struct Library_nf_rt_events_native_nanoFramework_Runtime_Events_GenericEvent
     static const int FIELD__Time = 5;
 
     //--//
-
 };
 
 struct Library_nf_rt_events_native_nanoFramework_Runtime_Events_NativeEventDispatcher
@@ -104,10 +108,9 @@ struct Library_nf_rt_events_native_nanoFramework_Runtime_Events_NativeEventDispa
 
     //--//
 
-    static CLR_RT_ObjectToEvent_Source*             GetEventDispReference( CLR_RT_StackFrame& stack                                  );
-    static HRESULT                                  GetEventDispatcher   ( CLR_RT_StackFrame& stack, CLR_RT_HeapBlock_NativeEventDispatcher*& event  );
-    static CLR_RT_HeapBlock_NativeEventDispatcher*  GetEventDispatcher   ( CLR_RT_StackFrame& stack                                  );
-
+    static CLR_RT_ObjectToEvent_Source *GetEventDispReference(CLR_RT_StackFrame &stack);
+    static HRESULT GetEventDispatcher(CLR_RT_StackFrame &stack, CLR_RT_HeapBlock_NativeEventDispatcher *&event);
+    static CLR_RT_HeapBlock_NativeEventDispatcher *GetEventDispatcher(CLR_RT_StackFrame &stack);
 };
 
 struct Library_nf_rt_events_native_nanoFramework_Runtime_Events_WeakDelegate
@@ -116,11 +119,10 @@ struct Library_nf_rt_events_native_nanoFramework_Runtime_Events_WeakDelegate
     NANOCLR_NATIVE_DECLARE(Remove___STATIC__SystemDelegate__SystemDelegate__SystemDelegate);
 
     //--//
-
 };
 
 extern const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_nanoFramework_Runtime_Events_EventSink_DriverProcs;
 
 extern const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_nanoFramework_Runtime_Events;
 
-#endif  //_NF_RT_EVENTS_NATIVE_H_
+#endif // NF_RT_EVENTS_NATIVE_H

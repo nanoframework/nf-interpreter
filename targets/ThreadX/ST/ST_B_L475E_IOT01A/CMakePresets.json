@@ -1,0 +1,30 @@
+{
+    "version": 4,
+    "include": [
+        "../../../../CMake/arm-gcc.json",
+        "../../../../config/user-tools-repos.json",
+        "../../../../config/user-prefs.json"
+    ],
+    "configurePresets": [
+        {
+            "name": "ST_B_L475E_IOT01A",
+            "inherits": [
+                "arm-gcc-cortex-preset",
+                "user-tools-repos",
+                "user-prefs"
+            ],
+            "hidden": false,
+            "cacheVariables": {
+                "NF_TARGET_DEFCONFIG": "targets/ThreadX/ST/ST_B_L475E_IOT01A/defconfig"
+            }
+        }
+    ],
+    "buildPresets": [
+        {
+            "inherits": "base-user",
+            "name": "ST_B_L475E_IOT01A",
+            "displayName": "ST_B_L475E_IOT01A",
+            "configurePreset": "ST_B_L475E_IOT01A"
+        }
+    ]
+}

@@ -1,0 +1,30 @@
+{
+    "version": 4,
+    "include": [
+        "../../../CMake/arm-gcc.json",
+        "../../../config/user-tools-repos.json",
+        "../../../config/user-prefs.json"
+    ],
+    "configurePresets": [
+        {
+            "name": "ORGPAL_PALTHREE",
+            "inherits": [
+                "arm-gcc-cortex-preset",
+                "user-tools-repos",
+                "user-prefs"
+            ],
+            "hidden": false,
+            "cacheVariables": {
+                "NF_TARGET_DEFCONFIG": "targets/ChibiOS/ORGPAL_PALTHREE/defconfig"
+            }
+        }
+    ],
+    "buildPresets": [
+        {
+            "inherits": "base-user",
+            "name": "ORGPAL_PALTHREE",
+            "displayName": "ORGPAL_PALTHREE",
+            "configurePreset": "ORGPAL_PALTHREE"
+        }
+    ]
+}

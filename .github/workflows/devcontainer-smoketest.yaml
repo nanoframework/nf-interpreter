@@ -1,0 +1,93 @@
+name: Smoketest Dockerfile builds for selected targets
+
+on:
+  pull_request:
+    paths:
+      - '.devcontainer/**/*'
+      - '.github/workflows/*'
+
+jobs:
+  build-target:
+    strategy:
+      fail-fast: false # Continues to build other targets in the matrix, even if one fails.
+
+      matrix: # Add the target and build type you wish to generate firmware for:
+        include: [
+          { target: SL_STK3701A,             build-type: Debug, container: ThreadX},
+          { target: SL_STK3701A,             build-type: Debug, container: All},
+          { target: ST_STM32F769I_DISCOVERY, build-type: Debug, container: ChibiOS },
+          { target: ST_STM32F769I_DISCOVERY, build-type: Debug, container: All },
+          { target: ORGPAL_PALTHREE,         build-type: Debug, container: ChibiOS },
+          # { target: M5Core2,                 build-type: Debug, container: ESP32 },
+          { target: ESP_WROVER_KIT,          build-type: Debug, container: ESP32 },
+          # { target: ESP32_S2_USB,            build-type: Debug, container: ESP32 },
+          { target: ESP32_S3,                build-type: Debug, container: ESP32 },
+          { target: ESP32_C3,                build-type: Debug, container: ESP32 },
+          # { target: ESP32_C6_THREAD,         build-type: Debug, container: ESP32 },
+          # { target: ESP32_H2_THREAD,         build-type: Debug, container: ESP32 },
+          { target: NXP_MIMXRT1060_EVK,      build-type: Debug, container: FreeRTOS-NXP },
+          { target: NXP_MIMXRT1060_EVK,      build-type: Debug, container: All },
+          { target: RP_PICO_W_RP2040,        build-type: Debug, container: ChibiOS-RP },
+          { target: TI_CC1352R1_LAUNCHXL,    build-type: Debug, container: TI, radio-freq: 915 },
+          { target: TI_CC1352R1_LAUNCHXL,    build-type: Debug, container: All, radio-freq: 915 },
+          { target: TI_CC1352R1_LAUNCHXL,    build-type: Debug, container: TI, radio-freq: 868 },
+        ]
+
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          submodules: true
+
+      - name: Free Disk Space (Ubuntu)
+        uses: jlumbroso/free-disk-space@main
+        with:
+          # this might remove tools that are actually needed,
+          # when set to "true" but frees about 6 GB
+          tool-cache: true
+          large-packages: false
+
+      - name: Adjust config templates for a devcontainer
+        run: |
+          # Move into the config directory
+          pushd config
+
+          # Rename the templates
+          mv user-kconfig.conf.TEMPLATE user-kconfig.conf
+          mv user-prefs.TEMPLATE.json user-prefs.json
+          mv user-tools-repos.TEMPLATE.json user-tools-repos.json
+
+          # Adjust the file content for a valid radio frequency (TI targets)
+          if [[ -n "${{ matrix.radio-freq }}" ]]; then
+            sed -i -- 's|# CONFIG_RADIO_FREQUENCY=915|CONFIG_RADIO_FREQUENCY=${{ matrix.radio-freq }}|g' user-kconfig.conf
+          fi
+
+          # Adjust the file content for a devcontainer
+          sed -i -- 's|"name": "user-tools-repos-container"|"name": "user-tools-repos"|g' user-tools-repos.json
+
+          # Move out of the config directory
+          popd
+
+      - name: Adjust devcontainer.json for ${{ matrix.container }} source
+        run: |
+          # Move into the .devcontainer directory
+          pushd .devcontainer/${{ matrix.container }}
+
+          # Target the dockerfile source.
+          sed -i -- 's|"dockerFile": "Dockerfile.${{ matrix.container }}"|"dockerFile": "Dockerfile.${{ matrix.container }}.SRC"|g' devcontainer.json
+
+          # Move out of the .devcontainer directory
+          popd
+
+      - name: Build ${{ matrix.target }} ${{ matrix.build-type }} Firmware
+        uses: devcontainers/ci@v0.3
+        with:
+          configFile: ./.devcontainer/${{ matrix.container }}/devcontainer.json
+          push: never
+          runCmd: |
+            # Build target:
+            cmake --preset=${{ matrix.target }} -DCMAKE_BUILD_TYPE=${{ matrix.build-type }}
+            cmake --build build

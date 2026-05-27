@@ -1,16 +1,17 @@
 #
-# Copyright (c) 2019 The nanoFramework project contributors
+# Copyright (c) .NET Foundation and Contributors
 # See LICENSE file in the project root for full license information.
+#
  
-list(APPEND Graphics_Includes "${PROJECT_SOURCE_DIR}/src/nanoFramework.Runtime.Events")
-list(APPEND Graphics_Includes "${PROJECT_SOURCE_DIR}/src/PAL/include")
-list(APPEND Graphics_Includes "${PROJECT_SOURCE_DIR}/src/nanoFramework.Graphics/Graphics/Core")
-list(APPEND Graphics_Includes "${PROJECT_SOURCE_DIR}/src/nanoFramework.Graphics/Graphics/Core/Support/Gif")
-list(APPEND Graphics_Includes "${PROJECT_SOURCE_DIR}/src/nanoFramework.Graphics/Graphics/Core/Support/Jpeg")
-list(APPEND Graphics_Includes "${PROJECT_SOURCE_DIR}/src/nanoFramework.Graphics/Graphics/Native")
-list(APPEND Graphics_Includes "${PROJECT_SOURCE_DIR}/src/nanoFramework.Graphics/TouchPanel/Core")
-list(APPEND Graphics_Includes "${PROJECT_SOURCE_DIR}/src/nanoFramework.Graphics/Graphics/Displays")
-list(APPEND Graphics_Includes "${PROJECT_SOURCE_DIR}/src/nanoFramework.Graphics/TouchPanel/Devices")
+list(APPEND nanoFramework.Graphics_INCLUDE_DIRS "${CMAKE_SOURCE_DIR}/src/nanoFramework.Runtime.Events")
+list(APPEND nanoFramework.Graphics_INCLUDE_DIRS "${CMAKE_SOURCE_DIR}/src/PAL/include")
+list(APPEND nanoFramework.Graphics_INCLUDE_DIRS "${CMAKE_SOURCE_DIR}/src/nanoFramework.Graphics/Graphics/Core")
+list(APPEND nanoFramework.Graphics_INCLUDE_DIRS "${CMAKE_SOURCE_DIR}/src/nanoFramework.Graphics/Graphics/Core/Support/Gif")
+list(APPEND nanoFramework.Graphics_INCLUDE_DIRS "${CMAKE_SOURCE_DIR}/src/nanoFramework.Graphics/Graphics/Core/Support/Jpeg")
+list(APPEND nanoFramework.Graphics_INCLUDE_DIRS "${CMAKE_SOURCE_DIR}/src/nanoFramework.Graphics/Graphics/Native")
+list(APPEND nanoFramework.Graphics_INCLUDE_DIRS "${CMAKE_SOURCE_DIR}/src/nanoFramework.Graphics/TouchPanel/Core")
+list(APPEND nanoFramework.Graphics_INCLUDE_DIRS "${CMAKE_SOURCE_DIR}/src/nanoFramework.Graphics/Graphics/Displays")
+list(APPEND nanoFramework.Graphics_INCLUDE_DIRS "${CMAKE_SOURCE_DIR}/src/nanoFramework.Graphics/TouchPanel/Devices")
 
  set (  nanoFramework.Graphics_SRCS
         nanoPAL_Events_functions.cpp
@@ -74,7 +75,6 @@ list(APPEND Graphics_Includes "${PROJECT_SOURCE_DIR}/src/nanoFramework.Graphics/
         transupp.c
         Graphics.cpp
         GraphicsDriver.cpp
-        GraphicsInitialize.cpp
         GraphicsMemoryHeap.cpp
         
         nanoFramework_Graphics.cpp
@@ -86,57 +86,51 @@ list(APPEND Graphics_Includes "${PROJECT_SOURCE_DIR}/src/nanoFramework.Graphics/
         nanoFramework_Graphics_nanoFramework_UI_DisplayControl.cpp
         nanoFramework_Graphics_nanoFramework_UI_Font.cpp
         
-        
         TouchPanel.cpp
         Gestures.cpp
         Ink.cpp
-        
-        # Byte reader
-        Various.cpp
         
         #Common Display/Touch Code
         "${GRAPHICS_DISPLAY}"
         "${TOUCHPANEL_DEVICE}"
         
         #Target board Display/Touch Code
+        Graphics_Memory.cpp
         "${GRAPHICS_DISPLAY_INTERFACE}"
-        "${GRAPHICS_MEMORY}"
         "${TOUCHPANEL_INTERFACE}"
 )
 
 foreach(SRC_FILE ${nanoFramework.Graphics_SRCS})
+
     set(nanoFramework.Graphics_SRC_FILE ${SRC_FILE}-NOTFOUND)
+
     find_file(nanoFramework.Graphics_SRC_FILE ${SRC_FILE}
         PATHS 
-        "${PROJECT_SOURCE_DIR}/src/PAL/Events"
-        "${PROJECT_SOURCE_DIR}/src/CLR/Core"
+        ${CMAKE_SOURCE_DIR}/src/PAL/Events
+        ${CMAKE_SOURCE_DIR}/src/CLR/Core
         
-        "${PROJECT_SOURCE_DIR}/src/nanoFramework.Graphics/Graphics/Core"
-        "${PROJECT_SOURCE_DIR}/src/nanoFramework.Graphics/Graphics/Core/Support/Bmp"
-        "${PROJECT_SOURCE_DIR}/src/nanoFramework.Graphics/Graphics/Core/Support/Fonts"
-        "${PROJECT_SOURCE_DIR}/src/nanoFramework.Graphics/Graphics/Core/Support/Gif"
-        "${PROJECT_SOURCE_DIR}/src/nanoFramework.Graphics/Graphics/Core/Support/Jpeg"
-        "${PROJECT_SOURCE_DIR}/src/nanoFramework.Graphics/Graphics/Displays"
-        "${PROJECT_SOURCE_DIR}/src/nanoFramework.Graphics/Graphics/Native"
-        "${PROJECT_SOURCE_DIR}/src/nanoFramework.Graphics/TouchPanel/Core"
-        "${PROJECT_SOURCE_DIR}/src/nanoFramework.Graphics/TouchPanel/Devices"
+        ${CMAKE_SOURCE_DIR}/src/nanoFramework.Graphics/Graphics/Core
+        ${CMAKE_SOURCE_DIR}/src/nanoFramework.Graphics/Graphics/Core/Support/Bmp
+        ${CMAKE_SOURCE_DIR}/src/nanoFramework.Graphics/Graphics/Core/Support/Fonts
+        ${CMAKE_SOURCE_DIR}/src/nanoFramework.Graphics/Graphics/Core/Support/Gif
+        ${CMAKE_SOURCE_DIR}/src/nanoFramework.Graphics/Graphics/Core/Support/Jpeg
+        ${CMAKE_SOURCE_DIR}/src/nanoFramework.Graphics/Graphics/Displays
+        ${CMAKE_SOURCE_DIR}/src/nanoFramework.Graphics/Graphics/Native
+        ${CMAKE_SOURCE_DIR}/src/nanoFramework.Graphics/TouchPanel/Core
+        ${CMAKE_SOURCE_DIR}/src/nanoFramework.Graphics/TouchPanel/Devices
 
-        "${TARGET_BASE_LOCATION}/nanoCLR/nanoFramework.Graphics" 
+        ${TARGET_BASE_LOCATION}/nanoCLR/nanoFramework.Graphics
 
-        CMAKE_FIND_ROOT_PATH_BOTH     )
+        CMAKE_FIND_ROOT_PATH_BOTH     
+    )
 
-        if( ${nanoFramework.Graphics_SRC_FILE} STREQUAL "nanoFramework.Graphics_SRC_FILE-NOTFOUND")
-           message( "___________________________________________________________________________")
-           message( "Cannot find file : ${SRC_FILE} in FindnanoFramework.Graphics.cmake")
-           message( "___________________________________________________________________________")
-        endif()
+    if (BUILD_VERBOSE)
+        message("${SRC_FILE} >> ${nanoFramework.Graphics_SRC_FILE}")
+    endif()
 
-    list(APPEND Graphics_Sources ${nanoFramework.Graphics_SRC_FILE} )
+    list(APPEND nanoFramework.Graphics_SOURCES ${nanoFramework.Graphics_SRC_FILE} )
+
 endforeach()
 
-# make var global
-set(Graphics_Sources  "${Graphics_Sources}"  CACHE INTERNAL "make global")
-set(Graphics_Includes "${Graphics_Includes}" CACHE INTERNAL "make global")
-
 include(FindPackageHandleStandardArgs)
-FIND_PACKAGE_HANDLE_STANDARD_ARGS(nanoFramework.Graphics DEFAULT_MSG Graphics_Includes Graphics_Sources)
+FIND_PACKAGE_HANDLE_STANDARD_ARGS(nanoFramework.Graphics DEFAULT_MSG nanoFramework.Graphics_INCLUDE_DIRS nanoFramework.Graphics_SOURCES)

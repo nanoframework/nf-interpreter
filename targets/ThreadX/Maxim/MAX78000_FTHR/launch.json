@@ -1,0 +1,97 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "MAX78000_FTHR nanoBooter",
+            "type": "cppdbg",
+            "request": "launch",
+            "miDebuggerPath": "<absolute-path-to-the-toolchain-folder-mind-the-forward-slashes>/bin/arm-none-eabi-gdb.exe",
+            "targetArchitecture": "ARM",
+            "program": "${workspaceRoot}/build/nanoBooter.elf",
+            "setupCommands": [
+                {
+                    "text": "target extended-remote localhost:3333"
+                },
+                {
+                    "text": "monitor reset halt"
+                },
+                {
+                    "text": "monitor flash write_image erase \"<path-to-the-repo-root-mind-the-forward-slash>/build/nanoBooter.hex\" "
+                },
+                {
+                    "text": "file <path-to-the-repo-root-mind-the-forward-slash>/build/nanoBooter.elf"
+                },
+                {
+                    "text": "set output-radix 16",
+                    "description": "set the default numeric base to 16",
+                    "ignoreFailures": false
+                }
+            ],
+            "customLaunchSetupCommands": [
+                {
+                    "text": "monitor reset_config none separate"
+                }
+            ],
+            "logging": {
+                "moduleLoad": false,
+                "trace": false,
+                "engineLogging": false,
+                "programOutput": true,
+                "exceptions": true
+            },
+            "launchCompleteCommand": "exec-continue",
+            "debugServerPath": "<absolute-path-to-openocd-mind-the-forward-slashes>/bin/openocd.exe",
+            "debugServerArgs": "-s \"<absolute-path-to-openocd-mind-the-forward-slashes>/scripts/\" -f interface/cmsis-dap.cfg -f target/max78000.cfg",
+            "serverStarted": "Listening on port 3333 for gdb connections",
+            "filterStderr": true,
+            "externalConsole": true,
+            "cwd": "${cwd}"
+        },
+        {
+            "name": "MAX78000_FTHR nanoCLR",
+            "type": "cppdbg",
+            "request": "launch",
+            "miDebuggerPath": "<absolute-path-to-the-toolchain-folder-mind-the-forward-slashes>/bin/arm-none-eabi-gdb.exe",
+            "targetArchitecture": "ARM",
+            "program": "${workspaceRoot}/build/nanoCLR.elf",
+            "setupCommands": [
+                {
+                    "text": "target extended-remote localhost:3333"
+                },
+                {
+                    "text": "monitor reset halt"
+                },
+                {
+                    "text": "monitor flash write_image erase \"<path-to-the-repo-root-mind-the-forward-slash>/build/nanoCLR.hex\" "
+                },
+                {
+                    "text": "file <path-to-the-repo-root-mind-the-forward-slash>/build/nanoCLR.elf"
+                },
+                {
+                    "text": "set output-radix 16",
+                    "description": "set the default numeric base to 16",
+                    "ignoreFailures": false
+                }
+            ],
+            "customLaunchSetupCommands": [
+                {
+                    "text": "monitor reset_config none separate"
+                }
+            ],
+            "logging": {
+                "moduleLoad": false,
+                "trace": false,
+                "engineLogging": false,
+                "programOutput": true,
+                "exceptions": true
+            },
+            "launchCompleteCommand": "exec-continue",
+            "debugServerPath": "<absolute-path-to-openocd-mind-the-forward-slashes>/bin/openocd.exe",
+            "debugServerArgs": "-s \"<absolute-path-to-openocd-mind-the-forward-slashes>/scripts/\" -f interface/cmsis-dap.cfg -f target/max78000.cfg",
+            "serverStarted": "Listening on port 3333 for gdb connections",
+            "filterStderr": true,
+            "externalConsole": true,
+            "cwd": "${cwd}"
+        }
+    ]
+}

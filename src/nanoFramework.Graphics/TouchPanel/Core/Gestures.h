@@ -1,5 +1,10 @@
-#ifndef _GESTURES_H_
-#define _GESTURES_H_ 1
+//
+// Copyright (c) .NET Foundation and Contributors
+// See LICENSE file in the project root for full license information.
+//
+
+#ifndef GESTURES_H
+#define GESTURES_H
 
 
 // Gesture Support
@@ -38,4 +43,4 @@ enum TouchGestures
     TouchGesture_UserDefined = 200
 };
 
-#endif  //_GESTURES_H_
+#endif // GESTURES_H

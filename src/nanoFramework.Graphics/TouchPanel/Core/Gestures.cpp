@@ -1,15 +1,16 @@
+//
+// Copyright (c) .NET Foundation and Contributors
+// See LICENSE file in the project root for full license information.
+//
 
 #include "Gestures.h"
 #include "Graphics.h"
 #include "TouchPanel.h"
 
 
-
-
 CLR_INT32 GestureCurrentStateX;
 CLR_INT32 GestureCurrentStateY;
 TOUCH_PANEL_Point GestureLastPoint;
-
 
 
 // It seems that events are defined in  nanoHAL_V2.h and are required to be matched with managed code events.
@@ -233,7 +234,7 @@ void GestureDriver::ResetRecognition()
 
 void GestureDriver::GestureContinuationRoutine(void* arg)
 {
-    if (arg == NULL) {}; // avoid unused parameter, maybe used in the future
+    if (arg == nullptr) {}; // avoid unused parameter, maybe used in the future
     HRESULT hr = S_OK;
     CLR_UINT32 flags = (m_index << 16) | GetTouchPointFlags_NextPoint | GetTouchPointFlags_UseTime | GetTouchPointFlags_UseSource;
     CLR_UINT16 source = 0;

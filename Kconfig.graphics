@@ -1,0 +1,107 @@
+#
+# Copyright (c) .NET Foundation and Contributors
+# See LICENSE file in the project root for full license information.
+#
+
+menu "Graphics"
+    depends on API_NANOFRAMEWORK_GRAPHICS
+
+choice GRAPHICS_DISPLAY_DRIVER
+    prompt "Display driver"
+
+config GRAPHICS_DISPLAY_ILI9341
+    bool "ILI9341"
+
+config GRAPHICS_DISPLAY_ILI9342
+    bool "ILI9342"
+
+config GRAPHICS_DISPLAY_ST7735S
+    bool "ST7735S"
+
+config GRAPHICS_DISPLAY_ST7789V
+    bool "ST7789V"
+
+config GRAPHICS_DISPLAY_GC9A01
+    bool "GC9A01"
+
+config GRAPHICS_DISPLAY_OTM8009A
+    bool "Otm8009a (DSI Video Mode)"
+
+config GRAPHICS_DISPLAY_GENERIC_SPI
+    bool "Generic SPI"
+
+endchoice
+
+config GRAPHICS_DISPLAY
+    string
+    default "ILI9341_240x320_SPI.cpp"           if GRAPHICS_DISPLAY_ILI9341
+    default "ILI9342_320x240_SPI.cpp"           if GRAPHICS_DISPLAY_ILI9342
+    default "ST7735S_SPI.cpp"                   if GRAPHICS_DISPLAY_ST7735S
+    default "ST7789V_240x320_SPI.cpp"           if GRAPHICS_DISPLAY_ST7789V
+    default "GC9A01_240x240_SPI.cpp"            if GRAPHICS_DISPLAY_GC9A01
+    default "Otm8009a_DSI_Video_Mode.cpp"       if GRAPHICS_DISPLAY_OTM8009A
+    default "Generic_SPI.cpp"                   if GRAPHICS_DISPLAY_GENERIC_SPI
+
+choice GRAPHICS_DISPLAY_INTERFACE_CHOICE
+    prompt "Display interface"
+
+config GRAPHICS_IFACE_SPI
+    bool "SPI to Display"
+
+config GRAPHICS_IFACE_DSI_VIDEO
+    bool "DSI Video Mode"
+
+endchoice
+
+config GRAPHICS_DISPLAY_INTERFACE
+    string
+    default "Spi_To_Display.cpp"                if GRAPHICS_IFACE_SPI
+    default "DSI_To_Display_Video_Mode.cpp"     if GRAPHICS_IFACE_DSI_VIDEO
+
+choice TOUCHPANEL_DRIVER
+    prompt "Touch panel driver"
+    optional
+
+config TOUCH_XPT2046
+    bool "XPT2046"
+
+config TOUCH_FT6X06
+    bool "ft6x06"
+
+config TOUCH_CST816S
+    bool "CST816S"
+
+config TOUCH_STMPE811QTR
+    bool "STMPE811QTR"
+
+endchoice
+
+config TOUCHPANEL_DEVICE
+    string
+    default "XPT2046.cpp"        if TOUCH_XPT2046
+    default "ft6x06_I2C.cpp"     if TOUCH_FT6X06
+    default "CST816S.cpp"        if TOUCH_CST816S
+    default "STMPE811QTR_I2C.cpp" if TOUCH_STMPE811QTR
+
+choice TOUCHPANEL_INTERFACE_CHOICE
+    prompt "Touch panel interface"
+    optional
+
+config TOUCH_IFACE_SPI
+    bool "SPI to Touch Panel"
+
+config TOUCH_IFACE_I2C
+    bool "I2C to Touch Panel"
+
+endchoice
+
+config TOUCHPANEL_INTERFACE
+    string
+    default "Spi_To_TouchPanel.cpp"   if TOUCH_IFACE_SPI
+    default "I2C_To_TouchPanel.cpp"   if TOUCH_IFACE_I2C
+
+config GRAPHICS_MEMORY
+    string "Graphics memory implementation"
+    default ""
+
+endmenu

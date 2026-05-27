@@ -1,17 +1,15 @@
 //
-// Copyright (c) 2019 The nanoFramework project contributors
+// Copyright (c) .NET Foundation and Contributors
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
 //
 
-#ifndef _TOUCHDEVICE_H_
-#define _TOUCHDEVICE_H_ 1
+#ifndef TOUCHDEVICE_H
+#define TOUCHDEVICE_H
 
 #include "nanoCLR_Types.h"
 #include "nanoPAL_AsyncProcCalls_decl.h"
 #include "TouchPanel.h"
-
-typedef void (*GPIO_INTERRUPT_SERVICE_ROUTINE)(GPIO_PIN Pin, bool PinState, void* Param);
 
 struct TouchPointDevice
 {
@@ -33,5 +31,5 @@ struct TouchDevice
 
 };
 
-#endif //_TOUCHDEVICE_H_
+#endif // TOUCHDEVICE_H
 

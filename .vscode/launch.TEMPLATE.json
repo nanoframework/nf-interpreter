@@ -7,7 +7,7 @@
             "request": "launch",
             "miDebuggerPath": "<absolute-path-to-the-esp32-toolchain-folder-mind-the-forward-slashes>",
             "targetArchitecture": "ARM",
-            "program": "<absolute-path-to-the-build-folder-mind-the-forward-slashes>/nanoBooter.elf",
+            "program": "${workspaceFolder}/build/nanoBooter.elf",
 
             "setupCommands": [
                 {"description":"" , "text" : "target extended-remote localhost:3333"},

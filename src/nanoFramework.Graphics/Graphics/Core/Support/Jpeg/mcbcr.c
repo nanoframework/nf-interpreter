@@ -1,3 +1,8 @@
+//
+// Copyright (c) .NET Foundation and Contributors
+// See LICENSE file in the project root for full license information.
+//
+
 /* YCbCr to RGB convertion API from Intel.  Does ITU-R 601-1 convertion. */
 
 #define JPEG_INTERNALS

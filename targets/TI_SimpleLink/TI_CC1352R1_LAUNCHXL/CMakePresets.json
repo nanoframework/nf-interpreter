@@ -1,0 +1,30 @@
+{
+    "version": 4,
+    "include": [
+        "../../../CMake/arm-gcc.json",
+        "../../../config/user-tools-repos.json",
+        "../../../config/user-prefs.json"
+    ],
+    "configurePresets": [
+        {
+            "name": "TI_CC1352R1_LAUNCHXL",
+            "inherits": [
+                "arm-gcc-cortex-preset",
+                "user-tools-repos",
+                "user-prefs"
+            ],
+            "hidden": false,
+            "cacheVariables": {
+                "NF_TARGET_DEFCONFIG": "targets/TI_SimpleLink/TI_CC1352R1_LAUNCHXL/defconfig"
+            }
+        }
+    ],
+    "buildPresets": [
+        {
+            "inherits": "base-user",
+            "name": "TI_CC1352R1_LAUNCHXL",
+            "displayName": "TI_CC1352R1_LAUNCHXL",
+            "configurePreset": "TI_CC1352R1_LAUNCHXL"
+        }
+    ]
+}

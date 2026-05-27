@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2017 The nanoFramework project contributors
+# Copyright (c) .NET Foundation and Contributors
 # See LICENSE file in the project root for full license information.
 #
 
@@ -9,11 +9,9 @@ set(BASE_PATH_FOR_THIS_MODULE "${BASE_PATH_FOR_CLASS_LIBRARIES_MODULES}/nanoFram
 
 
 # set include directories
-# list(APPEND nanoFramework.Hardware.Stm32_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/src/CLR/Core")
-# list(APPEND nanoFramework.Hardware.Stm32_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/src/CLR/Include")
-# list(APPEND nanoFramework.Hardware.Stm32_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/src/HAL/Include")
-# list(APPEND nanoFramework.Hardware.Stm32_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/src/PAL/Include")
 list(APPEND nanoFramework.Hardware.Stm32_INCLUDE_DIRS "${BASE_PATH_FOR_THIS_MODULE}")
+list(APPEND nanoFramework.Hardware.Stm32_INCLUDE_DIRS ${BASE_PATH_FOR_CLASS_LIBRARIES_MODULES}/System.Device.Adc)
+list(APPEND nanoFramework.Hardware.Stm32_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/System.Device.Adc)
 
 
 # source files
@@ -21,21 +19,29 @@ set(nanoFramework.Hardware.Stm32_SRCS
 
     nf_hardware_stm32_native.cpp
     nf_hardware_stm32_native_nanoFramework_Hardware_Stm32_BackupMemory.cpp
+    nf_hardware_stm32_native_nanoFramework_Hardware_Stm32_Configuration.cpp
     nf_hardware_stm32_native_nanoFramework_Hardware_Stm32_Power.cpp
     nf_hardware_stm32_native_nanoFramework_Hardware_Stm32_RTC.cpp
     nf_hardware_stm32_native_nanoFramework_Hardware_Stm32_Utilities.cpp
 )
 
 foreach(SRC_FILE ${nanoFramework.Hardware.Stm32_SRCS})
+
     set(nanoFramework.Hardware.Stm32_SRC_FILE SRC_FILE-NOTFOUND)
+
     find_file(nanoFramework.Hardware.Stm32_SRC_FILE ${SRC_FILE}
         PATHS 
             ${BASE_PATH_FOR_THIS_MODULE}
 
         CMAKE_FIND_ROOT_PATH_BOTH
     )
-    # message("${SRC_FILE} >> ${nanoFramework.Hardware.Stm32_SRC_FILE}") # debug helper
+
+    if (BUILD_VERBOSE)
+        message("${SRC_FILE} >> ${nanoFramework.Hardware.Stm32_SRC_FILE}")
+    endif()
+
     list(APPEND nanoFramework.Hardware.Stm32_SOURCES ${nanoFramework.Hardware.Stm32_SRC_FILE})
+    
 endforeach()
 
 

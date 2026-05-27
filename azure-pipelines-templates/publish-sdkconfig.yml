@@ -1,0 +1,15 @@
+# Copyright (c) .NET Foundation and Contributors
+# See LICENSE file in the project root for full license information.
+
+steps:
+  - task: PublishPipelineArtifact@1
+    displayName: Publish SDKCONFIG artifact
+    condition: >-
+      or(
+        succeeded(),
+        failed()
+      )    
+    inputs:
+      targetPath: '$(Build.ArtifactStagingDirectory)\$(TargetPublishName)_sdkconfig'
+      artifactName: $(TargetPublishName)_sdkconfig
+      artifactType: pipeline

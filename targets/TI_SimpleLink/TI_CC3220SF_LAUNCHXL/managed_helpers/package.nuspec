@@ -1,0 +1,28 @@
+<?xml version="1.0"?>
+<package >
+  <metadata>
+    <id>nanoFramework.Targets.TI_CC3220SF_LAUNCHXL</id>
+    <title>nanoFramework.Targets.TI_CC3220SF_LAUNCHXL</title>
+    <version>1.0.0</version>
+    <authors>nanoFramework project contributors</authors>
+    <owners>nanoFramework project contributors</owners>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>
+      Helper classes to use TI_CC3220SF_LAUNCHXL target in C# applications.
+    </description>
+    <releaseNotes>
+    </releaseNotes>
+    <summary>
+      This is an extension for .NET nanoFramework providing the GPIO pins when coding for the TI_CC3220SF_LAUNCHXL.
+    </summary>
+    <projectUrl>https://github.com/nanoframework</projectUrl>
+    <iconUrl>https://secure.gravatar.com/avatar/97d0e092247f0716db6d4b47b7d1d1ad</iconUrl>
+    <licenseUrl>https://github.com/nanoframework/nf-interpreter/blob/develop/LICENSE.md</licenseUrl>
+    <copyright>Copyright (c) .NET Foundation and Contributors</copyright>
+    <references></references>
+    <tags>nanoFramework, nano Framework, NETNF, NETMF, Micro Framework,.net </tags>
+  </metadata>
+  <files>
+    <file src="TI_CC3220SF_LAUNCHXL.Gpio.cs" target="content" />
+  </files>
+</package>

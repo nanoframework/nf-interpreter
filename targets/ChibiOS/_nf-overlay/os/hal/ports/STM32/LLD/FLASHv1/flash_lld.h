@@ -1,0 +1,87 @@
+//
+// Copyright (c) .NET Foundation and Contributors
+// See LICENSE file in the project root for full license information.
+//
+
+#ifndef FLASH_LLD_H
+#define FLASH_LLD_H
+
+#include "stm32_registry.h"
+#include <hal_nf_community.h>
+
+#if (HAL_NF_USE_STM32_FLASH == TRUE)
+
+///////////////////////////////////////////////////////////////////////////////
+// Driver constants.                                                         //
+///////////////////////////////////////////////////////////////////////////////
+
+///////////////////////////////////////////////////////////////////////////////
+// Driver pre-compile time settings.                                         //
+///////////////////////////////////////////////////////////////////////////////
+
+///////////////////////////////////////////////////////////////////////////////
+// Derived constants and error checks.                                       //
+///////////////////////////////////////////////////////////////////////////////
+
+///////////////////////////////////////////////////////////////////////////////
+// Driver data structures and types.                                         //
+///////////////////////////////////////////////////////////////////////////////
+
+// From STMicroelectronics Cube HAL
+// HAL Status structures definition
+typedef struct STM32FlashDriver
+{
+
+    // pointer to the FLASH Registers
+    FLASH_TypeDef *flash;
+
+} STM32FlashDriver;
+
+///////////////////////////////////////////////////////////////////////////////
+// Driver macros.                                                            //
+///////////////////////////////////////////////////////////////////////////////
+
+// From STMicroelectronics Cube HAL
+#define HAL_IS_BIT_SET(REG, BIT) (((REG) & (BIT)) != RESET)
+
+#define FLASH_FLAG_BSY    FLASH_SR_BSY    //!< FLASH Busy flag
+#define FLASH_FLAG_PGERR  FLASH_SR_PGERR  //!< FLASH Programming error flag
+#define FLASH_FLAG_WRPERR FLASH_SR_WRPERR //!< FLASH Write protected error flag
+#define FLASH_FLAG_EOP    FLASH_SR_EOP    //!< FLASH End of Operation flag
+
+#define FLASH_FLAG_ALL_ERRORS (FLASH_FLAG_WRPERR | FLASH_FLAG_PGERR)
+
+// FLASH_Program_Parallelism FLASH Program Parallelism
+#define FLASH_PSIZE_BYTE        ((uint32_t)0x00000000U)
+#define FLASH_PSIZE_HALF_WORD   ((uint32_t)0x00000100U)
+#define FLASH_PSIZE_WORD        ((uint32_t)0x00000200U)
+#define FLASH_PSIZE_DOUBLE_WORD ((uint32_t)0x00000300U)
+#define CR_PSIZE_MASK           ((uint32_t)0xFFFFFCFFU)
+
+#define __HAL_FLASH_GET_FLAG(__FLAG__)   ((FLASH->SR & (__FLAG__)))
+#define __HAL_FLASH_CLEAR_FLAG(__FLAG__) (FLASH->SR = (__FLAG__))
+
+#define F0_SERIES_SECTOR_SIZE ((uint32_t)0x00001000U)
+
+///////////////////////////////////////////////////////////////////////////////
+// External declarations.                                                    //
+///////////////////////////////////////////////////////////////////////////////
+
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
+    void flash_lld_init();
+    void flash_lld_readBytes(uint32_t startAddress, uint32_t length, uint8_t *buffer);
+    int flash_lld_write(uint32_t startAddress, uint32_t length, const uint8_t *buffer);
+    int flash_lld_isErased(uint32_t startAddress, uint32_t length);
+    int flash_lld_erase(uint32_t address);
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif // HAL_NF_USE_STM32_FLASH
+
+#endif // FLASH_LLD_H

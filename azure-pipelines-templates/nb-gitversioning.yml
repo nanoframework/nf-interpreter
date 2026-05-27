@@ -1,25 +1,42 @@
-# Copyright (c) 2018 The nanoFramework project contributors
+# Copyright (c) .NET Foundation and Contributors
 # See LICENSE file in the project root for full license information.
 
+parameters:
+  - name: repoDirectory
+    type: string
+    default: $(Build.SourcesDirectory)
+
 steps:
-  - task: DotNetCoreCLI@2  
-    inputs:
-      command: custom
-      custom: tool
-      arguments: install --tool-path . nbgv
-    condition: ne(variables['system.pullrequest.isfork'], true)
-    displayName: Install NBGV tool
-
-  - script: nbgv cloud -a -c
-    condition: ne(variables['system.pullrequest.isfork'], true)
+  - script: nbgv cloud -a -c -v $(Build.BuildNumber)
     displayName: Set build number
+    condition: succeeded()
+    workingDirectory: ${{ parameters.repoDirectory }}
 
-  # Currently Azure pipelines won't let PRs from forks setting the build ID
-  # so we need to come up with a versiom number to use for the build
+  # Force version number for PRs
   - task: PowerShell@2
-    inputs:
-        targetType: 'inline'
-        script: |
-            Write-Host "$("##vso[task.setvariable variable=NBGV_Version]")0.0.0.$env:System_PullRequest_PullRequestNumber"
-    condition: eq(variables['system.pullrequest.isfork'], true)
+    condition: ne(variables['system.pullrequest.pullRequestId'], '')
     displayName: Set temporary build number
+    inputs:
+      targetType: "inline"
+      script: |
+        Write-Host "$("##vso[task.setvariable variable=NBGV_Version]")0.0.0"
+        Write-Host "$("##vso[task.setvariable variable=NBGV_VersionMajor]")0"
+        Write-Host "$("##vso[task.setvariable variable=NBGV_VersionMinor]")$env:System_PullRequest_PullRequestNumber"
+        Write-Host "$("##vso[task.setvariable variable=NBGV_AssemblyInformationalVersion]")00000000000"
+        Write-Host "$("##vso[task.setvariable variable=NBGV_NuGetPackageVersion]")0.0.$env:System_PullRequest_PullRequestNumber-alpha.$env:NBGV_BuildNumber"
+
+  - task: PowerShell@2
+    displayName: Get target build counter
+    inputs:
+      targetType: "inline"
+      script: |
+        $counter = $env:REVISION
+        $version = ([int]$counter).ToString()
+
+        Write-Host "$("##vso[task.setvariable variable=TARGET_BUILD_COUNTER]")$version"
+        Write-Host "$("##vso[task.setvariable variable=NBGV_NuGetPackageVersion]")$(NBGV_VersionMajor).$(NBGV_VersionMinor).$(NBGV_BuildNumber).$version"
+        
+        $newBuildNumber = "$(NBGV_VersionMajor).$(NBGV_VersionMinor).$(NBGV_BuildNumber).$version"
+        
+        Write-Host "$("##vso[build.updatebuildnumber]")$newBuildNumber"
+        Write-Host "*** BUILD NUMBER IS: $newBuildNumber ***"

@@ -1,81 +1,415 @@
 #
-# Copyright (c) 2019 The nanoFramework project contributors
+# Copyright (c) .NET Foundation and Contributors
 # See LICENSE file in the project root for full license information.
 #
 
-function(NF_SET_OPTIMIZATION_OPTIONS TARGET) 
+include(binutils.common)
 
-    target_compile_options(${TARGET} PRIVATE
-        $<$<CONFIG:Debug>:-Og -femit-class-debug-always -g3 -ggdb>
-        $<$<CONFIG:Release>:-O3 -flto -fuse-linker-plugin -fno-fat-lto-objects>
+function(nf_set_optimization_options target) 
+
+    # debug compile options: -Og (optimize for debugging) and -ggdb (produce debug symbols specifically for gdb)
+    target_compile_options(${target} PRIVATE
+        $<$<CONFIG:Debug>:-Og -ggdb>
+        $<$<CONFIG:Release>:-O3 -flto>
         $<$<CONFIG:MinSizeRel>:-Os -flto>
-        $<$<CONFIG:RelWithDebInfo>:-Os -femit-class-debug-always -g3 -ggdb>
+        $<$<CONFIG:RelWithDebInfo>:-Os -ggdb>
     )
 
 endfunction()
 
 
-function(NF_SET_LINK_MAP TARGET) 
-
-    # need to remove the .elf suffix from target name
-    string(FIND ${TARGET} "." TARGET_EXTENSION_DOT_INDEX)
-    string(SUBSTRING ${TARGET} 0 ${TARGET_EXTENSION_DOT_INDEX} TARGET_SHORT)
-    
-    # add linker flags to generate map file
-    set_property(TARGET ${TARGET_SHORT}.elf APPEND_STRING PROPERTY LINK_FLAGS " -Wl,-Map=${PROJECT_BINARY_DIR}/${TARGET_SHORT}.map,--library-path=${PROJECT_SOURCE_DIR}/targets/CMSIS-OS/ChibiOS/common")
-
-endfunction()
-
-
-function(NF_SET_LINKER_FILE TARGET LINKER_FILE_NAME)
+function(nf_set_linker_file target linker_file_name)
 
     # set linker file name
-    set_target_properties(${TARGET} PROPERTIES LINK_FLAGS "-T${LINKER_FILE_NAME}")
+    set_target_properties(${target} PROPERTIES LINK_FLAGS "-T${linker_file_name}")
 
 endfunction()
 
+# setting compile definitions for a target based on general build options
+# TARGET parameter to set the target that's setting them for
+# optional EXTRA_COMPILE_DEFINITIONS with compiler definitions to be added to the library
+# optional BUILD_TARGET when target it's a library pass here the name ot the target that's building for (either nanoBooter or nanoCLR)
+macro(nf_set_compile_definitions)
 
-function(NF_SET_COMPILER_DEFINITIONS TARGET)
+    # parse arguments
+    cmake_parse_arguments(NFSCD "" "TARGET" "EXTRA_COMPILE_DEFINITIONS;BUILD_TARGET" ${ARGN})
+
+    if(NOT NFSCD_TARGET OR "${NFSCD_TARGET}" STREQUAL "")
+        message(FATAL_ERROR "Need to set TARGET argument when calling nf_set_compile_definitions()")
+    endif()
 
     # definition for platform 
-    # (always ARM here)
     # ChibiOS HAL community always include (nanoFramework overlay and official community contributions optionally)
-    target_compile_definitions(${TARGET} PUBLIC "-DPLATFORM_ARM -DHAL_USE_COMMUNITY")
+    target_compile_definitions(${NFSCD_TARGET} PUBLIC -DHAL_USE_COMMUNITY )
 
-    # build types that have debugging capabilities AND are NOT RTM have to have the define 'NANOCLR_ENABLE_SOURCELEVELDEBUGGING'
-    if((NOT NF_BUILD_RTM) OR NF_FEATURE_DEBUGGER)
-        target_compile_definitions(${TARGET} PUBLIC "-DNANOCLR_ENABLE_SOURCELEVELDEBUGGING ")
-    endif()
+    nf_common_compiler_definitions(TARGET ${NFSCD_TARGET} BUILD_TARGET ${NFSCD_BUILD_TARGET})
 
-    # set compiler definition for RTM build option
-    if(NF_BUILD_RTM)
-        target_compile_definitions(${TARGET} PUBLIC -DBUILD_RTM)
-    endif()
+    # include extra compiler definitions
+    target_compile_definitions(${NFSCD_TARGET} PUBLIC ${NFSCD_EXTRA_COMPILE_DEFINITIONS})
 
-    # set compiler definition for using Application Domains feature
-    if(NF_FEATURE_USE_APPDOMAINS)
-        target_compile_definitions(${TARGET} PUBLIC -DNANOCLR_USE_APPDOMAINS)
-    endif()
+endmacro()
 
-    # set compiler definition for implementing (or not) CRC32 in Wire Protocol
-    if(NF_WP_IMPLEMENTS_CRC32)
-        target_compile_definitions(${TARGET} PUBLIC -DWP_IMPLEMENTS_CRC32)
-    endif()
-
-    # set definition for Wire Protocol trace mask
-    target_compile_definitions(${TARGET} PUBLIC -DTRACE_MASK=${WP_TRACE_MASK})
-
-    # set compiler definition regarding inclusion of trace messages and checks on CLR
-    if(NF_PLATFORM_NO_CLR_TRACE)
-        target_compile_definitions(${TARGET} PUBLIC -DPLATFORM_NO_CLR_TRACE=1)
-    endif()
-
-    # set compiler definition regarding CLR IL inlining
-    if(NF_CLR_NO_IL_INLINE)
-        target_compile_definitions(${TARGET} PUBLIC -DNANOCLR_NO_IL_INLINE=1)
-    endif()
-
-    # include any extra compiler definitions coming from extra args
-    target_compile_definitions(${TARGET} PUBLIC ${ARGN})
+function(nf_set_stm32_target_series)
+    # process target series, which is in the format "STM32F4xx"
+    string(REPLACE "STM32" "" TARGET_SERIES_SHORT_1 "${TARGET_SERIES}")
+    string(REPLACE "xx" "" TARGET_SERIES_SHORT "${TARGET_SERIES_SHORT_1}")
+    
+    # store the series short name for later use
+    set(TARGET_SERIES_SHORT ${TARGET_SERIES_SHORT} CACHE INTERNAL "STM32 target series short name")
 
 endfunction()
+
+function(nf_set_rp_target_series)
+    # RP series names are simple (e.g. "RP2040", "RP2350") — use as-is for the short name
+    set(TARGET_SERIES_SHORT ${TARGET_SERIES} CACHE INTERNAL "RP target series short name")
+endfunction()
+
+# Add platform packages specific to ChibiOS
+# To be called from target CMakeList.txt
+# optional TARGET argument with target name
+macro(nf_add_platform_packages)
+
+    # parse arguments
+    cmake_parse_arguments(NFAPP "" "TARGET" "" ${ARGN})
+   
+    # packages common to all targets
+    find_package(ChibiOS REQUIRED QUIET)
+    find_package(ChibiOS_${TARGET_SERIES_SHORT}_HAL REQUIRED QUIET)
+    find_package(ChibiOSnfOverlay REQUIRED QUIET)
+
+    # ChibiOS contrib repo
+    if(CHIBIOS_CONTRIB_REQUIRED)
+        find_package(ChibiOS-Contrib REQUIRED QUIET)
+    endif()
+
+    if(USE_FILESYSTEM_OPTION)
+        find_package(CHIBIOS_FATFS REQUIRED QUIET)
+    endif()
+
+    # STM32-specific packages (not needed for RP targets)
+    if(TARGET_VENDOR STREQUAL "ST")
+        # littlefs
+        if(NF_FEATURE_USE_LITTLEFS_OPTION)
+            find_package(STM32F7_CubePackage REQUIRED QUIET)
+            find_package(LITTLEFS REQUIRED QUIET)
+        endif()
+
+        if(STM32_CUBE_PACKAGE_REQUIRED)
+            find_package(${TARGET_STM32_CUBE_PACKAGE}_CubePackage REQUIRED QUIET)
+        endif()
+    endif()
+
+    # littlefs for non-STM32 targets (e.g. RP2040)
+    if(NOT TARGET_VENDOR STREQUAL "ST" AND NF_FEATURE_USE_LITTLEFS_OPTION)
+        find_package(LITTLEFS REQUIRED QUIET)
+    endif()
+    
+    # packages specific for nanoBooter
+    if("${NFAPP_TARGET}" STREQUAL "${NANOBOOTER_PROJECT_NAME}")
+        # no packages for booter
+    endif()
+
+    # packages specific for nanoCLR
+    if("${NFAPP_TARGET}" STREQUAL "${NANOCLR_PROJECT_NAME}")
+
+        if(USE_NETWORKING_OPTION)
+
+            find_package(NF_Network REQUIRED QUIET)
+            find_package(lwIP REQUIRED QUIET)
+
+        endif()
+
+    endif()
+ 
+endmacro()
+
+# Add ChibiOS platform dependencies to a specific CMake target
+# To be called from target CMakeList.txt
+macro(nf_add_platform_dependencies target)
+
+    nf_add_common_dependencies(${target})
+
+    # dependencies specific to nanoCLR
+    if("${target}" STREQUAL "${NANOCLR_PROJECT_NAME}")
+
+        nf_add_lib_coreclr(
+            EXTRA_INCLUDES
+                ${CHIBIOS_INCLUDE_DIRS}
+                ${CHIBIOS_HAL_INCLUDE_DIRS}
+                ${ChibiOSnfOverlay_INCLUDE_DIRS}
+                ${CHIBIOS_CONTRIB_INCLUDE_DIRS}
+                ${CHIBIOS_FATFS_INCLUDE_DIRS}
+                ${TARGET_CHIBIOS_COMMON_INCLUDE_DIRS}
+                ${TARGET_CHIBIOS_NANOCLR_INCLUDE_DIRS}
+                ${chibios_SOURCE_DIR}/os/hal/boards/${TARGET_BOARD})
+
+        add_dependencies(${target}.elf nano::NF_CoreCLR)
+
+        nf_add_lib_wireprotocol(
+            EXTRA_INCLUDES
+                ${CHIBIOS_INCLUDE_DIRS}
+                ${CHIBIOS_HAL_INCLUDE_DIRS}
+                ${ChibiOSnfOverlay_INCLUDE_DIRS}
+                ${CHIBIOS_CONTRIB_INCLUDE_DIRS}
+                ${CHIBIOS_FATFS_INCLUDE_DIRS}
+                ${TARGET_CHIBIOS_COMMON_INCLUDE_DIRS}
+                ${TARGET_CHIBIOS_NANOCLR_INCLUDE_DIRS}
+                ${chibios_SOURCE_DIR}/os/hal/boards/${TARGET_BOARD})
+
+        add_dependencies(${target}.elf nano::WireProtocol)
+
+        if(NF_FEATURE_DEBUGGER)
+
+            nf_add_lib_debugger(
+                EXTRA_INCLUDES
+                    ${CHIBIOS_INCLUDE_DIRS}
+                    ${CHIBIOS_HAL_INCLUDE_DIRS}
+                    ${ChibiOSnfOverlay_INCLUDE_DIRS}
+                    ${CHIBIOS_CONTRIB_INCLUDE_DIRS}
+                    ${CHIBIOS_FATFS_INCLUDE_DIRS}
+                    ${lWIP_INCLUDE_DIRS}
+                    ${TARGET_CHIBIOS_COMMON_INCLUDE_DIRS}
+                    ${TARGET_CHIBIOS_NANOCLR_INCLUDE_DIRS}
+                    ${chibios_SOURCE_DIR}/os/hal/boards/${TARGET_BOARD})
+
+            add_dependencies(${target}.elf nano::NF_Debugger)
+
+        endif()
+
+        if(API_nanoFramework.System.Security.Cryptography)
+            FetchContent_GetProperties(mbedtls)
+        endif()
+    
+        nf_add_lib_native_assemblies(
+            EXTRA_SOURCES
+                ${CHIBIOS_FATFS_SOURCES}
+                ${littlefs_SOURCES}
+            EXTRA_INCLUDES
+                ${CHIBIOS_INCLUDE_DIRS}
+                ${CHIBIOS_HAL_INCLUDE_DIRS}
+                ${${TARGET_STM32_CUBE_PACKAGE}_CubePackage_INCLUDE_DIRS}
+                ${ChibiOSnfOverlay_INCLUDE_DIRS}
+                ${CHIBIOS_CONTRIB_INCLUDE_DIRS}
+                ${lWIP_INCLUDE_DIRS}
+                ${CHIBIOS_FATFS_INCLUDE_DIRS}
+                ${littlefs_INCLUDE_DIRS}
+                ${TARGET_CHIBIOS_COMMON_INCLUDE_DIRS}
+                ${TARGET_CHIBIOS_NANOCLR_INCLUDE_DIRS}
+                ${chibios_SOURCE_DIR}/os/hal/boards/${TARGET_BOARD}
+                ${mbedtls_SOURCE_DIR}/include
+                ${CMAKE_SOURCE_DIR}/src/PAL/COM/sockets/ssl/MbedTLS)
+        
+        add_dependencies(${target}.elf nano::NF_NativeAssemblies)
+        
+        # nF feature: networking
+        if(USE_NETWORKING_OPTION)
+
+            # WiFi targets don't use the ChibiOS MAC HAL driver
+            if(TARGET_HAS_WIFI)
+                set(NF_NETWORK_EXTRA_DEFS "")
+            else()
+                set(NF_NETWORK_EXTRA_DEFS -DHAL_USE_MAC=TRUE)
+            endif()
+
+            nf_add_lib_network(
+                BUILD_TARGET
+                    ${target}
+                EXTRA_SOURCES
+                    ${lWIP_SOURCES}
+                EXTRA_INCLUDES 
+                    ${CHIBIOS_INCLUDE_DIRS}
+                    ${CHIBIOS_HAL_INCLUDE_DIRS}
+                    ${TARGET_CHIBIOS_COMMON_INCLUDE_DIRS}
+                    ${TARGET_CHIBIOS_NANOCLR_INCLUDE_DIRS}
+                    ${lWIP_INCLUDE_DIRS}
+                    ${ChibiOSnfOverlay_INCLUDE_DIRS}
+                    ${CHIBIOS_FATFS_INCLUDE_DIRS}
+                    ${CHIBIOS_CONTRIB_INCLUDE_DIRS}
+                    ${${TARGET_STM32_CUBE_PACKAGE}_CubePackage_INCLUDE_DIRS}
+                EXTRA_COMPILE_DEFINITIONS ${NF_NETWORK_EXTRA_DEFS})
+
+            add_dependencies(${target}.elf nano::NF_Network)
+
+            # security provider is MbedTLS
+            if(USE_SECURITY_MBEDTLS_OPTION)
+                add_dependencies(NF_Network nano::NF_Network)
+                target_compile_definitions(NF_Network PUBLIC -DMBEDTLS_CONFIG_FILE=\"${CMAKE_SOURCE_DIR}/src/PAL/COM/sockets/ssl/MbedTLS/nf_mbedtls_config.h\")
+            endif()
+
+        endif()
+
+    endif()
+
+endmacro()
+
+# Add ChibiOS platform include directories to a specific CMake target
+# To be called from target CMakeList.txt
+macro(nf_add_platform_include_directories target)
+
+    target_include_directories(${target}.elf PUBLIC
+
+        ${CHIBIOS_HAL_INCLUDE_DIRS}
+        ${CHIBIOS_INCLUDE_DIRS}
+        ${ChibiOSnfOverlay_INCLUDE_DIRS}
+        ${CHIBIOS_CONTRIB_INCLUDE_DIRS}
+        ${${TARGET_STM32_CUBE_PACKAGE}_CubePackage_INCLUDE_DIRS}
+        ${TARGET_CMSIS_COMMON_INCLUDE_DIRS}
+        ${TARGET_CHIBIOS_COMMON_INCLUDE_DIRS}
+        ${lWIP_INCLUDE_DIRS}
+        ${littlefs_INCLUDE_DIRS}
+
+    )
+    
+    # includes specific to nanoBooter
+    if(${target} STREQUAL ${NANOBOOTER_PROJECT_NAME})
+
+        target_include_directories(${target}.elf PUBLIC
+
+            ${TARGET_CHIBIOS_NANOBOOTER_INCLUDE_DIRS}
+        )
+
+    endif()
+
+    # includes specific to nanoCLR
+    if(${target} STREQUAL ${NANOCLR_PROJECT_NAME})
+
+        target_include_directories(${target}.elf PUBLIC
+
+            ${TARGET_CHIBIOS_NANOCLR_INCLUDE_DIRS}
+            ${CHIBIOS_FATFS_INCLUDE_DIRS}
+        )
+
+                
+        if(USE_SECURITY_MBEDTLS_OPTION)
+
+            # need to add extra include directories for MbedTLS
+            target_include_directories(
+                mbedcrypto PRIVATE
+                ${CHIBIOS_HAL_INCLUDE_DIRS}
+                ${CHIBIOS_INCLUDE_DIRS}
+                ${ChibiOSnfOverlay_INCLUDE_DIRS}
+                ${CHIBIOS_CONTRIB_INCLUDE_DIRS}
+                ${${TARGET_STM32_CUBE_PACKAGE}_CubePackage_INCLUDE_DIRS}
+                ${TARGET_CHIBIOS_COMMON_INCLUDE_DIRS}
+                ${lWIP_INCLUDE_DIRS}
+            )
+
+        endif()
+
+    endif()
+
+endmacro()
+
+# Add ChibiOS platform target sources to a specific CMake target
+# To be called from target CMakeList.txt
+macro(nf_add_platform_sources target)
+
+    # add header files with common OS definitions and board definitions
+    configure_file(${CMAKE_CURRENT_SOURCE_DIR}/target_common.h.in
+                   ${CMAKE_BINARY_DIR}/targets/${RTOS}/${TARGET_BOARD}/target_common.h @ONLY)
+
+    # sources common to both builds
+    target_sources(${target}.elf PUBLIC
+    
+        ${TARGET_CHIBIOS_COMMON_SOURCES}
+
+        ${CHIBIOS_HAL_SOURCES}
+        ${CHIBIOS_SOURCES}
+        ${ChibiOSnfOverlay_SOURCES}
+    )
+
+    # STM32 Cube package sources (only for ST vendor)
+    if(TARGET_VENDOR STREQUAL "ST")
+        target_sources(${target}.elf PUBLIC
+            ${${TARGET_STM32_CUBE_PACKAGE}_CubePackage_SOURCES}
+        )
+    endif()
+
+    # sources specific to nanoBooter
+    if(${target} STREQUAL ${NANOBOOTER_PROJECT_NAME})
+
+        # add header file for board definition
+        configure_file(${CMAKE_CURRENT_SOURCE_DIR}/nanoBooter/target_board.h.in
+                       ${CMAKE_BINARY_DIR}/targets/${RTOS}/${TARGET_BOARD}/nanoBooter/target_board.h @ONLY)
+
+        target_sources(${target}.elf PUBLIC
+            
+            ${TARGET_CHIBIOS_NANOBOOTER_SOURCES}
+        )
+
+    endif()
+
+    # sources specific to nanoCLR
+    if(${target} STREQUAL ${NANOCLR_PROJECT_NAME})
+
+        configure_file(${CMAKE_CURRENT_SOURCE_DIR}/nanoCLR/target_board.h.in
+                       ${CMAKE_BINARY_DIR}/targets/${RTOS}/${TARGET_BOARD}/nanoCLR/target_board.h @ONLY)
+
+        target_sources(${target}.elf PUBLIC
+            ${TARGET_CHIBIOS_NANOCLR_SOURCES}
+            ${CHIBIOS_CONTRIB_SOURCES}
+        )
+
+        if(USE_NETWORKING_OPTION)
+            target_link_libraries(${target}.elf
+                nano::NF_Network
+            )
+
+            if(USE_SECURITY_MBEDTLS_OPTION)
+                target_link_libraries(${target}.elf
+                    mbedtls
+                )
+
+                add_dependencies(NF_Network mbedtls)
+
+            endif()
+
+        endif()
+
+    endif()
+
+endmacro()
+
+# macro to setup the build for a target
+# mandatory HAS_NANOBOOTER specifing if the target implements nanoBooter
+# BOOTER_LINKER_FILE with the path to the linker file for nanoBooter (if the target has it)
+# mandatory CLR_LINKER_FILE with the path to the linker file for nanoCLR
+# optional BOOTER_EXTRA_SOURCE_FILES with paths to extra files to be added to the nanoBooter build target
+# optional CLR_EXTRA_SOURCE_FILES with paths to extra files to be added to the nanoCLR build target
+# optional BOOTER_EXTRA_COMPILE_DEFINITIONS extra nanoBooter compile definitions to pass to nf_set_compile_definitions() 
+# optional CLR_EXTRA_COMPILE_DEFINITIONS extra nanoCLR compile definitions to pass to nf_set_compile_definitions() 
+# optional BOOTER_EXTRA_LINKMAP_PROPERTIES extra nanoBooter link map properties to pass to nf_set_link_map() 
+# optional CLR_EXTRA_LINKMAP_PROPERTIES extra nanoCLR link map properties to pass to nf_set_link_map() 
+# optional BOOTER_EXTRA_LINK_FLAGS extra nanoBooter link flags to pass to nf_set_link_options() 
+# optional CLR_EXTRA_LINK_FLAGS extra nanoCLR link flags to pass to nf_set_link_options() 
+macro(nf_setup_target_build)
+
+    if(${TARGET_BOARD} STREQUAL "MXCHIP_AZ3166")
+
+        # # add WICED WWM library
+        # set(CLR_EXTRA_LIBRARIES
+        #     ${CMAKE_SOURCE_DIR}/targets/ChibiOS/MXCHIP_AZ3166/libwiced_sdk_bin.a
+        # )
+
+        # # add these to the ARGN list
+        # list(APPEND ARGN CLR_EXTRA_LIBRARIES ${CLR_EXTRA_LIBRARIES})
+    endif()
+
+    # OK to pass ARGN, to have it perform it's parsings and validation 
+    nf_setup_target_build_common(${ARGN})
+
+endmacro()
+
+# macro to clear binary files related with nanoBooter from output
+# to make sure that the build file it's up to date
+macro(nf_clear_output_files_nanobooter)
+    nf_clear_common_output_files_nanobooter()
+    # other files specific to this platform should go here
+endmacro()
+
+# macro to clear binary files related with nanoCLR from output
+# to make sure that the build file it's up to date
+macro(nf_clear_output_files_nanoclr)
+    nf_clear_common_output_files_nanoclr()
+    # other files specific to this platform should go here
+endmacro()

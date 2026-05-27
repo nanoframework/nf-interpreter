@@ -1,11 +1,11 @@
 //
-// Copyright (c) 2019 The nanoFramework project contributors
+// Copyright (c) .NET Foundation and Contributors
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
 //
 
-#ifndef _NANO_SSL_H_
-#define _NANO_SSL_H_ 1
+#ifndef NANO_SSL_H
+#define NANO_SSL_H
 
 #include <ssl_types.h>
 #include <ssl_functions.h>
@@ -27,4 +27,4 @@ struct SSL_Driver
 
 extern SSL_Driver g_SSL_Driver;
 
-#endif // _NANO_SSL_H_
+#endif // NANO_SSL_H

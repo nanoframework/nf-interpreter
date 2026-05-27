@@ -1,0 +1,30 @@
+{
+    "version": 4,
+    "include": [
+        "../../../CMake/arm-gcc.json",
+        "../../../config/user-tools-repos.json",
+        "../../../config/user-prefs.json"
+    ],
+    "configurePresets": [
+        {
+            "name": "ST_STM32F769I_DISCOVERY",
+            "inherits": [
+                "arm-gcc-cortex-preset",
+                "user-tools-repos",
+                "user-prefs"
+            ],
+            "hidden": false,
+            "cacheVariables": {
+                "NF_TARGET_DEFCONFIG": "targets/ChibiOS/ST_STM32F769I_DISCOVERY/defconfig"
+            }
+        }
+    ],
+    "buildPresets": [
+        {
+            "inherits": "base-user",
+            "name": "ST_STM32F769I_DISCOVERY",
+            "displayName": "ST_STM32F769I_DISCOVERY",
+            "configurePreset": "ST_STM32F769I_DISCOVERY"
+        }
+    ]
+}

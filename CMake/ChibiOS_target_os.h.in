@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2017 The nanoFramework project contributors
+// Copyright (c) .NET Foundation and Contributors
 // See LICENSE file in the project root for full license information.
 //
 
@@ -10,28 +10,23 @@
 
 #include <chversion.h>
 
-#ifndef _TARGET_OS_H_
-#define _TARGET_OS_H_
+#ifndef TARGET_OS_H
+#define TARGET_OS_H
 
 #define STR_HELPER(x) #x
-#define STR(x) STR_HELPER(x)
+#define STR(x)        STR_HELPER(x)
 
-#define VERSION_MAJOR @nanoFramework_VERSION_MAJOR@U
-#define VERSION_MINOR @nanoFramework_VERSION_MINOR@U
-#define VERSION_BUILD @nanoFramework_VERSION_PATCH@U
+#define VERSION_MAJOR    @nanoFramework_VERSION_MAJOR@U
+#define VERSION_MINOR    @nanoFramework_VERSION_MINOR@U
+#define VERSION_BUILD    @nanoFramework_VERSION_PATCH@U
 #define VERSION_REVISION @nanoFramework_VERSION_TWEAK@U
 
 #define TARGETINFOSTRING "@CMAKE_BUILD_TYPE@ build with ChibiOS v" CH_VERSION "." STR(CH_VERSION_MONTH)
 
-#define NANOCLR_LIGHT_MATH @TARGET_LIGHT_MATH@
-#define DP_FLOATINGPOINT @TARGET_DP_FLOATINGPOINT@
+#include "nf_config.h"
 
-#define SUPPORT_ANY_BASE_CONVERSION @TARGET_SUPPORT_ANY_BASE_CONVERSION@
+#cmakedefine NANOCLR_PROFILE_NEW_CALLS           @NANOCLR_PROFILE_NEW_CALLS@
+#cmakedefine NANOCLR_PROFILE_NEW_ALLOCATIONS     @NANOCLR_PROFILE_NEW_ALLOCATIONS@
+#cmakedefine NANOCLR_TRACE_MEMORY_STATS          @NANOCLR_TRACE_MEMORY_STATS@
 
-#define HAS_CONFIG_BLOCK @TARGET_HAS_CONFIG_BLOCK@
-
-#define NANOCLR_REFLECTION @TARGET_NANOCLR_REFLECTION@
-
-#define NANOCLR_SYSTEM_COLLECTIONS @TARGET_SYSTEM_COLLECTIONS@
-
-#endif /* _TARGET_OS_H_ */
+#endif // TARGET_OS_H

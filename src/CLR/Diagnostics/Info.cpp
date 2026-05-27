@@ -1,18 +1,20 @@
-//
-// Copyright (c) 2017 The nanoFramework project contributors
+﻿//
+// Copyright (c) .NET Foundation and Contributors
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
 //
 #include "Diagnostics.h"
 
-
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#if defined(_WIN32) 
+#if defined(VIRTUAL_DEVICE)
 
-static std::string* s_redirectedString = NULL;
+#include <iostream>
+#include <nanoCLR_Win32.h>
 
-void CLR_Debug::RedirectToString( std::string* str )
+static std::string *s_redirectedString = nullptr;
+
+void CLR_Debug::RedirectToString(std::string *str)
 {
     NATIVE_PROFILE_CLR_DIAGNOSTICS();
     s_redirectedString = str;
@@ -22,39 +24,39 @@ static std::string s_messageString = "";
 
 void CLR_Debug::SaveMessage(std::string str)
 {
-	NATIVE_PROFILE_CLR_DIAGNOSTICS();
-
-	// clear LR & CR
-	int pos;
-	if ((pos = str.find('\n')) != std::string::npos)
-	{
-		str.erase(pos);
-	}
-	if ((pos = str.find('\r')) != std::string::npos)
-	{
-		str.erase(pos);
-	}
-
-	s_messageString = str;
-}
-
-HRESULT NANOCLR_DEBUG_PROCESS_EXCEPTION( HRESULT hr, const char* szFunc, const char* szFile, int line )
-{
     NATIVE_PROFILE_CLR_DIAGNOSTICS();
-    switch(hr)
+
+    // clear LR & CR
+    size_t pos;
+    if ((pos = str.find('\n')) != std::string::npos)
     {
-    case CLR_E_ENTRY_NOT_FOUND:
-    case CLR_E_PROCESS_EXCEPTION:
-    case CLR_E_THREAD_WAITING:
-    case CLR_E_RESTART_EXECUTION:
-    case CLR_E_RESCHEDULE:
-    case CLR_E_OUT_OF_MEMORY:
-        return hr;
+        str.erase(pos);
+    }
+    if ((pos = str.find('\r')) != std::string::npos)
+    {
+        str.erase(pos);
     }
 
-    if(s_CLR_RT_fTrace_StopOnFAILED >= c_CLR_RT_Trace_Info)
+    s_messageString = str;
+}
+
+HRESULT NANOCLR_DEBUG_PROCESS_EXCEPTION(HRESULT hr, const char *szFunc, const char *szFile, int line)
+{
+    NATIVE_PROFILE_CLR_DIAGNOSTICS();
+    switch (hr)
     {
-        if(::IsDebuggerPresent())
+        case CLR_E_ENTRY_NOT_FOUND:
+        case CLR_E_PROCESS_EXCEPTION:
+        case CLR_E_THREAD_WAITING:
+        case CLR_E_RESTART_EXECUTION:
+        case CLR_E_RESCHEDULE:
+        case CLR_E_OUT_OF_MEMORY:
+            return hr;
+    }
+
+    if (s_CLR_RT_fTrace_StopOnFAILED >= c_CLR_RT_Trace_Info)
+    {
+        if (::IsDebuggerPresent())
         {
             ::DebugBreak();
         }
@@ -65,20 +67,20 @@ HRESULT NANOCLR_DEBUG_PROCESS_EXCEPTION( HRESULT hr, const char* szFunc, const c
 #else
 
 #if defined(NANOCLR_TRACE_HRESULT)
-HRESULT NANOCLR_DEBUG_PROCESS_EXCEPTION( HRESULT hr, const char* szFunc, const char* szFile, int line )
+HRESULT NANOCLR_DEBUG_PROCESS_EXCEPTION(HRESULT hr, const char *szFunc, const char *szFile, int line)
 {
     NATIVE_PROFILE_CLR_DIAGNOSTICS();
-    switch(hr)
+    switch (hr)
     {
-    case CLR_E_ENTRY_NOT_FOUND:
+        case CLR_E_ENTRY_NOT_FOUND:
 
-    case CLR_E_PROCESS_EXCEPTION:
-    case CLR_E_THREAD_WAITING:
-    case CLR_E_RESTART_EXECUTION:
-        return hr;
+        case CLR_E_PROCESS_EXCEPTION:
+        case CLR_E_THREAD_WAITING:
+        case CLR_E_RESTART_EXECUTION:
+            return hr;
     }
 
-    CLR_Debug::Printf( "HRESULT %08x: %s %s:%d\r\n", hr, szFunc, szFile, line );
+    CLR_Debug::Printf("HRESULT %08x: %s %s:%d\r\n", hr, szFunc, szFile, line);
     return hr;
 }
 #endif
@@ -87,104 +89,75 @@ HRESULT NANOCLR_DEBUG_PROCESS_EXCEPTION( HRESULT hr, const char* szFunc, const c
 
 //--//
 
-bool CLR_SafeSprintfV( char*& szBuffer, size_t& iBuffer, const char* format, va_list arg )
-{
-    NATIVE_PROFILE_CLR_DIAGNOSTICS();
-
-    int  chars = vsnprintf( szBuffer, iBuffer, format, arg );
-    bool fRes  = (chars >= 0);
-
-    if(fRes == false) chars = (int)iBuffer;
-
-    szBuffer += chars; szBuffer[ 0 ] = 0;
-    iBuffer  -= chars;
-
-    return fRes;
-}
-
-bool CLR_SafeSprintf( char*& szBuffer, size_t& iBuffer, const char* format, ... )
-{
-    NATIVE_PROFILE_CLR_DIAGNOSTICS();
-    va_list arg;
-    bool    fRes;
-
-    va_start( arg, format );
-
-    fRes = CLR_SafeSprintfV( szBuffer, iBuffer, format, arg );
-
-    va_end( arg );
-
-    return fRes;
-}
-
-
-//--//
-
 void CLR_Debug::Flush()
 {
     NATIVE_PROFILE_CLR_DIAGNOSTICS();
-    DebuggerPort_Flush( HalSystemConfig.DebugTextPort );
+    DebuggerPort_Flush(HalSystemConfig.DebugTextPort);
 }
 
-void CLR_Debug::Emit( const char *text, int len )
+void CLR_Debug::Emit(const char *text, int len)
 {
     NATIVE_PROFILE_CLR_DIAGNOSTICS();
-    static char s_buffer[ 128 ];
-    static int  s_chars = 0;
+    static char s_buffer[128];
+    static int s_chars = 0;
 
-    if(CLR_EE_DBG_IS( RebootPending)) return;
+    if (CLR_EE_DBG_IS(RebootPending))
+        return;
 
-    if(len == -1) len = (int)hal_strlen_s( text );
+    if (len == -1)
+        len = (int)hal_strlen_s(text);
 
-#if defined(_WIN32)
-    if(s_redirectedString)
+#if defined(VIRTUAL_DEVICE)
+    if (s_redirectedString)
     {
-        s_redirectedString->append( text, len );
+        s_redirectedString->append(text, len);
         return;
     }
 
-    if(s_CLR_RT_fTrace_RedirectOutput.size())
+    if (s_CLR_RT_fTrace_RedirectOutput.size())
     {
-        static HANDLE hFile = INVALID_HANDLE_VALUE;
-        static int    lines = 0;
-        static int    num   = 0;
+        static auto hFile = INVALID_HANDLE_VALUE;
+        static int lines = 0;
+        static int num = 0;
 
-        if(hFile == INVALID_HANDLE_VALUE)
+        if (hFile == INVALID_HANDLE_VALUE)
         {
             std::wstring file = s_CLR_RT_fTrace_RedirectOutput;
 
-            if(s_CLR_RT_fTrace_RedirectLinesPerFile)
+            if (s_CLR_RT_fTrace_RedirectLinesPerFile)
             {
-                wchar_t rgBuf[ 64 ];
+                wchar_t rgBuf[64];
 
-                swprintf( rgBuf, ARRAYSIZE(rgBuf), L".%08d", num++ );
+                swprintf(rgBuf, ARRAYSIZE(rgBuf), L".%08d", num++);
 
-                file.append( rgBuf );
+                file.append(rgBuf);
             }
 
-            hFile = ::CreateFileW( file.c_str(), GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE, 0, CREATE_ALWAYS, 0, 0 );
+            hFile =
+                ::CreateFileW(file.c_str(), GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE, 0, CREATE_ALWAYS, 0, 0);
 
             lines = 0;
         }
 
-        if(hFile != INVALID_HANDLE_VALUE)
+        if (hFile != INVALID_HANDLE_VALUE)
         {
             unsigned long dwWritten;
 
-            ::WriteFile( hFile, text, (unsigned long)len, &dwWritten, NULL );
+            ::WriteFile(hFile, text, (unsigned long)len, &dwWritten, nullptr);
 
-            if(s_CLR_RT_fTrace_RedirectLinesPerFile)
+            if (s_CLR_RT_fTrace_RedirectLinesPerFile)
             {
-                while((text = strchr( text, '\n' )) != NULL)
+                while ((text = strchr(text, '\n')) != nullptr)
                 {
                     lines++;
                     text++;
 
-                    if(text[ 0 ] == 0)
+                    if (text[0] == 0)
                     {
-                        if(lines > s_CLR_RT_fTrace_RedirectLinesPerFile)
+                        if (lines > s_CLR_RT_fTrace_RedirectLinesPerFile)
                         {
-                            ::CloseHandle( hFile ); hFile = INVALID_HANDLE_VALUE;
+                            ::CloseHandle(hFile);
+                            hFile = INVALID_HANDLE_VALUE;
                         }
 
                         break;
@@ -197,38 +170,48 @@ void CLR_Debug::Emit( const char *text, int len )
     }
 #endif
 
-    while(len > 0)
+    while (len > 0)
     {
         int avail = MAXSTRLEN(s_buffer) - s_chars;
 
-        if(len < avail) avail = len;
+        if (len < avail)
+            avail = len;
 
-        memcpy( &s_buffer[ s_chars ], text, avail );
+        memcpy(&s_buffer[s_chars], text, avail);
 
         s_chars += avail;
-        text    += avail;
-        len     -= avail;
-        s_buffer[ s_chars ] = 0;
+        text += avail;
+        len -= avail;
+        s_buffer[s_chars] = 0;
 
-        if(s_chars > 80 || strchr( s_buffer, '\n' ))
+        if (s_chars > 80 || strchr(s_buffer, '\n'))
         {
             Watchdog_Reset();
-
-#if defined(PLATFORM_WINDOWS_EMULATOR)
-            HAL_Windows_Debug_Print( s_buffer );
+#ifdef VIRTUAL_DEVICE
+            OutputDebugStringA(s_buffer);
+            HAL_Windows_Debug_Print(s_buffer);
 #endif
 
-            if(CLR_EE_DBG_IS( Enabled ) && !CLR_EE_DBG_IS( Quiet ))
+            if (CLR_EE_DBG_IS(Enabled) && CLR_EE_DBG_IS_NOT(Quiet))
             {
-                CLR_EE_DBG_EVENT_BROADCAST( CLR_DBG_Commands_c_Monitor_Message, s_chars, s_buffer, WP_Flags_c_NonCritical | WP_Flags_c_NoCaching );
+                CLR_EE_DBG_EVENT_BROADCAST(
+                    CLR_DBG_Commands_c_Monitor_Message,
+                    s_chars,
+                    s_buffer,
+                    WP_Flags_c_NonCritical | WP_Flags_c_NoCaching);
             }
 
-            if(HalSystemConfig.DebugTextPort != HalSystemConfig.DebuggerPort)
+            if (CLR_EE_DBG_IS_NOT(Enabled) || HalSystemConfig.DebugTextPort != HalSystemConfig.DebuggerPort)
             {
-#if !defined(_WIN32)
-                DebuggerPort_Write( HalSystemConfig.DebugTextPort, s_buffer, s_chars, 0 ); // skip null terminator and don't bother retrying
-                DebuggerPort_Flush( HalSystemConfig.DebugTextPort );                    // skip null terminator
-#endif
+
+#ifndef VIRTUAL_DEVICE
+                DebuggerPort_Write(
+                    HalSystemConfig.DebugTextPort,
+                    s_buffer,
+                    s_chars,
+                    0);                                            // skip null terminator and don't bother retrying
+                DebuggerPort_Flush(HalSystemConfig.DebugTextPort); // skip null terminator
+#endif                                                             // VIRTUAL_DEVICE
             }
 
             s_chars = 0;
@@ -236,72 +219,60 @@ void CLR_Debug::Emit( const char *text, int len )
     }
 }
 
-int CLR_Debug::PrintfV( const char *format, va_list arg )
+int CLR_Debug::PrintfV(const char *format, va_list arg)
 {
     NATIVE_PROFILE_CLR_DIAGNOSTICS();
 
-#if defined(_WIN32)
-    char   buffer[512];
-	char*  szBuffer = buffer;
-    int16_t bufferSize = MAXSTRLEN(buffer);
-    size_t iBuffer  = bufferSize;
-#else
     // this should be more than enough for the existing output needs
+    // TODO: expose this in the build system to allow better adjustment according to the target
     const int16_t c_BufferSize = 512;
 
-    char*  buffer = (char*)platform_malloc(c_BufferSize);
-	char*  szBuffer = buffer;
-    size_t iBuffer = c_BufferSize;
-    int16_t bufferSize = c_BufferSize;
+    char buffer[c_BufferSize];
+    char *szBuffer = buffer;
+
+    // need to leave space for the null terminator
+    size_t bufferSize = c_BufferSize - 1;
+    size_t iBuffer = bufferSize;
+
+#if !defined(BUILD_RTM)
+    bool fRes =
 #endif
-    
-    bool fRes = CLR_SafeSprintfV(szBuffer, iBuffer, format, arg );
-    
+        CLR_SafeSprintfV(szBuffer, iBuffer, format, arg);
+
     _ASSERTE(fRes);
 
     iBuffer = bufferSize - iBuffer;
 
-    Emit( buffer, (int)iBuffer );
+    Emit(buffer, (int)iBuffer);
 
-#if defined(_WIN32)
-	OutputDebugStringA(buffer);
-
-	std::string outputString(buffer, iBuffer);
-	SaveMessage(outputString);
-
-#endif
-
-#if !defined(_WIN32)
-    if(buffer != NULL)
-    {
-        platform_free(buffer);
-    }
+#if defined(VIRTUAL_DEVICE)
+    std::string outputString(buffer, iBuffer);
+    SaveMessage(outputString);
 #endif
 
     return (int)iBuffer;
 }
 
-int CLR_Debug::Printf( const char *format, ... )
+int CLR_Debug::Printf(const char *format, ...)
 {
     NATIVE_PROFILE_CLR_DIAGNOSTICS();
     va_list arg;
-    int     chars;
+    int chars;
 
-    va_start( arg, format );
+    va_start(arg, format);
 
-    chars = CLR_Debug::PrintfV( format, arg );
+    chars = CLR_Debug::PrintfV(format, arg);
 
-    va_end( arg );
+    va_end(arg);
 
     return chars;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#if defined(_WIN32)
+#if defined(VIRTUAL_DEVICE)
 
-const CLR_UINT8 c_CLR_opParamSize[] =
-{
+const CLR_UINT8 c_CLR_opParamSize[] = {
     4, // CLR_OpcodeParam_Field
     4, // CLR_OpcodeParam_Method
     4, // CLR_OpcodeParam_Type
@@ -321,8 +292,7 @@ const CLR_UINT8 c_CLR_opParamSize[] =
     1, // CLR_OpcodeParam_ShortVar
 };
 
-const CLR_UINT8 c_CLR_opParamSizeCompressed[] =
-{
+const CLR_UINT8 c_CLR_opParamSizeCompressed[] = {
     2, // CLR_OpcodeParam_Field
     2, // CLR_OpcodeParam_Method
     2, // CLR_OpcodeParam_Type
@@ -342,21 +312,33 @@ const CLR_UINT8 c_CLR_opParamSizeCompressed[] =
     1, // CLR_OpcodeParam_ShortVar
 };
 
-CLR_UINT32 CLR_ReadTokenCompressed( const CLR_UINT8*& ip, CLR_OPCODE opcode )
+CLR_UINT32 CLR_ReadTokenCompressed(const CLR_UINT8 *&ip, CLR_OPCODE opcode)
 {
     NATIVE_PROFILE_CLR_DIAGNOSTICS();
-    CLR_UINT32       arg;
-    const CLR_UINT8* ptr = ip;
+    CLR_UINT32 arg;
+    const CLR_UINT8 *ptr = ip;
 
-    switch(c_CLR_RT_OpcodeLookup[ opcode ].m_opParam)
+    switch (c_CLR_RT_OpcodeLookup[opcode].m_opParam)
     {
-        case CLR_OpcodeParam_Field : NANOCLR_READ_UNALIGNED_COMPRESSED_FIELDTOKEN ( arg, ptr ); break;
-        case CLR_OpcodeParam_Method: NANOCLR_READ_UNALIGNED_COMPRESSED_METHODTOKEN( arg, ptr ); break;
-        case CLR_OpcodeParam_Type  : NANOCLR_READ_UNALIGNED_COMPRESSED_TYPETOKEN  ( arg, ptr ); break;
-        case CLR_OpcodeParam_String: NANOCLR_READ_UNALIGNED_COMPRESSED_STRINGTOKEN( arg, ptr ); break;
-        case CLR_OpcodeParam_Tok   :
-        case CLR_OpcodeParam_Sig   : NANOCLR_READ_UNALIGNED_UINT32                ( arg, ptr ); break;
-        default                    : arg = 0;                                                   break;
+        case CLR_OpcodeParam_Field:
+            NANOCLR_READ_UNALIGNED_COMPRESSED_FIELDTOKEN(arg, ptr);
+            break;
+        case CLR_OpcodeParam_Method:
+            NANOCLR_READ_UNALIGNED_COMPRESSED_METHODTOKEN(arg, ptr);
+            break;
+        case CLR_OpcodeParam_Type:
+            NANOCLR_READ_UNALIGNED_COMPRESSED_TYPETOKEN(arg, ptr);
+            break;
+        case CLR_OpcodeParam_String:
+            NANOCLR_READ_UNALIGNED_COMPRESSED_STRINGTOKEN(arg, ptr);
+            break;
+        case CLR_OpcodeParam_Tok:
+        case CLR_OpcodeParam_Sig:
+            NANOCLR_READ_UNALIGNED_UINT32(arg, ptr);
+            break;
+        default:
+            arg = 0;
+            break;
     }
 
     ip = ptr;
@@ -373,39 +355,41 @@ CLR_UINT32 CLR_ReadTokenCompressed( const CLR_UINT8*& ip, CLR_OPCODE opcode )
 //          the instruction stream.  Note that this is not an
 //          instruction boundary, it is past the opcode.
 //
-const CLR_UINT8* CLR_SkipBodyOfOpcode( const CLR_UINT8* ip, CLR_OPCODE opcode )
+const CLR_UINT8 *CLR_SkipBodyOfOpcode(const CLR_UINT8 *ip, CLR_OPCODE opcode)
 {
     NATIVE_PROFILE_CLR_DIAGNOSTICS();
-    CLR_OpcodeParam opParam = c_CLR_RT_OpcodeLookup[ opcode ].m_opParam;
+    CLR_OpcodeParam opParam = c_CLR_RT_OpcodeLookup[opcode].m_opParam;
 
-    if(opParam == CLR_OpcodeParam_Switch)
+    if (opParam == CLR_OpcodeParam_Switch)
     {
-        CLR_UINT32 numcases; NANOCLR_READ_UNALIGNED_UINT32( numcases, ip );
+        CLR_UINT32 numcases;
+        NANOCLR_READ_UNALIGNED_UINT32(numcases, ip);
 
         ip += numcases * sizeof(CLR_UINT32);
     }
     else
     {
-        ip += c_CLR_opParamSize[ opParam ];
+        ip += c_CLR_opParamSize[opParam];
     }
 
     return ip;
 }
 
-const CLR_UINT8* CLR_SkipBodyOfOpcodeCompressed( const CLR_UINT8* ip, CLR_OPCODE opcode )
+const CLR_UINT8 *CLR_SkipBodyOfOpcodeCompressed(const CLR_UINT8 *ip, CLR_OPCODE opcode)
 {
     NATIVE_PROFILE_CLR_DIAGNOSTICS();
-    CLR_OpcodeParam opParam = c_CLR_RT_OpcodeLookup[ opcode ].m_opParam;
+    CLR_OpcodeParam opParam = c_CLR_RT_OpcodeLookup[opcode].m_opParam;
 
-    if(opParam == CLR_OpcodeParam_Switch)
+    if (opParam == CLR_OpcodeParam_Switch)
     {
-        CLR_UINT32 numcases; NANOCLR_READ_UNALIGNED_UINT8(numcases, ip);
+        CLR_UINT32 numcases;
+        NANOCLR_READ_UNALIGNED_UINT8(numcases, ip);
 
         ip += numcases * sizeof(CLR_UINT16);
     }
     else
     {
-        ip += c_CLR_opParamSizeCompressed[ opParam ];
+        ip += c_CLR_opParamSizeCompressed[opParam];
     }
 
     return ip;
@@ -414,173 +398,756 @@ const CLR_UINT8* CLR_SkipBodyOfOpcodeCompressed( const CLR_UINT8* ip, CLR_OPCODE
 #endif
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-#define LOOKUP_ELEMENT(idx,tblName,tblNameUC) \
-    const CLR_RECORD_##tblNameUC* p = Get##tblName( idx )
+#define LOOKUP_ELEMENT(idx, tblName, tblNameUC) const CLR_RECORD_##tblNameUC *p = Get##tblName(idx)
 
-#define LOOKUP_ELEMENT_REF(idx,tblName,tblNameUC,tblName2) \
-    const CLR_RECORD_##tblNameUC*    p = Get##tblName( idx );\
-    const CLR_RT_##tblName2##_Index* s = &m_pCrossReference_##tblName[ idx ].m_target; if(s->m_data == 0) s = NULL
+#define LOOKUP_ELEMENT_REF(idx, tblName, tblNameUC, tblName2)                                                          \
+    const CLR_RECORD_##tblNameUC *p = Get##tblName(idx);                                                               \
+    const CLR_RT_##tblName2##_Index *s = &crossReference##tblName[idx].target;                                         \
+    if (s->data == 0)                                                                                                  \
+    s = nullptr
 
-#define LOOKUP_ELEMENT_IDX(idx,tblName,tblNameUC) \
-    const CLR_RECORD_##tblNameUC*    p = Get##tblName( idx );\
-    CLR_RT_##tblName##_Index         s; s.Set( m_idx, idx )
+#define LOOKUP_ELEMENT_IDX(idx, tblName, tblNameUC)                                                                    \
+    const CLR_RECORD_##tblNameUC *p = Get##tblName(idx);                                                               \
+    CLR_RT_##tblName##_Index s;                                                                                        \
+    s.Set(assemblyIndex, idx)
 
 #if defined(NANOCLR_TRACE_INSTRUCTIONS)
 
-void CLR_RT_Assembly::DumpToken( CLR_UINT32 tk )
+void CLR_RT_Assembly::DumpToken(
+    CLR_UINT32 token,
+    const CLR_RT_MethodDef_Instance &methodDefInstance,
+    const CLR_RT_TypeSpec_Index *contextTypeSpec)
 {
     NATIVE_PROFILE_CLR_DIAGNOSTICS();
-    CLR_UINT32 idx = CLR_DataFromTk( tk );
+    CLR_UINT32 index = CLR_DataFromTk(token);
 
-    switch(CLR_TypeFromTk(tk))
+    switch (CLR_TypeFromTk(token))
     {
-    case TBL_AssemblyRef: { LOOKUP_ELEMENT    ( idx, AssemblyRef, ASSEMBLYREF           );                                           { CLR_Debug::Printf( "[%s]" ,                            GetString( p->name ) ); } break; }
-    case TBL_TypeRef    : { LOOKUP_ELEMENT_REF( idx, TypeRef    , TYPEREF    , TypeDef  ); if(s) { CLR_RT_DUMP::TYPE  ( *s ); } else { CLR_Debug::Printf( "%s.%s", GetString( p->nameSpace ), GetString( p->name ) ); } break; }
-    case TBL_FieldRef   : { LOOKUP_ELEMENT_REF( idx, FieldRef   , FIELDREF   , FieldDef ); if(s) { CLR_RT_DUMP::FIELD ( *s ); } else { CLR_Debug::Printf( "%s"   ,                            GetString( p->name ) ); } break; }
-    case TBL_MethodRef  : { LOOKUP_ELEMENT_REF( idx, MethodRef  , METHODREF  , MethodDef); if(s) { CLR_RT_DUMP::METHOD( *s ); } else { CLR_Debug::Printf( "%s"   ,                            GetString( p->name ) ); } break; }
-    case TBL_TypeDef    : { LOOKUP_ELEMENT_IDX( idx, TypeDef    , TYPEDEF               );         CLR_RT_DUMP::TYPE  (  s );                                                                                           break; }
-    case TBL_FieldDef   : { LOOKUP_ELEMENT_IDX( idx, FieldDef   , FIELDDEF              );         CLR_RT_DUMP::FIELD (  s );                                                                                           break; }
-    case TBL_MethodDef  : { LOOKUP_ELEMENT_IDX( idx, MethodDef  , METHODDEF             );         CLR_RT_DUMP::METHOD(  s );                                                                                           break; }
-    case TBL_Strings    : { const char* p = GetString( idx );                                                                               CLR_Debug::Printf( "'%s'" ,            p                                    );   break; }
+        case TBL_AssemblyRef:
+        {
+            LOOKUP_ELEMENT(index, AssemblyRef, ASSEMBLYREF);
+            {
+                CLR_Debug::Printf("[%s]", GetString(p->name));
+            }
+            break;
+        }
+        case TBL_TypeRef:
+        {
+            LOOKUP_ELEMENT_REF(index, TypeRef, TYPEREF, TypeDef);
+            if (s)
+            {
+                CLR_RT_DUMP::TYPE(*s);
+            }
+            else
+            {
+                CLR_Debug::Printf("%s.%s", GetString(p->nameSpace), GetString(p->name));
+            }
+            break;
+        }
+        case TBL_FieldRef:
+        {
+            const CLR_RECORD_FIELDREF *fr = GetFieldRef(index);
+            const auto &xref = crossReferenceFieldRef[index];
 
-    default:
-        CLR_Debug::Printf( "[%08x]", tk );
+            // If the caller passed in a closed‐generic TypeSpec, use that
+            if (methodDefInstance.genericType != nullptr && methodDefInstance.genericType->data != CLR_EmptyToken)
+            {
+                // The field's encodedOwner points to the TypeSpec we want to build the name for (e.g., EmptyArray<!0>)
+                // and methodDefInstance.genericType is the closed generic type that provides context (e.g.,
+                // EmptyArray<int>)
+                if (fr->Owner() == TBL_TypeSpec)
+                {
+                    static CLR_RT_TypeSpec_Index s_ownerTypeSpec;
+                    s_ownerTypeSpec.Set(assemblyIndex, fr->OwnerIndex());
+
+                    // Build the type name using the closed generic as context to resolve VAR parameters
+                    char rgType[256], *sz = rgType;
+                    size_t cb = sizeof(rgType);
+                    g_CLR_RT_TypeSystem
+                        .BuildTypeName(s_ownerTypeSpec, sz, cb, 0, methodDefInstance.genericType, &methodDefInstance);
+
+                    // Append the field name
+                    CLR_SafeSprintf(sz, cb, "::%s", GetString(fr->name));
+                    CLR_Debug::Printf("%s", rgType);
+                }
+                else
+                {
+                    // TypeRef case - just use the existing genericType
+                    char rgType[256], *sz = rgType;
+                    size_t cb = sizeof(rgType);
+                    g_CLR_RT_TypeSystem.BuildTypeName(*methodDefInstance.genericType, sz, cb, 0, nullptr);
+
+                    // Append the field name
+                    CLR_SafeSprintf(sz, cb, "::%s", GetString(fr->name));
+                    CLR_Debug::Printf("%s", rgType);
+                }
+            }
+            else
+            {
+                // Otherwise fall back to the old FieldDef path
+                CLR_RT_FieldDef_Index fd;
+                fd.data = xref.target.data;
+                CLR_RT_DUMP::FIELD(fd);
+            }
+            break;
+        }
+        case TBL_MethodRef:
+        {
+            CLR_UINT32 idx = CLR_DataFromTk(token);
+            auto &xref = crossReferenceMethodRef[idx];
+
+            // Build a MethodDef_Index so we can format the reference:
+            CLR_RT_MethodDef_Index mdi;
+            mdi.data = xref.target.data;
+
+            // Decide which TypeSpec to supply to BuildMethodName:
+            // 1) If the caller passed a non-null genericType (i.e. we're inside SimpleList<I4>),
+            //    use that, so ResizeArray prints as SimpleList<I4>::ResizeArray.
+            // 2) Otherwise, fall back to xref.genericType (the raw MethodRef own owner).
+            const CLR_RT_TypeSpec_Index *ownerTypeSpec;
+            if (methodDefInstance.genericType != nullptr && NANOCLR_INDEX_IS_VALID(*methodDefInstance.genericType) &&
+                methodDefInstance.genericType->data != CLR_EmptyToken)
+            {
+                ownerTypeSpec = methodDefInstance.genericType;
+            }
+            else
+            {
+                ownerTypeSpec = &xref.genericType;
+            }
+
+            char buf[256], *p = buf;
+            size_t cb = sizeof(buf);
+
+            g_CLR_RT_TypeSystem.BuildMethodName(mdi, ownerTypeSpec, p, cb);
+
+            CLR_Debug::Printf("%s", buf);
+            break;
+        }
+        case TBL_TypeDef:
+        {
+            CLR_UINT32 idx = CLR_DataFromTk(token);
+            CLR_RT_TypeDef_Index td;
+            td.Set(assemblyIndex, idx);
+
+            char buf[256], *p = buf;
+            size_t cb = sizeof(buf);
+
+            g_CLR_RT_TypeSystem.BuildTypeName(td, p, cb);
+            CLR_Debug::Printf("%s", buf);
+            break;
+        }
+        case TBL_TypeSpec:
+        {
+            //
+            // The TypeSpec token can represent:
+            //  - a generic parameter (DATATYPE_VAR/ MVAR), e.g. !0
+            //  - a primitive or class (DATATYPE_CLASS / VALUETYPE), e.g. Int32
+            //  - an n-dimensional array (DATATYPE_ARRAY) or a single‐dim SZARRAY inside the signature
+            //  - a closed generic instantiation (DATATYPE_GENERICINST) like List`1<Int32>
+            //
+            // When DumpToken is called for “newarr”, often the token is the element‐type alone,
+            // so if that token is exactly “VAR0” (or “MVAR0”), we must substitute “!0→I4” right here.
+            // Only if it is not a plain VAR/MVAR do we then check for arrays or else fall
+            // back to BuildTypeName for the full concrete name.
+            //
+            CLR_INDEX genericPosition;
+
+            CLR_UINT32 ownerAsm = assemblyIndex;
+            if (methodDefInstance.genericType != nullptr && NANOCLR_INDEX_IS_VALID(*methodDefInstance.genericType))
+            {
+                ownerAsm = methodDefInstance.genericType->Assembly();
+            }
+
+            CLR_RT_TypeSpec_Index tsIdx{};
+            tsIdx.Set(assemblyIndex, index);
+
+            // bind to get the signature blob
+            CLR_RT_TypeSpec_Instance tsInst{};
+            if (!tsInst.InitializeFromIndex(tsIdx))
+            {
+                // unable to bind; dump raw RID
+                CLR_Debug::Printf("[TYPESPEC:%08x]", token);
+                break;
+            }
+
+            // start parsing the signature
+            CLR_RT_SignatureParser parser{};
+            parser.Initialize_TypeSpec(tsInst);
+
+            // read first element
+            CLR_RT_SignatureParser::Element elem;
+            if (FAILED(parser.Advance(elem)))
+            {
+                // corrupt signature: just fallback to full type name
+                char bufCorrupt[256];
+                char *pCorrupt = bufCorrupt;
+                size_t cbCorrupt = sizeof(bufCorrupt);
+                g_CLR_RT_TypeSystem.BuildTypeName(
+                    tsIdx,
+                    pCorrupt,
+                    cbCorrupt,
+                    elem.Levels,
+                    methodDefInstance.genericType,
+                    &methodDefInstance);
+                CLR_Debug::Printf("%s", bufCorrupt);
+                break;
+            }
+
+            if (elem.DataType == DATATYPE_GENERICINST)
+            {
+                if (FAILED(parser.Advance(elem)))
+                {
+                    // unable to bind; dump raw RID
+                    CLR_Debug::Printf("[TYPESPEC:%08x]", token);
+                    break;
+                }
+            }
+
+            genericPosition = elem.GenericParamPosition;
+
+            if (elem.DataType == DATATYPE_VAR)
+            {
+                // Use contextTypeSpec if provided, otherwise fall back to methodDefInstance.genericType
+                const CLR_RT_TypeSpec_Index *effectiveContext =
+                    (contextTypeSpec && NANOCLR_INDEX_IS_VALID(*contextTypeSpec)) ? contextTypeSpec
+                                                                                  : methodDefInstance.genericType;
+
+                if (effectiveContext != nullptr && NANOCLR_INDEX_IS_VALID(*effectiveContext))
+                {
+                    CLR_RT_TypeSpec_Instance typeSpec;
+                    if (!typeSpec.InitializeFromIndex(*effectiveContext))
+                    {
+                        CLR_Debug::Printf("!%d", genericPosition);
+                        break;
+                    }
+
+                    CLR_RT_SignatureParser::Element paramElement;
+                    if (typeSpec.GetGenericParam(genericPosition, paramElement))
+                    {
+                        // Successfully resolved from generic context
+                        if (NANOCLR_INDEX_IS_VALID(paramElement.Class))
+                        {
+                            char bufArg[256]{};
+                            char *pArg = bufArg;
+                            size_t cbArg = sizeof(bufArg);
+
+                            g_CLR_RT_TypeSystem.BuildTypeName(
+                                paramElement.Class,
+                                pArg,
+                                cbArg,
+                                CLR_RT_TypeSystem::TYPENAME_FLAGS_FULL,
+                                elem.Levels);
+
+                            CLR_Debug::Printf("%s", bufArg);
+                        }
+                        else if (paramElement.DataType == DATATYPE_MVAR)
+                        {
+                            // need to defer to generic method argument
+                            genericPosition = paramElement.GenericParamPosition;
+
+                            goto resolve_generic_argument;
+                        }
+                        else if (paramElement.DataType == DATATYPE_VAR)
+                        {
+                            // Nested VAR: the contextTypeSpec is itself open (unresolved VAR).
+                            // Fall through to print "!n" as a literal below.
+                        }
+                    }
+                }
+
+                // Couldn't resolve or caller was not generic: print "!n" literally
+                CLR_Debug::Printf("!%d", genericPosition);
+
+                break;
+            }
+            else if (elem.DataType == DATATYPE_MVAR)
+            {
+            resolve_generic_argument:
+
+                if (NANOCLR_INDEX_IS_VALID(methodDefInstance.methodSpec))
+                {
+                    CLR_RT_MethodSpec_Instance methodSpecInstance;
+                    if (methodSpecInstance.InitializeFromIndex(methodDefInstance.methodSpec))
+                    {
+                        CLR_RT_SignatureParser::Element element;
+
+                        if (methodSpecInstance.GetGenericArgument(genericPosition, element))
+                        {
+                            if (element.DataType == DATATYPE_VAR)
+                            {
+                                // need to defer to generic type parameter
+                                CLR_RT_TypeSpec_Instance contextTs;
+                                if (contextTypeSpec && contextTs.InitializeFromIndex(*contextTypeSpec))
+                                {
+                                    if (!contextTs.GetGenericParam(element.GenericParamPosition, element))
+                                    {
+                                        CLR_Debug::Printf("!!%d", genericPosition);
+
+                                        break;
+                                    }
+                                }
+                            }
+                            else if (element.DataType == DATATYPE_MVAR)
+                            {
+                                // nested MVAR not implemented
+                                ASSERT(false);
+                            }
+
+                            char bufArg[256]{};
+                            char *pArg = bufArg;
+                            size_t cbArg = sizeof(bufArg);
+
+                            g_CLR_RT_TypeSystem.BuildTypeName(
+                                element.Class,
+                                pArg,
+                                cbArg,
+                                CLR_RT_TypeSystem::TYPENAME_FLAGS_FULL,
+                                elem.Levels);
+
+                            CLR_Debug::Printf("%s", bufArg);
+
+                            break;
+                        }
+                    }
+                }
+
+                // Couldn't resolve or caller was not generic: print "!!n" literally
+                CLR_Debug::Printf("!!%d", genericPosition);
+
+                break;
+            }
+            else if (elem.DataType == DATATYPE_SZARRAY)
+            {
+                // advance to see what’s inside the array
+                if (FAILED(parser.Advance(elem)))
+                {
+                    // seems to be malformed: print SZARRAY and stop
+                    CLR_Debug::Printf("SZARRAY");
+                    break;
+                }
+
+                // inner element is a VAR/MVAR, it describes “!n[]”
+                if (elem.DataType == DATATYPE_VAR || elem.DataType == DATATYPE_MVAR)
+                {
+                    int gpIndex = elem.GenericParamPosition;
+
+                    if (methodDefInstance.genericType != nullptr &&
+                        NANOCLR_INDEX_IS_VALID(*methodDefInstance.genericType))
+                    {
+                        CLR_RT_TypeSpec_Instance typeSpec;
+                        if (typeSpec.InitializeFromIndex(*methodDefInstance.genericType))
+                        {
+                            CLR_RT_SignatureParser::Element paramElement;
+                            if (typeSpec.GetGenericParam(gpIndex, paramElement))
+                            {
+                                // print "I4[]" or the bound argument plus []
+                                char bufArg[256];
+                                char *pArg = bufArg;
+                                size_t cbArg = sizeof(bufArg);
+                                g_CLR_RT_TypeSystem.BuildTypeName(paramElement.Class, pArg, cbArg);
+                                CLR_Debug::Printf("%s[]", bufArg);
+                                break;
+                            }
+                        }
+                    }
+
+                    // Fallback if we couldn’t resolve: "!n[]" or "!!n[]"
+                    if (elem.DataType == DATATYPE_VAR)
+                    {
+                        CLR_Debug::Printf("!%d[]", gpIndex);
+                    }
+                    else
+                    {
+                        CLR_Debug::Printf("!!%d[]", gpIndex);
+                    }
+                    break;
+                }
+
+                // If it's SZARRAY of a primitive or class (e.g. "Int32[]"), just print full name:
+                {
+                    char bufArr[256];
+                    char *pArr = bufArr;
+                    size_t cbArr = sizeof(bufArr);
+                    g_CLR_RT_TypeSystem.BuildTypeName(
+                        tsIdx,
+                        pArr,
+                        cbArr,
+                        elem.Levels,
+                        methodDefInstance.genericType,
+                        &methodDefInstance);
+                    CLR_Debug::Printf("%s", bufArr);
+                    break;
+                }
+            }
+
+            // now all the rest: just print the full type name
+            char bufTypeName[256];
+            char *pTypeName = bufTypeName;
+            size_t cbType = sizeof(bufTypeName);
+            g_CLR_RT_TypeSystem.BuildTypeName(
+                tsIdx,
+                pTypeName,
+                cbType,
+                elem.Levels,
+                methodDefInstance.genericType,
+                &methodDefInstance);
+            CLR_Debug::Printf("%s", bufTypeName);
+            break;
+        }
+
+        case TBL_FieldDef:
+        {
+            LOOKUP_ELEMENT_IDX(index, FieldDef, FIELDDEF);
+            CLR_RT_DUMP::FIELD(s);
+            break;
+        }
+        case TBL_MethodDef:
+        {
+            LOOKUP_ELEMENT_IDX(index, MethodDef, METHODDEF);
+            CLR_RT_DUMP::METHOD(s, nullptr);
+            break;
+        }
+        case TBL_MethodSpec:
+        {
+            CLR_UINT32 idx = CLR_DataFromTk(token);
+            auto &xref = crossReferenceMethodSpec[idx];
+
+            CLR_RT_MethodSpec_Index msi;
+            msi.Set(assemblyIndex, idx);
+
+            char buf[256], *p = buf;
+            size_t cb = sizeof(buf);
+            g_CLR_RT_TypeSystem.BuildMethodSpecName(
+                msi,
+                &xref.genericType, // again: the closed declaring type
+                p,
+                cb);
+            CLR_Debug::Printf("%s", buf);
+            break;
+        }
+        case TBL_Strings:
+        {
+            const char *p = GetString(index);
+            CLR_Debug::Printf("'%s'", p);
+            break;
+        }
+
+        default:
+            CLR_Debug::Printf("[%08x]", token);
     }
 }
 
-void CLR_RT_Assembly::DumpSignature( CLR_SIG sig )
+void CLR_RT_Assembly::DumpSignature(CLR_SIG sig)
 {
     NATIVE_PROFILE_CLR_DIAGNOSTICS();
-    const CLR_UINT8* p = GetSignature( sig );
-    CLR_UINT32       len;
+    const CLR_UINT8 *p = GetSignature(sig);
+    CLR_UINT32 len;
 
     CLR_CorCallingConvention cc = (CLR_CorCallingConvention)*p++;
 
-    switch(cc & PIMAGE_CEE_CS_CALLCONV_MASK)
+    switch (cc & PIMAGE_CEE_CS_CALLCONV_MASK)
     {
-    case PIMAGE_CEE_CS_CALLCONV_FIELD:
-        CLR_Debug::Printf( "FIELD " );
-        DumpSignature( p );
-        break;
+        case PIMAGE_CEE_CS_CALLCONV_FIELD:
+            CLR_Debug::Printf("FIELD ");
+            DumpSignature(p);
+            break;
 
-    case PIMAGE_CEE_CS_CALLCONV_LOCAL_SIG:
-        break;
+        case PIMAGE_CEE_CS_CALLCONV_LOCAL_SIG:
+            break;
 
-    case PIMAGE_CEE_CS_CALLCONV_DEFAULT:
-        len = *p++;
+        case PIMAGE_CEE_CS_CALLCONV_DEFAULT:
+            len = *p++;
 
-        CLR_Debug::Printf( "METHOD " );
-        DumpSignature( p );
-        CLR_Debug::Printf( "(" );
+            CLR_Debug::Printf("METHOD ");
+            DumpSignature(p);
+            CLR_Debug::Printf("(");
 
-        while(len-- > 0)
-        {
-            CLR_Debug::Printf( " " );
-            DumpSignature( p );
-            if(len) CLR_Debug::Printf( "," );
-            else    CLR_Debug::Printf( " " );
-        }
-        CLR_Debug::Printf( ")" );
-        break;
+            while (len-- > 0)
+            {
+                CLR_Debug::Printf(" ");
+                DumpSignature(p);
+                if (len)
+                    CLR_Debug::Printf(",");
+                else
+                    CLR_Debug::Printf(" ");
+            }
+            CLR_Debug::Printf(")");
+            break;
     }
 }
 
-void CLR_RT_Assembly::DumpSignature( const CLR_UINT8*& p )
+void CLR_RT_Assembly::DumpSignature(const CLR_UINT8 *&p)
 {
     NATIVE_PROFILE_CLR_DIAGNOSTICS();
-    CLR_DataType opt = CLR_UncompressElementType( p );
+    NanoCLRDataType opt = CLR_UncompressElementType(p);
 
-    switch(opt)
+    switch (opt)
     {
-        case DATATYPE_VOID      : CLR_Debug::Printf( "VOID"       );                          break;
-        case DATATYPE_BOOLEAN   : CLR_Debug::Printf( "BOOLEAN"    );                          break;
-        case DATATYPE_CHAR      : CLR_Debug::Printf( "char"       );                          break;
-        case DATATYPE_I1        : CLR_Debug::Printf( "I1"         );                          break;
-        case DATATYPE_U1        : CLR_Debug::Printf( "U1"         );                          break;
-        case DATATYPE_I2        : CLR_Debug::Printf( "I2"         );                          break;
-        case DATATYPE_U2        : CLR_Debug::Printf( "U2"         );                          break;
-        case DATATYPE_I4        : CLR_Debug::Printf( "I4"         );                          break;
-        case DATATYPE_U4        : CLR_Debug::Printf( "U4"         );                          break;
-        case DATATYPE_I8        : CLR_Debug::Printf( "I8"         );                          break;
-        case DATATYPE_U8        : CLR_Debug::Printf( "U8"         );                          break;
-        case DATATYPE_R4        : CLR_Debug::Printf( "R4"         );                          break;
-        case DATATYPE_R8        : CLR_Debug::Printf( "R8"         );                          break;
-        case DATATYPE_STRING    : CLR_Debug::Printf( "STRING"     );                          break;
-        case DATATYPE_BYREF     : CLR_Debug::Printf( "BYREF "     ); DumpSignature     ( p ); break;
-        case DATATYPE_VALUETYPE : CLR_Debug::Printf( "VALUETYPE " ); DumpSignatureToken( p ); break;
-        case DATATYPE_CLASS     : CLR_Debug::Printf( "CLASS "     ); DumpSignatureToken( p ); break;
-        case DATATYPE_OBJECT    : CLR_Debug::Printf( "OBJECT"     );                          break;
-        case DATATYPE_SZARRAY   : CLR_Debug::Printf( "SZARRAY "   ); DumpSignature     ( p ); break;
+        case DATATYPE_VOID:
+            CLR_Debug::Printf("VOID");
+            break;
+        case DATATYPE_BOOLEAN:
+            CLR_Debug::Printf("BOOLEAN");
+            break;
+        case DATATYPE_CHAR:
+            CLR_Debug::Printf("char");
+            break;
+        case DATATYPE_I1:
+            CLR_Debug::Printf("I1");
+            break;
+        case DATATYPE_U1:
+            CLR_Debug::Printf("U1");
+            break;
+        case DATATYPE_I2:
+            CLR_Debug::Printf("I2");
+            break;
+        case DATATYPE_U2:
+            CLR_Debug::Printf("U2");
+            break;
+        case DATATYPE_I4:
+            CLR_Debug::Printf("I4");
+            break;
+        case DATATYPE_U4:
+            CLR_Debug::Printf("U4");
+            break;
+        case DATATYPE_I8:
+            CLR_Debug::Printf("I8");
+            break;
+        case DATATYPE_U8:
+            CLR_Debug::Printf("U8");
+            break;
+        case DATATYPE_R4:
+            CLR_Debug::Printf("R4");
+            break;
+        case DATATYPE_R8:
+            CLR_Debug::Printf("R8");
+            break;
+        case DATATYPE_STRING:
+            CLR_Debug::Printf("STRING");
+            break;
+        case DATATYPE_BYREF:
+            CLR_Debug::Printf("BYREF ");
+            DumpSignature(p);
+            break;
+        case DATATYPE_VALUETYPE:
+            CLR_Debug::Printf("VALUETYPE ");
+            DumpSignatureToken(p);
+            break;
+        case DATATYPE_CLASS:
+            CLR_Debug::Printf("CLASS ");
+            DumpSignatureToken(p);
+            break;
+        case DATATYPE_OBJECT:
+            CLR_Debug::Printf("OBJECT");
+            break;
+        case DATATYPE_SZARRAY:
+            CLR_Debug::Printf("SZARRAY ");
+            DumpSignature(p);
+            break;
 
-        default                 : CLR_Debug::Printf( "[UNKNOWN: %08x]", opt );                break;
+        default:
+            CLR_Debug::Printf("[UNKNOWN: %08x]", opt);
+            break;
     }
-
 }
 
-void CLR_RT_Assembly::DumpSignatureToken( const CLR_UINT8*& p )
+void CLR_RT_Assembly::DumpSignatureToken(const CLR_UINT8 *&p)
 {
     NATIVE_PROFILE_CLR_DIAGNOSTICS();
-    CLR_UINT32 tk = CLR_TkFromStream( p );
+    CLR_UINT32 token = CLR_TkFromStream(p);
 
-    CLR_Debug::Printf( "[%08x]", tk );
+    CLR_Debug::Printf("[%08x]", token);
 }
 
 //--//
 
-void CLR_RT_Assembly::DumpOpcode( CLR_RT_StackFrame* stack, CLR_PMETADATA ip )
+//
+// Returns true only when 'p' is a non-null pointer that lies within the process's
+// user-mode address space.  On 64-bit Windows/Linux user-mode addresses are always
+// below 2^47 (0x0000_8000_0000_0000); anything at or above that range (e.g. the
+// all-ones 0xFFFF_FFFF_FFFF_FFFF from a dangling calleeInst.m_typeSpecStorage) is a
+// kernel / guard / garbage address and must not be dereferenced.
+//
+static inline bool IsUserModePtr(const void *p)
 {
-    NATIVE_PROFILE_CLR_DIAGNOSTICS();
-    if(s_CLR_RT_fTrace_Instructions < c_CLR_RT_Trace_Info) return;
+    if (p == nullptr)
+        return false;
 
-    CLR_RT_MethodDef_Instance inst;
-
-    if(s_CLR_RT_fTrace_Instructions >= c_CLR_RT_Trace_Verbose)
-    {
-        inst = stack->m_call;
-    }
-    else
-    {
-        inst.Clear();
-    }
-
-    DumpOpcodeDirect( inst, ip, stack->m_IPstart, stack->m_owningThread->m_pid );
+#if defined(_WIN64) || (defined(__GNUC__) && defined(__x86_64__))
+    // On 64-bit: user-space tops out at canonical address boundary 0x00007FFF_FFFF_FFFF
+    return (reinterpret_cast<uintptr_t>(p) < 0x0000800000000000ULL);
+#else
+    // On 32-bit: any non-null pointer is potentially valid; let the OS fault on a bad one.
+    return true;
+#endif
 }
 
-void CLR_RT_Assembly::DumpOpcodeDirect( CLR_RT_MethodDef_Instance& call, CLR_PMETADATA ip, CLR_PMETADATA ipStart, int pid )
+void CLR_RT_Assembly::DumpOpcode(CLR_RT_StackFrame *stack, CLR_PMETADATA ip)
 {
     NATIVE_PROFILE_CLR_DIAGNOSTICS();
-    CLR_Debug::Printf( "    [%04x:%04x:%08x", pid, (int)(ip - ipStart), (size_t)ip );
+    if (s_CLR_RT_fTrace_Instructions < c_CLR_RT_Trace_Info)
+        return;
 
-    if(NANOCLR_INDEX_IS_VALID(call))
+    CLR_RT_MethodDef_Instance inst;
+    const CLR_RT_TypeSpec_Index *parentCtx = nullptr;
+
+    if (s_CLR_RT_fTrace_Instructions >= c_CLR_RT_Trace_Verbose)
     {
-        CLR_Debug::Printf( ":" );
-        CLR_RT_DUMP::METHOD( call );
-    }
+        inst = stack->m_call;
 
-    CLR_OPCODE      op      = CLR_ReadNextOpcodeCompressed( ip );
-    CLR_OpcodeParam opParam = c_CLR_RT_OpcodeLookup[ op ].m_opParam;
+        // When the current frame has an open generic type (contains MVAR) but no MethodSpec,
+        // inherit the caller frame's MethodSpec so BuildTypeName can resolve the MVAR to its
+        // concrete type (e.g. List<MVAR_0> + caller MethodSpec<String> -> List<String>).
+        if (!NANOCLR_INDEX_IS_VALID(inst.methodSpec) && IsUserModePtr(inst.genericType) &&
+            NANOCLR_INDEX_IS_VALID(*inst.genericType))
+        {
+            CLR_RT_StackFrame *caller = stack->Caller();
+            if (caller != nullptr && NANOCLR_INDEX_IS_VALID(caller->m_call.methodSpec))
+            {
+                inst.methodSpec = caller->m_call.methodSpec;
+            }
+        }
 
-    CLR_Debug::Printf( "] %-12s", c_CLR_RT_OpcodeLookup[ op ].m_name );
-
-    if(IsOpParamToken( opParam ))
-    {
-        DumpToken( CLR_ReadTokenCompressed( ip, op ) );
+        // When the current frame's genericType has open VAR params (e.g. List+Enumerator<!0>),
+        // search caller frames for a closed generic context that can resolve the open params.
+        // Example: Enumerator<!0>.ctor called from List<String>.GetEnumerator() resolves !0 = String.
+        if (IsUserModePtr(inst.genericType) && NANOCLR_INDEX_IS_VALID(*inst.genericType))
+        {
+            CLR_RT_TypeSpec_Instance tsInst{};
+            if (tsInst.InitializeFromIndex(*inst.genericType) && !tsInst.IsClosedGenericType())
+            {
+                for (CLR_RT_StackFrame *f = stack->Caller(); f != nullptr; f = f->Caller())
+                {
+                    const CLR_RT_TypeSpec_Index *callerGT = f->m_call.genericType;
+                    if (IsUserModePtr(callerGT) && NANOCLR_INDEX_IS_VALID(*callerGT))
+                    {
+                        CLR_RT_TypeSpec_Instance callerTs{};
+                        if (callerTs.InitializeFromIndex(*callerGT) && callerTs.IsClosedGenericType())
+                        {
+                            parentCtx = callerGT;
+                            break;
+                        }
+                    }
+                }
+            }
+        }
     }
     else
     {
-        CLR_UINT32 argLo;
-        CLR_UINT32 argHi;
+        inst.ClearInstance();
+    }
 
-        switch(c_CLR_opParamSizeCompressed[ opParam ])
+    DumpOpcodeDirect(inst, ip, stack->m_IPstart, stack->m_owningThread->m_pid, parentCtx);
+}
+
+void CLR_RT_Assembly::DumpOpcodeDirect(
+    CLR_RT_MethodDef_Instance &call,
+    CLR_PMETADATA ip,
+    CLR_PMETADATA ipStart,
+    int pid,
+    const CLR_RT_TypeSpec_Index *parentCtx)
+{
+    NATIVE_PROFILE_CLR_DIAGNOSTICS();
+    CLR_Debug::Printf("    [%04x:%04x", pid, (int)(ip - ipStart));
+
+    if (NANOCLR_INDEX_IS_VALID(call))
+    {
+        CLR_Debug::Printf(":");
+        CLR_RT_DUMP::METHOD(call, call.genericType, parentCtx);
+    }
+
+    CLR_OPCODE op = CLR_ReadNextOpcodeCompressed(ip);
+    CLR_OpcodeParam opParam = c_CLR_RT_OpcodeLookup[op].m_opParam;
+
+    CLR_Debug::Printf("] %-12s", c_CLR_RT_OpcodeLookup[op].m_name);
+
+    if (IsOpParamToken(opParam))
+    {
+        // Read the raw 32-bit “token” out of the IL stream:
+        CLR_UINT32 token = CLR_ReadTokenCompressed(ip, op);
+
+        // If this is a CALL or CALLVIRT, force a MethodDef_Instance resolve and
+        // use CLR_RT_DUMP::METHOD to print “TypeName::MethodName”. Otherwise fall
+        // back to the existing DumpToken logic (fields, types, strings, etc.).
+        if (op == CEE_CALL || op == CEE_CALLVIRT)
         {
-        case 8: NANOCLR_READ_UNALIGNED_UINT32( argLo, ip ); NANOCLR_READ_UNALIGNED_UINT32( argHi, ip ); CLR_Debug::Printf( "%08X,%08X", argHi, argLo ); break;
-        case 4: NANOCLR_READ_UNALIGNED_UINT32( argLo, ip );                                             CLR_Debug::Printf( "%08X"     ,        argLo ); break;
-        case 2: NANOCLR_READ_UNALIGNED_UINT16( argLo, ip );                                             CLR_Debug::Printf( "%04X"     ,        argLo ); break;
-        case 1: NANOCLR_READ_UNALIGNED_UINT8 ( argLo, ip );                                             CLR_Debug::Printf( "%02X"     ,        argLo ); break;
+            CLR_RT_MethodDef_Instance mdInst{};
+            // Resolve the call token using the caller's assembly and generic context.
+            // Pass null for genericType on the first attempt (avoids mismatching an open TypeSpec
+            // against a non-generic declaring type such as System.Object::.ctor).
+            if (NANOCLR_INDEX_IS_VALID(call) && mdInst.ResolveToken(token, call.assembly, nullptr, &call))
+            {
+                // If the first resolve found that the method's declaring type is generic (open TypeSpec),
+                // retry with call.genericType to get the closed form for display (e.g. List<String>::Add).
+                // Do NOT retry for non-generic declaring types (e.g. Object::.ctor) where genericType is null.
+                if (mdInst.genericType != nullptr && NANOCLR_INDEX_IS_VALID(*mdInst.genericType) &&
+                    call.genericType != nullptr && NANOCLR_INDEX_IS_VALID(*call.genericType))
+                {
+                    CLR_RT_MethodDef_Instance mdInstWithGeneric{};
+                    if (mdInstWithGeneric.ResolveToken(token, call.assembly, call.genericType, &call))
+                    {
+                        mdInst = mdInstWithGeneric;
+                    }
+                }
+
+                // If the resolved method's genericType is still open (has MVAR) but the calling frame
+                // has an inherited methodSpec, propagate it so BuildMethodName can close the MVAR args.
+                if (!NANOCLR_INDEX_IS_VALID(mdInst.methodSpec) && mdInst.genericType != nullptr &&
+                    NANOCLR_INDEX_IS_VALID(*mdInst.genericType) && NANOCLR_INDEX_IS_VALID(call.methodSpec))
+                {
+                    CLR_RT_TypeSpec_Instance tsCheck;
+                    if (tsCheck.InitializeFromIndex(*mdInst.genericType) && !tsCheck.IsClosedGenericType())
+                    {
+                        mdInst.methodSpec = call.methodSpec;
+                    }
+                }
+
+                // mdInst now holds the target MethodDef (or MethodSpec) plus any genericType.
+                CLR_RT_DUMP::METHOD(mdInst, mdInst.genericType);
+            }
+            else
+            {
+                // In the unlikely case ResolveToken fails, fall back to raw DumpToken:
+                DumpToken(token, call, nullptr);
+            }
+        }
+        else
+        {
+            // Pass the stack's generic type storage as context for VAR resolution
+            const CLR_RT_TypeSpec_Index *context =
+                (NANOCLR_INDEX_IS_VALID(call) && call.genericType && NANOCLR_INDEX_IS_VALID(*call.genericType))
+                    ? call.genericType
+                    : nullptr;
+            DumpToken(token, call, context);
+        }
+    }
+    else
+    {
+        CLR_UINT32 argLo, argHi;
+
+        switch (c_CLR_opParamSizeCompressed[opParam])
+        {
+            case 8:
+                NANOCLR_READ_UNALIGNED_UINT32(argLo, ip);
+                NANOCLR_READ_UNALIGNED_UINT32(argHi, ip);
+                CLR_Debug::Printf("%08X,%08X", argHi, argLo);
+                break;
+            case 4:
+                NANOCLR_READ_UNALIGNED_UINT32(argLo, ip);
+                CLR_Debug::Printf("%08X", argLo);
+                break;
+            case 2:
+                NANOCLR_READ_UNALIGNED_UINT16(argLo, ip);
+                CLR_Debug::Printf("%04X", argLo);
+                break;
+            case 1:
+                NANOCLR_READ_UNALIGNED_UINT8(argLo, ip);
+                CLR_Debug::Printf("%02X", argLo);
+                break;
         }
     }
 
-    CLR_Debug::Printf( "\r\n" );
+    CLR_Debug::Printf("\r\n");
 }
 
 #endif // defined(NANOCLR_TRACE_INSTRUCTIONS)
@@ -589,195 +1156,276 @@ void CLR_RT_Assembly::DumpOpcodeDirect( CLR_RT_MethodDef_Instance& call, CLR_PME
 
 #if defined(NANOCLR_TRACE_ERRORS)
 
-void CLR_RT_DUMP::TYPE( const CLR_RT_TypeDef_Index& cls )
+void CLR_RT_DUMP::TYPE(const CLR_RT_TypeDef_Index &cls)
 {
     NATIVE_PROFILE_CLR_DIAGNOSTICS();
-    char   rgBuffer[ 512 ];
-    char*  szBuffer = rgBuffer;
-    size_t iBuffer  = MAXSTRLEN(rgBuffer);
+    char rgBuffer[512];
+    char *szBuffer = rgBuffer;
+    size_t iBuffer = MAXSTRLEN(rgBuffer);
 
-    g_CLR_RT_TypeSystem.BuildTypeName( cls, szBuffer, iBuffer ); rgBuffer[ MAXSTRLEN(rgBuffer) ] = 0;
+    g_CLR_RT_TypeSystem.BuildTypeName(cls, szBuffer, iBuffer);
+    rgBuffer[MAXSTRLEN(rgBuffer)] = 0;
 
-    CLR_Debug::Printf( "%s", rgBuffer );
+    CLR_Debug::Printf("%s", rgBuffer);
 }
 
-void CLR_RT_DUMP::TYPE( const CLR_RT_ReflectionDef_Index& reflex )
+void CLR_RT_DUMP::TYPE(const CLR_RT_ReflectionDef_Index &reflex)
 {
     NATIVE_PROFILE_CLR_DIAGNOSTICS();
-    CLR_RT_TypeDef_Instance inst;
-    CLR_UINT32              levels;
+    CLR_RT_TypeDef_Instance inst{};
+    CLR_UINT32 levels;
 
-    if(inst.InitializeFromReflection( reflex, &levels ))
+    if (inst.InitializeFromReflection(reflex, &levels))
     {
-        CLR_RT_DUMP::TYPE( inst );
+        CLR_RT_DUMP::TYPE(inst);
 
-        while(levels-- > 0)
+        while (levels-- > 0)
         {
-            CLR_Debug::Printf( "[]" );
+            CLR_Debug::Printf("[]");
         }
     }
 }
 
-void CLR_RT_DUMP::METHOD( const CLR_RT_MethodDef_Index& method )
+void CLR_RT_DUMP::METHOD(const CLR_RT_MethodDef_Index &method, const CLR_RT_TypeSpec_Index *genericType)
 {
     NATIVE_PROFILE_CLR_DIAGNOSTICS();
-    char   rgBuffer[ 512 ];
-    char*  szBuffer = rgBuffer;
-    size_t iBuffer  = MAXSTRLEN(rgBuffer);
+    char rgBuffer[512];
+    char *szBuffer = rgBuffer;
+    size_t iBuffer = MAXSTRLEN(rgBuffer);
 
-    g_CLR_RT_TypeSystem.BuildMethodName( method, szBuffer, iBuffer );
+    g_CLR_RT_TypeSystem.BuildMethodName(method, genericType, szBuffer, iBuffer);
 
-    CLR_Debug::Printf( "%s", rgBuffer );
+    CLR_Debug::Printf("%s", rgBuffer);
 }
 
-void CLR_RT_DUMP::FIELD( const CLR_RT_FieldDef_Index& field )
+void CLR_RT_DUMP::METHOD(const CLR_RT_MethodDef_Instance &mdInst, const CLR_RT_TypeSpec_Index *genericType)
 {
     NATIVE_PROFILE_CLR_DIAGNOSTICS();
-    char   rgBuffer[ 512 ];
-    char*  szBuffer = rgBuffer;
-    size_t iBuffer  = MAXSTRLEN(rgBuffer);
+    char rgBuffer[512];
+    char *szBuffer = rgBuffer;
+    size_t iBuffer = MAXSTRLEN(rgBuffer);
 
-    g_CLR_RT_TypeSystem.BuildFieldName( field, szBuffer, iBuffer );
+    g_CLR_RT_TypeSystem.BuildMethodName(mdInst, genericType, szBuffer, iBuffer);
 
-    CLR_Debug::Printf( "%s", rgBuffer );
+    CLR_Debug::Printf("%s", rgBuffer);
 }
 
-void CLR_RT_DUMP::OBJECT( CLR_RT_HeapBlock* ptr, const char* text )
+void CLR_RT_DUMP::METHOD(
+    const CLR_RT_MethodDef_Instance &mdInst,
+    const CLR_RT_TypeSpec_Index *genericType,
+    const CLR_RT_TypeSpec_Index *parentCtx)
 {
     NATIVE_PROFILE_CLR_DIAGNOSTICS();
-  #define PELEMENT_TO_STRING(elem) case DATATYPE_##elem: CLR_Debug::Printf( "%s", #elem ); break
+    char rgBuffer[512];
+    char *szBuffer = rgBuffer;
+    size_t iBuffer = MAXSTRLEN(rgBuffer);
 
-    CLR_Debug::Printf( "%s - ", text );
+    g_CLR_RT_TypeSystem.BuildMethodName(mdInst, genericType, parentCtx, szBuffer, iBuffer);
 
-    while(ptr->DataType() == DATATYPE_OBJECT && ptr->Dereference())
+    CLR_Debug::Printf("%s", rgBuffer);
+}
+
+void CLR_RT_DUMP::FIELD(const CLR_RT_FieldDef_Index &field)
+{
+    NATIVE_PROFILE_CLR_DIAGNOSTICS();
+    char rgBuffer[512];
+    char *szBuffer = rgBuffer;
+    size_t iBuffer = MAXSTRLEN(rgBuffer);
+
+    g_CLR_RT_TypeSystem.BuildFieldName(field, szBuffer, iBuffer);
+
+    CLR_Debug::Printf("%s", rgBuffer);
+}
+
+void CLR_RT_DUMP::OBJECT(CLR_RT_HeapBlock *ptr, const char *text)
+{
+    NATIVE_PROFILE_CLR_DIAGNOSTICS();
+#define PELEMENT_TO_STRING(elem)                                                                                       \
+    case DATATYPE_##elem:                                                                                              \
+        CLR_Debug::Printf("%s", #elem);                                                                                \
+        break
+
+    CLR_Debug::Printf("%s - ", text);
+
+    while (ptr->DataType() == DATATYPE_OBJECT && ptr->Dereference())
     {
         ptr = ptr->Dereference();
 
-        CLR_Debug::Printf( "PTR " );
+        CLR_Debug::Printf("PTR ");
     }
 
-    CLR_Debug::Printf( "%04x blocks at %08x [%02x] ", ptr->DataSize(), (int)(size_t)ptr, ptr->DataType() );
+    CLR_Debug::Printf("%04x blocks at %08x [%02x] ", ptr->DataSize(), (int)(size_t)ptr, ptr->DataType());
 
-    switch(ptr->DataType())
+    switch (ptr->DataType())
     {
         case DATATYPE_CLASS:
         case DATATYPE_VALUETYPE:
-            {
-                CLR_RT_DUMP::TYPE( ptr->ObjectCls() );
-            }
-            break;
+        {
+            CLR_RT_DUMP::TYPE(ptr->ObjectCls());
+        }
+        break;
 
         case DATATYPE_STRING:
-            {
-                CLR_Debug::Printf( "'%s'", ptr->StringText() );
-            }
-            break;
+        {
+            CLR_Debug::Printf("'%s'", ptr->StringText());
+        }
+        break;
 
         case DATATYPE_SZARRAY:
-            {
-                CLR_RT_HeapBlock_Array* array = (CLR_RT_HeapBlock_Array*)ptr;
+        {
+            auto *array = (CLR_RT_HeapBlock_Array *)ptr;
 
-                CLR_RT_DUMP::TYPE( array->ReflectionData() );
-            }
-            break;
+            CLR_RT_DUMP::TYPE(array->ReflectionData());
+        }
+        break;
 
         case DATATYPE_DELEGATE_HEAD:
+        {
+            auto *dlg = (CLR_RT_HeapBlock_Delegate *)ptr;
+
+            CLR_RT_MethodDef_Instance mdInst;
+            if (mdInst.InitializeFromIndex(dlg->DelegateFtn()))
             {
-                CLR_RT_HeapBlock_Delegate* dlg = (CLR_RT_HeapBlock_Delegate*)ptr;
-
-                CLR_RT_DUMP::METHOD( dlg->DelegateFtn() );
+                // Use the delegate's stored generic context for more informative diagnostics
+                const CLR_RT_TypeSpec_Index *genericType =
+                    (dlg->m_genericTypeSpec.data != 0) ? &dlg->m_genericTypeSpec : nullptr;
+                CLR_RT_DUMP::METHOD(mdInst, genericType);
             }
-            break;
+            else
+            {
+                // Fallback if initialization fails
+                CLR_RT_DUMP::METHOD(dlg->DelegateFtn(), nullptr);
+            }
+        }
+        break;
 
+            PELEMENT_TO_STRING(BOOLEAN);
+            PELEMENT_TO_STRING(CHAR);
+            PELEMENT_TO_STRING(I1);
+            PELEMENT_TO_STRING(U1);
+            PELEMENT_TO_STRING(I2);
+            PELEMENT_TO_STRING(U2);
+            PELEMENT_TO_STRING(I4);
+            PELEMENT_TO_STRING(U4);
+            PELEMENT_TO_STRING(I8);
+            PELEMENT_TO_STRING(U8);
+            PELEMENT_TO_STRING(R4);
+            PELEMENT_TO_STRING(R8);
 
-        PELEMENT_TO_STRING(BOOLEAN);
-        PELEMENT_TO_STRING(CHAR   );
-        PELEMENT_TO_STRING(I1     );
-        PELEMENT_TO_STRING(U1     );
-        PELEMENT_TO_STRING(I2     );
-        PELEMENT_TO_STRING(U2     );
-        PELEMENT_TO_STRING(I4     );
-        PELEMENT_TO_STRING(U4     );
-        PELEMENT_TO_STRING(I8     );
-        PELEMENT_TO_STRING(U8     );
-        PELEMENT_TO_STRING(R4     );
-        PELEMENT_TO_STRING(R8     );
+            PELEMENT_TO_STRING(FREEBLOCK);
+            PELEMENT_TO_STRING(CACHEDBLOCK);
+            PELEMENT_TO_STRING(ASSEMBLY);
+            PELEMENT_TO_STRING(WEAKCLASS);
+            PELEMENT_TO_STRING(REFLECTION);
+            PELEMENT_TO_STRING(ARRAY_BYREF);
+            PELEMENT_TO_STRING(DELEGATELIST_HEAD);
+            PELEMENT_TO_STRING(OBJECT_TO_EVENT);
+            PELEMENT_TO_STRING(BINARY_BLOB_HEAD);
 
-        PELEMENT_TO_STRING(FREEBLOCK             );
-        PELEMENT_TO_STRING(CACHEDBLOCK           );
-        PELEMENT_TO_STRING(ASSEMBLY              );
-        PELEMENT_TO_STRING(WEAKCLASS             );
-        PELEMENT_TO_STRING(REFLECTION            );
-        PELEMENT_TO_STRING(ARRAY_BYREF           );
-        PELEMENT_TO_STRING(DELEGATELIST_HEAD     );
-        PELEMENT_TO_STRING(OBJECT_TO_EVENT       );
-        PELEMENT_TO_STRING(BINARY_BLOB_HEAD      );
-
-        PELEMENT_TO_STRING(THREAD                );
-        PELEMENT_TO_STRING(SUBTHREAD             );
-        PELEMENT_TO_STRING(STACK_FRAME           );
-        PELEMENT_TO_STRING(TIMER_HEAD            );
-        PELEMENT_TO_STRING(LOCK_HEAD             );
-        PELEMENT_TO_STRING(LOCK_OWNER_HEAD       );
-        PELEMENT_TO_STRING(LOCK_REQUEST_HEAD     );
-        PELEMENT_TO_STRING(WAIT_FOR_OBJECT_HEAD  );
-        PELEMENT_TO_STRING(FINALIZER_HEAD        );
-        PELEMENT_TO_STRING(MEMORY_STREAM_HEAD    );
-        PELEMENT_TO_STRING(MEMORY_STREAM_DATA    );
+            PELEMENT_TO_STRING(THREAD);
+            PELEMENT_TO_STRING(SUBTHREAD);
+            PELEMENT_TO_STRING(STACK_FRAME);
+            PELEMENT_TO_STRING(TIMER_HEAD);
+            PELEMENT_TO_STRING(LOCK_HEAD);
+            PELEMENT_TO_STRING(LOCK_OWNER_HEAD);
+            PELEMENT_TO_STRING(LOCK_REQUEST_HEAD);
+            PELEMENT_TO_STRING(WAIT_FOR_OBJECT_HEAD);
+            PELEMENT_TO_STRING(FINALIZER_HEAD);
+            PELEMENT_TO_STRING(MEMORY_STREAM_HEAD);
+            PELEMENT_TO_STRING(MEMORY_STREAM_DATA);
 
         default:
             // the remaining data types aren't to be handled
             break;
     }
 
-    CLR_Debug::Printf( "\r\n" );
+    CLR_Debug::Printf("\r\n");
 
-  #undef PELEMENT_TO_STRING
+#undef PELEMENT_TO_STRING
+}
+
+void CLR_RT_DUMP::METHODREF(const CLR_RT_MethodRef_Index &method)
+{
+    NATIVE_PROFILE_CLR_DIAGNOSTICS();
+
+    char rgBuffer[512];
+    char *szBuffer = rgBuffer;
+    size_t iBuffer = MAXSTRLEN(rgBuffer);
+
+    g_CLR_RT_TypeSystem.BuildMethodRefName(method, szBuffer, iBuffer);
+
+    CLR_Debug::Printf("%s", rgBuffer);
+}
+
+void CLR_RT_DUMP::METHODSPEC(const CLR_RT_MethodSpec_Index &method)
+{
+    NATIVE_PROFILE_CLR_DIAGNOSTICS();
+
+    char rgBuffer[512];
+    char *szBuffer = rgBuffer;
+    size_t iBuffer = MAXSTRLEN(rgBuffer);
+
+    g_CLR_RT_TypeSystem.BuildMethodSpecName(method, szBuffer, iBuffer);
+
+    CLR_Debug::Printf("%s", rgBuffer);
 }
 
 #endif // defined(NANOCLR_TRACE_ERRORS)
 
 //--//
 
-
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 #if defined(NANOCLR_TRACE_EXCEPTIONS)
 
-void CLR_RT_DUMP::EXCEPTION( CLR_RT_StackFrame& stack, CLR_RT_HeapBlock& ref )
+void CLR_RT_DUMP::EXCEPTION(CLR_RT_StackFrame &stack, CLR_RT_HeapBlock &ref)
 {
     NATIVE_PROFILE_CLR_DIAGNOSTICS();
-    const char* msg;
+    const char *msg;
 
-    CLR_RT_HeapBlock* obj = Library_corlib_native_System_Exception::GetTarget( ref ); if(!obj) return;
+    CLR_RT_HeapBlock *obj = Library_corlib_native_System_Exception::GetTarget(ref);
+    if (!obj)
+        return;
 
-    CLR_Debug::Printf( "    ++++ Exception " ); CLR_RT_DUMP::TYPE( obj->ObjectCls() ); CLR_Debug::Printf( " - %s (%d) ++++\r\n", CLR_RT_DUMP::GETERRORMESSAGE( Library_corlib_native_System_Exception::GetHResult( obj ) ), stack.m_owningThread->m_pid );
+    CLR_Debug::Printf("    ++++ Exception ");
+    CLR_RT_DUMP::TYPE(obj->ObjectCls());
+    CLR_Debug::Printf(
+        " - %s (%d) ++++\r\n",
+        CLR_RT_DUMP::GETERRORMESSAGE(Library_corlib_native_System_Exception::GetHResult(obj)),
+        stack.m_owningThread->m_pid);
 
-    msg = Library_corlib_native_System_Exception::GetMessage( obj );
-    
-    CLR_Debug::Printf( "    ++++ Message: %s\r\n", msg == NULL ? "" : msg );
+    msg = Library_corlib_native_System_Exception::GetMessage(obj);
 
-    CLR_UINT32                                          depth;
-    Library_corlib_native_System_Exception::StackTrace* stackTrace = Library_corlib_native_System_Exception::GetStackTrace( obj, depth ); if(!stackTrace) return;
+    CLR_Debug::Printf("    ++++ Message: %s\r\n", msg == nullptr ? "" : msg);
 
-    while(depth-- > 0)
+    CLR_UINT32 depth;
+    Library_corlib_native_System_Exception::StackTrace *stackTrace =
+        Library_corlib_native_System_Exception::GetStackTrace(obj, depth);
+    if (!stackTrace)
+        return;
+
+    while (depth-- > 0)
     {
-        CLR_Debug::Printf( "    ++++ " ); CLR_RT_DUMP::METHOD( stackTrace->m_md ); CLR_Debug::Printf( " [IP: %04x] ++++\r\n", stackTrace->m_IP );
+        CLR_Debug::Printf("    ++++ ");
+        CLR_RT_DUMP::METHOD(stackTrace->m_md, nullptr);
+        CLR_Debug::Printf(" [IP: %04x] ++++\r\n", stackTrace->m_IP);
 
         stackTrace++;
     }
 }
 
-void CLR_RT_DUMP::POST_PROCESS_EXCEPTION( CLR_RT_HeapBlock& ref )
+void CLR_RT_DUMP::POST_PROCESS_EXCEPTION(CLR_RT_HeapBlock &ref)
 {
     (void)ref;
 }
 
-const char* CLR_RT_DUMP::GETERRORMESSAGE( HRESULT hrError )
+const char *CLR_RT_DUMP::GETERRORMESSAGE(HRESULT hrError)
 {
     NATIVE_PROFILE_CLR_DIAGNOSTICS();
-#define CASE_HRESULT_TO_STRING(hr) case hr: return #hr
-    switch(hrError)
+#define CASE_HRESULT_TO_STRING(hr)                                                                                     \
+    case hr:                                                                                                           \
+        return #hr
+    switch (hrError)
     {
         CASE_HRESULT_TO_STRING(CLR_E_UNKNOWN_INSTRUCTION);
         CASE_HRESULT_TO_STRING(CLR_E_UNSUPPORTED_INSTRUCTION);
@@ -794,6 +1442,7 @@ const char* CLR_RT_DUMP::GETERRORMESSAGE( HRESULT hrError )
         CASE_HRESULT_TO_STRING(CLR_E_TYPE_UNAVAILABLE);
         CASE_HRESULT_TO_STRING(CLR_E_INVALID_CAST);
         CASE_HRESULT_TO_STRING(CLR_E_OUT_OF_RANGE);
+        CASE_HRESULT_TO_STRING(CLR_E_FORMAT_EXCEPTION);
         CASE_HRESULT_TO_STRING(CLR_E_SERIALIZATION_VIOLATION);
         CASE_HRESULT_TO_STRING(CLR_E_SERIALIZATION_BADSTREAM);
         CASE_HRESULT_TO_STRING(CLR_E_DIVIDE_BY_ZERO);
@@ -839,21 +1488,20 @@ const char* CLR_RT_DUMP::GETERRORMESSAGE( HRESULT hrError )
     }
 #undef CASE_HRESULT_TO_STRING
 
-    static char s_tmp[ 32 ];
+    static char s_tmp[32];
 
-    snprintf( s_tmp, MAXSTRLEN(s_tmp), "0x%08x", hrError );
+    snprintf(s_tmp, MAXSTRLEN(s_tmp), "0x%08x", hrError);
 
     return s_tmp;
 }
 
-#if defined(_WIN32)
-const char* CLR_RT_DUMP::GETERRORDETAIL()
+#if defined(VIRTUAL_DEVICE)
+const char *CLR_RT_DUMP::GETERRORDETAIL()
 {
-	return s_messageString.c_str();
+    return s_messageString.c_str();
 }
 #endif
 
 #endif // defined(NANOCLR_TRACE_EXCEPTIONS)
 
 //--//
-

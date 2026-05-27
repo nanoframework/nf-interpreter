@@ -1,10 +1,10 @@
-//
-// Copyright (c) 2019 The nanoFramework project contributors
+﻿//
+// Copyright (c) .NET Foundation and Contributors
 // See LICENSE file in the project root for full license information.
 //
 
-#ifndef _NF_SYSTEM_TEXT_H_
-#define _NF_SYSTEM_TEXT_H_
+#ifndef NF_SYSTEM_TEXT_H
+#define NF_SYSTEM_TEXT_H
 
 #include <nanoCLR_Interop.h>
 #include <nanoCLR_Runtime.h>
@@ -19,15 +19,14 @@ struct Library_nf_system_text_System_Text_StringBuilder
     static const int FIELD___chunkOffset = 5;
 
     //--//
-
 };
 
 struct Library_nf_system_text_System_Text_UTF8Decoder
 {
-    NANOCLR_NATIVE_DECLARE(Convert___VOID__SZARRAY_U1__I4__I4__SZARRAY_CHAR__I4__I4__BOOLEAN__BYREF_I4__BYREF_I4__BYREF_BOOLEAN);
+    NANOCLR_NATIVE_DECLARE(
+        Convert___VOID__SZARRAY_U1__I4__I4__SZARRAY_CHAR__I4__I4__BOOLEAN__BYREF_I4__BYREF_I4__BYREF_BOOLEAN);
 
     //--//
-
 };
 
 struct Library_nf_system_text_System_Text_UTF8Encoding
@@ -39,9 +38,9 @@ struct Library_nf_system_text_System_Text_UTF8Encoding
 
     //--//
 
-    static HRESULT Helper__GetChars(CLR_RT_StackFrame& stack, bool fIndexed);
+    static HRESULT Helper__GetChars(CLR_RT_StackFrame &stack, bool fIndexed);
 };
 
 extern const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_nanoFramework_System_Text;
 
-#endif  //_NF_SYSTEM_TEXT_H_
+#endif // NF_SYSTEM_TEXT_H

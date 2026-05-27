@@ -1,0 +1,50 @@
+#
+# Copyright (c) .NET Foundation and Contributors
+# See LICENSE file in the project root for full license information.
+#
+
+# native code directory
+set(BASE_PATH_FOR_THIS_MODULE ${BASE_PATH_FOR_CLASS_LIBRARIES_MODULES}/System.Device.Pwm)
+
+
+# set include directories
+list(APPEND System.Device.Pwm_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/CLR/Core)
+list(APPEND System.Device.Pwm_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/CLR/Include)
+list(APPEND System.Device.Pwm_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/HAL/Include)
+list(APPEND System.Device.Pwm_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/PAL/Include)
+list(APPEND System.Device.Pwm_INCLUDE_DIRS ${TARGET_BASE_LOCATION})
+list(APPEND System.Device.Pwm_INCLUDE_DIRS ${BASE_PATH_FOR_THIS_MODULE})
+list(APPEND System.Device.Pwm_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/System.Device.Pwm)
+
+# source files
+set(System.Device.Pwm_SRCS
+
+    sys_dev_pwm_native.cpp
+
+
+    sys_dev_pwm_native_System_Device_Pwm_PwmChannel.cpp
+    
+    target_system_device_pwm_config.cpp
+)
+
+foreach(SRC_FILE ${System.Device.Pwm_SRCS})
+    set(System.Device.Pwm_SRC_FILE SRC_FILE-NOTFOUND)
+    find_file(System.Device.Pwm_SRC_FILE ${SRC_FILE}
+        PATHS
+	        ${TARGET_BASE_LOCATION}
+	        ${BASE_PATH_FOR_THIS_MODULE}
+            ${CMAKE_SOURCE_DIR}/src/System.Device.Pwm
+
+	    CMAKE_FIND_ROOT_PATH_BOTH
+    )
+
+    if (BUILD_VERBOSE)
+        message("${SRC_FILE} >> ${System.Device.Pwm_SRC_FILE}")
+    endif()
+
+    list(APPEND System.Device.Pwm_SOURCES ${System.Device.Pwm_SRC_FILE})
+endforeach()
+
+include(FindPackageHandleStandardArgs)
+
+FIND_PACKAGE_HANDLE_STANDARD_ARGS(System.Device.Pwm DEFAULT_MSG System.Device.Pwm_INCLUDE_DIRS System.Device.Pwm_SOURCES)

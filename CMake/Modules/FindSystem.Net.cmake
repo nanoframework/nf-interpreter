@@ -1,11 +1,11 @@
 #
-# Copyright (c) 2017 The nanoFramework project contributors
+# Copyright (c) .NET Foundation and Contributors
 # See LICENSE file in the project root for full license information.
 #
 
 # set include directories
-list(APPEND System.Net_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/src/HAL/Include")
-list(APPEND System.Net_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/src/DeviceInterfaces/System.Net")
+list(APPEND System.Net_INCLUDE_DIRS "${CMAKE_SOURCE_DIR}/src/HAL/Include")
+list(APPEND System.Net_INCLUDE_DIRS "${CMAKE_SOURCE_DIR}/src/DeviceInterfaces/System.Net")
 
 # source files
 set(System.Net_SRCS
@@ -16,6 +16,7 @@ set(System.Net_SRCS
     sys_net_native_System_Net_IPAddress.cpp
 
     # System.Net.NetworkInformation
+    sys_net_native_System_Net_IPAddress.cpp
     sys_net_native_System_Net_NetworkInformation_NetworkInterface.cpp
     sys_net_native_System_Net_NetworkInformation_IPGlobalProperties.cpp
     sys_net_native_System_Net_NetworkInformation_Wireless80211Configuration.cpp
@@ -32,16 +33,23 @@ set(System.Net_SRCS
 )
 
 foreach(SRC_FILE ${System.Net_SRCS})
+
     set(System.Net_SRC_FILE SRC_FILE-NOTFOUND)
+
     find_file(System.Net_SRC_FILE ${SRC_FILE}
         PATHS
 
-            "${PROJECT_SOURCE_DIR}/src/DeviceInterfaces/System.Net"
+            ${CMAKE_SOURCE_DIR}/src/DeviceInterfaces/System.Net
 
         CMAKE_FIND_ROOT_PATH_BOTH
     )
-    # message("${SRC_FILE} >> ${System.Net_SRC_FILE}") # debug helper
+
+    if (BUILD_VERBOSE)
+        message("${SRC_FILE} >> ${System.Net_SRC_FILE}")
+    endif()
+
     list(APPEND System.Net_SOURCES ${System.Net_SRC_FILE})
+
 endforeach()
 
 include(FindPackageHandleStandardArgs)

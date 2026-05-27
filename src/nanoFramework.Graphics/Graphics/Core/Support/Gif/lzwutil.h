@@ -1,11 +1,11 @@
 //
-// Copyright (c) 2019 The nanoFramework project contributors
+// Copyright (c) .NET Foundation and Contributors
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
 //
 
-#ifndef _LZWUTIL_H_
-#define _LZWUTIL_H_
+#ifndef LZWUTIL_H
+#define LZWUTIL_H
 
 #include "Graphics.h"
 
@@ -57,4 +57,4 @@ inline unsigned int GIFU32(const unsigned char* pb)
     return pb[0] + (pb[1] << 8) + (pb[2] << 16) + (pb[3] << 24);
 }
 
-#endif
+#endif // LZWUTIL_H

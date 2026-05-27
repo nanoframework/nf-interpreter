@@ -1,0 +1,816 @@
+{
+    "version": 4,
+    "include": [
+        "../../CMake/xtensa-esp32.json",
+        "../../CMake/riscv-esp32c3.json",
+        "../../CMake/riscv-esp32c5.json",
+        "../../CMake/riscv-esp32c6.json",
+        "../../CMake/riscv-esp32h2.json",
+        "../../CMake/riscv-esp32p4.json",
+        "../../CMake/xtensa-esp32s2.json",
+        "../../CMake/xtensa-esp32s3.json",
+        "../../config/user-tools-repos.json",
+        "../../config/user-prefs.json"
+    ],
+    "configurePresets": [
+        {
+            "name": "ESP32_PSRAM_REV0",
+            "inherits": [
+                "xtensa-esp32-preset",
+                "user-tools-repos",
+                "user-prefs"
+            ],
+            "hidden": false,
+            "cacheVariables": {
+                "NF_TARGET_DEFCONFIG": "targets/ESP32/defconfig/ESP32_PSRAM_REV0_defconfig"
+            }
+        },
+        {
+            "name": "ESP32_PSRAM_REV3",
+            "inherits": [
+                "xtensa-esp32-preset",
+                "user-tools-repos",
+                "user-prefs"
+            ],
+            "hidden": false,
+            "cacheVariables": {
+                "TARGET_NAME": "${presetName}",
+                "NF_TARGET_DEFCONFIG": "targets/ESP32/defconfig/ESP32_PSRAM_REV3_defconfig"
+            }
+        },
+        {
+            "name": "ESP32_PSRAM_REV3_IPV6",
+            "inherits": [
+                "xtensa-esp32-preset",
+                "user-tools-repos",
+                "user-prefs"
+            ],
+            "hidden": false,
+            "cacheVariables": {
+                "TARGET_NAME": "${presetName}",
+                "NF_TARGET_DEFCONFIG": "targets/ESP32/defconfig/ESP32_PSRAM_REV3_IPV6_defconfig"
+            }
+        },
+        {
+            "name": "ESP32_REV0",
+            "inherits": [
+                "xtensa-esp32-preset",
+                "user-tools-repos",
+                "user-prefs"
+            ],
+            "hidden": false,
+            "cacheVariables": {
+                "TARGET_NAME": "${presetName}",
+                "NF_TARGET_DEFCONFIG": "targets/ESP32/defconfig/ESP32_REV0_defconfig"
+            }
+        },
+        {
+            "name": "ESP32_REV3",
+            "inherits": [
+                "xtensa-esp32-preset",
+                "user-tools-repos",
+                "user-prefs"
+            ],
+            "hidden": false,
+            "cacheVariables": {
+                "TARGET_NAME": "${presetName}",
+                "NF_TARGET_DEFCONFIG": "targets/ESP32/defconfig/ESP32_REV3_defconfig"
+            }
+        },
+        {
+            "name": "ESP32_PSRAM_XTAL26_REV0",
+            "inherits": [
+                "xtensa-esp32-preset",
+                "user-tools-repos",
+                "user-prefs"
+            ],
+            "hidden": false,
+            "cacheVariables": {
+                "TARGET_NAME": "${presetName}",
+                "NF_TARGET_DEFCONFIG": "targets/ESP32/defconfig/ESP32_PSRAM_XTAL26_REV0_defconfig"
+            }
+        },
+        {
+            "name": "ESP32_BLE_REV0",
+            "inherits": [
+                "xtensa-esp32-preset",
+                "user-tools-repos",
+                "user-prefs"
+            ],
+            "hidden": false,
+            "cacheVariables": {
+                "TARGET_NAME": "${presetName}",
+                "NF_TARGET_DEFCONFIG": "targets/ESP32/defconfig/ESP32_BLE_REV0_defconfig"
+            }
+        },
+        {
+            "name": "ESP32_BLE_REV3",
+            "inherits": [
+                "xtensa-esp32-preset",
+                "user-tools-repos",
+                "user-prefs"
+            ],
+            "hidden": false,
+            "cacheVariables": {
+                "TARGET_NAME": "${presetName}",
+                "NF_TARGET_DEFCONFIG": "targets/ESP32/defconfig/ESP32_BLE_REV3_defconfig"
+            }
+        },
+        {
+            "name": "ESP32_PICO",
+            "inherits": [
+                "xtensa-esp32-preset",
+                "user-tools-repos",
+                "user-prefs"
+            ],
+            "hidden": false,
+            "cacheVariables": {
+                "TARGET_NAME": "${presetName}",
+                "NF_TARGET_DEFCONFIG": "targets/ESP32/defconfig/ESP32_PICO_defconfig"
+            }
+        },
+        {
+            "name": "ESP_WROVER_KIT",
+            "inherits": [
+                "xtensa-esp32-preset",
+                "user-tools-repos",
+                "user-prefs"
+            ],
+            "hidden": false,
+            "cacheVariables": {
+                "TARGET_NAME": "${presetName}",
+                "NF_TARGET_DEFCONFIG": "targets/ESP32/defconfig/ESP_WROVER_KIT_defconfig"
+            }
+        },
+        {
+            "name": "ESP32_C3",
+            "inherits": [
+                "riscv-esp32c3-preset",
+                "user-tools-repos",
+                "user-prefs"
+            ],
+            "hidden": false,
+            "cacheVariables": {
+                "TARGET_NAME": "${presetName}",
+                "NF_TARGET_DEFCONFIG": "targets/ESP32/defconfig/ESP32_C3_defconfig"
+            }
+        },
+        {
+            "name": "ESP32_C3_REV3",
+            "inherits": [
+                "riscv-esp32c3-preset",
+                "user-tools-repos",
+                "user-prefs"
+            ],
+            "hidden": false,
+            "cacheVariables": {
+                "TARGET_NAME": "${presetName}",
+                "NF_TARGET_DEFCONFIG": "targets/ESP32/defconfig/ESP32_C3_REV3_defconfig"
+            }
+        },
+        {
+            "name": "ESP32_C5_THREAD_UART",
+            "inherits": [
+                "riscv-esp32c5-preset",
+                "user-tools-repos",
+                "user-prefs"
+            ],
+            "hidden": false,
+            "cacheVariables": {
+                "TARGET_NAME": "${presetName}",
+                "NF_TARGET_DEFCONFIG": "targets/ESP32/defconfig/ESP32_C5_THREAD_UART_defconfig"
+            }
+        },
+        {
+            "name": "ESP32_C5_THREAD_USB",
+            "inherits": [
+                "riscv-esp32c5-preset",
+                "user-tools-repos",
+                "user-prefs"
+            ],
+            "hidden": false,
+            "cacheVariables": {
+                "TARGET_NAME": "${presetName}",
+                "NF_TARGET_DEFCONFIG": "targets/ESP32/defconfig/ESP32_C5_UART_defconfig"
+            }
+        },
+        {
+            "name": "ESP32_C6_THREAD",
+            "inherits": [
+                "riscv-esp32c6-preset",
+                "user-tools-repos",
+                "user-prefs"
+            ],
+            "hidden": false,
+            "cacheVariables": {
+                "TARGET_NAME": "${presetName}",
+                "NF_TARGET_DEFCONFIG": "targets/ESP32/defconfig/ESP32_C6_THREAD_defconfig"
+            }
+        },
+        {
+            "name": "ESP32_H2_THREAD",
+            "inherits": [
+                "riscv-esp32h2-preset",
+                "user-tools-repos",
+                "user-prefs"
+            ],
+            "hidden": false,
+            "cacheVariables": {
+                "TARGET_NAME": "${presetName}",
+                "NF_TARGET_DEFCONFIG": "targets/ESP32/defconfig/ESP32_H2_THREAD_defconfig"
+            }
+        },
+        {
+            "name": "ESP32_P4_UART",
+            "inherits": [
+                "riscv-esp32p4-preset",
+                "user-tools-repos",
+                "user-prefs"
+            ],
+            "hidden": false,
+            "cacheVariables": {
+                "TARGET_NAME": "${presetName}",
+                "NF_TARGET_DEFCONFIG": "targets/ESP32/defconfig/ESP32_P4_UART_defconfig"
+            }
+        },
+        {
+            "name": "ESP32_P4_USB",
+            "inherits": [
+                "riscv-esp32p4-preset",
+                "user-tools-repos",
+                "user-prefs"
+            ],
+            "hidden": false,
+            "cacheVariables": {
+                "TARGET_NAME": "${presetName}",
+                "NF_TARGET_DEFCONFIG": "targets/ESP32/defconfig/ESP32_P4_USB_defconfig"
+            }
+        },
+        {
+            "name": "ESP32_S3",
+            "inherits": [
+                "xtensa-esp32s3-preset",
+                "user-tools-repos",
+                "user-prefs"
+            ],
+            "hidden": false,
+            "cacheVariables": {
+                "TARGET_NAME": "${presetName}",
+                "NF_TARGET_DEFCONFIG": "targets/ESP32/defconfig/ESP32_S3_defconfig"
+            }
+        },
+        {
+            "name": "ESP32_S3_BLE",
+            "inherits": [
+                "xtensa-esp32s3-preset",
+                "user-tools-repos",
+                "user-prefs"
+            ],
+            "hidden": false,
+            "cacheVariables": {
+                "TARGET_NAME": "${presetName}",
+                "NF_TARGET_DEFCONFIG": "targets/ESP32/defconfig/ESP32_S3_BLE_defconfig"
+            }
+        },
+        {
+            "name": "ESP32_S3_BLE_UART",
+            "inherits": [
+                "xtensa-esp32s3-preset",
+                "user-tools-repos",
+                "user-prefs"
+            ],
+            "hidden": false,
+            "cacheVariables": {
+                "TARGET_NAME": "${presetName}",
+                "NF_TARGET_DEFCONFIG": "targets/ESP32/defconfig/ESP32_S3_BLE_UART_defconfig"
+            }
+        },
+        {
+            "name": "ESP32_S3_ALL",
+            "inherits": [
+                "xtensa-esp32s3-preset",
+                "user-tools-repos",
+                "user-prefs"
+            ],
+            "hidden": false,
+            "cacheVariables": {
+                "TARGET_NAME": "${presetName}",
+                "NF_TARGET_DEFCONFIG": "targets/ESP32/defconfig/ESP32_S3_ALL_defconfig"
+            }
+        },
+        {
+            "name": "ESP32_S3_ALL_UART",
+            "inherits": [
+                "xtensa-esp32s3-preset",
+                "user-tools-repos",
+                "user-prefs"
+            ],
+            "hidden": false,
+            "cacheVariables": {
+                "TARGET_NAME": "${presetName}",
+                "NF_TARGET_DEFCONFIG": "targets/ESP32/defconfig/ESP32_S3_ALL_UART_defconfig"
+            }
+        },
+        {
+            "name": "XIAO_ESP32C3",
+            "inherits": [
+                "riscv-esp32c3-preset",
+                "user-tools-repos",
+                "user-prefs"
+            ],
+            "hidden": false,
+            "cacheVariables": {
+                "TARGET_NAME": "${presetName}",
+                "NF_TARGET_DEFCONFIG": "targets/ESP32/defconfig/XIAO_ESP32C3_defconfig"
+            }
+        },
+        {
+            "name": "M5Stack",
+            "inherits": [
+                "xtensa-esp32-preset",
+                "user-tools-repos",
+                "user-prefs"
+            ],
+            "hidden": false,
+            "cacheVariables": {
+                "TARGET_NAME": "${presetName}",
+                "NF_TARGET_DEFCONFIG": "targets/ESP32/defconfig/M5Stack_defconfig"
+            }
+        },
+        {
+            "name": "M5Core",
+            "inherits": [
+                "xtensa-esp32-preset",
+                "user-tools-repos",
+                "user-prefs"
+            ],
+            "hidden": false,
+            "cacheVariables": {
+                "TARGET_NAME": "${presetName}",
+                "NF_TARGET_DEFCONFIG": "targets/ESP32/defconfig/M5Core_defconfig"
+            }
+        },
+        {
+            "name": "M5Core2",
+            "inherits": [
+                "xtensa-esp32-preset",
+                "user-tools-repos",
+                "user-prefs"
+            ],
+            "hidden": false,
+            "cacheVariables": {
+                "TARGET_NAME": "${presetName}",
+                "NF_TARGET_DEFCONFIG": "targets/ESP32/defconfig/M5Core2_defconfig"
+            }
+        },
+        {
+            "name": "AtomS3",
+            "inherits": [
+                "xtensa-esp32s3-preset",
+                "user-tools-repos",
+                "user-prefs"
+            ],
+            "hidden": false,
+            "cacheVariables": {
+                "TARGET_NAME": "${presetName}",
+                "NF_TARGET_DEFCONFIG": "targets/ESP32/defconfig/AtomS3_defconfig"
+            }
+        },
+        {
+            "name": "ESP32_GenericDisplay_REV0",
+            "inherits": [
+                "xtensa-esp32-preset",
+                "user-tools-repos",
+                "user-prefs"
+            ],
+            "hidden": false,
+            "cacheVariables": {
+                "TARGET_NAME": "${presetName}",
+                "NF_TARGET_DEFCONFIG": "targets/ESP32/defconfig/ESP32_GenericDisplay_REV0_defconfig"
+            }
+        },
+        {
+            "name": "ESP32_PSRAM_BLE_GenericGraphic_REV3",
+            "inherits": [
+                "xtensa-esp32-preset",
+                "user-tools-repos",
+                "user-prefs"
+            ],
+            "hidden": false,
+            "cacheVariables": {
+                "TARGET_NAME": "${presetName}",
+                "NF_TARGET_DEFCONFIG": "targets/ESP32/defconfig/ESP32_PSRAM_BLE_GenericGraphic_REV3_defconfig"
+            }
+        },
+        {
+            "name": "ESP32_LILYGO",
+            "inherits": [
+                "xtensa-esp32-preset",
+                "user-tools-repos",
+                "user-prefs"
+            ],
+            "hidden": false,
+            "cacheVariables": {
+                "TARGET_NAME": "${presetName}",
+                "NF_TARGET_DEFCONFIG": "targets/ESP32/defconfig/ESP32_LILYGO_defconfig"
+            }
+        },
+        {
+            "name": "ESP32_OLIMEX",
+            "inherits": [
+                "xtensa-esp32-preset",
+                "user-tools-repos",
+                "user-prefs"
+            ],
+            "hidden": false,
+            "cacheVariables": {
+                "TARGET_NAME": "${presetName}",
+                "NF_TARGET_DEFCONFIG": "targets/ESP32/defconfig/ESP32_OLIMEX_defconfig"
+            }
+        },
+        {
+            "name": "ESP32_OLIMEX_WROVER",
+            "inherits": [
+                "xtensa-esp32-preset",
+                "user-tools-repos",
+                "user-prefs"
+            ],
+            "hidden": false,
+            "cacheVariables": {
+                "TARGET_NAME": "${presetName}",
+                "NF_TARGET_DEFCONFIG": "targets/ESP32/defconfig/ESP32_OLIMEX_WROVER_defconfig"
+            }
+        },
+        {
+            "name": "LilygoTWatch2020",
+            "inherits": [
+                "xtensa-esp32-preset",
+                "user-tools-repos",
+                "user-prefs"
+            ],
+            "hidden": false,
+            "cacheVariables": {
+                "TARGET_NAME": "${presetName}",
+                "NF_TARGET_DEFCONFIG": "targets/ESP32/defconfig/LilygoTWatch2020_defconfig"
+            }
+        },
+        {
+            "name": "LilygoTWatch2021",
+            "inherits": [
+                "xtensa-esp32-preset",
+                "user-tools-repos",
+                "user-prefs"
+            ],
+            "hidden": false,
+            "cacheVariables": {
+                "TARGET_NAME": "${presetName}",
+                "NF_TARGET_DEFCONFIG": "targets/ESP32/defconfig/LilygoTWatch2021_defconfig"
+            }
+        },
+        {
+            "name": "ESP32_ETHERNET_KIT_1.2",
+            "inherits": [
+                "xtensa-esp32-preset",
+                "user-tools-repos",
+                "user-prefs"
+            ],
+            "hidden": false,
+            "cacheVariables": {
+                "TARGET_NAME": "${presetName}",
+                "NF_TARGET_DEFCONFIG": "targets/ESP32/defconfig/ESP32_ETHERNET_KIT_1.2_defconfig"
+            }
+        },
+        {
+            "name": "ESP32_WT32_ETH01",
+            "inherits": [
+                "xtensa-esp32-preset",
+                "user-tools-repos",
+                "user-prefs"
+            ],
+            "hidden": false,
+            "cacheVariables": {
+                "TARGET_NAME": "${presetName}",
+                "NF_TARGET_DEFCONFIG": "targets/ESP32/defconfig/ESP32_WT32_ETH01_defconfig"
+            }
+        },
+        {
+            "name": "ESP32_WESP32",
+            "inherits": [
+                "xtensa-esp32-preset",
+                "user-tools-repos",
+                "user-prefs"
+            ],
+            "hidden": false,
+            "cacheVariables": {
+                "TARGET_NAME": "${presetName}",
+                "NF_TARGET_DEFCONFIG": "targets/ESP32/defconfig/ESP32_WESP32_defconfig"
+            }
+        },
+        {
+            "name": "M5StickC",
+            "inherits": [
+                "xtensa-esp32-preset",
+                "user-tools-repos",
+                "user-prefs"
+            ],
+            "hidden": false,
+            "cacheVariables": {
+                "TARGET_NAME": "${presetName}",
+                "NF_TARGET_DEFCONFIG": "targets/ESP32/defconfig/M5StickC_defconfig"
+            }
+        },
+        {
+            "name": "M5StickCPlus",
+            "inherits": [
+                "xtensa-esp32-preset",
+                "user-tools-repos",
+                "user-prefs"
+            ],
+            "hidden": false,
+            "cacheVariables": {
+                "TARGET_NAME": "${presetName}",
+                "NF_TARGET_DEFCONFIG": "targets/ESP32/defconfig/M5StickCPlus_defconfig"
+            }
+        },
+        {
+            "name": "ESP32_S2_USB",
+            "inherits": [
+                "xtensa-esp32s2-preset",
+                "user-tools-repos",
+                "user-prefs"
+            ],
+            "hidden": false,
+            "cacheVariables": {
+                "TARGET_NAME": "${presetName}",
+                "NF_TARGET_DEFCONFIG": "targets/ESP32/defconfig/ESP32_S2_USB_defconfig"
+            }
+        },
+        {
+            "name": "ESP32_S2_UART",
+            "inherits": [
+                "xtensa-esp32s2-preset",
+                "user-tools-repos",
+                "user-prefs"
+            ],
+            "hidden": false,
+            "cacheVariables": {
+                "TARGET_NAME": "${presetName}",
+                "NF_TARGET_DEFCONFIG": "targets/ESP32/defconfig/ESP32_S2_UART_defconfig"
+            }
+        }
+    ],
+    "buildPresets": [
+        {
+            "inherits": "base-user",
+            "name": "ESP32_PSRAM_REV0",
+            "displayName": "ESP32_PSRAM_REV0",
+            "configurePreset": "ESP32_PSRAM_REV0"
+        },
+        {
+            "inherits": "base-user",
+            "name": "ESP32_PSRAM_REV3",
+            "displayName": "ESP32_PSRAM_REV3",
+            "configurePreset": "ESP32_PSRAM_REV3"
+        },
+        {
+            "inherits": "base-user",
+            "name": "ESP32_PSRAM_REV3_IPV6",
+            "displayName": "ESP32_PSRAM_REV3_IPV6",
+            "configurePreset": "ESP32_PSRAM_REV3_IPV6"
+        },
+        {
+            "inherits": "base-user",
+            "name": "ESP32_REV0",
+            "displayName": "ESP32_REV0",
+            "configurePreset": "ESP32_REV0"
+        },
+        {
+            "inherits": "base-user",
+            "name": "ESP32_REV3",
+            "displayName": "ESP32_REV3",
+            "configurePreset": "ESP32_REV3"
+        },
+        {
+            "inherits": "base-user",
+            "name": "ESP32_PSRAM_XTAL26_REV0",
+            "displayName": "ESP32_PSRAM_XTAL26_REV0",
+            "configurePreset": "ESP32_PSRAM_XTAL26_REV0"
+        },
+        {
+            "inherits": "base-user",
+            "name": "ESP32_BLE_REV0",
+            "displayName": "ESP32_BLE_REV0",
+            "configurePreset": "ESP32_BLE_REV0"
+        },
+        {
+            "inherits": "base-user",
+            "name": "ESP32_BLE_REV3",
+            "displayName": "ESP32_BLE_REV3",
+            "configurePreset": "ESP32_BLE_REV3"
+        },
+        {
+            "inherits": "base-user",
+            "name": "ESP32_PICO",
+            "displayName": "ESP32_PICO",
+            "configurePreset": "ESP32_PICO"
+        },
+        {
+            "inherits": "base-user",
+            "name": "ESP_WROVER_KIT",
+            "displayName": "ESP_WROVER_KIT",
+            "configurePreset": "ESP_WROVER_KIT"
+        },
+        {
+            "inherits": "base-user",
+            "name": "ESP32_C3",
+            "displayName": "ESP32_C3",
+            "configurePreset": "ESP32_C3"
+        },
+        {
+            "inherits": "base-user",
+            "name": "ESP32_C3_REV3",
+            "displayName": "ESP32_C3_REV3",
+            "configurePreset": "ESP32_C3_REV3"
+        },
+        {
+            "inherits": "base-user",
+            "name": "ESP32_C5_THREAD_UART",
+            "displayName": "ESP32_C5_THREAD_UART",
+            "configurePreset": "ESP32_C5_THREAD_UART"
+        },        
+        {
+            "inherits": "base-user",
+            "name": "ESP32_C5_THREAD_USB",
+            "displayName": "ESP32_C5_THREAD_USB",
+            "configurePreset": "ESP32_C5_THREAD_USB"
+        },        
+        {
+            "inherits": "base-user",
+            "name": "ESP32_C6_THREAD",
+            "displayName": "ESP32_C6_THREAD",
+            "configurePreset": "ESP32_C6_THREAD"
+        },
+        {
+            "inherits": "base-user",
+            "name": "ESP32_H2_THREAD",
+            "displayName": "ESP32_H2_THREAD",
+            "configurePreset": "ESP32_H2_THREAD"
+        },
+        {
+            "inherits": "base-user",
+            "name": "ESP32_S3",
+            "displayName": "ESP32_S3",
+            "configurePreset": "ESP32_S3"
+        },
+        {
+            "inherits": "base-user",
+            "name": "ESP32_S3_BLE",
+            "displayName": "ESP32_S3_BLE",
+            "configurePreset": "ESP32_S3_BLE"
+        },
+        {
+            "inherits": "base-user",
+            "name": "ESP32_S3_BLE_UART",
+            "displayName": "ESP32_S3_BLE_UART",
+            "configurePreset": "ESP32_S3_BLE_UART"
+        },
+        {
+            "inherits": "base-user",
+            "name": "ESP32_S3_ALL",
+            "displayName": "ESP32_S3_ALL",
+            "configurePreset": "ESP32_S3_ALL"
+        },
+        {
+            "inherits": "base-user",
+            "name": "ESP32_S3_ALL_UART",
+            "displayName": "ESP32_S3_ALL_UART",
+            "configurePreset": "ESP32_S3_ALL_UART"
+        },
+        {
+            "inherits": "base-user",
+            "name": "XIAO_ESP32C3",
+            "displayName": "XIAO_ESP32C3",
+            "configurePreset": "XIAO_ESP32C3"
+        },
+        {
+            "inherits": "base-user",
+            "name": "M5Stack",
+            "displayName": "M5Stack",
+            "configurePreset": "M5Stack"
+        },
+        {
+            "inherits": "base-user",
+            "name": "M5Core",
+            "displayName": "M5Core",
+            "configurePreset": "M5Core"
+        },
+        {
+            "inherits": "base-user",
+            "name": "M5Core2",
+            "displayName": "M5Core2",
+            "configurePreset": "M5Core2"
+        },
+        {
+            "inherits": "base-user",
+            "name": "AtomS3",
+            "displayName": "AtomS3",
+            "configurePreset": "AtomS3"
+        },
+        {
+            "inherits": "base-user",
+            "name": "ESP32_GenericDisplay_REV0",
+            "displayName": "ESP32_GenericDisplay_REV0",
+            "configurePreset": "ESP32_GenericDisplay_REV0"
+        },
+        {
+            "inherits": "base-user",
+            "name": "ESP32_PSRAM_BLE_GenericGraphic_REV3",
+            "displayName": "ESP32_PSRAM_BLE_GenericGraphic_REV3",
+            "configurePreset": "ESP32_PSRAM_BLE_GenericGraphic_REV3"
+        },
+        {
+            "inherits": "base-user",
+            "name": "ESP32_LILYGO",
+            "displayName": "ESP32_LILYGO",
+            "configurePreset": "ESP32_LILYGO"
+        },
+        {
+            "inherits": "base-user",
+            "name": "ESP32_OLIMEX",
+            "displayName": "ESP32_OLIMEX",
+            "configurePreset": "ESP32_OLIMEX"
+        },
+        {
+            "inherits": "base-user",
+            "name": "ESP32_OLIMEX_WROVER",
+            "displayName": "ESP32_OLIMEX_WROVER",
+            "configurePreset": "ESP32_OLIMEX_WROVER"
+        },
+        {
+            "inherits": "base-user",
+            "name": "ESP32_ETHERNET_KIT_1.2",
+            "displayName": "ESP32_ETHERNET_KIT_1.2",
+            "configurePreset": "ESP32_ETHERNET_KIT_1.2"
+        },
+        {
+            "inherits": "base-user",
+            "name": "ESP32_WT32_ETH01",
+            "displayName": "ESP32_WT32_ETH01",
+            "configurePreset": "ESP32_WT32_ETH01"
+        },
+        {
+            "inherits": "base-user",
+            "name": "ESP32_WESP32",
+            "displayName": "ESP32_WESP32",
+            "configurePreset": "ESP32_WESP32"
+        },
+        {
+            "inherits": "base-user",
+            "name": "LilygoTWatch2020",
+            "displayName": "LilygoTWatch2020",
+            "configurePreset": "LilygoTWatch2020"
+        },
+        {
+            "inherits": "base-user",
+            "name": "LilygoTWatch2021",
+            "displayName": "LilygoTWatch2021",
+            "configurePreset": "LilygoTWatch2021"
+        },
+        {
+            "inherits": "base-user",
+            "name": "M5StickC",
+            "displayName": "M5StickC",
+            "configurePreset": "M5StickC"
+        },
+        {
+            "inherits": "base-user",
+            "name": "M5StickCPlus",
+            "displayName": "M5StickCPlus",
+            "configurePreset": "M5StickCPlus"
+        },
+        {
+            "inherits": "base-user",
+            "name": "ESP32_S2_USB",
+            "displayName": "ESP32_S2_USB",
+            "configurePreset": "ESP32_S2_USB"
+        },
+        {
+            "inherits": "base-user",
+            "name": "ESP32_S2_UART",
+            "displayName": "ESP32_S2_UART",
+            "configurePreset": "ESP32_S2_UART"
+        },
+        {
+            "inherits": "base-user",
+            "name": "ESP32_P4_UART",
+            "displayName": "ESP32_P4_UART",
+            "configurePreset": "ESP32_P4_UART"
+        },
+        {
+            "inherits": "base-user",
+            "name": "ESP32_P4_USB",
+            "displayName": "ESP32_P4_USB",
+            "configurePreset": "ESP32_P4_USB"
+        }
+    ]
+}

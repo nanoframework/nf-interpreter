@@ -1,0 +1,54 @@
+/**
+ * These arguments were used when this file was generated. They will be automatically applied on subsequent loads
+ * via the GUI or CLI. Run CLI with '--help' for additional information on how to override these arguments.
+ * @cliArgs --board "/ti/boards/CC1352R1_LAUNCHXL" --rtos "tirtos" --product "simplelink_cc13xx_cc26xx_sdk@5.30.01.01"
+ * @versions {"tool":"1.11.0+2225"}
+ */
+
+/**
+ * Import the modules used in this configuration.
+ */
+const CCFG     = scripting.addModule("/ti/devices/CCFG");
+const ADC      = scripting.addModule("/ti/drivers/ADC", {}, false);
+const ADC1     = ADC.addInstance();
+const GPIO     = scripting.addModule("/ti/drivers/GPIO", {}, false);
+const UART2    = scripting.addModule("/ti/drivers/UART2", {}, false);
+const UART21   = UART2.addInstance();
+const easylink = scripting.addModule("/ti/easylink/easylink");
+
+/**
+ * Write custom configuration values to the imported modules.
+ */
+CCFG.forceVddr          = true;
+CCFG.ccfgTemplate.$name = "ti_devices_CCFGTemplate0";
+
+ADC1.$name            = "ADC_0";
+ADC1.samplingDuration = "170 us";
+
+UART21.$name            = "UART0";
+UART21.$hardware        = system.deviceData.board.components.XDS110UART;
+UART21.rxRingBufferSize = 256;
+
+easylink.EasyLink_Phy_50kbps2gfsk                                  = true;
+easylink.EasyLink_Phy_5kbpsSlLr                                    = true;
+easylink.EasyLink_Phy_200kbps2gfsk                                 = true;
+easylink.enableAddrFilter                                          = false;
+easylink.radioConfigEasylinkPhyCustom.carrierFrequency             = 915.0000;
+easylink.radioConfigEasylinkPhyCustom.codeExportConfig.$name       = "ti_devices_radioconfig_code_export_param0";
+easylink.radioConfigEasylinkPhy50kbps2gfsk.carrierFrequency        = 915.0000;
+easylink.radioConfigEasylinkPhy50kbps2gfsk.codeExportConfig.$name  = "ti_devices_radioconfig_code_export_param1";
+easylink.radioConfigEasylinkPhy5kbpssllr.carrierFrequency          = 915.0000;
+easylink.radioConfigEasylinkPhy5kbpssllr.codeExportConfig.$name    = "ti_devices_radioconfig_code_export_param2";
+easylink.radioConfigEasylinkPhy200kbps2gfsk.carrierFrequency       = 915.0000;
+easylink.radioConfigEasylinkPhy200kbps2gfsk.codeExportConfig.$name = "ti_devices_radioconfig_code_export_param3";
+
+/**
+ * Pinmux solution for unlocked pins/peripherals. This ensures that minor changes to the automatic solver in a future
+ * version of the tool will not impact the pinmux you originally saw.  These lines can be completely deleted in order to
+ * re-solve from scratch.
+ */
+ADC1.adc.$suggestSolution          = "ADC0";
+ADC1.adc.adcPin.$suggestSolution   = "boosterpack.2";
+UART21.uart.$suggestSolution       = "UART0";
+UART21.uart.txPin.$suggestSolution = "boosterpack.4";
+UART21.uart.rxPin.$suggestSolution = "boosterpack.3";

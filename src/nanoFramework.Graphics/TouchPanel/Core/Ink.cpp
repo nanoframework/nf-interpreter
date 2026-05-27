@@ -1,8 +1,12 @@
-#include "ink.h"
+//
+// Copyright (c) .NET Foundation and Contributors
+// See LICENSE file in the project root for full license information.
+//
+
+#include "Ink.h"
 #include "TouchPanel.h"
 
 #define INK_COMPLETION_TIME_USEC 10000 // 10ms - same as default touch completion
-
 
 extern TouchPanelDriver g_TouchPanelDriver;
 struct InkDriver g_InkDriver;
@@ -18,11 +22,11 @@ HRESULT InkDriver::Initialize()
         g_InkDriver.m_InkCompletion.InitializeForUserMode(InkContinuationRoutine);
         m_initialized = true;
         m_InkingActive = false;
-        m_InkRegionInfo.Bmp = NULL;
+        m_InkRegionInfo.Bmp = nullptr;
         m_ScreenBmp.width = g_DisplayDriver.Attributes.Width;
         m_ScreenBmp.height = g_DisplayDriver.Attributes.Height;
-        //   m_ScreenBmp.data = Display::GetFrameBuffer();   
-        m_ScreenBmp.transparentColor = PAL_GFX_Bitmap::c_InvalidColor;
+        //   m_ScreenBmp.data = Display::GetFrameBuffer();
+        m_ScreenBmp.transparentColorSet = PAL_GFX_Bitmap::c_TransparentColorNotSet;
     }
 
     return S_OK;
@@ -39,7 +43,7 @@ HRESULT InkDriver::Uninitialize()
     return S_OK;
 }
 
-HRESULT InkDriver::SetRegion(InkRegionInfo* inkRegionInfo)
+HRESULT InkDriver::SetRegion(InkRegionInfo *inkRegionInfo)
 {
     m_InkRegionInfo = *inkRegionInfo;
 
@@ -52,11 +56,10 @@ HRESULT InkDriver::SetRegion(InkRegionInfo* inkRegionInfo)
     m_ScreenBmp.clipping.top = m_InkRegionInfo.Y1 + m_InkRegionInfo.BorderWidth;
     m_ScreenBmp.clipping.bottom = m_InkRegionInfo.Y2 - m_InkRegionInfo.BorderWidth;
 
-    if (m_InkRegionInfo.Bmp == NULL)
+    if (m_InkRegionInfo.Bmp == nullptr)
     {
         m_InkRegionInfo.Bmp = &m_ScreenBmp;
     }
-
 
     CLR_UINT32 flags = GetTouchPointFlags_LatestPoint | GetTouchPointFlags_UseTime | GetTouchPointFlags_UseSource;
     CLR_UINT16 source = 0;
@@ -67,7 +70,8 @@ HRESULT InkDriver::SetRegion(InkRegionInfo* inkRegionInfo)
     if (g_TouchPanelDriver.GetTouchPoint(&flags, &source, &x, &y, &time) == S_OK)
     {
 
-        if (x == TouchPointLocationFlags_ContactUp) return S_OK;
+        if (x == TouchPointLocationFlags_ContactUp)
+            return S_OK;
 
         if (x == TouchPointLocationFlags_ContactDown)
         {
@@ -78,33 +82,39 @@ HRESULT InkDriver::SetRegion(InkRegionInfo* inkRegionInfo)
         m_lastx = x;
         m_lasty = y;
 
-        if (!m_InkCompletion.IsLinked()) m_InkCompletion.EnqueueDelta(INK_COMPLETION_TIME_USEC);
+        if (!m_InkCompletion.IsLinked())
+            m_InkCompletion.EnqueueDelta(INK_COMPLETION_TIME_USEC);
     }
-    else return CLR_E_FAIL;
+    else
+        return CLR_E_FAIL;
 
     return S_OK;
 }
 
 HRESULT InkDriver::ResetRegion()
 {
-    if (m_InkCompletion.IsLinked()) m_InkCompletion.Abort();
+    if (m_InkCompletion.IsLinked())
+        m_InkCompletion.Abort();
 
     m_InkingActive = false;
-    m_InkRegionInfo.Bmp = NULL;
+    m_InkRegionInfo.Bmp = nullptr;
 
     return S_OK;
 }
 
-void InkDriver::InkContinuationRoutine(void* arg)
+void InkDriver::InkContinuationRoutine(void *arg)
 {
     g_InkDriver.DrawInk(arg);
 }
 
-void InkDriver::DrawInk(void* arg)
+void InkDriver::DrawInk(void *arg)
 {
-    if (arg == NULL) {}; // Avoid unused parameter, maybe we need it in the future?
+    if (arg == nullptr)
+    {
+    }; // Avoid unused parameter, maybe we need it in the future?
     HRESULT hr = S_OK;
-    CLR_UINT32 flags = (m_index << 16) | GetTouchPointFlags_NextPoint | GetTouchPointFlags_UseTime | GetTouchPointFlags_UseSource;
+    CLR_UINT32 flags =
+        (m_index << 16) | GetTouchPointFlags_NextPoint | GetTouchPointFlags_UseTime | GetTouchPointFlags_UseSource;
     CLR_UINT16 source = 0;
     CLR_UINT16 x = 0;
     CLR_UINT16 y = 0;
@@ -114,15 +124,18 @@ void InkDriver::DrawInk(void* arg)
 
     while ((hr = g_TouchPanelDriver.GetTouchPoint(&flags, &source, &x, &y, &time)) == S_OK)
     {
-        if (x == TouchPointLocationFlags_ContactUp) break;
-        if (x == TouchPointLocationFlags_ContactDown) continue;
+        if (x == TouchPointLocationFlags_ContactUp)
+            break;
+        if (x == TouchPointLocationFlags_ContactDown)
+            continue;
 
         if (m_lastx != 0xFFFF)
         {
             g_GraphicsDriver.DrawLineRaw(m_ScreenBmp, m_InkRegionInfo.Pen, m_lastx, m_lasty, x, y);
-            if (m_InkRegionInfo.Bmp != NULL)
+            if (m_InkRegionInfo.Bmp != nullptr)
             {
-                g_GraphicsDriver.DrawLine(*(m_InkRegionInfo.Bmp), m_InkRegionInfo.Pen, m_lastx - dx, m_lasty - dy, x - dx, y - dy);
+                g_GraphicsDriver
+                    .DrawLine(*(m_InkRegionInfo.Bmp), m_InkRegionInfo.Pen, m_lastx - dx, m_lasty - dy, x - dx, y - dy);
             }
         }
 
@@ -134,6 +147,7 @@ void InkDriver::DrawInk(void* arg)
 
     if (x != TouchPointLocationFlags_ContactUp)
     {
-        if (!m_InkCompletion.IsLinked()) m_InkCompletion.EnqueueDelta(INK_COMPLETION_TIME_USEC);
+        if (!m_InkCompletion.IsLinked())
+            m_InkCompletion.EnqueueDelta(INK_COMPLETION_TIME_USEC);
     }
 }

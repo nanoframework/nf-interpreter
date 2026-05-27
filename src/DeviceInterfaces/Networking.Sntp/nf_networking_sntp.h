@@ -1,24 +1,30 @@
 //
-// Copyright (c) 2018 The nanoFramework project contributors
+// Copyright (c) .NET Foundation and Contributors
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
 //
 
-
-#ifndef _NF_NETWORKING_SNTP_H_
-#define _NF_NETWORKING_SNTP_H_
+#ifndef NF_NETWORKING_SNTP_H
+#define NF_NETWORKING_SNTP_H
 
 #include <nanoCLR_Interop.h>
 #include <nanoCLR_Runtime.h>
 #include <nanoCLR_Checks.h>
-#include <nanoHAL_time.h>
+#include <nanoHAL_Time.h>
 
 extern "C"
 {
 #ifdef DeviceFamily_CC3220
 #include <targetSimpleLinkCC32xx_Sntp.h>
+#elif defined(VIRTUAL_DEVICE)
+// empty on purpose
+#elif defined(THREADX_RTOS_NETXDUO)
+#include <nxd_sntp_client.h>
+#elif defined(THREADX_RTOS)
+// TODO
+// #include <nxd_sntp_client.h>
 #else
-#include <apps/sntp.h>
+#include <lwip/apps/sntp.h>
 #endif
 }
 
@@ -34,9 +40,8 @@ struct Library_nf_networking_sntp_nanoFramework_Networking_Sntp
     NANOCLR_NATIVE_DECLARE(set_Server2___STATIC__VOID__STRING);
 
     //--//
-
 };
 
 extern const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_nanoFramework_Networking_Sntp;
 
-#endif  //_NF_NETWORKING_SNTP_H_
+#endif // NF_NETWORKING_SNTP_H

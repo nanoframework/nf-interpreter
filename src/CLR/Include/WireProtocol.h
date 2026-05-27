@@ -1,19 +1,19 @@
 //
-// Copyright (c) 2017 The nanoFramework project contributors
+// Copyright (c) .NET Foundation and Contributors
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
 //
 
-#ifndef _WIREPROTOCOL_H_
-#define _WIREPROTOCOL_H_
+// clang-format off
 
-#include <stdint.h>
-#include <stdbool.h>
-#include <stddef.h>
-#include <string.h>
+#ifndef WIREPROTOCOL_H
+#define WIREPROTOCOL_H
+
+#include <nanoCLR_Headers.h>
 #include <nanoSupport.h>
+#include "nanoVersion.h"
 
-#if !defined(_WIN32)
+#ifndef VIRTUAL_DEVICE
 #include <target_common.h>
 #endif
 
@@ -58,13 +58,13 @@ typedef enum WP_Flags
 // enum with machine states for Wire Procotol receiver
 typedef enum ReceiveState
 {
-    ReceiveState_Idle             = (1 << 0),
-    ReceiveState_Initialize       = (2 << 0),
-    ReceiveState_WaitingForHeader = (3 << 0),
-    ReceiveState_ReadingHeader    = (4 << 0),
-    ReceiveState_CompleteHeader   = (5 << 0),
-    ReceiveState_ReadingPayload   = (6 << 0),
-    ReceiveState_CompletePayload  = (7 << 0),
+    ReceiveState_Idle             = (uint8_t)1,
+    ReceiveState_Initialize       = (uint8_t)2,
+    ReceiveState_WaitingForHeader = (uint8_t)3,
+    ReceiveState_ReadingHeader    = (uint8_t)4,
+    ReceiveState_CompleteHeader   = (uint8_t)5,
+    ReceiveState_ReadingPayload   = (uint8_t)6,
+    ReceiveState_CompletePayload  = (uint8_t)7,
 }ReceiveState;
 
 // enum with CLR monitor commands
@@ -87,6 +87,8 @@ typedef enum CLR_DBG_Commands_Monitor
     CLR_DBG_Commands_c_Monitor_OemInfo             = 0x0000000E,
     CLR_DBG_Commands_c_Monitor_QueryConfiguration  = 0x0000000F,
     CLR_DBG_Commands_c_Monitor_UpdateConfiguration = 0x00000010,
+    CLR_DBG_Commands_c_Monitor_StorageOperation    = 0x00000011,
+    CLR_DBG_Commands_c_Monitor_TargetInfo          = 0x00000020,
 }CLR_DBG_Commands_Monitor;
 
 // structure for Wire Protocol packet
@@ -123,24 +125,6 @@ typedef struct WP_Message
 {
     WP_Packet      m_header;
     uint8_t*       m_payload;
-
-    uint8_t*       m_pos;
-    uint16_t       m_size;
-    uint64_t       m_payloadTicks;
-    int            m_rxState;
-
-    void (*Initialize)(WP_Controller* parent);
-    void (*PrepareReception)(void);
-    void (*PrepareRequest)(unsigned int cmd, unsigned int flags, unsigned int payloadSize, unsigned char* payload);
-    void (*PrepareReply)(const void** req, unsigned int flags, unsigned int payloadSize, unsigned char* payload);
-    void (*SetPayload)(unsigned char* payload);
-    void (*Release)(void);
-    bool (*Process)(void);
-
-    bool (*VerifyHeader)(void);
-    bool (*VerifyPayload)(void);
-    void (*ReplyBadPacket)(unsigned int flags);
-
 }WP_Message;
 
 
@@ -150,35 +134,42 @@ typedef struct WP_Message
 ///////////////////////////////////////////////////////////////////////
 typedef enum Monitor_Ping_Source_Flags
 {
-    Monitor_Ping_c_Ping_Source_NanoCLR          = 0x00010000,
-    Monitor_Ping_c_Ping_Source_NanoBooter       = 0x00010001,
-    Monitor_Ping_c_Ping_Source_Host             = 0x00010002,
+    ///////////////////////////////////////////////////////
 
-    Monitor_Ping_c_Ping_DbgFlag_Stop            = 0x00000001,
-    Monitor_Ping_c_Ping_DbgFlag_AppExit         = 0x00000004,
+    Monitor_Ping_c_Ping_Source_NanoCLR =        0x00010000,
+    Monitor_Ping_c_Ping_Source_NanoBooter =     0x00010001,
+    Monitor_Ping_c_Ping_Source_Host =           0x00010002,
+
+    Monitor_Ping_c_Ping_DbgFlag_Stop =          0x00000001,
+    Monitor_Ping_c_Ping_DbgFlag_AppExit =       0x00000004,
     
+    ///////////////////////////////////////////////////////
     // flags specific to Wire Protocol capabilities
-    Monitor_Ping_c_Ping_WPFlag_SupportsCRC32    = 0x00000010,
+
+    Monitor_Ping_c_Ping_WPFlag_SupportsCRC32 =  0x00000010,
     
     // Wire Protocol packet size (3rd position)
-    Monitor_Ping_c_PacketSize_1024              = 0x00000100,
-    Monitor_Ping_c_PacketSize_0512              = 0x00000200,
-    Monitor_Ping_c_PacketSize_0256              = 0x00000300,
-    Monitor_Ping_c_PacketSize_0128              = 0x00000400,
+    Monitor_Ping_c_PacketSize_1024 =            0x00000100,
+    Monitor_Ping_c_PacketSize_0512 =            0x00000200,
+    Monitor_Ping_c_PacketSize_0256 =            0x00000300,
+    Monitor_Ping_c_PacketSize_0128 =            0x00000400,
+
+    ///////////////////////////////////////////////////////
+    // flags related with device capabilities
+
+    // This flag indicates that the device has a proprietary bootloader.
+    Monitor_Ping_c_HasProprietaryBooter =       0x00010000,
+
+    // This flag indicates that the target device is IFU capable.
+    Monitor_Ping_c_IFUCapable =                 0x00020000,
+
+    // This flag indicates that the device requires that the configuration block to be erased before updating it.
+    Monitor_Ping_c_ConfigBlockRequiresErase =   0x00040000,
+
+    // This flag indicates that the device has nanoBooter.
+    Monitor_Ping_c_HasNanoBooter =              0x00080000,
 
 }Monitor_Ping_Source_Flags;
-
-
-// structure to hold 'standard' version information
-// equivalent with .NETMF MFVersion
-typedef struct VersionInfo
-{
-    unsigned short usMajor;
-    unsigned short usMinor;
-    unsigned short usBuild;
-    unsigned short usRevision;
-
-}VersionInfo;
 
 // structure to hold nanoFramework release information
 // equivalent with .NETMF MfReleaseInfo
@@ -192,6 +183,19 @@ typedef struct ReleaseInfo
     uint8_t PlatformInfoString[128];
 
 }ReleaseInfo;
+
+// structure to hold nanoFramework Target information
+typedef struct TargetInfo
+{
+
+    VersionInfo BooterVersion;
+    VersionInfo ClrVersion;
+    uint8_t InfoString[128];
+    uint8_t TargetName[32];
+    uint8_t PlatformName[32];
+    uint8_t PlatformInfoString[128];
+
+}TargetInfo;
 
 // structure for Wire Protocol command handler lookup
 typedef struct CommandHandlerLookup
@@ -210,4 +214,6 @@ struct WP_CompileCheck
     char buf1[ sizeof(WP_Packet) == 8 * 4 ? 1 : -1 ];
 };
 
-#endif // _WIREPROTOCOL_H_
+#endif // WIREPROTOCOL_H
+
+// clang-format on

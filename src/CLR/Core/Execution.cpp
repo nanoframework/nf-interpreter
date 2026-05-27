@@ -1,5 +1,5 @@
-//
-// Copyright (c) 2017 The nanoFramework project contributors
+﻿//
+// Copyright (c) .NET Foundation and Contributors
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
 //
@@ -7,16 +7,40 @@
 #include <nanoHAL_Power.h>
 #include <nanoHAL_Time.h>
 
+#ifdef _WIN64
+#include <inttypes.h>
+#include <stdint.h>
+#endif
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 static const CLR_INT64 c_MaximumTimeToActive = (TIME_CONVERSION__ONEMINUTE * TIME_CONVERSION__TO_SECONDS);
 
+//--//
+
+CLR_RT_ExecutionEngine::ExecutionConstraintCompensation CLR_RT_ExecutionEngine::s_compensation = {0, 0, 0};
 
 //--//
 
-CLR_RT_ExecutionEngine::ExecutionConstraintCompensation CLR_RT_ExecutionEngine::s_compensation = { 0, 0, 0 };
+#if defined(VIRTUAL_DEVICE)
 
-//--//
+HRESULT CLR_RT_ExecutionEngine::CreateInstance(CLR_SETTINGS params)
+{
+    NATIVE_PROFILE_CLR_CORE();
+    NANOCLR_HEADER();
+
+    NANOCLR_CLEAR(g_CLR_RT_ExecutionEngine);
+
+    // config from CLR settings
+    g_CLR_RT_ExecutionEngine.m_fPerformGarbageCollection = params.PerformGarbageCollection;
+    g_CLR_RT_ExecutionEngine.m_fPerformHeapCompaction = params.PerformHeapCompaction;
+
+    NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.ExecutionEngine_Initialize());
+
+    NANOCLR_NOCLEANUP();
+}
+
+#else
 
 HRESULT CLR_RT_ExecutionEngine::CreateInstance()
 {
@@ -30,6 +54,8 @@ HRESULT CLR_RT_ExecutionEngine::CreateInstance()
     NANOCLR_NOCLEANUP();
 }
 
+#endif
+
 //--//
 
 HRESULT CLR_RT_ExecutionEngine::ExecutionEngine_Initialize()
@@ -37,63 +63,62 @@ HRESULT CLR_RT_ExecutionEngine::ExecutionEngine_Initialize()
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
 
-    m_maximumTimeToActive = c_MaximumTimeToActive;  // CLR_INT64                           m_maximumTimeToActive
-                                                    // int                                 m_iDebugger_Conditions;
-                                                    //
+    m_maximumTimeToActive = c_MaximumTimeToActive; // CLR_INT64                           m_maximumTimeToActive
+                                                   // int                                 m_iDebugger_Conditions;
+                                                   //
 
-                                                    // CLR_INT64                           m_currentNextActivityTime;
-    m_timerCache    = false;                        // bool                                m_timerCache;
+    // CLR_INT64                           m_currentNextActivityTime;
+    m_timerCache = false;                           // bool                                m_timerCache;
                                                     // CLR_INT64                           m_timerCacheNextTimeout;
                                                     //
-    m_heap          .DblLinkedList_Initialize();    // CLR_RT_DblLinkedList                m_heap;
+    m_heap.DblLinkedList_Initialize();              // CLR_RT_DblLinkedList                m_heap;
                                                     // CLR_RT_HeapCluster*                 m_lastHcUsed;
-    m_heapState     = c_HeapState_Normal;           // int                                 m_heapState;
+    m_heapState = c_HeapState_Normal;               // int                                 m_heapState;
                                                     //
     m_weakReferences.DblLinkedList_Initialize();    // CLR_RT_DblLinkedList                m_weakReferences;
                                                     //
-    m_timers        .DblLinkedList_Initialize();    // CLR_RT_DblLinkedList                m_timers;
-    m_raisedEvents  = 0;                            // CLR_UINT32                          m_raisedEvents;
+    m_timers.DblLinkedList_Initialize();            // CLR_RT_DblLinkedList                m_timers;
+    m_raisedEvents = 0;                             // CLR_UINT32                          m_raisedEvents;
                                                     //
-    m_threadsReady  .DblLinkedList_Initialize();    // CLR_RT_DblLinkedList                m_threadsReady;
+    m_threadsReady.DblLinkedList_Initialize();      // CLR_RT_DblLinkedList                m_threadsReady;
     m_threadsWaiting.DblLinkedList_Initialize();    // CLR_RT_DblLinkedList                m_threadsWaiting;
-    m_threadsZombie .DblLinkedList_Initialize();    // CLR_RT_DblLinkedList                m_threadsZombie;
+    m_threadsZombie.DblLinkedList_Initialize();     // CLR_RT_DblLinkedList                m_threadsZombie;
                                                     // int                                 m_lastPid;
                                                     //
-    m_finalizersAlive  .DblLinkedList_Initialize(); // CLR_RT_DblLinkedList                m_finalizersAlive;
+    m_finalizersAlive.DblLinkedList_Initialize();   // CLR_RT_DblLinkedList                m_finalizersAlive;
     m_finalizersPending.DblLinkedList_Initialize(); // CLR_RT_DblLinkedList                m_finalizersPending;
                                                     // CLR_RT_Thread*                      m_finalizerThread;
                                                     // CLR_RT_Thread*                      m_cctorThread;
                                                     //
 #if !defined(NANOCLR_APPDOMAINS)
-    m_globalLock           = NULL;                  // CLR_RT_HeapBlock*                   m_globalLock;
-    m_outOfMemoryException = NULL;                  // CLR_RT_HeapBlock*                   m_outOfMemoryException;
-#endif                                              //
-
-    m_currentUICulture     = NULL;                  // CLR_RT_HeapBlock*                   m_currentUICulture;
-
-    CLR_RT_HeapBlock_EndPoint::HandlerMethod_Initialize(); 
-    CLR_RT_HeapBlock_NativeEventDispatcher::HandlerMethod_Initialize();
-
-    m_interruptThread     = NULL;                   // CLR_RT_Thread                       m_interruptThread;
-
-#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
-    m_scratchPadArray = NULL;                       // CLR_RT_HeapBlock_Array*             m_scratchPadArray;
-#endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
-    
-
-#if defined(NANOCLR_APPDOMAINS)
-    m_appDomains.DblLinkedList_Initialize();        // CLR_RT_DblLinkedList                m_appDomains;
-    
-    m_appDomainCurrent = NULL;                      // CLR_AppDomainCurrent*               m_appDomainCurrent;    
-    m_appDomainIdNext  = c_AppDomainId_Invalid + 1; // int                                 m_appDomainIdNext;
+    m_globalLock = nullptr;           // CLR_RT_HeapBlock*                  m_globalLock;
+    m_outOfMemoryException = nullptr; // CLR_RT_HeapBlock*                   m_outOfMemoryException;
 #endif
 
-    m_currentThread    = NULL;
+    m_currentUICulture = nullptr; // CLR_RT_HeapBlock*                   m_currentUICulture;
+
+    CLR_RT_HeapBlock_EndPoint::HandlerMethod_Initialize();
+    CLR_RT_HeapBlock_NativeEventDispatcher::HandlerMethod_Initialize();
+
+    m_interruptThread = nullptr; // CLR_RT_Thread                       m_interruptThread;
+
+#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
+    m_scratchPadArray = nullptr; // CLR_RT_HeapBlock_Array*             m_scratchPadArray;
+#endif                           // #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
+
+#if defined(NANOCLR_APPDOMAINS)
+    m_appDomains.DblLinkedList_Initialize(); // CLR_RT_DblLinkedList                m_appDomains;
+
+    m_appDomainCurrent = nullptr;                  // CLR_AppDomainCurrent*               m_appDomainCurrent;
+    m_appDomainIdNext = c_AppDomainId_Invalid + 1; // int                                 m_appDomainIdNext;
+#endif
+
+    m_currentThread = nullptr;
 
     m_GlobalExecutionCounter = 0;
 
 #if !defined(BUILD_RTM)
-    m_fShuttingDown = false;                        //bool                                m_fShuttingDown;
+    m_fShuttingDown = false; // bool                                m_fShuttingDown;
 #endif
 
     //--//
@@ -110,7 +135,7 @@ HRESULT CLR_RT_ExecutionEngine::ExecutionEngine_Initialize()
     //--//
 
     NANOCLR_CHECK_HRESULT(CLR_Messaging::CreateInstance());
-    
+
     NANOCLR_CHECK_HRESULT(CLR_DBG_Debugger::CreateInstance());
 
 #if defined(NANOCLR_PROFILE_NEW)
@@ -118,12 +143,12 @@ HRESULT CLR_RT_ExecutionEngine::ExecutionEngine_Initialize()
 #endif
 
 #if defined(NANOCLR_APPDOMAINS)
-    NANOCLR_CHECK_HRESULT(CLR_RT_AppDomain::CreateInstance( "default", m_appDomainCurrent ));
+    NANOCLR_CHECK_HRESULT(CLR_RT_AppDomain::CreateInstance("default", m_appDomainCurrent));
 #endif
 
     m_startTime = HAL_Time_CurrentTime();
 
-    CLR_RT_HeapBlock_WeakReference::RecoverObjects( m_heap );
+    CLR_RT_HeapBlock_WeakReference::RecoverObjects(m_heap);
 
     //--//
 
@@ -135,55 +160,62 @@ HRESULT CLR_RT_ExecutionEngine::AllocateHeaps()
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
 
-    const CLR_UINT32 c_HeapClusterSize = sizeof(CLR_RT_HeapBlock) * CLR_RT_HeapBlock::HB_MaxSize;
+    const CLR_UINT32 c_HeapClusterSize = sizeof(struct CLR_RT_HeapBlock) * CLR_RT_HeapBlock::HB_MaxSize;
 
-    CLR_UINT8* heapFirstFree = s_CLR_RT_Heap.m_location;
-    CLR_UINT32 heapFree      = s_CLR_RT_Heap.m_size;
-    CLR_INT32  i             = 0;
-    CLR_UINT32 blockSize     = 1;
+    CLR_UINT8 *heapFirstFree = s_CLR_RT_Heap.location;
+    CLR_UINT32 heapFree = s_CLR_RT_Heap.size;
+    CLR_INT32 i = 0;
+    CLR_UINT32 blockSize = 1;
 
-    if(heapFree <= sizeof(CLR_RT_HeapCluster))
+    if (heapFree <= sizeof(CLR_RT_HeapCluster))
     {
         NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
     }
 
-    while(heapFree > sizeof(CLR_RT_HeapCluster))
+    while (heapFree > sizeof(CLR_RT_HeapCluster))
     {
-        CLR_RT_HeapCluster* hc   = (CLR_RT_HeapCluster*)                                 heapFirstFree;
-        CLR_UINT32          size =                      (heapFree < c_HeapClusterSize) ? heapFree : c_HeapClusterSize;
+        CLR_RT_HeapCluster *hc = (CLR_RT_HeapCluster *)heapFirstFree;
+        CLR_UINT32 size = (heapFree < c_HeapClusterSize) ? heapFree : c_HeapClusterSize;
 
 #if NANOCLR_VALIDATE_HEAP >= NANOCLR_VALIDATE_HEAP_1_HeapBlocksAndUnlink
 
-        CLR_Debug::Printf( "Heap Cluster information\r\n");
-        CLR_Debug::Printf( "Start:       %08x\r\n", (size_t)heapFirstFree);
-        CLR_Debug::Printf( "Free:        %08x\r\n", (size_t)heapFree);
-        CLR_Debug::Printf( "Block size:  %d\r\n", sizeof(CLR_RT_HeapBlock));
+        CLR_Debug::Printf("Heap Cluster information\r\n");
+
+#ifdef _WIN64
+        CLR_Debug::Printf("Start:       0x%" PRIx64 "\r\n", heapFirstFree);
+        CLR_Debug::Printf("Free:        0x%" PRIx64 "\r\n", heapFree);
+        CLR_Debug::Printf("Block size:  %d\r\n", sizeof(struct CLR_RT_HeapBlock));
+#else
+        CLR_Debug::Printf("Start:       %08x\r\n", (size_t)heapFirstFree);
+        CLR_Debug::Printf("Free:        %08x\r\n", (size_t)heapFree);
+        CLR_Debug::Printf("Block size:  %d\r\n", sizeof(struct CLR_RT_HeapBlock));
+#endif
 
 #endif
         ///
         /// Speed up heap initialization for devices with very large heaps > 1MB
         /// Exponentially increase the size of a default heap block
         ///
-        if(i > 100*1024*1024)
+        if (i > 100 * 1024 * 1024)
         {
             blockSize = CLR_RT_HeapBlock::HB_MaxSize;
         }
-        else if( i > 10*1024*1024)
+        else if (i > 10 * 1024 * 1024)
         {
-            blockSize = 10*1024;
+            blockSize = 10 * 1024;
         }
-        else if(i > 1024*1024)
+        else if (i > 1024 * 1024)
         {
-            blockSize = 1*1024;
+            blockSize = 1 * 1024;
         }
 
-        hc->HeapCluster_Initialize( size, blockSize );
+        hc->HeapCluster_Initialize(size, blockSize);
 
-        m_heap.LinkAtBack( hc );
+        m_heap.LinkAtBack(hc);
 
         heapFirstFree += size;
-        heapFree      -= size;
-        i             += size;
+        heapFree -= size;
+        i += size;
     }
 
     NANOCLR_NOCLEANUP();
@@ -195,7 +227,7 @@ HRESULT CLR_RT_ExecutionEngine::DeleteInstance()
 {
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
-    
+
     g_CLR_RT_ExecutionEngine.ExecutionEngine_Cleanup();
 
     NANOCLR_NOCLEANUP_NOLABEL();
@@ -207,8 +239,8 @@ void CLR_RT_ExecutionEngine::ExecutionEngine_Cleanup()
     // developer notes:
     // Most of the following calls are just for pure ceremony and gracefully terminating stuff,
     // cleaning collections and such.
-    // In particular the previous existing calls to Abort threads and ReleaseAllThreads is completely irrelevant 
-    // because the execution engine wasn't running anymore. Whatever code that is on those threads 
+    // In particular the previous existing calls to Abort threads and ReleaseAllThreads is completely irrelevant
+    // because the execution engine wasn't running anymore. Whatever code that is on those threads
     // there to be executed wouldn't never be executed anyways.
     /////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -216,11 +248,11 @@ void CLR_RT_ExecutionEngine::ExecutionEngine_Cleanup()
     m_fShuttingDown = true;
 
 #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
-    m_scratchPadArray = NULL;
+    m_scratchPadArray = nullptr;
     m_breakpointsNum = 0;
 
     CLR_DBG_Debugger::DeleteInstance();
-#endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
+#endif // #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
 
 #if defined(NANOCLR_PROFILE_NEW)
     CLR_PRF_Profiler::DeleteInstance();
@@ -230,23 +262,23 @@ void CLR_RT_ExecutionEngine::ExecutionEngine_Cleanup()
 
     CLR_HW_Hardware::DeleteInstance();
 
-    m_finalizersAlive  .DblLinkedList_PushToCache();
+    m_finalizersAlive.DblLinkedList_PushToCache();
     m_finalizersPending.DblLinkedList_PushToCache();
-    m_finalizerThread = NULL;
-    m_cctorThread = NULL;
-    m_timerThread = NULL;
+    m_finalizerThread = nullptr;
+    m_cctorThread = nullptr;
+    m_timerThread = nullptr;
 
     g_CLR_RT_TypeSystem.TypeSystem_Cleanup();
     g_CLR_RT_EventCache.EventCache_Cleanup();
 
 #if !defined(NANOCLR_APPDOMAINS)
-    m_globalLock = NULL;
+    m_globalLock = nullptr;
 #endif
 
-    CLR_RT_HeapBlock_EndPoint::HandlerMethod_CleanUp(); 
+    CLR_RT_HeapBlock_EndPoint::HandlerMethod_CleanUp();
     CLR_RT_HeapBlock_NativeEventDispatcher::HandlerMethod_CleanUp();
 
-    m_interruptThread = NULL;    
+    m_interruptThread = nullptr;
 
     m_heap.DblLinkedList_Initialize();
 }
@@ -263,19 +295,25 @@ HRESULT CLR_RT_ExecutionEngine::StartHardware()
     NANOCLR_NOCLEANUP();
 }
 
-void CLR_RT_ExecutionEngine::Reboot( bool fHard )
+void CLR_RT_ExecutionEngine::Reboot(uint16_t rebootOptions)
 {
     NATIVE_PROFILE_CLR_CORE();
 
-    if(fHard)
+    if (CLR_DBG_Commands::Monitor_Reboot::c_EnterNanoBooter ==
+        (rebootOptions & CLR_DBG_Commands::Monitor_Reboot::c_EnterNanoBooter))
     {
-        ::CPU_Reset();
+        RequestToLaunchNanoBooter(0);
     }
-    else
+    else if (
+        CLR_DBG_Commands::Monitor_Reboot::c_EnterProprietaryBooter ==
+        (rebootOptions & CLR_DBG_Commands::Monitor_Reboot::c_EnterProprietaryBooter))
     {
-        CLR_EE_REBOOT_CLR;
-        CLR_EE_DBG_SET(RebootPending);
+        RequestToLaunchProprietaryBootloader();
     }
+
+    // apply reboot options and set reboot pending flag
+    g_CLR_RT_ExecutionEngine.m_iReboot_Options = rebootOptions;
+    CLR_EE_DBG_SET(RebootPending);
 }
 
 CLR_INT64 CLR_RT_ExecutionEngine::GetUptime()
@@ -289,30 +327,31 @@ void CLR_RT_ExecutionEngine::JoinAllThreadsAndExecuteFinalizer()
 
 void CLR_RT_ExecutionEngine::LoadDownloadedAssemblies()
 {
-    NATIVE_PROFILE_CLR_CORE ();
+    NATIVE_PROFILE_CLR_CORE();
     PerformGarbageCollection();
-    PerformHeapCompaction   ();
+    PerformHeapCompaction();
 
     //
     // Load any patch or similar!
     //
-    NANOCLR_FOREACH_NODE(CLR_RT_HeapBlock_WeakReference,weak,m_weakReferences)
+    NANOCLR_FOREACH_NODE(CLR_RT_HeapBlock_WeakReference, weak, m_weakReferences)
     {
-        if((weak->m_identity.m_flags & CLR_RT_HeapBlock_WeakReference::WR_ArrayOfBytes) != 0 && weak->m_targetSerialized)
+        if ((weak->m_identity.m_flags & CLR_RT_HeapBlock_WeakReference::WR_ArrayOfBytes) != 0 &&
+            weak->m_targetSerialized)
         {
-            CLR_RECORD_ASSEMBLY* header;
+            CLR_RECORD_ASSEMBLY *header;
 
-            header = (CLR_RECORD_ASSEMBLY*)weak->m_targetSerialized->GetFirstElement();
+            header = (CLR_RECORD_ASSEMBLY *)weak->m_targetSerialized->GetFirstElement();
 
-            if(header->GoodAssembly())
+            if (header->GoodAssembly())
             {
-                CLR_RT_Assembly* assm = NULL;
+                CLR_RT_Assembly *assm = nullptr;
 
-                if(SUCCEEDED(CLR_RT_Assembly::CreateInstance( header, assm )))
+                if (SUCCEEDED(CLR_RT_Assembly::CreateInstance(header, assm)))
                 {
-                    assm->m_pFile = weak->m_targetSerialized;
+                    assm->file = weak->m_targetSerialized;
 
-                    g_CLR_RT_TypeSystem.Link( assm );
+                    g_CLR_RT_TypeSystem.Link(assm);
                 }
             }
         }
@@ -323,14 +362,14 @@ void CLR_RT_ExecutionEngine::LoadDownloadedAssemblies()
 
     NANOCLR_FOREACH_ASSEMBLY(g_CLR_RT_TypeSystem)
     {
-        if(pASSM->m_pFile)
+        if (pASSM->file)
         {
             //
             // For those assemblies that failed to load (missing dependency?), clean up.
             //
-            if((pASSM->m_flags & CLR_RT_Assembly::ResolutionCompleted) == 0)
+            if ((pASSM->flags & CLR_RT_Assembly::ResolutionCompleted) == 0)
             {
-                pASSM->m_pFile = NULL;
+                pASSM->file = nullptr;
 
                 pASSM->DestroyInstance();
             }
@@ -366,10 +405,13 @@ CLR_UINT32 CLR_RT_ExecutionEngine::PerformGarbageCollection()
 
     m_heapState = c_HeapState_Normal;
 
-    m_lastHcUsed = NULL;
+    m_lastHcUsed = nullptr;
 
-#if !defined(BUILD_RTM) || defined(_WIN32)
-    if(m_fPerformHeapCompaction) CLR_EE_SET( Compaction_Pending );
+#if !defined(BUILD_RTM) || defined(VIRTUAL_DEVICE)
+    if (m_fPerformHeapCompaction)
+    {
+        CLR_EE_SET(Compaction_Pending);
+    }
 #endif
 
     g_CLR_RT_ExecutionEngine.SpawnFinalizer();
@@ -380,28 +422,38 @@ CLR_UINT32 CLR_RT_ExecutionEngine::PerformGarbageCollection()
 void CLR_RT_ExecutionEngine::PerformHeapCompaction()
 {
     NATIVE_PROFILE_CLR_CORE();
-    if(CLR_EE_DBG_IS( NoCompaction )) return;
+
+    if (CLR_EE_DBG_IS(NoCompaction))
+        return;
 
     g_CLR_RT_GarbageCollector.ExecuteCompaction();
 
-    CLR_EE_CLR( Compaction_Pending );
+    CLR_EE_CLR(Compaction_Pending);
 
-    m_lastHcUsed = NULL;
+    m_lastHcUsed = nullptr;
 }
 
 void CLR_RT_ExecutionEngine::Relocate()
 {
     NATIVE_PROFILE_CLR_CORE();
-#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
-    CLR_RT_GarbageCollector::Heap_Relocate( (void**)&m_scratchPadArray );
-#endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
 
-#if !defined(NANOCLR_APPDOMAINS)
-    CLR_RT_GarbageCollector::Heap_Relocate( (void**)&m_globalLock           );
-    //CLR_RT_GarbageCollector::Heap_Relocate( (void**)&m_outOfMemoryException );
+#if defined(NANOCLR_TRACE_MEMORY_STATS)
+    if (s_CLR_RT_fTrace_MemoryStats >= c_CLR_RT_Trace_Verbose)
+    {
+        CLR_Debug::Printf("\r\nGC: performing EE relocation\r\n");
+    }
 #endif
 
-    CLR_RT_GarbageCollector::Heap_Relocate( (void**)&m_currentUICulture     );
+#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
+    CLR_RT_GarbageCollector::Heap_Relocate((void **)&m_scratchPadArray);
+#endif // #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
+
+#if !defined(NANOCLR_APPDOMAINS)
+    CLR_RT_GarbageCollector::Heap_Relocate((void **)&m_globalLock);
+    CLR_RT_GarbageCollector::Heap_Relocate((void **)&m_outOfMemoryException);
+#endif
+
+    CLR_RT_GarbageCollector::Heap_Relocate((void **)&m_currentUICulture);
 
     m_weakReferences.Relocate();
 }
@@ -410,16 +462,16 @@ void CLR_RT_ExecutionEngine::Relocate()
 
 #if defined(NANOCLR_APPDOMAINS)
 
-void CLR_RT_ExecutionEngine::TryToUnloadAppDomains_Helper_Threads( CLR_RT_DblLinkedList& threads )
-{        
+void CLR_RT_ExecutionEngine::TryToUnloadAppDomains_Helper_Threads(CLR_RT_DblLinkedList &threads)
+{
     NATIVE_PROFILE_CLR_CORE();
-    NANOCLR_FOREACH_NODE(CLR_RT_Thread,th,threads)
+    NANOCLR_FOREACH_NODE(CLR_RT_Thread, th, threads)
     {
-        if(th->m_flags & CLR_RT_Thread::TH_F_ContainsDoomedAppDomain)
+        if (th->m_flags & CLR_RT_Thread::TH_F_ContainsDoomedAppDomain)
         {
             NANOCLR_FOREACH_NODE(CLR_RT_StackFrame, stack, th->m_stackFrames)
             {
-                stack->m_appDomain->m_fCanBeUnloaded = false;                
+                stack->m_appDomain->m_fCanBeUnloaded = false;
             }
             NANOCLR_FOREACH_NODE_END();
         }
@@ -427,18 +479,18 @@ void CLR_RT_ExecutionEngine::TryToUnloadAppDomains_Helper_Threads( CLR_RT_DblLin
     NANOCLR_FOREACH_NODE_END();
 }
 
-void CLR_RT_ExecutionEngine::TryToUnloadAppDomains_Helper_Finalizers( CLR_RT_DblLinkedList& finalizers, bool fAlive )
+void CLR_RT_ExecutionEngine::TryToUnloadAppDomains_Helper_Finalizers(CLR_RT_DblLinkedList &finalizers, bool fAlive)
 {
     NATIVE_PROFILE_CLR_CORE();
-    NANOCLR_FOREACH_NODE(CLR_RT_HeapBlock_Finalizer,fin,finalizers)
+    NANOCLR_FOREACH_NODE(CLR_RT_HeapBlock_Finalizer, fin, finalizers)
     {
-        if(!fin->m_appDomain->IsLoaded())
+        if (!fin->m_appDomain->IsLoaded())
         {
-            if(fAlive)
+            if (fAlive)
             {
-                //When an AppDomain is being unloaded, all live finalizers are run, regardless
-                //of whether or not they are still reachable.
-                m_finalizersPending.LinkAtBack( fin );
+                // When an AppDomain is being unloaded, all live finalizers are run, regardless
+                // of whether or not they are still reachable.
+                m_finalizersPending.LinkAtBack(fin);
             }
 
             fin->m_appDomain->m_fCanBeUnloaded = false;
@@ -452,26 +504,26 @@ bool CLR_RT_ExecutionEngine::TryToUnloadAppDomains()
     NATIVE_PROFILE_CLR_CORE();
     bool fAnyAppDomainsUnloaded = false;
 
-    NANOCLR_FOREACH_NODE(CLR_RT_AppDomain,appDomain,m_appDomains)
+    NANOCLR_FOREACH_NODE(CLR_RT_AppDomain, appDomain, m_appDomains)
     {
         appDomain->m_fCanBeUnloaded = true;
     }
     NANOCLR_FOREACH_NODE_END();
 
-    TryToUnloadAppDomains_Helper_Finalizers( m_finalizersAlive  , true  );
-    TryToUnloadAppDomains_Helper_Finalizers( m_finalizersPending, false );
-            
-    TryToUnloadAppDomains_Helper_Threads( m_threadsReady   );
-    TryToUnloadAppDomains_Helper_Threads( m_threadsWaiting );
+    TryToUnloadAppDomains_Helper_Finalizers(m_finalizersAlive, true);
+    TryToUnloadAppDomains_Helper_Finalizers(m_finalizersPending, false);
 
-    CLR_EE_CLR( UnloadingAppDomain );
-    
-    NANOCLR_FOREACH_NODE(CLR_RT_AppDomain,appDomain,m_appDomains)
+    TryToUnloadAppDomains_Helper_Threads(m_threadsReady);
+    TryToUnloadAppDomains_Helper_Threads(m_threadsWaiting);
+
+    CLR_EE_CLR(UnloadingAppDomain);
+
+    NANOCLR_FOREACH_NODE(CLR_RT_AppDomain, appDomain, m_appDomains)
     {
-        if(appDomain->m_state == CLR_RT_AppDomain::AppDomainState_Unloading)
+        if (appDomain->m_state == CLR_RT_AppDomain::AppDomainState_Unloading)
         {
-            if(appDomain->m_fCanBeUnloaded)
-            {                                
+            if (appDomain->m_fCanBeUnloaded)
+            {
                 appDomain->m_state = CLR_RT_AppDomain::AppDomainState_Unloaded;
                 appDomain->AppDomain_Uninitialize();
                 fAnyAppDomainsUnloaded = true;
@@ -484,12 +536,12 @@ bool CLR_RT_ExecutionEngine::TryToUnloadAppDomains()
     }
     NANOCLR_FOREACH_NODE_END();
 
-    if(fAnyAppDomainsUnloaded)
-    {                      
-        SignalEvents( CLR_RT_ExecutionEngine::c_Event_AppDomain );
+    if (fAnyAppDomainsUnloaded)
+    {
+        SignalEvents(Event_AppDomain);
 #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
         Breakpoint_Assemblies_Loaded();
-#endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
+#endif // #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
     }
 
     return fAnyAppDomainsUnloaded;
@@ -502,11 +554,11 @@ HRESULT CLR_RT_ExecutionEngine::WaitForDebugger()
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
 
-    while(CLR_EE_DBG_IS(Stopped) && !CLR_EE_DBG_IS(RebootPending) && !CLR_EE_DBG_IS(ExitPending))
+    while (CLR_EE_DBG_IS(Stopped) && !CLR_EE_DBG_IS(RebootPending) && !CLR_EE_DBG_IS(ExitPending))
     {
         // TODO: Generalize this as a standard HAL API
-#if defined(WIN32)
-        if(HAL_Windows_IsShutdownPending())
+#if defined(VIRTUAL_DEVICE)
+        if (HAL_Windows_IsShutdownPending())
         {
             NANOCLR_SET_AND_LEAVE(CLR_E_SHUTTING_DOWN);
         }
@@ -515,69 +567,71 @@ HRESULT CLR_RT_ExecutionEngine::WaitForDebugger()
         DebuggerLoop();
     }
 
-#if defined(WIN32)
+#if defined(VIRTUAL_DEVICE)
     NANOCLR_NOCLEANUP();
 #else
     NANOCLR_NOCLEANUP_NOLABEL();
-#endif 
+#endif
 }
 
-#if defined(WIN32)
-HRESULT CLR_RT_ExecutionEngine::CreateEntryPointArgs( CLR_RT_HeapBlock& argsBlk, wchar_t* szCommandLineArgs )
+#if defined(VIRTUAL_DEVICE)
+HRESULT CLR_RT_ExecutionEngine::CreateEntryPointArgs(CLR_RT_HeapBlock &argsBlk, wchar_t *szCommandLineArgs)
 {
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
-    
-    std::list<std::wstring> args;
 
-    wchar_t* szArgNext = NULL;
-    wchar_t* szArg     = szCommandLineArgs;
-    wchar_t* sep       = L" ";
-    wchar_t* context   = NULL;
-    
-    szArg = wcstok_s( szArg, sep, &context );
-    
-    while(szArg != NULL)
+    std::list<std::wstring> args;
+    CLR_RT_HeapBlock_Array *array;
+    CLR_UINT32 iArg;
+
+    wchar_t *szArgNext = nullptr;
+    wchar_t *szArg = szCommandLineArgs;
+    const wchar_t *sep = L" ";
+    wchar_t *context = nullptr;
+
+    szArg = wcstok_s(szArg, sep, &context);
+
+    while (szArg != nullptr)
     {
-        std::wstring arg = szArg;                
-        args.insert( args.end(), arg );
-        
-        szArg = wcstok_s( NULL, sep, &context );
+        std::wstring arg = szArg;
+        args.insert(args.end(), arg);
+
+        szArg = wcstok_s(nullptr, sep, &context);
     }
 
-    NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance( argsBlk, (CLR_UINT32)args.size(), g_CLR_RT_WellKnownTypes.m_String ));
-    
-    CLR_RT_HeapBlock_Array* array = argsBlk.Array();
-    CLR_UINT32 iArg = 0;
+    NANOCLR_CHECK_HRESULT(
+        CLR_RT_HeapBlock_Array::CreateInstance(argsBlk, (CLR_UINT32)args.size(), g_CLR_RT_WellKnownTypes.String));
 
-    for(std::list<std::wstring>::iterator it = args.begin(); it != args.end(); it++, iArg++)
+    array = argsBlk.Array();
+    iArg = 0;
+
+    for (std::list<std::wstring>::iterator it = args.begin(); it != args.end(); it++, iArg++)
     {
         std::string arg;
 
-        CLR_RT_HeapBlock* blk = (CLR_RT_HeapBlock*)array->GetElement( iArg );
-        CLR_RT_UnicodeHelper::ConvertToUTF8( (*it).c_str(), arg );
+        CLR_RT_HeapBlock *blk = (CLR_RT_HeapBlock *)array->GetElement(iArg);
+        CLR_RT_UnicodeHelper::ConvertToUTF8((*it).c_str(), arg);
 
-        NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_String::CreateInstance( *blk, arg.c_str() ));
-    }    
-    
+        NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_String::CreateInstance(*blk, arg.c_str()));
+    }
+
     NANOCLR_NOCLEANUP();
 }
 
 #endif
 
-HRESULT CLR_RT_ExecutionEngine::Execute( wchar_t* entryPointArgs, int maxContextSwitch )
-{            
+HRESULT CLR_RT_ExecutionEngine::Execute(wchar_t *entryPointArgs, int maxContextSwitch)
+{
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
 
     CLR_RT_HeapBlock ref;
-    CLR_RT_Thread*   thMain = NULL;
+    CLR_RT_Thread *thMain = nullptr;
 
-        
-    if(NANOCLR_INDEX_IS_INVALID(g_CLR_RT_TypeSystem.m_entryPoint))
+    if (NANOCLR_INDEX_IS_INVALID(g_CLR_RT_TypeSystem.m_entryPoint))
     {
-#if !defined(BUILD_RTM) || defined(_WIN32)
-        CLR_Debug::Printf( "Cannot find any entrypoint!\r\n" );
+#if !defined(BUILD_RTM) || defined(VIRTUAL_DEVICE)
+        CLR_Debug::Printf("Cannot find any entrypoint!\r\n");
 #endif
         NANOCLR_SET_AND_LEAVE(CLR_E_ENTRYPOINT_NOT_FOUND);
     }
@@ -585,58 +639,60 @@ HRESULT CLR_RT_ExecutionEngine::Execute( wchar_t* entryPointArgs, int maxContext
     NANOCLR_CHECK_HRESULT(WaitForDebugger());
 
 #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
-    CLR_EE_DBG_SET_MASK(StateProgramRunning,StateMask);
-#endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
- 
-    NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Delegate::CreateInstance( ref, g_CLR_RT_TypeSystem.m_entryPoint, NULL ));
+    CLR_EE_DBG_SET_MASK(StateProgramRunning, StateMask);
+#endif // #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
+
+    NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Delegate::CreateInstance(ref, g_CLR_RT_TypeSystem.m_entryPoint, nullptr));
 
     {
-        CLR_RT_ProtectFromGC gc( ref );
+        CLR_RT_ProtectFromGC gc(ref);
 
-        NANOCLR_CHECK_HRESULT(NewThread( thMain, ref.DereferenceDelegate(), ThreadPriority::Normal, -1 ));
+        NANOCLR_CHECK_HRESULT(NewThread(thMain, ref.DereferenceDelegate(), ThreadPriority::Normal, -1));
     }
 
-    {            
-        CLR_RT_StackFrame* stack = thMain->CurrentFrame();
-        
-        if(stack->m_call.m_target->numArgs > 0)
-        {                                
-            //Main entrypoint takes an optional String[] parameter.
-            //Set the arg to NULL, if that's the case.
+    {
+        CLR_RT_StackFrame *stack = thMain->CurrentFrame();
 
-  #if defined(WIN32)
-            if(entryPointArgs != NULL)
+        if (stack->m_call.target->argumentsCount > 0)
+        {
+            // Main entrypoint takes an optional String[] parameter.
+            // Set the arg to nullptr, if that's the case.
+
+#if defined(VIRTUAL_DEVICE)
+            if (entryPointArgs != nullptr)
             {
-                NANOCLR_CHECK_HRESULT(CreateEntryPointArgs( stack->m_arguments[ 0 ], entryPointArgs ));
+                NANOCLR_CHECK_HRESULT(CreateEntryPointArgs(stack->m_arguments[0], entryPointArgs));
             }
             else
-  #else
+#else
             (void)entryPointArgs;
-  #endif
+#endif
             {
-                NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance( stack->m_arguments[ 0 ], 0, g_CLR_RT_WellKnownTypes.m_String ));
+                NANOCLR_CHECK_HRESULT(
+                    CLR_RT_HeapBlock_Array::CreateInstance(stack->m_arguments[0], 0, g_CLR_RT_WellKnownTypes.String));
             }
         }
     }
 
-    //To debug static constructors, the thread should be created after the entrypoint thread.
+    // To debug static constructors, the thread should be created after the entrypoint thread.
     NANOCLR_CHECK_HRESULT(WaitForDebugger());
-    
-    // m_cctorThread is NULL before call and inialized by the SpawnStaticConstructor
-    SpawnStaticConstructor( m_cctorThread );
 
+    // m_cctorThread is nullptr before call and inialized by the SpawnStaticConstructor
+    // This will execute both non-generic and generic type static constructors
+    SpawnStaticConstructor(m_cctorThread);
 
-    while(true)
+    while (true)
     {
-        HRESULT hr2 = ScheduleThreads( maxContextSwitch ); NANOCLR_CHECK_HRESULT(hr2);
-        
-        if(CLR_EE_DBG_IS( RebootPending ) || CLR_EE_DBG_IS( ExitPending ) || CLR_EE_REBOOT_IS(ClrOnly))
+        HRESULT hr2 = ScheduleThreads(maxContextSwitch);
+        NANOCLR_CHECK_HRESULT(hr2);
+
+        if (CLR_EE_DBG_IS(RebootPending) || CLR_EE_DBG_IS(ExitPending) || CLR_EE_REBOOT_IS(ClrOnly))
         {
             NANOCLR_SET_AND_LEAVE(S_FALSE);
         }
 
 #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
-        if(CLR_EE_DBG_IS( Stopped ))
+        if (CLR_EE_DBG_IS(Stopped))
         {
             CLR_RT_ExecutionEngine::ExecutionConstraint_Suspend();
 
@@ -644,37 +700,37 @@ HRESULT CLR_RT_ExecutionEngine::Execute( wchar_t* entryPointArgs, int maxContext
 
             CLR_RT_ExecutionEngine::ExecutionConstraint_Resume();
         }
-#endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
+#endif // #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
 
-        if(CLR_EE_IS(Compaction_Pending))
-        {            
+        if (CLR_EE_IS(Compaction_Pending))
+        {
             PerformHeapCompaction();
             _ASSERTE(FIMPLIES(CLR_EE_DBG_IS_NOT(NoCompaction), CLR_EE_IS_NOT(Compaction_Pending)));
         }
-                                
-        if(hr2 == CLR_S_NO_READY_THREADS)
+
+        if (hr2 == CLR_S_NO_READY_THREADS)
         {
             WaitForActivity();
         }
-        else if(hr2 == CLR_S_QUANTUM_EXPIRED)
+        else if (hr2 == CLR_S_QUANTUM_EXPIRED)
         {
-#if !defined(BUILD_RTM) || defined(_WIN32)
-            if(m_fPerformGarbageCollection)
+#if !defined(BUILD_RTM) || defined(VIRTUAL_DEVICE)
+            if (m_fPerformGarbageCollection)
             {
 #if defined(NANOCLR_GC_VERBOSE)
-                if(s_CLR_RT_fTrace_GC >= c_CLR_RT_Trace_Info)
+                if (s_CLR_RT_fTrace_GC >= c_CLR_RT_Trace_Info)
                 {
-                    CLR_Debug::Printf( "    Memory: Forcing GC.\r\n" );
+                    CLR_Debug::Printf("    Memory: Forcing GC.\r\n");
                 }
 #endif
                 PerformGarbageCollection();
 
 #if defined(NANOCLR_GC_VERBOSE)
-                if(s_CLR_RT_fTrace_Memory > c_CLR_RT_Trace_Info)
+                if (s_CLR_RT_fTrace_Memory > c_CLR_RT_Trace_Info)
                 {
                     CLR_UINT32 inUse = g_CLR_RT_GarbageCollector.m_totalBytes - g_CLR_RT_GarbageCollector.m_freeBytes;
 
-                    CLR_Debug::Printf( "    Memory: INUSE: %d\r\n", (int)inUse );
+                    CLR_Debug::Printf("    Memory: INUSE: %d\r\n", (int)inUse);
                 }
 #endif
             }
@@ -682,7 +738,7 @@ HRESULT CLR_RT_ExecutionEngine::Execute( wchar_t* entryPointArgs, int maxContext
         }
         else
         {
-            break;           
+            break;
         }
     }
 
@@ -695,31 +751,31 @@ HRESULT CLR_RT_ExecutionEngine::Execute( wchar_t* entryPointArgs, int maxContext
     g_CLR_PRF_Profiler.Stream_Flush();
 #endif
 
-#if defined(WIN32)
+#if defined(VIRTUAL_DEVICE)
 #if defined(NANOCLR_PROFILE_NEW)
-    if(CLR_EE_PRF_IS( Enabled ))
+    if (CLR_EE_PRF_IS(Enabled))
     {
-        //Clients do not get all the messages they want if a program happens to end and the emulator terminates before
-        //the pipe can be read; furthermore the emulator must be able to persist until all required data is requested.
+        // Clients do not get all the messages they want if a program happens to end and the emulator terminates before
+        // the pipe can be read; furthermore the emulator must be able to persist until all required data is requested.
         CLR_EE_DBG_SET(Stopped);
     }
 #endif
 
-    //By skipping the whole CLRStartup routine, the Monitor_Program_Exit message never gets sent to clients.
-    CLR_EE_DBG_EVENT_BROADCAST(CLR_DBG_Commands::c_Monitor_ProgramExit,0,NULL,WP_Flags_c_NonCritical);
+    // By skipping the whole CLRStartup routine, the Monitor_Program_Exit message never gets sent to clients.
+    CLR_EE_DBG_EVENT_BROADCAST(CLR_DBG_Commands::c_Monitor_ProgramExit, 0, nullptr, WP_Flags_c_NonCritical);
     WaitForDebugger();
 #endif
 
     NANOCLR_CLEANUP_END();
 }
 
-bool CLR_RT_ExecutionEngine::EnsureSystemThread( CLR_RT_Thread*& thread, int priority )
+bool CLR_RT_ExecutionEngine::EnsureSystemThread(CLR_RT_Thread *&thread, int priority)
 {
     NATIVE_PROFILE_CLR_CORE();
 
-    if(thread == NULL)
+    if (thread == nullptr)
     {
-        return SUCCEEDED(NewThread( thread, NULL, priority, -1, CLR_RT_Thread::TH_F_System ));
+        return SUCCEEDED(NewThread(thread, nullptr, priority, -1, CLR_RT_Thread::TH_F_System));
     }
     else
     {
@@ -730,18 +786,18 @@ bool CLR_RT_ExecutionEngine::EnsureSystemThread( CLR_RT_Thread*& thread, int pri
 void CLR_RT_ExecutionEngine::SpawnTimer()
 {
     NATIVE_PROFILE_CLR_CORE();
-    NANOCLR_FOREACH_NODE(CLR_RT_HeapBlock_Timer,timer,m_timers)
+    NANOCLR_FOREACH_NODE(CLR_RT_HeapBlock_Timer, timer, m_timers)
     {
-        if(timer->m_flags & CLR_RT_HeapBlock_Timer::c_Triggered)
-        {               
-            if(EnsureSystemThread( m_timerThread, ThreadPriority::Normal ))
+        if (timer->m_flags & CLR_RT_HeapBlock_Timer::c_Triggered)
+        {
+            if (EnsureSystemThread(m_timerThread, ThreadPriority::Normal))
             {
-                //only fire one timer at a time
+                // only fire one timer at a time
 
-                timer->SpawnTimer( m_timerThread );
+                timer->SpawnTimer(m_timerThread);
 
-                //put at the back of the queue to allow for fairness of the timers.
-                m_timers.LinkAtBack( timer );
+                // put at the back of the queue to allow for fairness of the timers.
+                m_timers.LinkAtBack(timer);
             }
             break;
         }
@@ -749,41 +805,67 @@ void CLR_RT_ExecutionEngine::SpawnTimer()
     NANOCLR_FOREACH_NODE_END();
 }
 
-void CLR_RT_ExecutionEngine::StaticConstructorTerminationCallback( void* arg )
+void CLR_RT_ExecutionEngine::StaticConstructorTerminationCallback(void *arg)
 {
     (void)arg;
 
     NATIVE_PROFILE_CLR_CORE();
-    g_CLR_RT_ExecutionEngine.SpawnStaticConstructor( g_CLR_RT_ExecutionEngine.m_cctorThread );
+
+    // If the completed .cctor was for a generic type, mark it as executed
+    CLR_RT_HeapBlock_Delegate *dlg = g_CLR_RT_ExecutionEngine.m_cctorThread->m_dlg;
+    if (dlg != nullptr && dlg->m_genericTypeSpec.data != 0)
+    {
+        // This was a generic type .cctor - compute hash and mark as executed
+        CLR_RT_TypeSpec_Instance genericTypeInstance{};
+        if (genericTypeInstance.InitializeFromIndex(dlg->m_genericTypeSpec))
+        {
+            CLR_UINT32 hash = g_CLR_RT_TypeSystem.ComputeHashForClosedGenericType(genericTypeInstance);
+            CLR_RT_GenericCctorExecutionRecord *record =
+                g_CLR_RT_TypeSystem.FindOrCreateGenericCctorRecord(hash, nullptr);
+
+            if (record != nullptr)
+            {
+                // Clear scheduled flag and set executed flag
+                record->m_flags &= ~CLR_RT_GenericCctorExecutionRecord::c_Scheduled;
+                record->m_flags |= CLR_RT_GenericCctorExecutionRecord::c_Executed;
+            }
+        }
+    }
+
+    g_CLR_RT_ExecutionEngine.SpawnStaticConstructor(g_CLR_RT_ExecutionEngine.m_cctorThread);
 }
 
 #if defined(NANOCLR_APPDOMAINS)
-bool CLR_RT_ExecutionEngine::SpawnStaticConstructorHelper( CLR_RT_AppDomain* appDomain, CLR_RT_AppDomainAssembly* appDomainAssembly, const CLR_RT_MethodDef_Index& idx )
+bool CLR_RT_ExecutionEngine::SpawnStaticConstructorHelper(
+    CLR_RT_AppDomain *appDomain,
+    CLR_RT_AppDomainAssembly *appDomainAssembly,
+    const CLR_RT_MethodDef_Index &index)
 {
     NATIVE_PROFILE_CLR_CORE();
-    CLR_RT_MethodDef_Index idxNext;
+    CLR_RT_MethodDef_Index indexNext;
 
-    _ASSERTE(m_cctorThread != NULL);
-    //_ASSERTE(m_cctorThread->CanThreadBeReused());  
+    _ASSERTE(m_cctorThread != nullptr);
+    //_ASSERTE(m_cctorThread->CanThreadBeReused());
 
-    idxNext.m_data = idx.m_data;
+    indexNext.m_data = index.m_data;
 
-    _ASSERTE(appDomainAssembly != NULL);
+    _ASSERTE(appDomainAssembly != nullptr);
 
-    //find next method with static constructor
-    if(appDomainAssembly->m_assembly->FindNextStaticConstructor( idxNext ))
-    {                                
-        CLR_RT_HeapBlock_Delegate* dlg; 
-        CLR_RT_HeapBlock     refDlg; refDlg.SetObjectReference( NULL );    
-        CLR_RT_ProtectFromGC gc( refDlg );
-        
-        if(SUCCEEDED(CLR_RT_HeapBlock_Delegate::CreateInstance( refDlg, idxNext, NULL )))
+    // find next method with static constructor
+    if (appDomainAssembly->m_assembly->FindNextStaticConstructor(indexNext))
+    {
+        CLR_RT_HeapBlock_Delegate *dlg;
+        CLR_RT_HeapBlock refDlg;
+        refDlg.SetObjectReference(nullptr);
+        CLR_RT_ProtectFromGC gc(refDlg);
+
+        if (SUCCEEDED(CLR_RT_HeapBlock_Delegate::CreateInstance(refDlg, indexNext, nullptr)))
         {
             dlg = refDlg.DereferenceDelegate();
             dlg->m_appDomain = appDomain;
 
-            if(SUCCEEDED(m_cctorThread->PushThreadProcDelegate( dlg )))
-            {                                
+            if (SUCCEEDED(m_cctorThread->PushThreadProcDelegate(dlg)))
+            {
                 m_cctorThread->m_terminationCallback = CLR_RT_ExecutionEngine::StaticConstructorTerminationCallback;
 
                 return true;
@@ -795,67 +877,67 @@ bool CLR_RT_ExecutionEngine::SpawnStaticConstructorHelper( CLR_RT_AppDomain* app
     return false;
 }
 
-void CLR_RT_ExecutionEngine::SpawnStaticConstructor( CLR_RT_Thread *&pCctorThread )
+void CLR_RT_ExecutionEngine::SpawnStaticConstructor(CLR_RT_Thread *&pCctorThread)
 {
     NATIVE_PROFILE_CLR_CORE();
-    CLR_RT_HeapBlock_Delegate* dlg = NULL;
+    CLR_RT_HeapBlock_Delegate *dlg = nullptr;
 
-    if(!EnsureSystemThread(pCctorThread, ThreadPriority::System_Highest ))  
+    if (!EnsureSystemThread(pCctorThread, ThreadPriority::System_Highest))
         return;
 
     dlg = pCctorThread->m_dlg;
 
-    if(dlg != NULL)
+    if (dlg != nullptr)
     {
-        CLR_RT_AppDomainAssembly* appDomainAssembly;        
-        CLR_RT_MethodDef_Index idx = dlg->DelegateFtn();
+        CLR_RT_AppDomainAssembly *appDomainAssembly;
+        CLR_RT_MethodDef_Index index = dlg->DelegateFtn();
         CLR_RT_MethodDef_Instance inst;
 
-        //Find next static constructor for given idx
-        _ASSERTE(NANOCLR_INDEX_IS_VALID(idx));
-        _SIDE_ASSERTE(inst.InitializeFromIndex( idx ));
+        // Find next static constructor for given index
+        _ASSERTE(NANOCLR_INDEX_IS_VALID(index));
+        _SIDE_ASSERTE(inst.InitializeFromIndex(index));
 
-        appDomainAssembly = dlg->m_appDomain->FindAppDomainAssembly( inst.m_assm );
-                
-        _ASSERTE(appDomainAssembly != NULL);
-        _ASSERTE(appDomainAssembly->m_assembly == inst.m_assm );
-    
-        //This is ok if idx is no longer valid.  SpawnStaticConstructorHelper will call FindNextStaticConstructor
-        //which will fail        
-        idx.m_data++;
+        appDomainAssembly = dlg->m_appDomain->FindAppDomainAssembly(inst.m_assm);
 
-        //This is not the first static constructor run in this appDomain
-        if(SpawnStaticConstructorHelper( dlg->m_appDomain, appDomainAssembly, idx ))
+        _ASSERTE(appDomainAssembly != nullptr);
+        _ASSERTE(appDomainAssembly->m_assembly == inst.m_assm);
+
+        // This is ok if index is no longer valid.  SpawnStaticConstructorHelper will call FindNextStaticConstructor
+        // which will fail
+        index.m_data++;
+
+        // This is not the first static constructor run in this appDomain
+        if (SpawnStaticConstructorHelper(dlg->m_appDomain, appDomainAssembly, index))
             return;
     }
 
-    //first, find the AppDomainAssembly to run. (what about appdomains!!!)
-    NANOCLR_FOREACH_NODE(CLR_RT_AppDomain,appDomain,g_CLR_RT_ExecutionEngine.m_appDomains)
+    // first, find the AppDomainAssembly to run. (what about appdomains!!!)
+    NANOCLR_FOREACH_NODE(CLR_RT_AppDomain, appDomain, g_CLR_RT_ExecutionEngine.m_appDomains)
     {
-        NANOCLR_FOREACH_NODE(CLR_RT_AppDomainAssembly,appDomainAssembly,appDomain->m_appDomainAssemblies)
+        NANOCLR_FOREACH_NODE(CLR_RT_AppDomainAssembly, appDomainAssembly, appDomain->m_appDomainAssemblies)
         {
-            CLR_RT_Assembly* assembly = appDomainAssembly->m_assembly;
+            CLR_RT_Assembly *assembly = appDomainAssembly->m_assembly;
 
-            //Find an AppDomainAssembly that does not have it's static constructor bit set...
-            if((appDomainAssembly->m_flags & CLR_RT_AppDomainAssembly::StaticConstructorsExecuted) == 0)
-            {                                
-                CLR_RT_MethodDef_Index idx; idx.Set( assembly->m_idx, 0 );
+            // Find an AppDomainAssembly that does not have it's static constructor bit set...
+            if ((appDomainAssembly->m_flags & CLR_RT_AppDomainAssembly::StaticConstructorsExecuted) == 0)
+            {
+                CLR_RT_MethodDef_Index index;
+                index.Set(assembly->m_index, 0);
 
 #ifdef DEBUG
-                
-                //Check that all dependent assemblies have had static constructors run.                    
-                CLR_RT_AssemblyRef_CrossReference* ar = assembly->m_pCrossReference_AssemblyRef;
-                for(int i=0; i<assembly->m_pTablesSize[ TBL_AssemblyRef ]; i++, ar++)
+
+                // Check that all dependent assemblies have had static constructors run.
+                CLR_RT_AssemblyRef_CrossReference *ar = assembly->m_pCrossReference_AssemblyRef;
+                for (int i = 0; i < assembly->m_pTablesSize[TBL_AssemblyRef]; i++, ar++)
                 {
-                    CLR_RT_AppDomainAssembly* appDomainAssemblyRef = appDomain->FindAppDomainAssembly(ar->m_target);
-                    
-                    _ASSERTE(appDomainAssemblyRef != NULL);
+                    CLR_RT_AppDomainAssembly *appDomainAssemblyRef = appDomain->FindAppDomainAssembly(ar->m_target);
+
+                    _ASSERTE(appDomainAssemblyRef != nullptr);
                     _ASSERTE(appDomainAssemblyRef->m_flags & CLR_RT_AppDomainAssembly::StaticConstructorsExecuted);
                 }
 #endif
-                        
 
-                if(SpawnStaticConstructorHelper( appDomain, appDomainAssembly, idx ))
+                if (SpawnStaticConstructorHelper(appDomain, appDomainAssembly, index))
                     return;
             }
         }
@@ -863,39 +945,42 @@ void CLR_RT_ExecutionEngine::SpawnStaticConstructor( CLR_RT_Thread *&pCctorThrea
     }
     NANOCLR_FOREACH_NODE_END();
 
-
     // No more static constructors needed...
     // Perform 1 action:
     // 1. Destroy constructor thread.
     pCctorThread->DestroyInstance();
 }
-#else //NANOCLR_APPDOMAINS
+#else  // NANOCLR_APPDOMAINS
 
-bool CLR_RT_ExecutionEngine::SpawnStaticConstructorHelper( CLR_RT_Assembly* assembly, const CLR_RT_MethodDef_Index& idx )
+bool CLR_RT_ExecutionEngine::SpawnStaticConstructorHelper(
+    CLR_RT_Assembly *assembly,
+    const CLR_RT_MethodDef_Index &index)
 {
     NATIVE_PROFILE_CLR_CORE();
-    CLR_RT_MethodDef_Index idxNext;
+    CLR_RT_MethodDef_Index indexNext;
 
-    _ASSERTE(m_cctorThread != NULL);
-    _ASSERTE(m_cctorThread->CanThreadBeReused());  
+    _ASSERTE(m_cctorThread != nullptr);
+    _ASSERTE(m_cctorThread->CanThreadBeReused());
 
-    idxNext.m_data = idx.m_data;
+    indexNext.data = index.data;
 
-    _ASSERTE(assembly != NULL);
+    _ASSERTE(assembly != nullptr);
 
-    //find next method with static constructor
-    if(assembly->FindNextStaticConstructor( idxNext ))
-    {                                
-        CLR_RT_HeapBlock_Delegate* dlg; 
-        CLR_RT_HeapBlock     refDlg; refDlg.SetObjectReference( NULL );    
-        CLR_RT_ProtectFromGC gc( refDlg );
-        
-        if(SUCCEEDED(CLR_RT_HeapBlock_Delegate::CreateInstance( refDlg, idxNext, NULL )))
+    // find next method with static constructor
+    if (assembly->FindNextStaticConstructor(indexNext))
+    {
+        CLR_RT_HeapBlock_Delegate *dlg;
+        CLR_RT_HeapBlock refDlg;
+
+        refDlg.SetObjectReference(nullptr);
+        CLR_RT_ProtectFromGC gc(refDlg);
+
+        if (SUCCEEDED(CLR_RT_HeapBlock_Delegate::CreateInstance(refDlg, indexNext, nullptr)))
         {
             dlg = refDlg.DereferenceDelegate();
 
-            if(SUCCEEDED(m_cctorThread->PushThreadProcDelegate( dlg )))
-            {                                
+            if (SUCCEEDED(m_cctorThread->PushThreadProcDelegate(dlg)))
+            {
                 m_cctorThread->m_terminationCallback = CLR_RT_ExecutionEngine::StaticConstructorTerminationCallback;
 
                 return true;
@@ -903,69 +988,267 @@ bool CLR_RT_ExecutionEngine::SpawnStaticConstructorHelper( CLR_RT_Assembly* asse
         }
     }
 
-    assembly->m_flags |= CLR_RT_Assembly::StaticConstructorsExecuted;
+    // Set flag to indicate regular static constructors have been processed
+    assembly->flags |= CLR_RT_Assembly::StaticConstructorsExecuted;
     return false;
 }
 
-void CLR_RT_ExecutionEngine::SpawnStaticConstructor( CLR_RT_Thread *&pCctorThread )
+bool CLR_RT_ExecutionEngine::SpawnGenericTypeStaticConstructorsHelper(
+    CLR_RT_Assembly *assembly,
+    const CLR_RT_TypeSpec_Index &startTypeSpecIndex)
 {
     NATIVE_PROFILE_CLR_CORE();
-    CLR_RT_HeapBlock_Delegate* dlg = NULL;
 
-    if(!EnsureSystemThread(pCctorThread, ThreadPriority::System_Highest))
+    _ASSERTE(m_cctorThread != nullptr);
+    _ASSERTE(m_cctorThread->CanThreadBeReused());
+    _ASSERTE(assembly != nullptr);
+
+    // Crawl TypeSpecs in this assembly to find closed generic instantiations that need .cctor execution
+    int numTypeSpec = assembly->tablesSize[TBL_TypeSpec];
+
+    // Start from the specified TypeSpec index (to resume iteration after a .cctor completes)
+    CLR_UINT32 startIndex = startTypeSpecIndex.TypeSpec();
+    CLR_RT_TypeSpec_CrossReference *tsCross = assembly->crossReferenceTypeSpec + startIndex;
+
+    for (int iTs = startIndex; iTs < numTypeSpec; iTs++, tsCross++)
+    {
+        // Build a TypeSpec_Instance to check if this is a closed generic instantiation
+        CLR_RT_TypeSpec_Instance genericTypeInstance{};
+        CLR_RT_TypeSpec_Index tsIndex;
+        tsIndex.Set(assembly->assemblyIndex, iTs);
+
+        if (!genericTypeInstance.InitializeFromIndex(tsIndex))
+        {
+            continue;
+        }
+
+        // Only for closed generic instantiations (have genericTypeDef)
+        if (!genericTypeInstance.IsClosedGenericType())
+        {
+            continue;
+        }
+
+        // Get the generic type definition
+        CLR_RT_TypeDef_Index typeDef = genericTypeInstance.genericTypeDef;
+
+        // Check if the generic type definition has a static constructor
+        CLR_RT_Assembly *ownerAsm = g_CLR_RT_TypeSystem.m_assemblies[typeDef.Assembly() - 1];
+        if (!ownerAsm->HasStaticConstructor(typeDef))
+        {
+            continue;
+        }
+
+        // Find the static constructor method for this generic type definition
+        const CLR_RECORD_TYPEDEF *ownerTd = ownerAsm->GetTypeDef(typeDef.Type());
+        const CLR_RECORD_METHODDEF *md = ownerAsm->GetMethodDef(ownerTd->firstMethod);
+
+        // Calculate total method count for this type
+        int methodCount = ownerTd->virtualMethodCount + ownerTd->instanceMethodCount + ownerTd->staticMethodCount;
+
+        CLR_RT_MethodDef_Index cctorIndex;
+        bool foundCctor = false;
+
+        for (int i = 0; i < methodCount; i++, md++)
+        {
+            if (md->flags & CLR_RECORD_METHODDEF::MD_StaticConstructor)
+            {
+                cctorIndex.Set(ownerAsm->assemblyIndex, ownerTd->firstMethod + i);
+                foundCctor = true;
+                break;
+            }
+        }
+
+        if (!foundCctor)
+        {
+            continue;
+        }
+
+        // Compute hash for the closed generic type to check if .cctor already scheduled/executed
+        CLR_UINT32 hash = g_CLR_RT_TypeSystem.ComputeHashForClosedGenericType(genericTypeInstance);
+
+        // Find or create the .cctor execution record for this closed type
+        bool recordCreated = false;
+        CLR_RT_GenericCctorExecutionRecord *record =
+            g_CLR_RT_TypeSystem.FindOrCreateGenericCctorRecord(hash, &recordCreated);
+
+        if (record == nullptr)
+        {
+            // Out of memory - skip this .cctor
+            continue;
+        }
+
+        // Check if .cctor already scheduled or executed
+        if (record->m_flags &
+            (CLR_RT_GenericCctorExecutionRecord::c_Scheduled | CLR_RT_GenericCctorExecutionRecord::c_Executed))
+        {
+            // Already handled - skip to next TypeSpec
+            continue;
+        }
+
+        // Mark as scheduled to prevent duplicate scheduling
+        record->m_flags |= CLR_RT_GenericCctorExecutionRecord::c_Scheduled;
+
+        // Create delegate for the generic type .cctor
+        CLR_RT_HeapBlock_Delegate *dlg;
+        CLR_RT_HeapBlock refDlg;
+
+        refDlg.SetObjectReference(nullptr);
+        CLR_RT_ProtectFromGC gc(refDlg);
+
+        if (SUCCEEDED(CLR_RT_HeapBlock_Delegate::CreateInstance(refDlg, cctorIndex, nullptr)))
+        {
+            dlg = refDlg.DereferenceDelegate();
+
+            // Store the current closed generic TypeSpec index for correct resumption
+            dlg->m_genericTypeSpec = tsIndex;
+
+            if (SUCCEEDED(m_cctorThread->PushThreadProcDelegate(dlg)))
+            {
+                m_cctorThread->m_terminationCallback = StaticConstructorTerminationCallback;
+                return true;
+            }
+        }
+
+        // If we failed to schedule, clear the scheduled flag
+        record->m_flags &= ~CLR_RT_GenericCctorExecutionRecord::c_Scheduled;
+    }
+
+    // no more generic type .cctors for this assembly - set flag
+    assembly->flags |= CLR_RT_Assembly::StaticGenericConstructorsExecuted;
+    return false;
+}
+
+void CLR_RT_ExecutionEngine::SpawnStaticConstructor(CLR_RT_Thread *&pCctorThread)
+{
+    NATIVE_PROFILE_CLR_CORE();
+    CLR_RT_HeapBlock_Delegate *dlg = nullptr;
+
+    if (!EnsureSystemThread(pCctorThread, ThreadPriority::System_Highest))
         return;
 
     dlg = pCctorThread->m_dlg;
 
-    if(dlg != NULL)
-    {               
-        CLR_RT_MethodDef_Index idx = dlg->DelegateFtn();
-        CLR_RT_MethodDef_Instance inst;
-
-        //Find next static constructor for given idx
-        _ASSERTE(NANOCLR_INDEX_IS_VALID(idx));
-        _SIDE_ASSERTE(inst.InitializeFromIndex( idx ));
-    
-        //This is ok if idx is no longer valid.  SpawnStaticConstructorHelper will call FindNextStaticConstructor
-        //which will fail        
-        idx.m_data++;
-
-        if(SpawnStaticConstructorHelper( inst.m_assm, idx ))
-            return;
-    }
-
-    //first, find the AppDomainAssembly to run. (what about appdomains!!!)
-     NANOCLR_FOREACH_ASSEMBLY(g_CLR_RT_TypeSystem)
+    if (dlg != nullptr)
     {
-        //Find an AppDomainAssembly that does not have it's static constructor bit set...
-        if((pASSM->m_flags & CLR_RT_Assembly::StaticConstructorsExecuted) == 0)
-        {                                
-            CLR_RT_MethodDef_Index idx; idx.Set( pASSM->m_idx, 0 );
-            bool fDepedenciesRun = true;
+        CLR_RT_MethodDef_Index index = dlg->DelegateFtn();
+        CLR_RT_MethodDef_Instance inst{};
 
-            //Check that all dependent assemblies have had static constructors run.                    
-            CLR_RT_AssemblyRef_CrossReference* ar = pASSM->m_pCrossReference_AssemblyRef;
-            for(int i=0; i<pASSM->m_pTablesSize[ TBL_AssemblyRef ]; i++, ar++)
+        // Find next static constructor for given index
+        _ASSERTE(NANOCLR_INDEX_IS_VALID(index));
+        _SIDE_ASSERTE(inst.InitializeFromIndex(index));
+
+        // Check if this is a generic type .cctor (has m_genericTypeSpec.data != 0 in the delegate)
+        if (dlg->m_genericTypeSpec.data != 0)
+        {
+            // Extract the TypeSpec index from the delegate and increment to next TypeSpec
+            CLR_RT_TypeSpec_Index tsIndex = dlg->m_genericTypeSpec;
+            CLR_RT_Assembly *assembly = g_CLR_RT_TypeSystem.m_assemblies[tsIndex.Assembly() - 1];
+
+            // Increment to next TypeSpec (same pattern as regular .cctor)
+            tsIndex.data++;
+
+            if (SpawnGenericTypeStaticConstructorsHelper(assembly, tsIndex))
             {
-                if((ar->m_target->m_flags & CLR_RT_Assembly::StaticConstructorsExecuted) == 0)
-                {
-                    fDepedenciesRun = true;
-                    break;
-                }
-            }
-                    
-            if(fDepedenciesRun && SpawnStaticConstructorHelper( pASSM, idx ))
                 return;
+            }
+        }
+        else
+        {
+            // Regular static constructor - increment to next method index
+            index.data++;
+
+            if (SpawnStaticConstructorHelper(inst.assembly, index))
+            {
+                return;
+            }
         }
     }
-    NANOCLR_FOREACH_ASSEMBLY_END();
 
-    //no more static constructors needed...
+    // keep iterating until no more static constructors can be spawned
+    // note that multiple passes may be needed to satisfy all dependencies
+    bool anySpawned;
+
+    do
+    {
+        anySpawned = false;
+
+        NANOCLR_FOREACH_ASSEMBLY(g_CLR_RT_TypeSystem)
+        {
+            // Check if regular static constructors need to be executed
+            if ((pASSM->flags & CLR_RT_Assembly::StaticConstructorsExecuted) == 0)
+            {
+                CLR_RT_MethodDef_Index index;
+                index.Set(pASSM->assemblyIndex, 0);
+                bool dependenciesSatisfied = true;
+
+                // Check that all dependent assemblies have had regular static constructors run
+                CLR_RT_AssemblyRef_CrossReference *ar = pASSM->crossReferenceAssemblyRef;
+                for (int i = 0; i < pASSM->tablesSize[TBL_AssemblyRef]; i++, ar++)
+                {
+                    if ((ar->target->flags & CLR_RT_Assembly::StaticConstructorsExecuted) == 0)
+                    {
+                        dependenciesSatisfied = false;
+                        break;
+                    }
+                }
+
+                if (dependenciesSatisfied)
+                {
+                    if (SpawnStaticConstructorHelper(pASSM, index))
+                    {
+                        return;
+                    }
+
+                    // returned false, meaning it set the flag and there are no more cctors for this assembly.
+                    // flag that progress was made and we should re-iterate
+                    anySpawned = true;
+                }
+
+                // if there are dependencies not satisfied, just continue to next assembly
+                continue;
+            }
+
+            // Check if generic type static constructors need to be executed
+            if ((pASSM->flags & CLR_RT_Assembly::StaticGenericConstructorsExecuted) == 0)
+            {
+                bool dependenciesSatisfied = true;
+
+                // Check that all dependent assemblies have had regular static constructors run
+                CLR_RT_AssemblyRef_CrossReference *ar = pASSM->crossReferenceAssemblyRef;
+                for (int i = 0; i < pASSM->tablesSize[TBL_AssemblyRef]; i++, ar++)
+                {
+                    if ((ar->target->flags & CLR_RT_Assembly::StaticConstructorsExecuted) == 0)
+                    {
+                        dependenciesSatisfied = false;
+                        break;
+                    }
+                }
+
+                if (dependenciesSatisfied)
+                {
+                    CLR_RT_TypeSpec_Index startIndex;
+                    startIndex.Set(pASSM->assemblyIndex, 0);
+
+                    if (SpawnGenericTypeStaticConstructorsHelper(pASSM, startIndex))
+                    {
+                        return;
+                    }
+
+                    // returned false, meaning it set the flag and there are no more generic cctors for this assembly.
+                    // flag that progress was made and we should re-iterate
+                    anySpawned = true;
+                }
+            }
+        }
+        NANOCLR_FOREACH_ASSEMBLY_END();
+
+    } while (anySpawned);
+
     pCctorThread->DestroyInstance();
 }
-#endif //NANOCLR_APPDOMAINS
+#endif // NANOCLR_APPDOMAINS
 
-void CLR_RT_ExecutionEngine::FinalizerTerminationCallback(void* arg)
+void CLR_RT_ExecutionEngine::FinalizerTerminationCallback(void *arg)
 {
     (void)arg;
 
@@ -974,157 +1257,166 @@ void CLR_RT_ExecutionEngine::FinalizerTerminationCallback(void* arg)
 }
 
 void CLR_RT_ExecutionEngine::SpawnFinalizer()
-{    
+{
     NATIVE_PROFILE_CLR_CORE();
-        
-    CLR_RT_HeapBlock_Finalizer* fin = (CLR_RT_HeapBlock_Finalizer*)m_finalizersPending.FirstNode();
-    if(fin->Next() != NULL)
+
+    CLR_RT_HeapBlock_Finalizer *fin = (CLR_RT_HeapBlock_Finalizer *)m_finalizersPending.FirstNode();
+
+    if (fin->Next() != nullptr)
     {
-        CLR_RT_HeapBlock     delegate; delegate.SetObjectReference( NULL );
-        CLR_RT_ProtectFromGC gc( delegate );
+        CLR_RT_HeapBlock delegate;
+
+        delegate.SetObjectReference(nullptr);
+        CLR_RT_ProtectFromGC gc(delegate);
 
 #if defined(NANOCLR_APPDOMAINS)
-        (void)SetCurrentAppDomain( fin->m_appDomain );
+        (void)SetCurrentAppDomain(fin->m_appDomain);
 #endif
 
-        if(EnsureSystemThread(m_finalizerThread, ThreadPriority::BelowNormal))
+        if (EnsureSystemThread(m_finalizerThread, ThreadPriority::BelowNormal))
         {
-            if(SUCCEEDED(CLR_RT_HeapBlock_Delegate::CreateInstance( delegate, fin->m_md, NULL )))
+            if (SUCCEEDED(CLR_RT_HeapBlock_Delegate::CreateInstance(delegate, fin->m_md, nullptr)))
             {
-                CLR_RT_HeapBlock_Delegate* dlg = delegate.DereferenceDelegate();
+                CLR_RT_HeapBlock_Delegate *dlg = delegate.DereferenceDelegate();
 
-                dlg->m_object.SetObjectReference( fin->m_object );
+                dlg->m_object.SetObjectReference(fin->m_object);
 
-                if(SUCCEEDED(m_finalizerThread->PushThreadProcDelegate( dlg )))
+                if (SUCCEEDED(m_finalizerThread->PushThreadProcDelegate(dlg)))
                 {
-                    g_CLR_RT_EventCache.Append_Node( fin );
+                    g_CLR_RT_EventCache.Append_Node(fin);
                     m_finalizerThread->m_terminationCallback = CLR_RT_ExecutionEngine::FinalizerTerminationCallback;
-                }       
+                }
             }
         }
     }
 }
 
-void CLR_RT_ExecutionEngine::AdjustExecutionCounter( CLR_RT_DblLinkedList &threadList, int iUpdateValue )
+void CLR_RT_ExecutionEngine::AdjustExecutionCounter(CLR_RT_DblLinkedList &threadList, int iUpdateValue)
 
-{   // Iterate over threads in increase executioin counter by iUpdateValue    
-    NANOCLR_FOREACH_NODE(CLR_RT_Thread,pThread,threadList)
+{ // Iterate over threads in increase executioin counter by iUpdateValue
+    NANOCLR_FOREACH_NODE(CLR_RT_Thread, pThread, threadList)
     {
         pThread->m_executionCounter += iUpdateValue;
         // Update m_executionCounter if thread is too behind of m_GlobalExecutionCounter
-        pThread->BringExecCounterToDate( m_GlobalExecutionCounter );
+        pThread->BringExecCounterToDate(m_GlobalExecutionCounter);
     }
     NANOCLR_FOREACH_NODE_END()
 }
 
-void CLR_RT_ExecutionEngine::UpdateToLowestExecutionCounter( CLR_RT_Thread *pThread ) const 
+void CLR_RT_ExecutionEngine::UpdateToLowestExecutionCounter(CLR_RT_Thread *pThread) const
 {
     // Set the m_executionCounter in thread to lowest value among ready threads.
     // Thus it will be executed last.
-    pThread->m_executionCounter  = m_GlobalExecutionCounter - 1;
+    pThread->m_executionCounter = m_GlobalExecutionCounter - 1;
 }
 
-void CLR_RT_ExecutionEngine::RetrieveCurrentMethod( CLR_UINT32& assmIdx, CLR_UINT32& methodIdx )
+void CLR_RT_ExecutionEngine::RetrieveCurrentMethod(CLR_UINT32 &assmIndex, CLR_UINT32 &methodIndex)
 {
-    assmIdx   = 0;
-    methodIdx = 0;
+    assmIndex = 0;
+    methodIndex = 0;
 
-    if(m_currentThread != NULL)
+    if (m_currentThread != nullptr)
     {
-        CLR_RT_StackFrame* stack = m_currentThread->CurrentFrame();
+        CLR_RT_StackFrame *stack = m_currentThread->CurrentFrame();
 
-        if(stack)
+        if (stack)
         {
-            assmIdx   = stack->m_call.Assembly();
-            methodIdx = stack->m_call.Method  ();
+            assmIndex = stack->m_call.Assembly();
+            methodIndex = stack->m_call.Method();
         }
     }
 }
 
-void CLR_RetrieveCurrentMethod( CLR_UINT32 & assmIdx, CLR_UINT32 & methodIdx )
+void CLR_RetrieveCurrentMethod(CLR_UINT32 &assmIndex, CLR_UINT32 &methodIndex)
 {
-    g_CLR_RT_ExecutionEngine.RetrieveCurrentMethod( assmIdx, methodIdx );
+    g_CLR_RT_ExecutionEngine.RetrieveCurrentMethod(assmIndex, methodIndex);
 }
 
 void CLR_SoftReboot()
 {
-    CLR_EE_DBG_SET( RebootPending );
+    CLR_EE_DBG_SET(RebootPending);
 }
 
 void CLR_DebuggerBreak()
 {
-    if(g_CLR_RT_ExecutionEngine.m_currentThread != NULL)
+    if (g_CLR_RT_ExecutionEngine.m_currentThread != nullptr)
     {
         CLR_RT_HeapBlock *obj = g_CLR_RT_ExecutionEngine.m_currentThread->m_currentException.Dereference();
 
         ///
-        /// Only inject the exception once -- if the dereference is not null then the exception is already set on the current thread
+        /// Only inject the exception once -- if the dereference is not null then the exception is already set on the
+        /// current thread
         ///
-        if(obj == NULL)
-        {        
-            Library_corlib_native_System_Exception::CreateInstance( g_CLR_RT_ExecutionEngine.m_currentThread->m_currentException, g_CLR_RT_WellKnownTypes.m_WatchdogException, CLR_E_WATCHDOG_TIMEOUT, g_CLR_RT_ExecutionEngine.m_currentThread->CurrentFrame() );
+        if (obj == nullptr)
+        {
+            Library_corlib_native_System_Exception::CreateInstance(
+                g_CLR_RT_ExecutionEngine.m_currentThread->m_currentException,
+                g_CLR_RT_WellKnownTypes.WatchdogException,
+                CLR_E_WATCHDOG_TIMEOUT,
+                g_CLR_RT_ExecutionEngine.m_currentThread->CurrentFrame());
         }
     }
 }
-    
-HRESULT CLR_RT_ExecutionEngine::ScheduleThreads( int maxContextSwitch )
+
+HRESULT CLR_RT_ExecutionEngine::ScheduleThreads(int maxContextSwitch)
 {
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
 
-#if defined(NANOCLR_APPDOMAINS)                    
-    CLR_RT_AppDomain* appDomainSav = g_CLR_RT_ExecutionEngine.GetCurrentAppDomain();
+#if defined(NANOCLR_APPDOMAINS)
+    CLR_RT_AppDomain *appDomainSav = g_CLR_RT_ExecutionEngine.GetCurrentAppDomain();
 #endif
 
-    // We run threads based on the m_executionCounter. 
+    // We run threads based on the m_executionCounter.
     // The thread with highest m_executionCounter is chosen for execution.
     // The highest value of m_executionCounter of any thread is stored in m_GlobalExecutionCounter
-    // We need to check that m_GlobalExecutionCounter does not underflow ( runs below - -2147483647 ) This would be very rare condition, but it may happen.
-    // We put threshold at - 0x40000000
-    if ( m_GlobalExecutionCounter < -EXECUTION_COUNTER_MAXIMUM )
-    {   // Iterate over threads in all queues and bump the execution counter by MAX_EXECUTION_COUNTER_ADJUSTMENT 
+    // We need to check that m_GlobalExecutionCounter does not underflow ( runs below - -2147483647 ) This would be very
+    // rare condition, but it may happen. We put threshold at - 0x40000000
+    if (m_GlobalExecutionCounter < -EXECUTION_COUNTER_MAXIMUM)
+    { // Iterate over threads in all queues and bump the execution counter by MAX_EXECUTION_COUNTER_ADJUSTMENT
 
         m_GlobalExecutionCounter += EXECUTION_COUNTER_ADJUSTMENT;
 
-        // For each list of threads runs over it and updates execution counter. 
-        // AdjustExecutionCounter gets const & to list of threads. 
+        // For each list of threads runs over it and updates execution counter.
+        // AdjustExecutionCounter gets const & to list of threads.
         // List of threads is not modified, but m_executionCounter is bumped up in each thread.
 
-        AdjustExecutionCounter( m_threadsReady,   EXECUTION_COUNTER_ADJUSTMENT );
-        AdjustExecutionCounter( m_threadsWaiting, EXECUTION_COUNTER_ADJUSTMENT );
-        AdjustExecutionCounter( m_threadsZombie,  EXECUTION_COUNTER_ADJUSTMENT );
+        AdjustExecutionCounter(m_threadsReady, EXECUTION_COUNTER_ADJUSTMENT);
+        AdjustExecutionCounter(m_threadsWaiting, EXECUTION_COUNTER_ADJUSTMENT);
+        AdjustExecutionCounter(m_threadsZombie, EXECUTION_COUNTER_ADJUSTMENT);
     }
-    
-    while(maxContextSwitch-- > 0)
+
+    while (maxContextSwitch-- > 0)
     {
-        
-#if defined(WIN32)
-        if(HAL_Windows_IsShutdownPending())
+
+#if defined(VIRTUAL_DEVICE)
+        if (HAL_Windows_IsShutdownPending())
         {
             NANOCLR_SET_AND_LEAVE(CLR_S_NO_THREADS);
         }
 #endif
 
 #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
-        if(CLR_EE_DBG_IS( Stopped ))
+        if (CLR_EE_DBG_IS(Stopped))
         {
             NANOCLR_SET_AND_LEAVE(CLR_S_NO_READY_THREADS);
         }
-#endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)        
+#endif // #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
 
-        CLR_RT_Thread* th = NULL;
+        CLR_RT_Thread *th = nullptr;
 
         //  If a static constructor thread exists, we should be running it.
         //  What about func-eval?
-        if (m_cctorThread == NULL)  
+        if (m_cctorThread == nullptr)
         {
-            // This is normal case execution. Looks for first ready thread. 
-            th = (CLR_RT_Thread*)m_threadsReady.FirstNode();  
+            // This is normal case execution. Looks for first ready thread.
+            th = (CLR_RT_Thread *)m_threadsReady.FirstNode();
         }
-        else //If a static constructor thread exists, we should be running it.
+        else // If a static constructor thread exists, we should be running it.
         {
             //  This is special case executed during initialization of static constructors.
-            if (m_cctorThread->m_status == CLR_RT_Thread::TH_S_Ready  && !(m_cctorThread->m_flags & CLR_RT_Thread::TH_F_Suspended))
+            if (m_cctorThread->m_status == CLR_RT_Thread::TH_S_Ready &&
+                !(m_cctorThread->m_flags & CLR_RT_Thread::TH_F_Suspended))
             {
                 th = m_cctorThread;
             }
@@ -1132,54 +1424,51 @@ HRESULT CLR_RT_ExecutionEngine::ScheduleThreads( int maxContextSwitch )
             {
                 // The m_cctorThread is exists, but not ready - means entered blocking call.
                 // We do not want to preempt constructor thread, so stay idle.
-                NANOCLR_SET_AND_LEAVE(CLR_S_NO_READY_THREADS); 
+                NANOCLR_SET_AND_LEAVE(CLR_S_NO_READY_THREADS);
             }
         }
 
-        
-
-        
-        // If th->Next() is NULL, then there are no Ready to run threads in the system.
+        // If th->Next() is nullptr, then there are no Ready to run threads in the system.
         // In this case we spawn finalizer and make finalizer thread as ready one.
-        if(th->Next() == NULL)
+        if (th->Next() == nullptr)
         {
             g_CLR_RT_ExecutionEngine.SpawnFinalizer();
-            
+
             // Now finalizer thread might be in ready state if there are object that need call to finalizer.
             // th might point to finilizer thread.
-            th = (CLR_RT_Thread*)m_threadsReady.FirstNode();
+            th = (CLR_RT_Thread *)m_threadsReady.FirstNode();
 
-            //Thread create can cause stopping debugging event
+            // Thread create can cause stopping debugging event
 #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
-            if(CLR_EE_DBG_IS(Stopped))
+            if (CLR_EE_DBG_IS(Stopped))
             {
                 NANOCLR_SET_AND_LEAVE(CLR_S_NO_READY_THREADS);
             }
-#endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
+#endif // #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
         }
 
-        // If there is ready thread - decrease m_executionCounter for this (th) thread. 
-        if( th->Next() != NULL )
+        // If there is ready thread - decrease m_executionCounter for this (th) thread.
+        if (th->Next() != nullptr)
         {
             // The value to update m_executionCounter for each run. See comment for GetQuantumDebit for possible values
             int debitForEachRun = th->GetQuantumDebit();
 
             // If thread is way too much behind on its execution, we cut off extra credit.
             // We guarantee the thread will not be scheduled more than 4 consecutive times.
-            th->BringExecCounterToDate( m_GlobalExecutionCounter );
-            
+            th->BringExecCounterToDate(m_GlobalExecutionCounter);
+
             // Subtract the execution counter by debit value ( for executing thread )
             th->m_executionCounter -= debitForEachRun;
 
-            // Keep the track of lowest execution counter. 
-            if ( th->m_executionCounter < m_GlobalExecutionCounter )
+            // Keep the track of lowest execution counter.
+            if (th->m_executionCounter < m_GlobalExecutionCounter)
             {
                 m_GlobalExecutionCounter = th->m_executionCounter;
             }
         }
         else
         {
-            if(m_threadsWaiting.IsEmpty())
+            if (m_threadsWaiting.IsEmpty())
             {
                 NANOCLR_SET_AND_LEAVE(CLR_S_NO_THREADS);
             }
@@ -1194,26 +1483,26 @@ HRESULT CLR_RT_ExecutionEngine::ScheduleThreads( int maxContextSwitch )
             hr = th->Execute();
         }
 
-        if(FAILED(hr))
+        if (FAILED(hr))
         {
-            switch(hr)
+            switch (hr)
             {
-            case CLR_E_RESCHEDULE:
-                break;
+                case CLR_E_RESCHEDULE:
+                    break;
 
-            case CLR_E_THREAD_WAITING:
-                th->m_status = CLR_RT_Thread::TH_S_Waiting;
-                break;
+                case CLR_E_THREAD_WAITING:
+                    th->m_status = CLR_RT_Thread::TH_S_Waiting;
+                    break;
 
-            default:
-                th->m_status = CLR_RT_Thread::TH_S_Terminated;
-                break;
+                default:
+                    th->m_status = CLR_RT_Thread::TH_S_Terminated;
+                    break;
             }
         }
 
         Watchdog_Reset();
 
-        PutInProperList( th );
+        PutInProperList(th);
 
         (void)ProcessTimer();
     }
@@ -1222,21 +1511,21 @@ HRESULT CLR_RT_ExecutionEngine::ScheduleThreads( int maxContextSwitch )
 
     NANOCLR_CLEANUP();
 
-#if defined(NANOCLR_APPDOMAINS)                    
-                
-    if(CLR_EE_IS( UnloadingAppDomain ))
+#if defined(NANOCLR_APPDOMAINS)
+
+    if (CLR_EE_IS(UnloadingAppDomain))
     {
-        if(TryToUnloadAppDomains())
+        if (TryToUnloadAppDomains())
         {
-            //If we are successful in unloading an AppDomain, return CLR_S_QUANTUM_EXPIRED
-            //to cause ScheduleThreads to be called again.  This allows the somewhat expensive operation
-            //of trying to unload an AppDomain once every ScheduleThread call, rather than once every context switch            
+            // If we are successful in unloading an AppDomain, return CLR_S_QUANTUM_EXPIRED
+            // to cause ScheduleThreads to be called again.  This allows the somewhat expensive operation
+            // of trying to unload an AppDomain once every ScheduleThread call, rather than once every context switch
 
             hr = CLR_S_QUANTUM_EXPIRED;
         }
     }
 
-    g_CLR_RT_ExecutionEngine.SetCurrentAppDomain( appDomainSav );
+    g_CLR_RT_ExecutionEngine.SetCurrentAppDomain(appDomainSav);
 #endif
 
     NANOCLR_CLEANUP_END();
@@ -1248,238 +1537,304 @@ CLR_UINT32 CLR_RT_ExecutionEngine::WaitForActivity()
 
     CLR_INT64 timeoutMin = ProcessTimer();
 
-    if(m_threadsReady.IsEmpty() == false) return 0; // Someone woke up...
+    if (m_threadsReady.IsEmpty() == false)
+        return 0; // Someone woke up...
 
-    if(timeoutMin > 0LL)
+    if (timeoutMin > 0LL)
     {
-        NANOCLR_FOREACH_NODE(CLR_RT_Thread,th,m_threadsWaiting)
+        NANOCLR_FOREACH_NODE(CLR_RT_Thread, th, m_threadsWaiting)
         {
-            if((th->m_waitForEvents & c_Event_IdleCPU) != 0 && th->m_waitForEvents_IdleTimeWorkItem < timeoutMin)
+            if ((th->m_waitForEvents & Event_IdleCPU) != 0 && th->m_waitForEvents_IdleTimeWorkItem < timeoutMin)
             {
                 th->m_waitForEvents_IdleTimeWorkItem = TIMEOUT_ZERO;
 
-                th->Restart( true );
+                th->Restart(true);
 
                 return SYSTEM_EVENT_FLAG_ALL; // Someone woke up...
             }
         }
         NANOCLR_FOREACH_NODE_END();
 
-        return WaitForActivity( SLEEP_LEVEL__SLEEP, g_CLR_HW_Hardware.m_wakeupEvents, timeoutMin );
+        return WaitForActivity(SLEEP_LEVEL__SLEEP, g_CLR_HW_Hardware.m_wakeupEvents, timeoutMin);
     }
 
     return 0;
 }
 
-CLR_UINT32 CLR_RT_ExecutionEngine::WaitForActivity( CLR_UINT32 powerLevel, CLR_UINT32 events, CLR_INT64 timeout_ms )
+CLR_UINT32 CLR_RT_ExecutionEngine::WaitForActivity(CLR_UINT32 powerLevel, CLR_UINT32 events, CLR_INT64 timeout_ms)
 {
     NATIVE_PROFILE_CLR_CORE();
- 
-    if(powerLevel != PowerLevel__Active)
+
+    if (powerLevel != PowerLevel__Active)
     {
-        return WaitSystemEvents( powerLevel, events, timeout_ms );
+        return WaitSystemEvents(powerLevel, events, timeout_ms);
     }
-    
+
     return 0;
 }
 
 //--//
 
-void CLR_RT_ExecutionEngine::PutInProperList( CLR_RT_Thread* th )
+void CLR_RT_ExecutionEngine::PutInProperList(CLR_RT_Thread *th)
 {
     NATIVE_PROFILE_CLR_CORE();
-    switch(th->m_status)
+    switch (th->m_status)
     {
-    case CLR_RT_Thread::TH_S_Ready:
-        if((th->m_flags & CLR_RT_Thread::TH_F_Suspended) == 0)
-        {
-            InsertThreadRoundRobin( m_threadsReady, th );
+        case CLR_RT_Thread::TH_S_Ready:
+            if ((th->m_flags & CLR_RT_Thread::TH_F_Suspended) == 0)
+            {
+                InsertThreadRoundRobin(m_threadsReady, th);
+                break;
+            }
+            //
+            // Fall-through...
+            //
+        case CLR_RT_Thread::TH_S_Waiting:
+            m_threadsWaiting.LinkAtBack(th);
             break;
-        }
-        //
-        // Fall-through...
-        //
-    case CLR_RT_Thread::TH_S_Waiting:
-        m_threadsWaiting.LinkAtBack( th );
-        break;
 
-    case CLR_RT_Thread::TH_S_Terminated:
-        th->Passivate();
-        break;
+        case CLR_RT_Thread::TH_S_Terminated:
+            th->Passivate();
+            break;
 
-    case CLR_RT_Thread::TH_S_Unstarted:
-        m_threadsZombie.LinkAtFront( th );
-        break;
+        case CLR_RT_Thread::TH_S_Unstarted:
+            m_threadsZombie.LinkAtFront(th);
+            break;
     }
 }
 
-void CLR_RT_ExecutionEngine::AbortAllThreads( CLR_RT_DblLinkedList& threads )
+void CLR_RT_ExecutionEngine::AbortAllThreads(CLR_RT_DblLinkedList &threads)
 {
     NATIVE_PROFILE_CLR_CORE();
-    NANOCLR_FOREACH_NODE(CLR_RT_Thread,th,threads)
+    NANOCLR_FOREACH_NODE(CLR_RT_Thread, th, threads)
     {
-        if((th->m_flags & CLR_RT_Thread::TH_F_Aborted) == 0)
+        if ((th->m_flags & CLR_RT_Thread::TH_F_Aborted) == 0)
         {
             th->Abort();
 
-            NANOCLR_FOREACH_NODE_RESTART(CLR_RT_Thread,th,threads);
+            NANOCLR_FOREACH_NODE_RESTART(CLR_RT_Thread, th, threads);
         }
     }
     NANOCLR_FOREACH_NODE_END();
 }
 
-void CLR_RT_ExecutionEngine::ReleaseAllThreads( CLR_RT_DblLinkedList& threads )
+void CLR_RT_ExecutionEngine::ReleaseAllThreads(CLR_RT_DblLinkedList &threads)
 {
     NATIVE_PROFILE_CLR_CORE();
-    while(true)
+    while (true)
     {
-        CLR_RT_Thread* th = (CLR_RT_Thread*)threads.ExtractFirstNode(); if(!th) break;
+        CLR_RT_Thread *th = (CLR_RT_Thread *)threads.ExtractFirstNode();
+        if (!th)
+            break;
 
         th->DestroyInstance();
     }
 }
 
-void CLR_RT_ExecutionEngine::InsertThreadRoundRobin( CLR_RT_DblLinkedList& threads, CLR_RT_Thread* thTarget )
+void CLR_RT_ExecutionEngine::InsertThreadRoundRobin(CLR_RT_DblLinkedList &threads, CLR_RT_Thread *thTarget)
 {
     NATIVE_PROFILE_CLR_CORE();
-    CLR_RT_Thread* th;
+    CLR_RT_Thread *th;
 
     thTarget->Unlink();
 
-    if(threads.IsEmpty())
+    if (threads.IsEmpty())
     {
-        th = (CLR_RT_Thread*)threads.Tail();
+        th = (CLR_RT_Thread *)threads.Tail();
     }
     else
     {
         int priTarget = thTarget->GetExecutionCounter();
 
-        NANOCLR_FOREACH_NODE__NODECL(CLR_RT_Thread,th,threads)
+        NANOCLR_FOREACH_NODE__NODECL(CLR_RT_Thread, th, threads)
         {
-            if(th->GetExecutionCounter() < priTarget) break;
+            if (th->GetExecutionCounter() < priTarget)
+                break;
         }
         NANOCLR_FOREACH_NODE_END();
     }
 
-    thTarget->m_waitForEvents         = 0;
+    thTarget->m_waitForEvents = 0;
     thTarget->m_waitForEvents_Timeout = TIMEOUT_INFINITE;
 
-    if(thTarget->m_waitForObject != NULL)
+    if (thTarget->m_waitForObject != nullptr)
     {
-        g_CLR_RT_EventCache.Append_Node( thTarget->m_waitForObject );
-                    
-        thTarget->m_waitForObject = NULL;
+        g_CLR_RT_EventCache.Append_Node(thTarget->m_waitForObject);
+
+        thTarget->m_waitForObject = nullptr;
     }
 
-    threads.InsertBeforeNode( th, thTarget );
+    threads.InsertBeforeNode(th, thTarget);
 }
 
 //--//
 
-HRESULT CLR_RT_ExecutionEngine::NewThread( CLR_RT_Thread*& thRes, CLR_RT_HeapBlock_Delegate* pDelegate, int priority, CLR_INT32 id, CLR_UINT32 flags  )
+HRESULT CLR_RT_ExecutionEngine::NewThread(
+    CLR_RT_Thread *&thRes,
+    CLR_RT_HeapBlock_Delegate *pDelegate,
+    int priority,
+    CLR_INT32 id,
+    CLR_UINT32 flags)
 {
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
 
-    NANOCLR_CHECK_HRESULT(CLR_RT_Thread::CreateInstance( id != -1 ? id : ++m_lastPid, pDelegate, priority, thRes, flags ));
+    NANOCLR_CHECK_HRESULT(
+        CLR_RT_Thread::CreateInstance(id != -1 ? id : ++m_lastPid, pDelegate, priority, thRes, flags));
 
-    PutInProperList( thRes );
+    PutInProperList(thRes);
 
     NANOCLR_CLEANUP();
 
-    if(FAILED(hr))
+    if (FAILED(hr))
     {
-        if(thRes)
+        if (thRes)
         {
             thRes->DestroyInstance();
 
-            thRes = NULL;
+            thRes = nullptr;
         }
     }
 
     NANOCLR_CLEANUP_END();
 }
-                                                              
-CLR_INT32 CLR_RT_ExecutionEngine::GetNextThreadId() 
+
+CLR_INT32 CLR_RT_ExecutionEngine::GetNextThreadId()
 {
-    return ++m_lastPid; 
-}    
+    return ++m_lastPid;
+}
 
 //--//
 
-CLR_RT_HeapBlock* CLR_RT_ExecutionEngine::ExtractHeapBlocksForArray( CLR_RT_TypeDef_Instance& inst, CLR_UINT32 length, const CLR_RT_ReflectionDef_Index& reflex )
+CLR_RT_HeapBlock *CLR_RT_ExecutionEngine::ExtractHeapBlocksForArray(
+    CLR_RT_TypeDef_Instance &inst,
+    CLR_UINT32 length,
+    const CLR_RT_ReflectionDef_Index &reflex)
 {
     NATIVE_PROFILE_CLR_CORE();
-    CLR_DataType                 dt  = (CLR_DataType)inst.m_target->dataType;
-    const CLR_RT_DataTypeLookup& dtl = c_CLR_RT_DataTypeLookup[ dt ];
+    NanoCLRDataType dt = (NanoCLRDataType)inst.target->dataType;
+    const CLR_RT_DataTypeLookup &dtl = c_CLR_RT_DataTypeLookup[dt];
 
     CLR_UINT32 totLength = (CLR_UINT32)(sizeof(CLR_RT_HeapBlock_Array) + length * dtl.m_sizeInBytes);
     CLR_UINT32 lengthHB = CONVERTFROMSIZETOHEAPBLOCKS(totLength);
 
-    if(lengthHB > CLR_RT_HeapBlock::HB_MaxSize) return NULL;
-
-    CLR_RT_HeapBlock_Array* pArray = (CLR_RT_HeapBlock_Array*)ExtractHeapBlocks( m_heap, DATATYPE_SZARRAY, 0, lengthHB );
-
-    if(pArray)
+    if (lengthHB > CLR_RT_HeapBlock::HB_MaxSize)
     {
-        pArray->ReflectionData() =  reflex;
-        pArray->m_numOfElements  =  length;
+        return nullptr;
+    }
 
-        pArray->m_typeOfElement  =  dt;
-        pArray->m_sizeOfElement  =  dtl.m_sizeInBytes;
-        pArray->m_fReference     = (dtl.m_flags & CLR_RT_DataTypeLookup::c_Numeric) == 0;
+    CLR_RT_HeapBlock_Array *pArray = (CLR_RT_HeapBlock_Array *)ExtractHeapBlocks(m_heap, DATATYPE_SZARRAY, 0, lengthHB);
+
+    if (pArray)
+    {
+        pArray->ReflectionData() = reflex;
+        pArray->m_numOfElements = length;
+
+        pArray->m_typeOfElement = dt;
+        pArray->m_sizeOfElement = dtl.m_sizeInBytes;
+        pArray->m_fReference = (dtl.m_flags & CLR_RT_DataTypeLookup::c_Numeric) == 0;
+        pArray->m_StoragePointer = 0;
 
 #if defined(NANOCLR_PROFILE_NEW_ALLOCATIONS)
-        g_CLR_PRF_Profiler.TrackObjectCreation( pArray );
+        g_CLR_PRF_Profiler.TrackObjectCreation(pArray);
 #endif
     }
 
     return pArray;
 }
 
-CLR_RT_HeapBlock* CLR_RT_ExecutionEngine::ExtractHeapBlocksForClassOrValueTypes( CLR_UINT32 dataType, CLR_UINT32 flags, const CLR_RT_TypeDef_Index& cls, CLR_UINT32 length )
+CLR_RT_HeapBlock *CLR_RT_ExecutionEngine::ExtractHeapBlocksForClassOrValueTypes(
+    CLR_UINT32 dataType,
+    CLR_UINT32 flags,
+    const CLR_RT_TypeDef_Index &cls,
+    CLR_UINT32 length)
 {
     NATIVE_PROFILE_CLR_CORE();
-    if(length > CLR_RT_HeapBlock::HB_MaxSize) return NULL;
+
+    if (length > CLR_RT_HeapBlock::HB_MaxSize)
+    {
+        return nullptr;
+    }
 
     _ASSERTE(dataType == DATATYPE_CLASS || dataType == DATATYPE_VALUETYPE);
 
     flags = flags | CLR_RT_HeapBlock::HB_InitializeToZero;
-    CLR_RT_HeapBlock* hb = ExtractHeapBlocks( m_heap, dataType, flags, length );
+    CLR_RT_HeapBlock *hb = ExtractHeapBlocks(m_heap, dataType, flags, length);
 
-    if(hb)
+    if (hb)
     {
         hb->SetObjectCls(cls);
 
 #if defined(NANOCLR_PROFILE_NEW_ALLOCATIONS)
-        g_CLR_PRF_Profiler.TrackObjectCreation( hb );
+        g_CLR_PRF_Profiler.TrackObjectCreation(hb);
 #endif
     }
 
     return hb;
 }
 
-CLR_RT_HeapBlock* CLR_RT_ExecutionEngine::ExtractHeapBytesForObjects( CLR_UINT32 dataType, CLR_UINT32 flags, CLR_UINT32 length )
+CLR_RT_HeapBlock *CLR_RT_ExecutionEngine::ExtractHeapBlocksForGenericInstance(
+    CLR_UINT32 flags,
+    const CLR_RT_TypeSpec_Index &genericType,
+    CLR_UINT32 length)
 {
     NATIVE_PROFILE_CLR_CORE();
-    return ExtractHeapBlocksForObjects( dataType, flags, CONVERTFROMSIZETOHEAPBLOCKS(length) );
+
+    (void)genericType;
+
+    if (length > CLR_RT_HeapBlock::HB_MaxSize)
+    {
+        return nullptr;
+    }
+
+    flags = flags | CLR_RT_HeapBlock::HB_InitializeToZero;
+    CLR_RT_HeapBlock *hb = ExtractHeapBlocks(m_heap, DATATYPE_GENERICINST, flags, length);
+
+    _ASSERTE(true);
+
+    if (hb)
+    {
+        // hb->SetGenericInstanceObject(genericType);
+
+#if defined(NANOCLR_PROFILE_NEW_ALLOCATIONS)
+        g_CLR_PRF_Profiler.TrackObjectCreation(hb);
+#endif
+    }
+
+    return hb;
 }
 
-CLR_RT_HeapBlock* CLR_RT_ExecutionEngine::ExtractHeapBlocksForObjects( CLR_UINT32 dataType, CLR_UINT32 flags, CLR_UINT32 length )
+CLR_RT_HeapBlock *CLR_RT_ExecutionEngine::ExtractHeapBytesForObjects(
+    CLR_UINT32 dataType,
+    CLR_UINT32 flags,
+    CLR_UINT32 length)
 {
     NATIVE_PROFILE_CLR_CORE();
-    if(length > CLR_RT_HeapBlock::HB_MaxSize) return NULL;
+    return ExtractHeapBlocksForObjects(dataType, flags, CONVERTFROMSIZETOHEAPBLOCKS(length));
+}
+
+CLR_RT_HeapBlock *CLR_RT_ExecutionEngine::ExtractHeapBlocksForObjects(
+    CLR_UINT32 dataType,
+    CLR_UINT32 flags,
+    CLR_UINT32 length)
+{
+    NATIVE_PROFILE_CLR_CORE();
+
+    if (length > CLR_RT_HeapBlock::HB_MaxSize)
+    {
+        return nullptr;
+    }
 
     _ASSERTE(dataType != DATATYPE_CLASS && dataType != DATATYPE_VALUETYPE && dataType != DATATYPE_SZARRAY);
 
     flags &= ~CLR_RT_HeapBlock::HB_Alive;
 
-    CLR_RT_HeapBlock* hb = ExtractHeapBlocks( m_heap, dataType, flags, length );
+    CLR_RT_HeapBlock *hb = ExtractHeapBlocks(m_heap, dataType, flags, length);
 
 #if defined(NANOCLR_PROFILE_NEW_ALLOCATIONS)
-    if(hb)
+    if (hb)
     {
-        g_CLR_PRF_Profiler.TrackObjectCreation( hb );
+        g_CLR_PRF_Profiler.TrackObjectCreation(hb);
     }
 #endif
 
@@ -1488,61 +1843,78 @@ CLR_RT_HeapBlock* CLR_RT_ExecutionEngine::ExtractHeapBlocksForObjects( CLR_UINT3
 
 //--//
 
-CLR_RT_HeapBlock_Node* CLR_RT_ExecutionEngine::ExtractHeapBlocksForEvents( CLR_UINT32 dataType, CLR_UINT32 flags, CLR_UINT32 length )
+CLR_RT_HeapBlock_Node *CLR_RT_ExecutionEngine::ExtractHeapBlocksForEvents(
+    CLR_UINT32 dataType,
+    CLR_UINT32 flags,
+    CLR_UINT32 length)
 {
     NATIVE_PROFILE_CLR_CORE();
-    if(length > CLR_RT_HeapBlock::HB_MaxSize) return NULL;
+
+    if (length > CLR_RT_HeapBlock::HB_MaxSize)
+    {
+        return nullptr;
+    }
 
     flags |= CLR_RT_HeapBlock::HB_Alive | CLR_RT_HeapBlock::HB_Event;
 
-    CLR_RT_HeapBlock_Node* hb = (CLR_RT_HeapBlock_Node*)ExtractHeapBlocks( m_heap, dataType, flags, length );
+    CLR_RT_HeapBlock_Node *hb = (CLR_RT_HeapBlock_Node *)ExtractHeapBlocks(m_heap, dataType, flags, length);
 
-    if(hb)
+    if (hb)
     {
         hb->GenericNode_Initialize();
 
 #if defined(NANOCLR_PROFILE_NEW_ALLOCATIONS)
-        g_CLR_PRF_Profiler.TrackObjectCreation( hb );
+        g_CLR_PRF_Profiler.TrackObjectCreation(hb);
 #endif
     }
 
     return hb;
 }
 
-CLR_RT_HeapBlock* CLR_RT_ExecutionEngine::ExtractHeapBlocks( CLR_RT_DblLinkedList& heap, CLR_UINT32 dataType, CLR_UINT32 flags, CLR_UINT32 length )
+CLR_RT_HeapBlock *CLR_RT_ExecutionEngine::ExtractHeapBlocks(
+    CLR_RT_DblLinkedList &heap,
+    CLR_UINT32 dataType,
+    CLR_UINT32 flags,
+    CLR_UINT32 length)
 {
     NATIVE_PROFILE_CLR_CORE();
 #if !defined(BUILD_RTM)
-    if(m_heapState == c_HeapState_UnderGC && ((flags & CLR_RT_HeapBlock::HB_SpecialGCAllocation) == 0))
+    if (m_heapState == c_HeapState_UnderGC && ((flags & CLR_RT_HeapBlock::HB_SpecialGCAllocation) == 0))
     {
-        CLR_Debug::Printf( "Internal error: call to memory allocation during garbage collection!!!\r\n" );
+
+#if defined(NANOCLR_GC_VERBOSE)
+        if (s_CLR_RT_fTrace_Memory >= c_CLR_RT_Trace_Info)
+        {
+            CLR_Debug::Printf("Internal error: call to memory allocation during garbage collection!!!\r\n");
+        }
+#endif
 
         // Getting here during a GC is possible, since the watchdog ISR may now require
-        // dynamic memory allocation for logging.  Returning NULL means the watchdog log will 
+        // dynamic memory allocation for logging.  Returning nullptr means the watchdog log will
         // be lost, but without major restructuring there is not much we can do.
-        return NULL;
+        return nullptr;
     }
 #endif
 
 #if defined(NANOCLR_FORCE_GC_BEFORE_EVERY_ALLOCATION)
-    if(m_heapState != c_HeapState_UnderGC)
+    if (m_heapState != c_HeapState_UnderGC)
     {
         g_CLR_RT_EventCache.EventCache_Cleanup();
         PerformGarbageCollection();
     }
 #endif
 
-    for(int phase=0; ; phase++)
+    for (int phase = 0;; phase++)
     {
         {
-            CLR_RT_HeapBlock* hb;
+            CLR_RT_HeapBlock *hb;
 
-            if(flags & CLR_RT_HeapBlock::HB_Event)
+            if (flags & CLR_RT_HeapBlock::HB_Event)
             {
-                NANOCLR_FOREACH_NODE_BACKWARD(CLR_RT_HeapCluster,hc,heap)
+                NANOCLR_FOREACH_NODE_BACKWARD(CLR_RT_HeapCluster, hc, heap)
                 {
-                    hb = hc->ExtractBlocks( dataType, flags, length );
-                    if(hb)
+                    hb = hc->ExtractBlocks(dataType, flags, length);
+                    if (hb)
                     {
                         return hb;
                     }
@@ -1551,26 +1923,26 @@ CLR_RT_HeapBlock* CLR_RT_ExecutionEngine::ExtractHeapBlocks( CLR_RT_DblLinkedLis
             }
             else
             {
-                if(m_lastHcUsed != NULL)
+                if (m_lastHcUsed != nullptr)
                 {
-                    hb = m_lastHcUsed->ExtractBlocks( dataType, flags, length );
-                    if(hb)
+                    hb = m_lastHcUsed->ExtractBlocks(dataType, flags, length);
+                    if (hb)
                     {
                         return hb;
                     }
                 }
 
-                NANOCLR_FOREACH_NODE(CLR_RT_HeapCluster,hc,heap)
+                NANOCLR_FOREACH_NODE(CLR_RT_HeapCluster, hc, heap)
                 {
-                    hb = hc->ExtractBlocks( dataType, flags, length );
-                    if(hb)
+                    hb = hc->ExtractBlocks(dataType, flags, length);
+                    if (hb)
                     {
 #if defined(NANOCLR_GC_VERBOSE)
-                        if(s_CLR_RT_fTrace_Memory >= c_CLR_RT_Trace_Info)
+                        if (s_CLR_RT_fTrace_Memory >= c_CLR_RT_Trace_Info)
                         {
-                            if(phase != 0)
+                            if (phase != 0)
                             {
-                                CLR_Debug::Printf( "ExtractHeapBlocks succeeded at phase %d\r\n", phase );
+                                CLR_Debug::Printf("\r\n\r\nExtractHeapBlocks succeeded at phase %d\r\n", phase);
                             }
                         }
 #endif
@@ -1581,74 +1953,144 @@ CLR_RT_HeapBlock* CLR_RT_ExecutionEngine::ExtractHeapBlocks( CLR_RT_DblLinkedLis
                 NANOCLR_FOREACH_NODE_END();
             }
 
-            m_lastHcUsed = NULL;
+            m_lastHcUsed = nullptr;
         }
 
-        if(flags & CLR_RT_HeapBlock::HB_NoGcOnFailedAllocation)
+        if (flags & CLR_RT_HeapBlock::HB_NoGcOnFailedAllocation)
         {
-            return NULL;
+            return nullptr;
         }
 
-        switch(phase)
+        switch (phase)
         {
-        case 0:
+            // perform garbage collection to try to free up some memory
+            case 0:
+
 #if defined(NANOCLR_GC_VERBOSE)
-            if(s_CLR_RT_fTrace_Memory >= c_CLR_RT_Trace_Info)
-            {
-                CLR_Debug::Printf( "    Memory: ExtractHeapBlocks: %d bytes needed.\r\n", length * sizeof(CLR_RT_HeapBlock) );
-            }
+                if (s_CLR_RT_fTrace_Memory >= c_CLR_RT_Trace_Info)
+                {
+                    CLR_Debug::Printf(
+                        "\r\n\r\n    Memory: ExtractHeapBlocks: %d bytes needed.\r\n",
+                        length * sizeof(struct CLR_RT_HeapBlock));
+                }
 #endif
 
-            PerformGarbageCollection();
+                PerformGarbageCollection();
 
-            break;
+                break;
 
-        default: // Total failure...
-#if !defined(BUILD_RTM)
-            CLR_Debug::Printf( "Failed allocation for %d blocks, %d bytes\r\n\r\n", length, length * sizeof(CLR_RT_HeapBlock) );
+            // total failure on reclaiming enough memory
+            default:
+
+                if (g_CLR_RT_GarbageCollector.m_freeBytes >= (length * sizeof(struct CLR_RT_HeapBlock)))
+                {
+                    // A compaction probably would have saved this OOM
+                    // Compaction will occur for Bitmaps, Arrays, etc. if this function returns nullptr, so lets not
+                    // through an assert here
+
+                    // Throw the OOM, and schedule a compaction at a safe point
+                    CLR_EE_SET(Compaction_Pending);
+
+#if defined(NANOCLR_GC_VERBOSE)
+                    if (s_CLR_RT_fTrace_Memory >= c_CLR_RT_Trace_Info)
+                    {
+                        CLR_Debug::Printf(
+                            "\r\n\r\nFailed allocation for %d blocks, %d bytes.\r\nThere's enough free memory, heap "
+                            "compaction scheduled.\r\n\r\n",
+                            length,
+                            length * sizeof(struct CLR_RT_HeapBlock));
+                    }
 #endif
-            if(g_CLR_RT_GarbageCollector.m_freeBytes >= (length * sizeof(CLR_RT_HeapBlock)))
-            {
-                
-                //A compaction probably would have saved this OOM
-                //Compaction will occur for Bitmaps, Arrays, etc. if this function returns NULL, so lets not
-                //through an assert here
+                }
+                else
+                {
 
-                //Throw the OOM, and schedule a compaction at a safe point
-                CLR_EE_SET( Compaction_Pending );
-            }
+#if defined(NANOCLR_GC_VERBOSE)
+                    if (s_CLR_RT_fTrace_Memory >= c_CLR_RT_Trace_Info)
+                    {
+                        CLR_Debug::Printf(
+                            "\r\n\r\nFailed allocation for %d blocks, %d bytes\r\n\r\n",
+                            length,
+                            length * sizeof(struct CLR_RT_HeapBlock));
+                    }
+#endif
+                }
 
-            return NULL;
+                return nullptr;
         }
     }
 }
 
-   
-CLR_RT_HeapBlock* CLR_RT_ExecutionEngine::AccessStaticField( const CLR_RT_FieldDef_Index& fd )
+CLR_RT_HeapBlock *CLR_RT_ExecutionEngine::AccessStaticField(const CLR_RT_FieldDef_Index &fd)
 {
     NATIVE_PROFILE_CLR_CORE();
     CLR_RT_FieldDef_Instance inst;
 
-    if(inst.InitializeFromIndex( fd ) && inst.m_target->flags & CLR_RECORD_FIELDDEF::FD_Static)
+    if (inst.InitializeFromIndex(fd) && inst.target->flags & CLR_RECORD_FIELDDEF::FD_Static)
     {
-#if defined(NANOCLR_APPDOMAINS)        
+#if defined(NANOCLR_APPDOMAINS)
         {
-            CLR_RT_AppDomainAssembly* appDomainAssembly = g_CLR_RT_ExecutionEngine.GetCurrentAppDomain()->FindAppDomainAssembly( inst.m_assm );
+            CLR_RT_AppDomainAssembly *appDomainAssembly =
+                g_CLR_RT_ExecutionEngine.GetCurrentAppDomain()->FindAppDomainAssembly(inst.m_assm);
 
-            if(appDomainAssembly)
+            if (appDomainAssembly)
             {
-                return &appDomainAssembly->m_pStaticFields[ inst.CrossReference().m_offset ];
+                return &appDomainAssembly->m_pStaticFields[inst.CrossReference().m_offset];
             }
         }
 #else
-        return &inst.m_assm->m_pStaticFields[ inst.CrossReference().m_offset ];
+        return &inst.assembly->staticFields[inst.CrossReference().offset];
 #endif
     }
 
-    return NULL;
+    return nullptr;
 }
 
-HRESULT CLR_RT_ExecutionEngine::InitializeReference( CLR_RT_HeapBlock& ref, CLR_RT_SignatureParser& parser )
+// Helper function to resolve generic type parameters (VAR/MVAR) to their concrete types
+// Used by both InitializeReference and InitializeLocals to reduce code duplication
+static HRESULT ResolveGenericTypeParameter(
+    const CLR_RT_TypeSpec_Index &genericTypeIndex,
+    CLR_UINT8 paramPosition,
+    CLR_RT_TypeDef_Index &outClass,
+    NanoCLRDataType &outDataType)
+{
+    NATIVE_PROFILE_CLR_CORE();
+    NANOCLR_HEADER();
+
+    if (!NANOCLR_INDEX_IS_VALID(genericTypeIndex))
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
+    }
+
+    CLR_RT_TypeSpec_Instance typeSpec;
+    if (!typeSpec.InitializeFromIndex(genericTypeIndex))
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
+    }
+
+    CLR_RT_SignatureParser::Element paramElement;
+    if (!typeSpec.GetGenericParam(paramPosition, paramElement))
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
+    }
+
+    // Fail here so the caller's allowUnresolvedVarFallback path handles it.
+    if (paramElement.DataType == DATATYPE_VAR || paramElement.DataType == DATATYPE_MVAR)
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
+    }
+
+    outClass = paramElement.Class;
+    outDataType = paramElement.DataType;
+
+    NANOCLR_NOCLEANUP();
+}
+
+HRESULT CLR_RT_ExecutionEngine::InitializeReference(
+    CLR_RT_HeapBlock &ref,
+    CLR_RT_SignatureParser &parser,
+    const CLR_RT_TypeSpec_Instance *genericInstance,
+    bool allowUnresolvedVarFallback)
 {
     NATIVE_PROFILE_CLR_CORE();
     //
@@ -1659,202 +2101,488 @@ HRESULT CLR_RT_ExecutionEngine::InitializeReference( CLR_RT_HeapBlock& ref, CLR_
 
     NANOCLR_HEADER();
 
+    CLR_RT_SignatureParser internalParser{};
     CLR_RT_SignatureParser::Element res;
-    CLR_DataType                    dt;
+    NanoCLRDataType dt;
+    CLR_RT_TypeDef_Index realTypeDef{};
+    CLR_RT_TypeSpec_Instance internalGenericInstance{};
 
-    NANOCLR_CHECK_HRESULT(parser.Advance( res ));
+    NANOCLR_CHECK_HRESULT(parser.Advance(res));
 
-    dt = res.m_dt;
+    dt = res.DataType;
+    realTypeDef.data = res.Class.data;
 
-    if(res.m_levels > 0) // Array
+    if (res.Levels > 0) // Array
     {
         dt = DATATYPE_OBJECT;
     }
     else
     {
-        if(dt == DATATYPE_VALUETYPE)
-        {
-            CLR_RT_TypeDef_Instance inst; inst.InitializeFromIndex( res.m_cls );
+    process_datatype:
 
-            if((inst.m_target->flags & CLR_RECORD_TYPEDEF::TD_Semantics_Mask) == CLR_RECORD_TYPEDEF::TD_Semantics_Enum)
+        if (dt == DATATYPE_VAR)
+        {
+            if (genericInstance == nullptr || !NANOCLR_INDEX_IS_VALID(*genericInstance))
             {
-                dt = (CLR_DataType)inst.m_target->dataType;
+                if (allowUnresolvedVarFallback)
+                {
+                    // VAR cannot be resolved without a closed generic context (e.g. when
+                    // pre-allocating array element structs for an open generic type).
+                    // Treat as an object reference (null) so field initialization proceeds;
+                    // subsequent stfld instructions will overwrite with the correct type.
+                    dt = DATATYPE_OBJECT;
+                }
+                else
+                {
+                    NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
+                }
             }
             else
             {
-                NANOCLR_SET_AND_LEAVE(NewObject( ref, inst ));
+                HRESULT hrParam =
+                    ResolveGenericTypeParameter(*genericInstance, res.GenericParamPosition, realTypeDef, dt);
+                if (FAILED(hrParam))
+                {
+                    if (allowUnresolvedVarFallback)
+                    {
+                        dt = DATATYPE_OBJECT;
+                    }
+                    else
+                    {
+                        NANOCLR_CHECK_HRESULT(hrParam);
+                    }
+                }
+                else
+                {
+                    goto process_datatype;
+                }
+            }
+        }
+        else if (dt == DATATYPE_MVAR)
+        {
+            // MVAR cannot be resolved without method-spec context in InitializeReference.
+            // Treat as an object reference (null) so local initialization can proceed.
+            dt = DATATYPE_OBJECT;
+        }
+        else if (dt == DATATYPE_GENERICINST)
+        {
+            // need to unwind one position in the signature to have the complete one to seach TypeSpecs
+            CLR_PMETADATA typeSpecSignature = parser.Signature;
+            typeSpecSignature--;
+
+            CLR_RT_TypeSpec_Index genericTSIndex = {};
+            if (!parser.Assembly->FindTypeSpec(typeSpecSignature, genericTSIndex))
+            {
+                NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+            }
+
+            // copy over to parameter
+            internalGenericInstance.InitializeFromIndex(genericTSIndex);
+
+            internalParser.Initialize_TypeSpec(
+                parser.Assembly,
+                parser.Assembly->GetTypeSpec(internalGenericInstance.TypeSpec()));
+
+            CLR_RT_SignatureParser::Element element;
+            NANOCLR_CHECK_HRESULT(internalParser.Advance(element));
+
+            // if this is another generic instance, need to advance to get the type
+            if (dt == DATATYPE_GENERICINST)
+            {
+                NANOCLR_CHECK_HRESULT(internalParser.Advance(element));
+            }
+
+            dt = element.DataType;
+            realTypeDef.data = element.Class.data;
+
+            goto process_datatype;
+        }
+        else if (dt == DATATYPE_VALUETYPE)
+        {
+            CLR_RT_TypeDef_Instance inst{};
+            inst.InitializeFromIndex(realTypeDef);
+
+            if ((inst.target->flags & CLR_RECORD_TYPEDEF::TD_Semantics_Mask) == CLR_RECORD_TYPEDEF::TD_Semantics_Enum)
+            {
+                dt = (NanoCLRDataType)inst.target->dataType;
+            }
+            else
+            {
+                // prefer the generic instance contained in the signature
+                NANOCLR_SET_AND_LEAVE(NewObject(
+                    ref,
+                    inst,
+                    NANOCLR_INDEX_IS_VALID(internalGenericInstance) ? &internalGenericInstance : genericInstance));
             }
         }
         else
         {
-            if(c_CLR_RT_DataTypeLookup[ dt ].m_flags & CLR_RT_DataTypeLookup::c_Reference)
+            if (c_CLR_RT_DataTypeLookup[dt].m_flags & CLR_RT_DataTypeLookup::c_Reference)
             {
                 dt = DATATYPE_OBJECT;
             }
         }
     }
 
-    ref.SetDataId( CLR_RT_HEAPBLOCK_RAW_ID( dt, CLR_RT_HeapBlock::HB_Alive, 1 ) );
+    ref.SetDataId(CLR_RT_HEAPBLOCK_RAW_ID(dt, CLR_RT_HeapBlock::HB_Alive, 1));
     ref.ClearData();
 
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT CLR_RT_ExecutionEngine::InitializeReference( CLR_RT_HeapBlock& ref, const CLR_RECORD_FIELDDEF* target, CLR_RT_Assembly* assm )
+HRESULT CLR_RT_ExecutionEngine::InitializeReference(
+    CLR_RT_HeapBlock &ref,
+    const CLR_RECORD_FIELDDEF *target,
+    CLR_RT_Assembly *assm,
+    const CLR_RT_TypeSpec_Instance *genericInstance,
+    bool allowUnresolvedVarFallback)
 {
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
 
-    CLR_RT_SignatureParser parser; parser.Initialize_FieldDef( assm, target );
+    CLR_RT_SignatureParser parser{};
+    parser.Initialize_FieldDef(assm, target);
 
-    NANOCLR_SET_AND_LEAVE(InitializeReference( ref, parser ));
+    NANOCLR_SET_AND_LEAVE(InitializeReference(ref, parser, genericInstance, allowUnresolvedVarFallback));
 
     NANOCLR_NOCLEANUP();
 }
 
 //--//
 
-HRESULT CLR_RT_ExecutionEngine::InitializeLocals( CLR_RT_HeapBlock* locals, CLR_RT_Assembly* assm, const CLR_RECORD_METHODDEF* md )
+HRESULT CLR_RT_ExecutionEngine::InitializeLocals(
+    CLR_RT_HeapBlock *locals,
+    const CLR_RT_MethodDef_Instance &methodDefInstance)
 {
     NATIVE_PROFILE_CLR_CORE();
-    //
-    // WARNING!!!
-    //
-    // This method is a shortcut for the following code:
-    //
-  
+
+    //////////////////////////////////////////////////////////////////////
+    //                                                                  //
+    //                       ***** WARNING *****                        //
+    //                                                                  //
+    // Changes here must be ported to "CLR_RT_SignatureParser::Advance" //
+    //////////////////////////////////////////////////////////////////////
+
     NANOCLR_HEADER();
 
-    CLR_PMETADATA sig     = assm->GetSignature( md->locals );
-    CLR_UINT32    count   = md->numLocals;
-    bool          fZeroed = false;
+    CLR_RT_Assembly *assembly = methodDefInstance.assembly;
+    const CLR_RECORD_METHODDEF *methodDef = methodDefInstance.target;
+    CLR_PMETADATA sig = assembly->GetSignature(methodDef->locals);
+    CLR_UINT32 count = methodDef->localsCount;
+    bool fZeroed = false;
+    CLR_RT_TypeSpec_Instance genericInstance = {};
 
-    while(count)
+    while (count)
     {
-        CLR_DataType         dt = DATATYPE_VOID;
+        NanoCLRDataType dt = DATATYPE_VOID;
         CLR_RT_TypeDef_Index cls;
-        CLR_UINT32           levels = 0;
-        CLR_DataType         dtModifier = DATATYPE_VOID;
+        CLR_UINT32 levels = 0;
+        NanoCLRDataType dtModifier = DATATYPE_VOID;
 
-        while(true)
+        while (true)
         {
-            dt = CLR_UncompressElementType( sig );
-
-            switch(dt)
+            dt = CLR_UncompressElementType(sig);
+            switch (dt)
             {
-            case DATATYPE_TYPE_PINNED :
-                dtModifier = DATATYPE_TYPE_PINNED;
-                break;
-                
-            // Array declared on stack        .locals init [0] int16[] foo, 
-            case DATATYPE_SZARRAY:
-            // Reference declared on stack - .locals init [1] int16& pinned pShort,
-            case DATATYPE_BYREF:
-                levels++;
-                break;
+                case DATATYPE_TYPE_PINNED:
+                    dtModifier = DATATYPE_TYPE_PINNED;
+                    break;
 
-            case DATATYPE_CLASS:
-            case DATATYPE_VALUETYPE:
+                // Array declared on stack        .locals init [0] int16[] foo,
+                case DATATYPE_SZARRAY:
+                // Reference declared on stack - .locals init [1] int16& pinned pShort,
+                case DATATYPE_BYREF:
+                    levels++;
+                    break;
+
+                case DATATYPE_CLASS:
+                case DATATYPE_VALUETYPE:
                 {
-                    CLR_UINT32 tk  = CLR_TkFromStream( sig );
-                    CLR_UINT32 idx = CLR_DataFromTk( tk );
+                    CLR_UINT32 tk = CLR_TkFromStream(sig);
+                    CLR_UINT32 index = CLR_DataFromTk(tk);
 
-                    switch(CLR_TypeFromTk( tk ))
+                    switch (CLR_TypeFromTk(tk))
                     {
-                    case TBL_TypeSpec:
-                        {
-                            CLR_RT_SignatureParser          sub; sub.Initialize_TypeSpec( assm, assm->GetTypeSpec( idx ) );
-                            CLR_RT_SignatureParser::Element res;
+                        case TBL_TypeRef:
+                            cls = assembly->crossReferenceTypeRef[index].target;
+                            break;
 
-                            NANOCLR_CHECK_HRESULT(sub.Advance( res ));
+                        case TBL_TypeDef:
+                            cls.Set(assembly->assemblyIndex, index);
+                            break;
 
-                            cls     = res.m_cls;
-                            levels += res.m_levels;
-                        }
-                        break;
-
-                    case TBL_TypeRef:
-                        cls = assm->m_pCrossReference_TypeRef[ idx ].m_target;
-                        break;
-
-                    case TBL_TypeDef:
-                        cls.Set( assm->m_idx, idx );
-                        break;
-
-                    default:
-                        NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+                        default:
+                            NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
                     }
 
+                    goto done;
                 }
-                goto done;
 
-            default:
+                case DATATYPE_GENERICINST:
                 {
-                    const CLR_RT_TypeDef_Index* cls2 = c_CLR_RT_DataTypeLookup[ dt ].m_cls;
+                    // need to unwind one position in the signature to have the complete one to seach TypeSpecs
+                    CLR_PMETADATA typeSpecSignature = sig;
+                    typeSpecSignature--;
 
-                    if(cls2 == NULL)
+                    CLR_RT_TypeSpec_Index genericTSIndex = {};
+                    bool foundGenericTypeSpec = false;
+
+                    if (methodDefInstance.genericType && NANOCLR_INDEX_IS_VALID(*methodDefInstance.genericType) &&
+                        methodDefInstance.genericType->data != CLR_EmptyToken)
+                    {
+                        // method is generic, it can only use class from method's class generic parameters
+                        genericInstance.InitializeFromIndex(*methodDefInstance.genericType);
+                        foundGenericTypeSpec = true;
+                    }
+                    else
+                    {
+                        if (assembly->FindTypeSpec(typeSpecSignature, genericTSIndex))
+                        {
+                            // copy over to parameter
+                            genericInstance.InitializeFromIndex(genericTSIndex);
+                            foundGenericTypeSpec = true;
+                        }
+                    }
+
+                    if (foundGenericTypeSpec)
+                    {
+                        CLR_RT_SignatureParser parser;
+                        parser.Initialize_TypeSpec(genericInstance);
+
+                        CLR_RT_SignatureParser::Element element;
+                        NANOCLR_CHECK_HRESULT(parser.Advance(element));
+
+                        // if this is another generic instance, need to advance to get the type
+                        if (dt == DATATYPE_GENERICINST)
+                        {
+                            NANOCLR_CHECK_HRESULT(parser.Advance(element));
+                        }
+
+                        cls = element.Class;
+                        dt = element.DataType;
+                    }
+                    else
+                    {
+                        // Some generic method locals are open instantiations, such as IEnumerator<!!T>.
+                        // A reference-type local only needs a null object slot, so parse the local signature
+                        // directly instead of requiring a closed TypeSpec row.
+                        CLR_RT_SignatureParser ownerParser;
+                        ownerParser.Initialize_LocalVar(assembly, typeSpecSignature);
+
+                        CLR_RT_SignatureParser::Element ownerElement;
+                        NANOCLR_CHECK_HRESULT(ownerParser.Advance(ownerElement));
+
+                        if (ownerElement.DataType != DATATYPE_GENERICINST)
+                        {
+                            NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+                        }
+
+                        NANOCLR_CHECK_HRESULT(ownerParser.Advance(ownerElement));
+
+                        cls = ownerElement.Class;
+                        dt = ownerElement.DataType;
+
+                        if (dt == DATATYPE_VALUETYPE)
+                        {
+                            // Value-type generic locals need a closed generic instance for allocation.
+                            NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+                        }
+                    }
+
+                    // done, now consume the remaining of the local var signature
+                    CLR_RT_SignatureParser varParser;
+                    varParser.Initialize_LocalVar(assembly, typeSpecSignature);
+
+                    CLR_RT_SignatureParser::Element varElement;
+                    // consume GENERICINST (first element) - this sets ParamCount to 1 for
+                    // the class/valuetype that follows, plus all nested generic arguments.
+                    varParser.Advance(varElement);
+
+                    // Drain all remaining elements (class/valuetype token, generic argument count, and
+                    // all nested arguments recursively). Using Available() handles nested GENERICINSTs
+                    // such as ICollection<KeyValuePair<TKey,TValue>> where KVP itself has inner bytes
+                    // (VALUETYPE + TypeRef + count + I4 + STRING) that a fixed GenParamCount loop
+                    // would leave unread, corrupting `sig` for subsequent locals.
+                    while (varParser.Available() > 0)
+                    {
+                        NANOCLR_CHECK_HRESULT(varParser.Advance(varElement));
+                    }
+
+                    // advance locals signature
+                    while (sig < varParser.Signature)
+                    {
+                        sig++;
+                    }
+
+                    goto done;
+                }
+
+                case DATATYPE_VAR:
+                {
+                    // type-level generic parameter in a locals signature (e.g. 'T' inside a generic type)
+                    CLR_INT8 genericParamPosition = *sig++;
+
+                    // A propagated runtime element type can also bind the first type generic parameter
+                    // on helper objects whose closed generic context is inferred at runtime.
+                    if (NANOCLR_INDEX_IS_VALID(methodDefInstance.arrayElementType) && genericParamPosition == 0)
+                    {
+                        CLR_RT_TypeDef_Instance td;
+                        if (!td.InitializeFromIndex(methodDefInstance.arrayElementType))
+                        {
+                            NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+                        }
+
+                        cls = methodDefInstance.arrayElementType;
+                        dt = (NanoCLRDataType)td.target->dataType;
+                    }
+                    // Resolve type-level generic parameter (VAR) using the method's enclosing type context
+                    else if (
+                        methodDefInstance.genericType && NANOCLR_INDEX_IS_VALID(*methodDefInstance.genericType) &&
+                        methodDefInstance.genericType->data != CLR_EmptyToken)
+                    {
+                        NANOCLR_CHECK_HRESULT(
+                            ResolveGenericTypeParameter(*methodDefInstance.genericType, genericParamPosition, cls, dt));
+                    }
+                    else
+                    {
+                        NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
+                    }
+
+                    goto done;
+                }
+                case DATATYPE_MVAR:
+                {
+                    // Method-level generic parameter (e.g., '!!T' in a generic method like Array.Empty<T>())
+                    CLR_UINT8 genericParamPosition = *sig++;
+
+                    // Some rebound generic methods receive their method-generic argument from the
+                    // runtime element type rather than from a MethodSpec.
+                    if (NANOCLR_INDEX_IS_VALID(methodDefInstance.arrayElementType) && genericParamPosition == 0)
+                    {
+                        CLR_RT_TypeDef_Instance td;
+                        if (!td.InitializeFromIndex(methodDefInstance.arrayElementType))
+                        {
+                            NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+                        }
+
+                        cls = methodDefInstance.arrayElementType;
+                        dt = (NanoCLRDataType)td.target->dataType;
+                    }
+                    // For generic methods, use the MethodSpec's signature to get the concrete type
+                    else if (NANOCLR_INDEX_IS_VALID(methodDefInstance.methodSpec))
+                    {
+                        CLR_RT_MethodSpec_Instance methodSpec;
+                        CLR_RT_SignatureParser::Element element;
+
+                        if (!methodSpec.InitializeFromIndex(methodDefInstance.methodSpec))
+                        {
+                            NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
+                        }
+
+                        // Use GetGenericArgument to get the concrete type from MethodSpec's signature
+                        if (methodSpec.GetGenericArgument(genericParamPosition, element))
+                        {
+                            cls = element.Class;
+                            dt = element.DataType;
+                        }
+                        else
+                        {
+                            NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
+                        }
+                    }
+                    else
+                    {
+                        // Fallback: try to resolve using GenericParam table (for open generic methods)
+                        CLR_RT_GenericParam_Index gpIndex;
+                        assembly->FindGenericParamAtMethodDef(methodDefInstance, genericParamPosition, gpIndex);
+
+                        CLR_RT_GenericParam_CrossReference gp =
+                            assembly->crossReferenceGenericParam[gpIndex.GenericParam()];
+
+                        cls = gp.classTypeDef;
+                        dt = gp.dataType;
+                    }
+
+                    goto done;
+                }
+
+                default:
+                {
+                    const CLR_RT_TypeDef_Index *cls2 = c_CLR_RT_DataTypeLookup[dt].m_cls;
+
+                    if (cls2 == nullptr)
                     {
                         NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
                     }
 
                     cls = *cls2;
+
+                    goto done;
                 }
-                goto done;
             }
         }
 
-done:
-        if(levels > 0) // Array or reference
+    done:
+        if (levels > 0) // Array or reference
         {
-            locals->SetObjectReference( NULL );
-            
-            // If local varialb has DATATYPE_TYPE_PINNED, we mark heap block as 
-            if ( dtModifier == DATATYPE_TYPE_PINNED )
+            locals->SetObjectReference(nullptr);
+
+            // If local variable has DATATYPE_TYPE_PINNED, we mark heap block as
+            if (dtModifier == DATATYPE_TYPE_PINNED)
             {
                 locals->Pin();
             }
         }
         else
         {
-            if(dt == DATATYPE_VALUETYPE)
+            if (dt == DATATYPE_VALUETYPE)
             {
-                CLR_RT_TypeDef_Instance inst; inst.InitializeFromIndex( cls );
+                CLR_RT_TypeDef_Instance inst{};
+                inst.InitializeFromIndex(cls);
 
-                if(inst.m_target->dataType != DATATYPE_VALUETYPE)
+                if (inst.target->dataType != DATATYPE_VALUETYPE)
                 {
-                    locals->SetDataId( CLR_RT_HEAPBLOCK_RAW_ID( inst.m_target->dataType, CLR_RT_HeapBlock::HB_Alive, 1 ) );
+                    locals->SetDataId(CLR_RT_HEAPBLOCK_RAW_ID(inst.target->dataType, CLR_RT_HeapBlock::HB_Alive, 1));
                     locals->ClearData();
                 }
                 else
                 {
                     //
-                    // Before we allocate anything, we need to make sure the rest of the local variables are in a consistent state.
+                    // Before we allocate anything, we need to make sure the rest of the local variables are in a
+                    // consistent state.
                     //
-                    if(fZeroed == false)
+                    if (fZeroed == false)
                     {
                         fZeroed = true;
 
-                        CLR_RT_HeapBlock* ptr    =  locals;
-                        CLR_RT_HeapBlock* ptrEnd = &locals[ count ];
+                        CLR_RT_HeapBlock *ptr = locals;
+                        CLR_RT_HeapBlock *ptrEnd = &locals[count];
 
                         do
                         {
-                            ptr->SetDataId( CLR_RT_HEAPBLOCK_RAW_ID(DATATYPE_I4,0,1) );
+                            ptr->SetDataId(CLR_RT_HEAPBLOCK_RAW_ID(DATATYPE_I4, 0, 1));
 
-                        } while(++ptr < ptrEnd);
+                        } while (++ptr < ptrEnd);
                     }
 
-                    NANOCLR_CHECK_HRESULT(NewObject( *locals, inst ));
+                    // if (isGenericInstance)
+                    //{
+                    //     NANOCLR_CHECK_HRESULT(NewGenericInstanceObject(*locals, inst, &genericInstance));
+                    // }
+                    // else
+                    {
+                        NANOCLR_CHECK_HRESULT(NewObject(*locals, inst, &genericInstance));
+                    }
                 }
             }
             else
             {
-                if(c_CLR_RT_DataTypeLookup[ dt ].m_flags & CLR_RT_DataTypeLookup::c_Reference)
+                if (c_CLR_RT_DataTypeLookup[dt].m_flags & CLR_RT_DataTypeLookup::c_Reference)
                 {
                     dt = DATATYPE_OBJECT;
                 }
 
-                locals->SetDataId( CLR_RT_HEAPBLOCK_RAW_ID(dt,CLR_RT_HeapBlock::HB_Alive,1) );
+                locals->SetDataId(CLR_RT_HEAPBLOCK_RAW_ID(dt, CLR_RT_HeapBlock::HB_Alive, 1));
                 locals->ClearData();
             }
         }
@@ -1868,155 +2596,298 @@ done:
 
 //--//
 
-HRESULT CLR_RT_ExecutionEngine::NewObjectFromIndex( CLR_RT_HeapBlock& reference, const CLR_RT_TypeDef_Index& cls )
+HRESULT CLR_RT_ExecutionEngine::NewObjectFromIndex(
+    CLR_RT_HeapBlock &reference,
+    const CLR_RT_TypeDef_Index &cls,
+    const CLR_RT_TypeSpec_Instance *genericInstance)
 {
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
 
-    CLR_RT_TypeDef_Instance inst;
+    CLR_RT_TypeDef_Instance inst{};
 
-    if(inst.InitializeFromIndex( cls ) == false) NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+    if (inst.InitializeFromIndex(cls) == false)
+        NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
 
-    NANOCLR_SET_AND_LEAVE(NewObject( reference, inst ));
+    NANOCLR_SET_AND_LEAVE(NewObject(reference, inst, genericInstance));
 
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT CLR_RT_ExecutionEngine::NewObject( CLR_RT_HeapBlock& reference, const CLR_RT_TypeDef_Instance& inst )
+HRESULT CLR_RT_ExecutionEngine::NewObject(
+    CLR_RT_HeapBlock &reference,
+    const CLR_RT_TypeDef_Instance &inst,
+    const CLR_RT_TypeSpec_Instance *genericInstance)
 {
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
 
-    reference.SetObjectReference( NULL );
+    reference.SetObjectReference(nullptr);
 
-    CLR_DataType dt = (CLR_DataType)inst.m_target->dataType;
+    NanoCLRDataType dt = (NanoCLRDataType)inst.target->dataType;
 
     //
     // You cannot create an array this way.
     //
-    if(inst.m_data == g_CLR_RT_WellKnownTypes.m_Array.m_data)
+    if (inst.data == g_CLR_RT_WellKnownTypes.Array.data)
     {
         NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
     }
 
-    if((c_CLR_RT_DataTypeLookup[ dt ].m_flags & CLR_RT_DataTypeLookup::c_Reference) == 0)
+    if ((c_CLR_RT_DataTypeLookup[dt].m_flags & CLR_RT_DataTypeLookup::c_Reference) == 0)
     {
-        reference.SetDataId( CLR_RT_HEAPBLOCK_RAW_ID(dt,0,1) );
+        reference.SetDataId(CLR_RT_HEAPBLOCK_RAW_ID(dt, 0, 1));
     }
     else
     {
-        switch(dt)
+        switch (dt)
         {
-        case DATATYPE_STRING:
-            //
-            // Special case for strings.
-            //
-            break;
+            case DATATYPE_STRING:
+                //
+                // Special case for strings.
+                //
+                break;
 
-        case DATATYPE_WEAKCLASS:
+            case DATATYPE_WEAKCLASS:
             {
-                CLR_RT_HeapBlock_WeakReference* weakref;
+                CLR_RT_HeapBlock_WeakReference *weakref;
 
-                // this used to be a call to CLR_RT_HeapBlock_WeakReference::CreateInstance                
-                weakref = (CLR_RT_HeapBlock_WeakReference*)g_CLR_RT_ExecutionEngine.ExtractHeapBytesForObjects( DATATYPE_WEAKCLASS, CLR_RT_HeapBlock::HB_InitializeToZero, sizeof(*weakref) );
+                // this used to be a call to CLR_RT_HeapBlock_WeakReference::CreateInstance
+                weakref = (CLR_RT_HeapBlock_WeakReference *)g_CLR_RT_ExecutionEngine.ExtractHeapBytesForObjects(
+                    DATATYPE_WEAKCLASS,
+                    CLR_RT_HeapBlock::HB_InitializeToZero,
+                    sizeof(*weakref));
                 CHECK_ALLOCATION(weakref);
 
-                reference.SetObjectReference( weakref );
+                reference.SetObjectReference(weakref);
             }
             break;
 
-        case DATATYPE_CLASS:
-        case DATATYPE_VALUETYPE:
+            case DATATYPE_CLASS:
+            case DATATYPE_VALUETYPE:
             {
-                int               clsFields = inst.m_target->iFields_Num;
-                int               totFields = inst.CrossReference().m_totalFields + CLR_RT_HeapBlock::HB_Object_Fields_Offset;
-                CLR_RT_HeapBlock* obj       = ExtractHeapBlocksForClassOrValueTypes( dt, 0, inst, totFields ); CHECK_ALLOCATION(obj);
+                int clsFields = inst.target->instanceFieldsCount;
+                int totFields = inst.CrossReference().totalFields + CLR_RT_HeapBlock::HB_Object_Fields_Offset;
 
-                reference.SetObjectReference( obj );
+                CLR_UINT32 flags = 0;
+
+                if (genericInstance != nullptr && NANOCLR_INDEX_IS_VALID(*genericInstance))
+                {
+                    flags |= CLR_RT_HeapBlock::HB_GenericInstance;
+                }
+
+                CLR_RT_HeapBlock *obj = ExtractHeapBlocksForClassOrValueTypes(dt, flags, inst, totFields);
+                CHECK_ALLOCATION(obj);
+
+                reference.SetObjectReference(obj);
 
                 {
-                    const CLR_RECORD_FIELDDEF* target  = NULL;
-                    CLR_RT_Assembly*           assm    = NULL;
-                    CLR_RT_TypeDef_Instance    instSub = inst;
+                    const CLR_RECORD_FIELDDEF *target = nullptr;
+                    CLR_RT_Assembly *assm = nullptr;
+                    CLR_RT_TypeDef_Instance instSub = inst;
 
+                    NANOCLR_CHECK_HRESULT(obj->SetObjectCls(inst));
 
-                    NANOCLR_CHECK_HRESULT(obj->SetObjectCls( inst ));
+                    if (genericInstance != nullptr && NANOCLR_INDEX_IS_VALID(*genericInstance))
+                    {
+                        // If we have a generic instance, we need to set the corresponding TypeSpec
+                        obj->SetGenericInstanceType(*genericInstance);
+                    }
 
                     //
                     // Initialize field types, from last to first.
                     //
-                    // We do the decrement BEFORE the comparison because we want to stop short of the first field, the object descriptor (already initialized).
+                    // We do the decrement BEFORE the comparison because we want to stop short of the first field,
+                    // the object descriptor (already initialized).
                     //
+
                     obj += totFields;
-                    while(--totFields > 0)
+                    while (--totFields > 0)
                     {
-                        while(clsFields == 0)
+                        while (clsFields == 0)
                         {
-                            if(instSub.SwitchToParent() == false) NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
+                            if (instSub.SwitchToParent() == false)
+                            {
+                                NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
+                            }
 
-                            clsFields = instSub.m_target->iFields_Num;
-                            target    = NULL;
+                            clsFields = instSub.target->instanceFieldsCount;
+                            target = nullptr;
                         }
 
-                        if(target == NULL)
+                        if (target == nullptr)
                         {
-                            assm   = instSub.m_assm;
-                            target = assm->GetFieldDef( instSub.m_target->iFields_First + clsFields );
+                            assm = instSub.assembly;
+                            target = assm->GetFieldDef(instSub.target->firstInstanceField + clsFields);
                         }
 
-                        obj--; target--; clsFields--;
+                        obj--;
+                        target--;
+                        clsFields--;
 
-                        NANOCLR_CHECK_HRESULT(InitializeReference( *obj, target, assm ));
+#if defined(NANOCLR_INSTANCE_NAMES)
+                        const char *typeName = assm->GetString(target->type);
+                        const char *fieldName = assm->GetString(target->name);
+#endif
+
+                        NANOCLR_CHECK_HRESULT(InitializeReference(*obj, target, assm, genericInstance, true));
                     }
                 }
 
-                if(inst.HasFinalizer())
+                if (inst.HasFinalizer())
                 {
-                    NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Finalizer::CreateInstance( reference.Dereference(), inst ));
+                    NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Finalizer::CreateInstance(reference.Dereference(), inst));
                 }
             }
             break;
 
-        default:
-            NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+            default:
+                NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
         }
     }
 
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT CLR_RT_ExecutionEngine::NewObject( CLR_RT_HeapBlock& reference, CLR_UINT32 tk, CLR_RT_Assembly* assm )
+HRESULT CLR_RT_ExecutionEngine::NewObject(CLR_RT_HeapBlock &reference, CLR_UINT32 tk, CLR_RT_Assembly *assm)
 {
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
 
-    CLR_RT_TypeDef_Instance res;
+    CLR_RT_TypeDef_Instance res{};
 
-    if(res.ResolveToken( tk, assm ) == false) NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+    if (res.ResolveToken(tk, assm) == false)
+        NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
 
-    NANOCLR_CHECK_HRESULT(NewObjectFromIndex( reference, res ));
+    NANOCLR_CHECK_HRESULT(NewObjectFromIndex(reference, res));
 
     NANOCLR_NOCLEANUP();
 }
 
 //--//
 
-HRESULT CLR_RT_ExecutionEngine::CloneObject( CLR_RT_HeapBlock& reference, const CLR_RT_HeapBlock& source )
+HRESULT CLR_RT_ExecutionEngine::NewGenericInstanceObject(
+    CLR_RT_HeapBlock &reference,
+    const CLR_RT_TypeDef_Instance &typeDef,
+    const CLR_RT_TypeSpec_Index *genericType)
 {
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
 
-    const CLR_RT_HeapBlock* obj = &source;
-    CLR_DataType            dt;
+    CLR_RT_TypeSpec_Instance inst;
 
-    while(true)
+    if (inst.InitializeFromIndex(*genericType) == false)
     {
-        dt = (CLR_DataType)obj->DataType();
+        NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+    }
 
-        if(dt == DATATYPE_BYREF ||
-           dt == DATATYPE_OBJECT )
+    NANOCLR_SET_AND_LEAVE(NewGenericInstanceObject(reference, typeDef, &inst));
+
+    NANOCLR_NOCLEANUP();
+}
+
+HRESULT CLR_RT_ExecutionEngine::NewGenericInstanceObject(
+    CLR_RT_HeapBlock &reference,
+    const CLR_RT_TypeDef_Instance &instance,
+    const CLR_RT_TypeSpec_Instance *genericInstance)
+{
+    NATIVE_PROFILE_CLR_CORE();
+    NANOCLR_HEADER();
+
+    const CLR_RECORD_FIELDDEF *target = nullptr;
+    CLR_RT_Assembly *assm = nullptr;
+    CLR_RT_TypeDef_Instance instSub = instance;
+    CLR_RT_HeapBlock_GenericInstance *giHeader = nullptr;
+    CLR_RT_HeapBlock *fieldCursor = nullptr;
+
+    reference.SetObjectReference(nullptr);
+
+    int clsFields = instance.target->instanceFieldsCount;
+    int totFields = instance.CrossReference().totalFields + CLR_RT_HeapBlock::HB_Object_Fields_Offset;
+
+    giHeader = (CLR_RT_HeapBlock_GenericInstance *)ExtractHeapBlocksForGenericInstance(0, *genericInstance, totFields);
+    CHECK_ALLOCATION(giHeader);
+
+    reference.SetObjectReference(giHeader);
+
+    // Associate the instance with its declaring type for reflection & casting utilities.
+    giHeader->SetObjectCls(instance);
+
+    //
+    // Initialize field types, from last to first.
+    //
+    // We do the decrement BEFORE the comparison because we want to stop short of the first field, the
+    // object descriptor (already initialized).
+    //
+
+    fieldCursor = reinterpret_cast<CLR_RT_HeapBlock *>(giHeader) + totFields;
+
+    CLR_Debug::Printf(
+        "DBG GenericInst: NewGenericInstanceObject type='%s' totFields=%d giHeader=%08X\r\n",
+        instance.assembly->GetString(instance.target->name),
+        totFields,
+        (uintptr_t)giHeader);
+
+    while (--totFields > 0)
+    {
+        while (clsFields == 0)
         {
-            obj = obj->Dereference(); FAULT_ON_NULL(obj);
+            if (instSub.SwitchToParent() == false)
+            {
+                NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
+            }
+
+            clsFields = instSub.target->instanceFieldsCount;
+            target = nullptr;
+        }
+
+        if (target == nullptr)
+        {
+            assm = instSub.assembly;
+            target = assm->GetFieldDef(instSub.target->firstInstanceField + clsFields);
+        }
+
+        fieldCursor--;
+        target--;
+        clsFields--;
+
+        CLR_Debug::Printf(
+            "DBG GenericInst:   InitField field='%s' type='%s' cursor=%08X\r\n",
+            assm->GetString(target->name),
+            assm->GetString(target->type),
+            (uintptr_t)fieldCursor);
+
+        NANOCLR_CHECK_HRESULT(InitializeReference(*fieldCursor, target, assm, genericInstance));
+
+        CLR_Debug::Printf("DBG GenericInst:   InitField done dt=%d\r\n", (int)fieldCursor->DataType());
+    }
+
+    if (instance.HasFinalizer())
+    {
+        NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Finalizer::CreateInstance(reference.Dereference(), instance));
+    }
+
+    NANOCLR_NOCLEANUP();
+}
+
+//--//
+
+HRESULT CLR_RT_ExecutionEngine::CloneObject(CLR_RT_HeapBlock &reference, const CLR_RT_HeapBlock &source)
+{
+    NATIVE_PROFILE_CLR_CORE();
+    NANOCLR_HEADER();
+
+    const CLR_RT_HeapBlock *obj = &source;
+    NanoCLRDataType dt;
+
+    while (true)
+    {
+        dt = (NanoCLRDataType)obj->DataType();
+
+        if (dt == DATATYPE_BYREF || dt == DATATYPE_OBJECT)
+        {
+            obj = obj->Dereference();
+            FAULT_ON_NULL(obj);
         }
         else
         {
@@ -2024,65 +2895,77 @@ HRESULT CLR_RT_ExecutionEngine::CloneObject( CLR_RT_HeapBlock& reference, const 
         }
     }
 
-    switch(dt)
+    switch (dt)
     {
 
-    case DATATYPE_VALUETYPE:
-    case DATATYPE_CLASS:
+        case DATATYPE_VALUETYPE:
+        case DATATYPE_CLASS:
         {
             //
             // Save the pointer to the object to clone, in case 'reference' and 'source' point to the same block.
             //
-            CLR_RT_HeapBlock     safeSource; safeSource.SetObjectReference( obj );
-            CLR_RT_ProtectFromGC gc( safeSource );
+            CLR_RT_HeapBlock safeSource;
+            CLR_RT_TypeSpec_Instance genericInstance = {};
 
-            NANOCLR_CHECK_HRESULT(NewObjectFromIndex( reference              , obj->ObjectCls() ));
-            NANOCLR_CHECK_HRESULT(CopyValueType     ( reference.Dereference(), obj              ));
+            safeSource.SetObjectReference(obj);
+            CLR_RT_ProtectFromGC gc(safeSource);
+
+            if (obj->IsAGenericInstance())
+            {
+                // instanciate the generic type
+                genericInstance.InitializeFromIndex(obj->ObjectGenericType());
+            }
+
+            NANOCLR_CHECK_HRESULT(NewObjectFromIndex(reference, obj->ObjectCls(), &genericInstance));
+            NANOCLR_CHECK_HRESULT(CopyValueType(reference.Dereference(), obj));
         }
         break;
 
-    default:
-        if((c_CLR_RT_DataTypeLookup[ dt ].m_flags & CLR_RT_DataTypeLookup::c_OptimizedValueType) == 0)
-        {
-            NANOCLR_SET_AND_LEAVE(CLR_E_NOT_SUPPORTED);
-        }
+        default:
+            if ((c_CLR_RT_DataTypeLookup[dt].m_flags & CLR_RT_DataTypeLookup::c_OptimizedValueType) == 0)
+            {
+                NANOCLR_SET_AND_LEAVE(CLR_E_NOT_SUPPORTED);
+            }
 
-        //
-        // Non-reference type, straight copy.
-        //
-        reference.Assign( source );
-        break;
+            //
+            // Non-reference type, straight copy.
+            //
+            reference.Assign(source);
+            break;
     }
 
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT CLR_RT_ExecutionEngine::CopyValueType( CLR_RT_HeapBlock* destination, const CLR_RT_HeapBlock* source )
+HRESULT CLR_RT_ExecutionEngine::CopyValueType(CLR_RT_HeapBlock *destination, const CLR_RT_HeapBlock *source)
 {
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
 
-    if(destination != source)
+    if (destination != source)
     {
-        const CLR_RT_TypeDef_Index& cls = source->ObjectCls();
-        if(cls.m_data == destination->ObjectCls().m_data)
+        const CLR_RT_TypeDef_Index &cls = source->ObjectCls();
+        if (cls.data == destination->ObjectCls().data)
         {
-            CLR_RT_TypeDef_Instance inst; inst.InitializeFromIndex( cls );
-            CLR_UINT32              totFields = inst.CrossReference().m_totalFields;
+            CLR_RT_TypeDef_Instance inst{};
+            inst.InitializeFromIndex(cls);
+            CLR_UINT32 totFields = inst.CrossReference().totalFields;
 
-            if(source->IsBoxed()) destination->Box();
+            if (source->IsBoxed())
+                destination->Box();
 
-            while(true)
+            while (true)
             {
-                if(totFields-- == 0) break;
+                if (totFields-- == 0)
+                    break;
 
                 //
                 // We increment the two pointers to skip the header of the objects.
                 //
-                source     ++;
+                source++;
                 destination++;
 
-                NANOCLR_CHECK_HRESULT(destination->Reassign( *source ));
+                NANOCLR_CHECK_HRESULT(destination->Reassign(*source));
             }
 
             NANOCLR_SET_AND_LEAVE(S_OK);
@@ -2096,26 +2979,29 @@ HRESULT CLR_RT_ExecutionEngine::CopyValueType( CLR_RT_HeapBlock* destination, co
 
 //--//
 
-HRESULT CLR_RT_ExecutionEngine::NewArrayList( CLR_RT_HeapBlock& ref, int size, CLR_RT_HeapBlock_Array*& array )
+HRESULT CLR_RT_ExecutionEngine::NewArrayList(CLR_RT_HeapBlock &ref, int size, CLR_RT_HeapBlock_Array *&array)
 {
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
 
     const int minCapacity = CLR_RT_ArrayListHelper::c_defaultCapacity;
-    int       count       = size;
-    int       capacity    = size < minCapacity ? minCapacity : size;
+    int count = size;
+    int capacity = size < minCapacity ? minCapacity : size;
 
-    NANOCLR_CHECK_HRESULT(NewObjectFromIndex( ref, g_CLR_RT_WellKnownTypes.m_ArrayList ));
+    NANOCLR_CHECK_HRESULT(NewObjectFromIndex(ref, g_CLR_RT_WellKnownTypes.ArrayList));
 
-    NANOCLR_CHECK_HRESULT(CLR_RT_ArrayListHelper::PrepareArrayList         ( ref,        count, capacity ));
-    NANOCLR_CHECK_HRESULT(CLR_RT_ArrayListHelper::ExtractArrayFromArrayList( ref, array, count, capacity ));
+    NANOCLR_CHECK_HRESULT(CLR_RT_ArrayListHelper::PrepareArrayList(ref, count, capacity));
+    NANOCLR_CHECK_HRESULT(CLR_RT_ArrayListHelper::ExtractArrayFromArrayList(ref, array, count, capacity));
 
     NANOCLR_NOCLEANUP();
 }
 
 //--//
 
-HRESULT CLR_RT_ExecutionEngine::FindFieldDef( CLR_RT_TypeDef_Instance& inst, const char* szText, CLR_RT_FieldDef_Index& res )
+HRESULT CLR_RT_ExecutionEngine::FindFieldDef(
+    CLR_RT_TypeDef_Instance &inst,
+    const char *szText,
+    CLR_RT_FieldDef_Index &res)
 {
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
@@ -2124,61 +3010,72 @@ HRESULT CLR_RT_ExecutionEngine::FindFieldDef( CLR_RT_TypeDef_Instance& inst, con
 
     do
     {
-        if(local.m_assm->FindFieldDef( local.m_target, szText, NULL, 0, res )) NANOCLR_SET_AND_LEAVE(S_OK);
-    }
-    while(local.SwitchToParent());
+        if (local.assembly->FindFieldDef(local.target, szText, nullptr, 0, res))
+            NANOCLR_SET_AND_LEAVE(S_OK);
+    } while (local.SwitchToParent());
 
     NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
 
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT CLR_RT_ExecutionEngine::FindFieldDef( CLR_RT_HeapBlock& reference, const char* szText, CLR_RT_FieldDef_Index& res )
+HRESULT CLR_RT_ExecutionEngine::FindFieldDef(
+    CLR_RT_HeapBlock &reference,
+    const char *szText,
+    CLR_RT_FieldDef_Index &res)
 {
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
 
-    CLR_RT_HeapBlock*       obj;
-    CLR_RT_TypeDef_Instance inst;
+    CLR_RT_HeapBlock *obj;
+    CLR_RT_TypeDef_Instance inst{};
 
-    if(reference.DataType() != DATATYPE_OBJECT) NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+    if (reference.DataType() != DATATYPE_OBJECT)
+        NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
 
-    obj = reference.Dereference(); FAULT_ON_NULL(obj);
+    obj = reference.Dereference();
+    FAULT_ON_NULL(obj);
 
-    if(inst.InitializeFromIndex( obj->ObjectCls() ) == false)
+    if (inst.InitializeFromIndex(obj->ObjectCls()) == false)
     {
         NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
     }
 
-    NANOCLR_SET_AND_LEAVE(FindFieldDef( inst, szText, res ));
+    NANOCLR_SET_AND_LEAVE(FindFieldDef(inst, szText, res));
 
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT CLR_RT_ExecutionEngine::FindField( CLR_RT_HeapBlock& reference, const char* szText, CLR_RT_HeapBlock*& field )
+HRESULT CLR_RT_ExecutionEngine::FindField(CLR_RT_HeapBlock &reference, const char *szText, CLR_RT_HeapBlock *&field)
 {
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
 
-    CLR_RT_FieldDef_Instance inst; 
-    CLR_RT_FieldDef_Index    idx;
-    CLR_RT_HeapBlock*        res;
+    CLR_RT_FieldDef_Instance inst;
+    CLR_RT_FieldDef_Index index;
+    CLR_RT_HeapBlock *res;
 
-    field = NULL;
+    field = nullptr;
 
-    NANOCLR_CHECK_HRESULT(FindFieldDef( reference, szText, idx ));
+    NANOCLR_CHECK_HRESULT(FindFieldDef(reference, szText, index));
 
-    inst.InitializeFromIndex( idx );
+    inst.InitializeFromIndex(index);
 
-    if(inst.m_target->flags & CLR_RECORD_FIELDDEF::FD_Static)
+    if (inst.target->flags & CLR_RECORD_FIELDDEF::FD_Static)
     {
-        res = CLR_RT_ExecutionEngine::AccessStaticField( idx ); if(res == NULL) NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+        res = CLR_RT_ExecutionEngine::AccessStaticField(index);
+
+        if (res == nullptr)
+        {
+            NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+        }
     }
     else
     {
-        res = reference.Dereference(); FAULT_ON_NULL(res);
+        res = reference.Dereference();
+        FAULT_ON_NULL(res);
 
-        res += inst.CrossReference().m_offset;
+        res += inst.CrossReference().offset;
     }
 
     field = res;
@@ -2186,50 +3083,51 @@ HRESULT CLR_RT_ExecutionEngine::FindField( CLR_RT_HeapBlock& reference, const ch
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT CLR_RT_ExecutionEngine::SetField( CLR_RT_HeapBlock& reference, const char* szText, CLR_RT_HeapBlock& value )
+HRESULT CLR_RT_ExecutionEngine::SetField(CLR_RT_HeapBlock &reference, const char *szText, CLR_RT_HeapBlock &value)
 {
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
 
-    CLR_RT_HeapBlock* field;
+    CLR_RT_HeapBlock *field;
 
-    NANOCLR_CHECK_HRESULT(FindField( reference, szText, field ));
+    NANOCLR_CHECK_HRESULT(FindField(reference, szText, field));
 
-    field->Assign( value );
+    field->Assign(value);
 
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT CLR_RT_ExecutionEngine::GetField( CLR_RT_HeapBlock& reference, const char* szText, CLR_RT_HeapBlock& value )
+HRESULT CLR_RT_ExecutionEngine::GetField(CLR_RT_HeapBlock &reference, const char *szText, CLR_RT_HeapBlock &value)
 {
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
 
-    CLR_RT_HeapBlock* field;
+    CLR_RT_HeapBlock *field;
 
-    NANOCLR_CHECK_HRESULT(FindField( reference, szText, field ));
+    NANOCLR_CHECK_HRESULT(FindField(reference, szText, field));
 
-    value.Assign( *field );
+    value.Assign(*field);
 
     NANOCLR_NOCLEANUP();
 }
 
 //--//
 
-CLR_RT_HeapBlock_Lock* CLR_RT_ExecutionEngine::FindLockObject( CLR_RT_DblLinkedList& threads, CLR_RT_HeapBlock& object )
+CLR_RT_HeapBlock_Lock *CLR_RT_ExecutionEngine::FindLockObject(CLR_RT_DblLinkedList &threads, CLR_RT_HeapBlock &object)
 {
     NATIVE_PROFILE_CLR_CORE();
-    NANOCLR_FOREACH_NODE(CLR_RT_Thread,th,threads)
+    NANOCLR_FOREACH_NODE(CLR_RT_Thread, th, threads)
     {
-        NANOCLR_FOREACH_NODE(CLR_RT_HeapBlock_Lock,lock,th->m_locks)
-        {            
-            CLR_RT_HeapBlock& res = lock->m_resource;
+        NANOCLR_FOREACH_NODE(CLR_RT_HeapBlock_Lock, lock, th->m_locks)
+        {
+            CLR_RT_HeapBlock &res = lock->m_resource;
 
 #if defined(NANOCLR_APPDOMAINS)
-            if(lock->m_appDomain != GetCurrentAppDomain()) continue;
+            if (lock->m_appDomain != GetCurrentAppDomain())
+                continue;
 #endif
 
-            if(CLR_RT_HeapBlock::ObjectsEqual(res, object, true))
+            if (CLR_RT_HeapBlock::ObjectsEqual(res, object, true))
             {
                 return lock;
             }
@@ -2238,66 +3136,72 @@ CLR_RT_HeapBlock_Lock* CLR_RT_ExecutionEngine::FindLockObject( CLR_RT_DblLinkedL
     }
     NANOCLR_FOREACH_NODE_END();
 
-    return NULL;
+    return nullptr;
 }
 
-CLR_RT_HeapBlock_Lock* CLR_RT_ExecutionEngine::FindLockObject( CLR_RT_HeapBlock& object )
+CLR_RT_HeapBlock_Lock *CLR_RT_ExecutionEngine::FindLockObject(CLR_RT_HeapBlock &object)
 {
     NATIVE_PROFILE_CLR_CORE();
-    CLR_RT_HeapBlock_Lock* lock;
+    CLR_RT_HeapBlock_Lock *lock;
 
-    if(object.DataType() == DATATYPE_OBJECT)
+    if (object.DataType() == DATATYPE_OBJECT)
     {
-        CLR_RT_HeapBlock* ptr = object.Dereference();
+        CLR_RT_HeapBlock *ptr = object.Dereference();
 
-        if(ptr)
+        if (ptr)
         {
-            switch(ptr->DataType())
+            switch (ptr->DataType())
             {
                 case DATATYPE_VALUETYPE:
-                case DATATYPE_CLASS    :
+                case DATATYPE_CLASS:
                     return ptr->ObjectLock();
 
                 default:
                     // the remaining data types aren't to be handled
-                    break;  
+                    break;
             }
         }
     }
 
-    lock = FindLockObject( m_threadsReady  , object ); if(lock) return lock;
-    lock = FindLockObject( m_threadsWaiting, object );          return lock;    
+    lock = FindLockObject(m_threadsReady, object);
+    if (lock)
+        return lock;
+    lock = FindLockObject(m_threadsWaiting, object);
+    return lock;
 }
 
 //--//
 
-void CLR_RT_ExecutionEngine::DeleteLockRequests( CLR_RT_Thread* thTarget, CLR_RT_SubThread* sthTarget )
+void CLR_RT_ExecutionEngine::DeleteLockRequests(CLR_RT_Thread *thTarget, CLR_RT_SubThread *sthTarget)
 {
     NATIVE_PROFILE_CLR_CORE();
-    if(( thTarget &&  thTarget->m_lockRequestsCount) ||
-       (sthTarget && sthTarget->m_lockRequestsCount)  )
+    if ((thTarget && thTarget->m_lockRequestsCount) || (sthTarget && sthTarget->m_lockRequestsCount))
     {
-        DeleteLockRequests( thTarget, sthTarget, m_threadsReady   );
-        DeleteLockRequests( thTarget, sthTarget, m_threadsWaiting );
+        DeleteLockRequests(thTarget, sthTarget, m_threadsReady);
+        DeleteLockRequests(thTarget, sthTarget, m_threadsWaiting);
     }
 }
 
-void CLR_RT_ExecutionEngine::DeleteLockRequests( CLR_RT_Thread* thTarget, CLR_RT_SubThread* sthTarget, CLR_RT_DblLinkedList& threads )
+void CLR_RT_ExecutionEngine::DeleteLockRequests(
+    CLR_RT_Thread *thTarget,
+    CLR_RT_SubThread *sthTarget,
+    CLR_RT_DblLinkedList &threads)
 {
     NATIVE_PROFILE_CLR_CORE();
-    NANOCLR_FOREACH_NODE(CLR_RT_Thread,th,threads)
+    NANOCLR_FOREACH_NODE(CLR_RT_Thread, th, threads)
     {
-        NANOCLR_FOREACH_NODE(CLR_RT_HeapBlock_Lock,lock,th->m_locks)
+        NANOCLR_FOREACH_NODE(CLR_RT_HeapBlock_Lock, lock, th->m_locks)
         {
-            NANOCLR_FOREACH_NODE(CLR_RT_HeapBlock_LockRequest,req,lock->m_requests)
+            NANOCLR_FOREACH_NODE(CLR_RT_HeapBlock_LockRequest, req, lock->m_requests)
             {
-                CLR_RT_SubThread* sth = req->m_subthreadWaiting;
+                CLR_RT_SubThread *sth = req->m_subthreadWaiting;
 
-                if(sth == sthTarget || sth->m_owningThread == thTarget)
+                if (sth == sthTarget || sth->m_owningThread == thTarget)
                 {
-                    g_CLR_RT_EventCache.Append_Node( req );
+                    g_CLR_RT_EventCache.Append_Node(req);
 
-                    if(sth->ChangeLockRequestCount( -1 )) return;
+                    if (sth->ChangeLockRequestCount(-1))
+                        return;
                 }
             }
             NANOCLR_FOREACH_NODE_END();
@@ -2313,6 +3217,7 @@ void CLR_RT_ExecutionEngine::ProcessHardware()
 {
     NATIVE_PROFILE_CLR_CORE();
     Watchdog_Reset();
+    RtosYield();
 
     g_CLR_HW_Hardware.ProcessActivity();
 }
@@ -2329,67 +3234,66 @@ CLR_INT64 CLR_RT_ExecutionEngine::ProcessTimer()
 
     ////////////////////////////////////////////////
     // WARNING
-    // 
-    // The check on the 'Stopped' condition, and the 'else' 
-    // condition below cause a race condition when the application is running under debugger 
+    //
+    // The check on the 'Stopped' condition, and the 'else'
+    // condition below cause a race condition when the application is running under debugger
     // and there are no ready threads in the app.  teh desktop side debugger in facts is prodigal
-    // of Stopped commands and so is the runtime itself.  Since the commands come asynchronously 
-    // though and there is no co-ordination it is possible that 
+    // of Stopped commands and so is the runtime itself.  Since the commands come asynchronously
+    // though and there is no co-ordination it is possible that
     // a) a 'Stopped' condition reset get lost or
     // b) waiting threads whose timers are expired are never moved to the ready queue
-    // 
-    
-    if(CLR_EE_DBG_IS( Stopped ) && m_threadsWaiting.IsEmpty())
+    //
+
+    if (CLR_EE_DBG_IS(Stopped) && m_threadsWaiting.IsEmpty())
     {
         // Don't process events while the debugger is stopped and no thread was waiting.
         // if some thread was waiting we might need to transfer it to the ready queue
     }
     else
     {
-        if(m_timerCache && m_timerCacheNextTimeout > HAL_Time_CurrentTime())
+        if (m_timerCache && m_timerCacheNextTimeout > HAL_Time_CurrentTime())
         {
             timeoutMin = m_timerCacheNextTimeout - HAL_Time_CurrentTime();
         }
-        //else
+        // else
         {
-            CheckTimers( timeoutMin );
- 
-            CheckThreads( timeoutMin, m_threadsReady   );
-            CheckThreads( timeoutMin, m_threadsWaiting );
+            CheckTimers(timeoutMin);
+
+            CheckThreads(timeoutMin, m_threadsReady);
+            CheckThreads(timeoutMin, m_threadsWaiting);
 
             m_timerCacheNextTimeout = timeoutMin + HAL_Time_CurrentTime();
-            m_timerCache            = (m_timerCacheNextTimeout > HAL_Time_CurrentTime());
-        
+            m_timerCache = (m_timerCacheNextTimeout > HAL_Time_CurrentTime());
         }
     }
 
     // if the system timer is not set as one of the wakeup events then just return the max time to active
-    if(0 == (g_CLR_HW_Hardware.m_wakeupEvents & SYSTEM_EVENT_FLAG_SYSTEM_TIMER))
+    if (0 == (g_CLR_HW_Hardware.m_wakeupEvents & SYSTEM_EVENT_FLAG_SYSTEM_TIMER))
     {
         timeoutMin = m_maximumTimeToActive;
-    } 
+    }
 
     return timeoutMin;
 }
 
-void CLR_RT_ExecutionEngine::ProcessTimeEvent( CLR_UINT32 event )
+void CLR_RT_ExecutionEngine::ProcessTimeEvent(CLR_UINT32 event)
 {
     NATIVE_PROFILE_CLR_CORE();
     SYSTEMTIME systemTime;
 
-    HAL_Time_ToSystemTime( HAL_Time_CurrentTime(), &systemTime );
+    HAL_Time_ToSystemTime(HAL_Time_CurrentTime(), &systemTime);
 
-    NANOCLR_FOREACH_NODE(CLR_RT_HeapBlock_Timer,timer,m_timers)
+    NANOCLR_FOREACH_NODE(CLR_RT_HeapBlock_Timer, timer, m_timers)
     {
-        if(timer->m_flags & CLR_RT_HeapBlock_Timer::c_EnabledTimer)
+        if (timer->m_flags & CLR_RT_HeapBlock_Timer::c_EnabledTimer)
         {
             CLR_UINT32 val = timer->m_flags & CLR_RT_HeapBlock_Timer::c_AnyChange;
 
-            if(val)
+            if (val)
             {
-                timer->AdjustNextFixedExpire( systemTime, true );
+                timer->AdjustNextFixedExpire(systemTime, true);
 
-                if(val == event && (timer->m_flags & CLR_RT_HeapBlock_Timer::c_Recurring) == 0)
+                if (val == event && (timer->m_flags & CLR_RT_HeapBlock_Timer::c_Recurring) == 0)
                 {
                     timer->Trigger();
                 }
@@ -2409,15 +3313,16 @@ void CLR_RT_ExecutionEngine::InvalidateTimerCache()
 
 //--//--//
 
-bool CLR_RT_ExecutionEngine::IsTimeExpired( const CLR_INT64& timeExpire, CLR_INT64& timeoutMin )
+bool CLR_RT_ExecutionEngine::IsTimeExpired(const CLR_INT64 &timeExpire, CLR_INT64 &timeoutMin)
 {
     NATIVE_PROFILE_CLR_CORE();
 
-    if(timeExpire <= (CLR_INT64)HAL_Time_CurrentTime()) return true;
+    if (timeExpire <= (CLR_INT64)HAL_Time_CurrentTime())
+        return true;
 
     CLR_INT64 diff = timeExpire - HAL_Time_CurrentTime();
 
-    if(diff < timeoutMin)
+    if (diff < timeoutMin)
     {
         timeoutMin = diff;
     }
@@ -2425,36 +3330,38 @@ bool CLR_RT_ExecutionEngine::IsTimeExpired( const CLR_INT64& timeExpire, CLR_INT
     return false;
 }
 
-bool CLR_RT_ExecutionEngine::IsThereEnoughIdleTime( CLR_UINT32 expectedMsec )
+bool CLR_RT_ExecutionEngine::IsThereEnoughIdleTime(CLR_UINT32 expectedMsec)
 {
     NATIVE_PROFILE_CLR_CORE();
-    if(::Events_MaskedRead( g_CLR_HW_Hardware.m_wakeupEvents )) return false;
+    if (::Events_MaskedRead(g_CLR_HW_Hardware.m_wakeupEvents))
+        return false;
 
     CLR_INT64 now = HAL_Time_CurrentTime();
 
-    if(now + expectedMsec * TIME_CONVERSION__TO_MILLISECONDS >= m_currentNextActivityTime) return false;
+    if (now + expectedMsec * TIME_CONVERSION__TO_MILLISECONDS >= m_currentNextActivityTime)
+        return false;
 
     return true;
 }
 
 //--//
 
-void CLR_RT_ExecutionEngine::CheckTimers( CLR_INT64& timeoutMin )
+void CLR_RT_ExecutionEngine::CheckTimers(CLR_INT64 &timeoutMin)
 {
     NATIVE_PROFILE_CLR_CORE();
     bool fAnyTimersExpired = false;
 
-    NANOCLR_FOREACH_NODE(CLR_RT_HeapBlock_Timer,timer,m_timers)
+    NANOCLR_FOREACH_NODE(CLR_RT_HeapBlock_Timer, timer, m_timers)
     {
-        if(timer->m_flags & CLR_RT_HeapBlock_Timer::c_EnabledTimer)
+        if (timer->m_flags & CLR_RT_HeapBlock_Timer::c_EnabledTimer)
         {
             CLR_INT64 expire = timer->m_timeExpire;
-            if(IsTimeExpired( expire, timeoutMin ))
+            if (IsTimeExpired(expire, timeoutMin))
             {
-                
-          #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
-                if(CLR_EE_DBG_IS_NOT( PauseTimers ))
-          #endif
+
+#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
+                if (CLR_EE_DBG_IS_NOT(PauseTimers))
+#endif
                 {
                     timer->Trigger();
                     fAnyTimersExpired = true;
@@ -2464,37 +3371,36 @@ void CLR_RT_ExecutionEngine::CheckTimers( CLR_INT64& timeoutMin )
     }
     NANOCLR_FOREACH_NODE_END();
 
-    if(fAnyTimersExpired)
+    if (fAnyTimersExpired)
     {
         SpawnTimer();
     }
-
 }
 
-void CLR_RT_ExecutionEngine::CheckThreads( CLR_INT64& timeoutMin, CLR_RT_DblLinkedList& threads )
+void CLR_RT_ExecutionEngine::CheckThreads(CLR_INT64 &timeoutMin, CLR_RT_DblLinkedList &threads)
 {
     NATIVE_PROFILE_CLR_CORE();
 
-    NANOCLR_FOREACH_NODE(CLR_RT_Thread,th,threads)
+    NANOCLR_FOREACH_NODE(CLR_RT_Thread, th, threads)
     {
         CLR_INT64 expire;
 
 #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
-        if(th->m_flags & CLR_RT_Thread::TH_F_Suspended)
+        if (th->m_flags & CLR_RT_Thread::TH_F_Suspended)
         {
             continue;
         }
-#endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
+#endif // #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
 
         //
         // Check events.
         //
         expire = th->m_waitForEvents_Timeout;
-        if(IsTimeExpired( expire, timeoutMin ))
+        if (IsTimeExpired(expire, timeoutMin))
         {
             th->m_waitForEvents_Timeout = TIMEOUT_INFINITE;
 
-            th->Restart( false );
+            th->Restart(false);
         }
 
         //
@@ -2502,15 +3408,15 @@ void CLR_RT_ExecutionEngine::CheckThreads( CLR_INT64& timeoutMin, CLR_RT_DblLink
         //
 
         {
-            CLR_RT_HeapBlock_WaitForObject* wait = th->m_waitForObject;
+            CLR_RT_HeapBlock_WaitForObject *wait = th->m_waitForObject;
 
-            if(wait)
+            if (wait)
             {
-                if(IsTimeExpired( wait->m_timeExpire, timeoutMin ))
+                if (IsTimeExpired(wait->m_timeExpire, timeoutMin))
                 {
                     th->m_waitForObject_Result = CLR_RT_Thread::TH_WAIT_RESULT_TIMEOUT;
-        
-                    th->Restart( true );
+
+                    th->Restart(true);
                 }
             }
         }
@@ -2518,17 +3424,17 @@ void CLR_RT_ExecutionEngine::CheckThreads( CLR_INT64& timeoutMin, CLR_RT_DblLink
         //
         // Check lock requests.
         //
-        NANOCLR_FOREACH_NODE(CLR_RT_HeapBlock_Lock,lock,th->m_locks)
+        NANOCLR_FOREACH_NODE(CLR_RT_HeapBlock_Lock, lock, th->m_locks)
         {
-            NANOCLR_FOREACH_NODE(CLR_RT_HeapBlock_LockRequest,req,lock->m_requests)
+            NANOCLR_FOREACH_NODE(CLR_RT_HeapBlock_LockRequest, req, lock->m_requests)
             {
-                if(IsTimeExpired( req->m_timeExpire, timeoutMin ))
+                if (IsTimeExpired(req->m_timeExpire, timeoutMin))
                 {
-                    CLR_RT_SubThread* sth = req->m_subthreadWaiting;
+                    CLR_RT_SubThread *sth = req->m_subthreadWaiting;
 
-                    sth->ChangeLockRequestCount( -1 );
+                    sth->ChangeLockRequestCount(-1);
 
-                    g_CLR_RT_EventCache.Append_Node( req );
+                    g_CLR_RT_EventCache.Append_Node(req);
                 }
             }
             NANOCLR_FOREACH_NODE_END();
@@ -2538,26 +3444,31 @@ void CLR_RT_ExecutionEngine::CheckThreads( CLR_INT64& timeoutMin, CLR_RT_DblLink
         //
         // Check constraints.
         //
-        NANOCLR_FOREACH_NODE_BACKWARD(CLR_RT_SubThread,sth,th->m_subThreads)
+        NANOCLR_FOREACH_NODE_BACKWARD(CLR_RT_SubThread, sth, th->m_subThreads)
         {
-            if(sth->m_timeConstraint != TIMEOUT_INFINITE)
+            if (sth->m_timeConstraint != TIMEOUT_INFINITE)
             {
-                if(IsTimeExpired( s_compensation.Adjust( sth->m_timeConstraint ), timeoutMin ))
+                if (IsTimeExpired(s_compensation.Adjust(sth->m_timeConstraint), timeoutMin))
                 {
-                    (void)Library_corlib_native_System_Exception::CreateInstance( th->m_currentException, g_CLR_RT_WellKnownTypes.m_ConstraintException, S_OK, th->CurrentFrame() );
+                    (void)Library_corlib_native_System_Exception::CreateInstance(
+                        th->m_currentException,
+                        g_CLR_RT_WellKnownTypes.ConstraintException,
+                        S_OK,
+                        th->CurrentFrame());
 
-                    if((sth->m_status & CLR_RT_SubThread::STATUS_Triggered) == 0)
+                    if ((sth->m_status & CLR_RT_SubThread::STATUS_Triggered) == 0)
                     {
                         sth->m_status |= CLR_RT_SubThread::STATUS_Triggered;
 
                         //
                         // This is the first time, give it 500msec to clean before killing it.
                         //
-                        sth->m_timeConstraint += TIME_CONVERSION__TO_MILLISECONDS * 500; CLR_RT_ExecutionEngine::InvalidateTimerCache();
+                        sth->m_timeConstraint += TIME_CONVERSION__TO_MILLISECONDS * 500;
+                        CLR_RT_ExecutionEngine::InvalidateTimerCache();
                     }
                     else
                     {
-                        CLR_RT_SubThread::DestroyInstance( th, sth, CLR_RT_SubThread::MODE_CheckLocks );
+                        CLR_RT_SubThread::DestroyInstance(th, sth, CLR_RT_SubThread::MODE_CheckLocks);
 
                         //
                         // So it doesn't fire again...
@@ -2565,7 +3476,7 @@ void CLR_RT_ExecutionEngine::CheckThreads( CLR_INT64& timeoutMin, CLR_RT_DblLink
                         sth->m_timeConstraint = TIMEOUT_INFINITE;
                     }
 
-                    th->Restart( true );
+                    th->Restart(true);
                 }
             }
         }
@@ -2576,48 +3487,53 @@ void CLR_RT_ExecutionEngine::CheckThreads( CLR_INT64& timeoutMin, CLR_RT_DblLink
 
 //--//
 
-HRESULT CLR_RT_ExecutionEngine::LockObject( CLR_RT_HeapBlock& reference, CLR_RT_SubThread* sth, const CLR_INT64& timeExpire, bool fForce )
+HRESULT CLR_RT_ExecutionEngine::LockObject(
+    CLR_RT_HeapBlock &reference,
+    CLR_RT_SubThread *sth,
+    const CLR_INT64 &timeExpire,
+    bool fForce)
 {
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
 
-    CLR_RT_HeapBlock_Lock* lock;
+    CLR_RT_HeapBlock_Lock *lock;
 
-    lock = FindLockObject( reference );
-    
-    if(lock == NULL)
+    lock = FindLockObject(reference);
+
+    if (lock == nullptr)
     {
-        NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Lock::CreateInstance( lock, sth->m_owningThread, reference ));
+        NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Lock::CreateInstance(lock, sth->m_owningThread, reference));
     }
 
-    NANOCLR_SET_AND_LEAVE(CLR_RT_HeapBlock_Lock::IncrementOwnership( lock, sth, timeExpire, fForce ));
+    NANOCLR_SET_AND_LEAVE(CLR_RT_HeapBlock_Lock::IncrementOwnership(lock, sth, timeExpire, fForce));
 
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT CLR_RT_ExecutionEngine::UnlockObject( CLR_RT_HeapBlock& reference, CLR_RT_SubThread* sth )
+HRESULT CLR_RT_ExecutionEngine::UnlockObject(CLR_RT_HeapBlock &reference, CLR_RT_SubThread *sth)
 {
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
 
-    CLR_RT_HeapBlock_Lock* lock;
+    CLR_RT_HeapBlock_Lock *lock;
 
-    lock = FindLockObject( reference );
+    lock = FindLockObject(reference);
 
-    NANOCLR_SET_AND_LEAVE(CLR_RT_HeapBlock_Lock::DecrementOwnership( lock, sth ));
+    NANOCLR_SET_AND_LEAVE(CLR_RT_HeapBlock_Lock::DecrementOwnership(lock, sth));
 
     NANOCLR_NOCLEANUP();
 }
 
 //--//
 
-HRESULT CLR_RT_ExecutionEngine::Sleep( CLR_RT_Thread* caller, const CLR_INT64& timeExpire )
+HRESULT CLR_RT_ExecutionEngine::Sleep(CLR_RT_Thread *caller, const CLR_INT64 &timeExpire)
 {
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
-    
-    caller->m_waitForEvents_Timeout = timeExpire; CLR_RT_ExecutionEngine::InvalidateTimerCache();
-    caller->m_status                = CLR_RT_Thread::TH_S_Waiting;
+
+    caller->m_waitForEvents_Timeout = timeExpire;
+    CLR_RT_ExecutionEngine::InvalidateTimerCache();
+    caller->m_status = CLR_RT_Thread::TH_S_Waiting;
 
     NANOCLR_SET_AND_LEAVE(CLR_E_THREAD_WAITING);
 
@@ -2626,12 +3542,16 @@ HRESULT CLR_RT_ExecutionEngine::Sleep( CLR_RT_Thread* caller, const CLR_INT64& t
 
 //--//
 
-HRESULT CLR_RT_ExecutionEngine::WaitEvents( CLR_RT_Thread* caller, const CLR_INT64& timeExpire, CLR_UINT32 events, bool& fSuccess )
+HRESULT CLR_RT_ExecutionEngine::WaitEvents(
+    CLR_RT_Thread *caller,
+    const CLR_INT64 &timeExpire,
+    CLR_UINT32 events,
+    bool &fSuccess)
 {
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
 
-    if(m_raisedEvents & events)
+    if (m_raisedEvents & events)
     {
         m_raisedEvents &= ~events;
 
@@ -2641,11 +3561,12 @@ HRESULT CLR_RT_ExecutionEngine::WaitEvents( CLR_RT_Thread* caller, const CLR_INT
     {
         fSuccess = false;
 
-        if((CLR_INT64)HAL_Time_CurrentTime() < timeExpire)
+        if ((CLR_INT64)HAL_Time_CurrentTime() < timeExpire)
         {
-            caller->m_waitForEvents         = events;
-            caller->m_waitForEvents_Timeout = timeExpire; CLR_RT_ExecutionEngine::InvalidateTimerCache();
-            caller->m_status                = CLR_RT_Thread::TH_S_Waiting;
+            caller->m_waitForEvents = events;
+            caller->m_waitForEvents_Timeout = timeExpire;
+            CLR_RT_ExecutionEngine::InvalidateTimerCache();
+            caller->m_status = CLR_RT_Thread::TH_S_Waiting;
 
             NANOCLR_SET_AND_LEAVE(CLR_E_THREAD_WAITING);
         }
@@ -2654,82 +3575,84 @@ HRESULT CLR_RT_ExecutionEngine::WaitEvents( CLR_RT_Thread* caller, const CLR_INT
     NANOCLR_NOCLEANUP();
 }
 
-void CLR_RT_ExecutionEngine::SignalEvents( CLR_RT_DblLinkedList& threads, CLR_UINT32 events )
+void CLR_RT_ExecutionEngine::SignalEvents(CLR_RT_DblLinkedList &threads, CLR_UINT32 events)
 {
     NATIVE_PROFILE_CLR_CORE();
     m_raisedEvents |= events;
 
-    NANOCLR_FOREACH_NODE(CLR_RT_Thread,th,threads)
+    NANOCLR_FOREACH_NODE(CLR_RT_Thread, th, threads)
     {
-        if((th->m_waitForEvents & events) != 0)
+        if ((th->m_waitForEvents & events) != 0)
         {
             _ASSERTE(&threads == &m_threadsWaiting);
             _ASSERTE(th->m_status == CLR_RT_Thread::TH_S_Waiting);
 
-            th->Restart( true );
+            th->Restart(true);
         }
     }
     NANOCLR_FOREACH_NODE_END();
 }
 
-void CLR_RT_ExecutionEngine::SignalEvents( CLR_UINT32 events )
+void CLR_RT_ExecutionEngine::SignalEvents(CLR_UINT32 events)
 {
     NATIVE_PROFILE_CLR_CORE();
-    //Why does the ready queue need to be checked.
-    SignalEvents( m_threadsReady  , events );
-    SignalEvents( m_threadsWaiting, events );
+    // Why does the ready queue need to be checked.
+    SignalEvents(m_threadsReady, events);
+    SignalEvents(m_threadsWaiting, events);
 }
 
 //--//
 
-bool CLR_RT_ExecutionEngine::IsInstanceOf( CLR_RT_TypeDescriptor& desc, CLR_RT_TypeDescriptor& descTarget, bool isInstInstruction )
+bool CLR_RT_ExecutionEngine::IsInstanceOf(
+    CLR_RT_TypeDescriptor &desc,
+    CLR_RT_TypeDescriptor &descTarget,
+    bool isInstInstruction)
 {
     NATIVE_PROFILE_CLR_CORE();
-    CLR_RT_TypeDef_Instance& inst       = desc      .m_handlerCls;
-    CLR_RT_TypeDef_Instance& instTarget = descTarget.m_handlerCls;
-    bool                     fArray     = false;
+    CLR_RT_TypeDef_Instance &inst = desc.m_handlerCls;
+    CLR_RT_TypeDef_Instance &instTarget = descTarget.m_handlerCls;
+    bool fArray = false;
 
-    while(desc      .m_reflex.m_levels > 0 &&
-          descTarget.m_reflex.m_levels > 0  )
+    while (desc.m_reflex.levels > 0 && descTarget.m_reflex.levels > 0)
     {
-        desc      .GetElementType( desc       );
-        descTarget.GetElementType( descTarget );
+        desc.GetElementType(desc);
+        descTarget.GetElementType(descTarget);
 
         fArray = true;
     }
 
-    if(desc.m_reflex.m_levels < descTarget.m_reflex.m_levels) return false;
-
-    if(desc.m_reflex.m_levels > descTarget.m_reflex.m_levels)
+    // only check reflection levels if this is not an array
+    if (!fArray && desc.m_reflex.levels < descTarget.m_reflex.levels)
     {
-        if(
-            descTarget.m_reflex.m_levels == 0 &&
-            !isInstInstruction)
+        return false;
+    }
+
+    if (desc.m_reflex.levels > descTarget.m_reflex.levels)
+    {
+        if (descTarget.m_reflex.levels == 0 && !isInstInstruction)
         {
             //
             // Casting from <type>[] to System.Array or System.Object is always allowed.
             //
-            if(inst.m_data == g_CLR_RT_WellKnownTypes.m_Array     .m_data ||
-               inst.m_data == g_CLR_RT_WellKnownTypes.m_Object    .m_data ||
-               inst.m_data == g_CLR_RT_WellKnownTypes.m_IList     .m_data ||
-               inst.m_data == g_CLR_RT_WellKnownTypes.m_ICloneable.m_data  )
+            if (inst.data == g_CLR_RT_WellKnownTypes.Array.data || inst.data == g_CLR_RT_WellKnownTypes.Object.data ||
+                inst.data == g_CLR_RT_WellKnownTypes.IList.data || inst.data == g_CLR_RT_WellKnownTypes.ICloneable.data)
             {
                 return true;
             }
         }
 
-        if(inst.m_target->dataType != instTarget.m_target->dataType)
+        if (inst.target->dataType != instTarget.target->dataType)
         {
             return false;
         }
     }
 
-    CLR_UINT32 semantic       = (inst      .m_target->flags & CLR_RECORD_TYPEDEF::TD_Semantics_Mask);
-    CLR_UINT32 semanticTarget = (instTarget.m_target->flags & CLR_RECORD_TYPEDEF::TD_Semantics_Mask);
+    CLR_UINT32 semantic = (inst.target->flags & CLR_RECORD_TYPEDEF::TD_Semantics_Mask);
+    CLR_UINT32 semanticTarget = (instTarget.target->flags & CLR_RECORD_TYPEDEF::TD_Semantics_Mask);
 
-    if(fArray)
+    if (fArray)
     {
-        if(semantic != semanticTarget)
+        if (semantic != semanticTarget)
         {
             return false;
         }
@@ -2737,7 +3660,7 @@ bool CLR_RT_ExecutionEngine::IsInstanceOf( CLR_RT_TypeDescriptor& desc, CLR_RT_T
 
     do
     {
-        if(inst.m_data == instTarget.m_data)
+        if (inst.data == instTarget.data)
         {
             return true;
         }
@@ -2745,103 +3668,136 @@ bool CLR_RT_ExecutionEngine::IsInstanceOf( CLR_RT_TypeDescriptor& desc, CLR_RT_T
         //
         // Scan the list of interfaces.
         //
-        if(semanticTarget == CLR_RECORD_TYPEDEF::TD_Semantics_Interface && inst.m_target->interfaces != CLR_EmptyIndex)
+        if (semanticTarget == CLR_RECORD_TYPEDEF::TD_Semantics_Interface && inst.target->interfaces != CLR_EmptyIndex)
         {
-            CLR_RT_SignatureParser          parser; parser.Initialize_Interfaces( inst.m_assm, inst.m_target );
+            CLR_RT_SignatureParser parser{};
+            parser.Initialize_Interfaces(inst.assembly, inst.target);
             CLR_RT_SignatureParser::Element res;
 
-            while(parser.Available() > 0)
+            while (parser.Available() > 0)
             {
-                if(FAILED(parser.Advance( res ))) break;
+                if (FAILED(parser.Advance(res)))
+                    break;
 
-                if(res.m_cls.m_data == instTarget.m_data)
+                if (res.Class.data == instTarget.data)
                 {
                     return true;
                 }
             }
         }
-    }
-    while(inst.SwitchToParent());
+    } while (inst.SwitchToParent());
 
     return false;
 }
 
-bool CLR_RT_ExecutionEngine::IsInstanceOf( const CLR_RT_TypeDef_Index& cls, const CLR_RT_TypeDef_Index& clsTarget )
+bool CLR_RT_ExecutionEngine::IsInstanceOf(const CLR_RT_TypeDef_Index &cls, const CLR_RT_TypeDef_Index &clsTarget)
 {
     NATIVE_PROFILE_CLR_CORE();
-    CLR_RT_TypeDescriptor desc;
+    CLR_RT_TypeDescriptor desc{};
     CLR_RT_TypeDescriptor descTarget;
 
-    if(FAILED(desc      .InitializeFromType( cls       ))) return false;
-    if(FAILED(descTarget.InitializeFromType( clsTarget ))) return false;
+    if (FAILED(desc.InitializeFromType(cls)))
+        return false;
+    if (FAILED(descTarget.InitializeFromType(clsTarget)))
+        return false;
 
-    return IsInstanceOf( desc, descTarget, false );
+    return IsInstanceOf(desc, descTarget, false);
 }
 
-bool CLR_RT_ExecutionEngine::IsInstanceOf( CLR_RT_HeapBlock& ref, const CLR_RT_TypeDef_Index& clsTarget )
+bool CLR_RT_ExecutionEngine::IsInstanceOf(CLR_RT_HeapBlock &ref, const CLR_RT_TypeDef_Index &clsTarget)
 {
     NATIVE_PROFILE_CLR_CORE();
-    CLR_RT_TypeDescriptor desc;
+    CLR_RT_TypeDescriptor desc{};
     CLR_RT_TypeDescriptor descTarget;
 
-    if(FAILED(desc      .InitializeFromObject( ref       ))) return false;
-    if(FAILED(descTarget.InitializeFromType  ( clsTarget ))) return false;
+    if (FAILED(desc.InitializeFromObject(ref)))
+        return false;
+    if (FAILED(descTarget.InitializeFromType(clsTarget)))
+        return false;
 
-    return IsInstanceOf( desc, descTarget, false );
+    return IsInstanceOf(desc, descTarget, false);
 }
 
-bool CLR_RT_ExecutionEngine::IsInstanceOf( CLR_RT_HeapBlock& obj, CLR_RT_Assembly* assm, CLR_UINT32 token, bool isInstInstruction )
+bool CLR_RT_ExecutionEngine::IsInstanceOf(
+    CLR_RT_HeapBlock &obj,
+    CLR_RT_Assembly *assm,
+    CLR_UINT32 token,
+    bool isInstInstruction,
+    const CLR_RT_MethodDef_Instance *caller)
 {
     NATIVE_PROFILE_CLR_CORE();
-    CLR_RT_TypeDescriptor    desc;
-    CLR_RT_TypeDescriptor    descTarget;
-    CLR_RT_TypeDef_Instance  clsTarget;
-    CLR_RT_TypeSpec_Instance defTarget;
 
-    if(FAILED(desc.InitializeFromObject( obj ))) return false;
+    CLR_RT_TypeDescriptor desc{};
+    CLR_RT_TypeDescriptor descTarget{};
 
-    if(clsTarget.ResolveToken( token, assm ))
-    {
-        //
-        // Shortcut for identity.
-        //
-        if(desc.m_handlerCls.m_data == clsTarget.m_data) return true;
+    if (FAILED(desc.InitializeFromObject(obj)))
+        return false;
 
-        if(FAILED(descTarget.InitializeFromType( clsTarget ))) return false;
-    }
-    else if(defTarget.ResolveToken( token, assm ))
-    {
-        if(FAILED(descTarget.InitializeFromTypeSpec( defTarget ))) return false;
-    }
-    else
+    // Use InitializeFromSignatureToken to properly resolve VAR/MVAR tokens
+    if (FAILED(descTarget.InitializeFromSignatureToken(assm, token, caller)))
+        return false;
+
+    return IsInstanceOf(desc, descTarget, isInstInstruction);
+}
+
+/// <summary>
+/// Checks whether the heap-object 'obj' satisfies exactly the type encoded by
+/// the compressed token 'token' in the IL stream, under the current generic
+/// instantiation in 'caller'.  Supports DATATYPE_VAR slots and full GENERICINST.
+/// </summary>
+bool CLR_RT_ExecutionEngine::IsInstanceOfToken(
+    CLR_UINT32 token,
+    CLR_RT_HeapBlock &obj,
+    const CLR_RT_MethodDef_Instance &caller)
+{
+    // Resolve the *expected* signature into a TypeDescriptor
+    CLR_RT_TypeDescriptor expectedDesc;
+    HRESULT hr = expectedDesc.InitializeFromSignatureToken(caller.assembly, token, &caller);
+
+    if (FAILED(hr))
     {
         return false;
     }
 
-    return IsInstanceOf( desc, descTarget, isInstInstruction );
+    // Extract the *actual* runtime type of the object
+    CLR_RT_TypeDescriptor actualDesc;
+    hr = actualDesc.InitializeFromObject(obj);
+
+    if (FAILED(hr))
+    {
+        return false;
+    }
+
+    // Delegate to the CLR built-in type-compatibility test
+    return CLR_RT_HeapBlock::TypeDescriptorsMatch(expectedDesc, actualDesc);
 }
 
-HRESULT CLR_RT_ExecutionEngine::CastToType( CLR_RT_HeapBlock& ref, CLR_UINT32 tk, CLR_RT_Assembly* assm, bool isInstInstruction )
+HRESULT CLR_RT_ExecutionEngine::CastToType(
+    CLR_RT_HeapBlock &ref,
+    CLR_UINT32 tk,
+    CLR_RT_Assembly *assm,
+    bool isInstInstruction,
+    const CLR_RT_MethodDef_Instance *caller)
 {
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
 
-    if(ref.DataType() == DATATYPE_OBJECT && ref.Dereference() == NULL)
+    if (ref.DataType() == DATATYPE_OBJECT && ref.Dereference() == nullptr)
     {
         ;
     }
-    else if(g_CLR_RT_ExecutionEngine.IsInstanceOf( ref, assm, tk, isInstInstruction ) == true)
+    else if (g_CLR_RT_ExecutionEngine.IsInstanceOf(ref, assm, tk, isInstInstruction, caller) == true)
     {
         ;
     }
     else
     {
-        if(isInstInstruction == false)
+        if (isInstInstruction == false)
         {
             NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_CAST);
         }
 
-        ref.SetObjectReference( NULL );
+        ref.SetObjectReference(nullptr);
     }
 
     NANOCLR_NOCLEANUP();
@@ -2849,20 +3805,19 @@ HRESULT CLR_RT_ExecutionEngine::CastToType( CLR_RT_HeapBlock& ref, CLR_UINT32 tk
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-
-HRESULT CLR_RT_ExecutionEngine::InitTimeout( CLR_INT64& timeExpire, const CLR_INT64& timeout )
+HRESULT CLR_RT_ExecutionEngine::InitTimeout(CLR_INT64 &timeExpire, const CLR_INT64 &timeout)
 {
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
 
-    if(timeout < 0)
+    if (timeout < 0)
     {
         // because we are expecting the timeout value to be in ticks
         // need to check for two possible infinite timeouts:
         // 1. when coding in native it's supposed to use -1L as a timeout infinite
-        // 2. in managed code the constant System.Threading.Timeout.Infinite is -1 milliseconds, therefore needs to be converted to ticks
-        if( (timeout != -1L) &&
-            (timeout != -1L * TIME_CONVERSION__TO_MILLISECONDS))
+        // 2. in managed code the constant System.Threading.Timeout.Infinite is -1 milliseconds, therefore needs to be
+        // converted to ticks
+        if ((timeout != -1L) && (timeout != -1L * TIME_CONVERSION__TO_MILLISECONDS))
         {
             NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_RANGE);
         }
@@ -2877,14 +3832,14 @@ HRESULT CLR_RT_ExecutionEngine::InitTimeout( CLR_INT64& timeExpire, const CLR_IN
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT CLR_RT_ExecutionEngine::InitTimeout( CLR_INT64& timeExpire, CLR_INT32 timeout )
+HRESULT CLR_RT_ExecutionEngine::InitTimeout(CLR_INT64 &timeExpire, CLR_INT32 timeout)
 {
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
 
-    if(timeout < 0)
+    if (timeout < 0)
     {
-        if(timeout != -1)
+        if (timeout != -1)
         {
             NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_RANGE);
         }
@@ -2893,7 +3848,7 @@ HRESULT CLR_RT_ExecutionEngine::InitTimeout( CLR_INT64& timeExpire, CLR_INT32 ti
     }
     else
     {
-        timeExpire  = timeout;
+        timeExpire = timeout;
         timeExpire *= TIME_CONVERSION__TO_MILLISECONDS;
         timeExpire += HAL_Time_CurrentTime();
     }
@@ -2908,90 +3863,96 @@ void CLR_RT_ExecutionEngine::DebuggerLoop()
     NATIVE_PROFILE_CLR_CORE();
     ProcessHardware();
 
-    WaitSystemEvents(SLEEP_LEVEL__SLEEP, g_CLR_HW_Hardware.m_wakeupEvents, TIME_CONVERSION__TO_MILLISECONDS * 100 );
+    WaitSystemEvents(SLEEP_LEVEL__SLEEP, g_CLR_HW_Hardware.m_wakeupEvents, TIME_CONVERSION__TO_MILLISECONDS * 100);
 }
 
-
 //--//
-
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
 
-void CLR_RT_ExecutionEngine::SetDebuggingInfoBreakpoints( bool fSet )
+void CLR_RT_ExecutionEngine::SetDebuggingInfoBreakpoints(bool fSet)
 {
     NATIVE_PROFILE_CLR_CORE();
-    for(size_t pos=0; pos<m_breakpointsNum; pos++)
+    for (size_t pos = 0; pos < m_breakpointsNum; pos++)
     {
-        CLR_DBG_Commands::Debugging_Execution_BreakpointDef& def = m_breakpoints[ pos ];
+        CLR_DBG_Commands::Debugging_Execution_BreakpointDef &def = m_breakpoints[pos];
 
-        if(def.m_flags & CLR_DBG_Commands::Debugging_Execution_BreakpointDef::c_HARD)
+        if (def.m_flags & CLR_DBG_Commands::Debugging_Execution_BreakpointDef::c_HARD)
         {
-            CLR_RT_MethodDef_Instance inst;
+            CLR_RT_MethodDef_Instance inst{};
 
-            if(inst.InitializeFromIndex( def.m_md ))
+            if (inst.InitializeFromIndex(def.m_md))
             {
-                inst.DebuggingInfo().SetBreakpoint( fSet );
+                inst.DebuggingInfo().SetBreakpoint(fSet);
             }
         }
     }
 }
 
-void CLR_RT_ExecutionEngine::InstallBreakpoints( CLR_DBG_Commands::Debugging_Execution_BreakpointDef* data, size_t num )
+void CLR_RT_ExecutionEngine::InstallBreakpoints(CLR_DBG_Commands::Debugging_Execution_BreakpointDef *data, size_t num)
 {
     NATIVE_PROFILE_CLR_CORE();
-    SetDebuggingInfoBreakpoints( false );
+    SetDebuggingInfoBreakpoints(false);
 
-    if(m_breakpoints)
+    if (m_breakpoints)
     {
-        CLR_RT_Memory::Release( m_breakpoints );
+        CLR_RT_Memory::Release(m_breakpoints);
 
-        m_breakpoints    = NULL;
+        m_breakpoints = nullptr;
         m_breakpointsNum = 0;
     }
 
-    if(num)
+    if (num)
     {
         size_t len = num * sizeof(CLR_DBG_Commands::Debugging_Execution_BreakpointDef);
 
-        m_breakpoints = (CLR_DBG_Commands::Debugging_Execution_BreakpointDef*)CLR_RT_Memory::Allocate( len, CLR_RT_HeapBlock::HB_CompactOnFailure );
-        if(m_breakpoints)
+        m_breakpoints = (CLR_DBG_Commands::Debugging_Execution_BreakpointDef *)CLR_RT_Memory::Allocate(
+            len,
+            CLR_RT_HeapBlock::HB_CompactOnFailure);
+        if (m_breakpoints)
         {
-            memcpy( m_breakpoints, data, len );
+            memcpy(m_breakpoints, data, len);
 
             m_breakpointsNum = num;
         }
     }
 
-    SetDebuggingInfoBreakpoints( true );
+    SetDebuggingInfoBreakpoints(true);
 
-    Breakpoint_Threads_Prepare( m_threadsReady   );
-    Breakpoint_Threads_Prepare( m_threadsWaiting );
+    Breakpoint_Threads_Prepare(m_threadsReady);
+    Breakpoint_Threads_Prepare(m_threadsWaiting);
 }
 
-void CLR_RT_ExecutionEngine::StopOnBreakpoint( CLR_DBG_Commands::Debugging_Execution_BreakpointDef& def, CLR_RT_Thread* th )
+void CLR_RT_ExecutionEngine::StopOnBreakpoint(
+    CLR_DBG_Commands::Debugging_Execution_BreakpointDef &def,
+    CLR_RT_Thread *th)
 {
     NATIVE_PROFILE_CLR_CORE();
-    if(CLR_EE_DBG_IS_NOT(BreakpointsDisabled))
+    if (CLR_EE_DBG_IS_NOT(BreakpointsDisabled))
     {
-        if(m_breakpointsActiveNum < ARRAYSIZE(m_breakpointsActive))
+        if (m_breakpointsActiveNum < ARRAYSIZE(m_breakpointsActive))
         {
-            CLR_DBG_Commands::Debugging_Execution_BreakpointDef& bp = m_breakpointsActive[ m_breakpointsActiveNum++ ];
+            CLR_DBG_Commands::Debugging_Execution_BreakpointDef &bp = m_breakpointsActive[m_breakpointsActiveNum++];
 
             bp = def;
 
             CLR_EE_DBG_SET(Stopped);
-            
-            if(th)
+
+            if (th)
             {
-                bp.m_pid                 = th->m_pid;
+                bp.m_pid = th->m_pid;
                 th->m_timeQuantumExpired = true;
             }
 
-            if(m_breakpointsActiveNum == 1)
+            if (m_breakpointsActiveNum == 1)
             {
-				CLR_EE_DBG_EVENT_SEND(CLR_DBG_Commands::c_Debugging_Execution_BreakpointHit, sizeof(CLR_DBG_Commands::Debugging_Execution_BreakpointDef), &m_breakpointsActive[0],WP_Flags_c_NonCritical);
+                CLR_EE_DBG_EVENT_SEND(
+                    CLR_DBG_Commands::c_Debugging_Execution_BreakpointHit,
+                    sizeof(CLR_DBG_Commands::Debugging_Execution_BreakpointDef),
+                    &m_breakpointsActive[0],
+                    WP_Flags_c_NonCritical);
             }
         }
         else
@@ -3001,35 +3962,45 @@ void CLR_RT_ExecutionEngine::StopOnBreakpoint( CLR_DBG_Commands::Debugging_Execu
     }
 }
 
-void CLR_RT_ExecutionEngine::StopOnBreakpoint( CLR_DBG_Commands::Debugging_Execution_BreakpointDef& def, CLR_RT_StackFrame* stack, CLR_PMETADATA ip )
-{    
-    NATIVE_PROFILE_CLR_CORE();
-    if(ip == NULL) ip = stack->m_IP;
-    
-    def.m_depth = stack->m_depth;
-    def.m_md    = stack->m_call;
-    def.m_IP    = (CLR_UINT32)(ip - stack->m_IPstart);
-
-    //Don't fail for special cases regarding messages dealing with exception handling.
-    _ASSERTE(def.m_IP == 0xffffffff || ip >= stack->m_IPstart);
-    //we don't actually know the end of the method.
-
-    StopOnBreakpoint( def, stack->m_owningThread );
-}
-
-bool CLR_RT_ExecutionEngine::DequeueActiveBreakpoint( CLR_DBG_Commands::Debugging_Execution_BreakpointDef& def )
+void CLR_RT_ExecutionEngine::StopOnBreakpoint(
+    CLR_DBG_Commands::Debugging_Execution_BreakpointDef &def,
+    CLR_RT_StackFrame *stack,
+    CLR_PMETADATA ip)
 {
     NATIVE_PROFILE_CLR_CORE();
-    if(m_breakpointsActiveNum)
-    {
-        def = m_breakpointsActive[ 0 ];
 
-        if(--m_breakpointsActiveNum == 0)
+    if (ip == nullptr)
+    {
+        ip = stack->m_IP;
+    }
+
+    def.m_depth = stack->m_depth;
+    def.m_md = stack->m_call;
+    def.m_IP = (CLR_UINT32)(ip - stack->m_IPstart);
+
+    // Don't fail for special cases regarding messages dealing with exception handling.
+    _ASSERTE(def.m_IP == 0xffffffff || ip >= stack->m_IPstart);
+    // we don't actually know the end of the method.
+
+    StopOnBreakpoint(def, stack->m_owningThread);
+}
+
+bool CLR_RT_ExecutionEngine::DequeueActiveBreakpoint(CLR_DBG_Commands::Debugging_Execution_BreakpointDef &def)
+{
+    NATIVE_PROFILE_CLR_CORE();
+    if (m_breakpointsActiveNum)
+    {
+        def = m_breakpointsActive[0];
+
+        if (--m_breakpointsActiveNum == 0)
         {
             def.m_flags |= CLR_DBG_Commands::Debugging_Execution_BreakpointDef::c_LAST_BREAKPOINT;
         }
 
-        memmove( &m_breakpointsActive[ 0 ], &m_breakpointsActive[ 1 ], sizeof(m_breakpointsActive[ 0 ]) * m_breakpointsActiveNum );
+        memmove(
+            &m_breakpointsActive[0],
+            &m_breakpointsActive[1],
+            sizeof(m_breakpointsActive[0]) * m_breakpointsActiveNum);
 
         return true;
     }
@@ -3039,34 +4010,40 @@ bool CLR_RT_ExecutionEngine::DequeueActiveBreakpoint( CLR_DBG_Commands::Debuggin
 
 //--//
 
-void CLR_RT_ExecutionEngine::Breakpoint_System_Event( CLR_DBG_Commands::Debugging_Execution_BreakpointDef& hit, CLR_UINT16 event, CLR_RT_Thread* th, CLR_RT_StackFrame* stack, CLR_PMETADATA ip )
-{        
+void CLR_RT_ExecutionEngine::Breakpoint_System_Event(
+    CLR_DBG_Commands::Debugging_Execution_BreakpointDef &hit,
+    CLR_UINT16 event,
+    CLR_RT_Thread *th,
+    CLR_RT_StackFrame *stack,
+    CLR_PMETADATA ip)
+{
     NATIVE_PROFILE_CLR_CORE();
-    for(size_t pos=0; pos<m_breakpointsNum; pos++)
+    for (size_t pos = 0; pos < m_breakpointsNum; pos++)
     {
-        CLR_DBG_Commands::Debugging_Execution_BreakpointDef& def = m_breakpoints[ pos ];
+        CLR_DBG_Commands::Debugging_Execution_BreakpointDef &def = m_breakpoints[pos];
 
-        if(stack != NULL)
+        if (stack != nullptr)
         {
-            _ASSERTE(FIMPLIES(th != NULL, th == stack->m_owningThread));
+            _ASSERTE(FIMPLIES(th != nullptr, th == stack->m_owningThread));
 
             th = stack->m_owningThread;
         }
 
-        if(th == NULL || (def.m_pid == th->m_pid) || def.m_pid == CLR_DBG_Commands::Debugging_Execution_BreakpointDef::c_PID_ANY)
+        if (th == nullptr || (def.m_pid == th->m_pid) ||
+            def.m_pid == CLR_DBG_Commands::Debugging_Execution_BreakpointDef::c_PID_ANY)
         {
-            if(def.m_flags & event)
+            if (def.m_flags & event)
             {
-                hit.m_id    = def.m_id;
-                hit.m_flags = event;                
-                
-                if(stack != NULL)
+                hit.m_id = def.m_id;
+                hit.m_flags = event;
+
+                if (stack != nullptr)
                 {
-                    StopOnBreakpoint( hit, stack, ip );
+                    StopOnBreakpoint(hit, stack, ip);
                 }
                 else
                 {
-                    StopOnBreakpoint( hit, th );
+                    StopOnBreakpoint(hit, th);
                 }
             }
         }
@@ -3076,36 +4053,42 @@ void CLR_RT_ExecutionEngine::Breakpoint_System_Event( CLR_DBG_Commands::Debuggin
 void CLR_RT_ExecutionEngine::Breakpoint_Assemblies_Loaded()
 {
     NATIVE_PROFILE_CLR_CORE();
-    CLR_DBG_Commands::Debugging_Execution_BreakpointDef hit; NANOCLR_CLEAR(hit);
+    CLR_DBG_Commands::Debugging_Execution_BreakpointDef hit;
+    NANOCLR_CLEAR(hit);
 
-    for(size_t i = 0; i < this->m_breakpointsActiveNum; i++)
+    for (size_t i = 0; i < this->m_breakpointsActiveNum; i++)
     {
-        CLR_DBG_Commands::Debugging_Execution_BreakpointDef& def = this->m_breakpointsActive[ i ];
+        CLR_DBG_Commands::Debugging_Execution_BreakpointDef &def = this->m_breakpointsActive[i];
 
-        if(def.m_flags & CLR_DBG_Commands::Debugging_Execution_BreakpointDef::c_ASSEMBLIES_LOADED)
+        if (def.m_flags & CLR_DBG_Commands::Debugging_Execution_BreakpointDef::c_ASSEMBLIES_LOADED)
         {
-            //There is already one queued AssembliesLoaded breakpoint.  No need to send another one.
+            // There is already one queued AssembliesLoaded breakpoint.  No need to send another one.
             return;
         }
     }
 
-    Breakpoint_System_Event( hit, CLR_DBG_Commands::Debugging_Execution_BreakpointDef::c_ASSEMBLIES_LOADED, m_currentThread, NULL, NULL );
+    Breakpoint_System_Event(
+        hit,
+        CLR_DBG_Commands::Debugging_Execution_BreakpointDef::c_ASSEMBLIES_LOADED,
+        m_currentThread,
+        nullptr,
+        nullptr);
 }
 
-void CLR_RT_ExecutionEngine::Breakpoint_Threads_Prepare( CLR_RT_DblLinkedList& threads )
+void CLR_RT_ExecutionEngine::Breakpoint_Threads_Prepare(CLR_RT_DblLinkedList &threads)
 {
     NATIVE_PROFILE_CLR_CORE();
-    NANOCLR_FOREACH_NODE(CLR_RT_Thread,th,threads)
+    NANOCLR_FOREACH_NODE(CLR_RT_Thread, th, threads)
     {
         th->m_fHasJMCStepper = false;
 
-        for(size_t pos=0; pos<m_breakpointsNum; pos++)
+        for (size_t pos = 0; pos < m_breakpointsNum; pos++)
         {
-            CLR_DBG_Commands::Debugging_Execution_BreakpointDef& def = m_breakpoints[ pos ];
+            CLR_DBG_Commands::Debugging_Execution_BreakpointDef &def = m_breakpoints[pos];
 
-            if(def.m_flags & CLR_DBG_Commands::Debugging_Execution_BreakpointDef::c_STEP_JMC)
+            if (def.m_flags & CLR_DBG_Commands::Debugging_Execution_BreakpointDef::c_STEP_JMC)
             {
-                if(def.m_pid == th->m_pid)
+                if (def.m_pid == th->m_pid)
                 {
                     th->m_fHasJMCStepper = true;
                     break;
@@ -3113,23 +4096,23 @@ void CLR_RT_ExecutionEngine::Breakpoint_Threads_Prepare( CLR_RT_DblLinkedList& t
             }
         }
 
-        NANOCLR_FOREACH_NODE(CLR_RT_StackFrame,call,th->m_stackFrames)
+        NANOCLR_FOREACH_NODE(CLR_RT_StackFrame, call, th->m_stackFrames)
         {
             call->m_flags &= ~CLR_RT_StackFrame::c_HasBreakpoint;
 
-            if(call->m_call.DebuggingInfo().HasBreakpoint())
+            if (call->m_call.DebuggingInfo().HasBreakpoint())
             {
                 call->m_flags |= CLR_RT_StackFrame::c_HasBreakpoint;
             }
             else
             {
-                for(size_t pos=0; pos<m_breakpointsNum; pos++)
+                for (size_t pos = 0; pos < m_breakpointsNum; pos++)
                 {
-                    CLR_DBG_Commands::Debugging_Execution_BreakpointDef& def = m_breakpoints[ pos ];
+                    CLR_DBG_Commands::Debugging_Execution_BreakpointDef &def = m_breakpoints[pos];
 
-                    if(def.m_flags & CLR_DBG_Commands::Debugging_Execution_BreakpointDef::c_STEP)
+                    if (def.m_flags & CLR_DBG_Commands::Debugging_Execution_BreakpointDef::c_STEP)
                     {
-                        if(def.m_pid == th->m_pid && def.m_depth == call->m_depth)
+                        if (def.m_pid == th->m_pid && def.m_depth == call->m_depth)
                         {
                             call->m_flags |= CLR_RT_StackFrame::c_HasBreakpoint;
                             break;
@@ -3137,22 +4120,22 @@ void CLR_RT_ExecutionEngine::Breakpoint_Threads_Prepare( CLR_RT_DblLinkedList& t
                     }
                 }
             }
-#ifndef CLR_NO_IL_INLINE
-            if(call->m_inlineFrame)
+#ifndef NANOCLR_NO_IL_INLINE
+            if (call->m_inlineFrame)
             {
-                if(call->m_inlineFrame->m_frame.m_call.DebuggingInfo().HasBreakpoint())
+                if (call->m_inlineFrame->m_frame.m_call.DebuggingInfo().HasBreakpoint())
                 {
                     call->m_flags |= CLR_RT_StackFrame::c_HasBreakpoint;
                 }
                 else
                 {
-                    for(size_t pos=0; pos<m_breakpointsNum; pos++)
+                    for (size_t pos = 0; pos < m_breakpointsNum; pos++)
                     {
-                        CLR_DBG_Commands::Debugging_Execution_BreakpointDef& def = m_breakpoints[ pos ];
+                        CLR_DBG_Commands::Debugging_Execution_BreakpointDef &def = m_breakpoints[pos];
 
-                        if(def.m_flags & CLR_DBG_Commands::Debugging_Execution_BreakpointDef::c_STEP)
+                        if (def.m_flags & CLR_DBG_Commands::Debugging_Execution_BreakpointDef::c_STEP)
                         {
-                            if(def.m_pid == th->m_pid && def.m_depth == (call->m_depth-1))
+                            if (def.m_pid == th->m_pid && def.m_depth == (call->m_depth - 1))
                             {
                                 call->m_flags |= CLR_RT_StackFrame::c_HasBreakpoint;
                                 break;
@@ -3168,65 +4151,73 @@ void CLR_RT_ExecutionEngine::Breakpoint_Threads_Prepare( CLR_RT_DblLinkedList& t
     NANOCLR_FOREACH_NODE_END();
 }
 
-void CLR_RT_ExecutionEngine::Breakpoint_Thread_Terminated( CLR_RT_Thread* th )
+void CLR_RT_ExecutionEngine::Breakpoint_Thread_Terminated(CLR_RT_Thread *th)
 {
     NATIVE_PROFILE_CLR_CORE();
-    CLR_DBG_Commands::Debugging_Execution_BreakpointDef hit; NANOCLR_CLEAR(hit);
+    CLR_DBG_Commands::Debugging_Execution_BreakpointDef hit;
+    NANOCLR_CLEAR(hit);
     CLR_UINT16 evt = CLR_DBG_Commands::Debugging_Execution_BreakpointDef::c_THREAD_TERMINATED;
 
     hit.m_depth = 0xFFFFFFFF;
-       
-    if(th->m_scratchPad >= 0)
+
+    if (th->m_scratchPad >= 0)
     {
-        evt |= CLR_DBG_Commands::Debugging_Execution_BreakpointDef::c_EVAL_COMPLETE;  
+        evt |= CLR_DBG_Commands::Debugging_Execution_BreakpointDef::c_EVAL_COMPLETE;
     }
 
-    Breakpoint_System_Event( hit, evt, th, NULL, NULL );        
+    Breakpoint_System_Event(hit, evt, th, nullptr, nullptr);
 }
 
-void CLR_RT_ExecutionEngine::Breakpoint_Thread_Created( CLR_RT_Thread* th )
+void CLR_RT_ExecutionEngine::Breakpoint_Thread_Created(CLR_RT_Thread *th)
 {
     NATIVE_PROFILE_CLR_CORE();
-    CLR_DBG_Commands::Debugging_Execution_BreakpointDef hit; NANOCLR_CLEAR(hit);
+    CLR_DBG_Commands::Debugging_Execution_BreakpointDef hit;
+    NANOCLR_CLEAR(hit);
 
-    Breakpoint_System_Event( hit, CLR_DBG_Commands::Debugging_Execution_BreakpointDef::c_THREAD_CREATED, th, NULL, NULL );
+    Breakpoint_System_Event(
+        hit,
+        CLR_DBG_Commands::Debugging_Execution_BreakpointDef::c_THREAD_CREATED,
+        th,
+        nullptr,
+        nullptr);
 }
 
 //--//
 
-void CLR_RT_ExecutionEngine::Breakpoint_StackFrame_Push( CLR_RT_StackFrame* stack, CLR_UINT32 reason )
+void CLR_RT_ExecutionEngine::Breakpoint_StackFrame_Push(CLR_RT_StackFrame *stack, CLR_UINT32 reason)
 {
     NATIVE_PROFILE_CLR_CORE();
-    CLR_RT_Thread* th     = stack->m_owningThread;
-    int            pid    = th->m_pid;
-    CLR_UINT32     depthMax  = stack->m_depth - 1;
-    CLR_UINT16     flags  = CLR_DBG_Commands::Debugging_Execution_BreakpointDef::c_STEP_IN;
-    CLR_UINT32     depthMin = depthMax;
+    CLR_RT_Thread *th = stack->m_owningThread;
+    int pid = th->m_pid;
+    CLR_UINT32 depthMax = stack->m_depth - 1;
+    CLR_UINT16 flags = CLR_DBG_Commands::Debugging_Execution_BreakpointDef::c_STEP_IN;
+    CLR_UINT32 depthMin = depthMax;
 
-    if(stack->m_flags & CLR_RT_StackFrame::c_PseudoStackFrameForFilter)
+    if (stack->m_flags & CLR_RT_StackFrame::c_PseudoStackFrameForFilter)
     {
-        //If a filter frame is being pushed on (assuming the InterceptMask for filters is set), we want to intercept the frame
-        //in certain special cases.
+        // If a filter frame is being pushed on (assuming the InterceptMask for filters is set), we want to intercept
+        // the frame in certain special cases.
         _ASSERTE(th->m_nestedExceptionsPos);
-        CLR_RT_Thread::UnwindStack& us = th->m_nestedExceptions[ th->m_nestedExceptionsPos-1 ];
+        CLR_RT_Thread::UnwindStack &us = th->m_nestedExceptions[th->m_nestedExceptionsPos - 1];
         _ASSERTE(us.m_stack == stack);
         depthMin = us.m_handlerStack->m_depth;
-        //If we popped off frames from AppDomain transitions that had steppers, we want to break there as well.
+        // If we popped off frames from AppDomain transitions that had steppers, we want to break there as well.
         depthMax = 0xffffffff;
-        flags |= CLR_DBG_Commands::Debugging_Execution_BreakpointDef::c_STEP_OVER | CLR_DBG_Commands::Debugging_Execution_BreakpointDef::c_STEP_OUT;
+        flags |= CLR_DBG_Commands::Debugging_Execution_BreakpointDef::c_STEP_OVER |
+                 CLR_DBG_Commands::Debugging_Execution_BreakpointDef::c_STEP_OUT;
     }
 
-    for(size_t pos=0; pos<m_breakpointsNum; pos++)
+    for (size_t pos = 0; pos < m_breakpointsNum; pos++)
     {
-        CLR_DBG_Commands::Debugging_Execution_BreakpointDef& def = m_breakpoints[ pos ];
+        CLR_DBG_Commands::Debugging_Execution_BreakpointDef &def = m_breakpoints[pos];
 
-        if(def.m_flags & flags)
+        if (def.m_flags & flags)
         {
-            if(def.m_pid == pid)
+            if (def.m_pid == pid)
             {
                 bool fStop;
 
-                if(def.m_flags & CLR_DBG_Commands::Debugging_Execution_BreakpointDef::c_STEP_JMC)
+                if (def.m_flags & CLR_DBG_Commands::Debugging_Execution_BreakpointDef::c_STEP_JMC)
                 {
                     fStop = stack->m_call.DebuggingInfo().IsJMC();
                 }
@@ -3235,49 +4226,51 @@ void CLR_RT_ExecutionEngine::Breakpoint_StackFrame_Push( CLR_RT_StackFrame* stac
                     fStop = (def.m_depth >= depthMin && def.m_depth <= depthMax);
                 }
 
-                if(def.m_depth == depthMin && (def.m_flags & CLR_DBG_Commands::Debugging_Execution_BreakpointDef::c_STEP) == CLR_DBG_Commands::Debugging_Execution_BreakpointDef::c_STEP_OUT)
+                if (def.m_depth == depthMin &&
+                    (def.m_flags & CLR_DBG_Commands::Debugging_Execution_BreakpointDef::c_STEP) ==
+                        CLR_DBG_Commands::Debugging_Execution_BreakpointDef::c_STEP_OUT)
                 {
-                    //In the case a user did a step out in a frame, we don't want to break if a filter gets pushed from that frame. However, if there is a step in or over on that frame,
-                    //we should break.
+                    // In the case a user did a step out in a frame, we don't want to break if a filter gets pushed from
+                    // that frame. However, if there is a step in or over on that frame, we should break.
                     fStop = false;
                 }
 
-                if(fStop)
+                if (fStop)
                 {
                     CLR_DBG_Commands::Debugging_Execution_BreakpointDef hit = def;
 
                     hit.m_flags = CLR_DBG_Commands::Debugging_Execution_BreakpointDef::c_STEP_IN;
                     hit.m_depthExceptionHandler = reason;
 
-                    StopOnBreakpoint( hit, stack, NULL );
+                    StopOnBreakpoint(hit, stack, nullptr);
                 }
             }
         }
     }
 
-    Breakpoint_StackFrame_Hard( stack, stack->m_IP );
+    Breakpoint_StackFrame_Hard(stack, stack->m_IP);
 }
 
-void CLR_RT_ExecutionEngine::Breakpoint_StackFrame_Pop( CLR_RT_StackFrame* stack, bool stepEH )
+void CLR_RT_ExecutionEngine::Breakpoint_StackFrame_Pop(CLR_RT_StackFrame *stack, bool stepEH)
 {
     NATIVE_PROFILE_CLR_CORE();
-    int                pid    = stack->m_owningThread->m_pid;
-    CLR_UINT32         depth  = stack->m_depth;
-    CLR_RT_StackFrame* caller = stack->Caller();
+    int pid = stack->m_owningThread->m_pid;
+    CLR_UINT32 depth = stack->m_depth;
+    CLR_RT_StackFrame *caller = stack->Caller();
 
-    if(caller->Prev() || stepEH)
+    if (caller->Prev() || stepEH)
     {
-        for(size_t pos=0; pos<m_breakpointsNum; pos++)
+        for (size_t pos = 0; pos < m_breakpointsNum; pos++)
         {
-            CLR_DBG_Commands::Debugging_Execution_BreakpointDef& def    = m_breakpoints[ pos ];
+            CLR_DBG_Commands::Debugging_Execution_BreakpointDef &def = m_breakpoints[pos];
 
-            if(def.m_flags & CLR_DBG_Commands::Debugging_Execution_BreakpointDef::c_STEP_OUT)
+            if (def.m_flags & CLR_DBG_Commands::Debugging_Execution_BreakpointDef::c_STEP_OUT)
             {
-                if(def.m_pid == pid)
+                if (def.m_pid == pid)
                 {
                     bool fStop;
 
-                    if(def.m_flags & CLR_DBG_Commands::Debugging_Execution_BreakpointDef::c_STEP_JMC)
+                    if (def.m_flags & CLR_DBG_Commands::Debugging_Execution_BreakpointDef::c_STEP_JMC)
                     {
                         fStop = (depth <= def.m_depth) && caller->m_call.DebuggingInfo().IsJMC();
                     }
@@ -3286,22 +4279,24 @@ void CLR_RT_ExecutionEngine::Breakpoint_StackFrame_Pop( CLR_RT_StackFrame* stack
                         fStop = (depth <= def.m_depth);
                     }
 
-                    if(fStop)
+                    if (fStop)
                     {
                         CLR_DBG_Commands::Debugging_Execution_BreakpointDef hit = def;
 
                         hit.m_flags = CLR_DBG_Commands::Debugging_Execution_BreakpointDef::c_STEP_OUT;
-                        
-                        if(stepEH)
+
+                        if (stepEH)
                         {
-                            hit.m_depthExceptionHandler = CLR_DBG_Commands::Debugging_Execution_BreakpointDef::c_DEPTH_STEP_EXCEPTION_HANDLER;
+                            hit.m_depthExceptionHandler =
+                                CLR_DBG_Commands::Debugging_Execution_BreakpointDef::c_DEPTH_STEP_EXCEPTION_HANDLER;
                         }
                         else
                         {
-                            hit.m_depthExceptionHandler = CLR_DBG_Commands::Debugging_Execution_BreakpointDef::c_DEPTH_STEP_RETURN;
+                            hit.m_depthExceptionHandler =
+                                CLR_DBG_Commands::Debugging_Execution_BreakpointDef::c_DEPTH_STEP_RETURN;
                         }
 
-                        StopOnBreakpoint( hit, (stepEH)? stack : caller, NULL );
+                        StopOnBreakpoint(hit, (stepEH) ? stack : caller, nullptr);
                     }
                 }
             }
@@ -3309,24 +4304,24 @@ void CLR_RT_ExecutionEngine::Breakpoint_StackFrame_Pop( CLR_RT_StackFrame* stack
     }
 }
 
-void CLR_RT_ExecutionEngine::Breakpoint_StackFrame_Step( CLR_RT_StackFrame* stack, CLR_PMETADATA ip )
+void CLR_RT_ExecutionEngine::Breakpoint_StackFrame_Step(CLR_RT_StackFrame *stack, CLR_PMETADATA ip)
 {
     NATIVE_PROFILE_CLR_CORE();
-    int        pid      = stack->m_owningThread->m_pid;
-    CLR_UINT32 depth    = stack->m_depth;
+    int pid = stack->m_owningThread->m_pid;
+    CLR_UINT32 depth = stack->m_depth;
     CLR_UINT32 IPoffset = (CLR_UINT32)(ip - stack->m_IPstart);
 
-    for(size_t pos=0; pos<m_breakpointsNum; pos++)
+    for (size_t pos = 0; pos < m_breakpointsNum; pos++)
     {
-        CLR_DBG_Commands::Debugging_Execution_BreakpointDef& def = m_breakpoints[ pos ];
+        CLR_DBG_Commands::Debugging_Execution_BreakpointDef &def = m_breakpoints[pos];
 
-        if(def.m_flags & CLR_DBG_Commands::Debugging_Execution_BreakpointDef::c_STEP_OVER)
+        if (def.m_flags & CLR_DBG_Commands::Debugging_Execution_BreakpointDef::c_STEP_OVER)
         {
-            if(def.m_pid == pid && def.m_depth == depth && (IPoffset < def.m_IPStart || IPoffset >= def.m_IPEnd))
+            if (def.m_pid == pid && def.m_depth == depth && (IPoffset < def.m_IPStart || IPoffset >= def.m_IPEnd))
             {
-                if(def.m_flags & CLR_DBG_Commands::Debugging_Execution_BreakpointDef::c_STEP_JMC)
+                if (def.m_flags & CLR_DBG_Commands::Debugging_Execution_BreakpointDef::c_STEP_JMC)
                 {
-                    if(!stack->m_call.DebuggingInfo().IsJMC())
+                    if (!stack->m_call.DebuggingInfo().IsJMC())
                     {
                         continue;
                     }
@@ -3336,36 +4331,37 @@ void CLR_RT_ExecutionEngine::Breakpoint_StackFrame_Step( CLR_RT_StackFrame* stac
 
                 hit.m_flags = CLR_DBG_Commands::Debugging_Execution_BreakpointDef::c_STEP_OVER;
 
-                StopOnBreakpoint( hit, stack, ip );
+                StopOnBreakpoint(hit, stack, ip);
             }
         }
     }
 
-    Breakpoint_StackFrame_Hard( stack, ip );
+    Breakpoint_StackFrame_Hard(stack, ip);
 }
 
-void CLR_RT_ExecutionEngine::Breakpoint_StackFrame_Hard( CLR_RT_StackFrame* stack, CLR_PMETADATA ip )
+void CLR_RT_ExecutionEngine::Breakpoint_StackFrame_Hard(CLR_RT_StackFrame *stack, CLR_PMETADATA ip)
 {
     NATIVE_PROFILE_CLR_CORE();
-    if(stack->Prev() != NULL && ip != NULL)
+    if (stack->Prev() != nullptr && ip != nullptr)
     {
         CLR_UINT32 IPoffset = (CLR_UINT32)(ip - stack->m_IPstart);
 
-        for(size_t pos=0; pos<m_breakpointsNum; pos++)
+        for (size_t pos = 0; pos < m_breakpointsNum; pos++)
         {
-            CLR_DBG_Commands::Debugging_Execution_BreakpointDef& def = m_breakpoints[ pos ];
+            CLR_DBG_Commands::Debugging_Execution_BreakpointDef &def = m_breakpoints[pos];
 
-            if(def.m_flags & CLR_DBG_Commands::Debugging_Execution_BreakpointDef::c_HARD)
+            if (def.m_flags & CLR_DBG_Commands::Debugging_Execution_BreakpointDef::c_HARD)
             {
-                if(def.m_pid == stack->m_owningThread->m_pid || def.m_pid == CLR_DBG_Commands::Debugging_Execution_BreakpointDef::c_PID_ANY)
+                if (def.m_pid == stack->m_owningThread->m_pid ||
+                    def.m_pid == CLR_DBG_Commands::Debugging_Execution_BreakpointDef::c_PID_ANY)
                 {
-                    if(def.m_md.m_data == stack->m_call.m_data && def.m_IP == IPoffset)
+                    if (def.m_md.data == stack->m_call.data && def.m_IP == IPoffset)
                     {
                         CLR_DBG_Commands::Debugging_Execution_BreakpointDef hit = def;
 
                         hit.m_flags = CLR_DBG_Commands::Debugging_Execution_BreakpointDef::c_HARD;
 
-                        StopOnBreakpoint( hit, stack, ip );
+                        StopOnBreakpoint(hit, stack, ip);
                     }
                 }
             }
@@ -3373,96 +4369,112 @@ void CLR_RT_ExecutionEngine::Breakpoint_StackFrame_Hard( CLR_RT_StackFrame* stac
     }
 }
 
-void CLR_RT_ExecutionEngine::Breakpoint_StackFrame_Break( CLR_RT_StackFrame* stack )
+void CLR_RT_ExecutionEngine::Breakpoint_StackFrame_Break(CLR_RT_StackFrame *stack)
 {
     NATIVE_PROFILE_CLR_CORE();
-    CLR_DBG_Commands::Debugging_Execution_BreakpointDef hit; NANOCLR_CLEAR(hit);
-    
-    Breakpoint_System_Event( hit, CLR_DBG_Commands::Debugging_Execution_BreakpointDef::c_BREAK, NULL, stack, NULL );
+    CLR_DBG_Commands::Debugging_Execution_BreakpointDef hit;
+    NANOCLR_CLEAR(hit);
+
+    Breakpoint_System_Event(hit, CLR_DBG_Commands::Debugging_Execution_BreakpointDef::c_BREAK, nullptr, stack, nullptr);
 }
 
 //--//
 
-void CLR_RT_ExecutionEngine::Breakpoint_Exception( CLR_RT_StackFrame* stack, CLR_UINT32 reason, CLR_PMETADATA ip )
+void CLR_RT_ExecutionEngine::Breakpoint_Exception(CLR_RT_StackFrame *stack, CLR_UINT32 reason, CLR_PMETADATA ip)
 {
     NATIVE_PROFILE_CLR_CORE();
-    CLR_DBG_Commands::Debugging_Execution_BreakpointDef hit; NANOCLR_CLEAR(hit);
+    CLR_DBG_Commands::Debugging_Execution_BreakpointDef hit;
+    NANOCLR_CLEAR(hit);
     hit.m_depthExceptionHandler = reason;
 
-    Breakpoint_System_Event( hit, CLR_DBG_Commands::Debugging_Execution_BreakpointDef::c_EXCEPTION_THROWN, NULL, stack, ip );
+    Breakpoint_System_Event(
+        hit,
+        CLR_DBG_Commands::Debugging_Execution_BreakpointDef::c_EXCEPTION_THROWN,
+        nullptr,
+        stack,
+        ip);
 }
 
-void CLR_RT_ExecutionEngine::Breakpoint_Exception_Uncaught( CLR_RT_Thread* th )
+void CLR_RT_ExecutionEngine::Breakpoint_Exception_Uncaught(CLR_RT_Thread *th)
 {
     NATIVE_PROFILE_CLR_CORE();
-    CLR_DBG_Commands::Debugging_Execution_BreakpointDef hit; NANOCLR_CLEAR(hit);
+    CLR_DBG_Commands::Debugging_Execution_BreakpointDef hit;
+    NANOCLR_CLEAR(hit);
 
-    hit.m_depth                 = CLR_DBG_Commands::Debugging_Execution_BreakpointDef::c_DEPTH_UNCAUGHT;
+    hit.m_depth = CLR_DBG_Commands::Debugging_Execution_BreakpointDef::c_DEPTH_UNCAUGHT;
     hit.m_depthExceptionHandler = CLR_DBG_Commands::Debugging_Execution_BreakpointDef::c_DEPTH_UNCAUGHT;
 
-    Breakpoint_System_Event( hit, CLR_DBG_Commands::Debugging_Execution_BreakpointDef::c_EXCEPTION_THROWN, th, NULL, NULL );
+    Breakpoint_System_Event(
+        hit,
+        CLR_DBG_Commands::Debugging_Execution_BreakpointDef::c_EXCEPTION_THROWN,
+        th,
+        nullptr,
+        nullptr);
 }
 
-void CLR_RT_ExecutionEngine::Breakpoint_Exception_Intercepted( CLR_RT_StackFrame* stack )
+void CLR_RT_ExecutionEngine::Breakpoint_Exception_Intercepted(CLR_RT_StackFrame *stack)
 {
     NATIVE_PROFILE_CLR_CORE();
-    CLR_DBG_Commands::Debugging_Execution_BreakpointDef hit; NANOCLR_CLEAR(hit);
-    CLR_UINT16 event = CLR_DBG_Commands::Debugging_Execution_BreakpointDef::c_EXCEPTION_CAUGHT
-                       | CLR_DBG_Commands::Debugging_Execution_BreakpointDef::c_EXCEPTION_UNWIND;    
-    
+    CLR_DBG_Commands::Debugging_Execution_BreakpointDef hit;
+    NANOCLR_CLEAR(hit);
+    CLR_UINT16 event = CLR_DBG_Commands::Debugging_Execution_BreakpointDef::c_EXCEPTION_CAUGHT |
+                       CLR_DBG_Commands::Debugging_Execution_BreakpointDef::c_EXCEPTION_UNWIND;
+
     hit.m_depthExceptionHandler = stack->m_depth;
-    
-    Breakpoint_System_Event( hit, event, NULL, stack, NULL );
+
+    Breakpoint_System_Event(hit, event, nullptr, stack, nullptr);
 }
 
-#endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
+#endif // #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 #if defined(NANOCLR_APPDOMAINS)
 
-CLR_RT_AppDomain* CLR_RT_ExecutionEngine::SetCurrentAppDomain( CLR_RT_AppDomain* appDomain )
-{ 
+CLR_RT_AppDomain *CLR_RT_ExecutionEngine::SetCurrentAppDomain(CLR_RT_AppDomain *appDomain)
+{
     NATIVE_PROFILE_CLR_CORE();
-    CLR_RT_AppDomain* ad = m_appDomainCurrent; 
+    CLR_RT_AppDomain *ad = m_appDomainCurrent;
 
     m_appDomainCurrent = appDomain;
 
     return ad;
 }
 
-CLR_RT_AppDomain* CLR_RT_ExecutionEngine::GetCurrentAppDomain()
+CLR_RT_AppDomain *CLR_RT_ExecutionEngine::GetCurrentAppDomain()
 {
     NATIVE_PROFILE_CLR_CORE();
     return m_appDomainCurrent;
 }
 
-void CLR_RT_ExecutionEngine::PrepareThreadsForAppDomainUnload( CLR_RT_AppDomain* appDomain, CLR_RT_DblLinkedList& threads)
+void CLR_RT_ExecutionEngine::PrepareThreadsForAppDomainUnload(
+    CLR_RT_AppDomain *appDomain,
+    CLR_RT_DblLinkedList &threads)
 {
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_FOREACH_NODE(CLR_RT_Thread, th, threads)
     {
         bool fFoundDoomedAppDomain = false;
-        bool fInjectThreadAbort    = false;
+        bool fInjectThreadAbort = false;
 
         NANOCLR_FOREACH_NODE(CLR_RT_StackFrame, stack, th->m_stackFrames)
         {
-            if(!fFoundDoomedAppDomain)
+            if (!fFoundDoomedAppDomain)
             {
-                if(stack->m_appDomain == appDomain)
-                {                                    
-                    //The first stack frame found in a doomed AppDomain
+                if (stack->m_appDomain == appDomain)
+                {
+                    // The first stack frame found in a doomed AppDomain
                     fFoundDoomedAppDomain = true;
-                    fInjectThreadAbort    = true;
-                    stack->m_flags |= CLR_RT_StackFrame::c_AppDomainInjectException;   
-                    th   ->m_flags |= CLR_RT_Thread::TH_F_ContainsDoomedAppDomain;
+                    fInjectThreadAbort = true;
+                    stack->m_flags |= CLR_RT_StackFrame::c_AppDomainInjectException;
+                    th->m_flags |= CLR_RT_Thread::TH_F_ContainsDoomedAppDomain;
                 }
             }
-            else //fFoundDoomedAppDomain     
+            else // fFoundDoomedAppDomain
             {
-                if(stack->m_flags & CLR_RT_StackFrame::c_AppDomainInjectException)
+                if (stack->m_flags & CLR_RT_StackFrame::c_AppDomainInjectException)
                 {
-                    //This thread is already being unwound due to an unloading AppDomain
+                    // This thread is already being unwound due to an unloading AppDomain
                     stack->m_flags &= ~CLR_RT_StackFrame::c_AppDomainInjectException;
                     fInjectThreadAbort = false;
                 }
@@ -3470,28 +4482,29 @@ void CLR_RT_ExecutionEngine::PrepareThreadsForAppDomainUnload( CLR_RT_AppDomain*
         }
         NANOCLR_FOREACH_NODE_END();
 
-        if(fInjectThreadAbort)
-        {            
+        if (fInjectThreadAbort)
+        {
             (void)th->Abort();
         }
     }
     NANOCLR_FOREACH_NODE_END();
 }
 
-HRESULT CLR_RT_ExecutionEngine::UnloadAppDomain( CLR_RT_AppDomain* appDomain, CLR_RT_Thread* th )
+HRESULT CLR_RT_ExecutionEngine::UnloadAppDomain(CLR_RT_AppDomain *appDomain, CLR_RT_Thread *th)
 {
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
 
-    //Check to make sure the current thread does not contain any doomed AppDomains
+    // Check to make sure the current thread does not contain any doomed AppDomains
     NANOCLR_FOREACH_NODE(CLR_RT_StackFrame, stack, th->m_stackFrames)
     {
-        if(!stack->m_appDomain->IsLoaded() || stack->m_appDomain == appDomain) NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+        if (!stack->m_appDomain->IsLoaded() || stack->m_appDomain == appDomain)
+            NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
     }
     NANOCLR_FOREACH_NODE_END();
 
-    PrepareThreadsForAppDomainUnload( appDomain, m_threadsReady   );
-    PrepareThreadsForAppDomainUnload( appDomain, m_threadsWaiting );
+    PrepareThreadsForAppDomainUnload(appDomain, m_threadsReady);
+    PrepareThreadsForAppDomainUnload(appDomain, m_threadsWaiting);
 
     appDomain->m_state = CLR_RT_AppDomain::AppDomainState_Unloading;
     CLR_EE_SET(UnloadingAppDomain);
@@ -3503,30 +4516,30 @@ HRESULT CLR_RT_ExecutionEngine::UnloadAppDomain( CLR_RT_AppDomain* appDomain, CL
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-CLR_UINT32 CLR_RT_ExecutionEngine::WaitSystemEvents( CLR_UINT32 powerLevel, CLR_UINT32 events, CLR_INT64 timeExpire )
+CLR_UINT32 CLR_RT_ExecutionEngine::WaitSystemEvents(CLR_UINT32 powerLevel, CLR_UINT32 events, CLR_INT64 timeExpire)
 {
     NATIVE_PROFILE_CLR_CORE();
     CLR_INT32 timeout;
-    
+
     CLR_UINT32 res = 0;
 
     m_currentNextActivityTime = timeExpire + HAL_Time_CurrentTime();
 
     timeout = (CLR_INT32)timeExpire / TIME_CONVERSION__TO_MILLISECONDS;
 
-    if(timeout == 0) timeout = 1;
+    if (timeout == 0)
+        timeout = 1;
 
 #if defined(NANOCLR_TRACE_SYSTEMEVENTWAIT)
     CLR_INT64 start = HAL_Time_CurrentTime();
 #endif
 
 #if defined(NANOCLR_STRESS_GC)
-    if(timeout > 100)
+    if (timeout > 100)
     {
         CLR_INT64 startGC = HAL_Time_CurrentTime();
 
-
-        g_CLR_RT_ExecutionEngine.PerformHeapCompaction   ();
+        g_CLR_RT_ExecutionEngine.PerformHeapCompaction();
 
         CLR_INT64 endGC = HAL_Time_CurrentTime();
 
@@ -3539,32 +4552,31 @@ CLR_UINT32 CLR_RT_ExecutionEngine::WaitSystemEvents( CLR_UINT32 powerLevel, CLR_
     // TODO check if the watchdog needs to be feed here... don't think so
     Watchdog_Reset();
 
-    res = ::Events_WaitForEvents( powerLevel, events, timeout );
+    res = ::Events_WaitForEvents(powerLevel, events, timeout);
     // UNDONE: FIXME
     // ::Watchdog_GetSetEnabled( bool, bool );
     // TODO check if the watchdog needs to be feed here... don't think so
     Watchdog_Reset();
 
-
 #if defined(NANOCLR_TRACE_SYSTEMEVENTWAIT)
-    CLR_INT64 stop  = HAL_Time_CurrentTime();
+    CLR_INT64 stop = HAL_Time_CurrentTime();
     CLR_INT64 stop2 = HAL_Time_CurrentTime();
 
     static CLR_INT64 totalRequested = 0;
-    static CLR_INT64 totalActual    = 0;
-    static CLR_INT64 samples        = 0;
+    static CLR_INT64 totalActual = 0;
+    static CLR_INT64 samples = 0;
 
     totalRequested += timeout;
-    totalActual    += (stop - start) - (stop2 - stop);
-    samples        += 1;
+    totalActual += (stop - start) - (stop2 - stop);
+    samples += 1;
 
-    if(samples == 10000)
+    if (samples == 10000)
     {
-        CLR_Debug::Printf( "Wait %lld %lld\r\n", totalRequested / samples, totalActual / samples );
+        CLR_Debug::Printf("Wait %lld %lld\r\n", totalRequested / samples, totalActual / samples);
 
         totalRequested = 0;
-        totalActual    = 0;
-        samples        = 0;
+        totalActual = 0;
+        samples = 0;
     }
 #endif
 
@@ -3572,4 +4584,3 @@ CLR_UINT32 CLR_RT_ExecutionEngine::WaitSystemEvents( CLR_UINT32 powerLevel, CLR_
 
     return res;
 }
-

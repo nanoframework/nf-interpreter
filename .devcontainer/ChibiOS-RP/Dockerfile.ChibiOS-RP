@@ -1,0 +1,5 @@
+# Pre-built image is not yet available for ChibiOS-RP.
+# Use Dockerfile.ChibiOS-RP.SRC to build from source.
+# Once published, replace this line with the image reference, e.g.:
+# FROM ghcr.io/nanoframework/dev-container-chibios-rp:v1.0
+FROM ghcr.io/nanoframework/dev-container-chibios-rp:v1.0

@@ -1,12 +1,17 @@
 #
-# Copyright (c) 2019 The nanoFramework project contributors
+# Copyright (c) .NET Foundation and Contributors
 # See LICENSE file in the project root for full license information.
 #
 
 
 # set include directories
-list(APPEND nanoFramework.ResourceManager_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/src/HAL/Include")
-list(APPEND nanoFramework.ResourceManager_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/src/nanoFramework.ResourceManager")
+list(APPEND nanoFramework.ResourceManager_INCLUDE_DIRS "${CMAKE_SOURCE_DIR}/src/HAL/Include")
+list(APPEND nanoFramework.ResourceManager_INCLUDE_DIRS "${CMAKE_SOURCE_DIR}/src/nanoFramework.ResourceManager")
+
+if(API_nanoFramework.Graphics)
+list(APPEND nanoFramework.ResourceManager_INCLUDE_DIRS "${CMAKE_SOURCE_DIR}/src/nanoFramework.Graphics/Graphics/Core")
+list(APPEND nanoFramework.ResourceManager_INCLUDE_DIRS "${CMAKE_SOURCE_DIR}/src/nanoFramework.Graphics/Graphics/Displays")
+endif()
 
 
 # source files
@@ -19,17 +24,24 @@ set(nanoFramework.ResourceManager_SRCS
 )
 
 foreach(SRC_FILE ${nanoFramework.ResourceManager_SRCS})
+
     set(nanoFramework.ResourceManager_SRC_FILE SRC_FILE-NOTFOUND)
+
     find_file(nanoFramework.ResourceManager_SRC_FILE ${SRC_FILE}
         PATHS
 
             # path for source files of this module
-            ${PROJECT_SOURCE_DIR}/src/nanoFramework.ResourceManager
+            ${CMAKE_SOURCE_DIR}/src/nanoFramework.ResourceManager
 
         CMAKE_FIND_ROOT_PATH_BOTH
     )
-    # message("${SRC_FILE} >> ${nanoFramework.ResourceManager_SRC_FILE}") # debug helper
+
+    if (BUILD_VERBOSE)
+        message("${SRC_FILE} >> ${nanoFramework.ResourceManager_SRC_FILE}")
+    endif()
+
     list(APPEND nanoFramework.ResourceManager_SOURCES ${nanoFramework.ResourceManager_SRC_FILE})
+    
 endforeach()
 
 

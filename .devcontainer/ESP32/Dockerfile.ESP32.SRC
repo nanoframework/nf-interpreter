@@ -1,0 +1,111 @@
+# =============================================================================
+# IDF MIGRATION CHECKLIST
+# When upgrading ESP-IDF to a new version, review and update the following:
+#
+# 1. ESP-IDF version: search for the git clone --branch tag below (currently v5.5.4)
+# 2. ESP_PATCH_VER: the GCC toolchain patch version installed by IDF.
+#    After running install.sh in the new IDF, check the toolchain version at:
+#      ~/.espressif/tools/xtensa-esp-elf/ and ~/.espressif/tools/riscv32-esp-elf/
+#    Look for the folder name (e.g. esp-14.2.0_20260121) and update ESP_PATCH_VER.
+# 3. Python venv path: IDF creates a Python virtual environment whose name
+#    includes the IDF major.minor version (e.g. idf5.5_py3.11_env).
+#    Update the PATH entry for the venv when the IDF major/minor changes.
+# 4. CMake version (ARG CMAKE_VERSION): update if a newer CMake is needed.
+# 5. Prebuilt image tag: after building the new SRC image, bump the version tag
+#    in the sibling Dockerfile.ESP32 (e.g. dev-container-esp32:v2.38).
+# 6. Other files to update in the same PR:
+#    - azure-pipelines.yml / azure-pipelines-nightly.yml: IDF_TAG and
+#      resources.repositories ref for esp-idf
+#    - CMake/Modules/FindESP32_IDF.cmake: include path changes from IDF
+#      restructuring
+# =============================================================================
+FROM ubuntu:latest AS downloader
+RUN apt-get update \
+    && apt-get -y install --no-install-recommends apt-utils \
+    && apt-get install -y \
+    curl \
+    bzip2 \
+    unzip \
+    wget 
+
+RUN mkdir -p /tmp/dc-downloads /tmp/dc-extracted
+
+ARG CMAKE_VERSION=3.31.6
+ARG CMAKE_SCRIPT=https://github.com/Kitware/CMake/releases/download/v$CMAKE_VERSION/cmake-$CMAKE_VERSION-linux-x86_64.sh
+RUN wget $CMAKE_SCRIPT \
+    -q -O /tmp/dc-downloads/cmake-install.sh \
+    && chmod u+x /tmp/dc-downloads/cmake-install.sh \
+    && mkdir -p /tmp/dc-extracted/cmake \
+    && /tmp/dc-downloads/cmake-install.sh --skip-license --prefix=/tmp/dc-extracted/cmake \
+    && rm /tmp/dc-downloads/cmake-install.sh
+
+FROM python:3.11 AS devcontainer
+
+# Avoid warnings by switching to noninteractive
+ENV DEBIAN_FRONTEND=noninteractive
+
+# You can set up non-root user
+# ARG USERNAME=vscode
+# ARG USER_UID=1000
+# ARG USER_GID=$USER_UID
+
+# Configure apt and install packages
+RUN apt-get update \
+    && apt-get -y install --no-install-recommends apt-utils dialog icu-devtools 2>&1 \
+    && apt-get install -y \
+    git \
+    git-lfs \
+    clang-format \
+    curl \
+    ninja-build \
+    srecord \
+    nodejs \
+    libffi-dev \
+    libusb-1.0
+
+# Create needed directories
+RUN mkdir -p /usr/local/bin/gcc
+
+# Clone fatfs
+RUN git clone --branch R0.16 https://github.com/abbrev/fatfs.git --depth 1 ./sources/fatfs
+
+# Clone ESP-IDF
+# >>> IDF MIGRATION: update the branch tag to the new IDF version <<<
+RUN git clone --branch v5.5.4 https://github.com/espressif/esp-idf --depth 1 --recursive ./sources/esp-idf
+
+# Installing python dependencies for the container
+RUN pip3 install --no-cache-dir pyserial "kconfiglib>=14.1.0"
+
+# copy from our other container
+COPY --from=downloader /tmp/dc-extracted/cmake /usr/bin/cmake
+
+ENV PATH=/usr/bin/cmake/bin:${PATH}
+
+# Install ESP-IDF
+ENV IDF_PATH=/sources/esp-idf
+# >>> IDF MIGRATION: ESP_PATCH_VER is the GCC toolchain version installed by IDF.
+#     After install.sh completes, check ~/.espressif/tools/xtensa-esp-elf/ for
+#     the actual folder name and update this value accordingly. <<<
+ENV ESP_PATCH_VER=esp-14.2.0_20260121
+# This is now taking care in the following line
+# RUN python -m pip install -r $IDF_PATH/requirements.txt
+RUN $IDF_PATH/install.sh
+
+# >>> IDF MIGRATION: the python venv folder name contains the IDF major.minor
+#     version (e.g. idf5.5). Update when the IDF major/minor version changes. <<<
+ENV PATH=/root/.espressif/python_env/idf5.5_py3.11_env/bin:$PATH:\
+$IDF_PATH/components/esptool_py/esptool:\
+$IDF_PATH/components/espcoredump:\ 
+$IDF_PATH/components/partition_table/:\
+$IDF_PATH/tools/:\
+$IDF_PATH/components/app_update:\
+/root/.espressif/tools/xtensa-esp-elf/$ESP_PATCH_VER/xtensa-esp-elf/bin:\
+/root/.espressif/tools/riscv32-esp-elf/$ESP_PATCH_VER/riscv32-esp-elf/bin
+
+# Clean up downloaded files
+RUN apt-get autoremove -y \
+    && apt-get clean -y \
+    && rm -rf /var/lib/apt/lists/*
+
+# Switch back to dialog for any ad-hoc use of apt-get
+ENV DEBIAN_FRONTEND=dialog
