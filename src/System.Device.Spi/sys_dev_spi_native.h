@@ -17,22 +17,20 @@ typedef enum __nfpack DataFlow
     DataFlow_LsbFirst = 1,
 } DataFlow;
 
-// moved to src\PAL\Include\CPU_SPI_decl.h for convenience
-// typedef enum __nfpack SpiBusConfiguration
-// {
-//     SpiBusConfiguration_FullDuplex = 0,
-//     SpiBusConfiguration_HalfDuplex = 1,
-//     SpiBusConfiguration_Simplex = 2,
-// } SpiBusConfiguration;
+typedef enum __nfpack SpiBusConfiguration
+{
+    SpiBusConfiguration_FullDuplex = 0,
+    SpiBusConfiguration_HalfDuplex = 1,
+    SpiBusConfiguration_Simplex = 2,
+} SpiBusConfiguration;
 
-// moved to src\PAL\Include\CPU_SPI_decl.h for convenience
-// typedef enum __nfpack SpiMode
-// {
-//     SpiMode_Mode0 = 0,
-//     SpiMode_Mode1 = 1,
-//     SpiMode_Mode2 = 2,
-//     SpiMode_Mode3 = 3,
-// } SpiMode;
+typedef enum __nfpack SpiMode
+{
+    SpiMode_Mode0 = 0,
+    SpiMode_Mode1 = 1,
+    SpiMode_Mode2 = 2,
+    SpiMode_Mode3 = 3,
+} SpiMode;
 
 struct Library_sys_dev_spi_native_System_Device_Spi_SpiBusInfo
 {
@@ -73,8 +71,6 @@ struct Library_sys_dev_spi_native_System_Device_Spi_SpiDevice
     NANOCLR_NATIVE_DECLARE(NativeOpenDevice___I4);
 
     //--//
-
-    static HRESULT NativeTransfer(CLR_RT_StackFrame &stack, bool bufferIs16bits);
 };
 
 extern const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_System_Device_Spi;

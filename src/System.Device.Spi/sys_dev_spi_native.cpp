@@ -12,7 +12,6 @@ static const CLR_RT_MethodHandler method_lookup[] =
     nullptr,
     nullptr,
     nullptr,
-    nullptr,
     Library_sys_dev_spi_native_System_Device_Spi_SpiBusInfo::NativeMaxClockFrequency___I4,
     Library_sys_dev_spi_native_System_Device_Spi_SpiBusInfo::NativeMinClockFrequency___I4,
     nullptr,
@@ -52,9 +51,6 @@ static const CLR_RT_MethodHandler method_lookup[] =
     Library_sys_dev_spi_native_System_Device_Spi_SpiDevice::NativeTransfer___VOID__SystemReadOnlySpan_1__SystemSpan_1__BOOLEAN,
     Library_sys_dev_spi_native_System_Device_Spi_SpiDevice::NativeInit___VOID,
     Library_sys_dev_spi_native_System_Device_Spi_SpiDevice::NativeOpenDevice___I4,
-    nullptr,
-    nullptr,
-    nullptr,
     nullptr,
 };
 
