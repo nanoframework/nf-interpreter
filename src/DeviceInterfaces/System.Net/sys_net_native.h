@@ -167,13 +167,6 @@ struct Library_sys_net_native_nanoFramework_Networking_NetworkHelper
     //--//
 };
 
-struct Library_sys_net_native_nanoFramework_Networking_NetworkHelper__O
-{
-    static const int FIELD_STATIC__<0> __WorkingThread = 8;
-
-    //--//
-};
-
 struct Library_sys_net_native_System_Net_IPAddress
 {
     static const int FIELD_STATIC__Any = 9;
