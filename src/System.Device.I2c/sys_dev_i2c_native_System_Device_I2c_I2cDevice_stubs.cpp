@@ -1,19 +1,12 @@
-﻿//-----------------------------------------------------------------------------
 //
-//                   ** WARNING! ** 
-//    This file was generated automatically by a tool.
-//    Re-running the tool will overwrite this file.
-//    You should copy this file to a custom location
-//    before adding any customization in the copy to
-//    prevent loss of your changes when the tool is
-//    re-run.
+// Copyright (c) .NET Foundation and Contributors
+// Portions Copyright (c) Microsoft Corporation.  All rights reserved.
+// See LICENSE file in the project root for full license information.
 //
-//-----------------------------------------------------------------------------
 
 #include "sys_dev_i2c_native.h"
 
-
-HRESULT Library_sys_dev_i2c_native_System_Device_I2c_I2cDevice::NativeInit___VOID( CLR_RT_StackFrame &stack )
+HRESULT Library_sys_dev_i2c_native_System_Device_I2c_I2cDevice::NativeInit___VOID(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
@@ -22,7 +15,7 @@ HRESULT Library_sys_dev_i2c_native_System_Device_I2c_I2cDevice::NativeInit___VOI
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_sys_dev_i2c_native_System_Device_I2c_I2cDevice::NativeDispose___VOID( CLR_RT_StackFrame &stack )
+HRESULT Library_sys_dev_i2c_native_System_Device_I2c_I2cDevice::NativeDispose___VOID(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
@@ -31,7 +24,8 @@ HRESULT Library_sys_dev_i2c_native_System_Device_I2c_I2cDevice::NativeDispose___
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_sys_dev_i2c_native_System_Device_I2c_I2cDevice::NativeTransmit___SystemDeviceI2cI2cTransferResult__SystemReadOnlySpan_1__SystemSpan_1( CLR_RT_StackFrame &stack )
+HRESULT Library_sys_dev_i2c_native_System_Device_I2c_I2cDevice::
+    NativeTransmit___SystemDeviceI2cI2cTransferResult__SystemReadOnlySpan_1__SystemSpan_1(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
