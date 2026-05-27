@@ -14,6 +14,18 @@
 #include <nanoHAL_time.h>
 #include <corlib_native.h>
 
+typedef enum __nfpack NetworkHelperStatus
+{
+    NetworkHelperStatus_None = 0,
+    NetworkHelperStatus_Started = 1,
+    NetworkHelperStatus_NetworkIsReady = 2,
+    NetworkHelperStatus_FailedNoNetworkInterface = 3,
+    NetworkHelperStatus_TokenExpiredWaitingIPAddress = 4,
+    NetworkHelperStatus_TokenExpiredWaitingDateTime = 5,
+    NetworkHelperStatus_ErrorConnetingToWiFiWhileScanning = 6,
+    NetworkHelperStatus_ExceptionOccurred = 7,
+} NetworkHelperStatus;
+
 // MOVED TO src\HAL\Include\nanoHAL_Network.h for convinience
 // typedef enum __nfpack AddressMode
 // {
@@ -114,6 +126,15 @@
 //     WirelessAPConfiguration_ConfigurationOptions_HiddenSSID = 8,
 // } WirelessAPConfiguration_ConfigurationOptions;
 
+typedef enum __nfpack SslProtocols
+{
+    SslProtocols_None = 0,
+    SslProtocols_Tls = 192,
+    SslProtocols_Tls11 = 768,
+    SslProtocols_Tls12 = 3072,
+    SslProtocols_Tls13 = 12288,
+} SslProtocols;
+
 struct Library_sys_net_native_System_Net_NetworkInformation_NetworkInterface
 {
     static const int FIELD___interfaceIndex = 1;
@@ -135,9 +156,34 @@ struct Library_sys_net_native_System_Net_NetworkInformation_NetworkInterface
 
     NANOCLR_NATIVE_DECLARE(InitializeNetworkInterfaceSettings___VOID);
     NANOCLR_NATIVE_DECLARE(UpdateConfiguration___VOID__I4);
+    NANOCLR_NATIVE_DECLARE(GetIsNetworkAvailable___STATIC__BOOLEAN);
     NANOCLR_NATIVE_DECLARE(GetNetworkInterfaceCount___STATIC__I4);
     NANOCLR_NATIVE_DECLARE(GetNetworkInterface___STATIC__SystemNetNetworkInformationNetworkInterface__U4);
-    NANOCLR_NATIVE_DECLARE(IPAddressFromString___STATIC__U4__STRING);
+    NANOCLR_NATIVE_DECLARE(IPV4AddressFromString___STATIC__I8__STRING);
+    NANOCLR_NATIVE_DECLARE(IPV6AddressFromString___STATIC__SZARRAY_U2__STRING);
+
+    //--//
+
+};
+
+struct Library_sys_net_native_nanoFramework_Networking_NetworkHelper
+{
+    static const int FIELD_STATIC___ipAddressAvailable = 0;
+    static const int FIELD_STATIC___networkReady = 1;
+    static const int FIELD_STATIC___requiresDateTime = 2;
+    static const int FIELD_STATIC___networkHelperStatus = 3;
+    static const int FIELD_STATIC___helperException = 4;
+    static const int FIELD_STATIC___workingNetworkInterface = 5;
+    static const int FIELD_STATIC___ipConfiguration = 6;
+    static const int FIELD_STATIC___helperInstanciated = 7;
+
+    //--//
+
+};
+
+struct Library_sys_net_native_nanoFramework_Networking_NetworkHelper__O
+{
+    static const int FIELD_STATIC__WorkingThread = 8;
 
     //--//
 
@@ -145,12 +191,20 @@ struct Library_sys_net_native_System_Net_NetworkInformation_NetworkInterface
 
 struct Library_sys_net_native_System_Net_IPAddress
 {
-    static const int FIELD_STATIC__Any = 0;
-    static const int FIELD_STATIC__Loopback = 1;
+    static const int FIELD_STATIC__Any = 9;
+    static const int FIELD_STATIC__Loopback = 10;
+    static const int FIELD_STATIC__Broadcast = 11;
+    static const int FIELD_STATIC__None = 12;
+    static const int FIELD_STATIC__IPv6Any = 13;
+    static const int FIELD_STATIC__IPv6Loopback = 14;
 
-    static const int FIELD___address = 1;
+    static const int FIELD__Address = 1;
     static const int FIELD___family = 2;
     static const int FIELD___numbers = 3;
+    static const int FIELD___scopeid = 4;
+
+    NANOCLR_NATIVE_DECLARE(IPv4ToString___STATIC__STRING__U4);
+    NANOCLR_NATIVE_DECLARE(IPv6ToString___STATIC__STRING__SZARRAY_U2);
 
     //--//
 
@@ -169,6 +223,14 @@ struct Library_sys_net_native_System_Net_IPHostEntry
 {
     static const int FIELD__hostName = 1;
     static const int FIELD__addressList = 2;
+
+    //--//
+
+};
+
+struct Library_sys_net_native_System_Net_NetworkInformation_IPGlobalProperties
+{
+    NANOCLR_NATIVE_DECLARE(GetIPAddress___STATIC__SystemNetIPAddress);
 
     //--//
 
@@ -193,9 +255,9 @@ struct Library_sys_net_native_System_Net_NetworkInformation_NetworkAvailabilityE
 
 struct Library_sys_net_native_System_Net_NetworkInformation_NetworkChange
 {
-    static const int FIELD_STATIC__NetworkAddressChanged = 2;
-    static const int FIELD_STATIC__NetworkAvailabilityChanged = 3;
-    static const int FIELD_STATIC__NetworkAPStationChanged = 4;
+    static const int FIELD_STATIC__NetworkAddressChanged = 15;
+    static const int FIELD_STATIC__NetworkAvailabilityChanged = 16;
+    static const int FIELD_STATIC__NetworkAPStationChanged = 17;
 
     //--//
 
@@ -275,8 +337,8 @@ struct Library_sys_net_native_System_Net_Security_CertificateManager
 
 struct Library_sys_net_native_System_Net_Security_SslNative
 {
-    NANOCLR_NATIVE_DECLARE(SecureServerInit___STATIC__I4__I4__I4__SystemSecurityCryptographyX509CertificatesX509Certificate__SystemSecurityCryptographyX509CertificatesX509Certificate);
-    NANOCLR_NATIVE_DECLARE(SecureClientInit___STATIC__I4__I4__I4__SystemSecurityCryptographyX509CertificatesX509Certificate__SystemSecurityCryptographyX509CertificatesX509Certificate);
+    NANOCLR_NATIVE_DECLARE(SecureServerInit___STATIC__I4__I4__I4__SystemSecurityCryptographyX509CertificatesX509Certificate__SystemSecurityCryptographyX509CertificatesX509Certificate__BOOLEAN);
+    NANOCLR_NATIVE_DECLARE(SecureClientInit___STATIC__I4__I4__I4__SystemSecurityCryptographyX509CertificatesX509Certificate__SystemSecurityCryptographyX509CertificatesX509Certificate__BOOLEAN);
     NANOCLR_NATIVE_DECLARE(SecureAccept___STATIC__VOID__I4__OBJECT);
     NANOCLR_NATIVE_DECLARE(SecureConnect___STATIC__VOID__I4__STRING__OBJECT);
     NANOCLR_NATIVE_DECLARE(SecureRead___STATIC__I4__OBJECT__SZARRAY_U1__I4__I4__I4);
@@ -301,9 +363,7 @@ struct Library_sys_net_native_System_Net_Sockets_Socket
     static const int FIELD__m_recvTimeout = 4;
     static const int FIELD__m_sendTimeout = 5;
     static const int FIELD___socketType = 6;
-    static const int FIELD___nonBlockingConnectInProgress = 7;
-    static const int FIELD___nonBlockingConnectRightEndPoint = 8;
-    static const int FIELD___rightEndPoint = 9;
+    static const int FIELD___rightEndPoint = 7;
 
     //--//
 
@@ -312,15 +372,14 @@ struct Library_sys_net_native_System_Net_Sockets_Socket
 struct Library_sys_net_native_System_Security_Cryptography_X509Certificates_X509Certificate
 {
     static const int FIELD___certificate = 1;
-    static const int FIELD___password = 2;
-    static const int FIELD___issuer = 3;
-    static const int FIELD___subject = 4;
-    static const int FIELD___effectiveDate = 5;
-    static const int FIELD___expirationDate = 6;
-    static const int FIELD___handle = 7;
-    static const int FIELD___sessionHandle = 8;
+    static const int FIELD___issuer = 2;
+    static const int FIELD___subject = 3;
+    static const int FIELD___effectiveDate = 4;
+    static const int FIELD___expirationDate = 5;
+    static const int FIELD___handle = 6;
+    static const int FIELD___sessionHandle = 7;
 
-    NANOCLR_NATIVE_DECLARE(ParseCertificate___STATIC__VOID__SZARRAY_U1__STRING__BYREF_STRING__BYREF_STRING__BYREF_SystemDateTime__BYREF_SystemDateTime);
+    NANOCLR_NATIVE_DECLARE(ParseCertificate___STATIC__VOID__SZARRAY_U1__BYREF_STRING__BYREF_STRING__BYREF_SystemDateTime__BYREF_SystemDateTime);
 
     //--//
 
@@ -328,9 +387,10 @@ struct Library_sys_net_native_System_Security_Cryptography_X509Certificates_X509
 
 struct Library_sys_net_native_System_Net_Security_SslStream
 {
-    static const int FIELD___sslVerification = 6;
-    static const int FIELD___sslContext = 7;
-    static const int FIELD___isServer = 8;
+    static const int FIELD___sslVerification = 7;
+    static const int FIELD___useStoredDeviceCertificate = 8;
+    static const int FIELD___sslContext = 9;
+    static const int FIELD___isServer = 10;
 
     //--//
 
@@ -351,14 +411,18 @@ struct Library_sys_net_native_System_Net_Sockets_NativeSocket
     NANOCLR_NATIVE_DECLARE(bind___STATIC__VOID__OBJECT__SystemNetEndPoint);
     NANOCLR_NATIVE_DECLARE(connect___STATIC__VOID__OBJECT__SystemNetEndPoint__BOOLEAN);
     NANOCLR_NATIVE_DECLARE(send___STATIC__I4__OBJECT__SZARRAY_U1__I4__I4__I4__I4);
+    NANOCLR_NATIVE_DECLARE(Send___STATIC__I4__OBJECT__SystemReadOnlySpan_1__I4__I4__I4__I4);
     NANOCLR_NATIVE_DECLARE(recv___STATIC__I4__OBJECT__SZARRAY_U1__I4__I4__I4__I4);
+    NANOCLR_NATIVE_DECLARE(Recv___STATIC__I4__OBJECT__SystemSpan_1__I4__I4__I4__I4);
     NANOCLR_NATIVE_DECLARE(close___STATIC__I4__OBJECT);
     NANOCLR_NATIVE_DECLARE(listen___STATIC__VOID__OBJECT__I4);
     NANOCLR_NATIVE_DECLARE(accept___STATIC__I4__OBJECT);
     NANOCLR_NATIVE_DECLARE(getaddrinfo___STATIC__VOID__STRING__BYREF_STRING__BYREF_SZARRAY_SZARRAY_U1);
     NANOCLR_NATIVE_DECLARE(shutdown___STATIC__VOID__OBJECT__I4__BYREF_I4);
     NANOCLR_NATIVE_DECLARE(sendto___STATIC__I4__OBJECT__SZARRAY_U1__I4__I4__I4__I4__SystemNetEndPoint);
+    NANOCLR_NATIVE_DECLARE(SendTo___STATIC__I4__OBJECT__SystemReadOnlySpan_1__I4__I4__I4__I4__SystemNetEndPoint);
     NANOCLR_NATIVE_DECLARE(recvfrom___STATIC__I4__OBJECT__SZARRAY_U1__I4__I4__I4__I4__BYREF_SystemNetEndPoint);
+    NANOCLR_NATIVE_DECLARE(RecvFrom___STATIC__I4__OBJECT__SystemSpan_1__I4__I4__I4__I4__BYREF_SystemNetEndPoint);
     NANOCLR_NATIVE_DECLARE(getpeername___STATIC__VOID__OBJECT__BYREF_SystemNetEndPoint);
     NANOCLR_NATIVE_DECLARE(getsockname___STATIC__VOID__OBJECT__BYREF_SystemNetEndPoint);
     NANOCLR_NATIVE_DECLARE(getsockopt___STATIC__VOID__OBJECT__I4__I4__SZARRAY_U1);
@@ -389,11 +453,11 @@ struct Library_sys_net_native_System_Net_Sockets_NativeSocket
 
 struct Library_sys_net_native_System_Net_Sockets_NetworkStream
 {
-    static const int FIELD___socket = 1;
-    static const int FIELD___socketType = 2;
-    static const int FIELD___remoteEndPoint = 3;
-    static const int FIELD___ownsSocket = 4;
-    static const int FIELD___disposed = 5;
+    static const int FIELD___socket = 2;
+    static const int FIELD___socketType = 3;
+    static const int FIELD___remoteEndPoint = 4;
+    static const int FIELD___ownsSocket = 5;
+    static const int FIELD___disposed = 6;
 
     //--//
 
@@ -409,7 +473,8 @@ struct Library_sys_net_native_System_Net_Sockets_SocketException
 
 struct Library_sys_net_native_System_Security_Cryptography_X509Certificates_X509Certificate2
 {
-    static const int FIELD___privateKey = 9;
+    static const int FIELD___privateKey = 8;
+    static const int FIELD___password = 9;
 
     NANOCLR_NATIVE_DECLARE(DecodePrivateKeyNative___STATIC__VOID__SZARRAY_U1__STRING);
 

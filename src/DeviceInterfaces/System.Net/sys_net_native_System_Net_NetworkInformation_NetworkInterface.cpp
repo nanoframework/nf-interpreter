@@ -241,7 +241,16 @@ HRESULT Library_sys_net_native_System_Net_NetworkInformation_NetworkInterface::G
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_sys_net_native_System_Net_NetworkInformation_NetworkInterface::IPAddressFromString___STATIC__U4__STRING( CLR_RT_StackFrame& stack )
+HRESULT Library_sys_net_native_System_Net_NetworkInformation_NetworkInterface::GetIsNetworkAvailable___STATIC__BOOLEAN( CLR_RT_StackFrame& stack )
+{
+    NANOCLR_HEADER();
+
+    NANOCLR_SET_AND_LEAVE(stack.NotImplementedStub());
+
+    NANOCLR_NOCLEANUP();
+}
+
+HRESULT Library_sys_net_native_System_Net_NetworkInformation_NetworkInterface::IPV4AddressFromString___STATIC__I8__STRING( CLR_RT_StackFrame& stack )
 {
     NATIVE_PROFILE_CLR_NETWORK();
     NANOCLR_HEADER();
@@ -274,4 +283,13 @@ HRESULT Library_sys_net_native_System_Net_NetworkInformation_NetworkInterface::I
     if( addr ) SOCK_freeaddrinfo( addr );
 
     NANOCLR_CLEANUP_END();
+}
+
+HRESULT Library_sys_net_native_System_Net_NetworkInformation_NetworkInterface::IPV6AddressFromString___STATIC__SZARRAY_U2__STRING( CLR_RT_StackFrame& stack )
+{
+    NANOCLR_HEADER();
+
+    NANOCLR_SET_AND_LEAVE(stack.NotImplementedStub());
+
+    NANOCLR_NOCLEANUP();
 }

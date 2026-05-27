@@ -95,14 +95,14 @@ void Time_GetDateTime(DATE_TIME_INFO* dt)
  }
 
 // Initalise SSL as a server
-HRESULT Library_sys_net_native_System_Net_Security_SslNative::SecureServerInit___STATIC__I4__I4__I4__SystemSecurityCryptographyX509CertificatesX509Certificate__SystemSecurityCryptographyX509CertificatesX509Certificate( CLR_RT_StackFrame& stack )
+HRESULT Library_sys_net_native_System_Net_Security_SslNative::SecureServerInit___STATIC__I4__I4__I4__SystemSecurityCryptographyX509CertificatesX509Certificate__SystemSecurityCryptographyX509CertificatesX509Certificate__BOOLEAN( CLR_RT_StackFrame& stack )
 {
     NATIVE_PROFILE_CLR_NETWORK();
     return InitHelper( stack, true );
 }
 
 // Initalise SSL as a client
-HRESULT Library_sys_net_native_System_Net_Security_SslNative::SecureClientInit___STATIC__I4__I4__I4__SystemSecurityCryptographyX509CertificatesX509Certificate__SystemSecurityCryptographyX509CertificatesX509Certificate( CLR_RT_StackFrame& stack )
+HRESULT Library_sys_net_native_System_Net_Security_SslNative::SecureClientInit___STATIC__I4__I4__I4__SystemSecurityCryptographyX509CertificatesX509Certificate__SystemSecurityCryptographyX509CertificatesX509Certificate__BOOLEAN( CLR_RT_StackFrame& stack )
 {
     NATIVE_PROFILE_CLR_NETWORK();
     return InitHelper( stack, false );

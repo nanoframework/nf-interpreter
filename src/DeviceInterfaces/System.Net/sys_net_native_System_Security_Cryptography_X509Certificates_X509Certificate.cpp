@@ -6,7 +6,7 @@
 
 #include "sys_net_native.h"
 
-HRESULT Library_sys_net_native_System_Security_Cryptography_X509Certificates_X509Certificate::ParseCertificate___STATIC__VOID__SZARRAY_U1__STRING__BYREF_STRING__BYREF_STRING__BYREF_SystemDateTime__BYREF_SystemDateTime( CLR_RT_StackFrame& stack )
+HRESULT Library_sys_net_native_System_Security_Cryptography_X509Certificates_X509Certificate::ParseCertificate___STATIC__VOID__SZARRAY_U1__BYREF_STRING__BYREF_STRING__BYREF_SystemDateTime__BYREF_SystemDateTime( CLR_RT_StackFrame& stack )
 {
    NATIVE_PROFILE_CLR_NETWORK();
    NANOCLR_HEADER();
@@ -22,12 +22,6 @@ HRESULT Library_sys_net_native_System_Security_Cryptography_X509Certificates_X50
 //    CLR_INT64               tzOffset;
     SYSTEMTIME              st;
 //    INT32                   standardBias;
-    CLR_RT_HeapBlock*       hbPwd     = stack.Arg1().DereferenceString();
-    LPCSTR                  szPwd;
-
-    FAULT_ON_NULL_ARG(hbPwd);
-
-    szPwd = hbPwd->StringText();
 
     CLR_RT_Memory::ZeroFill( &cert, sizeof(cert) );
 
@@ -35,14 +29,14 @@ HRESULT Library_sys_net_native_System_Security_Cryptography_X509Certificates_X50
 
     certBytes = arrData->GetFirstElement();
 
-    if(!SSL_ParseCertificate( (const char*)certBytes, arrData->m_numOfElements, szPwd, &cert )) 
+    if(!SSL_ParseCertificate( (const char*)certBytes, arrData->m_numOfElements, NULL, &cert )) 
             NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
 
     NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_String::CreateInstance( hbIssuer, cert.Issuer ));
-    NANOCLR_CHECK_HRESULT(hbIssuer.StoreToReference( stack.Arg2(), 0 ));
+    NANOCLR_CHECK_HRESULT(hbIssuer.StoreToReference( stack.Arg1(), 0 ));
 
     NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_String::CreateInstance( hbSubject, cert.Subject ));
-    NANOCLR_CHECK_HRESULT(hbSubject.StoreToReference( stack.Arg3(), 0 ));
+    NANOCLR_CHECK_HRESULT(hbSubject.StoreToReference( stack.Arg2(), 0 ));
 
     st.wYear         = cert.EffectiveDate.year;
     st.wMonth        = cert.EffectiveDate.month;
@@ -55,7 +49,7 @@ HRESULT Library_sys_net_native_System_Security_Cryptography_X509Certificates_X50
  //   standardBias     = Time_GetTimeZoneOffset();
  //    standardBias    *= TIME_CONVERSION__ONEMINUTE;
  
-    val = Library_corlib_native_System_DateTime::GetValuePtr( stack.Arg4() );
+    val = Library_corlib_native_System_DateTime::GetValuePtr( stack.Arg3() );
     *val = HAL_Time_ConvertFromSystemTime(&st);
 
     // tzOffset = cert.EffectiveDate.tzOffset;
@@ -74,7 +68,7 @@ HRESULT Library_sys_net_native_System_Security_Cryptography_X509Certificates_X50
     st.wSecond       = cert.ExpirationDate.second;
     st.wMilliseconds = cert.ExpirationDate.msec;
     
-    val = Library_corlib_native_System_DateTime::GetValuePtr( stack.ArgN( 5 ) );
+    val = Library_corlib_native_System_DateTime::GetValuePtr( stack.ArgN( 4 ) );
     *val = HAL_Time_ConvertFromSystemTime(&st);
 
     // tzOffset = cert.ExpirationDate.tzOffset;
