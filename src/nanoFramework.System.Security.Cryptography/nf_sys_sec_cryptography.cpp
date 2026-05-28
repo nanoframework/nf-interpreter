@@ -19,7 +19,6 @@ static const CLR_RT_MethodHandler method_lookup[] =
     nullptr,
     nullptr,
     nullptr,
-    nullptr,
     Library_nf_sys_sec_cryptography_System_Security_Cryptography_Aes::EncryptAesEcb___SZARRAY_U1__SZARRAY_U1,
     Library_nf_sys_sec_cryptography_System_Security_Cryptography_Aes::DecryptAesEcb___SZARRAY_U1__SZARRAY_U1,
     Library_nf_sys_sec_cryptography_System_Security_Cryptography_Aes::EncryptAesCbc___SZARRAY_U1__SZARRAY_U1,
@@ -49,9 +48,9 @@ static const CLR_RT_MethodHandler method_lookup[] =
 const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_nanoFramework_System_Security_Cryptography =
 {
     "nanoFramework.System.Security.Cryptography",
-    0x1A1CC3FD,
+    0x727048B8,
     method_lookup,
-    { 100, 0, 0, 4 }
+    { 100, 2, 0, 5 }
 };
 
 // clang-format on
