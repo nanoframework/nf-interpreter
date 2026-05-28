@@ -9,6 +9,7 @@
 
 #include <nanoCLR_Interop.h>
 #include <nanoCLR_Runtime.h>
+#include <nanoPackStruct.h>
 #include <corlib_native.h>
 
 struct Library_nf_system_resourcemanager_System_Resources_ResourceManager
