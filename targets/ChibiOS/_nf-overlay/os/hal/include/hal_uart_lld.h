@@ -35,11 +35,11 @@ typedef struct hal_uart_config
     uint32_t UARTDMACR;
 } UARTConfig;
 
-#define uart_lld_driver_fields                                                                                            \
-    UART_TypeDef *uart;                                                                                                   \
-    uint16_t rxbuf;                                                                                                       \
-    uint8_t *rxbufp;                                                                                                      \
-    size_t rxsize;                                                                                                        \
+#define uart_lld_driver_fields                                                                                         \
+    UART_TypeDef *uart;                                                                                                \
+    uint16_t rxbuf;                                                                                                    \
+    uint8_t *rxbufp;                                                                                                   \
+    size_t rxsize;                                                                                                     \
     size_t rxidx;
 
 struct hal_uart_driver

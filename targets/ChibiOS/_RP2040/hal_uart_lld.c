@@ -8,7 +8,7 @@
 #if (HAL_USE_UART == TRUE) || defined(__DOXYGEN__)
 
 #define UART_LCRH_CFG_FORBIDDEN (UART_UARTLCR_H_BRK)
-#define UART_CR_CFG_FORBIDDEN                                                                                            \
+#define UART_CR_CFG_FORBIDDEN                                                                                          \
     (UART_UARTCR_RXE | UART_UARTCR_TXE | UART_UARTCR_SIRLP | UART_UARTCR_SIREN | UART_UARTCR_UARTEN)
 
 #if (RP_UART_USE_UART0 == TRUE) || defined(__DOXYGEN__)
@@ -65,9 +65,8 @@ static void uart_lld_apply_config(UARTDriver *uartp)
     uartp->uart->UARTICR = uartp->uart->UARTRIS;
 
     // Enable receive, timeout and line error interrupts for callback-driven receive path.
-    uartp->uart->UARTIMSC =
-        UART_UARTIMSC_RXIM | UART_UARTIMSC_RTIM | UART_UARTIMSC_OEIM | UART_UARTIMSC_BEIM | UART_UARTIMSC_PEIM |
-        UART_UARTIMSC_FEIM;
+    uartp->uart->UARTIMSC = UART_UARTIMSC_RXIM | UART_UARTIMSC_RTIM | UART_UARTIMSC_OEIM | UART_UARTIMSC_BEIM |
+                            UART_UARTIMSC_PEIM | UART_UARTIMSC_FEIM;
 
     uartp->uart->UARTCR = cr | UART_UARTCR_RXE | UART_UARTCR_TXE | UART_UARTCR_UARTEN;
 }
