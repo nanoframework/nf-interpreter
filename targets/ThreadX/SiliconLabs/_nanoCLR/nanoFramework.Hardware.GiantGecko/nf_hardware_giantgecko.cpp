@@ -9,7 +9,6 @@
 
 static const CLR_RT_MethodHandler method_lookup[] =
 {
-    nullptr,
     Library_nf_hardware_giantgecko_nanoFramework_Hardware_GiantGecko_GpioConfiguration::SetSlewRate___STATIC__VOID__I4__U1,
     Library_nf_hardware_giantgecko_nanoFramework_Hardware_GiantGecko_GpioConfiguration::SetSlewRateAlternate___STATIC__VOID__I4__U1,
     Library_nf_hardware_giantgecko_nanoFramework_Hardware_GiantGecko_GpioConfiguration::SetDriveStrenght___STATIC__VOID__I4__nanoFrameworkHardwareGiantGeckoGpioConfigurationDriveStrenght,
@@ -35,9 +34,9 @@ static const CLR_RT_MethodHandler method_lookup[] =
 const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_nanoFramework_Hardware_GiantGecko =
 {
     "nanoFramework.Hardware.GiantGecko",
-    0x16704DF6,
+    0x77895998,
     method_lookup,
-    { 100, 2, 0, 0 }
+    { 100, 2, 0, 1 }
 };
 
 // clang-format on
