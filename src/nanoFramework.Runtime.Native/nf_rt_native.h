@@ -9,6 +9,8 @@
 
 #include <nanoCLR_Interop.h>
 #include <nanoCLR_Runtime.h>
+#include <nanoPackStruct.h>
+#include <corlib_native.h>
 
 typedef enum __nfpack RebootOption
 {
