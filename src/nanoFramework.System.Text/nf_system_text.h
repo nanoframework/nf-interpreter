@@ -8,6 +8,7 @@
 
 #include <nanoCLR_Interop.h>
 #include <nanoCLR_Runtime.h>
+#include <nanoPackStruct.h>
 #include <corlib_native.h>
 
 struct Library_nf_system_text_System_Text_StringBuilder
