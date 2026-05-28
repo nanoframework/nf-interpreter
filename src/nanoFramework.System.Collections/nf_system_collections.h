@@ -10,15 +10,6 @@
 #include <nanoCLR_Interop.h>
 #include <nanoCLR_Runtime.h>
 #include <nanoCLR_Runtime__HeapBlock.h>
-#include <nanoPackStruct.h>
-#include <corlib_native.h>
-
-typedef enum __nfpack Dictionary_2_InsertionBehavior
-{
-    Dictionary_2_InsertionBehavior_None = 0,
-    Dictionary_2_InsertionBehavior_OverwriteExisting = 1,
-    Dictionary_2_InsertionBehavior_ThrowOnExisting = 2,
-} Dictionary_2_InsertionBehavior;
 
 struct Library_nf_system_collections_System_Collections_Bucket
 {
