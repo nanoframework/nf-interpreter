@@ -13,7 +13,6 @@ static const CLR_RT_MethodHandler method_lookup[] =
     nullptr,
     nullptr,
     nullptr,
-    nullptr,
     Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32_Configuration::NativeSetPinFunction___STATIC__VOID__I4__I4,
     Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32_Configuration::NativeGetPinFunction___STATIC__I4__I4,
     nullptr,
@@ -202,9 +201,9 @@ static const CLR_RT_MethodHandler method_lookup[] =
 const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_nanoFramework_Hardware_Esp32 =
 {
     "nanoFramework.Hardware.Esp32",
-    0x01F3162F,
+    0xC5C2813F,
     method_lookup,
-    { 100, 2, 0, 0 }
+    { 100, 2, 0, 1 }
 };
 
 // clang-format on
