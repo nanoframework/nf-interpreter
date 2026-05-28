@@ -42,9 +42,9 @@ static const CLR_RT_MethodHandler method_lookup[] =
 const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_System_Device_I2s =
 {
     "System.Device.I2s",
-    0x2A23C3F8,
+    0xA4BE3501,
     method_lookup,
-    { 100, 2, 0, 0 }
+    { 100, 2, 0, 1 }
 };
 
 // clang-format on
