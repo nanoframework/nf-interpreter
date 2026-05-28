@@ -89,56 +89,62 @@ static void TxEnd1(UARTDriver *uartp)
 
     NATIVE_INTERRUPT_START
 
-    NF_PAL_UART *palUart;
+    NF_PAL_UART *palUart = NULL;
 
 #if defined(NF_SERIAL_COMM_STM32_UART_USE_USART1) && (NF_SERIAL_COMM_STM32_UART_USE_USART1 == TRUE)
-    if (uartp == &UARTD1)
+    if (uartp == UART_DRIVER_PTR(1))
     {
         palUart = &Uart1_PAL;
     }
 #endif
 #if defined(NF_SERIAL_COMM_STM32_UART_USE_USART2) && (NF_SERIAL_COMM_STM32_UART_USE_USART2 == TRUE)
-    if (uartp == &UARTD2)
+    if (uartp == UART_DRIVER_PTR(2))
     {
         palUart = &Uart2_PAL;
     }
 #endif
 #if defined(NF_SERIAL_COMM_STM32_UART_USE_USART3) && (NF_SERIAL_COMM_STM32_UART_USE_USART3 == TRUE)
-    if (uartp == &UARTD3)
+    if (uartp == UART_DRIVER_PTR(3))
     {
         palUart = &Uart3_PAL;
     }
 #endif
 #if defined(NF_SERIAL_COMM_STM32_UART_USE_UART4) && (NF_SERIAL_COMM_STM32_UART_USE_UART4 == TRUE)
-    if (uartp == &UARTD4)
+    if (uartp == UART_DRIVER_PTR(4))
     {
         palUart = &Uart4_PAL;
     }
 #endif
 #if defined(NF_SERIAL_COMM_STM32_UART_USE_UART5) && (NF_SERIAL_COMM_STM32_UART_USE_UART5 == TRUE)
-    if (uartp == &UARTD5)
+    if (uartp == UART_DRIVER_PTR(5))
     {
         palUart = &Uart5_PAL;
     }
 #endif
 #if defined(NF_SERIAL_COMM_STM32_UART_USE_USART6) && (NF_SERIAL_COMM_STM32_UART_USE_USART6 == TRUE)
-    if (uartp == &UARTD6)
+    if (uartp == UART_DRIVER_PTR(6))
     {
         palUart = &Uart6_PAL;
     }
 #endif
 #if defined(NF_SERIAL_COMM_STM32_UART_USE_UART7) && (NF_SERIAL_COMM_STM32_UART_USE_UART7 == TRUE)
-    if (uartp == &UARTD7)
+    if (uartp == UART_DRIVER_PTR(7))
     {
         palUart = &Uart7_PAL;
     }
 #endif
 #if defined(NF_SERIAL_COMM_STM32_UART_USE_UART8) && (NF_SERIAL_COMM_STM32_UART_USE_UART8 == TRUE)
-    if (uartp == &UARTD8)
+    if (uartp == UART_DRIVER_PTR(8))
     {
         palUart = &Uart8_PAL;
     }
 #endif
+
+    if (palUart == NULL)
+    {
+        NATIVE_INTERRUPT_END
+        return;
+    }
 
     // reset Tx ongoing count
     palUart->TxOngoingCount = 0;
@@ -154,65 +160,71 @@ static void RxChar(UARTDriver *uartp, uint16_t c)
 {
     NATIVE_INTERRUPT_START
 
-    NF_PAL_UART *palUart;
+    NF_PAL_UART *palUart = NULL;
     uint8_t portIndex = 0;
 
 #if defined(NF_SERIAL_COMM_STM32_UART_USE_USART1) && (NF_SERIAL_COMM_STM32_UART_USE_USART1 == TRUE)
-    if (uartp == &UARTD1)
+    if (uartp == UART_DRIVER_PTR(1))
     {
         palUart = &Uart1_PAL;
         portIndex = 1;
     }
 #endif
 #if defined(NF_SERIAL_COMM_STM32_UART_USE_USART2) && (NF_SERIAL_COMM_STM32_UART_USE_USART2 == TRUE)
-    if (uartp == &UARTD2)
+    if (uartp == UART_DRIVER_PTR(2))
     {
         palUart = &Uart2_PAL;
         portIndex = 2;
     }
 #endif
 #if defined(NF_SERIAL_COMM_STM32_UART_USE_USART3) && (NF_SERIAL_COMM_STM32_UART_USE_USART3 == TRUE)
-    if (uartp == &UARTD3)
+    if (uartp == UART_DRIVER_PTR(3))
     {
         palUart = &Uart3_PAL;
         portIndex = 3;
     }
 #endif
 #if defined(NF_SERIAL_COMM_STM32_UART_USE_UART4) && (NF_SERIAL_COMM_STM32_UART_USE_UART4 == TRUE)
-    if (uartp == &UARTD4)
+    if (uartp == UART_DRIVER_PTR(4))
     {
         palUart = &Uart4_PAL;
         portIndex = 4;
     }
 #endif
 #if defined(NF_SERIAL_COMM_STM32_UART_USE_UART5) && (NF_SERIAL_COMM_STM32_UART_USE_UART5 == TRUE)
-    if (uartp == &UARTD5)
+    if (uartp == UART_DRIVER_PTR(5))
     {
         palUart = &Uart5_PAL;
         portIndex = 5;
     }
 #endif
 #if defined(NF_SERIAL_COMM_STM32_UART_USE_USART6) && (NF_SERIAL_COMM_STM32_UART_USE_USART6 == TRUE)
-    if (uartp == &UARTD6)
+    if (uartp == UART_DRIVER_PTR(6))
     {
         palUart = &Uart6_PAL;
         portIndex = 6;
     }
 #endif
 #if defined(NF_SERIAL_COMM_STM32_UART_USE_UART7) && (NF_SERIAL_COMM_STM32_UART_USE_UART7 == TRUE)
-    if (uartp == &UARTD7)
+    if (uartp == UART_DRIVER_PTR(7))
     {
         palUart = &Uart7_PAL;
         portIndex = 7;
     }
 #endif
 #if defined(NF_SERIAL_COMM_STM32_UART_USE_UART8) && (NF_SERIAL_COMM_STM32_UART_USE_UART8 == TRUE)
-    if (uartp == &UARTD8)
+    if (uartp == UART_DRIVER_PTR(8))
     {
         palUart = &Uart8_PAL;
         portIndex = 8;
     }
 #endif
+
+    if (palUart == NULL)
+    {
+        NATIVE_INTERRUPT_END
+        return;
+    }
 
     // store this into the UART Rx buffer
 
@@ -893,14 +905,14 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeInit___VOID(
 #if defined(NF_SERIAL_COMM_STM32_UART_USE_USART1) && (NF_SERIAL_COMM_STM32_UART_USE_USART1 == TRUE)
         case 1:
             Init_UART1();
-            Uart1_PAL.UartDriver = &UARTD1;
+            Uart1_PAL.UartDriver = UART_DRIVER_PTR(1);
             palUart = &Uart1_PAL;
             break;
 #endif
 #if defined(NF_SERIAL_COMM_STM32_UART_USE_USART2) && (NF_SERIAL_COMM_STM32_UART_USE_USART2 == TRUE)
         case 2:
             Init_UART2();
-            Uart2_PAL.UartDriver = &UARTD2;
+            Uart2_PAL.UartDriver = UART_DRIVER_PTR(2);
             palUart = &Uart2_PAL;
             break;
 #endif
@@ -990,6 +1002,7 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeConfig___VOI
     NANOCLR_HEADER();
 
     NF_PAL_UART *palUart = NULL;
+    uint32_t lcrh = 0;
 
     // get a pointer to the managed object instance and check that it's not NULL
     CLR_RT_HeapBlock *pThis = stack.This();
@@ -1003,6 +1016,80 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeConfig___VOI
     }
 
     // Setup configuration
+
+#if defined(RP2040_MCUCONF)
+
+    lcrh = palUart->Uart_cfg.UARTLCR_H;
+
+    // clear framing bits, preserving unrelated configuration bits
+    lcrh &=
+        ~(UART_UARTLCR_H_WLEN(3U) | UART_UARTLCR_H_PEN | UART_UARTLCR_H_EPS | UART_UARTLCR_H_STP2 | UART_UARTLCR_H_SPS);
+
+    // data bits
+    switch ((uint16_t)pThis[FIELD___dataBits].NumericByRef().s4)
+    {
+        case 7:
+            lcrh |= UART_UARTLCR_H_WLEN_7BITS;
+            break;
+
+        case 8:
+            lcrh |= UART_UARTLCR_H_WLEN_8BITS;
+            break;
+
+        default:
+            NANOCLR_SET_AND_LEAVE(CLR_E_NOT_SUPPORTED);
+    }
+
+    // parity
+    switch ((Parity)pThis[FIELD___parity].NumericByRef().s4)
+    {
+        case Parity_None:
+            break;
+
+        case Parity_Even:
+            lcrh |= UART_UARTLCR_H_PEN | UART_UARTLCR_H_EPS;
+            break;
+
+        case Parity_Odd:
+            lcrh |= UART_UARTLCR_H_PEN;
+            break;
+
+        default:
+            NANOCLR_SET_AND_LEAVE(CLR_E_NOT_SUPPORTED);
+    }
+
+    // stop bits
+    switch ((StopBits)pThis[FIELD___stopBits].NumericByRef().s4)
+    {
+        case StopBits_One:
+            break;
+
+        case StopBits_Two:
+            lcrh |= UART_UARTLCR_H_STP2;
+            break;
+
+        case StopBits_OnePointFive:
+            // RP2040 supports 1.5 stop bits only with 5 data bits.
+            NANOCLR_SET_AND_LEAVE(CLR_E_NOT_SUPPORTED);
+
+        default:
+            NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+    }
+
+    // serial mode
+    if ((SerialMode)pThis[FIELD___mode].NumericByRef().s4 != SerialMode_Normal)
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_NOT_SUPPORTED);
+    }
+
+    if (palUart->SignalLevelsInverted)
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_NOT_SUPPORTED);
+    }
+
+    palUart->Uart_cfg.UARTLCR_H = lcrh;
+
+#else
 
     // Check dataBits validity
     switch ((uint16_t)pThis[FIELD___dataBits].NumericByRef().s4)
@@ -1160,8 +1247,14 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeConfig___VOI
 
 #endif
 
+#endif
+
     // baud rate
+#if defined(RP2040_MCUCONF)
+    palUart->Uart_cfg.baud = (uint32_t)pThis[FIELD___baudRate].NumericByRef().s4;
+#else
     palUart->Uart_cfg.speed = (int)pThis[FIELD___baudRate].NumericByRef().s4;
+#endif
 
     // stop UART, better do this before changing configuration
     uartStop(palUart->UartDriver);
