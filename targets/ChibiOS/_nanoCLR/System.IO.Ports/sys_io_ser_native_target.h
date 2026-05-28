@@ -96,7 +96,7 @@ void ConfigPins_UART8();
 #define UART_DRIVER_8 UARTD8
 #endif
 
-#define UART_DRIVER(num) UART_DRIVER_##num
+#define UART_DRIVER(num)     UART_DRIVER_##num
 #define UART_DRIVER_PTR(num) (&UART_DRIVER(num))
 
 // the following macro defines a function that initializes an UART struct
@@ -108,9 +108,9 @@ void ConfigPins_UART8();
     void Init_UART##num()                                                                                              \
     {                                                                                                                  \
         Uart##num##_PAL.Uart_cfg.baud = 9600;                                                                          \
-        Uart##num##_PAL.Uart_cfg.UARTLCR_H = UART_UARTLCR_H_WLEN_8BITS | UART_UARTLCR_H_FEN;                          \
+        Uart##num##_PAL.Uart_cfg.UARTLCR_H = UART_UARTLCR_H_WLEN_8BITS | UART_UARTLCR_H_FEN;                           \
         Uart##num##_PAL.Uart_cfg.UARTCR = 0;                                                                           \
-        Uart##num##_PAL.Uart_cfg.UARTIFLS = UART_UARTIFLS_RXIFLSEL_1_2F | UART_UARTIFLS_TXIFLSEL_1_2E;               \
+        Uart##num##_PAL.Uart_cfg.UARTIFLS = UART_UARTIFLS_RXIFLSEL_1_2F | UART_UARTIFLS_TXIFLSEL_1_2E;                 \
         Uart##num##_PAL.Uart_cfg.UARTDMACR = 0;                                                                        \
         Uart##num##_PAL.TxBuffer = NULL;                                                                               \
         Uart##num##_PAL.TxOngoingCount = 0;                                                                            \
