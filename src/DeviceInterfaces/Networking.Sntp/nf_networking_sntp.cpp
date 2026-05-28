@@ -10,7 +10,6 @@
 static const CLR_RT_MethodHandler method_lookup[] =
 {
     nullptr,
-    nullptr,
     Library_nf_networking_sntp_nanoFramework_Networking_Sntp::Start___STATIC__VOID,
     Library_nf_networking_sntp_nanoFramework_Networking_Sntp::Stop___STATIC__VOID,
     Library_nf_networking_sntp_nanoFramework_Networking_Sntp::UpdateNow___STATIC__VOID,
@@ -24,9 +23,9 @@ static const CLR_RT_MethodHandler method_lookup[] =
 const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_nanoFramework_Networking_Sntp =
 {
     "nanoFramework.Networking.Sntp",
-    0x2D222508,
+    0x742C0B5C,
     method_lookup,
-    { 100, 2, 0, 0 }
+    { 100, 2, 0, 1 }
 };
 
 // clang-format on
