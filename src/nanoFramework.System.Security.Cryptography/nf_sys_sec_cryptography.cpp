@@ -49,9 +49,9 @@ static const CLR_RT_MethodHandler method_lookup[] =
 const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_nanoFramework_System_Security_Cryptography =
 {
     "nanoFramework.System.Security.Cryptography",
-    0x1A1CC3FD,
+    0x727048B8,
     method_lookup,
-    { 100, 0, 0, 4 }
+    { 100, 2, 0, 5 }
 };
 
 // clang-format on
