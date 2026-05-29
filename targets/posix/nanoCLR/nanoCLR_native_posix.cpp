@@ -172,18 +172,18 @@ int32_t nanoCLR_GetNativeAssemblyInformation(uint8_t *data, size_t size)
         memcpy(data, &g_CLR_InteropAssembliesNativeData[i]->m_checkSum, sizeof(uint32_t));
         data += sizeof(uint32_t);
 
-        memcpy(data, &g_CLR_InteropAssembliesNativeData[i]->m_Version.iMajorVersion, sizeof(uint16_t));
+        memcpy(data, &g_CLR_InteropAssembliesNativeData[i]->m_Version.majorVersion, sizeof(uint16_t));
         data += sizeof(uint16_t);
 
-        memcpy(data, &g_CLR_InteropAssembliesNativeData[i]->m_Version.iMinorVersion, sizeof(uint16_t));
+        memcpy(data, &g_CLR_InteropAssembliesNativeData[i]->m_Version.minorVersion, sizeof(uint16_t));
         data += sizeof(uint16_t);
 
-        memcpy(data, &g_CLR_InteropAssembliesNativeData[i]->m_Version.iBuildNumber, sizeof(uint16_t));
+        memcpy(data, &g_CLR_InteropAssembliesNativeData[i]->m_Version.buildNumber, sizeof(uint16_t));
         data += sizeof(uint16_t);
 
         memcpy(
             data,
-            &g_CLR_InteropAssembliesNativeData[i]->m_Version.iRevisionNumber,
+            &g_CLR_InteropAssembliesNativeData[i]->m_Version.revisionNumber,
             sizeof(uint16_t));
         data += sizeof(uint16_t);
 
