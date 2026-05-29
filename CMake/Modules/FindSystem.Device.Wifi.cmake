@@ -31,11 +31,11 @@ foreach(SRC_FILE ${System.Device.Wifi_SRCS})
 
     find_file(System.Device.Wifi_SRC_FILE ${SRC_FILE}
         PATHS
-	        ${BASE_PATH_FOR_THIS_MODULE}
-	        ${TARGET_BASE_LOCATION}
+            ${BASE_PATH_FOR_THIS_MODULE}
+            ${TARGET_BASE_LOCATION}
             ${PROJECT_SOURCE_DIR}/src/System.Device.Wifi
 
-	    CMAKE_FIND_ROOT_PATH_BOTH
+        CMAKE_FIND_ROOT_PATH_BOTH
     )
 
     if (BUILD_VERBOSE)
