@@ -2254,16 +2254,15 @@ bool CLR_RT_MethodDef_Instance::ResolveToken(
 
                                         if (argElem.DataType == DATATYPE_MVAR)
                                         {
-                                            if (caller != nullptr && NANOCLR_INDEX_IS_VALID(caller->arrayElementType) &&
-                                                argElem.GenericParamPosition == 0)
-                                            {
-                                                resolvedArgs[a] = caller->arrayElementType;
-                                            }
-                                            else
+                                            // The MethodSpec carries the explicit IL-encoded generic arguments for this
+                                            // call and is authoritative. It must take precedence over arrayElementType,
+                                            // which is only a runtime-inferred fallback (used for SZArrayHelper-style
+                                            // dispatch) and can be stale when propagated across generic method
+                                            // boundaries.
+                                            if (hasMethodSpec)
                                             {
                                                 CLR_RT_SignatureParser::Element msArgElem{};
-                                                if (hasMethodSpec &&
-                                                    msInst.GetGenericArgument(argElem.GenericParamPosition, msArgElem))
+                                                if (msInst.GetGenericArgument(argElem.GenericParamPosition, msArgElem))
                                                 {
                                                     if (msArgElem.DataType == DATATYPE_VAR &&
                                                         caller->genericType != nullptr &&
@@ -2274,7 +2273,8 @@ bool CLR_RT_MethodDef_Instance::ResolveToken(
                                                         if (callerTsInst.InitializeFromIndex(*caller->genericType) &&
                                                             callerTsInst.GetGenericParam(
                                                                 msArgElem.GenericParamPosition,
-                                                                paramElem))
+                                                                paramElem) &&
+                                                            NANOCLR_INDEX_IS_VALID(paramElem.Class))
                                                         {
                                                             resolvedArgs[a] = paramElem.Class;
                                                         }
@@ -2283,15 +2283,32 @@ bool CLR_RT_MethodDef_Instance::ResolveToken(
                                                             allResolved = false;
                                                         }
                                                     }
-                                                    else
+                                                    else if (NANOCLR_INDEX_IS_VALID(msArgElem.Class))
                                                     {
                                                         resolvedArgs[a] = msArgElem.Class;
+                                                    }
+                                                    else
+                                                    {
+                                                        // A DATATYPE_VAR without a resolvable caller context, or any
+                                                        // other element that did not yield a concrete type, must fail
+                                                        // resolution rather than bind to an empty Class index.
+                                                        allResolved = false;
                                                     }
                                                 }
                                                 else
                                                 {
                                                     allResolved = false;
                                                 }
+                                            }
+                                            else if (
+                                                caller != nullptr && NANOCLR_INDEX_IS_VALID(caller->arrayElementType) &&
+                                                argElem.GenericParamPosition == 0)
+                                            {
+                                                resolvedArgs[a] = caller->arrayElementType;
+                                            }
+                                            else
+                                            {
+                                                allResolved = false;
                                             }
                                         }
                                         else if (argElem.DataType == DATATYPE_VAR)
