@@ -108,6 +108,18 @@ struct Library_sys_dev_wifi_native_nanoFramework_Networking_WifiNetworkHelper
     //--//
 };
 
+struct Library_sys_dev_wifi_native_nanoFramework_Networking_WifiNetworkHelper__O
+{
+    // renamed compiler-generated field '<0>__WorkingThread'
+    static const int FIELD_STATIC____WorkingThread = 13;
+    // renamed compiler-generated field '<1>__AddressChangedCallback'
+    static const int FIELD_STATIC____AddressChangedCallback = 14;
+    // renamed compiler-generated field '<2>__WifiAvailableNetworksChanged'
+    static const int FIELD_STATIC____WifiAvailableNetworksChanged = 15;
+
+    //--//
+};
+
 struct Library_sys_dev_wifi_native_System_Device_Wifi_WifiEvent
 {
     static const int FIELD__EventType = 3;
