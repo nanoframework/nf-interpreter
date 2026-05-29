@@ -1002,6 +1002,9 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeConfig___VOI
     NANOCLR_HEADER();
 
     NF_PAL_UART *palUart = NULL;
+#if defined(RP2040_MCUCONF)
+    uint32_t lcrh = 0;
+#endif
 
     // get a pointer to the managed object instance and check that it's not NULL
     CLR_RT_HeapBlock *pThis = stack.This();
@@ -1018,7 +1021,7 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeConfig___VOI
 
 #if defined(RP2040_MCUCONF)
 
-    uint32_t lcrh = palUart->Uart_cfg.UARTLCR_H;
+    lcrh = palUart->Uart_cfg.UARTLCR_H;
 
     // clear framing bits, preserving unrelated configuration bits
     lcrh &=
