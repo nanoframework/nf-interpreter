@@ -8,15 +8,21 @@ set(BASE_PATH_FOR_THIS_MODULE ${BASE_PATH_FOR_CLASS_LIBRARIES_MODULES}/System.De
 
 
 # set include directories
+list(APPEND System.Device.Wifi_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/src/CLR/Core)
+list(APPEND System.Device.Wifi_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/src/CLR/Include)
+list(APPEND System.Device.Wifi_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/src/HAL/Include)
+list(APPEND System.Device.Wifi_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/src/PAL/Include)
 list(APPEND System.Device.Wifi_INCLUDE_DIRS ${BASE_PATH_FOR_THIS_MODULE})
-list(APPEND System.Device.Wifi_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/System.Device.Wifi)
-
+list(APPEND System.Device.Wifi_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/src/System.Device.Wifi)
 
 # source files
 set(System.Device.Wifi_SRCS
 
     sys_dev_wifi_native.cpp
+
+
     sys_dev_wifi_native_System_Device_Wifi_WifiAdapter.cpp
+
 )
 
 foreach(SRC_FILE ${System.Device.Wifi_SRCS})
@@ -24,12 +30,12 @@ foreach(SRC_FILE ${System.Device.Wifi_SRCS})
     set(System.Device.Wifi_SRC_FILE SRC_FILE-NOTFOUND)
 
     find_file(System.Device.Wifi_SRC_FILE ${SRC_FILE}
-        PATHS 
-            ${CMAKE_SOURCE_DIR}/targets/${RTOS}/_nanoCLR/System.Device.Wifi
-            ${BASE_PATH_FOR_THIS_MODULE}
-            ${CMAKE_SOURCE_DIR}/src/System.Device.Wifi
+        PATHS
+	        ${BASE_PATH_FOR_THIS_MODULE}
+	        ${TARGET_BASE_LOCATION}
+            ${PROJECT_SOURCE_DIR}/src/System.Device.Wifi
 
-        CMAKE_FIND_ROOT_PATH_BOTH
+	    CMAKE_FIND_ROOT_PATH_BOTH
     )
 
     if (BUILD_VERBOSE)
@@ -37,9 +43,8 @@ foreach(SRC_FILE ${System.Device.Wifi_SRCS})
     endif()
 
     list(APPEND System.Device.Wifi_SOURCES ${System.Device.Wifi_SRC_FILE})
-    
-endforeach()
 
+endforeach()
 
 include(FindPackageHandleStandardArgs)
 
