@@ -181,7 +181,6 @@ set(NF_SYSTEM_COLLECTIONS_SRCS
 set(NF_RUNTIME_NATIVE_SRCS
     ${REPO_ROOT}/src/nanoFramework.Runtime.Native/nf_rt_native.cpp
     ${REPO_ROOT}/src/nanoFramework.Runtime.Native/nf_rt_native_nanoFramework_Runtime_Native_SystemInfo.cpp
-    ${REPO_ROOT}/src/nanoFramework.Runtime.Native/nf_rt_native_nanoFramework_Runtime_Native_GC.cpp
     ${REPO_ROOT}/src/nanoFramework.Runtime.Native/nf_rt_native_nanoFramework_Runtime_Native_ExecutionConstraint.cpp
     ${REPO_ROOT}/src/nanoFramework.Runtime.Native/nf_rt_native_nanoFramework_Runtime_Native_Power.cpp
     ${REPO_ROOT}/src/nanoFramework.Runtime.Native/nf_rt_native_nanoFramework_Runtime_Native_Rtc_stubs.cpp
