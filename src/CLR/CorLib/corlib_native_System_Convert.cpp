@@ -22,7 +22,7 @@ HRESULT Library_corlib_native_System_Convert::
     NANOCLR_HEADER();
 
     char *endptr;
-    int64_t result = 0;
+    CLR_INT64 result = 0;
 
 #if CONFIG_NF_SUPPORT_ANY_BASE_CONVERSION
     // convert via strtoll / strtoull
