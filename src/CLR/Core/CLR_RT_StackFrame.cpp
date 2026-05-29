@@ -1122,8 +1122,7 @@ void CLR_RT_StackFrame::SetResult_U4(CLR_UINT32 val)
     top.SetInteger(val);
 }
 
-void CLR_RT_StackFrame::SetResult_U8(CLR_UINT64 &val)
-
+void CLR_RT_StackFrame::SetResult_U8(const CLR_UINT64 &val)
 {
     CLR_RT_HeapBlock &top = PushValue();
 

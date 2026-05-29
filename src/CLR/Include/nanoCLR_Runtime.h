@@ -2299,7 +2299,7 @@ struct CLR_RT_StackFrame : public CLR_RT_HeapBlock_Node // EVENT HEAP - NO RELOC
     void SetResult_U1(CLR_INT8 val);
     void SetResult_U2(CLR_UINT16 val);
     void SetResult_U4(CLR_UINT32 val);
-    void SetResult_U8(CLR_UINT64 &val);
+    void SetResult_U8(const CLR_UINT64 &val);
 
 #if !defined(NANOCLR_EMULATED_FLOATINGPOINT)
     void SetResult_R4(float val);
