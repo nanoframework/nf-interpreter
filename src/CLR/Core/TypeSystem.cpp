@@ -2273,7 +2273,8 @@ bool CLR_RT_MethodDef_Instance::ResolveToken(
                                                         if (callerTsInst.InitializeFromIndex(*caller->genericType) &&
                                                             callerTsInst.GetGenericParam(
                                                                 msArgElem.GenericParamPosition,
-                                                                paramElem))
+                                                                paramElem) &&
+                                                            NANOCLR_INDEX_IS_VALID(paramElem.Class))
                                                         {
                                                             resolvedArgs[a] = paramElem.Class;
                                                         }
@@ -2282,9 +2283,16 @@ bool CLR_RT_MethodDef_Instance::ResolveToken(
                                                             allResolved = false;
                                                         }
                                                     }
-                                                    else
+                                                    else if (NANOCLR_INDEX_IS_VALID(msArgElem.Class))
                                                     {
                                                         resolvedArgs[a] = msArgElem.Class;
+                                                    }
+                                                    else
+                                                    {
+                                                        // A DATATYPE_VAR without a resolvable caller context, or any
+                                                        // other element that did not yield a concrete type, must fail
+                                                        // resolution rather than bind to an empty Class index.
+                                                        allResolved = false;
                                                     }
                                                 }
                                                 else
