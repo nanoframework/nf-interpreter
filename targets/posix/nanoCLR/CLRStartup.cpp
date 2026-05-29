@@ -99,10 +99,10 @@ struct Settings
 
         NANOCLR_CHECK_HRESULT(CLR_RT_Assembly::CreateInstance(header, assm));
 
-        pNativeAssmData = GetAssemblyNativeData(assm->m_szName);
+        pNativeAssmData = GetAssemblyNativeData(assm->name);
         if (pNativeAssmData != NULL)
         {
-            if (assm->m_header->nativeMethodsChecksum != pNativeAssmData->m_checkSum)
+            if (assm->header->nativeMethodsChecksum != pNativeAssmData->m_checkSum)
             {
                 CLR_Debug::Printf(
                     "\r\n\r\n***********************************************************************\r\n");
@@ -111,8 +111,8 @@ struct Settings
                 CLR_Debug::Printf("*                                                                     *\r\n");
                 CLR_Debug::Printf(
                     "* Invalid native checksum: %s 0x%08X!=0x%08X *\r\n",
-                    assm->m_szName,
-                    assm->m_header->nativeMethodsChecksum,
+                    assm->name,
+                    assm->header->nativeMethodsChecksum,
                     pNativeAssmData->m_checkSum);
                 CLR_Debug::Printf("*                                                                     *\r\n");
                 CLR_Debug::Printf("***********************************************************************\r\n");
@@ -120,7 +120,7 @@ struct Settings
                 NANOCLR_SET_AND_LEAVE(CLR_E_ASSM_WRONG_CHECKSUM);
             }
 
-            assm->m_nativeCode = (const CLR_RT_MethodHandler *)pNativeAssmData->m_pNativeMethods;
+            assm->nativeCode = (const CLR_RT_MethodHandler *)pNativeAssmData->m_pNativeMethods;
         }
 
         g_CLR_RT_TypeSystem.Link(assm);
@@ -186,7 +186,7 @@ struct Settings
                 break;
             }
 
-            std::string key(assm->m_szName);
+            std::string key(assm->name);
             assm->DestroyInstance();
 
             m_assemblies[key] = bufferSub;
@@ -232,7 +232,7 @@ struct Settings
                 continue;
             }
 
-            if (g_CLR_RT_TypeSystem.FindAssembly(assm->m_szName, &assm->m_header->version, true) != NULL)
+            if (g_CLR_RT_TypeSystem.FindAssembly(assm->name, &assm->header->version, true) != NULL)
             {
                 assm->DestroyInstance();
                 continue;
@@ -247,7 +247,7 @@ struct Settings
             NANOCLR_FOREACH_ASSEMBLY(g_CLR_RT_TypeSystem)
             {
                 const CLR_RECORD_ASSEMBLYREF *src = (const CLR_RECORD_ASSEMBLYREF *)pASSM->GetTable(TBL_AssemblyRef);
-                for (int i = 0; i < pASSM->m_pTablesSize[TBL_AssemblyRef]; i++, src++)
+                for (int i = 0; i < pASSM->tablesSize[TBL_AssemblyRef]; i++, src++)
                 {
                     const char *szName = pASSM->GetString(src->name);
                     if (g_CLR_RT_TypeSystem.FindAssembly(szName, &src->version, true) == NULL)
@@ -255,10 +255,10 @@ struct Settings
                         printf(
                             "Missing assembly: %s (%d.%d.%d.%d)\n",
                             szName,
-                            src->version.iMajorVersion,
-                            src->version.iMinorVersion,
-                            src->version.iBuildNumber,
-                            src->version.iRevisionNumber);
+                            src->version.majorVersion,
+                            src->version.minorVersion,
+                            src->version.buildNumber,
+                            src->version.revisionNumber);
                         fError = true;
                     }
                 }
@@ -370,7 +370,7 @@ struct Settings
                 break;
             }
 
-            assm->m_flags |= CLR_RT_Assembly::Deployed;
+            assm->flags |= CLR_RT_Assembly::Deployed;
         }
 
         if (!isXIP)
