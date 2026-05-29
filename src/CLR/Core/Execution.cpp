@@ -3613,6 +3613,15 @@ bool CLR_RT_ExecutionEngine::IsInstanceOf(
     CLR_RT_TypeDef_Instance &instTarget = descTarget.m_handlerCls;
     bool fArray = false;
 
+    // Closed generic instances keep their type information in 'm_handlerGenericType' and have 'm_handlerCls'
+    // cleared (so GetDataType() reports DATATYPE_GENERICINST). The comparison logic below dereferences
+    // 'inst.target' / 'instTarget.target', which would be null for those descriptors. Better delegate to the
+    // generic-aware TypeDescriptorsMatch helper to avoid dereferencing a null handler.
+    if (desc.GetDataType() == DATATYPE_GENERICINST || descTarget.GetDataType() == DATATYPE_GENERICINST)
+    {
+        return CLR_RT_HeapBlock::TypeDescriptorsMatch(descTarget, desc);
+    }
+
     while (desc.m_reflex.levels > 0 && descTarget.m_reflex.levels > 0)
     {
         desc.GetElementType(desc);
