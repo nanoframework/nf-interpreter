@@ -42,6 +42,7 @@ static void uart_lld_apply_config(UARTDriver *uartp)
     uint32_t cr;
     halfreq_t clock;
     const UARTConfig *cfg = (uartp->config == NULL) ? &uart_default_config : uartp->config;
+    osalDbgAssert(cfg->baud > 0U, "invalid baud");
 
     clock = halClockGetPointX(RP_CLK_PERI);
     osalDbgAssert(clock > 0U, "no clock");
@@ -231,7 +232,9 @@ void uart_lld_start_send(UARTDriver *uartp, size_t n, const void *txbuf)
     for (size_t i = 0; i < n; i++)
     {
         while ((uartp->uart->UARTFR & UART_UARTFR_TXFF) != 0U)
-            ;
+        {
+            // Wait for space in the TX FIFO.
+        };
         uartp->uart->UARTDR = buffer[i];
     }
 
