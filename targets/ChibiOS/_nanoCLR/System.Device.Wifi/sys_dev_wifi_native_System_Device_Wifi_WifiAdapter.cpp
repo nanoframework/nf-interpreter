@@ -12,7 +12,8 @@
 #include <nanoHAL_v2.h>
 #include <nanoPAL_Sockets.h>
 
-extern "C" {
+extern "C"
+{
 #include <nf_lwipthread_wifi.h>
 }
 
@@ -115,8 +116,7 @@ HRESULT Library_sys_dev_wifi_native_System_Device_Wifi_WifiAdapter::
             // password can be NULL for open networks
 
             // Initiate WiFi connection via CYW43 driver (non-blocking)
-            int result = Network_Interface_Start_Connect(
-                netIndex, szSsid, szPassPhrase ? szPassPhrase : "", 0);
+            int result = Network_Interface_Start_Connect(netIndex, szSsid, szPassPhrase ? szPassPhrase : "", 0);
 
             if (result != 0)
             {
@@ -133,9 +133,7 @@ HRESULT Library_sys_dev_wifi_native_System_Device_Wifi_WifiAdapter::
             int connectResult = Network_Interface_Connect_Result(netIndex);
             if (connectResult >= 0)
             {
-                status = (connectResult == 0)
-                             ? WifiConnectionStatus_Success
-                             : WifiConnectionStatus_UnspecifiedFailure;
+                status = (connectResult == 0) ? WifiConnectionStatus_Success : WifiConnectionStatus_UnspecifiedFailure;
                 break;
             }
 
@@ -147,8 +145,7 @@ HRESULT Library_sys_dev_wifi_native_System_Device_Wifi_WifiAdapter::
 
             bool woke = true;
             NANOCLR_CHECK_HRESULT(
-                g_CLR_RT_ExecutionEngine.WaitEvents(
-                    stack.m_owningThread, *timeout, Event_Wifi_Station, woke));
+                g_CLR_RT_ExecutionEngine.WaitEvents(stack.m_owningThread, *timeout, Event_Wifi_Station, woke));
 
             if (!woke)
             {
@@ -225,8 +222,7 @@ HRESULT Library_sys_dev_wifi_native_System_Device_Wifi_WifiAdapter::GetNativeSca
         else
         {
             int rlen = sizeof(uint16_t) + (number * sizeof(ScanRecord));
-            NANOCLR_CHECK_HRESULT(
-                CLR_RT_HeapBlock_Array::CreateInstance(top, rlen, g_CLR_RT_WellKnownTypes.UInt8));
+            NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance(top, rlen, g_CLR_RT_WellKnownTypes.UInt8));
             CLR_RT_HeapBlock_Array *array = top.DereferenceArray();
             CLR_UINT8 *buf = array->GetFirstElement();
 
@@ -276,7 +272,9 @@ HRESULT Library_sys_dev_wifi_native_System_Device_Wifi_WifiAdapter::NativeFindWi
         for (index = 0; index < g_TargetConfiguration.NetworkInterfaceConfigs->Count; index++)
         {
             if (!ConfigurationManager_GetConfigurationBlock(
-                    netInterfaceConfig, DeviceConfigurationOption_Network, index))
+                    netInterfaceConfig,
+                    DeviceConfigurationOption_Network,
+                    index))
             {
                 NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
             }
@@ -295,7 +293,9 @@ HRESULT Library_sys_dev_wifi_native_System_Device_Wifi_WifiAdapter::NativeFindWi
         for (index = 0; index < g_TargetConfiguration.NetworkInterfaceConfigs->Count; index++)
         {
             if (!ConfigurationManager_GetConfigurationBlock(
-                    netInterfaceConfig, DeviceConfigurationOption_Network, index))
+                    netInterfaceConfig,
+                    DeviceConfigurationOption_Network,
+                    index))
             {
                 NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
             }
