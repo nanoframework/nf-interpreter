@@ -71,8 +71,8 @@ struct Settings
         // Get handlers for native functions in assembly
         pNativeAssmData = GetAssemblyNativeData(assm->name);
 
-        // If pNativeAssmData not nullptr - means this assembly has native calls and there is pointer to table with native
-        // calls.
+        // If pNativeAssmData not nullptr - means this assembly has native calls and there is pointer to table with
+        // native calls.
         if (pNativeAssmData != nullptr)
         {
             // First verify that check sum in assembly object matches hardcoded check sum.
@@ -161,10 +161,18 @@ struct Settings
         const CLR_RECORD_ASSEMBLY *header;
 
 #if !defined(BUILD_RTM)
-        CLR_Debug::Printf(" Loading start at %x, end %x\r\n", (unsigned int)assStart, (unsigned int)assEnd);
+        CLR_Debug::Printf(" Loading start at %p, end %p\r\n", assStart, assEnd);
 #endif
 
-        g_buildCRC = SUPPORT_ComputeCRC(assStart, (unsigned int)assEnd - (unsigned int)assStart, 0);
+        FAULT_ON_NULL_ARG(assStart);
+        FAULT_ON_NULL_ARG(assEnd);
+
+        if (assEnd < assStart)
+        {
+            NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
+        }
+
+        g_buildCRC = SUPPORT_ComputeCRC(assStart, (unsigned int)((uintptr_t)assEnd - (uintptr_t)assStart), 0);
 
         header = (const CLR_RECORD_ASSEMBLY *)assStart;
 
