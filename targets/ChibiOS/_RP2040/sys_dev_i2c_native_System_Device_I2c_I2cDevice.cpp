@@ -7,7 +7,8 @@
 
 typedef Library_sys_dev_i2c_native_System_Device_I2c_I2cConnectionSettings I2cConnectionSettings;
 typedef Library_sys_dev_i2c_native_System_Device_I2c_I2cTransferResult I2cTransferResult;
-typedef Library_corlib_native_System_SpanByte SpanByte;
+typedef Library_corlib_native_System_Span_1 Span;
+typedef Library_corlib_native_System_ReadOnlySpan_1 ReadOnlySpan;
 
 ////////////////////////////////////////////
 // declaration of the I2C PAL structs     //
@@ -204,12 +205,12 @@ HRESULT Library_sys_dev_i2c_native_System_Device_I2c_I2cDevice::NativeDispose___
 }
 
 HRESULT Library_sys_dev_i2c_native_System_Device_I2c_I2cDevice::
-    NativeTransmit___SystemDeviceI2cI2cTransferResult__SystemSpanByte__SystemSpanByte(CLR_RT_StackFrame &stack)
+    NativeTransmit___SystemDeviceI2cI2cTransferResult__SystemReadOnlySpan_1__SystemSpan_1(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
     uint8_t busIndex;
-    NF_PAL_I2C *palI2c = NULL;
+    NF_PAL_I2C *palI2c = nullptr;
     bool isLongRunningOperation = false;
     msg_t transactionResult = MSG_OK;
 
@@ -219,13 +220,11 @@ HRESULT Library_sys_dev_i2c_native_System_Device_I2c_I2cDevice::
     uint32_t estimatedDurationMiliseconds;
 
     CLR_RT_HeapBlock *result;
-    CLR_RT_HeapBlock *writeSpanByte;
+    CLR_RT_HeapBlock *writeReadOnlySpanByte;
     CLR_RT_HeapBlock *readSpanByte;
     CLR_RT_HeapBlock *connectionSettings;
-    CLR_RT_HeapBlock_Array *writeBuffer = NULL;
-    CLR_RT_HeapBlock_Array *readBuffer = NULL;
-    int readOffset = 0;
-    int writeOffset = 0;
+    CLR_RT_HeapBlock_Array *writeBuffer = nullptr;
+    CLR_RT_HeapBlock_Array *readBuffer = nullptr;
 
     CLR_RT_HeapBlock *pThis = stack.This();
     FAULT_ON_NULL(pThis);
@@ -251,36 +250,34 @@ HRESULT Library_sys_dev_i2c_native_System_Device_I2c_I2cDevice::
             break;
     }
 
-    writeSpanByte = stack.Arg1().Dereference();
-    if (writeSpanByte != NULL)
+    writeReadOnlySpanByte = stack.Arg1().Dereference();
+    if (writeReadOnlySpanByte != nullptr)
     {
-        writeBuffer = writeSpanByte[SpanByte::FIELD___array].DereferenceArray();
-        if (writeBuffer != NULL)
+        writeBuffer = writeReadOnlySpanByte[ReadOnlySpan::FIELD___array].DereferenceArray();
+        if (writeBuffer != nullptr)
         {
-            writeOffset = writeSpanByte[SpanByte::FIELD___start].NumericByRef().s4;
-            palI2c->WriteSize = writeSpanByte[SpanByte::FIELD___length].NumericByRef().s4;
+            palI2c->WriteSize = writeReadOnlySpanByte[ReadOnlySpan::FIELD___length].NumericByRef().s4;
             writeBuffer->Pin();
         }
     }
 
-    if (writeBuffer == NULL)
+    if (writeBuffer == nullptr)
     {
         palI2c->WriteSize = 0;
     }
 
     readSpanByte = stack.Arg2().Dereference();
-    if (readSpanByte != NULL)
+    if (readSpanByte != nullptr)
     {
-        readBuffer = readSpanByte[SpanByte::FIELD___array].DereferenceArray();
-        if (readBuffer != NULL)
+        readBuffer = readSpanByte[Span::FIELD___array].DereferenceArray();
+        if (readBuffer != nullptr)
         {
-            readOffset = readSpanByte[SpanByte::FIELD___start].NumericByRef().s4;
-            palI2c->ReadSize = readSpanByte[SpanByte::FIELD___length].NumericByRef().s4;
+            palI2c->ReadSize = readSpanByte[Span::FIELD___length].NumericByRef().s4;
             readBuffer->Pin();
         }
     }
 
-    if (readBuffer == NULL)
+    if (readBuffer == nullptr)
     {
         palI2c->ReadSize = 0;
     }
@@ -301,14 +298,14 @@ HRESULT Library_sys_dev_i2c_native_System_Device_I2c_I2cDevice::
     {
         palI2c->Address = (i2caddr_t)connectionSettings[I2cConnectionSettings::FIELD___deviceAddress].NumericByRef().s4;
 
-        if (writeBuffer != NULL)
+        if (writeBuffer != nullptr)
         {
-            palI2c->WriteBuffer = (uint8_t *)writeBuffer->GetElement(writeOffset);
+            palI2c->WriteBuffer = (uint8_t *)writeBuffer->GetFirstElement();
         }
 
-        if (readBuffer != NULL)
+        if (readBuffer != nullptr)
         {
-            palI2c->ReadBuffer = (uint8_t *)readBuffer->GetElement(readOffset);
+            palI2c->ReadBuffer = (uint8_t *)readBuffer->GetFirstElement();
         }
 
         i2cAcquireBus(palI2c->Driver);
@@ -395,7 +392,7 @@ HRESULT Library_sys_dev_i2c_native_System_Device_I2c_I2cDevice::
 
         CLR_RT_HeapBlock &top = stack.PushValueAndClear();
         NANOCLR_CHECK_HRESULT(
-            g_CLR_RT_ExecutionEngine.NewObjectFromIndex(top, g_CLR_RT_WellKnownTypes.m_I2cTransferResult));
+            g_CLR_RT_ExecutionEngine.NewObjectFromIndex(top, g_CLR_RT_WellKnownTypes.I2cTransferResult));
         result = top.Dereference();
         FAULT_ON_NULL(result);
 
@@ -438,12 +435,12 @@ HRESULT Library_sys_dev_i2c_native_System_Device_I2c_I2cDevice::
 
     if (hr != CLR_E_THREAD_WAITING)
     {
-        if (writeBuffer != NULL && writeBuffer->IsPinned())
+        if (writeBuffer != nullptr && writeBuffer->IsPinned())
         {
             writeBuffer->Unpin();
         }
 
-        if (readBuffer != NULL && readBuffer->IsPinned())
+        if (readBuffer != nullptr && readBuffer->IsPinned())
         {
             readBuffer->Unpin();
         }

@@ -34,7 +34,6 @@ static const CLR_RT_MethodHandler method_lookup[] =
     nullptr,
     nullptr,
     nullptr,
-    nullptr,
     Library_sys_dev_wifi_native_System_Device_Wifi_WifiAdapter::DisposeNative___VOID,
     Library_sys_dev_wifi_native_System_Device_Wifi_WifiAdapter::NativeInit___VOID,
     Library_sys_dev_wifi_native_System_Device_Wifi_WifiAdapter::NativeConnect___SystemDeviceWifiWifiConnectionStatus__STRING__STRING__SystemDeviceWifiWifiReconnectionKind,
@@ -79,14 +78,16 @@ static const CLR_RT_MethodHandler method_lookup[] =
     nullptr,
     nullptr,
     nullptr,
+    nullptr,
+    nullptr,
 };
 
 const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_System_Device_Wifi =
 {
     "System.Device.Wifi",
-    0x441BBD71,
+    0x7AE2272F,
     method_lookup,
-    { 100, 2, 0, 0 }
+    { 100, 2, 0, 1 }
 };
 
 // clang-format on
