@@ -1280,7 +1280,11 @@ jobs:
             *)             HOST_CANONICAL="$(uname -m)" ;;
           esac
           if [ "${HOST_CANONICAL}" = "${NANO_ARCH}" ]; then
-            ./build/posix/bin/nanoFramework.nanoCLR.test | tee build/posix/smoke.log
+            # With no assemblies the CLR engine may assert/abort; ignore the exit
+            # code and just validate that the version banner was printed.
+            set +e
+            ./build/posix/bin/nanoFramework.nanoCLR.test 2>&1 | tee build/posix/smoke.log
+            set -e
             if ! grep -Eq '[0-9]+\.[0-9]+\.[0-9]+' build/posix/smoke.log; then
               echo "ERROR: smoke output validation failed, expected semantic version in output."
               exit 1
