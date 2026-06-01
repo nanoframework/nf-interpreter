@@ -73,8 +73,11 @@ If ($gnuGccPathExists -eq $False -or $force) {
         # unzip toolchain
         Expand-Archive $output -DestinationPath $toolPath > $null
 
-        # update tool path to include versioned toolchain folder
-        $toolPath = $toolPath + "\arm-gnu-toolchain-" + $Version + "-mingw-w64-i686-arm-none-eabi"
+        # some archives extract into a versioned top-level folder, others directly into destination
+        $versionedToolPath = $toolPath + "\arm-gnu-toolchain-" + $Version + "-mingw-w64-i686-arm-none-eabi"
+        if (Test-Path $versionedToolPath -ErrorAction SilentlyContinue) {
+            $toolPath = $versionedToolPath
+        }
 
         "OK" | Write-Host -ForegroundColor Green
     }
