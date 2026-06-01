@@ -47,7 +47,7 @@ if ([string]::IsNullOrEmpty($Path)) {
     $toolPath = $toolPath + "\GNU_Tools_ARM_Embedded\$Version"
 }
 else {
-    $toolPath = $Path
+    $toolPath = Join-Path $Path $Version
 }
 
 # check if path already exists
