@@ -17,13 +17,16 @@
 #include <tinyusb_cdc_acm.h>
 #endif
 
-// The WP HAL interface implementation for ESP32 targets, supporting multiple transport layers (UART, USB CDC, USB/JTAG) based on the target and configuration.
-// Based on the configuration, the WP will try to use USB CDC first, then USB/JTAG, and finally fallback to UART if the previous options are not available or fail to initialize.
-// It can only be USB CDC or USB/JTAG not both. The ESP will reset if tinyusb has been initialized/deinitialized then try USB/JTAG as they use USB port in different modes
+// The WP HAL interface implementation for ESP32 targets, supporting multiple transport layers (UART, USB CDC, USB/JTAG)
+// based on the target and configuration. Based on the configuration, the WP will try to use USB CDC first, then
+// USB/JTAG, and finally fallback to UART if the previous options are not available or fail to initialize. It can only
+// be USB CDC or USB/JTAG not both. The ESP will reset if tinyusb has been initialized/deinitialized then try USB/JTAG
+// as they use USB port in different modes
 
 // Only ESP32S2 uses TinyUSB (USB CDC)
 // Select between USB Jtag or UART based WP transport based on where connected and configuration
-#if CONFIG_IDF_TARGET_ESP32S2 && CONFIG_TINYUSB_CDC_ENABLED && (CONFIG_NF_WP_TRANSPORT_USB_CDC || CONFIG_NF_WP_TRANSPORT_USB_CDC_OR_SERIAL)
+#if CONFIG_IDF_TARGET_ESP32S2 && CONFIG_TINYUSB_CDC_ENABLED &&                                                         \
+    (CONFIG_NF_WP_TRANSPORT_USB_CDC || CONFIG_NF_WP_TRANSPORT_USB_CDC_OR_SERIAL)
 #define WP_USE_TINYUSB
 #endif
 
@@ -37,13 +40,19 @@
 
 // Select between USB Jtag or UART based WP transport based on where connected and configuration
 static bool WP_Port_Initialised = false;
-enum { WP_TRANSPORT_NONE, WP_TRANSPORT_UART, WP_TRANSPORT_USB_JTAG, WP_TRANSPORT_TINY_USB } WP_Transport = WP_TRANSPORT_NONE;
+enum
+{
+    WP_TRANSPORT_NONE,
+    WP_TRANSPORT_UART,
+    WP_TRANSPORT_USB_JTAG,
+    WP_TRANSPORT_TINY_USB
+} WP_Transport = WP_TRANSPORT_NONE;
 
 // WP using TinyUSB CDC
 #if defined(WP_USE_TINYUSB)
 
 // TinyUSB stack doesn't work well with USB/JTAG, so disable it if Tinyusb is selected
-//#undef WP_USE_USB_JTAG
+// #undef WP_USE_USB_JTAG
 
 static void WP_Cdc_Rx_Callback(int itf, cdcacm_event_t *event)
 {
@@ -450,8 +459,8 @@ uint8_t WP_TransmitMessage(WP_Message *message)
     switch (WP_Transport)
     {
         default:
-        // No transport selected on startup
-            case WP_TRANSPORT_NONE:
+            // No transport selected on startup
+        case WP_TRANSPORT_NONE:
             // delay to avoid busy loop if no transport selected
             vTaskDelay(pdMS_TO_TICKS(1000));
             return 0;
