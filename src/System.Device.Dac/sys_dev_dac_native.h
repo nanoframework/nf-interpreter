@@ -8,7 +8,8 @@
 
 #include <nanoCLR_Interop.h>
 #include <nanoCLR_Runtime.h>
-#include <nanoCLR_Checks.h>
+#include <nanoPackStruct.h>
+#include <corlib_native.h>
 
 struct Library_sys_dev_dac_native_System_Device_Dac_DacController
 {
