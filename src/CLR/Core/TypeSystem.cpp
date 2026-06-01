@@ -478,6 +478,8 @@ HRESULT CLR_RT_SignatureParser::Advance(Element &res)
     res.Levels = 0;
     res.GenericParamPosition = 0xFFFF;
     res.Class.Clear();
+    res.IsGenericInst = 0;
+    res.GenParamCount = 0;
 
     switch (Type)
     {

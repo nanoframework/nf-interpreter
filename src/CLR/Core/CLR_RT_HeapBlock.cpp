@@ -885,8 +885,8 @@ bool CLR_RT_HeapBlock::TypeDescriptorsMatch(
         case DATATYPE_SZARRAY:
         {
             // derive element-type descriptors from the ARRAY descriptors
-            CLR_RT_TypeDescriptor expectedElementType;
-            CLR_RT_TypeDescriptor actualElementType;
+            CLR_RT_TypeDescriptor expectedElementType{};
+            CLR_RT_TypeDescriptor actualElementType{};
             CLR_RT_TypeDescriptor eCopy = expectedType;
             CLR_RT_TypeDescriptor aCopy = actualType;
 
@@ -899,11 +899,11 @@ bool CLR_RT_HeapBlock::TypeDescriptorsMatch(
                 CLR_Debug::Printf(
                     "[DIAG] TDM SZARRAY eOk=%d eCls=%08X eDT=%d aOk=%d aCls=%08X aDT=%d\r\n",
                     (int)eOk,
-                    (unsigned)expectedElementType.m_handlerCls.data,
-                    (int)expectedElementType.GetDataType(),
+                    eOk ? (unsigned)expectedElementType.m_handlerCls.data : 0u,
+                    eOk ? (int)expectedElementType.GetDataType() : -1,
                     (int)aOk,
-                    (unsigned)actualElementType.m_handlerCls.data,
-                    (int)actualElementType.GetDataType());
+                    aOk ? (unsigned)actualElementType.m_handlerCls.data : 0u,
+                    aOk ? (int)actualElementType.GetDataType() : -1);
             }
 #endif
             if (!eOk || !aOk)
