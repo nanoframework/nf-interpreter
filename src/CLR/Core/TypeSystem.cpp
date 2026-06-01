@@ -707,9 +707,14 @@ HRESULT CLR_RT_SignatureParser::Advance(Element &res)
         CLR_Debug::Printf(
             "[DIAG] SigParser::Advance hr=%08X Type=%d DataType=%02X Levels=%d IsByRef=%d "
             "IsGenericInst=%d GenParamCount=%d GenParamPos=%04X Class.data=%08X\r\n",
-            (unsigned)hr, (int)Type, (unsigned)res.DataType,
-            (int)res.Levels, (int)res.IsByRef, (int)res.IsGenericInst,
-            (int)res.GenParamCount, (unsigned)res.GenericParamPosition,
+            (unsigned)hr,
+            (int)Type,
+            (unsigned)res.DataType,
+            (int)res.Levels,
+            (int)res.IsByRef,
+            (int)res.IsGenericInst,
+            (int)res.GenParamCount,
+            (unsigned)res.GenericParamPosition,
             (unsigned)res.Class.data);
     }
 #endif
@@ -3251,8 +3256,10 @@ HRESULT CLR_RT_TypeDescriptor::InitializeFromSignatureToken(
         CLR_Debug::Printf(
             "[DIAG] InitFromSigToken EXIT hr=%08X DT=%d hCls=%08X hGT=%08X levels=%d\r\n",
             (unsigned)hr,
-            (int)GetDataType(), (unsigned)m_handlerCls.data,
-            (unsigned)m_handlerGenericType.data, (int)m_reflex.levels);
+            (int)GetDataType(),
+            (unsigned)m_handlerCls.data,
+            (unsigned)m_handlerGenericType.data,
+            (int)m_reflex.levels);
     }
 #endif
     NANOCLR_CLEANUP_END();

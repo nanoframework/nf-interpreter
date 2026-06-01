@@ -3617,11 +3617,16 @@ bool CLR_RT_ExecutionEngine::IsInstanceOf(
     if (s_CLR_RT_fTrace_GenericFields >= c_CLR_RT_Trace_Info)
     {
         CLR_Debug::Printf(
-            "[DIAG] IsInstanceOf desc DT=%d hCls=%08X hGT=%08X lvl=%d  target DT=%d hCls=%08X hGT=%08X lvl=%d isInst=%d\r\n",
-            (int)desc.GetDataType(), (unsigned)desc.m_handlerCls.data,
-            (unsigned)desc.m_handlerGenericType.data, (int)desc.m_reflex.levels,
-            (int)descTarget.GetDataType(), (unsigned)descTarget.m_handlerCls.data,
-            (unsigned)descTarget.m_handlerGenericType.data, (int)descTarget.m_reflex.levels,
+            "[DIAG] IsInstanceOf desc DT=%d hCls=%08X hGT=%08X lvl=%d  target DT=%d hCls=%08X hGT=%08X lvl=%d "
+            "isInst=%d\r\n",
+            (int)desc.GetDataType(),
+            (unsigned)desc.m_handlerCls.data,
+            (unsigned)desc.m_handlerGenericType.data,
+            (int)desc.m_reflex.levels,
+            (int)descTarget.GetDataType(),
+            (unsigned)descTarget.m_handlerCls.data,
+            (unsigned)descTarget.m_handlerGenericType.data,
+            (int)descTarget.m_reflex.levels,
             (int)isInstInstruction);
     }
 #endif
