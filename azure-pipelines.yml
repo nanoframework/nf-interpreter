@@ -1222,14 +1222,16 @@ jobs:
           ne( dependencies.Check_Build_Options.outputs['BuildOptions.SKIP_BUILD'], true ),
           or(
             eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ALL'], true),
-            eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_POSIX'], true)
+            eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_POSIX'], true),
+            eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_NANOCLR_CLI'], true)
           )
         ),
         and(
           eq(variables['Build.Reason'], 'Manual'),
           or(
             eq(variables['BUILD_ALL__'], 'true'),
-            eq(variables['BUILD_POSIX__'], 'true')
+            eq(variables['BUILD_POSIX__'], 'true'),
+            eq(variables['BUILD_NANOCLR_CLI__'], 'true')
           )
         )
       )
