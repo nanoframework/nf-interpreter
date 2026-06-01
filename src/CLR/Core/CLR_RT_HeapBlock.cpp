@@ -797,11 +797,16 @@ bool CLR_RT_HeapBlock::TypeDescriptorsMatch(
     if (s_CLR_RT_fTrace_GenericFields >= c_CLR_RT_Trace_Info)
     {
         CLR_Debug::Printf(
-            "[DIAG] TypeDescriptorsMatch expected DT=%d hCls=%08X hGT=%08X lvl=%d  actual DT=%d hCls=%08X hGT=%08X lvl=%d\r\n",
-            (int)expectedType.GetDataType(), (unsigned)expectedType.m_handlerCls.data,
-            (unsigned)expectedType.m_handlerGenericType.data, (int)expectedType.m_reflex.levels,
-            (int)actualType.GetDataType(), (unsigned)actualType.m_handlerCls.data,
-            (unsigned)actualType.m_handlerGenericType.data, (int)actualType.m_reflex.levels);
+            "[DIAG] TypeDescriptorsMatch expected DT=%d hCls=%08X hGT=%08X lvl=%d  actual DT=%d hCls=%08X hGT=%08X "
+            "lvl=%d\r\n",
+            (int)expectedType.GetDataType(),
+            (unsigned)expectedType.m_handlerCls.data,
+            (unsigned)expectedType.m_handlerGenericType.data,
+            (int)expectedType.m_reflex.levels,
+            (int)actualType.GetDataType(),
+            (unsigned)actualType.m_handlerCls.data,
+            (unsigned)actualType.m_handlerGenericType.data,
+            (int)actualType.m_reflex.levels);
     }
 #endif
 
@@ -893,9 +898,11 @@ bool CLR_RT_HeapBlock::TypeDescriptorsMatch(
             {
                 CLR_Debug::Printf(
                     "[DIAG] TDM SZARRAY eOk=%d eCls=%08X eDT=%d aOk=%d aCls=%08X aDT=%d\r\n",
-                    (int)eOk, (unsigned)expectedElementType.m_handlerCls.data,
+                    (int)eOk,
+                    (unsigned)expectedElementType.m_handlerCls.data,
                     (int)expectedElementType.GetDataType(),
-                    (int)aOk, (unsigned)actualElementType.m_handlerCls.data,
+                    (int)aOk,
+                    (unsigned)actualElementType.m_handlerCls.data,
                     (int)actualElementType.GetDataType());
             }
 #endif
