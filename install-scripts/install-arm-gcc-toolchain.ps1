@@ -44,6 +44,9 @@ if ([string]::IsNullOrEmpty($Path) -or $force) {
     # append the tool path
     $toolPath = $toolPath + "\GNU_Tools_ARM_Embedded\$Version"
 }
+else {
+    $toolPath = $Path
+}
 
 # check if path already exists
 $gnuGccPathExists = Test-Path $toolPath -ErrorAction SilentlyContinue    
