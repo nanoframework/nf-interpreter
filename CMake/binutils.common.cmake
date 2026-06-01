@@ -672,6 +672,9 @@ macro(nf_setup_target_build_common)
 
         # need to unset several flags for MbedTLS to compile correctly
         target_compile_options(mbedtls PRIVATE -Wno-undef -Wno-error=unused-function -Wno-error=discarded-qualifiers -Wno-error=unused-parameter)
+        # Upstream MbedTLS issue #9875 reports GCC 14.2 failures specifically with -O0.
+        # In this repo, nf_set_optimization_options already applies -Og (Debug) and -O1+ for non-Debug builds,
+        # so we keep only warning suppressions here and avoid target-specific frame-pointer tweaks.
         target_compile_options(mbedcrypto PRIVATE -Wno-undef -Wno-error=unused-function -Wno-error=discarded-qualifiers -Wno-error=unused-parameter)
         target_compile_options(mbedx509 PRIVATE -Wno-undef -Wno-error=unused-function -Wno-error=discarded-qualifiers -Wno-error=unused-parameter)
 

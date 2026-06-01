@@ -36,7 +36,7 @@ void WP_ReceiveBytes(uint8_t **ptr, uint32_t *size)
 
 uint8_t WP_TransmitMessage(WP_Message *message)
 {
-    uint32_t writeResult;
+    size_t writeResult;
     bool operationResult = false;
 
     TRACE_WP_HEADER(WP_TXMSG, message);
