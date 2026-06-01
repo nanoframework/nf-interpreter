@@ -185,7 +185,7 @@ esp_err_t NF_ESP32_InitialiseEthernet(uint8_t *pMacAdr)
     //    phy_config.reset_timeout_ms = 200;
     ESP_LOGI(
         TAG,
-        "Ethernet phy config reset %d timeout %d addr %d\n",
+        "Ethernet phy config reset %d timeout %d addr %d",
         phy_config.reset_gpio_num,
         phy_config.reset_timeout_ms,
         phy_config.phy_addr);
@@ -195,20 +195,21 @@ esp_err_t NF_ESP32_InitialiseEthernet(uint8_t *pMacAdr)
     // Internal Ethernet
 
     // Set Clock modes to override whats in sdkconfig
-#ifdef ESP32_ETHERNET_RMII_CLK_OUT_GPIO
+#if defined(CONFIG_ESP32_ETHERNET_RMII_CLK_OUT_GPIO) && CONFIG_ESP32_ETHERNET_RMII_CLK_OUT_GPIO != -1
     esp32_emac_config.clock_config.rmii.clock_mode = EMAC_CLK_OUT;
-    esp32_emac_config.clock_config.rmii.clock_gpio = (emac_rmii_clock_gpio_t)ESP32_ETHERNET_RMII_CLK_OUT_GPIO; // always 16 or 17
-    ESP_LOGI(TAG, "Ethernet clock_config OUT gpio %d\n", ESP32_ETHERNET_RMII_CLK_OUT_GPIO);
+    esp32_emac_config.clock_config.rmii.clock_gpio = (emac_rmii_clock_gpio_t)CONFIG_ESP32_ETHERNET_RMII_CLK_OUT_GPIO; // always 16 or 17
+    ESP_LOGI(TAG, "Ethernet clock_config OUT gpio %d", CONFIG_ESP32_ETHERNET_RMII_CLK_OUT_GPIO);
 
-    CPU_GPIO_ReservePin(EMAC_CLK_OUT, true);          // REF_CLK OUT
-    CPU_GPIO_ReservePin(ESP32_ETHERNET_RMII_CLK_OUT_GPIO, true); // REF_CLK OUT
+    CPU_GPIO_ReservePin(CONFIG_ESP32_ETHERNET_RMII_CLK_OUT_GPIO, true); // REF_CLK OUT
+#elif defined(CONFIG_ESP32_ETHERNET_RMII_CLK_IN_GPIO) && CONFIG_ESP32_ETHERNET_RMII_CLK_IN_GPIO != -1
+    esp32_emac_config.clock_config.rmii.clock_mode = EMAC_CLK_EXT_IN;
+    esp32_emac_config.clock_config.rmii.clock_gpio = (emac_rmii_clock_gpio_t)CONFIG_ESP32_ETHERNET_RMII_CLK_IN_GPIO;
+    ESP_LOGI(TAG, "Ethernet clock_config IN gpio %d", esp32_emac_config.clock_config.rmii.clock_gpio);
+    CPU_GPIO_ReservePin(esp32_emac_config.clock_config.rmii.clock_gpio, true); 
 #else
-    ESP_LOGI(TAG, "Ethernet clock_config IN gpio %d\n", esp32_emac_config.clock_config.rmii.clock_gpio);
-
-    CPU_GPIO_ReservePin(EMAC_CLK_EXT_IN, true);  // REF_CLK EXT
-    CPU_GPIO_ReservePin(esp32_emac_config.clock_config.rmii.clock_gpio, true); // REF_CLK IN
+    ESP_LOGI(TAG, "Ethernet clock pins not configured");
 #endif
-
+ 
 // If ESP32_ETHERNET_MDC_GPIO or ESP32_ETHERNET_MDIO_GPIO defined then use new values
 #ifdef ESP32_ETHERNET_MDC_GPIO
     esp32_emac_config.smi_gpio.mdc_num = ESP32_ETHERNET_MDC_GPIO;
@@ -218,7 +219,7 @@ esp_err_t NF_ESP32_InitialiseEthernet(uint8_t *pMacAdr)
     esp32_emac_config.smi_gpio.mdio_num = ESP32_ETHERNET_MDIO_GPIO;
 #endif
 
-    ESP_LOGI(TAG, "Ethernet pins for MDC %d MDIO %d\n", esp32_emac_config.smi_gpio.mdc_num, esp32_emac_config.smi_gpio.mdio_num);
+    ESP_LOGI(TAG, "Ethernet pins for MDC %d MDIO %d", esp32_emac_config.smi_gpio.mdc_num, esp32_emac_config.smi_gpio.mdio_num);
 
     esp_eth_mac_t *mac = esp_eth_mac_new_esp32(&esp32_emac_config, &mac_config);
 
@@ -247,19 +248,19 @@ esp_err_t NF_ESP32_InitialiseEthernet(uint8_t *pMacAdr)
 
     // Define PHY to use with internal Ethernet
 #if defined(ESP32_ETHERNET_PHY_IP101)
-    ESP_LOGI(TAG, "Ethernet IP101 phy\n");
+    ESP_LOGI(TAG, "Ethernet IP101 phy");
     esp_eth_phy_t *phy = esp_eth_phy_new_ip101(&phy_config);
 #elif defined(ESP32_ETHERNET_PHY_RTL8201)
-    ESP_LOGI(TAG, "Ethernet RTL8201 phy\n");
+    ESP_LOGI(TAG, "Ethernet RTL8201 phy");
     esp_eth_phy_t *phy = esp_eth_phy_new_rtl8201(&phy_config);
 #elif defined(ESP32_ETHERNET_PHY_LAN8720)
-    ESP_LOGI(TAG, "Ethernet Lan8720 phy\n");
+    ESP_LOGI(TAG, "Ethernet Lan8720 phy");
     esp_eth_phy_t *phy = esp_eth_phy_new_lan87xx(&phy_config);
 #elif defined(ESP32_ETHERNET_PHY_DP83848)
-    ESP_LOGI(TAG, "Ethernet DP83848 phy\n");
+    ESP_LOGI(TAG, "Ethernet DP83848 phy");
     esp_eth_phy_t *phy = esp_eth_phy_new_dp83848(&phy_config);
 #elif defined(ESP32_ETHERNET_PHY_KSZ8041)
-    ESP_LOGI(TAG, "Ethernet KSZ8041 phy\n");
+    ESP_LOGI(TAG, "Ethernet KSZ8041 phy");
     esp_eth_phy_t *phy = esp_eth_phy_new_ksz80xx(&phy_config);
 #endif
 
