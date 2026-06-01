@@ -1480,7 +1480,7 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::GetDeviceSelector_
 {
     NANOCLR_HEADER();
 
-    // declare the device selector string whose max size is "COM1,COM2,COM3,COM3,COM4,COM5 + terminator
+    // declare the device selector string whose max size is "COM1,COM2,COM3,COM4,COM5 + terminator
     char deviceSelectorString[64] = { 0 };
 
     auto appendPort = [&](const char *port)

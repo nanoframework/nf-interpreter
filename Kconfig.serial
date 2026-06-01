@@ -22,7 +22,7 @@ endchoice
 
 config TARGET_SERIAL_BAUDRATE
     int "Serial baudrate for Wire Protocol"
-    depends on NF_WP_TRANSPORT_SERIAL || NF_WP_TRANSPORT_USB_CDC_AND_SERIAL
+    depends on NF_WP_TRANSPORT_SERIAL || NF_WP_TRANSPORT_USB_CDC_OR_SERIAL
     default 921600
 
 endmenu

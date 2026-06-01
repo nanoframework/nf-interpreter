@@ -30,7 +30,7 @@ We also have a [Community Targets](https://github.com/nanoframework/nf-Community
 
 | Available pre-built targets | | | |
 |---|---|---|---|
-| [ESP32 boards](#user-content-esp32-modules-and-boards) | [ESP32 boards with ethernet](#user-content-esp32-boards-with-inbuilt-Ethernet) | [ESP32_S2 & ESP32_S3 boards](#user-content-esp32_s2-&-esp32_s3-boards) |
+| [ESP32 boards](#user-content-esp32-modules-and-boards) | [ESP32 boards with ethernet](#user-content-esp32-boards-with-inbuilt-Ethernet) | [ESP32_S2 & ESP32_S3 boards](#user-content-esp32_s2-and-esp32_s3-boards) |
 | [ESP32 riscv (C3,C5,C6,C61,P4 & H2)](#user-content-esp32-risc-v-boards) | [ESP32 M5STACK](#user-content-m5stack) | |
 | [STM32 boards](#user-content-stm32-boards-and-chip-based) | | | |
 | [Silicon Labs Giant Gecko](#user-content-silicon-labs-giant-gecko-boards) | | | |
@@ -65,7 +65,7 @@ We also have a [Community Targets](https://github.com/nanoframework/nf-Community
 | ESP32_WESP32  | Poe | [![Latest Version @ Cloudsmith](https://api-prd.cloudsmith.io/v1/badges/version/net-nanoframework/nanoframework-images/raw/ESP32_WESP32/latest/x/?render=true)](https://cloudsmith.io/~net-nanoframework/repos/nanoframework-images/packages/detail/raw/ESP32_WESP32/latest/) | [![Latest Version @ Cloudsmith](https://api-prd.cloudsmith.io/v1/badges/version/net-nanoframework/nanoframework-images-dev/raw/ESP32_WESP32/latest/x/?render=true)](https://cloudsmith.io/~net-nanoframework/repos/nanoframework-images-dev/packages/detail/raw/ESP32_WESP32/latest/) |
 | ESP32_LILYGO | Poe | [![Latest Version @ Cloudsmith](https://api-prd.cloudsmith.io/v1/badges/version/net-nanoframework/nanoframework-images/raw/ESP32_LILYGO/latest/x/?render=true)](https://cloudsmith.io/~net-nanoframework/repos/nanoframework-images/packages/detail/raw/ESP32_LILYGO/latest/) | [![Latest Version @ Cloudsmith](https://api-prd.cloudsmith.io/v1/badges/version/net-nanoframework/nanoframework-images-dev/raw/ESP32_LILYGO/latest/x/?render=true)](https://cloudsmith.io/~net-nanoframework/repos/nanoframework-images-dev/packages/detail/raw/ESP32_LILYGO/latest/) |
 
-### ESP32_S2 & ESP32_S3 boards
+### ESP32_S2 and ESP32_S3 boards
 | Target | Note | Stable | Preview |
 |:---|---|---|---|
 | ESP32_S2 | Uart or USB -> VS. Including Adafruit Feather_S2 | [![Latest Version @ Cloudsmith](https://api-prd.cloudsmith.io/v1/badges/version/net-nanoframework/nanoframework-images/raw/ESP32_S2/latest/x/?render=true)](https://cloudsmith.io/~net-nanoframework/repos/nanoframework-images/packages/detail/raw/ESP32_S2/latest/) | [![Latest Version @ Cloudsmith](https://api-prd.cloudsmith.io/v1/badges/version/net-nanoframework/nanoframework-images-dev/raw/ESP32_S2/latest/x/?render=true)](https://cloudsmith.io/~net-nanoframework/repos/nanoframework-images-dev/packages/detail/raw/ESP32_S2/latest/) |
