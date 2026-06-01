@@ -33,10 +33,69 @@ steps:
       destinationFolder: "$(Agent.TempDirectory)"
       cleanDestinationFolder: false
 
-  - script: |
-      echo Adding ARM GCC toolchain to PATH...
-      echo ##vso[task.prependpath]$(Agent.TempDirectory)\arm-gnu-toolchain-${{ parameters.gccArmVersion }}-mingw-w64-i686-arm-none-eabi\bin
+  - pwsh: |
+      $tempPath = "$(Agent.TempDirectory)"
+      $archivePath = Join-Path $tempPath "arm-gnu-toolchain-${{ parameters.gccArmVersion }}-mingw-w64-i686-arm-none-eabi.zip"
+
+      Write-Host "ARM GCC diagnostics"
+      Write-Host "Temp path: $tempPath"
+      Write-Host "Cache restored: $(GCC_CACHE_RESTORED)"
+      Write-Host "Expected archive: $archivePath"
+
+      if (Test-Path $archivePath) {
+        $archive = Get-Item $archivePath
+        Write-Host "Archive exists. Size: $($archive.Length) bytes. LastWriteTime: $($archive.LastWriteTimeUtc.ToString('u'))"
+      }
+      else {
+        Write-Host "Archive does not exist at expected path."
+      }
+
+      Write-Host "Top-level items in temp path:"
+      Get-ChildItem -Path $tempPath -Force |
+        Sort-Object PSIsContainer, Name -Descending |
+        Select-Object -First 80 FullName, Mode, Length, LastWriteTime |
+        Format-Table -AutoSize | Out-String -Width 240 | Write-Host
+
+      Write-Host "Directories matching arm-gnu-toolchain*:"
+      $toolchainDirs = Get-ChildItem -Path $tempPath -Directory -Recurse -ErrorAction SilentlyContinue |
+        Where-Object { $_.Name -like "arm-gnu-toolchain*" } |
+        Select-Object -First 80 FullName
+
+      if ($toolchainDirs) {
+        $toolchainDirs | Format-Table -AutoSize | Out-String -Width 240 | Write-Host
+      }
+      else {
+        Write-Host "No directories matching arm-gnu-toolchain* were found."
+      }
+
+      Write-Host "Compiler-like files found under temp path:"
+      $compilerCandidates = Get-ChildItem -Path $tempPath -Recurse -File -ErrorAction SilentlyContinue |
+        Where-Object { $_.Name -like "*gcc*.exe" -or $_.Name -like "arm-none-eabi-*" } |
+        Select-Object -First 120 FullName, Length
+
+      if ($compilerCandidates) {
+        $compilerCandidates | Format-Table -AutoSize | Out-String -Width 240 | Write-Host
+      }
+      else {
+        Write-Host "No compiler-like files were found."
+      }
+    displayName: Debug ARM GCC extraction
+
+  - pwsh: |
+      $tempPath = "$(Agent.TempDirectory)"
+      $gcc = Get-ChildItem -Path $tempPath -Recurse -Filter "arm-none-eabi-gcc.exe" -ErrorAction SilentlyContinue |
+        Select-Object -First 1
+
+      if ($null -eq $gcc) {
+        throw "Unable to find arm-none-eabi-gcc.exe under '$tempPath' after extracting/restoring ARM GCC ${{ parameters.gccArmVersion }}. Check the 'Debug ARM GCC extraction' step above for archive and extracted-file details."
+      }
+
+      $gccBinPath = $gcc.Directory.FullName
+      Write-Host "Adding ARM GCC toolchain to PATH: $gccBinPath"
+      Write-Host "##vso[task.setvariable variable=ARM_GCC_PATH]$gccBinPath"
+      Write-Host "##vso[task.prependpath]$gccBinPath"
     displayName: Add GCC to PATH
+    failOnStderr: true
 
   - script: |
       echo ##vso[task.prependpath]c:\windows\System32
