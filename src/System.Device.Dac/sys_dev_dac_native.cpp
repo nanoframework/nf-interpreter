@@ -20,7 +20,6 @@ static const CLR_RT_MethodHandler method_lookup[] =
     nullptr,
     nullptr,
     nullptr,
-    nullptr,
     Library_sys_dev_dac_native_System_Device_Dac_DacController::NativeOpenChannel___VOID__I4,
     Library_sys_dev_dac_native_System_Device_Dac_DacController::NativeGetChannelCount___I4,
     Library_sys_dev_dac_native_System_Device_Dac_DacController::NativeGetResolutionInBits___I4,
@@ -48,9 +47,9 @@ static const CLR_RT_MethodHandler method_lookup[] =
 const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_System_Device_Dac =
 {
     "System.Device.Dac",
-    0x435307F5,
+    0xBD443F06,
     method_lookup,
-    { 100, 2, 0, 0 }
+    { 100, 2, 0, 1 }
 };
 
 // clang-format on
