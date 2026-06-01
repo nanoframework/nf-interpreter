@@ -1,7 +1,7 @@
 # Copyright (c) .NET Foundation and Contributors
 # See LICENSE file in the project root for full license information.
 
-# This PS installs the ARM GNU GCC toolchain from our Cloudsmith repository if it's not already available
+# This PS installs the ARM GNU GCC toolchain if it's not already available
 
 [CmdletBinding(SupportsShouldProcess = $true)]
 param (
@@ -14,6 +14,8 @@ param (
 if ([string]::IsNullOrEmpty($Version)) {
     $Version = "15.2.rel1"
 }
+
+$packageName = "arm-gnu-toolchain-$Version-mingw-w64-i686-arm-none-eabi"
 
 # check if running on Azure Pipelines by looking at this two environment variables
 $IsAzurePipelines = $env:Agent_HomeDirectory -and $env:Build_BuildNumber
@@ -30,7 +32,7 @@ else {
     mkdir -Force $zipRoot | Out-Null
 }
 
-if ([string]::IsNullOrEmpty($Path) -or $force) {
+if ([string]::IsNullOrEmpty($Path)) {
     # no path requested
     # check for NF_TOOLS_PATH
     if ($env:NF_TOOLS_PATH) {
@@ -53,8 +55,8 @@ $gnuGccPathExists = Test-Path $toolPath -ErrorAction SilentlyContinue
 
 # download, if needed
 If ($gnuGccPathExists -eq $False -or $force) {
-    $url = "https://developer.arm.com/-/media/Files/downloads/gnu/" + $Version + "/binrel/arm-gnu-toolchain-" + $Version + "-mingw-w64-i686-arm-none-eabi.zip"
-    $output = "$zipRoot\arm-gnu-toolchain-" + $Version + "-mingw-w64-i686-arm-none-eabi.zip"
+    $url = "https://developer.arm.com/-/media/Files/downloads/gnu/$Version/binrel/$packageName.zip"
+    $output = Join-Path $zipRoot "$packageName.zip"
 
     # Don't download again if already exists
     if (![System.IO.File]::Exists($output) -or $force) {
@@ -77,7 +79,7 @@ If ($gnuGccPathExists -eq $False -or $force) {
         Expand-Archive $output -DestinationPath $toolPath > $null
 
         # some archives extract into a versioned top-level folder, others directly into destination
-        $versionedToolPath = $toolPath + "\arm-gnu-toolchain-" + $Version + "-mingw-w64-i686-arm-none-eabi"
+        $versionedToolPath = Join-Path $toolPath $packageName
         
         if (Test-Path $versionedToolPath -ErrorAction SilentlyContinue) {
             $toolPath = $versionedToolPath
@@ -97,9 +99,8 @@ if ($IsAzurePipelines -eq $False) {
     # need to replace forward slash for paths to work with GCC and CMake
     $toolPath = "$toolPath".Replace('\', '/')
 
-    "Setting User Environment Variable ARM_GCC_PATH='" + $env:ARM_GCC_PATH + "'" | Write-Host -ForegroundColor Yellow
-
     $env:ARM_GCC_PATH = $toolPath
+    "Setting User Environment Variable ARM_GCC_PATH='" + $env:ARM_GCC_PATH + "'" | Write-Host -ForegroundColor Yellow
 
     try {
         # this call can fail if the script is not run with appropriate permissions
