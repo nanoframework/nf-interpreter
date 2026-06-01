@@ -793,6 +793,18 @@ bool CLR_RT_HeapBlock::TypeDescriptorsMatch(
     const CLR_RT_TypeDescriptor &expectedType,
     const CLR_RT_TypeDescriptor &actualType)
 {
+#if defined(NANOCLR_TRACE_GENERICS)
+    if (s_CLR_RT_fTrace_GenericFields >= c_CLR_RT_Trace_Info)
+    {
+        CLR_Debug::Printf(
+            "[DIAG] TypeDescriptorsMatch expected DT=%d hCls=%08X hGT=%08X lvl=%d  actual DT=%d hCls=%08X hGT=%08X lvl=%d\r\n",
+            (int)expectedType.GetDataType(), (unsigned)expectedType.m_handlerCls.data,
+            (unsigned)expectedType.m_handlerGenericType.data, (int)expectedType.m_reflex.levels,
+            (int)actualType.GetDataType(), (unsigned)actualType.m_handlerCls.data,
+            (unsigned)actualType.m_handlerGenericType.data, (int)actualType.m_reflex.levels);
+    }
+#endif
+
     // Figure out logical DataTypes, promoting ACTUAL CLASS ---> GENERICINST
     NanoCLRDataType expectedDataType = expectedType.GetDataType();
     NanoCLRDataType actualDataType = actualType.GetDataType();
@@ -867,10 +879,31 @@ bool CLR_RT_HeapBlock::TypeDescriptorsMatch(
 
         case DATATYPE_SZARRAY:
         {
-            // compare outer dims (always 1) then element types
-            CLR_RT_TypeDescriptor expectedElementType, actualElementType;
-            expectedElementType.GetElementType(expectedElementType);
-            actualElementType.GetElementType(actualElementType);
+            // derive element-type descriptors from the ARRAY descriptors
+            CLR_RT_TypeDescriptor expectedElementType;
+            CLR_RT_TypeDescriptor actualElementType;
+            CLR_RT_TypeDescriptor eCopy = expectedType;
+            CLR_RT_TypeDescriptor aCopy = actualType;
+
+            bool eOk = eCopy.GetElementType(expectedElementType);
+            bool aOk = aCopy.GetElementType(actualElementType);
+
+#if defined(NANOCLR_TRACE_GENERICS)
+            if (s_CLR_RT_fTrace_GenericFields >= c_CLR_RT_Trace_Info)
+            {
+                CLR_Debug::Printf(
+                    "[DIAG] TDM SZARRAY eOk=%d eCls=%08X eDT=%d aOk=%d aCls=%08X aDT=%d\r\n",
+                    (int)eOk, (unsigned)expectedElementType.m_handlerCls.data,
+                    (int)expectedElementType.GetDataType(),
+                    (int)aOk, (unsigned)actualElementType.m_handlerCls.data,
+                    (int)actualElementType.GetDataType());
+            }
+#endif
+            if (!eOk || !aOk)
+            {
+                return false;
+            }
+
             return TypeDescriptorsMatch(expectedElementType, actualElementType);
         }
 
