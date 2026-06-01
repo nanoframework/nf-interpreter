@@ -35,9 +35,8 @@ typedef struct usb_string_vendor
 {
     uint8_t bLength;
     uint8_t bDescriptorType;
-    wchar_t bPropertyData[sizeof(USB_STRING_VENDOR) / sizeof(wchar_t) - 1]; // that's the 'w_char' string length less 1
-                                                                            // because we are not storing the terminator
-                                                                            // (according to the USB spec)
+    // that's the 'w_char' string length less 1 because we are not storing the terminator (according to the USB spec)
+    wchar_t bPropertyData[sizeof(USB_STRING_VENDOR) / sizeof(wchar_t) - 1] __attribute__((nonstring));
 
 } usb_string_vendor;
 
@@ -51,10 +50,8 @@ typedef struct usb_string_device_description
 {
     uint8_t bLength;
     uint8_t bDescriptorType;
-    wchar_t bPropertyData[sizeof(USB_STRING_DEVICE_DESCRIPTION) / sizeof(wchar_t) - 1]; // that's the 'w_char' string
-                                                                                        // length less 1 because we are
-                                                                                        // not storing the terminator
-                                                                                        // (according to the USB spec)
+    // that's the 'w_char' string length less 1 because we are not storing the terminator (according to the USB spec)
+    wchar_t bPropertyData[sizeof(USB_STRING_DEVICE_DESCRIPTION) / sizeof(wchar_t) - 1] __attribute__((nonstring));
 
 } usb_string_device_description;
 
@@ -71,10 +68,8 @@ typedef struct usb_string_serial_number
 {
     uint8_t bLength;
     uint8_t bDescriptorType;
-    wchar_t
-        bPropertyData[sizeof(USB_STRING_SERIAL_NUMBER) / sizeof(wchar_t) - 1]; // that's the 'w_char' string length less
-                                                                               // 1 because we are not storing the
-                                                                               // terminator (according to the USB spec)
+    // that's the 'w_char' string length less 1 because we are not storing the terminator (according to the USB spec)
+    wchar_t bPropertyData[sizeof(USB_STRING_SERIAL_NUMBER) / sizeof(wchar_t) - 1] __attribute__((nonstring));
 
 } usb_string_serial_number;
 
