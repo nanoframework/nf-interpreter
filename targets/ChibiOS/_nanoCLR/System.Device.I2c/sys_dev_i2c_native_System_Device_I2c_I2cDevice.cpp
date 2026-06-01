@@ -12,7 +12,13 @@ typedef Library_corlib_native_System_SpanByte SpanByte;
 ////////////////////////////////////////////
 // declaration of the the I2C PAL structs //
 ////////////////////////////////////////////
-#if (STM32_I2C_USE_I2C1 == TRUE)
+#if defined(RP_I2C_USE_I2C0)
+NF_PAL_I2C I2C0_PAL;
+#endif
+#if defined(RP_I2C_USE_I2C1)
+NF_PAL_I2C I2C1_PAL;
+#endif
+#if defined(STM32_I2C_USE_I2C1) && (STM32_I2C_USE_I2C1 == TRUE)
 NF_PAL_I2C I2C1_PAL;
 #endif
 #if defined(STM32_I2C_USE_I2C2) && (STM32_I2C_USE_I2C2 == TRUE)
@@ -25,7 +31,13 @@ NF_PAL_I2C I2C3_PAL;
 NF_PAL_I2C I2C4_PAL;
 #endif
 
-#if (STM32_I2C_USE_I2C1 == TRUE)
+#if defined(RP_I2C_USE_I2C0)
+uint8_t I2C0_DeviceCounter;
+#endif
+#if defined(RP_I2C_USE_I2C1)
+uint8_t I2C1_DeviceCounter;
+#endif
+#if defined(STM32_I2C_USE_I2C1) && (STM32_I2C_USE_I2C1 == TRUE)
 uint8_t I2C1_DeviceCounter;
 #endif
 #if defined(STM32_I2C_USE_I2C2) && (STM32_I2C_USE_I2C2 == TRUE)
@@ -43,7 +55,11 @@ void GetI2cConfig(CLR_RT_HeapBlock *managedConfig, I2CConfig *llConfig)
     I2cBusSpeed busSpeed = (I2cBusSpeed)managedConfig[I2cConnectionSettings::FIELD___busSpeed].NumericByRef().s4;
 
 // set the LL I2C configuration (according to I2C driver version)
-#if defined(STM32F1XX) || defined(STM32F4XX) || defined(STM32L1XX)
+#if defined(RP_I2C_USE_I2C0) || defined(RP_I2C_USE_I2C1)
+
+    llConfig->baudrate = busSpeed == I2cBusSpeed_StandardMode ? 100000U : 400000U;
+
+#elif defined(STM32F1XX) || defined(STM32F4XX) || defined(STM32L1XX)
 
     llConfig->op_mode = OPMODE_I2C;
     llConfig->clock_speed = busSpeed == I2cBusSpeed_StandardMode ? 100000U : 400000U;
@@ -167,7 +183,33 @@ HRESULT Library_sys_dev_i2c_native_System_Device_I2c_I2cDevice::NativeInit___VOI
     // the same bus just using different addresses
     switch (busIndex)
     {
-#if (STM32_I2C_USE_I2C1 == TRUE)
+#if defined(RP_I2C_USE_I2C0)
+        case 0:
+            if (I2C0_PAL.Driver == NULL)
+            {
+                ConfigPins_I2C0();
+
+                I2C0_PAL.Driver = &I2CD0;
+                palI2c = &I2C0_PAL;
+
+                I2C0_DeviceCounter++;
+            }
+            break;
+#endif
+#if defined(RP_I2C_USE_I2C1)
+        case 1:
+            if (I2C1_PAL.Driver == NULL)
+            {
+                ConfigPins_I2C1();
+
+                I2C1_PAL.Driver = &I2CD1;
+                palI2c = &I2C1_PAL;
+
+                I2C1_DeviceCounter++;
+            }
+            break;
+#endif
+#if defined(STM32_I2C_USE_I2C1) && (STM32_I2C_USE_I2C1 == TRUE)
         case 1:
             if (I2C1_PAL.Driver == NULL)
             {
@@ -270,7 +312,29 @@ HRESULT Library_sys_dev_i2c_native_System_Device_I2c_I2cDevice::NativeDispose___
     // get the driver for the I2C bus
     switch (busIndex)
     {
-#if (STM32_I2C_USE_I2C1 == TRUE)
+#if defined(RP_I2C_USE_I2C0)
+        case 0:
+            I2C0_DeviceCounter--;
+
+            if (I2C0_DeviceCounter == 0)
+            {
+                i2cStop(&I2CD0);
+                I2C0_PAL.Driver = NULL;
+            }
+            break;
+#endif
+#if defined(RP_I2C_USE_I2C1)
+        case 1:
+            I2C1_DeviceCounter--;
+
+            if (I2C1_DeviceCounter == 0)
+            {
+                i2cStop(&I2CD1);
+                I2C1_PAL.Driver = NULL;
+            }
+            break;
+#endif
+#if defined(STM32_I2C_USE_I2C1) && (STM32_I2C_USE_I2C1 == TRUE)
         case 1:
             // remove device
             I2C1_DeviceCounter--;
@@ -381,7 +445,17 @@ HRESULT Library_sys_dev_i2c_native_System_Device_I2c_I2cDevice::
     // get the driver for the I2C bus
     switch (busIndex)
     {
-#if (STM32_I2C_USE_I2C1 == TRUE)
+#if defined(RP_I2C_USE_I2C0)
+        case 0:
+            palI2c = &I2C0_PAL;
+            break;
+#endif
+#if defined(RP_I2C_USE_I2C1)
+        case 1:
+            palI2c = &I2C1_PAL;
+            break;
+#endif
+#if defined(STM32_I2C_USE_I2C1) && (STM32_I2C_USE_I2C1 == TRUE)
         case 1:
             palI2c = &I2C1_PAL;
             break;
