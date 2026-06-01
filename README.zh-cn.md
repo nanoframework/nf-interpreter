@@ -95,6 +95,13 @@
 |:-|---|---|
 | NXP_MIMXRT1060_EVK | [![Latest Version @ Cloudsmith](https://api-prd.cloudsmith.io/v1/badges/version/net-nanoframework/nanoframework-images/raw/NXP_MIMXRT1060_EVK/latest/x/?render=true)](https://cloudsmith.io/~net-nanoframework/repos/nanoframework-images/packages/detail/raw/NXP_MIMXRT1060_EVK/latest/) | [![Latest Version @ Cloudsmith](https://api-prd.cloudsmith.io/v1/badges/version/net-nanoframework/nanoframework-images-dev/raw/NXP_MIMXRT1060_EVK/latest/x/?render=true)](https://cloudsmith.io/~net-nanoframework/repos/nanoframework-images-dev/packages/detail/raw/NXP_MIMXRT1060_EVK/latest/) |
 
+### Raspberry Pi boards
+
+| 目标 | 说明 | 稳定版 | 预览版 |
+|:---|---|---|---|
+| RP_PICO_RP2040 | Raspberry Pi Pico | [![Latest Version @ Cloudsmith](https://api-prd.cloudsmith.io/v1/badges/version/net-nanoframework/nanoframework-images/raw/RP_PICO_RP2040/latest/x/?render=true)](https://cloudsmith.io/~net-nanoframework/repos/nanoframework-images/packages/detail/raw/RP_PICO_RP2040/latest/) | [![Latest Version @ Cloudsmith](https://api-prd.cloudsmith.io/v1/badges/version/net-nanoframework/nanoframework-images-dev/raw/RP_PICO_RP2040/latest/x/?render=true)](https://cloudsmith.io/~net-nanoframework/repos/nanoframework-images-dev/packages/detail/raw/RP_PICO_RP2040/latest/) |
+| RP_PICO_W_RP2040 | Raspberry Pi Pico W（含 WiFi） | [![Latest Version @ Cloudsmith](https://api-prd.cloudsmith.io/v1/badges/version/net-nanoframework/nanoframework-images/raw/RP_PICO_W_RP2040/latest/x/?render=true)](https://cloudsmith.io/~net-nanoframework/repos/nanoframework-images/packages/detail/raw/RP_PICO_W_RP2040/latest/) | [![Latest Version @ Cloudsmith](https://api-prd.cloudsmith.io/v1/badges/version/net-nanoframework/nanoframework-images-dev/raw/RP_PICO_W_RP2040/latest/x/?render=true)](https://cloudsmith.io/~net-nanoframework/repos/nanoframework-images-dev/packages/detail/raw/RP_PICO_W_RP2040/latest/) |
+
 ### TI boards
 
 | 目标 | 稳定版 | 预览版 |
@@ -142,6 +149,8 @@
   | TI_CC1352R1_LAUNCHXL    | :heavy_check_mark: |  |  |  |  |                    |                    |                    |  |                    |  |                    |                    |                    |
   | TI_CC3220SF_LAUNCHXL    | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |                    |                    |                    | :heavy_check_mark: |                    | :heavy_check_mark: |                    |                    |                    |
   | NXP_MIMXRT1060_EVK           | :heavy_check_mark: |  |  |  |  |  | :heavy_check_mark:  |                    | :heavy_check_mark: |                    | :heavy_check_mark: |                    | :heavy_check_mark: |                    |
+  | RP_PICO_RP2040 | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |  |  |  |  |  |  |  |  |  |
+  | RP_PICO_W_RP2040 | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |  |  |  |  |  | :heavy_check_mark: Wi-Fi |  |  |  |
 </details>
 
 <details>
@@ -173,6 +182,9 @@
   * TI SimpleLink 移植
     * [TI CC1352R1_LAUNCHXL](targets/TI_SimpleLink/TI_CC1352R1_LAUNCHXL)
     * [TI CC3220SF_LAUNCHXL](targets/TI_SimpleLink/TI_CC3220SF_LAUNCHXL)
+  * Raspberry Pi 移植 (ChibiOS)
+    * [RP_PICO_RP2040](targets/ChibiOS/RP_PICO_RP2040)
+    * [RP_PICO_W_RP2040](targets/ChibiOS/RP_PICO_W_RP2040)
   * 其它系统移植
     * [Win32 OS (test project only at this time)](targets/os/win32)
   * [CMake 编译文件](CMake)
