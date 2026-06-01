@@ -478,6 +478,8 @@ HRESULT CLR_RT_SignatureParser::Advance(Element &res)
     res.Levels = 0;
     res.GenericParamPosition = 0xFFFF;
     res.Class.Clear();
+    res.IsGenericInst = 0;
+    res.GenParamCount = 0;
 
     switch (Type)
     {
@@ -700,7 +702,25 @@ HRESULT CLR_RT_SignatureParser::Advance(Element &res)
             break;
     }
 
-    NANOCLR_NOCLEANUP();
+    NANOCLR_CLEANUP();
+#if defined(NANOCLR_TRACE_GENERICS)
+    if (s_CLR_RT_fTrace_GenericFields >= c_CLR_RT_Trace_Info)
+    {
+        CLR_Debug::Printf(
+            "[DIAG] SigParser::Advance hr=%08X Type=%d DataType=%02X Levels=%d IsByRef=%d "
+            "IsGenericInst=%d GenParamCount=%d GenParamPos=%04X Class.data=%08X\r\n",
+            (unsigned)hr,
+            (int)Type,
+            (unsigned)res.DataType,
+            (int)res.Levels,
+            (int)res.IsByRef,
+            (int)res.IsGenericInst,
+            (int)res.GenParamCount,
+            (unsigned)res.GenericParamPosition,
+            (unsigned)res.Class.data);
+    }
+#endif
+    NANOCLR_CLEANUP_END();
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -3040,6 +3060,18 @@ HRESULT CLR_RT_TypeDescriptor::InitializeFromSignatureToken(
 {
     NANOCLR_HEADER();
 
+#if defined(NANOCLR_TRACE_GENERICS)
+    if (s_CLR_RT_fTrace_GenericFields >= c_CLR_RT_Trace_Info)
+    {
+        CLR_Debug::Printf(
+            "[DIAG] InitFromSigToken assm=%s token=%08X callerHasGenType=%d callerHasElemType=%d\r\n",
+            assm ? assm->name : "(null)",
+            (unsigned)token,
+            (int)(caller && caller->genericType && NANOCLR_INDEX_IS_VALID(*caller->genericType)),
+            (int)(caller && NANOCLR_INDEX_IS_VALID(caller->arrayElementType)));
+    }
+#endif
+
     // Peel the compressed token to find out which table and index we're in
     NanoCLRTable dataTable = CLR_TypeFromTk(token);
     CLR_UINT32 idx = CLR_DataFromTk(token);
@@ -3189,7 +3221,22 @@ HRESULT CLR_RT_TypeDescriptor::InitializeFromSignatureToken(
             else
             {
                 // e.g. SZARRAY, VALUETYPE, CLASS
-                this->InitializeFromSignatureParser(parser);
+                // The parser has already been advanced above;
+                // use the parsed elem directly rather than re-advancing an exhausted parser.
+                if (NANOCLR_INDEX_IS_VALID(elem.Class))
+                {
+                    NANOCLR_CHECK_HRESULT(InitializeFromType(elem.Class));
+                }
+                else
+                {
+                    NANOCLR_CHECK_HRESULT(InitializeFromDataType(elem.DataType));
+                }
+
+                if (elem.Levels > 0)
+                {
+                    m_reflex.levels = elem.Levels;
+                    ConvertToArray();
+                }
             }
 
             if ((elem.DataType == DATATYPE_VAR || elem.DataType == DATATYPE_MVAR) && elem.Levels > 0)
@@ -3204,7 +3251,20 @@ HRESULT CLR_RT_TypeDescriptor::InitializeFromSignatureToken(
             NANOCLR_SET_AND_LEAVE(CLR_E_NOTIMPL);
     }
 
-    NANOCLR_NOCLEANUP();
+    NANOCLR_CLEANUP();
+#if defined(NANOCLR_TRACE_GENERICS)
+    if (s_CLR_RT_fTrace_GenericFields >= c_CLR_RT_Trace_Info)
+    {
+        CLR_Debug::Printf(
+            "[DIAG] InitFromSigToken EXIT hr=%08X DT=%d hCls=%08X hGT=%08X levels=%d\r\n",
+            (unsigned)hr,
+            (int)GetDataType(),
+            (unsigned)m_handlerCls.data,
+            (unsigned)m_handlerGenericType.data,
+            (int)m_reflex.levels);
+    }
+#endif
+    NANOCLR_CLEANUP_END();
 }
 
 HRESULT CLR_RT_TypeDescriptor::InitializeFromObject(const CLR_RT_HeapBlock &ref)

@@ -3613,6 +3613,24 @@ bool CLR_RT_ExecutionEngine::IsInstanceOf(
     CLR_RT_TypeDef_Instance &instTarget = descTarget.m_handlerCls;
     bool fArray = false;
 
+#if defined(NANOCLR_TRACE_GENERICS)
+    if (s_CLR_RT_fTrace_GenericFields >= c_CLR_RT_Trace_Info)
+    {
+        CLR_Debug::Printf(
+            "[DIAG] IsInstanceOf desc DT=%d hCls=%08X hGT=%08X lvl=%d  target DT=%d hCls=%08X hGT=%08X lvl=%d "
+            "isInst=%d\r\n",
+            (int)desc.GetDataType(),
+            (unsigned)desc.m_handlerCls.data,
+            (unsigned)desc.m_handlerGenericType.data,
+            (int)desc.m_reflex.levels,
+            (int)descTarget.GetDataType(),
+            (unsigned)descTarget.m_handlerCls.data,
+            (unsigned)descTarget.m_handlerGenericType.data,
+            (int)descTarget.m_reflex.levels,
+            (int)isInstInstruction);
+    }
+#endif
+
     // Closed generic instances keep their type information in 'm_handlerGenericType' and have 'm_handlerCls'
     // cleared (so GetDataType() reports DATATYPE_GENERICINST). The comparison logic below dereferences
     // 'inst.target' / 'instTarget.target', which would be null for those descriptors. Better delegate to the
