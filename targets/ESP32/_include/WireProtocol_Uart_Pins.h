@@ -6,7 +6,7 @@
 #ifndef WIREPROTOCOL_UART_PINS_H
 #define WIREPROTOCOL_UART_PINS_H
 
-// Define the gpio pins by target series used UART and the default baudrate. 
+// Define the gpio pins by target series used UART and the default baudrate.
 
 ///////////////////////////////////////////////////////////////////////////
 // Baudrate for the serial port                                          //
