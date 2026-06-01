@@ -1249,6 +1249,21 @@ jobs:
     steps:
       - checkout: self
 
+      - task: UseDotNet@2
+        condition: and(succeeded(), eq(variables['Agent.OS'], 'Darwin'))
+        displayName: Install .NET SDK for NBGV
+        inputs:
+          packageType: sdk
+          version: 8.0.x
+
+      - task: DotNetCoreCLI@2
+        condition: and(succeeded(), eq(variables['Agent.OS'], 'Darwin'))
+        displayName: Install NBGV tool
+        inputs:
+          command: custom
+          custom: tool
+          arguments: install nbgv -g
+
       - template: azure-pipelines-templates/nb-gitversioning.yml
 
       - bash: |
