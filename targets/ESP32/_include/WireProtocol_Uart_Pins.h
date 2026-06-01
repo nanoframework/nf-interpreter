@@ -6,7 +6,7 @@
 #ifndef WIREPROTOCOL_UART_PINS_H
 #define WIREPROTOCOL_UART_PINS_H
 
-// Define the gpio pins by target series used UART and the defaultbaudrate. 
+// Define the gpio pins by target series used UART and the defaultbaudrate.
 
 ///////////////////////////////////////////////////////////////////////////
 // Baudrate for the serial port                                          //
@@ -132,5 +132,4 @@ static uart_port_t ESP32_WP_UART = UART_NUM_0;
 #define ESP32_WP_TX_PIN UART_NUM_0_TXD_DIRECT_GPIO_NUM
 #endif
 
-#endif //WIREPROTOCOL_UART_PINS_H
-
+#endif // WIREPROTOCOL_UART_PINS_H
