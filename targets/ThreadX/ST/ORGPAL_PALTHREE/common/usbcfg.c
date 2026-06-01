@@ -36,7 +36,7 @@ typedef struct usb_string_vendor
     uint8_t bLength;
     uint8_t bDescriptorType;
     // that's the 'w_char' string length less 1 because we are not storing the terminator (according to the USB spec)
-    wchar_t bPropertyData[sizeof(USB_STRING_VENDOR) / sizeof(wchar_t) - 1]  __attribute__((nonstring));
+    wchar_t bPropertyData[sizeof(USB_STRING_VENDOR) / sizeof(wchar_t) - 1] __attribute__((nonstring));
 
 } usb_string_vendor;
 
