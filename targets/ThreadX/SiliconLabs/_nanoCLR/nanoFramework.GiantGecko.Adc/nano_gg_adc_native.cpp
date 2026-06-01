@@ -16,7 +16,6 @@ static const CLR_RT_MethodHandler method_lookup[] =
     nullptr,
     nullptr,
     nullptr,
-    nullptr,
     Library_nano_gg_adc_native_nanoFramework_GiantGecko_Adc_AdcChannel::NativeReadValue___I4__I4,
     Library_nano_gg_adc_native_nanoFramework_GiantGecko_Adc_AdcChannel::NativeDisposeChannel___VOID,
     nullptr,
@@ -81,9 +80,9 @@ static const CLR_RT_MethodHandler method_lookup[] =
 const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_nanoFramework_GiantGecko_Adc =
 {
     "nanoFramework.GiantGecko.Adc",
-    0xD40FA747,
+    0x046A2175,
     method_lookup,
-    { 100, 2, 0, 0 }
+    { 100, 2, 0, 1 }
 };
 
 // clang-format on
