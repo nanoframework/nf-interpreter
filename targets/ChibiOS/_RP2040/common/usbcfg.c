@@ -26,8 +26,8 @@ typedef struct usb_string_vendor
 {
     uint8_t bLength;
     uint8_t bDescriptorType;
-    // that's the 'w_char' string length less 1 because we are not storing the terminator (according to the USB spec)
-    wchar_t bPropertyData[sizeof(USB_STRING_VENDOR)/sizeof(wchar_t) - 1] __attribute__((nonstring));
+    // includes the C terminator; the USB descriptor length below excludes it
+    wchar_t bPropertyData[sizeof(USB_STRING_VENDOR) / sizeof(wchar_t)];
 
 }usb_string_vendor;
 
@@ -42,8 +42,8 @@ typedef struct usb_string_device_description
 {
     uint8_t bLength;
     uint8_t bDescriptorType;
-    // that's the 'w_char' string length less 1 because we are not storing the terminator (according to the USB spec)
-    wchar_t bPropertyData[sizeof(USB_STRING_DEVICE_DESCRIPTION)/sizeof(wchar_t) - 1] __attribute__((nonstring));
+    // includes the C terminator; the USB descriptor length below excludes it
+    wchar_t bPropertyData[sizeof(USB_STRING_DEVICE_DESCRIPTION) / sizeof(wchar_t)];
 
 }usb_string_device_description;
 
@@ -58,8 +58,8 @@ typedef struct usb_string_serial_number
 {
     uint8_t bLength;
     uint8_t bDescriptorType;
-    // that's the 'w_char' string length less 1 because we are not storing the terminator (according to the USB spec)
-    wchar_t bPropertyData[sizeof(USB_STRING_SERIAL_NUMBER)/sizeof(wchar_t) - 1] __attribute__((nonstring));
+    // includes the C terminator; the USB descriptor length below excludes it
+    wchar_t bPropertyData[sizeof(USB_STRING_SERIAL_NUMBER) / sizeof(wchar_t)];
 
 }usb_string_serial_number;
 
@@ -187,7 +187,7 @@ static const uint8_t vcom_string0[] = {
 
 // Vendor string
 static const usb_string_vendor usb_vendor = {
-  sizeof(usb_vendor),
+  sizeof(usb_vendor) - sizeof(wchar_t),
   USB_DESC_BYTE(USB_DESCRIPTOR_STRING),
   USB_STRING_VENDOR
 };
@@ -195,7 +195,7 @@ static const usb_string_vendor usb_vendor = {
 
 // Device Description string
 static const usb_string_device_description usb_device_description = {
-  sizeof(usb_device_description),
+  sizeof(usb_device_description) - sizeof(wchar_t),
   USB_DESC_BYTE(USB_DESCRIPTOR_STRING),
   USB_STRING_DEVICE_DESCRIPTION
 };
@@ -203,7 +203,7 @@ static const usb_string_device_description usb_device_description = {
 
 // Serial Number string.
 static usb_string_serial_number usb_serial_number = {
-  sizeof(usb_serial_number),
+  sizeof(usb_serial_number) - sizeof(wchar_t),
   USB_DESC_BYTE(USB_DESCRIPTOR_STRING),
   USB_STRING_SERIAL_NUMBER
 };
@@ -214,9 +214,9 @@ static usb_string_serial_number usb_serial_number = {
  */
 static const USBDescriptor vcom_strings[] = {
   {sizeof vcom_string0, vcom_string0},
-  {sizeof usb_vendor, (uint8_t*)(&usb_vendor)},
-  {sizeof usb_device_description, (uint8_t*)(&usb_device_description)},
-  {sizeof usb_serial_number, (uint8_t*)(&usb_serial_number)},
+  {sizeof usb_vendor - sizeof(wchar_t), (uint8_t*)(&usb_vendor)},
+  {sizeof usb_device_description - sizeof(wchar_t), (uint8_t*)(&usb_device_description)},
+  {sizeof usb_serial_number - sizeof(wchar_t), (uint8_t*)(&usb_serial_number)},
 };
 
 /*
