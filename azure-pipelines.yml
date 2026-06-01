@@ -1170,16 +1170,22 @@ jobs:
 
     variables:
       - group: sign-client-credentials
+      - name: REVISION
+        value: $[counter('POSIX_1_14_0_versioncounter', 0)]
 
     steps:
       - checkout: self
+
+      - template: azure-pipelines-templates/nb-gitversioning.yml
 
       - bash: |
           set -euo pipefail
           if [[ "${BUILD_SOURCEBRANCH}" == *"develop"* || "${BUILD_SOURCEBRANCH}" == *"release"* || "${FORCEUPLOAD}" == "true" ]]; then
             echo "##vso[task.setvariable variable=CLOUDSMITH_REPO]nanoframework-images-dev"
+            echo "##vso[task.setvariable variable=POSIX_PACKAGE_VERSION]$(NBGV_SimpleVersion)-preview.$(TARGET_BUILD_COUNTER)"
           else
             echo "##vso[task.setvariable variable=CLOUDSMITH_REPO]nanoframework-images"
+            echo "##vso[task.setvariable variable=POSIX_PACKAGE_VERSION]$(NBGV_SimpleVersion).$(TARGET_BUILD_COUNTER)"
           fi
         displayName: Set Cloudsmith repo path
         env:
@@ -1213,6 +1219,7 @@ jobs:
           echo "RID=$(POSIX_RID)  ARCH=${NANO_ARCH}  LIB_EXT=${LIB_EXT}"
 
           cmake -S targets/posix -B build/posix -G Ninja \
+            -DBUILD_VERSION=$(NBGV_VersionMajor).$(NBGV_VersionMinor).$(NBGV_BuildNumber).$(TARGET_BUILD_COUNTER) \
             -DNANO_POSIX_ARCH=${NANO_ARCH} \
             -DNANO_POSIX_ENABLE_SMOKE=ON \
             ${TOOLCHAIN_ARG}
@@ -1260,7 +1267,8 @@ jobs:
           cloudsmith push raw net-nanoframework/$(CLOUDSMITH_REPO) \
             "$(Build.ArtifactStagingDirectory)/runtimes/$(POSIX_RID)/native/nanoFramework.nanoCLR.$(POSIX_LIB_EXT)" \
             --name "nanoCLR_$(POSIX_RID)" \
-            --version "$(POSIX_CLR_VERSION)" \
+            --version "$(POSIX_PACKAGE_VERSION)" \
+            --republish \
             -k "$(CLOUDSMITH_KEY)"
         condition: >-
           and(
