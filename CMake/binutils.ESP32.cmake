@@ -604,7 +604,7 @@ macro(nf_add_idf_as_library)
     # Must be done before "tools/cmake/idf.cmake" 
 
     # Load tinyusb for esp32s2 series if USB CDC transport is enabled
-    if({TARGET_SERIES_SHORT} STREQUAL "esp32s2" AND NF_WP_TRANSPORT_USB_CDC)
+    if(${TARGET_SERIES_SHORT} STREQUAL "esp32s2" AND NF_WP_TRANSPORT_USB_CDC)
         # v0.19.0~2
         nf_install_idf_component_from_registry(tinyusb dda61643-82de-40f9-86f4-4f3d9b1cb008) 
         # v2.1.1

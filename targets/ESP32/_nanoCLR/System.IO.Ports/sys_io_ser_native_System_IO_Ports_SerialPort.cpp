@@ -1480,7 +1480,7 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::GetDeviceSelector_
 {
     NANOCLR_HEADER();
 
-    // declare the device selector string whose max size is "COM1,COM2,COM3,COM3" + terminator
+    // declare the device selector string whose max size is "COM1,COM2,COM3,COM3,COM4,COM5 + terminator
     char deviceSelectorString[64] = { 0 };
 
     auto appendPort = [&](const char *port)
@@ -1507,6 +1507,9 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::GetDeviceSelector_
 #endif
 #if SOC_UART_HP_NUM > 3
     appendPort("COM4,");
+#endif
+#if SOC_UART_HP_NUM > 4
+    appendPort("COM5,");
 #endif
 
     // replace the last comma with a terminator
