@@ -12,7 +12,7 @@ param (
 
 # set default GNU GCC version
 if ([string]::IsNullOrEmpty($Version)) {
-    $Version = "14.2.rel1"
+    $Version = "15.2.rel1"
 }
 
 # check if running on Azure Pipelines by looking at this two environment variables
@@ -75,11 +75,14 @@ If ($gnuGccPathExists -eq $False -or $force) {
 
         # some archives extract into a versioned top-level folder, others directly into destination
         $versionedToolPath = $toolPath + "\arm-gnu-toolchain-" + $Version + "-mingw-w64-i686-arm-none-eabi"
+        
         if (Test-Path $versionedToolPath -ErrorAction SilentlyContinue) {
             $toolPath = $versionedToolPath
         }
 
         "OK" | Write-Host -ForegroundColor Green
+
+        "GCC extracted to '$toolPath'" | Write-Host -ForegroundColor White
     }
 }
 else {
