@@ -27,8 +27,8 @@
 #define RP2040_LFS_SIZE (32U * 1024U)
 
 // Flash geometry
-#define RP2040_FLASH_SECTOR_SIZE 0x1000  // 4 KB
-#define RP2040_FLASH_PAGE_SIZE   0x100   // 256 B
+#define RP2040_FLASH_SECTOR_SIZE 0x1000 // 4 KB
+#define RP2040_FLASH_PAGE_SIZE   0x100  // 256 B
 
 //////////////////////////////////
 // Remap into littlefs defines
@@ -54,12 +54,7 @@ extern "C"
     bool hal_lfs_erase_chip_0();
     int32_t hal_lfs_sync_(const struct lfs_config *c);
     int32_t hal_lfs_erase_0(const struct lfs_config *c, lfs_block_t block);
-    int32_t hal_lfs_read_0(
-        const struct lfs_config *c,
-        lfs_block_t block,
-        lfs_off_t off,
-        void *buffer,
-        lfs_size_t size);
+    int32_t hal_lfs_read_0(const struct lfs_config *c, lfs_block_t block, lfs_off_t off, void *buffer, lfs_size_t size);
     int32_t hal_lfs_prog_0(
         const struct lfs_config *c,
         lfs_block_t block,
