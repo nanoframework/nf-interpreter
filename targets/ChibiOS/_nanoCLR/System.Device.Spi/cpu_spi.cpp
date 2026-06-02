@@ -270,11 +270,6 @@ HRESULT CPU_SPI_nWrite_nRead(
         }
         else
         {
-            if (wrc.DeviceChipSelect >= 0)
-            {
-                CPU_GPIO_SetPinState(wrc.DeviceChipSelect, (GpioPinValue)wrc.ChipSelectActiveState);
-            }
-
             if (palSpi->WriteSize != 0 && palSpi->ReadSize != 0)
             {
                 if (wrc.fullDuplex)

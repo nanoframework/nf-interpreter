@@ -9,7 +9,6 @@
 #include <sys_dev_spi_native.h>
 #include <hal.h>
 #include <targetPAL.h>
-#include <targetPAL.h>
 
 // struct representing the SPI bus
 struct NF_PAL_SPI
