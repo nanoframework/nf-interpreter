@@ -147,7 +147,7 @@ if(CHIBIOS_CONTRIB_REQUIRED)
 
         FetchContent_Declare(
             chibios-contrib
-            GIT_REPOSITORY https://github.com/chibios-upstream/ChibiOS-Contrib.git
+            GIT_REPOSITORY https://github.com/ChibiOS/ChibiOS-Contrib.git
             GIT_TAG chibios-21.11.x
         )
 
