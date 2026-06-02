@@ -154,7 +154,7 @@ foreach(SRC_FILE ${CHIBIOS_SRCS})
 
 endforeach()
 
-# chmemchecks.c only exists in ChibiOS master, not in stable-21.11.x
+# chmemchecks.c only exists in ChibiOS main, not in stable-21.11.x
 if(EXISTS ${chibios_SOURCE_DIR}/os/oslib/src/chmemchecks.c)
     list(APPEND CHIBIOS_SOURCES ${chibios_SOURCE_DIR}/os/oslib/src/chmemchecks.c)
 endif()
