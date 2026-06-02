@@ -8,6 +8,10 @@
 #include "sys_io_ser_native_target.h"
 #include <Esp32_DeviceMapping.h>
 #include <esp32_idf.h>
+#include <stdio.h>
+
+// Current transport being used for Wire protocol, defined in WireProtocol_HAL_Interface.c
+extern "C" enum { WP_TRANSPORT_NONE, WP_TRANSPORT_UART, WP_TRANSPORT_USB_JTAG, WP_TRANSPORT_TINY_USB } WP_Transport;
 
 // in UWP the COM ports are named COM1, COM2, COM3. But ESP32 uses internally UART0, UART1, UART2. This maps the port
 // index 1, 2 or 3 to the uart number 0, 1 or 2
@@ -890,13 +894,11 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeInit___VOID(
         NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
     }
 
-    // unless the build is configure to use USB CDC, COM1 is being used for VS debug, so it's not available
-#if !defined(CONFIG_TINYUSB_CDC_ENABLED) && !defined(CONFIG_ESP_CONSOLE_USB_SERIAL_JTAG_ENABLED)
-    if (uart_num == 0)
+    // When Wire protocol is using UART then COM1 is being used for VS debug, so it's not available
+    if (WP_Transport == WP_TRANSPORT_UART && uart_num == 0)
     {
         NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
     }
-#endif
 
     palUart = GetPalUartFromUartNum_sys(uart_num);
     if (palUart == nullptr)
@@ -916,6 +918,13 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeInit___VOID(
 
     // alloc buffer memory
     bufferSize = pThis[FIELD___bufferSize].NumericByRef().s4;
+
+    // Buffer size must be bigger then HW fifo
+    if (bufferSize <= SOC_UART_FIFO_LEN)
+    {
+        bufferSize = SOC_UART_FIFO_LEN + 1;
+    }
+
     palUart->RxBuffer = (uint8_t *)platform_malloc(bufferSize);
 
     // sanity check
@@ -1471,29 +1480,42 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::GetDeviceSelector_
 {
     NANOCLR_HEADER();
 
-    // declare the device selector string whose max size is "COM1,COM2,COM3" + terminator
-    // and init with the terminator
-    static char deviceSelectorString[] =
+    // declare the device selector string whose max size is "COM1,COM2,COM3,COM4,COM5 + terminator
+    char deviceSelectorString[64] = {0};
 
-    // unless the build is configure to use USB CDC, COM1 is being used for VS debug, so it's not available
-#if defined(CONFIG_TINYUSB_CDC_ENABLED) || defined(CONFIG_ESP_CONSOLE_USB_SERIAL_JTAG_ENABLED)
-        "COM1,"
-#endif
+    auto appendPort = [&](const char *port) {
+        size_t len = hal_strlen_s(deviceSelectorString);
+
+        if (len < sizeof(deviceSelectorString) - 1)
+        {
+            snprintf(deviceSelectorString + len, sizeof(deviceSelectorString) - len, "%s", port);
+        }
+    };
+
+    // COM1 is reserved for VS debug when Wire Protocol is using UART.
+    if (WP_Transport != WP_TRANSPORT_UART)
+    {
+        appendPort("COM1,");
+    }
+
 #if SOC_UART_HP_NUM > 1
-        "COM2,"
+    appendPort("COM2,");
 #endif
 #if SOC_UART_HP_NUM > 2
-        "COM3,"
+    appendPort("COM3,");
 #endif
 #if SOC_UART_HP_NUM > 3
-        "COM4,"
+    appendPort("COM4,");
 #endif
-        ;
+#if SOC_UART_HP_NUM > 4
+    appendPort("COM5,");
+#endif
 
     // replace the last comma with a terminator
-    if (deviceSelectorString[hal_strlen_s(deviceSelectorString) - 1] == ',')
+    size_t len = hal_strlen_s(deviceSelectorString);
+    if (len > 0 && deviceSelectorString[len - 1] == ',')
     {
-        deviceSelectorString[hal_strlen_s(deviceSelectorString) - 1] = '\0';
+        deviceSelectorString[len - 1] = '\0';
     }
 
     // because the caller is expecting a result to be returned

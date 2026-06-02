@@ -550,7 +550,7 @@ jobs:
     variables:
       DOTNET_NOLOGO: true
       # creates a counter and assigns it to the revision variable
-      REVISION: $[counter('RP_1_0_0_versioncounter', 0)]
+      REVISION: $[counter('RP_2_0_0_versioncounter', 0)]
       HelperPackageVersion: $[counter('HelperPackageVersioncounter', 0)]
       TargetPlatform: "rp"
 
@@ -633,14 +633,14 @@ jobs:
           CMakePreset: ESP32_C3
           RequiredBuildFlag: BUILD_ESP32
 
-        ESP32_C5_THREAD_USB:
+        ESP32_C5_THREAD:
           TargetBoard: ESP32_C5
           TargetSeries: "esp32c5"
           BuildOptions:
           IDF_Target: esp32c5
-          TargetName: ESP32_C5_THREAD_USB
-          PackageName: ESP32_C5_THREAD_USB
-          CMakePreset: ESP32_C5_THREAD_USB
+          TargetName: ESP32_C5_THREAD
+          PackageName: ESP32_C5_THREAD
+          CMakePreset: ESP32_C5_THREAD
 
         ESP32_C6_THREAD:
           TargetBoard: ESP32_C6
@@ -672,35 +672,32 @@ jobs:
           CMakePreset: ESP32_H2_THREAD
           RequiredBuildFlag: BUILD_ESP32
 
-        ESP32_S3_ALL:
+        ESP32_S3_QUAD:
           TargetBoard: ESP32_S3
           TargetSeries: "esp32s3"
           BuildOptions:
           IDF_Target: esp32s3
-          TargetName: ESP32_S3_ALL
-          PackageName: ESP32_S3_ALL
-          CMakePreset: ESP32_S3_ALL
-          RequiredBuildFlag: BUILD_ESP32
+          TargetName: ESP32_S3_QUADL
+          PackageName: ESP32_S3_QUAD
+          CMakePreset: ESP32_S3_QUAD
 
-        ESP32_ETHERNET_KIT_1.2:
-          TargetBoard: ESP32
-          TargetSeries: "esp32"
+        ESP32_S3_OCTAL:
+          TargetBoard: ESP32_S3
+          TargetSeries: "esp32s3"
           BuildOptions:
-          IDF_Target: esp32
-          TargetName: ESP32_ETHERNET_KIT_1.2
-          PackageName: ESP32_ETHERNET_KIT_1.2
-          CMakePreset: ESP32_ETHERNET_KIT_1.2
-          RequiredBuildFlag: BUILD_ESP32
+          IDF_Target: esp32s3
+          TargetName: ESP32_S3_OCTAL
+          PackageName: ESP32_S3_OCTAL
+          CMakePreset: ESP32_S3_OCTAL
 
-        ESP32_P4_UART:
+        ESP32_P4_REV_LESS3:
           TargetBoard: ESP32_P4
           TargetSeries: "esp32p4"
           BuildOptions:
           IDF_Target: esp32p4
-          TargetName: ESP32_P4_UART
-          PackageName: ESP32_P4_UART
-          CMakePreset: ESP32_P4_UART
-          RequiredBuildFlag: BUILD_ESP32
+          TargetName: ESP32_P4_REV_LESS3
+          PackageName: ESP32_P4_REV_LESS3
+          CMakePreset: ESP32_P4_REV_LESS3
 
     variables:
       DOTNET_NOLOGO: true
