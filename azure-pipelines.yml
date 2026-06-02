@@ -103,7 +103,7 @@ jobs:
                 echo "##vso[task.setvariable variable=SKIP_BUILD;isOutput=true]true"
               }
               # check if this is a PR with Code style fixes, if so, skip build
-              elseif( ($commit.commit.author.name -eq "nfbot") -and ($commit.commit.message -like "*Automated fix of code style*") )
+              elseif( ($commit.commit.author.name -eq "nfbot") -and ( ($commit.commit.message -like "*Automated fixes for code style*") -or ($commit.commit.message -like "*Automated fix of code style*") ) )
               {
                 Write-Host "##[command] **code style commit, skipping build**"
                 echo "##vso[task.setvariable variable=SKIP_BUILD;isOutput=true]true"
@@ -1147,14 +1147,16 @@ jobs:
           ne( dependencies.Check_Build_Options.outputs['BuildOptions.SKIP_BUILD'], true ),
           or(
             eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ALL'], true),
-            eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_POSIX'], true)
+            eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_POSIX'], true),
+            eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_NANOCLR_CLI'], true)
           )
         ),
         and(
           eq(variables['Build.Reason'], 'Manual'),
           or(
             eq(variables['BUILD_ALL__'], 'true'),
-            eq(variables['BUILD_POSIX__'], 'true')
+            eq(variables['BUILD_POSIX__'], 'true'),
+            eq(variables['BUILD_NANOCLR_CLI__'], 'true')
           )
         )
       )
@@ -1168,16 +1170,37 @@ jobs:
 
     variables:
       - group: sign-client-credentials
+      - name: REVISION
+        value: $[counter('POSIX_1_14_0_versioncounter', 0)]
 
     steps:
       - checkout: self
+
+      - task: UseDotNet@2
+        condition: and(succeeded(), eq(variables['Agent.OS'], 'Darwin'))
+        displayName: Install .NET SDK for NBGV
+        inputs:
+          packageType: sdk
+          version: 8.0.x
+
+      - task: DotNetCoreCLI@2
+        condition: and(succeeded(), eq(variables['Agent.OS'], 'Darwin'))
+        displayName: Install NBGV tool
+        inputs:
+          command: custom
+          custom: tool
+          arguments: install nbgv -g
+
+      - template: azure-pipelines-templates/nb-gitversioning.yml
 
       - bash: |
           set -euo pipefail
           if [[ "${BUILD_SOURCEBRANCH}" == *"develop"* || "${BUILD_SOURCEBRANCH}" == *"release"* || "${FORCEUPLOAD}" == "true" ]]; then
             echo "##vso[task.setvariable variable=CLOUDSMITH_REPO]nanoframework-images-dev"
+            echo "##vso[task.setvariable variable=POSIX_PACKAGE_VERSION]$(NBGV_SimpleVersion)-preview.$(TARGET_BUILD_COUNTER)"
           else
             echo "##vso[task.setvariable variable=CLOUDSMITH_REPO]nanoframework-images"
+            echo "##vso[task.setvariable variable=POSIX_PACKAGE_VERSION]$(NBGV_SimpleVersion).$(TARGET_BUILD_COUNTER)"
           fi
         displayName: Set Cloudsmith repo path
         env:
@@ -1211,6 +1234,7 @@ jobs:
           echo "RID=$(POSIX_RID)  ARCH=${NANO_ARCH}  LIB_EXT=${LIB_EXT}"
 
           cmake -S targets/posix -B build/posix -G Ninja \
+            -DBUILD_VERSION=$(NBGV_VersionMajor).$(NBGV_VersionMinor).$(NBGV_BuildNumber).$(TARGET_BUILD_COUNTER) \
             -DNANO_POSIX_ARCH=${NANO_ARCH} \
             -DNANO_POSIX_ENABLE_SMOKE=ON \
             ${TOOLCHAIN_ARG}
@@ -1258,7 +1282,8 @@ jobs:
           cloudsmith push raw net-nanoframework/$(CLOUDSMITH_REPO) \
             "$(Build.ArtifactStagingDirectory)/runtimes/$(POSIX_RID)/native/nanoFramework.nanoCLR.$(POSIX_LIB_EXT)" \
             --name "nanoCLR_$(POSIX_RID)" \
-            --version "$(POSIX_CLR_VERSION)" \
+            --version "$(POSIX_PACKAGE_VERSION)" \
+            --republish \
             -k "$(CLOUDSMITH_KEY)"
         condition: >-
           and(
