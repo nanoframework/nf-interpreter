@@ -65,14 +65,10 @@ else()
             )
 
         else()
-            # running on *nix requires setting up a local git repo
             message(STATUS "ChibiOS HAL is: ${CHIBIOS_HAL_VERSION} (source from: ${CHIBIOS_HAL_SOURCE})")
-
             FetchContent_Declare(
                 chibios
-                GIT_REPOSITORY "https://github.com/chibios-upstream/chibios.git"
-                GIT_TAG ${CHIBIOS_HAL_VERSION}
-                GIT_SHALLOW ON
+                SOURCE_DIR ${CHIBIOS_HAL_SOURCE}
             )
 
         endif()
