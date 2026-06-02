@@ -55,6 +55,32 @@ esp_eth_handle_t eth_handle = NULL;
     }
 #endif // CONFIG_IDF_TARGET_ESP32P4
 
+#if CONFIG_IDF_TARGET_ESP32
+#define NANO_ETH_ESP32_EMAC_DEFAULT_CONFIG()                                                                           \
+    {                                                                                                                  \
+        .smi_gpio = {.mdc_num = 23, .mdio_num = 18},                                                                   \
+        .interface = EMAC_DATA_INTERFACE_RMII,                                                                         \
+        .clock_config =                                                                                                \
+            {.rmii =                                                                                                   \
+                 {.clock_mode = DEFAULT_RMII_CLK_MODE, .clock_gpio = (emac_rmii_clock_gpio_t)DEFAULT_RMII_CLK_GPIO}},  \
+        .dma_burst_len = ETH_DMA_BURST_LEN_32,                                                                         \
+        .intr_priority = 0,                                                                                            \
+    }
+#elif CONFIG_IDF_TARGET_ESP32P4
+#define NANO_ETH_ESP32_EMAC_DEFAULT_CONFIG()                                                                           \
+    {                                                                                                                  \
+        .smi_gpio = {.mdc_num = 31, .mdio_num = 27},                                                                   \
+        .interface = EMAC_DATA_INTERFACE_RMII,                                                                         \
+        .clock_config = {.rmii = {.clock_mode = EMAC_CLK_EXT_IN, .clock_gpio = 50}},                                   \
+        .dma_burst_len = ETH_DMA_BURST_LEN_32,                                                                         \
+        .intr_priority = 0,                                                                                            \
+        .emac_dataif_gpio =                                                                                            \
+            {.rmii =                                                                                                   \
+                 {.tx_en_num = 49, .txd0_num = 34, .txd1_num = 35, .crs_dv_num = 28, .rxd0_num = 29, .rxd1_num = 30}}, \
+        .clock_config_out_in = {.rmii = {.clock_mode = EMAC_CLK_EXT_IN, .clock_gpio = -1}},                            \
+    }
+#endif // CONFIG_IDF_TARGET_ESP32P4
+
 esp_err_t NF_ESP32_InitialiseEthernet(uint8_t *pMacAdr)
 {
     (void)pMacAdr;
@@ -98,17 +124,16 @@ esp_err_t NF_ESP32_InitialiseEthernet(uint8_t *pMacAdr)
 #if defined(CONFIG_ESP32_ETHERNET_RMII_CLK_OUT_GPIO) && CONFIG_ESP32_ETHERNET_RMII_CLK_OUT_GPIO != -1
     esp32_emac_config.clock_config.rmii.clock_mode = EMAC_CLK_OUT;
     esp32_emac_config.clock_config.rmii.clock_gpio =
-        (emac_rmii_clock_gpio_t)CONFIG_ESP32_ETHERNET_RMII_CLK_OUT_GPIO; // always 16 or 17
-    ESP_LOGI(TAG, "Ethernet clock_config OUT gpio %d", CONFIG_ESP32_ETHERNET_RMII_CLK_OUT_GPIO);
+        (emac_rmii_clock_gpio_t)ESP32_ETHERNET_RMII_CLK_OUT_GPIO; // always 16 or 17
+    ESP_LOGI(TAG, "Ethernet clock_config OUT gpio %d\n", ESP32_ETHERNET_RMII_CLK_OUT_GPIO);
 
-    CPU_GPIO_ReservePin(CONFIG_ESP32_ETHERNET_RMII_CLK_OUT_GPIO, true); // REF_CLK OUT
-#elif defined(CONFIG_ESP32_ETHERNET_RMII_CLK_IN_GPIO) && CONFIG_ESP32_ETHERNET_RMII_CLK_IN_GPIO != -1
-    esp32_emac_config.clock_config.rmii.clock_mode = EMAC_CLK_EXT_IN;
-    esp32_emac_config.clock_config.rmii.clock_gpio = (emac_rmii_clock_gpio_t)CONFIG_ESP32_ETHERNET_RMII_CLK_IN_GPIO;
-    ESP_LOGI(TAG, "Ethernet clock_config IN gpio %d", esp32_emac_config.clock_config.rmii.clock_gpio);
-    CPU_GPIO_ReservePin(esp32_emac_config.clock_config.rmii.clock_gpio, true);
+    CPU_GPIO_ReservePin(EMAC_CLK_OUT, true);                     // REF_CLK OUT
+    CPU_GPIO_ReservePin(ESP32_ETHERNET_RMII_CLK_OUT_GPIO, true); // REF_CLK OUT
 #else
-    ESP_LOGI(TAG, "Ethernet clock pins not configured");
+    ESP_LOGI(TAG, "Ethernet clock_config IN gpio %d\n", esp32_emac_config.clock_config.rmii.clock_gpio);
+
+    CPU_GPIO_ReservePin(EMAC_CLK_EXT_IN, true);                                // REF_CLK EXT
+    CPU_GPIO_ReservePin(esp32_emac_config.clock_config.rmii.clock_gpio, true); // REF_CLK IN
 #endif
 
 // If ESP32_ETHERNET_MDC_GPIO or ESP32_ETHERNET_MDIO_GPIO defined then use new values
@@ -122,7 +147,7 @@ esp_err_t NF_ESP32_InitialiseEthernet(uint8_t *pMacAdr)
 
     ESP_LOGI(
         TAG,
-        "Ethernet pins for MDC %d MDIO %d",
+        "Ethernet pins for MDC %d MDIO %d\n",
         esp32_emac_config.smi_gpio.mdc_num,
         esp32_emac_config.smi_gpio.mdio_num);
 
