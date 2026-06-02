@@ -40,8 +40,6 @@ RUN apt-get update \
     && apt-get -y install --no-install-recommends apt-utils dialog icu-devtools 2>&1 \
     && apt-get install -y \
     git \
-    git-svn \
-    subversion \
     clang-format \
     curl \
     ninja-build \
@@ -57,12 +55,10 @@ RUN mkdir -p /usr/local/bin/gcc
 
 # ============================================================
 # KEY DIFFERENCE from ChibiOS container:
-# Clone ChibiOS master/trunk which has RP2040/RP2350 support
-# The stable_21.11.x branch does NOT include RP ports.
+# Clone ChibiOS main which has RP2040/RP2350 support
+# As soon as there is an official release that includes RP ports, this can be updated.
 # ============================================================
-# Try GitHub mirror first (faster), fall back to SVN trunk
-RUN git clone --branch master https://github.com/ChibiOS/ChibiOS.git --depth 1 ./sources/ChibiOs \
-    || git svn clone http://svn.code.sf.net/p/chibios/code/trunk -rHEAD ./sources/ChibiOs
+RUN git clone --branch main https://github.com/chibios-upstream/chibios.git --depth 1 ./sources/ChibiOs
 
 # NO STM32 Cube packages — not needed for RP targets
 

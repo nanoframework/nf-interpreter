@@ -61,7 +61,7 @@ jobs:
   ##############################
   - job: Check_Build_Options
     pool:
-      vmImage: "windows-2022"
+      vmImage: "windows-latest"
 
     variables:
       DOTNET_NOLOGO: true
@@ -372,7 +372,7 @@ jobs:
       - Check_Build_Options
 
     pool:
-      vmImage: "windows-2022"
+      vmImage: "windows-latest"
 
     steps:
       - checkout: self
@@ -409,7 +409,7 @@ jobs:
       - Check_Code_Style
 
     pool:
-      vmImage: "windows-2022"
+      vmImage: "windows-latest"
 
     strategy:
       matrix:
@@ -432,7 +432,7 @@ jobs:
     variables:
       DOTNET_NOLOGO: true
       # creates a counter and assigns it to the revision variable
-      REVISION: $[counter('STM32_1_14_0_versioncounter', 0)]
+      REVISION: $[counter('STM32_1_17_0_versioncounter', 0)]
       HelperPackageVersion: $[counter('HelperPackageVersioncounter', 0)]
       TargetPlatform: "stm32"
 
@@ -478,7 +478,7 @@ jobs:
       - Check_Code_Style
 
     pool:
-      vmImage: "windows-2022"
+      vmImage: "windows-latest"
 
     strategy:
       matrix:
@@ -496,7 +496,7 @@ jobs:
     variables:
       DOTNET_NOLOGO: true
       # creates a counter and assigns it to the revision variable
-      REVISION: $[counter('RP_1_0_0_versioncounter', 0)]
+      REVISION: $[counter('RP_1_17_0_versioncounter', 0)]
       HelperPackageVersion: $[counter('HelperPackageVersioncounter', 0)]
       TargetPlatform: "rp"
 
@@ -539,7 +539,7 @@ jobs:
       - Check_Code_Style
 
     pool:
-      vmImage: "windows-2022"
+      vmImage: "windows-latest"
 
     # there is only a single ESP32 target, but this is already config as a matrix to make it easy to add new ones
     strategy:
@@ -571,14 +571,14 @@ jobs:
           PackageName: ESP32_C3
           CMakePreset: ESP32_C3
 
-        ESP32_C5_THREAD_USB:
+        ESP32_C5_THREAD:
           TargetBoard: ESP32_C5
           TargetSeries: "esp32c5"
           BuildOptions:
           IDF_Target: esp32c5
-          TargetName: ESP32_C5_THREAD_USB
-          PackageName: ESP32_C5_THREAD_USB
-          CMakePreset: ESP32_C5_THREAD_USB
+          TargetName: ESP32_C5_THREAD
+          PackageName: ESP32_C5_THREAD
+          CMakePreset: ESP32_C5_THREAD
 
         ESP32_C6_THREAD:
           TargetBoard: ESP32_C6
@@ -589,14 +589,14 @@ jobs:
           PackageName: ESP32_C6_THREAD
           CMakePreset: ESP32_C6_THREAD
 
-        ESP32_C61_USB:
+        ESP32_C61:
           TargetBoard: ESP32_C61
           TargetSeries: "esp32c61"
           BuildOptions:
           IDF_Target: esp32c61
-          TargetName: ESP32_C61_USB
-          PackageName: ESP32_C61_USB
-          CMakePreset: ESP32_C61_USB
+          TargetName: ESP32_C61
+          PackageName: ESP32_C61
+          CMakePreset: ESP32_C61
 
         ESP32_H2_THREAD:
           TargetBoard: ESP32_H2
@@ -607,37 +607,37 @@ jobs:
           PackageName: ESP32_H2_THREAD
           CMakePreset: ESP32_H2_THREAD
 
-        ESP32_S3_ALL:
+        ESP32_S3_QUAD:
           TargetBoard: ESP32_S3
           TargetSeries: "esp32s3"
           BuildOptions:
           IDF_Target: esp32s3
-          TargetName: ESP32_S3_ALL
-          PackageName: ESP32_S3_ALL
-          CMakePreset: ESP32_S3_ALL
+          TargetName: ESP32_S3_QUADL
+          PackageName: ESP32_S3_QUAD
+          CMakePreset: ESP32_S3_QUAD
 
-        ESP32_ETHERNET_KIT_1.2:
-          TargetBoard: ESP32
-          TargetSeries: "esp32"
+        ESP32_S3_OCTAL:
+          TargetBoard: ESP32_S3
+          TargetSeries: "esp32s3"
           BuildOptions:
-          IDF_Target: esp32
-          TargetName: ESP32_ETHERNET_KIT_1.2
-          PackageName: ESP32_ETHERNET_KIT_1.2
-          CMakePreset: ESP32_ETHERNET_KIT_1.2
+          IDF_Target: esp32s3
+          TargetName: ESP32_S3_OCTAL
+          PackageName: ESP32_S3_OCTAL
+          CMakePreset: ESP32_S3_OCTAL
 
-        ESP32_P4_UART:
+        ESP32_P4_REV_LESS3:
           TargetBoard: ESP32_P4
           TargetSeries: "esp32p4"
           BuildOptions:
           IDF_Target: esp32p4
-          TargetName: ESP32_P4_UART
-          PackageName: ESP32_P4_UART
-          CMakePreset: ESP32_P4_UART
+          TargetName: ESP32_P4_REV_LESS3
+          PackageName: ESP32_P4_REV_LESS3
+          CMakePreset: ESP32_P4_REV_LESS3
 
     variables:
       DOTNET_NOLOGO: true
       # creates a counter and assigns it to the revision variable
-      REVISION: $[counter('ESP32_1_14_0_versioncounter', 0)]
+      REVISION: $[counter('ESP32_1_17_0_versioncounter', 0)]
       IDF_PATH: "D:/a/1/s/esp-idf"
       PIP_CACHE_DIR: $(Pipeline.Workspace)/.pip
       TargetPlatform: "esp32"
@@ -708,7 +708,7 @@ jobs:
       - Check_Code_Style
 
     pool:
-      vmImage: "windows-2022"
+      vmImage: "windows-latest"
 
     strategy:
       matrix:
@@ -722,7 +722,7 @@ jobs:
     variables:
       DOTNET_NOLOGO: true
       # creates a counter and assigns it to the revision variable
-      REVISION: $[counter('NXP_1_14_0_versioncounter', 0)]
+      REVISION: $[counter('NXP_1_17_0_versioncounter', 0)]
       GIT_LFS_SKIP_SMUDGE: 1
       TargetPlatform: "freertos"
 
@@ -767,7 +767,7 @@ jobs:
       - Check_Code_Style
 
     pool:
-      vmImage: "windows-2022"
+      vmImage: "windows-latest"
 
     strategy:
       matrix:
@@ -803,7 +803,7 @@ jobs:
     variables:
       DOTNET_NOLOGO: true
       # creates a counter and assigns it to the revision variable
-      REVISION: $[counter('TI_1_14_0_versioncounter', 0)]
+      REVISION: $[counter('TI_1_17_0_versioncounter', 0)]
       HelperPackageVersion: $[counter('HelperPackageVersioncounter', 0)]
       TargetPlatform: "ti_simplelink"
 
@@ -847,7 +847,7 @@ jobs:
       - Check_Code_Style
 
     pool:
-      vmImage: "windows-2022"
+      vmImage: "windows-latest"
 
     strategy:
       matrix:
@@ -877,7 +877,7 @@ jobs:
 
     variables:
       # creates a counter and assigns it to the revision variable
-      REVISION: $[counter('THREADX_1_14_0_versioncounter', 0)]
+      REVISION: $[counter('THREADX_1_17_0_versioncounter', 0)]
       HelperPackageVersion: $[counter('HelperPackageVersioncounter', 0)]
       TargetPlatform: "efm32"
 
@@ -923,7 +923,7 @@ jobs:
       - Check_Code_Style
 
     pool:
-      vmImage: "windows-2022"
+      vmImage: "windows-latest"
 
     variables:
       - group: sign-client-credentials
@@ -931,7 +931,7 @@ jobs:
         value: true
       # creates a counter and assigns it to the revision variable
       - name: REVISION
-        value: $[counter('WIN32_1_14_0_versioncounter', 0)]
+        value: $[counter('WIN32_1_17_0_versioncounter', 0)]
       - name: LITTLEFS_PATH
         value: "D:/a/1/s/littlefs"
 
@@ -1171,7 +1171,7 @@ jobs:
     variables:
       - group: sign-client-credentials
       - name: REVISION
-        value: $[counter('POSIX_1_14_0_versioncounter', 0)]
+        value: $[counter('POSIX_1_17_0_versioncounter', 0)]
 
     steps:
       - checkout: self
@@ -1327,7 +1327,7 @@ jobs:
       - Build_POSIX_nanoCLR
 
     pool:
-      vmImage: "windows-2022"
+      vmImage: "windows-latest"
 
     variables:
       - group: sign-client-credentials
@@ -1545,7 +1545,7 @@ jobs:
       - Build_nanoCLR_CLI
 
     pool:
-      vmImage: "windows-2022"
+      vmImage: "windows-latest"
 
     variables:
       DOTNET_NOLOGO: true
@@ -1673,7 +1673,7 @@ jobs:
       )
 
     pool:
-      vmImage: "windows-2022"
+      vmImage: "windows-latest"
 
     steps:
       - checkout: self
