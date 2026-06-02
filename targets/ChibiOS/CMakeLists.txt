@@ -92,7 +92,7 @@ if(RTOS_VERSION_EMPTY)
     # no ChibiOS version actualy specified, must be empty which is fine, we'll default to a known good version
     # WHEN CHANGING THIS MAKE SURE TO UPDATE THE DEV CONTAINERS
     # WHEN CHANGING THIS MAKE SURE TO UPDATE ThreadX\ST\CMakeLists.txt
-    set(RTOS_VERSION "ver_21.11.5")
+    set(RTOS_VERSION "stable-21.11.x")
 endif()
 
 if(NOT NO_CHIBIOS_SOURCE_FOLDER)
