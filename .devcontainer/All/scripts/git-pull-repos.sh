@@ -39,7 +39,7 @@ cd /sources/ThreadX || exit 1
 git pull
 cd /
 rm -rf /sources/ChibiOs
-git svn clone http://svn.code.sf.net/p/chibios/code/branches/stable_21.11.x -rHEAD /sources/ChibiOs
+git clone --branch stable-21.11.x https://github.com/chibios-upstream/chibios.git --depth 1 /sources/ChibiOs
 cd /sources/ChibiOs-Contrib || exit 1
 git pull origin chibios-21.11.x
 cd /sources/mbedtls || exit 1
