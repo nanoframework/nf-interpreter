@@ -16,6 +16,47 @@ if ([string]::IsNullOrEmpty($Version)) {
 }
 
 $packageName = "arm-gnu-toolchain-$Version-mingw-w64-i686-arm-none-eabi"
+$compilerName = "arm-none-eabi-gcc.exe"
+
+function Get-ArmGccCompilerPath {
+    param (
+        [string]$ToolchainPath
+    )
+
+    if ([string]::IsNullOrEmpty($ToolchainPath)) {
+        return $null
+    }
+
+    $compilerPath = Join-Path $ToolchainPath $compilerName
+    if (Test-Path $compilerPath -PathType Leaf -ErrorAction SilentlyContinue) {
+        return $compilerPath
+    }
+
+    $compilerPath = Join-Path (Join-Path $ToolchainPath "bin") $compilerName
+    if (Test-Path $compilerPath -PathType Leaf -ErrorAction SilentlyContinue) {
+        return $compilerPath
+    }
+
+    return $null
+}
+
+function Resolve-ArmGccToolPath {
+    param (
+        [ref]$ToolchainPath,
+        [string]$PackageName
+    )
+
+    $versionedToolPath = Join-Path $ToolchainPath.Value $PackageName
+    if (Test-Path $versionedToolPath -PathType Container -ErrorAction SilentlyContinue) {
+        $compilerPath = Get-ArmGccCompilerPath $versionedToolPath
+        if ($null -ne $compilerPath) {
+            $ToolchainPath.Value = $versionedToolPath
+            return $compilerPath
+        }
+    }
+
+    return Get-ArmGccCompilerPath $ToolchainPath.Value
+}
 
 # check if running on Azure Pipelines by looking at this two environment variables
 $IsAzurePipelines = $env:Agent_HomeDirectory -and $env:Build_BuildNumber
@@ -50,8 +91,12 @@ else {
     $toolPath = Join-Path $Path $Version
 }
 
-# check if path already exists
-$gnuGccPathExists = Test-Path $toolPath -ErrorAction SilentlyContinue    
+# check if path already exists and contains a usable compiler
+$gnuGccCompilerPath = $null
+if (Test-Path $toolPath -PathType Container -ErrorAction SilentlyContinue) {
+    $gnuGccCompilerPath = Resolve-ArmGccToolPath ([ref]$toolPath) $packageName
+}
+$gnuGccPathExists = $null -ne $gnuGccCompilerPath
 
 # download, if needed
 If ($gnuGccPathExists -eq $False -or $force) {
@@ -78,11 +123,9 @@ If ($gnuGccPathExists -eq $False -or $force) {
         # unzip toolchain
         Expand-Archive $output -DestinationPath $toolPath -Force > $null
 
-        # some archives extract into a versioned top-level folder, others directly into destination
-        $versionedToolPath = Join-Path $toolPath $packageName
-        
-        if (Test-Path $versionedToolPath -ErrorAction SilentlyContinue) {
-            $toolPath = $versionedToolPath
+        $gnuGccCompilerPath = Resolve-ArmGccToolPath ([ref]$toolPath) $packageName
+        if ($null -eq $gnuGccCompilerPath) {
+            throw "Unable to find $compilerName under '$toolPath' after installing ARM GCC $Version."
         }
 
         "OK" | Write-Host -ForegroundColor Green
@@ -96,8 +139,13 @@ else {
 
 # set env variable, if not on Azure
 if ($IsAzurePipelines -eq $False) {
+    $gnuGccCompilerPath = Resolve-ArmGccToolPath ([ref]$toolPath) $packageName
+    if ($null -eq $gnuGccCompilerPath) {
+        throw "Unable to set ARM_GCC_PATH because $compilerName was not found under '$toolPath'."
+    }
+
     # need to replace forward slash for paths to work with GCC and CMake
-    $toolPath = "$toolPath".Replace('\', '/')
+    $toolPath = "$(Split-Path $gnuGccCompilerPath -Parent)".Replace('\', '/')
 
     $env:ARM_GCC_PATH = $toolPath
     "Setting User Environment Variable ARM_GCC_PATH='" + $env:ARM_GCC_PATH + "'" | Write-Host -ForegroundColor Yellow
@@ -114,8 +162,8 @@ if ($IsAzurePipelines -eq $False) {
 # SIG # Begin signature block
 # MIIshwYJKoZIhvcNAQcCoIIseDCCLHQCAQExDzANBglghkgBZQMEAgEFADB5Bgor
 # BgEEAYI3AgEEoGswaTA0BgorBgEEAYI3AgEeMCYCAwEAAAQQH8w7YFlLCE63JNLG
-# KX7zUQIBAAIBAAIBAAIBAAIBADAxMA0GCWCGSAFlAwQCAQUABCDU9MAvvlKIHjpv
-# CxntV2GMKCBnOeh5lAkslt0J6fHxEaCCE7wwggVkMIIDTKADAgECAhAGzuExvm1V
+# KX7zUQIBAAIBAAIBAAIBAAIBADAxMA0GCWCGSAFlAwQCAQUABCC9lzveLAOdfmYc
+# zfBbBlMJgFgY6F3QzMatnuo8EJYLC6CCE7wwggVkMIIDTKADAgECAhAGzuExvm1V
 # yAf3wMf7ROYgMA0GCSqGSIb3DQEBDAUAMEwxCzAJBgNVBAYTAlVTMRcwFQYDVQQK
 # Ew5EaWdpQ2VydCwgSW5jLjEkMCIGA1UEAxMbRGlnaUNlcnQgQ1MgUlNBNDA5NiBS
 # b290IEc1MB4XDTIxMDExNTAwMDAwMFoXDTQ2MDExNDIzNTk1OVowTDELMAkGA1UE
@@ -225,28 +273,28 @@ if ($IsAzurePipelines -eq $False) {
 # BgNVBAMTKS5ORVQgRm91bmRhdGlvbiBQcm9qZWN0cyBDb2RlIFNpZ25pbmcgQ0Ey
 # AhACMZsPb7h9xe+S5DcyL6PwMA0GCWCGSAFlAwQCAQUAoIHOMBkGCSqGSIb3DQEJ
 # AzEMBgorBgEEAYI3AgEEMBwGCisGAQQBgjcCAQsxDjAMBgorBgEEAYI3AgEVMC8G
-# CSqGSIb3DQEJBDEiBCAvspAtMSvnBN6SDTQEY+aTfIqWpkYXP6JI0FLMloc7OTBi
+# CSqGSIb3DQEJBDEiBCAjCyJPnzrprxADSJkqdMXZDZOHopsAZP1l6+0iGnJ4ujBi
 # BgorBgEEAYI3AgEMMVQwUqAsgCoAbgBhAG4AbwBGAHIAYQBtAGUAdwBvAHIAawAg
 # AHMAYwByAGkAcAB0AHOhIoAgaHR0cHM6Ly9naXRodWIuY29tL25hbm9GcmFtZXdv
-# cmswDQYJKoZIhvcNAQEBBQAEggIAQk09RfomfF+tSDN7SyR/HPWVn32knD49t1VH
-# pGJUM07UOt0chcLSy1/60TelcnAPHHFlraQxUZjJ5sMF7/DhcaI4gvzbcxDggoJn
-# wR49R5zXKwsxCE7HtvYpxFZBw7tQD4KGnEM0tt68PtIiQ3lKvNTKgekto5t5FzVe
-# /Vrxo2qfSZz6gAJkGHZT/x6rHCPr2hrpDQ3JpH+Ch0n+uU82bCZUwcU1m9d9ng2f
-# +02gdfV34jrHUFbjf64Pk0pt18k9IAQM45Qti7dcbmyPf+1EXL0G2qFlg9jGMbNY
-# QvRdfO9x5gsk3cts+S6Zls0b94dt4Ec5I6kUR3E7lt3ivqsr/2sKHbAkFomfjBnM
-# 6pOnhEjHHjzt2nQUznkJgjbks7k18zGdJhyPdnzo4ZExPL6UeEe+iU6k5Cs7Agx7
-# Z26fcsHdXABoIhWJ0UJQoZqnAzBQMOHO9E6wKLd8elV1ii49KjFo9ncXOC1FLXtn
-# NBiRkw0JAlmYn5iCHakAb4Fqa0sH2OjEhqGjThevyFiQys+7o1bd4r0jZ7+0PVrz
-# 02wVULQGjuOwbZLF9E6RIOiKbFDbICJUp5aesUvfRNtjPrOcXQunNhDd7Dh0wXPL
-# PBZK1MOpAJI0bJu3kM8GpARBk5jcEuBaZxDL6nyuUhYmKty3QCbzRFCVHh2Kqu7b
-# zZe1+7ShghSyMIIUrgYKKwYBBAGCNwMDATGCFJ4wghSaBgkqhkiG9w0BBwKgghSL
+# cmswDQYJKoZIhvcNAQEBBQAEggIAOpa9KyChph0zSqkUn0bpg6HLbqPLaRQAviIm
+# bv9rFfu4cafbjIc6M8YZL5/ry6pXsupjpiCUbIAjk1xsxZBoLdU+RfCrK5ojjlvE
+# 228/H/JzC8SS/T2Pf9Im7EYgxjZbz1msPxJaLPUyIoeke6R2vGxQS73olgdkqhvo
+# h+g3T3vQL//O3KafMlCI52pHcZk+u/EHfN7EZIb5O07dvuhXiEDci49On0PIi0/R
+# V8dKCgtKyuqQhtSDGISJjSgaGLGfc28b+DeNW7Q4jduGsNjdO+5bW/JO2d9cifSI
+# G0quoONVDu+mMS/EIAIeK7JpTampN0ThvzQ8ECW5Q2QAnw3Cocv1TntKDGWFMsip
+# GJOie2nHkX+whoNNp19Y4RMjtb1Yx3+ohznLtidF5P9PlE9BXe2mVdnD4/L7HCjF
+# VWAFZzMXizH4SRmU69KwE+h6qLSpbYZdhuNuOiTrHz3CT/YWpXe7JPa3t9dNvHxO
+# zndTTlbaOYttuJY8xXsArr6SroeNsKVW56ui5of44xbOJT1KXbn+2F2fd8Ir2T+P
+# 1FnESvxsS+qfM+dO1DrmIj91/t/PKYsvsXwMD5clGRcCZYmoQv6OQCDDv5X1/sMk
+# sDfbIkRfwfBGovalJNQhY3ZmwyvqWql8HE/mgbcVnYX54qEhvGGom7UcpETRgGwg
+# cS0WBCqhghSyMIIUrgYKKwYBBAGCNwMDATGCFJ4wghSaBgkqhkiG9w0BBwKgghSL
 # MIIUhwIBAzEPMA0GCWCGSAFlAwQCAQUAMIIBagYLKoZIhvcNAQkQAQSgggFZBIIB
-# VTCCAVECAQEGCisGAQQBhFkKAwEwMTANBglghkgBZQMEAgEFAAQgwbYCTZ3J0bL8
-# pmX0Yf83fPbocC7ABKFmLJ0gkNOL3mgCBmdkGflexBgTMjAyNTAxMDMxODE4NDIu
-# NDY2WjAEgAIB9KCB6aSB5jCB4zELMAkGA1UEBhMCVVMxEzARBgNVBAgTCldhc2hp
+# VTCCAVECAQEGCisGAQQBhFkKAwEwMTANBglghkgBZQMEAgEFAAQgQFkYTslwNX4z
+# 8orpZEhMs78EejivTtW7ZzrGBLG5tdECBmoZgJF2mRgTMjAyNjA2MDIwODEyNDMu
+# NDQzWjAEgAIB9KCB6aSB5jCB4zELMAkGA1UEBhMCVVMxEzARBgNVBAgTCldhc2hp
 # bmd0b24xEDAOBgNVBAcTB1JlZG1vbmQxHjAcBgNVBAoTFU1pY3Jvc29mdCBDb3Jw
 # b3JhdGlvbjEtMCsGA1UECxMkTWljcm9zb2Z0IElyZWxhbmQgT3BlcmF0aW9ucyBM
-# aW1pdGVkMScwJQYDVQQLEx5uU2hpZWxkIFRTUyBFU046NDUxQS0wNUUwLUQ5NDcx
+# aW1pdGVkMScwJQYDVQQLEx5uU2hpZWxkIFRTUyBFU046NDkxQS0wNUUwLUQ5NDcx
 # NTAzBgNVBAMTLE1pY3Jvc29mdCBQdWJsaWMgUlNBIFRpbWUgU3RhbXBpbmcgQXV0
 # aG9yaXR5oIIPKTCCB4IwggVqoAMCAQICEzMAAAAF5c8P/2YuyYcAAAAAAAUwDQYJ
 # KoZIhvcNAQEMBQAwdzELMAkGA1UEBhMCVVMxHjAcBgNVBAoTFU1pY3Jvc29mdCBD
@@ -288,28 +336,28 @@ if ($IsAzurePipelines -eq $False) {
 # mQ1snFOTgyEX8qBpefQbF0fx6URrYiarjmBprwP6ZObwtZXJ23jK3Fg/9uqM3j0P
 # 01nzVygTppBabzxPAh/hHhhls6kwo3QLJ6No803jUsZcd4JQxiYHHc+Q/wAMcPUn
 # YKv/q2O444LO1+n6j01z5mggCSlRwD9faBIySAcA9S8h22hIAcRQqIGEjolCK9F6
-# nK9ZyX4lhthsGHumaABdWzCCB58wggWHoAMCAQICEzMAAABCmshvpRumfQYAAAAA
-# AEIwDQYJKoZIhvcNAQEMBQAwYTELMAkGA1UEBhMCVVMxHjAcBgNVBAoTFU1pY3Jv
+# nK9ZyX4lhthsGHumaABdWzCCB58wggWHoAMCAQICEzMAAABa9g1njIXt3QgAAAAA
+# AFowDQYJKoZIhvcNAQEMBQAwYTELMAkGA1UEBhMCVVMxHjAcBgNVBAoTFU1pY3Jv
 # c29mdCBDb3Jwb3JhdGlvbjEyMDAGA1UEAxMpTWljcm9zb2Z0IFB1YmxpYyBSU0Eg
-# VGltZXN0YW1waW5nIENBIDIwMjAwHhcNMjQwNDE4MTc1OTE3WhcNMjUwNDE3MTc1
-# OTE3WjCB4zELMAkGA1UEBhMCVVMxEzARBgNVBAgTCldhc2hpbmd0b24xEDAOBgNV
+# VGltZXN0YW1waW5nIENBIDIwMjAwHhcNMjYwMTA4MTg1OTAzWhcNMjcwMTA3MTg1
+# OTAzWjCB4zELMAkGA1UEBhMCVVMxEzARBgNVBAgTCldhc2hpbmd0b24xEDAOBgNV
 # BAcTB1JlZG1vbmQxHjAcBgNVBAoTFU1pY3Jvc29mdCBDb3Jwb3JhdGlvbjEtMCsG
 # A1UECxMkTWljcm9zb2Z0IElyZWxhbmQgT3BlcmF0aW9ucyBMaW1pdGVkMScwJQYD
-# VQQLEx5uU2hpZWxkIFRTUyBFU046NDUxQS0wNUUwLUQ5NDcxNTAzBgNVBAMTLE1p
+# VQQLEx5uU2hpZWxkIFRTUyBFU046NDkxQS0wNUUwLUQ5NDcxNTAzBgNVBAMTLE1p
 # Y3Jvc29mdCBQdWJsaWMgUlNBIFRpbWUgU3RhbXBpbmcgQXV0aG9yaXR5MIICIjAN
-# BgkqhkiG9w0BAQEFAAOCAg8AMIICCgKCAgEA2twOzEyo1PCxyO4bhS8Z2L4leL3I
-# OcD3HdEi52b+w/wmSrr+gksTBMfW8o6+ptz3lA25CHfTEqfjTp2m6XsklrQ8n65H
-# BDKO5tyWr+58Qw36jnxSZUIuA3+ldPfhrOgNTEIGF/Qu+ysg6AYBXXTG07HZ+ja2
-# MEABgVrrPfVOJfWz4hpnzWDWn6uMK/VxaaMYU1U1Hszn/TYxjMEKYnn0lNDICQqW
-# nigmW2syE9yANxcvqAc6cijRxEy4QBeS/x3d1yqj6Q8PVk+jViUB34eYSt6DEkKc
-# Mlpf3BU+i2NPD2uSuQUiZ9wNwjx4ewlvbNABTwbpLp4kngqE9mBeExgWi75HpmXa
-# NKwwuHWZf/C9EpaQuUhGgSMjiIKbEaNcoIVKzv3cf0cW8bcK94vYA32QIgdJwvYV
-# QkK5aHcn3zjIfn8wRZmVUExlxdHrydtxxQiAfnYvuWdMUarXfwwE79hcFrPnMiBR
-# HP/iq4yaxIXzRO/nDoWOEZDLJXql5QBtu6ifriXwPhE0sRMu6Ry5tNMKXiQvjcT+
-# M+zJdGIbCQT46hY1tmvilDKSSANcSIDx51FxI55HBArNvSDMiu2wj5X/akt0A/oH
-# HE9Q8yfghV7fKZzpHQylrnFNjzjcXj+XJEcJAhs8vuqdGNOvsIrNs/lbKPJn7RUj
-# nSKDU1AHtbkA3TsCAwEAAaOCAcswggHHMB0GA1UdDgQWBBQWZTL01RLFsDojzhz0
-# iS+hUWbxWTAfBgNVHSMEGDAWgBRraSg6NS9IY0DPe9ivSek+2T3bITBsBgNVHR8E
+# BgkqhkiG9w0BAQEFAAOCAg8AMIICCgKCAgEA7/Q7R5aOBRv2ucdxAtF19Y83gf73
+# VrdieVo/joTWbi4P4krHpyxYxK1fv1/EslQCocmpBYTX1SU0yFL2MQHfZ0AnjK5a
+# wfJS4z52mGMPPgTmOXiBgZkSZo6sq8234qqUVrLKD+hODcGUtG7hoGrzrrwDmqUd
+# x+y6HoN1KoUgPWLEkVnMetkUbWIYEbtTUGfY40sOjuNvBfmsxw925MBTD9zszdaF
+# LFAG5mlCLPxFAYoioIp8jGBCQp3OkKlTRJZA4T8OBNdvPdzXkoxEJ2QaUvbNv6We
+# 5JXiyx5Cbep+VmJlyQvKfbEkjxlcOSr4iD5v+uw88h8jx2Lbbxa8rWPrslenJ5UJ
+# pJQ70SvOUudOueNCR5dVAinvfG5UFWua+hN/+/hrsyeua4pLIhdzm8lQcQYHfjn4
+# 7yiYW3XDxv5eD0P08ohGoM8S/sdGTQL5i/G7wW8cm9KhxIhkr6/8WYoU6Kliek/v
+# rICYk2fKF65xKE6CTxCJTndRKf/4DIxvvFb3TmBmfI2pvb0d5V1DXvmkMckYTPwL
+# HnCId5WWIbPmEAG5wUPKVH3PctJOYHr7dm4jF4b0FlLjo/oA0+S5W4PmbzCBzsYs
+# vODvcKwMXT26S3xR/x1NwwFfeuj7v+T0zpe3xY8bsgv2//gO/IxjTe2Rv1j1GLod
+# Zq9dE9hEJR4+yk8CAwEAAaOCAcswggHHMB0GA1UdDgQWBBSOY7JDq3Axw/VltHK0
+# nEjh+deZwjAfBgNVHSMEGDAWgBRraSg6NS9IY0DPe9ivSek+2T3bITBsBgNVHR8E
 # ZTBjMGGgX6BdhltodHRwOi8vd3d3Lm1pY3Jvc29mdC5jb20vcGtpb3BzL2NybC9N
 # aWNyb3NvZnQlMjBQdWJsaWMlMjBSU0ElMjBUaW1lc3RhbXBpbmclMjBDQSUyMDIw
 # MjAuY3JsMHkGCCsGAQUFBwEBBG0wazBpBggrBgEFBQcwAoZdaHR0cDovL3d3dy5t
@@ -318,36 +366,36 @@ if ($IsAzurePipelines -eq $False) {
 # FgYDVR0lAQH/BAwwCgYIKwYBBQUHAwgwDgYDVR0PAQH/BAQDAgeAMGYGA1UdIARf
 # MF0wUQYMKwYBBAGCN0yDfQEBMEEwPwYIKwYBBQUHAgEWM2h0dHA6Ly93d3cubWlj
 # cm9zb2Z0LmNvbS9wa2lvcHMvRG9jcy9SZXBvc2l0b3J5Lmh0bTAIBgZngQwBBAIw
-# DQYJKoZIhvcNAQEMBQADggIBAGzy+mEn+SNj81hNpgWnhhNr9e4ZwB1llRy/ljj0
-# wN1JIrXa0tUBzlflRNZq4WQVM5BKDzoIXSsoUgbCN2QTCzM4Q0PcoKJiJ0tCuZp6
-# foJQpNpdAc/zuK90XGosALsCJlUuFfJkL3WTjWFt8Mz6t2JZZtdis2yCHUuGIAfB
-# l/gUl8EtbGCIfDGEsHyvgVSRJGOVApV3OVMPAaUsQQ3jqp28tIR9OOd+jOEtROc2
-# 1mJfwhcpqqLsmUV2WvJXEaRXylXGDRqibW/hhErfv8wXpAloo8fxG7ONVxk1HTm9
-# M9JbFpw2ICCQkRbnzQxKW6KOwtRnxrunx7Cze11eIv0JMYubjnKSSMzOWuqnLnA0
-# a86b1wVU/1lKjB0SaVz6IJKKyC+UH6T0pmEVNDE3cem/mbB6g6Qp5VDmOLqA3vFW
-# S3lFiu/KpEPc/RrJ0Kxyr449MHVjO4UtUOqlsYSJhU48nJ9hZVHGSamrgb1FKtBV
-# VCrCRYxyaeg9whS7WfmwXME53y8MeZTqfbQK6VFTYWdKt/He3kVu16K3mkVHaohb
-# d4FMMz9fT0tykS1HN51Zg7SBLcNH58dvOoDg6S79yNa3e53gzTjQ6tNNZypQ5Hrs
-# HrJaEgUszFqvC+1S4DYZGx5TzyHqbX3yv0H3tNPRhR8xXPlGXKTaAX1kGlslVzQA
-# xG7qMYID1DCCA9ACAQEweDBhMQswCQYDVQQGEwJVUzEeMBwGA1UEChMVTWljcm9z
+# DQYJKoZIhvcNAQEMBQADggIBAICUzyv63eEhvaHWUNMDH6JiRCXEW5TtA417IgUg
+# Fnb3G8aXyl6ErESsPMieI6khf96W5QDBAqhojTPC4oB1HSatIdcKeIygs2Sjlb7m
+# vuxc1qYpftAxXcF8Y5feCL2pV/HJR7sAddupDwoFAc1gKc0W1BAeABGuViG3IAqi
+# Xly0zQIBz/LehjttMyxUm+cDm7sNVY95ehJPYoQwN4sG8lirQglnrIykM5YtnhQ/
+# zZuSzJKEgH9d1rCKsgYt2x652vJHFUyTfXeYByMZFvn34i223qi1W9hBaof48atN
+# TMRx7PxpC47e6ag1mMq4WhflWw8/+BJmx76iuEbfN9mT0gPITcN9QWuG+S/ofS2K
+# MrUPS4gaHAwFZKb2S1Dqh5T5q6tkXHcwj4s4OcextEVkDLXW4y/Aqr5k0LVJ7i0g
+# zW72mJYCGdM+iHqZQsqKQc5WEdo73ne2TMMK2Oyx7kZQo7H3KD2eocpYyCc4Onrb
+# +48/ML/IMQhKtcJxTtQHu0BOvfNY0R20zh3TT2JdYjp1X9J1wghfjiumgvIIvD6d
+# ePGn59j93KAs7tR1JBpVpQVWPcradXK66M+ym3ku6dzkW+5g+qaL/PyQBKabBuIX
+# 5bQ/RRNYVoLzgxZ9TaHowODmzSjGZ00UrvqNevfBl91KhXsUIp+rkZ14ajLlTAND
+# AwLQMYID1DCCA9ACAQEweDBhMQswCQYDVQQGEwJVUzEeMBwGA1UEChMVTWljcm9z
 # b2Z0IENvcnBvcmF0aW9uMTIwMAYDVQQDEylNaWNyb3NvZnQgUHVibGljIFJTQSBU
-# aW1lc3RhbXBpbmcgQ0EgMjAyMAITMwAAAEKayG+lG6Z9BgAAAAAAQjANBglghkgB
+# aW1lc3RhbXBpbmcgQ0EgMjAyMAITMwAAAFr2DWeMhe3dCAAAAAAAWjANBglghkgB
 # ZQMEAgEFAKCCAS0wGgYJKoZIhvcNAQkDMQ0GCyqGSIb3DQEJEAEEMC8GCSqGSIb3
-# DQEJBDEiBCD4Iz64UADCD0IPO0LzK/cTI0vEu7i9Qoft6CwqDdmzRzCB3QYLKoZI
-# hvcNAQkQAi8xgc0wgcowgccwgaAEIK9+c1C+wP2H74bAFJeodjGjQTspUszYeQw+
-# AkLteuKqMHwwZaRjMGExCzAJBgNVBAYTAlVTMR4wHAYDVQQKExVNaWNyb3NvZnQg
+# DQEJBDEiBCDrVd9n7anTeLycG/aJqQVQcZiWrYkBNjAZsNhTHjV82jCB3QYLKoZI
+# hvcNAQkQAi8xgc0wgcowgccwgaAEIGK5ZECL6n3o9GwG3dPBbeM2jOA9BL5ByjUJ
+# Wb81pTRDMHwwZaRjMGExCzAJBgNVBAYTAlVTMR4wHAYDVQQKExVNaWNyb3NvZnQg
 # Q29ycG9yYXRpb24xMjAwBgNVBAMTKU1pY3Jvc29mdCBQdWJsaWMgUlNBIFRpbWVz
-# dGFtcGluZyBDQSAyMDIwAhMzAAAAQprIb6Ubpn0GAAAAAABCMCIEIEdx/RmxSxBb
-# q461auTbCma6cuSM0M0IcqjuxqzuIKizMA0GCSqGSIb3DQEBCwUABIICAIYQzeRW
-# DkWsmtzLH3o35n92H484pdXp5AwBFsMwu1u4XyvlxbPlL9qb3rjw9lc6lNtA9Gw5
-# k9dICklPWSnDZ0eyTdlmAaDo82a1I5rbjFzA50zXNwV75CRKWHhPjiwn1Z0dzf+y
-# Ug6FdCZsJOFqptHJ4HTdaVDf7JI755j4IQXtWx85yRz81HAmYEfw7iHowNFyTkjX
-# 7/nedV/4M7xtYXRwmKar1BG7sq7nztfE1pCSqCa/+gUuee604ZKi2/HGaMDRQLvY
-# RCe1xf+0sVKUC7u2Gb4Ud+aY2fU+80xLoSDV1CR6ZX7KTXdKLWB/u6JQPX9bEDIn
-# zk0LUom4Ym1Q+ffrn2SGF+UnpdhIpTp5yCZSfBKpj/JsVk589GgLdbRWVX0yEHwV
-# 7LxfHRN42Ub0bismdgeZBbEdo8y0Gdr3U3sDB8upLCh+99I0KOIodXXJFNf0IPh0
-# 6sp/hawCjlM+n7D0xNpAmhTRFIksPv4+JxG6d/2rfj4yLOLh32lKRM7agHZ/xEU+
-# v986ijQEoUxa/GTbxNSR/ZxsJfjPuggKfHX4mStIzZRZK3+MviekrwpRGBfpQzoy
-# d/yCaux9M8Ism7eaAIJ29pwu+OWv72sWXiYsGuJtr6F64tvbfW3EGx284Qz64gaz
-# kkzFW7ILL3jARRsSRD6Bv96K2U5pnKj7F1jc
+# dGFtcGluZyBDQSAyMDIwAhMzAAAAWvYNZ4yF7d0IAAAAAABaMCIEID2KqmGHly0s
+# rkS21M/gjxMhvzehPv/Emgxv7EGENg8QMA0GCSqGSIb3DQEBCwUABIICAEB++f2P
+# +/wgWThK1+9RMqnPBMFbilNkh6f/GkyPOQjNj1vIgPotxAvrut6CzQ1DHot3RAHo
+# bEcc+PQQ5uu4FlLCOM5klmE+LnEceKx5VEkGCTXfXm+GXMgmKy0J4fVZaGP+PRHI
+# sra7GZIq7y7TDvmy0VTpHG4/C4fmYo1hXzbQ5MPS0lHGRJ4Hj8IXsp//9iq6S5Fv
+# T5EYxSH/w0ACLn9p6FOamnXX/g9GrUTlx5omoU44mKaLQWWoQ9o+9FG3b5xPkqtX
+# lfDVdZ8ZS98RcmqaFexB0lAB+PO+2BoJ/mAphmbX9mMNFr+/0bq9VWDennSmjFWA
+# EYOEf+AFpi1pQa+8mVMZr5QmQdrSRQgJ7Q63Sm9b8mqDZo5MJbIEFtn5egPTIZC1
+# s7CEH0QuaegN2FuY8Ku/dBekTYF6UPPGj170FlN33mA0htt8uUy5VpboAXV161gM
+# Mxj6Xx1aO9OLl0mU4wEjKQEsmjtpc7ebAVUKPR6Gh6+2Kxhdjcvv5evZ1Z0FeMiv
+# cfiBkiaNteYFcRPWBGV8ADwNIoBTkb1qHSQCMLW5j1ucCvbGAOfSCAKMBW2ctbEF
+# ayzMnEahKMeHqXDUoXg7b+uIxTiBMmy5XLY/XMCnrvBK3vRLFNKR852qkEHkjr/9
+# eaVOMdUM26HRh/UbevXV8A0RzFbX79Qw87fM
 # SIG # End signature block
