@@ -111,7 +111,7 @@ esp_err_t NF_ESP32_InitialiseEthernet(uint8_t *pMacAdr)
     //    phy_config.reset_timeout_ms = 200;
     ESP_LOGI(
         TAG,
-        "Ethernet phy config reset %d timeout %d addr %d\n",
+        "Ethernet phy config reset %d timeout %d addr %d",
         phy_config.reset_gpio_num,
         phy_config.reset_timeout_ms,
         phy_config.phy_addr);
@@ -121,7 +121,7 @@ esp_err_t NF_ESP32_InitialiseEthernet(uint8_t *pMacAdr)
     // Internal Ethernet
 
     // Set Clock modes to override whats in sdkconfig
-#ifdef ESP32_ETHERNET_RMII_CLK_OUT_GPIO
+#if defined(CONFIG_ESP32_ETHERNET_RMII_CLK_OUT_GPIO) && CONFIG_ESP32_ETHERNET_RMII_CLK_OUT_GPIO != -1
     esp32_emac_config.clock_config.rmii.clock_mode = EMAC_CLK_OUT;
     esp32_emac_config.clock_config.rmii.clock_gpio =
         (emac_rmii_clock_gpio_t)ESP32_ETHERNET_RMII_CLK_OUT_GPIO; // always 16 or 17
@@ -178,19 +178,19 @@ esp_err_t NF_ESP32_InitialiseEthernet(uint8_t *pMacAdr)
 
     // Define PHY to use with internal Ethernet
 #if defined(ESP32_ETHERNET_PHY_IP101)
-    ESP_LOGI(TAG, "Ethernet IP101 phy\n");
+    ESP_LOGI(TAG, "Ethernet IP101 phy");
     esp_eth_phy_t *phy = esp_eth_phy_new_ip101(&phy_config);
 #elif defined(ESP32_ETHERNET_PHY_RTL8201)
-    ESP_LOGI(TAG, "Ethernet RTL8201 phy\n");
+    ESP_LOGI(TAG, "Ethernet RTL8201 phy");
     esp_eth_phy_t *phy = esp_eth_phy_new_rtl8201(&phy_config);
 #elif defined(ESP32_ETHERNET_PHY_LAN8720)
-    ESP_LOGI(TAG, "Ethernet Lan8720 phy\n");
+    ESP_LOGI(TAG, "Ethernet Lan8720 phy");
     esp_eth_phy_t *phy = esp_eth_phy_new_lan87xx(&phy_config);
 #elif defined(ESP32_ETHERNET_PHY_DP83848)
-    ESP_LOGI(TAG, "Ethernet DP83848 phy\n");
+    ESP_LOGI(TAG, "Ethernet DP83848 phy");
     esp_eth_phy_t *phy = esp_eth_phy_new_dp83848(&phy_config);
 #elif defined(ESP32_ETHERNET_PHY_KSZ8041)
-    ESP_LOGI(TAG, "Ethernet KSZ8041 phy\n");
+    ESP_LOGI(TAG, "Ethernet KSZ8041 phy");
     esp_eth_phy_t *phy = esp_eth_phy_new_ksz80xx(&phy_config);
 #endif
 

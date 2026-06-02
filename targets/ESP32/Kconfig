@@ -27,10 +27,6 @@ config ESP32_RESERVE_IRAM_IDF_ALLOCATION_KB
       Amount of internal RAM (in kB) to reserve for ESP-IDF allocations.
       Used on boards with limited memory (e.g., ESP32-PICO, M5StickC).
 
-config ESP32_USB_CDC
-    bool "USB CDC for Wire Protocol"
-    default n
-
 config ESP32_XTAL_FREQ_26
     bool "26 MHz crystal (instead of 40 MHz default)"
     default n
