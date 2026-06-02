@@ -927,9 +927,11 @@ function(nf_add_lwip_library)
     endif()
 
     ########################################################################
-    # add lwipdocs target, just to keep cmake happy
-    # after moving to a more recent lwIP versions this is not needed anymore
-    add_custom_target(lwipdocs)
+    # add lwipdocs target, just to keep cmake happy when Doxygen is not found
+    # (newer lwIP versions create this target themselves when Doxygen is present)
+    if(NOT TARGET lwipdocs)
+        add_custom_target(lwipdocs)
+    endif()
     ########################################################################
 
 endfunction()
