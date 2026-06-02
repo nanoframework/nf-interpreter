@@ -7,7 +7,7 @@
 #include <targetPAL.h>
 #include <sys_dev_pwm_native.h>
 
-#if defined(RP_PWM_USE_PWM0) || defined(RP_PWM_USE_PWM1) || defined(RP_PWM_USE_PWM2) || defined(RP_PWM_USE_PWM3) ||   \
+#if defined(RP_PWM_USE_PWM0) || defined(RP_PWM_USE_PWM1) || defined(RP_PWM_USE_PWM2) || defined(RP_PWM_USE_PWM3) ||    \
     defined(RP_PWM_USE_PWM4) || defined(RP_PWM_USE_PWM5) || defined(RP_PWM_USE_PWM6) || defined(RP_PWM_USE_PWM7)
 
 typedef Library_sys_dev_pwm_native_System_Device_Pwm_PwmChannel PwmChannel;

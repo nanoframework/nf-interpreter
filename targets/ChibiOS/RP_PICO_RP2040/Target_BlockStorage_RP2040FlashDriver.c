@@ -17,7 +17,10 @@
 extern EFlashDriver EFLD1;
 extern MEMORY_MAPPED_NOR_BLOCK_CONFIG Device_BlockStorageConfig;
 
-static bool IsValidAddressRange(const MEMORY_MAPPED_NOR_BLOCK_CONFIG *config, ByteAddress startAddress, unsigned int numBytes)
+static bool IsValidAddressRange(
+    const MEMORY_MAPPED_NOR_BLOCK_CONFIG *config,
+    ByteAddress startAddress,
+    unsigned int numBytes)
 {
     if (config == NULL)
     {

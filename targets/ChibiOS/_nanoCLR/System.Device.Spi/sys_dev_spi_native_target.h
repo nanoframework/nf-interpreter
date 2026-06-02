@@ -40,22 +40,22 @@ struct NF_PAL_SPI
 #define SPI_CONFIG_PINS(num, sck_pin, miso_pin, mosi_pin)                                                              \
     void ConfigPins_SPI##num(const SPI_DEVICE_CONFIGURATION &spiDeviceConfig)                                          \
     {                                                                                                                  \
-        palSetPadMode(IOPORT1, sck_pin, PAL_MODE_ALTERNATE_SPI);                                                      \
-        palSetPadMode(IOPORT1, mosi_pin, PAL_MODE_ALTERNATE_SPI);                                                     \
-        if (spiDeviceConfig.BusConfiguration != SpiBusConfiguration_HalfDuplex)                                       \
+        palSetPadMode(IOPORT1, sck_pin, PAL_MODE_ALTERNATE_SPI);                                                       \
+        palSetPadMode(IOPORT1, mosi_pin, PAL_MODE_ALTERNATE_SPI);                                                      \
+        if (spiDeviceConfig.BusConfiguration != SpiBusConfiguration_HalfDuplex)                                        \
         {                                                                                                              \
-            palSetPadMode(IOPORT1, miso_pin, PAL_MODE_ALTERNATE_SPI);                                                 \
+            palSetPadMode(IOPORT1, miso_pin, PAL_MODE_ALTERNATE_SPI);                                                  \
         }                                                                                                              \
-        if (spiDeviceConfig.DeviceChipSelect >= 0)                                                                    \
+        if (spiDeviceConfig.DeviceChipSelect >= 0)                                                                     \
         {                                                                                                              \
-            palSetPadMode(IOPORT1, spiDeviceConfig.DeviceChipSelect, PAL_MODE_OUTPUT_PUSHPULL);                       \
-            if (spiDeviceConfig.ChipSelectActiveState)                                                                \
+            palSetPadMode(IOPORT1, spiDeviceConfig.DeviceChipSelect, PAL_MODE_OUTPUT_PUSHPULL);                        \
+            if (spiDeviceConfig.ChipSelectActiveState)                                                                 \
             {                                                                                                          \
-                palSetPad(IOPORT1, spiDeviceConfig.DeviceChipSelect);                                                 \
+                palSetPad(IOPORT1, spiDeviceConfig.DeviceChipSelect);                                                  \
             }                                                                                                          \
             else                                                                                                       \
             {                                                                                                          \
-                palClearPad(IOPORT1, spiDeviceConfig.DeviceChipSelect);                                               \
+                palClearPad(IOPORT1, spiDeviceConfig.DeviceChipSelect);                                                \
             }                                                                                                          \
         }                                                                                                              \
     }
