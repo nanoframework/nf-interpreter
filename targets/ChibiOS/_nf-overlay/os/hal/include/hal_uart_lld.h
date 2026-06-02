@@ -38,6 +38,9 @@ typedef struct hal_uart_config
 #define uart_lld_driver_fields                                                                                         \
     UART_TypeDef *uart;                                                                                                \
     uint16_t rxbuf;                                                                                                    \
+    const uint8_t *txbufp;                                                                                             \
+    size_t txsize;                                                                                                     \
+    size_t txidx;                                                                                                      \
     uint8_t *rxbufp;                                                                                                   \
     size_t rxsize;                                                                                                     \
     size_t rxidx;
@@ -86,6 +89,7 @@ extern "C"
     size_t uart_lld_stop_send(UARTDriver *uartp);
     void uart_lld_start_receive(UARTDriver *uartp, size_t n, void *rxbuf);
     size_t uart_lld_stop_receive(UARTDriver *uartp);
+    void uart_lld_serve_interrupt(UARTDriver *uartp);
 #ifdef __cplusplus
 }
 #endif
