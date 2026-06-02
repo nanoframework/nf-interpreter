@@ -76,7 +76,7 @@ If ($gnuGccPathExists -eq $False -or $force) {
         "Installing ARM GNU GCC toolchain..." | Write-Host -ForegroundColor White -NoNewline
 
         # unzip toolchain
-        Expand-Archive $output -DestinationPath $toolPath > $null
+        Expand-Archive $output -DestinationPath $toolPath -Force > $null
 
         # some archives extract into a versioned top-level folder, others directly into destination
         $versionedToolPath = Join-Path $toolPath $packageName
