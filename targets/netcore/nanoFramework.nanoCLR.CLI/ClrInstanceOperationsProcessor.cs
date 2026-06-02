@@ -102,9 +102,15 @@ namespace nanoFramework.nanoCLR.CLI
         private static string GetCloudsmithPackageName()
         {
             if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+            {
                 return "MACOS_DYLIB_nanoCLR";
+            }
+
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+            {
                 return "LINUX_SO_nanoCLR";
+            }
+
             return "WIN_DLL_nanoCLR";
         }
 
@@ -114,9 +120,15 @@ namespace nanoFramework.nanoCLR.CLI
         private static string GetNativeLibraryFilename()
         {
             if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+            {
                 return "nanoFramework.nanoCLR.dylib";
+            }
+
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+            {
                 return "nanoFramework.nanoCLR.so";
+            }
+
             return "nanoFramework.nanoCLR.dll";
         }
 

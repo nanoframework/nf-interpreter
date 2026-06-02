@@ -2299,7 +2299,7 @@ struct CLR_RT_StackFrame : public CLR_RT_HeapBlock_Node // EVENT HEAP - NO RELOC
     void SetResult_U1(CLR_INT8 val);
     void SetResult_U2(CLR_UINT16 val);
     void SetResult_U4(CLR_UINT32 val);
-    void SetResult_U8(CLR_UINT64 &val);
+    void SetResult_U8(const CLR_UINT64 &val);
 
 #if !defined(NANOCLR_EMULATED_FLOATINGPOINT)
     void SetResult_R4(float val);
@@ -2452,7 +2452,7 @@ struct CLR_RT_StackFrame : public CLR_RT_HeapBlock_Node // EVENT HEAP - NO RELOC
 // The use of offsetof below throwns an "invalid offset warning" because CLR_RT_StackFrame is not POD type
 // C+17 is the first standard that allow this, so until we are using it we have to disable it to keep GCC happy
 
-#ifdef _MSC_VER
+#if defined(_MSC_VER)
 
 CT_ASSERT(
     offsetof(CLR_RT_StackFrame, CLR_RT_StackFrame::m_owningThread) + sizeof(CLR_RT_Thread *) ==
@@ -2467,12 +2467,10 @@ CT_ASSERT(
     offsetof(CLR_RT_StackFrame, CLR_RT_StackFrame::m_locals) + sizeof(CLR_RT_HeapBlock *) ==
     offsetof(CLR_RT_StackFrame, CLR_RT_StackFrame::m_IP))
 
-#else
+#elif defined(__clang__) && defined(__APPLE__)
 
-#ifdef __GNUC__
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Winvalid-offsetof"
-#endif
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Winvalid-offsetof"
 
 CT_ASSERT(
     offsetof(CLR_RT_StackFrame, m_owningThread) + sizeof(CLR_RT_Thread *) == offsetof(CLR_RT_StackFrame, m_evalStack))
@@ -2481,6 +2479,28 @@ CT_ASSERT(
 CT_ASSERT(
     offsetof(CLR_RT_StackFrame, m_arguments) + sizeof(CLR_RT_HeapBlock *) == offsetof(CLR_RT_StackFrame, m_locals))
 CT_ASSERT(offsetof(CLR_RT_StackFrame, m_locals) + sizeof(CLR_RT_HeapBlock *) == offsetof(CLR_RT_StackFrame, m_IP))
+
+#pragma clang diagnostic pop
+
+#else
+
+#ifdef __GNUC__
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Winvalid-offsetof"
+#endif
+
+CT_ASSERT(
+    offsetof(CLR_RT_StackFrame, CLR_RT_StackFrame::m_owningThread) + sizeof(CLR_RT_Thread *) ==
+    offsetof(CLR_RT_StackFrame, CLR_RT_StackFrame::m_evalStack))
+CT_ASSERT(
+    offsetof(CLR_RT_StackFrame, CLR_RT_StackFrame::m_evalStack) + sizeof(CLR_RT_HeapBlock *) ==
+    offsetof(CLR_RT_StackFrame, CLR_RT_StackFrame::m_arguments))
+CT_ASSERT(
+    offsetof(CLR_RT_StackFrame, CLR_RT_StackFrame::m_arguments) + sizeof(CLR_RT_HeapBlock *) ==
+    offsetof(CLR_RT_StackFrame, CLR_RT_StackFrame::m_locals))
+CT_ASSERT(
+    offsetof(CLR_RT_StackFrame, CLR_RT_StackFrame::m_locals) + sizeof(CLR_RT_HeapBlock *) ==
+    offsetof(CLR_RT_StackFrame, CLR_RT_StackFrame::m_IP))
 
 #ifdef __GNUC__
 #pragma GCC diagnostic pop
