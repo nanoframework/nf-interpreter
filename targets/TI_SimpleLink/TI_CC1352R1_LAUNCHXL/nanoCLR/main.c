@@ -11,6 +11,8 @@
 #include <xdc/runtime/Error.h>
 #include <ti/sysbios/BIOS.h>
 #include <ti/sysbios/knl/Task.h>
+#include <ti/drivers/ADC.h>
+
 // clang-format off
 #include DeviceFamily_constructPath(inc/hw_prcm.h)
 #include DeviceFamily_constructPath(driverlib/sys_ctrl.h)
@@ -18,6 +20,7 @@
 
 // need this until fix in TI SDK is implemented
 extern void PIN_init_nano();
+extern void ConfigUART();
 
 //////////////////////////////
 
