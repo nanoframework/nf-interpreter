@@ -25,20 +25,20 @@ HRESULT Library_sys_dev_adc_native_System_Device_Adc_AdcController::NativeOpenCh
 
     // channel is static?
 #if defined(RP_ADC_USE_ADC1)
-    if (channel < 0 || channel >= AdcChannelCount)
+    if (channel < 0 || channel >= c_AdcChannelCount)
     {
         NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
     }
 
-    adcDefinition = AdcPortPinConfig[channel];
+    adcDefinition = c_AdcPortPinConfig[channel];
 #else
-    if (channel < AdcChannelCount)
+    if (channel < c_AdcChannelCount)
     {
-        adcDefinition = AdcPortPinConfig[channel];
+        adcDefinition = c_AdcPortPinConfig[channel];
     }
-    else if (channel < AdcChannelCount + RuntimeAdcChannelCount)
+    else if (channel < c_AdcChannelCount + RuntimeAdcChannelCount)
     {
-        adcDefinition = RuntimeAdcPortPinConfig[channel - AdcChannelCount];
+        adcDefinition = RuntimeAdcPortPinConfig[channel - c_AdcChannelCount];
     }
     else
     {
@@ -100,9 +100,9 @@ HRESULT Library_sys_dev_adc_native_System_Device_Adc_AdcController::NativeGetCha
 
     // Return value to the managed application
 #if defined(RP_ADC_USE_ADC1)
-    stack.SetResult_I4(AdcChannelCount);
+    stack.SetResult_I4(c_AdcChannelCount);
 #else
-    stack.SetResult_I4(AdcChannelCount + RuntimeAdcChannelCount);
+    stack.SetResult_I4(c_AdcChannelCount + RuntimeAdcChannelCount);
 #endif
 
     NANOCLR_NOCLEANUP_NOLABEL();

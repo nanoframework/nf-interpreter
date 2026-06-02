@@ -11,7 +11,7 @@
 #define SERIAL_DRIVER SDU1
 
 extern const USBConfig usbcfg;
-extern SerialUSBConfig serusbcfg;
+extern const SerialUSBConfig serusbcfg;
 extern SerialUSBDriver SDU1;
 
 #endif // USBCFG_H

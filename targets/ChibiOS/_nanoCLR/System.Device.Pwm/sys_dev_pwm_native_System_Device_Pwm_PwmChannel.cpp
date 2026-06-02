@@ -55,10 +55,10 @@ static PWMDriver *GetDriverPwm(int timerId)
 }
 
 // RP2040: derive channel from pin number.
-// pin / 2 = slice, pin % 2 = channel.
+// PWM slice assignment repeats every 16 GPIOs: (pin % 16) / 2 = slice, pin % 2 = channel.
 int GetChannelPwm(int pin, int timerId)
 {
-    if ((pin / 2) != timerId)
+    if (((pin % 16) / 2) != timerId)
     {
         return -1;
     }
