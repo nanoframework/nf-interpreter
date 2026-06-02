@@ -114,7 +114,7 @@ else()
 
         FetchContent_Declare(
             chibios
-            GIT_REPOSITORY "https://github.com/ChibiOS/ChibiOS.git"
+            GIT_REPOSITORY "https://github.com/chibios-upstream/chibios.git"
             GIT_TAG "master"
             GIT_SHALLOW ON
         )
@@ -125,7 +125,7 @@ else()
 
         FetchContent_Declare(
             chibios
-            GIT_REPOSITORY "https://github.com/ChibiOS/ChibiOS.git"
+            GIT_REPOSITORY "https://github.com/chibios-upstream/chibios.git"
             GIT_TAG ${RTOS_VERSION}
             GIT_SHALLOW ON
         )
@@ -147,7 +147,7 @@ if(CHIBIOS_CONTRIB_REQUIRED)
 
         FetchContent_Declare(
             chibios-contrib
-            GIT_REPOSITORY https://github.com/ChibiOS/ChibiOS-Contrib.git
+            GIT_REPOSITORY https://github.com/chibios-upstream/ChibiOS-Contrib.git
             GIT_TAG chibios-21.11.x
         )
 

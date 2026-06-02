@@ -46,7 +46,7 @@ if(NO_CHIBIOS_HAL_SOURCE)
 
     FetchContent_Declare(
         chibios
-        GIT_REPOSITORY "https://github.com/ChibiOS/ChibiOS.git"
+        GIT_REPOSITORY "https://github.com/chibios-upstream/chibios.git"
         GIT_TAG ${CHIBIOS_HAL_VERSION}
         GIT_SHALLOW ON
     )
@@ -70,7 +70,7 @@ else()
 
             FetchContent_Declare(
                 chibios
-                GIT_REPOSITORY "https://github.com/ChibiOS/ChibiOS.git"
+                GIT_REPOSITORY "https://github.com/chibios-upstream/chibios.git"
                 GIT_TAG ${CHIBIOS_HAL_VERSION}
                 GIT_SHALLOW ON
             )
