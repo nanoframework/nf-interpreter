@@ -42,12 +42,13 @@ endif()
 
 if(NO_CHIBIOS_HAL_SOURCE)
     # no CHIBIOS source specified, download it from it's repo
-    message(STATUS "ChibiOS HAL is: ${CHIBIOS_HAL_VERSION} from SVN official repo")
+    message(STATUS "ChibiOS HAL is: ${CHIBIOS_HAL_VERSION} from GitHub repo")
 
     FetchContent_Declare(
         chibios
-        SVN_REPOSITORY http://svn.code.sf.net/p/chibios/code/branches/${CHIBIOS_HAL_VERSION}
-        SVN_REVISION -rHEAD
+        GIT_REPOSITORY "https://github.com/ChibiOS/ChibiOS.git"
+        GIT_TAG ${CHIBIOS_HAL_VERSION}
+        GIT_SHALLOW ON
     )
 
 else()
@@ -64,13 +65,14 @@ else()
             )
 
         else()
-            # running on *nix requires setting up a local git repo from SVN
-            # with git svn clone http://svn.code.sf.net/p/chibios/code/branches/${CHIBIOS_HAL_VERSION} -rHEAD
+            # running on *nix requires setting up a local git repo
             message(STATUS "ChibiOS HAL is: ${CHIBIOS_HAL_VERSION} (source from: ${CHIBIOS_HAL_SOURCE})")
 
             FetchContent_Declare(
                 chibios
-                SOURCE_DIR ${CHIBIOS_HAL_SOURCE}
+                GIT_REPOSITORY "https://github.com/ChibiOS/ChibiOS.git"
+                GIT_TAG ${CHIBIOS_HAL_VERSION}
+                GIT_SHALLOW ON
             )
 
         endif()

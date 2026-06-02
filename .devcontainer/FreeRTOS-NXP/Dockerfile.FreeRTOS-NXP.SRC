@@ -41,8 +41,6 @@ RUN apt-get update \
     && apt-get install -y \
     git \
     git-lfs \
-    git-svn \
-    subversion \
     clang-format \
     curl \
     ninja-build \

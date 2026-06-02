@@ -40,8 +40,6 @@ RUN apt-get update \
     && apt-get -y install --no-install-recommends apt-utils dialog icu-devtools 2>&1 \
     && apt-get install -y \
     git \
-    git-svn \
-    subversion \
     clang-format \
     curl \
     ninja-build \
@@ -51,9 +49,7 @@ RUN apt-get update \
 RUN mkdir -p /usr/local/bin/gcc
 
 # Clone ChibiOS repo (used for HAL)
-# RUN git svn clone http://svn.code.sf.net/p/chibios/code/branches/stable_21.11.x -rHEAD ./sources/ChibiOs
-# Alternative source for those having issues with git svn downloads:
-RUN git clone --branch stable_21.11.x https://github.com/ArduPilot/ChibiOS.svn.git --depth 1 ./sources/ChibiOs
+RUN git clone --branch stable_21.11.x https://github.com/ChibiOS/ChibiOS.git --depth 1 ./sources/ChibiOs
 
 # Clone support repos for STM32 - HAL drivers (official ST repositories)
 RUN git clone --branch v1.8.5 https://github.com/STMicroelectronics/stm32f4xx_hal_driver.git --depth 1 ./sources/stm32f4xx_hal_driver \

@@ -104,31 +104,33 @@ if(NOT NO_CHIBIOS_SOURCE_FOLDER)
         SOURCE_DIR ${CHIBIOS_SOURCE_FOLDER}
     )
 
-elseif(CHIBIOS_GIT_REPOSITORY)
-    # ChibiOS from Git repository (used for RP targets that need master branch)
-
-    if(NOT CHIBIOS_GIT_TAG)
-        set(CHIBIOS_GIT_TAG "master")
-    endif()
-
-    message(STATUS "RTOS is: ChibiOS ${CHIBIOS_GIT_TAG} from GitHub (${CHIBIOS_GIT_REPOSITORY})")
-
-    FetchContent_Declare(
-        chibios
-        GIT_REPOSITORY ${CHIBIOS_GIT_REPOSITORY}
-        GIT_TAG ${CHIBIOS_GIT_TAG}
-        GIT_SHALLOW ON
-    )
-
 else()
     # no CHIBIOS source specified, download it from it's repo
-    message(STATUS "RTOS is: ChibiOS ${RTOS_VERSION} from SVN official repo")
 
-    FetchContent_Declare(
-        chibios
-        SVN_REPOSITORY http://svn.code.sf.net/p/chibios/code/branches/${RTOS_VERSION}
-        SVN_REVISION -rHEAD
-    )
+    # temporary workaround to fetch from master branch for RPI Pico targets
+    if("${_TARGET_SERIES_PREFIX}" STREQUAL "RP2")
+
+        message(STATUS "RTOS is: ChibiOS from GitHub repo (master branch)")
+
+        FetchContent_Declare(
+            chibios
+            GIT_REPOSITORY "https://github.com/ChibiOS/ChibiOS.git"
+            GIT_TAG "master"
+            GIT_SHALLOW ON
+        )
+
+    else()
+
+        message(STATUS "RTOS is: ChibiOS ${RTOS_VERSION} from GitHub repo")
+
+        FetchContent_Declare(
+            chibios
+            GIT_REPOSITORY "https://github.com/ChibiOS/ChibiOS.git"
+            GIT_TAG ${RTOS_VERSION}
+            GIT_SHALLOW ON
+        )
+
+    endif()
 
 endif()
 
