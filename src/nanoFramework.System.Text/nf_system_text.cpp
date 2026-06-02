@@ -75,7 +75,6 @@ static const CLR_RT_MethodHandler method_lookup[] =
     nullptr,
     nullptr,
     nullptr,
-    nullptr,
     Library_nf_system_text_System_Text_UTF8Decoder::Convert___VOID__SZARRAY_U1__I4__I4__SZARRAY_CHAR__I4__I4__BOOLEAN__BYREF_I4__BYREF_I4__BYREF_BOOLEAN,
     nullptr,
     Library_nf_system_text_System_Text_UTF8Encoding::GetBytes___SZARRAY_U1__STRING,
@@ -89,9 +88,9 @@ static const CLR_RT_MethodHandler method_lookup[] =
 const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_nanoFramework_System_Text =
 {
     "nanoFramework.System.Text",
-    0x2DA592BB,
+    0x86EC2A29,
     method_lookup,
-    { 100, 2, 0, 0 }
+    { 100, 2, 0, 1 }
 };
 
 // clang-format on

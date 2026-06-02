@@ -8,6 +8,12 @@
 #define NANOPRINTF_H
 
 #include <stdarg.h>
+// size_t is guaranteed by C11/C++11, but some bare-metal toolchains pull it
+// in transitively.  On POSIX hosts (and for any standalone compile) include
+// <stddef.h> explicitly so that PRINTF_T / size_t can be resolved.
+#if defined(PLATFORM_POSIX_HOST) || !defined(__arm__)
+#include <stddef.h>
+#endif
 
 // clang-format off
 

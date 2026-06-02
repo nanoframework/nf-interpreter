@@ -9,6 +9,7 @@
 
 #include <nanoCLR_Interop.h>
 #include <nanoCLR_Runtime.h>
+#include <nanoPackStruct.h>
 
 typedef enum __nfpack RebootOption
 {

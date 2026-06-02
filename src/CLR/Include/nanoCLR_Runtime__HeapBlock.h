@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (c) .NET Foundation and Contributors
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
@@ -68,6 +68,13 @@
 struct CLR_RT_HeapBlock_Raw
 {
     CLR_UINT32 data[5];
+};
+#elif defined(__LP64__)
+// 64-bit POSIX hosts (macOS/Linux arm64/x86-64):
+// CLR_RT_HeapBlock = 4 (m_id) + 4 (align pad) + 16 (m_data with 2x 8-byte ptrs) = 24 bytes.
+struct CLR_RT_HeapBlock_Raw
+{
+    CLR_UINT32 data[6];
 };
 #else
 struct CLR_RT_HeapBlock_Raw
@@ -1354,6 +1361,29 @@ struct CLR_RT_HeapBlock
         //
         // For V1, we don't throw on overflow.
         //
+        // For conv.r.un, the source must be treated as unsigned regardless of its
+        // declared DataType (which is always a signed type on the eval stack).
+        // Remap to the unsigned equivalent so Convert_Internal selects scaleIn = -1.
+        if (fUnsigned)
+        {
+            switch (DataType())
+            {
+                case DATATYPE_I1:
+                    ChangeDataType(DATATYPE_U1);
+                    break;
+                case DATATYPE_I2:
+                    ChangeDataType(DATATYPE_U2);
+                    break;
+                case DATATYPE_I4:
+                    ChangeDataType(DATATYPE_U4);
+                    break;
+                case DATATYPE_I8:
+                    ChangeDataType(DATATYPE_U8);
+                    break;
+                default:
+                    break;
+            }
+        }
         return Convert_Internal(et);
     }
 

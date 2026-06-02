@@ -729,7 +729,8 @@ macro(nf_setup_target_build_common)
 
         # need to unset several flags for MbedTLS to compile correctly
         target_compile_options(mbedtls PRIVATE -Wno-undef -Wno-error=unused-function -Wno-error=discarded-qualifiers -Wno-error=unused-parameter)
-        target_compile_options(mbedcrypto PRIVATE -Wno-undef -Wno-error=unused-function -Wno-error=discarded-qualifiers -Wno-error=unused-parameter)
+        # Mbed TLS bignum ARM inline assembly can exceed available registers at -O0.
+        target_compile_options(mbedcrypto PRIVATE $<$<CONFIG:Debug>:-Og> -Wno-undef -Wno-error=unused-function -Wno-error=discarded-qualifiers -Wno-error=unused-parameter)
         target_compile_options(mbedx509 PRIVATE -Wno-undef -Wno-error=unused-function -Wno-error=discarded-qualifiers -Wno-error=unused-parameter)
 
     endif()

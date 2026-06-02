@@ -14,7 +14,7 @@ if ESP32_ETHERNET_SUPPORT
 
 choice ESP32_ETHERNET_INTERFACE_CHOICE
     prompt "Ethernet PHY interface"
-    default ESP32_ETHERNET_PHY_IP101
+    default ESP32_ETHERNET_PHY_LAN8720
 
 config ESP32_ETHERNET_PHY_IP101
     bool "IP101"
@@ -36,7 +36,7 @@ config ESP32_ETHERNET_INTERFACE
 config ESP32_ETHERNET_PHY_ADDR
     int "Ethernet PHY address"
     range 0 31
-    default 1
+    default 0
 
 config ESP32_ETHERNET_MDC_GPIO
     int "MDC GPIO pin"

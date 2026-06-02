@@ -33,7 +33,6 @@ static const CLR_RT_MethodHandler method_lookup[] =
     nullptr,
     nullptr,
     nullptr,
-    nullptr,
     Library_corlib_native_System_Globalization_CultureInfo::get_CurrentUICultureInternal___STATIC__SystemGlobalizationCultureInfo,
     Library_corlib_native_System_Globalization_CultureInfo::set_CurrentUICultureInternal___STATIC__VOID__SystemGlobalizationCultureInfo,
     nullptr,
@@ -631,6 +630,8 @@ static const CLR_RT_MethodHandler method_lookup[] =
     nullptr,
     nullptr,
     nullptr,
+    nullptr,
+    nullptr,
     Library_corlib_native_System_Guid::GenerateNewGuid___STATIC__SZARRAY_U1,
     nullptr,
     nullptr,
@@ -939,7 +940,6 @@ static const CLR_RT_MethodHandler method_lookup[] =
 
 static const CLR_RT_MethodHandler method_lookup[] =
 {
-    nullptr,
     nullptr,
     nullptr,
     nullptr,
@@ -1433,6 +1433,8 @@ static const CLR_RT_MethodHandler method_lookup[] =
     nullptr,
     nullptr,
     nullptr,
+    nullptr,
+    nullptr,
     Library_corlib_native_System_Guid::GenerateNewGuid___STATIC__SZARRAY_U1,
     nullptr,
     nullptr,
@@ -1625,18 +1627,18 @@ const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_mscorlib =
 
 #if CONFIG_NF_FEATURE_SUPPORT_REFLECTION
 
-    0x2DD1D4D8,
+    0x2D5CA905,
 
 #elif !CONFIG_NF_FEATURE_SUPPORT_REFLECTION
 
-    0xFF83B481,
+    0xCB139DD2,
 
 #else
 #error "CONFIG_NF_FEATURE_SUPPORT_REFLECTION has to be define either TRUE or FALSE. Check the build options."
 #endif
 
     method_lookup,
-    { 100, 22, 0, 3 }
+    { 100, 22, 0, 4 }
 };
 
 // clang-format on

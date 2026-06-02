@@ -10,7 +10,6 @@
 static const CLR_RT_MethodHandler method_lookup[] =
 {
     nullptr,
-    nullptr,
     Library_nf_native_system_math_System_Math::Abs___STATIC__R8__R8,
     Library_nf_native_system_math_System_Math::Abs___STATIC__R4__R4,
     Library_nf_native_system_math_System_Math::Acos___STATIC__R8__R8,
@@ -51,9 +50,9 @@ static const CLR_RT_MethodHandler method_lookup[] =
 const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_System_Math =
 {
     "System.Math",
-    0xF1856AC0,
+    0x5FEF7548,
     method_lookup,
-    { 100, 2, 0, 0 }
+    { 100, 2, 0, 1 }
 };
 
 // clang-format on

@@ -575,6 +575,10 @@ extern int s_CLR_RT_fTrace_GC_Depth;
 extern int s_CLR_RT_fTrace_SimulateSpeed;
 extern int s_CLR_RT_fTrace_AssemblyOverhead;
 
+#if defined(NANOCLR_TRACE_GENERICS)
+extern int s_CLR_RT_fTrace_GenericFields;
+#endif
+
 #if defined(VIRTUAL_DEVICE)
 extern int s_CLR_RT_fTrace_ARM_Execution;
 
@@ -1215,6 +1219,14 @@ struct CLR_RT_SignatureParser
     /// @brief Index into MetodDef table
     CLR_INDEX Method;
 
+    /// @brief When true the next CLASS/VALUETYPE element must read its arg-count byte unconditionally.
+    /// Set by DATATYPE_GENERICINST and cleared after the following class element is consumed.
+    /// This is required for nested generic types (e.g. List<T>.Enumerator) whose TypeDef has
+    /// genericParamCount == 0 (no own generic params) even though the metadata processor writes
+    /// cumulative enclosing-type arg counts into the signature.
+    /// Always reset to false by every Initialize_* function.
+    bool m_pendingGenericInst;
+
     //--//
 
     void Initialize_TypeSpec(CLR_RT_Assembly *assm, CLR_PMETADATA ts);
@@ -1589,8 +1601,12 @@ struct CLR_RT_Assembly : public CLR_RT_HeapBlock_Node // EVENT HEAP - NO RELOCAT
 
   public:
     void DumpOpcode(CLR_RT_StackFrame *stack, CLR_PMETADATA ip) DECL_POSTFIX;
-    void DumpOpcodeDirect(CLR_RT_MethodDef_Instance &call, CLR_PMETADATA ip, CLR_PMETADATA ipStart, int pid)
-        DECL_POSTFIX;
+    void DumpOpcodeDirect(
+        CLR_RT_MethodDef_Instance &call,
+        CLR_PMETADATA ip,
+        CLR_PMETADATA ipStart,
+        int pid,
+        const CLR_RT_TypeSpec_Index *parentCtx = nullptr) DECL_POSTFIX;
 
   private:
     void DumpToken(
@@ -2099,6 +2115,12 @@ struct CLR_RT_TypeSystem // EVENT HEAP - NO RELOCATION -
         const CLR_RT_TypeSpec_Index *genericType,
         char *&szBuffer,
         size_t &size);
+    HRESULT BuildMethodName(
+        const CLR_RT_MethodDef_Instance &mdInst,
+        const CLR_RT_TypeSpec_Index *genericType,
+        const CLR_RT_TypeSpec_Index *parentCtx,
+        char *&szBuffer,
+        size_t &size);
     HRESULT BuildFieldName(const CLR_RT_FieldDef_Index &fd, char *&szBuffer, size_t &size);
     HRESULT BuildMethodRefName(const CLR_RT_MethodRef_Index &method, char *&szBuffer, size_t &iBuffer);
     HRESULT BuildMethodRefName(
@@ -2123,7 +2145,8 @@ struct CLR_RT_TypeSystem // EVENT HEAP - NO RELOCATION -
         const CLR_RT_TypeDef_Index &cls,
         const CLR_RT_MethodDef_Index &calleeMD,
         const char *calleeName,
-        CLR_RT_MethodDef_Index &index);
+        CLR_RT_MethodDef_Index &index,
+        bool suffixMatchOnly = false);
 
     static bool MatchSignature(CLR_RT_SignatureParser &parserLeft, CLR_RT_SignatureParser &parserRight);
     static bool MatchSignatureDirect(
@@ -2277,6 +2300,10 @@ struct CLR_RT_MethodDef_Instance : public CLR_RT_MethodDef_Index
     const CLR_RT_TypeSpec_Index *genericType;
     CLR_RT_MethodSpec_Index methodSpec;
 
+    // Stable storage for the TypeSpec when set by InitializeFromIndex(md, typeSpec, caller).
+    // Prevents genericType from pointing to a caller's stack-local parameter.
+    CLR_RT_TypeSpec_Index m_typeSpecStorage;
+
     // For SZArrayHelper rebind: stores the array element TypeDef when dispatching from arrays
     CLR_RT_TypeDef_Index arrayElementType;
 
@@ -2285,6 +2312,21 @@ struct CLR_RT_MethodDef_Instance : public CLR_RT_MethodDef_Index
 #endif
 
     //--//
+
+    // After any plain by-value copy of a CLR_RT_MethodDef_Instance, call
+    // Normalize(src) to re-anchor the self-referential genericType pointer.
+    // InitializeFromIndex (typeSpec overload) sets genericType = &m_typeSpecStorage;
+    // a plain copy leaves genericType pointing at the source's m_typeSpecStorage,
+    // which dangles when the source goes out of scope.  Call Normalize(src)
+    // immediately after every  dst = src  where src may have had
+    // genericType == &src.m_typeSpecStorage.
+    inline void Normalize(const CLR_RT_MethodDef_Instance &src)
+    {
+        if (src.genericType == &src.m_typeSpecStorage)
+        {
+            genericType = &m_typeSpecStorage;
+        }
+    }
 
     bool InitializeFromIndex(const CLR_RT_MethodDef_Index &index);
     bool InitializeFromIndex(
@@ -2436,6 +2478,7 @@ struct CLR_RT_AttributeParser
         const NanoCLRDataType dt,
         const CLR_RT_TypeDef_Index *m_cls,
         const CLR_UINT32 size);
+    HRESULT ReadArrayValue(CLR_RT_HeapBlock *&value);
     HRESULT ReadString(CLR_RT_HeapBlock *&value);
 
   private:
@@ -2558,6 +2601,7 @@ struct CLR_RT_InlineFrame
     CLR_PMETADATA m_IPStart;
     CLR_UINT8 m_localAllocCount;
     uintptr_t m_localAllocs[MAX_LOCALALLOC_COUNT];
+    CLR_RT_TypeSpec_Index m_genericTypeSpecStorage;
 };
 
 struct CLR_RT_InlineBuffer
@@ -2728,11 +2772,11 @@ struct CLR_RT_StackFrame : public CLR_RT_HeapBlock_Node // EVENT HEAP - NO RELOC
     void SetResult_I1(CLR_UINT8 val);
     void SetResult_I2(CLR_INT16 val);
     void SetResult_I4(CLR_INT32 val);
-    void SetResult_I8(CLR_INT64 &val);
+    void SetResult_I8(const CLR_INT64 &val);
     void SetResult_U1(CLR_INT8 val);
     void SetResult_U2(CLR_UINT16 val);
     void SetResult_U4(CLR_UINT32 val);
-    void SetResult_U8(CLR_UINT64 &val);
+    void SetResult_U8(const CLR_UINT64 &val);
 
 #if !defined(NANOCLR_EMULATED_FLOATINGPOINT)
     void SetResult_R4(float val);
@@ -2885,7 +2929,7 @@ struct CLR_RT_StackFrame : public CLR_RT_HeapBlock_Node // EVENT HEAP - NO RELOC
 // The use of offsetof below throwns an "invalid offset warning" because CLR_RT_StackFrame is not POD type
 // C+17 is the first standard that allow this, so until we are using it we have to disable it to keep GCC happy
 
-#ifdef _MSC_VER
+#if defined(_MSC_VER)
 
 CT_ASSERT(
     offsetof(CLR_RT_StackFrame, CLR_RT_StackFrame::m_owningThread) + sizeof(CLR_RT_Thread *) ==
@@ -2899,6 +2943,21 @@ CT_ASSERT(
 CT_ASSERT(
     offsetof(CLR_RT_StackFrame, CLR_RT_StackFrame::m_locals) + sizeof(CLR_RT_HeapBlock *) ==
     offsetof(CLR_RT_StackFrame, CLR_RT_StackFrame::m_IP))
+
+#elif defined(__clang__) && defined(__APPLE__)
+
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Winvalid-offsetof"
+
+CT_ASSERT(
+    offsetof(CLR_RT_StackFrame, m_owningThread) + sizeof(CLR_RT_Thread *) == offsetof(CLR_RT_StackFrame, m_evalStack))
+CT_ASSERT(
+    offsetof(CLR_RT_StackFrame, m_evalStack) + sizeof(CLR_RT_HeapBlock *) == offsetof(CLR_RT_StackFrame, m_arguments))
+CT_ASSERT(
+    offsetof(CLR_RT_StackFrame, m_arguments) + sizeof(CLR_RT_HeapBlock *) == offsetof(CLR_RT_StackFrame, m_locals))
+CT_ASSERT(offsetof(CLR_RT_StackFrame, m_locals) + sizeof(CLR_RT_HeapBlock *) == offsetof(CLR_RT_StackFrame, m_IP))
+
+#pragma clang diagnostic pop
 
 #else
 
@@ -3123,7 +3182,13 @@ struct CLR_RT_GarbageCollector
     {
         if (field->m_fields)
         {
+            // Relocate the internal pointers within each HeapBlock in the array
+            // (must be done before updating m_fields, while it still points to the old location)
             CLR_RT_GarbageCollector::Heap_Relocate(field->m_fields, field->m_count);
+
+            // Update m_fields pointer itself to wherever the block array moved after compaction.
+            // Without this, m_fields becomes a dangling pointer after any GC compaction.
+            CLR_RT_GarbageCollector::Heap_Relocate((void **)&field->m_fields);
         }
 
         if (field->m_fieldDefs)
@@ -4202,12 +4267,14 @@ struct CLR_RT_ExecutionEngine
     HRESULT InitializeReference(
         CLR_RT_HeapBlock &ref,
         CLR_RT_SignatureParser &parser,
-        const CLR_RT_TypeSpec_Instance *genericInstance = nullptr);
+        const CLR_RT_TypeSpec_Instance *genericInstance = nullptr,
+        bool allowUnresolvedVarFallback = false);
     HRESULT InitializeReference(
         CLR_RT_HeapBlock &ref,
         const CLR_RECORD_FIELDDEF *target,
         CLR_RT_Assembly *assm,
-        const CLR_RT_TypeSpec_Instance *genericInstance = nullptr);
+        const CLR_RT_TypeSpec_Instance *genericInstance = nullptr,
+        bool allowUnresolvedVarFallback = false);
 
     HRESULT InitializeLocals(CLR_RT_HeapBlock *locals, const CLR_RT_MethodDef_Instance &methodDefInstance);
 
@@ -4393,11 +4460,15 @@ extern CLR_UINT32 g_buildCRC;
 
 #ifdef _WIN64
 CT_ASSERT(sizeof(struct CLR_RT_HeapBlock) == 20)
+#elif defined(PLATFORM_POSIX_HOST) && defined(__LP64__)
+// 64-bit POSIX host: HeapBlock layout will be determined during port; skip size check
 #else
 CT_ASSERT(sizeof(struct CLR_RT_HeapBlock) == 12)
 #endif // _WIN64
 
+#if !defined(PLATFORM_POSIX_HOST) || !defined(__LP64__)
 CT_ASSERT(sizeof(CLR_RT_HeapBlock_Raw) == sizeof(struct CLR_RT_HeapBlock))
+#endif
 
 #if defined(NANOCLR_TRACE_MEMORY_STATS)
 #define NANOCLR_TRACE_MEMORY_STATS_EXTRA_SIZE sizeof(const char *)
@@ -4405,7 +4476,7 @@ CT_ASSERT(sizeof(CLR_RT_HeapBlock_Raw) == sizeof(struct CLR_RT_HeapBlock))
 #define NANOCLR_TRACE_MEMORY_STATS_EXTRA_SIZE 0
 #endif
 
-#if defined(__GNUC__) // Gcc compiler uses 8 bytes for a function pointer
+#if defined(__GNUC__) && !defined(PLATFORM_POSIX_HOST) // Gcc compiler uses 8 bytes for a function pointer
 CT_ASSERT(sizeof(CLR_RT_DataTypeLookup) == 20 + NANOCLR_TRACE_MEMORY_STATS_EXTRA_SIZE)
 
 #elif defined(VIRTUAL_DEVICE) && defined(NANOCLR_TRACE_MEMORY_STATS)
@@ -4426,7 +4497,11 @@ CT_ASSERT(sizeof(CLR_RT_DataTypeLookup) == 16 + NANOCLR_TRACE_MEMORY_STATS_EXTRA
 
 #else
 
+#if defined(PLATFORM_POSIX_HOST) && defined(__LP64__)
+// 64-bit POSIX host: structure sizes will differ from embedded ARM; skip checks during port.
+#else
 !ERROR
+#endif
 
 #endif
 

@@ -47,7 +47,7 @@ const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_System_Device_Adc =
     "System.Device.Adc",
     0xA2D36208,
     method_lookup,
-    { 100, 2, 0, 0 }
+    { 100, 2, 0, 1 }
 };
 
 // clang-format on

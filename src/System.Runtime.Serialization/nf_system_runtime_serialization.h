@@ -9,6 +9,8 @@
 #include <Core.h>
 #include <nanoCLR_Interop.h>
 #include <nanoCLR_Runtime.h>
+#include <nanoPackStruct.h>
+#include <corlib_native.h>
 
 // declared as struct SerializationHintsAttribute in src\CLR\Include\nanoCLR_Runtime__Serialization.h
 // typedef enum __nfpack SerializationOptions

@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (c) .NET Foundation and Contributors
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
@@ -86,8 +86,8 @@
 #endif
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-// ARM & ESP32
-#if defined(PLATFORM_ARM) || defined(PLATFORM_ESP32)
+// ARM, ESP32 & POSIX host
+#if defined(PLATFORM_ARM) || defined(PLATFORM_ESP32) || defined(PLATFORM_POSIX_HOST)
 // #define NANOCLR_STRESS_GC
 // #define NANOCLR_GC_VERBOSE
 // #define NANOCLR_PROFILE_NEW
@@ -109,6 +109,7 @@
 #undef NANOCLR_TRACE_EXCEPTIONS
 #undef NANOCLR_TRACE_ERRORS
 #undef NANOCLR_TRACE_EARLYCOLLECTION
+#undef NANOCLR_TRACE_GENERICS
 #undef NANOCLR_VALIDATE_HEAP
 #undef NANOCLR_FILL_MEMORY_WITH_DIRTY_PATTERN
 #endif
@@ -175,7 +176,7 @@
 #define ULONGLONGCONSTANT(v) (v##UI64)
 #endif
 
-#if defined(PLATFORM_ARM) | defined(PLATFORM_ESP32)
+#if defined(PLATFORM_ARM) || defined(PLATFORM_ESP32) || defined(PLATFORM_POSIX_HOST)
 #define PROHIBIT_ALL_CONSTRUCTORS(cls)                                                                                 \
   private:                                                                                                             \
     cls();                                                                                                             \

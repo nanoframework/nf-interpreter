@@ -146,8 +146,10 @@ __nfweak void CLR_RT_Assembly::DumpOpcodeDirect(
     CLR_RT_MethodDef_Instance &call,
     CLR_PMETADATA ip,
     CLR_PMETADATA ipStart,
-    int pid)
+    int pid,
+    const CLR_RT_TypeSpec_Index *parentCtx)
 {
+    (void)parentCtx;
     NATIVE_PROFILE_CLR_DIAGNOSTICS();
 }
 
@@ -197,6 +199,18 @@ __nfweak void CLR_RT_DUMP::METHOD(const CLR_RT_MethodDef_Instance &mdInst, const
 {
     (void)mdInst;
     (void)genericType;
+
+    NATIVE_PROFILE_CLR_DIAGNOSTICS();
+}
+
+__nfweak void CLR_RT_DUMP::METHOD(
+    const CLR_RT_MethodDef_Instance &mdInst,
+    const CLR_RT_TypeSpec_Index *genericType,
+    const CLR_RT_TypeSpec_Index *parentCtx)
+{
+    (void)mdInst;
+    (void)genericType;
+    (void)parentCtx;
 
     NATIVE_PROFILE_CLR_DIAGNOSTICS();
 }

@@ -1046,6 +1046,8 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
     CLR_PMETADATA ip;
     bool fCondition;
     bool fDirty = false;
+    // set by CEE_CONSTRAINED prefix, consumed by CEE_CALLVIRT
+    CLR_UINT32 constrainedTypeToken = 0;
 
 #if defined(NANOCLR_OPCODE_STACKCHANGES)
     // Track stack depth for validation
@@ -2277,6 +2279,20 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
 
                     if (calleeInst.ResolveToken(arg, assm, effectiveCallerGeneric, &stack->m_call) == false)
                     {
+#if !defined(BUILD_RTM)
+                        CLR_Debug::Printf(
+                            "CALL resolve failed: op=%u token=%08x type=%u index=%u caller=%s callerTs=%08x "
+                            "callerMs=%08x effTs=%08x callerArr=%08x\r\n",
+                            op,
+                            arg,
+                            CLR_TypeFromTk(arg),
+                            CLR_DataFromTk(arg),
+                            stack->m_call.assembly->GetString(stack->m_call.target->name),
+                            stack->m_call.genericType ? stack->m_call.genericType->data : 0,
+                            stack->m_call.methodSpec.data,
+                            effectiveCallerGeneric ? effectiveCallerGeneric->data : 0,
+                            stack->m_call.arrayElementType.data);
+#endif
                         NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
                     }
 
@@ -2347,7 +2363,7 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
 
                             if (declType.target->dataType == DATATYPE_VALUETYPE)
                             {
-                                // any method on a value‐type is called via byref, so skip the object‐dereference path
+                                // any method on a value-type is called via byref, so skip the object-dereference path
                                 // altogether
                                 doInstanceResolution = false;
                             }
@@ -2413,8 +2429,9 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                                         }
 
                                         // Initialize the dispatched method, preserving the generic context from
-                                        // calleeInst The genericType was set by ResolveToken from the MethodRef's owner
-                                        // TypeSpec
+                                        // calleeInst. The genericType was set by ResolveToken from the MethodRef's
+                                        // owner TypeSpec. InitializeFromIndex stores the TypeSpec in stable member
+                                        // storage (m_typeSpecStorage), so genericType remains valid after the call.
                                         if (calleeInst.genericType && NANOCLR_INDEX_IS_VALID(*calleeInst.genericType))
                                         {
                                             if (calleeInst.InitializeFromIndex(
@@ -2423,6 +2440,56 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                                                     &stack->m_call) == false)
                                             {
                                                 NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+                                            }
+
+                                            // The TypeSpec from the MethodRef's owner might belong to an interface
+                                            // (e.g. ICollection<KVP<int,string>>) while the dispatched method belongs
+                                            // to the concrete type (e.g. Dictionary<TKey,TValue>). Using a mismatched
+                                            // TypeSpec corrupts generic-param resolution inside the callee.
+                                            // Detect this and try to recover the correct TypeSpec from the 'this'
+                                            // object, which stores its closed TypeSpec via HB_GenericInstance.
+                                            if (calleeInst.genericType &&
+                                                NANOCLR_INDEX_IS_VALID(*calleeInst.genericType))
+                                            {
+                                                CLR_RT_TypeSpec_Instance tsCheck{};
+                                                CLR_RT_TypeDef_Instance declCheck{};
+                                                if (tsCheck.InitializeFromIndex(*calleeInst.genericType) &&
+                                                    declCheck.InitializeFromMethod(calleeInst) &&
+                                                    tsCheck.genericTypeDef.data != declCheck.data)
+                                                {
+                                                    // Interface TypeSpec doesn't match the callee's declaring type.
+                                                    // Attempt to recover the correct closed TypeSpec from 'this'.
+                                                    bool recovered = false;
+                                                    CLR_RT_HeapBlock *thisHeap = pThis[0].Dereference();
+                                                    if (thisHeap != nullptr && thisHeap->IsAGenericInstance())
+                                                    {
+                                                        const CLR_RT_TypeSpec_Index &objTS =
+                                                            thisHeap->ObjectGenericType();
+                                                        if (NANOCLR_INDEX_IS_VALID(objTS))
+                                                        {
+                                                            CLR_RT_TypeSpec_Instance tsObj{};
+                                                            if (tsObj.InitializeFromIndex(objTS) &&
+                                                                tsObj.genericTypeDef.data == declCheck.data)
+                                                            {
+                                                                // The object's TypeSpec matches the callee's declaring
+                                                                // type — reinitialize with the correct closed TypeSpec.
+                                                                if (calleeInst.InitializeFromIndex(
+                                                                        calleeReal,
+                                                                        objTS,
+                                                                        &stack->m_call))
+                                                                {
+                                                                    recovered = true;
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+
+                                                    if (!recovered)
+                                                    {
+                                                        // Cannot recover — null is safer than a mismatched TypeSpec.
+                                                        calleeInst.genericType = nullptr;
+                                                    }
+                                                }
                                             }
                                         }
                                         else
@@ -2473,9 +2540,123 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                             calleeInst.arrayElementType = propagatedArrayElementType;
                         }
 
+                        // ECMA-335 §III.2.1 constrained. prefix semantics:
+                        // When constrained. T precedes callvirt and T is a reference type, the managed
+                        // pointer on the stack (from ldloca) must be dereferenced to the actual object
+                        // reference. For value types the BYREF is kept — the callee receives it as 'this'.
+                        if (constrainedTypeToken != 0)
+                        {
+                            if (op == CEE_CALLVIRT && pThis[0].DataType() == DATATYPE_BYREF)
+                            {
+                                CLR_RT_TypeDef_Instance constrainedType{};
+                                // Pass genericType as contextTypeSpec to enable MVAR→VAR→concrete
+                                // two-level resolution (e.g. constrained.!!T inside Equals<TValue>
+                                // where TValue is a VAR in the enclosing Dictionary<TKey,TValue>).
+                                if (constrainedType.ResolveToken(
+                                        constrainedTypeToken,
+                                        assm,
+                                        &stack->m_call,
+                                        stack->m_call.genericType))
+                                {
+                                    bool isValueType =
+                                        ((constrainedType.target->flags & CLR_RECORD_TYPEDEF::TD_Semantics_Mask) ==
+                                         CLR_RECORD_TYPEDEF::TD_Semantics_ValueType) ||
+                                        ((constrainedType.target->flags & CLR_RECORD_TYPEDEF::TD_Semantics_Mask) ==
+                                         CLR_RECORD_TYPEDEF::TD_Semantics_Enum);
+
+                                    if (!isValueType)
+                                    {
+                                        CLR_RT_HeapBlock *derefThis = pThis[0].Dereference();
+                                        if (derefThis != nullptr)
+                                        {
+                                            pThis[0].Assign(*derefThis);
+                                        }
+                                    }
+                                }
+                            }
+                            constrainedTypeToken = 0;
+                        }
+
 #ifndef NANOCLR_NO_IL_INLINE
                         if (stack->PushInline(ip, assm, evalPos, calleeInst, pThis))
                         {
+                            // PushInline switches stack->m_call to the callee but does NOT apply the
+                            // generic context or methodSpec inheritance.  Mirror the same logic used
+                            // by the regular Push path below.
+                            //
+                            // Determine the callee's declaring TypeDef so we only honor
+                            // effectiveCallerGeneric when it actually refers to the same generic
+                            // type as the callee's owner. Otherwise (e.g. a generic method calling
+                            // List<!!0>::GetEnumerator) the caller's genericType is unrelated and
+                            // would clobber the closed TypeSpec that ResolveToken already produced.
+                            CLR_UINT32 calleeOwnerTypeDefDataInline = 0;
+                            {
+                                CLR_RT_TypeDef_Instance calleeDeclTypeInline{};
+                                if (calleeInst.GetDeclaringType(calleeDeclTypeInline))
+                                {
+                                    calleeOwnerTypeDefDataInline = calleeDeclTypeInline.data;
+                                }
+                            }
+
+                            auto matchesCalleeOwner = [&](const CLR_RT_TypeSpec_Index *tsIdx) -> bool {
+                                if (calleeOwnerTypeDefDataInline == 0)
+                                    return true; // unknown owner: don't filter
+                                if (!tsIdx || !NANOCLR_INDEX_IS_VALID(*tsIdx))
+                                    return false;
+                                CLR_RT_TypeSpec_Instance tsInst{};
+                                if (!tsInst.InitializeFromIndex(*tsIdx))
+                                    return false;
+                                return NANOCLR_INDEX_IS_VALID(tsInst.genericTypeDef) &&
+                                       tsInst.genericTypeDef.data == calleeOwnerTypeDefDataInline;
+                            };
+
+                            const CLR_RT_TypeSpec_Index *inlineCtx = nullptr;
+
+                            if (effectiveCallerGeneric && NANOCLR_INDEX_IS_VALID(*effectiveCallerGeneric) &&
+                                matchesCalleeOwner(effectiveCallerGeneric))
+                            {
+                                inlineCtx = effectiveCallerGeneric;
+                            }
+                            else if (calleeInst.genericType && NANOCLR_INDEX_IS_VALID(*calleeInst.genericType))
+                            {
+                                inlineCtx = calleeInst.genericType;
+                            }
+                            else if (effectiveCallerGeneric && NANOCLR_INDEX_IS_VALID(*effectiveCallerGeneric))
+                            {
+                                // Fall back to caller's context even if TypeDef doesn't match.
+                                inlineCtx = effectiveCallerGeneric;
+                            }
+                            else if (
+                                stack->m_inlineFrame->m_frame.m_call.genericType &&
+                                NANOCLR_INDEX_IS_VALID(*stack->m_inlineFrame->m_frame.m_call.genericType))
+                            {
+                                inlineCtx = stack->m_inlineFrame->m_frame.m_call.genericType;
+                            }
+
+                            if (inlineCtx)
+                            {
+                                stack->m_genericTypeSpecStorage = *inlineCtx;
+                                stack->m_call.genericType = &stack->m_genericTypeSpecStorage;
+                            }
+                            else
+                            {
+                                stack->m_call.genericType = nullptr;
+                            }
+
+                            // Inherit caller's methodSpec when callee's genericType is open
+                            if (!NANOCLR_INDEX_IS_VALID(stack->m_call.methodSpec) &&
+                                stack->m_call.genericType != nullptr &&
+                                NANOCLR_INDEX_IS_VALID(*stack->m_call.genericType) &&
+                                NANOCLR_INDEX_IS_VALID(stack->m_inlineFrame->m_frame.m_call.methodSpec))
+                            {
+                                CLR_RT_TypeSpec_Instance tsCheck;
+                                if (tsCheck.InitializeFromIndex(*stack->m_call.genericType) &&
+                                    !tsCheck.IsClosedGenericType())
+                                {
+                                    stack->m_call.methodSpec = stack->m_inlineFrame->m_frame.m_call.methodSpec;
+                                }
+                            }
+
                             fDirty = true;
                             break;
                         }
@@ -2485,24 +2666,72 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
 
                         NANOCLR_CHECK_HRESULT(CLR_RT_StackFrame::Push(th, calleeInst, -1));
 
-                        // Set up the new stack frame's generic context
-                        // Priority order:
-                        // 1. effectiveCallerGeneric (extracted from TypeSpec search for interface calls) - HIGHEST
-                        // PRIORITY
-                        //    This is the concrete closed generic type (e.g., List<int>) not the interface (e.g.,
-                        //    IEnumerable<T>)
-                        // 2. calleeInst.genericType (from MethodRef TypeSpec or virtual dispatch)
-                        // 3. stack->m_call.genericType (inherited from caller)
+                        // Set up the new stack frame's generic context.
+                        //
+                        // Priority:
+                        //   1. effectiveCallerGeneric ONLY when it refers to the same generic
+                        //      TypeDef as the callee's declaring type. This covers interface
+                        //      callvirt cases (e.g. List<int> calling IEnumerable<T>::GetEnumerator)
+                        //      where we already extracted the concrete closed TypeSpec.
+                        //   2. calleeInst.genericType - already refined by ResolveToken's MVAR
+                        //      resolution against the caller's MethodSpec, so it is the closed
+                        //      TypeSpec when one exists.
+                        //   3. effectiveCallerGeneric as a fallback (TypeDef mismatch case).
+                        //   4. stack->m_call.genericType inherited from caller.
                         CLR_RT_StackFrame *newStack = th->CurrentFrame();
                         const CLR_RT_TypeSpec_Index *effectiveGenericContext = nullptr;
 
-                        if (effectiveCallerGeneric && NANOCLR_INDEX_IS_VALID(*effectiveCallerGeneric))
+                        CLR_UINT32 calleeOwnerTypeDefData = 0;
+                        {
+                            CLR_RT_TypeDef_Instance calleeDeclType{};
+                            if (calleeInst.GetDeclaringType(calleeDeclType))
+                            {
+                                calleeOwnerTypeDefData = calleeDeclType.data;
+                            }
+                        }
+
+                        auto refersToCalleeOwner = [&](const CLR_RT_TypeSpec_Index *tsIdx) -> bool {
+                            if (calleeOwnerTypeDefData == 0)
+                            {
+                                // unknown owner: don't filter
+                                return true;
+                            }
+
+                            if (!tsIdx || !NANOCLR_INDEX_IS_VALID(*tsIdx))
+                            {
+                                return false;
+                            }
+
+                            CLR_RT_TypeSpec_Instance tsInst{};
+                            if (!tsInst.InitializeFromIndex(*tsIdx))
+                            {
+                                return false;
+                            }
+
+                            return NANOCLR_INDEX_IS_VALID(tsInst.genericTypeDef) &&
+                                   tsInst.genericTypeDef.data == calleeOwnerTypeDefData;
+                        };
+
+                        if (effectiveCallerGeneric && NANOCLR_INDEX_IS_VALID(*effectiveCallerGeneric) &&
+                            refersToCalleeOwner(effectiveCallerGeneric))
                         {
                             effectiveGenericContext = effectiveCallerGeneric;
                         }
                         else if (calleeInst.genericType && NANOCLR_INDEX_IS_VALID(*calleeInst.genericType))
                         {
-                            effectiveGenericContext = calleeInst.genericType;
+                            // Only use calleeInst's genericType when it is a CLOSED generic (all VAR/MVAR
+                            // parameters already resolved to concrete types). An open TypeSpec (e.g.
+                            // KeyValuePair<TKey,TValue>) cannot resolve VAR indices and causes
+                            // CLR_E_WRONG_TYPE in the callee. Fall through to Priority 3 instead.
+                            CLR_RT_TypeSpec_Instance calleeTs{};
+                            if (calleeTs.InitializeFromIndex(*calleeInst.genericType) && calleeTs.IsClosedGenericType())
+                            {
+                                effectiveGenericContext = calleeInst.genericType;
+                            }
+                        }
+                        else if (effectiveCallerGeneric && NANOCLR_INDEX_IS_VALID(*effectiveCallerGeneric))
+                        {
+                            effectiveGenericContext = effectiveCallerGeneric;
                         }
                         else if (stack->m_call.genericType && NANOCLR_INDEX_IS_VALID(*stack->m_call.genericType))
                         {
@@ -2520,6 +2749,21 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                         {
                             // Ensure genericType doesn't point to garbage
                             newStack->m_call.genericType = nullptr;
+                        }
+
+                        // If the callee operates on an open generic type (MVAR-based) and has no MethodSpec,
+                        // inherit the caller's MethodSpec for MVAR resolution (e.g. static/instance field access).
+                        if (!NANOCLR_INDEX_IS_VALID(newStack->m_call.methodSpec) &&
+                            newStack->m_call.genericType != nullptr &&
+                            NANOCLR_INDEX_IS_VALID(*newStack->m_call.genericType) &&
+                            NANOCLR_INDEX_IS_VALID(stack->m_call.methodSpec))
+                        {
+                            CLR_RT_TypeSpec_Instance tsCheck;
+                            if (tsCheck.InitializeFromIndex(*newStack->m_call.genericType) &&
+                                !tsCheck.IsClosedGenericType())
+                            {
+                                newStack->m_call.methodSpec = stack->m_call.methodSpec;
+                            }
                         }
                     }
 
@@ -2671,6 +2915,18 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
 
                     if (calleeInst.ResolveToken(arg, assm, stack->m_call.genericType, &stack->m_call) == false)
                     {
+#if !defined(BUILD_RTM)
+                        CLR_Debug::Printf(
+                            "NEWOBJ resolve failed: token=%08x type=%u index=%u caller=%s callerTs=%08x callerMs=%08x "
+                            "callerArr=%08x\r\n",
+                            arg,
+                            CLR_TypeFromTk(arg),
+                            CLR_DataFromTk(arg),
+                            stack->m_call.assembly->GetString(stack->m_call.target->name),
+                            stack->m_call.genericType ? stack->m_call.genericType->data : 0,
+                            stack->m_call.methodSpec.data,
+                            stack->m_call.arrayElementType.data);
+#endif
                         NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
                     }
 
@@ -2680,6 +2936,21 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
 
                     if (!calleeInst.GetDeclaringType(cls))
                     {
+#if !defined(BUILD_RTM)
+                        CLR_Debug::Printf(
+                            "NEWOBJ declaring type failed: token=%08x callee=%s calleeTs=%08x calleeMs=%08x caller=%s "
+                            "callerTs=%08x callerMs=%08x callerArr=%08x\r\n",
+                            arg,
+                            calleeInst.assembly && calleeInst.target
+                                ? calleeInst.assembly->GetString(calleeInst.target->name)
+                                : "<null>",
+                            calleeInst.genericType ? calleeInst.genericType->data : 0,
+                            calleeInst.methodSpec.data,
+                            stack->m_call.assembly->GetString(stack->m_call.target->name),
+                            stack->m_call.genericType ? stack->m_call.genericType->data : 0,
+                            stack->m_call.methodSpec.data,
+                            stack->m_call.arrayElementType.data);
+#endif
                         NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
                     }
 
@@ -2825,6 +3096,20 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                             }
                         }
 
+                        // If the constructor operates on an open generic type (MVAR-based) and has no
+                        // MethodSpec of its own, inherit the caller's MethodSpec so that MVAR resolution
+                        // succeeds inside the callee (e.g. for ldsfld s_emptyArray on List<!!0>).
+                        if (!NANOCLR_INDEX_IS_VALID(calleeInst.methodSpec) && calleeInst.genericType != nullptr &&
+                            NANOCLR_INDEX_IS_VALID(*calleeInst.genericType) &&
+                            NANOCLR_INDEX_IS_VALID(stack->m_call.methodSpec))
+                        {
+                            CLR_RT_TypeSpec_Instance tsCheck;
+                            if (tsCheck.InitializeFromIndex(*calleeInst.genericType) && !tsCheck.IsClosedGenericType())
+                            {
+                                calleeInst.methodSpec = stack->m_call.methodSpec;
+                            }
+                        }
+
                         if (FAILED(hr = CLR_RT_StackFrame::Push(th, calleeInst, -1)))
                         {
                             if (hr == CLR_E_NOT_SUPPORTED)
@@ -2879,6 +3164,17 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                     CLR_RT_FieldDef_Instance fieldInst;
                     if (fieldInst.ResolveToken(arg, assm, &stack->m_call) == false)
                     {
+#if defined(NANOCLR_TRACE_GENERICS)
+                        if (s_CLR_RT_fTrace_GenericFields >= c_CLR_RT_Trace_Info)
+                        {
+                            CLR_Debug::Printf(
+                                "GenericFields: LDFLD ResolveToken failed tk=%08X assm='%s' caller='%s'\r\n",
+                                arg,
+                                assm ? assm->name : "<null>",
+                                stack->m_call.assembly ? stack->m_call.assembly->GetString(stack->m_call.target->name)
+                                                       : "<null>");
+                        }
+#endif
                         NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
                     }
 
@@ -2891,9 +3187,50 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                     {
                         case DATATYPE_CLASS:
                         case DATATYPE_VALUETYPE:
-                        case DATATYPE_GENERICINST:
-                            evalPos[0].Assign(obj[fieldInst.CrossReference().offset]);
+                        {
+                            CLR_RT_HeapBlock &field = obj[fieldInst.CrossReference().offset];
+                            if (field.DataSize() > 1)
+                            {
+                                // Embedded value type field spanning multiple heap blocks.
+                                // Mirror the LDOBJ pattern: BYREF + LoadFromReference clones
+                                // the full struct in a GC-safe way. Do NOT goto Execute_LoadAndPromote
+                                // since LoadFromReference already places the clone in evalPos[0].
+                                UPDATESTACK(stack, evalPos);
+                                CLR_RT_HeapBlock safeRef;
+                                safeRef.SetReference(field);
+                                CLR_RT_ProtectFromGC gc(safeRef);
+                                NANOCLR_CHECK_HRESULT(evalPos[0].LoadFromReference(safeRef));
+                                break;
+                            }
+                            evalPos[0].Assign(field);
                             goto Execute_LoadAndPromote;
+                        }
+                        case DATATYPE_GENERICINST:
+                        {
+#if defined(NANOCLR_TRACE_GENERICS)
+                            if (s_CLR_RT_fTrace_GenericFields >= c_CLR_RT_Trace_Verbose)
+                            {
+                                CLR_Debug::Printf(
+                                    "GenericFields: LDFLD GENERICINST field='%s' offset=%d dt=%d\r\n",
+                                    fieldInst.assembly ? fieldInst.assembly->GetString(fieldInst.target->name)
+                                                       : "<null>",
+                                    fieldInst.CrossReference().offset,
+                                    (int)obj[fieldInst.CrossReference().offset].DataType());
+                            }
+#endif
+                            CLR_RT_HeapBlock &field2 = obj[fieldInst.CrossReference().offset];
+                            if (field2.DataSize() > 1)
+                            {
+                                UPDATESTACK(stack, evalPos);
+                                CLR_RT_HeapBlock safeRef2;
+                                safeRef2.SetReference(field2);
+                                CLR_RT_ProtectFromGC gc(safeRef2);
+                                NANOCLR_CHECK_HRESULT(evalPos[0].LoadFromReference(safeRef2));
+                                break;
+                            }
+                            evalPos[0].Assign(field2);
+                            goto Execute_LoadAndPromote;
+                        }
                         case DATATYPE_DATETIME:
                         case DATATYPE_TIMESPAN:
                             evalPos[0].SetInteger((CLR_INT64)obj->NumericByRefConst().s8);
@@ -2933,6 +3270,17 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                     CLR_RT_FieldDef_Instance fieldInst;
                     if (fieldInst.ResolveToken(arg, assm, &stack->m_call) == false)
                     {
+#if defined(NANOCLR_TRACE_GENERICS)
+                        if (s_CLR_RT_fTrace_GenericFields >= c_CLR_RT_Trace_Info)
+                        {
+                            CLR_Debug::Printf(
+                                "GenericFields: LDFLDA ResolveToken failed tk=%08X assm='%s' caller='%s'\r\n",
+                                arg,
+                                assm ? assm->name : "<null>",
+                                stack->m_call.assembly ? stack->m_call.assembly->GetString(stack->m_call.target->name)
+                                                       : "<null>");
+                        }
+#endif
                         NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
                     }
 
@@ -2977,6 +3325,17 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                     CLR_RT_FieldDef_Instance fieldInst;
                     if (fieldInst.ResolveToken(arg, assm, &stack->m_call) == false)
                     {
+#if defined(NANOCLR_TRACE_GENERICS)
+                        if (s_CLR_RT_fTrace_GenericFields >= c_CLR_RT_Trace_Info)
+                        {
+                            CLR_Debug::Printf(
+                                "GenericFields: STFLD ResolveToken failed tk=%08X assm='%s' caller='%s'\r\n",
+                                arg,
+                                assm ? assm->name : "<null>",
+                                stack->m_call.assembly ? stack->m_call.assembly->GetString(stack->m_call.target->name)
+                                                       : "<null>");
+                        }
+#endif
                         NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
                     }
 
@@ -2987,9 +3346,22 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
 
                     switch (dt)
                     {
-                        case DATATYPE_GENERICINST:
                         case DATATYPE_CLASS:
                         case DATATYPE_VALUETYPE:
+                            obj[fieldInst.CrossReference().offset].AssignAndPreserveType(evalPos[2]);
+                            break;
+                        case DATATYPE_GENERICINST:
+#if defined(NANOCLR_TRACE_GENERICS)
+                            if (s_CLR_RT_fTrace_GenericFields >= c_CLR_RT_Trace_Verbose)
+                            {
+                                CLR_Debug::Printf(
+                                    "GenericFields: STFLD GENERICINST field='%s' offset=%d src_dt=%d\r\n",
+                                    fieldInst.assembly ? fieldInst.assembly->GetString(fieldInst.target->name)
+                                                       : "<null>",
+                                    fieldInst.CrossReference().offset,
+                                    (int)evalPos[2].DataType());
+                            }
+#endif
                             obj[fieldInst.CrossReference().offset].AssignAndPreserveType(evalPos[2]);
                             break;
                         case DATATYPE_DATETIME: // Special case.
@@ -3046,6 +3418,18 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                             field.genericType,
                             &stack->m_genericTypeSpecStorage,
                             &stack->m_call);
+
+#if defined(NANOCLR_TRACE_GENERICS)
+                        if (s_CLR_RT_fTrace_GenericFields >= c_CLR_RT_Trace_Verbose)
+                        {
+                            CLR_Debug::Printf(
+                                "GenericStatic: LDSFLD field='%s' ts=[%04X:%04X] ptr=%08X\r\n",
+                                field.assembly ? field.assembly->GetString(field.target->name) : "<null>",
+                                field.genericType->Assembly(),
+                                field.genericType->TypeSpec(),
+                                (uintptr_t)ptr);
+                        }
+#endif
                     }
                     else
                     {
@@ -3076,6 +3460,16 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                                 NANOCLR_CHECK_HRESULT(HandleGenericCctorReschedule(tsInst, stack, &ip));
                             }
                         }
+
+#if defined(NANOCLR_TRACE_GENERICS)
+                        if (s_CLR_RT_fTrace_GenericFields >= c_CLR_RT_Trace_Verbose)
+                        {
+                            CLR_Debug::Printf(
+                                "GenericStatic: LDSFLD resolved ptr=%08X dt=%d\r\n",
+                                (uintptr_t)ptr,
+                                (int)ptr->DataType());
+                        }
+#endif
                     }
 
                     evalPos++;
@@ -3241,7 +3635,10 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                         }
                     }
 
-                    if (typeInst.ResolveToken(arg, assm, &stack->m_call) == false)
+                    // Pass genericType as contextTypeSpec so that two-level MVAR→VAR→concrete
+                    // resolution succeeds (e.g. box !!T inside Equals<TValue> where TValue is a
+                    // VAR in the enclosing generic type like Dictionary<TKey,TValue>).
+                    if (typeInst.ResolveToken(arg, assm, &stack->m_call, stack->m_call.genericType) == false)
                     {
                         // restore previous context before bailing
                         stack->m_call.arrayElementType = previousArrayElemType;
@@ -3414,7 +3811,9 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                         }
                     }
 
-                    if (typeInst.ResolveToken(arg, assm, &stack->m_call) == false)
+                    // Pass genericType as contextTypeSpec for the same MVAR→VAR→concrete
+                    // two-level resolution needed by the BOX path.
+                    if (typeInst.ResolveToken(arg, assm, &stack->m_call, stack->m_call.genericType) == false)
                     {
                         // restore previous context before bailing
                         stack->m_call.arrayElementType = previousArrayElemType;
@@ -3808,7 +4207,7 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                     // Promote the value if it's a reference or boxed struct
                     evalPos[3].Promote();
 
-                    // Compute the element‐size: 0 for refs (incl. genericinst), sizeInBytes for primitives
+                    // Compute the element-size: 0 for refs (incl. genericinst), sizeInBytes for primitives
                     size_t size = 0;
                     if (elemDT <= DATATYPE_LAST_PRIMITIVE_TO_PRESERVE)
                     {
@@ -3969,7 +4368,7 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                                     // Type generic parameter (!T)
                                     if (stack->m_call.genericType == nullptr)
                                     {
-                                        // No closed‐generic context available: fall back to returning the
+                                        // No closed-generic context available: fall back to returning the
                                         // declaring TYPE itself as the reflection result (rarely correct, but at least
                                         // safe).
                                         CLR_RT_TypeDef_Index fallbackTypeDef = gpCR.classTypeDef;
@@ -4279,7 +4678,8 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                 {
                     FETCH_ARG_COMPRESSED_TYPETOKEN(arg, ip);
 
-                    // nop
+                    // Store the constrained type token; CEE_CALLVIRT will consume it.
+                    constrainedTypeToken = arg;
                     break;
                 }
 
