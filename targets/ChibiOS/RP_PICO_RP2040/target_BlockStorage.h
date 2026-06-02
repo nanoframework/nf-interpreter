@@ -7,6 +7,6 @@
 #define TARGETPAL_BLOCKSTORAGE_H
 
 // this device has 1 block storage device (external QSPI flash via XIP)
-#define TARGET_BLOCKSTORAGE_COUNT   1
+#define TARGET_BLOCKSTORAGE_COUNT 1
 
 #endif // TARGETPAL_BLOCKSTORAGE_H
