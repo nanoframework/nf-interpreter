@@ -6,4 +6,6 @@
 #ifndef TARGET_PLATFORM_H
 #define TARGET_PLATFORM_H
 
+#define NANOCLR_GRAPHICS 0
+
 #endif // TARGET_PLATFORM_H

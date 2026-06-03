@@ -95,7 +95,7 @@ void nanoHAL_Initialize()
     ::HeapLocation(heapStart, heapSize);
     memset(heapStart, 0, heapSize);
 
-#if (NANOCLR_GRAPHICS == TRUE)
+#if NANOCLR_GRAPHICS
     g_GraphicsMemoryHeap.Initialize();
 #endif
 
@@ -183,7 +183,7 @@ void nanoHAL_Initialize()
     Usart5_PAL = {0};
 #endif
 
-#if (NANOCLR_GRAPHICS == TRUE)
+#if NANOCLR_GRAPHICS
     DisplayInterfaceConfig config; // not used for DSI display
     g_DisplayInterface.Initialize(config);
     g_DisplayDriver.Initialize();
