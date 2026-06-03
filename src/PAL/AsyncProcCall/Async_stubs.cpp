@@ -19,7 +19,7 @@ __nfweak void HAL_CONTINUATION::Uninitialize()
     NATIVE_PROFILE_PAL_ASYNC_PROC_CALL();
 }
 
-__nfweak void HAL_CONTINUATION::InitializeCallback( HAL_CALLBACK_FPN entryPoint, void* argument )
+__nfweak void HAL_CONTINUATION::InitializeCallback(HAL_CALLBACK_FPN entryPoint, void *argument)
 {
     (void)entryPoint;
     (void)argument;
@@ -32,7 +32,7 @@ __nfweak void HAL_CONTINUATION::Enqueue()
     NATIVE_PROFILE_PAL_ASYNC_PROC_CALL();
 }
 
-__nfweak void HAL_CONTINUATION::Abort  ()
+__nfweak void HAL_CONTINUATION::Abort()
 {
     NATIVE_PROFILE_PAL_ASYNC_PROC_CALL();
 }
@@ -62,14 +62,14 @@ __nfweak void HAL_COMPLETION::Uninitialize()
     NATIVE_PROFILE_PAL_ASYNC_PROC_CALL();
 }
 
-__nfweak void HAL_COMPLETION::EnqueueTicks( uint64_t eventTimeTicks)
+__nfweak void HAL_COMPLETION::EnqueueTicks(uint64_t eventTimeTicks)
 {
     (void)eventTimeTicks;
 
     NATIVE_PROFILE_PAL_ASYNC_PROC_CALL();
 }
 
-__nfweak void HAL_COMPLETION::EnqueueDelta( uint32_t uSecFromNow )
+__nfweak void HAL_COMPLETION::EnqueueDelta(uint32_t uSecFromNow)
 {
     (void)uSecFromNow;
 
@@ -91,7 +91,7 @@ __nfweak void HAL_COMPLETION::DequeueAndExec()
     NATIVE_PROFILE_PAL_ASYNC_PROC_CALL();
 }
 
-__nfweak void HAL_COMPLETION::WaitForInterrupts( uint64_t expireTimeInSysTicks, uint32_t sleepLevel, uint64_t wakeEvents )
+__nfweak void HAL_COMPLETION::WaitForInterrupts(uint64_t expireTimeInSysTicks, uint32_t sleepLevel, uint64_t wakeEvents)
 {
     (void)expireTimeInSysTicks;
     (void)sleepLevel;

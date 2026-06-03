@@ -4,20 +4,20 @@
 // See LICENSE file in the project root for full license information.
 //
 
-// a byte array data source for the JPEG decoder implemented according to the structure of 
+// a byte array data source for the JPEG decoder implemented according to the structure of
 // jpeg_source_mgr
-
 
 #include "jinclude.h"
 #include "jpeglib.h"
 #include "jerror.h"
 
-typedef struct {
-    struct jpeg_source_mgr pub;	// public fields
-    JOCTET buffer[2];		// EOI buffer (so we don't have to call allocate() )
+typedef struct
+{
+    struct jpeg_source_mgr pub; // public fields
+    JOCTET buffer[2];           // EOI buffer (so we don't have to call allocate() )
 } my_source_mgr;
 
-typedef my_source_mgr* my_src_ptr;
+typedef my_source_mgr *my_src_ptr;
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-parameter"
@@ -31,7 +31,7 @@ init_source(j_decompress_ptr cinfo)
 METHODDEF(bool)
 fill_input_buffer(j_decompress_ptr cinfo)
 {
-    // since the initial buffer contains all the data that we have, 
+    // since the initial buffer contains all the data that we have,
     // if this method is called, it means we're out of data already
     // so we make up fake data to keep the decoder alive
 
@@ -49,23 +49,25 @@ fill_input_buffer(j_decompress_ptr cinfo)
     return true;
 }
 
-// Keeping the library's original implementation 
+// Keeping the library's original implementation
 METHODDEF(void)
 skip_input_data(j_decompress_ptr cinfo, long num_bytes)
 {
     my_src_ptr src = (my_src_ptr)cinfo->src;
 
     /* Just a dumb implementation for now.  Could use fseek() except
-    * it doesn't work on pipes.  Not clear that being smart is worth
-    * any trouble anyway --- large skips are infrequent.
-    */
-    if (num_bytes > 0) {
-        while (num_bytes > (long)src->pub.bytes_in_buffer) {
+     * it doesn't work on pipes.  Not clear that being smart is worth
+     * any trouble anyway --- large skips are infrequent.
+     */
+    if (num_bytes > 0)
+    {
+        while (num_bytes > (long)src->pub.bytes_in_buffer)
+        {
             num_bytes -= (long)src->pub.bytes_in_buffer;
             (void)fill_input_buffer(cinfo);
             /* note we assume that fill_input_buffer will never return false,
-            * so suspension need not be handled.
-            */
+             * so suspension need not be handled.
+             */
         }
         src->pub.next_input_byte += (CLR_INT32)num_bytes;
         src->pub.bytes_in_buffer -= (CLR_INT32)num_bytes;
@@ -82,14 +84,16 @@ term_source(j_decompress_ptr cinfo)
 #pragma GCC diagnostic pop
 
 GLOBAL(void)
-jpeg_byte_array_src(j_decompress_ptr cinfo, CLR_UINT8* source, CLR_INT32 size)
+jpeg_byte_array_src(j_decompress_ptr cinfo, CLR_UINT8 *source, CLR_INT32 size)
 {
     my_src_ptr src;
 
-    if (cinfo->src == NULL) {	// first time for this JPEG object?
-        cinfo->src = (struct jpeg_source_mgr*)
-            (*cinfo->mem->alloc_small) ((j_common_ptr)cinfo, JPOOL_PERMANENT,
-                SIZEOF(my_source_mgr));
+    if (cinfo->src == NULL)
+    { // first time for this JPEG object?
+        cinfo->src = (struct jpeg_source_mgr *)(*cinfo->mem->alloc_small)(
+            (j_common_ptr)cinfo,
+            JPOOL_PERMANENT,
+            SIZEOF(my_source_mgr));
     }
 
     src = (my_src_ptr)cinfo->src;

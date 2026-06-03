@@ -37,8 +37,8 @@ HRESULT PalEventDriver::Uninitialize()
 HRESULT PalEventDriver::PostEvent(uint32_t e, uint32_t param)
 {
     PalEventListener *listener = g_palEventDriver.listenerList.FirstNode();
-        
-    while(listener->Next() != NULL)
+
+    while (listener->Next() != NULL)
     {
         if (listener->m_eventMask & e)
         {
@@ -51,7 +51,7 @@ HRESULT PalEventDriver::PostEvent(uint32_t e, uint32_t param)
     return S_OK;
 }
 
-HRESULT PalEventDriver::EnlistListener(PalEventListener* listener)
+HRESULT PalEventDriver::EnlistListener(PalEventListener *listener)
 {
     listener->Initialize();
     g_palEventDriver.listenerList.LinkAtBack(listener);
