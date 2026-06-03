@@ -98,7 +98,7 @@ bool GestureDriver::ProcessPoint(CLR_UINT32 flags, CLR_UINT16 source, CLR_UINT16
     if (source == 0) {} // Avoid unused paramter , not used as ported, maybe in future?
     if (time == 0) {} // Avoid unused paramter , not used as ported, maybe in future?
 
-    if (!GestureDriver::s_initialized) return FALSE;
+    if (!GestureDriver::s_initialized) return false;
 
     m_index = (flags >> 16);
 
@@ -109,7 +109,7 @@ bool GestureDriver::ProcessPoint(CLR_UINT32 flags, CLR_UINT16 source, CLR_UINT16
         {
             PostManagedEvent(EVENT_GESTURE, gesture, 0, ((CLR_UINT32)m_startx << 16) | m_starty);
         }
-        return FALSE;
+        return false;
     }
 
     if (x == TouchPointLocationFlags_ContactDown) return true;

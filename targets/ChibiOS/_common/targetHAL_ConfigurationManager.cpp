@@ -216,7 +216,7 @@ __nfweak bool ConfigurationManager_GetConfigurationBlock(
         if (g_TargetConfiguration.Wireless80211Configs->Count == 0 ||
             (configurationIndex + 1) > g_TargetConfiguration.Wireless80211Configs->Count)
         {
-            return FALSE;
+            return false;
         }
 
         // set block size
@@ -230,7 +230,7 @@ __nfweak bool ConfigurationManager_GetConfigurationBlock(
         if (g_TargetConfiguration.CertificateStore->Count == 0 ||
             (configurationIndex + 1) > g_TargetConfiguration.CertificateStore->Count)
         {
-            return FALSE;
+            return false;
         }
 
         // get block address
@@ -246,7 +246,7 @@ __nfweak bool ConfigurationManager_GetConfigurationBlock(
         if (g_TargetConfiguration.DeviceCertificates->Count == 0 ||
             (configurationIndex + 1) > g_TargetConfiguration.DeviceCertificates->Count)
         {
-            return FALSE;
+            return false;
         }
 
         // get block address
@@ -296,7 +296,7 @@ __nfweak bool ConfigurationManager_StoreConfigurationBlock(
             // the requested config block is beyond the available count
             if ((configurationIndex + 1) > g_TargetConfiguration.NetworkInterfaceConfigs->Count)
             {
-                return FALSE;
+                return false;
             }
 
             // set storage address from block address, plus the requested offset
@@ -330,7 +330,7 @@ __nfweak bool ConfigurationManager_StoreConfigurationBlock(
         else if (g_TargetConfiguration.Wireless80211Configs->Count == 0 ||
                  (configurationIndex + 1) > g_TargetConfiguration.Wireless80211Configs->Count)
         {
-            return FALSE;
+            return false;
         }
         else
         {
@@ -378,14 +378,14 @@ __nfweak bool ConfigurationManager_StoreConfigurationBlock(
             if (((uint32_t)&__nanoConfig_end__ - storageAddress) < blockSize)
             {
                 // not enough room
-                return FALSE;
+                return false;
             }
 
             // now check if memory is erase, so the block can be stored
             if (!g_ConfigFlashDriver.IsBlockErased(NULL, storageAddress, blockSize))
             {
                 // memory not erased, can't store
-                return FALSE;
+                return false;
             }
         }
 
@@ -428,14 +428,14 @@ __nfweak bool ConfigurationManager_StoreConfigurationBlock(
             if (((uint32_t)&__nanoConfig_end__ - storageAddress) < blockSize)
             {
                 // not enough room
-                return FALSE;
+                return false;
             }
 
             // now check if memory is erase, so the block can be stored
             if (!g_ConfigFlashDriver.IsBlockErased(NULL, storageAddress, blockSize))
             {
                 // memory not erased, can't store
-                return FALSE;
+                return false;
             }
         }
 
@@ -458,7 +458,7 @@ __nfweak bool ConfigurationManager_StoreConfigurationBlock(
         // for save all the block size has to be provided, check that
         if (blockSize == 0)
         {
-            return FALSE;
+            return false;
         }
     }
 
@@ -760,7 +760,7 @@ __nfweak bool InitialiseNetworkDefaultConfig(HAL_Configuration_NetworkInterface 
     (void)configurationIndex;
 
     // can't create a "default" network config because we are lacking definition of a MAC address
-    return FALSE;
+    return false;
 }
 
 // default implementation

@@ -88,7 +88,7 @@ bool FATFS_FS_Driver::InitializeVolume(const VOLUME_ID *volume, const char *path
 
     if (fs == NULL)
     {
-        return FALSE;
+        return false;
     }
 
     // try mounting the volume
@@ -103,7 +103,7 @@ bool FATFS_FS_Driver::InitializeVolume(const VOLUME_ID *volume, const char *path
     // ... and free the volume
     FreeFatFsByVolumeId(volume);
 
-    return FALSE;
+    return false;
 }
 
 bool FATFS_FS_Driver::UnInitializeVolume(const VOLUME_ID *volume)
@@ -116,7 +116,7 @@ bool FATFS_FS_Driver::UnInitializeVolume(const VOLUME_ID *volume)
     // sanity check
     if (volumeIndex < 0)
     {
-        return FALSE;
+        return false;
     }
 
     // need to converto to string
@@ -227,7 +227,7 @@ HRESULT FATFS_FS_Driver::GetVolumeLabel(const VOLUME_ID *volume, char *volumeLab
 
     // if (fs == NULL)
     // {
-    //     return FALSE;
+    //     return false;
     // }
 
     // memcpy(volumeLabel, fatFS.lfnbuf, volumeLabelLen);

@@ -11,7 +11,7 @@
 __nfweak bool SSL_Initialize()
 {
     NATIVE_PROFILE_PAL_COM();
-    return FALSE;
+    return false;
 }
 
 __nfweak bool SSL_Uninitialize()

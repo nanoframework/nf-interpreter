@@ -72,7 +72,7 @@ unsigned int BlockStorageList_GetNumDevices()
 // ByteAddress &SectAddress)
 //{
 //    *pBSD = NULL;
-//    return FALSE;
+//    return false;
 //}
 bool BlockStorageList_FindDeviceForPhysicalAddress(
     BlockStorageDevice **pBSD,
@@ -84,12 +84,12 @@ bool BlockStorageList_FindDeviceForPhysicalAddress(
 
 // bool BlockStorageStream::Initialize(unsigned int blockUsage)
 //{
-//    return FALSE;
+//    return false;
 //}
 //
 // bool BlockStorageStream::Initialize(unsigned int usage, BlockStorageDevice* pDevice)
 //{
-//    return FALSE;
+//    return false;
 //}
 //
 //
@@ -100,12 +100,12 @@ bool BlockStorageList_FindDeviceForPhysicalAddress(
 //
 // bool BlockStorageStream::PrevStream()
 //{
-//    return FALSE;
+//    return false;
 //}
 //
 // bool BlockStorageStream::NextStream()
 //{
-//    return FALSE;
+//    return false;
 //}
 //
 // bool BlockStorageStream::Seek( signed int offset, SeekOrigin origin )
@@ -145,19 +145,19 @@ bool BlockStorageList_FindDeviceForPhysicalAddress(
 // bool DeviceBlockInfo::FindRegionFromAddress(ByteAddress Address, unsigned int &BlockRegionIndex, unsigned int
 // &BlockRangeIndex ) const
 //{
-//    return FALSE;
+//    return false;
 //}
 //
 // bool DeviceBlockInfo::FindNextUsageBlock(unsigned int BlockUsage, ByteAddress &Address, unsigned int
 // &BlockRegionIndex, unsigned int &BlockRangeIndex ) const
 //{
-//    return FALSE;
+//    return false;
 //}
 //
 // bool DeviceBlockInfo::FindForBlockUsage(unsigned int BlockUsage, ByteAddress &Address, unsigned int
 // &BlockRegionIndex, unsigned int &BlockRangeIndex ) const
 //{
-//    return FALSE;
+//    return false;
 //}
 
 //--//

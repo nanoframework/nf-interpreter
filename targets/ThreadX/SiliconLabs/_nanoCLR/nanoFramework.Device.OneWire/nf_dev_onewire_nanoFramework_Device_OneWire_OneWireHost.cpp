@@ -246,7 +246,7 @@ bool oneWireFindNext(bool doReset, bool alarmOnly)
         LastDevice = FALSE;
         LastFamilyDiscrepancy = 0;
 
-        return FALSE;
+        return false;
     }
 
     // check if reset bus was requested
@@ -259,7 +259,7 @@ bool oneWireFindNext(bool doReset, bool alarmOnly)
             // reset the search
             LastDiscrepancy = 0;
             LastFamilyDiscrepancy = 0;
-            return FALSE;
+            return false;
         }
     }
 

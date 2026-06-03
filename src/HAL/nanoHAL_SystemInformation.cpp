@@ -14,7 +14,7 @@ bool GetHalSystemInfo(HalSystemInfo &systemInfo)
 {
 #if defined(HAL_REDUCESIZE)
     // No config update.
-    return FALSE;
+    return false;
 #else
 
     // NFReleaseInfo:

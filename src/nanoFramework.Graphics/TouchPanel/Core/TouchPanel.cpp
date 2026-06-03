@@ -133,7 +133,7 @@ HRESULT TouchPanelDriver::GetDeviceCaps(unsigned int iIndex, void *lpOutput)
 {
     if (lpOutput == NULL)
     {
-        return FALSE;
+        return false;
     }
 
     switch (iIndex)
@@ -162,7 +162,7 @@ HRESULT TouchPanelDriver::GetDeviceCaps(unsigned int iIndex, void *lpOutput)
             return (g_TouchPanelDriver.CalibrationPointGet((TOUCH_PANEL_CALIBRATION_POINT *)lpOutput));
 
         default:
-            return FALSE;
+            return false;
     }
 
     return S_OK;

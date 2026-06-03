@@ -271,7 +271,7 @@ bool ISM43362_SOCKETS_Driver::Initialize()
             // sanity check
             if (networkConfiguration.StartupAddressMode == 0)
             {
-                return FALSE;
+                return false;
             }
 
             // Bind and Open the Ethernet driver
@@ -292,7 +292,7 @@ bool ISM43362_SOCKETS_Driver::Initialize()
                     (NetworkInterface_UpdateOperation_Dhcp | NetworkInterface_UpdateOperation_Dns),
                     &networkConfiguration) != S_OK)
             {
-                return FALSE;
+                return false;
             }
 
             // TODO NETWORK

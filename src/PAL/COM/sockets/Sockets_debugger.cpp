@@ -117,7 +117,7 @@ bool Sockets_LWIP_Driver::InitializeDbgListener(int ComPortNum)
     Debugger_Initialize();
 
     if (ComPortNum != ConvertCOM_SockPort(COM_SOCKET_DBG))
-        return FALSE;
+        return false;
 
     if (g_Sockets_LWIP_Driver.m_SocketDebugListener != SOCK_SOCKET_ERROR)
         return true;
@@ -182,7 +182,7 @@ bool Sockets_LWIP_Driver::UninitializeDbgListener(int ComPortNum)
     NATIVE_PROFILE_PAL_COM();
 
     if (ComPortNum != ConvertCOM_SockPort(COM_SOCKET_DBG))
-        return FALSE;
+        return false;
 
     g_Sockets_LWIP_Driver.m_stateDebugSocket = DbgSock_Uninitialized;
 
@@ -416,16 +416,16 @@ void Sockets_LWIP_Driver::OnDebuggerTimeout(void *arg)
 bool Sockets_LWIP_Driver::IsUsingSsl(int ComPortNum)
 {
     if (ComPortNum != ConvertCOM_SockPort(COM_SOCKET_DBG))
-        return FALSE;
+        return false;
     if (g_Sockets_LWIP_Driver.m_stateDebugSocket == DbgSock_Uninitialized)
-        return FALSE;
+        return false;
 
     if (g_Sockets_LWIP_Driver.m_stateDebugSocket == DbgSock_Connected)
     {
         return g_Sockets_LWIP_Driver.m_usingSSL;
     }
 
-    return FALSE;
+    return false;
 }
 
 bool Sockets_LWIP_Driver::UpgradeToSsl(
@@ -483,7 +483,7 @@ bool Sockets_LWIP_Driver::UpgradeToSsl(
         }
     }
 
-    return FALSE;
+    return false;
 }
 
 //-----------------------------------------------------------------------------

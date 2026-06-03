@@ -142,7 +142,7 @@ HRESULT LITTLEFS_FS_Driver::GetVolumeLabel(const VOLUME_ID *volume, char *volume
 
     // if (fs == NULL)
     // {
-    //     return FALSE;
+    //     return false;
     // }
 
     // memcpy(volumeLabel, fatFS.lfnbuf, volumeLabelLen);

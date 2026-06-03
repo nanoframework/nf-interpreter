@@ -288,7 +288,7 @@ bool LWIP_SOCKETS_Driver::InitializeInterfaceIndex(
         return true;
     }
 
-    return FALSE;
+    return false;
 }
 
 bool LWIP_SOCKETS_Driver::Initialize()

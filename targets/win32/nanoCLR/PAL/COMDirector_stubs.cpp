@@ -51,19 +51,19 @@ __nfweak bool DebuggerPort_Flush(COM_HANDLE ComPortNum)
 __nfweak bool DebuggerPort_IsSslSupported(COM_HANDLE ComPortNum)
 {
     NATIVE_PROFILE_PAL_COM();
-    return FALSE;
+    return false;
 }
 
 __nfweak bool DebuggerPort_UpgradeToSsl(COM_HANDLE ComPortNum, unsigned int flags)
 {
     NATIVE_PROFILE_PAL_COM();
-    return FALSE;
+    return false;
 }
 
 __nfweak bool DebuggerPort_IsUsingSsl(COM_HANDLE ComPortNum)
 {
     NATIVE_PROFILE_PAL_COM();
-    return FALSE;
+    return false;
 }
 
 //////////////////////////////////////////////////////////////////////////////////

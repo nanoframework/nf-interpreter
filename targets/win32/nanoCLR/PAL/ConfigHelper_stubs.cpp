@@ -50,29 +50,29 @@
 //
 // bool HAL_CONFIG_BLOCK::GetConfigSectorAddress(HAL_CONFIG_BLOCK_STORAGE_DATA& blData)
 //{
-//    return FALSE;
+//    return false;
 //}
 //
 // bool HAL_CONFIG_BLOCK::CompactBlock(HAL_CONFIG_BLOCK_STORAGE_DATA& blData, const ConfigurationSector* cfgStatic,
 // const HAL_CONFIG_BLOCK* cfgEnd)
 //{
-//    return FALSE;
+//    return false;
 //}
 //
 //
 // bool HAL_CONFIG_BLOCK::UpdateBlock( const HAL_CONFIG_BLOCK_STORAGE_DATA &blData, const void* pAddress, const
 // HAL_CONFIG_BLOCK *Header, void* Data, size_t Length, const void* LastConfigAddress, bool isChipRO )
 //{
-//    return FALSE;
+//    return false;
 //}
 //
 // bool HAL_CONFIG_BLOCK::UpdateBlockWithName( const char* Name, void* Data, size_t Length, bool isChipRO )
 //{
-//    return FALSE;
+//    return false;
 //}
 //
 
 bool GetHalSystemInfo(HalSystemInfo &systemInfo)
 {
-    return FALSE;
+    return false;
 }

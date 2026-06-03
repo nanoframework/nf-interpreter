@@ -214,7 +214,7 @@ bool NETX_SOCKETS_Driver::Initialize()
             // sanity check
             if (networkConfiguration.StartupAddressMode == 0)
             {
-                return FALSE;
+                return false;
             }
 
             // Bind and Open the Ethernet driver

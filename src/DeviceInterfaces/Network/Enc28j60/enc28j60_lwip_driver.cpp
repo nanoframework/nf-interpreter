@@ -206,7 +206,7 @@ bool enc28j60_Network_Interface_Close(int index, HAL_Configuration_NetworkInterf
 {
     NATIVE_PROFILE_HAL_DRIVERS_ETHERNET();
     if (pConfig->SpecificConfigId >= ARRAYSIZE(g_ENC28J60_LWIP_Config.DeviceConfigs))
-        return FALSE;
+        return false;
 
     return g_ENC28J60_LWIP_Driver.Close(&g_ENC28J60_LWIP_Config.DeviceConfigs[pConfig->SpecificConfigId], index);
 }

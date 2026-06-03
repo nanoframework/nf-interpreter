@@ -22,7 +22,7 @@ bool FS_MountVolume(const char *rootName, uint32_t deviceFlags, const char *file
 
     if (!rootName)
     {
-        return FALSE;
+        return false;
     }
 
     //--//
@@ -76,7 +76,7 @@ bool FS_MountVolume(const char *rootName, uint32_t deviceFlags, const char *file
     // sanity check
     if (!volume)
     {
-        return FALSE;
+        return false;
     }
 
     // initialize content to 0
@@ -156,7 +156,7 @@ bool FileSystemVolumeList::InitializeVolumes()
 #if defined(PLATFORM_ARM)
         debug_printf("There are no file system volume to initialize");
 #endif
-        return FALSE;
+        return false;
     }
 
     bool success = true;
@@ -214,7 +214,7 @@ bool FileSystemVolumeList::AddVolume(
 
     if (!fsv)
     {
-        return FALSE;
+        return false;
     }
 
     FileSystemVolume *current;
@@ -268,7 +268,7 @@ bool FileSystemVolumeList::AddVolume(
         return true;
     }
 
-    return FALSE;
+    return false;
 }
 
 bool FileSystemVolumeList::RemoveVolume(FileSystemVolume *fsv, bool uninit)
@@ -285,7 +285,7 @@ bool FileSystemVolumeList::RemoveVolume(FileSystemVolume *fsv, bool uninit)
         return true;
     }
 
-    return FALSE;
+    return false;
 }
 
 FileSystemVolume *FileSystemVolumeList::GetFirstVolume()
@@ -385,5 +385,5 @@ bool FileSystemVolumeList::Contains(FileSystemVolume *fsv)
         volume = FileSystemVolumeList::GetNextVolume(*volume);
     }
 
-    return FALSE;
+    return false;
 }
