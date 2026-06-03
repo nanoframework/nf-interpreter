@@ -49,6 +49,7 @@ uint8_t dataBuffer_0[AT25SF641_PAGE_SIZE];
 #endif
 
 extern uint32_t HAL_GetTick(void);
+extern void Watchdog_Reset(void);
 
 bool AT25SF641_WaitReady(void)
 {

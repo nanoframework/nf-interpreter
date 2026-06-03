@@ -55,6 +55,8 @@
 #define W25Q512_DEVICE_ID1      ((uint8_t)0x40)
 #define W25Q512_DEVICE_ID2      ((uint8_t)0x20)
 
+extern void Watchdog_Reset(void);
+
 ///////////////
 // Static helpers (internal to this translation unit)
 
