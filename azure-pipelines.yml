@@ -94,7 +94,7 @@ jobs:
             {
               Write-Host "##[command] **This is a PR build**"
 
-              $pr = Invoke-RestMethod -Uri "https://api.github.com/repos/nanoframework/nf-interpreter/pulls/$env:System_PullRequest_PullRequestId" -Header @{"Authorization"="$auth"} -ContentType "application/json" -Method GET
+              $pr = Invoke-RestMethod -Uri "https://api.github.com/repos/nanoframework/nf-interpreter/pulls/$env:System_PullRequest_PullRequestNumber" -Header @{"Authorization"="$auth"} -ContentType "application/json" -Method GET
 
               # check if this is a version update PR, if so, skip build
               if( ($pr.user.login -eq "nfbot") -and ($pr.title -like "*[version update]*") )
