@@ -228,7 +228,7 @@ list(APPEND NANOCLR_POSIX_SOURCES
 # .NET nanoclr global tool via P/Invoke.
 add_library(nanoFramework.nanoCLR SHARED ${NANOCLR_POSIX_SOURCES})
 
-target_compile_features(nanoFramework.nanoCLR PRIVATE cxx_std_20)
+target_compile_features(nanoFramework.nanoCLR PRIVATE c_std_23 cxx_std_23)
 
 target_include_directories(
     nanoFramework.nanoCLR
@@ -318,7 +318,7 @@ set_target_properties(
 # ─── Thin test harness (links against the shared library) ────────────────────
 if(NANO_POSIX_ENABLE_SMOKE)
 add_executable(nanoFramework.nanoCLR.test main.cpp)
-target_compile_features(nanoFramework.nanoCLR.test PRIVATE cxx_std_20)
+target_compile_features(nanoFramework.nanoCLR.test PRIVATE c_std_23 cxx_std_23)
 target_link_libraries(nanoFramework.nanoCLR.test PRIVATE nanoFramework.nanoCLR)
 target_include_directories(
     nanoFramework.nanoCLR.test
