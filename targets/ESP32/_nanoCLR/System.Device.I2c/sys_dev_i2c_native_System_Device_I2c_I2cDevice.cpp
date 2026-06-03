@@ -79,8 +79,6 @@ HRESULT Library_sys_dev_i2c_native_System_Device_I2c_I2cDevice::NativeInit___VOI
             NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
         }
 
-        ets_printf("I2C init bus %d\n", bus);
-
         // Set the Bus parameters
         if (!SetConfig(bus, pConfig))
         {
