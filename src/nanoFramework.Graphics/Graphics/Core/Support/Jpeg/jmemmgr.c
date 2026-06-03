@@ -171,9 +171,9 @@ struct jvirt_sarray_control {
     JDIMENSION rowsperchunk;   /* allocation chunk size in mem_buffer */
     JDIMENSION cur_start_row;   /* first logical row # in the buffer */
     JDIMENSION first_undef_row;   /* row # of first uninitialized row */
-    boolean pre_zero;      /* pre-zero mode requested? */
-    boolean dirty;      /* do current buffer contents need written? */
-    boolean b_s_open;      /* is backing-store data valid? */
+    bool pre_zero;      /* pre-zero mode requested? */
+    bool dirty;      /* do current buffer contents need written? */
+    bool b_s_open;      /* is backing-store data valid? */
     jvirt_sarray_ptr next;   /* link to next virtual sarray control block */
     backing_store_info b_s_info;   /* System-dependent control info */
 };
@@ -187,9 +187,9 @@ struct jvirt_barray_control {
     JDIMENSION rowsperchunk;   /* allocation chunk size in mem_buffer */
     JDIMENSION cur_start_row;   /* first logical row # in the buffer */
     JDIMENSION first_undef_row;   /* row # of first uninitialized row */
-    boolean pre_zero;      /* pre-zero mode requested? */
-    boolean dirty;      /* do current buffer contents need written? */
-    boolean b_s_open;      /* is backing-store data valid? */
+    bool pre_zero;      /* pre-zero mode requested? */
+    bool dirty;      /* do current buffer contents need written? */
+    bool b_s_open;      /* is backing-store data valid? */
     jvirt_barray_ptr next;   /* link to next virtual barray control block */
     backing_store_info b_s_info;   /* System-dependent control info */
 };
@@ -537,7 +537,7 @@ alloc_barray(j_common_ptr cinfo, int pool_id,
 
 
 METHODDEF(jvirt_sarray_ptr)
-request_virt_sarray(j_common_ptr cinfo, int pool_id, boolean pre_zero,
+request_virt_sarray(j_common_ptr cinfo, int pool_id, bool pre_zero,
     JDIMENSION samplesperrow, JDIMENSION numrows,
     JDIMENSION maxaccess)
     /* Request a virtual 2-D sample array */
@@ -558,7 +558,7 @@ request_virt_sarray(j_common_ptr cinfo, int pool_id, boolean pre_zero,
     result->samplesperrow = samplesperrow;
     result->maxaccess = maxaccess;
     result->pre_zero = pre_zero;
-    result->b_s_open = FALSE;   /* no associated backing-store object */
+    result->b_s_open = false;   /* no associated backing-store object */
     result->next = mem->virt_sarray_list; /* add to list of virtual arrays */
     mem->virt_sarray_list = result;
 
@@ -567,7 +567,7 @@ request_virt_sarray(j_common_ptr cinfo, int pool_id, boolean pre_zero,
 
 
 METHODDEF(jvirt_barray_ptr)
-request_virt_barray(j_common_ptr cinfo, int pool_id, boolean pre_zero,
+request_virt_barray(j_common_ptr cinfo, int pool_id, bool pre_zero,
     JDIMENSION blocksperrow, JDIMENSION numrows,
     JDIMENSION maxaccess)
     /* Request a virtual 2-D coefficient-block array */
@@ -588,7 +588,7 @@ request_virt_barray(j_common_ptr cinfo, int pool_id, boolean pre_zero,
     result->blocksperrow = blocksperrow;
     result->maxaccess = maxaccess;
     result->pre_zero = pre_zero;
-    result->b_s_open = FALSE;   /* no associated backing-store object */
+    result->b_s_open = false;   /* no associated backing-store object */
     result->next = mem->virt_barray_list; /* add to list of virtual arrays */
     mem->virt_barray_list = result;
 
@@ -667,14 +667,14 @@ realize_virt_arrays(j_common_ptr cinfo)
                     (long)sptr->rows_in_array *
                     (long)sptr->samplesperrow *
                     (long)SIZEOF(JSAMPLE));
-                sptr->b_s_open = TRUE;
+                sptr->b_s_open = true;
             }
             sptr->mem_buffer = alloc_sarray(cinfo, JPOOL_IMAGE,
                 sptr->samplesperrow, sptr->rows_in_mem);
             sptr->rowsperchunk = mem->last_rowsperchunk;
             sptr->cur_start_row = 0;
             sptr->first_undef_row = 0;
-            sptr->dirty = FALSE;
+            sptr->dirty = false;
         }
     }
 
@@ -692,21 +692,21 @@ realize_virt_arrays(j_common_ptr cinfo)
                     (long)bptr->rows_in_array *
                     (long)bptr->blocksperrow *
                     (long)SIZEOF(JBLOCK));
-                bptr->b_s_open = TRUE;
+                bptr->b_s_open = true;
             }
             bptr->mem_buffer = alloc_barray(cinfo, JPOOL_IMAGE,
                 bptr->blocksperrow, bptr->rows_in_mem);
             bptr->rowsperchunk = mem->last_rowsperchunk;
             bptr->cur_start_row = 0;
             bptr->first_undef_row = 0;
-            bptr->dirty = FALSE;
+            bptr->dirty = false;
         }
     }
 }
 
 
 LOCAL(void)
-do_sarray_io(j_common_ptr cinfo, jvirt_sarray_ptr ptr, boolean writing)
+do_sarray_io(j_common_ptr cinfo, jvirt_sarray_ptr ptr, bool writing)
 /* Do backing store read or write of a virtual sample array */
 {
     long bytesperrow, file_offset, byte_count, rows, thisrow, i;
@@ -739,7 +739,7 @@ do_sarray_io(j_common_ptr cinfo, jvirt_sarray_ptr ptr, boolean writing)
 
 
 LOCAL(void)
-do_barray_io(j_common_ptr cinfo, jvirt_barray_ptr ptr, boolean writing)
+do_barray_io(j_common_ptr cinfo, jvirt_barray_ptr ptr, bool writing)
 /* Do backing store read or write of a virtual coefficient-block array */
 {
     long bytesperrow, file_offset, byte_count, rows, thisrow, i;
@@ -774,7 +774,7 @@ do_barray_io(j_common_ptr cinfo, jvirt_barray_ptr ptr, boolean writing)
 METHODDEF(JSAMPARRAY)
 access_virt_sarray(j_common_ptr cinfo, jvirt_sarray_ptr ptr,
     JDIMENSION start_row, JDIMENSION num_rows,
-    boolean writable)
+    bool writable)
     /* Access the part of a virtual sample array starting at start_row */
     /* and extending for num_rows rows.  writable is true if  */
     /* caller intends to modify the accessed area. */
@@ -795,7 +795,7 @@ access_virt_sarray(j_common_ptr cinfo, jvirt_sarray_ptr ptr,
         /* Flush old buffer contents if necessary */
         if (ptr->dirty) {
             do_sarray_io(cinfo, ptr, TRUE);
-            ptr->dirty = FALSE;
+            ptr->dirty = false;
         }
         /* Decide what part of virtual array to access.
          * Algorithm: if target address > current window, assume forward scan,
@@ -853,7 +853,7 @@ access_virt_sarray(j_common_ptr cinfo, jvirt_sarray_ptr ptr,
     }
     /* Flag the buffer dirty if caller will write in it */
     if (writable)
-        ptr->dirty = TRUE;
+        ptr->dirty = true;
     /* Return address of proper part of the buffer */
     return ptr->mem_buffer + (start_row - ptr->cur_start_row);
 }
@@ -862,7 +862,7 @@ access_virt_sarray(j_common_ptr cinfo, jvirt_sarray_ptr ptr,
 METHODDEF(JBLOCKARRAY)
 access_virt_barray(j_common_ptr cinfo, jvirt_barray_ptr ptr,
     JDIMENSION start_row, JDIMENSION num_rows,
-    boolean writable)
+    bool writable)
     /* Access the part of a virtual block array starting at start_row */
     /* and extending for num_rows rows.  writable is true if  */
     /* caller intends to modify the accessed area. */
@@ -883,7 +883,7 @@ access_virt_barray(j_common_ptr cinfo, jvirt_barray_ptr ptr,
         /* Flush old buffer contents if necessary */
         if (ptr->dirty) {
             do_barray_io(cinfo, ptr, TRUE);
-            ptr->dirty = FALSE;
+            ptr->dirty = false;
         }
         /* Decide what part of virtual array to access.
          * Algorithm: if target address > current window, assume forward scan,
@@ -941,7 +941,7 @@ access_virt_barray(j_common_ptr cinfo, jvirt_barray_ptr ptr,
     }
     /* Flag the buffer dirty if caller will write in it */
     if (writable)
-        ptr->dirty = TRUE;
+        ptr->dirty = true;
     /* Return address of proper part of the buffer */
     return ptr->mem_buffer + (start_row - ptr->cur_start_row);
 }
@@ -974,14 +974,14 @@ free_pool(j_common_ptr cinfo, int pool_id)
 
         for (sptr = mem->virt_sarray_list; sptr != NULL; sptr = sptr->next) {
             if (sptr->b_s_open) {   /* there may be no backing store */
-                sptr->b_s_open = FALSE;   /* prevent recursive close if error */
+                sptr->b_s_open = false;   /* prevent recursive close if error */
                 (*sptr->b_s_info.close_backing_store) (cinfo, &sptr->b_s_info);
             }
         }
         mem->virt_sarray_list = NULL;
         for (bptr = mem->virt_barray_list; bptr != NULL; bptr = bptr->next) {
             if (bptr->b_s_open) {   /* there may be no backing store */
-                bptr->b_s_open = FALSE;   /* prevent recursive close if error */
+                bptr->b_s_open = false;   /* prevent recursive close if error */
                 (*bptr->b_s_info.close_backing_store) (cinfo, &bptr->b_s_info);
             }
         }

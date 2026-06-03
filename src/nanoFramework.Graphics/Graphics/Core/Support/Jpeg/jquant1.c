@@ -157,7 +157,7 @@ typedef struct {
      * premultiplied as described above.  Since colormap indexes must fit into
      * JSAMPLEs, the entries of this array will too.
      */
-    boolean is_padded;      /* is the colorindex padded for odither? */
+    bool is_padded;      /* is the colorindex padded for odither? */
 
     int Ncolors[MAX_Q_COMPS];   /* # of values alloced to each component */
 
@@ -167,7 +167,7 @@ typedef struct {
 
     /* Variables for Floyd-Steinberg dithering */
     FSERRPTR fserrors[MAX_Q_COMPS]; /* accumulated errors */
-    boolean on_odd_row;      /* flag to remember which row we are on */
+    bool on_odd_row;      /* flag to remember which row we are on */
 } my_cquantizer;
 
 typedef my_cquantizer* my_cquantize_ptr;
@@ -197,7 +197,7 @@ select_ncolors(j_decompress_ptr cinfo, int Ncolors[])
     int nc = cinfo->out_color_components; /* number of color components */
     int max_colors = cinfo->desired_number_of_colors;
     int total_colors, iroot, i, j;
-    boolean changed;
+    bool changed;
     long temp;
     static const int RGB_order[3] = { RGB_GREEN, RGB_RED, RGB_BLUE };
 
@@ -229,7 +229,7 @@ select_ncolors(j_decompress_ptr cinfo, int Ncolors[])
      * In RGB colorspace, try to increment G first, then R, then B.
      */
     do {
-        changed = FALSE;
+        changed = false;
         for (i = 0; i < nc; i++) {
             j = (cinfo->out_color_space == JCS_RGB ? RGB_order[i] : i);
             /* calculate new total_colors if Ncolors[j] is incremented */
@@ -239,7 +239,7 @@ select_ncolors(j_decompress_ptr cinfo, int Ncolors[])
                 break;         /* won't fit, done with this pass */
             Ncolors[j]++;      /* OK, apply the increment */
             total_colors = (int)temp;
-            changed = TRUE;
+            changed = true;
         }
     } while (changed);
 
@@ -349,11 +349,11 @@ create_colorindex(j_decompress_ptr cinfo)
      */
     if (cinfo->dither_mode == JDITHER_ORDERED) {
         pad = MAXJSAMPLE * 2;
-        cquantize->is_padded = TRUE;
+        cquantize->is_padded = true;
     }
     else {
         pad = 0;
-        cquantize->is_padded = FALSE;
+        cquantize->is_padded = false;
     }
 
     cquantize->colorindex = (*cinfo->mem->alloc_sarray)
@@ -746,7 +746,7 @@ alloc_fs_workspace(j_decompress_ptr cinfo)
  */
 
 METHODDEF(void)
-start_pass_1_quant(j_decompress_ptr cinfo, boolean is_pre_scan)
+start_pass_1_quant(j_decompress_ptr cinfo, bool is_pre_scan)
 {
     my_cquantize_ptr cquantize = (my_cquantize_ptr)cinfo->cquantize;
     CLR_INT32 arraysize;
@@ -782,7 +782,7 @@ start_pass_1_quant(j_decompress_ptr cinfo, boolean is_pre_scan)
         break;
     case JDITHER_FS:
         cquantize->pub.color_quantize = quantize_fs_dither;
-        cquantize->on_odd_row = FALSE; /* initialize state for F-S dither */
+        cquantize->on_odd_row = false; /* initialize state for F-S dither */
         /* Allocate Floyd-Steinberg workspace if didn't already. */
         if (cquantize->fserrors[0] == NULL)
             alloc_fs_workspace(cinfo);
@@ -862,4 +862,3 @@ jinit_1pass_quantizer(j_decompress_ptr cinfo)
 }
 
 #endif /* QUANT_1PASS_SUPPORTED */
-

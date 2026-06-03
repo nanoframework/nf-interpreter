@@ -260,7 +260,7 @@ __nfweak bool ConfigurationManager_GetConfigurationBlock(
     // copy the config block content to the pointer in the argument
     memcpy(configurationBlock, blockAddress, sizeOfBlock);
 
-    return TRUE;
+    return true;
 }
 
 // Stores the configuration block to the configuration flash sector
@@ -684,7 +684,7 @@ __nfweak UpdateConfigurationResult ConfigurationManager_UpdateConfigurationBlock
         {
 #if defined(RP2040) || defined(RP2350)
             // RP2040 has 4KB erase sectors — need to erase all sectors in the config region
-            bool eraseOk = TRUE;
+            bool eraseOk = true;
             for (uint32_t eraseAddr = (uint32_t)&__nanoConfig_start__;
                  eraseAddr < (uint32_t)&__nanoConfig_end__ && eraseOk;
                  eraseAddr += 4096)
@@ -692,7 +692,7 @@ __nfweak UpdateConfigurationResult ConfigurationManager_UpdateConfigurationBlock
                 eraseOk = g_ConfigFlashDriver.EraseBlock(NULL, eraseAddr);
             }
 #else
-            bool eraseOk = (g_ConfigFlashDriver.EraseBlock(NULL, (uint32_t)&__nanoConfig_start__) == TRUE);
+            bool eraseOk = (g_ConfigFlashDriver.EraseBlock(NULL, (uint32_t)&__nanoConfig_start__) == true);
 #endif
             if (eraseOk)
             {

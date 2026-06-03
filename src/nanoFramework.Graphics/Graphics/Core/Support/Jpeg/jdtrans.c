@@ -102,7 +102,7 @@ LOCAL(void)
 transdecode_master_selection(j_decompress_ptr cinfo)
 {
     /* This is effectively a buffered-image operation. */
-    cinfo->buffered_image = TRUE;
+    cinfo->buffered_image = true;
 
     /* Entropy decoding: either Huffman or arithmetic coding. */
     if (cinfo->arith_code) {

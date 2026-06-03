@@ -269,7 +269,7 @@ void CPU_Reset()
 
 bool CPU_IsSoftRebootSupported()
 {
-    return TRUE;
+    return true;
 }
 
 void CPU_SetPowerMode(PowerLevel_type powerLevel)

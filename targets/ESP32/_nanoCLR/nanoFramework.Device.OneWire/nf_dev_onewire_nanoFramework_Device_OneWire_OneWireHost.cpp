@@ -305,12 +305,12 @@ bool oneWireFindNext(bool doReset, bool alarmOnly)
     {
         attempt = 0;
 
-        if (oneWireTouchBit(TRUE) == 1)
+        if (oneWireTouchBit(true) == 1)
         {
             attempt = 2;
         }
 
-        if (oneWireTouchBit(TRUE) == 1)
+        if (oneWireTouchBit(true) == 1)
         {
             attempt |= 1;
         }

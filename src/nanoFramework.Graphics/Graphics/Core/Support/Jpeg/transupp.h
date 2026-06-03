@@ -95,8 +95,8 @@ typedef enum {
 typedef struct {
     /* Options: set by caller */
     JXFORM_CODE transform;   /* image transform operator */
-    boolean trim;         /* if TRUE, trim partial MCUs as needed */
-    boolean force_grayscale;   /* if TRUE, convert color image to grayscale */
+    bool trim;         /* if TRUE, trim partial MCUs as needed */
+    bool force_grayscale;   /* if TRUE, convert color image to grayscale */
 
     /* Internal workspace: caller should not touch these */
     int num_components;      /* # of components in workspace */

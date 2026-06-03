@@ -60,7 +60,7 @@ bool Events_Initialize()
 
     EventsSemaphore.release();
 
-    return TRUE;
+    return true;
 }
 
 bool Events_Uninitialize()
@@ -71,7 +71,7 @@ bool Events_Uninitialize()
 
     EventsSemaphore.release();
 
-    return TRUE;
+    return true;
 }
 
 void Events_Set(UINT32 Events)

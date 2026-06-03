@@ -278,7 +278,7 @@ __nfweak bool ConfigurationManager_GetConfigurationBlock(
     // copy the config block content to the pointer in the argument
     memcpy(configurationBlock, blockAddress, sizeOfBlock);
 
-    return TRUE;
+    return true;
 }
 
 // Stores the configuration block to the configuration flash sector
@@ -674,7 +674,7 @@ __nfweak UpdateConfigurationResult ConfigurationManager_UpdateConfigurationBlock
         }
 
         // // erase config sector
-        // if (STM32FlashDriver_EraseBlock(NULL, (uint32_t)&__nanoConfig_start__) == TRUE)
+        // if (STM32FlashDriver_EraseBlock(NULL, (uint32_t)&__nanoConfig_start__) == true)
         // {
         //     // flash block is erased
 
@@ -748,7 +748,7 @@ __nfweak bool InitialiseNetworkDefaultConfig(HAL_Configuration_NetworkInterface 
     //     WIFI_GetMAC_Address(config->MacAddress);
     // #endif
 
-    //     return TRUE;
+    //     return true;
 
     // #else
 

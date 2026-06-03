@@ -166,7 +166,7 @@ bool ConfigurationManager_GetConfigurationBlock(
     // copy the config block content to the pointer in the argument
     memcpy(configurationBlock, blockAddress, sizeOfBlock);
 
-    return TRUE;
+    return true;
 }
 
 // Stores the configuration block to the configuration flash sector
@@ -260,7 +260,7 @@ bool ConfigurationManager_StoreConfigurationBlock(
         storageAddress = (ByteAddress)&__nanoConfig_start__ + offset;
 
         // always enumerate the blocks again after storing it
-        requiresEnumeration = TRUE;
+        requiresEnumeration = true;
 
         // for save all the block size has to be provided, check that
         if (blockSize == 0)
@@ -370,7 +370,7 @@ UpdateConfigurationResult ConfigurationManager_UpdateConfigurationBlock(
         }
 
         // erase config sector
-        if (iMXRTFlexSPIDriver_EraseBlock(NULL, (uint32_t)&__nanoConfig_start__) == TRUE)
+        if (iMXRTFlexSPIDriver_EraseBlock(NULL, (uint32_t)&__nanoConfig_start__) == true)
         {
             // flash block is erased
 

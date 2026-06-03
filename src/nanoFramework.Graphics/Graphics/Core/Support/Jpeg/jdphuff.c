@@ -80,13 +80,13 @@ typedef struct {
 typedef phuff_entropy_decoder* phuff_entropy_ptr;
 
 /* Forward declarations */
-METHODDEF(boolean) decode_mcu_DC_first JPP((j_decompress_ptr cinfo,
+METHODDEF(bool) decode_mcu_DC_first JPP((j_decompress_ptr cinfo,
     JBLOCKROW* MCU_data));
-METHODDEF(boolean) decode_mcu_AC_first JPP((j_decompress_ptr cinfo,
+METHODDEF(bool) decode_mcu_AC_first JPP((j_decompress_ptr cinfo,
     JBLOCKROW* MCU_data));
-METHODDEF(boolean) decode_mcu_DC_refine JPP((j_decompress_ptr cinfo,
+METHODDEF(bool) decode_mcu_DC_refine JPP((j_decompress_ptr cinfo,
     JBLOCKROW* MCU_data));
-METHODDEF(boolean) decode_mcu_AC_refine JPP((j_decompress_ptr cinfo,
+METHODDEF(bool) decode_mcu_AC_refine JPP((j_decompress_ptr cinfo,
     JBLOCKROW* MCU_data));
 
 
@@ -98,7 +98,7 @@ METHODDEF(void)
 start_pass_phuff_decoder(j_decompress_ptr cinfo)
 {
     phuff_entropy_ptr entropy = (phuff_entropy_ptr)cinfo->entropy;
-    boolean is_DC_band, bad;
+    bool is_DC_band, bad;
     int ci, coefi, tbl;
     int* coef_bit_ptr;
     jpeg_component_info* compptr;
@@ -106,26 +106,26 @@ start_pass_phuff_decoder(j_decompress_ptr cinfo)
     is_DC_band = (cinfo->Ss == 0);
 
     /* Validate scan parameters */
-    bad = FALSE;
+    bad = false;
     if (is_DC_band) {
         if (cinfo->Se != 0)
-            bad = TRUE;
+            bad = true;
     }
     else {
         /* need not check Ss/Se < 0 since they came from unsigned bytes */
         if (cinfo->Ss > cinfo->Se || cinfo->Se >= DCTSIZE2)
-            bad = TRUE;
+            bad = true;
         /* AC scans may have only one component */
         if (cinfo->comps_in_scan != 1)
-            bad = TRUE;
+            bad = true;
     }
     if (cinfo->Ah != 0) {
         /* Successive approximation refinement scan: must have Al = Ah-1. */
         if (cinfo->Al != cinfo->Ah - 1)
-            bad = TRUE;
+            bad = true;
     }
     if (cinfo->Al > 13)      /* need not check for < 0 */
-        bad = TRUE;
+        bad = true;
     /* Arguably the maximum Al value should be less than 13 for 8-bit precision,
      * but the spec doesn't say so, and we try to be liberal about what we
      * accept.  Note: large Al values could result in out-of-range DC
@@ -192,7 +192,7 @@ start_pass_phuff_decoder(j_decompress_ptr cinfo)
     /* Initialize bitread state variables */
     entropy->bitstate.bits_left = 0;
     entropy->bitstate.get_buffer = 0; /* unnecessary, but keeps Purify quiet */
-    entropy->pub.insufficient_data = FALSE;
+    entropy->pub.insufficient_data = false;
 
     /* Initialize private state variables */
     entropy->saved.EOBRUN = 0;
@@ -242,7 +242,7 @@ static const int extend_offset[16] = /* entry n is (-1 << n) + 1 */
  * Returns FALSE if must suspend.
  */
 
-LOCAL(boolean)
+LOCAL(bool)
 process_restart(j_decompress_ptr cinfo)
 {
     phuff_entropy_ptr entropy = (phuff_entropy_ptr)cinfo->entropy;
@@ -255,7 +255,7 @@ process_restart(j_decompress_ptr cinfo)
 
     /* Advance past the RSTn marker */
     if (!(*cinfo->marker->read_restart_marker) (cinfo))
-        return FALSE;
+        return false;
 
     /* Re-initialize DC predictions to 0 */
     for (ci = 0; ci < cinfo->comps_in_scan; ci++)
@@ -272,9 +272,9 @@ process_restart(j_decompress_ptr cinfo)
      * leaving the flag set.
      */
     if (cinfo->unread_marker == 0)
-        entropy->pub.insufficient_data = FALSE;
+        entropy->pub.insufficient_data = false;
 
-    return TRUE;
+    return true;
 }
 
 
@@ -288,7 +288,7 @@ process_restart(j_decompress_ptr cinfo)
  * The i'th block of the MCU is stored into the block pointed to by
  * MCU_data[i].  WE ASSUME THIS AREA IS INITIALLY ZEROED BY THE CALLER.
  *
- * We return FALSE if data source requested suspension.  In that case no
+ * We return false if data source requested suspension.  In that case no
  * changes have been made to permanent state.  (Exception: some output
  * coefficients may already have been assigned.  This is harmless for
  * spectral selection, since we'll just re-assign them on the next call.
@@ -300,7 +300,7 @@ process_restart(j_decompress_ptr cinfo)
   * or first pass of successive approximation).
   */
 
-METHODDEF(boolean)
+METHODDEF(bool)
 decode_mcu_DC_first(j_decompress_ptr cinfo, JBLOCKROW* MCU_data)
 {
     phuff_entropy_ptr entropy = (phuff_entropy_ptr)cinfo->entropy;
@@ -317,7 +317,7 @@ decode_mcu_DC_first(j_decompress_ptr cinfo, JBLOCKROW* MCU_data)
     if (cinfo->restart_interval) {
         if (entropy->restarts_to_go == 0)
             if (!process_restart(cinfo))
-                return FALSE;
+                return false;
     }
 
     /* If we've run out of data, just leave the MCU set to zeroes.
@@ -340,9 +340,9 @@ decode_mcu_DC_first(j_decompress_ptr cinfo, JBLOCKROW* MCU_data)
             /* Decode a single block's worth of coefficients */
 
             /* Section F.2.2.1: decode the DC coefficient difference */
-            HUFF_DECODE(s, br_state, tbl, return FALSE, label1);
+            HUFF_DECODE(s, br_state, tbl, return false, label1);
             if (s) {
-                CHECK_BIT_BUFFER(br_state, s, return FALSE);
+                CHECK_BIT_BUFFER(br_state, s, return false);
                 r = GET_BITS(s);
                 s = HUFF_EXTEND(r, s);
             }
@@ -362,7 +362,7 @@ decode_mcu_DC_first(j_decompress_ptr cinfo, JBLOCKROW* MCU_data)
     /* Account for restart interval (no-op if not using restarts) */
     entropy->restarts_to_go--;
 
-    return TRUE;
+    return true;
 }
 
 
@@ -371,7 +371,7 @@ decode_mcu_DC_first(j_decompress_ptr cinfo, JBLOCKROW* MCU_data)
  * or first pass of successive approximation).
  */
 
-METHODDEF(boolean)
+METHODDEF(bool)
 decode_mcu_AC_first(j_decompress_ptr cinfo, JBLOCKROW* MCU_data)
 {
     phuff_entropy_ptr entropy = (phuff_entropy_ptr)cinfo->entropy;
@@ -387,7 +387,7 @@ decode_mcu_AC_first(j_decompress_ptr cinfo, JBLOCKROW* MCU_data)
     if (cinfo->restart_interval) {
         if (entropy->restarts_to_go == 0)
             if (!process_restart(cinfo))
-                return FALSE;
+                return false;
     }
 
     /* If we've run out of data, just leave the MCU set to zeroes.
@@ -410,12 +410,12 @@ decode_mcu_AC_first(j_decompress_ptr cinfo, JBLOCKROW* MCU_data)
             tbl = entropy->ac_derived_tbl;
 
             for (k = cinfo->Ss; k <= Se; k++) {
-                HUFF_DECODE(s, br_state, tbl, return FALSE, label2);
+                HUFF_DECODE(s, br_state, tbl, return false, label2);
                 r = s >> 4;
                 s &= 15;
                 if (s) {
                     k += r;
-                    CHECK_BIT_BUFFER(br_state, s, return FALSE);
+                    CHECK_BIT_BUFFER(br_state, s, return false);
                     r = GET_BITS(s);
                     s = HUFF_EXTEND(r, s);
                     /* Scale and output coefficient in natural (dezigzagged) order */
@@ -428,7 +428,7 @@ decode_mcu_AC_first(j_decompress_ptr cinfo, JBLOCKROW* MCU_data)
                     else {      /* EOBr, run length is 2^r + appended bits */
                         EOBRUN = 1 << r;
                         if (r) {      /* EOBr, r > 0 */
-                            CHECK_BIT_BUFFER(br_state, r, return FALSE);
+                            CHECK_BIT_BUFFER(br_state, r, return false);
                             r = GET_BITS(r);
                             EOBRUN += r;
                         }
@@ -448,7 +448,7 @@ decode_mcu_AC_first(j_decompress_ptr cinfo, JBLOCKROW* MCU_data)
     /* Account for restart interval (no-op if not using restarts) */
     entropy->restarts_to_go--;
 
-    return TRUE;
+    return true;
 }
 
 
@@ -458,7 +458,7 @@ decode_mcu_AC_first(j_decompress_ptr cinfo, JBLOCKROW* MCU_data)
  * is not very clear on the point.
  */
 
-METHODDEF(boolean)
+METHODDEF(bool)
 decode_mcu_DC_refine(j_decompress_ptr cinfo, JBLOCKROW* MCU_data)
 {
     phuff_entropy_ptr entropy = (phuff_entropy_ptr)cinfo->entropy;
@@ -471,7 +471,7 @@ decode_mcu_DC_refine(j_decompress_ptr cinfo, JBLOCKROW* MCU_data)
     if (cinfo->restart_interval) {
         if (entropy->restarts_to_go == 0)
             if (!process_restart(cinfo))
-                return FALSE;
+                return false;
     }
 
     /* Not worth the cycles to check insufficient_data here,
@@ -487,7 +487,7 @@ decode_mcu_DC_refine(j_decompress_ptr cinfo, JBLOCKROW* MCU_data)
         block = MCU_data[blkn];
 
         /* Encoded data is simply the next bit of the two's-complement DC value */
-        CHECK_BIT_BUFFER(br_state, 1, return FALSE);
+        CHECK_BIT_BUFFER(br_state, 1, return false);
         if (GET_BITS(1))
             (*block)[0] |= p1;
         /* Note: since we use |=, repeating the assignment later is safe */
@@ -499,7 +499,7 @@ decode_mcu_DC_refine(j_decompress_ptr cinfo, JBLOCKROW* MCU_data)
     /* Account for restart interval (no-op if not using restarts) */
     entropy->restarts_to_go--;
 
-    return TRUE;
+    return true;
 }
 
 
@@ -510,7 +510,7 @@ decode_mcu_DC_refine(j_decompress_ptr cinfo, JBLOCKROW* MCU_data)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wshift-negative-value"
 #endif
-METHODDEF(boolean)
+METHODDEF(bool)
 decode_mcu_AC_refine(j_decompress_ptr cinfo, JBLOCKROW* MCU_data)
 {
     phuff_entropy_ptr entropy = (phuff_entropy_ptr)cinfo->entropy;
@@ -530,7 +530,7 @@ decode_mcu_AC_refine(j_decompress_ptr cinfo, JBLOCKROW* MCU_data)
     if (cinfo->restart_interval) {
         if (entropy->restarts_to_go == 0)
             if (!process_restart(cinfo))
-                return FALSE;
+                return false;
     }
 
     /* If we've run out of data, don't modify the MCU.
@@ -647,14 +647,14 @@ decode_mcu_AC_refine(j_decompress_ptr cinfo, JBLOCKROW* MCU_data)
     /* Account for restart interval (no-op if not using restarts) */
     entropy->restarts_to_go--;
 
-    return TRUE;
+    return true;
 
 undoit:
     /* Re-zero any output coefficients that we made newly nonzero */
     while (num_newnz > 0)
         (*block)[newnz_pos[--num_newnz]] = 0;
 
-    return FALSE;
+    return false;
 }
 #if __GNUC__ > 6
 #pragma GCC diagnostic pop

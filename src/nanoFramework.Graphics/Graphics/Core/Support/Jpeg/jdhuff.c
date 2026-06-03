@@ -76,8 +76,8 @@ typedef struct {
     d_derived_tbl* dc_cur_tbls[D_MAX_BLOCKS_IN_MCU];
     d_derived_tbl* ac_cur_tbls[D_MAX_BLOCKS_IN_MCU];
     /* Whether we care about the DC and AC coefficient values for each block */
-    boolean dc_needed[D_MAX_BLOCKS_IN_MCU];
-    boolean ac_needed[D_MAX_BLOCKS_IN_MCU];
+    bool dc_needed[D_MAX_BLOCKS_IN_MCU];
+    bool ac_needed[D_MAX_BLOCKS_IN_MCU];
 } huff_entropy_decoder;
 
 typedef huff_entropy_decoder* huff_entropy_ptr;
@@ -125,19 +125,19 @@ start_pass_huff_decoder(j_decompress_ptr cinfo)
         entropy->ac_cur_tbls[blkn] = entropy->ac_derived_tbls[compptr->ac_tbl_no];
         /* Decide whether we really care about the coefficient values */
         if (compptr->component_needed) {
-            entropy->dc_needed[blkn] = TRUE;
+            entropy->dc_needed[blkn] = true;
             /* we don't need the ACs if producing a 1/8th-size image */
             entropy->ac_needed[blkn] = (compptr->DCT_scaled_size > 1);
         }
         else {
-            entropy->dc_needed[blkn] = entropy->ac_needed[blkn] = FALSE;
+            entropy->dc_needed[blkn] = entropy->ac_needed[blkn] = false;
         }
     }
 
     /* Initialize bitread state variables */
     entropy->bitstate.bits_left = 0;
     entropy->bitstate.get_buffer = 0; /* unnecessary, but keeps Purify quiet */
-    entropy->pub.insufficient_data = FALSE;
+    entropy->pub.insufficient_data = false;
 
     /* Initialize restart counter */
     entropy->restarts_to_go = cinfo->restart_interval;
@@ -152,7 +152,7 @@ start_pass_huff_decoder(j_decompress_ptr cinfo)
  */
 
 GLOBAL(void)
-jpeg_make_d_derived_tbl(j_decompress_ptr cinfo, boolean isDC, int tblno,
+jpeg_make_d_derived_tbl(j_decompress_ptr cinfo, bool isDC, int tblno,
     d_derived_tbl** pdtbl)
 {
     JHUFF_TBL* htbl;
@@ -294,7 +294,7 @@ jpeg_make_d_derived_tbl(j_decompress_ptr cinfo, boolean isDC, int tblno,
 #endif
 
 
-GLOBAL(boolean)
+GLOBAL(bool)
 jpeg_fill_bit_buffer(bitread_working_state* state,
     register bit_buf_type get_buffer, register int bits_left,
     int nbits)
@@ -316,7 +316,7 @@ jpeg_fill_bit_buffer(bitread_working_state* state,
             /* Attempt to read a byte */
             if (bytes_in_buffer == 0) {
                 if (!(*cinfo->src->fill_input_buffer) (cinfo))
-                    return FALSE;
+                    return false;
                 next_input_byte = cinfo->src->next_input_byte;
                 bytes_in_buffer = cinfo->src->bytes_in_buffer;
             }
@@ -333,7 +333,7 @@ jpeg_fill_bit_buffer(bitread_working_state* state,
                 do {
                     if (bytes_in_buffer == 0) {
                         if (!(*cinfo->src->fill_input_buffer) (cinfo))
-                            return FALSE;
+                            return false;
                         next_input_byte = cinfo->src->next_input_byte;
                         bytes_in_buffer = cinfo->src->bytes_in_buffer;
                     }
@@ -379,7 +379,7 @@ jpeg_fill_bit_buffer(bitread_working_state* state,
              */
             if (!cinfo->entropy->insufficient_data) {
                 WARNMS(cinfo, JWRN_HIT_MARKER);
-                cinfo->entropy->insufficient_data = TRUE;
+                cinfo->entropy->insufficient_data = true;
             }
             /* Fill the buffer with zero bits */
             get_buffer <<= MIN_GET_BITS - bits_left;
@@ -393,7 +393,7 @@ jpeg_fill_bit_buffer(bitread_working_state* state,
     state->get_buffer = get_buffer;
     state->bits_left = bits_left;
 
-    return TRUE;
+    return true;
 }
 
 
@@ -480,7 +480,7 @@ static const int extend_offset[16] = /* entry n is (-1 << n) + 1 */
  * Returns FALSE if must suspend.
  */
 
-LOCAL(boolean)
+LOCAL(bool)
 process_restart(j_decompress_ptr cinfo)
 {
     huff_entropy_ptr entropy = (huff_entropy_ptr)cinfo->entropy;
@@ -493,7 +493,7 @@ process_restart(j_decompress_ptr cinfo)
 
     /* Advance past the RSTn marker */
     if (!(*cinfo->marker->read_restart_marker) (cinfo))
-        return FALSE;
+        return false;
 
     /* Re-initialize DC predictions to 0 */
     for (ci = 0; ci < cinfo->comps_in_scan; ci++)
@@ -508,9 +508,9 @@ process_restart(j_decompress_ptr cinfo)
      * leaving the flag set.
      */
     if (cinfo->unread_marker == 0)
-        entropy->pub.insufficient_data = FALSE;
+        entropy->pub.insufficient_data = false;
 
-    return TRUE;
+    return true;
 }
 
 
@@ -529,7 +529,7 @@ process_restart(j_decompress_ptr cinfo)
  * this module, since we'll just re-assign them on the next call.)
  */
 
-METHODDEF(boolean)
+METHODDEF(bool)
 decode_mcu(j_decompress_ptr cinfo, JBLOCKROW* MCU_data)
 {
     huff_entropy_ptr entropy = (huff_entropy_ptr)cinfo->entropy;
@@ -541,7 +541,7 @@ decode_mcu(j_decompress_ptr cinfo, JBLOCKROW* MCU_data)
     if (cinfo->restart_interval) {
         if (entropy->restarts_to_go == 0)
             if (!process_restart(cinfo))
-                return FALSE;
+                return false;
     }
 
     /* If we've run out of data, just leave the MCU set to zeroes.
@@ -564,9 +564,9 @@ decode_mcu(j_decompress_ptr cinfo, JBLOCKROW* MCU_data)
             /* Decode a single block's worth of coefficients */
 
             /* Section F.2.2.1: decode the DC coefficient difference */
-            HUFF_DECODE(s, br_state, dctbl, return FALSE, label1);
+            HUFF_DECODE(s, br_state, dctbl, return false, label1);
             if (s) {
-                CHECK_BIT_BUFFER(br_state, s, return FALSE);
+                CHECK_BIT_BUFFER(br_state, s, return false);
                 r = GET_BITS(s);
                 s = HUFF_EXTEND(r, s);
             }
@@ -585,14 +585,14 @@ decode_mcu(j_decompress_ptr cinfo, JBLOCKROW* MCU_data)
                 /* Section F.2.2.2: decode the AC coefficients */
                 /* Since zeroes are skipped, output area must be cleared beforehand */
                 for (k = 1; k < DCTSIZE2; k++) {
-                    HUFF_DECODE(s, br_state, actbl, return FALSE, label2);
+                    HUFF_DECODE(s, br_state, actbl, return false, label2);
 
                     r = s >> 4;
                     s &= 15;
 
                     if (s) {
                         k += r;
-                        CHECK_BIT_BUFFER(br_state, s, return FALSE);
+                        CHECK_BIT_BUFFER(br_state, s, return false);
                         r = GET_BITS(s);
                         s = HUFF_EXTEND(r, s);
                         /* Output coefficient in natural (dezigzagged) order.
@@ -614,14 +614,14 @@ decode_mcu(j_decompress_ptr cinfo, JBLOCKROW* MCU_data)
                 /* Section F.2.2.2: decode the AC coefficients */
                 /* In this path we just discard the values */
                 for (k = 1; k < DCTSIZE2; k++) {
-                    HUFF_DECODE(s, br_state, actbl, return FALSE, label3);
+                    HUFF_DECODE(s, br_state, actbl, return false, label3);
 
                     r = s >> 4;
                     s &= 15;
 
                     if (s) {
                         k += r;
-                        CHECK_BIT_BUFFER(br_state, s, return FALSE);
+                        CHECK_BIT_BUFFER(br_state, s, return false);
                         DROP_BITS(s);
                     }
                     else {
@@ -642,7 +642,7 @@ decode_mcu(j_decompress_ptr cinfo, JBLOCKROW* MCU_data)
     /* Account for restart interval (no-op if not using restarts) */
     entropy->restarts_to_go--;
 
-    return TRUE;
+    return true;
 }
 
 
@@ -668,4 +668,3 @@ jinit_huff_decoder(j_decompress_ptr cinfo)
         entropy->dc_derived_tbls[i] = entropy->ac_derived_tbls[i] = NULL;
     }
 }
-

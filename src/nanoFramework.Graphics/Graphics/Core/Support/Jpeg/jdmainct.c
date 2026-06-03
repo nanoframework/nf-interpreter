@@ -123,7 +123,7 @@ typedef struct {
     /* Pointer to allocated workspace (M or M+2 row groups). */
     JSAMPARRAY buffer[MAX_COMPONENTS];
 
-    boolean buffer_full;      /* Have we gotten an iMCU row from decoder? */
+    bool buffer_full;      /* Have we gotten an iMCU row from decoder? */
     JDIMENSION rowgroup_ctr;   /* counts row groups output to postprocessor */
 
     /* Remaining fields are only used in the context case. */
@@ -332,7 +332,7 @@ start_pass_main(j_decompress_ptr cinfo, J_BUF_MODE pass_mode)
             /* Simple case with no context needed */
             main1->pub.process_data = process_data_simple_main;
         }
-        main1->buffer_full = FALSE;   /* Mark buffer empty */
+        main1->buffer_full = false;   /* Mark buffer empty */
         main1->rowgroup_ctr = 0;
         break;
 #ifdef QUANT_2PASS_SUPPORTED
@@ -366,7 +366,7 @@ process_data_simple_main(j_decompress_ptr cinfo,
     if (!main1->buffer_full) {
         if (!(*cinfo->coef->decompress_data) (cinfo, main1->buffer))
             return;         /* suspension forced, can do nothing more */
-        main1->buffer_full = TRUE;   /* OK, we have an iMCU row to work with */
+        main1->buffer_full = true;   /* OK, we have an iMCU row to work with */
     }
 
     /* There are always min_DCT_scaled_size row groups in an iMCU row. */
@@ -383,7 +383,7 @@ process_data_simple_main(j_decompress_ptr cinfo,
 
     /* Has postprocessor consumed all the data yet? If so, mark buffer empty */
     if (main1->rowgroup_ctr >= rowgroups_avail) {
-        main1->buffer_full = FALSE;
+        main1->buffer_full = false;
         main1->rowgroup_ctr = 0;
     }
 }
@@ -407,7 +407,7 @@ process_data_context_main(j_decompress_ptr cinfo,
         if (!(*cinfo->coef->decompress_data) (cinfo,
             main1->xbuffer[main1->whichptr]))
             return;         /* suspension forced, can do nothing more */
-        main1->buffer_full = TRUE;   /* OK, we have an iMCU row to work with */
+        main1->buffer_full = true;   /* OK, we have an iMCU row to work with */
         main1->iMCU_row_ctr++;   /* count rows received */
     }
 
@@ -451,7 +451,7 @@ process_data_context_main(j_decompress_ptr cinfo,
             set_wraparound_pointers(cinfo);
         /* Prepare to load new iMCU row using other xbuffer list */
         main1->whichptr ^= 1;   /* 0=>1 or 1=>0 */
-        main1->buffer_full = FALSE;
+        main1->buffer_full = false;
         /* Still need to process last row group of this iMCU row, */
         /* which is saved at index M+1 of the other xbuffer */
         main1->rowgroup_ctr = (JDIMENSION)(cinfo->min_DCT_scaled_size + 1);
@@ -487,7 +487,7 @@ process_data_crank_post(j_decompress_ptr cinfo,
  */
 
 GLOBAL(void)
-jinit_d_main_controller(j_decompress_ptr cinfo, boolean need_full_buffer)
+jinit_d_main_controller(j_decompress_ptr cinfo, bool need_full_buffer)
 {
     //my_main_ptr main;
     my_main_ptr main1;

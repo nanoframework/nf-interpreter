@@ -190,7 +190,7 @@ __nfweak bool ConfigurationManager_GetConfigurationBlock(
     // copy the config block content to the pointer in the argument
     memcpy(configurationBlock, blockAddress, sizeOfBlock);
 
-    return TRUE;
+    return true;
 }
 
 // Stores the configuration block to the configuration flash sector
@@ -396,7 +396,7 @@ __nfweak bool ConfigurationManager_UpdateConfigurationBlock(
                 platform_free(configSectorCopy);
 
                 // operation is successful (nothing to update)
-                return TRUE;
+                return true;
             }
 
             // get storage address from block address
@@ -427,7 +427,7 @@ __nfweak bool ConfigurationManager_UpdateConfigurationBlock(
                 platform_free(configSectorCopy);
 
                 // operation is successful (nothing to update)
-                return TRUE;
+                return true;
             }
 
             // storage address from block address
@@ -456,7 +456,7 @@ __nfweak bool ConfigurationManager_UpdateConfigurationBlock(
                 platform_free(configSectorCopy);
 
                 // operation is successful (nothing to update)
-                return TRUE;
+                return true;
             }
 
             // storage address from block address
@@ -477,7 +477,7 @@ __nfweak bool ConfigurationManager_UpdateConfigurationBlock(
         }
 
         // erase config sector
-        if (MXCFlashDriver_EraseBlock(NULL, (uint32_t)&__nanoConfig_start__) == TRUE)
+        if (MXCFlashDriver_EraseBlock(NULL, (uint32_t)&__nanoConfig_start__) == true)
         {
             // flash block is erased
 

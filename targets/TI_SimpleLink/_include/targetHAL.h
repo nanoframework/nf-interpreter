@@ -25,9 +25,6 @@
 
 #define LPCSTR const char *
 
-#define TRUE  true
-#define FALSE false
-
 #if !defined(BUILD_RTM)
 
 #define HARD_BREAKPOINT() HARD_Breakpoint()

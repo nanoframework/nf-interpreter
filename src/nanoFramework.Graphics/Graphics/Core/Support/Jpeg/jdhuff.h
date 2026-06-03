@@ -54,7 +54,7 @@ typedef struct {
 
 /* Expand a Huffman table definition into the derived format */
 EXTERN(void) jpeg_make_d_derived_tbl
-JPP((j_decompress_ptr cinfo, boolean isDC, int tblno,
+JPP((j_decompress_ptr cinfo, bool isDC, int tblno,
     d_derived_tbl** pdtbl));
 
 
@@ -158,7 +158,7 @@ typedef struct {      /* Bitreading working state within an MCU */
    (bits_left -= (nbits))
 
  /* Load up the bit buffer to a depth of at least nbits */
-EXTERN(boolean) jpeg_fill_bit_buffer
+EXTERN(bool) jpeg_fill_bit_buffer
 JPP((bitread_working_state* state, register bit_buf_type get_buffer,
     register int bits_left, int nbits));
 
@@ -206,4 +206,3 @@ slowlabel: \
 EXTERN(int) jpeg_huff_decode
 JPP((bitread_working_state* state, register bit_buf_type get_buffer,
     register int bits_left, d_derived_tbl* htbl, int min_bits));
-

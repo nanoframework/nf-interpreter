@@ -96,7 +96,7 @@ void fsmc_start(FSMCDriver *fsmcp)
 #ifdef rccResetFSMC
             rccResetFSMC();
 #endif
-            rccEnableFSMC(FALSE);
+            rccEnableFSMC(false);
 #if STM32_USE_FSMC_NAND
             nvicEnableVector(STM32_FSMC_NUMBER, STM32_FSMC_FSMC1_IRQ_PRIORITY);
 #endif

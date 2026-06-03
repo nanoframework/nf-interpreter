@@ -51,7 +51,7 @@ static void FreeFatFsByVolumeId(const VOLUME_ID *volumeId);
 bool FATFS_FS_Driver::LoadMedia(const void *driverInterface)
 {
     (void)driverInterface;
-    return TRUE;
+    return true;
 }
 
 STREAM_DRIVER_DETAILS *FATFS_FS_Driver::DriverDetails(const VOLUME_ID *volume)
@@ -59,7 +59,7 @@ STREAM_DRIVER_DETAILS *FATFS_FS_Driver::DriverDetails(const VOLUME_ID *volume)
     (void)volume;
 
     static STREAM_DRIVER_DETAILS driverDetail =
-        {DRIVER_BUFFERED_IO, fatfs_inputBuffer, fatfs_outputBuffer, FF_MAX_SS, FF_MAX_SS, TRUE, TRUE, TRUE, 0, 0};
+        {DRIVER_BUFFERED_IO, fatfs_inputBuffer, fatfs_outputBuffer, FF_MAX_SS, FF_MAX_SS, true, true, true, 0, 0};
 
     return &driverDetail;
 }
@@ -94,7 +94,7 @@ bool FATFS_FS_Driver::InitializeVolume(const VOLUME_ID *volume, const char *path
     // try mounting the volume
     if (f_mount(fs, path, 1) == FR_OK)
     {
-        return TRUE;
+        return true;
     }
 
     // something went wrong, unmount the volume...
@@ -131,7 +131,7 @@ bool FATFS_FS_Driver::UnInitializeVolume(const VOLUME_ID *volume)
     // free assigned volume
     FreeFatFsByVolumeId(volume);
 
-    return TRUE;
+    return true;
 }
 
 HRESULT FATFS_FS_Driver::Format(const VOLUME_ID *volume, const char *volumeLabel, uint32_t parameters)

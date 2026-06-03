@@ -397,24 +397,24 @@ uint8_t oneWireAccess(void)
             {
                 if (sendpacket[i] != SerialNum[i - 1])
                 {
-                    return FALSE;
+                    return false;
                 }
             }
 
             if (sendpacket[0] != MATCH_ROM)
             {
                 // OWERROR(//OWERROR_WRITE_VERIFY_FAILED);
-                return FALSE;
+                return false;
             }
             else
             {
-                return TRUE;
+                return true;
             }
         }
     }
 
     // reset or match echo failed
-    return FALSE;
+    return false;
 }
 
 /*******************************************************************************
@@ -458,7 +458,7 @@ uint8_t oneWireBlock(uint8_t doReset, uint8_t *tran_buf, uint8_t tran_len)
     if (tran_len > 160)
     {
         // error: BLOCK TOO BIG
-        return FALSE;
+        return false;
     }
 
     // check if need to do a owTouchReset first
@@ -467,7 +467,7 @@ uint8_t oneWireBlock(uint8_t doReset, uint8_t *tran_buf, uint8_t tran_len)
         if (!oneWireTouchReset())
         {
             // error: NO DEVICES ON NET
-            return FALSE;
+            return false;
         }
     }
 
@@ -477,7 +477,7 @@ uint8_t oneWireBlock(uint8_t doReset, uint8_t *tran_buf, uint8_t tran_len)
         tran_buf[i] = oneWireTouchByte(tran_buf[i]);
     }
 
-    return TRUE;
+    return true;
 }
 
 /*******************************************************************************
@@ -502,7 +502,7 @@ uint8_t oneWireWriteMemory(uint8_t *buf, uint32_t ln, uint32_t adr)
         return oneWireCopyScratchpad(ln, adr);
 
     // end function
-    return FALSE;
+    return false;
 }
 
 /*******************************************************************************
@@ -541,12 +541,12 @@ uint8_t oneWireCopyScratchpad(uint32_t ln, uint32_t adr)
         if (oneWireBlock(FALSE, pbuf, 14))
         {
             if ((pbuf[13] == 0x55) || (pbuf[13] == 0xAA))
-                return TRUE;
+                return true;
         }
     }
 
     // end function
-    return FALSE;
+    return false;
 }
 
 /*******************************************************************************
@@ -584,7 +584,7 @@ uint8_t oneWireWriteScratchpad(uint8_t *buf, uint32_t ln, uint32_t adr)
 
         // perform the block
         if (!oneWireBlock(FALSE, pbuf, ln + 3))
-            return FALSE;
+            return false;
 
         // Now read back the scratch
         if (oneWireAccess())
@@ -601,30 +601,30 @@ uint8_t oneWireWriteScratchpad(uint8_t *buf, uint32_t ln, uint32_t adr)
 
             // perform the block
             if (!oneWireBlock(FALSE, pbuf, ln + 4))
-                return FALSE;
+                return false;
 
             // read address 1
             if (pbuf[1] != (adr & 0xFF))
-                return FALSE;
+                return false;
             // read address 2
             if (pbuf[2] != ((adr >> 8) & 0xFF))
-                return FALSE;
+                return false;
             // read the offset
             if (pbuf[3] != ((adr + ln - 1) & 0x1F))
-                return FALSE;
+                return false;
             // read and compare the contents
             for (i = 0; i < ln; i++)
             {
                 if (pbuf[4 + i] != buf[i])
-                    return FALSE;
+                    return false;
             }
             // success
-            return TRUE;
+            return true;
         }
     }
 
     // end function
-    return FALSE;
+    return false;
 }
 
 /*******************************************************************************
@@ -687,16 +687,16 @@ uint8_t oneWireReadPage(uint32_t start_pg, uint8_t *finalbuf)
         }
         else
         {
-            return FALSE;
+            return false;
         }
     }
     else
     {
-        return FALSE;
+        return false;
     }
 
     // end function
-    return TRUE;
+    return true;
 }
 
 /*******************************************************************************
@@ -742,7 +742,7 @@ uint8_t oneWireReadPageCRCEE77(uint32_t page, uint8_t *buff)
     // select the device
     if (!oneWireAccess())
     {
-        return FALSE;
+        return false;
     }
 
     // command, address, offset, password (except last byte)
@@ -771,14 +771,14 @@ uint8_t oneWireReadPageCRCEE77(uint32_t page, uint8_t *buff)
         // send block (check copy indication complete)
         if (!oneWireBlock(FALSE, (uint8_t *)raw_buf, (send_len - 1)))
         {
-            return FALSE;
+            return false;
         }
     }
     else
     {
         if (!oneWireBlock(FALSE, (uint8_t *)raw_buf, send_len))
         {
-            return FALSE;
+            return false;
         }
     }
 
@@ -800,14 +800,14 @@ uint8_t oneWireReadPageCRCEE77(uint32_t page, uint8_t *buff)
     {
         if (!oneWireBlock(FALSE, (uint8_t *)buff, PAGE_LENGTH))
         {
-            return FALSE;
+            return false;
         }
     }
     else
     {
         if (!oneWireBlock(FALSE, (uint8_t *)buff, PAGE_LENGTH_HYGRO))
         {
-            return FALSE;
+            return false;
         }
     }
     // read the first CRC16 byte
@@ -828,10 +828,10 @@ uint8_t oneWireReadPageCRCEE77(uint32_t page, uint8_t *buff)
     // check lsByte of the CRC
     if ((lastcrc16 & 0xFF) != (~lsCRC16 & 0xFF))
     {
-        return FALSE;
+        return false;
     }
 
-    return TRUE;
+    return true;
 }
 
 /*******************************************************************************
@@ -858,7 +858,7 @@ bool oneWireFindFirst(bool doReset, bool alarmOnly)
 {
     // reset the search state
     LastDiscrepancy = 0;
-    LastDevice = FALSE;
+    LastDevice = false;
     LastFamilyDiscrepancy = 0;
 
     // Call Next and return it's return value;
@@ -895,7 +895,7 @@ bool oneWireFindNext(bool doReset, bool alarmOnly)
     uint8_t attempt = 0;
     uint8_t discrepMarker = 0;
     bool outBit = 0;
-    bool result = FALSE;
+    bool result = false;
     uint8_t lastcrc8 = 0;
 
     // clear serial number buffer for new search
@@ -906,23 +906,23 @@ bool oneWireFindNext(bool doReset, bool alarmOnly)
     {
         // reset the search
         LastDiscrepancy = 0;
-        LastDevice = FALSE;
+        LastDevice = false;
         LastFamilyDiscrepancy = 0;
 
-        return FALSE;
+        return false;
     }
 
     // check if reset bus was requested
     if (doReset)
     {
         // reset the 1-Wire bus
-        // if there is no presence pulse there is nothing to do here, return FALSE
+        // if there is no presence pulse there is nothing to do here, return false
         if (!oneWireTouchReset())
         {
             // reset the search
             LastDiscrepancy = 0;
             LastFamilyDiscrepancy = 0;
-            return FALSE;
+            return false;
         }
     }
 
@@ -942,12 +942,12 @@ bool oneWireFindNext(bool doReset, bool alarmOnly)
     {
         attempt = 0;
 
-        if (oneWireTouchBit(TRUE) == 1)
+        if (oneWireTouchBit(true) == 1)
         {
             attempt = 2;
         }
 
-        if (oneWireTouchBit(TRUE) == 1)
+        if (oneWireTouchBit(true) == 1)
         {
             attempt |= 1;
         }
@@ -1026,7 +1026,7 @@ bool oneWireFindNext(bool doReset, bool alarmOnly)
         LastDevice = (LastDiscrepancy == 0);
 
         // search isn't completed there are more devices present in the bus
-        result = TRUE;
+        result = true;
     }
 
     return result;

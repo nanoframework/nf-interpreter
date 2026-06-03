@@ -15,7 +15,7 @@ HRESULT PalEventDriver::Initialize()
     if (!g_palEventDriver.s_initialized)
     {
         g_palEventDriver.listenerList.Initialize();
-        PalEventDriver::s_initialized = TRUE;
+        PalEventDriver::s_initialized = true;
     }
 
     return S_OK;

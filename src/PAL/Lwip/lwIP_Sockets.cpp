@@ -285,7 +285,7 @@ bool LWIP_SOCKETS_Driver::InitializeInterfaceIndex(
         }
 #endif
 
-        return TRUE;
+        return true;
     }
 
     return FALSE;
@@ -365,7 +365,7 @@ bool LWIP_SOCKETS_Driver::Uninitialize()
 
     nanoHAL_Network_Uninitialize();
 
-    return TRUE;
+    return true;
 }
 
 extern void debug_printf(const char *format, ...);

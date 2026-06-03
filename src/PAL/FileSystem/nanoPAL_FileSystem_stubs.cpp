@@ -20,10 +20,10 @@ __nfweak void FileSystemVolumeList::Initialize()
 
 __nfweak bool FileSystemVolumeList::InitializeVolumes()
 {
-    return TRUE;
+    return true;
 }
 
 __nfweak bool FileSystemVolumeList::UninitializeVolumes()
 {
-    return TRUE;
+    return true;
 }

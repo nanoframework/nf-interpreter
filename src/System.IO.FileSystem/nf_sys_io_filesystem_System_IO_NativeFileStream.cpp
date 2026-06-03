@@ -38,7 +38,7 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_NativeFileStream::Read___I4__SZAR
     NATIVE_PROFILE_CLR_IO();
     NANOCLR_HEADER();
 
-    NANOCLR_SET_AND_LEAVE(ReadWriteHelper(stack, TRUE));
+    NANOCLR_SET_AND_LEAVE(ReadWriteHelper(stack, true));
 
     NANOCLR_NOCLEANUP();
 }

@@ -12,13 +12,6 @@
 #undef FAR
 #endif
 
-   /* boolean is defined in rpcndr.h, we can't define it the same way here
-      (unsigned char) because a == b is passed as an argument to a function
-      declared as taking a boolean, and MSVC treats this as warnable (hence
-      errorable)!  The hack is to hide the IJG definition. */
-#define boolean jpeg_boolean
-      // </Hacks from CE team>
-
 #define HAVE_PROTOTYPES
 #define HAVE_UNSIGNED_CHAR
 #define HAVE_UNSIGNED_SHORT

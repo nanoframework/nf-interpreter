@@ -363,7 +363,7 @@ SOCK_SOCKET Sockets_LWIP_Driver::Accept(SOCK_SOCKET socket, struct SOCK_sockaddr
 
     if (ret != SOCK_SOCKET_ERROR)
     {
-        RegisterSocket(ret, TRUE, fDebug);
+        RegisterSocket(ret, true, fDebug);
     }
 
     return ret;
@@ -429,7 +429,7 @@ bool Sockets_LWIP_Driver::Initialize()
 
         SSL_Initialize();
 
-        s_initialized = TRUE;
+        s_initialized = true;
     }
 
     SOCKET_CHECK_EXIT_bool();
@@ -446,14 +446,14 @@ __nfweak void Sockets_LWIP_Driver::Debugger_Uninitialize()
 bool Sockets_LWIP_Driver::Uninitialize()
 {
     NATIVE_PROFILE_PAL_COM();
-    bool ret = TRUE;
+    bool ret = true;
 
     if (s_initialized)
     {
         Debugger_Abort();
 
         // close all connections (including debugger sockets)
-        CloseConnections(TRUE);
+        CloseConnections(true);
 
         SSL_Uninitialize();
 

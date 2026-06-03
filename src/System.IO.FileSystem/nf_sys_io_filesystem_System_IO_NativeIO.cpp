@@ -145,7 +145,7 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_NativeIO::Format___STATIC__VOID__
 
     if (!hbFileSystemName)
     {
-        needInitialize = TRUE;
+        needInitialize = true;
 
         NANOCLR_SET_AND_LEAVE(driver->Format("", parameters));
     }
@@ -162,7 +162,7 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_NativeIO::Format___STATIC__VOID__
             }
 
             // From this point on, even if we fail, we should try to re-initialize before returning
-            needInitialize = TRUE;
+            needInitialize = true;
 
             driver->m_fsDriver = g_AvailableFSInterfaces[i].fsDriver;
             driver->m_streamDriver = g_AvailableFSInterfaces[i].streamDriver;

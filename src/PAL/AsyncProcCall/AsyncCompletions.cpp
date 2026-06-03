@@ -242,7 +242,7 @@ void HAL_COMPLETION::Uninitialize()
 
     GLOBAL_LOCK();
 
-    while (TRUE)
+    while (true)
     {
         ptr = (HAL_COMPLETION *)g_HAL_Completion_List.ExtractFirstNode();
 

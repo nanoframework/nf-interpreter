@@ -741,7 +741,7 @@ jinit_downsampler(j_compress_ptr cinfo)
     my_downsample_ptr downsample;
     int ci;
     jpeg_component_info* compptr;
-    boolean smoothok = TRUE;
+    bool smoothok = true;
 
     downsample = (my_downsample_ptr)
         (*cinfo->mem->alloc_small) ((j_common_ptr)cinfo, JPOOL_IMAGE,
@@ -749,7 +749,7 @@ jinit_downsampler(j_compress_ptr cinfo)
     cinfo->downsample = (struct jpeg_downsampler*) downsample;
     downsample->pub.start_pass = start_pass_downsample;
     downsample->pub.downsample = sep_downsample;
-    downsample->pub.need_context_rows = FALSE;
+    downsample->pub.need_context_rows = false;
 
     if (cinfo->CCIR601_sampling)
         ERREXIT(cinfo, JERR_CCIR601_NOTIMPL);
@@ -762,7 +762,7 @@ jinit_downsampler(j_compress_ptr cinfo)
 #ifdef INPUT_SMOOTHING_SUPPORTED
             if (cinfo->smoothing_factor) {
                 downsample->methods[ci] = fullsize_smooth_downsample;
-                downsample->pub.need_context_rows = TRUE;
+                downsample->pub.need_context_rows = true;
             }
             else
 #endif
@@ -770,7 +770,7 @@ jinit_downsampler(j_compress_ptr cinfo)
         }
         else if (compptr->h_samp_factor * 2 == cinfo->max_h_samp_factor &&
             compptr->v_samp_factor == cinfo->max_v_samp_factor) {
-            smoothok = FALSE;
+            smoothok = false;
             downsample->methods[ci] = h2v1_downsample;
         }
         else if (compptr->h_samp_factor * 2 == cinfo->max_h_samp_factor &&
@@ -778,7 +778,7 @@ jinit_downsampler(j_compress_ptr cinfo)
 #ifdef INPUT_SMOOTHING_SUPPORTED
             if (cinfo->smoothing_factor) {
                 downsample->methods[ci] = h2v2_smooth_downsample;
-                downsample->pub.need_context_rows = TRUE;
+                downsample->pub.need_context_rows = true;
             }
             else
 #endif
@@ -786,7 +786,7 @@ jinit_downsampler(j_compress_ptr cinfo)
         }
         else if ((cinfo->max_h_samp_factor % compptr->h_samp_factor) == 0 &&
             (cinfo->max_v_samp_factor % compptr->v_samp_factor) == 0) {
-            smoothok = FALSE;
+            smoothok = false;
             downsample->methods[ci] = int_downsample;
         }
         else
@@ -798,4 +798,3 @@ jinit_downsampler(j_compress_ptr cinfo)
         TRACEMS(cinfo, 0, JTRC_SMOOTH_NOTIMPL);
 #endif
 }
-

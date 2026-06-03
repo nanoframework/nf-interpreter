@@ -28,7 +28,7 @@ init_source(j_decompress_ptr cinfo)
 }
 #pragma GCC diagnostic pop
 
-METHODDEF(boolean)
+METHODDEF(bool)
 fill_input_buffer(j_decompress_ptr cinfo)
 {
     // since the initial buffer contains all the data that we have, 
@@ -46,7 +46,7 @@ fill_input_buffer(j_decompress_ptr cinfo)
     src->pub.next_input_byte = src->buffer;
     src->pub.bytes_in_buffer = 2;
 
-    return TRUE;
+    return true;
 }
 
 // Keeping the library's original implementation 
@@ -63,7 +63,7 @@ skip_input_data(j_decompress_ptr cinfo, long num_bytes)
         while (num_bytes > (long)src->pub.bytes_in_buffer) {
             num_bytes -= (long)src->pub.bytes_in_buffer;
             (void)fill_input_buffer(cinfo);
-            /* note we assume that fill_input_buffer will never return FALSE,
+            /* note we assume that fill_input_buffer will never return false,
             * so suspension need not be handled.
             */
         }

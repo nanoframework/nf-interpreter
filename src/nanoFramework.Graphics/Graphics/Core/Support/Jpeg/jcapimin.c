@@ -56,7 +56,7 @@ jpeg_CreateCompress(j_compress_ptr cinfo, int version, CLR_INT32 structsize)
         cinfo->err = err;
         cinfo->client_data = client_data;
     }
-    cinfo->is_decompressor = FALSE;
+    cinfo->is_decompressor = false;
 
     /* Initialize a memory manager instance for this object */
     jinit_memory_mgr((j_common_ptr)cinfo);
@@ -114,7 +114,7 @@ jpeg_abort_compress(j_compress_ptr cinfo)
  * jcparam.o would be linked whether the application used it or not.
  */
 GLOBAL(void)
-jpeg_suppress_tables(j_compress_ptr cinfo, boolean suppress)
+jpeg_suppress_tables(j_compress_ptr cinfo, bool suppress)
 {
     int i;
     JQUANT_TBL* qtbl;

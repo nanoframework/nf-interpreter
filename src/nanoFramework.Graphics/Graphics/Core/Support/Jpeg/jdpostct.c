@@ -254,7 +254,7 @@ post_process_2pass(j_decompress_ptr cinfo,
  */
 
 GLOBAL(void)
-jinit_d_post_controller(j_decompress_ptr cinfo, boolean need_full_buffer)
+jinit_d_post_controller(j_decompress_ptr cinfo, bool need_full_buffer)
 {
     my_post_ptr post;
 

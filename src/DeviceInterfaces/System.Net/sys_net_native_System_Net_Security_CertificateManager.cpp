@@ -53,7 +53,7 @@ HRESULT Library_sys_net_native_System_Net_Security_CertificateManager::
                 0,
                 certificateSize,
                 0,
-                true) != TRUE)
+                true) != true)
         {
             NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
         }
@@ -70,7 +70,7 @@ HRESULT Library_sys_net_native_System_Net_Security_CertificateManager::
     }
 
     // reach here, we should be OK
-    stack.SetResult_Boolean(TRUE);
+    stack.SetResult_Boolean(true);
 
     NANOCLR_CLEANUP();
 

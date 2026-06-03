@@ -40,7 +40,7 @@ __nfweak void HAL_CONTINUATION::Abort  ()
 __nfweak bool HAL_CONTINUATION::Dequeue_And_Execute()
 {
     NATIVE_PROFILE_PAL_ASYNC_PROC_CALL();
-    return TRUE;
+    return true;
 }
 
 __nfweak bool HAL_CONTINUATION::IsLinked()

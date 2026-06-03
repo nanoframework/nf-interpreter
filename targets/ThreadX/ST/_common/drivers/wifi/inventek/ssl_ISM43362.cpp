@@ -53,7 +53,7 @@ bool ssl_add_cert_auth_internal(int contextHandle, const char *certificate, int 
     (void)certLength;
     (void)certPassword;
 
-    // always return TRUE because we can't really add a certificate to the chain
+    // always return true because we can't really add a certificate to the chain
     return true;
 }
 

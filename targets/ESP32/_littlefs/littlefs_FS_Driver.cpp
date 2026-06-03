@@ -15,14 +15,14 @@ static int NormalizePath(const char *root, const char *path, char *buffer, size_
 bool LITTLEFS_FS_Driver::LoadMedia(const void *driverInterface)
 {
     (void)driverInterface;
-    return TRUE;
+    return true;
 }
 
 STREAM_DRIVER_DETAILS *LITTLEFS_FS_Driver::DriverDetails(const VOLUME_ID *volume)
 {
     (void)volume;
 
-    static STREAM_DRIVER_DETAILS driverDetail = {DIRECT_IO, NULL, NULL, 0, 0, TRUE, TRUE, TRUE, 0, 0};
+    static STREAM_DRIVER_DETAILS driverDetail = {DIRECT_IO, NULL, NULL, 0, 0, true, true, true, 0, 0};
 
     return &driverDetail;
 }
@@ -38,14 +38,14 @@ bool LITTLEFS_FS_Driver::InitializeVolume(const VOLUME_ID *volume, const char *p
 {
     // nothing to do here as the mount API will take care of this
 
-    return TRUE;
+    return true;
 }
 
 bool LITTLEFS_FS_Driver::UnInitializeVolume(const VOLUME_ID *volume)
 {
     // nothing to do here as the unmount API will take care of this
 
-    return TRUE;
+    return true;
 }
 
 HRESULT LITTLEFS_FS_Driver::Format(const VOLUME_ID *volume, const char *volumeLabel, uint32_t parameters)

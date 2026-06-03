@@ -321,7 +321,7 @@ bool ISM43362_SOCKETS_Driver::Initialize()
         }
     }
 
-    return TRUE;
+    return true;
 }
 
 bool ISM43362_SOCKETS_Driver::Uninitialize()
@@ -340,7 +340,7 @@ bool ISM43362_SOCKETS_Driver::Uninitialize()
     // FIXME    tcpip_shutdown();
     // tcpip_shutdown is MS method added to lwip tcpip.c
 
-    return TRUE;
+    return true;
 }
 
 extern void debug_printf(const char *format, ...);

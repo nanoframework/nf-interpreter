@@ -40,13 +40,13 @@
   */
 
 GLOBAL(void)
-jpeg_start_compress(j_compress_ptr cinfo, boolean write_all_tables)
+jpeg_start_compress(j_compress_ptr cinfo, bool write_all_tables)
 {
     if (cinfo->global_state != CSTATE_START)
         ERREXIT1(cinfo, JERR_BAD_STATE, cinfo->global_state);
 
     if (write_all_tables)
-        jpeg_suppress_tables(cinfo, FALSE);	/* mark all tables to be written */
+        jpeg_suppress_tables(cinfo, false);	/* mark all tables to be written */
 
       /* (Re)initialize error mgr and destination modules */
     (*cinfo->err->reset_error_mgr) ((j_common_ptr)cinfo);
@@ -160,4 +160,3 @@ jpeg_write_raw_data(j_compress_ptr cinfo, JSAMPIMAGE data,
     cinfo->next_scanline += lines_per_iMCU_row;
     return lines_per_iMCU_row;
 }
-

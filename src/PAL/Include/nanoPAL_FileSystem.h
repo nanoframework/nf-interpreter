@@ -219,7 +219,7 @@ extern "C"
         {
             if (!m_streamDriver || !(m_streamDriver->InitializeVolume))
             {
-                return FALSE;
+                return false;
             }
 
             return m_streamDriver->InitializeVolume(&m_volumeId, m_rootName);
@@ -230,7 +230,7 @@ extern "C"
             // it's we don't have valid stream driver, do nothing
             if (!m_streamDriver || !(m_streamDriver->UninitializeVolume))
             {
-                return TRUE;
+                return true;
             }
 
             return m_streamDriver->UninitializeVolume(&m_volumeId);
@@ -431,7 +431,7 @@ extern "C"
             if (!m_streamDriver || !(m_streamDriver->DriverDetails))
             {
                 // invalid streamDriver, or invalid DriverDetails pointer
-                return FALSE;
+                return false;
             }
 
             details = m_streamDriver->DriverDetails(&m_volumeId);
@@ -454,10 +454,10 @@ extern "C"
                 // if the stream can seek AND write, SetLength is required
                 (details->canSeek && details->canWrite && (!(m_streamDriver->SetLength))))
             {
-                return FALSE;
+                return false;
             }
 
-            return TRUE;
+            return true;
         }
 
         bool ValidateFind()

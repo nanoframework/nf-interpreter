@@ -70,7 +70,7 @@ HRESULT CLR_GFX_Bitmap::CreateInstanceJpeg(CLR_RT_HeapBlock &ref, const CLR_UINT
     // Create the decompression engine
     jpeg_create_decompress(&cinfo);
     jpeg_byte_array_src(&cinfo, (CLR_UINT8 *)data, size);
-    jpeg_read_header(&cinfo, TRUE);
+    jpeg_read_header(&cinfo, true);
 
     // Set output to 16bit 5-6-5 RGB format
     // We can add support for other bit-depth in the future

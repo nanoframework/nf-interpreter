@@ -1254,7 +1254,7 @@ jinit_upsampler(j_decompress_ptr cinfo)
     my_upsample_ptr upsample;
     int ci;
     jpeg_component_info* compptr;
-    boolean need_buffer, do_fancy;
+    bool need_buffer, do_fancy;
     int h_in_group, v_in_group, h_out_group, v_out_group;
 
     upsample = (my_upsample_ptr)
@@ -1263,7 +1263,7 @@ jinit_upsampler(j_decompress_ptr cinfo)
     cinfo->upsample = (struct jpeg_upsampler*) upsample;
     upsample->pub.start_pass = start_pass_upsample;
     upsample->pub.upsample = sep_upsample;
-    upsample->pub.need_context_rows = FALSE; /* until we find out differently */
+    upsample->pub.need_context_rows = false; /* until we find out differently */
 
     if (cinfo->CCIR601_sampling)   /* this isn't supported */
         ERREXIT(cinfo, JERR_CCIR601_NOTIMPL);
@@ -1288,16 +1288,16 @@ jinit_upsampler(j_decompress_ptr cinfo)
         h_out_group = cinfo->max_h_samp_factor;
         v_out_group = cinfo->max_v_samp_factor;
         upsample->rowgroup_height[ci] = v_in_group; /* save for use later */
-        need_buffer = TRUE;
+        need_buffer = true;
         if (!compptr->component_needed) {
             /* Don't bother to upsample an uninteresting component. */
             upsample->methods[ci] = noop_upsample;
-            need_buffer = FALSE;
+            need_buffer = false;
         }
         else if (h_in_group == h_out_group && v_in_group == v_out_group) {
             /* Fullsize components can be processed without any work. */
             upsample->methods[ci] = fullsize_upsample;
-            need_buffer = FALSE;
+            need_buffer = false;
         }
         else if (h_in_group * 2 == h_out_group &&
             v_in_group == v_out_group) {
@@ -1312,7 +1312,7 @@ jinit_upsampler(j_decompress_ptr cinfo)
             /* Special cases for 2h2v upsampling */
             if (do_fancy && compptr->downsampled_width > 2) {
                 upsample->methods[ci] = h2v2_fancy_upsample;
-                upsample->pub.need_context_rows = TRUE;
+                upsample->pub.need_context_rows = true;
             }
             else
                 upsample->methods[ci] = h2v2_upsample;

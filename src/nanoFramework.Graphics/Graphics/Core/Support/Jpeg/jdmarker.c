@@ -149,7 +149,7 @@ typedef my_marker_reader * my_marker_ptr;
     }
 
 /* Read a byte into variable V.
- * If must suspend, take the specified action (typically "return FALSE").
+ * If must suspend, take the specified action (typically "return false").
  */
 #define INPUT_BYTE(cinfo,V,action)  \
     MAKESTMT( MAKE_BYTE_AVAIL(cinfo,action); \
@@ -174,9 +174,9 @@ typedef my_marker_reader * my_marker_ptr;
  * Entry condition: JPEG marker itself has been read and its code saved
  *   in cinfo->unread_marker; input restart point is just after the marker.
  *
- * Exit: if return TRUE, have read and processed any parameters, and have
+ * Exit: if return true, have read and processed any parameters, and have
  *   updated the restart point to point after the parameters.
- *   If return FALSE, was forced to suspend before reaching end of
+ *   If return false, was forced to suspend before reaching end of
  *   marker parameters; restart point has not been moved.  Same routine
  *   will be called again after application supplies more input data.
  *
@@ -199,7 +199,7 @@ typedef my_marker_reader * my_marker_ptr;
  */
 
 
-LOCAL(boolean)
+LOCAL(bool)
 get_soi (j_decompress_ptr cinfo)
 /* Process an SOI marker */
 {
@@ -222,25 +222,25 @@ get_soi (j_decompress_ptr cinfo)
   /* Set initial assumptions for colorspace etc */
 
   cinfo->jpeg_color_space = JCS_UNKNOWN;
-  cinfo->CCIR601_sampling = FALSE; /* Assume non-CCIR sampling??? */
+  cinfo->CCIR601_sampling = false; /* Assume non-CCIR sampling??? */
 
-  cinfo->saw_JFIF_marker = FALSE;
+  cinfo->saw_JFIF_marker = false;
   cinfo->JFIF_major_version = 1; /* set default JFIF APP0 values */
   cinfo->JFIF_minor_version = 1;
   cinfo->density_unit = 0;
   cinfo->X_density = 1;
   cinfo->Y_density = 1;
-  cinfo->saw_Adobe_marker = FALSE;
+  cinfo->saw_Adobe_marker = false;
   cinfo->Adobe_transform = 0;
 
-  cinfo->marker->saw_SOI = TRUE;
+  cinfo->marker->saw_SOI = true;
 
-  return TRUE;
+  return true;
 }
 
 
-LOCAL(boolean)
-get_sof (j_decompress_ptr cinfo, boolean is_prog, boolean is_arith)
+LOCAL(bool)
+get_sof (j_decompress_ptr cinfo, bool is_prog, bool is_arith)
 /* Process a SOFn marker */
 {
   CLR_INT32 length;
@@ -251,12 +251,12 @@ get_sof (j_decompress_ptr cinfo, boolean is_prog, boolean is_arith)
   cinfo->progressive_mode = is_prog;
   cinfo->arith_code = is_arith;
 
-  INPUT_2BYTES(cinfo, length, return FALSE);
+  INPUT_2BYTES(cinfo, length, return false);
 
-  INPUT_BYTE(cinfo, cinfo->data_precision, return FALSE);
-  INPUT_2BYTES(cinfo, cinfo->image_height, return FALSE);
-  INPUT_2BYTES(cinfo, cinfo->image_width, return FALSE);
-  INPUT_BYTE(cinfo, cinfo->num_components, return FALSE);
+  INPUT_BYTE(cinfo, cinfo->data_precision, return false);
+  INPUT_2BYTES(cinfo, cinfo->image_height, return false);
+  INPUT_2BYTES(cinfo, cinfo->image_width, return false);
+  INPUT_BYTE(cinfo, cinfo->num_components, return false);
 
   length -= 8;
 
@@ -285,25 +285,25 @@ get_sof (j_decompress_ptr cinfo, boolean is_prog, boolean is_arith)
   for (ci = 0, compptr = cinfo->comp_info; ci < cinfo->num_components;
        ci++, compptr++) {
     compptr->component_index = ci;
-    INPUT_BYTE(cinfo, compptr->component_id, return FALSE);
-    INPUT_BYTE(cinfo, c, return FALSE);
+    INPUT_BYTE(cinfo, compptr->component_id, return false);
+    INPUT_BYTE(cinfo, c, return false);
     compptr->h_samp_factor = (c >> 4) & 15;
     compptr->v_samp_factor = (c     ) & 15;
-    INPUT_BYTE(cinfo, compptr->quant_tbl_no, return FALSE);
+    INPUT_BYTE(cinfo, compptr->quant_tbl_no, return false);
 
     TRACEMS4(cinfo, 1, JTRC_SOF_COMPONENT,
          compptr->component_id, compptr->h_samp_factor,
          compptr->v_samp_factor, compptr->quant_tbl_no);
   }
 
-  cinfo->marker->saw_SOF = TRUE;
+  cinfo->marker->saw_SOF = true;
 
   INPUT_SYNC(cinfo);
-  return TRUE;
+  return true;
 }
 
 
-LOCAL(boolean)
+LOCAL(bool)
 get_sos (j_decompress_ptr cinfo)
 /* Process a SOS marker */
 {
@@ -315,9 +315,9 @@ get_sos (j_decompress_ptr cinfo)
   if (! cinfo->marker->saw_SOF)
     ERREXIT(cinfo, JERR_SOS_NO_SOF);
 
-  INPUT_2BYTES(cinfo, length, return FALSE);
+  INPUT_2BYTES(cinfo, length, return false);
 
-  INPUT_BYTE(cinfo, n, return FALSE); /* Number of components */
+  INPUT_BYTE(cinfo, n, return false); /* Number of components */
 
   TRACEMS1(cinfo, 1, JTRC_SOS, n);
 
@@ -329,8 +329,8 @@ get_sos (j_decompress_ptr cinfo)
   /* Collect the component-spec parameters */
 
   for (i = 0; i < n; i++) {
-    INPUT_BYTE(cinfo, cc, return FALSE);
-    INPUT_BYTE(cinfo, c, return FALSE);
+    INPUT_BYTE(cinfo, cc, return false);
+    INPUT_BYTE(cinfo, c, return false);
     
     for (ci = 0, compptr = cinfo->comp_info; ci < cinfo->num_components;
      ci++, compptr++) {
@@ -351,11 +351,11 @@ get_sos (j_decompress_ptr cinfo)
   }
 
   /* Collect the additional scan parameters Ss, Se, Ah/Al. */
-  INPUT_BYTE(cinfo, c, return FALSE);
+  INPUT_BYTE(cinfo, c, return false);
   cinfo->Ss = c;
-  INPUT_BYTE(cinfo, c, return FALSE);
+  INPUT_BYTE(cinfo, c, return false);
   cinfo->Se = c;
-  INPUT_BYTE(cinfo, c, return FALSE);
+  INPUT_BYTE(cinfo, c, return false);
   cinfo->Ah = (c >> 4) & 15;
   cinfo->Al = (c     ) & 15;
 
@@ -369,13 +369,13 @@ get_sos (j_decompress_ptr cinfo)
   cinfo->input_scan_number++;
 
   INPUT_SYNC(cinfo);
-  return TRUE;
+  return true;
 }
 
 
 #ifdef D_ARITH_CODING_SUPPORTED
 
-LOCAL(boolean)
+LOCAL(bool)
 get_dac (j_decompress_ptr cinfo)
 /* Process a DAC marker */
 {
@@ -383,12 +383,12 @@ get_dac (j_decompress_ptr cinfo)
   int index, val;
   INPUT_VARS(cinfo);
 
-  INPUT_2BYTES(cinfo, length, return FALSE);
+  INPUT_2BYTES(cinfo, length, return false);
   length -= 2;
   
   while (length > 0) {
-    INPUT_BYTE(cinfo, index, return FALSE);
-    INPUT_BYTE(cinfo, val, return FALSE);
+    INPUT_BYTE(cinfo, index, return false);
+    INPUT_BYTE(cinfo, val, return false);
 
     length -= 2;
 
@@ -411,7 +411,7 @@ get_dac (j_decompress_ptr cinfo)
     ERREXIT(cinfo, JERR_BAD_LENGTH);
 
   INPUT_SYNC(cinfo);
-  return TRUE;
+  return true;
 }
 
 #else /* ! D_ARITH_CODING_SUPPORTED */
@@ -421,7 +421,7 @@ get_dac (j_decompress_ptr cinfo)
 #endif /* D_ARITH_CODING_SUPPORTED */
 
 
-LOCAL(boolean)
+LOCAL(bool)
 get_dht (j_decompress_ptr cinfo)
 /* Process a DHT marker */
 {
@@ -432,18 +432,18 @@ get_dht (j_decompress_ptr cinfo)
   JHUFF_TBL **htblptr;
   INPUT_VARS(cinfo);
 
-  INPUT_2BYTES(cinfo, length, return FALSE);
+  INPUT_2BYTES(cinfo, length, return false);
   length -= 2;
   
   while (length > 16) {
-    INPUT_BYTE(cinfo, index, return FALSE);
+    INPUT_BYTE(cinfo, index, return false);
 
     TRACEMS1(cinfo, 1, JTRC_DHT, index);
       
     bits[0] = 0;
     count = 0;
     for (i = 1; i <= 16; i++) {
-      INPUT_BYTE(cinfo, bits[i], return FALSE);
+      INPUT_BYTE(cinfo, bits[i], return false);
       count += bits[i];
     }
 
@@ -463,7 +463,7 @@ get_dht (j_decompress_ptr cinfo)
       ERREXIT(cinfo, JERR_BAD_HUFF_TABLE);
 
     for (i = 0; i < count; i++)
-      INPUT_BYTE(cinfo, huffval[i], return FALSE);
+      INPUT_BYTE(cinfo, huffval[i], return false);
 
     length -= count;
 
@@ -488,11 +488,11 @@ get_dht (j_decompress_ptr cinfo)
     ERREXIT(cinfo, JERR_BAD_LENGTH);
 
   INPUT_SYNC(cinfo);
-  return TRUE;
+  return true;
 }
 
 
-LOCAL(boolean)
+LOCAL(bool)
 get_dqt (j_decompress_ptr cinfo)
 /* Process a DQT marker */
 {
@@ -502,11 +502,11 @@ get_dqt (j_decompress_ptr cinfo)
   JQUANT_TBL *quant_ptr;
   INPUT_VARS(cinfo);
 
-  INPUT_2BYTES(cinfo, length, return FALSE);
+  INPUT_2BYTES(cinfo, length, return false);
   length -= 2;
 
   while (length > 0) {
-    INPUT_BYTE(cinfo, n, return FALSE);
+    INPUT_BYTE(cinfo, n, return false);
     prec = n >> 4;
     n &= 0x0F;
 
@@ -521,9 +521,9 @@ get_dqt (j_decompress_ptr cinfo)
 
     for (i = 0; i < DCTSIZE2; i++) {
       if (prec)
-    INPUT_2BYTES(cinfo, tmp, return FALSE);
+    INPUT_2BYTES(cinfo, tmp, return false);
       else
-    INPUT_BYTE(cinfo, tmp, return FALSE);
+    INPUT_BYTE(cinfo, tmp, return false);
       /* We convert the zigzag-order table to natural array order. */
       quant_ptr->quantval[jpeg_natural_order[i]] = (CLR_UINT16) tmp;
     }
@@ -546,11 +546,11 @@ get_dqt (j_decompress_ptr cinfo)
     ERREXIT(cinfo, JERR_BAD_LENGTH);
 
   INPUT_SYNC(cinfo);
-  return TRUE;
+  return true;
 }
 
 
-LOCAL(boolean)
+LOCAL(bool)
 get_dri (j_decompress_ptr cinfo)
 /* Process a DRI marker */
 {
@@ -558,19 +558,19 @@ get_dri (j_decompress_ptr cinfo)
   unsigned int tmp;
   INPUT_VARS(cinfo);
 
-  INPUT_2BYTES(cinfo, length, return FALSE);
+  INPUT_2BYTES(cinfo, length, return false);
   
   if (length != 4)
     ERREXIT(cinfo, JERR_BAD_LENGTH);
 
-  INPUT_2BYTES(cinfo, tmp, return FALSE);
+  INPUT_2BYTES(cinfo, tmp, return false);
 
   TRACEMS1(cinfo, 1, JTRC_DRI, tmp);
 
   cinfo->restart_interval = tmp;
 
   INPUT_SYNC(cinfo);
-  return TRUE;
+  return true;
 }
 
 
@@ -602,7 +602,7 @@ examine_app0 (j_decompress_ptr cinfo, JOCTET FAR * data,
       GETJOCTET(data[3]) == 0x46 &&
       GETJOCTET(data[4]) == 0) {
     /* Found JFIF APP0 marker: save info */
-    cinfo->saw_JFIF_marker = TRUE;
+    cinfo->saw_JFIF_marker = true;
     cinfo->JFIF_major_version = GETJOCTET(data[5]);
     cinfo->JFIF_minor_version = GETJOCTET(data[6]);
     cinfo->density_unit = GETJOCTET(data[7]);
@@ -683,7 +683,7 @@ examine_app14 (j_decompress_ptr cinfo, JOCTET FAR * data,
     flags1 = (GETJOCTET(data[9]) << 8) + GETJOCTET(data[10]);
     transform = GETJOCTET(data[11]);
     TRACEMS4(cinfo, 1, JTRC_ADOBE, version, flags0, flags1, transform);
-    cinfo->saw_Adobe_marker = TRUE;
+    cinfo->saw_Adobe_marker = true;
     cinfo->Adobe_transform = (CLR_UINT8) transform;
   } else {
     /* Start of APP14 does not match "Adobe", or too short */
@@ -692,7 +692,7 @@ examine_app14 (j_decompress_ptr cinfo, JOCTET FAR * data,
 }
 
 
-METHODDEF(boolean)
+METHODDEF(bool)
 get_interesting_appn (j_decompress_ptr cinfo)
 /* Process an APP0 or APP14 marker without saving it */
 {
@@ -701,7 +701,7 @@ get_interesting_appn (j_decompress_ptr cinfo)
   unsigned int i, numtoread;
   INPUT_VARS(cinfo);
 
-  INPUT_2BYTES(cinfo, length, return FALSE);
+  INPUT_2BYTES(cinfo, length, return false);
   length -= 2;
 
   /* get the interesting part of the marker data */
@@ -712,7 +712,7 @@ get_interesting_appn (j_decompress_ptr cinfo)
   else
     numtoread = 0;
   for (i = 0; i < numtoread; i++)
-    INPUT_BYTE(cinfo, b[i], return FALSE);
+    INPUT_BYTE(cinfo, b[i], return false);
   length -= numtoread;
 
   /* process it */
@@ -734,13 +734,13 @@ get_interesting_appn (j_decompress_ptr cinfo)
   if (length > 0)
     (*cinfo->src->skip_input_data) (cinfo, (long) length);
 
-  return TRUE;
+  return true;
 }
 
 
 #ifdef SAVE_MARKERS_SUPPORTED
 
-METHODDEF(boolean)
+METHODDEF(bool)
 save_marker (j_decompress_ptr cinfo)
 /* Save an APPn or COM marker into the marker list */
 {
@@ -753,7 +753,7 @@ save_marker (j_decompress_ptr cinfo)
 
   if (cur_marker == NULL) {
     /* begin reading a marker */
-    INPUT_2BYTES(cinfo, length, return FALSE);
+    INPUT_2BYTES(cinfo, length, return false);
     length -= 2;
     if (length >= 0) {      /* watch out for bogus length word */
       /* figure out how much we want to save */
@@ -797,7 +797,7 @@ save_marker (j_decompress_ptr cinfo)
     INPUT_SYNC(cinfo);      /* move the restart point to here */
     marker->bytes_read = bytes_read;
     /* If there's not at least one byte in buffer, suspend */
-    MAKE_BYTE_AVAIL(cinfo, return FALSE);
+    MAKE_BYTE_AVAIL(cinfo, return false);
     /* Copy bytes with reasonable rapidity */
     while (bytes_read < data_length && bytes_in_buffer > 0) {
       *data++ = *next_input_byte++;
@@ -843,19 +843,19 @@ save_marker (j_decompress_ptr cinfo)
   if (length > 0)
     (*cinfo->src->skip_input_data) (cinfo, (long) length);
 
-  return TRUE;
+  return true;
 }
 #endif /* SAVE_MARKERS_SUPPORTED */
 
 
-METHODDEF(boolean)
+METHODDEF(bool)
 skip_variable (j_decompress_ptr cinfo)
 /* Skip over an unknown or uninteresting variable-length marker */
 {
   CLR_INT32 length;
   INPUT_VARS(cinfo);
 
-  INPUT_2BYTES(cinfo, length, return FALSE);
+  INPUT_2BYTES(cinfo, length, return false);
   length -= 2;
   
   TRACEMS2(cinfo, 1, JTRC_MISC_MARKER, cinfo->unread_marker, (int) length);
@@ -864,7 +864,7 @@ skip_variable (j_decompress_ptr cinfo)
   if (length > 0)
     (*cinfo->src->skip_input_data) (cinfo, (long) length);
 
-  return TRUE;
+  return true;
 }
 
 
@@ -877,14 +877,14 @@ skip_variable (j_decompress_ptr cinfo)
  * but it will never be 0 or FF.
  */
 
-LOCAL(boolean)
+LOCAL(bool)
 next_marker (j_decompress_ptr cinfo)
 {
   int c;
   INPUT_VARS(cinfo);
 
   for (;;) {
-    INPUT_BYTE(cinfo, c, return FALSE);
+    INPUT_BYTE(cinfo, c, return false);
     /* Skip any non-FF bytes.
      * This may look a bit inefficient, but it will not occur in a valid file.
      * We sync after each discarded byte so that a suspending data source
@@ -893,7 +893,7 @@ next_marker (j_decompress_ptr cinfo)
     while (c != 0xFF) {
       cinfo->marker->discarded_bytes++;
       INPUT_SYNC(cinfo);
-      INPUT_BYTE(cinfo, c, return FALSE);
+      INPUT_BYTE(cinfo, c, return false);
     }
     /* This loop swallows any duplicate FF bytes.  Extra FF bytes are legal as
      * pad bytes, so don't count them in discarded_bytes.  We assume there
@@ -901,7 +901,7 @@ next_marker (j_decompress_ptr cinfo)
      * data source's input buffer.
      */
     do {
-      INPUT_BYTE(cinfo, c, return FALSE);
+      INPUT_BYTE(cinfo, c, return false);
     } while (c == 0xFF);
     if (c != 0)
       break;            /* found a valid marker, exit loop */
@@ -920,11 +920,11 @@ next_marker (j_decompress_ptr cinfo)
   cinfo->unread_marker = c;
 
   INPUT_SYNC(cinfo);
-  return TRUE;
+  return true;
 }
 
 
-LOCAL(boolean)
+LOCAL(bool)
 first_marker (j_decompress_ptr cinfo)
 /* Like next_marker, but used to obtain the initial SOI marker. */
 /* For this marker, we do not allow preceding garbage or fill; otherwise,
@@ -936,15 +936,15 @@ first_marker (j_decompress_ptr cinfo)
   int c, c2;
   INPUT_VARS(cinfo);
 
-  INPUT_BYTE(cinfo, c, return FALSE);
-  INPUT_BYTE(cinfo, c2, return FALSE);
+  INPUT_BYTE(cinfo, c, return false);
+  INPUT_BYTE(cinfo, c2, return false);
   if (c != 0xFF || c2 != (int) M_SOI)
     ERREXIT2(cinfo, JERR_NO_SOI, c, c2);
 
   cinfo->unread_marker = c2;
 
   INPUT_SYNC(cinfo);
-  return TRUE;
+  return true;
 }
 
 
@@ -1116,14 +1116,14 @@ read_markers (j_decompress_ptr cinfo)
  * it holds a marker which the decoder will be unable to read past.
  */
 
-METHODDEF(boolean)
+METHODDEF(bool)
 read_restart_marker (j_decompress_ptr cinfo)
 {
   /* Obtain a marker unless we already did. */
   /* Note that next_marker will complain if it skips any data. */
   if (cinfo->unread_marker == 0) {
     if (! next_marker(cinfo))
-      return FALSE;
+      return false;
   }
 
   if (cinfo->unread_marker ==
@@ -1136,13 +1136,13 @@ read_restart_marker (j_decompress_ptr cinfo)
     /* Let the data source manager determine how to resync. */
     if (! (*cinfo->src->resync_to_restart) (cinfo,
                         cinfo->marker->next_restart_num))
-      return FALSE;
+      return false;
   }
 
   /* Update next-restart state */
   cinfo->marker->next_restart_num = (cinfo->marker->next_restart_num + 1) & 7;
 
-  return TRUE;
+  return true;
 }
 
 
@@ -1195,7 +1195,7 @@ read_restart_marker (j_decompress_ptr cinfo)
  * any other marker would have to be bogus data in that case.
  */
 
-GLOBAL(boolean)
+GLOBAL(bool)
 jpeg_resync_to_restart (j_decompress_ptr cinfo, int desired)
 {
   int marker = cinfo->unread_marker;
@@ -1225,17 +1225,17 @@ jpeg_resync_to_restart (j_decompress_ptr cinfo, int desired)
     case 1:
       /* Discard marker and let entropy decoder resume processing. */
       cinfo->unread_marker = 0;
-      return TRUE;
+      return true;
     case 2:
       /* Scan to the next marker, and repeat the decision loop. */
       if (! next_marker(cinfo))
-    return FALSE;
+    return false;
       marker = cinfo->unread_marker;
       break;
     case 3:
       /* Return without advancing past this marker. */
       /* Entropy decoder will be forced to process an empty segment. */
-      return TRUE;
+      return true;
     }
   } /* end loop */
 }
@@ -1253,8 +1253,8 @@ reset_marker_reader (j_decompress_ptr cinfo)
   cinfo->comp_info = NULL;      /* until allocated by get_sof */
   cinfo->input_scan_number = 0;     /* no SOS seen yet */
   cinfo->unread_marker = 0;     /* no pending marker */
-  marker->pub.saw_SOI = FALSE;      /* set internal state too */
-  marker->pub.saw_SOF = FALSE;
+  marker->pub.saw_SOI = false;      /* set internal state too */
+  marker->pub.saw_SOF = false;
   marker->pub.discarded_bytes = 0;
   marker->cur_marker = NULL;
 }

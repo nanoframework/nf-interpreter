@@ -75,7 +75,7 @@ METHODDEF(int) decompress_data
 JPP((j_decompress_ptr cinfo, JSAMPIMAGE output_buf));
 #endif
 #ifdef BLOCK_SMOOTHING_SUPPORTED
-LOCAL(boolean) smoothing_ok JPP((j_decompress_ptr cinfo));
+LOCAL(bool) smoothing_ok JPP((j_decompress_ptr cinfo));
 METHODDEF(int) decompress_smooth_data
 JPP((j_decompress_ptr cinfo, JSAMPIMAGE output_buf));
 #endif
@@ -410,11 +410,11 @@ decompress_data(j_decompress_ptr cinfo, JSAMPIMAGE output_buf)
  * more accurately than they really are.
  */
 
-LOCAL(boolean)
+LOCAL(bool)
 smoothing_ok(j_decompress_ptr cinfo)
 {
     my_coef_ptr coef = (my_coef_ptr)cinfo->coef;
-    boolean smoothing_useful = FALSE;
+    bool smoothing_useful = false;
     int ci, coefi;
     jpeg_component_info* compptr;
     JQUANT_TBL* qtable;
@@ -422,7 +422,7 @@ smoothing_ok(j_decompress_ptr cinfo)
     int* coef_bits_latch;
 
     if (!cinfo->progressive_mode || cinfo->coef_bits == NULL)
-        return FALSE;
+        return false;
 
     /* Allocate latch area if not already done */
     if (coef->coef_bits_latch == NULL)
@@ -436,7 +436,7 @@ smoothing_ok(j_decompress_ptr cinfo)
         ci++, compptr++) {
         /* All components' quantization values must already be latched. */
         if ((qtable = compptr->quant_table) == NULL)
-            return FALSE;
+            return false;
         /* Verify DC & first 5 AC quantizers are nonzero to avoid zero-divide. */
         if (qtable->quantval[0] == 0 ||
             qtable->quantval[Q01_POS] == 0 ||
@@ -444,16 +444,16 @@ smoothing_ok(j_decompress_ptr cinfo)
             qtable->quantval[Q20_POS] == 0 ||
             qtable->quantval[Q11_POS] == 0 ||
             qtable->quantval[Q02_POS] == 0)
-            return FALSE;
+            return false;
         /* DC values must be at least partly known for all components. */
         coef_bits = cinfo->coef_bits[ci];
         if (coef_bits[0] < 0)
-            return FALSE;
+            return false;
         /* Block smoothing is helpful if some AC coefficients remain inaccurate. */
         for (coefi = 1; coefi <= 5; coefi++) {
             coef_bits_latch[coefi] = coef_bits[coefi];
             if (coef_bits[coefi] != 0)
-                smoothing_useful = TRUE;
+                smoothing_useful = true;
         }
         coef_bits_latch += SAVED_COEFS;
     }
@@ -479,7 +479,7 @@ decompress_smooth_data(j_decompress_ptr cinfo, JSAMPIMAGE output_buf)
     JDIMENSION output_col;
     jpeg_component_info* compptr;
     inverse_DCT_method_ptr inverse_DCT;
-    boolean first_row, last_row;
+    bool first_row, last_row;
     JBLOCK workspace;
     int* coef_bits;
     JQUANT_TBL* quanttbl;
@@ -514,14 +514,14 @@ decompress_smooth_data(j_decompress_ptr cinfo, JSAMPIMAGE output_buf)
         if (cinfo->output_iMCU_row < last_iMCU_row) {
             block_rows = compptr->v_samp_factor;
             access_rows = block_rows * 2; /* this and next iMCU row */
-            last_row = FALSE;
+            last_row = false;
         }
         else {
             /* NB: can't use last_row_height here; it is input-side-dependent! */
             block_rows = (int)(compptr->height_in_blocks % compptr->v_samp_factor);
             if (block_rows == 0) block_rows = compptr->v_samp_factor;
             access_rows = block_rows; /* this iMCU row only */
-            last_row = TRUE;
+            last_row = true;
         }
         /* Align the virtual buffer for this component. */
         if (cinfo->output_iMCU_row > 0) {
@@ -531,13 +531,13 @@ decompress_smooth_data(j_decompress_ptr cinfo, JSAMPIMAGE output_buf)
                 (cinfo->output_iMCU_row - 1) * compptr->v_samp_factor,
                     (JDIMENSION)access_rows, FALSE);
             buffer += compptr->v_samp_factor;   /* point to current iMCU row */
-            first_row = FALSE;
+            first_row = false;
         }
         else {
             buffer = (*cinfo->mem->access_virt_barray)
                 ((j_common_ptr)cinfo, coef->whole_image[ci],
                 (JDIMENSION)0, (JDIMENSION)access_rows, FALSE);
-            first_row = TRUE;
+            first_row = true;
         }
         /* Fetch component-dependent info */
         coef_bits = coef->coef_bits_latch + (ci * SAVED_COEFS);
@@ -689,7 +689,7 @@ decompress_smooth_data(j_decompress_ptr cinfo, JSAMPIMAGE output_buf)
  */
 
 GLOBAL(void)
-jinit_d_coef_controller(j_decompress_ptr cinfo, boolean need_full_buffer)
+jinit_d_coef_controller(j_decompress_ptr cinfo, bool need_full_buffer)
 {
     my_coef_ptr coef;
 
@@ -751,4 +751,3 @@ jinit_d_coef_controller(j_decompress_ptr cinfo, boolean need_full_buffer)
         coef->pub.coef_arrays = NULL; /* flag for no virtual arrays */
     }
 }
-

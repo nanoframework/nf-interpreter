@@ -173,7 +173,7 @@ HRESULT Library_nf_dev_onewire_nanoFramework_Device_OneWire_OneWireHost::FindFir
             // get a pointer to the first element of the byte array
             serialNumberPointer = (uint8_t *)serialNumberField->GetFirstElement();
 
-            oneWireSerialNum(serialNumberPointer, TRUE);
+            oneWireSerialNum(serialNumberPointer, true);
         }
     }
 
@@ -265,7 +265,7 @@ HRESULT Library_nf_dev_onewire_nanoFramework_Device_OneWire_OneWireHost::FindNex
             // get a pointer to the first element of the byte array
             serialNumberPointer = (uint8_t *)serialNumberField->GetFirstElement();
 
-            oneWireSerialNum(serialNumberPointer, TRUE);
+            oneWireSerialNum(serialNumberPointer, true);
         }
     }
 

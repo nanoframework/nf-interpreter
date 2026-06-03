@@ -44,7 +44,7 @@ bool GetHalSystemInfo(HalSystemInfo &systemInfo)
         (char *)&systemInfo.m_OemSerialNumbers.system_serial_number,
         sizeof(systemInfo.m_OemSerialNumbers.system_serial_number));
 
-    return TRUE;
+    return true;
 #endif
 }
 
@@ -62,7 +62,7 @@ bool Target_GetReleaseInfo(NFReleaseInfo &releaseInfo)
         hal_strlen_s(TARGETNAMESTRING),
         PLATFORMNAMESTRING,
         hal_strlen_s(PLATFORMNAMESTRING));
-    return TRUE; // alternatively, return false if you didn't initialize the releaseInfo structure.
+    return true; // alternatively, return false if you didn't initialize the releaseInfo structure.
 }
 
 bool DebuggerIsConnected()

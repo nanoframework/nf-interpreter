@@ -62,12 +62,12 @@ typedef struct {
 typedef my_coef_controller* my_coef_ptr;
 
 /* Forward declarations */
-METHODDEF(boolean) compress_data
+METHODDEF(bool) compress_data
 JPP((j_compress_ptr cinfo, JSAMPIMAGE input_buf));
 #ifdef FULL_COEF_BUFFER_SUPPORTED
-METHODDEF(boolean) compress_first_pass
+METHODDEF(bool) compress_first_pass
 JPP((j_compress_ptr cinfo, JSAMPIMAGE input_buf));
-METHODDEF(boolean) compress_output
+METHODDEF(bool) compress_output
 JPP((j_compress_ptr cinfo, JSAMPIMAGE input_buf));
 #endif
 
@@ -139,7 +139,7 @@ start_pass_coef(j_compress_ptr cinfo, J_BUF_MODE pass_mode)
  * NB: input_buf contains a plane for each component in image,
  * which we index according to the component's SOF position.
  */
-METHODDEF(boolean)
+METHODDEF(bool)
 compress_data(j_compress_ptr cinfo, JSAMPIMAGE input_buf)
 {
     my_coef_ptr coef = (my_coef_ptr)cinfo->coef;
@@ -206,7 +206,7 @@ compress_data(j_compress_ptr cinfo, JSAMPIMAGE input_buf)
                 /* Suspension forced; update state counters and exit */
                 coef->MCU_vert_offset = yoffset;
                 coef->mcu_ctr = MCU_col_num;
-                return FALSE;
+                return false;
             }
         }
         /* Completed an MCU row, but perhaps not an iMCU row */
@@ -215,7 +215,7 @@ compress_data(j_compress_ptr cinfo, JSAMPIMAGE input_buf)
     /* Completed the iMCU row, advance counters for next one */
     coef->iMCU_row_num++;
     start_iMCU_row(cinfo);
-    return TRUE;
+    return true;
 }
 
 #ifdef FULL_COEF_BUFFER_SUPPORTED
@@ -240,7 +240,7 @@ compress_data(j_compress_ptr cinfo, JSAMPIMAGE input_buf)
  * the entropy encoder during this first pass; be careful about looking
  * at the scan-dependent variables (MCU dimensions, etc).
  */
-METHODDEF(boolean)
+METHODDEF(bool)
 compress_first_pass(j_compress_ptr cinfo, JSAMPIMAGE input_buf)
 {
     my_coef_ptr coef = (my_coef_ptr)cinfo->coef;
@@ -336,7 +336,7 @@ compress_first_pass(j_compress_ptr cinfo, JSAMPIMAGE input_buf)
  */
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-parameter"
-METHODDEF(boolean)
+METHODDEF(bool)
 compress_output(j_compress_ptr cinfo, JSAMPIMAGE input_buf)
 {
     my_coef_ptr coef = (my_coef_ptr)cinfo->coef;
@@ -381,7 +381,7 @@ compress_output(j_compress_ptr cinfo, JSAMPIMAGE input_buf)
                 /* Suspension forced; update state counters and exit */
                 coef->MCU_vert_offset = yoffset;
                 coef->mcu_ctr = MCU_col_num;
-                return FALSE;
+                return false;
             }
         }
         /* Completed an MCU row, but perhaps not an iMCU row */
@@ -390,7 +390,7 @@ compress_output(j_compress_ptr cinfo, JSAMPIMAGE input_buf)
     /* Completed the iMCU row, advance counters for next one */
     coef->iMCU_row_num++;
     start_iMCU_row(cinfo);
-    return TRUE;
+    return true;
 }
 #pragma GCC diagnostic pop
 
@@ -401,7 +401,7 @@ compress_output(j_compress_ptr cinfo, JSAMPIMAGE input_buf)
  */
 
 GLOBAL(void)
-jinit_c_coef_controller(j_compress_ptr cinfo, boolean need_full_buffer)
+jinit_c_coef_controller(j_compress_ptr cinfo, bool need_full_buffer)
 {
     my_coef_ptr coef;
 

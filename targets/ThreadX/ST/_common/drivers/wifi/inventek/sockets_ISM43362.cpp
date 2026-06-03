@@ -359,7 +359,7 @@ SOCK_SOCKET Sockets_ISM43362_Driver::Accept(
 
     if (ret != SOCK_SOCKET_ERROR)
     {
-        RegisterSocket(ret, TRUE, fDebug);
+        RegisterSocket(ret, true, fDebug);
     }
 
     return ret;
@@ -425,7 +425,7 @@ bool Sockets_ISM43362_Driver::Initialize()
 
         SSL_Initialize();
 
-        s_initialized = TRUE;
+        s_initialized = true;
     }
 
     SOCKET_CHECK_EXIT_bool();
@@ -442,14 +442,14 @@ __nfweak void Sockets_ISM43362_Driver::Debugger_Uninitialize()
 bool Sockets_ISM43362_Driver::Uninitialize()
 {
     NATIVE_PROFILE_PAL_COM();
-    bool ret = TRUE;
+    bool ret = true;
 
     if (s_initialized)
     {
         Debugger_Abort();
 
         // close all connections (including debugger sockets)
-        CloseConnections(TRUE);
+        CloseConnections(true);
 
         SSL_Uninitialize();
 

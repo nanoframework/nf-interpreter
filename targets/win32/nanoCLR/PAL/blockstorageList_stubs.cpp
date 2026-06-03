@@ -24,17 +24,17 @@ void BlockStorageList_Initialize()
 //
 // bool BlockStorageList::InitializeDevices()
 //{
-//    return TRUE;
+//    return true;
 //}
 //
 // bool BlockStorageList::UnInitializeDevices()
 //{
-//    return TRUE;
+//    return true;
 //}
 //
 // bool BlockStorageList::AddDevice( BlockStorageDevice* pBSD, IBlockStorageDevice* vtable, void* config, bool Init)
 //{
-//    return TRUE;
+//    return true;
 //}
 bool BlockStorageList_AddDevice(BlockStorageDevice *pBSD, IBlockStorageDevice *vtable, void *config, bool init)
 {
@@ -46,7 +46,7 @@ bool BlockStorageList_AddDevice(BlockStorageDevice *pBSD, IBlockStorageDevice *v
 //
 // bool BlockStorageList::RemoveDevice( BlockStorageDevice* pBSD, bool UnInit)
 //{
-//    return TRUE;
+//    return true;
 //}
 
 // BlockStorageDevice* BlockStorageList::GetFirstDevice()
@@ -110,27 +110,27 @@ bool BlockStorageList_FindDeviceForPhysicalAddress(
 //
 // bool BlockStorageStream::Seek( signed int offset, SeekOrigin origin )
 //{
-//    return TRUE;
+//    return true;
 //}
 //
 // bool BlockStorageStream::Erase( unsigned int length )
 //{
-//    return TRUE;
+//    return true;
 //}
 //
 // bool BlockStorageStream::Write( unsigned char* data  , unsigned int length )
 //{
-//    return TRUE;
+//    return true;
 //}
 //
 // bool BlockStorageStream::ReadIntoBuffer( unsigned char* pBuffer, unsigned int length )
 //{
-//    return TRUE;
+//    return true;
 //}
 //
 // bool BlockStorageStream::Read( unsigned char** ppBuffer, unsigned int length )
 //{
-//    return TRUE;
+//    return true;
 //}
 //
 

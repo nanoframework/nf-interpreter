@@ -928,7 +928,7 @@ bool enc28j60_lwip_setup_device(struct netif *pNetIF)
         ENC28J60_ECON1,
         (uint8_t)(1 << ENC28J60_ECON1_RXEN_BIT));
 
-    return TRUE;
+    return true;
 }
 
 void enc28j60_lwip_destroy_device()

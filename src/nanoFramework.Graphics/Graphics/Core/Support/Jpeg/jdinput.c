@@ -33,7 +33,7 @@
 typedef struct {
     struct jpeg_input_controller pub; /* public fields */
 
-    boolean inheaders;      /* TRUE until first SOS is reached */
+    bool inheaders;      /* TRUE until first SOS is reached */
 } my_input_controller;
 
 typedef my_input_controller* my_inputctl_ptr;
@@ -111,7 +111,7 @@ initial_setup(j_decompress_ptr cinfo)
             jdiv_round_up((long)cinfo->image_height * (long)compptr->v_samp_factor,
             (long)cinfo->max_v_samp_factor);
         /* Mark component needed, until color conversion says otherwise */
-        compptr->component_needed = TRUE;
+        compptr->component_needed = true;
         /* Mark no quantization table yet saved for component */
         compptr->quant_table = NULL;
     }
@@ -123,9 +123,9 @@ initial_setup(j_decompress_ptr cinfo)
 
     /* Decide whether file contains multiple scans */
     if (cinfo->comps_in_scan < cinfo->num_components || cinfo->progressive_mode)
-        cinfo->inputctl->has_multiple_scans = TRUE;
+        cinfo->inputctl->has_multiple_scans = true;
     else
-        cinfo->inputctl->has_multiple_scans = FALSE;
+        cinfo->inputctl->has_multiple_scans = false;
 }
 
 
@@ -312,7 +312,7 @@ consume_markers(j_decompress_ptr cinfo)
     case JPEG_REACHED_SOS:   /* Found SOS */
         if (inputctl->inheaders) {   /* 1st SOS */
             initial_setup(cinfo);
-            inputctl->inheaders = FALSE;
+            inputctl->inheaders = false;
             /* Note: start_input_pass must be called by jdmaster.c
              * before any more input can be consumed.  jdapimin.c is
              * responsible for enforcing this sequencing.
@@ -325,7 +325,7 @@ consume_markers(j_decompress_ptr cinfo)
         }
         break;
     case JPEG_REACHED_EOI:   /* Found EOI */
-        inputctl->pub.eoi_reached = TRUE;
+        inputctl->pub.eoi_reached = true;
         if (inputctl->inheaders) {   /* Tables-only datastream, apparently */
             if (cinfo->marker->saw_SOF)
                 ERREXIT(cinfo, JERR_SOF_NO_SOS);
@@ -356,9 +356,9 @@ reset_input_controller(j_decompress_ptr cinfo)
     my_inputctl_ptr inputctl = (my_inputctl_ptr)cinfo->inputctl;
 
     inputctl->pub.consume_input = consume_markers;
-    inputctl->pub.has_multiple_scans = FALSE; /* "unknown" would be better */
-    inputctl->pub.eoi_reached = FALSE;
-    inputctl->inheaders = TRUE;
+    inputctl->pub.has_multiple_scans = false; /* "unknown" would be better */
+    inputctl->pub.eoi_reached = false;
+    inputctl->inheaders = true;
     /* Reset other modules */
     (*cinfo->err->reset_error_mgr) ((j_common_ptr)cinfo);
     (*cinfo->marker->reset_marker_reader) (cinfo);
@@ -390,8 +390,7 @@ jinit_input_controller(j_decompress_ptr cinfo)
     /* Initialize state: can't use reset_input_controller since we don't
      * want to try to reset other modules yet.
      */
-    inputctl->pub.has_multiple_scans = FALSE; /* "unknown" would be better */
-    inputctl->pub.eoi_reached = FALSE;
-    inputctl->inheaders = TRUE;
+    inputctl->pub.has_multiple_scans = false; /* "unknown" would be better */
+    inputctl->pub.eoi_reached = false;
+    inputctl->inheaders = true;
 }
-

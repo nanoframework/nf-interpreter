@@ -23,7 +23,7 @@ static int NormalizePath(const char *path, char *buffer, size_t bufferSize);
 bool LITTLEFS_FS_Driver::LoadMedia(const void *driverInterface)
 {
     (void)driverInterface;
-    return TRUE;
+    return true;
 }
 
 STREAM_DRIVER_DETAILS *LITTLEFS_FS_Driver::DriverDetails(const VOLUME_ID *volume)
@@ -36,9 +36,9 @@ STREAM_DRIVER_DETAILS *LITTLEFS_FS_Driver::DriverDetails(const VOLUME_ID *volume
         lfs_outputBuffer,
         lfs_inputBufferSize,
         lfs_outputBufferSize,
-        TRUE,
-        TRUE,
-        TRUE,
+        true,
+        true,
+        true,
         0,
         0};
 
@@ -58,7 +58,7 @@ bool LITTLEFS_FS_Driver::InitializeVolume(const VOLUME_ID *volume, const char *p
     (void)path;
 
     // nothing to do here as the littlefs instances are already initialized at target boot
-    return TRUE;
+    return true;
 }
 
 bool LITTLEFS_FS_Driver::UnInitializeVolume(const VOLUME_ID *volume)
@@ -66,7 +66,7 @@ bool LITTLEFS_FS_Driver::UnInitializeVolume(const VOLUME_ID *volume)
     (void)volume;
 
     // nothing to do here as the littlefs instances are already initialized at target boot
-    return TRUE;
+    return true;
 }
 
 HRESULT LITTLEFS_FS_Driver::Format(const VOLUME_ID *volume, const char *volumeLabel, uint32_t parameters)

@@ -25,7 +25,7 @@ HRESULT GestureDriver::Initialize()
         m_gestureListener.m_palEventListener = EventListener;
         m_gestureListener.m_eventMask = PAL_EVENT_TOUCH | PAL_EVENT_MOUSE;
         PalEvent_Enlist(&m_gestureListener);
-        GestureDriver::s_initialized = TRUE;
+        GestureDriver::s_initialized = true;
     }
     return S_OK;
 }
@@ -122,7 +122,7 @@ bool GestureDriver::ProcessPoint(CLR_UINT32 flags, CLR_UINT16 source, CLR_UINT16
         m_startx = x;
         m_starty = y;
 
-        return TRUE;
+        return true;
     }
 
     CLR_INT16 dx = (CLR_INT16)x - (CLR_INT16)m_lastx;

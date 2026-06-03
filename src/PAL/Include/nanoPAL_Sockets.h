@@ -26,8 +26,8 @@ typedef struct _DATE_TIME_INFO
     /* interpret the absolute */
     /* time meaning of the    */
     /* above values.          */
-    unsigned int dlsTime; /* boolean; daylight savings time is in effect                      */
-    int tzOffset;         /* signed int; difference in seconds imposed by timezone (from GMT) */
+    bool dlsTime;             /* boolean; daylight savings time is in effect                      */
+    int tzOffset;             /* signed int; difference in seconds imposed by timezone (from GMT) */
 } DATE_TIME_INFO;
 
 typedef struct _X509CertData

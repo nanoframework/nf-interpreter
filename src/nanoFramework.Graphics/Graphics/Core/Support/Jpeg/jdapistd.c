@@ -26,7 +26,7 @@
 
 
  /* Forward declarations */
-LOCAL(boolean) output_pass_setup JPP((j_decompress_ptr cinfo));
+LOCAL(bool) output_pass_setup JPP((j_decompress_ptr cinfo));
 
 
 /*
@@ -40,7 +40,7 @@ LOCAL(boolean) output_pass_setup JPP((j_decompress_ptr cinfo));
  * a suspending data source is used.
  */
 
-GLOBAL(boolean)
+GLOBAL(bool)
 jpeg_start_decompress(j_decompress_ptr cinfo)
 {
     if (cinfo->global_state == DSTATE_READY) {
@@ -49,7 +49,7 @@ jpeg_start_decompress(j_decompress_ptr cinfo)
         if (cinfo->buffered_image) {
             /* No more work here; expecting jpeg_start_output next */
             cinfo->global_state = DSTATE_BUFIMAGE;
-            return TRUE;
+            return true;
         }
         cinfo->global_state = DSTATE_PRELOAD;
     }
@@ -65,7 +65,7 @@ jpeg_start_decompress(j_decompress_ptr cinfo)
                 /* Absorb some more input */
                 retcode = (*cinfo->inputctl->consume_input) (cinfo);
                 if (retcode == JPEG_SUSPENDED)
-                    return FALSE;
+                    return false;
                 if (retcode == JPEG_REACHED_EOI)
                     break;
                 /* Advance progress counter if appropriate */
@@ -98,7 +98,7 @@ jpeg_start_decompress(j_decompress_ptr cinfo)
  *       If suspended, returns FALSE and sets global_state = DSTATE_PRESCAN.
  */
 
-LOCAL(boolean)
+LOCAL(bool)
 output_pass_setup(j_decompress_ptr cinfo)
 {
     if (cinfo->global_state != DSTATE_PRESCAN) {
@@ -124,7 +124,7 @@ output_pass_setup(j_decompress_ptr cinfo)
             (*cinfo->main->process_data) (cinfo, (JSAMPARRAY)NULL,
                 &cinfo->output_scanline, (JDIMENSION)0);
             if (cinfo->output_scanline == last_scanline)
-                return FALSE;        /* No progress made, must suspend */
+                return false;        /* No progress made, must suspend */
         }
         /* Finish up dummy pass, and set up for another one */
         (*cinfo->master->finish_output_pass) (cinfo);
@@ -138,7 +138,7 @@ output_pass_setup(j_decompress_ptr cinfo)
      * jpeg_read_scanlines or jpeg_read_raw_data.
      */
     cinfo->global_state = cinfo->raw_data_out ? DSTATE_RAW_OK : DSTATE_SCANNING;
-    return TRUE;
+    return true;
 }
 
 
@@ -231,7 +231,7 @@ jpeg_read_raw_data(j_decompress_ptr cinfo, JSAMPIMAGE data,
  * Initialize for an output pass in buffered-image mode.
  */
 
-GLOBAL(boolean)
+GLOBAL(bool)
 jpeg_start_output(j_decompress_ptr cinfo, int scan_number)
 {
     if (cinfo->global_state != DSTATE_BUFIMAGE &&
@@ -256,7 +256,7 @@ jpeg_start_output(j_decompress_ptr cinfo, int scan_number)
  * a suspending data source is used.
  */
 
-GLOBAL(boolean)
+GLOBAL(bool)
 jpeg_finish_output(j_decompress_ptr cinfo)
 {
     if ((cinfo->global_state == DSTATE_SCANNING ||
@@ -274,11 +274,10 @@ jpeg_finish_output(j_decompress_ptr cinfo)
     while (cinfo->input_scan_number <= cinfo->output_scan_number &&
         !cinfo->inputctl->eoi_reached) {
         if ((*cinfo->inputctl->consume_input) (cinfo) == JPEG_SUSPENDED)
-            return FALSE;        /* Suspend, come back later */
+            return false;        /* Suspend, come back later */
     }
     cinfo->global_state = DSTATE_BUFIMAGE;
-    return TRUE;
+    return true;
 }
 
 #endif /* D_MULTISCAN_FILES_SUPPORTED */
-
