@@ -5,7 +5,7 @@
 //
 
 #include <nanohal.h>
-//#include "net_decl_lwip.h"
+// #include "net_decl_lwip.h"
 #include "enc28j60_lwip.h"
 
 extern "C"
