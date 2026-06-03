@@ -73,7 +73,7 @@ bool CC13xx_26xxFlashDriver_Write(
 
     state = DisableCache();
 
-    if (FlashProgram((unsigned long *)buffer, (unsigned long)startAddress, (unsigned long)numBytes) == 0)
+    if (FlashProgram((uint8_t *)buffer, (unsigned long)startAddress, (unsigned long)numBytes) == 0)
     {
         result = true;
     }

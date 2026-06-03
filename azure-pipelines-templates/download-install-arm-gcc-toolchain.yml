@@ -4,14 +4,14 @@
 parameters:
   - name: gccArmVersion
     type: string
-    default: "13.3.rel1"
+    default: "15.2.rel1"
 
 steps:
   - task: Cache@2
     condition: eq(variables.GccArm_Version, '')
     displayName: Cache latest ARM GCC toolchain
     inputs:
-      key: "gcc-13_3__rel1 | gccUpdateKey"
+      key: "gcc-${{ replace(parameters.gccArmVersion, '.', '_') }} | gccUpdateKey"
       restoreKeys: gccUpdateKey
       path: $(Agent.TempDirectory)\arm-gnu-toolchain-${{ parameters.gccArmVersion }}-mingw-w64-i686-arm-none-eabi
       cacheHitVar: GCC_CACHE_RESTORED
@@ -30,13 +30,24 @@ steps:
     condition: ne(variables.GCC_CACHE_RESTORED, 'true')
     inputs:
       archiveFilePatterns: '$(Agent.TempDirectory)\arm-gnu-toolchain-${{ parameters.gccArmVersion }}-mingw-w64-i686-arm-none-eabi.zip'
-      destinationFolder: "$(Agent.TempDirectory)"
+      destinationFolder: '$(Agent.TempDirectory)\arm-gnu-toolchain-${{ parameters.gccArmVersion }}-mingw-w64-i686-arm-none-eabi'
       cleanDestinationFolder: false
 
-  - script: |
-      echo Adding ARM GCC toolchain to PATH...
-      echo ##vso[task.prependpath]$(Agent.TempDirectory)\arm-gnu-toolchain-${{ parameters.gccArmVersion }}-mingw-w64-i686-arm-none-eabi\bin
+  - pwsh: |
+      $toolchainPath = "$(Agent.TempDirectory)\arm-gnu-toolchain-${{ parameters.gccArmVersion }}-mingw-w64-i686-arm-none-eabi"
+      $gcc = Get-ChildItem -Path $toolchainPath -Recurse -Filter "arm-none-eabi-gcc.exe" -ErrorAction SilentlyContinue |
+        Select-Object -First 1
+
+      if ($null -eq $gcc) {
+        throw "Unable to find arm-none-eabi-gcc.exe under '$toolchainPath' after extracting/restoring ARM GCC ${{ parameters.gccArmVersion }}."
+      }
+
+      $gccBinPath = $gcc.Directory.FullName
+      Write-Host "Adding ARM GCC toolchain to PATH: $gccBinPath"
+      Write-Host "##vso[task.setvariable variable=ARM_GCC_PATH]$gccBinPath"
+      Write-Host "##vso[task.prependpath]$gccBinPath"
     displayName: Add GCC to PATH
+    failOnStderr: true
 
   - script: |
       echo ##vso[task.prependpath]c:\windows\System32
