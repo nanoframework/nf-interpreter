@@ -126,7 +126,7 @@ HRESULT Library_nf_hardware_stm32_native_nanoFramework_Hardware_Stm32_Configurat
     newChannel->pin = pinNumber % 16;
 
     // need to adjust channel index to account for the ones declared in the build
-    newChannelIndex += AdcChannelCount;
+    newChannelIndex += c_AdcChannelCount;
 
     // return the index of the channel
     stack.SetResult_U4(newChannelIndex);
@@ -151,7 +151,7 @@ HRESULT Library_nf_hardware_stm32_native_nanoFramework_Hardware_Stm32_Configurat
     channel = (uint8_t)stack.Arg0().NumericByRef().u4;
 
     // need to adjust channel index to account for the ones declared in the build
-    channel -= AdcChannelCount;
+    channel -= c_AdcChannelCount;
 
     // check if this channel definition is valid
     if (channel >= RuntimeAdcChannelCount)

@@ -7,11 +7,13 @@
 #ifndef USBCFG_H
 #define USBCFG_H
 
+#include <hal_serial_usb.h>
+
 // define which serial driver the Wire Protocol will be using
 #define SERIAL_DRIVER SDU1
 
 extern const USBConfig usbcfg;
-extern SerialUSBConfig serusbcfg;
+extern const SerialUSBConfig serusbcfg;
 extern SerialUSBDriver SDU1;
 
 #endif // USBCFG_H

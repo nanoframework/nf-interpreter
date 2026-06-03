@@ -82,7 +82,7 @@ static void SpiCallback(SPIDriver *spip)
 
 static void ComputeBaudRate(int32_t requestedFrequency, int32_t &actualFrequency, uint32_t &sspcpsr, uint32_t &sspcr0)
 {
-    if (requestedFrequency <= 0)
+    if (requestedFrequency <= 0 || requestedFrequency > RP_SPI_PERI_CLK / 2)
     {
         requestedFrequency = RP_SPI_PERI_CLK / 2;
     }
@@ -195,6 +195,10 @@ HRESULT CPU_SPI_nWrite_nRead(
 
         palSpi->BufferIs16bits = wrc.Bits16ReadWrite;
         palSpi->Callback = wrc.callback;
+        palSpi->WriteSize = 0;
+        palSpi->WriteBuffer = NULL;
+        palSpi->ReadSize = 0;
+        palSpi->ReadBuffer = NULL;
 
         if (writeBuffer != NULL)
         {
@@ -266,11 +270,6 @@ HRESULT CPU_SPI_nWrite_nRead(
         }
         else
         {
-            if (wrc.DeviceChipSelect >= 0)
-            {
-                CPU_GPIO_SetPinState(wrc.DeviceChipSelect, (GpioPinValue)wrc.ChipSelectActiveState);
-            }
-
             if (palSpi->WriteSize != 0 && palSpi->ReadSize != 0)
             {
                 if (wrc.fullDuplex)

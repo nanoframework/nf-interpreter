@@ -47,20 +47,20 @@ HRESULT Library_sys_dev_adc_native_System_Device_Adc_AdcChannel::NativeReadValue
 
     // channel is static?
 #if defined(RP_ADC_USE_ADC1)
-    if (channelNumber < 0 || channelNumber >= AdcChannelCount)
+    if (channelNumber < 0 || channelNumber >= c_AdcChannelCount)
     {
         NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
     }
 
-    adcDefinition = AdcPortPinConfig[channelNumber];
+    adcDefinition = c_AdcPortPinConfig[channelNumber];
 #else
-    if (channelNumber < AdcChannelCount)
+    if (channelNumber < c_AdcChannelCount)
     {
-        adcDefinition = AdcPortPinConfig[channelNumber];
+        adcDefinition = c_AdcPortPinConfig[channelNumber];
     }
-    else if (channelNumber < AdcChannelCount + RuntimeAdcChannelCount)
+    else if (channelNumber < c_AdcChannelCount + RuntimeAdcChannelCount)
     {
-        adcDefinition = RuntimeAdcPortPinConfig[channelNumber - AdcChannelCount];
+        adcDefinition = RuntimeAdcPortPinConfig[channelNumber - c_AdcChannelCount];
     }
     else
     {
