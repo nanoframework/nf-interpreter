@@ -89,21 +89,21 @@ jobs:
           }
           else
           {
-            # get commit details, if this is a PR
+            # get PR details, if this is a PR
             if($env:System_PullRequest_PullRequestId -ne $null)
             {
               Write-Host "##[command] **This is a PR build**"
 
-              $commit = Invoke-RestMethod -Uri "https://api.github.com/repos/nanoframework/nf-interpreter/commits/$(Build.SourceVersion)" -Header @{"Authorization"="$auth"} -ContentType "application/json" -Method GET
+              $pr = Invoke-RestMethod -Uri "https://api.github.com/repos/nanoframework/nf-interpreter/pulls/$env:System_PullRequest_PullRequestId" -Header @{"Authorization"="$auth"} -ContentType "application/json" -Method GET
 
-              # check if this is a version update commit, if so, skip build
-              if( ($commit.commit.author.name -eq "nfbot") -and ($commit.commit.message -like "*[version update]*") )
+              # check if this is a version update PR, if so, skip build
+              if( ($pr.user.login -eq "nfbot") -and ($pr.title -like "*[version update]*") )
               {
                 Write-Host "##[command] **version update commit, skipping build**"
                 echo "##vso[task.setvariable variable=SKIP_BUILD;isOutput=true]true"
               }
               # check if this is a PR with Code style fixes, if so, skip build
-              elseif( ($commit.commit.author.name -eq "nfbot") -and ( ($commit.commit.message -like "*Automated fixes for code style*") -or ($commit.commit.message -like "*Automated fix of code style*") ) )
+              elseif( ($pr.user.login -eq "nfbot") -and ( ($pr.title -like "*Code style fixes*") -or ($pr.body -like "*Automated fix of code style*") ) )
               {
                 Write-Host "##[command] **code style commit, skipping build**"
                 echo "##vso[task.setvariable variable=SKIP_BUILD;isOutput=true]true"
@@ -114,7 +114,7 @@ jobs:
               }
 
               # check if Unit Tests for mscorlib should be run
-              if(($commit.commit.message -like "*[run mscorlib tests]*") -or ($commit.commit.message -match "Tested against nanoframework/CoreLibrary#(\d+)"))
+              if(($pr.title -like "*[run mscorlib tests]*") -or ($pr.body -like "*[run mscorlib tests]*") -or ($pr.body -match "Tested against nanoframework/CoreLibrary#(\d+)"))
               {
                 Write-Host "##[command] **mscorlib tests are to be runned**"
                 echo "##vso[task.setvariable variable=RUN_MSCORLIB_TESTS;isOutput=true]true"
