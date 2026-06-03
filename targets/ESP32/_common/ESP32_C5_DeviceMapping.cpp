@@ -44,8 +44,7 @@ int8_t Esp32_I2C_DevicePinMap[I2C_NUM_MAX][2] = {
 //  16 channels LED1 to LED16  or PWM1 to PWM16
 //  Map pins Data & Clock
 //  Channels ( non assigned )
-int8_t Esp32_LED_DevicePinMap[TARGET_LED_NUM_PINS] = 
-{
+int8_t Esp32_LED_DevicePinMap[TARGET_LED_NUM_PINS] = {
     // Channels ( non assigned )
     -1, // 1
     -1, // 2
