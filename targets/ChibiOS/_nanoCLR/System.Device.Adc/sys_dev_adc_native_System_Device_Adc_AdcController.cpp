@@ -24,6 +24,14 @@ HRESULT Library_sys_dev_adc_native_System_Device_Adc_AdcController::NativeOpenCh
     channel = stack.Arg1().NumericByRef().s4;
 
     // channel is static?
+#if defined(RP_ADC_USE_ADC1)
+    if (channel < 0 || channel >= AdcChannelCount)
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+    }
+
+    adcDefinition = AdcPortPinConfig[channel];
+#else
     if (channel < AdcChannelCount)
     {
         adcDefinition = AdcPortPinConfig[channel];
@@ -36,24 +44,28 @@ HRESULT Library_sys_dev_adc_native_System_Device_Adc_AdcController::NativeOpenCh
     {
         NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
     }
+#endif
 
     // we should remove from the build the ADC options that aren't implemented
     // plus we have to use the default to catch invalid ADC Ids
+#if defined(RP_ADC_USE_ADC1)
+    adcDriver = &ADCD1;
+#else
     switch (adcDefinition.adcIndex)
     {
-#if STM32_ADC_USE_ADC1
+#if defined(STM32_ADC_USE_ADC1) && STM32_ADC_USE_ADC1
         case 1:
             adcDriver = &ADCD1;
             break;
 #endif
 
-#if STM32_ADC_USE_ADC2
+#if defined(STM32_ADC_USE_ADC2) && STM32_ADC_USE_ADC2
         case 2:
             adcDriver = &ADCD2;
             break;
 #endif
 
-#if STM32_ADC_USE_ADC3
+#if defined(STM32_ADC_USE_ADC3) && STM32_ADC_USE_ADC3
         case 3:
             adcDriver = &ADCD3;
             break;
@@ -61,11 +73,20 @@ HRESULT Library_sys_dev_adc_native_System_Device_Adc_AdcController::NativeOpenCh
         default:
             NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
     }
+#endif
 
+#if defined(RP_ADC_USE_ADC1)
+    // Initialize GPIO for ADC input (not needed for temp sensor).
+    if (adcDefinition.gpio != 0xFF)
+    {
+        adcRPGpioInit(adcDefinition.gpio);
+    }
+#else
     if (adcDefinition.portId != nullptr)
     {
         palSetGroupMode(adcDefinition.portId, PAL_PORT_BIT(adcDefinition.pin), 0, PAL_MODE_INPUT_ANALOG);
     }
+#endif
 
     // start ADC
     adcStart(adcDriver, nullptr);
@@ -78,7 +99,11 @@ HRESULT Library_sys_dev_adc_native_System_Device_Adc_AdcController::NativeGetCha
     NANOCLR_HEADER();
 
     // Return value to the managed application
+#if defined(RP_ADC_USE_ADC1)
+    stack.SetResult_I4(AdcChannelCount);
+#else
     stack.SetResult_I4(AdcChannelCount + RuntimeAdcChannelCount);
+#endif
 
     NANOCLR_NOCLEANUP_NOLABEL();
 }

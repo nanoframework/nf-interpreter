@@ -662,6 +662,15 @@ jobs:
         #   PackageName: ESP32_C61_USB
         #   CMakePreset: ESP32_C61_USB
 
+        ESP32_C61:
+          TargetBoard: ESP32_C61
+          TargetSeries: "esp32c61"
+          BuildOptions:
+          IDF_Target: esp32c61
+          TargetName: ESP32_C61
+          PackageName: ESP32_C61
+          CMakePreset: ESP32_C61
+
         ESP32_H2_THREAD:
           TargetBoard: ESP32_H2
           TargetSeries: "esp32h2"
