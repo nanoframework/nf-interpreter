@@ -15,6 +15,62 @@
 
 // Reference to ChibiOS EFL driver instance
 extern EFlashDriver EFLD1;
+extern MEMORY_MAPPED_NOR_BLOCK_CONFIG Device_BlockStorageConfig;
+
+static bool IsValidAddressRange(
+    const MEMORY_MAPPED_NOR_BLOCK_CONFIG *config,
+    ByteAddress startAddress,
+    unsigned int numBytes)
+{
+    if (config == NULL)
+    {
+        return false;
+    }
+
+    const uint32_t baseAddress = config->Memory.BaseAddress;
+    const uint32_t sizeInBytes = config->Memory.SizeInBytes;
+
+    if (startAddress < baseAddress)
+    {
+        return false;
+    }
+
+    const uint32_t offset = startAddress - baseAddress;
+    if (offset > sizeInBytes)
+    {
+        return false;
+    }
+
+    return numBytes <= (sizeInBytes - offset);
+}
+
+static bool IsValidBlockStartAddress(const MEMORY_MAPPED_NOR_BLOCK_CONFIG *config, ByteAddress address)
+{
+    if (!IsValidAddressRange(config, address, 1))
+    {
+        return false;
+    }
+
+    DeviceBlockInfo *blockInfo = config->BlockConfig.BlockDeviceInformation;
+    if (blockInfo == NULL || blockInfo->Regions == NULL)
+    {
+        return false;
+    }
+
+    for (uint32_t i = 0; i < blockInfo->NumRegions; i++)
+    {
+        const BlockRegionInfo *region = &blockInfo->Regions[i];
+        const uint64_t regionStart = region->Start;
+        const uint64_t regionEnd = regionStart + ((uint64_t)region->NumBlocks * region->BytesPerBlock);
+
+        if ((uint64_t)address >= regionStart && (uint64_t)address < regionEnd)
+        {
+            return ((address - region->Start) % region->BytesPerBlock) == 0;
+        }
+    }
+
+    return false;
+}
 
 bool RP2040FlashDriver_InitializeDevice(void *context)
 {
@@ -44,7 +100,22 @@ DeviceBlockInfo *RP2040FlashDriver_GetDeviceInfo(void *context)
 
 bool RP2040FlashDriver_Read(void *context, ByteAddress startAddress, unsigned int numBytes, unsigned char *buffer)
 {
-    (void)context;
+    MEMORY_MAPPED_NOR_BLOCK_CONFIG *config = (MEMORY_MAPPED_NOR_BLOCK_CONFIG *)context;
+
+    if (buffer == NULL)
+    {
+        return false;
+    }
+
+    if (numBytes == 0)
+    {
+        return true;
+    }
+
+    if (!IsValidAddressRange(config, startAddress, numBytes))
+    {
+        return false;
+    }
 
     // RP2040 flash is XIP memory-mapped, so we can read directly
     memcpy(buffer, (const void *)startAddress, numBytes);
@@ -59,11 +130,26 @@ bool RP2040FlashDriver_Write(
     unsigned char *buffer,
     bool readModifyWrite)
 {
-    (void)context;
+    MEMORY_MAPPED_NOR_BLOCK_CONFIG *config = (MEMORY_MAPPED_NOR_BLOCK_CONFIG *)context;
     (void)readModifyWrite;
 
+    if (buffer == NULL)
+    {
+        return false;
+    }
+
+    if (numBytes == 0)
+    {
+        return true;
+    }
+
+    if (!IsValidAddressRange(config, startAddress, numBytes))
+    {
+        return false;
+    }
+
     // Convert absolute address to flash offset for EFL driver
-    flash_offset_t offset = (flash_offset_t)(startAddress - RP2040_XIP_BASE);
+    flash_offset_t offset = (flash_offset_t)(startAddress - config->Memory.BaseAddress);
 
     flash_error_t err = flashProgram(&EFLD1, offset, numBytes, buffer);
 
@@ -72,7 +158,17 @@ bool RP2040FlashDriver_Write(
 
 bool RP2040FlashDriver_IsBlockErased(void *context, ByteAddress blockAddress, unsigned int length)
 {
-    (void)context;
+    MEMORY_MAPPED_NOR_BLOCK_CONFIG *config = (MEMORY_MAPPED_NOR_BLOCK_CONFIG *)context;
+
+    if (length == 0)
+    {
+        return true;
+    }
+
+    if (!IsValidAddressRange(config, blockAddress, length))
+    {
+        return false;
+    }
 
     // Check if all bytes are 0xFF (erased state)
     unsigned char *p = (unsigned char *)blockAddress;
@@ -90,10 +186,15 @@ bool RP2040FlashDriver_IsBlockErased(void *context, ByteAddress blockAddress, un
 
 bool RP2040FlashDriver_EraseBlock(void *context, ByteAddress address)
 {
-    (void)context;
+    MEMORY_MAPPED_NOR_BLOCK_CONFIG *config = (MEMORY_MAPPED_NOR_BLOCK_CONFIG *)context;
+
+    if (!IsValidBlockStartAddress(config, address))
+    {
+        return false;
+    }
 
     // Convert absolute address to flash offset
-    flash_offset_t offset = (flash_offset_t)(address - RP2040_XIP_BASE);
+    flash_offset_t offset = (flash_offset_t)(address - config->Memory.BaseAddress);
 
     // Calculate sector number
     flash_sector_t sector = (flash_sector_t)(offset / RP2040_FLASH_SECTOR_SIZE);
@@ -125,14 +226,34 @@ bool RP2040FlashDriver_EraseBlock(void *context, ByteAddress address)
 // nanoBooter flash access functions (called from WireProtocol_MonitorCommands)
 int nf_TargetFlashWrite(uint32_t startAddress, uint32_t length, const uint8_t *buffer)
 {
-    flash_offset_t offset = (flash_offset_t)(startAddress - RP2040_XIP_BASE);
+    if (buffer == NULL)
+    {
+        return 0;
+    }
+
+    if (length == 0)
+    {
+        return 1;
+    }
+
+    if (!IsValidAddressRange(&Device_BlockStorageConfig, startAddress, length))
+    {
+        return 0;
+    }
+
+    flash_offset_t offset = (flash_offset_t)(startAddress - Device_BlockStorageConfig.Memory.BaseAddress);
     flash_error_t err = flashProgram(&EFLD1, offset, length, buffer);
     return (err == FLASH_NO_ERROR) ? 1 : 0;
 }
 
 int nf_TargetFlashErase(uint32_t address)
 {
-    flash_offset_t offset = (flash_offset_t)(address - RP2040_XIP_BASE);
+    if (!IsValidBlockStartAddress(&Device_BlockStorageConfig, address))
+    {
+        return 0;
+    }
+
+    flash_offset_t offset = (flash_offset_t)(address - Device_BlockStorageConfig.Memory.BaseAddress);
     flash_sector_t sector = (flash_sector_t)(offset / RP2040_FLASH_SECTOR_SIZE);
 
     flash_error_t err = flashStartEraseSector(&EFLD1, sector);

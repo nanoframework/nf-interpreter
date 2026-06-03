@@ -20,8 +20,14 @@ bool SetConfig(i2c_port_t bus, CLR_RT_HeapBlock *config)
 {
     int busSpeed = config[I2cConnectionSettings::FIELD___busSpeed].NumericByRef().s4;
 
+    // Get and validate the GPIO pins for this bus from the device map
     gpio_num_t DataPin = (gpio_num_t)Esp32_GetMappedDevicePins(DEV_TYPE_I2C, bus, 0);
     gpio_num_t ClockPin = (gpio_num_t)Esp32_GetMappedDevicePins(DEV_TYPE_I2C, bus, 1);
+
+    if (CPU_GPIO_PinIsBusy((GPIO_PIN)DataPin) || CPU_GPIO_PinIsBusy((GPIO_PIN)ClockPin))
+    {
+        return false;
+    }
 
     i2c_config_t conf;
     conf.mode = I2C_MODE_MASTER;

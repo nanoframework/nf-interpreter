@@ -26,6 +26,21 @@ static inline flash_offset_t lfs_to_flash_offset(const struct lfs_config *c, lfs
     return (flash_offset_t)((RP2040_LFS_BASE - RP2040_XIP_BASE) + (block * c->block_size) + off);
 }
 
+static inline bool lfs_range_is_valid(const struct lfs_config *c, lfs_block_t block, lfs_off_t off, lfs_size_t size)
+{
+    if (block >= c->block_count)
+    {
+        return false;
+    }
+
+    if (off > c->block_size)
+    {
+        return false;
+    }
+
+    return size <= (lfs_size_t)(c->block_size - off);
+}
+
 // target specific implementation of hal_lfs_sync
 int32_t hal_lfs_sync_(const struct lfs_config *c)
 {
@@ -39,6 +54,11 @@ int32_t hal_lfs_sync_(const struct lfs_config *c)
 // target specific implementation of hal_lfs_erase
 int32_t hal_lfs_erase_0(const struct lfs_config *c, lfs_block_t block)
 {
+    if (!lfs_range_is_valid(c, block, 0, c->block_size))
+    {
+        return LFS_ERR_IO;
+    }
+
     flash_offset_t offset = lfs_to_flash_offset(c, block, 0);
     flash_sector_t sector = (flash_sector_t)(offset / RP2040_FLASH_SECTOR_SIZE);
 
@@ -69,6 +89,11 @@ int32_t hal_lfs_erase_0(const struct lfs_config *c, lfs_block_t block)
 // target specific implementation of hal_lfs_read
 int32_t hal_lfs_read_0(const struct lfs_config *c, lfs_block_t block, lfs_off_t off, void *buffer, lfs_size_t size)
 {
+    if (!lfs_range_is_valid(c, block, off, size))
+    {
+        return LFS_ERR_IO;
+    }
+
     // RP2040 flash is XIP memory-mapped, so we can read directly
     uint32_t addr = RP2040_LFS_BASE + (block * c->block_size) + off;
     memcpy(buffer, (const void *)addr, size);
@@ -84,6 +109,11 @@ int32_t hal_lfs_prog_0(
     const void *buffer,
     lfs_size_t size)
 {
+    if (!lfs_range_is_valid(c, block, off, size))
+    {
+        return LFS_ERR_IO;
+    }
+
     flash_offset_t offset = lfs_to_flash_offset(c, block, off);
 
     flash_error_t err = flashProgram(&EFLD1, offset, size, (const uint8_t *)buffer);
