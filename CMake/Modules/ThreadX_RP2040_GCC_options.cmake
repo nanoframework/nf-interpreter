@@ -47,8 +47,10 @@ macro(nf_set_link_options)
     endif()
 
     # set optimization linker flags for RELEASE and MinSizeRel
+    # NOTE: LTO is intentionally disabled for RP2040 (Cortex-M0+ / Thumb-1)
+    # The limited Thumb-1 immediate offset range causes "invalid offset, value too big" assembler errors with LTO
     if(CMAKE_BUILD_TYPE STREQUAL "Release" OR CMAKE_BUILD_TYPE STREQUAL "MinSizeRel")
-        set_property(TARGET ${NFSLO_TARGET} APPEND_STRING PROPERTY LINK_FLAGS " -Os -flto -fuse-linker-plugin -fstrict-aliasing -fomit-frame-pointer -fno-unroll-loops -frounding-math -fsignaling-nans -ffloat-store -fno-math-errno -ftree-vectorize -fno-default-inline -finline-functions-called-once -fno-defer-pop ")
+        set_property(TARGET ${NFSLO_TARGET} APPEND_STRING PROPERTY LINK_FLAGS " -Os -fstrict-aliasing -fomit-frame-pointer -fno-unroll-loops -frounding-math -fsignaling-nans -ffloat-store -fno-math-errno -ftree-vectorize -fno-default-inline -finline-functions-called-once -fno-defer-pop ")
     endif()
 
     # request specs from newlib nano
@@ -64,3 +66,17 @@ macro(nf_set_link_options)
     nf_set_optimization_options(${NFSLO_TARGET})
 
 endmacro()
+
+# Override nf_set_optimization_options for RP2040 to disable LTO
+# Cortex-M0+ Thumb-1 instructions have limited immediate offset range,
+# and LTO can create merged functions that exceed these limits
+function(nf_set_optimization_options target)
+
+    target_compile_options(${target} PRIVATE
+        $<$<CONFIG:Debug>:-Og -ggdb>
+        $<$<CONFIG:Release>:-O3>
+        $<$<CONFIG:MinSizeRel>:-Os>
+        $<$<CONFIG:RelWithDebInfo>:-Os -ggdb>
+    )
+
+endfunction()
