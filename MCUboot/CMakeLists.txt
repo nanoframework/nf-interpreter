@@ -345,6 +345,10 @@ if(${TARGET_SERIES} STREQUAL "STM32F7xx")
             ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/OTGv1
         )
 
+        # unset this warning as error required for this source file
+        set_source_files_properties(${mcuboot_SOURCE_DIR}/boot/boot_serial/src/boot_serial.c PROPERTIES COMPILE_FLAGS "-Wno-format -Wno-type-limits")
+
+
     endif() # NF_MCUBOOT_SERIAL_RECOVERY
 
     # Board-specific build rules live in each board's MCUboot folder.
