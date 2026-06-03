@@ -114,7 +114,7 @@ jobs:
               }
 
               # check if Unit Tests for mscorlib should be run
-              if(($pr.title -like "*[run mscorlib tests]*") -or ($pr.body -like "*[run mscorlib tests]*") -or ($pr.body -match "Tested against nanoframework/CoreLibrary#(\d+)"))
+              if(($pr.title -match "\[run mscorlib tests\]") -or ($pr.body -match "\[run mscorlib tests\]") -or ($pr.body -match "Tested against nanoframework/CoreLibrary#(\d+)"))
               {
                 Write-Host "##[command] **mscorlib tests are to be runned**"
                 echo "##vso[task.setvariable variable=RUN_MSCORLIB_TESTS;isOutput=true]true"
