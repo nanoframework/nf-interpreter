@@ -38,11 +38,13 @@ int main(void)
     {
         // check for valid CLR image at address contiguous to nanoBooter
         volatile uint32_t *clrVector = (volatile uint32_t *)(uint32_t)&__nanoImage_end__;
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Warray-bounds"
         uint32_t msp = clrVector[0];
         uint32_t resetHandler = clrVector[1];
+#pragma GCC diagnostic pop
 
-        if (msp != 0xFFFFFFFF && msp != 0x00000000 &&
-            resetHandler > 0x10000000 && resetHandler < 0x10200000)
+        if (msp != 0xFFFFFFFF && msp != 0x00000000 && resetHandler > 0x10000000 && resetHandler < 0x10200000)
         {
             // there seems to be a valid CLR image
             // launch nanoCLR

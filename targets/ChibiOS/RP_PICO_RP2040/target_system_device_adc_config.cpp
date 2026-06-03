@@ -11,7 +11,7 @@
 // Ch 2: GPIO28 (ADC2) - Pico pin 34
 // Ch 3: GPIO29 (ADC3) - Pico pin  (used for VSYS/3 on Pico board)
 // Ch 4: Internal temperature sensor
-const NF_PAL_ADC_PORT_PIN_CHANNEL AdcPortPinConfig[] = {
+const NF_PAL_ADC_PORT_PIN_CHANNEL c_AdcPortPinConfig[] = {
     {1, 26, ADC_CHANNEL_IN0},
     {1, 27, ADC_CHANNEL_IN1},
     {1, 28, ADC_CHANNEL_IN2},
@@ -19,4 +19,4 @@ const NF_PAL_ADC_PORT_PIN_CHANNEL AdcPortPinConfig[] = {
     {1, 0xFF, ADC_CHANNEL_TEMPSENSOR},
 };
 
-const int AdcChannelCount = sizeof(AdcPortPinConfig) / sizeof(AdcPortPinConfig[0]);
+const int c_AdcChannelCount = sizeof(c_AdcPortPinConfig) / sizeof(c_AdcPortPinConfig[0]);

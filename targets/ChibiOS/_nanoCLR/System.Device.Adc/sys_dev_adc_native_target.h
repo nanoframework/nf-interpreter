@@ -31,8 +31,8 @@ typedef struct
 
 #endif
 
-extern const NF_PAL_ADC_PORT_PIN_CHANNEL AdcPortPinConfig[];
-extern const int AdcChannelCount;
+extern const NF_PAL_ADC_PORT_PIN_CHANNEL c_AdcPortPinConfig[];
+extern const int c_AdcChannelCount;
 
 #if !defined(RP_ADC_USE_ADC1)
 extern NF_PAL_ADC_PORT_PIN_CHANNEL *RuntimeAdcPortPinConfig;
