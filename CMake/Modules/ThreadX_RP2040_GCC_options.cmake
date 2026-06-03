@@ -48,10 +48,9 @@ macro(nf_set_link_options)
 
     # set optimization linker flags for RELEASE and MinSizeRel
     # NOTE: LTO is intentionally disabled for RP2040 (Cortex-M0+ / Thumb-1)
-    # Also using -O2 instead of -Os: GCC 15 with -Os generates code with immediate offsets
-    # exceeding Thumb-1 encoding limits ("invalid offset, value too big" assembler errors)
+    # LTO merges translation units creating functions that exceed Thumb-1 offset limits
     if(CMAKE_BUILD_TYPE STREQUAL "Release" OR CMAKE_BUILD_TYPE STREQUAL "MinSizeRel")
-        set_property(TARGET ${NFSLO_TARGET} APPEND_STRING PROPERTY LINK_FLAGS " -O2 -fstrict-aliasing -fomit-frame-pointer -fno-unroll-loops -frounding-math -fsignaling-nans -ffloat-store -fno-math-errno -ftree-vectorize -fno-default-inline -finline-functions-called-once -fno-defer-pop ")
+        set_property(TARGET ${NFSLO_TARGET} APPEND_STRING PROPERTY LINK_FLAGS " -Os -fstrict-aliasing -fomit-frame-pointer -fno-unroll-loops -frounding-math -fsignaling-nans -ffloat-store -fno-math-errno -ftree-vectorize -fno-default-inline -finline-functions-called-once -fno-defer-pop ")
     endif()
 
     # request specs from newlib nano
@@ -68,17 +67,18 @@ macro(nf_set_link_options)
 
 endmacro()
 
-# Override nf_set_optimization_options for RP2040 to disable LTO and use -O2
-# Cortex-M0+ Thumb-1 instructions have limited immediate offset range.
-# GCC 15 with -Os or -flto generates code with offsets exceeding Thumb-1 limits.
-# -O2 uses different register allocation that avoids oversized stack frames.
+# Override nf_set_optimization_options for RP2040 to disable LTO
+# Cortex-M0+ Thumb-1 instructions have limited immediate offset range,
+# and LTO can create merged functions that exceed these limits.
+# Individual large files (e.g. hal_usb_lld.c) are handled with per-file
+# compile options in the relevant Find*.cmake module.
 function(nf_set_optimization_options target)
 
     target_compile_options(${target} PRIVATE
         $<$<CONFIG:Debug>:-Og -ggdb>
-        $<$<CONFIG:Release>:-O2>
-        $<$<CONFIG:MinSizeRel>:-O2>
-        $<$<CONFIG:RelWithDebInfo>:-O2 -ggdb>
+        $<$<CONFIG:Release>:-O3>
+        $<$<CONFIG:MinSizeRel>:-Os>
+        $<$<CONFIG:RelWithDebInfo>:-Os -ggdb>
     )
 
 endfunction()
