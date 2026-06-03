@@ -43,8 +43,7 @@ int main(void)
         uint32_t resetHandler = clrVector[1];
 #pragma GCC diagnostic pop
 
-        if (msp != 0xFFFFFFFF && msp != 0x00000000 &&
-            resetHandler > 0x10000000 && resetHandler < 0x10200000)
+        if (msp != 0xFFFFFFFF && msp != 0x00000000 && resetHandler > 0x10000000 && resetHandler < 0x10200000)
         {
             // there seems to be a valid CLR image
             // launch nanoCLR
