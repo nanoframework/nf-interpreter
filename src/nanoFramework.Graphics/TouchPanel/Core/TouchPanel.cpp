@@ -165,7 +165,7 @@ HRESULT TouchPanelDriver::GetDeviceCaps(unsigned int iIndex, void *lpOutput)
             return FALSE;
     }
 
-    return true;
+    return S_OK;
 }
 
 HRESULT TouchPanelDriver::ResetCalibration()
@@ -849,7 +849,7 @@ bool TouchPanelDriver::CalibrationPointGet(TOUCH_PANEL_CALIBRATION_POINT *pTCP)
             pTCP->CalibrationX = cDisplayWidth / 2;
             pTCP->CalibrationY = cDisplayHeight / 2;
 
-            return FALSE;
+            return false;
     }
 
     return true;

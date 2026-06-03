@@ -89,7 +89,7 @@ bool FS_MountVolume(const char *rootName, uint32_t deviceFlags, const char *file
             streamDriver,
             fsDriver,
             volumeId,
-            (fsDriver) ? true : FALSE))
+            (fsDriver) ? true : false))
     {
 
         // Now we can notify managed code
@@ -103,7 +103,7 @@ bool FS_MountVolume(const char *rootName, uint32_t deviceFlags, const char *file
         // if for some reason, AddVolume fails, there is not much that can be done
         platform_free(volume);
 
-        return FALSE;
+        return false;
     }
 }
 
