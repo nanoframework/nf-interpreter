@@ -717,7 +717,7 @@ quantize_fs_dither(j_decompress_ptr cinfo, JSAMPARRAY input_buf,
                  */
                 errorptr[0] = (FSERROR)bpreverr; /* unload prev err into array */
             }
-            cquantize->on_odd_row = (cquantize->on_odd_row ? FALSE : TRUE);
+            cquantize->on_odd_row = (cquantize->on_odd_row ? FALSE : true;
         }
 }
 

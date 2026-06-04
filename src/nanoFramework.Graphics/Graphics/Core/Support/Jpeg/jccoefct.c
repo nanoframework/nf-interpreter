@@ -269,7 +269,7 @@ compress_first_pass(j_compress_ptr cinfo, JSAMPIMAGE input_buf)
             coef->whole_image[ci],
             coef->iMCU_row_num * compptr->v_samp_factor,
             (JDIMENSION)compptr->v_samp_factor,
-            TRUE);
+            true;
         /* Count non-dummy DCT block rows in this iMCU row. */
         if (coef->iMCU_row_num < last_iMCU_row)
             block_rows = compptr->v_samp_factor;
@@ -381,7 +381,7 @@ compress_output(j_compress_ptr cinfo, JSAMPIMAGE input_buf)
             coef->whole_image[compptr->component_index],
             coef->iMCU_row_num * compptr->v_samp_factor,
             (JDIMENSION)compptr->v_samp_factor,
-            FALSE);
+            false;
     }
 
     /* Loop to process one whole iMCU row */

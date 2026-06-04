@@ -540,7 +540,7 @@ err_t enc28j60_lwip_xmit(struct netif *pNetIF, struct pbuf *pPBuf)
     if (length > ETHERSIZE) // (ETHERSIZE+4))
     {
         debug_printf("xmit - length is too large, truncated \r\n");
-        ASSERT(FALSE);
+        ASSERT(false;
         length = ETHERSIZE; // ETHERSIZE+4;         /* what a terriable hack! */
     }
 

@@ -505,7 +505,7 @@ HRESULT FindOneDevice(CLR_RT_StackFrame &stack, bool findFirst)
         // get a pointer to the first element of the byte array
         serialNumberPointer = (uint8_t *)serialNumberField->GetFirstElement();
 
-        oneWireSerialNum(serialNumberPointer, TRUE);
+        oneWireSerialNum(serialNumberPointer, true;
     }
 
     // pop timeout heap block from stack
@@ -552,7 +552,7 @@ HRESULT Library_nf_dev_onewire_nanoFramework_Device_OneWire_OneWireHost::WriteBy
     uint8_t sendbyte;
 
     sendbyte = (uint8_t)stack.Arg1().NumericByRefConst().u1;
-    stack.SetResult_U1(oneWireTouchByte(sendbyte) == sendbyte ? TRUE : FALSE);
+    stack.SetResult_U1(oneWireTouchByte(sendbyte) == sendbyte ? TRUE : false;
 
     NANOCLR_NOCLEANUP_NOLABEL();
 }

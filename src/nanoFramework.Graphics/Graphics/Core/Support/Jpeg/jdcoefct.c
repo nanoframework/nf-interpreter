@@ -266,7 +266,7 @@ consume_data(j_decompress_ptr cinfo)
         buffer[ci] = (*cinfo->mem->access_virt_barray)
             ((j_common_ptr)cinfo, coef->whole_image[compptr->component_index],
                 cinfo->input_iMCU_row * compptr->v_samp_factor,
-                (JDIMENSION)compptr->v_samp_factor, TRUE);
+                (JDIMENSION)compptr->v_samp_factor, true;
         /* Note: entropy decoder expects buffer to be zeroed,
          * but this is handled automatically by the memory manager
          * because we requested a pre-zeroed array.
@@ -352,7 +352,7 @@ decompress_data(j_decompress_ptr cinfo, JSAMPIMAGE output_buf)
         buffer = (*cinfo->mem->access_virt_barray)
             ((j_common_ptr)cinfo, coef->whole_image[ci],
                 cinfo->output_iMCU_row * compptr->v_samp_factor,
-                (JDIMENSION)compptr->v_samp_factor, FALSE);
+                (JDIMENSION)compptr->v_samp_factor, false;
         /* Count non-dummy DCT block rows in this iMCU row. */
         if (cinfo->output_iMCU_row < last_iMCU_row)
             block_rows = compptr->v_samp_factor;
@@ -529,14 +529,14 @@ decompress_smooth_data(j_decompress_ptr cinfo, JSAMPIMAGE output_buf)
             buffer = (*cinfo->mem->access_virt_barray)
                 ((j_common_ptr)cinfo, coef->whole_image[ci],
                 (cinfo->output_iMCU_row - 1) * compptr->v_samp_factor,
-                    (JDIMENSION)access_rows, FALSE);
+                    (JDIMENSION)access_rows, false;
             buffer += compptr->v_samp_factor;   /* point to current iMCU row */
             first_row = false;
         }
         else {
             buffer = (*cinfo->mem->access_virt_barray)
                 ((j_common_ptr)cinfo, coef->whole_image[ci],
-                (JDIMENSION)0, (JDIMENSION)access_rows, FALSE);
+                (JDIMENSION)0, (JDIMENSION)access_rows, false;
             first_row = true;
         }
         /* Fetch component-dependent info */

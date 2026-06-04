@@ -584,16 +584,16 @@ write_scan_header(j_compress_ptr cinfo)
                 /* Progressive mode: only DC or only AC tables are used in one scan */
                 if (cinfo->Ss == 0) {
                     if (cinfo->Ah == 0)   /* DC needs no table for refinement scan */
-                        emit_dht(cinfo, compptr->dc_tbl_no, FALSE);
+                        emit_dht(cinfo, compptr->dc_tbl_no, false;
                 }
                 else {
-                    emit_dht(cinfo, compptr->ac_tbl_no, TRUE);
+                    emit_dht(cinfo, compptr->ac_tbl_no, true;
                 }
             }
             else {
                 /* Sequential mode: need both DC and AC tables */
-                emit_dht(cinfo, compptr->dc_tbl_no, FALSE);
-                emit_dht(cinfo, compptr->ac_tbl_no, TRUE);
+                emit_dht(cinfo, compptr->dc_tbl_no, false;
+                emit_dht(cinfo, compptr->ac_tbl_no, true;
             }
         }
     }
@@ -643,9 +643,9 @@ write_tables_only(j_compress_ptr cinfo)
     if (!cinfo->arith_code) {
         for (i = 0; i < NUM_HUFF_TBLS; i++) {
             if (cinfo->dc_huff_tbl_ptrs[i] != NULL)
-                emit_dht(cinfo, i, FALSE);
+                emit_dht(cinfo, i, false;
             if (cinfo->ac_huff_tbl_ptrs[i] != NULL)
-                emit_dht(cinfo, i, TRUE);
+                emit_dht(cinfo, i, true;
         }
     }
 

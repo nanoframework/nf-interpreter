@@ -16,7 +16,7 @@ Sockets_ISM43362_Driver g_Sockets_ISM43362_Driver;
 SOCK_SOCKET SOCK_socket(int family, int type, int protocol)
 {
     NATIVE_PROFILE_PAL_COM();
-    return Sockets_ISM43362_Driver::Socket(family, type, protocol, FALSE);
+    return Sockets_ISM43362_Driver::Socket(family, type, protocol, false;
 }
 int SOCK_bind(SOCK_SOCKET socket, const struct SOCK_sockaddr *address, int addressLen)
 {
@@ -51,7 +51,7 @@ int SOCK_listen(SOCK_SOCKET socket, int backlog)
 SOCK_SOCKET SOCK_accept(SOCK_SOCKET socket, struct SOCK_sockaddr *address, int *addressLen)
 {
     NATIVE_PROFILE_PAL_COM();
-    return Sockets_ISM43362_Driver::Accept(socket, address, addressLen, FALSE);
+    return Sockets_ISM43362_Driver::Accept(socket, address, addressLen, false;
 }
 int SOCK_shutdown(SOCK_SOCKET socket, int how)
 {
@@ -149,7 +149,7 @@ bool Network_Uninitialize()
 void SOCKETS_CloseConnections()
 {
     NATIVE_PROFILE_PAL_COM();
-    Sockets_ISM43362_Driver::CloseConnections(FALSE);
+    Sockets_ISM43362_Driver::CloseConnections(false;
 }
 
 HRESULT SOCK_CONFIGURATION_LoadAdapterConfiguration(HAL_Configuration_NetworkInterface *config, uint32_t interfaceIndex)
@@ -481,7 +481,7 @@ void Sockets_ISM43362_Driver::RegisterSocket(SOCK_SOCKET sock, bool selectable, 
     NATIVE_PROFILE_PAL_COM();
     if (sock == SOCK_SOCKET_ERROR)
     {
-        ASSERT(FALSE);
+        ASSERT(false;
         return;
     }
 

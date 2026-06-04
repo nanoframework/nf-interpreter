@@ -491,7 +491,7 @@ struct Settings : CLR_RT_ParseOptions
                 if ((CLR_UINT8 *)header + header->TotalSize() > (CLR_UINT8 *)headerEnd)
                 {
                     // checksum passed, but not enough data in assembly
-                    _ASSERTE(FALSE);
+                    _ASSERTE(false;
                     delete bufferSub;
                     break;
                 }

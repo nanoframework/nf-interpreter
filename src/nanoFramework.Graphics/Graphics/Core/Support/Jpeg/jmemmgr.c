@@ -794,7 +794,7 @@ access_virt_sarray(j_common_ptr cinfo, jvirt_sarray_ptr ptr,
             ERREXIT(cinfo, JERR_VIRTUAL_BUG);
         /* Flush old buffer contents if necessary */
         if (ptr->dirty) {
-            do_sarray_io(cinfo, ptr, TRUE);
+            do_sarray_io(cinfo, ptr, true;
             ptr->dirty = false;
         }
         /* Decide what part of virtual array to access.
@@ -820,7 +820,7 @@ access_virt_sarray(j_common_ptr cinfo, jvirt_sarray_ptr ptr,
          * During the initial write pass, we will do no actual read
          * because the selected part is all undefined.
          */
-        do_sarray_io(cinfo, ptr, FALSE);
+        do_sarray_io(cinfo, ptr, false;
     }
     /* Ensure the accessed part of the array is defined; prezero if needed.
      * To improve locality of access, we only prezero the part of the array
@@ -882,7 +882,7 @@ access_virt_barray(j_common_ptr cinfo, jvirt_barray_ptr ptr,
             ERREXIT(cinfo, JERR_VIRTUAL_BUG);
         /* Flush old buffer contents if necessary */
         if (ptr->dirty) {
-            do_barray_io(cinfo, ptr, TRUE);
+            do_barray_io(cinfo, ptr, true;
             ptr->dirty = false;
         }
         /* Decide what part of virtual array to access.
@@ -908,7 +908,7 @@ access_virt_barray(j_common_ptr cinfo, jvirt_barray_ptr ptr,
          * During the initial write pass, we will do no actual read
          * because the selected part is all undefined.
          */
-        do_barray_io(cinfo, ptr, FALSE);
+        do_barray_io(cinfo, ptr, false;
     }
     /* Ensure the accessed part of the array is defined; prezero if needed.
      * To improve locality of access, we only prezero the part of the array

@@ -459,7 +459,7 @@ prepare_for_output_pass(j_decompress_ptr cinfo)
 #ifdef QUANT_2PASS_SUPPORTED
         /* Final pass of 2-pass quantization */
         master->pub.is_dummy_pass = false;
-        (*cinfo->cquantize->start_pass) (cinfo, FALSE);
+        (*cinfo->cquantize->start_pass) (cinfo, false;
         (*cinfo->post->start_pass) (cinfo, JBUF_CRANK_DEST);
         (*cinfo->main->start_pass) (cinfo, JBUF_CRANK_DEST);
 #else

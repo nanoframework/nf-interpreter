@@ -235,7 +235,7 @@ jpeg_write_m_byte(j_compress_ptr cinfo, int val)
  *		set destination to table file
  *		jpeg_write_tables(cinfo);
  *		set destination to image file
- *		jpeg_start_compress(cinfo, FALSE);
+ *		jpeg_start_compress(cinfo, false;
  *		write data...
  *		jpeg_finish_compress(cinfo);
  *

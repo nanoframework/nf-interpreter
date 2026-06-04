@@ -460,7 +460,7 @@ prepare_for_pass(j_compress_ptr cinfo)
         select_scan_parameters(cinfo);
         per_scan_setup(cinfo);
         if (cinfo->Ss != 0 || cinfo->Ah == 0 || cinfo->arith_code) {
-            (*cinfo->entropy->start_pass) (cinfo, TRUE);
+            (*cinfo->entropy->start_pass) (cinfo, true;
             (*cinfo->coef->start_pass) (cinfo, JBUF_CRANK_DEST);
             master->pub.call_pass_startup = false;
             break;
@@ -479,7 +479,7 @@ prepare_for_pass(j_compress_ptr cinfo)
             select_scan_parameters(cinfo);
             per_scan_setup(cinfo);
         }
-        (*cinfo->entropy->start_pass) (cinfo, FALSE);
+        (*cinfo->entropy->start_pass) (cinfo, false;
         (*cinfo->coef->start_pass) (cinfo, JBUF_CRANK_DEST);
         /* We emit frame/scan headers now */
         if (master->scan_number == 0)

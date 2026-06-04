@@ -211,7 +211,7 @@ HRESULT FATFS_FS_Driver::FlushAll(const VOLUME_ID *volume)
 
     //     return S_OK;
     // }
-    ASSERT(FALSE);
+    ASSERT(false;
     return CLR_E_INVALID_DRIVER;
 }
 
@@ -243,7 +243,7 @@ HRESULT FATFS_FS_Driver::GetVolumeLabel(const VOLUME_ID *volume, char *volumeLab
 
     //     return logicDisk->GetDiskVolLab(volumeLabel);
     // }
-    ASSERT(FALSE);
+    ASSERT(false;
     return CLR_E_INVALID_DRIVER;
 }
 

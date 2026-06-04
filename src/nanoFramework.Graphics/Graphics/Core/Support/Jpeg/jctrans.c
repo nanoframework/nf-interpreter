@@ -46,7 +46,7 @@ jpeg_write_coefficients(j_compress_ptr cinfo, jvirt_barray_ptr* coef_arrays)
     if (cinfo->global_state != CSTATE_START)
         ERREXIT1(cinfo, JERR_BAD_STATE, cinfo->global_state);
     /* Mark all tables to be written */
-    jpeg_suppress_tables(cinfo, FALSE);
+    jpeg_suppress_tables(cinfo, false;
     /* (Re)initialize error mgr and destination modules */
     (*cinfo->err->reset_error_mgr) ((j_common_ptr)cinfo);
     (*cinfo->dest->init_destination) (cinfo);
@@ -310,7 +310,7 @@ compress_output(j_compress_ptr cinfo, JSAMPIMAGE input_buf)
         buffer[ci] = (*cinfo->mem->access_virt_barray)
             ((j_common_ptr)cinfo, coef->whole_image[compptr->component_index],
                 coef->iMCU_row_num * compptr->v_samp_factor,
-                (JDIMENSION)compptr->v_samp_factor, FALSE);
+                (JDIMENSION)compptr->v_samp_factor, false;
     }
 
     /* Loop to process one whole iMCU row */
