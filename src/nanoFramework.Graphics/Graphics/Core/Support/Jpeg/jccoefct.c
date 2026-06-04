@@ -381,7 +381,7 @@ compress_output(j_compress_ptr cinfo, JSAMPIMAGE input_buf)
             coef->whole_image[compptr->component_index],
             coef->iMCU_row_num * compptr->v_samp_factor,
             (JDIMENSION)compptr->v_samp_factor,
-            false;
+            false);
     }
 
     /* Loop to process one whole iMCU row */
