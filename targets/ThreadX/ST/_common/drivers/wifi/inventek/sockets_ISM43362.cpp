@@ -16,7 +16,7 @@ Sockets_ISM43362_Driver g_Sockets_ISM43362_Driver;
 SOCK_SOCKET SOCK_socket(int family, int type, int protocol)
 {
     NATIVE_PROFILE_PAL_COM();
-    return Sockets_ISM43362_Driver::Socket(family, type, protocol, false;
+    return Sockets_ISM43362_Driver::Socket(family, type, protocol, false);
 }
 int SOCK_bind(SOCK_SOCKET socket, const struct SOCK_sockaddr *address, int addressLen)
 {
@@ -51,7 +51,7 @@ int SOCK_listen(SOCK_SOCKET socket, int backlog)
 SOCK_SOCKET SOCK_accept(SOCK_SOCKET socket, struct SOCK_sockaddr *address, int *addressLen)
 {
     NATIVE_PROFILE_PAL_COM();
-    return Sockets_ISM43362_Driver::Accept(socket, address, addressLen, false;
+    return Sockets_ISM43362_Driver::Accept(socket, address, addressLen, false);
 }
 int SOCK_shutdown(SOCK_SOCKET socket, int how)
 {

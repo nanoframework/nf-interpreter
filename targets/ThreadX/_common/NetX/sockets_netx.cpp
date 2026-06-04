@@ -51,7 +51,7 @@ int SOCK_listen(SOCK_SOCKET socket, int backlog)
 SOCK_SOCKET SOCK_accept(SOCK_SOCKET socket, struct SOCK_sockaddr *address, int *addressLen)
 {
     NATIVE_PROFILE_PAL_COM();
-    return Sockets_NETX_Driver::Accept(socket, address, addressLen, false;
+    return Sockets_NETX_Driver::Accept(socket, address, addressLen, false);
 }
 int SOCK_shutdown(SOCK_SOCKET socket, int how)
 {

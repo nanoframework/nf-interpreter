@@ -518,7 +518,7 @@ HRESULT FindOneDevice(CLR_RT_StackFrame &stack, bool findFirst)
             // get a pointer to the first element of the byte array
             serialNumberPointer = (uint8_t *)serialNumberField->GetFirstElement();
 
-            oneWireSerialNum(serialNumberPointer, true;
+            oneWireSerialNum(serialNumberPointer, true);
         }
     }
 

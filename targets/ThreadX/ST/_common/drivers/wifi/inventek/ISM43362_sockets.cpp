@@ -280,7 +280,7 @@ bool ISM43362_SOCKETS_Driver::Initialize()
 
             if (interfaceNumber == SOCK_SOCKET_ERROR)
             {
-                DEBUG_HANDLE_SOCKET_ERROR("Network init", false;
+                DEBUG_HANDLE_SOCKET_ERROR("Network init", false);
                 // FIXME			debug_printf("SocketError: %d\n", errorCode);
                 continue;
             }

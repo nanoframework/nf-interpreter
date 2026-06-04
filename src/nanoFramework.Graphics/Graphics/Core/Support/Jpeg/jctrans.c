@@ -46,7 +46,7 @@ jpeg_write_coefficients(j_compress_ptr cinfo, jvirt_barray_ptr* coef_arrays)
     if (cinfo->global_state != CSTATE_START)
         ERREXIT1(cinfo, JERR_BAD_STATE, cinfo->global_state);
     /* Mark all tables to be written */
-    jpeg_suppress_tables(cinfo, false;
+    jpeg_suppress_tables(cinfo, false);
     /* (Re)initialize error mgr and destination modules */
     (*cinfo->err->reset_error_mgr) ((j_common_ptr)cinfo);
     (*cinfo->dest->init_destination) (cinfo);
