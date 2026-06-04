@@ -16,11 +16,16 @@
 #include <nanoWeak.h>
 #include <nanoPackStruct.h>
 
-#ifndef TRUE
-#define TRUE 1
-#endif
-#ifndef FALSE
+// Constants for configuration options
+
+// Generic 'FALSE' preprocessor boolean constant
+#if !defined(FALSE)
 #define FALSE 0
+#endif
+
+// Generic 'TRUE' preprocessor boolean constant
+#if !defined(TRUE)
+#define TRUE 1
 #endif
 
 #endif // NANOCLR_HEADERS_H
