@@ -269,7 +269,7 @@ compress_first_pass(j_compress_ptr cinfo, JSAMPIMAGE input_buf)
             coef->whole_image[ci],
             coef->iMCU_row_num * compptr->v_samp_factor,
             (JDIMENSION)compptr->v_samp_factor,
-            true;
+            true);
         /* Count non-dummy DCT block rows in this iMCU row. */
         if (coef->iMCU_row_num < last_iMCU_row)
             block_rows = compptr->v_samp_factor;
@@ -452,7 +452,7 @@ jinit_c_coef_controller(j_compress_ptr cinfo, bool need_full_buffer)
             coef->whole_image[ci] = (*cinfo->mem->request_virt_barray)(
                 (j_common_ptr)cinfo,
                 JPOOL_IMAGE,
-                FALSE,
+                false,
                 (JDIMENSION)jround_up((long)compptr->width_in_blocks, (long)compptr->h_samp_factor),
                 (JDIMENSION)jround_up((long)compptr->height_in_blocks, (long)compptr->v_samp_factor),
                 (JDIMENSION)compptr->v_samp_factor);
