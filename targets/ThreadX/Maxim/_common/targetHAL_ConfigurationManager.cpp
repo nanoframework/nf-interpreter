@@ -207,8 +207,8 @@ __nfweak bool ConfigurationManager_StoreConfigurationBlock(
     bool done)
 {
     ByteAddress storageAddress = 0;
-    bool requiresEnumeration = FALSE;
-    bool success = FALSE;
+    bool requiresEnumeration = false;
+    bool success = false;
 
     if (configuration == DeviceConfigurationOption_Network)
     {
@@ -362,7 +362,7 @@ __nfweak bool ConfigurationManager_UpdateConfigurationBlock(
     uint32_t blockOffset;
     uint8_t *blockAddressInCopy;
     uint32_t blockSize;
-    bool success = FALSE;
+    bool success = false;
 
     // config sector size
     int sizeOfConfigSector = (uint32_t)&__nanoConfig_end__ - (uint32_t)&__nanoConfig_start__;

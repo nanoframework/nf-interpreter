@@ -25,7 +25,7 @@ bool Events_Initialize_Platform()
 
     Clock_Params_init(&params);
     params.arg = NULL;
-    params.startFlag = FALSE;
+    params.startFlag = false;
     params.period = 0;
 
     boolEventsTimer = Clock_create(local_Events_SetBoolTimer_Callback, 0, &params, Error_IGNORE);

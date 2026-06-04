@@ -261,7 +261,7 @@ bool oneWireFindNext(bool doReset, bool alarmOnly)
     uint8_t attempt = 0;
     uint8_t discrepMarker = 0;
     bool outBit = 0;
-    bool result = FALSE;
+    bool result = false;
     uint8_t lastcrc8 = 0;
 
     // if the last call was the last one
@@ -269,7 +269,7 @@ bool oneWireFindNext(bool doReset, bool alarmOnly)
     {
         // reset the search
         LastDiscrepancy = 0;
-        LastDevice = FALSE;
+        LastDevice = false;
         LastFamilyDiscrepancy = 0;
 
         return false;
@@ -389,7 +389,7 @@ bool oneWireFindNext(bool doReset, bool alarmOnly)
         LastDevice = (LastDiscrepancy == 0);
 
         // search isn't completed there are more devices present in the bus
-        result = TRUE;
+        result = true;
     }
 
     return result;
@@ -419,7 +419,7 @@ bool oneWireFindFirst(bool doReset, bool alarmOnly)
 {
     // reset the search state
     LastDiscrepancy = 0;
-    LastDevice = FALSE;
+    LastDevice = false;
     LastFamilyDiscrepancy = 0;
 
     // clear serial number buffer for new search

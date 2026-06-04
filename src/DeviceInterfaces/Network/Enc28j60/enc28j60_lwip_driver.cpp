@@ -22,7 +22,7 @@ static struct netif g_ENC28J60_NetIF;
 
 HAL_CONTINUATION InterruptTaskContinuation;
 HAL_COMPLETION LwipUpTimeCompletion;
-static bool LwipNetworkStatus = FALSE;
+static bool LwipNetworkStatus = false;
 static uint32_t LwipLastIpAddress = 0;
 
 extern ENC28J60_LWIP_DEVICE_CONFIG g_ENC28J60_LWIP_Config;

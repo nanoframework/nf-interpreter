@@ -15,7 +15,7 @@ TOUCH_PANEL_Point GestureLastPoint;
 
 // It seems that events are defined in  nanoHAL_V2.h and are required to be matched with managed code events.
 // This is a fudge to get it to compile
-bool GestureDriver::s_initialized = FALSE;
+bool GestureDriver::s_initialized = false;
 // 50ms - allow for some touch points to accumulate before we run the gesture engine
 HRESULT GestureDriver::Initialize()
 {
@@ -34,7 +34,7 @@ HRESULT GestureDriver::Uninitialize()
 {
     if (GestureDriver::s_initialized)
     {
-        GestureDriver::s_initialized = FALSE;
+        GestureDriver::s_initialized = false;
         if (m_gestureCompletion.IsLinked()) m_gestureCompletion.Abort();
         ResetRecognition();
     }

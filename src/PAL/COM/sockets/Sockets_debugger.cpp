@@ -82,7 +82,7 @@ void Sockets_LWIP_Driver::Debugger_Initialize()
 
         g_Sockets_LWIP_Driver.m_stateDebugSocket = DbgSock_Uninitialized;
 
-        g_Sockets_LWIP_Driver.m_usingSSL = FALSE;
+        g_Sockets_LWIP_Driver.m_usingSSL = false;
 
         s_initializedDbg = true;
     }
@@ -93,7 +93,7 @@ void Sockets_LWIP_Driver::Debugger_Uninitialize()
     g_Sockets_LWIP_Driver.m_multicastSocket = SOCK_SOCKET_ERROR;
     g_Sockets_LWIP_Driver.m_SocketDebugStream = SOCK_SOCKET_ERROR;
     g_Sockets_LWIP_Driver.m_SocketDebugListener = SOCK_SOCKET_ERROR;
-    s_initializedDbg = FALSE;
+    s_initializedDbg = false;
 }
 
 void Sockets_LWIP_Driver::Debugger_Abort()
@@ -396,7 +396,7 @@ void Sockets_LWIP_Driver::CloseDebuggerSocket()
             SOCK_close(g_Sockets_LWIP_Driver.m_SocketDebugStream);
         }
 
-        g_Sockets_LWIP_Driver.m_usingSSL = FALSE;
+        g_Sockets_LWIP_Driver.m_usingSSL = false;
 
         g_Sockets_LWIP_Driver.m_SocketDebugStream = SOCK_SOCKET_ERROR;
 
@@ -607,7 +607,7 @@ void Sockets_LWIP_Driver::MulticastDiscoveryRespond(void *arg)
     if (len > 0)
     {
         int32_t idx = 0;
-        bool fFound = FALSE;
+        bool fFound = false;
         const char *c_Signature = SOCK_DISCOVERY_MULTICAST_TOKEN;
         int32_t sigLen = hal_strlen_s(c_Signature);
 
@@ -685,4 +685,4 @@ void Sockets_LWIP_Driver::MulticastDiscoveryRespond(void *arg)
     MulticastDiscoverySchedule();
 }
 
-bool Sockets_LWIP_Driver::s_initializedDbg = FALSE;
+bool Sockets_LWIP_Driver::s_initializedDbg = false;

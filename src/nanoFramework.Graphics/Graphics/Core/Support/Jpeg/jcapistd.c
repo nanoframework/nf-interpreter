@@ -35,7 +35,7 @@
  * is wanted, but for safety's sake it should not be the default behavior:
  * programmers should have to make a deliberate choice to emit abbreviated
  * images.  Therefore the documentation and examples should encourage people
- * to pass write_all_tables=TRUE; then it will take active thought to do the
+ * to pass write_all_tables=true; then it will take active thought to do the
  * wrong thing.
  */
 

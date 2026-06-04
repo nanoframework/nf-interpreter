@@ -285,8 +285,8 @@ __nfweak bool ConfigurationManager_StoreConfigurationBlock(
     bool done)
 {
     ByteAddress storageAddress = 0;
-    bool requiresEnumeration = FALSE;
-    bool success = FALSE;
+    bool requiresEnumeration = false;
+    bool success = false;
 
     if (configuration == DeviceConfigurationOption_Network)
     {

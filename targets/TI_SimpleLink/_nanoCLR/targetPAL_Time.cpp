@@ -24,7 +24,7 @@ HRESULT Time_Initialize()
 
     Clock_Params_init(&params);
     params.arg = NULL;
-    params.startFlag = FALSE;
+    params.startFlag = false;
     params.period = 0;
 
     nextEventTimer = Clock_create(NextEventTimer_Callback, 0, &params, Error_IGNORE);

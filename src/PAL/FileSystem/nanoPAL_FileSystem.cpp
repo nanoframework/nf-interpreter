@@ -171,7 +171,7 @@ bool FileSystemVolumeList::InitializeVolumes()
         else
         {
             // even if success == FALSE, InitalizeVolume() will still get called
-            success = FALSE;
+            success = false;
         }
 
         volume = volume->Next();

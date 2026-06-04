@@ -160,7 +160,7 @@ HRESULT SOCK_CONFIGURATION_UpdateAdapterConfiguration(
 {
     NATIVE_PROFILE_PAL_COM();
     HRESULT hr = S_OK;
-    bool success = FALSE;
+    bool success = false;
 
     const uint32_t c_reInitFlag = NetworkInterface_UpdateOperation_Dhcp | NetworkInterface_UpdateOperation_DhcpRenew |
                                   NetworkInterface_UpdateOperation_Mac;
@@ -401,7 +401,7 @@ bool Sockets_NETX_Driver::Initialize()
 
     if (!s_initialized)
     {
-        g_Sockets_NETX_Driver.m_fShuttingDown = FALSE;
+        g_Sockets_NETX_Driver.m_fShuttingDown = false;
 
         g_Sockets_NETX_Driver.m_cntSockets = 0;
 
@@ -448,9 +448,9 @@ bool Sockets_NETX_Driver::Uninitialize()
 
         ret = HAL_SOCK_Uninitialize();
 
-        s_initialized = FALSE;
-        s_wirelessInitialized = FALSE;
-        s_discoveryInitialized = FALSE;
+        s_initialized = false;
+        s_wirelessInitialized = false;
+        s_discoveryInitialized = false;
     }
 
     return ret;
@@ -533,6 +533,6 @@ void Sockets_NETX_Driver::UnregisterSocket(SOCK_SOCKET sock)
 //     return;
 // }
 
-bool Sockets_NETX_Driver::s_initialized = FALSE;
-bool Sockets_NETX_Driver::s_wirelessInitialized = FALSE;
-bool Sockets_NETX_Driver::s_discoveryInitialized = FALSE;
+bool Sockets_NETX_Driver::s_initialized = false;
+bool Sockets_NETX_Driver::s_wirelessInitialized = false;
+bool Sockets_NETX_Driver::s_discoveryInitialized = false;

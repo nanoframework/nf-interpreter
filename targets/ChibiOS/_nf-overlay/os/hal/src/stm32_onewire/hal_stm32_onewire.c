@@ -270,7 +270,7 @@ COMMENTS:
 *******************************************************************************/
 uint8_t oneWireWriteByte(uint8_t sendbyte)
 {
-    return (oneWireTouchByte(sendbyte) == sendbyte) ? TRUE : FALSE;
+    return (oneWireTouchByte(sendbyte) == sendbyte) ? true : false;
 }
 
 /*******************************************************************************
@@ -357,9 +357,9 @@ DESCRIPTION:
   // function is complete the 1-Wire device is ready to accept device-specific
   // commands.
   //
-  // Returns:   TRUE (1) : reset indicates present and device is ready
+  // Returns:   true: reset indicates present and device is ready
   //                       for commands.
-  //            FALSE (0): reset does not indicate presence or echos 'writes'
+  //            false: reset does not indicate presence or echos 'writes'
   //                       are not correct.
   //
 
@@ -370,7 +370,7 @@ AUTHOR: jassimoes
 COMMENTS:
 
 *******************************************************************************/
-uint8_t oneWireAccess(void)
+bool oneWireAccess(void)
 {
     uint8_t sendpacket[9];
     uint8_t i;
@@ -434,11 +434,11 @@ DESCRIPTION:
   // 'tran_len' - length in bytes to transfer
   // Supported devices: all
   //
-  // Returns:   TRUE (1) : The optional reset returned a valid
-  //                       presence (doReset == TRUE) or there
+  // Returns:   true: The optional reset returned a valid
+  //                       presence (doReset == true) or there
   //                       was no reset required.
-  //            FALSE (0): The reset did not return a valid prsence
-  //                       (doReset == TRUE).
+  //            false: The reset did not return a valid prsence
+  //                       (doReset == true).
   //
   //  The maximum tran_len is 160
 
@@ -449,7 +449,7 @@ AUTHOR: jassimoes
 COMMENTS:
 
 *******************************************************************************/
-uint8_t oneWireBlock(uint8_t doReset, uint8_t *tran_buf, uint8_t tran_len)
+bool oneWireBlock(bool doReset, uint8_t *tran_buf, uint8_t tran_len)
 {
     uint8_t i;
     //
@@ -494,7 +494,7 @@ AUTHOR: jassimoes
 COMMENTS:
 
 *******************************************************************************/
-uint8_t oneWireWriteMemory(uint8_t *buf, uint32_t ln, uint32_t adr)
+bool oneWireWriteMemory(uint8_t *buf, uint32_t ln, uint32_t adr)
 {
     //-------------------------------------------------//
     // write to scratch and then copy
@@ -520,7 +520,7 @@ COMMENTS:
 Only valid for DS1921G,H,Z
 
 *******************************************************************************/
-uint8_t oneWireCopyScratchpad(uint32_t ln, uint32_t adr)
+bool oneWireCopyScratchpad(uint32_t ln, uint32_t adr)
 {
     // local variables
     uint8_t i;
@@ -564,7 +564,7 @@ COMMENTS:
 Only valid for DS1921G,H,Z
 
 *******************************************************************************/
-uint8_t oneWireWriteScratchpad(uint8_t *buf, uint32_t ln, uint32_t adr)
+bool oneWireWriteScratchpad(uint8_t *buf, uint32_t ln, uint32_t adr)
 {
     uint8_t i;
     uint8_t pbuf[40];
@@ -643,7 +643,7 @@ Only valid for DS1921G,H,Z
 Simplification of addressing using SKIP ROM
 
 *******************************************************************************/
-uint8_t oneWireReadPage(uint32_t start_pg, uint8_t *finalbuf)
+bool oneWireReadPage(uint32_t start_pg, uint8_t *finalbuf)
 {
     uint32_t lastcrc16;
     uint32_t len, i;
@@ -721,8 +721,8 @@ DESCRIPTION
           block.
  buff     byte array containing data that was read
 
- @return - returns '0' if the read page wasn't completed.
-                   '1' if the operation is complete.
+ @return - returns false if the read page wasn't completed.
+                   true if the operation is complete.
 
 
 USAGE EXAMPLES:
@@ -732,7 +732,7 @@ AUTHOR: jassimoes
 COMMENTS:
 
 *******************************************************************************/
-uint8_t oneWireReadPageCRCEE77(uint32_t page, uint8_t *buff)
+bool oneWireReadPageCRCEE77(uint32_t page, uint8_t *buff)
 {
     uint8_t i, send_len = 0, lsCRC16;
     uint8_t raw_buf[15];
@@ -851,9 +851,9 @@ uint8_t oneWireReadPageCRCEE77(uint32_t page, uint8_t *buff)
 // 'alarmOnly' - TRUE (1) the find alarm command 0xEC is
 //                sent instead of the normal search command 0xF0
 //
-// Returns:   TRUE (1) : when a 1-Wire device was found and it's
+// Returns:   true : when a 1-Wire device was found and it's
 //                       Serial Number placed in the global SerialNum
-//            FALSE (0): There are no devices on the 1-Wire Net.
+//            false: There are no devices on the 1-Wire Net.
 bool oneWireFindFirst(bool doReset, bool alarmOnly)
 {
     // reset the search state
@@ -869,22 +869,22 @@ bool oneWireFindFirst(bool doReset, bool alarmOnly)
 ** NAME: oneWireFindNext *******************************************************
 ********************************************************************************/
 // The 'oneWireFindNext' function does a general search.
-// This function continues from the previos search state. The search state
+// This function continues from the previous search state. The search state
 // can be reset by using the 'oneWireFindFirst' function.
 // This function contains one parameter 'alarmOnly'.
-// When 'alarmOnly' is TRUE (1) the find alarm command
+// When 'alarmOnly' is true the find alarm command
 // 0xEC is sent instead of the normal search command 0xF0.
 // Using the find alarm command 0xEC will limit the search to only
 // 1-Wire devices that are in an 'alarm' state.
 //
-// 'doReset'   - TRUE (1) perform reset before search, FALSE (0) do not
+// 'doReset'   - true : perform reset before search, false : do not
 //                perform reset before search.
-// 'alarmOnly' - TRUE (1) the find alarm command 0xEC is
+// 'alarmOnly' - true : the find alarm command 0xEC is
 //                sent instead of the normal search command 0xF0
 //
-// Returns:   TRUE (1) : when a 1-Wire device was found and it's
+// Returns:   true : when a 1-Wire device was found and it's
 //                       Serial Number placed in the global SerialNum
-//            FALSE (0): when no new device was found.  Either the
+//            false: when no new device was found.  Either the
 //                       last search was the last device or there
 //                       are no devices on the 1-Wire Net.
 bool oneWireFindNext(bool doReset, bool alarmOnly)

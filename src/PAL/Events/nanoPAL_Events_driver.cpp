@@ -8,7 +8,7 @@
 
 PalEventDriver g_palEventDriver;
 
-bool PalEventDriver::s_initialized = FALSE;
+bool PalEventDriver::s_initialized = false;
 
 HRESULT PalEventDriver::Initialize()
 {
@@ -25,7 +25,7 @@ HRESULT PalEventDriver::Uninitialize()
 {
     if (PalEventDriver::s_initialized)
     {
-        PalEventDriver::s_initialized = FALSE;
+        PalEventDriver::s_initialized = false;
 
         /// Remove all nodes.
         g_palEventDriver.listenerList.Initialize();
