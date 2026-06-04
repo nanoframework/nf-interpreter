@@ -157,8 +157,8 @@ start_pass_huff(j_compress_ptr cinfo, bool gather_statistics)
         {
             /* Compute derived values for Huffman tables */
             /* We may do this more than once for a table, but it's not expensive */
-            jpeg_make_c_derived_tbl(cinfo, TRUE, dctbl, &entropy->dc_derived_tbls[dctbl]);
-            jpeg_make_c_derived_tbl(cinfo, FALSE, actbl, &entropy->ac_derived_tbls[actbl]);
+            jpeg_make_c_derived_tbl(cinfo, true, dctbl, &entropy->dc_derived_tbls[dctbl]);
+            jpeg_make_c_derived_tbl(cinfo, false, actbl, &entropy->ac_derived_tbls[actbl]);
         }
         /* Initialize DC predictions to 0 */
         entropy->saved.last_dc_val[ci] = 0;

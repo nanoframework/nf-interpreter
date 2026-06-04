@@ -512,7 +512,7 @@ bool Sockets_LWIP_Driver::InitializeMulticastDiscovery()
     sockAddr.sin_addr.S_un.S_addr = SOCK_htonl(SOCK_INADDR_ANY);
 
     // UDP socket is easier in our scenario because it isn't session based
-    g_Sockets_LWIP_Driver.m_multicastSocket = Socket(SOCK_AF_INET, SOCK_SOCK_DGRAM, SOCK_IPPROTO_UDP, false;
+    g_Sockets_LWIP_Driver.m_multicastSocket = Socket(SOCK_AF_INET, SOCK_SOCK_DGRAM, SOCK_IPPROTO_UDP, false);
     SOCKET_CHECK_RESULT(g_Sockets_LWIP_Driver.m_multicastSocket);
 
     // set sock option for multicast
@@ -640,7 +640,7 @@ void Sockets_LWIP_Driver::MulticastDiscoveryRespond(void *arg)
             // info.macAddressLen = current.macAddressLen;
             // memcpy( &info.macAddressBuffer[0], &current.macAddressBuffer[0], current.macAddressLen );
 
-            sock = Socket(SOCK_AF_INET, SOCK_SOCK_DGRAM, SOCK_IPPROTO_UDP, false;
+            sock = Socket(SOCK_AF_INET, SOCK_SOCK_DGRAM, SOCK_IPPROTO_UDP, false);
             SOCKET_CHECK_RESULT(sock);
 
             memset(&sockAddr, 0, sizeof(sockAddr));
