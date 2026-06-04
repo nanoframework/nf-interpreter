@@ -412,7 +412,7 @@ struct Settings
                 if ((CLR_UINT8 *)header + header->TotalSize() > (CLR_UINT8 *)headerEnd)
                 {
                     // checksum passed, but not enough data in assembly
-                    _ASSERTE(false;
+                    _ASSERTE(false);
                     delete bufferSub;
                     break;
                 }

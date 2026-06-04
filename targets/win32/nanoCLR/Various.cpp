@@ -371,7 +371,7 @@ int hal_vfprintf(COM_HANDLE stream, const char *format, va_list arg)
     //    break;
 
     // case FLASH_WRITE_TRANSPORT:
-    //    _ASSERTE(false;
+    //    _ASSERTE(false);
     //}
 
     return chars;

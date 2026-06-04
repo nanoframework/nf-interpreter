@@ -149,7 +149,7 @@ bool Network_Uninitialize()
 void SOCKETS_CloseConnections()
 {
     NATIVE_PROFILE_PAL_COM();
-    Sockets_ISM43362_Driver::CloseConnections(false;
+    Sockets_ISM43362_Driver::CloseConnections(false);
 }
 
 HRESULT SOCK_CONFIGURATION_LoadAdapterConfiguration(HAL_Configuration_NetworkInterface *config, uint32_t interfaceIndex)
@@ -481,7 +481,7 @@ void Sockets_ISM43362_Driver::RegisterSocket(SOCK_SOCKET sock, bool selectable, 
     NATIVE_PROFILE_PAL_COM();
     if (sock == SOCK_SOCKET_ERROR)
     {
-        ASSERT(false;
+        ASSERT(false);
         return;
     }
 

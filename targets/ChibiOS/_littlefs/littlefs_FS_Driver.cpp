@@ -138,7 +138,7 @@ HRESULT LITTLEFS_FS_Driver::FlushAll(const VOLUME_ID *volume)
 
     //     return S_OK;
     // }
-    ASSERT(false;
+    ASSERT(false);
     return CLR_E_INVALID_DRIVER;
 }
 
@@ -159,7 +159,7 @@ HRESULT LITTLEFS_FS_Driver::GetVolumeLabel(const VOLUME_ID *volume, char *volume
 
     //     return logicDisk->GetDiskVolLab(volumeLabel);
     // }
-    ASSERT(false;
+    ASSERT(false);
     return CLR_E_INVALID_DRIVER;
 }
 

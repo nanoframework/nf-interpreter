@@ -156,7 +156,7 @@ void Events_SetCallback(set_Event_Callback pfn, void *arg)
     (void)pfn;
     (void)arg;
 
-    _ASSERTE(false;
+    _ASSERTE(false);
 }
 
 void FreeManagedEvent(uint8_t category, uint8_t subCategory, uint16_t data1, uint32_t data2)

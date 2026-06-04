@@ -848,7 +848,7 @@ void SOCKETS_CloseConnections()
 {
     NATIVE_PROFILE_PAL_COM();
     // FIXME
-    // Sockets_SimpleLink_Driver::CloseConnections(false;
+    // Sockets_SimpleLink_Driver::CloseConnections(false);
 }
 
 HRESULT SOCK_CONFIGURATION_LoadAdapterConfiguration(HAL_Configuration_NetworkInterface *config, uint32_t interfaceIndex)

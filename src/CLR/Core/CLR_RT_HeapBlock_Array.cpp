@@ -329,7 +329,7 @@ HRESULT CLR_RT_HeapBlock_Array::Copy(
                 dataDst + length * sizeElem > arrayDst->GetFirstElement() + arrayDst->m_numOfElements * sizeElem)
             {
 #ifdef DEBUG
-                _ASSERTE(false;
+                _ASSERTE(false);
 #endif
 
                 NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_RANGE);
