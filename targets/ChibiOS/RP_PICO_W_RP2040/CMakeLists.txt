@@ -9,25 +9,23 @@ FetchContent_GetProperties(chibios)
 include(binutils.common)
 include(binutils.ChibiOS)
 
-# shared RP2040 sources and include directory
-set(RP2040_COMMON "${CMAKE_SOURCE_DIR}/targets/ChibiOS/_RP2040")
-list(APPEND CMAKE_PREFIX_PATH "${RP2040_COMMON}")
-list(APPEND TARGET_CHIBIOS_COMMON_INCLUDE_DIRS "${RP2040_COMMON}")
-list(APPEND TARGET_CHIBIOS_COMMON_INCLUDE_DIRS "${RP2040_COMMON}/common")
+# RP2040 target-local sources and include directories
+list(APPEND CMAKE_PREFIX_PATH "${CMAKE_CURRENT_SOURCE_DIR}")
+list(APPEND CMAKE_PREFIX_PATH "${CMAKE_CURRENT_SOURCE_DIR}/common")
 
-# RP2040 flash driver and common sources from shared directory
-list(APPEND TARGET_CHIBIOS_COMMON_SOURCES "${RP2040_COMMON}/Target_BlockStorage_RP2040FlashDriver.c")
+list(APPEND TARGET_CHIBIOS_COMMON_INCLUDE_DIRS "${CMAKE_CURRENT_SOURCE_DIR}")
+list(APPEND TARGET_CHIBIOS_COMMON_INCLUDE_DIRS "${CMAKE_CURRENT_SOURCE_DIR}/common")
+
+list(APPEND TARGET_CHIBIOS_COMMON_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/Target_BlockStorage_RP2040FlashDriver.c")
 list(APPEND TARGET_CHIBIOS_COMMON_SOURCES "${RP2040_COMMON}/hal_uart_lld.c")
 
 # SMP support source (Pico W uses dual-core SMP)
 list(APPEND TARGET_CHIBIOS_COMMON_SOURCES "${chibios_SOURCE_DIR}/os/common/ports/ARMv6-M/smp/rp2/chcoresmp.c")
-list(APPEND TARGET_CHIBIOS_COMMON_SOURCES "${RP2040_COMMON}/target_stubs.cpp")
+list(APPEND TARGET_CHIBIOS_COMMON_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/target_stubs.cpp")
 
 # RP2040 RNG stub (ROSC-based, replaces STM32 RNG)
 list(APPEND TARGET_CHIBIOS_NANOCLR_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/target_rng.c")
 
-# target include directories
-list(APPEND TARGET_CHIBIOS_COMMON_INCLUDE_DIRS "${CMAKE_CURRENT_SOURCE_DIR}")
 list(APPEND TARGET_CHIBIOS_NANOCLR_INCLUDE_DIRS "${CMAKE_SOURCE_DIR}/targets/ChibiOS/_WiFi")
 list(APPEND TARGET_CHIBIOS_NANOCLR_INCLUDE_DIRS "${CMAKE_SOURCE_DIR}/targets/ChibiOS/_WiFi/cyw43")
 
@@ -68,9 +66,16 @@ nf_setup_target_build(
 if(USE_NETWORKING_OPTION AND TARGET_HAS_WIFI)
     foreach(CYW43_SRC ${CYW43_DRIVER_SOURCES})
         get_filename_component(CYW43_SRC_NAME ${CYW43_SRC} NAME)
-        if(CYW43_SRC_NAME MATCHES "^cyw43_")
+        if(CYW43_SRC_NAME STREQUAL "cyw43_ll.c")
+            # cyw43_ll.c is a very large file. GCC 15 changed -Og to keep more variables on
+            # the stack for debuggability, pushing function frames past the Thumb-1
+            # SP-relative ldr offset limit (1020 bytes). Force -Os -fno-inline to prevent
+            # this — same fix applied to hal_usb_lld.c for the same reason.
             set_source_files_properties(${CYW43_SRC} PROPERTIES COMPILE_FLAGS
-                "-Wno-error=shadow -Wno-error=return-type -Wno-error=implicit-function-declaration -Wno-error=type-limits -Wno-error=unused-parameter -Wno-error=missing-prototypes -Wno-error=missing-declarations -Wno-error=old-style-definition -Wno-error=undef")
+                "-Os -fno-inline -Wno-undef -Wno-error=shadow -Wno-error=return-type -Wno-error=implicit-function-declaration -Wno-error=type-limits -Wno-error=unused-parameter -Wno-error=missing-prototypes -Wno-error=missing-declarations -Wno-error=old-style-definition")
+        elseif(CYW43_SRC_NAME MATCHES "^cyw43_")
+            set_source_files_properties(${CYW43_SRC} PROPERTIES COMPILE_FLAGS
+                "-Wno-undef -Wno-error=shadow -Wno-error=return-type -Wno-error=implicit-function-declaration -Wno-error=type-limits -Wno-error=unused-parameter -Wno-error=missing-prototypes -Wno-error=missing-declarations -Wno-error=old-style-definition")
         endif()
     endforeach()
 endif()

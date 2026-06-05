@@ -9,19 +9,16 @@ FetchContent_GetProperties(chibios)
 include(binutils.common)
 include(binutils.ChibiOS)
 
-# shared RP2040 sources and include directory
-set(RP2040_COMMON "${CMAKE_SOURCE_DIR}/targets/ChibiOS/_RP2040")
-list(APPEND CMAKE_PREFIX_PATH "${RP2040_COMMON}")
-list(APPEND TARGET_CHIBIOS_COMMON_INCLUDE_DIRS "${RP2040_COMMON}")
-list(APPEND TARGET_CHIBIOS_COMMON_INCLUDE_DIRS "${RP2040_COMMON}/common")
+# RP2040 target-local sources and include directories
+list(APPEND CMAKE_PREFIX_PATH "${CMAKE_CURRENT_SOURCE_DIR}")
+list(APPEND CMAKE_PREFIX_PATH "${CMAKE_CURRENT_SOURCE_DIR}/common")
 
-# RP2040 flash driver and common sources from shared directory
-list(APPEND TARGET_CHIBIOS_COMMON_SOURCES "${RP2040_COMMON}/Target_BlockStorage_RP2040FlashDriver.c")
-list(APPEND TARGET_CHIBIOS_COMMON_SOURCES "${RP2040_COMMON}/hal_uart_lld.c")
-list(APPEND TARGET_CHIBIOS_COMMON_SOURCES "${RP2040_COMMON}/target_stubs.cpp")
-
-# target include directories
 list(APPEND TARGET_CHIBIOS_COMMON_INCLUDE_DIRS "${CMAKE_CURRENT_SOURCE_DIR}")
+list(APPEND TARGET_CHIBIOS_COMMON_INCLUDE_DIRS "${CMAKE_CURRENT_SOURCE_DIR}/common")
+
+list(APPEND TARGET_CHIBIOS_COMMON_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/Target_BlockStorage_RP2040FlashDriver.c")
+list(APPEND TARGET_CHIBIOS_COMMON_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/target_stubs.cpp")
+list(APPEND TARGET_CHIBIOS_COMMON_SOURCES "${RP2040_COMMON}/hal_uart_lld.c")
 
 nf_setup_target_build(
     HAS_NANOBOOTER

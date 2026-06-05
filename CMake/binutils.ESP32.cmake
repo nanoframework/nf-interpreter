@@ -602,7 +602,9 @@ macro(nf_add_idf_as_library)
 
     # Load any required Components from Component registry
     # Must be done before "tools/cmake/idf.cmake" 
-    if(ESP32_USB_CDC)
+
+    # Load tinyusb for esp32s2 series if USB CDC transport is enabled
+    if(${TARGET_SERIES_SHORT} STREQUAL "esp32s2" AND NF_WP_TRANSPORT_USB_CDC)
         # v0.19.0~2
         nf_install_idf_component_from_registry(tinyusb dda61643-82de-40f9-86f4-4f3d9b1cb008) 
         # v2.1.1
@@ -738,8 +740,8 @@ macro(nf_add_idf_as_library)
         list(APPEND IDF_LIBRARIES_TO_ADD idf::openthread)
     endif()
 
-    # handle specifics for ESP32S2/S3 series
-    if(${TARGET_SERIES_SHORT} STREQUAL "esp32s2" OR ${TARGET_SERIES_SHORT} STREQUAL "esp32s3")
+    # handle specifics for ESP32S2 series
+    if(${TARGET_SERIES_SHORT} STREQUAL "esp32s2")
 
         # need to read the supplied SDK CONFIG file and replace the appropriate option
         file(READ
@@ -747,9 +749,10 @@ macro(nf_add_idf_as_library)
             SDKCONFIG_DEFAULT_CONTENTS
         )
 
-        if(ESP32_USB_CDC)
+        # For ESP32S2 series we need to enable the USB CDC support in tinyUSB component as no native USB/jtag support
+        if(NF_WP_TRANSPORT_USB_CDC)
 
-            # add IDF components specific to ESP32S2/S3 series
+            # add IDF components specific to ESP32S2 series
             # They have to be added in a specific order so they compile/link ok
             list(APPEND IDF_COMPONENTS_TO_ADD tinyusb) 
             list(APPEND IDF_COMPONENTS_TO_ADD esp_tinyusb) 
@@ -865,6 +868,18 @@ macro(nf_add_idf_as_library)
         set(CMAKE_DISABLE_SOURCE_CHANGES ON)
     else()
         message(STATUS "Using default XTAL frequency")
+    endif()
+
+    # Workaround for MODLOG_N implicit-declaration error with GCC 15+ in NimBLE debug builds.
+    # NimBLE defines log-level names as integers (DEBUG=1, INFO=2, ...). When these are used as
+    # the level argument to MODLOG_DFLT(), they expand to their numeric values before the ## paste
+    # in modlog.h, producing e.g. MODLOG_1 which is not defined. GCC 15 turns that implicit-
+    # function-declaration into a hard error. The compat header provides silent no-op fallbacks.
+    if(HAL_USE_BLE_OPTION AND (CMAKE_BUILD_TYPE STREQUAL "Debug" OR CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo"))
+        idf_build_set_property(COMPILE_OPTIONS
+            "-include${CMAKE_SOURCE_DIR}/targets/ESP32/_include/nimble_modlog_compat.h"
+            APPEND
+        )
     endif()
 
     # create IDF static libraries
@@ -1044,7 +1059,7 @@ macro(nf_add_idf_as_library)
     endif()    
 
     # add tinyusb dependencies 
-    if(ESP32_USB_CDC)
+    if(NF_WP_TRANSPORT_USB_CDC AND ${TARGET_SERIES_SHORT} STREQUAL "esp32s2")
         nf_add_tinyusb_component()
     endif()    
 

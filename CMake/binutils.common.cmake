@@ -672,7 +672,8 @@ macro(nf_setup_target_build_common)
 
         # need to unset several flags for MbedTLS to compile correctly
         target_compile_options(mbedtls PRIVATE -Wno-undef -Wno-error=unused-function -Wno-error=discarded-qualifiers -Wno-error=unused-parameter)
-        target_compile_options(mbedcrypto PRIVATE -Wno-undef -Wno-error=unused-function -Wno-error=discarded-qualifiers -Wno-error=unused-parameter)
+        # Mbed TLS bignum ARM inline assembly can exceed available registers at -O0.
+        target_compile_options(mbedcrypto PRIVATE $<$<CONFIG:Debug>:-Og> -Wno-undef -Wno-error=unused-function -Wno-error=discarded-qualifiers -Wno-error=unused-parameter)
         target_compile_options(mbedx509 PRIVATE -Wno-undef -Wno-error=unused-function -Wno-error=discarded-qualifiers -Wno-error=unused-parameter)
 
     endif()
@@ -869,9 +870,11 @@ function(nf_add_lwip_library)
     endif()
 
     ########################################################################
-    # add lwipdocs target, just to keep cmake happy
-    # after moving to a more recent lwIP versions this is not needed anymore
-    add_custom_target(lwipdocs)
+    # add lwipdocs target, just to keep cmake happy when Doxygen is not found
+    # (newer lwIP versions create this target themselves when Doxygen is present)
+    if(NOT TARGET lwipdocs)
+        add_custom_target(lwipdocs)
+    endif()
     ########################################################################
 
 endfunction()

@@ -61,7 +61,7 @@ jobs:
   ##############################
   - job: Check_Build_Options
     pool:
-      vmImage: "windows-2022"
+      vmImage: "windows-latest"
 
     variables:
       DOTNET_NOLOGO: true
@@ -89,21 +89,21 @@ jobs:
           }
           else
           {
-            # get commit details, if this is a PR
+            # get PR details, if this is a PR
             if($env:System_PullRequest_PullRequestId -ne $null)
             {
               Write-Host "##[command] **This is a PR build**"
 
-              $commit = Invoke-RestMethod -Uri "https://api.github.com/repos/nanoframework/nf-interpreter/commits/$(Build.SourceVersion)" -Header @{"Authorization"="$auth"} -ContentType "application/json" -Method GET
+              $pr = Invoke-RestMethod -Uri "https://api.github.com/repos/nanoframework/nf-interpreter/pulls/$env:System_PullRequest_PullRequestNumber" -Header @{"Authorization"="$auth"} -ContentType "application/json" -Method GET
 
-              # check if this is a version update commit, if so, skip build
-              if( ($commit.commit.author.name -eq "nfbot") -and ($commit.commit.message -like "*[version update]*") )
+              # check if this is a version update PR, if so, skip build
+              if( ($pr.user.login -eq "nfbot") -and ($pr.title -like "*[version update]*") )
               {
                 Write-Host "##[command] **version update commit, skipping build**"
                 echo "##vso[task.setvariable variable=SKIP_BUILD;isOutput=true]true"
               }
               # check if this is a PR with Code style fixes, if so, skip build
-              elseif( ($commit.commit.author.name -eq "nfbot") -and ($commit.commit.message -like "*Automated fix of code style*") )
+              elseif( ($pr.user.login -eq "nfbot") -and ( ($pr.title -like "*Code style fixes*") -or ($pr.body -like "*Automated fix of code style*") ) )
               {
                 Write-Host "##[command] **code style commit, skipping build**"
                 echo "##vso[task.setvariable variable=SKIP_BUILD;isOutput=true]true"
@@ -114,7 +114,7 @@ jobs:
               }
 
               # check if Unit Tests for mscorlib should be run
-              if(($commit.commit.message -like "*[run mscorlib tests]*") -or ($commit.commit.message -match "Tested against nanoframework/CoreLibrary#(\d+)"))
+              if(($pr.title -match "\[run mscorlib tests\]") -or ($pr.body -match "\[run mscorlib tests\]") -or ($pr.body -match "Tested against nanoframework/CoreLibrary#(\d+)"))
               {
                 Write-Host "##[command] **mscorlib tests are to be runned**"
                 echo "##vso[task.setvariable variable=RUN_MSCORLIB_TESTS;isOutput=true]true"
@@ -186,6 +186,7 @@ jobs:
               echo "##vso[task.setvariable variable=BUILD_TI;isOutput=true]false"
               echo "##vso[task.setvariable variable=BUILD_THREADX;isOutput=true]false"
               echo "##vso[task.setvariable variable=BUILD_WIN32;isOutput=true]false"  
+              echo "##vso[task.setvariable variable=BUILD_POSIX;isOutput=true]false"  
               echo "##vso[task.setvariable variable=BUILD_NANOCLR_CLI;isOutput=true]false"  
               echo "##vso[task.setvariable variable=BUILD_ALL;isOutput=true]false"  
 
@@ -258,6 +259,14 @@ jobs:
                   echo "##vso[task.setvariable variable=BUILD_WIN32;isOutput=true]true"
 
                   Write-host "##[command] Building nanoCLR target"
+              }
+
+              if( ($files.where{$_.Contains('targets/posix')}).Count -gt 0)
+              {
+                  # files at POSIX folder
+                  echo "##vso[task.setvariable variable=BUILD_POSIX;isOutput=true]true"
+
+                  Write-host "##[command] Building POSIX nanoCLR target"
               }
               
               if( 
@@ -354,7 +363,8 @@ jobs:
           eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_FREERTOS'], true),
           eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_TI'], true),
           eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_THREADX'], true),
-          eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_WIN32'], true)
+          eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_WIN32'], true),
+          eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_POSIX'], true)
         )
       )
 
@@ -362,7 +372,7 @@ jobs:
       - Check_Build_Options
 
     pool:
-      vmImage: "windows-2022"
+      vmImage: "windows-latest"
 
     steps:
       - checkout: self
@@ -399,7 +409,7 @@ jobs:
       - Check_Code_Style
 
     pool:
-      vmImage: "windows-2022"
+      vmImage: "windows-latest"
 
     strategy:
       matrix:
@@ -422,7 +432,7 @@ jobs:
     variables:
       DOTNET_NOLOGO: true
       # creates a counter and assigns it to the revision variable
-      REVISION: $[counter('STM32_1_14_0_versioncounter', 0)]
+      REVISION: $[counter('STM32_1_17_0_versioncounter', 0)]
       HelperPackageVersion: $[counter('HelperPackageVersioncounter', 0)]
       TargetPlatform: "stm32"
 
@@ -468,7 +478,7 @@ jobs:
       - Check_Code_Style
 
     pool:
-      vmImage: "windows-2022"
+      vmImage: "windows-latest"
 
     strategy:
       matrix:
@@ -486,7 +496,7 @@ jobs:
     variables:
       DOTNET_NOLOGO: true
       # creates a counter and assigns it to the revision variable
-      REVISION: $[counter('RP_1_0_0_versioncounter', 0)]
+      REVISION: $[counter('RP_1_17_0_versioncounter', 0)]
       HelperPackageVersion: $[counter('HelperPackageVersioncounter', 0)]
       TargetPlatform: "rp"
 
@@ -529,7 +539,7 @@ jobs:
       - Check_Code_Style
 
     pool:
-      vmImage: "windows-2022"
+      vmImage: "windows-latest"
 
     # there is only a single ESP32 target, but this is already config as a matrix to make it easy to add new ones
     strategy:
@@ -561,14 +571,14 @@ jobs:
           PackageName: ESP32_C3
           CMakePreset: ESP32_C3
 
-        ESP32_C5_THREAD_USB:
+        ESP32_C5_THREAD:
           TargetBoard: ESP32_C5
           TargetSeries: "esp32c5"
           BuildOptions:
           IDF_Target: esp32c5
-          TargetName: ESP32_C5_THREAD_USB
-          PackageName: ESP32_C5_THREAD_USB
-          CMakePreset: ESP32_C5_THREAD_USB
+          TargetName: ESP32_C5_THREAD
+          PackageName: ESP32_C5_THREAD
+          CMakePreset: ESP32_C5_THREAD
 
         ESP32_C6_THREAD:
           TargetBoard: ESP32_C6
@@ -579,14 +589,14 @@ jobs:
           PackageName: ESP32_C6_THREAD
           CMakePreset: ESP32_C6_THREAD
 
-        ESP32_C61_USB:
+        ESP32_C61:
           TargetBoard: ESP32_C61
           TargetSeries: "esp32c61"
           BuildOptions:
           IDF_Target: esp32c61
-          TargetName: ESP32_C61_USB
-          PackageName: ESP32_C61_USB
-          CMakePreset: ESP32_C61_USB
+          TargetName: ESP32_C61
+          PackageName: ESP32_C61
+          CMakePreset: ESP32_C61
 
         ESP32_H2_THREAD:
           TargetBoard: ESP32_H2
@@ -597,37 +607,37 @@ jobs:
           PackageName: ESP32_H2_THREAD
           CMakePreset: ESP32_H2_THREAD
 
-        ESP32_S3_ALL:
+        ESP32_S3_QUAD:
           TargetBoard: ESP32_S3
           TargetSeries: "esp32s3"
           BuildOptions:
           IDF_Target: esp32s3
-          TargetName: ESP32_S3_ALL
-          PackageName: ESP32_S3_ALL
-          CMakePreset: ESP32_S3_ALL
+          TargetName: ESP32_S3_QUADL
+          PackageName: ESP32_S3_QUAD
+          CMakePreset: ESP32_S3_QUAD
 
-        ESP32_ETHERNET_KIT_1.2:
-          TargetBoard: ESP32
-          TargetSeries: "esp32"
+        ESP32_S3_OCTAL:
+          TargetBoard: ESP32_S3
+          TargetSeries: "esp32s3"
           BuildOptions:
-          IDF_Target: esp32
-          TargetName: ESP32_ETHERNET_KIT_1.2
-          PackageName: ESP32_ETHERNET_KIT_1.2
-          CMakePreset: ESP32_ETHERNET_KIT_1.2
+          IDF_Target: esp32s3
+          TargetName: ESP32_S3_OCTAL
+          PackageName: ESP32_S3_OCTAL
+          CMakePreset: ESP32_S3_OCTAL
 
-        ESP32_P4_UART:
+        ESP32_P4_REV_LESS3:
           TargetBoard: ESP32_P4
           TargetSeries: "esp32p4"
           BuildOptions:
           IDF_Target: esp32p4
-          TargetName: ESP32_P4_UART
-          PackageName: ESP32_P4_UART
-          CMakePreset: ESP32_P4_UART
+          TargetName: ESP32_P4_REV_LESS3
+          PackageName: ESP32_P4_REV_LESS3
+          CMakePreset: ESP32_P4_REV_LESS3
 
     variables:
       DOTNET_NOLOGO: true
       # creates a counter and assigns it to the revision variable
-      REVISION: $[counter('ESP32_1_14_0_versioncounter', 0)]
+      REVISION: $[counter('ESP32_1_17_0_versioncounter', 0)]
       IDF_PATH: "D:/a/1/s/esp-idf"
       PIP_CACHE_DIR: $(Pipeline.Workspace)/.pip
       TargetPlatform: "esp32"
@@ -698,7 +708,7 @@ jobs:
       - Check_Code_Style
 
     pool:
-      vmImage: "windows-2022"
+      vmImage: "windows-latest"
 
     strategy:
       matrix:
@@ -712,7 +722,7 @@ jobs:
     variables:
       DOTNET_NOLOGO: true
       # creates a counter and assigns it to the revision variable
-      REVISION: $[counter('NXP_1_14_0_versioncounter', 0)]
+      REVISION: $[counter('NXP_1_17_0_versioncounter', 0)]
       GIT_LFS_SKIP_SMUDGE: 1
       TargetPlatform: "freertos"
 
@@ -757,7 +767,7 @@ jobs:
       - Check_Code_Style
 
     pool:
-      vmImage: "windows-2022"
+      vmImage: "windows-latest"
 
     strategy:
       matrix:
@@ -793,7 +803,7 @@ jobs:
     variables:
       DOTNET_NOLOGO: true
       # creates a counter and assigns it to the revision variable
-      REVISION: $[counter('TI_1_14_0_versioncounter', 0)]
+      REVISION: $[counter('TI_1_17_0_versioncounter', 0)]
       HelperPackageVersion: $[counter('HelperPackageVersioncounter', 0)]
       TargetPlatform: "ti_simplelink"
 
@@ -837,7 +847,7 @@ jobs:
       - Check_Code_Style
 
     pool:
-      vmImage: "windows-2022"
+      vmImage: "windows-latest"
 
     strategy:
       matrix:
@@ -867,7 +877,7 @@ jobs:
 
     variables:
       # creates a counter and assigns it to the revision variable
-      REVISION: $[counter('THREADX_1_14_0_versioncounter', 0)]
+      REVISION: $[counter('THREADX_1_17_0_versioncounter', 0)]
       HelperPackageVersion: $[counter('HelperPackageVersioncounter', 0)]
       TargetPlatform: "efm32"
 
@@ -913,7 +923,7 @@ jobs:
       - Check_Code_Style
 
     pool:
-      vmImage: "windows-2022"
+      vmImage: "windows-latest"
 
     variables:
       - group: sign-client-credentials
@@ -921,7 +931,7 @@ jobs:
         value: true
       # creates a counter and assigns it to the revision variable
       - name: REVISION
-        value: $[counter('WIN32_1_14_0_versioncounter', 0)]
+        value: $[counter('WIN32_1_17_0_versioncounter', 0)]
       - name: LITTLEFS_PATH
         value: "D:/a/1/s/littlefs"
 
@@ -1113,6 +1123,184 @@ jobs:
       - template: azure-pipelines-templates/publish-nanoclr.yml
 
   #################
+  # POSIX host target (macOS + Linux)
+  - job: Build_POSIX_nanoCLR
+    strategy:
+      matrix:
+        macOS_arm64:
+          vmImage: 'macos-14'
+          POSIX_RID: osx-arm64
+        macOS_x64:
+          vmImage: 'macOS-latest'
+          POSIX_RID: osx-x64
+        Linux_x64:
+          vmImage: 'ubuntu-22.04'
+          POSIX_RID: linux-x64
+        Linux_arm64:
+          vmImage: 'ubuntu-22.04'
+          POSIX_RID: linux-arm64
+      maxParallel: 4
+    condition: >-
+      or(
+        and(
+          succeeded('Check_Code_Style'),
+          ne( dependencies.Check_Build_Options.outputs['BuildOptions.SKIP_BUILD'], true ),
+          or(
+            eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ALL'], true),
+            eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_POSIX'], true),
+            eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_NANOCLR_CLI'], true)
+          )
+        ),
+        and(
+          eq(variables['Build.Reason'], 'Manual'),
+          or(
+            eq(variables['BUILD_ALL__'], 'true'),
+            eq(variables['BUILD_POSIX__'], 'true'),
+            eq(variables['BUILD_NANOCLR_CLI__'], 'true')
+          )
+        )
+      )
+
+    dependsOn:
+      - Check_Build_Options
+      - Check_Code_Style
+
+    pool:
+      vmImage: $(vmImage)
+
+    variables:
+      - group: sign-client-credentials
+      - name: REVISION
+        value: $[counter('POSIX_1_17_0_versioncounter', 0)]
+
+    steps:
+      - checkout: self
+
+      - task: UseDotNet@2
+        condition: and(succeeded(), eq(variables['Agent.OS'], 'Darwin'))
+        displayName: Install .NET SDK for NBGV
+        inputs:
+          packageType: sdk
+          version: 8.0.x
+
+      - task: DotNetCoreCLI@2
+        condition: and(succeeded(), eq(variables['Agent.OS'], 'Darwin'))
+        displayName: Install NBGV tool
+        inputs:
+          command: custom
+          custom: tool
+          arguments: install nbgv -g
+
+      - template: azure-pipelines-templates/nb-gitversioning.yml
+
+      - bash: |
+          set -euo pipefail
+          if [[ "${BUILD_SOURCEBRANCH}" == *"develop"* || "${BUILD_SOURCEBRANCH}" == *"release"* || "${FORCEUPLOAD}" == "true" ]]; then
+            echo "##vso[task.setvariable variable=CLOUDSMITH_REPO]nanoframework-images-dev"
+            echo "##vso[task.setvariable variable=POSIX_PACKAGE_VERSION]$(NBGV_SimpleVersion)-preview.$(TARGET_BUILD_COUNTER)"
+          else
+            echo "##vso[task.setvariable variable=CLOUDSMITH_REPO]nanoframework-images"
+            echo "##vso[task.setvariable variable=POSIX_PACKAGE_VERSION]$(NBGV_SimpleVersion).$(TARGET_BUILD_COUNTER)"
+          fi
+        displayName: Set Cloudsmith repo path
+        env:
+          BUILD_SOURCEBRANCH: $(Build.SourceBranch)
+          FORCEUPLOAD: $(ForceUpload)
+
+      - bash: |
+          set -euo pipefail
+
+          # Derive cmake arch and library extension from the POSIX_RID matrix variable.
+          case "$(POSIX_RID)" in
+            osx-arm64|linux-arm64) NANO_ARCH=arm64  ; LIB_EXT=dylib ;;
+            osx-x64)               NANO_ARCH=x86_64 ; LIB_EXT=dylib ;;
+            linux-x64)             NANO_ARCH=x86_64 ; LIB_EXT=so    ;;
+          esac
+          # Correct extension for Linux regardless of arch.
+          [[ "$(POSIX_RID)" == linux-* ]] && LIB_EXT=so
+
+          # Install ninja if not present (Linux agents).
+          if ! command -v ninja >/dev/null 2>&1; then
+            sudo apt-get install -y ninja-build
+          fi
+
+          # Install arm64 cross-compiler when building linux-arm64 on an x86_64 agent.
+          TOOLCHAIN_ARG=""
+          if [ "$(POSIX_RID)" = "linux-arm64" ]; then
+            curl -fsSL "https://developer.arm.com/-/media/Files/downloads/gnu/15.2.rel1/binrel/arm-gnu-toolchain-15.2.rel1-x86_64-aarch64-none-linux-gnu.tar.xz" \
+              | sudo tar -xJ -C /opt
+            export PATH="/opt/arm-gnu-toolchain-15.2.rel1-x86_64-aarch64-none-linux-gnu/bin:$PATH"
+            TOOLCHAIN_ARG="-DCMAKE_TOOLCHAIN_FILE=$(pwd)/targets/posix/toolchain-aarch64-linux-gnu.cmake"
+          fi
+
+          echo "RID=$(POSIX_RID)  ARCH=${NANO_ARCH}  LIB_EXT=${LIB_EXT}"
+
+          cmake -S targets/posix -B build/posix -G Ninja \
+            -DBUILD_VERSION=$(NBGV_VersionMajor).$(NBGV_VersionMinor).$(NBGV_BuildNumber).$(TARGET_BUILD_COUNTER) \
+            -DNANO_POSIX_ARCH=${NANO_ARCH} \
+            -DNANO_POSIX_ENABLE_SMOKE=ON \
+            ${TOOLCHAIN_ARG}
+          cmake --build build/posix
+          # Smoke-run the test binary only when its architecture matches the runner.
+          # For cross-compiled builds (e.g. osx-x64 on an arm64 agent) we skip the run
+          # but the library artifact is still staged and published.
+          case "$(uname -m)" in
+            arm64|aarch64) HOST_CANONICAL=arm64  ;;
+            x86_64)        HOST_CANONICAL=x86_64 ;;
+            *)             HOST_CANONICAL="$(uname -m)" ;;
+          esac
+          if [ "${HOST_CANONICAL}" = "${NANO_ARCH}" ]; then
+            ./build/posix/bin/nanoFramework.nanoCLR.test | tee build/posix/smoke.log
+            if ! grep -Eq '[0-9]+\.[0-9]+\.[0-9]+' build/posix/smoke.log; then
+              echo "ERROR: smoke output validation failed, expected semantic version in output."
+              exit 1
+            fi
+            CLR_VERSION=$(grep -oE '[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+' build/posix/smoke.log | head -1)
+          else
+            echo "Skipping smoke run: host=$(uname -m) (${HOST_CANONICAL}), target=${NANO_ARCH} (cross-compiled binary)."
+            CLR_VERSION="0.0.0.0"
+          fi
+          echo "Detected CLR version: ${CLR_VERSION}"
+          echo "##vso[task.setvariable variable=POSIX_CLR_VERSION]${CLR_VERSION}"
+          echo "##vso[task.setvariable variable=POSIX_LIB_EXT]${LIB_EXT}"
+
+          # Stage under runtimes/{rid}/native/ so the CLI pack job can collect all RIDs.
+          STAGING="$(Build.ArtifactStagingDirectory)/runtimes/$(POSIX_RID)/native"
+          mkdir -p "${STAGING}"
+          cp "build/posix/lib/nanoFramework.nanoCLR.${LIB_EXT}" "${STAGING}/"
+        displayName: Build and smoke run POSIX nanoCLR
+
+      - task: PublishPipelineArtifact@1
+        condition: succeeded()
+        displayName: Publish POSIX nanoCLR artifact
+        inputs:
+          targetPath: "$(Build.ArtifactStagingDirectory)"
+          artifactName: nanoclr_posix_$(POSIX_RID)
+          artifactType: pipeline
+
+      - bash: |
+          set -euo pipefail
+          pip install --upgrade cloudsmith-cli --quiet
+          cloudsmith push raw net-nanoframework/$(CLOUDSMITH_REPO) \
+            "$(Build.ArtifactStagingDirectory)/runtimes/$(POSIX_RID)/native/nanoFramework.nanoCLR.$(POSIX_LIB_EXT)" \
+            --name "nanoCLR_$(POSIX_RID)" \
+            --version "$(POSIX_PACKAGE_VERSION)" \
+            --republish \
+            -k "$(CLOUDSMITH_KEY)"
+        condition: >-
+          and(
+            succeeded(),
+            or(
+              eq(variables['ForceUpload'], true),
+              and(
+                eq(variables['Build.SourceBranchName'], 'main'),
+                eq(variables['System.PullRequest.PullRequestId'], '')
+              )
+            )
+          )
+        displayName: Upload POSIX nanoCLR to Cloudsmith
+
+  #################
   # nanoCLR CLI tool
   - job: Build_nanoCLR_CLI
     condition: >-
@@ -1138,9 +1326,10 @@ jobs:
       - Check_Build_Options
       - Check_Code_Style
       - Build_WIN32_nanoCLR
+      - Build_POSIX_nanoCLR
 
     pool:
-      vmImage: "windows-2022"
+      vmImage: "windows-latest"
 
     variables:
       - group: sign-client-credentials
@@ -1222,13 +1411,44 @@ jobs:
             eq(variables['System.PullRequest.PullRequestId'], '')
           )
 
+      # Download all four POSIX native libraries and merge them into a single
+      # runtimes/{rid}/native/ staging tree that the pack step will consume.
+      # continueOnError=true so a skipped POSIX leg doesn't block the CLI pack.
+      - task: DownloadPipelineArtifact@2
+        displayName: 'Download POSIX artifact: osx-arm64'
+        continueOnError: true
+        inputs:
+          artifact: nanoclr_posix_osx-arm64
+          path: "$(Build.SourcesDirectory)/native-libs"
+
+      - task: DownloadPipelineArtifact@2
+        displayName: 'Download POSIX artifact: osx-x64'
+        continueOnError: true
+        inputs:
+          artifact: nanoclr_posix_osx-x64
+          path: "$(Build.SourcesDirectory)/native-libs"
+
+      - task: DownloadPipelineArtifact@2
+        displayName: 'Download POSIX artifact: linux-x64'
+        continueOnError: true
+        inputs:
+          artifact: nanoclr_posix_linux-x64
+          path: "$(Build.SourcesDirectory)/native-libs"
+
+      - task: DownloadPipelineArtifact@2
+        displayName: 'Download POSIX artifact: linux-arm64'
+        continueOnError: true
+        inputs:
+          artifact: nanoclr_posix_linux-arm64
+          path: "$(Build.SourcesDirectory)/native-libs"
+
       - task: MSBuild@1
         condition: succeeded()
         displayName: Pack nanoCLR CLI
         inputs:
           solution: "nf-interpreter/targets/netcore/nanoFramework.nanoCLR.CLI/nanoFramework.nanoCLR.CLI.csproj"
           platform: "Any CPU"
-          msbuildArguments: "/p:PublicRelease=true /t:pack /p:PackageOutputPath=$(Build.ArtifactStagingDirectory) "
+          msbuildArguments: "/p:PublicRelease=true /t:pack /p:PackageOutputPath=$(Build.ArtifactStagingDirectory) /p:NativeBinRoot=$(Build.SourcesDirectory)/native-libs/"
           configuration: "Release"
           maximumCpuCount: true
 
@@ -1260,6 +1480,14 @@ jobs:
           SourceFolder: "nf-interpreter/build/bin/Release"
           Contents: "nanoFramework.nanoCLR.dll"
           TargetFolder: "$(Build.ArtifactStagingDirectory)/nanoclr"
+
+      - task: PublishPipelineArtifact@1
+        condition: succeeded()
+        displayName: Publish nanoclr NuGet package
+        inputs:
+          targetPath: "$(Build.ArtifactStagingDirectory)"
+          artifactName: nanoclr_nuget
+          artifactType: pipeline
 
       - task: PublishPipelineArtifact@1
         condition: succeeded()
@@ -1319,7 +1547,7 @@ jobs:
       - Build_nanoCLR_CLI
 
     pool:
-      vmImage: "windows-2022"
+      vmImage: "windows-latest"
 
     variables:
       DOTNET_NOLOGO: true
@@ -1427,6 +1655,7 @@ jobs:
       - Build_TI_SimpleLink_targets
       - Build_ThreadX_targets
       - Build_WIN32_nanoCLR
+      - Build_POSIX_nanoCLR
       - Build_nanoCLR_CLI
       - Check_Code_Style
     condition: >-
@@ -1440,12 +1669,13 @@ jobs:
           failed('Build_TI_SimpleLink_targets'),
           failed('Build_ThreadX_targets'),
           failed('Build_WIN32_nanoCLR'),
+          failed('Build_POSIX_nanoCLR'),
           failed('Build_nanoCLR_CLI')
         )
       )
 
     pool:
-      vmImage: "windows-2022"
+      vmImage: "windows-latest"
 
     steps:
       - checkout: self

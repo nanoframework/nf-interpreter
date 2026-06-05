@@ -86,8 +86,8 @@
 #endif
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-// ARM & ESP32
-#if defined(PLATFORM_ARM) || defined(PLATFORM_ESP32)
+// ARM, ESP32 & POSIX host
+#if defined(PLATFORM_ARM) || defined(PLATFORM_ESP32) || defined(PLATFORM_POSIX_HOST)
 // #define NANOCLR_STRESS_GC
 // #define NANOCLR_GC_VERBOSE
 // #define NANOCLR_PROFILE_NEW
@@ -175,7 +175,7 @@
 #define ULONGLONGCONSTANT(v) (v##UI64)
 #endif
 
-#if defined(PLATFORM_ARM) | defined(PLATFORM_ESP32)
+#if defined(PLATFORM_ARM) || defined(PLATFORM_ESP32) || defined(PLATFORM_POSIX_HOST)
 #define PROHIBIT_ALL_CONSTRUCTORS(cls)                                                                                 \
   private:                                                                                                             \
     cls();                                                                                                             \
