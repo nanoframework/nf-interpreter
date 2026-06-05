@@ -65,9 +65,16 @@ nf_setup_target_build(
 if(USE_NETWORKING_OPTION AND TARGET_HAS_WIFI)
     foreach(CYW43_SRC ${CYW43_DRIVER_SOURCES})
         get_filename_component(CYW43_SRC_NAME ${CYW43_SRC} NAME)
-        if(CYW43_SRC_NAME MATCHES "^cyw43_")
+        if(CYW43_SRC_NAME STREQUAL "cyw43_ll.c")
+            # cyw43_ll.c is a very large file. GCC 15 changed -Og to keep more variables on
+            # the stack for debuggability, pushing function frames past the Thumb-1
+            # SP-relative ldr offset limit (1020 bytes). Force -Os -fno-inline to prevent
+            # this — same fix applied to hal_usb_lld.c for the same reason.
             set_source_files_properties(${CYW43_SRC} PROPERTIES COMPILE_FLAGS
-                "-Wno-error=shadow -Wno-error=return-type -Wno-error=implicit-function-declaration -Wno-error=type-limits -Wno-error=unused-parameter -Wno-error=missing-prototypes -Wno-error=missing-declarations -Wno-error=old-style-definition -Wno-error=undef")
+                "-Os -fno-inline -Wno-undef -Wno-error=shadow -Wno-error=return-type -Wno-error=implicit-function-declaration -Wno-error=type-limits -Wno-error=unused-parameter -Wno-error=missing-prototypes -Wno-error=missing-declarations -Wno-error=old-style-definition")
+        elseif(CYW43_SRC_NAME MATCHES "^cyw43_")
+            set_source_files_properties(${CYW43_SRC} PROPERTIES COMPILE_FLAGS
+                "-Wno-undef -Wno-error=shadow -Wno-error=return-type -Wno-error=implicit-function-declaration -Wno-error=type-limits -Wno-error=unused-parameter -Wno-error=missing-prototypes -Wno-error=missing-declarations -Wno-error=old-style-definition")
         endif()
     endforeach()
 endif()
