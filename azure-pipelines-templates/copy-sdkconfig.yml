@@ -4,7 +4,7 @@
 parameters:
   - name: repoDirectory
     type: string
-    default: $(Build.SourcesDirectory)\nf-interpreter
+    default: $(Build.SourcesDirectory)/nf-interpreter
 
 steps:
   - task: CopyFiles@2
@@ -18,5 +18,5 @@ steps:
       sourceFolder: "${{ parameters.repoDirectory }}"
       Contents: |
         sdkconfig
-      TargetFolder: '$(Build.ArtifactStagingDirectory)\$(TargetPublishName)_sdkconfig'
+      TargetFolder: '$(Build.ArtifactStagingDirectory)/$(TargetPublishName)_sdkconfig'
       ignoreMakeDirErrors: true

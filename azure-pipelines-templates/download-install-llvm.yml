@@ -6,39 +6,29 @@ steps:
     condition: ne(variables['System.PullRequest.PullRequestId'], '')
     displayName: Cache LLVM
     inputs:
-      key: "llvm_18_1_7_0 | llvmUpdateKey"
-      restoreKeys: llvmUpdateKey
-      path: $(Agent.TempDirectory)\llvm
+      key: "llvm_18_1_7_linux | llvmUpdateKey"
+      restoreKeys: llvmUpdateKey-linux
+      path: $(Agent.TempDirectory)/llvm
       cacheHitVar: LLVM_CACHE_RESTORED
 
-  - task: PowerShell@2
-    displayName: Downloading LLVM
+  - bash: |
+      mkdir -p $(Agent.TempDirectory)/llvm/bin
+      curl -fL \
+        "https://github.com/llvm/llvm-project/releases/download/llvmorg-18.1.7/clang+llvm-18.1.7-x86_64-linux-gnu-ubuntu-22.04.tar.xz" \
+        -o /tmp/llvm.tar.xz
+      # determine the top-level directory name inside the archive, then extract only clang-format
+      TARBALL_DIR=$(tar -tf /tmp/llvm.tar.xz | head -1 | cut -d'/' -f1)
+      tar -xf /tmp/llvm.tar.xz -C /tmp/ "$TARBALL_DIR/bin/clang-format"
+      mv "/tmp/$TARBALL_DIR/bin/clang-format" "$(Agent.TempDirectory)/llvm/bin/clang-format"
+      chmod +x "$(Agent.TempDirectory)/llvm/bin/clang-format"
+    displayName: Download clang-format
     condition: >-
       and(
         ne(variables['System.PullRequest.PullRequestId'], ''),
         ne(variables.LLVM_CACHE_RESTORED, 'true')
       )
-    inputs:
-      targetType: "inline"
-      script: |
-        $url = "https://github.com/llvm/llvm-project/releases/download/llvmorg-18.1.7/LLVM-18.1.7-win64.exe"
-        $output = "$(Agent.TempDirectory)\LLVM-18.1.7-win64.exe"
-        (New-Object Net.WebClient).DownloadFile($url, $output)
-      errorActionPreference: "stop"
-      failOnStderr: true
-
-  - task: ExtractFiles@1
-    displayName: Install LLVM
-    condition: >-
-      and(
-        ne(variables['System.PullRequest.PullRequestId'], ''),
-        ne(variables.LLVM_CACHE_RESTORED, 'true')
-      )
-    inputs:
-      archiveFilePatterns: '$(Agent.TempDirectory)\LLVM-18.1.7-win64.exe'
-      destinationFolder: '$(Agent.TempDirectory)\llvm'
 
   - script: |
-      echo ##vso[task.prependpath]$(Agent.TempDirectory)\llvm\bin
+      echo ##vso[task.prependpath]$(Agent.TempDirectory)/llvm/bin
     displayName: Add LLVM to PATH
     condition: ne(variables['System.PullRequest.PullRequestId'], '')

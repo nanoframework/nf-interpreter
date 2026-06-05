@@ -10,6 +10,6 @@ steps:
         failed()
       )    
     inputs:
-      targetPath: '$(Build.ArtifactStagingDirectory)\$(TargetPublishName)_sdkconfig'
+      targetPath: '$(Build.ArtifactStagingDirectory)/$(TargetPublishName)_sdkconfig'
       artifactName: $(TargetPublishName)_sdkconfig
       artifactType: pipeline

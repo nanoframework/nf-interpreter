@@ -24,12 +24,6 @@ steps:
       failOnStderr: true
 
   - task: PowerShell@2
-    displayName: Enable long paths
-    inputs:
-      targetType: "inline"
-      script: New-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\FileSystem" -Name "LongPathsEnabled" -Value 1 -PropertyType DWORD -Force
-
-  - task: PowerShell@2
     displayName: Add dummy cmake presets
     condition: ne(variables['Build.Repository.Name'], 'nanoframework/nf-Community-Targets')
     inputs:

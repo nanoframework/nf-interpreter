@@ -7,15 +7,15 @@ steps:
     displayName: Cache ESP32 tools
     inputs:
       key: 'esp32_tools | "$(IDF_TAG)"'
-      path: $(UserProfile)\.espressif\tools
+      path: $(Pipeline.Workspace)/.espressif/tools
       cacheHitVar: ESP32_TOOLS_CACHE_RESTORED
 
   # cache pip packages
   - task: Cache@2
     displayName: Cache pip packages
     inputs:
-      key: 'python | "$(Agent.OS)" | $(Agent.BuildDirectory)\s\esp-idf\tools\requirements\requirements.core.txt'
-      restoreKeys: python | "$(Agent.OS)" | $(Agent.BuildDirectory)\s\esp-idf\tools\requirements\requirements.core.txt
+      key: 'python | "$(Agent.OS)" | $(Agent.BuildDirectory)/s/esp-idf/tools/requirements/requirements.core.txt'
+      restoreKeys: python | "$(Agent.OS)" | $(Agent.BuildDirectory)/s/esp-idf/tools/requirements/requirements.core.txt
       path: $(PIP_CACHE_DIR)
       cacheHitVar: PIP_PACKAGES_RESTORED
 
@@ -26,79 +26,31 @@ steps:
       versionSpec: "3.11"
       addToPath: true
 
-  - task: PowerShell@2
-    displayName: Fix install.ps1
-    inputs:
-      targetType: "inline"
-      workingDirectory: $(Agent.BuildDirectory)\s\esp-idf
-      script: |
-        $filecontent = Get-Content('install.ps1')
-        attrib $file -r
-        $filecontent -replace '--features=${FEATURES}' , ' ' | Out-File 'install.ps1' -Encoding utf8
+  # run IDF installer
+  - bash: |
+      export IDF_TOOLS_PATH=$(Pipeline.Workspace)/.espressif
+      cd $(Agent.BuildDirectory)/s/esp-idf
+      ./install.sh all
+    displayName: Install IDF
+    condition: ne(variables.ESP32_TOOLS_CACHE_RESTORED, 'true')
 
-  # run IDF installers
-  - task: PowerShell@2
-    displayName: Install IDF (step 1)
-    inputs:
-      targetType: "filePath"
-      filePath: $(Agent.BuildDirectory)\s\esp-idf\install.ps1
-      workingDirectory: $(Agent.BuildDirectory)\s\esp-idf
+  - bash: |
+      python -m pip install -r $(Agent.BuildDirectory)/s/esp-idf/tools/requirements/requirements.core.txt
+    displayName: Install IDF pip requirements (step 1)
+    condition: ne(variables.PIP_PACKAGES_RESTORED, 'true')
 
-  - task: PowerShell@2
-    displayName: Install IDF (step 2)
-    inputs:
-      targetType: "inline"
-      workingDirectory: $(Agent.BuildDirectory)\s\esp-idf\tools\requirements
-      script: |
-        python -m pip install -r requirements.core.txt
-
-  - task: PowerShell@2
+  - bash: |
+      python -m pip install --quiet -r "$(Agent.BuildDirectory)/s/nf-interpreter/requirements.txt"
     displayName: Install nF Kconfig tools
-    inputs:
-      targetType: "inline"
-      script: |
-        python -m pip install --quiet -r "$(Agent.BuildDirectory)\s\nf-interpreter\requirements.txt"
 
-  - task: PowerShell@2
-    displayName: Install IDF (step 3)
-    inputs:
-      targetType: "filePath"
-      filePath: $(Agent.BuildDirectory)\s\esp-idf\export.ps1
-      workingDirectory: $(Agent.BuildDirectory)\s\esp-idf
-
-  - task: PowerShell@2
+  - bash: |
+      export IDF_TOOLS_PATH=$(Pipeline.Workspace)/.espressif
+      source $(Agent.BuildDirectory)/s/esp-idf/export.sh > /dev/null 2>&1
+      echo "$PATH" | tr ':' '\n' | while IFS= read -r p; do
+        echo "##vso[task.prependpath]$p"
+      done
     displayName: Update PATH with IDF tools
-    inputs:
-      targetType: "inline"
-      workingDirectory: $(Agent.BuildDirectory)\s\esp-idf
-      script: |
-        $ErrorActionPreference = 'SilentlyContinue'
-        $envars_raw = python tools/idf_tools.py export --format key-value 2>$null
 
-        # find element the PATH collection
-        $pathElement = 0
-
-        foreach ($element in $envars_raw) {
-            if ($element.StartsWith('PATH=')) {
-                break
-            }
-            $pathElement++
-        }
-
-        # go through the output and grab what has to be appended to the PATH
-        # remove the IDF-bundled CMake entry so the system-installed CMake is used instead
-        $newPath = $envars_raw[$pathElement].ToString().Replace('PATH=', '').Replace(';%PATH%', '') -replace '[^;]*\.espressif\\tools\\cmake\\[^;]+;?', ''
-
-        # append to path
-        Write-Host "##vso[task.prependpath]$newPath"
-
-  - task: PowerShell@2
+  - bash: |
+      python -m pip install --quiet -r "$(Agent.BuildDirectory)/s/nf-interpreter/requirements.txt"
     displayName: Install kconfiglib in IDF Python
-    inputs:
-      targetType: "inline"
-      script: |
-        python -m pip install --quiet -r "$(Agent.BuildDirectory)\s\nf-interpreter\requirements.txt"
-
-  - script: |
-      echo ##vso[task.prependpath]C:\Windows\System32
-    displayName: Tweak PATH to reach cmd
