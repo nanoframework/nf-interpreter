@@ -17,7 +17,7 @@ steps:
       cacheHitVar: GCC_CACHE_RESTORED
 
   - bash: |
-      curl -fL \
+      curl -fL --no-progress-meter \
         "https://developer.arm.com/-/media/Files/downloads/gnu/${{ parameters.gccArmVersion }}/binrel/arm-gnu-toolchain-${{ parameters.gccArmVersion }}-x86_64-arm-none-eabi.tar.xz" \
         -o "$(Agent.TempDirectory)/arm-gcc.tar.xz"
       tar -xf "$(Agent.TempDirectory)/arm-gcc.tar.xz" -C "$(Agent.TempDirectory)/"

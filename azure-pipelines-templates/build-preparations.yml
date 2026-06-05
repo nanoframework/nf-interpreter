@@ -27,7 +27,7 @@ steps:
     displayName: Add dummy cmake presets
     condition: ne(variables['Build.Repository.Name'], 'nanoframework/nf-Community-Targets')
     inputs:
-      workingDirectory: ${{ parameters.repoDirectory }}\targets-community
+      workingDirectory: ${{ parameters.repoDirectory }}/targets-community
       targetType: "inline"
       script: |
         New-Item -Path . -Name "CMakePresets.json" -ItemType "file" -Value "{`n""version"": 4,`n""include"": []`n}"
