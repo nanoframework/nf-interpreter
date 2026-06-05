@@ -4,8 +4,8 @@
 steps:
   - task: Cache@2
     inputs:
-      key: "3-1-3 | hex2dfuKey"
-      restoreKeys: hex2dfuKey
+      key: "3-1-3 | $(Agent.OS)-$(Agent.OSArchitecture) | hex2dfuKey"
+      restoreKeys: "3-1-3 | $(Agent.OS)-$(Agent.OSArchitecture)"
       path: $(Agent.TempDirectory)/hex2dfu
       cacheHitVar: HEX2DFU_CACHE_RESTORED
     condition: eq(variables['NeedsDFU'], true)
@@ -14,7 +14,11 @@ steps:
   - bash: |
       mkdir -p "$(Agent.TempDirectory)/hex2dfu"
       DOWNLOAD_URL=$(curl -s https://api.github.com/repos/nanoframework/nf-tools/releases/latest \
-        | grep "browser_download_url.*hex2dfu.*linux" | cut -d '"' -f 4)
+        | jq -r '[.assets[] | select(.name | test("hex2dfu.*linux"; "i")) | .browser_download_url] | if length == 1 then .[0] else error("expected exactly one hex2dfu linux asset, got \(length)") end')
+      if [ -z "$DOWNLOAD_URL" ]; then
+        echo "ERROR: Could not determine hex2dfu download URL"
+        exit 1
+      fi
       curl -fL "$DOWNLOAD_URL" -o "$(Agent.TempDirectory)/hex2dfu/hex2dfu"
       chmod +x "$(Agent.TempDirectory)/hex2dfu/hex2dfu"
     displayName: Install HEX2DFU

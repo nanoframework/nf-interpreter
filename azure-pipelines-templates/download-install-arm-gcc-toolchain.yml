@@ -12,7 +12,7 @@ steps:
     displayName: Cache ARM GCC toolchain
     inputs:
       key: "gcc-${{ replace(parameters.gccArmVersion, '.', '_') }}-linux | gccUpdateKey"
-      restoreKeys: gccUpdateKey-linux
+      restoreKeys: "gcc-${{ replace(parameters.gccArmVersion, '.', '_') }}-linux"
       path: $(Agent.TempDirectory)/arm-gnu-toolchain-${{ parameters.gccArmVersion }}-x86_64-arm-none-eabi
       cacheHitVar: GCC_CACHE_RESTORED
 
@@ -27,6 +27,10 @@ steps:
 
   - bash: |
       GCC_BIN=$(dirname "$(find "$(Agent.TempDirectory)/arm-gnu-toolchain-${{ parameters.gccArmVersion }}-x86_64-arm-none-eabi" -name "arm-none-eabi-gcc" -type f | head -1)")
+      if [ -z "$GCC_BIN" ] || [ ! -f "$GCC_BIN/arm-none-eabi-gcc" ]; then
+        echo "ERROR: arm-none-eabi-gcc not found in toolchain directory"
+        exit 1
+      fi
       echo "Adding ARM GCC toolchain to PATH: $GCC_BIN"
       echo "##vso[task.setvariable variable=ARM_GCC_PATH]$GCC_BIN"
       echo "##vso[task.prependpath]$GCC_BIN"

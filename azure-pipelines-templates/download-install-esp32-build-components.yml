@@ -32,12 +32,10 @@ steps:
       cd $(Agent.BuildDirectory)/s/esp-idf
       ./install.sh all
     displayName: Install IDF
-    condition: ne(variables.ESP32_TOOLS_CACHE_RESTORED, 'true')
 
   - bash: |
       python -m pip install -r $(Agent.BuildDirectory)/s/esp-idf/tools/requirements/requirements.core.txt
     displayName: Install IDF pip requirements (step 1)
-    condition: ne(variables.PIP_PACKAGES_RESTORED, 'true')
 
   - bash: |
       python -m pip install --quiet -r "$(Agent.BuildDirectory)/s/nf-interpreter/requirements.txt"
@@ -46,7 +44,7 @@ steps:
   - bash: |
       export IDF_TOOLS_PATH=$(Pipeline.Workspace)/.espressif
       source $(Agent.BuildDirectory)/s/esp-idf/export.sh > /dev/null 2>&1
-      echo "$PATH" | tr ':' '\n' | while IFS= read -r p; do
+      echo "$PATH" | tr ':' '\n' | tac | while IFS= read -r p; do
         echo "##vso[task.prependpath]$p"
       done
     displayName: Update PATH with IDF tools
