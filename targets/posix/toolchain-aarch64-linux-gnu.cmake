@@ -4,10 +4,10 @@
 #
 
 # CMake toolchain file for cross-compiling to Linux arm64 (aarch64)
-# on an x86_64 Linux host using the aarch64-linux-gnu GCC cross-toolchain.
+# on an x86_64 Linux host using the Arm GNU Toolchain (aarch64-none-linux-gnu).
 #
-# Install the cross-toolchain with:
-#   sudo apt-get install -y gcc-aarch64-linux-gnu g++-aarch64-linux-gnu
+# The toolchain is downloaded in CI from developer.arm.com (GCC 15.2.Rel1).
+# Binary prefix is aarch64-none-linux-gnu- (not the Debian aarch64-linux-gnu- prefix).
 #
 # Usage (passed automatically by CI; not needed for native arm64 builds):
 #   cmake -S targets/posix -B build/posix -G Ninja \
@@ -16,8 +16,8 @@
 set(CMAKE_SYSTEM_NAME Linux)
 set(CMAKE_SYSTEM_PROCESSOR aarch64)
 
-set(CMAKE_C_COMPILER   aarch64-linux-gnu-gcc)
-set(CMAKE_CXX_COMPILER aarch64-linux-gnu-g++)
+set(CMAKE_C_COMPILER   aarch64-none-linux-gnu-gcc)
+set(CMAKE_CXX_COMPILER aarch64-none-linux-gnu-g++)
 
 # Do not search host paths for libraries/includes/programs.
 set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
