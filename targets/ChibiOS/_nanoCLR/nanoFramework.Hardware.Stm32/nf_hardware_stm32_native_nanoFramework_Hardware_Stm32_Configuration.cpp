@@ -57,7 +57,10 @@ HRESULT Library_nf_hardware_stm32_native_nanoFramework_Hardware_Stm32_Configurat
     alternateFunction = (uint8_t)gpioConfiguration[GpioConfiguration::FIELD___alternateFunction].NumericByRef().s4;
 
     // configure the pin
-    palSetPadMode(port, pad, mode | pullUpDown | speed | (PAL_MODE_ALTERNATE(alternateFunction)));
+    palSetPadMode(
+        port,
+        pad,
+        (iomode_t)((uint32_t)mode | (uint32_t)pullUpDown | (uint32_t)speed | PAL_MODE_ALTERNATE(alternateFunction)));
 
     NANOCLR_NOCLEANUP_NOLABEL();
 }
