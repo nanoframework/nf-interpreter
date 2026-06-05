@@ -184,10 +184,12 @@ endforeach()
 # Suppress -Wshadow for ChibiOS ADC HAL (variable shadowing in macro expansion)
 SET_SOURCE_FILES_PROPERTIES(${chibios_SOURCE_DIR}/os/hal/ports/RP/LLD/ADCv1/hal_adc_lld.c PROPERTIES COMPILE_FLAGS -Wno-shadow)
 
-# Force -fno-inline for ChibiOS USB HAL on RP2040 (Cortex-M0+ / Thumb-1).
-# Inlining ChibiOS static inline helpers creates composite functions whose stack frames
-# exceed the Thumb-1 SP-relative ldr offset limit (1020 bytes), causing assembler errors.
-SET_SOURCE_FILES_PROPERTIES(${chibios_SOURCE_DIR}/os/hal/ports/RP/LLD/USBv1/hal_usb_lld.c PROPERTIES COMPILE_FLAGS -fno-inline)
+# Force -Os -fno-inline for ChibiOS USB HAL on RP2040 (Cortex-M0+ / Thumb-1).
+# -fno-inline prevents inlining static inline helpers that would create composite
+# functions with stack frames exceeding the Thumb-1 SP-relative ldr offset limit (1020 bytes).
+# -Os overrides the global -Og: GCC 15 changed -Og to keep more variables on the stack for
+# debuggability, pushing individual function frames past 1020 bytes even without inlining.
+SET_SOURCE_FILES_PROPERTIES(${chibios_SOURCE_DIR}/os/hal/ports/RP/LLD/USBv1/hal_usb_lld.c PROPERTIES COMPILE_FLAGS "-Os -fno-inline")
 
 include(FindPackageHandleStandardArgs)
 

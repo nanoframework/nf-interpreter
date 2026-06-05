@@ -1227,7 +1227,9 @@ jobs:
           # Install arm64 cross-compiler when building linux-arm64 on an x86_64 agent.
           TOOLCHAIN_ARG=""
           if [ "$(POSIX_RID)" = "linux-arm64" ]; then
-            sudo apt-get install -y gcc-aarch64-linux-gnu g++-aarch64-linux-gnu
+            curl -fsSL "https://developer.arm.com/-/media/Files/downloads/gnu/15.2.rel1/binrel/arm-gnu-toolchain-15.2.rel1-x86_64-aarch64-none-linux-gnu.tar.xz" \
+              | sudo tar -xJ -C /opt
+            export PATH="/opt/arm-gnu-toolchain-15.2.rel1-x86_64-aarch64-none-linux-gnu/bin:$PATH"
             TOOLCHAIN_ARG="-DCMAKE_TOOLCHAIN_FILE=$(pwd)/targets/posix/toolchain-aarch64-linux-gnu.cmake"
           fi
 

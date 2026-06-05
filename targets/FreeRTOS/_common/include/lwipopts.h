@@ -453,6 +453,15 @@
 #define SO_REUSE_RXTOALL 1
 #endif
 
+/**
+ * LWIP_TIMEVAL_PRIVATE==0: Use struct timeval from sys/_timeval.h provided by
+ * the toolchain (newlib) instead of lwIP's own definition, to avoid redefinition
+ * conflicts when system headers are included before lwip/sockets.h.
+ */
+#ifndef LWIP_TIMEVAL_PRIVATE
+#define LWIP_TIMEVAL_PRIVATE 0
+#endif
+
 /*
    ----------------------------------------
    ---------- Statistics options ----------
