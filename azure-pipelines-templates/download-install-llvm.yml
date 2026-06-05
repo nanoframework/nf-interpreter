@@ -13,15 +13,10 @@ steps:
 
   - bash: |
       mkdir -p $(Agent.TempDirectory)/llvm/bin
-      curl -fL \
-        "https://github.com/llvm/llvm-project/releases/download/llvmorg-18.1.7/clang+llvm-18.1.7-x86_64-linux-gnu-ubuntu-22.04.tar.xz" \
-        -o /tmp/llvm.tar.xz
-      # determine the top-level directory name inside the archive, then extract only clang-format
-      TARBALL_DIR=$(tar -tf /tmp/llvm.tar.xz | head -1 | cut -d'/' -f1)
-      tar -xf /tmp/llvm.tar.xz -C /tmp/ "$TARBALL_DIR/bin/clang-format"
-      mv "/tmp/$TARBALL_DIR/bin/clang-format" "$(Agent.TempDirectory)/llvm/bin/clang-format"
+      sudo apt-get install -y clang-format-18
+      cp /usr/bin/clang-format-18 "$(Agent.TempDirectory)/llvm/bin/clang-format"
       chmod +x "$(Agent.TempDirectory)/llvm/bin/clang-format"
-    displayName: Download clang-format
+    displayName: Install clang-format
     condition: >-
       and(
         ne(variables['System.PullRequest.PullRequestId'], ''),
