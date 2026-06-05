@@ -951,6 +951,18 @@ macro(nf_add_idf_as_library)
         message(STATUS "Using default XTAL frequency")
     endif()
 
+    # Workaround for MODLOG_N implicit-declaration error with GCC 15+ in NimBLE debug builds.
+    # NimBLE defines log-level names as integers (DEBUG=1, INFO=2, ...). When these are used as
+    # the level argument to MODLOG_DFLT(), they expand to their numeric values before the ## paste
+    # in modlog.h, producing e.g. MODLOG_1 which is not defined. GCC 15 turns that implicit-
+    # function-declaration into a hard error. The compat header provides silent no-op fallbacks.
+    if(HAL_USE_BLE_OPTION AND (CMAKE_BUILD_TYPE STREQUAL "Debug" OR CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo"))
+        idf_build_set_property(COMPILE_OPTIONS
+            "-include${CMAKE_SOURCE_DIR}/targets/ESP32/_include/nimble_modlog_compat.h"
+            APPEND
+        )
+    endif()
+
     # create IDF static libraries
     idf_build_process(${TARGET_SERIES_SHORT}
         COMPONENTS 

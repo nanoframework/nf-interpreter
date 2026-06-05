@@ -94,7 +94,7 @@ jobs:
             {
               Write-Host "##[command] **This is a PR build**"
 
-              $pr = Invoke-RestMethod -Uri "https://api.github.com/repos/nanoframework/nf-interpreter/pulls/$env:System_PullRequest_PullRequestId" -Header @{"Authorization"="$auth"} -ContentType "application/json" -Method GET
+              $pr = Invoke-RestMethod -Uri "https://api.github.com/repos/nanoframework/nf-interpreter/pulls/$env:System_PullRequest_PullRequestNumber" -Header @{"Authorization"="$auth"} -ContentType "application/json" -Method GET
 
               # check if this is a version update PR, if so, skip build
               if( ($pr.user.login -eq "nfbot") -and ($pr.title -like "*[version update]*") )
@@ -1301,7 +1301,9 @@ jobs:
           # Install arm64 cross-compiler when building linux-arm64 on an x86_64 agent.
           TOOLCHAIN_ARG=""
           if [ "$(POSIX_RID)" = "linux-arm64" ]; then
-            sudo apt-get install -y gcc-aarch64-linux-gnu g++-aarch64-linux-gnu
+            curl -fsSL "https://developer.arm.com/-/media/Files/downloads/gnu/15.2.rel1/binrel/arm-gnu-toolchain-15.2.rel1-x86_64-aarch64-none-linux-gnu.tar.xz" \
+              | sudo tar -xJ -C /opt
+            export PATH="/opt/arm-gnu-toolchain-15.2.rel1-x86_64-aarch64-none-linux-gnu/bin:$PATH"
             TOOLCHAIN_ARG="-DCMAKE_TOOLCHAIN_FILE=$(pwd)/targets/posix/toolchain-aarch64-linux-gnu.cmake"
           fi
 
