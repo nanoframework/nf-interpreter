@@ -67,7 +67,7 @@ if(USE_NETWORKING_OPTION AND TARGET_HAS_WIFI)
         get_filename_component(CYW43_SRC_NAME ${CYW43_SRC} NAME)
         if(CYW43_SRC_NAME MATCHES "^cyw43_")
             set_source_files_properties(${CYW43_SRC} PROPERTIES COMPILE_FLAGS
-                "-Wno-error=shadow -Wno-error=return-type -Wno-error=implicit-function-declaration -Wno-error=type-limits -Wno-error=unused-parameter -Wno-error=missing-prototypes -Wno-error=missing-declarations -Wno-error=old-style-definition -Wno-error=undef")
+                "-Wno-error=shadow -Wno-error=return-type -Wno-error=implicit-function-declaration -Wno-error=type-limits -Wno-error=unused-parameter -Wno-error=missing-prototypes -Wno-error=missing-declarations -Wno-error=old-style-definition")
         endif()
     endforeach()
 endif()
