@@ -92,49 +92,57 @@ static void TxEnd1(UARTDriver *uartp)
     NF_PAL_UART *palUart = NULL;
 
 #if defined(NF_SERIAL_COMM_STM32_UART_USE_USART1) && (NF_SERIAL_COMM_STM32_UART_USE_USART1 == TRUE)
-    if (uartp == UART_DRIVER_PTR(1))
+#if defined(RP2040_MCUCONF)
+    if (uartp == &UARTD0)
+#else
+    if (uartp == &UARTD1)
+#endif
     {
         palUart = &Uart1_PAL;
     }
 #endif
 #if defined(NF_SERIAL_COMM_STM32_UART_USE_USART2) && (NF_SERIAL_COMM_STM32_UART_USE_USART2 == TRUE)
-    if (uartp == UART_DRIVER_PTR(2))
+#if defined(RP2040_MCUCONF)
+    if (uartp == &UARTD1)
+#else
+    if (uartp == &UARTD2)
+#endif
     {
         palUart = &Uart2_PAL;
     }
 #endif
 #if defined(NF_SERIAL_COMM_STM32_UART_USE_USART3) && (NF_SERIAL_COMM_STM32_UART_USE_USART3 == TRUE)
-    if (uartp == UART_DRIVER_PTR(3))
+    if (uartp == &UARTD3)
     {
         palUart = &Uart3_PAL;
     }
 #endif
 #if defined(NF_SERIAL_COMM_STM32_UART_USE_UART4) && (NF_SERIAL_COMM_STM32_UART_USE_UART4 == TRUE)
-    if (uartp == UART_DRIVER_PTR(4))
+    if (uartp == &UARTD4)
     {
         palUart = &Uart4_PAL;
     }
 #endif
 #if defined(NF_SERIAL_COMM_STM32_UART_USE_UART5) && (NF_SERIAL_COMM_STM32_UART_USE_UART5 == TRUE)
-    if (uartp == UART_DRIVER_PTR(5))
+    if (uartp == &UARTD5)
     {
         palUart = &Uart5_PAL;
     }
 #endif
 #if defined(NF_SERIAL_COMM_STM32_UART_USE_USART6) && (NF_SERIAL_COMM_STM32_UART_USE_USART6 == TRUE)
-    if (uartp == UART_DRIVER_PTR(6))
+    if (uartp == &UARTD6)
     {
         palUart = &Uart6_PAL;
     }
 #endif
 #if defined(NF_SERIAL_COMM_STM32_UART_USE_UART7) && (NF_SERIAL_COMM_STM32_UART_USE_UART7 == TRUE)
-    if (uartp == UART_DRIVER_PTR(7))
+    if (uartp == &UARTD7)
     {
         palUart = &Uart7_PAL;
     }
 #endif
 #if defined(NF_SERIAL_COMM_STM32_UART_USE_UART8) && (NF_SERIAL_COMM_STM32_UART_USE_UART8 == TRUE)
-    if (uartp == UART_DRIVER_PTR(8))
+    if (uartp == &UARTD8)
     {
         palUart = &Uart8_PAL;
     }
@@ -164,56 +172,64 @@ static void RxChar(UARTDriver *uartp, uint16_t c)
     uint8_t portIndex = 0;
 
 #if defined(NF_SERIAL_COMM_STM32_UART_USE_USART1) && (NF_SERIAL_COMM_STM32_UART_USE_USART1 == TRUE)
-    if (uartp == UART_DRIVER_PTR(1))
+#if defined(RP2040_MCUCONF)
+    if (uartp == &UARTD0)
+#else
+    if (uartp == &UARTD1)
+#endif
     {
         palUart = &Uart1_PAL;
         portIndex = 1;
     }
 #endif
 #if defined(NF_SERIAL_COMM_STM32_UART_USE_USART2) && (NF_SERIAL_COMM_STM32_UART_USE_USART2 == TRUE)
-    if (uartp == UART_DRIVER_PTR(2))
+#if defined(RP2040_MCUCONF)
+    if (uartp == &UARTD1)
+#else
+    if (uartp == &UARTD2)
+#endif
     {
         palUart = &Uart2_PAL;
         portIndex = 2;
     }
 #endif
 #if defined(NF_SERIAL_COMM_STM32_UART_USE_USART3) && (NF_SERIAL_COMM_STM32_UART_USE_USART3 == TRUE)
-    if (uartp == UART_DRIVER_PTR(3))
+    if (uartp == &UARTD3)
     {
         palUart = &Uart3_PAL;
         portIndex = 3;
     }
 #endif
 #if defined(NF_SERIAL_COMM_STM32_UART_USE_UART4) && (NF_SERIAL_COMM_STM32_UART_USE_UART4 == TRUE)
-    if (uartp == UART_DRIVER_PTR(4))
+    if (uartp == &UARTD4)
     {
         palUart = &Uart4_PAL;
         portIndex = 4;
     }
 #endif
 #if defined(NF_SERIAL_COMM_STM32_UART_USE_UART5) && (NF_SERIAL_COMM_STM32_UART_USE_UART5 == TRUE)
-    if (uartp == UART_DRIVER_PTR(5))
+    if (uartp == &UARTD5)
     {
         palUart = &Uart5_PAL;
         portIndex = 5;
     }
 #endif
 #if defined(NF_SERIAL_COMM_STM32_UART_USE_USART6) && (NF_SERIAL_COMM_STM32_UART_USE_USART6 == TRUE)
-    if (uartp == UART_DRIVER_PTR(6))
+    if (uartp == &UARTD6)
     {
         palUart = &Uart6_PAL;
         portIndex = 6;
     }
 #endif
 #if defined(NF_SERIAL_COMM_STM32_UART_USE_UART7) && (NF_SERIAL_COMM_STM32_UART_USE_UART7 == TRUE)
-    if (uartp == UART_DRIVER_PTR(7))
+    if (uartp == &UARTD7)
     {
         palUart = &Uart7_PAL;
         portIndex = 7;
     }
 #endif
 #if defined(NF_SERIAL_COMM_STM32_UART_USE_UART8) && (NF_SERIAL_COMM_STM32_UART_USE_UART8 == TRUE)
-    if (uartp == UART_DRIVER_PTR(8))
+    if (uartp == &UARTD8)
     {
         palUart = &Uart8_PAL;
         portIndex = 8;
@@ -229,8 +245,17 @@ static void RxChar(UARTDriver *uartp, uint16_t c)
     // store this into the UART Rx buffer
 
     // push char to the ring buffer
-    // ignore the success of the operation, if it's full we are dropping the char anyway.
-    palUart->RxRingBuffer.Push((uint8_t)c);
+    // under heavy RX this can fail when full, in which case the new byte is dropped.
+    // keep processing minimal in ISR path to avoid making the overload worse.
+    const uint32_t previousLength = palUart->RxRingBuffer.Length();
+    const bool pushed = (palUart->RxRingBuffer.Push((uint8_t)c) != 0);
+    const uint32_t currentLength = palUart->RxRingBuffer.Length();
+
+    if (!pushed)
+    {
+        NATIVE_INTERRUPT_END
+        return;
+    }
 
     // is there a read operation going on?
     if (palUart->RxBytesToRead > 0)
@@ -255,7 +280,7 @@ static void RxChar(UARTDriver *uartp, uint16_t c)
     else
     {
         // no read operation ongoing, so fire an event, if the available bytes are above the threshold
-        if (palUart->RxRingBuffer.Length() >= palUart->ReceivedBytesThreshold)
+        if ((currentLength >= palUart->ReceivedBytesThreshold) && (previousLength < palUart->ReceivedBytesThreshold))
         {
             // Post a managed event with the port index and event code (check if there is a watch
             // char in the buffer or just any char)
@@ -905,14 +930,22 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeInit___VOID(
 #if defined(NF_SERIAL_COMM_STM32_UART_USE_USART1) && (NF_SERIAL_COMM_STM32_UART_USE_USART1 == TRUE)
         case 1:
             Init_UART1();
-            Uart1_PAL.UartDriver = UART_DRIVER_PTR(1);
+#if defined(RP2040_MCUCONF)
+            Uart1_PAL.UartDriver = &UARTD0;
+#else
+            Uart1_PAL.UartDriver = &UARTD1;
+#endif
             palUart = &Uart1_PAL;
             break;
 #endif
 #if defined(NF_SERIAL_COMM_STM32_UART_USE_USART2) && (NF_SERIAL_COMM_STM32_UART_USE_USART2 == TRUE)
         case 2:
             Init_UART2();
-            Uart2_PAL.UartDriver = UART_DRIVER_PTR(2);
+#if defined(RP2040_MCUCONF)
+            Uart2_PAL.UartDriver = &UARTD1;
+#else
+            Uart2_PAL.UartDriver = &UARTD2;
+#endif
             palUart = &Uart2_PAL;
             break;
 #endif
