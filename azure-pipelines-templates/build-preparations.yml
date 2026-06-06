@@ -12,7 +12,7 @@ steps:
     inputs:
       targetType: "inline"
       script: |
-        if($env:PackageName -eq $null)
+        if([string]::IsNullOrEmpty($env:PackageName))
         {
           Write-Host "$("##vso[task.setvariable variable=TargetPublishName]")$env:TargetBoard"
         }
