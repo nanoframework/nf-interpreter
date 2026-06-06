@@ -282,14 +282,15 @@ macro(nf_add_platform_sysconfig_steps ti_device ti_device_family)
                 SYSCONFIG_TASKS PRE_BUILD
 
             BYPRODUCTS
-                ${CMAKE_CURRENT_BINARY_DIR}/syscfg/ti_devices_config.c 
+                ${CMAKE_CURRENT_BINARY_DIR}/syscfg/ti_devices_config.c
                 ${CMAKE_CURRENT_BINARY_DIR}/syscfg/ti_drivers_config.c
                 ${CMAKE_CURRENT_BINARY_DIR}/syscfg/ti_easylink_config.c
                 ${CMAKE_CURRENT_BINARY_DIR}/syscfg/ti_radio_config.c
 
+            COMMAND chmod +x ${ti_sysconfig_SOURCE_DIR}/sysconfig_cli.sh
             COMMAND ${ti_sysconfig_SOURCE_DIR}/sysconfig_cli.sh -s "${simplelinkcc13xx_26xxsdk_SOURCE_DIR}/.metadata/product.json" --script ${SYS_CONFIG_FILENAME} -o "syscfg" --compiler gcc
-            WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR} 
-            COMMENT "Generate configuration files" 
+            WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+            COMMENT "Generate configuration files"
         )
     endif()
     ######################################
