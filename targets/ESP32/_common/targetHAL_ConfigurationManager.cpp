@@ -175,7 +175,7 @@ void ConfigurationManager_EnumerateConfigurationBlocks()
         netTypes[networkCount++] = NetworkInterfaceType_WirelessAP;
 #endif
 
-#ifdef ESP32_ETHERNET_SUPPORT
+#ifdef CONFIG_ESP32_ETHERNET_SUPPORT
         netTypes[networkCount++] = NetworkInterfaceType_Ethernet;
         ethernetEnabled = true;
 #endif

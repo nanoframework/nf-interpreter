@@ -542,7 +542,7 @@ void nanoHAL_Network_Initialize()
         // register the event handler for IP events
         ESP_ERROR_CHECK(esp_event_handler_instance_register(IP_EVENT, ESP_EVENT_ANY_ID, &event_handler, NULL, NULL));
 
-#ifdef ESP32_ETHERNET_SUPPORT
+#ifdef CONFIG_ESP32_ETHERNET_SUPPORT
         // register the event handler for Ethernet events
         ESP_ERROR_CHECK(esp_event_handler_instance_register(ETH_EVENT, ESP_EVENT_ANY_ID, &event_handler, NULL, NULL));
 #endif
