@@ -17,7 +17,7 @@ esp_eth_handle_t eth_handle = NULL;
 // ESP32_ETHERNET_MDIO_GPIO 18
 
 // OLIMEX POE and LILYGO use ESP32_ETHERNET_RMII_CLK_OUT_GPIO 17
-// OLIMEX WROVER uses ESP32_ETHERNET_RMII_CLK_OUT_GPIO 0 
+// OLIMEX WROVER uses ESP32_ETHERNET_RMII_CLK_OUT_GPIO 0
 // OLIMEX POE use ESP32_ETHERNET_PHY_RST_GPIO 12
 // OLIMEX gateway revs newer than C use ESP32_ETHERNET_PHY_RST_GPIO 5
 
@@ -73,7 +73,6 @@ esp_err_t NF_ESP32_InitialiseEthernet(uint8_t *pMacAdr)
     eth_mac_config_t mac_config = ETH_MAC_DEFAULT_CONFIG();
     eth_esp32_emac_config_t esp32_emac_config = NANO_ETH_ESP32_EMAC_DEFAULT_CONFIG();
 
-
     eth_phy_config_t phy_config = ETH_PHY_DEFAULT_CONFIG();
     phy_config.phy_addr = CONFIG_ESP32_ETHERNET_PHY_ADDR;
 
@@ -92,7 +91,7 @@ esp_err_t NF_ESP32_InitialiseEthernet(uint8_t *pMacAdr)
         phy_config.reset_timeout_ms,
         phy_config.phy_addr);
 
-// If not SPI then must be 
+// If not SPI then must be
 // Internal Ethernet controller
 #if !defined(CONFIG_ESP32_ETHERNET_SPI) || CONFIG_ESP32_ETHERNET_SPI == FALSE
 
@@ -103,7 +102,7 @@ esp_err_t NF_ESP32_InitialiseEthernet(uint8_t *pMacAdr)
         (emac_rmii_clock_gpio_t)CONFIG_ESP32_ETHERNET_RMII_CLK_OUT_GPIO; // always 16 or 17
     ESP_LOGI(TAG, "Ethernet clock_config OUT gpio %d\n", CONFIG_ESP32_ETHERNET_RMII_CLK_OUT_GPIO);
 
-    CPU_GPIO_ReservePin(EMAC_CLK_OUT, true);                     // REF_CLK OUT
+    CPU_GPIO_ReservePin(EMAC_CLK_OUT, true);                            // REF_CLK OUT
     CPU_GPIO_ReservePin(CONFIG_ESP32_ETHERNET_RMII_CLK_OUT_GPIO, true); // REF_CLK OUT
 #else
     ESP_LOGI(TAG, "Ethernet clock_config IN gpio %d\n", esp32_emac_config.clock_config.rmii.clock_gpio);
@@ -162,7 +161,7 @@ esp_err_t NF_ESP32_InitialiseEthernet(uint8_t *pMacAdr)
 #elif defined(CONFIG_ESP32_ETHERNET_PHY_LAN8720) && CONFIG_ESP32_ETHERNET_PHY_LAN8720 == TRUE
     ESP_LOGI(TAG, "Ethernet Lan8720 phy");
     esp_eth_phy_t *phy = esp_eth_phy_new_lan87xx(&phy_config);
-#elif defined(CONFIG_ESP32_ETHERNET_PHY_DP83848) && CONFIG_ESP32_ETHERNET_PHY_DP83848 == TRUE   
+#elif defined(CONFIG_ESP32_ETHERNET_PHY_DP83848) && CONFIG_ESP32_ETHERNET_PHY_DP83848 == TRUE
     ESP_LOGI(TAG, "Ethernet DP83848 phy");
     esp_eth_phy_t *phy = esp_eth_phy_new_dp83848(&phy_config);
 #elif defined(CONFIG_ESP32_ETHERNET_PHY_KSZ8041) && CONFIG_ESP32_ETHERNET_PHY_KSZ8041 == TRUE
@@ -173,7 +172,7 @@ esp_err_t NF_ESP32_InitialiseEthernet(uint8_t *pMacAdr)
 #elif CONFIG_ESP32_ETHERNET_SPI == TRUE
     // Or Use SPI ethernet module
 
-    #if defined(CONFIG_ESP32_ETHERNET_SPI_HOST) && CONFIG_ESP32_ETHERNET_SPI_HOST == 2
+#if defined(CONFIG_ESP32_ETHERNET_SPI_HOST) && CONFIG_ESP32_ETHERNET_SPI_HOST == 2
     spi_host_device_t spi_host = SPI2_HOST;
 #else
     spi_host_device_t host = SPI3_HOST;
@@ -185,7 +184,7 @@ esp_err_t NF_ESP32_InitialiseEthernet(uint8_t *pMacAdr)
     // Initialise SPI bus
     spi_bus_config_t buscfg = {0};
     buscfg.miso_io_num = CONFIG_ESP32_ETHERNET_SPI_MISO_GPIO;
-    buscfg.mosi_io_num = CONFIG_ESP32_ETHERNET_SPI_MOSI_GPIO;   
+    buscfg.mosi_io_num = CONFIG_ESP32_ETHERNET_SPI_MOSI_GPIO;
     buscfg.sclk_io_num = CONFIG_ESP32_ETHERNET_SPI_SCLK_GPIO;
     buscfg.quadwp_io_num = -1;
     buscfg.quadhd_io_num = -1;
