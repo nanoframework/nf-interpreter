@@ -12,10 +12,16 @@ steps:
       repoDirectory: ${{ parameters.repoDirectory }}
 
   - bash: |
-      sudo dpkg --add-architecture i386
-      sudo apt-get update -q
-      sudo apt-get install -y libc6:i386 libncurses6:i386 libstdc++6:i386
-    displayName: Install 32-bit libraries for TI XDC Tools
+      # TI XDC Tools Linux release. Version index: https://software-dl.ti.com/dsps/dsps_public_sw/sdo_sb/targetcontent/rtsc/index.html
+      # Note: 3.62.01.15 has no Linux release; 3.62.00.08 is the latest available (also used in the dev container).
+      TI_XDCTOOLS_VERSION="3_62_00_08"
+      TI_XDCTOOLS_URL="https://software-dl.ti.com/dsps/dsps_public_sw/sdo_sb/targetcontent/rtsc/${TI_XDCTOOLS_VERSION}/exports/xdccore/xdctools_${TI_XDCTOOLS_VERSION}_core_linux.zip"
+      curl -fL "$TI_XDCTOOLS_URL" -o /tmp/ti_xdctools.zip
+      mkdir -p /tmp/ti_xdctools
+      unzip -q /tmp/ti_xdctools.zip -d /tmp/ti_xdctools
+      chmod +x /tmp/ti_xdctools/xdctools_${TI_XDCTOOLS_VERSION}_core/xs
+      echo "##vso[task.prependpath]/tmp/ti_xdctools/xdctools_${TI_XDCTOOLS_VERSION}_core"
+    displayName: Download TI XDC Tools for Linux
 
   - task: CMake@1
     inputs:
