@@ -7,12 +7,15 @@ steps:
     displayName: Cache LLVM
     inputs:
       key: "llvm_18_1_7_linux | llvmUpdateKey"
-      restoreKeys: llvmUpdateKey-linux
+      restoreKeys: llvm_
       path: $(Agent.TempDirectory)/llvm
       cacheHitVar: LLVM_CACHE_RESTORED
 
   - bash: |
       mkdir -p $(Agent.TempDirectory)/llvm/bin
+      wget -qO- https://apt.llvm.org/llvm-snapshot.gpg.key | sudo tee /etc/apt/trusted.gpg.d/apt.llvm.org.asc > /dev/null
+      echo "deb [signed-by=/etc/apt/trusted.gpg.d/apt.llvm.org.asc] http://apt.llvm.org/$(lsb_release -cs)/ llvm-toolchain-$(lsb_release -cs)-18 main" | sudo tee /etc/apt/sources.list.d/llvm-18.list > /dev/null
+      sudo apt-get update -qq
       sudo apt-get install -y clang-format-18
       cp /usr/bin/clang-format-18 "$(Agent.TempDirectory)/llvm/bin/clang-format"
       chmod +x "$(Agent.TempDirectory)/llvm/bin/clang-format"
