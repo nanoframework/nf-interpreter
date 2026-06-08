@@ -76,7 +76,7 @@ esp_err_t NF_ESP32_InitialiseEthernet(uint8_t *pMacAdr)
     eth_phy_config_t phy_config = ETH_PHY_DEFAULT_CONFIG();
     phy_config.phy_addr = CONFIG_ESP32_ETHERNET_PHY_ADDR;
 
-// If not SPI then must be 
+// If not SPI then must be
 // Internal Ethernet controller
 #if !defined(CONFIG_ESP32_ETHERNET_SPI) || CONFIG_ESP32_ETHERNET_SPI == FALSE
 
@@ -102,7 +102,7 @@ esp_err_t NF_ESP32_InitialiseEthernet(uint8_t *pMacAdr)
 #if defined(CONFIG_ESP32_ETHERNET_RMII_CLK_OUT_GPIO) && CONFIG_ESP32_ETHERNET_RMII_CLK_OUT_GPIO != -1
     esp32_emac_config.clock_config.rmii.clock_mode = EMAC_CLK_OUT;
     esp32_emac_config.clock_config.rmii.clock_gpio =
-        (emac_rmii_clock_gpio_t)CONFIG_ESP32_ETHERNET_RMII_CLK_OUT_GPIO; // always 16 or 17
+        (emac_rmii_clock_gpio_t)CONFIG_ESP32_ETHERNET_RMII_CLK_OUT_GPIO; // normally 16, 17 or 0
     ESP_LOGI(TAG, "Ethernet clock_config OUT gpio %d\n", CONFIG_ESP32_ETHERNET_RMII_CLK_OUT_GPIO);
 
     CPU_GPIO_ReservePin(CONFIG_ESP32_ETHERNET_RMII_CLK_OUT_GPIO, true); // REF_CLK OUT
@@ -211,7 +211,6 @@ esp_err_t NF_ESP32_InitialiseEthernet(uint8_t *pMacAdr)
 
     ESP_ERROR_CHECK_WITHOUT_ABORT(spi_bus_initialize(spi_host, &buscfg, SPI_DMA_CH_AUTO));
 
-#pragma
     // Define SPI interface to use
 #if CONFIG_ESP32_ETHERNET_SPI_MODULE_DM9051 == TRUE
     spi_device_interface_config_t devcfg = {
@@ -231,6 +230,7 @@ esp_err_t NF_ESP32_InitialiseEthernet(uint8_t *pMacAdr)
     ESP_LOGI(TAG, "Ethernet DM9051 spi\n");
 
 #elif CONFIG_ESP32_ETHERNET_SPI_MODULE_W5500 == TRUE
+
     // Use W5500 in mac mode
     spi_device_interface_config_t devcfg = {
         .command_bits = 16, // Actually it's the address phase in W5500 SPI frame
