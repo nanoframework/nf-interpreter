@@ -106,7 +106,6 @@ esp_err_t NF_ESP32_InitialiseEthernet(uint8_t *pMacAdr)
         (emac_rmii_clock_gpio_t)CONFIG_ESP32_ETHERNET_RMII_CLK_OUT_GPIO; // always 16 or 17
     ESP_LOGI(TAG, "Ethernet clock_config OUT gpio %d\n", CONFIG_ESP32_ETHERNET_RMII_CLK_OUT_GPIO);
 
-    CPU_GPIO_ReservePin(EMAC_CLK_OUT, true);                            // REF_CLK OUT
     CPU_GPIO_ReservePin(CONFIG_ESP32_ETHERNET_RMII_CLK_OUT_GPIO, true); // REF_CLK OUT
 #else
     ESP_LOGI(TAG, "Ethernet clock_config IN gpio %d\n", esp32_emac_config.clock_config.rmii.clock_gpio);
