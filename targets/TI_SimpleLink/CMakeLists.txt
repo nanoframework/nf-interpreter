@@ -96,7 +96,7 @@ if("${TARGET_SERIES}" STREQUAL "CC32xx")
     else()
         # TI XDCTools source was specified
 
-        message(STATUS "TI XDCTools ${TI_XDCTOOLS_VERSION} (source from: ${TI_XDCTOOLS_SOURCE})")
+        message(STATUS "TI XDCTools (source from: ${TI_XDCTOOLS_SOURCE})")
 
         FetchContent_Declare(
             ti_xdctools
