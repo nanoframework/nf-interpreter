@@ -76,7 +76,7 @@ esp_err_t NF_ESP32_InitialiseEthernet(uint8_t *pMacAdr)
     eth_phy_config_t phy_config = ETH_PHY_DEFAULT_CONFIG();
     phy_config.phy_addr = CONFIG_ESP32_ETHERNET_PHY_ADDR;
 
-    // If not SPI then must be 
+// If not SPI then must be 
 // Internal Ethernet controller
 #if !defined(CONFIG_ESP32_ETHERNET_SPI) || CONFIG_ESP32_ETHERNET_SPI == FALSE
 
@@ -97,7 +97,6 @@ esp_err_t NF_ESP32_InitialiseEthernet(uint8_t *pMacAdr)
         phy_config.reset_gpio_num,
         phy_config.reset_timeout_ms,
         phy_config.phy_addr);
-
 
     // Set Clock modes to override whats in sdkconfig
 #if defined(CONFIG_ESP32_ETHERNET_RMII_CLK_OUT_GPIO) && CONFIG_ESP32_ETHERNET_RMII_CLK_OUT_GPIO != -1
@@ -181,8 +180,8 @@ esp_err_t NF_ESP32_InitialiseEthernet(uint8_t *pMacAdr)
     spi_host_device_t host = SPI3_HOST;
 #endif
 
-#ifdef ESP32_ETHERNET_SPI_RST_GPIO
-    phy_config.reset_gpio_num = ESP32_ETHERNET_SPI_RST_GPIO;
+#ifdef CONFIG_ESP32_ETHERNET_SPI_RST_GPIO
+    phy_config.reset_gpio_num = CONFIG_ESP32_ETHERNET_SPI_RST_GPIO;
 #else
     phy_config.reset_gpio_num = -1;
 #endif
