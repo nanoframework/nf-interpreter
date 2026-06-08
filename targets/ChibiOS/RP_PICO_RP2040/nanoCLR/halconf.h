@@ -355,7 +355,7 @@
  * @note    Time is in milliseconds.
  */
 #if !defined(MMC_IDLE_TIMEOUT_MS) || defined(__DOXYGEN__)
-#define MMC_IDLE_TIMEOUT_MS 1000
+#define MMC_IDLE_TIMEOUT_MS                 1000
 #endif
 
 /**
@@ -374,7 +374,7 @@
  * @note    Attempts are performed at 10mS intervals.
  */
 #if !defined(SDC_INIT_RETRY) || defined(__DOXYGEN__)
-#define SDC_INIT_RETRY 100
+#define SDC_INIT_RETRY                      100
 #endif
 
 /**
@@ -400,14 +400,14 @@
  * @brief   OCR initialization constant for V20 cards.
  */
 #if !defined(SDC_INIT_OCR_V20) || defined(__DOXYGEN__)
-#define SDC_INIT_OCR_V20 0x50FF8000U
+#define SDC_INIT_OCR_V20                    0x50FF8000U
 #endif
 
 /**
  * @brief   OCR initialization constant for non-V20 cards.
  */
 #if !defined(SDC_INIT_OCR) || defined(__DOXYGEN__)
-#define SDC_INIT_OCR 0x80100000U
+#define SDC_INIT_OCR                        0x80100000U
 #endif
 
 /*===========================================================================*/
@@ -420,7 +420,7 @@
  *          default configuration.
  */
 #if !defined(SERIAL_DEFAULT_BITRATE) || defined(__DOXYGEN__)
-#define SERIAL_DEFAULT_BITRATE 38400
+#define SERIAL_DEFAULT_BITRATE              38400
 #endif
 
 /**
@@ -431,7 +431,7 @@
  *          buffers.
  */
 #if !defined(SERIAL_BUFFERS_SIZE) || defined(__DOXYGEN__)
-#define SERIAL_BUFFERS_SIZE 16
+#define SERIAL_BUFFERS_SIZE                 16
 #endif
 
 /*===========================================================================*/
@@ -444,7 +444,7 @@
  *          default configuration.
  */
 #if !defined(SIO_DEFAULT_BITRATE) || defined(__DOXYGEN__)
-#define SIO_DEFAULT_BITRATE 115200
+#define SIO_DEFAULT_BITRATE                 115200
 #endif
 
 /**
@@ -467,7 +467,7 @@
  *          target. This is sufficient for Wire Protocol traffic.
  */
 #if !defined(SERIAL_USB_BUFFERS_SIZE) || defined(__DOXYGEN__)
-#define SERIAL_USB_BUFFERS_SIZE 64
+#define SERIAL_USB_BUFFERS_SIZE             64
 #endif
 
 /**
@@ -478,7 +478,7 @@
  *          traffic.
  */
 #if !defined(SERIAL_USB_BUFFERS_NUMBER) || defined(__DOXYGEN__)
-#define SERIAL_USB_BUFFERS_NUMBER 1
+#define SERIAL_USB_BUFFERS_NUMBER           1
 #endif
 
 /*===========================================================================*/
@@ -513,7 +513,7 @@
  * @note    Disabling this option saves both code and data space.
  */
 #if !defined(SPI_SELECT_MODE) || defined(__DOXYGEN__)
-#define SPI_SELECT_MODE SPI_SELECT_MODE_LINE
+#define SPI_SELECT_MODE                     SPI_SELECT_MODE_LINE
 #endif
 
 /*===========================================================================*/
