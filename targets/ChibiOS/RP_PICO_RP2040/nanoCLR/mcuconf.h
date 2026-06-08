@@ -32,80 +32,80 @@
 /*
  * HAL driver system settings.
  */
-#define RP_NO_INIT             FALSE
-#define RP_CORE1_START         FALSE
-#define RP_CORE1_VECTORS_TABLE _vectors
-#define RP_CORE1_ENTRY_POINT   _crt0_c1_entry
-#define RP_CORE1_STACK_END     __c1_main_stack_end__
+#define RP_NO_INIT                          FALSE
+#define RP_CORE1_START                      FALSE
+#define RP_CORE1_VECTORS_TABLE              _vectors
+#define RP_CORE1_ENTRY_POINT                _crt0_c1_entry
+#define RP_CORE1_STACK_END                  __c1_main_stack_end__
 
 /*
  * IRQ system settings.
  */
-#define RP_IRQ_SYSTICK_PRIORITY       2
-#define RP_IRQ_TIMER0_ALARM0_PRIORITY 2
-#define RP_IRQ_TIMER0_ALARM1_PRIORITY 2
-#define RP_IRQ_TIMER0_ALARM2_PRIORITY 2
-#define RP_IRQ_TIMER0_ALARM3_PRIORITY 2
-#define RP_IRQ_UART0_PRIORITY         3
-#define RP_IRQ_UART1_PRIORITY         3
-#define RP_IRQ_SPI0_PRIORITY          2
-#define RP_IRQ_SPI1_PRIORITY          2
-#define RP_IRQ_I2C0_PRIORITY          2
-#define RP_IRQ_I2C1_PRIORITY          2
-#define RP_IRQ_RTC_PRIORITY           2
+#define RP_IRQ_SYSTICK_PRIORITY             2
+#define RP_IRQ_TIMER0_ALARM0_PRIORITY       2
+#define RP_IRQ_TIMER0_ALARM1_PRIORITY       2
+#define RP_IRQ_TIMER0_ALARM2_PRIORITY       2
+#define RP_IRQ_TIMER0_ALARM3_PRIORITY       2
+#define RP_IRQ_UART0_PRIORITY               3
+#define RP_IRQ_UART1_PRIORITY               3
+#define RP_IRQ_SPI0_PRIORITY                2
+#define RP_IRQ_SPI1_PRIORITY                2
+#define RP_IRQ_I2C0_PRIORITY                2
+#define RP_IRQ_I2C1_PRIORITY                2
+#define RP_IRQ_RTC_PRIORITY                 2
 
 /*
  * USB driver system settings.
  */
-#define RP_USB_USE_USB1      TRUE
-#define RP_IRQ_USB0_PRIORITY 2
+#define RP_USB_USE_USB1                     TRUE
+#define RP_IRQ_USB0_PRIORITY                2
 
 /*
  * SIO driver system settings.
  */
-#define RP_SIO_USE_UART0 FALSE
-#define RP_SIO_USE_UART1 FALSE
+#define RP_SIO_USE_UART0                    FALSE
+#define RP_SIO_USE_UART1                    FALSE
 
 /*
  * UART driver system settings.
  */
-#define RP_UART_USE_UART0 TRUE
-#define RP_UART_USE_UART1 TRUE
+#define RP_UART_USE_UART0                   TRUE
+#define RP_UART_USE_UART1                   TRUE
 
 /*
  * SPI driver system settings.
  */
-#define RP_SPI_USE_SPI0            TRUE
-#define RP_SPI_USE_SPI1            TRUE
-#define RP_SPI_SPI0_RX_DMA_CHANNEL RP_DMA_CHANNEL_ID_ANY
-#define RP_SPI_SPI0_TX_DMA_CHANNEL RP_DMA_CHANNEL_ID_ANY
-#define RP_SPI_SPI1_RX_DMA_CHANNEL RP_DMA_CHANNEL_ID_ANY
-#define RP_SPI_SPI1_TX_DMA_CHANNEL RP_DMA_CHANNEL_ID_ANY
-#define RP_SPI_SPI0_DMA_PRIORITY   1
-#define RP_SPI_SPI1_DMA_PRIORITY   1
+#define RP_SPI_USE_SPI0                     TRUE
+#define RP_SPI_USE_SPI1                     TRUE
+#define RP_SPI_SPI0_RX_DMA_CHANNEL          RP_DMA_CHANNEL_ID_ANY
+#define RP_SPI_SPI0_TX_DMA_CHANNEL          RP_DMA_CHANNEL_ID_ANY
+#define RP_SPI_SPI1_RX_DMA_CHANNEL          RP_DMA_CHANNEL_ID_ANY
+#define RP_SPI_SPI1_TX_DMA_CHANNEL          RP_DMA_CHANNEL_ID_ANY
+#define RP_SPI_SPI0_DMA_PRIORITY            1
+#define RP_SPI_SPI1_DMA_PRIORITY            1
 #define RP_SPI_DMA_ERROR_HOOK(spip)
 
 /*
  * I2C driver system settings.
  */
-#define RP_I2C_USE_I2C0 TRUE
-#define RP_I2C_USE_I2C1 TRUE
+#define RP_I2C_USE_I2C0                     TRUE
+#define RP_I2C_USE_I2C1                     TRUE
 
 /*
  * PWM driver system settings.
  */
-#define RP_PWM_USE_PWM0 TRUE
-#define RP_PWM_USE_PWM1 TRUE
-#define RP_PWM_USE_PWM2 TRUE
-#define RP_PWM_USE_PWM3 TRUE
-#define RP_PWM_USE_PWM4 TRUE
-#define RP_PWM_USE_PWM5 TRUE
-#define RP_PWM_USE_PWM6 TRUE
-#define RP_PWM_USE_PWM7 TRUE
+#define RP_PWM_USE_PWM0                     TRUE
+#define RP_PWM_USE_PWM1                     TRUE
+#define RP_PWM_USE_PWM2                     TRUE
+#define RP_PWM_USE_PWM3                     TRUE
+#define RP_PWM_USE_PWM4                     TRUE
+#define RP_PWM_USE_PWM5                     TRUE
+#define RP_PWM_USE_PWM6                     TRUE
+#define RP_PWM_USE_PWM7                     TRUE
 
 /*
  * ADC driver system settings.
  */
-#define RP_ADC_USE_ADC1 TRUE
+#define RP_ADC_USE_ADC1                     TRUE
 
 #endif /* MCUCONF_H */

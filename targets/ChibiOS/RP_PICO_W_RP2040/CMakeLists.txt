@@ -9,10 +9,6 @@ FetchContent_GetProperties(chibios)
 include(binutils.common)
 include(binutils.ChibiOS)
 
-if(NOT DEFINED RP2040_COMMON OR RP2040_COMMON STREQUAL "")
-    set(RP2040_COMMON "${CMAKE_SOURCE_DIR}/targets/ChibiOS/_RP2040")
-endif()
-
 # RP2040 target-local sources and include directories
 list(APPEND CMAKE_PREFIX_PATH "${CMAKE_CURRENT_SOURCE_DIR}")
 list(APPEND CMAKE_PREFIX_PATH "${CMAKE_CURRENT_SOURCE_DIR}/common")
