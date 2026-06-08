@@ -61,7 +61,7 @@ jobs:
   ##############################
   - job: Check_Build_Options
     pool:
-      vmImage: "windows-latest"
+      vmImage: "ubuntu-latest"
 
     variables:
       DOTNET_NOLOGO: true
@@ -90,11 +90,11 @@ jobs:
           else
           {
             # get PR details, if this is a PR
-            if($env:System_PullRequest_PullRequestId -ne $null)
+            if($env:SYSTEM_PULLREQUEST_PULLREQUESTID -ne $null)
             {
               Write-Host "##[command] **This is a PR build**"
 
-              $pr = Invoke-RestMethod -Uri "https://api.github.com/repos/nanoframework/nf-interpreter/pulls/$env:System_PullRequest_PullRequestNumber" -Header @{"Authorization"="$auth"} -ContentType "application/json" -Method GET
+              $pr = Invoke-RestMethod -Uri "https://api.github.com/repos/nanoframework/nf-interpreter/pulls/$(System.PullRequest.PullRequestNumber)" -Header @{"Authorization"="$auth"} -ContentType "application/json" -Method GET
 
               # check if this is a version update PR, if so, skip build
               if( ($pr.user.login -eq "nfbot") -and ($pr.title -like "*[version update]*") )
@@ -142,23 +142,23 @@ jobs:
           {
               # this is a release prep so NO build
           }
-          elseif($env:Build_Reason -eq "Manual")
+          elseif("$(Build.Reason)" -eq "Manual")
           {
-              # this is a manual build, no need to check anything 
+              # this is a manual build, no need to check anything
               Write-host "##[command] Manual build"
-          }      
+          }
           else
           {
               # check if this build was triggered by the pipeline itself
-              if($env:Build_Reason -eq "Manual")
+              if("$(Build.Reason)" -eq "Manual")
               {
-                  # this is a manual build, no need to check anything 
+                  # this is a manual build, no need to check anything
                   Write-host "##[command] Manual build"
               }
-              if($env:System_PullRequest_PullRequestId -ne $null)
+              if($env:SYSTEM_PULLREQUEST_PULLREQUESTID -ne $null)
               {
                   # get files changed in PR, if this is a PR
-                  $commit = Invoke-RestMethod -Uri "https://api.github.com/repos/nanoframework/nf-interpreter/pulls/$env:System_PullRequest_PullRequestNumber/files" -Header @{"Authorization"="$auth"} -ContentType "application/json" -Method GET
+                  $commit = Invoke-RestMethod -Uri "https://api.github.com/repos/nanoframework/nf-interpreter/pulls/$(System.PullRequest.PullRequestNumber)/files" -Header @{"Authorization"="$auth"} -ContentType "application/json" -Method GET
 
                   # filter removed files              
                   $files = $commit.where{$_.status -ne 'removed'}
@@ -300,15 +300,14 @@ jobs:
           # 'encoded token' is the Base64 of the string "nfbot:personal-token"
           $auth = "basic $([System.Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes("nfbot:$(GitHubToken)")))"
 
-          cd "$env:Agent_TempDirectory" > $null
+          cd "$(Agent.TempDirectory)" > $null
 
-          git init "$env:Agent_TempDirectory\repo"
+          git init "$(Agent.TempDirectory)/repo"
           cd repo > $null
-          git remote add origin "$env:Build_Repository_Uri"
+          git remote add origin "$(Build.Repository.Uri)"
           git config --global gc.auto 0
           git config --global user.name nfbot
           git config --global user.email nanoframework@outlook.com
-          git config --global core.autocrlf true
           git -c http.extraheader="AUTHORIZATION: $auth" fetch --progress origin
 
           git checkout develop
@@ -324,7 +323,7 @@ jobs:
 
           # start PR for release
           $prRequestBody = @{title="Release $branch";body="";head="$branch";base="main"} | ConvertTo-Json
-          $githubApiEndpoint = "https://api.github.com/repos/$env:Build_Repository_Name/pulls"
+          $githubApiEndpoint = "https://api.github.com/repos/$(Build.Repository.Name)/pulls"
           [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 
           $headers = @{}
@@ -372,7 +371,7 @@ jobs:
       - Check_Build_Options
 
     pool:
-      vmImage: "windows-latest"
+      vmImage: "ubuntu-latest"
 
     steps:
       - checkout: self
@@ -409,7 +408,7 @@ jobs:
       - Check_Code_Style
 
     pool:
-      vmImage: "windows-latest"
+      vmImage: "ubuntu-latest"
 
     strategy:
       matrix:
@@ -478,7 +477,7 @@ jobs:
       - Check_Code_Style
 
     pool:
-      vmImage: "windows-latest"
+      vmImage: "ubuntu-latest"
 
     strategy:
       matrix:
@@ -539,7 +538,7 @@ jobs:
       - Check_Code_Style
 
     pool:
-      vmImage: "windows-latest"
+      vmImage: "ubuntu-latest"
 
     # there is only a single ESP32 target, but this is already config as a matrix to make it easy to add new ones
     strategy:
@@ -638,7 +637,7 @@ jobs:
       DOTNET_NOLOGO: true
       # creates a counter and assigns it to the revision variable
       REVISION: $[counter('ESP32_1_17_0_versioncounter', 0)]
-      IDF_PATH: "D:/a/1/s/esp-idf"
+      IDF_PATH: "$(Agent.BuildDirectory)/s/esp-idf"
       PIP_CACHE_DIR: $(Pipeline.Workspace)/.pip
       TargetPlatform: "esp32"
       IDF_TAG: "v5.5.4"
@@ -668,7 +667,7 @@ jobs:
           sourceFolder: '$(Agent.BuildDirectory)/s/nf-interpreter/build/bootloader'
           Contents: |
             bootloader.bin
-          TargetFolder: '$(Build.ArtifactStagingDirectory)\$(TargetPublishName)'
+          TargetFolder: '$(Build.ArtifactStagingDirectory)/$(TargetPublishName)'
           flattenFolders: true
           ignoreMakeDirErrors: true
 
@@ -708,7 +707,7 @@ jobs:
       - Check_Code_Style
 
     pool:
-      vmImage: "windows-latest"
+      vmImage: "ubuntu-latest"
 
     strategy:
       matrix:
@@ -767,7 +766,7 @@ jobs:
       - Check_Code_Style
 
     pool:
-      vmImage: "windows-latest"
+      vmImage: "ubuntu-latest"
 
     strategy:
       matrix:
@@ -847,7 +846,7 @@ jobs:
       - Check_Code_Style
 
     pool:
-      vmImage: "windows-latest"
+      vmImage: "ubuntu-latest"
 
     strategy:
       matrix:
@@ -1675,7 +1674,7 @@ jobs:
       )
 
     pool:
-      vmImage: "windows-latest"
+      vmImage: "ubuntu-latest"
 
     steps:
       - checkout: self

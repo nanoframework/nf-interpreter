@@ -27,7 +27,7 @@ jobs:
   ##############################
   - job: Check_Build_Options
     pool:
-      vmImage: "windows-latest"
+      vmImage: "ubuntu-latest"
 
     variables:
       DOTNET_NOLOGO: true
@@ -41,7 +41,7 @@ jobs:
       # check build options
       - powershell: |
 
-          if($env:Build_Reason -eq "Schedule")
+          if("$(Build.Reason)" -eq "Schedule")
           {
               # scheduled daily build
               $now = [System.DateTime]::UtcNow.Date
@@ -74,7 +74,7 @@ jobs:
           }
           else
           {
-              if ($env:System_PullRequest_PullRequestId -ne $null)
+              if ($env:SYSTEM_PULLREQUEST_PULLREQUESTID -ne $null)
               {
                 "**This is a PR build**" | Write-Host
 
@@ -118,7 +118,7 @@ jobs:
 
           $auth = "basic $([System.Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes(":$(GitHubToken)")))"
 
-          $buildingPr = $env:System_PullRequest_PullRequestId -ne $null
+          $buildingPr = $env:SYSTEM_PULLREQUEST_PULLREQUESTID -ne $null
 
           # set default values
           echo "##vso[task.setvariable variable=BUILD_CHIBIOS;isOutput=true]false"  
@@ -135,7 +135,7 @@ jobs:
           else
           {
               # check if this build was triggered by the pipeline itself
-              if($env:Build_Reason -eq "Manual")
+              if("$(Build.Reason)" -eq "Manual")
               {
                   # this is a manual build, no need to check anything 
                   Write-host "##[command] Manual build"
@@ -145,7 +145,7 @@ jobs:
                 if($buildingPr)
                 {
                     # get files changed in PR, if this is a PR
-                    $commit = Invoke-RestMethod -Uri "https://api.github.com/repos/nanoframework/nf-interpreter/pulls/$env:System_PullRequest_PullRequestNumber/files" -Header @{"Authorization"="$auth"} -ContentType "application/json" -Method GET
+                    $commit = Invoke-RestMethod -Uri "https://api.github.com/repos/nanoframework/nf-interpreter/pulls/$(System.PullRequest.PullRequestNumber)/files" -Header @{"Authorization"="$auth"} -ContentType "application/json" -Method GET
 
                     # filter removed files              
                     $files = $commit.where{$_.status -ne 'removed'}
@@ -286,7 +286,7 @@ jobs:
       - Check_Build_Options
 
     pool:
-      vmImage: "windows-latest"
+      vmImage: "ubuntu-latest"
 
     strategy:
       matrix:
@@ -365,7 +365,7 @@ jobs:
       - Check_Build_Options
 
     pool:
-      vmImage: "windows-latest"
+      vmImage: "ubuntu-latest"
 
     strategy:
       matrix:
@@ -602,7 +602,7 @@ jobs:
       DOTNET_NOLOGO: true
       # creates a counter and assigns it to the revision variable
       REVISION: $[counter('ESP32_1_17_0_versioncounter', 0)]
-      IDF_PATH: "D:/a/1/s/esp-idf"
+      IDF_PATH: "$(Agent.BuildDirectory)/s/esp-idf"
       PIP_CACHE_DIR: $(Pipeline.Workspace)/.pip
       TargetPlatform: "esp32"
       IDF_TAG: "v5.5.4"
@@ -632,7 +632,7 @@ jobs:
           sourceFolder: '$(Agent.BuildDirectory)/s/nf-interpreter/build/bootloader'
           Contents: |
             bootloader.bin
-          TargetFolder: '$(Build.ArtifactStagingDirectory)\$(TargetPublishName)'
+          TargetFolder: '$(Build.ArtifactStagingDirectory)/$(TargetPublishName)'
           flattenFolders: true
           ignoreMakeDirErrors: true
 
@@ -666,7 +666,7 @@ jobs:
       - Check_Build_Options
 
     pool:
-      vmImage: "windows-latest"
+      vmImage: "ubuntu-latest"
 
     strategy:
       matrix:
@@ -719,7 +719,7 @@ jobs:
       - Check_Build_Options
 
     pool:
-      vmImage: "windows-latest"
+      vmImage: "ubuntu-latest"
 
     strategy:
       matrix:
@@ -771,7 +771,7 @@ jobs:
       )
 
     pool:
-      vmImage: "windows-latest"
+      vmImage: "ubuntu-latest"
 
     steps:
       - checkout: self
