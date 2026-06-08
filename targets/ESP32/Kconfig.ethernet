@@ -103,6 +103,7 @@ endchoice
 
 config ESP32_ETHERNET_SPI_HOST
     int "SPI host (2 = SPI2_HOST, 3 = SPI3_HOST)"
+    range 2 3
     default 2
 
 config ESP32_ETHERNET_SPI_CLOCK_MHZ
