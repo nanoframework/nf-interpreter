@@ -274,8 +274,7 @@ static void RxChar(UARTDriver *uartp, uint16_t c)
         else
         {
             // no read operation ongoing, so fire an event, if the available bytes are above the threshold
-            if (
-                (palUart->RxRingBuffer.Length() >= palUart->ReceivedBytesThreshold) &&
+            if ((palUart->RxRingBuffer.Length() >= palUart->ReceivedBytesThreshold) &&
                 (previousLength < palUart->ReceivedBytesThreshold))
             {
                 // Post a managed event with the port index and event code (check if there is a watch
