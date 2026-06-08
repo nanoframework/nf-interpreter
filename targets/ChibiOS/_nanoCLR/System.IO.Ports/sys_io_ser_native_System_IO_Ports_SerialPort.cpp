@@ -247,52 +247,49 @@ static void RxChar(UARTDriver *uartp, uint16_t c)
     // push char to the ring buffer
     // under heavy RX this can fail when full, in which case the new byte is dropped.
     // keep processing minimal in ISR path to avoid making the overload worse.
-    const uint32_t previousLength = palUart->RxRingBuffer.Length();
-    const bool pushed = (palUart->RxRingBuffer.Push((uint8_t)c) != 0);
-    const uint32_t currentLength = palUart->RxRingBuffer.Length();
+    uint32_t previousLength = palUart->RxRingBuffer.Length();
 
-    if (!pushed)
+    if (palUart->RxRingBuffer.Push((uint8_t)c) != 0)
     {
-        NATIVE_INTERRUPT_END
-        return;
-    }
-
-    // is there a read operation going on?
-    if (palUart->RxBytesToRead > 0)
-    {
-        // yes
-        // check if the requested bytes are available in the buffer...
-        //... or if the watch char was received
-        if ((palUart->RxRingBuffer.Length() >= palUart->RxBytesToRead) || (c == palUart->WatchChar))
+        // is there a read operation going on?
+        if (palUart->RxBytesToRead > 0)
         {
-            // reset Rx bytes to read count
-            palUart->RxBytesToRead = 0;
+            // yes
+            // check if the requested bytes are available in the buffer...
+            //... or if the watch char was received
+            if ((palUart->RxRingBuffer.Length() >= palUart->RxBytesToRead) || (c == palUart->WatchChar))
+            {
+                // reset Rx bytes to read count
+                palUart->RxBytesToRead = 0;
 
-            // fire event for Rx buffer complete
+                // fire event for Rx buffer complete
+                Events_Set(SYSTEM_EVENT_FLAG_COM_IN);
+            }
+        }
+        else if (palUart->NewLineChar > 0 && c == palUart->NewLineChar)
+        {
+            // fire event for new line char found
             Events_Set(SYSTEM_EVENT_FLAG_COM_IN);
         }
-    }
-    else if (palUart->NewLineChar > 0 && c == palUart->NewLineChar)
-    {
-        // fire event for new line char found
-        Events_Set(SYSTEM_EVENT_FLAG_COM_IN);
-    }
-    else
-    {
-        // no read operation ongoing, so fire an event, if the available bytes are above the threshold
-        if ((currentLength >= palUart->ReceivedBytesThreshold) && (previousLength < palUart->ReceivedBytesThreshold))
+        else
         {
-            // Post a managed event with the port index and event code (check if there is a watch
-            // char in the buffer or just any char)
-            // FIXME: check if callbacks are registered so this is called only if there is anyone listening otherwise
-            // don't bother.
-            // TODO: For that to happen ChibiOS callback has to accept arg which we would passing the GpioPin
-            // Notes: CLR_RT_HeapBlock (Gpio handler) See: http://www.chibios.com/forum/viewtopic.php?f=36&t=4798
-            PostManagedEvent(
-                EVENT_SERIAL,
-                0,
-                portIndex,
-                (c == palUart->WatchChar) ? SerialData_WatchChar : SerialData_Chars);
+            // no read operation ongoing, so fire an event, if the available bytes are above the threshold
+            if (
+                (palUart->RxRingBuffer.Length() >= palUart->ReceivedBytesThreshold) &&
+                (previousLength < palUart->ReceivedBytesThreshold))
+            {
+                // Post a managed event with the port index and event code (check if there is a watch
+                // char in the buffer or just any char)
+                // FIXME: check if callbacks are registered so this is called only if there is anyone listening
+                // otherwise don't bother.
+                // TODO: For that to happen ChibiOS callback has to accept arg which we would passing the GpioPin
+                // Notes: CLR_RT_HeapBlock (Gpio handler) See: http://www.chibios.com/forum/viewtopic.php?f=36&t=4798
+                PostManagedEvent(
+                    EVENT_SERIAL,
+                    0,
+                    portIndex,
+                    (c == palUart->WatchChar) ? SerialData_WatchChar : SerialData_Chars);
+            }
         }
     }
 
