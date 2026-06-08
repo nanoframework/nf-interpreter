@@ -131,11 +131,16 @@ steps:
           {
               "##[error] Failed" | Write-Host -ForegroundColor Red
 
-              $result = $_.Exception.Response.GetResponseStream()
-              $reader = New-Object System.IO.StreamReader($result)
-              $reader.BaseStream.Position = 0
-              $reader.DiscardBufferedData()
-              $responseBody = $reader.ReadToEnd()
+              # PowerShell 7 (Linux) surfaces the response body in ErrorDetails.Message;
+              # Windows PowerShell 5.x uses the GetResponseStream() pattern.
+              $responseBody = $_.ErrorDetails.Message
+              if ([string]::IsNullOrEmpty($responseBody) -and $null -ne $_.Exception.Response) {
+                  $stream = $_.Exception.Response.GetResponseStream()
+                  $reader = New-Object System.IO.StreamReader($stream)
+                  $reader.BaseStream.Position = 0
+                  $reader.DiscardBufferedData()
+                  $responseBody = $reader.ReadToEnd()
+              }
 
               "##[error] Error submitting PR: $responseBody" | Write-Host -ForegroundColor Red
 
