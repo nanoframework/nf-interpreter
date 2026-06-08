@@ -17,15 +17,15 @@ steps:
       TI_XDCTOOLS_VERSION="3_62_00_08"
       TI_XDCTOOLS_URL="https://software-dl.ti.com/dsps/dsps_public_sw/sdo_sb/targetcontent/rtsc/${TI_XDCTOOLS_VERSION}/exports/xdccore/xdctools_${TI_XDCTOOLS_VERSION}_core_linux.zip"
       curl -fL "$TI_XDCTOOLS_URL" -o /tmp/ti_xdctools.zip
-      mkdir -p /tmp/ti_xdctools
-      unzip -q /tmp/ti_xdctools.zip -d /tmp/ti_xdctools
-      chmod +x /tmp/ti_xdctools/xdctools_${TI_XDCTOOLS_VERSION}_core/xs
-      echo "##vso[task.setvariable variable=TI_XDCTOOLS_PATH]/tmp/ti_xdctools/xdctools_${TI_XDCTOOLS_VERSION}_core"
+      sudo mkdir -p /usr/local/bin/titools
+      sudo unzip -q /tmp/ti_xdctools.zip -d /tmp/ti_xdctools
+      sudo cp -r /tmp/ti_xdctools/xdctools_${TI_XDCTOOLS_VERSION}_core/. /usr/local/bin/titools/
+      sudo chmod +x /usr/local/bin/titools/xs
     displayName: Download TI XDC Tools for Linux
 
   - task: CMake@1
     inputs:
-      cmakeArgs: " --preset $(TargetBoard) -DCMAKE_BUILD_TYPE=MinSizeRel -DBUILD_VERSION=$(NBGV_VersionMajor).$(NBGV_VersionMinor).$(NBGV_BuildNumber).$(TARGET_BUILD_COUNTER) -DTARGET_BOARD=$(TargetBoard) -DTARGET_NAME=$(TargetPublishName) $(BuildOptions) -DTI_XDCTOOLS_SOURCE=$(TI_XDCTOOLS_PATH)"
+      cmakeArgs: " --preset $(TargetBoard) -DCMAKE_BUILD_TYPE=MinSizeRel -DBUILD_VERSION=$(NBGV_VersionMajor).$(NBGV_VersionMinor).$(NBGV_BuildNumber).$(TARGET_BUILD_COUNTER) -DTARGET_BOARD=$(TargetBoard) -DTARGET_NAME=$(TargetPublishName) $(BuildOptions) -DTI_XDCTOOLS_SOURCE=/usr/local/bin/titools"
       workingDirectory: ${{ parameters.repoDirectory }}
     displayName: Setup build with CMake
 
