@@ -11,6 +11,12 @@ steps:
     parameters:
       repoDirectory: ${{ parameters.repoDirectory }}
 
+  - bash: |
+      sudo dpkg --add-architecture i386
+      sudo apt-get update -q
+      sudo apt-get install -y libc6:i386 libncurses5:i386 libstdc++6:i386
+    displayName: Install 32-bit libraries for TI XDC Tools
+
   - task: CMake@1
     inputs:
       cmakeArgs: " --preset $(TargetBoard) -DCMAKE_BUILD_TYPE=MinSizeRel -DBUILD_VERSION=$(NBGV_VersionMajor).$(NBGV_VersionMinor).$(NBGV_BuildNumber).$(TARGET_BUILD_COUNTER) -DTARGET_BOARD=$(TargetBoard) -DTARGET_NAME=$(TargetPublishName) $(BuildOptions)"
