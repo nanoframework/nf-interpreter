@@ -61,6 +61,7 @@ steps:
         if(!(Get-Command $clangFormat -ErrorAction SilentlyContinue))
         {
           "Can't find clang-format executable!" | Write-Host -ForegroundColor Red
+          exit 1
         }
 
         # have clang-format parse each file source file
