@@ -384,7 +384,7 @@ static void event_handler(void *arg, esp_event_base_t event_base, int32_t event_
 
 #if LWIP_IPV6
                 {
-                    // Create IPV6 link local address for ETH interface                
+                    // Create IPV6 link local address for ETH interface
                     struct netif *netif = esp_netif_get_handle_from_ifkey("ETH_DEF")->lwip_netif;
                     if (netif != NULL)
                     {
