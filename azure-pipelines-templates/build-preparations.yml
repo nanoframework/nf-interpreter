@@ -12,13 +12,16 @@ steps:
     inputs:
       targetType: "inline"
       script: |
-        if([string]::IsNullOrEmpty($env:PackageName))
+        $packageName = if(-not [string]::IsNullOrEmpty($env:PackageName)) { $env:PackageName } else { $env:PACKAGENAME }
+        $targetBoard = if(-not [string]::IsNullOrEmpty($env:TargetBoard)) { $env:TargetBoard } else { $env:TARGETBOARD }
+
+        if([string]::IsNullOrEmpty($packageName))
         {
-          Write-Host "$("##vso[task.setvariable variable=TargetPublishName]")$env:TargetBoard"
+          Write-Host "$("##vso[task.setvariable variable=TargetPublishName]")$targetBoard"
         }
         else
         {
-          Write-Host "$("##vso[task.setvariable variable=TargetPublishName]")$env:PackageName"
+          Write-Host "$("##vso[task.setvariable variable=TargetPublishName]")$packageName"
         }
       errorActionPreference: "stop"
       failOnStderr: true
