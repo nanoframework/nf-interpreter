@@ -9,9 +9,12 @@ parameters:
 steps:
   - task: CopyFiles@2
     condition: >-
-      or(
-        succeeded(),
-        failed()
+      and(
+        ne(variables['TargetPublishName'], ''),
+        or(
+          succeeded(),
+          failed()
+        )
       )
     displayName: Copying SDKCONFIG
     inputs:
