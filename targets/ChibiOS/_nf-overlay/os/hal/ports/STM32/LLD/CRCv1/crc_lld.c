@@ -66,7 +66,7 @@ void crc_lld_start(const crcConfig *config)
 {
 
     // enable peripheral
-    rccEnableCRC(FALSE);
+    rccEnableCRC(false);
 
 #if (STM32_CRC_PROGRAMMABLE == TRUE) || defined(STM32F7XX) || defined(STM32L0XX) || defined(STM32H7XX)
 

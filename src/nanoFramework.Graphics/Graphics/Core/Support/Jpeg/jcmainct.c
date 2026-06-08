@@ -35,7 +35,7 @@ typedef struct {
 
     JDIMENSION cur_iMCU_row;  /* number of current iMCU row */
     JDIMENSION rowgroup_ctr;  /* counts row groups received in iMCU row */
-    boolean suspended;    /* remember if we suspended output */
+    bool suspended;    /* remember if we suspended output */
     J_BUF_MODE pass_mode;    /* current operating mode */
 
     /* If using just a strip buffer, this points to the entire set of buffers
@@ -82,7 +82,7 @@ start_pass_main(j_compress_ptr cinfo, J_BUF_MODE pass_mode)
 
     main1->cur_iMCU_row = 0;  /* initialize counters */
     main1->rowgroup_ctr = 0;
-    main1->suspended = FALSE;
+    main1->suspended = false;
     main1->pass_mode = pass_mode;  /* save mode for use by process_data */
 
     switch (pass_mode) {
@@ -148,7 +148,7 @@ process_data_simple_main(j_compress_ptr cinfo,
              */
             if (!main1->suspended) {
                 (*in_row_ctr)--;
-                main1->suspended = TRUE;
+                main1->suspended = true;
             }
             return;
         }
@@ -157,7 +157,7 @@ process_data_simple_main(j_compress_ptr cinfo,
          */
         if (main1->suspended) {
             (*in_row_ctr)++;
-            main1->suspended = FALSE;
+            main1->suspended = false;
         }
         main1->rowgroup_ctr = 0;
         main1->cur_iMCU_row++;
@@ -180,7 +180,7 @@ process_data_buffer_main(j_compress_ptr cinfo,
     my_main_ptr main = (my_main_ptr)cinfo->main;
     int ci;
     jpeg_component_info* compptr;
-    boolean writing = (main->pass_mode != JBUF_CRANK_DEST);
+    bool writing = (main->pass_mode != JBUF_CRANK_DEST);
 
     while (main->cur_iMCU_row < cinfo->total_iMCU_rows) {
         /* Realign the virtual buffers if at the start of an iMCU row. */
@@ -222,7 +222,7 @@ process_data_buffer_main(j_compress_ptr cinfo,
                  */
                 if (!main->suspended) {
                     (*in_row_ctr)--;
-                    main->suspended = TRUE;
+                    main->suspended = true;
                 }
                 return;
             }
@@ -231,7 +231,7 @@ process_data_buffer_main(j_compress_ptr cinfo,
              */
             if (main->suspended) {
                 (*in_row_ctr)++;
-                main->suspended = FALSE;
+                main->suspended = false;
             }
         }
 
@@ -249,7 +249,7 @@ process_data_buffer_main(j_compress_ptr cinfo,
  */
 
 GLOBAL(void)
-jinit_c_main_controller(j_compress_ptr cinfo, boolean need_full_buffer)
+jinit_c_main_controller(j_compress_ptr cinfo, bool need_full_buffer)
 {
     //my_main_ptr main;
     my_main_ptr main1;
@@ -300,4 +300,3 @@ jinit_c_main_controller(j_compress_ptr cinfo, boolean need_full_buffer)
         }
     }
 }
-

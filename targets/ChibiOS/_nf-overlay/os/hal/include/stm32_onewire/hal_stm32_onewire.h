@@ -92,13 +92,13 @@ extern "C" {
   uint8_t oneWireWriteByte(uint8_t sendbyte);
   uint8_t oneWireReadByte(void);
   void oneWireSerialNum(uint8_t* serialnum_buf, uint8_t do_read);
-  uint8_t oneWireAccess(void);
-  uint8_t oneWireBlock(uint8_t doReset, uint8_t* tran_buf, uint8_t tran_len);
-  uint8_t oneWireWriteMemory(uint8_t* buf, uint32_t ln, uint32_t adr);
-  uint8_t oneWireCopyScratchpad(uint32_t ln, uint32_t adr);
-  uint8_t oneWireWriteScratchpad(uint8_t* buf, uint32_t ln, uint32_t adr);
-  uint8_t oneWireReadPage(uint32_t start_pg, uint8_t* finalbuf);
-  uint8_t oneWireReadPageCRCEE77(uint32_t page, uint8_t *buff);
+  bool oneWireAccess(void);
+  bool oneWireBlock(uint8_t doReset, uint8_t* tran_buf, uint8_t tran_len);
+  bool oneWireWriteMemory(uint8_t* buf, uint32_t ln, uint32_t adr);
+  bool oneWireCopyScratchpad(uint32_t ln, uint32_t adr);
+  bool oneWireWriteScratchpad(uint8_t* buf, uint32_t ln, uint32_t adr);
+  bool oneWireReadPage(uint32_t start_pg, uint8_t* finalbuf);
+  bool oneWireReadPageCRCEE77(uint32_t page, uint8_t *buff);
   bool oneWireFindFirst (bool doReset, bool alarmOnly);
   bool oneWireFindNext (bool doReset, bool alarmOnly);
 

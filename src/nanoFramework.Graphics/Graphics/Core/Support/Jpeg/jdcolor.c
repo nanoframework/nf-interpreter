@@ -824,7 +824,7 @@ jinit_color_deconverter(j_decompress_ptr cinfo)
             cconvert->pub.color_convert = grayscale_convert;
             /* For color->grayscale conversion, only the Y (0) component is needed */
             for (ci = 1; ci < cinfo->num_components; ci++)
-                cinfo->comp_info[ci].component_needed = FALSE;
+                cinfo->comp_info[ci].component_needed = false;
         }
         else
             ERREXIT(cinfo, JERR_CONVERSION_NOTIMPL);
@@ -911,4 +911,3 @@ jinit_color_deconverter(j_decompress_ptr cinfo)
     else
         cinfo->output_components = cinfo->out_color_components;
 }
-

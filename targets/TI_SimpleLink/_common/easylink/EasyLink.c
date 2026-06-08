@@ -1152,7 +1152,7 @@ EasyLink_Status EasyLink_init(EasyLink_Params *params)
     /* Create a clock instance to periodically flush all RF commands */
     Clock_Params clkparams;
     Clock_Params_init(&clkparams);
-    clkparams.startFlag = FALSE;
+    clkparams.startFlag = false;
     clkparams.period    = EASYLINK_ACTIVITY_PROFILING_PREEMPT_TIMEOUT;
     clkparams.arg       = (xdc_UArg)rfHandle;
     EasyLink_activityClock = Clock_create((Clock_FuncPtr)activityPreemptCb,

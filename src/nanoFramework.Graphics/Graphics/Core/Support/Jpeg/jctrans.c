@@ -46,7 +46,7 @@ jpeg_write_coefficients(j_compress_ptr cinfo, jvirt_barray_ptr* coef_arrays)
     if (cinfo->global_state != CSTATE_START)
         ERREXIT1(cinfo, JERR_BAD_STATE, cinfo->global_state);
     /* Mark all tables to be written */
-    jpeg_suppress_tables(cinfo, FALSE);
+    jpeg_suppress_tables(cinfo, false);
     /* (Re)initialize error mgr and destination modules */
     (*cinfo->err->reset_error_mgr) ((j_common_ptr)cinfo);
     (*cinfo->dest->init_destination) (cinfo);
@@ -105,7 +105,7 @@ jpeg_copy_critical_parameters(j_decompress_ptr srcinfo,
             MEMCOPY((*qtblptr)->quantval,
                 srcinfo->quant_tbl_ptrs[tblno]->quantval,
                 SIZEOF((*qtblptr)->quantval));
-            (*qtblptr)->sent_table = FALSE;
+            (*qtblptr)->sent_table = false;
         }
     }
     /* Copy the source's per-component info.
@@ -290,7 +290,7 @@ start_pass_coef(j_compress_ptr cinfo, J_BUF_MODE pass_mode)
  */
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-parameter"
-METHODDEF(boolean)
+METHODDEF(bool)
 compress_output(j_compress_ptr cinfo, JSAMPIMAGE input_buf)
 {
     my_coef_ptr coef = (my_coef_ptr)cinfo->coef;
@@ -310,7 +310,7 @@ compress_output(j_compress_ptr cinfo, JSAMPIMAGE input_buf)
         buffer[ci] = (*cinfo->mem->access_virt_barray)
             ((j_common_ptr)cinfo, coef->whole_image[compptr->component_index],
                 coef->iMCU_row_num * compptr->v_samp_factor,
-                (JDIMENSION)compptr->v_samp_factor, FALSE);
+                (JDIMENSION)compptr->v_samp_factor, false;
     }
 
     /* Loop to process one whole iMCU row */
@@ -355,7 +355,7 @@ compress_output(j_compress_ptr cinfo, JSAMPIMAGE input_buf)
                 /* Suspension forced; update state counters and exit */
                 coef->MCU_vert_offset = yoffset;
                 coef->mcu_ctr = MCU_col_num;
-                return FALSE;
+                return false;
             }
         }
         /* Completed an MCU row, but perhaps not an iMCU row */
@@ -364,7 +364,7 @@ compress_output(j_compress_ptr cinfo, JSAMPIMAGE input_buf)
     /* Completed the iMCU row, advance counters for next one */
     coef->iMCU_row_num++;
     start_iMCU_row(cinfo);
-    return TRUE;
+    return true;
 }
 
 #pragma GCC diagnostic pop
@@ -404,4 +404,3 @@ transencode_coef_controller(j_compress_ptr cinfo,
         coef->dummy_buffer[i] = buffer + i;
     }
 }
-

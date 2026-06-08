@@ -848,7 +848,7 @@ void SOCKETS_CloseConnections()
 {
     NATIVE_PROFILE_PAL_COM();
     // FIXME
-    // Sockets_SimpleLink_Driver::CloseConnections(FALSE);
+    // Sockets_SimpleLink_Driver::CloseConnections(false);
 }
 
 HRESULT SOCK_CONFIGURATION_LoadAdapterConfiguration(HAL_Configuration_NetworkInterface *config, uint32_t interfaceIndex)
@@ -864,7 +864,7 @@ HRESULT SOCK_CONFIGURATION_UpdateAdapterConfiguration(
 {
     NATIVE_PROFILE_PAL_COM();
     HRESULT hr = S_OK;
-    bool success = FALSE;
+    bool success = false;
 
     const uint32_t c_reInitFlag = NetworkInterface_UpdateOperation_Dhcp | NetworkInterface_UpdateOperation_DhcpRenew |
                                   NetworkInterface_UpdateOperation_Mac;

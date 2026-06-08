@@ -16,7 +16,7 @@ Sockets_NETX_Driver g_Sockets_NETX_Driver;
 SOCK_SOCKET SOCK_socket(int family, int type, int protocol)
 {
     NATIVE_PROFILE_PAL_COM();
-    return Sockets_NETX_Driver::Socket(family, type, protocol, FALSE);
+    return Sockets_NETX_Driver::Socket(family, type, protocol, false;
 }
 int SOCK_bind(SOCK_SOCKET socket, const struct SOCK_sockaddr *address, int addressLen)
 {
@@ -51,7 +51,7 @@ int SOCK_listen(SOCK_SOCKET socket, int backlog)
 SOCK_SOCKET SOCK_accept(SOCK_SOCKET socket, struct SOCK_sockaddr *address, int *addressLen)
 {
     NATIVE_PROFILE_PAL_COM();
-    return Sockets_NETX_Driver::Accept(socket, address, addressLen, FALSE);
+    return Sockets_NETX_Driver::Accept(socket, address, addressLen, false);
 }
 int SOCK_shutdown(SOCK_SOCKET socket, int how)
 {
@@ -144,7 +144,7 @@ bool Network_Uninitialize()
 void SOCKETS_CloseConnections()
 {
     NATIVE_PROFILE_PAL_COM();
-    Sockets_NETX_Driver::CloseConnections(FALSE);
+    Sockets_NETX_Driver::CloseConnections(false);
 }
 
 HRESULT SOCK_CONFIGURATION_LoadAdapterConfiguration(HAL_Configuration_NetworkInterface *config, uint32_t interfaceIndex)
@@ -160,7 +160,7 @@ HRESULT SOCK_CONFIGURATION_UpdateAdapterConfiguration(
 {
     NATIVE_PROFILE_PAL_COM();
     HRESULT hr = S_OK;
-    bool success = FALSE;
+    bool success = false;
 
     const uint32_t c_reInitFlag = NetworkInterface_UpdateOperation_Dhcp | NetworkInterface_UpdateOperation_DhcpRenew |
                                   NetworkInterface_UpdateOperation_Mac;
@@ -350,7 +350,7 @@ SOCK_SOCKET Sockets_NETX_Driver::Accept(SOCK_SOCKET socket, struct SOCK_sockaddr
 
     if (ret != SOCK_SOCKET_ERROR)
     {
-        RegisterSocket(ret, TRUE, fDebug);
+        RegisterSocket(ret, true, fDebug);
     }
 
     return ret;
@@ -401,7 +401,7 @@ bool Sockets_NETX_Driver::Initialize()
 
     if (!s_initialized)
     {
-        g_Sockets_NETX_Driver.m_fShuttingDown = FALSE;
+        g_Sockets_NETX_Driver.m_fShuttingDown = false;
 
         g_Sockets_NETX_Driver.m_cntSockets = 0;
 
@@ -416,7 +416,7 @@ bool Sockets_NETX_Driver::Initialize()
 
         SSL_Initialize();
 
-        s_initialized = TRUE;
+        s_initialized = true;
     }
 
     SOCKET_CHECK_EXIT_bool();
@@ -433,14 +433,14 @@ __nfweak void Sockets_NETX_Driver::Debugger_Uninitialize()
 bool Sockets_NETX_Driver::Uninitialize()
 {
     NATIVE_PROFILE_PAL_COM();
-    bool ret = TRUE;
+    bool ret = true;
 
     if (s_initialized)
     {
         Debugger_Abort();
 
         // close all connections (including debugger sockets)
-        CloseConnections(TRUE);
+        CloseConnections(true);
 
         SSL_Uninitialize();
 
@@ -448,9 +448,9 @@ bool Sockets_NETX_Driver::Uninitialize()
 
         ret = HAL_SOCK_Uninitialize();
 
-        s_initialized = FALSE;
-        s_wirelessInitialized = FALSE;
-        s_discoveryInitialized = FALSE;
+        s_initialized = false;
+        s_wirelessInitialized = false;
+        s_discoveryInitialized = false;
     }
 
     return ret;
@@ -472,7 +472,7 @@ void Sockets_NETX_Driver::RegisterSocket(SOCK_SOCKET sock, bool selectable, bool
     NATIVE_PROFILE_PAL_COM();
     if (sock == SOCK_SOCKET_ERROR)
     {
-        ASSERT(FALSE);
+        ASSERT(false);
         return;
     }
 
@@ -533,6 +533,6 @@ void Sockets_NETX_Driver::UnregisterSocket(SOCK_SOCKET sock)
 //     return;
 // }
 
-bool Sockets_NETX_Driver::s_initialized = FALSE;
-bool Sockets_NETX_Driver::s_wirelessInitialized = FALSE;
-bool Sockets_NETX_Driver::s_discoveryInitialized = FALSE;
+bool Sockets_NETX_Driver::s_initialized = false;
+bool Sockets_NETX_Driver::s_wirelessInitialized = false;
+bool Sockets_NETX_Driver::s_discoveryInitialized = false;

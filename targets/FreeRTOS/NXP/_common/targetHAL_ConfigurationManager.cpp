@@ -115,14 +115,14 @@ bool ConfigurationManager_GetConfigurationBlock(
             // there is no network config block, init one with default settings
             if (!InitialiseNetworkDefaultConfig(NULL, 0))
             {
-                return FALSE;
+                return false;
             }
         }
         else
         {
             if ((configurationIndex + 1) > g_TargetConfiguration.NetworkInterfaceConfigs->Count)
             {
-                return FALSE;
+                return false;
             }
         }
 
@@ -137,7 +137,7 @@ bool ConfigurationManager_GetConfigurationBlock(
         if (g_TargetConfiguration.Wireless80211Configs->Count == 0 ||
             (configurationIndex + 1) > g_TargetConfiguration.Wireless80211Configs->Count)
         {
-            return FALSE;
+            return false;
         }
 
         // set block size
@@ -151,7 +151,7 @@ bool ConfigurationManager_GetConfigurationBlock(
         if (g_TargetConfiguration.CertificateStore->Count == 0 ||
             (configurationIndex + 1) > g_TargetConfiguration.CertificateStore->Count)
         {
-            return FALSE;
+            return false;
         }
 
         // get block address
@@ -166,7 +166,7 @@ bool ConfigurationManager_GetConfigurationBlock(
     // copy the config block content to the pointer in the argument
     memcpy(configurationBlock, blockAddress, sizeOfBlock);
 
-    return TRUE;
+    return true;
 }
 
 // Stores the configuration block to the configuration flash sector
@@ -181,8 +181,8 @@ bool ConfigurationManager_StoreConfigurationBlock(
     bool done)
 {
     ByteAddress storageAddress = 0;
-    bool requiresEnumeration = FALSE;
-    bool success = FALSE;
+    bool requiresEnumeration = false;
+    bool success = false;
 
     if (configuration == DeviceConfigurationOption_Network)
     {
@@ -191,7 +191,7 @@ bool ConfigurationManager_StoreConfigurationBlock(
         {
             // there is no room for this block, or there are no blocks stored at all
             // failing the operation
-            return FALSE;
+            return false;
         }
 
         // set storage address from block address, plus the requested offset
@@ -213,7 +213,7 @@ bool ConfigurationManager_StoreConfigurationBlock(
         {
             // there is no room for this block, or there are no blocks stored at all
             // failing the operation
-            return FALSE;
+            return false;
         }
 
         // set storage address from block address, plus the requested offset
@@ -235,7 +235,7 @@ bool ConfigurationManager_StoreConfigurationBlock(
         {
             // there is no room for this block, or there are no blocks stored at all
             // failing the operation
-            return FALSE;
+            return false;
         }
 
         // set storage address from block address, plus the requested offset
@@ -260,12 +260,12 @@ bool ConfigurationManager_StoreConfigurationBlock(
         storageAddress = (ByteAddress)&__nanoConfig_start__ + offset;
 
         // always enumerate the blocks again after storing it
-        requiresEnumeration = TRUE;
+        requiresEnumeration = true;
 
         // for save all the block size has to be provided, check that
         if (blockSize == 0)
         {
-            return FALSE;
+            return false;
         }
     }
 
@@ -370,7 +370,7 @@ UpdateConfigurationResult ConfigurationManager_UpdateConfigurationBlock(
         }
 
         // erase config sector
-        if (iMXRTFlexSPIDriver_EraseBlock(NULL, (uint32_t)&__nanoConfig_start__) == TRUE)
+        if (iMXRTFlexSPIDriver_EraseBlock(NULL, (uint32_t)&__nanoConfig_start__) == true)
         {
             // flash block is erased
 
@@ -418,7 +418,7 @@ bool InitialiseNetworkDefaultConfig(HAL_Configuration_NetworkInterface *pconfig,
     (void)configurationIndex;
 
     // can't create a "default" network config because we are lacking definition of a MAC address
-    return FALSE;
+    return false;
 }
 
 // default implementation

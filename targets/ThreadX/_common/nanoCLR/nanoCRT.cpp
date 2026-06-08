@@ -140,14 +140,14 @@ int hal_strcpy_s(char *strDst, size_t sizeInBytes, const char *strSrc)
     size_t len;
     if (strDst == NULL || strSrc == NULL || sizeInBytes == 0)
     {
-        _ASSERTE(FALSE);
+        _ASSERTE(false);
         return 1;
     }
 
     len = hal_strlen_s(strSrc);
     if (sizeInBytes < len + 1)
     {
-        _ASSERTE(FALSE);
+        _ASSERTE(false);
         return 1;
     }
 
@@ -163,13 +163,13 @@ int hal_strncpy_s(char *strDst, size_t sizeInBytes, const char *strSrc, size_t c
 #undef strncpy
     if (strDst == NULL || strSrc == NULL || sizeInBytes == 0)
     {
-        _ASSERTE(FALSE);
+        _ASSERTE(false);
         return 1;
     }
 
     if (sizeInBytes < count + 1)
     {
-        _ASSERTE(FALSE);
+        _ASSERTE(false);
         strDst[0] = 0;
         return 1;
     }
@@ -197,7 +197,7 @@ int hal_strncmp_s(const char *str1, const char *str2, size_t num)
 #undef strncmp
     if (str1 == NULL || str2 == NULL)
     {
-        _ASSERTE(FALSE);
+        _ASSERTE(false);
         return 1;
     }
 

@@ -285,10 +285,10 @@ bool LWIP_SOCKETS_Driver::InitializeInterfaceIndex(
         }
 #endif
 
-        return TRUE;
+        return true;
     }
 
-    return FALSE;
+    return false;
 }
 
 bool LWIP_SOCKETS_Driver::Initialize()
@@ -336,7 +336,7 @@ bool LWIP_SOCKETS_Driver::Initialize()
         if (interfaceNumber == SOCK_SOCKET_ERROR)
         {
             g_LWIP_SOCKETS_Driver.m_interfaces[i].m_interfaceNumber = -1;
-            DEBUG_HANDLE_SOCKET_ERROR("Network init", FALSE);
+            DEBUG_HANDLE_SOCKET_ERROR("Network init", false);
             continue;
         }
 
@@ -365,7 +365,7 @@ bool LWIP_SOCKETS_Driver::Uninitialize()
 
     nanoHAL_Network_Uninitialize();
 
-    return TRUE;
+    return true;
 }
 
 extern void debug_printf(const char *format, ...);

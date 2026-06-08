@@ -452,7 +452,7 @@ bool BlockStorageStream_Read(BlockStorageStream *stream, unsigned char **buffer,
         {
             // TODO FIXME
             // need to check implementation of this call to get pointers to stream continuation
-            // if(!NextStream()) return FALSE;
+            // if(!NextStream()) return false;
         }
 
         if ((stream->CurrentIndex + readLen) > stream->Length)

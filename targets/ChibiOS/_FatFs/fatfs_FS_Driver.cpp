@@ -51,7 +51,7 @@ static void FreeFatFsByVolumeId(const VOLUME_ID *volumeId);
 bool FATFS_FS_Driver::LoadMedia(const void *driverInterface)
 {
     (void)driverInterface;
-    return TRUE;
+    return true;
 }
 
 STREAM_DRIVER_DETAILS *FATFS_FS_Driver::DriverDetails(const VOLUME_ID *volume)
@@ -59,7 +59,7 @@ STREAM_DRIVER_DETAILS *FATFS_FS_Driver::DriverDetails(const VOLUME_ID *volume)
     (void)volume;
 
     static STREAM_DRIVER_DETAILS driverDetail =
-        {DRIVER_BUFFERED_IO, fatfs_inputBuffer, fatfs_outputBuffer, FF_MAX_SS, FF_MAX_SS, TRUE, TRUE, TRUE, 0, 0};
+        {DRIVER_BUFFERED_IO, fatfs_inputBuffer, fatfs_outputBuffer, FF_MAX_SS, FF_MAX_SS, true, true, true, 0, 0};
 
     return &driverDetail;
 }
@@ -88,13 +88,13 @@ bool FATFS_FS_Driver::InitializeVolume(const VOLUME_ID *volume, const char *path
 
     if (fs == NULL)
     {
-        return FALSE;
+        return false;
     }
 
     // try mounting the volume
     if (f_mount(fs, path, 1) == FR_OK)
     {
-        return TRUE;
+        return true;
     }
 
     // something went wrong, unmount the volume...
@@ -103,7 +103,7 @@ bool FATFS_FS_Driver::InitializeVolume(const VOLUME_ID *volume, const char *path
     // ... and free the volume
     FreeFatFsByVolumeId(volume);
 
-    return FALSE;
+    return false;
 }
 
 bool FATFS_FS_Driver::UnInitializeVolume(const VOLUME_ID *volume)
@@ -116,7 +116,7 @@ bool FATFS_FS_Driver::UnInitializeVolume(const VOLUME_ID *volume)
     // sanity check
     if (volumeIndex < 0)
     {
-        return FALSE;
+        return false;
     }
 
     // need to converto to string
@@ -131,7 +131,7 @@ bool FATFS_FS_Driver::UnInitializeVolume(const VOLUME_ID *volume)
     // free assigned volume
     FreeFatFsByVolumeId(volume);
 
-    return TRUE;
+    return true;
 }
 
 HRESULT FATFS_FS_Driver::Format(const VOLUME_ID *volume, const char *volumeLabel, uint32_t parameters)
@@ -211,7 +211,7 @@ HRESULT FATFS_FS_Driver::FlushAll(const VOLUME_ID *volume)
 
     //     return S_OK;
     // }
-    ASSERT(FALSE);
+    ASSERT(false);
     return CLR_E_INVALID_DRIVER;
 }
 
@@ -227,7 +227,7 @@ HRESULT FATFS_FS_Driver::GetVolumeLabel(const VOLUME_ID *volume, char *volumeLab
 
     // if (fs == NULL)
     // {
-    //     return FALSE;
+    //     return false;
     // }
 
     // memcpy(volumeLabel, fatFS.lfnbuf, volumeLabelLen);
@@ -243,7 +243,7 @@ HRESULT FATFS_FS_Driver::GetVolumeLabel(const VOLUME_ID *volume, char *volumeLab
 
     //     return logicDisk->GetDiskVolLab(volumeLabel);
     // }
-    ASSERT(FALSE);
+    ASSERT(false);
     return CLR_E_INVALID_DRIVER;
 }
 

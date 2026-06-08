@@ -7,7 +7,7 @@
 #include "nf_system_resourcemanager.h"
 #include <target_platform.h>
 
-#if (NANOCLR_GRAPHICS == TRUE)
+#if NANOCLR_GRAPHICS
 #include "Graphics.h"
 #endif
 
@@ -65,7 +65,7 @@ HRESULT Library_nf_system_resourcemanager_System_Resources_ResourceManager::GetO
             }
             break;
 
-#if (NANOCLR_GRAPHICS == TRUE)
+#if NANOCLR_GRAPHICS
 
             case CLR_RECORD_RESOURCE::RESOURCE_Bitmap:
             {

@@ -22,7 +22,7 @@ bool FS_MountVolume(const char *rootName, uint32_t deviceFlags, const char *file
 
     if (!rootName)
     {
-        return FALSE;
+        return false;
     }
 
     //--//
@@ -76,7 +76,7 @@ bool FS_MountVolume(const char *rootName, uint32_t deviceFlags, const char *file
     // sanity check
     if (!volume)
     {
-        return FALSE;
+        return false;
     }
 
     // initialize content to 0
@@ -89,21 +89,21 @@ bool FS_MountVolume(const char *rootName, uint32_t deviceFlags, const char *file
             streamDriver,
             fsDriver,
             volumeId,
-            (fsDriver) ? TRUE : FALSE))
+            (fsDriver) ? true : false))
     {
 
         // Now we can notify managed code
         PostManagedEvent(EVENT_STORAGE, EVENT_SUBCATEGORY_MEDIAINSERT, 0, (uint32_t)volume->m_volumeId.volumeId);
 
         // done here
-        return TRUE;
+        return true;
     }
     else
     {
         // if for some reason, AddVolume fails, there is not much that can be done
         platform_free(volume);
 
-        return FALSE;
+        return false;
     }
 }
 
@@ -114,7 +114,7 @@ void FS_UnmountVolume(const char *rootName)
     if (volume)
     {
         // Let FS uninitialize now for this volume. Note this happens before managed stack is informed
-        FileSystemVolumeList::RemoveVolume(volume, TRUE);
+        FileSystemVolumeList::RemoveVolume(volume, true);
 
         // Move the volume into the zombie list rather than free up the memory so all the subsequent Close() from opened
         // handles will complete and/or fail properly
@@ -156,10 +156,10 @@ bool FileSystemVolumeList::InitializeVolumes()
 #if defined(PLATFORM_ARM)
         debug_printf("There are no file system volume to initialize");
 #endif
-        return FALSE;
+        return false;
     }
 
-    bool success = TRUE;
+    bool success = true;
 
     while (volume->Next())
     {
@@ -171,7 +171,7 @@ bool FileSystemVolumeList::InitializeVolumes()
         else
         {
             // even if success == FALSE, InitalizeVolume() will still get called
-            success = FALSE;
+            success = false;
         }
 
         volume = volume->Next();
@@ -182,7 +182,7 @@ bool FileSystemVolumeList::InitializeVolumes()
 
 bool FileSystemVolumeList::UninitializeVolumes()
 {
-    bool success = TRUE;
+    bool success = true;
 
     FileSystemVolume *volume = s_volumeList.FirstNode();
     FileSystemVolume *curVolume;
@@ -210,11 +210,11 @@ bool FileSystemVolumeList::AddVolume(
     uint32_t volumeId,
     bool init)
 {
-    bool success = TRUE;
+    bool success = true;
 
     if (!fsv)
     {
-        return FALSE;
+        return false;
     }
 
     FileSystemVolume *current;
@@ -237,7 +237,7 @@ bool FileSystemVolumeList::AddVolume(
     // if the name is already taken, there is no need to add the volume
     if (nameOK == false)
     {
-        return TRUE;
+        return true;
     }
 
     // initialize the members of the FileSystemVolume
@@ -265,10 +265,10 @@ bool FileSystemVolumeList::AddVolume(
     if (success)
     {
         s_volumeList.LinkAtBack(fsv);
-        return TRUE;
+        return true;
     }
 
-    return FALSE;
+    return false;
 }
 
 bool FileSystemVolumeList::RemoveVolume(FileSystemVolume *fsv, bool uninit)
@@ -282,10 +282,10 @@ bool FileSystemVolumeList::RemoveVolume(FileSystemVolume *fsv, bool uninit)
             fsv->UninitializeVolume();
         }
 
-        return TRUE;
+        return true;
     }
 
-    return FALSE;
+    return false;
 }
 
 FileSystemVolume *FileSystemVolumeList::GetFirstVolume()
@@ -379,11 +379,11 @@ bool FileSystemVolumeList::Contains(FileSystemVolume *fsv)
     {
         if (volume == fsv)
         {
-            return TRUE;
+            return true;
         }
 
         volume = FileSystemVolumeList::GetNextVolume(*volume);
     }
 
-    return FALSE;
+    return false;
 }

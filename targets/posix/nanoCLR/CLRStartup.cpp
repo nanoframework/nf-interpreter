@@ -323,7 +323,7 @@ struct Settings
             CLR_RT_Memory::ZeroFill(headerBuffer, headerInBytes);
         }
 
-        while (TRUE)
+        while (true)
         {
             if (!BlockStorageStream_Read(&stream, &headerBuffer, headerInBytes))
                 break;

@@ -57,7 +57,7 @@ jpeg_CreateDecompress(j_decompress_ptr cinfo, int version, CLR_INT32 structsize)
         cinfo->err = err;
         cinfo->client_data = client_data;
     }
-    cinfo->is_decompressor = TRUE;
+    cinfo->is_decompressor = true;
 
     /* Initialize a memory manager instance for this object */
     jinit_memory_mgr((j_common_ptr)cinfo);
@@ -196,25 +196,25 @@ default_decompress_parms(j_decompress_ptr cinfo)
     cinfo->scale_num = 1;        /* 1:1 scaling */
     cinfo->scale_denom = 1;
     cinfo->output_gamma = 1.0;
-    cinfo->buffered_image = FALSE;
-    cinfo->raw_data_out = FALSE;
+    cinfo->buffered_image = false;
+    cinfo->raw_data_out = false;
     cinfo->dct_method = JDCT_DEFAULT;
-    cinfo->do_fancy_upsampling = TRUE;
-    cinfo->do_block_smoothing = TRUE;
-    cinfo->quantize_colors = FALSE;
+    cinfo->do_fancy_upsampling = true;
+    cinfo->do_block_smoothing = true;
+    cinfo->quantize_colors = false;
     /* We set these in case application only sets quantize_colors. */
     cinfo->dither_mode = JDITHER_FS;
 #ifdef QUANT_2PASS_SUPPORTED
-    cinfo->two_pass_quantize = TRUE;
+    cinfo->two_pass_quantize = true;
 #else
-    cinfo->two_pass_quantize = FALSE;
+    cinfo->two_pass_quantize = false;
 #endif
     cinfo->desired_number_of_colors = 256;
     cinfo->colormap = NULL;
     /* Initialize for no mode change in buffered-image mode. */
-    cinfo->enable_1pass_quant = FALSE;
-    cinfo->enable_external_quant = FALSE;
-    cinfo->enable_2pass_quant = FALSE;
+    cinfo->enable_1pass_quant = false;
+    cinfo->enable_external_quant = false;
+    cinfo->enable_2pass_quant = false;
 }
 
 
@@ -246,7 +246,7 @@ default_decompress_parms(j_decompress_ptr cinfo)
  */
 
 GLOBAL(int)
-jpeg_read_header(j_decompress_ptr cinfo, boolean require_image)
+jpeg_read_header(j_decompress_ptr cinfo, bool require_image)
 {
     int retcode;
 
@@ -338,7 +338,7 @@ jpeg_consume_input(j_decompress_ptr cinfo)
  * Have we finished reading the input file?
  */
 
-GLOBAL(boolean)
+GLOBAL(bool)
 jpeg_input_complete(j_decompress_ptr cinfo)
 {
     /* Check for valid jpeg object */
@@ -353,7 +353,7 @@ jpeg_input_complete(j_decompress_ptr cinfo)
  * Is there more than one scan?
  */
 
-GLOBAL(boolean)
+GLOBAL(bool)
 jpeg_has_multiple_scans(j_decompress_ptr cinfo)
 {
     /* Only valid after jpeg_read_header completes */
@@ -373,7 +373,7 @@ jpeg_has_multiple_scans(j_decompress_ptr cinfo)
  * a suspending data source is used.
  */
 
-GLOBAL(boolean)
+GLOBAL(bool)
 jpeg_finish_decompress(j_decompress_ptr cinfo)
 {
     if ((cinfo->global_state == DSTATE_SCANNING ||
@@ -395,12 +395,11 @@ jpeg_finish_decompress(j_decompress_ptr cinfo)
     /* Read until EOI */
     while (!cinfo->inputctl->eoi_reached) {
         if ((*cinfo->inputctl->consume_input) (cinfo) == JPEG_SUSPENDED)
-            return FALSE;        /* Suspend, come back later */
+            return false;        /* Suspend, come back later */
     }
     /* Do final cleanup */
     (*cinfo->src->term_source) (cinfo);
     /* We can use jpeg_abort to release memory and reset global_state */
     jpeg_abort((j_common_ptr)cinfo);
-    return TRUE;
+    return true;
 }
-

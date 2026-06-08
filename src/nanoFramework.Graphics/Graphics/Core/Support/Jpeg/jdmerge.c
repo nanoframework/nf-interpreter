@@ -85,7 +85,7 @@ typedef struct {
      * to discard the dummy last row if the image height is odd.
      */
     JSAMPROW spare_row;
-    boolean spare_full;      /* T if spare buffer is occupied */
+    bool spare_full;      /* T if spare buffer is occupied */
 
     JDIMENSION out_row_width;   /* samples per output row */
     JDIMENSION rows_to_go;   /* counts rows remaining in image */
@@ -152,7 +152,7 @@ start_pass_merged_upsample(j_decompress_ptr cinfo)
     my_upsample_ptr upsample = (my_upsample_ptr)cinfo->upsample;
 
     /* Mark the spare buffer empty */
-    upsample->spare_full = FALSE;
+    upsample->spare_full = false;
     /* Initialize total-height counter for detecting bottom of image */
     upsample->rows_to_go = cinfo->output_height;
 }
@@ -182,7 +182,7 @@ merged_2v_upsample(j_decompress_ptr cinfo,
         jcopy_sample_rows(&upsample->spare_row, 0, output_buf + *out_row_ctr, 0,
             1, upsample->out_row_width);
         num_rows = 1;
-        upsample->spare_full = FALSE;
+        upsample->spare_full = false;
     }
     else {
         /* Figure number of rows to return to caller. */
@@ -201,7 +201,7 @@ merged_2v_upsample(j_decompress_ptr cinfo,
         }
         else {
             work_ptrs[1] = upsample->spare_row;
-            upsample->spare_full = TRUE;
+            upsample->spare_full = true;
         }
         /* Now do the upsampling. */
         (*upsample->upmethod) (cinfo, input_buf, *in_row_group_ctr, work_ptrs);
@@ -905,7 +905,7 @@ jinit_merged_upsampler(j_decompress_ptr cinfo)
             SIZEOF(my_upsampler));
     cinfo->upsample = (struct jpeg_upsampler*) upsample;
     upsample->pub.start_pass = start_pass_merged_upsample;
-    upsample->pub.need_context_rows = FALSE;
+    upsample->pub.need_context_rows = false;
 
     upsample->out_row_width = cinfo->output_width * cinfo->out_color_components;
 

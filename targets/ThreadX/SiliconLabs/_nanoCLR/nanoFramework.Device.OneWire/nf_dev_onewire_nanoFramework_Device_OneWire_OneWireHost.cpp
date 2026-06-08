@@ -235,7 +235,7 @@ bool oneWireFindNext(bool doReset, bool alarmOnly)
     uint8_t attempt = 0;
     uint8_t discrepMarker = 0;
     bool outBit = 0;
-    bool result = FALSE;
+    bool result = false;
     uint8_t lastcrc8 = 0;
 
     // if the last call was the last one
@@ -243,10 +243,10 @@ bool oneWireFindNext(bool doReset, bool alarmOnly)
     {
         // reset the search
         LastDiscrepancy = 0;
-        LastDevice = FALSE;
+        LastDevice = false;
         LastFamilyDiscrepancy = 0;
 
-        return FALSE;
+        return false;
     }
 
     // check if reset bus was requested
@@ -259,7 +259,7 @@ bool oneWireFindNext(bool doReset, bool alarmOnly)
             // reset the search
             LastDiscrepancy = 0;
             LastFamilyDiscrepancy = 0;
-            return FALSE;
+            return false;
         }
     }
 
@@ -363,7 +363,7 @@ bool oneWireFindNext(bool doReset, bool alarmOnly)
         LastDevice = (LastDiscrepancy == 0);
 
         // search isn't completed there are more devices present in the bus
-        result = TRUE;
+        result = true;
     }
 
     return result;
@@ -393,7 +393,7 @@ bool oneWireFindFirst(bool doReset, bool alarmOnly)
 {
     // reset the search state
     LastDiscrepancy = 0;
-    LastDevice = FALSE;
+    LastDevice = false;
     LastFamilyDiscrepancy = 0;
 
     // clear serial number buffer for new search
@@ -518,7 +518,7 @@ HRESULT FindOneDevice(CLR_RT_StackFrame &stack, bool findFirst)
             // get a pointer to the first element of the byte array
             serialNumberPointer = (uint8_t *)serialNumberField->GetFirstElement();
 
-            oneWireSerialNum(serialNumberPointer, TRUE);
+            oneWireSerialNum(serialNumberPointer, true);
         }
     }
 
@@ -570,7 +570,7 @@ HRESULT Library_nf_dev_onewire_nanoFramework_Device_OneWire_OneWireHost::WriteBy
     uint8_t sendbyte;
 
     sendbyte = (uint8_t)stack.Arg1().NumericByRefConst().u1;
-    stack.SetResult_U1(oneWireTouchByte(sendbyte) == sendbyte ? TRUE : FALSE);
+    stack.SetResult_U1(oneWireTouchByte(sendbyte) == sendbyte ? TRUE : false;
 
     NANOCLR_NOCLEANUP_NOLABEL();
 }

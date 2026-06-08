@@ -52,7 +52,7 @@ void FS_AddVolumes()
         g_AvailableFSInterfaces[1].streamDriver,
         g_AvailableFSInterfaces[1].fsDriver,
         0,
-        FALSE);
+        false);
 }
 
 void FS_MountRemovableVolumes()

@@ -68,7 +68,7 @@ bool TouchDevice::Enable(GPIO_INTERRUPT_SERVICE_ROUTINE touchIsrProc)
             g_TouchInterface.Write_Read(values, 2, 0);
         }
     }
-    return TRUE;
+    return true;
 }
 
 bool TouchDevice::Disable()

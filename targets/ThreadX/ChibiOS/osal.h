@@ -25,13 +25,6 @@
  * @name    Common constants
  * @{
  */
-#if !defined(FALSE) || defined(__DOXYGEN__)
-#define FALSE 0
-#endif
-
-#if !defined(TRUE) || defined(__DOXYGEN__)
-#define TRUE 1
-#endif
 
 #define OSAL_SUCCESS false
 #define OSAL_FAILED  true

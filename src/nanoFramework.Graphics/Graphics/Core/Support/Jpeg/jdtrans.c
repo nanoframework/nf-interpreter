@@ -102,7 +102,7 @@ LOCAL(void)
 transdecode_master_selection(j_decompress_ptr cinfo)
 {
     /* This is effectively a buffered-image operation. */
-    cinfo->buffered_image = TRUE;
+    cinfo->buffered_image = true;
 
     /* Entropy decoding: either Huffman or arithmetic coding. */
     if (cinfo->arith_code) {
@@ -121,7 +121,7 @@ transdecode_master_selection(j_decompress_ptr cinfo)
     }
 
     /* Always get a full-image coefficient buffer. */
-    jinit_d_coef_controller(cinfo, TRUE);
+    jinit_d_coef_controller(cinfo, true);
 
     /* We can now tell the memory manager to allocate virtual arrays. */
     (*cinfo->mem->realize_virt_arrays) ((j_common_ptr)cinfo);

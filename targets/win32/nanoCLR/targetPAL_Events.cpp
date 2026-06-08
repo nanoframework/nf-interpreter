@@ -60,7 +60,7 @@ bool Events_Initialize()
 
     EventsSemaphore.release();
 
-    return TRUE;
+    return true;
 }
 
 bool Events_Uninitialize()
@@ -71,7 +71,7 @@ bool Events_Uninitialize()
 
     EventsSemaphore.release();
 
-    return TRUE;
+    return true;
 }
 
 void Events_Set(UINT32 Events)
@@ -156,7 +156,7 @@ void Events_SetCallback(set_Event_Callback pfn, void *arg)
     (void)pfn;
     (void)arg;
 
-    _ASSERTE(FALSE);
+    _ASSERTE(false);
 }
 
 void FreeManagedEvent(uint8_t category, uint8_t subCategory, uint16_t data1, uint32_t data2)

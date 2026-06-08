@@ -11,7 +11,7 @@
 #ifndef TARGET_PLATFORM_H
 #define TARGET_PLATFORM_H
 
-#define NANOCLR_GRAPHICS @NANOCLR_GRAPHICS@
+#cmakedefine01 NANOCLR_GRAPHICS
 
 // set preference to enable (or not) the RTC subsystem
 #define NXP_USE_RTC @HAL_USE_RTC_OPTION@

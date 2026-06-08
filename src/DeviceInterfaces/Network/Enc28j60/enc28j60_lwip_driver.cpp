@@ -5,7 +5,7 @@
 //
 
 #include <nanohal.h>
-//#include "net_decl_lwip.h"
+// #include "net_decl_lwip.h"
 #include "enc28j60_lwip.h"
 
 extern "C"
@@ -22,7 +22,7 @@ static struct netif g_ENC28J60_NetIF;
 
 HAL_CONTINUATION InterruptTaskContinuation;
 HAL_COMPLETION LwipUpTimeCompletion;
-static bool LwipNetworkStatus = FALSE;
+static bool LwipNetworkStatus = false;
 static uint32_t LwipLastIpAddress = 0;
 
 extern ENC28J60_LWIP_DEVICE_CONFIG g_ENC28J60_LWIP_Config;
@@ -206,7 +206,7 @@ bool enc28j60_Network_Interface_Close(int index, HAL_Configuration_NetworkInterf
 {
     NATIVE_PROFILE_HAL_DRIVERS_ETHERNET();
     if (pConfig->SpecificConfigId >= ARRAYSIZE(g_ENC28J60_LWIP_Config.DeviceConfigs))
-        return FALSE;
+        return false;
 
     return g_ENC28J60_LWIP_Driver.Close(&g_ENC28J60_LWIP_Config.DeviceConfigs[pConfig->SpecificConfigId], index);
 }

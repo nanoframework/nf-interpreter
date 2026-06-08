@@ -115,7 +115,7 @@ int32_t hal_lfs_prog_0(
 // target specific implementation of chip erase
 bool hal_lfs_erase_chip_0()
 {
-    return QSPI_Erase_Chip() == TRUE;
+    return QSPI_Erase_Chip() == true;
 }
 
 static bool QSPI_Erase_Chip()
@@ -125,14 +125,14 @@ static bool QSPI_Erase_Chip()
     {
         if (QSPI_Erase_Block(i * W25Q512_SECTOR_SIZE) != QSPI_OK)
         {
-            return FALSE;
+            return false;
         }
 
         // reset watchdog
         Watchdog_Reset();
     }
 
-    return TRUE;
+    return true;
 }
 
 static uint8_t QSPI_ResetMemory(QSPI_HandleTypeDef *hqspi)

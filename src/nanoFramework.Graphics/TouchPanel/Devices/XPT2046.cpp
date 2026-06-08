@@ -26,7 +26,7 @@ bool TouchDevice::Enable(GPIO_INTERRUPT_SERVICE_ROUTINE touchIsrProc)
     if (touchIsrProc == NULL)
     {
     };
-    return TRUE;
+    return true;
 }
 
 bool TouchDevice::Disable()

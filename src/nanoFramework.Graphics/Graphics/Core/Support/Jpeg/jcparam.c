@@ -33,7 +33,7 @@
 GLOBAL(void)
 jpeg_add_quant_table(j_compress_ptr cinfo, int which_tbl,
     const unsigned int* basic_table,
-    int scale_factor, boolean force_baseline)
+    int scale_factor, bool force_baseline)
     /* Define a quantization table equal to the basic_table times
      * a scale factor (given as a percentage).
      * If force_baseline is TRUE, the computed quantization table entries
@@ -67,13 +67,13 @@ jpeg_add_quant_table(j_compress_ptr cinfo, int which_tbl,
     }
 
     /* Initialize sent_table FALSE so table will be written to JPEG file. */
-    (*qtblptr)->sent_table = FALSE;
+    (*qtblptr)->sent_table = false;
 }
 
 
 GLOBAL(void)
 jpeg_set_linear_quality(j_compress_ptr cinfo, int scale_factor,
-    boolean force_baseline)
+    bool force_baseline)
     /* Set or change the 'quality' (quantization) setting, using default tables
      * and a straight percentage-scaling quality scale.  In most cases it's better
      * to use jpeg_set_quality (below); this entry point is provided for
@@ -140,7 +140,7 @@ jpeg_quality_scaling(int quality)
 
 
 GLOBAL(void)
-jpeg_set_quality(j_compress_ptr cinfo, int quality, boolean force_baseline)
+jpeg_set_quality(j_compress_ptr cinfo, int quality, bool force_baseline)
 /* Set or change the 'quality' (quantization) setting, using default tables.
  * This is the standard quality-adjusting entry point for typical user
  * interfaces; only those who want detailed control over quantization tables
@@ -185,7 +185,7 @@ add_huff_table(j_compress_ptr cinfo,
     MEMCOPY((*htblptr)->huffval, val, nsymbols * SIZEOF(CLR_UINT8));
 
     /* Initialize sent_table FALSE so table will be written to JPEG file. */
-    (*htblptr)->sent_table = FALSE;
+    (*htblptr)->sent_table = false;
 }
 
 
@@ -297,7 +297,7 @@ jpeg_set_defaults(j_compress_ptr cinfo)
 
     cinfo->data_precision = BITS_IN_JSAMPLE;
     /* Set up two quantization tables using default quality of 75 */
-    jpeg_set_quality(cinfo, 75, TRUE);
+    jpeg_set_quality(cinfo, 75, true);
     /* Set up two Huffman tables */
     std_huff_tables(cinfo);
 
@@ -313,23 +313,23 @@ jpeg_set_defaults(j_compress_ptr cinfo)
     cinfo->num_scans = 0;
 
     /* Expect normal source image, not raw downsampled data */
-    cinfo->raw_data_in = FALSE;
+    cinfo->raw_data_in = false;
 
     /* Use Huffman coding, not arithmetic coding, by default */
-    cinfo->arith_code = FALSE;
+    cinfo->arith_code = false;
 
     /* By default, don't do extra passes to optimize entropy coding */
-    cinfo->optimize_coding = FALSE;
+    cinfo->optimize_coding = false;
     /* The standard Huffman tables are only valid for 8-bit data precision.
      * If the precision is higher, force optimization on so that usable
      * tables will be computed.  This test can be removed if default tables
      * are supplied that are valid for the desired precision.
      */
     if (cinfo->data_precision > 8)
-        cinfo->optimize_coding = TRUE;
+        cinfo->optimize_coding = true;
 
     /* By default, use the simpler non-cosited sampling alignment */
-    cinfo->CCIR601_sampling = FALSE;
+    cinfo->CCIR601_sampling = false;
 
     /* No input smoothing */
     cinfo->smoothing_factor = 0;
@@ -426,25 +426,25 @@ jpeg_set_colorspace(j_compress_ptr cinfo, J_COLOR_SPACE colorspace)
 
     cinfo->jpeg_color_space = colorspace;
 
-    cinfo->write_JFIF_header = FALSE; /* No marker for non-JFIF colorspaces */
-    cinfo->write_Adobe_marker = FALSE; /* write no Adobe marker by default */
+    cinfo->write_JFIF_header = false; /* No marker for non-JFIF colorspaces */
+    cinfo->write_Adobe_marker = false; /* write no Adobe marker by default */
 
     switch (colorspace) {
     case JCS_GRAYSCALE:
-        cinfo->write_JFIF_header = TRUE; /* Write a JFIF marker */
+        cinfo->write_JFIF_header = true; /* Write a JFIF marker */
         cinfo->num_components = 1;
         /* JFIF specifies component ID 1 */
         SET_COMP(0, 1, 1, 1, 0, 0, 0);
         break;
     case JCS_RGB:
-        cinfo->write_Adobe_marker = TRUE; /* write Adobe marker to flag RGB */
+        cinfo->write_Adobe_marker = true; /* write Adobe marker to flag RGB */
         cinfo->num_components = 3;
         SET_COMP(0, 0x52 /* 'R' */, 1, 1, 0, 0, 0);
         SET_COMP(1, 0x47 /* 'G' */, 1, 1, 0, 0, 0);
         SET_COMP(2, 0x42 /* 'B' */, 1, 1, 0, 0, 0);
         break;
     case JCS_YCbCr:
-        cinfo->write_JFIF_header = TRUE; /* Write a JFIF marker */
+        cinfo->write_JFIF_header = true; /* Write a JFIF marker */
         cinfo->num_components = 3;
         /* JFIF specifies component IDs 1,2,3 */
         /* We default to 2x2 subsamples of chrominance */
@@ -453,7 +453,7 @@ jpeg_set_colorspace(j_compress_ptr cinfo, J_COLOR_SPACE colorspace)
         SET_COMP(2, 3, 1, 1, 1, 1, 1);
         break;
     case JCS_CMYK:
-        cinfo->write_Adobe_marker = TRUE; /* write Adobe marker to flag CMYK */
+        cinfo->write_Adobe_marker = true; /* write Adobe marker to flag CMYK */
         cinfo->num_components = 4;
         SET_COMP(0, 0x43 /* 'C' */, 1, 1, 0, 0, 0);
         SET_COMP(1, 0x4D /* 'M' */, 1, 1, 0, 0, 0);
@@ -461,7 +461,7 @@ jpeg_set_colorspace(j_compress_ptr cinfo, J_COLOR_SPACE colorspace)
         SET_COMP(3, 0x4B /* 'K' */, 1, 1, 0, 0, 0);
         break;
     case JCS_YCCK:
-        cinfo->write_Adobe_marker = TRUE; /* write Adobe marker to flag YCCK */
+        cinfo->write_Adobe_marker = true; /* write Adobe marker to flag YCCK */
         cinfo->num_components = 4;
         SET_COMP(0, 1, 2, 2, 0, 0, 0);
         SET_COMP(1, 2, 1, 1, 1, 1, 1);
@@ -626,4 +626,3 @@ jpeg_simple_progression(j_compress_ptr cinfo)
 }
 
 #endif /* C_PROGRESSIVE_SUPPORTED */
-

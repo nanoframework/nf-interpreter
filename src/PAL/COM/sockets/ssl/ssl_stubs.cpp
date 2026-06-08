@@ -11,13 +11,13 @@
 __nfweak bool SSL_Initialize()
 {
     NATIVE_PROFILE_PAL_COM();
-    return FALSE;
+    return false;
 }
 
 __nfweak bool SSL_Uninitialize()
 {
     NATIVE_PROFILE_PAL_COM();
-    return TRUE;
+    return true;
 }
 
 __nfweak bool SSL_ServerInit(
@@ -45,7 +45,7 @@ __nfweak bool SSL_ServerInit(
 
     NATIVE_PROFILE_PAL_COM();
 
-    return TRUE;
+    return true;
 }
 
 __nfweak bool SSL_ClientInit(
@@ -73,7 +73,7 @@ __nfweak bool SSL_ClientInit(
 
     NATIVE_PROFILE_PAL_COM();
 
-    return TRUE;
+    return true;
 }
 
 __nfweak bool SSL_AddCertificateAuthority(int contextHandle, const char *certificate, int certLength)
@@ -84,7 +84,7 @@ __nfweak bool SSL_AddCertificateAuthority(int contextHandle, const char *certifi
 
     NATIVE_PROFILE_PAL_COM();
 
-    return TRUE;
+    return true;
 }
 
 __nfweak bool SSL_ExitContext(int contextHandle)
@@ -93,7 +93,7 @@ __nfweak bool SSL_ExitContext(int contextHandle)
 
     NATIVE_PROFILE_PAL_COM();
 
-    return TRUE;
+    return true;
 }
 
 __nfweak int SSL_Accept(SOCK_SOCKET socket, int contextHandle)
@@ -156,7 +156,7 @@ __nfweak bool SSL_ParseCertificate(const char *certificate, size_t certLength, X
 
     NATIVE_PROFILE_PAL_COM();
 
-    return TRUE;
+    return true;
 }
 
 __nfweak int SSL_DecodePrivateKey(

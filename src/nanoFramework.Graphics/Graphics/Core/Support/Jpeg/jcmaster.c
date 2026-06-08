@@ -127,7 +127,7 @@ initial_setup(j_compress_ptr cinfo)
             jdiv_round_up((long)cinfo->image_height * (long)compptr->v_samp_factor,
             (long)cinfo->max_v_samp_factor);
         /* Mark component needed (this flag isn't actually used for compression) */
-        compptr->component_needed = TRUE;
+        compptr->component_needed = true;
     }
 
     /* Compute number of fully interleaved MCU rows (number of times that
@@ -150,7 +150,7 @@ validate_script(j_compress_ptr cinfo)
     const jpeg_scan_info* scanptr;
     int scanno, ncomps, ci, coefi, thisi;
     int Ss, Se, Ah, Al;
-    boolean component_sent[MAX_COMPONENTS];
+    bool component_sent[MAX_COMPONENTS];
 #ifdef C_PROGRESSIVE_SUPPORTED
     int* last_bitpos_ptr;
     int last_bitpos[MAX_COMPONENTS][DCTSIZE2];
@@ -166,7 +166,7 @@ validate_script(j_compress_ptr cinfo)
     scanptr = cinfo->scan_info;
     if (scanptr->Ss != 0 || scanptr->Se != DCTSIZE2 - 1) {
 #ifdef C_PROGRESSIVE_SUPPORTED
-        cinfo->progressive_mode = TRUE;
+        cinfo->progressive_mode = true;
         last_bitpos_ptr = &last_bitpos[0][0];
         for (ci = 0; ci < cinfo->num_components; ci++)
             for (coefi = 0; coefi < DCTSIZE2; coefi++)
@@ -176,9 +176,9 @@ validate_script(j_compress_ptr cinfo)
 #endif
     }
     else {
-        cinfo->progressive_mode = FALSE;
+        cinfo->progressive_mode = false;
         for (ci = 0; ci < cinfo->num_components; ci++)
-            component_sent[ci] = FALSE;
+            component_sent[ci] = false;
     }
 
     for (scanno = 1; scanno <= cinfo->num_scans; scanptr++, scanno++) {
@@ -253,7 +253,7 @@ validate_script(j_compress_ptr cinfo)
                 thisi = scanptr->component_index[ci];
                 if (component_sent[thisi])
                     ERREXIT1(cinfo, JERR_BAD_SCAN_SCRIPT, scanno);
-                component_sent[thisi] = TRUE;
+                component_sent[thisi] = true;
             }
         }
     }
@@ -447,11 +447,11 @@ prepare_for_pass(j_compress_ptr cinfo)
         (*cinfo->main->start_pass) (cinfo, JBUF_PASS_THRU);
         if (cinfo->optimize_coding) {
             /* No immediate data output; postpone writing frame/scan headers */
-            master->pub.call_pass_startup = FALSE;
+            master->pub.call_pass_startup = false;
         }
         else {
             /* Will write frame/scan headers at first jpeg_write_scanlines call */
-            master->pub.call_pass_startup = TRUE;
+            master->pub.call_pass_startup = true;
         }
         break;
 #ifdef ENTROPY_OPT_SUPPORTED
@@ -460,9 +460,9 @@ prepare_for_pass(j_compress_ptr cinfo)
         select_scan_parameters(cinfo);
         per_scan_setup(cinfo);
         if (cinfo->Ss != 0 || cinfo->Ah == 0 || cinfo->arith_code) {
-            (*cinfo->entropy->start_pass) (cinfo, TRUE);
+            (*cinfo->entropy->start_pass) (cinfo, true;
             (*cinfo->coef->start_pass) (cinfo, JBUF_CRANK_DEST);
-            master->pub.call_pass_startup = FALSE;
+            master->pub.call_pass_startup = false;
             break;
         }
         /* Special case: Huffman DC refinement scans need no Huffman table
@@ -479,13 +479,13 @@ prepare_for_pass(j_compress_ptr cinfo)
             select_scan_parameters(cinfo);
             per_scan_setup(cinfo);
         }
-        (*cinfo->entropy->start_pass) (cinfo, FALSE);
+        (*cinfo->entropy->start_pass) (cinfo, false;
         (*cinfo->coef->start_pass) (cinfo, JBUF_CRANK_DEST);
         /* We emit frame/scan headers now */
         if (master->scan_number == 0)
             (*cinfo->marker->write_frame_header) (cinfo);
         (*cinfo->marker->write_scan_header) (cinfo);
-        master->pub.call_pass_startup = FALSE;
+        master->pub.call_pass_startup = false;
         break;
     default:
         ERREXIT(cinfo, JERR_NOT_COMPILED);
@@ -516,7 +516,7 @@ prepare_for_pass(j_compress_ptr cinfo)
 METHODDEF(void)
 pass_startup(j_compress_ptr cinfo)
 {
-    cinfo->master->call_pass_startup = FALSE; /* reset flag so call only once */
+    cinfo->master->call_pass_startup = false; /* reset flag so call only once */
 
     (*cinfo->marker->write_frame_header) (cinfo);
     (*cinfo->marker->write_scan_header) (cinfo);
@@ -568,7 +568,7 @@ finish_pass_master(j_compress_ptr cinfo)
  */
 
 GLOBAL(void)
-jinit_c_master_control(j_compress_ptr cinfo, boolean transcode_only)
+jinit_c_master_control(j_compress_ptr cinfo, bool transcode_only)
 {
     my_master_ptr master;
 
@@ -579,7 +579,7 @@ jinit_c_master_control(j_compress_ptr cinfo, boolean transcode_only)
     master->pub.prepare_for_pass = prepare_for_pass;
     master->pub.pass_startup = pass_startup;
     master->pub.finish_pass = finish_pass_master;
-    master->pub.is_last_pass = FALSE;
+    master->pub.is_last_pass = false;
 
     /* Validate parameters, determine derived values */
     initial_setup(cinfo);
@@ -592,12 +592,12 @@ jinit_c_master_control(j_compress_ptr cinfo, boolean transcode_only)
 #endif
     }
     else {
-        cinfo->progressive_mode = FALSE;
+        cinfo->progressive_mode = false;
         cinfo->num_scans = 1;
     }
 
     if (cinfo->progressive_mode)   /*  TEMPORARY HACK ??? */
-        cinfo->optimize_coding = TRUE; /* assume default tables no good for progressive mode */
+        cinfo->optimize_coding = true; /* assume default tables no good for progressive mode */
 
       /* Initialize my private state */
     if (transcode_only) {

@@ -216,7 +216,7 @@ __nfweak bool ConfigurationManager_GetConfigurationBlock(
         if (g_TargetConfiguration.Wireless80211Configs->Count == 0 ||
             (configurationIndex + 1) > g_TargetConfiguration.Wireless80211Configs->Count)
         {
-            return FALSE;
+            return false;
         }
 
         // set block size
@@ -230,7 +230,7 @@ __nfweak bool ConfigurationManager_GetConfigurationBlock(
         if (g_TargetConfiguration.CertificateStore->Count == 0 ||
             (configurationIndex + 1) > g_TargetConfiguration.CertificateStore->Count)
         {
-            return FALSE;
+            return false;
         }
 
         // get block address
@@ -246,7 +246,7 @@ __nfweak bool ConfigurationManager_GetConfigurationBlock(
         if (g_TargetConfiguration.DeviceCertificates->Count == 0 ||
             (configurationIndex + 1) > g_TargetConfiguration.DeviceCertificates->Count)
         {
-            return FALSE;
+            return false;
         }
 
         // get block address
@@ -260,7 +260,7 @@ __nfweak bool ConfigurationManager_GetConfigurationBlock(
     // copy the config block content to the pointer in the argument
     memcpy(configurationBlock, blockAddress, sizeOfBlock);
 
-    return TRUE;
+    return true;
 }
 
 // Stores the configuration block to the configuration flash sector
@@ -277,8 +277,8 @@ __nfweak bool ConfigurationManager_StoreConfigurationBlock(
     bool done)
 {
     ByteAddress storageAddress = 0;
-    bool requiresEnumeration = FALSE;
-    bool success = FALSE;
+    bool requiresEnumeration = false;
+    bool success = false;
 
     if (configuration == DeviceConfigurationOption_Network)
     {
@@ -296,7 +296,7 @@ __nfweak bool ConfigurationManager_StoreConfigurationBlock(
             // the requested config block is beyond the available count
             if ((configurationIndex + 1) > g_TargetConfiguration.NetworkInterfaceConfigs->Count)
             {
-                return FALSE;
+                return false;
             }
 
             // set storage address from block address, plus the requested offset
@@ -330,7 +330,7 @@ __nfweak bool ConfigurationManager_StoreConfigurationBlock(
         else if (g_TargetConfiguration.Wireless80211Configs->Count == 0 ||
                  (configurationIndex + 1) > g_TargetConfiguration.Wireless80211Configs->Count)
         {
-            return FALSE;
+            return false;
         }
         else
         {
@@ -378,14 +378,14 @@ __nfweak bool ConfigurationManager_StoreConfigurationBlock(
             if (((uint32_t)&__nanoConfig_end__ - storageAddress) < blockSize)
             {
                 // not enough room
-                return FALSE;
+                return false;
             }
 
             // now check if memory is erase, so the block can be stored
             if (!g_ConfigFlashDriver.IsBlockErased(NULL, storageAddress, blockSize))
             {
                 // memory not erased, can't store
-                return FALSE;
+                return false;
             }
         }
 
@@ -428,14 +428,14 @@ __nfweak bool ConfigurationManager_StoreConfigurationBlock(
             if (((uint32_t)&__nanoConfig_end__ - storageAddress) < blockSize)
             {
                 // not enough room
-                return FALSE;
+                return false;
             }
 
             // now check if memory is erase, so the block can be stored
             if (!g_ConfigFlashDriver.IsBlockErased(NULL, storageAddress, blockSize))
             {
                 // memory not erased, can't store
-                return FALSE;
+                return false;
             }
         }
 
@@ -458,7 +458,7 @@ __nfweak bool ConfigurationManager_StoreConfigurationBlock(
         // for save all the block size has to be provided, check that
         if (blockSize == 0)
         {
-            return FALSE;
+            return false;
         }
     }
 
@@ -684,7 +684,7 @@ __nfweak UpdateConfigurationResult ConfigurationManager_UpdateConfigurationBlock
         {
 #if defined(RP2040) || defined(RP2350)
             // RP2040 has 4KB erase sectors — need to erase all sectors in the config region
-            bool eraseOk = TRUE;
+            bool eraseOk = true;
             for (uint32_t eraseAddr = (uint32_t)&__nanoConfig_start__;
                  eraseAddr < (uint32_t)&__nanoConfig_end__ && eraseOk;
                  eraseAddr += 4096)
@@ -692,7 +692,7 @@ __nfweak UpdateConfigurationResult ConfigurationManager_UpdateConfigurationBlock
                 eraseOk = g_ConfigFlashDriver.EraseBlock(NULL, eraseAddr);
             }
 #else
-            bool eraseOk = (g_ConfigFlashDriver.EraseBlock(NULL, (uint32_t)&__nanoConfig_start__) == TRUE);
+            bool eraseOk = (g_ConfigFlashDriver.EraseBlock(NULL, (uint32_t)&__nanoConfig_start__) == true);
 #endif
             if (eraseOk)
             {
@@ -760,7 +760,7 @@ __nfweak bool InitialiseNetworkDefaultConfig(HAL_Configuration_NetworkInterface 
     (void)configurationIndex;
 
     // can't create a "default" network config because we are lacking definition of a MAC address
-    return FALSE;
+    return false;
 }
 
 // default implementation

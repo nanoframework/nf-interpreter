@@ -214,7 +214,7 @@ bool NETX_SOCKETS_Driver::Initialize()
             // sanity check
             if (networkConfiguration.StartupAddressMode == 0)
             {
-                return FALSE;
+                return false;
             }
 
             // Bind and Open the Ethernet driver
@@ -223,7 +223,7 @@ bool NETX_SOCKETS_Driver::Initialize()
 
             if (interfaceNumber == SOCK_SOCKET_ERROR)
             {
-                DEBUG_HANDLE_SOCKET_ERROR("Network init", FALSE);
+                DEBUG_HANDLE_SOCKET_ERROR("Network init", false);
                 // FIXME			debug_printf("SocketError: %d\n", errorCode);
                 continue;
             }
@@ -261,7 +261,7 @@ bool NETX_SOCKETS_Driver::Initialize()
         }
     }
 
-    return TRUE;
+    return true;
 }
 
 bool NETX_SOCKETS_Driver::Uninitialize()
@@ -282,7 +282,7 @@ bool NETX_SOCKETS_Driver::Uninitialize()
     // FIXME    tcpip_shutdown();
     // tcpip_shutdown is MS method added to lwip tcpip.c
 
-    return TRUE;
+    return true;
 }
 
 extern void debug_printf(const char *format, ...);

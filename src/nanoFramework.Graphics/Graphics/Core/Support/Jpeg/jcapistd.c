@@ -24,37 +24,37 @@
 #include "jinclude.h"
 #include "jpeglib.h"
 
- /*
-  * Compression initialization.
-  * Before calling this, all parameters and a data destination must be set up.
-  *
-  * We require a write_all_tables parameter as a failsafe check when writing
-  * multiple datastreams from the same compression object.  Since prior runs
-  * will have left all the tables marked sent_table=TRUE, a subsequent run
-  * would emit an abbreviated stream (no tables) by default.  This may be what
-  * is wanted, but for safety's sake it should not be the default behavior:
-  * programmers should have to make a deliberate choice to emit abbreviated
-  * images.  Therefore the documentation and examples should encourage people
-  * to pass write_all_tables=TRUE; then it will take active thought to do the
-  * wrong thing.
-  */
+/*
+ * Compression initialization.
+ * Before calling this, all parameters and a data destination must be set up.
+ *
+ * We require a write_all_tables parameter as a failsafe check when writing
+ * multiple datastreams from the same compression object.  Since prior runs
+ * will have left all the tables marked sent_table=TRUE, a subsequent run
+ * would emit an abbreviated stream (no tables) by default.  This may be what
+ * is wanted, but for safety's sake it should not be the default behavior:
+ * programmers should have to make a deliberate choice to emit abbreviated
+ * images.  Therefore the documentation and examples should encourage people
+ * to pass write_all_tables=true; then it will take active thought to do the
+ * wrong thing.
+ */
 
 GLOBAL(void)
-jpeg_start_compress(j_compress_ptr cinfo, boolean write_all_tables)
+jpeg_start_compress(j_compress_ptr cinfo, bool write_all_tables)
 {
     if (cinfo->global_state != CSTATE_START)
         ERREXIT1(cinfo, JERR_BAD_STATE, cinfo->global_state);
 
     if (write_all_tables)
-        jpeg_suppress_tables(cinfo, FALSE);	/* mark all tables to be written */
+        jpeg_suppress_tables(cinfo, false); /* mark all tables to be written */
 
-      /* (Re)initialize error mgr and destination modules */
-    (*cinfo->err->reset_error_mgr) ((j_common_ptr)cinfo);
-    (*cinfo->dest->init_destination) (cinfo);
+    /* (Re)initialize error mgr and destination modules */
+    (*cinfo->err->reset_error_mgr)((j_common_ptr)cinfo);
+    (*cinfo->dest->init_destination)(cinfo);
     /* Perform master selection of active modules */
     jinit_compress_master(cinfo);
     /* Set up for the first pass */
-    (*cinfo->master->prepare_for_pass) (cinfo);
+    (*cinfo->master->prepare_for_pass)(cinfo);
     /* Ready for application to drive first pass through jpeg_write_scanlines
      * or jpeg_write_raw_data.
      */
@@ -77,8 +77,7 @@ jpeg_start_compress(j_compress_ptr cinfo, boolean write_all_tables)
  * when using a multiple-scanline buffer.
  */
 GLOBAL(JDIMENSION)
-jpeg_write_scanlines(j_compress_ptr cinfo, JSAMPARRAY scanlines,
-    JDIMENSION num_lines)
+jpeg_write_scanlines(j_compress_ptr cinfo, JSAMPARRAY scanlines, JDIMENSION num_lines)
 {
     JDIMENSION row_ctr, rows_left;
 
@@ -88,10 +87,11 @@ jpeg_write_scanlines(j_compress_ptr cinfo, JSAMPARRAY scanlines,
         WARNMS(cinfo, JWRN_TOO_MUCH_DATA);
 
     /* Call progress monitor hook if present */
-    if (cinfo->progress != NULL) {
+    if (cinfo->progress != NULL)
+    {
         cinfo->progress->pass_counter = (long)cinfo->next_scanline;
         cinfo->progress->pass_limit = (long)cinfo->image_height;
-        (*cinfo->progress->progress_monitor) ((j_common_ptr)cinfo);
+        (*cinfo->progress->progress_monitor)((j_common_ptr)cinfo);
     }
 
     /* Give master control module another chance if this is first call to
@@ -100,7 +100,7 @@ jpeg_write_scanlines(j_compress_ptr cinfo, JSAMPARRAY scanlines,
      * jpeg_start_compress and jpeg_write_scanlines.
      */
     if (cinfo->master->call_pass_startup)
-        (*cinfo->master->pass_startup) (cinfo);
+        (*cinfo->master->pass_startup)(cinfo);
 
     /* Ignore any extra scanlines at bottom of image. */
     rows_left = cinfo->image_height - cinfo->next_scanline;
@@ -108,7 +108,7 @@ jpeg_write_scanlines(j_compress_ptr cinfo, JSAMPARRAY scanlines,
         num_lines = rows_left;
 
     row_ctr = 0;
-    (*cinfo->main->process_data) (cinfo, scanlines, &row_ctr, num_lines);
+    (*cinfo->main->process_data)(cinfo, scanlines, &row_ctr, num_lines);
     cinfo->next_scanline += row_ctr;
     return row_ctr;
 }
@@ -118,23 +118,24 @@ jpeg_write_scanlines(j_compress_ptr cinfo, JSAMPARRAY scanlines,
  * Processes exactly one iMCU row per call, unless suspended.
  */
 GLOBAL(JDIMENSION)
-jpeg_write_raw_data(j_compress_ptr cinfo, JSAMPIMAGE data,
-    JDIMENSION num_lines)
+jpeg_write_raw_data(j_compress_ptr cinfo, JSAMPIMAGE data, JDIMENSION num_lines)
 {
     JDIMENSION lines_per_iMCU_row;
 
     if (cinfo->global_state != CSTATE_RAW_OK)
         ERREXIT1(cinfo, JERR_BAD_STATE, cinfo->global_state);
-    if (cinfo->next_scanline >= cinfo->image_height) {
+    if (cinfo->next_scanline >= cinfo->image_height)
+    {
         WARNMS(cinfo, JWRN_TOO_MUCH_DATA);
         return 0;
     }
 
     /* Call progress monitor hook if present */
-    if (cinfo->progress != NULL) {
+    if (cinfo->progress != NULL)
+    {
         cinfo->progress->pass_counter = (long)cinfo->next_scanline;
         cinfo->progress->pass_limit = (long)cinfo->image_height;
-        (*cinfo->progress->progress_monitor) ((j_common_ptr)cinfo);
+        (*cinfo->progress->progress_monitor)((j_common_ptr)cinfo);
     }
 
     /* Give master control module another chance if this is first call to
@@ -143,7 +144,7 @@ jpeg_write_raw_data(j_compress_ptr cinfo, JSAMPIMAGE data,
      * jpeg_start_compress and jpeg_write_raw_data.
      */
     if (cinfo->master->call_pass_startup)
-        (*cinfo->master->pass_startup) (cinfo);
+        (*cinfo->master->pass_startup)(cinfo);
 
     /* Verify that at least one iMCU row has been passed. */
     lines_per_iMCU_row = cinfo->max_v_samp_factor * DCTSIZE;
@@ -151,7 +152,8 @@ jpeg_write_raw_data(j_compress_ptr cinfo, JSAMPIMAGE data,
         ERREXIT(cinfo, JERR_BUFFER_SIZE);
 
     /* Directly compress the row. */
-    if (!(*cinfo->coef->compress_data) (cinfo, data)) {
+    if (!(*cinfo->coef->compress_data)(cinfo, data))
+    {
         /* If compressor did not consume the whole row, suspend processing. */
         return 0;
     }
@@ -160,4 +162,3 @@ jpeg_write_raw_data(j_compress_ptr cinfo, JSAMPIMAGE data,
     cinfo->next_scanline += lines_per_iMCU_row;
     return lines_per_iMCU_row;
 }
-

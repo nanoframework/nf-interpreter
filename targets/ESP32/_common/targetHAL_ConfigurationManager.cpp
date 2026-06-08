@@ -413,7 +413,7 @@ bool InitialiseNetworkDefaultConfig(HAL_Configuration_NetworkInterface *config, 
     }
 
     // always good
-    return TRUE;
+    return true;
 }
 
 //

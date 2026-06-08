@@ -16,11 +16,6 @@ extern "C"
 #include "jpeglib.h"
 #include "jmemsys.h"
 
-    // elimnate error due to redefinition of these in the targetHAL.h
-#undef TRUE  
-#undef FALSE 
-#undef NULL 
-
 
 }
 

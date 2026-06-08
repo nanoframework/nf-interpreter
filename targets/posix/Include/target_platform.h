@@ -8,5 +8,6 @@
 // and from bare-metal PLATFORM_ARM / PLATFORM_ESP32.  All other POSIX-gate checks
 // in the CLR headers key off this symbol.
 #define PLATFORM_POSIX_HOST 1
+#define NANOCLR_GRAPHICS 0
 
 #endif // TARGET_PLATFORM_H

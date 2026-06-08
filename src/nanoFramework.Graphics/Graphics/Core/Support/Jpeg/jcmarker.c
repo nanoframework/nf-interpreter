@@ -178,7 +178,7 @@ emit_dqt(j_compress_ptr cinfo, int index)
             emit_byte(cinfo, (int)(qval & 0xFF));
         }
 
-        qtbl->sent_table = TRUE;
+        qtbl->sent_table = true;
     }
 
     return prec;
@@ -186,7 +186,7 @@ emit_dqt(j_compress_ptr cinfo, int index)
 
 
 LOCAL(void)
-emit_dht(j_compress_ptr cinfo, int index, boolean is_ac)
+emit_dht(j_compress_ptr cinfo, int index, bool is_ac)
 /* Emit a DHT marker */
 {
     JHUFF_TBL* htbl;
@@ -219,7 +219,7 @@ emit_dht(j_compress_ptr cinfo, int index, boolean is_ac)
         for (i = 0; i < length; i++)
             emit_byte(cinfo, htbl->huffval[i]);
 
-        htbl->sent_table = TRUE;
+        htbl->sent_table = true;
     }
 }
 
@@ -505,7 +505,7 @@ METHODDEF(void)
 write_frame_header(j_compress_ptr cinfo)
 {
     int ci, prec;
-    boolean is_baseline;
+    bool is_baseline;
     jpeg_component_info* compptr;
 
     /* Emit DQT for each quantization table.
@@ -523,17 +523,17 @@ write_frame_header(j_compress_ptr cinfo)
      */
     if (cinfo->arith_code || cinfo->progressive_mode ||
         cinfo->data_precision != 8) {
-        is_baseline = FALSE;
+        is_baseline = false;
     }
     else {
-        is_baseline = TRUE;
+        is_baseline = true;
         for (ci = 0, compptr = cinfo->comp_info; ci < cinfo->num_components;
             ci++, compptr++) {
             if (compptr->dc_tbl_no > 1 || compptr->ac_tbl_no > 1)
-                is_baseline = FALSE;
+                is_baseline = false;
         }
         if (prec && is_baseline) {
-            is_baseline = FALSE;
+            is_baseline = false;
             /* If it's baseline except for quantizer size, warn the user */
             TRACEMS(cinfo, 0, JTRC_16BIT_TABLES);
         }
@@ -584,16 +584,16 @@ write_scan_header(j_compress_ptr cinfo)
                 /* Progressive mode: only DC or only AC tables are used in one scan */
                 if (cinfo->Ss == 0) {
                     if (cinfo->Ah == 0)   /* DC needs no table for refinement scan */
-                        emit_dht(cinfo, compptr->dc_tbl_no, FALSE);
+                        emit_dht(cinfo, compptr->dc_tbl_no, false);
                 }
                 else {
-                    emit_dht(cinfo, compptr->ac_tbl_no, TRUE);
+                    emit_dht(cinfo, compptr->ac_tbl_no, true);
                 }
             }
             else {
                 /* Sequential mode: need both DC and AC tables */
-                emit_dht(cinfo, compptr->dc_tbl_no, FALSE);
-                emit_dht(cinfo, compptr->ac_tbl_no, TRUE);
+                emit_dht(cinfo, compptr->dc_tbl_no, false);
+                emit_dht(cinfo, compptr->ac_tbl_no, true);
             }
         }
     }
@@ -643,9 +643,9 @@ write_tables_only(j_compress_ptr cinfo)
     if (!cinfo->arith_code) {
         for (i = 0; i < NUM_HUFF_TBLS; i++) {
             if (cinfo->dc_huff_tbl_ptrs[i] != NULL)
-                emit_dht(cinfo, i, FALSE);
+                emit_dht(cinfo, i, false);
             if (cinfo->ac_huff_tbl_ptrs[i] != NULL)
-                emit_dht(cinfo, i, TRUE);
+                emit_dht(cinfo, i, true);
         }
     }
 
@@ -678,4 +678,3 @@ jinit_marker_writer(j_compress_ptr cinfo)
     /* Initialize private state */
     marker->last_restart_interval = 0;
 }
-

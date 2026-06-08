@@ -489,7 +489,7 @@ CLR_INT32 Library_sys_net_native_System_Net_Sockets_NativeSocket::Helper__Select
             writefds = &fds;
             break;
         default:
-            _ASSERTE(FALSE);
+            _ASSERTE(false);
             // fall through
         case 2:
             exceptfds = &fds;

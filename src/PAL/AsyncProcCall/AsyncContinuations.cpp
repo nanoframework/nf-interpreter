@@ -94,7 +94,7 @@ void HAL_CONTINUATION::Uninitialize()
 
     HAL_CONTINUATION *ptr;
 
-    while (TRUE)
+    while (true)
     {
         ptr = (HAL_CONTINUATION *)g_HAL_Continuation_List.ExtractFirstNode();
 

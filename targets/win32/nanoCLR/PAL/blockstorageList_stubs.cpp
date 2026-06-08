@@ -24,17 +24,17 @@ void BlockStorageList_Initialize()
 //
 // bool BlockStorageList::InitializeDevices()
 //{
-//    return TRUE;
+//    return true;
 //}
 //
 // bool BlockStorageList::UnInitializeDevices()
 //{
-//    return TRUE;
+//    return true;
 //}
 //
 // bool BlockStorageList::AddDevice( BlockStorageDevice* pBSD, IBlockStorageDevice* vtable, void* config, bool Init)
 //{
-//    return TRUE;
+//    return true;
 //}
 bool BlockStorageList_AddDevice(BlockStorageDevice *pBSD, IBlockStorageDevice *vtable, void *config, bool init)
 {
@@ -46,7 +46,7 @@ bool BlockStorageList_AddDevice(BlockStorageDevice *pBSD, IBlockStorageDevice *v
 //
 // bool BlockStorageList::RemoveDevice( BlockStorageDevice* pBSD, bool UnInit)
 //{
-//    return TRUE;
+//    return true;
 //}
 
 // BlockStorageDevice* BlockStorageList::GetFirstDevice()
@@ -72,7 +72,7 @@ unsigned int BlockStorageList_GetNumDevices()
 // ByteAddress &SectAddress)
 //{
 //    *pBSD = NULL;
-//    return FALSE;
+//    return false;
 //}
 bool BlockStorageList_FindDeviceForPhysicalAddress(
     BlockStorageDevice **pBSD,
@@ -84,12 +84,12 @@ bool BlockStorageList_FindDeviceForPhysicalAddress(
 
 // bool BlockStorageStream::Initialize(unsigned int blockUsage)
 //{
-//    return FALSE;
+//    return false;
 //}
 //
 // bool BlockStorageStream::Initialize(unsigned int usage, BlockStorageDevice* pDevice)
 //{
-//    return FALSE;
+//    return false;
 //}
 //
 //
@@ -100,37 +100,37 @@ bool BlockStorageList_FindDeviceForPhysicalAddress(
 //
 // bool BlockStorageStream::PrevStream()
 //{
-//    return FALSE;
+//    return false;
 //}
 //
 // bool BlockStorageStream::NextStream()
 //{
-//    return FALSE;
+//    return false;
 //}
 //
 // bool BlockStorageStream::Seek( signed int offset, SeekOrigin origin )
 //{
-//    return TRUE;
+//    return true;
 //}
 //
 // bool BlockStorageStream::Erase( unsigned int length )
 //{
-//    return TRUE;
+//    return true;
 //}
 //
 // bool BlockStorageStream::Write( unsigned char* data  , unsigned int length )
 //{
-//    return TRUE;
+//    return true;
 //}
 //
 // bool BlockStorageStream::ReadIntoBuffer( unsigned char* pBuffer, unsigned int length )
 //{
-//    return TRUE;
+//    return true;
 //}
 //
 // bool BlockStorageStream::Read( unsigned char** ppBuffer, unsigned int length )
 //{
-//    return TRUE;
+//    return true;
 //}
 //
 
@@ -145,19 +145,19 @@ bool BlockStorageList_FindDeviceForPhysicalAddress(
 // bool DeviceBlockInfo::FindRegionFromAddress(ByteAddress Address, unsigned int &BlockRegionIndex, unsigned int
 // &BlockRangeIndex ) const
 //{
-//    return FALSE;
+//    return false;
 //}
 //
 // bool DeviceBlockInfo::FindNextUsageBlock(unsigned int BlockUsage, ByteAddress &Address, unsigned int
 // &BlockRegionIndex, unsigned int &BlockRangeIndex ) const
 //{
-//    return FALSE;
+//    return false;
 //}
 //
 // bool DeviceBlockInfo::FindForBlockUsage(unsigned int BlockUsage, ByteAddress &Address, unsigned int
 // &BlockRegionIndex, unsigned int &BlockRangeIndex ) const
 //{
-//    return FALSE;
+//    return false;
 //}
 
 //--//

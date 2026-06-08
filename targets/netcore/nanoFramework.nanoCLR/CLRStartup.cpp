@@ -208,7 +208,7 @@ struct Settings
             CLR_RT_Memory::ZeroFill(headerBuffer, headerInBytes);
         }
 
-        while (TRUE)
+        while (true)
         {
             if (!BlockStorageStream_Read(&stream, &headerBuffer, headerInBytes))
                 break;
@@ -412,7 +412,7 @@ struct Settings
                 if ((CLR_UINT8 *)header + header->TotalSize() > (CLR_UINT8 *)headerEnd)
                 {
                     // checksum passed, but not enough data in assembly
-                    _ASSERTE(FALSE);
+                    _ASSERTE(false);
                     delete bufferSub;
                     break;
                 }

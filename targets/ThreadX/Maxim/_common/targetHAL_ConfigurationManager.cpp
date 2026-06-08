@@ -161,7 +161,7 @@ __nfweak bool ConfigurationManager_GetConfigurationBlock(
         if (g_TargetConfiguration.Wireless80211Configs->Count == 0 ||
             (configurationIndex + 1) > g_TargetConfiguration.Wireless80211Configs->Count)
         {
-            return FALSE;
+            return false;
         }
 
         // set block size
@@ -175,7 +175,7 @@ __nfweak bool ConfigurationManager_GetConfigurationBlock(
         if (g_TargetConfiguration.CertificateStore->Count == 0 ||
             (configurationIndex + 1) > g_TargetConfiguration.CertificateStore->Count)
         {
-            return FALSE;
+            return false;
         }
 
         // get block address
@@ -190,7 +190,7 @@ __nfweak bool ConfigurationManager_GetConfigurationBlock(
     // copy the config block content to the pointer in the argument
     memcpy(configurationBlock, blockAddress, sizeOfBlock);
 
-    return TRUE;
+    return true;
 }
 
 // Stores the configuration block to the configuration flash sector
@@ -207,8 +207,8 @@ __nfweak bool ConfigurationManager_StoreConfigurationBlock(
     bool done)
 {
     ByteAddress storageAddress = 0;
-    bool requiresEnumeration = FALSE;
-    bool success = FALSE;
+    bool requiresEnumeration = false;
+    bool success = false;
 
     if (configuration == DeviceConfigurationOption_Network)
     {
@@ -226,7 +226,7 @@ __nfweak bool ConfigurationManager_StoreConfigurationBlock(
             // the requested config block is beyond the available count
             if ((configurationIndex + 1) > g_TargetConfiguration.NetworkInterfaceConfigs->Count)
             {
-                return FALSE;
+                return false;
             }
 
             // set storage address from block address, plus the requested offset
@@ -250,7 +250,7 @@ __nfweak bool ConfigurationManager_StoreConfigurationBlock(
         {
             // there is no room for this block, or there are no blocks stored at all
             // failing the operation
-            return FALSE;
+            return false;
         }
 
         // set storage address from block address, plus the requested offset
@@ -295,14 +295,14 @@ __nfweak bool ConfigurationManager_StoreConfigurationBlock(
             if (((uint32_t)&__nanoConfig_end__ - storageAddress) < blockSize)
             {
                 // not enough room
-                return FALSE;
+                return false;
             }
 
             // now check if memory is erase, so the block can be stored
             if (!MXCFlashDriver_IsBlockErased(NULL, storageAddress, blockSize))
             {
                 // memory not erased, can't store
-                return FALSE;
+                return false;
             }
         }
 
@@ -325,7 +325,7 @@ __nfweak bool ConfigurationManager_StoreConfigurationBlock(
         // for save all the block size has to be provided, check that
         if (blockSize == 0)
         {
-            return FALSE;
+            return false;
         }
     }
 
@@ -362,7 +362,7 @@ __nfweak bool ConfigurationManager_UpdateConfigurationBlock(
     uint32_t blockOffset;
     uint8_t *blockAddressInCopy;
     uint32_t blockSize;
-    bool success = FALSE;
+    bool success = false;
 
     // config sector size
     int sizeOfConfigSector = (uint32_t)&__nanoConfig_end__ - (uint32_t)&__nanoConfig_start__;
@@ -396,7 +396,7 @@ __nfweak bool ConfigurationManager_UpdateConfigurationBlock(
                 platform_free(configSectorCopy);
 
                 // operation is successful (nothing to update)
-                return TRUE;
+                return true;
             }
 
             // get storage address from block address
@@ -427,7 +427,7 @@ __nfweak bool ConfigurationManager_UpdateConfigurationBlock(
                 platform_free(configSectorCopy);
 
                 // operation is successful (nothing to update)
-                return TRUE;
+                return true;
             }
 
             // storage address from block address
@@ -456,7 +456,7 @@ __nfweak bool ConfigurationManager_UpdateConfigurationBlock(
                 platform_free(configSectorCopy);
 
                 // operation is successful (nothing to update)
-                return TRUE;
+                return true;
             }
 
             // storage address from block address
@@ -473,11 +473,11 @@ __nfweak bool ConfigurationManager_UpdateConfigurationBlock(
             // free memory first
             platform_free(configSectorCopy);
 
-            return FALSE;
+            return false;
         }
 
         // erase config sector
-        if (MXCFlashDriver_EraseBlock(NULL, (uint32_t)&__nanoConfig_start__) == TRUE)
+        if (MXCFlashDriver_EraseBlock(NULL, (uint32_t)&__nanoConfig_start__) == true)
         {
             // flash block is erased
 
@@ -524,7 +524,7 @@ __nfweak bool InitialiseNetworkDefaultConfig(HAL_Configuration_NetworkInterface 
     (void)configurationIndex;
 
     // can't create a "default" network config because we are lacking definition of a MAC address
-    return FALSE;
+    return false;
 }
 
 // default implementation

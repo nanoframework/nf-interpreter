@@ -48,7 +48,7 @@ bool SOCKETS_Flush(int32_t ComPortNum)
 
     NATIVE_PROFILE_PAL_COM();
     // Events_WaitForEvents(0, 2);
-    return TRUE;
+    return true;
 }
 
 bool SOCKETS_UpgradeToSsl(
@@ -82,9 +82,9 @@ void Sockets_LWIP_Driver::Debugger_Initialize()
 
         g_Sockets_LWIP_Driver.m_stateDebugSocket = DbgSock_Uninitialized;
 
-        g_Sockets_LWIP_Driver.m_usingSSL = FALSE;
+        g_Sockets_LWIP_Driver.m_usingSSL = false;
 
-        s_initializedDbg = TRUE;
+        s_initializedDbg = true;
     }
 }
 
@@ -93,7 +93,7 @@ void Sockets_LWIP_Driver::Debugger_Uninitialize()
     g_Sockets_LWIP_Driver.m_multicastSocket = SOCK_SOCKET_ERROR;
     g_Sockets_LWIP_Driver.m_SocketDebugStream = SOCK_SOCKET_ERROR;
     g_Sockets_LWIP_Driver.m_SocketDebugListener = SOCK_SOCKET_ERROR;
-    s_initializedDbg = FALSE;
+    s_initializedDbg = false;
 }
 
 void Sockets_LWIP_Driver::Debugger_Abort()
@@ -117,16 +117,16 @@ bool Sockets_LWIP_Driver::InitializeDbgListener(int ComPortNum)
     Debugger_Initialize();
 
     if (ComPortNum != ConvertCOM_SockPort(COM_SOCKET_DBG))
-        return FALSE;
+        return false;
 
     if (g_Sockets_LWIP_Driver.m_SocketDebugListener != SOCK_SOCKET_ERROR)
-        return TRUE;
+        return true;
 
     s_DebuggerTimeoutCompletion.InitializeForUserMode(OnDebuggerTimeout);
 
     //-- debug api socket --//
 
-    g_Sockets_LWIP_Driver.m_SocketDebugListener = Socket(SOCK_AF_INET, SOCK_SOCK_STREAM, SOCK_IPPROTO_TCP, TRUE);
+    g_Sockets_LWIP_Driver.m_SocketDebugListener = Socket(SOCK_AF_INET, SOCK_SOCK_STREAM, SOCK_IPPROTO_TCP, true);
     SOCKET_CHECK_RESULT(g_Sockets_LWIP_Driver.m_SocketDebugListener);
 
     memset(&sockAddr, 0, sizeof(sockAddr));
@@ -182,7 +182,7 @@ bool Sockets_LWIP_Driver::UninitializeDbgListener(int ComPortNum)
     NATIVE_PROFILE_PAL_COM();
 
     if (ComPortNum != ConvertCOM_SockPort(COM_SOCKET_DBG))
-        return FALSE;
+        return false;
 
     g_Sockets_LWIP_Driver.m_stateDebugSocket = DbgSock_Uninitialized;
 
@@ -195,7 +195,7 @@ bool Sockets_LWIP_Driver::UninitializeDbgListener(int ComPortNum)
         g_Sockets_LWIP_Driver.m_SocketDebugListener = SOCK_SOCKET_ERROR;
     }
 
-    return TRUE;
+    return true;
 }
 
 //-----------------------------------------------------------------------------
@@ -313,7 +313,7 @@ int Sockets_LWIP_Driver::Read(int ComPortNum, char *Data, size_t size)
         // we always perform an accept so that we handle pending connections
         // if we already are connected and the debug stream socket is still active, then we immediately close
         // the pending connection
-        sock = Accept(g_Sockets_LWIP_Driver.m_SocketDebugListener, &addr, &len, TRUE);
+        sock = Accept(g_Sockets_LWIP_Driver.m_SocketDebugListener, &addr, &len, true);
 
         if (SOCK_SOCKET_ERROR != sock)
         {
@@ -396,7 +396,7 @@ void Sockets_LWIP_Driver::CloseDebuggerSocket()
             SOCK_close(g_Sockets_LWIP_Driver.m_SocketDebugStream);
         }
 
-        g_Sockets_LWIP_Driver.m_usingSSL = FALSE;
+        g_Sockets_LWIP_Driver.m_usingSSL = false;
 
         g_Sockets_LWIP_Driver.m_SocketDebugStream = SOCK_SOCKET_ERROR;
 
@@ -416,16 +416,16 @@ void Sockets_LWIP_Driver::OnDebuggerTimeout(void *arg)
 bool Sockets_LWIP_Driver::IsUsingSsl(int ComPortNum)
 {
     if (ComPortNum != ConvertCOM_SockPort(COM_SOCKET_DBG))
-        return FALSE;
+        return false;
     if (g_Sockets_LWIP_Driver.m_stateDebugSocket == DbgSock_Uninitialized)
-        return FALSE;
+        return false;
 
     if (g_Sockets_LWIP_Driver.m_stateDebugSocket == DbgSock_Connected)
     {
         return g_Sockets_LWIP_Driver.m_usingSSL;
     }
 
-    return FALSE;
+    return false;
 }
 
 bool Sockets_LWIP_Driver::UpgradeToSsl(
@@ -444,7 +444,7 @@ bool Sockets_LWIP_Driver::UpgradeToSsl(
     if (g_Sockets_LWIP_Driver.m_stateDebugSocket == DbgSock_Connected)
     {
         if (g_Sockets_LWIP_Driver.m_usingSSL)
-            return TRUE;
+            return true;
 
         // TLS only and Verify=Required --> only verify the server
         if (SSL_ClientInit(
@@ -476,14 +476,14 @@ bool Sockets_LWIP_Driver::UpgradeToSsl(
             }
             else
             {
-                g_Sockets_LWIP_Driver.m_usingSSL = TRUE;
+                g_Sockets_LWIP_Driver.m_usingSSL = true;
             }
 
             return ret == 0;
         }
     }
 
-    return FALSE;
+    return false;
 }
 
 //-----------------------------------------------------------------------------
@@ -501,7 +501,7 @@ bool Sockets_LWIP_Driver::InitializeMulticastDiscovery()
     int nonblocking = 1;
 
     if (g_Sockets_LWIP_Driver.s_discoveryInitialized)
-        return TRUE;
+        return true;
 
     MulticastResponseContinuation.InitializeCallback(MulticastDiscoveryRespond, NULL);
 
@@ -512,7 +512,7 @@ bool Sockets_LWIP_Driver::InitializeMulticastDiscovery()
     sockAddr.sin_addr.S_un.S_addr = SOCK_htonl(SOCK_INADDR_ANY);
 
     // UDP socket is easier in our scenario because it isn't session based
-    g_Sockets_LWIP_Driver.m_multicastSocket = Socket(SOCK_AF_INET, SOCK_SOCK_DGRAM, SOCK_IPPROTO_UDP, FALSE);
+    g_Sockets_LWIP_Driver.m_multicastSocket = Socket(SOCK_AF_INET, SOCK_SOCK_DGRAM, SOCK_IPPROTO_UDP, false);
     SOCKET_CHECK_RESULT(g_Sockets_LWIP_Driver.m_multicastSocket);
 
     // set sock option for multicast
@@ -536,7 +536,7 @@ bool Sockets_LWIP_Driver::InitializeMulticastDiscovery()
     SOCKET_CHECK_RESULT(
         SOCK_bind(g_Sockets_LWIP_Driver.m_multicastSocket, (const SOCK_sockaddr *)&dummyPtr, sizeof(sockAddr)));
 
-    g_Sockets_LWIP_Driver.s_discoveryInitialized = TRUE;
+    g_Sockets_LWIP_Driver.s_discoveryInitialized = true;
 
     SOCKET_CLEANUP()
 
@@ -607,7 +607,7 @@ void Sockets_LWIP_Driver::MulticastDiscoveryRespond(void *arg)
     if (len > 0)
     {
         int32_t idx = 0;
-        bool fFound = FALSE;
+        bool fFound = false;
         const char *c_Signature = SOCK_DISCOVERY_MULTICAST_TOKEN;
         int32_t sigLen = hal_strlen_s(c_Signature);
 
@@ -616,7 +616,7 @@ void Sockets_LWIP_Driver::MulticastDiscoveryRespond(void *arg)
         {
             if (0 == memcmp(&data[idx], c_Signature, sigLen))
             {
-                fFound = TRUE;
+                fFound = true;
                 break;
             }
             idx++;
@@ -640,7 +640,7 @@ void Sockets_LWIP_Driver::MulticastDiscoveryRespond(void *arg)
             // info.macAddressLen = current.macAddressLen;
             // memcpy( &info.macAddressBuffer[0], &current.macAddressBuffer[0], current.macAddressLen );
 
-            sock = Socket(SOCK_AF_INET, SOCK_SOCK_DGRAM, SOCK_IPPROTO_UDP, FALSE);
+            sock = Socket(SOCK_AF_INET, SOCK_SOCK_DGRAM, SOCK_IPPROTO_UDP, false);
             SOCKET_CHECK_RESULT(sock);
 
             memset(&sockAddr, 0, sizeof(sockAddr));
@@ -685,4 +685,4 @@ void Sockets_LWIP_Driver::MulticastDiscoveryRespond(void *arg)
     MulticastDiscoverySchedule();
 }
 
-bool Sockets_LWIP_Driver::s_initializedDbg = FALSE;
+bool Sockets_LWIP_Driver::s_initializedDbg = false;

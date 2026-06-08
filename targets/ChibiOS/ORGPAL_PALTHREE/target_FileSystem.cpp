@@ -51,7 +51,7 @@ void FS_AddVolumes()
         g_AvailableFSInterfaces[1].streamDriver,
         g_AvailableFSInterfaces[1].fsDriver,
         0,
-        FALSE);
+        false);
 
     // W25Q128, drive F:, volume 1
     FileSystemVolumeList::AddVolume(
@@ -61,7 +61,7 @@ void FS_AddVolumes()
         g_AvailableFSInterfaces[1].streamDriver,
         g_AvailableFSInterfaces[1].fsDriver,
         1,
-        FALSE);
+        false);
 }
 
 void FS_MountRemovableVolumes()

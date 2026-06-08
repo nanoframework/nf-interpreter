@@ -35,7 +35,7 @@ __nfweak bool CLR_SafeSprintfV(char *&szBuffer, size_t &iBuffer, const char *for
 
     NATIVE_PROFILE_CLR_DIAGNOSTICS();
 
-    return FALSE;
+    return false;
 }
 
 __nfweak bool CLR_SafeSprintf(char *&szBuffer, size_t &iBuffer, const char *format, ...)
@@ -46,7 +46,7 @@ __nfweak bool CLR_SafeSprintf(char *&szBuffer, size_t &iBuffer, const char *form
 
     NATIVE_PROFILE_CLR_DIAGNOSTICS();
 
-    return FALSE;
+    return false;
 }
 
 //--//

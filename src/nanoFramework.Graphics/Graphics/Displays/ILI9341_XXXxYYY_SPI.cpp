@@ -269,7 +269,7 @@ bool DisplayDriver::Uninitialize()
     Clear();
 
     // Anything else to Uninitialize?
-    return TRUE;
+    return true;
 }
 
 void DisplayDriver::PowerSave(PowerSaveState powerState)

@@ -223,7 +223,7 @@ HRESULT Library_sys_net_native_System_Net_Security_SslNative::ExitSecureContext_
 
     CLR_INT32 sslContext = stack.Arg0().NumericByRef().s4;
 
-    int result = SSL_ExitContext(sslContext) == TRUE ? 0 : -1;
+    int result = SSL_ExitContext(sslContext) == true ? 0 : -1;
 
     stack.SetResult_I4(result);
 

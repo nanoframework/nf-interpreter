@@ -92,7 +92,7 @@ start_pass_dpost(j_decompress_ptr cinfo, J_BUF_MODE pass_mode)
             if (post->buffer == NULL) {
                 post->buffer = (*cinfo->mem->access_virt_sarray)
                     ((j_common_ptr)cinfo, post->whole_image,
-                    (JDIMENSION)0, post->strip_height, TRUE);
+                    (JDIMENSION)0, post->strip_height, true;
             }
         }
         else {
@@ -175,7 +175,7 @@ post_process_prepass(j_decompress_ptr cinfo,
     if (post->next_row == 0) {
         post->buffer = (*cinfo->mem->access_virt_sarray)
             ((j_common_ptr)cinfo, post->whole_image,
-                post->starting_row, post->strip_height, TRUE);
+                post->starting_row, post->strip_height, true;
     }
 
     /* Upsample some data (up to a strip height's worth). */
@@ -219,7 +219,7 @@ post_process_2pass(j_decompress_ptr cinfo,
     if (post->next_row == 0) {
         post->buffer = (*cinfo->mem->access_virt_sarray)
             ((j_common_ptr)cinfo, post->whole_image,
-                post->starting_row, post->strip_height, FALSE);
+                post->starting_row, post->strip_height, false;
     }
 
     /* Determine number of rows to emit. */
@@ -254,7 +254,7 @@ post_process_2pass(j_decompress_ptr cinfo,
  */
 
 GLOBAL(void)
-jinit_d_post_controller(j_decompress_ptr cinfo, boolean need_full_buffer)
+jinit_d_post_controller(j_decompress_ptr cinfo, bool need_full_buffer)
 {
     my_post_ptr post;
 

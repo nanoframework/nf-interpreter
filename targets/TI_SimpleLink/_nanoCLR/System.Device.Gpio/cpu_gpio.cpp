@@ -392,7 +392,7 @@ bool CPU_GPIO_EnableInputPin(
 
             Clock_Params_init(&params);
             params.arg = (UArg)pState->pinConfigIndex;
-            params.startFlag = FALSE;
+            params.startFlag = false;
             // period it's 0 because we are using a one-shot timer
             params.period = 0;
 

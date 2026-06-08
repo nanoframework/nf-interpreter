@@ -66,7 +66,7 @@ int ff_mutex_create (	/* Returns 1:Function succeeded or 0:Could not create the 
 )
 {
     chSemObjectInit(&Mutex[vol], 1);
-    return TRUE;
+    return true;
 }
 
 

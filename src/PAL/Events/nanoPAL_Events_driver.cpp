@@ -8,14 +8,14 @@
 
 PalEventDriver g_palEventDriver;
 
-bool PalEventDriver::s_initialized = FALSE;
+bool PalEventDriver::s_initialized = false;
 
 HRESULT PalEventDriver::Initialize()
 {
     if (!g_palEventDriver.s_initialized)
     {
         g_palEventDriver.listenerList.Initialize();
-        PalEventDriver::s_initialized = TRUE;
+        PalEventDriver::s_initialized = true;
     }
 
     return S_OK;
@@ -25,7 +25,7 @@ HRESULT PalEventDriver::Uninitialize()
 {
     if (PalEventDriver::s_initialized)
     {
-        PalEventDriver::s_initialized = FALSE;
+        PalEventDriver::s_initialized = false;
 
         /// Remove all nodes.
         g_palEventDriver.listenerList.Initialize();
@@ -37,8 +37,8 @@ HRESULT PalEventDriver::Uninitialize()
 HRESULT PalEventDriver::PostEvent(uint32_t e, uint32_t param)
 {
     PalEventListener *listener = g_palEventDriver.listenerList.FirstNode();
-        
-    while(listener->Next() != NULL)
+
+    while (listener->Next() != NULL)
     {
         if (listener->m_eventMask & e)
         {
@@ -51,7 +51,7 @@ HRESULT PalEventDriver::PostEvent(uint32_t e, uint32_t param)
     return S_OK;
 }
 
-HRESULT PalEventDriver::EnlistListener(PalEventListener* listener)
+HRESULT PalEventDriver::EnlistListener(PalEventListener *listener)
 {
     listener->Initialize();
     g_palEventDriver.listenerList.LinkAtBack(listener);

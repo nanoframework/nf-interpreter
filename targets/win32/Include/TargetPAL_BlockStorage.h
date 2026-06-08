@@ -94,10 +94,10 @@
 //             BlockType == BlockRange_BLOCKTYPE_RESERVED  ||
 //             BlockType == BlockRange_BLOCKTYPE_DIRTYBIT)
 //         {
-//             return FALSE;
+//             return false;
 //         }
 
-//         return TRUE;
+//         return true;
 //     }
 
 //     bool IsReserved() const      { return ((RangeType & BlockRange_RESERVED) == BlockRange_RESERVED);       }

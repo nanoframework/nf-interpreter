@@ -49,7 +49,7 @@ bool ssl_generic_init_internal(
 
     if (sslContexIndex == -1)
     {
-        return FALSE;
+        return false;
     }
 
     // create and init MbedTLS nanoFramework context

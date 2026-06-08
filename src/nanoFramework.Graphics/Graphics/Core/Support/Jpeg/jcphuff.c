@@ -31,7 +31,7 @@ typedef struct {
     struct jpeg_entropy_encoder pub; /* public fields */
 
     /* Mode flag: TRUE for optimization, FALSE for actual data output */
-    boolean gather_statistics;
+    bool gather_statistics;
 
     /* Bit-level coding status.
      * next_output_byte/free_in_buffer are local copies of cinfo->dest fields.
@@ -92,13 +92,13 @@ typedef phuff_entropy_encoder* phuff_entropy_ptr;
 #endif
 
   /* Forward declarations */
-METHODDEF(boolean) encode_mcu_DC_first JPP((j_compress_ptr cinfo,
+METHODDEF(bool) encode_mcu_DC_first JPP((j_compress_ptr cinfo,
     JBLOCKROW* MCU_data));
-METHODDEF(boolean) encode_mcu_AC_first JPP((j_compress_ptr cinfo,
+METHODDEF(bool) encode_mcu_AC_first JPP((j_compress_ptr cinfo,
     JBLOCKROW* MCU_data));
-METHODDEF(boolean) encode_mcu_DC_refine JPP((j_compress_ptr cinfo,
+METHODDEF(bool) encode_mcu_DC_refine JPP((j_compress_ptr cinfo,
     JBLOCKROW* MCU_data));
-METHODDEF(boolean) encode_mcu_AC_refine JPP((j_compress_ptr cinfo,
+METHODDEF(bool) encode_mcu_AC_refine JPP((j_compress_ptr cinfo,
     JBLOCKROW* MCU_data));
 METHODDEF(void) finish_pass_phuff JPP((j_compress_ptr cinfo));
 METHODDEF(void) finish_pass_gather_phuff JPP((j_compress_ptr cinfo));
@@ -109,10 +109,10 @@ METHODDEF(void) finish_pass_gather_phuff JPP((j_compress_ptr cinfo));
  */
 
 METHODDEF(void)
-start_pass_phuff(j_compress_ptr cinfo, boolean gather_statistics)
+start_pass_phuff(j_compress_ptr cinfo, bool gather_statistics)
 {
     phuff_entropy_ptr entropy = (phuff_entropy_ptr)cinfo->entropy;
-    boolean is_DC_band;
+    bool is_DC_band;
     int ci, tbl;
     jpeg_component_info* compptr;
 
@@ -383,7 +383,7 @@ emit_restart(phuff_entropy_ptr entropy, int restart_num)
  * or first pass of successive approximation).
  */
 
-METHODDEF(boolean)
+METHODDEF(bool)
 encode_mcu_DC_first(j_compress_ptr cinfo, JBLOCKROW* MCU_data)
 {
     phuff_entropy_ptr entropy = (phuff_entropy_ptr)cinfo->entropy;
@@ -461,7 +461,7 @@ encode_mcu_DC_first(j_compress_ptr cinfo, JBLOCKROW* MCU_data)
         entropy->restarts_to_go--;
     }
 
-    return TRUE;
+    return true;
 }
 
 
@@ -470,7 +470,7 @@ encode_mcu_DC_first(j_compress_ptr cinfo, JBLOCKROW* MCU_data)
  * or first pass of successive approximation).
  */
 
-METHODDEF(boolean)
+METHODDEF(bool)
 encode_mcu_AC_first(j_compress_ptr cinfo, JBLOCKROW* MCU_data)
 {
     phuff_entropy_ptr entropy = (phuff_entropy_ptr)cinfo->entropy;
@@ -568,7 +568,7 @@ encode_mcu_AC_first(j_compress_ptr cinfo, JBLOCKROW* MCU_data)
         entropy->restarts_to_go--;
     }
 
-    return TRUE;
+    return true;
 }
 
 
@@ -578,7 +578,7 @@ encode_mcu_AC_first(j_compress_ptr cinfo, JBLOCKROW* MCU_data)
  * is not very clear on the point.
  */
 
-METHODDEF(boolean)
+METHODDEF(bool)
 encode_mcu_DC_refine(j_compress_ptr cinfo, JBLOCKROW* MCU_data)
 {
     phuff_entropy_ptr entropy = (phuff_entropy_ptr)cinfo->entropy;
@@ -617,7 +617,7 @@ encode_mcu_DC_refine(j_compress_ptr cinfo, JBLOCKROW* MCU_data)
         entropy->restarts_to_go--;
     }
 
-    return TRUE;
+    return true;
 }
 
 
@@ -625,7 +625,7 @@ encode_mcu_DC_refine(j_compress_ptr cinfo, JBLOCKROW* MCU_data)
  * MCU encoding for AC successive approximation refinement scan.
  */
 
-METHODDEF(boolean)
+METHODDEF(bool)
 encode_mcu_AC_refine(j_compress_ptr cinfo, JBLOCKROW* MCU_data)
 {
     phuff_entropy_ptr entropy = (phuff_entropy_ptr)cinfo->entropy;
@@ -745,7 +745,7 @@ encode_mcu_AC_refine(j_compress_ptr cinfo, JBLOCKROW* MCU_data)
         entropy->restarts_to_go--;
     }
 
-    return TRUE;
+    return true;
 }
 
 
@@ -778,11 +778,11 @@ METHODDEF(void)
 finish_pass_gather_phuff(j_compress_ptr cinfo)
 {
     phuff_entropy_ptr entropy = (phuff_entropy_ptr)cinfo->entropy;
-    boolean is_DC_band;
+    bool is_DC_band;
     int ci, tbl;
     jpeg_component_info* compptr;
     JHUFF_TBL** htblptr;
-    boolean did[NUM_HUFF_TBLS];
+    bool did[NUM_HUFF_TBLS];
 
     /* Flush out buffered data (all we care about is counting the EOB symbol) */
     emit_eobrun(entropy);
@@ -812,7 +812,7 @@ finish_pass_gather_phuff(j_compress_ptr cinfo)
             if (*htblptr == NULL)
                 *htblptr = jpeg_alloc_huff_table((j_common_ptr)cinfo);
             jpeg_gen_optimal_table(cinfo, *htblptr, entropy->count_ptrs[tbl]);
-            did[tbl] = TRUE;
+            did[tbl] = true;
         }
     }
 }
@@ -843,4 +843,3 @@ jinit_phuff_encoder(j_compress_ptr cinfo)
 }
 
 #endif /* C_PROGRESSIVE_SUPPORTED */
-

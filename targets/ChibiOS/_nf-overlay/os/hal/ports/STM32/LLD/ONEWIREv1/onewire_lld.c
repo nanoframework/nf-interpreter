@@ -201,8 +201,8 @@ uint8_t oneWire_lld_TouchReset(void)
     // set UART baud rate to 9600bps (required to send the RESET condition to the 1-Wire bus)
     uartSetSpeed(9600);
 
-    chBSemReset(&ONEWIRED1.TxCompleted, TRUE);
-    chBSemReset(&ONEWIRED1.RxCompleted, TRUE);
+    chBSemReset(&ONEWIRED1.TxCompleted, true);
+    chBSemReset(&ONEWIRED1.RxCompleted, true);
     uartStartReceive(ONEWIRED1.UartDriver, 1, &ONEWIRED1.RxBuffer[0]);
     uartStartSend(ONEWIRED1.UartDriver, 1, &ONEWIRED1.TxBuffer[0]);
     chThdSleepMilliseconds(10);
@@ -229,8 +229,8 @@ bool oneWire_lld_TouchBit(bool sendbit)
     // (only required for Cortex-M7)
     cacheBufferFlush(&ONEWIRED1.TxBuffer[0], 1);
 
-    chBSemReset(&ONEWIRED1.RxCompleted, TRUE);
-    chBSemReset(&ONEWIRED1.TxCompleted, TRUE);
+    chBSemReset(&ONEWIRED1.RxCompleted, true);
+    chBSemReset(&ONEWIRED1.TxCompleted, true);
     uartStartReceive(ONEWIRED1.UartDriver, 1, &ONEWIRED1.RxBuffer[0]);
     uartStartSend(ONEWIRED1.UartDriver, 1, &ONEWIRED1.TxBuffer[0]);
     chThdSleepMilliseconds(0.1);
@@ -274,8 +274,8 @@ uint8_t oneWire_lld_TouchByte(uint8_t sendbyte)
     // (only required for Cortex-M7)
     cacheBufferFlush(&ONEWIRED1.TxBuffer[0], 8);
 
-    chBSemReset(&ONEWIRED1.RxCompleted, TRUE);
-    chBSemReset(&ONEWIRED1.TxCompleted, TRUE);
+    chBSemReset(&ONEWIRED1.RxCompleted, true);
+    chBSemReset(&ONEWIRED1.TxCompleted, true);
     uartStartReceive(ONEWIRED1.UartDriver, 8, &ONEWIRED1.RxBuffer[0]);
     uartStartSend(ONEWIRED1.UartDriver, 8, &ONEWIRED1.TxBuffer[0]);
     chThdSleepMilliseconds(0.1);

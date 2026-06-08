@@ -134,7 +134,7 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_NativeIO::Format___STATIC__VOID__
     FileSystemVolume *driver;
     FILESYSTEM_DRIVER_INTERFACE *originalFS = NULL;
     STREAM_DRIVER_INTERFACE *originalStream = NULL;
-    bool needInitialize = FALSE;
+    bool needInitialize = false;
 
     NANOCLR_CHECK_HRESULT(FindVolume(stack.Arg0(), driver, path));
     hbFileSystemName = stack.Arg1().DereferenceString();
@@ -145,7 +145,7 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_NativeIO::Format___STATIC__VOID__
 
     if (!hbFileSystemName)
     {
-        needInitialize = TRUE;
+        needInitialize = true;
 
         NANOCLR_SET_AND_LEAVE(driver->Format("", parameters));
     }
@@ -162,7 +162,7 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_NativeIO::Format___STATIC__VOID__
             }
 
             // From this point on, even if we fail, we should try to re-initialize before returning
-            needInitialize = TRUE;
+            needInitialize = true;
 
             driver->m_fsDriver = g_AvailableFSInterfaces[i].fsDriver;
             driver->m_streamDriver = g_AvailableFSInterfaces[i].streamDriver;

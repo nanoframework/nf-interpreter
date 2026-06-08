@@ -8,7 +8,7 @@
 
 #include <target_platform.h>
 
-#if (NANOCLR_GRAPHICS == TRUE)
+#if NANOCLR_GRAPHICS
 #include "Display.h"
 #include "DisplayInterface.h"
 #include "TouchDevice.h"

@@ -61,7 +61,7 @@ void rng_lld_init(void)
 void rng_lld_start()
 {
 
-    rccEnableRNG(FALSE)
+    rccEnableRNG(false);
 
         // Enables the RNG peripheral.
         __RNG_ENABLE(RNGD1);

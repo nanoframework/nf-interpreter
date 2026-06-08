@@ -269,7 +269,7 @@ void CPU_Reset()
 
 bool CPU_IsSoftRebootSupported()
 {
-    return TRUE;
+    return true;
 }
 
 void CPU_SetPowerMode(PowerLevel_type powerLevel)
@@ -371,7 +371,7 @@ int hal_vfprintf(COM_HANDLE stream, const char *format, va_list arg)
     //    break;
 
     // case FLASH_WRITE_TRANSPORT:
-    //    _ASSERTE(FALSE);
+    //    _ASSERTE(false);
     //}
 
     return chars;

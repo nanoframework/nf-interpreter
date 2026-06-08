@@ -15,7 +15,7 @@ TOUCH_PANEL_Point GestureLastPoint;
 
 // It seems that events are defined in  nanoHAL_V2.h and are required to be matched with managed code events.
 // This is a fudge to get it to compile
-bool GestureDriver::s_initialized = FALSE;
+bool GestureDriver::s_initialized = false;
 // 50ms - allow for some touch points to accumulate before we run the gesture engine
 HRESULT GestureDriver::Initialize()
 {
@@ -25,7 +25,7 @@ HRESULT GestureDriver::Initialize()
         m_gestureListener.m_palEventListener = EventListener;
         m_gestureListener.m_eventMask = PAL_EVENT_TOUCH | PAL_EVENT_MOUSE;
         PalEvent_Enlist(&m_gestureListener);
-        GestureDriver::s_initialized = TRUE;
+        GestureDriver::s_initialized = true;
     }
     return S_OK;
 }
@@ -34,7 +34,7 @@ HRESULT GestureDriver::Uninitialize()
 {
     if (GestureDriver::s_initialized)
     {
-        GestureDriver::s_initialized = FALSE;
+        GestureDriver::s_initialized = false;
         if (m_gestureCompletion.IsLinked()) m_gestureCompletion.Abort();
         ResetRecognition();
     }
@@ -98,7 +98,7 @@ bool GestureDriver::ProcessPoint(CLR_UINT32 flags, CLR_UINT16 source, CLR_UINT16
     if (source == 0) {} // Avoid unused paramter , not used as ported, maybe in future?
     if (time == 0) {} // Avoid unused paramter , not used as ported, maybe in future?
 
-    if (!GestureDriver::s_initialized) return FALSE;
+    if (!GestureDriver::s_initialized) return false;
 
     m_index = (flags >> 16);
 
@@ -109,7 +109,7 @@ bool GestureDriver::ProcessPoint(CLR_UINT32 flags, CLR_UINT16 source, CLR_UINT16
         {
             PostManagedEvent(EVENT_GESTURE, gesture, 0, ((CLR_UINT32)m_startx << 16) | m_starty);
         }
-        return FALSE;
+        return false;
     }
 
     if (x == TouchPointLocationFlags_ContactDown) return true;
@@ -122,7 +122,7 @@ bool GestureDriver::ProcessPoint(CLR_UINT32 flags, CLR_UINT16 source, CLR_UINT16
         m_startx = x;
         m_starty = y;
 
-        return TRUE;
+        return true;
     }
 
     CLR_INT16 dx = (CLR_INT16)x - (CLR_INT16)m_lastx;
