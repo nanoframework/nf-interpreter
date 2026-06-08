@@ -203,6 +203,10 @@ if(${TARGET_SERIES} STREQUAL "STM32F7xx")
 
         # Stub: halCommunityInit() no-op — MCUboot does not use ChibiOS-Contrib.
         ${CMAKE_SOURCE_DIR}/targets/ChibiOS/_mcuboot/hal_community_stub.c
+
+        # HAL shims and weak defaults (HAL_GetTick, HAL_Delay, nf_mcuboot_log_write, …).
+        # All definitions are weak; boards override what they need in their BSP files.
+        ${CMAKE_SOURCE_DIR}/targets/ChibiOS/_mcuboot/mcuboot_hal_stubs.c
     )
 
     # Include directories shared by all STM32F7xx bootloader targets.

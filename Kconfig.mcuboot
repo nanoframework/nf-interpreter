@@ -88,6 +88,48 @@ config NF_MCUBOOT_SERIAL_DETECT_DELAY_MS
         GPIO. This provides hardware debounce for the detect pin. The default
         100 ms is sufficient for most push-buttons.
 
+choice NF_MCUBOOT_LOG_LEVEL
+    prompt "Log level"
+    depends on NF_FEATURE_HAS_MCUBOOT
+    default NF_MCUBOOT_LOG_LEVEL_OFF
+    help
+        Verbosity of MCUboot bootloader log output. Each level includes all
+        higher-priority levels (e.g. INFO includes ERROR and WARNING).
+
+        The log backend is the board-supplied nf_mcuboot_log_write() function.
+        The weak default is a no-op; boards that want output override it in
+        their MCUboot BSP file (e.g. to route messages via chprintf to UART or
+        USB CDC).
+
+        Select OFF for production builds to minimise flash usage.
+
+config NF_MCUBOOT_LOG_LEVEL_OFF
+    bool "Off"
+    help
+        No logging output. All BOOT_LOG_* calls compile to nothing.
+
+config NF_MCUBOOT_LOG_LEVEL_ERROR
+    bool "Error"
+    help
+        BOOT_LOG_ERR() messages only.
+
+config NF_MCUBOOT_LOG_LEVEL_WARNING
+    bool "Warning"
+    help
+        BOOT_LOG_ERR() and BOOT_LOG_WRN() messages.
+
+config NF_MCUBOOT_LOG_LEVEL_INFO
+    bool "Info"
+    help
+        BOOT_LOG_ERR(), BOOT_LOG_WRN(), and BOOT_LOG_INF() messages.
+
+config NF_MCUBOOT_LOG_LEVEL_DEBUG
+    bool "Debug"
+    help
+        All BOOT_LOG_* messages, including BOOT_LOG_DBG().
+
+endchoice # NF_MCUBOOT_LOG_LEVEL
+
 config NF_MCUBOOT_HEADER_SIZE
     hex "MCUboot image header size (bytes)"
     depends on NF_FEATURE_HAS_MCUBOOT

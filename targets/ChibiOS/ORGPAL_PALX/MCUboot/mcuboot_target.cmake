@@ -24,7 +24,6 @@ nf_setup_mcuboot_target_build(
         ${stm32f7_hal_driver_SOURCE_DIR}/Src/stm32f7xx_hal_qspi.c
         ${stm32f7_hal_driver_SOURCE_DIR}/Src/stm32f7xx_hal_cortex.c
         ${stm32f7_hal_driver_SOURCE_DIR}/Src/stm32f7xx_hal_dma.c
-        ${CMAKE_SOURCE_DIR}/targets/ChibiOS/_mcuboot/mcuboot_hal_stubs.c
         ${CMAKE_SOURCE_DIR}/targets/ChibiOS/ORGPAL_PALX/MCUboot/mcuboot_flash_map_boot.c
         ${CMAKE_SOURCE_DIR}/targets/ChibiOS/ORGPAL_PALX/MCUboot/mcuboot_detect_pin.c
         ${CMAKE_SOURCE_DIR}/targets/ChibiOS/ORGPAL_PALX/common/usbcfg.c

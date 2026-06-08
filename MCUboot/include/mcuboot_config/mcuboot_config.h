@@ -29,14 +29,14 @@
 #include "nf_config.h"
 
 //
-// Signature algorithm — ECDSA P-256 (secp256r1).
+// Signature algorithm - ECDSA P-256 (secp256r1).
 // Chosen for small key/signature size and fast Cortex-M verification.
 // The public key is compiled into the MCUboot binary; signing uses imgtool.
 //
 #define MCUBOOT_SIGN_EC256
 
 //
-// Upgrade strategy — exactly one of the following is set via Kconfig.
+// Upgrade strategy - exactly one of the following is set via Kconfig.
 //
 // CONFIG_NF_MCUBOOT_SWAP_USING_OFFSET: STM32 primary platform.
 //   Primary slot: internal STM32 flash (nanoCLR code area).
@@ -49,7 +49,7 @@
 //   MCUboot moves sectors without a dedicated scratch area (requires aligned slot sizes).
 //
 // CONFIG_NF_MCUBOOT_OVERWRITE_ONLY: fallback for targets with no secondary NVM.
-//   No rollback support — new image overwrites primary slot directly.
+//   No rollback support - new image overwrites primary slot directly.
 //
 #if defined(CONFIG_NF_MCUBOOT_SWAP_USING_OFFSET)
 #define MCUBOOT_SWAP_USING_OFFSET 1
@@ -60,7 +60,7 @@
 #endif
 
 //
-// Primary slot validation policy — build-type gated.
+// Primary slot validation policy - build-type gated.
 //
 // Debug builds (CONFIG_NF_BUILD_RTM not set):
 //   MCUBOOT_VALIDATE_PRIMARY_SLOT is NOT defined.
@@ -71,7 +71,7 @@
 //   a staged, signed OTA package).
 //
 // RTM builds (CONFIG_NF_BUILD_RTM=y):
-//   MCUBOOT_VALIDATE_PRIMARY_SLOT is defined — every boot validates the signature
+//   MCUBOOT_VALIDATE_PRIMARY_SLOT is defined - every boot validates the signature
 //   of the primary slot image.  Wire Protocol is disabled in RTM firmware, so
 //   direct writes to deploy_0 never occur.
 //
@@ -80,7 +80,7 @@
 #endif
 
 //
-// Flash abstraction — use the flash_area_get_sectors() API for sector enumeration.
+// Flash abstraction - use the flash_area_get_sectors() API for sector enumeration.
 // DEV_WITH_ERASE: flash device requires explicit erase before write.
 //
 #define MCUBOOT_USE_FLASH_AREA_GET_SECTORS
@@ -100,8 +100,8 @@
 //
 // Multi-image configuration.
 // IMAGE_NUMBER = 2 for ALL nanoFramework targets (STM32 and ESP32).
-//   Image 0 — nanoCLR firmware  (primary = clr_0, secondary = clr_1)
-//   Image 1 — deployment area   (primary = deploy_0, secondary = deploy_1)
+//   Image 0: nanoCLR firmware  (primary = clr_0, secondary = clr_1)
+//   Image 1: deployment area   (primary = deploy_0, secondary = deploy_1)
 // Both images are independently managed and can be upgraded/rolled back independently.
 //
 #if defined(CONFIG_NF_MCUBOOT_IMAGE_NUMBER)
@@ -111,7 +111,7 @@
 #endif
 
 //
-// Dependency checking — automatically enabled for multi-image configurations.
+// Dependency checking - automatically enabled for multi-image configurations.
 // Enforces deploy→CLR version compatibility via IMAGE_TLV_DEPENDENCY TLV in signed images.
 //
 #if (MCUBOOT_IMAGE_NUMBER > 1)
@@ -119,7 +119,7 @@
 #endif
 
 //
-// Serial recovery — optional bootloader recovery mode over UART.
+// Serial recovery - optional bootloader recovery mode over UART.
 // Enabled per target via CONFIG_NF_MCUBOOT_SERIAL_RECOVERY=y in Kconfig.
 //
 #if defined(CONFIG_NF_MCUBOOT_SERIAL_RECOVERY)
@@ -132,7 +132,7 @@
 #else
 #define MCUBOOT_SERIAL_DETECT_DELAY 100
 #endif
-// Disable the LED status pin — avoids os_cputime dependency in boot_serial.c.
+// Disable the LED status pin - avoids os_cputime dependency in boot_serial.c.
 #define BOOT_SERIAL_REPORT_PIN -1
 // Disable optional image info groups to minimise flash usage.
 // Only the image upload group (group 1, cmd 1) is required for OTA recovery.
@@ -144,7 +144,7 @@
 // Set to 0 (not 1) to skip bs_peruser_system_specific() call in boot_serial_input().
 #define MCUBOOT_PERUSER_MGMT_GROUP_ENABLED 0
 
-// CPU idle hook — called in boot_serial_read_console() when the read returns
+// CPU idle hook - called in boot_serial_read_console() when the read returns
 // no data. Must relinquish the CPU so ChibiOS can service the USB ISR and
 // allow the device to enumerate before any data arrives.
 // Implemented in targets/ChibiOS/_mcuboot/mcuboot_serial_port.c.
@@ -153,7 +153,7 @@ extern void nf_mcuboot_cpu_idle(void);
 #endif
 
 //
-// Image header size — must match the flash layout reserved header area and
+// Image header size - must match the flash layout reserved header area and
 // the imgtool sign --header-size argument.
 // Configured via CONFIG_NF_MCUBOOT_HEADER_SIZE in Kconfig (default 0x200 = 512 bytes).
 //
@@ -164,14 +164,30 @@ extern void nf_mcuboot_cpu_idle(void);
 #endif
 
 //
-// Logging — disabled for the bare-metal STM32 bootloader.
-// There is no UART or semihosting infrastructure in the bare-metal build.
-// Define MCUBOOT_HAVE_LOGGING and provide mcuboot_logging.h when adding a log backend.
+// Logging - controlled by Kconfig NF_MCUBOOT_LOG_LEVEL.
+// MCUBOOT_HAVE_LOGGING activates the log macros in bootutil_log.h.
+// MCUBOOT_LOG_LEVEL sets the minimum severity that produces output:
+//   1 = ERROR, 2 = WARNING, 3 = INFO, 4 = DEBUG  (0/unset = OFF, no output)
+// The output backend is the board-supplied nf_mcuboot_log_write() function
+// declared in mcuboot_logging.h; the weak default in mcuboot_hal_stubs.c is a no-op.
 //
-// #define MCUBOOT_HAVE_LOGGING 1
+#if defined(CONFIG_NF_MCUBOOT_LOG_LEVEL_ERROR)
+#define MCUBOOT_HAVE_LOGGING 1
+#define MCUBOOT_LOG_LEVEL    1
+#elif defined(CONFIG_NF_MCUBOOT_LOG_LEVEL_WARNING)
+#define MCUBOOT_HAVE_LOGGING 1
+#define MCUBOOT_LOG_LEVEL    2
+#elif defined(CONFIG_NF_MCUBOOT_LOG_LEVEL_INFO)
+#define MCUBOOT_HAVE_LOGGING 1
+#define MCUBOOT_LOG_LEVEL    3
+#elif defined(CONFIG_NF_MCUBOOT_LOG_LEVEL_DEBUG)
+#define MCUBOOT_HAVE_LOGGING 1
+#define MCUBOOT_LOG_LEVEL    4
+#endif
+// CONFIG_NF_MCUBOOT_LOG_LEVEL_OFF (or unset): MCUBOOT_HAVE_LOGGING not defined - all BOOT_LOG_* are no-ops.
 
 //
-// Watchdog — no watchdog in the bare-metal STM32 bootloader.
+// Watchdog - no watchdog in the bare-metal STM32 bootloader.
 // Define as a no-op; platform ports that use a watchdog should replace this.
 //
 #define MCUBOOT_WATCHDOG_FEED()                                                                                        \
