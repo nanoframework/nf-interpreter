@@ -62,8 +62,14 @@
 /*
  * SIO driver system settings.
  */
-#define RP_SIO_USE_UART0                    TRUE
-#define RP_SIO_USE_UART1                    TRUE
+#define RP_SIO_USE_UART0                    FALSE
+#define RP_SIO_USE_UART1                    FALSE
+
+/*
+ * UART driver system settings.
+ */
+#define RP_UART_USE_UART0                   TRUE
+#define RP_UART_USE_UART1                   TRUE
 
 /*
  * USB driver system settings.

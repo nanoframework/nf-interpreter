@@ -166,7 +166,7 @@
  * @brief   Enables the SIO subsystem.
  */
 #if !defined(HAL_USE_SIO) || defined(__DOXYGEN__)
-#define HAL_USE_SIO                         TRUE
+#define HAL_USE_SIO                         FALSE
 #endif
 
 /**
@@ -535,7 +535,7 @@
  * @note    Disabling this option saves both code and data space.
  */
 #if !defined(UART_USE_MUTUAL_EXCLUSION) || defined(__DOXYGEN__)
-#define UART_USE_MUTUAL_EXCLUSION           FALSE
+#define UART_USE_MUTUAL_EXCLUSION           TRUE
 #endif
 
 /*===========================================================================*/

@@ -82,10 +82,47 @@ void ConfigPins_UART6();
 void ConfigPins_UART7();
 void ConfigPins_UART8();
 
+#if defined(RP2040_MCUCONF)
+#define UART_DRIVER_1 UARTD0
+#define UART_DRIVER_2 UARTD1
+#else
+#define UART_DRIVER_1 UARTD1
+#define UART_DRIVER_2 UARTD2
+#define UART_DRIVER_3 UARTD3
+#define UART_DRIVER_4 UARTD4
+#define UART_DRIVER_5 UARTD5
+#define UART_DRIVER_6 UARTD6
+#define UART_DRIVER_7 UARTD7
+#define UART_DRIVER_8 UARTD8
+#endif
+
+#define UART_DRIVER(num)     UART_DRIVER_##num
+#define UART_DRIVER_PTR(num) (&UART_DRIVER(num))
+
 // the following macro defines a function that initializes an UART struct
 // it gets called in the system_io_ports_SerialDevice::NativeInit function
 
-#if defined(STM32F7XX) || defined(STM32F0XX)
+#if defined(RP2040_MCUCONF)
+
+#define UART_INIT(num)                                                                                                 \
+    void Init_UART##num()                                                                                              \
+    {                                                                                                                  \
+        Uart##num##_PAL.Uart_cfg.baud = 9600;                                                                          \
+        Uart##num##_PAL.Uart_cfg.UARTLCR_H = UART_UARTLCR_H_WLEN_8BITS | UART_UARTLCR_H_FEN;                           \
+        Uart##num##_PAL.Uart_cfg.UARTCR = 0;                                                                           \
+        Uart##num##_PAL.Uart_cfg.UARTIFLS = UART_UARTIFLS_RXIFLSEL_1_2F | UART_UARTIFLS_TXIFLSEL_1_2E;                 \
+        Uart##num##_PAL.Uart_cfg.UARTDMACR = 0;                                                                        \
+        Uart##num##_PAL.TxBuffer = NULL;                                                                               \
+        Uart##num##_PAL.TxOngoingCount = 0;                                                                            \
+        Uart##num##_PAL.RxBuffer = NULL;                                                                               \
+        Uart##num##_PAL.RxBytesToRead = 0;                                                                             \
+        Uart##num##_PAL.WatchChar = 0;                                                                                 \
+        Uart##num##_PAL.NewLineChar = 0;                                                                               \
+        Uart##num##_PAL.ReceivedBytesThreshold = 1;                                                                    \
+        Uart##num##_PAL.SignalLevelsInverted = false;                                                                  \
+    }
+
+#elif defined(STM32F7XX) || defined(STM32F0XX)
 
 // STM32F7 and STM32F0 use UART driver v2
 #define UART_INIT(num)                                                                                                 \
@@ -147,7 +184,7 @@ void Init_UART8();
 #define UART_UNINIT(num)                                                                                               \
     void UnInit_UART##num()                                                                                            \
     {                                                                                                                  \
-        uartStop(&UARTD##num);                                                                                         \
+        uartStop(UART_DRIVER_PTR(num));                                                                                \
         platform_free(Uart##num##_PAL.RxBuffer);                                                                       \
         Uart##num##_PAL.TxBuffer = NULL;                                                                               \
         Uart##num##_PAL.RxBuffer = NULL;                                                                               \
