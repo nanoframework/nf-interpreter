@@ -7,6 +7,8 @@
 #ifndef MCUCONF_H
 #define MCUCONF_H
 
+// clang-format off
+
 /*
  * STM32F0xx drivers configuration.
  * The following settings override the default settings present in
@@ -239,3 +241,5 @@
 #include "mcuconf_nf.h"
 
 #endif /* MCUCONF_H */
+
+// clang-format on

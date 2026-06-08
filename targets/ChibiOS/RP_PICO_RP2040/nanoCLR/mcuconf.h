@@ -17,6 +17,8 @@
 #ifndef MCUCONF_H
 #define MCUCONF_H
 
+// clang-format off
+
 /*
  * RP2040_MCUCONF drivers configuration.
  *
@@ -103,3 +105,5 @@
 #define RP_ADC_USE_ADC1                     TRUE
 
 #endif /* MCUCONF_H */
+
+// clang-format on
