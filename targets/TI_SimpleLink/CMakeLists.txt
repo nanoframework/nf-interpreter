@@ -247,7 +247,7 @@ elseif( "${TARGET_SERIES}" STREQUAL "CC13X2" )
     else()
         # TI XDCTools source was specified
 
-        message(STATUS "TI XDCTools ${TI_XDCTOOLS_VERSION_TAG} (source from: ${TI_XDCTOOLS_SOURCE})")
+        message(STATUS "TI XDCTools (source from: ${TI_XDCTOOLS_SOURCE})")
 
         FetchContent_Declare(
             ti_xdctools
