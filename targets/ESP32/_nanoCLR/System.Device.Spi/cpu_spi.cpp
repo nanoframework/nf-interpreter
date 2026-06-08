@@ -190,13 +190,20 @@ bool CPU_SPI_Initialize(uint8_t busIndex, const SPI_DEVICE_CONFIGURATION &spiDev
 
     if (ret != ESP_OK)
     {
+        if (ret != ESP_ERR_INVALID_STATE)
+        {
 #if defined(CONFIG_IDF_TARGET_ESP32S2)
-        ESP_LOGE(TAG, "Unable to init SPI bus %d esp_err %d", busIndex + SPI3_HOST, ret);
+            ESP_LOGE(TAG, "Unable to init SPI bus %d esp_err %d", busIndex + SPI3_HOST, ret);
 #else
-        // on all other series
-        ESP_LOGE(TAG, "Unable to init SPI bus %d esp_err %d", busIndex + SPI2_HOST, ret);
+            // on all other series
+            ESP_LOGE(TAG, "Unable to init SPI bus %d esp_err %d", busIndex + SPI2_HOST, ret);
 #endif
-        return false;
+            return false;
+        }
+
+        // Already initialized, so just log and continue
+        // could be opened by other code such as ethernet driver
+        ESP_LOGW(TAG, "SPI bus %d already initialized", busIndex);
     }
 
     nf_pal_spi[busIndex].BusIndex = busIndex;

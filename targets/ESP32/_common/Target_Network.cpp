@@ -54,7 +54,7 @@ int Network_Interface_Open(int index)
             return NF_ESP32_WirelessAP_Open(&networkConfiguration);
 #endif
 
-#ifdef CONFIG_ESP32_ETHERNET_SUPPORT
+#if defined(CONFIG_ESP32_ETHERNET_SUPPORT) && CONFIG_ESP32_ETHERNET_SUPPORT == TRUE
         // Ethernet
         case NetworkInterfaceType_Ethernet:
             return NF_ESP32_Ethernet_Open(&networkConfiguration);
@@ -99,7 +99,7 @@ bool Network_Interface_Close(int index)
             return NF_ESP32_WirelessAP_Close();
 #endif
 
-#ifdef CONFIG_ESP32_ETHERNET_SUPPORT
+#if defined(CONFIG_ESP32_ETHERNET_SUPPORT) && CONFIG_ESP32_ETHERNET_SUPPORT == TRUE
         // Ethernet
         case NetworkInterfaceType_Ethernet:
             return NF_ESP32_Ethernet_Close();

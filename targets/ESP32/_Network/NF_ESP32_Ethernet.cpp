@@ -177,7 +177,7 @@ esp_err_t NF_ESP32_InitialiseEthernet(uint8_t *pMacAdr)
 #if defined(CONFIG_ESP32_ETHERNET_SPI_HOST) && CONFIG_ESP32_ETHERNET_SPI_HOST == 2
     spi_host_device_t spi_host = SPI2_HOST;
 #else
-    spi_host_device_t host = SPI3_HOST;
+    spi_host_device_t spi_host = SPI3_HOST;
 #endif
 
 #ifdef CONFIG_ESP32_ETHERNET_SPI_RST_GPIO
@@ -258,7 +258,7 @@ esp_err_t NF_ESP32_InitialiseEthernet(uint8_t *pMacAdr)
         .queue_size = 20};
 
     //  enj28j60 ethernet driver is based on spi driver
-    eth_dm9051_config_t enj28j60_config = ETH_ENJ28J60_DEFAULT_CONFIG(spi_host, &devcfg);
+    eth_enj28j60_config_t enj28j60_config = ETH_ENJ28J60_DEFAULT_CONFIG(spi_host, &devcfg);
     enj28j60_config.int_gpio_num = CONFIG_ESP32_ETHERNET_SPI_INT_GPIO;
     esp_eth_mac_t *mac = esp_eth_mac_new_enj28j60(&enj28j60_config, &mac_config);
 
@@ -291,9 +291,11 @@ esp_err_t NF_ESP32_InitialiseEthernet(uint8_t *pMacAdr)
     // start Ethernet driver state machine
     ESP_ERROR_CHECK_WITHOUT_ABORT(esp_eth_start(eth_handle));
 
-#endif // CONFIG_ESP32_ETHERNET_SUPPORT
-
     return ESP_OK;
+#else
+    // Ethernet not supported
+    return ESP_FAIL;
+#endif // CONFIG_ESP32_ETHERNET_SUPPORT
 }
 
 //
