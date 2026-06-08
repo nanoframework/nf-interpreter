@@ -4,19 +4,22 @@
 parameters:
   - name: repoDirectory
     type: string
-    default: $(Build.SourcesDirectory)\nf-interpreter
+    default: $(Build.SourcesDirectory)/nf-interpreter
 
 steps:
   - task: CopyFiles@2
     condition: >-
-      or(
-        succeeded(),
-        failed()
+      and(
+        ne(variables['TargetPublishName'], ''),
+        or(
+          succeeded(),
+          failed()
+        )
       )
     displayName: Copying SDKCONFIG
     inputs:
       sourceFolder: "${{ parameters.repoDirectory }}"
       Contents: |
         sdkconfig
-      TargetFolder: '$(Build.ArtifactStagingDirectory)\$(TargetPublishName)_sdkconfig'
+      TargetFolder: '$(Build.ArtifactStagingDirectory)/$(TargetPublishName)_sdkconfig'
       ignoreMakeDirErrors: true

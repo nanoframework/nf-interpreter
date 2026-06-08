@@ -14,6 +14,8 @@
     limitations under the License.
 */
 
+// clang-format off
+
 /**
  * @file    templates/halconf.h
  * @brief   HAL configuration header.
@@ -572,3 +574,5 @@
 #endif /* HALCONF_H */
 
 /** @} */
+
+// clang-format on

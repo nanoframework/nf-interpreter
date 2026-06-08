@@ -10,8 +10,9 @@ steps:
       failOnStderr: false
       targetType: "inline"
       script: |
-        # need this to remove definition of redirect stdErr (only on Azure Pipelines image fo VS2019)
-        $env:GIT_REDIRECT_STDERR = '2>&1'
+        # use AZDO macro expansion for these so env var casing is never an issue on Linux
+        $pullRequestNumber = "$(System.PullRequest.PullRequestNumber)"
+        $repositoryName = "$(Build.Repository.Name)"
 
         # compute authorization header in format "AUTHORIZATION: basic 'encoded token'"
         # 'encoded token' is the Base64 of the string "nfbot:personal-token"
@@ -20,13 +21,12 @@ steps:
         git config --global gc.auto 0
         git config --global user.name nfbot
         git config --global user.email nanoframework@outlook.com
-        git config --global core.autocrlf true
 
         # find PR
-        "Getting PR#$env:System_PullRequest_PullRequestNumber details..." | Write-Host -ForegroundColor White -NoNewline
-        $pr = Invoke-RestMethod -Uri "https://api.github.com/repos/$env:Build_Repository_Name/pulls/$env:System_PullRequest_PullRequestNumber" -Header @{"Authorization"="$auth"} -ContentType "application/json" -Method GET
+        "Getting PR#$pullRequestNumber details..." | Write-Host -ForegroundColor White -NoNewline
+        $pr = Invoke-RestMethod -Uri "https://api.github.com/repos/$repositoryName/pulls/$pullRequestNumber" -Header @{"Authorization"="$auth"} -ContentType "application/json" -Method GET
 
-        if($($pr.number) -eq "$env:System_PullRequest_PullRequestNumber")
+        if($($pr.number) -eq "$pullRequestNumber")
         {
           '##[command] OK' | Write-Host -ForegroundColor Green
         }
@@ -52,29 +52,23 @@ steps:
         "Working branch is $branchName" | Write-Host -ForegroundColor White
 
         # list PR files
-        $prFiles = Invoke-RestMethod -Uri "https://api.github.com/repos/$env:Build_Repository_Name/pulls/$env:System_PullRequest_PullRequestNumber/files" -Header @{"Authorization"="$auth"} -ContentType "application/json" -Method GET
+        $prFiles = Invoke-RestMethod -Uri "https://api.github.com/repos/$repositoryName/pulls/$pullRequestNumber/files" -Header @{"Authorization"="$auth"} -ContentType "application/json" -Method GET
 
         "Starting file check..." | Write-Host -ForegroundColor White
 
         # find clang-format
-        $clangFormat = "clang-format.exe"
+        $clangFormat = "clang-format"
         if(!(Get-Command $clangFormat -ErrorAction SilentlyContinue))
         {
-            Write-Information "##[warning] Can't find clang-format.exe in %PATH%, trying to use %VCINSTALLDIR%..."
-            
-            $clangFormat="$(Agent.TempDirectory)\llvm\bin\clang-format.exe"
-            
-            if(!(Test-Path -Path $clangFormat -PathType leaf))
-            {
-              "Can't find clang-format.exe executable!" | Write-Host -ForegroundColor Red
-            }
+          "Can't find clang-format executable!" | Write-Host -ForegroundColor Red
+          exit 1
         }
 
         # have clang-format parse each file source file
         foreach($file in $prFiles)
         {
           Write-Debug "##[debug] checking: $($file.filename)"
-          
+
           # don't process deleted files
           if( $($file.status) -eq "modified" -or
               $($file.status) -eq "added" -or
@@ -86,12 +80,12 @@ steps:
                 $($file.filename).endswith(".h"))
             {
               "Parsing '$($file.filename)'..." | Write-Host -ForegroundColor White -NoNewline
-              
+
               # parse file
               & $clangFormat -style=file -i "$($file.filename)"
 
               "OK" | Write-Host -ForegroundColor Green
-            } 
+            }
           }
         }
 
@@ -112,7 +106,7 @@ steps:
           git -c http.extraheader="AUTHORIZATION: $auth" push --porcelain --set-upstream origin "$branchName"
 
           # submit PR with code style fixes
-          $prRequestBody = @{title="Code style fixes for $env:Build_Repository_Name PR#$env:System_PullRequest_PullRequestNumber";body="Automated fix of code style using project clang-format rules.`nYou can review and make changes or simply merge this PR to apply the fixes.";head="nanoFramework:$branchName";base="$($pr.head.ref)"} | ConvertTo-Json
+          $prRequestBody = @{title="Code style fixes for $repositoryName PR#$pullRequestNumber";body="Automated fix of code style using project clang-format rules.`nYou can review and make changes or simply merge this PR to apply the fixes.";head="nanoFramework:$branchName";base="$($pr.head.ref)"} | ConvertTo-Json
 
           # start PR
           Write-Debug "##[debug] Starting PR with fixes."
@@ -121,7 +115,7 @@ steps:
           $githubApiEndpoint = "https://api.github.com/repos/$($pr.head.repo.full_name)/pulls"
           [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 
-          try 
+          try
           {
               $result = Invoke-RestMethod -Method Post -UserAgent [Microsoft.PowerShell.Commands.PSUserAgent]::InternetExplorer -Uri  $githubApiEndpoint -Header @{"Authorization"="$auth"} -ContentType "application/json" -Body $prRequestBody
               'Submitting PR with code style fixes...' | Write-Host -ForegroundColor White -NoNewline
@@ -133,7 +127,7 @@ steps:
               $codeStyleFixesComment = @{body="@$($pr.user.login) there are issues with the code style on the source files.`nA PR was submitted with the code style fixes. Please click $($result.html_url), review the changes if you want and merge it.`n`nMake sure to follow the project code style. Check the details [here](https://docs.nanoframework.net/content/contributing/cxx-coding-style.html) on how it works and the tools required to help you with that.`n`n<!-- nfbot fix request DO NOT REMOVE -->"} | ConvertTo-Json
               Invoke-RestMethod -Method Post -UserAgent [Microsoft.PowerShell.Commands.PSUserAgent]::InternetExplorer -Uri $($pr.comments_url) -Header @{"Authorization"="$auth"} -ContentType "application/json" -Body $codeStyleFixesComment
           }
-          catch 
+          catch
           {
               "##[error] Failed" | Write-Host -ForegroundColor Red
 
@@ -148,7 +142,7 @@ steps:
               # most likely this is a permissions issue because the base repo is read only or protected
               # report to user
               # include TAG comment that allows github nfbot to remove it after branch is merged
-              $codeStyleFixesComment = @{body="@$($pr.user.login) there are issues with the code style on the source files.`n`n:warning:Couldn't submit a PR with the fixes against your repo.:warning:`n`nPlease merge the changes from https://github.com/$env:Build_Repository_Name/tree/$branchName.`n`n<!-- nfbot fix request DO NOT REMOVE -->"} | ConvertTo-Json
+              $codeStyleFixesComment = @{body="@$($pr.user.login) there are issues with the code style on the source files.`n`n:warning:Couldn't submit a PR with the fixes against your repo.:warning:`n`nPlease merge the changes from https://github.com/$repositoryName/tree/$branchName.`n`n<!-- nfbot fix request DO NOT REMOVE -->"} | ConvertTo-Json
               $result = Invoke-RestMethod -Method Post -UserAgent [Microsoft.PowerShell.Commands.PSUserAgent]::InternetExplorer -Uri $($pr.comments_url) -Header @{"Authorization"="$auth"} -ContentType "application/json" -Body $codeStyleFixesComment
 
               throw "##[error] Error starting PR: $responseBody"

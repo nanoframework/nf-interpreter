@@ -714,12 +714,6 @@ elseif(RTOS_ESP32_CHECK)
         message(STATUS "Support for Bluetooth disabled")
     endif()
 
-    if(ESP32_ETHERNET_SUPPORT)
-        message(STATUS "Support for Ethernet network interface enabled")
-    else()
-        message(STATUS "Support for Ethernet network interface disabled")
-    endif()
-
     if(API_nanoFramework.Networking.Thread)
         set(HAL_USE_THREAD_OPTION TRUE CACHE INTERNAL "OpenThread Support")
         message(STATUS "Support for Thread enabled")
