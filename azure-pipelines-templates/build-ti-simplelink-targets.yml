@@ -20,12 +20,12 @@ steps:
       mkdir -p /tmp/ti_xdctools
       unzip -q /tmp/ti_xdctools.zip -d /tmp/ti_xdctools
       chmod +x /tmp/ti_xdctools/xdctools_${TI_XDCTOOLS_VERSION}_core/xs
-      echo "##vso[task.prependpath]/tmp/ti_xdctools/xdctools_${TI_XDCTOOLS_VERSION}_core"
+      echo "##vso[task.setvariable variable=TI_XDCTOOLS_PATH]/tmp/ti_xdctools/xdctools_${TI_XDCTOOLS_VERSION}_core"
     displayName: Download TI XDC Tools for Linux
 
   - task: CMake@1
     inputs:
-      cmakeArgs: " --preset $(TargetBoard) -DCMAKE_BUILD_TYPE=MinSizeRel -DBUILD_VERSION=$(NBGV_VersionMajor).$(NBGV_VersionMinor).$(NBGV_BuildNumber).$(TARGET_BUILD_COUNTER) -DTARGET_BOARD=$(TargetBoard) -DTARGET_NAME=$(TargetPublishName) $(BuildOptions)"
+      cmakeArgs: " --preset $(TargetBoard) -DCMAKE_BUILD_TYPE=MinSizeRel -DBUILD_VERSION=$(NBGV_VersionMajor).$(NBGV_VersionMinor).$(NBGV_BuildNumber).$(TARGET_BUILD_COUNTER) -DTARGET_BOARD=$(TargetBoard) -DTARGET_NAME=$(TargetPublishName) $(BuildOptions) -DTI_XDCTOOLS_SOURCE=$(TI_XDCTOOLS_PATH)"
       workingDirectory: ${{ parameters.repoDirectory }}
     displayName: Setup build with CMake
 
