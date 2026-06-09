@@ -19,15 +19,15 @@ steps:
     inputs:
       targetType: "inline"
       script: |
-        $repoName = $env:Build_Repository_Name
-        $branchName = $env:Build_SourceBranchName
-        $forceUpload = $env:ForceUpload
+        $repoName = $env:BUILD_REPOSITORY_NAME
+        $branchName = $env:BUILD_SOURCEBRANCHNAME
+        $forceUpload = $env:FORCEUPLOAD
 
         Write-Host "repo name is: $repoName"
         Write-Host "branch name is: $branchName"
 
-        if( $env:Build_SourceBranchName -match "develop" -or 
-            $env:Build_SourceBranchName -match "^release*" -or
+        if( $env:BUILD_SOURCEBRANCHNAME -match "develop" -or
+            $env:BUILD_SOURCEBRANCHNAME -match "^release*" -or
             $forceUpload -eq "true")
         {
           # this a dev, release branch or force upload, publish to Cloudsmith dev repo

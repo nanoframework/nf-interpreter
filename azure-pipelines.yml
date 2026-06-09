@@ -84,7 +84,7 @@ jobs:
           {
             # this is a release prep so NO build
             echo "##vso[task.setvariable variable=SKIP_BUILD;isOutput=true]true"
-            
+
             Write-Host "##[command] Release preparation, skipping build."
           }
           else
@@ -160,7 +160,7 @@ jobs:
                   # get files changed in PR, if this is a PR
                   $commit = Invoke-RestMethod -Uri "https://api.github.com/repos/nanoframework/nf-interpreter/pulls/$(System.PullRequest.PullRequestNumber)/files" -Header @{"Authorization"="$auth"} -ContentType "application/json" -Method GET
 
-                  # filter removed files              
+                  # filter removed files
                   $files = $commit.where{$_.status -ne 'removed'}
               }
               else
