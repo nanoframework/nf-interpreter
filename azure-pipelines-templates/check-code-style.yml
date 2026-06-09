@@ -10,9 +10,8 @@ steps:
       failOnStderr: false
       targetType: "inline"
       script: |
-        # use AZDO macro expansion for these so env var casing is never an issue on Linux
-        $pullRequestNumber = "$(System.PullRequest.PullRequestNumber)"
-        $repositoryName = "$(Build.Repository.Name)"
+        $pullRequestNumber = $env:SYSTEM_PULLREQUEST_PULLREQUESTNUMBER
+        $repositoryName = $env:BUILD_REPOSITORY_NAME
 
         # compute authorization header in format "AUTHORIZATION: basic 'encoded token'"
         # 'encoded token' is the Base64 of the string "nfbot:personal-token"

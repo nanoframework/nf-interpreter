@@ -41,7 +41,7 @@ steps:
     inputs:
       targetType: "inline"
       script: |
-        Write-Host "$("##vso[task.setvariable variable=HEX2DFU_PATH]")$(Agent.TempDirectory)/hex2dfu"
+        Write-Host "$("##vso[task.setvariable variable=HEX2DFU_PATH]")$env:AGENT_TEMPDIRECTORY/hex2dfu"
       errorActionPreference: "stop"
       failOnStderr: true
     condition: eq(variables['NeedsDFU'], true)

@@ -104,8 +104,8 @@ steps:
       targetType: "inline"
       script: |
 
-        $repoName = "$(Build.Repository.Name)"
-        $branchName = "$(Build.SourceBranchName)"
+        $repoName = $env:BUILD_REPOSITORY_NAME
+        $branchName = $env:BUILD_SOURCEBRANCHNAME
         $forceUpload = $env:ForceUpload
 
         Write-Host "repo name is: $repoName"
@@ -116,9 +116,9 @@ steps:
           # this is a build for a community target
           $cloudsmithRepo = "nanoframework-images-community-targets"
           # set publishing package name
-          $publishingPackageName = "$(TargetPublishName)-$(NBGV_SimpleVersion).$(TARGET_BUILD_COUNTER)"
+          $publishingPackageName = "$env:TARGETPUBLISHNAME-$env:NBGV_SIMPLEVERSION.$env:TARGET_BUILD_COUNTER"
           # set version
-          $packageVersion = "$(NBGV_SimpleVersion).$(TARGET_BUILD_COUNTER)"
+          $packageVersion = "$env:NBGV_SIMPLEVERSION.$env:TARGET_BUILD_COUNTER"
         }
         else
         {
@@ -129,18 +129,18 @@ steps:
             # this a dev, release branch or force upload, publish to Cloudsmith dev repo
             $cloudsmithRepo = "nanoframework-images-dev"
             # set publishing package name
-            $publishingPackageName = "$(TargetPublishName)-$(NBGV_SimpleVersion)-preview.$(TARGET_BUILD_COUNTER)"
+            $publishingPackageName = "$env:TARGETPUBLISHNAME-$env:NBGV_SIMPLEVERSION-preview.$env:TARGET_BUILD_COUNTER"
             # set version
-            $packageVersion = "$(NBGV_SimpleVersion)-preview.$(TARGET_BUILD_COUNTER)"
+            $packageVersion = "$env:NBGV_SIMPLEVERSION-preview.$env:TARGET_BUILD_COUNTER"
           }
-          else 
+          else
           {
             # this main branch, publish to Cloudsmith stable repo
             $cloudsmithRepo = "nanoframework-images"
             # set publishing package name
-            $publishingPackageName = "$(TargetPublishName)-$(NBGV_SimpleVersion).$(TARGET_BUILD_COUNTER)"
+            $publishingPackageName = "$env:TARGETPUBLISHNAME-$env:NBGV_SIMPLEVERSION.$env:TARGET_BUILD_COUNTER"
             # set version
-            $packageVersion = "$(NBGV_SimpleVersion).$(TARGET_BUILD_COUNTER)"
+            $packageVersion = "$env:NBGV_SIMPLEVERSION.$env:TARGET_BUILD_COUNTER"
           }
         }
 
@@ -175,9 +175,9 @@ steps:
         # install Cloudsmith CLI
         python -m pip install --upgrade cloudsmith-cli --quiet
 
-        Write-Host "Uploading $(PUBLISHING_PACKAGE_NAME) v$(PACKAGE_VERSION) to $(CLOUDSMITH_REPO)"
+        Write-Host "Uploading $env:PUBLISHING_PACKAGE_NAME v$env:PACKAGE_VERSION to $env:CLOUDSMITH_REPO"
 
-        cloudsmith push raw net-nanoframework/$(CLOUDSMITH_REPO) $(Agent.TempDirectory)/$(PUBLISHING_PACKAGE_NAME).zip --name $(TargetPublishName) --version $(PACKAGE_VERSION) --tags $(TargetPlatform),$(TargetSeries) --republish -k $(CLOUDSMITH_KEY)
+        cloudsmith push raw net-nanoframework/$env:CLOUDSMITH_REPO $env:AGENT_TEMPDIRECTORY/$env:PUBLISHING_PACKAGE_NAME.zip --name $env:TARGETPUBLISHNAME --version $env:PACKAGE_VERSION --tags $env:TARGETPLATFORM,$env:TARGETSERIES --republish -k $(CLOUDSMITH_KEY)
 
       errorActionPreference: "stop"
       failOnStderr: false
