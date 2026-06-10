@@ -5,7 +5,7 @@
 
 #include <nanoPAL_BlockStorage.h>
 
-#if defined(RP2040) || defined(RP2350)
+#if defined(RP2040)
 
 #include <Target_BlockStorage_RP2040FlashDriver.h>
 
@@ -19,6 +19,23 @@ IBlockStorageDevice RP2040Flash_BlockStorageInterface = {
     NULL,
     &RP2040FlashDriver_IsBlockErased,
     &RP2040FlashDriver_EraseBlock,
+    NULL,
+    NULL};
+
+#elif defined(RP2350)
+
+#include <Target_BlockStorage_RP2350FlashDriver.h>
+
+// Map here the Block Storage Interface to the RP2350 flash driver
+IBlockStorageDevice RP2350Flash_BlockStorageInterface = {
+    &RP2350FlashDriver_InitializeDevice,
+    &RP2350FlashDriver_UninitializeDevice,
+    &RP2350FlashDriver_GetDeviceInfo,
+    &RP2350FlashDriver_Read,
+    &RP2350FlashDriver_Write,
+    NULL,
+    &RP2350FlashDriver_IsBlockErased,
+    &RP2350FlashDriver_EraseBlock,
     NULL,
     NULL};
 
