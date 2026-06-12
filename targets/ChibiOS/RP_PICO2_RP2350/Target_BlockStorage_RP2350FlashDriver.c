@@ -15,7 +15,7 @@
 
 // Reference to ChibiOS EFL driver instance
 extern EFlashDriver EFLD1;
-extern MEMORY_MAPPED_NOR_BLOCK_CONFIG Device_BlockStorageConfig;
+extern MEMORY_MAPPED_NOR_BLOCK_CONFIG g_Device_BlockStorageConfig;
 
 static bool IsValidAddressRange(
     const MEMORY_MAPPED_NOR_BLOCK_CONFIG *config,
@@ -236,24 +236,24 @@ int nf_TargetFlashWrite(uint32_t startAddress, uint32_t length, const uint8_t *b
         return 1;
     }
 
-    if (!IsValidAddressRange(&Device_BlockStorageConfig, startAddress, length))
+    if (!IsValidAddressRange(&g_Device_BlockStorageConfig, startAddress, length))
     {
         return 0;
     }
 
-    flash_offset_t offset = (flash_offset_t)(startAddress - Device_BlockStorageConfig.Memory.BaseAddress);
+    flash_offset_t offset = (flash_offset_t)(startAddress - g_Device_BlockStorageConfig.Memory.BaseAddress);
     flash_error_t err = flashProgram(&EFLD1, offset, length, buffer);
     return (err == FLASH_NO_ERROR) ? 1 : 0;
 }
 
 int nf_TargetFlashErase(uint32_t address)
 {
-    if (!IsValidBlockStartAddress(&Device_BlockStorageConfig, address))
+    if (!IsValidBlockStartAddress(&g_Device_BlockStorageConfig, address))
     {
         return 0;
     }
 
-    flash_offset_t offset = (flash_offset_t)(address - Device_BlockStorageConfig.Memory.BaseAddress);
+    flash_offset_t offset = (flash_offset_t)(address - g_Device_BlockStorageConfig.Memory.BaseAddress);
     flash_sector_t sector = (flash_sector_t)(offset / RP2350_FLASH_SECTOR_SIZE);
 
     flash_error_t err = flashStartEraseSector(&EFLD1, sector);

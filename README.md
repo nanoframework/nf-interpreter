@@ -215,7 +215,9 @@ The above .NET nanoFramework interpreter builds include support for the class li
     * [TI CC1352R1_LAUNCHXL](targets/TI_SimpleLink/TI_CC1352R1_LAUNCHXL)
     * [TI CC3220SF_LAUNCHXL](targets/TI_SimpleLink/TI_CC3220SF_LAUNCHXL)
   * Target reference for Raspberry Pi (ChibiOS)
-    * [RP_PICO_RP2040](targets/ChibiOS/RP_PICO_RP2040)        * [RP_PICO2_RP2350](targets/ChibiOS/RP_PICO2_RP2350)    * [RP_PICO_W_RP2040](targets/ChibiOS/RP_PICO_W_RP2040)
+    * [RP_PICO_RP2040](targets/ChibiOS/RP_PICO_RP2040)
+    * [RP_PICO2_RP2350](targets/ChibiOS/RP_PICO2_RP2350)
+    * [RP_PICO_W_RP2040](targets/ChibiOS/RP_PICO_W_RP2040)
   * Target reference for other OSes
     * [Win32 OS (test project only at this time)](targets/os/win32)
   * [CMake files for the build system](CMake)

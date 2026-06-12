@@ -7,7 +7,7 @@
 #include <Target_BlockStorage_RP2350FlashDriver.h>
 
 extern struct BlockStorageDevice Device_BlockStorage;
-extern struct MEMORY_MAPPED_NOR_BLOCK_CONFIG Device_BlockStorageConfig;
+extern struct MEMORY_MAPPED_NOR_BLOCK_CONFIG g_Device_BlockStorageConfig;
 extern IBlockStorageDevice RP2350Flash_BlockStorageInterface;
 
 void BlockStorage_AddDevices()
@@ -15,6 +15,6 @@ void BlockStorage_AddDevices()
     BlockStorageList_AddDevice(
         (BlockStorageDevice *)&Device_BlockStorage,
         &RP2350Flash_BlockStorageInterface,
-        &Device_BlockStorageConfig,
+        &g_Device_BlockStorageConfig,
         false);
 }

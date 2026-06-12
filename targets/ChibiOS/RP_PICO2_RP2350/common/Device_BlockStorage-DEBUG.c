@@ -14,7 +14,7 @@
 // 0x103F8000 - 0x103FFFFF : LittleFS     (32KB   = 8 sectors)
 
 // 4KB sectors
-const BlockRange BlockRange1[] = {
+const BlockRange c_BlockRange1[] = {
     // 0x10000000 nanoBooter (sectors 0-11)
     {BlockRange_BLOCKTYPE_BOOTSTRAP, 0, 11},
 
@@ -30,25 +30,25 @@ const BlockRange BlockRange1[] = {
     // 0x103F8000 littlefs (sectors 1016-1023)
     {BlockRange_BLOCKTYPE_FILESYSTEM, 1016, 1023}};
 
-const BlockRegionInfo BlockRegions[] = {
+const BlockRegionInfo c_BlockRegions[] = {
     {
         (0),        // no attributes for this region
         0x10000000, // start address for block region (XIP base)
         1024,       // total number of blocks in this region (4MB / 4KB)
         0x1000,     // total number of bytes per block (4KB)
-        ARRAYSIZE_CONST_EXPR(BlockRange1),
-        BlockRange1,
+        ARRAYSIZE_CONST_EXPR(c_BlockRange1),
+        c_BlockRange1,
     },
 };
 
-const DeviceBlockInfo Device_BlockInfo = {
+const DeviceBlockInfo c_Device_BlockInfo = {
     (MediaAttribute_SupportsXIP), // RP2350 flash is XIP (execute in place)
     2,                            // UINT32 BytesPerSector
-    ARRAYSIZE_CONST_EXPR(BlockRegions),
-    (BlockRegionInfo *)BlockRegions,
+    ARRAYSIZE_CONST_EXPR(c_BlockRegions),
+    (BlockRegionInfo *)c_BlockRegions,
 };
 
-MEMORY_MAPPED_NOR_BLOCK_CONFIG Device_BlockStorageConfig = {
+MEMORY_MAPPED_NOR_BLOCK_CONFIG g_Device_BlockStorageConfig = {
     {
         // BLOCK_CONFIG
         {
@@ -56,7 +56,7 @@ MEMORY_MAPPED_NOR_BLOCK_CONFIG Device_BlockStorageConfig = {
             false, // BOOL                 ActiveState;
         },
 
-        (DeviceBlockInfo *)&Device_BlockInfo, // BlockDeviceinfo
+        (DeviceBlockInfo *)&c_Device_BlockInfo, // BlockDeviceinfo
     },
 
     {

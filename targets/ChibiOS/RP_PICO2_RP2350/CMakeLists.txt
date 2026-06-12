@@ -31,6 +31,8 @@ nf_setup_target_build(
 
     CLR_EXTRA_COMPILE_DEFINITIONS
         -DRUNTIME_MEMORY_PROFILE__small=1
+        # RP flash is XIP-mapped and shared with code execution; this flag enables
+        # runtime handling that avoids USB/WP activity while XIP flash operations are in progress.
         -DTARGET_XIP_FLASH_BLOCKS_USB=1
         LFS_CONFIG=lfs_config.h
 

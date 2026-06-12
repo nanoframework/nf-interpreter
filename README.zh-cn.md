@@ -186,8 +186,8 @@
     * [TI CC3220SF_LAUNCHXL](targets/TI_SimpleLink/TI_CC3220SF_LAUNCHXL)
   * Raspberry Pi 移植 (ChibiOS)
     * [RP_PICO_RP2040](targets/ChibiOS/RP_PICO_RP2040)
-        * [RP_PICO2_RP2350](targets/ChibiOS/RP_PICO2_RP2350)
-        * [RP_PICO_W_RP2040](targets/ChibiOS/RP_PICO_W_RP2040)
+    * [RP_PICO2_RP2350](targets/ChibiOS/RP_PICO2_RP2350)
+    * [RP_PICO_W_RP2040](targets/ChibiOS/RP_PICO_W_RP2040)
   * 其它系统移植
     * [Win32 OS (test project only at this time)](targets/os/win32)
   * [CMake 编译文件](CMake)
