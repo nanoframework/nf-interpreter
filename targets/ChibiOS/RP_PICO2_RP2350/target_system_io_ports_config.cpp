@@ -16,7 +16,7 @@
 void ConfigPins_UART1()
 {
     palSetPadMode(IOPORT1, 0, PAL_MODE_ALTERNATE_UART);
-    palSetPadMode(IOPORT1, 1, PAL_MODE_ALTERNATE_UART);
+    palSetPadMode(IOPORT1, 1, PAL_MODE_ALTERNATE_UART | PAL_RP_PAD_PUE);
 }
 
 // initialization for UART1 (mapped to RP2350 UART0)
@@ -35,7 +35,7 @@ UART_UNINIT(1)
 void ConfigPins_UART2()
 {
     palSetPadMode(IOPORT1, 8, PAL_MODE_ALTERNATE_UART);
-    palSetPadMode(IOPORT1, 9, PAL_MODE_ALTERNATE_UART);
+    palSetPadMode(IOPORT1, 9, PAL_MODE_ALTERNATE_UART | PAL_RP_PAD_PUE);
 }
 
 // initialization for UART2 (mapped to RP2350 UART1)

@@ -31,7 +31,9 @@ macro(nf_set_compile_options)
     target_compile_options(${NFSCO_TARGET} PUBLIC ${NFSCO_EXTRA_COMPILE_OPTIONS} -mthumb -mcpu=cortex-m33 -mfloat-abi=softfp -mfpu=fpv5-sp-d16 -mabi=aapcs -nostdlib -Wall -Wextra -Werror -Wundef -Wshadow -Wimplicit-fallthrough $<$<COMPILE_LANGUAGE:CXX>:-Wno-cast-user-defined> -fshort-wchar -fno-builtin -fno-common -mno-long-calls -fno-exceptions -fcheck-new)
 
     # Note: RP2350 is defined by ChibiOS board.h, no need to add it here.
-    target_compile_definitions(${NFSCO_TARGET} PUBLIC -DPLATFORM_ARM -DCORTEX_USE_FPU=FALSE -DUSE_FPU=FALSE)
+    # RP2350 has an FPU and the toolchain emits VFP instructions with current flags,
+    # so CORTEX_USE_FPU must be TRUE to enable CPACR setup in crt0.
+    target_compile_definitions(${NFSCO_TARGET} PUBLIC -DPLATFORM_ARM -DCORTEX_USE_FPU=TRUE -DUSE_FPU=TRUE)
 
 endmacro()
 

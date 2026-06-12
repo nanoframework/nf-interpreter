@@ -107,6 +107,12 @@ void ConfigPins_UART8();
 #define UART_INIT(num)                                                                                                 \
     void Init_UART##num()                                                                                              \
     {                                                                                                                  \
+        Uart##num##_PAL.Uart_cfg.txend1_cb = NULL;                                                                     \
+        Uart##num##_PAL.Uart_cfg.txend2_cb = NULL;                                                                     \
+        Uart##num##_PAL.Uart_cfg.rxend_cb = NULL;                                                                      \
+        Uart##num##_PAL.Uart_cfg.rxchar_cb = NULL;                                                                     \
+        Uart##num##_PAL.Uart_cfg.rxerr_cb = NULL;                                                                      \
+        Uart##num##_PAL.Uart_cfg.timeout_cb = NULL;                                                                    \
         Uart##num##_PAL.Uart_cfg.baud = 9600;                                                                          \
         Uart##num##_PAL.Uart_cfg.UARTLCR_H = UART_UARTLCR_H_WLEN_8BITS | UART_UARTLCR_H_FEN;                           \
         Uart##num##_PAL.Uart_cfg.UARTCR = 0;                                                                           \
