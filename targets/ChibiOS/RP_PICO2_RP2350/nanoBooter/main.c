@@ -13,6 +13,11 @@
 #include <nanoPAL_BlockStorage.h>
 #include <LaunchCLR.h>
 
+// RP2350 memory windows used to validate CLR vector table before launch.
+#define RP2350_SRAM_START          0x20000000UL
+#define RP2350_SRAM_END_EXCLUSIVE  0x20090000UL
+#define RP2350_DEPLOYMENT_START    0x100FC000UL
+
 // need to declare the Receiver thread here
 osThreadDef(ReceiverThread, osPriorityHigh, 2048, "ReceiverThread");
 
@@ -36,18 +41,26 @@ int main(void)
         // check for valid CLR image at address contiguous to nanoBooter
         // NOTE: The standard CheckValidCLRImage() opcode check fails on RP2350 due to XIP flash read
         // behavior. Use a simple vector table validation instead.
-        volatile uint32_t *clrVector = (volatile uint32_t *)(uint32_t)&__nanoImage_end__;
+        uint32_t clrBase = (uint32_t)&__nanoImage_end__;
+        uint32_t clrEndExclusive = RP2350_DEPLOYMENT_START;
+        volatile uint32_t *clrVector = (volatile uint32_t *)clrBase;
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Warray-bounds"
         uint32_t msp = clrVector[0];
         uint32_t resetHandler = clrVector[1];
 #pragma GCC diagnostic pop
 
-        if (msp != 0xFFFFFFFF && msp != 0x00000000 && resetHandler > 0x10000000 && resetHandler < 0x10400000)
+        // Reset handler must be a Thumb address and point inside the CLR image range.
+        uint32_t resetHandlerAddress = resetHandler & (~1UL);
+        bool validMsp = (msp >= RP2350_SRAM_START) && (msp < RP2350_SRAM_END_EXCLUSIVE) && ((msp & 0x7UL) == 0UL);
+        bool validResetHandler = ((resetHandler & 0x1UL) != 0UL) && (resetHandlerAddress >= clrBase) &&
+                     (resetHandlerAddress < clrEndExclusive);
+
+        if (validMsp && validResetHandler)
         {
             // there seems to be a valid CLR image
             // launch nanoCLR
-            LaunchCLR((uint32_t)&__nanoImage_end__);
+            LaunchCLR(clrBase);
         }
     }
 

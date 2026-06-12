@@ -262,7 +262,7 @@ static USBInEndpointState ep2instate;
  * @brief   EP2 initialization structure (IN only).
  */
 static const USBEndpointConfig ep2config =
-    {USB_EP_MODE_TYPE_INTR, NULL, sduInterruptTransmitted, NULL, 0x0010, 0x0000, &ep2instate, NULL};
+    {USB_EP_MODE_TYPE_INTR, NULL, sduInterruptTransmitted, NULL, 0x0008, 0x0000, &ep2instate, NULL};
 
 /*
  * Handles the USB driver global events.
