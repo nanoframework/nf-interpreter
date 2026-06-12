@@ -14,9 +14,9 @@
 #include <LaunchCLR.h>
 
 // RP2350 memory windows used to validate CLR vector table before launch.
-#define RP2350_SRAM_START          0x20000000UL
-#define RP2350_SRAM_END_EXCLUSIVE  0x20090000UL
-#define RP2350_DEPLOYMENT_START    0x100FC000UL
+#define RP2350_SRAM_START         0x20000000UL
+#define RP2350_SRAM_END_EXCLUSIVE 0x20090000UL
+#define RP2350_DEPLOYMENT_START   0x100FC000UL
 
 // need to declare the Receiver thread here
 osThreadDef(ReceiverThread, osPriorityHigh, 2048, "ReceiverThread");
@@ -54,7 +54,7 @@ int main(void)
         uint32_t resetHandlerAddress = resetHandler & (~1UL);
         bool validMsp = (msp >= RP2350_SRAM_START) && (msp < RP2350_SRAM_END_EXCLUSIVE) && ((msp & 0x7UL) == 0UL);
         bool validResetHandler = ((resetHandler & 0x1UL) != 0UL) && (resetHandlerAddress >= clrBase) &&
-                     (resetHandlerAddress < clrEndExclusive);
+                                 (resetHandlerAddress < clrEndExclusive);
 
         if (validMsp && validResetHandler)
         {
