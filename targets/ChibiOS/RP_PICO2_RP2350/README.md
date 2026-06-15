@@ -79,10 +79,7 @@ var device = I2cDevice.Create(settings);
 
 ### PWM
 
-RP2350 has 8 PWM slices with 2 channels each (A and B). The pin-to-PWM mapping follows a simple formula:
-
-- **Slice** = GPIO number / 2
-- **Channel** = GPIO number % 2 (0 = A, 1 = B)
+RP2350 has 8 PWM slices with 2 channels each (A and B). Use the table below for the Pico 2 PWM mapping.
 
 | GPIO | Slice | Channel | GPIO | Slice | Channel |
 |------|-------|---------|------|-------|---------|
@@ -168,9 +165,9 @@ int raw = tempChannel.ReadValue();
 
 ## Known Limitations
 
-- **No hardware TRNG:** RP2350 lacks a true random number generator. `USE_RNG` is disabled.
-- **No FPU:** Cortex-M0+ has no floating-point unit. Floating-point operations use software emulation.
-- **Single GPIO bank:** All 30 pins are in one bank (`IOPORT1`).
+- **RNG not enabled:** RP2350 has a hardware TRNG, but `USE_RNG` is not enabled in this port. This is an implementation gap, not a silicon limitation.
+- **Software FP path not active:** RP2350 Cortex-M33 has a hardware single-precision FPU, which is enabled in this port (`CORTEX_USE_FPU=TRUE`).
+- **Single GPIO bank in PAL:** RP2350 has two GPIO banks in hardware, but this ChibiOS target exposes all pins through `IOPORT1` for simplicity.
 - **ADC channel 3 (GP29):** On the standard Pico board, this pin is connected to VSYS/3 (power supply monitoring). It can still be used as a general ADC input on custom boards.
 - **SPI/I2C pin flexibility:** The default pin assignments are for the standard Pico board. RP2350 supports flexible pin routing — custom boards may use different GPIO assignments.
 

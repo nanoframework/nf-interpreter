@@ -31,7 +31,7 @@ MEMORY
     flash7     (rx) : org = 0x00000000, len = 0
     config     (rw) : org = 0x1000C000, len = 32k       /* configuration block */
     deployment (rx) : org = 0x100FC000, len = 3056k      /* deployment area */
-    ramvt      (wx) : org = 0x00000000, len = 0         /* no RAM vector table needed on M0+ */
+    ramvt      (wx) : org = 0x00000000, len = 0         /* no RAM vector table needed on M33 */
     ram0       (wx) : org = 0x20000000, len = 512k-48   /* SRAM */
     ram1       (wx) : org = 0x00000000, len = 0
     ram2       (wx) : org = 0x00000000, len = 0

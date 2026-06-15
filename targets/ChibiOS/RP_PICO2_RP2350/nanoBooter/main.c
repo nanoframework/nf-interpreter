@@ -75,18 +75,20 @@ int main(void)
     usbStart(serusbcfg.usbp, &usbcfg);
     usbConnectBus(serusbcfg.usbp);
 
+    // Initialize block storage before the receiver thread starts.
+    // ReceiverThread runs at higher priority than main() so it can handle
+    // Monitor_FlashSectorMap immediately after osKernelStart(); devices must
+    // already be registered at that point.
+    // in CLR this is called in nanoHAL_Initialize()
+    BlockStorageList_Initialize();
+    BlockStorage_AddDevices();
+    BlockStorageList_InitializeDevices();
+
     // create the receiver thread
     osThreadCreate(osThread(ReceiverThread), NULL);
 
     // start kernel, after this main() will behave like a thread with priority osPriorityNormal
     osKernelStart();
-
-    // initialize block storage list and devices
-    // in CLR this is called in nanoHAL_Initialize()
-    // for nanoBooter we have to init it in order to provide the flash map for Monitor_FlashSectorMap command
-    BlockStorageList_Initialize();
-    BlockStorage_AddDevices();
-    BlockStorageList_InitializeDevices();
 
     // report successful nanoBooter execution
     ReportSuccessfullNanoBooter();
