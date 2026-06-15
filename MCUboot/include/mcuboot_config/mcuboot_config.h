@@ -140,9 +140,12 @@
 // MCUBOOT_SERIAL_IMG_GRP_HASH         not defined → disabled
 // MCUBOOT_SERIAL_IMG_GRP_SLOT_INFO    not defined → disabled
 
-// Disable per-user management group extension.
-// Set to 0 (not 1) to skip bs_peruser_system_specific() call in boot_serial_input().
-#define MCUBOOT_PERUSER_MGMT_GROUP_ENABLED 0
+// Enable per-user management group extension.
+// Set to 1 to allow bs_peruser_system_specific() call in boot_serial_input().
+#define MCUBOOT_PERUSER_MGMT_GROUP_ENABLED 1
+
+// Enable direct image upload group (group 1, cmd 1) for IFU recovery via UART.
+#define MCUBOOT_SERIAL_DIRECT_IMAGE_UPLOAD 1
 
 // CPU idle hook - called in boot_serial_read_console() when the read returns
 // no data. Must relinquish the CPU so ChibiOS can service the USB ISR and
