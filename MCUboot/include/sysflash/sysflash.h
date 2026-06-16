@@ -24,8 +24,10 @@
 //
 // Device identifiers — stored in flash_area.fa_device_id.
 //
-#define FLASH_DEVICE_INTERNAL_FLASH 0 // On-chip flash (primary slot for all targets)
-#define FLASH_DEVICE_EXTERNAL_FLASH 1 // Off-chip storage: (Q)SPI flash, SD card, USB MSD (STM32 secondary slots)
+#define FLASH_DEVICE_INTERNAL_FLASH  0 // On-chip flash (primary slot for all targets)
+#define FLASH_DEVICE_EXTERNAL_FLASH  1 // Off-chip storage: (Q)SPI flash
+#define FLASH_DEVICE_EXTERNAL_SDCARD 2 // Off-chip storage: SD card, USB MSD (STM32 secondary slots)
+#define FLASH_DEVICE_EXTERNAL_USBMSD 3 // Off-chip storage: USB MSD
 
 //
 // Sentinel value returned when FLASH_AREA_IMAGE_PRIMARY/SECONDARY macros receive
