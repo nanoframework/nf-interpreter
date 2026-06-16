@@ -54,6 +54,14 @@ static int nf_serial_read(char *buf, int cnt, int *newline)
     {
         *newline = 1;
     }
+
+    // NUL-terminate the freshly read data.
+    // Guard against the buffer-full case where there is no room for the terminator.
+    if (n >= 0 && n < cnt)
+    {
+        buf[n] = '\0';
+    }
+
     return n;
 }
 
