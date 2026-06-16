@@ -115,14 +115,16 @@ int flash_area_read(const struct flash_area *area, uint32_t off, void *dst, uint
         memcpy(dst, (const void *)(uintptr_t)(area->fa_off + off), len);
         return 0;
     }
-    else
+    else if (area->fa_device_id == FLASH_DEVICE_EXTERNAL_FLASH)
     {
-#if defined(NF_FEATURE_MCUBOOT_HAS_SDCARD)
-        return fatfs_flash_area_read(area, off, dst, len);
-#else
         return AT25SF641_Read((uint8_t *)dst, area->fa_off + off, len) ? 0 : -1;
-#endif
     }
+    else if (area->fa_device_id == FLASH_DEVICE_EXTERNAL_SDCARD || area->fa_device_id == FLASH_DEVICE_EXTERNAL_USBMSD)
+    {
+        return fatfs_flash_area_read(area, off, dst, len);
+    }
+
+    return -1;
 }
 
 int flash_area_write(const struct flash_area *area, uint32_t off, const void *src, uint32_t len)
@@ -131,14 +133,16 @@ int flash_area_write(const struct flash_area *area, uint32_t off, const void *sr
     {
         return stm32FlashWrite(area->fa_off + off, len, (const uint8_t *)src);
     }
-    else
+    else if (area->fa_device_id == FLASH_DEVICE_EXTERNAL_FLASH)
     {
-#if defined(NF_FEATURE_MCUBOOT_HAS_SDCARD)
-        return fatfs_flash_area_write(area, off, src, len);
-#else
         return AT25SF641_Write((const uint8_t *)src, area->fa_off + off, len) ? 0 : -1;
-#endif
     }
+    else if (area->fa_device_id == FLASH_DEVICE_EXTERNAL_SDCARD || area->fa_device_id == FLASH_DEVICE_EXTERNAL_USBMSD)
+    {
+        return fatfs_flash_area_write(area, off, src, len);
+    }
+
+    return -1;
 }
 
 int flash_area_erase(const struct flash_area *area, uint32_t off, uint32_t len)
@@ -157,11 +161,8 @@ int flash_area_erase(const struct flash_area *area, uint32_t off, uint32_t len)
             erase_addr = stm32_f7xx_next_sector_boundary(erase_addr);
         }
     }
-    else
+    else if (area->fa_device_id == FLASH_DEVICE_EXTERNAL_FLASH)
     {
-#if defined(NF_FEATURE_MCUBOOT_HAS_SDCARD)
-        return fatfs_flash_area_erase(area, off, len);
-#else
         uint32_t erase_addr = area->fa_off + off;
         uint32_t end = erase_addr + len;
 
@@ -173,7 +174,14 @@ int flash_area_erase(const struct flash_area *area, uint32_t off, uint32_t len)
             }
             erase_addr += MCUBOOT_EXTERNAL_FLASH_SECTOR_SIZE;
         }
-#endif
+    }
+    else if (area->fa_device_id == FLASH_DEVICE_EXTERNAL_SDCARD || area->fa_device_id == FLASH_DEVICE_EXTERNAL_USBMSD)
+    {
+        return fatfs_flash_area_erase(area, off, len);
+    }
+    else
+    {
+        return -1;
     }
 
     return 0;
