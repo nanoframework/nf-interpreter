@@ -10,20 +10,30 @@
 
 int flash_area_id_from_direct_image(int image_id)
 {
+    // load with index 1 which is the first updatable image (after the bootloader)
+    int imageIndex = 1;
+
     switch (image_id)
     {
         case 0:
-            return FLASH_AREA_IMAGE_PRIMARY(0);
+            imageIndex += FLASH_AREA_IMAGE_PRIMARY(0);
+            break;
 
         case 1:
-            return FLASH_AREA_IMAGE_PRIMARY(1);
+            imageIndex += FLASH_AREA_IMAGE_PRIMARY(1);
+            break;
 
         case 2:
-            return FLASH_AREA_IMAGE_SECONDARY(0);
+            imageIndex += FLASH_AREA_IMAGE_SECONDARY(0);
+            break;
 
         case 3:
-            return FLASH_AREA_IMAGE_SECONDARY(1);
+            imageIndex += FLASH_AREA_IMAGE_SECONDARY(1);
+            break;
+
+        default:
+            return -1;
     }
 
-    return -1;
+    return imageIndex;
 }

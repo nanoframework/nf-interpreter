@@ -39,12 +39,11 @@
 #define FLASH_AREA_BOOTLOADER        0 // MCUboot bootloader itself (read-only after flash)
 #define FLASH_AREA_IMAGE_0_PRIMARY   1 // nanoCLR primary slot   (internal flash, active CLR image)
 #define FLASH_AREA_IMAGE_0_SECONDARY 2 // nanoCLR secondary slot (external storage on STM32; internal on ESP32)
-#define FLASH_AREA_IMAGE_SCRATCH     3 // Scratch area (swap-using-scratch strategy only; unused by nanoFramework)
 
 #if (MCUBOOT_IMAGE_NUMBER == 2)
 #define FLASH_AREA_IMAGE_1_PRIMARY                                                                                     \
-    4 // Deployment primary slot   (deploy_0; Wire Protocol writes here directly in debug)
-#define FLASH_AREA_IMAGE_1_SECONDARY 5 // Deployment secondary slot (deploy_1; OTA staging area)
+    3 // Deployment primary slot   (deploy_0; Wire Protocol writes here directly in debug)
+#define FLASH_AREA_IMAGE_1_SECONDARY 4 // Deployment secondary slot (deploy_1; OTA staging area)
 #endif
 
 //
