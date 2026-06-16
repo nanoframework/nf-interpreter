@@ -340,6 +340,7 @@ if(${TARGET_SERIES} STREQUAL "STM32F7xx")
 
             ${CMAKE_SOURCE_DIR}/MCUboot/common/crc16_ccitt.c
             ${CMAKE_SOURCE_DIR}/MCUboot/common/base64_impl.c
+            ${CMAKE_SOURCE_DIR}/MCUboot/common/flash_map_extend.c
         )
 
         list(APPEND MCUBOOT_SERIES_COMMON_INCLUDES
