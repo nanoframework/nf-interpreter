@@ -10,30 +10,29 @@
 
 int flash_area_id_from_direct_image(int image_id)
 {
-    // load with index 1 which is the first updatable image (after the bootloader)
-    int imageIndex = 1;
-
+    // Map the direct-image id (the "image" field carried by the SMP serial-recovery
+    // upload command) to a flash area id. The id encodes (image, slot):
+    //   0 -> Image 0 (CLR)        primary       1 -> Image 1 (deployment) primary
+    //   2 -> Image 0 (CLR)        secondary     3 -> Image 1 (deployment) secondary
+    //
+    // The FLASH_AREA_IMAGE_PRIMARY/SECONDARY macros (sysflash.h) already resolve to
+    // the correct flash area id, so return them directly. This mapping must stay in
+    // sync with GetImageIndex() in the nanoFirmwareFlasher (McubootManager.cs).
     switch (image_id)
     {
         case 0:
-            imageIndex += FLASH_AREA_IMAGE_PRIMARY(0);
-            break;
+            return FLASH_AREA_IMAGE_PRIMARY(0);
 
         case 1:
-            imageIndex += FLASH_AREA_IMAGE_PRIMARY(1);
-            break;
+            return FLASH_AREA_IMAGE_PRIMARY(1);
 
         case 2:
-            imageIndex += FLASH_AREA_IMAGE_SECONDARY(0);
-            break;
+            return FLASH_AREA_IMAGE_SECONDARY(0);
 
         case 3:
-            imageIndex += FLASH_AREA_IMAGE_SECONDARY(1);
-            break;
+            return FLASH_AREA_IMAGE_SECONDARY(1);
 
         default:
             return -1;
     }
-
-    return imageIndex;
 }
