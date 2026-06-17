@@ -7,7 +7,7 @@
 //
 // This header declares the shared W25Q512 API used by both the littlefs
 // driver (target_littlefs.c) and the MCUboot flash map porting layer
-// (common/mcuboot_flash_map.c).
+// (MCUboot/mcuboot_flash_map_boot.c).
 //
 // The implementation (common/target_ext_flash.c) uses ChibiOS QSPI and the
 // STM32 HAL QSPI driver.  This header carries no ChibiOS dependencies and is

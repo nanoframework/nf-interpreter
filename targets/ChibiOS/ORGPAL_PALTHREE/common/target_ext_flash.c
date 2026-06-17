@@ -8,7 +8,7 @@
 // Provides the shared AT25SF641_* API declared in target_ext_flash.h.
 // This implementation uses ChibiOS SPI (SPID1) and is shared between:
 //   - The littlefs driver  (targets/ChibiOS/ORGPAL_PALTHREE/target_littlefs.c)
-//   - The MCUboot porting layer (common/mcuboot_flash_map.c)
+//   - The MCUboot porting layer (MCUboot/mcuboot_flash_map_boot.c)
 //
 // Callers must call spiStart(&SPID1, ...) before invoking any function here.
 // The DMA transfer buffer (dataBuffer_0) lives in the .nocache section to

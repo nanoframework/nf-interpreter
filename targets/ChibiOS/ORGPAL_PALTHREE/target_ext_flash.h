@@ -7,7 +7,7 @@
 //
 // This header declares the shared AT25SF641 API used by both the littlefs
 // driver (target_littlefs.c) and the MCUboot flash map porting layer
-// (common/mcuboot_flash_map.c).
+// (MCUboot/mcuboot_flash_map_boot.c).
 //
 // The implementation (common/target_ext_flash.c) uses ChibiOS SPI.  This
 // header carries no ChibiOS dependencies and is safe to include from plain C

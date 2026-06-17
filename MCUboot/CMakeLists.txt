@@ -286,6 +286,8 @@ if(${TARGET_SERIES} STREQUAL "STM32F7xx")
         CORTEX_USE_FPU=TRUE
         PLATFORM_ARM
         USE_FPU=TRUE
+        # Marker for the standalone bootloader build
+        NF_MCUBOOT_BOOTLOADER
     )
 
     # Link flags shared by all STM32F7xx bootloader targets.

@@ -3,12 +3,20 @@
 // See LICENSE file in the project root for full license information.
 //
 
-// MCUboot flash_area_* porting layer for the ChibiOS MCUboot bootloader
-// binary on ORGPAL_PALX (STM32F769NI).
+// MCUboot flash_area_* porting layer for ORGPAL_PALX (STM32F769NI).
 //
-// This file is the bootloader-context counterpart to:
-//   targets/ChibiOS/ORGPAL_PALX/common/mcuboot_flash_map.c
+// This is the single flash_area_* implementation for the board 
 //
+// PRIMARY SLOTS (FLASH_DEVICE_INTERNAL_FLASH):
+//   STM32 HAL flash driver (stm32FlashWrite / stm32FlashErase).
+//   Internal flash is memory-mapped (XIP); reads use direct memcpy.
+//
+// SECONDARY SLOTS (FLASH_DEVICE_EXTERNAL_FLASH):
+//   W25Q512 64 MB QSPI flash, via W25Q512_* (target_ext_flash.c).
+//
+// The USB MSD FatFs path and the board flash bring-up need the board drivers,
+// so they are gated behind NF_MCUBOOT_BOOTLOADER; the internal- and external-
+// flash logic is shared verbatim by both builds.
 
 #include <stdint.h>
 #include <stddef.h>
@@ -23,12 +31,24 @@
 #include "stm32_f7xx_flash.h"
 #include "target_ext_flash.h"
 #include "mcuboot_flash_layout.h"
+
+// Forward declarations for the nf-overlay internal flash API.
+// Available in both the bootloader and the nanoCLR runtime via the nf-overlay FLASHv2 driver.
+int stm32FlashWrite(uint32_t startAddress, uint32_t length, const uint8_t *buffer);
+int stm32FlashErase(uint32_t address);
+
+#if defined(NF_MCUBOOT_BOOTLOADER)
+
 #include "mcuboot_board_iface.h"
 #include "mcuboot_fatfs_flash_area.h"
 
-// Forward declarations for nf-overlay internal flash API (hal_stm32_flash.h).
-int stm32FlashWrite(uint32_t startAddress, uint32_t length, const uint8_t *buffer);
-int stm32FlashErase(uint32_t address);
+// Board interface: initialise W25Q512 via STM32 HAL QSPI bridge.
+int mcuboot_ext_flash_init(void)
+{
+    return W25Q512_Init() ? 0 : -1;
+}
+
+#endif // NF_MCUBOOT_BOOTLOADER
 
 // clang-format off
 static const struct flash_area s_flash_areas[] = {
@@ -45,12 +65,6 @@ static const struct flash_area s_flash_areas[] = {
 static_assert(
     NF_MCUBOOT_SLOT_IMG1_SEC_SIZE / MCUBOOT_EXTERNAL_FLASH_SECTOR_SIZE <= MCUBOOT_MAX_IMG_SECTORS,
     "Deploy secondary sector count exceeds MCUBOOT_MAX_IMG_SECTORS");
-
-// Board interface: initialise W25Q512 via STM32 HAL QSPI bridge.
-int mcuboot_ext_flash_init(void)
-{
-    return W25Q512_Init() ? 0 : -1;
-}
 
 int flash_area_open(uint8_t id, const struct flash_area **area_outp)
 {
@@ -81,10 +95,12 @@ int flash_area_read(const struct flash_area *area, uint32_t off, void *dst, uint
     {
         return W25Q512_Read((uint8_t *)dst, area->fa_off + off, len) ? 0 : -1;
     }
+#if defined(NF_MCUBOOT_BOOTLOADER)
     else if (area->fa_device_id == FLASH_DEVICE_EXTERNAL_USBMSD)
     {
         return fatfs_flash_area_read(area, off, dst, len);
     }
+#endif
 
     return -1;
 }
@@ -93,16 +109,19 @@ int flash_area_write(const struct flash_area *area, uint32_t off, const void *sr
 {
     if (area->fa_device_id == FLASH_DEVICE_INTERNAL_FLASH)
     {
-        return stm32FlashWrite(area->fa_off + off, len, (const uint8_t *)src);
+        // stm32FlashWrite() returns true (non-zero) on success; MCUboot expects 0 on success.
+        return stm32FlashWrite(area->fa_off + off, len, (const uint8_t *)src) ? 0 : -1;
     }
     else if (area->fa_device_id == FLASH_DEVICE_EXTERNAL_FLASH)
     {
         return W25Q512_Write((uint8_t *)src, area->fa_off + off, len) ? 0 : -1;
     }
+#if defined(NF_MCUBOOT_BOOTLOADER)
     else if (area->fa_device_id == FLASH_DEVICE_EXTERNAL_USBMSD)
     {
         return fatfs_flash_area_write(area, off, src, len);
     }
+#endif
 
     return -1;
 }
@@ -116,7 +135,8 @@ int flash_area_erase(const struct flash_area *area, uint32_t off, uint32_t len)
 
         while (erase_addr < end)
         {
-            if (stm32FlashErase(erase_addr) != 0)
+            // stm32FlashErase() returns true on success;
+            if (stm32FlashErase(erase_addr) != true)
             {
                 return -1;
             }
@@ -137,10 +157,12 @@ int flash_area_erase(const struct flash_area *area, uint32_t off, uint32_t len)
             erase_addr += MCUBOOT_EXTERNAL_FLASH_SECTOR_SIZE;
         }
     }
+#if defined(NF_MCUBOOT_BOOTLOADER)
     else if (area->fa_device_id == FLASH_DEVICE_EXTERNAL_USBMSD)
     {
         return fatfs_flash_area_erase(area, off, len);
     }
+#endif
     else
     {
         return -1;

@@ -49,33 +49,12 @@ list(APPEND MCUboot_INCLUDE_DIRS
     ${CMAKE_SOURCE_DIR}/targets/ChibiOS/_common/mcuboot
 )
 
-# Convention: each MCUboot-enabled board must provide
-#   <board>/common/mcuboot_flash_map.c
-# implementing the flash_area_* porting layer declared in flash_map_backend/flash_map_backend.h.
-# The file is located under ${TARGET_BASE_LOCATION}/common/ regardless of RTOS.
-
-set(src_MCUBOOT_PORT
-    mcuboot_flash_map.c
-)
-
-foreach(SRC_FILE ${src_MCUBOOT_PORT})
-
-    set(MCUBOOT_SRC_FILE SRC_FILE-NOTFOUND)
-
-    find_file(MCUBOOT_SRC_FILE ${SRC_FILE}
-        PATHS
-            ${TARGET_BASE_LOCATION}/common
-
-        CMAKE_FIND_ROOT_PATH_BOTH
-    )
-
-    if(BUILD_VERBOSE)
-        message("${SRC_FILE} >> ${MCUBOOT_SRC_FILE}")
-    endif()
-
-    list(APPEND MCUboot_SOURCES ${MCUBOOT_SRC_FILE})
-
-endforeach()
+# Convention: each MCUboot-enabled board provides
+#   <board>/MCUboot/mcuboot_flash_map_boot.c
+# implementing the flash_area_* porting layer (flash_map_backend/flash_map_backend.h).
+# The same file is compiled into the standalone bootloader and into the nanoCLR-side
+# nf_mcuboot_port library; bootloader-only code is gated behind NF_MCUBOOT_BOOTLOADER
+set(MCUboot_SOURCES ${TARGET_BASE_LOCATION}/MCUboot/mcuboot_flash_map_boot.c)
 
 include(FindPackageHandleStandardArgs)
 

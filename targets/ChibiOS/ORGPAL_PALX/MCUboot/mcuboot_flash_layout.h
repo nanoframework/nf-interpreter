@@ -6,9 +6,9 @@
 // mcuboot_flash_layout.h — Flash slot layout constants
 //
 // Single source of truth for all MCUboot slot addresses and sizes.
-// Included by both:
-//   - common/mcuboot_flash_map.c      (ChibiOS / nanoCLR context)
-//   - common/mcuboot_flash_map_boot.c (bare-metal bootloader context)
+// Included by the single flash map porting layer MCUboot/mcuboot_flash_map_boot.c,
+// which is compiled both for the bootloader and (lean scope) for the nanoCLR
+// nf_mcuboot_port library.
 //
 // Layout (STM32F769NI 2 MB + W25Q512 64 MB QSPI):
 //
