@@ -439,8 +439,10 @@ bool CPU_GPIO_SetDriveMode(GPIO_PIN pinNumber, PinMode driveMode)
     }
 
 #if defined(RP_GPIO_NUM_LINES)
-    // Use palSetLineMode on RP targets (palSetPadMode is not implemented in RP PAL LLD)
-    palSetLineMode((ioline_t)pinNumber, mode);
+    // RP targets still use palSetLineMode; GetIoLine returns the raw pad number there.
+    // palSetPadMode is not implemented in the RP PAL LLD.
+    ioline_t ioLine = GetIoLine(pinNumber);
+    palSetLineMode(ioLine, mode);
 #else
     // STM32 targets: use GetIoLine to encode port/pad into ioline_t
     ioline_t ioLine = GetIoLine(pinNumber);
