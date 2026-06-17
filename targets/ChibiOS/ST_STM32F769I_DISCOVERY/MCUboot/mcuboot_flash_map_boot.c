@@ -57,9 +57,9 @@ int mcuboot_ext_flash_init(void)
 static const struct flash_area s_flash_areas[] = {
     { .fa_id = FLASH_AREA_BOOTLOADER,        .fa_device_id = FLASH_DEVICE_INTERNAL_FLASH, .fa_off = NF_MCUBOOT_SLOT_BOOTLOADER_OFF, .fa_size = NF_MCUBOOT_SLOT_BOOTLOADER_SIZE },
     { .fa_id = FLASH_AREA_IMAGE_0_PRIMARY,   .fa_device_id = FLASH_DEVICE_INTERNAL_FLASH, .fa_off = NF_MCUBOOT_SLOT_IMG0_PRI_OFF,   .fa_size = NF_MCUBOOT_SLOT_IMG0_PRI_SIZE   },
-    { .fa_id = FLASH_AREA_IMAGE_0_SECONDARY, .fa_device_id = FLASH_DEVICE_EXTERNAL_FLASH, .fa_off = NF_MCUBOOT_SLOT_IMG0_SEC_OFF,   .fa_size = NF_MCUBOOT_SLOT_IMG0_SEC_SIZE   },
+    { .fa_id = FLASH_AREA_IMAGE_0_SECONDARY, .fa_device_id = FLASH_DEVICE_EXTERNAL_SDCARD, .fa_off = NF_MCUBOOT_SLOT_IMG0_SEC_OFF,   .fa_size = NF_MCUBOOT_SLOT_IMG0_SEC_SIZE   },
     { .fa_id = FLASH_AREA_IMAGE_1_PRIMARY,   .fa_device_id = FLASH_DEVICE_INTERNAL_FLASH, .fa_off = NF_MCUBOOT_SLOT_IMG1_PRI_OFF,   .fa_size = NF_MCUBOOT_SLOT_IMG1_PRI_SIZE   },
-    { .fa_id = FLASH_AREA_IMAGE_1_SECONDARY, .fa_device_id = FLASH_DEVICE_EXTERNAL_FLASH, .fa_off = NF_MCUBOOT_SLOT_IMG1_SEC_OFF,   .fa_size = NF_MCUBOOT_SLOT_IMG1_SEC_SIZE   },
+    { .fa_id = FLASH_AREA_IMAGE_1_SECONDARY, .fa_device_id = FLASH_DEVICE_EXTERNAL_SDCARD, .fa_off = NF_MCUBOOT_SLOT_IMG1_SEC_OFF,   .fa_size = NF_MCUBOOT_SLOT_IMG1_SEC_SIZE   },
 };
 // clang-format on
 
