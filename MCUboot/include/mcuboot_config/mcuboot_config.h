@@ -174,18 +174,18 @@ extern void nf_mcuboot_cpu_idle(void);
 // The output backend is the board-supplied nf_mcuboot_log_write() function
 // declared in mcuboot_logging.h; the weak default in mcuboot_hal_stubs.c is a no-op.
 //
-#if defined(CONFIG_NF_MCUBOOT_LOG_LEVEL_ERROR)
-#define MCUBOOT_HAVE_LOGGING 1
-#define MCUBOOT_LOG_LEVEL    1
-#elif defined(CONFIG_NF_MCUBOOT_LOG_LEVEL_WARNING)
-#define MCUBOOT_HAVE_LOGGING 1
-#define MCUBOOT_LOG_LEVEL    2
-#elif defined(CONFIG_NF_MCUBOOT_LOG_LEVEL_INFO)
-#define MCUBOOT_HAVE_LOGGING 1
-#define MCUBOOT_LOG_LEVEL    3
-#elif defined(CONFIG_NF_MCUBOOT_LOG_LEVEL_DEBUG)
+#if defined(CONFIG_NF_MCUBOOT_LOG_LEVEL_DEBUG) && CONFIG_NF_MCUBOOT_LOG_LEVEL_DEBUG
 #define MCUBOOT_HAVE_LOGGING 1
 #define MCUBOOT_LOG_LEVEL    4
+#elif defined(CONFIG_NF_MCUBOOT_LOG_LEVEL_INFO) && CONFIG_NF_MCUBOOT_LOG_LEVEL_INFO
+#define MCUBOOT_HAVE_LOGGING 1
+#define MCUBOOT_LOG_LEVEL    3
+#elif defined(CONFIG_NF_MCUBOOT_LOG_LEVEL_WARNING) && CONFIG_NF_MCUBOOT_LOG_LEVEL_WARNING
+#define MCUBOOT_HAVE_LOGGING 1
+#define MCUBOOT_LOG_LEVEL    2
+#elif defined(CONFIG_NF_MCUBOOT_LOG_LEVEL_ERROR) && CONFIG_NF_MCUBOOT_LOG_LEVEL_ERROR
+#define MCUBOOT_HAVE_LOGGING 1
+#define MCUBOOT_LOG_LEVEL    1
 #endif
 // CONFIG_NF_MCUBOOT_LOG_LEVEL_OFF (or unset): MCUBOOT_HAVE_LOGGING not defined - all BOOT_LOG_* are no-ops.
 

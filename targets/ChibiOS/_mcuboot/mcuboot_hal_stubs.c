@@ -15,6 +15,9 @@
 #include "ch.h"
 #include "hal.h"
 
+#include <stdarg.h>
+#include <stdio.h>
+
 // Return milliseconds since boot using ChibiOS system clock.
 // Used by HAL_QSPI_Command/Receive/AutoPolling for timeout tracking.
 __attribute__((weak)) uint32_t HAL_GetTick(void)
@@ -39,4 +42,41 @@ __attribute__((weak)) void Watchdog_Reset(void)
 __attribute__((weak)) void nf_mcuboot_log_write(const char *msg)
 {
     (void)msg;
+
+void nf_mcuboot_log_emit(const char *prefix, const char *fmt, ...)
+{
+    char buffer[128];
+    char *out = buffer;
+    const char *in = prefix;
+    size_t left;
+    int len;
+    va_list args;
+
+    while (*in != '\0')
+    {
+        *out++ = *in++;
+    }
+
+    left = sizeof(buffer) - (size_t)(out - buffer);
+    va_start(args, fmt);
+    len = vsnprintf(out, left, fmt, args);
+    va_end(args);
+
+    if (len > 0)
+    {
+        if ((size_t)len >= (left - 2U))
+        {
+            out = &buffer[sizeof(buffer) - 3U];
+        }
+        else
+        {
+            out += len;
+        }
+    }
+
+    *out++ = '\r';
+    *out++ = '\n';
+    *out = '\0';
+
+    nf_mcuboot_log_write(buffer);
 }

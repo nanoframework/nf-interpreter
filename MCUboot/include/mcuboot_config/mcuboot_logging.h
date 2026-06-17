@@ -18,8 +18,6 @@
 #ifndef __MCUBOOT_LOGGING_H__
 #define __MCUBOOT_LOGGING_H__
 
-#include <stdio.h>
-
 #define MCUBOOT_LOG_LEVEL_OFF     0
 #define MCUBOOT_LOG_LEVEL_ERROR   1
 #define MCUBOOT_LOG_LEVEL_WARNING 2
@@ -34,14 +32,9 @@
 extern void nf_mcuboot_log_write(const char *msg);
 
 // Format and emit one log line via nf_mcuboot_log_write().
-// Uses a fixed 160-byte stack buffer; MCUboot log lines are short.
-#define _NF_LOG(_prefix, _fmt, ...)                                                                                    \
-    do                                                                                                                 \
-    {                                                                                                                  \
-        char _nf_log_buf[160];                                                                                         \
-        snprintf(_nf_log_buf, sizeof(_nf_log_buf), _prefix _fmt "\r\n", ##__VA_ARGS__);                               \
-        nf_mcuboot_log_write(_nf_log_buf);                                                                             \
-    } while (0)
+extern void nf_mcuboot_log_emit(const char *prefix, const char *fmt, ...);
+
+#define _NF_LOG(_prefix, _fmt, ...) nf_mcuboot_log_emit(_prefix, _fmt, ##__VA_ARGS__)
 
 #if MCUBOOT_LOG_LEVEL >= MCUBOOT_LOG_LEVEL_ERROR
 #define MCUBOOT_LOG_ERR(_fmt, ...) _NF_LOG("[ERR] ", _fmt, ##__VA_ARGS__)
