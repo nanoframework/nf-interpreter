@@ -299,6 +299,13 @@ static uint8_t WP_TransmitMessageUsbJtag(WP_Message *message)
         }
     }
 
+    // Ensure all bytes are physically pushed out before returning. Without this,
+    // exact boundary-size payloads can remain buffered and cause request/reply desync.
+    if (usb_serial_jtag_wait_tx_done(pdMS_TO_TICKS(250)) != ESP_OK)
+    {
+        return false;
+    }
+
     return true;
 }
 #endif // WP_USE_USB_JTAG
