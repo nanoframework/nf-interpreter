@@ -89,6 +89,12 @@ typedef enum CLR_DBG_Commands_Monitor
     CLR_DBG_Commands_c_Monitor_UpdateConfiguration = 0x00000010,
     CLR_DBG_Commands_c_Monitor_StorageOperation    = 0x00000011,
     CLR_DBG_Commands_c_Monitor_TargetInfo          = 0x00000020,
+
+    // IFU (In-Field Update) commands - only handled when CONFIG_NF_FEATURE_HAS_MCUBOOT is set.
+    CLR_DBG_Commands_c_Monitor_ImageInfo           = 0x00000021, // query MCUboot image/slot state
+    CLR_DBG_Commands_c_Monitor_ImageWrite          = 0x00000022, // chunked write to a target slot
+    CLR_DBG_Commands_c_Monitor_ImageConfirm        = 0x00000023, // confirm the running image
+    CLR_DBG_Commands_c_Monitor_ImageErase          = 0x00000024, // erase the secondary slot
 }CLR_DBG_Commands_Monitor;
 
 // structure for Wire Protocol packet

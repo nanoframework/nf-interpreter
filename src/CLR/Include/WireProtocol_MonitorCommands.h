@@ -208,6 +208,91 @@ typedef struct __nfpack Flash_BlockRegionInfo
 
 #define BlockRegionAttributes_MASK  ((uint32_t)0x0000FF00)
 
+#if CONFIG_NF_FEATURE_HAS_MCUBOOT
+
+//////////////////////////////////////////
+// IFU (In-Field Update) command structures
+//
+// These commands manage MCUboot images over the Wire Protocol during nanoCLR
+// application time. They are only compiled when CONFIG_NF_FEATURE_HAS_MCUBOOT is set.
+
+// slot indexes used by the IFU commands
+typedef enum Monitor_Image_Slot
+{
+    Monitor_Image_Slot_Primary   = 0, // running slot (dev write path, unverified by the loader)
+    Monitor_Image_Slot_Secondary = 1, // staging slot (normal update path, triggers test-swap)
+} Monitor_Image_Slot;
+
+// state flags reported per slot in Monitor_ImageInfo
+typedef enum Monitor_Image_StateFlags
+{
+    Monitor_Image_State_Active    = 0x01, // image is the one currently running
+    Monitor_Image_State_Confirmed = 0x02, // image is confirmed (permanent - no revert)
+    Monitor_Image_State_Pending   = 0x04, // image is scheduled for a one-time test-swap
+} Monitor_Image_StateFlags;
+
+// per-slot entry returned by Monitor_ImageInfo
+typedef struct __nfpack Monitor_ImageInfo_Entry
+{
+    uint8_t  ImageIndex;    // 0 = nanoCLR, 1 = deployment
+    uint8_t  SlotIndex;     // 0 = primary, 1 = secondary
+    uint8_t  Flags;         // Monitor_Image_StateFlags bitmask
+    uint8_t  Valid;         // non-zero when the slot holds a valid MCUboot image
+    uint32_t Version;       // packed version from the MCUboot header (major.minor.rev.build)
+    uint8_t  Hash[32];      // SHA-256 of the image (from IMAGE_TLV_SHA256)
+} Monitor_ImageInfo_Entry;
+
+// reply for the Monitor_ImageInfo command (variable number of entries)
+typedef struct __nfpack Monitor_ImageInfo_Reply
+{
+    uint8_t                 ImageCount;  // number of entries that follow
+    Monitor_ImageInfo_Entry Images[1];   // variable length
+} Monitor_ImageInfo_Reply;
+
+// command to write a chunk of image data to a target slot
+typedef struct __nfpack Monitor_ImageWrite_Command
+{
+    uint8_t  ImageIndex;    // 0 = CLR firmware, 1 = deployment
+    uint8_t  SlotIndex;     // 0 = primary (dev path), 1 = secondary (normal update path)
+    uint32_t Offset;        // byte offset within the target slot
+    uint32_t TotalSize;     // total image size (only meaningful when Offset == 0)
+    uint8_t  Data[1];       // chunk data (variable length)
+} Monitor_ImageWrite_Command;
+
+// reply for the Monitor_ImageWrite command
+typedef struct __nfpack Monitor_ImageWrite_Reply
+{
+    uint32_t ErrorCode;     // 0 = success
+    uint32_t NextOffset;    // next expected offset for flow control
+} Monitor_ImageWrite_Reply;
+
+// command to confirm the currently running image as permanent
+typedef struct __nfpack Monitor_ImageConfirm_Command
+{
+    uint32_t ImageIndex;    // image to confirm (defaults to 0)
+} Monitor_ImageConfirm_Command;
+
+// reply for the Monitor_ImageConfirm command
+typedef struct __nfpack Monitor_ImageConfirm_Reply
+{
+    uint32_t ErrorCode;     // 0 = success
+} Monitor_ImageConfirm_Reply;
+
+// command to erase a slot (typically the secondary slot)
+typedef struct __nfpack Monitor_ImageErase_Command
+{
+    uint32_t ImageIndex;    // image whose slot is to be erased
+    uint32_t SlotIndex;     // slot to erase (typically Monitor_Image_Slot_Secondary)
+} Monitor_ImageErase_Command;
+
+// reply for the Monitor_ImageErase command
+typedef struct __nfpack Monitor_ImageErase_Reply
+{
+    uint32_t ErrorCode;     // 0 = success
+} Monitor_ImageErase_Reply;
+
+#endif // CONFIG_NF_FEATURE_HAS_MCUBOOT
+
 // clang-format on
 
 //////////////////////////////////////////

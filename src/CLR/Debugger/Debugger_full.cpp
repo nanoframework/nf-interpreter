@@ -37,6 +37,14 @@ const CLR_Messaging_CommandHandlerLookup c_Debugger_Lookup_Request[] = {
     DEFINE_CMD2(TargetInfo),
     DEFINE_CMD2(DeploymentMap),
     //
+#if CONFIG_NF_FEATURE_HAS_MCUBOOT
+    // IFU (In-Field Update) commands - MCUboot targets only
+    DEFINE_CMD2(ImageInfo),
+    DEFINE_CMD2(ImageWrite),
+    DEFINE_CMD2(ImageConfirm),
+    DEFINE_CMD2(ImageErase),
+    //
+#endif // CONFIG_NF_FEATURE_HAS_MCUBOOT
     DEFINE_CMD(Execution_BasePtr),
     DEFINE_CMD(Execution_ChangeConditions),
     //

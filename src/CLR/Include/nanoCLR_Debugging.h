@@ -946,7 +946,15 @@ public:
     static bool Monitor_QueryConfiguration              ( WP_Message *msg );
     static bool Monitor_UpdateConfiguration             ( WP_Message *msg );
     static bool Monitor_StorageOperation                ( WP_Message *msg );
-                                             
+
+#if CONFIG_NF_FEATURE_HAS_MCUBOOT
+    // IFU (In-Field Update) command handlers — MCUboot targets only
+    static bool Monitor_ImageInfo                       ( WP_Message *msg );
+    static bool Monitor_ImageWrite                      ( WP_Message *msg );
+    static bool Monitor_ImageConfirm                    ( WP_Message *msg );
+    static bool Monitor_ImageErase                      ( WP_Message *msg );
+#endif // CONFIG_NF_FEATURE_HAS_MCUBOOT
+
     static bool Debugging_Execution_BasePtr             ( WP_Message *msg );
     static bool Debugging_Execution_ChangeConditions    ( WP_Message *msg );
 
