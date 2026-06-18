@@ -3973,3 +3973,320 @@ bool CLR_DBG_Debugger::Debugging_Info_SetJMC(WP_Message *msg)
 }
 
 #endif // NANOCLR_ENABLE_SOURCELEVELDEBUGGING
+
+#if (CONFIG_NF_FEATURE_HAS_MCUBOOT)
+
+//
+// IFU (In-Field Update) Wire Protocol command handlers.
+//
+// These commands manage MCUboot images over the existing Wire Protocol transport
+// during nanoCLR application time. They are only compiled for MCUboot enabled targets.
+//
+// The MCUboot porting layer (flash_map_backend) and the bootutil public API are
+// reached directly here. The required include paths are added to the nanoCLR
+// target by the board CMake when NF_FEATURE_HAS_MCUBOOT is enabled.
+//
+
+#include <stddef.h>
+#include <flash_map_backend/flash_map_backend.h>
+#include <sysflash/sysflash.h>
+#include <mcuboot_config/mcuboot_config.h>
+#include <bootutil/bootutil_public.h>
+#include <bootutil/image.h>
+
+// Resolve the flash area ID for a (image index, slot) pair.
+// slotIndex: Monitor_Image_Slot_Primary or Monitor_Image_Slot_Secondary.
+static int Ifu_FlashAreaId(uint8_t imageIndex, uint8_t slotIndex)
+{
+    if (slotIndex == Monitor_Image_Slot_Secondary)
+    {
+        return FLASH_AREA_IMAGE_SECONDARY(imageIndex);
+    }
+
+    return FLASH_AREA_IMAGE_PRIMARY(imageIndex);
+}
+
+// Read the image header and (best-effort) SHA-256 digest from a slot, packing the
+// result into a Monitor_ImageInfo_Entry. Returns true when a valid MCUboot image
+// header is found. ImageIndex/SlotIndex are always populated; the remaining fields
+// are valid only when the return value is true.
+static bool Ifu_ReadSlotInfo(uint8_t imageIndex, uint8_t slotIndex, Monitor_ImageInfo_Entry *entry)
+{
+    memset(entry, 0, sizeof(*entry));
+    entry->ImageIndex = imageIndex;
+    entry->SlotIndex = slotIndex;
+
+    int faId = Ifu_FlashAreaId(imageIndex, slotIndex);
+    if (faId == FLASH_SLOT_DOES_NOT_EXIST)
+    {
+        return false;
+    }
+
+    const struct flash_area *fa = NULL;
+    if (flash_area_open((uint8_t)faId, &fa) != 0 || fa == NULL)
+    {
+        return false;
+    }
+
+    bool valid = false;
+    struct image_header hdr;
+
+    if (flash_area_read(fa, 0, &hdr, sizeof(hdr)) == 0 && hdr.ih_magic == IMAGE_MAGIC)
+    {
+        valid = true;
+        entry->Valid = 1;
+        entry->Version = ((uint32_t)hdr.ih_ver.iv_major << 24) | ((uint32_t)hdr.ih_ver.iv_minor << 16) |
+                         ((uint32_t)hdr.ih_ver.iv_revision);
+
+        // Locate the unprotected TLV area and extract the SHA-256 digest (best-effort).
+        // The unprotected TLV info follows the image body and the protected TLV area.
+        uint32_t tlvOff = (uint32_t)hdr.ih_hdr_size + hdr.ih_img_size + hdr.ih_protect_tlv_size;
+        struct image_tlv_info tlvInfo;
+
+        if (flash_area_read(fa, tlvOff, &tlvInfo, sizeof(tlvInfo)) == 0 && tlvInfo.it_magic == IMAGE_TLV_INFO_MAGIC)
+        {
+            uint32_t pos = tlvOff + sizeof(tlvInfo);
+            uint32_t end = tlvOff + tlvInfo.it_tlv_tot;
+
+            while (pos + sizeof(struct image_tlv) <= end)
+            {
+                struct image_tlv tlv;
+                if (flash_area_read(fa, pos, &tlv, sizeof(tlv)) != 0)
+                {
+                    break;
+                }
+
+                pos += sizeof(tlv);
+
+                if (tlv.it_type == IMAGE_TLV_SHA256 && tlv.it_len == sizeof(entry->Hash))
+                {
+                    flash_area_read(fa, pos, entry->Hash, sizeof(entry->Hash));
+                    break;
+                }
+
+                pos += tlv.it_len;
+            }
+        }
+    }
+
+    flash_area_close(fa);
+
+    return valid;
+}
+
+bool CLR_DBG_Debugger::Monitor_ImageInfo(WP_Message *msg)
+{
+    NATIVE_PROFILE_CLR_DEBUGGER();
+
+    // number of MCUboot images on this target (CLR + optional deployment)
+    const uint8_t imageCount = (uint8_t)MCUBOOT_IMAGE_NUMBER;
+
+    // primary + secondary slot reported for each image
+    const uint8_t slotsPerImage = 2;
+    const uint8_t entryCount = (uint8_t)(imageCount * slotsPerImage);
+
+    uint32_t replySize = sizeof(Monitor_ImageInfo_Reply) + (entryCount - 1) * sizeof(Monitor_ImageInfo_Entry);
+
+    Monitor_ImageInfo_Reply *reply = (Monitor_ImageInfo_Reply *)platform_malloc(replySize);
+    if (reply == NULL)
+    {
+        WP_ReplyToCommand(msg, false, false, NULL, 0);
+        return false;
+    }
+
+    memset(reply, 0, replySize);
+    reply->ImageCount = entryCount;
+
+    uint8_t idx = 0;
+    for (uint8_t image = 0; image < imageCount; image++)
+    {
+        // boot state for this image is read from the primary slot trailer
+        struct boot_swap_state swapState;
+        bool haveState = (boot_read_swap_state_by_id(FLASH_AREA_IMAGE_PRIMARY(image), &swapState) == 0);
+        int swapType = boot_swap_type_multi(image);
+
+        for (uint8_t slot = 0; slot < slotsPerImage; slot++)
+        {
+            Monitor_ImageInfo_Entry *entry = &reply->Images[idx++];
+            Ifu_ReadSlotInfo(image, slot, entry);
+
+            if (slot == Monitor_Image_Slot_Primary)
+            {
+                // the primary slot holds the running image
+                entry->Flags |= Monitor_Image_State_Active;
+
+                if (haveState && swapState.image_ok == BOOT_FLAG_SET)
+                {
+                    entry->Flags |= Monitor_Image_State_Confirmed;
+                }
+            }
+            else
+            {
+                // a scheduled swap from the secondary slot is reported as pending
+                if (swapType == BOOT_SWAP_TYPE_TEST || swapType == BOOT_SWAP_TYPE_PERM)
+                {
+                    entry->Flags |= Monitor_Image_State_Pending;
+                }
+            }
+        }
+    }
+
+    WP_ReplyToCommand(msg, true, false, reply, replySize);
+
+    platform_free(reply);
+
+    return true;
+}
+
+bool CLR_DBG_Debugger::Monitor_ImageWrite(WP_Message *msg)
+{
+    NATIVE_PROFILE_CLR_DEBUGGER();
+
+    Monitor_ImageWrite_Command *cmd = (Monitor_ImageWrite_Command *)msg->m_payload;
+
+    Monitor_ImageWrite_Reply cmdReply;
+    memset(&cmdReply, 0, sizeof(cmdReply));
+    cmdReply.NextOffset = cmd->Offset;
+
+    // number of data bytes carried in this chunk
+    uint32_t headerBytes = offsetof(Monitor_ImageWrite_Command, Data);
+    uint32_t dataLen = (msg->m_header.m_size > headerBytes) ? (msg->m_header.m_size - headerBytes) : 0;
+
+    int faId = Ifu_FlashAreaId(cmd->ImageIndex, cmd->SlotIndex);
+    const struct flash_area *fa = NULL;
+
+    if (faId == FLASH_SLOT_DOES_NOT_EXIST || flash_area_open((uint8_t)faId, &fa) != 0 || fa == NULL)
+    {
+        cmdReply.ErrorCode = Monitor_Image_Error_FlashOpen;
+        WP_ReplyToCommand(msg, false, false, &cmdReply, sizeof(cmdReply));
+        return true;
+    }
+
+    // first chunk: validate the MCUboot header magic, bounds-check, and erase the slot
+    if (cmd->Offset == 0)
+    {
+        uint32_t magic = 0;
+
+        if (dataLen >= sizeof(magic))
+        {
+            memcpy(&magic, cmd->Data, sizeof(magic));
+        }
+
+        if (magic != IMAGE_MAGIC)
+        {
+            cmdReply.ErrorCode = Monitor_Image_Error_BadMagic;
+        }
+        else if (cmd->TotalSize > fa->fa_size)
+        {
+            cmdReply.ErrorCode = Monitor_Image_Error_TooLarge;
+        }
+        else if (flash_area_erase(fa, 0, fa->fa_size) != 0)
+        {
+            cmdReply.ErrorCode = Monitor_Image_Error_Erase;
+        }
+    }
+
+    // write this chunk
+    if (cmdReply.ErrorCode == Monitor_Image_Error_Success)
+    {
+        if (cmd->Offset + dataLen > fa->fa_size)
+        {
+            cmdReply.ErrorCode = Monitor_Image_Error_TooLarge;
+        }
+        else if (dataLen > 0 && flash_area_write(fa, cmd->Offset, cmd->Data, dataLen) != 0)
+        {
+            cmdReply.ErrorCode = Monitor_Image_Error_Write;
+        }
+        else
+        {
+            cmdReply.NextOffset = cmd->Offset + dataLen;
+
+            // final chunk: a completed write to the secondary slot schedules a one-time
+            // test-swap on the next reboot. Primary-slot (developer) writes do not.
+            if (cmd->TotalSize > 0 && cmdReply.NextOffset >= cmd->TotalSize &&
+                cmd->SlotIndex == Monitor_Image_Slot_Secondary)
+            {
+                if (boot_set_pending_multi(cmd->ImageIndex, 0) != 0)
+                {
+                    cmdReply.ErrorCode = Monitor_Image_Error_SetPending;
+                }
+            }
+        }
+    }
+
+    flash_area_close(fa);
+
+    WP_ReplyToCommand(
+        msg,
+        cmdReply.ErrorCode == Monitor_Image_Error_Success,
+        false,
+        &cmdReply,
+        sizeof(cmdReply));
+
+    return true;
+}
+
+bool CLR_DBG_Debugger::Monitor_ImageConfirm(WP_Message *msg)
+{
+    NATIVE_PROFILE_CLR_DEBUGGER();
+
+    Monitor_ImageConfirm_Command *cmd = (Monitor_ImageConfirm_Command *)msg->m_payload;
+
+    Monitor_ImageConfirm_Reply cmdReply;
+    memset(&cmdReply, 0, sizeof(cmdReply));
+
+    // imageIndex defaults to 0 (nanoCLR) when the payload is empty
+    uint32_t imageIndex = (msg->m_header.m_size >= sizeof(Monitor_ImageConfirm_Command)) ? cmd->ImageIndex : 0;
+
+    if (boot_set_confirmed_multi((int)imageIndex) != 0)
+    {
+        cmdReply.ErrorCode = Monitor_Image_Error_Confirm;
+    }
+
+    WP_ReplyToCommand(
+        msg,
+        cmdReply.ErrorCode == Monitor_Image_Error_Success,
+        false,
+        &cmdReply,
+        sizeof(cmdReply));
+
+    return true;
+}
+
+bool CLR_DBG_Debugger::Monitor_ImageErase(WP_Message *msg)
+{
+    NATIVE_PROFILE_CLR_DEBUGGER();
+
+    Monitor_ImageErase_Command *cmd = (Monitor_ImageErase_Command *)msg->m_payload;
+
+    Monitor_ImageErase_Reply cmdReply;
+    memset(&cmdReply, 0, sizeof(cmdReply));
+
+    int faId = Ifu_FlashAreaId((uint8_t)cmd->ImageIndex, (uint8_t)cmd->SlotIndex);
+    const struct flash_area *fa = NULL;
+
+    if (faId == FLASH_SLOT_DOES_NOT_EXIST || flash_area_open((uint8_t)faId, &fa) != 0 || fa == NULL)
+    {
+        cmdReply.ErrorCode = Monitor_Image_Error_FlashOpen;
+    }
+    else
+    {
+        if (flash_area_erase(fa, 0, fa->fa_size) != 0)
+        {
+            cmdReply.ErrorCode = Monitor_Image_Error_Erase;
+        }
+
+        flash_area_close(fa);
+    }
+
+    WP_ReplyToCommand(
+        msg,
+        cmdReply.ErrorCode == Monitor_Image_Error_Success,
+        false,
+        &cmdReply,
+        sizeof(cmdReply));
+
+    return true;
+}
+
+#endif // CONFIG_NF_FEATURE_HAS_MCUBOOT

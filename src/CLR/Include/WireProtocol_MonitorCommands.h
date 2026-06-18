@@ -231,6 +231,20 @@ typedef enum Monitor_Image_StateFlags
     Monitor_Image_State_Pending   = 0x04, // image is scheduled for a one-time test-swap
 } Monitor_Image_StateFlags;
 
+// error codes carried in the ErrorCode field of the IFU command replies
+typedef enum Monitor_Image_Error
+{
+    Monitor_Image_Error_Success     = 0, // operation succeeded
+    Monitor_Image_Error_BadArgument = 1, // invalid image or slot index
+    Monitor_Image_Error_FlashOpen   = 2, // could not open the target flash area
+    Monitor_Image_Error_BadMagic    = 3, // first chunk is not a valid MCUboot image
+    Monitor_Image_Error_TooLarge    = 4, // image would exceed the target slot capacity
+    Monitor_Image_Error_Erase       = 5, // flash erase failed
+    Monitor_Image_Error_Write       = 6, // flash write failed
+    Monitor_Image_Error_SetPending  = 7, // boot_set_pending failed
+    Monitor_Image_Error_Confirm     = 8, // boot_set_confirmed failed
+} Monitor_Image_Error;
+
 // per-slot entry returned by Monitor_ImageInfo
 typedef struct __nfpack Monitor_ImageInfo_Entry
 {
@@ -238,7 +252,7 @@ typedef struct __nfpack Monitor_ImageInfo_Entry
     uint8_t  SlotIndex;     // 0 = primary, 1 = secondary
     uint8_t  Flags;         // Monitor_Image_StateFlags bitmask
     uint8_t  Valid;         // non-zero when the slot holds a valid MCUboot image
-    uint32_t Version;       // packed version from the MCUboot header (major.minor.rev.build)
+    uint32_t Version;       // packed MCUboot header version: (major<<24)|(minor<<16)|revision
     uint8_t  Hash[32];      // SHA-256 of the image (from IMAGE_TLV_SHA256)
 } Monitor_ImageInfo_Entry;
 
