@@ -13,7 +13,7 @@ extern "C"
 {
 #endif
 
-#ifdef NF_FEATURE_HAS_MCUBOOT
+#ifdef CONFIG_NF_FEATURE_HAS_MCUBOOT
 
 #include <bootutil/bootutil_public.h>
 
@@ -122,7 +122,7 @@ extern "C"
      */
     nf_mcuboot_error_t nf_mcuboot_startup_ok(void);
 
-#endif // NF_FEATURE_HAS_MCUBOOT
+#endif // CONFIG_NF_FEATURE_HAS_MCUBOOT
 
 #ifdef __cplusplus
 }

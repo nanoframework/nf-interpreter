@@ -15,7 +15,7 @@ extern "C"
 {
 #endif
 
-#ifdef NF_FEATURE_HAS_MCUBOOT
+#ifdef CONFIG_NF_FEATURE_HAS_MCUBOOT
 
     /**
      * @brief Combined image state returned by nf_mcuboot_get_image_details().
@@ -102,7 +102,7 @@ extern "C"
      */
     bool nf_mcuboot_image_needs_confirm(int image_index, nf_mcuboot_error_t *out_error);
 
-#endif // NF_FEATURE_HAS_MCUBOOT
+#endif // CONFIG_NF_FEATURE_HAS_MCUBOOT
 
 #ifdef __cplusplus
 }

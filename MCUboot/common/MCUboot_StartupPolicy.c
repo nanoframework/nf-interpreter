@@ -6,7 +6,7 @@
 #include <stdbool.h>
 #include <MCUboot_StartupPolicy.h>
 
-#ifdef NF_FEATURE_HAS_MCUBOOT
+#ifdef CONFIG_NF_FEATURE_HAS_MCUBOOT
 
 #include <sysflash/sysflash.h>
 #include <bootutil/bootutil_public.h>
@@ -102,4 +102,4 @@ nf_mcuboot_error_t nf_mcuboot_deploy_failed(void)
     return NF_MCUBOOT_SUCCESS;
 }
 
-#endif // NF_FEATURE_HAS_MCUBOOT
+#endif // CONFIG_NF_FEATURE_HAS_MCUBOOT

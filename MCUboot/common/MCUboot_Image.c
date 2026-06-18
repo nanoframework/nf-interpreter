@@ -7,7 +7,7 @@
 #include <stdbool.h>
 #include <MCUboot_Image.h>
 
-#ifdef NF_FEATURE_HAS_MCUBOOT
+#ifdef CONFIG_NF_FEATURE_HAS_MCUBOOT
 
 #include <sysflash/sysflash.h>
 #include <bootutil/bootutil_public.h>
@@ -105,4 +105,4 @@ bool nf_mcuboot_image_needs_confirm(int image_index, nf_mcuboot_error_t *out_err
     return (state.copy_done == BOOT_FLAG_SET) && (state.image_ok != BOOT_FLAG_SET);
 }
 
-#endif // NF_FEATURE_HAS_MCUBOOT
+#endif // CONFIG_NF_FEATURE_HAS_MCUBOOT

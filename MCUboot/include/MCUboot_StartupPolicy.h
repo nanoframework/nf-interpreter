@@ -11,7 +11,7 @@ extern "C"
 {
 #endif
 
-#ifdef NF_FEATURE_HAS_MCUBOOT
+#ifdef CONFIG_NF_FEATURE_HAS_MCUBOOT
 
 #include <MCUboot_RuntimeInterface.h>
 
@@ -44,7 +44,7 @@ extern "C"
      */
     nf_mcuboot_error_t nf_mcuboot_deploy_failed(void);
 
-#endif // NF_FEATURE_HAS_MCUBOOT
+#endif // CONFIG_NF_FEATURE_HAS_MCUBOOT
 
 #ifdef __cplusplus
 }

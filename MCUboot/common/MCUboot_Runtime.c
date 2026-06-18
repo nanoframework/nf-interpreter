@@ -5,7 +5,7 @@
 
 #include <MCUboot_RuntimeInterface.h>
 
-#ifdef NF_FEATURE_HAS_MCUBOOT
+#ifdef CONFIG_NF_FEATURE_HAS_MCUBOOT
 
 #include <bootutil/bootutil_public.h>
 
@@ -94,4 +94,4 @@ nf_mcuboot_error_t nf_mcuboot_set_image_pending(int image_index, int permanent)
     return NF_MCUBOOT_SUCCESS;
 }
 
-#endif // NF_FEATURE_HAS_MCUBOOT
+#endif // CONFIG_NF_FEATURE_HAS_MCUBOOT
