@@ -390,15 +390,12 @@ void CPU_GPIO_DisablePin(GPIO_PIN pinNumber, PinMode driveMode, uint32_t alterna
 
     CPU_GPIO_SetDriveMode(pinNumber, driveMode);
 
-#if defined(RP_GPIO_NUM_LINES)
     // On RP2040/RP2350, use palSetLineMode instead of palSetPadMode
     // because pal_lld_setpadmode is not implemented in the RP PAL LLD.
-    palSetLineMode((ioline_t)pinNumber, PAL_MODE_ALTERNATE(alternateFunction));
-#else
+    // Uses palSetLineMode for STM32 targets as well, since GetIoLine returns the raw pad number there.
     // get IoLine from pin number
     ioline_t ioLine = GetIoLine(pinNumber);
     palSetLineMode(ioLine, PAL_MODE_ALTERNATE(alternateFunction));
-#endif
 
     GLOBAL_UNLOCK();
 
@@ -438,16 +435,11 @@ bool CPU_GPIO_SetDriveMode(GPIO_PIN pinNumber, PinMode driveMode)
             return false;
     }
 
-#if defined(RP_GPIO_NUM_LINES)
     // RP targets still use palSetLineMode; GetIoLine returns the raw pad number there.
-    // palSetPadMode is not implemented in the RP PAL LLD.
-    ioline_t ioLine = GetIoLine(pinNumber);
-    palSetLineMode(ioLine, mode);
-#else
+    // palSetPadMode is not implemented in the RP PAL LLD.    
     // STM32 targets: use GetIoLine to encode port/pad into ioline_t
     ioline_t ioLine = GetIoLine(pinNumber);
     palSetLineMode(ioLine, mode);
-#endif
 
     return true;
 }
