@@ -92,7 +92,7 @@ static void TxEnd1(UARTDriver *uartp)
     NF_PAL_UART *palUart = NULL;
 
 #if defined(NF_SERIAL_COMM_STM32_UART_USE_USART1) && (NF_SERIAL_COMM_STM32_UART_USE_USART1 == TRUE)
-#if defined(RP2040_MCUCONF)
+#if defined(RP2040_MCUCONF) || defined(RP2350_MCUCONF)
     if (uartp == &UARTD0)
 #else
     if (uartp == &UARTD1)
@@ -102,7 +102,7 @@ static void TxEnd1(UARTDriver *uartp)
     }
 #endif
 #if defined(NF_SERIAL_COMM_STM32_UART_USE_USART2) && (NF_SERIAL_COMM_STM32_UART_USE_USART2 == TRUE)
-#if defined(RP2040_MCUCONF)
+#if defined(RP2040_MCUCONF) || defined(RP2350_MCUCONF)
     if (uartp == &UARTD1)
 #else
     if (uartp == &UARTD2)
@@ -172,7 +172,7 @@ static void RxChar(UARTDriver *uartp, uint16_t c)
     uint8_t portIndex = 0;
 
 #if defined(NF_SERIAL_COMM_STM32_UART_USE_USART1) && (NF_SERIAL_COMM_STM32_UART_USE_USART1 == TRUE)
-#if defined(RP2040_MCUCONF)
+#if defined(RP2040_MCUCONF) || defined(RP2350_MCUCONF)
     if (uartp == &UARTD0)
 #else
     if (uartp == &UARTD1)
@@ -183,7 +183,7 @@ static void RxChar(UARTDriver *uartp, uint16_t c)
     }
 #endif
 #if defined(NF_SERIAL_COMM_STM32_UART_USE_USART2) && (NF_SERIAL_COMM_STM32_UART_USE_USART2 == TRUE)
-#if defined(RP2040_MCUCONF)
+#if defined(RP2040_MCUCONF) || defined(RP2350_MCUCONF)
     if (uartp == &UARTD1)
 #else
     if (uartp == &UARTD2)
@@ -926,7 +926,7 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeInit___VOID(
 #if defined(NF_SERIAL_COMM_STM32_UART_USE_USART1) && (NF_SERIAL_COMM_STM32_UART_USE_USART1 == TRUE)
         case 1:
             Init_UART1();
-#if defined(RP2040_MCUCONF)
+#if defined(RP2040_MCUCONF) || defined(RP2350_MCUCONF)
             Uart1_PAL.UartDriver = &UARTD0;
 #else
             Uart1_PAL.UartDriver = &UARTD1;
@@ -937,7 +937,7 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeInit___VOID(
 #if defined(NF_SERIAL_COMM_STM32_UART_USE_USART2) && (NF_SERIAL_COMM_STM32_UART_USE_USART2 == TRUE)
         case 2:
             Init_UART2();
-#if defined(RP2040_MCUCONF)
+#if defined(RP2040_MCUCONF) || defined(RP2350_MCUCONF)
             Uart2_PAL.UartDriver = &UARTD1;
 #else
             Uart2_PAL.UartDriver = &UARTD2;
@@ -1031,7 +1031,7 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeConfig___VOI
     NANOCLR_HEADER();
 
     NF_PAL_UART *palUart = NULL;
-#if defined(RP2040_MCUCONF)
+#if defined(RP2040_MCUCONF) || defined(RP2350_MCUCONF)
     uint32_t lcrh = 0;
 #endif
 
@@ -1048,7 +1048,7 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeConfig___VOI
 
     // Setup configuration
 
-#if defined(RP2040_MCUCONF)
+#if defined(RP2040_MCUCONF) || defined(RP2350_MCUCONF)
 
     lcrh = palUart->Uart_cfg.UARTLCR_H;
 
@@ -1281,7 +1281,7 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeConfig___VOI
 #endif
 
     // baud rate
-#if defined(RP2040_MCUCONF)
+#if defined(RP2040_MCUCONF) || defined(RP2350_MCUCONF)
     palUart->Uart_cfg.baud = (uint32_t)pThis[FIELD___baudRate].NumericByRef().s4;
 #else
     palUart->Uart_cfg.speed = (int)pThis[FIELD___baudRate].NumericByRef().s4;

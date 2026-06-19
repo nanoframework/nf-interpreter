@@ -82,7 +82,7 @@ void ConfigPins_UART6();
 void ConfigPins_UART7();
 void ConfigPins_UART8();
 
-#if defined(RP2040_MCUCONF)
+#if defined(RP2040_MCUCONF) || defined(RP2350_MCUCONF)
 #define UART_DRIVER_1 UARTD0
 #define UART_DRIVER_2 UARTD1
 #else
@@ -102,11 +102,17 @@ void ConfigPins_UART8();
 // the following macro defines a function that initializes an UART struct
 // it gets called in the system_io_ports_SerialDevice::NativeInit function
 
-#if defined(RP2040_MCUCONF)
+#if defined(RP2040_MCUCONF) || defined(RP2350_MCUCONF)
 
 #define UART_INIT(num)                                                                                                 \
     void Init_UART##num()                                                                                              \
     {                                                                                                                  \
+        Uart##num##_PAL.Uart_cfg.txend1_cb = NULL;                                                                     \
+        Uart##num##_PAL.Uart_cfg.txend2_cb = NULL;                                                                     \
+        Uart##num##_PAL.Uart_cfg.rxend_cb = NULL;                                                                      \
+        Uart##num##_PAL.Uart_cfg.rxchar_cb = NULL;                                                                     \
+        Uart##num##_PAL.Uart_cfg.rxerr_cb = NULL;                                                                      \
+        Uart##num##_PAL.Uart_cfg.timeout_cb = NULL;                                                                    \
         Uart##num##_PAL.Uart_cfg.baud = 9600;                                                                          \
         Uart##num##_PAL.Uart_cfg.UARTLCR_H = UART_UARTLCR_H_WLEN_8BITS | UART_UARTLCR_H_FEN;                           \
         Uart##num##_PAL.Uart_cfg.UARTCR = 0;                                                                           \
