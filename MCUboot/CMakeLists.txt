@@ -6,12 +6,17 @@
 cmake_minimum_required(VERSION 3.31)
 
 # MCUboot porting layer static library (nanoCLR side).
-add_library(nf_mcuboot_port STATIC ${MCUboot_SOURCES})
+add_library(nf_mcuboot_port STATIC
+    ${MCUboot_SOURCES}
+    ${mcuboot_SOURCE_DIR}/boot/bootutil/src/bootutil_public.c
+    ${mcuboot_SOURCE_DIR}/boot/bootutil/src/bootutil_misc.c
+)
 
 target_include_directories(nf_mcuboot_port PUBLIC
     ${MCUboot_INCLUDE_DIRS}
     ${TARGET_BASE_LOCATION}
     ${TARGET_BASE_LOCATION}/MCUboot
+    ${mcuboot_SOURCE_DIR}/boot/bootutil/src
 )
 
 ##################################################################
@@ -357,6 +362,21 @@ if(${TARGET_SERIES} STREQUAL "STM32F7xx")
 
 
     endif() # NF_MCUBOOT_SERIAL_RECOVERY
+
+    # Apply series CPU/FPU flags to nf_mcuboot_port so it matches nanoCLR's ABI.
+    target_compile_options(nf_mcuboot_port PRIVATE
+        -mthumb
+        -mcpu=cortex-m7
+        -mfpu=fpv5-sp-d16
+        -mfloat-abi=hard
+        -mabi=aapcs
+        -ffunction-sections
+        -fdata-sections
+        -fno-common
+        -Wno-unused-parameter
+        -Wno-sign-compare
+        -Wno-missing-field-initializers
+    )
 
     # Board-specific build rules live in each board's MCUboot folder.
     include(${TARGET_BASE_LOCATION}/MCUboot/mcuboot_target.cmake)

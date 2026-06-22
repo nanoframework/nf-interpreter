@@ -350,6 +350,12 @@ macro(nf_add_platform_sources target)
             ${CHIBIOS_CONTRIB_SOURCES}
         )
 
+        if(NF_FEATURE_HAS_MCUBOOT)
+            target_link_libraries(${target}.elf
+                nf_mcuboot_port
+            )
+        endif()
+
         if(USE_NETWORKING_OPTION)
             target_link_libraries(${target}.elf
                 nano::NF_Network
