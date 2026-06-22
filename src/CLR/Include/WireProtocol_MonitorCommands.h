@@ -10,6 +10,7 @@
 #include <nanoHAL_v2.h>
 #include "WireProtocol.h"
 #include "WireProtocol_Message.h"
+#include <nanoCLR_Types.h>
 
 // clang-format off
 
@@ -248,12 +249,12 @@ typedef enum Monitor_Image_Error
 // per-slot entry returned by Monitor_ImageInfo
 typedef struct __nfpack Monitor_ImageInfo_Entry
 {
-    uint8_t  ImageIndex;    // 0 = nanoCLR, 1 = deployment
-    uint8_t  SlotIndex;     // 0 = primary, 1 = secondary
-    uint8_t  Flags;         // Monitor_Image_StateFlags bitmask
-    uint8_t  Valid;         // non-zero when the slot holds a valid MCUboot image
-    uint32_t Version;       // packed MCUboot header version: (major<<24)|(minor<<16)|revision
-    uint8_t  Hash[32];      // SHA-256 of the image (from IMAGE_TLV_SHA256)
+    uint8_t            ImageIndex;    // 0 = nanoCLR, 1 = deployment
+    uint8_t            SlotIndex;     // 0 = primary, 1 = secondary
+    uint8_t            Flags;         // Monitor_Image_StateFlags bitmask
+    uint8_t            Valid;         // non-zero when the slot holds a valid MCUboot image
+    CLR_RECORD_VERSION Version;       // MCUboot header version: major.minor.revision.build
+    uint8_t            Hash[32];      // SHA-256 of the image (from IMAGE_TLV_SHA256)
 } Monitor_ImageInfo_Entry;
 
 // reply for the Monitor_ImageInfo command (variable number of entries)

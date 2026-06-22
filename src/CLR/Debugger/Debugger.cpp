@@ -4035,8 +4035,10 @@ static bool Ifu_ReadSlotInfo(uint8_t imageIndex, uint8_t slotIndex, Monitor_Imag
     {
         valid = true;
         entry->Valid = 1;
-        entry->Version = ((uint32_t)hdr.ih_ver.iv_major << 24) | ((uint32_t)hdr.ih_ver.iv_minor << 16) |
-                         ((uint32_t)hdr.ih_ver.iv_revision);
+        entry->Version.majorVersion    = hdr.ih_ver.iv_major;
+        entry->Version.minorVersion    = hdr.ih_ver.iv_minor;
+        entry->Version.revisionNumber  = hdr.ih_ver.iv_revision;
+        entry->Version.buildNumber     = hdr.ih_ver.iv_build_num;
 
         // Locate the unprotected TLV area and extract the SHA-256 digest (best-effort).
         // The unprotected TLV info follows the image body and the protected TLV area.
