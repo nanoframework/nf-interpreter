@@ -42,6 +42,7 @@ __attribute__((weak)) void Watchdog_Reset(void)
 __attribute__((weak)) void nf_mcuboot_log_write(const char *msg)
 {
     (void)msg;
+}
 
 void nf_mcuboot_log_emit(const char *prefix, const char *fmt, ...)
 {
