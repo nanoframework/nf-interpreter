@@ -8,6 +8,10 @@ list(APPEND NF_Debugger_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/CLR/Debugger)
 list(APPEND NF_Debugger_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/CLR/Messaging)
 list(APPEND NF_Debugger_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/CLR/WireProtocol)
 
+if(NF_FEATURE_HAS_MCUBOOT)
+    list(APPEND NF_Debugger_INCLUDE_DIRS ${mcuboot_SOURCE_DIR}/boot/bootutil/include)
+endif()
+
 # source files for nanoFramework Debugger
 set(NF_Debugger_SRCS
 

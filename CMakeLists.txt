@@ -826,15 +826,18 @@ else()
     # Define base path for the class libraries
     nf_set_base_path_for_libraries_modules(${CMAKE_SOURCE_DIR}/targets/${RTOS}/_nanoCLR)
     
+    if(NF_FEATURE_HAS_MCUBOOT)
+        find_package(MCUboot REQUIRED)
+    endif()
+
     # add common directory for TARGET
     add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/targets/${RTOS})
-    
+
     # add TARGET board directory
     add_subdirectory(${TARGET_BASE_LOCATION})
 
     # Build the standalone MCUboot bootloader binary when enabled.
     if(NF_FEATURE_HAS_MCUBOOT)
-        find_package(MCUboot REQUIRED)
         add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/MCUboot)
     endif()
 
