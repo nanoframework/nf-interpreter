@@ -2859,6 +2859,8 @@ static const TypeIndexLookup c_TypeIndexLookup[] = {
     TIL("nanoFramework.UI", "Font", m_Font),
     TIL("nanoFramework.Touch", "TouchEvent", m_TouchEvent),
     TIL("nanoFramework.Touch", "TouchInput", m_TouchInput),
+    TIL("nanoFramework.EspNow", "DataSentEventInternal", m_EspNowDataSentEvent),
+    TIL("nanoFramework.EspNow", "DataRecvEventInternal", m_EspNowDataRecvEvent),
 
     TIL("System.Net.NetworkInformation", "NetworkInterface", m_NetworkInterface),
     TIL("System.Net.NetworkInformation", "Wireless80211Configuration", m_Wireless80211Configuration),
