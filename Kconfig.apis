@@ -102,6 +102,11 @@ config API_NANOFRAMEWORK_SYSTEM_IO_HASHING
     bool "nanoFramework.System.IO.Hashing"
     default n
 
+config API_NANOFRAMEWORK_ESPNOW
+    bool "nanoFramework.EspNow"
+    depends on RTOS_ESP32
+    default n
+
 config API_NANOFRAMEWORK_NETWORKING_THREAD
     bool "nanoFramework.Networking.Thread"
     default n
