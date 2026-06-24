@@ -2248,28 +2248,47 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                                     // 7. Object is a class instance (generic or not)
                                     if (obj && obj->DataType() == DATATYPE_CLASS)
                                     {
-                                        CLR_RT_TypeDef_Index objCls = obj->ObjectCls();
-
-                                        // 8. Object has a valid TypeDef
-                                        if (NANOCLR_INDEX_IS_VALID(objCls))
+                                        // 7a. A closed generic instance stores its OWN exact closed TypeSpec
+                                        // (set by NewObject via SetGenericInstanceType). That is the authoritative
+                                        // generic context for an explicit-interface dispatch through a non-generic
+                                        // interface (e.g. DataTemplate<ItemVm>::IDataTemplate.Build, called from a
+                                        // non-generic Repeater), where neither the caller nor the interface carries
+                                        // a TypeSpec. Use it directly so a (T)item cast inside the callee can
+                                        // resolve VAR !0 -> the real type arg instead of throwing CLR_E_INVALID_CAST.
+                                        if (obj->IsAGenericInstance())
                                         {
-                                            // NOW search for a TypeSpec that matches this object's TypeDef
-                                            // This is only needed for closed generic instances like List<int>
-                                            for (int i = 0; i < assm->tablesSize[TBL_TypeSpec]; i++)
+                                            const CLR_RT_TypeSpec_Index &objTS = obj->ObjectGenericType();
+                                            if (NANOCLR_INDEX_IS_VALID(objTS))
                                             {
-                                                const CLR_RT_TypeSpec_Index *tsIdx =
-                                                    &assm->crossReferenceTypeSpec[i].genericType;
-                                                if (NANOCLR_INDEX_IS_VALID(*tsIdx))
+                                                effectiveCallerGeneric = &objTS;
+                                            }
+                                        }
+
+                                        if (effectiveCallerGeneric == nullptr)
+                                        {
+                                            CLR_RT_TypeDef_Index objCls = obj->ObjectCls();
+
+                                            // 8. Object has a valid TypeDef
+                                            if (NANOCLR_INDEX_IS_VALID(objCls))
+                                            {
+                                                // Fallback: search for a TypeSpec that matches this object's TypeDef
+                                                // (covers instances not flagged as a closed generic).
+                                                for (int i = 0; i < assm->tablesSize[TBL_TypeSpec]; i++)
                                                 {
-                                                    CLR_RT_TypeSpec_Instance tsInst{};
-                                                    if (tsInst.InitializeFromIndex(*tsIdx) &&
-                                                        NANOCLR_INDEX_IS_VALID(tsInst.genericTypeDef) &&
-                                                        tsInst.genericTypeDef.data == objCls.data)
+                                                    const CLR_RT_TypeSpec_Index *tsIdx =
+                                                        &assm->crossReferenceTypeSpec[i].genericType;
+                                                    if (NANOCLR_INDEX_IS_VALID(*tsIdx))
                                                     {
-                                                        // Found a TypeSpec in the caller's assembly that matches the
-                                                        // object's class
-                                                        effectiveCallerGeneric = tsIdx;
-                                                        break;
+                                                        CLR_RT_TypeSpec_Instance tsInst{};
+                                                        if (tsInst.InitializeFromIndex(*tsIdx) &&
+                                                            NANOCLR_INDEX_IS_VALID(tsInst.genericTypeDef) &&
+                                                            tsInst.genericTypeDef.data == objCls.data)
+                                                        {
+                                                            // Found a TypeSpec in the caller's assembly that matches
+                                                            // the object's class
+                                                            effectiveCallerGeneric = tsIdx;
+                                                            break;
+                                                        }
                                                     }
                                                 }
                                             }
@@ -2500,6 +2519,36 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                                             if (calleeInst.InitializeFromIndex(calleeReal) == false)
                                             {
                                                 NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+                                            }
+
+                                            // Same-assembly interface dispatch uses a MethodDef token, so the
+                                            // CALLVIRT pre-pass above (guarded to TBL_MethodRef) does not run and
+                                            // genericType is left null. Recover the closed TypeSpec from the
+                                            // receiver, the same way the genericType branch above does, so a
+                                            // (T)item cast inside an explicit interface impl on a closed generic
+                                            // (e.g. DataTemplate<ItemVm>::IDataTemplate.Build) resolves VAR !0
+                                            // instead of throwing CLR_E_INVALID_CAST.
+                                            if (calleeInst.genericType == nullptr)
+                                            {
+                                                CLR_RT_HeapBlock *thisHeap = pThis[0].Dereference();
+                                                if (thisHeap != nullptr && thisHeap->IsAGenericInstance())
+                                                {
+                                                    const CLR_RT_TypeSpec_Index &objTS = thisHeap->ObjectGenericType();
+                                                    if (NANOCLR_INDEX_IS_VALID(objTS))
+                                                    {
+                                                        CLR_RT_TypeSpec_Instance tsObj{};
+                                                        CLR_RT_TypeDef_Instance declObj{};
+                                                        if (tsObj.InitializeFromIndex(objTS) &&
+                                                            declObj.InitializeFromMethod(calleeInst) &&
+                                                            tsObj.genericTypeDef.data == declObj.data)
+                                                        {
+                                                            calleeInst.InitializeFromIndex(
+                                                                calleeReal,
+                                                                objTS,
+                                                                &stack->m_call);
+                                                        }
+                                                    }
+                                                }
                                             }
                                         }
 
