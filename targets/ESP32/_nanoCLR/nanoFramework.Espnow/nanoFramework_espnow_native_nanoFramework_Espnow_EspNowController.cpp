@@ -19,6 +19,10 @@
 EspNowDataSentEventData Library_nanoFramework_EspNow_native_nanoFramework_EspNow_EspNowController::dataSentEventData;
 EspNowDataRecvEventData Library_nanoFramework_EspNow_native_nanoFramework_EspNow_EspNowController::dataRecvEventData;
 
+static const int ESPNOW_ERR_ESPNOW_INIT = 10001;
+static const int ESPNOW_ERR_INVALID_PEER = 10002;
+static const int ESPNOW_ERR_ADD_PEER = 10003;
+
 void Library_nanoFramework_EspNow_native_nanoFramework_EspNow_EspNowController::DataSentCb(
     const wifi_tx_info_t *tx_info,
     esp_now_send_status_t status)
@@ -69,31 +73,28 @@ HRESULT Library_nanoFramework_EspNow_native_nanoFramework_EspNow_EspNowControlle
 {
     NANOCLR_HEADER();
 
-    DEBUG_FENTER();
-
     esp_err_t ret;
 
-    DEBUG_WRITELINE("EspNow init");
-
     ret = esp_now_init();
-    if (ret == ESP_OK)
+    if (ret != ESP_OK)
     {
-
-        DEBUG_WRITELINE("EspNow reg recvcb");
-
-        ret = esp_now_register_recv_cb(DataRecvCb);
-        if (ret == ESP_OK)
-        {
-
-            DEBUG_WRITELINE("EspNow reg sendcb");
-
-            ret = esp_now_register_send_cb(DataSentCb);
-        }
+        stack.SetResult_I4(ESPNOW_ERR_ESPNOW_INIT);
+        NANOCLR_NOCLEANUP_NOLABEL();
     }
 
-    DEBUG_FEXIT_RET(ret);
+    ret = esp_now_register_recv_cb(DataRecvCb);
+    if (ret == ESP_OK)
+    {
+        ret = esp_now_register_send_cb(DataSentCb);
+    }
 
-    stack.SetResult_I4((int32_t)ret);
+    if (ret != ESP_OK)
+    {
+        stack.SetResult_I4(ESPNOW_ERR_ESPNOW_INIT);
+        NANOCLR_NOCLEANUP_NOLABEL();
+    }
+
+    stack.SetResult_I4(0);
 
     NANOCLR_NOCLEANUP_NOLABEL();
 }
@@ -156,20 +157,26 @@ HRESULT Library_nanoFramework_EspNow_native_nanoFramework_EspNow_EspNowControlle
 {
     NANOCLR_HEADER();
 
-    DEBUG_FENTER();
+    CLR_RT_HeapBlock_Array *macArray = stack.Arg1().DereferenceArray();
+    if (macArray == NULL)
+    {
+        stack.SetResult_I4(ESPNOW_ERR_INVALID_PEER);
+        NANOCLR_NOCLEANUP_NOLABEL();
+    }
 
-    esp_err_t ret;
+    if (macArray->m_numOfElements != ESP_NOW_ETH_ALEN)
+    {
+        stack.SetResult_I4(ESPNOW_ERR_INVALID_PEER);
+        NANOCLR_NOCLEANUP_NOLABEL();
+    }
 
-    CLR_RT_HeapBlock_Array *peerMacArg = stack.Arg1().DereferenceArray();
-    char *peerMac = (char *)peerMacArg->GetFirstElement();
+    uint8_t channel = stack.Arg2().NumericByRef().u1;
+    uint8_t *peerMac = (uint8_t *)macArray->GetFirstElement();
 
-    uint8_t channel = (uint8_t)stack.Arg2().NumericByRef().u1;
-
-    esp_now_peer_info_t peerInfo;
-    memset((void *)&peerInfo, 0, sizeof(peerInfo));
+    esp_now_peer_info_t peerInfo = {};
     memcpy(peerInfo.peer_addr, peerMac, ESP_NOW_ETH_ALEN);
-    peerInfo.ifidx = WIFI_IF_STA;
     peerInfo.channel = channel;
+    peerInfo.ifidx = WIFI_IF_STA;
     peerInfo.encrypt = false;
 
     DEBUG_WRITELINE(
@@ -182,11 +189,17 @@ HRESULT Library_nanoFramework_EspNow_native_nanoFramework_EspNow_EspNowControlle
         peerMac[5],
         channel);
 
-    ret = esp_now_add_peer(&peerInfo);
+    esp_err_t result = esp_now_add_peer(&peerInfo);
+    if (result != ESP_OK)
+    {
+        DEBUG_WRITELINE("esp_now_add_peer failed: %d", result);
+        stack.SetResult_I4(ESPNOW_ERR_ADD_PEER);
+        NANOCLR_NOCLEANUP_NOLABEL();
+    }
 
-    DEBUG_FEXIT_RET(ret);
-
-    stack.SetResult_I4((int32_t)ret);
+    stack.SetResult_I4(0);
 
     NANOCLR_NOCLEANUP_NOLABEL();
 }
+
+
