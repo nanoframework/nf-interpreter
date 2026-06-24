@@ -224,8 +224,17 @@ bool CLR_RT_GarbageCollector::ComputeReachabilityGraphForMultipleBlocks(CLR_RT_H
 
                     case DATATYPE_CLASS:
                     case DATATYPE_VALUETYPE:
+                    case DATATYPE_GENERICINST:
                         //
                         // This is the real object, mark all its fields.
+                        //
+                        // DATATYPE_GENERICINST is the dedicated heap representation of a closed generic
+                        // instance (see CLR_RT_ExecutionEngine::NewGenericInstanceObject). Just like a
+                        // DATATYPE_CLASS / DATATYPE_VALUETYPE object, block[0] is the header and block[1..]
+                        // are the instance fields. Without this case the object falls through to 'default'
+                        // and its fields are never marked, so any reference-typed field (e.g. the hidden
+                        // backing delegate of a field-like event) is reclaimed and left dangling, crashing
+                        // with LoadProhibited on the next access.
                         //
                         lst = ptr + 1;
                         num = ptr->DataSize() - 1;

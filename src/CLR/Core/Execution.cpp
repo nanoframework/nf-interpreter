@@ -2813,6 +2813,14 @@ HRESULT CLR_RT_ExecutionEngine::NewGenericInstanceObject(
     // Associate the instance with its declaring type for reflection & casting utilities.
     giHeader->SetObjectCls(instance);
 
+    // Record the closed TypeSpec on the instance and mark it as a generic instance.
+    // SetObjectCls writes objectHeader.cls (offset 0) and clears objectHeader.lock (offset 4);
+    // SetGenericInstanceType then stores the TypeSpec into the slot that overlaps the lock,
+    // leaving the declaring TypeDef intact. Without this, ObjectGenericType() (used by clone,
+    // type recovery and casting) and IsAGenericInstance() would not work for this representation.
+    giHeader->SetGenericInstanceType(*genericInstance);
+    giHeader->SetFlags(CLR_RT_HeapBlock::HB_GenericInstance);
+
     //
     // Initialize field types, from last to first.
     //
@@ -2821,12 +2829,6 @@ HRESULT CLR_RT_ExecutionEngine::NewGenericInstanceObject(
     //
 
     fieldCursor = reinterpret_cast<CLR_RT_HeapBlock *>(giHeader) + totFields;
-
-    CLR_Debug::Printf(
-        "DBG GenericInst: NewGenericInstanceObject type='%s' totFields=%d giHeader=%08X\r\n",
-        instance.assembly->GetString(instance.target->name),
-        totFields,
-        (uintptr_t)giHeader);
 
     while (--totFields > 0)
     {
@@ -2851,15 +2853,7 @@ HRESULT CLR_RT_ExecutionEngine::NewGenericInstanceObject(
         target--;
         clsFields--;
 
-        CLR_Debug::Printf(
-            "DBG GenericInst:   InitField field='%s' type='%s' cursor=%08X\r\n",
-            assm->GetString(target->name),
-            assm->GetString(target->type),
-            (uintptr_t)fieldCursor);
-
         NANOCLR_CHECK_HRESULT(InitializeReference(*fieldCursor, target, assm, genericInstance));
-
-        CLR_Debug::Printf("DBG GenericInst:   InitField done dt=%d\r\n", (int)fieldCursor->DataType());
     }
 
     if (instance.HasFinalizer())
@@ -2900,6 +2894,7 @@ HRESULT CLR_RT_ExecutionEngine::CloneObject(CLR_RT_HeapBlock &reference, const C
 
         case DATATYPE_VALUETYPE:
         case DATATYPE_CLASS:
+        case DATATYPE_GENERICINST:
         {
             //
             // Save the pointer to the object to clone, in case 'reference' and 'source' point to the same block.
@@ -2910,7 +2905,7 @@ HRESULT CLR_RT_ExecutionEngine::CloneObject(CLR_RT_HeapBlock &reference, const C
             safeSource.SetObjectReference(obj);
             CLR_RT_ProtectFromGC gc(safeSource);
 
-            if (obj->IsAGenericInstance())
+            if (obj->IsAGenericInstance() || dt == DATATYPE_GENERICINST)
             {
                 // instanciate the generic type
                 genericInstance.InitializeFromIndex(obj->ObjectGenericType());
@@ -3154,7 +3149,18 @@ CLR_RT_HeapBlock_Lock *CLR_RT_ExecutionEngine::FindLockObject(CLR_RT_HeapBlock &
             {
                 case DATATYPE_VALUETYPE:
                 case DATATYPE_CLASS:
+                    // A generic instance (either a dedicated DATATYPE_GENERICINST object or a class flagged
+                    // HB_GenericInstance) overloads the lock slot to store its closed TypeSpec, so it can
+                    // never carry a real monitor lock. Returning null here (instead of reading the slot as a
+                    // pointer) avoids dereferencing the TypeSpec value as a CLR_RT_HeapBlock_Lock.
+                    if (ptr->IsAGenericInstance())
+                    {
+                        return nullptr;
+                    }
                     return ptr->ObjectLock();
+
+                case DATATYPE_GENERICINST:
+                    return nullptr;
 
                 default:
                     // the remaining data types aren't to be handled

@@ -93,8 +93,11 @@ bool CLR_RT_HeapBlock::InitObject()
         return false;
     }
 
-    if (dt == DATATYPE_VALUETYPE && obj->IsBoxed() == false)
+    if ((dt == DATATYPE_VALUETYPE || dt == DATATYPE_GENERICINST) && obj->IsBoxed() == false)
     {
+        // A closed generic value-type instance (DATATYPE_GENERICINST) has the same header + inline-field
+        // layout as a value type, so zero each field block, not just the header. Skipping this leaves stale
+        // reference/value fields (e.g. a Nullable<T> initialized via initobj).
         CLR_UINT32 num = obj->DataSize();
 
         while (--num)
