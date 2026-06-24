@@ -16,7 +16,7 @@ endif()
 
 # set tag for currently supported version
 # WHEN CHANGING THIS MAKE SURE TO UPDATE THE DEV CONTAINERS
-set(MCUBOOT_GIT_TAG "v2.3.0")
+set(MCUBOOT_GIT_TAG "v2.4.0")
 
 if(NO_MCUBOOT_SOURCE)
     message(STATUS "MCUboot ${MCUBOOT_GIT_TAG} from GitHub repo")

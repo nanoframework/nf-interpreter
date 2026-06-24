@@ -77,7 +77,7 @@ RUN git clone --branch R0.16 https://github.com/abbrev/fatfs.git --depth 1 ./sou
     && git submodule update --init --recursive
 
 # Clone MCUboot
-RUN git clone --branch v2.3.0 https://github.com/mcu-tools/mcuboot.git --depth 1 ./sources/mcuboot
+RUN git clone --branch v2.4.0 https://github.com/mcu-tools/mcuboot.git --depth 1 ./sources/mcuboot
 
 # set gcc location
 ARG TMP_GCC_PATH=/usr/local/bin/gcc
