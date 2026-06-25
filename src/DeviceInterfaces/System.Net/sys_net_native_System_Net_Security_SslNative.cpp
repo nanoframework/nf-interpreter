@@ -17,7 +17,7 @@ void Time_GetDateTime(DATE_TIME_INFO *dt)
     NATIVE_PROFILE_CLR_NETWORK();
     SYSTEMTIME st;
 
-    HAL_Time_ToSystemTime(HAL_Time_CurrentTime(), &st);
+    HAL_Time_ToSystemTime(HAL_Time_CurrentDateTime(false), &st);
 
     // TODO check if offset needed for security date time, maybe needed to certificate validation
     //    dt->tzOffset = Time_GetTimeZoneOffset() * 60;
