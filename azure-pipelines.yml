@@ -496,6 +496,11 @@ jobs:
           TargetSeries: "RP2350"
           BuildOptions:
           CMakePreset: RP_PICO2_RP2350
+        RP_PICO2_W_RP2350:
+          TargetBoard: RP_PICO2_W_RP2350
+          TargetSeries: "RP2350"
+          BuildOptions:
+          CMakePreset: RP_PICO2_W_RP2350
 
     variables:
       DOTNET_NOLOGO: true
