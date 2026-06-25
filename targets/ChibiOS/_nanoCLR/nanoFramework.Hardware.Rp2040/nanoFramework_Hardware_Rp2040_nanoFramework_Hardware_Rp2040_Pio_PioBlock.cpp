@@ -5,7 +5,11 @@
 
 #include "nanoFramework_Hardware_Rp2040.h"
 #include "nanoFramework_Hardware_Rp2040_nanoFramework_Hardware_Rp2040_Pio_PioBlock.h"
+#if defined(RP2350)
+#include "rp2350.h"
+#else
 #include "rp2040.h"
+#endif
 
 using namespace nanoFramework_Hardware_Rp2040::nanoFramework_Hardware_Rp2040;
 
@@ -17,6 +21,10 @@ static PIO_TypeDef *PioFromIndex(int index)
             return PIO0;
         case 1:
             return PIO1;
+#if defined(RP2350)
+        case 2:
+            return PIO2;
+#endif
         default:
             return nullptr;
     }
