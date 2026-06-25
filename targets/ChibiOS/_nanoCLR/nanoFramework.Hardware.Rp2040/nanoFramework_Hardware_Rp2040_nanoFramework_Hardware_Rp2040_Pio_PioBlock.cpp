@@ -22,6 +22,8 @@ static PIO_TypeDef *PioFromIndex(int index)
     }
 }
 
+static int s_nextFree[3] = {0, 0, 0};
+
 signed int PioBlock::NativeAddProgram(
     signed int param0,
     CLR_RT_TypedArray_UINT16 param1,
@@ -29,10 +31,8 @@ signed int PioBlock::NativeAddProgram(
     signed int param3,
     HRESULT &hr)
 {
-    (void)param3;
-
     PIO_TypeDef *pio = PioFromIndex(param0);
-    if (pio == nullptr)
+    if (pio == nullptr || param0 < 0 || param0 > 2)
     {
         hr = CLR_E_INVALID_PARAMETER;
         return -1;
@@ -40,12 +40,32 @@ signed int PioBlock::NativeAddProgram(
 
     unsigned short *instr = param1.GetBuffer();
     int length = param2;
-    for (int i = 0; i < length && i < 32; i++)
+    int origin = param3;
+
+    int offset = origin >= 0 ? origin : s_nextFree[param0];
+    if (offset + length > 32)
     {
-        pio->INSTR_MEM[i] = instr[i];
+        return -1; // no room
     }
 
-    return 0;
+    bool relocate = origin < 0;
+    for (int i = 0; i < length; i++)
+    {
+        unsigned short w = instr[i];
+        if (relocate && (w & 0xE000) == 0x0000)
+        {
+            unsigned int target = ((unsigned int)(w & 0x1F) + (unsigned int)offset) & 0x1F;
+            w = (unsigned short)((w & ~0x1F) | target);
+        }
+        pio->INSTR_MEM[offset + i] = w;
+    }
+
+    if (origin < 0)
+    {
+        s_nextFree[param0] = offset + length;
+    }
+
+    return offset;
 }
 
 void PioBlock::NativeRemoveProgram(signed int param0, signed int param1, signed int param2, HRESULT &hr)
