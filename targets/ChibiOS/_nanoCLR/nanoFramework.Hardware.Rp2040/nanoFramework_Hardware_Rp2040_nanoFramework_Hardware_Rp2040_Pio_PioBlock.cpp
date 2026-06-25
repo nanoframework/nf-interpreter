@@ -32,6 +32,26 @@ static PIO_TypeDef *PioFromIndex(int index)
 
 static int s_nextFree[3] = {0, 0, 0};
 
+#if defined(RP2350)
+#define PIO_RESET_LSB 11u // RP2350: PIO0=11, PIO1=12, PIO2=13
+#define IO_BANK0_RESET_BIT (1u << 6)
+#define PADS_BANK0_RESET_BIT (1u << 9)
+#else
+#define PIO_RESET_LSB 10u // RP2040: PIO0=10, PIO1=11
+#define IO_BANK0_RESET_BIT (1u << 5)
+#define PADS_BANK0_RESET_BIT (1u << 8)
+#endif
+
+static void PioEnsureOutOfReset(int blockIndex)
+{
+    unsigned int bits =
+        (1u << (PIO_RESET_LSB + (unsigned int)blockIndex)) | IO_BANK0_RESET_BIT | PADS_BANK0_RESET_BIT;
+    RESETS->CLR.RESET = bits; // atomic-clear alias: deassert these resets
+    while ((RESETS->RESET_DONE & bits) != bits)
+    {
+    }
+}
+
 signed int PioBlock::NativeAddProgram(
     signed int param0,
     CLR_RT_TypedArray_UINT16 param1,
@@ -45,6 +65,8 @@ signed int PioBlock::NativeAddProgram(
         hr = CLR_E_INVALID_PARAMETER;
         return -1;
     }
+
+    PioEnsureOutOfReset(param0);
 
     unsigned short *instr = param1.GetBuffer();
     int length = param2;
@@ -114,12 +136,16 @@ void PioBlock::NativeInitGpio(signed int param0, signed int param1, HRESULT &hr)
 {
     int block = param0;
     int pin = param1;
+#if defined(RP2350)
+    if (block < 0 || block > 2 || pin < 0 || pin > 47)
+#else
     if (block < 0 || block > 1 || pin < 0 || pin > 29)
+#endif
     {
         hr = CLR_E_INVALID_PARAMETER;
         return;
     }
 
-    IO_BANK0->GPIO[pin].CTRL = (block == 0) ? 6u : 7u;
-    PADS_BANK0->GPIO[pin] = (PADS_BANK0->GPIO[pin] & ~0x80u) | 0x40u; // clear OD, set IE
+    IO_BANK0->GPIO[pin].CTRL = 6u + (unsigned int)block;
+    PADS_BANK0->GPIO[pin] = (PADS_BANK0->GPIO[pin] & ~0x180u) | 0x40u;
 }
