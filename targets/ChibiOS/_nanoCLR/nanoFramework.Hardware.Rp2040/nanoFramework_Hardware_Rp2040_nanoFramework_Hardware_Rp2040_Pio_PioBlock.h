@@ -28,6 +28,8 @@ namespace nanoFramework_Hardware_Rp2040
 
             static signed int NativeClaimUnusedSm( signed int param0, bool param1, HRESULT &hr );
 
+            static void NativeInitGpio( signed int param0, signed int param1, HRESULT &hr );
+
         };
     }
 }

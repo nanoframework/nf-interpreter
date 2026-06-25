@@ -149,3 +149,30 @@ HRESULT Library_nanoFramework_Hardware_Rp2040_nanoFramework_Hardware_Rp2040_Pio_
     }
     NANOCLR_NOCLEANUP();
 }
+
+HRESULT Library_nanoFramework_Hardware_Rp2040_nanoFramework_Hardware_Rp2040_Pio_PioStateMachine::NativeSetConsecutivePinDirs___STATIC__VOID__I4__I4__I4__I4__BOOLEAN( CLR_RT_StackFrame& stack )
+{
+    NANOCLR_HEADER(); hr = S_OK;
+    {
+
+        signed int param0;
+        NANOCLR_CHECK_HRESULT( Interop_Marshal_INT32( stack, 0, param0 ) );
+
+        signed int param1;
+        NANOCLR_CHECK_HRESULT( Interop_Marshal_INT32( stack, 1, param1 ) );
+
+        signed int param2;
+        NANOCLR_CHECK_HRESULT( Interop_Marshal_INT32( stack, 2, param2 ) );
+
+        signed int param3;
+        NANOCLR_CHECK_HRESULT( Interop_Marshal_INT32( stack, 3, param3 ) );
+
+        bool param4;
+        NANOCLR_CHECK_HRESULT( Interop_Marshal_bool( stack, 4, param4 ) );
+
+        PioStateMachine::NativeSetConsecutivePinDirs( param0, param1, param2, param3, param4, hr );
+        NANOCLR_CHECK_HRESULT( hr );
+
+    }
+    NANOCLR_NOCLEANUP();
+}
