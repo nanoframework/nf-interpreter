@@ -2,18 +2,6 @@
 // See LICENSE file in the project root for full license information.
 //
 
-//-----------------------------------------------------------------------------
-//
-//                   ** WARNING! **
-//    This file was generated automatically by a tool.
-//    Re-running the tool will overwrite this file.
-//    You should copy this file to a custom location
-//    before adding any customization in the copy to
-//    prevent loss of your changes when the tool is
-//    re-run.
-//
-//-----------------------------------------------------------------------------
-
 #include "nanoFramework_espnow_native.h"
 
 EspNowDataSentEventData Library_nanoFramework_EspNow_native_nanoFramework_EspNow_EspNowController::dataSentEventData;
@@ -153,7 +141,7 @@ HRESULT Library_nanoFramework_EspNow_native_nanoFramework_EspNow_EspNowControlle
 }
 
 HRESULT Library_nanoFramework_EspNow_native_nanoFramework_EspNow_EspNowController::
-    NativeEspNowAddPeer___I4__SZARRAY_U1__U1(CLR_RT_StackFrame &stack)
+    NativeEspNowAddPeer___I4__SZARRAY_U1__U1__BOOLEAN__SZARRAY_U1(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
@@ -171,13 +159,26 @@ HRESULT Library_nanoFramework_EspNow_native_nanoFramework_EspNow_EspNowControlle
     }
 
     uint8_t channel = stack.Arg2().NumericByRef().u1;
+    bool encrypted = stack.Arg3().NumericByRef().u1 != 0;
     uint8_t *peerMac = (uint8_t *)macArray->GetFirstElement();
 
     esp_now_peer_info_t peerInfo = {};
     memcpy(peerInfo.peer_addr, peerMac, ESP_NOW_ETH_ALEN);
     peerInfo.channel = channel;
     peerInfo.ifidx = WIFI_IF_STA;
-    peerInfo.encrypt = false;
+    peerInfo.encrypt = encrypted;
+
+    if (encrypted)
+    {
+        CLR_RT_HeapBlock_Array *localMasterKey = stack.Arg4().DereferenceArray();
+        if (localMasterKey == NULL || localMasterKey->m_numOfElements != ESP_NOW_KEY_LEN)
+        {
+            stack.SetResult_I4(ESPNOW_ERR_INVALID_PEER);
+            NANOCLR_NOCLEANUP_NOLABEL();
+        }
+
+        memcpy(peerInfo.lmk, localMasterKey->GetFirstElement(), ESP_NOW_KEY_LEN);
+    }
 
     DEBUG_WRITELINE(
         "add_peer, mac: %x:%x:%x:%x:%x:%x, ch: %d",

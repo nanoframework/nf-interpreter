@@ -27,7 +27,7 @@ static const CLR_RT_MethodHandler method_lookup[] =
     Library_nanoFramework_EspNow_native_nanoFramework_EspNow_EspNowController::NativeInitialize___I4,
     Library_nanoFramework_EspNow_native_nanoFramework_EspNow_EspNowController::NativeDispose___VOID__BOOLEAN,
     Library_nanoFramework_EspNow_native_nanoFramework_EspNow_EspNowController::NativeEspNowSend___I4__SZARRAY_U1__SZARRAY_U1__I4,
-    Library_nanoFramework_EspNow_native_nanoFramework_EspNow_EspNowController::NativeEspNowAddPeer___I4__SZARRAY_U1__U1,
+    Library_nanoFramework_EspNow_native_nanoFramework_EspNow_EspNowController::NativeEspNowAddPeer___I4__SZARRAY_U1__U1__BOOLEAN__SZARRAY_U1,
     NULL,
     NULL,
     NULL,
@@ -47,7 +47,7 @@ static const CLR_RT_MethodHandler method_lookup[] =
 const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_nanoFramework_EspNow =
 {
     "nanoFramework.EspNow",
-    0xDE541F8F,
+    0x97B518AA,
     method_lookup,
     { 100, 0, 0, 0 }
 };
