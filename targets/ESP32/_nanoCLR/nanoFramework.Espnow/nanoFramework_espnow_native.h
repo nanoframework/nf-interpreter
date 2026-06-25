@@ -2,18 +2,6 @@
 // See LICENSE file in the project root for full license information.
 //
 
-//-----------------------------------------------------------------------------
-//
-//                   ** WARNING! **
-//    This file was generated automatically by a tool.
-//    Re-running the tool will overwrite this file.
-//    You should copy this file to a custom location
-//    before adding any customization in the copy to
-//    prevent loss of your changes when the tool is
-//    re-run.
-//
-//-----------------------------------------------------------------------------
-
 #ifndef _NANOFRAMEWORK_EspNow_NATIVE_H_
 #define _NANOFRAMEWORK_EspNow_NATIVE_H_
 
@@ -117,7 +105,7 @@ struct Library_nanoFramework_EspNow_native_nanoFramework_EspNow_EspNowController
     NANOCLR_NATIVE_DECLARE(NativeInitialize___I4);
     NANOCLR_NATIVE_DECLARE(NativeDispose___VOID__BOOLEAN);
     NANOCLR_NATIVE_DECLARE(NativeEspNowSend___I4__SZARRAY_U1__SZARRAY_U1__I4);
-    NANOCLR_NATIVE_DECLARE(NativeEspNowAddPeer___I4__SZARRAY_U1__U1);
+    NANOCLR_NATIVE_DECLARE(NativeEspNowAddPeer___I4__SZARRAY_U1__U1__BOOLEAN__SZARRAY_U1);
 
     //--//
     static EspNowDataSentEventData dataSentEventData;
