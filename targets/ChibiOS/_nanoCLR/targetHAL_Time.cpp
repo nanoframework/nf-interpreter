@@ -15,93 +15,6 @@
 // Software UTC offset used when no hardware RTC is available.
 // Updated by HAL_Time_SetUtcTime() (e.g., from SNTP) and applied on reads.
 static int64_t s_utcOffsetTicks = 0;
-static bool s_softClockInitialized = false;
-
-static uint16_t ParseBuildMonth(const char *month)
-{
-    if (month[0] == 'J' && month[1] == 'a' && month[2] == 'n')
-        return 1;
-    if (month[0] == 'F' && month[1] == 'e' && month[2] == 'b')
-        return 2;
-    if (month[0] == 'M' && month[1] == 'a' && month[2] == 'r')
-        return 3;
-    if (month[0] == 'A' && month[1] == 'p' && month[2] == 'r')
-        return 4;
-    if (month[0] == 'M' && month[1] == 'a' && month[2] == 'y')
-        return 5;
-    if (month[0] == 'J' && month[1] == 'u' && month[2] == 'n')
-        return 6;
-    if (month[0] == 'J' && month[1] == 'u' && month[2] == 'l')
-        return 7;
-    if (month[0] == 'A' && month[1] == 'u' && month[2] == 'g')
-        return 8;
-    if (month[0] == 'S' && month[1] == 'e' && month[2] == 'p')
-        return 9;
-    if (month[0] == 'O' && month[1] == 'c' && month[2] == 't')
-        return 10;
-    if (month[0] == 'N' && month[1] == 'o' && month[2] == 'v')
-        return 11;
-    if (month[0] == 'D' && month[1] == 'e' && month[2] == 'c')
-        return 12;
-
-    return 1;
-}
-
-static uint16_t Parse2Digits(const char *value)
-{
-    return (uint16_t)(((value[0] - '0') * 10) + (value[1] - '0'));
-}
-
-static uint16_t ParseDay(const char *value)
-{
-    if (value[0] == ' ')
-    {
-        return (uint16_t)(value[1] - '0');
-    }
-
-    return Parse2Digits(value);
-}
-
-static uint16_t Parse4Digits(const char *value)
-{
-    return (uint16_t)(
-        ((value[0] - '0') * 1000) + ((value[1] - '0') * 100) + ((value[2] - '0') * 10) + (value[3] - '0'));
-}
-
-static uint64_t GetBuildTimeAsTicks()
-{
-    SYSTEMTIME st;
-    st.wYear = 0;
-    st.wMonth = 0;
-    st.wDayOfWeek = 0;
-    st.wDay = 0;
-    st.wHour = 0;
-    st.wMinute = 0;
-    st.wSecond = 0;
-    st.wMilliseconds = 0;
-
-    // __DATE__ format: "Mmm dd yyyy"
-    // __TIME__ format: "hh:mm:ss"
-    st.wYear = Parse4Digits(__DATE__ + 7);
-    st.wMonth = ParseBuildMonth(__DATE__);
-    st.wDay = ParseDay(__DATE__ + 4);
-    st.wHour = Parse2Digits(__TIME__ + 0);
-    st.wMinute = Parse2Digits(__TIME__ + 3);
-    st.wSecond = Parse2Digits(__TIME__ + 6);
-    st.wMilliseconds = 0;
-
-    return HAL_Time_ConvertFromSystemTime(&st);
-}
-
-static void InitializeSoftClockIfNeeded()
-{
-    if (!s_softClockInitialized)
-    {
-        // Start from firmware build timestamp so DateTime is sane before SNTP sync.
-        s_utcOffsetTicks = (int64_t)GetBuildTimeAsTicks() - (int64_t)HAL_Time_CurrentTime();
-        s_softClockInitialized = true;
-    }
-}
 #endif
 
 // Returns the current date time from the system tick or from the RTC if it's available (this depends on the respective configuration option)
@@ -146,7 +59,6 @@ uint64_t  HAL_Time_CurrentDateTime(bool datePartOnly)
   #else
 
         chSysLock();
-        InitializeSoftClockIfNeeded();
 
         uint64_t currentTime;
         currentTime = (uint64_t)((int64_t)HAL_Time_CurrentTime() + s_utcOffsetTicks);
