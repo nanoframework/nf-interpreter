@@ -113,6 +113,11 @@ config API_HARDWARE_STM32
     depends on RTOS_CHIBIOS
     default n
 
+config API_HARDWARE_RP2040
+    bool "Hardware.Rp2040"
+    depends on RTOS_CHIBIOS
+    default n
+
 config API_HARDWARE_ESP32
     bool "Hardware.Esp32"
     depends on RTOS_ESP32

@@ -42,6 +42,7 @@ option(API_nanoFramework.Networking.Thread              "option for nanoFramewor
 
 # Stm32 only
 option(API_Hardware.Stm32                               "option for Hardware.Stm32")
+option(API_Hardware.Rp2040                              "option for Hardware.Rp2040")
 
 # TI CC13xxCC26xx
 option(API_nanoFramework.TI.EasyLink                    "option for nanoFramework.TI.EasyLink API")
@@ -268,6 +269,12 @@ endif()
 if(API_Hardware.Stm32)
     ##### API name here (doted name)
     PerformSettingsForApiEntry("nanoFramework.Hardware.Stm32")
+endif()
+
+# Hardware.Rp2040
+if(API_Hardware.Rp2040)
+    ##### API name here (doted name)
+    PerformSettingsForApiEntry("nanoFramework.Hardware.Rp2040")
 endif()
 
 # nanoFramework.Device.Can
