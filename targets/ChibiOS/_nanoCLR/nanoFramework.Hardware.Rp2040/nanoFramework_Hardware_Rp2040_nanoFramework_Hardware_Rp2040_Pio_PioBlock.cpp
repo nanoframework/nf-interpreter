@@ -101,3 +101,17 @@ signed int PioBlock::NativeClaimUnusedSm(signed int param0, bool param1, HRESULT
 
     return 0;
 }
+
+void PioBlock::NativeInitGpio(signed int param0, signed int param1, HRESULT &hr)
+{
+    int block = param0;
+    int pin = param1;
+    if (block < 0 || block > 1 || pin < 0 || pin > 29)
+    {
+        hr = CLR_E_INVALID_PARAMETER;
+        return;
+    }
+
+    IO_BANK0->GPIO[pin].CTRL = (block == 0) ? 6u : 7u;
+    PADS_BANK0->GPIO[pin] = (PADS_BANK0->GPIO[pin] & ~0x80u) | 0x40u; // clear OD, set IE
+}

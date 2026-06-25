@@ -180,3 +180,38 @@ void PioStateMachine::NativeUnclaim(signed int param0, signed int param1, HRESUL
         hr = CLR_E_INVALID_PARAMETER;
     }
 }
+
+void PioStateMachine::NativeSetConsecutivePinDirs(
+    signed int param0,
+    signed int param1,
+    signed int param2,
+    signed int param3,
+    bool param4,
+    HRESULT &hr)
+{
+    PIO_TypeDef *pio = PioFromIndex(param0);
+    int sm = param1;
+    if (pio == nullptr || sm < 0 || sm > 3)
+    {
+        hr = CLR_E_INVALID_PARAMETER;
+        return;
+    }
+
+    int pin = param2;
+    int remaining = param3;
+    unsigned int savedPinCtrl = pio->SM[sm].PINCTRL;
+
+    while (remaining > 0)
+    {
+        int chunk = remaining < 5 ? remaining : 5;
+        unsigned int dirs = param4 ? ((1u << chunk) - 1u) : 0u;
+
+        pio->SM[sm].PINCTRL = ((unsigned int)chunk << 26) | ((unsigned int)pin << 5);
+        pio->SM[sm].INSTR = 0xE000u | (4u << 5) | (dirs & 0x1Fu);
+
+        remaining -= chunk;
+        pin += chunk;
+    }
+
+    pio->SM[sm].PINCTRL = savedPinCtrl;
+}

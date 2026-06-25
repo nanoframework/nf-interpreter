@@ -149,6 +149,7 @@
     NANOCLR_NATIVE_DECLARE(NativeAddProgram___STATIC__I4__I4__SZARRAY_U2__I4__I4);
     NANOCLR_NATIVE_DECLARE(NativeRemoveProgram___STATIC__VOID__I4__I4__I4);
     NANOCLR_NATIVE_DECLARE(NativeClaimUnusedSm___STATIC__I4__I4__BOOLEAN);
+    NANOCLR_NATIVE_DECLARE(NativeInitGpio___STATIC__VOID__I4__I4);
 
     //--//
 };
@@ -200,6 +201,7 @@
     NANOCLR_NATIVE_DECLARE(NativeTxFull___STATIC__BOOLEAN__I4__I4);
     NANOCLR_NATIVE_DECLARE(NativeRxEmpty___STATIC__BOOLEAN__I4__I4);
     NANOCLR_NATIVE_DECLARE(NativeUnclaim___STATIC__VOID__I4__I4);
+    NANOCLR_NATIVE_DECLARE(NativeSetConsecutivePinDirs___STATIC__VOID__I4__I4__I4__I4__BOOLEAN);
 
     //--//
 };

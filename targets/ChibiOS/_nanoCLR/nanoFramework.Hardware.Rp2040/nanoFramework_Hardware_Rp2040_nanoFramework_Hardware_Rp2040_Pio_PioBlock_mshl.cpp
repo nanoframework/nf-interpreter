@@ -74,3 +74,21 @@ HRESULT Library_nanoFramework_Hardware_Rp2040_nanoFramework_Hardware_Rp2040_Pio_
     }
     NANOCLR_NOCLEANUP();
 }
+
+HRESULT Library_nanoFramework_Hardware_Rp2040_nanoFramework_Hardware_Rp2040_Pio_PioBlock::NativeInitGpio___STATIC__VOID__I4__I4( CLR_RT_StackFrame& stack )
+{
+    NANOCLR_HEADER(); hr = S_OK;
+    {
+
+        signed int param0;
+        NANOCLR_CHECK_HRESULT( Interop_Marshal_INT32( stack, 0, param0 ) );
+
+        signed int param1;
+        NANOCLR_CHECK_HRESULT( Interop_Marshal_INT32( stack, 1, param1 ) );
+
+        PioBlock::NativeInitGpio( param0, param1, hr );
+        NANOCLR_CHECK_HRESULT( hr );
+
+    }
+    NANOCLR_NOCLEANUP();
+}
