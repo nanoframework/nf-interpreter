@@ -61,7 +61,7 @@ HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_P
         CLR_RT_HeapBlock_Array *blobArray = stack.Arg3().DereferenceArray();
 
         PIO_TypeDef *pio = PioFromIndex(block);
-        if (pio == nullptr || sm < 0 || sm > 3 || blobArray == nullptr ||
+        if (pio == nullptr || sm < 0 || sm > 3 || offset < 0 || offset > 31 || blobArray == nullptr ||
             (int)blobArray->m_numOfElements < PIO_CFG_BLOB_LENGTH)
         {
             NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
@@ -284,10 +284,12 @@ HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_P
 
         PIO_TypeDef *pio = PioFromIndex(block);
 #if defined(RP2350)
-        if (pio == nullptr || sm < 0 || sm > 3 || basePin < 0 || count < 0 || basePin + count > 48)
+        const int maxPins = 48;
 #else
-        if (pio == nullptr || sm < 0 || sm > 3 || basePin < 0 || count < 0 || basePin + count > 30)
+        const int maxPins = 30;
 #endif
+        if (pio == nullptr || sm < 0 || sm > 3 || basePin < 0 || count < 0 || basePin > maxPins ||
+            count > maxPins - basePin)
         {
             NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
         }
