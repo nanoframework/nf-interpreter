@@ -38,6 +38,16 @@ namespace nanoFramework_Hardware_Rp2040
 
             static void NativeSetConsecutivePinDirs( signed int param0, signed int param1, signed int param2, signed int param3, bool param4, HRESULT &hr );
 
+            static void NativeClearFifos( signed int param0, signed int param1, HRESULT &hr );
+
+            static void NativeDrainTxFifo( signed int param0, signed int param1, HRESULT &hr );
+
+            static void NativeRestart( signed int param0, signed int param1, HRESULT &hr );
+
+            static void NativeClkDivRestart( signed int param0, signed int param1, HRESULT &hr );
+
+            static void NativeExec( signed int param0, signed int param1, uint16_t param2, HRESULT &hr );
+
         };
     }
 }

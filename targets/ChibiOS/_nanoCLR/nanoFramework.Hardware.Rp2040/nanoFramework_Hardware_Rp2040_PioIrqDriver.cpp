@@ -1,0 +1,143 @@
+//
+// Copyright (c) .NET nanoFramework PIO contributors
+//
+//
+//
+//
+
+#include "nanoFramework_Hardware_Rp2040.h"
+#include <nanoHAL_v2.h>
+#include <hal.h> // nvicEnableVector / nvicDisableVector + RP_PIOx_IRQ_0_NUMBER
+#if defined(RP2350)
+#include "rp2350.h"
+#else
+#include "rp2040.h"
+#endif
+
+static CLR_RT_HeapBlock_NativeEventDispatcher *s_pioCtx[3] = {nullptr, nullptr, nullptr};
+
+static PIO_TypeDef *PioFromIndex(int index)
+{
+    switch (index)
+    {
+        case 0:
+            return PIO0;
+        case 1:
+            return PIO1;
+#if defined(RP2350)
+        case 2:
+            return PIO2;
+#endif
+        default:
+            return nullptr;
+    }
+}
+
+static int BlockOfContext(CLR_RT_HeapBlock_NativeEventDispatcher *pContext)
+{
+    for (int b = 0; b < 3; b++)
+    {
+        if (s_pioCtx[b] == pContext)
+        {
+            return b;
+        }
+    }
+
+    return -1;
+}
+
+extern "C" void PioIrqServiceBlock(int block)
+{
+    PIO_TypeDef *pio = PioFromIndex(block);
+    if (pio == nullptr)
+    {
+        return;
+    }
+
+    unsigned int flags = (pio->IRQ0_INTS >> 8) & 0x0Fu;
+    if (flags != 0)
+    {
+        CLR_RT_HeapBlock_NativeEventDispatcher *ctx = s_pioCtx[block];
+        if (ctx != nullptr)
+        {
+            CLR_UINT32 packed =
+                ((CLR_UINT32)flags << 16) | ((CLR_UINT32)EVENT_CUSTOM << 8) | (CLR_UINT32)block;
+            SaveNativeEventToHALQueue(ctx, packed, (CLR_UINT32)flags);
+        }
+
+        pio->IRQ = flags;
+    }
+}
+
+// ---- NativeEventDispatcher driver procs -------------------------------------
+
+static HRESULT PioIrqInitialize(CLR_RT_HeapBlock_NativeEventDispatcher *pContext, unsigned __int64 userData)
+{
+    int block = (int)(userData & 0xFF);
+    if (block < 0 || block > 2 || PioFromIndex(block) == nullptr)
+    {
+        return CLR_E_INVALID_PARAMETER;
+    }
+
+    s_pioCtx[block] = pContext;
+    return S_OK;
+}
+
+static HRESULT PioIrqEnableDisable(CLR_RT_HeapBlock_NativeEventDispatcher *pContext, bool fEnable)
+{
+    int block = BlockOfContext(pContext);
+    PIO_TypeDef *pio = (block >= 0) ? PioFromIndex(block) : nullptr;
+    if (pio == nullptr)
+    {
+        return CLR_E_INVALID_PARAMETER;
+    }
+
+#if !defined(RP2350)
+    int vector = (block == 0) ? RP_PIO0_IRQ_0_NUMBER : RP_PIO1_IRQ_0_NUMBER;
+    if (fEnable)
+    {
+        pio->IRQ0_INTE |= (0x0Fu << 8);
+        nvicEnableVector(vector, 3); // priority 3: kernel-safe, matches the low-priority peripherals
+    }
+    else
+    {
+        pio->IRQ0_INTE &= ~(0x0Fu << 8);
+        nvicDisableVector(vector);
+    }
+#else
+    (void)fEnable;
+#endif
+
+    return S_OK;
+}
+
+static HRESULT PioIrqCleanup(CLR_RT_HeapBlock_NativeEventDispatcher *pContext)
+{
+    int block = BlockOfContext(pContext);
+    if (block >= 0)
+    {
+#if !defined(RP2350)
+        PIO_TypeDef *pio = PioFromIndex(block);
+        if (pio != nullptr)
+        {
+            pio->IRQ0_INTE &= ~(0x0Fu << 8);
+            nvicDisableVector(block == 0 ? RP_PIO0_IRQ_0_NUMBER : RP_PIO1_IRQ_0_NUMBER);
+        }
+#endif
+        s_pioCtx[block] = nullptr;
+    }
+
+    CleanupNativeEventsFromHALQueue(pContext);
+    return S_OK;
+}
+
+static const CLR_RT_DriverInterruptMethods g_PioIrqDriverMethods = {
+    PioIrqInitialize,
+    PioIrqEnableDisable,
+    PioIrqCleanup};
+
+extern const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_nanoFramework_Hardware_Rp2040_PioIrqDriver = {
+    "PioIrqDriver",
+    DRIVER_INTERRUPT_METHODS_CHECKSUM,
+    &g_PioIrqDriverMethods,
+    {1, 0, 0, 0}};

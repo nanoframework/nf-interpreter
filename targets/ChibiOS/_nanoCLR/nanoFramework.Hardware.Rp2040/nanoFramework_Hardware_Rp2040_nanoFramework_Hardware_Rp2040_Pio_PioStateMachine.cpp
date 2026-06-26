@@ -35,7 +35,9 @@ enum PioCfgBlob
     PIO_CFG_WRAP = 17,
     PIO_CFG_CLKDIV_INT = 18,
     PIO_CFG_CLKDIV_FRAC = 19,
-    PIO_CFG_BLOB_LENGTH = 20,
+    PIO_CFG_FIFO_JOIN = 20,
+    PIO_CFG_GPIO_BASE = 21,
+    PIO_CFG_BLOB_LENGTH = 22,
 };
 
 static PIO_TypeDef *PioFromIndex(int index)
@@ -97,10 +99,15 @@ void PioStateMachine::NativeInit(
 
     unsigned int pushThresh = b[PIO_CFG_PUSH_THRESHOLD] & 0x1F;
     unsigned int pullThresh = b[PIO_CFG_PULL_THRESHOLD] & 0x1F;
+    unsigned int join = b[PIO_CFG_FIFO_JOIN];
     pio->SM[sm].SHIFTCTRL =
         (b[PIO_CFG_IN_SHIFT_RIGHT] << 18) | (b[PIO_CFG_OUT_SHIFT_RIGHT] << 19) |
         (b[PIO_CFG_AUTOPUSH] << 16) | (b[PIO_CFG_AUTOPULL] << 17) | (pushThresh << 20) |
-        (pullThresh << 25);
+        (pullThresh << 25) | ((join & 3u) << 30) | ((join >> 2) << 14);
+
+#if defined(RP2350)
+    *(volatile unsigned int *)&pio->GPIOBASE = b[PIO_CFG_GPIO_BASE];
+#endif
 
     pio->SM[sm].INSTR = (unsigned int)(param2 & 0x1F);
 }
@@ -178,15 +185,20 @@ bool PioStateMachine::NativeRxEmpty(signed int param0, signed int param1, HRESUL
     return (pio->FSTAT & (1u << (8 + param1))) != 0;
 }
 
+extern unsigned int g_PioClaimedSm[3];
+
 void PioStateMachine::NativeUnclaim(signed int param0, signed int param1, HRESULT &hr)
 {
-    (void)param1;
-
     PIO_TypeDef *pio = PioFromIndex(param0);
-    if (pio == nullptr)
+    int sm = param1;
+    if (pio == nullptr || sm < 0 || sm > 3)
     {
         hr = CLR_E_INVALID_PARAMETER;
+        return;
     }
+
+    pio->CTRL &= ~(1u << sm);
+    g_PioClaimedSm[param0] &= ~(1u << sm);
 }
 
 void PioStateMachine::NativeSetConsecutivePinDirs(
@@ -222,4 +234,76 @@ void PioStateMachine::NativeSetConsecutivePinDirs(
     }
 
     pio->SM[sm].PINCTRL = savedPinCtrl;
+}
+
+void PioStateMachine::NativeClearFifos(signed int param0, signed int param1, HRESULT &hr)
+{
+    PIO_TypeDef *pio = PioFromIndex(param0);
+    int sm = param1;
+    if (pio == nullptr || sm < 0 || sm > 3)
+    {
+        hr = CLR_E_INVALID_PARAMETER;
+        return;
+    }
+
+    unsigned int fjoinRx = (1u << 31);
+    pio->SM[sm].SHIFTCTRL ^= fjoinRx;
+    pio->SM[sm].SHIFTCTRL ^= fjoinRx;
+}
+
+void PioStateMachine::NativeDrainTxFifo(signed int param0, signed int param1, HRESULT &hr)
+{
+    PIO_TypeDef *pio = PioFromIndex(param0);
+    int sm = param1;
+    if (pio == nullptr || sm < 0 || sm > 3)
+    {
+        hr = CLR_E_INVALID_PARAMETER;
+        return;
+    }
+
+    unsigned int autopull = pio->SM[sm].SHIFTCTRL & (1u << 17);
+    unsigned int instr = autopull ? 0x6060u : 0x8080u;
+    while ((pio->FSTAT & (1u << (24 + sm))) == 0)
+    {
+        pio->SM[sm].INSTR = instr;
+    }
+}
+
+void PioStateMachine::NativeRestart(signed int param0, signed int param1, HRESULT &hr)
+{
+    PIO_TypeDef *pio = PioFromIndex(param0);
+    int sm = param1;
+    if (pio == nullptr || sm < 0 || sm > 3)
+    {
+        hr = CLR_E_INVALID_PARAMETER;
+        return;
+    }
+
+    pio->CTRL |= (1u << (4 + sm));
+}
+
+void PioStateMachine::NativeClkDivRestart(signed int param0, signed int param1, HRESULT &hr)
+{
+    PIO_TypeDef *pio = PioFromIndex(param0);
+    int sm = param1;
+    if (pio == nullptr || sm < 0 || sm > 3)
+    {
+        hr = CLR_E_INVALID_PARAMETER;
+        return;
+    }
+
+    pio->CTRL |= (1u << (8 + sm));
+}
+
+void PioStateMachine::NativeExec(signed int param0, signed int param1, unsigned short param2, HRESULT &hr)
+{
+    PIO_TypeDef *pio = PioFromIndex(param0);
+    int sm = param1;
+    if (pio == nullptr || sm < 0 || sm > 3)
+    {
+        hr = CLR_E_INVALID_PARAMETER;
+        return;
+    }
+
+    pio->SM[sm].INSTR = (unsigned int)param2;
 }

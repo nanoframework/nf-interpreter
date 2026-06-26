@@ -70,10 +70,25 @@
     NULL,
     NULL,
     NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
     Library_nanoFramework_Hardware_Rp2040_nanoFramework_Hardware_Rp2040_Pio_PioBlock::NativeAddProgram___STATIC__I4__I4__SZARRAY_U2__I4__I4,
     Library_nanoFramework_Hardware_Rp2040_nanoFramework_Hardware_Rp2040_Pio_PioBlock::NativeRemoveProgram___STATIC__VOID__I4__I4__I4,
     Library_nanoFramework_Hardware_Rp2040_nanoFramework_Hardware_Rp2040_Pio_PioBlock::NativeClaimUnusedSm___STATIC__I4__I4__BOOLEAN,
     Library_nanoFramework_Hardware_Rp2040_nanoFramework_Hardware_Rp2040_Pio_PioBlock::NativeInitGpio___STATIC__VOID__I4__I4,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
     NULL,
     NULL,
     NULL,
@@ -135,6 +150,16 @@
     Library_nanoFramework_Hardware_Rp2040_nanoFramework_Hardware_Rp2040_Pio_PioStateMachine::NativeRxEmpty___STATIC__BOOLEAN__I4__I4,
     Library_nanoFramework_Hardware_Rp2040_nanoFramework_Hardware_Rp2040_Pio_PioStateMachine::NativeUnclaim___STATIC__VOID__I4__I4,
     Library_nanoFramework_Hardware_Rp2040_nanoFramework_Hardware_Rp2040_Pio_PioStateMachine::NativeSetConsecutivePinDirs___STATIC__VOID__I4__I4__I4__I4__BOOLEAN,
+    Library_nanoFramework_Hardware_Rp2040_nanoFramework_Hardware_Rp2040_Pio_PioStateMachine::NativeClearFifos___STATIC__VOID__I4__I4,
+    Library_nanoFramework_Hardware_Rp2040_nanoFramework_Hardware_Rp2040_Pio_PioStateMachine::NativeDrainTxFifo___STATIC__VOID__I4__I4,
+    Library_nanoFramework_Hardware_Rp2040_nanoFramework_Hardware_Rp2040_Pio_PioStateMachine::NativeRestart___STATIC__VOID__I4__I4,
+    Library_nanoFramework_Hardware_Rp2040_nanoFramework_Hardware_Rp2040_Pio_PioStateMachine::NativeClkDivRestart___STATIC__VOID__I4__I4,
+    Library_nanoFramework_Hardware_Rp2040_nanoFramework_Hardware_Rp2040_Pio_PioStateMachine::NativeExec___STATIC__VOID__I4__I4__U2,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
     NULL,
     NULL,
     NULL,
@@ -152,7 +177,7 @@
 const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_nanoFramework_Hardware_Rp2040 =
 {
     "nanoFramework.Hardware.Rp2040",
-    0x4888E4A4,
+    0x349D04B9,
     method_lookup,
     { 1, 0, 0, 0 }
 };
