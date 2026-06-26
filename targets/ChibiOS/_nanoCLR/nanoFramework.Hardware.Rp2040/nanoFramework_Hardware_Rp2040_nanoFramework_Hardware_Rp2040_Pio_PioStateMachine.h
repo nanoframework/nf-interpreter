@@ -48,6 +48,12 @@ namespace nanoFramework_Hardware_Rp2040
 
             static void NativeExec( signed int param0, signed int param1, uint16_t param2, HRESULT &hr );
 
+            static unsigned int NativeTxLevel( signed int param0, signed int param1, HRESULT &hr );
+
+            static unsigned int NativeRxLevel( signed int param0, signed int param1, HRESULT &hr );
+
+            static unsigned int NativeGetPc( signed int param0, signed int param1, HRESULT &hr );
+
         };
     }
 }
