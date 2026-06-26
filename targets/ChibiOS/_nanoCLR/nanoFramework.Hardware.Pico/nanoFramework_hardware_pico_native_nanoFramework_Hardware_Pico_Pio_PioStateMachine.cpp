@@ -359,7 +359,7 @@ HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_P
 
         // exec OUT NULL,32 (autopull) or PULL noblock until TX empty. FSTAT TX_EMPTY = bits [27:24]
         unsigned int autopull = pio->SM[sm].SHIFTCTRL & (1u << 17);
-        unsigned int instr = autopull ? 0x6060u : 0x8080u;
+        unsigned int instr = autopull ? 0x6060u : 0x8000u;
         unsigned int guard = PIO_FIFO_WAIT_LIMIT;
         while ((pio->FSTAT & (1u << (24 + sm))) == 0 && --guard)
         {
