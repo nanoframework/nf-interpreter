@@ -42,7 +42,7 @@ option(API_nanoFramework.Networking.Thread              "option for nanoFramewor
 
 # Stm32 only
 option(API_Hardware.Stm32                               "option for Hardware.Stm32")
-option(API_Hardware.Rpi                              "option for Hardware.Rpi")
+option(API_Hardware.Pico                                "option for Hardware.Pico")
 
 # TI CC13xxCC26xx
 option(API_nanoFramework.TI.EasyLink                    "option for nanoFramework.TI.EasyLink API")
@@ -271,12 +271,13 @@ if(API_Hardware.Stm32)
     PerformSettingsForApiEntry("nanoFramework.Hardware.Stm32")
 endif()
 
-# Hardware.Rpi
-if(API_Hardware.Rpi)
-    PerformSettingsForApiEntry("nanoFramework.Hardware.Rpi")
+# Hardware.Pico
+if(API_Hardware.Pico)
+    ##### API name here (doted name)
+    PerformSettingsForApiEntry("nanoFramework.Hardware.Pico")
 
-    list(APPEND CLR_RT_NativeAssemblyDataList "extern const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_nanoFramework_Hardware_Rpi_PioIrqDriver;")
-    list(APPEND CLR_RT_NativeAssemblyDataTableEntriesList "&g_CLR_AssemblyNative_nanoFramework_Hardware_Rpi_PioIrqDriver,")
+    list(APPEND CLR_RT_NativeAssemblyDataList "extern const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_nanoFramework_Hardware_Pico_PioIrqDriver;")
+    list(APPEND CLR_RT_NativeAssemblyDataTableEntriesList "&g_CLR_AssemblyNative_nanoFramework_Hardware_Pico_PioIrqDriver,")
 endif()
 
 # nanoFramework.Device.Can

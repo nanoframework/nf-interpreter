@@ -113,8 +113,8 @@ config API_HARDWARE_STM32
     depends on RTOS_CHIBIOS
     default n
 
-config API_HARDWARE_RPI
-    bool "Hardware.Rpi"
+config API_HARDWARE_PICO
+    bool "Hardware.Pico"
     depends on RTOS_CHIBIOS
     default n
 

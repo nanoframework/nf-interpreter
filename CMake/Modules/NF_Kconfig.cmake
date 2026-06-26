@@ -43,7 +43,7 @@ set(_NF_KCONFIG_API_MAP
 
     # Platform-specific APIs
     "API_HARDWARE_STM32|API_Hardware.Stm32"
-    "API_HARDWARE_RPI|API_Hardware.Rpi"
+    "API_HARDWARE_PICO|API_Hardware.Pico"
     "API_HARDWARE_ESP32|API_Hardware.Esp32"
     "API_NANOFRAMEWORK_HARDWARE_ESP32_RMT|API_nanoFramework.Hardware.Esp32.Rmt"
     "API_NANOFRAMEWORK_HARDWARE_TI|API_nanoFramework.Hardware.TI"
