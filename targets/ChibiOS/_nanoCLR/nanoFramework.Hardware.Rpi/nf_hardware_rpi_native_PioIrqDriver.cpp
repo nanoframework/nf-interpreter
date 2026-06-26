@@ -95,6 +95,12 @@ static HRESULT PioIrqInitialize(CLR_RT_HeapBlock_NativeEventDispatcher *pContext
         return CLR_E_INVALID_PARAMETER;
     }
 
+    // one dispatcher per block
+    if (s_pioCtx[block] != nullptr && s_pioCtx[block] != pContext)
+    {
+        return CLR_E_INVALID_OPERATION;
+    }
+
     s_pioCtx[block] = pContext;
     return S_OK;
 }
@@ -121,8 +127,9 @@ static HRESULT PioIrqEnableDisable(CLR_RT_HeapBlock_NativeEventDispatcher *pCont
         nvicDisableVector(vector);
     }
 #else
+    // PIO IRQ0 is owned by the CYW43 driver on Pico W, so it can't reach managed code
     (void)fEnable;
-    (void)pio;
+    return CLR_E_NOT_SUPPORTED;
 #endif
 
     return S_OK;

@@ -25,4 +25,8 @@ static inline PIO_TypeDef *PioFromIndex(int index)
     }
 }
 
+// Releases a PIO block (and the IO/PAD banks) from reset on first use; idempotent. Defined in
+// the PioBlock translation unit so the reset state is shared across all entry points.
+void PioEnsureOutOfReset(int blockIndex);
+
 #endif // NF_HARDWARE_RPI_NATIVE_TARGET_H
