@@ -19,15 +19,15 @@ list(APPEND TARGET_CHIBIOS_COMMON_INCLUDE_DIRS "${CMAKE_CURRENT_SOURCE_DIR}/comm
 list(APPEND TARGET_CHIBIOS_COMMON_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/Target_BlockStorage_RP2350FlashDriver.c")
 
 list(APPEND TARGET_CHIBIOS_COMMON_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/target_stubs.cpp")
-list(APPEND TARGET_CHIBIOS_COMMON_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/target_core1_stubs.c")
 
-# RP2350 RNG stub (ROSC-based, using RP2350 ROSC base 0x400E8000)
-# Placed in common sources so it is available to both nanoBooter and nanoCLR
-# (mbedTLS SSL PAL references rngStart/rngGenerateRandomNumber in both binaries).
-list(APPEND TARGET_CHIBIOS_COMMON_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/target_rng.c")
+# Keep core1 behavior single-core/stubbed on RP2350 W to match known stable target runtime.
+list(APPEND TARGET_CHIBIOS_COMMON_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/target_core1_stubs.c")
 
 list(APPEND TARGET_CHIBIOS_NANOCLR_INCLUDE_DIRS "${CMAKE_SOURCE_DIR}/targets/ChibiOS/_WiFi")
 list(APPEND TARGET_CHIBIOS_NANOCLR_INCLUDE_DIRS "${CMAKE_SOURCE_DIR}/targets/ChibiOS/_WiFi/cyw43")
+
+# RP2350 RNG stub (ROSC-based, using RP2350 ROSC base 0x400E8000)
+list(APPEND TARGET_CHIBIOS_NANOCLR_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/target_rng.c")
 
 # CYW43 driver includes (from FetchContent)
 if(USE_NETWORKING_OPTION AND TARGET_HAS_WIFI)

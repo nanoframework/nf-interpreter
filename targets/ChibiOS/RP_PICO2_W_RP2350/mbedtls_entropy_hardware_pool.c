@@ -5,7 +5,10 @@
 
 #include <stdint.h>
 #include <stddef.h>
+#include <mbedtls/build_info.h>
+#if defined(MBEDTLS_PSA_CRYPTO_EXTERNAL_RNG)
 #include <psa/crypto.h>
+#endif
 
 int mbedtls_hardware_poll(void *data, unsigned char *output, size_t len, size_t *olen);
 
@@ -41,6 +44,7 @@ int mbedtls_hardware_poll(void *data, unsigned char *output, size_t len, size_t 
     return 0;
 }
 
+#if defined(MBEDTLS_PSA_CRYPTO_EXTERNAL_RNG)
 psa_status_t mbedtls_psa_external_get_random(
     mbedtls_psa_external_random_context_t *context,
     uint8_t *output,
@@ -58,3 +62,4 @@ psa_status_t mbedtls_psa_external_get_random(
 
     return PSA_SUCCESS;
 }
+#endif
