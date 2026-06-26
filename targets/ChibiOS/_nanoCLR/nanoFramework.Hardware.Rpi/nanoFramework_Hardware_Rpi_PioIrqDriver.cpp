@@ -6,7 +6,7 @@
 // un-mangled OSAL_IRQ_HANDLER symbol) and call PioIrqServiceBlock below.
 //
 
-#include "nanoFramework_Hardware_Rp2040.h"
+#include "nanoFramework_Hardware_Rpi.h"
 #include <nanoHAL_v2.h>
 #include <ch.h>  // chSysLockFromISR
 #include <hal.h> // nvicEnableVector + RP_PIOx_IRQ_0_NUMBER
@@ -170,7 +170,7 @@ static const CLR_RT_DriverInterruptMethods g_PioIrqDriverMethods = {
     PioIrqCleanup};
 
 // looked up by name from `new NativeEventDispatcher("PioIrqDriver", block)`
-extern const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_nanoFramework_Hardware_Rp2040_PioIrqDriver = {
+extern const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_nanoFramework_Hardware_Rpi_PioIrqDriver = {
     "PioIrqDriver",
     DRIVER_INTERRUPT_METHODS_CHECKSUM,
     &g_PioIrqDriverMethods,

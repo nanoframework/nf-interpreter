@@ -4,15 +4,15 @@
 // PioStateMachine InternalCalls. NativeInit unpacks the config blob into the SM registers.
 //
 
-#include "nanoFramework_Hardware_Rp2040.h"
-#include "nanoFramework_Hardware_Rp2040_nanoFramework_Hardware_Rp2040_Pio_PioStateMachine.h"
+#include "nanoFramework_Hardware_Rpi.h"
+#include "nanoFramework_Hardware_Rpi_nanoFramework_Hardware_Rpi_Pio_PioStateMachine.h"
 #if defined(RP2350)
 #include "rp2350.h"
 #else
 #include "rp2040.h"
 #endif
 
-using namespace nanoFramework_Hardware_Rp2040::nanoFramework_Hardware_Rp2040;
+using namespace nanoFramework_Hardware_Rpi::nanoFramework_Hardware_Rpi;
 
 // FIFO busy-wait cap so a stalled SM times out instead of hanging the interpreter.
 static const unsigned int PIO_FIFO_WAIT_LIMIT = 0x4000000u;
@@ -44,7 +44,10 @@ enum PioCfgBlob
     PIO_CFG_GPIO_BASE = 21,
     PIO_CFG_MOV_STATUS_SEL = 22,
     PIO_CFG_MOV_STATUS_N = 23,
-    PIO_CFG_BLOB_LENGTH = 24,
+    PIO_CFG_OUT_STICKY = 24,
+    PIO_CFG_INLINE_OUT_EN = 25,
+    PIO_CFG_OUT_EN_SEL = 26,
+    PIO_CFG_BLOB_LENGTH = 27,
 };
 
 static PIO_TypeDef *PioFromIndex(int index)
@@ -98,7 +101,9 @@ void PioStateMachine::NativeInit(
     // EXECCTRL: wrap [16:12], wrap_target [11:7], side_en [30], side_pindir [29], jmp_pin [28:24]
     unsigned int execCtrl =
         (b[PIO_CFG_WRAP] << 12) | (b[PIO_CFG_WRAP_TARGET] << 7) | (b[PIO_CFG_JMP_PIN] << 24) |
-        ((b[PIO_CFG_MOV_STATUS_SEL] & 1u) << 4) | (b[PIO_CFG_MOV_STATUS_N] & 0xFu);
+        ((b[PIO_CFG_MOV_STATUS_SEL] & 1u) << 4) | (b[PIO_CFG_MOV_STATUS_N] & 0xFu) |
+        ((b[PIO_CFG_OUT_STICKY] & 1u) << 17) | ((b[PIO_CFG_INLINE_OUT_EN] & 1u) << 18) |
+        ((b[PIO_CFG_OUT_EN_SEL] & 0x1Fu) << 19);
     if (b[PIO_CFG_SIDESET_OPT])
     {
         execCtrl |= (1u << 30);
@@ -385,4 +390,23 @@ unsigned int PioStateMachine::NativeGetPc(signed int param0, signed int param1, 
     }
 
     return pio->SM[sm].ADDR & 0x1Fu;
+}
+
+void PioStateMachine::NativeSetClockDivisor(
+    signed int param0,
+    signed int param1,
+    signed int param2,
+    signed int param3,
+    HRESULT &hr)
+{
+    PIO_TypeDef *pio = PioFromIndex(param0);
+    int sm = param1;
+    if (pio == nullptr || sm < 0 || sm > 3)
+    {
+        hr = CLR_E_INVALID_PARAMETER;
+        return;
+    }
+
+    pio->SM[sm].CLKDIV = ((unsigned int)param2 << 16) | ((unsigned int)param3 << 8);
+    pio->CTRL |= (1u << (8 + sm));
 }
