@@ -1,8 +1,6 @@
 //
-// Copyright (c) .NET nanoFramework PIO contributors
-//
-// Shared helpers for the RP2040/RP2350 PIO native interop. Include after the CMSIS header
-// (rp2040.h / rp2350.h) so PIO_TypeDef and PIO0/PIO1/PIO2 are defined.
+// Copyright (c) .NET Foundation and Contributors
+// See LICENSE file in the project root for full license information.
 //
 
 #ifndef NF_HARDWARE_RPI_NATIVE_TARGET_H

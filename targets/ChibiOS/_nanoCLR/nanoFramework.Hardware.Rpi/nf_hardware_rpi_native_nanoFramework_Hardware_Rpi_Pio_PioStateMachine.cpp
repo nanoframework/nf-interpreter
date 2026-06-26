@@ -1,7 +1,6 @@
 //
-// Copyright (c) .NET nanoFramework PIO contributors
-//
-// PioStateMachine InternalCalls. NativeInit unpacks the config blob into the SM registers.
+// Copyright (c) .NET Foundation and Contributors
+// See LICENSE file in the project root for full license information.
 //
 
 #include "nf_hardware_rpi_native.h"
