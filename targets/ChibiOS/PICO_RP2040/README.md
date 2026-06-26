@@ -137,6 +137,34 @@ int raw = tempChannel.ReadValue();
 - **Resolution:** 12-bit (0–4095)
 - **Reference voltage:** 3.3V (internal)
 
+### PIO (Programmable I/O)
+
+The RP2040's **two PIO blocks** (4 state machines each) are exposed through the `nanoFramework.Hardware.Pico` library. Write small PIO programs with the inline `PioAssembler`, load them onto a block and run them on a state machine — useful for precise or custom protocols (WS2812, bit-banged SPI/UART, etc.) the fixed peripherals don't cover.
+
+```csharp
+using nanoFramework.Hardware.Pico.Pio;
+
+// pull a word and drive its low bit onto the OUT pin
+var asm = new PioAssembler();
+PioLabel loop = asm.DefineLabel();
+asm.MarkLabel(loop);
+asm.Pull(ifEmpty: false, block: true);
+asm.Out(PioDest.Pins, 1);
+asm.Jmp(PioCondition.Always, loop);
+PioProgram program = asm.Build();
+
+PioBlock pio = Pio.Get(0);
+uint offset = pio.AddProgram(program);
+PioStateMachine sm = pio.ClaimStateMachine();
+sm.Init(offset, PioStateMachineConfig.FromProgram(program, (int)offset).OutPins(25, 1));
+pio.InitGpio(25);
+sm.SetConsecutivePinDirs(25, 1, true);
+sm.Enabled = true;
+sm.Put(1);  // drive the on-board LED
+```
+
+> Provided by the `nanoFramework.Hardware.Pico` NuGet package. State machine interrupts surface as the managed `PioBlock.Interrupt` event.
+
 ## Pico Board Pinout Reference
 
 ```
@@ -185,6 +213,7 @@ Key CMake preset options (`CMakePresets.json`):
   "API_System.Device.I2c": "ON",
   "API_System.Device.Pwm": "ON",
   "API_System.Device.Adc": "ON",
+  "API_Hardware.Pico": "ON",
   "USE_RNG": "OFF"
 }
 ```
