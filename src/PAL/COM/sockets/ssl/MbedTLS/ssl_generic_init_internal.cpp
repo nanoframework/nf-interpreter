@@ -301,7 +301,9 @@ SslError ssl_generic_init_internal(
 
     mbedtls_ssl_conf_ca_chain(context->conf, context->ca_cert, NULL);
 
+#if defined(MBEDTLS_USE_PSA_CRYPTO)
     psa_crypto_init();
+#endif
 
     // set certificate verification
     // the current options provided by Mbed TLS are only verify or don't verify

@@ -19,4 +19,13 @@
 #define MBEDTLS_SSL_IN_CONTENT_LEN   8192
 #define MBEDTLS_SSL_OUT_CONTENT_LEN  4096
 
+// Disable hardware acceleration alternative implementations on RP2350
+// (x86 PadLock, etc. are not available on ARM Cortex-M33)
+#define MBEDTLS_PADLOCK_C 0
+
+// Disable PSA_CRYPTO on RP2350. PSA operations (key import, key derivation)
+// fail without proper platform support, causing SSL_HW_ACCEL_FAILED errors.
+// RP2350 can run TLS 1.2 with legacy mbedTLS crypto primitives.
+#undef MBEDTLS_USE_PSA_CRYPTO
+
 #endif // MBEDTLS_CONFIG_H
