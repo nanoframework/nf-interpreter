@@ -30,6 +30,10 @@ namespace nanoFramework_Hardware_Rp2040
 
             static void NativeInitGpio( signed int param0, signed int param1, HRESULT &hr );
 
+            static void NativeForceIrq( signed int param0, signed int param1, HRESULT &hr );
+
+            static void NativeClearIrq( signed int param0, signed int param1, HRESULT &hr );
+
         };
     }
 }

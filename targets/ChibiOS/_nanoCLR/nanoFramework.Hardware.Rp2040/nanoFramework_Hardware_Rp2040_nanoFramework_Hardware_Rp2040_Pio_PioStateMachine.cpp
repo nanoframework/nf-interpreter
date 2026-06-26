@@ -42,7 +42,9 @@ enum PioCfgBlob
     PIO_CFG_CLKDIV_FRAC = 19,
     PIO_CFG_FIFO_JOIN = 20,
     PIO_CFG_GPIO_BASE = 21,
-    PIO_CFG_BLOB_LENGTH = 22,
+    PIO_CFG_MOV_STATUS_SEL = 22,
+    PIO_CFG_MOV_STATUS_N = 23,
+    PIO_CFG_BLOB_LENGTH = 24,
 };
 
 static PIO_TypeDef *PioFromIndex(int index)
@@ -95,7 +97,8 @@ void PioStateMachine::NativeInit(
 
     // EXECCTRL: wrap [16:12], wrap_target [11:7], side_en [30], side_pindir [29], jmp_pin [28:24]
     unsigned int execCtrl =
-        (b[PIO_CFG_WRAP] << 12) | (b[PIO_CFG_WRAP_TARGET] << 7) | (b[PIO_CFG_JMP_PIN] << 24);
+        (b[PIO_CFG_WRAP] << 12) | (b[PIO_CFG_WRAP_TARGET] << 7) | (b[PIO_CFG_JMP_PIN] << 24) |
+        ((b[PIO_CFG_MOV_STATUS_SEL] & 1u) << 4) | (b[PIO_CFG_MOV_STATUS_N] & 0xFu);
     if (b[PIO_CFG_SIDESET_OPT])
     {
         execCtrl |= (1u << 30);
@@ -343,4 +346,43 @@ void PioStateMachine::NativeExec(signed int param0, signed int param1, unsigned 
 
     // exec out of band, PC unchanged
     pio->SM[sm].INSTR = (unsigned int)param2;
+}
+
+unsigned int PioStateMachine::NativeTxLevel(signed int param0, signed int param1, HRESULT &hr)
+{
+    PIO_TypeDef *pio = PioFromIndex(param0);
+    int sm = param1;
+    if (pio == nullptr || sm < 0 || sm > 3)
+    {
+        hr = CLR_E_INVALID_PARAMETER;
+        return 0;
+    }
+
+    return (pio->FLEVEL >> (8 * sm)) & 0xFu;
+}
+
+unsigned int PioStateMachine::NativeRxLevel(signed int param0, signed int param1, HRESULT &hr)
+{
+    PIO_TypeDef *pio = PioFromIndex(param0);
+    int sm = param1;
+    if (pio == nullptr || sm < 0 || sm > 3)
+    {
+        hr = CLR_E_INVALID_PARAMETER;
+        return 0;
+    }
+
+    return (pio->FLEVEL >> (8 * sm + 4)) & 0xFu;
+}
+
+unsigned int PioStateMachine::NativeGetPc(signed int param0, signed int param1, HRESULT &hr)
+{
+    PIO_TypeDef *pio = PioFromIndex(param0);
+    int sm = param1;
+    if (pio == nullptr || sm < 0 || sm > 3)
+    {
+        hr = CLR_E_INVALID_PARAMETER;
+        return 0;
+    }
+
+    return pio->SM[sm].ADDR & 0x1Fu;
 }

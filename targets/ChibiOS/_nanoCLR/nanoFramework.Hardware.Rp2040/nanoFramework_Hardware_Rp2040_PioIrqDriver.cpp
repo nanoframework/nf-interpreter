@@ -49,6 +49,23 @@ static int BlockOfContext(CLR_RT_HeapBlock_NativeEventDispatcher *pContext)
     return -1;
 }
 
+static int PioIrqVector(int block)
+{
+    switch (block)
+    {
+        case 0:
+            return RP_PIO0_IRQ_0_NUMBER;
+        case 1:
+            return RP_PIO1_IRQ_0_NUMBER;
+#if defined(RP2350)
+        case 2:
+            return RP_PIO2_IRQ_0_NUMBER;
+#endif
+        default:
+            return -1;
+    }
+}
+
 // Called from the block's IRQ0 ISR (PioIrqHandlers.c), hence extern "C".
 extern "C" void PioIrqServiceBlock(int block)
 {
@@ -107,9 +124,8 @@ static HRESULT PioIrqEnableDisable(CLR_RT_HeapBlock_NativeEventDispatcher *pCont
         return CLR_E_INVALID_PARAMETER;
     }
 
-#if !defined(RP2350)
-    // SM irq flags = IRQ0_INTE bits [11:8]
-    int vector = (block == 0) ? RP_PIO0_IRQ_0_NUMBER : RP_PIO1_IRQ_0_NUMBER;
+#if !defined(RP_PIO_REQUIRED)
+    int vector = PioIrqVector(block);
     if (fEnable)
     {
         pio->IRQ0_INTE |= (0x0Fu << 8);
@@ -122,7 +138,7 @@ static HRESULT PioIrqEnableDisable(CLR_RT_HeapBlock_NativeEventDispatcher *pCont
     }
 #else
     (void)fEnable;
-    // RP2350 IRQ wiring is a follow-up
+    (void)pio;
 #endif
 
     return S_OK;
@@ -133,12 +149,12 @@ static HRESULT PioIrqCleanup(CLR_RT_HeapBlock_NativeEventDispatcher *pContext)
     int block = BlockOfContext(pContext);
     if (block >= 0)
     {
-#if !defined(RP2350)
+#if !defined(RP_PIO_REQUIRED)
         PIO_TypeDef *pio = PioFromIndex(block);
         if (pio != nullptr)
         {
             pio->IRQ0_INTE &= ~(0x0Fu << 8);
-            nvicDisableVector(block == 0 ? RP_PIO0_IRQ_0_NUMBER : RP_PIO1_IRQ_0_NUMBER);
+            nvicDisableVector(PioIrqVector(block));
         }
 #endif
         s_pioCtx[block] = nullptr;

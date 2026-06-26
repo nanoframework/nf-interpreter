@@ -56,6 +56,12 @@
     PioMovOp_BitReverse = 2,
 } PioMovOp;
 
+typedef enum __nfpack PioMovStatusSel
+{
+    PioMovStatusSel_TxLevel = 0,
+    PioMovStatusSel_RxLevel = 1,
+} PioMovStatusSel;
+
 typedef enum __nfpack PioShiftDir
 {
     PioShiftDir_Left = 0,
@@ -155,6 +161,8 @@
     NANOCLR_NATIVE_DECLARE(NativeRemoveProgram___STATIC__VOID__I4__I4__I4);
     NANOCLR_NATIVE_DECLARE(NativeClaimUnusedSm___STATIC__I4__I4__BOOLEAN);
     NANOCLR_NATIVE_DECLARE(NativeInitGpio___STATIC__VOID__I4__I4);
+    NANOCLR_NATIVE_DECLARE(NativeForceIrq___STATIC__VOID__I4__I4);
+    NANOCLR_NATIVE_DECLARE(NativeClearIrq___STATIC__VOID__I4__I4);
 
     //--//
 };
@@ -212,6 +220,9 @@
     NANOCLR_NATIVE_DECLARE(NativeRestart___STATIC__VOID__I4__I4);
     NANOCLR_NATIVE_DECLARE(NativeClkDivRestart___STATIC__VOID__I4__I4);
     NANOCLR_NATIVE_DECLARE(NativeExec___STATIC__VOID__I4__I4__U2);
+    NANOCLR_NATIVE_DECLARE(NativeTxLevel___STATIC__U4__I4__I4);
+    NANOCLR_NATIVE_DECLARE(NativeRxLevel___STATIC__U4__I4__I4);
+    NANOCLR_NATIVE_DECLARE(NativeGetPc___STATIC__U4__I4__I4);
 
     //--//
 };
@@ -240,6 +251,8 @@
     static const int FIELD___clkDivFrac = 20;
     static const int FIELD___fifoJoin = 21;
     static const int FIELD___gpioBase = 22;
+    static const int FIELD___movStatusSel = 23;
+    static const int FIELD___movStatusN = 24;
 
     //--//
 };

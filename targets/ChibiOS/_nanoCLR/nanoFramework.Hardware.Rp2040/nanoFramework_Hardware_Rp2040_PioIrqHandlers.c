@@ -8,7 +8,7 @@
 #include <hal.h>
 
 // RP_PIO_REQUIRED -> ChibiOS rp_pio.c owns these vectors (Pico W / CYW43); skip ours to avoid a clash.
-#if !defined(RP2350) && !defined(RP_PIO_REQUIRED)
+#if !defined(RP_PIO_REQUIRED)
 
 extern void PioIrqServiceBlock(int block);
 
@@ -26,4 +26,13 @@ OSAL_IRQ_HANDLER(RP_PIO1_IRQ_0_HANDLER)
     OSAL_IRQ_EPILOGUE();
 }
 
-#endif // !RP2350
+#if defined(RP2350)
+OSAL_IRQ_HANDLER(RP_PIO2_IRQ_0_HANDLER)
+{
+    OSAL_IRQ_PROLOGUE();
+    PioIrqServiceBlock(2);
+    OSAL_IRQ_EPILOGUE();
+}
+#endif
+
+#endif // !RP_PIO_REQUIRED

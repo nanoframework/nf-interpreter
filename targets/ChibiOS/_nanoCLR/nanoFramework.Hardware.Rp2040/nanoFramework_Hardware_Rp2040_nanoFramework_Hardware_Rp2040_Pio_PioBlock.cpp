@@ -209,3 +209,27 @@ void PioBlock::NativeInitGpio(signed int param0, signed int param1, HRESULT &hr)
     // clear OD (bit 7), set IE (bit 6); also clear the RP2350 pad isolation latch (bit 8, resets to 1)
     PADS_BANK0->GPIO[pin] = (PADS_BANK0->GPIO[pin] & ~0x180u) | 0x40u;
 }
+
+void PioBlock::NativeForceIrq(signed int param0, signed int param1, HRESULT &hr)
+{
+    PIO_TypeDef *pio = PioFromIndex(param0);
+    if (pio == nullptr || param1 < 0 || param1 > 7)
+    {
+        hr = CLR_E_INVALID_PARAMETER;
+        return;
+    }
+
+    pio->IRQ_FORCE = (1u << param1);
+}
+
+void PioBlock::NativeClearIrq(signed int param0, signed int param1, HRESULT &hr)
+{
+    PIO_TypeDef *pio = PioFromIndex(param0);
+    if (pio == nullptr || param1 < 0 || param1 > 7)
+    {
+        hr = CLR_E_INVALID_PARAMETER;
+        return;
+    }
+
+    pio->IRQ = (1u << param1);
+}
