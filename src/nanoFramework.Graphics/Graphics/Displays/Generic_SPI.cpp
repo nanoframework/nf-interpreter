@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (c) .NET Foundation and Contributors
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
@@ -260,7 +260,16 @@ void DisplayDriver::Clear()
 
         g_DisplayInterface.SendCommand(1, g_DisplayInterfaceConfig.GenericDriverCommands.MemoryWrite);
 
-        g_DisplayInterface.FillData16(0, Attributes.Width * Attributes.Height);
+        if (Attributes.BitsPerPixel <= 16)
+        {
+            // 2 bytes per pixel
+            g_DisplayInterface.FillData16(0, Attributes.Width * Attributes.Height);
+        }
+        else
+        {
+            // 3 bytes per pixel
+            g_DisplayInterface.FillData16(0, (Attributes.Width * Attributes.Height * 3 + 1) / 2);
+        }
     }
     else
     {
@@ -289,8 +298,6 @@ void DisplayDriver::BitBlt(
     int screenY,
     CLR_UINT32 data[])
 {
-    // 16 bit colour  RRRRRGGGGGGBBBBB mode 565
-
     ASSERT((screenX >= 0) && ((screenX + width) <= Attributes.Width));
     ASSERT((screenY >= 0) && ((screenY + height) <= Attributes.Height));
 
@@ -298,7 +305,16 @@ void DisplayDriver::BitBlt(
 
     g_DisplayInterface.SendCommand(1, g_DisplayInterfaceConfig.GenericDriverCommands.MemoryWrite);
 
-    g_DisplayInterface.SendData16Windowed((CLR_UINT16 *)&data[0], srcX, srcY, width, height, stride, true);
+    if (Attributes.BitsPerPixel <= 16)
+    {
+        // 16-bit / two byte pixel formats. RGB mode 565
+        g_DisplayInterface.SendData16Windowed((CLR_UINT16 *)&data[0], srcX, srcY, width, height, stride, true);
+    }
+    else
+    {
+        // 18-bit / three byte pixel formats. RGB mode 666
+        g_DisplayInterface.SendData18Windowed((CLR_UINT16 *)&data[0], srcX, srcY, width, height, stride);
+    }
 
     return;
 }
