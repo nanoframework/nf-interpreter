@@ -3,8 +3,8 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#ifndef NF_HARDWARE_RPI_NATIVE_TARGET_H
-#define NF_HARDWARE_RPI_NATIVE_TARGET_H
+#ifndef NANOFRAMEWORK_HARDWARE_PICO_NATIVE_TARGET_H
+#define NANOFRAMEWORK_HARDWARE_PICO_NATIVE_TARGET_H
 
 // Maps a PIO block index to its register block, or nullptr for an invalid index.
 // RP2040 exposes PIO0/PIO1; RP2350 adds PIO2.
@@ -29,4 +29,4 @@ static inline PIO_TypeDef *PioFromIndex(int index)
 // the PioBlock translation unit so the reset state is shared across all entry points.
 void PioEnsureOutOfReset(int blockIndex);
 
-#endif // NF_HARDWARE_RPI_NATIVE_TARGET_H
+#endif // NANOFRAMEWORK_HARDWARE_PICO_NATIVE_TARGET_H
