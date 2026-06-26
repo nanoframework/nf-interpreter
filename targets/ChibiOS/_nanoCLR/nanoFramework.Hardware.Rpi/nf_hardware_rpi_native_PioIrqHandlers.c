@@ -1,8 +1,6 @@
 //
-// Copyright (c) .NET nanoFramework PIO contributors
-//
-// PIO IRQ0 vector handlers. Compiled as C so OSAL_IRQ_HANDLER's un-mangled symbol resolves; they just
-// forward to PioIrqServiceBlock() in PioIrqDriver.cpp.
+// Copyright (c) .NET Foundation and Contributors
+// See LICENSE file in the project root for full license information.
 //
 
 #include <hal.h>

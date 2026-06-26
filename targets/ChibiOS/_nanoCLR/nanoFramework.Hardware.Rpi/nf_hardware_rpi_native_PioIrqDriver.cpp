@@ -1,9 +1,6 @@
 //
-// Copyright (c) .NET nanoFramework PIO contributors
-//
-// PIO SM irq -> managed NativeEventDispatcher event ("PioIrqDriver", one dispatcher per block).
-// Pure native driver, no InternalCalls. The NVIC vector handlers live in PioIrqHandlers.c (C, for the
-// un-mangled OSAL_IRQ_HANDLER symbol) and call PioIrqServiceBlock below.
+// Copyright (c) .NET Foundation and Contributors
+// See LICENSE file in the project root for full license information.
 //
 
 #include "nf_hardware_rpi_native.h"
