@@ -6,8 +6,8 @@
 //
 //-----------------------------------------------------------------------------
 
-#ifndef NANOFRAMEWORK_HARDWARE_RP2040_H
-#define NANOFRAMEWORK_HARDWARE_RP2040_H
+#ifndef NANOFRAMEWORK_HARDWARE_RPI_H
+#define NANOFRAMEWORK_HARDWARE_RPI_H
 
 #include <nanoCLR_Interop.h>
 #include <nanoCLR_Runtime.h>
@@ -92,14 +92,14 @@
     PioWaitSource_Irq = 2,
 } PioWaitSource;
 
-struct Library_nanoFramework_Hardware_Rp2040_nanoFramework_Hardware_Rp2040_Pio_Pio
+struct Library_nanoFramework_Hardware_Rpi_nanoFramework_Hardware_Rpi_Pio_Pio
 {
     static const int FIELD_STATIC___blocks = 0;
 
     //--//
 };
 
-struct Library_nanoFramework_Hardware_Rp2040_nanoFramework_Hardware_Rp2040_Pio_PioAssemblerOptions
+struct Library_nanoFramework_Hardware_Rpi_nanoFramework_Hardware_Rpi_Pio_PioAssemblerOptions
 {
     static const int FIELD__Version = 1;
     static const int FIELD__SideSetCount = 2;
@@ -109,7 +109,7 @@
     //--//
 };
 
-struct Library_nanoFramework_Hardware_Rp2040_nanoFramework_Hardware_Rp2040_Pio_PioInstructionRef
+struct Library_nanoFramework_Hardware_Rpi_nanoFramework_Hardware_Rpi_Pio_PioInstructionRef
 {
     static const int FIELD___owner = 1;
     static const int FIELD___index = 2;
@@ -117,7 +117,7 @@
     //--//
 };
 
-struct Library_nanoFramework_Hardware_Rp2040_nanoFramework_Hardware_Rp2040_Pio_PioLabel
+struct Library_nanoFramework_Hardware_Rpi_nanoFramework_Hardware_Rpi_Pio_PioLabel
 {
     // renamed backing field '<Id>k__BackingField'
     static const int FIELD__Id = 1;
@@ -127,7 +127,7 @@
     //--//
 };
 
-struct Library_nanoFramework_Hardware_Rp2040_nanoFramework_Hardware_Rp2040_Pio_PioAssembler
+struct Library_nanoFramework_Hardware_Rpi_nanoFramework_Hardware_Rpi_Pio_PioAssembler
 {
     static const int FIELD___baseBits = 1;
     static const int FIELD___delay = 2;
@@ -153,7 +153,7 @@
     //--//
 };
 
-struct Library_nanoFramework_Hardware_Rp2040_nanoFramework_Hardware_Rp2040_Pio_PioBlock
+struct Library_nanoFramework_Hardware_Rpi_nanoFramework_Hardware_Rpi_Pio_PioBlock
 {
     static const int FIELD___index = 1;
 
@@ -167,7 +167,7 @@
     //--//
 };
 
-struct Library_nanoFramework_Hardware_Rp2040_nanoFramework_Hardware_Rp2040_Pio_PioProgram
+struct Library_nanoFramework_Hardware_Rpi_nanoFramework_Hardware_Rpi_Pio_PioProgram
 {
     // renamed backing field '<Instructions>k__BackingField'
     static const int FIELD__Instructions = 1;
@@ -201,7 +201,7 @@
     //--//
 };
 
-struct Library_nanoFramework_Hardware_Rp2040_nanoFramework_Hardware_Rp2040_Pio_PioStateMachine
+struct Library_nanoFramework_Hardware_Rpi_nanoFramework_Hardware_Rpi_Pio_PioStateMachine
 {
     static const int FIELD___block = 1;
     static const int FIELD___sm = 2;
@@ -223,11 +223,12 @@
     NANOCLR_NATIVE_DECLARE(NativeTxLevel___STATIC__U4__I4__I4);
     NANOCLR_NATIVE_DECLARE(NativeRxLevel___STATIC__U4__I4__I4);
     NANOCLR_NATIVE_DECLARE(NativeGetPc___STATIC__U4__I4__I4);
+    NANOCLR_NATIVE_DECLARE(NativeSetClockDivisor___STATIC__VOID__I4__I4__I4__I4);
 
     //--//
 };
 
-struct Library_nanoFramework_Hardware_Rp2040_nanoFramework_Hardware_Rp2040_Pio_PioStateMachineConfig
+struct Library_nanoFramework_Hardware_Rpi_nanoFramework_Hardware_Rpi_Pio_PioStateMachineConfig
 {
     static const int FIELD___outBase = 1;
     static const int FIELD___outCount = 2;
@@ -253,11 +254,14 @@
     static const int FIELD___gpioBase = 22;
     static const int FIELD___movStatusSel = 23;
     static const int FIELD___movStatusN = 24;
+    static const int FIELD___outSticky = 25;
+    static const int FIELD___inlineOutEn = 26;
+    static const int FIELD___outEnSel = 27;
 
     //--//
 };
 
-extern const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_nanoFramework_Hardware_Rp2040;
+extern const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_nanoFramework_Hardware_Rpi;
 
-#endif // NANOFRAMEWORK_HARDWARE_RP2040_H
+#endif // NANOFRAMEWORK_HARDWARE_RPI_H
 

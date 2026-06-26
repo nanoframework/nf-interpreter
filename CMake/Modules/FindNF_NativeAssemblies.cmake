@@ -42,7 +42,7 @@ option(API_nanoFramework.Networking.Thread              "option for nanoFramewor
 
 # Stm32 only
 option(API_Hardware.Stm32                               "option for Hardware.Stm32")
-option(API_Hardware.Rp2040                              "option for Hardware.Rp2040")
+option(API_Hardware.Rpi                              "option for Hardware.Rp2040")
 
 # TI CC13xxCC26xx
 option(API_nanoFramework.TI.EasyLink                    "option for nanoFramework.TI.EasyLink API")
@@ -272,14 +272,14 @@ if(API_Hardware.Stm32)
 endif()
 
 # Hardware.Rp2040
-if(API_Hardware.Rp2040)
+if(API_Hardware.Rpi)
     ##### API name here (doted name)
-    PerformSettingsForApiEntry("nanoFramework.Hardware.Rp2040")
+    PerformSettingsForApiEntry("nanoFramework.Hardware.Rpi")
 
     # special: the PIO IRQ driver is an internal interrupt driver (no managed end of its own); it is
     # delivered to managed code through NativeEventDispatcher("PioIrqDriver", ...).
-    list(APPEND CLR_RT_NativeAssemblyDataList "extern const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_nanoFramework_Hardware_Rp2040_PioIrqDriver;")
-    list(APPEND CLR_RT_NativeAssemblyDataTableEntriesList "&g_CLR_AssemblyNative_nanoFramework_Hardware_Rp2040_PioIrqDriver,")
+    list(APPEND CLR_RT_NativeAssemblyDataList "extern const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_nanoFramework_Hardware_Rpi_PioIrqDriver;")
+    list(APPEND CLR_RT_NativeAssemblyDataTableEntriesList "&g_CLR_AssemblyNative_nanoFramework_Hardware_Rpi_PioIrqDriver,")
 endif()
 
 # nanoFramework.Device.Can

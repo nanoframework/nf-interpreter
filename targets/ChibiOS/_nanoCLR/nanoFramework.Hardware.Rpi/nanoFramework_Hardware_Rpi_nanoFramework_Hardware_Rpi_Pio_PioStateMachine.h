@@ -10,12 +10,12 @@
 //
 //-----------------------------------------------------------------------------
 
-#ifndef NANOFRAMEWORK_HARDWARE_RP2040_NANOFRAMEWORK_HARDWARE_RP2040_NANOFRAMEWORK_HARDWARE_RP2040_PIO_PIOSTATEMACHINE_H
-#define NANOFRAMEWORK_HARDWARE_RP2040_NANOFRAMEWORK_HARDWARE_RP2040_NANOFRAMEWORK_HARDWARE_RP2040_PIO_PIOSTATEMACHINE_H
+#ifndef NANOFRAMEWORK_HARDWARE_RPI_NANOFRAMEWORK_HARDWARE_RPI_NANOFRAMEWORK_HARDWARE_RPI_PIO_PIOSTATEMACHINE_H
+#define NANOFRAMEWORK_HARDWARE_RPI_NANOFRAMEWORK_HARDWARE_RPI_NANOFRAMEWORK_HARDWARE_RPI_PIO_PIOSTATEMACHINE_H
 
-namespace nanoFramework_Hardware_Rp2040
+namespace nanoFramework_Hardware_Rpi
 {
-    namespace nanoFramework_Hardware_Rp2040
+    namespace nanoFramework_Hardware_Rpi
     {
         struct PioStateMachine
         {
@@ -54,8 +54,10 @@ namespace nanoFramework_Hardware_Rp2040
 
             static unsigned int NativeGetPc( signed int param0, signed int param1, HRESULT &hr );
 
+            static void NativeSetClockDivisor( signed int param0, signed int param1, signed int param2, signed int param3, HRESULT &hr );
+
         };
     }
 }
 
-#endif // NANOFRAMEWORK_HARDWARE_RP2040_NANOFRAMEWORK_HARDWARE_RP2040_NANOFRAMEWORK_HARDWARE_RP2040_PIO_PIOSTATEMACHINE_H
+#endif // NANOFRAMEWORK_HARDWARE_RPI_NANOFRAMEWORK_HARDWARE_RPI_NANOFRAMEWORK_HARDWARE_RPI_PIO_PIOSTATEMACHINE_H
