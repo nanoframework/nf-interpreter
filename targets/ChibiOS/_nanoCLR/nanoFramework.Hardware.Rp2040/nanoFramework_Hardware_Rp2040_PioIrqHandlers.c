@@ -1,11 +1,14 @@
 //
 // Copyright (c) .NET nanoFramework PIO contributors
 //
+// PIO IRQ0 vector handlers. Compiled as C so OSAL_IRQ_HANDLER's un-mangled symbol resolves; they just
+// forward to PioIrqServiceBlock() in PioIrqDriver.cpp.
 //
 
 #include <hal.h>
 
-#if !defined(RP2350)
+// RP_PIO_REQUIRED -> ChibiOS rp_pio.c owns these vectors (Pico W / CYW43); skip ours to avoid a clash.
+#if !defined(RP2350) && !defined(RP_PIO_REQUIRED)
 
 extern void PioIrqServiceBlock(int block);
 

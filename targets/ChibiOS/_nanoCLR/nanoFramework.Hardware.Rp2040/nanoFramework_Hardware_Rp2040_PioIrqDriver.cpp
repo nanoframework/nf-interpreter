@@ -1,19 +1,22 @@
 //
 // Copyright (c) .NET nanoFramework PIO contributors
 //
-//
-//
+// PIO SM irq -> managed NativeEventDispatcher event ("PioIrqDriver", one dispatcher per block).
+// Pure native driver, no InternalCalls. The NVIC vector handlers live in PioIrqHandlers.c (C, for the
+// un-mangled OSAL_IRQ_HANDLER symbol) and call PioIrqServiceBlock below.
 //
 
 #include "nanoFramework_Hardware_Rp2040.h"
 #include <nanoHAL_v2.h>
-#include <hal.h> // nvicEnableVector / nvicDisableVector + RP_PIOx_IRQ_0_NUMBER
+#include <ch.h>  // chSysLockFromISR
+#include <hal.h> // nvicEnableVector + RP_PIOx_IRQ_0_NUMBER
 #if defined(RP2350)
 #include "rp2350.h"
 #else
 #include "rp2040.h"
 #endif
 
+// dispatcher context per block
 static CLR_RT_HeapBlock_NativeEventDispatcher *s_pioCtx[3] = {nullptr, nullptr, nullptr};
 
 static PIO_TypeDef *PioFromIndex(int index)
@@ -46,6 +49,7 @@ static int BlockOfContext(CLR_RT_HeapBlock_NativeEventDispatcher *pContext)
     return -1;
 }
 
+// Called from the block's IRQ0 ISR (PioIrqHandlers.c), hence extern "C".
 extern "C" void PioIrqServiceBlock(int block)
 {
     PIO_TypeDef *pio = PioFromIndex(block);
@@ -54,6 +58,12 @@ extern "C" void PioIrqServiceBlock(int block)
         return;
     }
 
+    // SaveNativeEventToHALQueue touches the shared HAL queue, so take the ISR critical section like GPIO.
+    NATIVE_INTERRUPT_START
+
+    chSysLockFromISR();
+
+    // SM irq flags -> IRQ0_INTS bits [11:8]
     unsigned int flags = (pio->IRQ0_INTS >> 8) & 0x0Fu;
     if (flags != 0)
     {
@@ -65,8 +75,13 @@ extern "C" void PioIrqServiceBlock(int block)
             SaveNativeEventToHALQueue(ctx, packed, (CLR_UINT32)flags);
         }
 
+        // write-1-to-clear
         pio->IRQ = flags;
     }
+
+    chSysUnlockFromISR();
+
+    NATIVE_INTERRUPT_END
 }
 
 // ---- NativeEventDispatcher driver procs -------------------------------------
@@ -93,11 +108,12 @@ static HRESULT PioIrqEnableDisable(CLR_RT_HeapBlock_NativeEventDispatcher *pCont
     }
 
 #if !defined(RP2350)
+    // SM irq flags = IRQ0_INTE bits [11:8]
     int vector = (block == 0) ? RP_PIO0_IRQ_0_NUMBER : RP_PIO1_IRQ_0_NUMBER;
     if (fEnable)
     {
         pio->IRQ0_INTE |= (0x0Fu << 8);
-        nvicEnableVector(vector, 3); // priority 3: kernel-safe, matches the low-priority peripherals
+        nvicEnableVector(vector, 3); // kernel-safe priority
     }
     else
     {
@@ -106,6 +122,7 @@ static HRESULT PioIrqEnableDisable(CLR_RT_HeapBlock_NativeEventDispatcher *pCont
     }
 #else
     (void)fEnable;
+    // RP2350 IRQ wiring is a follow-up
 #endif
 
     return S_OK;
@@ -136,6 +153,7 @@ static const CLR_RT_DriverInterruptMethods g_PioIrqDriverMethods = {
     PioIrqEnableDisable,
     PioIrqCleanup};
 
+// looked up by name from `new NativeEventDispatcher("PioIrqDriver", block)`
 extern const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_nanoFramework_Hardware_Rp2040_PioIrqDriver = {
     "PioIrqDriver",
     DRIVER_INTERRUPT_METHODS_CHECKSUM,
