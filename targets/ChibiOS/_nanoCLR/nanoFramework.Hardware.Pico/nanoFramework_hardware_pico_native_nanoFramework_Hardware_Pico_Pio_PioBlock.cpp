@@ -79,7 +79,7 @@ HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_P
         // fixed origin: exact slots; relocatable: first-fit
         if (origin >= 0)
         {
-            if (origin + length <= 32 && (g_PioInstrUsed[block] & PioSlotMask(origin, length)) == 0)
+            if (origin <= 32 - length && (g_PioInstrUsed[block] & PioSlotMask(origin, length)) == 0)
             {
                 offset = origin;
             }
@@ -128,7 +128,14 @@ HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_P
         int offset = stack.Arg2().NumericByRef().s4;
 
         PIO_TypeDef *pio = PioFromIndex(block);
-        if (pio == nullptr || offset < 0 || length <= 0 || offset + length > 32)
+        if (pio == nullptr || offset < 0 || length <= 0 || length > 32 || offset > 32 - length)
+        {
+            NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+        }
+
+        // only reclaim a range that is fully owned, else we'd corrupt the map and clobber other programs
+        unsigned int mask = PioSlotMask(offset, length);
+        if ((g_PioInstrUsed[block] & mask) != mask)
         {
             NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
         }
@@ -140,7 +147,7 @@ HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_P
             pio->INSTR_MEM[offset + i] = (unsigned short)((offset + i) & 0x1F);
         }
 
-        g_PioInstrUsed[block] &= ~PioSlotMask(offset, length);
+        g_PioInstrUsed[block] &= ~mask;
     }
     NANOCLR_NOCLEANUP();
 }
