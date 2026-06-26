@@ -285,11 +285,14 @@ HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_P
         PIO_TypeDef *pio = PioFromIndex(block);
 #if defined(RP2350)
         const int maxPins = 48;
+        const int gpioBase = (pio != nullptr) ? (int)pio->GPIOBASE : 0;
 #else
         const int maxPins = 30;
+        const int gpioBase = 0;
 #endif
-        if (pio == nullptr || sm < 0 || sm > 3 || basePin < 0 || count < 0 || basePin > maxPins ||
-            count > maxPins - basePin)
+        // SET_BASE is 5-bit, relative to the SM's GPIO base, so reject pins outside the 32-pin window
+        if (pio == nullptr || sm < 0 || sm > 3 || count < 0 || count > 32 || basePin < gpioBase ||
+            basePin - gpioBase > 32 - count || basePin > maxPins - count)
         {
             NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
         }
@@ -306,7 +309,7 @@ HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_P
             unsigned int dirs = output ? ((1u << chunk) - 1u) : 0u;
 
             // PINCTRL: SET_COUNT [28:26], SET_BASE [9:5]
-            pio->SM[sm].PINCTRL = ((unsigned int)chunk << 26) | (((unsigned int)pin & 0x1Fu) << 5);
+            pio->SM[sm].PINCTRL = ((unsigned int)chunk << 26) | (((unsigned int)(pin - gpioBase) & 0x1Fu) << 5);
             // SET pindirs, dirs
             pio->SM[sm].INSTR = 0xE000u | (4u << 5) | (dirs & 0x1Fu);
 
