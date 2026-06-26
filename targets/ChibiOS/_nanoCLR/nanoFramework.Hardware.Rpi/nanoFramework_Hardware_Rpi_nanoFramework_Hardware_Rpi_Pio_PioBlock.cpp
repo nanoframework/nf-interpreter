@@ -5,15 +5,15 @@
 // so the same code serves RP2040 and RP2350 (which adds PIO2).
 //
 
-#include "nanoFramework_Hardware_Rp2040.h"
-#include "nanoFramework_Hardware_Rp2040_nanoFramework_Hardware_Rp2040_Pio_PioBlock.h"
+#include "nanoFramework_Hardware_Rpi.h"
+#include "nanoFramework_Hardware_Rpi_nanoFramework_Hardware_Rpi_Pio_PioBlock.h"
 #if defined(RP2350)
 #include "rp2350.h"
 #else
 #include "rp2040.h"
 #endif
 
-using namespace nanoFramework_Hardware_Rp2040::nanoFramework_Hardware_Rp2040;
+using namespace nanoFramework_Hardware_Rpi::nanoFramework_Hardware_Rpi;
 
 static PIO_TypeDef *PioFromIndex(int index)
 {
