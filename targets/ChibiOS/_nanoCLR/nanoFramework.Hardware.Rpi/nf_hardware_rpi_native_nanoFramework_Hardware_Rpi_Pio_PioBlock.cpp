@@ -1,8 +1,6 @@
 //
-// Copyright (c) .NET nanoFramework PIO contributors
-//
-// PioBlock InternalCalls. Drives PIO registers directly (CMSIS, no pico-sdk). PIO v0 is a prefix of v1
-// so the same code serves RP2040 and RP2350 (which adds PIO2).
+// Copyright (c) .NET Foundation and Contributors
+// See LICENSE file in the project root for full license information.
 //
 
 #include "nf_hardware_rpi_native.h"
