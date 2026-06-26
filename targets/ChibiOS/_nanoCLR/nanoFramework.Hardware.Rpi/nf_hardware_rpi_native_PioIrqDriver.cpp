@@ -6,7 +6,7 @@
 // un-mangled OSAL_IRQ_HANDLER symbol) and call PioIrqServiceBlock below.
 //
 
-#include "nanoFramework_Hardware_Rpi.h"
+#include "nf_hardware_rpi_native.h"
 #include <nanoHAL_v2.h>
 #include <ch.h>  // chSysLockFromISR
 #include <hal.h> // nvicEnableVector + RP_PIOx_IRQ_0_NUMBER
@@ -15,26 +15,10 @@
 #else
 #include "rp2040.h"
 #endif
+#include "nf_hardware_rpi_native_target.h"
 
 // dispatcher context per block
 static CLR_RT_HeapBlock_NativeEventDispatcher *s_pioCtx[3] = {nullptr, nullptr, nullptr};
-
-static PIO_TypeDef *PioFromIndex(int index)
-{
-    switch (index)
-    {
-        case 0:
-            return PIO0;
-        case 1:
-            return PIO1;
-#if defined(RP2350)
-        case 2:
-            return PIO2;
-#endif
-        default:
-            return nullptr;
-    }
-}
 
 static int BlockOfContext(CLR_RT_HeapBlock_NativeEventDispatcher *pContext)
 {
