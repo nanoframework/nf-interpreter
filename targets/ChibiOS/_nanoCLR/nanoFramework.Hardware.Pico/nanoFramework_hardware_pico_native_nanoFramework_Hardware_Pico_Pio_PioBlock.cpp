@@ -3,13 +3,13 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#include "nf_hardware_rpi_native.h"
+#include "nanoFramework_hardware_pico_native.h"
 #if defined(RP2350)
 #include "rp2350.h"
 #else
 #include "rp2040.h"
 #endif
-#include "nf_hardware_rpi_native_target.h"
+#include "nanoFramework_hardware_pico_native_target.h"
 
 unsigned int g_PioInstrUsed[3] = {0, 0, 0};
 unsigned int g_PioClaimedSm[3] = {0, 0, 0};
@@ -55,7 +55,7 @@ void PioEnsureOutOfReset(int blockIndex)
     g_PioOutOfReset |= (1u << blockIndex);
 }
 
-HRESULT Library_nf_hardware_rpi_native_nanoFramework_Hardware_Rpi_Pio_PioBlock::
+HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioBlock::
     NativeAddProgram___STATIC__I4__I4__SZARRAY_U2__I4__I4(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
@@ -118,7 +118,7 @@ HRESULT Library_nf_hardware_rpi_native_nanoFramework_Hardware_Rpi_Pio_PioBlock::
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_nf_hardware_rpi_native_nanoFramework_Hardware_Rpi_Pio_PioBlock::
+HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioBlock::
     NativeRemoveProgram___STATIC__VOID__I4__I4__I4(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
@@ -145,7 +145,7 @@ HRESULT Library_nf_hardware_rpi_native_nanoFramework_Hardware_Rpi_Pio_PioBlock::
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_nf_hardware_rpi_native_nanoFramework_Hardware_Rpi_Pio_PioBlock::
+HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioBlock::
     NativeClaimUnusedSm___STATIC__I4__I4__BOOLEAN(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
@@ -180,7 +180,7 @@ HRESULT Library_nf_hardware_rpi_native_nanoFramework_Hardware_Rpi_Pio_PioBlock::
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_nf_hardware_rpi_native_nanoFramework_Hardware_Rpi_Pio_PioBlock::
+HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioBlock::
     NativeInitGpio___STATIC__VOID__I4__I4(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
@@ -206,7 +206,7 @@ HRESULT Library_nf_hardware_rpi_native_nanoFramework_Hardware_Rpi_Pio_PioBlock::
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_nf_hardware_rpi_native_nanoFramework_Hardware_Rpi_Pio_PioBlock::
+HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioBlock::
     NativeForceIrq___STATIC__VOID__I4__I4(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
@@ -226,7 +226,7 @@ HRESULT Library_nf_hardware_rpi_native_nanoFramework_Hardware_Rpi_Pio_PioBlock::
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_nf_hardware_rpi_native_nanoFramework_Hardware_Rpi_Pio_PioBlock::
+HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioBlock::
     NativeClearIrq___STATIC__VOID__I4__I4(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();

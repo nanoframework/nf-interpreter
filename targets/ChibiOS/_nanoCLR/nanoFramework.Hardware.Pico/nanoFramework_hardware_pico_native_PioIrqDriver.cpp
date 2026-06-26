@@ -3,7 +3,7 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#include "nf_hardware_rpi_native.h"
+#include "nanoFramework_hardware_pico_native.h"
 #include <nanoHAL_v2.h>
 #include <ch.h>  // chSysLockFromISR
 #include <hal.h> // nvicEnableVector + RP_PIOx_IRQ_0_NUMBER
@@ -12,7 +12,7 @@
 #else
 #include "rp2040.h"
 #endif
-#include "nf_hardware_rpi_native_target.h"
+#include "nanoFramework_hardware_pico_native_target.h"
 
 // dispatcher context per block
 static CLR_RT_HeapBlock_NativeEventDispatcher *s_pioCtx[3] = {nullptr, nullptr, nullptr};
@@ -161,7 +161,7 @@ static const CLR_RT_DriverInterruptMethods g_PioIrqDriverMethods = {
     PioIrqCleanup};
 
 // looked up by name from `new NativeEventDispatcher("PioIrqDriver", block)`
-extern const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_nanoFramework_Hardware_Rpi_PioIrqDriver = {
+extern const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_nanoFramework_Hardware_Pico_PioIrqDriver = {
     "PioIrqDriver",
     DRIVER_INTERRUPT_METHODS_CHECKSUM,
     &g_PioIrqDriverMethods,
