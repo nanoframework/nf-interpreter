@@ -33,6 +33,8 @@ static int BlockOfContext(CLR_RT_HeapBlock_NativeEventDispatcher *pContext)
     return -1;
 }
 
+// Used only by the IRQ0->NVIC wiring, compiled out on RP_PIO_REQUIRED (Pico W).
+#if !defined(RP_PIO_REQUIRED)
 static int PioIrqVector(int block)
 {
     switch (block)
@@ -49,6 +51,7 @@ static int PioIrqVector(int block)
             return -1;
     }
 }
+#endif
 
 // Called from the block's IRQ0 ISR (PioIrqHandlers.c), hence extern "C".
 extern "C" void PioIrqServiceBlock(int block)
