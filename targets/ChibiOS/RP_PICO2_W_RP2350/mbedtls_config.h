@@ -16,8 +16,8 @@
 
 // RP2350 has 520 KB SRAM vs 264 KB on RP2040, so we can afford larger buffers.
 // Still constrained compared to larger MCUs; limit to what TLS 1.2 needs.
-#define MBEDTLS_SSL_IN_CONTENT_LEN   8192
-#define MBEDTLS_SSL_OUT_CONTENT_LEN  4096
+#define MBEDTLS_SSL_IN_CONTENT_LEN  8192
+#define MBEDTLS_SSL_OUT_CONTENT_LEN 4096
 
 // Disable hardware acceleration alternative implementations on RP2350
 // (x86 PadLock, etc. are not available on ARM Cortex-M33)
