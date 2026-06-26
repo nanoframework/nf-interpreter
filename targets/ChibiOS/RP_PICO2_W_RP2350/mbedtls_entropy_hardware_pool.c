@@ -14,8 +14,8 @@ int mbedtls_hardware_poll(void *data, unsigned char *output, size_t len, size_t 
 
 // RP2350 ROSC random bit register (base differs from RP2040).
 // RP2040 ROSC_BASE = 0x40060000; RP2350 ROSC_BASE = 0x400E8000.
-#define RP2350_ROSC_BASE       0x400E8000U
-#define RP2350_ROSC_RANDOMBIT  (*(volatile uint32_t *)(RP2350_ROSC_BASE + 0x1CU))
+#define RP2350_ROSC_BASE      0x400E8000U
+#define RP2350_ROSC_RANDOMBIT (*(volatile uint32_t *)(RP2350_ROSC_BASE + 0x1CU))
 
 static uint32_t rp2350_get_random_u32(void)
 {

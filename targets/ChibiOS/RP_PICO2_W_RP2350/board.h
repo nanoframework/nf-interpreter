@@ -29,13 +29,13 @@
  * Board identifier.
  */
 #define BOARD_RP_PICO2_RP2350
-#define BOARD_NAME                  "Raspberry Pi Pico 2 W"
+#define BOARD_NAME "Raspberry Pi Pico 2 W"
 
 /*
  * Board oscillators-related settings.
  */
 #if !defined(RP_XOSCCLK)
-#define RP_XOSCCLK                  12000000U
+#define RP_XOSCCLK 12000000U
 #endif
 
 /*
@@ -73,9 +73,10 @@
 
 #if !defined(_FROM_ASM_)
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
-  void boardInit(void);
+    void boardInit(void);
 #ifdef __cplusplus
 }
 #endif
