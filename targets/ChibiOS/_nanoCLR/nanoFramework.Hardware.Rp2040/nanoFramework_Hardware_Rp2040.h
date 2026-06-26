@@ -39,6 +39,16 @@
     PioDest_Exec = 7,
 } PioDest;
 
+typedef enum __nfpack PioFifoJoin
+{
+    PioFifoJoin_None = 0,
+    PioFifoJoin_Tx = 1,
+    PioFifoJoin_Rx = 2,
+    PioFifoJoin_TxGet = 4,
+    PioFifoJoin_TxPut = 8,
+    PioFifoJoin_PutGet = 12,
+} PioFifoJoin;
+
 typedef enum __nfpack PioMovOp
 {
     PioMovOp_None = 0,
@@ -93,20 +103,10 @@
     //--//
 };
 
-struct Library_nanoFramework_Hardware_Rp2040_nanoFramework_Hardware_Rp2040_Pio_PioAssembler__Instr
-{
-    static const int FIELD__BaseBits = 1;
-    static const int FIELD__Delay = 2;
-    static const int FIELD__SideValue = 3;
-    static const int FIELD__SideUsed = 4;
-    static const int FIELD__JmpLabel = 5;
-
-    //--//
-};
-
 struct Library_nanoFramework_Hardware_Rp2040_nanoFramework_Hardware_Rp2040_Pio_PioInstructionRef
 {
-    static const int FIELD___instr = 1;
+    static const int FIELD___owner = 1;
+    static const int FIELD___index = 2;
 
     //--//
 };
@@ -123,21 +123,26 @@
 
 struct Library_nanoFramework_Hardware_Rp2040_nanoFramework_Hardware_Rp2040_Pio_PioAssembler
 {
-    static const int FIELD___instrs = 1;
-    static const int FIELD___labels = 2;
-    static const int FIELD___version = 3;
-    static const int FIELD___sideSetCount = 4;
-    static const int FIELD___sideSetOpt = 5;
-    static const int FIELD___sideSetPinDirs = 6;
-    static const int FIELD___wrapTarget = 7;
-    static const int FIELD___wrap = 8;
-    static const int FIELD___origin = 9;
-    static const int FIELD___outShiftDir = 10;
-    static const int FIELD___autoPull = 11;
-    static const int FIELD___pullThreshold = 12;
-    static const int FIELD___inShiftDir = 13;
-    static const int FIELD___autoPush = 14;
-    static const int FIELD___pushThreshold = 15;
+    static const int FIELD___baseBits = 1;
+    static const int FIELD___delay = 2;
+    static const int FIELD___sideValue = 3;
+    static const int FIELD___sideUsed = 4;
+    static const int FIELD___jmpLabel = 5;
+    static const int FIELD___count = 6;
+    static const int FIELD___labelCount = 7;
+    static const int FIELD___version = 8;
+    static const int FIELD___sideSetCount = 9;
+    static const int FIELD___sideSetOpt = 10;
+    static const int FIELD___sideSetPinDirs = 11;
+    static const int FIELD___wrapTarget = 12;
+    static const int FIELD___wrap = 13;
+    static const int FIELD___origin = 14;
+    static const int FIELD___outShiftDir = 15;
+    static const int FIELD___autoPull = 16;
+    static const int FIELD___pullThreshold = 17;
+    static const int FIELD___inShiftDir = 18;
+    static const int FIELD___autoPush = 19;
+    static const int FIELD___pushThreshold = 20;
 
     //--//
 };
@@ -202,6 +207,11 @@
     NANOCLR_NATIVE_DECLARE(NativeRxEmpty___STATIC__BOOLEAN__I4__I4);
     NANOCLR_NATIVE_DECLARE(NativeUnclaim___STATIC__VOID__I4__I4);
     NANOCLR_NATIVE_DECLARE(NativeSetConsecutivePinDirs___STATIC__VOID__I4__I4__I4__I4__BOOLEAN);
+    NANOCLR_NATIVE_DECLARE(NativeClearFifos___STATIC__VOID__I4__I4);
+    NANOCLR_NATIVE_DECLARE(NativeDrainTxFifo___STATIC__VOID__I4__I4);
+    NANOCLR_NATIVE_DECLARE(NativeRestart___STATIC__VOID__I4__I4);
+    NANOCLR_NATIVE_DECLARE(NativeClkDivRestart___STATIC__VOID__I4__I4);
+    NANOCLR_NATIVE_DECLARE(NativeExec___STATIC__VOID__I4__I4__U2);
 
     //--//
 };
@@ -228,6 +238,8 @@
     static const int FIELD___wrap = 18;
     static const int FIELD___clkDivInt = 19;
     static const int FIELD___clkDivFrac = 20;
+    static const int FIELD___fifoJoin = 21;
+    static const int FIELD___gpioBase = 22;
 
     //--//
 };

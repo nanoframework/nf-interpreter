@@ -176,3 +176,96 @@ HRESULT Library_nanoFramework_Hardware_Rp2040_nanoFramework_Hardware_Rp2040_Pio_
     }
     NANOCLR_NOCLEANUP();
 }
+
+HRESULT Library_nanoFramework_Hardware_Rp2040_nanoFramework_Hardware_Rp2040_Pio_PioStateMachine::NativeClearFifos___STATIC__VOID__I4__I4( CLR_RT_StackFrame& stack )
+{
+    NANOCLR_HEADER(); hr = S_OK;
+    {
+
+        signed int param0;
+        NANOCLR_CHECK_HRESULT( Interop_Marshal_INT32( stack, 0, param0 ) );
+
+        signed int param1;
+        NANOCLR_CHECK_HRESULT( Interop_Marshal_INT32( stack, 1, param1 ) );
+
+        PioStateMachine::NativeClearFifos( param0, param1, hr );
+        NANOCLR_CHECK_HRESULT( hr );
+
+    }
+    NANOCLR_NOCLEANUP();
+}
+
+HRESULT Library_nanoFramework_Hardware_Rp2040_nanoFramework_Hardware_Rp2040_Pio_PioStateMachine::NativeDrainTxFifo___STATIC__VOID__I4__I4( CLR_RT_StackFrame& stack )
+{
+    NANOCLR_HEADER(); hr = S_OK;
+    {
+
+        signed int param0;
+        NANOCLR_CHECK_HRESULT( Interop_Marshal_INT32( stack, 0, param0 ) );
+
+        signed int param1;
+        NANOCLR_CHECK_HRESULT( Interop_Marshal_INT32( stack, 1, param1 ) );
+
+        PioStateMachine::NativeDrainTxFifo( param0, param1, hr );
+        NANOCLR_CHECK_HRESULT( hr );
+
+    }
+    NANOCLR_NOCLEANUP();
+}
+
+HRESULT Library_nanoFramework_Hardware_Rp2040_nanoFramework_Hardware_Rp2040_Pio_PioStateMachine::NativeRestart___STATIC__VOID__I4__I4( CLR_RT_StackFrame& stack )
+{
+    NANOCLR_HEADER(); hr = S_OK;
+    {
+
+        signed int param0;
+        NANOCLR_CHECK_HRESULT( Interop_Marshal_INT32( stack, 0, param0 ) );
+
+        signed int param1;
+        NANOCLR_CHECK_HRESULT( Interop_Marshal_INT32( stack, 1, param1 ) );
+
+        PioStateMachine::NativeRestart( param0, param1, hr );
+        NANOCLR_CHECK_HRESULT( hr );
+
+    }
+    NANOCLR_NOCLEANUP();
+}
+
+HRESULT Library_nanoFramework_Hardware_Rp2040_nanoFramework_Hardware_Rp2040_Pio_PioStateMachine::NativeClkDivRestart___STATIC__VOID__I4__I4( CLR_RT_StackFrame& stack )
+{
+    NANOCLR_HEADER(); hr = S_OK;
+    {
+
+        signed int param0;
+        NANOCLR_CHECK_HRESULT( Interop_Marshal_INT32( stack, 0, param0 ) );
+
+        signed int param1;
+        NANOCLR_CHECK_HRESULT( Interop_Marshal_INT32( stack, 1, param1 ) );
+
+        PioStateMachine::NativeClkDivRestart( param0, param1, hr );
+        NANOCLR_CHECK_HRESULT( hr );
+
+    }
+    NANOCLR_NOCLEANUP();
+}
+
+HRESULT Library_nanoFramework_Hardware_Rp2040_nanoFramework_Hardware_Rp2040_Pio_PioStateMachine::NativeExec___STATIC__VOID__I4__I4__U2( CLR_RT_StackFrame& stack )
+{
+    NANOCLR_HEADER(); hr = S_OK;
+    {
+
+        signed int param0;
+        NANOCLR_CHECK_HRESULT( Interop_Marshal_INT32( stack, 0, param0 ) );
+
+        signed int param1;
+        NANOCLR_CHECK_HRESULT( Interop_Marshal_INT32( stack, 1, param1 ) );
+
+        uint16_t param2;
+        NANOCLR_CHECK_HRESULT( Interop_Marshal_UINT16( stack, 2, param2 ) );
+
+        PioStateMachine::NativeExec( param0, param1, param2, hr );
+        NANOCLR_CHECK_HRESULT( hr );
+
+    }
+    NANOCLR_NOCLEANUP();
+}

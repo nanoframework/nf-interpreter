@@ -20,6 +20,8 @@ set(nanoFramework.Hardware.Rp2040_SRCS
     nanoFramework_Hardware_Rp2040_nanoFramework_Hardware_Rp2040_Pio_PioBlock_mshl.cpp
     nanoFramework_Hardware_Rp2040_nanoFramework_Hardware_Rp2040_Pio_PioStateMachine.cpp
     nanoFramework_Hardware_Rp2040_nanoFramework_Hardware_Rp2040_Pio_PioStateMachine_mshl.cpp
+    nanoFramework_Hardware_Rp2040_PioIrqDriver.cpp
+    nanoFramework_Hardware_Rp2040_PioIrqHandlers.c
 )
 
 foreach(SRC_FILE ${nanoFramework.Hardware.Rp2040_SRCS})
