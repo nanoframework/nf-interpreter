@@ -35,14 +35,24 @@ static unsigned int PioSlotMask(int offset, int length)
 #define PADS_BANK0_RESET_BIT (1u << 8)
 #endif
 
-static void PioEnsureOutOfReset(int blockIndex)
+// PIO boots held in reset; release each block once, on first use of any entry point
+static unsigned int g_PioOutOfReset = 0;
+
+void PioEnsureOutOfReset(int blockIndex)
 {
+    if (g_PioOutOfReset & (1u << blockIndex))
+    {
+        return;
+    }
+
     unsigned int bits =
         (1u << (PIO_RESET_LSB + (unsigned int)blockIndex)) | IO_BANK0_RESET_BIT | PADS_BANK0_RESET_BIT;
-    RESETS->CLR.RESET = bits;
+    RESETS->CLR.RESET = bits; // atomic-clear alias
     while ((RESETS->RESET_DONE & bits) != bits)
     {
     }
+
+    g_PioOutOfReset |= (1u << blockIndex);
 }
 
 HRESULT Library_nf_hardware_rpi_native_nanoFramework_Hardware_Rpi_Pio_PioBlock::
@@ -51,39 +61,37 @@ HRESULT Library_nf_hardware_rpi_native_nanoFramework_Hardware_Rpi_Pio_PioBlock::
     NANOCLR_HEADER();
     {
         int block = stack.Arg0().NumericByRef().s4;
-        unsigned short *instr = (unsigned short *)stack.Arg1().DereferenceArray()->GetFirstElement();
+        CLR_RT_HeapBlock_Array *instrArray = stack.Arg1().DereferenceArray();
         int length = stack.Arg2().NumericByRef().s4;
         int origin = stack.Arg3().NumericByRef().s4;
 
-        PIO_TypeDef *pio = PioFromIndex(block);
-        if (pio == nullptr || block < 0 || block > 2)
+        if (PioFromIndex(block) == nullptr || block < 0 || block > 2 || instrArray == nullptr ||
+            length <= 0 || length > 32 || (int)instrArray->m_numOfElements < length)
         {
             NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
         }
 
-        // first PIO call in any flow, so un-reset here
+        PIO_TypeDef *pio = PioFromIndex(block);
+        unsigned short *instr = (unsigned short *)instrArray->GetFirstElement();
         PioEnsureOutOfReset(block);
 
         int offset = -1;
-        if (length > 0 && length <= 32)
+        // fixed origin: exact slots; relocatable: first-fit
+        if (origin >= 0)
         {
-            // fixed origin needs its exact slots free; relocatable takes the lowest free run (first-fit)
-            if (origin >= 0)
+            if (origin + length <= 32 && (g_PioInstrUsed[block] & PioSlotMask(origin, length)) == 0)
             {
-                if (origin + length <= 32 && (g_PioInstrUsed[block] & PioSlotMask(origin, length)) == 0)
-                {
-                    offset = origin;
-                }
+                offset = origin;
             }
-            else
+        }
+        else
+        {
+            for (int candidate = 0; candidate + length <= 32; candidate++)
             {
-                for (int candidate = 0; candidate + length <= 32; candidate++)
+                if ((g_PioInstrUsed[block] & PioSlotMask(candidate, length)) == 0)
                 {
-                    if ((g_PioInstrUsed[block] & PioSlotMask(candidate, length)) == 0)
-                    {
-                        offset = candidate;
-                        break;
-                    }
+                    offset = candidate;
+                    break;
                 }
             }
         }
@@ -124,6 +132,7 @@ HRESULT Library_nf_hardware_rpi_native_nanoFramework_Hardware_Rpi_Pio_PioBlock::
         {
             NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
         }
+        PioEnsureOutOfReset(block);
 
         // reclaim slots, blank to JMP-to-self so a stray enable can't run stale opcodes
         for (int i = 0; i < length; i++)
@@ -144,8 +153,7 @@ HRESULT Library_nf_hardware_rpi_native_nanoFramework_Hardware_Rpi_Pio_PioBlock::
         int block = stack.Arg0().NumericByRef().s4;
         bool required = stack.Arg1().NumericByRef().u1;
 
-        PIO_TypeDef *pio = PioFromIndex(block);
-        if (pio == nullptr)
+        if (PioFromIndex(block) == nullptr)
         {
             NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
         }
@@ -188,6 +196,7 @@ HRESULT Library_nf_hardware_rpi_native_nanoFramework_Hardware_Rpi_Pio_PioBlock::
         {
             NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
         }
+        PioEnsureOutOfReset(block);
 
         // FUNCSEL = 6 (PIO0), 7 (PIO1), 8 (PIO2)
         IO_BANK0->GPIO[pin].CTRL = 6u + (unsigned int)block;
@@ -210,6 +219,7 @@ HRESULT Library_nf_hardware_rpi_native_nanoFramework_Hardware_Rpi_Pio_PioBlock::
         {
             NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
         }
+        PioEnsureOutOfReset(block);
 
         pio->IRQ_FORCE = (1u << irq);
     }
@@ -229,6 +239,7 @@ HRESULT Library_nf_hardware_rpi_native_nanoFramework_Hardware_Rpi_Pio_PioBlock::
         {
             NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
         }
+        PioEnsureOutOfReset(block);
 
         pio->IRQ = (1u << irq);
     }

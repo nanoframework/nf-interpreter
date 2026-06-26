@@ -11,7 +11,7 @@
 #endif
 #include "nf_hardware_rpi_native_target.h"
 
-// FIFO busy-wait cap so a stalled SM times out instead of hanging the interpreter.
+// busy-wait cap so a stalled SM times out instead of hanging
 static const unsigned int PIO_FIFO_WAIT_LIMIT = 0x4000000u;
 
 // blob indices, must match PioStateMachineConfig.cs
@@ -59,34 +59,38 @@ HRESULT Library_nf_hardware_rpi_native_nanoFramework_Hardware_Rpi_Pio_PioStateMa
         int sm = stack.Arg1().NumericByRef().s4;
         int offset = stack.Arg2().NumericByRef().s4;
         CLR_RT_HeapBlock_Array *blobArray = stack.Arg3().DereferenceArray();
-        unsigned int *b = (unsigned int *)blobArray->GetFirstElement();
 
         PIO_TypeDef *pio = PioFromIndex(block);
-        if (pio == nullptr || sm < 0 || sm > 3 || (int)blobArray->m_numOfElements < PIO_CFG_BLOB_LENGTH)
+        if (pio == nullptr || sm < 0 || sm > 3 || blobArray == nullptr ||
+            (int)blobArray->m_numOfElements < PIO_CFG_BLOB_LENGTH)
         {
             NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
         }
+        PioEnsureOutOfReset(block);
+
+        unsigned int *b = (unsigned int *)blobArray->GetFirstElement();
 
         // disable + restart before reconfigure
         pio->CTRL &= ~(1u << sm);
         pio->CTRL |= (1u << (4 + sm)); // SM_RESTART
 
         // CLKDIV: int [31:16], frac [15:8]
-        pio->SM[sm].CLKDIV = (b[PIO_CFG_CLKDIV_INT] << 16) | (b[PIO_CFG_CLKDIV_FRAC] << 8);
+        pio->SM[sm].CLKDIV = ((b[PIO_CFG_CLKDIV_INT] & 0xFFFFu) << 16) | ((b[PIO_CFG_CLKDIV_FRAC] & 0xFFu) << 8);
 
-        // side-set count includes the optional enable bit
+        // side-set count includes the opt enable bit; each field masked to its width
         unsigned int sidesetTotal = b[PIO_CFG_SIDESET_COUNT] + b[PIO_CFG_SIDESET_OPT];
         pio->SM[sm].PINCTRL =
-            (sidesetTotal << 29) | (b[PIO_CFG_SET_COUNT] << 26) | (b[PIO_CFG_OUT_COUNT] << 20) |
-            (b[PIO_CFG_IN_BASE] << 15) | (b[PIO_CFG_SIDESET_BASE] << 10) | (b[PIO_CFG_SET_BASE] << 5) |
-            b[PIO_CFG_OUT_BASE];
+            ((sidesetTotal & 0x7u) << 29) | ((b[PIO_CFG_SET_COUNT] & 0x7u) << 26) |
+            ((b[PIO_CFG_OUT_COUNT] & 0x3Fu) << 20) | ((b[PIO_CFG_IN_BASE] & 0x1Fu) << 15) |
+            ((b[PIO_CFG_SIDESET_BASE] & 0x1Fu) << 10) | ((b[PIO_CFG_SET_BASE] & 0x1Fu) << 5) |
+            (b[PIO_CFG_OUT_BASE] & 0x1Fu);
 
         // EXECCTRL: wrap [16:12], wrap_target [11:7], side_en [30], side_pindir [29], jmp_pin [28:24]
         unsigned int execCtrl =
-            (b[PIO_CFG_WRAP] << 12) | (b[PIO_CFG_WRAP_TARGET] << 7) | (b[PIO_CFG_JMP_PIN] << 24) |
-            ((b[PIO_CFG_MOV_STATUS_SEL] & 1u) << 4) | (b[PIO_CFG_MOV_STATUS_N] & 0xFu) |
-            ((b[PIO_CFG_OUT_STICKY] & 1u) << 17) | ((b[PIO_CFG_INLINE_OUT_EN] & 1u) << 18) |
-            ((b[PIO_CFG_OUT_EN_SEL] & 0x1Fu) << 19);
+            ((b[PIO_CFG_WRAP] & 0x1Fu) << 12) | ((b[PIO_CFG_WRAP_TARGET] & 0x1Fu) << 7) |
+            ((b[PIO_CFG_JMP_PIN] & 0x1Fu) << 24) | ((b[PIO_CFG_MOV_STATUS_SEL] & 1u) << 4) |
+            (b[PIO_CFG_MOV_STATUS_N] & 0xFu) | ((b[PIO_CFG_OUT_STICKY] & 1u) << 17) |
+            ((b[PIO_CFG_INLINE_OUT_EN] & 1u) << 18) | ((b[PIO_CFG_OUT_EN_SEL] & 0x1Fu) << 19);
         if (b[PIO_CFG_SIDESET_OPT])
         {
             execCtrl |= (1u << 30);
@@ -103,13 +107,13 @@ HRESULT Library_nf_hardware_rpi_native_nanoFramework_Hardware_Rpi_Pio_PioStateMa
         // FJOIN: low 2 bits -> TX [30] / RX [31]; high 2 bits (PIO v1) -> RX_GET [14] / RX_PUT [15]
         unsigned int join = b[PIO_CFG_FIFO_JOIN];
         pio->SM[sm].SHIFTCTRL =
-            (b[PIO_CFG_IN_SHIFT_RIGHT] << 18) | (b[PIO_CFG_OUT_SHIFT_RIGHT] << 19) |
-            (b[PIO_CFG_AUTOPUSH] << 16) | (b[PIO_CFG_AUTOPULL] << 17) | (pushThresh << 20) |
-            (pullThresh << 25) | ((join & 3u) << 30) | ((join >> 2) << 14);
+            ((b[PIO_CFG_IN_SHIFT_RIGHT] & 1u) << 18) | ((b[PIO_CFG_OUT_SHIFT_RIGHT] & 1u) << 19) |
+            ((b[PIO_CFG_AUTOPUSH] & 1u) << 16) | ((b[PIO_CFG_AUTOPULL] & 1u) << 17) | (pushThresh << 20) |
+            (pullThresh << 25) | ((join & 3u) << 30) | (((join >> 2) & 3u) << 14);
 
 #if defined(RP2350)
         // GPIOBASE is 0 or 16; CMSIS types it __I so write through a volatile pointer
-        *(volatile unsigned int *)&pio->GPIOBASE = b[PIO_CFG_GPIO_BASE];
+        *(volatile unsigned int *)&pio->GPIOBASE = (b[PIO_CFG_GPIO_BASE] == 16) ? 16u : 0u;
 #endif
 
         // set PC via JMP <offset> (opcode 0)
@@ -132,6 +136,7 @@ HRESULT Library_nf_hardware_rpi_native_nanoFramework_Hardware_Rpi_Pio_PioStateMa
         {
             NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
         }
+        PioEnsureOutOfReset(block);
 
         if (enabled)
         {
@@ -159,6 +164,7 @@ HRESULT Library_nf_hardware_rpi_native_nanoFramework_Hardware_Rpi_Pio_PioStateMa
         {
             NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
         }
+        PioEnsureOutOfReset(block);
 
         // FSTAT TX_FULL = bits [19:16]
         unsigned int guard = PIO_FIFO_WAIT_LIMIT;
@@ -187,6 +193,7 @@ HRESULT Library_nf_hardware_rpi_native_nanoFramework_Hardware_Rpi_Pio_PioStateMa
         {
             NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
         }
+        PioEnsureOutOfReset(block);
 
         // FSTAT RX_EMPTY = bits [11:8]
         unsigned int guard = PIO_FIFO_WAIT_LIMIT;
@@ -215,6 +222,7 @@ HRESULT Library_nf_hardware_rpi_native_nanoFramework_Hardware_Rpi_Pio_PioStateMa
         {
             NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
         }
+        PioEnsureOutOfReset(block);
 
         stack.SetResult_Boolean((pio->FSTAT & (1u << (16 + sm))) != 0);
     }
@@ -234,6 +242,7 @@ HRESULT Library_nf_hardware_rpi_native_nanoFramework_Hardware_Rpi_Pio_PioStateMa
         {
             NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
         }
+        PioEnsureOutOfReset(block);
 
         stack.SetResult_Boolean((pio->FSTAT & (1u << (8 + sm))) != 0);
     }
@@ -253,6 +262,7 @@ HRESULT Library_nf_hardware_rpi_native_nanoFramework_Hardware_Rpi_Pio_PioStateMa
         {
             NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
         }
+        PioEnsureOutOfReset(block);
 
         // stop + release the claim
         pio->CTRL &= ~(1u << sm);
@@ -273,12 +283,17 @@ HRESULT Library_nf_hardware_rpi_native_nanoFramework_Hardware_Rpi_Pio_PioStateMa
         bool output = stack.Arg4().NumericByRef().u1;
 
         PIO_TypeDef *pio = PioFromIndex(block);
-        if (pio == nullptr || sm < 0 || sm > 3)
+#if defined(RP2350)
+        if (pio == nullptr || sm < 0 || sm > 3 || basePin < 0 || count < 0 || basePin + count > 48)
+#else
+        if (pio == nullptr || sm < 0 || sm > 3 || basePin < 0 || count < 0 || basePin + count > 30)
+#endif
         {
             NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
         }
+        PioEnsureOutOfReset(block);
 
-        // in chunks of up to 5 pins, point SET at them and exec "SET pindirs, dirs", then restore PINCTRL
+        // up to 5 pins per "SET pindirs" exec, then restore PINCTRL
         int pin = basePin;
         int remaining = count;
         unsigned int savedPinCtrl = pio->SM[sm].PINCTRL;
@@ -289,7 +304,7 @@ HRESULT Library_nf_hardware_rpi_native_nanoFramework_Hardware_Rpi_Pio_PioStateMa
             unsigned int dirs = output ? ((1u << chunk) - 1u) : 0u;
 
             // PINCTRL: SET_COUNT [28:26], SET_BASE [9:5]
-            pio->SM[sm].PINCTRL = ((unsigned int)chunk << 26) | ((unsigned int)pin << 5);
+            pio->SM[sm].PINCTRL = ((unsigned int)chunk << 26) | (((unsigned int)pin & 0x1Fu) << 5);
             // SET pindirs, dirs
             pio->SM[sm].INSTR = 0xE000u | (4u << 5) | (dirs & 0x1Fu);
 
@@ -315,6 +330,7 @@ HRESULT Library_nf_hardware_rpi_native_nanoFramework_Hardware_Rpi_Pio_PioStateMa
         {
             NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
         }
+        PioEnsureOutOfReset(block);
 
         // toggle FJOIN_RX (bit 31) twice to flush both FIFOs, SHIFTCTRL unchanged
         unsigned int fjoinRx = (1u << 31);
@@ -337,6 +353,7 @@ HRESULT Library_nf_hardware_rpi_native_nanoFramework_Hardware_Rpi_Pio_PioStateMa
         {
             NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
         }
+        PioEnsureOutOfReset(block);
 
         // exec OUT NULL,32 (autopull) or PULL noblock until TX empty. FSTAT TX_EMPTY = bits [27:24]
         unsigned int autopull = pio->SM[sm].SHIFTCTRL & (1u << 17);
@@ -367,6 +384,7 @@ HRESULT Library_nf_hardware_rpi_native_nanoFramework_Hardware_Rpi_Pio_PioStateMa
         {
             NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
         }
+        PioEnsureOutOfReset(block);
 
         // SM_RESTART = bits [7:4]
         pio->CTRL |= (1u << (4 + sm));
@@ -387,6 +405,7 @@ HRESULT Library_nf_hardware_rpi_native_nanoFramework_Hardware_Rpi_Pio_PioStateMa
         {
             NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
         }
+        PioEnsureOutOfReset(block);
 
         // CLKDIV_RESTART = bits [11:8]
         pio->CTRL |= (1u << (8 + sm));
@@ -408,6 +427,7 @@ HRESULT Library_nf_hardware_rpi_native_nanoFramework_Hardware_Rpi_Pio_PioStateMa
         {
             NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
         }
+        PioEnsureOutOfReset(block);
 
         // exec out of band, PC unchanged
         pio->SM[sm].INSTR = (unsigned int)instruction;
@@ -428,6 +448,7 @@ HRESULT Library_nf_hardware_rpi_native_nanoFramework_Hardware_Rpi_Pio_PioStateMa
         {
             NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
         }
+        PioEnsureOutOfReset(block);
 
         stack.SetResult_U4((pio->FLEVEL >> (8 * sm)) & 0xFu);
     }
@@ -447,6 +468,7 @@ HRESULT Library_nf_hardware_rpi_native_nanoFramework_Hardware_Rpi_Pio_PioStateMa
         {
             NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
         }
+        PioEnsureOutOfReset(block);
 
         stack.SetResult_U4((pio->FLEVEL >> (8 * sm + 4)) & 0xFu);
     }
@@ -466,6 +488,7 @@ HRESULT Library_nf_hardware_rpi_native_nanoFramework_Hardware_Rpi_Pio_PioStateMa
         {
             NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
         }
+        PioEnsureOutOfReset(block);
 
         stack.SetResult_U4(pio->SM[sm].ADDR & 0x1Fu);
     }
@@ -483,10 +506,13 @@ HRESULT Library_nf_hardware_rpi_native_nanoFramework_Hardware_Rpi_Pio_PioStateMa
         int clkDivFrac = stack.Arg3().NumericByRef().s4;
 
         PIO_TypeDef *pio = PioFromIndex(block);
-        if (pio == nullptr || sm < 0 || sm > 3)
+        // 16-bit int + 8-bit frac fields
+        if (pio == nullptr || sm < 0 || sm > 3 || clkDivInt < 0 || clkDivInt > 0xFFFF || clkDivFrac < 0 ||
+            clkDivFrac > 0xFF)
         {
             NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
         }
+        PioEnsureOutOfReset(block);
 
         pio->SM[sm].CLKDIV = ((unsigned int)clkDivInt << 16) | ((unsigned int)clkDivFrac << 8);
         pio->CTRL |= (1u << (8 + sm));
