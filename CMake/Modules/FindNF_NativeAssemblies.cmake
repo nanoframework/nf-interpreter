@@ -275,6 +275,11 @@ endif()
 if(API_Hardware.Rp2040)
     ##### API name here (doted name)
     PerformSettingsForApiEntry("nanoFramework.Hardware.Rp2040")
+
+    # special: the PIO IRQ driver is an internal interrupt driver (no managed end of its own); it is
+    # delivered to managed code through NativeEventDispatcher("PioIrqDriver", ...).
+    list(APPEND CLR_RT_NativeAssemblyDataList "extern const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_nanoFramework_Hardware_Rp2040_PioIrqDriver;")
+    list(APPEND CLR_RT_NativeAssemblyDataTableEntriesList "&g_CLR_AssemblyNative_nanoFramework_Hardware_Rp2040_PioIrqDriver,")
 endif()
 
 # nanoFramework.Device.Can
