@@ -17,9 +17,7 @@ set(nanoFramework.Hardware.Rpi_SRCS
 
     nf_hardware_rpi_native.cpp
     nf_hardware_rpi_native_nanoFramework_Hardware_Rpi_Pio_PioBlock.cpp
-    nf_hardware_rpi_native_nanoFramework_Hardware_Rpi_Pio_PioBlock_mshl.cpp
     nf_hardware_rpi_native_nanoFramework_Hardware_Rpi_Pio_PioStateMachine.cpp
-    nf_hardware_rpi_native_nanoFramework_Hardware_Rpi_Pio_PioStateMachine_mshl.cpp
     nf_hardware_rpi_native_PioIrqDriver.cpp
     nf_hardware_rpi_native_PioIrqHandlers.c
 )
