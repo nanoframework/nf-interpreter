@@ -305,9 +305,14 @@ void PioStateMachine::NativeDrainTxFifo(signed int param0, signed int param1, HR
     // exec OUT NULL,32 (autopull) or PULL noblock until TX empty. FSTAT TX_EMPTY = bits [27:24]
     unsigned int autopull = pio->SM[sm].SHIFTCTRL & (1u << 17);
     unsigned int instr = autopull ? 0x6060u : 0x8080u;
-    while ((pio->FSTAT & (1u << (24 + sm))) == 0)
+    unsigned int guard = PIO_FIFO_WAIT_LIMIT;
+    while ((pio->FSTAT & (1u << (24 + sm))) == 0 && --guard)
     {
         pio->SM[sm].INSTR = instr;
+    }
+    if (guard == 0)
+    {
+        hr = CLR_E_TIMEOUT;
     }
 }
 
