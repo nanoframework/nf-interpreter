@@ -15,13 +15,13 @@ list(APPEND nanoFramework.Hardware.Rpi_INCLUDE_DIRS "${BASE_PATH_FOR_THIS_MODULE
 # source files
 set(nanoFramework.Hardware.Rpi_SRCS
 
-    nanoFramework_Hardware_Rpi.cpp
-    nanoFramework_Hardware_Rpi_nanoFramework_Hardware_Rpi_Pio_PioBlock.cpp
-    nanoFramework_Hardware_Rpi_nanoFramework_Hardware_Rpi_Pio_PioBlock_mshl.cpp
-    nanoFramework_Hardware_Rpi_nanoFramework_Hardware_Rpi_Pio_PioStateMachine.cpp
-    nanoFramework_Hardware_Rpi_nanoFramework_Hardware_Rpi_Pio_PioStateMachine_mshl.cpp
-    nanoFramework_Hardware_Rpi_PioIrqDriver.cpp
-    nanoFramework_Hardware_Rpi_PioIrqHandlers.c
+    nf_hardware_rpi_native.cpp
+    nf_hardware_rpi_native_nanoFramework_Hardware_Rpi_Pio_PioBlock.cpp
+    nf_hardware_rpi_native_nanoFramework_Hardware_Rpi_Pio_PioBlock_mshl.cpp
+    nf_hardware_rpi_native_nanoFramework_Hardware_Rpi_Pio_PioStateMachine.cpp
+    nf_hardware_rpi_native_nanoFramework_Hardware_Rpi_Pio_PioStateMachine_mshl.cpp
+    nf_hardware_rpi_native_PioIrqDriver.cpp
+    nf_hardware_rpi_native_PioIrqHandlers.c
 )
 
 foreach(SRC_FILE ${nanoFramework.Hardware.Rpi_SRCS})

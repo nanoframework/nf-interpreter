@@ -5,32 +5,16 @@
 // so the same code serves RP2040 and RP2350 (which adds PIO2).
 //
 
-#include "nanoFramework_Hardware_Rpi.h"
-#include "nanoFramework_Hardware_Rpi_nanoFramework_Hardware_Rpi_Pio_PioBlock.h"
+#include "nf_hardware_rpi_native.h"
+#include "nf_hardware_rpi_native_nanoFramework_Hardware_Rpi_Pio_PioBlock.h"
 #if defined(RP2350)
 #include "rp2350.h"
 #else
 #include "rp2040.h"
 #endif
+#include "nf_hardware_rpi_native_target.h"
 
-using namespace nanoFramework_Hardware_Rpi::nanoFramework_Hardware_Rpi;
-
-static PIO_TypeDef *PioFromIndex(int index)
-{
-    switch (index)
-    {
-        case 0:
-            return PIO0;
-        case 1:
-            return PIO1;
-#if defined(RP2350)
-        case 2:
-            return PIO2;
-#endif
-        default:
-            return nullptr;
-    }
-}
+using namespace nf_hardware_rpi_native::nanoFramework_Hardware_Rpi;
 
 // per-block bookkeeping (external linkage; PioStateMachine::NativeUnclaim releases a claim too)
 //   g_PioInstrUsed: bit per instruction slot 0..31 in use

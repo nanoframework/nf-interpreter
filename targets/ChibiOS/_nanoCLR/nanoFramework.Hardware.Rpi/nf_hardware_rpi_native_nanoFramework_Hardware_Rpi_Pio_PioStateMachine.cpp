@@ -4,15 +4,16 @@
 // PioStateMachine InternalCalls. NativeInit unpacks the config blob into the SM registers.
 //
 
-#include "nanoFramework_Hardware_Rpi.h"
-#include "nanoFramework_Hardware_Rpi_nanoFramework_Hardware_Rpi_Pio_PioStateMachine.h"
+#include "nf_hardware_rpi_native.h"
+#include "nf_hardware_rpi_native_nanoFramework_Hardware_Rpi_Pio_PioStateMachine.h"
 #if defined(RP2350)
 #include "rp2350.h"
 #else
 #include "rp2040.h"
 #endif
+#include "nf_hardware_rpi_native_target.h"
 
-using namespace nanoFramework_Hardware_Rpi::nanoFramework_Hardware_Rpi;
+using namespace nf_hardware_rpi_native::nanoFramework_Hardware_Rpi;
 
 // FIFO busy-wait cap so a stalled SM times out instead of hanging the interpreter.
 static const unsigned int PIO_FIFO_WAIT_LIMIT = 0x4000000u;
@@ -49,23 +50,6 @@ enum PioCfgBlob
     PIO_CFG_OUT_EN_SEL = 26,
     PIO_CFG_BLOB_LENGTH = 27,
 };
-
-static PIO_TypeDef *PioFromIndex(int index)
-{
-    switch (index)
-    {
-        case 0:
-            return PIO0;
-        case 1:
-            return PIO1;
-#if defined(RP2350)
-        case 2:
-            return PIO2;
-#endif
-        default:
-            return nullptr;
-    }
-}
 
 void PioStateMachine::NativeInit(
     signed int param0,

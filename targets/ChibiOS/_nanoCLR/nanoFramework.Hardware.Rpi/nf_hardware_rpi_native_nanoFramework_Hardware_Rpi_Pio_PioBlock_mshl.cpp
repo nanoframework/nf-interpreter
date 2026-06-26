@@ -6,13 +6,13 @@
 //
 //-----------------------------------------------------------------------------
 
-#include "nanoFramework_Hardware_Rpi.h"
-#include "nanoFramework_Hardware_Rpi_nanoFramework_Hardware_Rpi_Pio_PioBlock.h"
+#include "nf_hardware_rpi_native.h"
+#include "nf_hardware_rpi_native_nanoFramework_Hardware_Rpi_Pio_PioBlock.h"
 
-using namespace nanoFramework_Hardware_Rpi::nanoFramework_Hardware_Rpi;
+using namespace nf_hardware_rpi_native::nanoFramework_Hardware_Rpi;
 
 
-HRESULT Library_nanoFramework_Hardware_Rpi_nanoFramework_Hardware_Rpi_Pio_PioBlock::NativeAddProgram___STATIC__I4__I4__SZARRAY_U2__I4__I4( CLR_RT_StackFrame& stack )
+HRESULT Library_nf_hardware_rpi_native_nanoFramework_Hardware_Rpi_Pio_PioBlock::NativeAddProgram___STATIC__I4__I4__SZARRAY_U2__I4__I4( CLR_RT_StackFrame& stack )
 {
     NANOCLR_HEADER(); hr = S_OK;
     {
@@ -36,7 +36,7 @@ HRESULT Library_nanoFramework_Hardware_Rpi_nanoFramework_Hardware_Rpi_Pio_PioBlo
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_nanoFramework_Hardware_Rpi_nanoFramework_Hardware_Rpi_Pio_PioBlock::NativeRemoveProgram___STATIC__VOID__I4__I4__I4( CLR_RT_StackFrame& stack )
+HRESULT Library_nf_hardware_rpi_native_nanoFramework_Hardware_Rpi_Pio_PioBlock::NativeRemoveProgram___STATIC__VOID__I4__I4__I4( CLR_RT_StackFrame& stack )
 {
     NANOCLR_HEADER(); hr = S_OK;
     {
@@ -57,7 +57,7 @@ HRESULT Library_nanoFramework_Hardware_Rpi_nanoFramework_Hardware_Rpi_Pio_PioBlo
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_nanoFramework_Hardware_Rpi_nanoFramework_Hardware_Rpi_Pio_PioBlock::NativeClaimUnusedSm___STATIC__I4__I4__BOOLEAN( CLR_RT_StackFrame& stack )
+HRESULT Library_nf_hardware_rpi_native_nanoFramework_Hardware_Rpi_Pio_PioBlock::NativeClaimUnusedSm___STATIC__I4__I4__BOOLEAN( CLR_RT_StackFrame& stack )
 {
     NANOCLR_HEADER(); hr = S_OK;
     {
@@ -75,7 +75,7 @@ HRESULT Library_nanoFramework_Hardware_Rpi_nanoFramework_Hardware_Rpi_Pio_PioBlo
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_nanoFramework_Hardware_Rpi_nanoFramework_Hardware_Rpi_Pio_PioBlock::NativeInitGpio___STATIC__VOID__I4__I4( CLR_RT_StackFrame& stack )
+HRESULT Library_nf_hardware_rpi_native_nanoFramework_Hardware_Rpi_Pio_PioBlock::NativeInitGpio___STATIC__VOID__I4__I4( CLR_RT_StackFrame& stack )
 {
     NANOCLR_HEADER(); hr = S_OK;
     {
@@ -93,7 +93,7 @@ HRESULT Library_nanoFramework_Hardware_Rpi_nanoFramework_Hardware_Rpi_Pio_PioBlo
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_nanoFramework_Hardware_Rpi_nanoFramework_Hardware_Rpi_Pio_PioBlock::NativeForceIrq___STATIC__VOID__I4__I4( CLR_RT_StackFrame& stack )
+HRESULT Library_nf_hardware_rpi_native_nanoFramework_Hardware_Rpi_Pio_PioBlock::NativeForceIrq___STATIC__VOID__I4__I4( CLR_RT_StackFrame& stack )
 {
     NANOCLR_HEADER(); hr = S_OK;
     {
@@ -111,7 +111,7 @@ HRESULT Library_nanoFramework_Hardware_Rpi_nanoFramework_Hardware_Rpi_Pio_PioBlo
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_nanoFramework_Hardware_Rpi_nanoFramework_Hardware_Rpi_Pio_PioBlock::NativeClearIrq___STATIC__VOID__I4__I4( CLR_RT_StackFrame& stack )
+HRESULT Library_nf_hardware_rpi_native_nanoFramework_Hardware_Rpi_Pio_PioBlock::NativeClearIrq___STATIC__VOID__I4__I4( CLR_RT_StackFrame& stack )
 {
     NANOCLR_HEADER(); hr = S_OK;
     {

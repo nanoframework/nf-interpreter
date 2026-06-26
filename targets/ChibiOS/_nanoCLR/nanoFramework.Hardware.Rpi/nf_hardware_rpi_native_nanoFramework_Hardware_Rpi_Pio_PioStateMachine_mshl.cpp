@@ -6,13 +6,13 @@
 //
 //-----------------------------------------------------------------------------
 
-#include "nanoFramework_Hardware_Rpi.h"
-#include "nanoFramework_Hardware_Rpi_nanoFramework_Hardware_Rpi_Pio_PioStateMachine.h"
+#include "nf_hardware_rpi_native.h"
+#include "nf_hardware_rpi_native_nanoFramework_Hardware_Rpi_Pio_PioStateMachine.h"
 
-using namespace nanoFramework_Hardware_Rpi::nanoFramework_Hardware_Rpi;
+using namespace nf_hardware_rpi_native::nanoFramework_Hardware_Rpi;
 
 
-HRESULT Library_nanoFramework_Hardware_Rpi_nanoFramework_Hardware_Rpi_Pio_PioStateMachine::NativeInit___STATIC__VOID__I4__I4__I4__SZARRAY_U4( CLR_RT_StackFrame& stack )
+HRESULT Library_nf_hardware_rpi_native_nanoFramework_Hardware_Rpi_Pio_PioStateMachine::NativeInit___STATIC__VOID__I4__I4__I4__SZARRAY_U4( CLR_RT_StackFrame& stack )
 {
     NANOCLR_HEADER(); hr = S_OK;
     {
@@ -36,7 +36,7 @@ HRESULT Library_nanoFramework_Hardware_Rpi_nanoFramework_Hardware_Rpi_Pio_PioSta
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_nanoFramework_Hardware_Rpi_nanoFramework_Hardware_Rpi_Pio_PioStateMachine::NativeSetEnabled___STATIC__VOID__I4__I4__BOOLEAN( CLR_RT_StackFrame& stack )
+HRESULT Library_nf_hardware_rpi_native_nanoFramework_Hardware_Rpi_Pio_PioStateMachine::NativeSetEnabled___STATIC__VOID__I4__I4__BOOLEAN( CLR_RT_StackFrame& stack )
 {
     NANOCLR_HEADER(); hr = S_OK;
     {
@@ -57,7 +57,7 @@ HRESULT Library_nanoFramework_Hardware_Rpi_nanoFramework_Hardware_Rpi_Pio_PioSta
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_nanoFramework_Hardware_Rpi_nanoFramework_Hardware_Rpi_Pio_PioStateMachine::NativePutBlocking___STATIC__VOID__I4__I4__U4( CLR_RT_StackFrame& stack )
+HRESULT Library_nf_hardware_rpi_native_nanoFramework_Hardware_Rpi_Pio_PioStateMachine::NativePutBlocking___STATIC__VOID__I4__I4__U4( CLR_RT_StackFrame& stack )
 {
     NANOCLR_HEADER(); hr = S_OK;
     {
@@ -78,7 +78,7 @@ HRESULT Library_nanoFramework_Hardware_Rpi_nanoFramework_Hardware_Rpi_Pio_PioSta
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_nanoFramework_Hardware_Rpi_nanoFramework_Hardware_Rpi_Pio_PioStateMachine::NativeGetBlocking___STATIC__U4__I4__I4( CLR_RT_StackFrame& stack )
+HRESULT Library_nf_hardware_rpi_native_nanoFramework_Hardware_Rpi_Pio_PioStateMachine::NativeGetBlocking___STATIC__U4__I4__I4( CLR_RT_StackFrame& stack )
 {
     NANOCLR_HEADER(); hr = S_OK;
     {
@@ -96,7 +96,7 @@ HRESULT Library_nanoFramework_Hardware_Rpi_nanoFramework_Hardware_Rpi_Pio_PioSta
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_nanoFramework_Hardware_Rpi_nanoFramework_Hardware_Rpi_Pio_PioStateMachine::NativeTxFull___STATIC__BOOLEAN__I4__I4( CLR_RT_StackFrame& stack )
+HRESULT Library_nf_hardware_rpi_native_nanoFramework_Hardware_Rpi_Pio_PioStateMachine::NativeTxFull___STATIC__BOOLEAN__I4__I4( CLR_RT_StackFrame& stack )
 {
     NANOCLR_HEADER(); hr = S_OK;
     {
@@ -114,7 +114,7 @@ HRESULT Library_nanoFramework_Hardware_Rpi_nanoFramework_Hardware_Rpi_Pio_PioSta
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_nanoFramework_Hardware_Rpi_nanoFramework_Hardware_Rpi_Pio_PioStateMachine::NativeRxEmpty___STATIC__BOOLEAN__I4__I4( CLR_RT_StackFrame& stack )
+HRESULT Library_nf_hardware_rpi_native_nanoFramework_Hardware_Rpi_Pio_PioStateMachine::NativeRxEmpty___STATIC__BOOLEAN__I4__I4( CLR_RT_StackFrame& stack )
 {
     NANOCLR_HEADER(); hr = S_OK;
     {
@@ -132,7 +132,7 @@ HRESULT Library_nanoFramework_Hardware_Rpi_nanoFramework_Hardware_Rpi_Pio_PioSta
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_nanoFramework_Hardware_Rpi_nanoFramework_Hardware_Rpi_Pio_PioStateMachine::NativeUnclaim___STATIC__VOID__I4__I4( CLR_RT_StackFrame& stack )
+HRESULT Library_nf_hardware_rpi_native_nanoFramework_Hardware_Rpi_Pio_PioStateMachine::NativeUnclaim___STATIC__VOID__I4__I4( CLR_RT_StackFrame& stack )
 {
     NANOCLR_HEADER(); hr = S_OK;
     {
@@ -150,7 +150,7 @@ HRESULT Library_nanoFramework_Hardware_Rpi_nanoFramework_Hardware_Rpi_Pio_PioSta
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_nanoFramework_Hardware_Rpi_nanoFramework_Hardware_Rpi_Pio_PioStateMachine::NativeSetConsecutivePinDirs___STATIC__VOID__I4__I4__I4__I4__BOOLEAN( CLR_RT_StackFrame& stack )
+HRESULT Library_nf_hardware_rpi_native_nanoFramework_Hardware_Rpi_Pio_PioStateMachine::NativeSetConsecutivePinDirs___STATIC__VOID__I4__I4__I4__I4__BOOLEAN( CLR_RT_StackFrame& stack )
 {
     NANOCLR_HEADER(); hr = S_OK;
     {
@@ -177,7 +177,7 @@ HRESULT Library_nanoFramework_Hardware_Rpi_nanoFramework_Hardware_Rpi_Pio_PioSta
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_nanoFramework_Hardware_Rpi_nanoFramework_Hardware_Rpi_Pio_PioStateMachine::NativeClearFifos___STATIC__VOID__I4__I4( CLR_RT_StackFrame& stack )
+HRESULT Library_nf_hardware_rpi_native_nanoFramework_Hardware_Rpi_Pio_PioStateMachine::NativeClearFifos___STATIC__VOID__I4__I4( CLR_RT_StackFrame& stack )
 {
     NANOCLR_HEADER(); hr = S_OK;
     {
@@ -195,7 +195,7 @@ HRESULT Library_nanoFramework_Hardware_Rpi_nanoFramework_Hardware_Rpi_Pio_PioSta
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_nanoFramework_Hardware_Rpi_nanoFramework_Hardware_Rpi_Pio_PioStateMachine::NativeDrainTxFifo___STATIC__VOID__I4__I4( CLR_RT_StackFrame& stack )
+HRESULT Library_nf_hardware_rpi_native_nanoFramework_Hardware_Rpi_Pio_PioStateMachine::NativeDrainTxFifo___STATIC__VOID__I4__I4( CLR_RT_StackFrame& stack )
 {
     NANOCLR_HEADER(); hr = S_OK;
     {
@@ -213,7 +213,7 @@ HRESULT Library_nanoFramework_Hardware_Rpi_nanoFramework_Hardware_Rpi_Pio_PioSta
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_nanoFramework_Hardware_Rpi_nanoFramework_Hardware_Rpi_Pio_PioStateMachine::NativeRestart___STATIC__VOID__I4__I4( CLR_RT_StackFrame& stack )
+HRESULT Library_nf_hardware_rpi_native_nanoFramework_Hardware_Rpi_Pio_PioStateMachine::NativeRestart___STATIC__VOID__I4__I4( CLR_RT_StackFrame& stack )
 {
     NANOCLR_HEADER(); hr = S_OK;
     {
@@ -231,7 +231,7 @@ HRESULT Library_nanoFramework_Hardware_Rpi_nanoFramework_Hardware_Rpi_Pio_PioSta
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_nanoFramework_Hardware_Rpi_nanoFramework_Hardware_Rpi_Pio_PioStateMachine::NativeClkDivRestart___STATIC__VOID__I4__I4( CLR_RT_StackFrame& stack )
+HRESULT Library_nf_hardware_rpi_native_nanoFramework_Hardware_Rpi_Pio_PioStateMachine::NativeClkDivRestart___STATIC__VOID__I4__I4( CLR_RT_StackFrame& stack )
 {
     NANOCLR_HEADER(); hr = S_OK;
     {
@@ -249,7 +249,7 @@ HRESULT Library_nanoFramework_Hardware_Rpi_nanoFramework_Hardware_Rpi_Pio_PioSta
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_nanoFramework_Hardware_Rpi_nanoFramework_Hardware_Rpi_Pio_PioStateMachine::NativeExec___STATIC__VOID__I4__I4__U2( CLR_RT_StackFrame& stack )
+HRESULT Library_nf_hardware_rpi_native_nanoFramework_Hardware_Rpi_Pio_PioStateMachine::NativeExec___STATIC__VOID__I4__I4__U2( CLR_RT_StackFrame& stack )
 {
     NANOCLR_HEADER(); hr = S_OK;
     {
@@ -270,7 +270,7 @@ HRESULT Library_nanoFramework_Hardware_Rpi_nanoFramework_Hardware_Rpi_Pio_PioSta
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_nanoFramework_Hardware_Rpi_nanoFramework_Hardware_Rpi_Pio_PioStateMachine::NativeTxLevel___STATIC__U4__I4__I4( CLR_RT_StackFrame& stack )
+HRESULT Library_nf_hardware_rpi_native_nanoFramework_Hardware_Rpi_Pio_PioStateMachine::NativeTxLevel___STATIC__U4__I4__I4( CLR_RT_StackFrame& stack )
 {
     NANOCLR_HEADER(); hr = S_OK;
     {
@@ -288,7 +288,7 @@ HRESULT Library_nanoFramework_Hardware_Rpi_nanoFramework_Hardware_Rpi_Pio_PioSta
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_nanoFramework_Hardware_Rpi_nanoFramework_Hardware_Rpi_Pio_PioStateMachine::NativeRxLevel___STATIC__U4__I4__I4( CLR_RT_StackFrame& stack )
+HRESULT Library_nf_hardware_rpi_native_nanoFramework_Hardware_Rpi_Pio_PioStateMachine::NativeRxLevel___STATIC__U4__I4__I4( CLR_RT_StackFrame& stack )
 {
     NANOCLR_HEADER(); hr = S_OK;
     {
@@ -306,7 +306,7 @@ HRESULT Library_nanoFramework_Hardware_Rpi_nanoFramework_Hardware_Rpi_Pio_PioSta
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_nanoFramework_Hardware_Rpi_nanoFramework_Hardware_Rpi_Pio_PioStateMachine::NativeGetPc___STATIC__U4__I4__I4( CLR_RT_StackFrame& stack )
+HRESULT Library_nf_hardware_rpi_native_nanoFramework_Hardware_Rpi_Pio_PioStateMachine::NativeGetPc___STATIC__U4__I4__I4( CLR_RT_StackFrame& stack )
 {
     NANOCLR_HEADER(); hr = S_OK;
     {
@@ -324,7 +324,7 @@ HRESULT Library_nanoFramework_Hardware_Rpi_nanoFramework_Hardware_Rpi_Pio_PioSta
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_nanoFramework_Hardware_Rpi_nanoFramework_Hardware_Rpi_Pio_PioStateMachine::NativeSetClockDivisor___STATIC__VOID__I4__I4__I4__I4( CLR_RT_StackFrame& stack )
+HRESULT Library_nf_hardware_rpi_native_nanoFramework_Hardware_Rpi_Pio_PioStateMachine::NativeSetClockDivisor___STATIC__VOID__I4__I4__I4__I4( CLR_RT_StackFrame& stack )
 {
     NANOCLR_HEADER(); hr = S_OK;
     {
