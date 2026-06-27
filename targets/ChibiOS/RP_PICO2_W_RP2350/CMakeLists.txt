@@ -52,6 +52,7 @@ nf_setup_target_build(
     CLR_EXTRA_COMPILE_DEFINITIONS
         -DRUNTIME_MEMORY_PROFILE__small=1
         -DTARGET_HAS_WIFI=1
+        -DTARGET_RP2350=1
         -DRP_PIO_REQUIRED=1
         LFS_CONFIG=lfs_config.h
 
