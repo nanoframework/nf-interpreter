@@ -15,16 +15,16 @@
 
 //////////////////////////////////
 // RP2350 Internal Flash
-// 4 MB total, littlefs region: 0x103F8000 - 0x103FFFFF (32 KB)
+// 4 MB total, littlefs region: 0x103E0000 - 0x103FFFFF (128 KB)
 
 // XIP base address
 #define RP2350_XIP_BASE 0x10000000U
 
 // littlefs partition start address (XIP-mapped)
-#define RP2350_LFS_BASE 0x103F8000U
+#define RP2350_LFS_BASE 0x103E0000U
 
 // littlefs partition size
-#define RP2350_LFS_SIZE (32U * 1024U)
+#define RP2350_LFS_SIZE (128U * 1024U)
 
 // Flash geometry
 #define RP2350_FLASH_SECTOR_SIZE 0x1000 // 4 KB
