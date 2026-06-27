@@ -183,8 +183,8 @@ The above .NET nanoFramework interpreter builds include support for the class li
   | RP_PICO_RP2040 | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |  | :heavy_check_mark: |  |  |  |  |  |  |  |
   | RP_PICO2_RP2350 | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |  | :heavy_check_mark: |  |  |  |  |  |  |  |
   | RP_PICO_W_RP2040 | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |  | :heavy_check_mark: |  |  |  | :heavy_check_mark: Wi-Fi |  |  |  |
-  | RP_PICO_W_RP2350 | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |  | :heavy_check_mark: |  |  |  | :heavy_check_mark: Wi-Fi |  |  |  |
-  
+  | RP_PICO2_W_RP2350 | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |  | :heavy_check_mark: |  |  |  | :heavy_check_mark: Wi-Fi |  |  |  |
+
 </details>
 
 <details>
