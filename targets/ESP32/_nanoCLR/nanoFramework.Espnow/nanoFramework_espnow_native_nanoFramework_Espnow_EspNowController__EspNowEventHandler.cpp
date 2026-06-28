@@ -4,6 +4,12 @@
 
 #include "nanoFramework_espnow_native.h"
 
+typedef EspNowDataSentEventData DataSentEventData;
+typedef EspNowDataRecvEventData DataRecvEventData;
+
+static const int EVENT_ESPNOW_DATASENT = 1;
+static const int EVENT_ESPNOW_DATARECV = 2;
+
 HRESULT
 Library_nanoFramework_EspNow_native_nanoFramework_EspNow_EspNowController__EspNowEventHandler::CopyByteArrayToCLRArray(
     CLR_RT_HeapBlock &target,
@@ -35,7 +41,7 @@ Library_nanoFramework_EspNow_native_nanoFramework_EspNow_EspNowController__EspNo
 {
     NANOCLR_HEADER();
 
-    EspNowDataSentEventData *sentEventData = (EspNowDataSentEventData *)stack.Arg2().NumericByRef().u4;
+    DataSentEventData *sentEventData = (DataSentEventData *)stack.Arg2().NumericByRef().u4;
     CLR_RT_HeapBlock *dataSentEvent;
 
     // create nanoFramework.EspNow.EspNowController.DataSentEventInternal instance to return
@@ -60,7 +66,14 @@ Library_nanoFramework_EspNow_native_nanoFramework_EspNow_EspNowController__EspNo
     dataSentEvent[Library_nanoFramework_EspNow_native_nanoFramework_EspNow_DataSentEventInternal::FIELD__Status]
         .SetInteger(sentEventData->status);
 
-    NANOCLR_NOCLEANUP();
+    NANOCLR_CLEANUP();
+
+    if (sentEventData != NULL)
+    {
+        platform_free(sentEventData);
+    }
+
+    NANOCLR_CLEANUP_END();
 }
 
 HRESULT
@@ -69,7 +82,7 @@ Library_nanoFramework_EspNow_native_nanoFramework_EspNow_EspNowController__EspNo
 {
     NANOCLR_HEADER();
 
-    EspNowDataRecvEventData *recvEventData = (EspNowDataRecvEventData *)stack.Arg2().NumericByRef().u4;
+    DataRecvEventData *recvEventData = (DataRecvEventData *)stack.Arg2().NumericByRef().u4;
     CLR_RT_HeapBlock *dataRecvEvent;
 
     // create nanoFramework.EspNow.EspNowController.DataRecvEventInternal instance to return
@@ -99,7 +112,14 @@ Library_nanoFramework_EspNow_native_nanoFramework_EspNow_EspNowController__EspNo
     dataRecvEvent[Library_nanoFramework_EspNow_native_nanoFramework_EspNow_DataRecvEventInternal::FIELD__DataLen]
         .SetInteger(recvEventData->dataLen);
 
-    NANOCLR_NOCLEANUP();
+    NANOCLR_CLEANUP();
+
+    if (recvEventData != NULL)
+    {
+        platform_free(recvEventData);
+    }
+
+    NANOCLR_CLEANUP_END();
 }
 
 HRESULT
