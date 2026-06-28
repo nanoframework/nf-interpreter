@@ -1030,6 +1030,24 @@ jobs:
             eq(variables['System.PullRequest.PullRequestId'], '')
           )
 
+      - task: CopyFiles@2
+        condition: succeeded()
+        displayName: Stage win-x64 nanoCLR runtime artifact
+        inputs:
+          SourceFolder: "$(Build.SourcesDirectory)/nf-interpreter/build/bin/Release"
+          Contents: "nanoFramework.nanoCLR.dll"
+          TargetFolder: "$(Build.ArtifactStagingDirectory)/runtimes/win-x64/native"
+          flattenFolders: true
+          ignoreMakeDirErrors: true
+
+      - task: PublishPipelineArtifact@1
+        condition: succeeded()
+        displayName: Publish win-x64 nanoCLR runtime artifact
+        inputs:
+          targetPath: "$(Build.ArtifactStagingDirectory)"
+          artifactName: nanoclr_win_x64
+          artifactType: pipeline
+
       - task: NuGetCommand@2
         condition: succeeded()
         displayName: Pack nanoCLR WIN32
@@ -1121,6 +1139,237 @@ jobs:
           publishFeedCredentials: "NuGet-nf-interpreter"
 
       - template: azure-pipelines-templates/publish-nanoclr.yml
+
+  #################
+  # WIN ARM64 native DLL
+  - job: Build_WIN_ARM64_nanoCLR
+    condition: >-
+      or(
+        and(
+          succeeded('Check_Code_Style'),
+          ne( dependencies.Check_Build_Options.outputs['BuildOptions.SKIP_BUILD'], true ),
+          or(
+            eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ALL'], true),
+            eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_WIN32'], true)
+          )
+        ),
+        and(
+          eq(variables['Build.Reason'], 'Manual'),
+          or(
+            eq(variables['BUILD_ALL__'], 'true'),
+            eq(variables['BUILD_WINDOWS_NANOCLR__'], 'true')
+          )
+        )
+      )
+
+    dependsOn:
+      - Check_Build_Options
+      - Check_Code_Style
+
+    pool:
+      vmImage: "windows-2022"
+
+    variables:
+      - group: sign-client-credentials
+      - name: DOTNET_NOLOGO
+        value: true
+      # creates a counter and assigns it to the revision variable
+      - name: REVISION
+        value: $[counter('WIN_ARM64_1_14_0_versioncounter', 0)]
+      - name: LITTLEFS_PATH
+        value: "D:/a/1/s/littlefs"
+
+    steps:
+      - checkout: self
+      - checkout: littlefs
+        fetchDepth: 1
+
+      - template: azure-pipelines-templates/nb-gitversioning.yml
+        parameters:
+          repoDirectory: '$(Build.SourcesDirectory)/nf-interpreter'
+
+      - task: PowerShell@2
+        displayName: Store CLR DLL revision
+        name: SetRevision
+        inputs:
+          targetType: "inline"
+          script: |
+            Write-Host "$("##vso[task.setvariable variable=CLR_REVISION;isOutput=true]")$(REVISION)"
+
+      - task: PowerShell@2
+        displayName: Store package version
+        inputs:
+          targetType: "inline"
+          script: |
+            Write-Host "$("##vso[task.setvariable variable=WINCLR_PACKAGE_VERSION]")$(NBGV_VersionMajor).$(NBGV_VersionMinor).$(NBGV_BuildNumber).$(TARGET_BUILD_COUNTER)"
+            Write-Host "$("##vso[task.setvariable variable=WINCLR_AssemblyInformationalVersion]")$(NBGV_VersionMajor).$(NBGV_VersionMinor).$(NBGV_BuildNumber).$(TARGET_BUILD_COUNTER)$(NBGV_BuildMetadataFragment)"
+
+      - template: azure-pipelines-templates/install-nuget.yml@templates
+
+      - task: Cache@2
+        displayName: Cache NuGet packages
+        continueOnError: true
+        inputs:
+          key: 'nuget | **/targets/netcore/nanoFramework.nanoCLR.Host/packages.lock.json | **/targets/netcore/nanoFramework.nanoCLR.CLI/packages.lock.json'
+          path: $(UserProfile)/.nuget/packages
+
+      - task: DotNetCoreCLI@2
+        displayName: Restore NuGet packages
+        inputs:
+          command: restore
+          restoreArguments: "--locked-mode"
+          verbosityRestore: minimal
+          projects: nf-interpreter/targets/netcore/nanoCLR.sln
+          feedsToUse: select
+          includeNuGetOrg: true
+
+      - task: VSBuild@1
+        displayName: Build WIN ARM64 DLL target
+        inputs:
+          solution: "nf-interpreter/targets/netcore/nanoCLR.sln"
+          vsVersion: "17.0"
+          msbuildArchitecture: "x64"
+          platform: "ARM64"
+          maximumCpuCount: true
+          msbuildArgs: "/restore /p:PublicRelease=true /p:BuildWithNetFrameworkHostedCompiler=true"
+          configuration: "Release"
+
+      - pwsh: |
+          $ErrorActionPreference = "Stop"
+
+          Write-Host "Agent OS: $env:Agent_OS"
+          Write-Host "PROCESSOR_ARCHITECTURE: $env:PROCESSOR_ARCHITECTURE"
+          Write-Host "Build.SourcesDirectory: $(Build.SourcesDirectory)"
+          Write-Host "LITTLEFS_PATH: $(LITTLEFS_PATH)"
+
+          $vswhere = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
+
+          if (-not (Test-Path $vswhere)) {
+            throw "vswhere.exe was not found."
+          }
+
+          $vsPath = & $vswhere `
+            -latest `
+            -version "[17.0,18.0)" `
+            -products * `
+            -requires Microsoft.VisualStudio.Component.VC.Tools.ARM64 `
+            -property installationPath
+
+          if (-not $vsPath) {
+            throw "Visual Studio 2022 with ARM64 C++ tools was not found."
+          }
+
+          Write-Host "Visual Studio path: $vsPath"
+
+          $dumpbin = Get-ChildItem `
+            "$vsPath\VC\Tools\MSVC\*\bin\Hostx64\x64\dumpbin.exe" `
+            -ErrorAction SilentlyContinue |
+            Sort-Object FullName -Descending |
+            Select-Object -First 1
+
+          if (-not $dumpbin) {
+            throw "dumpbin.exe was not found."
+          }
+
+          Write-Host "dumpbin path: $($dumpbin.FullName)"
+
+          $repoRootCandidates = @(
+            "$(Build.SourcesDirectory)",
+            (Join-Path "$(Build.SourcesDirectory)" "nf-interpreter")
+          )
+
+          $repoRoot = $repoRootCandidates |
+            Where-Object { Test-Path (Join-Path $_ "targets\netcore\nanoCLR.sln") } |
+            Select-Object -First 1
+
+          if (-not $repoRoot) {
+            throw "Could not resolve repository root from Build.SourcesDirectory."
+          }
+
+          $solutionPath = Join-Path $repoRoot "targets\netcore\nanoCLR.sln"
+          $binDir = Join-Path $repoRoot "build\bin\Release"
+
+          Write-Host "Resolved repository root: $repoRoot"
+          Write-Host "Solution path: $solutionPath"
+          Write-Host "Configuration: Release"
+          Write-Host "Platform: ARM64"
+          Write-Host "Output path: $binDir"
+
+          $targets = @(
+            (Join-Path $binDir "Core.lib"),
+            (Join-Path $binDir "nanoFramework.nanoCLR.dll")
+          )
+
+          foreach ($target in $targets) {
+            if (-not (Test-Path $target)) {
+              throw "Expected build artifact was not found: $target"
+            }
+
+            Write-Host "Verifying architecture: $target"
+
+            $headers = & $dumpbin.FullName /headers $target 2>&1
+            $machineLines = $headers | Select-String "machine"
+
+            $machineLines | ForEach-Object {
+              Write-Host $_
+            }
+
+            if (($headers -join "`n") -notmatch "AA64 machine \(ARM64\)") {
+              throw "Expected an ARM64 artifact: $target"
+            }
+          }
+        displayName: Verify ARM64 build artifacts
+
+      - task: DotNetCoreCLI@2
+        displayName: Install Sign Client CLI
+        condition: >-
+          and(
+            succeeded(),
+            eq(variables['System.PullRequest.PullRequestId'], '')
+          )
+        inputs:
+          command: custom
+          custom: tool
+          arguments: install --tool-path . sign --version 0.9.1-beta.23530.1
+
+      - pwsh: |
+          .\sign code azure-key-vault `
+          "**/nanoFramework.nanoCLR.*" `
+          --base-directory "$(Build.SourcesDirectory)/nf-interpreter/build/bin/Release" `
+          --publisher-name ".NET nanoFramework" `
+          --description "nanoFramework.nanoCLR" `
+          --description-url "https://github.com/$env:Build_Repository_Name" `
+          --azure-key-vault-tenant-id "$(SignTenantId)" `
+          --azure-key-vault-client-id "$(SignClientId)" `
+          --azure-key-vault-client-secret "$(SignClientSecret)" `
+          --azure-key-vault-certificate "$(SignKeyVaultCertificate)" `
+          --azure-key-vault-url "$(SignKeyVaultUrl)" `
+          --timestamp-url http://timestamp.digicert.com
+        displayName: Sign nanoCLR assemblies
+        continueOnError: true
+        condition: >-
+          and(
+            succeeded(),
+            eq(variables['System.PullRequest.PullRequestId'], '')
+          )
+
+      - task: CopyFiles@2
+        condition: succeeded()
+        displayName: Stage win-arm64 nanoCLR runtime artifact
+        inputs:
+          SourceFolder: "$(Build.SourcesDirectory)/nf-interpreter/build/bin/Release"
+          Contents: "nanoFramework.nanoCLR.dll"
+          TargetFolder: "$(Build.ArtifactStagingDirectory)/runtimes/win-arm64/native"
+          flattenFolders: true
+          ignoreMakeDirErrors: true
+
+      - task: PublishPipelineArtifact@1
+        condition: succeeded()
+        displayName: Publish win-arm64 nanoCLR runtime artifact
+        inputs:
+          targetPath: "$(Build.ArtifactStagingDirectory)"
+          artifactName: nanoclr_win_arm64
+          artifactType: pipeline
 
   #################
   # POSIX host target (macOS + Linux)
@@ -1299,6 +1548,7 @@ jobs:
       - Check_Build_Options
       - Check_Code_Style
       - Build_WIN32_nanoCLR
+      - Build_WIN_ARM64_nanoCLR
       - Build_POSIX_nanoCLR
 
     pool:
@@ -1413,6 +1663,20 @@ jobs:
         continueOnError: true
         inputs:
           artifact: nanoclr_posix_linux-arm64
+          path: "$(Build.SourcesDirectory)/native-libs"
+
+      - task: DownloadPipelineArtifact@2
+        displayName: 'Download Windows artifact: win-x64'
+        continueOnError: true
+        inputs:
+          artifact: nanoclr_win_x64
+          path: "$(Build.SourcesDirectory)/native-libs"
+
+      - task: DownloadPipelineArtifact@2
+        displayName: 'Download Windows artifact: win-arm64'
+        continueOnError: true
+        inputs:
+          artifact: nanoclr_win_arm64
           path: "$(Build.SourcesDirectory)/native-libs"
 
       - task: MSBuild@1
@@ -1628,6 +1892,7 @@ jobs:
       - Build_TI_SimpleLink_targets
       - Build_ThreadX_targets
       - Build_WIN32_nanoCLR
+      - Build_WIN_ARM64_nanoCLR
       - Build_POSIX_nanoCLR
       - Build_nanoCLR_CLI
       - Check_Code_Style
@@ -1642,6 +1907,7 @@ jobs:
           failed('Build_TI_SimpleLink_targets'),
           failed('Build_ThreadX_targets'),
           failed('Build_WIN32_nanoCLR'),
+          failed('Build_WIN_ARM64_nanoCLR'),
           failed('Build_POSIX_nanoCLR'),
           failed('Build_nanoCLR_CLI')
         )

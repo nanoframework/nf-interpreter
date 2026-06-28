@@ -41,10 +41,26 @@
 
   <!-- NuGet package files - native nanoCLR shared library, RID-specific paths -->
   <ItemGroup>
-    <!-- Windows: DLL is produced by the WIN32 build under build/bin/$(Configuration)/ -->
-    <None Condition="$([MSBuild]::IsOSPlatform('Windows'))" Include="..\..\..\build\bin\$(Configuration)\nanoFramework.nanoCLR.dll" Link="NanoCLR\nanoFramework.nanoCLR.dll">
+    <!-- Windows x64 -->
+    <None Condition="Exists('$(NativeBinRoot)runtimes\win-x64\native\nanoFramework.nanoCLR.dll')"
+          Include="$(NativeBinRoot)runtimes\win-x64\native\nanoFramework.nanoCLR.dll"
+          Link="NanoCLR\runtimes\win-x64\native\nanoFramework.nanoCLR.dll">
       <Pack>True</Pack>
-      <PackagePath>tools\$(PackageTfmSubFolder)any\NanoCLR</PackagePath>
+      <PackagePath>tools\$(PackageTfmSubFolder)any\NanoCLR\runtimes\win-x64\native</PackagePath>
+    </None>
+    <!-- Windows arm64 -->
+    <None Condition="Exists('$(NativeBinRoot)runtimes\win-arm64\native\nanoFramework.nanoCLR.dll')"
+          Include="$(NativeBinRoot)runtimes\win-arm64\native\nanoFramework.nanoCLR.dll"
+          Link="NanoCLR\runtimes\win-arm64\native\nanoFramework.nanoCLR.dll">
+      <Pack>True</Pack>
+      <PackagePath>tools\$(PackageTfmSubFolder)any\NanoCLR\runtimes\win-arm64\native</PackagePath>
+    </None>
+    <!-- Local Windows fallback: legacy single-arch build output is treated as win-x64. -->
+    <None Condition="$([MSBuild]::IsOSPlatform('Windows')) And !Exists('$(NativeBinRoot)runtimes\win-x64\native\nanoFramework.nanoCLR.dll') And Exists('..\..\..\build\bin\$(Configuration)\nanoFramework.nanoCLR.dll')"
+          Include="..\..\..\build\bin\$(Configuration)\nanoFramework.nanoCLR.dll"
+          Link="NanoCLR\runtimes\win-x64\native\nanoFramework.nanoCLR.dll">
+      <Pack>True</Pack>
+      <PackagePath>tools\$(PackageTfmSubFolder)any\NanoCLR\runtimes\win-x64\native</PackagePath>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <!-- macOS arm64 -->
