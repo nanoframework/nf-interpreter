@@ -14,7 +14,7 @@
     <IntDir Condition="'$(__IntDir)'==''">$(BuildDir)obj\$(Configuration)\$(ProjectName)\</IntDir>
   </PropertyGroup>
 
-  <PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)'=='Debug'">
     <NBGV_VersionMajor Condition="'$(NBGV_VersionMajor)'==''">9</NBGV_VersionMajor>
     <NBGV_VersionMinor Condition="'$(NBGV_VersionMinor)'==''">99</NBGV_VersionMinor>
     <NBGV_BuildNumber Condition="'$(NBGV_BuildNumber)'==''">999</NBGV_BuildNumber>
