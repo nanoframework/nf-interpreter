@@ -19,6 +19,16 @@ variables:
   BUILD_NANOCLR_CLI__: "false"
   RUN_MSCORLIB_TESTS__: "false"
   StartReleaseCandidate: "false"
+  NBGV_VersionMajor: "9"
+  NBGV_VersionMinor: "99"
+  NBGV_BuildNumber: "999"
+  TARGET_BUILD_COUNTER: "9999"
+  NBGV_Version: "9.99.999"
+  NBGV_AssemblyVersion: "9.99.999.9999"
+  NBGV_AssemblyFileVersion: "9.99.999.9999"
+  NBGV_AssemblyInformationalVersion: "9.99.999.9999-private-validation"
+  NBGV_NuGetPackageVersion: "9.99.999.9999"
+  NBGV_BuildMetadataFragment: "-private-validation"
 
 # add nf-tools repo to resources (for Azure Pipelines templates)
 resources:
@@ -193,7 +203,6 @@ jobs:
 
     steps:
       - template: azure-pipelines-templates/build-preparations.yml
-      - template: azure-pipelines-templates/nb-gitversioning.yml
       - template: azure-pipelines-templates/download-install-arm-gcc-toolchain.yml
       - template: azure-pipelines-templates/download-srecord.yml
       - template: azure-pipelines-templates/download-hexdfu.yml
@@ -316,7 +325,6 @@ jobs:
 
     steps:
       - template: azure-pipelines-templates/build-preparations.yml
-      - template: azure-pipelines-templates/nb-gitversioning.yml
       - template: azure-pipelines-templates/download-install-arm-gcc-toolchain.yml
       - template: azure-pipelines-templates/install-kconfig-tools.yml
       - template: azure-pipelines-templates/validate-kconfig.yml
@@ -473,9 +481,6 @@ jobs:
       - template: azure-pipelines-templates/build-preparations.yml
         parameters:
           repoDirectory: '$(Agent.BuildDirectory)/s/nf-interpreter'
-      - template: azure-pipelines-templates/nb-gitversioning.yml
-        parameters:
-          repoDirectory: '$(Agent.BuildDirectory)/s/nf-interpreter'
       - template: azure-pipelines-templates/download-install-esp32-build-components.yml
       - template: azure-pipelines-templates/build-espressif-esp32-targets.yml
         parameters:
@@ -554,7 +559,6 @@ jobs:
 
     steps:
       - template: azure-pipelines-templates/build-preparations.yml
-      - template: azure-pipelines-templates/nb-gitversioning.yml
       - template: azure-pipelines-templates/download-install-arm-gcc-toolchain.yml
       - template: azure-pipelines-templates/download-srecord.yml
       - template: azure-pipelines-templates/install-kconfig-tools.yml
@@ -689,7 +693,6 @@ jobs:
 
     steps:
       - template: azure-pipelines-templates/build-preparations.yml
-      - template: azure-pipelines-templates/nb-gitversioning.yml
       - template: azure-pipelines-templates/download-install-arm-gcc-toolchain.yml
       - template: azure-pipelines-templates/install-kconfig-tools.yml
       - template: azure-pipelines-templates/validate-kconfig.yml
@@ -804,7 +807,6 @@ jobs:
 
     steps:
       - template: azure-pipelines-templates/build-preparations.yml
-      - template: azure-pipelines-templates/nb-gitversioning.yml
       - template: azure-pipelines-templates/download-install-arm-gcc-toolchain.yml
       - template: azure-pipelines-templates/download-hexdfu.yml
       - template: azure-pipelines-templates/download-srecord.yml
@@ -913,10 +915,6 @@ jobs:
       - checkout: self
       - checkout: littlefs
         fetchDepth: 1
-
-      - template: azure-pipelines-templates/nb-gitversioning.yml
-        parameters:
-          repoDirectory: '$(Build.SourcesDirectory)/nf-interpreter'
 
       - task: PowerShell@2
         displayName: Store CLR DLL revision
@@ -1080,10 +1078,6 @@ jobs:
       - checkout: self
       - checkout: littlefs
         fetchDepth: 1
-
-      - template: azure-pipelines-templates/nb-gitversioning.yml
-        parameters:
-          repoDirectory: '$(Build.SourcesDirectory)/nf-interpreter'
 
       - task: PowerShell@2
         displayName: Store CLR DLL revision
@@ -1295,23 +1289,6 @@ jobs:
     steps:
       - checkout: self
 
-      - task: UseDotNet@2
-        condition: and(succeeded(), eq(variables['Agent.OS'], 'Darwin'))
-        displayName: Install .NET SDK for NBGV
-        inputs:
-          packageType: sdk
-          version: 8.0.x
-
-      - task: DotNetCoreCLI@2
-        condition: and(succeeded(), eq(variables['Agent.OS'], 'Darwin'))
-        displayName: Install NBGV tool
-        inputs:
-          command: custom
-          custom: tool
-          arguments: install nbgv -g
-
-      - template: azure-pipelines-templates/nb-gitversioning.yml
-
       - bash: |
           set -euo pipefail
 
@@ -1427,10 +1404,6 @@ jobs:
       - checkout: self
       - checkout: littlefs
         fetchDepth: 1
-
-      - template: azure-pipelines-templates/nb-gitversioning.yml
-        parameters:
-          repoDirectory: '$(Build.SourcesDirectory)/nf-interpreter'
 
       - template: azure-pipelines-templates/install-nuget.yml@templates
 
