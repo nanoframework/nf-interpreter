@@ -1,0 +1,1696 @@
+# Copyright (c) .NET Foundation and Contributors
+# See LICENSE file in the project root for full license information.
+
+# Private validation pipeline for full nanoCLR build/package flow.
+# Runs only when manually started in Azure DevOps.
+trigger: none
+pr: none
+
+variables:
+  BUILD_ALL__: "true"
+  BUILD_CHIBIOS__: "false"
+  BUILD_FREERTOS__: "false"
+  BUILD_ESP32__: "false"
+  BUILD_NXP__: "false"
+  BUILD_TI__: "false"
+  BUILD_THREADX__: "false"
+  BUILD_WINDOWS_NANOCLR__: "false"
+  BUILD_POSIX__: "false"
+  BUILD_NANOCLR_CLI__: "false"
+  RUN_MSCORLIB_TESTS__: "false"
+  StartReleaseCandidate: "false"
+# add nf-tools repo to resources (for Azure Pipelines templates)
+resources:
+  repositories:
+    - repository: templates
+      type: github
+      name: nanoframework/nf-tools
+      endpoint: nanoframework
+    - repository: esp32_idf
+      type: github
+      name: espressif/esp-idf
+      endpoint: nanoframework
+      ref: refs/tags/v5.5.4
+    - repository: mscorlib
+      type: github
+      name: nanoframework/CoreLibrary
+      endpoint: nanoframework
+    - repository: littlefs
+      type: github
+      name: littlefs-project/littlefs
+      endpoint: nanoframework
+      ref: refs/tags/v2.11.2
+
+jobs:
+  ##############################
+  - job: Check_Build_Options
+    pool:
+      vmImage: "windows-2022"
+
+    variables:
+      DOTNET_NOLOGO: true
+
+    steps:
+      - checkout: self
+        fetchDepth: 1
+
+      - powershell: |
+          echo "##vso[task.setvariable variable=RUN_MSCORLIB_TESTS;isOutput=true]$(RUN_MSCORLIB_TESTS__)"
+
+          if($env:StartReleaseCandidate -like "true")
+          {
+            echo "##vso[task.setvariable variable=SKIP_BUILD;isOutput=true]true"
+            Write-Host "##[command] Release preparation is disabled in private validation, skipping build."
+          }
+          else
+          {
+            echo "##vso[task.setvariable variable=SKIP_BUILD;isOutput=true]false"
+            Write-Host "##[command] Private validation build."
+          }
+
+        name: BuildOptions
+        displayName: Get build options
+
+      - powershell: |
+          function Test-Enabled($value) {
+            return $value -like "true"
+          }
+
+          if($env:StartReleaseCandidate -like "true")
+          {
+            Write-Host "##[command] Release preparation is disabled in private validation."
+          }
+          else
+          {
+            $buildAll = Test-Enabled "$(BUILD_ALL__)"
+            $targets = @{
+              BUILD_ALL = $buildAll
+              BUILD_CHIBIOS = ($buildAll -or (Test-Enabled "$(BUILD_CHIBIOS__)"))
+              BUILD_FREERTOS = ($buildAll -or (Test-Enabled "$(BUILD_FREERTOS__)"))
+              BUILD_ESP32 = ($buildAll -or (Test-Enabled "$(BUILD_ESP32__)"))
+              BUILD_TI = ($buildAll -or (Test-Enabled "$(BUILD_TI__)"))
+              BUILD_THREADX = ($buildAll -or (Test-Enabled "$(BUILD_THREADX__)"))
+              BUILD_WIN32 = ($buildAll -or (Test-Enabled "$(BUILD_WINDOWS_NANOCLR__)"))
+              BUILD_POSIX = ($buildAll -or (Test-Enabled "$(BUILD_POSIX__)"))
+              BUILD_NANOCLR_CLI = ($buildAll -or (Test-Enabled "$(BUILD_NANOCLR_CLI__)"))
+            }
+
+            foreach ($target in $targets.GetEnumerator()) {
+              $value = $target.Value.ToString().ToLowerInvariant()
+              echo "##vso[task.setvariable variable=$($target.Key);isOutput=true]$value"
+              Write-Host "##[command] $($target.Key)=$value"
+            }
+          }
+
+        name: TargetsToBuild
+        displayName: Get targets to build
+  ##############################
+  - job: Check_Code_Style
+    condition: >-
+      and(
+        ne(dependencies.Check_Build_Options.outputs['BuildOptions.SKIP_BUILD'], true),
+        or(
+          eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ALL'], true),
+          eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_CHIBIOS'], true),
+          eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ESP32'], true),
+          eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_FREERTOS'], true),
+          eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_TI'], true),
+          eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_THREADX'], true),
+          eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_WIN32'], true),
+          eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_POSIX'], true)
+        )
+      )
+
+    dependsOn:
+      - Check_Build_Options
+
+    pool:
+      vmImage: "windows-2022"
+
+    steps:
+      - checkout: self
+        fetchDepth: 1
+
+      - template: azure-pipelines-templates/download-install-llvm.yml
+      - template: azure-pipelines-templates/check-code-style.yml
+
+  ###############
+  # STM32
+  - job: Build_STM32_targets
+    condition: >-
+      or(
+        and(
+          succeeded('Check_Code_Style'),
+          ne( dependencies.Check_Build_Options.outputs['BuildOptions.SKIP_BUILD'], true ),
+          or(
+            eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ALL'], true),
+            eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_CHIBIOS'], true)
+          )
+        ),
+        and(
+          eq(variables['Build.Reason'], 'Manual'),
+          or(
+            eq(variables['BUILD_ALL__'], 'true'),
+            eq(variables['BUILD_CHIBIOS__'], 'true')
+          )
+        )
+      )
+
+    dependsOn:
+      - Check_Build_Options
+      - Check_Code_Style
+
+    pool:
+      vmImage: "windows-2022"
+
+    strategy:
+      matrix:
+        ST_STM32F429I_DISCOVERY:
+          TargetBoard: ST_STM32F429I_DISCOVERY
+          TargetSeries: "stm32f4xx"
+          BuildOptions:
+          NeedsDFU: false
+          NeedsSRECORD: false
+          CMakePreset: ST_STM32F429I_DISCOVERY
+
+        ST_STM32F769I_DISCOVERY:
+          TargetBoard: ST_STM32F769I_DISCOVERY
+          TargetSeries: "stm32f7xx"
+          BuildOptions:
+          NeedsDFU: false
+          NeedsSRECORD: true
+          CMakePreset: ST_STM32F769I_DISCOVERY
+
+    variables:
+      DOTNET_NOLOGO: true
+      # creates a counter and assigns it to the revision variable
+      REVISION: $[counter('STM32_1_14_0_versioncounter', 0)]
+      HelperPackageVersion: $[counter('HelperPackageVersioncounter', 0)]
+      TargetPlatform: "stm32"
+
+    steps:
+      - template: azure-pipelines-templates/build-preparations.yml
+      - template: azure-pipelines-templates/nb-gitversioning.yml
+      - template: azure-pipelines-templates/download-install-arm-gcc-toolchain.yml
+      - template: azure-pipelines-templates/download-srecord.yml
+      - template: azure-pipelines-templates/download-hexdfu.yml
+      - template: azure-pipelines-templates/install-kconfig-tools.yml
+      - template: azure-pipelines-templates/validate-kconfig.yml
+        parameters:
+          targetPreset: $(CMakePreset)
+      - template: azure-pipelines-templates/build-chibios-stm32-targets.yml
+      - template: azure-pipelines-templates/pack-publish-artifacts.yml
+      - task: PublishPipelineArtifact@1
+        condition: succeeded()
+        displayName: Publish validation target artifacts
+        inputs:
+          targetPath: '$(Build.ArtifactStagingDirectory)'
+          artifactName: '$(TargetPublishName)_validation'
+          artifactType: pipeline
+
+      - powershell: |
+          $nuspec = "targets\ChibiOS\$(TargetBoard)\managed_helpers\package.nuspec"
+
+          if (Test-Path $nuspec) {
+            $version = [int]$env:HelperPackageVersion
+            $packageVersion = "1.0." + $version.ToString()
+
+            echo "##vso[task.setvariable variable=BUILD_NUGET_PACKAGE]true"
+            echo "##vso[task.setvariable variable=PACKAGE_NUGET_VERSION]$packageVersion"
+            echo "##vso[task.setvariable variable=MANAGED_HELPERS_NUSPEC]$nuspec"
+            Write-Host "Managed helper package version is: $packageVersion"
+          }
+          else {
+            echo "##vso[task.setvariable variable=BUILD_NUGET_PACKAGE]false"
+            Write-Host "No managed helper package found at $nuspec."
+          }
+        condition: succeeded()
+        displayName: Check managed helpers package
+
+      - task: NuGetCommand@2
+        inputs:
+          command: "custom"
+          arguments: 'pack $(MANAGED_HELPERS_NUSPEC) -Version $(PACKAGE_NUGET_VERSION)'
+        condition: and(succeeded(), eq(variables['BUILD_NUGET_PACKAGE'], true))
+        displayName: Pack managed helpers NuGet
+
+      - task: CopyFiles@2
+        condition: and(succeeded(), eq(variables['BUILD_NUGET_PACKAGE'], true))
+        displayName: Collecting managed helpers deployable artifacts
+        inputs:
+          sourceFolder: $(Build.SourcesDirectory)
+          Contents: |
+            **\nanoFramework.Targets*.nupkg
+          TargetFolder: "$(Build.ArtifactStagingDirectory)"
+          flattenFolders: true
+          ignoreMakeDirErrors: true
+
+      - task: PublishPipelineArtifact@1
+        condition: and(succeeded(), eq(variables['BUILD_NUGET_PACKAGE'], true))
+        displayName: Publish managed helpers NuGet artifact
+        inputs:
+          targetPath: '$(Build.ArtifactStagingDirectory)'
+          artifactName: '$(TargetPublishName)_managed_helpers_validation'
+          artifactType: pipeline
+
+  ######################
+  # ChibiOS RP targets
+  - job: Build_ChibiOS_RP_targets
+    condition: >-
+      or(
+        and(
+          succeeded('Check_Code_Style'),
+          ne( dependencies.Check_Build_Options.outputs['BuildOptions.SKIP_BUILD'], true ),
+          or(
+            eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ALL'], true),
+            eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_CHIBIOS'], true)
+          )
+        ),
+        and(
+          eq(variables['Build.Reason'], 'Manual'),
+          or(
+            eq(variables['BUILD_ALL__'], 'true'),
+            eq(variables['BUILD_CHIBIOS__'], 'true')
+          )
+        )
+      )
+
+    dependsOn:
+      - Check_Build_Options
+      - Check_Code_Style
+
+    pool:
+      vmImage: "windows-2022"
+
+    strategy:
+      matrix:
+        RP_PICO_RP2040:
+          TargetBoard: RP_PICO_RP2040
+          TargetSeries: "RP2040"
+          BuildOptions:
+          CMakePreset: RP_PICO_RP2040
+        RP_PICO_W_RP2040:
+          TargetBoard: RP_PICO_W_RP2040
+          TargetSeries: "RP2040"
+          BuildOptions:
+          CMakePreset: RP_PICO_W_RP2040
+
+    variables:
+      DOTNET_NOLOGO: true
+      # creates a counter and assigns it to the revision variable
+      REVISION: $[counter('RP_1_0_0_versioncounter', 0)]
+      HelperPackageVersion: $[counter('HelperPackageVersioncounter', 0)]
+      TargetPlatform: "rp"
+
+    steps:
+      - template: azure-pipelines-templates/build-preparations.yml
+      - template: azure-pipelines-templates/nb-gitversioning.yml
+      - template: azure-pipelines-templates/download-install-arm-gcc-toolchain.yml
+      - template: azure-pipelines-templates/install-kconfig-tools.yml
+      - template: azure-pipelines-templates/validate-kconfig.yml
+        parameters:
+          targetPreset: $(CMakePreset)
+      - template: azure-pipelines-templates/build-chibios-rp-targets.yml
+      - template: azure-pipelines-templates/pack-publish-artifacts.yml
+      - task: PublishPipelineArtifact@1
+        condition: succeeded()
+        displayName: Publish validation target artifacts
+        inputs:
+          targetPath: '$(Build.ArtifactStagingDirectory)'
+          artifactName: '$(TargetPublishName)_validation'
+          artifactType: pipeline
+
+      - powershell: |
+          $nuspec = "targets\ChibiOS\$(TargetBoard)\managed_helpers\package.nuspec"
+
+          if (Test-Path $nuspec) {
+            $version = [int]$env:HelperPackageVersion
+            $packageVersion = "1.0." + $version.ToString()
+
+            echo "##vso[task.setvariable variable=BUILD_NUGET_PACKAGE]true"
+            echo "##vso[task.setvariable variable=PACKAGE_NUGET_VERSION]$packageVersion"
+            echo "##vso[task.setvariable variable=MANAGED_HELPERS_NUSPEC]$nuspec"
+            Write-Host "Managed helper package version is: $packageVersion"
+          }
+          else {
+            echo "##vso[task.setvariable variable=BUILD_NUGET_PACKAGE]false"
+            Write-Host "No managed helper package found at $nuspec."
+          }
+        condition: succeeded()
+        displayName: Check managed helpers package
+
+      - task: NuGetCommand@2
+        inputs:
+          command: "custom"
+          arguments: 'pack $(MANAGED_HELPERS_NUSPEC) -Version $(PACKAGE_NUGET_VERSION)'
+        condition: and(succeeded(), eq(variables['BUILD_NUGET_PACKAGE'], true))
+        displayName: Pack managed helpers NuGet
+
+      - task: CopyFiles@2
+        condition: and(succeeded(), eq(variables['BUILD_NUGET_PACKAGE'], true))
+        displayName: Collecting managed helpers deployable artifacts
+        inputs:
+          sourceFolder: $(Build.SourcesDirectory)
+          Contents: |
+            **\nanoFramework.Targets*.nupkg
+          TargetFolder: "$(Build.ArtifactStagingDirectory)"
+          flattenFolders: true
+          ignoreMakeDirErrors: true
+
+      - task: PublishPipelineArtifact@1
+        condition: and(succeeded(), eq(variables['BUILD_NUGET_PACKAGE'], true))
+        displayName: Publish managed helpers NuGet artifact
+        inputs:
+          targetPath: '$(Build.ArtifactStagingDirectory)'
+          artifactName: '$(TargetPublishName)_managed_helpers_validation'
+          artifactType: pipeline
+  #################
+  # ESP32 targets
+  - job: Build_ESP32_targets
+    condition: >-
+      or(
+        and(
+          succeeded('Check_Code_Style'),
+          ne( dependencies.Check_Build_Options.outputs['BuildOptions.SKIP_BUILD'], true ),
+          or(
+            eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ALL'], true),
+            eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ESP32'], true)
+          )
+        ),
+        and(
+          eq(variables['Build.Reason'], 'Manual'),
+          or(
+            eq(variables['BUILD_ALL__'], 'true'),
+            eq(variables['BUILD_ESP32__'], 'true')
+          )
+        )
+      )
+
+    dependsOn:
+      - Check_Build_Options
+      - Check_Code_Style
+
+    pool:
+      vmImage: "windows-2022"
+
+    # there is only a single ESP32 target, but this is already config as a matrix to make it easy to add new ones
+    strategy:
+      matrix:
+        ESP32_PSRAM_REV0:
+          TargetBoard: ESP32
+          TargetSeries: "esp32"
+          BuildOptions:
+          IDF_Target: esp32
+          TargetName: ESP32
+          PackageName: ESP32_PSRAM_REV0
+          CMakePreset: ESP32_PSRAM_REV0
+
+        ESP32_BLE_REV0:
+          TargetBoard: ESP32
+          TargetSeries: "esp32"
+          BuildOptions:
+          IDF_Target: esp32
+          TargetName: ESP32
+          PackageName: ESP32_BLE_REV0
+          CMakePreset: ESP32_BLE_REV0
+
+        ESP32_C3:
+          TargetBoard: ESP32_C3
+          TargetSeries: "esp32c3"
+          BuildOptions:
+          IDF_Target: esp32c3
+          TargetName: ESP32_C3
+          PackageName: ESP32_C3
+          CMakePreset: ESP32_C3
+
+        ESP32_C5_THREAD_USB:
+          TargetBoard: ESP32_C5
+          TargetSeries: "esp32c5"
+          BuildOptions:
+          IDF_Target: esp32c5
+          TargetName: ESP32_C5_THREAD_USB
+          PackageName: ESP32_C5_THREAD_USB
+          CMakePreset: ESP32_C5_THREAD_USB
+
+        ESP32_C6_THREAD:
+          TargetBoard: ESP32_C6
+          TargetSeries: "esp32c6"
+          BuildOptions:
+          IDF_Target: esp32c6
+          TargetName: ESP32_C6_THREAD
+          PackageName: ESP32_C6_THREAD
+          CMakePreset: ESP32_C6_THREAD
+
+        ESP32_C61_USB:
+          TargetBoard: ESP32_C61
+          TargetSeries: "esp32c61"
+          BuildOptions:
+          IDF_Target: esp32c61
+          TargetName: ESP32_C61_USB
+          PackageName: ESP32_C61_USB
+          CMakePreset: ESP32_C61_USB
+
+        ESP32_H2_THREAD:
+          TargetBoard: ESP32_H2
+          TargetSeries: "esp32h2"
+          BuildOptions:
+          IDF_Target: esp32h2
+          TargetName: ESP32_H2_THREAD
+          PackageName: ESP32_H2_THREAD
+          CMakePreset: ESP32_H2_THREAD
+
+        ESP32_S3_ALL:
+          TargetBoard: ESP32_S3
+          TargetSeries: "esp32s3"
+          BuildOptions:
+          IDF_Target: esp32s3
+          TargetName: ESP32_S3_ALL
+          PackageName: ESP32_S3_ALL
+          CMakePreset: ESP32_S3_ALL
+
+        ESP32_ETHERNET_KIT_1.2:
+          TargetBoard: ESP32
+          TargetSeries: "esp32"
+          BuildOptions:
+          IDF_Target: esp32
+          TargetName: ESP32_ETHERNET_KIT_1.2
+          PackageName: ESP32_ETHERNET_KIT_1.2
+          CMakePreset: ESP32_ETHERNET_KIT_1.2
+
+        ESP32_P4_UART:
+          TargetBoard: ESP32_P4
+          TargetSeries: "esp32p4"
+          BuildOptions:
+          IDF_Target: esp32p4
+          TargetName: ESP32_P4_UART
+          PackageName: ESP32_P4_UART
+          CMakePreset: ESP32_P4_UART
+
+    variables:
+      DOTNET_NOLOGO: true
+      # creates a counter and assigns it to the revision variable
+      REVISION: $[counter('ESP32_1_14_0_versioncounter', 0)]
+      IDF_PATH: "D:/a/1/s/esp-idf"
+      PIP_CACHE_DIR: $(Pipeline.Workspace)/.pip
+      TargetPlatform: "esp32"
+      IDF_TAG: "v5.5.4"
+
+    steps:
+      - checkout: self
+        path: s/nf-interpreter
+
+      - template: azure-pipelines-templates/checkout-idf.yml
+        parameters:
+          repoDirectory: '$(Agent.BuildDirectory)/s'
+      - template: azure-pipelines-templates/build-preparations.yml
+        parameters:
+          repoDirectory: '$(Agent.BuildDirectory)/s/nf-interpreter'
+      - template: azure-pipelines-templates/nb-gitversioning.yml
+        parameters:
+          repoDirectory: '$(Agent.BuildDirectory)/s/nf-interpreter'
+      - template: azure-pipelines-templates/download-install-esp32-build-components.yml
+      - template: azure-pipelines-templates/build-espressif-esp32-targets.yml
+        parameters:
+          repoDirectory: '$(Agent.BuildDirectory)/s/nf-interpreter'
+          partitionsDirectory: '$(Agent.BuildDirectory)/s/nf-interpreter/targets/ESP32/_IDF/$(IDF_Target)'
+      - task: CopyFiles@2
+        condition: succeeded()
+        displayName: Copying bootloader
+        inputs:
+          sourceFolder: '$(Agent.BuildDirectory)/s/nf-interpreter/build/bootloader'
+          Contents: |
+            bootloader.bin
+          TargetFolder: '$(Build.ArtifactStagingDirectory)\$(TargetPublishName)'
+          flattenFolders: true
+          ignoreMakeDirErrors: true
+
+      - template: azure-pipelines-templates/copy-sdkconfig.yml
+        parameters:
+          repoDirectory: '$(Agent.BuildDirectory)/s/nf-interpreter'
+      - template: azure-pipelines-templates/pack-publish-artifacts.yml
+        parameters:
+          buildDirectory: '$(Agent.BuildDirectory)/s/nf-interpreter/build'
+      - task: PublishPipelineArtifact@1
+        condition: succeeded()
+        displayName: Publish validation target artifacts
+        inputs:
+          targetPath: '$(Build.ArtifactStagingDirectory)'
+          artifactName: '$(TargetPublishName)_validation'
+          artifactType: pipeline
+
+      - template: azure-pipelines-templates/publish-sdkconfig.yml
+
+  #################
+  # NXP
+  - job: Build_NXP_targets
+    condition: >-
+      or(
+        and(
+          succeeded('Check_Code_Style'),
+          ne( dependencies.Check_Build_Options.outputs['BuildOptions.SKIP_BUILD'], true ),
+          or(
+            eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ALL'], true),
+            eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_FREERTOS'], true)
+          )
+        ),
+        and(
+          eq(variables['Build.Reason'], 'Manual'),
+          or(
+            eq(variables['BUILD_ALL__'], 'true'),
+            eq(variables['BUILD_NXP__'], 'true')
+          )
+        )
+      )
+
+    dependsOn:
+      - Check_Build_Options
+      - Check_Code_Style
+
+    pool:
+      vmImage: "windows-2022"
+
+    strategy:
+      matrix:
+        NXP_MIMXRT1060_EVK:
+          TargetBoard: NXP_MIMXRT1060_EVK
+          TargetSeries: "imxrt10xx"
+          BuildOptions:
+          NeedsSRECORD: true
+          CMakePreset: NXP_MIMXRT1060_EVK
+
+    variables:
+      DOTNET_NOLOGO: true
+      # creates a counter and assigns it to the revision variable
+      REVISION: $[counter('NXP_1_14_0_versioncounter', 0)]
+      GIT_LFS_SKIP_SMUDGE: 1
+      TargetPlatform: "freertos"
+
+    steps:
+      - template: azure-pipelines-templates/build-preparations.yml
+      - template: azure-pipelines-templates/nb-gitversioning.yml
+      - template: azure-pipelines-templates/download-install-arm-gcc-toolchain.yml
+      - template: azure-pipelines-templates/download-srecord.yml
+      - template: azure-pipelines-templates/install-kconfig-tools.yml
+      - template: azure-pipelines-templates/validate-kconfig.yml
+        parameters:
+          targetPreset: $(CMakePreset)
+      - template: azure-pipelines-templates/build-freertos-nxp-targets.yml
+      - template: azure-pipelines-templates/pack-publish-artifacts.yml
+      - task: PublishPipelineArtifact@1
+        condition: succeeded()
+        displayName: Publish validation target artifacts
+        inputs:
+          targetPath: '$(Build.ArtifactStagingDirectory)'
+          artifactName: '$(TargetPublishName)_validation'
+          artifactType: pipeline
+
+      - powershell: |
+          $nuspec = "targets\ChibiOS\$(TargetBoard)\managed_helpers\package.nuspec"
+
+          if (Test-Path $nuspec) {
+            $version = [int]$env:HelperPackageVersion
+            $packageVersion = "1.0." + $version.ToString()
+
+            echo "##vso[task.setvariable variable=BUILD_NUGET_PACKAGE]true"
+            echo "##vso[task.setvariable variable=PACKAGE_NUGET_VERSION]$packageVersion"
+            echo "##vso[task.setvariable variable=MANAGED_HELPERS_NUSPEC]$nuspec"
+            Write-Host "Managed helper package version is: $packageVersion"
+          }
+          else {
+            echo "##vso[task.setvariable variable=BUILD_NUGET_PACKAGE]false"
+            Write-Host "No managed helper package found at $nuspec."
+          }
+        condition: succeeded()
+        displayName: Check managed helpers package
+
+      - task: NuGetCommand@2
+        inputs:
+          command: "custom"
+          arguments: 'pack $(MANAGED_HELPERS_NUSPEC) -Version $(PACKAGE_NUGET_VERSION)'
+        condition: and(succeeded(), eq(variables['BUILD_NUGET_PACKAGE'], true))
+        displayName: Pack managed helpers NuGet
+
+      - task: CopyFiles@2
+        condition: and(succeeded(), eq(variables['BUILD_NUGET_PACKAGE'], true))
+        displayName: Collecting managed helpers deployable artifacts
+        inputs:
+          sourceFolder: $(Build.SourcesDirectory)
+          Contents: |
+            **\nanoFramework.Targets*.nupkg
+          TargetFolder: "$(Build.ArtifactStagingDirectory)"
+          flattenFolders: true
+          ignoreMakeDirErrors: true
+
+      - task: PublishPipelineArtifact@1
+        condition: and(succeeded(), eq(variables['BUILD_NUGET_PACKAGE'], true))
+        displayName: Publish managed helpers NuGet artifact
+        inputs:
+          targetPath: '$(Build.ArtifactStagingDirectory)'
+          artifactName: '$(TargetPublishName)_managed_helpers_validation'
+          artifactType: pipeline
+
+  #################
+  # TI SimpleLink
+  - job: Build_TI_SimpleLink_targets
+    condition: >-
+      or(
+        and(
+          succeeded('Check_Code_Style'),
+          ne( dependencies.Check_Build_Options.outputs['BuildOptions.SKIP_BUILD'], true ),
+          or(
+            eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ALL'], true),
+            eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_TI'], true)
+          )
+        ),
+        and(
+            eq(variables['Build.Reason'], 'Manual'),
+            or(
+              eq(variables['BUILD_ALL__'], 'true'),
+              eq(variables['BUILD_TI__'], 'true')
+            )
+        )    
+      )
+
+    dependsOn:
+      - Check_Build_Options
+      - Check_Code_Style
+
+    pool:
+      vmImage: "windows-2022"
+
+    strategy:
+      matrix:
+        # disabled: waiting to update SDK to latest version with Sys Config
+        # TI_CC3220SF_LAUNCHXL:
+        #   TargetBoard: TI_CC3220SF_LAUNCHXL
+        #   TargetSeries: 'cc32xx'
+        #   BuildOptions: >-
+        #  -DTARGET_SERIES=CC32xx
+        #  -DRTOS=TI_SimpleLink
+        #  -DNF_SUPPORT_ANY_BASE_CONVERSION=OFF
+        #  -DNF_FEATURE_DEBUGGER=ON
+        #  -DNF_FEATURE_RTC=ON
+        #  -DNF_FEATURE_WATCHDOG=OFF
+        #  -DNF_FEATURE_HAS_CONFIG_BLOCK=ON
+        #  -DAPI_System.Device.Gpio=ON
+        #  -DAPI_System.Device.Spi=ON
+        #  -DAPI_System.Device.I2c=ON
+        #  -DAPI_System.Device.Pwm=ON
+        #  -DAPI_System.Device.Adc=ON
+        #  -DAPI_System.Net=ON
+        #  -DAPI_nanoFramework.System.Collections=ON
+        #  -DAPI_nanoFramework.System.Text=ON
+
+        TI_CC1352R1_LAUNCHXL_915:
+          TargetBoard: TI_CC1352R1_LAUNCHXL
+          PackageName: TI_CC1352R1_LAUNCHXL_915
+          TargetSeries: "CC13X2"
+          BuildOptions: >-
+            -DTI_SIMPLELINK_RADIO_FREQ_MHZ=915
+          CMakePreset: TI_CC1352R1_LAUNCHXL
+
+    variables:
+      DOTNET_NOLOGO: true
+      # creates a counter and assigns it to the revision variable
+      REVISION: $[counter('TI_1_14_0_versioncounter', 0)]
+      HelperPackageVersion: $[counter('HelperPackageVersioncounter', 0)]
+      TargetPlatform: "ti_simplelink"
+
+    steps:
+      - template: azure-pipelines-templates/build-preparations.yml
+      - template: azure-pipelines-templates/nb-gitversioning.yml
+      - template: azure-pipelines-templates/download-install-arm-gcc-toolchain.yml
+      - template: azure-pipelines-templates/install-kconfig-tools.yml
+      - template: azure-pipelines-templates/validate-kconfig.yml
+        parameters:
+          targetPreset: $(CMakePreset)
+      - template: azure-pipelines-templates/build-ti-simplelink-targets.yml
+      - template: azure-pipelines-templates/pack-publish-artifacts.yml
+      - task: PublishPipelineArtifact@1
+        condition: succeeded()
+        displayName: Publish validation target artifacts
+        inputs:
+          targetPath: '$(Build.ArtifactStagingDirectory)'
+          artifactName: '$(TargetPublishName)_validation'
+          artifactType: pipeline
+
+      - powershell: |
+          $nuspec = "targets\TI_SimpleLink\$(TargetBoard)\managed_helpers\package.nuspec"
+
+          if (Test-Path $nuspec) {
+            $version = [int]$env:HelperPackageVersion
+            $packageVersion = "1.0." + $version.ToString()
+
+            echo "##vso[task.setvariable variable=BUILD_NUGET_PACKAGE]true"
+            echo "##vso[task.setvariable variable=PACKAGE_NUGET_VERSION]$packageVersion"
+            echo "##vso[task.setvariable variable=MANAGED_HELPERS_NUSPEC]$nuspec"
+            Write-Host "Managed helper package version is: $packageVersion"
+          }
+          else {
+            echo "##vso[task.setvariable variable=BUILD_NUGET_PACKAGE]false"
+            Write-Host "No managed helper package found at $nuspec."
+          }
+        condition: succeeded()
+        displayName: Check managed helpers package
+
+      - task: NuGetCommand@2
+        inputs:
+          command: "custom"
+          arguments: 'pack $(MANAGED_HELPERS_NUSPEC) -Version $(PACKAGE_NUGET_VERSION)'
+        condition: and(succeeded(), eq(variables['BUILD_NUGET_PACKAGE'], true))
+        displayName: Pack managed helpers NuGet
+
+      - task: CopyFiles@2
+        condition: and(succeeded(), eq(variables['BUILD_NUGET_PACKAGE'], true))
+        displayName: Collecting managed helpers deployable artifacts
+        inputs:
+          sourceFolder: $(Build.SourcesDirectory)
+          Contents: |
+            **\nanoFramework.Targets*.nupkg
+          TargetFolder: "$(Build.ArtifactStagingDirectory)"
+          flattenFolders: true
+          ignoreMakeDirErrors: true
+
+      - task: PublishPipelineArtifact@1
+        condition: and(succeeded(), eq(variables['BUILD_NUGET_PACKAGE'], true))
+        displayName: Publish managed helpers NuGet artifact
+        inputs:
+          targetPath: '$(Build.ArtifactStagingDirectory)'
+          artifactName: '$(TargetPublishName)_managed_helpers_validation'
+          artifactType: pipeline
+
+  #################
+  # ThreadX
+  - job: Build_ThreadX_targets
+    condition: >-
+      or(
+        and(
+          succeeded('Check_Code_Style'),
+          ne( dependencies.Check_Build_Options.outputs['BuildOptions.SKIP_BUILD'], true ),
+          or(
+            eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ALL'], true),
+            eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_THREADX'], true)
+          )
+        ),
+        and(
+          eq(variables['Build.Reason'], 'Manual'),
+          or(
+            eq(variables['BUILD_ALL__'], 'true'),
+            eq(variables['BUILD_THREADX__'], 'true')
+          )
+        )
+      )
+
+    dependsOn:
+      - Check_Build_Options
+      - Check_Code_Style
+
+    pool:
+      vmImage: "windows-2022"
+
+    strategy:
+      matrix:
+        # ST_B_L475E_IOT01A:
+        #   TargetBoard: ST_B_L475E_IOT01A
+        #   TargetSeries: 'stm32l4xx'
+        #   BuildOptions:
+        #   NeedsDFU: true
+        #   NeedsSRECORD: false
+        #   CMakePreset: ST_B_L475E_IOT01A
+
+        # ORGPAL_PALTHREE:
+        #   TargetBoard: ORGPAL_PALTHREE
+        #   TargetSeries: 'stm32f7xx'
+        #   BuildOptions:
+        #   NeedsDFU: true
+        #   NeedsSRECORD: false
+        #   CMakePreset: ORGPAL_PALTHREE
+
+        SL_STK3701A:
+          TargetBoard: SL_STK3701A
+          TargetSeries: "gg11"
+          BuildOptions:
+          NeedsDFU: false
+          NeedsSRECORD: false
+          CMakePreset: SL_STK3701A
+
+    variables:
+      # creates a counter and assigns it to the revision variable
+      REVISION: $[counter('THREADX_1_14_0_versioncounter', 0)]
+      HelperPackageVersion: $[counter('HelperPackageVersioncounter', 0)]
+      TargetPlatform: "efm32"
+
+    steps:
+      - template: azure-pipelines-templates/build-preparations.yml
+      - template: azure-pipelines-templates/nb-gitversioning.yml
+      - template: azure-pipelines-templates/download-install-arm-gcc-toolchain.yml
+      - template: azure-pipelines-templates/download-hexdfu.yml
+      - template: azure-pipelines-templates/download-srecord.yml
+      - template: azure-pipelines-templates/install-kconfig-tools.yml
+      - template: azure-pipelines-templates/validate-kconfig.yml
+        parameters:
+          targetPreset: $(CMakePreset)
+      - template: azure-pipelines-templates/build-threadx-targets.yml
+      - template: azure-pipelines-templates/pack-publish-artifacts.yml
+      - task: PublishPipelineArtifact@1
+        condition: succeeded()
+        displayName: Publish validation target artifacts
+        inputs:
+          targetPath: '$(Build.ArtifactStagingDirectory)'
+          artifactName: '$(TargetPublishName)_validation'
+          artifactType: pipeline
+
+      - powershell: |
+          $nuspec = "targets\ChibiOS\$(TargetBoard)\managed_helpers\package.nuspec"
+
+          if (Test-Path $nuspec) {
+            $version = [int]$env:HelperPackageVersion
+            $packageVersion = "1.0." + $version.ToString()
+
+            echo "##vso[task.setvariable variable=BUILD_NUGET_PACKAGE]true"
+            echo "##vso[task.setvariable variable=PACKAGE_NUGET_VERSION]$packageVersion"
+            echo "##vso[task.setvariable variable=MANAGED_HELPERS_NUSPEC]$nuspec"
+            Write-Host "Managed helper package version is: $packageVersion"
+          }
+          else {
+            echo "##vso[task.setvariable variable=BUILD_NUGET_PACKAGE]false"
+            Write-Host "No managed helper package found at $nuspec."
+          }
+        condition: succeeded()
+        displayName: Check managed helpers package
+
+      - task: NuGetCommand@2
+        inputs:
+          command: "custom"
+          arguments: 'pack $(MANAGED_HELPERS_NUSPEC) -Version $(PACKAGE_NUGET_VERSION)'
+        condition: and(succeeded(), eq(variables['BUILD_NUGET_PACKAGE'], true))
+        displayName: Pack managed helpers NuGet
+
+      - task: CopyFiles@2
+        condition: and(succeeded(), eq(variables['BUILD_NUGET_PACKAGE'], true))
+        displayName: Collecting managed helpers deployable artifacts
+        inputs:
+          sourceFolder: $(Build.SourcesDirectory)
+          Contents: |
+            **\nanoFramework.Targets*.nupkg
+          TargetFolder: "$(Build.ArtifactStagingDirectory)"
+          flattenFolders: true
+          ignoreMakeDirErrors: true
+
+      - task: PublishPipelineArtifact@1
+        condition: and(succeeded(), eq(variables['BUILD_NUGET_PACKAGE'], true))
+        displayName: Publish managed helpers NuGet artifact
+        inputs:
+          targetPath: '$(Build.ArtifactStagingDirectory)'
+          artifactName: '$(TargetPublishName)_managed_helpers_validation'
+          artifactType: pipeline
+
+  #################
+  # WIN32 executable
+  - job: Build_WIN32_nanoCLR
+    condition: >-
+      or(
+        and(
+          succeeded('Check_Code_Style'),
+          ne( dependencies.Check_Build_Options.outputs['BuildOptions.SKIP_BUILD'], true ),
+          or(
+            eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ALL'], true),
+            eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_WIN32'], true)
+          )
+        ),
+        and(
+          eq(variables['Build.Reason'], 'Manual'),
+          or(
+            eq(variables['BUILD_ALL__'], 'true'),
+            eq(variables['BUILD_WINDOWS_NANOCLR__'], 'true')
+          )
+        )
+      )
+
+    dependsOn:
+      - Check_Build_Options
+      - Check_Code_Style
+
+    pool:
+      vmImage: "windows-2022"
+
+    variables:
+      - name: DOTNET_NOLOGO
+        value: true
+      # creates a counter and assigns it to the revision variable
+      - name: REVISION
+        value: $[counter('WIN32_1_14_0_versioncounter', 0)]
+      - name: LITTLEFS_PATH
+        value: "D:/a/1/s/littlefs"
+
+    steps:
+      - checkout: self
+      - checkout: littlefs
+        fetchDepth: 1
+
+      - template: azure-pipelines-templates/nb-gitversioning.yml
+        parameters:
+          repoDirectory: '$(Build.SourcesDirectory)/nf-interpreter'
+
+      - task: PowerShell@2
+        displayName: Store CLR DLL revision
+        name: SetRevision
+        inputs:
+          targetType: "inline"
+          script: |
+            Write-Host "$("##vso[task.setvariable variable=CLR_REVISION;isOutput=true]")$(REVISION)"
+
+      - task: PowerShell@2
+        displayName: Store package version
+        inputs:
+          targetType: "inline"
+          script: |
+            Write-Host "$("##vso[task.setvariable variable=WINCLR_PACKAGE_VERSION]")$(NBGV_VersionMajor).$(NBGV_VersionMinor).$(NBGV_BuildNumber).$(TARGET_BUILD_COUNTER)"
+            Write-Host "$("##vso[task.setvariable variable=WINCLR_AssemblyInformationalVersion]")$(NBGV_VersionMajor).$(NBGV_VersionMinor).$(NBGV_BuildNumber).$(TARGET_BUILD_COUNTER)$(NBGV_BuildMetadataFragment)"
+
+      - template: azure-pipelines-templates/install-nuget.yml@templates
+
+      - task: Cache@2
+        displayName: Cache NuGet packages
+        continueOnError: true
+        inputs:
+          key: 'nuget | **/targets/netcore/nanoFramework.nanoCLR.Host/packages.lock.json | **/targets/netcore/nanoFramework.nanoCLR.CLI/packages.lock.json'
+          path: $(UserProfile)/.nuget/packages
+
+      - task: DotNetCoreCLI@2
+        displayName: Restore NuGet packages
+        inputs:
+          command: restore
+          restoreArguments: "--locked-mode"
+          verbosityRestore: minimal
+          projects: nf-interpreter/targets/netcore/nanoCLR.sln
+          feedsToUse: select
+          includeNuGetOrg: true
+
+      - task: VSBuild@1
+        displayName: Build WIN32 EXE target
+        inputs:
+          solution: "nf-interpreter/targets/win32/nanoCLR.sln"
+          platform: "x86"
+          maximumCpuCount: true
+          msbuildArgs: "/p:PublicRelease=true"
+          configuration: "Release"
+
+      - task: VSBuild@1
+        displayName: Build WIN DLL target
+        inputs:
+          solution: "nf-interpreter/targets/netcore/nanoCLR.sln"
+          platform: "Any CPU"
+          maximumCpuCount: true
+          msbuildArgs: "/restore /p:PublicRelease=true /p:BuildWithNetFrameworkHostedCompiler=true"
+          configuration: "Release"
+
+      - task: CopyFiles@2
+        condition: succeeded()
+        displayName: Stage win-x64 nanoCLR runtime artifact
+        inputs:
+          SourceFolder: "$(Build.SourcesDirectory)/nf-interpreter/build/bin/Release"
+          Contents: "nanoFramework.nanoCLR.dll"
+          TargetFolder: "$(Build.ArtifactStagingDirectory)/runtimes/win-x64/native"
+          flattenFolders: true
+          ignoreMakeDirErrors: true
+
+
+      - task: PublishPipelineArtifact@1
+        condition: succeeded()
+        displayName: Publish win-x64 nanoCLR runtime artifact
+        inputs:
+          targetPath: "$(Build.ArtifactStagingDirectory)"
+          artifactName: nanoclr_win_x64
+          artifactType: pipeline
+
+      - task: NuGetCommand@2
+        condition: succeeded()
+        displayName: Pack nanoCLR WIN32
+        inputs:
+          command: "custom"
+          arguments: "pack nf-interpreter/targets/win32/nanoFramework.nanoCLR.Win32.nuspec -Version $(NBGV_NuGetPackageVersion)"
+
+      - task: CopyFiles@2
+        condition: succeeded()
+        displayName: Collecting NuGet packages
+        inputs:
+          sourceFolder: $(Build.SourcesDirectory)
+          Contents: |
+            **\nanoFramework.nanoCLR.Win32*.nupkg
+          TargetFolder: "$(Build.ArtifactStagingDirectory)"
+          flattenFolders: true
+          ignoreMakeDirErrors: true
+
+
+      - task: CopyFiles@2
+        condition: succeeded()
+        displayName: Adding nanoCLR WIN32 to deployable artifacts
+        inputs:
+          sourceFolder: $(Build.SourcesDirectory)
+          Contents: |
+            **\nanoFramework.nanoCLR.exe
+          TargetFolder: '$(Build.ArtifactStagingDirectory)\WIN32_nanoCLR'
+          flattenFolders: true
+          ignoreMakeDirErrors: true
+
+
+      - task: CopyFiles@2
+        condition: succeeded()
+        displayName: Adding nanoCLR DLL to deployable artifacts
+        inputs:
+          sourceFolder: $(Build.SourcesDirectory)
+          Contents: |
+            **\nanoFramework.nanoCLR.dll
+          TargetFolder: '$(Build.ArtifactStagingDirectory)\WIN_DLL_nanoCLR'
+          flattenFolders: true
+          ignoreMakeDirErrors: true
+
+
+      - task: PublishPipelineArtifact@1
+        condition: succeeded()
+        displayName: Publish deployables artifacts
+        inputs:
+          targetPath: "$(Build.ArtifactStagingDirectory)"
+          artifactName: nanoclr_win32
+          artifactType: pipeline
+
+  #################
+  # WIN ARM64 native DLL
+  - job: Build_WIN_ARM64_nanoCLR
+    condition: >-
+      or(
+        and(
+          succeeded('Check_Code_Style'),
+          ne( dependencies.Check_Build_Options.outputs['BuildOptions.SKIP_BUILD'], true ),
+          or(
+            eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ALL'], true),
+            eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_WIN32'], true)
+          )
+        ),
+        and(
+          eq(variables['Build.Reason'], 'Manual'),
+          or(
+            eq(variables['BUILD_ALL__'], 'true'),
+            eq(variables['BUILD_WINDOWS_NANOCLR__'], 'true')
+          )
+        )
+      )
+
+    dependsOn:
+      - Check_Build_Options
+      - Check_Code_Style
+
+    pool:
+      vmImage: "windows-2022"
+
+    variables:
+      - name: DOTNET_NOLOGO
+        value: true
+      # creates a counter and assigns it to the revision variable
+      - name: REVISION
+        value: $[counter('WIN_ARM64_1_14_0_versioncounter', 0)]
+      - name: LITTLEFS_PATH
+        value: "D:/a/1/s/littlefs"
+
+    steps:
+      - checkout: self
+      - checkout: littlefs
+        fetchDepth: 1
+
+      - template: azure-pipelines-templates/nb-gitversioning.yml
+        parameters:
+          repoDirectory: '$(Build.SourcesDirectory)/nf-interpreter'
+
+      - task: PowerShell@2
+        displayName: Store CLR DLL revision
+        name: SetRevision
+        inputs:
+          targetType: "inline"
+          script: |
+            Write-Host "$("##vso[task.setvariable variable=CLR_REVISION;isOutput=true]")$(REVISION)"
+
+      - task: PowerShell@2
+        displayName: Store package version
+        inputs:
+          targetType: "inline"
+          script: |
+            Write-Host "$("##vso[task.setvariable variable=WINCLR_PACKAGE_VERSION]")$(NBGV_VersionMajor).$(NBGV_VersionMinor).$(NBGV_BuildNumber).$(TARGET_BUILD_COUNTER)"
+            Write-Host "$("##vso[task.setvariable variable=WINCLR_AssemblyInformationalVersion]")$(NBGV_VersionMajor).$(NBGV_VersionMinor).$(NBGV_BuildNumber).$(TARGET_BUILD_COUNTER)$(NBGV_BuildMetadataFragment)"
+
+      - template: azure-pipelines-templates/install-nuget.yml@templates
+
+      - task: Cache@2
+        displayName: Cache NuGet packages
+        continueOnError: true
+        inputs:
+          key: 'nuget | **/targets/netcore/nanoFramework.nanoCLR.Host/packages.lock.json | **/targets/netcore/nanoFramework.nanoCLR.CLI/packages.lock.json'
+          path: $(UserProfile)/.nuget/packages
+
+      - task: DotNetCoreCLI@2
+        displayName: Restore NuGet packages
+        inputs:
+          command: restore
+          restoreArguments: "--locked-mode"
+          verbosityRestore: minimal
+          projects: nf-interpreter/targets/netcore/nanoCLR.sln
+          feedsToUse: select
+          includeNuGetOrg: true
+
+      - task: VSBuild@1
+        displayName: Build WIN ARM64 DLL target
+        inputs:
+          solution: "nf-interpreter/targets/netcore/nanoCLR.sln"
+          vsVersion: "17.0"
+          msbuildArchitecture: "x64"
+          platform: "ARM64"
+          maximumCpuCount: true
+          msbuildArgs: "/restore /p:PublicRelease=true /p:BuildWithNetFrameworkHostedCompiler=true"
+          configuration: "Release"
+
+      - pwsh: |
+          $ErrorActionPreference = "Stop"
+
+          Write-Host "Agent OS: $env:Agent_OS"
+          Write-Host "PROCESSOR_ARCHITECTURE: $env:PROCESSOR_ARCHITECTURE"
+          Write-Host "Build.SourcesDirectory: $(Build.SourcesDirectory)"
+          Write-Host "LITTLEFS_PATH: $(LITTLEFS_PATH)"
+
+          $vswhere = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
+
+          if (-not (Test-Path $vswhere)) {
+            throw "vswhere.exe was not found."
+          }
+
+          $vsPath = & $vswhere `
+            -latest `
+            -version "[17.0,18.0)" `
+            -products * `
+            -requires Microsoft.VisualStudio.Component.VC.Tools.ARM64 `
+            -property installationPath
+
+          if (-not $vsPath) {
+            throw "Visual Studio 2022 with ARM64 C++ tools was not found."
+          }
+
+          Write-Host "Visual Studio path: $vsPath"
+
+          $dumpbin = Get-ChildItem `
+            "$vsPath\VC\Tools\MSVC\*\bin\Hostx64\x64\dumpbin.exe" `
+            -ErrorAction SilentlyContinue |
+            Sort-Object FullName -Descending |
+            Select-Object -First 1
+
+          if (-not $dumpbin) {
+            throw "dumpbin.exe was not found."
+          }
+
+          Write-Host "dumpbin path: $($dumpbin.FullName)"
+
+          $repoRootCandidates = @(
+            "$(Build.SourcesDirectory)",
+            (Join-Path "$(Build.SourcesDirectory)" "nf-interpreter")
+          )
+
+          $repoRoot = $repoRootCandidates |
+            Where-Object { Test-Path (Join-Path $_ "targets\netcore\nanoCLR.sln") } |
+            Select-Object -First 1
+
+          if (-not $repoRoot) {
+            throw "Could not resolve repository root from Build.SourcesDirectory."
+          }
+
+          $solutionPath = Join-Path $repoRoot "targets\netcore\nanoCLR.sln"
+          $binDir = Join-Path $repoRoot "build\bin\Release"
+
+          Write-Host "Resolved repository root: $repoRoot"
+          Write-Host "Solution path: $solutionPath"
+          Write-Host "Configuration: Release"
+          Write-Host "Platform: ARM64"
+          Write-Host "Output path: $binDir"
+
+          $targets = @(
+            (Join-Path $binDir "Core.lib"),
+            (Join-Path $binDir "nanoFramework.nanoCLR.dll")
+          )
+
+          foreach ($target in $targets) {
+            if (-not (Test-Path $target)) {
+              throw "Expected build artifact was not found: $target"
+            }
+
+            Write-Host "Verifying architecture: $target"
+
+            $headers = & $dumpbin.FullName /headers $target 2>&1
+            $machineLines = $headers | Select-String "machine"
+
+            $machineLines | ForEach-Object {
+              Write-Host $_
+            }
+
+            if (($headers -join "`n") -notmatch "AA64 machine \(ARM64\)") {
+              throw "Expected an ARM64 artifact: $target"
+            }
+          }
+        displayName: Verify ARM64 build artifacts
+
+      - task: CopyFiles@2
+        condition: succeeded()
+        displayName: Stage win-arm64 nanoCLR runtime artifact
+        inputs:
+          SourceFolder: "$(Build.SourcesDirectory)/nf-interpreter/build/bin/Release"
+          Contents: |
+            nanoFramework.nanoCLR.dll
+            nanoFramework.nanoCLR.pdb
+            Core.lib
+            Debugger.lib
+            Diagnostics.lib
+            Messaging.lib
+            WireProtocol.lib
+          TargetFolder: "$(Build.ArtifactStagingDirectory)/runtimes/win-arm64/native"
+          flattenFolders: true
+          ignoreMakeDirErrors: true
+
+      - task: PublishPipelineArtifact@1
+        condition: succeeded()
+        displayName: Publish win-arm64 nanoCLR runtime artifact
+        inputs:
+          targetPath: "$(Build.ArtifactStagingDirectory)"
+          artifactName: nanoclr_win_arm64
+          artifactType: pipeline
+
+  #################
+  # POSIX host target (macOS + Linux)
+  - job: Build_POSIX_nanoCLR
+    strategy:
+      matrix:
+        macOS_arm64:
+          vmImage: 'macos-14'
+          POSIX_RID: osx-arm64
+        macOS_x64:
+          vmImage: 'macOS-latest'
+          POSIX_RID: osx-x64
+        Linux_x64:
+          vmImage: 'ubuntu-22.04'
+          POSIX_RID: linux-x64
+        Linux_arm64:
+          vmImage: 'ubuntu-22.04'
+          POSIX_RID: linux-arm64
+      maxParallel: 4
+    condition: >-
+      or(
+        and(
+          succeeded('Check_Code_Style'),
+          ne( dependencies.Check_Build_Options.outputs['BuildOptions.SKIP_BUILD'], true ),
+          or(
+            eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ALL'], true),
+            eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_POSIX'], true)
+          )
+        ),
+        and(
+          eq(variables['Build.Reason'], 'Manual'),
+          or(
+            eq(variables['BUILD_ALL__'], 'true'),
+            eq(variables['BUILD_POSIX__'], 'true')
+          )
+        )
+      )
+
+    dependsOn:
+      - Check_Build_Options
+      - Check_Code_Style
+
+    pool:
+      vmImage: $(vmImage)
+
+    steps:
+      - checkout: self
+
+      - bash: |
+          set -euo pipefail
+
+          # Derive cmake arch and library extension from the POSIX_RID matrix variable.
+          case "$(POSIX_RID)" in
+            osx-arm64|linux-arm64) NANO_ARCH=arm64  ; LIB_EXT=dylib ;;
+            osx-x64)               NANO_ARCH=x86_64 ; LIB_EXT=dylib ;;
+            linux-x64)             NANO_ARCH=x86_64 ; LIB_EXT=so    ;;
+          esac
+          # Correct extension for Linux regardless of arch.
+          [[ "$(POSIX_RID)" == linux-* ]] && LIB_EXT=so
+
+          # Install ninja if not present (Linux agents).
+          if ! command -v ninja >/dev/null 2>&1; then
+            sudo apt-get install -y ninja-build
+          fi
+
+          # Install arm64 cross-compiler when building linux-arm64 on an x86_64 agent.
+          TOOLCHAIN_ARG=""
+          if [ "$(POSIX_RID)" = "linux-arm64" ]; then
+            sudo apt-get install -y gcc-aarch64-linux-gnu g++-aarch64-linux-gnu
+            TOOLCHAIN_ARG="-DCMAKE_TOOLCHAIN_FILE=$(pwd)/targets/posix/toolchain-aarch64-linux-gnu.cmake"
+          fi
+
+          echo "RID=$(POSIX_RID)  ARCH=${NANO_ARCH}  LIB_EXT=${LIB_EXT}"
+
+          cmake -S targets/posix -B build/posix -G Ninja \
+            -DNANO_POSIX_ARCH=${NANO_ARCH} \
+            -DNANO_POSIX_ENABLE_SMOKE=ON \
+            ${TOOLCHAIN_ARG}
+          cmake --build build/posix
+          # Smoke-run the test binary only when its architecture matches the runner.
+          # For cross-compiled builds (e.g. osx-x64 on an arm64 agent) we skip the run
+          # but the library artifact is still staged and published.
+          case "$(uname -m)" in
+            arm64|aarch64) HOST_CANONICAL=arm64  ;;
+            x86_64)        HOST_CANONICAL=x86_64 ;;
+            *)             HOST_CANONICAL="$(uname -m)" ;;
+          esac
+          if [ "${HOST_CANONICAL}" = "${NANO_ARCH}" ]; then
+            ./build/posix/bin/nanoFramework.nanoCLR.test | tee build/posix/smoke.log
+            if ! grep -Eq '[0-9]+\.[0-9]+\.[0-9]+' build/posix/smoke.log; then
+              echo "ERROR: smoke output validation failed, expected semantic version in output."
+              exit 1
+            fi
+            CLR_VERSION=$(grep -oE '[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+' build/posix/smoke.log | head -1)
+          else
+            echo "Skipping smoke run: host=$(uname -m) (${HOST_CANONICAL}), target=${NANO_ARCH} (cross-compiled binary)."
+            CLR_VERSION="0.0.0.0"
+          fi
+          echo "Detected CLR version: ${CLR_VERSION}"
+          echo "##vso[task.setvariable variable=POSIX_CLR_VERSION]${CLR_VERSION}"
+          echo "##vso[task.setvariable variable=POSIX_LIB_EXT]${LIB_EXT}"
+
+          # Stage under runtimes/{rid}/native/ so the CLI pack job can collect all RIDs.
+          STAGING="$(Build.ArtifactStagingDirectory)/runtimes/$(POSIX_RID)/native"
+          mkdir -p "${STAGING}"
+          cp "build/posix/lib/nanoFramework.nanoCLR.${LIB_EXT}" "${STAGING}/"
+        displayName: Build and smoke run POSIX nanoCLR
+
+      - task: PublishPipelineArtifact@1
+        condition: succeeded()
+        displayName: Publish POSIX nanoCLR artifact
+        inputs:
+          targetPath: "$(Build.ArtifactStagingDirectory)"
+          artifactName: nanoclr_posix_$(POSIX_RID)
+          artifactType: pipeline
+
+  #################
+  # nanoCLR CLI tool
+  - job: Build_nanoCLR_CLI
+    condition: >-
+      or(
+        and(
+          succeeded('Check_Code_Style'),
+          ne(dependencies.Check_Build_Options.outputs['BuildOptions.SKIP_BUILD'], true),
+          or(
+            eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ALL'], true),
+            eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_NANOCLR_CLI'], true)
+          )
+        ),
+        and(
+          eq(variables['Build.Reason'], 'Manual'),
+          or(
+            eq(variables['BUILD_ALL__'], 'true'),
+            eq(variables['BUILD_NANOCLR_CLI__'], 'true')
+          )
+        )
+      )
+
+    dependsOn:
+      - Check_Build_Options
+      - Check_Code_Style
+      - Build_WIN32_nanoCLR
+      - Build_WIN_ARM64_nanoCLR
+      - Build_POSIX_nanoCLR
+
+    pool:
+      vmImage: "windows-2022"
+
+    variables:
+      - name: DOTNET_NOLOGO
+        value: true
+      - name: LITTLEFS_PATH
+        value: "D:/a/1/s/littlefs"
+      - name: REVISION
+        value: $[dependencies.Build_WIN32_nanoCLR.outputs['SetRevision.CLR_REVISION']]
+
+    steps:
+      - checkout: self
+      - checkout: littlefs
+        fetchDepth: 1
+
+      - template: azure-pipelines-templates/nb-gitversioning.yml
+        parameters:
+          repoDirectory: '$(Build.SourcesDirectory)/nf-interpreter'
+
+      - template: azure-pipelines-templates/install-nuget.yml@templates
+
+      - task: Cache@2
+        displayName: Cache NuGet packages
+        continueOnError: true
+        inputs:
+          key: 'nuget | **/targets/netcore/nanoFramework.nanoCLR.Host/packages.lock.json | **/targets/netcore/nanoFramework.nanoCLR.CLI/packages.lock.json'
+          path: $(UserProfile)/.nuget/packages
+  
+      - task: DotNetCoreCLI@2
+        displayName: Restore NuGet packages
+        inputs:
+          command: restore
+          restoreArguments: "--locked-mode"
+          verbosityRestore: minimal
+          projects: "nf-interpreter/targets/netcore/nanoCLR.sln"
+          feedsToUse: select
+          includeNuGetOrg: true
+
+      - task: VSBuild@1
+        displayName: Build .NET tool
+        condition: succeeded()
+        inputs:
+          solution: "nf-interpreter/targets/netcore/nanoCLR.sln"
+          platform: "Any CPU"
+          maximumCpuCount: true
+          msbuildArgs: "/restore /p:PublicRelease=true /p:BuildWithNetFrameworkHostedCompiler=true"
+          configuration: "Release"
+
+      - task: DownloadPipelineArtifact@2
+        displayName: 'Download POSIX artifact: osx-arm64'
+        continueOnError: true
+        inputs:
+          artifact: nanoclr_posix_osx-arm64
+          path: "$(Build.SourcesDirectory)/native-libs"
+
+      - task: DownloadPipelineArtifact@2
+        displayName: 'Download POSIX artifact: osx-x64'
+        continueOnError: true
+        inputs:
+          artifact: nanoclr_posix_osx-x64
+          path: "$(Build.SourcesDirectory)/native-libs"
+
+      - task: DownloadPipelineArtifact@2
+        displayName: 'Download POSIX artifact: linux-x64'
+        continueOnError: true
+        inputs:
+          artifact: nanoclr_posix_linux-x64
+          path: "$(Build.SourcesDirectory)/native-libs"
+
+      - task: DownloadPipelineArtifact@2
+        displayName: 'Download POSIX artifact: linux-arm64'
+        continueOnError: true
+        inputs:
+          artifact: nanoclr_posix_linux-arm64
+          path: "$(Build.SourcesDirectory)/native-libs"
+
+      - task: DownloadPipelineArtifact@2
+        displayName: 'Download Windows artifact: win-x64'
+        continueOnError: true
+        inputs:
+          artifact: nanoclr_win_x64
+          path: "$(Build.SourcesDirectory)/native-libs"
+
+      - task: DownloadPipelineArtifact@2
+        displayName: 'Download Windows artifact: win-arm64'
+        continueOnError: true
+        inputs:
+          artifact: nanoclr_win_arm64
+          path: "$(Build.SourcesDirectory)/native-libs"
+
+      - task: MSBuild@1
+        condition: succeeded()
+        displayName: Pack nanoCLR CLI
+        inputs:
+          solution: "nf-interpreter/targets/netcore/nanoFramework.nanoCLR.CLI/nanoFramework.nanoCLR.CLI.csproj"
+          platform: "Any CPU"
+          msbuildArguments: "/p:PublicRelease=true /t:pack /p:PackageOutputPath=$(Build.ArtifactStagingDirectory) /p:NativeBinRoot=$(Build.SourcesDirectory)/native-libs/"
+          configuration: "Release"
+          maximumCpuCount: true
+
+      - task: CopyFiles@2
+        condition: succeeded()
+        displayName: Add CLI build output to validation artifacts
+        inputs:
+          SourceFolder: "nf-interpreter/build/bin/Release/net10.0"
+          Contents: "**/*"
+          TargetFolder: "$(Build.ArtifactStagingDirectory)/cli-output"
+          ignoreMakeDirErrors: true
+
+      - task: CopyFiles@2
+        condition: succeeded()
+        displayName: Add staged native runtime assets to validation artifacts
+        inputs:
+          SourceFolder: "$(Build.SourcesDirectory)/native-libs"
+          Contents: "**/*"
+          TargetFolder: "$(Build.ArtifactStagingDirectory)/staged-runtimes"
+          ignoreMakeDirErrors: true
+
+      - task: CopyFiles@2
+        condition: succeeded()
+        displayName: Copy nanoclr
+        inputs:
+          SourceFolder: "nf-interpreter/build/bin/Release"
+          Contents: "nanoFramework.nanoCLR.dll"
+          TargetFolder: "$(Build.ArtifactStagingDirectory)/nanoclr"
+
+      - task: PublishPipelineArtifact@1
+        condition: succeeded()
+        displayName: Publish nanoclr NuGet package
+        inputs:
+          targetPath: "$(Build.ArtifactStagingDirectory)"
+          artifactName: nanoclr_nuget
+          artifactType: pipeline
+
+      - task: PublishPipelineArtifact@1
+        condition: succeeded()
+        displayName: Publish nanoclr
+        inputs:
+          targetPath: "$(Build.ArtifactStagingDirectory)/nanoclr"
+          artifactName: nanoclr_cli
+          artifactType: pipeline
+
+  #########################
+  # Run mscorlib Unit Tests
+
+  - job: Run_UnitTests_mscorlib
+    condition: >-
+      or(
+        and(
+          succeeded('Build_nanoCLR_CLI'),
+          ne(dependencies.Check_Build_Options.outputs['BuildOptions.SKIP_BUILD'], true),
+          ne(variables['System.PullRequest.PullRequestId'], ''),
+          or(
+            eq(dependencies.Check_Build_Options.outputs['BuildOptions.RUN_MSCORLIB_TESTS'], true),
+            eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ALL'], true),
+            eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_NANOCLR_CLI'], true)
+          )
+        ),
+        and(
+          eq(variables['Build.Reason'], 'Manual'),
+          or(
+            eq(variables['BUILD_ALL__'], 'true'),
+            eq(variables['BUILD_NANOCLR_CLI__'], 'true')
+          ),
+          eq(variables['RUN_MSCORLIB_TESTS__'], 'true')
+        )
+      )
+
+    dependsOn:
+      - Build_nanoCLR_CLI
+
+    pool:
+      vmImage: "windows-2022"
+
+    variables:
+      DOTNET_NOLOGO: true
+      solution: "nanoFramework.CoreLibrary.sln"
+      buildPlatform: "Any CPU"
+      buildConfiguration: "Release"
+
+    steps:
+      - checkout: self
+        fetchDepth: 1
+      - checkout: mscorlib
+        fetchDepth: 100
+        submodules: true
+        persistCredentials: true
+
+      - template: azure-pipelines-templates/check-mscorlib-to-test.yml
+
+      # Download nanoclr from build artifacts
+      - task: DownloadPipelineArtifact@2
+        inputs:
+          artifact: nanoclr_cli
+          path: "$(Agent.TempDirectory)/nanoclr_cli"
+
+      # build mscorlib
+
+      - task: InstallNanoMSBuildComponents@1
+        condition: succeeded()
+        displayName: Install .NET nanoFramework MSBuild components
+
+      - template: azure-pipelines-templates/install-nuget.yml@templates
+
+      - task: Cache@2
+        displayName: Cache NuGet packages
+        condition: succeeded()
+        continueOnError: true
+        inputs:
+          key: 'nuget | **/packages.lock.json'
+          path: $(UserProfile)/.nuget/packages
+
+      - task: NuGetCommand@2
+        condition: succeeded()
+        displayName: NuGet restore
+        retryCountOnTaskFailure: 5
+        inputs:
+          restoreSolution: "**/nanoFramework.CoreLibrary.sln"
+          feedsToUse: select
+
+      - task: VSBuild@1
+        condition: succeeded()
+        inputs:
+          solution: "**/nanoFramework.CoreLibrary.sln"
+          platform: "Any CPU"
+          msbuildArgs: "/p:PublicRelease=true"
+          configuration: "Release"
+          msbuildArchitecture: "x64"
+          maximumCpuCount: true
+
+      # run tests
+      - template: azure-pipelines-templates/run-unit-tests.yml@templates
+        parameters:
+          runUnitTests: true
+          unitTestRunsettings: '$(System.DefaultWorkingDirectory)\nf-interpreter\targets\netcore\pipeline_tests.runsettings'
+          packagesDirectory: "$(Build.SourcesDirectory)/CoreLibrary/packages"
+
+      - task: CopyFiles@2
+        condition: succeededOrFailed()
+        displayName: Copy vstest dump files
+        inputs:
+          SourceFolder: 'D:\a\_temp\'
+          Contents: "**/*.dmp"
+          TargetFolder: "$(Build.ArtifactStagingDirectory)/vstest_dumps"
+          flattenFolders: true
+
+      - powershell: |
+          $dumpPath = "$(Build.ArtifactStagingDirectory)/vstest_dumps"
+          $hasFiles = $false
+
+          if (Test-Path $dumpPath -PathType Container) {
+              $fileCount = (Get-ChildItem $dumpPath -File | Measure-Object).Count
+              $hasFiles = $fileCount -gt 0
+          }
+          echo "##vso[task.setvariable variable=hasFiles;isOutput=true]$hasFiles"
+        displayName: "Check for dump files"
+        name: checkFiles
+
+      - task: PublishPipelineArtifact@1
+        condition: eq(variables['hasFiles'], 'true')
+        displayName: Publish vstest dump files
+        inputs:
+          targetPath: "$(Build.ArtifactStagingDirectory)/vstest_dumps"
+          artifactName: VsTestCrashDumps
+          artifactType: pipeline
+
+
+
+
+
