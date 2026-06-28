@@ -2,8 +2,8 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#ifndef _NANOFRAMEWORK_EspNow_NATIVE_H_
-#define _NANOFRAMEWORK_EspNow_NATIVE_H_
+#ifndef NANOFRAMEWORK_ESPNOW_NATIVE_H
+#define NANOFRAMEWORK_ESPNOW_NATIVE_H
 
 #include <nanoCLR_Interop.h>
 #include <nanoCLR_Runtime.h>
@@ -13,9 +13,6 @@
 #include <esp_interface.h>
 #include <esp_wifi.h>
 #include <esp_now.h>
-
-#define EVENT_ESPNOW_DATASENT 1
-#define EVENT_ESPNOW_DATARECV 2
 
 struct EspNowDataSentEventData
 {
@@ -79,9 +76,6 @@ struct Library_nanoFramework_EspNow_native_nanoFramework_EspNow_EspNowController
     NANOCLR_NATIVE_DECLARE(NativeEspNowAddPeer___I4__SZARRAY_U1__U1__BOOLEAN__SZARRAY_U1);
 
     //--//
-    static EspNowDataSentEventData dataSentEventData;
-    static EspNowDataRecvEventData dataRecvEventData;
-
     static void DataSentCb(const wifi_tx_info_t *tx_info, esp_now_send_status_t status);
     static void DataRecvCb(const esp_now_recv_info *recv_info, const uint8_t *incomingData, int len);
 };
@@ -108,4 +102,4 @@ struct Library_nanoFramework_EspNow_native_nanoFramework_EspNow_EspNowException
 
 extern const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_nanoFramework_EspNow;
 
-#endif //_NANOFRAMEWORK_EspNow_NATIVE_H_
+#endif // NANOFRAMEWORK_ESPNOW_NATIVE_H

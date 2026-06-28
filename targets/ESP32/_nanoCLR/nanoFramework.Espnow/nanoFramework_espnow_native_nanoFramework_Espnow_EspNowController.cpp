@@ -4,9 +4,8 @@
 
 #include "nanoFramework_espnow_native.h"
 
-EspNowDataSentEventData Library_nanoFramework_EspNow_native_nanoFramework_EspNow_EspNowController::dataSentEventData;
-EspNowDataRecvEventData Library_nanoFramework_EspNow_native_nanoFramework_EspNow_EspNowController::dataRecvEventData;
-
+static const int EVENT_ESPNOW_DATASENT = 1;
+static const int EVENT_ESPNOW_DATARECV = 2;
 static const int ESPNOW_ERR_ESPNOW_INIT = 10001;
 static const int ESPNOW_ERR_INVALID_PEER = 10002;
 static const int ESPNOW_ERR_ADD_PEER = 10003;
@@ -15,10 +14,16 @@ void Library_nanoFramework_EspNow_native_nanoFramework_EspNow_EspNowController::
     const wifi_tx_info_t *tx_info,
     esp_now_send_status_t status)
 {
-    memcpy(dataSentEventData.peer_mac, tx_info->des_addr, ESP_NOW_ETH_ALEN);
-    dataSentEventData.status = status;
+    EspNowDataSentEventData *dataSentEventData = (EspNowDataSentEventData *)platform_malloc(sizeof(EspNowDataSentEventData));
+    if (dataSentEventData == NULL)
+    {
+        return;
+    }
 
-    PostManagedEvent(EVENT_ESPNOW, 0, EVENT_ESPNOW_DATASENT, (CLR_UINT32)&dataSentEventData);
+    memcpy(dataSentEventData->peer_mac, tx_info->des_addr, ESP_NOW_ETH_ALEN);
+    dataSentEventData->status = status;
+
+    PostManagedEvent(EVENT_ESPNOW, 0, EVENT_ESPNOW_DATASENT, (CLR_UINT32)dataSentEventData);
 }
 
 void Library_nanoFramework_EspNow_native_nanoFramework_EspNow_EspNowController::DataRecvCb(
@@ -26,11 +31,17 @@ void Library_nanoFramework_EspNow_native_nanoFramework_EspNow_EspNowController::
     const uint8_t *incomingData,
     int len)
 {
-    memcpy(dataRecvEventData.peer_mac, recv_info->src_addr, ESP_NOW_ETH_ALEN);
-    memcpy(dataRecvEventData.data, incomingData, len);
-    dataRecvEventData.dataLen = len;
+    EspNowDataRecvEventData *dataRecvEventData = (EspNowDataRecvEventData *)platform_malloc(sizeof(EspNowDataRecvEventData));
+    if (dataRecvEventData == NULL)
+    {
+        return;
+    }
 
-    PostManagedEvent(EVENT_ESPNOW, 0, EVENT_ESPNOW_DATARECV, (CLR_UINT32)&dataRecvEventData);
+    memcpy(dataRecvEventData->peer_mac, recv_info->src_addr, ESP_NOW_ETH_ALEN);
+    memcpy(dataRecvEventData->data, incomingData, len);
+    dataRecvEventData->dataLen = len;
+
+    PostManagedEvent(EVENT_ESPNOW, 0, EVENT_ESPNOW_DATARECV, (CLR_UINT32)dataRecvEventData);
 }
 
 HRESULT Library_nanoFramework_EspNow_native_nanoFramework_EspNow_EspNowController::NativeInitialize___I4(
@@ -55,6 +66,9 @@ HRESULT Library_nanoFramework_EspNow_native_nanoFramework_EspNow_EspNowControlle
 
     if (ret != ESP_OK)
     {
+        esp_now_unregister_recv_cb();
+        esp_now_unregister_send_cb();
+        esp_now_deinit();
         stack.SetResult_I4(ESPNOW_ERR_ESPNOW_INIT);
         NANOCLR_NOCLEANUP_NOLABEL();
     }
@@ -84,12 +98,29 @@ HRESULT Library_nanoFramework_EspNow_native_nanoFramework_EspNow_EspNowControlle
     esp_err_t ret;
 
     CLR_RT_HeapBlock_Array *peerMacArg = stack.Arg1().DereferenceArray();
+    if (peerMacArg == NULL || peerMacArg->m_numOfElements != ESP_NOW_ETH_ALEN)
+    {
+        stack.SetResult_I4(ESPNOW_ERR_INVALID_PEER);
+        NANOCLR_NOCLEANUP_NOLABEL();
+    }
+
     char *peerMac = (char *)peerMacArg->GetFirstElement();
 
     CLR_RT_HeapBlock_Array *dataArg = stack.Arg2().DereferenceArray();
-    char *data = (char *)dataArg->GetFirstElement();
+    if (dataArg == NULL)
+    {
+        stack.SetResult_I4(ESPNOW_ERR_INVALID_PEER);
+        NANOCLR_NOCLEANUP_NOLABEL();
+    }
 
     int32_t dataLen = stack.Arg3().NumericByRef().s4;
+    if (dataLen < 0 || dataLen > (int32_t)dataArg->m_numOfElements)
+    {
+        stack.SetResult_I4(ESPNOW_ERR_INVALID_PEER);
+        NANOCLR_NOCLEANUP_NOLABEL();
+    }
+
+    char *data = (char *)dataArg->GetFirstElement();
 
     ret = esp_now_send((const uint8_t *)peerMac, (const uint8_t *)data, dataLen);
 
