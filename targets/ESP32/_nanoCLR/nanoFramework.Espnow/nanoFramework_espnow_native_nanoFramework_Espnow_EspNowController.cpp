@@ -15,18 +15,10 @@ void Library_nanoFramework_EspNow_native_nanoFramework_EspNow_EspNowController::
     const wifi_tx_info_t *tx_info,
     esp_now_send_status_t status)
 {
-    DEBUG_FENTER();
-
-    DEBUG_WRITELINE("Sending status:\t%d", status);
-
     memcpy(dataSentEventData.peer_mac, tx_info->des_addr, ESP_NOW_ETH_ALEN);
     dataSentEventData.status = status;
 
-    DEBUG_WRITELINE("Posting managed SENT event");
-
     PostManagedEvent(EVENT_ESPNOW, 0, EVENT_ESPNOW_DATASENT, (CLR_UINT32)&dataSentEventData);
-
-    DEBUG_FEXIT();
 }
 
 void Library_nanoFramework_EspNow_native_nanoFramework_EspNow_EspNowController::DataRecvCb(
@@ -34,26 +26,11 @@ void Library_nanoFramework_EspNow_native_nanoFramework_EspNow_EspNowController::
     const uint8_t *incomingData,
     int len)
 {
-    DEBUG_FENTER();
-
-    if (len > 0)
-    {
-        DEBUG_WRITELINE("Recv %d bytes from[0]:\t%d", len, incomingData[0]);
-    }
-    else
-    {
-        DEBUG_WRITELINE("Recv %d bytes", len);
-    }
-
     memcpy(dataRecvEventData.peer_mac, recv_info->src_addr, ESP_NOW_ETH_ALEN);
     memcpy(dataRecvEventData.data, incomingData, len);
     dataRecvEventData.dataLen = len;
 
-    DEBUG_WRITELINE("Posting managed RECV event");
-
     PostManagedEvent(EVENT_ESPNOW, 0, EVENT_ESPNOW_DATARECV, (CLR_UINT32)&dataRecvEventData);
-
-    DEBUG_FEXIT();
 }
 
 HRESULT Library_nanoFramework_EspNow_native_nanoFramework_EspNow_EspNowController::NativeInitialize___I4(
@@ -92,13 +69,9 @@ HRESULT Library_nanoFramework_EspNow_native_nanoFramework_EspNow_EspNowControlle
 {
     NANOCLR_HEADER();
 
-    DEBUG_FENTER();
-
     esp_now_unregister_recv_cb();
     esp_now_unregister_send_cb();
     esp_now_deinit();
-
-    DEBUG_FEXIT();
 
     NANOCLR_NOCLEANUP_NOLABEL();
 }
@@ -107,8 +80,6 @@ HRESULT Library_nanoFramework_EspNow_native_nanoFramework_EspNow_EspNowControlle
     NativeEspNowSend___I4__SZARRAY_U1__SZARRAY_U1__I4(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
-
-    DEBUG_FENTER();
 
     esp_err_t ret;
 
@@ -120,20 +91,7 @@ HRESULT Library_nanoFramework_EspNow_native_nanoFramework_EspNow_EspNowControlle
 
     int32_t dataLen = stack.Arg3().NumericByRef().s4;
 
-    DEBUG_WRITELINE(
-        "sending %d: bytes to peer mac: %x:%x:%x:%x:%x:%x, data[0]: %x",
-        dataLen,
-        peerMac[0],
-        peerMac[1],
-        peerMac[2],
-        peerMac[3],
-        peerMac[4],
-        peerMac[5],
-        data[0]);
-
     ret = esp_now_send((const uint8_t *)peerMac, (const uint8_t *)data, dataLen);
-
-    DEBUG_FEXIT_RET(ret);
 
     stack.SetResult_I4((int32_t)ret);
 
@@ -180,20 +138,9 @@ HRESULT Library_nanoFramework_EspNow_native_nanoFramework_EspNow_EspNowControlle
         memcpy(peerInfo.lmk, localMasterKey->GetFirstElement(), ESP_NOW_KEY_LEN);
     }
 
-    DEBUG_WRITELINE(
-        "add_peer, mac: %x:%x:%x:%x:%x:%x, ch: %d",
-        peerMac[0],
-        peerMac[1],
-        peerMac[2],
-        peerMac[3],
-        peerMac[4],
-        peerMac[5],
-        channel);
-
     esp_err_t result = esp_now_add_peer(&peerInfo);
     if (result != ESP_OK)
     {
-        DEBUG_WRITELINE("esp_now_add_peer failed: %d", result);
         stack.SetResult_I4(ESPNOW_ERR_ADD_PEER);
         NANOCLR_NOCLEANUP_NOLABEL();
     }
