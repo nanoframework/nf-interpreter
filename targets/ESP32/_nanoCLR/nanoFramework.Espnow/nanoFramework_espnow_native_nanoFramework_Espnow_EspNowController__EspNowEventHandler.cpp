@@ -2,18 +2,6 @@
 // See LICENSE file in the project root for full license information.
 //
 
-//-----------------------------------------------------------------------------
-//
-//                   ** WARNING! **
-//    This file was generated automatically by a tool.
-//    Re-running the tool will overwrite this file.
-//    You should copy this file to a custom location
-//    before adding any customization in the copy to
-//    prevent loss of your changes when the tool is
-//    re-run.
-//
-//-----------------------------------------------------------------------------
-
 #include "nanoFramework_espnow_native.h"
 
 HRESULT
@@ -23,8 +11,6 @@ Library_nanoFramework_EspNow_native_nanoFramework_EspNow_EspNowController__EspNo
     CLR_UINT32 length)
 {
     NANOCLR_HEADER();
-
-    DEBUG_FENTER();
 
     CLR_UINT8 *firstTargetByte;
     CLR_RT_HeapBlock_Array *targetArray;
@@ -37,12 +23,8 @@ Library_nanoFramework_EspNow_native_nanoFramework_EspNow_EspNowController__EspNo
         NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
     }
 
-    DEBUG_WRITELINE("copying %d bytes", length);
-
     firstTargetByte = targetArray->GetFirstElement();
     memcpy(firstTargetByte, src, length);
-
-    DEBUG_FEXIT();
 
     NANOCLR_NOCLEANUP();
 }
@@ -52,8 +34,6 @@ Library_nanoFramework_EspNow_native_nanoFramework_EspNow_EspNowController__EspNo
     CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
-
-    DEBUG_FENTER();
 
     EspNowDataSentEventData *sentEventData = (EspNowDataSentEventData *)stack.Arg2().NumericByRef().u4;
     CLR_RT_HeapBlock *dataSentEvent;
@@ -80,8 +60,6 @@ Library_nanoFramework_EspNow_native_nanoFramework_EspNow_EspNowController__EspNo
     dataSentEvent[Library_nanoFramework_EspNow_native_nanoFramework_EspNow_DataSentEventInternal::FIELD__Status]
         .SetInteger(sentEventData->status);
 
-    DEBUG_FEXIT();
-
     NANOCLR_NOCLEANUP();
 }
 
@@ -90,8 +68,6 @@ Library_nanoFramework_EspNow_native_nanoFramework_EspNow_EspNowController__EspNo
     CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
-
-    DEBUG_FENTER();
 
     EspNowDataRecvEventData *recvEventData = (EspNowDataRecvEventData *)stack.Arg2().NumericByRef().u4;
     CLR_RT_HeapBlock *dataRecvEvent;
@@ -123,8 +99,6 @@ Library_nanoFramework_EspNow_native_nanoFramework_EspNow_EspNowController__EspNo
     dataRecvEvent[Library_nanoFramework_EspNow_native_nanoFramework_EspNow_DataRecvEventInternal::FIELD__DataLen]
         .SetInteger(recvEventData->dataLen);
 
-    DEBUG_FEXIT();
-
     NANOCLR_NOCLEANUP();
 }
 
@@ -134,12 +108,8 @@ Library_nanoFramework_EspNow_native_nanoFramework_EspNow_EspNowController__EspNo
 {
     NANOCLR_HEADER();
 
-    DEBUG_FENTER();
-
     CLR_UINT32 data1 = stack.Arg1().NumericByRef().u4;
     CLR_UINT32 subEvent = data1 >> 16;
-
-    DEBUG_WRITELINE("subevent: %d", subEvent);
 
     switch (subEvent)
     {
@@ -152,13 +122,6 @@ Library_nanoFramework_EspNow_native_nanoFramework_EspNow_EspNowController__EspNo
         default:
             NANOCLR_SET_AND_LEAVE(stack.NotImplementedStub());
     }
-
-    if (FAILED(hr))
-    {
-        DEBUG_WRITELINE("failed hr: %x", hr);
-    }
-
-    DEBUG_FEXIT();
 
     NANOCLR_NOCLEANUP();
 }
