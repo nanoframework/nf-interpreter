@@ -75,9 +75,17 @@ elseif(TARGET_VENDOR STREQUAL "RP")
     list(APPEND CHIBIOS_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/common/portability/GCC)
     list(APPEND CHIBIOS_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/common/ports/ARM-common)
     list(APPEND CHIBIOS_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/common/ports/ARM-common/include)
-    list(APPEND CHIBIOS_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/common/ports/ARMv6-M)
-    list(APPEND CHIBIOS_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/common/ports/ARMv6-M/compilers/GCC)
-    list(APPEND CHIBIOS_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/common/ports/ARMv6-M/smp/rp2)
+
+    if(TARGET_SERIES STREQUAL "RP2040")
+        list(APPEND CHIBIOS_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/common/ports/ARMv6-M)
+        list(APPEND CHIBIOS_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/common/ports/ARMv6-M/compilers/GCC)
+        list(APPEND CHIBIOS_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/common/ports/ARMv6-M/smp/rp2)
+    elseif(TARGET_SERIES STREQUAL "RP2350")
+        list(APPEND CHIBIOS_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/common/ports/ARMv8-M-ML-ALT)
+        list(APPEND CHIBIOS_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/common/ports/ARMv8-M-ML-ALT/smp/rp2)
+        list(APPEND CHIBIOS_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/common/ports/ARMv8-M-ML-ALT/compilers/GCC)
+    endif()
+
     list(APPEND CHIBIOS_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/common/startup/ARMCMx/devices/${TARGET_SERIES})
     list(APPEND CHIBIOS_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/common/ext/ARM/CMSIS/Core/Include)
     list(APPEND CHIBIOS_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/common/ext/RP/${TARGET_SERIES})
@@ -154,7 +162,7 @@ foreach(SRC_FILE ${CHIBIOS_SRCS})
 
 endforeach()
 
-# chmemchecks.c only exists in ChibiOS master, not in stable_21.11.x
+# chmemchecks.c only exists in ChibiOS main, not in stable-21.11.x
 if(EXISTS ${chibios_SOURCE_DIR}/os/oslib/src/chmemchecks.c)
     list(APPEND CHIBIOS_SOURCES ${chibios_SOURCE_DIR}/os/oslib/src/chmemchecks.c)
 endif()

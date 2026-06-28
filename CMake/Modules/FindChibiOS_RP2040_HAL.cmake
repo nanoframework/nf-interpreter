@@ -31,8 +31,8 @@ list(APPEND CHIBIOS_HAL_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/hal/ports/RP/LLD/P
 list(APPEND CHIBIOS_HAL_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/hal/ports/RP/LLD/PWMv1)
 list(APPEND CHIBIOS_HAL_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/hal/ports/RP/LLD/RTCv1)
 list(APPEND CHIBIOS_HAL_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/hal/ports/RP/LLD/SPIv1)
-list(APPEND CHIBIOS_HAL_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/hal/ports/RP/LLD/TIMERv1)
 list(APPEND CHIBIOS_HAL_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/hal/ports/RP/LLD/UARTv1)
+list(APPEND CHIBIOS_HAL_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/hal/ports/RP/LLD/TIMERv1)
 list(APPEND CHIBIOS_HAL_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/hal/ports/RP/LLD/USBv1)
 list(APPEND CHIBIOS_HAL_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/hal/ports/RP/LLD/WDGv1)
 
@@ -81,7 +81,7 @@ set(CHIBIOS_HAL_SRCS
     hal_st.c
     
     hal_buffers.c
-    hal_queues.c
+    hal_uart_lld.c
     hal_flash.c
     hal_mmcsd.c
     hal_safety.c
@@ -183,6 +183,13 @@ endforeach()
 
 # Suppress -Wshadow for ChibiOS ADC HAL (variable shadowing in macro expansion)
 SET_SOURCE_FILES_PROPERTIES(${chibios_SOURCE_DIR}/os/hal/ports/RP/LLD/ADCv1/hal_adc_lld.c PROPERTIES COMPILE_FLAGS -Wno-shadow)
+
+# Force -Os -fno-inline for ChibiOS USB HAL on RP2040 (Cortex-M0+ / Thumb-1).
+# -fno-inline prevents inlining static inline helpers that would create composite
+# functions with stack frames exceeding the Thumb-1 SP-relative ldr offset limit (1020 bytes).
+# -Os overrides the global -Og: GCC 15 changed -Og to keep more variables on the stack for
+# debuggability, pushing individual function frames past 1020 bytes even without inlining.
+SET_SOURCE_FILES_PROPERTIES(${chibios_SOURCE_DIR}/os/hal/ports/RP/LLD/USBv1/hal_usb_lld.c PROPERTIES COMPILE_FLAGS "-Os -fno-inline")
 
 include(FindPackageHandleStandardArgs)
 

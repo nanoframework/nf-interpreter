@@ -1,7 +1,7 @@
 {
   "version": 1,
   "dependencies": {
-    "net10.0": {
+    "net8.0": {
       "System.IO.Ports": {
         "type": "Direct",
         "requested": "[8.0.0, )",

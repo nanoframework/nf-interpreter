@@ -19,6 +19,7 @@ variables:
   BUILD_NANOCLR_CLI__: "false"
   RUN_MSCORLIB_TESTS__: "false"
   StartReleaseCandidate: "false"
+
 # add nf-tools repo to resources (for Azure Pipelines templates)
 resources:
   repositories:
@@ -86,12 +87,12 @@ jobs:
             $targets = @{
               BUILD_ALL = $buildAll
               BUILD_CHIBIOS = ($buildAll -or (Test-Enabled "$(BUILD_CHIBIOS__)"))
-              BUILD_FREERTOS = ($buildAll -or (Test-Enabled "$(BUILD_FREERTOS__)"))
+              BUILD_FREERTOS = ($buildAll -or (Test-Enabled "$(BUILD_FREERTOS__)") -or (Test-Enabled "$(BUILD_NXP__)"))
               BUILD_ESP32 = ($buildAll -or (Test-Enabled "$(BUILD_ESP32__)"))
               BUILD_TI = ($buildAll -or (Test-Enabled "$(BUILD_TI__)"))
               BUILD_THREADX = ($buildAll -or (Test-Enabled "$(BUILD_THREADX__)"))
               BUILD_WIN32 = ($buildAll -or (Test-Enabled "$(BUILD_WINDOWS_NANOCLR__)"))
-              BUILD_POSIX = ($buildAll -or (Test-Enabled "$(BUILD_POSIX__)"))
+              BUILD_POSIX = ($buildAll -or (Test-Enabled "$(BUILD_POSIX__)") -or (Test-Enabled "$(BUILD_NANOCLR_CLI__)"))
               BUILD_NANOCLR_CLI = ($buildAll -or (Test-Enabled "$(BUILD_NANOCLR_CLI__)"))
             }
 
@@ -104,6 +105,7 @@ jobs:
 
         name: TargetsToBuild
         displayName: Get targets to build
+
   ##############################
   - job: Check_Code_Style
     condition: >-
@@ -125,11 +127,12 @@ jobs:
       - Check_Build_Options
 
     pool:
-      vmImage: "windows-2022"
+      vmImage: "ubuntu-latest"
 
     steps:
       - checkout: self
         fetchDepth: 1
+        condition: ne(variables['System.PullRequest.PullRequestId'], '')
 
       - template: azure-pipelines-templates/download-install-llvm.yml
       - template: azure-pipelines-templates/check-code-style.yml
@@ -161,7 +164,7 @@ jobs:
       - Check_Code_Style
 
     pool:
-      vmImage: "windows-2022"
+      vmImage: "ubuntu-latest"
 
     strategy:
       matrix:
@@ -184,7 +187,7 @@ jobs:
     variables:
       DOTNET_NOLOGO: true
       # creates a counter and assigns it to the revision variable
-      REVISION: $[counter('STM32_1_14_0_versioncounter', 0)]
+      REVISION: $[counter('STM32_1_17_0_versioncounter', 0)]
       HelperPackageVersion: $[counter('HelperPackageVersioncounter', 0)]
       TargetPlatform: "stm32"
 
@@ -207,52 +210,56 @@ jobs:
           targetPath: '$(Build.ArtifactStagingDirectory)'
           artifactName: '$(TargetPublishName)_validation'
           artifactType: pipeline
-
-      - powershell: |
-          $nuspec = "targets\ChibiOS\$(TargetBoard)\managed_helpers\package.nuspec"
-
-          if (Test-Path $nuspec) {
-            $version = [int]$env:HelperPackageVersion
-            $packageVersion = "1.0." + $version.ToString()
-
-            echo "##vso[task.setvariable variable=BUILD_NUGET_PACKAGE]true"
-            echo "##vso[task.setvariable variable=PACKAGE_NUGET_VERSION]$packageVersion"
-            echo "##vso[task.setvariable variable=MANAGED_HELPERS_NUSPEC]$nuspec"
-            Write-Host "Managed helper package version is: $packageVersion"
-          }
-          else {
-            echo "##vso[task.setvariable variable=BUILD_NUGET_PACKAGE]false"
-            Write-Host "No managed helper package found at $nuspec."
-          }
+      - task: NuGetToolInstaller@1
         condition: succeeded()
-        displayName: Check managed helpers package
+        displayName: Install NuGet for validation managed helpers
 
-      - task: NuGetCommand@2
-        inputs:
-          command: "custom"
-          arguments: 'pack $(MANAGED_HELPERS_NUSPEC) -Version $(PACKAGE_NUGET_VERSION)'
-        condition: and(succeeded(), eq(variables['BUILD_NUGET_PACKAGE'], true))
-        displayName: Pack managed helpers NuGet
+      - pwsh: |
+          $sourceRoot = "$(Build.SourcesDirectory)"
+          $nestedRepo = Join-Path $sourceRoot "nf-interpreter"
+          if (Test-Path $nestedRepo) {
+            $sourceRoot = $nestedRepo
+          }
 
-      - task: CopyFiles@2
-        condition: and(succeeded(), eq(variables['BUILD_NUGET_PACKAGE'], true))
-        displayName: Collecting managed helpers deployable artifacts
-        inputs:
-          sourceFolder: $(Build.SourcesDirectory)
-          Contents: |
-            **\nanoFramework.Targets*.nupkg
-          TargetFolder: "$(Build.ArtifactStagingDirectory)"
-          flattenFolders: true
-          ignoreMakeDirErrors: true
+          $candidates = @(
+            "targets/ChibiOS/$(TargetBoard)/managed_helpers/package.nuspec",
+            "targets/ThreadX/ST/$(TargetBoard)/managed_helpers/package.nuspec"
+          )
+
+          $nuspec = $null
+          foreach ($candidate in $candidates) {
+            $candidatePath = Join-Path $sourceRoot $candidate
+            if (Test-Path $candidatePath) {
+              $nuspec = $candidatePath
+              break
+            }
+          }
+
+          if (-not $nuspec) {
+            Write-Host "No managed helper package found for $(TargetBoard)."
+            exit 0
+          }
+
+          $outDir = "$(Build.ArtifactStagingDirectory)/managed-helpers"
+          New-Item -ItemType Directory -Force $outDir | Out-Null
+          $packageVersion = "1.0.$(HelperPackageVersion)"
+          Write-Host "Packing validation managed helpers from $nuspec as $packageVersion"
+          & nuget pack $nuspec -Version $packageVersion -OutputDirectory $outDir
+          if ($LASTEXITCODE -ne 0) {
+            exit $LASTEXITCODE
+          }
+
+          Write-Host "##vso[task.setvariable variable=HAS_MANAGED_HELPERS]true"
+        condition: succeeded()
+        displayName: Pack validation managed helpers
 
       - task: PublishPipelineArtifact@1
-        condition: and(succeeded(), eq(variables['BUILD_NUGET_PACKAGE'], true))
-        displayName: Publish managed helpers NuGet artifact
+        condition: and(succeeded(), eq(variables['HAS_MANAGED_HELPERS'], 'true'))
+        displayName: Publish validation managed helpers
         inputs:
-          targetPath: '$(Build.ArtifactStagingDirectory)'
-          artifactName: '$(TargetPublishName)_managed_helpers_validation'
+          targetPath: "$(Build.ArtifactStagingDirectory)/managed-helpers"
+          artifactName: "$(TargetPublishName)_managed_helpers_validation"
           artifactType: pipeline
-
   ######################
   # ChibiOS RP targets
   - job: Build_ChibiOS_RP_targets
@@ -280,7 +287,7 @@ jobs:
       - Check_Code_Style
 
     pool:
-      vmImage: "windows-2022"
+      vmImage: "ubuntu-latest"
 
     strategy:
       matrix:
@@ -294,11 +301,16 @@ jobs:
           TargetSeries: "RP2040"
           BuildOptions:
           CMakePreset: RP_PICO_W_RP2040
+        RP_PICO2_RP2350:
+          TargetBoard: RP_PICO2_RP2350
+          TargetSeries: "RP2350"
+          BuildOptions:
+          CMakePreset: RP_PICO2_RP2350
 
     variables:
       DOTNET_NOLOGO: true
       # creates a counter and assigns it to the revision variable
-      REVISION: $[counter('RP_1_0_0_versioncounter', 0)]
+      REVISION: $[counter('RP_1_17_0_versioncounter', 0)]
       HelperPackageVersion: $[counter('HelperPackageVersioncounter', 0)]
       TargetPlatform: "rp"
 
@@ -320,50 +332,6 @@ jobs:
           artifactName: '$(TargetPublishName)_validation'
           artifactType: pipeline
 
-      - powershell: |
-          $nuspec = "targets\ChibiOS\$(TargetBoard)\managed_helpers\package.nuspec"
-
-          if (Test-Path $nuspec) {
-            $version = [int]$env:HelperPackageVersion
-            $packageVersion = "1.0." + $version.ToString()
-
-            echo "##vso[task.setvariable variable=BUILD_NUGET_PACKAGE]true"
-            echo "##vso[task.setvariable variable=PACKAGE_NUGET_VERSION]$packageVersion"
-            echo "##vso[task.setvariable variable=MANAGED_HELPERS_NUSPEC]$nuspec"
-            Write-Host "Managed helper package version is: $packageVersion"
-          }
-          else {
-            echo "##vso[task.setvariable variable=BUILD_NUGET_PACKAGE]false"
-            Write-Host "No managed helper package found at $nuspec."
-          }
-        condition: succeeded()
-        displayName: Check managed helpers package
-
-      - task: NuGetCommand@2
-        inputs:
-          command: "custom"
-          arguments: 'pack $(MANAGED_HELPERS_NUSPEC) -Version $(PACKAGE_NUGET_VERSION)'
-        condition: and(succeeded(), eq(variables['BUILD_NUGET_PACKAGE'], true))
-        displayName: Pack managed helpers NuGet
-
-      - task: CopyFiles@2
-        condition: and(succeeded(), eq(variables['BUILD_NUGET_PACKAGE'], true))
-        displayName: Collecting managed helpers deployable artifacts
-        inputs:
-          sourceFolder: $(Build.SourcesDirectory)
-          Contents: |
-            **\nanoFramework.Targets*.nupkg
-          TargetFolder: "$(Build.ArtifactStagingDirectory)"
-          flattenFolders: true
-          ignoreMakeDirErrors: true
-
-      - task: PublishPipelineArtifact@1
-        condition: and(succeeded(), eq(variables['BUILD_NUGET_PACKAGE'], true))
-        displayName: Publish managed helpers NuGet artifact
-        inputs:
-          targetPath: '$(Build.ArtifactStagingDirectory)'
-          artifactName: '$(TargetPublishName)_managed_helpers_validation'
-          artifactType: pipeline
   #################
   # ESP32 targets
   - job: Build_ESP32_targets
@@ -391,7 +359,7 @@ jobs:
       - Check_Code_Style
 
     pool:
-      vmImage: "windows-2022"
+      vmImage: "ubuntu-latest"
 
     # there is only a single ESP32 target, but this is already config as a matrix to make it easy to add new ones
     strategy:
@@ -423,14 +391,14 @@ jobs:
           PackageName: ESP32_C3
           CMakePreset: ESP32_C3
 
-        ESP32_C5_THREAD_USB:
+        ESP32_C5_THREAD:
           TargetBoard: ESP32_C5
           TargetSeries: "esp32c5"
           BuildOptions:
           IDF_Target: esp32c5
-          TargetName: ESP32_C5_THREAD_USB
-          PackageName: ESP32_C5_THREAD_USB
-          CMakePreset: ESP32_C5_THREAD_USB
+          TargetName: ESP32_C5_THREAD
+          PackageName: ESP32_C5_THREAD
+          CMakePreset: ESP32_C5_THREAD
 
         ESP32_C6_THREAD:
           TargetBoard: ESP32_C6
@@ -441,14 +409,14 @@ jobs:
           PackageName: ESP32_C6_THREAD
           CMakePreset: ESP32_C6_THREAD
 
-        ESP32_C61_USB:
+        ESP32_C61:
           TargetBoard: ESP32_C61
           TargetSeries: "esp32c61"
           BuildOptions:
           IDF_Target: esp32c61
-          TargetName: ESP32_C61_USB
-          PackageName: ESP32_C61_USB
-          CMakePreset: ESP32_C61_USB
+          TargetName: ESP32_C61
+          PackageName: ESP32_C61
+          CMakePreset: ESP32_C61
 
         ESP32_H2_THREAD:
           TargetBoard: ESP32_H2
@@ -459,38 +427,38 @@ jobs:
           PackageName: ESP32_H2_THREAD
           CMakePreset: ESP32_H2_THREAD
 
-        ESP32_S3_ALL:
+        ESP32_S3_QUAD:
           TargetBoard: ESP32_S3
           TargetSeries: "esp32s3"
           BuildOptions:
           IDF_Target: esp32s3
-          TargetName: ESP32_S3_ALL
-          PackageName: ESP32_S3_ALL
-          CMakePreset: ESP32_S3_ALL
+          TargetName: ESP32_S3_QUADL
+          PackageName: ESP32_S3_QUAD
+          CMakePreset: ESP32_S3_QUAD
 
-        ESP32_ETHERNET_KIT_1.2:
-          TargetBoard: ESP32
-          TargetSeries: "esp32"
+        ESP32_S3_OCTAL:
+          TargetBoard: ESP32_S3
+          TargetSeries: "esp32s3"
           BuildOptions:
-          IDF_Target: esp32
-          TargetName: ESP32_ETHERNET_KIT_1.2
-          PackageName: ESP32_ETHERNET_KIT_1.2
-          CMakePreset: ESP32_ETHERNET_KIT_1.2
+          IDF_Target: esp32s3
+          TargetName: ESP32_S3_OCTAL
+          PackageName: ESP32_S3_OCTAL
+          CMakePreset: ESP32_S3_OCTAL
 
-        ESP32_P4_UART:
+        ESP32_P4_REV_LESS3:
           TargetBoard: ESP32_P4
           TargetSeries: "esp32p4"
           BuildOptions:
           IDF_Target: esp32p4
-          TargetName: ESP32_P4_UART
-          PackageName: ESP32_P4_UART
-          CMakePreset: ESP32_P4_UART
+          TargetName: ESP32_P4_REV_LESS3
+          PackageName: ESP32_P4_REV_LESS3
+          CMakePreset: ESP32_P4_REV_LESS3
 
     variables:
       DOTNET_NOLOGO: true
       # creates a counter and assigns it to the revision variable
-      REVISION: $[counter('ESP32_1_14_0_versioncounter', 0)]
-      IDF_PATH: "D:/a/1/s/esp-idf"
+      REVISION: $[counter('ESP32_1_17_0_versioncounter', 0)]
+      IDF_PATH: "$(Agent.BuildDirectory)/s/esp-idf"
       PIP_CACHE_DIR: $(Pipeline.Workspace)/.pip
       TargetPlatform: "esp32"
       IDF_TAG: "v5.5.4"
@@ -520,7 +488,7 @@ jobs:
           sourceFolder: '$(Agent.BuildDirectory)/s/nf-interpreter/build/bootloader'
           Contents: |
             bootloader.bin
-          TargetFolder: '$(Build.ArtifactStagingDirectory)\$(TargetPublishName)'
+          TargetFolder: '$(Build.ArtifactStagingDirectory)/$(TargetPublishName)'
           flattenFolders: true
           ignoreMakeDirErrors: true
 
@@ -537,7 +505,6 @@ jobs:
           targetPath: '$(Build.ArtifactStagingDirectory)'
           artifactName: '$(TargetPublishName)_validation'
           artifactType: pipeline
-
       - template: azure-pipelines-templates/publish-sdkconfig.yml
 
   #################
@@ -567,7 +534,7 @@ jobs:
       - Check_Code_Style
 
     pool:
-      vmImage: "windows-2022"
+      vmImage: "ubuntu-latest"
 
     strategy:
       matrix:
@@ -581,7 +548,7 @@ jobs:
     variables:
       DOTNET_NOLOGO: true
       # creates a counter and assigns it to the revision variable
-      REVISION: $[counter('NXP_1_14_0_versioncounter', 0)]
+      REVISION: $[counter('NXP_1_17_0_versioncounter', 0)]
       GIT_LFS_SKIP_SMUDGE: 1
       TargetPlatform: "freertos"
 
@@ -603,52 +570,56 @@ jobs:
           targetPath: '$(Build.ArtifactStagingDirectory)'
           artifactName: '$(TargetPublishName)_validation'
           artifactType: pipeline
-
-      - powershell: |
-          $nuspec = "targets\ChibiOS\$(TargetBoard)\managed_helpers\package.nuspec"
-
-          if (Test-Path $nuspec) {
-            $version = [int]$env:HelperPackageVersion
-            $packageVersion = "1.0." + $version.ToString()
-
-            echo "##vso[task.setvariable variable=BUILD_NUGET_PACKAGE]true"
-            echo "##vso[task.setvariable variable=PACKAGE_NUGET_VERSION]$packageVersion"
-            echo "##vso[task.setvariable variable=MANAGED_HELPERS_NUSPEC]$nuspec"
-            Write-Host "Managed helper package version is: $packageVersion"
-          }
-          else {
-            echo "##vso[task.setvariable variable=BUILD_NUGET_PACKAGE]false"
-            Write-Host "No managed helper package found at $nuspec."
-          }
+      - task: NuGetToolInstaller@1
         condition: succeeded()
-        displayName: Check managed helpers package
+        displayName: Install NuGet for validation managed helpers
 
-      - task: NuGetCommand@2
-        inputs:
-          command: "custom"
-          arguments: 'pack $(MANAGED_HELPERS_NUSPEC) -Version $(PACKAGE_NUGET_VERSION)'
-        condition: and(succeeded(), eq(variables['BUILD_NUGET_PACKAGE'], true))
-        displayName: Pack managed helpers NuGet
+      - pwsh: |
+          $sourceRoot = "$(Build.SourcesDirectory)"
+          $nestedRepo = Join-Path $sourceRoot "nf-interpreter"
+          if (Test-Path $nestedRepo) {
+            $sourceRoot = $nestedRepo
+          }
 
-      - task: CopyFiles@2
-        condition: and(succeeded(), eq(variables['BUILD_NUGET_PACKAGE'], true))
-        displayName: Collecting managed helpers deployable artifacts
-        inputs:
-          sourceFolder: $(Build.SourcesDirectory)
-          Contents: |
-            **\nanoFramework.Targets*.nupkg
-          TargetFolder: "$(Build.ArtifactStagingDirectory)"
-          flattenFolders: true
-          ignoreMakeDirErrors: true
+          $candidates = @(
+            "targets/ChibiOS/$(TargetBoard)/managed_helpers/package.nuspec",
+            "targets/ThreadX/ST/$(TargetBoard)/managed_helpers/package.nuspec"
+          )
+
+          $nuspec = $null
+          foreach ($candidate in $candidates) {
+            $candidatePath = Join-Path $sourceRoot $candidate
+            if (Test-Path $candidatePath) {
+              $nuspec = $candidatePath
+              break
+            }
+          }
+
+          if (-not $nuspec) {
+            Write-Host "No managed helper package found for $(TargetBoard)."
+            exit 0
+          }
+
+          $outDir = "$(Build.ArtifactStagingDirectory)/managed-helpers"
+          New-Item -ItemType Directory -Force $outDir | Out-Null
+          $packageVersion = "1.0.$(HelperPackageVersion)"
+          Write-Host "Packing validation managed helpers from $nuspec as $packageVersion"
+          & nuget pack $nuspec -Version $packageVersion -OutputDirectory $outDir
+          if ($LASTEXITCODE -ne 0) {
+            exit $LASTEXITCODE
+          }
+
+          Write-Host "##vso[task.setvariable variable=HAS_MANAGED_HELPERS]true"
+        condition: succeeded()
+        displayName: Pack validation managed helpers
 
       - task: PublishPipelineArtifact@1
-        condition: and(succeeded(), eq(variables['BUILD_NUGET_PACKAGE'], true))
-        displayName: Publish managed helpers NuGet artifact
+        condition: and(succeeded(), eq(variables['HAS_MANAGED_HELPERS'], 'true'))
+        displayName: Publish validation managed helpers
         inputs:
-          targetPath: '$(Build.ArtifactStagingDirectory)'
-          artifactName: '$(TargetPublishName)_managed_helpers_validation'
+          targetPath: "$(Build.ArtifactStagingDirectory)/managed-helpers"
+          artifactName: "$(TargetPublishName)_managed_helpers_validation"
           artifactType: pipeline
-
   #################
   # TI SimpleLink
   - job: Build_TI_SimpleLink_targets
@@ -668,7 +639,7 @@ jobs:
               eq(variables['BUILD_ALL__'], 'true'),
               eq(variables['BUILD_TI__'], 'true')
             )
-        )    
+        )
       )
 
     dependsOn:
@@ -676,7 +647,7 @@ jobs:
       - Check_Code_Style
 
     pool:
-      vmImage: "windows-2022"
+      vmImage: "ubuntu-latest"
 
     strategy:
       matrix:
@@ -712,7 +683,7 @@ jobs:
     variables:
       DOTNET_NOLOGO: true
       # creates a counter and assigns it to the revision variable
-      REVISION: $[counter('TI_1_14_0_versioncounter', 0)]
+      REVISION: $[counter('TI_1_17_0_versioncounter', 0)]
       HelperPackageVersion: $[counter('HelperPackageVersioncounter', 0)]
       TargetPlatform: "ti_simplelink"
 
@@ -733,52 +704,43 @@ jobs:
           targetPath: '$(Build.ArtifactStagingDirectory)'
           artifactName: '$(TargetPublishName)_validation'
           artifactType: pipeline
-
-      - powershell: |
-          $nuspec = "targets\TI_SimpleLink\$(TargetBoard)\managed_helpers\package.nuspec"
-
-          if (Test-Path $nuspec) {
-            $version = [int]$env:HelperPackageVersion
-            $packageVersion = "1.0." + $version.ToString()
-
-            echo "##vso[task.setvariable variable=BUILD_NUGET_PACKAGE]true"
-            echo "##vso[task.setvariable variable=PACKAGE_NUGET_VERSION]$packageVersion"
-            echo "##vso[task.setvariable variable=MANAGED_HELPERS_NUSPEC]$nuspec"
-            Write-Host "Managed helper package version is: $packageVersion"
-          }
-          else {
-            echo "##vso[task.setvariable variable=BUILD_NUGET_PACKAGE]false"
-            Write-Host "No managed helper package found at $nuspec."
-          }
+      - task: NuGetToolInstaller@1
         condition: succeeded()
-        displayName: Check managed helpers package
+        displayName: Install NuGet for validation managed helpers
 
-      - task: NuGetCommand@2
-        inputs:
-          command: "custom"
-          arguments: 'pack $(MANAGED_HELPERS_NUSPEC) -Version $(PACKAGE_NUGET_VERSION)'
-        condition: and(succeeded(), eq(variables['BUILD_NUGET_PACKAGE'], true))
-        displayName: Pack managed helpers NuGet
+      - pwsh: |
+          $sourceRoot = "$(Build.SourcesDirectory)"
+          $nestedRepo = Join-Path $sourceRoot "nf-interpreter"
+          if (Test-Path $nestedRepo) {
+            $sourceRoot = $nestedRepo
+          }
 
-      - task: CopyFiles@2
-        condition: and(succeeded(), eq(variables['BUILD_NUGET_PACKAGE'], true))
-        displayName: Collecting managed helpers deployable artifacts
-        inputs:
-          sourceFolder: $(Build.SourcesDirectory)
-          Contents: |
-            **\nanoFramework.Targets*.nupkg
-          TargetFolder: "$(Build.ArtifactStagingDirectory)"
-          flattenFolders: true
-          ignoreMakeDirErrors: true
+          $nuspec = Join-Path $sourceRoot "targets/TI_SimpleLink/$(TargetBoard)/managed_helpers/package.nuspec"
+          if (-not (Test-Path $nuspec)) {
+            Write-Host "No managed helper package found for $(TargetBoard)."
+            exit 0
+          }
+
+          $outDir = "$(Build.ArtifactStagingDirectory)/managed-helpers"
+          New-Item -ItemType Directory -Force $outDir | Out-Null
+          $packageVersion = "1.0.$(HelperPackageVersion)"
+          Write-Host "Packing validation managed helpers from $nuspec as $packageVersion"
+          & nuget pack $nuspec -Version $packageVersion -OutputDirectory $outDir
+          if ($LASTEXITCODE -ne 0) {
+            exit $LASTEXITCODE
+          }
+
+          Write-Host "##vso[task.setvariable variable=HAS_MANAGED_HELPERS]true"
+        condition: succeeded()
+        displayName: Pack validation managed helpers
 
       - task: PublishPipelineArtifact@1
-        condition: and(succeeded(), eq(variables['BUILD_NUGET_PACKAGE'], true))
-        displayName: Publish managed helpers NuGet artifact
+        condition: and(succeeded(), eq(variables['HAS_MANAGED_HELPERS'], 'true'))
+        displayName: Publish validation managed helpers
         inputs:
-          targetPath: '$(Build.ArtifactStagingDirectory)'
-          artifactName: '$(TargetPublishName)_managed_helpers_validation'
+          targetPath: "$(Build.ArtifactStagingDirectory)/managed-helpers"
+          artifactName: "$(TargetPublishName)_managed_helpers_validation"
           artifactType: pipeline
-
   #################
   # ThreadX
   - job: Build_ThreadX_targets
@@ -806,7 +768,7 @@ jobs:
       - Check_Code_Style
 
     pool:
-      vmImage: "windows-2022"
+      vmImage: "ubuntu-latest"
 
     strategy:
       matrix:
@@ -836,7 +798,7 @@ jobs:
 
     variables:
       # creates a counter and assigns it to the revision variable
-      REVISION: $[counter('THREADX_1_14_0_versioncounter', 0)]
+      REVISION: $[counter('THREADX_1_17_0_versioncounter', 0)]
       HelperPackageVersion: $[counter('HelperPackageVersioncounter', 0)]
       TargetPlatform: "efm32"
 
@@ -859,52 +821,56 @@ jobs:
           targetPath: '$(Build.ArtifactStagingDirectory)'
           artifactName: '$(TargetPublishName)_validation'
           artifactType: pipeline
-
-      - powershell: |
-          $nuspec = "targets\ChibiOS\$(TargetBoard)\managed_helpers\package.nuspec"
-
-          if (Test-Path $nuspec) {
-            $version = [int]$env:HelperPackageVersion
-            $packageVersion = "1.0." + $version.ToString()
-
-            echo "##vso[task.setvariable variable=BUILD_NUGET_PACKAGE]true"
-            echo "##vso[task.setvariable variable=PACKAGE_NUGET_VERSION]$packageVersion"
-            echo "##vso[task.setvariable variable=MANAGED_HELPERS_NUSPEC]$nuspec"
-            Write-Host "Managed helper package version is: $packageVersion"
-          }
-          else {
-            echo "##vso[task.setvariable variable=BUILD_NUGET_PACKAGE]false"
-            Write-Host "No managed helper package found at $nuspec."
-          }
+      - task: NuGetToolInstaller@1
         condition: succeeded()
-        displayName: Check managed helpers package
+        displayName: Install NuGet for validation managed helpers
 
-      - task: NuGetCommand@2
-        inputs:
-          command: "custom"
-          arguments: 'pack $(MANAGED_HELPERS_NUSPEC) -Version $(PACKAGE_NUGET_VERSION)'
-        condition: and(succeeded(), eq(variables['BUILD_NUGET_PACKAGE'], true))
-        displayName: Pack managed helpers NuGet
+      - pwsh: |
+          $sourceRoot = "$(Build.SourcesDirectory)"
+          $nestedRepo = Join-Path $sourceRoot "nf-interpreter"
+          if (Test-Path $nestedRepo) {
+            $sourceRoot = $nestedRepo
+          }
 
-      - task: CopyFiles@2
-        condition: and(succeeded(), eq(variables['BUILD_NUGET_PACKAGE'], true))
-        displayName: Collecting managed helpers deployable artifacts
-        inputs:
-          sourceFolder: $(Build.SourcesDirectory)
-          Contents: |
-            **\nanoFramework.Targets*.nupkg
-          TargetFolder: "$(Build.ArtifactStagingDirectory)"
-          flattenFolders: true
-          ignoreMakeDirErrors: true
+          $candidates = @(
+            "targets/ChibiOS/$(TargetBoard)/managed_helpers/package.nuspec",
+            "targets/ThreadX/ST/$(TargetBoard)/managed_helpers/package.nuspec"
+          )
+
+          $nuspec = $null
+          foreach ($candidate in $candidates) {
+            $candidatePath = Join-Path $sourceRoot $candidate
+            if (Test-Path $candidatePath) {
+              $nuspec = $candidatePath
+              break
+            }
+          }
+
+          if (-not $nuspec) {
+            Write-Host "No managed helper package found for $(TargetBoard)."
+            exit 0
+          }
+
+          $outDir = "$(Build.ArtifactStagingDirectory)/managed-helpers"
+          New-Item -ItemType Directory -Force $outDir | Out-Null
+          $packageVersion = "1.0.$(HelperPackageVersion)"
+          Write-Host "Packing validation managed helpers from $nuspec as $packageVersion"
+          & nuget pack $nuspec -Version $packageVersion -OutputDirectory $outDir
+          if ($LASTEXITCODE -ne 0) {
+            exit $LASTEXITCODE
+          }
+
+          Write-Host "##vso[task.setvariable variable=HAS_MANAGED_HELPERS]true"
+        condition: succeeded()
+        displayName: Pack validation managed helpers
 
       - task: PublishPipelineArtifact@1
-        condition: and(succeeded(), eq(variables['BUILD_NUGET_PACKAGE'], true))
-        displayName: Publish managed helpers NuGet artifact
+        condition: and(succeeded(), eq(variables['HAS_MANAGED_HELPERS'], 'true'))
+        displayName: Publish validation managed helpers
         inputs:
-          targetPath: '$(Build.ArtifactStagingDirectory)'
-          artifactName: '$(TargetPublishName)_managed_helpers_validation'
+          targetPath: "$(Build.ArtifactStagingDirectory)/managed-helpers"
+          artifactName: "$(TargetPublishName)_managed_helpers_validation"
           artifactType: pipeline
-
   #################
   # WIN32 executable
   - job: Build_WIN32_nanoCLR
@@ -932,14 +898,14 @@ jobs:
       - Check_Code_Style
 
     pool:
-      vmImage: "windows-2022"
+      vmImage: "windows-latest"
 
     variables:
       - name: DOTNET_NOLOGO
         value: true
       # creates a counter and assigns it to the revision variable
       - name: REVISION
-        value: $[counter('WIN32_1_14_0_versioncounter', 0)]
+        value: $[counter('WIN32_1_17_0_versioncounter', 0)]
       - name: LITTLEFS_PATH
         value: "D:/a/1/s/littlefs"
 
@@ -1015,7 +981,6 @@ jobs:
           flattenFolders: true
           ignoreMakeDirErrors: true
 
-
       - task: PublishPipelineArtifact@1
         condition: succeeded()
         displayName: Publish win-x64 nanoCLR runtime artifact
@@ -1042,7 +1007,6 @@ jobs:
           flattenFolders: true
           ignoreMakeDirErrors: true
 
-
       - task: CopyFiles@2
         condition: succeeded()
         displayName: Adding nanoCLR WIN32 to deployable artifacts
@@ -1053,7 +1017,6 @@ jobs:
           TargetFolder: '$(Build.ArtifactStagingDirectory)\WIN32_nanoCLR'
           flattenFolders: true
           ignoreMakeDirErrors: true
-
 
       - task: CopyFiles@2
         condition: succeeded()
@@ -1066,7 +1029,6 @@ jobs:
           flattenFolders: true
           ignoreMakeDirErrors: true
 
-
       - task: PublishPipelineArtifact@1
         condition: succeeded()
         displayName: Publish deployables artifacts
@@ -1075,6 +1037,7 @@ jobs:
           artifactName: nanoclr_win32
           artifactType: pipeline
 
+      # push NuGet packages to NuGet (always happens when building from main, except on PR builds)
   #################
   # WIN ARM64 native DLL
   - job: Build_WIN_ARM64_nanoCLR
@@ -1109,7 +1072,7 @@ jobs:
         value: true
       # creates a counter and assigns it to the revision variable
       - name: REVISION
-        value: $[counter('WIN_ARM64_1_14_0_versioncounter', 0)]
+        value: $[counter('WIN_ARM64_1_17_0_versioncounter', 0)]
       - name: LITTLEFS_PATH
         value: "D:/a/1/s/littlefs"
 
@@ -1304,14 +1267,16 @@ jobs:
           ne( dependencies.Check_Build_Options.outputs['BuildOptions.SKIP_BUILD'], true ),
           or(
             eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ALL'], true),
-            eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_POSIX'], true)
+            eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_POSIX'], true),
+            eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_NANOCLR_CLI'], true)
           )
         ),
         and(
           eq(variables['Build.Reason'], 'Manual'),
           or(
             eq(variables['BUILD_ALL__'], 'true'),
-            eq(variables['BUILD_POSIX__'], 'true')
+            eq(variables['BUILD_POSIX__'], 'true'),
+            eq(variables['BUILD_NANOCLR_CLI__'], 'true')
           )
         )
       )
@@ -1323,8 +1288,29 @@ jobs:
     pool:
       vmImage: $(vmImage)
 
+    variables:
+      - name: REVISION
+        value: $[counter('POSIX_1_17_0_versioncounter', 0)]
+
     steps:
       - checkout: self
+
+      - task: UseDotNet@2
+        condition: and(succeeded(), eq(variables['Agent.OS'], 'Darwin'))
+        displayName: Install .NET SDK for NBGV
+        inputs:
+          packageType: sdk
+          version: 8.0.x
+
+      - task: DotNetCoreCLI@2
+        condition: and(succeeded(), eq(variables['Agent.OS'], 'Darwin'))
+        displayName: Install NBGV tool
+        inputs:
+          command: custom
+          custom: tool
+          arguments: install nbgv -g
+
+      - template: azure-pipelines-templates/nb-gitversioning.yml
 
       - bash: |
           set -euo pipefail
@@ -1346,13 +1332,16 @@ jobs:
           # Install arm64 cross-compiler when building linux-arm64 on an x86_64 agent.
           TOOLCHAIN_ARG=""
           if [ "$(POSIX_RID)" = "linux-arm64" ]; then
-            sudo apt-get install -y gcc-aarch64-linux-gnu g++-aarch64-linux-gnu
+            curl -fsSL "https://developer.arm.com/-/media/Files/downloads/gnu/15.2.rel1/binrel/arm-gnu-toolchain-15.2.rel1-x86_64-aarch64-none-linux-gnu.tar.xz" \
+              | sudo tar -xJ -C /opt
+            export PATH="/opt/arm-gnu-toolchain-15.2.rel1-x86_64-aarch64-none-linux-gnu/bin:$PATH"
             TOOLCHAIN_ARG="-DCMAKE_TOOLCHAIN_FILE=$(pwd)/targets/posix/toolchain-aarch64-linux-gnu.cmake"
           fi
 
           echo "RID=$(POSIX_RID)  ARCH=${NANO_ARCH}  LIB_EXT=${LIB_EXT}"
 
           cmake -S targets/posix -B build/posix -G Ninja \
+            -DBUILD_VERSION=$(NBGV_VersionMajor).$(NBGV_VersionMinor).$(NBGV_BuildNumber).$(TARGET_BUILD_COUNTER) \
             -DNANO_POSIX_ARCH=${NANO_ARCH} \
             -DNANO_POSIX_ENABLE_SMOKE=ON \
             ${TOOLCHAIN_ARG}
@@ -1424,7 +1413,7 @@ jobs:
       - Build_POSIX_nanoCLR
 
     pool:
-      vmImage: "windows-2022"
+      vmImage: "windows-latest"
 
     variables:
       - name: DOTNET_NOLOGO
@@ -1451,7 +1440,7 @@ jobs:
         inputs:
           key: 'nuget | **/targets/netcore/nanoFramework.nanoCLR.Host/packages.lock.json | **/targets/netcore/nanoFramework.nanoCLR.CLI/packages.lock.json'
           path: $(UserProfile)/.nuget/packages
-  
+
       - task: DotNetCoreCLI@2
         displayName: Restore NuGet packages
         inputs:
@@ -1528,7 +1517,7 @@ jobs:
         condition: succeeded()
         displayName: Add CLI build output to validation artifacts
         inputs:
-          SourceFolder: "nf-interpreter/build/bin/Release/net10.0"
+          SourceFolder: "nf-interpreter/build/bin/Release/net8.0"
           Contents: "**/*"
           TargetFolder: "$(Build.ArtifactStagingDirectory)/cli-output"
           ignoreMakeDirErrors: true
@@ -1541,7 +1530,6 @@ jobs:
           Contents: "**/*"
           TargetFolder: "$(Build.ArtifactStagingDirectory)/staged-runtimes"
           ignoreMakeDirErrors: true
-
       - task: CopyFiles@2
         condition: succeeded()
         displayName: Copy nanoclr
@@ -1566,6 +1554,7 @@ jobs:
           artifactName: nanoclr_cli
           artifactType: pipeline
 
+      # push NuGet packages to NuGet (always happens when building from main, except on PR builds)
   #########################
   # Run mscorlib Unit Tests
 
@@ -1596,7 +1585,7 @@ jobs:
       - Build_nanoCLR_CLI
 
     pool:
-      vmImage: "windows-2022"
+      vmImage: "windows-latest"
 
     variables:
       DOTNET_NOLOGO: true
@@ -1689,8 +1678,4 @@ jobs:
           targetPath: "$(Build.ArtifactStagingDirectory)/vstest_dumps"
           artifactName: VsTestCrashDumps
           artifactType: pipeline
-
-
-
-
 

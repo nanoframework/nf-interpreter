@@ -295,7 +295,7 @@ namespace nanoFramework.nanoCLR.CLI
             }
 
             string installerName = RuntimeInformation.OSArchitecture == Architecture.Arm64
-                ? "virtual-serial-port-tools-redist-arm64.exe"
+                ? "virtual-serial-port-tools-arm64-redist.exe"
                 : "virtual-serial-port-tools-redist.exe";
             var installerLocation = Path.Combine(Path.GetTempPath(), installerName);
 

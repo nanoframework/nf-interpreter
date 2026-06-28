@@ -89,16 +89,24 @@ static void TxEnd1(UARTDriver *uartp)
 
     NATIVE_INTERRUPT_START
 
-    NF_PAL_UART *palUart;
+    NF_PAL_UART *palUart = NULL;
 
 #if defined(NF_SERIAL_COMM_STM32_UART_USE_USART1) && (NF_SERIAL_COMM_STM32_UART_USE_USART1 == TRUE)
+#if defined(RP2040_MCUCONF) || defined(RP2350_MCUCONF)
+    if (uartp == &UARTD0)
+#else
     if (uartp == &UARTD1)
+#endif
     {
         palUart = &Uart1_PAL;
     }
 #endif
 #if defined(NF_SERIAL_COMM_STM32_UART_USE_USART2) && (NF_SERIAL_COMM_STM32_UART_USE_USART2 == TRUE)
+#if defined(RP2040_MCUCONF) || defined(RP2350_MCUCONF)
+    if (uartp == &UARTD1)
+#else
     if (uartp == &UARTD2)
+#endif
     {
         palUart = &Uart2_PAL;
     }
@@ -140,6 +148,12 @@ static void TxEnd1(UARTDriver *uartp)
     }
 #endif
 
+    if (palUart == NULL)
+    {
+        NATIVE_INTERRUPT_END
+        return;
+    }
+
     // reset Tx ongoing count
     palUart->TxOngoingCount = 0;
 
@@ -154,18 +168,26 @@ static void RxChar(UARTDriver *uartp, uint16_t c)
 {
     NATIVE_INTERRUPT_START
 
-    NF_PAL_UART *palUart;
+    NF_PAL_UART *palUart = NULL;
     uint8_t portIndex = 0;
 
 #if defined(NF_SERIAL_COMM_STM32_UART_USE_USART1) && (NF_SERIAL_COMM_STM32_UART_USE_USART1 == TRUE)
+#if defined(RP2040_MCUCONF) || defined(RP2350_MCUCONF)
+    if (uartp == &UARTD0)
+#else
     if (uartp == &UARTD1)
+#endif
     {
         palUart = &Uart1_PAL;
         portIndex = 1;
     }
 #endif
 #if defined(NF_SERIAL_COMM_STM32_UART_USE_USART2) && (NF_SERIAL_COMM_STM32_UART_USE_USART2 == TRUE)
+#if defined(RP2040_MCUCONF) || defined(RP2350_MCUCONF)
+    if (uartp == &UARTD1)
+#else
     if (uartp == &UARTD2)
+#endif
     {
         palUart = &Uart2_PAL;
         portIndex = 2;
@@ -214,48 +236,59 @@ static void RxChar(UARTDriver *uartp, uint16_t c)
     }
 #endif
 
+    if (palUart == NULL)
+    {
+        NATIVE_INTERRUPT_END
+        return;
+    }
+
     // store this into the UART Rx buffer
 
     // push char to the ring buffer
-    // ignore the success of the operation, if it's full we are dropping the char anyway.
-    palUart->RxRingBuffer.Push((uint8_t)c);
+    // under heavy RX this can fail when full, in which case the new byte is dropped.
+    // keep processing minimal in ISR path to avoid making the overload worse.
+    uint32_t previousLength = palUart->RxRingBuffer.Length();
 
-    // is there a read operation going on?
-    if (palUart->RxBytesToRead > 0)
+    if (palUart->RxRingBuffer.Push((uint8_t)c) != 0)
     {
-        // yes
-        // check if the requested bytes are available in the buffer...
-        //... or if the watch char was received
-        if ((palUart->RxRingBuffer.Length() >= palUart->RxBytesToRead) || (c == palUart->WatchChar))
+        // is there a read operation going on?
+        if (palUart->RxBytesToRead > 0)
         {
-            // reset Rx bytes to read count
-            palUart->RxBytesToRead = 0;
+            // yes
+            // check if the requested bytes are available in the buffer...
+            //... or if the watch char was received
+            if ((palUart->RxRingBuffer.Length() >= palUart->RxBytesToRead) || (c == palUart->WatchChar))
+            {
+                // reset Rx bytes to read count
+                palUart->RxBytesToRead = 0;
 
-            // fire event for Rx buffer complete
+                // fire event for Rx buffer complete
+                Events_Set(SYSTEM_EVENT_FLAG_COM_IN);
+            }
+        }
+        else if (palUart->NewLineChar > 0 && c == palUart->NewLineChar)
+        {
+            // fire event for new line char found
             Events_Set(SYSTEM_EVENT_FLAG_COM_IN);
         }
-    }
-    else if (palUart->NewLineChar > 0 && c == palUart->NewLineChar)
-    {
-        // fire event for new line char found
-        Events_Set(SYSTEM_EVENT_FLAG_COM_IN);
-    }
-    else
-    {
-        // no read operation ongoing, so fire an event, if the available bytes are above the threshold
-        if (palUart->RxRingBuffer.Length() >= palUart->ReceivedBytesThreshold)
+        else
         {
-            // Post a managed event with the port index and event code (check if there is a watch
-            // char in the buffer or just any char)
-            // FIXME: check if callbacks are registered so this is called only if there is anyone listening otherwise
-            // don't bother.
-            // TODO: For that to happen ChibiOS callback has to accept arg which we would passing the GpioPin
-            // Notes: CLR_RT_HeapBlock (Gpio handler) See: http://www.chibios.com/forum/viewtopic.php?f=36&t=4798
-            PostManagedEvent(
-                EVENT_SERIAL,
-                0,
-                portIndex,
-                (c == palUart->WatchChar) ? SerialData_WatchChar : SerialData_Chars);
+            // no read operation ongoing, so fire an event, if the available bytes are above the threshold
+            if ((palUart->RxRingBuffer.Length() >= palUart->ReceivedBytesThreshold) &&
+                (previousLength < palUart->ReceivedBytesThreshold))
+            {
+                // Post a managed event with the port index and event code (check if there is a watch
+                // char in the buffer or just any char)
+                // FIXME: check if callbacks are registered so this is called only if there is anyone listening
+                // otherwise don't bother.
+                // TODO: For that to happen ChibiOS callback has to accept arg which we would passing the GpioPin
+                // Notes: CLR_RT_HeapBlock (Gpio handler) See: http://www.chibios.com/forum/viewtopic.php?f=36&t=4798
+                PostManagedEvent(
+                    EVENT_SERIAL,
+                    0,
+                    portIndex,
+                    (c == palUart->WatchChar) ? SerialData_WatchChar : SerialData_Chars);
+            }
         }
     }
 
@@ -893,14 +926,22 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeInit___VOID(
 #if defined(NF_SERIAL_COMM_STM32_UART_USE_USART1) && (NF_SERIAL_COMM_STM32_UART_USE_USART1 == TRUE)
         case 1:
             Init_UART1();
+#if defined(RP2040_MCUCONF) || defined(RP2350_MCUCONF)
+            Uart1_PAL.UartDriver = &UARTD0;
+#else
             Uart1_PAL.UartDriver = &UARTD1;
+#endif
             palUart = &Uart1_PAL;
             break;
 #endif
 #if defined(NF_SERIAL_COMM_STM32_UART_USE_USART2) && (NF_SERIAL_COMM_STM32_UART_USE_USART2 == TRUE)
         case 2:
             Init_UART2();
+#if defined(RP2040_MCUCONF) || defined(RP2350_MCUCONF)
+            Uart2_PAL.UartDriver = &UARTD1;
+#else
             Uart2_PAL.UartDriver = &UARTD2;
+#endif
             palUart = &Uart2_PAL;
             break;
 #endif
@@ -990,6 +1031,9 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeConfig___VOI
     NANOCLR_HEADER();
 
     NF_PAL_UART *palUart = NULL;
+#if defined(RP2040_MCUCONF) || defined(RP2350_MCUCONF)
+    uint32_t lcrh = 0;
+#endif
 
     // get a pointer to the managed object instance and check that it's not NULL
     CLR_RT_HeapBlock *pThis = stack.This();
@@ -1003,6 +1047,80 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeConfig___VOI
     }
 
     // Setup configuration
+
+#if defined(RP2040_MCUCONF) || defined(RP2350_MCUCONF)
+
+    lcrh = palUart->Uart_cfg.UARTLCR_H;
+
+    // clear framing bits, preserving unrelated configuration bits
+    lcrh &=
+        ~(UART_UARTLCR_H_WLEN(3U) | UART_UARTLCR_H_PEN | UART_UARTLCR_H_EPS | UART_UARTLCR_H_STP2 | UART_UARTLCR_H_SPS);
+
+    // data bits
+    switch ((uint16_t)pThis[FIELD___dataBits].NumericByRef().s4)
+    {
+        case 7:
+            lcrh |= UART_UARTLCR_H_WLEN_7BITS;
+            break;
+
+        case 8:
+            lcrh |= UART_UARTLCR_H_WLEN_8BITS;
+            break;
+
+        default:
+            NANOCLR_SET_AND_LEAVE(CLR_E_NOT_SUPPORTED);
+    }
+
+    // parity
+    switch ((Parity)pThis[FIELD___parity].NumericByRef().s4)
+    {
+        case Parity_None:
+            break;
+
+        case Parity_Even:
+            lcrh |= UART_UARTLCR_H_PEN | UART_UARTLCR_H_EPS;
+            break;
+
+        case Parity_Odd:
+            lcrh |= UART_UARTLCR_H_PEN;
+            break;
+
+        default:
+            NANOCLR_SET_AND_LEAVE(CLR_E_NOT_SUPPORTED);
+    }
+
+    // stop bits
+    switch ((StopBits)pThis[FIELD___stopBits].NumericByRef().s4)
+    {
+        case StopBits_One:
+            break;
+
+        case StopBits_Two:
+            lcrh |= UART_UARTLCR_H_STP2;
+            break;
+
+        case StopBits_OnePointFive:
+            // RP2040 supports 1.5 stop bits only with 5 data bits.
+            NANOCLR_SET_AND_LEAVE(CLR_E_NOT_SUPPORTED);
+
+        default:
+            NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+    }
+
+    // serial mode
+    if ((SerialMode)pThis[FIELD___mode].NumericByRef().s4 != SerialMode_Normal)
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_NOT_SUPPORTED);
+    }
+
+    if (palUart->SignalLevelsInverted)
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_NOT_SUPPORTED);
+    }
+
+    palUart->Uart_cfg.UARTLCR_H = lcrh;
+
+#else
 
     // Check dataBits validity
     switch ((uint16_t)pThis[FIELD___dataBits].NumericByRef().s4)
@@ -1160,8 +1278,14 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeConfig___VOI
 
 #endif
 
+#endif
+
     // baud rate
+#if defined(RP2040_MCUCONF) || defined(RP2350_MCUCONF)
+    palUart->Uart_cfg.baud = (uint32_t)pThis[FIELD___baudRate].NumericByRef().s4;
+#else
     palUart->Uart_cfg.speed = (int)pThis[FIELD___baudRate].NumericByRef().s4;
+#endif
 
     // stop UART, better do this before changing configuration
     uartStop(palUart->UartDriver);

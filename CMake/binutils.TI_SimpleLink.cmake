@@ -282,14 +282,15 @@ macro(nf_add_platform_sysconfig_steps ti_device ti_device_family)
                 SYSCONFIG_TASKS PRE_BUILD
 
             BYPRODUCTS
-                ${CMAKE_CURRENT_BINARY_DIR}/syscfg/ti_devices_config.c 
+                ${CMAKE_CURRENT_BINARY_DIR}/syscfg/ti_devices_config.c
                 ${CMAKE_CURRENT_BINARY_DIR}/syscfg/ti_drivers_config.c
                 ${CMAKE_CURRENT_BINARY_DIR}/syscfg/ti_easylink_config.c
                 ${CMAKE_CURRENT_BINARY_DIR}/syscfg/ti_radio_config.c
 
+            COMMAND chmod +x ${ti_sysconfig_SOURCE_DIR}/sysconfig_cli.sh
             COMMAND ${ti_sysconfig_SOURCE_DIR}/sysconfig_cli.sh -s "${simplelinkcc13xx_26xxsdk_SOURCE_DIR}/.metadata/product.json" --script ${SYS_CONFIG_FILENAME} -o "syscfg" --compiler gcc
-            WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR} 
-            COMMENT "Generate configuration files" 
+            WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+            COMMENT "Generate configuration files"
         )
     endif()
     ######################################
@@ -317,16 +318,16 @@ macro(nf_add_platform_sysconfig_steps ti_device ti_device_family)
 
     if(CMAKE_HOST_SYSTEM_NAME STREQUAL Windows)
         add_custom_target(
-            TIRTOS_CONFIG        
-            COMMAND ${ti_xdctools_SOURCE_DIR}/xs.exe --xdcpath="${simplelinkcc13xx_26xxsdk_SOURCE_DIR}/source\;${simplelinkcc13xx_26xxsdk_SOURCE_DIR}/kernel/tirtos/packages" xdc.tools.configuro -o configPkg -t gnu.targets.arm.M4F -p ti.platforms.simplelink:${ti_device} -r release -c "${ARM_TOOLCHAIN_PATH_WITHOUT_BIN}" --compileOptions " -DDeviceFamily_${ti_device_family} " "${CMAKE_CURRENT_BINARY_DIR}/${TI_RTOS_CONFIG_FILE}"    
-            COMMENT "Generate TI-RTOS configuration" 
+            TIRTOS_CONFIG
+            COMMAND ${ti_xdctools_SOURCE_DIR}/xs.exe --xdcpath="${simplelinkcc13xx_26xxsdk_SOURCE_DIR}/source\;${simplelinkcc13xx_26xxsdk_SOURCE_DIR}/kernel/tirtos/packages" xdc.tools.configuro -o configPkg -t gnu.targets.arm.M4F -p ti.platforms.simplelink:${ti_device} -r release -c "${ARM_TOOLCHAIN_PATH_WITHOUT_BIN}" --compileOptions " -DDeviceFamily_${ti_device_family} " "${CMAKE_CURRENT_BINARY_DIR}/${TI_RTOS_CONFIG_FILE}"
+            COMMENT "Generate TI-RTOS configuration"
         )
     else()
         add_custom_target(
             TIRTOS_CONFIG
             COMMAND ${ti_xdctools_SOURCE_DIR}/xs --xdcpath="${simplelinkcc13xx_26xxsdk_SOURCE_DIR}/source\;${simplelinkcc13xx_26xxsdk_SOURCE_DIR}/kernel/tirtos/packages" xdc.tools.configuro -o configPkg -t gnu.targets.arm.M4F -p ti.platforms.simplelink:${ti_device} -r release -c "${ARM_TOOLCHAIN_PATH_WITHOUT_BIN}" --compileOptions " -DDeviceFamily_${ti_device_family} " "${CMAKE_CURRENT_BINARY_DIR}/${TI_RTOS_CONFIG_FILE}"
-            WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}    
-            COMMENT "Generate TI-RTOS configuration" 
+            WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+            COMMENT "Generate TI-RTOS configuration"
         )
     endif()
 endmacro()

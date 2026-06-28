@@ -103,8 +103,8 @@ There is no standalone test suite or test runner in this repository. Testing is 
 
 ### Language Standards
 
-- **C++20** (`stdcpp20`) for C++ files (`.cpp`).
-- **C17** (`stdc17`) for C files (`.c`).
+- **C++23** (`stdcpp23`) for C++ files (`.cpp`).
+- **C23** (`stdc23`) for C files (`.c`).
 - HAL-level code tends to be C; CLR, PAL, and device API code is C++.
 
 ### Formatting

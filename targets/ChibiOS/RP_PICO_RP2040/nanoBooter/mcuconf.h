@@ -17,6 +17,8 @@
 #ifndef MCUCONF_H
 #define MCUCONF_H
 
+// clang-format off
+
 /*
  * RP2040_MCUCONF drivers configuration.
  *
@@ -98,3 +100,5 @@
 #define RP_PWM_USE_PWM7                     FALSE
 
 #endif /* MCUCONF_H */
+
+// clang-format on

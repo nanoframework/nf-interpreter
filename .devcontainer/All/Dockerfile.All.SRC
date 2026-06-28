@@ -32,12 +32,11 @@ RUN apt-get update \
 
 RUN mkdir -p /tmp/dc-downloads /tmp/dc-extracted
 
-ARG GCC_VERSION=13.3.rel1
-ARG GCC_URI=https://armkeil.blob.core.windows.net/developer/Files/downloads/gnu/$GCC_VERSION/binrel/arm-gnu-toolchain-$GCC_VERSION-x86_64-arm-none-eabi.tar.xz
+ARG GCC_VERSION=15.2.rel1
+ARG GCC_URI=https://developer.arm.com/-/media/Files/downloads/gnu/$GCC_VERSION/binrel/arm-gnu-toolchain-$GCC_VERSION-x86_64-arm-none-eabi.tar.xz
 RUN mkdir -p /tmp/dc-downloads /tmp/dc-extracted/gcc \
-    && curl -o /tmp/dc-downloads/gcc-arm.tar.xz  $GCC_URI \
-    && xz -d /tmp/dc-downloads/gcc-arm.tar.xz \
-    && tar -xvf /tmp/dc-downloads/gcc-arm.tar -C /tmp/dc-extracted/gcc --strip-components 1 \
+    && curl -fL -o /tmp/dc-downloads/gcc-arm.tar.xz $GCC_URI \
+    && tar -xJf /tmp/dc-downloads/gcc-arm.tar.xz -C /tmp/dc-extracted/gcc --strip-components 1 \
     && rm -rf /tmp/dc-extracted/gcc/share/doc/ /tmp/dc-extracted/gcc/share/gcc-arm-none-eabi/samples/
 
 ARG CMAKE_VERSION=3.31.6
@@ -71,8 +70,6 @@ RUN apt-get update \
     && apt-get install -y \
     git \
     git-lfs \
-    git-svn \
-    subversion \
     clang-format \
     curl \
     ninja-build \
@@ -86,9 +83,7 @@ RUN mkdir -p /usr/local/bin/gcc \
     && mkdir -p /usr/local/bin/titools
 
 # Clone ChibiOS repo
-# RUN git svn clone http://svn.code.sf.net/p/chibios/code/branches/stable_21.11.x -rHEAD ./sources/ChibiOs
-# Alternative source for those having issues with git svn downloads:
-RUN git clone --branch stable_21.11.x https://github.com/ArduPilot/ChibiOS.svn.git --depth 1 ./sources/ChibiOs
+RUN git clone --branch stable-21.11.x https://github.com/chibios-upstream/chibios.git --depth 1 ./sources/ChibiOs
 
 # Clone support repos for STM32 - HAL drivers (official ST repositories)
 # WHEN CHANGING THESE MAKE SURE TO UPDATE git-pull-repos.sh

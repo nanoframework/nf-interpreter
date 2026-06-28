@@ -390,6 +390,9 @@ void CPU_GPIO_DisablePin(GPIO_PIN pinNumber, PinMode driveMode, uint32_t alterna
 
     CPU_GPIO_SetDriveMode(pinNumber, driveMode);
 
+    // On RP2040/RP2350, use palSetLineMode instead of palSetPadMode
+    // because pal_lld_setpadmode is not implemented in the RP PAL LLD.
+    // Uses palSetLineMode for STM32 targets as well, since GetIoLine returns the raw pad number there.
     // get IoLine from pin number
     ioline_t ioLine = GetIoLine(pinNumber);
     palSetLineMode(ioLine, PAL_MODE_ALTERNATE(alternateFunction));
@@ -403,35 +406,40 @@ void CPU_GPIO_DisablePin(GPIO_PIN pinNumber, PinMode driveMode, uint32_t alterna
 // return true if ok
 bool CPU_GPIO_SetDriveMode(GPIO_PIN pinNumber, PinMode driveMode)
 {
-    // get IoLine from pin number
-    ioline_t ioLine = GetIoLine(pinNumber);
+    iomode_t mode;
 
     switch (driveMode)
     {
         case PinMode_Input:
-            palSetLineMode(ioLine, PAL_MODE_INPUT);
+            mode = PAL_MODE_INPUT;
             break;
 
         case PinMode_InputPullDown:
-            palSetLineMode(ioLine, PAL_MODE_INPUT_PULLDOWN);
+            mode = PAL_MODE_INPUT_PULLDOWN;
             break;
 
         case PinMode_InputPullUp:
-            palSetLineMode(ioLine, PAL_MODE_INPUT_PULLUP);
+            mode = PAL_MODE_INPUT_PULLUP;
             break;
 
         case PinMode_Output:
-            palSetLineMode(ioLine, PAL_MODE_OUTPUT_PUSHPULL);
+            mode = PAL_MODE_OUTPUT_PUSHPULL;
             break;
 
         case PinMode_OutputOpenDrain:
-            palSetLineMode(ioLine, PAL_MODE_OUTPUT_OPENDRAIN);
+            mode = PAL_MODE_OUTPUT_OPENDRAIN;
             break;
 
         default:
             // all other modes are NOT supported
             return false;
     }
+
+    // RP targets still use palSetLineMode; GetIoLine returns the raw pad number there.
+    // palSetPadMode is not implemented in the RP PAL LLD.    
+    // STM32 targets: use GetIoLine to encode port/pad into ioline_t
+    ioline_t ioLine = GetIoLine(pinNumber);
+    palSetLineMode(ioLine, mode);
 
     return true;
 }

@@ -19,28 +19,28 @@ steps:
     inputs:
       targetType: "inline"
       script: |
-        $repoName = $env:Build_Repository_Name
-        $branchName = $env:Build_SourceBranchName
-        $forceUpload = $env:ForceUpload
+        $repoName = $env:BUILD_REPOSITORY_NAME
+        $branchName = $env:BUILD_SOURCEBRANCHNAME
+        $forceUpload = $env:FORCEUPLOAD
 
         Write-Host "repo name is: $repoName"
         Write-Host "branch name is: $branchName"
 
-        if( $env:Build_SourceBranchName -match "develop" -or 
-            $env:Build_SourceBranchName -match "^release*" -or
+        if( $env:BUILD_SOURCEBRANCHNAME -match "develop" -or
+            $env:BUILD_SOURCEBRANCHNAME -match "^release*" -or
             $forceUpload -eq "true")
         {
           # this a dev, release branch or force upload, publish to Cloudsmith dev repo
           Write-Host "$("##vso[task.setvariable variable=CLOUDSMITH_REPO]")nanoframework-images-dev"
           # set version
-          Write-Host "$("##vso[task.setvariable variable=PACKAGE_VERSION]")$(NBGV_NuGetPackageVersion)"
+          Write-Host "$("##vso[task.setvariable variable=PACKAGE_VERSION]")$env:NBGV_NUGETPACKAGEVERSION"
         }
-        else 
+        else
         {
           # this main branch, publish to Cloudsmith stable repo
           Write-Host "$("##vso[task.setvariable variable=CLOUDSMITH_REPO]")nanoframework-images"
           # set version
-          Write-Host "$("##vso[task.setvariable variable=PACKAGE_VERSION]")$(NBGV_SimpleVersion).$(TARGET_BUILD_COUNTER)"
+          Write-Host "$("##vso[task.setvariable variable=PACKAGE_VERSION]")$env:NBGV_SIMPLEVERSION.$env:TARGET_BUILD_COUNTER"
         }
       errorActionPreference: "stop"
       failOnStderr: true
@@ -65,11 +65,11 @@ steps:
         # install Cloudsmith CLI
         python -m pip install --upgrade cloudsmith-cli --quiet
 
-        Write-Host "Uploading nanoCLR v$(WINCLR_PACKAGE_VERSION) to Cloudsmith"
+        Write-Host "Uploading nanoCLR v$env:WINCLR_PACKAGE_VERSION to Cloudsmith"
 
-        cloudsmith push raw net-nanoframework/$(CLOUDSMITH_REPO) $(Build.ArtifactStagingDirectory)\WIN32_nanoCLR\nanoFramework.nanoCLR.exe --name WIN32_nanoCLR --version $(WINCLR_PACKAGE_VERSION) -k $(CLOUDSMITH_KEY)
+        cloudsmith push raw net-nanoframework/$env:CLOUDSMITH_REPO $env:BUILD_ARTIFACTSTAGINGDIRECTORY\WIN32_nanoCLR\nanoFramework.nanoCLR.exe --name WIN32_nanoCLR --version $env:WINCLR_PACKAGE_VERSION -k $(CLOUDSMITH_KEY)
 
-        cloudsmith push raw net-nanoframework/$(CLOUDSMITH_REPO) $(Build.ArtifactStagingDirectory)\WIN_DLL_nanoCLR\nanoFramework.nanoCLR.dll --name WIN_DLL_nanoCLR --version $(WINCLR_PACKAGE_VERSION) -k $(CLOUDSMITH_KEY)
+        cloudsmith push raw net-nanoframework/$env:CLOUDSMITH_REPO $env:BUILD_ARTIFACTSTAGINGDIRECTORY\WIN_DLL_nanoCLR\nanoFramework.nanoCLR.dll --name WIN_DLL_nanoCLR --version $env:WINCLR_PACKAGE_VERSION -k $(CLOUDSMITH_KEY)
 
       errorActionPreference: "stop"
       failOnStderr: false

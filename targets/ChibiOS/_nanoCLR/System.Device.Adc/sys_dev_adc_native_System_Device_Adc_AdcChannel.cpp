@@ -32,7 +32,9 @@ HRESULT Library_sys_dev_adc_native_System_Device_Adc_AdcChannel::NativeReadValue
     int channelNumber;
     NF_PAL_ADC_PORT_PIN_CHANNEL adcDefinition;
     ADCConversionGroup adcgrpcfg1;
+#if !defined(RP_ADC_USE_ADC1)
     bool enableVref;
+#endif
 
     ADCDriver *adcDriver = NULL;
 
@@ -44,36 +46,48 @@ HRESULT Library_sys_dev_adc_native_System_Device_Adc_AdcChannel::NativeReadValue
     channelNumber = pThis[FIELD___channelNumber].NumericByRef().s4;
 
     // channel is static?
-    if (channelNumber < AdcChannelCount)
+#if defined(RP_ADC_USE_ADC1)
+    if (channelNumber < 0 || channelNumber >= c_AdcChannelCount)
     {
-        adcDefinition = AdcPortPinConfig[channelNumber];
+        NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
     }
-    else if (channelNumber < AdcChannelCount + RuntimeAdcChannelCount)
+
+    adcDefinition = c_AdcPortPinConfig[channelNumber];
+#else
+    if (channelNumber < c_AdcChannelCount)
     {
-        adcDefinition = RuntimeAdcPortPinConfig[channelNumber - AdcChannelCount];
+        adcDefinition = c_AdcPortPinConfig[channelNumber];
+    }
+    else if (channelNumber < c_AdcChannelCount + RuntimeAdcChannelCount)
+    {
+        adcDefinition = RuntimeAdcPortPinConfig[channelNumber - c_AdcChannelCount];
     }
     else
     {
         NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
     }
+#endif
 
     // we should remove form the build the ADC options that aren't implemented
     // plus we have to use the default to catch invalid ADC Ids
+#if defined(RP_ADC_USE_ADC1)
+    adcDriver = &ADCD1;
+#else
     switch (adcDefinition.adcIndex)
     {
-#if STM32_ADC_USE_ADC1
+#if defined(STM32_ADC_USE_ADC1) && STM32_ADC_USE_ADC1
         case 1:
             adcDriver = &ADCD1;
             break;
 #endif
 
-#if STM32_ADC_USE_ADC2
+#if defined(STM32_ADC_USE_ADC2) && STM32_ADC_USE_ADC2
         case 2:
             adcDriver = &ADCD2;
             break;
 #endif
 
-#if STM32_ADC_USE_ADC3
+#if defined(STM32_ADC_USE_ADC3) && STM32_ADC_USE_ADC3
         case 3:
             adcDriver = &ADCD3;
             break;
@@ -81,7 +95,33 @@ HRESULT Library_sys_dev_adc_native_System_Device_Adc_AdcChannel::NativeReadValue
         default:
             NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
     }
+#endif
 
+#if defined(RP_ADC_USE_ADC1)
+    adcgrpcfg1 = {
+        FALSE,
+        1,
+        NULL,
+        NULL,
+        adcDefinition.adcChannel,
+        0,
+        0,
+        (adcDefinition.adcChannel == ADC_CHANNEL_TEMPSENSOR),
+    };
+
+    if (adcDefinition.adcChannel == ADC_CHANNEL_TEMPSENSOR)
+    {
+        adcRPEnableTS(adcDriver);
+        osDelay(1);
+    }
+
+    adcConvert(adcDriver, &adcgrpcfg1, sampleBuffer, 1);
+
+    if (adcDefinition.adcChannel == ADC_CHANNEL_TEMPSENSOR)
+    {
+        adcRPDisableTS(adcDriver);
+    }
+#else
     enableVref = (adcDefinition.adcChannel == ADC_CHANNEL_SENSOR) | (adcDefinition.adcChannel == ADC_CHANNEL_VREFINT) |
                  (adcDefinition.adcChannel == ADC_CHANNEL_VBAT);
 
@@ -117,6 +157,7 @@ HRESULT Library_sys_dev_adc_native_System_Device_Adc_AdcChannel::NativeReadValue
     {
         adcSTM32DisableTSVREFE();
     }
+#endif
 
     // set the return result with the conversion value from the array
     stack.SetResult_I4(sampleBuffer[0]);
