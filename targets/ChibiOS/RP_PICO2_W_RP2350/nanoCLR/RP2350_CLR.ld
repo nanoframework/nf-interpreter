@@ -11,10 +11,10 @@
  *
  * Flash layout:
  *   0x10000000 - 0x1000BFFF : nanoBooter   (48KB)   - not used by CLR
- *   0x1000C000 - 0x10013FFF : Config block (128KB)   - read-only from CLR
- *   0x10014000 - 0x10193FFF : nanoCLR      (1536KB))
+ *   0x1000C000 - 0x10013FFF : Config block (32KB)    - read-only from CLR
+ *   0x10014000 - 0x10193FFF : nanoCLR      (1536KB)
  *   0x10194000 - 0x103DFFFF : Deployment   (2352KB)
- *   0x103E0000 - 0x103FFFFF : littlefs     (128KB))
+ *   0x103E0000 - 0x103FFFFF : littlefs     (128KB)
  *
  * When updating the flash1 address below make sure to update the address
  * in nf_generate_bin_package if applicable.
