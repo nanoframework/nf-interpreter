@@ -146,7 +146,7 @@ var asm = new PioAssembler();
 PioLabel loop = asm.DefineLabel();
 asm.MarkLabel(loop);
 asm.Pull(ifEmpty: false, block: true);
-asm.Out(PioDest.Pins, 1);
+asm.Out(DestinationOperand.Pins, 1);
 asm.Jmp(PioCondition.Always, loop);
 PioProgram program = asm.Build();
 
