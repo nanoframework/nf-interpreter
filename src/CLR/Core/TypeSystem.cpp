@@ -9114,29 +9114,34 @@ static bool MatchSignatureForVirtualDispatch(CLR_RT_SignatureParser &parserLeft,
         // Relaxed VAR <-> GENERICINST matching for interface virtual dispatch:
         // the interface method may use a type parameter (VAR N) while the concrete
         // implementation uses the expanded generic type (GENERICINST ...).  Drain the
-        // GENERICINST inner elements so the parser position stays consistent.
+        // whole GENERICINST sub-tree on the expanded side so the parser position stays
+        // consistent.
         if (resLeft.DataType == DATATYPE_VAR && resRight.DataType == DATATYPE_GENERICINST)
         {
-            CLR_RT_SignatureParser::Element inner{};
-            if (FAILED(parserRight.Advance(inner)))
-                return false; // type element (CLASS/VALUETYPE + TypeRef)
-            for (int i = 0; i < inner.GenParamCount; i++)
+            int targetAvail = iAvailLeft - 1;
+            while (parserRight.Available() > targetAvail)
             {
-                if (FAILED(parserRight.Advance(inner)))
+                CLR_RT_SignatureParser::Element drained{};
+
+                if (FAILED(parserRight.Advance(drained)))
+                {
                     return false;
+                }
             }
             continue;
         }
 
         if (resLeft.DataType == DATATYPE_GENERICINST && resRight.DataType == DATATYPE_VAR)
         {
-            CLR_RT_SignatureParser::Element inner{};
-            if (FAILED(parserLeft.Advance(inner)))
-                return false;
-            for (int i = 0; i < inner.GenParamCount; i++)
+            int targetAvail = iAvailRight - 1;
+            while (parserLeft.Available() > targetAvail)
             {
-                if (FAILED(parserLeft.Advance(inner)))
+                CLR_RT_SignatureParser::Element drained{};
+
+                if (FAILED(parserLeft.Advance(drained)))
+                {
                     return false;
+                }
             }
             continue;
         }
