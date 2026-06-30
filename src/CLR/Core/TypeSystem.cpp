@@ -9086,6 +9086,21 @@ bool CLR_RT_TypeSystem::FindVirtualMethodDef(
 // method uses generic type parameter T (VAR N) while the concrete implementation uses
 // a closed generic instance (e.g. KeyValuePair<TKey,TValue>).  The inner sub-elements
 // of the GENERICINST are drained from the parser so Available() stays consistent.
+static bool DrainGenericInstSubtree(CLR_RT_SignatureParser &parser, int targetAvail)
+{
+    while (parser.Available() > targetAvail)
+    {
+        CLR_RT_SignatureParser::Element drained{};
+
+        if (FAILED(parser.Advance(drained)))
+        {
+            return false;
+        }
+    }
+
+    return true;
+}
+
 static bool MatchSignatureForVirtualDispatch(CLR_RT_SignatureParser &parserLeft, CLR_RT_SignatureParser &parserRight)
 {
     if (parserLeft.Type != parserRight.Type)
@@ -9119,30 +9134,23 @@ static bool MatchSignatureForVirtualDispatch(CLR_RT_SignatureParser &parserLeft,
         if (resLeft.DataType == DATATYPE_VAR && resRight.DataType == DATATYPE_GENERICINST)
         {
             int targetAvail = iAvailLeft - 1;
-            while (parserRight.Available() > targetAvail)
+            if (!DrainGenericInstSubtree(parserRight, targetAvail))
             {
-                CLR_RT_SignatureParser::Element drained{};
-
-                if (FAILED(parserRight.Advance(drained)))
-                {
-                    return false;
-                }
+                return false;
             }
+
             continue;
         }
 
         if (resLeft.DataType == DATATYPE_GENERICINST && resRight.DataType == DATATYPE_VAR)
         {
             int targetAvail = iAvailRight - 1;
-            while (parserLeft.Available() > targetAvail)
-            {
-                CLR_RT_SignatureParser::Element drained{};
 
-                if (FAILED(parserLeft.Advance(drained)))
-                {
-                    return false;
-                }
+            if (!DrainGenericInstSubtree(parserLeft, targetAvail))
+            {
+                return false;
             }
+
             continue;
         }
 
