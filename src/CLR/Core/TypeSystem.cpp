@@ -9086,6 +9086,21 @@ bool CLR_RT_TypeSystem::FindVirtualMethodDef(
 // method uses generic type parameter T (VAR N) while the concrete implementation uses
 // a closed generic instance (e.g. KeyValuePair<TKey,TValue>).  The inner sub-elements
 // of the GENERICINST are drained from the parser so Available() stays consistent.
+static bool DrainGenericInstSubtree(CLR_RT_SignatureParser &parser, int targetAvail)
+{
+    while (parser.Available() > targetAvail)
+    {
+        CLR_RT_SignatureParser::Element drained{};
+
+        if (FAILED(parser.Advance(drained)))
+        {
+            return false;
+        }
+    }
+
+    return true;
+}
+
 static bool MatchSignatureForVirtualDispatch(CLR_RT_SignatureParser &parserLeft, CLR_RT_SignatureParser &parserRight)
 {
     if (parserLeft.Type != parserRight.Type)
@@ -9114,30 +9129,28 @@ static bool MatchSignatureForVirtualDispatch(CLR_RT_SignatureParser &parserLeft,
         // Relaxed VAR <-> GENERICINST matching for interface virtual dispatch:
         // the interface method may use a type parameter (VAR N) while the concrete
         // implementation uses the expanded generic type (GENERICINST ...).  Drain the
-        // GENERICINST inner elements so the parser position stays consistent.
+        // whole GENERICINST sub-tree on the expanded side so the parser position stays
+        // consistent.
         if (resLeft.DataType == DATATYPE_VAR && resRight.DataType == DATATYPE_GENERICINST)
         {
-            CLR_RT_SignatureParser::Element inner{};
-            if (FAILED(parserRight.Advance(inner)))
-                return false; // type element (CLASS/VALUETYPE + TypeRef)
-            for (int i = 0; i < inner.GenParamCount; i++)
+            int targetAvail = iAvailLeft - 1;
+            if (!DrainGenericInstSubtree(parserRight, targetAvail))
             {
-                if (FAILED(parserRight.Advance(inner)))
-                    return false;
+                return false;
             }
+
             continue;
         }
 
         if (resLeft.DataType == DATATYPE_GENERICINST && resRight.DataType == DATATYPE_VAR)
         {
-            CLR_RT_SignatureParser::Element inner{};
-            if (FAILED(parserLeft.Advance(inner)))
-                return false;
-            for (int i = 0; i < inner.GenParamCount; i++)
+            int targetAvail = iAvailRight - 1;
+
+            if (!DrainGenericInstSubtree(parserLeft, targetAvail))
             {
-                if (FAILED(parserLeft.Advance(inner)))
-                    return false;
+                return false;
             }
+
             continue;
         }
 
