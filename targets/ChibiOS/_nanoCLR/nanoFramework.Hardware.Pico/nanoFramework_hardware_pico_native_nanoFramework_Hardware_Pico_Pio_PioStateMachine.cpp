@@ -567,11 +567,10 @@ HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_P
     PIO_TypeDef *pio = PioFromIndex(block);
     PioDmaWork *work = &g_PioDmaWork[block][sm];
 
-    // re-established on each re-entry; SetupTimeoutFromTicks pushes hbTimeout once
     hbTimeout.SetInteger((CLR_INT64)timeoutMs * TIME_CONVERSION__TO_MILLISECONDS);
     NANOCLR_CHECK_HRESULT(stack.SetupTimeoutFromTicks(hbTimeout, timeoutTicks));
 
-    // first call: validate + arm the DMA + park. jose's pattern: m_customState 1 => setup, 2 => waiting
+    // first call: validate + arm the DMA + park
     if (stack.m_customState == 1)
     {
         // PIO RX DREQ is only mapped for PIO0/PIO1; PIO2 (RP2350) not wired yet
@@ -691,11 +690,10 @@ HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_P
     PIO_TypeDef *pio = PioFromIndex(block);
     PioDmaWork *work = &g_PioDmaWorkTx[block][sm];
 
-    // re-established on each re-entry; SetupTimeoutFromTicks pushes hbTimeout once
     hbTimeout.SetInteger((CLR_INT64)timeoutMs * TIME_CONVERSION__TO_MILLISECONDS);
     NANOCLR_CHECK_HRESULT(stack.SetupTimeoutFromTicks(hbTimeout, timeoutTicks));
 
-    // first call: validate + copy out + arm the DMA + park. jose's pattern: m_customState 1 => setup, 2 => waiting
+    // first call: validate + copy out + arm the DMA + park
     if (stack.m_customState == 1)
     {
         // PIO TX DREQ is only mapped for PIO0/PIO1; PIO2 (RP2350) not wired yet
