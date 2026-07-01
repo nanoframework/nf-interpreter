@@ -26,6 +26,9 @@ struct PioDmaWork
 };
 static PioDmaWork g_PioDmaWork[3][4] = {};
 
+// Independent TX slots so a Write can run concurrently with a Read on the same state machine.
+static PioDmaWork g_PioDmaWorkTx[3][4] = {};
+
 // DMA completion callback (ChibiOS shared handler dispatches here); just wake the waiting thread
 static void PioDmaCallback(void *p, uint32_t ct)
 {
@@ -652,6 +655,130 @@ HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_P
             (offset + transferred) <= (int)arr->m_numOfElements)
         {
             memcpy(arr->GetFirstElement() + (size_t)offset * 4, work->Buffer, (size_t)transferred * 4);
+        }
+
+        (void)dmaChannelGetAndClearInterrupts(ch);
+        dmaChannelFree(ch);
+        platform_free(work->Buffer);
+        work->Channel = nullptr;
+        work->Buffer = nullptr;
+        work->Count = 0;
+    }
+
+    // pop the timeout heap block and return the word count actually transferred
+    stack.PopValue();
+    stack.SetResult_I4(transferred);
+
+    NANOCLR_NOCLEANUP();
+}
+
+HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioStateMachine::NativeWrite___STATIC__I4__I4__I4__SZARRAY_U4__I4__I4__I4(CLR_RT_StackFrame &stack)
+{
+    NANOCLR_HEADER();
+
+    CLR_RT_HeapBlock hbTimeout;
+    CLR_INT64 *timeoutTicks;
+    bool eventResult = true;
+    int transferred = 0;
+
+    int block = stack.Arg0().NumericByRef().s4;
+    int sm = stack.Arg1().NumericByRef().s4;
+    CLR_RT_HeapBlock_Array *arr = stack.Arg2().DereferenceArray();
+    int offset = stack.Arg3().NumericByRef().s4;
+    int count = stack.Arg4().NumericByRef().s4;
+    int timeoutMs = stack.Arg5().NumericByRef().s4;
+
+    PIO_TypeDef *pio = PioFromIndex(block);
+    PioDmaWork *work = &g_PioDmaWorkTx[block][sm];
+
+    // re-established on each re-entry; SetupTimeoutFromTicks pushes hbTimeout once
+    hbTimeout.SetInteger((CLR_INT64)timeoutMs * TIME_CONVERSION__TO_MILLISECONDS);
+    NANOCLR_CHECK_HRESULT(stack.SetupTimeoutFromTicks(hbTimeout, timeoutTicks));
+
+    // first call: validate + copy out + arm the DMA + park. jose's pattern: m_customState 1 => setup, 2 => waiting
+    if (stack.m_customState == 1)
+    {
+        // PIO TX DREQ is only mapped for PIO0/PIO1; PIO2 (RP2350) not wired yet
+        if (pio == nullptr || block > 1 || sm < 0 || sm > 3)
+        {
+            NANOCLR_SET_AND_LEAVE(CLR_E_NOT_SUPPORTED);
+        }
+        // native ownership check replaces the managed _disposed test
+        if ((g_PioClaimedSm[block] & (1u << sm)) == 0)
+        {
+            NANOCLR_SET_AND_LEAVE(CLR_E_OBJECT_DISPOSED);
+        }
+        if (arr == nullptr || count <= 0 || work->Channel != nullptr || offset < 0 ||
+            (offset + count) > (int)arr->m_numOfElements)
+        {
+            NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_OPERATION);
+        }
+
+        // ChibiOS-owned DMA channel + completion callback (no raw vector, no clash with the SPI DMA)
+        const rp_dma_channel_t *ch = dmaChannelAlloc(RP_DMA_CHANNEL_ID_ANY, 3, PioDmaCallback, work);
+        if (ch == nullptr)
+        {
+            NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_OPERATION);
+        }
+
+        unsigned int *buf = (unsigned int *)platform_malloc((size_t)count * 4);
+        if (buf == nullptr)
+        {
+            dmaChannelFree(ch);
+            NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
+        }
+
+        // copy the words out into the bounce buffer before the DMA drains it into the TX FIFO
+        memcpy(buf, arr->GetFirstElement() + (size_t)offset * 4, (size_t)count * 4);
+
+        // read = bounce buffer (incrementing), write = SM TX FIFO (fixed), paced by the SM TX DREQ
+        unsigned int dreq = (block == 0 ? 0u : 8u) + (unsigned int)sm;
+        ch->channel->READ_ADDR = (unsigned int)(size_t)buf;
+        ch->channel->WRITE_ADDR = (unsigned int)(size_t)&pio->TXF[sm];
+        ch->channel->TRANS_COUNT = (unsigned int)count;
+        dmaChannelEnableInterruptX(ch);
+        ch->channel->CTRL_TRIG = DMA_CTRL_TRIG_EN | DMA_CTRL_TRIG_DATA_SIZE_WORD | DMA_CTRL_TRIG_INCR_READ |
+                                 DMA_CTRL_TRIG_TREQ_SEL(dreq) | DMA_CTRL_TRIG_CHAIN_TO(ch->chnidx);
+
+        work->Channel = ch;
+        work->Buffer = buf;
+        work->Count = (unsigned int)count;
+
+        Events_Get(SYSTEM_EVENT_FLAG_PICOPIO);
+        stack.m_customState = 2;
+    }
+
+    // wait on the shared PICOPIO event; re-check OUR channel's busy bit each wake (shared-event safe)
+    while (work->Channel != nullptr && dmaChannelIsBusyX(work->Channel))
+    {
+        NANOCLR_CHECK_HRESULT(
+            g_CLR_RT_ExecutionEngine.WaitEvents(stack.m_owningThread, *timeoutTicks, Event_PicoPio, eventResult));
+        if (!eventResult)
+        {
+            // timed out; the finish path below aborts the channel
+            break;
+        }
+    }
+
+    if (work->Channel != nullptr)
+    {
+        const rp_dma_channel_t *ch = work->Channel;
+
+        // on timeout the channel is still busy; stop it so it can't read after we free the buffer
+        if (dmaChannelIsBusyX(ch))
+        {
+            ch->channel->CTRL_TRIG &= ~DMA_CTRL_TRIG_EN;
+            DMA->CHAN_ABORT = (1u << ch->chnidx);
+            while (DMA->CHAN_ABORT & (1u << ch->chnidx))
+            {
+            }
+        }
+
+        // data already went out to the TX FIFO -- nothing to copy back
+        transferred = (int)(work->Count - ch->channel->TRANS_COUNT);
+        if (transferred < 0)
+        {
+            transferred = 0;
         }
 
         (void)dmaChannelGetAndClearInterrupts(ch);

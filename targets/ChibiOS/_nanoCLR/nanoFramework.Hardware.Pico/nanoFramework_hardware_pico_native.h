@@ -819,6 +819,9 @@ struct Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pi
     NANOCLR_NATIVE_DECLARE(NativeRead___STATIC__I4__I4__I4__SZARRAY_U4__I4__I4__I4);
 
 
+    NANOCLR_NATIVE_DECLARE(NativeWrite___STATIC__I4__I4__I4__SZARRAY_U4__I4__I4__I4);
+
+
     NANOCLR_NATIVE_DECLARE(NativeInit___STATIC__VOID__I4__I4__I4__SZARRAY_U4);
 
 
