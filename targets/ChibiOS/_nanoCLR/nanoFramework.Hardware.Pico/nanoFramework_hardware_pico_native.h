@@ -3,6 +3,33 @@
 // See LICENSE file in the project root for full license information.
 //
 
+
+
+//-----------------------------------------------------------------------------
+
+//
+
+//                   ** WARNING! ** 
+
+//    This file was generated automatically by a tool.
+
+//    Re-running the tool will overwrite this file.
+
+//    You should copy this file to a custom location
+
+//    before adding any customization in the copy to
+
+//    prevent loss of your changes when the tool is
+
+//    re-run.
+
+//
+
+//-----------------------------------------------------------------------------
+
+
+
+
 #ifndef NANOFRAMEWORK_HARDWARE_PICO_NATIVE_H
 
 #define NANOFRAMEWORK_HARDWARE_PICO_NATIVE_H
@@ -19,6 +46,46 @@
 #include <corlib_native.h>
 
 
+
+
+
+typedef enum __nfpack DestinationOperand
+
+{
+
+
+    DestinationOperand_Pins = 0,
+
+
+    DestinationOperand_RegisterX = 1,
+
+
+    DestinationOperand_RegisterY = 2,
+
+
+    DestinationOperand_DiscardsData = 3,
+
+
+    DestinationOperand_PinDirs = 4,
+
+
+    DestinationOperand_Pc = 5,
+
+
+    DestinationOperand_Status = 5,
+
+
+    DestinationOperand_InputShiftRegister = 6,
+
+
+    DestinationOperand_OutputShiftRegister = 7,
+
+
+    DestinationOperand_Executes = 7,
+
+
+
+} DestinationOperand;
 
 
 
@@ -53,46 +120,6 @@ typedef enum __nfpack PioCondition
 
 
 } PioCondition;
-
-
-
-typedef enum __nfpack PioDest
-
-{
-
-
-    PioDest_Pins = 0,
-
-
-    PioDest_X = 1,
-
-
-    PioDest_Y = 2,
-
-
-    PioDest_Null = 3,
-
-
-    PioDest_PinDirs = 4,
-
-
-    PioDest_Pc = 5,
-
-
-    PioDest_Status = 5,
-
-
-    PioDest_Isr = 6,
-
-
-    PioDest_Osr = 7,
-
-
-    PioDest_Exec = 7,
-
-
-
-} PioDest;
 
 
 
@@ -159,53 +186,6 @@ typedef enum __nfpack PioMovStatusSel
 
 
 
-typedef enum __nfpack PioShiftDir
-
-{
-
-
-    PioShiftDir_Left = 0,
-
-
-    PioShiftDir_Right = 1,
-
-
-
-} PioShiftDir;
-
-
-
-typedef enum __nfpack PioSrc
-
-{
-
-
-    PioSrc_Pins = 0,
-
-
-    PioSrc_X = 1,
-
-
-    PioSrc_Y = 2,
-
-
-    PioSrc_Null = 3,
-
-
-    PioSrc_Status = 5,
-
-
-    PioSrc_Isr = 6,
-
-
-    PioSrc_Osr = 7,
-
-
-
-} PioSrc;
-
-
-
 typedef enum __nfpack PioVersion
 
 {
@@ -238,6 +218,53 @@ typedef enum __nfpack PioWaitSource
 
 
 } PioWaitSource;
+
+
+
+typedef enum __nfpack ShiftDirection
+
+{
+
+
+    ShiftDirection_Left = 0,
+
+
+    ShiftDirection_Right = 1,
+
+
+
+} ShiftDirection;
+
+
+
+typedef enum __nfpack SourceOperand
+
+{
+
+
+    SourceOperand_Pins = 0,
+
+
+    SourceOperand_RegisterX = 1,
+
+
+    SourceOperand_RegisterY = 2,
+
+
+    SourceOperand_Null = 3,
+
+
+    SourceOperand_Status = 5,
+
+
+    SourceOperand_InputShiftRegister = 6,
+
+
+    SourceOperand_OutputShiftRegister = 7,
+
+
+
+} SourceOperand;
 
 
 
@@ -295,10 +322,10 @@ struct Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pi
 
 
 
-    // renamed backing field '<SideSetOpt>k__BackingField'
+    // renamed backing field '<SideSetOption>k__BackingField'
 
 
-    static const int FIELD__SideSetOpt = 3;
+    static const int FIELD__SideSetOption = 3;
 
 
 
@@ -573,10 +600,10 @@ struct Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pi
 
 
 
-    // renamed backing field '<SideSetOpt>k__BackingField'
+    // renamed backing field '<SideSetOptional>k__BackingField'
 
 
-    static const int FIELD__SideSetOpt = 4;
+    static const int FIELD__SideSetOptional = 4;
 
 
 
@@ -684,10 +711,10 @@ struct Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pi
 
 
 
-    // renamed backing field '<SideSetOpt>k__BackingField'
+    // renamed backing field '<SideSetOptional>k__BackingField'
 
 
-    static const int FIELD__SideSetOpt = 6;
+    static const int FIELD__SideSetOptional = 6;
 
 
 
@@ -789,13 +816,7 @@ struct Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pi
 
 
 
-    NANOCLR_NATIVE_DECLARE(NativeStartDmaRead___STATIC__BOOLEAN__I4__I4__I4);
-
-
-    NANOCLR_NATIVE_DECLARE(NativeDmaReadComplete___STATIC__BOOLEAN__I4__I4);
-
-
-    NANOCLR_NATIVE_DECLARE(NativeFinishDmaRead___STATIC__I4__I4__I4__SZARRAY_U4__I4);
+    NANOCLR_NATIVE_DECLARE(NativeRead___STATIC__I4__I4__I4__SZARRAY_U4__I4__I4__I4);
 
 
     NANOCLR_NATIVE_DECLARE(NativeInit___STATIC__VOID__I4__I4__I4__SZARRAY_U4);
