@@ -21,7 +21,7 @@ const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_System_Runtime_Serializatio
     "System.Runtime.Serialization",
     0x33AD7648,
     method_lookup,
-    { 100, 2, 0, 1 }
+    { 100, 2, 0, 2 }
 };
 
 // clang-format on
