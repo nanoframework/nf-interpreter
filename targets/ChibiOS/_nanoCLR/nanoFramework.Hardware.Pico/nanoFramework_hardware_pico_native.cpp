@@ -3,6 +3,10 @@
 // See LICENSE file in the project root for full license information.
 //
 
+
+
+
+
 #include "nanoFramework_hardware_pico_native.h"
 
 
@@ -562,13 +566,7 @@ static const CLR_RT_MethodHandler method_lookup[] =
     NULL,
 
 
-    Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioStateMachine::NativeStartDmaRead___STATIC__BOOLEAN__I4__I4__I4,
-
-
-    Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioStateMachine::NativeDmaReadComplete___STATIC__BOOLEAN__I4__I4,
-
-
-    Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioStateMachine::NativeFinishDmaRead___STATIC__I4__I4__I4__SZARRAY_U4__I4,
+    Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioStateMachine::NativeRead___STATIC__I4__I4__I4__SZARRAY_U4__I4__I4__I4,
 
 
     Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioStateMachine::NativeInit___STATIC__VOID__I4__I4__I4__SZARRAY_U4,
@@ -689,7 +687,7 @@ const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_nanoFramework_Hardware_Pico
 
     "nanoFramework.Hardware.Pico",
 
-    0x779AF39A,
+    0xD87B7417,
 
     method_lookup,
 

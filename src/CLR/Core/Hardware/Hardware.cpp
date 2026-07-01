@@ -173,6 +173,11 @@ void CLR_HW_Hardware::ProcessActivity()
         eventsCLR |= Event_StorageIo;
     }
 
+    if (events & SYSTEM_EVENT_FLAG_PICOPIO)
+    {
+        eventsCLR |= Event_PicoPio;
+    }
+
     if (events & SYSTEM_EVENT_FLAG_RADIO)
     {
         eventsCLR |= Event_Radio;
