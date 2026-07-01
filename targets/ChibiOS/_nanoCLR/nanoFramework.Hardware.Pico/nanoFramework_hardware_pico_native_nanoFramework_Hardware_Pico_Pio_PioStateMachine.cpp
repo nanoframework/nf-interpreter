@@ -10,15 +10,29 @@
 #include "rp2040.h"
 #endif
 #include "nanoFramework_hardware_pico_native_target.h"
+#include <hal.h>
+#include <nanoHAL.h>
 
 // busy-wait cap so a stalled SM times out instead of hanging
 static const unsigned int PIO_FIFO_WAIT_LIMIT = 0x4000000u;
 
-// DMA bulk-read prototype state (one slot per block/sm; channel == -1 when idle)
-static int g_PioDmaChannel[3][4] = {{-1, -1, -1, -1}, {-1, -1, -1, -1}, {-1, -1, -1, -1}};
-static unsigned int *g_PioDmaBuffer[3][4] = {{0}};
-static unsigned int g_PioDmaCount[3][4] = {{0}};
-static unsigned int g_PioDmaClaimed = 0; // bitmap of the 12 DMA channels we hold
+// DMA bulk-read state, one slot per block/sm (Channel == nullptr when idle). The channel is a ChibiOS
+// RP DMA descriptor so completion arrives via PioDmaCallback (no raw NVIC vector, no clash with the SPI DMA).
+struct PioDmaWork
+{
+    const rp_dma_channel_t *Channel;
+    unsigned int *Buffer;
+    unsigned int Count;
+};
+static PioDmaWork g_PioDmaWork[3][4] = {};
+
+// DMA completion callback (ChibiOS shared handler dispatches here); just wake the waiting thread
+static void PioDmaCallback(void *p, uint32_t ct)
+{
+    (void)p;
+    (void)ct;
+    Events_Set(SYSTEM_EVENT_FLAG_PICOPIO);
+}
 
 // blob indices, must match PioStateMachineConfig.cs
 enum PioCfgBlob
@@ -531,125 +545,126 @@ HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_P
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioStateMachine::NativeStartDmaRead___STATIC__BOOLEAN__I4__I4__I4(CLR_RT_StackFrame &stack)
+HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioStateMachine::NativeRead___STATIC__I4__I4__I4__SZARRAY_U4__I4__I4__I4(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
+
+    CLR_RT_HeapBlock hbTimeout;
+    CLR_INT64 *timeoutTicks;
+    bool eventResult = true;
+    int transferred = 0;
+
+    int block = stack.Arg0().NumericByRef().s4;
+    int sm = stack.Arg1().NumericByRef().s4;
+    CLR_RT_HeapBlock_Array *arr = stack.Arg2().DereferenceArray();
+    int offset = stack.Arg3().NumericByRef().s4;
+    int count = stack.Arg4().NumericByRef().s4;
+    int timeoutMs = stack.Arg5().NumericByRef().s4;
+
+    PIO_TypeDef *pio = PioFromIndex(block);
+    PioDmaWork *work = &g_PioDmaWork[block][sm];
+
+    // re-established on each re-entry; SetupTimeoutFromTicks pushes hbTimeout once
+    hbTimeout.SetInteger((CLR_INT64)timeoutMs * TIME_CONVERSION__TO_MILLISECONDS);
+    NANOCLR_CHECK_HRESULT(stack.SetupTimeoutFromTicks(hbTimeout, timeoutTicks));
+
+    // first call: validate + arm the DMA + park. jose's pattern: m_customState 1 => setup, 2 => waiting
+    if (stack.m_customState == 1)
     {
-        int block = stack.Arg0().NumericByRef().s4;
-        int sm = stack.Arg1().NumericByRef().s4;
-        int count = stack.Arg2().NumericByRef().s4;
-
-        // the PIO RX DREQ is only mapped for PIO0/PIO1 here; PIO2 (RP2350) is out of scope for the prototype
-        PIO_TypeDef *pio = PioFromIndex(block);
-        if (pio == nullptr || block > 1 || sm < 0 || sm > 3 || count <= 0 || g_PioDmaChannel[block][sm] >= 0)
+        // PIO RX DREQ is only mapped for PIO0/PIO1; PIO2 (RP2350) not wired yet
+        if (pio == nullptr || block > 1 || sm < 0 || sm > 3)
         {
-            stack.SetResult_Boolean(false);
-            NANOCLR_SET_AND_LEAVE(S_OK);
+            NANOCLR_SET_AND_LEAVE(CLR_E_NOT_SUPPORTED);
+        }
+        // native ownership check replaces the managed _disposed test
+        if ((g_PioClaimedSm[block] & (1u << sm)) == 0)
+        {
+            NANOCLR_SET_AND_LEAVE(CLR_E_OBJECT_DISPOSED);
+        }
+        if (arr == nullptr || count <= 0 || work->Channel != nullptr)
+        {
+            NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_OPERATION);
         }
 
-        int ch = -1;
-        for (int c = 0; c < 12; c++)
+        // ChibiOS-owned DMA channel + completion callback (no raw vector, no clash with the SPI DMA)
+        const rp_dma_channel_t *ch = dmaChannelAlloc(RP_DMA_CHANNEL_ID_ANY, 3, PioDmaCallback, work);
+        if (ch == nullptr)
         {
-            if ((g_PioDmaClaimed & (1u << c)) == 0)
-            {
-                g_PioDmaClaimed |= (1u << c);
-                ch = c;
-                break;
-            }
-        }
-        if (ch < 0)
-        {
-            stack.SetResult_Boolean(false);
-            NANOCLR_SET_AND_LEAVE(S_OK);
+            NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_OPERATION);
         }
 
         unsigned int *buf = (unsigned int *)platform_malloc((size_t)count * 4);
         if (buf == nullptr)
         {
-            g_PioDmaClaimed &= ~(1u << ch);
-            stack.SetResult_Boolean(false);
-            NANOCLR_SET_AND_LEAVE(S_OK);
+            dmaChannelFree(ch);
+            NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
         }
 
         // read = SM RX FIFO (fixed), write = bounce buffer (incrementing), paced by the SM RX DREQ
         unsigned int dreq = (block == 0 ? 4u : 12u) + (unsigned int)sm;
-        DMA->CH[ch].READ_ADDR = (unsigned int)(size_t)&pio->RXF[sm];
-        DMA->CH[ch].WRITE_ADDR = (unsigned int)(size_t)buf;
-        DMA->CH[ch].TRANS_COUNT = (unsigned int)count;
-        DMA->CH[ch].CTRL_TRIG = DMA_CTRL_TRIG_EN | DMA_CTRL_TRIG_DATA_SIZE_WORD | DMA_CTRL_TRIG_INCR_WRITE |
-                                DMA_CTRL_TRIG_TREQ_SEL(dreq) | DMA_CTRL_TRIG_CHAIN_TO(ch);
+        ch->channel->READ_ADDR = (unsigned int)(size_t)&pio->RXF[sm];
+        ch->channel->WRITE_ADDR = (unsigned int)(size_t)buf;
+        ch->channel->TRANS_COUNT = (unsigned int)count;
+        dmaChannelEnableInterruptX(ch);
+        ch->channel->CTRL_TRIG = DMA_CTRL_TRIG_EN | DMA_CTRL_TRIG_DATA_SIZE_WORD | DMA_CTRL_TRIG_INCR_WRITE |
+                                 DMA_CTRL_TRIG_TREQ_SEL(dreq) | DMA_CTRL_TRIG_CHAIN_TO(ch->chnidx);
 
-        g_PioDmaChannel[block][sm] = ch;
-        g_PioDmaBuffer[block][sm] = buf;
-        g_PioDmaCount[block][sm] = (unsigned int)count;
-        stack.SetResult_Boolean(true);
+        work->Channel = ch;
+        work->Buffer = buf;
+        work->Count = (unsigned int)count;
+
+        Events_Get(SYSTEM_EVENT_FLAG_PICOPIO);
+        stack.m_customState = 2;
     }
+
+    // wait on the shared PICOPIO event; re-check OUR channel's busy bit each wake (shared-event safe)
+    while (work->Channel != nullptr && dmaChannelIsBusyX(work->Channel))
+    {
+        NANOCLR_CHECK_HRESULT(
+            g_CLR_RT_ExecutionEngine.WaitEvents(stack.m_owningThread, *timeoutTicks, Event_PicoPio, eventResult));
+        if (!eventResult)
+        {
+            // timed out; the finish path below aborts the channel
+            break;
+        }
+    }
+
+    if (work->Channel != nullptr)
+    {
+        const rp_dma_channel_t *ch = work->Channel;
+
+        // on timeout the channel is still busy; stop it so it can't write after we free the buffer
+        if (dmaChannelIsBusyX(ch))
+        {
+            ch->channel->CTRL_TRIG &= ~DMA_CTRL_TRIG_EN;
+            DMA->CHAN_ABORT = (1u << ch->chnidx);
+            while (DMA->CHAN_ABORT & (1u << ch->chnidx))
+            {
+            }
+        }
+
+        transferred = (int)(work->Count - ch->channel->TRANS_COUNT);
+        if (transferred < 0)
+        {
+            transferred = 0;
+        }
+        if (arr != nullptr && offset >= 0 && transferred > 0 &&
+            (offset + transferred) <= (int)arr->m_numOfElements)
+        {
+            memcpy(arr->GetFirstElement() + (size_t)offset * 4, work->Buffer, (size_t)transferred * 4);
+        }
+
+        (void)dmaChannelGetAndClearInterrupts(ch);
+        dmaChannelFree(ch);
+        platform_free(work->Buffer);
+        work->Channel = nullptr;
+        work->Buffer = nullptr;
+        work->Count = 0;
+    }
+
+    // pop the timeout heap block and return the word count actually transferred
+    stack.PopValue();
+    stack.SetResult_I4(transferred);
+
     NANOCLR_NOCLEANUP();
-}
-
-HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioStateMachine::NativeDmaReadComplete___STATIC__BOOLEAN__I4__I4(CLR_RT_StackFrame &stack)
-{
-    NANOCLR_HEADER();
-    {
-        int block = stack.Arg0().NumericByRef().s4;
-        int sm = stack.Arg1().NumericByRef().s4;
-
-        bool done = true;
-        if (block >= 0 && block < 3 && sm >= 0 && sm < 4)
-        {
-            int ch = g_PioDmaChannel[block][sm];
-            if (ch >= 0)
-            {
-                done = (DMA->CH[ch].CTRL_TRIG & DMA_CTRL_TRIG_BUSY) == 0;
-            }
-        }
-        stack.SetResult_Boolean(done);
-    }
-    NANOCLR_NOCLEANUP_NOLABEL();
-}
-
-HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioStateMachine::NativeFinishDmaRead___STATIC__I4__I4__I4__SZARRAY_U4__I4(CLR_RT_StackFrame &stack)
-{
-    NANOCLR_HEADER();
-    {
-        int block = stack.Arg0().NumericByRef().s4;
-        int sm = stack.Arg1().NumericByRef().s4;
-        CLR_RT_HeapBlock_Array *arr = stack.Arg2().DereferenceArray();
-        int offset = stack.Arg3().NumericByRef().s4;
-
-        int transferred = 0;
-        if (block >= 0 && block < 3 && sm >= 0 && sm < 4 && g_PioDmaChannel[block][sm] >= 0)
-        {
-            int ch = g_PioDmaChannel[block][sm];
-
-            // on timeout the channel is still busy; abort it so it can't write after we free the buffer
-            if (DMA->CH[ch].CTRL_TRIG & DMA_CTRL_TRIG_BUSY)
-            {
-                DMA->CHAN_ABORT = (1u << ch);
-                while (DMA->CHAN_ABORT & (1u << ch))
-                {
-                }
-            }
-
-            transferred = (int)(g_PioDmaCount[block][sm] - DMA->CH[ch].TRANS_COUNT);
-            if (transferred < 0)
-            {
-                transferred = 0;
-            }
-
-            if (arr != nullptr && offset >= 0 && transferred > 0 &&
-                (offset + transferred) <= (int)arr->m_numOfElements)
-            {
-                memcpy(arr->GetFirstElement() + (size_t)offset * 4, g_PioDmaBuffer[block][sm], (size_t)transferred * 4);
-            }
-
-            platform_free(g_PioDmaBuffer[block][sm]);
-            g_PioDmaBuffer[block][sm] = nullptr;
-            g_PioDmaCount[block][sm] = 0;
-            g_PioDmaChannel[block][sm] = -1;
-            g_PioDmaClaimed &= ~(1u << ch);
-        }
-        stack.SetResult_I4(transferred);
-    }
-    NANOCLR_NOCLEANUP_NOLABEL();
 }

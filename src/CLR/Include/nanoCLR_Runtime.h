@@ -3440,6 +3440,7 @@ typedef enum Events
     Event_SerialPortIn      = 0x00000002,
     Event_SerialPortOut     = 0x00000004,
     Event_EndPoint          = 0x00000008,
+    Event_PicoPio           = 0x00000010,
     Event_StorageIo         = 0x00000020,
     Event_I2cMaster         = 0x00000080,
     Event_SpiMaster         = 0x00000100,
