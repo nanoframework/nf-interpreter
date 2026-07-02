@@ -46,7 +46,14 @@ HRESULT CLR_RT_HeapBlock_Lock::CreateInstance(
             {
                 case DATATYPE_VALUETYPE:
                 case DATATYPE_CLASS:
-                    ptr->SetObjectLock(lock);
+                    // A generic instance overloads the object-lock slot to store its closed TypeSpec
+                    // (see SetGenericInstanceType / ObjectGenericType), so it cannot also hold a monitor
+                    // lock pointer. Writing the lock here would clobber the TypeSpec and break every
+                    // subsequent generic field / method resolution on the instance.
+                    if (ptr->IsAGenericInstance() == false)
+                    {
+                        ptr->SetObjectLock(lock);
+                    }
                     break;
 
                 default:
@@ -138,7 +145,12 @@ void CLR_RT_HeapBlock_Lock::ChangeOwner()
             {
                 case DATATYPE_VALUETYPE:
                 case DATATYPE_CLASS:
-                    ptr->SetObjectLock(nullptr);
+                    // See CreateInstance: a generic instance never stored a lock here (the slot holds its
+                    // closed TypeSpec), so do not clear it or the TypeSpec would be wiped.
+                    if (ptr->IsAGenericInstance() == false)
+                    {
+                        ptr->SetObjectLock(nullptr);
+                    }
                     break;
 
                 default:
