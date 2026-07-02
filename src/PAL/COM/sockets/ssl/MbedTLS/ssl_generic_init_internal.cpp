@@ -171,11 +171,11 @@ bool ssl_generic_init_internal(
         }
         else if (sslMode & SslProtocols_Tls13)
         {
-    #if defined(MBEDTLS_SSL_PROTO_TLS1_3)
+#if defined(MBEDTLS_SSL_PROTO_TLS1_3)
             minVersion = MBEDTLS_SSL_VERSION_TLS1_3;
-    #else
+#else
             minVersion = MBEDTLS_SSL_VERSION_TLS1_2;
-    #endif
+#endif
         }
 
         // find maximum version
