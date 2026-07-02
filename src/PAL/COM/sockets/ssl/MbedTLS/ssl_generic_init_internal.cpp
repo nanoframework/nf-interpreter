@@ -23,9 +23,14 @@ bool ssl_generic_init_internal(
     bool isServer)
 {
     // set default values for min and max protocol versions
-    // aiming for TLS 1.3 which is the most secure
+    // default to the highest protocol version compiled in
+#if defined(MBEDTLS_SSL_PROTO_TLS1_3)
     mbedtls_ssl_protocol_version minVersion = MBEDTLS_SSL_VERSION_TLS1_3;
     mbedtls_ssl_protocol_version maxVersion = MBEDTLS_SSL_VERSION_TLS1_3;
+#else
+    mbedtls_ssl_protocol_version minVersion = MBEDTLS_SSL_VERSION_TLS1_2;
+    mbedtls_ssl_protocol_version maxVersion = MBEDTLS_SSL_VERSION_TLS1_2;
+#endif
 
     int sslContexIndex = -1;
     int authMode = MBEDTLS_SSL_VERIFY_NONE;
@@ -166,13 +171,21 @@ bool ssl_generic_init_internal(
         }
         else if (sslMode & SslProtocols_Tls13)
         {
+    #if defined(MBEDTLS_SSL_PROTO_TLS1_3)
             minVersion = MBEDTLS_SSL_VERSION_TLS1_3;
+    #else
+            minVersion = MBEDTLS_SSL_VERSION_TLS1_2;
+    #endif
         }
 
         // find maximum version
         if (sslMode & SslProtocols_Tls13)
         {
+#if defined(MBEDTLS_SSL_PROTO_TLS1_3)
             maxVersion = MBEDTLS_SSL_VERSION_TLS1_3;
+#else
+            maxVersion = MBEDTLS_SSL_VERSION_TLS1_2;
+#endif
         }
         else
         {
