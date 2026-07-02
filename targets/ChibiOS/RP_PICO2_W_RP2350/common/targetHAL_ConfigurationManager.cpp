@@ -39,7 +39,7 @@ void InitialiseWirelessDefaultConfig(HAL_Configuration_Wireless80211 *pconfig, u
     memset(pconfig, 0, sizeof(HAL_Configuration_Wireless80211));
 
     // set config block marker
-    memcpy(pconfig, c_MARKER_CONFIGURATION_WIRELESS80211_V1, sizeof(c_MARKER_CONFIGURATION_WIRELESS80211_V1));
+    memcpy(pconfig->Marker, c_MARKER_CONFIGURATION_WIRELESS80211_V1, sizeof(c_MARKER_CONFIGURATION_WIRELESS80211_V1));
 
     pconfig->Id = configurationIndex;
 

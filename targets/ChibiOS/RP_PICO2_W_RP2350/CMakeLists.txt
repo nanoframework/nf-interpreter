@@ -9,6 +9,9 @@ FetchContent_GetProperties(chibios)
 include(binutils.common)
 include(binutils.ChibiOS)
 
+# Configure-time flag used by the WiFi driver gating below.
+set(TARGET_HAS_WIFI TRUE)
+
 # RP2350 W target-local sources and include directories
 list(APPEND CMAKE_PREFIX_PATH "${CMAKE_CURRENT_SOURCE_DIR}")
 list(APPEND CMAKE_PREFIX_PATH "${CMAKE_CURRENT_SOURCE_DIR}/common")
