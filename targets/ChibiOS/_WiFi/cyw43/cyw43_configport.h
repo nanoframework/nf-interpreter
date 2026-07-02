@@ -75,11 +75,21 @@ extern void debug_printf(const char *format, ...);
 // and output level via SIO registers; never touch FUNCSEL or PADS.
 // ---------------------------------------------------------------------------
 #define SIO_BASE_ADDR       0xD0000000
+#define SIO_GPIO_IN_REG     (*(volatile uint32_t *)(SIO_BASE_ADDR + 0x004))
+// SIO GPIO output/OE set/clear offsets differ between RP2040 and RP2350.
+// RP2350 inserts GPIO_HI_* registers (for GPIO32+) between each bank,
+// shifting all the atomic set/clr/xor offsets up.
+#if defined(RP2350)
+#define SIO_GPIO_OUT_SET    (*(volatile uint32_t *)(SIO_BASE_ADDR + 0x018))
+#define SIO_GPIO_OUT_CLR    (*(volatile uint32_t *)(SIO_BASE_ADDR + 0x020))
+#define SIO_GPIO_OE_SET     (*(volatile uint32_t *)(SIO_BASE_ADDR + 0x038))
+#define SIO_GPIO_OE_CLR     (*(volatile uint32_t *)(SIO_BASE_ADDR + 0x040))
+#else // RP2040
 #define SIO_GPIO_OUT_SET    (*(volatile uint32_t *)(SIO_BASE_ADDR + 0x014))
 #define SIO_GPIO_OUT_CLR    (*(volatile uint32_t *)(SIO_BASE_ADDR + 0x018))
 #define SIO_GPIO_OE_SET     (*(volatile uint32_t *)(SIO_BASE_ADDR + 0x024))
 #define SIO_GPIO_OE_CLR     (*(volatile uint32_t *)(SIO_BASE_ADDR + 0x028))
-#define SIO_GPIO_IN_REG     (*(volatile uint32_t *)(SIO_BASE_ADDR + 0x004))
+#endif
 
 #define CYW43_HAL_PIN_MODE_INPUT  0
 #define CYW43_HAL_PIN_MODE_OUTPUT 1

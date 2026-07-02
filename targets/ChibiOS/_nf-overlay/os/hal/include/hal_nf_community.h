@@ -65,6 +65,17 @@ extern "C" {
 #ifdef __cplusplus
 }
 #endif
+#elif defined(RP2350)
+// RP2350 RNG stubs (ROSC-based, ROSC_BASE=0x400E8000) — provided by target_rng.c
+#ifdef __cplusplus
+extern "C" {
+#endif
+  void rngStart(void);
+  void rngStop(void);
+  uint32_t rngGenerateRandomNumber(void);
+#ifdef __cplusplus
+}
+#endif
 #endif
 
 // Complex drivers

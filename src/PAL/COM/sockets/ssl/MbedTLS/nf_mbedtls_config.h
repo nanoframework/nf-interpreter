@@ -87,11 +87,14 @@ extern "C"
 #define MBEDTLS_SSL_RENEGOTIATION
 #define MBEDTLS_SSL_MAX_FRAGMENT_LENGTH
 #define MBEDTLS_SSL_PROTO_TLS1_2
+// RP2350: TLS1.3 depends on PSA_CRYPTO which requires platform wiring (missing psa_* implementations)
+#if !defined(TARGET_RP2350)
 #define MBEDTLS_SSL_PROTO_TLS1_3
 #define MBEDTLS_SSL_TLS1_3_COMPATIBILITY_MODE
 #define MBEDTLS_SSL_TLS1_3_KEY_EXCHANGE_MODE_PSK_ENABLED
 #define MBEDTLS_SSL_TLS1_3_KEY_EXCHANGE_MODE_EPHEMERAL_ENABLED
 #define MBEDTLS_SSL_TLS1_3_KEY_EXCHANGE_MODE_PSK_EPHEMERAL_ENABLED
+#endif
 #define MBEDTLS_SSL_PROTO_DTLS
 #define MBEDTLS_SSL_ALPN
 #define MBEDTLS_SSL_DTLS_ANTI_REPLAY
@@ -137,7 +140,8 @@ extern "C"
 #define MBEDTLS_MD5_C
 
 #define MBEDTLS_OID_C
-#define MBEDTLS_PADLOCK_C
+// MBEDTLS_PADLOCK_C disabled: VIA PadLock is x86-specific; not used on embedded ARM targets
+// #define MBEDTLS_PADLOCK_C
 
 #define MBEDTLS_PEM_PARSE_C
 
@@ -170,10 +174,14 @@ extern "C"
 
 #define MBEDTLS_AES_ROM_TABLES
 
+// RP2350: PSA_CRYPTO requires platform wiring (missing psa_import_key, psa_key_derivation_output_bytes, etc.)
+// Without these implementations, mbedTLS maps PSA failures to SSL_HW_ACCEL_FAILED (-32640) during TLS handshake.
+#if !defined(TARGET_RP2350)
 #define MBEDTLS_USE_PSA_CRYPTO
 #define MBEDTLS_PSA_CRYPTO_C
 #define MBEDTLS_PSA_CRYPTO_CONFIG
 #define MBEDTLS_PSA_CRYPTO_EXTERNAL_RNG
+#endif
 
 ////////////////////////////////////////////////////////////////////////////
 // This define depends on the platform having a hardware random generator.

@@ -11,6 +11,12 @@
 #include <hal.h>
 #include <ch.h>
 
+#if (HAL_USE_RTC == FALSE)
+// Software UTC offset used when no hardware RTC is available.
+// Updated by HAL_Time_SetUtcTime() (e.g., from SNTP) and applied on reads.
+static int64_t s_utcOffsetTicks = 0;
+#endif
+
 // Returns the current date time from the system tick or from the RTC if it's available (this depends on the respective configuration option)
 uint64_t  HAL_Time_CurrentDateTime(bool datePartOnly)
 {
@@ -52,10 +58,16 @@ uint64_t  HAL_Time_CurrentDateTime(bool datePartOnly)
 
   #else
 
+        chSysLock();
+
+        uint64_t currentTime;
+        currentTime = (uint64_t)((int64_t)HAL_Time_CurrentTime() + s_utcOffsetTicks);
+        chSysUnlock();
+
 	if (datePartOnly)
 	{
 		SYSTEMTIME st;
-		HAL_Time_ToSystemTime(HAL_Time_CurrentTime(), &st);
+		HAL_Time_ToSystemTime(currentTime, &st);
 
 		st.wHour = 0;
 		st.wMinute = 0;
@@ -66,7 +78,7 @@ uint64_t  HAL_Time_CurrentDateTime(bool datePartOnly)
 	}
 	else
     {
-        return HAL_Time_CurrentTime();
+        return currentTime;
     }
 
   #endif
@@ -96,9 +108,11 @@ void HAL_Time_SetUtcTime(uint64_t utcTime)
 
   #else
 
-    // TODO FIXME
-    // need to add implementation when RTC is not being used
-    // can't mess with the systicks because the scheduling can fail
+        // No RTC available: keep UTC as an offset over monotonic HAL ticks.
+        // This allows SNTP to set a usable wall clock without touching scheduler ticks.
+        chSysLock();
+        s_utcOffsetTicks = (int64_t)utcTime - (int64_t)HAL_Time_CurrentTime();
+        chSysUnlock();
 
   #endif
 }
