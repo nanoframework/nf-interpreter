@@ -109,52 +109,6 @@ __nfweak void ConfigurationManager_EnumerateConfigurationBlocks()
             }
         }
 
-        // If storing defaults to flash failed, keep one synthetic network config in RAM so
-        // managed enumeration still exposes at least one adapter.
-        if (networkConfigs->Count == 0)
-        {
-            static HAL_Configuration_NetworkInterface fallbackNetworkConfig;
-
-            HAL_CONFIGURATION_NETWORK *fallbackNetworkConfigs =
-                (HAL_CONFIGURATION_NETWORK *)platform_malloc(
-                    offsetof(HAL_CONFIGURATION_NETWORK, Configs) + sizeof(HAL_Configuration_NetworkInterface *));
-
-            if (fallbackNetworkConfigs != NULL && InitialiseNetworkDefaultConfig(&fallbackNetworkConfig, 0))
-            {
-                fallbackNetworkConfigs->Count = 1;
-                fallbackNetworkConfigs->Configs[0] = &fallbackNetworkConfig;
-
-                platform_free(networkConfigs);
-                networkConfigs = fallbackNetworkConfigs;
-            }
-            else if (fallbackNetworkConfigs != NULL)
-            {
-                platform_free(fallbackNetworkConfigs);
-            }
-        }
-
-        // Apply the same synthetic fallback to wireless settings.
-        if (networkWirelessConfigs->Count == 0)
-        {
-            static HAL_Configuration_Wireless80211 fallbackWirelessConfig;
-
-            HAL_CONFIGURATION_NETWORK_WIRELESS80211 *fallbackWirelessConfigs =
-                (HAL_CONFIGURATION_NETWORK_WIRELESS80211 *)platform_malloc(
-                    offsetof(HAL_CONFIGURATION_NETWORK_WIRELESS80211, Configs) +
-                    sizeof(HAL_Configuration_Wireless80211 *));
-
-            if (fallbackWirelessConfigs != NULL)
-            {
-                InitialiseWirelessDefaultConfig(&fallbackWirelessConfig, 0);
-
-                fallbackWirelessConfigs->Count = 1;
-                fallbackWirelessConfigs->Configs[0] = &fallbackWirelessConfig;
-
-                platform_free(networkWirelessConfigs);
-                networkWirelessConfigs = fallbackWirelessConfigs;
-            }
-        }
-
         // find X509 CA certificate blocks
         HAL_CONFIGURATION_X509_CERTIFICATE *certificateStore =
             (HAL_CONFIGURATION_X509_CERTIFICATE *)ConfigurationManager_FindX509CertificateConfigurationBlocks(

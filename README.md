@@ -220,6 +220,7 @@ The above .NET nanoFramework interpreter builds include support for the class li
     * [RP_PICO_RP2040](targets/ChibiOS/RP_PICO_RP2040)
     * [RP_PICO2_RP2350](targets/ChibiOS/RP_PICO2_RP2350)
     * [RP_PICO_W_RP2040](targets/ChibiOS/RP_PICO_W_RP2040)
+    * [RP_PICO2_W_RP2350](targets/ChibiOS/RP_PICO2_W_RP2350)
   * Target reference for other OSes
     * [Win32 OS (test project only at this time)](targets/os/win32)
   * [CMake files for the build system](CMake)
