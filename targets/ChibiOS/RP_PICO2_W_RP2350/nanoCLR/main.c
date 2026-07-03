@@ -49,7 +49,11 @@ int main(void)
     usbConnectBus(serusbcfg.usbp);
 
     // create the receiver thread
-    osThreadCreate(osThread(ReceiverThread), NULL);
+    osThreadId receiverThread = osThreadCreate(osThread(ReceiverThread), NULL);
+    if (receiverThread == NULL)
+    {
+        chSysHalt("ReceiverThread create failed");
+    }
 
     // CLR settings to launch CLR thread
     CLR_SETTINGS clrSettings;
@@ -60,7 +64,11 @@ int main(void)
     clrSettings.EnterDebuggerLoopAfterExit = true;
 
     // create the CLR Startup thread
-    osThreadCreate(osThread(CLRStartupThread), &clrSettings);
+    osThreadId clrStartupThread = osThreadCreate(osThread(CLRStartupThread), &clrSettings);
+    if (clrStartupThread == NULL)
+    {
+        chSysHalt("CLRStartupThread create failed");
+    }
 
     // start kernel, after this main() will behave like a thread with priority osPriorityNormal
     osKernelStart();
