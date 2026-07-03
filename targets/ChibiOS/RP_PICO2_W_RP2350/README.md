@@ -18,8 +18,8 @@ The Pico 2 W uses the same **Infineon CYW43439** wireless chip as the original P
 
 - **GP23**: `WL_ON` — CYW43 power enable
 - **GP24**: `WL_D` — SPI data (SDIO)
-- **GP25**: `WL_CLK` / `WL_CS` — SPI clock/CS (shared with VSYS monitor on ADC)
-- **GP29**: `WL_CS` / VSYS monitor (ADC)
+- **GP25**: `WL_CS` — SPI chip select
+- **GP29**: `WL_CLK` / VSYS monitor (ADC) — SPI clock line shared with VSYS monitor (ADC)
 
 > **Note**: GP25 is **not** the LED on Pico 2 W. The on-board LED is connected to `WL_GPIO0` on the CYW43439. Do not toggle GP25 as an LED.
 

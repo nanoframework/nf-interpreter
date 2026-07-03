@@ -21,7 +21,7 @@
 
 // Disable hardware acceleration alternative implementations on RP2350
 // (x86 PadLock, etc. are not available on ARM Cortex-M33)
-#define MBEDTLS_PADLOCK_C 0
+#undef MBEDTLS_PADLOCK_C
 
 // Disable PSA_CRYPTO on RP2350. PSA operations (key import, key derivation)
 // fail without proper platform support, causing SSL_HW_ACCEL_FAILED errors.

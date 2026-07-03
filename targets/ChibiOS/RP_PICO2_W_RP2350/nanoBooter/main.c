@@ -86,7 +86,11 @@ int main(void)
     BlockStorageList_InitializeDevices();
 
     // create the receiver thread
-    osThreadCreate(osThread(ReceiverThread), NULL);
+    osThreadId receiverThread = osThreadCreate(osThread(ReceiverThread), NULL);
+    if (receiverThread == NULL)
+    {
+        chSysHalt("ReceiverThread create failed");
+    }
 
     // start kernel, after this main() will behave like a thread with priority osPriorityNormal
     osKernelStart();
