@@ -5,7 +5,7 @@
 
 #include <nanoHAL_v2.h>
 #include <nanoWeak.h>
-#ifdef __CM0_CMSIS_VERSION
+#if defined(__CM0_CMSIS_VERSION) || defined(__CM0PLUS_CMSIS_VERSION)
 #include <targetHAL.h>
 #endif
 
@@ -30,7 +30,7 @@ __nfweak bool SystemState_QueryNoLock(SYSTEM_STATE_type state)
 
 __nfweak void SystemState_Set(SYSTEM_STATE_type state)
 {
-#ifdef __CM0_CMSIS_VERSION
+#if defined(__CM0_CMSIS_VERSION) || defined(__CM0PLUS_CMSIS_VERSION)
     GLOBAL_LOCK();
     SystemState_SetNoLock(state);
     GLOBAL_UNLOCK();
@@ -41,7 +41,7 @@ __nfweak void SystemState_Set(SYSTEM_STATE_type state)
 
 __nfweak void SystemState_Clear(SYSTEM_STATE_type state)
 {
-#ifdef __CM0_CMSIS_VERSION
+#if defined(__CM0_CMSIS_VERSION) || defined(__CM0PLUS_CMSIS_VERSION)
     GLOBAL_LOCK();
     SystemState_ClearNoLock(state);
     GLOBAL_UNLOCK();
@@ -52,7 +52,7 @@ __nfweak void SystemState_Clear(SYSTEM_STATE_type state)
 
 __nfweak bool SystemState_Query(SYSTEM_STATE_type state)
 {
-#if defined(__CM0_CMSIS_VERSION)
+#if defined(__CM0_CMSIS_VERSION) || defined(__CM0PLUS_CMSIS_VERSION)
     return (SystemStates[state] > 0) ? true : false;
 #else
     return (__atomic_load_n(&SystemStates[state], __ATOMIC_RELAXED) > 0) ? true : false;

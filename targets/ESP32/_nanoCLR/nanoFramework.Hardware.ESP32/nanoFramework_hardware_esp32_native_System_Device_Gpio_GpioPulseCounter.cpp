@@ -7,8 +7,8 @@
 #include "nanoFramework_hardware_esp32_native.h"
 #include <Core.h>
 
-// PCNT device not available of the ESP32-C3
-#if !defined(CONFIG_IDF_TARGET_ESP32C3)
+// PCNT device not available of the ESP32-C3 or ESP32-C61
+#if defined(CONFIG_SOC_PCNT_SUPPORTED)
 
 #include "driver/pulse_cnt.h"
 
@@ -261,7 +261,7 @@ HRESULT Library_nanoFramework_hardware_esp32_native_System_Device_Gpio_GpioPulse
 {
     NANOCLR_HEADER();
     {
-#if !defined(CONFIG_IDF_TARGET_ESP32C3)
+#if defined(CONFIG_SOC_PCNT_SUPPORTED)
 
         int16_t pinNumberA;
         int16_t pinNumberB;
@@ -319,7 +319,7 @@ HRESULT Library_nanoFramework_hardware_esp32_native_System_Device_Gpio_GpioPulse
 {
     NANOCLR_HEADER();
     {
-#if !defined(CONFIG_IDF_TARGET_ESP32C3)
+#if defined(CONFIG_SOC_PCNT_SUPPORTED)
 
         CLR_RT_TypeDef_Index gpioPulseCountTypeDef;
         CLR_RT_HeapBlock *gpioPulseCount;
@@ -397,7 +397,7 @@ HRESULT Library_nanoFramework_hardware_esp32_native_System_Device_Gpio_GpioPulse
 {
     NANOCLR_HEADER();
     {
-#if !defined(CONFIG_IDF_TARGET_ESP32C3)
+#if defined(CONFIG_SOC_PCNT_SUPPORTED)
 
         CLR_RT_HeapBlock *pThis = stack.This();
         FAULT_ON_NULL(pThis);
@@ -449,7 +449,7 @@ HRESULT Library_nanoFramework_hardware_esp32_native_System_Device_Gpio_GpioPulse
 {
     NANOCLR_HEADER();
     {
-#if !defined(CONFIG_IDF_TARGET_ESP32C3)
+#if defined(CONFIG_SOC_PCNT_SUPPORTED)
 
         CLR_RT_HeapBlock *pThis = stack.This();
         FAULT_ON_NULL(pThis);
@@ -482,7 +482,7 @@ HRESULT Library_nanoFramework_hardware_esp32_native_System_Device_Gpio_GpioPulse
 {
     NANOCLR_HEADER();
     {
-#if !defined(CONFIG_IDF_TARGET_ESP32C3)
+#if defined(CONFIG_SOC_PCNT_SUPPORTED)
 
         CLR_RT_HeapBlock *pThis = stack.This();
         FAULT_ON_NULL(pThis);

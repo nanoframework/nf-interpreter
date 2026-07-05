@@ -1037,6 +1037,8 @@ bool CLR_DBG_Debugger::Monitor_EraseMemory(WP_Message *msg)
 {
     NATIVE_PROFILE_CLR_DEBUGGER();
 
+    (void)msg;
+
     CLR_DBG_Commands_Monitor_EraseMemory *cmd = (CLR_DBG_Commands_Monitor_EraseMemory *)msg->m_payload;
     CLR_DBG_Commands_Monitor_EraseMemory_Reply cmdReply;
     uint32_t errorCode;

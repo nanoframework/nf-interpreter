@@ -27,7 +27,7 @@ jobs:
   ##############################
   - job: Check_Build_Options
     pool:
-      vmImage: "windows-2022"
+      vmImage: "ubuntu-latest"
 
     variables:
       DOTNET_NOLOGO: true
@@ -41,7 +41,7 @@ jobs:
       # check build options
       - powershell: |
 
-          if($env:Build_Reason -eq "Schedule")
+          if("$(Build.Reason)" -eq "Schedule")
           {
               # scheduled daily build
               $now = [System.DateTime]::UtcNow.Date
@@ -74,12 +74,31 @@ jobs:
           }
           else
           {
-              # build for other reasons: build depending on target tag
-              echo "##vso[task.setvariable variable=CHECK_CHANGES;isOutput=true]true"
-
-              if ($env:System_PullRequest_PullRequestId -ne $null)
+              if ($env:SYSTEM_PULLREQUEST_PULLREQUESTID -ne $null)
               {
                 "**This is a PR build**" | Write-Host
+
+                $auth = "basic $([System.Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes(":$(GitHubToken)")))"
+
+                $pr = Invoke-RestMethod -Uri "https://api.github.com/repos/nanoframework/nf-interpreter/pulls/$(System.PullRequest.PullRequestNumber)" -Header @{"Authorization"="$auth"} -ContentType "application/json" -Method GET
+
+                # check if this is a version update PR, if so, skip build
+                if( ($pr.user.login -eq "nfbot") -and ($pr.title -like "*[version update]*") )
+                {
+                  Write-Host "##[command] **version update commit, skipping build**"
+                  echo "##vso[task.setvariable variable=CHECK_CHANGES;isOutput=true]false"
+                }
+                # check if this is a PR with Code style fixes, if so, skip build
+                elseif( ($pr.user.login -eq "nfbot") -and ( ($pr.title -like "*Code style fixes*") -or ($pr.body -like "*Automated fix of code style*") ) )
+                {
+                  Write-Host "##[command] **code style commit, skipping build**"
+                  echo "##vso[task.setvariable variable=CHECK_CHANGES;isOutput=true]false"
+                }
+                else
+                {
+                  # build for other reasons: build depending on target tag
+                  echo "##vso[task.setvariable variable=CHECK_CHANGES;isOutput=true]true"
+                }
               }
               else
               {
@@ -97,7 +116,7 @@ jobs:
 
           $auth = "basic $([System.Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes(":$(GitHubToken)")))"
 
-          $buildingPr = $env:System_PullRequest_PullRequestId -ne $null
+          $buildingPr = $env:SYSTEM_PULLREQUEST_PULLREQUESTID -ne $null
 
           # set default values
           echo "##vso[task.setvariable variable=BUILD_CHIBIOS;isOutput=true]false"  
@@ -114,7 +133,7 @@ jobs:
           else
           {
               # check if this build was triggered by the pipeline itself
-              if($env:Build_Reason -eq "Manual")
+              if("$(Build.Reason)" -eq "Manual")
               {
                   # this is a manual build, no need to check anything 
                   Write-host "##[command] Manual build"
@@ -124,7 +143,7 @@ jobs:
                 if($buildingPr)
                 {
                     # get files changed in PR, if this is a PR
-                    $commit = Invoke-RestMethod -Uri "https://api.github.com/repos/nanoframework/nf-interpreter/pulls/$env:System_PullRequest_PullRequestNumber/files" -Header @{"Authorization"="$auth"} -ContentType "application/json" -Method GET
+                    $commit = Invoke-RestMethod -Uri "https://api.github.com/repos/nanoframework/nf-interpreter/pulls/$(System.PullRequest.PullRequestNumber)/files" -Header @{"Authorization"="$auth"} -ContentType "application/json" -Method GET
 
                     # filter removed files              
                     $files = $commit.where{$_.status -ne 'removed'}
@@ -265,7 +284,7 @@ jobs:
       - Check_Build_Options
 
     pool:
-      vmImage: "windows-2022"
+      vmImage: "ubuntu-latest"
 
     strategy:
       matrix:
@@ -304,7 +323,7 @@ jobs:
     variables:
       DOTNET_NOLOGO: true
       # creates a counter and assigns it to the revision variable
-      REVISION: $[counter('STM32_1_14_0_versioncounter', 0)]
+      REVISION: $[counter('STM32_1_17_0_versioncounter', 0)]
       HelperPackageVersion: $[counter('HelperPackageVersioncounter', 0)]
       TargetPlatform: "stm32"
 
@@ -344,7 +363,7 @@ jobs:
       - Check_Build_Options
 
     pool:
-      vmImage: "windows-2022"
+      vmImage: "ubuntu-latest"
 
     strategy:
       matrix:
@@ -394,23 +413,14 @@ jobs:
           PackageName: ESP32_PICO
           CMakePreset: ESP32_PICO
 
-        ESP32_S2_UART:
+        ESP32_S2:
           TargetBoard: ESP32_S2
           TargetSeries: "esp32_s2"
           BuildOptions:
           IDF_Target: esp32s2
-          TargetName: ESP32_S2_UART
-          PackageName: ESP32_S2_UART
-          CMakePreset: ESP32_S2_UART
-
-        ESP32_S2_USB:
-          TargetBoard: ESP32_S2
-          TargetSeries: "esp32_s2"
-          BuildOptions:
-          IDF_Target: esp32s2
-          TargetName: ESP32_S2_USB
-          PackageName: ESP32_S2_USB
-          CMakePreset: ESP32_S2_USB
+          TargetName: ESP32_S2
+          PackageName: ESP32_S2
+          CMakePreset: ESP32_S2
 
         ESP32_BLE_REV3:
           TargetBoard: ESP32
@@ -420,6 +430,34 @@ jobs:
           TargetName: ESP32
           PackageName: ESP32_BLE_REV3
           CMakePreset: ESP32_BLE_REV3
+
+ # ESP32 Ethernet targets
+        ESP32_ETHERNET_KIT_1.2:
+          TargetBoard: ESP32
+          TargetSeries: "esp32"
+          BuildOptions:
+          IDF_Target: esp32
+          TargetName: ESP32_ETHERNET_KIT_1.2
+          PackageName: ESP32_ETHERNET_KIT_1.2
+          CMakePreset: ESP32_ETHERNET_KIT_1.2
+
+        ESP32_WESP32:
+          TargetSeries: "esp32"
+          TargetBoard: ESP32
+          BuildOptions:
+          IDF_Target: esp32
+          TargetName: ESP32_WESP32
+          PackageName: ESP32_WESP32
+          CMakePreset: ESP32_WESP32
+
+        ESP32_WT32_ETH01:
+          TargetBoard: ESP32
+          TargetSeries: "esp32"
+          BuildOptions:
+          TargetName: ESP32_WT32_ETH01
+          IDF_Target: esp32
+          PackageName: ESP32_WT32_ETH01
+          CMakePreset: ESP32_WT32_ETH01
 
         ESP32_OLIMEX:
           TargetBoard: ESP32
@@ -439,6 +477,7 @@ jobs:
           PackageName: ESP32_OLIMEX_WROVER
           CMakePreset: ESP32_OLIMEX_WROVER
 
+# ESP32 M5STACK targets
         M5StickC:
           TargetBoard: ESP32
           TargetPlatform: "esp32"
@@ -489,14 +528,15 @@ jobs:
           PackageName: AtomS3
           CMakePreset: AtomS3
 
-        ESP32_C3_REV3:
+# ESP32 custom targets
+        ESP32_C3_BETA:
           TargetBoard: ESP32_C3
           TargetSeries: "esp32c3"
           BuildOptions:
           IDF_Target: esp32c3
-          TargetName: ESP32_C3_REV3
-          PackageName: ESP32_C3_REV3
-          CMakePreset: ESP32_C3_REV3
+          TargetName: ESP32_C3_BETA
+          PackageName: ESP32_C3_BETA
+          CMakePreset: ESP32_C3_BETA
 
         ESP32_GenericDisplay_REV0:
           TargetBoard: ESP32
@@ -528,60 +568,6 @@ jobs:
           PackageName: ESP32_PSRAM_REV3_IPV6
           CMakePreset: ESP32_PSRAM_REV3_IPV6
 
-        XIAO_ESP32C3:
-          TargetBoard: ESP32_C3
-          TargetSeries: "esp32c3"
-          BuildOptions:
-          IDF_Target: esp32c3
-          TargetName: XIAO_ESP32C3
-          PackageName: XIAO_ESP32C3
-          CMakePreset: XIAO_ESP32C3
-
-        ESP32_S3_BLE:
-          TargetBoard: ESP32_S3
-          TargetSeries: "esp32s3"
-          BuildOptions:
-          IDF_Target: esp32s3
-          TargetName: ESP32_S3_BLE
-          PackageName: ESP32_S3_BLE
-          CMakePreset: ESP32_S3_BLE
-
-        ESP32_S3_BLE_UART:
-          TargetBoard: ESP32_S3
-          TargetSeries: "esp32s3"
-          BuildOptions:
-          IDF_Target: esp32s3
-          TargetName: ESP32_S3_BLE_UART
-          PackageName: ESP32_S3_BLE_UART
-          CMakePreset: ESP32_S3_BLE_UART
-
-        ESP32_S3_ALL_UART:
-          TargetBoard: ESP32_S3
-          TargetSeries: "esp32s3"
-          BuildOptions:
-          IDF_Target: esp32s3
-          TargetName: ESP32_S3_ALL_UART
-          PackageName: ESP32_S3_ALL_UART
-          CMakePreset: ESP32_S3_ALL_UART
-
-        ESP32_WESP32:
-          TargetSeries: "esp32"
-          TargetBoard: ESP32
-          BuildOptions:
-          IDF_Target: esp32
-          TargetName: ESP32_WESP32
-          PackageName: ESP32_WESP32
-          CMakePreset: ESP32_WESP32
-
-        ESP32_WT32_ETH01:
-          TargetBoard: ESP32
-          TargetSeries: "esp32"
-          BuildOptions:
-          TargetName: ESP32_WT32_ETH01
-          IDF_Target: esp32
-          PackageName: ESP32_WT32_ETH01
-          CMakePreset: ESP32_WT32_ETH01
-
         ESP32_LILYGO:
           TargetBoard: ESP32
           TargetSeries: "esp32"
@@ -590,15 +576,6 @@ jobs:
           TargetName: ESP32_LILYGO
           PackageName: ESP32_LILYGO
           CMakePreset: ESP32_LILYGO
-
-        ESP32_S3:
-          TargetBoard: ESP32_S3
-          TargetSeries: "esp32s3"
-          BuildOptions:
-          IDF_Target: esp32s3
-          TargetName: ESP32_S3
-          PackageName: ESP32_S3
-          CMakePreset: ESP32_S3
 
         ESP_WROVER_KIT:
           TargetBoard: ESP32
@@ -609,38 +586,21 @@ jobs:
           PackageName: ESP_WROVER_KIT
           CMakePreset: ESP_WROVER_KIT
 
-        ESP32_P4_USB:
+        ESP32_P4:
           TargetBoard: ESP32_P4
           TargetSeries: "esp32p4"
           BuildOptions:
           IDF_Target: esp32p4
-          TargetName: ESP32_P4_USB
-          PackageName: ESP32_P4_USB
-          CMakePreset: ESP32_P4_USB
+          TargetName: ESP32_P4
+          PackageName: ESP32_P4
+          CMakePreset: ESP32_P4
 
-        ESP32_C5_THREAD_USB:
-          TargetBoard: ESP32_C5
-          TargetSeries: "esp32c5"
-          BuildOptions:
-          IDF_Target: esp32c5
-          TargetName: ESP32_C5_THREAD_USB 
-          PackageName: ESP32_C5_THREAD_USB
-          CMakePreset: ESP32_C5_THREAD_USB
-
-        ESP32_C5_THREAD_UART:
-          TargetBoard: ESP32_C5
-          TargetSeries: "esp32c5"
-          BuildOptions:
-          IDF_Target: esp32c5
-          TargetName: ESP32_C5_THREAD_UART
-          PackageName: ESP32_C5_THREAD_UART
-          CMakePreset: ESP32_C5_THREAD_UART
 
     variables:
       DOTNET_NOLOGO: true
       # creates a counter and assigns it to the revision variable
-      REVISION: $[counter('ESP32_1_14_0_versioncounter', 0)]
-      IDF_PATH: "D:/a/1/s/esp-idf"
+      REVISION: $[counter('ESP32_1_17_0_versioncounter', 0)]
+      IDF_PATH: "$(Agent.BuildDirectory)/s/esp-idf"
       PIP_CACHE_DIR: $(Pipeline.Workspace)/.pip
       TargetPlatform: "esp32"
       IDF_TAG: "v5.5.4"
@@ -670,7 +630,7 @@ jobs:
           sourceFolder: '$(Agent.BuildDirectory)/s/nf-interpreter/build/bootloader'
           Contents: |
             bootloader.bin
-          TargetFolder: '$(Build.ArtifactStagingDirectory)\$(TargetPublishName)'
+          TargetFolder: '$(Build.ArtifactStagingDirectory)/$(TargetPublishName)'
           flattenFolders: true
           ignoreMakeDirErrors: true
 
@@ -704,7 +664,7 @@ jobs:
       - Check_Build_Options
 
     pool:
-      vmImage: "windows-2022"
+      vmImage: "ubuntu-latest"
 
     strategy:
       matrix:
@@ -719,7 +679,7 @@ jobs:
     variables:
       DOTNET_NOLOGO: true
       # creates a counter and assigns it to the revision variable
-      REVISION: $[counter('TI_1_14_0_versioncounter', 0)]
+      REVISION: $[counter('TI_1_17_0_versioncounter', 0)]
       HelperPackageVersion: $[counter('HelperPackageVersioncounter', 0)]
       TargetPlatform: "ti_simplelink"
 
@@ -757,7 +717,7 @@ jobs:
       - Check_Build_Options
 
     pool:
-      vmImage: "windows-2022"
+      vmImage: "ubuntu-latest"
 
     strategy:
       matrix:
@@ -773,7 +733,7 @@ jobs:
 
     variables:
       # creates a counter and assigns it to the revision variable
-      REVISION: $[counter('THREADX_1_14_0_versioncounter', 0)]
+      REVISION: $[counter('THREADX_1_17_0_versioncounter', 0)]
       HelperPackageVersion: $[counter('HelperPackageVersioncounter', 0)]
       TargetPlatform: "efm32"
 
@@ -809,7 +769,7 @@ jobs:
       )
 
     pool:
-      vmImage: "windows-2022"
+      vmImage: "ubuntu-latest"
 
     steps:
       - checkout: self

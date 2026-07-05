@@ -1052,6 +1052,9 @@
 // empty define to keep the compiler when enabling lwIP debug
 #define sntp_format_time
 
+// SNTP servers can be specified as DNS names (required by nanoFramework SNTP API)
+#define SNTP_SERVER_DNS 1
+
 // required as we are defining priority-aware mutexes
 #define LWIP_COMPAT_MUTEX_ALLOWED
 

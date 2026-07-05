@@ -33,6 +33,38 @@ struct NF_PAL_SPI
     int32_t ChipSelect;
 };
 
+#if defined(RP_SPI_USE_SPI0) || defined(RP_SPI_USE_SPI1)
+
+// RP2040 SPI pin configuration macro.
+// Configure SCK, MOSI, MISO pins with SPI alternate function and CS as GPIO output.
+#define SPI_CONFIG_PINS(num, sck_pin, miso_pin, mosi_pin)                                                              \
+    void ConfigPins_SPI##num(const SPI_DEVICE_CONFIGURATION &spiDeviceConfig)                                          \
+    {                                                                                                                  \
+        palSetPadMode(IOPORT1, sck_pin, PAL_MODE_ALTERNATE_SPI);                                                       \
+        palSetPadMode(IOPORT1, mosi_pin, PAL_MODE_ALTERNATE_SPI);                                                      \
+        if (spiDeviceConfig.BusConfiguration != SpiBusConfiguration_HalfDuplex)                                        \
+        {                                                                                                              \
+            palSetPadMode(IOPORT1, miso_pin, PAL_MODE_ALTERNATE_SPI);                                                  \
+        }                                                                                                              \
+        if (spiDeviceConfig.DeviceChipSelect >= 0)                                                                     \
+        {                                                                                                              \
+            palSetPadMode(IOPORT1, spiDeviceConfig.DeviceChipSelect, PAL_MODE_OUTPUT_PUSHPULL);                        \
+            if (spiDeviceConfig.ChipSelectActiveState)                                                                 \
+            {                                                                                                          \
+                palSetPad(IOPORT1, spiDeviceConfig.DeviceChipSelect);                                                  \
+            }                                                                                                          \
+            else                                                                                                       \
+            {                                                                                                          \
+                palClearPad(IOPORT1, spiDeviceConfig.DeviceChipSelect);                                                \
+            }                                                                                                          \
+        }                                                                                                              \
+    }
+
+void ConfigPins_SPI0(const SPI_DEVICE_CONFIGURATION &spiDeviceConfig);
+void ConfigPins_SPI1(const SPI_DEVICE_CONFIGURATION &spiDeviceConfig);
+
+#else
+
 // the following macro defines a function that configures the GPIO pins for an STM32 SPI peripheral
 // it gets called in the Windows_Devices_SPi_SPiDevice::NativeInit function
 // this is required because the SPI peripherals can use multiple GPIO configuration combinations
@@ -96,5 +128,7 @@ void ConfigPins_SPI3(const SPI_DEVICE_CONFIGURATION &spiDeviceConfig);
 void ConfigPins_SPI4(const SPI_DEVICE_CONFIGURATION &spiDeviceConfig);
 void ConfigPins_SPI5(const SPI_DEVICE_CONFIGURATION &spiDeviceConfig);
 void ConfigPins_SPI6(const SPI_DEVICE_CONFIGURATION &spiDeviceConfig);
+
+#endif
 
 #endif // SYS_DEV_SPI_NATIVE_TARGET_H

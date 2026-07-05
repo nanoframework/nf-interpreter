@@ -28,7 +28,7 @@ __nfweak void Events_Set(uint32_t events)
     NATIVE_PROFILE_PAL_EVENTS();
 
     // set events atomically
-#ifdef __CM0_CMSIS_VERSION
+#if defined(__CM0_CMSIS_VERSION) || defined(__CM0PLUS_CMSIS_VERSION)
     GLOBAL_LOCK();
     systemEvents |= events;
     GLOBAL_UNLOCK();
@@ -48,7 +48,7 @@ __nfweak uint32_t Events_Get(uint32_t eventsOfInterest)
 
     // ... clear the requested flags atomically
     // give the caller notice of just the events they asked for ( and were cleared already )
-#ifdef __CM0_CMSIS_VERSION
+#if defined(__CM0_CMSIS_VERSION) || defined(__CM0PLUS_CMSIS_VERSION)
     // get the requested flags from system events state and...
     uint32_t returnEvents = (systemEvents & eventsOfInterest);
 

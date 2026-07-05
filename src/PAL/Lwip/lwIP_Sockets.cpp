@@ -1221,12 +1221,20 @@ HRESULT LWIP_SOCKETS_Driver::LoadAdapterConfiguration(
 {
     NATIVE_PROFILE_PAL_NETWORK();
 
+    struct netif *networkInterface =
+        netif_find_interface(g_LWIP_SOCKETS_Driver.m_interfaces[interfaceIndex].m_interfaceNumber);
+
+    if (networkInterface != NULL)
+    {
+        // Always copy the MAC from the live netif — the config block pointer
+        // may reference read-only flash (e.g. XIP on RP2040) where runtime
+        // updates via memcpy are silently ignored.
+        memcpy(config->MacAddress, networkInterface->hwaddr, NETIF_MAX_HWADDR_LEN);
+    }
+
     if (config->StartupAddressMode == AddressMode_DHCP)
     {
-        struct netif *networkInterface;
-
-        if ((networkInterface =
-                 netif_find_interface(g_LWIP_SOCKETS_Driver.m_interfaces[interfaceIndex].m_interfaceNumber)))
+        if (networkInterface != NULL)
         {
 #if LWIP_IPV6
             config->IPv4Address = networkInterface->ip_addr.u_addr.ip4.addr;

@@ -46,12 +46,26 @@
 // #include "hal_nnnn.h"
 
 // Normal drivers
+// STM32-specific overlay drivers — only include for STM32 targets
+#if defined(STM32F0XX) || defined(STM32F4XX) || defined(STM32F7XX) || defined(STM32H7XX) || defined(STM32L0XX) || defined(STM32L4XX)
 #include "stm32_qspi/hal_stm32_qspi.h"
 #include "stm32_flash/hal_stm32_flash.h"
 #include "stm32_crc/hal_stm32_crc.h"
 #include "stm32_rng/hal_stm32_rng.h"
 #include "stm32_fsmc/hal_stm32_fsmc.h"
 #include "stm32_onewire/hal_stm32_onewire.h"
+#elif defined(RP2040)
+// RP2040 RNG stubs (ROSC-based) — provided by target_rng.c
+#ifdef __cplusplus
+extern "C" {
+#endif
+  void rngStart(void);
+  void rngStop(void);
+  uint32_t rngGenerateRandomNumber(void);
+#ifdef __cplusplus
+}
+#endif
+#endif
 
 // Complex drivers
 // #include "hal_nnnn.h"

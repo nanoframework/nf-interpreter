@@ -10,6 +10,7 @@ The available pre build images are:
 * ghcr.io/nanoframework/dev-container-esp32: contains all elements to build a firmware image for any of the ESP32 targets
 * ghcr.io/nanoframework/dev-container-azure-rtos: contains all elements to build a firmware image for any of the Eclipse ThreadX (used to be Azure RTOS) targets
 * ghcr.io/nanoframework/dev-container-freertos-nxp: contains all elements to build a firmware image for any of the NXP targets
+* ChibiOS-RP: contains all elements to build a firmware image for Raspberry Pi Pico (RP2040/RP2350) ChibiOS targets. Uses ChibiOS master branch which includes RP support.
 
 You can choose the dev container needed when opening a remote container in VSCode. The options are:
 
@@ -19,6 +20,7 @@ You can choose the dev container needed when opening a remote container in VSCod
 * `nanoFramework-ESP32` to use the pre build container with all the elements to build ESP32 targets
 * `nanoFramework-TI` to use the pre build container with all the elements to build TI SimpleLink targets
 * `nanoFramework-FreeRTOS-NXP` to use the pre build container with all the elements to build TI SimpleLink targets
+* `nanoFramework-ChibiOS-RP` to build from source a container with all the elements to build Raspberry Pi Pico RP2040/RP2350 ChibiOS targets
 
 To use the source dockerfile for the respective platform adjust its `devcontainer.json` file and change the `"dockerFile": "Dockerfile.<platform>"` element for the image you would like to use:
 
@@ -28,6 +30,7 @@ To use the source dockerfile for the respective platform adjust its `devcontaine
 * `Dockerfile.ESP32.SRC` to build the container image from the source with all the elements to build ESP32 based devices
 * `Dockerfile.TI.SRC` to build the container image from the source with all the elements to build TI SimpleLink based devices
 * `Dockerfile.FreeRTOS.NXP.SRC` to build the container image from the source with all the elements to build NXP based devices
+* `Dockerfile.ChibiOS-RP.SRC` to build the container image from the source with all the elements to build Raspberry Pi Pico (RP2040/RP2350) ChibiOS targets
 
 
 ## Building and releasing Docker images in a fork

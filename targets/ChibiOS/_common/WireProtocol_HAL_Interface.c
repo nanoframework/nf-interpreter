@@ -17,7 +17,7 @@ extern uint32_t traceLoopCounter;
 
 #if (HAL_USE_SERIAL_USB == TRUE)
 #include <usbcfg.h>
-#elif (HAL_USE_SERIAL == TRUE)
+#elif (HAL_USE_SERIAL == TRUE) || (HAL_USE_SIO == TRUE)
 #include <serialcfg.h>
 #endif
 
