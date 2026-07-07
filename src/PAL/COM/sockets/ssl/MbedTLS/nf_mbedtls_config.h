@@ -140,8 +140,7 @@ extern "C"
 #define MBEDTLS_MD5_C
 
 #define MBEDTLS_OID_C
-// MBEDTLS_PADLOCK_C disabled: VIA PadLock is x86-specific; not used on embedded ARM targets
-// #define MBEDTLS_PADLOCK_C
+#define MBEDTLS_PADLOCK_C
 
 #define MBEDTLS_PEM_PARSE_C
 

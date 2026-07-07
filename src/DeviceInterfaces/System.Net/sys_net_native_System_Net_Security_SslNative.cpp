@@ -17,7 +17,7 @@ void Time_GetDateTime(DATE_TIME_INFO *dt)
     NATIVE_PROFILE_CLR_NETWORK();
     SYSTEMTIME st;
 
-    HAL_Time_ToSystemTime(HAL_Time_CurrentDateTime(false), &st);
+    HAL_Time_ToSystemTime(HAL_Time_CurrentTime(), &st);
 
     // TODO check if offset needed for security date time, maybe needed to certificate validation
     //    dt->tzOffset = Time_GetTimeZoneOffset() * 60;
@@ -427,6 +427,17 @@ HRESULT Library_sys_net_native_System_Net_Security_SslNative::InitHelper(CLR_RT_
     uint8_t *pk = NULL;
     const char *pkPassword = NULL;
     CLR_UINT32 pkPasswordLength = 0;
+
+#if defined(TARGET_RP2350)
+    // RP2350 builds currently provide TLS 1.2 only.
+    // Any explicit protocol value above TLS 1.2 must fail fast instead of
+    // silently downgrading.
+    const CLR_INT32 maxTls12ProtocolValue = 3072;
+    if (sslMode > maxTls12ProtocolValue)
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_NOT_SUPPORTED);
+    }
+#endif
 
     if (hbCert != NULL)
     {
