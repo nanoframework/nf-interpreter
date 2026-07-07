@@ -430,10 +430,10 @@ HRESULT Library_sys_net_native_System_Net_Security_SslNative::InitHelper(CLR_RT_
 
 #if defined(TARGET_RP2350)
     // RP2350 builds currently provide TLS 1.2 only.
-    // Any explicit protocol value above TLS 1.2 must fail fast instead of
-    // silently downgrading.
-    const CLR_INT32 maxTls12ProtocolValue = 3072;
-    if (sslMode > maxTls12ProtocolValue)
+    // Explicit TLS 1.3 requests must fail fast instead of silently
+    // downgrading.
+    const CLR_INT32 c_tls13ProtocolMask = 12288;
+    if ((sslMode & c_tls13ProtocolMask) != 0)
     {
         NANOCLR_SET_AND_LEAVE(CLR_E_NOT_SUPPORTED);
     }
