@@ -332,7 +332,8 @@ HRESULT SetI2sConfig(i2s_port_t bus, CLR_RT_HeapBlock *config)
 #endif
 #endif
 
-    pin_config.mck_io_num = I2S_PIN_NO_CHANGE;
+    // Keep MCLK as resolved from the device map at the top of this function.
+    // If not mapped, pin 0 resolves to -1 (I2S_PIN_NO_CHANGE) and MCLK stays disabled.
 
     if (mode == (I2S_MODE_MASTER | I2S_MODE_RX))
     {
