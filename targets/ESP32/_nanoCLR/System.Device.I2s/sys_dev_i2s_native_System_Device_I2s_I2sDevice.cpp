@@ -191,7 +191,7 @@ HRESULT SetI2sConfig(i2s_port_t bus, CLR_RT_HeapBlock *config)
 
     // Important: this will have to be adjusted for IDF5
     i2s_config_t conf;
-    
+
     int commformat = config[I2sConnectionSettings::FIELD___i2sConnectionFormat].NumericByRef().s4;
     i2s_mode_t mode = (i2s_mode_t)config[I2sConnectionSettings::FIELD___i2sMode].NumericByRef().s4;
     i2s_bits_per_sample_t bits =
@@ -319,7 +319,8 @@ HRESULT SetI2sConfig(i2s_port_t bus, CLR_RT_HeapBlock *config)
 #endif
     }
 
-#if !defined(CONFIG_IDF_TARGET_ESP32C3) && !defined(CONFIG_IDF_TARGET_ESP32C5) && !defined(CONFIG_IDF_TARGET_ESP32C6) && !defined(CONFIG_IDF_TARGET_ESP32C61) && !defined(CONFIG_IDF_TARGET_ESP32H2)  
+#if !defined(CONFIG_IDF_TARGET_ESP32C3) && !defined(CONFIG_IDF_TARGET_ESP32C5) &&                                      \
+    !defined(CONFIG_IDF_TARGET_ESP32C6) && !defined(CONFIG_IDF_TARGET_ESP32C61) && !defined(CONFIG_IDF_TARGET_ESP32H2)
 // apply low-level workaround for bug in some ESP-IDF versions that swap
 // the left and right channels
 // https://github.com/espressif/esp-idf/issues/6625
