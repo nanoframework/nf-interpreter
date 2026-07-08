@@ -2217,10 +2217,9 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                     // from the caller's assembly by matching the object's TypeDef
                     const CLR_RT_TypeSpec_Index *effectiveCallerGeneric = stack->m_call.genericType;
 
-                    // Only perform expensive TypeSpec search if ALL conditions are met:
-                    // 1. This is a virtual call (interfaces use CALLVIRT)
-                    // 2. No generic context exists yet
-                    // 3. The token is a MethodRef (not direct MethodDef)
+                    // TypeSpec search is expensive — gate it on CALLVIRT + no existing
+                    // generic context + MethodRef token. See CLAUDE.md "Generic context
+                    // propagation".
                     if (op == CEE_CALLVIRT && stack->m_call.genericType == nullptr &&
                         CLR_TypeFromTk(arg) == TBL_MethodRef)
                     {
@@ -2428,10 +2427,8 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                                             }
                                         }
 
-                                        // Initialize the dispatched method, preserving the generic context from
-                                        // calleeInst. The genericType was set by ResolveToken from the MethodRef's
-                                        // owner TypeSpec. InitializeFromIndex stores the TypeSpec in stable member
-                                        // storage (m_typeSpecStorage), so genericType remains valid after the call.
+                                        // Re-initialize the dispatched method, preserving calleeInst.genericType
+                                        // via m_typeSpecStorage (stable storage outlives this call).
                                         if (calleeInst.genericType && NANOCLR_INDEX_IS_VALID(*calleeInst.genericType))
                                         {
                                             if (calleeInst.InitializeFromIndex(
@@ -2442,12 +2439,9 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                                                 NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
                                             }
 
-                                            // The TypeSpec from the MethodRef's owner might belong to an interface
-                                            // (e.g. ICollection<KVP<int,string>>) while the dispatched method belongs
-                                            // to the concrete type (e.g. Dictionary<TKey,TValue>). Using a mismatched
-                                            // TypeSpec corrupts generic-param resolution inside the callee.
-                                            // Detect this and try to recover the correct TypeSpec from the 'this'
-                                            // object, which stores its closed TypeSpec via HB_GenericInstance.
+                                            // Interface-TypeSpec / concrete-TypeDef mismatch — try to recover the
+                                            // correct closed TypeSpec from `this`. See CLAUDE.md "Virtual method
+                                            // dispatch on generics".
                                             if (calleeInst.genericType &&
                                                 NANOCLR_INDEX_IS_VALID(*calleeInst.genericType))
                                             {
@@ -2540,10 +2534,8 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                             calleeInst.arrayElementType = propagatedArrayElementType;
                         }
 
-                        // ECMA-335 §III.2.1 constrained. prefix semantics:
-                        // When constrained. T precedes callvirt and T is a reference type, the managed
-                        // pointer on the stack (from ldloca) must be dereferenced to the actual object
-                        // reference. For value types the BYREF is kept — the callee receives it as 'this'.
+                        // ECMA-335 §III.2.1: ref types → deref the BYREF; value types → keep it.
+                        // See CLAUDE.md "constrained. prefix".
                         if (constrainedTypeToken != 0)
                         {
                             if (op == CEE_CALLVIRT && pThis[0].DataType() == DATATYPE_BYREF)
@@ -2580,15 +2572,9 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
 #ifndef NANOCLR_NO_IL_INLINE
                         if (stack->PushInline(ip, assm, evalPos, calleeInst, pThis))
                         {
-                            // PushInline switches stack->m_call to the callee but does NOT apply the
-                            // generic context or methodSpec inheritance.  Mirror the same logic used
-                            // by the regular Push path below.
-                            //
-                            // Determine the callee's declaring TypeDef so we only honor
-                            // effectiveCallerGeneric when it actually refers to the same generic
-                            // type as the callee's owner. Otherwise (e.g. a generic method calling
-                            // List<!!0>::GetEnumerator) the caller's genericType is unrelated and
-                            // would clobber the closed TypeSpec that ResolveToken already produced.
+                            // PushInline does not inherit generic context — mirror the Push-path
+                            // priority below. TypeDef-match guards effectiveCallerGeneric against
+                            // clobbering an unrelated closed TypeSpec from ResolveToken.
                             CLR_UINT32 calleeOwnerTypeDefDataInline = 0;
                             {
                                 CLR_RT_TypeDef_Instance calleeDeclTypeInline{};
@@ -2666,18 +2652,11 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
 
                         NANOCLR_CHECK_HRESULT(CLR_RT_StackFrame::Push(th, calleeInst, -1));
 
-                        // Set up the new stack frame's generic context.
-                        //
-                        // Priority:
-                        //   1. effectiveCallerGeneric ONLY when it refers to the same generic
-                        //      TypeDef as the callee's declaring type. This covers interface
-                        //      callvirt cases (e.g. List<int> calling IEnumerable<T>::GetEnumerator)
-                        //      where we already extracted the concrete closed TypeSpec.
-                        //   2. calleeInst.genericType - already refined by ResolveToken's MVAR
-                        //      resolution against the caller's MethodSpec, so it is the closed
-                        //      TypeSpec when one exists.
-                        //   3. effectiveCallerGeneric as a fallback (TypeDef mismatch case).
-                        //   4. stack->m_call.genericType inherited from caller.
+                        // Generic context priority (see CLAUDE.md "Generic context propagation"):
+                        //   1. caller's TypeSpec if it owns the same TypeDef as callee
+                        //   2. callee's genericType if closed
+                        //   3. caller's TypeSpec (TypeDef-mismatch fallback)
+                        //   4. caller's inherited genericType
                         CLR_RT_StackFrame *newStack = th->CurrentFrame();
                         const CLR_RT_TypeSpec_Index *effectiveGenericContext = nullptr;
 
@@ -2719,10 +2698,8 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                         }
                         else if (calleeInst.genericType && NANOCLR_INDEX_IS_VALID(*calleeInst.genericType))
                         {
-                            // Only use calleeInst's genericType when it is a CLOSED generic (all VAR/MVAR
-                            // parameters already resolved to concrete types). An open TypeSpec (e.g.
-                            // KeyValuePair<TKey,TValue>) cannot resolve VAR indices and causes
-                            // CLR_E_WRONG_TYPE in the callee. Fall through to Priority 3 instead.
+                            // Priority 2: only if calleeInst.genericType is CLOSED — open TypeSpec
+                            // can't resolve VAR. Open → fall through to Priority 3.
                             CLR_RT_TypeSpec_Instance calleeTs{};
                             if (calleeTs.InitializeFromIndex(*calleeInst.genericType) && calleeTs.IsClosedGenericType())
                             {
@@ -3022,10 +2999,8 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                         }
                         top->SetObjectReference(nullptr);
 
-                        // For constructors on generic classes, we need to use the class's generic type
-                        // from the calling context, not the method's generic type.
-                        // The calleeInst.genericType might point to an open generic from the MethodRef,
-                        // but we need the closed generic from the caller's context (stack->m_call.genericType).
+                        // NEWOBJ: prefer the caller's closed TypeSpec over the callee's (open)
+                        // MethodRef TypeSpec. See CLAUDE.md "NEWOBJ on generic types".
                         const CLR_RT_TypeSpec_Index *genericTypeForContext = nullptr;
 
                         // Prefer the caller's generic type if available and valid
@@ -3622,10 +3597,8 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                     CLR_RT_TypeDef_Instance typeInst{};
                     CLR_RT_TypeDef_Index previousArrayElemType = stack->m_call.arrayElementType;
 
-                    // For BOXing a generic VAR (!0) inside an interface adapter (e.g., IList.get_Item)
-                    // we may lack a closed generic TypeSpec in stack->m_call.genericType. In that case
-                    // use the runtime type of the value being boxed to populate arrayElementType so
-                    // TypeDef::ResolveToken can fall back and close the VAR slot.
+                    // VAR fallback via runtime type. See CLAUDE.md "BOX / UNBOX.ANY / LDOBJ
+                    // / STELEM on generics".
                     if (!NANOCLR_INDEX_IS_VALID(stack->m_call.arrayElementType))
                     {
                         CLR_RT_TypeDef_Index valueTypeIdx;
@@ -3798,10 +3771,8 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                     CLR_RT_TypeDef_Instance typeInst{};
                     CLR_RT_TypeDef_Index previousArrayElemType = stack->m_call.arrayElementType;
 
-                    // For UNBOX.ANY of a generic VAR (!0) inside an interface adapter (e.g., IList.set_Item)
-                    // we may lack a closed generic TypeSpec in stack->m_call.genericType. In that case
-                    // use the runtime type of the boxed value to populate arrayElementType so
-                    // TypeDef::ResolveToken can fall back and close the VAR slot.
+                    // VAR fallback via runtime type. See CLAUDE.md "BOX / UNBOX.ANY / LDOBJ
+                    // / STELEM on generics".
                     if (!NANOCLR_INDEX_IS_VALID(stack->m_call.arrayElementType))
                     {
                         CLR_RT_TypeDef_Index valueTypeIdx;
@@ -3987,9 +3958,8 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                     CLR_RT_TypeDef_Instance type{};
                     CLR_RT_TypeDef_Index cls;
 
-                    // Propagate the array element type into the current call context so generic VAR can resolve
-                    // against a closed type (e.g., List<Int32>[] -> Int32). This mirrors the SZArrayHelper flow
-                    // used in method dispatch, but scoped to this instruction.
+                    // Propagate the array element type so generic VAR can close — same pattern
+                    // as SZArrayHelper dispatch. See CLAUDE.md "BOX / UNBOX.ANY / LDOBJ / STELEM".
                     CLR_RT_TypeDef_Index previousArrayElemType = stack->m_call.arrayElementType;
 
                     NANOCLR_CHECK_HRESULT(CLR_RT_TypeDescriptor::ExtractTypeIndexFromObject(evalPos[0], cls));
@@ -4179,10 +4149,8 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                     CLR_RT_TypeDef_Instance expectedType;
                     CLR_RT_TypeDef_Index previousArrayElemType = stack->m_call.arrayElementType;
 
-                    // For STELEM of a generic VAR (!0) inside an interface adapter (e.g., IList.set_Item)
-                    // we may lack a closed generic TypeSpec in stack->m_call.genericType. In that case
-                    // use the runtime type of the array element to populate arrayElementType so
-                    // TypeDef::ResolveToken can fall back and close the VAR slot.
+                    // VAR fallback via array element's runtime type. See CLAUDE.md
+                    // "BOX / UNBOX.ANY / LDOBJ / STELEM on generics".
                     if (!NANOCLR_INDEX_IS_VALID(stack->m_call.arrayElementType))
                     {
                         CLR_RT_TypeDef_Index elemTypeIdx;

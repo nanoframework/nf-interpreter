@@ -1003,10 +1003,9 @@ bool CLR_RT_ExecutionEngine::SpawnGenericTypeStaticConstructorsHelper(
     _ASSERTE(m_cctorThread->CanThreadBeReused());
     _ASSERTE(assembly != nullptr);
 
-    // Crawl TypeSpecs in this assembly to find closed generic instantiations that need .cctor execution
+    // Crawl TypeSpecs to schedule .cctors for closed generic types — resumable from
+    // startTypeSpecIndex. See CLAUDE.md "Generic .cctor lifecycle".
     int numTypeSpec = assembly->tablesSize[TBL_TypeSpec];
-
-    // Start from the specified TypeSpec index (to resume iteration after a .cctor completes)
     CLR_UINT32 startIndex = startTypeSpecIndex.TypeSpec();
     CLR_RT_TypeSpec_CrossReference *tsCross = assembly->crossReferenceTypeSpec + startIndex;
 
@@ -2126,10 +2125,8 @@ HRESULT CLR_RT_ExecutionEngine::InitializeReference(
             {
                 if (allowUnresolvedVarFallback)
                 {
-                    // VAR cannot be resolved without a closed generic context (e.g. when
-                    // pre-allocating array element structs for an open generic type).
-                    // Treat as an object reference (null) so field initialization proceeds;
-                    // subsequent stfld instructions will overwrite with the correct type.
+                    // Unresolvable VAR (open generic, pre-allocation) → null object ref;
+                    // subsequent stfld overwrites. See CLAUDE.md "VAR / MVAR resolution".
                     dt = DATATYPE_OBJECT;
                 }
                 else
@@ -2363,9 +2360,8 @@ HRESULT CLR_RT_ExecutionEngine::InitializeLocals(
                     }
                     else
                     {
-                        // Some generic method locals are open instantiations, such as IEnumerator<!!T>.
-                        // A reference-type local only needs a null object slot, so parse the local signature
-                        // directly instead of requiring a closed TypeSpec row.
+                        // Open generic local (e.g. IEnumerator<!!T>): ref types only need a null
+                        // slot — value types still require a closed TypeSpec (failure path below).
                         CLR_RT_SignatureParser ownerParser;
                         ownerParser.Initialize_LocalVar(assembly, typeSpecSignature);
 
@@ -2398,11 +2394,8 @@ HRESULT CLR_RT_ExecutionEngine::InitializeLocals(
                     // the class/valuetype that follows, plus all nested generic arguments.
                     varParser.Advance(varElement);
 
-                    // Drain all remaining elements (class/valuetype token, generic argument count, and
-                    // all nested arguments recursively). Using Available() handles nested GENERICINSTs
-                    // such as ICollection<KeyValuePair<TKey,TValue>> where KVP itself has inner bytes
-                    // (VALUETYPE + TypeRef + count + I4 + STRING) that a fixed GenParamCount loop
-                    // would leave unread, corrupting `sig` for subsequent locals.
+                    // Drain via Available() — handles nested GENERICINSTs that a fixed
+                    // GenParamCount loop would mis-count. See CLAUDE.md "Signature parsing".
                     while (varParser.Available() > 0)
                     {
                         NANOCLR_CHECK_HRESULT(varParser.Advance(varElement));
@@ -2452,11 +2445,10 @@ HRESULT CLR_RT_ExecutionEngine::InitializeLocals(
                 }
                 case DATATYPE_MVAR:
                 {
-                    // Method-level generic parameter (e.g., '!!T' in a generic method like Array.Empty<T>())
+                    // MVAR resolution chain: arrayElementType → MethodSpec → GenericParam table.
+                    // See CLAUDE.md "VAR / MVAR resolution".
                     CLR_UINT8 genericParamPosition = *sig++;
 
-                    // Some rebound generic methods receive their method-generic argument from the
-                    // runtime element type rather than from a MethodSpec.
                     if (NANOCLR_INDEX_IS_VALID(methodDefInstance.arrayElementType) && genericParamPosition == 0)
                     {
                         CLR_RT_TypeDef_Instance td;
@@ -2468,7 +2460,6 @@ HRESULT CLR_RT_ExecutionEngine::InitializeLocals(
                         cls = methodDefInstance.arrayElementType;
                         dt = (NanoCLRDataType)td.target->dataType;
                     }
-                    // For generic methods, use the MethodSpec's signature to get the concrete type
                     else if (NANOCLR_INDEX_IS_VALID(methodDefInstance.methodSpec))
                     {
                         CLR_RT_MethodSpec_Instance methodSpec;
@@ -3631,10 +3622,8 @@ bool CLR_RT_ExecutionEngine::IsInstanceOf(
     }
 #endif
 
-    // Closed generic instances keep their type information in 'm_handlerGenericType' and have 'm_handlerCls'
-    // cleared (so GetDataType() reports DATATYPE_GENERICINST). The comparison logic below dereferences
-    // 'inst.target' / 'instTarget.target', which would be null for those descriptors. Better delegate to the
-    // generic-aware TypeDescriptorsMatch helper to avoid dereferencing a null handler.
+    // GENERICINST descriptors have m_handlerCls cleared — delegate to the generic-aware
+    // helper to avoid dereferencing a null handler.
     if (desc.GetDataType() == DATATYPE_GENERICINST || descTarget.GetDataType() == DATATYPE_GENERICINST)
     {
         return CLR_RT_HeapBlock::TypeDescriptorsMatch(descTarget, desc);

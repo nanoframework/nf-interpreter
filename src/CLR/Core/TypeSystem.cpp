@@ -626,14 +626,10 @@ HRESULT CLR_RT_SignatureParser::Advance(Element &res)
                         CLR_RT_TypeDef_Instance cls{};
                         cls.InitializeFromIndex(res.Class);
 
-                        // Read arg_count when:
-                        //  a) this CLASS/VALUETYPE immediately follows a GENERICINST marker
-                        //     (covers nested types whose TypeDef has genericParamCount == 0 but
-                        //      whose GENERICINST TypeSpec still carries enclosing-type args), OR
-                        //  b) the TypeDef declares its own generic parameters.
-                        // m_pendingGenericInst is checked FIRST so we never dereference cls.target
-                        // when InitializeFromIndex returned false (e.g. TBL_TypeSpec sub-case where
-                        // res.Class was not populated).
+                        // Read arg_count if this element follows a GENERICINST marker or the
+                        // TypeDef declares its own generic params. m_pendingGenericInst is checked
+                        // first so cls.target is not dereferenced when InitializeFromIndex failed.
+                        // See CLAUDE.md "Signature parsing".
                         if (m_pendingGenericInst || (cls.target != nullptr && cls.target->genericParamCount > 0))
                         {
                             // reset the generic instance flag
@@ -1337,11 +1333,9 @@ bool CLR_RT_TypeDef_Instance::ResolveToken(
                     {
                         if (elem.DataType == DATATYPE_GENERICINST)
                         {
-                            // Advance past the open generic type token.
-                            // After this call elem.Class holds the open generic typedef (e.g. Pair<,>).
-                            // The parser has already consumed the arg-count byte inside Advance,
-                            // so there is no further element to skip.  Return the typedef directly
-                            // for NEWARR / STELEM / ISINST / CASTCLASS with a GENERICINST token.
+                            // Advance once past the open generic typedef. Advance already consumed
+                            // the arg-count byte, so no further skip is needed for NEWARR / STELEM
+                            // / ISINST / CASTCLASS on a GENERICINST token.
                             if (FAILED(parser.Advance(elem)))
                             {
                                 return false;
@@ -1364,11 +1358,10 @@ bool CLR_RT_TypeDef_Instance::ResolveToken(
 
                         genericPosition = elem.GenericParamPosition;
 
-                        // If it's a type‐generic slot (!T), resolve against the caller's closed generic
+                        // VAR (!T) resolution chain: contextTypeSpec → caller->genericType
+                        // → arrayElementType. See CLAUDE.md "VAR / MVAR resolution".
                         if (elem.DataType == DATATYPE_VAR)
                         {
-                            // Determine the effective generic type context
-                            // Prefer explicit contextTypeSpec over caller->genericType
                             const CLR_RT_TypeSpec_Index *effectiveContext = nullptr;
 
                             if (contextTypeSpec != nullptr && NANOCLR_INDEX_IS_VALID(*contextTypeSpec))
@@ -1423,8 +1416,7 @@ bool CLR_RT_TypeDef_Instance::ResolveToken(
                                     caller != nullptr && NANOCLR_INDEX_IS_VALID(caller->arrayElementType) &&
                                     genericPosition == 0)
                                 {
-                                    // Fallback to arrayElementType: covers runtime-inferred generic bindings and
-                                    // the nested-VAR case where the context TypeSpec is still open.
+                                    // arrayElementType fallback (runtime-inferred / still-open context).
                                     data = caller->arrayElementType.data;
                                     assembly =
                                         g_CLR_RT_TypeSystem.m_assemblies[caller->arrayElementType.Assembly() - 1];
@@ -2124,8 +2116,7 @@ bool CLR_RT_MethodDef_Instance::InitializeFromIndex(
         return false;
     }
 
-    // Store the TypeSpec in stable member storage so that genericType doesn't point
-    // to the caller's stack (the 'typeSpec' parameter would be freed after return).
+    // Copy into member storage — genericType must outlive the caller's stack.
     m_typeSpecStorage = typeSpec;
     genericType = &m_typeSpecStorage;
 
@@ -2167,16 +2158,9 @@ bool CLR_RT_MethodDef_Instance::ResolveToken(
 
                 if (mr->Owner() == TBL_TypeSpec)
                 {
-                    // owner is TypeSpec
-
-                    // The raw MethodRef* says "Owner = a TypeSpec row".
-                    // That TypeSpec row might be either the *open* generic or a purely nested flavor.
-                    // Even if we know we are inside a closed instantiation of that same generic.
-                    // We want to prefer the calling method's closed TypeSpec (callerGeneric) ONLY if they refer to the
-                    // same TypeDef token.
-                    //
-
-                    // grab the MethodRef *declared* owner:
+                    // Owner is a TypeSpec — possibly open. Prefer the caller's closed TypeSpec
+                    // only when it points at the same TypeDef. See CLAUDE.md "Generic context
+                    // propagation".
                     const CLR_RT_TypeSpec_Index *methodOwnerTS = &assm->crossReferenceMethodRef[index].genericType;
 
                     // check if MethodRef TypeDef token is the same TypeDef as in that caller
@@ -2223,20 +2207,17 @@ bool CLR_RT_MethodDef_Instance::ResolveToken(
 
                                 if ((callerTypeDefToken == ownerTypeDefToken) && callerTypeDefToken != 0x0)
                                 {
-                                    // we have a match on the typeDef, so they refer to the same type
-                                    // lets bind using the closed generic
+                                    // same TypeDef → bind to the caller's closed TypeSpec
                                     useCaller = true;
                                 }
                             }
                         }
                     }
 
-                    // Pick the "winner" between methodOwnerTS or callerGeneric:
                     genericType = useCaller ? callerGeneric : methodOwnerTS;
 
-                    // When the chosen TypeSpec is open (contains MVAR), resolve it to a matching closed TypeSpec.
-                    // Normal generic calls use MethodSpec; some rebound calls instead supply the method generic
-                    // through a runtime-inferred element type.
+                    // Open TypeSpec — resolve MVAR via MethodSpec, with arrayElementType
+                    // fallback for runtime-inferred bindings.
                     if (!useCaller && caller != nullptr &&
                         (NANOCLR_INDEX_IS_VALID(caller->methodSpec) ||
                          NANOCLR_INDEX_IS_VALID(caller->arrayElementType)))
@@ -2274,11 +2255,8 @@ bool CLR_RT_MethodDef_Instance::ResolveToken(
 
                                         if (argElem.DataType == DATATYPE_MVAR)
                                         {
-                                            // The MethodSpec carries the explicit IL-encoded generic arguments for this
-                                            // call and is authoritative. It must take precedence over arrayElementType,
-                                            // which is only a runtime-inferred fallback (used for SZArrayHelper-style
-                                            // dispatch) and can be stale when propagated across generic method
-                                            // boundaries.
+                                            // MethodSpec is authoritative for MVAR; arrayElementType is only a
+                                            // runtime-inferred fallback and can be stale across generic boundaries.
                                             if (hasMethodSpec)
                                             {
                                                 CLR_RT_SignatureParser::Element msArgElem{};
@@ -2309,9 +2287,7 @@ bool CLR_RT_MethodDef_Instance::ResolveToken(
                                                     }
                                                     else
                                                     {
-                                                        // A DATATYPE_VAR without a resolvable caller context, or any
-                                                        // other element that did not yield a concrete type, must fail
-                                                        // resolution rather than bind to an empty Class index.
+                                                        // No concrete Class — fail rather than bind to an empty index.
                                                         allResolved = false;
                                                     }
                                                 }
@@ -6138,10 +6114,8 @@ CLR_RT_HeapBlock *CLR_RT_Assembly::GetStaticFieldByFieldDef(
             }
         }
 
-        // Generic field not found in the per-TypeSpec store (even after on-demand allocation).
-        // Do NOT fall through to the assembly static field offset: generic static fields have no
-        // assembly-level storage slot (fdCross.offset == CLR_EmptyIndex), so the fallback would
-        // hit the assert below.  Return nullptr and let the caller handle the miss.
+        // Generic static fields have no assembly-level storage slot; do not fall through
+        // to the assembly static fields path. See CLAUDE.md "Static fields on generic types".
         return nullptr;
     }
 
@@ -6373,13 +6347,11 @@ HRESULT CLR_RT_Assembly::AllocateGenericStaticFieldsOnDemand(
                 {
                     CLR_RT_HeapBlock_Delegate *dlg = refDlg.DereferenceDelegate();
 
-                    // Developer notes:
-                    // - Store the TypeSpec index so the .cctor can resolve type generic parameters
-                    // - Use the typeSpecIndex which represents the closed generic type being initialized
-                    // NOT the caller's context which may be non-generic
+                    // Store the closed TypeSpec (NOT the caller's context) for VAR resolution
+                    // inside the .cctor. See CLAUDE.md "Generic .cctor lifecycle".
                     dlg->m_genericTypeSpec = typeSpecIndex;
 
-                    // Store the caller's MethodSpec (if any) to enable reolution of method generic parameters
+                    // Store the caller's MethodSpec for MVAR resolution inside the .cctor.
                     if (contextMethod != nullptr)
                     {
                         dlg->m_genericMethodSpec = contextMethod->methodSpec;
@@ -6544,11 +6516,8 @@ bool CLR_RT_Assembly::FindTypeDef(const char *typeName, const char *nameSpace, C
 
                 if (!strcmp(szName, typeName))
                 {
-                    // When the caller encoded the full path as "Namespace.OuterType/NestedType",
-                    // we extracted enclosedTypeName (e.g. "List`1"). Verify the enclosing type's
-                    // name matches so that two generic types with identically-named nested types
-                    // (e.g. List`1/Enumerator vs Dictionary`2/Enumerator) are correctly
-                    // distinguished.
+                    // Verify the enclosing type name when the path was "Outer/Nested" — same-named
+                    // nested types in different generic outers must not collide.
                     if (!enclosedTypeName.empty() && target->EnclosingType() == TBL_TypeDef)
                     {
                         CLR_INDEX enclosingIdx = target->EnclosingTypeIndex();
@@ -6595,12 +6564,8 @@ bool CLR_RT_Assembly::FindTypeDef(const char *typeName, CLR_INDEX scope, CLR_RT_
             continue;
         }
 
-        // The caller passes a TypeDef index for the enclosing type. Make sure we only
-        // compare against nested types whose EnclosingType token also points to the
-        // TypeDef table. Ignoring the table kind allows accidental matches against
-        // nested types encoded with a TypeRef parent whose row number happens to equal
-        // the requested TypeDef index, which can resolve to the wrong nested generic
-        // type (for example List`1/Enumerator vs Dictionary`2/Enumerator).
+        // Filter to nested types whose EnclosingType is a TypeDef (matches the caller's
+        // index space) — without this, a TypeRef row with a colliding index can match.
         if (target->EnclosingType() != TBL_TypeDef)
         {
             continue;
@@ -7232,10 +7197,8 @@ void CLR_RT_Assembly::Relocate()
         CLR_RT_GarbageCollector::RelocateGenericStaticField(&g_CLR_RT_TypeSystem.m_genericStaticFields[i]);
     }
 
-    // Sync all TypeSpec cross-reference caches that point into generic static field arrays.
-    // These caches (tsCross->genericStaticFields) are raw copies of record->m_fields stored in
-    // platform_malloc'd memory, so they are NOT updated by the GC relocation above.  Refresh them
-    // from the now-updated m_genericStaticFields records.
+    // Resync TypeSpec cross-ref caches into the relocated generic static field arrays
+    // (they are platform_malloc'd, so GC relocation above does not update them).
     for (CLR_UINT32 i = 0; i < g_CLR_RT_TypeSystem.m_genericStaticFieldsCount; i++)
     {
         const CLR_RT_GenericStaticFieldRecord &record = g_CLR_RT_TypeSystem.m_genericStaticFields[i];
@@ -8190,24 +8153,18 @@ bool CLR_RT_TypeSystem::MatchSignatureElement(
 
         if (resLeft.DataType == DATATYPE_GENERICINST && resRight.DataType == DATATYPE_GENERICINST)
         {
-            // Advance past GENERICINST to read the actual generic type definition (CLASS/VALUETYPE
-            // token) and the total generic argument count.
+            // Advance past the GENERICINST marker to the generic typedef + arg count.
             if (FAILED(parserLeft.Advance(resLeft)) || FAILED(parserRight.Advance(resRight)))
             {
                 return false;
             }
 
-            // The generic type definitions must be identical.  Without this check two distinct
-            // nested types that happen to share the same argument count and argument types (e.g.
-            // List<int>.Enumerator vs Stack<int>.Enumerator) would be incorrectly treated as the
-            // same TypeSpec, causing FindTypeSpec to return the wrong entry.
+            // The generic type definitions and argument counts must match exactly.
             if (resLeft.Class.data != resRight.Class.data)
             {
                 return false;
             }
 
-            // Argument counts must match unconditionally (not only when both are > 0, which would
-            // silently skip the check when one side has zero arguments).
             if (resLeft.GenParamCount != resRight.GenParamCount)
             {
                 return false;
@@ -9060,13 +9017,9 @@ bool CLR_RT_TypeSystem::FindVirtualMethodDef(
             if (FindVirtualMethodDef(cls, calleeMD, rgBuffer, index))
                 return true;
 
-            // For generic interfaces BuildTypeName() produces the backtick form
-            // (e.g. "ICollection`1.Remove") which never matches the stored explicit
-            // implementation name (e.g. "ICollection<KeyValuePair<TKey,TValue>>.Remove").
-            // Do a suffix-only pass: this accepts only methods whose name ends with
-            // ".<calleeName>" (explicit interface implementations) while rejecting
-            // regular virtual methods whose name is exactly calleeName.  This ensures
-            // ICollection<KVP<TKey,TValue>>.Remove is chosen over Dictionary.Remove(TKey).
+            // Second pass: suffix-only ".<calleeName>" — matches explicit interface
+            // impls stored under the expanded name form when BuildTypeName produced the
+            // backtick form. See CLAUDE.md "Virtual method dispatch on generics".
             if (FindVirtualMethodDef(cls, calleeMD, calleeName, index, /*suffixMatchOnly=*/true))
                 return true;
         }
@@ -9080,12 +9033,9 @@ bool CLR_RT_TypeSystem::FindVirtualMethodDef(
     return false;
 }
 
-// Signature matching for virtual method dispatch.  Identical to MatchSignatureDirect
-// except that it accepts a DATATYPE_VAR on one side against DATATYPE_GENERICINST on
-// the other.  This covers interface explicit-implementation lookup where the interface
-// method uses generic type parameter T (VAR N) while the concrete implementation uses
-// a closed generic instance (e.g. KeyValuePair<TKey,TValue>).  The inner sub-elements
-// of the GENERICINST are drained from the parser so Available() stays consistent.
+// Drain one full GENERICINST sub-tree from `parser` by advancing until Available()
+// converges with `targetAvail`. Relies on the parser's ParamCount bookkeeping rather
+// than counting GenParamCount by hand — see CLAUDE.md "Signature parsing".
 static bool DrainGenericInstSubtree(CLR_RT_SignatureParser &parser, int targetAvail)
 {
     while (parser.Available() > targetAvail)
@@ -9126,11 +9076,8 @@ static bool MatchSignatureForVirtualDispatch(CLR_RT_SignatureParser &parserLeft,
         if (FAILED(parserRight.Advance(resRight)))
             return false;
 
-        // Relaxed VAR <-> GENERICINST matching for interface virtual dispatch:
-        // the interface method may use a type parameter (VAR N) while the concrete
-        // implementation uses the expanded generic type (GENERICINST ...).  Drain the
-        // whole GENERICINST sub-tree on the expanded side so the parser position stays
-        // consistent.
+        // Relaxed VAR <-> GENERICINST match for explicit interface impls — drain the
+        // expanded side's sub-tree. See CLAUDE.md "Virtual method dispatch on generics".
         if (resLeft.DataType == DATATYPE_VAR && resRight.DataType == DATATYPE_GENERICINST)
         {
             int targetAvail = iAvailLeft - 1;
@@ -9199,18 +9146,11 @@ bool CLR_RT_TypeSystem::FindVirtualMethodDef(
             {
                 const char *targetName = targetAssm->GetString(targetMDR->name);
 
-                // Match by exact name OR by suffix ".<calleeName>" (explicit interface implementation).
-                // Explicit implementations store the full qualified interface name, e.g.
-                //   "System.Collections.Generic.IEnumerable<KeyValuePair<TKey,TValue>>.GetEnumerator"
-                // while the runtime looks up the short name "GetEnumerator" or a backtick-form
-                // "System.Collections.Generic.IEnumerable`1.GetEnumerator".  The suffix check
-                // handles both forms uniformly.
+                // Match exact short name, OR suffix ".<calleeName>" for explicit interface
+                // impls. suffixMatchOnly=true skips the exact short-name path so a public
+                // method does not shadow an explicit impl with the same short name.
                 size_t targetLen = hal_strlen_s(targetName);
                 size_t calleeLen = hal_strlen_s(calleeName);
-                // When suffixMatchOnly=true only explicit interface implementations are
-                // considered.  Exact short-name matches (e.g. "Remove" == "Remove") are
-                // skipped so that Dictionary.Remove(TKey) does not shadow the explicit
-                // impl ICollection<KeyValuePair<TKey,TValue>>.Remove.
                 bool nameMatch = (!suffixMatchOnly && !strcmp(targetName, calleeName));
                 if (!nameMatch && targetLen > calleeLen + 1)
                 {
