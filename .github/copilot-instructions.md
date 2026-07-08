@@ -199,6 +199,15 @@ Follow the PR template at `.github/PULL_REQUEST_TEMPLATE.md`:
 - Ensure code follows the project style (`.clang-format`).
 - Contributing guidelines are at `https://github.com/nanoframework/.github/blob/main/CONTRIBUTING.md`.
 
+## Subsystem Knowledge Files
+
+The repository includes knowledge files (`CLAUDE.md`) that capture hard-won debugging insights, architectural invariants, and failure-mode catalogs. These are essential reading when working on the corresponding subsystems:
+
+- **`CLAUDE.md`** (repo root) — build system, repository architecture, feature configuration, code conventions, CI/CD, and PR guidelines.
+- **`src/CLR/Core/CLAUDE.md`** — CLR runtime internals: generics type system (VAR/MVAR/GENERICINST resolution), signature parsing invariants, virtual method dispatch on generic interfaces, generic context propagation, constrained. prefix semantics, generic `.cctor` lifecycle, cross-assembly resolution, and a known failure-mode catalog.
+
+Consult the relevant file before modifying code in that area — it documents non-obvious invariants that are not captured in code comments.
+
 ## Common Pitfalls and Workarounds
 
 1. **Local builds require toolchains**: This repo requires embedded cross-compilers (ARM GCC, Xtensa, RISC-V) and RTOS SDKs. Local builds are possible when these tools are installed on the developer machine. If the tools are not available, the dev containers provide a ready-to-use environment. The cloud agent environment itself does not have these tools pre-installed. When a build is needed, **ask the user** whether to build locally or use a dev container before proceeding.
