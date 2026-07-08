@@ -5,6 +5,7 @@
 
 #include <hal.h>
 #include <hal_nf_community.h>
+#include <mbedtls/entropy.h>
 #include <psa/crypto.h>
 int mbedtls_hardware_poll(void *data, unsigned char *output, size_t len, size_t *olen);
 // Get len bytes of entropy from the hardware RNG.
@@ -35,7 +36,11 @@ int mbedtls_hardware_poll(void *data, unsigned char *output, size_t len, size_t 
 
     trngStart(&TRNGD1, NULL);
 
-    trngGenerate(&TRNGD1, len, output);
+    if (!trngGenerate(&TRNGD1, len, output))
+    {
+        trngStop(&TRNGD1);
+        return MBEDTLS_ERR_ENTROPY_SOURCE_FAILED;
+    }
 
     // callers require this to be set
     *olen = len;
@@ -78,13 +83,19 @@ psa_status_t mbedtls_psa_external_get_random(
 
     trngStart(&TRNGD1, NULL);
 
-    trngGenerate(&TRNGD1, output_size, output);
+    if (!trngGenerate(&TRNGD1, output_size, output))
+    {
+        trngStop(&TRNGD1);
+        return PSA_ERROR_HARDWARE_FAILURE;
+    }
 
     // callers require this to be set
     *output_length = output_size;
 
     trngStop(&TRNGD1);
 
+#else
+#error "No hardware RNG source configured: enable HAL_NF_USE_STM32_RNG or HAL_USE_TRNG"
 #endif
 
     return PSA_SUCCESS;
