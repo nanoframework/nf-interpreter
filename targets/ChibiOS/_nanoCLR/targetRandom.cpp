@@ -16,6 +16,8 @@ void CLR_RT_Random::Initialize()
 
     trngStart(&TRNGD1, NULL);
 
+#else
+#error "No hardware RNG source configured: enable HAL_NF_USE_STM32_RNG or HAL_USE_TRNG"
 #endif
 }
 
@@ -31,6 +33,8 @@ void CLR_RT_Random::Initialize(int seed)
 
     trngStart(&TRNGD1, NULL);
 
+#else
+#error "No hardware RNG source configured: enable HAL_NF_USE_STM32_RNG or HAL_USE_TRNG"
 #endif
 }
 
@@ -47,6 +51,8 @@ uint32_t CLR_RT_Random::Next()
 
     return randomValue;
 
+#else
+#error "No hardware RNG source configured: enable HAL_NF_USE_STM32_RNG or HAL_USE_TRNG"
 #endif
 }
 
@@ -64,6 +70,8 @@ double CLR_RT_Random::NextDouble()
     trngGenerate(&TRNGD1, sizeof(randomValue), (uint8_t *)&randomValue);
     return ((double)randomValue) / ((double)0xFFFFFFFF);
 
+#else
+#error "No hardware RNG source configured: enable HAL_NF_USE_STM32_RNG or HAL_USE_TRNG"
 #endif
 }
 
@@ -81,5 +89,7 @@ void CLR_RT_Random::NextBytes(unsigned char *buffer, unsigned int count)
 
     trngGenerate(&TRNGD1, count, buffer);
 
+#else
+#error "No hardware RNG source configured: enable HAL_NF_USE_STM32_RNG or HAL_USE_TRNG"
 #endif
 }
