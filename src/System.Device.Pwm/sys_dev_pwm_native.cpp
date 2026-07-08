@@ -20,7 +20,6 @@ static const CLR_RT_MethodHandler method_lookup[] =
     nullptr,
     nullptr,
     nullptr,
-    nullptr,
     Library_sys_dev_pwm_native_System_Device_Pwm_PwmChannel::NativeInit___VOID,
     Library_sys_dev_pwm_native_System_Device_Pwm_PwmChannel::NativeSetDesiredFrequency___VOID__I4,
     Library_sys_dev_pwm_native_System_Device_Pwm_PwmChannel::NativeSetActiveDutyCyclePercentage___VOID__R8,
@@ -35,7 +34,7 @@ static const CLR_RT_MethodHandler method_lookup[] =
 const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_System_Device_Pwm =
 {
     "System.Device.Pwm",
-    0x916EE980,
+    0xCF40DA96,
     method_lookup,
     { 100, 2, 0, 0 }
 };

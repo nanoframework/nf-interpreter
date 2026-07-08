@@ -20,6 +20,7 @@ trigger:
       - nf.props
       - nfcore.vssettings
       - README*.md
+      - '**/CLAUDE.md'
       - RunCmd.bat
       - startocd.bat
       - .github/*
