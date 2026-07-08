@@ -17,8 +17,8 @@
 #endif
 
 #if !defined(HAL_NF_USE_STM32_RNG)
-// the default for this driver is to be included
-#define HAL_NF_USE_STM32_RNG TRUE
+// the default for this driver is NOT to be included
+#define HAL_NF_USE_STM32_RNG FALSE
 #endif
 
 #if !defined(HAL_NF_USE_FSMC)

@@ -7,11 +7,13 @@
 #include <hal_nf_community.h>
 #include <psa/crypto.h>
 int mbedtls_hardware_poll(void *data, unsigned char *output, size_t len, size_t *olen);
-
 // Get len bytes of entropy from the hardware RNG.
 int mbedtls_hardware_poll(void *data, unsigned char *output, size_t len, size_t *olen)
 {
     (void)data;
+
+    
+#if (HAL_NF_USE_STM32_RNG == TRUE)
 
     // start random generator
     rngStart();
@@ -30,6 +32,19 @@ int mbedtls_hardware_poll(void *data, unsigned char *output, size_t len, size_t 
     // stop random generator
     rngStop();
 
+#elif (HAL_USE_TRNG == TRUE)
+
+    trngStart(&TRNGD1, NULL);
+
+    trngGenerate(&TRNGD1, len, output);
+
+    // callers require this to be set
+    *olen = len;
+
+    trngStop(&TRNGD1);
+
+#endif
+
     return 0;
 }
 
@@ -40,6 +55,8 @@ psa_status_t mbedtls_psa_external_get_random(
     size_t *output_length)
 {
     (void)context;
+
+#if HAL_NF_USE_STM32_RNG == TRUE
 
     // start random generator
     rngStart();
@@ -54,6 +71,22 @@ psa_status_t mbedtls_psa_external_get_random(
 
     // callers require this to be set
     *output_length = output_size;
+
+    // stop random generator
+    rngStop();
+
+#elif (HAL_USE_TRNG == TRUE)
+
+    trngStart(&TRNGD1, NULL);
+
+    trngGenerate(&TRNGD1, output_size, output);
+
+    // callers require this to be set
+    *output_length = output_size;
+
+    trngStop(&TRNGD1);
+
+#endif
 
     return PSA_SUCCESS;
 }
