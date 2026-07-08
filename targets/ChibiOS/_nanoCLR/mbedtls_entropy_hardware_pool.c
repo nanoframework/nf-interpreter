@@ -12,7 +12,6 @@ int mbedtls_hardware_poll(void *data, unsigned char *output, size_t len, size_t 
 {
     (void)data;
 
-    
 #if (HAL_NF_USE_STM32_RNG == TRUE)
 
     // start random generator
