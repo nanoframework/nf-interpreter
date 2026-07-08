@@ -629,6 +629,15 @@ jobs:
           PackageName: ESP32_S3_OCTAL
           CMakePreset: ESP32_S3_OCTAL
 
+        ESP32_S3_PICO:
+          TargetBoard: ESP32_S3
+          TargetSeries: "esp32s3"
+          BuildOptions:
+          IDF_Target: esp32s3
+          TargetName: ESP32_S3_PICO
+          PackageName: ESP32_S3_PICO
+          CMakePreset: ESP32_S3_PICO
+
         ESP32_P4_REV_LESS3:
           TargetBoard: ESP32_P4
           TargetSeries: "esp32p4"

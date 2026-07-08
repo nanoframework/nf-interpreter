@@ -274,6 +274,19 @@
             }
         },
         {
+            "name": "ESP32_S3_PICO",
+            "inherits": [
+                "xtensa-esp32s3-preset",
+                "user-tools-repos",
+                "user-prefs"
+            ],
+            "hidden": false,
+            "cacheVariables": {
+                "TARGET_NAME": "${presetName}",
+                "NF_TARGET_DEFCONFIG": "targets/ESP32/defconfig/ESP32_S3_PICO_defconfig"
+            }
+        },
+        {
             "name": "M5Stack",
             "inherits": [
                 "xtensa-esp32-preset",
@@ -603,6 +616,12 @@
             "name": "ESP32_S3_OCTAL",
             "displayName": "ESP32_S3_OCTAL",
             "configurePreset": "ESP32_S3_OCTAL"
+        },
+        {
+            "inherits": "base-user",
+            "name": "ESP32_S3_PICO",
+            "displayName": "ESP32_S3_PICO",
+            "configurePreset": "ESP32_S3_PICO"
         },
         {
             "inherits": "base-user",
