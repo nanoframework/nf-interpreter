@@ -27,7 +27,7 @@ if(TARGET_VENDOR STREQUAL "ST")
 endif()
 
 # RP-specific overlay components
-if(TARGET_SERIES STREQUAL "RP2040" OR TARGET_SERIES STREQUAL "RP2350")
+if(TARGET_VENDOR STREQUAL "RP")
     # component RP_RNG
     list(APPEND ChibiOSnfOverlay_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/targets/ChibiOS/_nf-overlay/os/hal/include/rp_rng)
     list(APPEND ChibiOSnfOverlay_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/targets/ChibiOS/_nf-overlay/os/hal/ports/RP/LLD/RNGv1)
@@ -70,7 +70,7 @@ if(TARGET_VENDOR STREQUAL "ST")
 endif()
 
 # RP-specific overlay sources
-if(TARGET_SERIES STREQUAL "RP2040" OR TARGET_SERIES STREQUAL "RP2350")
+if(TARGET_VENDOR STREQUAL "RP")
     # component RP_RNG
     list(APPEND ChibiOSnfOverlay_SOURCES ${CMAKE_SOURCE_DIR}/targets/ChibiOS/_nf-overlay/os/hal/src/rp_rng/hal_rp_rng.c)
     list(APPEND ChibiOSnfOverlay_SOURCES ${CMAKE_SOURCE_DIR}/targets/ChibiOS/_nf-overlay/os/hal/ports/RP/LLD/RNGv1/rng_lld.c)
