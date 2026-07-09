@@ -39,7 +39,9 @@ static const CLR_RT_MethodHandler method_lookup[] =
     NULL,
     NULL,
     NULL,
-    Library_nanoFramework_EspNow_native_nanoFramework_EspNow_EspNowController__EspNowEventHandler::ProcessEvent___nanoFrameworkRuntimeEventsBaseEvent__U4__U4__SystemDateTime,
+    NULL,
+    Library_nanoFramework_EspNow_native_nanoFramework_EspNow_EspNowControllerEventListener::ProcessEvent___nanoFrameworkRuntimeEventsBaseEvent__U4__U4__SystemDateTime,
+    NULL,
     NULL,
     NULL,
 };
@@ -47,7 +49,7 @@ static const CLR_RT_MethodHandler method_lookup[] =
 const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_nanoFramework_EspNow =
 {
     "nanoFramework.EspNow",
-    0xC6C47E7A,
+    0x0D47343A,
     method_lookup,
     { 100, 0, 0, 0 }
 };

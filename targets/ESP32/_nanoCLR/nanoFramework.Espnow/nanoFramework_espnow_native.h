@@ -63,12 +63,14 @@ struct Library_nanoFramework_EspNow_native_nanoFramework_EspNow_DataSentEventInt
 
 struct Library_nanoFramework_EspNow_native_nanoFramework_EspNow_EspNowController
 {
-    static const int FIELD_STATIC__BROADCASTMAC = 0;
+    static const int FIELD_STATIC__s_instance = 0;
+    static const int FIELD_STATIC__s_syncLock = 1;
 
-    static const int FIELD__DataSent = 1;
-    static const int FIELD__DataReceived = 2;
-    static const int FIELD__isDisposed = 3;
-    static const int FIELD__eventHandler = 4;
+    static const int FIELD___disposed = 1;
+    static const int FIELD___syncLock = 2;
+    static const int FIELD___eventHandler = 3;
+    static const int FIELD__DataSent = 4;
+    static const int FIELD__DataReceived = 5;
 
     NANOCLR_NATIVE_DECLARE(NativeInitialize___I4);
     NANOCLR_NATIVE_DECLARE(NativeDispose___VOID__BOOLEAN);
@@ -80,9 +82,9 @@ struct Library_nanoFramework_EspNow_native_nanoFramework_EspNow_EspNowController
     static void DataRecvCb(const esp_now_recv_info *recv_info, const uint8_t *incomingData, int len);
 };
 
-struct Library_nanoFramework_EspNow_native_nanoFramework_EspNow_EspNowController__EspNowEventHandler
+struct Library_nanoFramework_EspNow_native_nanoFramework_EspNow_EspNowControllerEventListener
 {
-    static const int FIELD__controllerInstance = 1;
+    static const int FIELD___controller = 1;
 
     NANOCLR_NATIVE_DECLARE(ProcessEvent___nanoFrameworkRuntimeEventsBaseEvent__U4__U4__SystemDateTime);
 
