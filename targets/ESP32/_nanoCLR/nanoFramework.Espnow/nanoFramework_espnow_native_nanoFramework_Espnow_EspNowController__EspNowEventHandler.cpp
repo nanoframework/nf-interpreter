@@ -11,7 +11,7 @@ static const int EVENT_ESPNOW_DATASENT = 1;
 static const int EVENT_ESPNOW_DATARECV = 2;
 
 HRESULT
-Library_nanoFramework_EspNow_native_nanoFramework_EspNow_EspNowController__EspNowEventHandler::CopyByteArrayToCLRArray(
+Library_nanoFramework_EspNow_native_nanoFramework_EspNow_EspNowControllerEventListener::CopyByteArrayToCLRArray(
     CLR_RT_HeapBlock &target,
     uint8_t *src,
     CLR_UINT32 length)
@@ -36,7 +36,7 @@ Library_nanoFramework_EspNow_native_nanoFramework_EspNow_EspNowController__EspNo
 }
 
 HRESULT
-Library_nanoFramework_EspNow_native_nanoFramework_EspNow_EspNowController__EspNowEventHandler::ProcessEvent_DataSent(
+Library_nanoFramework_EspNow_native_nanoFramework_EspNow_EspNowControllerEventListener::ProcessEvent_DataSent(
     CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
@@ -77,7 +77,7 @@ Library_nanoFramework_EspNow_native_nanoFramework_EspNow_EspNowController__EspNo
 }
 
 HRESULT
-Library_nanoFramework_EspNow_native_nanoFramework_EspNow_EspNowController__EspNowEventHandler::ProcessEvent_DataRecv(
+Library_nanoFramework_EspNow_native_nanoFramework_EspNow_EspNowControllerEventListener::ProcessEvent_DataRecv(
     CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
@@ -123,7 +123,7 @@ Library_nanoFramework_EspNow_native_nanoFramework_EspNow_EspNowController__EspNo
 }
 
 HRESULT
-Library_nanoFramework_EspNow_native_nanoFramework_EspNow_EspNowController__EspNowEventHandler::
+Library_nanoFramework_EspNow_native_nanoFramework_EspNow_EspNowControllerEventListener::
     ProcessEvent___nanoFrameworkRuntimeEventsBaseEvent__U4__U4__SystemDateTime(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
