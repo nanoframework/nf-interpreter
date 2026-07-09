@@ -9,7 +9,7 @@
 #include <hal.h>
 #include <hal_nf_community.h>
 
-#if (HAL_NF_USE_RP_RNG == TRUE)
+#if (HAL_NF_USE_RNG == TRUE)
 
 /*===========================================================================*/
 /* Driver local definitions.                                                 */
@@ -77,4 +77,4 @@ uint32_t rngGetLastRandomNumber(void)
     return randomNumber;
 }
 
-#endif /* HAL_NF_USE_RP_RNG */
+#endif /* HAL_NF_USE_RNG */

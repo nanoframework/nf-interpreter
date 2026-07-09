@@ -27,42 +27,42 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 // HAL initialization (community part).
-void halCommunityInit(void) {
+void halCommunityInit(void)
+{
 
-///////////////////////////////
-// from ChibiOS-Contrib repo //
-///////////////////////////////
+    ///////////////////////////////
+    // from ChibiOS-Contrib repo //
+    ///////////////////////////////
 
 #if (HAL_USE_USBH == TRUE)
-  usbhInit();
+    usbhInit();
 #endif
 
-///////////////////////////
-// nanoFramework overlay //
-///////////////////////////
+    ///////////////////////////
+    // nanoFramework overlay //
+    ///////////////////////////
 
 #if (HAL_NF_USE_STM32_FLASH == TRUE)
-  stm32FlashInit();
+    stm32FlashInit();
 #endif
 
 #if (HAL_NF_USE_STM32_CRC == TRUE)
-  crcInit();
+    crcInit();
 #endif
 
-#if (HAL_NF_USE_STM32_RNG == TRUE)
-  rngInit();
+#if (HAL_NF_USE_RNG == TRUE)
+    rngInit();
 #endif
 
 #if HAL_NF_USE_FSMC
-  stm32FsmcInit();
+    stm32FsmcInit();
 #endif
 
 #if (HAL_NF_USE_STM32_ONEWIRE == TRUE)
-  oneWireInit();
+    oneWireInit();
 #endif
 
 #if (HAL_NF_USE_STM32_QSPI == TRUE)
-  qspiInit();
+    qspiInit();
 #endif
-
 }

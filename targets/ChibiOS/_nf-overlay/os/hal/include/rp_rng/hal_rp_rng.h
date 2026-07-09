@@ -6,7 +6,7 @@
 #ifndef HAL_NF_RP_RNG_H
 #define HAL_NF_RP_RNG_H
 
-#if (HAL_NF_USE_RP_RNG == TRUE)
+#if (HAL_NF_USE_RNG == TRUE)
 
 /*===========================================================================*/
 /* Driver constants.                                                         */
@@ -67,6 +67,6 @@ extern "C"
 }
 #endif
 
-#endif // HAL_NF_USE_RP_RNG
+#endif // HAL_NF_USE_RNG
 
 #endif // HAL_NF_RP_RNG_H

@@ -6,7 +6,7 @@
 #ifndef HAL_NF_STM32_RNG_H
 #define HAL_NF_STM32_RNG_H
 
-#if (HAL_NF_USE_STM32_RNG == TRUE)
+#if (HAL_NF_USE_RNG == TRUE)
 
 #if defined(STM32F0xx_MCUCONF)
 #error "CAN'T ENABLE RNG FOR STM32F0 series"
@@ -81,7 +81,7 @@ extern "C" {
 }
 #endif
 
-#endif // HAL_NF_USE_STM32_RNG
+#endif // HAL_NF_USE_RNG
 
 #endif // HAL_NF_STM32_RNG_H
 

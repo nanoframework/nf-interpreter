@@ -16,14 +16,9 @@
 #define HAL_NF_USE_STM32_CRC TRUE
 #endif
 
-#if !defined(HAL_NF_USE_STM32_RNG)
+#if !defined(HAL_NF_USE_RNG)
 // the default for this driver is NOT to be included
-#define HAL_NF_USE_STM32_RNG FALSE
-#endif
-
-#if !defined(HAL_NF_USE_RP_RNG)
-// the default for this driver is NOT to be included
-#define HAL_NF_USE_RP_RNG FALSE
+#define HAL_NF_USE_RNG FALSE
 #endif
 
 #if !defined(HAL_NF_USE_FSMC)

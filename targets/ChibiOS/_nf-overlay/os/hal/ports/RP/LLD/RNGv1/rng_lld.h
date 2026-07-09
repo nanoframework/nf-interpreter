@@ -9,7 +9,7 @@
 #include <hal.h>
 #include <hal_nf_community.h>
 
-#if (HAL_NF_USE_RP_RNG == TRUE)
+#if (HAL_NF_USE_RNG == TRUE)
 
 /*===========================================================================*/
 /* Driver constants.                                                         */
@@ -87,6 +87,6 @@ extern "C"
 }
 #endif
 
-#endif /* HAL_NF_USE_RP_RNG */
+#endif /* HAL_NF_USE_RNG */
 
 #endif /* RNG_LLD_H */

@@ -6,7 +6,7 @@
 #include <hal.h>
 #include <hal_nf_community.h>
 
-#if (HAL_NF_USE_RP_RNG == TRUE)
+#if (HAL_NF_USE_RNG == TRUE)
 
 /*===========================================================================*/
 /* Driver local definitions.                                                 */
@@ -151,4 +151,4 @@ void rng_lld_release(void)
 
 #endif
 
-#endif /* HAL_NF_USE_RP_RNG */
+#endif /* HAL_NF_USE_RNG */
