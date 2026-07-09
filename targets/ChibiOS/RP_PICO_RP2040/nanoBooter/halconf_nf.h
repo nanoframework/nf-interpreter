@@ -9,8 +9,8 @@
 // nanoFramework HAL overlay for nanoBooter
 
 // RP2040 does not have STM32-specific peripherals
-#define HAL_NF_USE_STM32_CRC    FALSE
-#define HAL_NF_USE_RNG    FALSE
-#define HAL_NF_USE_STM32_FLASH  FALSE
+#define HAL_NF_USE_STM32_CRC   FALSE
+#define HAL_NF_USE_RNG         FALSE
+#define HAL_NF_USE_STM32_FLASH FALSE
 
 #endif // HALCONF_NF_H
