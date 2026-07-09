@@ -9,8 +9,8 @@
 // nanoFramework HAL overlay for nanoCLR
 
 // RP2350 does not have STM32-specific peripherals
-#define HAL_NF_USE_STM32_RNG    FALSE
-#define HAL_NF_USE_STM32_FLASH  FALSE
-#define HAL_NF_USE_RP_RNG       TRUE
+#define HAL_NF_USE_STM32_RNG   FALSE
+#define HAL_NF_USE_STM32_FLASH FALSE
+#define HAL_NF_USE_RP_RNG      TRUE
 
 #endif // HALCONF_NF_H
