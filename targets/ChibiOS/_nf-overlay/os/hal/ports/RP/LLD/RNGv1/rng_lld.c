@@ -20,14 +20,16 @@
 
 #elif defined(RP2350)
 
-// RP2350: hardware TRNG peripheral
-#define TRNG_BASE              0x400c0000UL
-#define TRNG_EHR_DATA0         (*(volatile uint32_t *)(TRNG_BASE + 0x00UL))
+// RP2350 hardware TRNG peripheral - see RP2350 datasheet §12.12
+#define TRNG_BASE              0x400f0000UL
 #define TRNG_RNG_ISR           (*(volatile uint32_t *)(TRNG_BASE + 0x104UL))
-#define TRNG_SAMPLE_CNT1       (*(volatile uint32_t *)(TRNG_BASE + 0x108UL))
-#define TRNG_CONFIG            (*(volatile uint32_t *)(TRNG_BASE + 0x10CUL))
+#define TRNG_RNG_ICR           (*(volatile uint32_t *)(TRNG_BASE + 0x108UL))
+#define TRNG_EHR_DATA0         (*(volatile uint32_t *)(TRNG_BASE + 0x114UL))
+#define TRNG_EHR_DATA5         (*(volatile uint32_t *)(TRNG_BASE + 0x128UL))
+#define TRNG_RND_SOURCE_ENABLE (*(volatile uint32_t *)(TRNG_BASE + 0x12CUL))
+#define TRNG_SAMPLE_CNT1       (*(volatile uint32_t *)(TRNG_BASE + 0x130UL))
 #define TRNG_RNG_ISR_EHR_VALID (1UL << 0)
-#define TRNG_CONFIG_RNG_EN     (1UL << 1)
+#define TRNG_RND_SRC_EN        (1UL << 0)
 
 // With SAMPLE_CNT1 = 0, a full 192-bit EHR fills in well under 1 ms.
 #define RNG_TIMEOUT_VALUE      20
@@ -72,9 +74,10 @@ void rng_lld_start(void)
     // RP2040: ROSC is always running, nothing to enable
 
 #if defined(RP2350)
-    // smallest sample interval so an EHR fills in <1 ms;
+    // smallest sample interval so an EHR fills in <1 ms
     TRNG_SAMPLE_CNT1 = 0;
-    TRNG_CONFIG |= TRNG_CONFIG_RNG_EN;
+    // start ROSC sampling
+    TRNG_RND_SOURCE_ENABLE = TRNG_RND_SRC_EN;
 #endif
 
     RNGD1.State = RNG_READY;
@@ -83,7 +86,7 @@ void rng_lld_start(void)
 void rng_lld_stop(void)
 {
 #if defined(RP2350)
-    TRNG_CONFIG &= ~TRNG_CONFIG_RNG_EN;
+    TRNG_RND_SOURCE_ENABLE = 0;
 #endif
 
     RNGD1.State = RNG_STOP;
@@ -108,8 +111,12 @@ uint32_t rng_lld_GenerateRandomNumber(void)
         {
             RNGD1.RandomNumber = TRNG_EHR_DATA0;
 
-            // Clear EHR_VALID to trigger collection of the next EHR
-            TRNG_RNG_ISR = TRNG_RNG_ISR_EHR_VALID;
+            // Reading EHR_DATA5 clears all six EHR result registers,
+            // consuming the current 192-bit sample so the next fill can start.
+            (void)TRNG_EHR_DATA5;
+
+            // Need to clear EHR_VALID
+            TRNG_RNG_ICR = TRNG_RNG_ISR_EHR_VALID;
 
             return RNGD1.RandomNumber;
         }
