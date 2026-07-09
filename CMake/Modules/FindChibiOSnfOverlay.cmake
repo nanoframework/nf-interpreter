@@ -26,6 +26,13 @@ if(TARGET_VENDOR STREQUAL "ST")
     list(APPEND ChibiOSnfOverlay_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/targets/ChibiOS/_nf-overlay/os/hal/include/stm32_qspi)
 endif()
 
+# RP-specific overlay components
+if(TARGET_SERIES STREQUAL "RP2040" OR TARGET_SERIES STREQUAL "RP2350")
+    # component RP_RNG
+    list(APPEND ChibiOSnfOverlay_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/targets/ChibiOS/_nf-overlay/os/hal/include/rp_rng)
+    list(APPEND ChibiOSnfOverlay_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/targets/ChibiOS/_nf-overlay/os/hal/ports/RP/LLD/RNGv1)
+endif()
+
 ##################################################################################################################################
 # Add above the required include directory(ies) for a new nanoFramework overlay component that you are adding
 # following the template below. 
@@ -60,6 +67,13 @@ if(TARGET_VENDOR STREQUAL "ST")
     list(APPEND ChibiOSnfOverlay_SOURCES ${CMAKE_SOURCE_DIR}/targets/ChibiOS/_nf-overlay/os/hal/src/stm32_onewire/hal_stm32_onewire.c)
     # component STM32_QSPI (QSPI driver)
     list(APPEND ChibiOSnfOverlay_SOURCES ${CMAKE_SOURCE_DIR}/targets/ChibiOS/_nf-overlay/os/hal/src/stm32_qspi/hal_stm32_qspi.c)
+endif()
+
+# RP-specific overlay sources
+if(TARGET_SERIES STREQUAL "RP2040" OR TARGET_SERIES STREQUAL "RP2350")
+    # component RP_RNG
+    list(APPEND ChibiOSnfOverlay_SOURCES ${CMAKE_SOURCE_DIR}/targets/ChibiOS/_nf-overlay/os/hal/src/rp_rng/hal_rp_rng.c)
+    list(APPEND ChibiOSnfOverlay_SOURCES ${CMAKE_SOURCE_DIR}/targets/ChibiOS/_nf-overlay/os/hal/ports/RP/LLD/RNGv1/rng_lld.c)
 endif()
 
 
