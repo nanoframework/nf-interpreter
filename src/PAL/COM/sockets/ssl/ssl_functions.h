@@ -48,7 +48,7 @@ int ssl_write_internal(int socket, const char *data, size_t size);
 int ssl_close_socket_internal(int sd);
 int ssl_available_internal(int sd);
 bool ssl_exit_context_internal(int contextHandle);
-bool ssl_generic_init_internal(
+SslError ssl_generic_init_internal(
     int sslMode,
     int sslVerify,
     const char *certificate,

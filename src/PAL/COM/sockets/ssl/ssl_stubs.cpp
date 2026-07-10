@@ -5,6 +5,7 @@
 //
 
 #include "nanoHAL.h"
+#include <ssl_functions.h>
 
 //--//
 
@@ -20,7 +21,7 @@ __nfweak bool SSL_Uninitialize()
     return TRUE;
 }
 
-__nfweak bool SSL_ServerInit(
+__nfweak SSL_Error SSL_ServerInit(
     int sslMode,
     int sslVerify,
     const char *certificate,
@@ -45,10 +46,10 @@ __nfweak bool SSL_ServerInit(
 
     NATIVE_PROFILE_PAL_COM();
 
-    return TRUE;
+    return SslError_None;
 }
 
-__nfweak bool SSL_ClientInit(
+__nfweak SSL_Error SSL_ClientInit(
     int sslMode,
     int sslVerify,
     const char *certificate,
@@ -73,7 +74,7 @@ __nfweak bool SSL_ClientInit(
 
     NATIVE_PROFILE_PAL_COM();
 
-    return TRUE;
+    return SslError_None;
 }
 
 __nfweak bool SSL_AddCertificateAuthority(int contextHandle, const char *certificate, int certLength)

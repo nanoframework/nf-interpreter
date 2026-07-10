@@ -2874,6 +2874,7 @@ static const TypeIndexLookup c_TypeIndexLookup[] = {
     TIL("System.Resources", "ResourceManager", m_ResourceManager),
 
     TIL("System.Net.Sockets", "SocketException", m_SocketException),
+    TIL("System.Security.Cryptography", "CryptographicException", m_CryptographicException),
 
     TIL("System.Device.I2c", "I2cTransferResult", m_I2cTransferResult),
 
