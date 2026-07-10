@@ -680,9 +680,23 @@ typedef void (*SSL_DATE_TIME_FUNC)(DATE_TIME_INFO *pdt);
 
 #define SSL_RESULT__WOULD_BLOCK -2
 
+enum SslError
+{
+    SslError_None = 0,
+    SslError_NoFreeContext = 1,
+    SslError_OutOfMemory = 2,
+    SslError_DrbgSeedFailed = 3,
+    SslError_ConfigDefaultsFailed = 4,
+    SslError_UnsupportedProtocolVersion = 5,
+    SslError_PrivateKeyParseFailed = 6,
+    SslError_CertificateParseFailed = 7,
+    SslError_OwnCertConfigFailed = 8,
+    SslError_SetupFailed = 9,
+};
+
 bool SSL_Initialize();
 bool SSL_Uninitialize();
-bool SSL_ServerInit(
+SslError SSL_ServerInit(
     int sslMode,
     int sslVerify,
     const char *certificate,
@@ -694,7 +708,7 @@ bool SSL_ServerInit(
     int &sslContextHandle,
     bool useDeviceCertificate);
 
-bool SSL_ClientInit(
+SslError SSL_ClientInit(
     int sslMode,
     int sslVerify,
     const char *certificate,

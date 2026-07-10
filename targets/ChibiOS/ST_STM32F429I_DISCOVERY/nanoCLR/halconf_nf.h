@@ -20,4 +20,8 @@
 #define HAL_LTDC_MODULE_ENABLED TRUE
 #endif
 
+#if !defined(HAL_NF_USE_STM32_RNG)
+#define HAL_NF_USE_STM32_RNG TRUE
+#endif
+
 #endif // HALCONF_NF_H

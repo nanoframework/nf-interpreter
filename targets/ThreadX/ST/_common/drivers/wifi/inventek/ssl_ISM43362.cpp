@@ -67,7 +67,7 @@ bool ssl_initialize_internal()
     return true;
 }
 
-bool ssl_generic_init_internal(
+SslError ssl_generic_init_internal(
     int sslMode,
     int sslVerify,
     const char *certificate,
@@ -106,7 +106,7 @@ bool ssl_generic_init_internal(
 
     if (sslContexIndex == -1)
     {
-        return false;
+        return SslError_NoFreeContext;
     }
 
     // create and init context
@@ -128,7 +128,7 @@ bool ssl_generic_init_internal(
 
     contextHandle = sslContexIndex;
 
-    return true;
+    return SslError_None;
 
 error:
 
@@ -138,7 +138,7 @@ error:
         platform_free(context);
     }
 
-    return false;
+    return SslError_OutOfMemory;
 }
 
 bool ssl_exit_context_internal(int contextHandle)
@@ -187,7 +187,7 @@ int ssl_connect_internal(int sd, const char *szTargetHost, int contextHandle)
     context->SocketIndex = sd;
 
     // at this point the socket must have been connected
-    
+
     //////////////////////////////////////////////////////////////////////
     // current firmware in ISM43362 does not support secure connections //
     // so we are faking it as if it would work                          //
@@ -221,7 +221,7 @@ int ssl_read_internal(int sd, char *data, size_t size)
 {
     (void)sd;
     (void)data;
-    (void)size; //SSL_RESULT__WOULD_BLOCK
+    (void)size; // SSL_RESULT__WOULD_BLOCK
 
     // ISM43362 takes care of everything for us, just call the recv API
     return SOCK_recv(sd, data, size, 0);
