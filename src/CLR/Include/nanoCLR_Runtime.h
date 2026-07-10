@@ -1576,6 +1576,7 @@ struct CLR_RT_WellKnownTypes
     CLR_RT_TypeDef_Index m_ResourceManager;
 
     CLR_RT_TypeDef_Index m_SocketException;
+    CLR_RT_TypeDef_Index m_CryptographicException;
 
     CLR_RT_TypeDef_Index m_I2cTransferResult;
     CLR_RT_TypeDef_Index m_I2cTransferResult_old;

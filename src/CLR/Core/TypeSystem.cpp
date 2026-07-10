@@ -2796,7 +2796,10 @@ struct TypeIndexLookup
 };
 
 static const TypeIndexLookup c_TypeIndexLookup[] = {
-#define TIL(ns, nm, fld) {ns, nm, &g_CLR_RT_WellKnownTypes.fld}
+#define TIL(ns, nm, fld)                                                                                               \
+    {                                                                                                                  \
+        ns, nm, &g_CLR_RT_WellKnownTypes.fld                                                                           \
+    }
     TIL("System", "Boolean", m_Boolean),
     TIL("System", "Char", m_Char),
     TIL("System", "SByte", m_Int8),
@@ -2874,6 +2877,7 @@ static const TypeIndexLookup c_TypeIndexLookup[] = {
     TIL("System.Resources", "ResourceManager", m_ResourceManager),
 
     TIL("System.Net.Sockets", "SocketException", m_SocketException),
+    TIL("System.Security.Cryptography", "CryptographicException", m_CryptographicException),
 
     TIL("System.Device.I2c", "I2cTransferResult", m_I2cTransferResult),
 
@@ -2892,7 +2896,10 @@ struct MethodIndexLookup
 };
 
 static const MethodIndexLookup c_MethodIndexLookup[] = {
-#define MIL(nm, type, method) {nm, &g_CLR_RT_WellKnownTypes.type, &g_CLR_RT_WellKnownMethods.method}
+#define MIL(nm, type, method)                                                                                          \
+    {                                                                                                                  \
+        nm, &g_CLR_RT_WellKnownTypes.type, &g_CLR_RT_WellKnownMethods.method                                           \
+    }
 
     MIL("GetObjectFromId", m_ResourceManager, m_ResourceManager_GetObjectFromId),
     MIL("GetObjectChunkFromId", m_ResourceManager, m_ResourceManager_GetObjectChunkFromId),
