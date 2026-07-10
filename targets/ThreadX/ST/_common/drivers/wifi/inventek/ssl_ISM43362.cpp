@@ -67,7 +67,7 @@ bool ssl_initialize_internal()
     return true;
 }
 
-SSL_Error ssl_generic_init_internal(
+SslError ssl_generic_init_internal(
     int sslMode,
     int sslVerify,
     const char *certificate,

@@ -21,7 +21,7 @@ __nfweak bool SSL_Uninitialize()
     return TRUE;
 }
 
-__nfweak SSL_Error SSL_ServerInit(
+__nfweak SslError SSL_ServerInit(
     int sslMode,
     int sslVerify,
     const char *certificate,
@@ -49,7 +49,7 @@ __nfweak SSL_Error SSL_ServerInit(
     return SslError_None;
 }
 
-__nfweak SSL_Error SSL_ClientInit(
+__nfweak SslError SSL_ClientInit(
     int sslMode,
     int sslVerify,
     const char *certificate,
