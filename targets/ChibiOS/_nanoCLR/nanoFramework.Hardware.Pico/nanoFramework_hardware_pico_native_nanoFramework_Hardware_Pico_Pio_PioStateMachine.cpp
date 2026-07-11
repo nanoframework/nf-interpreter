@@ -13,6 +13,10 @@
 #include <hal.h>
 #include <nanoHAL.h>
 
+// PIO FSTAT: RXEMPTY [11:8], TXFULL [19:16] -- one status bit per state machine
+#define PIO_FSTAT_RXEMPTY_LSB 8u
+#define PIO_FSTAT_TXFULL_LSB 16u
+
 // busy-wait cap so a stalled SM times out instead of hanging
 static const unsigned int PIO_FIFO_WAIT_LIMIT = 0x4000000u;
 
@@ -191,7 +195,7 @@ HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_P
 
         // FSTAT TX_FULL = bits [19:16]
         unsigned int guard = PIO_FIFO_WAIT_LIMIT;
-        while ((pio->FSTAT & (1u << (16 + sm))) && --guard)
+        while ((pio->FSTAT & (1u << (PIO_FSTAT_TXFULL_LSB + sm))) && --guard)
         {
         }
         if (guard == 0)
@@ -220,7 +224,7 @@ HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_P
 
         // FSTAT RX_EMPTY = bits [11:8]
         unsigned int guard = PIO_FIFO_WAIT_LIMIT;
-        while ((pio->FSTAT & (1u << (8 + sm))) && --guard)
+        while ((pio->FSTAT & (1u << (PIO_FSTAT_RXEMPTY_LSB + sm))) && --guard)
         {
         }
         if (guard == 0)
@@ -247,7 +251,7 @@ HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_P
         }
         PioEnsureOutOfReset(block);
 
-        stack.SetResult_Boolean((pio->FSTAT & (1u << (16 + sm))) != 0);
+        stack.SetResult_Boolean((pio->FSTAT & (1u << (PIO_FSTAT_TXFULL_LSB + sm))) != 0);
     }
     NANOCLR_NOCLEANUP();
 }
@@ -267,7 +271,7 @@ HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_P
         }
         PioEnsureOutOfReset(block);
 
-        stack.SetResult_Boolean((pio->FSTAT & (1u << (8 + sm))) != 0);
+        stack.SetResult_Boolean((pio->FSTAT & (1u << (PIO_FSTAT_RXEMPTY_LSB + sm))) != 0);
     }
     NANOCLR_NOCLEANUP();
 }
