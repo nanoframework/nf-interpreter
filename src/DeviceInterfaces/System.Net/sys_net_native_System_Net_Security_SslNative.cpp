@@ -428,17 +428,6 @@ HRESULT Library_sys_net_native_System_Net_Security_SslNative::InitHelper(CLR_RT_
     const char *pkPassword = NULL;
     CLR_UINT32 pkPasswordLength = 0;
 
-#if defined(TARGET_RP2350)
-    // RP2350 builds currently provide TLS 1.2 only.
-    // Explicit TLS 1.3 requests must fail fast instead of silently
-    // downgrading.
-    const CLR_INT32 c_tls13ProtocolMask = 12288;
-    if ((sslMode & c_tls13ProtocolMask) != 0)
-    {
-        NANOCLR_SET_AND_LEAVE(CLR_E_NOT_SUPPORTED);
-    }
-#endif
-
     if (hbCert != NULL)
     {
         g_CLR_RT_TypeSystem.FindTypeDef(
