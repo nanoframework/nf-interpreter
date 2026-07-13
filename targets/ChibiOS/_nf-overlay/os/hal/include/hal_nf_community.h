@@ -16,9 +16,9 @@
 #define HAL_NF_USE_STM32_CRC TRUE
 #endif
 
-#if !defined(HAL_NF_USE_STM32_RNG)
+#if !defined(HAL_NF_USE_RNG)
 // the default for this driver is NOT to be included
-#define HAL_NF_USE_STM32_RNG FALSE
+#define HAL_NF_USE_RNG FALSE
 #endif
 
 #if !defined(HAL_NF_USE_FSMC)
@@ -55,18 +55,8 @@
 #include "stm32_rng/hal_stm32_rng.h"
 #include "stm32_fsmc/hal_stm32_fsmc.h"
 #include "stm32_onewire/hal_stm32_onewire.h"
-#elif defined(RP2040)
-// RP2040 RNG stubs (ROSC-based) — provided by target_rng.c
-#ifdef __cplusplus
-extern "C"
-{
-#endif
-    void rngStart(void);
-    void rngStop(void);
-    uint32_t rngGenerateRandomNumber(void);
-#ifdef __cplusplus
-}
-#endif
+#elif defined(RP2040) || defined(RP2350)
+#include "rp_rng/hal_rp_rng.h"
 #endif
 
 // Complex drivers

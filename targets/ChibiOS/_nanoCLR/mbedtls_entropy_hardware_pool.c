@@ -13,7 +13,7 @@ int mbedtls_hardware_poll(void *data, unsigned char *output, size_t len, size_t 
 {
     (void)data;
 
-#if (HAL_NF_USE_STM32_RNG == TRUE)
+#if (HAL_NF_USE_RNG == TRUE)
 
     // start random generator
     rngStart();
@@ -60,7 +60,7 @@ psa_status_t mbedtls_psa_external_get_random(
 {
     (void)context;
 
-#if HAL_NF_USE_STM32_RNG == TRUE
+#if (HAL_NF_USE_RNG == TRUE)
 
     // start random generator
     rngStart();
@@ -95,7 +95,7 @@ psa_status_t mbedtls_psa_external_get_random(
     trngStop(&TRNGD1);
 
 #else
-#error "No hardware RNG source configured: enable HAL_NF_USE_STM32_RNG or HAL_USE_TRNG"
+#error "No hardware RNG source configured: enable HAL_NF_USE_RNG or HAL_USE_TRNG"
 #endif
 
     return PSA_SUCCESS;

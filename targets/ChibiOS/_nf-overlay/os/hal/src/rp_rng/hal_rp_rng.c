@@ -4,7 +4,7 @@
 //
 
 /*
- * Hardware Abstraction Layer for RNG Unit
+ * Hardware Abstraction Layer for RP2040/RP2350 RNG
  */
 #include <hal.h>
 #include <hal_nf_community.h>
@@ -31,67 +31,49 @@
 /* Driver exported functions.                                                */
 /*===========================================================================*/
 
-// Initializes the RNG Driver
 void rngInit(void)
 {
     rng_lld_init();
 }
 
-// Configures and activates the CRC peripheral
-void rngStart()
+void rngStart(void)
 {
-
-    // better lock this to setup the driver and start the peripheral
     osalSysLock();
-
     rng_lld_start();
-
     osalSysUnlock();
 }
 
-// Deactivates the RNG peripheral
-void rngStop()
+void rngStop(void)
 {
-
-    // better lock this to stop the peripheral
     osalSysLock();
-
     rng_lld_stop();
-
     osalSysUnlock();
 }
 
 #if (RNG_USE_MUTUAL_EXCLUSION == TRUE)
 
-void rngAquireModule()
+void rngAcquireModule(void)
 {
-
     rng_lld_aquire();
 }
 
-void rngReleaseModule()
+void rngReleaseModule(void)
 {
-
     rng_lld_release();
 }
 
 #endif /* RNG_USE_MUTUAL_EXCLUSION == TRUE */
 
-uint32_t rngGenerateRandomNumber()
+uint32_t rngGenerateRandomNumber(void)
 {
-    uint32_t randomNumber;
-    osalSysLock();
-    randomNumber = rng_lld_GenerateRandomNumber();
-    osalSysUnlock();
-    return randomNumber;
+    return rng_lld_GenerateRandomNumber();
 }
 
-uint32_t rngGetLastRandomNumber()
+uint32_t rngGetLastRandomNumber(void)
 {
     uint32_t randomNumber;
-    osalSysLock();
     randomNumber = rng_lld_GetLastRandomNumber();
-    osalSysUnlock();
+
     return randomNumber;
 }
 
