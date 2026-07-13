@@ -384,7 +384,7 @@ static void event_handler(void *arg, esp_event_base_t event_base, int32_t event_
 
 #if LWIP_IPV6
                 {
-                    // Create IPV6 link local address for ETH interface                
+                    // Create IPV6 link local address for ETH interface
                     struct netif *netif = esp_netif_get_handle_from_ifkey("ETH_DEF")->lwip_netif;
                     if (netif != NULL)
                     {
@@ -542,7 +542,7 @@ void nanoHAL_Network_Initialize()
         // register the event handler for IP events
         ESP_ERROR_CHECK(esp_event_handler_instance_register(IP_EVENT, ESP_EVENT_ANY_ID, &event_handler, nullptr, nullptr));
 
-#ifdef ESP32_ETHERNET_SUPPORT
+#if defined(CONFIG_ESP32_ETHERNET_SUPPORT) && CONFIG_ESP32_ETHERNET_SUPPORT == TRUE
         // register the event handler for Ethernet events
         ESP_ERROR_CHECK(esp_event_handler_instance_register(ETH_EVENT, ESP_EVENT_ANY_ID, &event_handler, nullptr, nullptr));
 #endif

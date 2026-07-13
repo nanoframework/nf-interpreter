@@ -457,7 +457,7 @@ bool Sockets_LWIP_Driver::UpgradeToSsl(
                 nullptr,
                 0,
                 g_DebuggerPort_SslCtx_Handle,
-                false))
+                false) == SslError_None)
         {
             int32_t ret;
 

@@ -374,6 +374,14 @@ SOCK_SOCKET LWIP_SOCKETS_Driver::Socket(int family, int type, int protocol)
 {
     NATIVE_PROFILE_PAL_NETWORK();
 
+    // Validate socket type+protocol combination
+    if ((type == SOCK_SOCK_STREAM && protocol != SOCK_IPPROTO_TCP && protocol != SOCK_IPPROTO_IP) ||
+        (type == SOCK_SOCK_DGRAM && protocol != SOCK_IPPROTO_UDP && protocol != SOCK_IPPROTO_IP))
+    {
+        errorCode = EPROTONOSUPPORT;
+        return SOCK_SOCKET_ERROR;
+    }
+
     switch (family)
     {
         case SOCK_AF_INET:

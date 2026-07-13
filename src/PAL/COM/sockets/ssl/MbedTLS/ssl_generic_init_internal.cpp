@@ -9,7 +9,7 @@
 #include <mbedtls.h>
 #include <mbedtls/debug.h>
 
-bool ssl_generic_init_internal(
+SslError ssl_generic_init_internal(
     int sslMode,
     int sslVerify,
     const char *certificate,
@@ -32,6 +32,7 @@ bool ssl_generic_init_internal(
     int endpoint = 0;
     int ret = 0;
 
+    SslError error = SslError_OutOfMemory;
     HAL_Configuration_X509CaRootBundle *certStore = nullptr;
     HAL_Configuration_X509DeviceCertificate *deviceCert = nullptr;
 
@@ -49,7 +50,7 @@ bool ssl_generic_init_internal(
 
     if (sslContexIndex == -1)
     {
-        return FALSE;
+        return SslError_NoFreeContext;
     }
 
     // create and init MbedTLS nanoFramework context
@@ -140,7 +141,7 @@ bool ssl_generic_init_internal(
     // TODO: review if we can add some instance-unique data to the custom argument below
     if (mbedtls_ctr_drbg_seed(context->ctr_drbg, mbedtls_entropy_func, context->entropy, nullptr, 0) != 0)
     {
-        // ctr_drbg_seed_failed
+        error = SslError_DrbgSeedFailed;
         goto error;
     }
 
@@ -150,7 +151,7 @@ bool ssl_generic_init_internal(
             MBEDTLS_SSL_TRANSPORT_STREAM,
             MBEDTLS_SSL_PRESET_DEFAULT) != 0)
     {
-        // ssl_config_defaults_failed
+        error = SslError_ConfigDefaultsFailed;
         goto error;
     }
 
@@ -255,7 +256,7 @@ bool ssl_generic_init_internal(
                     context->ctr_drbg) < 0)
 #endif
             {
-                // private key parse failed
+                error = SslError_PrivateKeyParseFailed;
                 goto error;
             }
         }
@@ -272,13 +273,13 @@ bool ssl_generic_init_internal(
 
         if (mbedtls_x509_crt_parse(context->own_cert, (const unsigned char *)certificate, certLength))
         {
-            // failed parsing own certificate failed
+            error = SslError_CertificateParseFailed;
             goto error;
         }
 
         if (mbedtls_ssl_conf_own_cert(context->conf, context->own_cert, context->pk))
         {
-            // configuring own certificate failed
+            error = SslError_OwnCertConfigFailed;
             goto error;
         }
 
@@ -319,7 +320,7 @@ bool ssl_generic_init_internal(
     ret = mbedtls_ssl_setup(context->ssl, context->conf);
     if (ret != 0)
     {
-        // ssl_setup_failed
+        error = SslError_SetupFailed;
         goto error;
     }
 
@@ -330,7 +331,7 @@ bool ssl_generic_init_internal(
 
     contextHandle = sslContexIndex;
 
-    return true;
+    return SslError_None;
 
 error:
 
@@ -407,5 +408,5 @@ error:
         platform_free(deviceCert);
     }
 
-    return false;
+    return error;
 }

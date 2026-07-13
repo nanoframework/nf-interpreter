@@ -11,9 +11,12 @@
 #define CFGDBG(...) ((void)0)
 
 // Use the block storage interface for flash operations (vendor-neutral)
-#if defined(RP2040) || defined(RP2350)
+#if defined(RP2040)
 extern IBlockStorageDevice RP2040Flash_BlockStorageInterface;
 #define g_ConfigFlashDriver RP2040Flash_BlockStorageInterface
+#elif defined(RP2350)
+extern IBlockStorageDevice RP2350Flash_BlockStorageInterface;
+#define g_ConfigFlashDriver RP2350Flash_BlockStorageInterface
 #else
 extern IBlockStorageDevice STM32Flash_BlockStorageInterface;
 #define g_ConfigFlashDriver STM32Flash_BlockStorageInterface

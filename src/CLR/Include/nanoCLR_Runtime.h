@@ -1802,6 +1802,8 @@ struct CLR_RT_WellKnownTypes
 
     CLR_RT_TypeDef_Index SocketException;
 
+
+    CLR_RT_TypeDef_Index CryptographicException;
     CLR_RT_TypeDef_Index I2cTransferResult;
 
     CLR_RT_TypeDef_Index RmtCommand;
