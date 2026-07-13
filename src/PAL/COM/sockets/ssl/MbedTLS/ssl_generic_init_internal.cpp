@@ -23,6 +23,7 @@ SslError ssl_generic_init_internal(
     bool isServer)
 {
     // set default values for min and max protocol versions
+    // aiming for TLS 1.3 which is the most secure
     mbedtls_ssl_protocol_version minVersion = MBEDTLS_SSL_VERSION_TLS1_3;
     mbedtls_ssl_protocol_version maxVersion = MBEDTLS_SSL_VERSION_TLS1_3;
 
