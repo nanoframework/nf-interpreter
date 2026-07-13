@@ -17,11 +17,6 @@
 extern EFlashDriver EFLD1;
 extern MEMORY_MAPPED_NOR_BLOCK_CONFIG g_Device_BlockStorageConfig;
 
-static MEMORY_MAPPED_NOR_BLOCK_CONFIG *GetBlockStorageConfig(void *context)
-{
-    return (context != NULL) ? (MEMORY_MAPPED_NOR_BLOCK_CONFIG *)context : &g_Device_BlockStorageConfig;
-}
-
 static bool IsValidAddressRange(
     const MEMORY_MAPPED_NOR_BLOCK_CONFIG *config,
     ByteAddress startAddress,
@@ -98,14 +93,14 @@ bool RP2350FlashDriver_UninitializeDevice(void *context)
 
 DeviceBlockInfo *RP2350FlashDriver_GetDeviceInfo(void *context)
 {
-    MEMORY_MAPPED_NOR_BLOCK_CONFIG *config = GetBlockStorageConfig(context);
+    MEMORY_MAPPED_NOR_BLOCK_CONFIG *config = context;
 
     return config->BlockConfig.BlockDeviceInformation;
 }
 
 bool RP2350FlashDriver_Read(void *context, ByteAddress startAddress, unsigned int numBytes, unsigned char *buffer)
 {
-    MEMORY_MAPPED_NOR_BLOCK_CONFIG *config = GetBlockStorageConfig(context);
+    MEMORY_MAPPED_NOR_BLOCK_CONFIG *config = (MEMORY_MAPPED_NOR_BLOCK_CONFIG *)context;
 
     if (buffer == NULL)
     {
@@ -135,7 +130,13 @@ bool RP2350FlashDriver_Write(
     unsigned char *buffer,
     bool readModifyWrite)
 {
-    MEMORY_MAPPED_NOR_BLOCK_CONFIG *config = GetBlockStorageConfig(context);
+    if (context == NULL)
+    {
+        return false;
+    }
+
+    MEMORY_MAPPED_NOR_BLOCK_CONFIG *config = (MEMORY_MAPPED_NOR_BLOCK_CONFIG *)context;
+
     (void)readModifyWrite;
 
     if (buffer == NULL)
@@ -163,7 +164,12 @@ bool RP2350FlashDriver_Write(
 
 bool RP2350FlashDriver_IsBlockErased(void *context, ByteAddress blockAddress, unsigned int length)
 {
-    MEMORY_MAPPED_NOR_BLOCK_CONFIG *config = GetBlockStorageConfig(context);
+    if (context == NULL)
+    {
+        return false;
+    }
+
+    MEMORY_MAPPED_NOR_BLOCK_CONFIG *config = (MEMORY_MAPPED_NOR_BLOCK_CONFIG *)context;
 
     if (length == 0)
     {
@@ -191,7 +197,12 @@ bool RP2350FlashDriver_IsBlockErased(void *context, ByteAddress blockAddress, un
 
 bool RP2350FlashDriver_EraseBlock(void *context, ByteAddress address)
 {
-    MEMORY_MAPPED_NOR_BLOCK_CONFIG *config = GetBlockStorageConfig(context);
+    if (context == NULL)
+    {
+        return false;
+    }
+
+    MEMORY_MAPPED_NOR_BLOCK_CONFIG *config = (MEMORY_MAPPED_NOR_BLOCK_CONFIG *)context;
 
     if (!IsValidBlockStartAddress(config, address))
     {
