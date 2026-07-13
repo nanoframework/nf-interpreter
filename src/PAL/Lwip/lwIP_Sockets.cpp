@@ -375,8 +375,27 @@ SOCK_SOCKET LWIP_SOCKETS_Driver::Socket(int family, int type, int protocol)
     NATIVE_PROFILE_PAL_NETWORK();
 
     // Validate socket type+protocol combination
-    if ((type == SOCK_SOCK_STREAM && protocol != SOCK_IPPROTO_TCP && protocol != SOCK_IPPROTO_IP) ||
-        (type == SOCK_SOCK_DGRAM && protocol != SOCK_IPPROTO_UDP && protocol != SOCK_IPPROTO_IP))
+    bool validTypeProtocol;
+
+    if (type == SOCK_SOCK_STREAM)
+    {
+        validTypeProtocol = (protocol == SOCK_IPPROTO_IP || protocol == SOCK_IPPROTO_TCP);
+    }
+    else if (type == SOCK_SOCK_DGRAM)
+    {
+        validTypeProtocol = (protocol == SOCK_IPPROTO_IP || protocol == SOCK_IPPROTO_UDP);
+    }
+    else if (type == SOCK_SOCK_RAW)
+    {
+        // Raw sockets require an explicit IP protocol number (0-255), SOCK_IPPROTO_IP (0) is not a valid choice
+        validTypeProtocol = (protocol > SOCK_IPPROTO_IP && protocol <= 255);
+    }
+    else
+    {
+        validTypeProtocol = false;
+    }
+
+    if (!validTypeProtocol)
     {
         errorCode = EPROTONOSUPPORT;
         return SOCK_SOCKET_ERROR;
