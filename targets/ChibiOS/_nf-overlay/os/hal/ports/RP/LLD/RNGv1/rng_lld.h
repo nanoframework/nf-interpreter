@@ -3,14 +3,13 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#ifndef HAL_NF_STM32_RNG_H
-#define HAL_NF_STM32_RNG_H
+#ifndef RNG_LLD_H
+#define RNG_LLD_H
+
+#include <hal.h>
+#include <hal_nf_community.h>
 
 #if (HAL_NF_USE_RNG == TRUE)
-
-#if defined(STM32F0xx_MCUCONF)
-#error "CAN'T ENABLE RNG FOR STM32F0 series"
-#endif
 
 /*===========================================================================*/
 /* Driver constants.                                                         */
@@ -19,19 +18,6 @@
 /*===========================================================================*/
 /* Driver pre-compile time settings.                                         */
 /*===========================================================================*/
-
-/**
- * @name    Configuration options
- * @{
- */
-
-/**
- * @brief   Enables the @p rngAcquireBus() and @p rngReleaseBus() APIs.
- * @note    Disabling this option saves both code and data space.
- */
-#if !defined(RNG_USE_MUTUAL_EXCLUSION)
-#define RNG_USE_MUTUAL_EXCLUSION TRUE
-#endif
 
 /*===========================================================================*/
 /* Derived constants and error checks.                                       */
@@ -52,7 +38,24 @@ typedef enum
     RNG_ACTIVE  /* Generating random number.                  */
 } rngState;
 
-#include "rng_lld.h"
+/**
+ * @brief   Structure representing an RNG driver.
+ */
+typedef struct RNGDriver
+{
+
+    // Driver state.
+    rngState State;
+
+    // Last Generated random number.
+    uint32_t RandomNumber;
+
+#if RNG_USE_MUTUAL_EXCLUSION
+    // Mutex protecting the peripheral
+    mutex_t Lock;
+#endif // RNG_USE_MUTUAL_EXCLUSION
+
+} RNGDriver;
 
 /*===========================================================================*/
 /* Driver macros.                                                            */
@@ -67,21 +70,23 @@ extern "C"
 {
 #endif
 
-    void rngInit(void);
-    void rngStart(void);
-    void rngStop(void);
-    uint32_t rngGenerateRandomNumber(void);
-    uint32_t rngGetLastRandomNumber(void);
+    void rng_lld_init(void);
+    void rng_lld_start(void);
+    void rng_lld_stop(void);
+    uint32_t rng_lld_GenerateRandomNumber(void);
+    uint32_t rng_lld_GetLastRandomNumber(void);
 
-#if RNG_USE_MUTUAL_EXCLUSION == TRUE
-    void rngAcquireModule(void);
-    void rngReleaseModule(void);
+#if (RNG_USE_MUTUAL_EXCLUSION == TRUE)
+
+    void rng_lld_aquire(void);
+    void rng_lld_release(void);
+
 #endif
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif // HAL_NF_USE_RNG
+#endif /* HAL_NF_USE_RNG */
 
-#endif // HAL_NF_STM32_RNG_H
+#endif /* RNG_LLD_H */

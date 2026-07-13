@@ -3,14 +3,10 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#ifndef HAL_NF_STM32_RNG_H
-#define HAL_NF_STM32_RNG_H
+#ifndef HAL_NF_RP_RNG_H
+#define HAL_NF_RP_RNG_H
 
 #if (HAL_NF_USE_RNG == TRUE)
-
-#if defined(STM32F0xx_MCUCONF)
-#error "CAN'T ENABLE RNG FOR STM32F0 series"
-#endif
 
 /*===========================================================================*/
 /* Driver constants.                                                         */
@@ -26,11 +22,11 @@
  */
 
 /**
- * @brief   Enables the @p rngAcquireBus() and @p rngReleaseBus() APIs.
+ * @brief   Enables the @p rngAcquireModule() and @p rngReleaseModule() APIs.
  * @note    Disabling this option saves both code and data space.
  */
 #if !defined(RNG_USE_MUTUAL_EXCLUSION)
-#define RNG_USE_MUTUAL_EXCLUSION TRUE
+#define RNG_USE_MUTUAL_EXCLUSION FALSE
 #endif
 
 /*===========================================================================*/
@@ -40,17 +36,6 @@
 /*===========================================================================*/
 /* Driver data structures and types.                                         */
 /*===========================================================================*/
-
-/**
- * @brief   Driver state machine possible states.
- */
-typedef enum
-{
-    RNG_UNINIT, /* Not initialized.                           */
-    RNG_STOP,   /* Stopped.                                   */
-    RNG_READY,  /* Ready.                                     */
-    RNG_ACTIVE  /* Generating random number.                  */
-} rngState;
 
 #include "rng_lld.h"
 
@@ -84,4 +69,4 @@ extern "C"
 
 #endif // HAL_NF_USE_RNG
 
-#endif // HAL_NF_STM32_RNG_H
+#endif // HAL_NF_RP_RNG_H
