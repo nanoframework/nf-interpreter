@@ -72,7 +72,7 @@ steps:
 
         cloudsmith push raw net-nanoframework/$env:CLOUDSMITH_REPO $env:BUILD_ARTIFACTSTAGINGDIRECTORY\WIN32_nanoCLR\nanoFramework.nanoCLR.exe --name WIN32_nanoCLR --version $env:WINCLR_PACKAGE_VERSION -k $(CLOUDSMITH_KEY)
 
-        cloudsmith push raw net-nanoframework/$env:CLOUDSMITH_REPO $env:BUILD_ARTIFACTSTAGINGDIRECTORY\WIN_DLL_nanoCLR\nanoFramework.nanoCLR.dll --name WIN_DLL_nanoCLR --version $env:WINCLR_PACKAGE_VERSION -k $(CLOUDSMITH_KEY)
+        cloudsmith push raw net-nanoframework/$env:CLOUDSMITH_REPO $env:BUILD_ARTIFACTSTAGINGDIRECTORY\nanoclr\nanoFramework.nanoCLR.dll --name WIN_DLL_nanoCLR --version $env:WINCLR_PACKAGE_VERSION -k $(CLOUDSMITH_KEY)
 
       errorActionPreference: "stop"
       failOnStderr: false

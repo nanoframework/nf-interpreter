@@ -26,7 +26,7 @@ int ssl_decode_private_key_internal(
 #if MBEDTLS_VERSION_MAJOR < 3
     retCode = mbedtls_pk_parse_key(&pkey, key, keyLength, password, passwordLength);
 #else
-    retCode = mbedtls_pk_parse_key(&pkey, key, keyLength, password, passwordLength, random, nullptr);
+    retCode = mbedtls_pk_parse_key(&pkey, key, keyLength, password, passwordLength, mbedtls_ctr_drbg_random, nullptr);
 #endif
 
     // need to free this here
