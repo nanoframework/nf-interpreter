@@ -17,7 +17,7 @@
 #define RP2350_SRAM_START         0x20000000UL
 #define RP2350_SRAM_END_EXCLUSIVE 0x20090000UL
 // CLR region ends at 0x10194000 on Pico 2 W (1536KB CLR, expanded for WiFi+TLS)
-#define RP2350_DEPLOYMENT_START   0x10194000UL
+#define RP2350_DEPLOYMENT_START 0x10194000UL
 
 // need to declare the Receiver thread here
 osThreadDef(ReceiverThread, osPriorityHigh, 2048, "ReceiverThread");
