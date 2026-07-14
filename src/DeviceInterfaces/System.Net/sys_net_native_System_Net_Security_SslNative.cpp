@@ -67,7 +67,6 @@ HRESULT Library_sys_net_native_System_Net_Security_SslNative::SecureAccept___STA
     CLR_RT_HeapBlock hbTimeout;
 
     CLR_INT32 handle;
-    bool fRes = true;
     CLR_INT64 *timeout;
     SslError sslErr;
     int mbedtlsCode = 0;
@@ -89,22 +88,11 @@ HRESULT Library_sys_net_native_System_Net_Security_SslNative::SecureAccept___STA
 
     NANOCLR_CHECK_HRESULT(stack.SetupTimeoutFromTicks(hbTimeout, timeout));
 
-    // first make sure we have data to read or ability to write
-    while (true)
-    {
-        sslErr = SSL_Accept(handle, sslContext, &mbedtlsCode);
+    (void)timeout;
 
-        if ((int)sslErr == SOCK_EWOULDBLOCK || (int)sslErr == SOCK_TRY_AGAIN)
-        {
-            // non-blocking - allow other threads to run while we wait for socket activity
-            NANOCLR_CHECK_HRESULT(
-                g_CLR_RT_ExecutionEngine.WaitEvents(stack.m_owningThread, *timeout, Event_Socket, fRes));
-        }
-        else
-        {
-            break;
-        }
-    }
+    // ssl_accept_internal runs the handshake in blocking mode and loops internally
+    // on WANT_READ / WANT_WRITE, returning only on a terminal outcome
+    sslErr = SSL_Accept(handle, sslContext, &mbedtlsCode);
 
     stack.PopValue(); // Timeout
 
@@ -147,7 +135,6 @@ HRESULT Library_sys_net_native_System_Net_Security_SslNative::SecureConnect___ST
 
     const char *szName;
     CLR_INT32 handle;
-    bool fRes = true;
     CLR_INT64 *timeout;
     SslError sslErr;
     int mbedtlsCode = 0;
@@ -174,21 +161,11 @@ HRESULT Library_sys_net_native_System_Net_Security_SslNative::SecureConnect___ST
 
     NANOCLR_CHECK_HRESULT(stack.SetupTimeoutFromTicks(hbTimeout, timeout));
 
-    while (true)
-    {
-        sslErr = SSL_Connect(handle, szName, sslContext, &mbedtlsCode);
+    (void)timeout;
 
-        if ((int)sslErr == SOCK_EWOULDBLOCK || (int)sslErr == SOCK_TRY_AGAIN)
-        {
-            // non-blocking - allow other threads to run while we wait for socket activity
-            NANOCLR_CHECK_HRESULT(
-                g_CLR_RT_ExecutionEngine.WaitEvents(stack.m_owningThread, *timeout, Event_Socket, fRes));
-        }
-        else
-        {
-            break;
-        }
-    }
+    // ssl_connect_internal runs the handshake in blocking mode and loops internally
+    // on WANT_READ / WANT_WRITE, returning only on a terminal outcome
+    sslErr = SSL_Connect(handle, szName, sslContext, &mbedtlsCode);
 
     stack.PopValue(); // Timeout
 
@@ -550,6 +527,9 @@ HRESULT Library_sys_net_native_System_Net_Security_SslNative::InitHelper(CLR_RT_
         case SslError_ConfigDefaultsFailed:
         case SslError_SetupFailed:
             NANOCLR_CHECK_HRESULT(ThrowCryptographicError(stack, (int)sslError));
+            break;
+
+        default:
             break;
     }
 
