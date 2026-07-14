@@ -22,13 +22,14 @@ SslError ssl_accept_internal(int sd, int contextHandle, int *mbedtlsCode)
     }
 
     context = (mbedTLS_NFContext *)g_SSL_Driver.ContextArray[contextHandle].Context;
-    ssl = context->ssl;
 
     // sanity check
-    if (ssl == NULL)
+    if (context == NULL || context->ssl == NULL)
     {
         return SslError_HandshakeBadContext;
     }
+
+    ssl = context->ssl;
 
     // set socket in network context
     context->server_fd->fd = sd;

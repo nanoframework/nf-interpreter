@@ -183,11 +183,6 @@ HRESULT Library_sys_net_native_System_Net_Security_SslNative::SecureConnect___ST
             // non-blocking - allow other threads to run while we wait for socket activity
             NANOCLR_CHECK_HRESULT(
                 g_CLR_RT_ExecutionEngine.WaitEvents(stack.m_owningThread, *timeout, Event_Socket, fRes));
-
-            if ((int)sslErr < 0)
-            {
-                break;
-            }
         }
         else
         {
