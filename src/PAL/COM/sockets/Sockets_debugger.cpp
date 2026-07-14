@@ -459,17 +459,17 @@ bool Sockets_LWIP_Driver::UpgradeToSsl(
                 g_DebuggerPort_SslCtx_Handle,
                 false) == SslError_None)
         {
-            int32_t ret;
+            int mbedtlsCode = 0;
 
             SSL_AddCertificateAuthority(g_DebuggerPort_SslCtx_Handle, (const char *)pCACert, caCertLen);
 
-            do
-            {
-                ret =
-                    SSL_Connect(g_Sockets_LWIP_Driver.m_SocketDebugStream, szTargetHost, g_DebuggerPort_SslCtx_Handle);
-            } while (ret == SOCK_EWOULDBLOCK || ret == SOCK_TRY_AGAIN);
+            SslError sslErr = SSL_Connect(
+                g_Sockets_LWIP_Driver.m_SocketDebugStream,
+                szTargetHost,
+                g_DebuggerPort_SslCtx_Handle,
+                &mbedtlsCode);
 
-            if (ret != 0)
+            if (sslErr != SslError_None)
             {
                 SSL_CloseSocket(g_Sockets_LWIP_Driver.m_SocketDebugStream);
                 SSL_ExitContext(g_DebuggerPort_SslCtx_Handle);
@@ -479,7 +479,7 @@ bool Sockets_LWIP_Driver::UpgradeToSsl(
                 g_Sockets_LWIP_Driver.m_usingSSL = TRUE;
             }
 
-            return ret == 0;
+            return sslErr == SslError_None;
         }
     }
 

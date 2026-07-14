@@ -692,6 +692,10 @@ enum SslError
     SslError_CertificateParseFailed = 7,
     SslError_OwnCertConfigFailed = 8,
     SslError_SetupFailed = 9,
+    SslError_HandshakeBadContext = 10,
+    SslError_HandshakeSetHostname = 11,
+    SslError_HandshakeCertVerifyFailed = 12,
+    SslError_HandshakeFailed = 13,
 };
 
 bool SSL_Initialize();
@@ -722,8 +726,8 @@ SslError SSL_ClientInit(
 
 bool SSL_AddCertificateAuthority(int sslContextHandle, const char *certificate, int certLength);
 bool SSL_ExitContext(int sslContextHandle);
-int SSL_Accept(int socket, int sslContextHandle);
-int SSL_Connect(int socket, const char *szTargetHost, int sslContextHandle);
+SslError SSL_Accept(int socket, int sslContextHandle, int *mbedtlsCode);
+SslError SSL_Connect(int socket, const char *szTargetHost, int sslContextHandle, int *mbedtlsCode);
 int SSL_Write(int socket, const char *Data, size_t size);
 int SSL_Read(int socket, char *Data, size_t size);
 int SSL_CloseSocket(int socket);

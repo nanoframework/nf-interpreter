@@ -136,6 +136,10 @@
 //     SslError_CertificateParseFailed = 7,
 //     SslError_OwnCertConfigFailed = 8,
 //     SslError_SetupFailed = 9,
+//     SslError_HandshakeBadContext = 10,
+//     SslError_HandshakeSetHostname = 11,
+//     SslError_HandshakeCertVerifyFailed = 12,
+//     SslError_HandshakeFailed = 13,
 // } SslError;
 
 struct Library_sys_net_native_System_Net_NetworkInformation_NetworkInterface
