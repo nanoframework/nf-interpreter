@@ -10,7 +10,7 @@
 #include <flash.h>
 
 // local defines
-#define FLASH_ERASED_WORD 0x0FFFFFFFFU
+#define FLASH_ERASED_WORD 0xFFFFFFFFU
 
 bool CC32xxFlashDriver_InitializeDevice(void *context)
 {

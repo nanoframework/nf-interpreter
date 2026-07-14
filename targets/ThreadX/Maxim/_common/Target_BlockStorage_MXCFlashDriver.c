@@ -75,7 +75,6 @@ bool MXCFlashDriver_Write(
     uint32_t remainingBytes = numBytes;
     bool success = false;
     uint32_t error;
-    uint64_t data, temp;
 
     // Check if flash controller is busy
     if (MXC_FLC0->ctrl & MXC_F_FLC_CTRL_PEND)
@@ -91,35 +90,32 @@ bool MXCFlashDriver_Write(
         MXC_FLC0->ctrl &= ~MXC_F_FLC_CTRL_UNLOCK;
         MXC_FLC0->ctrl |= MXC_S_FLC_CTRL_UNLOCK_UNLOCKED;
 
-        if (remainingBytes >= sizeof(uint64_t))
-        {
-            data = *(uint64_t *)buffer;
-        }
-        else
-        {
-            temp = *(uint64_t *)buffer;
+        uint32_t data[4] = {FLASH_ERASED_WORD, FLASH_ERASED_WORD, FLASH_ERASED_WORD, FLASH_ERASED_WORD};
+        uint8_t *dataBytes = (uint8_t *)data;
+        uint32_t validBytes = remainingBytes >= sizeof(data) ? sizeof(data) : remainingBytes;
 
-            // keep the valid bytes; pad the unused upper bytes with 0xFF (erased state)
-            data = temp & (((uint64_t)1 << (remainingBytes * 8)) - 1);
-            data |= ~(((uint64_t)1 << (remainingBytes * 8)) - 1);
+        // keep the valid bytes; pad the unused bytes with 0xFF (erased state)
+        for (uint32_t i = 0; i < validBytes; i++)
+        {
+            dataBytes[i] = buffer[i];
         }
 
         MXC_FLC0->addr = address;
-        error = MXC_FLC_Write128(address, (uint32_t *)&data);
+        error = MXC_FLC_Write128(address, data);
 
         if (error == E_NO_ERROR)
         {
             // increase address
-            address += sizeof(uint64_t);
+            address += sizeof(data);
 
             // move buffer pointer
-            buffer += sizeof(uint64_t);
+            buffer += sizeof(data);
 
-            // update counter: tail branch sets remainingBytes < sizeof(uint64_t),
+            // update counter: tail branch sets remainingBytes < sizeof(data),
             // so cap to zero to avoid unsigned underflow
-            if (remainingBytes >= sizeof(uint64_t))
+            if (remainingBytes >= sizeof(data))
             {
-                remainingBytes -= sizeof(uint64_t);
+                remainingBytes -= sizeof(data);
             }
             else
             {
