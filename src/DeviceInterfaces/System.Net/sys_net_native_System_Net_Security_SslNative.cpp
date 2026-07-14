@@ -530,6 +530,7 @@ HRESULT Library_sys_net_native_System_Net_Security_SslNative::InitHelper(CLR_RT_
             break;
 
         default:
+            NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
             break;
     }
 
