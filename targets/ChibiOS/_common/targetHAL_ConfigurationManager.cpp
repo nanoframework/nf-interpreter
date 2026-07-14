@@ -270,6 +270,12 @@ __nfweak bool ConfigurationManager_StoreConfigurationBlock(
     ByteAddress storageAddress = 0;
     bool requiresEnumeration = FALSE;
     bool success = FALSE;
+    BlockStorageDevice *device = BlockStorageList_GetFirstDevice();
+
+    if (device == NULL)
+    {
+        return FALSE;
+    }
 
     if (configuration == DeviceConfigurationOption_Network)
     {
@@ -374,7 +380,7 @@ __nfweak bool ConfigurationManager_StoreConfigurationBlock(
             }
 
             // now check if memory is erase, so the block can be stored
-            if (!BlockStorageDevice_IsBlockErased(BlockStorageList_GetFirstDevice(), storageAddress, blockSize))
+            if (!BlockStorageDevice_IsBlockErased(device, storageAddress, blockSize))
             {
                 // memory not erased, can't store
                 return FALSE;
@@ -424,7 +430,7 @@ __nfweak bool ConfigurationManager_StoreConfigurationBlock(
             }
 
             // now check if memory is erase, so the block can be stored
-            if (!BlockStorageDevice_IsBlockErased(BlockStorageList_GetFirstDevice(), storageAddress, blockSize))
+            if (!BlockStorageDevice_IsBlockErased(device, storageAddress, blockSize))
             {
                 // memory not erased, can't store
                 return FALSE;
@@ -455,12 +461,7 @@ __nfweak bool ConfigurationManager_StoreConfigurationBlock(
     }
 
     // copy the config block content to the config block storage
-    success = BlockStorageDevice_Write(
-        BlockStorageList_GetFirstDevice(),
-        storageAddress,
-        blockSize,
-        (unsigned char *)configurationBlock,
-        true);
+    success = BlockStorageDevice_Write(device, storageAddress, blockSize, (unsigned char *)configurationBlock, true);
 
     // enumeration is required after we are DONE with SUCCESSFULLY storing all the config chunks
     requiresEnumeration = (success && done);
@@ -494,6 +495,12 @@ __nfweak UpdateConfigurationResult ConfigurationManager_UpdateConfigurationBlock
     uint8_t *blockAddressInCopy;
     uint32_t blockSize;
     UpdateConfigurationResult success = UpdateConfigurationResult_Failed;
+    BlockStorageDevice *device = BlockStorageList_GetFirstDevice();
+
+    if (device == NULL)
+    {
+        return UpdateConfigurationResult_Failed;
+    }
 
     // config sector size
     int sizeOfConfigSector = (uint32_t)&__nanoConfig_end__ - (uint32_t)&__nanoConfig_start__;
@@ -690,12 +697,10 @@ __nfweak UpdateConfigurationResult ConfigurationManager_UpdateConfigurationBlock
                  eraseAddr < (uint32_t)&__nanoConfig_end__ && eraseOk;
                  eraseAddr += 4096)
             {
-                eraseOk = BlockStorageDevice_EraseBlock(BlockStorageList_GetFirstDevice(), eraseAddr);
+                eraseOk = BlockStorageDevice_EraseBlock(device, eraseAddr);
             }
 #else
-            bool eraseOk =
-                (BlockStorageDevice_EraseBlock(BlockStorageList_GetFirstDevice(), (uint32_t)&__nanoConfig_start__) ==
-                 TRUE);
+            bool eraseOk = (BlockStorageDevice_EraseBlock(device, (uint32_t)&__nanoConfig_start__) == TRUE);
 #endif
             if (eraseOk)
             {
@@ -717,7 +722,7 @@ __nfweak UpdateConfigurationResult ConfigurationManager_UpdateConfigurationBlock
 
                 // copy the config block copy back to the config block storage
                 if (BlockStorageDevice_Write(
-                        BlockStorageList_GetFirstDevice(),
+                        device,
                         (uint32_t)&__nanoConfig_start__,
                         sizeOfConfigSector,
                         (unsigned char *)configSectorCopy,
