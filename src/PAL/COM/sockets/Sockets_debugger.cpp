@@ -460,14 +460,24 @@ bool Sockets_LWIP_Driver::UpgradeToSsl(
                 false) == SslError_None)
         {
             int mbedtlsCode = 0;
+            SslError sslErr;
 
             SSL_AddCertificateAuthority(g_DebuggerPort_SslCtx_Handle, (const char *)pCACert, caCertLen);
 
-            SslError sslErr = SSL_Connect(
-                g_Sockets_LWIP_Driver.m_SocketDebugStream,
-                szTargetHost,
-                g_DebuggerPort_SslCtx_Handle,
-                &mbedtlsCode);
+            // Retry the TLS handshake while it signals a would-block condition.
+            // TLS negotiation requires multiple round trips; non-blocking sockets
+            // will return EWOULDBLOCK / TRY_AGAIN until all flights are complete.
+            do
+            {
+                mbedtlsCode = 0;
+
+                sslErr = SSL_Connect(
+                    g_Sockets_LWIP_Driver.m_SocketDebugStream,
+                    szTargetHost,
+                    g_DebuggerPort_SslCtx_Handle,
+                    &mbedtlsCode);
+            } while (sslErr == SslError_HandshakeFailed &&
+                     (mbedtlsCode == SOCK_EWOULDBLOCK || mbedtlsCode == SOCK_TRY_AGAIN));
 
             if (sslErr != SslError_None)
             {
