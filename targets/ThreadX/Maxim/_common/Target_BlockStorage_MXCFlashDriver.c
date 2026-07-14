@@ -38,6 +38,11 @@ bool MXCFlashDriver_Read(void *context, ByteAddress startAddress, unsigned int n
 {
     (void)context;
 
+    if (buffer == NULL)
+    {
+        return false;
+    }
+
     volatile uint8_t *cursor = (volatile uint8_t *)startAddress;
     volatile uint8_t *endAddress = (volatile uint8_t *)(startAddress + numBytes);
 
@@ -60,6 +65,11 @@ bool MXCFlashDriver_Write(
     (void)context;
     (void)readModifyWrite;
 
+    if (buffer == NULL)
+    {
+        return false;
+    }
+
     uint32_t address = startAddress;
     uint32_t endAddress = startAddress + numBytes;
     uint32_t remainingBytes = numBytes;
@@ -74,7 +84,7 @@ bool MXCFlashDriver_Write(
     }
 
     // The FLC supports write widths of 128-bits only. 32*64bits (32*4bytes)
-   
+
     while (address < endAddress)
     {
         // Unlock the Flash to enable the flash control register access
@@ -89,15 +99,13 @@ bool MXCFlashDriver_Write(
         {
             temp = *(uint64_t *)buffer;
 
-            // "move" data to start of position
-            data = temp << sizeof(uint8_t) * (sizeof(uint64_t) - remainingBytes);
-
-            // need to clear the "remaining" bytes
-            data |= 0xFFFFFFFFFFFFFFFF;
+            // keep the valid bytes; pad the unused upper bytes with 0xFF (erased state)
+            data = temp & (((uint64_t)1 << (remainingBytes * 8)) - 1);
+            data |= ~(((uint64_t)1 << (remainingBytes * 8)) - 1);
         }
 
         MXC_FLC0->addr = address;
-        error = MXC_FLC_Write128(address, (uint32_t*)&data);
+        error = MXC_FLC_Write128(address, (uint32_t *)&data);
 
         if (error == E_NO_ERROR)
         {
@@ -107,20 +115,24 @@ bool MXCFlashDriver_Write(
             // move buffer pointer
             buffer += sizeof(uint64_t);
 
-            // update counter
-            remainingBytes -= sizeof(uint64_t);
+            // update counter: tail branch sets remainingBytes < sizeof(uint64_t),
+            // so cap to zero to avoid unsigned underflow
+            if (remainingBytes >= sizeof(uint64_t))
+            {
+                remainingBytes -= sizeof(uint64_t);
+            }
+            else
+            {
+                remainingBytes = 0;
+            }
         }
         else
         {
-#ifdef DEBUG
-            // get error
-            // volatile uint32_t errorCode = HAL_FLASH_GetError();
-            // (void)errorCode;
-#endif
             break;
         }
     }
 
+    success = (address >= endAddress);
     return success;
 }
 

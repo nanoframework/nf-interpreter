@@ -130,11 +130,6 @@ bool RP2350FlashDriver_Write(
     unsigned char *buffer,
     bool readModifyWrite)
 {
-    if (context == NULL)
-    {
-        return false;
-    }
-
     MEMORY_MAPPED_NOR_BLOCK_CONFIG *config = (MEMORY_MAPPED_NOR_BLOCK_CONFIG *)context;
     (void)readModifyWrite;
 
@@ -163,11 +158,6 @@ bool RP2350FlashDriver_Write(
 
 bool RP2350FlashDriver_IsBlockErased(void *context, ByteAddress blockAddress, unsigned int length)
 {
-    if (context == NULL)
-    {
-        return false;
-    }
-
     MEMORY_MAPPED_NOR_BLOCK_CONFIG *config = (MEMORY_MAPPED_NOR_BLOCK_CONFIG *)context;
 
     if (length == 0)
@@ -196,11 +186,6 @@ bool RP2350FlashDriver_IsBlockErased(void *context, ByteAddress blockAddress, un
 
 bool RP2350FlashDriver_EraseBlock(void *context, ByteAddress address)
 {
-    if (context == NULL)
-    {
-        return false;
-    }
-
     MEMORY_MAPPED_NOR_BLOCK_CONFIG *config = (MEMORY_MAPPED_NOR_BLOCK_CONFIG *)context;
 
     if (!IsValidBlockStartAddress(config, address))
