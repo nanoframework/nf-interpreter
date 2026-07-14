@@ -40,7 +40,7 @@ bool SSL_Uninitialize()
     return true;
 }
 
-static bool SSL_GenericInit(
+static SslError SSL_GenericInit(
     int sslMode,
     int sslVerify,
     const char *certificate,
@@ -96,7 +96,7 @@ int SSL_DecodePrivateKey(const unsigned char *key, size_t keyLength, const unsig
     return ssl_decode_private_key_internal(key, keyLength, pwd, pwdLength);
 }
 
-bool SSL_ServerInit(
+SslError SSL_ServerInit(
     int sslMode,
     int sslVerify,
     const char *certificate,
@@ -124,7 +124,7 @@ bool SSL_ServerInit(
         true);
 }
 
-bool SSL_ClientInit(
+SslError SSL_ClientInit(
     int sslMode,
     int sslVerify,
     const char *certificate,

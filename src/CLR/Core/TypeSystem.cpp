@@ -5666,6 +5666,8 @@ static const TypeIndexLookup c_TypeIndexLookup[] = {
 
     TIL("System.Net.Sockets",                       "SocketException",                  SocketException),
 
+
+    TIL("System.Security.Cryptography",             "CryptographicException",           CryptographicException),
     TIL("System.Device.I2c",                        "I2cTransferResult",                I2cTransferResult),
 
     TIL("nanoFramework.Hardware.Esp32.Rmt",         "RmtCommand",                       RmtCommand),
@@ -5685,7 +5687,10 @@ struct MethodIndexLookup
 };
 
 static const MethodIndexLookup c_MethodIndexLookup[] = {
-#define MIL(nm, type, method) {nm, &g_CLR_RT_WellKnownTypes.type, &g_CLR_RT_WellKnownMethods.method}
+#define MIL(nm, type, method)                                                                                          \
+    {                                                                                                                  \
+        nm, &g_CLR_RT_WellKnownTypes.type, &g_CLR_RT_WellKnownMethods.method                                           \
+    }
 
     // clang-format off
 

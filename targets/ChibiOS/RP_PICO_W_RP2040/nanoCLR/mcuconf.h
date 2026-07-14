@@ -17,6 +17,8 @@
 #ifndef MCUCONF_H
 #define MCUCONF_H
 
+// clang-format off
+
 /*
  * RP2040_MCUCONF drivers configuration.
  * Raspberry Pi Pico W variant — requires PIO for CYW43439 WiFi.
@@ -60,8 +62,14 @@
 /*
  * SIO driver system settings.
  */
-#define RP_SIO_USE_UART0                    TRUE
-#define RP_SIO_USE_UART1                    TRUE
+#define RP_SIO_USE_UART0                    FALSE
+#define RP_SIO_USE_UART1                    FALSE
+
+/*
+ * UART driver system settings.
+ */
+#define RP_UART_USE_UART0                   TRUE
+#define RP_UART_USE_UART1                   TRUE
 
 /*
  * USB driver system settings.
@@ -106,3 +114,5 @@
 #define RP_ADC_USE_ADC1                     TRUE
 
 #endif /* MCUCONF_H */
+
+// clang-format on

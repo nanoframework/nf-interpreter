@@ -4,7 +4,7 @@
 parameters:
   - name: buildDirectory
     type: string
-    default: '$(Build.SourcesDirectory)\build'
+    default: '$(Build.SourcesDirectory)/build'
 
 steps:
   - task: CopyFiles@2
@@ -18,6 +18,6 @@ steps:
         *.dfu
         *.uf2
         *.csv
-      TargetFolder: '$(Build.ArtifactStagingDirectory)\$(TargetPublishName)'
+      TargetFolder: '$(Build.ArtifactStagingDirectory)/$(TargetPublishName)'
       flattenFolders: true
       ignoreMakeDirErrors: true

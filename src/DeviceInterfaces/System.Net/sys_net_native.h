@@ -123,6 +123,21 @@
 //     SslProtocols_Tls13 = 12288,
 // } SslProtocols;
 
+// MOVED TO src\PAL\Include\nanoPAL_Sockets.h for convenience
+// typedef enum __nfpack SslError
+// {
+//     SslError_None = 0,
+//     SslError_NoFreeContext = 1,
+//     SslError_OutOfMemory = 2,
+//     SslError_DrbgSeedFailed = 3,
+//     SslError_ConfigDefaultsFailed = 4,
+//     SslError_UnsupportedProtocolVersion = 5,
+//     SslError_PrivateKeyParseFailed = 6,
+//     SslError_CertificateParseFailed = 7,
+//     SslError_OwnCertConfigFailed = 8,
+//     SslError_SetupFailed = 9,
+// } SslError;
+
 struct Library_sys_net_native_System_Net_NetworkInformation_NetworkInterface
 {
     static const int FIELD___interfaceIndex = 1;
@@ -162,19 +177,21 @@ struct Library_sys_net_native_nanoFramework_Networking_NetworkHelper
     static const int FIELD_STATIC___helperException = 4;
     static const int FIELD_STATIC___workingNetworkInterface = 5;
     static const int FIELD_STATIC___ipConfiguration = 6;
-    static const int FIELD_STATIC___helperInstanciated = 7;
+    static const int FIELD_STATIC___workerThread = 7;
+    static const int FIELD_STATIC___stopRequested = 8;
+    static const int FIELD_STATIC___helperInstanciated = 9;
 
     //--//
 };
 
 struct Library_sys_net_native_System_Net_IPAddress
 {
-    static const int FIELD_STATIC__Any = 9;
-    static const int FIELD_STATIC__Loopback = 10;
-    static const int FIELD_STATIC__Broadcast = 11;
-    static const int FIELD_STATIC__None = 12;
-    static const int FIELD_STATIC__IPv6Any = 13;
-    static const int FIELD_STATIC__IPv6Loopback = 14;
+    static const int FIELD_STATIC__Any = 10;
+    static const int FIELD_STATIC__Loopback = 11;
+    static const int FIELD_STATIC__Broadcast = 12;
+    static const int FIELD_STATIC__None = 13;
+    static const int FIELD_STATIC__IPv6Any = 14;
+    static const int FIELD_STATIC__IPv6Loopback = 15;
 
     static const int FIELD__Address = 1;
     static const int FIELD___family = 2;
@@ -227,9 +244,9 @@ struct Library_sys_net_native_System_Net_NetworkInformation_NetworkAvailabilityE
 
 struct Library_sys_net_native_System_Net_NetworkInformation_NetworkChange
 {
-    static const int FIELD_STATIC__NetworkAddressChanged = 15;
-    static const int FIELD_STATIC__NetworkAvailabilityChanged = 16;
-    static const int FIELD_STATIC__NetworkAPStationChanged = 17;
+    static const int FIELD_STATIC__NetworkAddressChanged = 16;
+    static const int FIELD_STATIC__NetworkAvailabilityChanged = 17;
+    static const int FIELD_STATIC__NetworkAPStationChanged = 18;
 
     //--//
 };
@@ -323,6 +340,7 @@ struct Library_sys_net_native_System_Net_Security_SslNative
     static HRESULT InitHelper(CLR_RT_StackFrame &stack, bool isServer);
     static HRESULT ThrowOnError(CLR_RT_StackFrame &stack, int err);
     static void ThrowError(CLR_RT_StackFrame &stack, int errorCode);
+    static HRESULT ThrowCryptographicError(CLR_RT_StackFrame &stack, int errorCode);
 };
 
 struct Library_sys_net_native_System_Net_Sockets_Socket
@@ -412,7 +430,6 @@ struct Library_sys_net_native_System_Net_Sockets_NativeSocket
     static HRESULT BindConnectHelper(CLR_RT_StackFrame &stack, bool fBind);
     static HRESULT ThrowOnError(CLR_RT_StackFrame &stack, CLR_INT32 err);
     static void ThrowError(CLR_RT_StackFrame &stack, CLR_INT32 errorCode);
-
     static CLR_INT32 Helper__SelectSocket(CLR_INT32 socket, CLR_INT32 mode);
 
     /* WARNING!!!
@@ -436,6 +453,13 @@ struct Library_sys_net_native_System_Net_Sockets_NetworkStream
 };
 
 struct Library_sys_net_native_System_Net_Sockets_SocketException
+{
+    static const int FIELD___errorCode = 5;
+
+    //--//
+};
+
+struct Library_sys_net_native_System_Security_Cryptography_CryptographicException
 {
     static const int FIELD___errorCode = 5;
 

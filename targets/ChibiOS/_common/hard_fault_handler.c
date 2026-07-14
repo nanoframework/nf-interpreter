@@ -38,7 +38,7 @@ void NMI_Handler(void)
 #pragma GCC diagnostic ignored "-Wunused-but-set-variable"
 #endif
 
-#if defined(STM32F4XX) || defined(STM32F7XX) || defined(STM32H7XX) || defined(STM32L4XX)
+#if defined(STM32F4XX) || defined(STM32F7XX) || defined(STM32H7XX) || defined(STM32L4XX) || defined(RP2350)
 
 // hard fault handler for Cortex-M3 & M4
 

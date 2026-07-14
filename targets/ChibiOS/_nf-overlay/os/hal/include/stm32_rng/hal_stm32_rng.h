@@ -6,7 +6,7 @@
 #ifndef HAL_NF_STM32_RNG_H
 #define HAL_NF_STM32_RNG_H
 
-#if (HAL_NF_USE_STM32_RNG == TRUE)
+#if (HAL_NF_USE_RNG == TRUE)
 
 #if defined(STM32F0xx_MCUCONF)
 #error "CAN'T ENABLE RNG FOR STM32F0 series"
@@ -30,7 +30,7 @@
  * @note    Disabling this option saves both code and data space.
  */
 #if !defined(RNG_USE_MUTUAL_EXCLUSION)
-#define RNG_USE_MUTUAL_EXCLUSION        TRUE
+#define RNG_USE_MUTUAL_EXCLUSION TRUE
 #endif
 
 /*===========================================================================*/
@@ -44,15 +44,15 @@
 /**
  * @brief   Driver state machine possible states.
  */
-typedef enum {
-  RNG_UNINIT,                /* Not initialized.                           */
-  RNG_STOP,                  /* Stopped.                                   */
-  RNG_READY,                 /* Ready.                                     */
-  RNG_ACTIVE                 /* Generating random number.                  */
+typedef enum
+{
+    RNG_UNINIT, /* Not initialized.                           */
+    RNG_STOP,   /* Stopped.                                   */
+    RNG_READY,  /* Ready.                                     */
+    RNG_ACTIVE  /* Generating random number.                  */
 } rngState;
 
 #include "rng_lld.h"
-
 
 /*===========================================================================*/
 /* Driver macros.                                                            */
@@ -63,25 +63,25 @@ typedef enum {
 /*===========================================================================*/
 
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
 
-  void rngInit(void);
-  void rngStart(void);
-  void rngStop(void);
-  uint32_t rngGenerateRandomNumber(void);
-  uint32_t rngGetLastRandomNumber(void);
+    void rngInit(void);
+    void rngStart(void);
+    void rngStop(void);
+    uint32_t rngGenerateRandomNumber(void);
+    uint32_t rngGetLastRandomNumber(void);
 
 #if RNG_USE_MUTUAL_EXCLUSION == TRUE
-  void rngAcquireModule(void);
-  void rngReleaseModule(void);
+    void rngAcquireModule(void);
+    void rngReleaseModule(void);
 #endif
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif // HAL_NF_USE_STM32_RNG
+#endif // HAL_NF_USE_RNG
 
 #endif // HAL_NF_STM32_RNG_H
-

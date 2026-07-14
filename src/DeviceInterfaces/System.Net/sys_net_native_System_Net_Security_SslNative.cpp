@@ -9,7 +9,7 @@
 // remap types to ease code readability
 typedef Library_sys_net_native_System_Security_Cryptography_X509Certificates_X509Certificate X509Certificate;
 typedef Library_sys_net_native_System_Security_Cryptography_X509Certificates_X509Certificate2 X509Certificate2;
-
+typedef Library_sys_net_native_System_Security_Cryptography_CryptographicException CryptographicException;
 //--//
 
 void Time_GetDateTime(DATE_TIME_INFO *dt)
@@ -422,6 +422,8 @@ HRESULT Library_sys_net_native_System_Net_Security_SslNative::InitHelper(CLR_RT_
     CLR_RT_HeapBlock_Array *arrCert = nullptr;
     CLR_RT_HeapBlock_Array *privateKey = nullptr;
     CLR_UINT8 *sslCert = nullptr;
+
+    SslError sslError;
     volatile int result;
     uint8_t *pk = nullptr;
     const char *pkPassword = nullptr;
@@ -466,40 +468,56 @@ HRESULT Library_sys_net_native_System_Net_Security_SslNative::InitHelper(CLR_RT_
 
     if (isServer)
     {
-        result =
-            (SSL_ServerInit(
-                 sslMode,
-                 sslVerify,
-                 (const char *)sslCert,
-                 sslCert == nullptr ? 0 : arrCert->m_numOfElements,
-                 pk,
-                 pk == nullptr ? 0 : privateKey->m_numOfElements,
-                 pkPassword,
-                 pkPasswordLength,
-                 sslContext,
-                 useDeviceCertificate)
-                 ? 0
-                 : -1);
+        sslError = SSL_ServerInit(
+            sslMode,
+            sslVerify,
+            (const char *)sslCert,
+            sslCert == nullptr ? 0 : arrCert->m_numOfElements,
+            pk,
+            pk == nullptr ? 0 : privateKey->m_numOfElements,
+            pkPassword,
+            pkPasswordLength,
+            sslContext,
+            useDeviceCertificate);
     }
     else
     {
-        result =
-            (SSL_ClientInit(
-                 sslMode,
-                 sslVerify,
-                 (const char *)sslCert,
-                 sslCert == nullptr ? 0 : arrCert->m_numOfElements,
-                 pk,
-                 pk == nullptr ? 0 : privateKey->m_numOfElements,
-                 pkPassword,
-                 pkPasswordLength,
-                 sslContext,
-                 useDeviceCertificate)
-                 ? 0
-                 : -1);
+        sslError = SSL_ClientInit(
+            sslMode,
+            sslVerify,
+            (const char *)sslCert,
+            sslCert == nullptr ? 0 : arrCert->m_numOfElements,
+            pk,
+            pk == nullptr ? 0 : privateKey->m_numOfElements,
+            pkPassword,
+            pkPasswordLength,
+            sslContext,
+            useDeviceCertificate);
     }
 
-    NANOCLR_CHECK_HRESULT(ThrowOnError(stack, result));
+    switch (sslError)
+    {
+        case SslError_None:
+            break;
+
+        case SslError_OutOfMemory:
+            NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
+            break;
+
+        case SslError_NoFreeContext:
+            NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_OPERATION);
+            break;
+
+        case SslError_UnsupportedProtocolVersion:
+        case SslError_CertificateParseFailed:
+        case SslError_PrivateKeyParseFailed:
+        case SslError_OwnCertConfigFailed:
+        case SslError_DrbgSeedFailed:
+        case SslError_ConfigDefaultsFailed:
+        case SslError_SetupFailed:
+            NANOCLR_CHECK_HRESULT(ThrowCryptographicError(stack, (int)sslError));
+            break;
+    }
 
     if (caCert != nullptr)
     {
@@ -571,6 +589,33 @@ HRESULT Library_sys_net_native_System_Net_Security_SslNative::ThrowOnError(CLR_R
         ThrowError(stack, res);
 
         NANOCLR_SET_AND_LEAVE(CLR_E_PROCESS_EXCEPTION);
+    }
+
+    NANOCLR_NOCLEANUP();
+}
+
+HRESULT Library_sys_net_native_System_Net_Security_SslNative::ThrowCryptographicError(
+    CLR_RT_StackFrame &stack,
+    int errorCode)
+{
+    NATIVE_PROFILE_CLR_NETWORK();
+    NANOCLR_HEADER();
+
+    CLR_RT_HeapBlock &res = stack.m_owningThread->m_currentException;
+
+    if ((Library_corlib_native_System_Exception::CreateInstance(
+            res,
+            g_CLR_RT_WellKnownTypes.CryptographicException,
+            CLR_E_FAIL,
+            &stack)) == S_OK)
+    {
+        res.Dereference()[CryptographicException::FIELD___errorCode].SetInteger(errorCode);
+
+        NANOCLR_SET_AND_LEAVE(CLR_E_PROCESS_EXCEPTION);
+    }
+    else
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_UNKNOWN_TYPE);
     }
 
     NANOCLR_NOCLEANUP();

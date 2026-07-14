@@ -25,4 +25,4 @@ steps:
         New-Item -Path ${{ parameters.repoDirectory }} -ItemType "directory" -ErrorAction SilentlyContinue
         # move to the build sources directory
         Set-Location -Path ${{ parameters.repoDirectory }}
-        git clone --recurse-submodules --shallow-submodules --single-branch --depth 1 --branch $(IDF_TAG)  https://github.com/espressif/esp-idf
+        git -c core.autocrlf=false clone --recurse-submodules --shallow-submodules --single-branch --depth 1 --branch $(IDF_TAG) https://github.com/espressif/esp-idf

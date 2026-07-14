@@ -7,6 +7,8 @@
 #ifndef MCUCONF_H
 #define MCUCONF_H
 
+// clang-format off
+
 /*
  * STM32F4xx drivers configuration.
  * The following settings override the default settings present in
@@ -268,6 +270,11 @@
 #define STM32_ST_USE_TIMER                  5
 
 /*
+ * TRNG driver system settings.
+ */
+#define STM32_TRNG_USE_RNG1                 FALSE
+
+/*
  * UART driver system settings.
  */
 #define STM32_UART_USE_USART1               FALSE
@@ -311,3 +318,5 @@
 #include "mcuconf_nf.h"
 
 #endif /* MCUCONF_H */
+
+// clang-format on

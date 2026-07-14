@@ -4,27 +4,44 @@
 steps:
   - task: Cache@2
     inputs:
-      key: "3-1-3 | hex2dfuKey"
-      restoreKeys: hex2dfuKey
+      key: "3-1-3 | $(Agent.OS)-$(Agent.OSArchitecture) | hex2dfuKey"
+      restoreKeys: "3-1-3 | $(Agent.OS)-$(Agent.OSArchitecture)"
       path: $(Agent.TempDirectory)/hex2dfu
       cacheHitVar: HEX2DFU_CACHE_RESTORED
     condition: eq(variables['NeedsDFU'], true)
     displayName: Cache HEX2DFU
 
-  - task: PowerShell@2
-    condition: and( eq(variables['NeedsDFU'], true), ne(variables.HEX2DFU_CACHE_RESTORED, 'true'))
+  - bash: |
+      mkdir -p "$(Agent.TempDirectory)/hex2dfu"
+      AUTH="basic $(printf ':%s' "$GITHUB_TOKEN" | base64 -w 0)"
+      API_RESPONSE=$(curl -s \
+        -H "Authorization: $AUTH" \
+        -H "Accept: application/vnd.github+json" \
+        https://api.github.com/repos/nanoframework/hex2dfu/releases/tags/v3.1.3)
+      if echo "$API_RESPONSE" | jq -e '.message' > /dev/null 2>&1; then
+        echo "ERROR: GitHub API error: $(echo "$API_RESPONSE" | jq -r '.message')"
+        exit 1
+      fi
+      DOWNLOAD_URL=$(echo "$API_RESPONSE" \
+        | jq -r '[.assets[] | select(.name == "hex2dfu") | .browser_download_url] | if length == 1 then .[0] else error("expected exactly one hex2dfu asset, got \(length)") end')
+      if [ -z "$DOWNLOAD_URL" ]; then
+        echo "ERROR: Could not determine hex2dfu download URL"
+        exit 1
+      fi
+      curl -fL \
+        -H "Authorization: $AUTH" \
+        "$DOWNLOAD_URL" -o "$(Agent.TempDirectory)/hex2dfu/hex2dfu"
+      chmod +x "$(Agent.TempDirectory)/hex2dfu/hex2dfu"
+    env:
+      GITHUB_TOKEN: $(GitHubToken)
     displayName: Install HEX2DFU
-    inputs:
-      targetType: "filePath"
-      filePath: '$(Build.Repository.LocalPath)\install-scripts\install-nf-hex2dfu.ps1'
-      failOnStderr: true
+    condition: and( eq(variables['NeedsDFU'], true), ne(variables.HEX2DFU_CACHE_RESTORED, 'true'))
 
   - task: PowerShell@2
     inputs:
       targetType: "inline"
       script: |
-        $newPath = "$env:Agent_TempDirectory".Replace('\','/') + "/hex2dfu"
-        Write-Host "$("##vso[task.setvariable variable=HEX2DFU_PATH]")$newPath"
+        Write-Host "$("##vso[task.setvariable variable=HEX2DFU_PATH]")$env:AGENT_TEMPDIRECTORY/hex2dfu"
       errorActionPreference: "stop"
       failOnStderr: true
     condition: eq(variables['NeedsDFU'], true)
