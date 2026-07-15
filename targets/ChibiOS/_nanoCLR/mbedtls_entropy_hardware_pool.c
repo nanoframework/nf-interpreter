@@ -36,7 +36,7 @@ int mbedtls_hardware_poll(void *data, unsigned char *output, size_t len, size_t 
 
     trngStart(&TRNGD1, NULL);
 
-    if (!trngGenerate(&TRNGD1, len, output))
+    if (trngGenerate(&TRNGD1, len, output) == true)
     {
         trngStop(&TRNGD1);
         return MBEDTLS_ERR_ENTROPY_SOURCE_FAILED;
@@ -83,7 +83,8 @@ psa_status_t mbedtls_psa_external_get_random(
 
     trngStart(&TRNGD1, NULL);
 
-    if (!trngGenerate(&TRNGD1, output_size, output))
+    // trngGenerate returns true if an error occurred
+    if (trngGenerate(&TRNGD1, output_size, output) == true)
     {
         trngStop(&TRNGD1);
         return PSA_ERROR_HARDWARE_FAILURE;
