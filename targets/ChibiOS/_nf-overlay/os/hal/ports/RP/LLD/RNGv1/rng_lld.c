@@ -21,37 +21,37 @@
 #elif defined(RP2350)
 
 // RP2350 TRNG peripheral (RP2350 datasheet section 12.12)
-#define TRNG_BASE               0x400F0000UL
-#define TRNG_RNG_ISR            (*(volatile uint32_t *)(TRNG_BASE + 0x104UL))
-#define TRNG_RNG_ICR            (*(volatile uint32_t *)(TRNG_BASE + 0x108UL))
-#define TRNG_TRNG_VALID         (*(volatile uint32_t *)(TRNG_BASE + 0x110UL))
-#define TRNG_EHR_DATA0          (*(volatile uint32_t *)(TRNG_BASE + 0x114UL))
-#define TRNG_EHR_DATA1          (*(volatile uint32_t *)(TRNG_BASE + 0x118UL))
-#define TRNG_EHR_DATA2          (*(volatile uint32_t *)(TRNG_BASE + 0x11CUL))
-#define TRNG_EHR_DATA3          (*(volatile uint32_t *)(TRNG_BASE + 0x120UL))
-#define TRNG_EHR_DATA4          (*(volatile uint32_t *)(TRNG_BASE + 0x124UL))
-#define TRNG_EHR_DATA5          (*(volatile uint32_t *)(TRNG_BASE + 0x128UL))
-#define TRNG_RND_SOURCE_ENABLE  (*(volatile uint32_t *)(TRNG_BASE + 0x12CUL))
-#define TRNG_TRNG_SW_RESET      (*(volatile uint32_t *)(TRNG_BASE + 0x140UL))
-#define TRNG_RST_BITS_COUNTER   (*(volatile uint32_t *)(TRNG_BASE + 0x1BCUL))
+#define TRNG_BASE              0x400F0000UL
+#define TRNG_RNG_ISR           (*(volatile uint32_t *)(TRNG_BASE + 0x104UL))
+#define TRNG_RNG_ICR           (*(volatile uint32_t *)(TRNG_BASE + 0x108UL))
+#define TRNG_TRNG_VALID        (*(volatile uint32_t *)(TRNG_BASE + 0x110UL))
+#define TRNG_EHR_DATA0         (*(volatile uint32_t *)(TRNG_BASE + 0x114UL))
+#define TRNG_EHR_DATA1         (*(volatile uint32_t *)(TRNG_BASE + 0x118UL))
+#define TRNG_EHR_DATA2         (*(volatile uint32_t *)(TRNG_BASE + 0x11CUL))
+#define TRNG_EHR_DATA3         (*(volatile uint32_t *)(TRNG_BASE + 0x120UL))
+#define TRNG_EHR_DATA4         (*(volatile uint32_t *)(TRNG_BASE + 0x124UL))
+#define TRNG_EHR_DATA5         (*(volatile uint32_t *)(TRNG_BASE + 0x128UL))
+#define TRNG_RND_SOURCE_ENABLE (*(volatile uint32_t *)(TRNG_BASE + 0x12CUL))
+#define TRNG_TRNG_SW_RESET     (*(volatile uint32_t *)(TRNG_BASE + 0x140UL))
+#define TRNG_RST_BITS_COUNTER  (*(volatile uint32_t *)(TRNG_BASE + 0x1BCUL))
 
-#define TRNG_RNG_ISR_VN_ERR        (1UL << 3)
-#define TRNG_RNG_ISR_CRNGT_ERR     (1UL << 2)
-#define TRNG_RNG_ISR_AUTOCORR_ERR  (1UL << 1)
-#define TRNG_RNG_ISR_EHR_VALID     (1UL << 0)
+#define TRNG_RNG_ISR_VN_ERR       (1UL << 3)
+#define TRNG_RNG_ISR_CRNGT_ERR    (1UL << 2)
+#define TRNG_RNG_ISR_AUTOCORR_ERR (1UL << 1)
+#define TRNG_RNG_ISR_EHR_VALID    (1UL << 0)
 
-#define TRNG_RNG_ICR_ALL            (TRNG_RNG_ISR_VN_ERR | TRNG_RNG_ISR_CRNGT_ERR | TRNG_RNG_ISR_AUTOCORR_ERR | TRNG_RNG_ISR_EHR_VALID)
-#define TRNG_TRNG_VALID_EHR_VALID   (1UL << 0)
-#define TRNG_RND_SRC_EN             (1UL << 0)
+#define TRNG_RNG_ICR_ALL                                                                                               \
+    (TRNG_RNG_ISR_VN_ERR | TRNG_RNG_ISR_CRNGT_ERR | TRNG_RNG_ISR_AUTOCORR_ERR | TRNG_RNG_ISR_EHR_VALID)
+#define TRNG_TRNG_VALID_EHR_VALID (1UL << 0)
+#define TRNG_RND_SRC_EN           (1UL << 0)
 
-#define RNG_TIMEOUT_VALUE_MS        500UL
+#define RNG_TIMEOUT_VALUE_MS 500UL
 
 #endif
 
 /*===========================================================================*/
 /* Driver exported variables.                                                */
 /*===========================================================================*/
-
 
 #if defined(RP2350)
 
