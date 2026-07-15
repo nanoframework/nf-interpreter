@@ -45,7 +45,7 @@
 #define TRNG_TRNG_VALID_EHR_VALID (1UL << 0)
 #define TRNG_RND_SRC_EN           (1UL << 0)
 
-#define RNG_TIMEOUT_VALUE_MS 500UL
+#define c_RNG_TIMEOUT_VALUE_MS 500UL
 
 #endif
 
@@ -130,7 +130,7 @@ uint32_t rng_lld_GenerateRandomNumber(void)
 
 #elif defined(RP2350)
 
-    for (uint32_t elapsed = 0; elapsed < RNG_TIMEOUT_VALUE_MS; elapsed++)
+    for (uint32_t elapsed = 0; elapsed < c_RNG_TIMEOUT_VALUE_MS; elapsed++)
     {
         uint32_t isr = TRNG_RNG_ISR;
 
@@ -161,8 +161,9 @@ uint32_t rng_lld_GenerateRandomNumber(void)
         osalThreadSleepMilliseconds(1);
     }
 
-    // Keep previous value on timeout to avoid collapsing to repeated zeros.
-    return RNGD1.RandomNumber;
+    // Hardware RNG failure. Halting is cryptographically safer than returning predictable/repeated values.
+    osalSysHalt("TRNG Timeout");
+    return 0;
 
 #endif
 
