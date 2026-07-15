@@ -138,10 +138,8 @@ uint32_t rng_lld_GenerateRandomNumber(void)
         if ((isr & (TRNG_RNG_ISR_AUTOCORR_ERR | TRNG_RNG_ISR_CRNGT_ERR | TRNG_RNG_ISR_VN_ERR)) != 0)
         {
             trng_prepare_source();
-            continue;
         }
-
-        if ((TRNG_TRNG_VALID & TRNG_TRNG_VALID_EHR_VALID) != 0 || (isr & TRNG_RNG_ISR_EHR_VALID) != 0)
+        else if ((TRNG_TRNG_VALID & TRNG_TRNG_VALID_EHR_VALID) != 0 || (isr & TRNG_RNG_ISR_EHR_VALID) != 0)
         {
             uint32_t e0 = TRNG_EHR_DATA0;
             (void)TRNG_EHR_DATA1;
