@@ -9,7 +9,6 @@
 SslError ssl_accept_internal(int sd, int contextHandle, int *mbedtlsCode)
 {
     mbedTLS_NFContext *context;
-    mbedtls_ssl_context *ssl;
     int nonblock = 0;
     int ret;
 
@@ -28,8 +27,6 @@ SslError ssl_accept_internal(int sd, int contextHandle, int *mbedtlsCode)
     {
         return SslError_HandshakeBadContext;
     }
-
-    ssl = context->ssl;
 
     // set socket in network context
     context->server_fd->fd = sd;
