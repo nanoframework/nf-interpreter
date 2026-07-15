@@ -26,7 +26,7 @@ SslError ssl_connect_internal(int sd, const char *szTargetHost, int contextHandl
     // sd should already have been created
     // Now do the SSL negotiation
     context = (mbedTLS_NFContext *)g_SSL_Driver.ContextArray[contextHandle].Context;
-    if (context == NULL)
+    if (context == NULL || context->ssl == NULL)
     {
         return SslError_HandshakeBadContext;
     }
