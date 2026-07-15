@@ -66,10 +66,10 @@ HRESULT Library_sys_net_native_System_Net_Security_SslNative::SecureAccept___STA
     CLR_INT32 timeout_ms = -1; // wait forever
     CLR_RT_HeapBlock hbTimeout;
 
-    int result = 0;
     CLR_INT32 handle;
-    bool fRes = true;
     CLR_INT64 *timeout;
+    SslError sslErr;
+    int mbedtlsCode = 0;
 
     FAULT_ON_NULL(socket);
 
@@ -88,26 +88,33 @@ HRESULT Library_sys_net_native_System_Net_Security_SslNative::SecureAccept___STA
 
     NANOCLR_CHECK_HRESULT(stack.SetupTimeoutFromTicks(hbTimeout, timeout));
 
-    // first make sure we have data to read or ability to write
-    while (true)
-    {
-        result = SSL_Accept(handle, sslContext);
+    (void)timeout;
 
-        if (result == SOCK_EWOULDBLOCK || result == SOCK_TRY_AGAIN)
-        {
-            // non-blocking - allow other threads to run while we wait for socket activity
-            NANOCLR_CHECK_HRESULT(
-                g_CLR_RT_ExecutionEngine.WaitEvents(stack.m_owningThread, *timeout, Event_Socket, fRes));
-        }
-        else
-        {
-            break;
-        }
-    }
+    // ssl_accept_internal runs the handshake in blocking mode and loops internally
+    // on WANT_READ / WANT_WRITE, returning only on a terminal outcome
+    sslErr = SSL_Accept(handle, sslContext, &mbedtlsCode);
 
     stack.PopValue(); // Timeout
 
-    NANOCLR_CHECK_HRESULT(ThrowOnError(stack, result));
+    switch (sslErr)
+    {
+        case SslError_None:
+            break;
+
+        case SslError_HandshakeBadContext:
+        case SslError_HandshakeSetHostname:
+            NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_OPERATION);
+            break;
+
+        case SslError_HandshakeCertVerifyFailed:
+        case SslError_HandshakeFailed:
+            NANOCLR_CHECK_HRESULT(ThrowCryptographicError(stack, mbedtlsCode));
+            break;
+
+        default:
+            NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
+            break;
+    }
 
     NANOCLR_NOCLEANUP();
 }
@@ -126,11 +133,11 @@ HRESULT Library_sys_net_native_System_Net_Security_SslNative::SecureConnect___ST
     CLR_RT_HeapBlock *socket = stack.Arg2().Dereference();
     CLR_RT_HeapBlock hbTimeout;
 
-    int result;
     const char *szName;
     CLR_INT32 handle;
-    bool fRes = true;
     CLR_INT64 *timeout;
+    SslError sslErr;
+    int mbedtlsCode = 0;
 
     FAULT_ON_NULL(socket);
 
@@ -154,28 +161,33 @@ HRESULT Library_sys_net_native_System_Net_Security_SslNative::SecureConnect___ST
 
     NANOCLR_CHECK_HRESULT(stack.SetupTimeoutFromTicks(hbTimeout, timeout));
 
-    while (true)
-    {
-        result = SSL_Connect(handle, szName, sslContext);
+    (void)timeout;
 
-        if (result == SOCK_EWOULDBLOCK || result == SOCK_TRY_AGAIN)
-        {
-            // non-blocking - allow other threads to run while we wait for socket activity
-            NANOCLR_CHECK_HRESULT(
-                g_CLR_RT_ExecutionEngine.WaitEvents(stack.m_owningThread, *timeout, Event_Socket, fRes));
-
-            if (result < 0)
-                break;
-        }
-        else
-        {
-            break;
-        }
-    }
+    // ssl_connect_internal runs the handshake in blocking mode and loops internally
+    // on WANT_READ / WANT_WRITE, returning only on a terminal outcome
+    sslErr = SSL_Connect(handle, szName, sslContext, &mbedtlsCode);
 
     stack.PopValue(); // Timeout
 
-    NANOCLR_CHECK_HRESULT(ThrowOnError(stack, result));
+    switch (sslErr)
+    {
+        case SslError_None:
+            break;
+
+        case SslError_HandshakeBadContext:
+        case SslError_HandshakeSetHostname:
+            NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_OPERATION);
+            break;
+
+        case SslError_HandshakeCertVerifyFailed:
+        case SslError_HandshakeFailed:
+            NANOCLR_CHECK_HRESULT(ThrowCryptographicError(stack, mbedtlsCode));
+            break;
+
+        default:
+            NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
+            break;
+    }
 
     NANOCLR_NOCLEANUP();
 }
@@ -515,6 +527,10 @@ HRESULT Library_sys_net_native_System_Net_Security_SslNative::InitHelper(CLR_RT_
         case SslError_ConfigDefaultsFailed:
         case SslError_SetupFailed:
             NANOCLR_CHECK_HRESULT(ThrowCryptographicError(stack, (int)sslError));
+            break;
+
+        default:
+            NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
             break;
     }
 
