@@ -36,7 +36,7 @@ int mbedtls_hardware_poll(void *data, unsigned char *output, size_t len, size_t 
     {
         uint32_t rand = rng_lld_GenerateRandomNumber();
         size_t take = (len - i < 4) ? (len - i) : 4;
-        
+
         for (size_t j = 0; j < take; j++)
         {
             output[i + j] = (unsigned char)((rand >> (j * 8)) & 0xFF);
@@ -69,7 +69,7 @@ psa_status_t mbedtls_psa_external_get_random(
     {
         uint32_t rand = rng_lld_GenerateRandomNumber();
         size_t take = (output_size - i < 4) ? (output_size - i) : 4;
-        
+
         for (size_t j = 0; j < take; j++)
         {
             output[i + j] = (uint8_t)((rand >> (j * 8)) & 0xFF);
