@@ -41,6 +41,5 @@ This WiFi target adds:
 - I/O filesystem API (`CONFIG_API_SYSTEM_IO_FILESYSTEM`) and LittleFS storage
 - CYW43439 driver (PIO-based SPI, fetched via CMake FetchContent)
 - Larger nanoCLR flash partition to fit WiFi + TLS native code
-- ROSC-based entropy pool for mbedTLS (`mbedtls_entropy_hardware_pool.c`)
 - lwIP WiFi options (`target_lwipopts.h`, `target_lwip_sntp_opts.h`)
 - Larger CLRStartupThread stack (8192 bytes) for TLS operations
