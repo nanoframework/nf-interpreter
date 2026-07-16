@@ -24,7 +24,7 @@ int mbedtls_hardware_poll(void *data, unsigned char *output, size_t len, size_t 
 #define TRNG_TRNG_SW_RESET     (*(volatile uint32_t *)(TRNG_BASE + 0x140UL))
 #define TRNG_RST_BITS_COUNTER  (*(volatile uint32_t *)(TRNG_BASE + 0x1BCUL))
 
-#define TRNG_ISR_ERRORS (1UL << 3 | 1UL << 2 | 1UL << 1) // VN_ERR | CRNGT_ERR | AUTOCORR_ERR
+#define TRNG_ISR_ERRORS    (1UL << 3 | 1UL << 2 | 1UL << 1) // VN_ERR | CRNGT_ERR | AUTOCORR_ERR
 #define TRNG_ISR_EHR_VALID (1UL << 0)
 #define TRNG_ICR_ALL       (TRNG_ISR_ERRORS | TRNG_ISR_EHR_VALID)
 #define TRNG_VALID_EHR     (1UL << 0)
@@ -33,7 +33,7 @@ int mbedtls_hardware_poll(void *data, unsigned char *output, size_t len, size_t 
 // RESETS_ALLREG_TRNG (bit 25) and RESETS struct are defined in rp2350.h via hal.h.
 
 // Maximum poll loops waiting for EHR_VALID (~500 ms budget at 150 MHz)
-#define c_TRNG_POLL_LIMIT   5000000UL
+#define c_TRNG_POLL_LIMIT 5000000UL
 
 // ---------------------------------------------------------------------------
 // Initialise TRNG and prepare entropy source.
