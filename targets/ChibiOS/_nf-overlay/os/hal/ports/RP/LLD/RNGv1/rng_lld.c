@@ -117,6 +117,80 @@ void rng_lld_stop(void)
     RNGD1.State = RNG_STOP;
 }
 
+bool rng_lld_generate(size_t size, uint8_t *out)
+{
+#if defined(RP2040)
+
+    while (size > 0)
+    {
+        uint32_t value = 0;
+        for (int i = 0; i < 32; i++)
+        {
+            value = (value << 1) | (ROSC_RANDOMBIT & 1u);
+        }
+
+        for (size_t i = 0; i < sizeof(uint32_t) && size > 0; i++)
+        {
+            *out++ = (uint8_t)value;
+            value >>= 8;
+            size--;
+        }
+    }
+
+    return true;
+
+#elif defined(RP2350)
+
+    while (size > 0)
+    {
+        for (uint32_t elapsed = 0; elapsed < c_RNG_TIMEOUT_VALUE_MS; elapsed++)
+        {
+            uint32_t isr = TRNG_RNG_ISR;
+
+            if ((isr & (TRNG_RNG_ISR_AUTOCORR_ERR | TRNG_RNG_ISR_CRNGT_ERR | TRNG_RNG_ISR_VN_ERR)) != 0)
+            {
+                trng_prepare_source();
+                continue;
+            }
+
+            if ((TRNG_TRNG_VALID & TRNG_TRNG_VALID_EHR_VALID) != 0 || (isr & TRNG_RNG_ISR_EHR_VALID) != 0)
+            {
+                volatile uint32_t *ehrRegs[] = {
+                    &TRNG_EHR_DATA0,
+                    &TRNG_EHR_DATA1,
+                    &TRNG_EHR_DATA2,
+                    &TRNG_EHR_DATA3,
+                    &TRNG_EHR_DATA4,
+                    &TRNG_EHR_DATA5};
+
+                for (int r = 0; r < 6 && size > 0; r++)
+                {
+                    uint32_t word = *ehrRegs[r];
+                    for (size_t b = 0; b < sizeof(uint32_t) && size > 0; b++)
+                    {
+                        *out++ = (uint8_t)word;
+                        word >>= 8;
+                        size--;
+                    }
+                }
+
+                TRNG_RNG_ICR = TRNG_RNG_ISR_EHR_VALID;
+                goto next_chunk;
+            }
+
+            osalThreadSleepMilliseconds(1);
+        }
+
+        return false;
+
+    next_chunk:;
+    }
+
+    return true;
+
+#endif
+}
+
 uint32_t rng_lld_GenerateRandomNumber(void)
 {
 #if defined(RP2040)

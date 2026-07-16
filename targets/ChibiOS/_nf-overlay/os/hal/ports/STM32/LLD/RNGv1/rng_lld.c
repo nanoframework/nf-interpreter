@@ -85,6 +85,42 @@ void rng_lld_stop()
     RNGD1.State = RNG_STOP;
 }
 
+bool rng_lld_generate(size_t size, uint8_t *out)
+{
+    while (size > 0)
+    {
+        systime_t start = osalOsGetSystemTimeX();
+        systime_t end = start + OSAL_MS2I(RNG_TIMEOUT_VALUE);
+
+        while (__RNG_GET_FLAG(RNGD1, RNG_FLAG_CECS) || __RNG_GET_FLAG(RNGD1, RNG_FLAG_SECS))
+        {
+            if (!osalTimeIsInRangeX(osalOsGetSystemTimeX(), start, end))
+            {
+                return false;
+            }
+        }
+
+        while (!__RNG_GET_FLAG(RNGD1, RNG_FLAG_DRDY))
+        {
+            if (!osalTimeIsInRangeX(osalOsGetSystemTimeX(), start, end))
+            {
+                return false;
+            }
+        }
+
+        uint32_t r = RNGD1.Instance->DR;
+
+        for (size_t i = 0; i < sizeof(uint32_t) && size > 0; i++)
+        {
+            *out++ = (uint8_t)r;
+            r >>= 8;
+            size--;
+        }
+    }
+
+    return true;
+}
+
 uint32_t rng_lld_GenerateRandomNumber()
 {
     systime_t start = osalOsGetSystemTimeX();

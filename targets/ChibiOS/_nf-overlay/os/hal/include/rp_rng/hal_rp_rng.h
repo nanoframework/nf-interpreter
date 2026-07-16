@@ -55,8 +55,7 @@ extern "C"
     void rngInit(void);
     void rngStart(void);
     void rngStop(void);
-    uint32_t rngGenerateRandomNumber(void);
-    uint32_t rngGetLastRandomNumber(void);
+    bool rngGenerate(size_t size, uint8_t *out);
 
 #if RNG_USE_MUTUAL_EXCLUSION == TRUE
     void rngAcquireModule(void);
