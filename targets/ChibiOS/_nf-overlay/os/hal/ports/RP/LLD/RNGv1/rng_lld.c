@@ -188,6 +188,10 @@ bool rng_lld_generate(size_t size, uint8_t *out)
 
     return true;
 
+#else
+    (void)size;
+    (void)out;
+    return false;
 #endif
 }
 

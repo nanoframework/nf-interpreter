@@ -57,6 +57,9 @@ typedef struct RNGDriver
 
 } RNGDriver;
 
+/** @brief RNGD1 driver identifier.*/
+extern RNGDriver RNGD1;
+
 /*===========================================================================*/
 /* Driver macros.                                                            */
 /*===========================================================================*/
