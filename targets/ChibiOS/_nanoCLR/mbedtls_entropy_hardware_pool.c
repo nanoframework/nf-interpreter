@@ -42,6 +42,8 @@ int mbedtls_hardware_poll(void *data, unsigned char *output, size_t len, size_t 
 
     trngStop(&TRNGD1);
 
+#else
+#error "No hardware RNG source configured: enable HAL_NF_USE_RNG or HAL_USE_TRNG"
 #endif
 
     return 0;
