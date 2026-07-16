@@ -3286,6 +3286,10 @@ HRESULT CLR_RT_TypeDescriptor::InitializeFromObject(const CLR_RT_HeapBlock &ref)
 
             case DATATYPE_VALUETYPE:
             case DATATYPE_CLASS:
+            case DATATYPE_GENERICINST:
+                // A closed generic instance laid out as a dedicated DATATYPE_GENERICINST heap object
+                // still records its declaring (open) TypeDef in the object header via SetObjectCls, so
+                // recover the type the same way as a regular class/value-type instance.
                 cls = &obj->ObjectCls();
                 break;
 
@@ -3496,8 +3500,10 @@ HRESULT CLR_RT_TypeDescriptor::ExtractTypeIndexFromObject(const CLR_RT_HeapBlock
 
     NANOCLR_CHECK_HRESULT(CLR_RT_TypeDescriptor::ExtractObjectAndDataType(obj, dt));
 
-    if (dt == DATATYPE_VALUETYPE || dt == DATATYPE_CLASS)
+    if (dt == DATATYPE_VALUETYPE || dt == DATATYPE_CLASS || dt == DATATYPE_GENERICINST)
     {
+        // DATATYPE_GENERICINST objects keep their declaring TypeDef in the object header (SetObjectCls),
+        // so the type index is recovered exactly like a class/value-type instance.
         res = obj->ObjectCls();
     }
     else
