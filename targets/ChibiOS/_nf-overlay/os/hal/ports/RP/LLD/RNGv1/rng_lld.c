@@ -32,6 +32,7 @@
 #define TRNG_EHR_DATA4         (*(volatile uint32_t *)(TRNG_BASE + 0x124UL))
 #define TRNG_EHR_DATA5         (*(volatile uint32_t *)(TRNG_BASE + 0x128UL))
 #define TRNG_RND_SOURCE_ENABLE (*(volatile uint32_t *)(TRNG_BASE + 0x12CUL))
+#define TRNG_SAMPLE_CNT1       (*(volatile uint32_t *)(TRNG_BASE + 0x130UL))
 #define TRNG_TRNG_SW_RESET     (*(volatile uint32_t *)(TRNG_BASE + 0x140UL))
 #define TRNG_RST_BITS_COUNTER  (*(volatile uint32_t *)(TRNG_BASE + 0x1BCUL))
 
@@ -55,13 +56,18 @@
 
 #if defined(RP2350)
 
+// Arm the TRNG entropy source: disable, reset, restart the bit-collection
+// window, clear IRQ flags and (re)enable.
 static void trng_prepare_source(void)
 {
-    // Requirement: counter reset only takes effect while source is disabled.
+    // Requirement: counter reset and sample-rate config only take effect while the source is disabled.
     TRNG_RND_SOURCE_ENABLE = 0;
     TRNG_TRNG_SW_RESET = 1;
     TRNG_TRNG_SW_RESET = 0;
     TRNG_RST_BITS_COUNTER = 1;
+
+    // Sample every rng_clk cycle
+    TRNG_SAMPLE_CNT1 = 0;
     TRNG_RNG_ICR = TRNG_RNG_ICR_ALL;
     TRNG_RND_SOURCE_ENABLE = TRNG_RND_SRC_EN;
 }
@@ -99,7 +105,6 @@ void rng_lld_init(void)
 void rng_lld_start(void)
 {
 #if defined(RP2350)
-    // Ensure TRNG peripheral clock domain is enabled.
     rp_peripheral_unreset(RESETS_ALLREG_TRNG);
     trng_prepare_source();
 #endif
