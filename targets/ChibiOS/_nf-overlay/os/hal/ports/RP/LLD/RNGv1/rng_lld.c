@@ -195,62 +195,6 @@ bool rng_lld_generate(size_t size, uint8_t *out)
 #endif
 }
 
-uint32_t rng_lld_GenerateRandomNumber(void)
-{
-#if defined(RP2040)
-
-    uint32_t value = 0;
-    for (int i = 0; i < 32; i++)
-    {
-        value = (value << 1) | (ROSC_RANDOMBIT & 1u);
-    }
-    RNGD1.RandomNumber = value;
-
-#elif defined(RP2350)
-
-    for (uint32_t elapsed = 0; elapsed < c_RNG_TIMEOUT_VALUE_MS; elapsed++)
-    {
-        uint32_t isr = TRNG_RNG_ISR;
-
-        // Per TRNG status semantics, AUTOCORR error stops RNG until reset.
-        if ((isr & (TRNG_RNG_ISR_AUTOCORR_ERR | TRNG_RNG_ISR_CRNGT_ERR | TRNG_RNG_ISR_VN_ERR)) != 0)
-        {
-            trng_prepare_source();
-        }
-        else if ((TRNG_TRNG_VALID & TRNG_TRNG_VALID_EHR_VALID) != 0 || (isr & TRNG_RNG_ISR_EHR_VALID) != 0)
-        {
-            uint32_t e0 = TRNG_EHR_DATA0;
-            (void)TRNG_EHR_DATA1;
-            (void)TRNG_EHR_DATA2;
-            (void)TRNG_EHR_DATA3;
-            (void)TRNG_EHR_DATA4;
-            (void)TRNG_EHR_DATA5;
-
-            // EHR already contains conditioned entropy; return one native 32-bit lane.
-            RNGD1.RandomNumber = e0;
-
-            TRNG_RNG_ICR = TRNG_RNG_ISR_EHR_VALID;
-
-            return RNGD1.RandomNumber;
-        }
-
-        osalThreadSleepMilliseconds(1);
-    }
-
-    // Hardware RNG failure. Halting is cryptographically safer than returning predictable/repeated values.
-    osalSysHalt("TRNG Timeout");
-    return 0;
-
-#endif
-
-    return RNGD1.RandomNumber;
-}
-
-uint32_t rng_lld_GetLastRandomNumber(void)
-{
-    return RNGD1.RandomNumber;
-}
-
 #if (RNG_USE_MUTUAL_EXCLUSION == TRUE)
 
 void rng_lld_aquire(void)

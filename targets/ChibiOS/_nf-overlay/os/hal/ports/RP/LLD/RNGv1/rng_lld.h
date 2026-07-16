@@ -77,8 +77,6 @@ extern "C"
     void rng_lld_start(void);
     void rng_lld_stop(void);
     bool rng_lld_generate(size_t size, uint8_t *out);
-    uint32_t rng_lld_GenerateRandomNumber(void);
-    uint32_t rng_lld_GetLastRandomNumber(void);
 
 #if (RNG_USE_MUTUAL_EXCLUSION == TRUE)
 
