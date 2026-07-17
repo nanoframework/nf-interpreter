@@ -97,7 +97,12 @@ void rng_lld_init(void)
 void rng_lld_start(void)
 {
 #if defined(RP2350)
+    // Per Pico SDK: set up sampling parameters, then ENABLE first, THEN clear ICR.
+    TRNG_SAMPLE_CNT1 = 0;
+    TRNG_DEBUG_CONTROL = (uint32_t)-1;
     TRNG_RND_SOURCE_ENABLE = TRNG_RND_SRC_EN;
+    // Clear all flags AFTER enable - triggers fresh collection
+    TRNG_RNG_ICR = (uint32_t)-1;
 #endif
 
     RNGD1.State = RNG_READY;
@@ -140,22 +145,42 @@ bool rng_lld_generate(size_t size, uint8_t *out)
 
 #elif defined(RP2350)
 
+    // Per Pico SDK (pico_rand/rand.c capture_additional_trng_samples):
+    // - rng_lld_start() already enabled source and cleared ICR, triggering first collection
+    // - Here we just wait for BUSY LOW (data ready), then read ALL 6 EHR words
+    // - Reading EHR_DATA5 (last word) hardware-triggers the next collection cycle automatically
+    // - Do NOT write ICR inside this loop: it interrupts mid-collection and breaks re-arming
+
     while (size > 0)
     {
-        // Wait for 192 ROSC samples to fill EHR
-        while (TRNG_BUSY)
+        // Wait for collection to complete
+        uint32_t timeout_ms = 50;
+        while (timeout_ms > 0 && TRNG_BUSY)
         {
-            osalThreadSleepMilliseconds(1);
+            // 10 ms is a good compromise between responsiveness and CPU load, since the TRNG collection time is ~15ms
+            osalThreadSleepMilliseconds(10);
+            timeout_ms = timeout_ms - 10;
         }
 
-        // Copy 6 EHR words
-        volatile uint32_t *ehrRegs[] =
-            {&TRNG_EHR_DATA0, &TRNG_EHR_DATA1, &TRNG_EHR_DATA2, &TRNG_EHR_DATA3, &TRNG_EHR_DATA4, &TRNG_EHR_DATA5};
+        if (TRNG_BUSY)
+        {
+            RNGD1.State = RNG_READY;
+            return false;
+        }
 
+        // ALWAYS read all 6 EHR words into a local buffer.
+        uint32_t ehr[6];
+        ehr[0] = TRNG_EHR_DATA0;
+        ehr[1] = TRNG_EHR_DATA1;
+        ehr[2] = TRNG_EHR_DATA2;
+        ehr[3] = TRNG_EHR_DATA3;
+        ehr[4] = TRNG_EHR_DATA4;
+        ehr[5] = TRNG_EHR_DATA5;
+
+        // Copy needed bytes from local EHR buffer to output
         for (int r = 0; r < 6 && size > 0; r++)
         {
-            uint32_t word = *ehrRegs[r];
-
+            uint32_t word = ehr[r];
             for (size_t b = 0; b < sizeof(uint32_t) && size > 0; b++)
             {
                 *out++ = (uint8_t)word;
