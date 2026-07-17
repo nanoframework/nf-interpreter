@@ -98,12 +98,11 @@ void rng_lld_start(void)
 {
 #if defined(RP2350)
     // Per Pico SDK: set up sampling parameters, then ENABLE first, THEN clear ICR.
-    // Clearing EHR_VALID (bit 0) with source ON is what triggers a fresh collection cycle.
-    // Clearing before enable does nothing and leaves stale EHR data.
     TRNG_SAMPLE_CNT1 = 0;
     TRNG_DEBUG_CONTROL = (uint32_t)-1;
     TRNG_RND_SOURCE_ENABLE = TRNG_RND_SRC_EN;
-    TRNG_RNG_ICR = (uint32_t)-1;  // Clear all flags AFTER enable - triggers fresh collection
+    // Clear all flags AFTER enable - triggers fresh collection
+    TRNG_RNG_ICR = (uint32_t)-1;
 #endif
 
     RNGD1.State = RNG_READY;
@@ -151,13 +150,10 @@ bool rng_lld_generate(size_t size, uint8_t *out)
     // - Here we just wait for BUSY LOW (data ready), then read ALL 6 EHR words
     // - Reading EHR_DATA5 (last word) hardware-triggers the next collection cycle automatically
     // - Do NOT write ICR inside this loop: it interrupts mid-collection and breaks re-arming
-    //
-    // IMPORTANT: always read all 6 EHR words per batch even if fewer bytes are needed,
-    // because reading EHR_DATA5 is the hardware trigger for the next collection cycle.
 
     while (size > 0)
     {
-        // Wait for collection to complete (TRNG_BUSY LOW = 192 bits ready in EHR_DATA0-5)
+        // Wait for collection to complete
         uint32_t timeout_ms = 50;
         while (timeout_ms > 0 && TRNG_BUSY)
         {
@@ -173,14 +169,13 @@ bool rng_lld_generate(size_t size, uint8_t *out)
         }
 
         // ALWAYS read all 6 EHR words into a local buffer.
-        // Reading EHR_DATA5 hardware-triggers the next collection cycle.
         uint32_t ehr[6];
         ehr[0] = TRNG_EHR_DATA0;
         ehr[1] = TRNG_EHR_DATA1;
         ehr[2] = TRNG_EHR_DATA2;
         ehr[3] = TRNG_EHR_DATA3;
         ehr[4] = TRNG_EHR_DATA4;
-        ehr[5] = TRNG_EHR_DATA5;  // ← reading this triggers the next collection cycle
+        ehr[5] = TRNG_EHR_DATA5;
 
         // Copy needed bytes from local EHR buffer to output
         for (int r = 0; r < 6 && size > 0; r++)
