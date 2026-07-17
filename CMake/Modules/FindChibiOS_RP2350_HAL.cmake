@@ -31,7 +31,9 @@ list(APPEND CHIBIOS_HAL_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/hal/ports/RP/LLD/G
 list(APPEND CHIBIOS_HAL_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/hal/ports/RP/LLD/I2Cv1)
 list(APPEND CHIBIOS_HAL_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/hal/ports/RP/LLD/PIOv1)
 list(APPEND CHIBIOS_HAL_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/hal/ports/RP/LLD/PWMv1)
-list(APPEND CHIBIOS_HAL_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/hal/ports/RP/LLD/RTCv1)
+# this can be reverted when nano HAL RTCv2 is fully integrated into ChibiOS
+# list(APPEND CHIBIOS_HAL_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/hal/ports/RP/LLD/RTCv1)
+list(APPEND CHIBIOS_HAL_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/targets/ChibiOS/_nf-overlay/os/hal/ports/RP/LLD/RTCv2)
 list(APPEND CHIBIOS_HAL_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/hal/ports/RP/LLD/SPIv1)
 list(APPEND CHIBIOS_HAL_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/hal/ports/RP/LLD/UARTv1)
 list(APPEND CHIBIOS_HAL_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/hal/ports/RP/LLD/TIMERv1)
@@ -159,7 +161,9 @@ foreach(SRC_FILE ${CHIBIOS_HAL_SRCS})
             ${chibios_SOURCE_DIR}/os/hal/ports/RP/LLD/I2Cv1
             ${chibios_SOURCE_DIR}/os/hal/ports/RP/LLD/PIOv1
             ${chibios_SOURCE_DIR}/os/hal/ports/RP/LLD/PWMv1
-            ${chibios_SOURCE_DIR}/os/hal/ports/RP/LLD/RTCv1
+            # this can be reverted when nano HAL RTCv2 is fully integrated into ChibiOS
+            # ${chibios_SOURCE_DIR}/os/hal/ports/RP/LLD/RTCv1
+            ${CMAKE_SOURCE_DIR}/targets/ChibiOS/_nf-overlay/os/hal/ports/RP/LLD/RTCv2
             ${chibios_SOURCE_DIR}/os/hal/ports/RP/LLD/SPIv1
             ${chibios_SOURCE_DIR}/os/hal/ports/RP/LLD/TIMERv1
             ${chibios_SOURCE_DIR}/os/hal/ports/RP/LLD/UARTv1
