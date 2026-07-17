@@ -101,7 +101,7 @@ SslError ssl_generic_init_internal(
     }
 
     mbedtls_ssl_config_init(context->conf);
-    
+
     // create and init entropy context
     // this needs to be freed in ssl_exit_context_internal
     context->entropy = (mbedtls_entropy_context *)platform_malloc(sizeof(mbedtls_entropy_context));
