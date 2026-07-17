@@ -314,12 +314,6 @@ SslError ssl_generic_init_internal(
 
     mbedtls_ssl_conf_ca_chain(context->conf, context->ca_cert, NULL);
 
-    if (psa_crypto_init() != PSA_SUCCESS)
-    {
-        error = SslError_SetupFailed;
-        goto error;
-    }
-
     // set certificate verification
     // the current options provided by Mbed TLS are only verify or don't verify
     if ((SslVerification)sslVerify == SslVerification_CertificateRequired)
