@@ -33,21 +33,22 @@
  * @brief   Early initialization code.
  * @note    Called before DATA/BSS init and stack fill.
  */
-void __early_init(void) {
+void __early_init(void)
+{
 
-  /* Disable the bootrom watchdog. */
-  WATCHDOG->CLR.CTRL = WATCHDOG_CTRL_ENABLE;
+    /* Disable the bootrom watchdog. */
+    WATCHDOG->CLR.CTRL = WATCHDOG_CTRL_ENABLE;
 
 #if RP_NO_INIT == FALSE
-  /* Reset of all peripherals.
-     Note, IO_QSPI, PADS_QSPI, PLL_SYS and PLL_USB are not reset because
-     the system is executing from flash via XIP and needs clock sources to
-     remain active. PLLs are handled by rp_clock_init() after switching to
-     safe sources.*/
-  rp_peripheral_reset(~(RESETS_ALLREG_IO_QSPI  | RESETS_ALLREG_PADS_QSPI |
-                         RESETS_ALLREG_PLL_SYS  | RESETS_ALLREG_PLL_USB));
+    /* Reset of all peripherals.
+       Note, IO_QSPI, PADS_QSPI, PLL_SYS and PLL_USB are not reset because
+       the system is executing from flash via XIP and needs clock sources to
+       remain active. PLLs are handled by rp_clock_init() after switching to
+       safe sources.*/
+    rp_peripheral_reset(
+        ~(RESETS_ALLREG_IO_QSPI | RESETS_ALLREG_PADS_QSPI | RESETS_ALLREG_PLL_SYS | RESETS_ALLREG_PLL_USB));
 
-  rp_clock_init();
+    rp_clock_init();
 #endif
 }
 
@@ -55,19 +56,21 @@ void __early_init(void) {
 /**
  * @brief   SDC card detection.
  */
-bool sdc_lld_is_card_inserted(SDCDriver *sdcp) {
+bool sdc_lld_is_card_inserted(SDCDriver *sdcp)
+{
 
-  (void)sdcp;
-  return true;
+    (void)sdcp;
+    return true;
 }
 
 /**
  * @brief   SDC card write protection detection.
  */
-bool sdc_lld_is_write_protected(SDCDriver *sdcp) {
+bool sdc_lld_is_write_protected(SDCDriver *sdcp)
+{
 
-  (void)sdcp;
-  return false;
+    (void)sdcp;
+    return false;
 }
 #endif /* HAL_USE_SDC */
 
@@ -75,25 +78,27 @@ bool sdc_lld_is_write_protected(SDCDriver *sdcp) {
 /**
  * @brief   MMC_SPI card detection.
  */
-bool mmc_lld_is_card_inserted(MMCDriver *mmcp) {
+bool mmc_lld_is_card_inserted(MMCDriver *mmcp)
+{
 
-  (void)mmcp;
-  return true;
+    (void)mmcp;
+    return true;
 }
 
 /**
  * @brief   MMC_SPI card write protection detection.
  */
-bool mmc_lld_is_write_protected(MMCDriver *mmcp) {
+bool mmc_lld_is_write_protected(MMCDriver *mmcp)
+{
 
-  (void)mmcp;
-  return false;
+    (void)mmcp;
+    return false;
 }
 #endif
 
 /**
  * @brief   Board-specific initialization code.
  */
-void boardInit(void) {
-
+void boardInit(void)
+{
 }
