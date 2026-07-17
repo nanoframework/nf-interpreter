@@ -85,8 +85,8 @@ void rng_lld_init(void)
     rp_peripheral_unreset(RESETS_ALLREG_TRNG);
 
     TRNG_RND_SOURCE_ENABLE = 0;
-    // Sample one ROSC bit into EHR every cycle
-    TRNG_SAMPLE_CNT1 = 0;
+    // Sample one ROSC bit into EHR every other cycle
+    TRNG_SAMPLE_CNT1 = 1;
     // Disable checks and bypass decorrelators
     TRNG_DEBUG_CONTROL = -1;
     TRNG_RNG_ICR = TRNG_RNG_ICR_ALL;
@@ -145,7 +145,7 @@ bool rng_lld_generate(size_t size, uint8_t *out)
         // Wait for 192 ROSC samples to fill EHR
         while (TRNG_BUSY)
         {
-            osalThreadSleepMilliseconds(1);
+            osalThreadSleepMilliseconds(5);
         }
 
         // Copy 6 EHR words
@@ -163,6 +163,9 @@ bool rng_lld_generate(size_t size, uint8_t *out)
                 size--;
             }
         }
+
+        // always read the last EHR word to clear the EHR_VALID bit, which is required to rearm the next batch
+        (void)TRNG_EHR_DATA5;
     }
 
     RNGD1.State = RNG_READY;
