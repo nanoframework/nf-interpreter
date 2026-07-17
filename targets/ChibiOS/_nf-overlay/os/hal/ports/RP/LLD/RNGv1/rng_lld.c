@@ -81,7 +81,7 @@ void rng_lld_init(void)
 #endif
 
     rp_peripheral_unreset(RESETS_ALLREG_TRNG);
-    
+
     TRNG_RND_SOURCE_ENABLE = 0;
     // Sample one ROSC bit into EHR every cycle
     TRNG_SAMPLE_CNT1 = 0;
@@ -145,14 +145,8 @@ bool rng_lld_generate(size_t size, uint8_t *out)
         }
 
         // Copy 6 EHR words
-        volatile uint32_t *ehrRegs[] = {
-            &TRNG_EHR_DATA0,
-            &TRNG_EHR_DATA1,
-            &TRNG_EHR_DATA2,
-            &TRNG_EHR_DATA3,
-            &TRNG_EHR_DATA4,
-            &TRNG_EHR_DATA5
-        };
+        volatile uint32_t *ehrRegs[] =
+            {&TRNG_EHR_DATA0, &TRNG_EHR_DATA1, &TRNG_EHR_DATA2, &TRNG_EHR_DATA3, &TRNG_EHR_DATA4, &TRNG_EHR_DATA5};
 
         for (int r = 0; r < 6 && size > 0; r++)
         {
@@ -166,7 +160,7 @@ bool rng_lld_generate(size_t size, uint8_t *out)
             }
         }
     }
-    
+
     RNGD1.State = RNG_READY;
 
     return true;
