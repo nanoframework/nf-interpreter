@@ -80,6 +80,8 @@ void rng_lld_init(void)
     osalMutexObjectInit(&RNGD1.Lock);
 #endif
 
+#if defined(RP2350)
+
     rp_peripheral_unreset(RESETS_ALLREG_TRNG);
 
     TRNG_RND_SOURCE_ENABLE = 0;
@@ -87,7 +89,9 @@ void rng_lld_init(void)
     TRNG_SAMPLE_CNT1 = 0;
     // Disable checks and bypass decorrelators
     TRNG_DEBUG_CONTROL = -1;
-    TRNG_ICR = TRNG_RNG_ICR_ALL;
+    TRNG_RNG_ICR = TRNG_RNG_ICR_ALL;
+
+#endif
 }
 
 void rng_lld_start(void)
