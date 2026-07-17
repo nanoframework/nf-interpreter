@@ -102,15 +102,6 @@ SslError ssl_generic_init_internal(
 
     mbedtls_ssl_config_init(context->conf);
 
-    // create and init CTR_DRBG
-    // this needs to be freed in ssl_exit_context_internal
-    context->ctr_drbg = (mbedtls_ctr_drbg_context *)platform_malloc(sizeof(mbedtls_ctr_drbg_context));
-    if (context->ctr_drbg == NULL)
-    {
-        goto error;
-    }
-    mbedtls_ctr_drbg_init(context->ctr_drbg);
-
     // create and init entropy context
     // this needs to be freed in ssl_exit_context_internal
     context->entropy = (mbedtls_entropy_context *)platform_malloc(sizeof(mbedtls_entropy_context));
@@ -138,6 +129,21 @@ SslError ssl_generic_init_internal(
         goto error;
     }
     mbedtls_x509_crt_init(context->ca_cert);
+
+    // create and init CTR_DRBG
+    // this needs to be freed in ssl_exit_context_internal
+    context->ctr_drbg = (mbedtls_ctr_drbg_context *)platform_malloc(sizeof(mbedtls_ctr_drbg_context));
+    if (context->ctr_drbg == NULL)
+    {
+        goto error;
+    }
+    mbedtls_ctr_drbg_init(context->ctr_drbg);
+
+    if (psa_crypto_init() != PSA_SUCCESS)
+    {
+        error = SslError_SetupFailed;
+        goto error;
+    }
 
     // TODO: review if we can add some instance-unique data to the custom argument below
     if (mbedtls_ctr_drbg_seed(context->ctr_drbg, mbedtls_entropy_func, context->entropy, NULL, 0) != 0)
@@ -191,6 +197,13 @@ SslError ssl_generic_init_internal(
 
 #if defined(PLATFORM_ESP32) && defined(CONFIG_MBEDTLS_DEBUG)
     mbedtls_esp_enable_debug_log(context->conf, CONFIG_MBEDTLS_DEBUG_LEVEL);
+#endif
+
+    // setup debug stuff
+    // only required if output debug is enabled in mbedtls_config.h
+#if defined(MBEDTLS_DEBUG_C) && defined(MBEDTLS_DEBUG_THRESHOLD)
+    mbedtls_debug_set_threshold(MBEDTLS_DEBUG_THRESHOLD);
+    mbedtls_ssl_conf_dbg(context->conf, nf_debug, stdout);
 #endif
 
     // CA root certs from store, if available
@@ -314,13 +327,6 @@ SslError ssl_generic_init_internal(
         authMode = MBEDTLS_SSL_VERIFY_REQUIRED;
     }
     mbedtls_ssl_conf_authmode(context->conf, authMode);
-
-    // setup debug stuff
-    // only required if output debug is enabled in mbedtls_config.h
-#if defined(MBEDTLS_DEBUG_C) && defined(MBEDTLS_DEBUG_THRESHOLD)
-    mbedtls_debug_set_threshold(MBEDTLS_DEBUG_THRESHOLD);
-    mbedtls_ssl_conf_dbg(context->conf, nf_debug, stdout);
-#endif
 
     ret = mbedtls_ssl_setup(context->ssl, context->conf);
     if (ret != 0)
