@@ -657,11 +657,7 @@ macro(nf_setup_target_build_common)
         )
 
         # platform implementation of hardware random provider
-        if(EXISTS ${TARGET_BASE_LOCATION}/mbedtls_entropy_hardware_pool.c)
-            target_sources(mbedcrypto PRIVATE ${TARGET_BASE_LOCATION}/mbedtls_entropy_hardware_pool.c)
-        else()
-            target_sources(mbedcrypto PRIVATE ${BASE_PATH_FOR_CLASS_LIBRARIES_MODULES}/mbedtls_entropy_hardware_pool.c)
-        endif()
+        target_sources(mbedcrypto PRIVATE ${BASE_PATH_FOR_CLASS_LIBRARIES_MODULES}/mbedtls_entropy_hardware_pool.c)
 
         nf_set_compile_options(TARGET mbedcrypto)
         nf_set_compile_options(TARGET mbedx509)
