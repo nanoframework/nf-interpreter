@@ -85,7 +85,7 @@ void rng_lld_init(void)
     rp_peripheral_unreset(RESETS_ALLREG_TRNG);
 
     TRNG_RND_SOURCE_ENABLE = 0;
-    // Sample one ROSC bit into EHR every cycle (faster ~7.5ms per batch vs 15ms with value 1)
+    // Sample one ROSC bit into EHR every cycle
     TRNG_SAMPLE_CNT1 = 0;
     // Disable checks and bypass decorrelators
     TRNG_DEBUG_CONTROL = -1;
