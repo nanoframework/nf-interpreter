@@ -33,7 +33,7 @@
 /*
  * Board identifier.
  */
-#define BOARD_RP_PICO_RP2040
+#define BOARD_PICO_RP2040
 #define BOARD_NAME                  "Raspberry Pi Pico"
 
 /*

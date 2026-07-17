@@ -1,4 +1,4 @@
-# RP_PICO2_W_RP2350 — Raspberry Pi Pico 2 W
+# PICO2_RP2350_W — Raspberry Pi Pico 2 W
 
 This target is the **Raspberry Pi Pico 2 W** board, which uses the **RP2350** microcontroller (dual-core Arm Cortex-M33 @ 150 MHz) with the **Infineon CYW43439** WiFi+Bluetooth module.
 
@@ -33,7 +33,7 @@ The Pico 2 W uses the same **Infineon CYW43439** wireless chip as the original P
 | Deployment | `0x10194000` | 2352 KB |
 | LittleFS | `0x103E0000` | 128 KB |
 
-## Differences from RP_PICO2_RP2350
+## Differences from PICO2_RP2350
 
 This WiFi target adds:
 - WiFi/networking APIs (`CONFIG_API_SYSTEM_DEVICE_WIFI`, `CONFIG_API_SYSTEM_NET`)

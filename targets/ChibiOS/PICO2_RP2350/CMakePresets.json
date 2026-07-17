@@ -7,7 +7,7 @@
     ],
     "configurePresets": [
         {
-            "name": "RP_PICO2_W_RP2350",
+            "name": "PICO2_RP2350",
             "inherits": [
                 "arm-gcc-cortex-preset",
                 "user-tools-repos",
@@ -15,16 +15,16 @@
             ],
             "hidden": false,
             "cacheVariables": {
-                "NF_TARGET_DEFCONFIG": "targets/ChibiOS/RP_PICO2_W_RP2350/defconfig"
+                "NF_TARGET_DEFCONFIG": "targets/ChibiOS/PICO2_RP2350/defconfig"
             }
         }
     ],
     "buildPresets": [
         {
             "inherits": "base-user",
-            "name": "RP_PICO2_W_RP2350",
-            "displayName": "RP_PICO2_W_RP2350",
-            "configurePreset": "RP_PICO2_W_RP2350"
+            "name": "PICO2_RP2350",
+            "displayName": "PICO2_RP2350",
+            "configurePreset": "PICO2_RP2350"
         }
     ]
 }
