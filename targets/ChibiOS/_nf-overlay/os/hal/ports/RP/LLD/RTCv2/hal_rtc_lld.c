@@ -76,14 +76,19 @@ static void powman_write(volatile uint32_t *reg, uint32_t value)
     *reg = POWMAN_PASSWORD_BITS | value;
 }
 
+#define POWMAN_ALIAS_SET_OFFSET 0x2000UL
+#define POWMAN_ALIAS_CLR_OFFSET 0x3000UL
+
 static void powman_set_bits(volatile uint32_t *reg, uint32_t bits)
 {
-    *reg = POWMAN_PASSWORD_BITS | (*reg | bits);
+    volatile uint32_t *setAlias = (volatile uint32_t *)((volatile uint8_t *)reg + POWMAN_ALIAS_SET_OFFSET);
+    *setAlias = POWMAN_PASSWORD_BITS | bits;
 }
 
 static void powman_clear_bits(volatile uint32_t *reg, uint32_t bits)
 {
-    *reg = POWMAN_PASSWORD_BITS | (*reg & ~bits);
+    volatile uint32_t *clearAlias = (volatile uint32_t *)((volatile uint8_t *)reg + POWMAN_ALIAS_CLR_OFFSET);
+    *clearAlias = POWMAN_PASSWORD_BITS | bits;
 }
 
 // Returns the current AON timer value in milliseconds since RTC_BASE_YEAR.
@@ -262,9 +267,28 @@ static uint64_t next_match_ms(const RTCDateTime *wantedTime, rtcdtmask_t mask, u
         return 0;
     }
 
-    for (uint32_t dayOffset = 1U; dayOffset <= 366U; dayOffset++)
+    uint64_t scanStartMilliseconds = dayStartMilliseconds + MS_PER_DAY;
+    if (RTC_ALARM_TEST_MATCH(mask, RTC_DT_ALARM_YEAR) && wantedTime->year != candidate.year)
     {
-        uint64_t candidateDayStartMilliseconds = dayStartMilliseconds + (uint64_t)dayOffset * MS_PER_DAY;
+        if (wantedTime->year < candidate.year)
+        {
+            // The requested year has already passed: unsatisfiable.
+            return 0;
+        }
+        RTCDateTime yearStart = {0};
+        yearStart.year = wantedTime->year;
+        yearStart.month = 1U;
+        yearStart.day = 1U;
+        uint64_t yearStartMilliseconds = rtcdt_to_ms64(&yearStart);
+        if (yearStartMilliseconds > scanStartMilliseconds)
+        {
+            scanStartMilliseconds = yearStartMilliseconds;
+        }
+    }
+
+    for (uint32_t dayOffset = 0U; dayOffset <= 366U; dayOffset++)
+    {
+        uint64_t candidateDayStartMilliseconds = scanStartMilliseconds + (uint64_t)dayOffset * MS_PER_DAY;
         ms64_to_rtcdt(candidateDayStartMilliseconds, &candidate);
         if (date_matches(&candidate, wantedTime, mask))
         {
