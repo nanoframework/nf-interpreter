@@ -87,11 +87,11 @@ uint64_t  HAL_Time_CurrentDateTime(bool datePartOnly)
 
 void HAL_Time_SetUtcTime(uint64_t utcTime)
 {
+  #if (HAL_USE_RTC == TRUE)
+
     SYSTEMTIME systemTime;
 
     HAL_Time_ToSystemTime(utcTime, &systemTime);
-
-  #if (HAL_USE_RTC == TRUE)
 
     // set RTC
     RTCDateTime newTime;
