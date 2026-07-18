@@ -481,26 +481,26 @@ jobs:
 
     strategy:
       matrix:
-        RP_PICO_RP2040:
-          TargetBoard: RP_PICO_RP2040
+        PICO_RP2040:
+          TargetBoard: PICO_RP2040
           TargetSeries: "RP2040"
           BuildOptions:
-          CMakePreset: RP_PICO_RP2040
-        RP_PICO_W_RP2040:
-          TargetBoard: RP_PICO_W_RP2040
+          CMakePreset: PICO_RP2040
+        PICORP2040_W:
+          TargetBoard: PICORP2040_W
           TargetSeries: "RP2040"
           BuildOptions:
-          CMakePreset: RP_PICO_W_RP2040
-        RP_PICO2_RP2350:
-          TargetBoard: RP_PICO2_RP2350
+          CMakePreset: PICORP2040_W
+        PICO2_RP2350:
+          TargetBoard: PICO2_RP2350
           TargetSeries: "RP2350"
           BuildOptions:
-          CMakePreset: RP_PICO2_RP2350
-        RP_PICO2_W_RP2350:
-          TargetBoard: RP_PICO2_W_RP2350
+          CMakePreset: PICO2_RP2350
+        PICO2_RP2350_W:
+          TargetBoard: PICO2_RP2350_W
           TargetSeries: "RP2350"
           BuildOptions:
-          CMakePreset: RP_PICO2_W_RP2350
+          CMakePreset: PICO2_RP2350_W
 
     variables:
       DOTNET_NOLOGO: true
