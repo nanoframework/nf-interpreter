@@ -43,6 +43,11 @@ bool iMXRTFlexSPIDriver_Read(void *context, ByteAddress startAddress, unsigned i
 {
     (void)context;
 
+    if (buffer == NULL)
+    {
+        return false;
+    }
+
     memcpy(buffer, (void *)startAddress, numBytes);
 
     return true;
@@ -62,6 +67,17 @@ bool iMXRTFlexSPIDriver_Write(
     {
         return false;
     }
+
+    if (buffer == NULL)
+    {
+        return false;
+    }
+
+    if (startAddress < (uint32_t)&__flash_start__)
+    {
+        return false;
+    }
+
     portENTER_CRITICAL();
 
     for (uint32_t i = 0; i < numBytes;)
@@ -105,6 +121,12 @@ bool iMXRTFlexSPIDriver_Write(
 bool iMXRTFlexSPIDriver_IsBlockErased(void *context, ByteAddress blockAddress, unsigned int length)
 {
     (void)context;
+
+    if ((blockAddress % sizeof(uint32_t)) != 0 || (length % sizeof(uint32_t)) != 0)
+    {
+        return false;
+    }
+
     uint32_t *cursor = (uint32_t *)blockAddress;
     uint32_t *endAddress = (uint32_t *)(blockAddress + length);
     // an erased flash address has to read FLASH_ERASED_WORD
@@ -126,6 +148,12 @@ bool iMXRTFlexSPIDriver_IsBlockErased(void *context, ByteAddress blockAddress, u
 bool iMXRTFlexSPIDriver_EraseBlock(void *context, ByteAddress address)
 {
     (void)context;
+
+    if (address < (uint32_t)&__flash_start__)
+    {
+        return false;
+    }
+
     portENTER_CRITICAL();
     status_t status = flexspi_nor_flash_erase_sector(FLEXSPI, address - (uint32_t)&__flash_start__);
     portEXIT_CRITICAL();

@@ -38,13 +38,11 @@ if(NF_FEATURE_USE_RNG)
         ${TARGET_SERIES} STREQUAL "STM32L4xx" OR
         ${TARGET_SERIES} STREQUAL "STM32F4xx" OR 
         ${TARGET_SERIES} STREQUAL "STM32F7xx" OR
-        ${TARGET_SERIES} STREQUAL "STM32H7xx")
+        ${TARGET_SERIES} STREQUAL "STM32H7xx" OR
+        ${TARGET_SERIES} STREQUAL "RP2040" OR
+        ${TARGET_SERIES} STREQUAL "RP2350" )
 
         list(APPEND TARGET_CHIBIOS_NANOCLR_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/targetRandom.cpp)  
-
-    elseif(${TARGET_SERIES} STREQUAL "RP2040")
-        # RP2040 does not have hardware TRNG
-        message(ERROR "RP2040 doesn't have a hardware Random Number Generator. Please change USE_RNG option to OFF.")
 
     else()
         # this series doesn't feature hardware TRNG, report

@@ -1,0 +1,30 @@
+{
+    "version": 4,
+    "include": [
+        "../../../CMake/arm-gcc.json",
+        "../../../config/user-tools-repos.json",
+        "../../../config/user-prefs.json"
+    ],
+    "configurePresets": [
+        {
+            "name": "PICORP2040_W",
+            "inherits": [
+                "arm-gcc-cortex-preset",
+                "user-tools-repos",
+                "user-prefs"
+            ],
+            "hidden": false,
+            "cacheVariables": {
+                "NF_TARGET_DEFCONFIG": "targets/ChibiOS/PICORP2040_W/defconfig"
+            }
+        }
+    ],
+    "buildPresets": [
+        {
+            "inherits": "base-user",
+            "name": "PICORP2040_W",
+            "displayName": "PICORP2040_W",
+            "configurePreset": "PICORP2040_W"
+        }
+    ]
+}

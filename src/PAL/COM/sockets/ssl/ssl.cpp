@@ -162,18 +162,18 @@ bool SSL_ExitContext(int contextHandle)
     return ssl_exit_context_internal(contextHandle);
 }
 
-int SSL_Accept(SOCK_SOCKET socket, int contextHandle)
+SslError SSL_Accept(SOCK_SOCKET socket, int contextHandle, int *mbedtlsCode)
 {
     NATIVE_PROFILE_PAL_COM();
 
-    return ssl_accept_internal(socket, contextHandle);
+    return ssl_accept_internal(socket, contextHandle, mbedtlsCode);
 }
 
-int SSL_Connect(SOCK_SOCKET socket, const char *szTargetHost, int contextHandle)
+SslError SSL_Connect(SOCK_SOCKET socket, const char *szTargetHost, int contextHandle, int *mbedtlsCode)
 {
     NATIVE_PROFILE_PAL_COM();
 
-    return ssl_connect_internal(socket, szTargetHost, contextHandle);
+    return ssl_connect_internal(socket, szTargetHost, contextHandle, mbedtlsCode);
 }
 
 int SSL_Write(SOCK_SOCKET socket, const char *data, size_t size)

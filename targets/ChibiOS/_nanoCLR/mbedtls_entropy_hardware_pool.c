@@ -13,40 +13,37 @@ int mbedtls_hardware_poll(void *data, unsigned char *output, size_t len, size_t 
 {
     (void)data;
 
-#if (HAL_NF_USE_STM32_RNG == TRUE)
+#if (HAL_NF_USE_RNG == TRUE)
 
-    // start random generator
     rngStart();
 
-    for (size_t i = 0; i < len; i++)
+    if (!rngGenerate(len, output))
     {
-        // our generator returns 32bits numbers
-        *output = rngGenerateRandomNumber();
-
-        output++;
+        rngStop();
+        return MBEDTLS_ERR_ENTROPY_SOURCE_FAILED;
     }
 
-    // callers require this to be set
     *olen = len;
 
-    // stop random generator
     rngStop();
 
 #elif (HAL_USE_TRNG == TRUE)
 
     trngStart(&TRNGD1, NULL);
 
-    if (!trngGenerate(&TRNGD1, len, output))
+    // trngGenerate returns true if an error occurred
+    if (trngGenerate(&TRNGD1, len, output) == true)
     {
         trngStop(&TRNGD1);
         return MBEDTLS_ERR_ENTROPY_SOURCE_FAILED;
     }
 
-    // callers require this to be set
     *olen = len;
 
     trngStop(&TRNGD1);
 
+#else
+#error "No hardware RNG source configured: enable HAL_NF_USE_RNG or HAL_USE_TRNG"
 #endif
 
     return 0;
@@ -60,42 +57,37 @@ psa_status_t mbedtls_psa_external_get_random(
 {
     (void)context;
 
-#if HAL_NF_USE_STM32_RNG == TRUE
+#if (HAL_NF_USE_RNG == TRUE)
 
-    // start random generator
     rngStart();
 
-    for (size_t i = 0; i < output_size; i++)
+    if (!rngGenerate(output_size, output))
     {
-        // our generator returns 32bits numbers
-        *output = (uint8_t)rngGenerateRandomNumber();
-
-        output++;
+        rngStop();
+        return PSA_ERROR_HARDWARE_FAILURE;
     }
 
-    // callers require this to be set
     *output_length = output_size;
 
-    // stop random generator
     rngStop();
 
 #elif (HAL_USE_TRNG == TRUE)
 
     trngStart(&TRNGD1, NULL);
 
-    if (!trngGenerate(&TRNGD1, output_size, output))
+    // trngGenerate returns true if an error occurred
+    if (trngGenerate(&TRNGD1, output_size, output) == true)
     {
         trngStop(&TRNGD1);
         return PSA_ERROR_HARDWARE_FAILURE;
     }
 
-    // callers require this to be set
     *output_length = output_size;
 
     trngStop(&TRNGD1);
 
 #else
-#error "No hardware RNG source configured: enable HAL_NF_USE_STM32_RNG or HAL_USE_TRNG"
+#error "No hardware RNG source configured: enable HAL_NF_USE_RNG or HAL_USE_TRNG"
 #endif
 
     return PSA_SUCCESS;

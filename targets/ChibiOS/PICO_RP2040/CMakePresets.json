@@ -1,0 +1,30 @@
+{
+    "version": 4,
+    "include": [
+        "../../../CMake/arm-gcc.json",
+        "../../../config/user-tools-repos.json",
+        "../../../config/user-prefs.json"
+    ],
+    "configurePresets": [
+        {
+            "name": "PICO_RP2040",
+            "inherits": [
+                "arm-gcc-cortex-preset",
+                "user-tools-repos",
+                "user-prefs"
+            ],
+            "hidden": false,
+            "cacheVariables": {
+                "NF_TARGET_DEFCONFIG": "targets/ChibiOS/PICO_RP2040/defconfig"
+            }
+        }
+    ],
+    "buildPresets": [
+        {
+            "inherits": "base-user",
+            "name": "PICO_RP2040",
+            "displayName": "PICO_RP2040",
+            "configurePreset": "PICO_RP2040"
+        }
+    ]
+}
