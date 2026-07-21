@@ -19,7 +19,7 @@ extern "C"
         WP_TRANSPORT_TINY_USB
     } WP_TransportType;
 
-    extern WP_TransportType WP_Transport;
+    extern WP_TransportType g_WP_Transport;
 
 #ifdef __cplusplus
 }
