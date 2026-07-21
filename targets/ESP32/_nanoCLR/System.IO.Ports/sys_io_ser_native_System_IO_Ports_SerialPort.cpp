@@ -893,7 +893,7 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeInit___VOID(
     }
 
     // When Wire protocol is using UART then COM1 is being used for VS debug, so it's not available
-    if (WP_Transport == WP_TRANSPORT_UART && uart_num == 0)
+    if (g_WP_Transport == WP_TRANSPORT_UART && uart_num == 0)
     {
         NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
     }
@@ -1491,7 +1491,7 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::GetDeviceSelector_
     };
 
     // COM1 is reserved for VS debug when Wire Protocol is using UART.
-    if (WP_Transport != WP_TRANSPORT_UART)
+    if (g_WP_Transport != WP_TRANSPORT_UART)
     {
         appendPort("COM1,");
     }
