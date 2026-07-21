@@ -9,9 +9,7 @@
 #include <Esp32_DeviceMapping.h>
 #include <esp32_idf.h>
 #include <stdio.h>
-
-// Current transport being used for Wire protocol, defined in WireProtocol_HAL_Interface.c
-extern "C" enum { WP_TRANSPORT_NONE, WP_TRANSPORT_UART, WP_TRANSPORT_USB_JTAG, WP_TRANSPORT_TINY_USB } WP_Transport;
+#include <WireProtocol_Transport.h>
 
 // in UWP the COM ports are named COM1, COM2, COM3. But ESP32 uses internally UART0, UART1, UART2. This maps the port
 // index 1, 2 or 3 to the uart number 0, 1 or 2
