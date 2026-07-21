@@ -566,6 +566,16 @@ macro(nf_add_idf_as_library)
        nf_install_idf_component_from_registry(esp_wifi_remote c90c182f-b7fc-4a59-a445-96f712e36bb2)
        nf_install_idf_component_from_registry(esp_hosted 2c2bb417-ac4a-415a-8bd8-d2437701bb5e)
        endif()
+
+    # Set PYTHON to the ESP-IDF virtual environment
+    # CMake falls back to the system Python which lacks the required ESP-IDF packages.
+    if(DEFINED ENV{IDF_PYTHON_ENV_PATH})
+        if(CMAKE_HOST_WIN32)
+            set(PYTHON "$ENV{IDF_PYTHON_ENV_PATH}/Scripts/python.exe")
+        else()
+            set(PYTHON "$ENV{IDF_PYTHON_ENV_PATH}/bin/python")
+        endif()
+    endif()
     
     include(${IDF_PATH_CMAKED}/tools/cmake/idf.cmake)
 
