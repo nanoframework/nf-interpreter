@@ -44,7 +44,7 @@
 
 // Select between USB Jtag or UART based WP transport based on where connected and configuration
 static bool WP_Port_Initialised = false;
-WP_TransportType WP_Transport = WP_TRANSPORT_NONE;
+WP_TransportType g_WP_Transport = WP_TRANSPORT_NONE;
 
 // WP using TinyUSB CDC
 #if defined(WP_USE_TINYUSB)
@@ -386,7 +386,7 @@ static bool WP_Initialise(COM_HANDLE port)
 #if defined(WP_USE_TINYUSB)
     if (WP_InitialiseTinyUsb(port))
     {
-        WP_Transport = WP_TRANSPORT_TINY_USB;
+        g_WP_Transport = WP_TRANSPORT_TINY_USB;
         return true;
     }
 #endif
@@ -394,7 +394,7 @@ static bool WP_Initialise(COM_HANDLE port)
 #if defined(WP_USE_USB_JTAG)
     if (WP_InitialiseUsbJtag(port))
     {
-        WP_Transport = WP_TRANSPORT_USB_JTAG;
+        g_WP_Transport = WP_TRANSPORT_USB_JTAG;
         return true;
     }
 
@@ -403,12 +403,12 @@ static bool WP_Initialise(COM_HANDLE port)
 #if defined(WP_USE_UART)
     if (WP_InitialiseUart(port))
     {
-        WP_Transport = WP_TRANSPORT_UART;
+        g_WP_Transport = WP_TRANSPORT_UART;
         return true;
     }
 #endif
 
-    WP_Transport = WP_TRANSPORT_NONE;
+    g_WP_Transport = WP_TRANSPORT_NONE;
     WP_Port_Initialised = true;
     return false;
 }
@@ -421,7 +421,7 @@ void WP_ReceiveBytes(uint8_t **ptr, uint32_t *size)
         WP_Initialise(ESP32_WP_UART);
     }
 
-    switch (WP_Transport)
+    switch (g_WP_Transport)
     {
         default:
         // No transport selected on startup
@@ -458,7 +458,7 @@ uint8_t WP_TransmitMessage(WP_Message *message)
         WP_Initialise(ESP32_WP_UART);
     }
 
-    switch (WP_Transport)
+    switch (g_WP_Transport)
     {
         default:
             // No transport selected on startup
