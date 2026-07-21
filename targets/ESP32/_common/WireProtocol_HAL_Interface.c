@@ -409,7 +409,7 @@ static bool WP_Initialise(COM_HANDLE port)
 #endif
 
     g_WP_Transport = WP_TRANSPORT_NONE;
-    WP_Port_Initialised = true;
+
     return false;
 }
 
