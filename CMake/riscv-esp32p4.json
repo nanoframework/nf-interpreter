@@ -17,7 +17,7 @@
                 "NF_INTEROP_ASSEMBLIES": null
             },
             "environment": {
-                "ESP_IDF_VERSION": "5.4"
+                "ESP_IDF_VERSION": "5.5.5"
             }
         }
     ]
