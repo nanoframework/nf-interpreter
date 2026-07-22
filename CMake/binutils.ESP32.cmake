@@ -563,9 +563,11 @@ macro(nf_add_idf_as_library)
     nf_install_idf_component_from_registry(littlefs 97bf51ce-1daa-4369-81ec-eacbd8102815) 
 
     if(${TARGET_SERIES_SHORT} STREQUAL "esp32p4")
-       nf_install_idf_component_from_registry(esp_wifi_remote c90c182f-b7fc-4a59-a445-96f712e36bb2)
-       nf_install_idf_component_from_registry(esp_hosted 2c2bb417-ac4a-415a-8bd8-d2437701bb5e)
-       endif()
+        # v1.6.3
+        nf_install_idf_component_from_registry(esp_wifi_remote 3c98b2c9-11fb-4477-b80a-1aaa3536b46d)
+        # v3.0.2
+        nf_install_idf_component_from_registry(esp_hosted 7d2f0ec1-fe03-49f3-bfbe-f544d1050f97)
+    endif()
 
     # Set PYTHON to the ESP-IDF virtual environment
     # CMake falls back to the system Python which lacks the required ESP-IDF packages.
