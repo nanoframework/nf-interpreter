@@ -565,8 +565,8 @@ macro(nf_add_idf_as_library)
     if(${TARGET_SERIES_SHORT} STREQUAL "esp32p4")
         # v1.6.3
         nf_install_idf_component_from_registry(esp_wifi_remote 3c98b2c9-11fb-4477-b80a-1aaa3536b46d)
-        # v3.0.2
-        nf_install_idf_component_from_registry(esp_hosted 7d2f0ec1-fe03-49f3-bfbe-f544d1050f97)
+        # v2.12.11
+        nf_install_idf_component_from_registry(esp_hosted 310ee40e-29c8-42de-9454-a52718131a30)
     endif()
 
     # Set PYTHON to the ESP-IDF virtual environment
