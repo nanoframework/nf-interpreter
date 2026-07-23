@@ -1101,6 +1101,8 @@ static HRESULT EnsureGenericCctorCompleted(
     CLR_RT_MethodDef_Instance cctorInst{};
     if (!cctorInst.InitializeFromIndex(cctorIndex))
     {
+        record->m_flags &=
+            ~(CLR_RT_GenericCctorExecutionRecord::c_Scheduled | CLR_RT_GenericCctorExecutionRecord::c_Executed);
         return CLR_E_WRONG_TYPE;
     }
 
@@ -1114,6 +1116,8 @@ static HRESULT EnsureGenericCctorCompleted(
 
     if (FAILED(hr))
     {
+        record->m_flags &=
+            ~(CLR_RT_GenericCctorExecutionRecord::c_Scheduled | CLR_RT_GenericCctorExecutionRecord::c_Executed);
         return hr;
     }
 
@@ -3066,14 +3070,13 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                     {
                         const CLR_RT_TypeSpec_Index *tsForCctor = nullptr;
 
-                        if (calleeInst.genericType != nullptr && NANOCLR_INDEX_IS_VALID(*calleeInst.genericType))
-                        {
-                            tsForCctor = calleeInst.genericType;
-                        }
-                        else if (stack->m_call.genericType != nullptr &&
-                                 NANOCLR_INDEX_IS_VALID(*stack->m_call.genericType))
+                        if (stack->m_call.genericType != nullptr && NANOCLR_INDEX_IS_VALID(*stack->m_call.genericType))
                         {
                             tsForCctor = stack->m_call.genericType;
+                        }
+                        else if (calleeInst.genericType != nullptr && NANOCLR_INDEX_IS_VALID(*calleeInst.genericType))
+                        {
+                            tsForCctor = calleeInst.genericType;
                         }
 
                         if (tsForCctor != nullptr)
