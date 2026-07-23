@@ -1,129 +1,23 @@
 // Copyright (c) .NET Foundation and Contributors
 // See LICENSE file in the project root for full license information.
-//
 
 #include "nanoFramework_espnow_native.h"
 
-typedef EspNowDataSentEventData DataSentEventData;
-typedef EspNowDataRecvEventData DataRecvEventData;
-
-static const int EVENT_ESPNOW_DATASENT = 1;
 static const int EVENT_ESPNOW_DATARECV = 2;
 
-HRESULT
-Library_nanoFramework_EspNow_native_nanoFramework_EspNow_EspNowControllerEventListener::CopyByteArrayToCLRArray(
-    CLR_RT_HeapBlock &target,
-    uint8_t *src,
-    CLR_UINT32 length)
-{
-    NANOCLR_HEADER();
-
-    CLR_UINT8 *firstTargetByte;
-    CLR_RT_HeapBlock_Array *targetArray;
-
-    NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance(target, length, g_CLR_RT_WellKnownTypes.m_UInt8));
-
-    targetArray = target.DereferenceArray();
-    if (!targetArray)
-    {
-        NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
-    }
-
-    firstTargetByte = targetArray->GetFirstElement();
-    memcpy(firstTargetByte, src, length);
-
-    NANOCLR_NOCLEANUP();
-}
-
-HRESULT
-Library_nanoFramework_EspNow_native_nanoFramework_EspNow_EspNowControllerEventListener::ProcessEvent_DataSent(
+HRESULT Library_nanoFramework_EspNow_native_nanoFramework_EspNow_EspNowControllerEventListener::ProcessEvent_DataRecv(
     CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
-    DataSentEventData *sentEventData = (DataSentEventData *)stack.Arg2().NumericByRef().u4;
-    CLR_RT_HeapBlock *dataSentEvent;
-
-    // create nanoFramework.EspNow.EspNowController.DataSentEventInternal instance to return
-    CLR_RT_HeapBlock &clrRet = stack.PushValueAndClear();
-
-    NANOCLR_CHECK_HRESULT(
-        g_CLR_RT_ExecutionEngine.NewObjectFromIndex(clrRet, g_CLR_RT_WellKnownTypes.m_EspNowDataSentEvent));
-
-    dataSentEvent = clrRet.Dereference();
-    if (!dataSentEvent)
-    {
-        NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
-    }
-
-    // clrRet.PeerMac
-    NANOCLR_CHECK_HRESULT(CopyByteArrayToCLRArray(
-        dataSentEvent[Library_nanoFramework_EspNow_native_nanoFramework_EspNow_DataSentEventInternal::FIELD__PeerMac],
-        sentEventData->peer_mac,
-        6));
-
-    // clrRet.Status
-    dataSentEvent[Library_nanoFramework_EspNow_native_nanoFramework_EspNow_DataSentEventInternal::FIELD__Status]
-        .SetInteger(sentEventData->status);
-
-    NANOCLR_CLEANUP();
-
-    if (sentEventData != NULL)
-    {
-        platform_free(sentEventData);
-    }
-
-    NANOCLR_CLEANUP_END();
-}
-
-HRESULT
-Library_nanoFramework_EspNow_native_nanoFramework_EspNow_EspNowControllerEventListener::ProcessEvent_DataRecv(
-    CLR_RT_StackFrame &stack)
-{
-    NANOCLR_HEADER();
-
-    DataRecvEventData *recvEventData = (DataRecvEventData *)stack.Arg2().NumericByRef().u4;
-    CLR_RT_HeapBlock *dataRecvEvent;
-
-    // create nanoFramework.EspNow.EspNowController.DataRecvEventInternal instance to return
     CLR_RT_HeapBlock &clrRet = stack.PushValue();
     NANOCLR_CHECK_HRESULT(
         g_CLR_RT_ExecutionEngine.NewObjectFromIndex(clrRet, g_CLR_RT_WellKnownTypes.m_EspNowDataRecvEvent));
 
-    dataRecvEvent = clrRet.Dereference();
-    if (!dataRecvEvent)
-    {
-        NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
-    }
-
-    // clrRet.PeerMac
-    NANOCLR_CHECK_HRESULT(CopyByteArrayToCLRArray(
-        dataRecvEvent[Library_nanoFramework_EspNow_native_nanoFramework_EspNow_DataRecvEventInternal::FIELD__PeerMac],
-        recvEventData->peer_mac,
-        6));
-
-    // clrRet.Data
-    NANOCLR_CHECK_HRESULT(CopyByteArrayToCLRArray(
-        dataRecvEvent[Library_nanoFramework_EspNow_native_nanoFramework_EspNow_DataRecvEventInternal::FIELD__Data],
-        recvEventData->data,
-        recvEventData->dataLen));
-
-    // clrRet.DataLen
-    dataRecvEvent[Library_nanoFramework_EspNow_native_nanoFramework_EspNow_DataRecvEventInternal::FIELD__DataLen]
-        .SetInteger(recvEventData->dataLen);
-
-    NANOCLR_CLEANUP();
-
-    if (recvEventData != NULL)
-    {
-        platform_free(recvEventData);
-    }
-
-    NANOCLR_CLEANUP_END();
+    NANOCLR_NOCLEANUP();
 }
 
-HRESULT
-Library_nanoFramework_EspNow_native_nanoFramework_EspNow_EspNowControllerEventListener::
+HRESULT Library_nanoFramework_EspNow_native_nanoFramework_EspNow_EspNowControllerEventListener::
     ProcessEvent___nanoFrameworkRuntimeEventsBaseEvent__U4__U4__SystemDateTime(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
@@ -133,9 +27,6 @@ Library_nanoFramework_EspNow_native_nanoFramework_EspNow_EspNowControllerEventLi
 
     switch (subEvent)
     {
-        case EVENT_ESPNOW_DATASENT:
-            hr = ProcessEvent_DataSent(stack);
-            break;
         case EVENT_ESPNOW_DATARECV:
             hr = ProcessEvent_DataRecv(stack);
             break;
