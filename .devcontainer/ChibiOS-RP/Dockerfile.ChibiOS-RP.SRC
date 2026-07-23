@@ -55,7 +55,7 @@ RUN mkdir -p /usr/local/bin/gcc
 
 # ============================================================
 # KEY DIFFERENCE from ChibiOS container:
-# Clone ChibiOS main which has RP2040/RP2350 support
+# Clone ChibiOS master which has RP2040/RP2350 support
 # As soon as there is an official release that includes RP ports, this can be updated.
 # ============================================================
 RUN git clone --branch master https://github.com/chibios-upstream/chibios.git --depth 1 ./sources/ChibiOs
