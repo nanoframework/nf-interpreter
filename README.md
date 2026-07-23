@@ -125,7 +125,7 @@ We also have a [Community Targets](https://github.com/nanoframework/nf-Community
 |:---|---|---|---|
 | PICO_RP2040 | Raspberry Pi Pico | [![Latest Version @ Cloudsmith](https://api-prd.cloudsmith.io/v1/badges/version/net-nanoframework/nanoframework-images/raw/PICO_RP2040/latest/x/?render=true)](https://cloudsmith.io/~net-nanoframework/repos/nanoframework-images/packages/detail/raw/PICO_RP2040/latest/) | [![Latest Version @ Cloudsmith](https://api-prd.cloudsmith.io/v1/badges/version/net-nanoframework/nanoframework-images-dev/raw/PICO_RP2040/latest/x/?render=true)](https://cloudsmith.io/~net-nanoframework/repos/nanoframework-images-dev/packages/detail/raw/PICO_RP2040/latest/) |
 | PICO2_RP2350 | Raspberry Pi Pico 2 | [![Latest Version @ Cloudsmith](https://api-prd.cloudsmith.io/v1/badges/version/net-nanoframework/nanoframework-images/raw/PICO2_RP2350/latest/x/?render=true)](https://cloudsmith.io/~net-nanoframework/repos/nanoframework-images/packages/detail/raw/PICO2_RP2350/latest/) | [![Latest Version @ Cloudsmith](https://api-prd.cloudsmith.io/v1/badges/version/net-nanoframework/nanoframework-images-dev/raw/PICO2_RP2350/latest/x/?render=true)](https://cloudsmith.io/~net-nanoframework/repos/nanoframework-images-dev/packages/detail/raw/PICO2_RP2350/latest/) |
-| PICORP2040_W | Raspberry Pi Pico W with WiFi | [![Latest Version @ Cloudsmith](https://api-prd.cloudsmith.io/v1/badges/version/net-nanoframework/nanoframework-images/raw/PICORP2040_W/latest/x/?render=true)](https://cloudsmith.io/~net-nanoframework/repos/nanoframework-images/packages/detail/raw/PICORP2040_W/latest/) | [![Latest Version @ Cloudsmith](https://api-prd.cloudsmith.io/v1/badges/version/net-nanoframework/nanoframework-images-dev/raw/PICORP2040_W/latest/x/?render=true)](https://cloudsmith.io/~net-nanoframework/repos/nanoframework-images-dev/packages/detail/raw/PICORP2040_W/latest/) |
+| PICO_RP2040_W | Raspberry Pi Pico W with WiFi | [![Latest Version @ Cloudsmith](https://api-prd.cloudsmith.io/v1/badges/version/net-nanoframework/nanoframework-images/raw/PICO_RP2040_W/latest/x/?render=true)](https://cloudsmith.io/~net-nanoframework/repos/nanoframework-images/packages/detail/raw/PICO_RP2040_W/latest/) | [![Latest Version @ Cloudsmith](https://api-prd.cloudsmith.io/v1/badges/version/net-nanoframework/nanoframework-images-dev/raw/PICO_RP2040_W/latest/x/?render=true)](https://cloudsmith.io/~net-nanoframework/repos/nanoframework-images-dev/packages/detail/raw/PICO_RP2040_W/latest/) |
 | PICO2_RP2350_W | Raspberry Pi Pico 2 W with WiFi | [![Latest Version @ Cloudsmith](https://api-prd.cloudsmith.io/v1/badges/version/net-nanoframework/nanoframework-images/raw/PICO2_RP2350_W/latest/x/?render=true)](https://cloudsmith.io/~net-nanoframework/repos/nanoframework-images/packages/detail/raw/PICO2_RP2350_W/latest/) | [![Latest Version @ Cloudsmith](https://api-prd.cloudsmith.io/v1/badges/version/net-nanoframework/nanoframework-images-dev/raw/PICO2_RP2350_W/latest/x/?render=true)](https://cloudsmith.io/~net-nanoframework/repos/nanoframework-images-dev/packages/detail/raw/PICO2_RP2350_W/latest/) |
 
 ### TI boards
@@ -182,7 +182,7 @@ The above .NET nanoFramework interpreter builds include support for the class li
   | NXP_MIMXRT1060_EVK           | :heavy_check_mark: |  |  |  |  |  | :heavy_check_mark:  |                    | :heavy_check_mark: |                    | :heavy_check_mark: |                    | :heavy_check_mark: |                    |
   | PICO_RP2040 | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |  | :heavy_check_mark: |  |  |  |  |  |  |  |
   | PICO2_RP2350 | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |  | :heavy_check_mark: |  |  |  |  |  |  |  |
-  | PICORP2040_W | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |  | :heavy_check_mark: |  |  |  | :heavy_check_mark: Wi-Fi |  |  |  |
+  | PICO_RP2040_W | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |  | :heavy_check_mark: |  |  |  | :heavy_check_mark: Wi-Fi |  |  |  |
   | PICO2_RP2350_W | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |  | :heavy_check_mark: |  |  |  | :heavy_check_mark: Wi-Fi |  |  |  |
 
 </details>
@@ -219,7 +219,7 @@ The above .NET nanoFramework interpreter builds include support for the class li
   * Target reference for Raspberry Pi (ChibiOS)
     * [PICO_RP2040](targets/ChibiOS/PICO_RP2040)
     * [PICO2_RP2350](targets/ChibiOS/PICO2_RP2350)
-    * [PICORP2040_W](targets/ChibiOS/PICORP2040_W)
+    * [PICO_RP2040_W](targets/ChibiOS/PICO_RP2040_W)
     * [PICO2_RP2350_W](targets/ChibiOS/PICO2_RP2350_W)
   * Target reference for other OSes
     * [Win32 OS (test project only at this time)](targets/os/win32)
