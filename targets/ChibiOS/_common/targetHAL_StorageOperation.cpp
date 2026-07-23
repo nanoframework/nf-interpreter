@@ -22,7 +22,7 @@
 
 // Must match FileAttributes::FileAttributes_Normal (managed System.IO.FileAttributes) without pulling in
 // the full CLR runtime headers (nf_sys_io_filesystem.h) into this HAL-layer file.
-static const uint32_t c_kFileAttributesNormal = 128;
+static const uint32_t c_FileAttributesNormal = 128;
 
 // Function to create all necessary intermediate directories with LittleFS.
 //
@@ -188,7 +188,7 @@ uint32_t HAL_StorageOperation(
         // LITTLEFS_FS_Driver::Open does. Without this attribute, managed File.GetAttributes()/File.Exists()
         // will report EMPTY_ATTRIBUTE (0xFFFFFFFF) for this file - even though it exists on disk - because
         // lfs_getattr() fails with LFS_ERR_NOATTR when the attribute was never written.
-        uint32_t nanoAttributes = c_kFileAttributesNormal;
+        uint32_t nanoAttributes = c_FileAttributesNormal;
         struct lfs_attr attr = {NANO_LITTLEFS_ATTRIBUTE, &nanoAttributes, NANO_LITTLEFS_ATTRIBUTE_SIZE};
         struct lfs_file_config fileConfig = {
             .buffer = NULL,
@@ -224,6 +224,8 @@ uint32_t HAL_StorageOperation(
     }
     else if (operation == StorageOperation_Monitor::StorageOperation_Append)
     {
+        memset(&lfsFile, 0, sizeof(lfsFile));
+
         // Extract directory path from file path
         char dir_path[256];
         snprintf(dir_path, sizeof(dir_path), "%s", lfsPath);
@@ -252,7 +254,7 @@ uint32_t HAL_StorageOperation(
 
         // Open/create the file in read mode.
         // Same custom-attribute requirement as the Write branch above - see the comment there.
-        uint32_t nanoAttributes = c_kFileAttributesNormal;
+        uint32_t nanoAttributes = c_FileAttributesNormal;
         struct lfs_attr attr = {NANO_LITTLEFS_ATTRIBUTE, &nanoAttributes, NANO_LITTLEFS_ATTRIBUTE_SIZE};
         struct lfs_file_config fileConfig = {
             .buffer = NULL,
@@ -270,7 +272,12 @@ uint32_t HAL_StorageOperation(
         }
 
         // persist the custom attribute immediately, so it survives even if the write below fails
-        lfs_file_sync(lfsDrive, &lfsFile);
+        if (lfs_file_sync(lfsDrive, &lfsFile) != LFS_ERR_OK)
+        {
+            errorCode = StorageOperationErrorCode::WriteError;
+            lfs_file_close(lfsDrive, &lfsFile);
+            goto done;
+        }
 
         // append more data
         lfs_ssize_t writeResult = lfs_file_write(lfsDrive, &lfsFile, (data + nameLength), dataLength);
