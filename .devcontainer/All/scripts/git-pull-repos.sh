@@ -43,9 +43,9 @@ git clone --branch stable-21.11.x https://github.com/chibios-upstream/chibios.gi
 cd /sources/ChibiOs-Contrib || exit 1
 git pull origin chibios-21.11.x
 cd /sources/mbedtls || exit 1
-git fetch --depth=1 origin tag mbedtls-3.6.5
-git checkout tags/mbedtls-3.6.5
-git submodule update --init
+git fetch --depth=1 origin tag mbedtls-3.6.7
+git checkout tags/mbedtls-3.6.7
+git submodule update --init --recursive
 cd /sources/fatfs || exit 1
 git fetch --depth=1 origin tag R0.16
 git checkout tags/R0.16

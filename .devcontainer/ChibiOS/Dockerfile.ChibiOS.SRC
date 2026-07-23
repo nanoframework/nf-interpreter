@@ -72,7 +72,7 @@ RUN git clone --branch chibios-21.11.x https://github.com/ChibiOS/ChibiOS-Contri
 RUN git clone --branch R0.16 https://github.com/abbrev/fatfs.git --depth 1 ./sources/fatfs \
     && git clone --branch v2.11.2 https://github.com/littlefs-project/littlefs --depth 1 ./sources/littlefs \
     && git clone --branch STABLE-2_1_3_RELEASE https://github.com/lwip-tcpip/lwip.git --depth 1 ./sources/lwip \
-    && git clone --branch mbedtls-3.6.5 https://github.com/ARMmbed/mbedtls.git --depth 1 ./sources/mbedtls \
+    && git clone --branch mbedtls-3.6.7 https://github.com/ARMmbed/mbedtls.git --depth 1 ./sources/mbedtls \
     && cd ./sources/mbedtls \
     && git submodule update --init --recursive
 
