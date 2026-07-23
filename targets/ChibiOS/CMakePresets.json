@@ -7,7 +7,7 @@
         "PICO_RP2040/CMakePresets.json",
         "PICO2_RP2350/CMakePresets.json",
         "PICO2_RP2350_W/CMakePresets.json",
-        "PICORP2040_W/CMakePresets.json",
+        "PICO_RP2040_W/CMakePresets.json",
         "ST_NUCLEO64_F091RC/CMakePresets.json",
         "ST_STM32F429I_DISCOVERY/CMakePresets.json",
         "ST_STM32F769I_DISCOVERY/CMakePresets.json"
