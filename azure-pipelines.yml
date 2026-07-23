@@ -486,11 +486,11 @@ jobs:
           TargetSeries: "RP2040"
           BuildOptions:
           CMakePreset: PICO_RP2040
-        PICOR_2040_W:
-          TargetBoard: PICORP_2040_W
+        PICO_RP2040_W:
+          TargetBoard: PICO_RP2040_W
           TargetSeries: "RP2040"
           BuildOptions:
-          CMakePreset: PICORP_2040_W
+          CMakePreset: PICO_RP2040_W
         PICO2_RP2350:
           TargetBoard: PICO2_RP2350
           TargetSeries: "RP2350"
