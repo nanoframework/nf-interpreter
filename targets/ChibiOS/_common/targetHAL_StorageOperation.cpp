@@ -157,8 +157,17 @@ uint32_t HAL_StorageOperation(
     {
         memset(&lfsFile, 0, sizeof(lfsFile));
 
-        // Extract directory path from file path
+        // Extract directory path from file path.
+        // Reject paths that don't fit dir_path instead of silently truncating them - truncating here
+        // would create directories for a shorter/different path than the one lfs_file_opencfg() below
+        // actually opens (using the full, untruncated lfsPath), leaving the real parent directory missing.
         char dir_path[256];
+        if (hal_strlen_s(lfsPath) >= sizeof(dir_path))
+        {
+            errorCode = StorageOperationErrorCode::WriteError;
+            goto done;
+        }
+
         snprintf(dir_path, sizeof(dir_path), "%s", lfsPath);
         char *last_slash = strrchr(dir_path, '/');
         if (last_slash != NULL)
@@ -219,15 +228,27 @@ uint32_t HAL_StorageOperation(
             errorCode = StorageOperationErrorCode::WriteError;
         }
 
-        // close file
-        lfs_file_close(lfsDrive, &lfsFile);
+        // close file - a failed close can mean the write was never actually committed, even if
+        // lfs_file_write() above reported success, so this must also be treated as a failure.
+        if (lfs_file_close(lfsDrive, &lfsFile) != LFS_ERR_OK)
+        {
+            errorCode = StorageOperationErrorCode::WriteError;
+        }
     }
     else if (operation == StorageOperation_Monitor::StorageOperation_Append)
     {
         memset(&lfsFile, 0, sizeof(lfsFile));
 
-        // Extract directory path from file path
+        // Extract directory path from file path.
+        // Reject paths that don't fit dir_path instead of silently truncating them - see the comment
+        // in the Write branch above for why truncation here would be incorrect.
         char dir_path[256];
+        if (hal_strlen_s(lfsPath) >= sizeof(dir_path))
+        {
+            errorCode = StorageOperationErrorCode::WriteError;
+            goto done;
+        }
+
         snprintf(dir_path, sizeof(dir_path), "%s", lfsPath);
         char *last_slash = strrchr(dir_path, '/');
         if (last_slash != NULL)
@@ -287,8 +308,12 @@ uint32_t HAL_StorageOperation(
             errorCode = StorageOperationErrorCode::WriteError;
         }
 
-        // close file
-        lfs_file_close(lfsDrive, &lfsFile);
+        // close file - a failed close can mean the write was never actually committed, even if
+        // lfs_file_write() above reported success, so this must also be treated as a failure.
+        if (lfs_file_close(lfsDrive, &lfsFile) != LFS_ERR_OK)
+        {
+            errorCode = StorageOperationErrorCode::WriteError;
+        }
     }
     else if (operation == StorageOperation_Monitor::StorageOperation_Delete)
     {
