@@ -193,8 +193,7 @@ uint32_t HAL_StorageOperation(
             .attr_count = 1,
         };
 
-        int32_t openResult =
-            lfs_file_opencfg(lfsDrive, &lfsFile, lfsPath, LFS_O_RDWR | LFS_O_CREAT, &fileConfig);
+        int32_t openResult = lfs_file_opencfg(lfsDrive, &lfsFile, lfsPath, LFS_O_RDWR | LFS_O_CREAT, &fileConfig);
         if (openResult != LFS_ERR_OK)
         {
             errorCode = StorageOperationErrorCode::WriteError;
