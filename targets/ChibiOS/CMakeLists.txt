@@ -115,7 +115,7 @@ else()
         FetchContent_Declare(
             chibios
             GIT_REPOSITORY "https://github.com/chibios-upstream/chibios.git"
-            GIT_TAG "main"
+            GIT_TAG "master"
             GIT_SHALLOW ON
         )
 
