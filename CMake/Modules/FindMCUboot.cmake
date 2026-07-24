@@ -16,7 +16,8 @@ endif()
 
 # set tag for currently supported version
 # WHEN CHANGING THIS MAKE SURE TO UPDATE THE DEV CONTAINERS
-set(MCUBOOT_GIT_TAG "v2.4.0")
+# DEVELOPER NOTE: currently on MAIN as there are features that haven't made it into a release yet
+set(MCUBOOT_GIT_TAG "main")
 
 if(NO_MCUBOOT_SOURCE)
     message(STATUS "MCUboot ${MCUBOOT_GIT_TAG} from GitHub repo")
