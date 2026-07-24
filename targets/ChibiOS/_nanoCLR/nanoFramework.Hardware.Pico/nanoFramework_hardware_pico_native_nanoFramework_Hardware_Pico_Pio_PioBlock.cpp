@@ -26,12 +26,12 @@ static unsigned int PioSlotMask(int offset, int length)
 }
 
 #if defined(RP2350)
-#define PIO_RESET_LSB 11u
-#define IO_BANK0_RESET_BIT (1u << 6)
+#define PIO_RESET_LSB        11u
+#define IO_BANK0_RESET_BIT   (1u << 6)
 #define PADS_BANK0_RESET_BIT (1u << 9)
 #else
-#define PIO_RESET_LSB 10u
-#define IO_BANK0_RESET_BIT (1u << 5)
+#define PIO_RESET_LSB        10u
+#define IO_BANK0_RESET_BIT   (1u << 5)
 #define PADS_BANK0_RESET_BIT (1u << 8)
 #endif
 
@@ -45,8 +45,7 @@ void PioEnsureOutOfReset(int blockIndex)
         return;
     }
 
-    unsigned int bits =
-        (1u << (PIO_RESET_LSB + (unsigned int)blockIndex)) | IO_BANK0_RESET_BIT | PADS_BANK0_RESET_BIT;
+    unsigned int bits = (1u << (PIO_RESET_LSB + (unsigned int)blockIndex)) | IO_BANK0_RESET_BIT | PADS_BANK0_RESET_BIT;
     RESETS->CLR.RESET = bits; // atomic-clear alias
     while ((RESETS->RESET_DONE & bits) != bits)
     {
@@ -65,8 +64,8 @@ HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_P
         int length = stack.Arg2().NumericByRef().s4;
         int origin = stack.Arg3().NumericByRef().s4;
 
-        if (PioFromIndex(block) == nullptr || block < 0 || block > 2 || instrArray == nullptr ||
-            length <= 0 || length > 32 || (int)instrArray->m_numOfElements < length)
+        if (PioFromIndex(block) == nullptr || block < 0 || block > 2 || instrArray == nullptr || length <= 0 ||
+            length > 32 || (int)instrArray->m_numOfElements < length)
         {
             NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
         }

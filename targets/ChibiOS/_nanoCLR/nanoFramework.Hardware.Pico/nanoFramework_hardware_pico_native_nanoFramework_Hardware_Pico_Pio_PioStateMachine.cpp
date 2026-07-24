@@ -15,7 +15,7 @@
 
 // PIO FSTAT: RXEMPTY [11:8], TXFULL [19:16] -- one status bit per state machine
 #define PIO_FSTAT_RXEMPTY_LSB 8u
-#define PIO_FSTAT_TXFULL_LSB 16u
+#define PIO_FSTAT_TXFULL_LSB  16u
 
 // busy-wait cap so a stalled SM times out instead of hanging
 static const unsigned int PIO_FIFO_WAIT_LIMIT = 0x4000000u;
@@ -106,18 +106,16 @@ HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_P
 
         // side-set count includes the opt enable bit; each field masked to its width
         unsigned int sidesetTotal = b[PIO_CFG_SIDESET_COUNT] + b[PIO_CFG_SIDESET_OPT];
-        pio->SM[sm].PINCTRL =
-            ((sidesetTotal & 0x7u) << 29) | ((b[PIO_CFG_SET_COUNT] & 0x7u) << 26) |
-            ((b[PIO_CFG_OUT_COUNT] & 0x3Fu) << 20) | ((b[PIO_CFG_IN_BASE] & 0x1Fu) << 15) |
-            ((b[PIO_CFG_SIDESET_BASE] & 0x1Fu) << 10) | ((b[PIO_CFG_SET_BASE] & 0x1Fu) << 5) |
-            (b[PIO_CFG_OUT_BASE] & 0x1Fu);
+        pio->SM[sm].PINCTRL = ((sidesetTotal & 0x7u) << 29) | ((b[PIO_CFG_SET_COUNT] & 0x7u) << 26) |
+                              ((b[PIO_CFG_OUT_COUNT] & 0x3Fu) << 20) | ((b[PIO_CFG_IN_BASE] & 0x1Fu) << 15) |
+                              ((b[PIO_CFG_SIDESET_BASE] & 0x1Fu) << 10) | ((b[PIO_CFG_SET_BASE] & 0x1Fu) << 5) |
+                              (b[PIO_CFG_OUT_BASE] & 0x1Fu);
 
         // EXECCTRL: wrap [16:12], wrap_target [11:7], side_en [30], side_pindir [29], jmp_pin [28:24]
-        unsigned int execCtrl =
-            ((b[PIO_CFG_WRAP] & 0x1Fu) << 12) | ((b[PIO_CFG_WRAP_TARGET] & 0x1Fu) << 7) |
-            ((b[PIO_CFG_JMP_PIN] & 0x1Fu) << 24) | ((b[PIO_CFG_MOV_STATUS_SEL] & 1u) << 4) |
-            (b[PIO_CFG_MOV_STATUS_N] & 0xFu) | ((b[PIO_CFG_OUT_STICKY] & 1u) << 17) |
-            ((b[PIO_CFG_INLINE_OUT_EN] & 1u) << 18) | ((b[PIO_CFG_OUT_EN_SEL] & 0x1Fu) << 19);
+        unsigned int execCtrl = ((b[PIO_CFG_WRAP] & 0x1Fu) << 12) | ((b[PIO_CFG_WRAP_TARGET] & 0x1Fu) << 7) |
+                                ((b[PIO_CFG_JMP_PIN] & 0x1Fu) << 24) | ((b[PIO_CFG_MOV_STATUS_SEL] & 1u) << 4) |
+                                (b[PIO_CFG_MOV_STATUS_N] & 0xFu) | ((b[PIO_CFG_OUT_STICKY] & 1u) << 17) |
+                                ((b[PIO_CFG_INLINE_OUT_EN] & 1u) << 18) | ((b[PIO_CFG_OUT_EN_SEL] & 0x1Fu) << 19);
         if (b[PIO_CFG_SIDESET_OPT])
         {
             execCtrl |= (1u << 30);
@@ -133,10 +131,10 @@ HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_P
         unsigned int pullThresh = b[PIO_CFG_PULL_THRESHOLD] & 0x1F;
         // FJOIN: low 2 bits -> TX [30] / RX [31]; high 2 bits (PIO v1) -> RX_GET [14] / RX_PUT [15]
         unsigned int join = b[PIO_CFG_FIFO_JOIN];
-        pio->SM[sm].SHIFTCTRL =
-            ((b[PIO_CFG_IN_SHIFT_RIGHT] & 1u) << 18) | ((b[PIO_CFG_OUT_SHIFT_RIGHT] & 1u) << 19) |
-            ((b[PIO_CFG_AUTOPUSH] & 1u) << 16) | ((b[PIO_CFG_AUTOPULL] & 1u) << 17) | (pushThresh << 20) |
-            (pullThresh << 25) | ((join & 3u) << 30) | (((join >> 2) & 3u) << 14);
+        pio->SM[sm].SHIFTCTRL = ((b[PIO_CFG_IN_SHIFT_RIGHT] & 1u) << 18) | ((b[PIO_CFG_OUT_SHIFT_RIGHT] & 1u) << 19) |
+                                ((b[PIO_CFG_AUTOPUSH] & 1u) << 16) | ((b[PIO_CFG_AUTOPULL] & 1u) << 17) |
+                                (pushThresh << 20) | (pullThresh << 25) | ((join & 3u) << 30) |
+                                (((join >> 2) & 3u) << 14);
 
 #if defined(RP2350)
         // GPIOBASE is 0 or 16; CMSIS types it __I so write through a volatile pointer
@@ -552,7 +550,8 @@ HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_P
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioStateMachine::NativeRead___STATIC__I4__I4__I4__SZARRAY_U4__I4__I4__I4(CLR_RT_StackFrame &stack)
+HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioStateMachine::
+    NativeRead___STATIC__I4__I4__I4__SZARRAY_U4__I4__I4__I4(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
@@ -654,8 +653,7 @@ HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_P
         {
             transferred = 0;
         }
-        if (arr != nullptr && offset >= 0 && transferred > 0 &&
-            (offset + transferred) <= (int)arr->m_numOfElements)
+        if (arr != nullptr && offset >= 0 && transferred > 0 && (offset + transferred) <= (int)arr->m_numOfElements)
         {
             memcpy(arr->GetFirstElement() + (size_t)offset * 4, work->Buffer, (size_t)transferred * 4);
         }
@@ -675,7 +673,8 @@ HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_P
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioStateMachine::NativeWrite___STATIC__I4__I4__I4__SZARRAY_U4__I4__I4__I4(CLR_RT_StackFrame &stack)
+HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioStateMachine::
+    NativeWrite___STATIC__I4__I4__I4__SZARRAY_U4__I4__I4__I4(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
