@@ -3087,8 +3087,8 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                             ownerParser.Initialize_TypeSpec(calleeOwnerTs);
 
                             CLR_RT_SignatureParser::Element ownerElem{};
-                            if (SUCCEEDED(ownerParser.Advance(ownerElem)) && ownerElem.DataType == DATATYPE_GENERICINST &&
-                                SUCCEEDED(ownerParser.Advance(ownerElem)))
+                            if (SUCCEEDED(ownerParser.Advance(ownerElem)) &&
+                                ownerElem.DataType == DATATYPE_GENERICINST && SUCCEEDED(ownerParser.Advance(ownerElem)))
                             {
                                 int argCount = ownerElem.GenParamCount;
                                 CLR_RT_TypeDef_Index resolvedArgs[8];
@@ -3130,7 +3130,8 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                                 {
                                     const CLR_RT_TypeSpec_Index *closedMatch = nullptr;
 
-                                    for (size_t ai = 0; ai < g_CLR_RT_TypeSystem.m_assembliesMax && closedMatch == nullptr;
+                                    for (size_t ai = 0;
+                                         ai < g_CLR_RT_TypeSystem.m_assembliesMax && closedMatch == nullptr;
                                          ai++)
                                     {
                                         CLR_RT_Assembly *pASSM = g_CLR_RT_TypeSystem.m_assemblies[ai];
@@ -3304,8 +3305,8 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                             genericTypeForContext = nestedGenericTag;
                         }
                         // Prefer the caller's generic type if available and valid
-                        else if (stack->m_call.genericType != nullptr &&
-                                 NANOCLR_INDEX_IS_VALID(*stack->m_call.genericType))
+                        else if (
+                            stack->m_call.genericType != nullptr && NANOCLR_INDEX_IS_VALID(*stack->m_call.genericType))
                         {
                             genericTypeForContext = stack->m_call.genericType;
                         }
