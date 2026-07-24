@@ -179,7 +179,6 @@ typedef struct __nfpack Monitor_UpdateConfiguration_Command
 typedef struct Monitor_StorageOperation_Command
 {
     uint32_t    Operation;
-    uint32_t    NameLength;
     uint32_t    DataLength;
     uint32_t    Offset;
     uint8_t     Data[1];
