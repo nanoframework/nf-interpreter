@@ -349,40 +349,31 @@ slots:
   Passing no instance here would leave every VAR field wrongly typed as
   the OBJECT block that `ExtractHeapBlocksForObjects` produced.
 
-### KNOWN LIMITATION — nested generic construction (deferred)
+### Nested generic construction
 
-A generic type whose `.cctor` constructs a **different** generic type
-parameterized by the holder's own type parameter is not yet supported.
-Canonical shape:
+When a generic `.cctor` constructs a **different** generic type parameterized
+by the holder's own type parameter (`Holder<T>` building `Box<T>`), the
+`newobj Box<!0>::.ctor()` leaves the callee's owner TypeSpec **open** because
+caller and callee have different typedefs — the §7 caller-preference does not
+fire. The pushed ctor frame inherits the open `Box<T>`, so `new T[]` inside
+the ctor can't resolve `T`; the `.cctor` aborts before `stsfld` and the
+static field stays null.
 
-```csharp
-static class Holder<T> {
-    static readonly Box<T> Field = new Box<T>();   // Box<!0> — open target
-}
-```
+Resolution is in `CEE_NEWOBJ` (after `GetDeclaringType`): parse the open
+owner TypeSpec, resolve each argument against the caller's closed TypeSpec
+via `GetGenericParam`, then either find a matching closed TypeSpec row in
+metadata or fall back to `arrayElementType` for single-VAR cases.
 
-`Holder<int>`'s `.cctor` emits `newobj Box<!0>::.ctor()` where `!0` is
-`Holder`'s `T`. `CEE_NEWOBJ` (`Interpreter.cpp`, §7) only knows how to
-prefer the caller's closed TypeSpec when caller and callee share a
-**typedef** (the `List<int>`-builds-`List<int>` case). Here the typedefs
-differ (`Holder` vs `Box`), so the pushed `Box::.ctor` frame inherits the
-**open** `Box<T>` as its `genericType`. Any `new T[]` / VAR use inside that
-ctor then fails to resolve `T`, the `.cctor` aborts before its `stsfld`,
-and the per-instantiation field stays null. Symptom: `NullReferenceException`
-on first use of the static field, even though the field slot was allocated.
+**Invariant: never set both `genericType` and `arrayElementType`** on the
+same ctor frame — doing so corrupts `newarr`'s element-type resolution
+(native `AccessViolation`). The `arrayElementType` fallback is used **only**
+when no closed TypeSpec row exists.
 
-The demand gate (§10) and the bare-VAR storage fix above are **not** the
-problem — the `.cctor` is scheduled correctly; it dies inside its own body.
-
-A proper fix must resolve the callee's open type argument (`Box<!0>`) to the
-concrete closed form (`Box<int>`) via the caller's closed `genericType`, and
-flow that closed instantiation into **both** the `NewObject` object tag and
-the pushed ctor frame's `genericType` (so single-VAR cases can also lean on
-the `arrayElementType` chain in §5/§8). You cannot rely on a matching closed
-TypeSpec row already existing in metadata — it only exists when some other
-non-generic site happens to use the same closed instantiation. Repro:
-`Generic_StaticField_GenericHolder` in `NFUnitTestClasses/UnitTestGenericStaticTests.cs`
-(currently commented out with a pointer here).
+**Why not widen the `ResolveToken` gate:** `ResolveToken` has a closed-row
+search for MVAR / `arrayElementType` cases, gated so it skips pure-VAR
+callers. Widening that gate made the search fire for every generic
+`newobj`/`call`, crashing during startup `.cctor` crawling. The fix is
+scoped inside `CEE_NEWOBJ` behind a strict nested-case guard.
 
 ---
 
