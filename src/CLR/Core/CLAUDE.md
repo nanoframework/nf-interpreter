@@ -318,6 +318,72 @@ Field access on a generic type is also entangled with `.cctor` scheduling
 current thread and the triggering opcode retries after the `.cctor`
 returns.
 
+### Storage layout
+
+A static field declared on an open generic TypeDef has **two** heap-block
+slots:
+
+- **Assembly-wide slot** (`assembly->staticFields`), reserved by
+  `ResolveLink` for every static FieldDef regardless of whether the
+  declaring type is generic. For generic-declared fields this slot is
+  **dead storage** — `GetStaticFieldByFieldDef` returns `nullptr` for a
+  generic access and does *not* fall through to it. But the GC still
+  walks the whole assembly-static array (`GarbageCollector.cpp`
+  `Assembly_Mark`, `TypeSystem.cpp` `Heap_Relocate`), so the block must
+  be validly typed. `ResolveAllocateStaticFields` (`TypeSystem.cpp`)
+  initializes these with `allowUnresolvedVarFallback = true` — a bare
+  `static T` field (`DATATYPE_VAR` at slot 0) becomes a null OBJECT
+  block, the same shape as a `static T[]` field. Without the fallback,
+  the VAR would abort `ClrStartup` at `Execution.cpp` line 2134.
+
+- **Per-instantiation slot** (`crossReferenceTypeSpec[..].genericStaticFields`),
+  the live storage returned by `GetStaticFieldByFieldDef` for the
+  matching closed TypeSpec. Allocated by
+  `ResolveAllocateGenericTypeStaticFields` at startup (for closed
+  TypeSpec rows in metadata) and by `AllocateGenericStaticFieldsOnDemand`
+  at runtime (for instantiations reached only through VAR/MVAR binding —
+  same population gap the demand gate in §10 handles for `.cctor`s).
+  Both call `InitializeReference` with the **closed TypeSpec instance**,
+  so a bare-VAR field like `static T DefaultValue` in
+  `Foo<int>` is stamped `I4` and in `Foo<string>` is stamped OBJECT.
+  Passing no instance here would leave every VAR field wrongly typed as
+  the OBJECT block that `ExtractHeapBlocksForObjects` produced.
+
+### KNOWN LIMITATION — nested generic construction (deferred)
+
+A generic type whose `.cctor` constructs a **different** generic type
+parameterized by the holder's own type parameter is not yet supported.
+Canonical shape:
+
+```csharp
+static class Holder<T> {
+    static readonly Box<T> Field = new Box<T>();   // Box<!0> — open target
+}
+```
+
+`Holder<int>`'s `.cctor` emits `newobj Box<!0>::.ctor()` where `!0` is
+`Holder`'s `T`. `CEE_NEWOBJ` (`Interpreter.cpp`, §7) only knows how to
+prefer the caller's closed TypeSpec when caller and callee share a
+**typedef** (the `List<int>`-builds-`List<int>` case). Here the typedefs
+differ (`Holder` vs `Box`), so the pushed `Box::.ctor` frame inherits the
+**open** `Box<T>` as its `genericType`. Any `new T[]` / VAR use inside that
+ctor then fails to resolve `T`, the `.cctor` aborts before its `stsfld`,
+and the per-instantiation field stays null. Symptom: `NullReferenceException`
+on first use of the static field, even though the field slot was allocated.
+
+The demand gate (§10) and the bare-VAR storage fix above are **not** the
+problem — the `.cctor` is scheduled correctly; it dies inside its own body.
+
+A proper fix must resolve the callee's open type argument (`Box<!0>`) to the
+concrete closed form (`Box<int>`) via the caller's closed `genericType`, and
+flow that closed instantiation into **both** the `NewObject` object tag and
+the pushed ctor frame's `genericType` (so single-VAR cases can also lean on
+the `arrayElementType` chain in §5/§8). You cannot rely on a matching closed
+TypeSpec row already existing in metadata — it only exists when some other
+non-generic site happens to use the same closed instantiation. Repro:
+`Generic_StaticField_GenericHolder` in `NFUnitTestClasses/UnitTestGenericStaticTests.cs`
+(currently commented out with a pointer here).
+
 ---
 
 ## 10. Generic `.cctor` lifecycle

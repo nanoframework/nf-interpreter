@@ -5852,7 +5852,11 @@ HRESULT CLR_RT_Assembly::ResolveAllocateStaticFields(CLR_RT_HeapBlock *pStaticFi
         {
             CLR_RT_FieldDef_CrossReference &res = crossReferenceFieldDef[i];
 
-            NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.InitializeReference(pStaticFields[res.offset], fd, this));
+            // Static fields declared on an open generic TypeDef live per-instantiation;
+            // this assembly-wide slot is dead storage. Allow VAR fallback so the slot
+            // is stamped as a null OBJECT rather than aborting startup.
+            NANOCLR_CHECK_HRESULT(
+                g_CLR_RT_ExecutionEngine.InitializeReference(pStaticFields[res.offset], fd, this, nullptr, true));
         }
     }
 
@@ -6013,9 +6017,11 @@ HRESULT CLR_RT_Assembly::ResolveAllocateGenericTypeStaticFields()
             CLR_INDEX fieldIndex = ownerTd->firstStaticField + i;
             fieldDefs[i].Set(ownerAsm->assemblyIndex, fieldIndex);
 
-            // Initialize the storage using the field definition
+            // Initialize the storage using the field definition, resolving VAR against
+            // the closed TypeSpec so bare-VAR fields get the concrete type argument.
             const CLR_RECORD_FIELDDEF *pFd = ownerAsm->GetFieldDef(fieldIndex);
-            g_CLR_RT_ExecutionEngine.InitializeReference(fields[i], pFd, ownerAsm);
+            NANOCLR_CHECK_HRESULT(
+                g_CLR_RT_ExecutionEngine.InitializeReference(fields[i], pFd, ownerAsm, &genericTypeInstance));
         }
 
         // Link this assembly's cross-reference to the global registry entry
@@ -6289,7 +6295,8 @@ HRESULT CLR_RT_Assembly::AllocateGenericStaticFieldsOnDemand(
         }
 #endif
 
-        g_CLR_RT_ExecutionEngine.InitializeReference(fields[i], pFd, ownerAsm);
+        // Resolve VAR against the closed TypeSpec so bare-VAR fields get the concrete type argument.
+        NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.InitializeReference(fields[i], pFd, ownerAsm, &tsInstance));
     }
 
     // Link this assembly's cross-reference to the global registry entry
