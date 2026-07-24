@@ -5,6 +5,14 @@ knowledge, gotchas, and debugging context for generics support in the CLR core
 (type system, interpreter, execution engine) so the source files can stay
 focused on the algorithms.
 
+**Documentation policy:** source comments in this directory stay minimal —
+only what's needed to flag a non-obvious invariant at the point it matters.
+Deductions, root-cause analysis, design rationale, and "why not the other
+approach" belong here, not as comment blocks in the `.cpp`/`.h` files. If
+you find yourself writing more than a one-line comment in the source, put
+the explanation here instead and leave a short pointer (or nothing) in the
+code.
+
 If you are about to read or modify any of these and the comment looks terse,
 the rationale is in here:
 
@@ -13,7 +21,8 @@ the rationale is in here:
   `MethodRef_Instance::InitializeFromToken`, `ResolveMethodRef`.
 - `Interpreter.cpp` — `CEE_CALLVIRT`, `CEE_NEWOBJ`, `CEE_BOX`,
   `CEE_UNBOX_ANY`, `CEE_LDOBJ`, `CEE_STELEM_*`, `CEE_LDSFLD`/`CEE_STSFLD`/
-  `CEE_LDSFLDA`, and the `CEE_CONSTRAINED` prefix handler.
+  `CEE_LDSFLDA`, the `CEE_CONSTRAINED` prefix handler, and
+  `EnsureGenericCctorCompleted` (§9–§10 below).
 - `Execution.cpp` — `ExecutionEngine_RunGenericStaticConstructors`,
   `SpawnStaticConstructor`, `ResolveGenericTypeParameter`,
   `InitializeLocals`.
@@ -303,33 +312,135 @@ of the concrete type, which then breaks every subsequent read of that
 field.
 
 Field access on a generic type is also entangled with `.cctor` scheduling
-(§10). If the field-resolution helper reports "not found" but the type has
-a pending generic `.cctor`, the instruction reschedules and lets the
-`.cctor` complete the field-table initialization first.
+(§10). The interpreter enforces ECMA-335 §I.8.9.5 by calling
+`EnsureGenericCctorCompleted` **before** the field read/write. If the
+`.cctor` has not yet run, the helper pushes a stack frame for it on the
+current thread and the triggering opcode retries after the `.cctor`
+returns.
+
+### Storage layout
+
+A static field declared on an open generic TypeDef has **two** heap-block
+slots:
+
+- **Assembly-wide slot** (`assembly->staticFields`), reserved by
+  `ResolveLink` for every static FieldDef regardless of whether the
+  declaring type is generic. For generic-declared fields this slot is
+  **dead storage** — `GetStaticFieldByFieldDef` returns `nullptr` for a
+  generic access and does *not* fall through to it. But the GC still
+  walks the whole assembly-static array (`GarbageCollector.cpp`
+  `Assembly_Mark`, `TypeSystem.cpp` `Heap_Relocate`), so the block must
+  be validly typed. `ResolveAllocateStaticFields` (`TypeSystem.cpp`)
+  initializes these with `allowUnresolvedVarFallback = true` — a bare
+  `static T` field (`DATATYPE_VAR` at slot 0) becomes a null OBJECT
+  block, the same shape as a `static T[]` field. Without the fallback,
+  the VAR would abort `ClrStartup` at `Execution.cpp` line 2134.
+
+- **Per-instantiation slot** (`crossReferenceTypeSpec[..].genericStaticFields`),
+  the live storage returned by `GetStaticFieldByFieldDef` for the
+  matching closed TypeSpec. Allocated by
+  `ResolveAllocateGenericTypeStaticFields` at startup (for closed
+  TypeSpec rows in metadata) and by `AllocateGenericStaticFieldsOnDemand`
+  at runtime (for instantiations reached only through VAR/MVAR binding —
+  same population gap the demand gate in §10 handles for `.cctor`s).
+  Both call `InitializeReference` with the **closed TypeSpec instance**,
+  so a bare-VAR field like `static T DefaultValue` in
+  `Foo<int>` is stamped `I4` and in `Foo<string>` is stamped OBJECT.
+  Passing no instance here would leave every VAR field wrongly typed as
+  the OBJECT block that `ExtractHeapBlocksForObjects` produced.
+
+### Nested generic construction
+
+When a generic `.cctor` constructs a **different** generic type parameterized
+by the holder's own type parameter (`Holder<T>` building `Box<T>`), the
+`newobj Box<!0>::.ctor()` leaves the callee's owner TypeSpec **open** because
+caller and callee have different typedefs — the §7 caller-preference does not
+fire. The pushed ctor frame inherits the open `Box<T>`, so `new T[]` inside
+the ctor can't resolve `T`; the `.cctor` aborts before `stsfld` and the
+static field stays null.
+
+Resolution is in `CEE_NEWOBJ` (after `GetDeclaringType`): parse the open
+owner TypeSpec, resolve each argument against the caller's closed TypeSpec
+via `GetGenericParam`, then either find a matching closed TypeSpec row in
+metadata or fall back to `arrayElementType` for single-VAR cases.
+
+**Invariant: never set both `genericType` and `arrayElementType`** on the
+same ctor frame — doing so corrupts `newarr`'s element-type resolution
+(native `AccessViolation`). The `arrayElementType` fallback is used **only**
+when no closed TypeSpec row exists.
+
+**Why not widen the `ResolveToken` gate:** `ResolveToken` has a closed-row
+search for MVAR / `arrayElementType` cases, gated so it skips pure-VAR
+callers. Widening that gate made the search fire for every generic
+`newobj`/`call`, crashing during startup `.cctor` crawling. The fix is
+scoped inside `CEE_NEWOBJ` behind a strict nested-case guard.
 
 ---
 
 ## 10. Generic `.cctor` lifecycle
 
-Implemented in `ExecutionEngine_RunGenericStaticConstructors`
-(`Execution.cpp`) and `SpawnStaticConstructor`.
+Two mechanisms cooperate:
 
-- The crawler walks every assembly's `TypeSpec` table, filters to **closed**
-  generic instantiations (open TypeSpecs have no observable static state),
-  and schedules a `.cctor` for each one that has one.
-- Each closed type is hashed (via `FindOrCreateGenericStaticFields`); the
-  hash deduplicates so the same closed type is not initialized twice across
-  multiple TypeSpec rows that happen to encode the same closed
-  instantiation.
-- The crawler is **resumable**: after a `.cctor` completes, the helper picks
-  up at the next TypeSpec index. The current crawl position is stored on
-  the spawned delegate via field repurposing — `m_genericTypeSpec.data != 0`
-  on the delegate discriminates a generic-type `.cctor` from an ordinary
-  one, and the field carries the TypeSpec index for resumption.
-- The crawler runs lazily — generic `.cctor`s only fire when something
-  forces them (typically the first field access via `LDSFLD`/`STSFLD`).
-  This is why the field-access opcodes reschedule themselves when they
-  observe a pending `.cctor` (§9).
+**Interpreter-level demand gate** (`EnsureGenericCctorCompleted` in
+`Interpreter.cpp`). Enforces ECMA-335 §I.8.9.5: the first
+`NEWOBJ`/`LDSFLD`/`STSFLD`/`LDSFLDA`/static `CALL` touching a closed
+generic type checks whether the `.cctor` has completed. The declaring
+TypeSpec may be **closed** (`List<int>`) or **open** (`SZGenericArray‑
+Enumerator<!!0>::Empty` accessed inside `List<int>::GetEnumerator`, where
+`!!0` binds to `int` only through the caller's method context). The gate
+handles both: it does not require `IsClosedGenericType()`, it requires
+only that `ComputeHashForClosedGenericType(tsInst, contextTypeSpec,
+contextMethod)` resolves the arguments to a concrete closed form (a
+`0xFFFFFFFF` hash — still open after resolution — short-circuits to
+`S_OK`). This open case matters because the crawler never covers it (see
+below), so the demand gate is the *only* thing that runs those `.cctor`s.
+
+Call contract (identical at all five call sites — `NEWOBJ`, static
+`CALL`, `LDSFLD`, `LDSFLDA`, `STSFLD`):
+- `S_OK` — nothing to do, proceed with the opcode as normal.
+- `CLR_E_PROCESS_EXCEPTION` — a `.cctor` frame was just pushed on the
+  current thread. The caller must rewind `ip` by 3 bytes (1 opcode + 2
+  compressed token — same width for all five opcodes) and
+  `goto Execute_Restart` so the `.cctor` runs as a nested call; when it
+  returns (`Pop`), the triggering opcode re-decodes from the rewound `ip`
+  and retries, now seeing initialized fields.
+- `CLR_E_RESCHEDULE` — the `.cctor` is already scheduled (by the crawler
+  or a prior trigger) but not yet done, and we're not re-entering it from
+  within itself. Rewind `ip` by 3 and yield via
+  `NANOCLR_SET_AND_LEAVE(CLR_E_RESCHEDULE)` so the cctor thread gets a
+  chance to run it.
+
+Internally: the helper marks the `CLR_RT_GenericCctorExecutionRecord` as
+both `c_Scheduled` and `c_Executed` *before* pushing the `.cctor` frame —
+this ordering is what prevents infinite re-entrant triggering if the
+`.cctor` body itself touches the same closed type. When the record is
+already `c_Scheduled`-but-not-`c_Executed` (crawler got there first), the
+helper walks the current thread's call stack looking for a `.cctor` frame
+for the same generic type; finding one means we're already inside it
+(re-entrant access from the `.cctor`'s own body), so it returns `S_OK`
+instead of yielding — yielding here would deadlock, since the thread
+would be waiting on a `.cctor` that only it can run. The pushed `.cctor`
+frame is given the declaring TypeSpec as its generic-type context so any
+VAR references inside the `.cctor` body resolve correctly; when that
+TypeSpec is *open*, the caller's `methodSpec` is also copied onto the
+frame so the body's `!0` resolves two-level (`!0` → TypeSpec slot → MVAR
+→ concrete), landing on the same closed instantiation the triggering
+field access resolved to.
+
+**Crawler** (`SpawnGenericTypeStaticConstructorsHelper` in
+`Execution.cpp` and `SpawnStaticConstructor`). Walks every assembly's
+`TypeSpec` table in a second phase (after all regular `.cctor`s), filters
+to closed instantiations, and schedules their `.cctor`s on the dedicated
+`m_cctorThread`. The crawler is resumable via
+`CLR_RT_HeapBlock_Delegate::m_genericTypeSpec`. Because the demand gate
+above fires earlier, the crawler typically only picks up instantiations
+that were never touched by user code — most `.cctor`s will already be
+marked `c_Executed` by the time the crawler reaches them. The crawler
+only sees instantiations that appear as **closed TypeSpec rows in
+metadata**; closed types that arise solely from runtime VAR/MVAR binding
+(e.g. `SZGenericArrayEnumerator<int>`, materialised inside a generic
+method) have no such row and are therefore reached *only* by the demand
+gate's open-TypeSpec path.
 
 ---
 
