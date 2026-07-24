@@ -17,8 +17,6 @@
 
 uint32_t HAL_StorageOperation(uint8_t operation, uint32_t dataLength, uint32_t offset, uint8_t *data)
 {
-    (void)offset;
-
     char *storageName = NULL;
     char *rootName = NULL;
     char *relativePath = NULL;
@@ -77,6 +75,13 @@ uint32_t HAL_StorageOperation(uint8_t operation, uint32_t dataLength, uint32_t o
             }
         }
 
+        if (offset != 0)
+        {
+            errorCode = StorageOperationErrorCode::WriteError;
+            volume->Close(fileHandle);
+            goto done;
+        }
+
         // open the file (creates it, if it doesn't exist)
         if (FAILED(volume->Open(relativePath, fileHandle)))
         {
@@ -84,12 +89,13 @@ uint32_t HAL_StorageOperation(uint8_t operation, uint32_t dataLength, uint32_t o
             goto done;
         }
 
-        // truncate and seek to the beginning, for a full write
-        volume->SetLength(fileHandle, 0);
-        volume->Seek(fileHandle, 0, SEEKORIGIN_BEGIN, &position);
-
         // write the data
-        volume->Write(fileHandle, fileData, (int)dataLength, &bytesWritten);
+        if (FAILED(volume->Write(fileHandle, fileData, (int)dataLength, &bytesWritten)))
+        {
+            errorCode = StorageOperationErrorCode::WriteError;
+            volume->Close(fileHandle);
+            goto done;
+        }
 
         // close file
         volume->Close(fileHandle);
@@ -114,10 +120,20 @@ uint32_t HAL_StorageOperation(uint8_t operation, uint32_t dataLength, uint32_t o
         }
 
         // seek to the end, to append
-        volume->Seek(fileHandle, 0, SEEKORIGIN_END, &position);
+        if (FAILED(volume->Seek(fileHandle, 0, SEEKORIGIN_END, &position)))
+        {
+            errorCode = StorageOperationErrorCode::WriteError;
+            volume->Close(fileHandle);
+            goto done;
+        }
 
         // append the data
-        volume->Write(fileHandle, fileData, (int)dataLength, &bytesWritten);
+        if (FAILED(volume->Write(fileHandle, fileData, (int)dataLength, &bytesWritten)))
+        {
+            errorCode = StorageOperationErrorCode::WriteError;
+            volume->Close(fileHandle);
+            goto done;
+        }
 
         // close file
         volume->Close(fileHandle);
@@ -138,12 +154,6 @@ uint32_t HAL_StorageOperation(uint8_t operation, uint32_t dataLength, uint32_t o
     }
 
 done:
-
-    // free buffer memory
-    if (storageName != NULL)
-    {
-        platform_free(storageName);
-    }
 
     return errorCode;
 }
