@@ -13,10 +13,10 @@ const BlockRange BlockRange1[] = {
     {BlockRange_BLOCKTYPE_BOOTSTRAP, 0, 15},
 
     // 08008000 nanoCLR
-    {BlockRange_BLOCKTYPE_CODE, 16, 158},
+    {BlockRange_BLOCKTYPE_CODE, 16, 255},
 
-    // 0804F800 deployment
-    {BlockRange_BLOCKTYPE_DEPLOYMENT, 159, 509},
+    // 08080000 deployment (start of flash bank 2 - see STM32L475xG_CLR.ld for why)
+    {BlockRange_BLOCKTYPE_DEPLOYMENT, 256, 509},
 
     ///////////////////////////////////////////////////////////////////////////////////////
     // because this target is using a configuration block need to add the
@@ -99,7 +99,7 @@ MEMORY_MAPPED_NOR_BLOCK_CONFIG Device_BlockStorageConfig = {
         0x08000000,
 
         // UINT32 CPU_MEMORY_CONFIG::SizeInBytes;
-        0x00200000,
+        0x00100000,
 
         // UINT8  CPU_MEMORY_CONFIG::XREADYEnable
         0,

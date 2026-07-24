@@ -11,7 +11,7 @@
  */
 MEMORY
 {
-    flash0     (rx) : org = 0x08008000, len = 0x6F000     /* space reserved for nanoCLR (debug build) */
+    flash0     (rx) : org = 0x08008000, len = 0x78000     /* space reserved for nanoCLR (debug build) */
     flash1     (rx) : org = 0x00000000, len = 0
     flash2     (rx) : org = 0x00000000, len = 0
     flash3     (rx) : org = 0x00000000, len = 0
@@ -20,7 +20,8 @@ MEMORY
     flash6     (rx) : org = 0x00000000, len = 0
     flash7     (rx) : org = 0x00000000, len = 0
     config     (rw) : org = 0x080FF000, len = 4k           /* space reserved for configuration block */
-    deployment (rx) : org = 0x08077000, len = 0x88000       /* space reserved for application deployment */
+    deployment (rx) : org = 0x08080000, len = 0x7F000       /* space reserved for application deployment - starts at the bank 2
+                                                             boundary, see STM32L475xG_CLR.ld for details */
     ramvt      (wx) : org = 0x00000000, len = 0             /* initial RAM address is reserved for a copy of the vector table */
     ram0       (wx) : org = 0x20000030, len = 96k-48         /* SRAM1 */
     ram1       (wx) : org = 0x00000000, len = 0
