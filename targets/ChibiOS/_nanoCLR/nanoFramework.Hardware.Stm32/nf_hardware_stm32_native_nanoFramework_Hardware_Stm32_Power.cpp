@@ -58,6 +58,10 @@ HRESULT Library_nf_hardware_stm32_native_nanoFramework_Hardware_Stm32_Power::Dis
         case WakeupPin_Pin1:
             wakeUpPin = PWR_CSR2_EWUP1;
             break;
+      #elif defined(PWR_CR3_EWUP1)
+        case WakeupPin_Pin1:
+            wakeUpPin = PWR_CR3_EWUP1;
+            break;
       #else
         #error "missing include for STM32 target PAL"
       #endif
@@ -70,6 +74,10 @@ HRESULT Library_nf_hardware_stm32_native_nanoFramework_Hardware_Stm32_Power::Dis
         case WakeupPin_Pin2:
             wakeUpPin = PWR_CSR2_EWUP2;
             break;
+      #elif defined(PWR_CR3_EWUP2)
+        case WakeupPin_Pin2:
+            wakeUpPin = PWR_CR3_EWUP2;
+            break;
       #endif
 
       #if defined(PWR_CSR_EWUP3)
@@ -79,6 +87,10 @@ HRESULT Library_nf_hardware_stm32_native_nanoFramework_Hardware_Stm32_Power::Dis
       #elif defined(PWR_CSR2_EWUP3)
         case WakeupPin_Pin3:
             wakeUpPin = PWR_CSR2_EWUP3;
+            break;
+      #elif defined(PWR_CR3_EWUP3)
+        case WakeupPin_Pin3:
+            wakeUpPin = PWR_CR3_EWUP3;
             break;
       #endif
 
@@ -95,11 +107,17 @@ HRESULT Library_nf_hardware_stm32_native_nanoFramework_Hardware_Stm32_Power::Dis
 
   #endif
 
-  #if defined(STM32F7XX) || defined(STM32H7XX) || defined(STM32L4XX)
+  #if defined(STM32F7XX) || defined(STM32H7XX)
 
     CLEAR_BIT(PWR->CSR2, wakeUpPin);
 
-  #endif    
+  #endif
+
+  #if defined(STM32L4XX)
+
+    CLEAR_BIT(PWR->CR3, wakeUpPin);
+
+  #endif
  
     NANOCLR_NOCLEANUP();
 }
@@ -146,6 +164,17 @@ HRESULT Library_nf_hardware_stm32_native_nanoFramework_Hardware_Stm32_Power::Ena
 
             break;
 
+      #elif defined(PWR_CR3_EWUP1)
+
+        case WakeupPin_Pin1:
+            wakeUpPin = PWR_CR3_EWUP1;
+
+            // need to config the respective EXTI line (PA0)
+            EXTI->IMR1 |= EXTI_IMR1_IM0;
+            EXTI->RTSR1 |= EXTI_RTSR1_RT0;
+
+            break;
+
       #else
         #error "missing include for STM32 target PAL"
       #endif
@@ -168,6 +197,17 @@ HRESULT Library_nf_hardware_stm32_native_nanoFramework_Hardware_Stm32_Power::Ena
             // need to config the respective EXTI line (PA2)
             EXTI->IMR |= EXTI_IMR_IM2;
             EXTI->RTSR |= EXTI_RTSR_TR2;
+
+            break;
+
+      #elif defined(PWR_CR3_EWUP2)
+
+        case WakeupPin_Pin2:
+            wakeUpPin = PWR_CR3_EWUP2;
+
+            // need to config the respective EXTI line (PA2)
+            EXTI->IMR1 |= EXTI_IMR1_IM2;
+            EXTI->RTSR1 |= EXTI_RTSR1_RT2;
 
             break;
 
@@ -195,6 +235,17 @@ HRESULT Library_nf_hardware_stm32_native_nanoFramework_Hardware_Stm32_Power::Ena
 
             break;
 
+      #elif defined(PWR_CR3_EWUP3)
+
+        case WakeupPin_Pin3:
+            wakeUpPin = PWR_CR3_EWUP3;
+
+            // need to config the respective EXTI line (PC1)
+            EXTI->IMR1 |= EXTI_IMR1_IM1;
+            EXTI->RTSR1 |= EXTI_RTSR1_RT1;
+
+            break;
+
       #endif
 
         default:
@@ -217,10 +268,17 @@ HRESULT Library_nf_hardware_stm32_native_nanoFramework_Hardware_Stm32_Power::Ena
 
   #endif
 
-  #if defined(STM32F7XX) || defined(STM32H7XX) || defined(STM32L4XX)
+  #if defined(STM32F7XX) || defined(STM32H7XX)
 
     // enable the wake up pin
     SET_BIT(PWR->CSR2, wakeUpPin);
+
+  #endif
+
+  #if defined(STM32L4XX)
+
+    // enable the wake up pin
+    SET_BIT(PWR->CR3, wakeUpPin);
 
   #endif
     

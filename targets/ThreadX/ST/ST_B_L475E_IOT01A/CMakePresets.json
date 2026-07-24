@@ -7,7 +7,7 @@
     ],
     "configurePresets": [
         {
-            "name": "ST_B_L475E_IOT01A",
+            "name": "ST_B_L475E_IOT01A_AZRT",
             "inherits": [
                 "arm-gcc-cortex-preset",
                 "user-tools-repos",
@@ -22,9 +22,9 @@
     "buildPresets": [
         {
             "inherits": "base-user",
-            "name": "ST_B_L475E_IOT01A",
-            "displayName": "ST_B_L475E_IOT01A",
-            "configurePreset": "ST_B_L475E_IOT01A"
+            "name": "ST_B_L475E_IOT01A_AZRT",
+            "displayName": "ST_B_L475E_IOT01A_AZRT",
+            "configurePreset": "ST_B_L475E_IOT01A_AZRT"
         }
     ]
 }

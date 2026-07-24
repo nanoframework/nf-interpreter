@@ -92,8 +92,14 @@ elseif(TARGET_VENDOR STREQUAL "RP")
 endif()
 
 # common build output include directories
-list(APPEND CHIBIOS_INCLUDE_DIRS ${CMAKE_BINARY_DIR}/targets/ChibiOS/${TARGET_BOARD}/nanoBooter)
+# NOTE: nanoCLR must be listed BEFORE nanoBooter here. Libraries that are only ever built for
+# nanoCLR (e.g. NF_CoreCLR, which contains CLRStartup.cpp and its OEMSYSTEMINFOSTRING usage)
+# consume CHIBIOS_INCLUDE_DIRS without any later override, so whichever generated target_board.h
+# directory appears first in this list is the one that wins for <target_board.h> lookups in
+# those libraries. nanoBooter.elf itself is unaffected by this order because it explicitly adds
+# its own generated directory earlier in its own include path (see nf_add_common_include_directories).
 list(APPEND CHIBIOS_INCLUDE_DIRS ${CMAKE_BINARY_DIR}/targets/ChibiOS/${TARGET_BOARD}/nanoCLR)
+list(APPEND CHIBIOS_INCLUDE_DIRS ${CMAKE_BINARY_DIR}/targets/ChibiOS/${TARGET_BOARD}/nanoBooter)
 
 # source files and GCC options according to target vendor and series
 

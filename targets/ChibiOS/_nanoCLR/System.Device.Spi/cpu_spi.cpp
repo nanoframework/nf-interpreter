@@ -650,6 +650,20 @@ uint16_t ComputeBaudRate(SPI_DEVICE_CONFIGURATION &config, int32_t &actualFreque
         maxSpiFrequency = STM32_SPI123_MAX;
     }
 
+#elif defined(STM32L4XX)
+
+    // SPI1 is feed by APB2 (STM32_PCLK2)
+    actualFrequency = STM32_PCLK2;
+
+    // SPI2 and SPI3 are feed by APB1 (STM32_PCLK1)
+    if (busIndex == 2 || busIndex == 3)
+    {
+        actualFrequency = STM32_PCLK1;
+    }
+
+    // from datasheet, SPI max is half of the feeding peripheral clock
+    maxSpiFrequency = 40000000;
+
 #else
 
 #error "Error setting max SPI frequency. Check if the target series is defined."
