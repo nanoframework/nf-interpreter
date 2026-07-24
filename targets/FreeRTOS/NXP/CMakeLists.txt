@@ -41,6 +41,7 @@ if(NO_FATFS_SOURCE)
         fatfs
         GIT_REPOSITORY https://github.com/abbrev/fatfs.git
         GIT_TAG ${FATFS_VERSION_TAG}
+        UPDATE_DISCONNECTED ON
     )
 
 else()
