@@ -10,6 +10,7 @@
 #include <WireProtocol_Message.h>
 #include <WireProtocol_HAL_Interface.h>
 #include <WireProtocol_Uart_Pins.h>
+#include <WireProtocol_Transport.h>
 
 #if CONFIG_TINYUSB_CDC_ENABLED
 #include <tinyusb.h>
@@ -22,9 +23,11 @@
 // USB/JTAG, and finally fallback to UART if the previous options are not available or fail to initialize. It can only
 // be USB CDC or USB/JTAG not both. The ESP will reset if tinyusb has been initialized/deinitialized then try USB/JTAG
 // as they use USB port in different modes
+// - ESP32-S2: TinyUSB CDC only (USB-OTG). No USB/JTAG peripheral, and no UART fallback is compiled.
+// - Other targets with USB-Serial/JTAG (C3/C5/C6/C61/H2/P4/S3): USB/JTAG first, then UART fallback.
+// - Targets without USB: UART only.
 
-// Only ESP32S2 uses TinyUSB (USB CDC)
-// Select between USB Jtag or UART based WP transport based on where connected and configuration
+// Only ESP32-S2 uses TinyUSB (USB CDC)
 #if CONFIG_IDF_TARGET_ESP32S2 && CONFIG_TINYUSB_CDC_ENABLED &&                                                         \
     (CONFIG_NF_WP_TRANSPORT_USB_CDC || CONFIG_NF_WP_TRANSPORT_USB_CDC_OR_SERIAL)
 #define WP_USE_TINYUSB
@@ -34,19 +37,14 @@
 #define WP_USE_USB_JTAG
 #endif
 
-#if (CONFIG_NF_WP_TRANSPORT_SERIAL || CONFIG_NF_WP_TRANSPORT_USB_CDC_OR_SERIAL)
+// UART fallback is skipped on S2 when TinyUSB is in use (see note above).
+#if (CONFIG_NF_WP_TRANSPORT_SERIAL || CONFIG_NF_WP_TRANSPORT_USB_CDC_OR_SERIAL) && !defined(WP_USE_TINYUSB)
 #define WP_USE_UART
 #endif
 
 // Select between USB Jtag or UART based WP transport based on where connected and configuration
 static bool WP_Port_Initialised = false;
-enum
-{
-    WP_TRANSPORT_NONE,
-    WP_TRANSPORT_UART,
-    WP_TRANSPORT_USB_JTAG,
-    WP_TRANSPORT_TINY_USB
-} WP_Transport = WP_TRANSPORT_NONE;
+WP_TransportType g_WP_Transport = WP_TRANSPORT_NONE;
 
 // WP using TinyUSB CDC
 #if defined(WP_USE_TINYUSB)
@@ -93,6 +91,8 @@ static bool WP_InitialiseTinyUsb(COM_HANDLE port)
 
     // delay for a while to allow the host to recognize the device and enumerate it
     // Also if no delay then the tinyusb_driver_uninstall() crashes
+#if defined(WP_USE_UART) || defined(WP_USE_USB_JTAG)
+    // Only probe destructively when a fallback transport is available.
     vTaskDelay(pdMS_TO_TICKS(100));
 
     // Check if the device is connected to host, if not, deinit and return false to fallback to other transport
@@ -102,6 +102,7 @@ static bool WP_InitialiseTinyUsb(COM_HANDLE port)
         tinyusb_driver_uninstall();
         return false;
     }
+#endif
 
     // TinyUSB CDC ACM is connected and ready to use
     WP_Port_Initialised = true;
@@ -385,7 +386,7 @@ static bool WP_Initialise(COM_HANDLE port)
 #if defined(WP_USE_TINYUSB)
     if (WP_InitialiseTinyUsb(port))
     {
-        WP_Transport = WP_TRANSPORT_TINY_USB;
+        g_WP_Transport = WP_TRANSPORT_TINY_USB;
         return true;
     }
 #endif
@@ -393,7 +394,7 @@ static bool WP_Initialise(COM_HANDLE port)
 #if defined(WP_USE_USB_JTAG)
     if (WP_InitialiseUsbJtag(port))
     {
-        WP_Transport = WP_TRANSPORT_USB_JTAG;
+        g_WP_Transport = WP_TRANSPORT_USB_JTAG;
         return true;
     }
 
@@ -402,12 +403,13 @@ static bool WP_Initialise(COM_HANDLE port)
 #if defined(WP_USE_UART)
     if (WP_InitialiseUart(port))
     {
-        WP_Transport = WP_TRANSPORT_UART;
+        g_WP_Transport = WP_TRANSPORT_UART;
         return true;
     }
 #endif
 
-    WP_Transport = WP_TRANSPORT_NONE;
+    g_WP_Transport = WP_TRANSPORT_NONE;
+
     return false;
 }
 
@@ -419,7 +421,7 @@ void WP_ReceiveBytes(uint8_t **ptr, uint32_t *size)
         WP_Initialise(ESP32_WP_UART);
     }
 
-    switch (WP_Transport)
+    switch (g_WP_Transport)
     {
         default:
         // No transport selected on startup
@@ -456,7 +458,7 @@ uint8_t WP_TransmitMessage(WP_Message *message)
         WP_Initialise(ESP32_WP_UART);
     }
 
-    switch (WP_Transport)
+    switch (g_WP_Transport)
     {
         default:
             // No transport selected on startup
