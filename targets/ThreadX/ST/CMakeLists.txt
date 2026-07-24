@@ -49,6 +49,7 @@ if(NO_CHIBIOS_HAL_SOURCE)
         GIT_REPOSITORY "https://github.com/chibios-upstream/chibios.git"
         GIT_TAG ${CHIBIOS_HAL_VERSION}
         GIT_SHALLOW ON
+        UPDATE_DISCONNECTED ON
     )
 
 else()
