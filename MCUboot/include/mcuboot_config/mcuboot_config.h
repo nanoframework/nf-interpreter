@@ -86,6 +86,11 @@
 #define MCUBOOT_USE_FLASH_AREA_GET_SECTORS
 #define MCUBOOT_DEV_WITH_ERASE
 
+#define MCUBOOT_LOGICAL_SECTOR_SIZE CONFIG_NF_MCUBOOT_LOGICAL_SECTOR_SIZE
+#if CONFIG_NF_MCUBOOT_VERIFY_LOGICAL_SECTORS != 0
+#define MCUBOOT_VERIFY_LOGICAL_SECTORS CONFIG_NF_MCUBOOT_VERIFY_LOGICAL_SECTORS
+#endif
+
 //
 // Maximum number of erasable sectors that MCUboot will track per image slot.
 // Must be >= (slot_size / min_sector_size).

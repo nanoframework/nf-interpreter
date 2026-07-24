@@ -153,4 +153,20 @@ config NF_FEATURE_MCUBOOT_HAS_SDCARD
         ffconf.h is reused so that the same FatFs configuration applies
         to both the bootloader and the nanoCLR runtime.
 
+config NF_MCUBOOT_LOGICAL_SECTOR_SIZE
+    hex "MCUboot size of a logical sector"
+    depends on NF_FEATURE_HAS_MCUBOOT
+    default 0x0
+    help
+        Set to 0x0 to use hardware sectors. Any other value here should be aligned to hardware
+        sectors in size and alignment, and must be a power of two. A build time assertion
+        rejects sizes that are not, as offsets are rounded by masking rather than by division.
+
+config NF_MCUBOOT_VERIFY_LOGICAL_SECTORS
+	bool "Validate logical sector layout"
+	depends on NF_MCUBOOT_LOGICAL_SECTOR_SIZE != 0x0
+	help
+	  Validation of logical sector size against hardware constraints. Should be used to
+	  validate compile-time configuration against run-time system.
+
 endmenu # MCUboot
