@@ -45,8 +45,8 @@ void PioEnsureOutOfReset(int blockIndex)
         return;
     }
 
-    unsigned int bits =
-        (1u << (PIO_RESET_LSB + (unsigned int)blockIndex)) | IO_BANK0_RESET_BIT | PADS_BANK0_RESET_BIT;
+    const unsigned int bits =
+        (1u << (PIO_RESET_LSB + static_cast<unsigned int>(blockIndex))) | IO_BANK0_RESET_BIT | PADS_BANK0_RESET_BIT;
     RESETS->CLR.RESET = bits; // atomic-clear alias
     while ((RESETS->RESET_DONE & bits) != bits)
     {
@@ -59,62 +59,65 @@ HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_P
     NativeAddProgram___STATIC__I4__I4__SZARRAY_U2__I4__I4(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
+
+    PIO_TypeDef *pio;
+    unsigned short *instr;
+    int offset;
+    bool relocate;
+
+    const int block = stack.Arg0().NumericByRef().s4;
+    CLR_RT_HeapBlock_Array *instrArray = stack.Arg1().DereferenceArray();
+    const int length = stack.Arg2().NumericByRef().s4;
+    const int origin = stack.Arg3().NumericByRef().s4;
+
+    if (PioFromIndex(block) == nullptr || block < 0 || block > 2 || instrArray == nullptr ||
+        length <= 0 || length > 32 || static_cast<int>(instrArray->m_numOfElements) < length)
     {
-        int block = stack.Arg0().NumericByRef().s4;
-        CLR_RT_HeapBlock_Array *instrArray = stack.Arg1().DereferenceArray();
-        int length = stack.Arg2().NumericByRef().s4;
-        int origin = stack.Arg3().NumericByRef().s4;
-
-        if (PioFromIndex(block) == nullptr || block < 0 || block > 2 || instrArray == nullptr ||
-            length <= 0 || length > 32 || (int)instrArray->m_numOfElements < length)
-        {
-            NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
-        }
-
-        PIO_TypeDef *pio = PioFromIndex(block);
-        unsigned short *instr = (unsigned short *)instrArray->GetFirstElement();
-        PioEnsureOutOfReset(block);
-
-        int offset = -1;
-        // fixed origin: exact slots; relocatable: first-fit
-        if (origin >= 0)
-        {
-            if (origin <= 32 - length && (g_PioInstrUsed[block] & PioSlotMask(origin, length)) == 0)
-            {
-                offset = origin;
-            }
-        }
-        else
-        {
-            for (int candidate = 0; candidate + length <= 32; candidate++)
-            {
-                if ((g_PioInstrUsed[block] & PioSlotMask(candidate, length)) == 0)
-                {
-                    offset = candidate;
-                    break;
-                }
-            }
-        }
-
-        if (offset >= 0)
-        {
-            bool relocate = origin < 0;
-            for (int i = 0; i < length; i++)
-            {
-                unsigned short w = instr[i];
-                // relocate JMP (opcode 0b000) targets by the load offset
-                if (relocate && (w & 0xE000) == 0x0000)
-                {
-                    unsigned int target = ((unsigned int)(w & 0x1F) + (unsigned int)offset) & 0x1F;
-                    w = (unsigned short)((w & ~0x1F) | target);
-                }
-                pio->INSTR_MEM[offset + i] = w;
-            }
-            g_PioInstrUsed[block] |= PioSlotMask(offset, length);
-        }
-
-        stack.SetResult_I4(offset);
+        NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
     }
+
+    pio = PioFromIndex(block);
+    instr = reinterpret_cast<unsigned short *>(instrArray->GetFirstElement());
+    PioEnsureOutOfReset(block);
+
+    offset = -1;
+    if (origin >= 0)
+    {
+        if (origin <= 32 - length && (g_PioInstrUsed[block] & PioSlotMask(origin, length)) == 0)
+        {
+            offset = origin;
+        }
+    }
+    else
+    {
+        for (int candidate = 0; candidate + length <= 32; candidate++)
+        {
+            if ((g_PioInstrUsed[block] & PioSlotMask(candidate, length)) == 0)
+            {
+                offset = candidate;
+                break;
+            }
+        }
+    }
+
+    if (offset >= 0)
+    {
+        relocate = origin < 0;
+        for (int i = 0; i < length; i++)
+        {
+            unsigned short w = instr[i];
+            if (relocate && (w & 0xE000) == 0x0000)
+            {
+                const unsigned int target = (static_cast<unsigned int>(w & 0x1F) + static_cast<unsigned int>(offset)) & 0x1F;
+                w = static_cast<unsigned short>((w & ~0x1F) | target);
+            }
+            pio->INSTR_MEM[offset + i] = w;
+        }
+        g_PioInstrUsed[block] |= PioSlotMask(offset, length);
+    }
+
+    stack.SetResult_I4(offset);
+
     NANOCLR_NOCLEANUP();
 }
 
@@ -122,33 +125,33 @@ HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_P
     NativeRemoveProgram___STATIC__VOID__I4__I4__I4(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
+
+    unsigned int mask;
+
+    const int block = stack.Arg0().NumericByRef().s4;
+    const int length = stack.Arg1().NumericByRef().s4;
+    const int offset = stack.Arg2().NumericByRef().s4;
+
+    PIO_TypeDef *pio = PioFromIndex(block);
+    if (pio == nullptr || offset < 0 || length <= 0 || length > 32 || offset > 32 - length)
     {
-        int block = stack.Arg0().NumericByRef().s4;
-        int length = stack.Arg1().NumericByRef().s4;
-        int offset = stack.Arg2().NumericByRef().s4;
-
-        PIO_TypeDef *pio = PioFromIndex(block);
-        if (pio == nullptr || offset < 0 || length <= 0 || length > 32 || offset > 32 - length)
-        {
-            NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
-        }
-
-        // only reclaim a range that is fully owned, else we'd corrupt the map and clobber other programs
-        unsigned int mask = PioSlotMask(offset, length);
-        if ((g_PioInstrUsed[block] & mask) != mask)
-        {
-            NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
-        }
-        PioEnsureOutOfReset(block);
-
-        // reclaim slots, blank to JMP-to-self so a stray enable can't run stale opcodes
-        for (int i = 0; i < length; i++)
-        {
-            pio->INSTR_MEM[offset + i] = (unsigned short)((offset + i) & 0x1F);
-        }
-
-        g_PioInstrUsed[block] &= ~mask;
+        NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
     }
+
+    mask = PioSlotMask(offset, length);
+    if ((g_PioInstrUsed[block] & mask) != mask)
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+    }
+    PioEnsureOutOfReset(block);
+
+    for (int i = 0; i < length; i++)
+    {
+        pio->INSTR_MEM[offset + i] = static_cast<unsigned short>((offset + i) & 0x1F);
+    }
+
+    g_PioInstrUsed[block] &= ~mask;
+
     NANOCLR_NOCLEANUP();
 }
 
@@ -156,34 +159,35 @@ HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_P
     NativeClaimUnusedSm___STATIC__I4__I4__BOOLEAN(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
+
+    int claimed;
+
+    const int block = stack.Arg0().NumericByRef().s4;
+    const bool required = stack.Arg1().NumericByRef().u1;
+
+    if (PioFromIndex(block) == nullptr)
     {
-        int block = stack.Arg0().NumericByRef().s4;
-        bool required = stack.Arg1().NumericByRef().u1;
-
-        if (PioFromIndex(block) == nullptr)
-        {
-            NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
-        }
-
-        int claimed = -1;
-        for (int sm = 0; sm < 4; sm++)
-        {
-            if ((g_PioClaimedSm[block] & (1u << sm)) == 0)
-            {
-                g_PioClaimedSm[block] |= (1u << sm);
-                claimed = sm;
-                break;
-            }
-        }
-
-        // none free: `required` hard-fails, else soft -1
-        if (claimed < 0 && required)
-        {
-            NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_OPERATION);
-        }
-
-        stack.SetResult_I4(claimed);
+        NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
     }
+
+    claimed = -1;
+    for (int sm = 0; sm < 4; sm++)
+    {
+        if ((g_PioClaimedSm[block] & (1u << sm)) == 0)
+        {
+            g_PioClaimedSm[block] |= (1u << sm);
+            claimed = sm;
+            break;
+        }
+    }
+
+    if (claimed < 0 && required)
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_OPERATION);
+    }
+
+    stack.SetResult_I4(claimed);
+
     NANOCLR_NOCLEANUP();
 }
 
@@ -191,25 +195,23 @@ HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_P
     NativeInitGpio___STATIC__VOID__I4__I4(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
-    {
-        int block = stack.Arg0().NumericByRef().s4;
-        int pin = stack.Arg1().NumericByRef().s4;
+
+    const int block = stack.Arg0().NumericByRef().s4;
+    const int pin = stack.Arg1().NumericByRef().s4;
 
 #if defined(RP2350)
-        if (block < 0 || block > 2 || pin < 0 || pin > 47)
+    if (block < 0 || block > 2 || pin < 0 || pin > 47)
 #else
-        if (block < 0 || block > 1 || pin < 0 || pin > 29)
+    if (block < 0 || block > 1 || pin < 0 || pin > 29)
 #endif
-        {
-            NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
-        }
-        PioEnsureOutOfReset(block);
-
-        // FUNCSEL = 6 (PIO0), 7 (PIO1), 8 (PIO2)
-        IO_BANK0->GPIO[pin].CTRL = 6u + (unsigned int)block;
-        // clear OD (bit 7), set IE (bit 6); also clear the RP2350 pad isolation latch (bit 8, resets to 1)
-        PADS_BANK0->GPIO[pin] = (PADS_BANK0->GPIO[pin] & ~0x180u) | 0x40u;
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
     }
+    PioEnsureOutOfReset(block);
+
+    IO_BANK0->GPIO[pin].CTRL = 6u + static_cast<unsigned int>(block);
+    PADS_BANK0->GPIO[pin] = (PADS_BANK0->GPIO[pin] & ~0x180u) | 0x40u;
+
     NANOCLR_NOCLEANUP();
 }
 
@@ -217,19 +219,19 @@ HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_P
     NativeForceIrq___STATIC__VOID__I4__I4(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
+
+    const int block = stack.Arg0().NumericByRef().s4;
+    const int irq = stack.Arg1().NumericByRef().s4;
+
+    PIO_TypeDef *pio = PioFromIndex(block);
+    if (pio == nullptr || irq < 0 || irq > 7)
     {
-        int block = stack.Arg0().NumericByRef().s4;
-        int irq = stack.Arg1().NumericByRef().s4;
-
-        PIO_TypeDef *pio = PioFromIndex(block);
-        if (pio == nullptr || irq < 0 || irq > 7)
-        {
-            NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
-        }
-        PioEnsureOutOfReset(block);
-
-        pio->IRQ_FORCE = (1u << irq);
+        NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
     }
+    PioEnsureOutOfReset(block);
+
+    pio->IRQ_FORCE = (1u << irq);
+
     NANOCLR_NOCLEANUP();
 }
 
@@ -237,18 +239,18 @@ HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_P
     NativeClearIrq___STATIC__VOID__I4__I4(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
+
+    const int block = stack.Arg0().NumericByRef().s4;
+    const int irq = stack.Arg1().NumericByRef().s4;
+
+    PIO_TypeDef *pio = PioFromIndex(block);
+    if (pio == nullptr || irq < 0 || irq > 7)
     {
-        int block = stack.Arg0().NumericByRef().s4;
-        int irq = stack.Arg1().NumericByRef().s4;
-
-        PIO_TypeDef *pio = PioFromIndex(block);
-        if (pio == nullptr || irq < 0 || irq > 7)
-        {
-            NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
-        }
-        PioEnsureOutOfReset(block);
-
-        pio->IRQ = (1u << irq);
+        NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
     }
+    PioEnsureOutOfReset(block);
+
+    pio->IRQ = (1u << irq);
+
     NANOCLR_NOCLEANUP();
 }
