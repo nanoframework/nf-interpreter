@@ -40,6 +40,7 @@ if(NO_RPI_PICO_SDK_SOURCE_FOLDER)
         pico_sdk
         GIT_REPOSITORY https://github.com/raspberrypi/pico-sdk
         GIT_TAG ${RPI_PICO_SDK_VERSION}
+        UPDATE_DISCONNECTED ON
     )
 
 else()

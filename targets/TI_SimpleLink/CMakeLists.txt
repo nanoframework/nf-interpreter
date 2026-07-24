@@ -41,6 +41,7 @@ if("${TARGET_SERIES}" STREQUAL "CC32xx")
             simplelinkcc32xxsdk
             GIT_REPOSITORY https://github.com/nanoframework/SimpleLink_CC32xx_SDK
             GIT_TAG ${TI_SL_CC32xx_SDK_TAG}
+            UPDATE_DISCONNECTED ON
         )
 
     else()
@@ -91,6 +92,7 @@ if("${TARGET_SERIES}" STREQUAL "CC32xx")
             ti_xdctools
             GIT_REPOSITORY https://github.com/nanoframework/TI_XDCTools
             GIT_TAG ${TI_XDCTOOLS_VERSION_TAG}
+            UPDATE_DISCONNECTED ON
         )
 
     else()
@@ -142,6 +144,7 @@ elseif( "${TARGET_SERIES}" STREQUAL "CC13X2" )
             simplelinkcc13xx_26xxsdk
             GIT_REPOSITORY https://github.com/nanoframework/SimpleLink_CC13xx_26xx_SDK
             GIT_TAG ${TI_SL_CC13xx_26xx_SDK_TAG}
+            UPDATE_DISCONNECTED ON
         )
 
     else()
@@ -192,6 +195,7 @@ elseif( "${TARGET_SERIES}" STREQUAL "CC13X2" )
             ti_sysconfig
             GIT_REPOSITORY https://github.com/nanoframework/TI_SysConfig
             GIT_TAG ${TI_SYSCONFIG_VERSION_TAG}
+            UPDATE_DISCONNECTED ON
         )
 
     else()
@@ -242,6 +246,7 @@ elseif( "${TARGET_SERIES}" STREQUAL "CC13X2" )
             ti_xdctools
             GIT_REPOSITORY https://github.com/nanoframework/TI_XDCTools
             GIT_TAG ${TI_XDCTOOLS_VERSION_TAG}
+            UPDATE_DISCONNECTED ON
         )
 
     else()
