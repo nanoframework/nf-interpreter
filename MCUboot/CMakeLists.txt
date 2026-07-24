@@ -10,6 +10,8 @@ add_library(nf_mcuboot_port STATIC
     ${MCUboot_SOURCES}
     ${mcuboot_SOURCE_DIR}/boot/bootutil/src/bootutil_public.c
     ${mcuboot_SOURCE_DIR}/boot/bootutil/src/bootutil_misc.c
+
+    ${CMAKE_SOURCE_DIR}/targets/ChibiOS/_mcuboot/mcuboot_log_stubs.c
 )
 
 target_include_directories(nf_mcuboot_port PUBLIC
@@ -209,9 +211,13 @@ if(${TARGET_SERIES} STREQUAL "STM32F7xx")
         # Stub: halCommunityInit() no-op — MCUboot does not use ChibiOS-Contrib.
         ${CMAKE_SOURCE_DIR}/targets/ChibiOS/_mcuboot/hal_community_stub.c
 
-        # HAL shims and weak defaults (HAL_GetTick, HAL_Delay, nf_mcuboot_log_write, …).
+        # HAL shims and weak defaults (HAL_GetTick, HAL_Delay,...).
         # All definitions are weak; boards override what they need in their BSP files.
         ${CMAKE_SOURCE_DIR}/targets/ChibiOS/_mcuboot/mcuboot_hal_stubs.c
+
+        # Logging backend (nf_mcuboot_log_emit, nf_mcuboot_log_write) for linking bootutil's
+        # MCUBOOT_LOG_* calls.
+        ${CMAKE_SOURCE_DIR}/targets/ChibiOS/_mcuboot/mcuboot_log_stubs.c
     )
 
     # Include directories shared by all STM32F7xx bootloader targets.
