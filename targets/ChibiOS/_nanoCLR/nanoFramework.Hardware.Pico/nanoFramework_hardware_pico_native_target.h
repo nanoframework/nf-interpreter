@@ -6,8 +6,6 @@
 #ifndef NANOFRAMEWORK_HARDWARE_PICO_NATIVE_TARGET_H
 #define NANOFRAMEWORK_HARDWARE_PICO_NATIVE_TARGET_H
 
-// Maps a PIO block index to its register block, or nullptr for an invalid index.
-// RP2040 exposes PIO0/PIO1; RP2350 adds PIO2.
 static inline PIO_TypeDef *PioFromIndex(int index)
 {
     switch (index)
@@ -25,8 +23,6 @@ static inline PIO_TypeDef *PioFromIndex(int index)
     }
 }
 
-// Releases a PIO block (and the IO/PAD banks) from reset on first use; idempotent. Defined in
-// the PioBlock translation unit so the reset state is shared across all entry points.
 void PioEnsureOutOfReset(int blockIndex);
 
 #endif // NANOFRAMEWORK_HARDWARE_PICO_NATIVE_TARGET_H

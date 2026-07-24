@@ -59,7 +59,6 @@ HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_P
 {
     NANOCLR_HEADER();
 
-    PIO_TypeDef *pio;
     unsigned short *instr;
     int offset;
     bool relocate;
@@ -69,13 +68,14 @@ HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_P
     const int length = stack.Arg2().NumericByRef().s4;
     const int origin = stack.Arg3().NumericByRef().s4;
 
-    if (PioFromIndex(block) == nullptr || block < 0 || block > 2 || instrArray == nullptr ||
-        length <= 0 || length > 32 || static_cast<int>(instrArray->m_numOfElements) < length)
+    PIO_TypeDef *pio = PioFromIndex(block);
+
+    if (pio == nullptr || block < 0 || block > 2 || instrArray == nullptr || length <= 0 || length > 32 ||
+        static_cast<int>(instrArray->m_numOfElements) < length)
     {
         NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
     }
 
-    pio = PioFromIndex(block);
     instr = reinterpret_cast<unsigned short *>(instrArray->GetFirstElement());
     PioEnsureOutOfReset(block);
 
@@ -107,7 +107,8 @@ HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_P
             unsigned short w = instr[i];
             if (relocate && (w & 0xE000) == 0x0000)
             {
-                const unsigned int target = (static_cast<unsigned int>(w & 0x1F) + static_cast<unsigned int>(offset)) & 0x1F;
+                const unsigned int target =
+                    (static_cast<unsigned int>(w & 0x1F) + static_cast<unsigned int>(offset)) & 0x1F;
                 w = static_cast<unsigned short>((w & ~0x1F) | target);
             }
             pio->INSTR_MEM[offset + i] = w;
