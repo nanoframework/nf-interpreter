@@ -52,7 +52,6 @@ uint32_t HAL_StorageOperation(uint8_t operation, uint32_t dataLength, uint32_t o
         void *fileHandle = NULL;
         char dirPath[FS_MAX_DIRECTORY_LENGTH];
         char *lastSeparator;
-        int64_t position;
         int bytesWritten = 0;
 
         // extract parent directory from relative path and create it if needed
