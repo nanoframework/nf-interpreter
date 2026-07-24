@@ -17,6 +17,8 @@
 
 uint32_t HAL_StorageOperation(uint8_t operation, uint32_t dataLength, uint32_t offset, uint8_t *data)
 {
+    (void)offset;
+
     char *storageName = NULL;
     char *rootName = NULL;
     char *relativePath = NULL;
@@ -73,13 +75,6 @@ uint32_t HAL_StorageOperation(uint8_t operation, uint32_t dataLength, uint32_t o
                 errorCode = StorageOperationErrorCode::WriteError;
                 goto done;
             }
-        }
-
-        if (offset != 0)
-        {
-            errorCode = StorageOperationErrorCode::WriteError;
-            volume->Close(fileHandle);
-            goto done;
         }
 
         // open the file (creates it, if it doesn't exist)
