@@ -3096,6 +3096,8 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
 
                                 for (int a = 0; a < argCount && allResolved; a++)
                                 {
+                                    int targetAvail = ownerParser.Available() - 1;
+
                                     CLR_RT_SignatureParser::Element argElem{};
                                     if (FAILED(ownerParser.Advance(argElem)))
                                     {
@@ -3103,7 +3105,11 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                                         break;
                                     }
 
-                                    if (argElem.DataType == DATATYPE_VAR)
+                                    if (argElem.Levels > 0 || argElem.DataType == DATATYPE_GENERICINST)
+                                    {
+                                        allResolved = false;
+                                    }
+                                    else if (argElem.DataType == DATATYPE_VAR)
                                     {
                                         CLR_RT_SignatureParser::Element paramElem{};
                                         if (callerTs.GetGenericParam(argElem.GenericParamPosition, paramElem) &&
@@ -3123,6 +3129,16 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                                     else
                                     {
                                         allResolved = false;
+                                    }
+
+                                    while (ownerParser.Available() > targetAvail)
+                                    {
+                                        CLR_RT_SignatureParser::Element drained{};
+                                        if (FAILED(ownerParser.Advance(drained)))
+                                        {
+                                            allResolved = false;
+                                            break;
+                                        }
                                     }
                                 }
 
