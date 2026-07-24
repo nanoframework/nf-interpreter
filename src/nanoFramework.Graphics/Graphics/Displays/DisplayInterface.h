@@ -88,6 +88,13 @@ struct DisplayInterface
         CLR_UINT32 height,
         CLR_UINT32 stride,
         bool doByteSwap);
+    void SendData18Windowed(
+        CLR_UINT16 *data,
+        CLR_UINT32 startX,
+        CLR_UINT32 startY,
+        CLR_UINT32 width,
+        CLR_UINT32 height,
+        CLR_UINT32 stride);
     void FillData16(CLR_UINT16 fillValue, CLR_UINT32 fillLength);
     void SetCommandMode(int mode);
 };
