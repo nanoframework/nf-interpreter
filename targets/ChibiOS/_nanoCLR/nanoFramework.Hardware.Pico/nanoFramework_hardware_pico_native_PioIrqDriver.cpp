@@ -71,8 +71,7 @@ extern "C" void PioIrqServiceBlock(int block)
         CLR_RT_HeapBlock_NativeEventDispatcher *ctx = s_pioCtx[block];
         if (ctx != nullptr)
         {
-            CLR_UINT32 packed =
-                ((CLR_UINT32)flags << 16) | ((CLR_UINT32)EVENT_CUSTOM << 8) | (CLR_UINT32)block;
+            CLR_UINT32 packed = ((CLR_UINT32)flags << 16) | ((CLR_UINT32)EVENT_CUSTOM << 8) | (CLR_UINT32)block;
             SaveNativeEventToHALQueue(ctx, packed, (CLR_UINT32)flags);
         }
 
@@ -161,8 +160,5 @@ static const CLR_RT_DriverInterruptMethods g_PioIrqDriverMethods = {
     PioIrqCleanup};
 
 // looked up by name from `new NativeEventDispatcher("PioIrqDriver", block)`
-extern const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_nanoFramework_Hardware_Pico_PioIrqDriver = {
-    "PioIrqDriver",
-    DRIVER_INTERRUPT_METHODS_CHECKSUM,
-    &g_PioIrqDriverMethods,
-    {1, 0, 0, 0}};
+extern const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_nanoFramework_Hardware_Pico_PioIrqDriver =
+    {"PioIrqDriver", DRIVER_INTERRUPT_METHODS_CHECKSUM, &g_PioIrqDriverMethods, {1, 0, 0, 0}};

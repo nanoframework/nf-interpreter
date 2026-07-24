@@ -26,12 +26,12 @@ static unsigned int PioSlotMask(int offset, int length)
 }
 
 #if defined(RP2350)
-#define PIO_RESET_LSB 11u
-#define IO_BANK0_RESET_BIT (1u << 6)
+#define PIO_RESET_LSB        11u
+#define IO_BANK0_RESET_BIT   (1u << 6)
 #define PADS_BANK0_RESET_BIT (1u << 9)
 #else
-#define PIO_RESET_LSB 10u
-#define IO_BANK0_RESET_BIT (1u << 5)
+#define PIO_RESET_LSB        10u
+#define IO_BANK0_RESET_BIT   (1u << 5)
 #define PADS_BANK0_RESET_BIT (1u << 8)
 #endif
 
@@ -45,8 +45,7 @@ void PioEnsureOutOfReset(int blockIndex)
         return;
     }
 
-    const unsigned int bits =
-        (1u << (PIO_RESET_LSB + static_cast<unsigned int>(blockIndex))) | IO_BANK0_RESET_BIT | PADS_BANK0_RESET_BIT;
+    unsigned int bits = (1u << (PIO_RESET_LSB + (unsigned int)blockIndex)) | IO_BANK0_RESET_BIT | PADS_BANK0_RESET_BIT;
     RESETS->CLR.RESET = bits; // atomic-clear alias
     while ((RESETS->RESET_DONE & bits) != bits)
     {

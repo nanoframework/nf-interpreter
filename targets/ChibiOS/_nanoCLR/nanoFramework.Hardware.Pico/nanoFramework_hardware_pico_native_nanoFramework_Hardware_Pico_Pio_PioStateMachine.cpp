@@ -14,7 +14,7 @@
 #include <nanoHAL.h>
 
 #define PIO_FSTAT_RXEMPTY_LSB 8u
-#define PIO_FSTAT_TXFULL_LSB 16u
+#define PIO_FSTAT_TXFULL_LSB  16u
 
 static constexpr unsigned int PIO_FIFO_WAIT_LIMIT = 0x4000000u;
 
