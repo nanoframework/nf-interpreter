@@ -27,6 +27,8 @@ if(NO_MCUBOOT_SOURCE)
         GIT_REPOSITORY https://github.com/mcu-tools/mcuboot.git
         GIT_TAG        ${MCUBOOT_GIT_TAG}
         GIT_SHALLOW    ON
+        GIT_SUBMODULES ""
+        UPDATE_DISCONNECTED ON
     )
 
 else()
