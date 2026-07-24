@@ -17,8 +17,6 @@
 
 uint32_t HAL_StorageOperation(uint8_t operation, uint32_t dataLength, uint32_t offset, uint8_t *data)
 {
-    (void)offset;
-
     char *storageName = NULL;
     char *rootName = NULL;
     char *relativePath = NULL;
@@ -116,6 +114,14 @@ uint32_t HAL_StorageOperation(uint8_t operation, uint32_t dataLength, uint32_t o
 
         // seek to the end, to append
         if (FAILED(volume->Seek(fileHandle, 0, SEEKORIGIN_END, &position)))
+        {
+            errorCode = StorageOperationErrorCode::WriteError;
+            volume->Close(fileHandle);
+            goto done;
+        }
+
+        // validate that the seek position matches the offset provided
+        if (position != offset)
         {
             errorCode = StorageOperationErrorCode::WriteError;
             volume->Close(fileHandle);
