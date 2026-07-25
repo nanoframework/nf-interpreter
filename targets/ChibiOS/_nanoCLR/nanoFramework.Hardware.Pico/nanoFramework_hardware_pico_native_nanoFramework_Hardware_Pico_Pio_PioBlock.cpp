@@ -166,14 +166,36 @@ HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_P
     const int block = stack.Arg0().NumericByRef().s4;
     const int irq = stack.Arg1().NumericByRef().s4;
 
-    PIO_TypeDef *pio = PioFromIndex(block);
-    if (pio == nullptr || irq < 0 || irq > 7)
+    VALIDATE_PIO_BLOCK(block);
+
+    if (irq < 0 || irq > 7)
     {
         NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
     }
-    PioEnsureOutOfReset(block);
 
-    pio->IRQ = (1u << irq);
+    __rp_pio_blocks[block].pio->IRQ = (1u << irq);
+
+    NANOCLR_NOCLEANUP();
+}
+
+HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioBlock::
+    NativeSetIrqEnabled___STATIC__VOID__I4__BOOLEAN(CLR_RT_StackFrame &stack)
+{
+    NANOCLR_HEADER();
+
+    const int block = stack.Arg0().NumericByRef().s4;
+    const bool enabled = static_cast<bool>(stack.Arg1().NumericByRef().u1);
+
+    VALIDATE_PIO_BLOCK(block);
+
+    if (enabled)
+    {
+        __rp_pio_blocks[block].pio->IRQ0_INTE |= (0x0Fu << 8);
+    }
+    else
+    {
+        __rp_pio_blocks[block].pio->IRQ0_INTE &= ~(0x0Fu << 8);
+    }
 
     NANOCLR_NOCLEANUP();
 }
