@@ -23,6 +23,34 @@ static inline PIO_TypeDef *PioFromIndex(int index)
     }
 }
 
-void PioEnsureOutOfReset(int blockIndex);
+#if defined(RP2350)
+#define PIO_MAX_BLOCK 2
+#define PIO_MAX_PIN   47
+#else
+#define PIO_MAX_BLOCK 1
+#define PIO_MAX_PIN   29
+#endif
+
+#if defined(RP_PIO_REQUIRED)
+#define PIO_MIN_BLOCK 1
+#else
+#define PIO_MIN_BLOCK 0
+#endif
+
+#define VALIDATE_PIO_BLOCK(block)                                                                                      \
+    if ((block) < 0 || (block) > PIO_MAX_BLOCK)                                                                        \
+    {                                                                                                                  \
+        NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);                                                                \
+    }                                                                                                                  \
+    if ((block) < PIO_MIN_BLOCK)                                                                                       \
+    {                                                                                                                  \
+        NANOCLR_SET_AND_LEAVE(CLR_E_NOT_SUPPORTED);                                                                    \
+    }
+
+#define VALIDATE_SM(sm)                                                                                                \
+    if ((sm) < 0 || (sm) > 3)                                                                                          \
+    {                                                                                                                  \
+        NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);                                                                \
+    }
 
 #endif // NANOFRAMEWORK_HARDWARE_PICO_NATIVE_TARGET_H
