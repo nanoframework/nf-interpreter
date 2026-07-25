@@ -116,7 +116,7 @@ typedef enum SLEEP_LEVEL
 #define EVENT_TOUCH                 120
 #define EVENT_GESTURE               130
 #define EVENT_OPENTHREAD            140
-#define EVENT_PIO                   160
+#define EVENT_PICO_PIO              160
 
 #define PAL_EVENT_TOUCH 0x1
 #define PAL_EVENT_KEY   0x2

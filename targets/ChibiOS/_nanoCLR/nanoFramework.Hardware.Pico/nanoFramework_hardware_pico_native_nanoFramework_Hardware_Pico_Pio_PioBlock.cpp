@@ -11,13 +11,13 @@
 #include "rp2040.h"
 #endif
 
-#define EVENT_TYPE_PIO 160
+#define EVENT_TYPE_PICO_PIO 160
 
 static void PioChibiOSCallback(void *param, const uint32_t flags)
 {
     const int block = reinterpret_cast<int>(param);
 
-    PostManagedEvent(EVENT_PIO, EVENT_TYPE_PIO, static_cast<uint16_t>(block), flags);
+    PostManagedEvent(EVENT_PICO_PIO, EVENT_TYPE_PICO_PIO, static_cast<uint16_t>(block), flags);
 
     // Clear the flag in hardware to avoid an infinite loop of interrupts.
     __rp_pio_blocks[block].pio->IRQ = flags;
