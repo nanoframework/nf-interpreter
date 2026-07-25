@@ -18,8 +18,6 @@ set(nanoFramework.Hardware.Pico_SRCS
     nanoFramework_hardware_pico_native.cpp
     nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioBlock.cpp
     nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioStateMachine.cpp
-    nanoFramework_hardware_pico_native_PioIrqDriver.cpp
-    nanoFramework_hardware_pico_native_PioIrqHandlers.c
 )
 
 foreach(SRC_FILE ${nanoFramework.Hardware.Pico_SRCS})

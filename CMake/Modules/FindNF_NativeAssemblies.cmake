@@ -288,9 +288,6 @@ endif()
 if(API_Hardware.Pico)
     ##### API name here (doted name)
     PerformSettingsForApiEntry("nanoFramework.Hardware.Pico")
-
-    list(APPEND CLR_RT_NativeAssemblyDataList "extern const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_nanoFramework_Hardware_Pico_PioIrqDriver;")
-    list(APPEND CLR_RT_NativeAssemblyDataTableEntriesList "&g_CLR_AssemblyNative_nanoFramework_Hardware_Pico_PioIrqDriver,")
 endif()
 
 # nanoFramework.Device.Can
