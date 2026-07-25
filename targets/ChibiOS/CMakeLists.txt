@@ -117,6 +117,7 @@ else()
             GIT_REPOSITORY "https://github.com/chibios-upstream/chibios.git"
             GIT_TAG "master"
             GIT_SHALLOW ON
+            UPDATE_DISCONNECTED ON
         )
 
     else()
@@ -128,6 +129,7 @@ else()
             GIT_REPOSITORY "https://github.com/chibios-upstream/chibios.git"
             GIT_TAG ${RTOS_VERSION}
             GIT_SHALLOW ON
+            UPDATE_DISCONNECTED ON
         )
 
     endif()
@@ -149,6 +151,10 @@ if(CHIBIOS_CONTRIB_REQUIRED)
             chibios-contrib
             GIT_REPOSITORY https://github.com/ChibiOS/ChibiOS-Contrib.git
             GIT_TAG chibios-21.11.x
+            # ext/mcux-sdk (NXP MCUXpresso SDK, ~400MB) is only needed by NXP boards;
+            # none of the ChibiOS-Contrib consumers here target NXP parts, so skip it.
+            GIT_SUBMODULES ""
+            UPDATE_DISCONNECTED ON
         )
 
         message(STATUS "ChibiOS-Contrib from GitHub repo")
@@ -213,6 +219,7 @@ if(NF_FEATURE_HAS_SDCARD OR NF_FEATURE_HAS_USB_MSD)
             fatfs
             GIT_REPOSITORY https://github.com/abbrev/fatfs.git
             GIT_TAG ${FATFS_VERSION_TAG}
+            UPDATE_DISCONNECTED ON
         )
 
     else()
@@ -408,6 +415,7 @@ if(NF_FEATURE_USE_LITTLEFS_OPTION)
             littlefs
             GIT_REPOSITORY https://github.com/littlefs-project/littlefs.git
             GIT_TAG ${LITTLEFS_VERSION_TAG}
+            UPDATE_DISCONNECTED ON
         )
 
     else()

@@ -37,6 +37,7 @@ if(NO_NRF_CONNECT_SDK_SOURCE_FOLDER)
         nRFConnectSdk
         GIT_REPOSITORY https://github.com/nrfconnect/sdk-nrf
         GIT_TAG ${NRF_CONNECT_SDK_VERSION}
+        UPDATE_DISCONNECTED ON
     )
 
 else()

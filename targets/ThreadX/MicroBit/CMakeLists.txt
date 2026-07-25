@@ -40,6 +40,7 @@ if(NO_CODAL_MICROBIT_V2_SOURCE_FOLDER)
         CODALMicroBitV2
         GIT_REPOSITORY https://github.com/lancaster-university/codal-microbit-v2
         GIT_TAG ${CODAL_MICROBIT_V2_VERSION}
+        UPDATE_DISCONNECTED ON
     )
 
 else()
@@ -96,6 +97,7 @@ if(NO_CODAL_CORE_SOURCE_FOLDER)
         CodalCore
         GIT_REPOSITORY https://github.com/lancaster-university/codal-core
         GIT_TAG ${CODAL_CORE_VERSION}
+        UPDATE_DISCONNECTED ON
     )
 
 else()
@@ -152,6 +154,7 @@ if(NO_CODAL_NRF52_SOURCE_FOLDER)
         CodalNrf52
         GIT_REPOSITORY https://github.com/lancaster-university/codal-nrf52
         GIT_TAG ${CODAL_NRF52_VERSION}
+        UPDATE_DISCONNECTED ON
     )
 
 else()
@@ -208,6 +211,7 @@ if(NO_CODAL_MICROBIT_NRF5SDK_SOURCE_FOLDER)
         CodalMicrobitNrf5Sdk
         GIT_REPOSITORY https://github.com/microbit-foundation/codal-microbit-nrf5sdk
         GIT_TAG ${CODAL_MICROBIT_NRF5SDK_VERSION}
+        UPDATE_DISCONNECTED ON
     )
 
 else()
