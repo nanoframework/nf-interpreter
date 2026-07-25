@@ -17,10 +17,13 @@ static void PioChibiOSCallback(void *param, const uint32_t flags)
 {
     const int block = reinterpret_cast<int>(param);
 
-    PostManagedEvent(EVENT_PICO_PIO, EVENT_TYPE_PICO_PIO, static_cast<uint16_t>(block), flags);
+    // Align the flags to the PIO block - See IRQ0_INTS documentation
+    const uint32_t sm_flags = (flags >> 8) & 0x0F;
+
+    PostManagedEvent(EVENT_PICO_PIO, EVENT_TYPE_PICO_PIO, static_cast<uint16_t>(block), sm_flags);
 
     // Clear the flag in hardware to avoid an infinite loop of interrupts.
-    __rp_pio_blocks[block].pio->IRQ = flags;
+    __rp_pio_blocks[block].pio->IRQ = sm_flags;
 }
 
 HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioBlock::
@@ -120,7 +123,7 @@ HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_P
     const int block = stack.Arg0().NumericByRef().s4;
     const int pin = stack.Arg1().NumericByRef().s4;
 
-    VALIDATE_PIO_BLOCK(block)
+    VALIDATE_PIO_BLOCK(block);
 
     if (pin < 0 || pin > PIO_MAX_PIN)
     {
