@@ -663,7 +663,9 @@ HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_P
         {
             ch->channel->CTRL_TRIG &= ~DMA_CTRL_TRIG_EN;
             DMA->CHAN_ABORT = (1u << ch->chnidx);
-            while (DMA->CHAN_ABORT & (1u << ch->chnidx))
+
+            unsigned int abortGuard = PIO_FIFO_WAIT_LIMIT;
+            while (DMA->CHAN_ABORT & (1u << ch->chnidx) && --abortGuard)
             {
             }
         }
@@ -789,12 +791,13 @@ HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_P
     {
         const rp_dma_channel_t *ch = work->Channel;
 
-        // on timeout the channel is still busy; stop it so it can't read after we free the buffer
         if (dmaChannelIsBusyX(ch))
         {
             ch->channel->CTRL_TRIG &= ~DMA_CTRL_TRIG_EN;
             DMA->CHAN_ABORT = (1u << ch->chnidx);
-            while (DMA->CHAN_ABORT & (1u << ch->chnidx))
+
+            unsigned int abortGuard = PIO_FIFO_WAIT_LIMIT;
+            while ((DMA->CHAN_ABORT & (1u << ch->chnidx)) && --abortGuard)
             {
             }
         }
