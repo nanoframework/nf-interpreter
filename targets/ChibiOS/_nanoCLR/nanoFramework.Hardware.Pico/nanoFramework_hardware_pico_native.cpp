@@ -242,7 +242,10 @@ static const CLR_RT_MethodHandler method_lookup[] =
 
 const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_nanoFramework_Hardware_Pico =
 {
-    "nanoFramework.Hardware.Pico",0x52CD0E56,method_lookup,{ 1, 0, 0, 0 }
+    "nanoFramework.Hardware.Pico",
+    0x4AF39F9D,
+    method_lookup,
+    { 1, 0, 0, 0 }
 };
 
 // clang-format on
