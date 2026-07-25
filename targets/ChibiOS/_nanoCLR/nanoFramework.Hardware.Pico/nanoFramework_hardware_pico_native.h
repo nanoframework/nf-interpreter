@@ -142,17 +142,29 @@ struct Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pi
 
 struct Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioBlock
 {
+    static const int FIELD_STATIC__s_eventListener = 2;
     static const int FIELD___index = 1;
-    static const int FIELD___irqDispatcher = 2;
-    static const int FIELD___interruptCallbacks = 3;
-    static const int FIELD___irqLock = 4;
-
+    static const int FIELD___interruptCallbacks = 2;
+    static const int FIELD___irqLock = 3;
     NANOCLR_NATIVE_DECLARE(NativeAddProgram___STATIC__I4__I4__SZARRAY_U2__I4__I4);
     NANOCLR_NATIVE_DECLARE(NativeRemoveProgram___STATIC__VOID__I4__I4__I4);
     NANOCLR_NATIVE_DECLARE(NativeClaimUnusedSm___STATIC__I4__I4__BOOLEAN);
     NANOCLR_NATIVE_DECLARE(NativeInitGpio___STATIC__VOID__I4__I4);
     NANOCLR_NATIVE_DECLARE(NativeForceIrq___STATIC__VOID__I4__I4);
     NANOCLR_NATIVE_DECLARE(NativeClearIrq___STATIC__VOID__I4__I4);
+    NANOCLR_NATIVE_DECLARE(NativeSetIrqEnabled___STATIC__VOID__I4__BOOLEAN);
+};
+
+struct Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioEvent
+{
+    static const int FIELD__BlockIndex = 3;
+    static const int FIELD__Flags = 4;
+};
+
+struct Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioEventListener
+{
+    static const int FIELD___pioMap = 1;
+    static const int FIELD___syncRoot = 2;
 };
 
 struct Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioProgramOptions
