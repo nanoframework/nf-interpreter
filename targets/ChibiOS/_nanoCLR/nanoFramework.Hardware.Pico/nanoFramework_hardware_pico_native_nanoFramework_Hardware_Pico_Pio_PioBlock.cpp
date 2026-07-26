@@ -13,6 +13,8 @@
 
 #define EVENT_TYPE_PICO_PIO 160
 
+const rp_pio_sm_t *g_AllocatedSMs[3][4] = {{nullptr}};
+
 static void PioChibiOSCallback(void *param, const uint32_t flags)
 {
     const int block = reinterpret_cast<int>(param);
@@ -142,14 +144,16 @@ HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_P
     }
     else
     {
+        g_AllocatedSMs[block][sm->smidx] = sm;
+
         stack.SetResult_I4(static_cast<CLR_INT32>(sm->smidx));
     }
 
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioBlock::
-    InitGpio___VOID__I4(CLR_RT_StackFrame &stack)
+HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioBlock::InitGpio___VOID__I4(
+    CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
@@ -181,8 +185,8 @@ HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_P
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioBlock::
-    ForceIrq___VOID__I4(CLR_RT_StackFrame &stack)
+HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioBlock::ForceIrq___VOID__I4(
+    CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
@@ -207,8 +211,8 @@ HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_P
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioBlock::
-    ClearIrq___VOID__I4(CLR_RT_StackFrame &stack)
+HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioBlock::ClearIrq___VOID__I4(
+    CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 

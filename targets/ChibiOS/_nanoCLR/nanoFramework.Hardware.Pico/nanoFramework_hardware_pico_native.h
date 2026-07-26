@@ -163,7 +163,6 @@ struct Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pi
     NANOCLR_NATIVE_DECLARE(ClearIrq___VOID__I4);
     NANOCLR_NATIVE_DECLARE(NativeSetIrqEnabled___VOID__BOOLEAN);
     NANOCLR_NATIVE_DECLARE(NativeClaimUnusedSm___STATIC__I4__I4__BOOLEAN);
-
 };
 
 struct Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioEvent
@@ -219,25 +218,26 @@ struct Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pi
     static const int FIELD___disposed = 4;
     static const int FIELD___enabled = 5;
 
-    NANOCLR_NATIVE_DECLARE(NativeRead___STATIC__I4__I4__I4__SZARRAY_U4__I4__I4__I4);
-    NANOCLR_NATIVE_DECLARE(NativeWrite___STATIC__I4__I4__I4__SZARRAY_U4__I4__I4__I4);
-    NANOCLR_NATIVE_DECLARE(NativeInit___STATIC__VOID__I4__I4__I4__SZARRAY_U4);
-    NANOCLR_NATIVE_DECLARE(NativeSetEnabled___STATIC__VOID__I4__I4__BOOLEAN);
-    NANOCLR_NATIVE_DECLARE(NativePutBlocking___STATIC__VOID__I4__I4__U4);
-    NANOCLR_NATIVE_DECLARE(NativeGetBlocking___STATIC__U4__I4__I4);
-    NANOCLR_NATIVE_DECLARE(NativeTxFull___STATIC__BOOLEAN__I4__I4);
-    NANOCLR_NATIVE_DECLARE(NativeRxEmpty___STATIC__BOOLEAN__I4__I4);
-    NANOCLR_NATIVE_DECLARE(NativeUnclaim___STATIC__VOID__I4__I4);
-    NANOCLR_NATIVE_DECLARE(NativeSetConsecutivePinDirs___STATIC__VOID__I4__I4__I4__I4__BOOLEAN);
-    NANOCLR_NATIVE_DECLARE(NativeClearFifos___STATIC__VOID__I4__I4);
-    NANOCLR_NATIVE_DECLARE(NativeDrainTxFifo___STATIC__VOID__I4__I4);
-    NANOCLR_NATIVE_DECLARE(NativeRestart___STATIC__VOID__I4__I4);
-    NANOCLR_NATIVE_DECLARE(NativeClkDivRestart___STATIC__VOID__I4__I4);
-    NANOCLR_NATIVE_DECLARE(NativeExec___STATIC__VOID__I4__I4__U2);
-    NANOCLR_NATIVE_DECLARE(NativeTxLevel___STATIC__U4__I4__I4);
-    NANOCLR_NATIVE_DECLARE(NativeRxLevel___STATIC__U4__I4__I4);
-    NANOCLR_NATIVE_DECLARE(NativeGetPc___STATIC__U4__I4__I4);
-    NANOCLR_NATIVE_DECLARE(NativeSetClockDivisor___STATIC__VOID__I4__I4__R4);
+    NANOCLR_NATIVE_DECLARE(get_Enabled___BOOLEAN);
+    NANOCLR_NATIVE_DECLARE(set_Enabled___VOID__BOOLEAN);
+    NANOCLR_NATIVE_DECLARE(get_IsTxFull___BOOLEAN);
+    NANOCLR_NATIVE_DECLARE(get_IsRxEmpty___BOOLEAN);
+    NANOCLR_NATIVE_DECLARE(get_TxLevel___U4);
+    NANOCLR_NATIVE_DECLARE(get_RxLevel___U4);
+    NANOCLR_NATIVE_DECLARE(get_ProgramCounter___U4);
+    NANOCLR_NATIVE_DECLARE(set_ClockDivisor___VOID__R4);
+    NANOCLR_NATIVE_DECLARE(ClearFifos___VOID);
+    NANOCLR_NATIVE_DECLARE(DrainTxFifo___VOID);
+    NANOCLR_NATIVE_DECLARE(Restart___VOID);
+    NANOCLR_NATIVE_DECLARE(ClockDivRestart___VOID);
+    NANOCLR_NATIVE_DECLARE(Exec___VOID__U2);
+    NANOCLR_NATIVE_DECLARE(SetConsecutivePinDirs___VOID__I4__I4__BOOLEAN);
+    NANOCLR_NATIVE_DECLARE(Read___I4__SZARRAY_U4__I4__I4__I4);
+    NANOCLR_NATIVE_DECLARE(Write___I4__SZARRAY_U4__I4__I4__I4);
+    NANOCLR_NATIVE_DECLARE(NativeInit___VOID__I4__SZARRAY_U4);
+    NANOCLR_NATIVE_DECLARE(NativePutBlocking___VOID__U4);
+    NANOCLR_NATIVE_DECLARE(NativeGetBlocking___U4);
+    NANOCLR_NATIVE_DECLARE(NativeUnclaim___VOID);
 };
 
 struct Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioStateMachineConfig
