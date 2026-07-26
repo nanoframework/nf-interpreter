@@ -36,37 +36,38 @@ HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_P
     rp_pio_program_t prog;
     int offset, origin, length;
     uint8_t block;
-    CLR_RT_HeapBlock_Array *program;
+    CLR_RT_HeapBlock_Array *program_array;
 
-    const CLR_RT_HeapBlock *pProgram = stack.Arg1().Dereference();
+    CLR_RT_HeapBlock *pProgram = stack.Arg1().Dereference();
 
     CLR_RT_HeapBlock *pThis = stack.This();
     FAULT_ON_NULL(pThis);
 
     block = pThis[FIELD___index].NumericByRef().s4;
 
+    VALIDATE_PIO_BLOCK(block);
+
     // Get the data from the PioProgram class passed as argument
-    program =
+    program_array =
         pProgram
             [Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioProgram::FIELD__Instructions]
                 .DereferenceArray();
 
-    FAULT_ON_NULL(program);
+    FAULT_ON_NULL(program_array);
 
-    length = static_cast<int>(program->m_numOfElements);
+    length = static_cast<int>(program_array->m_numOfElements);
     origin =
-        program[Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioProgram::FIELD__Origin]
+        pProgram[Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioProgram::FIELD__Origin]
             .NumericByRef()
             .s4;
 
-    VALIDATE_PIO_BLOCK(block);
-
-    if (program == nullptr || length <= 0 || length > 32 || static_cast<int>(program->m_numOfElements) < length)
+    if (program_array == nullptr || length <= 0 || length > 32 ||
+        static_cast<int>(program_array->m_numOfElements) < length)
     {
         NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
     }
 
-    prog.instructions = reinterpret_cast<uint16_t *>(program->GetFirstElement());
+    prog.instructions = reinterpret_cast<uint16_t *>(program_array->GetFirstElement());
     prog.length = length;
     prog.origin = origin;
 

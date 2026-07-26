@@ -14,7 +14,7 @@
 #define PIO_MAX_PIN   29
 #endif
 
-#if defined(RP_PIO_REQUIRED)
+#if defined(TARGET_HAS_WIFI)
 #define PIO_MIN_BLOCK 1
 #else
 #define PIO_MIN_BLOCK 0
