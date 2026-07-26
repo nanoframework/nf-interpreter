@@ -46,6 +46,15 @@ typedef enum __nfpack PioFifoJoin
     PioFifoJoin_PutGet = 12,
 } PioFifoJoin;
 
+typedef enum __nfpack PioInterruptFlags
+{
+    PioInterruptFlags_None = 0,
+    PioInterruptFlags_Sm0 = 1,
+    PioInterruptFlags_Sm1 = 2,
+    PioInterruptFlags_Sm2 = 4,
+    PioInterruptFlags_Sm3 = 8,
+} PioInterruptFlags;
+
 typedef enum __nfpack PioMovOp
 {
     PioMovOp_None = 0,
