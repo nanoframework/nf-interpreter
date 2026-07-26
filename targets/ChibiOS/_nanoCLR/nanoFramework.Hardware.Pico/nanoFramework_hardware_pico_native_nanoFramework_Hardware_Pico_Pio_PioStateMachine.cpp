@@ -330,16 +330,18 @@ HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_P
 {
     NANOCLR_HEADER();
 
+    PIO_TypeDef *pio;
     int pin, remaining, gpioBase;
+    int block, sm, basePin, count, output;
     unsigned int savedPinCtrl;
 
-    const int block = stack.Arg0().NumericByRef().s4;
-    const int sm = stack.Arg1().NumericByRef().s4;
-    const int basePin = stack.Arg2().NumericByRef().s4;
-    const int count = stack.Arg3().NumericByRef().s4;
-    const bool output = stack.Arg4().NumericByRef().u1;
+    VALIDATE_NOT_DISPOSED(stack);
 
-    PIO_TypeDef *pio;
+    block = stack.Arg0().NumericByRef().s4;
+    sm = stack.Arg1().NumericByRef().s4;
+    basePin = stack.Arg2().NumericByRef().s4;
+    count = stack.Arg3().NumericByRef().s4;
+    output = stack.Arg4().NumericByRef().u1;
 
     VALIDATE_PIO_BLOCK(block);
     VALIDATE_SM(sm);
@@ -353,8 +355,8 @@ HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_P
 #endif
 
     // SET_BASE is 5-bit, relative to the SM's GPIO base, so reject pins outside the 32-pin window
-    if (count < 0 || count > 32 || basePin < gpioBase || basePin - gpioBase > 32 - count ||
-        basePin > PIO_MAX_PIN + 1 - count)
+    if (basePin < 0 || basePin > PIO_MAX_PIN || count < 0 || count > 32 || (basePin + count) > (PIO_MAX_PIN + 1) ||
+        basePin < gpioBase || (basePin - gpioBase + count) > 32)
     {
         NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
     }
