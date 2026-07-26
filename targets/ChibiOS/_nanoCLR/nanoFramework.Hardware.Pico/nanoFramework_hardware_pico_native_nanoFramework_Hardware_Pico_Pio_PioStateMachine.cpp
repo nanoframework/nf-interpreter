@@ -642,18 +642,36 @@ HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_P
 
     CLR_RT_HeapBlock hbTimeout{};
     CLR_INT64 *timeoutTicks;
+    CLR_RT_HeapBlock_Array *buffer;
     bool eventResult = true;
     int transferred = 0;
+    int block, sm, offset, count, timeoutMs;
 
     PIO_TypeDef *pio;
     PioDmaWork *work;
 
-    const int block = stack.Arg0().NumericByRef().s4;
-    const int sm = stack.Arg1().NumericByRef().s4;
-    CLR_RT_HeapBlock_Array *arr = stack.Arg2().DereferenceArray();
-    const int offset = stack.Arg3().NumericByRef().s4;
-    const int count = stack.Arg4().NumericByRef().s4;
-    const int timeoutMs = stack.Arg5().NumericByRef().s4;
+    VALIDATE_NOT_DISPOSED(stack);
+
+    block = stack.Arg0().NumericByRef().s4;
+    sm = stack.Arg1().NumericByRef().s4;
+    buffer = stack.Arg2().DereferenceArray();
+    offset = stack.Arg3().NumericByRef().s4;
+    count = stack.Arg4().NumericByRef().s4;
+    timeoutMs = stack.Arg5().NumericByRef().s4;
+
+    FAULT_ON_NULL(buffer);
+
+    if (offset < 0 || count < 0 || timeoutMs < 0 || count > static_cast<int>(buffer->m_numOfElements) ||
+        offset > static_cast<int>(buffer->m_numOfElements) - count)
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+    }
+
+    if (count == 0)
+    {
+        stack.SetResult_I4(false);
+        NANOCLR_EXIT_ON_SUCCESS(S_OK);
+    }
 
     VALIDATE_PIO_BLOCK(block);
     VALIDATE_SM(sm);
@@ -672,7 +690,7 @@ HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_P
         {
             NANOCLR_SET_AND_LEAVE(CLR_E_OBJECT_DISPOSED);
         }
-        if (arr == nullptr || count <= 0 || work->Channel != nullptr)
+        if (buffer == nullptr || count <= 0 || work->Channel != nullptr)
         {
             NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_OPERATION);
         }
@@ -742,11 +760,11 @@ HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_P
         {
             transferred = 0;
         }
-        if (arr != nullptr && offset >= 0 && transferred > 0 &&
-            (offset + transferred) <= static_cast<int>(arr->m_numOfElements))
+        if (buffer != nullptr && offset >= 0 && transferred > 0 &&
+            (offset + transferred) <= static_cast<int>(buffer->m_numOfElements))
         {
             memcpy(
-                arr->GetFirstElement() + static_cast<size_t>(offset) * 4,
+                buffer->GetFirstElement() + static_cast<size_t>(offset) * 4,
                 work->Buffer,
                 static_cast<size_t>(transferred) * 4);
         }
@@ -773,18 +791,36 @@ HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_P
 
     CLR_RT_HeapBlock hbTimeout{};
     CLR_INT64 *timeoutTicks;
+    CLR_RT_HeapBlock_Array *buffer = nullptr;
     bool eventResult = true;
     int transferred = 0;
+    int block, sm, offset, count, timeoutMs;
 
     PIO_TypeDef *pio;
     PioDmaWork *work;
 
-    const int block = stack.Arg0().NumericByRef().s4;
-    const int sm = stack.Arg1().NumericByRef().s4;
-    CLR_RT_HeapBlock_Array *arr = stack.Arg2().DereferenceArray();
-    const int offset = stack.Arg3().NumericByRef().s4;
-    const int count = stack.Arg4().NumericByRef().s4;
-    const int timeoutMs = stack.Arg5().NumericByRef().s4;
+    VALIDATE_NOT_DISPOSED(stack);
+
+    block = stack.Arg0().NumericByRef().s4;
+    sm = stack.Arg1().NumericByRef().s4;
+    buffer = stack.Arg2().DereferenceArray();
+    offset = stack.Arg3().NumericByRef().s4;
+    count = stack.Arg4().NumericByRef().s4;
+    timeoutMs = stack.Arg5().NumericByRef().s4;
+
+    FAULT_ON_NULL(buffer);
+
+    if (offset < 0 || count < 0 || timeoutMs < 0 || count > static_cast<int>(buffer->m_numOfElements) ||
+        offset > static_cast<int>(buffer->m_numOfElements) - count)
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+    }
+
+    if (count == 0)
+    {
+        stack.SetResult_I4(false);
+        NANOCLR_EXIT_ON_SUCCESS(S_OK);
+    }
 
     VALIDATE_PIO_BLOCK(block);
     VALIDATE_SM(sm);
@@ -804,8 +840,8 @@ HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_P
             NANOCLR_SET_AND_LEAVE(CLR_E_OBJECT_DISPOSED);
         }
 
-        if (arr == nullptr || count <= 0 || work->Channel != nullptr || offset < 0 ||
-            (offset + count) > static_cast<int>(arr->m_numOfElements))
+        if (buffer == nullptr || count <= 0 || work->Channel != nullptr || offset < 0 ||
+            (offset + count) > static_cast<int>(buffer->m_numOfElements))
         {
             NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_OPERATION);
         }
@@ -825,7 +861,7 @@ HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_P
         }
 
         // copy the words out into the bounce buffer before the DMA drains it into the TX FIFO
-        memcpy(buf, arr->GetFirstElement() + static_cast<size_t>(offset) * 4, static_cast<size_t>(count) * 4);
+        memcpy(buf, buffer->GetFirstElement() + static_cast<size_t>(offset) * 4, static_cast<size_t>(count) * 4);
 
         // read = bounce buffer (incrementing), write = SM TX FIFO (fixed), paced by the SM TX DREQ
         const unsigned int dreq = (static_cast<unsigned int>(block) * 8u) + static_cast<unsigned int>(sm);
