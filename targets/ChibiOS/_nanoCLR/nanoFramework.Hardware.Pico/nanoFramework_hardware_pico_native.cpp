@@ -218,7 +218,7 @@ static const CLR_RT_MethodHandler method_lookup[] =
     Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioStateMachine::NativeTxLevel___STATIC__U4__I4__I4,
     Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioStateMachine::NativeRxLevel___STATIC__U4__I4__I4,
     Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioStateMachine::NativeGetPc___STATIC__U4__I4__I4,
-    Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioStateMachine::NativeSetClockDivisor___STATIC__VOID__I4__I4__I4__I4,
+    Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioStateMachine::NativeSetClockDivisor___STATIC__VOID__I4__I4__R4,
     NULL,
     NULL,
     NULL,

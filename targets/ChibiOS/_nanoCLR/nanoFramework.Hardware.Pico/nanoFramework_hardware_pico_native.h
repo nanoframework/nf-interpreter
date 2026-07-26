@@ -235,7 +235,7 @@ struct Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pi
     NANOCLR_NATIVE_DECLARE(NativeTxLevel___STATIC__U4__I4__I4);
     NANOCLR_NATIVE_DECLARE(NativeRxLevel___STATIC__U4__I4__I4);
     NANOCLR_NATIVE_DECLARE(NativeGetPc___STATIC__U4__I4__I4);
-    NANOCLR_NATIVE_DECLARE(NativeSetClockDivisor___STATIC__VOID__I4__I4__I4__I4);
+    NANOCLR_NATIVE_DECLARE(NativeSetClockDivisor___STATIC__VOID__I4__I4__R4);
 };
 
 struct Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioStateMachineConfig

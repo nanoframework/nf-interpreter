@@ -595,28 +595,41 @@ HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_P
 }
 
 HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioStateMachine::
-    NativeSetClockDivisor___STATIC__VOID__I4__I4__I4__I4(CLR_RT_StackFrame &stack)
+    NativeSetClockDivisor___STATIC__VOID__I4__I4__R4(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
     PIO_TypeDef *pio;
+    int block, sm, intPart, frac;
+    float div;
 
-    const int block = stack.Arg0().NumericByRef().s4;
-    const int sm = stack.Arg1().NumericByRef().s4;
-    const int clkDivInt = stack.Arg2().NumericByRef().s4;
-    const int clkDivFrac = stack.Arg3().NumericByRef().s4;
+    VALIDATE_NOT_DISPOSED(stack);
+
+    block = stack.Arg0().NumericByRef().s4;
+    sm = stack.Arg1().NumericByRef().s4;
+    div = stack.Arg2().NumericByRef().r4;
 
     VALIDATE_PIO_BLOCK(block);
     VALIDATE_SM(sm);
 
-    pio = PioFromIndex(block);
-    // 16-bit int + 8-bit frac fields
-    if (clkDivInt < 0 || clkDivInt > 0xFFFF || clkDivFrac < 0 || clkDivFrac > 0xFF)
+    if (!(div >= 1.0f && div <= 65536.0f))
     {
         NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
     }
 
-    pio->SM[sm].CLKDIV = (static_cast<unsigned int>(clkDivInt) << 16) | (static_cast<unsigned int>(clkDivFrac) << 8);
+    intPart = static_cast<int>(div);
+    frac = static_cast<int>(roundf((div - static_cast<float>(intPart)) * 256.0f));
+    if (frac > 255)
+    {
+        frac = 0;
+        intPart += 1;
+    }
+
+    pio = __rp_pio_blocks[block].pio;
+
+    pio->SM[sm].CLKDIV =
+        (static_cast<unsigned int>(intPart >= 65536 ? 0 : intPart) << 16) | (static_cast<unsigned int>(frac) << 8);
+
     pio->CTRL |= (1u << (8 + sm));
 
     NANOCLR_NOCLEANUP();
