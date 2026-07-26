@@ -27,26 +27,44 @@ static void PioChibiOSCallback(void *param, const uint32_t flags)
 }
 
 HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioBlock::
-    NativeAddProgram___STATIC__I4__I4__SZARRAY_U2__I4__I4(CLR_RT_StackFrame &stack)
+    AddProgram___U4__nanoFrameworkHardwarePicoPioPioProgram(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
     rp_pio_program_t prog;
-    int offset;
+    int offset, origin, length;
+    uint8_t block;
+    CLR_RT_HeapBlock_Array *program;
 
-    const int block = stack.Arg0().NumericByRef().s4;
-    CLR_RT_HeapBlock_Array *instrArray = stack.Arg1().DereferenceArray();
-    const int length = stack.Arg2().NumericByRef().s4;
-    const int origin = stack.Arg3().NumericByRef().s4;
+    const CLR_RT_HeapBlock *pProgram = stack.Arg1().Dereference();
+
+    CLR_RT_HeapBlock *pThis = stack.This();
+    FAULT_ON_NULL(pThis);
+
+    block = pThis[FIELD___index].NumericByRef().s4;
+
+    // Get the data from the PioProgram class passed as argument
+    program =
+        pProgram
+            [Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioProgram::FIELD__Instructions]
+                .DereferenceArray();
+
+    FAULT_ON_NULL(program);
+
+    length = static_cast<int>(program->m_numOfElements);
+    origin =
+        program[Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioProgram::FIELD__Origin]
+            .NumericByRef()
+            .s4;
 
     VALIDATE_PIO_BLOCK(block);
 
-    if (instrArray == nullptr || length <= 0 || length > 32 || static_cast<int>(instrArray->m_numOfElements) < length)
+    if (program == nullptr || length <= 0 || length > 32 || static_cast<int>(program->m_numOfElements) < length)
     {
         NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
     }
 
-    prog.instructions = reinterpret_cast<uint16_t *>(instrArray->GetFirstElement());
+    prog.instructions = reinterpret_cast<uint16_t *>(program->GetFirstElement());
     prog.length = length;
     prog.origin = origin;
 
@@ -54,7 +72,7 @@ HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_P
 
     if (offset < 0)
     {
-        NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_OPERATION); // No hay memoria
+        NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_OPERATION); // No memory left
     }
 
     stack.SetResult_I4(offset);
@@ -63,13 +81,30 @@ HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_P
 }
 
 HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioBlock::
-    NativeRemoveProgram___STATIC__VOID__I4__I4__I4(CLR_RT_StackFrame &stack)
+    RemoveProgram___VOID__nanoFrameworkHardwarePicoPioPioProgram__U4(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
-    const int block = stack.Arg0().NumericByRef().s4;
-    const int length = stack.Arg1().NumericByRef().s4;
+    uint8_t block;
+    int length;
+    CLR_RT_HeapBlock_Array *program;
+
+    const CLR_RT_HeapBlock *pProgram = stack.Arg1().Dereference();
     const int offset = stack.Arg2().NumericByRef().s4;
+
+    CLR_RT_HeapBlock *pThis = stack.This();
+    FAULT_ON_NULL(pThis);
+
+    block = pThis[FIELD___index].NumericByRef().s4;
+
+    program =
+        pProgram
+            [Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioProgram::FIELD__Instructions]
+                .DereferenceArray();
+
+    FAULT_ON_NULL(program);
+
+    length = static_cast<int>(program->m_numOfElements);
 
     VALIDATE_PIO_BLOCK(block);
 
@@ -114,14 +149,19 @@ HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_P
 }
 
 HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioBlock::
-    NativeInitGpio___STATIC__VOID__I4__I4(CLR_RT_StackFrame &stack)
+    InitGpio___VOID__I4(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
     uint32_t mode;
+    int block;
 
-    const int block = stack.Arg0().NumericByRef().s4;
     const int pin = stack.Arg1().NumericByRef().s4;
+
+    CLR_RT_HeapBlock *pThis = stack.This();
+    FAULT_ON_NULL(pThis);
+
+    block = pThis[FIELD___index].NumericByRef().s4;
 
     VALIDATE_PIO_BLOCK(block);
 
@@ -142,12 +182,18 @@ HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_P
 }
 
 HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioBlock::
-    NativeForceIrq___STATIC__VOID__I4__I4(CLR_RT_StackFrame &stack)
+    ForceIrq___VOID__I4(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
-    const int block = stack.Arg0().NumericByRef().s4;
+    int block;
+
     const int irq = stack.Arg1().NumericByRef().s4;
+
+    CLR_RT_HeapBlock *pThis = stack.This();
+    FAULT_ON_NULL(pThis);
+
+    block = pThis[FIELD___index].NumericByRef().s4;
 
     VALIDATE_PIO_BLOCK(block);
 
@@ -162,12 +208,18 @@ HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_P
 }
 
 HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioBlock::
-    NativeClearIrq___STATIC__VOID__I4__I4(CLR_RT_StackFrame &stack)
+    ClearIrq___VOID__I4(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
-    const int block = stack.Arg0().NumericByRef().s4;
+    int block;
+
     const int irq = stack.Arg1().NumericByRef().s4;
+
+    CLR_RT_HeapBlock *pThis = stack.This();
+    FAULT_ON_NULL(pThis);
+
+    block = pThis[FIELD___index].NumericByRef().s4;
 
     VALIDATE_PIO_BLOCK(block);
 
@@ -182,12 +234,18 @@ HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_P
 }
 
 HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioBlock::
-    NativeSetIrqEnabled___STATIC__VOID__I4__BOOLEAN(CLR_RT_StackFrame &stack)
+    NativeSetIrqEnabled___VOID__BOOLEAN(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
-    const int block = stack.Arg0().NumericByRef().s4;
+    int block;
+
     const bool enabled = static_cast<bool>(stack.Arg1().NumericByRef().u1);
+
+    CLR_RT_HeapBlock *pThis = stack.This();
+    FAULT_ON_NULL(pThis);
+
+    block = pThis[FIELD___index].NumericByRef().s4;
 
     VALIDATE_PIO_BLOCK(block);
 
