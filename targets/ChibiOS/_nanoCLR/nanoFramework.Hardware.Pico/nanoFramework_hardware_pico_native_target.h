@@ -53,4 +53,14 @@ static inline PIO_TypeDef *PioFromIndex(int index)
         NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);                                                                \
     }
 
+#define VALIDATE_NOT_DISPOSED(stack)                                                                   \
+    {                                                                                                  \
+        CLR_RT_HeapBlock *pThis = (stack).This();                                                      \
+        FAULT_ON_NULL(pThis);                                                                          \
+        if (pThis[FIELD___disposed].NumericByRef().u1 != 0)                                            \
+        {                                                                                              \
+            NANOCLR_SET_AND_LEAVE(CLR_E_OBJECT_DISPOSED);                                              \
+        }                                                                                              \
+    }
+
 #endif // NANOFRAMEWORK_HARDWARE_PICO_NATIVE_TARGET_H
