@@ -78,13 +78,24 @@ HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_P
     NANOCLR_HEADER();
 
     PIO_TypeDef *pio;
+    CLR_RT_HeapBlock_Array *blobArray;
     unsigned int *b;
     unsigned int sidesetTotal, execCtrl, pushThresh, pullThresh, join;
+    int block, sm, offset;
 
-    const int block = stack.Arg0().NumericByRef().s4;
-    const int sm = stack.Arg1().NumericByRef().s4;
-    const int offset = stack.Arg2().NumericByRef().s4;
-    CLR_RT_HeapBlock_Array *blobArray = stack.Arg3().DereferenceArray();
+    VALIDATE_NOT_DISPOSED(stack);
+
+    block = stack.Arg0().NumericByRef().s4;
+    sm = stack.Arg1().NumericByRef().s4;
+    offset = stack.Arg2().NumericByRef().s4;
+    blobArray = stack.Arg3().DereferenceArray();
+
+    FAULT_ON_NULL(blobArray);
+
+    if (offset > 31)
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+    }
 
     VALIDATE_PIO_BLOCK(block);
     VALIDATE_SM(sm);
@@ -151,9 +162,14 @@ HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_P
 {
     NANOCLR_HEADER();
 
-    const int block = stack.Arg0().NumericByRef().s4;
-    const int sm = stack.Arg1().NumericByRef().s4;
-    const bool enabled = stack.Arg2().NumericByRef().u1;
+    int block, sm;
+    bool enabled;
+
+    VALIDATE_NOT_DISPOSED(stack);
+
+    block = stack.Arg0().NumericByRef().s4;
+    sm = stack.Arg1().NumericByRef().s4;
+    enabled = stack.Arg2().NumericByRef().u1;
 
     VALIDATE_PIO_BLOCK(block);
     VALIDATE_SM(sm);
@@ -176,11 +192,14 @@ HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_P
     NANOCLR_HEADER();
 
     PIO_TypeDef *pio;
-    unsigned int guard;
+    unsigned int guard, value;
+    int block, sm;
 
-    const int block = stack.Arg0().NumericByRef().s4;
-    const int sm = stack.Arg1().NumericByRef().s4;
-    const unsigned int value = stack.Arg2().NumericByRef().u4;
+    VALIDATE_NOT_DISPOSED(stack);
+
+    block = stack.Arg0().NumericByRef().s4;
+    sm = stack.Arg1().NumericByRef().s4;
+    value = stack.Arg2().NumericByRef().u4;
 
     VALIDATE_PIO_BLOCK(block);
     VALIDATE_SM(sm);
@@ -210,9 +229,12 @@ HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_P
 
     const PIO_TypeDef *pio;
     unsigned int guard;
+    int block, sm;
 
-    const int block = stack.Arg0().NumericByRef().s4;
-    const int sm = stack.Arg1().NumericByRef().s4;
+    VALIDATE_NOT_DISPOSED(stack);
+
+    block = stack.Arg0().NumericByRef().s4;
+    sm = stack.Arg1().NumericByRef().s4;
 
     VALIDATE_PIO_BLOCK(block);
     VALIDATE_SM(sm);
@@ -241,9 +263,12 @@ HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_P
     NANOCLR_HEADER();
 
     const PIO_TypeDef *pio;
+    int block, sm;
 
-    const int block = stack.Arg0().NumericByRef().s4;
-    const int sm = stack.Arg1().NumericByRef().s4;
+    VALIDATE_NOT_DISPOSED(stack);
+
+    block = stack.Arg0().NumericByRef().s4;
+    sm = stack.Arg1().NumericByRef().s4;
 
     VALIDATE_PIO_BLOCK(block);
     VALIDATE_SM(sm);
@@ -261,9 +286,12 @@ HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_P
     NANOCLR_HEADER();
 
     const PIO_TypeDef *pio;
+    int block, sm;
 
-    const int block = stack.Arg0().NumericByRef().s4;
-    const int sm = stack.Arg1().NumericByRef().s4;
+    VALIDATE_NOT_DISPOSED(stack);
+
+    block = stack.Arg0().NumericByRef().s4;
+    sm = stack.Arg1().NumericByRef().s4;
 
     VALIDATE_PIO_BLOCK(block);
     VALIDATE_SM(sm);
@@ -363,9 +391,12 @@ HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_P
 
     PIO_TypeDef *pio;
     unsigned int fjoinRx;
+    int block, sm;
 
-    const int block = stack.Arg0().NumericByRef().s4;
-    const int sm = stack.Arg1().NumericByRef().s4;
+    VALIDATE_NOT_DISPOSED(stack);
+
+    block = stack.Arg0().NumericByRef().s4;
+    sm = stack.Arg1().NumericByRef().s4;
 
     VALIDATE_PIO_BLOCK(block);
     VALIDATE_SM(sm);
@@ -386,12 +417,13 @@ HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_P
     NANOCLR_HEADER();
 
     PIO_TypeDef *pio;
-    unsigned int autopull;
-    unsigned int instr;
-    unsigned int guard;
+    unsigned int autopull, instr, guard;
+    int block, sm;
 
-    const int block = stack.Arg0().NumericByRef().s4;
-    const int sm = stack.Arg1().NumericByRef().s4;
+    VALIDATE_NOT_DISPOSED(stack);
+
+    block = stack.Arg0().NumericByRef().s4;
+    sm = stack.Arg1().NumericByRef().s4;
 
     VALIDATE_PIO_BLOCK(block);
     VALIDATE_SM(sm);
@@ -421,9 +453,12 @@ HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_P
     NANOCLR_HEADER();
 
     PIO_TypeDef *pio;
+    int block, sm;
 
-    const int block = stack.Arg0().NumericByRef().s4;
-    const int sm = stack.Arg1().NumericByRef().s4;
+    VALIDATE_NOT_DISPOSED(stack);
+
+    block = stack.Arg0().NumericByRef().s4;
+    sm = stack.Arg1().NumericByRef().s4;
 
     VALIDATE_PIO_BLOCK(block);
     VALIDATE_SM(sm);
@@ -442,9 +477,13 @@ HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_P
     NANOCLR_HEADER();
 
     PIO_TypeDef *pio;
+    int block;
+    int sm;
 
-    const int block = stack.Arg0().NumericByRef().s4;
-    const int sm = stack.Arg1().NumericByRef().s4;
+    VALIDATE_NOT_DISPOSED(stack);
+
+    block = stack.Arg0().NumericByRef().s4;
+    sm = stack.Arg1().NumericByRef().s4;
 
     VALIDATE_PIO_BLOCK(block);
     VALIDATE_SM(sm);
@@ -463,10 +502,15 @@ HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_P
     NANOCLR_HEADER();
 
     PIO_TypeDef *pio;
+    int block;
+    int sm;
+    unsigned short instruction;
 
-    const int block = stack.Arg0().NumericByRef().s4;
-    const int sm = stack.Arg1().NumericByRef().s4;
-    const unsigned short instruction = stack.Arg2().NumericByRef().u2;
+    VALIDATE_NOT_DISPOSED(stack);
+
+    block = stack.Arg0().NumericByRef().s4;
+    sm = stack.Arg1().NumericByRef().s4;
+    instruction = stack.Arg2().NumericByRef().u2;
 
     VALIDATE_PIO_BLOCK(block);
     VALIDATE_SM(sm);
@@ -485,9 +529,12 @@ HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_P
     NANOCLR_HEADER();
 
     const PIO_TypeDef *pio;
+    int block, sm;
 
-    const int block = stack.Arg0().NumericByRef().s4;
-    const int sm = stack.Arg1().NumericByRef().s4;
+    VALIDATE_NOT_DISPOSED(stack);
+
+    block = stack.Arg0().NumericByRef().s4;
+    sm = stack.Arg1().NumericByRef().s4;
 
     VALIDATE_PIO_BLOCK(block);
     VALIDATE_SM(sm);
@@ -505,9 +552,12 @@ HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_P
     NANOCLR_HEADER();
 
     const PIO_TypeDef *pio;
+    int block, sm;
 
-    const int block = stack.Arg0().NumericByRef().s4;
-    const int sm = stack.Arg1().NumericByRef().s4;
+    VALIDATE_NOT_DISPOSED(stack);
+
+    block = stack.Arg0().NumericByRef().s4;
+    sm = stack.Arg1().NumericByRef().s4;
 
     VALIDATE_PIO_BLOCK(block);
     VALIDATE_SM(sm);
@@ -525,9 +575,12 @@ HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_P
     NANOCLR_HEADER();
 
     const PIO_TypeDef *pio;
+    int block, sm;
 
-    const int block = stack.Arg0().NumericByRef().s4;
-    const int sm = stack.Arg1().NumericByRef().s4;
+    VALIDATE_NOT_DISPOSED(stack);
+
+    block = stack.Arg0().NumericByRef().s4;
+    sm = stack.Arg1().NumericByRef().s4;
 
     VALIDATE_PIO_BLOCK(block);
     VALIDATE_SM(sm);
