@@ -914,13 +914,7 @@ HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_P
         // on timeout the channel is still busy; stop it so it can't write after we free the buffer
         if (dmaChannelIsBusyX(ch))
         {
-            ch->channel->CTRL_TRIG &= ~DMA_CTRL_TRIG_EN;
-            DMA->CHAN_ABORT = (1u << ch->chnidx);
-
-            unsigned int abortGuard = PIO_FIFO_WAIT_LIMIT;
-            while (DMA->CHAN_ABORT & (1u << ch->chnidx) && --abortGuard)
-            {
-            }
+            dmaChannelDisableX(ch);
         }
 
         transferred = static_cast<int>(work->Count - ch->channel->TRANS_COUNT);
@@ -1076,13 +1070,7 @@ HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_P
 
         if (dmaChannelIsBusyX(ch))
         {
-            ch->channel->CTRL_TRIG &= ~DMA_CTRL_TRIG_EN;
-            DMA->CHAN_ABORT = (1u << ch->chnidx);
-
-            unsigned int abortGuard = PIO_FIFO_WAIT_LIMIT;
-            while ((DMA->CHAN_ABORT & (1u << ch->chnidx)) && --abortGuard)
-            {
-            }
+            dmaChannelDisableX(ch);
         }
 
         // data already went out to the TX FIFO -- nothing to copy back
