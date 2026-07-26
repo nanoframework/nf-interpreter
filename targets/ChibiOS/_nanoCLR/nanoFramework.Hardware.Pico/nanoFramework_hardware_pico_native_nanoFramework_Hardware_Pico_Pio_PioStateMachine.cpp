@@ -18,8 +18,6 @@
 
 static constexpr unsigned int PIO_FIFO_WAIT_LIMIT = 0x4000000u;
 
-extern const rp_pio_sm_t *g_AllocatedSMs[3][4];
-
 struct PioDmaWork
 {
     const rp_dma_channel_t *Channel;
@@ -73,22 +71,31 @@ enum PioCfgBlob
 extern unsigned int g_PioClaimedSm[3];
 
 HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioStateMachine::
-    NativeInit___STATIC__VOID__I4__I4__I4__SZARRAY_U4(CLR_RT_StackFrame &stack)
+    NativeInit___VOID__I4__SZARRAY_U4(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
     PIO_TypeDef *pio;
+    CLR_RT_HeapBlock *pPioBlock;
     CLR_RT_HeapBlock_Array *blobArray;
     unsigned int *b;
     unsigned int sidesetTotal, execCtrl, pushThresh, pullThresh, join;
     int block, sm, offset;
 
-    VALIDATE_NOT_DISPOSED(stack);
+    CLR_RT_HeapBlock *pThis = stack.This();
+    VALIDATE_NOT_DISPOSED(pThis);
 
-    block = stack.Arg0().NumericByRef().s4;
-    sm = stack.Arg1().NumericByRef().s4;
-    offset = stack.Arg2().NumericByRef().s4;
-    blobArray = stack.Arg3().DereferenceArray();
+    offset = stack.Arg1().NumericByRef().s4;
+    blobArray = stack.Arg2().DereferenceArray();
+
+    pPioBlock = pThis[FIELD___block].Dereference();
+    FAULT_ON_NULL(pPioBlock);
+
+    block =
+        pPioBlock[Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioBlock::FIELD___index]
+            .NumericByRef()
+            .s4;
+    sm = pPioBlock[FIELD___sm].NumericByRef().s4;
 
     FAULT_ON_NULL(blobArray);
 
@@ -158,23 +165,47 @@ HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_P
 }
 
 HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioStateMachine::
-    NativeSetEnabled___STATIC__VOID__I4__I4__BOOLEAN(CLR_RT_StackFrame &stack)
+    get_Enabled___BOOLEAN(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
+    CLR_RT_HeapBlock *pThis = stack.This();
+    VALIDATE_NOT_DISPOSED(pThis);
+
+    stack.SetResult_Boolean(pThis[FIELD___enabled].NumericByRef().u1);
+
+    NANOCLR_NOCLEANUP();
+}
+
+HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioStateMachine::
+    set_Enabled___VOID__BOOLEAN(CLR_RT_StackFrame &stack)
+{
+    NANOCLR_HEADER();
+
+    CLR_RT_HeapBlock *pPioBlock;
     int block, sm;
-    bool enabled;
+    bool value;
 
-    VALIDATE_NOT_DISPOSED(stack);
+    CLR_RT_HeapBlock *pThis = stack.This();
+    VALIDATE_NOT_DISPOSED(pThis);
 
-    block = stack.Arg0().NumericByRef().s4;
-    sm = stack.Arg1().NumericByRef().s4;
-    enabled = stack.Arg2().NumericByRef().u1;
+    value = stack.Arg1().NumericByRef().u1;
+
+    pPioBlock = pThis[FIELD___block].Dereference();
+    FAULT_ON_NULL(pPioBlock);
+
+    block =
+        pPioBlock[Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioBlock::FIELD___index]
+            .NumericByRef()
+            .s4;
+    sm = pPioBlock[FIELD___sm].NumericByRef().s4;
 
     VALIDATE_PIO_BLOCK(block);
     VALIDATE_SM(sm);
 
-    if (enabled)
+    pThis[FIELD___enabled].NumericByRef().u1 = value;
+
+    if (value)
     {
         __rp_pio_blocks[block].pio->CTRL |= (1u << sm);
     }
@@ -187,19 +218,28 @@ HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_P
 }
 
 HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioStateMachine::
-    NativePutBlocking___STATIC__VOID__I4__I4__U4(CLR_RT_StackFrame &stack)
+    NativePutBlocking___VOID__U4(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
     PIO_TypeDef *pio;
+    CLR_RT_HeapBlock *pPioBlock;
     unsigned int guard, value;
     int block, sm;
 
-    VALIDATE_NOT_DISPOSED(stack);
+    CLR_RT_HeapBlock *pThis = stack.This();
+    VALIDATE_NOT_DISPOSED(pThis);
 
-    block = stack.Arg0().NumericByRef().s4;
-    sm = stack.Arg1().NumericByRef().s4;
     value = stack.Arg2().NumericByRef().u4;
+
+    pPioBlock = pThis[FIELD___block].Dereference();
+    FAULT_ON_NULL(pPioBlock);
+
+    block =
+        pPioBlock[Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioBlock::FIELD___index]
+            .NumericByRef()
+            .s4;
+    sm = pPioBlock[FIELD___sm].NumericByRef().s4;
 
     VALIDATE_PIO_BLOCK(block);
     VALIDATE_SM(sm);
@@ -223,18 +263,26 @@ HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_P
 }
 
 HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioStateMachine::
-    NativeGetBlocking___STATIC__U4__I4__I4(CLR_RT_StackFrame &stack)
+    NativeGetBlocking___U4(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
     const PIO_TypeDef *pio;
+    CLR_RT_HeapBlock *pPioBlock;
     unsigned int guard;
     int block, sm;
 
-    VALIDATE_NOT_DISPOSED(stack);
+    CLR_RT_HeapBlock *pThis = stack.This();
+    VALIDATE_NOT_DISPOSED(pThis);
 
-    block = stack.Arg0().NumericByRef().s4;
-    sm = stack.Arg1().NumericByRef().s4;
+    pPioBlock = pThis[FIELD___block].Dereference();
+    FAULT_ON_NULL(pPioBlock);
+
+    block =
+        pPioBlock[Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioBlock::FIELD___index]
+            .NumericByRef()
+            .s4;
+    sm = pPioBlock[FIELD___sm].NumericByRef().s4;
 
     VALIDATE_PIO_BLOCK(block);
     VALIDATE_SM(sm);
@@ -258,17 +306,25 @@ HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_P
 }
 
 HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioStateMachine::
-    NativeTxFull___STATIC__BOOLEAN__I4__I4(CLR_RT_StackFrame &stack)
+    get_IsTxFull___BOOLEAN(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
     const PIO_TypeDef *pio;
+    CLR_RT_HeapBlock *pPioBlock;
     int block, sm;
 
-    VALIDATE_NOT_DISPOSED(stack);
+    CLR_RT_HeapBlock *pThis = stack.This();
+    VALIDATE_NOT_DISPOSED(pThis);
 
-    block = stack.Arg0().NumericByRef().s4;
-    sm = stack.Arg1().NumericByRef().s4;
+    pPioBlock = pThis[FIELD___block].Dereference();
+    FAULT_ON_NULL(pPioBlock);
+
+    block =
+        pPioBlock[Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioBlock::FIELD___index]
+            .NumericByRef()
+            .s4;
+    sm = pPioBlock[FIELD___sm].NumericByRef().s4;
 
     VALIDATE_PIO_BLOCK(block);
     VALIDATE_SM(sm);
@@ -281,17 +337,25 @@ HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_P
 }
 
 HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioStateMachine::
-    NativeRxEmpty___STATIC__BOOLEAN__I4__I4(CLR_RT_StackFrame &stack)
+    get_IsRxEmpty___BOOLEAN(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
     const PIO_TypeDef *pio;
+    CLR_RT_HeapBlock *pPioBlock;
     int block, sm;
 
-    VALIDATE_NOT_DISPOSED(stack);
+    CLR_RT_HeapBlock *pThis = stack.This();
+    VALIDATE_NOT_DISPOSED(pThis);
 
-    block = stack.Arg0().NumericByRef().s4;
-    sm = stack.Arg1().NumericByRef().s4;
+    pPioBlock = pThis[FIELD___block].Dereference();
+    FAULT_ON_NULL(pPioBlock);
+
+    block =
+        pPioBlock[Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioBlock::FIELD___index]
+            .NumericByRef()
+            .s4;
+    sm = pPioBlock[FIELD___sm].NumericByRef().s4;
 
     VALIDATE_PIO_BLOCK(block);
     VALIDATE_SM(sm);
@@ -304,12 +368,24 @@ HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_P
 }
 
 HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioStateMachine::
-    NativeUnclaim___STATIC__VOID__I4__I4(CLR_RT_StackFrame &stack)
+    NativeUnclaim___VOID(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
-    const int block = stack.Arg0().NumericByRef().s4;
-    const int sm = stack.Arg1().NumericByRef().s4;
+    CLR_RT_HeapBlock *pPioBlock;
+    int block, sm;
+
+    CLR_RT_HeapBlock *pThis = stack.This();
+    VALIDATE_NOT_DISPOSED(pThis);
+
+    pPioBlock = pThis[FIELD___block].Dereference();
+    FAULT_ON_NULL(pPioBlock);
+
+    block =
+        pPioBlock[Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioBlock::FIELD___index]
+            .NumericByRef()
+            .s4;
+    sm = pPioBlock[FIELD___sm].NumericByRef().s4;
 
     VALIDATE_PIO_BLOCK(block);
     VALIDATE_SM(sm);
@@ -326,22 +402,31 @@ HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_P
 }
 
 HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioStateMachine::
-    NativeSetConsecutivePinDirs___STATIC__VOID__I4__I4__I4__I4__BOOLEAN(CLR_RT_StackFrame &stack)
+    SetConsecutivePinDirs___VOID__I4__I4__BOOLEAN(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
     PIO_TypeDef *pio;
+    CLR_RT_HeapBlock *pPioBlock;
     int pin, remaining, gpioBase;
     int block, sm, basePin, count, output;
     unsigned int savedPinCtrl;
 
-    VALIDATE_NOT_DISPOSED(stack);
+    CLR_RT_HeapBlock *pThis = stack.This();
+    VALIDATE_NOT_DISPOSED(pThis);
 
-    block = stack.Arg0().NumericByRef().s4;
-    sm = stack.Arg1().NumericByRef().s4;
-    basePin = stack.Arg2().NumericByRef().s4;
-    count = stack.Arg3().NumericByRef().s4;
-    output = stack.Arg4().NumericByRef().u1;
+    basePin = stack.Arg1().NumericByRef().s4;
+    count = stack.Arg2().NumericByRef().s4;
+    output = stack.Arg3().NumericByRef().u1;
+
+    pPioBlock = pThis[FIELD___block].Dereference();
+    FAULT_ON_NULL(pPioBlock);
+
+    block =
+        pPioBlock[Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioBlock::FIELD___index]
+            .NumericByRef()
+            .s4;
+    sm = pPioBlock[FIELD___sm].NumericByRef().s4;
 
     VALIDATE_PIO_BLOCK(block);
     VALIDATE_SM(sm);
@@ -386,19 +471,27 @@ HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_P
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioStateMachine::
-    NativeClearFifos___STATIC__VOID__I4__I4(CLR_RT_StackFrame &stack)
+HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioStateMachine::ClearFifos___VOID(
+    CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
     PIO_TypeDef *pio;
+    CLR_RT_HeapBlock *pPioBlock;
     unsigned int fjoinRx;
     int block, sm;
 
-    VALIDATE_NOT_DISPOSED(stack);
+    CLR_RT_HeapBlock *pThis = stack.This();
+    VALIDATE_NOT_DISPOSED(pThis);
 
-    block = stack.Arg0().NumericByRef().s4;
-    sm = stack.Arg1().NumericByRef().s4;
+    pPioBlock = pThis[FIELD___block].Dereference();
+    FAULT_ON_NULL(pPioBlock);
+
+    block =
+        pPioBlock[Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioBlock::FIELD___index]
+            .NumericByRef()
+            .s4;
+    sm = pPioBlock[FIELD___sm].NumericByRef().s4;
 
     VALIDATE_PIO_BLOCK(block);
     VALIDATE_SM(sm);
@@ -413,19 +506,27 @@ HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_P
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioStateMachine::
-    NativeDrainTxFifo___STATIC__VOID__I4__I4(CLR_RT_StackFrame &stack)
+HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioStateMachine::DrainTxFifo___VOID(
+    CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
     PIO_TypeDef *pio;
+    CLR_RT_HeapBlock *pPioBlock;
     unsigned int autopull, instr, guard;
     int block, sm;
 
-    VALIDATE_NOT_DISPOSED(stack);
+    CLR_RT_HeapBlock *pThis = stack.This();
+    VALIDATE_NOT_DISPOSED(pThis);
 
-    block = stack.Arg0().NumericByRef().s4;
-    sm = stack.Arg1().NumericByRef().s4;
+    pPioBlock = pThis[FIELD___block].Dereference();
+    FAULT_ON_NULL(pPioBlock);
+
+    block =
+        pPioBlock[Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioBlock::FIELD___index]
+            .NumericByRef()
+            .s4;
+    sm = pPioBlock[FIELD___sm].NumericByRef().s4;
 
     VALIDATE_PIO_BLOCK(block);
     VALIDATE_SM(sm);
@@ -449,18 +550,26 @@ HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_P
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioStateMachine::
-    NativeRestart___STATIC__VOID__I4__I4(CLR_RT_StackFrame &stack)
+HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioStateMachine::Restart___VOID(
+    CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
     PIO_TypeDef *pio;
+    CLR_RT_HeapBlock *pPioBlock;
     int block, sm;
 
-    VALIDATE_NOT_DISPOSED(stack);
+    CLR_RT_HeapBlock *pThis = stack.This();
+    VALIDATE_NOT_DISPOSED(pThis);
 
-    block = stack.Arg0().NumericByRef().s4;
-    sm = stack.Arg1().NumericByRef().s4;
+    pPioBlock = pThis[FIELD___block].Dereference();
+    FAULT_ON_NULL(pPioBlock);
+
+    block =
+        pPioBlock[Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioBlock::FIELD___index]
+            .NumericByRef()
+            .s4;
+    sm = pPioBlock[FIELD___sm].NumericByRef().s4;
 
     VALIDATE_PIO_BLOCK(block);
     VALIDATE_SM(sm);
@@ -474,18 +583,26 @@ HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_P
 }
 
 HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioStateMachine::
-    NativeClkDivRestart___STATIC__VOID__I4__I4(CLR_RT_StackFrame &stack)
+    ClockDivRestart___VOID(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
     PIO_TypeDef *pio;
+    CLR_RT_HeapBlock *pPioBlock;
     int block;
     int sm;
 
-    VALIDATE_NOT_DISPOSED(stack);
+    CLR_RT_HeapBlock *pThis = stack.This();
+    VALIDATE_NOT_DISPOSED(pThis);
 
-    block = stack.Arg0().NumericByRef().s4;
-    sm = stack.Arg1().NumericByRef().s4;
+    pPioBlock = pThis[FIELD___block].Dereference();
+    FAULT_ON_NULL(pPioBlock);
+
+    block =
+        pPioBlock[Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioBlock::FIELD___index]
+            .NumericByRef()
+            .s4;
+    sm = pPioBlock[FIELD___sm].NumericByRef().s4;
 
     VALIDATE_PIO_BLOCK(block);
     VALIDATE_SM(sm);
@@ -498,21 +615,30 @@ HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_P
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioStateMachine::
-    NativeExec___STATIC__VOID__I4__I4__U2(CLR_RT_StackFrame &stack)
+HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioStateMachine::Exec___VOID__U2(
+    CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
     PIO_TypeDef *pio;
+    CLR_RT_HeapBlock *pPioBlock;
     int block;
     int sm;
     unsigned short instruction;
 
-    VALIDATE_NOT_DISPOSED(stack);
+    CLR_RT_HeapBlock *pThis = stack.This();
+    VALIDATE_NOT_DISPOSED(pThis);
 
-    block = stack.Arg0().NumericByRef().s4;
-    sm = stack.Arg1().NumericByRef().s4;
-    instruction = stack.Arg2().NumericByRef().u2;
+    instruction = stack.Arg1().NumericByRef().u2;
+
+    pPioBlock = pThis[FIELD___block].Dereference();
+    FAULT_ON_NULL(pPioBlock);
+
+    block =
+        pPioBlock[Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioBlock::FIELD___index]
+            .NumericByRef()
+            .s4;
+    sm = pPioBlock[FIELD___sm].NumericByRef().s4;
 
     VALIDATE_PIO_BLOCK(block);
     VALIDATE_SM(sm);
@@ -525,18 +651,26 @@ HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_P
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioStateMachine::
-    NativeTxLevel___STATIC__U4__I4__I4(CLR_RT_StackFrame &stack)
+HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioStateMachine::get_TxLevel___U4(
+    CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
     const PIO_TypeDef *pio;
+    CLR_RT_HeapBlock *pPioBlock;
     int block, sm;
 
-    VALIDATE_NOT_DISPOSED(stack);
+    CLR_RT_HeapBlock *pThis = stack.This();
+    VALIDATE_NOT_DISPOSED(pThis);
 
-    block = stack.Arg0().NumericByRef().s4;
-    sm = stack.Arg1().NumericByRef().s4;
+    pPioBlock = pThis[FIELD___block].Dereference();
+    FAULT_ON_NULL(pPioBlock);
+
+    block =
+        pPioBlock[Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioBlock::FIELD___index]
+            .NumericByRef()
+            .s4;
+    sm = pPioBlock[FIELD___sm].NumericByRef().s4;
 
     VALIDATE_PIO_BLOCK(block);
     VALIDATE_SM(sm);
@@ -548,18 +682,26 @@ HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_P
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioStateMachine::
-    NativeRxLevel___STATIC__U4__I4__I4(CLR_RT_StackFrame &stack)
+HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioStateMachine::get_RxLevel___U4(
+    CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
     const PIO_TypeDef *pio;
+    CLR_RT_HeapBlock *pPioBlock;
     int block, sm;
 
-    VALIDATE_NOT_DISPOSED(stack);
+    CLR_RT_HeapBlock *pThis = stack.This();
+    VALIDATE_NOT_DISPOSED(pThis);
 
-    block = stack.Arg0().NumericByRef().s4;
-    sm = stack.Arg1().NumericByRef().s4;
+    pPioBlock = pThis[FIELD___block].Dereference();
+    FAULT_ON_NULL(pPioBlock);
+
+    block =
+        pPioBlock[Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioBlock::FIELD___index]
+            .NumericByRef()
+            .s4;
+    sm = pPioBlock[FIELD___sm].NumericByRef().s4;
 
     VALIDATE_PIO_BLOCK(block);
     VALIDATE_SM(sm);
@@ -572,17 +714,25 @@ HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_P
 }
 
 HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioStateMachine::
-    NativeGetPc___STATIC__U4__I4__I4(CLR_RT_StackFrame &stack)
+    get_ProgramCounter___U4(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
     const PIO_TypeDef *pio;
+    CLR_RT_HeapBlock *pPioBlock;
     int block, sm;
 
-    VALIDATE_NOT_DISPOSED(stack);
+    CLR_RT_HeapBlock *pThis = stack.This();
+    VALIDATE_NOT_DISPOSED(pThis);
 
-    block = stack.Arg0().NumericByRef().s4;
-    sm = stack.Arg1().NumericByRef().s4;
+    pPioBlock = pThis[FIELD___block].Dereference();
+    FAULT_ON_NULL(pPioBlock);
+
+    block =
+        pPioBlock[Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioBlock::FIELD___index]
+            .NumericByRef()
+            .s4;
+    sm = pPioBlock[FIELD___sm].NumericByRef().s4;
 
     VALIDATE_PIO_BLOCK(block);
     VALIDATE_SM(sm);
@@ -595,30 +745,39 @@ HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_P
 }
 
 HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioStateMachine::
-    NativeSetClockDivisor___STATIC__VOID__I4__I4__R4(CLR_RT_StackFrame &stack)
+    set_ClockDivisor___VOID__R4(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
     PIO_TypeDef *pio;
+    CLR_RT_HeapBlock *pPioBlock;
     int block, sm, intPart, frac;
-    float div;
+    float value;
 
-    VALIDATE_NOT_DISPOSED(stack);
+    CLR_RT_HeapBlock *pThis = stack.This();
+    VALIDATE_NOT_DISPOSED(pThis);
 
-    block = stack.Arg0().NumericByRef().s4;
-    sm = stack.Arg1().NumericByRef().s4;
-    div = stack.Arg2().NumericByRef().r4;
+    pPioBlock = pThis[FIELD___block].Dereference();
+    FAULT_ON_NULL(pPioBlock);
+
+    block =
+        pPioBlock[Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioBlock::FIELD___index]
+            .NumericByRef()
+            .s4;
+    sm = pPioBlock[FIELD___sm].NumericByRef().s4;
+
+    value = stack.Arg1().NumericByRef().r4;
 
     VALIDATE_PIO_BLOCK(block);
     VALIDATE_SM(sm);
 
-    if (!(div >= 1.0f && div <= 65536.0f))
+    if (!(value >= 1.0f && value <= 65536.0f))
     {
         NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
     }
 
-    intPart = static_cast<int>(div);
-    frac = static_cast<int>(roundf((div - static_cast<float>(intPart)) * 256.0f));
+    intPart = static_cast<int>(value);
+    frac = static_cast<int>(roundf((value - static_cast<float>(intPart)) * 256.0f));
     if (frac > 255)
     {
         frac = 0;
@@ -636,11 +795,12 @@ HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_P
 }
 
 HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioStateMachine::
-    NativeRead___STATIC__I4__I4__I4__SZARRAY_U4__I4__I4__I4(CLR_RT_StackFrame &stack)
+    Read___I4__SZARRAY_U4__I4__I4__I4(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
     CLR_RT_HeapBlock hbTimeout{};
+    CLR_RT_HeapBlock *pPioBlock;
     CLR_INT64 *timeoutTicks;
     CLR_RT_HeapBlock_Array *buffer;
     bool eventResult = true;
@@ -650,14 +810,22 @@ HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_P
     PIO_TypeDef *pio;
     PioDmaWork *work;
 
-    VALIDATE_NOT_DISPOSED(stack);
+    CLR_RT_HeapBlock *pThis = stack.This();
+    VALIDATE_NOT_DISPOSED(pThis);
 
-    block = stack.Arg0().NumericByRef().s4;
-    sm = stack.Arg1().NumericByRef().s4;
-    buffer = stack.Arg2().DereferenceArray();
-    offset = stack.Arg3().NumericByRef().s4;
-    count = stack.Arg4().NumericByRef().s4;
-    timeoutMs = stack.Arg5().NumericByRef().s4;
+    buffer = stack.Arg1().DereferenceArray();
+    offset = stack.Arg2().NumericByRef().s4;
+    count = stack.Arg3().NumericByRef().s4;
+    timeoutMs = stack.Arg4().NumericByRef().s4;
+
+    pPioBlock = pThis[FIELD___block].Dereference();
+    FAULT_ON_NULL(pPioBlock);
+
+    block =
+        pPioBlock[Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioBlock::FIELD___index]
+            .NumericByRef()
+            .s4;
+    sm = pPioBlock[FIELD___sm].NumericByRef().s4;
 
     FAULT_ON_NULL(buffer);
 
@@ -669,8 +837,8 @@ HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_P
 
     if (count == 0)
     {
-        stack.SetResult_I4(false);
-        NANOCLR_EXIT_ON_SUCCESS(S_OK);
+        stack.SetResult_I4(0);
+        NANOCLR_SET_AND_LEAVE(S_OK);
     }
 
     VALIDATE_PIO_BLOCK(block);
@@ -785,11 +953,12 @@ HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_P
 }
 
 HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioStateMachine::
-    NativeWrite___STATIC__I4__I4__I4__SZARRAY_U4__I4__I4__I4(CLR_RT_StackFrame &stack)
+    Write___I4__SZARRAY_U4__I4__I4__I4(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
     CLR_RT_HeapBlock hbTimeout{};
+    CLR_RT_HeapBlock *pPioBlock;
     CLR_INT64 *timeoutTicks;
     CLR_RT_HeapBlock_Array *buffer = nullptr;
     bool eventResult = true;
@@ -799,14 +968,22 @@ HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_P
     PIO_TypeDef *pio;
     PioDmaWork *work;
 
-    VALIDATE_NOT_DISPOSED(stack);
+    CLR_RT_HeapBlock *pThis = stack.This();
+    VALIDATE_NOT_DISPOSED(pThis);
 
-    block = stack.Arg0().NumericByRef().s4;
-    sm = stack.Arg1().NumericByRef().s4;
-    buffer = stack.Arg2().DereferenceArray();
-    offset = stack.Arg3().NumericByRef().s4;
-    count = stack.Arg4().NumericByRef().s4;
-    timeoutMs = stack.Arg5().NumericByRef().s4;
+    buffer = stack.Arg1().DereferenceArray();
+    offset = stack.Arg2().NumericByRef().s4;
+    count = stack.Arg3().NumericByRef().s4;
+    timeoutMs = stack.Arg4().NumericByRef().s4;
+
+    pPioBlock = pThis[FIELD___block].Dereference();
+    FAULT_ON_NULL(pPioBlock);
+
+    block =
+        pPioBlock[Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioBlock::FIELD___index]
+            .NumericByRef()
+            .s4;
+    sm = pPioBlock[FIELD___sm].NumericByRef().s4;
 
     FAULT_ON_NULL(buffer);
 
@@ -818,8 +995,8 @@ HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_P
 
     if (count == 0)
     {
-        stack.SetResult_I4(false);
-        NANOCLR_EXIT_ON_SUCCESS(S_OK);
+        stack.SetResult_I4(0);
+        NANOCLR_SET_AND_LEAVE(S_OK);
     }
 
     VALIDATE_PIO_BLOCK(block);

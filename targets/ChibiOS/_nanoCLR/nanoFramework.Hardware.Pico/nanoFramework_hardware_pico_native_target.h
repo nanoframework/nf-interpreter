@@ -36,14 +36,13 @@
         NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);                                                                \
     }
 
-#define VALIDATE_NOT_DISPOSED(stack)                                                                   \
-    {                                                                                                  \
-        CLR_RT_HeapBlock *pThis = (stack).This();                                                      \
-        FAULT_ON_NULL(pThis);                                                                          \
-        if (pThis[FIELD___disposed].NumericByRef().u1 != 0)                                            \
-        {                                                                                              \
-            NANOCLR_SET_AND_LEAVE(CLR_E_OBJECT_DISPOSED);                                              \
-        }                                                                                              \
+#define VALIDATE_NOT_DISPOSED(pThis)                                                                                   \
+    FAULT_ON_NULL(pThis);                                                                                              \
+    if (pThis[FIELD___disposed].NumericByRef().u1 != 0)                                                                \
+    {                                                                                                                  \
+        NANOCLR_SET_AND_LEAVE(CLR_E_OBJECT_DISPOSED);                                                                  \
     }
+
+extern const rp_pio_sm_t *g_AllocatedSMs[3][4];
 
 #endif // NANOFRAMEWORK_HARDWARE_PICO_NATIVE_TARGET_H
