@@ -155,13 +155,15 @@ struct Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pi
     static const int FIELD___index = 1;
     static const int FIELD___interruptCallbacks = 2;
     static const int FIELD___irqLock = 3;
-    NANOCLR_NATIVE_DECLARE(NativeAddProgram___STATIC__I4__I4__SZARRAY_U2__I4__I4);
-    NANOCLR_NATIVE_DECLARE(NativeRemoveProgram___STATIC__VOID__I4__I4__I4);
+
+    NANOCLR_NATIVE_DECLARE(AddProgram___U4__nanoFrameworkHardwarePicoPioPioProgram);
+    NANOCLR_NATIVE_DECLARE(RemoveProgram___VOID__nanoFrameworkHardwarePicoPioPioProgram__U4);
+    NANOCLR_NATIVE_DECLARE(InitGpio___VOID__I4);
+    NANOCLR_NATIVE_DECLARE(ForceIrq___VOID__I4);
+    NANOCLR_NATIVE_DECLARE(ClearIrq___VOID__I4);
+    NANOCLR_NATIVE_DECLARE(NativeSetIrqEnabled___VOID__BOOLEAN);
     NANOCLR_NATIVE_DECLARE(NativeClaimUnusedSm___STATIC__I4__I4__BOOLEAN);
-    NANOCLR_NATIVE_DECLARE(NativeInitGpio___STATIC__VOID__I4__I4);
-    NANOCLR_NATIVE_DECLARE(NativeForceIrq___STATIC__VOID__I4__I4);
-    NANOCLR_NATIVE_DECLARE(NativeClearIrq___STATIC__VOID__I4__I4);
-    NANOCLR_NATIVE_DECLARE(NativeSetIrqEnabled___STATIC__VOID__I4__BOOLEAN);
+
 };
 
 struct Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioEvent
