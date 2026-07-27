@@ -18,13 +18,6 @@
 static uint16_t _lastOutboundMessage = 0;
 static uint64_t _receiveExpiryTicks;
 static uint8_t _rxState;
-
-// TEMPORARY DIAGNOSTIC: counters to check whether WireProtocol messages are arriving intact
-// but being silently rejected during parsing. Read via OpenOCD/gdb.
-volatile uint32_t g_wpHeaderCrcOk = 0;
-volatile uint32_t g_wpHeaderCrcFailures = 0;
-volatile uint32_t g_wpPayloadCrcOk = 0;
-volatile uint32_t g_wpPayloadCrcFailures = 0;
 static uint8_t *_pos;
 static uint32_t _size;
 static WP_Message _inboundMessage;
@@ -265,10 +258,8 @@ uint8_t WP_Message_VerifyHeader(WP_Message *message)
             "Header CRC check failed: computed: 0x%08X; got: 0x%08X\n",
             computedCrc,
             message->m_header.m_crcHeader);
-        g_wpHeaderCrcFailures++;
         return false;
     }
-    g_wpHeaderCrcOk++;
 #else
 
     (void)message;
@@ -301,10 +292,8 @@ uint8_t WP_Message_VerifyPayload(WP_Message *message)
             "Payload CRC check failed: computed: 0x%08X; got: 0x%08X\n",
             computedCrc,
             message->m_header.m_crcData);
-        g_wpPayloadCrcFailures++;
         return false;
     }
-    g_wpPayloadCrcOk++;
 
 #endif
 
