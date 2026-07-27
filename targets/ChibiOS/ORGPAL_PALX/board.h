@@ -945,7 +945,7 @@ The user should also disable the MCO pin of the clock output if not used.
  * PH15 - IO0_P12_PWM               (output pullup).
  */
 #define VAL_GPIOH_MODER                                                                                                \
-    (PIN_MODE_INPUT(GPIOH_OSC_IN) | PIN_MODE_INPUT(GPIOH_OSC_OUT) | PIN_MODE_OUTPUT(GPIOH_PIN2) |                       \
+    (PIN_MODE_INPUT(GPIOH_OSC_IN) | PIN_MODE_INPUT(GPIOH_OSC_OUT) | PIN_MODE_OUTPUT(GPIOH_PIN2) |                      \
      PIN_MODE_INPUT(GPIOH_PIN3) | PIN_MODE_INPUT(GPIOH_I2C2_SCL) | PIN_MODE_INPUT(GPIOH_I2C2_SDA) |                    \
      PIN_MODE_ALTERNATE(GPIOH_FMC_SDNE1) | PIN_MODE_ALTERNATE(GPIOH_FMC_SDCKE1) | PIN_MODE_INPUT(GPIOH_I2C3_SDA) |     \
      PIN_MODE_OUTPUT(GPIOH_IO1_P12_PWM) | PIN_MODE_INPUT(GPIOH_IO1_P13_IO) | PIN_MODE_INPUT(GPIOH_IO1_P19_IO) |        \
