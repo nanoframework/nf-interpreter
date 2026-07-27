@@ -120,7 +120,7 @@ RUN groupadd --gid $USER_GID $USERNAME \
     && apt-get clean -y \
     && rm -rf /var/lib/apt/lists/* \
     && chmod o+rx /root \
-    && chmod -R a+rwX /sources /root/.espressif /usr/bin/cmake
+    && chown -R $USER_UID:$USER_GID /sources /root/.espressif /usr/bin/cmake
 
 # Switch back to dialog for any ad-hoc use of apt-get
 ENV DEBIAN_FRONTEND=dialog
