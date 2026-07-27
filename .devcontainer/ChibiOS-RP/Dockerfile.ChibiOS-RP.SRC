@@ -30,10 +30,12 @@ FROM ubuntu:latest AS devcontainer
 # Avoid warnings by switching to noninteractive
 ENV DEBIAN_FRONTEND=noninteractive
 
-# You can set up non-root user
-# ARG USERNAME=vscode
-# ARG USER_UID=1000
-# ARG USER_GID=$USER_UID
+# Non-root user. VS Code automatically adjusts this user's UID/GID to match
+# the local user on Linux hosts (updateRemoteUserUID), so files created
+# inside the bind-mounted workspace keep correct ownership on the host.
+ARG USERNAME=vscode
+ARG USER_UID=1000
+ARG USER_GID=$USER_UID
 
 # Configure apt and install packages
 RUN apt-get update \
@@ -104,5 +106,26 @@ RUN curl -sSL https://dot.net/v1/dotnet-install.sh -o /tmp/dotnet-install.sh \
 
 ENV DOTNET_ROOT=/usr/share/dotnet
 
+# Create the non-root user and open up read/execute access to the toolchains
+# and repositories that were downloaded/cloned as root above.
+# Recent Ubuntu base images already ship a default non-root user/group at
+# UID/GID 1000 (e.g. "ubuntu"), which would otherwise collide with the
+# groupadd/useradd below. Remove any existing user/group holding our target
+# UID/GID first so this works regardless of what the base image ships.
+RUN (getent passwd $USER_UID > /dev/null && userdel -r $(getent passwd $USER_UID | cut -d: -f1) || true) \
+    && (getent group $USER_GID > /dev/null && groupdel $(getent group $USER_GID | cut -d: -f1) || true) \
+    && groupadd --gid $USER_GID $USERNAME \
+    && useradd --uid $USER_UID --gid $USER_GID -m -s /bin/bash $USERNAME \
+    && apt-get update \
+    && apt-get install -y --no-install-recommends sudo \
+    && echo "$USERNAME ALL=(root) NOPASSWD:ALL" > /etc/sudoers.d/$USERNAME \
+    && chmod 0440 /etc/sudoers.d/$USERNAME \
+    && apt-get clean -y \
+    && rm -rf /var/lib/apt/lists/* \
+    && chown -R $USER_UID:$USER_GID /sources /usr/local/bin /usr/share/dotnet /usr/bin/cmake
+
 # Switch back to dialog for any ad-hoc use of apt-get
 ENV DEBIAN_FRONTEND=dialog
+
+USER $USERNAME
+WORKDIR /home/$USERNAME

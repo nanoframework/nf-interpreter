@@ -44,10 +44,12 @@ FROM python:3.11 AS devcontainer
 # Avoid warnings by switching to noninteractive
 ENV DEBIAN_FRONTEND=noninteractive
 
-# You can set up non-root user
-# ARG USERNAME=vscode
-# ARG USER_UID=1000
-# ARG USER_GID=$USER_UID
+# Non-root user. VS Code automatically adjusts this user's UID/GID to match
+# the local user on Linux hosts (updateRemoteUserUID), so files created
+# inside the bind-mounted workspace keep correct ownership on the host.
+ARG USERNAME=vscode
+ARG USER_UID=1000
+ARG USER_GID=$USER_UID
 
 # Configure apt and install packages
 RUN apt-get update \
@@ -83,6 +85,11 @@ ENV PATH=/usr/bin/cmake/bin:${PATH}
 
 # Install ESP-IDF
 ENV IDF_PATH=/sources/esp-idf
+# Pin the IDF tools/python-env location to where install.sh actually put them
+# (it runs as root during the image build, so $HOME is /root). ESP-IDF defaults
+# this to $HOME/.espressif, which would otherwise resolve to /home/vscode for
+# the non-root user and miss the toolchain/venv installed below.
+ENV IDF_TOOLS_PATH=/root/.espressif
 # >>> IDF MIGRATION: ESP_PATCH_VER is the GCC toolchain version installed by IDF.
 #     After install.sh completes, check ~/.espressif/tools/xtensa-esp-elf/ for
 #     the actual folder name and update this value accordingly. <<<
@@ -107,5 +114,21 @@ RUN apt-get autoremove -y \
     && apt-get clean -y \
     && rm -rf /var/lib/apt/lists/*
 
+# Create the non-root user and open up read/execute access to the ESP-IDF
+# toolchain and repositories that were downloaded/cloned as root above.
+RUN groupadd --gid $USER_GID $USERNAME \
+    && useradd --uid $USER_UID --gid $USER_GID -m -s /bin/bash $USERNAME \
+    && apt-get update \
+    && apt-get install -y --no-install-recommends sudo \
+    && echo "$USERNAME ALL=(root) NOPASSWD:ALL" > /etc/sudoers.d/$USERNAME \
+    && chmod 0440 /etc/sudoers.d/$USERNAME \
+    && apt-get clean -y \
+    && rm -rf /var/lib/apt/lists/* \
+    && chmod o+x /root \
+    && chown -R $USER_UID:$USER_GID /sources /root/.espressif /usr/bin/cmake
+
 # Switch back to dialog for any ad-hoc use of apt-get
 ENV DEBIAN_FRONTEND=dialog
+
+USER $USERNAME
+WORKDIR /home/$USERNAME
