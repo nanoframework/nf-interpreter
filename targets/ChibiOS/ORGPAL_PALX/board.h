@@ -929,7 +929,7 @@ The user should also disable the MCO pin of the clock output if not used.
  *
  * PH0  - OSC_IN                    (input floating).
  * PH1  - OSC_OUT                   (input floating).
- * PH2  - PIN2                      (input pullup).
+ * PH2  - PIN2                      (output pullup).
  * PH3  - PIN3                      (input pullup).
  * PH4  - I2C2_SCL                  (input pullup).
  * PH5  - I2C2_SDA                  (input pullup).
@@ -945,7 +945,7 @@ The user should also disable the MCO pin of the clock output if not used.
  * PH15 - IO0_P12_PWM               (output pullup).
  */
 #define VAL_GPIOH_MODER                                                                                                \
-    (PIN_MODE_INPUT(GPIOH_OSC_IN) | PIN_MODE_INPUT(GPIOH_OSC_OUT) | PIN_MODE_INPUT(GPIOH_PIN2) |                       \
+    (PIN_MODE_INPUT(GPIOH_OSC_IN) | PIN_MODE_INPUT(GPIOH_OSC_OUT) | PIN_MODE_OUTPUT(GPIOH_PIN2) |                      \
      PIN_MODE_INPUT(GPIOH_PIN3) | PIN_MODE_INPUT(GPIOH_I2C2_SCL) | PIN_MODE_INPUT(GPIOH_I2C2_SDA) |                    \
      PIN_MODE_ALTERNATE(GPIOH_FMC_SDNE1) | PIN_MODE_ALTERNATE(GPIOH_FMC_SDCKE1) | PIN_MODE_INPUT(GPIOH_I2C3_SDA) |     \
      PIN_MODE_OUTPUT(GPIOH_IO1_P12_PWM) | PIN_MODE_INPUT(GPIOH_IO1_P13_IO) | PIN_MODE_INPUT(GPIOH_IO1_P19_IO) |        \
@@ -1068,7 +1068,7 @@ The user should also disable the MCO pin of the clock output if not used.
  * PJ12 - PULSE_COUNT               (input ).
  * PJ13 - PIN13                     (input pullup).
  * PJ14 - PIN14                     (input pullup).
- * PJ15 - PIN15                     (output).
+ * PJ15 - PIN15                     (output pulldown).
  */
 #define VAL_GPIOJ_MODER                                                                                                \
     (PIN_MODE_OUTPUT(GPIOJ_IO0_PWR_ON_OFF) | PIN_MODE_OUTPUT(GPIOJ_IO1_PWR_ON_OFF) | PIN_MODE_INPUT(GPIOJ_PIN2) |      \
@@ -1076,7 +1076,7 @@ The user should also disable the MCO pin of the clock output if not used.
      PIN_MODE_INPUT(GPIOJ_PIN6) | PIN_MODE_INPUT(GPIOJ_PIN7) | PIN_MODE_INPUT(GPIOJ_PIN8) |                            \
      PIN_MODE_INPUT(GPIOJ_PIN9) | PIN_MODE_INPUT(GPIOJ_PIN10) | PIN_MODE_INPUT(GPIOJ_PIN11) |                          \
      PIN_MODE_INPUT(GPIOJ_PULSE_COUNT) | PIN_MODE_INPUT(GPIOJ_PIN13) | PIN_MODE_INPUT(GPIOJ_PIN14) |                   \
-     PIN_MODE_INPUT(GPIOJ_PIN15))
+     PIN_MODE_OUTPUT(GPIOJ_PIN15))
 #define VAL_GPIOJ_OTYPER                                                                                               \
     (PIN_OTYPE_PUSHPULL(GPIOJ_IO0_PWR_ON_OFF) | PIN_OTYPE_PUSHPULL(GPIOJ_IO1_PWR_ON_OFF) |                             \
      PIN_OTYPE_PUSHPULL(GPIOJ_PIN2) | PIN_OTYPE_PUSHPULL(GPIOJ_SPI_FLASH_WP) |                                         \
@@ -1097,7 +1097,7 @@ The user should also disable the MCO pin of the clock output if not used.
      PIN_PUPDR_PULLDOWN(GPIOJ_RELAY) | PIN_PUPDR_PULLUP(GPIOJ_PIN6) | PIN_PUPDR_PULLUP(GPIOJ_PIN7) |                   \
      PIN_PUPDR_PULLUP(GPIOJ_PIN8) | PIN_PUPDR_PULLUP(GPIOJ_PIN9) | PIN_PUPDR_PULLUP(GPIOJ_PIN10) |                     \
      PIN_PUPDR_PULLUP(GPIOJ_PIN11) | PIN_PUPDR_FLOATING(GPIOJ_PULSE_COUNT) | PIN_PUPDR_PULLUP(GPIOJ_PIN13) |           \
-     PIN_PUPDR_PULLUP(GPIOJ_PIN14) | PIN_PUPDR_PULLUP(GPIOJ_PIN15))
+     PIN_PUPDR_PULLUP(GPIOJ_PIN14) | PIN_PUPDR_PULLDOWN(GPIOJ_PIN15))
 #define VAL_GPIOJ_ODR                                                                                                  \
     (PIN_ODR_HIGH(GPIOJ_IO0_PWR_ON_OFF) | PIN_ODR_HIGH(GPIOJ_IO1_PWR_ON_OFF) | PIN_ODR_HIGH(GPIOJ_PIN2) |              \
      PIN_ODR_HIGH(GPIOJ_SPI_FLASH_WP) | PIN_ODR_HIGH(GPIOJ_SPI_FLASH_HOLD) | PIN_ODR_HIGH(GPIOJ_RELAY) |               \
