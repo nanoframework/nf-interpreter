@@ -77,22 +77,13 @@ void rngReleaseModule()
 
 #endif /* RNG_USE_MUTUAL_EXCLUSION == TRUE */
 
-uint32_t rngGenerateRandomNumber()
+bool rngGenerate(size_t size, uint8_t *out)
 {
-    uint32_t randomNumber;
-    osalSysLock();
-    randomNumber = rng_lld_GenerateRandomNumber();
-    osalSysUnlock();
-    return randomNumber;
-}
+    RNGD1.State = RNG_ACTIVE;
+    bool result = rng_lld_generate(size, out);
+    RNGD1.State = RNG_READY;
 
-uint32_t rngGetLastRandomNumber()
-{
-    uint32_t randomNumber;
-    osalSysLock();
-    randomNumber = rng_lld_GetLastRandomNumber();
-    osalSysUnlock();
-    return randomNumber;
+    return result;
 }
 
 #endif /* HAL_NF_USE_RNG */

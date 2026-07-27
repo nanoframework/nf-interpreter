@@ -57,6 +57,9 @@ typedef struct RNGDriver
 
 } RNGDriver;
 
+/** @brief RNGD1 driver identifier.*/
+extern RNGDriver RNGD1;
+
 // From STMicroelectronics Cube HAL
 /////////////////////////////////////////////////////////////
 
@@ -106,8 +109,7 @@ extern "C"
     void rng_lld_init(void);
     void rng_lld_start(void);
     void rng_lld_stop(void);
-    uint32_t rng_lld_GenerateRandomNumber(void);
-    uint32_t rng_lld_GetLastRandomNumber(void);
+    bool rng_lld_generate(size_t size, uint8_t *out);
 
 #if (RNG_USE_MUTUAL_EXCLUSION == TRUE)
 

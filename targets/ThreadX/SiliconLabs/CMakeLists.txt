@@ -51,6 +51,7 @@ if(NO_GECKO_SDK_SOURCE)
         GIT_REPOSITORY https://github.com/SiliconLabs/gecko_sdk.git
         GIT_TAG ${GECKO_SDK_VERSION}
         GIT_SHALLOW 1
+        UPDATE_DISCONNECTED ON
     )
 
 else()

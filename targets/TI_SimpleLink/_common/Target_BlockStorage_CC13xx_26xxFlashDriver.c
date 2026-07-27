@@ -45,6 +45,11 @@ bool CC13xx_26xxFlashDriver_Read(void *context, ByteAddress startAddress, unsign
 {
     (void)context;
 
+    if (buffer == NULL)
+    {
+        return false;
+    }
+
     // direct read from memory...
     memcpy(buffer, (void *)startAddress, (size_t)numBytes);
 
@@ -70,6 +75,11 @@ bool CC13xx_26xxFlashDriver_Write(
     // // enter critical section
     // swiState = Swi_disable();
     // hwiState = Hwi_disable();
+
+    if (buffer == NULL)
+    {
+        return false;
+    }
 
     state = DisableCache();
 
