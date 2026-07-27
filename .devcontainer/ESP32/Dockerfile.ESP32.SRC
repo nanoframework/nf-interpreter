@@ -85,6 +85,11 @@ ENV PATH=/usr/bin/cmake/bin:${PATH}
 
 # Install ESP-IDF
 ENV IDF_PATH=/sources/esp-idf
+# Pin the IDF tools/python-env location to where install.sh actually put them
+# (it runs as root during the image build, so $HOME is /root). ESP-IDF defaults
+# this to $HOME/.espressif, which would otherwise resolve to /home/vscode for
+# the non-root user and miss the toolchain/venv installed below.
+ENV IDF_TOOLS_PATH=/root/.espressif
 # >>> IDF MIGRATION: ESP_PATCH_VER is the GCC toolchain version installed by IDF.
 #     After install.sh completes, check ~/.espressif/tools/xtensa-esp-elf/ for
 #     the actual folder name and update this value accordingly. <<<
