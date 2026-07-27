@@ -8,7 +8,7 @@
 
 #include "hal.h"
 
-#if (HAL_USE_RTC == TRUE) || defined(__DOXYGEN__)
+#if (HAL_NF_USE_RTC == TRUE) || defined(__DOXYGEN__)
 
 /*===========================================================================*/
 /* Driver local definitions.                                                 */
