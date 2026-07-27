@@ -17,15 +17,20 @@ const rp_pio_sm_t *g_AllocatedSMs[3][4] = {{nullptr}};
 
 static void PioChibiOSCallback(void *param, const uint32_t flags)
 {
-    const int block = reinterpret_cast<int>(param);
+    const int block = reinterpret_cast<intptr_t>(param);
+    PIO_TypeDef *pio = __rp_pio_blocks[block].pio;
 
-    // Align the flags to the PIO block - See IRQ0_INTS documentation
-    const uint32_t sm_flags = (flags >> 8) & 0x0F;
+    // IRQ0_INTS bits [11:8] are the SM-raised flags, IRQ holds the same flags live
+    const uint32_t smFlags = ((flags >> 8) & 0x0Fu) & pio->IRQ;
 
-    PostManagedEvent(EVENT_PICO_PIO, EVENT_TYPE_PICO_PIO, static_cast<uint16_t>(block), sm_flags);
+    if (smFlags == 0u)
+    {
+        return;
+    }
 
-    // Clear the flag in hardware to avoid an infinite loop of interrupts.
-    __rp_pio_blocks[block].pio->IRQ = sm_flags;
+    pio->IRQ = smFlags;
+
+    PostManagedEvent(EVENT_PICO_PIO, EVENT_TYPE_PICO_PIO, static_cast<uint16_t>(block), smFlags);
 }
 
 HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioBlock::
@@ -47,7 +52,6 @@ HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_P
 
     VALIDATE_PIO_BLOCK(block);
 
-    // Get the data from the PioProgram class passed as argument
     program_array =
         pProgram
             [Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioProgram::FIELD__Instructions]
@@ -75,7 +79,8 @@ HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_P
 
     if (offset < 0)
     {
-        NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_OPERATION); // No memory left
+        // No memory left
+        NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_OPERATION);
     }
 
     stack.SetResult_I4(offset);
@@ -134,9 +139,9 @@ HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_P
     if (const rp_pio_sm_t *sm = pioSmAlloc(
             &__rp_pio_blocks[block],
             RP_PIO_SM_ID_ANY,
-            3,
+            NF_PICO_PIO_IRQ_PRIORITY,
             PioChibiOSCallback,
-            reinterpret_cast<void *>(block));
+            reinterpret_cast<void *>(static_cast<intptr_t>(block)));
         sm == nullptr)
     {
         if (required)
@@ -158,7 +163,6 @@ HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_P
 {
     NANOCLR_HEADER();
 
-    uint32_t mode;
     int block;
 
     const int pin = stack.Arg1().NumericByRef().s4;
@@ -175,13 +179,7 @@ HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_P
         NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
     }
 
-    mode = (block == 0) ? PAL_MODE_ALTERNATE_PIO0 : PAL_MODE_ALTERNATE_PIO1;
-#if defined(RP2350)
-    if (block == 2)
-        mode = PAL_MODE_ALTERNATE_PIO2;
-#endif
-
-    palSetPadMode(0, pin, mode);
+    NfPioBlockGpioInit(&__rp_pio_blocks[block], static_cast<uint32_t>(pin));
 
     NANOCLR_NOCLEANUP();
 }
@@ -207,7 +205,7 @@ HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_P
         NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
     }
 
-    __rp_pio_blocks[block].pio->IRQ_FORCE = (1u << irq);
+    NfPioBlockForceIrq(&__rp_pio_blocks[block], static_cast<uint32_t>(irq));
 
     NANOCLR_NOCLEANUP();
 }
@@ -233,7 +231,7 @@ HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_P
         NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
     }
 
-    __rp_pio_blocks[block].pio->IRQ = (1u << irq);
+    NfPioBlockClearIrq(&__rp_pio_blocks[block], static_cast<uint32_t>(irq));
 
     NANOCLR_NOCLEANUP();
 }
@@ -244,6 +242,8 @@ HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_P
     NANOCLR_HEADER();
 
     int block;
+
+    const uint32_t mask = PIO_IRQ_SM(0) | PIO_IRQ_SM(1) | PIO_IRQ_SM(2) | PIO_IRQ_SM(3);
 
     const bool enabled = static_cast<bool>(stack.Arg1().NumericByRef().u1);
 
@@ -256,11 +256,11 @@ HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_P
 
     if (enabled)
     {
-        __rp_pio_blocks[block].pio->IRQ0_INTE |= (0x0Fu << 8);
+        NfPioBlockEnableInterrupt(&__rp_pio_blocks[block], mask);
     }
     else
     {
-        __rp_pio_blocks[block].pio->IRQ0_INTE &= ~(0x0Fu << 8);
+        NfPioBlockDisableInterrupt(&__rp_pio_blocks[block], mask);
     }
 
     NANOCLR_NOCLEANUP();
