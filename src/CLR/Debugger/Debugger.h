@@ -7,6 +7,8 @@
 #ifndef DEBUGGER_H
 #define DEBUGGER_H
 
+#include <nanoHAL_StorageOperation.h>
+
 // enum with CLR debugging commands
 // backwards compatible with .NETMF
 typedef enum CLR_DBG_Commands_Debugging
@@ -101,21 +103,5 @@ typedef enum AccessMemoryErrorCodes
     AccessMemoryErrorCode_RequestedOperationFailed = 0x0030, // the requested operation failed
 
 } AccessMemoryErrorCodes;
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// !!! KEEP IN SYNC WITH nanoFramework.Tools.Debugger.WireProtocol.StorageOperationErrorCode (in managed code) !!! //
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-typedef enum StorageOperationErrorCode
-{
-    // no error
-    NoError = 0x0001,
-    // write error
-    WriteError = 0x0010,
-    // delete error
-    DeleteError = 0x0020,
-    // platform error
-    PlatformError = 0x0030,
-
-} StorageOperationErrorCode;
 
 #endif // DEBUGGER_H

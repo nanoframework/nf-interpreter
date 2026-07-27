@@ -8,17 +8,28 @@
 
 #include <nanoCLR_Headers.h>
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// !!! KEEP IN SYNC WITH nanoFramework.Tools.Debugger.WireProtocol.StorageOperationErrorCode (in managed code) !!! //
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+typedef enum StorageOperationErrorCode
+{
+    // no error
+    NoError = 0x0001,
+    // write error
+    WriteError = 0x0010,
+    // delete error
+    DeleteError = 0x0020,
+    // platform error
+    PlatformError = 0x0030,
+
+} StorageOperationErrorCode;
+
 #ifdef __cplusplus
 extern "C"
 {
 #endif
 
-    uint32_t HAL_StorageOperation(
-        uint8_t operation,
-        uint32_t nameLength,
-        uint32_t dataLength,
-        uint32_t offset,
-        uint8_t *data);
+    uint32_t HAL_StorageOperation(uint8_t operation, uint32_t dataLength, uint32_t offset, uint8_t *data);
 
 #ifdef __cplusplus
 }

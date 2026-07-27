@@ -58,6 +58,7 @@ if(NO_FREERTOS_SOURCE_FOLDER)
         freertos
         GIT_REPOSITORY https://github.com/FreeRTOS/FreeRTOS-Kernel.git
         GIT_TAG ${RTOS_VERSION}
+        UPDATE_DISCONNECTED ON
     )
 
 else()
@@ -114,6 +115,7 @@ if(NO_CMSIS_SOURCE)
         cmsis
         GIT_REPOSITORY https://github.com/ARM-software/CMSIS_5.git
         GIT_TAG ${CMSIS_GIT_TAG}
+        UPDATE_DISCONNECTED ON
     )
 
 else()
