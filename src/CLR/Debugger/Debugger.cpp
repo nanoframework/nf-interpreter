@@ -1388,7 +1388,7 @@ bool CLR_DBG_Debugger::Monitor_StorageOperation(WP_Message *message)
     Monitor_StorageOperation_Command *cmd = (Monitor_StorageOperation_Command *)message->m_payload;
     Monitor_StorageOperation_Reply cmdReply;
 
-    cmdReply.ErrorCode = HAL_StorageOperation(cmd->Operation, cmd->NameLength, cmd->DataLength, cmd->Offset, cmd->Data);
+    cmdReply.ErrorCode = HAL_StorageOperation(cmd->Operation, cmd->DataLength, cmd->Offset, cmd->Data);
 
     WP_ReplyToCommand(message, true, false, &cmdReply, sizeof(cmdReply));
 

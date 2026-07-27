@@ -42,11 +42,15 @@ uint32_t CLR_RT_Random::Next()
 {
 #if (HAL_NF_USE_RNG == TRUE)
 
-    return rngGenerateRandomNumber();
+    uint32_t randomValue = 0;
+    rngGenerate(sizeof(randomValue), (uint8_t *)&randomValue);
+
+    return randomValue;
 
 #elif (HAL_USE_TRNG == TRUE)
 
     uint32_t randomValue = 0;
+    // trngGenerate returns true if an error occurred
     trngGenerate(&TRNGD1, sizeof(randomValue), (uint8_t *)&randomValue);
 
     return randomValue;
@@ -62,11 +66,14 @@ double CLR_RT_Random::NextDouble()
 
 #if (HAL_NF_USE_RNG == TRUE)
 
-    return ((double)rngGenerateRandomNumber()) / ((double)0xFFFFFFFF);
+    uint32_t randomValue = 0;
+    rngGenerate(sizeof(randomValue), (uint8_t *)&randomValue);
+    return ((double)randomValue) / ((double)0xFFFFFFFF);
 
 #elif (HAL_USE_TRNG == TRUE)
 
     uint32_t randomValue = 0;
+    // trngGenerate returns true if an error occurred
     trngGenerate(&TRNGD1, sizeof(randomValue), (uint8_t *)&randomValue);
     return ((double)randomValue) / ((double)0xFFFFFFFF);
 
@@ -78,15 +85,12 @@ double CLR_RT_Random::NextDouble()
 void CLR_RT_Random::NextBytes(unsigned char *buffer, unsigned int count)
 {
 #if (HAL_NF_USE_RNG == TRUE)
-    unsigned int i;
 
-    for (i = 0; i < count; i++)
-    {
-        buffer[i] = (unsigned char)rngGenerateRandomNumber();
-    }
+    rngGenerate(count, buffer);
 
 #elif (HAL_USE_TRNG == TRUE)
 
+    // trngGenerate returns true if an error occurred
     trngGenerate(&TRNGD1, count, buffer);
 
 #else

@@ -64,17 +64,13 @@ void rngReleaseModule(void)
 
 #endif /* RNG_USE_MUTUAL_EXCLUSION == TRUE */
 
-uint32_t rngGenerateRandomNumber(void)
+bool rngGenerate(size_t size, uint8_t *out)
 {
-    return rng_lld_GenerateRandomNumber();
-}
+    RNGD1.State = RNG_ACTIVE;
+    bool result = rng_lld_generate(size, out);
+    RNGD1.State = RNG_READY;
 
-uint32_t rngGetLastRandomNumber(void)
-{
-    uint32_t randomNumber;
-    randomNumber = rng_lld_GetLastRandomNumber();
-
-    return randomNumber;
+    return result;
 }
 
 #endif /* HAL_NF_USE_RNG */

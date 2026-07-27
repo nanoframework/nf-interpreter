@@ -20,19 +20,31 @@
 
 #elif defined(RP2350)
 
-// RP2350 hardware TRNG peripheral - see RP2350 datasheet §12.12
-#define TRNG_BASE              0x400f0000UL
+// RP2350 TRNG peripheral (RP2350 datasheet section 12.12)
+#define TRNG_BASE              0x400F0000UL
 #define TRNG_RNG_ISR           (*(volatile uint32_t *)(TRNG_BASE + 0x104UL))
 #define TRNG_RNG_ICR           (*(volatile uint32_t *)(TRNG_BASE + 0x108UL))
+#define TRNG_TRNG_VALID        (*(volatile uint32_t *)(TRNG_BASE + 0x110UL))
 #define TRNG_EHR_DATA0         (*(volatile uint32_t *)(TRNG_BASE + 0x114UL))
+#define TRNG_EHR_DATA1         (*(volatile uint32_t *)(TRNG_BASE + 0x118UL))
+#define TRNG_EHR_DATA2         (*(volatile uint32_t *)(TRNG_BASE + 0x11CUL))
+#define TRNG_EHR_DATA3         (*(volatile uint32_t *)(TRNG_BASE + 0x120UL))
+#define TRNG_EHR_DATA4         (*(volatile uint32_t *)(TRNG_BASE + 0x124UL))
 #define TRNG_EHR_DATA5         (*(volatile uint32_t *)(TRNG_BASE + 0x128UL))
 #define TRNG_RND_SOURCE_ENABLE (*(volatile uint32_t *)(TRNG_BASE + 0x12CUL))
 #define TRNG_SAMPLE_CNT1       (*(volatile uint32_t *)(TRNG_BASE + 0x130UL))
-#define TRNG_RNG_ISR_EHR_VALID (1UL << 0)
-#define TRNG_RND_SRC_EN        (1UL << 0)
+#define TRNG_DEBUG_CONTROL     (*(volatile uint32_t *)(TRNG_BASE + 0x138UL))
+#define TRNG_BUSY              (*(volatile uint32_t *)(TRNG_BASE + 0x1B8UL))
 
-// With SAMPLE_CNT1 = 0, a full 192-bit EHR fills in well under 1 ms.
-#define RNG_TIMEOUT_VALUE      20
+#define TRNG_RNG_ISR_VN_ERR       (1UL << 3)
+#define TRNG_RNG_ISR_CRNGT_ERR    (1UL << 2)
+#define TRNG_RNG_ISR_AUTOCORR_ERR (1UL << 1)
+#define TRNG_RNG_ISR_EHR_VALID    (1UL << 0)
+
+#define TRNG_RNG_ICR_ALL                                                                                               \
+    (TRNG_RNG_ISR_VN_ERR | TRNG_RNG_ISR_CRNGT_ERR | TRNG_RNG_ISR_AUTOCORR_ERR | TRNG_RNG_ISR_EHR_VALID)
+#define TRNG_TRNG_VALID_EHR_VALID (1UL << 0)
+#define TRNG_RND_SRC_EN           (1UL << 0)
 
 #endif
 
@@ -67,17 +79,30 @@ void rng_lld_init(void)
 #if (RNG_USE_MUTUAL_EXCLUSION == TRUE)
     osalMutexObjectInit(&RNGD1.Lock);
 #endif
+
+#if defined(RP2350)
+
+    rp_peripheral_unreset(RESETS_ALLREG_TRNG);
+
+    TRNG_RND_SOURCE_ENABLE = 0;
+    // Sample one ROSC bit into EHR every cycle
+    TRNG_SAMPLE_CNT1 = 0;
+    // Disable checks and bypass decorrelators
+    TRNG_DEBUG_CONTROL = -1;
+    TRNG_RNG_ICR = TRNG_RNG_ICR_ALL;
+
+#endif
 }
 
 void rng_lld_start(void)
 {
-    // RP2040: ROSC is always running, nothing to enable
-
 #if defined(RP2350)
-    // smallest sample interval so an EHR fills in <1 ms
+    // Per Pico SDK: set up sampling parameters, then ENABLE first, THEN clear ICR.
     TRNG_SAMPLE_CNT1 = 0;
-    // start ROSC sampling
+    TRNG_DEBUG_CONTROL = (uint32_t)-1;
     TRNG_RND_SOURCE_ENABLE = TRNG_RND_SRC_EN;
+    // Clear all flags AFTER enable - triggers fresh collection
+    TRNG_RNG_ICR = (uint32_t)-1;
 #endif
 
     RNGD1.State = RNG_READY;
@@ -92,49 +117,91 @@ void rng_lld_stop(void)
     RNGD1.State = RNG_STOP;
 }
 
-uint32_t rng_lld_GenerateRandomNumber(void)
+bool rng_lld_generate(size_t size, uint8_t *out)
 {
+    RNGD1.State = RNG_ACTIVE;
+
 #if defined(RP2040)
 
-    uint32_t value = 0;
-    for (int i = 0; i < 32; i++)
+    while (size > 0)
     {
-        value = (value << 1) | (ROSC_RANDOMBIT & 1u);
+        uint32_t value = 0;
+        for (int i = 0; i < 32; i++)
+        {
+            value = (value << 1) | (ROSC_RANDOMBIT & 1u);
+        }
+
+        for (size_t i = 0; i < sizeof(uint32_t) && size > 0; i++)
+        {
+            *out++ = (uint8_t)value;
+            value >>= 8;
+            size--;
+        }
     }
-    RNGD1.RandomNumber = value;
+
+    RNGD1.State = RNG_READY;
+
+    return true;
 
 #elif defined(RP2350)
 
-    for (uint32_t elapsed = 0; elapsed < RNG_TIMEOUT_VALUE; elapsed++)
+    // Per Pico SDK (pico_rand/rand.c capture_additional_trng_samples):
+    // - rng_lld_start() already enabled source and cleared ICR, triggering first collection
+    // - Here we just wait for BUSY LOW (data ready), then read ALL 6 EHR words
+    // - Reading EHR_DATA5 (last word) hardware-triggers the next collection cycle automatically
+    // - Do NOT write ICR inside this loop: it interrupts mid-collection and breaks re-arming
+
+    while (size > 0)
     {
-        if ((TRNG_RNG_ISR & TRNG_RNG_ISR_EHR_VALID) != 0)
+        // Wait for collection to complete
+        uint32_t timeout_ms = 50;
+        while (timeout_ms > 0 && TRNG_BUSY)
         {
-            RNGD1.RandomNumber = TRNG_EHR_DATA0;
-
-            // Reading EHR_DATA5 clears all six EHR result registers,
-            // consuming the current 192-bit sample so the next fill can start.
-            (void)TRNG_EHR_DATA5;
-
-            // Need to clear EHR_VALID
-            TRNG_RNG_ICR = TRNG_RNG_ISR_EHR_VALID;
-
-            return RNGD1.RandomNumber;
+            // 10 ms is a good compromise between responsiveness and CPU load, since the TRNG collection time is ~15ms
+            osalThreadSleepMilliseconds(10);
+            timeout_ms = timeout_ms - 10;
         }
 
-        // Yield to other threads between checks
-        osalThreadSleepMilliseconds(1);
+        if (TRNG_BUSY)
+        {
+            RNGD1.State = RNG_READY;
+            return false;
+        }
+
+        // ALWAYS read all 6 EHR words into a local buffer.
+        uint32_t ehr[6];
+        ehr[0] = TRNG_EHR_DATA0;
+        ehr[1] = TRNG_EHR_DATA1;
+        ehr[2] = TRNG_EHR_DATA2;
+        ehr[3] = TRNG_EHR_DATA3;
+        ehr[4] = TRNG_EHR_DATA4;
+        ehr[5] = TRNG_EHR_DATA5;
+
+        // Copy needed bytes from local EHR buffer to output
+        for (int r = 0; r < 6 && size > 0; r++)
+        {
+            uint32_t word = ehr[r];
+            for (size_t b = 0; b < sizeof(uint32_t) && size > 0; b++)
+            {
+                *out++ = (uint8_t)word;
+                word >>= 8;
+                size--;
+            }
+        }
     }
 
-    return 0;
+    RNGD1.State = RNG_READY;
 
+    return true;
+
+#else
+    (void)size;
+    (void)out;
+
+    RNGD1.State = RNG_READY;
+
+    return false;
 #endif
-
-    return RNGD1.RandomNumber;
-}
-
-uint32_t rng_lld_GetLastRandomNumber(void)
-{
-    return RNGD1.RandomNumber;
 }
 
 #if (RNG_USE_MUTUAL_EXCLUSION == TRUE)
