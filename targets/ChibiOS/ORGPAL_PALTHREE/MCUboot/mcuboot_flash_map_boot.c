@@ -25,6 +25,7 @@
 #include <stddef.h>
 #include <string.h>
 #include <assert.h>
+#include <errno.h>
 
 #include "mcuboot_config.h"
 
@@ -221,6 +222,14 @@ uint8_t flash_area_erased_val(const struct flash_area *area)
     return 0xFFU;
 }
 
+// Returns sector geometry for a flash area.
+//
+// Contract: on input, *count is the capacity of the `sectors` buffer. On
+// return, *count is the number of entries written (min(actual, capacity)).
+// If the area has more sectors than the buffer holds, returns -ENOMEM with
+// the buffer filled up to capacity -- MCUboot's serial direct-upload path
+// (SWAP_USING_OFFSET) relies on this: it probes with a 1-entry buffer just
+// to read sector 0's size and treats -ENOMEM as a valid partial result.
 int flash_area_get_sectors(int fa_id, uint32_t *count, struct flash_sector *sectors)
 {
     const struct flash_area *fa = NULL;
@@ -243,46 +252,54 @@ int flash_area_get_sectors(int fa_id, uint32_t *count, struct flash_sector *sect
     {
         uint32_t addr = fa->fa_off;
         uint32_t end = fa->fa_off + fa->fa_size;
-        uint32_t n = 0U;
         uint32_t cap = *count;
+        uint32_t n = 0U;
 
         while (addr < end)
         {
-            if (n >= cap)
-            {
-                return -1;
-            }
-
             uint32_t sz = stm32_f7xx_get_sector_size(addr);
             if (sz == 0U)
             {
+                *count = n;
                 return -1;
             }
 
-            sectors[n].fs_off = addr - fa->fa_off;
-            sectors[n].fs_size = sz;
+            // Fill within capacity; keep counting to detect overflow below.
+            if (n < cap)
+            {
+                sectors[n].fs_off = addr - fa->fa_off;
+                sectors[n].fs_size = sz;
+            }
+
             addr += sz;
             n++;
         }
 
-        *count = n;
+        *count = (n < cap) ? n : cap;
+
+        if (n > cap)
+        {
+            return -ENOMEM;
+        }
     }
     else
     {
         uint32_t n = fa->fa_size / MCUBOOT_EXTERNAL_FLASH_SECTOR_SIZE;
+        uint32_t cap = *count;
+        uint32_t fill = (n < cap) ? n : cap;
 
-        if (n > *count)
-        {
-            return -1;
-        }
-
-        for (uint32_t i = 0U; i < n; i++)
+        for (uint32_t i = 0U; i < fill; i++)
         {
             sectors[i].fs_off = i * MCUBOOT_EXTERNAL_FLASH_SECTOR_SIZE;
             sectors[i].fs_size = MCUBOOT_EXTERNAL_FLASH_SECTOR_SIZE;
         }
 
-        *count = n;
+        *count = fill;
+
+        if (n > cap)
+        {
+            return -ENOMEM;
+        }
     }
 
     return 0;
