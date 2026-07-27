@@ -12,29 +12,8 @@
 #include "nanoFramework_hardware_pico_native_target.h"
 #include <hal.h>
 #include <nanoHAL.h>
-
-#define PIO_FSTAT_RXEMPTY_LSB 8u
-#define PIO_FSTAT_TXFULL_LSB  16u
-
-static constexpr unsigned int PIO_FIFO_WAIT_LIMIT = 0x4000000u;
-
-struct PioDmaWork
-{
-    const rp_dma_channel_t *Channel;
-    unsigned int *Buffer;
-    unsigned int Count;
-};
-
-static PioDmaWork g_PioDmaWork[3][4] = {};
-static PioDmaWork g_PioDmaWorkTx[3][4] = {};
-
-// DMA completion callback (ChibiOS shared handler dispatches here); just wake the waiting thread
-static void PioDmaCallback(void *p, uint32_t ct)
-{
-    (void)p;
-    (void)ct;
-    Events_Set(SYSTEM_EVENT_FLAG_PICOPIO);
-}
+#include <math.h>
+#include <string.h>
 
 enum PioCfgBlob
 {
@@ -68,98 +47,334 @@ enum PioCfgBlob
     PIO_CFG_BLOB_LENGTH = 27,
 };
 
-extern unsigned int g_PioClaimedSm[3];
+static inline unsigned int PioRelPin(unsigned int gpio, unsigned int gpioBase)
+{
+    return (gpio >= gpioBase && (gpio - gpioBase) < 32u) ? (gpio - gpioBase) : (gpio & 0x1Fu);
+}
+
+static inline unsigned int PioShiftThreshold(unsigned int threshold)
+{
+    return (threshold == 0u || threshold > 32u) ? 32u : threshold;
+}
+
+enum PioDmaDir
+{
+    PioDmaRx = 0,
+    PioDmaTx = 1,
+};
+
+struct PioDmaWork
+{
+    const rp_dma_channel_t *Channel;
+    uint32_t *Buffer;
+    uint32_t Count;
+    uint32_t Status;
+};
+
+static PioDmaWork g_PioDmaWork[3][4][2] = {};
+
+#define PIO_DMA_ERROR_MASK (DMA_CTRL_TRIG_AHB_ERROR | DMA_CTRL_TRIG_READ_ERROR | DMA_CTRL_TRIG_WRITE_ERROR)
+
+static void PioDmaCallback(void *p, const uint32_t ct)
+{
+
+    if (auto *work = static_cast<PioDmaWork *>(p); work != nullptr)
+    {
+        work->Status = ct & PIO_DMA_ERROR_MASK;
+    }
+
+    Events_Set(SYSTEM_EVENT_FLAG_PICOPIO);
+}
+
+// Stops a transfer and gives the channel and bounce buffer back.
+static void PioDmaFinish(PioDmaWork *work)
+{
+    const rp_dma_channel_t *ch = work->Channel;
+
+    if (ch == nullptr)
+    {
+        return;
+    }
+
+    if (dmaChannelIsBusyX(ch))
+    {
+        dmaChannelDisableX(ch);
+    }
+
+    (void)dmaChannelGetAndClearInterrupts(ch);
+    dmaChannelFree(ch);
+
+    if (work->Buffer != nullptr)
+    {
+        platform_free(work->Buffer);
+    }
+
+    work->Channel = nullptr;
+    work->Buffer = nullptr;
+    work->Count = 0;
+    work->Status = 0;
+}
+
+// Aborts and releases both directions of a state machine.
+void PioDmaReleaseSm(const int block, const int sm)
+{
+    PioDmaFinish(&g_PioDmaWork[block][sm][PioDmaRx]);
+    PioDmaFinish(&g_PioDmaWork[block][sm][PioDmaTx]);
+}
+
+// Arms a channel to move count words between the state machine FIFO and the bounce buffer.
+static void PioDmaArm(
+    const rp_dma_channel_t *ch,
+    const rp_pio_sm_t *smp,
+    const PioDmaDir dir,
+    uint32_t *buf,
+    const uint32_t count)
+{
+    if (dir == PioDmaRx)
+    {
+        dmaChannelSetSourceX(ch, reinterpret_cast<uint32_t>(pioSmRxFifoAddrX(smp)));
+        dmaChannelSetDestinationX(ch, reinterpret_cast<uint32_t>(buf));
+        dmaChannelSetCounterX(ch, count);
+        dmaChannelSetModeX(
+            ch,
+            DMA_CTRL_TRIG_DATA_SIZE_WORD | DMA_CTRL_TRIG_INCR_WRITE | DMA_CTRL_TRIG_TREQ_SEL(pioSmRxDreqX(smp)));
+    }
+    else
+    {
+        dmaChannelSetSourceX(ch, reinterpret_cast<uint32_t>(buf));
+        dmaChannelSetDestinationX(ch, reinterpret_cast<uint32_t>(pioSmTxFifoAddrX(smp)));
+        dmaChannelSetCounterX(ch, count);
+        dmaChannelSetModeX(
+            ch,
+            DMA_CTRL_TRIG_DATA_SIZE_WORD | DMA_CTRL_TRIG_INCR_READ | DMA_CTRL_TRIG_TREQ_SEL(pioSmTxDreqX(smp)));
+    }
+    dmaChannelEnableInterruptX(ch);
+    dmaChannelEnableX(ch);
+}
+
+// Shared body of Read and Write.
+static HRESULT PioDmaTransfer(CLR_RT_StackFrame &stack, const PioDmaDir dir)
+{
+    NANOCLR_HEADER();
+
+    PioSmContext ctx{};
+    CLR_RT_HeapBlock hbTimeout{};
+    CLR_INT64 *timeoutTicks;
+    CLR_RT_HeapBlock_Array *buffer;
+    PioDmaWork *work;
+    PioDmaWork *ownedWork = nullptr;
+    uint32_t dmaStatus = 0;
+    bool eventResult = true;
+    bool timeoutPushed = false;
+    int transferred = 0;
+    int offset, count, timeoutMs;
+
+    NANOCLR_PIO_SM_PROLOGUE(ctx);
+
+    buffer = stack.Arg1().DereferenceArray();
+    offset = stack.Arg2().NumericByRef().s4;
+    count = stack.Arg3().NumericByRef().s4;
+    timeoutMs = stack.Arg4().NumericByRef().s4;
+
+    FAULT_ON_NULL(buffer);
+
+    if (offset < 0 || count < 0 || timeoutMs < 0 || count > static_cast<int>(buffer->m_numOfElements) ||
+        offset > static_cast<int>(buffer->m_numOfElements) - count)
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+    }
+
+    if (count == 0)
+    {
+        stack.SetResult_I4(0);
+        NANOCLR_SET_AND_LEAVE(S_OK);
+    }
+
+    work = &g_PioDmaWork[ctx.block][ctx.sm][dir];
+
+    if (stack.m_customState != 1)
+    {
+        ownedWork = work;
+    }
+
+    hbTimeout.SetInteger(static_cast<CLR_INT64>(timeoutMs) * TIME_CONVERSION__TO_MILLISECONDS);
+    NANOCLR_CHECK_HRESULT(stack.SetupTimeoutFromTicks(hbTimeout, timeoutTicks));
+    timeoutPushed = true;
+
+    if (stack.m_customState == 1)
+    {
+        if (work->Channel != nullptr)
+        {
+            NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_OPERATION);
+        }
+
+        const rp_dma_channel_t *ch =
+            dmaChannelAlloc(RP_DMA_CHANNEL_ID_ANY, NF_PICO_PIO_IRQ_PRIORITY, PioDmaCallback, work);
+        if (ch == nullptr)
+        {
+            NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_OPERATION);
+        }
+
+        const auto buf = static_cast<uint32_t *>(platform_malloc(static_cast<size_t>(count) * sizeof(uint32_t)));
+        if (buf == nullptr)
+        {
+            dmaChannelFree(ch);
+            NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
+        }
+
+        if (dir == PioDmaTx)
+        {
+            memcpy(
+                buf,
+                buffer->GetFirstElement() + static_cast<size_t>(offset) * sizeof(uint32_t),
+                static_cast<size_t>(count) * sizeof(uint32_t));
+        }
+
+        work->Channel = ch;
+        work->Buffer = buf;
+        work->Count = static_cast<uint32_t>(count);
+        work->Status = 0;
+        ownedWork = work;
+
+        PioDmaArm(ch, ctx.smp, dir, buf, static_cast<uint32_t>(count));
+
+        Events_Get(SYSTEM_EVENT_FLAG_PICOPIO);
+        stack.m_customState = 2;
+    }
+
+    while (work->Channel != nullptr && dmaChannelIsBusyX(work->Channel))
+    {
+        NANOCLR_CHECK_HRESULT(
+            g_CLR_RT_ExecutionEngine.WaitEvents(stack.m_owningThread, *timeoutTicks, Event_PicoPio, eventResult));
+
+        if (!eventResult)
+        {
+            break;
+        }
+    }
+
+    if (work->Channel != nullptr)
+    {
+        const uint32_t remaining = NfDmaChannelGetCounter(work->Channel);
+
+        dmaStatus = work->Status;
+        transferred = static_cast<int>(work->Count - (remaining > work->Count ? work->Count : remaining));
+
+        if (dir == PioDmaRx && transferred > 0)
+        {
+            memcpy(
+                buffer->GetFirstElement() + static_cast<size_t>(offset) * sizeof(uint32_t),
+                work->Buffer,
+                static_cast<size_t>(transferred) * sizeof(uint32_t));
+        }
+
+        PioDmaFinish(work);
+    }
+
+    stack.PopValue();
+    timeoutPushed = false;
+
+    if (dmaStatus != 0)
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
+    }
+
+    stack.SetResult_I4(transferred);
+
+    NANOCLR_CLEANUP();
+
+    if (hr != CLR_E_THREAD_WAITING)
+    {
+        if (timeoutPushed)
+        {
+            stack.PopValue();
+        }
+
+        if (ownedWork != nullptr)
+        {
+            PioDmaFinish(ownedWork);
+        }
+    }
+
+    NANOCLR_CLEANUP_END();
+}
 
 HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioStateMachine::
     NativeInit___VOID__I4__SZARRAY_U4(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
-    PIO_TypeDef *pio;
-    CLR_RT_HeapBlock *pPioBlock;
+    PioSmContext ctx{};
+    rp_pio_sm_config_t cfg;
     CLR_RT_HeapBlock_Array *blobArray;
-    unsigned int *b;
-    unsigned int sidesetTotal, execCtrl, pushThresh, pullThresh, join;
-    int block, sm, offset;
+    const unsigned int *b;
+    unsigned int gpioBase;
+    int offset;
 
-    CLR_RT_HeapBlock *pThis = stack.This();
-    VALIDATE_NOT_DISPOSED(pThis);
+    NANOCLR_PIO_SM_PROLOGUE(ctx);
 
     offset = stack.Arg1().NumericByRef().s4;
     blobArray = stack.Arg2().DereferenceArray();
 
-    pPioBlock = pThis[FIELD___block].Dereference();
-    FAULT_ON_NULL(pPioBlock);
-
-    block =
-        pPioBlock[Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioBlock::FIELD___index]
-            .NumericByRef()
-            .s4;
-    sm = pPioBlock[FIELD___sm].NumericByRef().s4;
-
     FAULT_ON_NULL(blobArray);
 
-    if (offset > 31)
-    {
-        NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
-    }
-
-    VALIDATE_PIO_BLOCK(block);
-    VALIDATE_SM(sm);
-
-    if (offset < 0 || offset > 31 || blobArray == nullptr ||
+    if (offset < 0 || offset >= static_cast<int>(RP_PIO_NUM_INSTR_MEM) ||
         static_cast<int>(blobArray->m_numOfElements) < PIO_CFG_BLOB_LENGTH)
     {
         NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
     }
 
-    pio = __rp_pio_blocks[block].pio;
-    b = reinterpret_cast<unsigned int *>(blobArray->GetFirstElement());
-
-    // disable + restart before reconfigure
-    pio->CTRL &= ~(1u << sm);
-    pio->CTRL |= (1u << (4 + sm)); // SM_RESTART
-
-    // CLKDIV: int [31:16], frac [15:8]
-    pio->SM[sm].CLKDIV = ((b[PIO_CFG_CLKDIV_INT] & 0xFFFFu) << 16) | ((b[PIO_CFG_CLKDIV_FRAC] & 0xFFu) << 8);
-
-    // side-set count includes the opt enable bit; each field masked to its width
-    sidesetTotal = b[PIO_CFG_SIDESET_COUNT] + b[PIO_CFG_SIDESET_OPT];
-    pio->SM[sm].PINCTRL = ((sidesetTotal & 0x7u) << 29) | ((b[PIO_CFG_SET_COUNT] & 0x7u) << 26) |
-                          ((b[PIO_CFG_OUT_COUNT] & 0x3Fu) << 20) | ((b[PIO_CFG_IN_BASE] & 0x1Fu) << 15) |
-                          ((b[PIO_CFG_SIDESET_BASE] & 0x1Fu) << 10) | ((b[PIO_CFG_SET_BASE] & 0x1Fu) << 5) |
-                          (b[PIO_CFG_OUT_BASE] & 0x1Fu);
-
-    // EXECCTRL: wrap [16:12], wrap_target [11:7], side_en [30], side_pindir [29], jmp_pin [28:24]
-    execCtrl = ((b[PIO_CFG_WRAP] & 0x1Fu) << 12) | ((b[PIO_CFG_WRAP_TARGET] & 0x1Fu) << 7) |
-               ((b[PIO_CFG_JMP_PIN] & 0x1Fu) << 24) | ((b[PIO_CFG_MOV_STATUS_SEL] & 1u) << 4) |
-               (b[PIO_CFG_MOV_STATUS_N] & 0xFu) | ((b[PIO_CFG_OUT_STICKY] & 1u) << 17) |
-               ((b[PIO_CFG_INLINE_OUT_EN] & 1u) << 18) | ((b[PIO_CFG_OUT_EN_SEL] & 0x1Fu) << 19);
-
-    if (b[PIO_CFG_SIDESET_OPT])
-    {
-        execCtrl |= (1u << 30);
-    }
-    if (b[PIO_CFG_SIDESET_PINDIRS])
-    {
-        execCtrl |= (1u << 29);
-    }
-    pio->SM[sm].EXECCTRL = execCtrl;
-
-    // a 32-bit threshold encodes as 0 in the 5-bit field
-    pushThresh = b[PIO_CFG_PUSH_THRESHOLD] & 0x1F;
-    pullThresh = b[PIO_CFG_PULL_THRESHOLD] & 0x1F;
-    // FJOIN: low 2 bits -> TX [30] / RX [31]; high 2 bits (PIO v1) -> RX_GET [14] / RX_PUT [15]
-    join = b[PIO_CFG_FIFO_JOIN];
-    pio->SM[sm].SHIFTCTRL = ((b[PIO_CFG_IN_SHIFT_RIGHT] & 1u) << 18) | ((b[PIO_CFG_OUT_SHIFT_RIGHT] & 1u) << 19) |
-                            ((b[PIO_CFG_AUTOPUSH] & 1u) << 16) | ((b[PIO_CFG_AUTOPULL] & 1u) << 17) |
-                            (pushThresh << 20) | (pullThresh << 25) | ((join & 3u) << 30) | (((join >> 2) & 3u) << 14);
+    b = reinterpret_cast<const unsigned int *>(blobArray->GetFirstElement());
 
 #if defined(RP2350)
-    *reinterpret_cast<volatile unsigned int *>(&pio->GPIOBASE) = (b[PIO_CFG_GPIO_BASE] == 16) ? 16u : 0u;
+    gpioBase = (b[PIO_CFG_GPIO_BASE] == 16) ? 16u : 0u;
+    ctx.smp->block->pio->GPIOBASE = gpioBase;
+#else
+    gpioBase = 0;
 #endif
 
-    pio->SM[sm].INSTR = static_cast<unsigned int>(offset & 0x1F);
+    pioSmConfigDefaultX(&cfg);
+
+    pioSmConfigSetClkdivX(&cfg, b[PIO_CFG_CLKDIV_INT] & 0xFFFFu, b[PIO_CFG_CLKDIV_FRAC] & 0xFFu);
+    pioSmConfigSetWrapX(&cfg, b[PIO_CFG_WRAP_TARGET] & 0x1Fu, b[PIO_CFG_WRAP] & 0x1Fu);
+
+    pioSmConfigSetOutPinsX(&cfg, PioRelPin(b[PIO_CFG_OUT_BASE], gpioBase), b[PIO_CFG_OUT_COUNT] & 0x3Fu);
+    pioSmConfigSetSetPinsX(&cfg, PioRelPin(b[PIO_CFG_SET_BASE], gpioBase), b[PIO_CFG_SET_COUNT] & 0x7u);
+    pioSmConfigSetInPinsX(&cfg, PioRelPin(b[PIO_CFG_IN_BASE], gpioBase));
+    pioSmConfigSetJmpPinX(&cfg, PioRelPin(b[PIO_CFG_JMP_PIN], gpioBase));
+
+    pioSmConfigSetSidesetX(
+        &cfg,
+        (b[PIO_CFG_SIDESET_COUNT] + b[PIO_CFG_SIDESET_OPT]) & 0x7u,
+        b[PIO_CFG_SIDESET_OPT] != 0,
+        b[PIO_CFG_SIDESET_PINDIRS] != 0);
+    pioSmConfigSetSidesetPinsX(&cfg, PioRelPin(b[PIO_CFG_SIDESET_BASE], gpioBase));
+
+    pioSmConfigSetInShiftX(
+        &cfg,
+        b[PIO_CFG_IN_SHIFT_RIGHT] != 0,
+        b[PIO_CFG_AUTOPUSH] != 0,
+        PioShiftThreshold(b[PIO_CFG_PUSH_THRESHOLD]));
+    pioSmConfigSetOutShiftX(
+        &cfg,
+        b[PIO_CFG_OUT_SHIFT_RIGHT] != 0,
+        b[PIO_CFG_AUTOPULL] != 0,
+        PioShiftThreshold(b[PIO_CFG_PULL_THRESHOLD]));
+
+    NfPioSmConfigSetFifoJoin(&cfg, b[PIO_CFG_FIFO_JOIN]);
+
+    pioSmConfigSetMovStatusX(
+        &cfg,
+        static_cast<rp_pio_mov_status_t>(b[PIO_CFG_MOV_STATUS_SEL]),
+        b[PIO_CFG_MOV_STATUS_N] & (PIO_SM_EXECCTRL_STATUS_N_Msk >> PIO_SM_EXECCTRL_STATUS_N_Pos));
+
+    pioSmConfigSetOutSpecialX(
+        &cfg,
+        b[PIO_CFG_OUT_STICKY] != 0,
+        b[PIO_CFG_INLINE_OUT_EN] != 0,
+        b[PIO_CFG_OUT_EN_SEL] & 0x1Fu);
+
+    pioSmInit(ctx.smp, static_cast<uint32_t>(offset), &cfg);
 
     NANOCLR_NOCLEANUP();
 }
@@ -182,39 +397,49 @@ HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_P
 {
     NANOCLR_HEADER();
 
-    CLR_RT_HeapBlock *pPioBlock;
-    int block, sm;
+    PioSmContext ctx{};
     bool value;
 
-    CLR_RT_HeapBlock *pThis = stack.This();
-    VALIDATE_NOT_DISPOSED(pThis);
+    NANOCLR_PIO_SM_PROLOGUE(ctx);
 
     value = stack.Arg1().NumericByRef().u1;
 
-    pPioBlock = pThis[FIELD___block].Dereference();
-    FAULT_ON_NULL(pPioBlock);
-
-    block =
-        pPioBlock[Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioBlock::FIELD___index]
-            .NumericByRef()
-            .s4;
-    sm = pPioBlock[FIELD___sm].NumericByRef().s4;
-
-    VALIDATE_PIO_BLOCK(block);
-    VALIDATE_SM(sm);
-
-    pThis[FIELD___enabled].NumericByRef().u1 = value;
+    stack.This()[FIELD___enabled].NumericByRef().u1 = value;
 
     if (value)
     {
-        __rp_pio_blocks[block].pio->CTRL |= (1u << sm);
+        pioSmEnableX(ctx.smp);
     }
     else
     {
-        __rp_pio_blocks[block].pio->CTRL &= ~(1u << sm);
+        pioSmDisableX(ctx.smp);
     }
 
     NANOCLR_NOCLEANUP();
+}
+
+template <typename TCondition> static bool PioSpinWhile(TCondition blocked)
+{
+    unsigned int spins = NF_PICO_PIO_FIFO_SPIN_LIMIT;
+    unsigned int sleeps = NF_PICO_PIO_FIFO_TIMEOUT_MS;
+
+    while (blocked())
+    {
+        if (spins > 0u)
+        {
+            spins--;
+            continue;
+        }
+
+        if (sleeps-- == 0u)
+        {
+            return false;
+        }
+
+        osalThreadSleepMilliseconds(1);
+    }
+
+    return true;
 }
 
 HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioStateMachine::
@@ -222,42 +447,19 @@ HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_P
 {
     NANOCLR_HEADER();
 
-    PIO_TypeDef *pio;
-    CLR_RT_HeapBlock *pPioBlock;
-    unsigned int guard, value;
-    int block, sm;
+    PioSmContext ctx{};
+    unsigned int value;
 
-    CLR_RT_HeapBlock *pThis = stack.This();
-    VALIDATE_NOT_DISPOSED(pThis);
+    NANOCLR_PIO_SM_PROLOGUE(ctx);
 
     value = stack.Arg2().NumericByRef().u4;
 
-    pPioBlock = pThis[FIELD___block].Dereference();
-    FAULT_ON_NULL(pPioBlock);
-
-    block =
-        pPioBlock[Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioBlock::FIELD___index]
-            .NumericByRef()
-            .s4;
-    sm = pPioBlock[FIELD___sm].NumericByRef().s4;
-
-    VALIDATE_PIO_BLOCK(block);
-    VALIDATE_SM(sm);
-
-    pio = __rp_pio_blocks[block].pio;
-
-    // FSTAT TX_FULL = bits [19:16]
-    guard = PIO_FIFO_WAIT_LIMIT;
-    while ((pio->FSTAT & (1u << (PIO_FSTAT_TXFULL_LSB + sm))) && --guard)
-    {
-    }
-
-    if (guard == 0)
+    if (!PioSpinWhile([&ctx] { return pioSmIsTxFullX(ctx.smp); }))
     {
         NANOCLR_SET_AND_LEAVE(CLR_E_TIMEOUT);
     }
 
-    pio->TXF[sm] = value;
+    pioSmPutX(ctx.smp, value);
 
     NANOCLR_NOCLEANUP();
 }
@@ -267,40 +469,16 @@ HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_P
 {
     NANOCLR_HEADER();
 
-    const PIO_TypeDef *pio;
-    CLR_RT_HeapBlock *pPioBlock;
-    unsigned int guard;
-    int block, sm;
+    PioSmContext ctx{};
 
-    CLR_RT_HeapBlock *pThis = stack.This();
-    VALIDATE_NOT_DISPOSED(pThis);
+    NANOCLR_PIO_SM_PROLOGUE(ctx);
 
-    pPioBlock = pThis[FIELD___block].Dereference();
-    FAULT_ON_NULL(pPioBlock);
-
-    block =
-        pPioBlock[Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioBlock::FIELD___index]
-            .NumericByRef()
-            .s4;
-    sm = pPioBlock[FIELD___sm].NumericByRef().s4;
-
-    VALIDATE_PIO_BLOCK(block);
-    VALIDATE_SM(sm);
-
-    pio = __rp_pio_blocks[block].pio;
-
-    // FSTAT RX_EMPTY = bits [11:8]
-    guard = PIO_FIFO_WAIT_LIMIT;
-    while ((pio->FSTAT & (1u << (PIO_FSTAT_RXEMPTY_LSB + sm))) && --guard)
-    {
-    }
-
-    if (guard == 0)
+    if (!PioSpinWhile([&ctx] { return pioSmIsRxEmptyX(ctx.smp); }))
     {
         NANOCLR_SET_AND_LEAVE(CLR_E_TIMEOUT);
     }
 
-    stack.SetResult_U4(pio->RXF[sm]);
+    stack.SetResult_U4(pioSmGetX(ctx.smp));
 
     NANOCLR_NOCLEANUP();
 }
@@ -310,28 +488,11 @@ HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_P
 {
     NANOCLR_HEADER();
 
-    const PIO_TypeDef *pio;
-    CLR_RT_HeapBlock *pPioBlock;
-    int block, sm;
+    PioSmContext ctx{};
 
-    CLR_RT_HeapBlock *pThis = stack.This();
-    VALIDATE_NOT_DISPOSED(pThis);
+    NANOCLR_PIO_SM_PROLOGUE(ctx);
 
-    pPioBlock = pThis[FIELD___block].Dereference();
-    FAULT_ON_NULL(pPioBlock);
-
-    block =
-        pPioBlock[Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioBlock::FIELD___index]
-            .NumericByRef()
-            .s4;
-    sm = pPioBlock[FIELD___sm].NumericByRef().s4;
-
-    VALIDATE_PIO_BLOCK(block);
-    VALIDATE_SM(sm);
-
-    pio = __rp_pio_blocks[block].pio;
-
-    stack.SetResult_Boolean((pio->FSTAT & (1u << (PIO_FSTAT_TXFULL_LSB + sm))) != 0);
+    stack.SetResult_Boolean(pioSmIsTxFullX(ctx.smp));
 
     NANOCLR_NOCLEANUP();
 }
@@ -341,28 +502,11 @@ HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_P
 {
     NANOCLR_HEADER();
 
-    const PIO_TypeDef *pio;
-    CLR_RT_HeapBlock *pPioBlock;
-    int block, sm;
+    PioSmContext ctx{};
 
-    CLR_RT_HeapBlock *pThis = stack.This();
-    VALIDATE_NOT_DISPOSED(pThis);
+    NANOCLR_PIO_SM_PROLOGUE(ctx);
 
-    pPioBlock = pThis[FIELD___block].Dereference();
-    FAULT_ON_NULL(pPioBlock);
-
-    block =
-        pPioBlock[Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioBlock::FIELD___index]
-            .NumericByRef()
-            .s4;
-    sm = pPioBlock[FIELD___sm].NumericByRef().s4;
-
-    VALIDATE_PIO_BLOCK(block);
-    VALIDATE_SM(sm);
-
-    pio = __rp_pio_blocks[block].pio;
-
-    stack.SetResult_Boolean((pio->FSTAT & (1u << (PIO_FSTAT_RXEMPTY_LSB + sm))) != 0);
+    stack.SetResult_Boolean(pioSmIsRxEmptyX(ctx.smp));
 
     NANOCLR_NOCLEANUP();
 }
@@ -372,31 +516,14 @@ HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_P
 {
     NANOCLR_HEADER();
 
-    CLR_RT_HeapBlock *pPioBlock;
-    int block, sm;
+    PioSmContext ctx{};
 
-    CLR_RT_HeapBlock *pThis = stack.This();
-    VALIDATE_NOT_DISPOSED(pThis);
+    NANOCLR_PIO_SM_TEARDOWN_PROLOGUE(ctx);
 
-    pPioBlock = pThis[FIELD___block].Dereference();
-    FAULT_ON_NULL(pPioBlock);
-
-    block =
-        pPioBlock[Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioBlock::FIELD___index]
-            .NumericByRef()
-            .s4;
-    sm = pPioBlock[FIELD___sm].NumericByRef().s4;
-
-    VALIDATE_PIO_BLOCK(block);
-    VALIDATE_SM(sm);
-
-    __rp_pio_blocks[block].pio->CTRL &= ~(1u << sm);
-
-    if (g_AllocatedSMs[block][sm] != nullptr)
-    {
-        pioSmFree(g_AllocatedSMs[block][sm]);
-        g_AllocatedSMs[block][sm] = nullptr;
-    }
+    pioSmDisableX(ctx.smp);
+    PioDmaReleaseSm(ctx.block, ctx.sm);
+    pioSmFree(ctx.smp);
+    g_AllocatedSMs[ctx.block][ctx.sm] = nullptr;
 
     NANOCLR_NOCLEANUP();
 }
@@ -406,67 +533,34 @@ HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_P
 {
     NANOCLR_HEADER();
 
-    PIO_TypeDef *pio;
-    CLR_RT_HeapBlock *pPioBlock;
-    int pin, remaining, gpioBase;
-    int block, sm, basePin, count, output;
-    unsigned int savedPinCtrl;
+    PioSmContext ctx{};
+    int basePin, count, gpioBase;
+    bool output;
 
-    CLR_RT_HeapBlock *pThis = stack.This();
-    VALIDATE_NOT_DISPOSED(pThis);
+    NANOCLR_PIO_SM_PROLOGUE(ctx);
 
     basePin = stack.Arg1().NumericByRef().s4;
     count = stack.Arg2().NumericByRef().s4;
-    output = stack.Arg3().NumericByRef().u1;
+    output = stack.Arg3().NumericByRef().u1 != 0;
 
-    pPioBlock = pThis[FIELD___block].Dereference();
-    FAULT_ON_NULL(pPioBlock);
-
-    block =
-        pPioBlock[Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioBlock::FIELD___index]
-            .NumericByRef()
-            .s4;
-    sm = pPioBlock[FIELD___sm].NumericByRef().s4;
-
-    VALIDATE_PIO_BLOCK(block);
-    VALIDATE_SM(sm);
-
-    pio = __rp_pio_blocks[block].pio;
+    if (count == 0)
+    {
+        NANOCLR_SET_AND_LEAVE(S_OK);
+    }
 
 #if defined(RP2350)
-    gpioBase = static_cast<int>(pio->GPIOBASE);
+    gpioBase = static_cast<int>(ctx.smp->block->pio->GPIOBASE);
 #else
     gpioBase = 0;
 #endif
 
-    // SET_BASE is 5-bit, relative to the SM's GPIO base, so reject pins outside the 32-pin window
     if (basePin < 0 || basePin > PIO_MAX_PIN || count < 0 || count > 32 || (basePin + count) > (PIO_MAX_PIN + 1) ||
         basePin < gpioBase || (basePin - gpioBase + count) > 32)
     {
         NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
     }
 
-    // up to 5 pins per "SET pindirs" exec, then restore PINCTRL
-    pin = basePin;
-    remaining = count;
-    savedPinCtrl = pio->SM[sm].PINCTRL;
-
-    while (remaining > 0)
-    {
-        const int chunk = remaining < 5 ? remaining : 5;
-        const unsigned int dirs = output ? ((1u << chunk) - 1u) : 0u;
-
-        // PINCTRL: SET_COUNT [28:26], SET_BASE [9:5]
-        pio->SM[sm].PINCTRL =
-            (static_cast<unsigned int>(chunk) << 26) | ((static_cast<unsigned int>(pin - gpioBase) & 0x1Fu) << 5);
-        // SET pindirs, dirs
-        pio->SM[sm].INSTR = 0xE000u | (4u << 5) | (dirs & 0x1Fu);
-
-        remaining -= chunk;
-        pin += chunk;
-    }
-
-    pio->SM[sm].PINCTRL = savedPinCtrl;
+    pioSmSetConsecutivePindirsX(ctx.smp, static_cast<uint32_t>(basePin), static_cast<uint32_t>(count), output);
 
     NANOCLR_NOCLEANUP();
 }
@@ -476,32 +570,11 @@ HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_P
 {
     NANOCLR_HEADER();
 
-    PIO_TypeDef *pio;
-    CLR_RT_HeapBlock *pPioBlock;
-    unsigned int fjoinRx;
-    int block, sm;
+    PioSmContext ctx{};
 
-    CLR_RT_HeapBlock *pThis = stack.This();
-    VALIDATE_NOT_DISPOSED(pThis);
+    NANOCLR_PIO_SM_PROLOGUE(ctx);
 
-    pPioBlock = pThis[FIELD___block].Dereference();
-    FAULT_ON_NULL(pPioBlock);
-
-    block =
-        pPioBlock[Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioBlock::FIELD___index]
-            .NumericByRef()
-            .s4;
-    sm = pPioBlock[FIELD___sm].NumericByRef().s4;
-
-    VALIDATE_PIO_BLOCK(block);
-    VALIDATE_SM(sm);
-
-    pio = __rp_pio_blocks[block].pio;
-
-    // toggle FJOIN_RX (bit 31) twice to flush both FIFOs, SHIFTCTRL unchanged
-    fjoinRx = (1u << 31);
-    pio->SM[sm].SHIFTCTRL ^= fjoinRx;
-    pio->SM[sm].SHIFTCTRL ^= fjoinRx;
+    pioSmClearFifosX(ctx.smp);
 
     NANOCLR_NOCLEANUP();
 }
@@ -511,38 +584,11 @@ HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_P
 {
     NANOCLR_HEADER();
 
-    PIO_TypeDef *pio;
-    CLR_RT_HeapBlock *pPioBlock;
-    unsigned int autopull, instr, guard;
-    int block, sm;
+    PioSmContext ctx{};
 
-    CLR_RT_HeapBlock *pThis = stack.This();
-    VALIDATE_NOT_DISPOSED(pThis);
+    NANOCLR_PIO_SM_PROLOGUE(ctx);
 
-    pPioBlock = pThis[FIELD___block].Dereference();
-    FAULT_ON_NULL(pPioBlock);
-
-    block =
-        pPioBlock[Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioBlock::FIELD___index]
-            .NumericByRef()
-            .s4;
-    sm = pPioBlock[FIELD___sm].NumericByRef().s4;
-
-    VALIDATE_PIO_BLOCK(block);
-    VALIDATE_SM(sm);
-
-    pio = __rp_pio_blocks[block].pio;
-
-    // exec OUT NULL,32 (autopull) or PULL noblock until TX empty. FSTAT TX_EMPTY = bits [27:24]
-    autopull = pio->SM[sm].SHIFTCTRL & (1u << 17);
-    instr = autopull ? 0x6060u : 0x8000u;
-    guard = PIO_FIFO_WAIT_LIMIT;
-
-    while ((pio->FSTAT & (1u << (24 + sm))) == 0 && --guard)
-    {
-        pio->SM[sm].INSTR = instr;
-    }
-    if (guard == 0)
+    if (!NfPioSmDrainTxFifo(ctx.smp, NF_PICO_PIO_DRAIN_LIMIT))
     {
         NANOCLR_SET_AND_LEAVE(CLR_E_TIMEOUT);
     }
@@ -555,29 +601,11 @@ HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_P
 {
     NANOCLR_HEADER();
 
-    PIO_TypeDef *pio;
-    CLR_RT_HeapBlock *pPioBlock;
-    int block, sm;
+    PioSmContext ctx{};
 
-    CLR_RT_HeapBlock *pThis = stack.This();
-    VALIDATE_NOT_DISPOSED(pThis);
+    NANOCLR_PIO_SM_PROLOGUE(ctx);
 
-    pPioBlock = pThis[FIELD___block].Dereference();
-    FAULT_ON_NULL(pPioBlock);
-
-    block =
-        pPioBlock[Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioBlock::FIELD___index]
-            .NumericByRef()
-            .s4;
-    sm = pPioBlock[FIELD___sm].NumericByRef().s4;
-
-    VALIDATE_PIO_BLOCK(block);
-    VALIDATE_SM(sm);
-
-    pio = __rp_pio_blocks[block].pio;
-
-    // SM_RESTART = bits [7:4]
-    pio->CTRL |= (1u << (4 + sm));
+    pioSmRestartX(ctx.smp);
 
     NANOCLR_NOCLEANUP();
 }
@@ -587,30 +615,11 @@ HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_P
 {
     NANOCLR_HEADER();
 
-    PIO_TypeDef *pio;
-    CLR_RT_HeapBlock *pPioBlock;
-    int block;
-    int sm;
+    PioSmContext ctx{};
 
-    CLR_RT_HeapBlock *pThis = stack.This();
-    VALIDATE_NOT_DISPOSED(pThis);
+    NANOCLR_PIO_SM_PROLOGUE(ctx);
 
-    pPioBlock = pThis[FIELD___block].Dereference();
-    FAULT_ON_NULL(pPioBlock);
-
-    block =
-        pPioBlock[Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioBlock::FIELD___index]
-            .NumericByRef()
-            .s4;
-    sm = pPioBlock[FIELD___sm].NumericByRef().s4;
-
-    VALIDATE_PIO_BLOCK(block);
-    VALIDATE_SM(sm);
-
-    pio = __rp_pio_blocks[block].pio;
-
-    // CLKDIV_RESTART = bits [11:8]
-    pio->CTRL |= (1u << (8 + sm));
+    pioSmClkdivRestartX(ctx.smp);
 
     NANOCLR_NOCLEANUP();
 }
@@ -620,33 +629,11 @@ HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_P
 {
     NANOCLR_HEADER();
 
-    PIO_TypeDef *pio;
-    CLR_RT_HeapBlock *pPioBlock;
-    int block;
-    int sm;
-    unsigned short instruction;
+    PioSmContext ctx{};
 
-    CLR_RT_HeapBlock *pThis = stack.This();
-    VALIDATE_NOT_DISPOSED(pThis);
+    NANOCLR_PIO_SM_PROLOGUE(ctx);
 
-    instruction = stack.Arg1().NumericByRef().u2;
-
-    pPioBlock = pThis[FIELD___block].Dereference();
-    FAULT_ON_NULL(pPioBlock);
-
-    block =
-        pPioBlock[Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioBlock::FIELD___index]
-            .NumericByRef()
-            .s4;
-    sm = pPioBlock[FIELD___sm].NumericByRef().s4;
-
-    VALIDATE_PIO_BLOCK(block);
-    VALIDATE_SM(sm);
-
-    pio = __rp_pio_blocks[block].pio;
-
-    // exec out of band, PC unchanged
-    pio->SM[sm].INSTR = static_cast<unsigned int>(instruction);
+    pioSmExecX(ctx.smp, stack.Arg1().NumericByRef().u2);
 
     NANOCLR_NOCLEANUP();
 }
@@ -656,28 +643,11 @@ HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_P
 {
     NANOCLR_HEADER();
 
-    const PIO_TypeDef *pio;
-    CLR_RT_HeapBlock *pPioBlock;
-    int block, sm;
+    PioSmContext ctx{};
 
-    CLR_RT_HeapBlock *pThis = stack.This();
-    VALIDATE_NOT_DISPOSED(pThis);
+    NANOCLR_PIO_SM_PROLOGUE(ctx);
 
-    pPioBlock = pThis[FIELD___block].Dereference();
-    FAULT_ON_NULL(pPioBlock);
-
-    block =
-        pPioBlock[Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioBlock::FIELD___index]
-            .NumericByRef()
-            .s4;
-    sm = pPioBlock[FIELD___sm].NumericByRef().s4;
-
-    VALIDATE_PIO_BLOCK(block);
-    VALIDATE_SM(sm);
-
-    pio = __rp_pio_blocks[block].pio;
-
-    stack.SetResult_U4((pio->FLEVEL >> (8 * sm)) & 0xFu);
+    stack.SetResult_U4(pioSmTxFifoLevelX(ctx.smp));
 
     NANOCLR_NOCLEANUP();
 }
@@ -687,28 +657,11 @@ HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_P
 {
     NANOCLR_HEADER();
 
-    const PIO_TypeDef *pio;
-    CLR_RT_HeapBlock *pPioBlock;
-    int block, sm;
+    PioSmContext ctx{};
 
-    CLR_RT_HeapBlock *pThis = stack.This();
-    VALIDATE_NOT_DISPOSED(pThis);
+    NANOCLR_PIO_SM_PROLOGUE(ctx);
 
-    pPioBlock = pThis[FIELD___block].Dereference();
-    FAULT_ON_NULL(pPioBlock);
-
-    block =
-        pPioBlock[Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioBlock::FIELD___index]
-            .NumericByRef()
-            .s4;
-    sm = pPioBlock[FIELD___sm].NumericByRef().s4;
-
-    VALIDATE_PIO_BLOCK(block);
-    VALIDATE_SM(sm);
-
-    pio = __rp_pio_blocks[block].pio;
-
-    stack.SetResult_U4((pio->FLEVEL >> (8 * sm + 4)) & 0xFu);
+    stack.SetResult_U4(pioSmRxFifoLevelX(ctx.smp));
 
     NANOCLR_NOCLEANUP();
 }
@@ -718,28 +671,11 @@ HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_P
 {
     NANOCLR_HEADER();
 
-    const PIO_TypeDef *pio;
-    CLR_RT_HeapBlock *pPioBlock;
-    int block, sm;
+    PioSmContext ctx{};
 
-    CLR_RT_HeapBlock *pThis = stack.This();
-    VALIDATE_NOT_DISPOSED(pThis);
+    NANOCLR_PIO_SM_PROLOGUE(ctx);
 
-    pPioBlock = pThis[FIELD___block].Dereference();
-    FAULT_ON_NULL(pPioBlock);
-
-    block =
-        pPioBlock[Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioBlock::FIELD___index]
-            .NumericByRef()
-            .s4;
-    sm = pPioBlock[FIELD___sm].NumericByRef().s4;
-
-    VALIDATE_PIO_BLOCK(block);
-    VALIDATE_SM(sm);
-
-    pio = __rp_pio_blocks[block].pio;
-
-    stack.SetResult_U4(pio->SM[sm].ADDR & 0x1Fu);
+    stack.SetResult_U4(pioSmGetAddrX(ctx.smp) & 0x1Fu);
 
     NANOCLR_NOCLEANUP();
 }
@@ -749,27 +685,13 @@ HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_P
 {
     NANOCLR_HEADER();
 
-    PIO_TypeDef *pio;
-    CLR_RT_HeapBlock *pPioBlock;
-    int block, sm, intPart, frac;
+    PioSmContext ctx{};
+    int intPart, frac;
     float value;
 
-    CLR_RT_HeapBlock *pThis = stack.This();
-    VALIDATE_NOT_DISPOSED(pThis);
-
-    pPioBlock = pThis[FIELD___block].Dereference();
-    FAULT_ON_NULL(pPioBlock);
-
-    block =
-        pPioBlock[Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioBlock::FIELD___index]
-            .NumericByRef()
-            .s4;
-    sm = pPioBlock[FIELD___sm].NumericByRef().s4;
+    NANOCLR_PIO_SM_PROLOGUE(ctx);
 
     value = stack.Arg1().NumericByRef().r4;
-
-    VALIDATE_PIO_BLOCK(block);
-    VALIDATE_SM(sm);
 
     if (!(value >= 1.0f && value <= 65536.0f))
     {
@@ -784,12 +706,8 @@ HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_P
         intPart += 1;
     }
 
-    pio = __rp_pio_blocks[block].pio;
-
-    pio->SM[sm].CLKDIV =
-        (static_cast<unsigned int>(intPart >= 65536 ? 0 : intPart) << 16) | (static_cast<unsigned int>(frac) << 8);
-
-    pio->CTRL |= (1u << (8 + sm));
+    pioSmSetClkdivX(ctx.smp, PIO_SM_CLKDIV(intPart >= 65536 ? 0 : intPart, frac));
+    pioSmClkdivRestartX(ctx.smp);
 
     NANOCLR_NOCLEANUP();
 }
@@ -797,300 +715,11 @@ HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_P
 HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioStateMachine::
     Read___I4__SZARRAY_U4__I4__I4__I4(CLR_RT_StackFrame &stack)
 {
-    NANOCLR_HEADER();
-
-    CLR_RT_HeapBlock hbTimeout{};
-    CLR_RT_HeapBlock *pPioBlock;
-    CLR_INT64 *timeoutTicks;
-    CLR_RT_HeapBlock_Array *buffer;
-    bool eventResult = true;
-    int transferred = 0;
-    int block, sm, offset, count, timeoutMs;
-
-    PIO_TypeDef *pio;
-    PioDmaWork *work;
-
-    CLR_RT_HeapBlock *pThis = stack.This();
-    VALIDATE_NOT_DISPOSED(pThis);
-
-    buffer = stack.Arg1().DereferenceArray();
-    offset = stack.Arg2().NumericByRef().s4;
-    count = stack.Arg3().NumericByRef().s4;
-    timeoutMs = stack.Arg4().NumericByRef().s4;
-
-    pPioBlock = pThis[FIELD___block].Dereference();
-    FAULT_ON_NULL(pPioBlock);
-
-    block =
-        pPioBlock[Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioBlock::FIELD___index]
-            .NumericByRef()
-            .s4;
-    sm = pPioBlock[FIELD___sm].NumericByRef().s4;
-
-    FAULT_ON_NULL(buffer);
-
-    if (offset < 0 || count < 0 || timeoutMs < 0 || count > static_cast<int>(buffer->m_numOfElements) ||
-        offset > static_cast<int>(buffer->m_numOfElements) - count)
-    {
-        NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
-    }
-
-    if (count == 0)
-    {
-        stack.SetResult_I4(0);
-        NANOCLR_SET_AND_LEAVE(S_OK);
-    }
-
-    VALIDATE_PIO_BLOCK(block);
-    VALIDATE_SM(sm);
-
-    pio = __rp_pio_blocks[block].pio;
-    work = &g_PioDmaWork[block][sm];
-
-    hbTimeout.SetInteger(static_cast<CLR_INT64>(timeoutMs) * TIME_CONVERSION__TO_MILLISECONDS);
-    NANOCLR_CHECK_HRESULT(stack.SetupTimeoutFromTicks(hbTimeout, timeoutTicks));
-
-    // first call: validate + arm the DMA + park
-    if (stack.m_customState == 1)
-    {
-        // PIO RX DREQ is only mapped for PIO0/PIO1; PIO2 (RP2350) not wired yet
-        if (g_AllocatedSMs[block][sm] == nullptr)
-        {
-            NANOCLR_SET_AND_LEAVE(CLR_E_OBJECT_DISPOSED);
-        }
-        if (buffer == nullptr || count <= 0 || work->Channel != nullptr)
-        {
-            NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_OPERATION);
-        }
-
-        // ChibiOS-owned DMA channel + completion callback (no raw vector, no clash with the SPI DMA)
-        const rp_dma_channel_t *ch = dmaChannelAlloc(RP_DMA_CHANNEL_ID_ANY, 3, PioDmaCallback, work);
-        if (ch == nullptr)
-        {
-            NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_OPERATION);
-        }
-
-        unsigned int *buf = static_cast<unsigned int *>(platform_malloc(static_cast<size_t>(count) * 4));
-        if (buf == nullptr)
-        {
-            dmaChannelFree(ch);
-            NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
-        }
-
-        // read = SM RX FIFO (fixed), write = bounce buffer (incrementing), paced by the SM RX DREQ
-        const unsigned int dreq = (static_cast<unsigned int>(block) * 8u) + 4u + static_cast<unsigned int>(sm);
-
-        ch->channel->READ_ADDR = reinterpret_cast<size_t>(&pio->RXF[sm]);
-        ch->channel->WRITE_ADDR = reinterpret_cast<size_t>(buf);
-        ch->channel->TRANS_COUNT = static_cast<unsigned int>(count);
-        dmaChannelEnableInterruptX(ch);
-        ch->channel->CTRL_TRIG = DMA_CTRL_TRIG_EN | DMA_CTRL_TRIG_DATA_SIZE_WORD | DMA_CTRL_TRIG_INCR_WRITE |
-                                 DMA_CTRL_TRIG_TREQ_SEL(dreq) | DMA_CTRL_TRIG_CHAIN_TO(ch->chnidx);
-
-        work->Channel = ch;
-        work->Buffer = buf;
-        work->Count = static_cast<unsigned int>(count);
-
-        Events_Get(SYSTEM_EVENT_FLAG_PICOPIO);
-        stack.m_customState = 2;
-    }
-
-    // wait on the shared PICOPIO event; re-check OUR channel's busy bit each wake (shared-event safe)
-    while (work->Channel != nullptr && dmaChannelIsBusyX(work->Channel))
-    {
-        NANOCLR_CHECK_HRESULT(
-            g_CLR_RT_ExecutionEngine.WaitEvents(stack.m_owningThread, *timeoutTicks, Event_PicoPio, eventResult));
-        if (!eventResult)
-        {
-            // timed out; the finish path below aborts the channel
-            break;
-        }
-    }
-
-    if (work->Channel != nullptr)
-    {
-        const rp_dma_channel_t *ch = work->Channel;
-
-        // on timeout the channel is still busy; stop it so it can't write after we free the buffer
-        if (dmaChannelIsBusyX(ch))
-        {
-            dmaChannelDisableX(ch);
-        }
-
-        transferred = static_cast<int>(work->Count - ch->channel->TRANS_COUNT);
-        if (transferred < 0)
-        {
-            transferred = 0;
-        }
-        if (buffer != nullptr && offset >= 0 && transferred > 0 &&
-            (offset + transferred) <= static_cast<int>(buffer->m_numOfElements))
-        {
-            memcpy(
-                buffer->GetFirstElement() + static_cast<size_t>(offset) * 4,
-                work->Buffer,
-                static_cast<size_t>(transferred) * 4);
-        }
-
-        (void)dmaChannelGetAndClearInterrupts(ch);
-        dmaChannelFree(ch);
-        platform_free(work->Buffer);
-        work->Channel = nullptr;
-        work->Buffer = nullptr;
-        work->Count = 0;
-    }
-
-    // pop the timeout heap block and return the word count actually transferred
-    stack.PopValue();
-    stack.SetResult_I4(transferred);
-
-    NANOCLR_NOCLEANUP();
+    return PioDmaTransfer(stack, PioDmaRx);
 }
 
 HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioStateMachine::
     Write___I4__SZARRAY_U4__I4__I4__I4(CLR_RT_StackFrame &stack)
 {
-    NANOCLR_HEADER();
-
-    CLR_RT_HeapBlock hbTimeout{};
-    CLR_RT_HeapBlock *pPioBlock;
-    CLR_INT64 *timeoutTicks;
-    CLR_RT_HeapBlock_Array *buffer = nullptr;
-    bool eventResult = true;
-    int transferred = 0;
-    int block, sm, offset, count, timeoutMs;
-
-    PIO_TypeDef *pio;
-    PioDmaWork *work;
-
-    CLR_RT_HeapBlock *pThis = stack.This();
-    VALIDATE_NOT_DISPOSED(pThis);
-
-    buffer = stack.Arg1().DereferenceArray();
-    offset = stack.Arg2().NumericByRef().s4;
-    count = stack.Arg3().NumericByRef().s4;
-    timeoutMs = stack.Arg4().NumericByRef().s4;
-
-    pPioBlock = pThis[FIELD___block].Dereference();
-    FAULT_ON_NULL(pPioBlock);
-
-    block =
-        pPioBlock[Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioBlock::FIELD___index]
-            .NumericByRef()
-            .s4;
-    sm = pPioBlock[FIELD___sm].NumericByRef().s4;
-
-    FAULT_ON_NULL(buffer);
-
-    if (offset < 0 || count < 0 || timeoutMs < 0 || count > static_cast<int>(buffer->m_numOfElements) ||
-        offset > static_cast<int>(buffer->m_numOfElements) - count)
-    {
-        NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
-    }
-
-    if (count == 0)
-    {
-        stack.SetResult_I4(0);
-        NANOCLR_SET_AND_LEAVE(S_OK);
-    }
-
-    VALIDATE_PIO_BLOCK(block);
-    VALIDATE_SM(sm);
-
-    pio = __rp_pio_blocks[block].pio;
-    work = &g_PioDmaWorkTx[block][sm];
-
-    hbTimeout.SetInteger(static_cast<CLR_INT64>(timeoutMs) * TIME_CONVERSION__TO_MILLISECONDS);
-    NANOCLR_CHECK_HRESULT(stack.SetupTimeoutFromTicks(hbTimeout, timeoutTicks));
-
-    // first call: validate + copy out + arm the DMA + park
-    if (stack.m_customState == 1)
-    {
-        // PIO TX DREQ is only mapped for PIO0/PIO1; PIO2 (RP2350) not wired yet
-        if (g_AllocatedSMs[block][sm] == nullptr)
-        {
-            NANOCLR_SET_AND_LEAVE(CLR_E_OBJECT_DISPOSED);
-        }
-
-        if (buffer == nullptr || count <= 0 || work->Channel != nullptr || offset < 0 ||
-            (offset + count) > static_cast<int>(buffer->m_numOfElements))
-        {
-            NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_OPERATION);
-        }
-
-        // ChibiOS-owned DMA channel + completion callback (no raw vector, no clash with the SPI DMA)
-        const rp_dma_channel_t *ch = dmaChannelAlloc(RP_DMA_CHANNEL_ID_ANY, 3, PioDmaCallback, work);
-        if (ch == nullptr)
-        {
-            NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_OPERATION);
-        }
-
-        unsigned int *buf = static_cast<unsigned int *>(platform_malloc(static_cast<size_t>(count) * 4));
-        if (buf == nullptr)
-        {
-            dmaChannelFree(ch);
-            NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
-        }
-
-        // copy the words out into the bounce buffer before the DMA drains it into the TX FIFO
-        memcpy(buf, buffer->GetFirstElement() + static_cast<size_t>(offset) * 4, static_cast<size_t>(count) * 4);
-
-        // read = bounce buffer (incrementing), write = SM TX FIFO (fixed), paced by the SM TX DREQ
-        const unsigned int dreq = (static_cast<unsigned int>(block) * 8u) + static_cast<unsigned int>(sm);
-
-        ch->channel->READ_ADDR = reinterpret_cast<size_t>(buf);
-        ch->channel->WRITE_ADDR = reinterpret_cast<size_t>(&pio->TXF[sm]);
-        ch->channel->TRANS_COUNT = static_cast<unsigned int>(count);
-        dmaChannelEnableInterruptX(ch);
-        ch->channel->CTRL_TRIG = DMA_CTRL_TRIG_EN | DMA_CTRL_TRIG_DATA_SIZE_WORD | DMA_CTRL_TRIG_INCR_READ |
-                                 DMA_CTRL_TRIG_TREQ_SEL(dreq) | DMA_CTRL_TRIG_CHAIN_TO(ch->chnidx);
-
-        work->Channel = ch;
-        work->Buffer = buf;
-        work->Count = static_cast<unsigned int>(count);
-
-        Events_Get(SYSTEM_EVENT_FLAG_PICOPIO);
-        stack.m_customState = 2;
-    }
-
-    // wait on the shared PICOPIO event; re-check OUR channel's busy bit each wake (shared-event safe)
-    while (work->Channel != nullptr && dmaChannelIsBusyX(work->Channel))
-    {
-        NANOCLR_CHECK_HRESULT(
-            g_CLR_RT_ExecutionEngine.WaitEvents(stack.m_owningThread, *timeoutTicks, Event_PicoPio, eventResult));
-        if (!eventResult)
-        {
-            // timed out; the finish path below aborts the channel
-            break;
-        }
-    }
-
-    if (work->Channel != nullptr)
-    {
-        const rp_dma_channel_t *ch = work->Channel;
-
-        if (dmaChannelIsBusyX(ch))
-        {
-            dmaChannelDisableX(ch);
-        }
-
-        // data already went out to the TX FIFO -- nothing to copy back
-        transferred = static_cast<int>(work->Count - ch->channel->TRANS_COUNT);
-        if (transferred < 0)
-        {
-            transferred = 0;
-        }
-
-        (void)dmaChannelGetAndClearInterrupts(ch);
-        dmaChannelFree(ch);
-        platform_free(work->Buffer);
-        work->Channel = nullptr;
-        work->Buffer = nullptr;
-        work->Count = 0;
-    }
-
-    // pop the timeout heap block and return the word count actually transferred
-    stack.PopValue();
-    stack.SetResult_I4(transferred);
-
-    NANOCLR_NOCLEANUP();
+    return PioDmaTransfer(stack, PioDmaTx);
 }
