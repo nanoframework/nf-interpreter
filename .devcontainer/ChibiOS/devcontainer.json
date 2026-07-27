@@ -3,7 +3,7 @@
 	// Adjust this file to choose the platform you want using the prebuild containers:
 	// To do this, change the "dockerFile" to use 'Dockerfile.ChibiOS.SRC'.
 	// This will allow you to customize and build the container source and add anything you may need on top.
-	"dockerFile": "Dockerfile.ChibiOS",
+	"dockerFile": "Dockerfile.ChibiOS.SRC",
 	"context": ".",
 	"mounts": [
 		// Bind the Unix socket the Docker daemon listens on by default
