@@ -21,6 +21,13 @@ static void PioChibiOSCallback(void *param, const uint32_t flags)
     PIO_TypeDef *pio = __rp_pio_blocks[block].pio;
 
     // IRQ0_INTS bits [11:8] are the SM-raised flags, IRQ holds the same flags live
+
+    if (const uint32_t fifoFlags = flags & 0xFFu; fifoFlags != 0u)
+    {
+        NfPioBlockDisableInterrupt(&__rp_pio_blocks[block], fifoFlags);
+        Events_Set(SYSTEM_EVENT_FLAG_PICOPIO);
+    }
+
     const uint32_t smFlags = ((flags >> 8) & 0x0Fu) & pio->IRQ;
 
     if (smFlags == 0u)
@@ -68,7 +75,7 @@ HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_P
     if (program_array == nullptr || length <= 0 || length > 32 ||
         static_cast<int>(program_array->m_numOfElements) < length)
     {
-        NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+        NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_RANGE);
     }
 
     prog.instructions = reinterpret_cast<uint16_t *>(program_array->GetFirstElement());
@@ -118,7 +125,7 @@ HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_P
 
     if (offset < 0 || length <= 0 || length > 32 || offset > 32 - length)
     {
-        NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+        NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_RANGE);
     }
 
     pioProgramUnload(&__rp_pio_blocks[block], offset, length);
@@ -126,34 +133,43 @@ HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_P
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioBlock::
-    NativeClaimUnusedSm___STATIC__I4__I4__BOOLEAN(CLR_RT_StackFrame &stack)
+HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioBlock::NativeClaimSm___I4__I4(
+    CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
-    const int block = stack.Arg0().NumericByRef().s4;
-    const bool required = stack.Arg1().NumericByRef().u1;
+    int block;
+    const rp_pio_sm_t *smp;
+
+    const int wanted = stack.Arg1().NumericByRef().s4;
+
+    CLR_RT_HeapBlock *pThis = stack.This();
+    FAULT_ON_NULL(pThis);
+
+    block = pThis[FIELD___index].NumericByRef().s4;
 
     VALIDATE_PIO_BLOCK(block);
 
-    if (const rp_pio_sm_t *sm = pioSmAlloc(
-            &__rp_pio_blocks[block],
-            RP_PIO_SM_ID_ANY,
-            NF_PICO_PIO_IRQ_PRIORITY,
-            PioChibiOSCallback,
-            reinterpret_cast<void *>(static_cast<intptr_t>(block)));
-        sm == nullptr)
+    if (wanted != static_cast<int>(RP_PIO_SM_ID_ANY))
     {
-        if (required)
-            NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_OPERATION);
-        stack.SetResult_I4(-1);
+        VALIDATE_SM(wanted);
     }
-    else
-    {
-        g_AllocatedSMs[block][sm->smidx] = sm;
 
-        stack.SetResult_I4(static_cast<CLR_INT32>(sm->smidx));
+    smp = pioSmAlloc(
+        &__rp_pio_blocks[block],
+        static_cast<uint32_t>(wanted),
+        NF_PICO_PIO_IRQ_PRIORITY,
+        PioChibiOSCallback,
+        reinterpret_cast<void *>(static_cast<intptr_t>(block)));
+
+    if (smp == nullptr)
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_OPERATION);
     }
+
+    g_AllocatedSMs[block][smp->smidx] = smp;
+
+    stack.SetResult_I4(static_cast<CLR_INT32>(smp->smidx));
 
     NANOCLR_NOCLEANUP();
 }
@@ -176,7 +192,7 @@ HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_P
 
     if (pin < 0 || pin > PIO_MAX_PIN)
     {
-        NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+        NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_RANGE);
     }
 
     NfPioBlockGpioInit(&__rp_pio_blocks[block], static_cast<uint32_t>(pin));
@@ -202,7 +218,7 @@ HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_P
 
     if (irq < 0 || irq > 7)
     {
-        NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+        NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_RANGE);
     }
 
     NfPioBlockForceIrq(&__rp_pio_blocks[block], static_cast<uint32_t>(irq));
@@ -228,7 +244,7 @@ HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_P
 
     if (irq < 0 || irq > 7)
     {
-        NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+        NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_RANGE);
     }
 
     NfPioBlockClearIrq(&__rp_pio_blocks[block], static_cast<uint32_t>(irq));

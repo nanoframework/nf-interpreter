@@ -12,8 +12,8 @@
 #include "nanoFramework_hardware_pico_native_target.h"
 #include <hal.h>
 #include <nanoHAL.h>
-#include <math.h>
-#include <string.h>
+#include <cmath>
+#include <cstring>
 
 enum PioCfgBlob
 {
@@ -57,10 +57,10 @@ static inline unsigned int PioShiftThreshold(unsigned int threshold)
     return (threshold == 0u || threshold > 32u) ? 32u : threshold;
 }
 
-enum PioDmaDir
+enum PioFifoDir
 {
-    PioDmaRx = 0,
-    PioDmaTx = 1,
+    PioFifoRx = 0,
+    PioFifoTx = 1,
 };
 
 struct PioDmaWork
@@ -118,19 +118,19 @@ static void PioDmaFinish(PioDmaWork *work)
 // Aborts and releases both directions of a state machine.
 void PioDmaReleaseSm(const int block, const int sm)
 {
-    PioDmaFinish(&g_PioDmaWork[block][sm][PioDmaRx]);
-    PioDmaFinish(&g_PioDmaWork[block][sm][PioDmaTx]);
+    PioDmaFinish(&g_PioDmaWork[block][sm][PioFifoRx]);
+    PioDmaFinish(&g_PioDmaWork[block][sm][PioFifoTx]);
 }
 
 // Arms a channel to move count words between the state machine FIFO and the bounce buffer.
 static void PioDmaArm(
     const rp_dma_channel_t *ch,
     const rp_pio_sm_t *smp,
-    const PioDmaDir dir,
+    const PioFifoDir dir,
     uint32_t *buf,
     const uint32_t count)
 {
-    if (dir == PioDmaRx)
+    if (dir == PioFifoRx)
     {
         dmaChannelSetSourceX(ch, reinterpret_cast<uint32_t>(pioSmRxFifoAddrX(smp)));
         dmaChannelSetDestinationX(ch, reinterpret_cast<uint32_t>(buf));
@@ -153,7 +153,7 @@ static void PioDmaArm(
 }
 
 // Shared body of Read and Write.
-static HRESULT PioDmaTransfer(CLR_RT_StackFrame &stack, const PioDmaDir dir)
+static HRESULT PioDmaTransfer(CLR_RT_StackFrame &stack, const PioFifoDir dir)
 {
     NANOCLR_HEADER();
 
@@ -181,7 +181,7 @@ static HRESULT PioDmaTransfer(CLR_RT_StackFrame &stack, const PioDmaDir dir)
     if (offset < 0 || count < 0 || timeoutMs < 0 || count > static_cast<int>(buffer->m_numOfElements) ||
         offset > static_cast<int>(buffer->m_numOfElements) - count)
     {
-        NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+        NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_RANGE);
     }
 
     if (count == 0)
@@ -222,7 +222,7 @@ static HRESULT PioDmaTransfer(CLR_RT_StackFrame &stack, const PioDmaDir dir)
             NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
         }
 
-        if (dir == PioDmaTx)
+        if (dir == PioFifoTx)
         {
             memcpy(
                 buf,
@@ -260,7 +260,7 @@ static HRESULT PioDmaTransfer(CLR_RT_StackFrame &stack, const PioDmaDir dir)
         dmaStatus = work->Status;
         transferred = static_cast<int>(work->Count - (remaining > work->Count ? work->Count : remaining));
 
-        if (dir == PioDmaRx && transferred > 0)
+        if (dir == PioFifoRx && transferred > 0)
         {
             memcpy(
                 buffer->GetFirstElement() + static_cast<size_t>(offset) * sizeof(uint32_t),
@@ -318,8 +318,12 @@ HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_P
 
     FAULT_ON_NULL(blobArray);
 
-    if (offset < 0 || offset >= static_cast<int>(RP_PIO_NUM_INSTR_MEM) ||
-        static_cast<int>(blobArray->m_numOfElements) < PIO_CFG_BLOB_LENGTH)
+    if (offset < 0 || offset >= static_cast<int>(RP_PIO_NUM_INSTR_MEM))
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_RANGE);
+    }
+
+    if (static_cast<int>(blobArray->m_numOfElements) < PIO_CFG_BLOB_LENGTH)
     {
         NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
     }
@@ -418,67 +422,149 @@ HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_P
     NANOCLR_NOCLEANUP();
 }
 
-template <typename TCondition> static bool PioSpinWhile(TCondition blocked)
+static inline bool PioFifoBlocked(const rp_pio_sm_t *smp, const PioFifoDir dir)
 {
-    unsigned int spins = NF_PICO_PIO_FIFO_SPIN_LIMIT;
-    unsigned int sleeps = NF_PICO_PIO_FIFO_TIMEOUT_MS;
-
-    while (blocked())
-    {
-        if (spins > 0u)
-        {
-            spins--;
-            continue;
-        }
-
-        if (sleeps-- == 0u)
-        {
-            return false;
-        }
-
-        osalThreadSleepMilliseconds(1);
-    }
-
-    return true;
+    return (dir == PioFifoTx) ? pioSmIsTxFullX(smp) : pioSmIsRxEmptyX(smp);
 }
 
-HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioStateMachine::
-    NativePutBlocking___VOID__U4(CLR_RT_StackFrame &stack)
+static HRESULT PioFifoTransfer(CLR_RT_StackFrame &stack, const PioFifoDir dir)
 {
     NANOCLR_HEADER();
 
     PioSmContext ctx{};
-    unsigned int value;
+    CLR_RT_HeapBlock hbTimeout{};
+    CLR_INT64 *timeoutTicks;
+    const rp_pio_block_t *blockp = nullptr;
+    uint32_t inteMask = 0;
+    bool eventResult = true;
+    bool timeoutPushed = false;
+    bool interruptEnabled = false;
+    bool blocked;
 
     NANOCLR_PIO_SM_PROLOGUE(ctx);
 
-    value = stack.Arg2().NumericByRef().u4;
+    blockp = &__rp_pio_blocks[ctx.block];
+    inteMask = (dir == PioFifoTx) ? PIO_IRQ_TXNFULL(ctx.sm) : PIO_IRQ_RXNEMPTY(ctx.sm);
 
-    if (!PioSpinWhile([&ctx] { return pioSmIsTxFullX(ctx.smp); }))
+    hbTimeout.SetInteger(static_cast<CLR_INT64>(NF_PICO_PIO_FIFO_TIMEOUT_MS) * TIME_CONVERSION__TO_MILLISECONDS);
+    NANOCLR_CHECK_HRESULT(stack.SetupTimeoutFromTicks(hbTimeout, timeoutTicks));
+    timeoutPushed = true;
+
+    if (stack.m_customState == 1)
+    {
+        Events_Get(SYSTEM_EVENT_FLAG_PICOPIO);
+        stack.m_customState = 2;
+    }
+
+    while (PioFifoBlocked(ctx.smp, dir))
+    {
+        NfPioBlockEnableInterrupt(blockp, inteMask);
+        interruptEnabled = true;
+
+        NANOCLR_CHECK_HRESULT(
+            g_CLR_RT_ExecutionEngine.WaitEvents(stack.m_owningThread, *timeoutTicks, Event_PicoPio, eventResult));
+
+        if (!eventResult)
+        {
+            break;
+        }
+    }
+
+    NfPioBlockDisableInterrupt(blockp, inteMask);
+    interruptEnabled = false;
+
+    blocked = PioFifoBlocked(ctx.smp, dir);
+
+    stack.PopValue();
+    timeoutPushed = false;
+
+    if (blocked)
     {
         NANOCLR_SET_AND_LEAVE(CLR_E_TIMEOUT);
     }
 
-    pioSmPutX(ctx.smp, value);
+    if (dir == PioFifoTx)
+    {
+        pioSmPutX(ctx.smp, stack.Arg1().NumericByRef().u4);
+    }
+    else
+    {
+        stack.SetResult_U4(pioSmGetX(ctx.smp));
+    }
+
+    NANOCLR_CLEANUP();
+
+    if (hr != CLR_E_THREAD_WAITING)
+    {
+        if (interruptEnabled)
+        {
+            NfPioBlockDisableInterrupt(blockp, inteMask);
+        }
+
+        if (timeoutPushed)
+        {
+            stack.PopValue();
+        }
+    }
+
+    NANOCLR_CLEANUP_END();
+}
+
+HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioStateMachine::Put___VOID__U4(
+    CLR_RT_StackFrame &stack)
+{
+    return PioFifoTransfer(stack, PioFifoTx);
+}
+
+HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioStateMachine::Get___U4(
+    CLR_RT_StackFrame &stack)
+{
+    return PioFifoTransfer(stack, PioFifoRx);
+}
+
+HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioStateMachine::
+    TryPut___BOOLEAN__U4(CLR_RT_StackFrame &stack)
+{
+    NANOCLR_HEADER();
+
+    PioSmContext ctx{};
+
+    NANOCLR_PIO_SM_PROLOGUE(ctx);
+
+    if (pioSmIsTxFullX(ctx.smp))
+    {
+        stack.SetResult_Boolean(false);
+        NANOCLR_SET_AND_LEAVE(S_OK);
+    }
+
+    pioSmPutX(ctx.smp, stack.Arg1().NumericByRef().u4);
+    stack.SetResult_Boolean(true);
 
     NANOCLR_NOCLEANUP();
 }
 
 HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioStateMachine::
-    NativeGetBlocking___U4(CLR_RT_StackFrame &stack)
+    TryGet___BOOLEAN__BYREF_U4(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
     PioSmContext ctx{};
+    CLR_RT_HeapBlock *value;
 
     NANOCLR_PIO_SM_PROLOGUE(ctx);
 
-    if (!PioSpinWhile([&ctx] { return pioSmIsRxEmptyX(ctx.smp); }))
+    value = stack.Arg1().Dereference();
+    FAULT_ON_NULL(value);
+
+    if (pioSmIsRxEmptyX(ctx.smp))
     {
-        NANOCLR_SET_AND_LEAVE(CLR_E_TIMEOUT);
+        value->NumericByRef().u4 = 0;
+        stack.SetResult_Boolean(false);
+        NANOCLR_SET_AND_LEAVE(S_OK);
     }
 
-    stack.SetResult_U4(pioSmGetX(ctx.smp));
+    value->NumericByRef().u4 = pioSmGetX(ctx.smp);
+    stack.SetResult_Boolean(true);
 
     NANOCLR_NOCLEANUP();
 }
@@ -557,7 +643,7 @@ HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_P
     if (basePin < 0 || basePin > PIO_MAX_PIN || count < 0 || count > 32 || (basePin + count) > (PIO_MAX_PIN + 1) ||
         basePin < gpioBase || (basePin - gpioBase + count) > 32)
     {
-        NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+        NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_RANGE);
     }
 
     pioSmSetConsecutivePindirsX(ctx.smp, static_cast<uint32_t>(basePin), static_cast<uint32_t>(count), output);
@@ -695,7 +781,7 @@ HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_P
 
     if (!(value >= 1.0f && value <= 65536.0f))
     {
-        NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+        NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_RANGE);
     }
 
     intPart = static_cast<int>(value);
@@ -715,11 +801,11 @@ HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_P
 HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioStateMachine::
     Read___I4__SZARRAY_U4__I4__I4__I4(CLR_RT_StackFrame &stack)
 {
-    return PioDmaTransfer(stack, PioDmaRx);
+    return PioDmaTransfer(stack, PioFifoRx);
 }
 
 HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioStateMachine::
     Write___I4__SZARRAY_U4__I4__I4__I4(CLR_RT_StackFrame &stack)
 {
-    return PioDmaTransfer(stack, PioDmaTx);
+    return PioDmaTransfer(stack, PioFifoTx);
 }
