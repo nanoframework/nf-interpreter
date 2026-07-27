@@ -37,6 +37,15 @@ foreach(SRC_FILE ${nanoFramework.Hardware.Pico_SRCS})
 
     list(APPEND nanoFramework.Hardware.Pico_SOURCES ${nanoFramework.Hardware.Pico_SRC_FILE})
 
+    # Debug-only: compile every native source of the Pico binding at -O0 so gdb can inspect
+    # locals/arguments across the whole binding. The rest of the firmware stays at -Og (see
+    # nf_set_optimization_options), which otherwise makes gdb report "value has been optimized
+    # out" for locals in these files. Scoped to just this folder (Option C) to keep the rest of
+    # the image at -Og and avoid overflowing flash. See docs/CLION_GDB.md §8.
+    set_source_files_properties(
+        ${nanoFramework.Hardware.Pico_SRC_FILE}
+        PROPERTIES COMPILE_OPTIONS "$<$<CONFIG:Debug>:-O0>")
+
 endforeach()
 
 
