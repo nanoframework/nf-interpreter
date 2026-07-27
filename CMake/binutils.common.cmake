@@ -237,6 +237,12 @@ macro(nf_add_common_sources)
             ${Graphics_Sources}
         )
 
+        # include storage operation support, if feature is enabled
+        if(NF_FEATURE_HAS_ACCESSIBLE_STORAGE)
+            target_sources(${NFACS_TARGET}.elf PUBLIC
+                ${CMAKE_SOURCE_DIR}/src/HAL/nanoHAL_StorageOperation.cpp)
+        endif()
+
     endif()
 
 endmacro()
