@@ -113,7 +113,7 @@ RUN groupadd --gid $USER_GID $USERNAME \
     && chmod 0440 /etc/sudoers.d/$USERNAME \
     && apt-get clean -y \
     && rm -rf /var/lib/apt/lists/* \
-    && chmod -R a+rX /sources /usr/local/bin
+    && chmod -R a+rwX /sources /usr/local/bin /usr/bin/cmake
 
 # Switch back to dialog for any ad-hoc use of apt-get
 ENV DEBIAN_FRONTEND=dialog
