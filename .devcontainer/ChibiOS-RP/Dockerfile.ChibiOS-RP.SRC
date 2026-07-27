@@ -108,7 +108,13 @@ ENV DOTNET_ROOT=/usr/share/dotnet
 
 # Create the non-root user and open up read/execute access to the toolchains
 # and repositories that were downloaded/cloned as root above.
-RUN groupadd --gid $USER_GID $USERNAME \
+# Recent Ubuntu base images already ship a default non-root user/group at
+# UID/GID 1000 (e.g. "ubuntu"), which would otherwise collide with the
+# groupadd/useradd below. Remove any existing user/group holding our target
+# UID/GID first so this works regardless of what the base image ships.
+RUN (getent passwd $USER_UID > /dev/null && userdel -r $(getent passwd $USER_UID | cut -d: -f1) || true) \
+    && (getent group $USER_GID > /dev/null && groupdel $(getent group $USER_GID | cut -d: -f1) || true) \
+    && groupadd --gid $USER_GID $USERNAME \
     && useradd --uid $USER_UID --gid $USER_GID -m -s /bin/bash $USERNAME \
     && apt-get update \
     && apt-get install -y --no-install-recommends sudo \

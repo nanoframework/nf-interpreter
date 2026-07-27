@@ -60,6 +60,7 @@ prebuilt image tag that predates the fix do **not** have a `vscode` user.
 2. **If rebuilding still fails**, the prebuilt image itself doesn't have the `vscode` user yet.
    Remove the stale container and any locally cached image built from it, then either wait for
    an updated prebuilt image or build from source locally as a workaround:
+
    ```bash
    # Find containers for this workspace/devcontainer config
    docker ps -a --filter label=devcontainer.local_folder=<path-to-your-workspace>
@@ -71,6 +72,7 @@ prebuilt image tag that predates the fix do **not** have a `vscode` user.
    docker images --filter reference='vsc-nf-interpreter-*'
    docker rmi <image-id>
    ```
+
    Then reopen the folder in a container (or run `Dev Containers: Rebuild Container` again).
 3. **Workaround to unblock immediately**: edit the platform's `devcontainer.json` and change
    `"dockerFile": "Dockerfile.<platform>"` to `"dockerFile": "Dockerfile.<platform>.SRC"`. This
@@ -80,9 +82,11 @@ prebuilt image tag that predates the fix do **not** have a `vscode` user.
 4. **Clean up root-owned files left over from before the fix.** If you built or ran the
    container as `root` before this change, files/directories such as `build/` or `sdkconfig`
    in the bind-mounted workspace may still be owned by `root` on the host. Fix them once with:
+
    ```bash
    sudo chown -R "$USER":"$USER" .
    ```
+   
    or simply delete the affected build directories and let the build regenerate them.
 
 ## Building and releasing Docker images in a fork
