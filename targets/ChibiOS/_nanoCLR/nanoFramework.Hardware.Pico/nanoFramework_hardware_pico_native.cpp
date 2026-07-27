@@ -8,6 +8,9 @@
 // clang-format off
 static const CLR_RT_MethodHandler method_lookup[] =
 {
+    Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_Pio::get_MinIndex___STATIC__I4,
+    Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_Pio::get_BlockCount___STATIC__I4,
+    Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_Pio::get_MaxPin___STATIC__I4,
     NULL,
     NULL,
     NULL,
@@ -76,7 +79,6 @@ static const CLR_RT_MethodHandler method_lookup[] =
     Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioBlock::AddProgram___U4__nanoFrameworkHardwarePicoPioPioProgram,
     Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioBlock::RemoveProgram___VOID__nanoFrameworkHardwarePicoPioPioProgram__U4,
     NULL,
-    NULL,
     Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioBlock::InitGpio___VOID__I4,
     NULL,
     Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioBlock::ForceIrq___VOID__I4,
@@ -84,8 +86,8 @@ static const CLR_RT_MethodHandler method_lookup[] =
     NULL,
     NULL,
     NULL,
+    Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioBlock::NativeClaimSm___I4__I4,
     Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioBlock::NativeSetIrqEnabled___VOID__BOOLEAN,
-    Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioBlock::NativeClaimUnusedSm___STATIC__I4__I4__BOOLEAN,
     NULL,
     NULL,
     NULL,
@@ -182,10 +184,10 @@ static const CLR_RT_MethodHandler method_lookup[] =
     Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioStateMachine::get_RxLevel___U4,
     Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioStateMachine::get_ProgramCounter___U4,
     Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioStateMachine::set_ClockDivisor___VOID__R4,
-    NULL,
-    NULL,
-    NULL,
-    NULL,
+    Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioStateMachine::Put___VOID__U4,
+    Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioStateMachine::Get___U4,
+    Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioStateMachine::TryPut___BOOLEAN__U4,
+    Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioStateMachine::TryGet___BOOLEAN__BYREF_U4,
     Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioStateMachine::ClearFifos___VOID,
     Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioStateMachine::DrainTxFifo___VOID,
     Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioStateMachine::Restart___VOID,
@@ -196,8 +198,6 @@ static const CLR_RT_MethodHandler method_lookup[] =
     Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioStateMachine::Read___I4__SZARRAY_U4__I4__I4__I4,
     Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioStateMachine::Write___I4__SZARRAY_U4__I4__I4__I4,
     Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioStateMachine::NativeInit___VOID__I4__SZARRAY_U4,
-    Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioStateMachine::NativePutBlocking___VOID__U4,
-    Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioStateMachine::NativeGetBlocking___U4,
     Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioStateMachine::NativeUnclaim___VOID,
     NULL,
     NULL,
@@ -223,7 +223,7 @@ static const CLR_RT_MethodHandler method_lookup[] =
 const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_nanoFramework_Hardware_Pico =
 {
     "nanoFramework.Hardware.Pico",
-    0xB0752CBB,
+    0xD0D5FFA7,
     method_lookup,
     { 1, 0, 0, 0 }
 };

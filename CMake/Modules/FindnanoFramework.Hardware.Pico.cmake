@@ -16,6 +16,7 @@ list(APPEND nanoFramework.Hardware.Pico_INCLUDE_DIRS "${BASE_PATH_FOR_THIS_MODUL
 set(nanoFramework.Hardware.Pico_SRCS
 
     nanoFramework_hardware_pico_native.cpp
+    nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_Pio.cpp
     nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioBlock.cpp
     nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioStateMachine.cpp
 )

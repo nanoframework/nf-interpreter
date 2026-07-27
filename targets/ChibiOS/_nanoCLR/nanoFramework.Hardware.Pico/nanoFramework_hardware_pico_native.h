@@ -68,6 +68,15 @@ typedef enum __nfpack PioMovStatusSel
     PioMovStatusSel_RxLevel = 1,
 } PioMovStatusSel;
 
+typedef enum __nfpack PioStateMachineIndex
+{
+    PioStateMachineIndex_Sm0 = 0,
+    PioStateMachineIndex_Sm1 = 1,
+    PioStateMachineIndex_Sm2 = 2,
+    PioStateMachineIndex_Sm3 = 3,
+    PioStateMachineIndex_Any = 4,
+} PioStateMachineIndex;
+
 typedef enum __nfpack PioVersion
 {
     PioVersion_Rp2040 = 0,
@@ -102,27 +111,46 @@ struct Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pi
 {
     static const int FIELD_STATIC___blocks = 0;
     static const int FIELD_STATIC___lock = 1;
+
+    NANOCLR_NATIVE_DECLARE(get_MinIndex___STATIC__I4);
+    NANOCLR_NATIVE_DECLARE(get_BlockCount___STATIC__I4);
+    NANOCLR_NATIVE_DECLARE(get_MaxPin___STATIC__I4);
+
+    //--//
 };
 
 struct Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioAssemblerOptions
 {
+    // renamed backing field '<Version>k__BackingField'
     static const int FIELD__Version = 1;
+    // renamed backing field '<SideSetCount>k__BackingField'
     static const int FIELD__SideSetCount = 2;
+    // renamed backing field '<SideSetOption>k__BackingField'
     static const int FIELD__SideSetOption = 3;
+    // renamed backing field '<SideSetPinDirs>k__BackingField'
     static const int FIELD__SideSetPinDirs = 4;
+
+    //--//
 };
 
 struct Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioInstructionRef
 {
     static const int FIELD___owner = 1;
     static const int FIELD___index = 2;
+
+    //--//
 };
 
 struct Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioLabel
 {
+    // renamed backing field '<Id>k__BackingField'
     static const int FIELD__Id = 1;
+    // renamed backing field '<Owner>k__BackingField'
     static const int FIELD__Owner = 2;
+    // renamed backing field '<Address>k__BackingField'
     static const int FIELD__Address = 3;
+
+    //--//
 };
 
 struct Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioAssembler
@@ -147,11 +175,14 @@ struct Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pi
     static const int FIELD___inShiftDir = 18;
     static const int FIELD___autoPush = 19;
     static const int FIELD___pushThreshold = 20;
+
+    //--//
 };
 
 struct Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioBlock
 {
     static const int FIELD_STATIC__s_eventListener = 2;
+
     static const int FIELD___index = 1;
     static const int FIELD___interruptCallbacks = 2;
     static const int FIELD___irqLock = 3;
@@ -161,53 +192,88 @@ struct Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pi
     NANOCLR_NATIVE_DECLARE(InitGpio___VOID__I4);
     NANOCLR_NATIVE_DECLARE(ForceIrq___VOID__I4);
     NANOCLR_NATIVE_DECLARE(ClearIrq___VOID__I4);
+    NANOCLR_NATIVE_DECLARE(NativeClaimSm___I4__I4);
     NANOCLR_NATIVE_DECLARE(NativeSetIrqEnabled___VOID__BOOLEAN);
-    NANOCLR_NATIVE_DECLARE(NativeClaimUnusedSm___STATIC__I4__I4__BOOLEAN);
+
+    //--//
 };
 
 struct Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioEvent
 {
     static const int FIELD__BlockIndex = 3;
     static const int FIELD__Flags = 4;
+
+    //--//
 };
 
 struct Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioEventListener
 {
     static const int FIELD___pioMap = 1;
     static const int FIELD___syncRoot = 2;
+
+    //--//
 };
 
 struct Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioProgramOptions
 {
+    // renamed backing field '<Version>k__BackingField'
     static const int FIELD__Version = 1;
+    // renamed backing field '<Origin>k__BackingField'
     static const int FIELD__Origin = 2;
+    // renamed backing field '<SideSetCount>k__BackingField'
     static const int FIELD__SideSetCount = 3;
+    // renamed backing field '<SideSetOptional>k__BackingField'
     static const int FIELD__SideSetOptional = 4;
+    // renamed backing field '<SideSetPinDirs>k__BackingField'
     static const int FIELD__SideSetPinDirs = 5;
+    // renamed backing field '<OutShiftDir>k__BackingField'
     static const int FIELD__OutShiftDir = 6;
+    // renamed backing field '<AutoPull>k__BackingField'
     static const int FIELD__AutoPull = 7;
+    // renamed backing field '<PullThreshold>k__BackingField'
     static const int FIELD__PullThreshold = 8;
+    // renamed backing field '<InShiftDir>k__BackingField'
     static const int FIELD__InShiftDir = 9;
+    // renamed backing field '<AutoPush>k__BackingField'
     static const int FIELD__AutoPush = 10;
+    // renamed backing field '<PushThreshold>k__BackingField'
     static const int FIELD__PushThreshold = 11;
+
+    //--//
 };
 
 struct Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioProgram
 {
+    // renamed backing field '<Instructions>k__BackingField'
     static const int FIELD__Instructions = 1;
+    // renamed backing field '<Wrap>k__BackingField'
     static const int FIELD__Wrap = 2;
+    // renamed backing field '<WrapTarget>k__BackingField'
     static const int FIELD__WrapTarget = 3;
+    // renamed backing field '<Origin>k__BackingField'
     static const int FIELD__Origin = 4;
+    // renamed backing field '<SideSetCount>k__BackingField'
     static const int FIELD__SideSetCount = 5;
+    // renamed backing field '<SideSetOptional>k__BackingField'
     static const int FIELD__SideSetOptional = 6;
+    // renamed backing field '<SideSetPinDirs>k__BackingField'
     static const int FIELD__SideSetPinDirs = 7;
+    // renamed backing field '<OutShiftDir>k__BackingField'
     static const int FIELD__OutShiftDir = 8;
+    // renamed backing field '<AutoPull>k__BackingField'
     static const int FIELD__AutoPull = 9;
+    // renamed backing field '<PullThreshold>k__BackingField'
     static const int FIELD__PullThreshold = 10;
+    // renamed backing field '<InShiftDir>k__BackingField'
     static const int FIELD__InShiftDir = 11;
+    // renamed backing field '<AutoPush>k__BackingField'
     static const int FIELD__AutoPush = 12;
+    // renamed backing field '<PushThreshold>k__BackingField'
     static const int FIELD__PushThreshold = 13;
+    // renamed backing field '<Version>k__BackingField'
     static const int FIELD__Version = 14;
+
+    //--//
 };
 
 struct Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioStateMachine
@@ -226,6 +292,10 @@ struct Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pi
     NANOCLR_NATIVE_DECLARE(get_RxLevel___U4);
     NANOCLR_NATIVE_DECLARE(get_ProgramCounter___U4);
     NANOCLR_NATIVE_DECLARE(set_ClockDivisor___VOID__R4);
+    NANOCLR_NATIVE_DECLARE(Put___VOID__U4);
+    NANOCLR_NATIVE_DECLARE(Get___U4);
+    NANOCLR_NATIVE_DECLARE(TryPut___BOOLEAN__U4);
+    NANOCLR_NATIVE_DECLARE(TryGet___BOOLEAN__BYREF_U4);
     NANOCLR_NATIVE_DECLARE(ClearFifos___VOID);
     NANOCLR_NATIVE_DECLARE(DrainTxFifo___VOID);
     NANOCLR_NATIVE_DECLARE(Restart___VOID);
@@ -235,9 +305,9 @@ struct Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pi
     NANOCLR_NATIVE_DECLARE(Read___I4__SZARRAY_U4__I4__I4__I4);
     NANOCLR_NATIVE_DECLARE(Write___I4__SZARRAY_U4__I4__I4__I4);
     NANOCLR_NATIVE_DECLARE(NativeInit___VOID__I4__SZARRAY_U4);
-    NANOCLR_NATIVE_DECLARE(NativePutBlocking___VOID__U4);
-    NANOCLR_NATIVE_DECLARE(NativeGetBlocking___U4);
     NANOCLR_NATIVE_DECLARE(NativeUnclaim___VOID);
+
+    //--//
 };
 
 struct Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioStateMachineConfig
@@ -271,6 +341,8 @@ struct Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pi
     static const int FIELD___outSticky = 27;
     static const int FIELD___inlineOutEn = 28;
     static const int FIELD___outEnSel = 29;
+
+    //--//
 };
 
 extern const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_nanoFramework_Hardware_Pico;
