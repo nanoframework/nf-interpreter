@@ -17,7 +17,10 @@
 #include <targetPAL.h>
 
 // need to declare the Receiver thread here
-osThreadDef(ReceiverThread, osPriorityHigh, 2048, "ReceiverThread");
+// 4096 bytes: WP_Message_Process() runs inline on this thread. Wire Protocol file
+// deployment into a folder walks HAL_StorageOperation -> FS driver CreateDirectory
+// -> lfs_mkdir, which needs significantly more stack than writing a file at the root.
+osThreadDef(ReceiverThread, osPriorityHigh, 4096, "ReceiverThread");
 // declare CLRStartup thread here
 // 8192 bytes: software TLS on Cortex-M0+ (no hardware crypto) needs ~4KB
 // for mbedTLS bignum operations, on top of the CLR interpreter stack.
