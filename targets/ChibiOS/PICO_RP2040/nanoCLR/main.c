@@ -22,7 +22,7 @@ extern void hal_lfs_mount(void);
 #endif
 
 // need to declare the Receiver thread here
-osThreadDef(ReceiverThread, osPriorityHigh, 2048, "ReceiverThread");
+osThreadDef(ReceiverThread, osPriorityHigh, 4096, "ReceiverThread");
 // declare CLRStartup thread here
 osThreadDef(CLRStartupThread, osPriorityNormal, 4096, "CLRStartupThread");
 
