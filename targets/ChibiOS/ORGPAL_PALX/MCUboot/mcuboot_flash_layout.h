@@ -14,11 +14,17 @@
 //
 //   FLASH_AREA_BOOTLOADER        (0): 0x08000000  32 kB   internal sector 0
 //   FLASH_AREA_IMAGE_0_PRIMARY   (1): 0x08010000  704 kB  internal sectors 2-6 (bank 1)
-//   FLASH_AREA_IMAGE_0_SECONDARY (2): W25Q512 @ 0x000000  704 kB  (11 × 64 kB)
+//   FLASH_AREA_IMAGE_0_SECONDARY (2): W25Q512 @ 0x000000  736 kB  (23 × 32 kB)
 //   FLASH_AREA_IMAGE_1_PRIMARY   (4): 0x080C0000  1280 kB internal sector 7 (bank 1) + bank 2
-//   FLASH_AREA_IMAGE_1_SECONDARY (5): W25Q512 @ 0x0B0000  1280 kB (20 × 64 kB)
+//   FLASH_AREA_IMAGE_1_SECONDARY (5): W25Q512 @ 0x0B8000  1312 kB (41 × 32 kB)
 //
 // Config block: 0x08008000, 32 kB (sector 1) — not a flash_area, managed by HAL.
+//
+// Secondary slots are sized one MCUBOOT_EXTERNAL_FLASH_SECTOR_SIZE block
+// (32 kB) larger than their primary counterpart, matching
+// CONFIG_NF_MCUBOOT_LOGICAL_SECTOR_SIZE exactly — the driver's W25Q512_Erase()
+// supports a 32 kB block-erase command (0x52) in addition to 4 kB sector
+// erase, so this hits boot_slots_compatible()'s "primary + 1 logical sector" optimum
 
 #ifndef MCUBOOT_FLASH_LAYOUT_ORGPAL_PALX_H
 #define MCUBOOT_FLASH_LAYOUT_ORGPAL_PALX_H
@@ -36,17 +42,19 @@
 #define NF_MCUBOOT_SLOT_IMG0_PRI_OFF        0x08010000U
 #define NF_MCUBOOT_SLOT_IMG0_PRI_SIZE       (704U * 1024U)
 
-// Image 0 secondary — CLR upgrade candidate on W25Q512 (11 × 64 kB = 704 kB)
+// Image 0 secondary — CLR upgrade candidate on W25Q512 (23 × 32 kB = 736 kB;
+// primary size + one 32 kB erase block, see note above)
 #define NF_MCUBOOT_SLOT_IMG0_SEC_OFF        0x000000U
-#define NF_MCUBOOT_SLOT_IMG0_SEC_SIZE       (704U * 1024U)
+#define NF_MCUBOOT_SLOT_IMG0_SEC_SIZE       (736U * 1024U)
 
 // Image 1 primary — deployment (sector 7 bank 1 + bank 2, 1280 kB)
 #define NF_MCUBOOT_SLOT_IMG1_PRI_OFF        0x080C0000U
 #define NF_MCUBOOT_SLOT_IMG1_PRI_SIZE       (1280U * 1024U)
 
-// Image 1 secondary — deployment upgrade candidate on W25Q512 (20 × 64 kB = 1280 kB)
-#define NF_MCUBOOT_SLOT_IMG1_SEC_OFF        0x0B0000U
-#define NF_MCUBOOT_SLOT_IMG1_SEC_SIZE       (1280U * 1024U)
+// Image 1 secondary — deployment upgrade candidate on W25Q512 (41 × 32 kB = 1312 kB;
+// primary size + one 32 kB erase block, see note above)
+#define NF_MCUBOOT_SLOT_IMG1_SEC_OFF        0x0B8000U
+#define NF_MCUBOOT_SLOT_IMG1_SEC_SIZE       (1312U * 1024U)
 
 // clang-format on
 
