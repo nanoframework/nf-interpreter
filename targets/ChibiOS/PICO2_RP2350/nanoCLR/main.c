@@ -22,9 +22,6 @@ extern void hal_lfs_mount(void);
 #endif
 
 // need to declare the Receiver thread here
-// 4096 bytes: WP_Message_Process() runs inline on this thread. Wire Protocol file
-// deployment into a folder walks HAL_StorageOperation -> FS driver CreateDirectory
-// -> lfs_mkdir, which needs significantly more stack than writing a file at the root.
 osThreadDef(ReceiverThread, osPriorityHigh, 4096, "ReceiverThread");
 // declare CLRStartup thread here
 osThreadDef(CLRStartupThread, osPriorityNormal, 4096, "CLRStartupThread");
