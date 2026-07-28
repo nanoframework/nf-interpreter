@@ -24,7 +24,8 @@
 
 // AT25SF641 command bytes (internal to this translation unit)
 #define READ_CMD              0x03U
-#define BLOCK_ERASE_CMD       0xD8U
+#define BLOCK32_ERASE_CMD     0x52U
+#define BLOCK64_ERASE_CMD     0xD8U
 #define SECTOR_ERASE_CMD      0x20U
 #define PAGE_PROG_CMD         0x02U
 #define WRITE_ENABLE_CMD      0x06U
@@ -86,7 +87,7 @@ bool AT25SF641_WaitReady(void)
     return true;
 }
 
-bool AT25SF641_Erase(uint32_t addr, bool large_block)
+bool AT25SF641_Erase(uint32_t addr, bool is32kBlock)
 {
     // send write enable
     dataBuffer_0[0] = WRITE_ENABLE_CMD;
@@ -97,7 +98,7 @@ bool AT25SF641_Erase(uint32_t addr, bool large_block)
     CS_UNSELECT;
 
     // send erase command with 24-bit address
-    dataBuffer_0[0] = large_block ? BLOCK_ERASE_CMD : SECTOR_ERASE_CMD;
+    dataBuffer_0[0] = is32kBlock ? BLOCK32_ERASE_CMD : SECTOR_ERASE_CMD;
     dataBuffer_0[1] = (uint8_t)(addr >> 16);
     dataBuffer_0[2] = (uint8_t)(addr >> 8);
     dataBuffer_0[3] = (uint8_t)addr;
@@ -216,10 +217,10 @@ bool AT25SF641_Init(void)
 
 bool AT25SF641_EraseChip(void)
 {
-    // erase one 64 kB block at a time to avoid watchdog expiry during long chip erases
-    for (uint32_t i = 0; i < AT25SF641_FLASH_SIZE / AT25SF641_SECTOR_SIZE; i++)
+    // erase one 32 kB block at a time to avoid watchdog expiry during long chip erases
+    for (uint32_t i = 0; i < AT25SF641_FLASH_SIZE / AT25SF641_BLOCK32_SIZE; i++)
     {
-        if (!AT25SF641_Erase(i * AT25SF641_SECTOR_SIZE, true))
+        if (!AT25SF641_Erase(i * AT25SF641_BLOCK32_SIZE, true))
         {
             return false;
         }

@@ -26,9 +26,9 @@
 // AT25SF641 geometry
 // 64 Mbits => 8 MByte
 #define AT25SF641_FLASH_SIZE     0x800000U
-// 128 sectors of 64 kBytes (block-erase unit used by MCUboot)
-#define AT25SF641_SECTOR_SIZE    0x10000U
-// 2048 subsectors of 4 kBytes (minimum erase size, used by littlefs)
+// 256 blocks of 32 kBytes (block-erase unit used by AT25SF641_EraseChip)
+#define AT25SF641_BLOCK32_SIZE   0x8000U
+// 2048 subsectors of 4 kBytes (minimum erase size, used by littlefs and MCUboot)
 #define AT25SF641_SUBSECTOR_SIZE 0x1000U
 // 32768 pages of 256 bytes (page-program unit)
 #define AT25SF641_PAGE_SIZE      0x100U
@@ -56,10 +56,10 @@ extern "C"
     bool AT25SF641_WaitReady(void);
 
     // Erase a block starting at byte offset addr.
-    // large_block=true  => 64 kB block erase   (0xD8, used by MCUboot).
-    // large_block=false => 4 kB sub-sector erase (0x20, used by littlefs).
+    // is32kBlock=true  => 32 kB block erase     (0x52, used by AT25SF641_EraseChip).
+    // is32kBlock=false => 4 kB sub-sector erase (0x20, used by littlefs and MCUboot).
     // addr must be aligned to the chosen erase unit.
-    bool AT25SF641_Erase(uint32_t addr, bool large_block);
+    bool AT25SF641_Erase(uint32_t addr, bool is32kBlock);
 
     // Read size bytes from flash at byte offset addr into buf.
     // Handles reads larger than one page by looping through the DMA buffer.
@@ -70,7 +70,7 @@ extern "C"
     // The destination region must already be erased.
     bool AT25SF641_Write(const uint8_t *buf, uint32_t addr, uint32_t size);
 
-    // Erase the entire AT25SF641 chip in 64 kB block increments.
+    // Erase the entire AT25SF641 chip in 32 kB block increments.
     // Resets the watchdog between blocks to prevent WDT expiry during long erases.
     bool AT25SF641_EraseChip(void);
 
