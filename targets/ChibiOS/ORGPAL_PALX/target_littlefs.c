@@ -31,7 +31,7 @@ int32_t hal_lfs_sync_(const struct lfs_config *c)
 // target specific implementation of hal_lfs_erase
 int32_t hal_lfs_erase_0(const struct lfs_config *c, lfs_block_t block)
 {
-    uint32_t addr = block * c->block_size;
+    uint32_t addr = LFS0_BASE_OFFSET + (block * c->block_size);
 
     if (!W25Q512_Erase(addr, false))
     {
@@ -45,7 +45,7 @@ int32_t hal_lfs_erase_0(const struct lfs_config *c, lfs_block_t block)
 // target specific implementation of hal_lfs_read
 int32_t hal_lfs_read_0(const struct lfs_config *c, lfs_block_t block, lfs_off_t off, void *buffer, lfs_size_t size)
 {
-    uint32_t addr = block * c->block_size + off;
+    uint32_t addr = LFS0_BASE_OFFSET + (block * c->block_size) + off;
 
     if (!W25Q512_Read((uint8_t *)buffer, addr, size))
     {
@@ -64,7 +64,7 @@ int32_t hal_lfs_prog_0(
     const void *buffer,
     lfs_size_t size)
 {
-    uint32_t addr = block * c->block_size + off;
+    uint32_t addr = LFS0_BASE_OFFSET + (block * c->block_size) + off;
 
     if (!W25Q512_Write((uint8_t *)buffer, addr, size))
     {
@@ -77,7 +77,7 @@ int32_t hal_lfs_prog_0(
     memset(tempBuffer, 0xBB, size);
 
     // read back and compare
-    W25Q512_Read(tempBuffer, (block * c->block_size + off), size);
+    W25Q512_Read(tempBuffer, addr, size);
     for (lfs_size_t i = 0; i < size; i++)
     {
         ASSERT(((const uint8_t *)buffer)[i] == tempBuffer[i]);
@@ -89,9 +89,21 @@ int32_t hal_lfs_prog_0(
 }
 
 // target specific implementation of chip erase
+// only erases the FS0 region (from LFS0_BASE_OFFSET onward), not the whole chip,
+// since the space before it belongs to the MCUboot secondary slots
 bool hal_lfs_erase_chip_0()
 {
-    return W25Q512_EraseChip();
+    for (uint32_t i = 0; i < LFS0_BLOCK_COUNT; i++)
+    {
+        Watchdog_Reset();
+
+        if (!W25Q512_Erase(LFS0_BASE_OFFSET + (i * W25Q512_SECTOR_SIZE), false))
+        {
+            return false;
+        }
+    }
+
+    return true;
 }
 
 int8_t target_lfs_init()

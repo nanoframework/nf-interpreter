@@ -22,7 +22,7 @@
 #ifdef LFS_SPI1
 
 #include "target_ext_flash.h"
-#include "mcuboot_flash_layout.h"
+#include <mcuboot_flash_layout.h>
 
 ////////////////////////////////
 // remapping into littlefs defines
