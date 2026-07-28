@@ -88,6 +88,3 @@ REGION_ALIAS("CLR_MANAGED_HEAP_RAM", ram0);
 REGION_ALIAS("SECTION_FOR_BOOTCLIPBOARD", bootclpbrd);
 
 INCLUDE rules.ld
-
-/* Set the RAM segment used end for threadx */
-__RAM_segment_used_end__ = 0;
