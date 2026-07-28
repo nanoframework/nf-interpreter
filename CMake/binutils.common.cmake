@@ -316,7 +316,11 @@ function(nf_generate_hex_package file1 file2 outputfilename)
 endfunction()
 
 # generates a binary file with nanoBooter + nanoCLR at the proper addresses
-# ready to be drag & drop on targets that feature DAPLink 
+# ready to be drag & drop on targets that feature DAPLink
+# NOTE: outputfilename is expected to be an absolute path (all current callers pass one built
+# from ${CMAKE_SOURCE_DIR}/build/...), so it's used as-is for BYPRODUCTS instead of being
+# re-prefixed with ${CMAKE_BINARY_DIR}, which would declare a bogus path that doesn't match
+# the file srec_cat actually writes.
 function(nf_generate_bin_package file1 file2 offset outputfilename)
 
     add_custom_command(
@@ -331,7 +335,7 @@ function(nf_generate_bin_package file1 file2 offset outputfilename)
 
         WORKING_DIRECTORY ${TOOL_SRECORD_PREFIX}
 
-        BYPRODUCTS ${CMAKE_BINARY_DIR}/${outputfilename}
+        BYPRODUCTS ${outputfilename}
 
         COMMENT "exporting hex files to one binary file" 
     )

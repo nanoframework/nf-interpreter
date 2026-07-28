@@ -9,7 +9,7 @@
 // I2C1 //
 //////////
 
-// Note on ST_B_L457EIOT01A I2C1 connects to CN1 ARDUINO connector pins 10 and 9
+// Note on ST_B_L475E_IOT01A I2C1 connects to CN1 ARDUINO connector pins 10 and 9
 
 // pin configuration for I2C1 on GPIOB AF4
 // port for I2C1_SCL is: GPIOB_8 : I2C1_SCL pin CN1_10
@@ -22,7 +22,7 @@ I2C_CONFIG_PINS(1, GPIOB, GPIOB, 8, 9, 4)
 // I2C2 //
 //////////
 
-// Note on ST_B_L457EIOT01A I2C2 connects to the following devices
+// Note on ST_B_L475E_IOT01A I2C2 connects to the following devices
 // Modules     | Description                             | SAD[6:0] + R/W | I2C write address | I2C read address
 // HTS221      | Capacitive digital sensor for           |
 //             | relative humidity and temperature       | 1011111x       | 0xBE              | 0xBF
@@ -45,7 +45,7 @@ I2C_CONFIG_PINS(2, GPIOB, GPIOB, 10, 11, 4)
 // I2C3 //
 //////////
 
-// Note on ST_B_L457EIOT01A I2C3 connects to CN4 ARDUINO connector pins 5 and 6
+// Note on ST_B_L475E_IOT01A I2C3 connects to CN4 ARDUINO connector pins 5 and 6
 
 // pin configuration for I2C3 on GPIOC AF4
 // port for I2C1_SCL is: GPIOC_0 : ADC / I2C3_SCL pin CN4_5

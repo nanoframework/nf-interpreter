@@ -23,7 +23,7 @@ const BlockRange BlockRange1[] = {
     // configuration manager files to the CMake and call ConfigurationManager_Initialize()
     // in nanoBooter so the configuration can be managed when in booter mode
     ///////////////////////////////////////////////////////////////////////////////////////
-    // 080FF800 configuration block
+    // 080FF000 configuration block
     {BlockRange_BLOCKTYPE_CONFIG, 510, 511},
     ///////////////////////////////////////////////////////////////////////////////////////
 };

@@ -36,16 +36,16 @@ if(SRECORD_TOOL_AVAILABLE)
 
     if(CMAKE_BUILD_TYPE MATCHES Debug OR CMAKE_BUILD_TYPE MATCHES RelWithDebInfo)
         nf_generate_bin_package(
-            ${CMAKE_SOURCE_DIR}/build/${NANOBOOTER_PROJECT_NAME}.bin
-            ${CMAKE_SOURCE_DIR}/build/${NANOCLR_PROJECT_NAME}.bin
+            ${CMAKE_BINARY_DIR}/${NANOBOOTER_PROJECT_NAME}.bin
+            ${CMAKE_BINARY_DIR}/${NANOCLR_PROJECT_NAME}.bin
             10000
-            ${CMAKE_SOURCE_DIR}/build/nanobooter-nanoclr.bin)
+            ${CMAKE_BINARY_DIR}/nanobooter-nanoclr.bin)
     else()
         nf_generate_bin_package(
-            ${CMAKE_SOURCE_DIR}/build/${NANOBOOTER_PROJECT_NAME}.bin
-            ${CMAKE_SOURCE_DIR}/build/${NANOCLR_PROJECT_NAME}.bin
+            ${CMAKE_BINARY_DIR}/${NANOBOOTER_PROJECT_NAME}.bin
+            ${CMAKE_BINARY_DIR}/${NANOCLR_PROJECT_NAME}.bin
             10000
-            ${CMAKE_SOURCE_DIR}/build/nanobooter-nanoclr.bin)
+            ${CMAKE_BINARY_DIR}/nanobooter-nanoclr.bin)
     endif()
 
 endif()

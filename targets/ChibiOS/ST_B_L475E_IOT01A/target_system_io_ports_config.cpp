@@ -17,8 +17,7 @@
 // port for RX pin is: GPIOD
 // TX pin: is GPIOD_8
 // RX pin: is GPIOD_9
-// GPIO alternate pin function is 7 (see "Table 12. STM32F427xx and STM32F429xx alternate function mapping" in
-// STM32F427xx and STM32F429xx datasheet)
+// GPIO alternate pin function is 7 (see "Alternate function mapping" table in the STM32L475xx datasheet)
 // UART_CONFIG_PINS(3, GPIOD, GPIOD, 8, 9, 7)
 
 // initialization for UART3
@@ -41,8 +40,8 @@
 // GPIO alternate pin function is 8
 UART_CONFIG_PINS(4, GPIOA, GPIOA, 0, 1, 8)
 
-// initialization for UART3
+// initialization for UART4
 UART_INIT(4)
 
-// un-initialization for UART3
+// un-initialization for UART4
 UART_UNINIT(4)
