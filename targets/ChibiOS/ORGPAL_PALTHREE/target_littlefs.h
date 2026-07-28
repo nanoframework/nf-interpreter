@@ -22,13 +22,19 @@
 #ifdef LFS_SPI1
 
 #include "target_ext_flash.h"
+#include "mcuboot_flash_layout.h"
 
 ////////////////////////////////
 // remapping into littlefs defines
+
+// FS0 shares the AT25SF641 chip with the MCUboot secondary slots (image 0 and
+// image 1 upgrade candidates); it must start right after them, not at offset 0.
+#define LFS0_BASE_OFFSET (NF_MCUBOOT_SLOT_IMG1_SEC_OFF + NF_MCUBOOT_SLOT_IMG1_SEC_SIZE)
+
 #define LFS0_READ_SIZE      1
 #define LFS0_PROG_SIZE      1
 #define LFS0_BLOCK_SIZE     AT25SF641_SUBSECTOR_SIZE
-#define LFS0_BLOCK_COUNT    AT25SF641_FLASH_SIZE / AT25SF641_SUBSECTOR_SIZE
+#define LFS0_BLOCK_COUNT    ((AT25SF641_FLASH_SIZE - LFS0_BASE_OFFSET) / AT25SF641_SUBSECTOR_SIZE)
 #define LFS0_BLOCK_CYCLES   100
 #define LFS0_CACHE_SIZE     AT25SF641_PAGE_SIZE
 #define LFS0_LOOKAHEAD_SIZE LFS0_BLOCK_COUNT / 8

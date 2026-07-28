@@ -56,7 +56,7 @@ int32_t hal_lfs_erase_0(const struct lfs_config *c, lfs_block_t block)
 {
     Watchdog_Reset();
 
-    uint32_t addr = block * c->block_size;
+    uint32_t addr = LFS0_BASE_OFFSET + (block * c->block_size);
 
     if (!AT25SF641_Erase(addr, false))
     {
@@ -69,7 +69,7 @@ int32_t hal_lfs_erase_0(const struct lfs_config *c, lfs_block_t block)
 // target specific implementation of hal_lfs_read
 int32_t hal_lfs_read_0(const struct lfs_config *c, lfs_block_t block, lfs_off_t off, void *buffer, lfs_size_t size)
 {
-    uint32_t addr = block * c->block_size + off;
+    uint32_t addr = LFS0_BASE_OFFSET + (block * c->block_size) + off;
 
     if (!AT25SF641_Read(buffer, addr, size))
     {
@@ -87,7 +87,7 @@ int32_t hal_lfs_prog_0(
     const void *buffer,
     lfs_size_t size)
 {
-    uint32_t addr = block * c->block_size + off;
+    uint32_t addr = LFS0_BASE_OFFSET + (block * c->block_size) + off;
 
     if (!AT25SF641_Write(buffer, addr, size))
     {
@@ -108,9 +108,21 @@ int32_t hal_lfs_prog_0(
 }
 
 // target specific implementation of chip erase
+// only erases the FS0 region (from LFS0_BASE_OFFSET onward), not the whole chip,
+// since the space before it belongs to the MCUboot secondary slots
 bool hal_lfs_erase_chip_0()
 {
-    return AT25SF641_EraseChip();
+    for (uint32_t i = 0; i < LFS0_BLOCK_COUNT; i++)
+    {
+        Watchdog_Reset();
+
+        if (!AT25SF641_Erase(LFS0_BASE_OFFSET + (i * AT25SF641_SUBSECTOR_SIZE), false))
+        {
+            return false;
+        }
+    }
+
+    return true;
 }
 
 #endif // LFS_SPI1

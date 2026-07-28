@@ -21,7 +21,7 @@ MCUboot replaces nanoBooter at the same base address. The MCUboot build uses a *
 |---|---|---|---|---|---|
 | Image 0 secondary (CLR) | `FLASH_AREA_IMAGE_0_SECONDARY` | `0x000000` | 960 kB | 240 | Upgrade candidate for Image 0; primary (928 kB) + 1 logical sector (32 kB) |
 | Image 1 secondary (deploy) | `FLASH_AREA_IMAGE_1_SECONDARY` | `0x0F0000` | 1056 kB | 264 | Upgrade candidate for Image 1; primary (1024 kB) + 1 logical sector (32 kB) |
-| LittleFS FS0 | — | `0x1F8000` | 6176 kB (≈ 6 MB) | — | Boundary moved by +64 kB (the two logical-sector bumps above). **`LFS0_BLOCK_COUNT` in `target_littlefs.h` is currently hardcoded to the whole chip (`AT25SF641_FLASH_SIZE / AT25SF641_SUBSECTOR_SIZE` = 2048) and the driver applies no base offset — LittleFS FS0 does not actually honor this boundary today; see open issue below.** |
+| LittleFS FS0 | — | `0x1F8000` | 6176 kB (≈ 6 MB) | 1544 | `LFS0_BASE_OFFSET` in `target_littlefs.h` derives this offset from `NF_MCUBOOT_SLOT_IMG1_SEC_OFF + NF_MCUBOOT_SLOT_IMG1_SEC_SIZE` in `mcuboot_flash_layout.h`, and `hal_lfs_read_0`/`hal_lfs_prog_0`/`hal_lfs_erase_0`/`hal_lfs_erase_chip_0` in `target_littlefs.c` all add it to the block address. |
 
 W25Q128 QSPI (16 MB) — unchanged, still fully allocated to LittleFS FS1.
 
