@@ -6,7 +6,7 @@
 #ifndef HAL_RTC_LLD_H
 #define HAL_RTC_LLD_H
 
-#if (HAL_USE_RTC == TRUE) || defined(__DOXYGEN__)
+#if (HAL_NF_USE_RTC == TRUE) || defined(__DOXYGEN__)
 
 /*===========================================================================*/
 /* Driver constants.                                                         */
@@ -140,6 +140,6 @@ extern "C"
 }
 #endif
 
-#endif /* HAL_USE_RTC == TRUE */
+#endif /* HAL_NF_USE_RTC == TRUE */
 
 #endif /* HAL_RTC_LLD_H */
