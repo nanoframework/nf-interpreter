@@ -15,13 +15,19 @@
 //   FLASH_AREA_BOOTLOADER        (0): 0x08000000  64 kB   internal sectors 0-1
 //   [config block]                    0x08010000  32 kB   internal sector 2 — HAL-managed, not a flash_area
 //   FLASH_AREA_IMAGE_0_PRIMARY   (1): 0x08018000  928 kB  internal sectors 3-7 (bank 1)
-//   FLASH_AREA_IMAGE_0_SECONDARY (2): SD card file /mcuboot/img0_sec.bin  928 kB
+//   FLASH_AREA_IMAGE_0_SECONDARY (2): SD card file /mcuboot/img0_sec.bin  960 kB
 //   FLASH_AREA_IMAGE_1_PRIMARY   (4): 0x08100000  1024 kB internal bank 2
-//   FLASH_AREA_IMAGE_1_SECONDARY (5): SD card file /mcuboot/img1_sec.bin  1024 kB
+//   FLASH_AREA_IMAGE_1_SECONDARY (5): SD card file /mcuboot/img1_sec.bin  1056 kB
 //
 // Secondary slots are accessed as FatFs files (virtual sector = 4 kB).
 // FatFs integration is deferred — mcuboot_ext_flash_init() currently returns -1
 // so MCUboot boots the primary slot without attempting an upgrade.
+//
+// Secondary slots are sized one logical sector (CONFIG_NF_MCUBOOT_LOGICAL_SECTOR_SIZE,
+// 32 kB) larger than their primary counterpart, as MCUBOOT_SWAP_USING_OFFSET's
+// boot_slots_compatible() treats secondary == primary + 1 logical sector as the
+// optimal distribution (the extra sector covers the swap-status trailer without
+// eating into the primary slot's own capacity).
 
 #ifndef MCUBOOT_FLASH_LAYOUT_ST_STM32F769I_DISCOVERY_H
 #define MCUBOOT_FLASH_LAYOUT_ST_STM32F769I_DISCOVERY_H
@@ -43,17 +49,19 @@
 #define NF_MCUBOOT_SLOT_IMG0_PRI_OFF        0x08018000U
 #define NF_MCUBOOT_SLOT_IMG0_PRI_SIZE       (928U * 1024U)
 
-// Image 0 secondary — CLR upgrade candidate on SD card (virtual, 928 kB)
+// Image 0 secondary — CLR upgrade candidate on SD card (virtual, 960 kB;
+// primary size + one 32 kB logical sector, see note above)
 #define NF_MCUBOOT_SLOT_IMG0_SEC_OFF        0x000000U
-#define NF_MCUBOOT_SLOT_IMG0_SEC_SIZE       (928U * 1024U)
+#define NF_MCUBOOT_SLOT_IMG0_SEC_SIZE       (960U * 1024U)
 
 // Image 1 primary — deployment (bank 2, 1024 kB)
 #define NF_MCUBOOT_SLOT_IMG1_PRI_OFF        0x08100000U
 #define NF_MCUBOOT_SLOT_IMG1_PRI_SIZE       (1024U * 1024U)
 
-// Image 1 secondary — deployment upgrade candidate on SD card (virtual, 1024 kB)
+// Image 1 secondary — deployment upgrade candidate on SD card (virtual, 1056 kB;
+// primary size + one 32 kB logical sector, see note above)
 #define NF_MCUBOOT_SLOT_IMG1_SEC_OFF        0x0F0000U
-#define NF_MCUBOOT_SLOT_IMG1_SEC_SIZE       (1024U * 1024U)
+#define NF_MCUBOOT_SLOT_IMG1_SEC_SIZE       (1056U * 1024U)
 
 // clang-format on
 

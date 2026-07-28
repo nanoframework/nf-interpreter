@@ -26,7 +26,7 @@
 #define MCUBOOT_IMAGE_HEADER_SIZE 0x200U
 
 // Maximum number of sectors across any single image slot.
-// Largest slot: Image 1 secondary = 1024 kB / 4 kB virtual sectors = 256.
-#define MCUBOOT_MAX_IMG_SECTORS 256U
+// Largest slot: Image 1 secondary = 1056 kB / 4 kB virtual sectors = 264.
+#define MCUBOOT_MAX_IMG_SECTORS 264U
 
 #endif // MCUBOOT_CONFIG_ST_STM32F769I_DISCOVERY_H

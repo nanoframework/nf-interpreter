@@ -34,8 +34,8 @@ Bank 2 (0x08100000–0x081FFFFF, 1024 kB) has the same sector geometry.
 
 | Area | `fa_id` | File path on SD card | Size | Notes |
 |---|---|---|---|---|
-| Image 0 secondary (CLR) | `FLASH_AREA_IMAGE_0_SECONDARY` | `/mcuboot/img0_sec.bin` | 928 kB | CLR upgrade candidate |
-| Image 1 secondary (deploy) | `FLASH_AREA_IMAGE_1_SECONDARY` | `/mcuboot/img1_sec.bin` | 1024 kB | deploy upgrade candidate |
+| Image 0 secondary (CLR) | `FLASH_AREA_IMAGE_0_SECONDARY` | `/mcuboot/img0_sec.bin` | 960 kB | CLR upgrade candidate; primary (928 kB) + 1 logical sector (32 kB) |
+| Image 1 secondary (deploy) | `FLASH_AREA_IMAGE_1_SECONDARY` | `/mcuboot/img1_sec.bin` | 1056 kB | deploy upgrade candidate; primary (1024 kB) + 1 logical sector (32 kB) |
 
 - Virtual sector size: 4 kB (FatFs cluster granularity)
 - SD card interface: SDMMC1 (ChibiOS `SDCD1`)
@@ -51,7 +51,7 @@ Bank 2 (0x08100000–0x081FFFFF, 1024 kB) has the same sector geometry.
 | `MCUBOOT_FLASH_WRITE_ALIGNMENT` | 4 bytes | STM32F7 FLASHv2 word-write minimum |
 | `MCUBOOT_IMAGE_HEADER_SIZE` | `0x200` (512 B) | must match `--header-size` in `imgtool sign` |
 | `MCUBOOT_EXTERNAL_FLASH_SECTOR_SIZE` | 4 kB | virtual sector for FatFs file-backed slots |
-| `MCUBOOT_MAX_IMG_SECTORS` | 256 | Image 1 secondary: 1024 kB ÷ 4 kB = 256 virtual sectors |
+| `MCUBOOT_MAX_IMG_SECTORS` | 264 | Image 1 secondary: 1056 kB ÷ 4 kB = 264 virtual sectors |
 
 ## Serial recovery
 
