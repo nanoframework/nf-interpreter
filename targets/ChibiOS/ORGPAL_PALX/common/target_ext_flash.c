@@ -10,7 +10,7 @@
 // flash map porting layer (mcuboot_flash_map.c).
 //
 // W25Q512_Erase() unifies 4 kB sector erase (littlefs)
-// and 64 kB block erase (MCUboot) behind a single entry point.
+// and 32 kB block erase (MCUboot) behind a single entry point.
 
 #include <ch.h>
 #include <hal.h>
@@ -37,7 +37,7 @@
 #define PAGE_PROG_CMD          0x02U
 #define QUAD_IN_FAST_PROG_CMD  0x32U
 #define SECTOR_ERASE_CMD       0x20U
-#define BLOCK_ERASE_CMD        0xD8U
+#define BLOCK32_ERASE_CMD      0x52U
 
 #define W25Q512_DUMMY_CYCLES_READ      8U
 #define W25Q512_DUMMY_CYCLES_READ_QUAD 8U
@@ -135,12 +135,12 @@ bool W25Q512_Init(void)
     return true;
 }
 
-bool W25Q512_Erase(uint32_t addr, bool use_64k)
+bool W25Q512_Erase(uint32_t addr, bool is32kBlock)
 {
     QSPI_CommandTypeDef s_command;
 
     s_command.InstructionMode = QSPI_INSTRUCTION_1_LINE;
-    s_command.Instruction = use_64k ? BLOCK_ERASE_CMD : SECTOR_ERASE_CMD;
+    s_command.Instruction = is32kBlock ? BLOCK32_ERASE_CMD : SECTOR_ERASE_CMD;
     s_command.AddressMode = QSPI_ADDRESS_1_LINE;
     s_command.AddressSize = QSPI_ADDRESS_24_BITS;
     s_command.Address = addr;
@@ -161,7 +161,7 @@ bool W25Q512_Erase(uint32_t addr, bool use_64k)
         return false;
     }
 
-    uint32_t timeout = use_64k ? W25Q512_BLOCK_ERASE_MAX_TIME : W25Q512_SECTOR_ERASE_MAX_TIME;
+    uint32_t timeout = is32kBlock ? W25Q512_BLOCK_ERASE_MAX_TIME : W25Q512_SECTOR_ERASE_MAX_TIME;
     if (QSPI_AutoPollingMemReady(&QSPID1, timeout) != QSPI_OK)
     {
         return false;

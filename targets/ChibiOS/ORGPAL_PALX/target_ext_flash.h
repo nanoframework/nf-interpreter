@@ -40,10 +40,10 @@ extern "C"
     bool W25Q512_Init(void);
 
     // Erase a region starting at byte offset addr.
-    // use_64k=true  => 64 kB block erase   (0xD8, used by MCUboot).
-    // use_64k=false => 4 kB sector erase   (0x20, used by littlefs).
+    // is32kBlock=true  => 32 kB block erase   (0x52, used by MCUboot).
+    // is32kBlock=false => 4 kB sector erase   (0x20, used by littlefs).
     // addr must be aligned to the chosen erase unit.
-    bool W25Q512_Erase(uint32_t addr, bool use_64k);
+    bool W25Q512_Erase(uint32_t addr, bool is32kBlock);
 
     // Read size bytes from flash at byte offset addr into buf.
     bool W25Q512_Read(uint8_t *buf, uint32_t addr, uint32_t size);
