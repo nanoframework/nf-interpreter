@@ -19,9 +19,10 @@
 
 // AT25SF641 4 kB sub-sector erase (0x20) is used as the MCUboot erase unit for
 // secondary slots. The primary slot (IMG0) is 928 kB which is not divisible by
-// 64 kB (the large block erase size), so the 4 kB sub-sector must be used to
-// allow MCUboot to enumerate the secondary slot cleanly.
-// The AT25SF641 also supports 64 kB block erase (0xD8), used by AT25SF641_EraseChip.
+// 32 kB or 64 kB (the block erase sizes), so the 4 kB sub-sector must be used
+// to allow MCUboot to enumerate the secondary slot cleanly.
+// The AT25SF641 also supports 32 kB block erase (0x52), used by AT25SF641_EraseChip
+// (not called by MCUboot).
 #define MCUBOOT_EXTERNAL_FLASH_SECTOR_SIZE (4U * 1024U)
 
 // MCUboot image header size in bytes.
