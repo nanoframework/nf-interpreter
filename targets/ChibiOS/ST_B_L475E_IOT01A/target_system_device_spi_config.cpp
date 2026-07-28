@@ -23,7 +23,7 @@ SPI_CONFIG_PINS(1, GPIOA, 5, GPIOA, 6, GPIOA, 7, 5)
 // SPI2 //
 //////////
 
-// Note on ST_B_L475E_IOT01A SPI2 connects to PMOD port (with defaault solder jumper settings)
+// Note on ST_B_L475E_IOT01A SPI2 connects to PMOD port (with default solder jumper settings)
 
 // pin configuration for SPI2 on GPIOD AF5
 // port for SPI2_SCK is: GPIOD_1 PMOD-SPI2_SCK

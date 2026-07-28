@@ -1,5 +1,6 @@
 //
 // Copyright (c) .NET Foundation and Contributors
+// Portions Copyright (c) 2006..2026 Giovanni Di Sirio. All rights reserved.
 // See LICENSE file in the project root for full license information.
 //
 
@@ -82,7 +83,7 @@
 #define STM32_ADCSEL                        STM32_ADCSEL_SYSCLK
 #define STM32_SWPMI1SEL                     STM32_SWPMI1SEL_PCLK1
 #define STM32_DFSDMSEL                       STM32_DFSDMSEL_PCLK2
-#define STM32_RTCSEL                        STM32_RTCSEL_LSI
+#define STM32_RTCSEL                        STM32_RTCSEL_LSE
 
 /*
  * IRQ system settings.
