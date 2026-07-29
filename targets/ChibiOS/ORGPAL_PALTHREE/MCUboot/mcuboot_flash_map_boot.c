@@ -48,7 +48,7 @@ int stm32FlashErase(uint32_t address);
 
 #include "mcuboot_board_iface.h"
 
-#if defined(NF_FEATURE_MCUBOOT_HAS_SDCARD)
+#if (NF_FEATURE_MCUBOOT_HAS_SDCARD == 1 || NF_FEATURE_MCUBOOT_HAS_USB_MSD == 1)
 #include "mcuboot_fatfs_flash_area.h"
 #endif
 
@@ -128,7 +128,7 @@ int flash_area_read(const struct flash_area *area, uint32_t off, void *dst, uint
     {
         return AT25SF641_Read((uint8_t *)dst, area->fa_off + off, len) ? 0 : -1;
     }
-#if defined(NF_MCUBOOT_BOOTLOADER)
+#if (NF_FEATURE_MCUBOOT_HAS_SDCARD == 1 || NF_FEATURE_MCUBOOT_HAS_USB_MSD == 1)
     else if (area->fa_device_id == FLASH_DEVICE_EXTERNAL_SDCARD || area->fa_device_id == FLASH_DEVICE_EXTERNAL_USBMSD)
     {
         return fatfs_flash_area_read(area, off, dst, len);
@@ -149,7 +149,7 @@ int flash_area_write(const struct flash_area *area, uint32_t off, const void *sr
     {
         return AT25SF641_Write((const uint8_t *)src, area->fa_off + off, len) ? 0 : -1;
     }
-#if defined(NF_MCUBOOT_BOOTLOADER)
+#if (NF_FEATURE_MCUBOOT_HAS_SDCARD == 1 || NF_FEATURE_MCUBOOT_HAS_USB_MSD == 1)
     else if (area->fa_device_id == FLASH_DEVICE_EXTERNAL_SDCARD || area->fa_device_id == FLASH_DEVICE_EXTERNAL_USBMSD)
     {
         return fatfs_flash_area_write(area, off, src, len);
@@ -190,7 +190,7 @@ int flash_area_erase(const struct flash_area *area, uint32_t off, uint32_t len)
             erase_addr += MCUBOOT_EXTERNAL_FLASH_SECTOR_SIZE;
         }
     }
-#if defined(NF_MCUBOOT_BOOTLOADER)
+#if (NF_FEATURE_MCUBOOT_HAS_SDCARD == 1 || NF_FEATURE_MCUBOOT_HAS_USB_MSD == 1)
     else if (area->fa_device_id == FLASH_DEVICE_EXTERNAL_SDCARD || area->fa_device_id == FLASH_DEVICE_EXTERNAL_USBMSD)
     {
         return fatfs_flash_area_erase(area, off, len);
