@@ -5,6 +5,7 @@
 
 #ifndef NANOFRAMEWORK_HARDWARE_PICO_NATIVE_H
 #define NANOFRAMEWORK_HARDWARE_PICO_NATIVE_H
+
 #include <nanoCLR_Interop.h>
 #include <nanoCLR_Runtime.h>
 #include <nanoPackStruct.h>
@@ -68,6 +69,13 @@ typedef enum __nfpack PioMovStatusSel
     PioMovStatusSel_RxLevel = 1,
 } PioMovStatusSel;
 
+typedef enum __nfpack PioPinPull
+{
+    PioPinPull_None = 0,
+    PioPinPull_Up = 1,
+    PioPinPull_Down = 2,
+} PioPinPull;
+
 typedef enum __nfpack PioStateMachineIndex
 {
     PioStateMachineIndex_Sm0 = 0,
@@ -115,6 +123,7 @@ struct Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pi
     NANOCLR_NATIVE_DECLARE(get_MinIndex___STATIC__I4);
     NANOCLR_NATIVE_DECLARE(get_BlockCount___STATIC__I4);
     NANOCLR_NATIVE_DECLARE(get_MaxPin___STATIC__I4);
+    NANOCLR_NATIVE_DECLARE(get_SystemClock___STATIC__I4);
 
     //--//
 };
@@ -189,7 +198,7 @@ struct Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pi
 
     NANOCLR_NATIVE_DECLARE(AddProgram___U4__nanoFrameworkHardwarePicoPioPioProgram);
     NANOCLR_NATIVE_DECLARE(RemoveProgram___VOID__nanoFrameworkHardwarePicoPioPioProgram__U4);
-    NANOCLR_NATIVE_DECLARE(InitGpio___VOID__I4);
+    NANOCLR_NATIVE_DECLARE(InitGpio___VOID__I4__nanoFrameworkHardwarePicoPioPioPinPull);
     NANOCLR_NATIVE_DECLARE(ForceIrq___VOID__I4);
     NANOCLR_NATIVE_DECLARE(ClearIrq___VOID__I4);
     NANOCLR_NATIVE_DECLARE(NativeClaimSm___I4__I4);
@@ -291,6 +300,7 @@ struct Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pi
     NANOCLR_NATIVE_DECLARE(get_TxLevel___U4);
     NANOCLR_NATIVE_DECLARE(get_RxLevel___U4);
     NANOCLR_NATIVE_DECLARE(get_ProgramCounter___U4);
+    NANOCLR_NATIVE_DECLARE(get_ClockDivisor___R4);
     NANOCLR_NATIVE_DECLARE(set_ClockDivisor___VOID__R4);
     NANOCLR_NATIVE_DECLARE(Put___VOID__U4);
     NANOCLR_NATIVE_DECLARE(Get___U4);

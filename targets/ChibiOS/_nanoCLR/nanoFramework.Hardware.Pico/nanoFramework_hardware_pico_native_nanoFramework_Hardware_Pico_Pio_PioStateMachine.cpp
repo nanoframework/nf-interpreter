@@ -767,6 +767,25 @@ HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_P
 }
 
 HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioStateMachine::
+    get_ClockDivisor___R4(CLR_RT_StackFrame &stack)
+{
+    NANOCLR_HEADER();
+
+    PioSmContext ctx{};
+    uint32_t clkdiv, intPart, frac;
+
+    NANOCLR_PIO_SM_PROLOGUE(ctx);
+
+    clkdiv = ctx.smp->block->pio->SM[ctx.smp->smidx].CLKDIV;
+    intPart = (clkdiv & PIO_SM_CLKDIV_INT_Msk) >> PIO_SM_CLKDIV_INT_Pos;
+    frac = (clkdiv & PIO_SM_CLKDIV_FRAC_Msk) >> PIO_SM_CLKDIV_FRAC_Pos;
+
+    stack.SetResult_R4((intPart == 0u ? 65536.0f : static_cast<float>(intPart)) + static_cast<float>(frac) / 256.0f);
+
+    NANOCLR_NOCLEANUP();
+}
+
+HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioStateMachine::
     set_ClockDivisor___VOID__R4(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();

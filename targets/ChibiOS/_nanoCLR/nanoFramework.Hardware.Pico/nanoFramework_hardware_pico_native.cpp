@@ -6,11 +6,13 @@
 #include "nanoFramework_hardware_pico_native.h"
 
 // clang-format off
+
 static const CLR_RT_MethodHandler method_lookup[] =
 {
     Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_Pio::get_MinIndex___STATIC__I4,
     Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_Pio::get_BlockCount___STATIC__I4,
     Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_Pio::get_MaxPin___STATIC__I4,
+    Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_Pio::get_SystemClock___STATIC__I4,
     NULL,
     NULL,
     NULL,
@@ -79,7 +81,7 @@ static const CLR_RT_MethodHandler method_lookup[] =
     Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioBlock::AddProgram___U4__nanoFrameworkHardwarePicoPioPioProgram,
     Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioBlock::RemoveProgram___VOID__nanoFrameworkHardwarePicoPioPioProgram__U4,
     NULL,
-    Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioBlock::InitGpio___VOID__I4,
+    Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioBlock::InitGpio___VOID__I4__nanoFrameworkHardwarePicoPioPioPinPull,
     NULL,
     Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioBlock::ForceIrq___VOID__I4,
     Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioBlock::ClearIrq___VOID__I4,
@@ -183,6 +185,7 @@ static const CLR_RT_MethodHandler method_lookup[] =
     Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioStateMachine::get_TxLevel___U4,
     Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioStateMachine::get_RxLevel___U4,
     Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioStateMachine::get_ProgramCounter___U4,
+    Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioStateMachine::get_ClockDivisor___R4,
     Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioStateMachine::set_ClockDivisor___VOID__R4,
     Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioStateMachine::Put___VOID__U4,
     Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioStateMachine::Get___U4,
@@ -223,7 +226,7 @@ static const CLR_RT_MethodHandler method_lookup[] =
 const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_nanoFramework_Hardware_Pico =
 {
     "nanoFramework.Hardware.Pico",
-    0xD0D5FFA7,
+    0xFC6F7F0C,
     method_lookup,
     { 1, 0, 0, 0 }
 };
