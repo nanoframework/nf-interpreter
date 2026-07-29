@@ -52,6 +52,12 @@ list(APPEND MCUboot_INCLUDE_DIRS
     ${CMAKE_SOURCE_DIR}/targets/ChibiOS/_common/mcuboot
 )
 
+if(RTOS_CHIBIOS_CHECK)
+    list(APPEND MCUboot_INCLUDE_DIRS
+        ${CMAKE_SOURCE_DIR}/targets/ChibiOS/_mcuboot
+    )
+endif()
+
 # Convention: each MCUboot-enabled board provides
 #   <board>/MCUboot/mcuboot_flash_map_boot.c
 # implementing the flash_area_* porting layer (flash_map_backend/flash_map_backend.h).
