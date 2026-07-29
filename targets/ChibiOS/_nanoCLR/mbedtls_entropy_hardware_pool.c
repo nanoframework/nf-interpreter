@@ -6,8 +6,9 @@
 #include <hal.h>
 #include <hal_nf_community.h>
 #include <mbedtls/entropy.h>
+#include <entropy_poll.h>
 #include <psa/crypto.h>
-int mbedtls_hardware_poll(void *data, unsigned char *output, size_t len, size_t *olen);
+
 // Get len bytes of entropy from the hardware RNG.
 int mbedtls_hardware_poll(void *data, unsigned char *output, size_t len, size_t *olen)
 {
