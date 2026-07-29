@@ -40,9 +40,6 @@ int stm32FlashErase(uint32_t address);
 
 #include "mcuboot_board_iface.h"
 
-#if (CONFIG_NF_FEATURE_MCUBOOT_HAS_SDCARD == 1)
-#include "mcuboot_fatfs_flash_area.h"
-#endif
 
 // Discovery has no external SPI/QSPI flash device.
 // Secondary slots use the SD card (via FatFs); SD card init is handled
@@ -53,6 +50,10 @@ int mcuboot_ext_flash_init(void)
 }
 
 #endif // NF_MCUBOOT_BOOTLOADER
+
+#if (CONFIG_NF_FEATURE_MCUBOOT_HAS_SDCARD == 1)
+#include <mcuboot_fatfs_flash_area.h>
+#endif
 
 // clang-format off
 static const struct flash_area s_flash_areas[] = {

@@ -48,10 +48,6 @@ int stm32FlashErase(uint32_t address);
 
 #include "mcuboot_board_iface.h"
 
-#if (CONFIG_NF_FEATURE_MCUBOOT_HAS_SDCARD == 1 || CONFIG_NF_FEATURE_MCUBOOT_HAS_USB_MSD == 1)
-#include "mcuboot_fatfs_flash_area.h"
-#endif
-
 // HAL_GetTick() is declared extern in target_ext_flash.c for the wait-ready
 // timeout. Implemented here using the ChibiOS system tick counter.
 uint32_t HAL_GetTick(void)
@@ -82,6 +78,10 @@ int mcuboot_ext_flash_init(void)
 }
 
 #endif // NF_MCUBOOT_BOOTLOADER
+
+#if (CONFIG_NF_FEATURE_MCUBOOT_HAS_SDCARD == 1 || CONFIG_NF_FEATURE_MCUBOOT_HAS_USB_MSD == 1)
+#include <mcuboot_fatfs_flash_area.h>
+#endif
 
 // clang-format off
 static const struct flash_area s_flash_areas[] = {

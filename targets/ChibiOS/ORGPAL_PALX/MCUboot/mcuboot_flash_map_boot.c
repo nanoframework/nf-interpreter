@@ -42,10 +42,6 @@ int stm32FlashErase(uint32_t address);
 
 #include "mcuboot_board_iface.h"
 
-#if (CONFIG_NF_FEATURE_MCUBOOT_HAS_USB_MSD == 1)
-#include "mcuboot_fatfs_flash_area.h"
-#endif
-
 // Board interface: initialise W25Q512 via STM32 HAL QSPI bridge.
 int mcuboot_ext_flash_init(void)
 {
@@ -53,6 +49,10 @@ int mcuboot_ext_flash_init(void)
 }
 
 #endif // NF_MCUBOOT_BOOTLOADER
+
+#if (CONFIG_NF_FEATURE_MCUBOOT_HAS_USB_MSD == 1)
+#include <mcuboot_fatfs_flash_area.h>
+#endif
 
 // clang-format off
 static const struct flash_area s_flash_areas[] = {
