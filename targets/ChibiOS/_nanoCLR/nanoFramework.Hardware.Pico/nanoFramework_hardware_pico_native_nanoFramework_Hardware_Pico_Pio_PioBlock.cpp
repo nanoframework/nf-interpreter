@@ -174,14 +174,16 @@ HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_P
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioBlock::InitGpio___VOID__I4(
+HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioBlock::InitGpio___VOID__I4__nanoFrameworkHardwarePicoPioPioPinPull(
     CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
     int block;
+    uint32_t padbits = RP_PIO_PAD_DEFAULT;
 
     const int pin = stack.Arg1().NumericByRef().s4;
+    const int pull = stack.Arg2().NumericByRef().s4;
 
     CLR_RT_HeapBlock *pThis = stack.This();
     FAULT_ON_NULL(pThis);
@@ -195,7 +197,20 @@ HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_P
         NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_RANGE);
     }
 
-    NfPioBlockGpioInit(&__rp_pio_blocks[block], static_cast<uint32_t>(pin));
+    if (pull == 1)
+    {
+        padbits |= RP_PIO_PAD_PUE;
+    }
+    else if (pull == 2)
+    {
+        padbits |= RP_PIO_PAD_PDE;
+    }
+    else if (pull != 0)
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_RANGE);
+    }
+
+    NfPioBlockGpioInit(&__rp_pio_blocks[block], static_cast<uint32_t>(pin), padbits);
 
     NANOCLR_NOCLEANUP();
 }

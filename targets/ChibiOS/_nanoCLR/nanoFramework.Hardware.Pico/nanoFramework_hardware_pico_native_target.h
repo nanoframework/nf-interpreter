@@ -169,7 +169,7 @@ inline void NfPioBlockClearIrq(const rp_pio_block_t *block, const uint32_t irq)
     block->pio->IRQ = 1u << irq;
 }
 
-inline void NfPioBlockGpioInit(const rp_pio_block_t *block, uint32_t gpio)
+inline void NfPioBlockGpioInit(const rp_pio_block_t *block, uint32_t gpio, uint32_t padbits)
 {
     static constexpr uint32_t funcsels[] = {
         RP_PIO_FUNCSEL_PIO0,
@@ -182,11 +182,11 @@ inline void NfPioBlockGpioInit(const rp_pio_block_t *block, uint32_t gpio)
     const uint32_t funcsel = funcsels[block->pioidx];
 
 #if defined(RP2350)
-    PADS_BANK0->GPIO[gpio] = RP_PIO_PAD_DEFAULT | RP_PIO_PAD_ISO;
+    PADS_BANK0->GPIO[gpio] = padbits | RP_PIO_PAD_ISO;
     IO_BANK0->GPIO[gpio].CTRL = funcsel;
-    PADS_BANK0->GPIO[gpio] = RP_PIO_PAD_DEFAULT;
+    PADS_BANK0->GPIO[gpio] = padbits;
 #else
-    PADS_BANK0->GPIO[gpio] = RP_PIO_PAD_DEFAULT;
+    PADS_BANK0->GPIO[gpio] = padbits;
     IO_BANK0->GPIO[gpio].CTRL = funcsel;
 #endif
 }
