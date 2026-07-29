@@ -193,20 +193,28 @@ inline void NfPioBlockGpioInit(const rp_pio_block_t *block, uint32_t gpio, uint3
 
 inline bool NfPioSmDrainTxFifo(const rp_pio_sm_t *smp, unsigned int spinLimit)
 {
-    const bool autopull = (smp->block->pio->SM[smp->smidx].SHIFTCTRL & PIO_SM_SHIFTCTRL_AUTOPULL) != 0u;
-    const uint16_t instr = autopull ? NF_PIO_INSTR_OUT_NULL_32 : NF_PIO_INSTR_PULL_NOBLOCK;
+    const uint32_t shiftctrl = smp->block->pio->SM[smp->smidx].SHIFTCTRL;
+    bool drained = true;
+
+    if ((shiftctrl & PIO_SM_SHIFTCTRL_AUTOPULL) != 0u)
+    {
+        smp->block->pio->SM[smp->smidx].SHIFTCTRL = shiftctrl & ~PIO_SM_SHIFTCTRL_AUTOPULL;
+    }
 
     while ((smp->block->pio->FSTAT & PIO_FSTAT_TXEMPTY(smp->smidx)) == 0u)
     {
         if (spinLimit-- == 0u)
         {
-            return false;
+            drained = false;
+            break;
         }
 
-        pioSmExecX(smp, instr);
+        pioSmExecX(smp, NF_PIO_INSTR_PULL_NOBLOCK);
     }
 
-    return true;
+    smp->block->pio->SM[smp->smidx].SHIFTCTRL = shiftctrl;
+
+    return drained;
 }
 
 inline uint32_t NfDmaChannelGetCounter(const rp_dma_channel_t *dmachp)
