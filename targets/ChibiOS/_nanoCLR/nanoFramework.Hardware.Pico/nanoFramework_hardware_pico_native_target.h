@@ -212,6 +212,8 @@ inline bool NfPioSmDrainTxFifo(const rp_pio_sm_t *smp, unsigned int spinLimit)
         pioSmExecX(smp, NF_PIO_INSTR_PULL_NOBLOCK);
     }
 
+    pioSmExecX(smp, NF_PIO_INSTR_OUT_NULL_32);
+
     smp->block->pio->SM[smp->smidx].SHIFTCTRL = shiftctrl;
 
     return drained;
