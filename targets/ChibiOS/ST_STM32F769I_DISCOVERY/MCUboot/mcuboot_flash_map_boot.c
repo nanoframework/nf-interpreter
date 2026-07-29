@@ -40,7 +40,7 @@ int stm32FlashErase(uint32_t address);
 
 #include "mcuboot_board_iface.h"
 
-#if (CONFIG_NF_FEATURE_MCUBOOT_HAS_SDCARD == TRUE)
+#if (CONFIG_NF_FEATURE_MCUBOOT_HAS_SDCARD == 1)
 #include "mcuboot_fatfs_flash_area.h"
 #endif
 
@@ -95,7 +95,7 @@ int flash_area_read(const struct flash_area *area, uint32_t off, void *dst, uint
         memcpy(dst, (const void *)(uintptr_t)(area->fa_off + off), len);
         return 0;
     }
-#if (CONFIG_NF_FEATURE_MCUBOOT_HAS_SDCARD == TRUE)
+#if (CONFIG_NF_FEATURE_MCUBOOT_HAS_SDCARD == 1)
     else if (area->fa_device_id == FLASH_DEVICE_EXTERNAL_SDCARD)
     {
         return fatfs_flash_area_read(area, off, dst, len);
@@ -112,7 +112,7 @@ int flash_area_write(const struct flash_area *area, uint32_t off, const void *sr
         // stm32FlashWrite() returns true (non-zero) on success; MCUboot expects 0 on success.
         return stm32FlashWrite(area->fa_off + off, len, (const uint8_t *)src) ? 0 : -1;
     }
-#if (CONFIG_NF_FEATURE_MCUBOOT_HAS_SDCARD == TRUE)
+#if (CONFIG_NF_FEATURE_MCUBOOT_HAS_SDCARD == 1)
     else if (area->fa_device_id == FLASH_DEVICE_EXTERNAL_SDCARD)
     {
         return fatfs_flash_area_write(area, off, src, len);
@@ -139,7 +139,7 @@ int flash_area_erase(const struct flash_area *area, uint32_t off, uint32_t len)
             erase_addr = stm32_f7xx_next_sector_boundary(erase_addr);
         }
     }
-#if (CONFIG_NF_FEATURE_MCUBOOT_HAS_SDCARD == TRUE)
+#if (CONFIG_NF_FEATURE_MCUBOOT_HAS_SDCARD == 1)
     else if (area->fa_device_id == FLASH_DEVICE_EXTERNAL_SDCARD)
     {
         return fatfs_flash_area_erase(area, off, len);

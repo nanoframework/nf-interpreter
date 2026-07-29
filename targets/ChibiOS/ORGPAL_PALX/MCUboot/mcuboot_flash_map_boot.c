@@ -42,7 +42,7 @@ int stm32FlashErase(uint32_t address);
 
 #include "mcuboot_board_iface.h"
 
-#if (CONFIG_NF_FEATURE_MCUBOOT_HAS_USB_MSD == TRUE)
+#if (CONFIG_NF_FEATURE_MCUBOOT_HAS_USB_MSD == 1)
 #include "mcuboot_fatfs_flash_area.h"
 #endif
 
@@ -99,7 +99,7 @@ int flash_area_read(const struct flash_area *area, uint32_t off, void *dst, uint
     {
         return W25Q512_Read((uint8_t *)dst, area->fa_off + off, len) ? 0 : -1;
     }
-#if (CONFIG_NF_FEATURE_MCUBOOT_HAS_USB_MSD == TRUE)
+#if (CONFIG_NF_FEATURE_MCUBOOT_HAS_USB_MSD == 1)
     else if (area->fa_device_id == FLASH_DEVICE_EXTERNAL_USBMSD)
     {
         return fatfs_flash_area_read(area, off, dst, len);
@@ -120,7 +120,7 @@ int flash_area_write(const struct flash_area *area, uint32_t off, const void *sr
     {
         return W25Q512_Write((uint8_t *)src, area->fa_off + off, len) ? 0 : -1;
     }
-#if (CONFIG_NF_FEATURE_MCUBOOT_HAS_USB_MSD == TRUE)
+#if (CONFIG_NF_FEATURE_MCUBOOT_HAS_USB_MSD == 1)
     else if (area->fa_device_id == FLASH_DEVICE_EXTERNAL_USBMSD)
     {
         return fatfs_flash_area_write(area, off, src, len);
@@ -161,7 +161,7 @@ int flash_area_erase(const struct flash_area *area, uint32_t off, uint32_t len)
             erase_addr += MCUBOOT_EXTERNAL_FLASH_SECTOR_SIZE;
         }
     }
-#if (CONFIG_NF_FEATURE_MCUBOOT_HAS_USB_MSD == TRUE)
+#if (CONFIG_NF_FEATURE_MCUBOOT_HAS_USB_MSD == 1)
     else if (area->fa_device_id == FLASH_DEVICE_EXTERNAL_USBMSD)
     {
         return fatfs_flash_area_erase(area, off, len);
