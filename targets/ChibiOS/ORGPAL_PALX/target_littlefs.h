@@ -16,8 +16,8 @@
 
 #define LFS_DRIVER_QSPI (1)
 
-#include "target_ext_flash.h"
-#include "mcuboot_flash_layout.h"
+#include <target_ext_flash.h>
+#include <MCUboot/mcuboot_flash_layout.h>
 
 //////////////////////////////////
 // remapping into littlefs defines
