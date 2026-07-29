@@ -28,14 +28,25 @@ static void PioChibiOSCallback(void *param, const uint32_t flags)
         Events_Set(SYSTEM_EVENT_FLAG_PICOPIO);
     }
 
-    const uint32_t smFlags = ((flags >> 8) & 0x0Fu) & pio->IRQ;
+    const uint32_t live = (flags >> 8) & 0x0Fu;
+    const uint32_t latched = live & pio->IRQ;
+    const uint32_t forced = live & pio->IRQ_FORCE;
+    const uint32_t smFlags = latched | forced;
 
     if (smFlags == 0u)
     {
         return;
     }
 
-    pio->IRQ = smFlags;
+    if (latched != 0u)
+    {
+        pio->IRQ = latched;
+    }
+
+    if (forced != 0u)
+    {
+        pio->CLR.IRQ_FORCE = forced;
+    }
 
     PostManagedEvent(EVENT_PICO_PIO, EVENT_TYPE_PICO_PIO, static_cast<uint16_t>(block), smFlags);
 }
