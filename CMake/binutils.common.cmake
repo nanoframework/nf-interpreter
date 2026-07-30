@@ -396,9 +396,7 @@ function(nf_generate_build_output_files target)
     nf_print_target_size(${target})
 
     # MCUboot targets: sign the nanoCLR binary with imgtool after it is built.
-    # Only applies to the nanoCLR target (nanoBooter is excluded from MCUboot builds).
-    # Requires NF_MCUBOOT_SLOT_SIZE and NF_MCUBOOT_SIGNING_KEY to be set by the caller
-    # (they are CMake-only parameters, not Kconfig symbols).
+    # Only applies to the nanoCLR target.
     if(NF_FEATURE_HAS_MCUBOOT AND ("${TARGET_SHORT}" STREQUAL "${NANOCLR_PROJECT_NAME}"))
 
         if(NOT DEFINED NF_MCUBOOT_SLOT_SIZE OR "${NF_MCUBOOT_SLOT_SIZE}" STREQUAL "")
@@ -417,7 +415,7 @@ function(nf_generate_build_output_files target)
         endif()
 
         # Sign the binary into a temp file then replace the original so that
-        # nanoCLR.bin is always the signed image, preserving tool compatibility.
+        # nanoCLR.bin is always the signed image.
         add_custom_command(TARGET ${TARGET_SHORT}.elf POST_BUILD
             COMMAND ${IMGTOOL} sign
                 --key "${NF_MCUBOOT_SIGNING_KEY}"
@@ -431,6 +429,7 @@ function(nf_generate_build_output_files target)
             COMMAND ${CMAKE_COMMAND} -E rename "${TARGET_SIGNED_BIN_FILE}" "${TARGET_BIN_FILE}"
 
             COMMENT "Sign nanoCLR binary with imgtool (MCUboot)")
+
     endif()
 
 endfunction()
