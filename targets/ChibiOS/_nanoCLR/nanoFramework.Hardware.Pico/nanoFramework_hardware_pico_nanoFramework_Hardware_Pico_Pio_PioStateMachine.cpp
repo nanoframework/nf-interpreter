@@ -3,13 +3,13 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#include "nanoFramework_hardware_pico_native.h"
+#include "nanoFramework_hardware_pico.h"
 #if defined(RP2350)
 #include "rp2350.h"
 #else
 #include "rp2040.h"
 #endif
-#include "nanoFramework_hardware_pico_native_target.h"
+#include "nanoFramework_hardware_pico_target.h"
 #include <hal.h>
 #include <nanoHAL.h>
 #include <cmath>
@@ -299,7 +299,7 @@ static HRESULT PioDmaTransfer(CLR_RT_StackFrame &stack, const PioFifoDir dir)
     NANOCLR_CLEANUP_END();
 }
 
-HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioStateMachine::
+HRESULT Library_nanoFramework_hardware_pico_nanoFramework_Hardware_Pico_Pio_PioStateMachine::
     NativeInit___VOID__I4__SZARRAY_U4(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
@@ -383,7 +383,7 @@ HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_P
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioStateMachine::
+HRESULT Library_nanoFramework_hardware_pico_nanoFramework_Hardware_Pico_Pio_PioStateMachine::
     get_Enabled___BOOLEAN(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
@@ -396,7 +396,7 @@ HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_P
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioStateMachine::
+HRESULT Library_nanoFramework_hardware_pico_nanoFramework_Hardware_Pico_Pio_PioStateMachine::
     set_Enabled___VOID__BOOLEAN(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
@@ -510,19 +510,19 @@ static HRESULT PioFifoTransfer(CLR_RT_StackFrame &stack, const PioFifoDir dir)
     NANOCLR_CLEANUP_END();
 }
 
-HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioStateMachine::Put___VOID__U4(
+HRESULT Library_nanoFramework_hardware_pico_nanoFramework_Hardware_Pico_Pio_PioStateMachine::Put___VOID__U4(
     CLR_RT_StackFrame &stack)
 {
     return PioFifoTransfer(stack, PioFifoTx);
 }
 
-HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioStateMachine::Get___U4(
+HRESULT Library_nanoFramework_hardware_pico_nanoFramework_Hardware_Pico_Pio_PioStateMachine::Get___U4(
     CLR_RT_StackFrame &stack)
 {
     return PioFifoTransfer(stack, PioFifoRx);
 }
 
-HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioStateMachine::
+HRESULT Library_nanoFramework_hardware_pico_nanoFramework_Hardware_Pico_Pio_PioStateMachine::
     TryPut___BOOLEAN__U4(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
@@ -543,7 +543,7 @@ HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_P
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioStateMachine::
+HRESULT Library_nanoFramework_hardware_pico_nanoFramework_Hardware_Pico_Pio_PioStateMachine::
     TryGet___BOOLEAN__BYREF_U4(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
@@ -569,7 +569,7 @@ HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_P
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioStateMachine::
+HRESULT Library_nanoFramework_hardware_pico_nanoFramework_Hardware_Pico_Pio_PioStateMachine::
     get_IsTxFull___BOOLEAN(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
@@ -583,7 +583,7 @@ HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_P
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioStateMachine::
+HRESULT Library_nanoFramework_hardware_pico_nanoFramework_Hardware_Pico_Pio_PioStateMachine::
     get_IsRxEmpty___BOOLEAN(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
@@ -597,7 +597,7 @@ HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_P
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioStateMachine::
+HRESULT Library_nanoFramework_hardware_pico_nanoFramework_Hardware_Pico_Pio_PioStateMachine::
     NativeUnclaim___VOID(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
@@ -614,7 +614,7 @@ HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_P
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioStateMachine::
+HRESULT Library_nanoFramework_hardware_pico_nanoFramework_Hardware_Pico_Pio_PioStateMachine::
     SetConsecutivePinDirs___VOID__I4__I4__BOOLEAN(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
@@ -651,7 +651,7 @@ HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_P
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioStateMachine::ClearFifos___VOID(
+HRESULT Library_nanoFramework_hardware_pico_nanoFramework_Hardware_Pico_Pio_PioStateMachine::ClearFifos___VOID(
     CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
@@ -665,7 +665,7 @@ HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_P
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioStateMachine::DrainTxFifo___VOID(
+HRESULT Library_nanoFramework_hardware_pico_nanoFramework_Hardware_Pico_Pio_PioStateMachine::DrainTxFifo___VOID(
     CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
@@ -682,7 +682,7 @@ HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_P
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioStateMachine::Restart___VOID(
+HRESULT Library_nanoFramework_hardware_pico_nanoFramework_Hardware_Pico_Pio_PioStateMachine::Restart___VOID(
     CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
@@ -696,7 +696,7 @@ HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_P
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioStateMachine::
+HRESULT Library_nanoFramework_hardware_pico_nanoFramework_Hardware_Pico_Pio_PioStateMachine::
     ClockDivRestart___VOID(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
@@ -710,7 +710,7 @@ HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_P
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioStateMachine::Exec___VOID__U2(
+HRESULT Library_nanoFramework_hardware_pico_nanoFramework_Hardware_Pico_Pio_PioStateMachine::Exec___VOID__U2(
     CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
@@ -724,7 +724,7 @@ HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_P
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioStateMachine::get_TxLevel___U4(
+HRESULT Library_nanoFramework_hardware_pico_nanoFramework_Hardware_Pico_Pio_PioStateMachine::get_TxLevel___U4(
     CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
@@ -738,7 +738,7 @@ HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_P
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioStateMachine::get_RxLevel___U4(
+HRESULT Library_nanoFramework_hardware_pico_nanoFramework_Hardware_Pico_Pio_PioStateMachine::get_RxLevel___U4(
     CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
@@ -752,7 +752,7 @@ HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_P
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioStateMachine::
+HRESULT Library_nanoFramework_hardware_pico_nanoFramework_Hardware_Pico_Pio_PioStateMachine::
     get_ProgramCounter___U4(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
@@ -766,7 +766,7 @@ HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_P
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioStateMachine::
+HRESULT Library_nanoFramework_hardware_pico_nanoFramework_Hardware_Pico_Pio_PioStateMachine::
     get_ClockDivisor___R4(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
@@ -785,7 +785,7 @@ HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_P
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioStateMachine::
+HRESULT Library_nanoFramework_hardware_pico_nanoFramework_Hardware_Pico_Pio_PioStateMachine::
     set_ClockDivisor___VOID__R4(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
@@ -817,13 +817,13 @@ HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_P
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioStateMachine::
+HRESULT Library_nanoFramework_hardware_pico_nanoFramework_Hardware_Pico_Pio_PioStateMachine::
     Read___I4__SZARRAY_U4__I4__I4__I4(CLR_RT_StackFrame &stack)
 {
     return PioDmaTransfer(stack, PioFifoRx);
 }
 
-HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioStateMachine::
+HRESULT Library_nanoFramework_hardware_pico_nanoFramework_Hardware_Pico_Pio_PioStateMachine::
     Write___I4__SZARRAY_U4__I4__I4__I4(CLR_RT_StackFrame &stack)
 {
     return PioDmaTransfer(stack, PioFifoTx);

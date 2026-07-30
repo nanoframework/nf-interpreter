@@ -3,13 +3,13 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#ifndef NANOFRAMEWORK_HARDWARE_PICO_NATIVE_TARGET_H
-#define NANOFRAMEWORK_HARDWARE_PICO_NATIVE_TARGET_H
+#ifndef NANOFRAMEWORK_HARDWARE_PICO_TARGET_H
+#define NANOFRAMEWORK_HARDWARE_PICO_TARGET_H
 
 #include <ch.h>
 #include <hal.h>
 #include <nanoHAL.h>
-#include <nanoFramework_hardware_pico_native.h>
+#include <nanoFramework_hardware_pico.h>
 
 #if defined(RP2350)
 #define PIO_MAX_BLOCK 2
@@ -71,7 +71,7 @@ inline HRESULT PioGetSmContext(CLR_RT_HeapBlock *pThis, PioSmContext &ctx, const
     FAULT_ON_NULL(pThis);
 
     if (!allowDisposed &&
-        pThis[Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioStateMachine::
+        pThis[Library_nanoFramework_hardware_pico_nanoFramework_Hardware_Pico_Pio_PioStateMachine::
                   FIELD___disposed]
                 .NumericByRef()
                 .u1 != 0)
@@ -80,16 +80,16 @@ inline HRESULT PioGetSmContext(CLR_RT_HeapBlock *pThis, PioSmContext &ctx, const
     }
 
     pPioBlock =
-        pThis[Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioStateMachine::FIELD___block]
+        pThis[Library_nanoFramework_hardware_pico_nanoFramework_Hardware_Pico_Pio_PioStateMachine::FIELD___block]
             .Dereference();
     FAULT_ON_NULL(pPioBlock);
 
     ctx.block =
-        pPioBlock[Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioBlock::FIELD___index]
+        pPioBlock[Library_nanoFramework_hardware_pico_nanoFramework_Hardware_Pico_Pio_PioBlock::FIELD___index]
             .NumericByRef()
             .s4;
     ctx.sm =
-        pThis[Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioStateMachine::FIELD___sm]
+        pThis[Library_nanoFramework_hardware_pico_nanoFramework_Hardware_Pico_Pio_PioStateMachine::FIELD___sm]
             .NumericByRef()
             .s4;
 
@@ -228,4 +228,4 @@ inline uint32_t NfDmaChannelGetCounter(const rp_dma_channel_t *dmachp)
 #endif
 }
 
-#endif // NANOFRAMEWORK_HARDWARE_PICO_NATIVE_TARGET_H
+#endif // NANOFRAMEWORK_HARDWARE_PICO_TARGET_H

@@ -3,8 +3,8 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#include "nanoFramework_hardware_pico_native.h"
-#include "nanoFramework_hardware_pico_native_target.h"
+#include "nanoFramework_hardware_pico.h"
+#include "nanoFramework_hardware_pico_target.h"
 #if defined(RP2350)
 #include "rp2350.h"
 #else
@@ -51,7 +51,7 @@ static void PioChibiOSCallback(void *param, const uint32_t flags)
     PostManagedEvent(EVENT_PICO_PIO, EVENT_TYPE_PICO_PIO, static_cast<uint16_t>(block), smFlags);
 }
 
-HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioBlock::
+HRESULT Library_nanoFramework_hardware_pico_nanoFramework_Hardware_Pico_Pio_PioBlock::
     AddProgram___U4__nanoFrameworkHardwarePicoPioPioProgram(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
@@ -72,14 +72,14 @@ HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_P
 
     program_array =
         pProgram
-            [Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioProgram::FIELD__Instructions]
+            [Library_nanoFramework_hardware_pico_nanoFramework_Hardware_Pico_Pio_PioProgram::FIELD__Instructions]
                 .DereferenceArray();
 
     FAULT_ON_NULL(program_array);
 
     length = static_cast<int>(program_array->m_numOfElements);
     origin =
-        pProgram[Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioProgram::FIELD__Origin]
+        pProgram[Library_nanoFramework_hardware_pico_nanoFramework_Hardware_Pico_Pio_PioProgram::FIELD__Origin]
             .NumericByRef()
             .s4;
 
@@ -106,7 +106,7 @@ HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_P
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioBlock::
+HRESULT Library_nanoFramework_hardware_pico_nanoFramework_Hardware_Pico_Pio_PioBlock::
     RemoveProgram___VOID__nanoFrameworkHardwarePicoPioPioProgram__U4(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
@@ -125,7 +125,7 @@ HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_P
 
     program =
         pProgram
-            [Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioProgram::FIELD__Instructions]
+            [Library_nanoFramework_hardware_pico_nanoFramework_Hardware_Pico_Pio_PioProgram::FIELD__Instructions]
                 .DereferenceArray();
 
     FAULT_ON_NULL(program);
@@ -144,7 +144,7 @@ HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_P
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioBlock::NativeClaimSm___I4__I4(
+HRESULT Library_nanoFramework_hardware_pico_nanoFramework_Hardware_Pico_Pio_PioBlock::NativeClaimSm___I4__I4(
     CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
@@ -185,7 +185,7 @@ HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_P
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioBlock::InitGpio___VOID__I4__nanoFrameworkHardwarePicoPioPioPinPull(
+HRESULT Library_nanoFramework_hardware_pico_nanoFramework_Hardware_Pico_Pio_PioBlock::InitGpio___VOID__I4__nanoFrameworkHardwarePicoPioPioPinPull(
     CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
@@ -226,7 +226,7 @@ HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_P
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioBlock::ForceIrq___VOID__I4(
+HRESULT Library_nanoFramework_hardware_pico_nanoFramework_Hardware_Pico_Pio_PioBlock::ForceIrq___VOID__I4(
     CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
@@ -252,7 +252,7 @@ HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_P
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioBlock::ClearIrq___VOID__I4(
+HRESULT Library_nanoFramework_hardware_pico_nanoFramework_Hardware_Pico_Pio_PioBlock::ClearIrq___VOID__I4(
     CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
@@ -278,7 +278,7 @@ HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_P
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioBlock::
+HRESULT Library_nanoFramework_hardware_pico_nanoFramework_Hardware_Pico_Pio_PioBlock::
     NativeSetIrqEnabled___VOID__BOOLEAN(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();

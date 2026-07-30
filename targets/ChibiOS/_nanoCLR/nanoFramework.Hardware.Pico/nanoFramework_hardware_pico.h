@@ -3,8 +3,8 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#ifndef NANOFRAMEWORK_HARDWARE_PICO_NATIVE_H
-#define NANOFRAMEWORK_HARDWARE_PICO_NATIVE_H
+#ifndef NANOFRAMEWORK_HARDWARE_PICO_H
+#define NANOFRAMEWORK_HARDWARE_PICO_H
 
 #include <nanoCLR_Interop.h>
 #include <nanoCLR_Runtime.h>
@@ -115,7 +115,7 @@ typedef enum __nfpack SourceOperand
     SourceOperand_OutputShiftRegister = 7,
 } SourceOperand;
 
-struct Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_Pio
+struct Library_nanoFramework_hardware_pico_nanoFramework_Hardware_Pico_Pio_Pio
 {
     static const int FIELD_STATIC___blocks = 0;
     static const int FIELD_STATIC___lock = 1;
@@ -128,7 +128,7 @@ struct Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pi
     //--//
 };
 
-struct Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioAssemblerOptions
+struct Library_nanoFramework_hardware_pico_nanoFramework_Hardware_Pico_Pio_PioAssemblerOptions
 {
     // renamed backing field '<Version>k__BackingField'
     static const int FIELD__Version = 1;
@@ -142,7 +142,7 @@ struct Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pi
     //--//
 };
 
-struct Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioInstructionRef
+struct Library_nanoFramework_hardware_pico_nanoFramework_Hardware_Pico_Pio_PioInstructionRef
 {
     static const int FIELD___owner = 1;
     static const int FIELD___index = 2;
@@ -150,7 +150,7 @@ struct Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pi
     //--//
 };
 
-struct Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioLabel
+struct Library_nanoFramework_hardware_pico_nanoFramework_Hardware_Pico_Pio_PioLabel
 {
     // renamed backing field '<Id>k__BackingField'
     static const int FIELD__Id = 1;
@@ -162,7 +162,7 @@ struct Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pi
     //--//
 };
 
-struct Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioAssembler
+struct Library_nanoFramework_hardware_pico_nanoFramework_Hardware_Pico_Pio_PioAssembler
 {
     static const int FIELD___baseBits = 1;
     static const int FIELD___delay = 2;
@@ -188,7 +188,7 @@ struct Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pi
     //--//
 };
 
-struct Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioBlock
+struct Library_nanoFramework_hardware_pico_nanoFramework_Hardware_Pico_Pio_PioBlock
 {
     static const int FIELD_STATIC__s_eventListener = 2;
 
@@ -207,7 +207,7 @@ struct Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pi
     //--//
 };
 
-struct Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioEvent
+struct Library_nanoFramework_hardware_pico_nanoFramework_Hardware_Pico_Pio_PioEvent
 {
     static const int FIELD__BlockIndex = 3;
     static const int FIELD__Flags = 4;
@@ -215,7 +215,7 @@ struct Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pi
     //--//
 };
 
-struct Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioEventListener
+struct Library_nanoFramework_hardware_pico_nanoFramework_Hardware_Pico_Pio_PioEventListener
 {
     static const int FIELD___pioMap = 1;
     static const int FIELD___syncRoot = 2;
@@ -223,7 +223,7 @@ struct Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pi
     //--//
 };
 
-struct Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioProgramOptions
+struct Library_nanoFramework_hardware_pico_nanoFramework_Hardware_Pico_Pio_PioProgramOptions
 {
     // renamed backing field '<Version>k__BackingField'
     static const int FIELD__Version = 1;
@@ -251,7 +251,7 @@ struct Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pi
     //--//
 };
 
-struct Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioProgram
+struct Library_nanoFramework_hardware_pico_nanoFramework_Hardware_Pico_Pio_PioProgram
 {
     // renamed backing field '<Instructions>k__BackingField'
     static const int FIELD__Instructions = 1;
@@ -285,7 +285,7 @@ struct Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pi
     //--//
 };
 
-struct Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioStateMachine
+struct Library_nanoFramework_hardware_pico_nanoFramework_Hardware_Pico_Pio_PioStateMachine
 {
     static const int FIELD___block = 1;
     static const int FIELD___sm = 2;
@@ -320,7 +320,7 @@ struct Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pi
     //--//
 };
 
-struct Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioStateMachineConfig
+struct Library_nanoFramework_hardware_pico_nanoFramework_Hardware_Pico_Pio_PioStateMachineConfig
 {
     static const int FIELD___outBase = 1;
     static const int FIELD___outCount = 2;
@@ -357,4 +357,4 @@ struct Library_nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pi
 
 extern const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_nanoFramework_Hardware_Pico;
 
-#endif // NANOFRAMEWORK_HARDWARE_PICO_NATIVE_H
+#endif // NANOFRAMEWORK_HARDWARE_PICO_H

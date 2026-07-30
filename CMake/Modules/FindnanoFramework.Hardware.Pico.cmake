@@ -15,10 +15,10 @@ list(APPEND nanoFramework.Hardware.Pico_INCLUDE_DIRS "${BASE_PATH_FOR_THIS_MODUL
 # source files
 set(nanoFramework.Hardware.Pico_SRCS
 
-    nanoFramework_hardware_pico_native.cpp
-    nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_Pio.cpp
-    nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioBlock.cpp
-    nanoFramework_hardware_pico_native_nanoFramework_Hardware_Pico_Pio_PioStateMachine.cpp
+    nanoFramework_hardware_pico.cpp
+    nanoFramework_hardware_pico_nanoFramework_Hardware_Pico_Pio_Pio.cpp
+    nanoFramework_hardware_pico_nanoFramework_Hardware_Pico_Pio_PioBlock.cpp
+    nanoFramework_hardware_pico_nanoFramework_Hardware_Pico_Pio_PioStateMachine.cpp
 )
 
 foreach(SRC_FILE ${nanoFramework.Hardware.Pico_SRCS})
