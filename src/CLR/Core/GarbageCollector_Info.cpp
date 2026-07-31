@@ -114,10 +114,13 @@ void CLR_RT_GarbageCollector::ValidateCluster(CLR_RT_HeapCluster *hc)
             NANOCLR_DEBUG_STOP();
         }
 
-        // Check for overlapping blocks, if this is not a class or value type
+        // Check for overlapping blocks, if this is not a class, value type, or generic instance —
+        // those reuse the Next()/Prev() header slot for object data, so it isn't a real free-list link.
         // First the next block
         CLR_RT_HeapBlock_Node const *nextPtr = ptr->Next();
-        if ((ptr->DataType() != DATATYPE_VALUETYPE && ptr->DataType() != DATATYPE_CLASS) && nextPtr)
+        if ((ptr->DataType() != DATATYPE_VALUETYPE && ptr->DataType() != DATATYPE_CLASS &&
+             ptr->DataType() != DATATYPE_GENERICINST) &&
+            nextPtr)
         {
             // is the next pointer before or after the current block?
             if (nextPtr < ptr)
@@ -134,7 +137,9 @@ void CLR_RT_GarbageCollector::ValidateCluster(CLR_RT_HeapCluster *hc)
 
         // now the previous block
         CLR_RT_HeapBlock_Node const *prevPtr = ptr->Prev();
-        if ((ptr->DataType() != DATATYPE_VALUETYPE && ptr->DataType() != DATATYPE_CLASS) && prevPtr)
+        if ((ptr->DataType() != DATATYPE_VALUETYPE && ptr->DataType() != DATATYPE_CLASS &&
+             ptr->DataType() != DATATYPE_GENERICINST) &&
+            prevPtr)
         {
             // is the previous pointer before or after the current block?
             if (prevPtr < ptr)

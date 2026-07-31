@@ -1335,6 +1335,10 @@ CLR_UINT32 CLR_RT_HeapBlock::GetHashCode(CLR_RT_HeapBlock *ptr, bool fRecurse, C
 
         case DATATYPE_CLASS:
         case DATATYPE_VALUETYPE:
+        // a boxed generic value type (the dedicated DATATYPE_GENERICINST heap object) keeps its
+        // declaring TypeDef in the object header (SetObjectCls), so it hashes by its inline fields
+        // exactly like a value-type instance.
+        case DATATYPE_GENERICINST:
         {
             CLR_RT_TypeDef_Instance cls{};
             cls.InitializeFromIndex(ptr->ObjectCls());
@@ -1462,6 +1466,9 @@ bool CLR_RT_HeapBlock::ObjectsEqual(
 
     switch (leftDataType)
     {
+        // a boxed generic value type (DATATYPE_GENERICINST) compares by its inline fields like a
+        // value type; keys of the same closed type share TypeDef + layout, so the field walk is valid.
+        case DATATYPE_GENERICINST:
         case DATATYPE_VALUETYPE:
             if (pArgLeft.ObjectCls().data == pArgRight.ObjectCls().data)
             {
@@ -1914,6 +1921,7 @@ CLR_INT32 CLR_RT_HeapBlock::Compare_Values(const CLR_RT_HeapBlock &left, const C
 
             case DATATYPE_CLASS:
             case DATATYPE_VALUETYPE:
+            case DATATYPE_GENERICINST:   // boxed generic value type: order by reference like class/value-type
             case DATATYPE_SZARRAY:
             case DATATYPE_WEAKCLASS:
                 return CompareValues_Pointers(&left, &right);
