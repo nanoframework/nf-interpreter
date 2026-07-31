@@ -19,6 +19,13 @@ uint32_t GetExistingConfigSize()
         g_TargetConfiguration.NetworkInterfaceConfigs->Count * sizeof(HAL_Configuration_NetworkInterface);
     currentConfigSize += g_TargetConfiguration.Wireless80211Configs->Count * sizeof(HAL_Configuration_Wireless80211);
 
+    // round up to the next 8-byte boundary - see the matching comment in
+    // ConfigurationManager_StoreConfigurationBlock()'s Wireless80211Network branch for why (STM32
+    // flash can only be programmed in 8-byte aligned units, and programming a unit that isn't
+    // fully erased fails outright even if the value being written is unchanged - so no two config
+    // blocks may ever share one of those units).
+    currentConfigSize = (currentConfigSize + 7U) & ~7U;
+
     return currentConfigSize;
 }
 
@@ -322,6 +329,21 @@ __nfweak bool ConfigurationManager_StoreConfigurationBlock(
                     (uint32_t)&__nanoConfig_end__);
             uint32_t existingSize = existingNet->Count * sizeof(HAL_Configuration_NetworkInterface);
             platform_free(existingNet);
+
+            // Round up to the next 8-byte boundary. STM32 (L4 and similar) internal flash can
+            // only be PROGRAMMED in 8-byte ("double word") aligned units - and, critically, the
+            // flash controller flags a programming error (PROGERR) if any part of that unit isn't
+            // already erased, EVEN IF the value being written there is unchanged. So if this new
+            // block started mid-line (sharing an 8-byte line with the tail of the preceding
+            // Network block), programming would try to "rewrite" that already-programmed, non-
+            // erased tail and fail outright - confirmed on real hardware via the raw FLASH->SR
+            // error bits (0xA8 = PROGERR | PGAERR | PGSERR) on every attempt, regardless of
+            // whether the write preserved or clobbered those leading bytes. Starting each new
+            // config block on a fresh 8-byte boundary sidesteps this entirely: no two blocks ever
+            // share a programmable line, so this alignment padding is required, not optional, on
+            // this flash technology (a few bytes of gap in the config sector is a non-issue).
+            existingSize = (existingSize + 7U) & ~7U;
+
             storageAddress = (uint32_t)&__nanoConfig_start__ + existingSize;
         }
         else if (
@@ -458,6 +480,32 @@ __nfweak bool ConfigurationManager_StoreConfigurationBlock(
         {
             return FALSE;
         }
+    }
+
+    // Network and Wireless80211Network blocks (unlike the X509 ones above) don't have an
+    // explicit "is erased" check/fail - they were written assuming the flash is already erased
+    // (e.g. from the factory, or from a full-chip erase done once before the very first flash).
+    // That assumption doesn't always hold - e.g. a dev board shipped with a pre-loaded demo
+    // firmware occupying this same flash region, where the deployment tooling only
+    // programs the nanoBooter/nanoCLR address ranges and never touches this far-end config
+    // sector. Confirmed on real hardware: this caused ConfigurationManager_StoreConfigurationBlock()
+    // to consistently return FALSE when auto-creating the first Wireless80211 config block, with
+    // no indication why (the plain BlockStorageDevice_Write() call below just silently failed due
+    // to a flash programming error). Erase first if needed - safe here because this code path
+    // (storing the very first block of this type - see the Count == 0 checks above) never has
+    // any other valid data overlapping the specific bytes about to be written.
+    if (configuration == DeviceConfigurationOption_Wireless80211Network)
+    {
+        if (!BlockStorageDevice_IsBlockErased(device, storageAddress, blockSize))
+        {
+            BlockStorageDevice_EraseBlock(device, storageAddress);
+        }
+    }
+    else if (
+        configuration == DeviceConfigurationOption_Network &&
+        !BlockStorageDevice_IsBlockErased(device, storageAddress, blockSize))
+    {
+        BlockStorageDevice_EraseBlock(device, storageAddress);
     }
 
     // copy the config block content to the config block storage
@@ -700,7 +748,29 @@ __nfweak UpdateConfigurationResult ConfigurationManager_UpdateConfigurationBlock
                 eraseOk = BlockStorageDevice_EraseBlock(device, eraseAddr);
             }
 #else
-            bool eraseOk = (BlockStorageDevice_EraseBlock(device, (uint32_t)&__nanoConfig_start__) == TRUE);
+            // BlockStorageDevice_EraseBlock() only erases the single flash page/block CONTAINING
+            // the given address (e.g. 2KB on STM32L4) - it does NOT erase the whole config
+            // sector in one call. The config sector itself can (and on this board does) span
+            // MULTIPLE such pages/blocks (4KB config sector / 2KB blocks = 2 blocks) - calling
+            // this just once, for the sector's start address, only ever erased the FIRST block,
+            // silently leaving any subsequent block(s) with their ORIGINAL (never-erased)
+            // content. Confirmed on real hardware: this caused the very next config update after
+            // the first one landed a real block in the second half of the sector to fail with a
+            // flash programming error, since BlockStorageDevice_Write() below writes the WHOLE
+            // sector back in one shot (including the still-not-actually-erased tail). Loop over
+            // the whole sector in block-sized steps instead - erasing the same physical block
+            // more than once (if the block size doesn't evenly divide into the loop stride) is
+            // harmless, so a conservative fixed stride matching this platform's device block size
+            // is used rather than assuming the sector is only ever a single block.
+            bool eraseOk = TRUE;
+            DeviceBlockInfo *blockInfo = BlockStorageDevice_GetDeviceInfo(device);
+            uint32_t eraseStride = blockInfo->Regions[0].BytesPerBlock;
+            for (uint32_t eraseAddr = (uint32_t)&__nanoConfig_start__;
+                 eraseAddr < (uint32_t)&__nanoConfig_end__ && eraseOk;
+                 eraseAddr += eraseStride)
+            {
+                eraseOk = BlockStorageDevice_EraseBlock(device, eraseAddr);
+            }
 #endif
             if (eraseOk)
             {

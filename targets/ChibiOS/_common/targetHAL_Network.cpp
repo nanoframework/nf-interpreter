@@ -6,11 +6,28 @@
 // This file includes the platform and board specific Network Intialisation
 
 #include <nanoHAL.h>
+#include <nanoCLR_Types.h>
+#include <ch.h>
 
 #if defined(RP2040) || defined(RP2350)
 extern "C" {
 #include <nf_lwipthread_wifi.h>
 }
+#elif defined(TARGET_HAS_WIFI_ISM43362)
+extern "C" {
+#include <wifi.h>
+}
+
+// set to 1 to re-enable the "[ISM43362] ..." trace prints below (see the same flag in
+// sockets_ism43362.cpp for the bulk of the AT-command-level tracing this quiets down)
+#ifndef ISM43362_ENABLE_DEBUG_TRACE
+#define ISM43362_ENABLE_DEBUG_TRACE 0
+#endif
+#if ISM43362_ENABLE_DEBUG_TRACE
+#define ISM43362_TRACE(...) CLR_Debug::Printf(__VA_ARGS__)
+#else
+#define ISM43362_TRACE(...) ((void)0)
+#endif
 #else
 #include <nf_lwipthread.h>
 #endif
@@ -18,8 +35,10 @@ extern "C" {
 // this is the declaration for the callback implement in nf_sys_arch.c
 extern "C" void set_signal_sock_function(void (*funcPtr)());
 
+#if !defined(TARGET_HAS_WIFI_ISM43362)
 // buffer with host name
 static char hostName[18] = "nanodevice_";
+#endif
 
 //
 // Callback from lwIP on event
@@ -31,15 +50,35 @@ void sys_signal_sock_event()
 
 void nanoHAL_Network_Initialize()
 {
-    // Initialise the lwIP CLR signal callback
+#if !defined(TARGET_HAS_WIFI_ISM43362)
+    // Initialise the lwIP CLR signal callback (not used by the ISM43362 socket-proxy layer,
+    // which doesn't go through lwIP's socket/netif event signaling at all)
     set_signal_sock_function(&sys_signal_sock_event);
+#endif
 
     // get network configuration, if available
     if (g_TargetConfiguration.NetworkInterfaceConfigs->Count == 0)
     {
         // there is no networking configuration block, can't proceed
+#if defined(TARGET_HAS_WIFI_ISM43362)
+        ISM43362_TRACE("[ISM43362] nanoHAL_Network_Initialize: no NetworkInterfaceConfigs, skipping.\r\n");
+#endif
         return;
     }
+
+#if defined(TARGET_HAS_WIFI_ISM43362)
+
+    // the ES-WIFI module runs its own onboard TCP/IP stack and is only ever driven through its
+    // socket-oriented AT command set, so there's no lwIP netif/thread to start here - just bring
+    // up the module itself; joining a network happens later via Network_Interface_Start_Connect()
+    ISM43362_TRACE("[ISM43362] nanoHAL_Network_Initialize: calling WIFI_Init()...\r\n");
+
+    WIFI_Status_t initStatus = WIFI_Init();
+    (void)initStatus;
+
+    ISM43362_TRACE("[ISM43362] nanoHAL_Network_Initialize: WIFI_Init() returned %d\r\n", (int)initStatus);
+
+#else
 
     HAL_Configuration_NetworkInterface networkConfig;
 
@@ -121,6 +160,8 @@ void nanoHAL_Network_Initialize()
         }
 #endif
     }
+
+#endif // defined(TARGET_HAS_WIFI_ISM43362)
 }
 
 void nanoHAL_Network_Uninitialize()

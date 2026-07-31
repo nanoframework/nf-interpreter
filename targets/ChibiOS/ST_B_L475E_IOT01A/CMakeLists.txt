@@ -6,6 +6,24 @@
 include(binutils.common)
 include(binutils.ChibiOS)
 
+# this board has an onboard Inventek ISM43362 (ES-WIFI) module, driven over SPI - it doesn't
+# expose a raw MAC/link-layer interface, so it uses a dedicated socket-proxy networking
+# implementation (see targets/ChibiOS/_WiFi/inventek and CMake/Modules/FindNF_Network.cmake)
+# instead of the generic lwIP one
+if(TARGET_HAS_WIFI)
+    set(TARGET_HAS_WIFI_ISM43362 TRUE)
+
+    # needs to be visible to every compilation unit in this board (not just the NF_Network
+    # library), since e.g. the System.Device.Wifi native implementation also branches on it
+    add_compile_definitions(TARGET_HAS_WIFI_ISM43362)
+
+    # ditto for the ES-WIFI driver headers (wifi.h), needed by the System.Device.Wifi native
+    # implementation in addition to the NF_Network library
+    include_directories(
+        ${CMAKE_SOURCE_DIR}/targets/ChibiOS/_WiFi
+        ${CMAKE_SOURCE_DIR}/targets/ChibiOS/_WiFi/inventek)
+endif()
+
 nf_setup_target_build(
     HAS_NANOBOOTER
 
