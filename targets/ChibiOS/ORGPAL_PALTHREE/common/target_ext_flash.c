@@ -178,7 +178,10 @@ bool AT25SF641_Write(const uint8_t *buf, uint32_t addr, uint32_t size)
         spiSend(&SPID1, writeSize, dataBuffer_0);
         CS_UNSELECT;
 
-        AT25SF641_WaitReady();
+        if (!AT25SF641_WaitReady())
+        {
+            return false;
+        }
 
         address += writeSize;
         buf += writeSize;
