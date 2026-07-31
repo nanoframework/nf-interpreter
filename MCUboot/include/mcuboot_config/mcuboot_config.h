@@ -51,11 +51,11 @@
 // CONFIG_NF_MCUBOOT_OVERWRITE_ONLY: fallback for targets with no secondary NVM.
 //   No rollback support - new image overwrites primary slot directly.
 //
-#if defined(CONFIG_NF_MCUBOOT_SWAP_USING_OFFSET)
+#if defined(CONFIG_NF_MCUBOOT_SWAP_USING_OFFSET) && CONFIG_NF_MCUBOOT_SWAP_USING_OFFSET
 #define MCUBOOT_SWAP_USING_OFFSET 1
-#elif defined(CONFIG_NF_MCUBOOT_SWAP_USING_MOVE)
+#elif defined(CONFIG_NF_MCUBOOT_SWAP_USING_MOVE) && CONFIG_NF_MCUBOOT_SWAP_USING_MOVE
 #define MCUBOOT_SWAP_USING_MOVE 1
-#elif defined(CONFIG_NF_MCUBOOT_OVERWRITE_ONLY)
+#elif defined(CONFIG_NF_MCUBOOT_OVERWRITE_ONLY) && CONFIG_NF_MCUBOOT_OVERWRITE_ONLY
 #define MCUBOOT_OVERWRITE_ONLY
 #endif
 
@@ -75,7 +75,7 @@
 //   of the primary slot image.  Wire Protocol is disabled in RTM firmware, so
 //   direct writes to deploy_0 never occur.
 //
-#if defined(CONFIG_NF_BUILD_RTM)
+#if defined(CONFIG_NF_BUILD_RTM) && CONFIG_NF_BUILD_RTM
 #define MCUBOOT_VALIDATE_PRIMARY_SLOT
 #endif
 
@@ -127,7 +127,7 @@
 // Serial recovery - optional bootloader recovery mode over UART.
 // Enabled per target via CONFIG_NF_MCUBOOT_SERIAL_RECOVERY=y in Kconfig.
 //
-#if defined(CONFIG_NF_MCUBOOT_SERIAL_RECOVERY)
+#if defined(CONFIG_NF_MCUBOOT_SERIAL_RECOVERY) && CONFIG_NF_MCUBOOT_SERIAL_RECOVERY
 #define MCUBOOT_SERIAL 1
 // Use snprintf() for version string formatting (smaller code with newlib-nano).
 #define MCUBOOT_USE_SNPRINTF 1

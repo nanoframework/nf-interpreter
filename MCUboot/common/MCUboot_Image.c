@@ -7,7 +7,7 @@
 #include <stdbool.h>
 #include <MCUboot_Image.h>
 
-#ifdef CONFIG_NF_FEATURE_HAS_MCUBOOT
+#if defined(CONFIG_NF_FEATURE_HAS_MCUBOOT) && CONFIG_NF_FEATURE_HAS_MCUBOOT
 
 #include <sysflash/sysflash.h>
 #include <bootutil/bootutil_public.h>

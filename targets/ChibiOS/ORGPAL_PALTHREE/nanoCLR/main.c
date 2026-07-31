@@ -17,7 +17,7 @@
 #include <nanoHAL_v2.h>
 #include <targetPAL.h>
 
-#ifdef CONFIG_NF_FEATURE_HAS_MCUBOOT
+#if defined(CONFIG_NF_FEATURE_HAS_MCUBOOT) && CONFIG_NF_FEATURE_HAS_MCUBOOT
 #include <MCUboot_StartupPolicy.h>
 #endif
 
@@ -71,7 +71,7 @@ int main(void)
     // and performs the board-specific initializations.
     halInit();
 
-#ifdef CONFIG_NF_FEATURE_HAS_MCUBOOT
+#if defined(CONFIG_NF_FEATURE_HAS_MCUBOOT) && CONFIG_NF_FEATURE_HAS_MCUBOOT
     // Initialize MCUboot startup policies for both CLR and deploy images
     nf_mcuboot_startup_init();
 #endif

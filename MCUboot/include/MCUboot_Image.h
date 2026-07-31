@@ -15,7 +15,7 @@ extern "C"
 {
 #endif
 
-#ifdef CONFIG_NF_FEATURE_HAS_MCUBOOT
+#if defined(CONFIG_NF_FEATURE_HAS_MCUBOOT) && CONFIG_NF_FEATURE_HAS_MCUBOOT
 
     /**
      * @brief Combined image state returned by nf_mcuboot_get_image_details().

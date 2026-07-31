@@ -11,7 +11,7 @@ extern "C"
 {
 #endif
 
-#ifdef CONFIG_NF_FEATURE_HAS_MCUBOOT
+#if defined(CONFIG_NF_FEATURE_HAS_MCUBOOT) && CONFIG_NF_FEATURE_HAS_MCUBOOT
 
 #include <MCUboot_RuntimeInterface.h>
 
