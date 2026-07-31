@@ -14,14 +14,13 @@
 //   [config block]                  : 0x08010000  32 kB   internal sector 2  (HAL-managed, not a MCUboot slot)
 //   FLASH_AREA_IMAGE_0_PRIMARY   (1): 0x08018000  928 kB  internal sectors 3-7 (bank 1)
 //   FLASH_AREA_IMAGE_0_SECONDARY (2): AT25SF641 @ 0x000000  960 kB  (240 × 4 kB sub-sectors)
-//   FLASH_AREA_IMAGE_1_PRIMARY   (4): 0x08100000  1024 kB internal bank 2
-//   FLASH_AREA_IMAGE_1_SECONDARY (5): AT25SF641 @ 0x0F0000  1056 kB (264 × 4 kB sub-sectors)
+//   FLASH_AREA_IMAGE_1_PRIMARY   (3): 0x08100000  1024 kB internal bank 2
+//   FLASH_AREA_IMAGE_1_SECONDARY (4): AT25SF641 @ 0x0F0000  1056 kB (264 × 4 kB sub-sectors)
 //
 // Secondary slots are sized one logical sector (CONFIG_NF_MCUBOOT_LOGICAL_SECTOR_SIZE,
 // 32 kB) larger than their primary counterpart, as MCUBOOT_SWAP_USING_OFFSET's
 // boot_slots_compatible() treats secondary == primary + 1 logical sector as the
-// optimal distribution (the extra sector covers the swap-status trailer without
-// eating into the primary slot's own capacity).
+// optimal distribution.
 
 #ifndef MCUBOOT_FLASH_LAYOUT_ORGPAL_PALTHREE_H
 #define MCUBOOT_FLASH_LAYOUT_ORGPAL_PALTHREE_H

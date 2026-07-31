@@ -95,9 +95,21 @@ static const struct flash_area s_flash_areas[] = {
 
 #define FLASH_AREA_TABLE_COUNT (sizeof(s_flash_areas) / sizeof(s_flash_areas[0]))
 
+// MCUBOOT_MAX_IMG_SECTORS bounds the unit the swap algorithms count in, which is the
+// logical sector when one is configured and the physical sector otherwise. The deploy
+// secondary slot is the largest, so it sets the requirement.
+#if defined(MCUBOOT_LOGICAL_SECTOR_SIZE) && MCUBOOT_LOGICAL_SECTOR_SIZE != 0
+static_assert(
+    NF_MCUBOOT_SLOT_IMG1_SEC_SIZE / MCUBOOT_LOGICAL_SECTOR_SIZE <= MCUBOOT_MAX_IMG_SECTORS,
+    "Deploy secondary logical sector count exceeds MCUBOOT_MAX_IMG_SECTORS");
+static_assert(
+    MCUBOOT_LOGICAL_SECTOR_SIZE % MCUBOOT_EXTERNAL_FLASH_SECTOR_SIZE == 0,
+    "Logical sector size must be a whole number of external flash sectors");
+#else
 static_assert(
     NF_MCUBOOT_SLOT_IMG1_SEC_SIZE / MCUBOOT_EXTERNAL_FLASH_SECTOR_SIZE <= MCUBOOT_MAX_IMG_SECTORS,
     "Deploy secondary sector count exceeds MCUBOOT_MAX_IMG_SECTORS");
+#endif
 
 int flash_area_open(uint8_t id, const struct flash_area **area_outp)
 {

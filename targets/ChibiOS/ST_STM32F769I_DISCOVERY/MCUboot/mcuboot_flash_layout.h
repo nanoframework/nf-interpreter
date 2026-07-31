@@ -16,8 +16,8 @@
 //   [config block]                    0x08010000  32 kB   internal sector 2 — HAL-managed, not a flash_area
 //   FLASH_AREA_IMAGE_0_PRIMARY   (1): 0x08018000  928 kB  internal sectors 3-7 (bank 1)
 //   FLASH_AREA_IMAGE_0_SECONDARY (2): SD card file /mcuboot/img0_sec.bin  960 kB
-//   FLASH_AREA_IMAGE_1_PRIMARY   (4): 0x08100000  1024 kB internal bank 2
-//   FLASH_AREA_IMAGE_1_SECONDARY (5): SD card file /mcuboot/img1_sec.bin  1056 kB
+//   FLASH_AREA_IMAGE_1_PRIMARY   (3): 0x08100000  1024 kB internal bank 2
+//   FLASH_AREA_IMAGE_1_SECONDARY (4): SD card file /mcuboot/img1_sec.bin  1056 kB
 //
 // Secondary slots are accessed as FatFs files (virtual sector = 4 kB).
 // FatFs integration is deferred — mcuboot_ext_flash_init() currently returns -1

@@ -6,7 +6,7 @@
 # ORGPAL_PALX — STM32F769NI, W25Q512 QUADSPI external flash.
 # Called from MCUboot/CMakeLists.txt via include() after the series-common
 # variables (MCUBOOT_SERIES_COMMON_*) have been set for STM32F7xx.
-# Always optimise for size (-Os): the bootloader slot is 32 kB.
+# Always optimise for size (-Os): the bootloader slot is 64 kB.
 
 include(FetchContent)
 FetchContent_GetProperties(stm32f7_hal_driver)

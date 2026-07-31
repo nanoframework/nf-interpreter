@@ -13,10 +13,6 @@
 #ifndef MCUBOOT_CONFIG_ORGPAL_PALTHREE_H
 #define MCUBOOT_CONFIG_ORGPAL_PALTHREE_H
 
-// STM32F7 FLASHv2: minimum write unit is 4 bytes (FLASH_CR_PSIZE_WORD).
-// MCUboot uses this to align swap-state trailer fields.
-#define MCUBOOT_FLASH_WRITE_ALIGNMENT 4U
-
 // AT25SF641 4 kB sub-sector erase (0x20) is used as the MCUboot erase unit for
 // secondary slots. The primary slot (IMG0) is 928 kB which is not divisible by
 // 32 kB or 64 kB (the block erase sizes), so the 4 kB sub-sector must be used
@@ -24,13 +20,5 @@
 // The AT25SF641 also supports 32 kB block erase (0x52), used by AT25SF641_EraseChip
 // (not called by MCUboot).
 #define MCUBOOT_EXTERNAL_FLASH_SECTOR_SIZE (4U * 1024U)
-
-// MCUboot image header size in bytes.
-// Must match the --header-size argument passed to imgtool sign.
-#define MCUBOOT_IMAGE_HEADER_SIZE 0x200U
-
-// Maximum number of sectors across any single image slot.
-// Largest slot: Image 1 secondary = 1056 kB / 4 kB = 264 sub-sectors.
-#define MCUBOOT_MAX_IMG_SECTORS 264U
 
 #endif // MCUBOOT_CONFIG_ORGPAL_PALTHREE_H

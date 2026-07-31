@@ -17,14 +17,23 @@
 #ifndef NF_CONFIG_MCUBOOT_STUB_H
 #define NF_CONFIG_MCUBOOT_STUB_H
 
+// Every definition below is a FALLBACK for the platform.
+// Target configurations are authoritative.
+
 // STM32 targets use swap-using-offset: primary slot in internal flash, secondary slot on external storage.
+#ifndef CONFIG_NF_MCUBOOT_SWAP_USING_OFFSET
 #define CONFIG_NF_MCUBOOT_SWAP_USING_OFFSET 1
+#endif
 
 // Two images: Image 0 = nanoCLR firmware, Image 1 = deployment area.
+#ifndef CONFIG_NF_MCUBOOT_IMAGE_NUMBER
 #define CONFIG_NF_MCUBOOT_IMAGE_NUMBER 2
+#endif
 
 // Image header size in bytes — must match imgtool sign --header-size.
+#ifndef CONFIG_NF_MCUBOOT_HEADER_SIZE
 #define CONFIG_NF_MCUBOOT_HEADER_SIZE 0x200
+#endif
 
 // CONFIG_NF_BUILD_RTM is intentionally NOT defined here.
 // In the bootloader context this allows boot even when primary slot signature
@@ -32,7 +41,11 @@
 
 // Serial recovery mode: detect BOOT button (GPIOK7, active-LOW) and enter SMP
 // recovery loop if pressed. Enables MCUBOOT_SERIAL=1 and full boot_serial.c stack.
-#define CONFIG_NF_MCUBOOT_SERIAL_RECOVERY        1
+#ifndef CONFIG_NF_MCUBOOT_SERIAL_RECOVERY
+#define CONFIG_NF_MCUBOOT_SERIAL_RECOVERY 1
+#endif
+#ifndef CONFIG_NF_MCUBOOT_SERIAL_DETECT_DELAY_MS
 #define CONFIG_NF_MCUBOOT_SERIAL_DETECT_DELAY_MS 100
+#endif
 
 #endif // NF_CONFIG_MCUBOOT_STUB_H
