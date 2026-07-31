@@ -773,6 +773,9 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeInit___VOID(
     palUart->ReceivedBytesThreshold = (receivedBytesThreshold > 0) ? (uint32_t)receivedBytesThreshold : 1;
 
     // get "new line" and cache its last character, mirroring WatchChar
+    // not every port's init path resets NewLineChar (only USART1 does, via InitConfig_USART1), so clear it here
+    // first to avoid leaking a stale value from a previous Open() when the managed newLine is null or empty
+    palUart->NewLineChar = 0;
     newLine = pThis[FIELD___newLine].RecoverString();
     if (newLine != NULL)
     {

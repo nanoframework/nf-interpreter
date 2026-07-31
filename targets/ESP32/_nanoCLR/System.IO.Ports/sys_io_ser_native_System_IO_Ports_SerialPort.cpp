@@ -215,7 +215,7 @@ void uart_event_task_sys(void *pvParameters)
                         {
                             // no synchronous read pending: wake up a blocked ReadLine(), if the new line char
                             // was received in this chunk
-                            if (palUart->NewLineChar > 0)
+                            if (palUart->NewLineChar > 0 && readCount > 0)
                             {
                                 int32_t newLineSearchIndex = readCount;
 
