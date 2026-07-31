@@ -63,6 +63,25 @@ config NF_MCUBOOT_IMAGE_NUMBER
         2 (default): Image 0 = nanoCLR firmware, Image 1 = deployment area.
         Both images can be upgraded and rolled back independently.
 
+config NF_MCUBOOT_BOOTSTRAP
+    bool "Adopt a valid secondary image when the primary slot is empty"
+    depends on NF_FEATURE_HAS_MCUBOOT
+    default y
+    help
+        Allow MCUboot to install the secondary slot image into an erased or
+        otherwise invalid primary slot, without requiring a pending marker in
+        the secondary slot trailer.
+
+        This is what makes a blank device bootable: after a full flash erase,
+        an image uploaded to the secondary slot (via serial recovery or JTAG)
+        is adopted on the next reset.
+
+        The option is inert once the primary slot holds a valid image, so it
+        does not interfere with the normal test/confirm/revert upgrade flow.
+
+        Disable only for production images that must never boot an unsolicited
+        secondary image.
+
 config NF_MCUBOOT_SERIAL_RECOVERY
     bool "Enable serial recovery mode"
     depends on NF_FEATURE_HAS_MCUBOOT
@@ -75,8 +94,16 @@ config NF_MCUBOOT_SERIAL_RECOVERY
 
         The transport channel is board-specific: USB CDC boards return &SDU1
         from mcuboot_serial_get_channel(); UART boards return &SD1 (or similar).
-        Only the image upload group is compiled in; image-state, hash, and
-        slot-info groups are disabled to minimise flash usage.
+        The image upload group is always compiled in; the image-state group is
+        controlled by NF_MCUBOOT_SERIAL_IMG_STATE and the slot-info group is
+        disabled to minimise flash usage.
+
+config NF_MCUBOOT_SERIAL_IMG_STATE
+    bool "Enable the SMP image-state group"
+    depends on NF_MCUBOOT_SERIAL_RECOVERY
+    default n
+    help
+        Enable the mcumgr image-state write command (group 1, cmd 0, write).
 
 config NF_MCUBOOT_SERIAL_DETECT_DELAY_MS
     int "Serial recovery detect delay (ms)"

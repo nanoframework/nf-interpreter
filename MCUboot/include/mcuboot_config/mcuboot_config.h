@@ -80,6 +80,19 @@
 #endif
 
 //
+// Bootstrap - adopt a valid secondary image when the primary slot is erased or invalid.
+//
+// Without this, a blank device is a dead end: an image uploaded to the secondary slot has
+// no pending marker in its trailer.
+// Inert once the primary slot holds a valid image.
+//
+// Enabled per target via CONFIG_NF_MCUBOOT_BOOTSTRAP=y in Kconfig.
+//
+#if defined(CONFIG_NF_MCUBOOT_BOOTSTRAP) && CONFIG_NF_MCUBOOT_BOOTSTRAP
+#define MCUBOOT_BOOTSTRAP 1
+#endif
+
+//
 // Flash abstraction - use the flash_area_get_sectors() API for sector enumeration.
 // DEV_WITH_ERASE: flash device requires explicit erase before write.
 //
@@ -92,14 +105,23 @@
 #endif
 
 //
-// Maximum number of erasable sectors that MCUboot will track per image slot.
-// Must be >= (slot_size / min_sector_size).
-// 512 is sufficient for all current nanoFramework targets:
-//   - STM32F76xx 128kB sectors: 960kB / 128kB = 7.5 → 8 sectors
-//   - ESP32 4kB sectors: 1664kB / 4kB = 416 sectors  (< 512 ✓)
+// Maximum number of sectors that MCUboot will track per image slot.
+// Must be >= (largest slot size / sector size), where "sector" is whatever unit the
+// swap algorithms count in. It bounds BOOT_STATUS_MAX_ENTRIES, and so the size of the
+// swap status area reserved at the end of every slot.
+//
+// Do NOT define this per board.
 //
 #ifndef MCUBOOT_MAX_IMG_SECTORS
+#if defined(MCUBOOT_LOGICAL_SECTOR_SIZE) && MCUBOOT_LOGICAL_SECTOR_SIZE != 0
+// Logical sectors: the swap algorithms count logical, not physical, sectors.
+#define MCUBOOT_MAX_IMG_SECTORS 64
+#else
+// Physical sectors:
+//   - STM32F76xx 128kB sectors: 960kB / 128kB = 7.5 → 8 sectors
+//   - ESP32 4kB sectors: 1664kB / 4kB = 416 sectors  (< 512 ✓)
 #define MCUBOOT_MAX_IMG_SECTORS 512
+#endif
 #endif
 
 //
@@ -139,10 +161,19 @@
 #endif
 // Disable the LED status pin - avoids os_cputime dependency in boot_serial.c.
 #define BOOT_SERIAL_REPORT_PIN -1
-// Disable optional image info groups to minimise flash usage.
-// Only the image upload group (group 1, cmd 1) is required for OTA recovery.
-// MCUBOOT_SERIAL_IMG_GRP_IMAGE_STATE not defined → disabled
-// MCUBOOT_SERIAL_IMG_GRP_HASH         not defined → disabled
+// Image-state group (group 1, cmd 0, write) - "image test" / "image confirm".
+//
+// MCUBOOT_SERIAL_IMG_GRP_HASH is not optional alongside it when MCUBOOT_IMAGE_NUMBER
+// is 2: bs_set() rejects a hash-less request for multi-image builds, and without the
+// hash decoded it cannot resolve which image the request refers to (image_index would
+// stay pinned at 0).
+//
+// Enabled per target via CONFIG_NF_MCUBOOT_SERIAL_IMG_STATE=y in Kconfig.
+//
+#if defined(CONFIG_NF_MCUBOOT_SERIAL_IMG_STATE) && CONFIG_NF_MCUBOOT_SERIAL_IMG_STATE
+#define MCUBOOT_SERIAL_IMG_GRP_IMAGE_STATE 1
+#define MCUBOOT_SERIAL_IMG_GRP_HASH        1
+#endif
 // MCUBOOT_SERIAL_IMG_GRP_SLOT_INFO    not defined → disabled
 
 // Disable per-user management group extension.
