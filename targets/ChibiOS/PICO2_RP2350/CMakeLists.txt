@@ -20,6 +20,10 @@ list(APPEND TARGET_CHIBIOS_COMMON_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/Target_Bl
 list(APPEND TARGET_CHIBIOS_COMMON_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/target_stubs.cpp")
 list(APPEND TARGET_CHIBIOS_COMMON_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/target_core1_stubs.c")
 
+# PIO LLD sources
+list(APPEND TARGET_CHIBIOS_NANOCLR_INCLUDE_DIRS "${chibios_SOURCE_DIR}/os/hal/ports/RP/LLD/PIOv1")
+list(APPEND TARGET_CHIBIOS_NANOCLR_SOURCES "${chibios_SOURCE_DIR}/os/hal/ports/RP/LLD/PIOv1/rp_pio.c")
+
 nf_setup_target_build(
     HAS_NANOBOOTER
 
@@ -31,6 +35,7 @@ nf_setup_target_build(
 
     CLR_EXTRA_COMPILE_DEFINITIONS
         -DRUNTIME_MEMORY_PROFILE__small=1
+        -DRP_PIO_REQUIRED=1
         # RP flash is XIP-mapped and shared with code execution; this flag enables
         # runtime handling that avoids USB/WP activity while XIP flash operations are in progress.
         -DTARGET_XIP_FLASH_BLOCKS_USB=1

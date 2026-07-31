@@ -1,4 +1,4 @@
-﻿#
+#
 # Copyright (c) .NET Foundation and Contributors
 # See LICENSE file in the project root for full license information.
 #
@@ -42,6 +42,7 @@ option(API_nanoFramework.Networking.Thread              "option for nanoFramewor
 
 # Stm32 only
 option(API_Hardware.Stm32                               "option for Hardware.Stm32")
+option(API_Hardware.Pico                                "option for Hardware.Pico")
 
 # TI CC13xxCC26xx
 option(API_nanoFramework.TI.EasyLink                    "option for nanoFramework.TI.EasyLink API")
@@ -268,6 +269,12 @@ endif()
 if(API_Hardware.Stm32)
     ##### API name here (doted name)
     PerformSettingsForApiEntry("nanoFramework.Hardware.Stm32")
+endif()
+
+# Hardware.Pico
+if(API_Hardware.Pico)
+    ##### API name here (doted name)
+    PerformSettingsForApiEntry("nanoFramework.Hardware.Pico")
 endif()
 
 # nanoFramework.Device.Can
