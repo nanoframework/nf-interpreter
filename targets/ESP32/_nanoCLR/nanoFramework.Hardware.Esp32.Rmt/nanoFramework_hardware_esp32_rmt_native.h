@@ -158,12 +158,16 @@ struct Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_Es
     //--//
 
     static std::map<rmt_channel_handle_t, RmtChannelInfo> registeredRmtChannels;
- 
+
     static void UninitializeAll();
     static void AddRegisteredTxChannel(rmt_channel_handle_t h, int bufferSize, rmt_encoder_handle_t encoder);
-    static void AddRegisteredRxChannel(rmt_channel_handle_t h, QueueHandle_t receive_queue, uint8_t * buffer, CLR_INT32 bufferSize);
+    static void AddRegisteredRxChannel(
+        rmt_channel_handle_t h,
+        QueueHandle_t receive_queue,
+        uint8_t *buffer,
+        CLR_INT32 bufferSize);
 
-    static RmtChannelInfo * FindRegisteredRmtChannel(rmt_channel_handle_t handle, RmtChannelType channelType);
+    static RmtChannelInfo *FindRegisteredRmtChannel(rmt_channel_handle_t handle, RmtChannelType channelType);
 
     static bool CheckChannel(rmt_channel_handle_t channel);
     static void EraseChannel(rmt_channel_handle_t h);
@@ -211,7 +215,8 @@ struct Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_Es
 
 struct Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_Esp32_Rmt_Utils
 {
-    NANOCLR_NATIVE_DECLARE(DecodeSymbolArrayToBytes___STATIC__SZARRAY_U1__SZARRAY_nanoFrameworkHardwareEsp32RmtRmtSymbol__I4__BOOLEAN__I4__I4__BOOLEAN);
+    NANOCLR_NATIVE_DECLARE(
+        DecodeSymbolArrayToBytes___STATIC__SZARRAY_U1__SZARRAY_nanoFrameworkHardwareEsp32RmtRmtSymbol__I4__BOOLEAN__I4__I4__BOOLEAN);
 
     //--//
 };
