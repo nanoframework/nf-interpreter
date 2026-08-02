@@ -9,11 +9,13 @@
 #include <lwip/dns.h>
 
 #if defined(RP2040) || defined(RP2350)
-extern "C" {
+extern "C"
+{
 #include <nf_lwipthread_wifi.h>
 }
 #elif defined(TARGET_HAS_WIFI_ISM43362)
-extern "C" {
+extern "C"
+{
 #include <wifi.h>
 }
 #else
@@ -127,8 +129,7 @@ int Network_Interface_Connect_Result(int configIndex)
     if (g_TargetConfiguration.NetworkInterfaceConfigs != NULL &&
         g_TargetConfiguration.NetworkInterfaceConfigs->Count > 0)
     {
-        HAL_Configuration_NetworkInterface *cfg =
-            g_TargetConfiguration.NetworkInterfaceConfigs->Configs[0];
+        HAL_Configuration_NetworkInterface *cfg = g_TargetConfiguration.NetworkInterfaceConfigs->Configs[0];
 
         struct netif *nif = nf_getNetif();
         if (nif != NULL)

@@ -62,7 +62,6 @@ extern "C" void ISM43362_DebugPrintf(const char *fmt, ...)
 #endif
 }
 
-
 // Size of the per-socket receive lookahead buffer used by SOCK_ioctl(SOCK_FIONREAD) (see below).
 // Chosen to match the internal buffer size InputNetworkStreamWrapper itself uses (256 bytes) - big
 // enough to turn a whole HTTP response chunk into a handful of AT command round trips instead of
@@ -181,13 +180,7 @@ int SOCK_connect(SOCK_SOCKET socket, const struct SOCK_sockaddr *address, int ad
     uint16_t port;
     GetIPv4AddressAndPort(address, ipAddr, &port);
 
-    if (WIFI_OpenClientConnection(
-            (uint32_t)socket,
-            s_sockets[socket].protocol,
-            "",
-            ipAddr,
-            port,
-            0) != WIFI_STATUS_OK)
+    if (WIFI_OpenClientConnection((uint32_t)socket, s_sockets[socket].protocol, "", ipAddr, port, 0) != WIFI_STATUS_OK)
     {
         s_lastError = SOCK_ECONNREFUSED;
         return SOCK_SOCKET_ERROR;
@@ -212,12 +205,8 @@ int SOCK_send(SOCK_SOCKET socket, const char *buf, int len, int flags)
 
     uint16_t sentLen = 0;
 
-    if (WIFI_SendData(
-            (uint8_t)socket,
-            (uint8_t *)buf,
-            (uint16_t)len,
-            &sentLen,
-            ISM43362_SOCKET_TIMEOUT) != WIFI_STATUS_OK)
+    if (WIFI_SendData((uint8_t)socket, (uint8_t *)buf, (uint16_t)len, &sentLen, ISM43362_SOCKET_TIMEOUT) !=
+        WIFI_STATUS_OK)
     {
         s_lastError = SOCK_ECONNRESET;
         return SOCK_SOCKET_ERROR;
@@ -264,7 +253,8 @@ int SOCK_recv(SOCK_SOCKET socket, char *buf, int len, int flags)
     // erroring out above it.
     uint16_t requestLen = (len > ES_WIFI_PAYLOAD_SIZE) ? ES_WIFI_PAYLOAD_SIZE : (uint16_t)len;
 
-    WIFI_Status_t status = WIFI_ReceiveData((uint8_t)socket, (uint8_t *)buf, requestLen, &receivedLen, ISM43362_SOCKET_TIMEOUT);
+    WIFI_Status_t status =
+        WIFI_ReceiveData((uint8_t)socket, (uint8_t *)buf, requestLen, &receivedLen, ISM43362_SOCKET_TIMEOUT);
 
     if (status == WIFI_STATUS_SOCKET_CLOSED)
     {
@@ -428,12 +418,8 @@ int SOCK_ioctl(SOCK_SOCKET socket, int cmd, int *data)
         state.peekBufLen = 0;
 
         uint16_t receivedLen = 0;
-        WIFI_Status_t status = WIFI_ReceiveData(
-            (uint8_t)socket,
-            state.peekBuf,
-            ISM43362_RX_LOOKAHEAD_SIZE,
-            &receivedLen,
-            0);
+        WIFI_Status_t status =
+            WIFI_ReceiveData((uint8_t)socket, state.peekBuf, ISM43362_RX_LOOKAHEAD_SIZE, &receivedLen, 0);
 
         if (status == WIFI_STATUS_SOCKET_CLOSED)
         {
@@ -564,7 +550,6 @@ int SOCK_select(
 
     return readyCount;
 }
-
 
 int SOCK_setsockopt(SOCK_SOCKET socket, int level, int optname, const char *optval, int optlen)
 {
@@ -718,14 +703,8 @@ int SOCK_sendto(SOCK_SOCKET s, const char *buf, int len, int flags, const struct
 
     uint16_t sentLen = 0;
 
-    if (WIFI_SendDataTo(
-            (uint8_t)s,
-            (uint8_t *)buf,
-            (uint16_t)len,
-            &sentLen,
-            ISM43362_SOCKET_TIMEOUT,
-            ipAddr,
-            port) != WIFI_STATUS_OK)
+    if (WIFI_SendDataTo((uint8_t)s, (uint8_t *)buf, (uint16_t)len, &sentLen, ISM43362_SOCKET_TIMEOUT, ipAddr, port) !=
+        WIFI_STATUS_OK)
     {
         s_lastError = SOCK_ECONNRESET;
         return SOCK_SOCKET_ERROR;
@@ -802,8 +781,7 @@ HRESULT SOCK_CONFIGURATION_LoadAdapterConfiguration(HAL_Configuration_NetworkInt
 
         if (WIFI_GetGateway_Address(gatewayAddr) == WIFI_STATUS_OK)
         {
-            config->IPv4GatewayAddress =
-                LWIP_MAKEU32(gatewayAddr[0], gatewayAddr[1], gatewayAddr[2], gatewayAddr[3]);
+            config->IPv4GatewayAddress = LWIP_MAKEU32(gatewayAddr[0], gatewayAddr[1], gatewayAddr[2], gatewayAddr[3]);
         }
 
         if (WIFI_GetDNS_Address(dns1, dns2) == WIFI_STATUS_OK)

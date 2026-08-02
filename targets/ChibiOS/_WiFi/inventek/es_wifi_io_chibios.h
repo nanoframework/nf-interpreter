@@ -15,13 +15,13 @@ extern "C"
 {
 #endif
 
-#define WIFI_RESET_MODULE()                                                                                          \
-    do                                                                                                               \
-    {                                                                                                                \
-        palClearLine(LINE_ISM43362_RST);                                                                             \
-        chThdSleepMilliseconds(20);                                                                                  \
-        palSetLine(LINE_ISM43362_RST);                                                                               \
-        chThdSleepMilliseconds(500);                                                                                 \
+#define WIFI_RESET_MODULE()                                                                                            \
+    do                                                                                                                 \
+    {                                                                                                                  \
+        palClearLine(LINE_ISM43362_RST);                                                                               \
+        chThdSleepMilliseconds(20);                                                                                    \
+        palSetLine(LINE_ISM43362_RST);                                                                                 \
+        chThdSleepMilliseconds(500);                                                                                   \
     } while (0);
 
 #define WIFI_IS_CMDDATA_READY() (palReadLine(LINE_ISM43362_CMDTRDY) == PAL_HIGH)

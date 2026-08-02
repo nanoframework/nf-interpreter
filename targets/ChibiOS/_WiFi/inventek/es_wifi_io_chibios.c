@@ -175,10 +175,16 @@ int8_t SPI_WIFI_ResetModule(void)
     CS_UNSELECT;
 
     ISM43362_DebugPrintf(
-        "[ISM43362] SPI_WIFI_ResetModule: drain done, count=%d, readSucceed=%d, bytes=%02X %02X %02X %02X %02X %02X\r\n",
+        "[ISM43362] SPI_WIFI_ResetModule: drain done, count=%d, readSucceed=%d, bytes=%02X %02X %02X %02X %02X "
+        "%02X\r\n",
         (int)count,
         (int)readSucceed,
-        rxBuffer[0], rxBuffer[1], rxBuffer[2], rxBuffer[3], rxBuffer[4], rxBuffer[5]);
+        rxBuffer[0],
+        rxBuffer[1],
+        rxBuffer[2],
+        rxBuffer[3],
+        rxBuffer[4],
+        rxBuffer[5]);
 
     if (!readSucceed || (rxBuffer[0] != 0x15) || (rxBuffer[1] != 0x15) || (rxBuffer[2] != '\r') ||
         (rxBuffer[3] != '\n') || (rxBuffer[4] != '>') || (rxBuffer[5] != ' '))
