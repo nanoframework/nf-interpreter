@@ -5,8 +5,6 @@
 //
 
 #include <nanoHAL.h>
-#include <nanoCLR_Types.h>
-#include <ch.h>
 #include <lwip/netifapi.h>
 #include <lwip/dns.h>
 
@@ -18,17 +16,6 @@ extern "C" {
 extern "C" {
 #include <wifi.h>
 }
-
-// set to 1 to re-enable the "[ISM43362] ..." trace prints below (see the same flag in
-// sockets_ism43362.cpp for the bulk of the AT-command-level tracing this quiets down)
-#ifndef ISM43362_ENABLE_DEBUG_TRACE
-#define ISM43362_ENABLE_DEBUG_TRACE 0
-#endif
-#if ISM43362_ENABLE_DEBUG_TRACE
-#define ISM43362_TRACE(...) CLR_Debug::Printf(__VA_ARGS__)
-#else
-#define ISM43362_TRACE(...) ((void)0)
-#endif
 #else
 extern "C" struct netif *nf_getNetif();
 #endif
@@ -199,11 +186,7 @@ int Network_Interface_Start_Connect(int index, const char *ssid, const char *pas
 
     WIFI_Ecn_t ecn = (passphrase != NULL && passphrase[0] != '\0') ? WIFI_ECN_WPA2_PSK : WIFI_ECN_OPEN;
 
-    ISM43362_TRACE("[ISM43362] Start_Connect: ssid='%s', ecn=%d - calling WIFI_Connect()...\r\n", ssid, (int)ecn);
-
     WIFI_Status_t status = WIFI_Connect(ssid, passphrase, ecn);
-
-    ISM43362_TRACE("[ISM43362] Start_Connect: WIFI_Connect() returned %d\r\n", (int)status);
 
     // NOTE: the automatic NTP sync is NOT triggered here anymore, even though WIFI_Connect()
     // returning OK usually means the module's own onboard DHCP client already has an IP address.
@@ -259,16 +242,12 @@ int Network_Interface_Connect_Result(int configIndex)
     {
         s_sntpAutoSyncTriggered = true;
 
-        ISM43362_TRACE("[ISM43362] Connect_Result: about to call Ism43362_Sntp_TriggerAutoSync()\r\n");
-
         // only kick off the best-effort automatic NTP sync now that a real IP address has been
         // confirmed (matching how other targets auto-sync the clock once the network comes up -
         // see the comment at the top of sntp_ism43362.cpp for why this is needed on this board
         // specifically) - deferring it to here (instead of right after WIFI_Connect() returns)
         // avoids racing the background SNTP thread against the connection-establishment window.
         Ism43362_Sntp_TriggerAutoSync();
-
-        ISM43362_TRACE("[ISM43362] Connect_Result: Ism43362_Sntp_TriggerAutoSync() returned\r\n");
     }
 
     return 0;

@@ -174,7 +174,7 @@ The above .NET nanoFramework interpreter builds include support for the class li
   | ST_STM32F429I_DISCOVERY (B01) | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |                    | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |                    |                    | :heavy_check_mark: |                    |
   | ST_NUCLEO64_F091RC      | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |                    |                    | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |                    |                    |                    |                    |
   | ST_STM32F769I_DISCOVERY | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |                    | :heavy_check_mark: | :heavy_check_mark: |
-  | ST_B_L475E_IOT01A | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |                    |                    |                    | :heavy_check_mark: |                    | :heavy_check_mark: |                    |                    |                    |                    |                    |
+  | ST_B_L475E_IOT01A | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |                    |                    |                    | :heavy_check_mark: |                    | :heavy_check_mark: |                    | :heavy_check_mark: Wi-Fi, no TLS |                    |                    |                    |
   | ORGPAL_PALTHREE | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |                    | :heavy_check_mark: |                    |
   | ORGPAL_PALX | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |                    | :heavy_check_mark: |                    |
   | SL_STK3701A_REVB | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |  | :heavy_check_mark: |  | :heavy_check_mark: | :heavy_check_mark: |  |                    |  |  |
@@ -204,7 +204,7 @@ The above .NET nanoFramework interpreter builds include support for the class li
         * [ST NUCLEO64 F091RC](targets/ChibiOS/ST_NUCLEO64_F091RC)
         * [ST STM32F429I DISCOVERY (B01)](targets/ChibiOS/ST_STM32F429I_DISCOVERY)
         * [ST STM32F769I DISCOVERY](targets/ChibiOS/ST_STM32F769I_DISCOVERY)
-        * [ST B-L475E-IOT01A](targets/ChibiOS/ST_B_L475E_IOT01A)
+        * [ST B-L475E-IOT01A](targets/ChibiOS/ST_B_L475E_IOT01A) (WiFi only, no TLS/HTTPS support - see board [README](targets/ChibiOS/ST_B_L475E_IOT01A/README.md#known-limitations))
       * ChibiOS overlay for **nanoFramework**
         * [STM32 1.Wire driver](targets/ChibiOS/_nf-overlay/os/hal/src/stm32_onewire)
         * [STM32 CRC32 driver](targets/ChibiOS/_nf-overlay/os/hal/src/stm32_crc)

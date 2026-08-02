@@ -6,8 +6,6 @@
 // This file includes the platform and board specific Network Intialisation
 
 #include <nanoHAL.h>
-#include <nanoCLR_Types.h>
-#include <ch.h>
 
 #if defined(RP2040) || defined(RP2350)
 extern "C" {
@@ -17,17 +15,6 @@ extern "C" {
 extern "C" {
 #include <wifi.h>
 }
-
-// set to 1 to re-enable the "[ISM43362] ..." trace prints below (see the same flag in
-// sockets_ism43362.cpp for the bulk of the AT-command-level tracing this quiets down)
-#ifndef ISM43362_ENABLE_DEBUG_TRACE
-#define ISM43362_ENABLE_DEBUG_TRACE 0
-#endif
-#if ISM43362_ENABLE_DEBUG_TRACE
-#define ISM43362_TRACE(...) CLR_Debug::Printf(__VA_ARGS__)
-#else
-#define ISM43362_TRACE(...) ((void)0)
-#endif
 #else
 #include <nf_lwipthread.h>
 #endif
@@ -60,9 +47,6 @@ void nanoHAL_Network_Initialize()
     if (g_TargetConfiguration.NetworkInterfaceConfigs->Count == 0)
     {
         // there is no networking configuration block, can't proceed
-#if defined(TARGET_HAS_WIFI_ISM43362)
-        ISM43362_TRACE("[ISM43362] nanoHAL_Network_Initialize: no NetworkInterfaceConfigs, skipping.\r\n");
-#endif
         return;
     }
 
@@ -71,12 +55,8 @@ void nanoHAL_Network_Initialize()
     // the ES-WIFI module runs its own onboard TCP/IP stack and is only ever driven through its
     // socket-oriented AT command set, so there's no lwIP netif/thread to start here - just bring
     // up the module itself; joining a network happens later via Network_Interface_Start_Connect()
-    ISM43362_TRACE("[ISM43362] nanoHAL_Network_Initialize: calling WIFI_Init()...\r\n");
-
     WIFI_Status_t initStatus = WIFI_Init();
     (void)initStatus;
-
-    ISM43362_TRACE("[ISM43362] nanoHAL_Network_Initialize: WIFI_Init() returned %d\r\n", (int)initStatus);
 
 #else
 

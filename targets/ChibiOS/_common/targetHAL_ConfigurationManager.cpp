@@ -19,12 +19,13 @@ uint32_t GetExistingConfigSize()
         g_TargetConfiguration.NetworkInterfaceConfigs->Count * sizeof(HAL_Configuration_NetworkInterface);
     currentConfigSize += g_TargetConfiguration.Wireless80211Configs->Count * sizeof(HAL_Configuration_Wireless80211);
 
-    // round up to the next 8-byte boundary - see the matching comment in
-    // ConfigurationManager_StoreConfigurationBlock()'s Wireless80211Network branch for why (STM32
-    // flash can only be programmed in 8-byte aligned units, and programming a unit that isn't
-    // fully erased fails outright even if the value being written is unchanged - so no two config
-    // blocks may ever share one of those units).
+#if defined(RP2040) || defined(RP2350)
+    // round up to 256 bytes - RP2040/RP2350 flash program granularity
+    currentConfigSize = (currentConfigSize + 255U) & ~255U;
+#else
+    // round up to 8 bytes - STM32 flash can only be programmed in double-word units
     currentConfigSize = (currentConfigSize + 7U) & ~7U;
+#endif
 
     return currentConfigSize;
 }
@@ -330,19 +331,14 @@ __nfweak bool ConfigurationManager_StoreConfigurationBlock(
             uint32_t existingSize = existingNet->Count * sizeof(HAL_Configuration_NetworkInterface);
             platform_free(existingNet);
 
-            // Round up to the next 8-byte boundary. STM32 (L4 and similar) internal flash can
-            // only be PROGRAMMED in 8-byte ("double word") aligned units - and, critically, the
-            // flash controller flags a programming error (PROGERR) if any part of that unit isn't
-            // already erased, EVEN IF the value being written there is unchanged. So if this new
-            // block started mid-line (sharing an 8-byte line with the tail of the preceding
-            // Network block), programming would try to "rewrite" that already-programmed, non-
-            // erased tail and fail outright - confirmed on real hardware via the raw FLASH->SR
-            // error bits (0xA8 = PROGERR | PGAERR | PGSERR) on every attempt, regardless of
-            // whether the write preserved or clobbered those leading bytes. Starting each new
-            // config block on a fresh 8-byte boundary sidesteps this entirely: no two blocks ever
-            // share a programmable line, so this alignment padding is required, not optional, on
-            // this flash technology (a few bytes of gap in the config sector is a non-issue).
+#if defined(RP2040) || defined(RP2350)
+            // round up to 256 bytes - RP2040/RP2350 flash program granularity
+            existingSize = (existingSize + 255U) & ~255U;
+#else
+            // round up to 8 bytes - STM32 flash can only be programmed in double-word units,
+            // and programming a non-erased unit fails even if unchanged, so blocks can't share one
             existingSize = (existingSize + 7U) & ~7U;
+#endif
 
             storageAddress = (uint32_t)&__nanoConfig_start__ + existingSize;
         }

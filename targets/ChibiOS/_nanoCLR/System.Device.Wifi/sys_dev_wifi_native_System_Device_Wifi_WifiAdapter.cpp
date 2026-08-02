@@ -12,23 +12,11 @@
 #include <nanoPAL_Events.h>
 #include <nanoHAL_v2.h>
 #include <nanoPAL_Sockets.h>
-#include <ch.h>
 
 #if defined(TARGET_HAS_WIFI_ISM43362)
 extern "C" {
 #include <wifi.h>
 }
-
-// set to 1 to re-enable the "[ISM43362] ..." trace prints below (see the same flag in
-// sockets_ism43362.cpp for the bulk of the AT-command-level tracing this quiets down)
-#ifndef ISM43362_ENABLE_DEBUG_TRACE
-#define ISM43362_ENABLE_DEBUG_TRACE 0
-#endif
-#if ISM43362_ENABLE_DEBUG_TRACE
-#define ISM43362_TRACE(...) CLR_Debug::Printf(__VA_ARGS__)
-#else
-#define ISM43362_TRACE(...) ((void)0)
-#endif
 #else
 extern "C" {
 #include <nf_lwipthread_wifi.h>
@@ -123,11 +111,7 @@ HRESULT Library_sys_dev_wifi_native_System_Device_Wifi_WifiAdapter::
         bool eventResult = true;
         WifiConnectionStatus status = WifiConnectionStatus_UnspecifiedFailure;
 
-        ISM43362_TRACE("[ISM43362] NativeConnect: entered native method.\r\n");
-
         NANOCLR_CHECK_HRESULT(GetNetInterfaceIndex(stack, &netIndex));
-
-        ISM43362_TRACE("[ISM43362] NativeConnect: GetNetInterfaceIndex OK, netIndex=%d, m_customState=%d\r\n", netIndex, (int)stack.m_customState);
 
         if (stack.m_customState == 0)
         {
@@ -137,13 +121,9 @@ HRESULT Library_sys_dev_wifi_native_System_Device_Wifi_WifiAdapter::
             szPassPhrase = stack.Arg2().RecoverString();
             // password can be NULL for open networks
 
-            ISM43362_TRACE("[ISM43362] NativeConnect: ssid='%s', calling Network_Interface_Start_Connect()...\r\n", szSsid);
-
             // Initiate WiFi connection via CYW43 driver (non-blocking)
             int result = Network_Interface_Start_Connect(
                 netIndex, szSsid, szPassPhrase ? szPassPhrase : "", 0);
-
-            ISM43362_TRACE("[ISM43362] NativeConnect: Network_Interface_Start_Connect() returned %d\r\n", result);
 
             if (result != 0)
             {
@@ -215,11 +195,7 @@ HRESULT Library_sys_dev_wifi_native_System_Device_Wifi_WifiAdapter::NativeScanAs
         int netIndex;
         NANOCLR_CHECK_HRESULT(GetNetInterfaceIndex(stack, &netIndex));
 
-        ISM43362_TRACE("[ISM43362] NativeScanAsync: calling Network_Interface_Start_Scan()...\r\n");
-
         int startScanResult = Network_Interface_Start_Scan(netIndex);
-
-        ISM43362_TRACE("[ISM43362] NativeScanAsync: Network_Interface_Start_Scan() returned %d\r\n", startScanResult);
 
         if (startScanResult != 0)
         {
@@ -244,16 +220,12 @@ HRESULT Library_sys_dev_wifi_native_System_Device_Wifi_WifiAdapter::GetNativeSca
         CLR_RT_HeapBlock &top = stack.PushValueAndClear();
 
 #if defined(TARGET_HAS_WIFI_ISM43362)
-        ISM43362_TRACE("[ISM43362] GetNativeScanReport: calling WIFI_ListAccessPoints()...\r\n");
-
         // static rather than a local (stack) variable - ~2.3KB (WIFI_MAX_APS=20 entries), and
         // this is already several native call frames deep from the managed scan report getter
         static WIFI_APs_t apList;
         memset(&apList, 0, sizeof(apList));
         WIFI_ListAccessPoints(&apList, WIFI_MAX_APS);
         uint16_t number = apList.count;
-
-        ISM43362_TRACE("[ISM43362] GetNativeScanReport: WIFI_ListAccessPoints() done, count=%d\r\n", (int)number);
 #else
         uint16_t number = (uint16_t)cyw43_wifi_scan_get_count();
         const wifi_scan_record_t *results = cyw43_wifi_scan_get_results();
