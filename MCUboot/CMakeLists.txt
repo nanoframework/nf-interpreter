@@ -118,15 +118,39 @@ macro(nf_setup_mcuboot_target_build)
         LINK_FLAGS "-T${NFSMTB_LINKER_FILE} ${MCUBOOT_SERIES_COMMON_LINK_FLAGS}"
     )
 
-    add_custom_command(TARGET ${NANOMCUBOOTER_PROJECT_NAME}.elf POST_BUILD
-        COMMAND ${CMAKE_OBJCOPY} -O binary
-            $<TARGET_FILE:${NANOMCUBOOTER_PROJECT_NAME}.elf>
-            ${CMAKE_BINARY_DIR}/${NANOMCUBOOTER_PROJECT_NAME}.bin
-        COMMAND ${CMAKE_OBJCOPY} -O ihex
-            $<TARGET_FILE:${NANOMCUBOOTER_PROJECT_NAME}.elf>
-            ${CMAKE_BINARY_DIR}/${NANOMCUBOOTER_PROJECT_NAME}.hex
-        COMMENT "Generating ${NANOMCUBOOTER_PROJECT_NAME}.bin and ${NANOMCUBOOTER_PROJECT_NAME}.hex"
-    )
+    if(CMAKE_BUILD_TYPE MATCHES "Release" OR CMAKE_BUILD_TYPE MATCHES "MinSizeRel")
+
+        add_custom_command(TARGET ${NANOMCUBOOTER_PROJECT_NAME}.elf POST_BUILD
+            COMMAND ${CMAKE_OBJCOPY} -O binary
+                $<TARGET_FILE:${NANOMCUBOOTER_PROJECT_NAME}.elf>
+                ${CMAKE_BINARY_DIR}/${NANOMCUBOOTER_PROJECT_NAME}.bin
+            COMMAND ${CMAKE_OBJCOPY} -O ihex
+                $<TARGET_FILE:${NANOMCUBOOTER_PROJECT_NAME}.elf>
+                ${CMAKE_BINARY_DIR}/${NANOMCUBOOTER_PROJECT_NAME}.hex
+            COMMENT "Generating ${NANOMCUBOOTER_PROJECT_NAME}.bin and ${NANOMCUBOOTER_PROJECT_NAME}.hex"
+        )
+
+    else()
+
+        add_custom_command(TARGET ${NANOMCUBOOTER_PROJECT_NAME}.elf POST_BUILD
+            COMMAND ${CMAKE_OBJCOPY} -O binary
+                $<TARGET_FILE:${NANOMCUBOOTER_PROJECT_NAME}.elf>
+                ${CMAKE_BINARY_DIR}/${NANOMCUBOOTER_PROJECT_NAME}.bin
+            COMMAND ${CMAKE_OBJCOPY} -O ihex
+                $<TARGET_FILE:${NANOMCUBOOTER_PROJECT_NAME}.elf>
+                ${CMAKE_BINARY_DIR}/${NANOMCUBOOTER_PROJECT_NAME}.hex
+        
+            # dump target image as source code listing 
+            # ONLY when DEBUG info is available, this is on 'Debug' and 'RelWithDebInfo'
+            COMMAND ${CMAKE_OBJDUMP} -d -EL -S 
+                $<TARGET_FILE:${NANOMCUBOOTER_PROJECT_NAME}.elf> > 
+                ${CMAKE_BINARY_DIR}/${NANOMCUBOOTER_PROJECT_NAME}.lst
+
+            COMMENT "Generating ${NANOMCUBOOTER_PROJECT_NAME}.bin, ${NANOMCUBOOTER_PROJECT_NAME}.hex and ${NANOMCUBOOTER_PROJECT_NAME}.lst"
+        )
+
+    endif()
+    
     add_custom_command(TARGET ${NANOMCUBOOTER_PROJECT_NAME}.elf POST_BUILD
         COMMAND ${CMAKE_SIZE_UTIL} --format=berkeley $<TARGET_FILE:${NANOMCUBOOTER_PROJECT_NAME}.elf>
         COMMENT "MCUboot memory usage:"
