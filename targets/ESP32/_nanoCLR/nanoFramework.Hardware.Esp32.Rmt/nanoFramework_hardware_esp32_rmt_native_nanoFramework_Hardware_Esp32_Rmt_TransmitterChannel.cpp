@@ -5,7 +5,6 @@
 
 #include <cstring>
 #include "nanoFramework_hardware_esp32_rmt_native.h"
-#include "esp_heap_trace.h"
 
 // reduce line lengths
 typedef Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_Esp32_Rmt_EncoderData EncoderData;
@@ -30,7 +29,7 @@ HRESULT TXSetCarrier(rmt_channel_handle_t tx_chan, CLR_RT_HeapBlock *transmitter
     // Enable carrier ?
     if ((bool)transmitter_channel_settings[TransmitterChannelSettings::FIELD___enableCarrierWave].NumericByRef().u1)
     {
-        rmt_carrier_config_t carrier_cfg;
+        rmt_carrier_config_t carrier_cfg = {};
 
         carrier_cfg.frequency_hz =
             transmitter_channel_settings[TransmitterChannelSettings::FIELD___carrierWaveFrequency].NumericByRef().u4;
@@ -211,7 +210,7 @@ HRESULT Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_E
             {
                 case EncoderType_Byte:
                 {
-                    rmt_bytes_encoder_config_t encoder_config;
+                    rmt_bytes_encoder_config_t encoder_config = {};
 
                     ManagedByteEncoderToNative(encoder_settings, encoder_config);
                     encoder_config.flags.msb_first =
