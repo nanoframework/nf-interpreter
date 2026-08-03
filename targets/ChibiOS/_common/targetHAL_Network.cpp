@@ -8,11 +8,13 @@
 #include <nanoHAL.h>
 
 #if defined(RP2040) || defined(RP2350)
-extern "C" {
+extern "C"
+{
 #include <nf_lwipthread_wifi.h>
 }
 #elif defined(TARGET_HAS_WIFI_ISM43362)
-extern "C" {
+extern "C"
+{
 #include <wifi.h>
 }
 #else

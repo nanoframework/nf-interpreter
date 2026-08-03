@@ -42,7 +42,8 @@
 #include <cstdint>
 #include <cstring>
 
-extern "C" {
+extern "C"
+{
 #include <wifi.h>
 }
 
@@ -117,14 +118,10 @@ bool Ism43362_Sntp_Sync(const char *serverName)
     // slot index since SOCK_SOCKET handles on this board ARE the raw slot index (see
     // AllocateSocketSlot() in sockets_ism43362.cpp).
     uint16_t receivedLen = 0;
-    int received = (WIFI_ReceiveData(
-                        (uint8_t)s,
-                        packet,
-                        sizeof(packet),
-                        &receivedLen,
-                        NTP_RECEIVE_TIMEOUT_MS) == WIFI_STATUS_OK)
-                       ? (int)receivedLen
-                       : -1;
+    int received =
+        (WIFI_ReceiveData((uint8_t)s, packet, sizeof(packet), &receivedLen, NTP_RECEIVE_TIMEOUT_MS) == WIFI_STATUS_OK)
+            ? (int)receivedLen
+            : -1;
 
     SOCK_close(s);
 
@@ -137,8 +134,8 @@ bool Ism43362_Sntp_Sync(const char *serverName)
     }
 
     // Transmit Timestamp seconds field is the 4 bytes at offset 40, big-endian
-    uint32_t ntpSeconds = ((uint32_t)packet[40] << 24) | ((uint32_t)packet[41] << 16) |
-                          ((uint32_t)packet[42] << 8) | (uint32_t)packet[43];
+    uint32_t ntpSeconds = ((uint32_t)packet[40] << 24) | ((uint32_t)packet[41] << 16) | ((uint32_t)packet[42] << 8) |
+                          (uint32_t)packet[43];
 
     if (ntpSeconds < NTP_TO_UNIX_EPOCH_OFFSET_SECONDS)
     {
