@@ -22,10 +22,6 @@ HRESULT RXSetDemodulation(rmt_channel_handle_t rx_chan, CLR_RT_HeapBlock *receiv
 
     // primitives
     bool enableDemodulation;
-    esp_err_t err;
-
-    // structs
-    rmt_carrier_config_t rx_carrier_cfg;
 
     settings = receiver_channel_settings;
     enableDemodulation = settings[ReceiverChannelSettings::FIELD___enableDemodulation].NumericByRef().u1 != 0;
@@ -33,6 +29,8 @@ HRESULT RXSetDemodulation(rmt_channel_handle_t rx_chan, CLR_RT_HeapBlock *receiv
     if (enableDemodulation)
     {
 #if SOC_RMT_SUPPORT_RX_DEMODULATION
+        rmt_carrier_config_t rx_carrier_cfg;
+        esp_err_t err;
 
         rx_carrier_cfg = {};
         rx_carrier_cfg.frequency_hz = settings[ReceiverChannelSettings::FIELD___carrierWaveFrequency].NumericByRef().u4;
