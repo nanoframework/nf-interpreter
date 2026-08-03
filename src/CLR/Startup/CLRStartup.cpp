@@ -7,9 +7,8 @@
 #include "CLRStartup.h"
 #include <nanoCLR_Hardware.h>
 
-#ifdef NF_FEATURE_HAS_MCUBOOT
-#include <MCUboot_RuntimeInterface.h>
-#include <MCUboot_StartupPolicy.h>
+#if defined(CONFIG_NF_FEATURE_HAS_MCUBOOT) && CONFIG_NF_FEATURE_HAS_MCUBOOT
+#include <mcuboot_config/mcuboot_config.h>
 #endif
 
 void ClrExit()
@@ -345,6 +344,17 @@ struct Settings
 #endif
             NANOCLR_SET_AND_LEAVE(CLR_E_NOT_SUPPORTED);
         }
+
+#if defined(CONFIG_NF_FEATURE_HAS_MCUBOOT) && CONFIG_NF_FEATURE_HAS_MCUBOOT
+        // MCUboot partitions have an image_header occupying the first MCUBOOT_HEADER_SIZE bytes. Skip
+        if (!BlockStorageStream_Seek(&stream, MCUBOOT_HEADER_SIZE, BlockStorageStream_SeekBegin))
+        {
+#if !defined(BUILD_RTM)
+            CLR_Debug::Printf("ERROR: failed to seek past MCUboot image header in DEPLOYMENT storage\r\n");
+#endif
+            NANOCLR_SET_AND_LEAVE(CLR_E_NOT_SUPPORTED);
+        }
+#endif
 
         NANOCLR_CHECK_HRESULT(ContiguousBlockAssemblies(stream));
 
