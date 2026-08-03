@@ -48,9 +48,6 @@ int main(void)
     nf_mcuboot_startup_init();
 #endif
 
-    // init boot clipboard
-    InitBootClipboard();
-
 // init SWO as soon as possible to make it available to output ASAP
 #if CONFIG_CHIBIOS_SWO_OUTPUT
     SwoInit();

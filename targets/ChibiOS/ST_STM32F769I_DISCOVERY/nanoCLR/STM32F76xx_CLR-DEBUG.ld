@@ -32,7 +32,7 @@ MEMORY
     ram0         (wx) : org = 0x20020000, len = 384k                      /* SRAM1 + SRAM2 */
     ram1         (wx) : org = 0x20020000, len = 368k                      /* SRAM1 */
     ram2         (wx) : org = 0x2007C000, len = 16k                       /* SRAM2 */
-    ram3         (wx) : org = 0x20000030, len = 128k-48                   /* DTCM-RAM */
+    ram3         (wx) : org = 0x20000000, len = 128k                      /* DTCM-RAM */
     ram4         (wx) : org = 0x00000000, len = 16k                       /* ITCM-RAM */
     ram5         (wx) : org = 0x40024000, len = 4k                        /* BCKP SRAM */
     ram6         (wx) : org = 0x00000000, len = 0
@@ -40,7 +40,6 @@ MEMORY
     ext_ram      (wx) : org = 0xC0000000, len = 13631488                  /* external SDRAM */
     graphics_ram (wx) : org = 0xC0D00000, len = 2377728                  /* external graphics ram for frame buffer and bitmaps*/
     graphics_vfb (wx) : org = 0xC0F44800, len = 768000                   /* Frame buffer for video output mode  800*480*2 bytes ( 16 bits RGB565 )*/
-    bootclpbrd   (wx) : org = 0x20000000, len = 48                        /* boot clipboard area */
 }
 
 /* For each data/text section two region are defined, a virtual region
@@ -96,9 +95,6 @@ REGION_ALIAS("GRAPHICS_HEAP_RAM", graphics_ram);
 /* RAM region to be used for the nanoFramework graphics heap.*/
 REGION_ALIAS("GRAPHICS_VIDEO_FRAME_BUFFER", graphics_vfb);
 
-/* RAM region to be used for the boot clipboard.*/
-REGION_ALIAS("SECTION_FOR_BOOTCLIPBOARD", bootclpbrd);
-
 /* rules inclusion.*/
 INCLUDE rules_stacks.ld
 
@@ -151,6 +147,3 @@ INCLUDE rules_clr.ld
 
 /* Graphics rules inclusion.*/
 INCLUDE rules_graphics.ld
-
-/* boot clipboard rules inclusion.*/
-INCLUDE rules_bootclipboard.ld

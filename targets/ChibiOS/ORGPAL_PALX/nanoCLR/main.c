@@ -76,9 +76,6 @@ int main(void)
     nf_mcuboot_startup_init();
 #endif
 
-    // init boot clipboard
-    InitBootClipboard();
-
     // set default values for GPIOs
     palClearPad(GPIOE, GPIOE_PIN4);
     palClearLine(LINE_RELAY);
