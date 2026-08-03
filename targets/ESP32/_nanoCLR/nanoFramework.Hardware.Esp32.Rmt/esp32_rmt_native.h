@@ -9,8 +9,6 @@
 
 extern void RmtDeleteSyncManager();
 
-
-
 enum class RmtChannelType : uint8_t
 {
     Unknown = 0,
@@ -24,14 +22,14 @@ struct RmtChannelInfo
 
     bool isBlockingReceiving;
     bool isContinuousReceiving;
- 
+
     // TX fields
     rmt_encoder_handle_t txEncoder = nullptr;
     std::vector<uint8_t> txBuffer;
 
     // RX fields
     QueueHandle_t rxQueue = nullptr;
-    uint8_t* rxBuffer = nullptr;
+    uint8_t *rxBuffer = nullptr;
     CLR_INT32 rxBufferSize = 0;
 };
 
