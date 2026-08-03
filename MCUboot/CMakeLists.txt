@@ -223,6 +223,7 @@ if(${TARGET_SERIES} STREQUAL "STM32F7xx")
     # Include directories shared by all STM32F7xx bootloader targets.
     set(MCUBOOT_SERIES_COMMON_INCLUDES
         ${CMAKE_SOURCE_DIR}/targets/ChibiOS/_mcuboot
+        ${CMAKE_SOURCE_DIR}/targets/ChibiOS/_include
         ${CMAKE_CURRENT_SOURCE_DIR}/include
 
         ${mcuboot_SOURCE_DIR}/boot/bootutil/include
