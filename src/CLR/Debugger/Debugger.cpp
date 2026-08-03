@@ -14,6 +14,10 @@
 #include <target_common.h>
 #include <nanoHAL_StorageOperation.h>
 
+#if CONFIG_NF_FEATURE_HAS_MCUBOOT
+#include <mcuboot_config/mcuboot_config.h>
+#endif
+
 #define __min(a, b) (((a) < (b)) ? (a) : (b))
 
 //--//
@@ -406,6 +410,19 @@ bool CLR_DBG_Debugger::Monitor_Ping(WP_Message *msg)
 #if CONFIG_NF_FEATURE_HAS_MCUBOOT
         // MCUboot target: MCUboot is the bootloader
         cmdReply.Flags |= Monitor_Ping_c_HasMCUboot;
+
+        // report MCUBOOT_HEADER_SIZE so the debugger can compose a valid image around deployments
+#if (MCUBOOT_HEADER_SIZE == 0x200)
+        cmdReply.Flags |= Monitor_Ping_c_HeaderSize_0x200;
+#elif (MCUBOOT_HEADER_SIZE == 0x400)
+        cmdReply.Flags |= Monitor_Ping_c_HeaderSize_0x400;
+#elif (MCUBOOT_HEADER_SIZE == 0x800)
+        cmdReply.Flags |= Monitor_Ping_c_HeaderSize_0x800;
+#elif (MCUBOOT_HEADER_SIZE == 0x1000)
+        cmdReply.Flags |= Monitor_Ping_c_HeaderSize_0x1000;
+#else
+#error "MCUBOOT_HEADER_SIZE value is not reportable over Wire Protocol; add a Monitor_Ping_c_HeaderSize_* flag for it."
+#endif
 #else
         if (::Target_HasNanoBooter())
         {

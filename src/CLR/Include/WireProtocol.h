@@ -175,6 +175,15 @@ typedef enum Monitor_Ping_Source_Flags
     // This flag indicates that the device has nanoBooter.
     Monitor_Ping_c_HasNanoBooter =              0x00080000,
 
+    // MCUboot image header size (4th position), only meaningful together with Monitor_Ping_c_HasMCUboot.
+    // Reports MCUBOOT_HEADER_SIZE so the debugger can compose a valid MCUboot image (header + TLV
+    // footer) around deployed assemblies instead of writing them as a raw blob.
+    Monitor_Ping_c_HeaderSize_Position =        0x00700000,
+    Monitor_Ping_c_HeaderSize_0x200 =           0x00100000,
+    Monitor_Ping_c_HeaderSize_0x400 =           0x00200000,
+    Monitor_Ping_c_HeaderSize_0x800 =           0x00300000,
+    Monitor_Ping_c_HeaderSize_0x1000 =          0x00400000,
+
 }Monitor_Ping_Source_Flags;
 
 // Default capability flags reported in Monitor_Ping reply for MCUboot targets.
