@@ -168,8 +168,10 @@ HRESULT Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_E
     NANOCLR_NOCLEANUP();
 }
 
-
-HRESULT StartReceive(rmt_channel_handle_t rx_handle, CLR_RT_HeapBlock *receiver_channel_settings, RmtChannelInfo *rcInfo)
+HRESULT StartReceive(
+    rmt_channel_handle_t rx_handle,
+    CLR_RT_HeapBlock *receiver_channel_settings,
+    RmtChannelInfo *rcInfo)
 {
     NANOCLR_HEADER();
 
@@ -195,7 +197,6 @@ HRESULT StartReceive(rmt_channel_handle_t rx_handle, CLR_RT_HeapBlock *receiver_
 
     NANOCLR_NOCLEANUP();
 }
-
 
 //
 //  Start continuous receive (non-blocking)
