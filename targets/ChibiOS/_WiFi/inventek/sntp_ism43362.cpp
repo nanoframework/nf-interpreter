@@ -192,4 +192,3 @@ extern "C" void Ism43362_Sntp_TriggerAutoSync()
         Ism43362_Sntp_Sync("time.nist.gov");
     }
 }
-

@@ -132,8 +132,7 @@ int Network_Interface_Connect_Result(int configIndex)
             return -1;
         }
 
-        HAL_Configuration_NetworkInterface *cfg =
-            g_TargetConfiguration.NetworkInterfaceConfigs->Configs[configIndex];
+        HAL_Configuration_NetworkInterface *cfg = g_TargetConfiguration.NetworkInterfaceConfigs->Configs[configIndex];
 
         struct netif *nif = nf_getNetif();
         if (nif != NULL)
