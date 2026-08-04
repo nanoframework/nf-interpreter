@@ -115,8 +115,6 @@ int Network_Interface_Start_Connect(int index, const char *ssid, const char *pas
 
 int Network_Interface_Connect_Result(int configIndex)
 {
-    (void)configIndex;
-
     if (!cyw43_wifi_is_connected())
         return -1;
 
@@ -129,7 +127,13 @@ int Network_Interface_Connect_Result(int configIndex)
     if (g_TargetConfiguration.NetworkInterfaceConfigs != NULL &&
         g_TargetConfiguration.NetworkInterfaceConfigs->Count > 0)
     {
-        HAL_Configuration_NetworkInterface *cfg = g_TargetConfiguration.NetworkInterfaceConfigs->Configs[0];
+        if (configIndex < 0 || (uint32_t)configIndex >= g_TargetConfiguration.NetworkInterfaceConfigs->Count)
+        {
+            return -1;
+        }
+
+        HAL_Configuration_NetworkInterface *cfg =
+            g_TargetConfiguration.NetworkInterfaceConfigs->Configs[configIndex];
 
         struct netif *nif = nf_getNetif();
         if (nif != NULL)
@@ -202,8 +206,6 @@ int Network_Interface_Start_Connect(int index, const char *ssid, const char *pas
 
 int Network_Interface_Connect_Result(int configIndex)
 {
-    (void)configIndex;
-
     if (WIFI_IsConnected() != WIFI_STATUS_OK)
     {
         return -1;
@@ -224,7 +226,12 @@ int Network_Interface_Connect_Result(int configIndex)
     if (g_TargetConfiguration.NetworkInterfaceConfigs != NULL &&
         g_TargetConfiguration.NetworkInterfaceConfigs->Count > 0)
     {
-        HAL_Configuration_NetworkInterface *cfg = g_TargetConfiguration.NetworkInterfaceConfigs->Configs[0];
+        if (configIndex < 0 || (uint32_t)configIndex >= g_TargetConfiguration.NetworkInterfaceConfigs->Count)
+        {
+            return -1;
+        }
+
+        HAL_Configuration_NetworkInterface *cfg = g_TargetConfiguration.NetworkInterfaceConfigs->Configs[configIndex];
 
         cfg->IPv4Address = LWIP_MAKEU32(ipAddr[0], ipAddr[1], ipAddr[2], ipAddr[3]);
 

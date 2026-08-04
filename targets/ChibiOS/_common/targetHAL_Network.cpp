@@ -6,6 +6,7 @@
 // This file includes the platform and board specific Network Intialisation
 
 #include <nanoHAL.h>
+#include <nanoCLR_Types.h>
 
 #if defined(RP2040) || defined(RP2350)
 extern "C"
@@ -58,7 +59,10 @@ void nanoHAL_Network_Initialize()
     // socket-oriented AT command set, so there's no lwIP netif/thread to start here - just bring
     // up the module itself; joining a network happens later via Network_Interface_Start_Connect()
     WIFI_Status_t initStatus = WIFI_Init();
-    (void)initStatus;
+    if (initStatus != WIFI_STATUS_OK)
+    {
+        CLR_Debug::Printf("[ISM43362] WIFI_Init() failed with status %d\r\n", (int)initStatus);
+    }
 
 #else
 

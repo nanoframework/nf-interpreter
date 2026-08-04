@@ -173,12 +173,23 @@ bool Ism43362_Sntp_Sync(const char *serverName)
 // that's already executing the native call - which already blocks synchronously for several
 // seconds during the WiFi join sequence anyway, so a few more seconds here for SNTP is a
 // quantitative increase, not a qualitatively new kind of blocking.
+//
+// This is called from inside Network_Interface_Connect_Result(), which is itself polled from the
+// managed connect's 20-second timeout window - so the two synchronous attempts below are capped
+// to a combined budget well under that, to make sure a slow/unreachable NTP server can't eat
+// enough of that window to turn an otherwise-successful WiFi connect into a reported timeout.
+#define SNTP_AUTOSYNC_BUDGET_MS 4000
+
 extern "C" void Ism43362_Sntp_TriggerAutoSync()
 {
     ISM43362_DebugPrintf("[ISM43362] SNTP: TriggerAutoSync entered (synchronous)\r\n");
 
-    if (!Ism43362_Sntp_Sync("pool.ntp.org"))
+    systime_t start = chVTGetSystemTimeX();
+
+    if (!Ism43362_Sntp_Sync("pool.ntp.org") &&
+        TIME_I2MS(chTimeDiffX(start, chVTGetSystemTimeX())) < SNTP_AUTOSYNC_BUDGET_MS)
     {
         Ism43362_Sntp_Sync("time.nist.gov");
     }
 }
+

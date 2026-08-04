@@ -278,6 +278,8 @@ __nfweak bool ConfigurationManager_StoreConfigurationBlock(
     ByteAddress storageAddress = 0;
     bool requiresEnumeration = FALSE;
     bool success = FALSE;
+    // true only for the very first Network/Wireless80211 block ever stored (see erase logic below)
+    bool isInitialAllocation = FALSE;
     BlockStorageDevice *device = BlockStorageList_GetFirstDevice();
 
     if (device == NULL)
@@ -295,6 +297,7 @@ __nfweak bool ConfigurationManager_StoreConfigurationBlock(
             // OK to continue
             // set storage address as the start of the flash configuration sector
             storageAddress = (ByteAddress)&__nanoConfig_start__;
+            isInitialAllocation = TRUE;
         }
         else
         {
@@ -341,6 +344,7 @@ __nfweak bool ConfigurationManager_StoreConfigurationBlock(
 #endif
 
             storageAddress = (uint32_t)&__nanoConfig_start__ + existingSize;
+            isInitialAllocation = TRUE;
         }
         else if (
             g_TargetConfiguration.Wireless80211Configs->Count == 0 ||
@@ -478,30 +482,20 @@ __nfweak bool ConfigurationManager_StoreConfigurationBlock(
         }
     }
 
-    // Network and Wireless80211Network blocks (unlike the X509 ones above) don't have an
-    // explicit "is erased" check/fail - they were written assuming the flash is already erased
-    // (e.g. from the factory, or from a full-chip erase done once before the very first flash).
-    // That assumption doesn't always hold - e.g. a dev board shipped with a pre-loaded demo
-    // firmware occupying this same flash region, where the deployment tooling only
-    // programs the nanoBooter/nanoCLR address ranges and never touches this far-end config
-    // sector. Confirmed on real hardware: this caused ConfigurationManager_StoreConfigurationBlock()
-    // to consistently return FALSE when auto-creating the first Wireless80211 config block, with
-    // no indication why (the plain BlockStorageDevice_Write() call below just silently failed due
-    // to a flash programming error). Erase first if needed - safe here because this code path
-    // (storing the very first block of this type - see the Count == 0 checks above) never has
-    // any other valid data overlapping the specific bytes about to be written.
-    if (configuration == DeviceConfigurationOption_Wireless80211Network)
-    {
-        if (!BlockStorageDevice_IsBlockErased(device, storageAddress, blockSize))
-        {
-            BlockStorageDevice_EraseBlock(device, storageAddress);
-        }
-    }
-    else if (
-        configuration == DeviceConfigurationOption_Network &&
+    // Network/Wireless80211 blocks assume the flash is already erased, which isn't always true
+    // (e.g. a board pre-loaded with demo firmware - confirmed needed on real hardware). Restricted
+    // to isInitialAllocation because EraseBlock() erases the whole physical block, which could
+    // otherwise clobber an adjacent, already-stored block. Re-storing an EXISTING block must use
+    // ConfigurationManager_UpdateConfigurationBlock() instead, which preserves the rest of the sector.
+    if (isInitialAllocation &&
+        (configuration == DeviceConfigurationOption_Wireless80211Network ||
+         configuration == DeviceConfigurationOption_Network) &&
         !BlockStorageDevice_IsBlockErased(device, storageAddress, blockSize))
     {
-        BlockStorageDevice_EraseBlock(device, storageAddress);
+        if (!BlockStorageDevice_EraseBlock(device, storageAddress))
+        {
+            return FALSE;
+        }
     }
 
     // copy the config block content to the config block storage
@@ -734,40 +728,23 @@ __nfweak UpdateConfigurationResult ConfigurationManager_UpdateConfigurationBlock
         // erase config sector
         CFGDBG("CFGUPD: erasing 0x%08X\r\n", (unsigned)(uint32_t)&__nanoConfig_start__);
         {
-#if defined(RP2040) || defined(RP2350)
-            // RP2040/RP2350 have 4KB erase sectors — need to erase all sectors in the config region
-            bool eraseOk = TRUE;
-            for (uint32_t eraseAddr = (uint32_t)&__nanoConfig_start__;
-                 eraseAddr < (uint32_t)&__nanoConfig_end__ && eraseOk;
-                 eraseAddr += 4096)
-            {
-                eraseOk = BlockStorageDevice_EraseBlock(device, eraseAddr);
-            }
-#else
-            // BlockStorageDevice_EraseBlock() only erases the single flash page/block CONTAINING
-            // the given address (e.g. 2KB on STM32L4) - it does NOT erase the whole config
-            // sector in one call. The config sector itself can (and on this board does) span
-            // MULTIPLE such pages/blocks (4KB config sector / 2KB blocks = 2 blocks) - calling
-            // this just once, for the sector's start address, only ever erased the FIRST block,
-            // silently leaving any subsequent block(s) with their ORIGINAL (never-erased)
-            // content. Confirmed on real hardware: this caused the very next config update after
-            // the first one landed a real block in the second half of the sector to fail with a
-            // flash programming error, since BlockStorageDevice_Write() below writes the WHOLE
-            // sector back in one shot (including the still-not-actually-erased tail). Loop over
-            // the whole sector in block-sized steps instead - erasing the same physical block
-            // more than once (if the block size doesn't evenly divide into the loop stride) is
-            // harmless, so a conservative fixed stride matching this platform's device block size
-            // is used rather than assuming the sector is only ever a single block.
+            // BlockStorageDevice_EraseBlock() only erases the single physical block containing the
+            // given address, and some drivers (e.g. RP2040/RP2350) reject addresses that aren't a
+            // genuine block-start address. The config sector can span multiple blocks and doesn't
+            // necessarily start on a block boundary, so align down to the actual containing block
+            // first, then step through every block that overlaps the sector using its real size
+            // (confirmed needed on real hardware - the STM32 sector spans 2x 2KB blocks).
             bool eraseOk = TRUE;
             DeviceBlockInfo *blockInfo = BlockStorageDevice_GetDeviceInfo(device);
-            uint32_t eraseStride = blockInfo->Regions[0].BytesPerBlock;
-            for (uint32_t eraseAddr = (uint32_t)&__nanoConfig_start__;
+            BlockRegionInfo *region = &blockInfo->Regions[0];
+            uint32_t firstBlockIndex = BlockRegionInfo_BlockIndexFromAddress(region, (uint32_t)&__nanoConfig_start__);
+
+            for (uint32_t eraseAddr = BlockRegionInfo_BlockAddress(region, firstBlockIndex);
                  eraseAddr < (uint32_t)&__nanoConfig_end__ && eraseOk;
-                 eraseAddr += eraseStride)
+                 eraseAddr += region->BytesPerBlock)
             {
                 eraseOk = BlockStorageDevice_EraseBlock(device, eraseAddr);
             }
-#endif
             if (eraseOk)
             {
                 // flash block is erased

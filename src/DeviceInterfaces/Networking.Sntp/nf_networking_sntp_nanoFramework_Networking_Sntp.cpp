@@ -14,7 +14,9 @@ extern bool Ism43362_Sntp_Sync(const char *serverName);
 // immediate, synchronous NTP query) - these track enough state to back Server1/Server2/IsStarted
 static char s_ism43362SntpServer1[64] = "pool.ntp.org";
 static char s_ism43362SntpServer2[64] = "time.nist.gov";
-static bool s_ism43362SntpStarted = false;
+// true once Start()/UpdateNow() has been called, until Stop() - independent of whether the
+// synchronous query actually succeeded, to match sntp_enabled() semantics on other targets
+static bool s_ism43362SntpEnabled = false;
 #endif
 
 HRESULT Library_nf_networking_sntp_nanoFramework_Networking_Sntp::Start___STATIC__VOID(CLR_RT_StackFrame &stack)
@@ -24,10 +26,11 @@ HRESULT Library_nf_networking_sntp_nanoFramework_Networking_Sntp::Start___STATIC
     NANOCLR_HEADER();
 
 #if defined(TARGET_HAS_WIFI_ISM43362)
-    s_ism43362SntpStarted = Ism43362_Sntp_Sync(s_ism43362SntpServer1);
-    if (!s_ism43362SntpStarted)
+    s_ism43362SntpEnabled = true;
+
+    if (!Ism43362_Sntp_Sync(s_ism43362SntpServer1))
     {
-        s_ism43362SntpStarted = Ism43362_Sntp_Sync(s_ism43362SntpServer2);
+        Ism43362_Sntp_Sync(s_ism43362SntpServer2);
     }
 #elif defined(THREADX_RTOS)
 #else
@@ -45,7 +48,7 @@ HRESULT Library_nf_networking_sntp_nanoFramework_Networking_Sntp::Stop___STATIC_
 
 #if defined(TARGET_HAS_WIFI_ISM43362)
     // no background service to stop - just clear the tracked state
-    s_ism43362SntpStarted = false;
+    s_ism43362SntpEnabled = false;
 #elif defined(THREADX_RTOS)
 #else
     sntp_stop();
@@ -61,10 +64,11 @@ HRESULT Library_nf_networking_sntp_nanoFramework_Networking_Sntp::UpdateNow___ST
     NANOCLR_HEADER();
 
 #if defined(TARGET_HAS_WIFI_ISM43362)
-    s_ism43362SntpStarted = Ism43362_Sntp_Sync(s_ism43362SntpServer1);
-    if (!s_ism43362SntpStarted)
+    s_ism43362SntpEnabled = true;
+
+    if (!Ism43362_Sntp_Sync(s_ism43362SntpServer1))
     {
-        s_ism43362SntpStarted = Ism43362_Sntp_Sync(s_ism43362SntpServer2);
+        Ism43362_Sntp_Sync(s_ism43362SntpServer2);
     }
 #elif defined(THREADX_RTOS)
 #else
@@ -86,7 +90,7 @@ HRESULT Library_nf_networking_sntp_nanoFramework_Networking_Sntp::get_IsStarted_
         FAULT_ON_NULL(pThis);
 
 #if defined(TARGET_HAS_WIFI_ISM43362)
-        stack.SetResult_Boolean(s_ism43362SntpStarted);
+        stack.SetResult_Boolean(s_ism43362SntpEnabled);
 #elif defined(THREADX_RTOS)
 #else
         stack.SetResult_Boolean(sntp_enabled());
