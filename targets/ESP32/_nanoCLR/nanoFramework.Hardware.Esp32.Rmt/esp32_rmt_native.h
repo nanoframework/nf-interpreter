@@ -20,8 +20,8 @@ struct RmtChannelInfo
 {
     RmtChannelType type = RmtChannelType::Unknown;
 
-    bool isBlockingReceiving;
-    bool isContinuousReceiving;
+    bool isBlockingReceiving = false;
+    bool isContinuousReceiving = false;
 
     // TX fields
     rmt_encoder_handle_t txEncoder = nullptr;

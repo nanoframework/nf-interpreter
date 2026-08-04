@@ -59,7 +59,7 @@ endif()
 ######################################################
 
 # add compiler define for DEBUG
-#add_compile_options("$<$<CONFIG:DEBUG>:-DDEBUG>")
+add_compile_options("$<$<CONFIG:DEBUG>:-DDEBUG>")
 
 ######################################################
 # set time stamp of build
