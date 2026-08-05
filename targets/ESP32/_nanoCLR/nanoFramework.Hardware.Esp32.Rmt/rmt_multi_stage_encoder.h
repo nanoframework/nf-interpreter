@@ -3,17 +3,20 @@
 // See LICENSE file in the project root for full license information.
 //
 
-enum encoderType
+#ifndef RMT_MULTI_STAGE_ENCODER_H  
+#define RMT_MULTI_STAGE_ENCODER_H 
+
+enum RmtEncoderType
 {
-    none = 0,
-    copy,
-    byte
+    RmtEncoderType_None = 0,
+    RmtEncoderType_Copy,
+    RmtEncoderType_Byte
 };
 
 typedef struct
 {
     rmt_encoder_t *base;
-    encoderType encType;
+    RmtEncoderType encType;
 
     // encoder handle
     rmt_encoder_t *encoder;
@@ -51,3 +54,5 @@ esp_err_t rmt_add_copy_encoder(
     rmt_copy_encoder_config_t &config,
     rmt_symbol_word_t *symbols,
     uint dataLen);
+
+#endif // RMT_MULTI_STAGE_ENCODER_H

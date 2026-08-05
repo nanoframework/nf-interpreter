@@ -122,17 +122,23 @@ HRESULT Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_E
     NANOCLR_NOCLEANUP();
 }
 
-inline void ManagedByteEncoderToNative(
-    CLR_RT_HeapBlock *byteEncoderSetttings,
+inline HRESULT ManagedByteEncoderToNative(
+    CLR_RT_HeapBlock *byteEncoderSettings,
     rmt_bytes_encoder_config_t &encoder_config)
 {
+    NANOCLR_HEADER();
+
     CLR_RT_HeapBlock *rmt_symbol_settings;
 
-    rmt_symbol_settings = byteEncoderSetttings[ByteEncoderSettings::FIELD___bit0].Dereference();
+    rmt_symbol_settings = byteEncoderSettings[ByteEncoderSettings::FIELD___bit0].Dereference();
+    FAULT_ON_NULL(rmt_symbol_settings);
     ManagedSymbolToNative(rmt_symbol_settings, &encoder_config.bit0);
 
-    rmt_symbol_settings = byteEncoderSetttings[ByteEncoderSettings::FIELD___bit1].Dereference();
+    rmt_symbol_settings = byteEncoderSettings[ByteEncoderSettings::FIELD___bit1].Dereference();
+    FAULT_ON_NULL(rmt_symbol_settings);
     ManagedSymbolToNative(rmt_symbol_settings, &encoder_config.bit1);
+
+    NANOCLR_NOCLEANUP();
 }
 
 HRESULT Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_Esp32_Rmt_TransmitterEncodedChannel::
@@ -212,7 +218,7 @@ HRESULT Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_E
                 {
                     rmt_bytes_encoder_config_t encoder_config = {};
 
-                    ManagedByteEncoderToNative(encoder_settings, encoder_config);
+                    NANOCLR_CHECK_HRESULT(ManagedByteEncoderToNative(encoder_settings, encoder_config));
                     encoder_config.flags.msb_first =
                         (bool)encoder_settings[ByteEncoderSettings::FIELD___msbFirst].NumericByRef().u1;
 
@@ -248,7 +254,7 @@ HRESULT Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_E
             }
         }
 
-        // Enable channel
+        // Enable channel, ignore any error, as it may already be enabled
         rmt_enable(tx_chan);
 
         RmtChannel::AddRegisteredTxChannel(tx_chan, 0, encoder_handle);
@@ -326,10 +332,10 @@ HRESULT Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_E
 // Common function to transmit data, used by both TxWriteSymbolItems and TxWriteEncoder
 void SetupTxConfig(CLR_RT_HeapBlock *transmitter_channel_settings, rmt_transmit_config_t &txConfig)
 {
+    txConfig = {};
     txConfig.flags.eot_level =
         (bool)transmitter_channel_settings[TransmitterChannelSettings::FIELD___idleLevel].NumericByRef().u1;
     txConfig.flags.queue_nonblocking = false;
-    txConfig.loop_count = 1;
 
 #if SOC_RMT_SUPPORT_TX_LOOP_COUNT
     if ((bool)transmitter_channel_settings[TransmitterChannelSettings::FIELD___enableLooping].NumericByRef().u1)
@@ -338,6 +344,11 @@ void SetupTxConfig(CLR_RT_HeapBlock *transmitter_channel_settings, rmt_transmit_
             transmitter_channel_settings[TransmitterChannelSettings::FIELD___loopCount].NumericByRef().s4;
     }
 #endif
+}
+
+static bool WaitForTxDone(rmt_channel_handle_t chanHandle)
+{
+    return (rmt_tx_wait_all_done((rmt_channel_handle_t)chanHandle, portMAX_DELAY) == ESP_OK);
 }
 
 // Common function to transmit data
@@ -368,8 +379,7 @@ HRESULT TransmitRmtChannel(
 
     if (wait_tx_done)
     {
-        err = rmt_tx_wait_all_done((rmt_channel_handle_t)chanHandle, portMAX_DELAY);
-        if (err != ESP_OK)
+        if (!WaitForTxDone(chanHandle))
         {
             hr = CLR_E_INVALID_PARAMETER;
             NANOCLR_LEAVE();
@@ -412,6 +422,13 @@ HRESULT Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_E
         // Get encoder handle for channel
         multiEncoder = __containerof(tci->txEncoder, rmt_multi_stage_encoder_t, base);
 
+        // Validate that only 1 encoder is configured and that it is a copy encoder
+        if (multiEncoder->numberSteps == 0 && multiEncoder->encoders[0].encType != RmtEncoderType_Copy)
+        {
+            // Only 1 encoder is supported for this function
+            NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+        }
+
         // Get tx byte buffer address & size
         data = stack.Arg1().DereferenceArray();
         FAULT_ON_NULL(data);
@@ -426,6 +443,14 @@ HRESULT Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_E
         }
 
         {
+            // Make sure any previous calls are completed before we start a new one, 
+            // as we are going to overwrite the buffer.
+            if (!WaitForTxDone(chanHandle))
+            {
+                hr = CLR_E_INVALID_PARAMETER;
+                NANOCLR_LEAVE();
+            }
+
             // Copy data to vector buffer
             auto &d = tci->txBuffer;
 
@@ -524,7 +549,7 @@ HRESULT Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_E
             dataLen = dataBuffer->m_numOfElements;
 
             // Validate data length for copy encoders
-            if (mstep->encType == copy)
+            if (mstep->encType == RmtEncoderType_Copy)
             {
                 if ((dataLen % sizeof(rmt_symbol_word_t)) != 0)
                 {

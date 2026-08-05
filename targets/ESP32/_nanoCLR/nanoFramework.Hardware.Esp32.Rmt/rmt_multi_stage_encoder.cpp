@@ -88,10 +88,10 @@ static esp_err_t rmt_del_multi_stage_encoder(rmt_encoder_t *encoder)
     for (int index = 0; index < multi_encoder->numberSteps; index++)
     {
         // note don't need to delete copy symbols as ptr to managed heap
-        if ((multi_encoder->encoders + index)->encType != none)
+        if ((multi_encoder->encoders + index)->encType != RmtEncoderType_None)
         {
             rmt_del_encoder((multi_encoder->encoders + index)->encoder);
-            (multi_encoder->encoders + index)->encType = none;
+            (multi_encoder->encoders + index)->encType = RmtEncoderType_None;
         }
     }
 
@@ -112,8 +112,11 @@ static esp_err_t rmt_multi_stage_encoder_reset(rmt_encoder_t *encoder)
     for (int index = 0; index < multi_encoder->numberSteps; index++)
     {
         rmt_multi_item_t *item = (multi_encoder->encoders + index);
-        rmt_encoder_reset(item->encoder);
-
+        if (item->encType != RmtEncoderType_None)  
+        {
+            rmt_encoder_reset(item->encoder);
+        }
+    
         item->currentLoop = 0;
     }
 
@@ -166,7 +169,7 @@ esp_err_t rmt_add_byte_encoder(rmt_encoder_t *encoder, int loopCount, rmt_bytes_
 
     mstep = multi_encoder->encoders + multi_encoder->step;
 
-    mstep->encType = byte;
+    mstep->encType = RmtEncoderType_Byte;
     mstep->encoder = byte_encoder;
     mstep->currentLoop = 0;
     mstep->loopCount = loopCount;
@@ -192,10 +195,10 @@ esp_err_t rmt_add_copy_encoder(
     rmt_encoder_handle_t copy_encoder;
     rmt_multi_item_t *mstep;
 
-    ESP_GOTO_ON_ERROR(rmt_new_copy_encoder(&config, &copy_encoder), err, TAG, "create bytes encoder failed");
+    ESP_GOTO_ON_ERROR(rmt_new_copy_encoder(&config, &copy_encoder), err, TAG, "create copy encoder failed");
 
     mstep = multi_encoder->encoders + multi_encoder->step;
-    mstep->encType = copy;
+    mstep->encType = RmtEncoderType_Copy;
     mstep->encoder = copy_encoder;
     mstep->loopCount = loopCount;
     mstep->currentLoop = 0;

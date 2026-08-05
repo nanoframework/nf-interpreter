@@ -384,14 +384,14 @@ __inline void debug_printf(const char *format, ...)
 #endif
 //--//
 
-#define NANOCLR_LOCKED_ACCESS_DECLARATION(type, name) type copy##name
+#define NANOCLR_LOCKED_ACCESS_DECLARATION(type, name) type RmtEncoderType_Copy##name
 #define NANOCLR_LOCKED_ACCESS_EXECUTE(name, expr)                                                                      \
     {                                                                                                                  \
         GLOBAL_LOCK();                                                                                                 \
-        copy##name = expr;                                                                                             \
+        RmtEncoderType_Copy##name = expr;                                                                                             \
         GLOBAL_UNLOCK();                                                                                               \
     }
-#define NANOCLR_LOCKED_ACCESS_GET(name) copy##name
+#define NANOCLR_LOCKED_ACCESS_GET(name) RmtEncoderType_Copy##name
 
 //--//
 
