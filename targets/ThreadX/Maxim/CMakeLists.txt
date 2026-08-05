@@ -41,6 +41,7 @@ if(NO_MAXIM_MICROS_SDK_SOURCE_FOLDER)
         maxim_micros_sdk
         GIT_REPOSITORY https://github.com/nanoframework/MaximIntegratedMicros-SDK
         GIT_TAG ${MAXIM_MICROS_SDK_VERSION}
+        UPDATE_DISCONNECTED ON
     )
 
 else()
@@ -105,6 +106,7 @@ if(NO_CMSIS_SOURCE)
         cmsis
         GIT_REPOSITORY https://github.com/ARM-software/CMSIS_5.git
         GIT_TAG ${CMSIS_GIT_TAG}
+        UPDATE_DISCONNECTED ON
     )
 
 else()

@@ -50,21 +50,22 @@
  * @details GPIO ports and system clocks are initialized before everything
  *          else.
  */
-void __early_init(void) {
+void __early_init(void)
+{
 
-  /* Disable the bootrom watchdog. */
-  WATCHDOG->CLR.CTRL = WATCHDOG_CTRL_ENABLE;
+    /* Disable the bootrom watchdog. */
+    WATCHDOG->CLR.CTRL = WATCHDOG_CTRL_ENABLE;
 
 #if RP_NO_INIT == FALSE
-  /* Reset of all peripherals.
-     Note, IO_QSPI, PADS_QSPI, PLL_SYS and PLL_USB are not reset because
-     the system is executing from flash via XIP and needs clock sources to
-     remain active. PLLs are handled by rp_clock_init() after switching to
-     safe sources.*/
-  rp_peripheral_reset(~(RESETS_ALLREG_IO_QSPI  | RESETS_ALLREG_PADS_QSPI |
-                         RESETS_ALLREG_PLL_SYS  | RESETS_ALLREG_PLL_USB));
+    /* Reset of all peripherals.
+       Note, IO_QSPI, PADS_QSPI, PLL_SYS and PLL_USB are not reset because
+       the system is executing from flash via XIP and needs clock sources to
+       remain active. PLLs are handled by rp_clock_init() after switching to
+       safe sources.*/
+    rp_peripheral_reset(
+        ~(RESETS_ALLREG_IO_QSPI | RESETS_ALLREG_PADS_QSPI | RESETS_ALLREG_PLL_SYS | RESETS_ALLREG_PLL_USB));
 
-  rp_clock_init();
+    rp_clock_init();
 #endif
 }
 
@@ -72,21 +73,23 @@ void __early_init(void) {
 /**
  * @brief   SDC card detection.
  */
-bool sdc_lld_is_card_inserted(SDCDriver *sdcp) {
+bool sdc_lld_is_card_inserted(SDCDriver *sdcp)
+{
 
-  (void)sdcp;
-  /* CHTODO: Fill the implementation.*/
-  return true;
+    (void)sdcp;
+    /* CHTODO: Fill the implementation.*/
+    return true;
 }
 
 /**
  * @brief   SDC card write protection detection.
  */
-bool sdc_lld_is_write_protected(SDCDriver *sdcp) {
+bool sdc_lld_is_write_protected(SDCDriver *sdcp)
+{
 
-  (void)sdcp;
-  /* CHTODO: Fill the implementation.*/
-  return false;
+    (void)sdcp;
+    /* CHTODO: Fill the implementation.*/
+    return false;
 }
 #endif /* HAL_USE_SDC */
 
@@ -94,21 +97,23 @@ bool sdc_lld_is_write_protected(SDCDriver *sdcp) {
 /**
  * @brief   MMC_SPI card detection.
  */
-bool mmc_lld_is_card_inserted(MMCDriver *mmcp) {
+bool mmc_lld_is_card_inserted(MMCDriver *mmcp)
+{
 
-  (void)mmcp;
-  /* CHTODO: Fill the implementation.*/
-  return true;
+    (void)mmcp;
+    /* CHTODO: Fill the implementation.*/
+    return true;
 }
 
 /**
  * @brief   MMC_SPI card write protection detection.
  */
-bool mmc_lld_is_write_protected(MMCDriver *mmcp) {
+bool mmc_lld_is_write_protected(MMCDriver *mmcp)
+{
 
-  (void)mmcp;
-  /* CHTODO: Fill the implementation.*/
-  return false;
+    (void)mmcp;
+    /* CHTODO: Fill the implementation.*/
+    return false;
 }
 #endif
 
@@ -116,6 +121,6 @@ bool mmc_lld_is_write_protected(MMCDriver *mmcp) {
  * @brief   Board-specific initialization code.
  * @note    You can add your board-specific code here.
  */
-void boardInit(void) {
-
+void boardInit(void)
+{
 }

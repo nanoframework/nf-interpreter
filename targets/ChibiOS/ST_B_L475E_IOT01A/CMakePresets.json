@@ -7,7 +7,7 @@
     ],
     "configurePresets": [
         {
-            "name": "PICORP2040_W",
+            "name": "ST_B_L475E_IOT01A",
             "inherits": [
                 "arm-gcc-cortex-preset",
                 "user-tools-repos",
@@ -15,16 +15,16 @@
             ],
             "hidden": false,
             "cacheVariables": {
-                "NF_TARGET_DEFCONFIG": "targets/ChibiOS/PICORP2040_W/defconfig"
+                "NF_TARGET_DEFCONFIG": "targets/ChibiOS/ST_B_L475E_IOT01A/defconfig"
             }
         }
     ],
     "buildPresets": [
         {
             "inherits": "base-user",
-            "name": "PICORP2040_W",
-            "displayName": "PICORP2040_W",
-            "configurePreset": "PICORP2040_W"
+            "name": "ST_B_L475E_IOT01A",
+            "displayName": "ST_B_L475E_IOT01A",
+            "configurePreset": "ST_B_L475E_IOT01A"
         }
     ]
 }

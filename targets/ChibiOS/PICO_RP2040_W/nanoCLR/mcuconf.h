@@ -42,6 +42,13 @@
 #define RP_CORE1_STACK_END                  __c1_main_stack_end__
 
 /*
+ * EFL driver system settings.
+ * SMP mode requires an explicit XIP safety strategy; LOCKOUT uses the
+ * built-in core parking mechanism and needs no application-provided hooks.
+ */
+#define RP_EFL_XIP_SAFETY                   RP_EFL_XIP_SAFETY_LOCKOUT
+
+/*
  * IRQ system settings.
  */
 #define RP_IRQ_SYSTICK_PRIORITY             2

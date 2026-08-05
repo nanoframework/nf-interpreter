@@ -113,22 +113,22 @@ extern "C"
 #if !defined(LFS_NO_INTRINSICS) && (defined(__GNUC__) || defined(__CC_ARM))
         return 32 - __builtin_clz(a - 1);
 #else
-        uint32_t r = 0;
-        uint32_t s;
-        a -= 1;
-        s = (a > 0xffff) << 4;
-        a >>= s;
-        r |= s;
-        s = (a > 0xff) << 3;
-        a >>= s;
-        r |= s;
-        s = (a > 0xf) << 2;
-        a >>= s;
-        r |= s;
-        s = (a > 0x3) << 1;
-        a >>= s;
-        r |= s;
-        return (r | (a >> 1)) + 1;
+    uint32_t r = 0;
+    uint32_t s;
+    a -= 1;
+    s = (a > 0xffff) << 4;
+    a >>= s;
+    r |= s;
+    s = (a > 0xff) << 3;
+    a >>= s;
+    r |= s;
+    s = (a > 0xf) << 2;
+    a >>= s;
+    r |= s;
+    s = (a > 0x3) << 1;
+    a >>= s;
+    r |= s;
+    return (r | (a >> 1)) + 1;
 #endif
     }
 
@@ -138,7 +138,7 @@ extern "C"
 #if !defined(LFS_NO_INTRINSICS) && defined(__GNUC__)
         return __builtin_ctz(a);
 #else
-        return lfs_npw2((a & -a) + 1) - 1;
+    return lfs_npw2((a & -a) + 1) - 1;
 #endif
     }
 
@@ -148,9 +148,9 @@ extern "C"
 #if !defined(LFS_NO_INTRINSICS) && (defined(__GNUC__) || defined(__CC_ARM))
         return __builtin_popcount(a);
 #else
-        a = a - ((a >> 1) & 0x55555555);
-        a = (a & 0x33333333) + ((a >> 2) & 0x33333333);
-        return (((a + (a >> 4)) & 0xf0f0f0f) * 0x1010101) >> 24;
+    a = a - ((a >> 1) & 0x55555555);
+    a = (a & 0x33333333) + ((a >> 2) & 0x33333333);
+    return (((a + (a >> 4)) & 0xf0f0f0f) * 0x1010101) >> 24;
 #endif
     }
 
@@ -171,10 +171,10 @@ extern "C"
     ((defined(BYTE_ORDER) && defined(ORDER_BIG_ENDIAN) && BYTE_ORDER == ORDER_BIG_ENDIAN) ||                           \
      (defined(__BYTE_ORDER) && defined(__ORDER_BIG_ENDIAN) && __BYTE_ORDER == __ORDER_BIG_ENDIAN) ||                   \
      (defined(__BYTE_ORDER__) && defined(__ORDER_BIG_ENDIAN__) && __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__))
-        return __builtin_bswap32(a);
+    return __builtin_bswap32(a);
 #else
-        return (((uint8_t *)&a)[0] << 0) | (((uint8_t *)&a)[1] << 8) | (((uint8_t *)&a)[2] << 16) |
-               (((uint8_t *)&a)[3] << 24);
+    return (((uint8_t *)&a)[0] << 0) | (((uint8_t *)&a)[1] << 8) | (((uint8_t *)&a)[2] << 16) |
+           (((uint8_t *)&a)[3] << 24);
 #endif
     }
 
@@ -194,10 +194,10 @@ extern "C"
 #elif (defined(BYTE_ORDER) && defined(ORDER_BIG_ENDIAN) && BYTE_ORDER == ORDER_BIG_ENDIAN) ||                          \
     (defined(__BYTE_ORDER) && defined(__ORDER_BIG_ENDIAN) && __BYTE_ORDER == __ORDER_BIG_ENDIAN) ||                    \
     (defined(__BYTE_ORDER__) && defined(__ORDER_BIG_ENDIAN__) && __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__)
-        return a;
+    return a;
 #else
-        return (((uint8_t *)&a)[0] << 24) | (((uint8_t *)&a)[1] << 16) | (((uint8_t *)&a)[2] << 8) |
-               (((uint8_t *)&a)[3] << 0);
+    return (((uint8_t *)&a)[0] << 24) | (((uint8_t *)&a)[1] << 16) | (((uint8_t *)&a)[2] << 8) |
+           (((uint8_t *)&a)[3] << 0);
 #endif
     }
 
@@ -206,8 +206,8 @@ extern "C"
         return lfs_frombe32(a);
     }
 
-// Calculate CRC-32 with polynomial = 0x04c11db7
-uint32_t lfs_crc(uint32_t crc, const void *buffer, size_t size);
+    // Calculate CRC-32 with polynomial = 0x04c11db7
+    uint32_t lfs_crc(uint32_t crc, const void *buffer, size_t size);
 
     // Allocate memory
     static inline void *lfs_malloc(size_t size)
@@ -215,10 +215,10 @@ uint32_t lfs_crc(uint32_t crc, const void *buffer, size_t size);
 #if defined(LFS_MALLOC)
         return LFS_MALLOC(size);
 #elif !defined(LFS_NO_MALLOC)
-        return malloc(size);
+    return malloc(size);
 #else
-        (void)size;
-        return NULL;
+    (void)size;
+    return NULL;
 #endif
     }
 
@@ -228,9 +228,9 @@ uint32_t lfs_crc(uint32_t crc, const void *buffer, size_t size);
 #if defined(LFS_FREE)
         LFS_FREE(p);
 #elif !defined(LFS_NO_MALLOC)
-        free(p);
+    free(p);
 #else
-        (void)p;
+    (void)p;
 #endif
     }
 
