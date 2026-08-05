@@ -430,6 +430,41 @@ function(nf_generate_build_output_files target)
 
             COMMENT "Sign nanoCLR binary with imgtool (MCUboot)")
 
+        # Build a placeholder image for image 1's primary slot (deploy_0). 
+        # Required for factory-fresh device
+        # This placeholder (header + zero-length payload + TLV, signed with the same key as nanoCLR).
+        #
+        if(NOT DEFINED NF_MCUBOOT_DEPLOY_SLOT_OFFSET OR "${NF_MCUBOOT_DEPLOY_SLOT_OFFSET}" STREQUAL "")
+            message(FATAL_ERROR "NF_MCUBOOT_DEPLOY_SLOT_OFFSET must be set when NF_FEATURE_HAS_MCUBOOT is enabled")
+        endif()
+
+        if(NOT DEFINED NF_MCUBOOT_DEPLOY_SLOT_SIZE OR "${NF_MCUBOOT_DEPLOY_SLOT_SIZE}" STREQUAL "")
+            message(FATAL_ERROR "NF_MCUBOOT_DEPLOY_SLOT_SIZE must be set when NF_FEATURE_HAS_MCUBOOT is enabled")
+        endif()
+
+        set(DEPLOY_PLACEHOLDER_INPUT_FILE ${CMAKE_SOURCE_DIR}/MCUboot/deploy-placeholder-empty.bin)
+        set(DEPLOY_PLACEHOLDER_SIGNED_BIN_FILE ${CMAKE_BINARY_DIR}/${TARGET_SHORT}-deploy-placeholder.bin)
+        set(DEPLOY_PLACEHOLDER_HEX_FILE ${CMAKE_BINARY_DIR}/${TARGET_SHORT}-deploy-placeholder.hex)
+
+        add_custom_command(TARGET ${TARGET_SHORT}.elf POST_BUILD
+            COMMAND ${IMGTOOL} sign
+                --key "${NF_MCUBOOT_SIGNING_KEY}"
+                --align 4
+                --version "1.0.0"
+                --header-size "${NF_MCUBOOT_HEADER_SIZE}"
+                --pad-header
+                --slot-size "${NF_MCUBOOT_DEPLOY_SLOT_SIZE}"
+                "${DEPLOY_PLACEHOLDER_INPUT_FILE}"
+                "${DEPLOY_PLACEHOLDER_SIGNED_BIN_FILE}"
+            COMMAND ${CMAKE_OBJCOPY} -I binary -O ihex --change-addresses ${NF_MCUBOOT_DEPLOY_SLOT_OFFSET}
+                "${DEPLOY_PLACEHOLDER_SIGNED_BIN_FILE}" "${DEPLOY_PLACEHOLDER_HEX_FILE}"
+
+            BYPRODUCTS
+                ${DEPLOY_PLACEHOLDER_SIGNED_BIN_FILE}
+                ${DEPLOY_PLACEHOLDER_HEX_FILE}
+
+            COMMENT "Build placeholder deployment (image 1) image for a factory-fresh device")
+
     endif()
 
 endfunction()
