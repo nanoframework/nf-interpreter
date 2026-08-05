@@ -476,11 +476,6 @@ function(nf_generate_build_output_files target)
         # Build a placeholder image for image 1's primary slot (deploy_0).
         # Required for factory-fresh device
         # This placeholder (header + zero-length payload + TLV, signed with the same key as nanoCLR).
-        #
-        # The slot's offset/size already live in the target's own mcuboot_flash_layout.h (the
-        # header the flash_area table itself is built from) - derive them from there instead of
-        # duplicating them by hand in CMakePresets.json, which drifts silently if the layout
-        # ever changes.
         set(MCUBOOT_FLASH_LAYOUT_HEADER ${CMAKE_CURRENT_SOURCE_DIR}/MCUboot/mcuboot_flash_layout.h)
 
         nf_extract_define_from_header(${MCUBOOT_FLASH_LAYOUT_HEADER} NF_MCUBOOT_SLOT_IMG1_PRI_OFF  NF_MCUBOOT_DEPLOY_SLOT_OFFSET)
