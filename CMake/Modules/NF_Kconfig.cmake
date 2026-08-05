@@ -39,6 +39,7 @@ set(_NF_KCONFIG_API_MAP
     "API_NANOFRAMEWORK_SYSTEM_TEXT|API_nanoFramework.System.Text"
     "API_NANOFRAMEWORK_SYSTEM_SECURITY_CRYPTOGRAPHY|API_nanoFramework.System.Security.Cryptography"
     "API_NANOFRAMEWORK_SYSTEM_IO_HASHING|API_nanoFramework.System.IO.Hashing"
+    "API_NANOFRAMEWORK_ESPNOW|API_nanoFramework.EspNow"
     "API_NANOFRAMEWORK_NETWORKING_THREAD|API_nanoFramework.Networking.Thread"
 
     # Platform-specific APIs
