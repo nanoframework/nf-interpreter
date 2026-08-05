@@ -350,6 +350,39 @@ function(nf_generate_bin_package file1 file2 offset outputfilename)
 
 endfunction()
 
+############################################################################################
+# Extract the value of a #define from a C/C++ header and evaluate it as a CMake integer,
+# so build-system numbers (flash addresses, sizes) can be derived from the same header the
+# firmware itself compiles against instead of being retyped into CMake by hand.
+function(nf_extract_define_from_header header_file define_name out_var)
+
+    if(NOT EXISTS "${header_file}")
+        message(FATAL_ERROR "nf_extract_define_from_header: '${header_file}' does not exist")
+    endif()
+
+    file(STRINGS "${header_file}" matched_lines REGEX "^[ \t]*#define[ \t]+${define_name}[ \t]+")
+
+    list(LENGTH matched_lines matched_count)
+    if(matched_count EQUAL 0)
+        message(FATAL_ERROR "nf_extract_define_from_header: '${define_name}' not found in '${header_file}'")
+    endif()
+
+    # use the last match: if the macro is guarded by #ifndef/#define fallback pairs, the
+    # active (non-fallback) definition is conventionally the last one in these headers
+    list(GET matched_lines -1 matched_line)
+
+    string(REGEX REPLACE "^[ \t]*#define[ \t]+${define_name}[ \t]+(.*)$" "\\1" value_expr "${matched_line}")
+
+    # strip trailing line comments and unsigned-literal suffixes
+    string(REGEX REPLACE "//.*$" "" value_expr "${value_expr}")
+    string(REGEX REPLACE "[Uu]" "" value_expr "${value_expr}")
+    string(STRIP "${value_expr}" value_expr)
+
+    math(EXPR value "${value_expr}" OUTPUT_FORMAT HEXADECIMAL)
+    set(${out_var} "${value}" PARENT_SCOPE)
+
+endfunction()
+
 function(nf_generate_build_output_files target)
 
     # need to remove the .elf suffix from target name
@@ -430,17 +463,18 @@ function(nf_generate_build_output_files target)
 
             COMMENT "Sign nanoCLR binary with imgtool (MCUboot)")
 
-        # Build a placeholder image for image 1's primary slot (deploy_0). 
+        # Build a placeholder image for image 1's primary slot (deploy_0).
         # Required for factory-fresh device
         # This placeholder (header + zero-length payload + TLV, signed with the same key as nanoCLR).
         #
-        if(NOT DEFINED NF_MCUBOOT_DEPLOY_SLOT_OFFSET OR "${NF_MCUBOOT_DEPLOY_SLOT_OFFSET}" STREQUAL "")
-            message(FATAL_ERROR "NF_MCUBOOT_DEPLOY_SLOT_OFFSET must be set when NF_FEATURE_HAS_MCUBOOT is enabled")
-        endif()
+        # The slot's offset/size already live in the target's own mcuboot_flash_layout.h (the
+        # header the flash_area table itself is built from) - derive them from there instead of
+        # duplicating them by hand in CMakePresets.json, which drifts silently if the layout
+        # ever changes.
+        set(MCUBOOT_FLASH_LAYOUT_HEADER ${CMAKE_CURRENT_SOURCE_DIR}/MCUboot/mcuboot_flash_layout.h)
 
-        if(NOT DEFINED NF_MCUBOOT_DEPLOY_SLOT_SIZE OR "${NF_MCUBOOT_DEPLOY_SLOT_SIZE}" STREQUAL "")
-            message(FATAL_ERROR "NF_MCUBOOT_DEPLOY_SLOT_SIZE must be set when NF_FEATURE_HAS_MCUBOOT is enabled")
-        endif()
+        nf_extract_define_from_header(${MCUBOOT_FLASH_LAYOUT_HEADER} NF_MCUBOOT_SLOT_IMG1_PRI_OFF  NF_MCUBOOT_DEPLOY_SLOT_OFFSET)
+        nf_extract_define_from_header(${MCUBOOT_FLASH_LAYOUT_HEADER} NF_MCUBOOT_SLOT_IMG1_PRI_SIZE NF_MCUBOOT_DEPLOY_SLOT_SIZE)
 
         set(DEPLOY_PLACEHOLDER_INPUT_FILE ${CMAKE_SOURCE_DIR}/MCUboot/deploy-placeholder-empty.bin)
         set(DEPLOY_PLACEHOLDER_SIGNED_BIN_FILE ${CMAKE_BINARY_DIR}/${TARGET_SHORT}-deploy-placeholder.bin)
