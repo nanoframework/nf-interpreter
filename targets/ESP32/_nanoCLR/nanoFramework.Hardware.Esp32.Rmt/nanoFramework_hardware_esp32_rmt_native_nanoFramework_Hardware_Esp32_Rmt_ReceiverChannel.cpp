@@ -80,7 +80,7 @@ HRESULT Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_E
     NativeRxInit___I4(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
-    
+
     rmt_channel_handle_t rx_chan_handle = NULL;
     QueueHandle_t receive_queue = NULL;
     rmt_rx_event_callbacks_t cbs;
@@ -120,9 +120,9 @@ HRESULT Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_E
     // Invert signal input ?
     rx_chan_config.flags.invert_in =
         receiver_channel_settings[RmtChannelSettings::FIELD___signalInverterEnabled].NumericByRef().u1;
-    
+
     // Don't use DMA for RX channel, as it is not supported on all ESP32 targets
-    // maybe we can extend later to support DMA for RX channel on targets that support it 
+    // maybe we can extend later to support DMA for RX channel on targets that support it
     rx_chan_config.flags.with_dma = false;
     rx_chan_config.flags.io_loop_back = false;
 
@@ -364,7 +364,7 @@ HRESULT Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_E
         NANOCLR_SET_AND_LEAVE(S_OK);
     }
 
-    if (xQueueReceive(rcInfo->rxQueue, &rx_data, 0) != pdTRUE )
+    if (xQueueReceive(rcInfo->rxQueue, &rx_data, 0) != pdTRUE)
     {
         stack.SetResult_Object(NULL);
         NANOCLR_SET_AND_LEAVE(S_OK);

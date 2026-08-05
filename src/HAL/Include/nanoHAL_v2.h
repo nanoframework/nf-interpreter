@@ -77,7 +77,7 @@ typedef enum SLEEP_LEVEL
 #define SYSTEM_EVENT_FLAG_RADIO          0x00010000
 #define SYSTEM_EVENT_FLAG_BLUETOOTH      0x00020000
 
-#define SYSTEM_EVENT_FLAG_RMT_RX         0x00080000
+#define SYSTEM_EVENT_FLAG_RMT_RX 0x00080000
 
 // #define SYSTEM_EVENT_FLAG_UNUSED_0x00100000         0x00100000
 
@@ -388,7 +388,7 @@ __inline void debug_printf(const char *format, ...)
 #define NANOCLR_LOCKED_ACCESS_EXECUTE(name, expr)                                                                      \
     {                                                                                                                  \
         GLOBAL_LOCK();                                                                                                 \
-        RmtEncoderType_Copy##name = expr;                                                                                             \
+        RmtEncoderType_Copy##name = expr;                                                                              \
         GLOBAL_UNLOCK();                                                                                               \
     }
 #define NANOCLR_LOCKED_ACCESS_GET(name) RmtEncoderType_Copy##name
