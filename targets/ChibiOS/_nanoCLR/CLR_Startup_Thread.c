@@ -13,6 +13,10 @@
 #include <nanoCLR_Application.h>
 #include <nanoPAL_BlockStorage.h>
 
+#ifdef NF_FEATURE_HAS_MCUBOOT
+#include <mcuboot_config/mcuboot_config.h>
+#endif
+
 void AssertBlockStorage()
 {
     // if the target Device_BlockStorageConfig (and collections) and the linker file have an address mismatch
@@ -31,7 +35,12 @@ void AssertBlockStorage()
     // this one can be spread accross several blocks so we can only check the start address
     memset(&stream, 0, sizeof(BlockStorageStream));
     BlockStorageStream_Initialize(&stream, BlockUsage_CODE);
+#ifdef NF_FEATURE_HAS_MCUBOOT
+    // For MCUboot targets this check has to account for the MCUBOOT_HEADER_SIZE
+    ASSERT(stream.BaseAddress + MCUBOOT_HEADER_SIZE == (uint32_t)&__nanoImage_start__);
+#else
     ASSERT(stream.BaseAddress == (uint32_t)&__nanoImage_start__);
+#endif
     // ASSERT(stream.Length == ((uint32_t)&__nanoImage_end__) - ((uint32_t)&__nanoImage_start__));
 
     // CONFIG block
