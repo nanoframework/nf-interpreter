@@ -476,9 +476,9 @@ function(nf_generate_build_output_files target)
         nf_extract_define_from_header(${MCUBOOT_FLASH_LAYOUT_HEADER} NF_MCUBOOT_SLOT_IMG1_PRI_OFF  NF_MCUBOOT_DEPLOY_SLOT_OFFSET)
         nf_extract_define_from_header(${MCUBOOT_FLASH_LAYOUT_HEADER} NF_MCUBOOT_SLOT_IMG1_PRI_SIZE NF_MCUBOOT_DEPLOY_SLOT_SIZE)
 
-        set(DEPLOY_PLACEHOLDER_INPUT_FILE ${CMAKE_SOURCE_DIR}/MCUboot/deploy-placeholder-empty.bin)
-        set(DEPLOY_PLACEHOLDER_SIGNED_BIN_FILE ${CMAKE_BINARY_DIR}/${TARGET_SHORT}-deploy-placeholder.bin)
-        set(DEPLOY_PLACEHOLDER_HEX_FILE ${CMAKE_BINARY_DIR}/${TARGET_SHORT}-deploy-placeholder.hex)
+        set(DEPLOY_PLACEHOLDER_INPUT_FILE ${CMAKE_SOURCE_DIR}/MCUboot/deployment-placeholder-empty.bin)
+        set(DEPLOY_PLACEHOLDER_SIGNED_BIN_FILE ${CMAKE_BINARY_DIR}/deployment-placeholder.bin)
+        set(DEPLOY_PLACEHOLDER_HEX_FILE ${CMAKE_BINARY_DIR}/deployment-placeholder.hex)
 
         add_custom_command(TARGET ${TARGET_SHORT}.elf POST_BUILD
             COMMAND ${IMGTOOL} sign
