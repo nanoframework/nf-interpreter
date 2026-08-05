@@ -463,6 +463,16 @@ function(nf_generate_build_output_files target)
 
             COMMENT "Sign nanoCLR binary with imgtool (MCUboot)")
 
+        # Regenerate the HEX from the now-signed binary, rebased to image 0's primary slot base address.
+        set(MCUBOOT_IMG0_FLASH_LAYOUT_HEADER ${CMAKE_CURRENT_SOURCE_DIR}/MCUboot/mcuboot_flash_layout.h)
+        nf_extract_define_from_header(${MCUBOOT_IMG0_FLASH_LAYOUT_HEADER} NF_MCUBOOT_SLOT_IMG0_PRI_OFF NF_MCUBOOT_IMG0_PRI_SLOT_OFFSET)
+
+        add_custom_command(TARGET ${TARGET_SHORT}.elf POST_BUILD
+            COMMAND ${CMAKE_OBJCOPY} -I binary -O ihex --change-addresses ${NF_MCUBOOT_IMG0_PRI_SLOT_OFFSET}
+                "${TARGET_BIN_FILE}" "${TARGET_HEX_FILE}"
+
+            COMMENT "Regenerate nanoCLR HEX from the signed binary (MCUboot)")
+
         # Build a placeholder image for image 1's primary slot (deploy_0).
         # Required for factory-fresh device
         # This placeholder (header + zero-length payload + TLV, signed with the same key as nanoCLR).
