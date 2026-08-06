@@ -4024,9 +4024,11 @@ static int Ifu_FlashAreaId(uint8_t imageIndex, uint8_t slotIndex)
 }
 
 // Read the image header and (best-effort) SHA-256 digest from a slot, packing the
-// result into a Monitor_ImageInfo_Entry. Returns true when a valid MCUboot image
-// header is found. ImageIndex/SlotIndex are always populated; the remaining fields
-// are valid only when the return value is true.
+// result into a Monitor_ImageInfo_Entry. Returns true when both the image header magic
+// and the TLV info magic parse correctly (ImageInfo_Entry.ValidHeader) - this is a cheap,
+// structural sanity check only, no hash or signature is verified. ImageIndex/SlotIndex are
+// always populated; Version and the Bootable flag are populated as soon as the header magic
+// alone parses; Hash and ValidHeader require the TLV info area to also parse.
 static bool Ifu_ReadSlotInfo(uint8_t imageIndex, uint8_t slotIndex, Monitor_ImageInfo_Entry *entry)
 {
     memset(entry, 0, sizeof(*entry));
@@ -4045,25 +4047,30 @@ static bool Ifu_ReadSlotInfo(uint8_t imageIndex, uint8_t slotIndex, Monitor_Imag
         return false;
     }
 
-    bool valid = false;
+    bool validHeader = false;
     struct image_header hdr;
 
     if (flash_area_read(fa, 0, &hdr, sizeof(hdr)) == 0 && hdr.ih_magic == IMAGE_MAGIC)
     {
-        valid = true;
-        entry->Valid = 1;
         entry->Version.majorVersion    = hdr.ih_ver.iv_major;
         entry->Version.minorVersion    = hdr.ih_ver.iv_minor;
         entry->Version.revisionNumber  = hdr.ih_ver.iv_revision;
         entry->Version.buildNumber     = hdr.ih_ver.iv_build_num;
 
+        if (!(hdr.ih_flags & IMAGE_F_NON_BOOTABLE))
+        {
+            entry->Flags |= Monitor_Image_State_Bootable;
+        }
+
         // Locate the unprotected TLV area and extract the SHA-256 digest (best-effort).
-        // The unprotected TLV info follows the image body and the protected TLV area.
         uint32_t tlvOff = (uint32_t)hdr.ih_hdr_size + hdr.ih_img_size + hdr.ih_protect_tlv_size;
         struct image_tlv_info tlvInfo;
 
         if (flash_area_read(fa, tlvOff, &tlvInfo, sizeof(tlvInfo)) == 0 && tlvInfo.it_magic == IMAGE_TLV_INFO_MAGIC)
         {
+            validHeader = true;
+            entry->ValidHeader = 1;
+
             uint32_t pos = tlvOff + sizeof(tlvInfo);
             uint32_t end = tlvOff + tlvInfo.it_tlv_tot;
 
@@ -4090,7 +4097,7 @@ static bool Ifu_ReadSlotInfo(uint8_t imageIndex, uint8_t slotIndex, Monitor_Imag
 
     flash_area_close(fa);
 
-    return valid;
+    return validHeader;
 }
 
 bool CLR_DBG_Debugger::Monitor_ImageInfo(WP_Message *msg)
@@ -4119,9 +4126,7 @@ bool CLR_DBG_Debugger::Monitor_ImageInfo(WP_Message *msg)
     uint8_t idx = 0;
     for (uint8_t image = 0; image < imageCount; image++)
     {
-        // boot state for this image is read from the primary slot trailer
-        struct boot_swap_state swapState;
-        bool haveState = (boot_read_swap_state_by_id(FLASH_AREA_IMAGE_PRIMARY(image), &swapState) == 0);
+        // Derive confirmed/pending purely from boot_swap_type_multi()
         int swapType = boot_swap_type_multi(image);
 
         for (uint8_t slot = 0; slot < slotsPerImage; slot++)
@@ -4134,17 +4139,28 @@ bool CLR_DBG_Debugger::Monitor_ImageInfo(WP_Message *msg)
                 // the primary slot holds the running image
                 entry->Flags |= Monitor_Image_State_Active;
 
-                if (haveState && swapState.image_ok == BOOT_FLAG_SET)
+                if (swapType != BOOT_SWAP_TYPE_REVERT)
                 {
                     entry->Flags |= Monitor_Image_State_Confirmed;
                 }
             }
             else
             {
-                // a scheduled swap from the secondary slot is reported as pending
                 if (swapType == BOOT_SWAP_TYPE_TEST || swapType == BOOT_SWAP_TYPE_PERM)
                 {
+                    // a scheduled swap from this slot is pending on the next reboot
                     entry->Flags |= Monitor_Image_State_Pending;
+
+                    if (swapType == BOOT_SWAP_TYPE_PERM)
+                    {
+                        // the pending swap is permanent (no revert)
+                        entry->Flags |= Monitor_Image_State_Permanent;
+                    }
+                }
+                else if (swapType == BOOT_SWAP_TYPE_REVERT)
+                {
+                    // this slot holds the last known-good image, to be restored on revert
+                    entry->Flags |= Monitor_Image_State_Confirmed;
                 }
             }
         }

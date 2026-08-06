@@ -228,6 +228,8 @@ typedef enum Monitor_Image_StateFlags
     Monitor_Image_State_Active    = 0x01, // image is the one currently running
     Monitor_Image_State_Confirmed = 0x02, // image is confirmed (permanent - no revert)
     Monitor_Image_State_Pending   = 0x04, // image is scheduled for a one-time test-swap
+    Monitor_Image_State_Permanent = 0x08, // pending swap is permanent (BOOT_SWAP_TYPE_PERM); unset means a revertible TEST swap
+    Monitor_Image_State_Bootable  = 0x10, // image is bootable - IMAGE_F_NON_BOOTABLE not set in ih_flags
 } Monitor_Image_StateFlags;
 
 // error codes carried in the ErrorCode field of the IFU command replies
@@ -250,15 +252,17 @@ typedef struct __nfpack Monitor_ImageInfo_Entry
     uint8_t  ImageIndex;    // 0 = nanoCLR, 1 = deployment
     uint8_t  SlotIndex;     // 0 = primary, 1 = secondary
     uint8_t  Flags;         // Monitor_Image_StateFlags bitmask
-    uint8_t  Valid;         // non-zero when the slot holds a valid MCUboot image
-    // MCUboot header version — mirrors struct image_version in bootutil/image.h
+    // Non-zero when both the image header magic and the TLV info magic parse correctly.
+    // This is a structural sanity check only - no hash or signature is verified.
+    uint8_t  ValidHeader;
+    // MCUboot header version (image_version in bootutil/image.h)
     struct __nfpack {
         uint8_t  majorVersion;
         uint8_t  minorVersion;
         uint16_t revisionNumber;
         uint32_t buildNumber;
     } Version;
-    uint8_t  Hash[32];      // SHA-256 of the image (from IMAGE_TLV_SHA256)
+    uint8_t  Hash[32];
 } Monitor_ImageInfo_Entry;
 
 // reply for the Monitor_ImageInfo command (variable number of entries)
