@@ -13,9 +13,7 @@
 //
 // SECONDARY SLOTS: Discovery has no external SPI/QSPI flash. Secondary slots are
 //   backed by FatFs files on the SD card (img0_sec.bin / img1_sec.bin) via
-//   fatfs_flash_area_read/write/erase. The SD card / FatFs path needs the board
-//   drivers, so it is gated behind NF_MCUBOOT_BOOTLOADER; the lean nanoCLR build
-//   sees only the internal-flash logic, which is shared verbatim.
+//   fatfs_flash_area_read/write/erase.
 
 #include <stdint.h>
 #include <stddef.h>
