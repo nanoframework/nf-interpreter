@@ -17,8 +17,12 @@
  */
 MEMORY
 {
-    flash0     (rx) : org = 0x08018000, len = 2M - 64k - 32k - 1280k    /* flash size less the space reserved for MCUboot, configuration block and application deployment*/
-    flash1     (rx) : org = 0x00218000, len = 2M - 64k - 32k - 1280k
+    /* Image 0 primary slot (NF_MCUBOOT_SLOT_IMG0_PRI_*: 0x08018000, 672k) less the
+       MCUboot image header. MCUboot jumps to slot base + ih_hdr_size, so the vector
+       table must be linked at exactly 0x08018000 + CONFIG_NF_MCUBOOT_HEADER_SIZE.
+       ChibiOS aligns .vectors to __vectors_align__ (1024 by default); */
+    flash0     (rx) : org = 0x08018400, len = 672k - 0x400
+    flash1     (rx) : org = 0x00218400, len = 672k - 0x400               /* ITCM alias of flash0 */
     flash2     (rx) : org = 0x00000000, len = 0
     flash3     (rx) : org = 0x00000000, len = 0
     flash4     (rx) : org = 0x00000000, len = 0

@@ -8,18 +8,21 @@
 
 /*
  * STM32F76xxI generic setup.
- * 
+ *
  * RAM0 - Data, Heap.
  * RAM3 - Main Stack, Process Stack, BSS, NOCACHE, ETH.
  *
  * Notes:
  * BSS is placed in DTCM RAM in order to simplify DMA buffers management.
- * When updating the flash0 address below make sure to update the address in nf_generate_bin_package 
  */
 MEMORY
 {
-    flash0       (rx) : org = 0x08018000, len = 2M - 64k - 32k - 992k     /* flash size less the space reserved for MCUboot, configuration block and application deployment*/
-    flash1       (rx) : org = 0x00218000, len = 2M - 64k - 32k - 992k
+    /* Image 0 primary slot (NF_MCUBOOT_SLOT_IMG0_PRI_*: 0x08018000, 928k) less the
+       MCUboot image header. MCUboot jumps to slot base + ih_hdr_size, so the vector
+       table must be linked at exactly 0x08018000 + CONFIG_NF_MCUBOOT_HEADER_SIZE.
+       ChibiOS aligns .vectors to __vectors_align__ (1024 by default); */
+    flash0       (rx) : org = 0x08018400, len = 928k - 0x400
+    flash1       (rx) : org = 0x00218400, len = 928k - 0x400              /* ITCM alias of flash0 */
     flash2       (rx) : org = 0x00000000, len = 0
     flash3       (rx) : org = 0x00000000, len = 0
     flash4       (rx) : org = 0x00000000, len = 0
@@ -27,7 +30,7 @@ MEMORY
     flash6       (rx) : org = 0x00000000, len = 0
     flash7       (rx) : org = 0x00000000, len = 0
     config       (rw) : org = 0x08010000, len = 32k                       /* space reserved for configuration block */
-    deployment   (rx) : org = 0x08120000, len = 992k                      /* space reserved for application deployment */
+    deployment   (rx) : org = 0x08100000, len = 1024k                     /* image 1 primary slot (NF_MCUBOOT_SLOT_IMG1_PRI_*) */
     ramvt        (wx) : org = 0x00000000, len = 0                         /* initial RAM address is reserved for a copy of the vector table */
     ram0         (wx) : org = 0x20020000, len = 384k                      /* SRAM1 + SRAM2 */
     ram1         (wx) : org = 0x20020000, len = 368k                      /* SRAM1 */
