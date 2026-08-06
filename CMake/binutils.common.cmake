@@ -447,13 +447,15 @@ function(nf_generate_build_output_files target)
             message(FATAL_ERROR "imgtool not found. Install it with: pip install imgtool")
         endif()
 
-        # Sign the binary into a temp file then replace the original so that
-        # nanoCLR.bin is always the signed image.
+        # convert BUILD_VERSION to imgtool format maj.min.rev[+build]
+        string(REGEX REPLACE "\\.([0-9]+)$" "+\\1" NF_MCUBOOT_IMAGE_VERSION "${BUILD_VERSION}")
+
+        # Sign the binary into a temp file then replace the original
         add_custom_command(TARGET ${TARGET_SHORT}.elf POST_BUILD
             COMMAND ${IMGTOOL} sign
                 --key "${NF_MCUBOOT_SIGNING_KEY}"
                 --align 4
-                --version "1.0.0"
+                --version "${NF_MCUBOOT_IMAGE_VERSION}"
                 --header-size "${NF_MCUBOOT_HEADER_SIZE}"
                 --pad-header
                 --slot-size "${NF_MCUBOOT_SLOT_SIZE}"
@@ -489,7 +491,7 @@ function(nf_generate_build_output_files target)
             COMMAND ${IMGTOOL} sign
                 --key "${NF_MCUBOOT_SIGNING_KEY}"
                 --align 4
-                --version "1.0.0"
+                --version "${NF_MCUBOOT_IMAGE_VERSION}"
                 --header-size "${NF_MCUBOOT_HEADER_SIZE}"
                 --pad-header
                 --slot-size "${NF_MCUBOOT_DEPLOY_SLOT_SIZE}"
