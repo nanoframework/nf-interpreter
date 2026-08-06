@@ -42,6 +42,10 @@
 #include "mcuboot_board_iface.h"
 #include "mcuboot_serial_port.h"
 
+#if defined(CONFIG_NF_FEATURE_WATCHDOG) && CONFIG_NF_FEATURE_WATCHDOG
+#include <targetHAL_Watchdog.h>
+#endif
+
 // ----------------------------------------------------------------------- //
 // do_boot — hand off to the application image selected by MCUboot          //
 // ----------------------------------------------------------------------- //
@@ -90,6 +94,10 @@ int main(void)
 
     // Start the ChibiOS RT kernel.
     chSysInit();
+
+#if defined(CONFIG_NF_FEATURE_WATCHDOG) && CONFIG_NF_FEATURE_WATCHDOG
+    Watchdog_Init();
+#endif
 
     // Initialise the board's external flash device
     // Non-fatal: if the external device fails to initialise the boot will still

@@ -190,7 +190,11 @@
  * @brief   Enables the WDG subsystem.
  */
 #if !defined(HAL_USE_WDG) || defined(__DOXYGEN__)
+#if defined(CONFIG_NF_FEATURE_WATCHDOG) && CONFIG_NF_FEATURE_WATCHDOG
+#define HAL_USE_WDG                         TRUE
+#else
 #define HAL_USE_WDG                         FALSE
+#endif
 #endif
 
 /**

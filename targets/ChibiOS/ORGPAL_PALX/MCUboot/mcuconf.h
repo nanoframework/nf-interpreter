@@ -415,7 +415,11 @@
 /*
  * WDG driver system settings.
  */
+#if defined(CONFIG_NF_FEATURE_WATCHDOG) && CONFIG_NF_FEATURE_WATCHDOG
+#define STM32_WDG_USE_IWDG TRUE
+#else
 #define STM32_WDG_USE_IWDG FALSE
+#endif
 
 /*
  * WSPI driver system settings.

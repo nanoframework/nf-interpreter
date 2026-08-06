@@ -394,6 +394,22 @@ if(${TARGET_SERIES} STREQUAL "STM32F7xx")
 
     endif() # NF_MCUBOOT_SERIAL_RECOVERY
 
+    if(NF_FEATURE_WATCHDOG)
+
+        list(APPEND MCUBOOT_SERIES_COMMON_COMPILE_DEFINITIONS CONFIG_NF_FEATURE_WATCHDOG=1)
+
+        list(APPEND MCUBOOT_SERIES_COMMON_SOURCES
+            ${CMAKE_SOURCE_DIR}/targets/ChibiOS/_common/targetHAL_Watchdog.c
+            ${chibios_SOURCE_DIR}/os/hal/src/hal_wdg.c
+            ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/xWDGv1/hal_wdg_lld.c
+        )
+
+        list(APPEND MCUBOOT_SERIES_COMMON_INCLUDES
+            ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/xWDGv1
+        )
+
+    endif() # NF_FEATURE_WATCHDOG
+
     # Apply series CPU/FPU flags to nf_mcuboot_port so it matches nanoCLR's ABI.
     target_compile_options(nf_mcuboot_port PRIVATE
         -mthumb

@@ -6,7 +6,6 @@
 #include <ch.h>
 #include <hal.h>
 #include <targetHAL_Watchdog.h>
-#include <target_common.h>
 
 #if defined(RP2040) || defined(RP2350)
 

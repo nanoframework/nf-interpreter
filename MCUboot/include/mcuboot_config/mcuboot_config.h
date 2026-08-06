@@ -236,12 +236,20 @@ extern void nf_mcuboot_cpu_idle(void);
 // CONFIG_NF_MCUBOOT_LOG_LEVEL_OFF (or unset): MCUBOOT_HAVE_LOGGING not defined - all BOOT_LOG_* are no-ops.
 
 //
-// Watchdog - no watchdog in the bare-metal STM32 bootloader.
-// Define as a no-op; platform ports that use a watchdog should replace this.
+// Watchdog - platform ports with a hardware watchdog define MCUBOOT_WATCHDOG_FEED() themselves
+// before this point is reached. Fall back to a no-op when no platform-level definition was made available.
 //
+#if defined(NF_MCUBOOT_BOOTLOADER) && defined(CONFIG_NF_FEATURE_WATCHDOG) &&                                           \
+    CONFIG_NF_FEATURE_WATCHDOG
+extern void Watchdog_Reset(void);
+#define MCUBOOT_WATCHDOG_FEED() Watchdog_Reset()
+#endif
+
+#ifndef MCUBOOT_WATCHDOG_FEED
 #define MCUBOOT_WATCHDOG_FEED()                                                                                        \
     do                                                                                                                 \
     {                                                                                                                  \
     } while (0)
+#endif
 
 #endif // __MCUBOOT_CONFIG_H__

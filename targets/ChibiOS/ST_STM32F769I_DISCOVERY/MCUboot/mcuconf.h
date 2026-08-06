@@ -42,7 +42,7 @@
 #define STM32_PLS                           STM32_PLS_LEV0
 #define STM32_BKPRAM_ENABLE                 FALSE
 #define STM32_HSI_ENABLED                   TRUE
-#define STM32_LSI_ENABLED                   FALSE
+#define STM32_LSI_ENABLED                   TRUE
 #define STM32_HSE_ENABLED                   TRUE
 #define STM32_LSE_ENABLED                   FALSE
 #define STM32_CLOCK48_REQUIRED              FALSE
@@ -425,7 +425,11 @@
 /*
  * WDG driver system settings.
  */
+#if defined(CONFIG_NF_FEATURE_WATCHDOG) && CONFIG_NF_FEATURE_WATCHDOG
+#define STM32_WDG_USE_IWDG                  TRUE
+#else
 #define STM32_WDG_USE_IWDG                  FALSE
+#endif
 
 /*
  * WSPI driver system settings.

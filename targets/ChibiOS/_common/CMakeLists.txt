@@ -49,5 +49,10 @@ if(NF_FEATURE_HAS_MCUBOOT)
     list(APPEND TARGET_CHIBIOS_COMMON_SOURCES ${CMAKE_SOURCE_DIR}/targets/ChibiOS/_mcuboot/mcuboot_fatfs_flash_area.c)
 endif()
 
+# append watchdog only if option is ON — shared by nanoCLR, nanoBooter and the MCUboot bootloader
+if(HAL_USE_WDG_OPTION)
+    list(APPEND TARGET_CHIBIOS_COMMON_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/targetHAL_Watchdog.c)
+endif()
+
 # make var global
 set(TARGET_CHIBIOS_COMMON_SOURCES ${TARGET_CHIBIOS_COMMON_SOURCES} CACHE INTERNAL "make global")
