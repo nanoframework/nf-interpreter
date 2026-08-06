@@ -32,8 +32,9 @@
 #include <string.h>
 
 // ChibiOS HAL and RT kernel headers.
-#include "hal.h"
-#include "ch.h"
+#include <hal.h>
+#include <ch.h>
+#include <vectors.h>
 
 #include "bootutil/bootutil.h"
 #include "bootutil/image.h"
@@ -45,55 +46,37 @@
 // do_boot — hand off to the application image selected by MCUboot          //
 // ----------------------------------------------------------------------- //
 
-// Structure of the Cortex-M ARM vector table (first two entries)
-typedef struct
-{
-    uint32_t msp;   // Initial Main Stack Pointer
-    uint32_t reset; // Reset Handler address
-} VectorTable_t;
-
-__attribute__((noreturn)) static void do_boot(struct boot_rsp *rsp)
+static void do_boot(struct boot_rsp *rsp)
 {
     // Compute the absolute address of the application vector table.
-    // boot_rsp.br_hdr points to the MCUboot image header; the vector table
-    // follows immediately after the header.
-    uint32_t img_base = (uint32_t)(uintptr_t)rsp->br_hdr;
-    uint32_t vtor_addr = img_base + rsp->br_hdr->ih_hdr_size;
+    // br_image_off is the real flash offset of the image;
+    uint32_t vtor_addr = rsp->br_image_off + rsp->br_hdr->ih_hdr_size;
 
-    const VectorTable_t *vt = (const VectorTable_t *)vtor_addr;
+    // function pointer to load nanoCLR ResetHandler address
+    irq_vector_t JumpToNanoCLR;
 
-    // Stop the SysTick timer before tearing down the ChibiOS RT state so
-    // no SysTick interrupt fires during the handoff sequence.
-    SysTick->CTRL = 0U;
+    // load nanoCLR vector table
+    const vectors_t *nanoCLRVectorTable = (vectors_t *)vtor_addr;
 
-    // Relocate the vector table to the application's location.
+    // load the jump address with the nanoCLR ResetHandler address
+    JumpToNanoCLR = nanoCLRVectorTable->reset_handler;
+
+    // disable all interrupts in ChibiOS
+    chSysDisable();
+
+    // clear any pending interrupts to make sure we are jumping straight to nanoCLR ResetHandler
+    SCB->ICSR = SCB_ICSR_PENDSTCLR_Msk | SCB_ICSR_PENDSVCLR_Msk;
+
+    // set VTOR to point to nanoCLR vector table so interrupts use the correct handlers
     SCB->VTOR = vtor_addr;
-    __DSB();
-    __ISB();
 
-    // Load the application's initial MSP.
-    __set_MSP(vt->msp);
-    __DSB();
+    SCB->SHCSR |= SCB_SHCSR_USGFAULTENA_Msk | SCB_SHCSR_BUSFAULTENA_Msk | SCB_SHCSR_MEMFAULTENA_Msk;
 
-    // Disable all interrupts and clear any pending NVIC flags so the
-    // application starts with a clean interrupt state.
-    __disable_irq();
-    for (uint32_t i = 0; i < (sizeof(NVIC->ICER) / sizeof(NVIC->ICER[0])); i++)
-    {
-        NVIC->ICER[i] = 0xFFFFFFFFU;
-        NVIC->ICPR[i] = 0xFFFFFFFFU;
-    }
-    __DSB();
-    __ISB();
+    // need to set stack pointer from CLR vector table
+    __set_MSP((uint32_t)nanoCLRVectorTable->init_stack);
 
-    // Cast reset handler address to a function pointer and jump.
-    void (*reset_handler)(void) = (void (*)(void))(vt->reset);
-    reset_handler();
-
-    // Unreachable — suppress compiler warning.
-    while (1)
-    {
-    }
+    // make the jump to nanoCLR, at last
+    JumpToNanoCLR();
 }
 
 // ----------------------------------------------------------------------- //
@@ -117,6 +100,7 @@ int main(void)
     // Initialise the SD card and mount the FatFs filesystem for the secondary slot.
     // Non-fatal: a failed SD card init causes boot_go() to skip external slots
     // and boot the primary slot directly.
+
     (void)mcuboot_sdcard_init();
 #endif
 
