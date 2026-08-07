@@ -199,6 +199,10 @@ HRESULT Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_E
         FAULT_ON_NULL(encoderArray);
 
         numEncoders = encoderArray->m_numOfElements;
+        if (numEncoders == 0)
+        {
+            NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+        }
 
         NANOCLR_CHECK_HRESULT(
             RmtChannel::RmtMapEspErrToClrErr(rmt_new_multi_stage_encoder(&encoder_handle, numEncoders)));
@@ -209,6 +213,7 @@ HRESULT Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_E
 
             // Get EncoderSettings reference
             encoder_settings = encoder->Dereference();
+            FAULT_ON_NULL(encoder_settings);
 
             encoderType = encoder_settings[EncoderSettings::FIELD___encoderType].NumericByRef().u1;
 
@@ -219,6 +224,7 @@ HRESULT Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_E
                     rmt_bytes_encoder_config_t encoder_config = {};
 
                     NANOCLR_CHECK_HRESULT(ManagedByteEncoderToNative(encoder_settings, encoder_config));
+
                     encoder_config.flags.msb_first =
                         (bool)encoder_settings[ByteEncoderSettings::FIELD___msbFirst].NumericByRef().u1;
 

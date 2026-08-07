@@ -62,6 +62,11 @@ HRESULT Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_E
 {
     NANOCLR_HEADER();
     {
+        if (s_syncManagerHandle == NULL)
+        {
+            NANOCLR_SET_AND_LEAVE(CLR_E_OBJECT_DISPOSED);
+        }
+
         esp_err_t err = rmt_sync_reset(s_syncManagerHandle);
         if (err != ESP_OK)
         {
