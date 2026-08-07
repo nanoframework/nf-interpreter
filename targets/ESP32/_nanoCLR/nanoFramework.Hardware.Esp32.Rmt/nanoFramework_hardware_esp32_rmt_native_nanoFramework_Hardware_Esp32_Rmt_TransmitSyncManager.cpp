@@ -75,6 +75,7 @@ void RmtDeleteSyncManager()
 {
     if (s_syncManagerHandle)
     {
+        // ignore errors, as we are cleaning up
         rmt_del_sync_manager(s_syncManagerHandle);
     }
 

@@ -516,7 +516,7 @@ HRESULT Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_E
         int encDataIndex = 0;
 
         // For each encoder
-        for (int encIndex = 0; encIndex < multiEncoder->step; encIndex++)
+        for (int encIndex = 0; encIndex < multiEncoder->numberSteps; encIndex++)
         {
             // Ptr to current encoder index
             rmt_multi_item_t *mstep = multiEncoder->encoders + encIndex;
@@ -544,7 +544,8 @@ HRESULT Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_E
 
             mstep->loopCount = encoderData[EncoderData::FIELD___loop].NumericByRef().s4;
             CLR_RT_HeapBlock_Array *dataBuffer = encoderData[EncoderData::FIELD___data].DereferenceArray();
-
+            FAULT_ON_NULL(dataBuffer);  
+ 
             data = dataBuffer->GetFirstElement();
             dataLen = dataBuffer->m_numOfElements;
 

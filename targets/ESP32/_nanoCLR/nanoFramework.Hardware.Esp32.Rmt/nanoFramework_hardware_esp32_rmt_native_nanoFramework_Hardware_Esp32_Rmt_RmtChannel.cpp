@@ -59,6 +59,7 @@ void DumpRegisteredRmtChannels(const char *text)
 
 static void DestroyChannel(rmt_channel_handle_t handle, RmtChannelInfo &info)
 {
+    // ignore any errors, as we are cleaning up and the channel may already be disabled or deleted
     rmt_disable(handle);
     rmt_del_channel(handle);
 
@@ -81,6 +82,8 @@ static void DestroyChannel(rmt_channel_handle_t handle, RmtChannelInfo &info)
 
 void Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_Esp32_Rmt_RmtChannel::UninitializeAll()
 {
+    RmtDeleteSyncManager();
+
     for (auto &entry : registeredRmtChannels)
     {
         rmt_channel_handle_t handle = entry.first;
@@ -90,8 +93,6 @@ void Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_Esp3
     }
 
     registeredRmtChannels.clear();
-
-    RmtDeleteSyncManager();
 }
 
 void Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_Esp32_Rmt_RmtChannel::
@@ -190,6 +191,9 @@ HRESULT Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_E
     {
         case ESP_OK:
             hr = S_OK;
+            break;
+        case ESP_ERR_TIMEOUT:
+            hr = CLR_E_TIMEOUT;
             break;
         case ESP_ERR_INVALID_ARG:
             hr = CLR_E_INVALID_PARAMETER;

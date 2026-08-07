@@ -445,6 +445,8 @@ HRESULT Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_E
 
         // setup timeout
         hbTimeout.SetInteger((CLR_INT64)*timeoutTicks);
+
+        rcInfo->isBlockingReceiving = true;
     }
 
     // Load expire time to timeoutEvent
