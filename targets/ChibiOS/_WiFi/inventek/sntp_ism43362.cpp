@@ -20,7 +20,6 @@
 // see Ism43362_Sntp_TriggerAutoSync() below, called from Network_Interface_Start_Connect() in
 // Target_Network.cpp right after a successful WIFI_Connect().
 
-
 #include <nanoHAL.h>
 #include <nanoCLR_Types.h>
 #include <nanoPAL_Sockets.h>
@@ -175,4 +174,3 @@ extern "C" void Ism43362_Sntp_TriggerAutoSync()
         Ism43362_Sntp_Sync("time.nist.gov");
     }
 }
-
