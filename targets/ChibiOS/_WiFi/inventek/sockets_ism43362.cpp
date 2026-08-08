@@ -115,6 +115,45 @@ static bool IsValidSocket(SOCK_SOCKET socket)
     return socket >= 0 && socket < ISM43362_MAX_SOCKETS && s_sockets[socket].inUse;
 }
 
+// Checks whether there's data available to read right now: cached in peekBuf, or (TCP only - see
+// SOCK_ioctl(SOCK_FIONREAD) for why UDP can't be probed this way) discovered via a fresh
+// non-blocking probe read. Sets *closed if the probe finds the peer has closed the connection.
+static bool Ism43362_HasDataAvailable(Ism43362SocketState &state, int socket, bool *closed)
+{
+    *closed = false;
+
+    if (state.peekBufPos < state.peekBufLen)
+    {
+        return true;
+    }
+
+    if (state.protocol != WIFI_TCP_PROTOCOL)
+    {
+        return false;
+    }
+
+    state.peekBufPos = 0;
+    state.peekBufLen = 0;
+
+    uint16_t receivedLen = 0;
+    WIFI_Status_t status =
+        WIFI_ReceiveData((uint8_t)socket, state.peekBuf, ISM43362_RX_LOOKAHEAD_SIZE, &receivedLen, 0);
+
+    if (status == WIFI_STATUS_SOCKET_CLOSED)
+    {
+        *closed = true;
+        return true;
+    }
+
+    if (status == WIFI_STATUS_OK && receivedLen > 0)
+    {
+        state.peekBufLen = receivedLen;
+        return true;
+    }
+
+    return false;
+}
+
 // extracts IPv4 address (network byte order) and port (host byte order) from a SOCK_sockaddr
 static void GetIPv4AddressAndPort(const struct SOCK_sockaddr *address, uint8_t ipAddr[4], uint16_t *port)
 {
@@ -408,42 +447,18 @@ int SOCK_ioctl(SOCK_SOCKET socket, int cmd, int *data)
 
         Ism43362SocketState &state = s_sockets[socket];
 
-        if (state.peekBufPos < state.peekBufLen)
+        bool closed = false;
+        if (Ism43362_HasDataAvailable(state, socket, &closed))
         {
-            *data = state.peekBufLen - state.peekBufPos;
-            return 0;
-        }
-
-        // Restricted to TCP: SOCK_recvfrom() (UDP) doesn't drain peekBuf, so caching a datagram
-        // here would make it silently disappear from a subsequent ReceiveFrom() call. TCP is a
-        // byte stream (no datagram framing to lose), and SOCK_recv() already knows to serve from
-        // this buffer first.
-        if (state.protocol != WIFI_TCP_PROTOCOL)
-        {
-            *data = 0;
-            return 0;
-        }
-
-        // No "peek without consuming" AT command exists, so checking for data means actually
-        // reading with a near-instant timeout (0 -> 1ms). Read a whole lookahead buffer's worth
-        // (not 1 byte) so SOCK_recv() can serve large chunks from RAM instead of one round trip
-        // per byte.
-        state.peekBufPos = 0;
-        state.peekBufLen = 0;
-
-        uint16_t receivedLen = 0;
-        WIFI_Status_t status =
-            WIFI_ReceiveData((uint8_t)socket, state.peekBuf, ISM43362_RX_LOOKAHEAD_SIZE, &receivedLen, 0);
-
-        if (status == WIFI_STATUS_SOCKET_CLOSED)
-        {
-            state.connected = false;
-            *data = 0;
-        }
-        else if (status == WIFI_STATUS_OK && receivedLen > 0)
-        {
-            state.peekBufLen = receivedLen;
-            *data = receivedLen;
+            if (closed)
+            {
+                state.connected = false;
+                *data = 0;
+            }
+            else
+            {
+                *data = state.peekBufLen - state.peekBufPos;
+            }
         }
         else
         {
@@ -558,8 +573,36 @@ int SOCK_select(
         for (unsigned int i = 0; i < count; i++)
         {
             int socket = snapshot[i];
+            bool ready = false;
 
             if (IsValidSocket(socket) && s_sockets[socket].connected)
+            {
+                Ism43362SocketState &state = s_sockets[socket];
+
+                if (state.protocol == WIFI_TCP_PROTOCOL)
+                {
+                    // only report readable when data is actually cached/available or the peer
+                    // closed - not just because the socket is connected (a caller would then
+                    // call SOCK_recv() and block for ISM43362_SOCKET_TIMEOUT for nothing)
+                    bool closed = false;
+                    if (Ism43362_HasDataAvailable(state, socket, &closed))
+                    {
+                        ready = true;
+                        if (closed)
+                        {
+                            state.connected = false;
+                        }
+                    }
+                }
+                else
+                {
+                    // no non-consuming peek exists for UDP (see SOCK_ioctl(SOCK_FIONREAD)) - keep
+                    // reporting ready whenever connected
+                    ready = true;
+                }
+            }
+
+            if (ready)
             {
                 readyCount++;
                 SOCK_FD_SET(socket, readfds);
