@@ -15,6 +15,11 @@ bool InitialiseNetworkDefaultConfig(HAL_Configuration_NetworkInterface *pconfig,
 {
     (void)configurationIndex;
 
+    if (pconfig == NULL)
+    {
+        return false;
+    }
+
     // zero memory
     memset(pconfig, 0, sizeof(HAL_Configuration_NetworkInterface));
 

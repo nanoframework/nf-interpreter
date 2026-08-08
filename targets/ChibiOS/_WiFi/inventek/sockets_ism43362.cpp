@@ -49,18 +49,17 @@
 
 // Debug tracing shim for the WiFi driver's C files (es_wifi.c/wifi.c/es_wifi_io_chibios.c) -
 // forwards to CLR_Debug::Printf so trace output shows up over the wire protocol in the
-// debugger output window. Declared (as a plain C-callable prototype) in es_wifi_conf.h.
-extern "C" void ISM43362_DebugPrintf(const char *fmt, ...)
-{
+// debugger output window. Declared (as ISM43362_DebugPrintf, a macro) in es_wifi_conf.h - only
+// compiled in at all when ISM43362_ENABLE_DEBUG_TRACE is set.
 #if ISM43362_ENABLE_DEBUG_TRACE
+extern "C" void ISM43362_DebugPrintf_Impl(const char *fmt, ...)
+{
     va_list args;
     va_start(args, fmt);
     CLR_Debug::PrintfV(fmt, args);
     va_end(args);
-#else
-    (void)fmt;
-#endif
 }
+#endif
 
 // Size of the per-socket receive lookahead buffer used by SOCK_ioctl(SOCK_FIONREAD) (see below).
 // Chosen to match the internal buffer size InputNetworkStreamWrapper itself uses (256 bytes) - big
@@ -77,15 +76,10 @@ struct Ism43362SocketState
     uint8_t remoteIp[4];
     uint16_t remotePort;
 
-    // Lookahead buffer used by SOCK_ioctl(SOCK_FIONREAD) to implement Socket.Available/
-    // NetworkStream.DataAvailable. The ES-WIFI AT protocol has no way to "peek" at pending data
-    // without actually consuming it (no MSG_PEEK equivalent), so a real availability check has to
-    // actually read (using the module's built-in near-instant non-blocking timeout) - but rather
-    // than only ever peeking 1 byte at a time (which forced NetworkStream.Read() to clamp EVERY
-    // read down to 1 byte, since it trusts Available literally - see NetworkStream.Read()'s
-    // `if (count > available && available > 0) count = available;` clamp), read up to a whole
-    // lookahead buffer's worth in one AT command round trip and cache it here, so SOCK_recv() can
-    // hand back large chunks directly from RAM instead of hitting the module again for every byte.
+    // Lookahead buffer for SOCK_ioctl(SOCK_FIONREAD) (Socket.Available/NetworkStream.DataAvailable).
+    // The ES-WIFI AT protocol has no MSG_PEEK equivalent, so checking availability means actually
+    // reading (with the module's near-instant non-blocking timeout). Caching a whole buffer's
+    // worth here lets SOCK_recv() serve large chunks from RAM instead of one round trip per byte.
     uint8_t peekBuf[ISM43362_RX_LOOKAHEAD_SIZE];
     uint16_t peekBufLen; // number of valid bytes currently cached in peekBuf
     uint16_t peekBufPos; // offset of the next unread byte within peekBuf
@@ -203,6 +197,14 @@ int SOCK_send(SOCK_SOCKET socket, const char *buf, int len, int flags)
         return SOCK_SOCKET_ERROR;
     }
 
+    // reject anything that doesn't fit in the uint16_t WIFI_SendData() expects - a negative or
+    // oversized len would otherwise wrap into an unrelated request length
+    if (len < 0 || len > (int)UINT16_MAX)
+    {
+        s_lastError = SOCK_EINVAL;
+        return SOCK_SOCKET_ERROR;
+    }
+
     uint16_t sentLen = 0;
 
     if (WIFI_SendData((uint8_t)socket, (uint8_t *)buf, (uint16_t)len, &sentLen, ISM43362_SOCKET_TIMEOUT) !=
@@ -223,6 +225,11 @@ int SOCK_recv(SOCK_SOCKET socket, char *buf, int len, int flags)
     {
         s_lastError = SOCK_ENOTCONN;
         return SOCK_SOCKET_ERROR;
+    }
+
+    if (len <= 0)
+    {
+        return 0;
     }
 
     // if SOCK_ioctl(SOCK_FIONREAD) already cached data from the module to answer a
@@ -340,6 +347,10 @@ int SOCK_getaddrinfo(
     (void)servname;
     (void)hints;
 
+    // returns a pointer into shared static storage - only one resolution can be in use at a time.
+    // WIFI_GetHostAddress() locks/unlocks WiFiMutex internally around just the AT command (can't
+    // hold it for this whole function - non-recursive mutex), so only the population below is
+    // guarded. Callers should copy out anything they need before calling this again.
     static uint8_t s_ipAddr[4];
     static SOCK_sockaddr_in s_sockAddr;
     static SOCK_addrinfo s_addrInfo;
@@ -349,6 +360,8 @@ int SOCK_getaddrinfo(
         s_lastError = SOCK_HOST_NOT_FOUND;
         return SOCK_SOCKET_ERROR;
     }
+
+    LOCK_WIFI();
 
     memset(&s_sockAddr, 0, sizeof(s_sockAddr));
     s_sockAddr.sin_family = SOCK_AF_INET;
@@ -364,6 +377,8 @@ int SOCK_getaddrinfo(
 
     *res = &s_addrInfo;
 
+    UNLOCK_WIFI();
+
     return 0;
 }
 
@@ -377,15 +392,9 @@ int SOCK_ioctl(SOCK_SOCKET socket, int cmd, int *data)
 {
     if (cmd == SOCK_FIONREAD)
     {
-        // Socket.Available / NetworkStream.DataAvailable map to this - InputNetworkStreamWrapper's
-        // body-read logic (System.Net.Http) relies on it to distinguish "no data queued right now"
-        // (returns 0 without blocking) from a genuine read, retrying in a loop until either more
-        // data shows up or the response is known to be complete. Previously this was a complete
-        // no-op stub that never set *data, so Available always read back as 0/uninitialised,
-        // regardless of how much data was actually queued on the module - which made that retry
-        // loop spin forever (since it never saw a nonzero Available to justify calling recv()
-        // again), eventually tripping a request timeout that disposed the connection out from
-        // under the still-spinning read loop (surfacing as ObjectDisposedException).
+        // Socket.Available/NetworkStream.DataAvailable map to this. Managed code polls it in a
+        // loop and expects a real value - previously this never set *data, so Available always
+        // read 0 and the retry loop spun until a request timeout disposed the connection.
         if (data == NULL)
         {
             return SOCK_SOCKET_ERROR;
@@ -405,15 +414,20 @@ int SOCK_ioctl(SOCK_SOCKET socket, int cmd, int *data)
             return 0;
         }
 
-        // The ES-WIFI AT protocol has no "peek without consuming" primitive, so the only way to
-        // truly know whether data is queued is to attempt a read using the module's built-in
-        // near-instant non-blocking timeout (Timeout=0 -> NET_DEFAULT_NOBLOCKING_READ_TIMEOUT,
-        // 1ms). Request a whole lookahead buffer's worth (not just 1 byte!) so that whatever is
-        // already sitting in the module's receive queue gets pulled into RAM in ONE AT command
-        // round trip - SOCK_recv() then serves large chunks straight out of this buffer instead
-        // of needing a fresh round trip per byte (which is what happens if this only ever
-        // reports/caches 1 byte: NetworkStream.Read() clamps every read down to whatever
-        // Available says, via `if (count > available && available > 0) count = available;`).
+        // Restricted to TCP: SOCK_recvfrom() (UDP) doesn't drain peekBuf, so caching a datagram
+        // here would make it silently disappear from a subsequent ReceiveFrom() call. TCP is a
+        // byte stream (no datagram framing to lose), and SOCK_recv() already knows to serve from
+        // this buffer first.
+        if (state.protocol != WIFI_TCP_PROTOCOL)
+        {
+            *data = 0;
+            return 0;
+        }
+
+        // No "peek without consuming" AT command exists, so checking for data means actually
+        // reading with a near-instant timeout (0 -> 1ms). Read a whole lookahead buffer's worth
+        // (not 1 byte) so SOCK_recv() can serve large chunks from RAM instead of one round trip
+        // per byte.
         state.peekBufPos = 0;
         state.peekBufLen = 0;
 
@@ -495,11 +509,20 @@ int SOCK_select(
     // a remote close until the next actual send/recv.
     int readyCount = 0;
 
+    // SOCK_FD_CLR() swaps the last set entry into the cleared slot and shrinks fd_count - doing
+    // that while iterating fd_array[i] in order would skip the swapped-in entry. Snapshot the
+    // original entries first, then rebuild each set via SOCK_FD_ZERO()+SOCK_FD_SET() instead.
     if (writefds != NULL)
     {
-        for (unsigned int i = 0; i < writefds->fd_count; i++)
+        unsigned int count = writefds->fd_count;
+        int snapshot[SOCK_FD_SETSIZE];
+        memcpy(snapshot, writefds->fd_array, count * sizeof(int));
+
+        SOCK_FD_ZERO(writefds);
+
+        for (unsigned int i = 0; i < count; i++)
         {
-            int socket = writefds->fd_array[i];
+            int socket = snapshot[i];
             bool ready = false;
 
             if (IsValidSocket(socket) && s_sockets[socket].connected)
@@ -519,26 +542,27 @@ int SOCK_select(
             if (ready)
             {
                 readyCount++;
-            }
-            else
-            {
-                SOCK_FD_CLR(socket, writefds);
+                SOCK_FD_SET(socket, writefds);
             }
         }
     }
 
     if (readfds != NULL)
     {
-        for (unsigned int i = 0; i < readfds->fd_count; i++)
+        unsigned int count = readfds->fd_count;
+        int snapshot[SOCK_FD_SETSIZE];
+        memcpy(snapshot, readfds->fd_array, count * sizeof(int));
+
+        SOCK_FD_ZERO(readfds);
+
+        for (unsigned int i = 0; i < count; i++)
         {
-            int socket = readfds->fd_array[i];
+            int socket = snapshot[i];
+
             if (IsValidSocket(socket) && s_sockets[socket].connected)
             {
                 readyCount++;
-            }
-            else
-            {
-                SOCK_FD_CLR(socket, readfds);
+                SOCK_FD_SET(socket, readfds);
             }
         }
     }
@@ -694,6 +718,14 @@ int SOCK_sendto(SOCK_SOCKET s, const char *buf, int len, int flags, const struct
     if (!IsValidSocket(s))
     {
         s_lastError = SOCK_ENOTSOCK;
+        return SOCK_SOCKET_ERROR;
+    }
+
+    // reject anything that doesn't fit in the uint16_t WIFI_SendDataTo() expects - a negative or
+    // oversized len would otherwise wrap into an unrelated request length
+    if (len < 0 || len > (int)UINT16_MAX)
+    {
+        s_lastError = SOCK_EINVAL;
         return SOCK_SOCKET_ERROR;
     }
 

@@ -33,13 +33,9 @@ mutex_t WiFiMutex;
 static int wait_cmddata_rdy_high(int timeout);
 static void SPI_WIFI_DelayUs(uint32_t);
 
-// Genuine edge counter for the CMDDATA_RDY line, incremented from ISR context every time a
-// RISING EDGE is detected on the line (via EXTI). This mirrors the original STM32Cube HAL
-// reference driver (es_wifi_io_stm.c), which uses a real GPIO_MODE_IT_RISING interrupt +
-// semaphore for this exact purpose. A polling approximation that only looks at the CURRENT
-// level of the line cannot distinguish "still high from an earlier, already-consumed response"
-// from "a genuinely new response has just become ready" - both look identical to a level check.
-// Counting actual edges removes that ambiguity entirely.
+// Edge counter for CMDDATA_RDY, incremented from ISR on every rising edge (EXTI). Needed to tell
+// a genuinely NEW response apart from the line simply still being high from an earlier one - a
+// plain level check can't distinguish the two.
 static volatile uint32_t cmddataRdyEdgeCount = 0;
 
 static void CmdDataRdyEdgeCallback(void *arg)
@@ -80,12 +76,8 @@ int8_t SPI_WIFI_Init(uint16_t mode)
         // configure SPI driver
         spiDriver = &SPID3;
 
-        // prescaler - PCLK1 on this board runs undivided at the 80MHz SYSCLK (STM32_PPRE1_DIV1),
-        // so SPI_CR1_BR_0 alone (/4) would clock SPI3 at 20MHz. Scan/connect testing on real
-        // hardware showed intermittent data corruption (inconsistent access-point counts across
-        // otherwise-identical scans, occasional runaway reads hitting the STUFFING_FOREVER safety
-        // net) consistent with the SPI clock being too fast for reliable communication with this
-        // module on this board - use /16 (5MHz) instead for a much larger timing margin.
+        // /16 (5MHz) - /4 (20MHz) caused intermittent SPI data corruption on real hardware
+        // (bad scan counts, STUFFING_FOREVER errors)
         spiConfiguration.cr1 = SPI_CR1_BR_1 | SPI_CR1_BR_0;
 
         // 16bits
@@ -101,8 +93,8 @@ int8_t SPI_WIFI_Init(uint16_t mode)
         // wait_cmddata_rdy_rising_event() can reliably detect a genuinely NEW response becoming
         // ready rather than guessing from the line's current (possibly already-high) level
         cmddataRdyEdgeCount = 0;
-        palEnableLineEvent(LINE_ISM43362_CMDTRDY, PAL_EVENT_MODE_RISING_EDGE);
         palSetLineCallback(LINE_ISM43362_CMDTRDY, CmdDataRdyEdgeCallback, NULL);
+        palEnableLineEvent(LINE_ISM43362_CMDTRDY, PAL_EVENT_MODE_RISING_EDGE);
 
         // first call used for calibration
         SPI_WIFI_DelayUs(10);
@@ -140,14 +132,20 @@ int8_t SPI_WIFI_ResetModule(void)
 
     CS_SELECT;
 
-    // drain the reset prompt ("\x15\x15\r\n> ") - bounded by both a byte count and a wall-clock
-    // timeout so a CMDDATA_RDY line that (for whatever reason - SPI/timing mismatch, module not
-    // actually reset, etc.) never drops back to idle can't turn this into an infinite busy-loop
-    // that starves the rest of the RTOS (and the debugger monitor thread with it).
-    uint32_t resetDrainDeadline = GetTick() + 1000;
+    // drain the reset prompt ("\x15\x15\r\n> ") - bounded by count and a wall-clock timeout so a
+    // stuck CMDDATA_RDY line can't turn this into an infinite busy-loop
+    uint32_t drainStart = GetTick();
 
     while (WIFI_IS_CMDDATA_READY() && readSucceed)
     {
+        // bail out before a batch write could overflow rxBuffer - tied to the buffer's actual
+        // size (rather than a magic number) so this stays safe if either one changes later
+        if ((size_t)count + 2 * 3 > sizeof(rxBuffer))
+        {
+            readSucceed = false;
+            break;
+        }
+
         // read in batches of 6 bytes (which are passed as 3 because we're using 16bit mode)
         if (spiReceive(spiDriver, 3, &rxBuffer[count]) == MSG_OK)
         {
@@ -158,14 +156,7 @@ int8_t SPI_WIFI_ResetModule(void)
             readSucceed = false;
         }
 
-        // sanity check for buffer overflow because of repeated operations reading garbage data
-        if (count > 200)
-        {
-            readSucceed = false;
-            break;
-        }
-
-        if (GetTick() > resetDrainDeadline)
+        if ((uint32_t)(GetTick() - drainStart) > 1000)
         {
             readSucceed = false;
             break;
@@ -200,7 +191,15 @@ int8_t SPI_WIFI_ResetModule(void)
 // @retval None
 int8_t SPI_WIFI_DeInit(void)
 {
-    spiStop(spiDriver);
+    // stop delivering CMDDATA_RDY edges - otherwise CmdDataRdyEdgeCallback() keeps firing and
+    // incrementing cmddataRdyEdgeCount after this deinit, and a later re-Init(ES_WIFI_RESET)
+    // would see stale edges left over from before this call
+    palDisableLineEvent(LINE_ISM43362_CMDTRDY);
+
+    if (spiDriver != NULL)
+    {
+        spiStop(spiDriver);
+    }
 
     return ES_WIFI_STATUS_OK;
 }
@@ -209,12 +208,12 @@ int8_t SPI_WIFI_DeInit(void)
 // @param  timeout : timeout to wait for the signal to be asserted in mS
 int wait_cmddata_rdy_high(int timeout)
 {
-    uint32_t ticksToEnd = GetTick() + (uint32_t)timeout;
-    uint32_t lastWatchdogFeed = GetTick();
+    uint32_t startTick = GetTick();
+    uint32_t lastWatchdogFeed = startTick;
 
     while (WIFI_IS_CMDDATA_READY() == 0)
     {
-        if (GetTick() > ticksToEnd)
+        if ((uint32_t)(GetTick() - startTick) > (uint32_t)timeout)
         {
             return ES_WIFI_STATUS_ERROR;
         }
@@ -236,22 +235,19 @@ int wait_cmddata_rdy_high(int timeout)
     return ES_WIFI_STATUS_OK;
 }
 
-// Wait for a genuinely NEW rising edge on CMDDATA_RDY (i.e. the module signaling that a fresh
-// response has become ready) - NOT merely for the line to currently read high, which could just
-// as easily be leftover from an earlier, already-fully-read response. Backed by a real EXTI
-// interrupt edge counter (see CmdDataRdyEdgeCallback above), matching the original STM32Cube HAL
-// reference driver's semaphore-based wait_cmddata_rdy_rising_event() semantics exactly.
+// Wait for a genuinely NEW rising edge on CMDDATA_RDY (a fresh response becoming ready), not just
+// for the line to currently read high (which could be stale leftover from an earlier response).
+// Backed by the real EXTI edge counter above.
 // @param  timeout : timeout to wait for a new edge, in mS
 int wait_cmddata_rdy_rising_event(int timeout)
 {
     uint32_t startTick = GetTick();
-    uint32_t ticksToEnd = startTick + (uint32_t)timeout;
     uint32_t lastWatchdogFeed = startTick;
     uint32_t startCount = cmddataRdyEdgeCount;
 
     while (cmddataRdyEdgeCount == startCount)
     {
-        if (GetTick() > ticksToEnd)
+        if ((uint32_t)(GetTick() - startTick) > (uint32_t)timeout)
         {
             ISM43362_DebugPrintf(
                 "[ISM43362] wait_cmddata_rdy_rising_event: TIMED OUT after %d ms waiting for a new edge\r\n",
@@ -282,22 +278,13 @@ int16_t SPI_WIFI_ReceiveData(uint8_t *data, uint16_t len, uint32_t timeout)
 
     SPI_WIFI_DelayUs(3);
 
-    // wait for a genuinely NEW rising edge on CMDDATA_RDY (i.e. THIS command's response
-    // becoming ready) - matches the original STM32Cube HAL reference driver's structure
-    // exactly. Earlier attempts at guessing from the line's CURRENT level (e.g. "if already
-    // high on entry, assume it's stale leftover data and drain it") were fundamentally
-    // ambiguous - a fast module response and genuinely stale leftover data both look identical
-    // to a level check. The edge-counter-backed wait removes that ambiguity: it only returns
-    // once a NEW edge has actually been observed since this call started waiting.
+    // wait for a genuinely NEW rising edge on CMDDATA_RDY (this command's response becoming
+    // ready) - a plain level check can't tell that apart from stale leftover data
     if (wait_cmddata_rdy_rising_event((int)timeout) < 0)
     {
-        // CMDDATA_RDY never produced a new edge within the timeout - confirmed on real hardware
-        // that once this happens (e.g. after a WiFi join that failed/hung on the module's own
-        // side), the module can get stuck with CMDDATA_RDY sitting at a fixed level forever,
-        // meaning every SUBSEQUENT command would time out identically too, with no recovery for
-        // the rest of the session. Reset the module here (matching the existing STUFFING_FOREVER
-        // recovery below) so the NEXT command at least starts from a known-good state instead of
-        // being stuck permanently.
+        // module can get stuck with CMDDATA_RDY fixed forever (e.g. after a failed/hung join),
+        // which would time out every subsequent command too - reset so the next command at
+        // least starts from a known-good state
         SPI_WIFI_ResetModule();
 
         return ES_WIFI_ERROR_WAITING_DRDY_FALLING;
@@ -316,8 +303,15 @@ int16_t SPI_WIFI_ReceiveData(uint8_t *data, uint16_t len, uint32_t timeout)
 
                 return ES_WIFI_ERROR_SPI_FAILED;
             }
+
+            // always drain both bytes of this 16bit-mode SPI unit, but only commit the second
+            // one to the caller's buffer if it's actually within the requested len - otherwise,
+            // for an odd len, this would write one byte past the end of the caller's buffer
             data[0] = tmp[0];
-            data[1] = tmp[1];
+            if ((!len) || ((length + 1) < len))
+            {
+                data[1] = tmp[1];
+            }
             length += 2;
             data += 2;
 
@@ -347,7 +341,7 @@ int16_t SPI_WIFI_ReceiveData(uint8_t *data, uint16_t len, uint32_t timeout)
 // @retval Length of sent data
 int16_t SPI_WIFI_SendData(uint8_t *data, uint16_t len, uint32_t timeout)
 {
-    if (wait_cmddata_rdy_high((int)timeout) < 0)
+    if (wait_cmddata_rdy_high((int)timeout) != ES_WIFI_STATUS_OK)
     {
         return ES_WIFI_ERROR_SPI_FAILED;
     }
@@ -356,8 +350,17 @@ int16_t SPI_WIFI_SendData(uint8_t *data, uint16_t len, uint32_t timeout)
 
     SPI_WIFI_DelayUs(15);
 
-    if (len > 1)
+    if (len > 0)
     {
+        // txBuffer is a fixed-size buffer - reject anything that wouldn't fit instead of
+        // overflowing it (the -1 accounts for the odd-length filler byte written below)
+        if (len > sizeof(txBuffer) - 1)
+        {
+            CS_UNSELECT;
+
+            return ES_WIFI_ERROR_SPI_FAILED;
+        }
+
         memcpy(txBuffer, data, len);
 
         if (len % 2)
@@ -376,6 +379,8 @@ int16_t SPI_WIFI_SendData(uint8_t *data, uint16_t len, uint32_t timeout)
             return ES_WIFI_ERROR_SPI_FAILED;
         }
     }
+
+    CS_UNSELECT;
 
     return len;
 }

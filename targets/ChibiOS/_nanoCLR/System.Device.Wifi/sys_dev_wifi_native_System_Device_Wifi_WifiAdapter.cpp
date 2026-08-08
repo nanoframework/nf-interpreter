@@ -153,12 +153,29 @@ HRESULT Library_sys_dev_wifi_native_System_Device_Wifi_WifiAdapter::
             // Wait for Event_Wifi_Station OR 500ms poll timeout
             NANOCLR_CHECK_HRESULT(stack.SetupTimeoutFromTicks(hbTimeout, timeout));
 
+#if defined(TARGET_HAS_WIFI_ISM43362)
+            // ISM43362 never signals Event_Wifi_Station, so waiting on the full connect deadline
+            // would only re-check Network_Interface_Connect_Result() once, right at the end -
+            // poll every 500ms instead, without exceeding the real connect deadline (*timeout)
+            CLR_INT64 pollDeadline = (CLR_INT64)HAL_Time_CurrentTime() + (500 * TIME_CONVERSION__TO_MILLISECONDS);
+            CLR_INT64 waitDeadline = (pollDeadline < *timeout) ? pollDeadline : *timeout;
+#else
+            CLR_INT64 waitDeadline = *timeout;
+#endif
+
             bool woke = true;
             NANOCLR_CHECK_HRESULT(
-                g_CLR_RT_ExecutionEngine.WaitEvents(stack.m_owningThread, *timeout, Event_Wifi_Station, woke));
+                g_CLR_RT_ExecutionEngine.WaitEvents(stack.m_owningThread, waitDeadline, Event_Wifi_Station, woke));
 
             if (!woke)
             {
+#if defined(TARGET_HAS_WIFI_ISM43362)
+                // just a poll tick, not the real connect timeout yet - keep looping
+                if ((CLR_INT64)HAL_Time_CurrentTime() < *timeout)
+                {
+                    continue;
+                }
+#endif
                 status = WifiConnectionStatus_Timeout;
                 break;
             }
@@ -222,7 +239,10 @@ HRESULT Library_sys_dev_wifi_native_System_Device_Wifi_WifiAdapter::GetNativeSca
         // this is already several native call frames deep from the managed scan report getter
         static WIFI_APs_t apList;
         memset(&apList, 0, sizeof(apList));
-        WIFI_ListAccessPoints(&apList, WIFI_MAX_APS);
+        if (WIFI_ListAccessPoints(&apList, WIFI_MAX_APS) != WIFI_STATUS_OK)
+        {
+            NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
+        }
         uint16_t number = apList.count;
 #else
         uint16_t number = (uint16_t)cyw43_wifi_scan_get_count();

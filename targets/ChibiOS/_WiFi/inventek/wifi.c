@@ -89,7 +89,14 @@ WIFI_Status_t WIFI_ListAccessPoints(WIFI_APs_t *APs, uint8_t AP_MaxNbr)
       for(APCount = 0; APCount < APs->count; APCount++)
       {
         APs->ap[APCount].Ecn = (WIFI_Ecn_t)esWifiAPs.AP[APCount].Security;
-        strncpy( (char *)APs->ap[APCount].SSID, (char *)esWifiAPs.AP[APCount].SSID, MIN (WIFI_MAX_SSID_NAME, WIFI_MAX_SSID_NAME));
+        // source SSID (ES_WIFI_MAX_SSID_NAME_SIZE + 1 bytes) isn't guaranteed NUL-terminated -
+        // bound the copy to its actual size, not the (much larger) destination size, and
+        // terminate the destination explicitly
+        strncpy(
+            (char *)APs->ap[APCount].SSID,
+            (char *)esWifiAPs.AP[APCount].SSID,
+            sizeof(esWifiAPs.AP[APCount].SSID));
+        APs->ap[APCount].SSID[sizeof(esWifiAPs.AP[APCount].SSID)] = 0;
         APs->ap[APCount].RSSI = esWifiAPs.AP[APCount].RSSI;
         memcpy(APs->ap[APCount].MAC, esWifiAPs.AP[APCount].MAC, 6);
         APs->ap[APCount].Channel = esWifiAPs.AP[APCount].Channel;
@@ -174,8 +181,8 @@ WIFI_Status_t WIFI_GetMAC_Address(uint8_t  *mac)
 WIFI_Status_t WIFI_GetIP_Address (uint8_t  *ipaddr)
 {
   WIFI_Status_t ret = WIFI_STATUS_ERROR;
-  
-  if (ES_WIFI_IsConnected(&EsWifiObj) == 1)
+
+  if (EsWifiObj.NetSettings.IsConnected)
   {
     memcpy(ipaddr, EsWifiObj.NetSettings.IP_Addr, 4);
     ret = WIFI_STATUS_OK;
@@ -191,7 +198,7 @@ WIFI_Status_t WIFI_GetIP_Mask (uint8_t  *mask)
 {
   WIFI_Status_t ret = WIFI_STATUS_ERROR;
   
-  if (ES_WIFI_IsConnected(&EsWifiObj) == 1)
+  if (EsWifiObj.NetSettings.IsConnected)
   {
     memcpy(mask, EsWifiObj.NetSettings.IP_Mask, 4);
     ret = WIFI_STATUS_OK;
@@ -320,6 +327,7 @@ WIFI_Status_t WIFI_HandleAPEvents(WIFI_APSettings_t *setting)
   * @param  ipaddr : array of the IP address
   * @retval Operation status
   */
+#if (ES_WIFI_USE_PING == 1)
 WIFI_Status_t WIFI_Ping(uint8_t *ipaddr, uint16_t count, uint16_t interval_ms, int32_t result[])
 {
   WIFI_Status_t ret = WIFI_STATUS_ERROR;
@@ -330,6 +338,7 @@ WIFI_Status_t WIFI_Ping(uint8_t *ipaddr, uint16_t count, uint16_t interval_ms, i
   }
   return ret;
 }
+#endif /* ES_WIFI_USE_PING */
 
 /**
   * @brief  Get IP address from URL using DNS
@@ -556,6 +565,17 @@ WIFI_Status_t WIFI_ReceiveData(uint8_t socket, uint8_t *pdata, uint16_t Reqlen, 
   {
     *RcvDatalen = 0;
     return WIFI_STATUS_SOCKET_CLOSED;
+  }
+
+  // AT_RequestReceiveData() (es_wifi.c) returns ES_WIFI_STATUS_IO_ERROR both for a plain "no data
+  // arrived within Timeout" (the common case) and for a malformed response - it doesn't
+  // distinguish the two. Map it to WIFI_STATUS_TIMEOUT so SOCK_recv() can retry instead of
+  // treating an ordinary empty poll as a connection reset (see SOCK_recv() in
+  // sockets_ism43362.cpp, which maps WIFI_STATUS_TIMEOUT to SOCK_ETIMEDOUT).
+  if (esStatus == ES_WIFI_STATUS_IO_ERROR)
+  {
+    *RcvDatalen = 0;
+    return WIFI_STATUS_TIMEOUT;
   }
 
   return WIFI_STATUS_ERROR;

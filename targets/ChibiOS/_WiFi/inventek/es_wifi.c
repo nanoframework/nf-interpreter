@@ -44,6 +44,11 @@
   * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
   *
   ******************************************************************************
+  * 
+  * Some adjustments made to the original STMicroelectronics reference driver
+  * to support ChibiOS and the .NET nanoFramework. Those are mainly buffer
+  * overflow and timeout fixes, plus some minor code cleanup.
+  *
   */
 /* Includes ------------------------------------------------------------------*/
 #include "es_wifi.h"
@@ -435,7 +440,11 @@ static void AT_ParseSingleAP(char *pdata, ES_WIFI_AP_t *AP)
       break;
 
     case 1:
-      ptr[strlen(ptr) - 1] = 0;
+      // guard against an empty token - see the matching comment in AT_ParseAP() above
+      if (strlen(ptr) > 0)
+      {
+        ptr[strlen(ptr) - 1] = 0;
+      }
       strncpy((char *)AP->SSID,  ptr+ 1, ES_WIFI_MAX_SSID_NAME_SIZE + 1);
       break;
 
@@ -737,6 +746,7 @@ static void AT_ParseIsConnected(char *pdata, uint8_t *isConnected)
   * @param  isConnected: pointer to result
   * @retval None.
   */
+#if (ES_WIFI_USE_PING == 1)
 static void AT_ParsePing(int32_t res[], uint32_t count,char* pdata)
 {
   char *ptr;
@@ -754,6 +764,7 @@ static void AT_ParsePing(int32_t res[], uint32_t count,char* pdata)
     }
   }
 }
+#endif /* ES_WIFI_USE_PING */
 
 
 
@@ -844,7 +855,11 @@ static ES_WIFI_Status_t AT_RequestSendData(ES_WIFIObject_t *Obj, uint8_t* cmd, u
   cmd_len = strlen((char*)cmd);
 
   /* can send only even number of byte on first send */
-  if (cmd_len & 1) return ES_WIFI_STATUS_ERROR;
+  if (cmd_len & 1)
+  {
+    UNLOCK_WIFI();
+    return ES_WIFI_STATUS_ERROR;
+  }
   n=Obj->fops.IO_Send(cmd, cmd_len, Obj->Timeout);
   if (n == cmd_len)
   {
@@ -880,9 +895,11 @@ static ES_WIFI_Status_t AT_RequestSendData(ES_WIFIObject_t *Obj, uint8_t* cmd, u
     }
     else
     {
+      UNLOCK_WIFI();
       return ES_WIFI_STATUS_ERROR;
     }
   }
+  UNLOCK_WIFI();
   return ES_WIFI_STATUS_IO_ERROR;
 }
 
@@ -1136,7 +1153,10 @@ ES_WIFI_Status_t  ES_WIFI_ListAccessPoints(ES_WIFIObject_t *Obj, ES_WIFI_APs_t *
 
   ISM43362_DebugPrintf("[ISM43362] ES_WIFI_ListAccessPoints: checking FW revision...\r\n");
 
-  sprintf((char*)Obj->CmdData, (char*)Obj->FW_Rev);
+  // copy (not sprintf-format) FW_Rev - it's data parsed from the module, so using it as a
+  // format string would let any '%' sequence in it drive sprintf's conversions
+  strncpy((char*)Obj->CmdData, (char*)Obj->FW_Rev, ES_WIFI_FW_REV_SIZE);
+  Obj->CmdData[ES_WIFI_FW_REV_SIZE] = 0;
 
   AT_ParseFWRev((char*)Obj->CmdData, version);
 
@@ -2031,6 +2051,7 @@ ES_WIFI_Status_t  ES_WIFI_WaitServerConnection(ES_WIFIObject_t *Obj,uint32_t tim
 	   tstart=0;
   }
 
+  LOCK_WIFI();
 
   do
   {
@@ -2095,6 +2116,8 @@ ES_WIFI_Status_t  ES_WIFI_WaitServerConnection(ES_WIFIObject_t *Obj,uint32_t tim
     t = HAL_GetTick();
   }
   while ((timeout==0) ||((t < tlast) || (t < tstart)));
+
+  UNLOCK_WIFI();
   return ES_WIFI_STATUS_TIMEOUT;
 }
 

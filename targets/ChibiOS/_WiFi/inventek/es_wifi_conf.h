@@ -41,7 +41,21 @@ extern mutex_t WiFiMutex;
 // Debug tracing: forwards to CLR_Debug::Printf (wire protocol output) so trace messages show up
 // in the debugger output window. Implemented in sockets_ism43362.cpp (a C++ TU) since
 // CLR_Debug::Printf is a C++ API - this is just a thin C-callable wrapper around it.
-void ISM43362_DebugPrintf(const char *fmt, ...);
+//
+// Set to 1 to re-enable trace output - defaults to off (matches this board's
+// CONFIG_NF_CLR_NO_TRACE=y). ISM43362_DebugPrintf is a MACRO, not a plain function, so that when
+// disabled every call site's format string/arguments compile away entirely instead of relying on
+// the callee's body being a no-op.
+#ifndef ISM43362_ENABLE_DEBUG_TRACE
+#define ISM43362_ENABLE_DEBUG_TRACE 0
+#endif
+
+#if ISM43362_ENABLE_DEBUG_TRACE
+void ISM43362_DebugPrintf_Impl(const char *fmt, ...);
+#define ISM43362_DebugPrintf(...) ISM43362_DebugPrintf_Impl(__VA_ARGS__)
+#else
+#define ISM43362_DebugPrintf(...) ((void)0)
+#endif
 
 #define ES_WIFI_MAX_SSID_NAME_SIZE                  32
 #define ES_WIFI_MAX_PSWD_NAME_SIZE                  32
@@ -62,7 +76,8 @@ void ISM43362_DebugPrintf(const char *fmt, ...);
 #define ES_WIFI_TRANSPORT_TIMEOUT                   30000
 #endif /* ES_WIFI_TRANSPORT_TIMEOUT  */
                                                     
-#define ES_WIFI_USE_PING                            1
+// ES_WIFI_Ping()/WIFI_Ping() are unused (no callers) - disabled to recover code space
+#define ES_WIFI_USE_PING                            0
 #define ES_WIFI_USE_AWS                             0
 #define ES_WIFI_USE_FIRMWAREUPDATE                  0
 #define ES_WIFI_USE_WPS                             0

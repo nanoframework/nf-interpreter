@@ -5,34 +5,21 @@
 
 // Minimal synchronous SNTP client for the Inventek ISM43362 (ES-WIFI) module.
 //
-// nanoFramework.Networking.Sntp's native implementation normally just drives lwIP's own
-// sntp_* API (see nf_networking_sntp_nanoFramework_Networking_Sntp.cpp) - but lwIP's SNTP
-// client sends/receives its UDP packets through a real lwIP netif, and this board doesn't have
-// one: the ES-WIFI module runs its own onboard TCP/IP stack and is only exposed to the host via
-// an AT-command socket proxy (see sockets_ism43362.cpp), not raw link-layer frames. lwIP's
-// sntp_init() therefore has nothing to actually send/receive over on this board and silently
-// never succeeds (confirmed on real hardware: WifiNetworkHelper.ConnectDhcp() got a valid IP
-// address but never got a DateTime, eventually timing out).
+// lwIP's sntp_* API (normally used by nf_networking_sntp_nanoFramework_Networking_Sntp.cpp) needs
+// a real lwIP netif to send/receive UDP over - this board doesn't have one, since the ES-WIFI
+// module runs its own onboard TCP/IP stack, exposed only via an AT-command socket proxy (see
+// sockets_ism43362.cpp). So lwIP's sntp_init() never succeeds here.
 //
-// This file implements a minimal, synchronous NTP client instead, built directly on top of the
-// existing SOCK_* socket-proxy functions (DNS lookup via SOCK_getaddrinfo() -> WIFI_GetHostAddress,
-// and a UDP "connected" socket for send/recv), reusing the SetSystemTimeFromUnixEpoch() helper
-// (declared in nf_networking_sntp_nanoFramework_Networking_Sntp.cpp) to actually update the
-// system clock. It's synchronous (blocks the calling thread for the DNS+UDP round trip, typically
-// well under the ES-WIFI socket timeout) rather than a periodic background service like lwIP's -
-// callers get one-shot behavior matching Start()/UpdateNow() being invoked explicitly.
+// This file implements a minimal synchronous NTP client instead, on top of the existing SOCK_*
+// socket-proxy functions, reusing SetSystemTimeFromUnixEpoch() to update the system clock.
 //
-// IMPORTANT: managed code (e.g. nanoFramework.Networking.WifiNetworkHelper.ConnectDhcp(...,
-// requiresDateTime: true, ...)) does NOT call Sntp.Start()/UpdateNow() itself - it just polls
-// DateTime.UtcNow in a loop (see NetworkHelperInternal.WaitForValidDateTime() in the
-// nanoframework/System.Net repo), with a comment saying this relies on "SNTP available and
-// enabled on target device" - i.e. it expects the FIRMWARE to sync the clock automatically in
-// the background once the network comes up, exactly like ESP32 (esp_netif_sntp_init()) and
-// lwIP-netif ChibiOS boards (nf_lwipthread_wifi.c's automatic sntp_init() on DHCP-up) already do.
-// Confirmed on real hardware: neither Sntp.Start()/UpdateNow() nor SOCK_select() ever got called
-// even after multiple successful connect+DHCP cycles - so this board needs the same kind of
-// automatic trigger. See Ism43362_Sntp_TriggerAutoSync() below, called from
-// Network_Interface_Start_Connect() in Target_Network.cpp right after a successful WIFI_Connect().
+// Managed code (nanoFramework.Networking.WifiNetworkHelper.ConnectDhcp(..., requiresDateTime:
+// true, ...)) never calls Sntp.Start()/UpdateNow() itself - it just polls DateTime.UtcNow,
+// expecting the firmware to auto-sync the clock once the network comes up (like ESP32 and
+// lwIP-netif ChibiOS boards already do). So this board needs the same kind of automatic trigger -
+// see Ism43362_Sntp_TriggerAutoSync() below, called from Network_Interface_Start_Connect() in
+// Target_Network.cpp right after a successful WIFI_Connect().
+
 
 #include <nanoHAL.h>
 #include <nanoCLR_Types.h>
@@ -47,7 +34,6 @@ extern "C"
 #include <wifi.h>
 }
 
-extern "C" void ISM43362_DebugPrintf(const char *fmt, ...);
 extern "C" void SetSystemTimeFromUnixEpoch(uint32_t seconds);
 
 // NTP (RFC 5905) timestamps are seconds since 1900-01-01; Unix time is seconds since 1970-01-01 -
@@ -81,11 +67,15 @@ bool Ism43362_Sntp_Sync(const char *serverName)
         return false;
     }
 
-    // getaddrinfo() doesn't know about the service port - set it explicitly (network byte order)
-    SOCK_sockaddr_in *addr = (SOCK_sockaddr_in *)res->ai_addr;
-    addr->sin_port = (uint16_t)(((NTP_PORT & 0xFF) << 8) | ((NTP_PORT >> 8) & 0xFF));
+    // copy out of SOCK_getaddrinfo()'s shared static storage before mutating anything - it can be
+    // overwritten by another resolution as soon as this call returns
+    SOCK_sockaddr_in addr;
+    memcpy(&addr, res->ai_addr, sizeof(addr));
 
-    if (SOCK_connect(s, (struct SOCK_sockaddr *)addr, sizeof(SOCK_sockaddr_in)) != 0)
+    // getaddrinfo() doesn't know about the service port - set it explicitly (network byte order)
+    addr.sin_port = (uint16_t)(((NTP_PORT & 0xFF) << 8) | ((NTP_PORT >> 8) & 0xFF));
+
+    if (SOCK_connect(s, (struct SOCK_sockaddr *)&addr, sizeof(addr)) != 0)
     {
         ISM43362_DebugPrintf("[ISM43362] SNTP: connect() failed\r\n");
         SOCK_close(s);
@@ -108,15 +98,9 @@ bool Ism43362_Sntp_Sync(const char *serverName)
         return false;
     }
 
-    // NOTE: deliberately NOT using SOCK_recv() here - it hardcodes a 10-second
-    // (ISM43362_SOCKET_TIMEOUT) wait on the module while holding the shared WiFiMutex for the
-    // WHOLE duration (see ES_WIFI_ReceiveData()'s LOCK_WIFI()/UNLOCK_WIFI() pair), which was found
-    // to be long enough to make a concurrent WiFi (re)connect attempt's own AT commands hang/time
-    // out waiting for the module to become responsive again. Calling WIFI_ReceiveData() directly
-    // with a much shorter timeout keeps this best-effort sync from monopolizing the module for
-    // long if the NTP server doesn't respond quickly. `s` is usable directly as the ES-WIFI socket
-    // slot index since SOCK_SOCKET handles on this board ARE the raw slot index (see
-    // AllocateSocketSlot() in sockets_ism43362.cpp).
+    // not using SOCK_recv() - it hardcodes a 10s wait while holding WiFiMutex the whole time,
+    // which can block a concurrent WiFi (re)connect's AT commands. Use a shorter timeout instead.
+    // `s` is usable directly as the ES-WIFI socket slot index (see AllocateSocketSlot()).
     uint16_t receivedLen = 0;
     int received =
         (WIFI_ReceiveData((uint8_t)s, packet, sizeof(packet), &receivedLen, NTP_RECEIVE_TIMEOUT_MS) == WIFI_STATUS_OK)
@@ -130,6 +114,19 @@ bool Ism43362_Sntp_Sync(const char *serverName)
     if (received != NTP_PACKET_SIZE)
     {
         ISM43362_DebugPrintf("[ISM43362] SNTP: recv() failed/timed out (returned %d)\r\n", received);
+        return false;
+    }
+
+    // reject responses the server itself flags as not usable (RFC 5905): LI == 3 ("alarm",
+    // server clock not synchronized) or Stratum == 0 (kiss-o'-death, e.g. rate-limiting/deny)
+    uint8_t leapIndicator = (packet[0] >> 6) & 0x03;
+    uint8_t stratum = packet[1];
+    if (leapIndicator == 3 || stratum == 0)
+    {
+        ISM43362_DebugPrintf(
+            "[ISM43362] SNTP: server reports unsynchronized (LI=%d, stratum=%d), ignoring\r\n",
+            (int)leapIndicator,
+            (int)stratum);
         return false;
     }
 
@@ -155,29 +152,15 @@ bool Ism43362_Sntp_Sync(const char *serverName)
 // Kicks off a one-shot, best-effort automatic NTP sync - call this right after a WiFi connection
 // succeeds (see the big comment at the top of this file for why this is needed).
 //
-// NOTE: this runs SYNCHRONOUSLY (blocking the calling native method call for the DNS+UDP round
-// trip, typically well under a second, occasionally a couple of seconds) rather than on a
-// background thread. A background-thread approach was tried extensively first - both a STATIC
-// working area (THD_WORKING_AREA()+chThdCreateStatic(), in a custom ".ram4" linker section with
-// an explicit 8-byte alignment attribute, verified correctly aligned via `nm`) and a heap-based
-// one (chThdCreateFromHeap(), with the heap deliberately sized generously to guarantee the
-// allocation would succeed) - but BOTH reliably crashed (silent reboot, no error message) the
-// instant the thread was created/started, at the EXACT same point in the call sequence, regardless
-// of the underlying memory mechanism, stack size (tried 8192 and 12288 bytes), or verified-correct
-// alignment. Since the crash reproduced identically across two totally different thread-creation
-// mechanisms, the problem clearly isn't about memory placement/size at all - it's specific to
-// creating/starting ANY new OS thread from this exact calling context (inside
-// Network_Interface_Connect_Result(), itself called from the NativeConnect___... nanoCLR native
-// method) - a root cause that wasn't identified despite extensive bisection. Rather than continue
-// blocking this feature on that unresolved mystery, this now runs synchronously on the SAME thread
-// that's already executing the native call - which already blocks synchronously for several
-// seconds during the WiFi join sequence anyway, so a few more seconds here for SNTP is a
-// quantitative increase, not a qualitatively new kind of blocking.
+// Runs SYNCHRONOUSLY on the calling thread rather than a background one. A background-thread
+// approach (both a static working area and a heap-based thread) was tried and reliably crashed
+// (silent reboot) the instant a thread was created from this calling context, regardless of
+// stack size/alignment - root cause not identified. Running synchronously here just adds a few
+// seconds to a native call that already blocks for several seconds during WiFi join anyway.
 //
-// This is called from inside Network_Interface_Connect_Result(), which is itself polled from the
-// managed connect's 20-second timeout window - so the two synchronous attempts below are capped
-// to a combined budget well under that, to make sure a slow/unreachable NTP server can't eat
-// enough of that window to turn an otherwise-successful WiFi connect into a reported timeout.
+// This is polled from within the managed connect's 20-second timeout window, so the two sync
+// attempts below are capped to a combined budget well under that - a slow/unreachable NTP server
+// must not be able to turn an otherwise-successful connect into a reported timeout.
 #define SNTP_AUTOSYNC_BUDGET_MS 4000
 
 extern "C" void Ism43362_Sntp_TriggerAutoSync()
