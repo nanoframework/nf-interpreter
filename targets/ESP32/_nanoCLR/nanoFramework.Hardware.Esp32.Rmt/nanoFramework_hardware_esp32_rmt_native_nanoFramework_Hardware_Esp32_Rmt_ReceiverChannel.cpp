@@ -512,7 +512,7 @@ HRESULT Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_E
         if (cancelReceive)
         {
             rmt_disable(rx_handle);
-            
+
             // discard any completion event queued before the receive was cancelled
             xQueueReset(rcInfo->rxQueue);
 
