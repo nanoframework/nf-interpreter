@@ -185,6 +185,13 @@ struct Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_Es
     //--//
 };
 
+struct Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_Esp32_Rmt_RmtUtils
+{
+    NANOCLR_NATIVE_DECLARE(DecodeSymbolArrayToBytes___STATIC__SZARRAY_U1__SZARRAY_nanoFrameworkHardwareEsp32RmtRmtSymbol__I4__BOOLEAN__I4__I4__BOOLEAN);
+
+    //--//
+};
+
 struct Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_Esp32_Rmt_TransmitSyncManager
 {
     static const int FIELD__disposedValue = 1;
@@ -209,14 +216,6 @@ struct Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_Es
     NANOCLR_NATIVE_DECLARE(NativeTxWriteSymbolItems___U4__SZARRAY_U1__BOOLEAN);
     NANOCLR_NATIVE_DECLARE(NativeTxWriteEncoder___U4__BOOLEAN);
     NANOCLR_NATIVE_DECLARE(NativeTxDispose___VOID);
-
-    //--//
-};
-
-struct Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_Esp32_Rmt_Utils
-{
-    NANOCLR_NATIVE_DECLARE(
-        DecodeSymbolArrayToBytes___STATIC__SZARRAY_U1__SZARRAY_nanoFrameworkHardwareEsp32RmtRmtSymbol__I4__BOOLEAN__I4__I4__BOOLEAN);
 
     //--//
 };

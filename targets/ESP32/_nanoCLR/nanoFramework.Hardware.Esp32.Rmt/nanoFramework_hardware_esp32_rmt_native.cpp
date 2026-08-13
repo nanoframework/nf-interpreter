@@ -82,6 +82,9 @@ static const CLR_RT_MethodHandler method_lookup[] =
     NULL,
     NULL,
     NULL,
+    NULL,
+    NULL,
+    NULL,
     Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_Esp32_Rmt_ReceiverChannel::NativeRxInit___I4,
     Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_Esp32_Rmt_ReceiverChannel::NativeReceive___SZARRAY_nanoFrameworkHardwareEsp32RmtRmtSymbol,
     Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_Esp32_Rmt_ReceiverChannel::NativeTryGetReceived___SZARRAY_nanoFrameworkHardwareEsp32RmtRmtSymbol,
@@ -124,6 +127,7 @@ static const CLR_RT_MethodHandler method_lookup[] =
     NULL,
     NULL,
     Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_Esp32_Rmt_RmtSymbols::NativeRmtSymbolsToBytes___SZARRAY_U1,
+    Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_Esp32_Rmt_RmtUtils::DecodeSymbolArrayToBytes___STATIC__SZARRAY_U1__SZARRAY_nanoFrameworkHardwareEsp32RmtRmtSymbol__I4__BOOLEAN__I4__I4__BOOLEAN,
     NULL,
     NULL,
     NULL,
@@ -156,13 +160,12 @@ static const CLR_RT_MethodHandler method_lookup[] =
     Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_Esp32_Rmt_TransmitterEncodedChannel::NativeTxWriteSymbolItems___U4__SZARRAY_U1__BOOLEAN,
     Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_Esp32_Rmt_TransmitterEncodedChannel::NativeTxWriteEncoder___U4__BOOLEAN,
     Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_Esp32_Rmt_TransmitterEncodedChannel::NativeTxDispose___VOID,
-    Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_Esp32_Rmt_Utils::DecodeSymbolArrayToBytes___STATIC__SZARRAY_U1__SZARRAY_nanoFrameworkHardwareEsp32RmtRmtSymbol__I4__BOOLEAN__I4__I4__BOOLEAN,
 };
 
 const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_nanoFramework_Hardware_Esp32_Rmt =
 {
     "nanoFramework.Hardware.Esp32.Rmt",
-    0xC094C732,
+    0x56901C93,
     method_lookup,
     { 100, 0, 6, 0 }
 };

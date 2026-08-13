@@ -127,12 +127,6 @@ HRESULT Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_E
     rx_chan_config.flags.io_loop_back = false;
 
     err = rmt_new_rx_channel(&rx_chan_config, &rx_chan_handle);
-
-    NANOCLR_CHECK_HRESULT(RmtChannel::RmtMapEspErrToClrErr(err));
-
-    // Enable Demodulation if feature available on target ?
-    err = rmt_new_rx_channel(&rx_chan_config, &rx_chan_handle);
-
     NANOCLR_CHECK_HRESULT(RmtChannel::RmtMapEspErrToClrErr(err));
 
     // Enable Demodulation if feature available on target ?
@@ -518,6 +512,10 @@ HRESULT Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_E
         if (cancelReceive)
         {
             rmt_disable(rx_handle);
+            
+            // discard any completion event queued before the receive was cancelled
+            xQueueReset(rcInfo->rxQueue);
+
             rmt_enable(rx_handle);
         }
     }

@@ -429,7 +429,10 @@ HRESULT Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_E
         multiEncoder = __containerof(tci->txEncoder, rmt_multi_stage_encoder_t, base);
 
         // Validate that only 1 encoder is configured and that it is a copy encoder
-        if (multiEncoder->numberSteps == 0 && multiEncoder->encoders[0].encType != RmtEncoderType_Copy)
+         if (
+            multiEncoder->numberSteps != 1 ||
+            multiEncoder->encoders == NULL ||
+            multiEncoder->encoders[0].encType != RmtEncoderType_Copy)
         {
             // Only 1 encoder is supported for this function
             NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
