@@ -126,6 +126,7 @@ static const CLR_RT_MethodHandler method_lookup[] =
     NULL,
     NULL,
     NULL,
+    NULL,
     Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_Esp32_Rmt_RmtSymbols::NativeRmtSymbolsToBytes___SZARRAY_U1,
     Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_Esp32_Rmt_RmtUtils::DecodeSymbolArrayToBytes___STATIC__SZARRAY_U1__SZARRAY_nanoFrameworkHardwareEsp32RmtRmtSymbol__I4__BOOLEAN__I4__I4__BOOLEAN,
     NULL,
@@ -165,7 +166,7 @@ static const CLR_RT_MethodHandler method_lookup[] =
 const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_nanoFramework_Hardware_Esp32_Rmt =
 {
     "nanoFramework.Hardware.Esp32.Rmt",
-    0x56901C93,
+    0x95D05C61,
     method_lookup,
     { 100, 0, 6, 0 }
 };
