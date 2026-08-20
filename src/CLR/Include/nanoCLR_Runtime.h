@@ -2045,19 +2045,19 @@ struct CLR_RT_AttributeParser
 
         int m_mode;
         CLR_RT_HeapBlock m_value;
-        CLR_RT_ProtectFromGC m_valueGC { m_value };
+        CLR_RT_ProtectFromGC m_valueGC{m_value};
 
         int m_pos;
         const char *m_name;
 
         //--//
 
-        Value() = default;                       // Explicitly request default constructor
+        Value() = default; // Explicitly request default constructor
 
         // Prevent copying because shallow copies of CLR_RT_ProtectFromGC
         // can corrupt the GC protection list during destruction.
-        Value(const Value&) = delete;            // Delete copy constructor
-        Value& operator=(const Value&) = delete; // Delete copy-assignment operator
+        Value(const Value &) = delete;            // Delete copy constructor
+        Value &operator=(const Value &) = delete; // Delete copy-assignment operator
     };
 
     //--//
