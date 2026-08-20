@@ -2045,6 +2045,7 @@ struct CLR_RT_AttributeParser
 
         int m_mode;
         CLR_RT_HeapBlock m_value;
+        CLR_RT_ProtectFromGC m_valueGC { m_value };
 
         int m_pos;
         const char *m_name;
