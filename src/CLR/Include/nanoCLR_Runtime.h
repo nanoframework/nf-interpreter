@@ -1968,6 +1968,46 @@ struct CLR_RT_MethodDef_Instance : public CLR_RT_MethodDef_Index
 #endif // #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
 };
 
+////////////////////////////////////////////////////////////////////////////////
+
+struct CLR_RT_ProtectFromGC
+{
+    static const CLR_UINT32 c_Generic = 0x00000001;
+    static const CLR_UINT32 c_HeapBlock = 0x00000002;
+    static const CLR_UINT32 c_ResetKeepAlive = 0x00000004;
+
+    typedef void (*Callback)(void *state);
+
+    static CLR_RT_ProtectFromGC *s_first;
+
+    CLR_RT_ProtectFromGC *m_next;
+    void **m_data;
+    Callback m_fpn;
+    CLR_UINT32 m_flags;
+
+    CLR_RT_ProtectFromGC(CLR_RT_HeapBlock &ref)
+    {
+        Initialize(ref);
+    }
+    CLR_RT_ProtectFromGC(void **data, Callback fpn)
+    {
+        Initialize(data, fpn);
+    }
+    ~CLR_RT_ProtectFromGC()
+    {
+        Cleanup();
+    }
+
+    static void InvokeAll();
+
+  private:
+    void Initialize(CLR_RT_HeapBlock &ref);
+    void Initialize(void **data, Callback fpn);
+    void Cleanup();
+
+    void Invoke();
+};
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 struct CLR_RT_AttributeEnumerator
@@ -2508,46 +2548,6 @@ CT_ASSERT(
 #endif
 
 #endif // _MSC_VER
-
-////////////////////////////////////////////////////////////////////////////////
-
-struct CLR_RT_ProtectFromGC
-{
-    static const CLR_UINT32 c_Generic = 0x00000001;
-    static const CLR_UINT32 c_HeapBlock = 0x00000002;
-    static const CLR_UINT32 c_ResetKeepAlive = 0x00000004;
-
-    typedef void (*Callback)(void *state);
-
-    static CLR_RT_ProtectFromGC *s_first;
-
-    CLR_RT_ProtectFromGC *m_next;
-    void **m_data;
-    Callback m_fpn;
-    CLR_UINT32 m_flags;
-
-    CLR_RT_ProtectFromGC(CLR_RT_HeapBlock &ref)
-    {
-        Initialize(ref);
-    }
-    CLR_RT_ProtectFromGC(void **data, Callback fpn)
-    {
-        Initialize(data, fpn);
-    }
-    ~CLR_RT_ProtectFromGC()
-    {
-        Cleanup();
-    }
-
-    static void InvokeAll();
-
-  private:
-    void Initialize(CLR_RT_HeapBlock &ref);
-    void Initialize(void **data, Callback fpn);
-    void Cleanup();
-
-    void Invoke();
-};
 
 ////////////////////////////////////////
 
