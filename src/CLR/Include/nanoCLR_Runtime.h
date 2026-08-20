@@ -2049,6 +2049,13 @@ struct CLR_RT_AttributeParser
 
         int m_pos;
         const char *m_name;
+
+        //--//
+
+        // Prevent copying because shallow copies of CLR_RT_ProtectFromGC
+        // can corrupt the GC protection list during destruction.
+        Value(const Value&) = delete;            // Delete copy constructor
+        Value& operator=(const Value&) = delete; // Delete copy-assignment operator
     };
 
     //--//
