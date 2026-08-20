@@ -13,47 +13,47 @@ HRESULT Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_E
     NativeCreateSyncManager___VOID__SZARRAY_I4(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
+
+    CLR_RT_HeapBlock_Array *transmitChannelArray = NULL;
+    rmt_sync_manager_config_t config = {};
+    esp_err_t err;
+
+    CLR_RT_HeapBlock *pThis = stack.This();
+    FAULT_ON_NULL(pThis);
+
+    // Only 1 SyncManager allowed
+    if (s_syncManagerHandle != NULL)
     {
-        CLR_RT_HeapBlock_Array *transmitChannelArray = NULL;
-        rmt_sync_manager_config_t config = {};
-        esp_err_t err;
+        NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_OPERATION);
+    }
 
-        CLR_RT_HeapBlock *pThis = stack.This();
-        FAULT_ON_NULL(pThis);
+    // Get array of TransmitterChannel handle objects
+    transmitChannelArray = stack.Arg1().DereferenceArray();
+    FAULT_ON_NULL(transmitChannelArray);
 
-        // Only 1 SyncManager allowed
-        if (s_syncManagerHandle != NULL)
+    config.array_size = transmitChannelArray->m_numOfElements;
+
+    if (config.array_size == 0)
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+    }
+
+    config.tx_channel_array = (rmt_channel_handle_t *)transmitChannelArray->GetFirstElement();
+
+    for (size_t index = 0; index < config.array_size; index++)
+    {
+        if (!RmtChannel::CheckChannel(config.tx_channel_array[index]))
         {
-            NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_OPERATION);
-        }
-
-        // Get array of TransmitterChannel handle objects
-        transmitChannelArray = stack.Arg1().DereferenceArray();
-        FAULT_ON_NULL(transmitChannelArray);
-
-        config.array_size = transmitChannelArray->m_numOfElements;
-
-        if (config.array_size == 0)
-        {
-            NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
-        }
-
-        config.tx_channel_array = (rmt_channel_handle_t *)transmitChannelArray->GetFirstElement();
-
-        for (size_t index = 0; index < config.array_size; index++)
-        {
-            if (!RmtChannel::CheckChannel(config.tx_channel_array[index]))
-            {
-                NANOCLR_SET_AND_LEAVE(CLR_E_OBJECT_DISPOSED);
-            }
-        }
-
-        err = rmt_new_sync_manager(&config, &s_syncManagerHandle);
-        if (err != ESP_OK)
-        {
-            NANOCLR_SET_AND_LEAVE(RmtChannel::RmtMapEspErrToClrErr(err));
+            NANOCLR_SET_AND_LEAVE(CLR_E_OBJECT_DISPOSED);
         }
     }
+
+    err = rmt_new_sync_manager(&config, &s_syncManagerHandle);
+    if (err != ESP_OK)
+    {
+        NANOCLR_SET_AND_LEAVE(RmtChannel::RmtMapEspErrToClrErr(err));
+    }
+
     NANOCLR_NOCLEANUP();
 }
 
@@ -91,8 +91,8 @@ HRESULT Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_E
     NativeDisposeSyncManager___VOID(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
-    {
-        RmtDeleteSyncManager();
-    }
+
+    RmtDeleteSyncManager();
+
     NANOCLR_NOCLEANUP_NOLABEL();
 }

@@ -108,11 +108,17 @@ HRESULT Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_E
         uint32_t d;
 
         if (level0IsSpace)
+        {
             d = duration0;
+        }
         else if (level1IsSpace)
+        {
             d = duration1;
+        }
         else
+        {
             d = duration1; // fallback (matches ESP-IDF behavior)
+        }
 
         // Convert duration to bit
         bitIndex = i;
