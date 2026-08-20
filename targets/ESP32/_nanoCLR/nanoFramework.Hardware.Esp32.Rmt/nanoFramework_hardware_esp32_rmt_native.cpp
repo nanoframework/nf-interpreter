@@ -155,6 +155,7 @@ static const CLR_RT_MethodHandler method_lookup[] =
     NULL,
     NULL,
     NULL,
+    NULL,
     Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_Esp32_Rmt_TransmitterEncodedChannel::NativeTxInit___I4,
     Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_Esp32_Rmt_TransmitterEncodedChannel::NativeTxGetIsChannelIdle___BOOLEAN,
     Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_Esp32_Rmt_TransmitterEncodedChannel::NativeTxSetCarrierMode___VOID,
@@ -166,7 +167,7 @@ static const CLR_RT_MethodHandler method_lookup[] =
 const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_nanoFramework_Hardware_Esp32_Rmt =
 {
     "nanoFramework.Hardware.Esp32.Rmt",
-    0x95D05C61,
+    0x84E4A55C,
     method_lookup,
     { 100, 0, 6, 0 }
 };

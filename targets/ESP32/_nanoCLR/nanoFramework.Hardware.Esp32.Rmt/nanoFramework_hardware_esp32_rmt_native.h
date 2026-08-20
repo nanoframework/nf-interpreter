@@ -135,6 +135,7 @@ struct Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_Es
         rmt_symbol_word_t *rmtItem,
         CLR_RT_HeapBlock *returnArray,
         CLR_RT_TypeDef_Index &rmtSymbolTypeDef);
+
 };
 
 struct Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_Esp32_Rmt_ReceiverChannelSettings
@@ -187,8 +188,7 @@ struct Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_Es
 
 struct Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_Esp32_Rmt_RmtUtils
 {
-    NANOCLR_NATIVE_DECLARE(
-        DecodeSymbolArrayToBytes___STATIC__SZARRAY_U1__SZARRAY_nanoFrameworkHardwareEsp32RmtRmtSymbol__I4__BOOLEAN__I4__I4__BOOLEAN);
+    NANOCLR_NATIVE_DECLARE(DecodeSymbolArrayToBytes___STATIC__SZARRAY_U1__SZARRAY_nanoFrameworkHardwareEsp32RmtRmtSymbol__I4__BOOLEAN__I4__I4__BOOLEAN);
 
     //--//
 };
@@ -201,6 +201,13 @@ struct Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_Es
     NANOCLR_NATIVE_DECLARE(NativeCreateSyncManager___VOID__SZARRAY_I4);
     NANOCLR_NATIVE_DECLARE(NativeDisposeSyncManager___VOID);
     NANOCLR_NATIVE_DECLARE(NativeResetSyncManager___VOID);
+
+    //--//
+};
+
+struct Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_Esp32_Rmt_TransmitterChannel
+{
+    static const int FIELD___disposed = 5;
 
     //--//
 };
