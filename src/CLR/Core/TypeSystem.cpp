@@ -2881,7 +2881,7 @@ static const TypeIndexLookup c_TypeIndexLookup[] = {
 
     TIL("System.Device.I2c", "I2cTransferResult", m_I2cTransferResult),
 
-    TIL("nanoFramework.Hardware.Esp32.Rmt", "RmtCommand", m_RmtCommand),
+    TIL("nanoFramework.Hardware.Esp32.Rmt", "RmtSymbol", m_RmtSymbol),
 
 #undef TIL
 };

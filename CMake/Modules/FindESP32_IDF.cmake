@@ -33,9 +33,10 @@ list(APPEND ESP32_IDF_INCLUDE_DIRS ${IDF_PATH_CMAKED}/components/esp_driver_dac/
 list(APPEND ESP32_IDF_INCLUDE_DIRS ${IDF_PATH_CMAKED}/components/esp_driver_ledc/include)
 list(APPEND ESP32_IDF_INCLUDE_DIRS ${IDF_PATH_CMAKED}/components/esp_driver_pcnt/include)
 list(APPEND ESP32_IDF_INCLUDE_DIRS ${IDF_PATH_CMAKED}/components/esp_driver_sdmmc/include)
+list(APPEND ESP32_IDF_INCLUDE_DIRS ${IDF_PATH_CMAKED}/components/esp_driver_rmt/include)
 list(APPEND ESP32_IDF_INCLUDE_DIRS ${IDF_PATH_CMAKED}/components/esp_driver_sdspi/include)
 
-# Use depecated drivers for RMT, I2S etc
+# Use depecated drivers for I2S etc
 list(APPEND ESP32_IDF_INCLUDE_DIRS ${IDF_PATH_CMAKED}/components/driver/deprecated)
 
 # includes specific to ESP32 or ESP32S2 or ESP32S3
