@@ -2046,7 +2046,7 @@ struct CLR_RT_AttributeParser
         static const int c_DefaultConstructor = 4;
 
         int m_mode;
-        CLR_RT_HeapBlock m_value;
+        CLR_RT_HeapBlock m_value{};
         CLR_RT_ProtectFromGC m_valueGC{m_value};
 
         int m_pos;
