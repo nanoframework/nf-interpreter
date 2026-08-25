@@ -2010,8 +2010,6 @@ struct CLR_RT_ProtectFromGC
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-// Developer note: Value::m_valueGC holds a live entry in the CLR_RT_ProtectFromGC chain for this object whole lifetime. 
-// Never memset/memcpy an instance (NANOCLR_CLEAR included) and never give one a lifetime that doesn't nest with the enclosing scope.
 struct CLR_RT_AttributeEnumerator
 {
     CLR_RT_Assembly *m_assm;
@@ -2036,6 +2034,8 @@ struct CLR_RT_AttributeEnumerator
     void Initialize(CLR_RT_Assembly *assm);
 };
 
+// Developer note: Value::m_valueGC holds a live entry in the CLR_RT_ProtectFromGC chain for this object whole lifetime. 
+// Never memset/memcpy an instance (NANOCLR_CLEAR included) and never give one a lifetime that doesn't nest with the enclosing scope.
 struct CLR_RT_AttributeParser
 {
     struct Value
