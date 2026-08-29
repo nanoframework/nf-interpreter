@@ -289,37 +289,39 @@ void DisplayDriver::BitBlt(
 
     g_DisplayInterface.SendCommand(1, Memory_Write);
 
-    uint32_t numPixels = width * height;
     uint32_t count = 0;
 
     CLR_UINT8 *TransferBuffer = Attributes.TransferBuffer;
     CLR_UINT32 TransferBufferSize = Attributes.TransferBufferSize;
 
     // only 18/24 bit is supported on SPI
-    for (uint32_t i = 0; i < numPixels; i++)
-    {
-        uint32_t element = data[i / 2]; // Each uint32 stores 2 pixels
-        uint16_t color = (i % 2 == 0) ? (element & 0xFFFF) : (element >> 16);
-
-        uint8_t b = color & 0x1F;
-        uint8_t g = (color >> 5) & 0x3F;
-        uint8_t r = (color >> 11) & 0x1F;
-
-        b = (b << 3) | (b >> 2);
-        g = (g << 2) | (g >> 4);
-        r = (r << 3) | (r >> 2);
-
-        TransferBuffer[count++] = b;
-        TransferBuffer[count++] = g;
-        TransferBuffer[count++] = r;
-
-        // can't fit another 3 bytes
-        if (count + 3 > TransferBufferSize - 1)
+    for (uint32_t y = srcY; y < srcY + height; y++)
+        for (uint32_t x = srcX; x < srcX + width; x++)
         {
-            g_DisplayInterface.SendBytes(TransferBuffer, count);
-            count = 0;
+            uint32_t i = y * Attributes.Width + x;
+
+            uint32_t element = data[i / 2]; // Each uint32 stores 2 pixels
+            uint16_t color = (i % 2 == 0) ? (element & 0xFFFF) : (element >> 16);
+
+            uint8_t b = color & 0x1F;
+            uint8_t g = (color >> 5) & 0x3F;
+            uint8_t r = (color >> 11) & 0x1F;
+
+            b = (b << 3) | (b >> 2);
+            g = (g << 2) | (g >> 4);
+            r = (r << 3) | (r >> 2);
+
+            TransferBuffer[count++] = r;
+            TransferBuffer[count++] = g;
+            TransferBuffer[count++] = b;
+
+            // can't fit another 3 bytes
+            if (count + 3 > TransferBufferSize - 1)
+            {
+                g_DisplayInterface.SendBytes(TransferBuffer, count);
+                count = 0;
+            }
         }
-    }
     g_DisplayInterface.SendBytes(TransferBuffer, count);
     return;
 }
