@@ -1968,6 +1968,46 @@ struct CLR_RT_MethodDef_Instance : public CLR_RT_MethodDef_Index
 #endif // #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
 };
 
+////////////////////////////////////////////////////////////////////////////////
+
+struct CLR_RT_ProtectFromGC
+{
+    static const CLR_UINT32 c_Generic = 0x00000001;
+    static const CLR_UINT32 c_HeapBlock = 0x00000002;
+    static const CLR_UINT32 c_ResetKeepAlive = 0x00000004;
+
+    typedef void (*Callback)(void *state);
+
+    static CLR_RT_ProtectFromGC *s_first;
+
+    CLR_RT_ProtectFromGC *m_next;
+    void **m_data;
+    Callback m_fpn;
+    CLR_UINT32 m_flags;
+
+    CLR_RT_ProtectFromGC(CLR_RT_HeapBlock &ref)
+    {
+        Initialize(ref);
+    }
+    CLR_RT_ProtectFromGC(void **data, Callback fpn)
+    {
+        Initialize(data, fpn);
+    }
+    ~CLR_RT_ProtectFromGC()
+    {
+        Cleanup();
+    }
+
+    static void InvokeAll();
+
+  private:
+    void Initialize(CLR_RT_HeapBlock &ref);
+    void Initialize(void **data, Callback fpn);
+    void Cleanup();
+
+    void Invoke();
+};
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 struct CLR_RT_AttributeEnumerator
@@ -1994,6 +2034,9 @@ struct CLR_RT_AttributeEnumerator
     void Initialize(CLR_RT_Assembly *assm);
 };
 
+// Developer note: Value::m_valueGC holds a live entry in the CLR_RT_ProtectFromGC chain for this object whole lifetime.
+// Never memset/memcpy an instance (NANOCLR_CLEAR included) and never give one a lifetime that doesn't nest with the
+// enclosing scope.
 struct CLR_RT_AttributeParser
 {
     struct Value
@@ -2004,10 +2047,23 @@ struct CLR_RT_AttributeParser
         static const int c_DefaultConstructor = 4;
 
         int m_mode;
-        CLR_RT_HeapBlock m_value;
+        CLR_RT_HeapBlock m_value{};
+        CLR_RT_ProtectFromGC m_valueGC{m_value};
 
         int m_pos;
         const char *m_name;
+
+        //--//
+
+        Value() = default; // Explicitly request default constructor
+
+        // Prevent copying because shallow copies of CLR_RT_ProtectFromGC
+        // can corrupt the GC protection list during destruction.
+
+        // Delete copy constructor
+        Value(const Value &) = delete;
+        // Delete copy-assignment operator
+        Value &operator=(const Value &) = delete;
     };
 
     //--//
@@ -2508,46 +2564,6 @@ CT_ASSERT(
 #endif
 
 #endif // _MSC_VER
-
-////////////////////////////////////////////////////////////////////////////////
-
-struct CLR_RT_ProtectFromGC
-{
-    static const CLR_UINT32 c_Generic = 0x00000001;
-    static const CLR_UINT32 c_HeapBlock = 0x00000002;
-    static const CLR_UINT32 c_ResetKeepAlive = 0x00000004;
-
-    typedef void (*Callback)(void *state);
-
-    static CLR_RT_ProtectFromGC *s_first;
-
-    CLR_RT_ProtectFromGC *m_next;
-    void **m_data;
-    Callback m_fpn;
-    CLR_UINT32 m_flags;
-
-    CLR_RT_ProtectFromGC(CLR_RT_HeapBlock &ref)
-    {
-        Initialize(ref);
-    }
-    CLR_RT_ProtectFromGC(void **data, Callback fpn)
-    {
-        Initialize(data, fpn);
-    }
-    ~CLR_RT_ProtectFromGC()
-    {
-        Cleanup();
-    }
-
-    static void InvokeAll();
-
-  private:
-    void Initialize(CLR_RT_HeapBlock &ref);
-    void Initialize(void **data, Callback fpn);
-    void Cleanup();
-
-    void Invoke();
-};
 
 ////////////////////////////////////////
 
