@@ -21,7 +21,7 @@
 #endif
 
 // need to declare the Receiver thread here
-osThreadDef(ReceiverThread, osPriorityHigh, 2048, "ReceiverThread");
+osThreadDef(ReceiverThread, osPriorityHigh, 4096, "ReceiverThread");
 // declare CLRStartup thread here
 // 8192 bytes: software TLS on Cortex-M33 (mbedTLS bignum on top of CLR interpreter stack)
 // and WiFi background processing needs significant headroom.

@@ -316,7 +316,7 @@ function(nf_generate_hex_package file1 file2 outputfilename)
 endfunction()
 
 # generates a binary file with nanoBooter + nanoCLR at the proper addresses
-# ready to be drag & drop on targets that feature DAPLink 
+# ready to be drag & drop on targets that feature DAPLink
 function(nf_generate_bin_package file1 file2 offset outputfilename)
 
     add_custom_command(
