@@ -2752,7 +2752,12 @@ void CLR_RT_HeapBlock::Relocate_Obj()
 void CLR_RT_HeapBlock::Relocate_Cls()
 {
     NATIVE_PROFILE_CLR_CORE();
-    CLR_RT_GarbageCollector::Heap_Relocate((void **)&m_data.objectHeader.lock);
+
+    // a generic instance keeps a TypeSpec in that word, not a pointer: see CLAUDE.md "Object header aliasing"
+    if (HasObjectLockSlot())
+    {
+        CLR_RT_GarbageCollector::Heap_Relocate((void **)&m_data.objectHeader.lock);
+    }
 
     CLR_RT_GarbageCollector::Heap_Relocate(this + 1, DataSize() - 1);
 }

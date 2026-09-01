@@ -749,6 +749,13 @@ struct CLR_RT_HeapBlock
 
         CLR_RT_ReflectionDef_Index reflection;
 
+        // same word except on LP64, where the pointer aligns to 8: see CLAUDE.md "Object header aliasing"
+#if !defined(__LP64__)
+        CT_ASSERT_UNIQUE_NAME(
+            offsetof(ObjectHeader, lock) == offsetof(CLR_RT_ReflectionDef_Index, data),
+            objectHeaderLockAliasesReflectionData)
+#endif
+
         //--//
 
         struct BinaryBlob
@@ -1105,6 +1112,14 @@ struct CLR_RT_HeapBlock
         return ((DataFlags() & CLR_RT_HeapBlock::HB_GenericInstance) == CLR_RT_HeapBlock::HB_GenericInstance);
     }
 
+    // m_data.objectHeader.lock aliases m_data.reflection.data.typeSpec: see CLAUDE.md "Object header aliasing"
+    bool HasObjectLockSlot() const
+    {
+        const NanoCLRDataType dt = DataType();
+
+        return (dt == DATATYPE_CLASS || dt == DATATYPE_VALUETYPE) && !IsAGenericInstance();
+    }
+
     bool SameHeader(const CLR_RT_HeapBlock &right) const
     {
         return this->m_data.numeric.u8 == right.m_data.numeric.u8;
@@ -1195,11 +1210,14 @@ struct CLR_RT_HeapBlock
     }
     CLR_RT_HeapBlock_Lock *ObjectLock() const
     {
-        return m_data.objectHeader.lock;
+        return HasObjectLockSlot() ? m_data.objectHeader.lock : nullptr;
     }
     void SetObjectLock(CLR_RT_HeapBlock_Lock *lock)
     {
-        m_data.objectHeader.lock = lock;
+        if (HasObjectLockSlot())
+        {
+            m_data.objectHeader.lock = lock;
+        }
     }
 
     HRESULT SetObjectCls(const CLR_RT_TypeDef_Index &cls);

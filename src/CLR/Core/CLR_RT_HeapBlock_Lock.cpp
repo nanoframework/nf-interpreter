@@ -42,17 +42,8 @@ HRESULT CLR_RT_HeapBlock_Lock::CreateInstance(
 
         if (ptr)
         {
-            switch (ptr->DataType())
-            {
-                case DATATYPE_VALUETYPE:
-                case DATATYPE_CLASS:
-                    ptr->SetObjectLock(lock);
-                    break;
-
-                default:
-                    // the remaining data types aren't to be handled
-                    break;
-            }
+            // no-op for blocks without a header lock slot: see CLAUDE.md "Object header aliasing"
+            ptr->SetObjectLock(lock);
         }
     }
 
@@ -134,17 +125,8 @@ void CLR_RT_HeapBlock_Lock::ChangeOwner()
 
         if (ptr)
         {
-            switch (ptr->DataType())
-            {
-                case DATATYPE_VALUETYPE:
-                case DATATYPE_CLASS:
-                    ptr->SetObjectLock(nullptr);
-                    break;
-
-                default:
-                    // the remaining data types aren't to be handled
-                    break;
-            }
+            // no-op for blocks without a header lock slot: see CLAUDE.md "Object header aliasing"
+            ptr->SetObjectLock(nullptr);
         }
     }
 
