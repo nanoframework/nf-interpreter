@@ -496,7 +496,7 @@ they're not generics-related.
 `CLR_RT_HeapBlock::m_data` is a union, and two of its members overlap
 exactly:
 
-```
+```text
 m_data byte offset:      0    1    2    3  |  4    5    6    7
                        --------------------+--------------------
 objectHeader           [    cls (4B)      ] | [   lock (ptr)   ]
