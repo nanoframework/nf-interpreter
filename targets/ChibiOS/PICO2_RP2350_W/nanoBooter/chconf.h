@@ -41,6 +41,16 @@
 #endif
 
 /**
+ * @brief   Runtime Faults Collection Unit.
+ * @details If enabled then detected runtime faults are collected and made
+ *          available to the application.
+ * @note    The default is @p TRUE.
+ */
+#if !defined(CH_CFG_USE_RFCU)
+#define CH_CFG_USE_RFCU                     TRUE
+#endif
+
+/**
  * @brief   Kernel hardening level.
  * @details This option is the level of functional-safety checks enabled
  *          in the kerkel. The meaning is:
