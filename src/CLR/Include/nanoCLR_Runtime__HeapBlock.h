@@ -749,6 +749,11 @@ struct CLR_RT_HeapBlock
 
         CLR_RT_ReflectionDef_Index reflection;
 
+        // this overlap is relied upon and must not change: see CLAUDE.md "Object header aliasing"
+        CT_ASSERT_UNIQUE_NAME(
+            offsetof(ObjectHeader, lock) == offsetof(CLR_RT_ReflectionDef_Index, data),
+            objectHeaderLockAliasesReflectionData)
+
         //--//
 
         struct BinaryBlob
@@ -1105,6 +1110,14 @@ struct CLR_RT_HeapBlock
         return ((DataFlags() & CLR_RT_HeapBlock::HB_GenericInstance) == CLR_RT_HeapBlock::HB_GenericInstance);
     }
 
+    // m_data.objectHeader.lock aliases m_data.reflection.data.typeSpec: see CLAUDE.md "Object header aliasing"
+    bool HasObjectLockSlot() const
+    {
+        const NanoCLRDataType dt = DataType();
+
+        return (dt == DATATYPE_CLASS || dt == DATATYPE_VALUETYPE) && !IsAGenericInstance();
+    }
+
     bool SameHeader(const CLR_RT_HeapBlock &right) const
     {
         return this->m_data.numeric.u8 == right.m_data.numeric.u8;
@@ -1195,11 +1208,14 @@ struct CLR_RT_HeapBlock
     }
     CLR_RT_HeapBlock_Lock *ObjectLock() const
     {
-        return m_data.objectHeader.lock;
+        return HasObjectLockSlot() ? m_data.objectHeader.lock : nullptr;
     }
     void SetObjectLock(CLR_RT_HeapBlock_Lock *lock)
     {
-        m_data.objectHeader.lock = lock;
+        if (HasObjectLockSlot())
+        {
+            m_data.objectHeader.lock = lock;
+        }
     }
 
     HRESULT SetObjectCls(const CLR_RT_TypeDef_Index &cls);
