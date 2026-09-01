@@ -8,6 +8,7 @@
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
+#include <type_traits>
 #include <nanoCLR_Types.h>
 #include <nanoCLR_Interop.h>
 #include <nanoCLR_ErrorCodes.h>
@@ -517,9 +518,9 @@ struct CLR_RT_Memory
 
     template <typename T> static void Clear(T &ref)
     {
-        // A type with a non-trivial destructor owns something that has to be released (for example
-        // an entry in the CLR_RT_ProtectFromGC chain). Zero-filling it silently orphans that.
-        static_assert(__is_trivially_destructible(T), "NANOCLR_CLEAR on a type that owns resources");
+        // A type with a non-trivial destructor owns something that has to be released
+        // for example, an entry in the CLR_RT_ProtectFromGC chain on which zero-filling it silently orphans that.
+        static_assert(std::is_trivially_destructible<T>::value, "NANOCLR_CLEAR on a type that owns resources");
 
         ZeroFill(&ref, sizeof(T));
     }
