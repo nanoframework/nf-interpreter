@@ -503,12 +503,29 @@ objectHeader           [    cls (4B)      ] | [   lock (ptr)   ]
 reflection             [kind(2)][levels(2)] | [ data.typeSpec  ]
 ```
 
-`objectHeader.lock` and `reflection.data.typeSpec` are the *same word*.
-The pointer is not padded up to an 8-byte boundary because the whole
-runtime header compiles inside `#pragma pack(push, ..., 4)`
-(`nanoCLR_Runtime.h`). On 32-bit targets the overlap is total; on Win64
-`typeSpec` is the low dword of the 8-byte `lock`, with the high dword left
-zero by `HB_InitializeToZero`.
+`reflection.data` is always at offset 4. Where `lock` lands depends on
+pointer size and packing, and follows the same three cases already spelled
+out by `CLR_RT_HeapBlock_Raw` at the top of the header:
+
+- **32-bit targets** (ARM/Xtensa/RISC-V) — pointer is 4 bytes, so `lock` is
+  at offset 4. The overlap is total.
+- **MSVC, including `_WIN64`** — the runtime headers compile inside
+  `#pragma pack(push, ..., 4)` (`nanoCLR_Runtime.h`), so the 8-byte pointer
+  is not padded up and still starts at offset 4. `typeSpec` is its low
+  dword; the high dword is left zero by `HB_InitializeToZero`, which is why
+  a stored TypeSpec reads back as a small value such as `0x0000000001000002`.
+- **`__LP64__`** (macOS/Linux, `targets/posix`) — that pack pragma is
+  `#if defined(_MSC_VER)` only, so the pointer aligns naturally to 8 and
+  `lock` sits at offset 8. **The two do not overlap here.**
+
+Two consequences. The bug does not reproduce on the 64-bit POSIX build, so
+do not use that target to verify a change in this area. And the `CT_ASSERT`
+pinning the overlap is guarded with `#if !defined(__LP64__)` — without the
+guard it fails the posix build, which is a real signal, not a nuisance.
+
+`HasObjectLockSlot()` is correct on all three: on LP64 it simply routes
+generic instances through the thread-list lookup they would not strictly
+need there.
 
 `SetGenericInstanceType` writes the closed TypeSpec into that word for
 every generic instance, immediately after `SetObjectCls` has set

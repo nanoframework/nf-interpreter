@@ -749,10 +749,12 @@ struct CLR_RT_HeapBlock
 
         CLR_RT_ReflectionDef_Index reflection;
 
-        // this overlap is relied upon and must not change: see CLAUDE.md "Object header aliasing"
+        // same word except on LP64, where the pointer aligns to 8: see CLAUDE.md "Object header aliasing"
+#if !defined(__LP64__)
         CT_ASSERT_UNIQUE_NAME(
             offsetof(ObjectHeader, lock) == offsetof(CLR_RT_ReflectionDef_Index, data),
             objectHeaderLockAliasesReflectionData)
+#endif
 
         //--//
 
