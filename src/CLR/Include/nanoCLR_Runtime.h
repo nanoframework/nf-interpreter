@@ -8,6 +8,7 @@
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
+#include <type_traits>
 #include <nanoCLR_Types.h>
 #include <nanoCLR_Interop.h>
 #include <nanoCLR_ErrorCodes.h>
@@ -515,6 +516,15 @@ struct CLR_RT_Memory
         memset(buf, 0, len);
     }
 
+    template <typename T> static void Clear(T &ref)
+    {
+        // A type with a non-trivial destructor owns something that has to be released
+        // for example, an entry in the CLR_RT_ProtectFromGC chain on which zero-filling it silently orphans that.
+        static_assert(std::is_trivially_destructible<T>::value, "NANOCLR_CLEAR on a type that owns resources");
+
+        ZeroFill(&ref, sizeof(T));
+    }
+
     //--//
 
     static void Reset();
@@ -551,7 +561,7 @@ extern void CLR_RT_GetVersion(
     unsigned short int *pBuild,
     unsigned short int *pRevision);
 
-#define NANOCLR_CLEAR(ref) CLR_RT_Memory::ZeroFill(&ref, sizeof(ref))
+#define NANOCLR_CLEAR(ref) CLR_RT_Memory::Clear(ref)
 
 //--//
 
@@ -2005,6 +2015,10 @@ struct CLR_RT_ProtectFromGC
     void Initialize(void **data, Callback fpn);
     void Cleanup();
 
+    // Cold recovery path for Cleanup(), kept out of line so that it isn't inlined into every
+    // destruction site.
+    NANOCLR_NOINLINE void UnlinkOutOfOrder();
+
     void Invoke();
 };
 
@@ -2047,6 +2061,8 @@ struct CLR_RT_AttributeParser
         static const int c_DefaultConstructor = 4;
 
         int m_mode;
+        // Declaration order below is load-bearing: CLR_RT_ProtectFromGC's constructor reads
+        // m_value.IsForcedAlive(), so m_value has to be declared -- and zeroed -- before m_valueGC.
         CLR_RT_HeapBlock m_value{};
         CLR_RT_ProtectFromGC m_valueGC{m_value};
 
@@ -2055,7 +2071,11 @@ struct CLR_RT_AttributeParser
 
         //--//
 
-        Value() = default; // Explicitly request default constructor
+        // Required, not decorative: declaring the deleted copy constructor below suppresses the
+        // implicit default constructor. It also has to stay defaulted *here*, in the class body --
+        // an out of line "= default" would make it user provided, which drops the zero
+        // initialization that m_valueGC's constructor depends on.
+        Value() = default;
 
         // Prevent copying because shallow copies of CLR_RT_ProtectFromGC
         // can corrupt the GC protection list during destruction.
@@ -2064,6 +2084,11 @@ struct CLR_RT_AttributeParser
         Value(const Value &) = delete;
         // Delete copy-assignment operator
         Value &operator=(const Value &) = delete;
+
+        // Stack only: the CLR_RT_ProtectFromGC entry is released by popping the chain, not by
+        // searching it, so this object's lifetime has to nest with the enclosing scope.
+        static void *operator new(size_t) = delete;
+        static void *operator new[](size_t) = delete;
     };
 
     //--//
@@ -2095,6 +2120,11 @@ struct CLR_RT_AttributeParser
         const CLR_RT_TypeDef_Index *m_cls,
         const CLR_UINT32 size);
     HRESULT ReadString(CLR_RT_HeapBlock *&value);
+
+    // Stack only, for the same reason as CLR_RT_AttributeParser::Value above: this owns the
+    // registration through m_lastValue.
+    static void *operator new(size_t) = delete;
+    static void *operator new[](size_t) = delete;
 
   private:
     const char *GetString();
