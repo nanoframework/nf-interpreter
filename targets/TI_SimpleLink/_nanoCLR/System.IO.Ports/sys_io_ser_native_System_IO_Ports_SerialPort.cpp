@@ -163,19 +163,19 @@ void SerialRxTask(UArg a0, UArg a1)
                     Events_Set(SYSTEM_EVENT_FLAG_COM_IN);
                 }
             }
-            else if (palUart->NewLineChar > 0 && input == palUart->NewLineChar)
-            {
-                // fire event for new line char found
-                Events_Set(SYSTEM_EVENT_FLAG_COM_IN);
-            }
             else
             {
-                // no read operation ongoing, so fire an event, if the available bytes are above the
-                // threshold
+                // no synchronous read pending: wake up a blocked ReadLine(), if the new line char was received
+                if (palUart->NewLineChar > 0 && input == palUart->NewLineChar)
+                {
+                    Events_Set(SYSTEM_EVENT_FLAG_COM_IN);
+                }
+
+                // fire an event for DataReceived, if the available bytes are at/above the threshold
                 if (palUart->RxRingBuffer.Length() >= palUart->ReceivedBytesThreshold)
                 {
-                    // post a managed event with the port index and event code (check if this is the watch char or just
-                    // another another)
+                    // post a managed event with the port index and event code (check if this is the watch char or
+                    // just another)
                     PostManagedEvent(
                         EVENT_SERIAL,
                         0,
@@ -488,7 +488,7 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::ReadLine___STRING(
     {
         // check if there is a full line available to read
         GLOBAL_LOCK();
-        newLineFound = GetLineFromRxBuffer(pThis, &(palUart->RxRingBuffer), line;
+        newLineFound = GetLineFromRxBuffer(pThis, &(palUart->RxRingBuffer), line);
         GLOBAL_UNLOCK();
 
         if (newLineFound)
@@ -523,9 +523,6 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::ReadLine___STRING(
         // wait for event
         NANOCLR_CHECK_HRESULT(
             g_CLR_RT_ExecutionEngine.WaitEvents(stack.m_owningThread, *timeoutTicks, Event_SerialPortIn, eventResult));
-
-        // clear the new line watch char
-        palUart->NewLineChar = 0;
 
         if (eventResult)
         {
@@ -730,6 +727,8 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeInit___VOID(
         uint8_t uartNum;
         int32_t bufferSize;
         uint8_t watchChar;
+        int32_t receivedBytesThreshold;
+        const char *newLine;
 
         // get a pointer to the managed object instance and check that it's not nullptr
         CLR_RT_HeapBlock *pThis = stack.This();
@@ -782,8 +781,26 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeInit___VOID(
         {
             palUart->WatchChar = watchChar;
         }
-        // all the rest
+
+        // get received bytes threshold
+        // managed setter guarantees > 0 once explicitly set; a native value of 0 only happens if it was never set
+        receivedBytesThreshold = pThis[FIELD___receivedBytesThreshold].NumericByRef().s4;
+        palUart->ReceivedBytesThreshold = (receivedBytesThreshold > 0) ? (uint32_t)receivedBytesThreshold : 1;
+
+        // get "new line" and cache its last character, mirroring WatchChar
         palUart->NewLineChar = 0;
+        newLine = pThis[FIELD___newLine].RecoverString();
+        if (newLine != NULL)
+        {
+            uint32_t newLineLength = hal_strlen_s(newLine);
+
+            if (newLineLength > 0)
+            {
+                palUart->NewLineChar = newLine[newLineLength - 1];
+            }
+        }
+
+        // all the rest
         palUart->RxBytesToRead = 0;
         palUart->TxOngoingCount = 0;
     }

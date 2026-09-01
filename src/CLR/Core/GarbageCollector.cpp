@@ -41,10 +41,38 @@ void CLR_RT_ProtectFromGC::Initialize(void **data, Callback fpn)
     m_flags = c_Generic;
 }
 
+void CLR_RT_ProtectFromGC::UnlinkOutOfOrder()
+{
+    NATIVE_PROFILE_CLR_CORE();
+
+    for (CLR_RT_ProtectFromGC **slot = &s_first; *slot != NULL; slot = &(*slot)->m_next)
+    {
+        if (*slot == this)
+        {
+            *slot = m_next;
+            break;
+        }
+    }
+}
+
 void CLR_RT_ProtectFromGC::Cleanup()
 {
     NATIVE_PROFILE_CLR_CORE();
-    s_first = m_next;
+
+    if (s_first == this)
+    {
+        // LIFO fast path: instances are stack scoped and nest, so this is a pop.
+        s_first = m_next;
+    }
+    else
+    {
+        // Destroyed out of order. Popping here would drop every outer registration and let the GC
+        // collect objects that are still live, so recover in all builds -- but this is a bug, not a
+        // supported case: it means an instance escaped its scope.
+        _ASSERTE(false);
+
+        UnlinkOutOfOrder();
+    }
 
     if (m_flags & c_ResetKeepAlive)
     {

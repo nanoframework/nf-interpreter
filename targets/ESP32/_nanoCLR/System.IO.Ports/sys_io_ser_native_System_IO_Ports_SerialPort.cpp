@@ -211,31 +211,34 @@ void uart_event_task_sys(void *pvParameters)
                                 Events_Set(SYSTEM_EVENT_FLAG_COM_IN);
                             }
                         }
-                        else if (palUart->NewLineChar > 0)
-                        {
-                            // try to find the new line char we're waiting for
-                            do
-                            {
-                                if (buffer[readCount - 1] == palUart->NewLineChar)
-                                {
-                                    // fire event for new line char found
-                                    Events_Set(SYSTEM_EVENT_FLAG_COM_IN);
-
-                                    // done here
-                                    break;
-                                }
-                            } while (--readCount >= 0);
-                        }
                         else
                         {
-                            // no read operation ongoing, so fire an event, if the available bytes are above the
-                            // threshold
+                            // no synchronous read pending: wake up a blocked ReadLine(), if the new line char
+                            // was received in this chunk
+                            if (palUart->NewLineChar > 0 && readCount > 0)
+                            {
+                                int32_t newLineSearchIndex = readCount;
+
+                                do
+                                {
+                                    if (buffer[newLineSearchIndex - 1] == palUart->NewLineChar)
+                                    {
+                                        // fire event for new line char found
+                                        Events_Set(SYSTEM_EVENT_FLAG_COM_IN);
+
+                                        // done here
+                                        break;
+                                    }
+                                } while (--newLineSearchIndex >= 0);
+                            }
+
+                            // fire an event for DataReceived, if the available bytes are at/above the threshold
                             if (palUart->RxRingBuffer.Length() >= palUart->ReceivedBytesThreshold)
                             {
-                                // post a managed event with the port index and event code (check if there is a watch
-                                // char in the buffer or just any char)
-                                // TODO: check if callbacks are registered so this is called only if there is anyone
-                                // listening otherwise don't bother
+                                // post a managed event with the port index and event code (check if there is a
+                                // watch char in the buffer or just any char)
+                                // TODO: check if callbacks are registered so this is called only if there is
+                                // anyone listening otherwise don't bother
                                 PostManagedEvent(
                                     EVENT_SERIAL,
                                     0,
@@ -665,9 +668,6 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::ReadLine___STRING(
         NANOCLR_CHECK_HRESULT(
             g_CLR_RT_ExecutionEngine.WaitEvents(stack.m_owningThread, *timeoutTicks, Event_SerialPortIn, eventResult));
 
-        // clear the new line watch char
-        palUart->NewLineChar = 0;
-
         if (eventResult)
         {
             GLOBAL_LOCK();
@@ -880,6 +880,8 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeInit___VOID(
     esp_err_t esp_err;
     int32_t bufferSize;
     uint8_t watchChar;
+    int32_t receivedBytesThreshold;
+    const char *newLine;
 
     NF_PAL_UART *palUart;
 
@@ -940,7 +942,6 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeInit___VOID(
     palUart->UartNum = uart_num;
     palUart->TxOngoingCount = 0;
     palUart->RxBytesToRead = 0;
-    palUart->NewLineChar = 0;
 
     // Install driver
     esp_err = uart_driver_install(
@@ -971,6 +972,24 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeInit___VOID(
         uart_enable_pattern_det_baud_intr(uart_num, watchChar, 1, 9, 0, 00);
         // Reset the pattern queue length to record at most 10 pattern positions.
         uart_pattern_queue_reset(uart_num, 10);
+    }
+
+    // get received bytes threshold
+    // managed setter guarantees > 0 once explicitly set; a native value of 0 only happens if it was never set
+    receivedBytesThreshold = pThis[FIELD___receivedBytesThreshold].NumericByRef().s4;
+    palUart->ReceivedBytesThreshold = (receivedBytesThreshold > 0) ? (uint32_t)receivedBytesThreshold : 1;
+
+    // get "new line" and cache its last character, mirroring WatchChar
+    palUart->NewLineChar = 0;
+    newLine = pThis[FIELD___newLine].RecoverString();
+    if (newLine != NULL)
+    {
+        uint32_t newLineLength = hal_strlen_s(newLine);
+
+        if (newLineLength > 0)
+        {
+            palUart->NewLineChar = newLine[newLineLength - 1];
+        }
     }
 
     // Create a task to handle UART event from ISR

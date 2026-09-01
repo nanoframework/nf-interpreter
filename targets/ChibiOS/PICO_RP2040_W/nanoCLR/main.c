@@ -17,7 +17,7 @@
 #include <targetPAL.h>
 
 // need to declare the Receiver thread here
-osThreadDef(ReceiverThread, osPriorityHigh, 2048, "ReceiverThread");
+osThreadDef(ReceiverThread, osPriorityHigh, 4096, "ReceiverThread");
 // declare CLRStartup thread here
 // 8192 bytes: software TLS on Cortex-M0+ (no hardware crypto) needs ~4KB
 // for mbedTLS bignum operations, on top of the CLR interpreter stack.

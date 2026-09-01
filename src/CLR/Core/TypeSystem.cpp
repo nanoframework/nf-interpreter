@@ -5670,7 +5670,7 @@ static const TypeIndexLookup c_TypeIndexLookup[] = {
     TIL("System.Security.Cryptography",             "CryptographicException",           CryptographicException),
     TIL("System.Device.I2c",                        "I2cTransferResult",                I2cTransferResult),
 
-    TIL("nanoFramework.Hardware.Esp32.Rmt",         "RmtCommand",                       RmtCommand),
+    TIL("nanoFramework.Hardware.Esp32.Rmt",         "RmtSymbol",                        RmtSymbol),
 
 #undef TIL
 };

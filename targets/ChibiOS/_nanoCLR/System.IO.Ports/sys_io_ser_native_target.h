@@ -124,7 +124,6 @@ void ConfigPins_UART8();
         Uart##num##_PAL.RxBytesToRead = 0;                                                                             \
         Uart##num##_PAL.WatchChar = 0;                                                                                 \
         Uart##num##_PAL.NewLineChar = 0;                                                                               \
-        Uart##num##_PAL.ReceivedBytesThreshold = 1;                                                                    \
         Uart##num##_PAL.SignalLevelsInverted = false;                                                                  \
     }
 
