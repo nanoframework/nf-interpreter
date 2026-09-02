@@ -6,10 +6,17 @@
 // This file includes the platform and board specific Network Intialisation
 
 #include <nanoHAL.h>
+#include <nanoCLR_Types.h>
 
 #if defined(RP2040) || defined(RP2350)
-extern "C" {
+extern "C"
+{
 #include <nf_lwipthread_wifi.h>
+}
+#elif defined(TARGET_HAS_WIFI_ISM43362)
+extern "C"
+{
+#include <wifi.h>
 }
 #else
 #include <nf_lwipthread.h>
@@ -18,8 +25,10 @@ extern "C" {
 // this is the declaration for the callback implement in nf_sys_arch.c
 extern "C" void set_signal_sock_function(void (*funcPtr)());
 
+#if !defined(TARGET_HAS_WIFI_ISM43362)
 // buffer with host name
 static char hostName[18] = "nanodevice_";
+#endif
 
 //
 // Callback from lwIP on event
@@ -31,8 +40,11 @@ void sys_signal_sock_event()
 
 void nanoHAL_Network_Initialize()
 {
-    // Initialise the lwIP CLR signal callback
+#if !defined(TARGET_HAS_WIFI_ISM43362)
+    // Initialise the lwIP CLR signal callback (not used by the ISM43362 socket-proxy layer,
+    // which doesn't go through lwIP's socket/netif event signaling at all)
     set_signal_sock_function(&sys_signal_sock_event);
+#endif
 
     // get network configuration, if available
     if (g_TargetConfiguration.NetworkInterfaceConfigs->Count == 0)
@@ -40,6 +52,19 @@ void nanoHAL_Network_Initialize()
         // there is no networking configuration block, can't proceed
         return;
     }
+
+#if defined(TARGET_HAS_WIFI_ISM43362)
+
+    // the ES-WIFI module runs its own onboard TCP/IP stack and is only ever driven through its
+    // socket-oriented AT command set, so there's no lwIP netif/thread to start here - just bring
+    // up the module itself; joining a network happens later via Network_Interface_Start_Connect()
+    WIFI_Status_t initStatus = WIFI_Init();
+    if (initStatus != WIFI_STATUS_OK)
+    {
+        CLR_Debug::Printf("[ISM43362] WIFI_Init() failed with status %d\r\n", (int)initStatus);
+    }
+
+#else
 
     HAL_Configuration_NetworkInterface networkConfig;
 
@@ -121,6 +146,8 @@ void nanoHAL_Network_Initialize()
         }
 #endif
     }
+
+#endif // defined(TARGET_HAS_WIFI_ISM43362)
 }
 
 void nanoHAL_Network_Uninitialize()

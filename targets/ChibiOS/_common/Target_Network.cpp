@@ -9,8 +9,14 @@
 #include <lwip/dns.h>
 
 #if defined(RP2040) || defined(RP2350)
-extern "C" {
+extern "C"
+{
 #include <nf_lwipthread_wifi.h>
+}
+#elif defined(TARGET_HAS_WIFI_ISM43362)
+extern "C"
+{
+#include <wifi.h>
 }
 #else
 extern "C" struct netif *nf_getNetif();
@@ -46,6 +52,12 @@ int Network_Interface_Open(int index)
     {
         case 0:
         {
+#if defined(TARGET_HAS_WIFI_ISM43362)
+            // the ES-WIFI module runs its own onboard TCP/IP stack and doesn't expose a raw
+            // MAC/link-layer interface, so there's no lwIP netif to hand back here - this is
+            // the only network interface on this board, so its index is always 0
+            return 0;
+#else
             // Open the network interface and set its config
             // TODO / FIXME
 
@@ -55,6 +67,7 @@ int Network_Interface_Open(int index)
             // For now get the Netif number form original Chibios binding code
             struct netif *nptr = nf_getNetif();
             return nptr->num;
+#endif
         }
         break;
     }
@@ -68,6 +81,8 @@ bool Network_Interface_Close(int index)
         case 0:
 #if defined(RP2040) || defined(RP2350)
             cyw43_wifi_disconnect();
+#elif defined(TARGET_HAS_WIFI_ISM43362)
+            WIFI_Disconnect();
 #else
             macStop(&ETHD1);
 #endif
@@ -100,8 +115,6 @@ int Network_Interface_Start_Connect(int index, const char *ssid, const char *pas
 
 int Network_Interface_Connect_Result(int configIndex)
 {
-    (void)configIndex;
-
     if (!cyw43_wifi_is_connected())
         return -1;
 
@@ -114,8 +127,12 @@ int Network_Interface_Connect_Result(int configIndex)
     if (g_TargetConfiguration.NetworkInterfaceConfigs != NULL &&
         g_TargetConfiguration.NetworkInterfaceConfigs->Count > 0)
     {
-        HAL_Configuration_NetworkInterface *cfg =
-            g_TargetConfiguration.NetworkInterfaceConfigs->Configs[0];
+        if (configIndex < 0 || (uint32_t)configIndex >= g_TargetConfiguration.NetworkInterfaceConfigs->Count)
+        {
+            return -1;
+        }
+
+        HAL_Configuration_NetworkInterface *cfg = g_TargetConfiguration.NetworkInterfaceConfigs->Configs[configIndex];
 
         struct netif *nif = nf_getNetif();
         if (nif != NULL)
@@ -139,6 +156,115 @@ int Network_Interface_Start_Scan(int index)
     (void)index;
 
     cyw43_wifi_scan_start();
+    return 0;
+}
+
+#elif defined(TARGET_HAS_WIFI_ISM43362)
+
+// The ES-WIFI module has its own onboard TCP/IP stack and is only ever driven through its
+// socket-oriented AT command set (see targets/ChibiOS/_WiFi/inventek), so there's no lwIP netif
+// backing this interface - IP configuration is read directly from the module and copied into the
+// in-memory config block, and connection lifecycle maps straight onto the WIFI_* driver API.
+
+// implemented in targets/ChibiOS/_WiFi/inventek/sntp_ism43362.cpp
+extern "C" void Ism43362_Sntp_TriggerAutoSync();
+
+// Guards against spawning more than one auto-sync thread for the same connection - set once
+// Network_Interface_Connect_Result() has confirmed a real IP address, cleared again on disconnect
+// so a future reconnect can trigger a fresh sync.
+static bool s_sntpAutoSyncTriggered = false;
+
+int Network_Interface_Disconnect(int index)
+{
+    (void)index;
+
+    s_sntpAutoSyncTriggered = false;
+
+    return WIFI_Disconnect() == WIFI_STATUS_OK ? 0 : -1;
+}
+
+int Network_Interface_Start_Connect(int index, const char *ssid, const char *passphrase, int options)
+{
+    (void)index;
+    (void)options;
+
+    WIFI_Ecn_t ecn = (passphrase != NULL && passphrase[0] != '\0') ? WIFI_ECN_WPA2_PSK : WIFI_ECN_OPEN;
+
+    WIFI_Status_t status = WIFI_Connect(ssid, passphrase, ecn);
+
+    // NOTE: the automatic NTP sync is NOT triggered here anymore, even though WIFI_Connect()
+    // returning OK usually means the module's own onboard DHCP client already has an IP address.
+    // Kicking off the SNTP background thread (which drives the SAME ES-WIFI module over the SAME
+    // AT command channel/mutex for DNS lookup + UDP socket I/O) this early was found to race with
+    // the still-settling post-join status-polling window, so it's deferred to
+    // Network_Interface_Connect_Result() instead, once a real IP address has been confirmed - see
+    // the comment there.
+
+    return status == WIFI_STATUS_OK ? 0 : -1;
+}
+
+int Network_Interface_Connect_Result(int configIndex)
+{
+    if (WIFI_IsConnected() != WIFI_STATUS_OK)
+    {
+        return -1;
+    }
+
+    uint8_t ipAddr[4];
+    uint8_t ipMask[4];
+    uint8_t gatewayAddr[4];
+
+    if (WIFI_GetIP_Address(ipAddr) != WIFI_STATUS_OK)
+    {
+        return -1;
+    }
+
+    // DHCP has completed (the module runs its own DHCP client internally) - sync the reported
+    // IP configuration into the in-memory config block so that managed code reads the correct
+    // addresses via ConfigurationManager_GetConfigurationBlock.
+    if (g_TargetConfiguration.NetworkInterfaceConfigs != NULL &&
+        g_TargetConfiguration.NetworkInterfaceConfigs->Count > 0)
+    {
+        if (configIndex < 0 || (uint32_t)configIndex >= g_TargetConfiguration.NetworkInterfaceConfigs->Count)
+        {
+            return -1;
+        }
+
+        HAL_Configuration_NetworkInterface *cfg = g_TargetConfiguration.NetworkInterfaceConfigs->Configs[configIndex];
+
+        cfg->IPv4Address = LWIP_MAKEU32(ipAddr[0], ipAddr[1], ipAddr[2], ipAddr[3]);
+
+        if (WIFI_GetIP_Mask(ipMask) == WIFI_STATUS_OK)
+        {
+            cfg->IPv4NetMask = LWIP_MAKEU32(ipMask[0], ipMask[1], ipMask[2], ipMask[3]);
+        }
+
+        if (WIFI_GetGateway_Address(gatewayAddr) == WIFI_STATUS_OK)
+        {
+            cfg->IPv4GatewayAddress = LWIP_MAKEU32(gatewayAddr[0], gatewayAddr[1], gatewayAddr[2], gatewayAddr[3]);
+        }
+    }
+
+    if (!s_sntpAutoSyncTriggered)
+    {
+        s_sntpAutoSyncTriggered = true;
+
+        // only kick off the best-effort automatic NTP sync now that a real IP address has been
+        // confirmed (matching how other targets auto-sync the clock once the network comes up -
+        // see the comment at the top of sntp_ism43362.cpp for why this is needed on this board
+        // specifically) - deferring it to here (instead of right after WIFI_Connect() returns)
+        // avoids racing the background SNTP thread against the connection-establishment window.
+        Ism43362_Sntp_TriggerAutoSync();
+    }
+
+    return 0;
+}
+
+int Network_Interface_Start_Scan(int index)
+{
+    (void)index;
+
+    // handled synchronously by WIFI_ListAccessPoints(), called directly from the managed API layer
     return 0;
 }
 

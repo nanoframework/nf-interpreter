@@ -21,7 +21,12 @@
 // need to declare the Receiver thread here
 osThreadDef(ReceiverThread, osPriorityHigh, 2048, "ReceiverThread");
 // declare CLRStartup thread here
-osThreadDef(CLRStartupThread, osPriorityNormal, 4096, "CLRStartupThread");
+// NOTE: bumped from 4096 - the ES-WIFI (ISM43362) driver call chain (WifiAdapter.Connect() ->
+// Network_Interface_Start_Connect() -> WIFI_Connect() -> ES_WIFI_Connect() -> AT_ExecuteCommand()
+// -> SPI_WIFI_SendData/ReceiveData()) runs several frames deep on this same thread, and
+// CLR_Debug::Printf()/PrintfV() alone uses a 512-byte local buffer - the original 4096 bytes
+// left too little headroom once WiFi native calls (with debug tracing) are on the stack too.
+osThreadDef(CLRStartupThread, osPriorityNormal, 8192, "CLRStartupThread");
 
 //  Application entry point.
 int main(void)

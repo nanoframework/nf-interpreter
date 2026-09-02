@@ -3,8 +3,9 @@
 // See LICENSE file in the project root for full license information.
 //
 
-// ChibiOS WiFi adapter native implementation for Pico W (CYW43439).
-// Implements the System.Device.Wifi managed API using the CYW43 driver.
+// ChibiOS WiFi adapter native implementation.
+// Implements the System.Device.Wifi managed API using either the CYW43 driver
+// (Pico W) or the Inventek ISM43362 (ES-WIFI) driver, depending on the target.
 
 #include <sys_dev_wifi_native.h>
 #include <nf_rt_events_native.h>
@@ -12,9 +13,17 @@
 #include <nanoHAL_v2.h>
 #include <nanoPAL_Sockets.h>
 
-extern "C" {
+#if defined(TARGET_HAS_WIFI_ISM43362)
+extern "C"
+{
+#include <wifi.h>
+}
+#else
+extern "C"
+{
 #include <nf_lwipthread_wifi.h>
 }
+#endif
 
 ////////////////////////////////////////////////////////////////////////////////////
 // !!! KEEP IN SYNC WITH System.Device.Wifi (in managed code) !!! //
@@ -115,8 +124,7 @@ HRESULT Library_sys_dev_wifi_native_System_Device_Wifi_WifiAdapter::
             // password can be NULL for open networks
 
             // Initiate WiFi connection via CYW43 driver (non-blocking)
-            int result = Network_Interface_Start_Connect(
-                netIndex, szSsid, szPassPhrase ? szPassPhrase : "", 0);
+            int result = Network_Interface_Start_Connect(netIndex, szSsid, szPassPhrase ? szPassPhrase : "", 0);
 
             if (result != 0)
             {
@@ -133,25 +141,41 @@ HRESULT Library_sys_dev_wifi_native_System_Device_Wifi_WifiAdapter::
             int connectResult = Network_Interface_Connect_Result(netIndex);
             if (connectResult >= 0)
             {
-                status = (connectResult == 0)
-                             ? WifiConnectionStatus_Success
-                             : WifiConnectionStatus_UnspecifiedFailure;
+                status = (connectResult == 0) ? WifiConnectionStatus_Success : WifiConnectionStatus_UnspecifiedFailure;
                 break;
             }
 
+#if !defined(TARGET_HAS_WIFI_ISM43362)
             // Do a direct SPI poll from this thread context to help drain packets
             cyw43_wifi_direct_poll();
+#endif
 
             // Wait for Event_Wifi_Station OR 500ms poll timeout
             NANOCLR_CHECK_HRESULT(stack.SetupTimeoutFromTicks(hbTimeout, timeout));
 
+#if defined(TARGET_HAS_WIFI_ISM43362)
+            // ISM43362 never signals Event_Wifi_Station, so waiting on the full connect deadline
+            // would only re-check Network_Interface_Connect_Result() once, right at the end -
+            // poll every 500ms instead, without exceeding the real connect deadline (*timeout)
+            CLR_INT64 pollDeadline = (CLR_INT64)HAL_Time_CurrentTime() + (500 * TIME_CONVERSION__TO_MILLISECONDS);
+            CLR_INT64 waitDeadline = (pollDeadline < *timeout) ? pollDeadline : *timeout;
+#else
+            CLR_INT64 waitDeadline = *timeout;
+#endif
+
             bool woke = true;
             NANOCLR_CHECK_HRESULT(
-                g_CLR_RT_ExecutionEngine.WaitEvents(
-                    stack.m_owningThread, *timeout, Event_Wifi_Station, woke));
+                g_CLR_RT_ExecutionEngine.WaitEvents(stack.m_owningThread, waitDeadline, Event_Wifi_Station, woke));
 
             if (!woke)
             {
+#if defined(TARGET_HAS_WIFI_ISM43362)
+                // just a poll tick, not the real connect timeout yet - keep looping
+                if ((CLR_INT64)HAL_Time_CurrentTime() < *timeout)
+                {
+                    continue;
+                }
+#endif
                 status = WifiConnectionStatus_Timeout;
                 break;
             }
@@ -210,8 +234,20 @@ HRESULT Library_sys_dev_wifi_native_System_Device_Wifi_WifiAdapter::GetNativeSca
     {
         CLR_RT_HeapBlock &top = stack.PushValueAndClear();
 
+#if defined(TARGET_HAS_WIFI_ISM43362)
+        // static rather than a local (stack) variable - ~2.3KB (WIFI_MAX_APS=20 entries), and
+        // this is already several native call frames deep from the managed scan report getter
+        static WIFI_APs_t apList;
+        memset(&apList, 0, sizeof(apList));
+        if (WIFI_ListAccessPoints(&apList, WIFI_MAX_APS) != WIFI_STATUS_OK)
+        {
+            NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
+        }
+        uint16_t number = apList.count;
+#else
         uint16_t number = (uint16_t)cyw43_wifi_scan_get_count();
         const wifi_scan_record_t *results = cyw43_wifi_scan_get_results();
+#endif
 
         if (number == 0)
         {
@@ -225,8 +261,7 @@ HRESULT Library_sys_dev_wifi_native_System_Device_Wifi_WifiAdapter::GetNativeSca
         else
         {
             int rlen = sizeof(uint16_t) + (number * sizeof(ScanRecord));
-            NANOCLR_CHECK_HRESULT(
-                CLR_RT_HeapBlock_Array::CreateInstance(top, rlen, g_CLR_RT_WellKnownTypes.m_UInt8));
+            NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance(top, rlen, g_CLR_RT_WellKnownTypes.m_UInt8));
             CLR_RT_HeapBlock_Array *array = top.DereferenceArray();
             CLR_UINT8 *buf = array->GetFirstElement();
 
@@ -237,12 +272,21 @@ HRESULT Library_sys_dev_wifi_native_System_Device_Wifi_WifiAdapter::GetNativeSca
 
             for (int i = 0; i < number; i++)
             {
+#if defined(TARGET_HAS_WIFI_ISM43362)
+                memcpy(pScanRec->bssid, apList.ap[i].MAC, 6);
+                memset(pScanRec->ssid, 0, 33);
+                memcpy(pScanRec->ssid, apList.ap[i].SSID, 32);
+                pScanRec->rssi = (uint8_t)(apList.ap[i].RSSI & 0xFF);
+                pScanRec->authMode = (uint8_t)apList.ap[i].Ecn;
+                pScanRec->cypherType = 0;
+#else
                 memcpy(pScanRec->bssid, results[i].bssid, 6);
                 memset(pScanRec->ssid, 0, 33);
                 memcpy(pScanRec->ssid, results[i].ssid, 33);
                 pScanRec->rssi = (uint8_t)(results[i].rssi & 0xFF);
                 pScanRec->authMode = results[i].auth_mode;
                 pScanRec->cypherType = 0;
+#endif
                 pScanRec++;
             }
         }
@@ -276,7 +320,9 @@ HRESULT Library_sys_dev_wifi_native_System_Device_Wifi_WifiAdapter::NativeFindWi
         for (index = 0; index < g_TargetConfiguration.NetworkInterfaceConfigs->Count; index++)
         {
             if (!ConfigurationManager_GetConfigurationBlock(
-                    netInterfaceConfig, DeviceConfigurationOption_Network, index))
+                    netInterfaceConfig,
+                    DeviceConfigurationOption_Network,
+                    index))
             {
                 NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
             }
@@ -295,7 +341,9 @@ HRESULT Library_sys_dev_wifi_native_System_Device_Wifi_WifiAdapter::NativeFindWi
         for (index = 0; index < g_TargetConfiguration.NetworkInterfaceConfigs->Count; index++)
         {
             if (!ConfigurationManager_GetConfigurationBlock(
-                    netInterfaceConfig, DeviceConfigurationOption_Network, index))
+                    netInterfaceConfig,
+                    DeviceConfigurationOption_Network,
+                    index))
             {
                 NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
             }

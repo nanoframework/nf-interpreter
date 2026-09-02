@@ -211,6 +211,13 @@ macro(nf_add_platform_dependencies target)
                 set(NF_NETWORK_EXTRA_DEFS -DHAL_USE_MAC=TRUE)
             endif()
 
+            # boards using the Inventek ISM43362 (ES-WIFI) module need this macro visible to
+            # Target_Network.cpp/targetHAL_Network.cpp, set directly by the board's own
+            # CMakeLists.txt (not Kconfig-driven, same pattern as the RP2040/RP2350 chip macros)
+            if(TARGET_HAS_WIFI_ISM43362)
+                list(APPEND NF_NETWORK_EXTRA_DEFS -DTARGET_HAS_WIFI_ISM43362)
+            endif()
+
             nf_add_lib_network(
                 BUILD_TARGET
                     ${target}

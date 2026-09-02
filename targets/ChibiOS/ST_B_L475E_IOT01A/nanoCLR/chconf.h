@@ -243,9 +243,18 @@
  *
  * @note    The default is @p FALSE.
  * @note    Requires @p CH_CFG_USE_MUTEXES.
+ * @note    Enabled for this board because the ported Inventek ISM43362 (ES-WIFI)
+ *          driver (targets/ChibiOS/_WiFi/inventek) was originally written against
+ *          ThreadX's TX_MUTEX, which supports recursive locking by the owning
+ *          thread out of the box - its LOCK_WIFI()/UNLOCK_WIFI() call sites rely on
+ *          that (e.g. ES_WIFI_ListAccessPoints() holds the lock for its whole
+ *          duration while also calling AT_ExecuteCommand(), which locks again).
+ *          With a plain (non-recursive) ChibiOS mutex_t this deadlocks the calling
+ *          thread forever (chMtxLock() blocking on a lock it already owns), which
+ *          then starves the independent watchdog and resets the board ~10s later.
  */
 #if !defined(CH_CFG_USE_MUTEXES_RECURSIVE)
-#define CH_CFG_USE_MUTEXES_RECURSIVE FALSE
+#define CH_CFG_USE_MUTEXES_RECURSIVE TRUE
 #endif
 
 /**
