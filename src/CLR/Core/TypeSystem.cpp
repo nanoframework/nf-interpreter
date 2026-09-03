@@ -5862,7 +5862,7 @@ HRESULT CLR_RT_Assembly::ResolveAllocateStaticFields(CLR_RT_HeapBlock *pStaticFi
 
 // The slots are indexed as an array, so the run has to stay contiguous and unmoved: see CLAUDE.md
 // "Static fields on generic types".
-static CLR_RT_HeapBlock *AllocateGenericStaticFieldStorage(CLR_UINT32 count)
+static CLR_RT_HeapBlock *CLR_AllocateGenericStaticFieldStorage(CLR_UINT32 count)
 {
     NATIVE_PROFILE_CLR_CORE();
 
@@ -6011,7 +6011,7 @@ HRESULT CLR_RT_Assembly::ResolveAllocateGenericTypeStaticFields()
         }
 
         // Allocate storage for the static fields
-        CLR_RT_HeapBlock *fields = AllocateGenericStaticFieldStorage(count);
+        CLR_RT_HeapBlock *fields = CLR_AllocateGenericStaticFieldStorage(count);
 
         if (fields == nullptr)
         {
@@ -6277,7 +6277,7 @@ HRESULT CLR_RT_Assembly::AllocateGenericStaticFieldsOnDemand(
     }
 
     // Allocate storage for the static fields
-    fields = AllocateGenericStaticFieldStorage(count);
+    fields = CLR_AllocateGenericStaticFieldStorage(count);
 
     if (fields == nullptr)
     {
@@ -9337,7 +9337,7 @@ CLR_RT_GenericStaticFieldRecord *CLR_RT_TypeSystem::FindOrCreateGenericStaticFie
     const CLR_RECORD_TYPEDEF *ownerTd = ownerAssembly->GetTypeDef(typeDef.Type());
 
     // Allocate storage for the static fields
-    CLR_RT_HeapBlock *pFields = AllocateGenericStaticFieldStorage(staticFieldCount);
+    CLR_RT_HeapBlock *pFields = CLR_AllocateGenericStaticFieldStorage(staticFieldCount);
 
     if (pFields == nullptr)
     {
