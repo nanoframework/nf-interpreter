@@ -1811,7 +1811,6 @@ struct CLR_RT_WellKnownTypes
 
     CLR_RT_TypeDef_Index SocketException;
 
-
     CLR_RT_TypeDef_Index CryptographicException;
     CLR_RT_TypeDef_Index I2cTransferResult;
 
@@ -2461,7 +2460,6 @@ struct CLR_RT_ProtectFromGC
     NANOCLR_NOINLINE void UnlinkOutOfOrder();
 
     void Invoke();
-
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
