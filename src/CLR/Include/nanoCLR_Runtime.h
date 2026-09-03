@@ -2077,6 +2077,8 @@ struct CLR_RT_TypeSystem // EVENT HEAP - NO RELOCATION -
     void TypeSystem_Initialize();
     void TypeSystem_Cleanup();
 
+    void Relocate();
+
     void Link(CLR_RT_Assembly *assm);
     void PostLinkageProcessing(CLR_RT_Assembly *assm);
 
@@ -3228,18 +3230,9 @@ struct CLR_RT_GarbageCollector
     {
         if (field->m_fields)
         {
-            // Relocate the internal pointers within each HeapBlock in the array
-            // (must be done before updating m_fields, while it still points to the old location)
+            // The slots sit inside an unmovable blob the heap walk steps over, so they are relocated
+            // here and nowhere else. See CLAUDE.md "Static fields on generic types".
             CLR_RT_GarbageCollector::Heap_Relocate(field->m_fields, field->m_count);
-
-            // Update m_fields pointer itself to wherever the block array moved after compaction.
-            // Without this, m_fields becomes a dangling pointer after any GC compaction.
-            CLR_RT_GarbageCollector::Heap_Relocate((void **)&field->m_fields);
-        }
-
-        if (field->m_fieldDefs)
-        {
-            CLR_RT_GarbageCollector::Heap_Relocate((void **)&field->m_fieldDefs);
         }
     }
 

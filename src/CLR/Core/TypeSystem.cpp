@@ -5860,6 +5860,39 @@ HRESULT CLR_RT_Assembly::ResolveAllocateStaticFields(CLR_RT_HeapBlock *pStaticFi
     NANOCLR_NOCLEANUP();
 }
 
+// The slots are indexed as an array, so the run has to stay contiguous and unmoved: see CLAUDE.md
+// "Static fields on generic types".
+static CLR_RT_HeapBlock *CLR_AllocateGenericStaticFieldStorage(CLR_UINT32 count)
+{
+    NATIVE_PROFILE_CLR_CORE();
+
+    const CLR_UINT32 headerBlocks = CONVERTFROMSIZETOHEAPBLOCKS(sizeof(CLR_RT_HeapBlock_BinaryBlob));
+
+    auto *blob = (CLR_RT_HeapBlock_BinaryBlob *)g_CLR_RT_ExecutionEngine.ExtractHeapBlocksForEvents(
+        DATATYPE_BINARY_BLOB_HEAD,
+        0,
+        headerBlocks + count);
+
+    if (blob == nullptr)
+    {
+        return nullptr;
+    }
+
+    // no handlers: the registry marks and relocates the payload, see CLR_RT_TypeSystem::Relocate
+    blob->SetBinaryBlobHandlers(nullptr, nullptr);
+    blob->m_assembly = nullptr;
+
+    CLR_RT_HeapBlock *fields = (CLR_RT_HeapBlock *)blob + headerBlocks;
+
+    // the record is registered before the slots are typed, so they have to be walkable right away
+    for (CLR_UINT32 i = 0; i < count; i++)
+    {
+        fields[i].SetObjectReference(nullptr);
+    }
+
+    return fields;
+}
+
 HRESULT CLR_RT_Assembly::ResolveAllocateGenericTypeStaticFields()
 {
     NATIVE_PROFILE_CLR_CORE();
@@ -5977,26 +6010,24 @@ HRESULT CLR_RT_Assembly::ResolveAllocateGenericTypeStaticFields()
             g_CLR_RT_TypeSystem.m_genericStaticFieldsMaxCount = newMax;
         }
 
-        // Allocate storage for the static fields
-        CLR_RT_HeapBlock *fields = g_CLR_RT_ExecutionEngine.ExtractHeapBlocksForObjects(
-            DATATYPE_OBJECT, // heapblock kind
-            0,               // flags
-            count);          // number of CLR_RT_HeapBlock entries
-
-        if (fields == nullptr)
-        {
-            NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
-        }
-
-        // Allocate mapping for field definitions
+        // Allocate mapping for field definitions first: a platform_malloc failure here is trivial to
+        // unwind, whereas the GC heap blob allocated below has no direct release path and would
+        // otherwise leak until the next GC cycle if allocated first and this failed.
         CLR_RT_FieldDef_Index *fieldDefs =
             (CLR_RT_FieldDef_Index *)platform_malloc(sizeof(CLR_RT_FieldDef_Index) * count);
 
         if (fieldDefs == nullptr)
         {
-            // Free already allocated fields
-            // Since we don't have a direct ReleaseHeapBlocksForObjects function,
-            // we'll need to have the GC clean it up later
+            NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
+        }
+
+        // Allocate storage for the static fields
+        CLR_RT_HeapBlock *fields = CLR_AllocateGenericStaticFieldStorage(count);
+
+        if (fields == nullptr)
+        {
+            // Field defs mapping isn't published anywhere yet, so it can be freed directly
+            platform_free(fieldDefs);
             NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
         }
 
@@ -6246,22 +6277,22 @@ HRESULT CLR_RT_Assembly::AllocateGenericStaticFieldsOnDemand(
         g_CLR_RT_TypeSystem.m_genericStaticFieldsMaxCount = newMax;
     }
 
-    // Allocate storage for the static fields
-    fields = g_CLR_RT_ExecutionEngine.ExtractHeapBlocksForObjects(
-        DATATYPE_OBJECT, // heapblock kind
-        0,               // flags
-        count);          // number of CLR_RT_HeapBlock entries
-
-    if (fields == nullptr)
-    {
-        NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
-    }
-
-    // Allocate mapping for field definitions
+    // Allocate mapping for field definitions first: a platform_malloc failure here is trivial to
+    // unwind, whereas the GC heap blob allocated below has no direct release path.
     fieldDefs = (CLR_RT_FieldDef_Index *)platform_malloc(sizeof(CLR_RT_FieldDef_Index) * count);
 
     if (fieldDefs == nullptr)
     {
+        NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
+    }
+
+    // Allocate storage for the static fields
+    fields = CLR_AllocateGenericStaticFieldStorage(count);
+
+    if (fields == nullptr)
+    {
+        // Field defs mapping isn't published anywhere yet, so it can be freed directly
+        platform_free(fieldDefs);
         NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
     }
 
@@ -7200,40 +7231,24 @@ void CLR_RT_Assembly::Relocate()
     CLR_RT_GarbageCollector::Heap_Relocate(staticFields, staticFieldsCount);
 #endif
 
-    // Relocate all generic static field entries
-    for (CLR_UINT32 i = 0; i < g_CLR_RT_TypeSystem.m_genericStaticFieldsCount; i++)
-    {
-        CLR_RT_GarbageCollector::RelocateGenericStaticField(&g_CLR_RT_TypeSystem.m_genericStaticFields[i]);
-    }
-
-    // Resync TypeSpec cross-ref caches into the relocated generic static field arrays
-    // (they are platform_malloc'd, so GC relocation above does not update them).
-    for (CLR_UINT32 i = 0; i < g_CLR_RT_TypeSystem.m_genericStaticFieldsCount; i++)
-    {
-        const CLR_RT_GenericStaticFieldRecord &record = g_CLR_RT_TypeSystem.m_genericStaticFields[i];
-
-        // Walk every assembly, every TypeSpec cross-reference, and update the cache if it was
-        // pointing at this record's old field block.
-        NANOCLR_FOREACH_ASSEMBLY(g_CLR_RT_TypeSystem)
-        {
-            for (int tsIdx = 0; tsIdx < pASSM->tablesSize[TBL_TypeSpec]; tsIdx++)
-            {
-                CLR_RT_TypeSpec_CrossReference &tsCross = pASSM->crossReferenceTypeSpec[tsIdx];
-
-                if (tsCross.genericStaticFields != nullptr && tsCross.genericStaticFieldsCount == record.m_count &&
-                    tsCross.genericStaticFieldDefs == record.m_fieldDefs)
-                {
-                    tsCross.genericStaticFields = record.m_fields;
-                }
-            }
-        }
-        NANOCLR_FOREACH_ASSEMBLY_END();
-    }
-
     CLR_RT_GarbageCollector::Heap_Relocate((void **)&header);
     CLR_RT_GarbageCollector::Heap_Relocate((void **)&name);
     CLR_RT_GarbageCollector::Heap_Relocate((void **)&file);
     CLR_RT_GarbageCollector::Heap_Relocate((void **)&nativeCode);
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void CLR_RT_TypeSystem::Relocate()
+{
+    NATIVE_PROFILE_CLR_CORE();
+
+    // The registry is global, so this runs once per relocation pass, never per assembly:
+    // see CLAUDE.md "Static fields on generic types".
+    for (CLR_UINT32 i = 0; i < m_genericStaticFieldsCount; i++)
+    {
+        CLR_RT_GarbageCollector::RelocateGenericStaticField(&m_genericStaticFields[i]);
+    }
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -9325,34 +9340,24 @@ CLR_RT_GenericStaticFieldRecord *CLR_RT_TypeSystem::FindOrCreateGenericStaticFie
     // Get the type definition record
     const CLR_RECORD_TYPEDEF *ownerTd = ownerAssembly->GetTypeDef(typeDef.Type());
 
-    // Allocate storage for the static fields
-    CLR_RT_HeapBlock *pFields = g_CLR_RT_ExecutionEngine.ExtractHeapBlocksForObjects(
-        DATATYPE_OBJECT, // Use OBJECT type for proper GC management
-        0,               // No special flags
-        staticFieldCount // Number of fields
-    );
-
-    if (pFields == nullptr)
-    {
-        return nullptr; // Out of memory
-    }
-
-    // Allocate mapping for field definitions using platform_malloc since we need to manage this memory separately
+    // Allocate mapping for field definitions first using platform_malloc: if this fails there's
+    // nothing to unwind. Doing this before the GC heap blob avoids leaking GC-managed memory
+    // that has no direct release path.
     CLR_RT_FieldDef_Index *pFieldDefs =
         (CLR_RT_FieldDef_Index *)platform_malloc(sizeof(CLR_RT_FieldDef_Index) * staticFieldCount);
 
     if (pFieldDefs == nullptr)
     {
-        // Unable to allocate field definitions, must clean up the fields we already allocated
-        // Since ExtractHeapBlocksForObjects allocates memory that's managed by the GC,
-        // we don't explicitly free it. The next GC cycle will reclaim it.
+        return nullptr; // Out of memory
+    }
 
-        // Reset the allocated fields to null to ensure no dangling references
-        for (CLR_UINT32 i = 0; i < staticFieldCount; i++)
-        {
-            pFields[i].SetObjectReference(nullptr);
-        }
+    // Allocate storage for the static fields
+    CLR_RT_HeapBlock *pFields = CLR_AllocateGenericStaticFieldStorage(staticFieldCount);
 
+    if (pFields == nullptr)
+    {
+        // Field defs mapping isn't published anywhere yet, so it can be freed directly
+        platform_free(pFieldDefs);
         return nullptr; // Out of memory
     }
 
