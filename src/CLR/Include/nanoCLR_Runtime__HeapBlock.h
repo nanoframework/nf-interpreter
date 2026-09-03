@@ -766,14 +766,6 @@ struct CLR_RT_HeapBlock
 
         //--//
 
-        struct GenericInstance
-        {
-            CLR_RT_TypeSpec_Index genericType;
-            CLR_RT_HeapBlock_GenericInstance *ptr;
-        } genericInstance;
-
-        //--//
-
         struct UnmanagedPointer
         {
             uintptr_t ptr;
@@ -1234,13 +1226,6 @@ struct CLR_RT_HeapBlock
     }
 
     //--//
-
-    void SetGenericType(const CLR_RT_TypeSpec_Index &genericType)
-    {
-        m_id.raw = CLR_RT_HEAPBLOCK_RAW_ID(DATATYPE_GENERICINST, 0, 1);
-        m_data.genericInstance.genericType.data = genericType.data;
-        m_data.genericInstance.ptr = nullptr;
-    }
 
     const CLR_RT_TypeSpec_Index &ObjectGenericType() const
     {
@@ -2505,15 +2490,6 @@ struct CLR_RT_HeapBlock_WeakReference : public CLR_RT_HeapBlock_Node // OBJECT H
     HRESULT GetTarget(CLR_RT_HeapBlock &targetReference);
 
     void InsertInPriorityOrder();
-
-    void Relocate();
-};
-
-//--//
-
-struct CLR_RT_HeapBlock_GenericInstance : public CLR_RT_HeapBlock_Node // OBJECT HEAP - DO RELOCATION -
-{
-    static HRESULT CreateInstance(CLR_RT_HeapBlock &reference, const CLR_RT_TypeSpec_Index &tsIndex);
 
     void Relocate();
 };

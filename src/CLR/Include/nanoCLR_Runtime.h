@@ -339,7 +339,6 @@ struct CLR_RT_HeapBlock_Timer;
 struct CLR_RT_HeapBlock_WaitForObject;
 struct CLR_RT_HeapBlock_Finalizer;
 struct CLR_RT_HeapBlock_MemoryStream;
-struct CLR_RT_HeapBlock_GenericInstance;
 
 struct CLR_RT_HeapCluster;
 struct CLR_RT_GarbageCollector;
@@ -1812,7 +1811,6 @@ struct CLR_RT_WellKnownTypes
 
     CLR_RT_TypeDef_Index SocketException;
 
-
     CLR_RT_TypeDef_Index CryptographicException;
     CLR_RT_TypeDef_Index I2cTransferResult;
 
@@ -2462,7 +2460,6 @@ struct CLR_RT_ProtectFromGC
     NANOCLR_NOINLINE void UnlinkOutOfOrder();
 
     void Invoke();
-
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -4297,10 +4294,6 @@ struct CLR_RT_ExecutionEngine
         CLR_UINT32 flags,
         const CLR_RT_TypeDef_Index &cls,
         CLR_UINT32 length);
-    CLR_RT_HeapBlock *ExtractHeapBlocksForGenericInstance(
-        CLR_UINT32 flags,
-        const CLR_RT_TypeSpec_Index &genericType,
-        CLR_UINT32 length);
     CLR_RT_HeapBlock *ExtractHeapBytesForObjects(CLR_UINT32 dataType, CLR_UINT32 flags, CLR_UINT32 length);
     CLR_RT_HeapBlock *ExtractHeapBlocksForObjects(CLR_UINT32 dataType, CLR_UINT32 flags, CLR_UINT32 length);
     CLR_RT_HeapBlock_Node *ExtractHeapBlocksForEvents(CLR_UINT32 dataType, CLR_UINT32 flags, CLR_UINT32 length);
@@ -4337,15 +4330,6 @@ struct CLR_RT_ExecutionEngine
         const CLR_RT_TypeDef_Instance &inst,
         const CLR_RT_TypeSpec_Instance *genericInstance = nullptr);
     HRESULT NewObject(CLR_RT_HeapBlock &reference, CLR_UINT32 token, CLR_RT_Assembly *assm);
-
-    HRESULT NewGenericInstanceObject(
-        CLR_RT_HeapBlock &reference,
-        const CLR_RT_TypeDef_Instance &typeDef,
-        const CLR_RT_TypeSpec_Index *genericType);
-    HRESULT NewGenericInstanceObject(
-        CLR_RT_HeapBlock &reference,
-        const CLR_RT_TypeDef_Instance &typeDef,
-        const CLR_RT_TypeSpec_Instance *genericInstance);
 
     HRESULT CloneObject(CLR_RT_HeapBlock &reference, const CLR_RT_HeapBlock &source);
     HRESULT CopyValueType(CLR_RT_HeapBlock *destination, const CLR_RT_HeapBlock *source);

@@ -1911,10 +1911,11 @@ static bool FillValues(
         case DATATYPE_CLASS:
         case DATATYPE_VALUETYPE:
             dst->m_td = ptr->ObjectCls();
-            break;
 
-        case DATATYPE_GENERICINST:
-            dst->m_ts = ptr->ObjectGenericType();
+            if (ptr->IsAGenericInstance())
+            {
+                dst->m_ts = ptr->ObjectGenericType();
+            }
             break;
 
         case DATATYPE_SZARRAY:
@@ -2431,11 +2432,10 @@ bool CLR_DBG_Debugger::Debugging_Thread_Get(WP_Message *msg)
 
             pRes[Library_corlib_native_System_Threading_Thread::FIELD___priority].NumericByRef().s4 = pri;
 
-            if (SUCCEEDED(
-                    CLR_RT_ObjectToEvent_Source::CreateInstance(
-                        th,
-                        *pRes,
-                        pRes[Library_corlib_native_System_Threading_Thread::FIELD___thread])))
+            if (SUCCEEDED(CLR_RT_ObjectToEvent_Source::CreateInstance(
+                    th,
+                    *pRes,
+                    pRes[Library_corlib_native_System_Threading_Thread::FIELD___thread])))
             {
 #if defined(NANOCLR_APPDOMAINS)
                 CLR_RT_ObjectToEvent_Source::CreateInstance(
