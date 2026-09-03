@@ -2236,7 +2236,6 @@ HRESULT CLR_RT_ExecutionEngine::InitializeLocals(
     CLR_PMETADATA sig = assembly->GetSignature(methodDef->locals);
     CLR_UINT32 count = methodDef->localsCount;
     bool fZeroed = false;
-    CLR_RT_TypeSpec_Instance genericInstance = {};
 
     while (count)
     {
@@ -2244,6 +2243,9 @@ HRESULT CLR_RT_ExecutionEngine::InitializeLocals(
         CLR_RT_TypeDef_Index cls;
         CLR_UINT32 levels = 0;
         NanoCLRDataType dtModifier = DATATYPE_VOID;
+
+        // per local: a stale TypeSpec here would stamp the next local as a generic instance
+        CLR_RT_TypeSpec_Instance genericInstance = {};
 
         while (true)
         {

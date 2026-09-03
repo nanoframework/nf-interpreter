@@ -583,7 +583,8 @@ struct CLR_DBG_Commands
         CLR_RT_TypeDef_Index    m_td;
 
         //
-        // For DATATYPE_GENERICINST
+        // For a generic instance: DATATYPE_CLASS or DATATYPE_VALUETYPE with HB_GenericInstance
+        // set in m_flags. Zero otherwise.
         //
         CLR_RT_TypeSpec_Index    m_ts;
 
