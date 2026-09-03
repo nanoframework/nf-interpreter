@@ -56,6 +56,8 @@ fundamentally about choosing the right closed TypeSpec for a given call site.
   in a signature. The element stream is: `GENERICINST` marker → CLASS or
   VALUETYPE element carrying the *generic typedef* + arg count → that many
   argument elements (each may itself be a nested `GENERICINST`).
+  It is a signature element type **only** — it is never the datatype of a
+  heap block. See §13.
 
 **How a closed TypeSpec is selected at a call site.** Roughly:
 
@@ -600,6 +602,52 @@ so a packing change breaks the build instead of the runtime.
   of faulting. Validating it as a TypeSpec via `InitializeFromIndex`
   avoids the dereference but reduces to "is the top byte a loaded assembly
   index?", which holds only by memory-map coincidence.
+
+---
+
+### One representation for generic instances
+
+A generic instance is a `DATATYPE_CLASS`/`DATATYPE_VALUETYPE` block carrying
+`HB_GenericInstance`, with its closed TypeSpec in the aliased word described
+above. That is the only representation. `DATATYPE_GENERICINST` is a signature
+element type (§1) and must never appear as a heap-block datatype.
+
+There used to be a second representation. `NewGenericInstanceObject` allocated
+`DATATYPE_GENERICINST` blocks for the `unbox`-a-`Nullable<T>` path, and those
+blocks were never finished:
+
+- the TypeSpec was never actually stored — the setter call sat commented out in
+  `ExtractHeapBlocksForGenericInstance`, so `ObjectGenericType()` read zero;
+- the datatype was absent from the switch in
+  `GarbageCollector_ComputeReachabilityGraph.cpp`, so the block was marked alive
+  but its fields were never traced — a reference held only by such a block was
+  collected while live;
+- `TypeSystemLookup.cpp` gave it `DT_NOREL`, so its field references were never
+  fixed up during compaction;
+- `IsAGenericInstance()` returned false for it, because the allocator never set
+  `HB_GenericInstance`.
+
+About ten other datatype switches — `InitializeFromObject`,
+`ExtractTypeIndexFromObject`, `EnsureObjectReference`, `GetHashCode`,
+`ObjectsEqual`, `Compare_Values`, `Reassign`, `CloneObject` — rejected such a
+block outright, so it could not be cast, hashed, compared or cloned either.
+
+It was removed rather than completed. `InitializeLocals` and `CloneObject` had
+already been migrated to `NewObject` — the `if (isGenericInstance)` branch sat
+commented out beside the live call — leaving one unconverted call site. Finishing
+the second representation would have meant re-integrating it with the GC, the
+type descriptor, hashing, equality, cloning and casting merely to reach parity
+with what `NewObject` already produced.
+
+The two GC defects were silent rather than crashing, which is what decided it:
+deleting the allocator makes them unreachable by construction, a stronger
+guarantee than adding the missing handlers and then having to remember this
+datatype in every future switch.
+
+**Design rule.** A new heap-block datatype is not done until it appears in
+`GarbageCollector_ComputeReachabilityGraph.cpp`, has a non-null `m_relocate`
+entry in `TypeSystemLookup.cpp`, and is handled in
+`CLR_RT_TypeDescriptor::InitializeFromObject`.
 
 ---
 

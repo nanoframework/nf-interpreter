@@ -1913,10 +1913,6 @@ static bool FillValues(
             dst->m_td = ptr->ObjectCls();
             break;
 
-        case DATATYPE_GENERICINST:
-            dst->m_ts = ptr->ObjectGenericType();
-            break;
-
         case DATATYPE_SZARRAY:
         {
             CLR_RT_HeapBlock_Array const *ptr2 = (CLR_RT_HeapBlock_Array *)ptr;
