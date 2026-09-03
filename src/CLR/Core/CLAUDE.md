@@ -352,7 +352,7 @@ slots:
   so a bare-VAR field like `static T DefaultValue` in
   `Foo<int>` is stamped `I4` and in `Foo<string>` is stamped OBJECT.
   Passing no instance here would leave every VAR field wrongly typed as
-  the OBJECT block that `AllocateGenericStaticFieldStorage` produced.
+  the OBJECT block that `CLR_AllocateGenericStaticFieldStorage` produced.
 
 ### GC contract for the per-instantiation storage
 
@@ -365,7 +365,7 @@ the contents of an unrelated heap block. When the block it lands on is a
 generic instance, the value comes back as a `CLR_RT_TypeSpec_Index` bit
 pattern such as `0x01000001` (§13).
 
-**1. The run must not be split.** `AllocateGenericStaticFieldStorage`
+**1. The run must not be split.** `CLR_AllocateGenericStaticFieldStorage`
 allocates the slots as the payload of an unmovable
 `DATATYPE_BINARY_BLOB_HEAD` block (`ExtractHeapBlocksForEvents`, which
 adds `HB_Event`, hence `HB_Unmovable`). Compaction moves *maximal
