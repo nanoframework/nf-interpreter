@@ -10,7 +10,8 @@
 HRESULT CLR_RT_HeapBlock_Array::CreateInstance(
     CLR_RT_HeapBlock &reference,
     CLR_UINT32 length,
-    const CLR_RT_ReflectionDef_Index &reflex)
+    const CLR_RT_ReflectionDef_Index &reflex,
+    CLR_UINT32 extraBytes)
 {
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
@@ -52,7 +53,8 @@ HRESULT CLR_RT_HeapBlock_Array::CreateInstance(
             NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
         }
 
-        pArray = (CLR_RT_HeapBlock_Array *)g_CLR_RT_ExecutionEngine.ExtractHeapBlocksForArray(inst, length, reflex);
+        pArray = (CLR_RT_HeapBlock_Array *)g_CLR_RT_ExecutionEngine
+                     .ExtractHeapBlocksForArray(inst, length, reflex, extraBytes);
         CHECK_ALLOCATION(pArray);
 
         reference.SetObjectReference(pArray);
@@ -91,7 +93,8 @@ HRESULT CLR_RT_HeapBlock_Array::CreateInstanceWithStorage(
     CLR_RT_HeapBlock &reference,
     CLR_UINT32 length,
     const uintptr_t storageAddress,
-    const CLR_RT_TypeDef_Index &cls)
+    const CLR_RT_TypeDef_Index &cls,
+    const CLR_RT_HeapBlock *owner)
 {
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
@@ -103,8 +106,8 @@ HRESULT CLR_RT_HeapBlock_Array::CreateInstanceWithStorage(
     reflex.levels = 1;
     reflex.data.type = cls;
 
-    // create an instance with ZERO length because there is no need to allocate storage
-    NANOCLR_CHECK_HRESULT(CreateInstance(reference, 0, reflex));
+    // ZERO length: elements live in someone else's storage. extraBytes reserves the StorageOwner() slot.
+    NANOCLR_CHECK_HRESULT(CreateInstance(reference, 0, reflex, sizeof(CLR_RT_HeapBlock)));
 
     thisArray = reference.DereferenceArray();
 
@@ -113,6 +116,9 @@ HRESULT CLR_RT_HeapBlock_Array::CreateInstanceWithStorage(
 
     // adjust the number of elements with the provided length
     thisArray->m_numOfElements = length;
+
+    // see CLAUDE.md §16
+    thisArray->StorageOwner()->SetObjectReference(owner);
 
     NANOCLR_NOCLEANUP();
 }
@@ -226,11 +232,23 @@ HRESULT CLR_RT_HeapBlock_Array::ClearElements(int index, int length)
 void CLR_RT_HeapBlock_Array::Relocate()
 {
     NATIVE_PROFILE_CLR_CORE();
-    //
-    // If the array is full of reference types, relocate each of them.
-    //
-    if (m_fReference)
+
+    if (IsStoragePointer())
     {
+        // no owner => unmanaged-memory Span, nothing to relocate. See CLAUDE.md §16.
+        CLR_RT_HeapBlock *owner = StorageOwner();
+
+        if (owner->Dereference() != nullptr)
+        {
+            CLR_RT_GarbageCollector::Heap_Relocate(owner, 1);
+            CLR_RT_GarbageCollector::Heap_Relocate((void **)&m_StoragePointer);
+        }
+    }
+    else if (m_fReference)
+    {
+        //
+        // If the array is full of reference types, relocate each of them.
+        //
         CLR_RT_GarbageCollector::Heap_Relocate((CLR_RT_HeapBlock *)GetFirstElement(), m_numOfElements);
     }
 }

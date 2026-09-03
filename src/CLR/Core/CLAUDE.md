@@ -839,3 +839,78 @@ instance.**
   pass 2 of `FindVirtualMethodDef`. If `MatchSignatureForVirtualDispatch`
   mishandles the VAR↔GENERICINST drain (specifically for multi-argument
   generics like `KeyValuePair<,>`), this is the symptom.
+
+---
+
+## 16. `Span<T>`/`ReadOnlySpan<T>` storage-pointer arrays and GC
+
+Not generics-specific, but the same "storage array split/mis-relocated/
+swept" family as §9, so documented the same way: rationale here, source
+stays terse.
+
+**Background.** `Span<T>`'s native backing (`corlib_native_System_Span_1.cpp`,
+`corlib_native_System_ReadOnlySpan_1.cpp`) doesn't reuse the wrapped
+`T[]`'s `CLR_RT_HeapBlock_Array` directly — it allocates a second, small
+"shell" `CLR_RT_HeapBlock_Array` via `CreateInstanceWithStorage` whose
+`ReflectionData().kind == REFLECTION_STORAGE_PTR`. The shell has no
+element storage of its own; `GetFirstElement()` returns a raw
+`m_StoragePointer` address that points into the *original* array's
+element data (or, for the `Span(void*, int)` ctor, into unmanaged
+memory). This lets slicing/wrapping avoid copying.
+
+**The bug.** Originally the shell held nothing but that raw address —
+no `CLR_RT_HeapBlock` reference back to the array that actually owns the
+memory. Two independent failures followed from that:
+1. **Reachability.** `ComputeReachabilityGraphForMultipleBlocks`'s
+   `DATATYPE_SZARRAY` case only marks an array's *elements* reachable,
+   and only when `m_fReference` is set (never true for a shell, since
+   `Span<T>` rejects reference-containing `T`). Nothing marked the
+   *owning* array reachable through the shell, so a temporary like
+   `new Span<int>(new int[n])` had no live reference to the backing
+   `int[]` once the constructor returned — `--forcegc` would sweep it,
+   filling it with `SENTINEL_RECOVERED` (`0xDFDFDFDF`,
+   `CLR_RT_HeapCluster::RecoverFromGC` in `CLR_RT_HeapCluster.cpp`) while
+   the shell's raw pointer kept pointing at that now-dead memory. This is
+   the `CopyTo_WithLargeArray_ShouldCopyAllElements` failure signature:
+   `Actual:<-538976289>` is `0xDFDFDFDF` as `int32`.
+2. **Compaction.** Even had the owner survived sweep, `m_StoragePointer`
+   is a bare address with no type tag — `CLR_RT_HeapBlock_Array::Relocate()`
+   had no way to know it needed adjusting when the owner's element data
+   physically moved, so it would go stale across `--compactionaftergc`
+   too.
+
+Both require `--forcegc --compactionaftergc` together to reproduce
+reliably; either flag alone can miss it depending on allocation timing —
+about 1 run in 9–10 failed under both flags before the fix, which is why
+a single clean run proves nothing here (loop 15–20×, see §14).
+
+**The fix.** `CreateInstanceWithStorage` now takes an `owner` reference
+(the array actually backing the memory — `nullptr` for the unmanaged-
+memory ctor) and allocates one extra `sizeof(CLR_RT_HeapBlock)` of
+storage beyond the shell's header (`extraBytes` threaded through
+`CLR_RT_HeapBlock_Array::CreateInstance` → `CLR_RT_ExecutionEngine::
+ExtractHeapBlocksForArray`). That slot — `StorageOwner()`, aliasing the
+same `&this[1]` address a normal array would use for element 0, which is
+otherwise unused on a storage-pointer shell — holds a real
+`SetObjectReference` to the owner. `ComputeReachabilityGraphForMultipleBlocks`
+marks it explicitly for `IsStoragePointer()` arrays, so the owner is
+reachable transitively through the shell like any other object
+reference. `CLR_RT_HeapBlock_Array::Relocate()` relocates that reference
+via the normal `Heap_Relocate(CLR_RT_HeapBlock*, 1)` path, then relocates
+`m_StoragePointer` itself via the generic `Heap_Relocate(void**)` address-
+range lookup — safe because that call only rewrites the stored address
+value by table lookup, it never dereferences memory at the (possibly
+not-yet-moved) target, so ordering within the compaction pass doesn't
+matter. A shell built over a shell (e.g. `Span.Slice` of a `Span`) chains
+correctly with no special-casing: each shell only tracks its immediate
+`sourceArray`, and marking/relocation recurse through the chain via the
+same generic per-object dispatch.
+
+**If you see `SENTINEL_RECOVERED` (`0xDFDFDFDF`) or a stale value read
+through a `Span<T>`/`ReadOnlySpan<T>`:**
+- Confirm it reproduces only with `--forcegc` (sweep) or needs
+  `--compactionaftergc` too (relocation) — tells you which of the two
+  mechanisms above is implicated.
+- Check that the shell's `StorageOwner()` was actually set (i.e. the
+  constructor path went through the array-backed `CreateInstanceWithStorage`
+  call, not the raw-pointer one, which intentionally has no owner).

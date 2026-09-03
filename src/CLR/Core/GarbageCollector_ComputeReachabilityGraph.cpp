@@ -232,14 +232,19 @@ bool CLR_RT_GarbageCollector::ComputeReachabilityGraphForMultipleBlocks(CLR_RT_H
                         break;
 
                     case DATATYPE_SZARRAY:
-                        //
-                        // If the array is full of reference types, mark each of them.
-                        //
                         {
                             CLR_RT_HeapBlock_Array *array = (CLR_RT_HeapBlock_Array *)ptr;
 
-                            if (array->m_fReference)
+                            if (array->IsStoragePointer())
                             {
+                                // keep the array owning the wrapped storage alive (e.g. a Span<T>'s
+                                // backing array) - see CreateInstanceWithStorage / StorageOwner()
+                                lst = array->StorageOwner();
+                                num = 1;
+                            }
+                            else if (array->m_fReference)
+                            {
+                                // If the array is full of reference types, mark each of them.
                                 lst = (CLR_RT_HeapBlock *)array->GetFirstElement();
                                 num = array->m_numOfElements;
                             }
