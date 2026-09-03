@@ -53,8 +53,8 @@ HRESULT CLR_RT_HeapBlock_Array::CreateInstance(
             NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
         }
 
-        pArray = (CLR_RT_HeapBlock_Array *)g_CLR_RT_ExecutionEngine
-                     .ExtractHeapBlocksForArray(inst, length, reflex, extraBytes);
+        pArray = (CLR_RT_HeapBlock_Array *)
+                     g_CLR_RT_ExecutionEngine.ExtractHeapBlocksForArray(inst, length, reflex, extraBytes);
         CHECK_ALLOCATION(pArray);
 
         reference.SetObjectReference(pArray);
