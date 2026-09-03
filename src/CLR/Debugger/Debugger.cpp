@@ -1930,10 +1930,11 @@ static bool FillValues(
         case DATATYPE_CLASS:
         case DATATYPE_VALUETYPE:
             dst->m_td = ptr->ObjectCls();
-            break;
 
-        case DATATYPE_GENERICINST:
-            dst->m_ts = ptr->ObjectGenericType();
+            if (ptr->IsAGenericInstance())
+            {
+                dst->m_ts = ptr->ObjectGenericType();
+            }
             break;
 
         case DATATYPE_SZARRAY:

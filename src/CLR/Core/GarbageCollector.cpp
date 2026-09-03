@@ -734,22 +734,23 @@ void CLR_RT_GarbageCollector::Assembly_Mark()
 
 #if !defined(NANOCLR_APPDOMAINS)
         CheckMultipleBlocks(pASSM->staticFields, pASSM->staticFieldsCount);
-
-        // Mark generic static fields for each TypeSpec
-        for (int i = 0; i < pASSM->tablesSize[TBL_TypeSpec]; i++)
-        {
-            CLR_RT_TypeSpec_CrossReference &ts = pASSM->crossReferenceTypeSpec[i];
-
-            if (ts.genericStaticFields != nullptr && ts.genericStaticFieldsCount > 0)
-            {
-                CheckMultipleBlocks(ts.genericStaticFields, ts.genericStaticFieldsCount);
-            }
-        }
 #endif
 
         CheckSingleBlock(&pASSM->file);
     }
     NANOCLR_FOREACH_ASSEMBLY_END();
+
+    // Generic static fields are rooted in the global registry, not per assembly: marking has to walk
+    // the same array relocation does. See CLAUDE.md "Static fields on generic types".
+    for (CLR_UINT32 i = 0; i < g_CLR_RT_TypeSystem.m_genericStaticFieldsCount; i++)
+    {
+        CLR_RT_GenericStaticFieldRecord &record = g_CLR_RT_TypeSystem.m_genericStaticFields[i];
+
+        if (record.m_fields != nullptr && record.m_count > 0)
+        {
+            CheckMultipleBlocks(record.m_fields, record.m_count);
+        }
+    }
 }
 
 //--//

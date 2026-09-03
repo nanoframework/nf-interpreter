@@ -3498,32 +3498,6 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                             evalPos[0].Assign(field);
                             goto Execute_LoadAndPromote;
                         }
-                        case DATATYPE_GENERICINST:
-                        {
-#if defined(NANOCLR_TRACE_GENERICS)
-                            if (s_CLR_RT_fTrace_GenericFields >= c_CLR_RT_Trace_Verbose)
-                            {
-                                CLR_Debug::Printf(
-                                    "GenericFields: LDFLD GENERICINST field='%s' offset=%d dt=%d\r\n",
-                                    fieldInst.assembly ? fieldInst.assembly->GetString(fieldInst.target->name)
-                                                       : "<null>",
-                                    fieldInst.CrossReference().offset,
-                                    (int)obj[fieldInst.CrossReference().offset].DataType());
-                            }
-#endif
-                            CLR_RT_HeapBlock &field2 = obj[fieldInst.CrossReference().offset];
-                            if (field2.DataSize() > 1)
-                            {
-                                UPDATESTACK(stack, evalPos);
-                                CLR_RT_HeapBlock safeRef2;
-                                safeRef2.SetReference(field2);
-                                CLR_RT_ProtectFromGC gc(safeRef2);
-                                NANOCLR_CHECK_HRESULT(evalPos[0].LoadFromReference(safeRef2));
-                                break;
-                            }
-                            evalPos[0].Assign(field2);
-                            goto Execute_LoadAndPromote;
-                        }
                         case DATATYPE_DATETIME:
                         case DATATYPE_TIMESPAN:
                             evalPos[0].SetInteger((CLR_INT64)obj->NumericByRefConst().s8);
@@ -3585,7 +3559,7 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
 #if defined(NANOCLR_APPDOMAINS)
                     _ASSERTE(dt != DATATYPE_TRANSPARENT_PROXY);
 #endif
-                    if (dt == DATATYPE_CLASS || dt == DATATYPE_VALUETYPE || dt == DATATYPE_GENERICINST)
+                    if (dt == DATATYPE_CLASS || dt == DATATYPE_VALUETYPE)
                     {
                         // This is a reference to the field.
                         // We need to make sure that the object is not a transparent proxy.
@@ -3641,20 +3615,6 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                     {
                         case DATATYPE_CLASS:
                         case DATATYPE_VALUETYPE:
-                            obj[fieldInst.CrossReference().offset].AssignAndPreserveType(evalPos[2]);
-                            break;
-                        case DATATYPE_GENERICINST:
-#if defined(NANOCLR_TRACE_GENERICS)
-                            if (s_CLR_RT_fTrace_GenericFields >= c_CLR_RT_Trace_Verbose)
-                            {
-                                CLR_Debug::Printf(
-                                    "GenericFields: STFLD GENERICINST field='%s' offset=%d src_dt=%d\r\n",
-                                    fieldInst.assembly ? fieldInst.assembly->GetString(fieldInst.target->name)
-                                                       : "<null>",
-                                    fieldInst.CrossReference().offset,
-                                    (int)evalPos[2].DataType());
-                            }
-#endif
                             obj[fieldInst.CrossReference().offset].AssignAndPreserveType(evalPos[2]);
                             break;
                         case DATATYPE_DATETIME: // Special case.
@@ -4048,10 +4008,15 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                             CLR_RT_TypeSpec_Index destinationTypeSpec;
                             destinationTypeSpec.data = arg;
 
-                            NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewGenericInstanceObject(
-                                nullableObject,
-                                typeInst,
-                                &destinationTypeSpec));
+                            CLR_RT_TypeSpec_Instance nullableTypeSpec{};
+
+                            if (nullableTypeSpec.InitializeFromIndex(destinationTypeSpec) == false)
+                            {
+                                NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+                            }
+
+                            NANOCLR_CHECK_HRESULT(
+                                g_CLR_RT_ExecutionEngine.NewObject(nullableObject, typeInst, &nullableTypeSpec));
 
                             CLR_RT_ProtectFromGC gc(nullableObject);
 

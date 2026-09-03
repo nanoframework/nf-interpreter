@@ -766,14 +766,6 @@ struct CLR_RT_HeapBlock
 
         //--//
 
-        struct GenericInstance
-        {
-            CLR_RT_TypeSpec_Index genericType;
-            CLR_RT_HeapBlock_GenericInstance *ptr;
-        } genericInstance;
-
-        //--//
-
         struct UnmanagedPointer
         {
             uintptr_t ptr;
@@ -1234,13 +1226,6 @@ struct CLR_RT_HeapBlock
     }
 
     //--//
-
-    void SetGenericType(const CLR_RT_TypeSpec_Index &genericType)
-    {
-        m_id.raw = CLR_RT_HEAPBLOCK_RAW_ID(DATATYPE_GENERICINST, 0, 1);
-        m_data.genericInstance.genericType.data = genericType.data;
-        m_data.genericInstance.ptr = nullptr;
-    }
 
     const CLR_RT_TypeSpec_Index &ObjectGenericType() const
     {
@@ -1914,7 +1899,8 @@ struct CLR_RT_HeapBlock_Array : public CLR_RT_HeapBlock
     static HRESULT CreateInstance(
         CLR_RT_HeapBlock &reference,
         CLR_UINT32 length,
-        const CLR_RT_ReflectionDef_Index &reflex);
+        const CLR_RT_ReflectionDef_Index &reflex,
+        CLR_UINT32 extraBytes = 0);
     static HRESULT CreateInstance(CLR_RT_HeapBlock &reference, CLR_UINT32 length, const CLR_RT_TypeDef_Index &cls);
     static HRESULT CreateInstance(
         CLR_RT_HeapBlock &reference,
@@ -1927,7 +1913,8 @@ struct CLR_RT_HeapBlock_Array : public CLR_RT_HeapBlock
         CLR_RT_HeapBlock &reference,
         CLR_UINT32 length,
         const uintptr_t storageAddress,
-        const CLR_RT_TypeDef_Index &cls);
+        const CLR_RT_TypeDef_Index &cls,
+        const CLR_RT_HeapBlock *owner);
 
     CLR_UINT8 *GetFirstElement()
     {
@@ -1966,6 +1953,12 @@ struct CLR_RT_HeapBlock_Array : public CLR_RT_HeapBlock
     bool IsStoragePointer()
     {
         return (ReflectionData().kind == REFLECTION_STORAGE_PTR);
+    }
+
+    // Valid only when IsStoragePointer() is true. See CLAUDE.md §16.
+    CLR_RT_HeapBlock *StorageOwner()
+    {
+        return (CLR_RT_HeapBlock *)&this[1];
     }
 
     HRESULT ClearElements(int index, int length);
@@ -2505,15 +2498,6 @@ struct CLR_RT_HeapBlock_WeakReference : public CLR_RT_HeapBlock_Node // OBJECT H
     HRESULT GetTarget(CLR_RT_HeapBlock &targetReference);
 
     void InsertInPriorityOrder();
-
-    void Relocate();
-};
-
-//--//
-
-struct CLR_RT_HeapBlock_GenericInstance : public CLR_RT_HeapBlock_Node // OBJECT HEAP - DO RELOCATION -
-{
-    static HRESULT CreateInstance(CLR_RT_HeapBlock &reference, const CLR_RT_TypeSpec_Index &tsIndex);
 
     void Relocate();
 };

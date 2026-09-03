@@ -339,7 +339,6 @@ struct CLR_RT_HeapBlock_Timer;
 struct CLR_RT_HeapBlock_WaitForObject;
 struct CLR_RT_HeapBlock_Finalizer;
 struct CLR_RT_HeapBlock_MemoryStream;
-struct CLR_RT_HeapBlock_GenericInstance;
 
 struct CLR_RT_HeapCluster;
 struct CLR_RT_GarbageCollector;
@@ -1812,7 +1811,6 @@ struct CLR_RT_WellKnownTypes
 
     CLR_RT_TypeDef_Index SocketException;
 
-
     CLR_RT_TypeDef_Index CryptographicException;
     CLR_RT_TypeDef_Index I2cTransferResult;
 
@@ -2078,6 +2076,8 @@ struct CLR_RT_TypeSystem // EVENT HEAP - NO RELOCATION -
 
     void TypeSystem_Initialize();
     void TypeSystem_Cleanup();
+
+    void Relocate();
 
     void Link(CLR_RT_Assembly *assm);
     void PostLinkageProcessing(CLR_RT_Assembly *assm);
@@ -2462,7 +2462,6 @@ struct CLR_RT_ProtectFromGC
     NANOCLR_NOINLINE void UnlinkOutOfOrder();
 
     void Invoke();
-
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -3231,18 +3230,9 @@ struct CLR_RT_GarbageCollector
     {
         if (field->m_fields)
         {
-            // Relocate the internal pointers within each HeapBlock in the array
-            // (must be done before updating m_fields, while it still points to the old location)
+            // The slots sit inside an unmovable blob the heap walk steps over, so they are relocated
+            // here and nowhere else. See CLAUDE.md "Static fields on generic types".
             CLR_RT_GarbageCollector::Heap_Relocate(field->m_fields, field->m_count);
-
-            // Update m_fields pointer itself to wherever the block array moved after compaction.
-            // Without this, m_fields becomes a dangling pointer after any GC compaction.
-            CLR_RT_GarbageCollector::Heap_Relocate((void **)&field->m_fields);
-        }
-
-        if (field->m_fieldDefs)
-        {
-            CLR_RT_GarbageCollector::Heap_Relocate((void **)&field->m_fieldDefs);
         }
     }
 
@@ -4291,15 +4281,12 @@ struct CLR_RT_ExecutionEngine
     CLR_RT_HeapBlock *ExtractHeapBlocksForArray(
         CLR_RT_TypeDef_Instance &inst,
         CLR_UINT32 length,
-        const CLR_RT_ReflectionDef_Index &reflex);
+        const CLR_RT_ReflectionDef_Index &reflex,
+        CLR_UINT32 extraBytes = 0);
     CLR_RT_HeapBlock *ExtractHeapBlocksForClassOrValueTypes(
         CLR_UINT32 dataType,
         CLR_UINT32 flags,
         const CLR_RT_TypeDef_Index &cls,
-        CLR_UINT32 length);
-    CLR_RT_HeapBlock *ExtractHeapBlocksForGenericInstance(
-        CLR_UINT32 flags,
-        const CLR_RT_TypeSpec_Index &genericType,
         CLR_UINT32 length);
     CLR_RT_HeapBlock *ExtractHeapBytesForObjects(CLR_UINT32 dataType, CLR_UINT32 flags, CLR_UINT32 length);
     CLR_RT_HeapBlock *ExtractHeapBlocksForObjects(CLR_UINT32 dataType, CLR_UINT32 flags, CLR_UINT32 length);
@@ -4337,15 +4324,6 @@ struct CLR_RT_ExecutionEngine
         const CLR_RT_TypeDef_Instance &inst,
         const CLR_RT_TypeSpec_Instance *genericInstance = nullptr);
     HRESULT NewObject(CLR_RT_HeapBlock &reference, CLR_UINT32 token, CLR_RT_Assembly *assm);
-
-    HRESULT NewGenericInstanceObject(
-        CLR_RT_HeapBlock &reference,
-        const CLR_RT_TypeDef_Instance &typeDef,
-        const CLR_RT_TypeSpec_Index *genericType);
-    HRESULT NewGenericInstanceObject(
-        CLR_RT_HeapBlock &reference,
-        const CLR_RT_TypeDef_Instance &typeDef,
-        const CLR_RT_TypeSpec_Instance *genericInstance);
 
     HRESULT CloneObject(CLR_RT_HeapBlock &reference, const CLR_RT_HeapBlock &source);
     HRESULT CopyValueType(CLR_RT_HeapBlock *destination, const CLR_RT_HeapBlock *source);

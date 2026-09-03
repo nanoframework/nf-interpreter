@@ -56,6 +56,8 @@ fundamentally about choosing the right closed TypeSpec for a given call site.
   in a signature. The element stream is: `GENERICINST` marker → CLASS or
   VALUETYPE element carrying the *generic typedef* + arg count → that many
   argument elements (each may itself be a nested `GENERICINST`).
+  It is a signature element type **only** — it is never the datatype of a
+  heap block. See §13.
 
 **How a closed TypeSpec is selected at a call site.** Roughly:
 
@@ -350,7 +352,66 @@ slots:
   so a bare-VAR field like `static T DefaultValue` in
   `Foo<int>` is stamped `I4` and in `Foo<string>` is stamped OBJECT.
   Passing no instance here would leave every VAR field wrongly typed as
-  the OBJECT block that `ExtractHeapBlocksForObjects` produced.
+  the OBJECT block that `CLR_AllocateGenericStaticFieldStorage` produced.
+
+### GC contract for the per-instantiation storage
+
+The per-instantiation slots are the one place in the CLR where an *array*
+of heap blocks is addressed by pointer arithmetic
+(`GetGenericStaticField` returns `&ts.genericStaticFields[i]`) while
+living outside a containing object. That forces three rules, and getting
+any of them wrong produces the same symptom: a static field read returns
+the contents of an unrelated heap block. When the block it lands on is a
+generic instance, the value comes back as a `CLR_RT_TypeSpec_Index` bit
+pattern such as `0x01000001` (§13).
+
+**1. The run must not be split.** `CLR_AllocateGenericStaticFieldStorage`
+allocates the slots as the payload of an unmovable
+`DATATYPE_BINARY_BLOB_HEAD` block (`ExtractHeapBlocksForEvents`, which
+adds `HB_Event`, hence `HB_Unmovable`). Compaction moves *maximal
+contiguous groups* of movable blocks into whatever free region is
+current, and ends a group when that region fills
+(`GarbageCollector_Compaction.cpp`, the `freeRegion_Size < len` break).
+So a bare run of N separately-movable size-1 blocks — what
+`ExtractHeapBlocksForObjects` gives you — can be broken in the middle,
+after which `m_fields[1]` points at an unrelated block while
+`m_fields[0]` is still correct. The blob header carries the whole run's
+`DataSize`, so the heap walk steps over the payload and compaction skips
+the run as a unit.
+
+*Rejected: pinning the slots individually.* Compaction tests
+`HB_Unmovable` per block, so every slot would need the flag, and slot
+flags do not survive. `InitializeReference` ends with
+`SetDataId(RAW_ID(dt, HB_Alive, 1))`, and `stsfld` on a reference-typed
+field goes through `AssignAndPreserveType`, which copies the whole `m_id`
+(flags included) from the eval-stack value whenever the slot's datatype
+is above `DATATYPE_LAST_PRIMITIVE_TO_PRESERVE`. The first write to a
+`static T` field would silently unpin the run.
+
+**2. Marking and relocation must walk the same array.** Both are driven
+from the global registry `g_CLR_RT_TypeSystem.m_genericStaticFields[]` —
+marking in `Assembly_Mark`, relocation in `CLR_RT_TypeSystem::Relocate`.
+Marking used to iterate per-assembly `crossReferenceTypeSpec` rows while
+relocation iterated the global array; a record reachable only from the
+registry (`FindOrCreateGenericStaticFields` creates exactly that shape,
+though it currently has no callers) would then be relocated but never
+marked, and freed while live.
+
+**3. Relocation runs once per pass, not once per assembly.**
+`Heap_Relocate(void**)` adds a region offset — it is *not* idempotent.
+`CLR_RT_Assembly::Relocate` is the `DATATYPE_ASSEMBLY` handler
+(`TypeSystemLookup.cpp`), so the heap walk calls it once per loaded
+assembly; driving the global registry from there shifted every pointer
+once per assembly. The hook is now `CLR_RT_ExecutionEngine::Relocate`,
+which `Heap_Relocate_Pass` calls exactly once after the walk.
+
+Because the payload is inside a blob the heap walk steps over, the slots'
+own contents are relocated *only* by
+`RelocateGenericStaticField` — that is why it still calls
+`Heap_Relocate(m_fields, m_count)`. Conversely `m_fields` itself never
+moves, so it is not relocated, and neither are the `tsCross` caches that
+copy it. `m_fieldDefs` is `platform_malloc`'d and was never a heap
+pointer; relocating it was always meaningless.
 
 ### Nested generic construction
 
@@ -603,6 +664,52 @@ so a packing change breaks the build instead of the runtime.
 
 ---
 
+### One representation for generic instances
+
+A generic instance is a `DATATYPE_CLASS`/`DATATYPE_VALUETYPE` block carrying
+`HB_GenericInstance`, with its closed TypeSpec in the aliased word described
+above. That is the only representation. `DATATYPE_GENERICINST` is a signature
+element type (§1) and must never appear as a heap-block datatype.
+
+There used to be a second representation. `NewGenericInstanceObject` allocated
+`DATATYPE_GENERICINST` blocks for the `unbox`-a-`Nullable<T>` path, and those
+blocks were never finished:
+
+- the TypeSpec was never actually stored — the setter call sat commented out in
+  `ExtractHeapBlocksForGenericInstance`, so `ObjectGenericType()` read zero;
+- the datatype was absent from the switch in
+  `GarbageCollector_ComputeReachabilityGraph.cpp`, so the block was marked alive
+  but its fields were never traced — a reference held only by such a block was
+  collected while live;
+- `TypeSystemLookup.cpp` gave it `DT_NOREL`, so its field references were never
+  fixed up during compaction;
+- `IsAGenericInstance()` returned false for it, because the allocator never set
+  `HB_GenericInstance`.
+
+About ten other datatype switches — `InitializeFromObject`,
+`ExtractTypeIndexFromObject`, `EnsureObjectReference`, `GetHashCode`,
+`ObjectsEqual`, `Compare_Values`, `Reassign`, `CloneObject` — rejected such a
+block outright, so it could not be cast, hashed, compared or cloned either.
+
+It was removed rather than completed. `InitializeLocals` and `CloneObject` had
+already been migrated to `NewObject` — the `if (isGenericInstance)` branch sat
+commented out beside the live call — leaving one unconverted call site. Finishing
+the second representation would have meant re-integrating it with the GC, the
+type descriptor, hashing, equality, cloning and casting merely to reach parity
+with what `NewObject` already produced.
+
+The two GC defects were silent rather than crashing, which is what decided it:
+deleting the allocator makes them unreachable by construction, a stronger
+guarantee than adding the missing handlers and then having to remember this
+datatype in every future switch.
+
+**Design rule.** A new heap-block datatype is not done until it appears in
+`GarbageCollector_ComputeReachabilityGraph.cpp`, has a non-null `m_relocate`
+entry in `TypeSystemLookup.cpp`, and is handled in
+`CLR_RT_TypeDescriptor::InitializeFromObject`.
+
+---
+
 ## 14. Build + debug workflow
 
 ### Build the netcore CLR DLL
@@ -696,6 +803,17 @@ When you see one of these symptoms, this is where to look first.
   priority-2 result is being picked up when it shouldn't (because the
   callee's `genericType` is open), the gate is missing or wrong.
 
+**A generic static field reads back as `0x0100000N` (or any unrelated
+value) only when the GC compacts.**
+- Reproduce with **both** `--forcegc` and `--compactionaftergc`;
+  `--forcegc` alone only marks and sweeps, and the bug will not show.
+- The storage array was split, mis-relocated, or swept. Check the three
+  rules in §9 "GC contract for the per-instantiation storage" — the
+  symptom is identical for all three.
+- A crash (host exit code 3) on the *next* generic-static test rather
+  than a bad value is the same bug reaching a slot that holds an object
+  reference instead of an `int`.
+
 **Generic `.cctor` not firing or firing twice.**
 - `FindOrCreateGenericStaticFields` hash mismatch — two TypeSpec rows
   encode the same closed type but hash differently, or vice versa. See §10.
@@ -721,3 +839,78 @@ instance.**
   pass 2 of `FindVirtualMethodDef`. If `MatchSignatureForVirtualDispatch`
   mishandles the VAR↔GENERICINST drain (specifically for multi-argument
   generics like `KeyValuePair<,>`), this is the symptom.
+
+---
+
+## 16. `Span<T>`/`ReadOnlySpan<T>` storage-pointer arrays and GC
+
+Not generics-specific, but the same "storage array split/mis-relocated/
+swept" family as §9, so documented the same way: rationale here, source
+stays terse.
+
+**Background.** `Span<T>`'s native backing (`corlib_native_System_Span_1.cpp`,
+`corlib_native_System_ReadOnlySpan_1.cpp`) doesn't reuse the wrapped
+`T[]`'s `CLR_RT_HeapBlock_Array` directly — it allocates a second, small
+"shell" `CLR_RT_HeapBlock_Array` via `CreateInstanceWithStorage` whose
+`ReflectionData().kind == REFLECTION_STORAGE_PTR`. The shell has no
+element storage of its own; `GetFirstElement()` returns a raw
+`m_StoragePointer` address that points into the *original* array's
+element data (or, for the `Span(void*, int)` ctor, into unmanaged
+memory). This lets slicing/wrapping avoid copying.
+
+**The bug.** Originally the shell held nothing but that raw address —
+no `CLR_RT_HeapBlock` reference back to the array that actually owns the
+memory. Two independent failures followed from that:
+1. **Reachability.** `ComputeReachabilityGraphForMultipleBlocks`'s
+   `DATATYPE_SZARRAY` case only marks an array's *elements* reachable,
+   and only when `m_fReference` is set (never true for a shell, since
+   `Span<T>` rejects reference-containing `T`). Nothing marked the
+   *owning* array reachable through the shell, so a temporary like
+   `new Span<int>(new int[n])` had no live reference to the backing
+   `int[]` once the constructor returned — `--forcegc` would sweep it,
+   filling it with `SENTINEL_RECOVERED` (`0xDFDFDFDF`,
+   `CLR_RT_HeapCluster::RecoverFromGC` in `CLR_RT_HeapCluster.cpp`) while
+   the shell's raw pointer kept pointing at that now-dead memory. This is
+   the `CopyTo_WithLargeArray_ShouldCopyAllElements` failure signature:
+   `Actual:<-538976289>` is `0xDFDFDFDF` as `int32`.
+2. **Compaction.** Even had the owner survived sweep, `m_StoragePointer`
+   is a bare address with no type tag — `CLR_RT_HeapBlock_Array::Relocate()`
+   had no way to know it needed adjusting when the owner's element data
+   physically moved, so it would go stale across `--compactionaftergc`
+   too.
+
+The reachability failure reproduces with `--forcegc`; add
++`--compactionaftergc` to exercise the relocation failure.
+About 1 run in 9–10 failed under both flags before the fix, which is why
+a single clean run proves nothing here (loop 15–20×, see §14).
+
+**The fix.** `CreateInstanceWithStorage` now takes an `owner` reference
+(the array actually backing the memory — `nullptr` for the unmanaged-
+memory ctor) and allocates one extra `sizeof(CLR_RT_HeapBlock)` of
+storage beyond the shell's header (`extraBytes` threaded through
+`CLR_RT_HeapBlock_Array::CreateInstance` → `CLR_RT_ExecutionEngine::
+ExtractHeapBlocksForArray`). That slot — `StorageOwner()`, aliasing the
+same `&this[1]` address a normal array would use for element 0, which is
+otherwise unused on a storage-pointer shell — holds a real
+`SetObjectReference` to the owner. `ComputeReachabilityGraphForMultipleBlocks`
+marks it explicitly for `IsStoragePointer()` arrays, so the owner is
+reachable transitively through the shell like any other object
+reference. `CLR_RT_HeapBlock_Array::Relocate()` relocates that reference
+via the normal `Heap_Relocate(CLR_RT_HeapBlock*, 1)` path, then relocates
+`m_StoragePointer` itself via the generic `Heap_Relocate(void**)` address-
+range lookup — safe because that call only rewrites the stored address
+value by table lookup, it never dereferences memory at the (possibly
+not-yet-moved) target, so ordering within the compaction pass doesn't
+matter. A shell built over a shell (e.g. `Span.Slice` of a `Span`) chains
+correctly with no special-casing: each shell only tracks its immediate
+`sourceArray`, and marking/relocation recurse through the chain via the
+same generic per-object dispatch.
+
+**If you see `SENTINEL_RECOVERED` (`0xDFDFDFDF`) or a stale value read
+through a `Span<T>`/`ReadOnlySpan<T>`:**
+- Confirm it reproduces only with `--forcegc` (sweep) or needs
+  `--compactionaftergc` too (relocation) — tells you which of the two
+  mechanisms above is implicated.
+- Check that the shell's `StorageOwner()` was actually set (i.e. the
+  constructor path went through the array-backed `CreateInstanceWithStorage`
+  call, not the raw-pointer one, which intentionally has no owner).
