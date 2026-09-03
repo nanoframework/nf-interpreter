@@ -456,6 +456,8 @@ void CLR_RT_ExecutionEngine::Relocate()
     CLR_RT_GarbageCollector::Heap_Relocate((void **)&m_currentUICulture);
 
     m_weakReferences.Relocate();
+
+    g_CLR_RT_TypeSystem.Relocate();
 }
 
 //--//

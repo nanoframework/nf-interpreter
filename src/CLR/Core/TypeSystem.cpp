@@ -5860,6 +5860,39 @@ HRESULT CLR_RT_Assembly::ResolveAllocateStaticFields(CLR_RT_HeapBlock *pStaticFi
     NANOCLR_NOCLEANUP();
 }
 
+// The slots are indexed as an array, so the run has to stay contiguous and unmoved: see CLAUDE.md
+// "Static fields on generic types".
+static CLR_RT_HeapBlock *AllocateGenericStaticFieldStorage(CLR_UINT32 count)
+{
+    NATIVE_PROFILE_CLR_CORE();
+
+    const CLR_UINT32 headerBlocks = CONVERTFROMSIZETOHEAPBLOCKS(sizeof(CLR_RT_HeapBlock_BinaryBlob));
+
+    auto *blob = (CLR_RT_HeapBlock_BinaryBlob *)g_CLR_RT_ExecutionEngine.ExtractHeapBlocksForEvents(
+        DATATYPE_BINARY_BLOB_HEAD,
+        0,
+        headerBlocks + count);
+
+    if (blob == nullptr)
+    {
+        return nullptr;
+    }
+
+    // no handlers: the registry marks and relocates the payload, see CLR_RT_TypeSystem::Relocate
+    blob->SetBinaryBlobHandlers(nullptr, nullptr);
+    blob->m_assembly = nullptr;
+
+    CLR_RT_HeapBlock *fields = (CLR_RT_HeapBlock *)blob + headerBlocks;
+
+    // the record is registered before the slots are typed, so they have to be walkable right away
+    for (CLR_UINT32 i = 0; i < count; i++)
+    {
+        fields[i].SetObjectReference(nullptr);
+    }
+
+    return fields;
+}
+
 HRESULT CLR_RT_Assembly::ResolveAllocateGenericTypeStaticFields()
 {
     NATIVE_PROFILE_CLR_CORE();
@@ -5978,10 +6011,7 @@ HRESULT CLR_RT_Assembly::ResolveAllocateGenericTypeStaticFields()
         }
 
         // Allocate storage for the static fields
-        CLR_RT_HeapBlock *fields = g_CLR_RT_ExecutionEngine.ExtractHeapBlocksForObjects(
-            DATATYPE_OBJECT, // heapblock kind
-            0,               // flags
-            count);          // number of CLR_RT_HeapBlock entries
+        CLR_RT_HeapBlock *fields = AllocateGenericStaticFieldStorage(count);
 
         if (fields == nullptr)
         {
@@ -6247,10 +6277,7 @@ HRESULT CLR_RT_Assembly::AllocateGenericStaticFieldsOnDemand(
     }
 
     // Allocate storage for the static fields
-    fields = g_CLR_RT_ExecutionEngine.ExtractHeapBlocksForObjects(
-        DATATYPE_OBJECT, // heapblock kind
-        0,               // flags
-        count);          // number of CLR_RT_HeapBlock entries
+    fields = AllocateGenericStaticFieldStorage(count);
 
     if (fields == nullptr)
     {
@@ -7200,40 +7227,24 @@ void CLR_RT_Assembly::Relocate()
     CLR_RT_GarbageCollector::Heap_Relocate(staticFields, staticFieldsCount);
 #endif
 
-    // Relocate all generic static field entries
-    for (CLR_UINT32 i = 0; i < g_CLR_RT_TypeSystem.m_genericStaticFieldsCount; i++)
-    {
-        CLR_RT_GarbageCollector::RelocateGenericStaticField(&g_CLR_RT_TypeSystem.m_genericStaticFields[i]);
-    }
-
-    // Resync TypeSpec cross-ref caches into the relocated generic static field arrays
-    // (they are platform_malloc'd, so GC relocation above does not update them).
-    for (CLR_UINT32 i = 0; i < g_CLR_RT_TypeSystem.m_genericStaticFieldsCount; i++)
-    {
-        const CLR_RT_GenericStaticFieldRecord &record = g_CLR_RT_TypeSystem.m_genericStaticFields[i];
-
-        // Walk every assembly, every TypeSpec cross-reference, and update the cache if it was
-        // pointing at this record's old field block.
-        NANOCLR_FOREACH_ASSEMBLY(g_CLR_RT_TypeSystem)
-        {
-            for (int tsIdx = 0; tsIdx < pASSM->tablesSize[TBL_TypeSpec]; tsIdx++)
-            {
-                CLR_RT_TypeSpec_CrossReference &tsCross = pASSM->crossReferenceTypeSpec[tsIdx];
-
-                if (tsCross.genericStaticFields != nullptr && tsCross.genericStaticFieldsCount == record.m_count &&
-                    tsCross.genericStaticFieldDefs == record.m_fieldDefs)
-                {
-                    tsCross.genericStaticFields = record.m_fields;
-                }
-            }
-        }
-        NANOCLR_FOREACH_ASSEMBLY_END();
-    }
-
     CLR_RT_GarbageCollector::Heap_Relocate((void **)&header);
     CLR_RT_GarbageCollector::Heap_Relocate((void **)&name);
     CLR_RT_GarbageCollector::Heap_Relocate((void **)&file);
     CLR_RT_GarbageCollector::Heap_Relocate((void **)&nativeCode);
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void CLR_RT_TypeSystem::Relocate()
+{
+    NATIVE_PROFILE_CLR_CORE();
+
+    // The registry is global, so this runs once per relocation pass, never per assembly:
+    // see CLAUDE.md "Static fields on generic types".
+    for (CLR_UINT32 i = 0; i < m_genericStaticFieldsCount; i++)
+    {
+        CLR_RT_GarbageCollector::RelocateGenericStaticField(&m_genericStaticFields[i]);
+    }
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -9326,11 +9337,7 @@ CLR_RT_GenericStaticFieldRecord *CLR_RT_TypeSystem::FindOrCreateGenericStaticFie
     const CLR_RECORD_TYPEDEF *ownerTd = ownerAssembly->GetTypeDef(typeDef.Type());
 
     // Allocate storage for the static fields
-    CLR_RT_HeapBlock *pFields = g_CLR_RT_ExecutionEngine.ExtractHeapBlocksForObjects(
-        DATATYPE_OBJECT, // Use OBJECT type for proper GC management
-        0,               // No special flags
-        staticFieldCount // Number of fields
-    );
+    CLR_RT_HeapBlock *pFields = AllocateGenericStaticFieldStorage(staticFieldCount);
 
     if (pFields == nullptr)
     {
