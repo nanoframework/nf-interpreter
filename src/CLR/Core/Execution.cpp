@@ -3139,18 +3139,12 @@ CLR_RT_HeapBlock_Lock *CLR_RT_ExecutionEngine::FindLockObject(CLR_RT_HeapBlock &
     {
         CLR_RT_HeapBlock *ptr = object.Dereference();
 
-        if (ptr)
+        // for these the header slot is authoritative: nullptr means "not locked". Everything else
+        // (strings, arrays, generic instances) falls through to the thread list search below.
+        // See CLAUDE.md "Object header aliasing"
+        if (ptr && ptr->HasObjectLockSlot())
         {
-            switch (ptr->DataType())
-            {
-                case DATATYPE_VALUETYPE:
-                case DATATYPE_CLASS:
-                    return ptr->ObjectLock();
-
-                default:
-                    // the remaining data types aren't to be handled
-                    break;
-            }
+            return ptr->ObjectLock();
         }
     }
 

@@ -27,7 +27,10 @@ the rationale is in here:
   `SpawnStaticConstructor`, `ResolveGenericTypeParameter`,
   `InitializeLocals`.
 - `CLR_RT_HeapBlock.cpp` — `SetGenericInstanceType`, `TypeDescriptorsMatch`,
-  the `CLASS → GENERICINST` promotion path.
+  the `CLASS → GENERICINST` promotion path, `Relocate_Cls`.
+- `CLR_RT_HeapBlock_Lock.cpp` and `FindLockObject`/`LockObject` in
+  `Execution.cpp`, plus `HasObjectLockSlot`/`ObjectLock`/`SetObjectLock` in
+  `nanoCLR_Runtime__HeapBlock.h` (§13).
 
 Generics in this CLR are an active preview. Expect gaps. When something
 doesn't work, the first question is almost always *which generic context is
@@ -488,7 +491,119 @@ they're not generics-related.
 
 ---
 
-## 13. Build + debug workflow
+## 13. Object header aliasing - monitor lock vs generic TypeSpec
+
+`CLR_RT_HeapBlock::m_data` is a union, and two of its members overlap
+exactly:
+
+```text
+m_data byte offset:      0    1    2    3  |  4    5    6    7
+                       --------------------+--------------------
+objectHeader           [    cls (4B)      ] | [   lock (ptr)   ]
+reflection             [kind(2)][levels(2)] | [ data.typeSpec  ]
+```
+
+`reflection.data` is always at offset 4. Where `lock` lands depends on
+pointer size and packing, and follows the same three cases already spelled
+out by `CLR_RT_HeapBlock_Raw` at the top of the header:
+
+- **32-bit targets** (ARM/Xtensa/RISC-V) — pointer is 4 bytes, so `lock` is
+  at offset 4. The overlap is total.
+- **MSVC, including `_WIN64`** — the runtime headers compile inside
+  `#pragma pack(push, ..., 4)` (`nanoCLR_Runtime.h`), so the 8-byte pointer
+  is not padded up and still starts at offset 4. `typeSpec` is its low
+  dword; the high dword is left zero by `HB_InitializeToZero`, which is why
+  a stored TypeSpec reads back as a small value such as `0x0000000001000002`.
+- **`__LP64__`** (macOS/Linux, `targets/posix`) — that pack pragma is
+  `#if defined(_MSC_VER)` only, so the pointer aligns naturally to 8 and
+  `lock` sits at offset 8. **The two do not overlap here.**
+
+Two consequences. The bug does not reproduce on the 64-bit POSIX build, so
+do not use that target to verify a change in this area. And the `CT_ASSERT`
+pinning the overlap is guarded with `#if !defined(__LP64__)` — without the
+guard it fails the posix build, which is a real signal, not a nuisance.
+
+`HasObjectLockSlot()` is correct on all three: on LP64 it simply routes
+generic instances through the thread-list lookup they would not strictly
+need there.
+
+`SetGenericInstanceType` writes the closed TypeSpec into that word for
+every generic instance, immediately after `SetObjectCls` has set
+`lock = nullptr` (`NewObject`, §7). A generic instance keeps
+`DATATYPE_CLASS`/`DATATYPE_VALUETYPE`; genericness is carried only by the
+`HB_GenericInstance` flag. The flag and the aliased write are set under the
+same condition, so `IsAGenericInstance()` is exactly the predicate *"this
+header word holds a TypeSpec."*
+
+### Why it cannot simply be un-aliased
+
+On 32-bit targets `m_data` is exactly 8 bytes (`cls` + `lock`). A third
+word grows **every** heap block from 12 to 16 bytes — a third of the whole
+managed heap. The object header has two 32-bit slots and generics took the
+second one.
+
+### The rule
+
+**A generic instance has no header lock slot.** `HasObjectLockSlot()` is
+the single predicate for this; `ObjectLock()` returns `nullptr` and
+`SetObjectLock()` is a no-op for anything it rejects.
+
+Generic instances are located by the thread-list search in
+`CLR_RT_ExecutionEngine::FindLockObject`, which walks
+`m_threadsReady`/`m_threadsWaiting` matching `lock->m_resource` by
+reference identity. That is **not** a fallback invented for generics — it
+is already the only lookup for everything that hits `default:` in the old
+datatype switch: `lock(someString)`, `lock(someArray)`, and every
+`[MethodImpl(Synchronized)]` *static* method (which locks a
+`DATATYPE_REFLECTION` block built in `CLR_RT_StackFrame`). Generic
+instances simply joined that set.
+
+The invariant it depends on — every live lock reachable from
+`m_threadsReady`/`m_threadsWaiting` — is already enforced by the GC:
+`Thread_Mark` runs on exactly those two lists and is the only thing that
+marks `lock->m_resource`. A lock reachable only from `m_threadsZombie`
+would already have had its resource collected.
+
+Consequences elsewhere:
+- `Relocate_Cls` must not relocate that word for a generic instance. This
+  is hardening rather than a live bug — lock nodes carry `HB_Event`, hence
+  `HB_Unmovable`, so compaction never moves them and the relocation is a
+  no-op for real locks.
+- `Profiler` dumping `ObjectLock()` gets `nullptr`, same as an unlocked
+  object.
+- The GC reachability marker never touches the header word (it walks
+  `ptr + 1` onward), so there is nothing to change there.
+
+A `CT_ASSERT` next to the union members pins
+`offsetof(ObjectHeader, lock) == offsetof(CLR_RT_ReflectionDef_Index, data)`
+so a packing change breaks the build instead of the runtime.
+
+### Rejected alternatives
+
+- **A `HB_HasLock` flag bit plus displacing the TypeSpec into the lock
+  node.** Architecturally the right destination and what the desktop CLR
+  does, but `m_id.type.flags` is a `CLR_UINT8` with all eight bits
+  assigned. The header offers `HB_Signaled`/`HB_SignalAutoReset` as
+  reclaimable, but those are wanted for the C# `async`/`await` work, and
+  freeing them means reworking `CLR_RT_HeapBlock_WaitForObject`,
+  `ManualResetEvent`, `AutoResetEvent`, `WaitHandle` and `Thread.Join`.
+- **A tag bit in the TypeSpec encoding (`(data << 1) | 1`) plus
+  displacement.** Exact and spends no flag bit, but costs a bit of
+  assembly-index range and needs save/restore pairing that must be exact
+  across `CreateInstance`, `ChangeOwner`, `DestroyOwner`, thread teardown
+  and AppDomain unload — a silent-corruption failure mode in exchange for
+  a lookup win that is single-digit iterations on these devices.
+- **Discriminating by inspecting the value.** Every variant is a
+  heuristic. Reading the pointee's `DATATYPE_LOCK_HEAD` tag or
+  round-tripping through `lock->m_resource` both dereference a value that
+  may not be a pointer — on an MMU-less MCU that returns garbage instead
+  of faulting. Validating it as a TypeSpec via `InitializeFromIndex`
+  avoids the dereference but reduces to "is the top byte a loaded assembly
+  index?", which holds only by memory-map coincidence.
+
+---
+
+## 14. Build + debug workflow
 
 ### Build the netcore CLR DLL
 
@@ -551,7 +666,7 @@ need step-by-step visibility into opcode dispatch.
 
 ---
 
-## 14. Known failure-mode catalog
+## 15. Known failure-mode catalog
 
 When you see one of these symptoms, this is where to look first.
 
@@ -586,6 +701,19 @@ When you see one of these symptoms, this is where to look first.
   encode the same closed type but hash differently, or vice versa. See §10.
 - Alternatively, the resumption logic on `SpawnStaticConstructor` lost the
   TypeSpec index (`m_genericTypeSpec.data` zeroed prematurely).
+
+**Access violation in `CLR_RT_HeapBlock_Lock::IncrementOwnership`, `lock`
+argument is a small value like `0x01000002`.**
+- That is not a corrupt pointer, it is a `CLR_RT_TypeSpec_Index`
+  (`assembly << 24 | index`) being read out of the aliased header word.
+  Something handed a generic instance's header to the monitor code. See
+  §13.
+
+**Generic dispatch or `MemberwiseClone` breaks after a `lock` on the same
+instance.**
+- The mirror image: a lock pointer was stored over the instance's closed
+  TypeSpec. Check that the write went through `SetObjectLock` rather than
+  touching `m_data.objectHeader.lock` directly. See §13.
 
 **`Dictionary<TKey,TValue>` constructor from an `IDictionary<,>` crashes.**
 - Specific instance of the suffix-only / signature-matcher bug. The
