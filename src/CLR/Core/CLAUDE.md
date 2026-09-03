@@ -879,9 +879,9 @@ memory. Two independent failures followed from that:
    physically moved, so it would go stale across `--compactionaftergc`
    too.
 
-Both require `--forcegc --compactionaftergc` together to reproduce
-reliably; either flag alone can miss it depending on allocation timing —
-about 1 run in 9–10 failed under both flags before the fix, which is why
+The reachability failure reproduces with `--forcegc`; add
++`--compactionaftergc` to exercise the relocation failure.
+About 1 run in 9–10 failed under both flags before the fix, which is why
 a single clean run proves nothing here (loop 15–20×, see §14).
 
 **The fix.** `CreateInstanceWithStorage` now takes an `owner` reference
