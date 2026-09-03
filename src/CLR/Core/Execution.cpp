@@ -1710,13 +1710,14 @@ CLR_INT32 CLR_RT_ExecutionEngine::GetNextThreadId()
 CLR_RT_HeapBlock *CLR_RT_ExecutionEngine::ExtractHeapBlocksForArray(
     CLR_RT_TypeDef_Instance &inst,
     CLR_UINT32 length,
-    const CLR_RT_ReflectionDef_Index &reflex)
+    const CLR_RT_ReflectionDef_Index &reflex,
+    CLR_UINT32 extraBytes)
 {
     NATIVE_PROFILE_CLR_CORE();
     NanoCLRDataType dt = (NanoCLRDataType)inst.target->dataType;
     const CLR_RT_DataTypeLookup &dtl = c_CLR_RT_DataTypeLookup[dt];
 
-    CLR_UINT32 totLength = (CLR_UINT32)(sizeof(CLR_RT_HeapBlock_Array) + length * dtl.m_sizeInBytes);
+    CLR_UINT32 totLength = (CLR_UINT32)(sizeof(CLR_RT_HeapBlock_Array) + length * dtl.m_sizeInBytes + extraBytes);
     CLR_UINT32 lengthHB = CONVERTFROMSIZETOHEAPBLOCKS(totLength);
 
     if (lengthHB > CLR_RT_HeapBlock::HB_MaxSize)

@@ -1899,7 +1899,8 @@ struct CLR_RT_HeapBlock_Array : public CLR_RT_HeapBlock
     static HRESULT CreateInstance(
         CLR_RT_HeapBlock &reference,
         CLR_UINT32 length,
-        const CLR_RT_ReflectionDef_Index &reflex);
+        const CLR_RT_ReflectionDef_Index &reflex,
+        CLR_UINT32 extraBytes = 0);
     static HRESULT CreateInstance(CLR_RT_HeapBlock &reference, CLR_UINT32 length, const CLR_RT_TypeDef_Index &cls);
     static HRESULT CreateInstance(
         CLR_RT_HeapBlock &reference,
@@ -1912,7 +1913,8 @@ struct CLR_RT_HeapBlock_Array : public CLR_RT_HeapBlock
         CLR_RT_HeapBlock &reference,
         CLR_UINT32 length,
         const uintptr_t storageAddress,
-        const CLR_RT_TypeDef_Index &cls);
+        const CLR_RT_TypeDef_Index &cls,
+        const CLR_RT_HeapBlock *owner);
 
     CLR_UINT8 *GetFirstElement()
     {
@@ -1951,6 +1953,12 @@ struct CLR_RT_HeapBlock_Array : public CLR_RT_HeapBlock
     bool IsStoragePointer()
     {
         return (ReflectionData().kind == REFLECTION_STORAGE_PTR);
+    }
+
+    // Valid only when IsStoragePointer() is true. See CLAUDE.md §16.
+    CLR_RT_HeapBlock *StorageOwner()
+    {
+        return (CLR_RT_HeapBlock *)&this[1];
     }
 
     HRESULT ClearElements(int index, int length);

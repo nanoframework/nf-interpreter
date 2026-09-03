@@ -64,12 +64,11 @@ HRESULT Library_corlib_native_System_Span_1::_ctor___VOID__VOIDptr__I4(CLR_RT_St
     }
 
     // check if T is a reference type or contains references
-    NANOCLR_CHECK_HRESULT(
-        RuntimeHelpers::CheckReferenceOrContainsReferences(
-            element.Class,
-            element.DataType,
-            &parser,
-            isRefContainsRefs));
+    NANOCLR_CHECK_HRESULT(RuntimeHelpers::CheckReferenceOrContainsReferences(
+        element.Class,
+        element.DataType,
+        &parser,
+        isRefContainsRefs));
 
     if (isRefContainsRefs)
     {
@@ -95,8 +94,13 @@ HRESULT Library_corlib_native_System_Span_1::_ctor___VOID__VOIDptr__I4(CLR_RT_St
 
     {
         CLR_RT_HeapBlock &refArray = thisSpan[FIELD___array];
-        NANOCLR_CHECK_HRESULT(
-            CLR_RT_HeapBlock_Array::CreateInstanceWithStorage(refArray, length, objectRawPointer, element.Class));
+        // this Span wraps raw unmanaged memory, not a managed array - no owner to keep alive/relocate
+        NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstanceWithStorage(
+            refArray,
+            length,
+            objectRawPointer,
+            element.Class,
+            nullptr));
     }
 
     // set length
@@ -172,8 +176,13 @@ HRESULT Library_corlib_native_System_Span_1::NativeSpanConstructor___VOID__SZARR
         uintptr_t ptrToStartElement = (uintptr_t)sourceArray->GetElement(start);
 
         CLR_RT_HeapBlock &refArray = thisSpan[FIELD___array];
-        NANOCLR_CHECK_HRESULT(
-            CLR_RT_HeapBlock_Array::CreateInstanceWithStorage(refArray, length, ptrToStartElement, sourceType));
+        // keep sourceArray (which owns the wrapped storage) alive and tracked across GC/compaction
+        NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstanceWithStorage(
+            refArray,
+            length,
+            ptrToStartElement,
+            sourceType,
+            sourceArray));
     }
 
     // set length

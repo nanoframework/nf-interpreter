@@ -4281,7 +4281,8 @@ struct CLR_RT_ExecutionEngine
     CLR_RT_HeapBlock *ExtractHeapBlocksForArray(
         CLR_RT_TypeDef_Instance &inst,
         CLR_UINT32 length,
-        const CLR_RT_ReflectionDef_Index &reflex);
+        const CLR_RT_ReflectionDef_Index &reflex,
+        CLR_UINT32 extraBytes = 0);
     CLR_RT_HeapBlock *ExtractHeapBlocksForClassOrValueTypes(
         CLR_UINT32 dataType,
         CLR_UINT32 flags,
