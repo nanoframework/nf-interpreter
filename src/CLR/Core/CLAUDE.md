@@ -352,7 +352,66 @@ slots:
   so a bare-VAR field like `static T DefaultValue` in
   `Foo<int>` is stamped `I4` and in `Foo<string>` is stamped OBJECT.
   Passing no instance here would leave every VAR field wrongly typed as
-  the OBJECT block that `ExtractHeapBlocksForObjects` produced.
+  the OBJECT block that `CLR_AllocateGenericStaticFieldStorage` produced.
+
+### GC contract for the per-instantiation storage
+
+The per-instantiation slots are the one place in the CLR where an *array*
+of heap blocks is addressed by pointer arithmetic
+(`GetGenericStaticField` returns `&ts.genericStaticFields[i]`) while
+living outside a containing object. That forces three rules, and getting
+any of them wrong produces the same symptom: a static field read returns
+the contents of an unrelated heap block. When the block it lands on is a
+generic instance, the value comes back as a `CLR_RT_TypeSpec_Index` bit
+pattern such as `0x01000001` (§13).
+
+**1. The run must not be split.** `CLR_AllocateGenericStaticFieldStorage`
+allocates the slots as the payload of an unmovable
+`DATATYPE_BINARY_BLOB_HEAD` block (`ExtractHeapBlocksForEvents`, which
+adds `HB_Event`, hence `HB_Unmovable`). Compaction moves *maximal
+contiguous groups* of movable blocks into whatever free region is
+current, and ends a group when that region fills
+(`GarbageCollector_Compaction.cpp`, the `freeRegion_Size < len` break).
+So a bare run of N separately-movable size-1 blocks — what
+`ExtractHeapBlocksForObjects` gives you — can be broken in the middle,
+after which `m_fields[1]` points at an unrelated block while
+`m_fields[0]` is still correct. The blob header carries the whole run's
+`DataSize`, so the heap walk steps over the payload and compaction skips
+the run as a unit.
+
+*Rejected: pinning the slots individually.* Compaction tests
+`HB_Unmovable` per block, so every slot would need the flag, and slot
+flags do not survive. `InitializeReference` ends with
+`SetDataId(RAW_ID(dt, HB_Alive, 1))`, and `stsfld` on a reference-typed
+field goes through `AssignAndPreserveType`, which copies the whole `m_id`
+(flags included) from the eval-stack value whenever the slot's datatype
+is above `DATATYPE_LAST_PRIMITIVE_TO_PRESERVE`. The first write to a
+`static T` field would silently unpin the run.
+
+**2. Marking and relocation must walk the same array.** Both are driven
+from the global registry `g_CLR_RT_TypeSystem.m_genericStaticFields[]` —
+marking in `Assembly_Mark`, relocation in `CLR_RT_TypeSystem::Relocate`.
+Marking used to iterate per-assembly `crossReferenceTypeSpec` rows while
+relocation iterated the global array; a record reachable only from the
+registry (`FindOrCreateGenericStaticFields` creates exactly that shape,
+though it currently has no callers) would then be relocated but never
+marked, and freed while live.
+
+**3. Relocation runs once per pass, not once per assembly.**
+`Heap_Relocate(void**)` adds a region offset — it is *not* idempotent.
+`CLR_RT_Assembly::Relocate` is the `DATATYPE_ASSEMBLY` handler
+(`TypeSystemLookup.cpp`), so the heap walk calls it once per loaded
+assembly; driving the global registry from there shifted every pointer
+once per assembly. The hook is now `CLR_RT_ExecutionEngine::Relocate`,
+which `Heap_Relocate_Pass` calls exactly once after the walk.
+
+Because the payload is inside a blob the heap walk steps over, the slots'
+own contents are relocated *only* by
+`RelocateGenericStaticField` — that is why it still calls
+`Heap_Relocate(m_fields, m_count)`. Conversely `m_fields` itself never
+moves, so it is not relocated, and neither are the `tsCross` caches that
+copy it. `m_fieldDefs` is `platform_malloc`'d and was never a heap
+pointer; relocating it was always meaningless.
 
 ### Nested generic construction
 
@@ -743,6 +802,17 @@ When you see one of these symptoms, this is where to look first.
 - The §4 priority-2 closed-only gate is the first place to look. If a
   priority-2 result is being picked up when it shouldn't (because the
   callee's `genericType` is open), the gate is missing or wrong.
+
+**A generic static field reads back as `0x0100000N` (or any unrelated
+value) only when the GC compacts.**
+- Reproduce with **both** `--forcegc` and `--compactionaftergc`;
+  `--forcegc` alone only marks and sweeps, and the bug will not show.
+- The storage array was split, mis-relocated, or swept. Check the three
+  rules in §9 "GC contract for the per-instantiation storage" — the
+  symptom is identical for all three.
+- A crash (host exit code 3) on the *next* generic-static test rather
+  than a bad value is the same bug reaching a slot that holds an object
+  reference instead of an `int`.
 
 **Generic `.cctor` not firing or firing twice.**
 - `FindOrCreateGenericStaticFields` hash mismatch — two TypeSpec rows
