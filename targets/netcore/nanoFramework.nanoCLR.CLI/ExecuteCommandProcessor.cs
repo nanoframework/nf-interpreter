@@ -5,6 +5,7 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
 using nanoFramework.nanoCLR.Host;
 using nanoFramework.nanoCLR.Host.Port.TcpIp;
@@ -13,7 +14,6 @@ namespace nanoFramework.nanoCLR.CLI
 {
     internal static class ExecuteCommandProcessor
     {
-        [SupportedOSPlatform("windows")]
         public static int ProcessVerb(
             ExecuteCommandLineOptions options,
             VirtualSerialDeviceManager virtualBridgeManager)
@@ -40,52 +40,64 @@ namespace nanoFramework.nanoCLR.CLI
 
             hostBuilder.UseConsoleDebugPrint();
 
-            // flag to signal that the intenal serial port has already been configured
+            // flag to signal that the internal serial port has already been configured
             bool internalSerialPortConfig = false;
 
             if (options.ExposedSerialPort != null)
             {
-                // a serial port was requested 
-
-                // validate serial port
-                if (!Utilities.ValidateSerialPortName(options.ExposedSerialPort))
+                if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
                 {
-                    throw new CLIException(ExitCode.E9001);
-                }
-
-                // check if Virtual Serial Port Tools are available 
-                if (VirtualSerialDeviceCommandProcessor.CheckIfFunctional(virtualBridgeManager))
-                {
-                    VirtualSerialBridge bridge;
-
-                    // check if the requested port it's a valid Virtual Device
-                    if (VirtualSerialDeviceCommandProcessor.CheckIfPortIsValid(virtualBridgeManager, options.ExposedSerialPort))
+                    // On Windows: validate as a COM port and use the virtual serial bridge if available.
+                    if (!Utilities.ValidateSerialPortName(options.ExposedSerialPort))
                     {
-                        // get the virtual bridge that contains the request port
-                        bridge = virtualBridgeManager.GetVirtualBridgeContainingPort(options.ExposedSerialPort);
-                    }
-                    else
-                    {
-                        // no Virtual Device for that index, create a new virtual bridge
-                        bridge = VirtualSerialDeviceCommandProcessor.CreateVirtualBridge(virtualBridgeManager, options.ExposedSerialPort);
+                        throw new CLIException(ExitCode.E9001);
                     }
 
-                    if (bridge == null)
+                    // check if Virtual Serial Port Tools are available 
+                    if (VirtualSerialDeviceCommandProcessor.CheckIfFunctional(virtualBridgeManager))
                     {
-                        throw new CLIException(ExitCode.E1003);
+                        VirtualSerialBridge bridge;
+
+                        // check if the requested port it's a valid Virtual Device
+                        if (VirtualSerialDeviceCommandProcessor.CheckIfPortIsValid(virtualBridgeManager, options.ExposedSerialPort))
+                        {
+                            // get the virtual bridge that contains the request port
+                            bridge = virtualBridgeManager.GetVirtualBridgeContainingPort(options.ExposedSerialPort);
+                        }
+                        else
+                        {
+                            // no Virtual Device for that index, create a new virtual bridge
+                            bridge = VirtualSerialDeviceCommandProcessor.CreateVirtualBridge(virtualBridgeManager, options.ExposedSerialPort);
+                        }
+
+                        if (bridge == null)
+                        {
+                            throw new CLIException(ExitCode.E1003);
+                        }
+
+                        // need to set debugger serial port to the _other_ port so it shows at the expected end
+                        var internalSerialPort = $"COM{bridge.GetOtherPort(options.ExposedSerialPort)}";
+
+                        hostBuilder.UseSerialPortWireProtocol(internalSerialPort);
+
+                        // set flag
+                        internalSerialPortConfig = true;
                     }
 
-                    // need to set debugger serial port to the _other_ port so it shows at the expected end
-                    var internalSerialPort = $"COM{bridge.GetOtherPort(options.ExposedSerialPort)}";
-
-                    hostBuilder.UseSerialPortWireProtocol(internalSerialPort);
-
-                    // set flag
-                    internalSerialPortConfig = true;
+                    // if virtual bridge was not available, fall through to use the port directly
                 }
                 else
                 {
-                    return -1;
+                    // On Linux/macOS: accept /dev/ttyUSB0, /dev/tty.usbserial-*, /dev/ttyS0, etc.
+                    if (!Utilities.ValidatePosixSerialPortName(options.ExposedSerialPort))
+                    {
+                        throw new CLIException(ExitCode.E9001,
+                            $"Invalid serial port name '{options.ExposedSerialPort}'. " +
+                            "On Linux/macOS use a /dev/ path, e.g. /dev/ttyUSB0, /dev/ttyACM0, /dev/cu.usbserial-XXXX.");
+                    }
+
+                    hostBuilder.UseSerialPortWireProtocol(options.ExposedSerialPort);
+                    internalSerialPortConfig = true;
                 }
             }
 
@@ -105,7 +117,8 @@ namespace nanoFramework.nanoCLR.CLI
             }
 
             if (!internalSerialPortConfig
-                && options.ExposedSerialPort != null)
+                && options.ExposedSerialPort != null
+                && RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
                 hostBuilder.UseSerialPortWireProtocol(options.ExposedSerialPort);
             }
@@ -117,7 +130,14 @@ namespace nanoFramework.nanoCLR.CLI
 
             if (options.ExposedNamedPipe != null)
             {
-                hostBuilder.UseNamedPipeWireProtocol(options.ExposedNamedPipe);
+                if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                {
+                    hostBuilder.UseNamedPipeWireProtocol(options.ExposedNamedPipe);
+                }
+                else
+                {
+                    throw new CLIException(ExitCode.E9000, "--namedpipe is only supported on Windows.");
+                }
             }
 
             if (options.TraceWireProtocol)

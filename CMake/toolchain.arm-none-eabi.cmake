@@ -50,10 +50,5 @@ set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
 set(CMAKE_FIND_ROOT_PATH_MODE_PACKAGE ONLY)
 
 # set required C and C++ standard for ALL targets
-set(CMAKE_C_STANDARD 17 CACHE INTERNAL "C standard for all targets")
-set(CMAKE_CXX_STANDARD 17 CACHE INTERNAL "C++ standard for all targets")
-
-# set all C and C++ extensions to be OFF on ALL targets
-# this forces the use of -std=c17 and -std=c++17 instead of -std=gnu17 and -std=gnu++17
-set(CMAKE_C_EXTENSIONS OFF CACHE INTERNAL "C compiler extensions OFF")
-set(CMAKE_CXX_EXTENSIONS OFF CACHE INTERNAL "C++ compiler extensions OFF")
+set(CMAKE_C_STANDARD 23 CACHE INTERNAL "C standard for all targets")
+set(CMAKE_CXX_STANDARD 23 CACHE INTERNAL "C++ standard for all targets")

@@ -78,11 +78,6 @@ if(NF_FEATURE_HAS_CONFIG_BLOCK)
     list(APPEND TARGET_NXP_COMMON_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/targetHAL_ConfigurationManager.cpp)
 endif()
 
-# include internal storage, if feature is enabled
-if(NF_FEATURE_HAS_ACCESSIBLE_STORAGE)
-    list(APPEND TARGET_NXP_COMMON_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/targetHAL_StorageOperation.cpp)
-endif()
-
 # List of the required FatFs include files.
 list(APPEND TARGET_NXP_COMMON_INCLUDE_DIRS ${fatfs_SOURCE_DIR}/source)
 list(APPEND TARGET_NXP_COMMON_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/targets/FreeRTOS/NXP/_fatfs)

@@ -37,7 +37,7 @@ steps:
           "Test PR found: $testPR" | Write-Host -ForegroundColor White
 
           # move to the build sources directory
-          Set-Location -Path $(Agent.BuildDirectory)/s/CoreLibrary
+          Set-Location -Path "$env:AGENT_BUILDDIRECTORY/s/CoreLibrary"
 
           # need to call this first to setup authentication
           gh auth setup-git

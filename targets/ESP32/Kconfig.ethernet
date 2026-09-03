@@ -12,51 +12,129 @@ config ESP32_ETHERNET_SUPPORT
 
 if ESP32_ETHERNET_SUPPORT
 
+#
+# Mutually exclusive Ethernet interface selection
+#
 choice ESP32_ETHERNET_INTERFACE_CHOICE
-    prompt "Ethernet PHY interface"
-    default ESP32_ETHERNET_PHY_IP101
+    prompt "Ethernet PHY interface type"
+    default ESP32_ETHERNET_PHY_LAN8720
 
 config ESP32_ETHERNET_PHY_IP101
-    bool "IP101"
+    bool "Internal PHY: IP101"
 
 config ESP32_ETHERNET_PHY_LAN8720
-    bool "LAN8720"
+    bool "Internal PHY: LAN8720"
 
 config ESP32_ETHERNET_PHY_RTL8201
-    bool "RTL8201"
+    bool "Internal PHY: RTL8201"
+
+config ESP32_ETHERNET_SPI
+    bool "External SPI Ethernet module"
+    help
+        Use an external SPI-based Ethernet controller.
+        This disables all internal RMII/MII PHY settings.
 
 endchoice
 
+#
+# Interface string (used by CMake / C code)
+#
 config ESP32_ETHERNET_INTERFACE
     string
     default "IP101"   if ESP32_ETHERNET_PHY_IP101
     default "LAN8720" if ESP32_ETHERNET_PHY_LAN8720
     default "RTL8201" if ESP32_ETHERNET_PHY_RTL8201
+    default "SPI"     if ESP32_ETHERNET_SPI
 
+#
+# Internal PHY settings (hidden when SPI is selected)
+#
 config ESP32_ETHERNET_PHY_ADDR
     int "Ethernet PHY address"
     range 0 31
-    default 1
+    default 0
+    depends on !ESP32_ETHERNET_SPI
 
 config ESP32_ETHERNET_MDC_GPIO
     int "MDC GPIO pin"
     default 23
+    depends on !ESP32_ETHERNET_SPI
 
 config ESP32_ETHERNET_MDIO_GPIO
     int "MDIO GPIO pin"
     default 18
+    depends on !ESP32_ETHERNET_SPI
 
 config ESP32_ETHERNET_RMII_CLK_OUT_GPIO
     int "RMII clock output GPIO pin (-1 to disable)"
     default -1
+    depends on !ESP32_ETHERNET_SPI
 
 config ESP32_ETHERNET_RMII_CLK_IN_GPIO
     int "RMII clock input GPIO pin (-1 to disable)"
     default -1
+    depends on !ESP32_ETHERNET_SPI
 
 config ESP32_ETHERNET_PHY_RST_GPIO
     int "Ethernet PHY reset GPIO pin (-1 to disable)"
     default -1
+    depends on !ESP32_ETHERNET_SPI
+
+#
+# SPI Ethernet configuration (only visible when SPI is selected)
+#
+menu "SPI Ethernet configuration"
+    depends on ESP32_ETHERNET_SPI
+
+choice ESP32_ETHERNET_SPI_MODULE
+    prompt "SPI Ethernet module"
+    default ESP32_ETHERNET_SPI_MODULE_W5500
+
+config ESP32_ETHERNET_SPI_MODULE_DM9051
+    bool "DM9051"
+
+config ESP32_ETHERNET_SPI_MODULE_W5500
+    bool "W5500"
+
+config ESP32_ETHERNET_SPI_MODULE_ENJ28J60
+    bool "ENJ28J60"
+
+endchoice
+
+config ESP32_ETHERNET_SPI_HOST
+    int "SPI host (2 = SPI2_HOST, 3 = SPI3_HOST)"
+    range 2 3
+    default 2
+
+config ESP32_ETHERNET_SPI_CLOCK_MHZ
+    int "SPI clock speed (MHz)"
+    default 8
+
+config ESP32_ETHERNET_SPI_CS_GPIO
+    int "SPI CS pin"
+    default 5
+
+config ESP32_ETHERNET_SPI_INT_GPIO
+    int "SPI interrupt pin"
+    default 16
+
+config ESP32_ETHERNET_SPI_RST_GPIO
+    int "SPI reset pin"
+    default 17
+
+config ESP32_ETHERNET_SPI_MISO_GPIO
+    int "SPI MISO pin"
+    default 23
+
+config ESP32_ETHERNET_SPI_MOSI_GPIO
+    int "SPI MOSI pin"
+    default 18
+
+config ESP32_ETHERNET_SPI_SCLK_GPIO
+    int "SPI SCLK pin"
+    default 19
+
+endmenu # SPI Ethernet configuration
 
 endif # ESP32_ETHERNET_SUPPORT
 

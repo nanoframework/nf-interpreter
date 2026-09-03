@@ -69,7 +69,7 @@ HRESULT Library_corlib_native_System_Reflection_RuntimeFieldInfo::get_FieldType_
 
         NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObjectFromIndex(top, g_CLR_RT_WellKnownTypes.m_TypeStatic));
         hbObj = top.Dereference();
-        hbObj->SetReflection(desc.m_handlerCls);
+        hbObj->SetReflection(desc.m_reflex);
     }
 
     NANOCLR_NOCLEANUP();

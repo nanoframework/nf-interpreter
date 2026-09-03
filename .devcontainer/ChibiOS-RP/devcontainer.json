@@ -1,0 +1,54 @@
+{
+	"name": "nanoFramework-ChibiOS-RP",
+	// This container is for developing Raspberry Pi Pico (RP2040/RP2350) targets using ChibiOS.
+	// It uses Dockerfile.ChibiOS-RP.SRC which builds from source because there is no pre-built image yet.
+	// Once a pre-built image is published, change "dockerFile" to "Dockerfile.ChibiOS-RP".
+	"dockerFile": "Dockerfile.ChibiOS-RP.SRC",
+	"context": ".",
+	"runArgs": ["--privileged", "--device=/dev/ttyUSB0:/dev/ttyUSB0"],
+	"mounts": [
+		// Keep command history 
+		"source=nano-bashhistory,target=/home/vscode/commandhistory,type=volume",
+		// Map /dev for USB device access (debug probes, serial ports)
+		"source=/dev,target=/dev,type=bind"
+		// OPTIONAL: Mount .azure folder for seamless az cli auth
+		// ,"source=${env:HOME}${env:USERPROFILE}/.azure,target=/home/vscode/.azure,type=bind"
+	],
+	// Set the *default* container specific settings.json values on container create.
+	"customizations": {
+		"vscode": {
+			"settings": {
+				"cmake.preferredGenerators": [
+					"Ninja"
+				],
+				"cmake.generator": "Ninja",
+				"cmake.autoRestartBuild" : true,
+				"cmake.configureSettings": {
+					"CMAKE_MAKE_PROGRAM":"/usr/bin/ninja"
+				},
+				"cmake.configureOnOpen": false
+			},
+			// Add the IDs of extensions you want installed when the container is created.
+			"extensions": [
+				"ms-vsliveshare.vsliveshare-pack",
+				"streetsidesoftware.code-spell-checker",
+				"twxs.cmake",
+				"ms-vscode.cmake-tools",
+				"xaver.clang-format"
+			]
+		}
+	},
+	// Use 'forwardPorts' to make a list of ports inside the container available locally.
+	// "forwardPorts": [],	
+	// Use 'postCreateCommand' to run commands after the container is created.
+	// This is needed to allow cloning repositories
+	"postCreateCommand": {
+		"chown-workspace": ["sudo", "chown", "-R", "vscode:vscode", "${containerWorkspaceFolder}", "/sources", "/usr/local/bin", "/usr/share/dotnet", "/usr/bin/cmake"],
+		"git-safe-directory": ["git", "config", "--global", "safe.directory", "*"]
+	},
+	// Connect as the non-root "vscode" user created in the Dockerfile. VS Code
+	// aligns its UID/GID with your local user (updateRemoteUserUID) so files
+	// created in the bind-mounted workspace aren't left owned by root.
+	"remoteUser": "vscode",
+	"updateRemoteUserUID": true
+}

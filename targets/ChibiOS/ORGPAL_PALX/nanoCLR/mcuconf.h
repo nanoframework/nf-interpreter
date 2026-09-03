@@ -7,6 +7,8 @@
 #ifndef MCUCONF_H
 #define MCUCONF_H
 
+// clang-format off
+
 /*
  * STM32F7xx drivers configuration.
  * The following settings override the default settings present in
@@ -364,7 +366,7 @@
 /*
  * TRNG driver system settings.
  */
-#define STM32_TRNG_USE_RNG1 FALSE
+#define STM32_TRNG_USE_RNG1 TRUE
 
 /*
  * UART driver system settings.
@@ -433,3 +435,5 @@
 #include "mcuconf_community.h"
 
 #endif /* MCUCONF_H */
+
+// clang-format on

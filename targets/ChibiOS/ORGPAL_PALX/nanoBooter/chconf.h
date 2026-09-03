@@ -4,6 +4,8 @@
 // See LICENSE file in the project root for full license information.
 //
 
+// clang-format off
+
 /**
  * @file    rt/templates/chconf.h
  * @brief   Configuration file template.
@@ -817,3 +819,5 @@
 #endif /* CHCONF_H */
 
 /** @} */
+
+// clang-format on

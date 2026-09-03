@@ -31,7 +31,13 @@ typedef struct NF_PAL_I2C_
 ////////////////////////////////////////////
 // declaration of the the I2C PAL structs //
 ////////////////////////////////////////////
-#if (STM32_I2C_USE_I2C1 == TRUE)
+#if defined(RP_I2C_USE_I2C0)
+extern NF_PAL_I2C I2C0_PAL;
+#endif
+#if defined(RP_I2C_USE_I2C1)
+extern NF_PAL_I2C I2C1_PAL;
+#endif
+#if defined(STM32_I2C_USE_I2C1) && (STM32_I2C_USE_I2C1 == TRUE)
 extern NF_PAL_I2C I2C1_PAL;
 #endif
 #if defined(STM32_I2C_USE_I2C2) && (STM32_I2C_USE_I2C2 == TRUE)
@@ -44,6 +50,23 @@ extern NF_PAL_I2C I2C3_PAL;
 extern NF_PAL_I2C I2C4_PAL;
 #endif
 
+#if defined(RP_I2C_USE_I2C0) || defined(RP_I2C_USE_I2C1)
+
+// RP2040 I2C pin configuration macro.
+// I2C function select = 3 on RP2040.
+#define I2C_CONFIG_PINS(num, scl_pin, sda_pin)                                                                         \
+    void ConfigPins_I2C##num()                                                                                         \
+    {                                                                                                                  \
+        palSetPadMode(IOPORT1, scl_pin, PAL_MODE_ALTERNATE_I2C | PAL_RP_PAD_PUE);                                     \
+        palSetPadMode(IOPORT1, sda_pin, PAL_MODE_ALTERNATE_I2C | PAL_RP_PAD_PUE);                                     \
+    }
+
+// RP2040 has 2 I2C buses (I2C0, I2C1).
+void ConfigPins_I2C0();
+void ConfigPins_I2C1();
+
+#else
+
 // the following macro defines a function that configures the GPIO pins for a STM32 I2C peripheral
 // it gets called in the Windows_Devices_I2c_I2cDevice::NativeInit function
 // this is required because the I2C peripherals can use multiple GPIO configuration combinations
@@ -53,11 +76,11 @@ extern NF_PAL_I2C I2C4_PAL;
         palSetPadMode(                                                                                                 \
             gpio_port_scl,                                                                                             \
             scl_pin,                                                                                                   \
-            (PAL_MODE_ALTERNATE(alternate_function) | PAL_STM32_OSPEED_HIGHEST | PAL_STM32_OTYPE_OPENDRAIN));          \
+            (PAL_MODE_ALTERNATE(alternate_function) | PAL_STM32_OSPEED_HIGHEST | PAL_STM32_OTYPE_OPENDRAIN));         \
         palSetPadMode(                                                                                                 \
             gpio_port_sda,                                                                                             \
             sda_pin,                                                                                                   \
-            (PAL_MODE_ALTERNATE(alternate_function) | PAL_STM32_OSPEED_HIGHEST | PAL_STM32_OTYPE_OPENDRAIN));          \
+            (PAL_MODE_ALTERNATE(alternate_function) | PAL_STM32_OSPEED_HIGHEST | PAL_STM32_OTYPE_OPENDRAIN));         \
     }
 
 //////////////////////////////////////////////////////////////////////////////////////////////
@@ -68,5 +91,7 @@ void ConfigPins_I2C1();
 void ConfigPins_I2C2();
 void ConfigPins_I2C3();
 void ConfigPins_I2C4();
+
+#endif
 
 #endif // SYS_DEV_I2C_NATIVE_TARGET_H

@@ -86,8 +86,8 @@
 #endif
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-// ARM & ESP32
-#if defined(PLATFORM_ARM) || defined(PLATFORM_ESP32)
+// ARM, ESP32 & POSIX host
+#if defined(PLATFORM_ARM) || defined(PLATFORM_ESP32) || defined(PLATFORM_POSIX_HOST)
 // #define NANOCLR_STRESS_GC
 // #define NANOCLR_GC_VERBOSE
 // #define NANOCLR_PROFILE_NEW
@@ -175,7 +175,7 @@
 #define ULONGLONGCONSTANT(v) (v##UI64)
 #endif
 
-#if defined(PLATFORM_ARM) | defined(PLATFORM_ESP32)
+#if defined(PLATFORM_ARM) || defined(PLATFORM_ESP32) || defined(PLATFORM_POSIX_HOST)
 #define PROHIBIT_ALL_CONSTRUCTORS(cls)                                                                                 \
   private:                                                                                                             \
     cls();                                                                                                             \
@@ -199,6 +199,16 @@
 
 #define LONGLONGCONSTANT(v)  (v##ll)
 #define ULONGLONGCONSTANT(v) (v##ull)
+#endif
+
+// Keeps a function out of line even under LTO. Use it for cold error/recovery paths that would
+// otherwise be inlined into every one of their call sites and bloat the image.
+#if defined(__GNUC__)
+#define NANOCLR_NOINLINE __attribute__((noinline))
+#elif defined(_MSC_VER)
+#define NANOCLR_NOINLINE __declspec(noinline)
+#else
+#define NANOCLR_NOINLINE
 #endif
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////

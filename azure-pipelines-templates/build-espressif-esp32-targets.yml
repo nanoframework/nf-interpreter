@@ -4,10 +4,10 @@
 parameters:
   - name: repoDirectory
     type: string
-    default: $(Build.SourcesDirectory)\nf-interpreter
+    default: $(Build.SourcesDirectory)/nf-interpreter
   - name: partitionsDirectory
     type: string
-    default: $(Build.SourcesDirectory)\nf-interpreter\targets\ESP32\_IDF\$(IDF_Target)
+    default: $(Build.SourcesDirectory)/nf-interpreter/targets/ESP32/_IDF/$(IDF_Target)
 
 steps:
   - template: setup-cmake-user-presets.yml
@@ -53,8 +53,8 @@ steps:
     displayName: Generate ESP32 Partition tables for 16MB flash
     inputs:
       scriptSource: "filePath"
-      scriptPath: '$(IDF_PATH)\components\partition_table\gen_esp32part.py'
-      arguments: '--verify ${{ parameters.partitionsDirectory }}\partitions_nanoclr_16mb.csv ${{ parameters.repoDirectory }}\build\partitions_16mb.bin'
+      scriptPath: '$(IDF_PATH)/components/partition_table/gen_esp32part.py'
+      arguments: '--verify ${{ parameters.partitionsDirectory }}/partitions_nanoclr_16mb.csv ${{ parameters.repoDirectory }}/build/partitions_16mb.bin'
 
   - task: PythonScript@0
     condition: >-
@@ -72,11 +72,11 @@ steps:
     displayName: Generate ESP32 Partition tables for 8MB flash
     inputs:
       scriptSource: "filePath"
-      scriptPath: '$(IDF_PATH)\components\partition_table\gen_esp32part.py'
-      arguments: '--verify ${{ parameters.partitionsDirectory }}\partitions_nanoclr_8mb.csv ${{ parameters.repoDirectory }}\build\partitions_8mb.bin'
+      scriptPath: '$(IDF_PATH)/components/partition_table/gen_esp32part.py'
+      arguments: '--verify ${{ parameters.partitionsDirectory }}/partitions_nanoclr_8mb.csv ${{ parameters.repoDirectory }}/build/partitions_8mb.bin'
 
   - task: PythonScript@0
-    condition: >-  
+    condition: >-
       and(
         succeeded(),
         or(
@@ -93,8 +93,8 @@ steps:
     displayName: Generate ESP32 Partition tables for 4MB flash
     inputs:
       scriptSource: "filePath"
-      scriptPath: '$(IDF_PATH)\components\partition_table\gen_esp32part.py'
-      arguments: '--verify ${{ parameters.partitionsDirectory }}\partitions_nanoclr_4mb.csv ${{ parameters.repoDirectory }}\build\partitions_4mb.bin'
+      scriptPath: '$(IDF_PATH)/components/partition_table/gen_esp32part.py'
+      arguments: '--verify ${{ parameters.partitionsDirectory }}/partitions_nanoclr_4mb.csv ${{ parameters.repoDirectory }}/build/partitions_4mb.bin'
 
   - task: PythonScript@0
     condition: >-
@@ -109,8 +109,8 @@ steps:
     displayName: Generate ESP32 Partition tables for 2MB flash
     inputs:
       scriptSource: "filePath"
-      scriptPath: '$(IDF_PATH)\components\partition_table\gen_esp32part.py'
-      arguments: '--verify ${{ parameters.partitionsDirectory }}\partitions_nanoclr_2mb.csv ${{ parameters.repoDirectory }}\build\partitions_2mb.bin'
+      scriptPath: '$(IDF_PATH)/components/partition_table/gen_esp32part.py'
+      arguments: '--verify ${{ parameters.partitionsDirectory }}/partitions_nanoclr_2mb.csv ${{ parameters.repoDirectory }}/build/partitions_2mb.bin'
 
   - task: PythonScript@0
     condition: >-
@@ -124,8 +124,8 @@ steps:
     displayName: Generate ESP32 Partition tables for 32MB flash
     inputs:
       scriptSource: "filePath"
-      scriptPath: '$(IDF_PATH)\components\partition_table\gen_esp32part.py'
-      arguments: '--verify ${{ parameters.partitionsDirectory }}\partitions_nanoclr_32mb.csv ${{ parameters.repoDirectory }}\build\partitions_32mb.bin'
+      scriptPath: '$(IDF_PATH)/components/partition_table/gen_esp32part.py'
+      arguments: '--verify ${{ parameters.partitionsDirectory }}/partitions_nanoclr_32mb.csv ${{ parameters.repoDirectory }}/build/partitions_32mb.bin'
 
   - task: CopyFiles@2
     condition: succeeded()
@@ -134,6 +134,6 @@ steps:
       sourceFolder: ${{ parameters.partitionsDirectory }}
       Contents: |
         *.csv
-      TargetFolder: ${{ parameters.repoDirectory }}\build
+      TargetFolder: ${{ parameters.repoDirectory }}/build
       flattenFolders: false
       ignoreMakeDirErrors: true

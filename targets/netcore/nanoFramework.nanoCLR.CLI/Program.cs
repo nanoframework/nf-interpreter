@@ -30,7 +30,6 @@ namespace nanoFramework.nanoCLR.CLI
 
         public static VerbosityLevel VerbosityLevel => _verbosityLevel;
 
-        [SupportedOSPlatform("windows")]
         static int Main(string[] args)
         {
             // take care of static fields
@@ -44,10 +43,8 @@ namespace nanoFramework.nanoCLR.CLI
             _copyrightInfo = new CopyrightInfo(true, ".NET Foundation and nanoFramework project contributors", 2021);
 
             // need this to be able to use ProcessStart at the location where the .NET Core CLI tool is running from
-            string codeBase = Assembly.GetExecutingAssembly().Location;
-            var uri = new UriBuilder(codeBase);
-            var fullPath = Uri.UnescapeDataString(uri.Path);
-            ExecutingPath = Path.GetDirectoryName(fullPath);
+            string assemblyLocation = Assembly.GetExecutingAssembly().Location;
+            ExecutingPath = Path.GetDirectoryName(Path.GetFullPath(assemblyLocation));
 
             // check for empty argument collection
             if (!args.Any())
@@ -90,11 +87,13 @@ namespace nanoFramework.nanoCLR.CLI
 
             LogErrors(() =>
             {
-                VirtualSerialDeviceManager virtualSerialBridgeManager = new();
-                virtualSerialBridgeManager.Initialize();
-
-                // need to set DLL directory to HHD interop DLL
-                SetDllDirectory(Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Vendor"));
+                // Virtual serial bridge support is Windows-only (uses hhdvspkit COM library).
+                VirtualSerialDeviceManager virtualSerialBridgeManager = null;
+                if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                {
+                    virtualSerialBridgeManager = new VirtualSerialDeviceManager();
+                    virtualSerialBridgeManager.Initialize();
+                }
 
                 var parsedArguments = Parser.Default.ParseArguments<ExecuteCommandLineOptions, ClrInstanceOperationsOptions, VirtualSerialDeviceCommandLineOptions>(args);
 
@@ -109,9 +108,9 @@ namespace nanoFramework.nanoCLR.CLI
                             ClrInstanceOperationsProcessor.ProcessVerb(
                                 opts),
                         (VirtualSerialDeviceCommandLineOptions opts) =>
-                            VirtualSerialDeviceCommandProcessor.ProcessVerb(
-                                opts,
-                                virtualSerialBridgeManager),
+                            RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
+                                ? VirtualSerialDeviceCommandProcessor.ProcessVerb(opts, virtualSerialBridgeManager)
+                                : throw new CLIException(ExitCode.E9000, "Virtual serial bridge is only supported on Windows."),
                         (IEnumerable<Error> errors) => HandleErrors(errors));
 
                 // do we need to show version?
@@ -239,9 +238,6 @@ namespace nanoFramework.nanoCLR.CLI
                 Console.WriteLine($"Error: {e.Message}");
             }
         }
-
-        [DllImport("kernel32.dll", CharSet = CharSet.Auto, SetLastError = true)]
-        public static extern bool SetDllDirectory(string lpPathName);
 
     }
 }

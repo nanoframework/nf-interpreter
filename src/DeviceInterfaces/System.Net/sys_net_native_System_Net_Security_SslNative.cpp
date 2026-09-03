@@ -9,7 +9,7 @@
 // remap types to ease code readability
 typedef Library_sys_net_native_System_Security_Cryptography_X509Certificates_X509Certificate X509Certificate;
 typedef Library_sys_net_native_System_Security_Cryptography_X509Certificates_X509Certificate2 X509Certificate2;
-
+typedef Library_sys_net_native_System_Security_Cryptography_CryptographicException CryptographicException;
 //--//
 
 void Time_GetDateTime(DATE_TIME_INFO *dt)
@@ -66,10 +66,10 @@ HRESULT Library_sys_net_native_System_Net_Security_SslNative::SecureAccept___STA
     CLR_INT32 timeout_ms = -1; // wait forever
     CLR_RT_HeapBlock hbTimeout;
 
-    int result = 0;
     CLR_INT32 handle;
-    bool fRes = true;
     CLR_INT64 *timeout;
+    SslError sslErr;
+    int mbedtlsCode = 0;
 
     FAULT_ON_NULL(socket);
 
@@ -88,26 +88,33 @@ HRESULT Library_sys_net_native_System_Net_Security_SslNative::SecureAccept___STA
 
     NANOCLR_CHECK_HRESULT(stack.SetupTimeoutFromTicks(hbTimeout, timeout));
 
-    // first make sure we have data to read or ability to write
-    while (true)
-    {
-        result = SSL_Accept(handle, sslContext);
+    (void)timeout;
 
-        if (result == SOCK_EWOULDBLOCK || result == SOCK_TRY_AGAIN)
-        {
-            // non-blocking - allow other threads to run while we wait for socket activity
-            NANOCLR_CHECK_HRESULT(
-                g_CLR_RT_ExecutionEngine.WaitEvents(stack.m_owningThread, *timeout, Event_Socket, fRes));
-        }
-        else
-        {
-            break;
-        }
-    }
+    // ssl_accept_internal runs the handshake in blocking mode and loops internally
+    // on WANT_READ / WANT_WRITE, returning only on a terminal outcome
+    sslErr = SSL_Accept(handle, sslContext, &mbedtlsCode);
 
     stack.PopValue(); // Timeout
 
-    NANOCLR_CHECK_HRESULT(ThrowOnError(stack, result));
+    switch (sslErr)
+    {
+        case SslError_None:
+            break;
+
+        case SslError_HandshakeBadContext:
+        case SslError_HandshakeSetHostname:
+            NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_OPERATION);
+            break;
+
+        case SslError_HandshakeCertVerifyFailed:
+        case SslError_HandshakeFailed:
+            NANOCLR_CHECK_HRESULT(ThrowCryptographicError(stack, mbedtlsCode));
+            break;
+
+        default:
+            NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
+            break;
+    }
 
     NANOCLR_NOCLEANUP();
 }
@@ -126,11 +133,11 @@ HRESULT Library_sys_net_native_System_Net_Security_SslNative::SecureConnect___ST
     CLR_RT_HeapBlock *socket = stack.Arg2().Dereference();
     CLR_RT_HeapBlock hbTimeout;
 
-    int result;
     const char *szName;
     CLR_INT32 handle;
-    bool fRes = true;
     CLR_INT64 *timeout;
+    SslError sslErr;
+    int mbedtlsCode = 0;
 
     FAULT_ON_NULL(socket);
 
@@ -154,28 +161,33 @@ HRESULT Library_sys_net_native_System_Net_Security_SslNative::SecureConnect___ST
 
     NANOCLR_CHECK_HRESULT(stack.SetupTimeoutFromTicks(hbTimeout, timeout));
 
-    while (true)
-    {
-        result = SSL_Connect(handle, szName, sslContext);
+    (void)timeout;
 
-        if (result == SOCK_EWOULDBLOCK || result == SOCK_TRY_AGAIN)
-        {
-            // non-blocking - allow other threads to run while we wait for socket activity
-            NANOCLR_CHECK_HRESULT(
-                g_CLR_RT_ExecutionEngine.WaitEvents(stack.m_owningThread, *timeout, Event_Socket, fRes));
-
-            if (result < 0)
-                break;
-        }
-        else
-        {
-            break;
-        }
-    }
+    // ssl_connect_internal runs the handshake in blocking mode and loops internally
+    // on WANT_READ / WANT_WRITE, returning only on a terminal outcome
+    sslErr = SSL_Connect(handle, szName, sslContext, &mbedtlsCode);
 
     stack.PopValue(); // Timeout
 
-    NANOCLR_CHECK_HRESULT(ThrowOnError(stack, result));
+    switch (sslErr)
+    {
+        case SslError_None:
+            break;
+
+        case SslError_HandshakeBadContext:
+        case SslError_HandshakeSetHostname:
+            NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_OPERATION);
+            break;
+
+        case SslError_HandshakeCertVerifyFailed:
+        case SslError_HandshakeFailed:
+            NANOCLR_CHECK_HRESULT(ThrowCryptographicError(stack, mbedtlsCode));
+            break;
+
+        default:
+            NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
+            break;
+    }
 
     NANOCLR_NOCLEANUP();
 }
@@ -422,6 +434,7 @@ HRESULT Library_sys_net_native_System_Net_Security_SslNative::InitHelper(CLR_RT_
     CLR_RT_HeapBlock_Array *arrCert = NULL;
     CLR_RT_HeapBlock_Array *privateKey = NULL;
     CLR_UINT8 *sslCert = NULL;
+    SslError sslError;
     volatile int result;
     uint8_t *pk = NULL;
     const char *pkPassword = NULL;
@@ -466,40 +479,60 @@ HRESULT Library_sys_net_native_System_Net_Security_SslNative::InitHelper(CLR_RT_
 
     if (isServer)
     {
-        result =
-            (SSL_ServerInit(
-                 sslMode,
-                 sslVerify,
-                 (const char *)sslCert,
-                 sslCert == NULL ? 0 : arrCert->m_numOfElements,
-                 pk,
-                 pk == NULL ? 0 : privateKey->m_numOfElements,
-                 pkPassword,
-                 pkPasswordLength,
-                 sslContext,
-                 useDeviceCertificate)
-                 ? 0
-                 : -1);
+        sslError = SSL_ServerInit(
+            sslMode,
+            sslVerify,
+            (const char *)sslCert,
+            sslCert == NULL ? 0 : arrCert->m_numOfElements,
+            pk,
+            pk == NULL ? 0 : privateKey->m_numOfElements,
+            pkPassword,
+            pkPasswordLength,
+            sslContext,
+            useDeviceCertificate);
     }
     else
     {
-        result =
-            (SSL_ClientInit(
-                 sslMode,
-                 sslVerify,
-                 (const char *)sslCert,
-                 sslCert == NULL ? 0 : arrCert->m_numOfElements,
-                 pk,
-                 pk == NULL ? 0 : privateKey->m_numOfElements,
-                 pkPassword,
-                 pkPasswordLength,
-                 sslContext,
-                 useDeviceCertificate)
-                 ? 0
-                 : -1);
+        sslError = SSL_ClientInit(
+            sslMode,
+            sslVerify,
+            (const char *)sslCert,
+            sslCert == NULL ? 0 : arrCert->m_numOfElements,
+            pk,
+            pk == NULL ? 0 : privateKey->m_numOfElements,
+            pkPassword,
+            pkPasswordLength,
+            sslContext,
+            useDeviceCertificate);
     }
 
-    NANOCLR_CHECK_HRESULT(ThrowOnError(stack, result));
+    switch (sslError)
+    {
+        case SslError_None:
+            break;
+
+        case SslError_OutOfMemory:
+            NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
+            break;
+
+        case SslError_NoFreeContext:
+            NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_OPERATION);
+            break;
+
+        case SslError_UnsupportedProtocolVersion:
+        case SslError_CertificateParseFailed:
+        case SslError_PrivateKeyParseFailed:
+        case SslError_OwnCertConfigFailed:
+        case SslError_DrbgSeedFailed:
+        case SslError_ConfigDefaultsFailed:
+        case SslError_SetupFailed:
+            NANOCLR_CHECK_HRESULT(ThrowCryptographicError(stack, (int)sslError));
+            break;
+
+        default:
+            NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
+            break;
+    }
 
     if (caCert != NULL)
     {
@@ -571,6 +604,33 @@ HRESULT Library_sys_net_native_System_Net_Security_SslNative::ThrowOnError(CLR_R
         ThrowError(stack, res);
 
         NANOCLR_SET_AND_LEAVE(CLR_E_PROCESS_EXCEPTION);
+    }
+
+    NANOCLR_NOCLEANUP();
+}
+
+HRESULT Library_sys_net_native_System_Net_Security_SslNative::ThrowCryptographicError(
+    CLR_RT_StackFrame &stack,
+    int errorCode)
+{
+    NATIVE_PROFILE_CLR_NETWORK();
+    NANOCLR_HEADER();
+
+    CLR_RT_HeapBlock &res = stack.m_owningThread->m_currentException;
+
+    if ((Library_corlib_native_System_Exception::CreateInstance(
+            res,
+            g_CLR_RT_WellKnownTypes.m_CryptographicException,
+            CLR_E_FAIL,
+            &stack)) == S_OK)
+    {
+        res.Dereference()[CryptographicException::FIELD___errorCode].SetInteger(errorCode);
+
+        NANOCLR_SET_AND_LEAVE(CLR_E_PROCESS_EXCEPTION);
+    }
+    else
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_UNKNOWN_TYPE);
     }
 
     NANOCLR_NOCLEANUP();

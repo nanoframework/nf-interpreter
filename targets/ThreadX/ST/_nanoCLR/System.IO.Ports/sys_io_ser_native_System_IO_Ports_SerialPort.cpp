@@ -233,20 +233,21 @@ static void RxChar(UARTDriver *uartp, uint16_t c)
             Events_Set(SYSTEM_EVENT_FLAG_COM_IN);
         }
     }
-    else if (palUart->NewLineChar > 0 && c == palUart->NewLineChar)
-    {
-        // fire event for new line char found
-        Events_Set(SYSTEM_EVENT_FLAG_COM_IN);
-    }
     else
     {
-        // no read operation ongoing, so fire an event, if the available bytes are above the threshold
+        // no synchronous read pending: wake up a blocked ReadLine(), if the new line char was received
+        if (palUart->NewLineChar > 0 && c == palUart->NewLineChar)
+        {
+            Events_Set(SYSTEM_EVENT_FLAG_COM_IN);
+        }
+
+        // fire an event for DataReceived, if the available bytes are at/above the threshold
         if (palUart->RxRingBuffer.Length() >= palUart->ReceivedBytesThreshold)
         {
             // Post a managed event with the port index and event code (check if there is a watch
             // char in the buffer or just any char)
-            // FIXME: check if callbacks are registered so this is called only if there is anyone listening otherwise
-            // don't bother.
+            // FIXME: check if callbacks are registered so this is called only if there is anyone listening
+            // otherwise don't bother.
             // TODO: For that to happen ChibiOS callback has to accept arg which we would passing the GpioPin
             // Notes: CLR_RT_HeapBlock (Gpio handler) See: http://www.chibios.com/forum/viewtopic.php?f=36&t=4798
             PostManagedEvent(
@@ -637,9 +638,6 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::ReadLine___STRING(
         NANOCLR_CHECK_HRESULT(
             g_CLR_RT_ExecutionEngine.WaitEvents(stack.m_owningThread, *timeoutTicks, Event_SerialPortIn, eventResult));
 
-        // clear the new line watch char
-        palUart->NewLineChar = 0;
-
         if (eventResult)
         {
             GLOBAL_LOCK();
@@ -880,6 +878,8 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeInit___VOID(
     NF_PAL_UART *palUart;
     int32_t bufferSize;
     uint8_t watchChar;
+    int32_t receivedBytesThreshold;
+    const char *newLine;
 
     // get a pointer to the managed object instance and check that it's not NULL
     CLR_RT_HeapBlock *pThis = stack.This();
@@ -975,6 +975,23 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeInit___VOID(
     if (watchChar != 0)
     {
         palUart->WatchChar = watchChar;
+    }
+
+    // get received bytes threshold
+    // managed setter guarantees > 0 once explicitly set; a native value of 0 only happens if it was never set
+    receivedBytesThreshold = pThis[FIELD___receivedBytesThreshold].NumericByRef().s4;
+    palUart->ReceivedBytesThreshold = (receivedBytesThreshold > 0) ? (uint32_t)receivedBytesThreshold : 1;
+
+    // get "new line" and cache its last character, mirroring WatchChar
+    newLine = pThis[FIELD___newLine].RecoverString();
+    if (newLine != NULL)
+    {
+        uint32_t newLineLength = hal_strlen_s(newLine);
+
+        if (newLineLength > 0)
+        {
+            palUart->NewLineChar = newLine[newLineLength - 1];
+        }
     }
 
     // call the configure

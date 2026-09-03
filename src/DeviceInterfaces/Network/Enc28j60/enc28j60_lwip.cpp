@@ -242,6 +242,7 @@ void enc28j60_lwip_interrupt(struct netif *pNetIF)
 
     if (!pNetIF)
     {
+        GLOBAL_UNLOCK();
         return;
     }
 
@@ -399,6 +400,7 @@ int enc28j60_lwip_recv(struct netif *pNetIF)
         {
             enc28j60_handle_recv_error(pNetIF, spiHandle);
             packetsLeft = 0;
+            GLOBAL_UNLOCK();
             break;
         }
         else
@@ -488,6 +490,7 @@ int enc28j60_lwip_recv(struct netif *pNetIF)
 
         if ((++numPacketsProcessed > CFG_MAX_PACKETS_PROCESSED) && packetsLeft)
         {
+            GLOBAL_UNLOCK();
             break;
         }
 
@@ -524,6 +527,7 @@ err_t enc28j60_lwip_xmit(struct netif *pNetIF, struct pbuf *pPBuf)
 
     if (!pNetIF)
     {
+        GLOBAL_UNLOCK();
         return ERR_ARG;
     }
 
@@ -593,7 +597,10 @@ err_t enc28j60_lwip_xmit(struct netif *pNetIF, struct pbuf *pPBuf)
     // irq.Acquire();
 
     if (!pTmp)
+    {
+        GLOBAL_UNLOCK();
         return ERR_MEM;
+    }
 
     pTx = (uint8_t *)pTmp->payload;
 
@@ -606,6 +613,13 @@ err_t enc28j60_lwip_xmit(struct netif *pNetIF, struct pbuf *pPBuf)
 
     while (pPBuf)
     {
+        if ((idx + pPBuf->len) > (length + 2))
+        {
+            GLOBAL_UNLOCK();
+            pbuf_free(pTmp);
+            return ERR_BUF;
+        }
+
         memcpy(&pTx[idx], pPBuf->payload, pPBuf->len);
 
         idx += pPBuf->len;
@@ -925,7 +939,8 @@ void enc28j60_lwip_destroy_device()
         spiHandle,
         ENC28J60_SPI_BIT_FIELD_CLEAR_OPCODE,
         ENC28J60_EIE,
-        (uint8_t)((1 << ENC28J60_EIE_INTIE_BIT) | (1 << ENC28J60_EIE_PKTIE_BIT) | (1 << ENC28J60_EIE_TXIE_BIT) | (1 << ENC28J60_EIE_TXERIE_BIT)));
+        (uint8_t)((1 << ENC28J60_EIE_INTIE_BIT) | (1 << ENC28J60_EIE_PKTIE_BIT) | (1 << ENC28J60_EIE_TXIE_BIT) |
+                  (1 << ENC28J60_EIE_TXERIE_BIT)));
 }
 
 /*
@@ -1140,7 +1155,8 @@ void enc28j60_lwip_soft_reset(uint32_t spiHandle)
         spiHandle,
         ENC28J60_SPI_BIT_FIELD_CLEAR_OPCODE,
         ENC28J60_EIE,
-        (uint8_t)((1 << ENC28J60_EIE_INTIE_BIT) | (1 << ENC28J60_EIE_PKTIE_BIT) | (1 << ENC28J60_EIE_TXIE_BIT) | (1 << ENC28J60_EIE_TXERIE_BIT)));
+        (uint8_t)((1 << ENC28J60_EIE_INTIE_BIT) | (1 << ENC28J60_EIE_PKTIE_BIT) | (1 << ENC28J60_EIE_TXIE_BIT) |
+                  (1 << ENC28J60_EIE_TXERIE_BIT)));
 
     /* Combine the command and the data */
     byteData = (ENC28J60_SPI_SYSTEM_COMMAND_SOFT_RESET_OPCODE << 5) | ENC28J60_SPI_SYSTEM_COMMAND_SOFT_RESET_ARGUMENT;

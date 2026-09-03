@@ -13,10 +13,10 @@
 #include <cmsis_os.h>
 #include <targetHAL_Watchdog.h>
 
-#if (STM32_USE_FSMC_SDRAM == TRUE)
+#if defined(STM32_USE_FSMC_SDRAM) && (STM32_USE_FSMC_SDRAM == TRUE)
 #include <fsmc_sdram_lld.h>
 #endif
-#if (STM32_USE_FSMC_SRAM == TRUE)
+#if defined(STM32_USE_FSMC_SRAM) && (STM32_USE_FSMC_SRAM == TRUE)
 #include <fsmc_sram_lld.h>
 #endif
 
@@ -54,10 +54,10 @@ void CPU_SetPowerMode(PowerLevel_type powerLevel)
 #endif
 
 // shutdown memory
-#if (STM32_USE_FSMC_SDRAM == TRUE)
+#if defined(STM32_USE_FSMC_SDRAM) && (STM32_USE_FSMC_SDRAM == TRUE)
             fsmcSdramStop(&SDRAMD);
 #endif
-#if (STM32_USE_FSMC_SRAM == TRUE)
+#if defined(STM32_USE_FSMC_SRAM) && (STM32_USE_FSMC_SRAM == TRUE)
 #if (STM32_SRAM_USE_FSMC_SRAM1 == TRUE)
             fsmcSramStop(&SRAMD1);
 #endif
@@ -157,7 +157,7 @@ void CPU_SetPowerMode(PowerLevel_type powerLevel)
 #endif
 
             // set SLEEPDEEP bit of Cortex SCR
-            SET_BIT(SCB->SCR, ((uint32_t)SCB_SCR_SLEEPDEEP_Msk));
+            SCB->SCR |= ((uint32_t)SCB_SCR_SLEEPDEEP_Msk);
 
             // wait for interrupt, and the execution dies here
             __WFI();

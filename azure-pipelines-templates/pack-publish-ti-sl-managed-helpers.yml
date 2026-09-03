@@ -9,11 +9,11 @@ steps:
 
       $auth = "basic $([System.Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes(":$(GitHubToken)")))"
 
-      $commit = Invoke-RestMethod -Uri "https://api.github.com/repos/nanoframework/nf-interpreter/commits/$(Build.SourceVersion)" -Header @{"Authorization"="$auth"} -ContentType "application/json" -Method GET
+      $commit = Invoke-RestMethod -Uri "https://api.github.com/repos/nanoframework/nf-interpreter/commits/$env:BUILD_SOURCEVERSION" -Header @{"Authorization"="$auth"} -ContentType "application/json" -Method GET
       Write-host "Files changed:"
       $commit.files | % {$_.filename}
 
-      if ( $commit.files.filename -like "*$(TargetBoard)/managed_helpers*" )
+      if ( $commit.files.filename -like "*$env:TARGETBOARD/managed_helpers*" )
       {
         echo "##vso[task.setvariable variable=BUILD_NUGET_PACKAGE]true"
 

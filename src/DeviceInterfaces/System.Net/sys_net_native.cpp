@@ -42,6 +42,10 @@ static const CLR_RT_MethodHandler method_lookup[] =
     NULL,
     NULL,
     NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
     Library_sys_net_native_System_Net_NetworkInformation_NetworkInterface::InitializeNetworkInterfaceSettings___VOID,
     Library_sys_net_native_System_Net_NetworkInformation_NetworkInterface::UpdateConfiguration___VOID__I4,
     Library_sys_net_native_System_Net_NetworkInformation_NetworkInterface::GetIsNetworkAvailable___STATIC__BOOLEAN,
@@ -50,10 +54,6 @@ static const CLR_RT_MethodHandler method_lookup[] =
     Library_sys_net_native_System_Net_NetworkInformation_NetworkInterface::GetNetworkInterface___STATIC__SystemNetNetworkInformationNetworkInterface__U4,
     Library_sys_net_native_System_Net_NetworkInformation_NetworkInterface::IPV4AddressFromString___STATIC__I8__STRING,
     Library_sys_net_native_System_Net_NetworkInformation_NetworkInterface::IPV6AddressFromString___STATIC__SZARRAY_U2__STRING,
-    NULL,
-    NULL,
-    NULL,
-    NULL,
     NULL,
     NULL,
     NULL,
@@ -340,15 +340,18 @@ static const CLR_RT_MethodHandler method_lookup[] =
     NULL,
     NULL,
     NULL,
+    NULL,
+    NULL,
+    NULL,
     Library_sys_net_native_System_Security_Cryptography_X509Certificates_X509Certificate2::DecodePrivateKeyNative___STATIC__VOID__SZARRAY_U1__STRING,
 };
 
 const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_System_Net =
 {
     "System.Net",
-    0x6DFA71D6,
+    0x8EFB9944,
     method_lookup,
-    { 100, 2, 0, 12 }
+    { 100, 2, 0, 14 }
 };
 
 // clang-format on

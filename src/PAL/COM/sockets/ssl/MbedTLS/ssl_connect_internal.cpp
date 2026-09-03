@@ -8,26 +8,27 @@
 #include <ssl.h>
 #include "mbedtls.h"
 
-int ssl_connect_internal(int sd, const char *szTargetHost, int contextHandle)
+SslError ssl_connect_internal(int sd, const char *szTargetHost, int contextHandle, int *mbedtlsCode)
 {
     mbedTLS_NFContext *context;
     int nonblock = 0;
+    int ret;
 
-    int ret = SOCK_SOCKET_ERROR;
+    *mbedtlsCode = 0;
 
     // Check contextHandle range
     if ((contextHandle >= (int)ARRAYSIZE(g_SSL_Driver.ContextArray)) || (contextHandle < 0))
     {
-        goto error;
+        return SslError_HandshakeBadContext;
     }
 
     // Retrieve SSL struct from g_SSL_Driver
     // sd should already have been created
     // Now do the SSL negotiation
     context = (mbedTLS_NFContext *)g_SSL_Driver.ContextArray[contextHandle].Context;
-    if (context == NULL)
+    if (context == NULL || context->ssl == NULL)
     {
-        return false;
+        return SslError_HandshakeBadContext;
     }
 
     // set socket in network context
@@ -37,8 +38,8 @@ int ssl_connect_internal(int sd, const char *szTargetHost, int contextHandle)
     {
         if ((ret = mbedtls_ssl_set_hostname(context->ssl, szTargetHost)) != 0)
         {
-            // hostname_failed
-            goto error;
+            *mbedtlsCode = ret;
+            return SslError_HandshakeSetHostname;
         }
     }
 
@@ -54,7 +55,15 @@ int ssl_connect_internal(int sd, const char *szTargetHost, int contextHandle)
         {
             // SSL handshake failed
             // mbedtls_printf( " failed\n  ! mbedtls_ssl_handshake returned -0x%x\n\n", -ret );
-            goto error;
+            if (ret == MBEDTLS_ERR_X509_CERT_VERIFY_FAILED)
+            {
+                // surface the verify result flags - more actionable than the raw mbedTLS code
+                *mbedtlsCode = (int)mbedtls_ssl_get_verify_result(context->ssl);
+                return SslError_HandshakeCertVerifyFailed;
+            }
+
+            *mbedtlsCode = ret;
+            return SslError_HandshakeFailed;
         }
     }
 
@@ -64,6 +73,5 @@ int ssl_connect_internal(int sd, const char *szTargetHost, int contextHandle)
     // store SSL context in sockets driver
     SOCKET_DRIVER.SetSocketSslData(sd, (void *)context);
 
-error:
-    return ret;
+    return SslError_None;
 }

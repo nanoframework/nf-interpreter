@@ -38,6 +38,11 @@ bool MXCFlashDriver_Read(void *context, ByteAddress startAddress, unsigned int n
 {
     (void)context;
 
+    if (buffer == NULL)
+    {
+        return false;
+    }
+
     volatile uint8_t *cursor = (volatile uint8_t *)startAddress;
     volatile uint8_t *endAddress = (volatile uint8_t *)(startAddress + numBytes);
 
@@ -60,12 +65,16 @@ bool MXCFlashDriver_Write(
     (void)context;
     (void)readModifyWrite;
 
+    if (buffer == NULL)
+    {
+        return false;
+    }
+
     uint32_t address = startAddress;
     uint32_t endAddress = startAddress + numBytes;
     uint32_t remainingBytes = numBytes;
     bool success = false;
     uint32_t error;
-    uint64_t data, temp;
 
     // Check if flash controller is busy
     if (MXC_FLC0->ctrl & MXC_F_FLC_CTRL_PEND)
@@ -74,53 +83,52 @@ bool MXCFlashDriver_Write(
     }
 
     // The FLC supports write widths of 128-bits only. 32*64bits (32*4bytes)
-   
+
     while (address < endAddress)
     {
         // Unlock the Flash to enable the flash control register access
         MXC_FLC0->ctrl &= ~MXC_F_FLC_CTRL_UNLOCK;
         MXC_FLC0->ctrl |= MXC_S_FLC_CTRL_UNLOCK_UNLOCKED;
 
-        if (remainingBytes >= sizeof(uint64_t))
-        {
-            data = *(uint64_t *)buffer;
-        }
-        else
-        {
-            temp = *(uint64_t *)buffer;
+        uint32_t data[4] = {FLASH_ERASED_WORD, FLASH_ERASED_WORD, FLASH_ERASED_WORD, FLASH_ERASED_WORD};
+        uint8_t *dataBytes = (uint8_t *)data;
+        uint32_t validBytes = remainingBytes >= sizeof(data) ? sizeof(data) : remainingBytes;
 
-            // "move" data to start of position
-            data = temp << sizeof(uint8_t) * (sizeof(uint64_t) - remainingBytes);
-
-            // need to clear the "remaining" bytes
-            data |= 0xFFFFFFFFFFFFFFFF;
+        // keep the valid bytes; pad the unused bytes with 0xFF (erased state)
+        for (uint32_t i = 0; i < validBytes; i++)
+        {
+            dataBytes[i] = buffer[i];
         }
 
         MXC_FLC0->addr = address;
-        error = MXC_FLC_Write128(address, (uint32_t*)&data);
+        error = MXC_FLC_Write128(address, data);
 
         if (error == E_NO_ERROR)
         {
             // increase address
-            address += sizeof(uint64_t);
+            address += sizeof(data);
 
             // move buffer pointer
-            buffer += sizeof(uint64_t);
+            buffer += sizeof(data);
 
-            // update counter
-            remainingBytes -= sizeof(uint64_t);
+            // update counter: tail branch sets remainingBytes < sizeof(data),
+            // so cap to zero to avoid unsigned underflow
+            if (remainingBytes >= sizeof(data))
+            {
+                remainingBytes -= sizeof(data);
+            }
+            else
+            {
+                remainingBytes = 0;
+            }
         }
         else
         {
-#ifdef DEBUG
-            // get error
-            // volatile uint32_t errorCode = HAL_FLASH_GetError();
-            // (void)errorCode;
-#endif
             break;
         }
     }
 
+    success = (address >= endAddress);
     return success;
 }
 

@@ -1064,7 +1064,8 @@ static err_t lwip_netconn_do_close_internal(struct netconn *conn WRITE_DELAYED_P
         /* check linger possibilites before calling tcp_close */
         err = ERR_OK;
         /* linger enabled/required at all? (i.e. is there untransmitted data left?) */
-        if ((conn->linger >= 0) && (conn->pcb.tcp->unsent || conn->pcb.tcp->unacked))
+        /* listen PCBs never have pending data; skip linger check to avoid calling tcp_abort on a listen PCB */
+        if ((tpcb->state != LISTEN) && (conn->linger >= 0) && (conn->pcb.tcp->unsent || conn->pcb.tcp->unacked))
         {
             if ((conn->linger == 0))
             {
@@ -1546,10 +1547,7 @@ void lwip_netconn_do_connect(void *m)
                 break;
 #endif /* LWIP_TCP */
             default:
-                LWIP_ERROR(
-                    "Invalid netconn type",
-                    0,
-                    do { err = ERR_VAL; } while (0));
+                LWIP_ERROR("Invalid netconn type", 0, do { err = ERR_VAL; } while (0));
                 break;
         }
     }

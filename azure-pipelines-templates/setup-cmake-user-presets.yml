@@ -25,5 +25,4 @@ steps:
         Rename-Item -Path "user-prefs.TEMPLATE.json" -NewName $file
 
         $filecontent = Get-Content($file)
-        attrib $file -r
         $filecontent -replace  'Debug', 'MinSizeRel' | Out-File $file -Encoding UTF8

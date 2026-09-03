@@ -237,9 +237,38 @@ macro(nf_add_common_sources)
             ${Graphics_Sources}
         )
 
+        # include storage operation support, if feature is enabled
+        if(NF_FEATURE_HAS_ACCESSIBLE_STORAGE)
+            target_sources(${NFACS_TARGET}.elf PUBLIC
+                ${CMAKE_SOURCE_DIR}/src/HAL/nanoHAL_StorageOperation.cpp)
+        endif()
+
     endif()
 
 endmacro()
+
+# generates a UF2 image from a binary file for RP2040/RP2350 targets
+# uses the bin2uf2 C# tool (requires dotnet SDK)
+# NOTE: The RP2040 ROM UF2 bootloader does not flash data after address gaps.
+# bin2uf2 --merge automatically pads gaps with 0xFF to produce a continuous image.
+function(nf_generate_uf2_package file1 address1 file2 address2 familyid outputfilename)
+
+    add_custom_command(
+
+        TARGET ${NANOCLR_PROJECT_NAME}.elf POST_BUILD
+
+        COMMAND dotnet run --project ${CMAKE_SOURCE_DIR}/CMake/Scripts/bin2uf2
+            -- --merge "${outputfilename}" "${familyid}"
+            "${file1}" "${address1}"
+            "${file2}" "${address2}"
+
+        COMMENT "Generating combined UF2 image for RP2040/RP2350 (gap-free)"
+    )
+
+    # need to add a dependency of NANOCLR to NANOBOOTER because UF2 gen needs bin outputs of both targets
+    add_dependencies(${NANOCLR_PROJECT_NAME}.elf ${NANOBOOTER_PROJECT_NAME}.elf)
+
+endfunction()
 
 function(nf_generate_dfu_package file1 address1 file2 address2 outputfilename)
 
@@ -287,7 +316,7 @@ function(nf_generate_hex_package file1 file2 outputfilename)
 endfunction()
 
 # generates a binary file with nanoBooter + nanoCLR at the proper addresses
-# ready to be drag & drop on targets that feature DAPLink 
+# ready to be drag & drop on targets that feature DAPLink
 function(nf_generate_bin_package file1 file2 offset outputfilename)
 
     add_custom_command(
@@ -604,6 +633,7 @@ macro(nf_setup_target_build_common)
             ${TARGET_BASE_LOCATION}/nanoCLR
             ${TARGET_BASE_LOCATION}
             ${CMAKE_BINARY_DIR}/targets/${RTOS}/${TARGET_BOARD}
+            ${CMAKE_BINARY_DIR}/targets/${RTOS}/${TARGET_VENDOR}/${TARGET_BOARD}
         )
 
         # need to add extra include directories for MbedTLS
@@ -644,7 +674,8 @@ macro(nf_setup_target_build_common)
 
         # need to unset several flags for MbedTLS to compile correctly
         target_compile_options(mbedtls PRIVATE -Wno-undef -Wno-error=unused-function -Wno-error=discarded-qualifiers -Wno-error=unused-parameter)
-        target_compile_options(mbedcrypto PRIVATE -Wno-undef -Wno-error=unused-function -Wno-error=discarded-qualifiers -Wno-error=unused-parameter)
+        # Mbed TLS bignum ARM inline assembly can exceed available registers at -O0.
+        target_compile_options(mbedcrypto PRIVATE $<$<CONFIG:Debug>:-Og> -Wno-undef -Wno-error=unused-function -Wno-error=discarded-qualifiers -Wno-error=unused-parameter)
         target_compile_options(mbedx509 PRIVATE -Wno-undef -Wno-error=unused-function -Wno-error=discarded-qualifiers -Wno-error=unused-parameter)
 
     endif()
@@ -748,7 +779,7 @@ function(nf_add_mbedtls_library)
 
     # set tag for currently supported version
     # WHEN CHANGING THIS MAKE SURE TO UPDATE THE DEV CONTAINERS
-    set(MBEDTLS_GIT_TAG "mbedtls-3.6.5")
+    set(MBEDTLS_GIT_TAG "mbedtls-3.6.7")
 
     # set options for Mbed TLS
     option(ENABLE_TESTING "no testing when building Mbed TLS." OFF)
@@ -761,6 +792,7 @@ function(nf_add_mbedtls_library)
             mbedtls
             GIT_REPOSITORY https://github.com/ARMmbed/mbedtls
             GIT_TAG ${MBEDTLS_GIT_TAG}
+            UPDATE_DISCONNECTED ON
         )
 
     else()
@@ -818,6 +850,7 @@ function(nf_add_lwip_library)
             lwIP
             GIT_REPOSITORY https://github.com/lwip-tcpip/lwip.git
             GIT_TAG ${LWIP_GIT_TAG}
+            UPDATE_DISCONNECTED ON
         )
 
     else()
@@ -841,9 +874,59 @@ function(nf_add_lwip_library)
     endif()
 
     ########################################################################
-    # add lwipdocs target, just to keep cmake happy
-    # after moving to a more recent lwIP versions this is not needed anymore
-    add_custom_target(lwipdocs)
+    # add lwipdocs target, just to keep cmake happy when Doxygen is not found
+    # (newer lwIP versions create this target themselves when Doxygen is present)
+    if(NOT TARGET lwipdocs)
+        add_custom_target(lwipdocs)
+    endif()
     ########################################################################
+
+endfunction()
+
+# CYW43 driver for WiFi targets (Pico W, etc.)
+function(nf_add_cyw43_driver_library)
+
+    # check if CYW43_DRIVER_SOURCE was specified or if it's empty (default is empty)
+    set(NO_CYW43_SOURCE TRUE)
+
+    if(CYW43_DRIVER_SOURCE)
+        if(NOT ${CYW43_DRIVER_SOURCE} STREQUAL "")
+            set(NO_CYW43_SOURCE FALSE)
+        endif()
+    endif()
+
+    # set tag for currently supported version
+    set(CYW43_DRIVER_GIT_TAG "main")
+
+    if(NO_CYW43_SOURCE)
+        # no CYW43 source specified, download it from its repo
+        message(STATUS "CYW43 driver from GitHub repo")
+
+        FetchContent_Declare(
+            cyw43_driver
+            GIT_REPOSITORY https://github.com/georgerobotics/cyw43-driver.git
+            GIT_TAG ${CYW43_DRIVER_GIT_TAG}
+            GIT_SHALLOW TRUE
+            GIT_CONFIG "core.fileMode=false"
+            UPDATE_DISCONNECTED ON
+        )
+
+    else()
+        # CYW43 source was specified
+        message(STATUS "CYW43 driver (source from: ${CYW43_DRIVER_SOURCE})")
+
+        FetchContent_Declare(
+            cyw43_driver
+            SOURCE_DIR ${CYW43_DRIVER_SOURCE}
+        )
+
+    endif()
+
+    # Check if population has already been performed
+    FetchContent_GetProperties(cyw43_driver)
+
+    if(NOT cyw43_driver_POPULATED)
+        FetchContent_MakeAvailable(cyw43_driver)
+    endif()
 
 endfunction()

@@ -150,6 +150,11 @@ bool Esp32FlashDriver_Read(void *context, ByteAddress startAddress, unsigned int
 {
     (void)context;
 
+    if (buffer == NULL)
+    {
+        return false;
+    }
+
     uint8_t *memStartAdr;
     ByteAddress readAddress;
 
@@ -209,10 +214,8 @@ bool Esp32FlashDriver_IsBlockErased(void *context, ByteAddress blockAddress, uns
     // need to setup the start and end addresses to the region (block) boundaries
     if (AddressIn_CODE_Region(blockAddress))
     {
-        // start at 0 because this a memory mapped address
-        memStartAdr = 0;
-        // end address
-        memEndAdr = (uint8_t *)CODE_Region_Size;
+        // CODE region is read-only XIP flash; it is never erased by the deployment layer
+        return true;
     }
     else if (AddressIn_DEPLOYMENT_Region(blockAddress))
     {
@@ -249,6 +252,11 @@ bool Esp32FlashDriver_EraseBlock(void *context, ByteAddress address)
     // this implementation here assumes that with ESP32 erase operations are performed only in the DEPLOYMENT region
     // and for the full block so the offset it's 0 and the size corresponds to the partition size
 
+    if (g_pFlashDriver_partition == NULL)
+    {
+        return false;
+    }
+
     return (esp_partition_erase_range(g_pFlashDriver_partition, 0, g_pFlashDriver_partition->size) == ESP_OK);
 }
 
@@ -261,13 +269,10 @@ bool Esp32FlashDriver_GetMemoryMappedAddress(
     MEMORY_MAPPED_NOR_BLOCK_CONFIG *config = (MEMORY_MAPPED_NOR_BLOCK_CONFIG *)context;
     DeviceBlockInfo *deviceInfo = config->BlockConfig.BlockDeviceInformation;
 
-#if defined(DEBUG)
-    // sanity check for non-existent block region
-    if (blockRegionIndex > (deviceInfo->NumRegions + 1))
+    if (blockRegionIndex >= deviceInfo->NumRegions)
     {
         return false;
     }
-#endif
 
     switch (BlockRange_GetBlockUsage(deviceInfo->Regions[blockRegionIndex].BlockRanges[blockRangeIndex]))
     {

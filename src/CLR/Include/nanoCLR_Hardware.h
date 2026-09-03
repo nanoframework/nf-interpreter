@@ -26,8 +26,7 @@ struct CLR_HW_Hardware
         SYSTEM_EVENT_FLAG_SPI_MASTER | SYSTEM_EVENT_FLAG_I2C_MASTER | SYSTEM_EVENT_FLAG_I2C_SLAVE |
         SYSTEM_EVENT_HW_INTERRUPT | SYSTEM_EVENT_FLAG_SOCKET | SYSTEM_EVENT_FLAG_DEBUGGER_ACTIVITY |
         SYSTEM_EVENT_FLAG_MESSAGING_ACTIVITY | SYSTEM_EVENT_FLAG_ONEWIRE_MASTER | SYSTEM_EVENT_FLAG_RADIO |
-        SYSTEM_EVENT_FLAG_WIFI_STATION | SYSTEM_EVENT_FLAG_BLUETOOTH;
-
+        SYSTEM_EVENT_FLAG_WIFI_STATION | SYSTEM_EVENT_FLAG_BLUETOOTH | SYSTEM_EVENT_FLAG_RMT_RX;
     //--//
 
     struct HalInterruptRecord
@@ -93,7 +92,7 @@ extern CLR_HW_Hardware g_CLR_HW_Hardware;
 // keep under control the size of the HalInterruptRecord, since we will use externally
 // defined arrays to handle those data structures in the interrupt dispatching
 
-#ifdef _WIN64
+#if defined(_WIN64) || (defined(PLATFORM_POSIX_HOST) && defined(__LP64__))
 CT_ASSERT(sizeof(CLR_HW_Hardware::HalInterruptRecord) == 32)
 #else
 CT_ASSERT(sizeof(CLR_HW_Hardware::HalInterruptRecord) == 24)

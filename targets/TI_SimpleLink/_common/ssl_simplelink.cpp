@@ -69,7 +69,7 @@ bool ssl_initialize_internal()
     return true;
 }
 
-bool ssl_generic_init_internal(
+SslError ssl_generic_init_internal(
     int sslMode,
     int sslVerify,
     const char *certificate,
@@ -110,7 +110,7 @@ bool ssl_generic_init_internal(
     }
 
     if (sslContexIndex == -1)
-        return false;
+        return SslError_NoFreeContext;
 
     // create and init nanoFramework Simple Link context
     // this needs to be freed in ssl_exit_context_internal
@@ -220,7 +220,7 @@ bool ssl_generic_init_internal(
 
     contextHandle = sslContexIndex;
 
-    return true;
+    return SslError_None;
 
 error:
 
@@ -235,7 +235,7 @@ error:
         SlNetSock_secAttribDelete(context->SecurityAttributes);
     }
 
-    return false;
+    return SslError_OutOfMemory;
 }
 
 bool ssl_exit_context_internal(int contextHandle)

@@ -16,9 +16,9 @@
 #define HAL_NF_USE_STM32_CRC TRUE
 #endif
 
-#if !defined(HAL_NF_USE_STM32_RNG)
-// the default for this driver is to be included
-#define HAL_NF_USE_STM32_RNG TRUE
+#if !defined(HAL_NF_USE_RNG)
+// the default for this driver is NOT to be included
+#define HAL_NF_USE_RNG FALSE
 #endif
 
 #if !defined(HAL_NF_USE_FSMC)
@@ -46,12 +46,18 @@
 // #include "hal_nnnn.h"
 
 // Normal drivers
+// STM32-specific overlay drivers — only include for STM32 targets
+#if defined(STM32F0XX) || defined(STM32F4XX) || defined(STM32F7XX) || defined(STM32H7XX) || defined(STM32L0XX) ||      \
+    defined(STM32L4XX)
 #include "stm32_qspi/hal_stm32_qspi.h"
 #include "stm32_flash/hal_stm32_flash.h"
 #include "stm32_crc/hal_stm32_crc.h"
 #include "stm32_rng/hal_stm32_rng.h"
 #include "stm32_fsmc/hal_stm32_fsmc.h"
 #include "stm32_onewire/hal_stm32_onewire.h"
+#elif defined(RP2040) || defined(RP2350)
+#include "rp_rng/hal_rp_rng.h"
+#endif
 
 // Complex drivers
 // #include "hal_nnnn.h"

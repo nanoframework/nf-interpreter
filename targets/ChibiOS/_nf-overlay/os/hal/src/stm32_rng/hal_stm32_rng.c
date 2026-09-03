@@ -9,7 +9,7 @@
 #include <hal.h>
 #include <hal_nf_community.h>
 
-#if (HAL_NF_USE_STM32_RNG == TRUE)
+#if (HAL_NF_USE_RNG == TRUE)
 
 /*===========================================================================*/
 /* Driver local definitions.                                                 */
@@ -31,64 +31,59 @@
 /* Driver exported functions.                                                */
 /*===========================================================================*/
 
-
 // Initializes the RNG Driver
-void rngInit(void) {
-  rng_lld_init();
+void rngInit(void)
+{
+    rng_lld_init();
 }
 
 // Configures and activates the CRC peripheral
-void rngStart() {
+void rngStart()
+{
 
-  // better lock this to setup the driver and start the peripheral
-  osalSysLock();
-
-  rng_lld_start();
-
-  osalSysUnlock();
-}
-
-// Deactivates the RNG peripheral
-void rngStop() {
-
-    // better lock this to stop the peripheral
+    // better lock this to setup the driver and start the peripheral
     osalSysLock();
-  
-    rng_lld_stop();
-    
+
+    rng_lld_start();
+
     osalSysUnlock();
 }
 
+// Deactivates the RNG peripheral
+void rngStop()
+{
+
+    // better lock this to stop the peripheral
+    osalSysLock();
+
+    rng_lld_stop();
+
+    osalSysUnlock();
+}
 
 #if (RNG_USE_MUTUAL_EXCLUSION == TRUE)
 
-void rngAquireModule() {
+void rngAquireModule()
+{
 
-  rng_lld_aquire();
+    rng_lld_aquire();
 }
 
-void rngReleaseModule() {
+void rngReleaseModule()
+{
 
-  rng_lld_release();  
+    rng_lld_release();
 }
 
 #endif /* RNG_USE_MUTUAL_EXCLUSION == TRUE */
 
+bool rngGenerate(size_t size, uint8_t *out)
+{
+    RNGD1.State = RNG_ACTIVE;
+    bool result = rng_lld_generate(size, out);
+    RNGD1.State = RNG_READY;
 
-uint32_t rngGenerateRandomNumber() {
-  uint32_t randomNumber;
-  osalSysLock();
-  randomNumber = rng_lld_GenerateRandomNumber();
-  osalSysUnlock();
-  return randomNumber;
+    return result;
 }
 
-uint32_t rngGetLastRandomNumber() {
-  uint32_t randomNumber;
-  osalSysLock();
-  randomNumber = rng_lld_GetLastRandomNumber();
-  osalSysUnlock();
-  return randomNumber;
-}
-
-#endif /* HAL_NF_USE_STM32_RNG */
+#endif /* HAL_NF_USE_RNG */

@@ -45,6 +45,11 @@ bool CC13xx_26xxFlashDriver_Read(void *context, ByteAddress startAddress, unsign
 {
     (void)context;
 
+    if (buffer == NULL)
+    {
+        return false;
+    }
+
     // direct read from memory...
     memcpy(buffer, (void *)startAddress, (size_t)numBytes);
 
@@ -71,9 +76,14 @@ bool CC13xx_26xxFlashDriver_Write(
     // swiState = Swi_disable();
     // hwiState = Hwi_disable();
 
+    if (buffer == NULL)
+    {
+        return false;
+    }
+
     state = DisableCache();
 
-    if (FlashProgram((unsigned long *)buffer, (unsigned long)startAddress, (unsigned long)numBytes) == 0)
+    if (FlashProgram((uint8_t *)buffer, (unsigned long)startAddress, (unsigned long)numBytes) == 0)
     {
         result = true;
     }

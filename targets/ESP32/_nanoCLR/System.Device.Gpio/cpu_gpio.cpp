@@ -41,6 +41,9 @@ static const int spiReservedFinalGpio = 22;
 #elif defined(CONFIG_IDF_TARGET_ESP32C6)
 static const int spiReservedInitialGpio = 24;
 static const int spiReservedFinalGpio = 30;
+#elif defined(CONFIG_IDF_TARGET_ESP32C61)
+static const int spiReservedInitialGpio = 14;
+static const int spiReservedFinalGpio = 21;
 #elif defined(CONFIG_IDF_TARGET_ESP32H2)
 static const int spiReservedInitialGpio = 15;
 static const int spiReservedFinalGpio = 21;
@@ -247,6 +250,12 @@ bool CPU_GPIO_ReservePin(GPIO_PIN pinNumber, bool fReserve)
 // Return if Pin is reserved
 bool CPU_GPIO_PinIsBusy(GPIO_PIN pin)
 {
+    // Always return busy for invalid pins
+    if (!GPIO_IS_VALID_GPIO((gpio_num_t)pin))
+    {
+        return true;
+    }
+
     int port = pin >> 4, sh = pin & 0x0F;
     return (pinReserved[port] >> sh) & 1;
 }

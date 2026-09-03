@@ -13,6 +13,16 @@
 #include <WireProtocol_MonitorCommands.h>
 #include <target_board.h>
 
+// Vendor-abstracted flash operations
+#if (HAL_NF_USE_STM32_FLASH == TRUE)
+#define nf_TargetFlashWrite stm32FlashWrite
+#define nf_TargetFlashErase stm32FlashErase
+#else
+// Forward declarations for target-provided flash operations
+int nf_TargetFlashWrite(uint32_t startAddress, uint32_t length, const uint8_t *buffer);
+int nf_TargetFlashErase(uint32_t address);
+#endif
+
 int AccessMemory(uint32_t location, uint32_t lengthInBytes, uint8_t *buffer, int32_t mode, uint32_t *errorCode)
 {
     // reset error code
@@ -22,13 +32,11 @@ int AccessMemory(uint32_t location, uint32_t lengthInBytes, uint8_t *buffer, int
     {
         case AccessMemory_Write:
             // use FLASH driver to perform write operation
-            // this requires that HAL_NF_USE_STM32_FLASH is set to TRUE on halconf_nf.h
-            return stm32FlashWrite(location, lengthInBytes, buffer);
+            return nf_TargetFlashWrite(location, lengthInBytes, buffer);
 
         case AccessMemory_Erase:
             // erase using FLASH driver
-            // this requires that HAL_NF_USE_STM32_FLASH is set to TRUE on halconf_nf.h
-            return stm32FlashErase(location);
+            return nf_TargetFlashErase(location);
 
         case AccessMemory_Check:
             // compute CRC32 of the memory segment

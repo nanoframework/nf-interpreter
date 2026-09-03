@@ -9,12 +9,11 @@ RUN apt-get update \
 
 RUN mkdir -p /tmp/dc-downloads /tmp/dc-extracted
 
-ARG GCC_VERSION=13.3.rel1
-ARG GCC_URI=https://armkeil.blob.core.windows.net/developer/Files/downloads/gnu/$GCC_VERSION/binrel/arm-gnu-toolchain-$GCC_VERSION-x86_64-arm-none-eabi.tar.xz
+ARG GCC_VERSION=15.2.rel1
+ARG GCC_URI=https://developer.arm.com/-/media/Files/downloads/gnu/$GCC_VERSION/binrel/arm-gnu-toolchain-$GCC_VERSION-x86_64-arm-none-eabi.tar.xz
 RUN mkdir -p /tmp/dc-downloads /tmp/dc-extracted/gcc \
-    && curl -o /tmp/dc-downloads/gcc-arm.tar.xz  $GCC_URI \
-    && xz -d /tmp/dc-downloads/gcc-arm.tar.xz \
-    && tar -xvf /tmp/dc-downloads/gcc-arm.tar -C /tmp/dc-extracted/gcc --strip-components 1 \
+    && curl -fL -o /tmp/dc-downloads/gcc-arm.tar.xz $GCC_URI \
+    && tar -xJf /tmp/dc-downloads/gcc-arm.tar.xz -C /tmp/dc-extracted/gcc --strip-components 1 \
     && rm -rf /tmp/dc-extracted/gcc/share/doc/ /tmp/dc-extracted/gcc/share/gcc-arm-none-eabi/samples/
 
 ARG CMAKE_VERSION=3.31.6
@@ -31,10 +30,12 @@ FROM python:3.11 AS devcontainer
 # Avoid warnings by switching to noninteractive
 ENV DEBIAN_FRONTEND=noninteractive
 
-# You can set up non-root user
-# ARG USERNAME=vscode
-# ARG USER_UID=1000
-# ARG USER_GID=$USER_UID
+# Non-root user. VS Code automatically adjusts this user's UID/GID to match
+# the local user on Linux hosts (updateRemoteUserUID), so files created
+# inside the bind-mounted workspace keep correct ownership on the host.
+ARG USERNAME=vscode
+ARG USER_UID=1000
+ARG USER_GID=$USER_UID
 
 # Configure apt and install packages
 RUN apt-get update \
@@ -42,8 +43,6 @@ RUN apt-get update \
     && apt-get install -y \
     git \
     git-lfs \
-    git-svn \
-    subversion \
     clang-format \
     curl \
     ninja-build \
@@ -55,15 +54,18 @@ RUN apt-get update \
 RUN mkdir -p /usr/local/bin/gcc
 
 # Clone libs mbedtls and fatfs etc.
-RUN git clone --branch R0.15a https://github.com/abbrev/fatfs.git --depth 1 ./sources/fatfs \
+RUN git clone --branch R0.16 https://github.com/abbrev/fatfs.git --depth 1 ./sources/fatfs \
     && git clone --branch STABLE-2_1_3_RELEASE https://github.com/lwip-tcpip/lwip.git --depth 1 ./sources/lwip \
-    && git clone --branch mbedtls-3.6.5 https://github.com/ARMmbed/mbedtls.git --depth 1 ./sources/mbedtls \
+    && git clone --branch mbedtls-3.6.7 https://github.com/ARMmbed/mbedtls.git --depth 1 ./sources/mbedtls \
     && cd ./sources/mbedtls \
     && git submodule update --init --recursive
     
 # Clone FreeRTOS
-RUN git clone --branch V10.4.1-kernel-only https://github.com/FreeRTOS/FreeRTOS-Kernel.git --depth 1 ./sources/FreeRTOS \
-    && git clone --branch 5.5.1 https://github.com/ARM-software/CMSIS_5.git --depth 1 ./sources/CMSIS_5
+RUN git clone --branch V10.4.1-kernel-only https://github.com/FreeRTOS/FreeRTOS-Kernel.git --depth 1 ./sources/FreeRTOS
+
+# Clone CMSIS
+RUN git clone --branch 5.5.1 https://github.com/ARM-software/CMSIS_5.git --depth 1 ./sources/CMSIS_5 \  
+    && git -C ./sources/CMSIS_5 lfs pull --include="CMSIS/DSP/**"  
 
 # set gcc location
 ARG TMP_GCC_PATH=/usr/local/bin/gcc
@@ -83,5 +85,20 @@ RUN apt-get autoremove -y \
     && apt-get clean -y \
     && rm -rf /var/lib/apt/lists/*
 
+# Create the non-root user and open up read/execute access to the toolchains
+# and repositories that were downloaded/cloned as root above.
+RUN groupadd --gid $USER_GID $USERNAME \
+    && useradd --uid $USER_UID --gid $USER_GID -m -s /bin/bash $USERNAME \
+    && apt-get update \
+    && apt-get install -y --no-install-recommends sudo \
+    && echo "$USERNAME ALL=(root) NOPASSWD:ALL" > /etc/sudoers.d/$USERNAME \
+    && chmod 0440 /etc/sudoers.d/$USERNAME \
+    && apt-get clean -y \
+    && rm -rf /var/lib/apt/lists/* \
+    && chown -R $USER_UID:$USER_GID /sources /usr/local/bin /usr/bin/cmake
+
 # Switch back to dialog for any ad-hoc use of apt-get
 ENV DEBIAN_FRONTEND=dialog
+
+USER $USERNAME
+WORKDIR /home/$USERNAME

@@ -63,12 +63,13 @@ jobs:
           pushd config
 
           # Rename the templates
+          mv user-kconfig.conf.TEMPLATE user-kconfig.conf
           mv user-prefs.TEMPLATE.json user-prefs.json
           mv user-tools-repos.TEMPLATE.json user-tools-repos.json
 
           # Adjust the file content for a valid radio frequency (TI targets)
           if [[ -n "${{ matrix.radio-freq }}" ]]; then
-            sed -i -- 's|"RADIO_FREQUENCY": "CHANGE_ME_TO_A_VALID_VALUE_868_OR_915"|"RADIO_FREQUENCY": "${{ matrix.radio-freq }}"|g' user-prefs.json
+            sed -i -- 's|# CONFIG_RADIO_FREQUENCY=915|CONFIG_RADIO_FREQUENCY=${{ matrix.radio-freq }}|g' user-kconfig.conf
           fi
 
           # Adjust the file content for a devcontainer

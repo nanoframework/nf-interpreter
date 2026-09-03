@@ -8,6 +8,7 @@
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
+#include <type_traits>
 #include <nanoCLR_Types.h>
 #include <nanoCLR_Interop.h>
 #include <nanoCLR_ErrorCodes.h>
@@ -515,6 +516,15 @@ struct CLR_RT_Memory
         memset(buf, 0, len);
     }
 
+    template <typename T> static void Clear(T &ref)
+    {
+        // A type with a non-trivial destructor owns something that has to be released
+        // for example, an entry in the CLR_RT_ProtectFromGC chain on which zero-filling it silently orphans that.
+        static_assert(std::is_trivially_destructible<T>::value, "NANOCLR_CLEAR on a type that owns resources");
+
+        ZeroFill(&ref, sizeof(T));
+    }
+
     //--//
 
     static void Reset();
@@ -551,7 +561,7 @@ extern void CLR_RT_GetVersion(
     unsigned short int *pBuild,
     unsigned short int *pRevision);
 
-#define NANOCLR_CLEAR(ref) CLR_RT_Memory::ZeroFill(&ref, sizeof(ref))
+#define NANOCLR_CLEAR(ref) CLR_RT_Memory::Clear(ref)
 
 //--//
 
@@ -1576,11 +1586,12 @@ struct CLR_RT_WellKnownTypes
     CLR_RT_TypeDef_Index m_ResourceManager;
 
     CLR_RT_TypeDef_Index m_SocketException;
+    CLR_RT_TypeDef_Index m_CryptographicException;
 
     CLR_RT_TypeDef_Index m_I2cTransferResult;
     CLR_RT_TypeDef_Index m_I2cTransferResult_old;
 
-    CLR_RT_TypeDef_Index m_RmtCommand;
+    CLR_RT_TypeDef_Index m_RmtSymbol;
 
     PROHIBIT_COPY_CONSTRUCTORS(CLR_RT_WellKnownTypes);
 };
@@ -1967,6 +1978,50 @@ struct CLR_RT_MethodDef_Instance : public CLR_RT_MethodDef_Index
 #endif // #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
 };
 
+////////////////////////////////////////////////////////////////////////////////
+
+struct CLR_RT_ProtectFromGC
+{
+    static const CLR_UINT32 c_Generic = 0x00000001;
+    static const CLR_UINT32 c_HeapBlock = 0x00000002;
+    static const CLR_UINT32 c_ResetKeepAlive = 0x00000004;
+
+    typedef void (*Callback)(void *state);
+
+    static CLR_RT_ProtectFromGC *s_first;
+
+    CLR_RT_ProtectFromGC *m_next;
+    void **m_data;
+    Callback m_fpn;
+    CLR_UINT32 m_flags;
+
+    CLR_RT_ProtectFromGC(CLR_RT_HeapBlock &ref)
+    {
+        Initialize(ref);
+    }
+    CLR_RT_ProtectFromGC(void **data, Callback fpn)
+    {
+        Initialize(data, fpn);
+    }
+    ~CLR_RT_ProtectFromGC()
+    {
+        Cleanup();
+    }
+
+    static void InvokeAll();
+
+  private:
+    void Initialize(CLR_RT_HeapBlock &ref);
+    void Initialize(void **data, Callback fpn);
+    void Cleanup();
+
+    // Cold recovery path for Cleanup(), kept out of line so that it isn't inlined into every
+    // destruction site.
+    NANOCLR_NOINLINE void UnlinkOutOfOrder();
+
+    void Invoke();
+};
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 struct CLR_RT_AttributeEnumerator
@@ -1993,6 +2048,9 @@ struct CLR_RT_AttributeEnumerator
     void Initialize(CLR_RT_Assembly *assm);
 };
 
+// Developer note: Value::m_valueGC holds a live entry in the CLR_RT_ProtectFromGC chain for this object whole lifetime.
+// Never memset/memcpy an instance (NANOCLR_CLEAR included) and never give one a lifetime that doesn't nest with the
+// enclosing scope.
 struct CLR_RT_AttributeParser
 {
     struct Value
@@ -2003,10 +2061,34 @@ struct CLR_RT_AttributeParser
         static const int c_DefaultConstructor = 4;
 
         int m_mode;
-        CLR_RT_HeapBlock m_value;
+        // Declaration order below is load-bearing: CLR_RT_ProtectFromGC's constructor reads
+        // m_value.IsForcedAlive(), so m_value has to be declared -- and zeroed -- before m_valueGC.
+        CLR_RT_HeapBlock m_value{};
+        CLR_RT_ProtectFromGC m_valueGC{m_value};
 
         int m_pos;
         const char *m_name;
+
+        //--//
+
+        // Required, not decorative: declaring the deleted copy constructor below suppresses the
+        // implicit default constructor. It also has to stay defaulted *here*, in the class body --
+        // an out of line "= default" would make it user provided, which drops the zero
+        // initialization that m_valueGC's constructor depends on.
+        Value() = default;
+
+        // Prevent copying because shallow copies of CLR_RT_ProtectFromGC
+        // can corrupt the GC protection list during destruction.
+
+        // Delete copy constructor
+        Value(const Value &) = delete;
+        // Delete copy-assignment operator
+        Value &operator=(const Value &) = delete;
+
+        // Stack only: the CLR_RT_ProtectFromGC entry is released by popping the chain, not by
+        // searching it, so this object's lifetime has to nest with the enclosing scope.
+        static void *operator new(size_t) = delete;
+        static void *operator new[](size_t) = delete;
     };
 
     //--//
@@ -2038,6 +2120,11 @@ struct CLR_RT_AttributeParser
         const CLR_RT_TypeDef_Index *m_cls,
         const CLR_UINT32 size);
     HRESULT ReadString(CLR_RT_HeapBlock *&value);
+
+    // Stack only, for the same reason as CLR_RT_AttributeParser::Value above: this owns the
+    // registration through m_lastValue.
+    static void *operator new(size_t) = delete;
+    static void *operator new[](size_t) = delete;
 
   private:
     const char *GetString();
@@ -2295,11 +2382,11 @@ struct CLR_RT_StackFrame : public CLR_RT_HeapBlock_Node // EVENT HEAP - NO RELOC
     void SetResult_I1(CLR_UINT8 val);
     void SetResult_I2(CLR_INT16 val);
     void SetResult_I4(CLR_INT32 val);
-    void SetResult_I8(CLR_INT64 &val);
+    void SetResult_I8(const CLR_INT64 &val);
     void SetResult_U1(CLR_INT8 val);
     void SetResult_U2(CLR_UINT16 val);
     void SetResult_U4(CLR_UINT32 val);
-    void SetResult_U8(CLR_UINT64 &val);
+    void SetResult_U8(const CLR_UINT64 &val);
 
 #if !defined(NANOCLR_EMULATED_FLOATINGPOINT)
     void SetResult_R4(float val);
@@ -2452,7 +2539,7 @@ struct CLR_RT_StackFrame : public CLR_RT_HeapBlock_Node // EVENT HEAP - NO RELOC
 // The use of offsetof below throwns an "invalid offset warning" because CLR_RT_StackFrame is not POD type
 // C+17 is the first standard that allow this, so until we are using it we have to disable it to keep GCC happy
 
-#ifdef _MSC_VER
+#if defined(_MSC_VER)
 
 CT_ASSERT(
     offsetof(CLR_RT_StackFrame, CLR_RT_StackFrame::m_owningThread) + sizeof(CLR_RT_Thread *) ==
@@ -2466,6 +2553,21 @@ CT_ASSERT(
 CT_ASSERT(
     offsetof(CLR_RT_StackFrame, CLR_RT_StackFrame::m_locals) + sizeof(CLR_RT_HeapBlock *) ==
     offsetof(CLR_RT_StackFrame, CLR_RT_StackFrame::m_IP))
+
+#elif defined(__clang__) && defined(__APPLE__)
+
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Winvalid-offsetof"
+
+CT_ASSERT(
+    offsetof(CLR_RT_StackFrame, m_owningThread) + sizeof(CLR_RT_Thread *) == offsetof(CLR_RT_StackFrame, m_evalStack))
+CT_ASSERT(
+    offsetof(CLR_RT_StackFrame, m_evalStack) + sizeof(CLR_RT_HeapBlock *) == offsetof(CLR_RT_StackFrame, m_arguments))
+CT_ASSERT(
+    offsetof(CLR_RT_StackFrame, m_arguments) + sizeof(CLR_RT_HeapBlock *) == offsetof(CLR_RT_StackFrame, m_locals))
+CT_ASSERT(offsetof(CLR_RT_StackFrame, m_locals) + sizeof(CLR_RT_HeapBlock *) == offsetof(CLR_RT_StackFrame, m_IP))
+
+#pragma clang diagnostic pop
 
 #else
 
@@ -2492,46 +2594,6 @@ CT_ASSERT(
 #endif
 
 #endif // _MSC_VER
-
-////////////////////////////////////////////////////////////////////////////////
-
-struct CLR_RT_ProtectFromGC
-{
-    static const CLR_UINT32 c_Generic = 0x00000001;
-    static const CLR_UINT32 c_HeapBlock = 0x00000002;
-    static const CLR_UINT32 c_ResetKeepAlive = 0x00000004;
-
-    typedef void (*Callback)(void *state);
-
-    static CLR_RT_ProtectFromGC *s_first;
-
-    CLR_RT_ProtectFromGC *m_next;
-    void **m_data;
-    Callback m_fpn;
-    CLR_UINT32 m_flags;
-
-    CLR_RT_ProtectFromGC(CLR_RT_HeapBlock &ref)
-    {
-        Initialize(ref);
-    }
-    CLR_RT_ProtectFromGC(void **data, Callback fpn)
-    {
-        Initialize(data, fpn);
-    }
-    ~CLR_RT_ProtectFromGC()
-    {
-        Cleanup();
-    }
-
-    static void InvokeAll();
-
-  private:
-    void Initialize(CLR_RT_HeapBlock &ref);
-    void Initialize(void **data, Callback fpn);
-    void Cleanup();
-
-    void Invoke();
-};
 
 ////////////////////////////////////////
 
@@ -3436,6 +3498,7 @@ typedef enum Events
     Event_UsbOut            = 0x00004000,
     Event_IO                = 0x00008000,
     Event_I2cSlave          = 0x00010000,
+    Event_RmtRx             = 0x00020000,
     Event_AppDomain         = 0x02000000,
     Event_Socket            = 0x20000000,
     Event_IdleCPU           = 0x40000000,
@@ -3908,11 +3971,15 @@ extern CLR_UINT32 g_buildCRC;
 
 #ifdef _WIN64
 CT_ASSERT(sizeof(struct CLR_RT_HeapBlock) == 20)
+#elif defined(PLATFORM_POSIX_HOST) && defined(__LP64__)
+// 64-bit POSIX host: HeapBlock layout will be determined during port; skip size check
 #else
 CT_ASSERT(sizeof(struct CLR_RT_HeapBlock) == 12)
 #endif // _WIN64
 
+#if !defined(PLATFORM_POSIX_HOST) || !defined(__LP64__)
 CT_ASSERT(sizeof(CLR_RT_HeapBlock_Raw) == sizeof(struct CLR_RT_HeapBlock))
+#endif
 
 #if defined(NANOCLR_TRACE_MEMORY_STATS)
 #define NANOCLR_TRACE_MEMORY_STATS_EXTRA_SIZE sizeof(const char *)
@@ -3920,7 +3987,7 @@ CT_ASSERT(sizeof(CLR_RT_HeapBlock_Raw) == sizeof(struct CLR_RT_HeapBlock))
 #define NANOCLR_TRACE_MEMORY_STATS_EXTRA_SIZE 0
 #endif
 
-#if defined(__GNUC__) // Gcc compiler uses 8 bytes for a function pointer
+#if defined(__GNUC__) && !defined(PLATFORM_POSIX_HOST) // Gcc compiler uses 8 bytes for a function pointer
 CT_ASSERT(sizeof(CLR_RT_DataTypeLookup) == 20 + NANOCLR_TRACE_MEMORY_STATS_EXTRA_SIZE)
 
 #elif defined(VIRTUAL_DEVICE) && defined(NANOCLR_TRACE_MEMORY_STATS)
@@ -3941,7 +4008,11 @@ CT_ASSERT(sizeof(CLR_RT_DataTypeLookup) == 16 + NANOCLR_TRACE_MEMORY_STATS_EXTRA
 
 #else
 
+#if defined(PLATFORM_POSIX_HOST) && defined(__LP64__)
+// 64-bit POSIX host: structure sizes will differ from embedded ARM; skip checks during port.
+#else
 !ERROR
+#endif
 
 #endif
 
