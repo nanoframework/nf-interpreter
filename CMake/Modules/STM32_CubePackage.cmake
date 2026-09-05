@@ -68,6 +68,7 @@ macro(ProcessSTM32CubePackage)
             stm32${TARGET_SERIES_SHORT_LOWER}_hal_driver
             GIT_REPOSITORY https://github.com/STMicroelectronics/stm32${TARGET_SERIES_SHORT_LOWER}xx_hal_driver
             GIT_TAG ${HAL_DRIVER_GIT_TAG}
+            UPDATE_DISCONNECTED ON
         )
 
     else()
@@ -103,6 +104,7 @@ macro(ProcessSTM32CubePackage)
             cmsis_device_${TARGET_SERIES_SHORT_LOWER}
             GIT_REPOSITORY https://github.com/STMicroelectronics/cmsis_device_${TARGET_SERIES_SHORT_LOWER}
             GIT_TAG ${CMSIS_DEVICE_GIT_TAG}
+            UPDATE_DISCONNECTED ON
         )
 
     else()
@@ -138,7 +140,8 @@ macro(ProcessSTM32CubePackage)
             cmsis_core
             GIT_REPOSITORY https://github.com/STMicroelectronics/cmsis_core
             GIT_TAG ${CMSIS_CORE_GIT_TAG}
-        )       
+            UPDATE_DISCONNECTED ON
+        )
 
     else()
         # STM32 CMSIS Core source was specified

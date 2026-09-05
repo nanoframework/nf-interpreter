@@ -39,16 +39,27 @@
 // RP2040 hardware register definitions (direct access)
 // ---------------------------------------------------------------------------
 #define SIO_BASE        0xD0000000u
+#define GPIO_IN_REG     (*(volatile uint32_t *)(SIO_BASE + 0x004))
+// SIO GPIO output/OE set/clear offsets differ between RP2040 and RP2350.
+// RP2350 inserts GPIO_HI_* registers (for GPIO32+) between each bank,
+// shifting all the atomic set/clr/xor offsets up.
+// Reference: rp2040/addressmap.h vs rp2350/addressmap.h in the Pico SDK.
+#if defined(RP2350)
+#define GPIO_OUT_SET    (*(volatile uint32_t *)(SIO_BASE + 0x018))
+#define GPIO_OUT_CLR    (*(volatile uint32_t *)(SIO_BASE + 0x020))
+#define GPIO_OE_SET     (*(volatile uint32_t *)(SIO_BASE + 0x038))
+#define GPIO_OE_CLR     (*(volatile uint32_t *)(SIO_BASE + 0x040))
+#define IO_BANK0_BASE   0x40028000u
+#define PADS_BANK0_BASE 0x40038000u
+#else // RP2040
 #define GPIO_OUT_SET    (*(volatile uint32_t *)(SIO_BASE + 0x014))
 #define GPIO_OUT_CLR    (*(volatile uint32_t *)(SIO_BASE + 0x018))
 #define GPIO_OE_SET     (*(volatile uint32_t *)(SIO_BASE + 0x024))
 #define GPIO_OE_CLR     (*(volatile uint32_t *)(SIO_BASE + 0x028))
-#define GPIO_IN_REG     (*(volatile uint32_t *)(SIO_BASE + 0x004))
-
 #define IO_BANK0_BASE   0x40014000u
-#define GPIO_CTRL(n)    (*(volatile uint32_t *)(IO_BANK0_BASE + 0x04 + 8 * (n)))
-
 #define PADS_BANK0_BASE 0x4001C000u
+#endif
+#define GPIO_CTRL(n)    (*(volatile uint32_t *)(IO_BANK0_BASE + 0x04 + 8 * (n)))
 #define PADS_GPIO(n)    (*(volatile uint32_t *)(PADS_BANK0_BASE + 0x04 + 4 * (n)))
 #define PAD_OD          (1u << 7)
 #define PAD_IE          (1u << 6)
@@ -276,8 +287,15 @@ int cyw43_spi_init(cyw43_int_t *self)
 
     uint32_t sm = pio_sm->smidx;
 
-    // Clock: 125 MHz / 2 = 62.5 MHz PIO → ~31 MHz SPI
-    pioSmSetClkdivX(pio_sm, PIO_SM_CLKDIV(2, 0));
+    // Clock divider for CYW43 gSPI.
+    // RP2040 typically runs clk_sys at 125MHz, so div=2 yields ~31MHz SPI.
+    // RP2350 targets often run a faster clk_sys, where div=2 can overclock
+    // the CYW43 bus and cause unreliable data traffic (e.g. DHCP/connect).
+#if defined(RP2350)
+    pioSmSetClkdivX(pio_sm, PIO_SM_CLKDIV(3, 0)); // ~25MHz @150MHz sysclk
+#else
+    pioSmSetClkdivX(pio_sm, PIO_SM_CLKDIV(2, 0)); // ~31MHz @125MHz sysclk
+#endif
 
     // Shift: OUT left, IN left, autopull/autopush at 32 bits
     pioSmSetShiftctrlX(pio_sm,

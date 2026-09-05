@@ -5,7 +5,7 @@
 //
 
 #include <nanohal.h>
-//#include "net_decl_lwip.h"
+// #include "net_decl_lwip.h"
 #include "enc28j60_lwip.h"
 
 extern "C"
@@ -255,6 +255,11 @@ int ENC28J60_LWIP_Driver::Open(ENC28J60_LWIP_DRIVER_CONFIG *config, int index)
     //     len = iface->macAddressLen;
     //     g_ENC28J60_NetIF.hwaddr_len = len;
     // }
+    if (len > NETIF_MAX_HWADDR_LEN)
+    {
+        len = NETIF_MAX_HWADDR_LEN;
+    }
+
     g_ENC28J60_NetIF.hwaddr_len = len;
     memcpy(g_ENC28J60_NetIF.hwaddr, iface->MacAddress, len);
 

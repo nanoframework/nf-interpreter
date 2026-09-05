@@ -22,6 +22,9 @@ set(nanoFramework.Hardware.Esp32.Rmt_SRCS
     nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_Esp32_Rmt_RmtChannel.cpp
     nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_Esp32_Rmt_TransmitterChannel.cpp
     nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_Esp32_Rmt_ReceiverChannel.cpp
+    nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_Esp32_Rmt_TransmitSyncManager.cpp
+    rmt_multi_stage_encoder.cpp
+    nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_Esp32_Rmt_Utils.cpp
 )
 
 foreach(SRC_FILE ${nanoFramework.Hardware.Esp32.Rmt_SRCS})

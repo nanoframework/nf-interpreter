@@ -18,6 +18,17 @@ on:
 
 jobs:
   build-posix-nanoclr:
+    if: >-
+      ${{
+        github.event_name != 'pull_request' ||
+        !(
+          github.actor == 'nfbot' &&
+          (
+            contains(github.event.pull_request.title, 'Code style fixes') ||
+            contains(github.event.pull_request.body || '', 'Automated fix of code style')
+          )
+        )
+      }}
     strategy:
       matrix:
         include:

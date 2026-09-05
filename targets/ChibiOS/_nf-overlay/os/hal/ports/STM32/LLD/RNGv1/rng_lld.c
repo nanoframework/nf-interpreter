@@ -11,7 +11,7 @@
 #include <hal.h>
 #include <hal_nf_community.h>
 
-#if (HAL_NF_USE_STM32_RNG == TRUE)
+#if (HAL_NF_USE_RNG == TRUE)
 
 /*===========================================================================*/
 /* Driver local definitions.                                                 */
@@ -85,29 +85,40 @@ void rng_lld_stop()
     RNGD1.State = RNG_STOP;
 }
 
-uint32_t rng_lld_GenerateRandomNumber()
+bool rng_lld_generate(size_t size, uint8_t *out)
 {
-    systime_t start = osalOsGetSystemTimeX();
-    systime_t end = start + OSAL_MS2I(RNG_TIMEOUT_VALUE);
-
-    /* Check if data register contains valid random data */
-    while (__RNG_GET_FLAG(RNGD1, RNG_FLAG_DRDY) == RESET)
+    while (size > 0)
     {
-        if (!osalTimeIsInRangeX(osalOsGetSystemTimeX(), start, end))
+        systime_t start = osalOsGetSystemTimeX();
+        systime_t end = start + OSAL_MS2I(RNG_TIMEOUT_VALUE);
+
+        while (__RNG_GET_FLAG(RNGD1, RNG_FLAG_CECS) || __RNG_GET_FLAG(RNGD1, RNG_FLAG_SECS))
         {
-            return 0;
+            if (!osalTimeIsInRangeX(osalOsGetSystemTimeX(), start, end))
+            {
+                return false;
+            }
+        }
+
+        while (!__RNG_GET_FLAG(RNGD1, RNG_FLAG_DRDY))
+        {
+            if (!osalTimeIsInRangeX(osalOsGetSystemTimeX(), start, end))
+            {
+                return false;
+            }
+        }
+
+        uint32_t r = RNGD1.Instance->DR;
+
+        for (size_t i = 0; i < sizeof(uint32_t) && size > 0; i++)
+        {
+            *out++ = (uint8_t)r;
+            r >>= 8;
+            size--;
         }
     }
 
-    /* Get a 32bit Random number */
-    RNGD1.RandomNumber = RNGD1.Instance->DR;
-
-    return RNGD1.RandomNumber;
-}
-
-uint32_t rng_lld_GetLastRandomNumber()
-{
-    return RNGD1.RandomNumber;
+    return true;
 }
 
 #if (RNG_USE_MUTUAL_EXCLUSION == TRUE)
@@ -124,4 +135,4 @@ void rng_lld_release()
 
 #endif
 
-#endif /* HAL_NF_USE_STM32_RNG */
+#endif /* HAL_NF_USE_RNG */

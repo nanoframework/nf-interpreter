@@ -41,14 +41,14 @@ int ssl_decode_private_key_internal(
     size_t keyLength,
     const unsigned char *pwd,
     size_t pwdLength);
-int ssl_connect_internal(int sd, const char *szTargetHost, int contextHandle);
-int ssl_accept_internal(int socket, int contextHandle);
+SslError ssl_connect_internal(int sd, const char *szTargetHost, int contextHandle, int *mbedtlsCode);
+SslError ssl_accept_internal(int socket, int contextHandle, int *mbedtlsCode);
 int ssl_read_internal(int socket, char *data, size_t size);
 int ssl_write_internal(int socket, const char *data, size_t size);
 int ssl_close_socket_internal(int sd);
 int ssl_available_internal(int sd);
 bool ssl_exit_context_internal(int contextHandle);
-bool ssl_generic_init_internal(
+SslError ssl_generic_init_internal(
     int sslMode,
     int sslVerify,
     const char *certificate,

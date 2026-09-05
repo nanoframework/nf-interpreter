@@ -8,33 +8,92 @@
 
 void CLR_RT_Random::Initialize()
 {
+#if (HAL_NF_USE_RNG == TRUE)
+
     rngStart();
+
+#elif (HAL_USE_TRNG == TRUE)
+
+    trngStart(&TRNGD1, NULL);
+
+#else
+#error "No hardware RNG source configured: enable HAL_NF_USE_RNG or HAL_USE_TRNG"
+#endif
 }
 
-void CLR_RT_Random::Initialize( int seed )
+void CLR_RT_Random::Initialize(int seed)
 {
     (void)seed;
 
+#if (HAL_NF_USE_RNG == TRUE)
+
     rngStart();
+
+#elif (HAL_USE_TRNG == TRUE)
+
+    trngStart(&TRNGD1, NULL);
+
+#else
+#error "No hardware RNG source configured: enable HAL_NF_USE_RNG or HAL_USE_TRNG"
+#endif
 }
 
 uint32_t CLR_RT_Random::Next()
 {
-    return rngGenerateRandomNumber();
+#if (HAL_NF_USE_RNG == TRUE)
+
+    uint32_t randomValue = 0;
+    rngGenerate(sizeof(randomValue), (uint8_t *)&randomValue);
+
+    return randomValue;
+
+#elif (HAL_USE_TRNG == TRUE)
+
+    uint32_t randomValue = 0;
+    // trngGenerate returns true if an error occurred
+    trngGenerate(&TRNGD1, sizeof(randomValue), (uint8_t *)&randomValue);
+
+    return randomValue;
+
+#else
+#error "No hardware RNG source configured: enable HAL_NF_USE_RNG or HAL_USE_TRNG"
+#endif
 }
 
 double CLR_RT_Random::NextDouble()
 {
     // the hardware generator returns a value between 0 - 0xFFFFFFFF
-    return ((double)rngGenerateRandomNumber()) / ((double)0xFFFFFFFF);
+
+#if (HAL_NF_USE_RNG == TRUE)
+
+    uint32_t randomValue = 0;
+    rngGenerate(sizeof(randomValue), (uint8_t *)&randomValue);
+    return ((double)randomValue) / ((double)0xFFFFFFFF);
+
+#elif (HAL_USE_TRNG == TRUE)
+
+    uint32_t randomValue = 0;
+    // trngGenerate returns true if an error occurred
+    trngGenerate(&TRNGD1, sizeof(randomValue), (uint8_t *)&randomValue);
+    return ((double)randomValue) / ((double)0xFFFFFFFF);
+
+#else
+#error "No hardware RNG source configured: enable HAL_NF_USE_RNG or HAL_USE_TRNG"
+#endif
 }
 
-void CLR_RT_Random::NextBytes(unsigned char* buffer, unsigned int count)
+void CLR_RT_Random::NextBytes(unsigned char *buffer, unsigned int count)
 {
-    unsigned int i;
+#if (HAL_NF_USE_RNG == TRUE)
 
-    for(i = 0; i < count; i++)
-    {
-        buffer[i] = (unsigned char)rngGenerateRandomNumber();
-    }
+    rngGenerate(count, buffer);
+
+#elif (HAL_USE_TRNG == TRUE)
+
+    // trngGenerate returns true if an error occurred
+    trngGenerate(&TRNGD1, count, buffer);
+
+#else
+#error "No hardware RNG source configured: enable HAL_NF_USE_RNG or HAL_USE_TRNG"
+#endif
 }

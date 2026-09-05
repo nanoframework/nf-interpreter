@@ -35,6 +35,11 @@ bool SL_MscFlashDriver_Read(void *context, ByteAddress startAddress, unsigned in
 {
     (void)context;
 
+    if (buffer == NULL)
+    {
+        return false;
+    }
+
     volatile uint8_t *cursor = (volatile uint8_t *)startAddress;
     volatile uint8_t *endAddress = (volatile uint8_t *)(startAddress + numBytes);
 
@@ -56,6 +61,11 @@ bool SL_MscFlashDriver_Write(
 {
     (void)context;
     (void)readModifyWrite;
+
+    if (buffer == NULL)
+    {
+        return false;
+    }
 
     MSC_Status_TypeDef mscReturn;
 

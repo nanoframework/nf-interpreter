@@ -6,8 +6,7 @@
 	"dockerFile": "Dockerfile.All",
 	"context": ".",
 	"mounts": [
-		// Bind the Unix socket the Docker daemon listens on by default
-		"source=/var/run/docker.sock,target=/var/run/docker.sock,type=bind",
+
 		// Keep command history 
 		"source=nano-bashhistory,target=/home/vscode/commandhistory,type=volume"
 		// OPTIONAL: Mount .azure folder for seamless az cli auth
@@ -42,7 +41,13 @@
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
 	// "forwardPorts": [],
 	// This is needed to allow cloning repositories like the STM32 hal driver ones
-	"postCreateCommand": "git config --global safe.directory '*'"
-	// Uncomment to connect as a non-root user. See https: //aka.ms/vscode-remote/containers/non-root.
-	// ,"remoteUser": "vscode"
+	"postCreateCommand": {
+		"chown-workspace": ["sudo", "chown", "-R", "vscode:vscode", "${containerWorkspaceFolder}", "/sources", "/usr/local/bin", "/root/.espressif", "/usr/bin/cmake"],
+		"git-safe-directory": ["git", "config", "--global", "safe.directory", "*"]
+	},
+	// Connect as the non-root "vscode" user created in the Dockerfile. VS Code
+	// aligns its UID/GID with your local user (updateRemoteUserUID) so files
+	// created in the bind-mounted workspace aren't left owned by root.
+	"remoteUser": "vscode",
+	"updateRemoteUserUID": true
 }

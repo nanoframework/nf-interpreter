@@ -680,9 +680,27 @@ typedef void (*SSL_DATE_TIME_FUNC)(DATE_TIME_INFO *pdt);
 
 #define SSL_RESULT__WOULD_BLOCK -2
 
+enum SslError
+{
+    SslError_None = 0,
+    SslError_NoFreeContext = 1,
+    SslError_OutOfMemory = 2,
+    SslError_DrbgSeedFailed = 3,
+    SslError_ConfigDefaultsFailed = 4,
+    SslError_UnsupportedProtocolVersion = 5,
+    SslError_PrivateKeyParseFailed = 6,
+    SslError_CertificateParseFailed = 7,
+    SslError_OwnCertConfigFailed = 8,
+    SslError_SetupFailed = 9,
+    SslError_HandshakeBadContext = 10,
+    SslError_HandshakeSetHostname = 11,
+    SslError_HandshakeCertVerifyFailed = 12,
+    SslError_HandshakeFailed = 13,
+};
+
 bool SSL_Initialize();
 bool SSL_Uninitialize();
-bool SSL_ServerInit(
+SslError SSL_ServerInit(
     int sslMode,
     int sslVerify,
     const char *certificate,
@@ -694,7 +712,7 @@ bool SSL_ServerInit(
     int &sslContextHandle,
     bool useDeviceCertificate);
 
-bool SSL_ClientInit(
+SslError SSL_ClientInit(
     int sslMode,
     int sslVerify,
     const char *certificate,
@@ -708,8 +726,8 @@ bool SSL_ClientInit(
 
 bool SSL_AddCertificateAuthority(int sslContextHandle, const char *certificate, int certLength);
 bool SSL_ExitContext(int sslContextHandle);
-int SSL_Accept(int socket, int sslContextHandle);
-int SSL_Connect(int socket, const char *szTargetHost, int sslContextHandle);
+SslError SSL_Accept(int socket, int sslContextHandle, int *mbedtlsCode);
+SslError SSL_Connect(int socket, const char *szTargetHost, int sslContextHandle, int *mbedtlsCode);
 int SSL_Write(int socket, const char *Data, size_t size);
 int SSL_Read(int socket, char *Data, size_t size);
 int SSL_CloseSocket(int socket);

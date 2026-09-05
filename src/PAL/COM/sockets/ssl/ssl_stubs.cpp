@@ -5,6 +5,7 @@
 //
 
 #include "nanoHAL.h"
+#include <ssl_functions.h>
 
 //--//
 
@@ -20,7 +21,7 @@ __nfweak bool SSL_Uninitialize()
     return TRUE;
 }
 
-__nfweak bool SSL_ServerInit(
+__nfweak SslError SSL_ServerInit(
     int sslMode,
     int sslVerify,
     const char *certificate,
@@ -45,10 +46,10 @@ __nfweak bool SSL_ServerInit(
 
     NATIVE_PROFILE_PAL_COM();
 
-    return TRUE;
+    return SslError_None;
 }
 
-__nfweak bool SSL_ClientInit(
+__nfweak SslError SSL_ClientInit(
     int sslMode,
     int sslVerify,
     const char *certificate,
@@ -73,7 +74,7 @@ __nfweak bool SSL_ClientInit(
 
     NATIVE_PROFILE_PAL_COM();
 
-    return TRUE;
+    return SslError_None;
 }
 
 __nfweak bool SSL_AddCertificateAuthority(int contextHandle, const char *certificate, int certLength)
@@ -96,25 +97,27 @@ __nfweak bool SSL_ExitContext(int contextHandle)
     return TRUE;
 }
 
-__nfweak int SSL_Accept(SOCK_SOCKET socket, int contextHandle)
+__nfweak SslError SSL_Accept(SOCK_SOCKET socket, int contextHandle, int *mbedtlsCode)
 {
     (void)socket;
     (void)contextHandle;
+    (void)mbedtlsCode;
 
     NATIVE_PROFILE_PAL_COM();
 
-    return 0;
+    return SslError_None;
 }
 
-__nfweak int SSL_Connect(SOCK_SOCKET socket, const char *szTargetHost, int contextHandle)
+__nfweak SslError SSL_Connect(SOCK_SOCKET socket, const char *szTargetHost, int contextHandle, int *mbedtlsCode)
 {
     (void)socket;
     (void)szTargetHost;
     (void)contextHandle;
+    (void)mbedtlsCode;
 
     NATIVE_PROFILE_PAL_COM();
 
-    return 0;
+    return SslError_None;
 }
 
 __nfweak int SSL_Write(SOCK_SOCKET socket, const char *data, size_t size)

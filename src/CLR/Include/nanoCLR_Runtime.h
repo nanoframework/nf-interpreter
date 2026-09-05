@@ -8,6 +8,7 @@
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
+#include <type_traits>
 #include <nanoCLR_Types.h>
 #include <nanoCLR_Interop.h>
 #include <nanoCLR_ErrorCodes.h>
@@ -515,6 +516,15 @@ struct CLR_RT_Memory
         memset(buf, 0, len);
     }
 
+    template <typename T> static void Clear(T &ref)
+    {
+        // A type with a non-trivial destructor owns something that has to be released
+        // for example, an entry in the CLR_RT_ProtectFromGC chain on which zero-filling it silently orphans that.
+        static_assert(std::is_trivially_destructible<T>::value, "NANOCLR_CLEAR on a type that owns resources");
+
+        ZeroFill(&ref, sizeof(T));
+    }
+
     //--//
 
     static void Reset();
@@ -551,7 +561,7 @@ extern void CLR_RT_GetVersion(
     unsigned short int *pBuild,
     unsigned short int *pRevision);
 
-#define NANOCLR_CLEAR(ref) CLR_RT_Memory::ZeroFill(&ref, sizeof(ref))
+#define NANOCLR_CLEAR(ref) CLR_RT_Memory::Clear(ref)
 
 //--//
 
@@ -1576,11 +1586,12 @@ struct CLR_RT_WellKnownTypes
     CLR_RT_TypeDef_Index m_ResourceManager;
 
     CLR_RT_TypeDef_Index m_SocketException;
+    CLR_RT_TypeDef_Index m_CryptographicException;
 
     CLR_RT_TypeDef_Index m_I2cTransferResult;
     CLR_RT_TypeDef_Index m_I2cTransferResult_old;
 
-    CLR_RT_TypeDef_Index m_RmtCommand;
+    CLR_RT_TypeDef_Index m_RmtSymbol;
 
     PROHIBIT_COPY_CONSTRUCTORS(CLR_RT_WellKnownTypes);
 };
@@ -1967,6 +1978,50 @@ struct CLR_RT_MethodDef_Instance : public CLR_RT_MethodDef_Index
 #endif // #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
 };
 
+////////////////////////////////////////////////////////////////////////////////
+
+struct CLR_RT_ProtectFromGC
+{
+    static const CLR_UINT32 c_Generic = 0x00000001;
+    static const CLR_UINT32 c_HeapBlock = 0x00000002;
+    static const CLR_UINT32 c_ResetKeepAlive = 0x00000004;
+
+    typedef void (*Callback)(void *state);
+
+    static CLR_RT_ProtectFromGC *s_first;
+
+    CLR_RT_ProtectFromGC *m_next;
+    void **m_data;
+    Callback m_fpn;
+    CLR_UINT32 m_flags;
+
+    CLR_RT_ProtectFromGC(CLR_RT_HeapBlock &ref)
+    {
+        Initialize(ref);
+    }
+    CLR_RT_ProtectFromGC(void **data, Callback fpn)
+    {
+        Initialize(data, fpn);
+    }
+    ~CLR_RT_ProtectFromGC()
+    {
+        Cleanup();
+    }
+
+    static void InvokeAll();
+
+  private:
+    void Initialize(CLR_RT_HeapBlock &ref);
+    void Initialize(void **data, Callback fpn);
+    void Cleanup();
+
+    // Cold recovery path for Cleanup(), kept out of line so that it isn't inlined into every
+    // destruction site.
+    NANOCLR_NOINLINE void UnlinkOutOfOrder();
+
+    void Invoke();
+};
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 struct CLR_RT_AttributeEnumerator
@@ -1993,6 +2048,9 @@ struct CLR_RT_AttributeEnumerator
     void Initialize(CLR_RT_Assembly *assm);
 };
 
+// Developer note: Value::m_valueGC holds a live entry in the CLR_RT_ProtectFromGC chain for this object whole lifetime.
+// Never memset/memcpy an instance (NANOCLR_CLEAR included) and never give one a lifetime that doesn't nest with the
+// enclosing scope.
 struct CLR_RT_AttributeParser
 {
     struct Value
@@ -2003,10 +2061,34 @@ struct CLR_RT_AttributeParser
         static const int c_DefaultConstructor = 4;
 
         int m_mode;
-        CLR_RT_HeapBlock m_value;
+        // Declaration order below is load-bearing: CLR_RT_ProtectFromGC's constructor reads
+        // m_value.IsForcedAlive(), so m_value has to be declared -- and zeroed -- before m_valueGC.
+        CLR_RT_HeapBlock m_value{};
+        CLR_RT_ProtectFromGC m_valueGC{m_value};
 
         int m_pos;
         const char *m_name;
+
+        //--//
+
+        // Required, not decorative: declaring the deleted copy constructor below suppresses the
+        // implicit default constructor. It also has to stay defaulted *here*, in the class body --
+        // an out of line "= default" would make it user provided, which drops the zero
+        // initialization that m_valueGC's constructor depends on.
+        Value() = default;
+
+        // Prevent copying because shallow copies of CLR_RT_ProtectFromGC
+        // can corrupt the GC protection list during destruction.
+
+        // Delete copy constructor
+        Value(const Value &) = delete;
+        // Delete copy-assignment operator
+        Value &operator=(const Value &) = delete;
+
+        // Stack only: the CLR_RT_ProtectFromGC entry is released by popping the chain, not by
+        // searching it, so this object's lifetime has to nest with the enclosing scope.
+        static void *operator new(size_t) = delete;
+        static void *operator new[](size_t) = delete;
     };
 
     //--//
@@ -2038,6 +2120,11 @@ struct CLR_RT_AttributeParser
         const CLR_RT_TypeDef_Index *m_cls,
         const CLR_UINT32 size);
     HRESULT ReadString(CLR_RT_HeapBlock *&value);
+
+    // Stack only, for the same reason as CLR_RT_AttributeParser::Value above: this owns the
+    // registration through m_lastValue.
+    static void *operator new(size_t) = delete;
+    static void *operator new[](size_t) = delete;
 
   private:
     const char *GetString();
@@ -2507,46 +2594,6 @@ CT_ASSERT(
 #endif
 
 #endif // _MSC_VER
-
-////////////////////////////////////////////////////////////////////////////////
-
-struct CLR_RT_ProtectFromGC
-{
-    static const CLR_UINT32 c_Generic = 0x00000001;
-    static const CLR_UINT32 c_HeapBlock = 0x00000002;
-    static const CLR_UINT32 c_ResetKeepAlive = 0x00000004;
-
-    typedef void (*Callback)(void *state);
-
-    static CLR_RT_ProtectFromGC *s_first;
-
-    CLR_RT_ProtectFromGC *m_next;
-    void **m_data;
-    Callback m_fpn;
-    CLR_UINT32 m_flags;
-
-    CLR_RT_ProtectFromGC(CLR_RT_HeapBlock &ref)
-    {
-        Initialize(ref);
-    }
-    CLR_RT_ProtectFromGC(void **data, Callback fpn)
-    {
-        Initialize(data, fpn);
-    }
-    ~CLR_RT_ProtectFromGC()
-    {
-        Cleanup();
-    }
-
-    static void InvokeAll();
-
-  private:
-    void Initialize(CLR_RT_HeapBlock &ref);
-    void Initialize(void **data, Callback fpn);
-    void Cleanup();
-
-    void Invoke();
-};
 
 ////////////////////////////////////////
 
@@ -3451,6 +3498,7 @@ typedef enum Events
     Event_UsbOut            = 0x00004000,
     Event_IO                = 0x00008000,
     Event_I2cSlave          = 0x00010000,
+    Event_RmtRx             = 0x00020000,
     Event_AppDomain         = 0x02000000,
     Event_Socket            = 0x20000000,
     Event_IdleCPU           = 0x40000000,

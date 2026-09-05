@@ -9,7 +9,7 @@
 #include <mbedtls.h>
 #include <mbedtls/debug.h>
 
-bool ssl_generic_init_internal(
+SslError ssl_generic_init_internal(
     int sslMode,
     int sslVerify,
     const char *certificate,
@@ -32,6 +32,8 @@ bool ssl_generic_init_internal(
     int endpoint = 0;
     int ret = 0;
 
+    SslError error = SslError_OutOfMemory;
+
     HAL_Configuration_X509CaRootBundle *certStore = NULL;
     HAL_Configuration_X509DeviceCertificate *deviceCert = NULL;
 
@@ -49,7 +51,7 @@ bool ssl_generic_init_internal(
 
     if (sslContexIndex == -1)
     {
-        return FALSE;
+        return SslError_NoFreeContext;
     }
 
     // create and init MbedTLS nanoFramework context
@@ -100,15 +102,6 @@ bool ssl_generic_init_internal(
 
     mbedtls_ssl_config_init(context->conf);
 
-    // create and init CTR_DRBG
-    // this needs to be freed in ssl_exit_context_internal
-    context->ctr_drbg = (mbedtls_ctr_drbg_context *)platform_malloc(sizeof(mbedtls_ctr_drbg_context));
-    if (context->ctr_drbg == NULL)
-    {
-        goto error;
-    }
-    mbedtls_ctr_drbg_init(context->ctr_drbg);
-
     // create and init entropy context
     // this needs to be freed in ssl_exit_context_internal
     context->entropy = (mbedtls_entropy_context *)platform_malloc(sizeof(mbedtls_entropy_context));
@@ -137,10 +130,25 @@ bool ssl_generic_init_internal(
     }
     mbedtls_x509_crt_init(context->ca_cert);
 
+    // create and init CTR_DRBG
+    // this needs to be freed in ssl_exit_context_internal
+    context->ctr_drbg = (mbedtls_ctr_drbg_context *)platform_malloc(sizeof(mbedtls_ctr_drbg_context));
+    if (context->ctr_drbg == NULL)
+    {
+        goto error;
+    }
+    mbedtls_ctr_drbg_init(context->ctr_drbg);
+
+    if (psa_crypto_init() != PSA_SUCCESS)
+    {
+        error = SslError_SetupFailed;
+        goto error;
+    }
+
     // TODO: review if we can add some instance-unique data to the custom argument below
     if (mbedtls_ctr_drbg_seed(context->ctr_drbg, mbedtls_entropy_func, context->entropy, NULL, 0) != 0)
     {
-        // ctr_drbg_seed_failed
+        error = SslError_DrbgSeedFailed;
         goto error;
     }
 
@@ -150,7 +158,7 @@ bool ssl_generic_init_internal(
             MBEDTLS_SSL_TRANSPORT_STREAM,
             MBEDTLS_SSL_PRESET_DEFAULT) != 0)
     {
-        // ssl_config_defaults_failed
+        error = SslError_ConfigDefaultsFailed;
         goto error;
     }
 
@@ -189,6 +197,13 @@ bool ssl_generic_init_internal(
 
 #if defined(PLATFORM_ESP32) && defined(CONFIG_MBEDTLS_DEBUG)
     mbedtls_esp_enable_debug_log(context->conf, CONFIG_MBEDTLS_DEBUG_LEVEL);
+#endif
+
+    // setup debug stuff
+    // only required if output debug is enabled in mbedtls_config.h
+#if defined(MBEDTLS_DEBUG_C) && defined(MBEDTLS_DEBUG_THRESHOLD)
+    mbedtls_debug_set_threshold(MBEDTLS_DEBUG_THRESHOLD);
+    mbedtls_ssl_conf_dbg(context->conf, nf_debug, stdout);
 #endif
 
     // CA root certs from store, if available
@@ -255,7 +270,7 @@ bool ssl_generic_init_internal(
                     context->ctr_drbg) < 0)
 #endif
             {
-                // private key parse failed
+                error = SslError_PrivateKeyParseFailed;
                 goto error;
             }
         }
@@ -272,13 +287,13 @@ bool ssl_generic_init_internal(
 
         if (mbedtls_x509_crt_parse(context->own_cert, (const unsigned char *)certificate, certLength))
         {
-            // failed parsing own certificate failed
+            error = SslError_CertificateParseFailed;
             goto error;
         }
 
         if (mbedtls_ssl_conf_own_cert(context->conf, context->own_cert, context->pk))
         {
-            // configuring own certificate failed
+            error = SslError_OwnCertConfigFailed;
             goto error;
         }
 
@@ -299,8 +314,6 @@ bool ssl_generic_init_internal(
 
     mbedtls_ssl_conf_ca_chain(context->conf, context->ca_cert, NULL);
 
-    psa_crypto_init();
-
     // set certificate verification
     // the current options provided by Mbed TLS are only verify or don't verify
     if ((SslVerification)sslVerify == SslVerification_CertificateRequired)
@@ -309,17 +322,10 @@ bool ssl_generic_init_internal(
     }
     mbedtls_ssl_conf_authmode(context->conf, authMode);
 
-    // setup debug stuff
-    // only required if output debug is enabled in mbedtls_config.h
-#if defined(MBEDTLS_DEBUG_C) && defined(MBEDTLS_DEBUG_THRESHOLD)
-    mbedtls_debug_set_threshold(MBEDTLS_DEBUG_THRESHOLD);
-    mbedtls_ssl_conf_dbg(context->conf, nf_debug, stdout);
-#endif
-
     ret = mbedtls_ssl_setup(context->ssl, context->conf);
     if (ret != 0)
     {
-        // ssl_setup_failed
+        error = SslError_SetupFailed;
         goto error;
     }
 
@@ -330,7 +336,7 @@ bool ssl_generic_init_internal(
 
     contextHandle = sslContexIndex;
 
-    return true;
+    return SslError_None;
 
 error:
 
@@ -407,5 +413,5 @@ error:
         platform_free(deviceCert);
     }
 
-    return false;
+    return error;
 }
