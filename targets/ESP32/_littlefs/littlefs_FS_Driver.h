@@ -19,6 +19,13 @@ extern "C"
     struct LITTLEFS_FileHandle
     {
         FILE *file;
+        // Direction of the last operation: 0 - none or right after a seek,
+        // 1 - read, 2 - write. Files are opened in update mode ("r+"), and ANSI C
+        // requires an fflush or an fseek between a change of direction, otherwise
+        // the stdio buffer returns stale or misaligned data. The driver places
+        // that barrier itself (see Read and Write) rather than relying on the
+        // caller.
+        uint8_t lastOp;
     };
 
     struct LITTLEFS_FindFileHandle
