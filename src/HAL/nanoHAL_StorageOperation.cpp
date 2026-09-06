@@ -53,6 +53,7 @@ uint32_t HAL_StorageOperation(uint8_t operation, uint32_t dataLength, uint32_t o
         char dirPath[FS_MAX_DIRECTORY_LENGTH];
         char *lastSeparator;
         int bytesWritten = 0;
+        HRESULT deleteResult;
 
         // extract parent directory from relative path and create it if needed
         snprintf(dirPath, sizeof(dirPath), "%s", relativePath);
@@ -80,8 +81,18 @@ uint32_t HAL_StorageOperation(uint8_t operation, uint32_t dataLength, uint32_t o
         // length, so the first Append chunk fails the "seek(END) == offset" check
         // below and no file larger than a single Wire Protocol packet can ever be
         // overwritten
-        // the return value is ignored on purpose: a missing file is the normal case
-        volume->Delete(relativePath, false);
+        deleteResult = volume->Delete(relativePath, false);
+
+        // nothing to remove is the normal case, and a driver without Delete keeps
+        // whatever semantics Open() has for it, as before this call. Any other
+        // failure leaves the previous content in place, and writing over it would
+        // produce a file with a stale tail
+        if (FAILED(deleteResult) && deleteResult != CLR_E_FILE_NOT_FOUND &&
+            deleteResult != CLR_E_NOT_SUPPORTED)
+        {
+            errorCode = StorageOperationErrorCode::WriteError;
+            goto done;
+        }
 
         // open the file (creates it, if it doesn't exist)
         if (FAILED(volume->Open(relativePath, fileHandle)))
