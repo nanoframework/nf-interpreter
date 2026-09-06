@@ -45,6 +45,13 @@ static const char *TAG = "SDCard";
 
 sdmmc_card_t *card;
 
+// Drive letter the card in `card` is mounted under, 0 when it is not mounted.
+// There is a single `card` for the whole system while there can be several
+// slots, so without this binding a consumer could not tell its own volume from
+// another one and would report the characteristics of the first card for the
+// second slot.
+char cardDriveLetter;
+
 //
 //  Unmount SD card ( MMC/SDIO or SPI)
 //
@@ -62,6 +69,7 @@ bool Storage_UnMountSDCard(int driveIndex)
     }
 
     card = NULL;
+    cardDriveLetter = 0;
 
     return true;
 }
@@ -183,7 +191,16 @@ bool Storage_MountMMC(bool bit1Mode, int driveIndex)
         errCode = esp_vfs_fat_sdmmc_mount(mountPoint, &host, &slot_config, &mount_config, &card);
     }
 
-    return LogMountResult(errCode);
+    if (!LogMountResult(errCode))
+    {
+        return false;
+    }
+
+    // the letter is only stored on success: after a failure `card` is not valid
+    // and no volume may be bound to it
+    cardDriveLetter = INDEX0_DRIVE_LETTER[0] + driveIndex;
+
+    return true;
 }
 #endif
 
@@ -237,7 +254,16 @@ bool Storage_MountSpi(int spiBus, uint32_t csPin, int driveIndex)
         errCode = esp_vfs_fat_sdspi_mount(mountPoint, &host, &slot_config, &mount_config, &card);
     }
 
-    return LogMountResult(errCode);
+    if (!LogMountResult(errCode))
+    {
+        return false;
+    }
+
+    // the letter is only stored on success: after a failure `card` is not valid
+    // and no volume may be bound to it
+    cardDriveLetter = INDEX0_DRIVE_LETTER[0] + driveIndex;
+
+    return true;
 }
 
 #endif
