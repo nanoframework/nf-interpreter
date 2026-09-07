@@ -282,10 +282,11 @@ HRESULT LITTLEFS_FS_Driver::Read(void *handle, uint8_t *buffer, int size, int *b
 
     fileHandle = (LITTLEFS_FileHandle *)handle;
 
-    if (fileHandle->lastOp == LITTLEFS_LastOperation_Write)
+    if (fileHandle->lastOp == LITTLEFS_LastOperation_Write && fseek(fileHandle->file, 0, SEEK_CUR) != 0)
     {
-        fseek(fileHandle->file, 0, SEEK_CUR);
+        NANOCLR_SET_AND_LEAVE(CLR_E_FILE_IO);
     }
+
     fileHandle->lastOp = LITTLEFS_LastOperation_Read;
 
     // read from the file
@@ -330,10 +331,11 @@ HRESULT LITTLEFS_FS_Driver::Write(void *handle, uint8_t *buffer, int size, int *
 
     fileHandle = (LITTLEFS_FileHandle *)handle;
 
-    if (fileHandle->lastOp == LITTLEFS_LastOperation_Read)
+    if (fileHandle->lastOp == LITTLEFS_LastOperation_Read && fseek(fileHandle->file, 0, SEEK_CUR) != 0)
     {
-        fseek(fileHandle->file, 0, SEEK_CUR);
+        NANOCLR_SET_AND_LEAVE(CLR_E_FILE_IO);
     }
+
     fileHandle->lastOp = LITTLEFS_LastOperation_Write;
 
     // write to the file
