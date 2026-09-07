@@ -100,7 +100,7 @@ struct Library_nf_espnow_nanoFramework_EspNow_EspNowEventListener
 
 struct Library_nf_espnow_nanoFramework_EspNow_EspNowException
 {
-    static const int FIELD__esp_err = 5;
+    static const int FIELD___espErr = 5;
 
     //--//
 };
