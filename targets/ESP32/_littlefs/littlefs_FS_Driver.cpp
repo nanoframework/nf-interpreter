@@ -8,32 +8,58 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
+#include <sdkconfig.h>
+
+#if CONFIG_SPIRAM
 #include <esp_heap_caps.h>
 #include <esp_memory_utils.h>
+#endif
 
 extern FileSystemVolume *g_FS_Volumes;
 
 static int32_t RemoveAllFiles(const char *path);
 static int NormalizePath(const char *root, const char *path, char *buffer, size_t bufferSize);
 
-// bounce buffer in internal RAM, for transfers of buffers backed by external RAM
-static uint8_t *s_ioBounceBuffer = NULL;
 static const int c_ioBounceBufferSize = 16 * 1024;
+
+#if CONFIG_SPIRAM
 
 // transfers below one sector are left to the stdio buffer, the bounce path would only add an ftell
 static const int c_ioBounceMinTransfer = 512;
 
-static uint8_t *GetIoBounceBuffer()
+// bounce buffer in internal RAM, for transfers of buffers backed by external RAM
+static uint8_t *s_ioBounceBuffer = NULL;
+
+// NULL when the transfer needs no bouncing, or when there is no internal RAM left: the caller then
+// takes the direct path
+static uint8_t *GetIoBounceBuffer(const void *buffer, int size)
 {
+    if (size < c_ioBounceMinTransfer || !esp_ptr_external_ram(buffer))
+    {
+        return NULL;
+    }
+
     if (s_ioBounceBuffer == NULL)
     {
         s_ioBounceBuffer =
             (uint8_t *)heap_caps_malloc(c_ioBounceBufferSize, MALLOC_CAP_INTERNAL | MALLOC_CAP_DMA | MALLOC_CAP_8BIT);
     }
 
-    // NULL, when there is no internal RAM left, makes the caller fall back to the direct path
     return s_ioBounceBuffer;
 }
+
+#else
+
+// no external RAM on this target, a transfer never needs bouncing
+static uint8_t *GetIoBounceBuffer(const void *buffer, int size)
+{
+    (void)buffer;
+    (void)size;
+
+    return NULL;
+}
+
+#endif
 
 bool LITTLEFS_FS_Driver::LoadMedia(const void *driverInterface)
 {
@@ -306,10 +332,7 @@ HRESULT LITTLEFS_FS_Driver::Read(void *handle, uint8_t *buffer, int size, int *b
 
     fileHandle = (LITTLEFS_FileHandle *)handle;
 
-    if (size >= c_ioBounceMinTransfer && esp_ptr_external_ram(buffer))
-    {
-        readBounce = GetIoBounceBuffer();
-    }
+    readBounce = GetIoBounceBuffer(buffer, size);
 
     if (readBounce != NULL)
     {
@@ -387,10 +410,7 @@ HRESULT LITTLEFS_FS_Driver::Write(void *handle, uint8_t *buffer, int size, int *
 
     fileHandle = (LITTLEFS_FileHandle *)handle;
 
-    if (size >= c_ioBounceMinTransfer && esp_ptr_external_ram(buffer))
-    {
-        writeBounce = GetIoBounceBuffer();
-    }
+    writeBounce = GetIoBounceBuffer(buffer, size);
 
     if (writeBounce != NULL)
     {
