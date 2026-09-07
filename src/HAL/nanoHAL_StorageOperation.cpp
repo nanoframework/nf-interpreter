@@ -80,8 +80,7 @@ uint32_t HAL_StorageOperation(uint8_t operation, uint32_t dataLength, uint32_t o
 
         // a missing file, or a volume without Delete, is the normal case; any other failure would leave
         // the previous content in place and the write would produce a file with a stale tail
-        if (FAILED(deleteResult) && deleteResult != CLR_E_FILE_NOT_FOUND &&
-            deleteResult != CLR_E_NOT_SUPPORTED)
+        if (FAILED(deleteResult) && deleteResult != CLR_E_FILE_NOT_FOUND && deleteResult != CLR_E_NOT_SUPPORTED)
         {
             errorCode = StorageOperationErrorCode::WriteError;
             goto done;
