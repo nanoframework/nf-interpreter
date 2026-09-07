@@ -638,10 +638,6 @@ HRESULT CLR_RT_ExecutionEngine::Execute(wchar_t *entryPointArgs, int maxContextS
 
     NANOCLR_CHECK_HRESULT(WaitForDebugger());
 
-    // set unconditionally (not only with source-level debugging): the state mask
-    // zero-value means "initialize", so an RTM build that never sets ProgramRunning
-    // is treated as stuck-in-initialize by debugger clients (nanoff refuses
-    // --filedeployment with E2002 and keeps rebooting the device)
     CLR_EE_DBG_SET_MASK(StateProgramRunning, StateMask);
 
     NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Delegate::CreateInstance(ref, g_CLR_RT_TypeSystem.m_entryPoint, NULL));
