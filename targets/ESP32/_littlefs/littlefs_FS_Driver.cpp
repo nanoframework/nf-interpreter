@@ -10,11 +10,7 @@
 #if (HAL_USE_SDC == TRUE)
 #include <sdmmc_cmd.h>
 
-// The mounted card from Target_System_IO_FileSystem.c: its CSD was read at mount
-// time, so the capacity is available from there instantly, unlike a calculation
-// over the FAT which runs into f_getfree() (see GetSizeInfo). cardDriveLetter is
-// the volume the card belongs to: there is a single card per system, and without
-// that check a second slot would report the characteristics of the first card.
+// the mounted card and the volume it belongs to, from Target_System_IO_FileSystem.c
 extern "C" sdmmc_card_t *card;
 extern "C" char cardDriveLetter;
 #endif
@@ -93,7 +89,6 @@ HRESULT LITTLEFS_FS_Driver::Format(const VOLUME_ID *volume, const char *volumeLa
 
 HRESULT LITTLEFS_FS_Driver::GetSizeInfo(const VOLUME_ID *volume, int64_t *totalSize, int64_t *totalFreeSpace)
 {
-
     // FATFS *fsPtr = &fs;
     // char buffer[3];
     // DWORD freeClusters, freeSectors, totalSectors;
@@ -120,29 +115,21 @@ HRESULT LITTLEFS_FS_Driver::GetSizeInfo(const VOLUME_ID *volume, int64_t *totalS
     // //     *totalFreeSpace = (int64_t)freeSectors * FF_MAX_SS;
     // // #endif
 
-    // -1 means "unknown", which is how the caller reads it: UpdateVolumeInfo puts
-    // a zero into the managed field when an error is returned, so S_OK is always
-    // returned here.
+    // -1 means "unknown" to the caller
     *totalSize = -1;
 
-    // Free space is deliberately left unknown: the only way to it is f_getfree(),
-    // which walks the FAT and on large cards takes long enough to trip the
-    // watchdog. The card capacity needs no such walk, so it is reported.
+    // free space would need f_getfree(), which walks the FAT and trips the watchdog on large cards
     *totalFreeSpace = -1;
 
 #if (HAL_USE_SDC == TRUE)
 
-    // The driver also serves the internal flash, which has no CSD, so the card
-    // capacity only makes sense for the volume the card is actually mounted on
-    // (there can be several slots but only one card).
+    // the driver also serves the internal flash, which has no card behind it
     FileSystemVolume *currentVolume = FileSystemVolumeList::FindVolume(volume->volumeId);
 
     if (currentVolume != NULL && card != NULL && cardDriveLetter != 0 &&
         currentVolume->m_rootName[0] == cardDriveLetter)
     {
-        // csd.capacity is the number of sectors and csd.sector_size their size:
-        // this is the physical capacity of the card, not the capacity of the
-        // file system on it.
+        // physical capacity of the card, not of the file system on it
         *totalSize = (int64_t)card->csd.capacity * card->csd.sector_size;
     }
 

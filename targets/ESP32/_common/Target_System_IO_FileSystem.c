@@ -45,11 +45,7 @@ static const char *TAG = "SDCard";
 
 sdmmc_card_t *card;
 
-// Drive letter the card in `card` is mounted under, 0 when it is not mounted.
-// There is a single `card` for the whole system while there can be several
-// slots, so without this binding a consumer could not tell its own volume from
-// another one and would report the characteristics of the first card for the
-// second slot.
+// drive letter the card above is mounted under, 0 when it is not mounted
 char cardDriveLetter;
 
 //
@@ -196,8 +192,7 @@ bool Storage_MountMMC(bool bit1Mode, int driveIndex)
         return false;
     }
 
-    // the letter is only stored on success: after a failure `card` is not valid
-    // and no volume may be bound to it
+    // only stored on success, a failed mount leaves no card to bind the volume to
     cardDriveLetter = INDEX0_DRIVE_LETTER[0] + driveIndex;
 
     return true;
@@ -259,8 +254,7 @@ bool Storage_MountSpi(int spiBus, uint32_t csPin, int driveIndex)
         return false;
     }
 
-    // the letter is only stored on success: after a failure `card` is not valid
-    // and no volume may be bound to it
+    // only stored on success, a failed mount leaves no card to bind the volume to
     cardDriveLetter = INDEX0_DRIVE_LETTER[0] + driveIndex;
 
     return true;
