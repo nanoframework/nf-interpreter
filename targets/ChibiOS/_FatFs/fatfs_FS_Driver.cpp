@@ -166,13 +166,11 @@ HRESULT FATFS_FS_Driver::Format(const VOLUME_ID *volume, const char *volumeLabel
 
 HRESULT FATFS_FS_Driver::GetSizeInfo(const VOLUME_ID *volume, int64_t *totalSize, int64_t *totalFreeSpace)
 {
-    (void)totalSize;
-
     // FATFS *fsPtr = &fs;
     // char buffer[3];
     // DWORD freeClusters, freeSectors, totalSectors;
 
-    // FATFS *fs = GetFatFsByVolumeId(volume, false);
+    FATFS *fs = GetFatFsByVolumeId(volume, false);
 
     FileSystemVolume *currentVolume = FileSystemVolumeList::FindVolume(volume->volumeId);
 
@@ -194,8 +192,21 @@ HRESULT FATFS_FS_Driver::GetSizeInfo(const VOLUME_ID *volume, int64_t *totalSize
     //     *totalFreeSpace = (int64_t)freeSectors * FF_MAX_SS;
     // #endif
 
+    // -1 means "unknown" to the caller
     *totalSize = -1;
+
+    // free space would need f_getfree(), see above
     *totalFreeSpace = -1;
+
+    if (fs != NULL)
+    {
+        // capacity of the file system, from the mounted FATFS object, without walking the FAT
+#if FF_MAX_SS != FF_MIN_SS
+        *totalSize = (int64_t)(fs->n_fatent - 2) * fs->csize * fs->ssize;
+#else
+        *totalSize = (int64_t)(fs->n_fatent - 2) * fs->csize * FF_MAX_SS;
+#endif
+    }
 
     return S_OK;
 }
