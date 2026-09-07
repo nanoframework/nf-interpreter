@@ -282,15 +282,11 @@ HRESULT LITTLEFS_FS_Driver::Read(void *handle, uint8_t *buffer, int size, int *b
 
     fileHandle = (LITTLEFS_FileHandle *)handle;
 
-    // direction change barrier, write to read: ANSI C requires an fflush or a
-    // file positioning call between a write and a read on the same update mode
-    // stream. The fseek to the current position flushes the pending write and
-    // makes the read legal.
-    if (fileHandle->lastOp == 2)
+    if (fileHandle->lastOp == LITTLEFS_LastOperation_Write)
     {
         fseek(fileHandle->file, 0, SEEK_CUR);
     }
-    fileHandle->lastOp = 1;
+    fileHandle->lastOp = LITTLEFS_LastOperation_Read;
 
     // read from the file
     readCount = fread(buffer, 1, size, fileHandle->file);
@@ -334,14 +330,11 @@ HRESULT LITTLEFS_FS_Driver::Write(void *handle, uint8_t *buffer, int size, int *
 
     fileHandle = (LITTLEFS_FileHandle *)handle;
 
-    // direction change barrier, read to write: without a positioning call
-    // between an fread and an fwrite, stdio writes at the buffer position rather
-    // than at the logical file position.
-    if (fileHandle->lastOp == 1)
+    if (fileHandle->lastOp == LITTLEFS_LastOperation_Read)
     {
         fseek(fileHandle->file, 0, SEEK_CUR);
     }
-    fileHandle->lastOp = 2;
+    fileHandle->lastOp = LITTLEFS_LastOperation_Write;
 
     // write to the file
     writeCount = fwrite(buffer, 1, size, fileHandle->file);
@@ -416,8 +409,7 @@ HRESULT LITTLEFS_FS_Driver::Seek(void *handle, int64_t offset, uint32_t origin, 
         return CLR_E_FILE_IO;
     }
 
-    // a positioning call is a legal barrier for both directions (see lastOp)
-    fileHandle->lastOp = 0;
+    fileHandle->lastOp = LITTLEFS_LastOperation_None;
 
     // get the current position
     *position = ftell(fileHandle->file);
@@ -467,9 +459,7 @@ HRESULT LITTLEFS_FS_Driver::GetLength(void *handle, int64_t *length)
         return CLR_E_FILE_IO;
     }
 
-    // the restore above left the stream positioned, which is a barrier for both
-    // directions (see lastOp)
-    fileHandle->lastOp = 0;
+    fileHandle->lastOp = LITTLEFS_LastOperation_None;
 
     return S_OK;
 }
@@ -515,9 +505,7 @@ HRESULT LITTLEFS_FS_Driver::SetLength(void *handle, int64_t length)
         return CLR_E_FILE_IO;
     }
 
-    // the restore above left the stream positioned, which is a barrier for both
-    // directions (see lastOp)
-    fileHandle->lastOp = 0;
+    fileHandle->lastOp = LITTLEFS_LastOperation_None;
 
     // Synchronize the file state
     fflush(fileHandle->file);

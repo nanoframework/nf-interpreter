@@ -16,16 +16,22 @@ extern "C"
 {
 #endif
 
+    // direction of the last operation on a file, files are opened in update mode and ANSI C
+    // requires a positioning call between a read and a write on such a stream
+    enum LITTLEFS_LastOperation
+    {
+        // no operation yet, or the file was just positioned: both directions are legal
+        LITTLEFS_LastOperation_None = 0,
+        // last operation was a read: a write needs a positioning call first
+        LITTLEFS_LastOperation_Read = 1,
+        // last operation was a write: a read needs a positioning call first
+        LITTLEFS_LastOperation_Write = 2,
+    };
+
     struct LITTLEFS_FileHandle
     {
         FILE *file;
-        // Direction of the last operation: 0 - none or right after a seek,
-        // 1 - read, 2 - write. Files are opened in update mode ("r+"), and ANSI C
-        // requires an fflush or an fseek between a change of direction, otherwise
-        // the stdio buffer returns stale or misaligned data. The driver places
-        // that barrier itself (see Read and Write) rather than relying on the
-        // caller.
-        uint8_t lastOp;
+        LITTLEFS_LastOperation lastOp;
     };
 
     struct LITTLEFS_FindFileHandle
