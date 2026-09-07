@@ -6,11 +6,60 @@
 #include <nf_sys_io_filesystem.h>
 #include "littlefs_FS_Driver.h"
 #include <stdlib.h>
+#include <string.h>
+#include <stdio.h>
+#include <sdkconfig.h>
+
+#if CONFIG_SPIRAM
+#include <esp_heap_caps.h>
+#include <esp_memory_utils.h>
+#endif
 
 extern FileSystemVolume *g_FS_Volumes;
 
 static int32_t RemoveAllFiles(const char *path);
 static int NormalizePath(const char *root, const char *path, char *buffer, size_t bufferSize);
+
+static const int c_ioBounceBufferSize = 16 * 1024;
+
+#if CONFIG_SPIRAM
+
+// transfers below one sector are left to the stdio buffer, the bounce path would only add an ftell
+static const int c_ioBounceMinTransfer = 512;
+
+// bounce buffer in internal RAM, for transfers of buffers backed by external RAM
+static uint8_t *s_ioBounceBuffer = NULL;
+
+// NULL when the transfer needs no bouncing, or when there is no internal RAM left: the caller then
+// takes the direct path
+static uint8_t *GetIoBounceBuffer(const void *buffer, int size)
+{
+    if (size < c_ioBounceMinTransfer || !esp_ptr_external_ram(buffer))
+    {
+        return NULL;
+    }
+
+    if (s_ioBounceBuffer == NULL)
+    {
+        s_ioBounceBuffer =
+            (uint8_t *)heap_caps_malloc(c_ioBounceBufferSize, MALLOC_CAP_INTERNAL | MALLOC_CAP_DMA | MALLOC_CAP_8BIT);
+    }
+
+    return s_ioBounceBuffer;
+}
+
+#else
+
+// no external RAM on this target, a transfer never needs bouncing
+static uint8_t *GetIoBounceBuffer(const void *buffer, int size)
+{
+    (void)buffer;
+    (void)size;
+
+    return NULL;
+}
+
+#endif
 
 bool LITTLEFS_FS_Driver::LoadMedia(const void *driverInterface)
 {
@@ -269,6 +318,7 @@ HRESULT LITTLEFS_FS_Driver::Read(void *handle, uint8_t *buffer, int size, int *b
 
     unsigned int readCount = 0;
     LITTLEFS_FileHandle *fileHandle;
+    uint8_t *readBounce = NULL;
 
     if (handle == 0)
     {
@@ -289,8 +339,51 @@ HRESULT LITTLEFS_FS_Driver::Read(void *handle, uint8_t *buffer, int size, int *b
 
     fileHandle->lastOp = LITTLEFS_LastOperation_Read;
 
-    // read from the file
-    readCount = fread(buffer, 1, size, fileHandle->file);
+    readBounce = GetIoBounceBuffer(buffer, size);
+
+    if (readBounce != NULL)
+    {
+        int total = 0;
+
+        while (total < size)
+        {
+            long filePosition = ftell(fileHandle->file);
+
+            if (filePosition < 0)
+            {
+                NANOCLR_SET_AND_LEAVE(CLR_E_FILE_IO);
+            }
+
+            // keeps the pointer handed to the whole sector transfers 4 byte aligned
+            int pad = (int)(filePosition & 3);
+
+            int chunk = size - total;
+            if (chunk > c_ioBounceBufferSize - pad)
+            {
+                chunk = c_ioBounceBufferSize - pad;
+            }
+
+            unsigned int part = fread(readBounce + pad, 1, chunk, fileHandle->file);
+            if (part > 0)
+            {
+                memcpy(buffer + total, readBounce + pad, part);
+                total += part;
+            }
+
+            if (part < (unsigned int)chunk)
+            {
+                // end of file or an error, the checks below decide which
+                break;
+            }
+        }
+
+        readCount = total;
+    }
+    else
+    {
+        // read from the file
+        readCount = fread(buffer, 1, size, fileHandle->file);
+    }
 
     if (readCount > 0)
     {
@@ -318,6 +411,7 @@ HRESULT LITTLEFS_FS_Driver::Write(void *handle, uint8_t *buffer, int size, int *
 
     unsigned int writeCount = 0;
     LITTLEFS_FileHandle *fileHandle;
+    uint8_t *writeBounce = NULL;
 
     if (handle == 0)
     {
@@ -338,10 +432,50 @@ HRESULT LITTLEFS_FS_Driver::Write(void *handle, uint8_t *buffer, int size, int *
 
     fileHandle->lastOp = LITTLEFS_LastOperation_Write;
 
-    // write to the file
-    writeCount = fwrite(buffer, 1, size, fileHandle->file);
+    writeBounce = GetIoBounceBuffer(buffer, size);
 
-    if (writeCount < size)
+    if (writeBounce != NULL)
+    {
+        int total = 0;
+
+        while (total < size)
+        {
+            long filePosition = ftell(fileHandle->file);
+
+            if (filePosition < 0)
+            {
+                NANOCLR_SET_AND_LEAVE(CLR_E_FILE_IO);
+            }
+
+            // keeps the pointer handed to the whole sector transfers 4 byte aligned
+            int pad = (int)(filePosition & 3);
+
+            int chunk = size - total;
+            if (chunk > c_ioBounceBufferSize - pad)
+            {
+                chunk = c_ioBounceBufferSize - pad;
+            }
+
+            memcpy(writeBounce + pad, buffer + total, chunk);
+
+            unsigned int part = fwrite(writeBounce + pad, 1, chunk, fileHandle->file);
+            total += part;
+
+            if (part < (unsigned int)chunk)
+            {
+                break;
+            }
+        }
+
+        writeCount = total;
+    }
+    else
+    {
+        // write to the file
+        writeCount = fwrite(buffer, 1, size, fileHandle->file);
+    }
+
+    if ((int)writeCount < size)
     {
         // failed to write the full buffer to the file
         NANOCLR_SET_AND_LEAVE(CLR_E_FILE_IO);
