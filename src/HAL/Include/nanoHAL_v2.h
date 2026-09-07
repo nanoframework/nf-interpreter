@@ -79,7 +79,7 @@ typedef enum SLEEP_LEVEL
 
 #define SYSTEM_EVENT_FLAG_RMT_RX 0x00080000
 
-// #define SYSTEM_EVENT_FLAG_UNUSED_0x00100000         0x00100000
+#define SYSTEM_EVENT_FLAG_ESPNOW 0x00100000
 
 // #define SYSTEM_EVENT_FLAG_UNUSED_0x00200000         0x00200000
 // #define SYSTEM_EVENT_FLAG_UNUSED_0x00400000         0x00400000
@@ -113,6 +113,7 @@ typedef enum SLEEP_LEVEL
 #define EVENT_TOUCH                 120
 #define EVENT_GESTURE               130
 #define EVENT_OPENTHREAD            140
+#define EVENT_ESPNOW                150
 
 #define PAL_EVENT_TOUCH 0x1
 #define PAL_EVENT_KEY   0x2
