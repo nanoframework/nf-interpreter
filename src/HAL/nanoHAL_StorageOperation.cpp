@@ -75,18 +75,11 @@ uint32_t HAL_StorageOperation(uint8_t operation, uint32_t dataLength, uint32_t o
             }
         }
 
-        // remove an existing file, so the write always starts from an empty one
-        // Open() below does not truncate: a stream driver that opens an existing
-        // file for R/W (the ESP32 littlefs driver uses "r+") keeps the previous
-        // length, so the first Append chunk fails the "seek(END) == offset" check
-        // below and no file larger than a single Wire Protocol packet can ever be
-        // overwritten
+        // Open() below doesn't truncate, so remove an existing file to start the write from an empty one
         deleteResult = volume->Delete(relativePath, false);
 
-        // nothing to remove is the normal case, and a driver without Delete keeps
-        // whatever semantics Open() has for it, as before this call. Any other
-        // failure leaves the previous content in place, and writing over it would
-        // produce a file with a stale tail
+        // a missing file, or a volume without Delete, is the normal case; any other failure would leave
+        // the previous content in place and the write would produce a file with a stale tail
         if (FAILED(deleteResult) && deleteResult != CLR_E_FILE_NOT_FOUND &&
             deleteResult != CLR_E_NOT_SUPPORTED)
         {
