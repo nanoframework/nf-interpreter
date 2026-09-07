@@ -53,6 +53,7 @@ uint32_t HAL_StorageOperation(uint8_t operation, uint32_t dataLength, uint32_t o
         char dirPath[FS_MAX_DIRECTORY_LENGTH];
         char *lastSeparator;
         int bytesWritten = 0;
+        HRESULT deleteResult;
 
         // extract parent directory from relative path and create it if needed
         snprintf(dirPath, sizeof(dirPath), "%s", relativePath);
@@ -72,6 +73,17 @@ uint32_t HAL_StorageOperation(uint8_t operation, uint32_t dataLength, uint32_t o
                 errorCode = StorageOperationErrorCode::WriteError;
                 goto done;
             }
+        }
+
+        // Open() below doesn't truncate, so remove an existing file to start the write from an empty one
+        deleteResult = volume->Delete(relativePath, false);
+
+        // a missing file, or a volume without Delete, is the normal case; any other failure would leave
+        // the previous content in place and the write would produce a file with a stale tail
+        if (FAILED(deleteResult) && deleteResult != CLR_E_FILE_NOT_FOUND && deleteResult != CLR_E_NOT_SUPPORTED)
+        {
+            errorCode = StorageOperationErrorCode::WriteError;
+            goto done;
         }
 
         // open the file (creates it, if it doesn't exist)
