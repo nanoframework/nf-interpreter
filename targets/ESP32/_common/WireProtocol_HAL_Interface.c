@@ -161,11 +161,7 @@ static uint8_t WP_TransmitMessageTinyUsb(WP_Message *message)
 
 #include "driver/usb_serial_jtag.h"
 
-// must hold at least one full WP frame (32-byte header + WP_PACKET_SIZE payload
-// = 1056 bytes): the driver ISR drops RX bytes when the ring buffer is full,
-// which happens while the receiver task is busy processing the previous message
-// (e.g. Monitor_StorageOperation writing to SD during nanoff --filedeployment)
-#define USB_JTAG_BUFFER_SIZE 2048
+#define USB_JTAG_BUFFER_SIZE (sizeof(WP_Packet) + WP_PACKET_SIZE)
 
 static size_t UsbSerialWrite(const uint8_t *data, size_t dataSize, TickType_t xTicksToWait);
 static size_t UsbSerialRead(uint8_t *data, size_t dataSize, TickType_t xTicksToWait);
