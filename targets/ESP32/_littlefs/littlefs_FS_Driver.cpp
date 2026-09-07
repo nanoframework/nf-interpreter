@@ -16,28 +16,22 @@ extern FileSystemVolume *g_FS_Volumes;
 static int32_t RemoveAllFiles(const char *path);
 static int NormalizePath(const char *root, const char *path, char *buffer, size_t bufferSize);
 
-// Bounce buffer in internal RAM for transfers of buffers backed by external RAM.
-// The SDMMC host cannot DMA from or to external RAM: for a PSRAM buffer,
-// sdmmc_cmd falls back to single sector transfers through a 512 byte temporary
-// buffer (around 2 ms per sector), which caps file IO at roughly 150-250 KB/s.
-// The CLR managed heap lives in PSRAM, so every buffer coming from managed code
-// takes that path. Copying through this internal RAM buffer restores multi
-// sector DMA, and the extra memcpy is negligible next to the bus transfer.
-// File system driver calls are serialised by the CLR (SYNC_IO), so a single
-// shared buffer is enough.
+// bounce buffer in internal RAM, for transfers of buffers backed by external RAM
 static uint8_t *s_ioBounceBuffer = NULL;
-static const int IO_BOUNCE_BUFFER_SIZE = 16 * 1024;
+static const int c_ioBounceBufferSize = 16 * 1024;
+
+// transfers below one sector are left to the stdio buffer, the bounce path would only add an ftell
+static const int c_ioBounceMinTransfer = 512;
 
 static uint8_t *GetIoBounceBuffer()
 {
     if (s_ioBounceBuffer == NULL)
     {
         s_ioBounceBuffer =
-            (uint8_t *)heap_caps_malloc(IO_BOUNCE_BUFFER_SIZE, MALLOC_CAP_INTERNAL | MALLOC_CAP_DMA | MALLOC_CAP_8BIT);
+            (uint8_t *)heap_caps_malloc(c_ioBounceBufferSize, MALLOC_CAP_INTERNAL | MALLOC_CAP_DMA | MALLOC_CAP_8BIT);
     }
 
-    // NULL, when there is no internal RAM left, makes the caller fall back to
-    // the direct slow path
+    // NULL, when there is no internal RAM left, makes the caller fall back to the direct path
     return s_ioBounceBuffer;
 }
 
@@ -248,13 +242,6 @@ HRESULT LITTLEFS_FS_Driver::Open(const VOLUME_ID *volume, const char *path, void
     fileHandle->file = fopen(normalizedPath, flags);
     if (fileHandle->file != NULL)
     {
-        // NOTE: keep the stream BUFFERED (the default). newlib only has a direct
-        // large transfer path in fread for buffered streams - with _IONBF it
-        // degrades to byte sized refills. A large fwrite or fread on a buffered
-        // stream flushes the small stdio buffer and then transfers straight from
-        // the caller's pointer, which keeps the ftell based alignment in Read and
-        // Write exact.
-
         // store the handle
         handle = fileHandle;
 
@@ -319,12 +306,7 @@ HRESULT LITTLEFS_FS_Driver::Read(void *handle, uint8_t *buffer, int size, int *b
 
     fileHandle = (LITTLEFS_FileHandle *)handle;
 
-    // a buffer in external RAM is read through the internal RAM bounce buffer
-    // (see above). pad = (position & 3) keeps the pointer used for direct whole
-    // sector transfers 4 byte aligned. Small reads (< 512) go straight through:
-    // the stdio buffer serves them without touching the medium, while the bounce
-    // path would add an ftell on every call.
-    if (size >= 512 && esp_ptr_external_ram(buffer))
+    if (size >= c_ioBounceMinTransfer && esp_ptr_external_ram(buffer))
     {
         readBounce = GetIoBounceBuffer();
     }
@@ -338,9 +320,9 @@ HRESULT LITTLEFS_FS_Driver::Read(void *handle, uint8_t *buffer, int size, int *b
             int pad = (int)(ftell(fileHandle->file) & 3);
 
             int chunk = size - total;
-            if (chunk > IO_BOUNCE_BUFFER_SIZE - pad)
+            if (chunk > c_ioBounceBufferSize - pad)
             {
-                chunk = IO_BOUNCE_BUFFER_SIZE - pad;
+                chunk = c_ioBounceBufferSize - pad;
             }
 
             unsigned int part = fread(readBounce + pad, 1, chunk, fileHandle->file);
@@ -405,9 +387,7 @@ HRESULT LITTLEFS_FS_Driver::Write(void *handle, uint8_t *buffer, int size, int *
 
     fileHandle = (LITTLEFS_FileHandle *)handle;
 
-    // a buffer in external RAM is written through the internal RAM bounce
-    // buffer, for the same reason as in Read
-    if (size >= 512 && esp_ptr_external_ram(buffer))
+    if (size >= c_ioBounceMinTransfer && esp_ptr_external_ram(buffer))
     {
         writeBounce = GetIoBounceBuffer();
     }
@@ -421,9 +401,9 @@ HRESULT LITTLEFS_FS_Driver::Write(void *handle, uint8_t *buffer, int size, int *
             int pad = (int)(ftell(fileHandle->file) & 3);
 
             int chunk = size - total;
-            if (chunk > IO_BOUNCE_BUFFER_SIZE - pad)
+            if (chunk > c_ioBounceBufferSize - pad)
             {
-                chunk = IO_BOUNCE_BUFFER_SIZE - pad;
+                chunk = c_ioBounceBufferSize - pad;
             }
 
             memcpy(writeBounce + pad, buffer + total, chunk);
