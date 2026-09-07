@@ -347,7 +347,15 @@ HRESULT LITTLEFS_FS_Driver::Read(void *handle, uint8_t *buffer, int size, int *b
 
         while (total < size)
         {
-            int pad = (int)(ftell(fileHandle->file) & 3);
+            long filePosition = ftell(fileHandle->file);
+
+            if (filePosition < 0)
+            {
+                NANOCLR_SET_AND_LEAVE(CLR_E_FILE_IO);
+            }
+
+            // keeps the pointer handed to the whole sector transfers 4 byte aligned
+            int pad = (int)(filePosition & 3);
 
             int chunk = size - total;
             if (chunk > c_ioBounceBufferSize - pad)
@@ -432,7 +440,15 @@ HRESULT LITTLEFS_FS_Driver::Write(void *handle, uint8_t *buffer, int size, int *
 
         while (total < size)
         {
-            int pad = (int)(ftell(fileHandle->file) & 3);
+            long filePosition = ftell(fileHandle->file);
+
+            if (filePosition < 0)
+            {
+                NANOCLR_SET_AND_LEAVE(CLR_E_FILE_IO);
+            }
+
+            // keeps the pointer handed to the whole sector transfers 4 byte aligned
+            int pad = (int)(filePosition & 3);
 
             int chunk = size - total;
             if (chunk > c_ioBounceBufferSize - pad)
