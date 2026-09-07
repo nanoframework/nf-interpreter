@@ -158,12 +158,6 @@ esp_err_t NF_ESP32_InitaliseWifi()
         esp_hosted_init();
 #endif
         // create Wi-Fi STA (ignoring return)
-        // guarded against re-creation: an initialisation that bails out on one of
-        // the returns further down leaves the netif created while
-        // IsWifiInitialised is still false, so the next attempt comes back here
-        // and would create a second default netif with the same key - the first
-        // one is leaked and the attach of the second one fails. NF_ESP32_DeinitWifi
-        // clears the pointer, so a clean re-init still creates it.
         if (wifiStaNetif == NULL)
         {
             wifiStaNetif = esp_netif_create_default_wifi_sta();
@@ -184,7 +178,6 @@ esp_err_t NF_ESP32_InitaliseWifi()
         if (expectedWifiMode & WIFI_MODE_AP)
         {
             // create AP (ignoring return)
-            // same guard against re-creation on a retry as for the station above
             if (wifiAPNetif == NULL)
             {
                 wifiAPNetif = esp_netif_create_default_wifi_ap();
