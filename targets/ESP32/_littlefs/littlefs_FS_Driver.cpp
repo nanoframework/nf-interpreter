@@ -332,6 +332,13 @@ HRESULT LITTLEFS_FS_Driver::Read(void *handle, uint8_t *buffer, int size, int *b
 
     fileHandle = (LITTLEFS_FileHandle *)handle;
 
+    if (fileHandle->lastOp == LITTLEFS_LastOperation_Write && fseek(fileHandle->file, 0, SEEK_CUR) != 0)
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_FILE_IO);
+    }
+
+    fileHandle->lastOp = LITTLEFS_LastOperation_Read;
+
     readBounce = GetIoBounceBuffer(buffer, size);
 
     if (readBounce != NULL)
@@ -409,6 +416,13 @@ HRESULT LITTLEFS_FS_Driver::Write(void *handle, uint8_t *buffer, int size, int *
     }
 
     fileHandle = (LITTLEFS_FileHandle *)handle;
+
+    if (fileHandle->lastOp == LITTLEFS_LastOperation_Read && fseek(fileHandle->file, 0, SEEK_CUR) != 0)
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_FILE_IO);
+    }
+
+    fileHandle->lastOp = LITTLEFS_LastOperation_Write;
 
     writeBounce = GetIoBounceBuffer(buffer, size);
 
@@ -515,6 +529,8 @@ HRESULT LITTLEFS_FS_Driver::Seek(void *handle, int64_t offset, uint32_t origin, 
         return CLR_E_FILE_IO;
     }
 
+    fileHandle->lastOp = LITTLEFS_LastOperation_None;
+
     // get the current position
     *position = ftell(fileHandle->file);
 
@@ -563,6 +579,8 @@ HRESULT LITTLEFS_FS_Driver::GetLength(void *handle, int64_t *length)
         return CLR_E_FILE_IO;
     }
 
+    fileHandle->lastOp = LITTLEFS_LastOperation_None;
+
     return S_OK;
 }
 
@@ -606,6 +624,8 @@ HRESULT LITTLEFS_FS_Driver::SetLength(void *handle, int64_t length)
         // Handle error
         return CLR_E_FILE_IO;
     }
+
+    fileHandle->lastOp = LITTLEFS_LastOperation_None;
 
     // Synchronize the file state
     fflush(fileHandle->file);
