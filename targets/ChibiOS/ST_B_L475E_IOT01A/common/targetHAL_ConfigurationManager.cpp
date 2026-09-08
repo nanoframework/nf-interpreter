@@ -32,8 +32,7 @@ bool InitialiseNetworkDefaultConfig(HAL_Configuration_NetworkInterface *pconfig,
     pconfig->AutomaticDNS = 1;
     pconfig->SpecificConfigId = 0;
 
-    // MAC address is read from the module at runtime (see
-    // SOCK_CONFIGURATION_LoadAdapterConfiguration in sockets_ism43362.cpp); leave as zeros here.
+    // MAC address is read from the module at runtime, not storing it here
 
     return true;
 }

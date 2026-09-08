@@ -278,7 +278,7 @@ __nfweak bool ConfigurationManager_StoreConfigurationBlock(
     ByteAddress storageAddress = 0;
     bool requiresEnumeration = FALSE;
     bool success = FALSE;
-    // true only for the very first Network/Wireless80211 block ever stored (see erase logic below)
+    // true only for the very first Network/Wireless80211 block ever stored
     bool isInitialAllocation = FALSE;
     BlockStorageDevice *device = BlockStorageList_GetFirstDevice();
 
@@ -482,11 +482,6 @@ __nfweak bool ConfigurationManager_StoreConfigurationBlock(
         }
     }
 
-    // Network/Wireless80211 blocks assume the flash is already erased, which isn't always true
-    // (e.g. a board pre-loaded with demo firmware - confirmed needed on real hardware). Restricted
-    // to isInitialAllocation because EraseBlock() erases the whole physical block, which could
-    // otherwise clobber an adjacent, already-stored block. Re-storing an EXISTING block must use
-    // ConfigurationManager_UpdateConfigurationBlock() instead, which preserves the rest of the sector.
     if (isInitialAllocation &&
         (configuration == DeviceConfigurationOption_Wireless80211Network ||
          configuration == DeviceConfigurationOption_Network) &&
@@ -728,20 +723,6 @@ __nfweak UpdateConfigurationResult ConfigurationManager_UpdateConfigurationBlock
         // erase config sector
         CFGDBG("CFGUPD: erasing 0x%08X\r\n", (unsigned)(uint32_t)&__nanoConfig_start__);
         {
-            // NOTE: this assumes __nanoConfig_start__/__nanoConfig_end__ are themselves aligned to
-            // the device's erase block size (true for this board's linker script - see rules_code.ld).
-            // If a target's config sector isn't block-aligned, aligning the erase down to the
-            // containing block (below) can erase bytes just outside [start, end) that the restore
-            // write further down does NOT cover (it only writes back sizeOfConfigSector bytes) -
-            // permanently losing whatever was there. Not an issue on this board, but a target with
-            // a misaligned config sector would need to also back up/restore those extra bytes.
-            //
-            // BlockStorageDevice_EraseBlock() only erases the single physical block containing the
-            // given address, and some drivers (e.g. RP2040/RP2350) reject addresses that aren't a
-            // genuine block-start address. The config sector can span multiple blocks and doesn't
-            // necessarily start on a block boundary, so align down to the actual containing block
-            // first, then step through every block that overlaps the sector using its real size
-            // (confirmed needed on real hardware - the STM32 sector spans 2x 2KB blocks).
             bool eraseOk = TRUE;
             DeviceBlockInfo *blockInfo = BlockStorageDevice_GetDeviceInfo(device);
             BlockRegionInfo *region = &blockInfo->Regions[0];

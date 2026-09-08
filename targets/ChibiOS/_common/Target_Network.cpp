@@ -53,9 +53,7 @@ int Network_Interface_Open(int index)
         case 0:
         {
 #if defined(TARGET_HAS_WIFI_ISM43362)
-            // the ES-WIFI module runs its own onboard TCP/IP stack and doesn't expose a raw
-            // MAC/link-layer interface, so there's no lwIP netif to hand back here - this is
-            // the only network interface on this board, so its index is always 0
+            // only network interface on this board, so its index is always 0
             return 0;
 #else
             // Open the network interface and set its config
@@ -161,17 +159,9 @@ int Network_Interface_Start_Scan(int index)
 
 #elif defined(TARGET_HAS_WIFI_ISM43362)
 
-// The ES-WIFI module has its own onboard TCP/IP stack and is only ever driven through its
-// socket-oriented AT command set (see targets/ChibiOS/_WiFi/inventek), so there's no lwIP netif
-// backing this interface - IP configuration is read directly from the module and copied into the
-// in-memory config block, and connection lifecycle maps straight onto the WIFI_* driver API.
-
-// implemented in targets/ChibiOS/_WiFi/inventek/sntp_ism43362.cpp
 extern "C" void Ism43362_Sntp_TriggerAutoSync();
 
-// Guards against spawning more than one auto-sync thread for the same connection - set once
-// Network_Interface_Connect_Result() has confirmed a real IP address, cleared again on disconnect
-// so a future reconnect can trigger a fresh sync.
+// Guards against spawning more than one auto-sync thread for the same connection
 static bool s_sntpAutoSyncTriggered = false;
 
 int Network_Interface_Disconnect(int index)
@@ -192,7 +182,7 @@ int Network_Interface_Start_Connect(int index, const char *ssid, const char *pas
 
     WIFI_Status_t status = WIFI_Connect(ssid, passphrase, ecn);
 
-    // NOTE: the automatic NTP sync is NOT triggered here anymore, even though WIFI_Connect()
+    // NOTE: the automatic NTP sync is NOT triggered here, even though WIFI_Connect()
     // returning OK usually means the module's own onboard DHCP client already has an IP address.
     // Kicking off the SNTP background thread (which drives the SAME ES-WIFI module over the SAME
     // AT command channel/mutex for DNS lookup + UDP socket I/O) this early was found to race with
@@ -219,9 +209,7 @@ int Network_Interface_Connect_Result(int configIndex)
         return -1;
     }
 
-    // DHCP has completed (the module runs its own DHCP client internally) - sync the reported
-    // IP configuration into the in-memory config block so that managed code reads the correct
-    // addresses via ConfigurationManager_GetConfigurationBlock.
+    // DHCP has completed (the module runs its own DHCP client internally).
     if (g_TargetConfiguration.NetworkInterfaceConfigs != NULL &&
         g_TargetConfiguration.NetworkInterfaceConfigs->Count > 0)
     {
@@ -249,11 +237,7 @@ int Network_Interface_Connect_Result(int configIndex)
     {
         s_sntpAutoSyncTriggered = true;
 
-        // only kick off the best-effort automatic NTP sync now that a real IP address has been
-        // confirmed (matching how other targets auto-sync the clock once the network comes up -
-        // see the comment at the top of sntp_ism43362.cpp for why this is needed on this board
-        // specifically) - deferring it to here (instead of right after WIFI_Connect() returns)
-        // avoids racing the background SNTP thread against the connection-establishment window.
+        // only kick off the best-effort automatic NTP sync now that a real IP address has been confirmed
         Ism43362_Sntp_TriggerAutoSync();
     }
 

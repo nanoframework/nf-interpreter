@@ -154,9 +154,8 @@ HRESULT Library_sys_dev_wifi_native_System_Device_Wifi_WifiAdapter::
             NANOCLR_CHECK_HRESULT(stack.SetupTimeoutFromTicks(hbTimeout, timeout));
 
 #if defined(TARGET_HAS_WIFI_ISM43362)
-            // ISM43362 never signals Event_Wifi_Station, so waiting on the full connect deadline
-            // would only re-check Network_Interface_Connect_Result() once, right at the end -
-            // poll every 500ms instead, without exceeding the real connect deadline (*timeout)
+            // ISM43362 never signals Event_Wifi_Station, so waiting on the full connect deadline would only re-check Network_Interface_Connect_Result() once
+            // poll every 500ms, without exceeding the real connect deadline
             CLR_INT64 pollDeadline = (CLR_INT64)HAL_Time_CurrentTime() + (500 * TIME_CONVERSION__TO_MILLISECONDS);
             CLR_INT64 waitDeadline = (pollDeadline < *timeout) ? pollDeadline : *timeout;
 #else

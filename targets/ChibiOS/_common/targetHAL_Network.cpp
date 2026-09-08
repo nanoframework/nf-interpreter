@@ -41,8 +41,7 @@ void sys_signal_sock_event()
 void nanoHAL_Network_Initialize()
 {
 #if !defined(TARGET_HAS_WIFI_ISM43362)
-    // Initialise the lwIP CLR signal callback (not used by the ISM43362 socket-proxy layer,
-    // which doesn't go through lwIP's socket/netif event signaling at all)
+    // Initialise this only for non ISM43362 targets
     set_signal_sock_function(&sys_signal_sock_event);
 #endif
 
@@ -55,9 +54,6 @@ void nanoHAL_Network_Initialize()
 
 #if defined(TARGET_HAS_WIFI_ISM43362)
 
-    // the ES-WIFI module runs its own onboard TCP/IP stack and is only ever driven through its
-    // socket-oriented AT command set, so there's no lwIP netif/thread to start here - just bring
-    // up the module itself; joining a network happens later via Network_Interface_Start_Connect()
     WIFI_Status_t initStatus = WIFI_Init();
     if (initStatus != WIFI_STATUS_OK)
     {

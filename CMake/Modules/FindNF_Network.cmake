@@ -343,9 +343,6 @@ else()
     # source files for nanoFramework Networking
     if(TARGET_HAS_WIFI_ISM43362)
 
-        # Inventek ISM43362 (ES-WIFI): the module runs its own onboard TCP/IP stack and only
-        # exposes a socket-oriented AT command set, so it uses a dedicated socket-proxy
-        # implementation instead of the generic lwIP one (see targets/ChibiOS/_WiFi/inventek).
         list(APPEND NF_Network_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/targets/ChibiOS/_WiFi)
         list(APPEND NF_Network_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/targets/ChibiOS/_WiFi/inventek)
 
@@ -408,9 +405,6 @@ else()
     )
 
     if(NF_FEATURE_DEBUGGER AND NOT TARGET_HAS_WIFI_ISM43362)
-        # relies on socket listen/accept (via g_Sockets_LWIP_Driver), which ISM43362's
-        # client-socket-only implementation doesn't support - debugging on this board
-        # is expected to happen over a different transport (UART/USB)
         list(APPEND NF_Network_SRCS Sockets_debugger.cpp)
     endif()
 

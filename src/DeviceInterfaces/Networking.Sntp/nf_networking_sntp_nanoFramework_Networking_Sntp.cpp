@@ -6,16 +6,10 @@
 #include "nf_networking_sntp.h"
 
 #if defined(TARGET_HAS_WIFI_ISM43362)
-// implemented in targets/ChibiOS/_WiFi/inventek/sntp_ism43362.cpp - see the comment there for why
-// this board needs its own synchronous NTP client instead of lwIP's sntp_* API
 extern bool Ism43362_Sntp_Sync(const char *serverName);
 
-// this board has no periodic background SNTP service (Start()/UpdateNow() both just perform one
-// immediate, synchronous NTP query) - these track enough state to back Server1/Server2/IsStarted
 static char s_ism43362SntpServer1[64] = "pool.ntp.org";
 static char s_ism43362SntpServer2[64] = "time.nist.gov";
-// true once Start()/UpdateNow() has been called, until Stop() - independent of whether the
-// synchronous query actually succeeded, to match sntp_enabled() semantics on other targets
 static bool s_ism43362SntpEnabled = false;
 #endif
 
