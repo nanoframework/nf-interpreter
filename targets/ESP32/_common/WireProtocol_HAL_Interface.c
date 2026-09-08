@@ -161,7 +161,7 @@ static uint8_t WP_TransmitMessageTinyUsb(WP_Message *message)
 
 #include "driver/usb_serial_jtag.h"
 
-#define USB_JTAG_BUFFER_SIZE 256
+#define USB_JTAG_BUFFER_SIZE (sizeof(WP_Packet) + WP_PACKET_SIZE)
 
 static size_t UsbSerialWrite(const uint8_t *data, size_t dataSize, TickType_t xTicksToWait);
 static size_t UsbSerialRead(uint8_t *data, size_t dataSize, TickType_t xTicksToWait);

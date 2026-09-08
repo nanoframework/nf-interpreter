@@ -1,116 +1,131 @@
-//
-// Copyright (c) 2020 The nanoFramework project contributors
+﻿//
+// Copyright (c) .NET Foundation and Contributors
 // See LICENSE file in the project root for full license information.
 //
 
 #include "nanoFramework_hardware_esp32_rmt_native.h"
 
-std::map<rmt_channel_t, std::vector<rmt_item32_t>>
-    Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_Esp32_Rmt_RmtChannel::registredChannels;
+// reduce line lengths
+typedef Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_Esp32_Rmt_RmtChannel RmtChannel;
 
-typedef Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_Esp32_Rmt_RmtChannelSettings
-    RmtChannelSettings;
+// Map for registered channels
+std::map<rmt_channel_handle_t, RmtChannelInfo> RmtChannel::registeredRmtChannels;
 
-HRESULT Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_Esp32_Rmt_RmtChannel::
-    NativeSetGpioPin___VOID__I4__U1__I4__BOOLEAN(CLR_RT_StackFrame &stack)
+// Uncomment to dump RMT channel info on ADD, ERASE channel
+// #define DUMP_RMT_CHANNELS
+
+#ifdef DUMP_RMT_CHANNELS
+void DumpRegisteredRmtChannels(const char *text)
 {
-    NANOCLR_HEADER();
+    ets_printf("---- Registered RMT Channels Dump (%s) ----\n", text);
 
-    rmt_channel_t channel = CHANNEL(stack.Arg1().NumericByRef().s4);
-    uint8_t mode = stack.Arg2().NumericByRef().u1;
-    int32_t pin = stack.Arg3().NumericByRef().s4;
-    bool invert_signal = (bool)stack.Arg4().NumericByRef().u1;
-
-    rmt_mode_t rmt_mode;
-    if (mode == 0x00)
+    if (RmtChannel::registeredRmtChannels.empty())
     {
-        rmt_mode = RMT_MODE_RX;
-    }
-    else
-    {
-        rmt_mode = RMT_MODE_TX;
+        ets_printf("No registered RMT channels.\n");
+        return;
     }
 
-    auto err = rmt_set_gpio(channel, rmt_mode, (gpio_num_t)pin, invert_signal);
-    if (err != ESP_OK)
+    for (auto &entry : RmtChannel::registeredRmtChannels)
     {
-        NANOCLR_SET_AND_LEAVE(stack.NotImplementedStub());
-    }
+        rmt_channel_handle_t handle = entry.first;
+        const RmtChannelInfo &info = entry.second;
 
-    NANOCLR_NOCLEANUP();
-}
+        ets_printf("Channel Handle: %p\n", handle);
 
-HRESULT Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_Esp32_Rmt_RmtChannel::
-    NativeSetClockDivider___VOID__U1(CLR_RT_StackFrame &stack)
-{
-    NANOCLR_HEADER();
-
-    CLR_RT_HeapBlock *channel_settings = NULL;
-    int32_t channel;
-    uint8_t clockdiv = (uint8_t)stack.Arg1().NumericByRef().u1;
-
-    CLR_RT_HeapBlock *pThis = stack.This();
-    FAULT_ON_NULL(pThis);
-
-    // get a reference to the configs in the managed code instance
-    channel_settings = pThis[FIELD___settings].Dereference();
-    channel = channel_settings[RmtChannelSettings::FIELD___channel].NumericByRef().s4;
-
-    if (!CheckChannel(channel))
-    {
-        NANOCLR_SET_AND_LEAVE(CLR_E_OBJECT_DISPOSED);
-    }
-
-    rmt_set_clk_div((rmt_channel_t)channel, clockdiv);
-
-    NANOCLR_NOCLEANUP();
-}
-
-HRESULT Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_Esp32_Rmt_RmtChannel::
-    NativeSetNumberOfMemoryBlocks___VOID__U1(CLR_RT_StackFrame &stack)
-{
-    NANOCLR_HEADER();
-    {
-        CLR_RT_HeapBlock *channel_settings = NULL;
-        int32_t channel;
-        uint8_t rmt_mem_num;
-
-        CLR_RT_HeapBlock *pThis = stack.This();
-        FAULT_ON_NULL(pThis);
-
-        // get a reference to the configs in the managed code instance
-        channel_settings = pThis[FIELD___settings].Dereference();
-        channel = channel_settings[RmtChannelSettings::FIELD___channel].NumericByRef().s4;
-
-        if (!CheckChannel(channel))
+        switch (info.type)
         {
-            NANOCLR_SET_AND_LEAVE(CLR_E_OBJECT_DISPOSED);
+            case RmtChannelType::Transmit:
+                ets_printf("  Type: Transmit\n");
+                ets_printf("  TX Encoder: %p\n", info.txEncoder);
+                ets_printf("  TX Buffer Size: %d bytes\n", (int)info.txBuffer.size());
+                break;
+
+            case RmtChannelType::Receive:
+                ets_printf("  Type: Receive\n");
+                ets_printf("  RX Queue: %p\n", info.rxQueue);
+                ets_printf("  RX Buffer: %p\n", info.rxBuffer);
+                ets_printf("  RX Buffer Size: %d bytes\n", info.rxBufferSize);
+                break;
+
+            default:
+                ets_printf("  Type: Unknown\n");
+                break;
         }
 
-        rmt_mem_num = (uint8_t)channel_settings[RmtChannelSettings::FIELD___numberOfMemoryBlocks].NumericByRef().u1;
-        auto err = rmt_set_mem_block_num((rmt_channel_t)channel, rmt_mem_num);
-        if (err != ESP_OK)
-        {
-            NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
-        }
+        ets_printf("--------------------------------------\n");
     }
-    NANOCLR_NOCLEANUP();
+}
+#endif
+
+static void DestroyChannel(rmt_channel_handle_t handle, RmtChannelInfo &info)
+{
+    // ignore any errors, as we are cleaning up and the channel may already be disabled or deleted
+    rmt_disable(handle);
+    rmt_del_channel(handle);
+
+    if (info.type == RmtChannelType::Transmit)
+    {
+        if (info.txEncoder)
+            rmt_del_encoder(info.txEncoder);
+
+        info.txBuffer.clear();
+    }
+    else if (info.type == RmtChannelType::Receive)
+    {
+        if (info.rxQueue)
+            vQueueDelete(info.rxQueue);
+
+        if (info.rxBuffer)
+            platform_free(info.rxBuffer);
+    }
 }
 
-//
-//  Search map for next free Channel and return channel number.
-//  return -1 if no free channels.
-//
-CLR_INT32 Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_Esp32_Rmt_RmtChannel::FindNextChannel()
+void Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_Esp32_Rmt_RmtChannel::UninitializeAll()
 {
-    for (signed int channel = RMT_CHANNEL_0; channel < RMT_CHANNEL_MAX; ++channel)
+    RmtDeleteSyncManager();
+
+    for (auto &entry : registeredRmtChannels)
     {
-        if (registredChannels.find(CHANNEL(channel)) == registredChannels.end())
-        {
-            return channel;
-        }
+        rmt_channel_handle_t handle = entry.first;
+        RmtChannelInfo &info = entry.second;
+
+        DestroyChannel(handle, info);
     }
-    return -1;
+
+    registeredRmtChannels.clear();
+}
+
+void Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_Esp32_Rmt_RmtChannel::
+    AddRegisteredTxChannel(rmt_channel_handle_t handle, int bufferSize, rmt_encoder_handle_t encoder)
+{
+    RmtChannelInfo info;
+    info.type = RmtChannelType::Transmit;
+    info.txEncoder = encoder;
+    info.txBuffer.resize(bufferSize);
+
+    registeredRmtChannels.emplace(handle, std::move(info));
+
+#ifdef DUMP_RMT_CHANNELS
+    DumpRegisteredRmtChannels("add Tx");
+#endif
+}
+
+void Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_Esp32_Rmt_RmtChannel::
+    AddRegisteredRxChannel(rmt_channel_handle_t handle, QueueHandle_t queue, uint8_t *buffer, CLR_INT32 bufferSize)
+{
+    RmtChannelInfo info;
+    info.type = RmtChannelType::Receive;
+    info.rxQueue = queue;
+    info.rxBuffer = buffer;
+    info.rxBufferSize = bufferSize;
+    info.isBlockingReceiving = false;
+    info.isContinuousReceiving = false;
+
+    registeredRmtChannels.emplace(handle, std::move(info));
+
+#ifdef DUMP_RMT_CHANNELS
+    DumpRegisteredRmtChannels("add Rx");
+#endif
 }
 
 //
@@ -118,9 +133,9 @@ CLR_INT32 Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware
 //  return true if present (valid)
 //
 bool Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_Esp32_Rmt_RmtChannel::CheckChannel(
-    int channel)
+    rmt_channel_handle_t handle)
 {
-    if (registredChannels.find(CHANNEL(channel)) == registredChannels.end())
+    if (registeredRmtChannels.find(handle) == registeredRmtChannels.end())
     {
         return false;
     }
@@ -128,17 +143,76 @@ bool Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_Esp3
     return true;
 }
 
-HRESULT Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_Esp32_Rmt_RmtChannel::
-    NativeGetSourceClockFrequency___STATIC__I4(CLR_RT_StackFrame &stack)
+RmtChannelInfo *Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_Esp32_Rmt_RmtChannel::
+    FindRegisteredRmtChannel(rmt_channel_handle_t handle, RmtChannelType expectedType)
 {
-    NANOCLR_HEADER();
+    auto it = registeredRmtChannels.find(handle);
+    if (it == registeredRmtChannels.end())
+    {
+        return nullptr;
+    }
 
-// Currently we use the default clock for all targets. This is 80Mhz except for H2 where it is 32Mhz.
-#if defined(CONFIG_IDF_TARGET_ESP32H2)
-    stack.SetResult_I4(32000000);
-#else
-    stack.SetResult_I4(80000000);
+    RmtChannelInfo &info = it->second;
+
+    if (info.type != expectedType)
+    {
+        return nullptr;
+    }
+
+    return &info;
+}
+
+void Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_Esp32_Rmt_RmtChannel::EraseChannel(
+    rmt_channel_handle_t handle)
+{
+    auto it = registeredRmtChannels.find(handle);
+    if (it == registeredRmtChannels.end())
+    {
+        return;
+    }
+
+    RmtChannelInfo &info = it->second;
+
+    DestroyChannel(handle, info);
+
+    registeredRmtChannels.erase(handle);
+
+#ifdef DUMP_RMT_CHANNELS
+    DumpRegisteredRmtChannels("Erase channel");
 #endif
+}
 
-    NANOCLR_NOCLEANUP_NOLABEL();
+HRESULT Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_Esp32_Rmt_RmtChannel::
+    RmtMapEspErrToClrErr(esp_err_t err)
+{
+    HRESULT hr = 0;
+
+    switch (err)
+    {
+        case ESP_OK:
+            hr = S_OK;
+            break;
+        case ESP_ERR_TIMEOUT:
+            hr = CLR_E_TIMEOUT;
+            break;
+        case ESP_ERR_INVALID_ARG:
+            hr = CLR_E_INVALID_PARAMETER;
+            break;
+        case ESP_ERR_NOT_SUPPORTED:
+            hr = CLR_E_NOT_SUPPORTED;
+            break;
+        case ESP_ERR_INVALID_STATE:
+            hr = CLR_E_INVALID_OPERATION;
+            break;
+        case ESP_ERR_NO_MEM:
+            hr = CLR_E_OUT_OF_MEMORY;
+            break;
+        case ESP_ERR_NOT_FOUND: // RMT channels are used up
+            hr = CLR_E_NOT_FOUND;
+            break;
+        default:
+            hr = CLR_E_FAIL;
+            break;
+    }
+    return hr;
 }

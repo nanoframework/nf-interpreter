@@ -7,6 +7,14 @@
 #include "littlefs_FS_Driver.h"
 #include <stdlib.h>
 
+#if (HAL_USE_SDC == TRUE)
+#include <sdmmc_cmd.h>
+
+// the mounted card and the volume it belongs to, from Target_System_IO_FileSystem.c
+extern "C" sdmmc_card_t *card;
+extern "C" char cardDriveLetter;
+#endif
+
 extern FileSystemVolume *g_FS_Volumes;
 
 static int32_t RemoveAllFiles(const char *path);
@@ -81,8 +89,6 @@ HRESULT LITTLEFS_FS_Driver::Format(const VOLUME_ID *volume, const char *volumeLa
 
 HRESULT LITTLEFS_FS_Driver::GetSizeInfo(const VOLUME_ID *volume, int64_t *totalSize, int64_t *totalFreeSpace)
 {
-    (void)totalSize;
-
     // FATFS *fsPtr = &fs;
     // char buffer[3];
     // DWORD freeClusters, freeSectors, totalSectors;
@@ -109,8 +115,29 @@ HRESULT LITTLEFS_FS_Driver::GetSizeInfo(const VOLUME_ID *volume, int64_t *totalS
     // //     *totalFreeSpace = (int64_t)freeSectors * FF_MAX_SS;
     // // #endif
 
+    // -1 means "unknown" to the caller
     *totalSize = -1;
+
+    // free space would need f_getfree(), which walks the FAT and trips the watchdog on large cards
     *totalFreeSpace = -1;
+
+#if (HAL_USE_SDC == TRUE)
+
+    // the driver also serves the internal flash, which has no card behind it
+    FileSystemVolume *currentVolume = FileSystemVolumeList::FindVolume(volume->volumeId);
+
+    if (currentVolume != NULL && card != NULL && cardDriveLetter != 0 &&
+        currentVolume->m_rootName[0] == cardDriveLetter)
+    {
+        // physical capacity of the card, not of the file system on it
+        *totalSize = (int64_t)card->csd.capacity * card->csd.sector_size;
+    }
+
+#else
+
+    (void)volume;
+
+#endif
 
     return S_OK;
 }
@@ -282,6 +309,13 @@ HRESULT LITTLEFS_FS_Driver::Read(void *handle, uint8_t *buffer, int size, int *b
 
     fileHandle = (LITTLEFS_FileHandle *)handle;
 
+    if (fileHandle->lastOp == LITTLEFS_LastOperation_Write && fseek(fileHandle->file, 0, SEEK_CUR) != 0)
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_FILE_IO);
+    }
+
+    fileHandle->lastOp = LITTLEFS_LastOperation_Read;
+
     // read from the file
     readCount = fread(buffer, 1, size, fileHandle->file);
 
@@ -323,6 +357,13 @@ HRESULT LITTLEFS_FS_Driver::Write(void *handle, uint8_t *buffer, int size, int *
     }
 
     fileHandle = (LITTLEFS_FileHandle *)handle;
+
+    if (fileHandle->lastOp == LITTLEFS_LastOperation_Read && fseek(fileHandle->file, 0, SEEK_CUR) != 0)
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_FILE_IO);
+    }
+
+    fileHandle->lastOp = LITTLEFS_LastOperation_Write;
 
     // write to the file
     writeCount = fwrite(buffer, 1, size, fileHandle->file);
@@ -397,6 +438,8 @@ HRESULT LITTLEFS_FS_Driver::Seek(void *handle, int64_t offset, uint32_t origin, 
         return CLR_E_FILE_IO;
     }
 
+    fileHandle->lastOp = LITTLEFS_LastOperation_None;
+
     // get the current position
     *position = ftell(fileHandle->file);
 
@@ -445,6 +488,8 @@ HRESULT LITTLEFS_FS_Driver::GetLength(void *handle, int64_t *length)
         return CLR_E_FILE_IO;
     }
 
+    fileHandle->lastOp = LITTLEFS_LastOperation_None;
+
     return S_OK;
 }
 
@@ -488,6 +533,8 @@ HRESULT LITTLEFS_FS_Driver::SetLength(void *handle, int64_t length)
         // Handle error
         return CLR_E_FILE_IO;
     }
+
+    fileHandle->lastOp = LITTLEFS_LastOperation_None;
 
     // Synchronize the file state
     fflush(fileHandle->file);
