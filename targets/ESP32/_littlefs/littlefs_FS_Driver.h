@@ -16,9 +16,22 @@ extern "C"
 {
 #endif
 
+    // direction of the last operation on a file, files are opened in update mode and ANSI C
+    // requires a positioning call between a read and a write on such a stream
+    enum LITTLEFS_LastOperation
+    {
+        // no operation yet, or the file was just positioned: both directions are legal
+        LITTLEFS_LastOperation_None = 0,
+        // last operation was a read: a write needs a positioning call first
+        LITTLEFS_LastOperation_Read = 1,
+        // last operation was a write: a read needs a positioning call first
+        LITTLEFS_LastOperation_Write = 2,
+    };
+
     struct LITTLEFS_FileHandle
     {
         FILE *file;
+        LITTLEFS_LastOperation lastOp;
     };
 
     struct LITTLEFS_FindFileHandle
