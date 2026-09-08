@@ -472,8 +472,8 @@ void ClrStartup(CLR_SETTINGS params)
 
         if (CLR_EE_DBG_IS_NOT(RebootPending))
         {
-#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
             CLR_EE_DBG_SET_MASK(StateProgramExited, StateMask);
+#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
             CLR_EE_DBG_EVENT_BROADCAST(CLR_DBG_Commands_c_Monitor_ProgramExit, 0, nullptr, WP_Flags_c_NonCritical);
 #endif // #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
 
