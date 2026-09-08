@@ -6,6 +6,7 @@
 #include <target_platform.h>
 #include <esp32_idf.h>
 #include <nanoHAL_v2.h>
+#include <WireProtocol_Transport.h>
 
 #if CONFIG_IDF_TARGET_ESP32C3
 #include <soc/rtc_cntl_reg.h>
@@ -13,14 +14,16 @@
 
 inline void CPU_Reset()
 {
-#if CONFIG_IDF_TARGET_ESP32C3 && CONFIG_NF_WP_TRANSPORT_USB_CDC
-    SET_PERI_REG_MASK(RTC_CNTL_OPTIONS0_REG, RTC_CNTL_SW_SYS_RST);
-    while (true)
+#if CONFIG_IDF_TARGET_ESP32C3
+    if (g_WP_Transport == WP_TRANSPORT_USB_JTAG)
     {
+        SET_PERI_REG_MASK(RTC_CNTL_OPTIONS0_REG, RTC_CNTL_SW_SYS_RST);
+        while (true)
+        {
+        }
     }
-#else
-    esp_restart();
 #endif
+    esp_restart();
 };
 
 // CPU sleep is not currently implemented in this target
