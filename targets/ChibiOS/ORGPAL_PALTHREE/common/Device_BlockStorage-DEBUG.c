@@ -8,17 +8,16 @@
 
 // 32kB blocks
 const BlockRange BlockRange1[] = {
-    {BlockRange_BLOCKTYPE_BOOTSTRAP, 0, 1}, // 08000000 MCUboot (sectors 0-1, 64 kB)
+    {BlockRange_BLOCKTYPE_BOOTSTRAP, 0, 2}, // 08000000 MCUboot (sectors 0-2, 96 kB)
 
     ///////////////////////////////////////////////////////////////////////////////////////
     // because this target is using a configuration block need to add the
     // configuration manager files to the CMake and call ConfigurationManager_Initialize()
     // in nanoBooter so the configuration can be managed when in booter mode
     ///////////////////////////////////////////////////////////////////////////////////////
-    {BlockRange_BLOCKTYPE_CONFIG, 2, 2}, // 08010000 configuration block
+    {BlockRange_BLOCKTYPE_CONFIG, 3, 3}, // 08018000 configuration block
     ///////////////////////////////////////////////////////////////////////////////////////
 
-    {BlockRange_BLOCKTYPE_CODE, 3, 3} // 08018000 nanoCLR
 };
 
 // 128kB block

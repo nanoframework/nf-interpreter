@@ -6,12 +6,12 @@ MCUboot replaces nanoBooter at the same base address. The MCUboot build uses a *
 
 | Region | Address | Size | Sector(s) | Notes |
 |---|---|---|---|---|
-| MCUboot | `0x08000000` | **64 kB** | **0–1** | replaces nanoBooter; expanded from 32 kB to accommodate FatFs |
-| Config block | `0x08010000` | 32 kB | **2** | HAL-managed; **outside** any MCUboot slot |
-| Image 0 primary slot (CLR) | `0x08018000` | **928 kB** | **3–7 (bank 1)** | MCUboot-managed slot; MCUboot header at slot start (`0x08018000`) |
+| MCUboot | `0x08000000` | **96 kB** | **0–2** | replaces nanoBooter |
+| Config block | `0x08018000` | 32 kB | **3** | HAL-managed; **outside** any MCUboot slot |
+| Image 0 primary slot (CLR) | `0x08020000` | **896 kB** | **4–7 (bank 1)** | MCUboot-managed slot; MCUboot header at slot start (`0x08020000`) |
 | Image 1 primary (deploy) | `0x08100000` | 1024 kB | bank 2 | MCUboot-managed deploy slot |
 
-> **Config block placement:** Sector 2 (0x08010000, 32 kB) sits between the MCUboot bootloader and the CLR primary slot. It is not part of any MCUboot-managed flash area. MCUboot never enumerates, erases, or writes to sector 2.
+> **Config block placement:** Sector 3 (0x08018000, 32 kB) sits between the MCUboot bootloader and the CLR primary slot. It is not part of any MCUboot-managed flash area. MCUboot never enumerates, erases, or writes to sector 3.
 
 > **Deploy slot note:** 1024 kB matches the F76xx nanoBooter debug deploy slot. Legacy nanoBooter release builds retain 1280 kB.
 
@@ -19,7 +19,7 @@ MCUboot replaces nanoBooter at the same base address. The MCUboot build uses a *
 
 | Area | `fa_id` | Offset on AT25SF641 | Size | 4 kB sub-sectors | Notes |
 |---|---|---|---|---|---|
-| Image 0 secondary (CLR) | `FLASH_AREA_IMAGE_0_SECONDARY` | `0x000000` | 960 kB | 240 | Upgrade candidate for Image 0; primary (928 kB) + 1 logical sector (32 kB) |
+| Image 0 secondary (CLR) | `FLASH_AREA_IMAGE_0_SECONDARY` | `0x000000` | 928 kB | 232 | Upgrade candidate for Image 0; primary (896 kB) + 1 logical sector (32 kB) |
 | Image 1 secondary (deploy) | `FLASH_AREA_IMAGE_1_SECONDARY` | `0x0F0000` | 1056 kB | 264 | Upgrade candidate for Image 1; primary (1024 kB) + 1 logical sector (32 kB) |
 | LittleFS FS0 | — | `0x1F8000` | 6176 kB (≈ 6 MB) | 1544 | `LFS0_BASE_OFFSET` in `target_littlefs.h` derives this offset from `NF_MCUBOOT_SLOT_IMG1_SEC_OFF + NF_MCUBOOT_SLOT_IMG1_SEC_SIZE` in `mcuboot_flash_layout.h`, and `hal_lfs_read_0`/`hal_lfs_prog_0`/`hal_lfs_erase_0`/`hal_lfs_erase_chip_0` in `target_littlefs.c` all add it to the block address. |
 
@@ -49,7 +49,7 @@ W25Q128 QSPI (16 MB) — unchanged, still fully allocated to LittleFS FS1.
 | | nanoBooter (release) | MCUboot |
 |---|---|---|
 | Bootloader | 32 kB (sector 0) | **64 kB (sectors 0–1)** |
-| Config | 32 kB @ `0x08008000` (sector 1) | 32 kB @ `0x08010000` (sector 2) |
-| CLR code start | `0x08010000` (sector 2) | `0x08018000` (sector 3) |
+| Config | 32 kB @ `0x08008000` (sector 1) | 32 kB @ `0x08018000` (sector 3) |
+| CLR code start | `0x08010000` (sector 2) | `0x08020000` (sector 4) |
 | Deploy slot | 1280 kB @ `0x080C0000` | 1024 kB @ `0x08100000` (bank 2) |
 | Upgrade mechanism | manual flash | MCUboot swap-using-offset |

@@ -20,8 +20,8 @@
  */
 MEMORY
 {
-    flash0     (rx) : org = 0x08000000, len = 64k     /* MCUboot bootloader (sectors 0-1) */
-    flash1     (rx) : org = 0x00200000, len = 64k     /* ITCM alias of flash0 */
+    flash0     (rx) : org = 0x08000000, len = 96k     /* MCUboot bootloader (sectors 0-2) */
+    flash1     (rx) : org = 0x00200000, len = 96k     /* ITCM alias of flash0 */
     flash2     (rx) : org = 0x00000000, len = 0
     flash3     (rx) : org = 0x00000000, len = 0
     flash4     (rx) : org = 0x00000000, len = 0

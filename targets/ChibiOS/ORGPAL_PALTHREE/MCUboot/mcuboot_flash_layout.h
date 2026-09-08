@@ -10,9 +10,9 @@
 //
 // Layout (STM32F769ZI 2 MB + AT25SF641 8 MB SPI1):
 //
-//   FLASH_AREA_BOOTLOADER        (0): 0x08000000  64 kB   internal sectors 0-1
-//   [config block]                  : 0x08010000  32 kB   internal sector 2  (HAL-managed, not a MCUboot slot)
-//   FLASH_AREA_IMAGE_0_PRIMARY   (1): 0x08018000  928 kB  internal sectors 3-7 (bank 1)
+//   FLASH_AREA_BOOTLOADER        (0): 0x08000000  96 kB   internal sectors 0-2
+//   [config block]                  : 0x08018000  32 kB   internal sector 3  (HAL-managed, not a MCUboot slot)
+//   FLASH_AREA_IMAGE_0_PRIMARY   (1): 0x08020000  896 kB  internal sectors 4-7 (bank 1)
 //   FLASH_AREA_IMAGE_0_SECONDARY (2): AT25SF641 @ 0x000000  960 kB  (240 × 4 kB sub-sectors)
 //   FLASH_AREA_IMAGE_1_PRIMARY   (3): 0x08100000  1024 kB internal bank 2
 //   FLASH_AREA_IMAGE_1_SECONDARY (4): AT25SF641 @ 0x0F0000  1056 kB (264 × 4 kB sub-sectors)
@@ -30,24 +30,24 @@
 
 // clang-format off
 
-// MCUboot bootloader slot (sectors 0-1, 64 kB)
+// MCUboot bootloader slot (sectors 0-2, 96 kB)
 #define NF_MCUBOOT_SLOT_BOOTLOADER_OFF      0x08000000U
-#define NF_MCUBOOT_SLOT_BOOTLOADER_SIZE     (64U * 1024U)
+#define NF_MCUBOOT_SLOT_BOOTLOADER_SIZE     (96U * 1024U)
 
-// Config block (sector 2, 32 kB) — HAL-managed; NOT a MCUboot flash area.
+// Config block (sector 3, 32 kB) — HAL-managed; NOT a MCUboot flash area.
 // It sits between the bootloader and the CLR primary slot and is never
 // enumerated, erased, or written by MCUboot during an upgrade.
-#define NF_MCUBOOT_CONFIG_OFF               0x08010000U
+#define NF_MCUBOOT_CONFIG_OFF               0x08018000U
 #define NF_MCUBOOT_CONFIG_SIZE              (32U * 1024U)
 
-// Image 0 primary — nanoCLR (sectors 3-7, bank 1, 928 kB)
-#define NF_MCUBOOT_SLOT_IMG0_PRI_OFF        0x08018000U
-#define NF_MCUBOOT_SLOT_IMG0_PRI_SIZE       (928U * 1024U)
+// Image 0 primary — nanoCLR (sectors 4-7, bank 1, 896 kB)
+#define NF_MCUBOOT_SLOT_IMG0_PRI_OFF        0x08020000U
+#define NF_MCUBOOT_SLOT_IMG0_PRI_SIZE       (896U * 1024U)
 
-// Image 0 secondary — CLR upgrade candidate on AT25SF641 (240 × 4 kB = 960 kB;
+// Image 0 secondary — CLR upgrade candidate on AT25SF641 (232 × 4 kB = 928 kB;
 // primary size + one 32 kB logical sector, see note above)
 #define NF_MCUBOOT_SLOT_IMG0_SEC_OFF        0x000000U
-#define NF_MCUBOOT_SLOT_IMG0_SEC_SIZE       (960U * 1024U)
+#define NF_MCUBOOT_SLOT_IMG0_SEC_SIZE       (928U * 1024U)
 
 // Image 1 primary — deployment (bank 2, 1024 kB)
 #define NF_MCUBOOT_SLOT_IMG1_PRI_OFF        0x08100000U
