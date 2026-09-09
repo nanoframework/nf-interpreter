@@ -193,6 +193,9 @@
 // Enable direct image upload group (group 1, cmd 1) for IFU recovery via UART.
 #define MCUBOOT_SERIAL_DIRECT_IMAGE_UPLOAD 1
 
+// Enable revision component in versions
+#define MCUBOOT_VERSION_CMP_USE_BUILD_NUMBER 1
+
 // CPU idle hook - called in boot_serial_read_console() when the read returns
 // no data. Must relinquish the CPU so ChibiOS can service the USB ISR and
 // allow the device to enumerate before any data arrives.
