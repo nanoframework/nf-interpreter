@@ -9,7 +9,7 @@
 // declared in mcuboot_board_iface.h and called from mcuboot_main.c.
 // Compiled only when NF_FEATURE_MCUBOOT_HAS_SDCARD is enabled.
 
-#if defined(NF_FEATURE_MCUBOOT_HAS_SDCARD)
+#if defined(CONFIG_NF_FEATURE_MCUBOOT_HAS_SDCARD) && CONFIG_NF_FEATURE_MCUBOOT_HAS_SDCARD
 
 #include "hal.h"
 #include "ff.h"
@@ -41,4 +41,4 @@ int mcuboot_sdcard_init(void)
     return 0;
 }
 
-#endif // NF_FEATURE_MCUBOOT_HAS_SDCARD
+#endif // CONFIG_NF_FEATURE_MCUBOOT_HAS_SDCARD
