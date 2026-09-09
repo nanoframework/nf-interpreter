@@ -9,6 +9,7 @@
 
 #if defined(CONFIG_NF_FEATURE_HAS_MCUBOOT) && CONFIG_NF_FEATURE_HAS_MCUBOOT
 #include <mcuboot_config/mcuboot_config.h>
+#include <MCUboot_StartupPolicy.h>
 #endif
 
 void ClrExit()
@@ -391,7 +392,7 @@ void ClrStartup(CLR_SETTINGS params)
     ASSERT(sizeof(CLR_RT_HeapBlock_Raw) == sizeof(struct CLR_RT_HeapBlock));
     bool softReboot;
 
-#ifdef NF_FEATURE_HAS_MCUBOOT
+#if defined(CONFIG_NF_FEATURE_HAS_MCUBOOT) && CONFIG_NF_FEATURE_HAS_MCUBOOT
     // Guard flag: confirm CLR image only once per power cycle,
     // even if ClrStartup loops for a soft reboot.
     static bool s_mcubootStartupConfirmed = false;
@@ -423,11 +424,23 @@ void ClrStartup(CLR_SETTINGS params)
 
         if (SUCCEEDED(hr = s_ClrSettings.Initialize(params)))
         {
-#ifdef NF_FEATURE_HAS_MCUBOOT
+#if defined(CONFIG_NF_FEATURE_HAS_MCUBOOT) && CONFIG_NF_FEATURE_HAS_MCUBOOT
             if (!s_mcubootStartupConfirmed)
             {
-                nf_mcuboot_startup_ok();
+                // CLR core came up (EE created, hardware started, debugger discovery done).
+                // Treat this as the CLR health check passing and confirm image 0
+                nf_mcuboot_error_t mcubootConfirmResult = nf_mcuboot_startup_ok();
                 s_mcubootStartupConfirmed = true;
+#if !defined(BUILD_RTM)
+                if (mcubootConfirmResult != NF_MCUBOOT_SUCCESS)
+                {
+                    CLR_Debug::Printf(
+                        "CLR health checks passed but MCUboot confirm of image 0 failed (%d)\r\n",
+                        (int)mcubootConfirmResult);
+                }
+#else
+                (void)mcubootConfirmResult;
+#endif
             }
 #endif
             if (SUCCEEDED(hr = s_ClrSettings.Load()))
@@ -436,7 +449,7 @@ void ClrStartup(CLR_SETTINGS params)
                 CLR_Debug::Printf("Ready.\r\n");
 #endif
 
-#ifdef NF_FEATURE_HAS_MCUBOOT
+#if defined(CONFIG_NF_FEATURE_HAS_MCUBOOT) && CONFIG_NF_FEATURE_HAS_MCUBOOT
                 const bool hasManagedEntryPoint = !NANOCLR_INDEX_IS_INVALID(g_CLR_RT_TypeSystem.m_entryPoint);
                 if (!hasManagedEntryPoint)
                 {
@@ -454,7 +467,7 @@ void ClrStartup(CLR_SETTINGS params)
                 CLR_Debug::Printf("Done.\r\n");
 #endif
             }
-#ifdef NF_FEATURE_HAS_MCUBOOT
+#if defined(CONFIG_NF_FEATURE_HAS_MCUBOOT) && CONFIG_NF_FEATURE_HAS_MCUBOOT
             else
             {
                 // Type load/resolve failure means validation of deployment image did not succeed.
