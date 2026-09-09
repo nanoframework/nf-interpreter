@@ -35,6 +35,10 @@ list(APPEND NF_CoreCLR_INCLUDE_DIRS ${CMAKE_BINARY_DIR}/targets/${RTOS}/${TARGET
 list(APPEND NF_CoreCLR_INCLUDE_DIRS ${CMAKE_BINARY_DIR}/targets/${RTOS}/${TARGET_VENDOR}/${TARGET_BOARD})
 list(APPEND NF_CoreCLR_INCLUDE_DIRS ${CMAKE_BINARY_DIR}/targets/${RTOS}/${TARGET_VENDOR}/${TARGET_BOARD}/nanoCLR)
 
+if(NF_FEATURE_HAS_MCUBOOT)
+    list(APPEND NF_CoreCLR_INCLUDE_DIRS ${mcuboot_SOURCE_DIR}/boot/bootutil/include)
+endif()
+
 # source files for nanoFramework Core, CoreLib and CLR startup
 set(NF_CoreCLR_SRCS
 
