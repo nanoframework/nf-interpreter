@@ -344,15 +344,7 @@ if(${TARGET_SERIES} STREQUAL "STM32F7xx")
          -Wl,--defsym=__process_stack_size__=0x800")
 
     # FatFs core + ChibiOS platform diskio for targets using SD card as secondary slot storage.
-    # SDC HAL driver stack (hal_sdc.c, hal_mmcsd.c, hal_sdc_lld.c) and their headers are
-    # included unconditionally above, gated at compile time by HAL_USE_SDC in halconf.h.
-    # This block adds only the FatFs library files and the ChibiOS-platform diskio glue.
-    # Must come BEFORE include(mcuboot_target.cmake) because the macro calls add_executable()
-    # with ${MCUBOOT_SERIES_COMMON_SOURCES} immediately.
     if(NF_FEATURE_MCUBOOT_HAS_SDCARD)
-
-        # Propagate the Kconfig option into C preprocessor
-        list(APPEND MCUBOOT_SERIES_COMMON_COMPILE_DEFINITIONS NF_FEATURE_MCUBOOT_HAS_SDCARD)
 
         list(APPEND MCUBOOT_SERIES_COMMON_SOURCES
             ${MCUBOOT_FATFS_SOURCES}
@@ -395,8 +387,6 @@ if(${TARGET_SERIES} STREQUAL "STM32F7xx")
     endif() # NF_MCUBOOT_SERIAL_RECOVERY
 
     if(NF_FEATURE_WATCHDOG)
-
-        list(APPEND MCUBOOT_SERIES_COMMON_COMPILE_DEFINITIONS CONFIG_NF_FEATURE_WATCHDOG=1)
 
         list(APPEND MCUBOOT_SERIES_COMMON_SOURCES
             ${CMAKE_SOURCE_DIR}/targets/ChibiOS/_common/targetHAL_Watchdog.c
