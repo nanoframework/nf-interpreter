@@ -16,7 +16,7 @@
 #include <nanoHAL_v2.h>
 #include <targetPAL.h>
 
-#if (NF_FEATURE_USE_LITTLEFS == TRUE)
+#if CONFIG_NF_FEATURE_USE_LITTLEFS
 #include <hal_littlefs.h>
 #endif
 
@@ -52,7 +52,7 @@ int main(void)
     usbStart(serusbcfg.usbp, &usbcfg);
     usbConnectBus(serusbcfg.usbp);
 
-#if (NF_FEATURE_USE_LITTLEFS == TRUE)
+#if CONFIG_NF_FEATURE_USE_LITTLEFS
     hal_lfs_config();
     hal_lfs_mount();
 #endif
