@@ -22,7 +22,7 @@ uint32_t GetExistingConfigSize()
 #if defined(RP2040) || defined(RP2350)
     // round up to 256 bytes - RP2040/RP2350 flash program granularity
     currentConfigSize = (currentConfigSize + 255U) & ~255U;
-#elif defined(STM32L4XX)
+#elif defined(STM32L475xx)
     // round up to 8 bytes - STM32L4 flash can only be programmed in double-word units
     currentConfigSize = (currentConfigSize + 7U) & ~7U;
 #else
@@ -339,7 +339,7 @@ __nfweak bool ConfigurationManager_StoreConfigurationBlock(
 #if defined(RP2040) || defined(RP2350)
             // round up to 256 bytes - RP2040/RP2350 flash program granularity
             existingSize = (existingSize + 255U) & ~255U;
-#elif defined(STM32L4XX)
+#elif defined(STM32L475xx)
             // round up to 8 bytes - STM32L4 flash can only be programmed in double-word units
             existingSize = (existingSize + 7U) & ~7U;
 #else
