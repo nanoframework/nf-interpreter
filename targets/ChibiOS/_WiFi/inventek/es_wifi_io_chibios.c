@@ -380,8 +380,6 @@ int16_t SPI_WIFI_SendData(uint8_t *data, uint16_t len, uint32_t timeout)
         }
     }
 
-    CS_UNSELECT;
-
     return len;
 }
 
