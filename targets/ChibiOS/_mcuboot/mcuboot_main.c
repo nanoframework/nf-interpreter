@@ -104,7 +104,7 @@ int main(void)
     // proceed, but any upgrade requiring the secondary slot will fail gracefully
     (void)mcuboot_ext_flash_init();
 
-#if defined(NF_FEATURE_MCUBOOT_HAS_SDCARD)
+#if defined(CONFIG_NF_FEATURE_MCUBOOT_HAS_SDCARD) && CONFIG_NF_FEATURE_MCUBOOT_HAS_SDCARD
     // Initialise the SD card and mount the FatFs filesystem for the secondary slot.
     // Non-fatal: a failed SD card init causes boot_go() to skip external slots
     // and boot the primary slot directly.
