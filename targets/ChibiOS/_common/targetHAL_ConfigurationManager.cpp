@@ -22,9 +22,11 @@ uint32_t GetExistingConfigSize()
 #if defined(RP2040) || defined(RP2350)
     // round up to 256 bytes - RP2040/RP2350 flash program granularity
     currentConfigSize = (currentConfigSize + 255U) & ~255U;
-#else
-    // round up to 8 bytes - STM32 flash can only be programmed in double-word units
+#elif defined(STM32L4XX)
+    // round up to 8 bytes - STM32L4 flash can only be programmed in double-word units
     currentConfigSize = (currentConfigSize + 7U) & ~7U;
+#else
+    // default to byte alignment
 #endif
 
     return currentConfigSize;
@@ -337,10 +339,11 @@ __nfweak bool ConfigurationManager_StoreConfigurationBlock(
 #if defined(RP2040) || defined(RP2350)
             // round up to 256 bytes - RP2040/RP2350 flash program granularity
             existingSize = (existingSize + 255U) & ~255U;
-#else
-            // round up to 8 bytes - STM32 flash can only be programmed in double-word units,
-            // and programming a non-erased unit fails even if unchanged, so blocks can't share one
+#elif defined(STM32L4XX)
+            // round up to 8 bytes - STM32L4 flash can only be programmed in double-word units
             existingSize = (existingSize + 7U) & ~7U;
+#else
+            // default to byte alignment
 #endif
 
             storageAddress = (uint32_t)&__nanoConfig_start__ + existingSize;
