@@ -21,7 +21,7 @@
 // need to declare the Receiver thread here
 osThreadDef(ReceiverThread, osPriorityHigh, 2048, "ReceiverThread");
 // declare CLRStartup thread here
-osThreadDef(CLRStartupThread, osPriorityNormal, 4096, "CLRStartupThread");
+osThreadDef(CLRStartupThread, osPriorityNormal, 8192, "CLRStartupThread");
 
 //  Application entry point.
 int main(void)
