@@ -143,24 +143,6 @@
 #endif
 
 //
-// Dependency checking - automatically enabled for multi-image configurations.
-// Enforces deploy→CLR version compatibility via IMAGE_TLV_DEPENDENCY TLV in signed images.
-//
-#if (MCUBOOT_IMAGE_NUMBER > 1)
-#define MCUBOOT_DEPENDENCY_CHECK 1
-#endif
-
-//
-// Only image 0 (nanoCLR) is independently bootable; other images (e.g. deployment) hold
-// data the running CLR reads, not firmware MCUboot ever jumps to. Without this, MCUboot's
-// final per-image validation pass refuses to boot image 0 whenever another image's slot
-// has never been provisioned, on every reset, even though image 0 itself is valid.
-//
-#if (MCUBOOT_IMAGE_NUMBER > 1)
-#define MCUBOOT_ALLOW_NON_BOOTABLE_SECONDARY_IMAGES 1
-#endif
-
-//
 // Serial recovery - optional bootloader recovery mode over UART.
 // Enabled per target via CONFIG_NF_MCUBOOT_SERIAL_RECOVERY=y in Kconfig.
 //
