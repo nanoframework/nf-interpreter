@@ -19,17 +19,13 @@ static struct boot_swap_state s_clr_boot_state;
 static struct boot_swap_state s_deploy_boot_state;
 static bool s_boot_state_valid = false;
 
-// Returns true when the image needs app-side confirmation:
-//   - copy_done == SET  → MCUboot completed a swap (we are running the swapped image)
-//   - image_ok  != SET  → the image has not been confirmed yet
-//
-// This is more precise than checking swap_type == TEST:
-//   - PERM swaps: MCUboot sets image_ok itself before jumping to app → no action needed
-//   - REVERT:     the restored image was already confirmed    → image_ok is SET → no action
-//   - Factory/no-swap: copy_done is UNSET                    → no action needed
+// True when the primary slot holds a valid image (magic GOOD) that is not yet confirmed
+// (image_ok not SET): the app must confirm it or MCUboot discards it on the next boot.
+// copy_done is deliberately not required - a bootstrap copy writes only magic, and
+// boot_set_next() confirms a magic=GOOD image without it.
 static bool needs_confirmation(const struct boot_swap_state *state)
 {
-    return (state->copy_done == BOOT_FLAG_SET) && (state->image_ok != BOOT_FLAG_SET);
+    return (state->magic == BOOT_MAGIC_GOOD) && (state->image_ok != BOOT_FLAG_SET);
 }
 
 void nf_mcuboot_startup_init(void)
