@@ -8,7 +8,7 @@
 
 // 32kB blocks
 const BlockRange BlockRange1[] = {
-    {BlockRange_BLOCKTYPE_BOOTSTRAP, 0, 1}, // 0x08000000 MCUboot (expanded to 64 kB)
+    {BlockRange_BLOCKTYPE_BOOTSTRAP, 0, 1}, // 0x08000000 MCUboot (sectors 0-1, 64 kB)
 
     ///////////////////////////////////////////////////////////////////////////////////////
     // because this target is using a configuration block need to add the
@@ -17,26 +17,27 @@ const BlockRange BlockRange1[] = {
     ///////////////////////////////////////////////////////////////////////////////////////
     {BlockRange_BLOCKTYPE_CONFIG, 2, 2}, // 0x08010000 configuration block
     ///////////////////////////////////////////////////////////////////////////////////////
-
-    {BlockRange_BLOCKTYPE_CODE, 3, 4} // 0x08018000 nanoCLR
 };
 
 // 128kB block
-const BlockRange BlockRange2[] = {
-    {BlockRange_BLOCKTYPE_CODE, 0, 0} // 0x08020000 nanoCLR
-};
+// Internal sectors 3-4 (0x08018000, 32 kB + 128 kB) are intentionally unused: 0x08018000 is
+// not a 256 kB boundary, so they cannot belong to a swap-using-offset primary slot. nanoCLR
+// (image 0 primary) starts at the next 256 kB boundary, 0x08040000.
+// const BlockRange BlockRange2[] = {
+//     {BlockRange_BLOCKTYPE_CODE, 0, 0} // 0x08020000 nanoCLR
+// };
 
 // 256kB blocks
 const BlockRange BlockRange3[] = {
-    {BlockRange_BLOCKTYPE_CODE, 0, 1},      // 08040000 nanoCLR
-    {BlockRange_BLOCKTYPE_DEPLOYMENT, 2, 6} // 080C0000 deployment
+    {BlockRange_BLOCKTYPE_CODE, 0, 3},      // 0x08040000 nanoCLR    (image 0 primary, 4 x 256 kB = 1024 kB, ends 0x08140000)
+    {BlockRange_BLOCKTYPE_DEPLOYMENT, 4, 6} // 0x08140000 deployment (image 1 primary, 3 x 256 kB =  768 kB, ends 0x08200000)
 };
 
 const BlockRegionInfo BlockRegions[] = {
     {
         (0),        // no attributes for this region
         0x08000000, // start address for block region
-        4,          // total number of blocks in this region
+        3,          // total number of blocks in this region (bootloader + config; sector 3 @ 0x08018000 unused)
         0x8000,     // total number of bytes per block
         ARRAYSIZE_CONST_EXPR(BlockRange1),
         BlockRange1,
@@ -44,16 +45,7 @@ const BlockRegionInfo BlockRegions[] = {
 
     {
         (0),        // no attributes for this region
-        0x08020000, // start address for block region
-        1,          // total number of blocks in this region
-        0x20000,    // total number of bytes per block
-        ARRAYSIZE_CONST_EXPR(BlockRange2),
-        BlockRange2,
-    },
-
-    {
-        (0),        // no attributes for this region
-        0x08040000, // start address for block region
+        0x08040000, // start address for block region (sectors 3-4 @ 0x08018000-0x08040000 skipped — unused)
         7,          // total number of blocks in this region
         0x40000,    // total number of bytes per block
         ARRAYSIZE_CONST_EXPR(BlockRange3),

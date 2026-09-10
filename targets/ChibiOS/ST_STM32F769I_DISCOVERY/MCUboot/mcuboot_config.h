@@ -13,8 +13,13 @@
 #ifndef MCUBOOT_CONFIG_ST_STM32F769I_DISCOVERY_H
 #define MCUBOOT_CONFIG_ST_STM32F769I_DISCOVERY_H
 
-// SD card virtual sector size = 4 kB (FAT cluster granularity used for FatFs
-// file-backed secondary slots). FatFs integration is deferred; stub returns -1.
-#define MCUBOOT_EXTERNAL_FLASH_SECTOR_SIZE (4U * 1024U)
+// SD card virtual sector size for the FatFs file-backed secondary slots. This is
+// only the granularity MCUboot chunks the file at (fatfs_flash_area_read/write/erase
+// take plain byte offset + length, no alignment requirement), so it is set to 32 kB
+// to match ORGPAL_PALTHREE / ORGPAL_PALX: CONFIG_NF_MCUBOOT_LOGICAL_SECTOR_SIZE
+// (256 kB) is a whole multiple of it and every secondary slot offset/size is
+// 256 kB-aligned, and it keeps flash_area_get_sectors() well inside
+// MCUBOOT_MAX_IMG_SECTORS. FatFs integration is deferred; the stub returns -1.
+#define MCUBOOT_EXTERNAL_FLASH_SECTOR_SIZE (32U * 1024U)
 
 #endif // MCUBOOT_CONFIG_ST_STM32F769I_DISCOVERY_H

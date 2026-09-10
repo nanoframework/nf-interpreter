@@ -17,13 +17,16 @@
  */
 MEMORY
 {
-    /* Image 0 primary slot (NF_MCUBOOT_SLOT_IMG0_PRI_*: 0x08018000, 672k) less the
-       MCUboot image header. MCUboot jumps to slot base + ih_hdr_size, so the vector
-       table must be linked at exactly 0x08018000 + CONFIG_NF_MCUBOOT_HEADER_SIZE.
-       ChibiOS aligns .vectors to __vectors_align__ (1024 by default); */
+    /* Image 0 primary slot (NF_MCUBOOT_SLOT_IMG0_PRI_*: 0x08040000, 1024k physical).
+       MCUboot jumps to slot base + ih_hdr_size, so the vector table must be linked at
+       exactly 0x08040000 + CONFIG_NF_MCUBOOT_HEADER_SIZE (0x400). ChibiOS aligns
+       .vectors to __vectors_align__ (1024 by default).
+       len is the swap-using-offset USABLE size: 4 logical sectors (1024k) minus one
+       256k logical sector that MCUboot reserves for the swap trailer, minus the header.
+       The linker therefore errors if the image would overrun what MCUboot can swap. */
 
-    flash0     (rx) : org = 0x08018400, len = 672k - 0x400
-    flash1     (rx) : org = 0x00218400, len = 672k - 0x400               /* ITCM alias of flash0 */
+    flash0     (rx) : org = 0x08040400, len = 768k - 0x400
+    flash1     (rx) : org = 0x00240400, len = 768k - 0x400               /* ITCM alias of flash0 */
     flash2     (rx) : org = 0x00000000, len = 0
     flash3     (rx) : org = 0x00000000, len = 0
     flash4     (rx) : org = 0x00000000, len = 0
@@ -31,7 +34,7 @@ MEMORY
     flash6     (rx) : org = 0x00000000, len = 0
     flash7     (rx) : org = 0x00000000, len = 0
     config     (rw) : org = 0x08010000, len = 32k                       /* space reserved for configuration block */
-    deployment (rx) : org = 0x080C0000, len = 1280k                     /* space reserved for application deployment */
+    deployment (rx) : org = 0x08140000, len = 768k                      /* image 1 primary slot (NF_MCUBOOT_SLOT_IMG1_PRI_*; 512k usable after swap trailer) */
     ramvt      (wx) : org = 0x00000000, len = 0                         /* initial RAM address is reserved for a copy of the vector table */
     ram0       (wx) : org = 0x20020000, len = 384k                      /* SRAM1 + SRAM2 */
     ram1       (wx) : org = 0x20020000, len = 368k                      /* SRAM1 */

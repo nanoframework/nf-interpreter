@@ -13,8 +13,9 @@
 #ifndef MCUBOOT_CONFIG_ORGPAL_PALX_H
 #define MCUBOOT_CONFIG_ORGPAL_PALX_H
 
-// W25Q512 32 kB block erase (0x52) is the MCUboot erase unit for secondary slots.
-// This matches CONFIG_NF_MCUBOOT_LOGICAL_SECTOR_SIZE (32 kB).
+// W25Q512 32 kB block erase (0x52) is the MCUboot erase unit for the secondary slots.
+// All secondary slot offsets and sizes are 256 kB-aligned and
+// CONFIG_NF_MCUBOOT_LOGICAL_SECTOR_SIZE (256 kB) is a whole multiple of 32 kB.
 // The W25Q512 also supports 4 kB sector erase (0x20), used by littlefs.
 #define MCUBOOT_EXTERNAL_FLASH_SECTOR_SIZE (32U * 1024U)
 
