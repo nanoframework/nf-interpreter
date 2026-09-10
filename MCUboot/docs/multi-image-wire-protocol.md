@@ -43,48 +43,71 @@ addresses and sizes.
 
 ## IMAGE_TLV_DEPENDENCY — Deployment-to-CLR Version Checking
 
-When a managed application deployment update (Image 1) is staged in `deploy_1`,
-it can declare a minimum CLR version requirement using the MCUboot
-`IMAGE_TLV_DEPENDENCY (0x40)` TLV entry. MCUboot validates this dependency at boot time
-before allowing the Image 1 swap to proceed.
+> **Status: not supported. Do not sign deployment images with `--dependencies`.**
+> Doing so does not merely fail the dependency — it cancels the swap of *every* image,
+> nanoCLR included, leaving the device on its existing firmware and deployment.
 
-### How it works
+MCUboot lets an image declare a minimum version of another image via the
+`IMAGE_TLV_DEPENDENCY (0x40)` TLV, embedded by passing `--dependencies` to
+`imgtool sign`. The obvious use would be for a deployment package (Image 1) to declare
+the minimum nanoCLR version its assemblies need, so MCUboot refuses to swap it in against
+an older CLR.
 
-1. When signing the deployment Image 1 package, the build pipeline includes a
-   `--dependencies` argument to `imgtool sign`:
-   ```
-   imgtool sign \
-       --key dev-signing-key.pem \
-       --version <deploy_version> \
-       --dependencies "(0, <min_clr_version>+)" \
-       ...
-   ```
-2. This embeds a `IMAGE_TLV_DEPENDENCY` TLV that says: *"Image 0 must be at least
-   version `<min_clr_version>`"*.
-3. At boot, MCUboot checks the active Image 0 (CLR) version against the dependency
-   before swapping in the new Image 1.
-4. If the CLR version is too old, MCUboot rejects the Image 1 swap and boots the
-   existing deployment. The managed application can read the rejection reason via SMP
-   / mcumgr in Phase 1+.
+### Why it does not work here
 
-### imgtool signing example
+`mcuboot_main.c` runs MCUboot as two `boot_go_for_image_id()` passes, so that a
+never-provisioned `deploy_0` cannot veto the boot of a valid nanoCLR. Image 0 is masked
+during the deployment pass, so its header is never read. A dependency naming Image 0 then
+compares against `0.0.0.0`, fails, and `boot_verify_dependencies()` responds by forcing
+`BOOT_SWAP_TYPE` to `NONE` for **all** images — so a pending nanoCLR update is silently
+discarded too.
+
+Enforcing a minimum CLR version for a deployment therefore has to happen above MCUboot,
+in the managed application or the deployment tooling, not in the image trailer.
+
+### Who signs what
+
+nanoFramework's own build signs only two things, in `CMake/binutils.common.cmake`: the
+nanoCLR image, and an empty deployment placeholder used to provision `deploy_0` on a
+factory-fresh device. Neither passes `--dependencies`.
+
+Real deployment images are **not** produced by this repository. A developer signs their
+compiled C# application externally with `imgtool`, choosing the key, version and slot
+size for their target. The constraint above binds that external step: whatever else those
+invocations carry, `--dependencies` must not be among it.
+
+### Related: version comparison
+
+MCUboot compares `major.minor.revision` only, unless `MCUBOOT_VERSION_CMP_USE_BUILD_NUMBER`
+is defined — see `boot_compare_version()` in `bootutil_loader.c`. nanoFramework versions are
+4-component, so `mcuboot_config.h` defines it unconditionally for all targets.
+
+### Signing a deployment image
+
+The supported form — no `--dependencies`:
 
 ```bash
-# Sign Image 1 (deployment) with a CLR version dependency
 imgtool sign \
     --key dev-signing-key.pem \
     --align 4 \
-    --version 1.2.0.0 \
-    --header-size 0x200 \
+    --version 1.2.0+0 \
+    --header-size 0x400 \
     --pad-header \
     --slot-size <deploy_slot_size_bytes> \
-    --dependencies "(0,1.5.0.0+)" \
     deployment.bin \
     deployment-signed.bin
 ```
 
-The `(0,1.5.0.0+)` argument declares: *Image 0 (nanoCLR) must be version 1.5.0.0 or
-higher*.
+Two things to get right:
+
+* `--header-size` must match `CONFIG_NF_MCUBOOT_HEADER_SIZE` for the target — `0x400` on
+  ORGPAL_PALTHREE, not the `0x200` Kconfig default.
+* `--slot-size` is the **usable** slot size, which is one logical sector less than the
+  physical slot: MCUboot rounds the swap trailer up to a whole logical sector. See the
+  target's `MCUboot-flash-layout.md`.
+
+Versions are `maj.min.rev[+build]` (`imgtool/version.py`); a four-dot `1.2.0.0` is a parse
+error, so a nanoFramework 4-component version is written `1.2.0+0`.
 
 ---
 
@@ -101,8 +124,8 @@ to the deployment flash region (`deploy_0` — Image 1 primary slot).
 │  Wire Protocol (nanoff / VS extension)                                    │
 │  └── writes raw managed assemblies directly to deploy_0               │
 │      (Image 1 primary slot)                                               │
-│      - No MCUboot image header                                            │
-│      - No signature required                                              │
+│      - MCUboot header + SHA256 TLV footer synthesised by the debugger      │
+│      - Unsigned - no ECDSA signature                                      │
 │      - Device boots next time with new assemblies already in deploy_0     │
 │      - Unchanged developer workflow                                       │
 └──────────────────────────────────────────────────────────────────────┘
