@@ -59,6 +59,11 @@
 #define MCUBOOT_OVERWRITE_ONLY
 #endif
 
+// Serial-recovery upload: erase the target slot sector-by-sector as chunks arrive
+#if defined(MCUBOOT_SWAP_USING_OFFSET)
+#define MCUBOOT_ERASE_PROGRESSIVELY
+#endif
+
 //
 // Primary slot validation policy - build-type gated.
 //
