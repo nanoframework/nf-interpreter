@@ -13,7 +13,7 @@
 //
 // Secondary slots are backed by:
 //   - FatFs files on the SD card (SDMMC1) when NF_FEATURE_MCUBOOT_HAS_SDCARD
-//     is enabled:  img0_sec.bin (928 kB), img1_sec.bin (1024 kB)
+//     is enabled:  img0_sec.bin (1536 kB), img1_sec.bin (768 kB)
 //   - AT25SF641 8 MB SPI1 flash when NF_FEATURE_MCUBOOT_HAS_SDCARD is not set
 //
 // SD card access is routed through fatfs_flash_area_read/write/erase
@@ -96,19 +96,30 @@ static const struct flash_area s_flash_areas[] = {
 #define FLASH_AREA_TABLE_COUNT (sizeof(s_flash_areas) / sizeof(s_flash_areas[0]))
 
 // MCUBOOT_MAX_IMG_SECTORS bounds the unit the swap algorithms count in, which is the
-// logical sector when one is configured and the physical sector otherwise. The deploy
+// logical sector when one is configured and the physical sector otherwise. The image 0
 // secondary slot is the largest, so it sets the requirement.
 #if defined(MCUBOOT_LOGICAL_SECTOR_SIZE) && MCUBOOT_LOGICAL_SECTOR_SIZE != 0
 static_assert(
-    NF_MCUBOOT_SLOT_IMG1_SEC_SIZE / MCUBOOT_LOGICAL_SECTOR_SIZE <= MCUBOOT_MAX_IMG_SECTORS,
-    "Deploy secondary logical sector count exceeds MCUBOOT_MAX_IMG_SECTORS");
+    NF_MCUBOOT_SLOT_IMG0_SEC_SIZE / MCUBOOT_LOGICAL_SECTOR_SIZE <= MCUBOOT_MAX_IMG_SECTORS,
+    "Image 0 secondary logical sector count exceeds MCUBOOT_MAX_IMG_SECTORS");
 static_assert(
     MCUBOOT_LOGICAL_SECTOR_SIZE % MCUBOOT_EXTERNAL_FLASH_SECTOR_SIZE == 0,
     "Logical sector size must be a whole number of external flash sectors");
+
+// swap-using-offset erases and copies one logical sector at a time. Every logical-sector
+// boundary in an internal primary slot must fall on a real STM32F7 erase-page boundary
+static_assert(
+    NF_MCUBOOT_SLOT_IMG0_PRI_OFF % MCUBOOT_LOGICAL_SECTOR_SIZE == 0 &&
+        NF_MCUBOOT_SLOT_IMG0_PRI_SIZE % MCUBOOT_LOGICAL_SECTOR_SIZE == 0,
+    "Image 0 primary slot must be logical-sector aligned and sized");
+static_assert(
+    NF_MCUBOOT_SLOT_IMG1_PRI_OFF % MCUBOOT_LOGICAL_SECTOR_SIZE == 0 &&
+        NF_MCUBOOT_SLOT_IMG1_PRI_SIZE % MCUBOOT_LOGICAL_SECTOR_SIZE == 0,
+    "Image 1 primary slot must be logical-sector aligned and sized");
 #else
 static_assert(
-    NF_MCUBOOT_SLOT_IMG1_SEC_SIZE / MCUBOOT_EXTERNAL_FLASH_SECTOR_SIZE <= MCUBOOT_MAX_IMG_SECTORS,
-    "Deploy secondary sector count exceeds MCUBOOT_MAX_IMG_SECTORS");
+    NF_MCUBOOT_SLOT_IMG0_SEC_SIZE / MCUBOOT_EXTERNAL_FLASH_SECTOR_SIZE <= MCUBOOT_MAX_IMG_SECTORS,
+    "Image 0 secondary sector count exceeds MCUBOOT_MAX_IMG_SECTORS");
 #endif
 
 int flash_area_open(uint8_t id, const struct flash_area **area_outp)
@@ -190,12 +201,15 @@ int flash_area_erase(const struct flash_area *area, uint32_t off, uint32_t len)
     }
     else if (area->fa_device_id == FLASH_DEVICE_EXTERNAL_FLASH)
     {
+        // erase with 32kB block. Keep this in step with  MCUBOOT_EXTERNAL_FLASH_SECTOR_SIZE.
+        const bool use32kBlock = (MCUBOOT_EXTERNAL_FLASH_SECTOR_SIZE == AT25SF641_BLOCK32_SIZE);
+
         uint32_t erase_addr = area->fa_off + off;
         uint32_t end = erase_addr + len;
 
         while (erase_addr < end)
         {
-            if (!AT25SF641_Erase(erase_addr, false))
+            if (!AT25SF641_Erase(erase_addr, use32kBlock))
             {
                 return -1;
             }
