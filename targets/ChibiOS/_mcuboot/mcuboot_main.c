@@ -118,6 +118,9 @@ int main(void)
     (void)mcuboot_sdcard_init();
 #endif
 
+    // Start the LED heartbeat
+    mcuboot_heartbeat_start();
+
 #if defined(MCUBOOT_SERIAL)
     // Check recovery button and - if held - run the SMP serial recovery loop.
     // If the button is not pressed, returns immediately and boot continues.

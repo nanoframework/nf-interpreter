@@ -14,6 +14,7 @@ set(MCUBOOT_EXTRA_SOURCES
     ${CMAKE_SOURCE_DIR}/targets/ChibiOS/ST_STM32F769I_DISCOVERY/MCUboot/mcuboot_flash_map_boot.c
     ${CMAKE_SOURCE_DIR}/targets/ChibiOS/ST_STM32F769I_DISCOVERY/MCUboot/mcuboot_detect_pin.c
     ${CMAKE_SOURCE_DIR}/targets/ChibiOS/ST_STM32F769I_DISCOVERY/MCUboot/mcuboot_target_init.c
+    ${CMAKE_SOURCE_DIR}/targets/ChibiOS/ST_STM32F769I_DISCOVERY/MCUboot/mcuboot_heartbeat_led.c
 )
 
 if(NF_FEATURE_MCUBOOT_HAS_SDCARD)

@@ -33,6 +33,28 @@ extern "C"
     // but any upgrade using the SD card secondary slot will fail gracefully).
     int mcuboot_sdcard_init(void);
 
+    // Heartbeat blink cadence. Selected by the shared bootloader code; boards do not set it.
+    typedef enum
+    {
+        // Normal boot and image swap. Matches the legacy nanoBooter cadence.
+        MCUBOOT_HEARTBEAT_BOOT = 0,
+
+        // SMP serial recovery.
+        MCUBOOT_HEARTBEAT_RECOVERY = 1,
+    } mcuboot_heartbeat_pattern_t;
+
+    // Start the "bootloader is alive" LED heartbeat thread.
+    // Called once from main() after chSysInit() and the storage init.
+    // Shared implementation in mcuboot_heartbeat.c; no board code required.
+    void mcuboot_heartbeat_start(void);
+
+    // Select the blink cadence. Safe to call from any thread.
+    void mcuboot_heartbeat_set_pattern(mcuboot_heartbeat_pattern_t pattern);
+
+    // Toggle the board's user LED once.
+    // Board-supplied; a weak no-op covers boards with no suitable LED.
+    void mcuboot_heartbeat_led_toggle(void);
+
 #ifdef __cplusplus
 }
 #endif

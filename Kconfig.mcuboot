@@ -191,6 +191,24 @@ config NF_FEATURE_MCUBOOT_HAS_USB_MSD
         existing ffconf.h is reused so that the same FatFs configuration applies
         to both the bootloader and the nanoCLR runtime.
 
+config NF_FEATURE_MCUBOOT_HEARTBEAT
+    bool "Blink the user LED while MCUboot runs"
+    depends on NF_FEATURE_HAS_MCUBOOT
+    default y
+    help
+        Start a low-priority thread that blinks the board's user LED for as long as
+        the bootloader is running, so a long operation - a full image swap can take
+        tens of seconds - is visibly distinct from a hang. The cadence is faster
+        while in serial recovery.
+
+        Boards supply the LED toggle; one with no suitable LED gets a no-op and
+        simply does not blink. Disable to reclaim the (small) code size on targets
+        with a tight bootloader slot.
+
+        Note the LED cannot blink while an erase or program stalls the flash bank
+        the bootloader executes from - expect a pause of a couple of seconds per
+        sector during a swap.
+
 config NF_MCUBOOT_LOGICAL_SECTOR_SIZE
     hex "MCUboot size of a logical sector"
     depends on NF_FEATURE_HAS_MCUBOOT

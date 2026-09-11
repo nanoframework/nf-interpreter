@@ -138,6 +138,10 @@ __attribute__((noreturn)) void mcuboot_serial_recovery_start(void)
 {
     chThdSetPriority(HIGHPRIO);
 
+    // Switch the LED heartbeat to the faster recovery cadence so the operator can tell
+    // serial recovery apart from a normal boot.
+    mcuboot_heartbeat_set_pattern(MCUBOOT_HEARTBEAT_RECOVERY);
+
     // Initialise board hardware (USB CDC, UART, etc.) from the main thread
     mcuboot_target_init();
 

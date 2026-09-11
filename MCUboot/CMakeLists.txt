@@ -174,6 +174,7 @@ if(${TARGET_SERIES} STREQUAL "STM32F7xx")
         # MCUboot bootloader entry point.
         ${CMAKE_SOURCE_DIR}/targets/ChibiOS/_mcuboot/mcuboot_main.c
         ${CMAKE_SOURCE_DIR}/targets/ChibiOS/_mcuboot/mcuboot_serial_port.c
+        ${CMAKE_SOURCE_DIR}/targets/ChibiOS/_mcuboot/mcuboot_heartbeat.c
 
         # ChibiOS RT startup (Cortex-M7, ARMCMx).
         ${chibios_SOURCE_DIR}/os/common/startup/ARMCMx/compilers/GCC/crt0_v7m.S
