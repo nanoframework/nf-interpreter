@@ -475,37 +475,6 @@ function(nf_generate_build_output_files target)
 
             COMMENT "Regenerate nanoCLR HEX from the signed binary (MCUboot)")
 
-        # Build a placeholder image for image 1's primary slot (deploy_0).
-        # Required for factory-fresh device
-        # This placeholder (header + zero-length payload + TLV, signed with the same key as nanoCLR).
-        set(MCUBOOT_FLASH_LAYOUT_HEADER ${CMAKE_CURRENT_SOURCE_DIR}/MCUboot/mcuboot_flash_layout.h)
-
-        nf_extract_define_from_header(${MCUBOOT_FLASH_LAYOUT_HEADER} NF_MCUBOOT_SLOT_IMG1_PRI_OFF  NF_MCUBOOT_DEPLOY_SLOT_OFFSET)
-        nf_extract_define_from_header(${MCUBOOT_FLASH_LAYOUT_HEADER} NF_MCUBOOT_SLOT_IMG1_PRI_SIZE NF_MCUBOOT_DEPLOY_SLOT_SIZE)
-
-        set(DEPLOY_PLACEHOLDER_INPUT_FILE ${CMAKE_SOURCE_DIR}/MCUboot/deployment-placeholder-empty.bin)
-        set(DEPLOY_PLACEHOLDER_SIGNED_BIN_FILE ${CMAKE_BINARY_DIR}/deployment-placeholder.bin)
-        set(DEPLOY_PLACEHOLDER_HEX_FILE ${CMAKE_BINARY_DIR}/deployment-placeholder.hex)
-
-        add_custom_command(TARGET ${TARGET_SHORT}.elf POST_BUILD
-            COMMAND ${IMGTOOL} sign
-                --key "${NF_MCUBOOT_SIGNING_KEY}"
-                --align 4
-                --version "${NF_MCUBOOT_IMAGE_VERSION}"
-                --header-size "${NF_MCUBOOT_HEADER_SIZE}"
-                --pad-header
-                --slot-size "${NF_MCUBOOT_DEPLOY_SLOT_SIZE}"
-                "${DEPLOY_PLACEHOLDER_INPUT_FILE}"
-                "${DEPLOY_PLACEHOLDER_SIGNED_BIN_FILE}"
-            COMMAND ${CMAKE_OBJCOPY} -I binary -O ihex --change-addresses ${NF_MCUBOOT_DEPLOY_SLOT_OFFSET}
-                "${DEPLOY_PLACEHOLDER_SIGNED_BIN_FILE}" "${DEPLOY_PLACEHOLDER_HEX_FILE}"
-
-            BYPRODUCTS
-                ${DEPLOY_PLACEHOLDER_SIGNED_BIN_FILE}
-                ${DEPLOY_PLACEHOLDER_HEX_FILE}
-
-            COMMENT "Build placeholder deployment (image 1) image for a factory-fresh device")
-
     endif()
 
 endfunction()

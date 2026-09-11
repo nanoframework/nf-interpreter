@@ -32,12 +32,10 @@ The previous 32 kB logical sector (CLR primary at `0x08018000` / 928 kB) split t
 
 MCUboot rounds the swap trailer up to a whole logical sector, so the largest image a slot can hold is **`(logical_sectors − 1) × 256 kB`**:
 
-| Slot | Physical | Logical sectors | Usable |
-|---|---|---|---|
-| Image 0 primary (CLR) | 1280 kB | 5 | **1024 kB** |
-| Image 1 primary (deploy) | 512 kB | 2 | **256 kB** |
-
-`imgtool`'s `--slot-size` (`NF_MCUBOOT_SLOT_SIZE` in `CMakePresets.json`) is `0x100000` — the **usable** 1024 kB, not the 1280 kB physical — and the nanoCLR linker `flash0` length is `1024k − 0x400`, so an oversized image fails at link/sign time rather than at swap time.
+| Slot | Physical | Logical sectors | Usable | `imgtool --slot-size` |
+|---|---|---|---|---|
+| Image 0 primary (CLR) | 1280 kB | 5 | **1024 kB** | `0x100000` |
+| Image 1 primary (deploy) | 512 kB | 2 | **256 kB** | `0x40000` |
 
 > **LS split:** identical to ORGPAL_PALTHREE. The Discovery nanoCLR is large (NET + crypto + `System.IO.Hashing` + `nanoFramework.Graphics` / DSI + CAN + OneWire) and fit the old 928 kB slot, so it needs all 5 logical sectors (1024 kB usable, ~100 kB headroom). That leaves the deploy slot at 2 LS / 256 kB usable — down from 1024 kB in the pre-rework layout. Confirm 256 kB usable is adequate for the intended deploy payload; the only way to grow it is to cut CLR features to free a logical sector.
 

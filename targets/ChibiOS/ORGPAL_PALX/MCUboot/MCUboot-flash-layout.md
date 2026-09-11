@@ -30,12 +30,10 @@ The previous 32 kB logical sector (CLR primary at `0x08018000` / 672 kB) split t
 
 MCUboot rounds the swap trailer up to a whole logical sector, so the largest image a slot can hold is **`(logical_sectors − 1) × 256 kB`**:
 
-| Slot | Physical | Logical sectors | Usable |
-|---|---|---|---|
-| Image 0 primary (CLR) | 1024 kB | 4 | **768 kB** |
-| Image 1 primary (deploy) | 768 kB | 3 | **512 kB** |
-
-`imgtool`'s `--slot-size` (`NF_MCUBOOT_SLOT_SIZE` in `CMakePresets.json`) is `0xC0000` — the **usable** 768 kB, not the 1024 kB physical — and the nanoCLR linker `flash0` length is `768k − 0x400`, so an oversized image fails at link/sign time rather than at swap time.
+| Slot | Physical | Logical sectors | Usable | `imgtool --slot-size` |
+|---|---|---|---|---|
+| Image 0 primary (CLR) | 1024 kB | 4 | **768 kB** | `0xC0000` |
+| Image 1 primary (deploy) | 768 kB | 3 | **512 kB** | `0x80000` |
 
 > **LS split vs. ORGPAL_PALTHREE:** PALTHREE gives the CLR 5 LS (1024 kB usable) and the deploy slot 2 LS (256 kB usable) because its signed nanoCLR is ~825 kB (networking + crypto). PALX's nanoCLR has neither namespace and fit the old 672 kB slot, so PALX keeps the CLR at 4 LS (768 kB usable, ~100 kB headroom) and hands the extra logical sector to the deploy slot (3 LS, 512 kB usable) — closer to PALX's historical 1280 kB deploy allocation.
 

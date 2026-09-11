@@ -13,7 +13,7 @@
 //        c. Initialise external storage (mcuboot_ext_flash_init or mcuboot_sdcard_init)
 //        d. Check recovery button and run SMP serial recovery if pressed (mcuboot_serial_recovery_try)
 //           If recovery is triggered, this never returns (device resets after image upload)
-//        e. Run MCUboot (boot_go) — only if recovery was not triggered
+//        e. Run MCUboot (two boot_go_for_image_id passes) — only if recovery was not triggered
 //        f. Launch the selected image (do_boot)
 //
 // do_boot() performs the low-level Cortex image launch:
@@ -23,7 +23,7 @@
 //   - Disable all interrupts and clear pending flags
 //   - Jump to the application's reset handler
 //
-// The bootloader never returns from do_boot().  If boot_go() fails (no valid
+// The bootloader never returns from do_boot().  If the nanoCLR pass fails (no valid
 // image found), the system enters SMP serial recovery (when MCUBOOT_SERIAL is
 // defined) so firmware can be uploaded over SMP, or halts if serial recovery
 // is unavailable.
@@ -41,6 +41,12 @@
 
 #include "mcuboot_board_iface.h"
 #include "mcuboot_serial_port.h"
+
+// Image indices (convention: 0 = nanoCLR, 1 = deployment).
+// Mirrors MCUboot_RuntimeInterface.h, which is a nanoCLR-side header the bootloader
+// does not include.
+#define NF_MCUBOOT_IMAGE_CLR    0
+#define NF_MCUBOOT_IMAGE_DEPLOY 1
 
 #if defined(CONFIG_NF_FEATURE_WATCHDOG) && CONFIG_NF_FEATURE_WATCHDOG
 #include <targetHAL_Watchdog.h>
@@ -118,9 +124,24 @@ int main(void)
     mcuboot_serial_recovery_try();
 #endif
 
-    // Run MCUboot image validation and upgrade logic
+    // Run MCUboot image validation and upgrade logic as two boot_go_for_image_id() passes -
+    // image 1 (deployment) first so a staged swap can complete, then image 0 (nanoCLR) for
+    // the actual boot decision, masked so a never-provisioned deploy_0 can't veto it. See
+    // "Two-Pass Boot Sequence" in MCUboot/docs/multi-image-management.md for the full reasoning.
+    struct boot_loader_state *bootState = boot_get_loader_state();
     struct boot_rsp rsp;
-    if (boot_go(&rsp) != 0)
+
+#if (MCUBOOT_IMAGE_NUMBER > 1)
+    struct boot_rsp deployRsp;
+
+    boot_state_init(bootState);
+    (void)boot_go_for_image_id(&deployRsp, NF_MCUBOOT_IMAGE_DEPLOY);
+#endif
+
+    boot_state_init(bootState);
+    int bootResult = boot_go_for_image_id(&rsp, NF_MCUBOOT_IMAGE_CLR);
+
+    if (bootResult != 0)
     {
 #if defined(MCUBOOT_SERIAL)
         // No valid image found - enter SMP serial recovery

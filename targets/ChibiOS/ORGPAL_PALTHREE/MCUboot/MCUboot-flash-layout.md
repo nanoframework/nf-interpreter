@@ -30,12 +30,10 @@ A 32 kB logical sector (the previous value, with the CLR primary at `0x08020000`
 
 MCUboot rounds the swap trailer up to a whole logical sector, so the largest image a slot can hold is **`(logical_sectors − 1) × 256 kB`**:
 
-| Slot | Physical | Logical sectors | Usable |
-|---|---|---|---|
-| Image 0 primary (CLR) | 1280 kB | 5 | **1024 kB** |
-| Image 1 primary (deploy) | 512 kB | 2 | **256 kB** |
-
-`imgtool`'s `--slot-size` (`NF_MCUBOOT_SLOT_SIZE` in `CMakePresets.json`) is set to the **usable** value, and the nanoCLR linker `flash0` length is `1024k − 0x400`, so an oversized image fails at link/sign time rather than at swap time. The earlier 1024 kB (4-LS) CLR slot only yielded 768 kB usable and the ~825 kB CLR did not fit — `bootutil_img_validate` rejected it with `TLV beyond image size`.
+| Slot | Physical | Logical sectors | Usable | `imgtool --slot-size` |
+|---|---|---|---|---|
+| Image 0 primary (CLR) | 1280 kB | 5 | **1024 kB** | `0x100000` |
+| Image 1 primary (deploy) | 512 kB | 2 | **256 kB** | `0x40000` |
 
 ## External secondary slots (AT25SF641, SPI1, 8 MB)
 

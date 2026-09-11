@@ -1,8 +1,10 @@
-﻿# MCUboot Multi-Image Configuration and Wire Protocol Coexistence
+﻿# MCUboot Multi-Image Management
 
 This document describes the two-image MCUboot configuration used on all nanoFramework
-MCUboot-enabled targets, and how the MCUboot IFU path coexists with the existing
-Wire Protocol development workflow.
+MCUboot-enabled targets: how the two images are laid out and signed, why
+`IMAGE_TLV_DEPENDENCY` is not usable here, the `MCUBOOT_VALIDATE_PRIMARY_SLOT` policy for
+Image 1, and how the MCUboot IFU path coexists with the existing Wire Protocol development
+workflow.
 
 ---
 
@@ -41,6 +43,51 @@ addresses and sizes.
 
 ---
 
+## Two-Pass Boot Sequence
+
+`main()` in `targets/ChibiOS/_mcuboot/mcuboot_main.c` runs MCUboot's own
+image-validation-and-upgrade logic twice, once per image, instead of calling the
+single-pass `boot_go()` most MCUboot integrations use.
+
+### Why two passes
+
+Image 1 (deployment) holds data the CLR reads, not firmware MCUboot can boot. A
+never-provisioned `deploy_0` must not be able to veto booting a valid nanoCLR, so each
+image needs its own pass with its own independent pass/fail outcome:
+
+* **Pass 1, image 1** — the update loop runs before the bootable-image check, so a staged
+  deployment in `deploy_1` is swapped into `deploy_0` even though the pass then reports
+  failure (there being no bootable code in that slot). The result of this pass is
+  deliberately discarded for that reason.
+* **Pass 2, image 0** — the actual boot decision. `deploy_0` is masked out of this pass, so
+  a never-provisioned or otherwise invalid deployment slot cannot veto a valid nanoCLR.
+
+### `boot_go_for_image_id()` and the image mask
+
+Both passes call `boot_go_for_image_id()`, defined in upstream mcuboot's `loader.c`
+(`boot/bootutil/src/loader.c`, pulled in by `MCUboot/CMakeLists.txt` via CMake
+`FetchContent` - not a file in this repo) — MCUboot's own public entry point for
+validating and booting a single image by index, not a nanoFramework patch. It sets
+MCUboot's internal image mask to that one image, and every multi-image loop in `loader.c`
+honours the mask, so each pass considers only the image it was called for.
+
+### Explicit `boot_state_init()`, no matching `boot_state_clear()`
+
+Each pass calls `boot_state_init(bootState)` immediately before its
+`boot_go_for_image_id()` call. Unlike `boot_go()`, `boot_go_for_image_id()` does not
+initialise the loader state itself, and pass 2 must not inherit pass 1's image headers,
+swap types or secondary-slot offsets — so both passes init explicitly. `boot_go()`'s
+matching `boot_state_clear()` call is not needed here: its body is entirely compiled under
+`MCUBOOT_ENC_IMAGES`, which nanoFramework does not define.
+
+### Consequence for signing
+
+Because image 0 is masked out during pass 1, its header is never read during that pass.
+See [Why it does not work here](#why-it-does-not-work-here) for what that means for
+`IMAGE_TLV_DEPENDENCY`.
+
+---
+
 ## IMAGE_TLV_DEPENDENCY — Deployment-to-CLR Version Checking
 
 > **Status: not supported. Do not sign deployment images with `--dependencies`.**
@@ -55,12 +102,12 @@ an older CLR.
 
 ### Why it does not work here
 
-`mcuboot_main.c` runs MCUboot as two `boot_go_for_image_id()` passes, so that a
-never-provisioned `deploy_0` cannot veto the boot of a valid nanoCLR. Image 0 is masked
-during the deployment pass, so its header is never read. A dependency naming Image 0 then
-compares against `0.0.0.0`, fails, and `boot_verify_dependencies()` responds by forcing
-`BOOT_SWAP_TYPE` to `NONE` for **all** images — so a pending nanoCLR update is silently
-discarded too.
+`mcuboot_main.c` runs MCUboot as two `boot_go_for_image_id()` passes — see
+[Two-Pass Boot Sequence](#two-pass-boot-sequence) for the full mechanics. Image 0 is
+masked during the deployment pass, so its header is never read during that pass. A
+dependency naming Image 0 then compares against `0.0.0.0`, fails, and
+`boot_verify_dependencies()` responds by forcing `BOOT_SWAP_TYPE` to `NONE` for **all**
+images — so a pending nanoCLR update is silently discarded too.
 
 Enforcing a minimum CLR version for a deployment therefore has to happen above MCUboot,
 in the managed application or the deployment tooling, not in the image trailer.
@@ -68,8 +115,8 @@ in the managed application or the deployment tooling, not in the image trailer.
 ### Who signs what
 
 nanoFramework's own build signs only two things, in `CMake/binutils.common.cmake`: the
-nanoCLR image, and an empty deployment placeholder used to provision `deploy_0` on a
-factory-fresh device. Neither passes `--dependencies`.
+nanoCLR image, and an empty deployment placeholder for `deploy_0`. Neither passes
+`--dependencies`.
 
 Real deployment images are **not** produced by this repository. A developer signs their
 compiled C# application externally with `imgtool`, choosing the key, version and slot
@@ -102,12 +149,25 @@ Two things to get right:
 
 * `--header-size` must match `CONFIG_NF_MCUBOOT_HEADER_SIZE` for the target — `0x400` on
   ORGPAL_PALTHREE, not the `0x200` Kconfig default.
-* `--slot-size` is the **usable** slot size, which is one logical sector less than the
-  physical slot: MCUboot rounds the swap trailer up to a whole logical sector. See the
-  target's `MCUboot-flash-layout.md`.
+* `--slot-size` is **image 1's usable size, not image 0's, and not either slot's physical
+  size.** See below for where to find it.
 
 Versions are `maj.min.rev[+build]` (`imgtool/version.py`); a four-dot `1.2.0.0` is a parse
 error, so a nanoFramework 4-component version is written `1.2.0+0`.
+
+### Finding the right `--slot-size`
+
+`--slot-size` is the only size check `imgtool sign` performs at sign time. Get it wrong and
+that check doesn't fail loudly — the image signs successfully against the wrong ceiling,
+and an oversized image only fails on the device, at swap time.
+
+Every target's `MCUboot-flash-layout.md` has a "Usable image size" table with an
+`imgtool --slot-size` column - one row per image. Always use the **Image 1 (deploy)** row
+and the **usable** value, never image 0's row and never either slot's physical size:
+MCUboot reserves one whole logical sector for the swap trailer, so usable is always one
+logical sector less than physical. Image 0's value is applied automatically by the build
+(`NF_MCUBOOT_SLOT_SIZE`); image 1's is not - nothing but this table catches a wrong value
+before the device does.
 
 ---
 
