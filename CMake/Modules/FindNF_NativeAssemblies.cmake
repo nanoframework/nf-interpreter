@@ -13,6 +13,7 @@ option(API_nanoFramework.Device.Can                     "option for nanoFramewor
 option(API_nanoFramework.Device.OneWire                 "option for nanoFramework.Device.OneWire")
 option(API_nanoFramework.Networking.Sntp                "option for nanoFramework.Networking.Sntp")
 option(API_nanoFramework.Runtime.Events                 "option for nanoFramework.Runtime.Events API")
+option(API_nanoFramework.Runtime.InFieldUpdate          "option for nanoFramework.Runtime.InFieldUpdate API")
 option(API_nanoFramework.ResourceManager                "option for nanoFramework.ResourceManager")
 option(API_nanoFramework.System.Collections             "option for nanoFramework.System.Collections")
 option(API_nanoFramework.System.Text                    "option for nanoFramework.System.Text")
@@ -363,6 +364,14 @@ if(API_nanoFramework.Runtime.Events)
     # append to list of entries for Interop Assemblies table
     list(APPEND CLR_RT_NativeAssemblyDataTableEntriesList "&g_CLR_AssemblyNative_nanoFramework_Runtime_Events_EventSink_DriverProcs,")
 
+endif()
+
+# nanoFramework.Runtime.InFieldUpdate
+if(API_nanoFramework.Runtime.InFieldUpdate AND NF_FEATURE_HAS_MCUBOOT)
+    ##### API name here (doted name)
+    PerformSettingsForApiEntry("nanoFramework.Runtime.InFieldUpdate")
+elseif(NF_FEATURE_HAS_MCUBOOT AND NOT API_nanoFramework.Runtime.InFieldUpdate)
+    message(WARNING "NF_FEATURE_HAS_MCUBOOT is enabled for this target but API_nanoFramework.Runtime.InFieldUpdate is not. Managed code will have no way to query or control In-Field Update state on this target. Enable API_nanoFramework.Runtime.InFieldUpdate to include it.")
 endif()
 
 # System.IO.FileSystem

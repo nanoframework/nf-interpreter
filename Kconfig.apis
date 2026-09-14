@@ -102,6 +102,10 @@ config API_NANOFRAMEWORK_SYSTEM_IO_HASHING
     bool "nanoFramework.System.IO.Hashing"
     default n
 
+config API_NANOFRAMEWORK_RUNTIME_INFIELDUPDATE
+    bool "nanoFramework.Runtime.InFieldUpdate"
+    default n
+
 config API_NANOFRAMEWORK_NETWORKING_THREAD
     bool "nanoFramework.Networking.Thread"
     default n
