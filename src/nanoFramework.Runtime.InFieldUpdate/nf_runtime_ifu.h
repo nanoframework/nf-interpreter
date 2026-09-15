@@ -33,6 +33,20 @@ typedef enum __nfpack UpdateStatus
     UpdateStatus_Unknown = 255,
 } UpdateStatus;
 
+// Best-effort snapshot of a single (image+slot) flash area
+struct Ifu_SlotSnapshot
+{
+    bool HeaderValid;
+    bool TlvValid;
+    bool Bootable;
+    uint8_t MajorVersion;
+    uint8_t MinorVersion;
+    uint16_t RevisionNumber;
+    uint32_t BuildNumber;
+    bool HasHash;
+    uint8_t Hash[32];
+};
+
 struct Library_nf_runtime_ifu_nanoFramework_Runtime_InFieldUpdate_ImageInfo
 {
     // renamed backing field '<Image>k__BackingField'
@@ -68,18 +82,25 @@ struct Library_nf_runtime_ifu_nanoFramework_Runtime_InFieldUpdate_ImageInfoExten
 
 struct Library_nf_runtime_ifu_nanoFramework_Runtime_InFieldUpdate_UpdateManager
 {
-    NANOCLR_NATIVE_DECLARE(GetStatus___STATIC__nanoFrameworkRuntimeInFieldUpdateUpdateStatus__nanoFrameworkRuntimeInFieldUpdateImageType);
-    NANOCLR_NATIVE_DECLARE(GetPrimaryImageInfo___STATIC__nanoFrameworkRuntimeInFieldUpdateImageInfo__nanoFrameworkRuntimeInFieldUpdateImageType);
-    NANOCLR_NATIVE_DECLARE(GetSecondaryImageInfo___STATIC__nanoFrameworkRuntimeInFieldUpdateImageInfo__nanoFrameworkRuntimeInFieldUpdateImageType);
+    NANOCLR_NATIVE_DECLARE(
+        GetStatus___STATIC__nanoFrameworkRuntimeInFieldUpdateUpdateStatus__nanoFrameworkRuntimeInFieldUpdateImageType);
+    NANOCLR_NATIVE_DECLARE(
+        GetPrimaryImageInfo___STATIC__nanoFrameworkRuntimeInFieldUpdateImageInfo__nanoFrameworkRuntimeInFieldUpdateImageType);
+    NANOCLR_NATIVE_DECLARE(
+        GetSecondaryImageInfo___STATIC__nanoFrameworkRuntimeInFieldUpdateImageInfo__nanoFrameworkRuntimeInFieldUpdateImageType);
     NANOCLR_NATIVE_DECLARE(GetImageList___STATIC__SZARRAY_nanoFrameworkRuntimeInFieldUpdateImageInfo);
     NANOCLR_NATIVE_DECLARE(EraseSecondaryImage___STATIC__BOOLEAN__nanoFrameworkRuntimeInFieldUpdateImageType);
-    NANOCLR_NATIVE_DECLARE(StoreImageChunk___STATIC__BOOLEAN__nanoFrameworkRuntimeInFieldUpdateImageType__SZARRAY_U1__I4__I4);
+    NANOCLR_NATIVE_DECLARE(
+        StoreImageChunk___STATIC__BOOLEAN__nanoFrameworkRuntimeInFieldUpdateImageType__SZARRAY_U1__I4__I4);
     NANOCLR_NATIVE_DECLARE(ConfirmDeploymentImage___STATIC__BOOLEAN);
     NANOCLR_NATIVE_DECLARE(RequestDeploymentRevert___STATIC__BOOLEAN);
     NANOCLR_NATIVE_DECLARE(RequestClrRevert___STATIC__BOOLEAN);
     NANOCLR_NATIVE_DECLARE(RequestReboot___STATIC__VOID);
 
     //--//
+
+    static int Ifu_GetFlashAreaId(uint8_t imageIndex, uint8_t slotIndex);
+    static void Ifu_ReadSlotSnapshot(uint8_t imageIndex, uint8_t slotIndex, Ifu_SlotSnapshot &snapshot);
 };
 
 extern const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_nanoFramework_Runtime_InFieldUpdate;
