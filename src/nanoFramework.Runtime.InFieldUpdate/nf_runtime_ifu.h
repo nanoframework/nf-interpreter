@@ -109,6 +109,7 @@ struct Library_nf_runtime_ifu_nanoFramework_Runtime_InFieldUpdate_UpdateManager
         CLR_RT_TypeDef_Index imageInfoTypeDef,
         CLR_RT_TypeDef_Index versionTypeDef);
     static HRESULT Ifu_GetImageInfoForSlot(CLR_RT_StackFrame &stack, uint8_t slotIndex);
+    static bool Ifu_IsPrimaryConfirmed(uint8_t imageIndex);
 };
 
 extern const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_nanoFramework_Runtime_InFieldUpdate;

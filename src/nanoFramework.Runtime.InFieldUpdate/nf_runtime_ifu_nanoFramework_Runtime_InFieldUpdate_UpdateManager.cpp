@@ -9,6 +9,7 @@
 #include <mcuboot_config/mcuboot_config.h>
 #include <bootutil/bootutil_public.h>
 #include <bootutil/image.h>
+#include <nanoHAL_v2.h>
 
 typedef Library_nf_runtime_ifu_nanoFramework_Runtime_InFieldUpdate_ImageInfo ImageInfo;
 typedef Library_corlib_native_System_Version Version;
@@ -22,7 +23,37 @@ HRESULT Library_nf_runtime_ifu_nanoFramework_Runtime_InFieldUpdate_UpdateManager
 {
     NANOCLR_HEADER();
 
-    NANOCLR_SET_AND_LEAVE(stack.NotImplementedStub());
+    uint8_t imageIndex = (uint8_t)stack.Arg0().NumericByRef().s4;
+    UpdateStatus status;
+
+    int swapType = boot_swap_type_multi(imageIndex);
+
+    switch (swapType)
+    {
+        case BOOT_SWAP_TYPE_TEST:
+            status = UpdateStatus_TestPending;
+            break;
+
+        case BOOT_SWAP_TYPE_PERM:
+            status = UpdateStatus_PermanentPending;
+            break;
+
+        case BOOT_SWAP_TYPE_REVERT:
+            status = UpdateStatus_RollbackPending;
+            break;
+
+        case BOOT_SWAP_TYPE_NONE:
+            status = Ifu_IsPrimaryConfirmed(imageIndex) ? UpdateStatus_Confirmed : UpdateStatus_Testing;
+            break;
+
+        default:
+            status = UpdateStatus_Unknown;
+            break;
+    }
+
+    stack.SetResult_I4((CLR_INT32)status);
+
+    NANOCLR_SET_AND_LEAVE(S_OK);
 
     NANOCLR_NOCLEANUP();
 }
@@ -96,7 +127,8 @@ HRESULT Library_nf_runtime_ifu_nanoFramework_Runtime_InFieldUpdate_UpdateManager
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_nf_runtime_ifu_nanoFramework_Runtime_InFieldUpdate_UpdateManager::EraseSecondaryImage___STATIC__BOOLEAN__nanoFrameworkRuntimeInFieldUpdateImageType( CLR_RT_StackFrame &stack )
+HRESULT Library_nf_runtime_ifu_nanoFramework_Runtime_InFieldUpdate_UpdateManager::
+    EraseSecondaryImage___STATIC__BOOLEAN__nanoFrameworkRuntimeInFieldUpdateImageType(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
@@ -123,47 +155,133 @@ HRESULT Library_nf_runtime_ifu_nanoFramework_Runtime_InFieldUpdate_UpdateManager
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_nf_runtime_ifu_nanoFramework_Runtime_InFieldUpdate_UpdateManager::StoreImageChunk___STATIC__BOOLEAN__nanoFrameworkRuntimeInFieldUpdateImageType__SZARRAY_U1__I4__I4( CLR_RT_StackFrame &stack )
+HRESULT Library_nf_runtime_ifu_nanoFramework_Runtime_InFieldUpdate_UpdateManager::
+    StoreImageChunk___STATIC__BOOLEAN__nanoFrameworkRuntimeInFieldUpdateImageType__SZARRAY_U1__I4__I4(
+        CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
-    NANOCLR_SET_AND_LEAVE(stack.NotImplementedStub());
+    uint8_t imageIndex = (uint8_t)stack.Arg0().NumericByRef().s4;
+    CLR_RT_HeapBlock_Array *data = stack.Arg1().DereferenceArray();
+    CLR_INT32 offset = stack.Arg2().NumericByRef().s4;
+    CLR_INT32 length = stack.Arg3().NumericByRef().s4;
+    bool success = false;
+
+    int faId;
+    const struct flash_area *fa = NULL;
+
+    FAULT_ON_NULL_ARG(data);
+
+    if (offset < 0 || length < 0 || length > (CLR_INT32)data->m_numOfElements)
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_RANGE);
+    }
+
+    faId = Ifu_GetFlashAreaId(imageIndex, SlotId_Secondary);
+
+    if (faId != FLASH_SLOT_DOES_NOT_EXIST && flash_area_open((uint8_t)faId, &fa) == 0 && fa != NULL)
+    {
+        bool ok = true;
+
+        // first chunk: validate the MCUboot header magic and erase the slot
+        if (offset == 0)
+        {
+            uint32_t magic = 0;
+
+            if (length >= (CLR_INT32)sizeof(magic))
+            {
+                memcpy(&magic, data->GetFirstElement(), sizeof(magic));
+            }
+
+            if (magic != IMAGE_MAGIC || flash_area_erase(fa, 0, fa->fa_size) != 0)
+            {
+                ok = false;
+            }
+        }
+
+        if (ok && (uint32_t)offset + (uint32_t)length > fa->fa_size)
+        {
+            ok = false;
+        }
+
+        if (ok && length > 0 && flash_area_write(fa, offset, data->GetFirstElement(), length) != 0)
+        {
+            ok = false;
+        }
+
+        success = ok;
+
+        flash_area_close(fa);
+    }
+
+    stack.SetResult_Boolean(success);
+
+    NANOCLR_SET_AND_LEAVE(S_OK);
 
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_nf_runtime_ifu_nanoFramework_Runtime_InFieldUpdate_UpdateManager::ConfirmDeploymentImage___STATIC__BOOLEAN( CLR_RT_StackFrame &stack )
+HRESULT Library_nf_runtime_ifu_nanoFramework_Runtime_InFieldUpdate_UpdateManager::
+    ConfirmDeploymentImage___STATIC__BOOLEAN(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
-    NANOCLR_SET_AND_LEAVE(stack.NotImplementedStub());
+    bool success = (boot_set_confirmed_multi(ImageType_Deployment) == 0);
+
+    stack.SetResult_Boolean(success);
+
+    NANOCLR_SET_AND_LEAVE(S_OK);
 
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_nf_runtime_ifu_nanoFramework_Runtime_InFieldUpdate_UpdateManager::RequestDeploymentRevert___STATIC__BOOLEAN( CLR_RT_StackFrame &stack )
+HRESULT Library_nf_runtime_ifu_nanoFramework_Runtime_InFieldUpdate_UpdateManager::
+    RequestDeploymentRevert___STATIC__BOOLEAN(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
-    NANOCLR_SET_AND_LEAVE(stack.NotImplementedStub());
+    bool success = (boot_swap_type_multi(ImageType_Deployment) == BOOT_SWAP_TYPE_NONE) &&
+                    !Ifu_IsPrimaryConfirmed(ImageType_Deployment);
+
+    stack.SetResult_Boolean(success);
+
+    NANOCLR_SET_AND_LEAVE(S_OK);
 
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_nf_runtime_ifu_nanoFramework_Runtime_InFieldUpdate_UpdateManager::RequestClrRevert___STATIC__BOOLEAN( CLR_RT_StackFrame &stack )
+HRESULT Library_nf_runtime_ifu_nanoFramework_Runtime_InFieldUpdate_UpdateManager::RequestClrRevert___STATIC__BOOLEAN(
+    CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
-    NANOCLR_SET_AND_LEAVE(stack.NotImplementedStub());
+    Ifu_SlotSnapshot snapshot;
+    bool success = false;
+
+    Ifu_ReadSlotSnapshot(ImageType_NanoClr, SlotId_Secondary, snapshot);
+
+    if (snapshot.HeaderValid)
+    {
+        success = (boot_set_pending_multi(ImageType_NanoClr, 0) == 0);
+    }
+
+    stack.SetResult_Boolean(success);
+
+    NANOCLR_SET_AND_LEAVE(S_OK);
 
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_nf_runtime_ifu_nanoFramework_Runtime_InFieldUpdate_UpdateManager::RequestReboot___STATIC__VOID( CLR_RT_StackFrame &stack )
+HRESULT Library_nf_runtime_ifu_nanoFramework_Runtime_InFieldUpdate_UpdateManager::RequestReboot___STATIC__VOID(
+    CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
-    NANOCLR_SET_AND_LEAVE(stack.NotImplementedStub());
+    (void)stack;
+
+    CPU_Reset();
+
+    NANOCLR_SET_AND_LEAVE(S_OK);
 
     NANOCLR_NOCLEANUP();
 }
@@ -383,4 +501,27 @@ HRESULT Library_nf_runtime_ifu_nanoFramework_Runtime_InFieldUpdate_UpdateManager
     }
 
     NANOCLR_NOCLEANUP();
+}
+
+// True only when the primary slot's swap-state trailer reads successfully and reports the image
+// as confirmed (image_ok == BOOT_FLAG_SET). boot_swap_type_multi() alone returns
+// BOOT_SWAP_TYPE_NONE both when the primary image is settled/confirmed and when it is running as
+// an unconfirmed test image, so only the trailer's image_ok flag can tell the two apart.
+bool Library_nf_runtime_ifu_nanoFramework_Runtime_InFieldUpdate_UpdateManager::Ifu_IsPrimaryConfirmed(
+    uint8_t imageIndex)
+{
+    struct boot_swap_state state;
+
+    int faId = Ifu_GetFlashAreaId(imageIndex, SlotId_Primary);
+    if (faId == FLASH_SLOT_DOES_NOT_EXIST)
+    {
+        return false;
+    }
+
+    if (boot_read_swap_state_by_id(faId, &state) != 0)
+    {
+        return false;
+    }
+
+    return state.image_ok == BOOT_FLAG_SET;
 }
