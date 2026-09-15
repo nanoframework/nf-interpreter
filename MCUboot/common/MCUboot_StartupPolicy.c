@@ -63,39 +63,4 @@ nf_mcuboot_error_t nf_mcuboot_startup_ok(void)
     return NF_MCUBOOT_SUCCESS;
 }
 
-nf_mcuboot_error_t nf_mcuboot_deploy_ok(void)
-{
-    if (s_boot_state_valid)
-    {
-        if (needs_confirmation(&s_deploy_boot_state))
-        {
-            return nf_mcuboot_confirm_image(NF_MCUBOOT_IMAGE_DEPLOY);
-        }
-
-        return NF_MCUBOOT_SUCCESS;
-    }
-
-    // Fallback: cache was not populated — read live state.
-    int swap_type;
-    nf_mcuboot_error_t result = nf_mcuboot_image_state(NF_MCUBOOT_IMAGE_DEPLOY, &swap_type);
-    if (result != NF_MCUBOOT_SUCCESS)
-    {
-        return result;
-    }
-
-    if (swap_type == BOOT_SWAP_TYPE_TEST)
-    {
-        return nf_mcuboot_confirm_image(NF_MCUBOOT_IMAGE_DEPLOY);
-    }
-
-    return NF_MCUBOOT_SUCCESS;
-}
-
-nf_mcuboot_error_t nf_mcuboot_deploy_failed(void)
-{
-    // No action required: keeping the deploy image unconfirmed causes MCUboot
-    // to revert to the previous image on the next reboot.
-    return NF_MCUBOOT_SUCCESS;
-}
-
 #endif // CONFIG_NF_FEATURE_HAS_MCUBOOT

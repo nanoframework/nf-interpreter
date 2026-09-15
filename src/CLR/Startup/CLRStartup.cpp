@@ -449,31 +449,12 @@ void ClrStartup(CLR_SETTINGS params)
                 CLR_Debug::Printf("Ready.\r\n");
 #endif
 
-#if defined(CONFIG_NF_FEATURE_HAS_MCUBOOT) && CONFIG_NF_FEATURE_HAS_MCUBOOT
-                const bool hasManagedEntryPoint = !NANOCLR_INDEX_IS_INVALID(g_CLR_RT_TypeSystem.m_entryPoint);
-                if (!hasManagedEntryPoint)
-                {
-                    (void)nf_mcuboot_deploy_failed();
-                }
-                else
-                {
-                    (void)nf_mcuboot_deploy_ok();
-                }
-#endif
-
                 hr = g_CLR_RT_ExecutionEngine.Execute(nullptr, params.MaxContextSwitches);
 
 #if !defined(BUILD_RTM)
                 CLR_Debug::Printf("Done.\r\n");
 #endif
             }
-#if defined(CONFIG_NF_FEATURE_HAS_MCUBOOT) && CONFIG_NF_FEATURE_HAS_MCUBOOT
-            else
-            {
-                // Type load/resolve failure means validation of deployment image did not succeed.
-                (void)nf_mcuboot_deploy_failed();
-            }
-#endif
         }
 
         // process setting of power mode, if reboot was requested along with a power mode "higher" then
