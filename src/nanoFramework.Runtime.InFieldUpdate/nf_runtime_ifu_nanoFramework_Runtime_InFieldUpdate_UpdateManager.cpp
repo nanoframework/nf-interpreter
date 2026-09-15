@@ -4,6 +4,8 @@
 //
 
 #include "nf_runtime_ifu.h"
+#include <flash_map_backend/flash_map_backend.h>
+#include <sysflash/sysflash.h>
 
 
 HRESULT Library_nf_runtime_ifu_nanoFramework_Runtime_InFieldUpdate_UpdateManager::GetStatus___STATIC__nanoFrameworkRuntimeInFieldUpdateUpdateStatus__nanoFrameworkRuntimeInFieldUpdateImageType( CLR_RT_StackFrame &stack )
@@ -46,7 +48,25 @@ HRESULT Library_nf_runtime_ifu_nanoFramework_Runtime_InFieldUpdate_UpdateManager
 {
     NANOCLR_HEADER();
 
-    NANOCLR_SET_AND_LEAVE(stack.NotImplementedStub());
+    uint8_t imageIndex = (uint8_t)stack.Arg0().NumericByRef().s4;
+    bool success = false;
+
+    int faId = FLASH_AREA_IMAGE_SECONDARY(imageIndex);
+    const struct flash_area *fa = NULL;
+
+    if (faId != FLASH_SLOT_DOES_NOT_EXIST && flash_area_open((uint8_t)faId, &fa) == 0 && fa != NULL)
+    {
+        if (flash_area_erase(fa, 0, fa->fa_size) == 0)
+        {
+            success = true;
+        }
+
+        flash_area_close(fa);
+    }
+
+    stack.SetResult_Boolean(success);
+
+    NANOCLR_SET_AND_LEAVE(S_OK);
 
     NANOCLR_NOCLEANUP();
 }
