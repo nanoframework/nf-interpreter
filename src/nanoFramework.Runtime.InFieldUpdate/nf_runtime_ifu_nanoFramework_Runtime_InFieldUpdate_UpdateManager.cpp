@@ -27,20 +27,24 @@ HRESULT Library_nf_runtime_ifu_nanoFramework_Runtime_InFieldUpdate_UpdateManager
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_nf_runtime_ifu_nanoFramework_Runtime_InFieldUpdate_UpdateManager::GetPrimaryImageInfo___STATIC__nanoFrameworkRuntimeInFieldUpdateImageInfo__nanoFrameworkRuntimeInFieldUpdateImageType( CLR_RT_StackFrame &stack )
+HRESULT Library_nf_runtime_ifu_nanoFramework_Runtime_InFieldUpdate_UpdateManager::
+    GetPrimaryImageInfo___STATIC__nanoFrameworkRuntimeInFieldUpdateImageInfo__nanoFrameworkRuntimeInFieldUpdateImageType(
+        CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
-    NANOCLR_SET_AND_LEAVE(stack.NotImplementedStub());
+    NANOCLR_SET_AND_LEAVE(Ifu_GetImageInfoForSlot(stack, SlotId_Primary));
 
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_nf_runtime_ifu_nanoFramework_Runtime_InFieldUpdate_UpdateManager::GetSecondaryImageInfo___STATIC__nanoFrameworkRuntimeInFieldUpdateImageInfo__nanoFrameworkRuntimeInFieldUpdateImageType( CLR_RT_StackFrame &stack )
+HRESULT Library_nf_runtime_ifu_nanoFramework_Runtime_InFieldUpdate_UpdateManager::
+    GetSecondaryImageInfo___STATIC__nanoFrameworkRuntimeInFieldUpdateImageInfo__nanoFrameworkRuntimeInFieldUpdateImageType(
+        CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
-    NANOCLR_SET_AND_LEAVE(stack.NotImplementedStub());
+    NANOCLR_SET_AND_LEAVE(Ifu_GetImageInfoForSlot(stack, SlotId_Secondary));
 
     NANOCLR_NOCLEANUP();
 }
@@ -78,87 +82,12 @@ HRESULT Library_nf_runtime_ifu_nanoFramework_Runtime_InFieldUpdate_UpdateManager
 
     for (uint8_t image = 0; image < imageCount; image++)
     {
-        // Derive active/confirmed/pending/rollback-pending purely from boot_swap_type_multi(),
-        int swapType = boot_swap_type_multi(image);
-        bool isRollbackPending = (swapType == BOOT_SWAP_TYPE_REVERT);
-
         for (uint8_t slot = 0; slot < c_Ifu_SlotsPerImage; slot++, entryRef++)
         {
-            NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObjectFromIndex(*entryRef, imageInfoTypeDef));
-
-            CLR_RT_HeapBlock *pImageInfo = entryRef->Dereference();
-            if (pImageInfo == NULL)
-            {
-                NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
-            }
-
             Ifu_ReadSlotSnapshot(image, slot, snapshot);
 
-            bool isActive = false;
-            bool isConfirmed = false;
-            bool isPending = false;
-
-            if (slot == SlotId_Primary)
-            {
-                // the primary slot holds the running image
-                isActive = true;
-
-                if (swapType != BOOT_SWAP_TYPE_REVERT)
-                {
-                    isConfirmed = true;
-                }
-            }
-            else
-            {
-                if (swapType == BOOT_SWAP_TYPE_TEST || swapType == BOOT_SWAP_TYPE_PERM)
-                {
-                    isPending = true;
-                }
-                else if (swapType == BOOT_SWAP_TYPE_REVERT)
-                {
-                    isConfirmed = true;
-                }
-            }
-
-            pImageInfo[ImageInfo::FIELD__Image].SetInteger((CLR_INT32)image);
-            pImageInfo[ImageInfo::FIELD__Slot].SetInteger((CLR_INT32)slot);
-            pImageInfo[ImageInfo::FIELD__HasValidHeader].SetBoolean(snapshot.TlvValid);
-            pImageInfo[ImageInfo::FIELD__IsBootable].SetBoolean(snapshot.HeaderValid && snapshot.Bootable);
-            pImageInfo[ImageInfo::FIELD__IsActive].SetBoolean(isActive);
-            pImageInfo[ImageInfo::FIELD__IsConfirmed].SetBoolean(isConfirmed);
-            pImageInfo[ImageInfo::FIELD__IsPending].SetBoolean(isPending);
-            pImageInfo[ImageInfo::FIELD__IsRollbackPending].SetBoolean(isRollbackPending);
-
-            if (snapshot.HeaderValid)
-            {
-                CLR_RT_HeapBlock &versionField = pImageInfo[ImageInfo::FIELD__Version];
-
-                NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObjectFromIndex(versionField, versionTypeDef));
-
-                CLR_RT_HeapBlock *pVersion = versionField.Dereference();
-                if (pVersion == NULL)
-                {
-                    NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
-                }
-
-                pVersion[Version::FIELD___Major].SetInteger((CLR_INT32)snapshot.MajorVersion);
-                pVersion[Version::FIELD___Minor].SetInteger((CLR_INT32)snapshot.MinorVersion);
-                pVersion[Version::FIELD___Build].SetInteger((CLR_INT32)snapshot.BuildNumber);
-                pVersion[Version::FIELD___Revision].SetInteger((CLR_INT32)snapshot.RevisionNumber);
-            }
-
-            // ImageHash is only populated when the TLV SHA-256 entry was actually found.
-            if (snapshot.HasHash)
-            {
-                CLR_RT_HeapBlock &hashField = pImageInfo[ImageInfo::FIELD__ImageHash];
-
-                NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance(
-                    hashField,
-                    sizeof(snapshot.Hash),
-                    g_CLR_RT_WellKnownTypes.UInt8));
-
-                memcpy(hashField.DereferenceArray()->GetFirstElement(), snapshot.Hash, sizeof(snapshot.Hash));
-            }
+            NANOCLR_CHECK_HRESULT(
+                Ifu_PopulateImageInfo(*entryRef, image, slot, snapshot, imageInfoTypeDef, versionTypeDef));
         }
     }
 
@@ -240,7 +169,9 @@ HRESULT Library_nf_runtime_ifu_nanoFramework_Runtime_InFieldUpdate_UpdateManager
 }
 
 // Resolve the flash area ID for a (image+slot) pair.
-int Library_nf_runtime_ifu_nanoFramework_Runtime_InFieldUpdate_UpdateManager::Ifu_GetFlashAreaId(uint8_t imageIndex, uint8_t slotIndex)
+int Library_nf_runtime_ifu_nanoFramework_Runtime_InFieldUpdate_UpdateManager::Ifu_GetFlashAreaId(
+    uint8_t imageIndex,
+    uint8_t slotIndex)
 {
     if (slotIndex == SlotId_Secondary)
     {
@@ -251,7 +182,10 @@ int Library_nf_runtime_ifu_nanoFramework_Runtime_InFieldUpdate_UpdateManager::If
 }
 
 // Read the image header and (best-effort) SHA-256 digest from a slot.
-void Library_nf_runtime_ifu_nanoFramework_Runtime_InFieldUpdate_UpdateManager::Ifu_ReadSlotSnapshot(uint8_t imageIndex, uint8_t slotIndex, Ifu_SlotSnapshot &snapshot)
+void Library_nf_runtime_ifu_nanoFramework_Runtime_InFieldUpdate_UpdateManager::Ifu_ReadSlotSnapshot(
+    uint8_t imageIndex,
+    uint8_t slotIndex,
+    Ifu_SlotSnapshot &snapshot)
 {
     memset(&snapshot, 0, sizeof(snapshot));
 
@@ -319,4 +253,134 @@ void Library_nf_runtime_ifu_nanoFramework_Runtime_InFieldUpdate_UpdateManager::I
     }
 
     flash_area_close(fa);
+}
+
+HRESULT Library_nf_runtime_ifu_nanoFramework_Runtime_InFieldUpdate_UpdateManager::Ifu_PopulateImageInfo(
+    CLR_RT_HeapBlock &destSlot,
+    uint8_t imageIndex,
+    uint8_t slotIndex,
+    const Ifu_SlotSnapshot &snapshot,
+    CLR_RT_TypeDef_Index imageInfoTypeDef,
+    CLR_RT_TypeDef_Index versionTypeDef)
+{
+    NANOCLR_HEADER();
+
+    CLR_RT_HeapBlock *pImageInfo = NULL;
+    CLR_RT_HeapBlock *pVersion = NULL;
+
+    // Derive active/confirmed/pending/rollback-pending purely from boot_swap_type_multi().
+    int swapType = boot_swap_type_multi(imageIndex);
+    bool isRollbackPending = (swapType == BOOT_SWAP_TYPE_REVERT);
+    bool isActive = false;
+    bool isConfirmed = false;
+    bool isPending = false;
+
+    if (slotIndex == SlotId_Primary)
+    {
+        // the primary slot holds the running image
+        isActive = true;
+
+        if (swapType != BOOT_SWAP_TYPE_REVERT)
+        {
+            isConfirmed = true;
+        }
+    }
+    else
+    {
+        if (swapType == BOOT_SWAP_TYPE_TEST || swapType == BOOT_SWAP_TYPE_PERM)
+        {
+            isPending = true;
+        }
+        else if (swapType == BOOT_SWAP_TYPE_REVERT)
+        {
+            isConfirmed = true;
+        }
+    }
+
+    NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObjectFromIndex(destSlot, imageInfoTypeDef));
+
+    pImageInfo = destSlot.Dereference();
+    if (pImageInfo == NULL)
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
+    }
+
+    pImageInfo[ImageInfo::FIELD__Image].SetInteger((CLR_INT32)imageIndex);
+    pImageInfo[ImageInfo::FIELD__Slot].SetInteger((CLR_INT32)slotIndex);
+    pImageInfo[ImageInfo::FIELD__HasValidHeader].SetBoolean(snapshot.TlvValid);
+    pImageInfo[ImageInfo::FIELD__IsBootable].SetBoolean(snapshot.HeaderValid && snapshot.Bootable);
+    pImageInfo[ImageInfo::FIELD__IsActive].SetBoolean(isActive);
+    pImageInfo[ImageInfo::FIELD__IsConfirmed].SetBoolean(isConfirmed);
+    pImageInfo[ImageInfo::FIELD__IsPending].SetBoolean(isPending);
+    pImageInfo[ImageInfo::FIELD__IsRollbackPending].SetBoolean(isRollbackPending);
+
+    if (snapshot.HeaderValid)
+    {
+        NANOCLR_CHECK_HRESULT(
+            g_CLR_RT_ExecutionEngine.NewObjectFromIndex(pImageInfo[ImageInfo::FIELD__Version], versionTypeDef));
+
+        pVersion = pImageInfo[ImageInfo::FIELD__Version].Dereference();
+        if (pVersion == NULL)
+        {
+            NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
+        }
+
+        pVersion[Version::FIELD___Major].SetInteger((CLR_INT32)snapshot.MajorVersion);
+        pVersion[Version::FIELD___Minor].SetInteger((CLR_INT32)snapshot.MinorVersion);
+        pVersion[Version::FIELD___Build].SetInteger((CLR_INT32)snapshot.BuildNumber);
+        pVersion[Version::FIELD___Revision].SetInteger((CLR_INT32)snapshot.RevisionNumber);
+    }
+
+    // ImageHash is only populated when the TLV SHA-256 entry was actually found.
+    if (snapshot.HasHash)
+    {
+        NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance(
+            pImageInfo[ImageInfo::FIELD__ImageHash],
+            sizeof(snapshot.Hash),
+            g_CLR_RT_WellKnownTypes.UInt8));
+
+        memcpy(
+            pImageInfo[ImageInfo::FIELD__ImageHash].DereferenceArray()->GetFirstElement(),
+            snapshot.Hash,
+            sizeof(snapshot.Hash));
+    }
+
+    NANOCLR_NOCLEANUP();
+}
+
+HRESULT Library_nf_runtime_ifu_nanoFramework_Runtime_InFieldUpdate_UpdateManager::Ifu_GetImageInfoForSlot(
+    CLR_RT_StackFrame &stack,
+    uint8_t slotIndex)
+{
+    NANOCLR_HEADER();
+
+    uint8_t imageIndex = (uint8_t)stack.Arg0().NumericByRef().s4;
+
+    CLR_RT_TypeDef_Index imageInfoTypeDef;
+    CLR_RT_TypeDef_Index versionTypeDef;
+    Ifu_SlotSnapshot snapshot;
+
+    // PushValueAndClear (not plain PushValue) so the result is an explicit null reference when
+    // this method leaves it untouched.
+    CLR_RT_HeapBlock &top = stack.PushValueAndClear();
+
+    Ifu_ReadSlotSnapshot(imageIndex, slotIndex, snapshot);
+
+    if (snapshot.HeaderValid)
+    {
+        if (!g_CLR_RT_TypeSystem.FindTypeDef("ImageInfo", "nanoFramework.Runtime.InFieldUpdate", imageInfoTypeDef))
+        {
+            NANOCLR_SET_AND_LEAVE(CLR_E_TYPE_UNAVAILABLE);
+        }
+
+        if (!g_CLR_RT_TypeSystem.FindTypeDef("Version", "System", versionTypeDef))
+        {
+            NANOCLR_SET_AND_LEAVE(CLR_E_TYPE_UNAVAILABLE);
+        }
+
+        NANOCLR_CHECK_HRESULT(
+            Ifu_PopulateImageInfo(top, imageIndex, slotIndex, snapshot, imageInfoTypeDef, versionTypeDef));
+    }
+
+    NANOCLR_NOCLEANUP();
 }

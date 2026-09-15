@@ -101,6 +101,14 @@ struct Library_nf_runtime_ifu_nanoFramework_Runtime_InFieldUpdate_UpdateManager
 
     static int Ifu_GetFlashAreaId(uint8_t imageIndex, uint8_t slotIndex);
     static void Ifu_ReadSlotSnapshot(uint8_t imageIndex, uint8_t slotIndex, Ifu_SlotSnapshot &snapshot);
+    static HRESULT Ifu_PopulateImageInfo(
+        CLR_RT_HeapBlock &destSlot,
+        uint8_t imageIndex,
+        uint8_t slotIndex,
+        const Ifu_SlotSnapshot &snapshot,
+        CLR_RT_TypeDef_Index imageInfoTypeDef,
+        CLR_RT_TypeDef_Index versionTypeDef);
+    static HRESULT Ifu_GetImageInfoForSlot(CLR_RT_StackFrame &stack, uint8_t slotIndex);
 };
 
 extern const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_nanoFramework_Runtime_InFieldUpdate;
