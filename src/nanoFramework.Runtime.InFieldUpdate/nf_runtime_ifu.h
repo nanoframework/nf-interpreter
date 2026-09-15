@@ -10,6 +10,7 @@
 #include <nanoCLR_Runtime.h>
 #include <nanoPackStruct.h>
 #include <corlib_native.h>
+#include <MCUboot_ImageSlotInfo.h>
 
 typedef enum __nfpack ImageType
 {
@@ -32,20 +33,6 @@ typedef enum __nfpack UpdateStatus
     UpdateStatus_RollbackPending = 4,
     UpdateStatus_Unknown = 255,
 } UpdateStatus;
-
-// Best-effort snapshot of a single (image+slot) flash area
-struct Ifu_SlotSnapshot
-{
-    bool HeaderValid;
-    bool TlvValid;
-    bool Bootable;
-    uint8_t MajorVersion;
-    uint8_t MinorVersion;
-    uint16_t RevisionNumber;
-    uint32_t BuildNumber;
-    bool HasHash;
-    uint8_t Hash[32];
-};
 
 struct Library_nf_runtime_ifu_nanoFramework_Runtime_InFieldUpdate_ImageInfo
 {
@@ -99,8 +86,6 @@ struct Library_nf_runtime_ifu_nanoFramework_Runtime_InFieldUpdate_UpdateManager
 
     //--//
 
-    static int Ifu_GetFlashAreaId(uint8_t imageIndex, uint8_t slotIndex);
-    static void Ifu_ReadSlotSnapshot(uint8_t imageIndex, uint8_t slotIndex, Ifu_SlotSnapshot &snapshot);
     static HRESULT Ifu_PopulateImageInfo(
         CLR_RT_HeapBlock &destSlot,
         uint8_t imageIndex,

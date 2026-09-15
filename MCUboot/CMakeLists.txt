@@ -12,6 +12,8 @@ add_library(nf_mcuboot_port STATIC
     ${mcuboot_SOURCE_DIR}/boot/bootutil/src/bootutil_misc.c
 
     ${CMAKE_SOURCE_DIR}/targets/ChibiOS/_mcuboot/mcuboot_log_stubs.c
+
+    ${CMAKE_SOURCE_DIR}/MCUboot/common/MCUboot_ImageSlotInfo.c
 )
 
 target_include_directories(nf_mcuboot_port PUBLIC

@@ -4011,95 +4011,7 @@ bool CLR_DBG_Debugger::Debugging_Info_SetJMC(WP_Message *msg)
 #include <mcuboot_config/mcuboot_config.h>
 #include <bootutil/bootutil_public.h>
 #include <bootutil/image.h>
-
-// Resolve the flash area ID for a (image index, slot) pair.
-// slotIndex: Monitor_Image_Slot_Primary or Monitor_Image_Slot_Secondary.
-static int Ifu_FlashAreaId(uint8_t imageIndex, uint8_t slotIndex)
-{
-    if (slotIndex == Monitor_Image_Slot_Secondary)
-    {
-        return FLASH_AREA_IMAGE_SECONDARY(imageIndex);
-    }
-
-    return FLASH_AREA_IMAGE_PRIMARY(imageIndex);
-}
-
-// Read the image header and (best-effort) SHA-256 digest from a slot, packing the
-// result into a Monitor_ImageInfo_Entry. Returns true when both the image header magic
-// and the TLV info magic parse correctly (ImageInfo_Entry.ValidHeader) - this is a cheap,
-// structural sanity check only, no hash or signature is verified. ImageIndex/SlotIndex are
-// always populated; Version and the Bootable flag are populated as soon as the header magic
-// alone parses; Hash and ValidHeader require the TLV info area to also parse.
-static bool Ifu_ReadSlotInfo(uint8_t imageIndex, uint8_t slotIndex, Monitor_ImageInfo_Entry *entry)
-{
-    memset(entry, 0, sizeof(*entry));
-    entry->ImageIndex = imageIndex;
-    entry->SlotIndex = slotIndex;
-
-    int faId = Ifu_FlashAreaId(imageIndex, slotIndex);
-    if (faId == FLASH_SLOT_DOES_NOT_EXIST)
-    {
-        return false;
-    }
-
-    const struct flash_area *fa = NULL;
-    if (flash_area_open((uint8_t)faId, &fa) != 0 || fa == NULL)
-    {
-        return false;
-    }
-
-    bool validHeader = false;
-    struct image_header hdr;
-
-    if (flash_area_read(fa, 0, &hdr, sizeof(hdr)) == 0 && hdr.ih_magic == IMAGE_MAGIC)
-    {
-        entry->Version.majorVersion    = hdr.ih_ver.iv_major;
-        entry->Version.minorVersion    = hdr.ih_ver.iv_minor;
-        entry->Version.revisionNumber  = hdr.ih_ver.iv_revision;
-        entry->Version.buildNumber     = hdr.ih_ver.iv_build_num;
-
-        if (!(hdr.ih_flags & IMAGE_F_NON_BOOTABLE))
-        {
-            entry->Flags |= Monitor_Image_State_Bootable;
-        }
-
-        // Locate the unprotected TLV area and extract the SHA-256 digest (best-effort).
-        uint32_t tlvOff = (uint32_t)hdr.ih_hdr_size + hdr.ih_img_size + hdr.ih_protect_tlv_size;
-        struct image_tlv_info tlvInfo;
-
-        if (flash_area_read(fa, tlvOff, &tlvInfo, sizeof(tlvInfo)) == 0 && tlvInfo.it_magic == IMAGE_TLV_INFO_MAGIC)
-        {
-            validHeader = true;
-            entry->ValidHeader = 1;
-
-            uint32_t pos = tlvOff + sizeof(tlvInfo);
-            uint32_t end = tlvOff + tlvInfo.it_tlv_tot;
-
-            while (pos + sizeof(struct image_tlv) <= end)
-            {
-                struct image_tlv tlv;
-                if (flash_area_read(fa, pos, &tlv, sizeof(tlv)) != 0)
-                {
-                    break;
-                }
-
-                pos += sizeof(tlv);
-
-                if (tlv.it_type == IMAGE_TLV_SHA256 && tlv.it_len == sizeof(entry->Hash))
-                {
-                    flash_area_read(fa, pos, entry->Hash, sizeof(entry->Hash));
-                    break;
-                }
-
-                pos += tlv.it_len;
-            }
-        }
-    }
-
-    flash_area_close(fa);
-
-    return validHeader;
-}
+#include <MCUboot_ImageSlotInfo.h>
 
 bool CLR_DBG_Debugger::Monitor_ImageInfo(WP_Message *msg)
 {
@@ -4133,7 +4045,27 @@ bool CLR_DBG_Debugger::Monitor_ImageInfo(WP_Message *msg)
         for (uint8_t slot = 0; slot < slotsPerImage; slot++)
         {
             Monitor_ImageInfo_Entry *entry = &reply->Images[idx++];
-            Ifu_ReadSlotInfo(image, slot, entry);
+
+            Ifu_SlotSnapshot snapshot;
+            Ifu_ReadSlotInfo(image, slot, &snapshot);
+
+            entry->ImageIndex = image;
+            entry->SlotIndex = slot;
+            entry->ValidHeader = snapshot.TlvValid ? 1 : 0;
+            entry->Version.majorVersion = snapshot.MajorVersion;
+            entry->Version.minorVersion = snapshot.MinorVersion;
+            entry->Version.revisionNumber = snapshot.RevisionNumber;
+            entry->Version.buildNumber = snapshot.BuildNumber;
+
+            if (snapshot.HeaderValid && snapshot.Bootable)
+            {
+                entry->Flags |= Monitor_Image_State_Bootable;
+            }
+
+            if (snapshot.HasHash)
+            {
+                memcpy(entry->Hash, snapshot.Hash, sizeof(entry->Hash));
+            }
 
             if (slot == Monitor_Image_Slot_Primary)
             {

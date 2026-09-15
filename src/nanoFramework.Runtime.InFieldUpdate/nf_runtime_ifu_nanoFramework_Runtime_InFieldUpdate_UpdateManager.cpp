@@ -115,7 +115,7 @@ HRESULT Library_nf_runtime_ifu_nanoFramework_Runtime_InFieldUpdate_UpdateManager
     {
         for (uint8_t slot = 0; slot < c_Ifu_SlotsPerImage; slot++, entryRef++)
         {
-            Ifu_ReadSlotSnapshot(image, slot, snapshot);
+            Ifu_ReadSlotInfo(image, slot, &snapshot);
 
             NANOCLR_CHECK_HRESULT(
                 Ifu_PopulateImageInfo(*entryRef, image, slot, snapshot, imageInfoTypeDef, versionTypeDef));
@@ -177,7 +177,7 @@ HRESULT Library_nf_runtime_ifu_nanoFramework_Runtime_InFieldUpdate_UpdateManager
         NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_RANGE);
     }
 
-    faId = Ifu_GetFlashAreaId(imageIndex, SlotId_Secondary);
+    faId = Ifu_FlashAreaId(imageIndex, SlotId_Secondary);
 
     if (faId != FLASH_SLOT_DOES_NOT_EXIST && flash_area_open((uint8_t)faId, &fa) == 0 && fa != NULL)
     {
@@ -258,7 +258,7 @@ HRESULT Library_nf_runtime_ifu_nanoFramework_Runtime_InFieldUpdate_UpdateManager
     Ifu_SlotSnapshot snapshot;
     bool success = false;
 
-    Ifu_ReadSlotSnapshot(ImageType_NanoClr, SlotId_Secondary, snapshot);
+    Ifu_ReadSlotInfo(ImageType_NanoClr, SlotId_Secondary, &snapshot);
 
     if (snapshot.HeaderValid)
     {
@@ -284,93 +284,6 @@ HRESULT Library_nf_runtime_ifu_nanoFramework_Runtime_InFieldUpdate_UpdateManager
     NANOCLR_SET_AND_LEAVE(S_OK);
 
     NANOCLR_NOCLEANUP();
-}
-
-// Resolve the flash area ID for a (image+slot) pair.
-int Library_nf_runtime_ifu_nanoFramework_Runtime_InFieldUpdate_UpdateManager::Ifu_GetFlashAreaId(
-    uint8_t imageIndex,
-    uint8_t slotIndex)
-{
-    if (slotIndex == SlotId_Secondary)
-    {
-        return FLASH_AREA_IMAGE_SECONDARY(imageIndex);
-    }
-
-    return FLASH_AREA_IMAGE_PRIMARY(imageIndex);
-}
-
-// Read the image header and (best-effort) SHA-256 digest from a slot.
-void Library_nf_runtime_ifu_nanoFramework_Runtime_InFieldUpdate_UpdateManager::Ifu_ReadSlotSnapshot(
-    uint8_t imageIndex,
-    uint8_t slotIndex,
-    Ifu_SlotSnapshot &snapshot)
-{
-    memset(&snapshot, 0, sizeof(snapshot));
-
-    int faId = Ifu_GetFlashAreaId(imageIndex, slotIndex);
-    if (faId == FLASH_SLOT_DOES_NOT_EXIST)
-    {
-        return;
-    }
-
-    const struct flash_area *fa = NULL;
-    if (flash_area_open((uint8_t)faId, &fa) != 0 || fa == NULL)
-    {
-        return;
-    }
-
-    struct image_header hdr;
-
-    if (flash_area_read(fa, 0, &hdr, sizeof(hdr)) == 0 && hdr.ih_magic == IMAGE_MAGIC)
-    {
-        snapshot.HeaderValid = true;
-
-        snapshot.MajorVersion = hdr.ih_ver.iv_major;
-        snapshot.MinorVersion = hdr.ih_ver.iv_minor;
-        snapshot.RevisionNumber = hdr.ih_ver.iv_revision;
-        snapshot.BuildNumber = hdr.ih_ver.iv_build_num;
-
-        if (!(hdr.ih_flags & IMAGE_F_NON_BOOTABLE))
-        {
-            snapshot.Bootable = true;
-        }
-
-        // Locate the unprotected TLV area and extract the SHA-256 digest (best-effort).
-        uint32_t tlvOff = (uint32_t)hdr.ih_hdr_size + hdr.ih_img_size + hdr.ih_protect_tlv_size;
-        struct image_tlv_info tlvInfo;
-
-        if (flash_area_read(fa, tlvOff, &tlvInfo, sizeof(tlvInfo)) == 0 && tlvInfo.it_magic == IMAGE_TLV_INFO_MAGIC)
-        {
-            snapshot.TlvValid = true;
-
-            uint32_t pos = tlvOff + sizeof(tlvInfo);
-            uint32_t end = tlvOff + tlvInfo.it_tlv_tot;
-
-            while (pos + sizeof(struct image_tlv) <= end)
-            {
-                struct image_tlv tlv;
-                if (flash_area_read(fa, pos, &tlv, sizeof(tlv)) != 0)
-                {
-                    break;
-                }
-
-                pos += sizeof(tlv);
-
-                if (tlv.it_type == IMAGE_TLV_SHA256 && tlv.it_len == sizeof(snapshot.Hash))
-                {
-                    if (flash_area_read(fa, pos, snapshot.Hash, sizeof(snapshot.Hash)) == 0)
-                    {
-                        snapshot.HasHash = true;
-                    }
-                    break;
-                }
-
-                pos += tlv.it_len;
-            }
-        }
-    }
-
-    flash_area_close(fa);
 }
 
 HRESULT Library_nf_runtime_ifu_nanoFramework_Runtime_InFieldUpdate_UpdateManager::Ifu_PopulateImageInfo(
@@ -482,7 +395,7 @@ HRESULT Library_nf_runtime_ifu_nanoFramework_Runtime_InFieldUpdate_UpdateManager
     // this method leaves it untouched.
     CLR_RT_HeapBlock &top = stack.PushValueAndClear();
 
-    Ifu_ReadSlotSnapshot(imageIndex, slotIndex, snapshot);
+    Ifu_ReadSlotInfo(imageIndex, slotIndex, &snapshot);
 
     if (snapshot.HeaderValid)
     {
@@ -512,7 +425,7 @@ bool Library_nf_runtime_ifu_nanoFramework_Runtime_InFieldUpdate_UpdateManager::I
 {
     struct boot_swap_state state;
 
-    int faId = Ifu_GetFlashAreaId(imageIndex, SlotId_Primary);
+    int faId = Ifu_FlashAreaId(imageIndex, SlotId_Primary);
     if (faId == FLASH_SLOT_DOES_NOT_EXIST)
     {
         return false;
