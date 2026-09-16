@@ -358,8 +358,8 @@ HRESULT Library_nf_runtime_ifu_nanoFramework_Runtime_InFieldUpdate_UpdateManager
 
         pVersion[Version::FIELD___Major].SetInteger((CLR_INT32)snapshot.MajorVersion);
         pVersion[Version::FIELD___Minor].SetInteger((CLR_INT32)snapshot.MinorVersion);
-        pVersion[Version::FIELD___Build].SetInteger((CLR_INT32)snapshot.BuildNumber);
-        pVersion[Version::FIELD___Revision].SetInteger((CLR_INT32)snapshot.RevisionNumber);
+        pVersion[Version::FIELD___Build].SetInteger((CLR_INT32)snapshot.RevisionNumber);
+        pVersion[Version::FIELD___Revision].SetInteger((CLR_INT32)snapshot.BuildNumber);
     }
 
     // ImageHash is only populated when the TLV SHA-256 entry was actually found.
