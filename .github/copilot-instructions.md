@@ -160,7 +160,7 @@ The project uses **Kconfig** (via Python `kconfiglib`) for feature and API confi
 - **RTOS selection**: `CONFIG_RTOS_ESP32`, `CONFIG_RTOS_CHIBIOS`, `CONFIG_RTOS_FREERTOS`, `CONFIG_RTOS_TI_SIMPLELINK`, `CONFIG_RTOS_THREADX`.
 - **API toggles**: `CONFIG_API_SYSTEM_DEVICE_GPIO=y`, `CONFIG_API_SYSTEM_NET=y`, etc.
 - **Feature flags**: `CONFIG_NF_FEATURE_DEBUGGER`, `CONFIG_NF_FEATURE_HAS_SDCARD`, `CONFIG_NF_FEATURE_USE_LITTLEFS`, etc.
-- **Build modes**: `CONFIG_NF_BUILD_RTM=y` for release builds (suppresses debug output).
+- **Build modes**: `CONFIG_NF_BUILD_RTM=y` (or `NF_BUILD_RTM` in Kconfig) enables the RTM (release) build. `nf_genconfig.py` mirrors this into `nf_config.h` as both `CONFIG_NF_BUILD_RTM` and a source-facing `BUILD_RTM` alias — C/C++ code gates on `#if defined(BUILD_RTM)`, never on `CONFIG_NF_BUILD_RTM` directly. This only applies to Kconfig-driven targets; `netcore`, `win32`, and `posix` build via MSBuild/plain CMake and never define `BUILD_RTM`.
 
 When modifying Kconfig files, respect the naming conventions:
 - `NF_FEATURE_HAS_*` — hardware capability is present.
