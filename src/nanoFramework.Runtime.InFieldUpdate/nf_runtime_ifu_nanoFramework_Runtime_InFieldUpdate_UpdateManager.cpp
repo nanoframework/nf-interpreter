@@ -241,7 +241,7 @@ HRESULT Library_nf_runtime_ifu_nanoFramework_Runtime_InFieldUpdate_UpdateManager
     NANOCLR_HEADER();
 
     bool success = (boot_swap_type_multi(ImageType_Deployment) == BOOT_SWAP_TYPE_NONE) &&
-                    !Ifu_IsPrimaryConfirmed(ImageType_Deployment);
+                   !Ifu_IsPrimaryConfirmed(ImageType_Deployment);
 
     stack.SetResult_Boolean(success);
 
