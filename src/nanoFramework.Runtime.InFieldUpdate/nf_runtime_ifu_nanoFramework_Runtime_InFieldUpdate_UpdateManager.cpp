@@ -299,7 +299,6 @@ HRESULT Library_nf_runtime_ifu_nanoFramework_Runtime_InFieldUpdate_UpdateManager
     CLR_RT_HeapBlock *pImageInfo = NULL;
     CLR_RT_HeapBlock *pVersion = NULL;
 
-    // Derive active/confirmed/pending/rollback-pending purely from boot_swap_type_multi().
     int swapType = boot_swap_type_multi(imageIndex);
     bool isRollbackPending = (swapType == BOOT_SWAP_TYPE_REVERT);
     bool isActive = false;
@@ -308,10 +307,13 @@ HRESULT Library_nf_runtime_ifu_nanoFramework_Runtime_InFieldUpdate_UpdateManager
 
     if (slotIndex == SlotId_Primary)
     {
-        // the primary slot holds the running image
-        isActive = true;
+        isActive = snapshot.HeaderValid;
 
-        if (swapType != BOOT_SWAP_TYPE_REVERT)
+        if (swapType == BOOT_SWAP_TYPE_NONE)
+        {
+            isConfirmed = Ifu_IsPrimaryConfirmed(imageIndex);
+        }
+        else if (swapType != BOOT_SWAP_TYPE_REVERT)
         {
             isConfirmed = true;
         }
