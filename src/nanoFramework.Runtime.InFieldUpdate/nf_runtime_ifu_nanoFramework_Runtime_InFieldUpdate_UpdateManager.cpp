@@ -226,7 +226,10 @@ HRESULT Library_nf_runtime_ifu_nanoFramework_Runtime_InFieldUpdate_UpdateManager
 {
     NANOCLR_HEADER();
 
-    bool success = (boot_set_confirmed_multi(ImageType_Deployment) == 0);
+    // need to read the trailer back to report the actual state because a zero return alone does not mean the image is
+    // confirmed
+    bool success =
+        (boot_set_confirmed_multi(ImageType_Deployment) == 0) && Ifu_IsPrimaryConfirmed(ImageType_Deployment);
 
     stack.SetResult_Boolean(success);
 

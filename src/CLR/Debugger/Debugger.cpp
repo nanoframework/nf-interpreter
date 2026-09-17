@@ -4210,6 +4210,18 @@ bool CLR_DBG_Debugger::Monitor_ImageConfirm(WP_Message *msg)
     {
         cmdReply.ErrorCode = Monitor_Image_Error_Confirm;
     }
+    else
+    {
+        // need to read the trailer back to make sure image_ok is actually set
+        struct boot_swap_state state;
+        int faId = Ifu_FlashAreaId((uint8_t)imageIndex, Monitor_Image_Slot_Primary);
+
+        if (faId == FLASH_SLOT_DOES_NOT_EXIST || boot_read_swap_state_by_id(faId, &state) != 0 ||
+            state.image_ok != BOOT_FLAG_SET)
+        {
+            cmdReply.ErrorCode = Monitor_Image_Error_Confirm;
+        }
+    }
 
     WP_ReplyToCommand(
         msg,
