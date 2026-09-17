@@ -35,10 +35,6 @@
 #define CONFIG_NF_MCUBOOT_HEADER_SIZE 0x200
 #endif
 
-// CONFIG_NF_BUILD_RTM is intentionally NOT defined here.
-// In the bootloader context this allows boot even when primary slot signature
-// validation is skipped (debug/development builds).
-
 // Serial recovery mode: detect BOOT button (GPIOK7, active-LOW) and enter SMP
 // recovery loop if pressed. Enables MCUBOOT_SERIAL=1 and full boot_serial.c stack.
 #ifndef CONFIG_NF_MCUBOOT_SERIAL_RECOVERY

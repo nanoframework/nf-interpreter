@@ -82,6 +82,28 @@ config NF_MCUBOOT_BOOTSTRAP
         Disable only for production images that must never boot an unsolicited
         secondary image.
 
+config NF_MCUBOOT_VALIDATE_PRIMARY_SLOT
+    bool "Validate the primary slot signature on every boot"
+    depends on NF_FEATURE_HAS_MCUBOOT
+    default y if NF_BUILD_RTM
+    default n
+    help
+        Defines MCUBOOT_VALIDATE_PRIMARY_SLOT: MCUboot re-validates the hash
+        and signature of the image in each primary slot on every boot, in
+        addition to the validation performed on the secondary slot before an
+        upgrade.
+
+        Enabled by default on RTM builds. Debug builds default to disabled
+        because the Wire Protocol writes raw assemblies into the deployment
+        primary slot (deploy_0) without a MCUboot image header, and validating
+        that slot would reject them.
+
+        Note that this option also changes MCUboot's swap status assertions
+        (BOOT_STATUS_ASSERT) from a hard assert into a failure counter.
+
+        Exposed as a separate option so the two behaviours can be tested
+        independently of the build flavour.
+
 config NF_MCUBOOT_SERIAL_RECOVERY
     bool "Enable serial recovery mode"
     depends on NF_FEATURE_HAS_MCUBOOT

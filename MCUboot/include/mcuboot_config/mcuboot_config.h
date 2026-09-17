@@ -65,9 +65,10 @@
 #endif
 
 //
-// Primary slot validation policy - build-type gated.
+// Primary slot validation policy - selected via Kconfig CONFIG_NF_MCUBOOT_VALIDATE_PRIMARY_SLOT,
+// which defaults to the build flavour (enabled on RTM, disabled on debug builds).
 //
-// Debug builds (CONFIG_NF_BUILD_RTM not set):
+// Disabled (debug/development builds by default):
 //   MCUBOOT_VALIDATE_PRIMARY_SLOT is NOT defined.
 //   Wire Protocol writes raw .NET assemblies directly to Image 1 primary slot
 //   (deploy_0) without MCUboot image headers.  MCUboot must not validate Image 1
@@ -75,12 +76,16 @@
 //   MCUboot only validates Image 1 at OTA upgrade time (when deploy_1 contains
 //   a staged, signed OTA package).
 //
-// RTM builds (CONFIG_NF_BUILD_RTM=y):
+// Enabled (RTM builds by default):
 //   MCUBOOT_VALIDATE_PRIMARY_SLOT is defined - every boot validates the signature
 //   of the primary slot image.  Wire Protocol is disabled in RTM firmware, so
 //   direct writes to deploy_0 never occur.
 //
-#if defined(CONFIG_NF_BUILD_RTM) && CONFIG_NF_BUILD_RTM
+// Side effect to be aware of: with MCUBOOT_VALIDATE_PRIMARY_SLOT defined, MCUboot's swap
+// status writes are no longer asserted (BOOT_STATUS_ASSERT becomes a failure counter reported
+// as a warning after the swap) and an inconsistent swap status no longer aborts the boot.
+//
+#if defined(CONFIG_NF_MCUBOOT_VALIDATE_PRIMARY_SLOT) && CONFIG_NF_MCUBOOT_VALIDATE_PRIMARY_SLOT
 #define MCUBOOT_VALIDATE_PRIMARY_SLOT
 #endif
 

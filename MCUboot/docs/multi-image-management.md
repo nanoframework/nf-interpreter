@@ -223,25 +223,35 @@ coexistence requirement.
 
 ### Build-type policy
 
-| Build type | `MCUBOOT_VALIDATE_PRIMARY_SLOT` (Image 1) | Effect |
+The policy is selected by the Kconfig symbol `CONFIG_NF_MCUBOOT_VALIDATE_PRIMARY_SLOT`
+(`Kconfig.mcuboot`), whose default follows the build flavour:
+
+| Build type | `CONFIG_NF_MCUBOOT_VALIDATE_PRIMARY_SLOT` default | Effect |
 |---|---|---|
-| **Debug / dev** (`NF_BUILD_RTM=OFF`) | **Disabled** | MCUboot boots `deploy_0` without validating its contents. Wire Protocol can write raw assemblies to `deploy_0` and the device boots normally on the next reset. |
-| **RTM** (`NF_BUILD_RTM=ON`) | **Enabled** | MCUboot re-validates the `deploy_0` signature on every boot. All assembly updates must arrive via a signed MCUboot Image 1 IFU package through the IFU path. Wire Protocol is disabled in RTM builds anyway. |
+| **Debug / dev** (`NF_BUILD_RTM=OFF`) | **n** | MCUboot boots `deploy_0` without validating its contents. Wire Protocol can write raw assemblies to `deploy_0` and the device boots normally on the next reset. |
+| **RTM** (`NF_BUILD_RTM=ON`) | **y** | MCUboot re-validates the `deploy_0` signature on every boot. All assembly updates must arrive via a signed MCUboot Image 1 IFU package through the IFU path. Wire Protocol is disabled in RTM builds anyway. |
+
+The default can be overridden in `config/user-kconfig.conf`, e.g. to exercise the validation
+path on a debug build or to rule it out on an RTM build while troubleshooting an upgrade.
 
 ### Configuration mapping
 
 In `MCUboot/include/mcuboot_config/mcuboot_config.h`:
 
 ```c
-// MCUBOOT_VALIDATE_PRIMARY_SLOT is enabled only in RTM builds.
-// In debug builds, Wire Protocol writes raw assemblies to deploy_0 (Image 1 primary)
-// without a MCUboot header; primary slot validation would reject those writes.
-#if defined(CONFIG_NF_BUILD_RTM)
-#define MCUBOOT_VALIDATE_PRIMARY_SLOT   1
-#else
-#define MCUBOOT_VALIDATE_PRIMARY_SLOT   0
+#if defined(CONFIG_NF_MCUBOOT_VALIDATE_PRIMARY_SLOT) && CONFIG_NF_MCUBOOT_VALIDATE_PRIMARY_SLOT
+#define MCUBOOT_VALIDATE_PRIMARY_SLOT
 #endif
 ```
+
+The Kconfig generated `nf_config.h` is force-included into every translation unit of both the
+nanoCLR and the standalone bootloader build, so the bootloader always sees the same selection
+as the firmware it was configured with.
+
+Be aware that `MCUBOOT_VALIDATE_PRIMARY_SLOT` also changes MCUboot's swap status handling
+(`boot/bootutil/src/swap_offset.c`): status write failures are counted and reported as a
+warning after the swap instead of asserting, and an inconsistent swap status no longer aborts
+the boot. An RTM bootloader therefore never traps where a debug bootloader would.
 
 ### Wire Protocol is NOT affected by Image 0 validation
 
