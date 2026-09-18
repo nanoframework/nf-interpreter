@@ -19,6 +19,16 @@ uint32_t GetExistingConfigSize()
         g_TargetConfiguration.NetworkInterfaceConfigs->Count * sizeof(HAL_Configuration_NetworkInterface);
     currentConfigSize += g_TargetConfiguration.Wireless80211Configs->Count * sizeof(HAL_Configuration_Wireless80211);
 
+#if defined(RP2040) || defined(RP2350)
+    // round up to 256 bytes - RP2040/RP2350 flash program granularity
+    currentConfigSize = (currentConfigSize + 255U) & ~255U;
+#elif defined(STM32L475xx)
+    // round up to 8 bytes - STM32L4 flash can only be programmed in double-word units
+    currentConfigSize = (currentConfigSize + 7U) & ~7U;
+#else
+    // default to byte alignment
+#endif
+
     return currentConfigSize;
 }
 
@@ -270,6 +280,8 @@ __nfweak bool ConfigurationManager_StoreConfigurationBlock(
     ByteAddress storageAddress = 0;
     bool requiresEnumeration = FALSE;
     bool success = FALSE;
+    // true only for the very first Network/Wireless80211 block ever stored
+    bool isInitialAllocation = FALSE;
     BlockStorageDevice *device = BlockStorageList_GetFirstDevice();
 
     if (device == NULL)
@@ -287,6 +299,7 @@ __nfweak bool ConfigurationManager_StoreConfigurationBlock(
             // OK to continue
             // set storage address as the start of the flash configuration sector
             storageAddress = (ByteAddress)&__nanoConfig_start__;
+            isInitialAllocation = TRUE;
         }
         else
         {
@@ -322,7 +335,19 @@ __nfweak bool ConfigurationManager_StoreConfigurationBlock(
                     (uint32_t)&__nanoConfig_end__);
             uint32_t existingSize = existingNet->Count * sizeof(HAL_Configuration_NetworkInterface);
             platform_free(existingNet);
+
+#if defined(RP2040) || defined(RP2350)
+            // round up to 256 bytes - RP2040/RP2350 flash program granularity
+            existingSize = (existingSize + 255U) & ~255U;
+#elif defined(STM32L475xx)
+            // round up to 8 bytes - STM32L4 flash can only be programmed in double-word units
+            existingSize = (existingSize + 7U) & ~7U;
+#else
+            // default to byte alignment
+#endif
+
             storageAddress = (uint32_t)&__nanoConfig_start__ + existingSize;
+            isInitialAllocation = TRUE;
         }
         else if (
             g_TargetConfiguration.Wireless80211Configs->Count == 0 ||
@@ -455,6 +480,17 @@ __nfweak bool ConfigurationManager_StoreConfigurationBlock(
 
         // for save all the block size has to be provided, check that
         if (blockSize == 0)
+        {
+            return FALSE;
+        }
+    }
+
+    if (isInitialAllocation &&
+        (configuration == DeviceConfigurationOption_Wireless80211Network ||
+         configuration == DeviceConfigurationOption_Network) &&
+        !BlockStorageDevice_IsBlockErased(device, storageAddress, blockSize))
+    {
+        if (!BlockStorageDevice_EraseBlock(device, storageAddress))
         {
             return FALSE;
         }
@@ -690,18 +726,17 @@ __nfweak UpdateConfigurationResult ConfigurationManager_UpdateConfigurationBlock
         // erase config sector
         CFGDBG("CFGUPD: erasing 0x%08X\r\n", (unsigned)(uint32_t)&__nanoConfig_start__);
         {
-#if defined(RP2040) || defined(RP2350)
-            // RP2040/RP2350 have 4KB erase sectors — need to erase all sectors in the config region
             bool eraseOk = TRUE;
-            for (uint32_t eraseAddr = (uint32_t)&__nanoConfig_start__;
+            DeviceBlockInfo *blockInfo = BlockStorageDevice_GetDeviceInfo(device);
+            BlockRegionInfo *region = &blockInfo->Regions[0];
+            uint32_t firstBlockIndex = BlockRegionInfo_BlockIndexFromAddress(region, (uint32_t)&__nanoConfig_start__);
+
+            for (uint32_t eraseAddr = BlockRegionInfo_BlockAddress(region, firstBlockIndex);
                  eraseAddr < (uint32_t)&__nanoConfig_end__ && eraseOk;
-                 eraseAddr += 4096)
+                 eraseAddr += region->BytesPerBlock)
             {
                 eraseOk = BlockStorageDevice_EraseBlock(device, eraseAddr);
             }
-#else
-            bool eraseOk = (BlockStorageDevice_EraseBlock(device, (uint32_t)&__nanoConfig_start__) == TRUE);
-#endif
             if (eraseOk)
             {
                 // flash block is erased
