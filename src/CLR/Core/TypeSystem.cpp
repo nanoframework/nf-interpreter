@@ -3557,26 +3557,68 @@ bool CLR_RECORD_ASSEMBLY::ValidateMarker() const
     return memcmp(marker, c_MARKER_ASSEMBLY_V2, sizeof(c_MARKER_ASSEMBLY_V2)) == 0;
 }
 
+// Classify a candidate record: marker, header CRC and string table version.
+// See CLAUDE.md.
+CLR_RECORD_ASSEMBLY::HeaderStatus CLR_RECORD_ASSEMBLY::CheckHeader() const
+{
+    NATIVE_PROFILE_CLR_CORE();
+
+    // an all-0xFF (erased NOR) or all-0x00 (zero-filled media, e.g. virtual device RAM) marker marks
+    // the end of the deployment region
+    bool allErased = true;
+    bool allZero = true;
+    for (size_t i = 0; i < sizeof(marker); i++)
+    {
+        if (marker[i] != 0xFF)
+        {
+            allErased = false;
+        }
+        if (marker[i] != 0x00)
+        {
+            allZero = false;
+        }
+    }
+    if (allErased || allZero)
+    {
+        return HeaderStatus_Erased;
+    }
+
+    if (memcmp(marker, c_MARKER_ASSEMBLY_V2, sizeof(c_MARKER_ASSEMBLY_V2)) != 0)
+    {
+        // a recognized nanoFramework marker prefix but not V2 (e.g. the retired NFMRK1) is an
+        // unsupported PE format; anything else is foreign data where a record was expected
+        if (memcmp(marker, "NFMRK", 5) == 0)
+        {
+            return HeaderStatus_UnsupportedVersion;
+        }
+
+        return HeaderStatus_NotAnAssembly;
+    }
+
+    CLR_RECORD_ASSEMBLY header = *this;
+    header.headerCRC = 0;
+
+    if (SUPPORT_ComputeCRC(&header, sizeof(header), 0) != this->headerCRC)
+    {
+        return HeaderStatus_BadHeaderCrc;
+    }
+
+    if (this->stringTableVersion != c_CLR_StringTable_Version)
+    {
+        return HeaderStatus_BadStringTableVersion;
+    }
+
+    return HeaderStatus_Valid;
+}
+
 /// @brief Check for valid assembly header (CRC32 of header, string table version and marker)
 ///
 /// @return Check result
 bool CLR_RECORD_ASSEMBLY::GoodHeader() const
 {
     NATIVE_PROFILE_CLR_CORE();
-    CLR_RECORD_ASSEMBLY header = *this;
-    header.headerCRC = 0;
 
-    if (SUPPORT_ComputeCRC(&header, sizeof(header), 0) != this->headerCRC)
-    {
-        return false;
-    }
-
-    if (this->stringTableVersion != c_CLR_StringTable_Version)
-    {
-        return false;
-    }
-
-    return ValidateMarker();
+    return CheckHeader() == HeaderStatus_Valid;
 }
 
 /// @brief Check for valid assembly (header and CRC32 of assembly content)

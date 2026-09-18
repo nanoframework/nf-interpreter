@@ -85,6 +85,7 @@ typedef int HRESULT;
 #define CLR_E_SHUTTING_DOWN                             MAKE_HRESULT(SEVERITY_ERROR, 0x1800, 0x0000)
 #define CLR_E_OBJECT_DISPOSED                           MAKE_HRESULT(SEVERITY_ERROR, 0x1900, 0x0000)
 #define CLR_E_WATCHDOG_TIMEOUT                          MAKE_HRESULT(SEVERITY_ERROR, 0x1A00, 0x0000)
+#define CLR_E_ASSM_UNSUPPORTED_FORMAT                   MAKE_HRESULT(SEVERITY_ERROR, 0x1B00, 0x0000)
 
 #define CLR_E_NULL_REFERENCE                            MAKE_HRESULT(SEVERITY_ERROR, 0x2100, 0x0000)
 #define CLR_E_WRONG_TYPE                                MAKE_HRESULT(SEVERITY_ERROR, 0x2200, 0x0000)

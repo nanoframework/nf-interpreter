@@ -127,6 +127,32 @@ struct Settings
         NANOCLR_NOCLEANUP();
     }
 
+    // Classify a candidate assembly record and map a failure to the matching HRESULT.
+    HRESULT CheckAssemblyFormat(const CLR_RECORD_ASSEMBLY *header)
+    {
+        NANOCLR_HEADER();
+
+        CLR_RECORD_ASSEMBLY::HeaderStatus status = header->CheckHeader();
+
+        if (status != CLR_RECORD_ASSEMBLY::HeaderStatus_Valid)
+        {
+            if (status == CLR_RECORD_ASSEMBLY::HeaderStatus_BadHeaderCrc)
+            {
+                NANOCLR_SET_AND_LEAVE(CLR_E_ASSM_WRONG_CHECKSUM);
+            }
+
+            NANOCLR_SET_AND_LEAVE(CLR_E_ASSM_UNSUPPORTED_FORMAT);
+        }
+
+        // header is a valid NFMRK2 record: also verify the assembly body CRC
+        if (!header->GoodAssembly())
+        {
+            NANOCLR_SET_AND_LEAVE(CLR_E_ASSM_WRONG_CHECKSUM);
+        }
+
+        NANOCLR_NOCLEANUP();
+    }
+
     // Called by nanoCLR_LoadAssembly – validates header and adds buffer to map.
     HRESULT LoadAssembly(const char16_t *name, const uint8_t *data, size_t size)
     {
@@ -136,12 +162,7 @@ struct Settings
         CLR_RECORD_ASSEMBLY *header = (CLR_RECORD_ASSEMBLY *)&(*buffer)[0];
         std::string key;
 
-        if (!header->GoodAssembly())
-        {
-            delete buffer;
-            buffer = nullptr;
-            NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
-        }
+        NANOCLR_CHECK_HRESULT(CheckAssemblyFormat(header));
 
         key = Char16ToString(name);
         m_assemblies[key] = buffer;
@@ -157,7 +178,6 @@ struct Settings
         NANOCLR_CLEANUP_END();
     }
 
-    // Called by nanoCLR_LoadAssembliesSet – parses a concatenated .pe blob.
     HRESULT LoadAssembliesSet(const uint8_t *data, size_t size)
     {
         NANOCLR_HEADER();
@@ -166,12 +186,34 @@ struct Settings
         CLR_RECORD_ASSEMBLY *header = (CLR_RECORD_ASSEMBLY *)&bulk[0];
         CLR_RECORD_ASSEMBLY *headerEnd = (CLR_RECORD_ASSEMBLY *)(&bulk[bulk.size() - 1]);
 
-        while (header + 1 <= headerEnd && header->GoodAssembly())
+        while (header + 1 <= headerEnd)
         {
+            CLR_RECORD_ASSEMBLY::HeaderStatus status = header->CheckHeader();
+
+            // an erased/blank marker is the normal end of the buffer
+            if (status == CLR_RECORD_ASSEMBLY::HeaderStatus_Erased)
+            {
+                break;
+            }
+
+            if (status != CLR_RECORD_ASSEMBLY::HeaderStatus_Valid || !header->GoodAssembly())
+            {
+                if (status == CLR_RECORD_ASSEMBLY::HeaderStatus_BadHeaderCrc ||
+                    status == CLR_RECORD_ASSEMBLY::HeaderStatus_Valid)
+                {
+                    NANOCLR_SET_AND_LEAVE(CLR_E_ASSM_WRONG_CHECKSUM);
+                }
+
+                NANOCLR_SET_AND_LEAVE(CLR_E_ASSM_UNSUPPORTED_FORMAT);
+            }
+
             size_t asmSize = header->TotalSize();
 
             if ((uint8_t *)header + asmSize > (uint8_t *)headerEnd + 1)
+            {
+                // checksum passed, but not enough data left in the buffer - should never happen
                 break;
+            }
 
             CLR_RT_Buffer *bufferSub = new CLR_RT_Buffer((uint8_t *)header, (uint8_t *)header + asmSize);
             CLR_RECORD_ASSEMBLY *headerSub = (CLR_RECORD_ASSEMBLY *)&(*bufferSub)[0];
@@ -191,15 +233,10 @@ struct Settings
 
             m_assemblies[key] = bufferSub;
 
-            header =
-                (CLR_RECORD_ASSEMBLY *)ROUNDTOMULTIPLE((uintptr_t)header + asmSize, CLR_UINT32);
+            header = (CLR_RECORD_ASSEMBLY *)ROUNDTOMULTIPLE((uintptr_t)header + asmSize, CLR_UINT32);
         }
 
-        // Return S_OK even if some assemblies failed to parse – same behaviour
-        // as the Windows implementation.
-        hr = S_OK;
-        NANOCLR_CLEANUP();
-        NANOCLR_CLEANUP_END();
+        NANOCLR_NOCLEANUP();
     }
 
     // Resolve all assembly references.
