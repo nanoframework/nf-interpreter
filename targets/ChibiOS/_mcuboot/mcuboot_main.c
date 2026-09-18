@@ -38,6 +38,7 @@
 
 #include "bootutil/bootutil.h"
 #include "bootutil/image.h"
+#include "bootutil/bootutil_log.h"
 
 #include "mcuboot_board_iface.h"
 #include "mcuboot_serial_port.h"
@@ -138,14 +139,27 @@ int main(void)
     struct boot_rsp deployRsp;
 
     boot_state_init(bootState);
-    (void)boot_go_for_image_id(&deployRsp, NF_MCUBOOT_IMAGE_DEPLOY);
+    FIH_DECLARE(deployResult, FIH_FAILURE);
+    FIH_CALL(boot_go_for_image_id, deployResult, &deployRsp, NF_MCUBOOT_IMAGE_DEPLOY);
+
+    // Deployment pass is not fatal: empty or invalid deploy_0 must not prevent nanoCLR from booting
+    if (FIH_NOT_EQ(deployResult, FIH_SUCCESS))
+    {
+        BOOT_LOG_ERR(
+            "Image %d boot pass failed (%d); continuing with nanoCLR pass",
+            NF_MCUBOOT_IMAGE_DEPLOY,
+            (int)deployResult);
+    }
 #endif
 
     boot_state_init(bootState);
-    int bootResult = boot_go_for_image_id(&rsp, NF_MCUBOOT_IMAGE_CLR);
+    FIH_DECLARE(bootResult, FIH_FAILURE);
+    FIH_CALL(boot_go_for_image_id, bootResult, &rsp, NF_MCUBOOT_IMAGE_CLR);
 
-    if (bootResult != 0)
+    if (FIH_NOT_EQ(bootResult, FIH_SUCCESS))
     {
+        BOOT_LOG_ERR("Image %d boot pass failed (%d); no bootable nanoCLR", NF_MCUBOOT_IMAGE_CLR, (int)bootResult);
+
 #if defined(MCUBOOT_SERIAL)
         // No valid image found - enter SMP serial recovery
         mcuboot_serial_recovery_start();
