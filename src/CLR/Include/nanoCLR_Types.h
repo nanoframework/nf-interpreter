@@ -1036,6 +1036,19 @@ struct CLR_RECORD_ASSEMBLY
     CLR_UINT8 paddingOfTables[((TBL_Max - 1) + 3) / 4 * 4];
     //--//
 
+    // Result of classifying a candidate assembly record found while crawling a deployment region.
+    // See src/CLR/Startup/CLAUDE.md.
+    enum HeaderStatus
+    {
+        HeaderStatus_Valid,              // NFMRK2 record with good header CRC and string table version
+        HeaderStatus_Erased,             // marker all 0xFF or all 0x00: end of the deployment region
+        HeaderStatus_UnsupportedVersion, // "NFMRK" prefix but not V2 (e.g. NFMRK1)
+        HeaderStatus_NotAnAssembly,      // no recognized marker where a record was expected
+        HeaderStatus_BadHeaderCrc,       // NFMRK2 marker but header CRC mismatch
+        HeaderStatus_BadStringTableVersion,
+    };
+
+    HeaderStatus CheckHeader() const;
     bool GoodHeader() const;
     bool GoodAssembly() const;
     bool ValidateMarker() const;

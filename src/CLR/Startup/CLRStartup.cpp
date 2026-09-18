@@ -10,6 +10,7 @@
 #if defined(CONFIG_NF_FEATURE_HAS_MCUBOOT) && CONFIG_NF_FEATURE_HAS_MCUBOOT
 #include <mcuboot_config/mcuboot_config.h>
 #include <MCUboot_StartupPolicy.h>
+#include <bootutil/image.h>
 #endif
 
 void ClrExit()
@@ -27,6 +28,22 @@ void ClrReboot()
 
 // the CLR Startup code on Windows version is different
 #ifndef VIRTUAL_DEVICE
+
+// Map a non-fatal (non-terminator) record classification to the HRESULT
+static HRESULT HeaderStatusToHResult(CLR_RECORD_ASSEMBLY::HeaderStatus status)
+{
+    switch (status)
+    {
+        case CLR_RECORD_ASSEMBLY::HeaderStatus_BadHeaderCrc:
+            return CLR_E_ASSM_WRONG_CHECKSUM;
+
+        case CLR_RECORD_ASSEMBLY::HeaderStatus_UnsupportedVersion:
+        case CLR_RECORD_ASSEMBLY::HeaderStatus_NotAnAssembly:
+        case CLR_RECORD_ASSEMBLY::HeaderStatus_BadStringTableVersion:
+        default:
+            return CLR_E_ASSM_UNSUPPORTED_FORMAT;
+    }
+}
 
 struct Settings
 {
@@ -194,7 +211,9 @@ struct Settings
         NANOCLR_NOCLEANUP();
     }
 
-    HRESULT ContiguousBlockAssemblies(BlockStorageStream stream)
+    // Crawl the deployment region loading each contiguous assembly record.
+    // See CLAUDE.md for details.
+    HRESULT ContiguousBlockAssemblies(BlockStorageStream stream, uint32_t endIndex)
     {
         NANOCLR_HEADER();
 
@@ -202,11 +221,18 @@ struct Settings
         unsigned char *assembliesBuffer;
         uint32_t headerInBytes = sizeof(CLR_RECORD_ASSEMBLY);
         unsigned char *headerBuffer = nullptr;
+        int loadedCount = 0;
+        (void)loadedCount;
 
         // for the context it's being used (read the assemblies)
         // XIP and memory mapped block regions are equivalent so they can be ORed
         bool isXIP = (stream.Flags & BLOCKSTORAGESTREAM_c_BlockStorageStream__XIP) ||
                      (stream.Flags & BLOCKSTORAGESTREAM_c_BlockStorageStream__MemoryMapped);
+
+        if (endIndex > stream.Length)
+        {
+            endIndex = stream.Length;
+        }
 
         if (!isXIP)
         {
@@ -221,31 +247,59 @@ struct Settings
             memset(headerBuffer, 0, headerInBytes);
         }
 
-        while (stream.CurrentIndex < stream.Length)
+        while (stream.CurrentIndex < endIndex)
         {
-            // check if there is enough stream length to continue
-            if ((stream.Length - stream.CurrentIndex) < headerInBytes)
+            uint32_t recordIndex = stream.CurrentIndex;
+            uint32_t recordAddress = BlockStorageStream_CurrentAddress(&stream);
+            uint32_t remaining = endIndex - recordIndex;
+            (void)recordAddress;
+
+            // a partial record at the tail is treated as a clean end of the deployment
+            if (remaining < headerInBytes)
             {
-                // not enough stream to read, leave now
                 break;
             }
 
             if (!BlockStorageStream_Read(&stream, &headerBuffer, headerInBytes))
             {
-                // failed to read
-                break;
+                if (!isXIP)
+                {
+                    platform_free(headerBuffer);
+                }
+
+                NANOCLR_SET_AND_LEAVE(CLR_E_NOT_SUPPORTED);
             }
 
             header = (const CLR_RECORD_ASSEMBLY *)headerBuffer;
 
-            // check header first before read
-            if (!header->GoodHeader())
+            CLR_RECORD_ASSEMBLY::HeaderStatus status = header->CheckHeader();
+
+            // an erased/blank marker is the normal end of the deployment region
+            if (status == CLR_RECORD_ASSEMBLY::HeaderStatus_Erased)
             {
-                // check failed, try to continue to the next
-                continue;
+                break;
+            }
+
+            if (status != CLR_RECORD_ASSEMBLY::HeaderStatus_Valid)
+            {
+                if (!isXIP)
+                {
+                    platform_free(headerBuffer);
+                }
+                NANOCLR_SET_AND_LEAVE(HeaderStatusToHResult(status));
             }
 
             unsigned int assemblySizeInByte = ROUNDTOMULTIPLE(header->TotalSize(), CLR_UINT32);
+
+            // bounds check: a structurally invalid size must not drive a read past the region
+            if (header->TotalSize() < headerInBytes || assemblySizeInByte > remaining)
+            {
+                if (!isXIP)
+                {
+                    platform_free(headerBuffer);
+                }
+                NANOCLR_SET_AND_LEAVE(CLR_E_ASSM_UNSUPPORTED_FORMAT);
+            }
 
             if (!isXIP)
             {
@@ -268,46 +322,47 @@ struct Settings
                 memset(assembliesBuffer, 0, assemblySizeInByte);
             }
 
-            // advance stream beyond header
-            BlockStorageStream_Seek(&stream, -headerInBytes, BlockStorageStream_SeekCurrent);
-
-            // read the assembly
-            if (!BlockStorageStream_Read(&stream, &assembliesBuffer, assemblySizeInByte))
+            // rewind to the start of the record and read the whole assembly (absolute, checked)
+            if (!BlockStorageStream_Seek(&stream, recordIndex, BlockStorageStream_SeekBegin) ||
+                !BlockStorageStream_Read(&stream, &assembliesBuffer, assemblySizeInByte))
             {
-                // something wrong with the read, can't continue
-                break;
+                if (!isXIP)
+                {
+                    platform_free(assembliesBuffer);
+                    platform_free(headerBuffer);
+                }
+
+                NANOCLR_SET_AND_LEAVE(CLR_E_NOT_SUPPORTED);
             }
 
             header = (const CLR_RECORD_ASSEMBLY *)assembliesBuffer;
 
             if (!header->GoodAssembly())
             {
-                // check failed, try to continue to the next
-
                 if (!isXIP)
                 {
-                    // release the assembliesBuffer
                     platform_free(assembliesBuffer);
+                    platform_free(headerBuffer);
                 }
 
-                continue;
+                NANOCLR_SET_AND_LEAVE(CLR_E_ASSM_WRONG_CHECKSUM);
             }
 
-            // we have good Assembly
+            // we have a good Assembly
             CLR_RT_Assembly *assm;
 
             // Creates instance of assembly, sets pointer to native functions, links to g_CLR_RT_TypeSystem
-            if (FAILED(LoadAssembly(header, assm)))
+            HRESULT loadHr = LoadAssembly(header, assm);
+            if (FAILED(loadHr))
             {
-                // load failed, try to continue to the next
-
                 if (!isXIP)
                 {
                     // release the assembliesBuffer which has being used and leave
                     platform_free(assembliesBuffer);
+                    platform_free(headerBuffer);
                 }
 
-                continue;
+                NANOCLR_SET_AND_LEAVE(loadHr);
             }
 
             // load successful, mark as deployed
@@ -318,6 +373,8 @@ struct Settings
             {
                 assm->flags |= CLR_RT_Assembly::FreeOnDestroy;
             }
+
+            loadedCount++;
         }
 
         if (!isXIP)
@@ -346,18 +403,57 @@ struct Settings
             NANOCLR_SET_AND_LEAVE(CLR_E_NOT_SUPPORTED);
         }
 
+        uint32_t endIndex;
+        endIndex = stream.Length;
+
 #if defined(CONFIG_NF_FEATURE_HAS_MCUBOOT) && CONFIG_NF_FEATURE_HAS_MCUBOOT
-        // MCUboot partitions have an image_header occupying the first MCUBOOT_HEADER_SIZE bytes. Skip
-        if (!BlockStorageStream_Seek(&stream, MCUBOOT_HEADER_SIZE, BlockStorageStream_SeekBegin))
+        // MCUboot partitions have an image_header occupying the first MCUBOOT_HEADER_SIZE bytes.
+        // Bound the crawl to the payload and skip the header to reach the first record.
         {
+            // BlockStorageStream_Read returns a pointer into the mapped region for XIP/memory-mapped
+            // storage and reads into the supplied buffer otherwise, so always go through the pointer.
+            // (BlockStorageStream_ReadIntoBuffer is not implemented for on-device storage.)
+            struct image_header imageHeader;
+            unsigned char *imageHeaderPtr = (unsigned char *)&imageHeader;
+            const struct image_header *hdr;
+
+            if (!BlockStorageStream_Read(&stream, &imageHeaderPtr, sizeof(imageHeader)))
+            {
+                NANOCLR_SET_AND_LEAVE(CLR_E_NOT_SUPPORTED);
+            }
+
+            hdr = (const struct image_header *)imageHeaderPtr;
+
+            if (hdr->ih_magic == 0xFFFFFFFF)
+            {
+                // erased slot: there is no deployment image, nothing to load
+                NANOCLR_SET_AND_LEAVE(S_OK);
+            }
+
+            if (hdr->ih_magic != IMAGE_MAGIC || hdr->ih_hdr_size != MCUBOOT_HEADER_SIZE ||
+                ((uint32_t)hdr->ih_hdr_size + hdr->ih_img_size) > stream.Length)
+            {
 #if !defined(BUILD_RTM)
-            CLR_Debug::Printf("ERROR: failed to seek past MCUboot image header in DEPLOYMENT storage\r\n");
+                CLR_Debug::Printf(
+                    "ERROR: invalid MCUboot image header in DEPLOYMENT storage (magic 0x%08X, header %u, image %u)\r\n",
+                    (unsigned int)hdr->ih_magic,
+                    (unsigned int)hdr->ih_hdr_size,
+                    (unsigned int)hdr->ih_img_size);
 #endif
-            NANOCLR_SET_AND_LEAVE(CLR_E_NOT_SUPPORTED);
+                NANOCLR_SET_AND_LEAVE(CLR_E_NOT_SUPPORTED);
+            }
+
+            endIndex = (uint32_t)hdr->ih_hdr_size + hdr->ih_img_size;
+
+            // skip past the MCUboot image header to the first assembly record
+            if (!BlockStorageStream_Seek(&stream, hdr->ih_hdr_size, BlockStorageStream_SeekBegin))
+            {
+                NANOCLR_SET_AND_LEAVE(CLR_E_NOT_SUPPORTED);
+            }
         }
 #endif
 
-        NANOCLR_CHECK_HRESULT(ContiguousBlockAssemblies(stream));
+        NANOCLR_CHECK_HRESULT(ContiguousBlockAssemblies(stream, endIndex));
 
         NANOCLR_NOCLEANUP();
     }

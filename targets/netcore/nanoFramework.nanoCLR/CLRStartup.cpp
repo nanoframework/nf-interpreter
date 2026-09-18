@@ -344,9 +344,11 @@ struct Settings
     {
         NANOCLR_HEADER();
 
-        if (header->GoodAssembly() == false)
+        CLR_RECORD_ASSEMBLY::HeaderStatus status = header->CheckHeader();
+
+        if (status != CLR_RECORD_ASSEMBLY::HeaderStatus_Valid)
         {
-            wprintf(L"Invalid assembly format for assembly '%s'\n", src);
+            wprintf(L"Invalid assembly format for assembly '%s' (status %d)\n", src, (int)status);
 
             wprintf(L"Header is: ");
             for (size_t i = 0; i < sizeof(header->marker); i++)
@@ -356,7 +358,20 @@ struct Settings
 
             wprintf(L"\n");
 
-            NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
+            if (status == CLR_RECORD_ASSEMBLY::HeaderStatus_BadHeaderCrc)
+            {
+                NANOCLR_SET_AND_LEAVE(CLR_E_ASSM_WRONG_CHECKSUM);
+            }
+
+            NANOCLR_SET_AND_LEAVE(CLR_E_ASSM_UNSUPPORTED_FORMAT);
+        }
+
+        // header is a valid NFMRK2 record: also verify the assembly body CRC
+        if (header->GoodAssembly() == false)
+        {
+            wprintf(L"Invalid assembly checksum for assembly '%s'\n", src);
+
+            NANOCLR_SET_AND_LEAVE(CLR_E_ASSM_WRONG_CHECKSUM);
         }
 
         NANOCLR_NOCLEANUP();
@@ -402,8 +417,31 @@ struct Settings
             header = (CLR_RECORD_ASSEMBLY *)&buffer[0];
             headerEnd = (CLR_RECORD_ASSEMBLY *)&buffer[buffer.size() - 1];
 
-            while (header + 1 <= headerEnd && header->GoodAssembly())
+            while (header + 1 <= headerEnd)
             {
+                CLR_RECORD_ASSEMBLY::HeaderStatus status = header->CheckHeader();
+
+                if (status == CLR_RECORD_ASSEMBLY::HeaderStatus_Erased)
+                {
+                    break;
+                }
+
+                if (status != CLR_RECORD_ASSEMBLY::HeaderStatus_Valid || header->GoodAssembly() == false)
+                {
+                    wprintf(
+                        L"ERROR: assembly record at offset %u: not a supported assembly (status %d)\n",
+                        (unsigned int)((CLR_UINT8 *)header - (CLR_UINT8 *)&buffer[0]),
+                        (int)status);
+
+                    if (status == CLR_RECORD_ASSEMBLY::HeaderStatus_BadHeaderCrc ||
+                        status == CLR_RECORD_ASSEMBLY::HeaderStatus_Valid)
+                    {
+                        NANOCLR_SET_AND_LEAVE(CLR_E_ASSM_WRONG_CHECKSUM);
+                    }
+
+                    NANOCLR_SET_AND_LEAVE(CLR_E_ASSM_UNSUPPORTED_FORMAT);
+                }
+
                 auto *bufferSub = new CLR_RT_Buffer();
                 CLR_RECORD_ASSEMBLY *headerSub;
                 CLR_RT_Assembly *assm;
