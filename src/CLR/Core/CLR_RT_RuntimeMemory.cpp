@@ -138,6 +138,10 @@ unsigned int
 #ifndef NANOCLR_NO_IL_INLINE
 unsigned int
     g_scratchInlineBuffer[INLINE_SIZE_BYTES * PLATFORM_DEPENDENT_INLINE_BUFFER_SIZE / sizeof(unsigned int) + 1];
+
+static_assert(
+    sizeof(g_scratchInlineBuffer) >= PLATFORM_DEPENDENT_INLINE_BUFFER_SIZE * sizeof(CLR_RT_InlineBuffer),
+    "g_scratchInlineBuffer is too small for PLATFORM_DEPENDENT_INLINE_BUFFER_SIZE inline frames");
 #endif
 
 //--//
