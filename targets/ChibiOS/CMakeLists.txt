@@ -182,7 +182,7 @@ endif()
 
 
 # include FatFS if SDCard or USB MSD are ON
-if(NF_FEATURE_HAS_SDCARD OR NF_FEATURE_HAS_USB_MSD OR NF_FEATURE_MCUBOOT_HAS_SDCARD)
+if(NF_FEATURE_HAS_SDCARD OR NF_FEATURE_HAS_USB_MSD OR NF_FEATURE_MCUBOOT_HAS_SDCARD OR NF_FEATURE_MCUBOOT_HAS_USB_MSD)
 
     # check if FATFS_SOURCE was specified or if it's empty (default is empty)
     set(NO_FATFS_SOURCE TRUE)
@@ -248,10 +248,7 @@ if(NF_FEATURE_HAS_SDCARD OR NF_FEATURE_HAS_USB_MSD OR NF_FEATURE_MCUBOOT_HAS_SDC
 
 endif()
 
-# Populate MCUBOOT_FATFS_SOURCES/INCLUDE_DIRS (FatFs core only) for MCUboot.
-# SDC HAL driver stack and fatfs_diskio_boot.c are added directly in MCUboot/CMakeLists.txt
-# alongside the other ChibiOS HAL files gated by HAL_USE_SDC in halconf.h.
-if(NF_FEATURE_MCUBOOT_HAS_SDCARD)
+if(NF_FEATURE_MCUBOOT_HAS_SDCARD OR NF_FEATURE_MCUBOOT_HAS_USB_MSD)
 
     find_package(FATFS REQUIRED)
 

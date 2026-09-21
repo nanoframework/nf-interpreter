@@ -11,9 +11,11 @@
 //   STM32 HAL flash driver (stm32FlashWrite / stm32FlashErase).
 //   Internal flash is memory-mapped (XIP); reads use direct memcpy.
 //
-// SECONDARY SLOTS: Discovery has no external SPI/QSPI flash. Secondary slots are
-//   backed by FatFs files on the SD card (img0_sec.bin / img1_sec.bin) via
-//   fatfs_flash_area_read/write/erase.
+// SECONDARY SLOTS: Discovery has no external SPI/QSPI flash. The table names
+//   FLASH_DEVICE_EXTERNAL_SDCARD for the secondary slots but no backend exists for it,
+//   so flash_area_read/write/erase fail and MCUboot boots the primary slot directly.
+//   SD card is an *update medium* (see MCUboot/common/mcuboot_media_import.c), not a
+//   slot; a secondary slot on real NVM is still to be defined for this board.
 
 #include <stdint.h>
 #include <stddef.h>
@@ -38,7 +40,6 @@ int stm32FlashErase(uint32_t address);
 
 #include "mcuboot_board_iface.h"
 
-
 // Discovery has no external SPI/QSPI flash device.
 // Secondary slots use the SD card (via FatFs); SD card init is handled
 // separately by mcuboot_sdcard_init() in mcuboot_sdcard_boot.c.
@@ -48,10 +49,6 @@ int mcuboot_ext_flash_init(void)
 }
 
 #endif // NF_MCUBOOT_BOOTLOADER
-
-#if (CONFIG_NF_FEATURE_MCUBOOT_HAS_SDCARD == 1)
-#include <mcuboot_fatfs_flash_area.h>
-#endif
 
 // clang-format off
 static const struct flash_area s_flash_areas[] = {
@@ -117,12 +114,6 @@ int flash_area_read(const struct flash_area *area, uint32_t off, void *dst, uint
         memcpy(dst, (const void *)(uintptr_t)(area->fa_off + off), len);
         return 0;
     }
-#if (CONFIG_NF_FEATURE_MCUBOOT_HAS_SDCARD == 1)
-    else if (area->fa_device_id == FLASH_DEVICE_EXTERNAL_SDCARD)
-    {
-        return fatfs_flash_area_read(area, off, dst, len);
-    }
-#endif
 
     return -1;
 }
@@ -134,12 +125,6 @@ int flash_area_write(const struct flash_area *area, uint32_t off, const void *sr
         // stm32FlashWrite() returns true (non-zero) on success; MCUboot expects 0 on success.
         return stm32FlashWrite(area->fa_off + off, len, (const uint8_t *)src) ? 0 : -1;
     }
-#if (CONFIG_NF_FEATURE_MCUBOOT_HAS_SDCARD == 1)
-    else if (area->fa_device_id == FLASH_DEVICE_EXTERNAL_SDCARD)
-    {
-        return fatfs_flash_area_write(area, off, src, len);
-    }
-#endif
 
     return -1;
 }
@@ -159,14 +144,10 @@ int flash_area_erase(const struct flash_area *area, uint32_t off, uint32_t len)
                 return -1;
             }
             erase_addr = stm32_f7xx_next_sector_boundary(erase_addr);
+
+            MCUBOOT_WATCHDOG_FEED();
         }
     }
-#if (CONFIG_NF_FEATURE_MCUBOOT_HAS_SDCARD == 1)
-    else if (area->fa_device_id == FLASH_DEVICE_EXTERNAL_SDCARD)
-    {
-        return fatfs_flash_area_erase(area, off, len);
-    }
-#endif
     else
     {
         return -1;

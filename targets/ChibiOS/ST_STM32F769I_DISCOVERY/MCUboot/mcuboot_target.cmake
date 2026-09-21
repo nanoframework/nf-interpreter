@@ -3,12 +3,6 @@
 # See LICENSE file in the project root for full license information.
 #
 
-# ST_STM32F769I_DISCOVERY — STM32F769NI, SD card FatFs secondary slots.
-# Called from MCUboot/CMakeLists.txt via include() after the series-common
-# variables (MCUBOOT_SERIES_COMMON_*) have been set for STM32F7xx.
-# Secondary slots use SD card FatFs files; FatFs + SDC driver are included
-# when NF_FEATURE_MCUBOOT_HAS_SDCARD is enabled.
-
 set(MCUBOOT_EXTRA_SOURCES
     ${CMAKE_SOURCE_DIR}/targets/ChibiOS/ST_STM32F769I_DISCOVERY/board.c
     ${CMAKE_SOURCE_DIR}/targets/ChibiOS/ST_STM32F769I_DISCOVERY/MCUboot/mcuboot_flash_map_boot.c
@@ -19,7 +13,7 @@ set(MCUBOOT_EXTRA_SOURCES
 
 if(NF_FEATURE_MCUBOOT_HAS_SDCARD)
     list(APPEND MCUBOOT_EXTRA_SOURCES
-        ${CMAKE_SOURCE_DIR}/targets/ChibiOS/ST_STM32F769I_DISCOVERY/MCUboot/mcuboot_sdcard_boot.c
+        ${CMAKE_SOURCE_DIR}/targets/ChibiOS/ST_STM32F769I_DISCOVERY/MCUboot/mcuboot_media_boot.c
     )
 endif()
 

@@ -10,11 +10,13 @@
 //   2. main():
 //        a. halInit()  — clock, GPIO, enabled peripheral drivers, board.c
 //        b. chSysInit() — start the ChibiOS RT kernel (OSAL for SPI/WSPI/SERIAL)
-//        c. Initialise external storage (mcuboot_ext_flash_init or mcuboot_sdcard_init)
+//        c. Initialise the external flash holding the secondary slots (mcuboot_ext_flash_init)
 //        d. Check recovery button and run SMP serial recovery if pressed (mcuboot_serial_recovery_try)
 //           If recovery is triggered, this never returns (device resets after image upload)
-//        e. Run MCUboot (two boot_go_for_image_id passes) — only if recovery was not triggered
-//        f. Launch the selected image (do_boot)
+//        e. Sweep removable update media (SD card / USB MSD) for signed images and stage
+//           them into the secondary slots (mcuboot_media_import_run), when enabled
+//        f. Run MCUboot (two boot_go_for_image_id passes) — only if recovery was not triggered
+//        g. Launch the selected image (do_boot)
 //
 // do_boot() performs the low-level Cortex image launch:
 //   - Stop SysTick so it cannot fire during handoff
@@ -42,6 +44,12 @@
 
 #include "mcuboot_board_iface.h"
 #include "mcuboot_serial_port.h"
+
+#if (defined(CONFIG_NF_FEATURE_MCUBOOT_HAS_SDCARD) && CONFIG_NF_FEATURE_MCUBOOT_HAS_SDCARD) ||                         \
+    (defined(CONFIG_NF_FEATURE_MCUBOOT_HAS_USB_MSD) && CONFIG_NF_FEATURE_MCUBOOT_HAS_USB_MSD)
+#define NF_MCUBOOT_MEDIA_IMPORT 1
+#include <mcuboot_media_import.h>
+#endif
 
 // Image indices (convention: 0 = nanoCLR, 1 = deployment).
 // Mirrors MCUboot_RuntimeInterface.h, which is a nanoCLR-side header the bootloader
@@ -111,14 +119,6 @@ int main(void)
     // proceed, but any upgrade requiring the secondary slot will fail gracefully
     (void)mcuboot_ext_flash_init();
 
-#if defined(CONFIG_NF_FEATURE_MCUBOOT_HAS_SDCARD) && CONFIG_NF_FEATURE_MCUBOOT_HAS_SDCARD
-    // Initialise the SD card and mount the FatFs filesystem for the secondary slot.
-    // Non-fatal: a failed SD card init causes boot_go() to skip external slots
-    // and boot the primary slot directly.
-
-    (void)mcuboot_sdcard_init();
-#endif
-
     // Start the LED heartbeat
     mcuboot_heartbeat_start();
 
@@ -126,6 +126,11 @@ int main(void)
     // Check recovery button and - if held - run the SMP serial recovery loop.
     // If the button is not pressed, returns immediately and boot continues.
     mcuboot_serial_recovery_try();
+#endif
+
+#if defined(NF_MCUBOOT_MEDIA_IMPORT)
+    // Look for signed update images on removable media
+    mcuboot_media_import_run();
 #endif
 
     // Run MCUboot image validation and upgrade logic as two boot_go_for_image_id() passes -

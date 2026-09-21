@@ -25,6 +25,9 @@
 
 #include "mcuconf.h"
 
+// HAL_USE_SDC / HAL_USBH_USE_MSD follow the MCUboot update-media switches
+#include <target_platform.h>
+
 /**
  * @brief   Enables the HAL safety subsystem.
  */
@@ -566,6 +569,9 @@
 
 // header for nanoFramework overlay
 #include "halconf_nf.h"
+
+// header for ChibiOS-Contrib (USB host for the USB MSD update medium)
+#include "halconf_community.h"
 
 #endif /* HALCONF_H */
 

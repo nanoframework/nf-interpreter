@@ -60,6 +60,22 @@ W25Q128 QSPI (16 MB) — unchanged, still fully allocated to LittleFS FS1.
 | `MCUBOOT_ERASE_PROGRESSIVELY` | enabled (via swap-using-offset) | serial-recovery upload erases the slot sector-by-sector as chunks arrive |
 | `MCUBOOT_MAX_IMG_SECTORS` | 64 | largest slot = image 0 secondary, 1536 kB ÷ 256 kB = 6 logical sectors |
 
+## Update files on SD card / USB MSD
+
+Both are enabled for this board (`CONFIG_NF_FEATURE_MCUBOOT_HAS_SDCARD`, `CONFIG_NF_FEATURE_MCUBOOT_HAS_USB_MSD`). The card and the stick stay the regular storage volumes the application uses through the file system (`D:` / `E:`); they are not slots. Before the boot passes the bootloader looks in their root directory for update files and stages them into the AT25SF641 secondary slots above (`mcuboot_media_boot.c`, engine in `MCUboot/common/MCUboot_media_import.c`), then releases the devices for nanoCLR.
+
+| Item | Value |
+|---|---|
+| Sweep order | USB MSD (OTG_HS, `USBHD2`, FatFs `E:`) first, then SD card (SDMMC1, `SDCD1`, FatFs `D:`) — first medium with a file for an image wins |
+| Files (root of the volume) | `nano-clr-update-*.bin` → image 0, `nano-deployment-update-*.bin` → image 1 (e.g. `nano-clr-update-1.2.3.bin`); two separate signed files (`imgtool sign --header-size 0x400 --pad-header --slot-size <usable>`), no bundle. Several matches → the highest image version wins |
+| Placement | one logical sector in (`+0x40000`) as `MCUBOOT_SWAP_USING_OFFSET` requires; max file size = usable image size (1024 kB / 256 kB) |
+| After import | slot marked pending (**test** swap; the CLR confirms), file kept, `<file>.used` gets a line `<STM32 UID hex> <version> <size>` |
+| Skipped when | `.used` already lists this device for that version/size · a swap/revert is in flight for the image · the primary already runs that exact version (then tagged) · header/size invalid (left untouched) |
+| USB bring-up budget | nothing attached: gives up after `MCUBOOT_USB_MSD_ATTACH_TIMEOUT_MS` (1 s, judged on the live `HPRT.PCSTS` bit); device attached: up to `MCUBOOT_USB_MSD_ENUM_TIMEOUT_MS` (6 s) for enumeration + LUN ready. Outcome is logged either way |
+| Bootloader cost | +17.5 kB with USB host (68 424 B of 96 kB, MinSizeRel); process stack raised to 8 kB for the FatFs/USBH paths |
+
+Signature verification is MCUboot's: a bad signature is caught by `boot_go()` and the secondary slot erased; the `.used` line prevents the same file from being staged again on this device.
+
 ## Serial recovery
 
 | Item | Value |

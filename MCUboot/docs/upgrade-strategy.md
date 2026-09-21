@@ -55,12 +55,15 @@ Supported external storage media:
 | Media | Driver in nf-interpreter | Sector / erase unit for MCUboot |
 |---|---|---|
 | (Q)SPI NOR flash | `hal_lfs_read/prog/erase` (LittleFS) | 64 kB blocks (hardware erase unit) |
-| SD card | FatFs | 4 kB virtual (file-backed; `flash_area_erase` fills with 0xFF) |
-| USB MSD | FatFs | 4 kB virtual (same as SD card) |
 
-> **FatFs bootloader size risk:** FatFs integration may push the MCUboot binary beyond the
-> 64 KB budget. This must be validated in Phase 1 before committing to SD card or USB MSD.
-> The (Q)SPI + LittleFS path is the lowest-risk first implementation.
+SD card and USB MSD are **not** secondary-slot media: MCUboot only ever swaps from the
+(Q)SPI secondary slot. They remain the regular storage volumes the application uses through
+the file system — when `NF_FEATURE_MCUBOOT_HAS_SDCARD` / `NF_FEATURE_MCUBOOT_HAS_USB_MSD` are
+enabled the bootloader additionally reads update files (`nano-clr-update-*.bin`,
+`nano-deployment-update-*.bin`) from their root directory and stages them into the secondary
+slot before running the swap logic (see `MCUboot/common/MCUboot_media_import.c` and section
+9.1 of `docs/mcuboot-stm32-porting-guide.md`). Measured cost on ORGPAL_PALTHREE (MinSizeRel):
+FatFs + SDC + import engine ≈ 8 kB, USB host + MSD ≈ 12 kB.
 
 #### STM32 Target Decision Table
 

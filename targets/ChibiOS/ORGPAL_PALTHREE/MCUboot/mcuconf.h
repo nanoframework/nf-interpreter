@@ -438,8 +438,9 @@
 #define STM32_WSPI_QUADSPI1_DMA_STREAM      STM32_DMA_STREAM_ID(2, 7)
 #define STM32_WSPI_QUADSPI1_PRESCALER_VALUE 2
 
-// header for nanoFramework overlay drivers
 #include "mcuconf_nf.h"
+
+#include "mcuconf_community.h"
 
 #endif /* MCUCONF_H */
 

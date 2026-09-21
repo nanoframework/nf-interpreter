@@ -50,10 +50,6 @@ int mcuboot_ext_flash_init(void)
 
 #endif // NF_MCUBOOT_BOOTLOADER
 
-#if (CONFIG_NF_FEATURE_MCUBOOT_HAS_USB_MSD == 1)
-#include <mcuboot_fatfs_flash_area.h>
-#endif
-
 // clang-format off
 static const struct flash_area s_flash_areas[] = {
     { .fa_id = FLASH_AREA_BOOTLOADER,        .fa_device_id = FLASH_DEVICE_INTERNAL_FLASH, .fa_off = NF_MCUBOOT_SLOT_BOOTLOADER_OFF, .fa_size = NF_MCUBOOT_SLOT_BOOTLOADER_SIZE },
@@ -122,12 +118,6 @@ int flash_area_read(const struct flash_area *area, uint32_t off, void *dst, uint
     {
         return W25Q512_Read((uint8_t *)dst, area->fa_off + off, len) ? 0 : -1;
     }
-#if (CONFIG_NF_FEATURE_MCUBOOT_HAS_USB_MSD == 1)
-    else if (area->fa_device_id == FLASH_DEVICE_EXTERNAL_USBMSD)
-    {
-        return fatfs_flash_area_read(area, off, dst, len);
-    }
-#endif
 
     return -1;
 }
@@ -143,12 +133,6 @@ int flash_area_write(const struct flash_area *area, uint32_t off, const void *sr
     {
         return W25Q512_Write((uint8_t *)src, area->fa_off + off, len) ? 0 : -1;
     }
-#if (CONFIG_NF_FEATURE_MCUBOOT_HAS_USB_MSD == 1)
-    else if (area->fa_device_id == FLASH_DEVICE_EXTERNAL_USBMSD)
-    {
-        return fatfs_flash_area_write(area, off, src, len);
-    }
-#endif
 
     return -1;
 }
@@ -168,6 +152,8 @@ int flash_area_erase(const struct flash_area *area, uint32_t off, uint32_t len)
                 return -1;
             }
             erase_addr = stm32_f7xx_next_sector_boundary(erase_addr);
+
+            MCUBOOT_WATCHDOG_FEED();
         }
     }
     else if (area->fa_device_id == FLASH_DEVICE_EXTERNAL_FLASH)
@@ -182,14 +168,10 @@ int flash_area_erase(const struct flash_area *area, uint32_t off, uint32_t len)
                 return -1;
             }
             erase_addr += MCUBOOT_EXTERNAL_FLASH_SECTOR_SIZE;
+
+            MCUBOOT_WATCHDOG_FEED();
         }
     }
-#if (CONFIG_NF_FEATURE_MCUBOOT_HAS_USB_MSD == 1)
-    else if (area->fa_device_id == FLASH_DEVICE_EXTERNAL_USBMSD)
-    {
-        return fatfs_flash_area_erase(area, off, len);
-    }
-#endif
     else
     {
         return -1;

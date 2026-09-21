@@ -278,21 +278,29 @@ INCLUDE rules_memory.ld
 
 ## 9. Secondary Slot Options
 
-Three secondary slot backends are supported. Choose the one appropriate for the target's external storage.
+MCUboot knows exactly two slots per image (primary + secondary); the secondary slot must live on non-volatile memory the `flash_area_*` port can read, write and erase in place. Two backends are supported for that. An SD card or USB stick is **not** a slot: it stays the regular storage volume the application uses through the file system, and the bootloader merely reads update files from it, see [9.1](#91-update-files-on-sd-card--usb-msd).
 
 **SPI flash** — secondary slots backed by a SPI NOR flash device accessed via the ChibiOS `SPI` HAL driver. `mcuboot_ext_flash_init()` initialises the SPI bus and the device. Read/write/erase are routed through the device-specific driver. Set `MCUBOOT_EXTERNAL_FLASH_SECTOR_SIZE` to the device's erase unit (typically 4 kB for sub-sector erase or 64 kB for block erase). See ORGPAL_PALTHREE (AT25SF641 via SPID1) as a reference.
 
 **QSPI flash** — same as SPI flash but accessed via the STM32 QUADSPI peripheral. Set `MCUBOOT_EXTERNAL_FLASH_SECTOR_SIZE` to match the device's erase unit. See ORGPAL_PALX (W25Q512) as a reference.
 
-**SD card via FatFs** — secondary slot images are stored as files on an SD card. Enabled by the `NF_FEATURE_MCUBOOT_HAS_SDCARD` Kconfig flag.
+When `mcuboot_ext_flash_init()` returns -1, MCUboot boots the primary slot directly without attempting an upgrade (graceful degradation).
 
-- Files: `/mcuboot/img0_sec.bin` (Image 0) and `/mcuboot/img1_sec.bin` (Image 1)
-- `mcuboot_sdcard_init()` in `mcuboot_sdcard_boot.c` mounts the SD card via `sdcStart()` + `f_mount()`
-- The shared `mcuboot_fatfs_flash_area.c` (in `targets/ChibiOS/_mcuboot/`) implements the flash area read/write/erase operations using FatFs file I/O
-- Set `MCUBOOT_EXTERNAL_FLASH_SECTOR_SIZE = 4U * 1024U` (virtual sector granularity)
-- Add `mcuboot_sdcard_boot.c` to `mcuboot_target.cmake` under the `NF_FEATURE_MCUBOOT_HAS_SDCARD` guard
+### 9.1 Update files on SD card / USB MSD
 
-When `mcuboot_ext_flash_init()` returns -1 and no SD card is configured, MCUboot boots the primary slot directly without attempting an upgrade (graceful degradation). See ST_STM32F769I_DISCOVERY and ORGPAL_PALTHREE as references.
+Enabled per board by `NF_FEATURE_MCUBOOT_HAS_SDCARD` and/or `NF_FEATURE_MCUBOOT_HAS_USB_MSD` (each depends on the matching runtime feature, whose `ffconf.h` and driver configuration the bootloader reuses). Nothing changes for the application: the card/stick remains its ordinary FatFs volume; the bootloader mounts it for a few seconds before hand-off and releases it again.
+
+Before `boot_go()`, `mcuboot_media_import_run()` (`MCUboot/common/MCUboot_media_import.c`) sweeps the board's media table in order and, for every image index, enumerates the root directory of the volume for files matching `nano-clr-update-*.bin` (image 0) and `nano-deployment-update-*.bin` (image 1) — patterns overridable through `MCUBOOT_IMPORT_IMG0_PATTERN` / `MCUBOOT_IMPORT_IMG1_PATTERN`. Among the matches whose MCUboot header is sane and that fit the usable slot size, the one with the highest image version is chosen; it is then copied into the image's secondary slot (one logical sector in under `MCUBOOT_SWAP_USING_OFFSET`), the slot is marked pending for a **test** swap and the file is tagged as consumed by this device: a line `<device unique id> <version> <size>` is appended to `<file name>.used` next to it. The same medium therefore updates any number of devices, and a device does not re-import a file it already consumed. The import is skipped, and the file left untagged, while a swap/revert is in flight for that image; a file whose version already runs in the primary slot is tagged and skipped. Signature verification stays with MCUboot: a bad signature is found by `boot_go()`, which erases the secondary slot as usual.
+
+The engine is platform-neutral and talks to media through `mcuboot_media_ops` (mount/unmount, find, open/read/close, is_used/mark_used) declared in `MCUboot/include/mcuboot_media_import.h`. What a board provides:
+
+- `targets/ChibiOS/_mcuboot/mcuboot_media_fatfs.c` already implements the ops for any FatFs logical drive; reuse it as is.
+- `targets/ChibiOS/<BOARD>/MCUboot/mcuboot_media_boot.c`: one `mcuboot_media_fatfs_ctx` per medium (drive letter as in `FF_VOLUME_STRS`, plus `device_init`/`device_deinit` that bring the block device up and down — `sdcStart`/`sdcConnect` for SD, `usbhStart` + `usbhMainLoop` polling + `usbhmsdLUNConnect` for USB MSD) and `mcuboot_media_table()` listing them in sweep order. See ORGPAL_PALTHREE.
+- The bootloader FatFs diskio (`targets/ChibiOS/_mcuboot/fatfs_diskio_boot.c`) maps physical drive 0/1 to `SDCD1`/`MSBLKD[0]` following the same `HAL_USE_SDC`/`HAL_USBH_USE_MSD` rules as `ffconf.h`; the board's bootloader `target_platform.h` derives those two from the Kconfig switches.
+- USB MSD additionally needs, in the board's `MCUboot/` folder, a `halconf_community.h` (`HAL_USE_USBH`, `HAL_USBH_USE_MSD`, hub and debug off) and a `mcuconf_community.h` (which OTG is the host), plus `CH_CFG_USE_SEMAPHORES` and `CH_CFG_USE_HEAP` in `chconf.h`; the ChibiOS-Contrib sources are added by `MCUboot/CMakeLists.txt`. Budget roughly 15 kB of flash for the host stack.
+- `mcuboot_media_device_id()` (STM32 96-bit UID) and `mcuboot_media_watchdog_feed()` have defaults in `targets/ChibiOS/_mcuboot/mcuboot_hal_stubs.c`.
+
+Another platform implements the same ops on its own filesystem API; `MCUboot/port/esp32/mcuboot_media_esp32_sample.c` is a non-compiled sketch of that for ESP-IDF.
 
 ---
 
@@ -327,9 +335,9 @@ set(MCUBOOT_EXTRA_SOURCES
     ${CMAKE_SOURCE_DIR}/targets/ChibiOS/<BOARD>/MCUboot/mcuboot_detect_pin.c
 )
 
-if(NF_FEATURE_MCUBOOT_HAS_SDCARD)
+if(NF_FEATURE_MCUBOOT_HAS_SDCARD OR NF_FEATURE_MCUBOOT_HAS_USB_MSD)
     list(APPEND MCUBOOT_EXTRA_SOURCES
-        ${CMAKE_SOURCE_DIR}/targets/ChibiOS/<BOARD>/MCUboot/mcuboot_sdcard_boot.c
+        ${CMAKE_SOURCE_DIR}/targets/ChibiOS/<BOARD>/MCUboot/mcuboot_media_boot.c
     )
 endif()
 

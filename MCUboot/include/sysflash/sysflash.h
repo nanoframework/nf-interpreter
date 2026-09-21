@@ -14,7 +14,8 @@
 //   Image 1 = deployment area   (IDs 4, 5)
 //
 // FLASH_DEVICE_EXTERNAL_FLASH is used by the STM32 port for the secondary (update)
-// slots that reside on (Q)SPI flash, SD card, or USB MSD.
+// slots that reside on (Q)SPI flash. FLASH_DEVICE_EXTERNAL_SDCARD/_USBMSD identify SD
+// card / USB MSD as off-chip storage
 
 #ifndef __SYSFLASH_H__
 #define __SYSFLASH_H__
@@ -26,7 +27,7 @@
 //
 #define FLASH_DEVICE_INTERNAL_FLASH  0 // On-chip flash (primary slot for all targets)
 #define FLASH_DEVICE_EXTERNAL_FLASH  1 // Off-chip storage: (Q)SPI flash
-#define FLASH_DEVICE_EXTERNAL_SDCARD 2 // Off-chip storage: SD card, USB MSD (STM32 secondary slots)
+#define FLASH_DEVICE_EXTERNAL_SDCARD 2 // Off-chip storage: SD card
 #define FLASH_DEVICE_EXTERNAL_USBMSD 3 // Off-chip storage: USB MSD
 
 //

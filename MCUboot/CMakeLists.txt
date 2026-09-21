@@ -334,7 +334,10 @@ if(${TARGET_SERIES} STREQUAL "STM32F7xx")
     # The linker script is board-specific and supplied by nf_setup_mcuboot_target_build.
     # -L adds the ChibiOS GCC ld directory so INCLUDE directives in the linker script
     # can resolve rules_stacks.ld, rules_code.ld, rules_data.ld, rules_memory.ld.
-    # --defsym provides the stack/heap sizes expected by rules_stacks.ld.
+    # --defsym provides the stack/heap sizes expected by rules_stacks.ld. main() runs on the
+    # process stack: image validation (ECDSA), swap, serial recovery (zcbor) and the media
+    # import (FatFs with LFN, USB host enumeration) all run there, so keep it roomy - RAM is
+    # not the constraint on these parts.
     set(MCUBOOT_SERIES_COMMON_LINK_FLAGS
         "-mthumb -mcpu=cortex-m7 -mfpu=fpv5-sp-d16 -mfloat-abi=hard -mabi=aapcs \
          -Wl,--gc-sections \
@@ -344,20 +347,47 @@ if(${TARGET_SERIES} STREQUAL "STM32F7xx")
          --specs=nosys.specs \
          -L${chibios_SOURCE_DIR}/os/common/startup/ARMCMx/compilers/GCC/ld \
          -Wl,--defsym=__main_stack_size__=0x400 \
-         -Wl,--defsym=__process_stack_size__=0x800")
+         -Wl,--defsym=__process_stack_size__=0x2000")
 
-    # FatFs core + ChibiOS platform diskio for targets using SD card as secondary slot storage.
-    if(NF_FEATURE_MCUBOOT_HAS_SDCARD)
+    if(NF_FEATURE_MCUBOOT_HAS_SDCARD OR NF_FEATURE_MCUBOOT_HAS_USB_MSD)
 
         list(APPEND MCUBOOT_SERIES_COMMON_SOURCES
             ${MCUBOOT_FATFS_SOURCES}
             ${CMAKE_SOURCE_DIR}/targets/ChibiOS/_mcuboot/fatfs_diskio_boot.c
-            ${CMAKE_SOURCE_DIR}/targets/ChibiOS/_mcuboot/mcuboot_fatfs_flash_area.c
+            ${CMAKE_SOURCE_DIR}/targets/ChibiOS/_mcuboot/mcuboot_media_fatfs.c
+            ${CMAKE_SOURCE_DIR}/MCUboot/common/MCUboot_media_import.c
         )
 
         list(APPEND MCUBOOT_SERIES_COMMON_INCLUDES ${MCUBOOT_FATFS_INCLUDE_DIRS})
 
-    endif() # NF_FEATURE_MCUBOOT_HAS_SDCARD
+    endif() # NF_FEATURE_MCUBOOT_HAS_SDCARD OR NF_FEATURE_MCUBOOT_HAS_USB_MSD
+
+    if(NF_FEATURE_MCUBOOT_HAS_USB_MSD)
+
+        FetchContent_GetProperties(chibios-contrib)
+
+        list(APPEND MCUBOOT_SERIES_COMMON_SOURCES
+            # kernel heap: the USBH core allocates the full configuration descriptor from it
+            ${chibios_SOURCE_DIR}/os/oslib/src/chmemheaps.c
+            ${chibios-contrib_SOURCE_DIR}/os/hal/src/hal_usbh.c
+            ${chibios-contrib_SOURCE_DIR}/os/hal/src/usbh/hal_usbh_msd.c
+            # root port object init lives here even with HAL_USBH_USE_HUB FALSE
+            ${chibios-contrib_SOURCE_DIR}/os/hal/src/usbh/hal_usbh_hub.c
+            ${chibios-contrib_SOURCE_DIR}/os/hal/src/usbh/hal_usbh_desciter.c
+            ${chibios-contrib_SOURCE_DIR}/os/hal/ports/STM32/LLD/USBHv1/hal_usbh_lld.c
+        )
+
+        set_source_files_properties(${chibios-contrib_SOURCE_DIR}/os/hal/src/hal_usbh.c PROPERTIES COMPILE_FLAGS -Wno-type-limits)
+
+        # Contrib's real hal_community.h (it pulls in hal_usbh.h) replaces the dummy one.
+        list(REMOVE_ITEM MCUBOOT_SERIES_COMMON_INCLUDES ${CMAKE_SOURCE_DIR}/targets/ChibiOS/_nf-overlay/os/hal/include/dummy_includes)
+
+        list(APPEND MCUBOOT_SERIES_COMMON_INCLUDES
+            ${chibios-contrib_SOURCE_DIR}/os/hal/include
+            ${chibios-contrib_SOURCE_DIR}/os/hal/ports/STM32/LLD/USBHv1
+        )
+
+    endif() # NF_FEATURE_MCUBOOT_HAS_USB_MSD
 
     # When serial recovery is enabled, add the full SMP/mcumgr serial stack:
     if(NF_MCUBOOT_SERIAL_RECOVERY)

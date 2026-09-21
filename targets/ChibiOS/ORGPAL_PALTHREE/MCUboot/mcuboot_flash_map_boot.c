@@ -11,15 +11,9 @@
 //   STM32 HAL flash driver (stm32FlashWrite / stm32FlashErase).
 //   Internal flash is memory-mapped (XIP); reads use direct memcpy.
 //
-// Secondary slots are backed by:
-//   - FatFs files on the SD card (SDMMC1) when NF_FEATURE_MCUBOOT_HAS_SDCARD
-//     is enabled:  img0_sec.bin (1536 kB), img1_sec.bin (768 kB)
-//   - AT25SF641 8 MB SPI1 flash when NF_FEATURE_MCUBOOT_HAS_SDCARD is not set
-//
-// SD card access is routed through fatfs_flash_area_read/write/erase
-// (targets/ChibiOS/_mcuboot/mcuboot_fatfs_flash_area.c).
-// SD card initialisation is handled separately by mcuboot_sdcard_init()
-// in mcuboot_sdcard_boot.c; mcuboot_ext_flash_init() returns -1 in that case.
+// SECONDARY SLOTS (FLASH_DEVICE_EXTERNAL_FLASH):
+//   AT25SF641 8 MB SPI1 flash. This is the only staging area MCUboot knows about.
+//   SD card and USB MSD are *update media*, not slots.
 
 #include <stdint.h>
 #include <stddef.h>
@@ -69,8 +63,8 @@ static const SPIConfig s_spi1cfg = {
 };
 
 // Board interface: initialise AT25SF641 via ChibiOS SPI1 HAL.
-// When NF_FEATURE_MCUBOOT_HAS_SDCARD is enabled, SD card initialisation is
-// handled separately by mcuboot_sdcard_init() in mcuboot_sdcard_boot.c.
+// Removable update media (SD card, USB MSD) are brought up separately by the
+// media table in mcuboot_media_boot.c.
 int mcuboot_ext_flash_init(void)
 {
     spiStart(&SPID1, &s_spi1cfg);
@@ -78,10 +72,6 @@ int mcuboot_ext_flash_init(void)
 }
 
 #endif // NF_MCUBOOT_BOOTLOADER
-
-#if (CONFIG_NF_FEATURE_MCUBOOT_HAS_SDCARD == 1 || CONFIG_NF_FEATURE_MCUBOOT_HAS_USB_MSD == 1)
-#include <mcuboot_fatfs_flash_area.h>
-#endif
 
 // clang-format off
 static const struct flash_area s_flash_areas[] = {
@@ -151,12 +141,6 @@ int flash_area_read(const struct flash_area *area, uint32_t off, void *dst, uint
     {
         return AT25SF641_Read((uint8_t *)dst, area->fa_off + off, len) ? 0 : -1;
     }
-#if (CONFIG_NF_FEATURE_MCUBOOT_HAS_SDCARD == 1 || CONFIG_NF_FEATURE_MCUBOOT_HAS_USB_MSD == 1)
-    else if (area->fa_device_id == FLASH_DEVICE_EXTERNAL_SDCARD || area->fa_device_id == FLASH_DEVICE_EXTERNAL_USBMSD)
-    {
-        return fatfs_flash_area_read(area, off, dst, len);
-    }
-#endif
 
     return -1;
 }
@@ -172,12 +156,6 @@ int flash_area_write(const struct flash_area *area, uint32_t off, const void *sr
     {
         return AT25SF641_Write((const uint8_t *)src, area->fa_off + off, len) ? 0 : -1;
     }
-#if (CONFIG_NF_FEATURE_MCUBOOT_HAS_SDCARD == 1 || CONFIG_NF_FEATURE_MCUBOOT_HAS_USB_MSD == 1)
-    else if (area->fa_device_id == FLASH_DEVICE_EXTERNAL_SDCARD || area->fa_device_id == FLASH_DEVICE_EXTERNAL_USBMSD)
-    {
-        return fatfs_flash_area_write(area, off, src, len);
-    }
-#endif
 
     return -1;
 }
@@ -197,6 +175,8 @@ int flash_area_erase(const struct flash_area *area, uint32_t off, uint32_t len)
                 return -1;
             }
             erase_addr = stm32_f7xx_next_sector_boundary(erase_addr);
+
+            MCUBOOT_WATCHDOG_FEED();
         }
     }
     else if (area->fa_device_id == FLASH_DEVICE_EXTERNAL_FLASH)
@@ -214,14 +194,10 @@ int flash_area_erase(const struct flash_area *area, uint32_t off, uint32_t len)
                 return -1;
             }
             erase_addr += MCUBOOT_EXTERNAL_FLASH_SECTOR_SIZE;
+
+            MCUBOOT_WATCHDOG_FEED();
         }
     }
-#if (CONFIG_NF_FEATURE_MCUBOOT_HAS_SDCARD == 1 || CONFIG_NF_FEATURE_MCUBOOT_HAS_USB_MSD == 1)
-    else if (area->fa_device_id == FLASH_DEVICE_EXTERNAL_SDCARD || area->fa_device_id == FLASH_DEVICE_EXTERNAL_USBMSD)
-    {
-        return fatfs_flash_area_erase(area, off, len);
-    }
-#endif
     else
     {
         return -1;

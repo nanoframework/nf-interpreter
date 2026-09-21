@@ -3,9 +3,8 @@
 # See LICENSE file in the project root for full license information.
 #
 
-# ORGPAL_PALTHREE — STM32F769ZI, AT25SF641 SPI1 external flash.
-# Called from MCUboot/CMakeLists.txt via include() after the series-common
-# variables (MCUBOOT_SERIES_COMMON_*) have been set for STM32F7xx.
+# ORGPAL_PALTHREE — STM32F769ZI, AT25SF641 SPI1 external flash (secondary slots),
+# SD card and USB MSD as removable update media.
 
 set(MCUBOOT_EXTRA_SOURCES
     ${CMAKE_SOURCE_DIR}/targets/ChibiOS/ORGPAL_PALTHREE/board.c
@@ -22,9 +21,9 @@ set(MCUBOOT_EXTRA_SOURCES
     ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/OTGv1/hal_usb_lld.c
 )
 
-if(NF_FEATURE_MCUBOOT_HAS_SDCARD)
+if(NF_FEATURE_MCUBOOT_HAS_SDCARD OR NF_FEATURE_MCUBOOT_HAS_USB_MSD)
     list(APPEND MCUBOOT_EXTRA_SOURCES
-        ${CMAKE_SOURCE_DIR}/targets/ChibiOS/ORGPAL_PALTHREE/MCUboot/mcuboot_sdcard_boot.c
+        ${CMAKE_SOURCE_DIR}/targets/ChibiOS/ORGPAL_PALTHREE/MCUboot/mcuboot_media_boot.c
     )
 endif()
 

@@ -192,26 +192,35 @@ config NF_MCUBOOT_HEADER_SIZE
         different alignment.
 
 config NF_FEATURE_MCUBOOT_HAS_SDCARD
-    bool "Enable SD card (FatFs) support in MCUboot"
-    depends on NF_FEATURE_HAS_MCUBOOT
+    bool "Import update images from an SD card in MCUboot"
+    depends on NF_FEATURE_HAS_MCUBOOT && NF_FEATURE_HAS_SDCARD
     default n
     help
         Include the ChibiOS SDC driver and FatFs library in the MCUboot
-        bootloader build. Required when the secondary image slot(s) reside
-        on an SD card accessed via FatFs files. The target's existing
-        ffconf.h is reused so that the same FatFs configuration applies
-        to both the bootloader and the nanoCLR runtime.
+        bootloader build. The SD card stays the regular storage volume the
+        application sees through the file system; at boot, before deciding
+        what to run, MCUboot mounts it and looks in its root directory for
+        update files: nano-clr-update-*.bin (image 0) and
+        nano-deployment-update-*.bin (image 1). The newest valid one per image
+        is copied into the secondary slot, marked pending for a test swap and
+        tagged as consumed by this device in a sidecar file (<file>.used), so
+        the same card can update other devices. The target's existing ffconf.h
+        is reused so that the same FatFs configuration applies to both the
+        bootloader and the nanoCLR runtime.
 
 config NF_FEATURE_MCUBOOT_HAS_USB_MSD
-    bool "Enable USB MSD (FatFs) support in MCUboot"
-    depends on NF_FEATURE_HAS_MCUBOOT
+    bool "Import update images from a USB mass storage device in MCUboot"
+    depends on NF_FEATURE_HAS_MCUBOOT && NF_FEATURE_HAS_USB_MSD
     default n
     help
-        Include the ChibiOS USB MSD driver and FatFs library in the MCUboot
-        bootloader build. Required when the secondary image slot(s) reside
-        on a USB mass-storage device accessed via FatFs files. The target's
-        existing ffconf.h is reused so that the same FatFs configuration applies
-        to both the bootloader and the nanoCLR runtime.
+        Include the ChibiOS-Contrib USB host stack (MSD class driver) and
+        FatFs library in the MCUboot bootloader build. The USB stick stays the
+        regular storage volume the application sees through the file system;
+        at boot MCUboot enumerates it and imports update files from it into
+        the secondary slot, exactly as described for
+        NF_FEATURE_MCUBOOT_HAS_SDCARD. When both media are enabled the board
+        decides the sweep order. Adds roughly 12 kB to the bootloader; check
+        it still fits the bootloader partition.
 
 config NF_FEATURE_MCUBOOT_HEARTBEAT
     bool "Blink the user LED while MCUboot runs"
