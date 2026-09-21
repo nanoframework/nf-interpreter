@@ -191,7 +191,7 @@ HRESULT LITTLEFS_FS_Driver::GetVolumeLabel(const VOLUME_ID *volume, char *volume
 
 //--//
 
-HRESULT LITTLEFS_FS_Driver::Open(const VOLUME_ID *volume, const char *path, void *&handle)
+HRESULT LITTLEFS_FS_Driver::Open(const VOLUME_ID *volume, const char *path, uint32_t access, void *&handle)
 {
     NANOCLR_HEADER();
 
@@ -233,16 +233,19 @@ HRESULT LITTLEFS_FS_Driver::Open(const VOLUME_ID *volume, const char *path, void
     fileExists = (stat(normalizedPath, &info) == FR_OK);
 #endif
 
+    // this goes through the VFS layer, which has no attribute support, so read-only isn't enforced here
     if (fileExists)
     {
-        // file already exists, open for R/W
-        flags = "r+";
+        // file already exists, open it with the requested access ("r+" is the only mode that writes without
+        // truncating)
+        flags = (access == FileAccess_Read) ? "r" : "r+";
     }
     else
     {
-        // file doesn't exist, create and open for R/W
-        flags = "w+";
+        // file doesn't exist, create it
+        flags = (access == FileAccess_Write) ? "w" : "w+";
     }
+
     fileHandle->file = fopen(normalizedPath, flags);
     if (fileHandle->file != NULL)
     {
