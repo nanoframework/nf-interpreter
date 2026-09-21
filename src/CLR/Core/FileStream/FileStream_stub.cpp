@@ -10,11 +10,12 @@
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-HRESULT CLR_RT_FileStream::CreateInstance(CLR_RT_HeapBlock &ref, const char *path, int bufferSize)
+HRESULT CLR_RT_FileStream::CreateInstance(CLR_RT_HeapBlock &ref, const char *path, int bufferSize, uint32_t access)
 {
     (void)ref;
     (void)path;
     (void)bufferSize;
+    (void)access;
 
     NANOCLR_FEATURE_STUB_RETURN();
 }

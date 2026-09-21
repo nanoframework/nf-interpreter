@@ -46,13 +46,13 @@ typedef enum __nfpack RemovableDriveEventArgs_RemovableDeviceEvent
     RemovableDriveEventArgs_RemovableDeviceEvent_Removed = 1,
 } RemovableDriveEventArgs_RemovableDeviceEvent;
 
-typedef enum __nfpack StorageEventManager_StorageEventType
+typedef enum __nfpack StorageEventManager_StorageEventTypes
 {
-    StorageEventManager_StorageEventType_Invalid = 0,
-    StorageEventManager_StorageEventType_RemovableDeviceInsertion = 1,
-    StorageEventManager_StorageEventType_RemovableDeviceRemoval = 2,
-    StorageEventManager_StorageEventType_CardDetectChanged = 3,
-} StorageEventManager_StorageEventType;
+    StorageEventManager_StorageEventTypes_None = 0,
+    StorageEventManager_StorageEventTypes_RemovableDeviceInsertion = 1,
+    StorageEventManager_StorageEventTypes_RemovableDeviceRemoval = 2,
+    StorageEventManager_StorageEventTypes_CardDetectChanged = 3,
+} StorageEventManager_StorageEventTypes;
 
 typedef enum __nfpack DriveType
 {
@@ -102,6 +102,16 @@ struct Library_nf_sys_io_filesystem_nanoFramework_System_IO_CardDetectChangedEve
 {
     static const int FIELD___cardState = 1;
     static const int FIELD___slotIndex = 2;
+
+    //--//
+};
+
+struct Library_nf_sys_io_filesystem_nanoFramework_System_IO_FileSystem_CardDetectParameters
+{
+    static const int FIELD__enableCardDetectPin = 1;
+    static const int FIELD__cardDetectedState = 2;
+    static const int FIELD__cardDetectPin = 3;
+    static const int FIELD__autoMount = 4;
 
     //--//
 };
@@ -187,8 +197,9 @@ struct Library_nf_sys_io_filesystem_nanoFramework_System_IO_StorageEventManager_
 {
     static const int FIELD__EventType = 3;
     static const int FIELD__VolumeIndex = 4;
-    static const int FIELD__Time = 5;
-    static const int FIELD__state = 6;
+    static const int FIELD__SlotIndex = 5;
+    static const int FIELD__Time = 6;
+    static const int FIELD__state = 7;
 
     //--//
 };
@@ -263,7 +274,7 @@ struct Library_nf_sys_io_filesystem_System_IO_NativeFileStream
 {
     static const int FIELD___fs = 1;
 
-    NANOCLR_NATIVE_DECLARE(_ctor___VOID__STRING__I4);
+    NANOCLR_NATIVE_DECLARE(_ctor___VOID__STRING__I4__I4);
     NANOCLR_NATIVE_DECLARE(Read___I4__SZARRAY_U1__I4__I4__I4);
     NANOCLR_NATIVE_DECLARE(Write___I4__SZARRAY_U1__I4__I4__I4);
     NANOCLR_NATIVE_DECLARE(Seek___I8__I8__U4);
