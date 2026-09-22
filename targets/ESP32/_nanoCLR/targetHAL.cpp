@@ -135,8 +135,8 @@ void nanoHAL_Uninitialize(bool isPoweringDown)
 {
     (void)isPoweringDown;
 
-    // check for s_rebootHandlers
-    for (unsigned int i = 0; i < ARRAYSIZE(s_rebootHandlers); i++)
+    // process Reboot Handlers
+    for (size_t i = 0; i < ARRAYSIZE(s_rebootHandlers); i++)
     {
         if (s_rebootHandlers[i] != nullptr)
         {

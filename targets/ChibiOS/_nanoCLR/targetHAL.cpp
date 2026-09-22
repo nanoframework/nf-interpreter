@@ -28,9 +28,6 @@
 #include <sys_io_ser_native_target.h>
 #endif
 
-// global mutex protecting the internal state of the interpreter, including event flags
-// mutex_t interpreterGlobalMutex;
-
 // because nanoHAL_Initialize/Uninitialize needs to be called in both C and C++ we need a proxy to allow it to be called
 // in 'C'
 extern "C"
@@ -49,9 +46,6 @@ extern "C"
 
 void nanoHAL_Initialize()
 {
-    // initialize global mutex
-    // chMtxObjectInit(&interpreterGlobalMutex);
-
     HAL_CONTINUATION::InitializeList();
     HAL_COMPLETION ::InitializeList();
 
@@ -165,21 +159,18 @@ void nanoHAL_Uninitialize(bool isPoweringDown)
 {
     (void)isPoweringDown;
 
-    // release the global mutex, just in case it's locked somewhere
-    // chMtxUnlock(&interpreterGlobalMutex);
-
-    // TODO check for s_rebootHandlers
-    // for(int i = 0; i< ARRAYSIZE(s_rebootHandlers); i++)
-    // {
-    //     if(s_rebootHandlers[i] != nullptr)
-    //     {
-    //         s_rebootHandlers[i]();
-    //     }
-    //     else
-    //     {
-    //         break;
-    //     }
-    // }
+    // process Reboot Handlers
+    for (size_t i = 0; i < ARRAYSIZE(s_rebootHandlers); i++)
+    {
+        if (s_rebootHandlers[i] != nullptr)
+        {
+            s_rebootHandlers[i]();
+        }
+        else
+        {
+            break;
+        }
+    }
 
     SOCKETS_CloseConnections();
 

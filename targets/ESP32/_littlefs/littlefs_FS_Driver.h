@@ -55,7 +55,7 @@ extern "C"
         static bool LoadMedia(const void *driverInterface);
         static STREAM_DRIVER_DETAILS *DriverDetails(const VOLUME_ID *volume);
 
-        static HRESULT Open(const VOLUME_ID *volume, const char *path, void *&handle);
+        static HRESULT Open(const VOLUME_ID *volume, const char *path, uint32_t access, void *&handle);
         static HRESULT Close(void *handle);
         static HRESULT Read(void *handle, uint8_t *buffer, int size, int *readsize);
         static HRESULT Write(void *handle, uint8_t *buffer, int size, int *writesize);
