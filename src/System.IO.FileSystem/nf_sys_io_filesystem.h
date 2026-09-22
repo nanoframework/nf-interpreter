@@ -274,7 +274,7 @@ struct Library_nf_sys_io_filesystem_System_IO_NativeFileStream
 {
     static const int FIELD___fs = 1;
 
-    NANOCLR_NATIVE_DECLARE(_ctor___VOID__STRING__I4);
+    NANOCLR_NATIVE_DECLARE(_ctor___VOID__STRING__I4__I4);
     NANOCLR_NATIVE_DECLARE(Read___I4__SZARRAY_U1__I4__I4__I4);
     NANOCLR_NATIVE_DECLARE(Write___I4__SZARRAY_U1__I4__I4__I4);
     NANOCLR_NATIVE_DECLARE(Seek___I8__I8__U4);

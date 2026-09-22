@@ -10,7 +10,7 @@
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-HRESULT CLR_RT_FileStream::CreateInstance(CLR_RT_HeapBlock &ref, const char *path, int bufferSize)
+HRESULT CLR_RT_FileStream::CreateInstance(CLR_RT_HeapBlock &ref, const char *path, int bufferSize, uint32_t access)
 {
     NATIVE_PROFILE_CLR_IO();
     NANOCLR_HEADER();
@@ -102,7 +102,7 @@ HRESULT CLR_RT_FileStream::CreateInstance(CLR_RT_HeapBlock &ref, const char *pat
             break;
     }
 
-    NANOCLR_CHECK_HRESULT(driver->Open(relativePath, fs->m_handle));
+    NANOCLR_CHECK_HRESULT(driver->Open(relativePath, access, fs->m_handle));
 
     NANOCLR_NOCLEANUP();
 }
