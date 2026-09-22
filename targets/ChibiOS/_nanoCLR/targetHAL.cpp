@@ -168,18 +168,18 @@ void nanoHAL_Uninitialize(bool isPoweringDown)
     // release the global mutex, just in case it's locked somewhere
     // chMtxUnlock(&interpreterGlobalMutex);
 
-    // TODO check for s_rebootHandlers
-    // for(int i = 0; i< ARRAYSIZE(s_rebootHandlers); i++)
-    // {
-    //     if(s_rebootHandlers[i] != nullptr)
-    //     {
-    //         s_rebootHandlers[i]();
-    //     }
-    //     else
-    //     {
-    //         break;
-    //     }
-    // }
+    // process Reboot Handlers
+    for (size_t i = 0; i < ARRAYSIZE(s_rebootHandlers); i++)
+    {
+        if (s_rebootHandlers[i] != nullptr)
+        {
+            s_rebootHandlers[i]();
+        }
+        else
+        {
+            break;
+        }
+    }
 
     SOCKETS_CloseConnections();
 
