@@ -15,6 +15,14 @@
 #include <esp_memory_utils.h>
 #endif
 
+#if (HAL_USE_SDC == TRUE)
+#include <sdmmc_cmd.h>
+
+// the mounted card and the volume it belongs to, from Target_System_IO_FileSystem.c
+extern "C" sdmmc_card_t *card;
+extern "C" char cardDriveLetter;
+#endif
+
 extern FileSystemVolume *g_FS_Volumes;
 
 static int32_t RemoveAllFiles(const char *path);
@@ -130,8 +138,6 @@ HRESULT LITTLEFS_FS_Driver::Format(const VOLUME_ID *volume, const char *volumeLa
 
 HRESULT LITTLEFS_FS_Driver::GetSizeInfo(const VOLUME_ID *volume, int64_t *totalSize, int64_t *totalFreeSpace)
 {
-    (void)totalSize;
-
     // FATFS *fsPtr = &fs;
     // char buffer[3];
     // DWORD freeClusters, freeSectors, totalSectors;
@@ -158,8 +164,29 @@ HRESULT LITTLEFS_FS_Driver::GetSizeInfo(const VOLUME_ID *volume, int64_t *totalS
     // //     *totalFreeSpace = (int64_t)freeSectors * FF_MAX_SS;
     // // #endif
 
+    // -1 means "unknown" to the caller
     *totalSize = -1;
+
+    // free space would need f_getfree(), which walks the FAT and trips the watchdog on large cards
     *totalFreeSpace = -1;
+
+#if (HAL_USE_SDC == TRUE)
+
+    // the driver also serves the internal flash, which has no card behind it
+    FileSystemVolume *currentVolume = FileSystemVolumeList::FindVolume(volume->volumeId);
+
+    if (currentVolume != NULL && card != NULL && cardDriveLetter != 0 &&
+        currentVolume->m_rootName[0] == cardDriveLetter)
+    {
+        // physical capacity of the card, not of the file system on it
+        *totalSize = (int64_t)card->csd.capacity * card->csd.sector_size;
+    }
+
+#else
+
+    (void)volume;
+
+#endif
 
     return S_OK;
 }
@@ -213,7 +240,7 @@ HRESULT LITTLEFS_FS_Driver::GetVolumeLabel(const VOLUME_ID *volume, char *volume
 
 //--//
 
-HRESULT LITTLEFS_FS_Driver::Open(const VOLUME_ID *volume, const char *path, void *&handle)
+HRESULT LITTLEFS_FS_Driver::Open(const VOLUME_ID *volume, const char *path, uint32_t access, void *&handle)
 {
     NANOCLR_HEADER();
 
@@ -255,16 +282,19 @@ HRESULT LITTLEFS_FS_Driver::Open(const VOLUME_ID *volume, const char *path, void
     fileExists = (stat(normalizedPath, &info) == FR_OK);
 #endif
 
+    // this goes through the VFS layer, which has no attribute support, so read-only isn't enforced here
     if (fileExists)
     {
-        // file already exists, open for R/W
-        flags = "r+";
+        // file already exists, open it with the requested access ("r+" is the only mode that writes without
+        // truncating)
+        flags = (access == FileAccess_Read) ? "r" : "r+";
     }
     else
     {
-        // file doesn't exist, create and open for R/W
-        flags = "w+";
+        // file doesn't exist, create it
+        flags = (access == FileAccess_Write) ? "w" : "w+";
     }
+
     fileHandle->file = fopen(normalizedPath, flags);
     if (fileHandle->file != NULL)
     {

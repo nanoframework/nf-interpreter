@@ -28,7 +28,7 @@ struct CLR_RT_FileStream
     //--//
 
   public:
-    static HRESULT CreateInstance(CLR_RT_HeapBlock &ref, const char *path, int bufferSize);
+    static HRESULT CreateInstance(CLR_RT_HeapBlock &ref, const char *path, int bufferSize, uint32_t access);
 
     static void RelocationHandler(CLR_RT_HeapBlock_BinaryBlob *ptr);
 
