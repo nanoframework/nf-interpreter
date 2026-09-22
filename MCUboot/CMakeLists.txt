@@ -166,28 +166,21 @@ endmacro()
 
 if(${TARGET_SERIES} STREQUAL "STM32F7xx")
 
-    # Retrieve chibios_SOURCE_DIR — it was populated in targets/ChibiOS/CMakeLists.txt
-    # but CMake FetchContent variables don't cross subdirectory scopes automatically.
     include(FetchContent)
     FetchContent_GetProperties(chibios)
 
-    # Sources shared by all STM32F7xx MCUboot boards (ChibiOS RT + HAL + nf-overlay).
     set(MCUBOOT_SERIES_COMMON_SOURCES
-        # MCUboot bootloader entry point.
         ${CMAKE_SOURCE_DIR}/targets/ChibiOS/_mcuboot/mcuboot_main.c
         ${CMAKE_SOURCE_DIR}/targets/ChibiOS/_mcuboot/mcuboot_serial_port.c
         ${CMAKE_SOURCE_DIR}/targets/ChibiOS/_mcuboot/mcuboot_heartbeat.c
 
-        # ChibiOS RT startup (Cortex-M7, ARMCMx).
         ${chibios_SOURCE_DIR}/os/common/startup/ARMCMx/compilers/GCC/crt0_v7m.S
         ${chibios_SOURCE_DIR}/os/common/startup/ARMCMx/compilers/GCC/crt1.c
         ${chibios_SOURCE_DIR}/os/common/startup/ARMCMx/compilers/GCC/vectors.S
 
-        # ChibiOS RT port (ARMv7-M).
         ${chibios_SOURCE_DIR}/os/common/ports/ARMv7-M/chcore.c
         ${chibios_SOURCE_DIR}/os/common/ports/ARMv7-M/compilers/GCC/chcoreasm.S
 
-        # ChibiOS RT minimal kernel.
         ${chibios_SOURCE_DIR}/os/rt/src/chsys.c
         ${chibios_SOURCE_DIR}/os/rt/src/chvt.c
         ${chibios_SOURCE_DIR}/os/rt/src/chschd.c
@@ -200,7 +193,6 @@ if(${TARGET_SERIES} STREQUAL "STM32F7xx")
         ${chibios_SOURCE_DIR}/os/rt/src/chdebug.c
         ${chibios_SOURCE_DIR}/os/oslib/src/chmemcore.c
 
-        # ChibiOS HAL core.
         ${chibios_SOURCE_DIR}/os/hal/src/hal.c
         ${chibios_SOURCE_DIR}/os/hal/src/hal_st.c
         ${chibios_SOURCE_DIR}/os/hal/src/hal_pal.c
@@ -209,14 +201,11 @@ if(${TARGET_SERIES} STREQUAL "STM32F7xx")
         ${chibios_SOURCE_DIR}/os/hal/src/hal_serial.c
         ${chibios_SOURCE_DIR}/os/hal/src/hal_queues.c
 
-        # ChibiOS HAL STM32F7xx platform.
         ${chibios_SOURCE_DIR}/os/hal/ports/STM32/STM32F7xx/hal_lld.c
         ${chibios_SOURCE_DIR}/os/hal/ports/STM32/STM32F7xx/stm32_isr.c
 
-        # ChibiOS HAL common ARMCMx support.
         ${chibios_SOURCE_DIR}/os/hal/ports/common/ARMCMx/nvic.c
 
-        # ChibiOS HAL LLD (STM32 shared drivers).
         ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/GPIOv2/hal_pal_lld.c
         ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/DMAv2/stm32_dma.c
         ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/EXTIv1/stm32_exti.c
@@ -227,24 +216,14 @@ if(${TARGET_SERIES} STREQUAL "STM32F7xx")
         ${chibios_SOURCE_DIR}/os/hal/src/hal_mmcsd.c
         ${chibios_SOURCE_DIR}/os/hal/src/hal_sdc.c
         ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/SDMMCv1/hal_sdc_lld.c
-
-        # ChibiOS HAL OSAL (RT).
         ${chibios_SOURCE_DIR}/os/hal/osal/rt-nil/osal.c
         
-        # nf-overlay: STM32 internal flash driver (FLASHv2 LLD).
         ${CMAKE_SOURCE_DIR}/targets/ChibiOS/_nf-overlay/os/hal/src/stm32_flash/hal_stm32_flash.c
         ${CMAKE_SOURCE_DIR}/targets/ChibiOS/_nf-overlay/os/hal/ports/STM32/LLD/FLASHv2/flash_lld.c
 
-        # Stub: halCommunityInit() no-op — MCUboot does not use ChibiOS-Contrib.
         ${CMAKE_SOURCE_DIR}/targets/ChibiOS/_mcuboot/hal_community_stub.c
-
-        # HAL shims and weak defaults (HAL_GetTick, HAL_Delay,...).
-        # All definitions are weak; boards override what they need in their BSP files.
         ${CMAKE_SOURCE_DIR}/targets/ChibiOS/_mcuboot/mcuboot_cpu_init.c
         ${CMAKE_SOURCE_DIR}/targets/ChibiOS/_mcuboot/mcuboot_hal_stubs.c
-
-        # Logging backend (nf_mcuboot_log_emit, nf_mcuboot_log_write) for linking bootutil's
-        # MCUBOOT_LOG_* calls.
         ${CMAKE_SOURCE_DIR}/targets/ChibiOS/_mcuboot/mcuboot_log_stubs.c
     )
 
@@ -295,7 +274,6 @@ if(${TARGET_SERIES} STREQUAL "STM32F7xx")
         ${CMAKE_SOURCE_DIR}/targets/ChibiOS/_nf-overlay/os/hal/ports/STM32/LLD/QSPIv1
     )
 
-    # Compile options shared by all STM32F7xx bootloader targets.
     set(MCUBOOT_SERIES_COMMON_COMPILE_OPTIONS
         -mthumb
         -mcpu=cortex-m7
@@ -307,9 +285,7 @@ if(${TARGET_SERIES} STREQUAL "STM32F7xx")
         -ffunction-sections
         -fdata-sections
         -fno-common
-        # wchar_t must be 2 bytes (UTF-16) for USB string descriptors to be laid out
-        # correctly. Without this flag the default 4-byte wchar_t adds alignment
-        # padding inside the USB descriptor structs, corrupting every string descriptor.
+        # wchar_t must be 2 bytes (UTF-16) for USB string descriptors
         -fshort-wchar
         # Suppress warnings from MCUboot upstream code that we do not own.
         -Wno-unused-parameter
@@ -317,11 +293,6 @@ if(${TARGET_SERIES} STREQUAL "STM32F7xx")
         -Wno-missing-field-initializers
     )
 
-    # Compile definitions shared by all STM32F7xx bootloader targets.
-    # CORTEX_USE_FPU must be passed explicitly: crt0_v7m.S is assembled (not compiled),
-    # so chcore.h is never included and CRT0_INIT_FPU defaults to FALSE, leaving the
-    # FPU un-enabled. With -mfloat-abi=hard the compiler emits FPU instructions,
-    # causing a UsageFault (NOCP) -> HardFault on the first FPU access.
     set(MCUBOOT_SERIES_COMMON_COMPILE_DEFINITIONS
         CORTEX_USE_FPU=TRUE
         PLATFORM_ARM
@@ -330,15 +301,6 @@ if(${TARGET_SERIES} STREQUAL "STM32F7xx")
         NF_MCUBOOT_BOOTLOADER
     )
 
-    # Link flags shared by all STM32F7xx bootloader targets.
-    # -nostartfiles is removed: ChibiOS provides crt0_v7m.s + vectors.c.
-    # The linker script is board-specific and supplied by nf_setup_mcuboot_target_build.
-    # -L adds the ChibiOS GCC ld directory so INCLUDE directives in the linker script
-    # can resolve rules_stacks.ld, rules_code.ld, rules_data.ld, rules_memory.ld.
-    # --defsym provides the stack/heap sizes expected by rules_stacks.ld. main() runs on the
-    # process stack: image validation (ECDSA), swap, serial recovery (zcbor) and the media
-    # import (FatFs with LFN, USB host enumeration) all run there, so keep it roomy - RAM is
-    # not the constraint on these parts.
     set(MCUBOOT_SERIES_COMMON_LINK_FLAGS
         "-mthumb -mcpu=cortex-m7 -mfpu=fpv5-sp-d16 -mfloat-abi=hard -mabi=aapcs \
          -Wl,--gc-sections \
@@ -368,11 +330,9 @@ if(${TARGET_SERIES} STREQUAL "STM32F7xx")
         FetchContent_GetProperties(chibios-contrib)
 
         list(APPEND MCUBOOT_SERIES_COMMON_SOURCES
-            # kernel heap: the USBH core allocates the full configuration descriptor from it
             ${chibios_SOURCE_DIR}/os/oslib/src/chmemheaps.c
             ${chibios-contrib_SOURCE_DIR}/os/hal/src/hal_usbh.c
             ${chibios-contrib_SOURCE_DIR}/os/hal/src/usbh/hal_usbh_msd.c
-            # root port object init lives here even with HAL_USBH_USE_HUB FALSE
             ${chibios-contrib_SOURCE_DIR}/os/hal/src/usbh/hal_usbh_hub.c
             ${chibios-contrib_SOURCE_DIR}/os/hal/src/usbh/hal_usbh_desciter.c
             ${chibios-contrib_SOURCE_DIR}/os/hal/ports/STM32/LLD/USBHv1/hal_usbh_lld.c
@@ -380,7 +340,6 @@ if(${TARGET_SERIES} STREQUAL "STM32F7xx")
 
         set_source_files_properties(${chibios-contrib_SOURCE_DIR}/os/hal/src/hal_usbh.c PROPERTIES COMPILE_FLAGS -Wno-type-limits)
 
-        # Contrib's real hal_community.h (it pulls in hal_usbh.h) replaces the dummy one.
         list(REMOVE_ITEM MCUBOOT_SERIES_COMMON_INCLUDES ${CMAKE_SOURCE_DIR}/targets/ChibiOS/_nf-overlay/os/hal/include/dummy_includes)
 
         list(APPEND MCUBOOT_SERIES_COMMON_INCLUDES
@@ -414,9 +373,7 @@ if(${TARGET_SERIES} STREQUAL "STM32F7xx")
             ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/OTGv1
         )
 
-        # unset this warning as error required for this source file
         set_source_files_properties(${mcuboot_SOURCE_DIR}/boot/boot_serial/src/boot_serial.c PROPERTIES COMPILE_FLAGS "-Wno-format -Wno-type-limits")
-
 
     endif() # NF_MCUBOOT_SERIAL_RECOVERY
 
@@ -434,7 +391,6 @@ if(${TARGET_SERIES} STREQUAL "STM32F7xx")
 
     endif() # NF_FEATURE_WATCHDOG
 
-    # Apply series CPU/FPU flags to nf_mcuboot_port so it matches nanoCLR's ABI.
     target_compile_options(nf_mcuboot_port PRIVATE
         -mthumb
         -mcpu=cortex-m7
@@ -449,11 +405,10 @@ if(${TARGET_SERIES} STREQUAL "STM32F7xx")
         -Wno-missing-field-initializers
     )
 
-    # Board-specific build rules live in each board's MCUboot folder.
     include(${TARGET_BASE_LOCATION}/MCUboot/mcuboot_target.cmake)
 
 else()
 
     message(FATAL_ERROR "MCUboot: add series-specific sources, includes and compile options for ${TARGET_SERIES}")
 
-endif() # TARGET_SERIES STREQUAL "STM32F7xx"
+endif()
