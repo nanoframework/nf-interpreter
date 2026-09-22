@@ -28,11 +28,11 @@
 
 #include <mcuboot_media_fatfs.h>
 #include <mcuboot_board_iface.h>
+#include <bootutil/bootutil_log.h>
 
 #if defined(CONFIG_NF_FEATURE_MCUBOOT_HAS_USB_MSD) && CONFIG_NF_FEATURE_MCUBOOT_HAS_USB_MSD
 
 #include <usbh/dev/msd.h>
-#include <bootutil/bootutil_log.h>
 
 // USB host controller carrying the MSD port (OTG_HS, see mcuconf_community.h).
 #define MCUBOOT_USB_MSD_HOST USBHD2
@@ -168,9 +168,12 @@ static int sdcard_init(void)
     // Connect to (identify) the inserted SD card: OCR, CID, CSD negotiation.
     if (sdcConnect(&SDCD1) != HAL_SUCCESS)
     {
+        BOOT_LOG_INF("SD card: no card detected (sdcConnect failed)");
         sdcStop(&SDCD1);
         return -1;
     }
+
+    BOOT_LOG_INF("SD card: connected");
 
     return 0;
 }

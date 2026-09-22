@@ -18,8 +18,4 @@
 // CONFIG_NF_MCUBOOT_LOGICAL_SECTOR_SIZE (256 kB) is a whole multiple of 32 kB
 #define MCUBOOT_EXTERNAL_FLASH_SECTOR_SIZE (32U * 1024U)
 
-// Update media import (SD card / USB MSD -> secondary slot): the SDMMC and USB host
-// drivers use DMA, so the file copy buffer lives in the non-cacheable RAM region.
-#define MCUBOOT_MEDIA_BUFFER_ATTR __attribute__((section(".nocache"), aligned(32)))
-
 #endif // MCUBOOT_CONFIG_ORGPAL_PALTHREE_H

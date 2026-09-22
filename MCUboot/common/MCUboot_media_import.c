@@ -23,7 +23,7 @@
 #include <mcuboot_media_import.h>
 
 // Copy buffer shared by all media (the sweep is strictly sequential).
-static uint8_t s_chunk[MCUBOOT_IMPORT_CHUNK_SIZE] MCUBOOT_MEDIA_BUFFER_ATTR;
+static uint8_t s_chunk[MCUBOOT_IMPORT_CHUNK_SIZE];
 
 // Best candidate found for an image on a medium.
 typedef struct

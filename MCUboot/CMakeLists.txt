@@ -240,6 +240,7 @@ if(${TARGET_SERIES} STREQUAL "STM32F7xx")
 
         # HAL shims and weak defaults (HAL_GetTick, HAL_Delay,...).
         # All definitions are weak; boards override what they need in their BSP files.
+        ${CMAKE_SOURCE_DIR}/targets/ChibiOS/_mcuboot/mcuboot_cpu_init.c
         ${CMAKE_SOURCE_DIR}/targets/ChibiOS/_mcuboot/mcuboot_hal_stubs.c
 
         # Logging backend (nf_mcuboot_log_emit, nf_mcuboot_log_write) for linking bootutil's

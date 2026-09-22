@@ -84,13 +84,6 @@ extern "C"
 #define MCUBOOT_IMPORT_CHUNK_SIZE 4096U
 #endif
 
-// Attribute for the copy buffer. Ports whose media drivers use DMA on a cached core
-// set this to place the buffer in non-cacheable memory, e.g.
-//   #define MCUBOOT_MEDIA_BUFFER_ATTR __attribute__((section(".nocache"), aligned(32)))
-#ifndef MCUBOOT_MEDIA_BUFFER_ATTR
-#define MCUBOOT_MEDIA_BUFFER_ATTR
-#endif
-
 // Longest stamp string the engine produces (device id + version + size + NUL).
 #define MCUBOOT_MEDIA_STAMP_MAX 96U
 

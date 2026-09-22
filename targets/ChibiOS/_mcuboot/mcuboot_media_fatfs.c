@@ -18,6 +18,7 @@
 
 #include <string.h>
 
+#include <bootutil/bootutil_log.h>
 #include <mcuboot_media_fatfs.h>
 
 #if !FF_USE_FIND
@@ -66,8 +67,12 @@ static int fatfs_mount(void *p)
     }
 
     // immediate mount so an absent/unformatted medium is detected right here
-    if (f_mount(&ctx->fs, ctx->volume, 1) != FR_OK)
+    FRESULT fr = f_mount(&ctx->fs, ctx->volume, 1);
+
+    if (fr != FR_OK)
     {
+        BOOT_LOG_ERR("media import: f_mount(%s) failed (FRESULT %d)", ctx->volume, (int)fr);
+
         if (ctx->device_deinit != NULL)
         {
             ctx->device_deinit();
