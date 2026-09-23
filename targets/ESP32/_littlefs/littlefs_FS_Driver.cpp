@@ -606,7 +606,7 @@ HRESULT LITTLEFS_FS_Driver::FindNext(void *handle, FS_FILEINFO *fi, bool *fileFo
     NANOCLR_HEADER();
 
     LITTLEFS_FindFileHandle *findHandle;
-    char buffer[FS_MAX_PATH_LENGTH];
+    char buffer[FS_MAX_DIRECTORY_LENGTH + FS_MAX_FILENAME_LENGTH];
 
     struct stat info;
     struct dirent *entry;
@@ -676,7 +676,7 @@ HRESULT LITTLEFS_FS_Driver::FindNext(void *handle, FS_FILEINFO *fi, bool *fileFo
             // compose the full path of the current entry
             snprintf(
                 buffer,
-                FS_MAX_PATH_LENGTH,
+                sizeof(buffer),
                 "%s%s%s",
                 findHandle->basePath,
                 findHandle->basePath[hal_strlen_s(findHandle->basePath) - 1] == '/' ? "" : "/",
