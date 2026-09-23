@@ -674,7 +674,13 @@ HRESULT LITTLEFS_FS_Driver::FindNext(void *handle, FS_FILEINFO *fi, bool *fileFo
             hal_strcpy_s((char *)fi->FileName, fi->FileNameSize + 1, entry->d_name);
 
             // compose the full path of the current entry
-            snprintf(buffer, FS_MAX_PATH_LENGTH, "%s%s", findHandle->basePath, entry->d_name);
+            snprintf(
+                buffer,
+                FS_MAX_PATH_LENGTH,
+                "%s%s%s",
+                findHandle->basePath,
+                findHandle->basePath[hal_strlen_s(findHandle->basePath) - 1] == '/' ? "" : "/",
+                entry->d_name);
 
             // POSIX dirent does not directly provide file attributes or size
             // need to use stat() function to retrieve that information
@@ -864,14 +870,9 @@ HRESULT LITTLEFS_FS_Driver::SetAttributes(const VOLUME_ID *volume, const char *p
 
 HRESULT LITTLEFS_FS_Driver::CreateDirectory(const VOLUME_ID *volume, const char *path)
 {
-    struct stat info;
     int32_t result = FR_OK;
     char normalizedPath[FS_MAX_DIRECTORY_LENGTH];
-    char tempPath[FS_MAX_DIRECTORY_LENGTH + 1];
-    char *segment;
-    int32_t dirExists;
-
-    (void)dirExists;
+    char *pathCursor;
 
     FileSystemVolume *currentVolume = FileSystemVolumeList::FindVolume(volume->volumeId);
 
@@ -881,51 +882,30 @@ HRESULT LITTLEFS_FS_Driver::CreateDirectory(const VOLUME_ID *volume, const char 
         return CLR_E_PATH_TOO_LONG;
     }
 
-    memset(tempPath, 0, sizeof(tempPath));
-
-    strcat(tempPath, "/");
-
-    // iterate over the path segments and create the directories
-    // 1st segment is the root directory, so need to skip that
-    segment = strtok(normalizedPath, "/");
-    strcat(tempPath, segment);
-    strcat(tempPath, "/");
-    segment = strtok(NULL, "/");
-
-    while (segment)
+    // Create each path segment, including the final directory.
+    for (pathCursor = normalizedPath + 1; *pathCursor != '\0'; pathCursor++)
     {
-        strcat(tempPath, segment);
-
-        result = mkdir(tempPath, 0);
-
-        if (result != 0 && errno != EEXIST)
+        if (*pathCursor == '/')
         {
-            return CLR_E_FILE_IO;
+            *pathCursor = '\0';
+
+            result = mkdir(normalizedPath, 0700);
+            *pathCursor = '/';
+
+            if (result != 0 && errno != EEXIST)
+            {
+                return CLR_E_FILE_IO;
+            }
         }
-
-        // add back the '/' separator
-        strcat(tempPath, "/");
-
-        segment = strtok(NULL, "/");
     }
 
-    // remove trailing '/'
-    tempPath[hal_strlen_s(tempPath) - 1] = '\0';
-
-    // sanity check for success
-    dirExists = stat(tempPath, &info);
-
-    // sanity check for success
-    if (dirExists == 0)
-    {
-        return S_OK;
-    }
-    else
+    result = mkdir(normalizedPath, 0700);
+    if (result != 0 && errno != EEXIST)
     {
         return CLR_E_FILE_IO;
     }
 
-    return CLR_E_INVALID_DRIVER;
+    return S_OK;
 }
 
 HRESULT LITTLEFS_FS_Driver::Move(const VOLUME_ID *volume, const char *oldPath, const char *newPath)

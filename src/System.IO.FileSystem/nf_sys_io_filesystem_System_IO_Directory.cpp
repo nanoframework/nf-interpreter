@@ -163,9 +163,7 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_Directory::NativeGetChildren___ST
             memset(workingPath, 0, sizeof(workingPath));
 
             hal_strncpy_s(workingPath, sizeof(workingPath), rootName, rootNameLength);
-            size_t bufferSize = FS_MAX_PATH_LENGTH - rootNameLength;
-            char *bufferP = &workingPath[rootNameLength];
-            CLR_SafeSprintf(bufferP, bufferSize, "%s%s", path, (const char *)fileData.FileName);
+            CombinePaths(workingPath, path, (const char *)fileData.FileName);
 
             // set file full path in array of strings
             NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_String::CreateInstance(*pathEntry, workingPath));
