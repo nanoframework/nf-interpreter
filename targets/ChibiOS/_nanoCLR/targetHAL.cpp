@@ -28,6 +28,32 @@
 #include <sys_io_ser_native_target.h>
 #endif
 
+#if defined(CONFIG_NF_FEATURE_HAS_MCUBOOT) && CONFIG_NF_FEATURE_HAS_MCUBOOT
+#include <MCUboot_UpdateSession.h>
+#endif
+
+//
+//  Reboot handlers clean up on reboot
+//
+static ON_SOFT_REBOOT_HANDLER s_rebootHandlers[16] =
+    {nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr};
+
+void HAL_AddSoftRebootHandler(ON_SOFT_REBOOT_HANDLER handler)
+{
+    for (unsigned int i = 0; i < ARRAYSIZE(s_rebootHandlers); i++)
+    {
+        if (s_rebootHandlers[i] == nullptr)
+        {
+            s_rebootHandlers[i] = handler;
+            return;
+        }
+        else if (s_rebootHandlers[i] == handler)
+        {
+            return;
+        }
+    }
+}
+
 // because nanoHAL_Initialize/Uninitialize needs to be called in both C and C++ we need a proxy to allow it to be called
 // in 'C'
 extern "C"
