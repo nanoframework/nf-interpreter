@@ -341,19 +341,43 @@ else()
     endif()
 
     # source files for nanoFramework Networking
-    set(NF_Network_SRCS
+    if(TARGET_HAS_WIFI_ISM43362)
 
-        #pal Socket
-        sockets_lwip.cpp
+        list(APPEND NF_Network_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/targets/ChibiOS/_WiFi)
+        list(APPEND NF_Network_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/targets/ChibiOS/_WiFi/inventek)
 
-        #Lwip 
-        lwIP_Sockets.cpp
-        lwIP_Sockets_functions.cpp 
+        set(NF_Network_SRCS
 
-        # platform specific
-        Target_Network.cpp
-        targetHAL_Network.cpp
-    )
+            # ES-WIFI driver + socket-proxy implementation
+            es_wifi.c
+            wifi.c
+            es_wifi_io_chibios.c
+            sockets_ism43362.cpp
+            sntp_ism43362.cpp
+
+            # platform specific
+            Target_Network.cpp
+            targetHAL_Network.cpp
+        )
+
+    else()
+
+        # source files for nanoFramework Networking
+        set(NF_Network_SRCS
+
+            #pal Socket
+            sockets_lwip.cpp
+
+            #Lwip 
+            lwIP_Sockets.cpp
+            lwIP_Sockets_functions.cpp 
+
+            # platform specific
+            Target_Network.cpp
+            targetHAL_Network.cpp
+        )
+
+    endif()
 
     # need a conditional include because of ESP32 building network as a library 
     if(NOT USE_SECURITY_MBEDTLS_OPTION)
@@ -380,7 +404,7 @@ else()
         ssl_write_internal.cpp
     )
 
-    if(NF_FEATURE_DEBUGGER)
+    if(NF_FEATURE_DEBUGGER AND NOT TARGET_HAS_WIFI_ISM43362)
         list(APPEND NF_Network_SRCS Sockets_debugger.cpp)
     endif()
 
@@ -410,6 +434,7 @@ else()
                 ${CMAKE_SOURCE_DIR}/src/PAL/Lwip
                 ${CMAKE_SOURCE_DIR}/targets/${RTOS}/_common
                 ${CMAKE_SOURCE_DIR}/targets/${RTOS}/_Network
+                ${CMAKE_SOURCE_DIR}/targets/${RTOS}/_WiFi/inventek
 
                 ${BASE_PATH_FOR_CLASS_LIBRARIES_MODULES}
     
