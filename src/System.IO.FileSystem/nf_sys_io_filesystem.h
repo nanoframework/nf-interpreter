@@ -210,7 +210,7 @@ struct Library_nf_sys_io_filesystem_System_IO_Directory
 
     //--//
 
-    static void CombinePaths(char *outpath, const char *path1, const char *path2);
+    static HRESULT CombinePaths(char *outpath, size_t bufferSize, const char *path1, const char *path2);
 };
 
 struct Library_nf_sys_io_filesystem_System_IO_FileSystemManager__FileRecord
