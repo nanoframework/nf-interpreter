@@ -46,6 +46,24 @@ static_assert(
 // On 32-bit platforms the handle is the pointer itself.
 // On 64-bit platforms it's the offset from the managed heap base, biased so that 0 stays reserved for nullptr.
 // The mapping is linear, so the debugger can do arithmetic on handles (e.g. +4/-4) and still round-trip them.
+// 0xFFFFFFFF is reserved for the "no reference" sentinel (CLR_RT_HeapBlock *)-1 and never decodes to a heap block.
+
+static const CLR_UINT32 c_HeapBlockHandleSentinel = 0xFFFFFFFFu;
+
+// Handles coming from the debugger are only turned into pointers when they land on a heap block inside the heap.
+static CLR_RT_HeapBlock *ValidateHeapBlockAddress(uintptr_t address)
+{
+    uintptr_t base = (uintptr_t)s_CLR_RT_Heap.location;
+
+    if (address >= base && (address - base) <= s_CLR_RT_Heap.size &&
+        (s_CLR_RT_Heap.size - (address - base)) >= sizeof(CLR_RT_HeapBlock) && (address % sizeof(CLR_UINT32)) == 0)
+    {
+        return (CLR_RT_HeapBlock *)address;
+    }
+
+    return nullptr;
+}
+
 #if UINTPTR_MAX > 0xFFFFFFFFu
 
 static const uintptr_t c_HeapBlockHandleBias = 4;
@@ -57,10 +75,15 @@ static CLR_UINT32 HeapBlockToHandle(const void *ptr)
         return 0;
     }
 
+    if (ptr == (const void *)-1)
+    {
+        return c_HeapBlockHandleSentinel;
+    }
+
     uintptr_t base = (uintptr_t)s_CLR_RT_Heap.location;
     uintptr_t address = (uintptr_t)ptr;
 
-    if (address < base || (address - base) > (uintptr_t)(0xFFFFFFFFu - c_HeapBlockHandleBias))
+    if (address < base || (address - base) > (uintptr_t)(c_HeapBlockHandleSentinel - 1 - c_HeapBlockHandleBias))
     {
         // outside the range that can be represented by a handle
         ASSERT(false);
@@ -72,24 +95,30 @@ static CLR_UINT32 HeapBlockToHandle(const void *ptr)
 
 static CLR_RT_HeapBlock *HandleToHeapBlock(CLR_UINT32 handle)
 {
-    if (handle == 0)
+    if (handle < c_HeapBlockHandleBias || handle == c_HeapBlockHandleSentinel)
     {
         return nullptr;
     }
 
-    return (CLR_RT_HeapBlock *)((uintptr_t)s_CLR_RT_Heap.location + (uintptr_t)handle - c_HeapBlockHandleBias);
+    return ValidateHeapBlockAddress((uintptr_t)s_CLR_RT_Heap.location + (uintptr_t)handle - c_HeapBlockHandleBias);
 }
 
 #else
 
 static CLR_UINT32 HeapBlockToHandle(const void *ptr)
 {
+    // the (CLR_RT_HeapBlock *)-1 sentinel maps to c_HeapBlockHandleSentinel as is
     return (CLR_UINT32)(uintptr_t)ptr;
 }
 
 static CLR_RT_HeapBlock *HandleToHeapBlock(CLR_UINT32 handle)
 {
-    return (CLR_RT_HeapBlock *)(uintptr_t)handle;
+    if (handle == 0 || handle == c_HeapBlockHandleSentinel)
+    {
+        return nullptr;
+    }
+
+    return ValidateHeapBlockAddress((uintptr_t)handle);
 }
 
 #endif
