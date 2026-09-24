@@ -73,8 +73,8 @@
 //   Wire Protocol writes raw .NET assemblies directly to Image 1 primary slot
 //   (deploy_0) without MCUboot image headers.  MCUboot must not validate Image 1
 //   primary on every boot or it would reject Wire-Protocol-written content.
-//   MCUboot only validates Image 1 at OTA upgrade time (when deploy_1 contains
-//   a staged, signed OTA package).
+//   MCUboot only validates Image 1 at in-field update time (when deploy_1 contains
+//   a staged, signed update package).
 //
 // Enabled (RTM builds by default):
 //   MCUBOOT_VALIDATE_PRIMARY_SLOT is defined - every boot validates the signature
@@ -234,9 +234,12 @@ extern void nf_mcuboot_cpu_idle(void);
 // Watchdog - platform ports with a hardware watchdog define MCUBOOT_WATCHDOG_FEED() themselves
 // before this point is reached. Fall back to a no-op when no platform-level definition was made available.
 //
-#if defined(NF_MCUBOOT_BOOTLOADER) && defined(CONFIG_NF_FEATURE_WATCHDOG) &&                                           \
-    CONFIG_NF_FEATURE_WATCHDOG
+#if !defined(MCUBOOT_WATCHDOG_FEED) && defined(CONFIG_NF_FEATURE_WATCHDOG) && CONFIG_NF_FEATURE_WATCHDOG
+#ifdef __cplusplus
+extern "C" void Watchdog_Reset(void);
+#else
 extern void Watchdog_Reset(void);
+#endif
 #define MCUBOOT_WATCHDOG_FEED() Watchdog_Reset()
 #endif
 

@@ -12,6 +12,11 @@
 #include <corlib_native.h>
 #include <MCUboot_ImageSlotInfo.h>
 
+// MCUboot_UpdateSession.h includes THIS header for the managed UpdateSessionResult/UpdateSessionOwner
+// enums, so it cannot be included from here. The helpers below only take a session by reference,
+// which an incomplete type satisfies; the .cpp includes the session header for the full definition.
+struct Ifu_Session;
+
 typedef enum __nfpack ImageType
 {
     ImageType_NanoClr = 0,
@@ -23,6 +28,33 @@ typedef enum __nfpack SlotId
     SlotId_Primary = 0,
     SlotId_Secondary = 1,
 } SlotId;
+
+typedef enum __nfpack UpdateSessionOwner
+{
+    UpdateSessionOwner_None = 0,
+    UpdateSessionOwner_Managed = 1,
+    UpdateSessionOwner_WireProtocol = 2,
+    UpdateSessionOwner_Native = 3,
+} UpdateSessionOwner;
+
+typedef enum __nfpack UpdateSessionResult
+{
+    UpdateSessionResult_Success = 0,
+    UpdateSessionResult_Busy = 1,
+    UpdateSessionResult_BadToken = 2,
+    UpdateSessionResult_BadOffset = 3,
+    UpdateSessionResult_TooLarge = 4,
+    UpdateSessionResult_FlashError = 5,
+    UpdateSessionResult_BadMagic = 6,
+    UpdateSessionResult_SwapInFlight = 7,
+    UpdateSessionResult_NoImage = 8,
+    UpdateSessionResult_HeaderMismatch = 9,
+    UpdateSessionResult_Incomplete = 10,
+    UpdateSessionResult_BadTlv = 11,
+    UpdateSessionResult_HashMismatch = 12,
+    UpdateSessionResult_BadArgument = 13,
+    UpdateSessionResult_NoSlot = 14,
+} UpdateSessionResult;
 
 typedef enum __nfpack UpdateStatus
 {
@@ -78,7 +110,18 @@ struct Library_nf_runtime_ifu_nanoFramework_Runtime_InFieldUpdate_UpdateManager
     NANOCLR_NATIVE_DECLARE(GetImageList___STATIC__SZARRAY_nanoFrameworkRuntimeInFieldUpdateImageInfo);
     NANOCLR_NATIVE_DECLARE(EraseSecondaryImage___STATIC__BOOLEAN__nanoFrameworkRuntimeInFieldUpdateImageType);
     NANOCLR_NATIVE_DECLARE(
-        StoreImageChunk___STATIC__BOOLEAN__nanoFrameworkRuntimeInFieldUpdateImageType__SZARRAY_U1__I4__I4);
+        StartUpdateSession___STATIC__nanoFrameworkRuntimeInFieldUpdateUpdateSession__nanoFrameworkRuntimeInFieldUpdateImageType__I4);
+    NANOCLR_NATIVE_DECLARE(
+        ResumeUpdateSession___STATIC__nanoFrameworkRuntimeInFieldUpdateUpdateSession__nanoFrameworkRuntimeInFieldUpdateImageType__I4__SZARRAY_U1);
+    NANOCLR_NATIVE_DECLARE(
+        StoreImageChunk___STATIC__BOOLEAN__nanoFrameworkRuntimeInFieldUpdateUpdateSession__SZARRAY_U1__I4__I4);
+    NANOCLR_NATIVE_DECLARE(
+        CompleteUpdateSession___STATIC__nanoFrameworkRuntimeInFieldUpdateUpdateSessionResult__nanoFrameworkRuntimeInFieldUpdateUpdateSession);
+    NANOCLR_NATIVE_DECLARE(
+        AbortUpdateSession___STATIC__BOOLEAN__nanoFrameworkRuntimeInFieldUpdateUpdateSession__BOOLEAN);
+    NANOCLR_NATIVE_DECLARE(
+        GetUpdateSessionOwner___STATIC__nanoFrameworkRuntimeInFieldUpdateUpdateSessionOwner__nanoFrameworkRuntimeInFieldUpdateImageType);
+    NANOCLR_NATIVE_DECLARE(GetLastSessionError___STATIC__nanoFrameworkRuntimeInFieldUpdateUpdateSessionResult);
     NANOCLR_NATIVE_DECLARE(ConfirmDeploymentImage___STATIC__BOOLEAN);
     NANOCLR_NATIVE_DECLARE(RequestDeploymentRevert___STATIC__BOOLEAN);
     NANOCLR_NATIVE_DECLARE(RequestClrRevert___STATIC__BOOLEAN);
@@ -95,6 +138,36 @@ struct Library_nf_runtime_ifu_nanoFramework_Runtime_InFieldUpdate_UpdateManager
         CLR_RT_TypeDef_Index versionTypeDef);
     static HRESULT Ifu_GetImageInfoForSlot(CLR_RT_StackFrame &stack, uint8_t slotIndex);
     static bool Ifu_IsPrimaryConfirmed(uint8_t imageIndex);
+    static HRESULT Ifu_OpenSession(CLR_RT_StackFrame &stack, bool resume);
+    static HRESULT Ifu_PopulateSession(CLR_RT_HeapBlock &destSlot, const Ifu_Session &session, bool resumed);
+    static HRESULT Ifu_UpdateSessionHeader(CLR_RT_HeapBlock *pSession, const struct image_header &hdr);
+    static HRESULT Ifu_ReadSessionArg(
+        CLR_RT_HeapBlock &arg,
+        uint8_t &imageIndex,
+        uint32_t &token,
+        CLR_RT_HeapBlock *&pSession);
+};
+
+struct Library_nf_runtime_ifu_nanoFramework_Runtime_InFieldUpdate_UpdateSession
+{
+    // renamed backing field '<Image>k__BackingField'
+    static const int FIELD__Image = 1;
+    // renamed backing field '<Token>k__BackingField'
+    static const int FIELD__Token = 2;
+    // renamed backing field '<TotalLength>k__BackingField'
+    static const int FIELD__TotalLength = 3;
+    // renamed backing field '<NextOffset>k__BackingField'
+    static const int FIELD__NextOffset = 4;
+    // renamed backing field '<IsResumed>k__BackingField'
+    static const int FIELD__IsResumed = 5;
+    // renamed backing field '<Version>k__BackingField'
+    static const int FIELD__Version = 6;
+    // renamed backing field '<HeaderSize>k__BackingField'
+    static const int FIELD__HeaderSize = 7;
+    // renamed backing field '<ImageSize>k__BackingField'
+    static const int FIELD__ImageSize = 8;
+
+    //--//
 };
 
 extern const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_nanoFramework_Runtime_InFieldUpdate;

@@ -4012,6 +4012,46 @@ bool CLR_DBG_Debugger::Debugging_Info_SetJMC(WP_Message *msg)
 #include <bootutil/bootutil_public.h>
 #include <bootutil/image.h>
 #include <MCUboot_ImageSlotInfo.h>
+#include <MCUboot_UpdateSession.h>
+
+// The WP keeps no session state: the token of the session it holds is read back from the registry
+static uint32_t Ifu_WireSessionToken(uint8_t image)
+{
+    return Ifu_SessionToken(image, UpdateSessionOwner_WireProtocol);
+}
+
+// Map a session outcome onto the wire error codes.
+static uint32_t Ifu_StatusToWireError(UpdateSessionResult status)
+{
+    switch (status)
+    {
+        case UpdateSessionResult_Success:
+            return Monitor_Image_Error_Success;
+        case UpdateSessionResult_Busy:
+        case UpdateSessionResult_BadToken:
+            return Monitor_Image_Error_Busy;
+        case UpdateSessionResult_BadOffset:
+            return Monitor_Image_Error_BadOffset;
+        case UpdateSessionResult_TooLarge:
+            return Monitor_Image_Error_TooLarge;
+        case UpdateSessionResult_BadMagic:
+            return Monitor_Image_Error_BadMagic;
+        case UpdateSessionResult_NoSlot:
+        case UpdateSessionResult_BadArgument:
+            return Monitor_Image_Error_BadArgument;
+        case UpdateSessionResult_SwapInFlight:
+            return Monitor_Image_Error_SetPending;
+        case UpdateSessionResult_Incomplete:
+        case UpdateSessionResult_BadTlv:
+        case UpdateSessionResult_HashMismatch:
+        case UpdateSessionResult_NoImage:
+        case UpdateSessionResult_HeaderMismatch:
+            return Monitor_Image_Error_BadImage;
+        case UpdateSessionResult_FlashError:
+        default:
+            return Monitor_Image_Error_Write;
+    }
+}
 
 bool CLR_DBG_Debugger::Monitor_ImageInfo(WP_Message *msg)
 {
@@ -4120,69 +4160,109 @@ bool CLR_DBG_Debugger::Monitor_ImageWrite(WP_Message *msg)
     uint32_t headerBytes = offsetof(Monitor_ImageWrite_Command, Data);
     uint32_t dataLen = (msg->m_header.m_size > headerBytes) ? (msg->m_header.m_size - headerBytes) : 0;
 
-    int faId = Ifu_FlashAreaId(cmd->ImageIndex, cmd->SlotIndex);
-    const struct flash_area *fa = NULL;
-
-    if (faId == FLASH_SLOT_DOES_NOT_EXIST || flash_area_open((uint8_t)faId, &fa) != 0 || fa == NULL)
+    if (cmd->ImageIndex >= MCUBOOT_IMAGE_NUMBER)
     {
-        cmdReply.ErrorCode = Monitor_Image_Error_FlashOpen;
-        WP_ReplyToCommand(msg, false, false, &cmdReply, sizeof(cmdReply));
-        return true;
+        cmdReply.ErrorCode = Monitor_Image_Error_BadArgument;
     }
-
-    // first chunk: validate the MCUboot header magic, bounds-check, and erase the slot
-    if (cmd->Offset == 0)
+    else if (cmd->SlotIndex == Monitor_Image_Slot_Secondary)
     {
-        uint32_t magic = 0;
+        UpdateSessionResult status = UpdateSessionResult_Success;
+        Ifu_Session session;
 
-        if (dataLen >= sizeof(magic))
+        if (cmd->Offset == 0)
         {
-            memcpy(&magic, cmd->Data, sizeof(magic));
+            status = Ifu_SessionStart(
+                cmd->ImageIndex,
+                UpdateSessionOwner_WireProtocol,
+                cmd->TotalSize,
+                (uint32_t)HAL_Time_CurrentSysTicks(),
+                &session);
         }
 
-        if (magic != IMAGE_MAGIC)
+        if (status == UpdateSessionResult_Success)
         {
-            cmdReply.ErrorCode = Monitor_Image_Error_BadMagic;
+            uint32_t nextOffset = 0;
+            uint32_t token = Ifu_WireSessionToken(cmd->ImageIndex);
+
+            // a zero-length write just reports the current position
+            status = Ifu_SessionWrite(cmd->ImageIndex, token, cmd->Data, 0, &nextOffset);
+
+            if (status == UpdateSessionResult_Success && cmd->Offset != nextOffset)
+            {
+                status = UpdateSessionResult_BadOffset;
+                cmdReply.NextOffset = nextOffset;
+            }
+
+            if (status == UpdateSessionResult_Success)
+            {
+                status = Ifu_SessionWrite(cmd->ImageIndex, token, cmd->Data, dataLen, &nextOffset);
+                cmdReply.NextOffset = nextOffset;
+            }
+
+            // final chunk: verify the staged image and schedule a one-time test-swap on the next reboot
+            if (status == UpdateSessionResult_Success && cmd->TotalSize > 0 && nextOffset >= cmd->TotalSize)
+            {
+                status = Ifu_SessionComplete(cmd->ImageIndex, token, NULL);
+            }
         }
-        else if (cmd->TotalSize > fa->fa_size)
-        {
-            cmdReply.ErrorCode = Monitor_Image_Error_TooLarge;
-        }
-        else if (flash_area_erase(fa, 0, fa->fa_size) != 0)
-        {
-            cmdReply.ErrorCode = Monitor_Image_Error_Erase;
-        }
+
+        cmdReply.ErrorCode = Ifu_StatusToWireError(status);
     }
-
-    // write this chunk
-    if (cmdReply.ErrorCode == Monitor_Image_Error_Success)
+    else
     {
-        if (cmd->Offset + dataLen > fa->fa_size)
+        // Primary slot (developer write path): direct, unverified, image at offset 0.
+        int faId = Ifu_FlashAreaId(cmd->ImageIndex, cmd->SlotIndex);
+        const struct flash_area *fa = NULL;
+
+        if (faId == FLASH_SLOT_DOES_NOT_EXIST || flash_area_open((uint8_t)faId, &fa) != 0 || fa == NULL)
         {
-            cmdReply.ErrorCode = Monitor_Image_Error_TooLarge;
-        }
-        else if (dataLen > 0 && flash_area_write(fa, cmd->Offset, cmd->Data, dataLen) != 0)
-        {
-            cmdReply.ErrorCode = Monitor_Image_Error_Write;
+            cmdReply.ErrorCode = Monitor_Image_Error_FlashOpen;
         }
         else
         {
-            cmdReply.NextOffset = cmd->Offset + dataLen;
-
-            // final chunk: a completed write to the secondary slot schedules a one-time
-            // test-swap on the next reboot. Primary-slot (developer) writes do not.
-            if (cmd->TotalSize > 0 && cmdReply.NextOffset >= cmd->TotalSize &&
-                cmd->SlotIndex == Monitor_Image_Slot_Secondary)
+            // first chunk: validate the MCUboot header magic, bounds-check, and erase the slot
+            if (cmd->Offset == 0)
             {
-                if (boot_set_pending_multi(cmd->ImageIndex, 0) != 0)
+                uint32_t magic = 0;
+
+                if (dataLen >= sizeof(magic))
                 {
-                    cmdReply.ErrorCode = Monitor_Image_Error_SetPending;
+                    memcpy(&magic, cmd->Data, sizeof(magic));
+                }
+
+                if (magic != IMAGE_MAGIC)
+                {
+                    cmdReply.ErrorCode = Monitor_Image_Error_BadMagic;
+                }
+                else if (cmd->TotalSize > fa->fa_size)
+                {
+                    cmdReply.ErrorCode = Monitor_Image_Error_TooLarge;
+                }
+                else if (flash_area_erase(fa, 0, fa->fa_size) != 0)
+                {
+                    cmdReply.ErrorCode = Monitor_Image_Error_Erase;
                 }
             }
+
+            if (cmdReply.ErrorCode == Monitor_Image_Error_Success)
+            {
+                if (cmd->Offset + dataLen > fa->fa_size)
+                {
+                    cmdReply.ErrorCode = Monitor_Image_Error_TooLarge;
+                }
+                else if (dataLen > 0 && flash_area_write(fa, cmd->Offset, cmd->Data, dataLen) != 0)
+                {
+                    cmdReply.ErrorCode = Monitor_Image_Error_Write;
+                }
+                else
+                {
+                    cmdReply.NextOffset = cmd->Offset + dataLen;
+                }
+            }
+
+            flash_area_close(fa);
         }
     }
-
-    flash_area_close(fa);
 
     WP_ReplyToCommand(
         msg,
@@ -4242,21 +4322,36 @@ bool CLR_DBG_Debugger::Monitor_ImageErase(WP_Message *msg)
     Monitor_ImageErase_Reply cmdReply;
     memset(&cmdReply, 0, sizeof(cmdReply));
 
-    int faId = Ifu_FlashAreaId((uint8_t)cmd->ImageIndex, (uint8_t)cmd->SlotIndex);
-    const struct flash_area *fa = NULL;
-
-    if (faId == FLASH_SLOT_DOES_NOT_EXIST || flash_area_open((uint8_t)faId, &fa) != 0 || fa == NULL)
+    if (cmd->ImageIndex >= MCUBOOT_IMAGE_NUMBER)
     {
-        cmdReply.ErrorCode = Monitor_Image_Error_FlashOpen;
+        cmdReply.ErrorCode = Monitor_Image_Error_BadArgument;
+    }
+    else if (cmd->SlotIndex == Monitor_Image_Slot_Secondary)
+    {
+        // refused with Busy while any update session (managed, wire, native) is open on the image
+        UpdateSessionResult status = Ifu_EraseSecondary((uint8_t)cmd->ImageIndex);
+
+        cmdReply.ErrorCode = (status == UpdateSessionResult_FlashError) ? (uint32_t)Monitor_Image_Error_Erase
+                                                                       : Ifu_StatusToWireError(status);
     }
     else
     {
-        if (flash_area_erase(fa, 0, fa->fa_size) != 0)
-        {
-            cmdReply.ErrorCode = Monitor_Image_Error_Erase;
-        }
+        int faId = Ifu_FlashAreaId((uint8_t)cmd->ImageIndex, (uint8_t)cmd->SlotIndex);
+        const struct flash_area *fa = NULL;
 
-        flash_area_close(fa);
+        if (faId == FLASH_SLOT_DOES_NOT_EXIST || flash_area_open((uint8_t)faId, &fa) != 0 || fa == NULL)
+        {
+            cmdReply.ErrorCode = Monitor_Image_Error_FlashOpen;
+        }
+        else
+        {
+            if (flash_area_erase(fa, 0, fa->fa_size) != 0)
+            {
+                cmdReply.ErrorCode = Monitor_Image_Error_Erase;
+            }
+
+            flash_area_close(fa);
+        }
     }
 
     WP_ReplyToCommand(

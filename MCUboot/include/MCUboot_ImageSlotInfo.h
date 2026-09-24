@@ -8,6 +8,7 @@
 
 #include <stdint.h>
 #include <stdbool.h>
+#include <flash_map_backend/flash_map_backend.h>
 
 #ifdef __cplusplus
 extern "C"
@@ -39,7 +40,25 @@ typedef struct
 // Resolve the flash area ID for a (image index, slot) pair.
 int Ifu_FlashAreaId(uint8_t imageIndex, uint8_t slotIndex);
 
+// Offset inside a SECONDARY slot where the upgrade image must start. This is the single source
+// of truth for every writer (managed IFU sessions, Wire Protocol, media import) and reader.
+// swap-using-offset keeps the first sector of the secondary slot free (MCUboot reads the header
+// at boot_img_sector_size(secondary, 0)); every other swap mode expects the image at offset 0.
+// Primary slots always hold the image at offset 0.
+uint32_t Ifu_ImageOffset(const struct flash_area *fa);
+
+// Largest image a secondary slot accepts. Under swap-using-offset one sector is skipped at the
+// start (Ifu_ImageOffset) and the primary reserves one sector for the swap trailer, so two
+// sectors come off the top. MCUboot performs the definitive check at swap time.
+uint32_t Ifu_UsableSize(const struct flash_area *fa);
+
+// SHA-256 over [offset, offset + length) of a flash area, streamed in small reads.
+// Returns 0 on success, non-zero when a flash read failed. Keeps the tinycrypt dependency inside
+// the MCUboot porting library.
+int Ifu_HashFlashRange(const struct flash_area *fa, uint32_t offset, uint32_t length, uint8_t digest[32]);
+
 // Read the image header and (best-effort) SHA-256 digest from a slot into *snapshot.
+// For the secondary slot the header is read at Ifu_ImageOffset(fa).
 void Ifu_ReadSlotInfo(uint8_t imageIndex, uint8_t slotIndex, Ifu_SlotSnapshot *snapshot);
 
 #ifdef __cplusplus

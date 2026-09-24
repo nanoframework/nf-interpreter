@@ -14,6 +14,9 @@ add_library(nf_mcuboot_port STATIC
     ${CMAKE_SOURCE_DIR}/targets/ChibiOS/_mcuboot/mcuboot_log_stubs.c
 
     ${CMAKE_SOURCE_DIR}/MCUboot/common/MCUboot_ImageSlotInfo.c
+
+    ${mcuboot_SOURCE_DIR}/ext/tinycrypt/lib/source/sha256.c
+    ${mcuboot_SOURCE_DIR}/ext/tinycrypt/lib/source/utils.c
 )
 
 target_include_directories(nf_mcuboot_port PUBLIC
@@ -21,6 +24,7 @@ target_include_directories(nf_mcuboot_port PUBLIC
     ${TARGET_BASE_LOCATION}
     ${TARGET_BASE_LOCATION}/MCUboot
     ${mcuboot_SOURCE_DIR}/boot/bootutil/src
+    ${mcuboot_SOURCE_DIR}/ext/tinycrypt/lib/include
 )
 
 ##################################################################
@@ -319,6 +323,7 @@ if(${TARGET_SERIES} STREQUAL "STM32F7xx")
             ${CMAKE_SOURCE_DIR}/targets/ChibiOS/_mcuboot/fatfs_diskio_boot.c
             ${CMAKE_SOURCE_DIR}/targets/ChibiOS/_mcuboot/mcuboot_media_fatfs.c
             ${CMAKE_SOURCE_DIR}/MCUboot/common/MCUboot_media_import.c
+            ${CMAKE_SOURCE_DIR}/MCUboot/common/MCUboot_ImageSlotInfo.c
         )
 
         list(APPEND MCUBOOT_SERIES_COMMON_INCLUDES ${MCUBOOT_FATFS_INCLUDE_DIRS})

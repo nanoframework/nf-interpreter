@@ -46,14 +46,15 @@ extern "C"
 {
 #endif
 
+    // All functions below are thread-safe in the nanoCLR: each one runs as a whole under the
+    // driver's lock (see common/target_ext_flash.c). In the MCUboot bootloader, which is
+    // single-threaded, they are unlocked.
+
     // Wake device from deep power down and verify JEDEC ID.
-    // Must be called once after spiStart() before any other operation.
+    // Must be called once before any other operation. In the nanoCLR it also starts SPI1 with the
+    // flash configuration; the bootloader starts SPI1 itself before calling it.
     // Returns true on success (JEDEC ID matched), false on timeout or ID mismatch.
     bool AT25SF641_Init(void);
-
-    // Poll the BUSY flag until the device is idle or the timeout expires.
-    // Returns true when the device becomes ready, false on timeout.
-    bool AT25SF641_WaitReady(void);
 
     // Erase a block starting at byte offset addr.
     // is32kBlock=true  => 32 kB block erase     (0x52, used by AT25SF641_EraseChip).

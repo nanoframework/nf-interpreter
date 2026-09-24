@@ -37,15 +37,6 @@ int32_t lfs_outputBufferSize = LFS_CACHE_SIZE;
 
 #ifdef LFS_SPI1
 
-static const SPIConfig spiConfig = {
-    .circular = false,
-    .slave = false,
-    .data_cb = NULL,
-    .error_cb = NULL,
-    // CPHA=0, CPOL=0, MSb first
-    .cr1 = 0U, // SPI_CR1_CPOL | SPI_CR1_BR_0,
-    // transfer length to 8bit
-    .cr2 = SPI_CR2_DS_2 | SPI_CR2_DS_1 | SPI_CR2_DS_0};
 
 #ifdef DEBUG
 uint8_t tempBuffer[AT25SF641_PAGE_SIZE];
@@ -627,14 +618,6 @@ uint8_t QSPI_Erase_Block(uint32_t blockAddress)
 int8_t target_lfs_init()
 {
 #ifdef LFS_SPI1
-
-    // init SPI driver
-    spiAcquireBus(&SPID1);
-    spiStart(&SPID1, &spiConfig);
-
-    ////////////////////////////////////////////////////////////////////////
-    // no need to worry with cache issues at this early stage of the boot //
-    ////////////////////////////////////////////////////////////////////////
 
     AT25SF641_Init();
 

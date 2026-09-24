@@ -242,8 +242,11 @@ typedef enum Monitor_Image_Error
     Monitor_Image_Error_TooLarge    = 4, // image would exceed the target slot capacity
     Monitor_Image_Error_Erase       = 5, // flash erase failed
     Monitor_Image_Error_Write       = 6, // flash write failed
-    Monitor_Image_Error_SetPending  = 7, // boot_set_pending failed
+    Monitor_Image_Error_SetPending  = 7, // boot_set_pending failed, or a swap is already in flight
     Monitor_Image_Error_Confirm     = 8, // boot_set_confirmed failed
+    Monitor_Image_Error_Busy        = 9, // an update session held by another writer is open on the image
+    Monitor_Image_Error_BadOffset   = 10, // chunk offset is not the next expected offset (reply carries it)
+    Monitor_Image_Error_BadImage    = 11, // final verification failed (TLV structure or SHA-256)
 } Monitor_Image_Error;
 
 // per-slot entry returned by Monitor_ImageInfo
@@ -278,7 +281,7 @@ typedef struct __nfpack Monitor_ImageWrite_Command
     uint8_t  ImageIndex;    // 0 = CLR firmware, 1 = deployment
     uint8_t  SlotIndex;     // 0 = primary (dev path), 1 = secondary (normal update path)
     uint32_t Offset;        // byte offset within the target slot
-    uint32_t TotalSize;     // total image size (only meaningful when Offset == 0)
+    uint32_t TotalSize;     // total image size; checked against the usable slot size when Offset == 0
     uint8_t  Data[1];       // chunk data (variable length)
 } Monitor_ImageWrite_Command;
 

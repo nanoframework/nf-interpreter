@@ -212,6 +212,16 @@ MCUboot's Image 1 management only activates when a valid MCUboot image is staged
 `deploy_1` (the secondary slot). The presence of a valid MCUboot image trailer in
 `deploy_1` triggers the swap on the next boot.
 
+### Staging writers share one session registry
+
+Writes to a *secondary* slot at run time - from the Wire Protocol (`Monitor_ImageWrite`) and
+from managed code (`nanoFramework.Runtime.InFieldUpdate`) alike - go through the update session
+registry, so the two can never interleave chunks into the same slot. The registry also owns the
+write position, verifies the staged image before marking it pending, and can resume a download
+interrupted by a reboot. The bootloader media importer shares its slot geometry helpers.
+
+See [session-update.md](session-update.md).
+
 ---
 
 ## MCUBOOT_VALIDATE_PRIMARY_SLOT for Image 1

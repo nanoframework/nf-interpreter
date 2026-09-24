@@ -51,6 +51,7 @@ if(NF_FEATURE_HAS_MCUBOOT)
     list(APPEND TARGET_CHIBIOS_NANOCLR_SOURCES ${CMAKE_SOURCE_DIR}/MCUboot/common/MCUboot_Runtime.c)
     list(APPEND TARGET_CHIBIOS_NANOCLR_SOURCES ${CMAKE_SOURCE_DIR}/MCUboot/common/MCUboot_StartupPolicy.c)
     list(APPEND TARGET_CHIBIOS_NANOCLR_SOURCES ${CMAKE_SOURCE_DIR}/MCUboot/common/MCUboot_Image.c)
+    list(APPEND TARGET_CHIBIOS_NANOCLR_SOURCES ${CMAKE_SOURCE_DIR}/MCUboot/common/MCUboot_UpdateSession.cpp)
 endif()
 
 # make var global

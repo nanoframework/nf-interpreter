@@ -42,7 +42,22 @@ extern "C"
     {
         nanoHAL_Uninitialize(isPoweringDown);
     }
+
 }
+
+#if defined(CONFIG_NF_FEATURE_HAS_MCUBOOT) && CONFIG_NF_FEATURE_HAS_MCUBOOT
+
+void Ifu_SessionLock(void)
+{
+    chSysLock();
+}
+
+void Ifu_SessionUnlock(void)
+{
+    chSysUnlock();
+}
+
+#endif
 
 void nanoHAL_Initialize()
 {
@@ -71,6 +86,10 @@ void nanoHAL_Initialize()
     ConfigurationManager_Initialize();
 
     Events_Initialize();
+
+#if defined(CONFIG_NF_FEATURE_HAS_MCUBOOT) && CONFIG_NF_FEATURE_HAS_MCUBOOT
+    Ifu_SessionResetAll();
+#endif
 
     CPU_GPIO_Initialize();
 
@@ -171,6 +190,10 @@ void nanoHAL_Uninitialize(bool isPoweringDown)
             break;
         }
     }
+
+#if defined(CONFIG_NF_FEATURE_HAS_MCUBOOT) && CONFIG_NF_FEATURE_HAS_MCUBOOT
+    Ifu_SessionResetAll();
+#endif
 
     SOCKETS_CloseConnections();
 

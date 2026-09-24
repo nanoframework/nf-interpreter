@@ -3,10 +3,7 @@
 // See LICENSE file in the project root for full license information.
 //
 
-// Implements the algorithm and port interface described in mcuboot_media_import.h —
-// see that file for the six-step per-image flow, the layering and the "used" marker
-// format. This file is the platform-neutral engine: it touches only flash_area_*,
-// bootutil_public.h and the mcuboot_media_ops callbacks, never a filesystem directly.
+// Implements the algorithm and port interface described in mcuboot_media_import.h
 
 #include <stdint.h>
 #include <stdbool.h>
@@ -21,6 +18,7 @@
 #include <bootutil/bootutil_log.h>
 
 #include <mcuboot_media_import.h>
+#include <MCUboot_ImageSlotInfo.h>
 
 // Copy buffer shared by all media (the sweep is strictly sequential).
 static uint8_t s_chunk[MCUBOOT_IMPORT_CHUNK_SIZE];
@@ -51,43 +49,6 @@ const char *mcuboot_media_pattern_for_image(uint8_t image)
         default:
             return NULL;
     }
-}
-
-// Offset inside the secondary slot where the upgrade image must start.
-// swap-using-offset keeps the first sector of the secondary slot free (MCUboot reads the
-// header at boot_img_sector_size(secondary, 0) and rejects a magic at offset 0); every
-// other swap mode expects the image at the start of the slot.
-static uint32_t image_offset(const struct flash_area *fa)
-{
-#if defined(MCUBOOT_SWAP_USING_OFFSET)
-#if defined(MCUBOOT_LOGICAL_SECTOR_SIZE) && (MCUBOOT_LOGICAL_SECTOR_SIZE != 0)
-    (void)fa;
-    return MCUBOOT_LOGICAL_SECTOR_SIZE;
-#else
-    struct flash_sector sector;
-
-    if (flash_area_get_sector(fa, 0, &sector) != 0)
-    {
-        return 0;
-    }
-
-    return sector.fs_size;
-#endif
-#else
-    (void)fa;
-    return 0;
-#endif
-}
-
-// Largest image the slot pair accepts. Under swap-using-offset the secondary slot is one
-// sector larger than the primary: one sector is skipped at the start (imageOff) and the
-// primary reserves one sector for the swap trailer, so two sectors come off the top.
-// MCUboot performs the definitive check; this only avoids copying something hopeless.
-static uint32_t usable_size(const struct flash_area *fa, uint32_t imageOff)
-{
-    uint32_t reserved = 2U * imageOff;
-
-    return (fa->fa_size > reserved) ? (fa->fa_size - reserved) : 0U;
 }
 
 static bool header_is_sane(const struct image_header *hdr, uint32_t fileSize, uint32_t usable)
@@ -319,8 +280,8 @@ static bool import_image(const mcuboot_media *media, uint8_t image)
         return false;
     }
 
-    uint32_t imageOff = image_offset(fa);
-    uint32_t usable = usable_size(fa, imageOff);
+    uint32_t imageOff = Ifu_ImageOffset(fa);
+    uint32_t usable = Ifu_UsableSize(fa);
 
     if (!find_candidate(media, image, usable, &s_cand))
     {

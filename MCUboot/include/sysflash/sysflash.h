@@ -46,7 +46,7 @@
 #if (MCUBOOT_IMAGE_NUMBER == 2)
 #define FLASH_AREA_IMAGE_1_PRIMARY                                                                                     \
     3 // Deployment primary slot   (deploy_0; Wire Protocol writes here directly in debug)
-#define FLASH_AREA_IMAGE_1_SECONDARY 4 // Deployment secondary slot (deploy_1; OTA staging area)
+#define FLASH_AREA_IMAGE_1_SECONDARY 4 // Deployment secondary slot (deploy_1; in-field update staging area)
 #endif
 
 //

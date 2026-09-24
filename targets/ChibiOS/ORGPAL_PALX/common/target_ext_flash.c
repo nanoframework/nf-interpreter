@@ -11,6 +11,13 @@
 //
 // W25Q512_Erase() unifies 4 kB sector erase (littlefs)
 // and 32 kB block erase (MCUboot) behind a single entry point.
+//
+// There are concurrency concerns in nanoCLR. Several threads reach this chip:
+// - the CLR thread (littlefs FS0, in-field update sessions staging the MCUboot secondary slots)
+// - WP receiver thread (image info / write / erase commands).
+//
+// The MCUboot bootloader is single-threaded and built without mutexes: there the lock compiles to
+// nothing.
 
 #include <ch.h>
 #include <hal.h>
@@ -57,6 +64,31 @@
 
 extern void Watchdog_Reset(void);
 
+#if defined(NF_MCUBOOT_BOOTLOADER)
+
+#define ExtFlash_Lock()                                                                                                \
+    do                                                                                                                 \
+    {                                                                                                                  \
+    } while (0)
+#define ExtFlash_Unlock()                                                                                              \
+    do                                                                                                                 \
+    {                                                                                                                  \
+    } while (0)
+
+#else
+
+#if !defined(CH_CFG_USE_MUTEXES) || (CH_CFG_USE_MUTEXES != TRUE)
+#error "W25Q512 is shared between threads: CH_CFG_USE_MUTEXES must be TRUE"
+#endif
+
+// serialises every user of the chip (see the concurrency note at the top of the file)
+static MUTEX_DECL(s_extFlashMutex);
+
+#define ExtFlash_Lock()   chMtxLock(&s_extFlashMutex)
+#define ExtFlash_Unlock() chMtxUnlock(&s_extFlashMutex)
+
+#endif // NF_MCUBOOT_BOOTLOADER
+
 ///////////////
 // Static helpers (internal to this translation unit)
 
@@ -66,10 +98,7 @@ static uint8_t QSPI_WriteEnable(QSPI_HandleTypeDef *hqspi);
 static uint8_t QSPI_AutoPollingMemReady(QSPI_HandleTypeDef *hqspi, uint32_t Timeout);
 static uint8_t QSPI_ReadChipID(QSPI_HandleTypeDef *hqspi, uint8_t *buffer);
 
-///////////////
-// Public API
-
-bool W25Q512_Init(void)
+static bool InitUnlocked(void)
 {
     // Configure MPU for QSPI memory region.
     // Required on STM32F7 to avoid QSPI BUSY flag issue with indirect access.
@@ -135,7 +164,7 @@ bool W25Q512_Init(void)
     return true;
 }
 
-bool W25Q512_Erase(uint32_t addr, bool is32kBlock)
+static bool EraseUnlocked(uint32_t addr, bool is32kBlock)
 {
     QSPI_CommandTypeDef s_command;
 
@@ -170,7 +199,7 @@ bool W25Q512_Erase(uint32_t addr, bool is32kBlock)
     return true;
 }
 
-bool W25Q512_Read(uint8_t *pData, uint32_t readAddr, uint32_t size)
+static bool ReadUnlocked(uint8_t *pData, uint32_t readAddr, uint32_t size)
 {
     QSPI_CommandTypeDef s_command;
     HAL_StatusTypeDef status;
@@ -214,7 +243,7 @@ config_command:
     return status == HAL_OK;
 }
 
-bool W25Q512_Write(uint8_t *pData, uint32_t writeAddr, uint32_t size)
+static bool WriteUnlocked(uint8_t *pData, uint32_t writeAddr, uint32_t size)
 {
     QSPI_CommandTypeDef s_command;
     uint32_t current_size, current_addr, end_addr;
@@ -266,11 +295,54 @@ bool W25Q512_Write(uint8_t *pData, uint32_t writeAddr, uint32_t size)
 
         current_addr += current_size;
         pData += current_size;
-        current_size =
-            ((current_addr + W25Q512_PAGE_SIZE) > end_addr) ? (end_addr - current_addr) : W25Q512_PAGE_SIZE;
+        current_size = ((current_addr + W25Q512_PAGE_SIZE) > end_addr) ? (end_addr - current_addr) : W25Q512_PAGE_SIZE;
     } while (current_addr < end_addr);
 
     return true;
+}
+
+bool W25Q512_Init(void)
+{
+    ExtFlash_Lock();
+
+    bool ok = InitUnlocked();
+
+    ExtFlash_Unlock();
+
+    return ok;
+}
+
+bool W25Q512_Erase(uint32_t addr, bool is32kBlock)
+{
+    ExtFlash_Lock();
+
+    bool ok = EraseUnlocked(addr, is32kBlock);
+
+    ExtFlash_Unlock();
+
+    return ok;
+}
+
+bool W25Q512_Read(uint8_t *buf, uint32_t addr, uint32_t size)
+{
+    ExtFlash_Lock();
+
+    bool ok = ReadUnlocked(buf, addr, size);
+
+    ExtFlash_Unlock();
+
+    return ok;
+}
+
+bool W25Q512_Write(uint8_t *buf, uint32_t addr, uint32_t size)
+{
+    ExtFlash_Lock();
+
+    bool ok = WriteUnlocked(buf, addr, size);
+
+    ExtFlash_Unlock();
+
+    return ok;
 }
 
 bool W25Q512_EraseChip(void)

@@ -10,9 +10,15 @@
 //   - The littlefs driver  (targets/ChibiOS/ORGPAL_PALTHREE/target_littlefs.c)
 //   - The MCUboot porting layer (MCUboot/mcuboot_flash_map_boot.c)
 //
-// Callers must call spiStart(&SPID1, ...) before invoking any function here.
 // The DMA transfer buffer (dataBuffer_0) lives in the .nocache section to
 // satisfy the Cortex-M7 D-cache / DMA coherency requirement.
+//
+// There are concurrency concerns in nanoCLR. Several threads reach this chip:
+// - the CLR thread (littlefs FS0, in-field update sessions staging the MCUboot secondary slots)
+// - WP receiver thread (image info / write / erase commands).
+//
+// The MCUboot bootloader is single-threaded and built without mutexes: there the lock compiles to
+// nothing and mcuboot_ext_flash_init() starts SPI1 once.
 
 #include <ch.h>
 #include <hal.h>
@@ -52,7 +58,52 @@ uint8_t dataBuffer_0[AT25SF641_PAGE_SIZE];
 extern uint32_t HAL_GetTick(void);
 extern void Watchdog_Reset(void);
 
-bool AT25SF641_WaitReady(void)
+#if defined(NF_MCUBOOT_BOOTLOADER)
+
+#define ExtFlash_Lock()                                                                                                \
+    do                                                                                                                 \
+    {                                                                                                                  \
+    } while (0)
+#define ExtFlash_Unlock()                                                                                              \
+    do                                                                                                                 \
+    {                                                                                                                  \
+    } while (0)
+
+#else
+
+#if !defined(CH_CFG_USE_MUTEXES) || (CH_CFG_USE_MUTEXES != TRUE) || !defined(SPI_USE_MUTUAL_EXCLUSION) ||              \
+    (SPI_USE_MUTUAL_EXCLUSION != TRUE)
+#error "AT25SF641 is shared between threads: CH_CFG_USE_MUTEXES and SPI_USE_MUTUAL_EXCLUSION must be TRUE"
+#endif
+
+// serialises every user of the chip (see the concurrency note at the top of the file)
+static MUTEX_DECL(s_extFlashMutex);
+
+static const SPIConfig s_extFlashSpiConfig = {
+    .circular = false,
+    .slave = false,
+    .data_cb = NULL,
+    .error_cb = NULL,
+    .cr1 = 0U,
+    .cr2 = SPI_CR2_DS_2 | SPI_CR2_DS_1 | SPI_CR2_DS_0};
+
+static void ExtFlash_Lock(void)
+{
+    chMtxLock(&s_extFlashMutex);
+
+    spiAcquireBus(&SPID1);
+    spiStart(&SPID1, &s_extFlashSpiConfig);
+}
+
+static void ExtFlash_Unlock(void)
+{
+    spiReleaseBus(&SPID1);
+    chMtxUnlock(&s_extFlashMutex);
+}
+
+#endif // NF_MCUBOOT_BOOTLOADER
+
+static bool WaitReady(void)
 {
     uint32_t tickstart = HAL_GetTick();
 
@@ -87,7 +138,7 @@ bool AT25SF641_WaitReady(void)
     return true;
 }
 
-bool AT25SF641_Erase(uint32_t addr, bool is32kBlock)
+static bool EraseUnlocked(uint32_t addr, bool is32kBlock)
 {
     // send write enable
     dataBuffer_0[0] = WRITE_ENABLE_CMD;
@@ -107,10 +158,10 @@ bool AT25SF641_Erase(uint32_t addr, bool is32kBlock)
     spiSend(&SPID1, 4, dataBuffer_0);
     CS_UNSELECT;
 
-    return AT25SF641_WaitReady();
+    return WaitReady();
 }
 
-bool AT25SF641_Read(uint8_t *buf, uint32_t addr, uint32_t size)
+static bool ReadUnlocked(uint8_t *buf, uint32_t addr, uint32_t size)
 {
     // send read command with 24-bit address; CS stays asserted for the data phase
     dataBuffer_0[0] = READ_CMD;
@@ -142,7 +193,7 @@ bool AT25SF641_Read(uint8_t *buf, uint32_t addr, uint32_t size)
     return true;
 }
 
-bool AT25SF641_Write(const uint8_t *buf, uint32_t addr, uint32_t size)
+static bool WriteUnlocked(const uint8_t *buf, uint32_t addr, uint32_t size)
 {
     uint32_t writeSize;
     uint32_t address = addr;
@@ -178,7 +229,7 @@ bool AT25SF641_Write(const uint8_t *buf, uint32_t addr, uint32_t size)
         spiSend(&SPID1, writeSize, dataBuffer_0);
         CS_UNSELECT;
 
-        if (!AT25SF641_WaitReady())
+        if (!WaitReady())
         {
             return false;
         }
@@ -191,7 +242,7 @@ bool AT25SF641_Write(const uint8_t *buf, uint32_t addr, uint32_t size)
     return true;
 }
 
-bool AT25SF641_Init(void)
+static bool InitUnlocked(void)
 {
     // resume from deep power down; required to make the device functional after sleep
     dataBuffer_0[0] = RESUME_DEEP_PD_CMD;
@@ -218,9 +269,52 @@ bool AT25SF641_Init(void)
            (dataBuffer_0[2] == AT25SF641_DEVICE_ID2);
 }
 
+bool AT25SF641_Init(void)
+{
+    ExtFlash_Lock();
+
+    bool ok = InitUnlocked();
+
+    ExtFlash_Unlock();
+
+    return ok;
+}
+
+bool AT25SF641_Erase(uint32_t addr, bool is32kBlock)
+{
+    ExtFlash_Lock();
+
+    bool ok = EraseUnlocked(addr, is32kBlock);
+
+    ExtFlash_Unlock();
+
+    return ok;
+}
+
+bool AT25SF641_Read(uint8_t *buf, uint32_t addr, uint32_t size)
+{
+    ExtFlash_Lock();
+
+    bool ok = ReadUnlocked(buf, addr, size);
+
+    ExtFlash_Unlock();
+
+    return ok;
+}
+
+bool AT25SF641_Write(const uint8_t *buf, uint32_t addr, uint32_t size)
+{
+    ExtFlash_Lock();
+
+    bool ok = WriteUnlocked(buf, addr, size);
+
+    ExtFlash_Unlock();
+
+    return ok;
+}
+
 bool AT25SF641_EraseChip(void)
 {
-    // erase one 32 kB block at a time to avoid watchdog expiry during long chip erases
     for (uint32_t i = 0; i < AT25SF641_FLASH_SIZE / AT25SF641_BLOCK32_SIZE; i++)
     {
         if (!AT25SF641_Erase(i * AT25SF641_BLOCK32_SIZE, true))
