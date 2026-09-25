@@ -428,6 +428,14 @@ jobs:
           NeedsSRECORD: true
           CMakePreset: ST_STM32F769I_DISCOVERY
 
+        ST_B_L475E_IOT01A:
+          TargetBoard: ST_B_L475E_IOT01A
+          TargetSeries: 'stm32l4xx'
+          BuildOptions:
+          NeedsDFU: false
+          NeedsSRECORD: false
+          CMakePreset: ST_B_L475E_IOT01A
+
     variables:
       DOTNET_NOLOGO: true
       # creates a counter and assigns it to the revision variable
@@ -860,14 +868,6 @@ jobs:
 
     strategy:
       matrix:
-        # ST_B_L475E_IOT01A:
-        #   TargetBoard: ST_B_L475E_IOT01A
-        #   TargetSeries: 'stm32l4xx'
-        #   BuildOptions:
-        #   NeedsDFU: true
-        #   NeedsSRECORD: false
-        #   CMakePreset: ST_B_L475E_IOT01A
-
         # ORGPAL_PALTHREE:
         #   TargetBoard: ORGPAL_PALTHREE
         #   TargetSeries: 'stm32f7xx'
