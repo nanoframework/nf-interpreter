@@ -61,6 +61,36 @@ static bool AllocateReceiveQueueSlots(uint32_t maximumDataLength)
     return true;
 }
 
+static void StopEspNow()
+{
+    s_rxQueue.initialized = false;
+
+    // Wake a thread that may be blocked in NativeReadPacket().
+    Events_Set(SYSTEM_EVENT_FLAG_ESPNOW);
+
+    // These calls are intentionally unconditional. The software state may be
+    // stale after managed redeployment, while the ESP-IDF state can still be
+    // active. ESP-IDF returns a not-initialized error when there is nothing to
+    // clean up; that result is intentionally ignored here.
+    esp_now_unregister_recv_cb();
+    esp_now_unregister_send_cb();
+    esp_now_deinit();
+
+    if (s_rxQueue.mutex != NULL && xSemaphoreTake(s_rxQueue.mutex, EspNowMutexTimeoutTicks) == pdTRUE)
+    {
+        xSemaphoreGive(s_rxQueue.mutex);
+    }
+
+    FreeReceiveQueueSlots();
+
+    if (s_rxQueue.mutex != NULL)
+    {
+        vSemaphoreDelete(s_rxQueue.mutex);
+    }
+
+    s_rxQueue = {};
+}
+
 void Library_nf_espnow_nanoFramework_EspNow_EspNowController::DataSentCb(
     const wifi_tx_info_t *tx_info,
     esp_now_send_status_t status)
@@ -136,11 +166,11 @@ HRESULT Library_nf_espnow_nanoFramework_EspNow_EspNowController::NativeInitializ
 {
     NANOCLR_HEADER();
 
-    if (s_rxQueue.initialized)
-    {
-        stack.SetResult_I4((int32_t)ESP_ERR_INVALID_STATE);
-        NANOCLR_NOCLEANUP_NOLABEL();
-    }
+    // A managed redeployment may leave the native
+    // instance alive, so always tear down the previous ESP-NOW state first.
+    // esp_now_deinit() also removes the peer table; managed startup adds peers
+    // again after initialization.
+    StopEspNow();
 
     esp_err_t ret = esp_now_init();
     if (ret != ESP_OK)
@@ -153,7 +183,7 @@ HRESULT Library_nf_espnow_nanoFramework_EspNow_EspNowController::NativeInitializ
     ret = esp_now_get_version(&espNowVersion);
     if (ret != ESP_OK)
     {
-        esp_now_deinit();
+        StopEspNow();
         stack.SetResult_I4((int32_t)ret);
         NANOCLR_NOCLEANUP_NOLABEL();
     }
@@ -168,7 +198,7 @@ HRESULT Library_nf_espnow_nanoFramework_EspNow_EspNowController::NativeInitializ
 
     if (!AllocateReceiveQueueSlots(maximumDataLength))
     {
-        esp_now_deinit();
+        StopEspNow();
         stack.SetResult_I4((int32_t)ESP_ERR_NO_MEM);
         NANOCLR_NOCLEANUP_NOLABEL();
     }
@@ -181,7 +211,7 @@ HRESULT Library_nf_espnow_nanoFramework_EspNow_EspNowController::NativeInitializ
     if (s_rxQueue.mutex == NULL)
     {
         FreeReceiveQueueSlots();
-        esp_now_deinit();
+        StopEspNow();
         stack.SetResult_I4((int32_t)ESP_ERR_NO_MEM);
         NANOCLR_NOCLEANUP_NOLABEL();
     }
@@ -202,12 +232,7 @@ HRESULT Library_nf_espnow_nanoFramework_EspNow_EspNowController::NativeInitializ
 
     if (ret != ESP_OK)
     {
-        esp_now_unregister_recv_cb();
-        esp_now_unregister_send_cb();
-        FreeReceiveQueueSlots();
-        vSemaphoreDelete(s_rxQueue.mutex);
-        s_rxQueue.mutex = NULL;
-        esp_now_deinit();
+        StopEspNow();
         stack.SetResult_I4((int32_t)ret);
         NANOCLR_NOCLEANUP_NOLABEL();
     }
@@ -222,35 +247,7 @@ HRESULT Library_nf_espnow_nanoFramework_EspNow_EspNowController::NativeDispose__
 {
     NANOCLR_HEADER();
 
-    if (s_rxQueue.initialized)
-    {
-        s_rxQueue.initialized = false;
-
-        Events_Set(SYSTEM_EVENT_FLAG_ESPNOW);
-
-        esp_now_unregister_recv_cb();
-        esp_now_unregister_send_cb();
-        esp_now_deinit();
-
-        if (s_rxQueue.mutex != NULL && xSemaphoreTake(s_rxQueue.mutex, EspNowMutexTimeoutTicks) == pdTRUE)
-        {
-            xSemaphoreGive(s_rxQueue.mutex);
-        }
-
-        FreeReceiveQueueSlots();
-
-        if (s_rxQueue.mutex != NULL)
-        {
-            vSemaphoreDelete(s_rxQueue.mutex);
-            s_rxQueue.mutex = NULL;
-        }
-
-        s_rxQueue.head = 0;
-        s_rxQueue.count = 0;
-        s_rxQueue.overflow_count = 0;
-        s_rxQueue.maximum_data_length = 0;
-        s_rxQueue.readPending = false;
-    }
+    StopEspNow();
 
     NANOCLR_NOCLEANUP_NOLABEL();
 }
@@ -397,10 +394,12 @@ HRESULT Library_nf_espnow_nanoFramework_EspNow_EspNowController::NativeReadPacke
 
                 xSemaphoreGive(s_rxQueue.mutex);
 
-                stack.SetResult_I4(dataLength);
-
                 // pop the timeout heap block pushed by SetupTimeoutFromTicks
                 stack.PopValue();
+
+                // Set the result after removing the temporary timeout value.
+                // The return slot can otherwise be overwritten/corrupted.
+                stack.SetResult_I4(dataLength);
 
                 NANOCLR_SET_AND_LEAVE(S_OK);
             }
@@ -411,8 +410,9 @@ HRESULT Library_nf_espnow_nanoFramework_EspNow_EspNowController::NativeReadPacke
                 s_rxQueue.readPending = false;
                 xSemaphoreGive(s_rxQueue.mutex);
 
-                stack.SetResult_I4(0);
                 stack.PopValue();
+
+                stack.SetResult_I4(0);
 
                 NANOCLR_SET_AND_LEAVE(S_OK);
             }

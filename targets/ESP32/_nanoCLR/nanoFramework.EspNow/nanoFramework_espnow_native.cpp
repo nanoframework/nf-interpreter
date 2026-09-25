@@ -60,7 +60,7 @@ static const CLR_RT_MethodHandler method_lookup[] =
 const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_nanoFramework_EspNow =
 {
     "nanoFramework.EspNow",
-    0x65E7BDBE,
+    0x1B1730D1,
     method_lookup,
     { 100, 0, 0, 1 }
 };
