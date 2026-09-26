@@ -3139,11 +3139,8 @@ struct CLR_RT_GarbageCollector
         CLR_UINT8 *m_start;
         CLR_UINT8 *m_end;
         CLR_UINT8 *m_destination;
-#ifdef _WIN64
-        CLR_UINT64 m_offset;
-#else
-        CLR_UINT32 m_offset;
-#endif
+        // pointer-sized: a narrower offset is zero-extended when added back to a pointer, corrupting relocation
+        uintptr_t m_offset;
     };
 
     //--//
@@ -4486,17 +4483,16 @@ extern CLR_UINT32 g_buildCRC;
 // CT_ASSERT macro generates a compiler error in case the size of any structure changes.
 //
 
-#ifdef _WIN64
+#if defined(_MSC_VER) && defined(NANOCLR_64BIT_POINTERS)
+// packed to 4 bytes (see #pragma pack above)
 CT_ASSERT(sizeof(struct CLR_RT_HeapBlock) == 20)
-#elif defined(PLATFORM_POSIX_HOST) && defined(__LP64__)
-// 64-bit POSIX host: HeapBlock layout will be determined during port; skip size check
+#elif defined(NANOCLR_64BIT_POINTERS)
+CT_ASSERT(sizeof(struct CLR_RT_HeapBlock) == 24)
 #else
 CT_ASSERT(sizeof(struct CLR_RT_HeapBlock) == 12)
-#endif // _WIN64
-
-#if !defined(PLATFORM_POSIX_HOST) || !defined(__LP64__)
-CT_ASSERT(sizeof(CLR_RT_HeapBlock_Raw) == sizeof(struct CLR_RT_HeapBlock))
 #endif
+
+CT_ASSERT(sizeof(CLR_RT_HeapBlock_Raw) == sizeof(struct CLR_RT_HeapBlock))
 
 #if defined(NANOCLR_TRACE_MEMORY_STATS)
 #define NANOCLR_TRACE_MEMORY_STATS_EXTRA_SIZE sizeof(const char *)
@@ -4504,7 +4500,11 @@ CT_ASSERT(sizeof(CLR_RT_HeapBlock_Raw) == sizeof(struct CLR_RT_HeapBlock))
 #define NANOCLR_TRACE_MEMORY_STATS_EXTRA_SIZE 0
 #endif
 
-#if defined(__GNUC__) && !defined(PLATFORM_POSIX_HOST) // Gcc compiler uses 8 bytes for a function pointer
+// GCC and Clang use two pointers for a pointer to member function (m_relocate)
+#if defined(__GNUC__) && defined(NANOCLR_64BIT_POINTERS)
+CT_ASSERT(sizeof(CLR_RT_DataTypeLookup) == 32 + NANOCLR_TRACE_MEMORY_STATS_EXTRA_SIZE)
+
+#elif defined(__GNUC__)
 CT_ASSERT(sizeof(CLR_RT_DataTypeLookup) == 20 + NANOCLR_TRACE_MEMORY_STATS_EXTRA_SIZE)
 
 #elif defined(VIRTUAL_DEVICE) && defined(NANOCLR_TRACE_MEMORY_STATS)
@@ -4524,13 +4524,7 @@ CT_ASSERT(sizeof(CLR_RT_DataTypeLookup) == 16 + NANOCLR_TRACE_MEMORY_STATS_EXTRA
 #endif // _WIN64
 
 #else
-
-#if defined(PLATFORM_POSIX_HOST) && defined(__LP64__)
-// 64-bit POSIX host: structure sizes will differ from embedded ARM; skip checks during port.
-#else
 !ERROR
-#endif
-
 #endif
 
 //--//

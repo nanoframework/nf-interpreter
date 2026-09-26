@@ -19,6 +19,13 @@
 
 #define NANOCLR_MAX_ASSEMBLY_NAME 128
 
+// Defined when pointers are 64 bits wide (Win64, 64-bit POSIX hosts), whatever the OS or compiler.
+// Use this, not _WIN64 or __LP64__, for code whose layout or behaviour depends on the pointer size.
+#include <stdint.h>
+#if UINTPTR_MAX > 0xFFFFFFFFu
+#define NANOCLR_64BIT_POINTERS
+#endif
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // FEATURES
 
