@@ -2661,11 +2661,8 @@ struct CLR_RT_GarbageCollector
         CLR_UINT8 *m_start;
         CLR_UINT8 *m_end;
         CLR_UINT8 *m_destination;
-#ifdef _WIN64
-        CLR_UINT64 m_offset;
-#else
-        CLR_UINT32 m_offset;
-#endif
+        // pointer-sized: a narrower offset is zero-extended when added back to a pointer, corrupting relocation
+        uintptr_t m_offset;
     };
 
     //--//
