@@ -64,13 +64,14 @@
 //
 // This is used in memory move operations.
 //
-#ifdef _WIN64
+#if defined(_MSC_VER) && defined(NANOCLR_64BIT_POINTERS)
+// 64-bit MSVC, packed to 4 bytes: CLR_RT_HeapBlock = 4 (m_id) + 16 (m_data with 2x 8-byte ptrs) = 20 bytes.
 struct CLR_RT_HeapBlock_Raw
 {
     CLR_UINT32 data[5];
 };
-#elif defined(__LP64__)
-// 64-bit POSIX hosts (macOS/Linux arm64/x86-64):
+#elif defined(NANOCLR_64BIT_POINTERS)
+// other 64-bit hosts (Linux/macOS x86-64/arm64), not packed:
 // CLR_RT_HeapBlock = 4 (m_id) + 4 (align pad) + 16 (m_data with 2x 8-byte ptrs) = 24 bytes.
 struct CLR_RT_HeapBlock_Raw
 {
@@ -81,7 +82,7 @@ struct CLR_RT_HeapBlock_Raw
 {
     CLR_UINT32 data[3];
 };
-#endif // _WIN64
+#endif
 
 #ifdef __GNUC__
 #pragma GCC diagnostic push
