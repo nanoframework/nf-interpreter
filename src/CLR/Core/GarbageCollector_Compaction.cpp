@@ -202,11 +202,7 @@ void CLR_RT_GarbageCollector::Heap_Compact()
                 relocCurrent->m_destination = (CLR_UINT8 *)freeRegion;
                 relocCurrent->m_start = (CLR_UINT8 *)currentSource;
 
-#ifdef _WIN64
-                relocCurrent->m_offset = (CLR_UINT64)(relocCurrent->m_destination - relocCurrent->m_start);
-#else
-                relocCurrent->m_offset = (CLR_UINT32)(relocCurrent->m_destination - relocCurrent->m_start);
-#endif
+                relocCurrent->m_offset = (uintptr_t)(relocCurrent->m_destination - relocCurrent->m_start);
 
                 //
                 // Are the free block and the last moved block adjacent?
@@ -399,11 +395,7 @@ void CLR_RT_GarbageCollector::Heap_Relocate_AddBlock(CLR_UINT8 *dst, CLR_UINT8 *
     reloc->m_start = src;
     reloc->m_end = &src[length];
     reloc->m_destination = dst;
-#ifdef _WIN64
-    reloc->m_offset = (CLR_UINT64)(dst - src);
-#else
-    reloc->m_offset = (CLR_UINT32)(dst - src);
-#endif
+    reloc->m_offset = (uintptr_t)(dst - src);
 
     if (++m_relocCount == m_relocTotal)
     {
