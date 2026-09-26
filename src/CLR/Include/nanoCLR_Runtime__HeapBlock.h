@@ -834,7 +834,7 @@ struct CLR_RT_HeapBlock
 
     //--//
 
-#ifdef _WIN64
+#if defined(NANOCLR_64BIT_POINTERS)
 #define SENTINEL_NODE_APPENDED  0xABABABABABABABAB
 #define SENTINEL_NODE_EXTRACTED 0xADADADADADADADAD
 #define SENTINEL_CLEAR_BLOCK    0xCBCBCBCBCBCBCBCB
@@ -850,7 +850,7 @@ struct CLR_RT_HeapBlock
 
 #if defined(NANOCLR_FILL_MEMORY_WITH_DIRTY_PATTERN)
 
-#ifdef _WIN64
+#if defined(NANOCLR_64BIT_POINTERS)
     void Debug_ClearBlock(CLR_UINT64 data);
 #else
     void Debug_ClearBlock(CLR_UINT32 data);
@@ -860,7 +860,7 @@ struct CLR_RT_HeapBlock
 
 #else
 
-#ifdef _WIN64
+#if defined(NANOCLR_64BIT_POINTERS)
     void Debug_ClearBlock(CLR_UINT64 data)
 #else
     void Debug_ClearBlock(CLR_UINT32 data)
