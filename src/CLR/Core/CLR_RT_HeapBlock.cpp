@@ -2535,7 +2535,7 @@ void CLR_RT_HeapBlock::Debug_CheckPointer(void *ptr)
     }
 }
 
-#ifdef _WIN64
+#if defined(NANOCLR_64BIT_POINTERS)
 void CLR_RT_HeapBlock::Debug_ClearBlock(CLR_UINT64 data)
 #else
 void CLR_RT_HeapBlock::Debug_ClearBlock(CLR_UINT32 data)
@@ -2555,18 +2555,13 @@ void CLR_RT_HeapBlock::Debug_ClearBlock(CLR_UINT32 data)
 
             ptr->data[0] = raw1;
 
-#ifdef _WIN64
+            // fill every word after the header, whatever the size of CLR_RT_HeapBlock on this platform
             // need to cast this to CLR_UINT32 to avoid warning
             // in the end these will be pointers so the size of the data type is irrelevant
-            ptr->data[1] = (CLR_UINT32)data;
-            ptr->data[2] = (CLR_UINT32)data;
-            ptr->data[3] = (CLR_UINT32)data;
-            ptr->data[4] = (CLR_UINT32)data;
-#else
-            ptr->data[1] = data;
-            ptr->data[2] = data;
-
-#endif
+            for (size_t i = 1; i < ARRAYSIZE(ptr->data); i++)
+            {
+                ptr->data[i] = (CLR_UINT32)data;
+            }
         }
     }
 }
