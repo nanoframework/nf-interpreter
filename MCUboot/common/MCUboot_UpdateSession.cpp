@@ -20,7 +20,9 @@
 //  - A page that was being programmed when power failed cannot be repaired by writing it again
 //    (bits only ever clear), so the erase block containing the high-water mark is always erased
 //    and the caller restarts from its beginning. This also keeps ECC / write-once internal flash
-//    happy: the resumed range is always freshly erased.
+//    happy: the resumed range is always freshly erased. The one exception is an image that is
+//    already fully stored and passes the SHA-256 check: a matching hash proves no page was torn,
+//    so it is kept whole and the session reopens at TotalLength.
 //  - The scan is bounded by the declared total length, which is <= the usable size, so it never
 //    reaches the swap trailer at the end of the slot.
 //  - After a completed swap the secondary slot holds the *previous* primary image, with a valid
@@ -323,6 +325,12 @@ static UpdateSessionResult high_water_mark(
     return UpdateSessionResult_Success;
 }
 
+static UpdateSessionResult verify_image(
+    const struct flash_area *fa,
+    uint32_t imageOffset,
+    uint32_t totalLength,
+    struct image_header *hdr);
+
 UpdateSessionResult Ifu_SessionResume(
     uint8_t image,
     UpdateSessionOwner owner,
@@ -334,7 +342,9 @@ UpdateSessionResult Ifu_SessionResume(
 {
     const struct flash_area *fa = NULL;
     struct image_header hdr;
+    struct image_header verifiedHdr;
     struct image_tlv_info tlvInfo;
+    bool tlvInfoStored = false;
     uint32_t token = 0U;
     uint32_t imageOffset = 0U;
     uint32_t span = 0U;
@@ -397,9 +407,21 @@ UpdateSessionResult Ifu_SessionResume(
             status = UpdateSessionResult_HeaderMismatch;
             goto done;
         }
+
+        tlvInfoStored = (tlvInfo.it_magic == IMAGE_TLV_INFO_MAGIC);
     }
 
-    // 3. how far did the previous session get
+    // 3. the whole image may already be stored: when it verifies, nothing was left half-programmed,
+    //    so keep it all and let the caller go straight to completion. Anything else (hash still
+    //    erased, torn page) falls through to the rewind below.
+    if (tlvInfoStored && verify_image(fa, imageOffset, totalLength, &verifiedHdr) == UpdateSessionResult_Success)
+    {
+        resumeOffset = totalLength;
+        status = UpdateSessionResult_Success;
+        goto done;
+    }
+
+    // 4. how far did the previous session get
     status = high_water_mark(fa, imageOffset, totalLength, &hwm);
     if (status != UpdateSessionResult_Success)
     {
@@ -412,7 +434,7 @@ UpdateSessionResult Ifu_SessionResume(
         goto done;
     }
 
-    // 4. rewind to the start of the erase block holding the high-water mark and erase it: the
+    // 5. rewind to the start of the erase block holding the high-water mark and erase it: the
     //    tail of that block may be partially programmed and cannot be repaired by rewriting
     if (flash_area_get_sector(fa, imageOffset + hwm - 1U, &sector) != 0)
     {

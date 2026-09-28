@@ -90,12 +90,14 @@ writes there. Primary slots always hold the image at offset 0.
 3. `span = hdr_size + img_size + protect_tlv_size` must not exceed `totalLength`. If the
    unprotected TLV info at `span` is already stored and parses, `span + it_tlv_tot` must not
    exceed `totalLength` either → `IFU_E_HEADER_MISMATCH`.
-4. High-water mark: scan backwards from `totalLength` in 256-byte reads for the last byte
+4. Already complete: if the unprotected TLV info is stored, run the same verification as
+   `Complete` (TLV walk + SHA-256). When it passes, nothing is erased, `NextOffset =
+   totalLength` and the caller can go straight to `Complete`. Any failure falls through to 5.
+5. High-water mark: scan backwards from `totalLength` in 256-byte reads for the last byte
    that is not `flash_area_erased_val(fa)`.
-5. Rewind: `flash_area_get_sector()` for the block holding the high-water mark. If that block
+6. Rewind: `flash_area_get_sector()` for the block holding the high-water mark. If that block
    also holds the header → `IFU_E_NO_IMAGE` (caller starts fresh). Otherwise the block is
-   erased and `NextOffset = block start - ImageOffset`. If the mark equals `totalLength`
-   nothing is erased and the caller can go straight to `Complete`.
+   erased and `NextOffset = block start - ImageOffset`.
 
 Why this is sound:
 

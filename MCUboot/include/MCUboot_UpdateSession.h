@@ -69,7 +69,8 @@ UpdateSessionResult Ifu_SessionStart(
 // Reopen a session on an image already partially stored in the secondary slot.
 // expectedHeader may be NULL; when given, min(expectedHeaderLen, sizeof(struct image_header)) bytes
 // are compared with the stored header. On success out->NextOffset is where the caller must
-// continue from (the block containing the high-water mark has been re-erased).
+// continue from (the block containing the high-water mark has been re-erased), or TotalLength
+// when the whole image was already stored and verifies - nothing is erased then.
 UpdateSessionResult Ifu_SessionResume(
     uint8_t image,
     UpdateSessionOwner owner,

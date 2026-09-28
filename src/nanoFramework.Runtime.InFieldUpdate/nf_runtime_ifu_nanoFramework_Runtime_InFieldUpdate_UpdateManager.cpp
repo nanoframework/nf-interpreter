@@ -489,10 +489,12 @@ HRESULT Library_nf_runtime_ifu_nanoFramework_Runtime_InFieldUpdate_UpdateManager
     NANOCLR_NOCLEANUP();
 }
 
-// True only when the primary slot's swap-state trailer reads successfully and reports the image
-// as confirmed (image_ok == BOOT_FLAG_SET). boot_swap_type_multi() alone returns
-// BOOT_SWAP_TYPE_NONE both when the primary image is settled/confirmed and when it is running as
-// an unconfirmed test image, so only the trailer's image_ok flag can tell the two apart.
+// True when the primary slot's swap-state trailer reads successfully and MCUboot will keep booting
+// the image. boot_swap_type_multi() alone returns BOOT_SWAP_TYPE_NONE both when the primary image
+// is settled and when it is running as an unconfirmed test image, so the trailer decides: only an
+// image with trailer magic GOOD and image_ok not SET gets reverted. An image programmed directly
+// (no trailer magic) is settled for good - boot_set_confirmed_multi() is a no-op on it and never
+// writes image_ok. Mirrors needs_confirmation() in MCUboot_StartupPolicy.c.
 bool Library_nf_runtime_ifu_nanoFramework_Runtime_InFieldUpdate_UpdateManager::Ifu_IsPrimaryConfirmed(
     uint8_t imageIndex)
 {
@@ -509,7 +511,7 @@ bool Library_nf_runtime_ifu_nanoFramework_Runtime_InFieldUpdate_UpdateManager::I
         return false;
     }
 
-    return state.image_ok == BOOT_FLAG_SET;
+    return !(state.magic == BOOT_MAGIC_GOOD && state.image_ok != BOOT_FLAG_SET);
 }
 
 HRESULT Library_nf_runtime_ifu_nanoFramework_Runtime_InFieldUpdate_UpdateManager::Ifu_OpenSession(CLR_RT_StackFrame &stack, bool resume)
