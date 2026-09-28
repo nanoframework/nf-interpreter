@@ -61,7 +61,7 @@ static const CLR_RT_MethodHandler method_lookup[] =
 const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_nanoFramework_Runtime_InFieldUpdate =
 {
     "nanoFramework.Runtime.InFieldUpdate",
-    0xFD280147,
+    0x71C5187B,
     method_lookup,
     { 100, 0, 0, 2 }
 };
