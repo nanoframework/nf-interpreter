@@ -2519,11 +2519,6 @@ bool CLR_DBG_Debugger::Debugging_Thread_Get(WP_Message *msg)
 
     if (!fFound)
     {
-        // Holds the new object only while it is being set up. It used to be platform_malloc'ed and passed to
-        // GetValue, which leaked it and reported its address (outside the managed heap, invisible to GC) to the
-        // debugger as a reference ID; on a 64-bit host that address cannot be encoded as a handle at all.
-        // Once set up, the object is kept alive through the thread's ObjectToEvent link, and the reply carries the
-        // object itself, exactly as when an existing managed thread is found above.
         CLR_RT_HeapBlock managedThreadRef;
         managedThreadRef.SetObjectReference(nullptr);
         CLR_RT_ProtectFromGC gc(managedThreadRef);
