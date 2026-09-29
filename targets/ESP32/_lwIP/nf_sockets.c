@@ -4889,9 +4889,30 @@ static void lwip_socket_drop_registered_mld6_memberships(int s)
 // lwIP is clearly missing an API to get the last error from a socket
 uint32_t lwip_socket_get_err(int s)
 {
+    int err;
+    struct netconn *conn;
+    SYS_ARCH_DECL_PROTECT(lev);
     struct lwip_sock *sock = get_socket(s);
+    if (sock == NULL)
+    {
+        return EBADF;
+    }
+
+    // an asynchronous failure (RST, abort, timeout) stays pending in the netconn and never reaches sock->err.
+    // Peek it rather than netconn_err(), which would clear it for the recv/send that follows.
+    err = sock->err;
+    conn = sock->conn;
+    if (conn != NULL)
+    {
+        SYS_ARCH_PROTECT(lev);
+        if (conn->pending_err != ERR_OK)
+        {
+            err = err_to_errno(conn->pending_err);
+        }
+        SYS_ARCH_UNPROTECT(lev);
+    }
     done_socket(sock);
-    return sock->err;
+    return err;
 }
 // [END_NF_CHANGE]
 
