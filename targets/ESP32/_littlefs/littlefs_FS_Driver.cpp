@@ -7,6 +7,14 @@
 #include "littlefs_FS_Driver.h"
 #include <stdlib.h>
 
+#if (HAL_USE_SDC == TRUE)
+#include <sdmmc_cmd.h>
+
+// the mounted card and the volume it belongs to, from Target_System_IO_FileSystem.c
+extern "C" sdmmc_card_t *card;
+extern "C" char cardDriveLetter;
+#endif
+
 extern FileSystemVolume *g_FS_Volumes;
 
 static int32_t RemoveAllFiles(const char *path);
@@ -81,8 +89,6 @@ HRESULT LITTLEFS_FS_Driver::Format(const VOLUME_ID *volume, const char *volumeLa
 
 HRESULT LITTLEFS_FS_Driver::GetSizeInfo(const VOLUME_ID *volume, int64_t *totalSize, int64_t *totalFreeSpace)
 {
-    (void)totalSize;
-
     // FATFS *fsPtr = &fs;
     // char buffer[3];
     // DWORD freeClusters, freeSectors, totalSectors;
@@ -109,8 +115,29 @@ HRESULT LITTLEFS_FS_Driver::GetSizeInfo(const VOLUME_ID *volume, int64_t *totalS
     // //     *totalFreeSpace = (int64_t)freeSectors * FF_MAX_SS;
     // // #endif
 
+    // -1 means "unknown" to the caller
     *totalSize = -1;
+
+    // free space would need f_getfree(), which walks the FAT and trips the watchdog on large cards
     *totalFreeSpace = -1;
+
+#if (HAL_USE_SDC == TRUE)
+
+    // the driver also serves the internal flash, which has no card behind it
+    FileSystemVolume *currentVolume = FileSystemVolumeList::FindVolume(volume->volumeId);
+
+    if (currentVolume != NULL && card != NULL && cardDriveLetter != 0 &&
+        currentVolume->m_rootName[0] == cardDriveLetter)
+    {
+        // physical capacity of the card, not of the file system on it
+        *totalSize = (int64_t)card->csd.capacity * card->csd.sector_size;
+    }
+
+#else
+
+    (void)volume;
+
+#endif
 
     return S_OK;
 }
@@ -164,7 +191,7 @@ HRESULT LITTLEFS_FS_Driver::GetVolumeLabel(const VOLUME_ID *volume, char *volume
 
 //--//
 
-HRESULT LITTLEFS_FS_Driver::Open(const VOLUME_ID *volume, const char *path, void *&handle)
+HRESULT LITTLEFS_FS_Driver::Open(const VOLUME_ID *volume, const char *path, uint32_t access, void *&handle)
 {
     NANOCLR_HEADER();
 
@@ -206,16 +233,19 @@ HRESULT LITTLEFS_FS_Driver::Open(const VOLUME_ID *volume, const char *path, void
     fileExists = (stat(normalizedPath, &info) == FR_OK);
 #endif
 
+    // this goes through the VFS layer, which has no attribute support, so read-only isn't enforced here
     if (fileExists)
     {
-        // file already exists, open for R/W
-        flags = "r+";
+        // file already exists, open it with the requested access ("r+" is the only mode that writes without
+        // truncating)
+        flags = (access == FileAccess_Read) ? "r" : "r+";
     }
     else
     {
-        // file doesn't exist, create and open for R/W
-        flags = "w+";
+        // file doesn't exist, create it
+        flags = (access == FileAccess_Write) ? "w" : "w+";
     }
+
     fileHandle->file = fopen(normalizedPath, flags);
     if (fileHandle->file != NULL)
     {
@@ -282,6 +312,13 @@ HRESULT LITTLEFS_FS_Driver::Read(void *handle, uint8_t *buffer, int size, int *b
 
     fileHandle = (LITTLEFS_FileHandle *)handle;
 
+    if (fileHandle->lastOp == LITTLEFS_LastOperation_Write && fseek(fileHandle->file, 0, SEEK_CUR) != 0)
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_FILE_IO);
+    }
+
+    fileHandle->lastOp = LITTLEFS_LastOperation_Read;
+
     // read from the file
     readCount = fread(buffer, 1, size, fileHandle->file);
 
@@ -323,6 +360,13 @@ HRESULT LITTLEFS_FS_Driver::Write(void *handle, uint8_t *buffer, int size, int *
     }
 
     fileHandle = (LITTLEFS_FileHandle *)handle;
+
+    if (fileHandle->lastOp == LITTLEFS_LastOperation_Read && fseek(fileHandle->file, 0, SEEK_CUR) != 0)
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_FILE_IO);
+    }
+
+    fileHandle->lastOp = LITTLEFS_LastOperation_Write;
 
     // write to the file
     writeCount = fwrite(buffer, 1, size, fileHandle->file);
@@ -397,6 +441,8 @@ HRESULT LITTLEFS_FS_Driver::Seek(void *handle, int64_t offset, uint32_t origin, 
         return CLR_E_FILE_IO;
     }
 
+    fileHandle->lastOp = LITTLEFS_LastOperation_None;
+
     // get the current position
     *position = ftell(fileHandle->file);
 
@@ -445,6 +491,8 @@ HRESULT LITTLEFS_FS_Driver::GetLength(void *handle, int64_t *length)
         return CLR_E_FILE_IO;
     }
 
+    fileHandle->lastOp = LITTLEFS_LastOperation_None;
+
     return S_OK;
 }
 
@@ -488,6 +536,8 @@ HRESULT LITTLEFS_FS_Driver::SetLength(void *handle, int64_t length)
         // Handle error
         return CLR_E_FILE_IO;
     }
+
+    fileHandle->lastOp = LITTLEFS_LastOperation_None;
 
     // Synchronize the file state
     fflush(fileHandle->file);
@@ -556,7 +606,7 @@ HRESULT LITTLEFS_FS_Driver::FindNext(void *handle, FS_FILEINFO *fi, bool *fileFo
     NANOCLR_HEADER();
 
     LITTLEFS_FindFileHandle *findHandle;
-    char buffer[FS_MAX_PATH_LENGTH];
+    char buffer[FS_MAX_DIRECTORY_LENGTH + FS_MAX_FILENAME_LENGTH];
 
     struct stat info;
     struct dirent *entry;
@@ -624,7 +674,13 @@ HRESULT LITTLEFS_FS_Driver::FindNext(void *handle, FS_FILEINFO *fi, bool *fileFo
             hal_strcpy_s((char *)fi->FileName, fi->FileNameSize + 1, entry->d_name);
 
             // compose the full path of the current entry
-            snprintf(buffer, FS_MAX_PATH_LENGTH, "%s%s", findHandle->basePath, entry->d_name);
+            snprintf(
+                buffer,
+                sizeof(buffer),
+                "%s%s%s",
+                findHandle->basePath,
+                findHandle->basePath[hal_strlen_s(findHandle->basePath) - 1] == '/' ? "" : "/",
+                entry->d_name);
 
             // POSIX dirent does not directly provide file attributes or size
             // need to use stat() function to retrieve that information
@@ -814,14 +870,9 @@ HRESULT LITTLEFS_FS_Driver::SetAttributes(const VOLUME_ID *volume, const char *p
 
 HRESULT LITTLEFS_FS_Driver::CreateDirectory(const VOLUME_ID *volume, const char *path)
 {
-    struct stat info;
     int32_t result = FR_OK;
     char normalizedPath[FS_MAX_DIRECTORY_LENGTH];
-    char tempPath[FS_MAX_DIRECTORY_LENGTH + 1];
-    char *segment;
-    int32_t dirExists;
-
-    (void)dirExists;
+    char *pathCursor;
 
     FileSystemVolume *currentVolume = FileSystemVolumeList::FindVolume(volume->volumeId);
 
@@ -831,51 +882,30 @@ HRESULT LITTLEFS_FS_Driver::CreateDirectory(const VOLUME_ID *volume, const char 
         return CLR_E_PATH_TOO_LONG;
     }
 
-    memset(tempPath, 0, sizeof(tempPath));
-
-    strcat(tempPath, "/");
-
-    // iterate over the path segments and create the directories
-    // 1st segment is the root directory, so need to skip that
-    segment = strtok(normalizedPath, "/");
-    strcat(tempPath, segment);
-    strcat(tempPath, "/");
-    segment = strtok(NULL, "/");
-
-    while (segment)
+    // Create each path segment, including the final directory.
+    for (pathCursor = normalizedPath + 1; *pathCursor != '\0'; pathCursor++)
     {
-        strcat(tempPath, segment);
-
-        result = mkdir(tempPath, 0);
-
-        if (result != 0 && errno != EEXIST)
+        if (*pathCursor == '/')
         {
-            return CLR_E_FILE_IO;
+            *pathCursor = '\0';
+
+            result = mkdir(normalizedPath, 0700);
+            *pathCursor = '/';
+
+            if (result != 0 && errno != EEXIST)
+            {
+                return CLR_E_FILE_IO;
+            }
         }
-
-        // add back the '/' separator
-        strcat(tempPath, "/");
-
-        segment = strtok(NULL, "/");
     }
 
-    // remove trailing '/'
-    tempPath[hal_strlen_s(tempPath) - 1] = '\0';
-
-    // sanity check for success
-    dirExists = stat(tempPath, &info);
-
-    // sanity check for success
-    if (dirExists == 0)
-    {
-        return S_OK;
-    }
-    else
+    result = mkdir(normalizedPath, 0700);
+    if (result != 0 && errno != EEXIST)
     {
         return CLR_E_FILE_IO;
     }
 
-    return CLR_E_INVALID_DRIVER;
+    return S_OK;
 }
 
 HRESULT LITTLEFS_FS_Driver::Move(const VOLUME_ID *volume, const char *oldPath, const char *newPath)

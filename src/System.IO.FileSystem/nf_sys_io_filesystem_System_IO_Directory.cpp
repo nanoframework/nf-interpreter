@@ -163,9 +163,8 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_Directory::NativeGetChildren___ST
             memset(workingPath, 0, sizeof(workingPath));
 
             hal_strncpy_s(workingPath, sizeof(workingPath), rootName, rootNameLength);
-            size_t bufferSize = FS_MAX_PATH_LENGTH - rootNameLength;
-            char *bufferP = &workingPath[rootNameLength];
-            CLR_SafeSprintf(bufferP, bufferSize, "%s%s", path, (const char *)fileData.FileName);
+            NANOCLR_CHECK_HRESULT(
+                CombinePaths(workingPath, sizeof(workingPath), path, (const char *)fileData.FileName));
 
             // set file full path in array of strings
             NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_String::CreateInstance(*pathEntry, workingPath));
@@ -199,15 +198,31 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_Directory::NativeGetChildren___ST
     NANOCLR_CLEANUP_END();
 }
 
-void Library_nf_sys_io_filesystem_System_IO_Directory::CombinePaths(char *outpath, const char *path1, const char *path2)
+HRESULT Library_nf_sys_io_filesystem_System_IO_Directory::CombinePaths(
+    char *outpath,
+    size_t bufferSize,
+    const char *path1,
+    const char *path2)
 {
+    size_t outputLength = hal_strlen_s(outpath);
+    size_t path1Length = hal_strlen_s(path1);
+    size_t path2Length = hal_strlen_s(path2);
+    bool addSeparator = path1Length == 0 || path1[path1Length - 1] != '\\';
+
+    if (outputLength + path1Length + path2Length + (addSeparator ? 1 : 0) >= bufferSize)
+    {
+        return CLR_E_PATH_TOO_LONG;
+    }
+
     strcat(outpath, path1);
 
     // Add "\" to path if required
-    if (outpath[hal_strlen_s(outpath) - 1] != '\\')
+    if (addSeparator)
     {
         strcat(outpath, "\\");
     }
 
     strcat(outpath, path2);
+
+    return S_OK;
 }

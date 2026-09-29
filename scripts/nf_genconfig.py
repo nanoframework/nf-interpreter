@@ -79,5 +79,15 @@ def main():
             for name in disabled:
                 f.write(f"#define {name} 0\n")
 
+    # Emit source-facing aliases for Kconfig switches whose historical
+    # preprocessor name in the C/C++ source differs from CONFIG_<sym>.
+    # Keeps the source unchanged while making nf_config.h the single
+    # source of truth for the RTM build flag.
+    with open(header_file, "a") as f:
+        f.write("\n/* Source-facing aliases */\n")
+        f.write("#if CONFIG_NF_BUILD_RTM\n")
+        f.write("#define BUILD_RTM 1\n")
+        f.write("#endif\n")
+
 if __name__ == "__main__":
     main()

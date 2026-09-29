@@ -53,11 +53,6 @@ macro(nf_common_compiler_definitions)
         target_compile_definitions(${NFCCF_TARGET} PUBLIC -DNANOCLR_ENABLE_SOURCELEVELDEBUGGING)
     endif()
 
-    # set compiler definition for RTM build option
-    if(NF_BUILD_RTM)
-        target_compile_definitions(${NFCCF_TARGET} PUBLIC -DBUILD_RTM)
-    endif()
-
     # set compiler definition for using Application Domains feature
     if(NF_FEATURE_USE_APPDOMAINS)
         target_compile_definitions(${NFCCF_TARGET} PUBLIC -DNANOCLR_USE_APPDOMAINS)
