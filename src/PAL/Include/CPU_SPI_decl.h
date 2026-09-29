@@ -54,9 +54,10 @@ typedef enum __nfpack SpiBusMode
 // Async operation status
 typedef enum __nfpack SPI_OP_STATUS
 {
-    SPI_OP_READY,   // Bus ready for new operation
-    SPI_OP_RUNNING, // operation still running
-    SPI_OP_COMPLETE // Last operation complete
+    SPI_OP_READY,    // Bus ready for new operation
+    SPI_OP_RUNNING,  // operation still running
+    SPI_OP_COMPLETE, // Last operation complete
+    SPI_OP_FAILED    // Last operation failed (e.g. DMA error)
 } SPI_OP_STATUS;
 
 struct SPI_DEVICE_CONFIGURATION

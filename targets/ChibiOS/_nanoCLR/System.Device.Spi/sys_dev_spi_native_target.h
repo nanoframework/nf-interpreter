@@ -33,6 +33,9 @@ struct NF_PAL_SPI
     // thread waiting for the async transfer to complete, resumed from the SPI completion callback
     thread_reference_t AsyncWaiter;
 
+    // set when the last transfer failed (DMA error), the driver is reset when the bus is released
+    volatile bool TransferFailed;
+
     uint8_t *WriteBuffer;
     uint16_t WriteSize;
 
