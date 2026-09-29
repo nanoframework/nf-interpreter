@@ -75,6 +75,10 @@ extern "C"
     // Resets the watchdog between blocks to prevent WDT expiry during long erases.
     bool AT25SF641_EraseChip(void);
 
+    // Completes an async transfer that the calling thread may still be holding an SPI bus with (managed SPI,
+    // implemented in the ChibiOS SPI PAL). Used before acquiring SPI1 to avoid a deadlock on a bus already held.
+    void CPU_SPI_CompleteAsyncTransfer(uint8_t busIndex);
+
 #ifdef __cplusplus
 }
 #endif

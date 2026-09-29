@@ -58,6 +58,28 @@ uint8_t dataBuffer_0[AT25SF641_PAGE_SIZE];
 extern uint32_t HAL_GetTick(void);
 extern void Watchdog_Reset(void);
 
+// Checks the result of an SPI transfer.
+// On failure (e.g. DMA error) unselects the chip and gets the SPI driver back to a usable state: after a DMA error the
+// driver is left active, so the transfer is stopped. In the nanoCLR the driver is also stopped, the next
+// ExtFlash_Lock() starts it again from scratch. The bootloader starts SPI1 only once, so there it's kept started.
+static bool ExtFlash_Check(msg_t result)
+{
+    if (result == MSG_OK)
+    {
+        return true;
+    }
+
+    CS_UNSELECT;
+
+    (void)spiStopTransfer(&SPID1, NULL);
+
+#if !defined(NF_MCUBOOT_BOOTLOADER)
+    spiStop(&SPID1);
+#endif
+
+    return false;
+}
+
 #if defined(NF_MCUBOOT_BOOTLOADER)
 
 #define ExtFlash_Lock()                                                                                                \
@@ -87,8 +109,19 @@ static const SPIConfig s_extFlashSpiConfig = {
     .cr1 = 0U,
     .cr2 = SPI_CR2_DS_2 | SPI_CR2_DS_1 | SPI_CR2_DS_0};
 
+// Completes an async transfer that the calling thread may still be holding SPI1 with (managed SPI, see cpu_spi.cpp),
+// otherwise that thread would deadlock trying to acquire a bus that it already holds.
+// Weak, so that builds without managed SPI support still link.
+__attribute__((weak)) void CPU_SPI_CompleteAsyncTransfer(uint8_t busIndex)
+{
+    (void)busIndex;
+}
+
 static void ExtFlash_Lock(void)
 {
+    // SPI1 is bus index 0
+    CPU_SPI_CompleteAsyncTransfer(0);
+
     chMtxLock(&s_extFlashMutex);
 
     spiAcquireBus(&SPID1);
@@ -114,11 +147,18 @@ static bool WaitReady(void)
 
     CS_SELECT;
 
-    spiSend(&SPID1, 1, dataBuffer_0);
+    if (!ExtFlash_Check(spiSend(&SPID1, 1, dataBuffer_0)))
+    {
+        return false;
+    }
 
     while (true)
     {
-        spiReceive(&SPID1, 1, dataBuffer_0);
+        if (!ExtFlash_Check(spiReceive(&SPID1, 1, dataBuffer_0)))
+        {
+            return false;
+        }
+
         cacheBufferInvalidate(dataBuffer_0, sizeof(dataBuffer_0));
 
         if (!(dataBuffer_0[0] & AT25SF641_SR_BUSY))
@@ -145,7 +185,10 @@ static bool EraseUnlocked(uint32_t addr, bool is32kBlock)
     cacheBufferFlush(dataBuffer_0, sizeof(dataBuffer_0));
 
     CS_SELECT;
-    spiSend(&SPID1, 1, dataBuffer_0);
+    if (!ExtFlash_Check(spiSend(&SPID1, 1, dataBuffer_0)))
+    {
+        return false;
+    }
     CS_UNSELECT;
 
     // send erase command with 24-bit address
@@ -155,7 +198,10 @@ static bool EraseUnlocked(uint32_t addr, bool is32kBlock)
     dataBuffer_0[3] = (uint8_t)addr;
 
     CS_SELECT;
-    spiSend(&SPID1, 4, dataBuffer_0);
+    if (!ExtFlash_Check(spiSend(&SPID1, 4, dataBuffer_0)))
+    {
+        return false;
+    }
     CS_UNSELECT;
 
     return WaitReady();
@@ -170,7 +216,10 @@ static bool ReadUnlocked(uint8_t *buf, uint32_t addr, uint32_t size)
     dataBuffer_0[3] = (uint8_t)addr;
 
     CS_SELECT;
-    spiSend(&SPID1, 4, dataBuffer_0);
+    if (!ExtFlash_Check(spiSend(&SPID1, 4, dataBuffer_0)))
+    {
+        return false;
+    }
 
     // read in page-sized chunks through the DMA buffer for cache coherency
     uint32_t remaining = size;
@@ -180,7 +229,11 @@ static bool ReadUnlocked(uint8_t *buf, uint32_t addr, uint32_t size)
     {
         uint32_t chunk = (remaining < AT25SF641_PAGE_SIZE) ? remaining : AT25SF641_PAGE_SIZE;
 
-        spiReceive(&SPID1, chunk, dataBuffer_0);
+        if (!ExtFlash_Check(spiReceive(&SPID1, chunk, dataBuffer_0)))
+        {
+            return false;
+        }
+
         cacheBufferInvalidate(dataBuffer_0, sizeof(dataBuffer_0));
         memcpy(out, dataBuffer_0, chunk);
 
@@ -205,7 +258,10 @@ static bool WriteUnlocked(const uint8_t *buf, uint32_t addr, uint32_t size)
         cacheBufferFlush(dataBuffer_0, sizeof(dataBuffer_0));
 
         CS_SELECT;
-        spiSend(&SPID1, 1, dataBuffer_0);
+        if (!ExtFlash_Check(spiSend(&SPID1, 1, dataBuffer_0)))
+        {
+            return false;
+        }
         CS_UNSELECT;
 
         // clamp to the remaining space in the current page
@@ -222,11 +278,17 @@ static bool WriteUnlocked(const uint8_t *buf, uint32_t addr, uint32_t size)
         dataBuffer_0[3] = (uint8_t)(writeSize == AT25SF641_PAGE_SIZE ? address & 0xFFFFFF00U : address);
 
         CS_SELECT;
-        spiSend(&SPID1, 4, dataBuffer_0);
+        if (!ExtFlash_Check(spiSend(&SPID1, 4, dataBuffer_0)))
+        {
+            return false;
+        }
 
         memcpy(dataBuffer_0, buf, writeSize);
 
-        spiSend(&SPID1, writeSize, dataBuffer_0);
+        if (!ExtFlash_Check(spiSend(&SPID1, writeSize, dataBuffer_0)))
+        {
+            return false;
+        }
         CS_UNSELECT;
 
         if (!WaitReady())
@@ -248,7 +310,10 @@ static bool InitUnlocked(void)
     dataBuffer_0[0] = RESUME_DEEP_PD_CMD;
 
     CS_SELECT;
-    spiSend(&SPID1, 1, dataBuffer_0);
+    if (!ExtFlash_Check(spiSend(&SPID1, 1, dataBuffer_0)))
+    {
+        return false;
+    }
     CS_UNSELECT;
 
     // from AT25SF641 datasheet: device needs time to become fully responsive
@@ -256,8 +321,14 @@ static bool InitUnlocked(void)
     chThdSleepMilliseconds(10);
 
     CS_SELECT;
-    spiSend(&SPID1, 1, dataBuffer_0);
-    spiReceive(&SPID1, 3, dataBuffer_0);
+    if (!ExtFlash_Check(spiSend(&SPID1, 1, dataBuffer_0)))
+    {
+        return false;
+    }
+    if (!ExtFlash_Check(spiReceive(&SPID1, 3, dataBuffer_0)))
+    {
+        return false;
+    }
     CS_UNSELECT;
 
     // verify JEDEC ID (constants from AT25SF641 datasheet, ID Definitions table)
