@@ -327,7 +327,10 @@ bool CPU_SPI_Initialize(uint8_t busIndex, const SPI_DEVICE_CONFIGURATION &spiDev
     pnf_pal_spi->BusIndex = busIndex;
 
     // only a bus initialized here is freed when uninitializing
-    pnf_pal_spi->BusInitializedByNf = (ret == ESP_OK);
+    if (ret == ESP_OK)
+    {
+        pnf_pal_spi->BusInitializedByNf = true;
+    }
 
     return true;
 }
