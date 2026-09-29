@@ -173,19 +173,17 @@ HRESULT Library_nf_espnow_nanoFramework_EspNow_EspNowController::NativeInitializ
     StopEspNow();
 
     esp_err_t ret = esp_now_init();
+
     if (ret != ESP_OK)
     {
-        stack.SetResult_I4((int32_t)ret);
-        NANOCLR_NOCLEANUP_NOLABEL();
+        NANOCLR_LEAVE();
     }
 
     uint32_t espNowVersion = 1;
     ret = esp_now_get_version(&espNowVersion);
     if (ret != ESP_OK)
     {
-        StopEspNow();
-        stack.SetResult_I4((int32_t)ret);
-        NANOCLR_NOCLEANUP_NOLABEL();
+        NANOCLR_LEAVE();
     }
 
     uint32_t maximumDataLength = ESP_NOW_MAX_DATA_LEN;
@@ -198,9 +196,9 @@ HRESULT Library_nf_espnow_nanoFramework_EspNow_EspNowController::NativeInitializ
 
     if (!AllocateReceiveQueueSlots(maximumDataLength))
     {
-        StopEspNow();
-        stack.SetResult_I4((int32_t)ESP_ERR_NO_MEM);
-        NANOCLR_NOCLEANUP_NOLABEL();
+        ret = ESP_ERR_NO_MEM;
+
+        NANOCLR_LEAVE();
     }
 
     if (s_rxQueue.mutex == NULL)
@@ -211,9 +209,9 @@ HRESULT Library_nf_espnow_nanoFramework_EspNow_EspNowController::NativeInitializ
     if (s_rxQueue.mutex == NULL)
     {
         FreeReceiveQueueSlots();
-        StopEspNow();
-        stack.SetResult_I4((int32_t)ESP_ERR_NO_MEM);
-        NANOCLR_NOCLEANUP_NOLABEL();
+        ret = ESP_ERR_NO_MEM;
+
+        NANOCLR_LEAVE();
     }
 
     s_rxQueue.head = 0;
@@ -232,15 +230,24 @@ HRESULT Library_nf_espnow_nanoFramework_EspNow_EspNowController::NativeInitializ
 
     if (ret != ESP_OK)
     {
-        StopEspNow();
-        stack.SetResult_I4((int32_t)ret);
-        NANOCLR_NOCLEANUP_NOLABEL();
+        NANOCLR_LEAVE();
     }
 
     s_rxQueue.initialized = true;
 
-    stack.SetResult_I4(0);
-    NANOCLR_NOCLEANUP_NOLABEL();
+    NANOCLR_CLEANUP();
+
+    if (ret != ESP_OK)
+    {
+        StopEspNow();
+        stack.SetResult_I4((int32_t)ret);
+    }
+    else
+    {
+        stack.SetResult_I4(0);
+    }
+
+    NANOCLR_CLEANUP_END();
 }
 
 HRESULT Library_nf_espnow_nanoFramework_EspNow_EspNowController::NativeDispose___VOID__BOOLEAN(CLR_RT_StackFrame &stack)
