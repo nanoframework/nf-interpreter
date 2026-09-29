@@ -26,6 +26,10 @@ extern "C"
     int8_t target_lfs_init();
     void hal_lfs_config();
 
+    // true when the storage of a littlefs instance was successfully initialized (see target_lfs_init)
+    // an instance that isn't ready is neither mounted nor formatted
+    bool target_lfs_is_instance_ready(int32_t index);
+
     int hal_lfs_read(const struct lfs_config *c, lfs_block_t block, lfs_off_t off, void *buffer, lfs_size_t size);
     int hal_lfs_prog(const struct lfs_config *c, lfs_block_t block, lfs_off_t off, const void *buffer, lfs_size_t size);
     int hal_lfs_erase(const struct lfs_config *c, lfs_block_t block);

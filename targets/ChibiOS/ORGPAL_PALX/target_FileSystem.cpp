@@ -23,6 +23,7 @@ extern "C" void SdCardDetectCallback(void *arg);
 #endif
 
 extern "C" void UsbMsdForceMount();
+extern "C" bool target_lfs_is_instance_ready(int32_t index);
 
 FILESYSTEM_INTERFACES g_AvailableFSInterfaces[] = {
     {&g_FATFS_FILE_SYSTEM_DriverInterface, &g_FATFS_STREAM_DriverInterface},
@@ -45,14 +46,18 @@ void FS_AddVolumes()
     g_FS_DriverDetails = new STREAM_DRIVER_DETAILS[g_FS_NumVolumes];
 
     // W25Q128, drive I:, volume 0
-    FileSystemVolumeList::AddVolume(
-        &g_FS_Volumes[0],
-        "I:",
-        0,
-        g_AvailableFSInterfaces[1].streamDriver,
-        g_AvailableFSInterfaces[1].fsDriver,
-        0,
-        FALSE);
+    // (a volume whose storage failed to initialize isn't mounted, so it isn't made available)
+    if (target_lfs_is_instance_ready(0))
+    {
+        FileSystemVolumeList::AddVolume(
+            &g_FS_Volumes[0],
+            "I:",
+            0,
+            g_AvailableFSInterfaces[1].streamDriver,
+            g_AvailableFSInterfaces[1].fsDriver,
+            0,
+            FALSE);
+    }
 }
 
 void FS_MountRemovableVolumes()

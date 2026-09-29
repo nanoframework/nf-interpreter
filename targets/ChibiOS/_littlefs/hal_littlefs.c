@@ -4,11 +4,24 @@
 //
 
 #include "hal_littlefs.h"
+#include <nanoWeak.h>
 
 static mutex_t lfs_mutex[LITTLEFS_INSTANCES_COUNT];
 static lfs_t lfs[LITTLEFS_INSTANCES_COUNT];
 static struct lfs_config lfsConfig[LITTLEFS_INSTANCES_COUNT];
 static int8_t lfsInstanceIndex[LITTLEFS_INSTANCES_COUNT];
+
+// result of the target initialization (see hal_lfs_config)
+static int8_t targetInitResult = LFS_ERR_OK;
+
+// default for targets with a single storage device: all the instances share the initialization result
+// targets with more than one storage device report each instance on its own
+__nfweak bool target_lfs_is_instance_ready(int32_t index)
+{
+    (void)index;
+
+    return targetInitResult == LFS_ERR_OK;
+}
 
 void *hal_lfs_getReadHandler(int32_t index)
 {
@@ -237,7 +250,7 @@ void hal_lfs_config()
     memset(&lfs_mutex, 0, sizeof(lfs_mutex));
 
     // low level hardware and drivers initializations
-    target_lfs_init();
+    targetInitResult = target_lfs_init();
 
     for (int i = 0; i < LITTLEFS_INSTANCES_COUNT; i++)
     {
@@ -310,6 +323,12 @@ void hal_lfs_mount()
 int32_t hal_lfs_mount_partition(int32_t index, bool forceFormat)
 {
     int32_t operationResult = 0;
+
+    if (!target_lfs_is_instance_ready(index))
+    {
+        // the storage failed to initialize: don't mount it and, above all, don't format it
+        return LFS_ERR_IO;
+    }
 
     // mount the file system
     operationResult = lfs_mount(&lfs[index], &lfsConfig[index]);
