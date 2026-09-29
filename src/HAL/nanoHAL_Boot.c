@@ -79,7 +79,8 @@ inline bool RequestToLaunchNanoBooter(int32_t errorCode)
 
 // Request to launch proprietary bootloader
 // Returns false in case it's not supported (which is considered the default).
-inline bool RequestToLaunchProprietaryBootloader()
+// Implemented as "weak" to allow it to be replaced with "hard" implementation at platform level.
+__nfweak bool RequestToLaunchProprietaryBootloader()
 {
 #if CONFIG_NF_TARGET_HAS_NANOBOOTER
     if (Target_HasProprietaryBooter())
