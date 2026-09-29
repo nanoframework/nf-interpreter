@@ -23,12 +23,15 @@ struct NF_PAL_SPI
     bool SequentialTxRx;
     bool BufferIs16bits;
 
-    // set when an async transfer is started and, therefore, the SPI bus is being held by it
-    // it's cleared when the transfer completes and the bus is released (always from thread context)
-    volatile bool AsyncBusHeld;
+    // thread that started the async transfer in progress, NULL if there is none
+    // an async transfer keeps holding the bus until it completes and the bus can only be released by this thread
+    thread_t *AsyncOwner;
 
     // set from the SPI completion callback (ISR context) when an async transfer completes
     volatile bool AsyncTransferComplete;
+
+    // thread waiting for the async transfer to complete, resumed from the SPI completion callback
+    thread_reference_t AsyncWaiter;
 
     uint8_t *WriteBuffer;
     uint16_t WriteSize;
