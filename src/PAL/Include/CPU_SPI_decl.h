@@ -54,9 +54,10 @@ typedef enum __nfpack SpiBusMode
 // Async operation status
 typedef enum __nfpack SPI_OP_STATUS
 {
-    SPI_OP_READY,   // Bus ready for new operation
-    SPI_OP_RUNNING, // operation still running
-    SPI_OP_COMPLETE // Last operation complete
+    SPI_OP_READY,    // Bus ready for new operation
+    SPI_OP_RUNNING,  // operation still running
+    SPI_OP_COMPLETE, // Last operation complete
+    SPI_OP_FAILED    // Last operation failed (e.g. DMA error)
 } SPI_OP_STATUS;
 
 struct SPI_DEVICE_CONFIGURATION
@@ -138,6 +139,10 @@ HRESULT CPU_SPI_nWrite_nRead(
     int32_t readSize);
 
 void CPU_SPI_Wait_Busy(uint32_t deviceHandle, SPI_DEVICE_CONFIGURATION &sdev);
+
+// Aborts an async transfer in progress (started by the calling thread).
+// When this returns, DMA is no longer using the transfer buffers.
+void CPU_SPI_Abort(uint32_t deviceHandle, SPI_DEVICE_CONFIGURATION &sdev);
 
 // Write / read 16 bit data to device specified by handle
 // return result 0=S_OK, CLR_E_BUSY async operation and operation still running or another error code
