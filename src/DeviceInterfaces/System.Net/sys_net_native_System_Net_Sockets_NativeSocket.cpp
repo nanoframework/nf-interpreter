@@ -521,6 +521,9 @@ CLR_INT32 Library_sys_net_native_System_Net_Sockets_NativeSocket::Helper__Select
         // For read mode ignore exception if we have data to read
         if (!(mode == 0 && fds.fd_count != 0))
         {
+            // select() doesn't store the socket error where ThrowOnError reads it. Refresh it from the socket.
+            SOCK_getsocklasterror(handle);
+
             return SOCK_SOCKET_ERROR;
         }
     }
