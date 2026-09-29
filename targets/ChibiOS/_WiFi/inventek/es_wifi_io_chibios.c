@@ -153,6 +153,9 @@ int8_t SPI_WIFI_ResetModule(void)
         }
         else
         {
+            // DMA error: get the driver back to ready
+            (void)spiStopTransfer(spiDriver, NULL);
+
             readSucceed = false;
         }
 
@@ -299,6 +302,9 @@ int16_t SPI_WIFI_ReceiveData(uint8_t *data, uint16_t len, uint32_t timeout)
         {
             if (spiReceive(spiDriver, 1, &tmp[0]) != MSG_OK)
             {
+                // DMA error: get the driver back to ready
+                (void)spiStopTransfer(spiDriver, NULL);
+
                 CS_UNSELECT;
 
                 return ES_WIFI_ERROR_SPI_FAILED;
@@ -374,6 +380,9 @@ int16_t SPI_WIFI_SendData(uint8_t *data, uint16_t len, uint32_t timeout)
 
         if (spiSend(spiDriver, len / 2, txBuffer) != MSG_OK)
         {
+            // DMA error: get the driver back to ready
+            (void)spiStopTransfer(spiDriver, NULL);
+
             CS_UNSELECT;
 
             return ES_WIFI_ERROR_SPI_FAILED;
