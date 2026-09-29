@@ -61,6 +61,12 @@ __nfweak void CPU_SPI_Wait_Busy(uint32_t deviceHandle, SPI_DEVICE_CONFIGURATION 
     (void)spiDeviceConfig;
 }
 
+// platforms that can't abort a transfer have to wait for it to complete
+__nfweak void CPU_SPI_Abort(uint32_t deviceHandle, SPI_DEVICE_CONFIGURATION &spiDeviceConfig)
+{
+    CPU_SPI_Wait_Busy(deviceHandle, spiDeviceConfig);
+}
+
 __nfweak bool CPU_SPI_Remove_Device(uint32_t deviceHandle)
 {
     (void)deviceHandle;
@@ -451,6 +457,16 @@ void nanoSPI_Wait_Busy(uint32_t handle)
     getDevice(handle, spiBus, deviceIndex);
 
     CPU_SPI_Wait_Busy(spiconfig[spiBus].deviceHandles[deviceIndex], spiconfig[spiBus].deviceConfig[deviceIndex]);
+}
+
+void nanoSPI_Abort(uint32_t handle)
+{
+    uint8_t spiBus;
+    int deviceIndex;
+
+    getDevice(handle, spiBus, deviceIndex);
+
+    CPU_SPI_Abort(spiconfig[spiBus].deviceHandles[deviceIndex], spiconfig[spiBus].deviceConfig[deviceIndex]);
 }
 
 //
