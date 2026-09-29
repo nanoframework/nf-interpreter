@@ -259,10 +259,18 @@ HRESULT Library_sys_dev_spi_native_System_Device_Spi_SpiDevice::NativeTransfer(
         while (eventResult)
         {
             // Has it completed ?
-            if (nanoSPI_Op_Status(deviceId) == SPI_OP_COMPLETE)
+            SPI_OP_STATUS opStatus = nanoSPI_Op_Status(deviceId);
+
+            if (opStatus == SPI_OP_COMPLETE)
             {
                 // SPI driver is ready meaning that the SPI transaction(s) is(are) completed
                 break;
+            }
+
+            if (opStatus == SPI_OP_FAILED)
+            {
+                // the transfer failed (e.g. DMA error)
+                NANOCLR_SET_AND_LEAVE(CLR_E_IO);
             }
 
             // non-blocking wait allowing other threads to run while we wait for the Spi transaction to complete
@@ -272,6 +280,10 @@ HRESULT Library_sys_dev_spi_native_System_Device_Spi_SpiDevice::NativeTransfer(
             if (!eventResult)
             {
                 // Timeout
+                // abort the transfer before leaving: DMA has to be stopped before the buffers are unpinned,
+                // otherwise they could be moved by the GC while DMA is still using them
+                nanoSPI_Abort(deviceId);
+
                 NANOCLR_SET_AND_LEAVE(CLR_E_TIMEOUT);
             }
         }

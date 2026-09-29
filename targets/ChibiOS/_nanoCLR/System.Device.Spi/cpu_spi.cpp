@@ -13,6 +13,35 @@
 #include <sys_dev_spi_native_target.h>
 #include <hal.h>
 
+// SPI DMA errors are reported through an extension field of the SPI driver, which is set by the SPI DMA error hook
+// (see SPI_DRIVER_EXT_FIELDS in the target mcuconf.h). Targets that don't define it keep their previous behaviour.
+#if defined(SPI_DRIVER_EXT_FIELDS)
+
+static inline bool DmaErrorOccurred(SPIDriver *spip)
+{
+    return spip->dmaError;
+}
+
+static inline void ClearDmaError(SPIDriver *spip)
+{
+    spip->dmaError = false;
+}
+
+#else
+
+static inline bool DmaErrorOccurred(SPIDriver *spip)
+{
+    (void)spip;
+    return false;
+}
+
+static inline void ClearDmaError(SPIDriver *spip)
+{
+    (void)spip;
+}
+
+#endif
+
 #if defined(RP_SPI_USE_SPI0) || defined(RP_SPI_USE_SPI1)
 
 #if defined(RP_SPI_USE_SPI0)
@@ -24,12 +53,6 @@ NF_PAL_SPI SPI1_PAL;
 
 #define RP_SPI_PERI_CLK 125000000
 
-// Maximum time (in milliseconds) to wait for an ongoing async transfer to complete when the bus has to be
-// released on behalf of another caller.
-// The transfer is DMA driven so it completes no matter what thread is running: this is just a sanity
-// limit so a caller is never blocked forever in case the transfer never completes.
-#define SPI_ASYNC_TRANSFER_TIMEOUT_MS 1000
-
 // Tidy up after completing tranfer
 // CAUTION: has to be called from thread context, never from an ISR!
 // spiReleaseBus() unlocks a mutex which is owned by the thread that acquired the bus, so calling it
@@ -37,35 +60,71 @@ NF_PAL_SPI SPI1_PAL;
 static void CompleteTranfer(NF_PAL_SPI *palSpi)
 {
     spiUnselect(palSpi->Driver);
+
+    if (palSpi->TransferFailed)
+    {
+        // DMA error: stop the driver
+        spiStop(palSpi->Driver);
+        ClearDmaError(palSpi->Driver);
+    }
+
     spiReleaseBus(palSpi->Driver);
 }
 
-// Completes an async transfer that's still holding the SPI bus, releasing it.
-// The completion callback for an async transfer runs in ISR context, where the bus can't be released,
-// so this is called from thread context: either when the caller collects the result of the transfer
-// (see CPU_SPI_OP_Status) or when another caller needs the bus.
-// If the transfer is still ongoing, waits for the ISR to flag it as completed.
+// Waits for the async transfer in progress to complete.
+// The completion callback always runs when the transfer ends, so there is no timeout here: the bus must never be
+// released while a transfer is still using it, no matter how long it takes (e.g. a large display update).
+static void WaitAsyncTransfer(NF_PAL_SPI *palSpi)
+{
+    osalSysLock();
+
+    if (!palSpi->AsyncTransferComplete)
+    {
+        // resumed by the completion callback
+        (void)osalThreadSuspendS(&palSpi->AsyncWaiter);
+    }
+
+    osalSysUnlock();
+}
+
+// Completes the async transfer started by the calling thread, if any, and releases the bus.
+// The bus is a mutex owned by the thread that acquired it, so only that thread can release it. Any other thread
+// returns without doing anything and gets the bus through spiAcquireBus(), once the owner has released it.
 static void CompleteAsyncTranfer(NF_PAL_SPI *palSpi)
 {
-    if (!palSpi->AsyncBusHeld)
+    if (palSpi->AsyncOwner != chThdGetSelfX())
     {
+        // no async transfer in progress, or it belongs to another thread
         return;
     }
 
-    uint32_t timeout = SPI_ASYNC_TRANSFER_TIMEOUT_MS;
+    WaitAsyncTransfer(palSpi);
 
-    // wait for the transfer to complete
-    while (!palSpi->AsyncTransferComplete && timeout > 0)
-    {
-        chThdSleepMilliseconds(1);
-        timeout--;
-    }
-
-    // clear the flags before releasing the bus
-    palSpi->AsyncTransferComplete = false;
-    palSpi->AsyncBusHeld = false;
+    palSpi->AsyncOwner = NULL;
 
     CompleteTranfer(palSpi);
+}
+
+// Ends the transfer in progress, from the SPI callback (ISR context)
+static void FinishTransferFromIsr(NF_PAL_SPI *palSpi, bool failed)
+{
+    if (palSpi->ChipSelect >= 0)
+    {
+        CPU_GPIO_TogglePinState(palSpi->ChipSelect);
+    }
+
+    palSpi->TransferFailed = failed;
+
+    if (palSpi->Callback)
+    {
+        palSpi->Callback(palSpi->BusIndex);
+    }
+
+    // flag the transfer as completed and resume the thread waiting for it
+    osalSysLockFromISR();
+    palSpi->AsyncTransferComplete = true;
+    osalThreadResumeI(&palSpi->AsyncWaiter, MSG_OK);
+    osalSysUnlockFromISR();
 }
 
 static void SpiCallback(SPIDriver *spip)
@@ -95,7 +154,15 @@ static void SpiCallback(SPIDriver *spip)
         return;
     }
 
-    if (palSpi->SequentialTxRx)
+    if (DmaErrorOccurred(spip))
+    {
+        // DMA error: the driver ends the transfer and has to be reported as failed and prevent
+        // prevent the next phase of a sequential transfer from starting
+        palSpi->SequentialTxRx = false;
+
+        FinishTransferFromIsr(palSpi, true);
+    }
+    else if (palSpi->SequentialTxRx)
     {
         palSpi->SequentialTxRx = false;
 
@@ -105,18 +172,7 @@ static void SpiCallback(SPIDriver *spip)
     }
     else
     {
-        if (palSpi->ChipSelect >= 0)
-        {
-            CPU_GPIO_TogglePinState(palSpi->ChipSelect);
-        }
-
-        // flag that the transfer is completed
-        palSpi->AsyncTransferComplete = true;
-
-        if (palSpi->Callback)
-        {
-            palSpi->Callback(palSpi->BusIndex);
-        }
+        FinishTransferFromIsr(palSpi, false);
     }
 
     NATIVE_INTERRUPT_END
@@ -235,9 +291,33 @@ HRESULT CPU_SPI_nWrite_nRead(
         NF_PAL_SPI *palSpi = (NF_PAL_SPI *)deviceHandle;
         bool sync = (wrc.callback == 0);
 
-        // if there is an async transfer from a previous call still holding the bus, complete it now
-        // (this is thread context, which is where the bus can be released)
+        // the driver is cleared when the bus is uninitialized
+        SPIDriver *driver = palSpi->Driver;
+
+        if (driver == NULL)
+        {
+            // the bus has been uninitialized
+            NANOCLR_SET_AND_LEAVE(CLR_E_OBJECT_DISPOSED);
+        }
+
+        // complete a previous async transfer from this thread, which still holds the bus
+        // (otherwise this thread would deadlock trying to acquire a bus that it already owns)
         CompleteAsyncTranfer(palSpi);
+
+        // acquire the bus before touching the PAL struct: it's shared by all the devices on this bus and it's also
+        // used by the completion callback of a transfer that can still be in progress
+        spiAcquireBus(driver);
+
+        if (palSpi->Driver != driver)
+        {
+            spiReleaseBus(driver);
+
+            NANOCLR_SET_AND_LEAVE(CLR_E_OBJECT_DISPOSED);
+        }
+
+        // clear the error state of the previous transfer
+        palSpi->TransferFailed = false;
+        ClearDmaError(palSpi->Driver);
 
         palSpi->BufferIs16bits = wrc.Bits16ReadWrite;
         palSpi->Callback = wrc.callback;
@@ -267,7 +347,6 @@ HRESULT CPU_SPI_nWrite_nRead(
             palSpi->Configuration.end_cb = NULL;
         }
 
-        spiAcquireBus(palSpi->Driver);
         spiStart(palSpi->Driver, &palSpi->Configuration);
         spiSelect(palSpi->Driver);
 
@@ -292,7 +371,12 @@ HRESULT CPU_SPI_nWrite_nRead(
                 else
                 {
                     spiSend(palSpi->Driver, palSpi->WriteSize, palSpi->WriteBuffer);
-                    spiReceive(palSpi->Driver, palSpi->ReadSize, palSpi->ReadBuffer);
+
+                    // receive, unless the send failed
+                    if (!DmaErrorOccurred(palSpi->Driver))
+                    {
+                        spiReceive(palSpi->Driver, palSpi->ReadSize, palSpi->ReadBuffer);
+                    }
                 }
             }
             else
@@ -307,18 +391,27 @@ HRESULT CPU_SPI_nWrite_nRead(
                 }
             }
 
+            // a DMA error fails the transfer
+            bool failed = DmaErrorOccurred(palSpi->Driver);
+            palSpi->TransferFailed = failed;
+
             CompleteTranfer(palSpi);
 
             if (wrc.DeviceChipSelect >= 0)
             {
                 CPU_GPIO_SetPinState(wrc.DeviceChipSelect, (GpioPinValue)!wrc.ChipSelectActiveState);
             }
+
+            if (failed)
+            {
+                NANOCLR_SET_AND_LEAVE(CLR_E_IO);
+            }
         }
         else
         {
-            // flag that the bus is being held by an async transfer
+            // the bus stays held by this thread until the transfer completes (see CompleteAsyncTranfer)
             palSpi->AsyncTransferComplete = false;
-            palSpi->AsyncBusHeld = true;
+            palSpi->AsyncOwner = chThdGetSelfX();
 
             if (palSpi->WriteSize != 0 && palSpi->ReadSize != 0)
             {
@@ -364,18 +457,21 @@ SPI_OP_STATUS CPU_SPI_OP_Status(uint8_t busIndex, uint32_t deviceHandle)
 
     NF_PAL_SPI *palSpi = (NF_PAL_SPI *)deviceHandle;
 
-    if (palSpi->AsyncBusHeld)
+    if (palSpi->AsyncOwner != NULL)
     {
-        // there is an async transfer holding the bus
+        // async transfer in progress, or completed and still holding the bus
         if (!palSpi->AsyncTransferComplete)
         {
             return SPI_OP_RUNNING;
         }
 
-        // transfer is completed and this is thread context, so this is where the bus gets released
+        // get the result before the bus is released
+        bool failed = palSpi->TransferFailed;
+
+        // completed: release the bus (only happens if the calling thread is the one that owns it)
         CompleteAsyncTranfer(palSpi);
 
-        return SPI_OP_COMPLETE;
+        return failed ? SPI_OP_FAILED : SPI_OP_COMPLETE;
     }
 
     switch (palSpi->Driver->state)
@@ -390,6 +486,65 @@ SPI_OP_STATUS CPU_SPI_OP_Status(uint8_t busIndex, uint32_t deviceHandle)
         case SPI_COMPLETE:
             return SPI_OP_COMPLETE;
     }
+}
+
+// Waits for an async transfer started by the calling thread to complete and releases the bus
+void CPU_SPI_Wait_Busy(uint32_t deviceHandle, SPI_DEVICE_CONFIGURATION &sdev)
+{
+    (void)sdev;
+
+    NF_PAL_SPI *palSpi = (NF_PAL_SPI *)deviceHandle;
+
+    if (palSpi != NULL)
+    {
+        CompleteAsyncTranfer(palSpi);
+    }
+}
+
+// Aborts the async transfer started by the calling thread, if any, and releases the bus.
+// DMA is stopped before the bus is released, so the transfer buffers are no longer in use when this returns.
+void CPU_SPI_Abort(uint32_t deviceHandle, SPI_DEVICE_CONFIGURATION &sdev)
+{
+    (void)sdev;
+
+    NF_PAL_SPI *palSpi = (NF_PAL_SPI *)deviceHandle;
+    bool aborted = false;
+
+    if (palSpi == NULL || palSpi->AsyncOwner != chThdGetSelfX())
+    {
+        // no async transfer in progress, or it belongs to another thread
+        return;
+    }
+
+    osalSysLock();
+
+    if (!palSpi->AsyncTransferComplete)
+    {
+        // stop both DMA channels
+        dmaChannelDisableX(palSpi->Driver->dmatx);
+        dmaChannelDisableX(palSpi->Driver->dmarx);
+
+        // back to ready, as spiAbortI() would do
+        palSpi->Driver->state = SPI_READY;
+
+        // the transfer is over: report it as failed
+        palSpi->SequentialTxRx = false;
+        palSpi->TransferFailed = true;
+        palSpi->AsyncTransferComplete = true;
+
+        aborted = true;
+    }
+
+    osalSysUnlock();
+
+    if (aborted && palSpi->ChipSelect >= 0)
+    {
+        // the completion callback won't run, so CS has to be de-asserted here
+        CPU_GPIO_TogglePinState(palSpi->ChipSelect);
+    }
+
+    // release the bus (and reset the driver)
+    CompleteAsyncTranfer(palSpi);
 }
 
 bool CPU_SPI_Initialize(uint8_t busIndex, const SPI_DEVICE_CONFIGURATION &spiDeviceConfig)
@@ -439,17 +594,20 @@ bool CPU_SPI_Uninitialize(uint8_t busIndex)
         return true;
     }
 
-    // make sure that an async transfer that could still be holding the bus is completed
+    SPIDriver *driver = palSpi->Driver;
+
+    // complete an async transfer from this thread, which still holds the bus
     CompleteAsyncTranfer(palSpi);
 
-    // this bus can be shared with other (native) drivers, so it has to be acquired before stopping it
-    spiAcquireBus(palSpi->Driver);
+    // acquire the bus before stopping it: it can be in use by a transfer from another thread or by another (native)
+    // driver sharing it, and stopping it in the middle of a transaction would corrupt that transaction
+    spiAcquireBus(driver);
 
-    spiStop(palSpi->Driver);
-
-    spiReleaseBus(palSpi->Driver);
+    spiStop(driver);
 
     palSpi->Driver = NULL;
+
+    spiReleaseBus(driver);
 
     return true;
 }
@@ -544,12 +702,6 @@ NF_PAL_SPI SPI5_PAL;
 NF_PAL_SPI SPI6_PAL;
 #endif
 
-// Maximum time (in milliseconds) to wait for an ongoing async transfer to complete when the bus has to be
-// released on behalf of another caller.
-// The transfer is DMA driven so it completes no matter what thread is running: this is just a sanity
-// limit so a caller is never blocked forever in case the transfer never completes.
-#define SPI_ASYNC_TRANSFER_TIMEOUT_MS 1000
-
 // Invalidate the cache over the read buffer, if any, so the content that DMA has transfered is the one being read
 // (only required for Cortex-M7)
 // It's safe to call this from an ISR: these are cache maintenance operations, no OS calls involved.
@@ -580,84 +732,144 @@ static void InvalidateReadBuffer(NF_PAL_SPI *palSpi)
 // from an ISR would operate on whatever thread happens to be running at that moment.
 static void CompleteTranfer(NF_PAL_SPI *palSpi)
 {
+    if (palSpi->TransferFailed)
+    {
+        // DMA error: the driver is left active, stop the transfer to get it back to ready...
+        (void)spiStopTransfer(palSpi->Driver, NULL);
+    }
+
     spiUnselect(palSpi->Driver);
+
+    if (palSpi->TransferFailed)
+    {
+        // ... and stop the driver, which releases its DMA streams and disables the peripheral
+        spiStop(palSpi->Driver);
+        ClearDmaError(palSpi->Driver);
+    }
 
     spiReleaseBus(palSpi->Driver);
 }
 
-// Completes an async transfer that's still holding the SPI bus, releasing it.
-// The completion callback for an async transfer runs in ISR context, where the bus can't be released,
-// so this is called from thread context: either when the caller collects the result of the transfer
-// (see CPU_SPI_OP_Status) or when another caller needs the bus.
-// If the transfer is still ongoing, waits for the ISR to flag it as completed.
+// Waits for the async transfer in progress to complete.
+// The completion callback always runs when the transfer ends, so there is no timeout here: the bus must never be
+// released while a transfer is still using it, no matter how long it takes (e.g. a large display update).
+static void WaitAsyncTransfer(NF_PAL_SPI *palSpi)
+{
+    osalSysLock();
+
+    if (!palSpi->AsyncTransferComplete)
+    {
+        // resumed by the completion callback
+        (void)osalThreadSuspendS(&palSpi->AsyncWaiter);
+    }
+
+    osalSysUnlock();
+}
+
+// Completes the async transfer started by the calling thread, if any, and releases the bus.
+// The bus is a mutex owned by the thread that acquired it, so only that thread can release it. Any other thread
+// returns without doing anything and gets the bus through spiAcquireBus(), once the owner has released it.
 static void CompleteAsyncTranfer(NF_PAL_SPI *palSpi)
 {
-    if (!palSpi->AsyncBusHeld)
+    if (palSpi->AsyncOwner != chThdGetSelfX())
     {
+        // no async transfer in progress, or it belongs to another thread
         return;
     }
 
-    uint32_t timeout = SPI_ASYNC_TRANSFER_TIMEOUT_MS;
+    WaitAsyncTransfer(palSpi);
 
-    while (!palSpi->AsyncTransferComplete && timeout > 0)
-    {
-        chThdSleepMilliseconds(1);
-        timeout--;
-    }
-
-    // clear the flags before releasing the bus
-    palSpi->AsyncTransferComplete = false;
-    palSpi->AsyncBusHeld = false;
+    palSpi->AsyncOwner = nullptr;
 
     CompleteTranfer(palSpi);
 }
 
-// Callback used when a async opertion completes
-static void SpiCallback(SPIDriver *spip)
+// Return the NF_PAL structure for an SPI driver
+// Return nullptr if the driver isn't one of the buses of the SPI PAL
+static NF_PAL_SPI *GetNfPalFromDriver(SPIDriver *spip)
 {
-    (void)spip;
-
-    NATIVE_INTERRUPT_START
-
-    NF_PAL_SPI *palSpi = NULL;
-
-    // Find the NF_PAL_SPI * for driver
 #if STM32_SPI_USE_SPI1
     if (spip == &SPID1)
     {
-        palSpi = &SPI1_PAL;
+        return &SPI1_PAL;
     }
 #endif
 #if STM32_SPI_USE_SPI2
     if (spip == &SPID2)
     {
-        palSpi = &SPI2_PAL;
+        return &SPI2_PAL;
     }
 #endif
 #if STM32_SPI_USE_SPI3
     if (spip == &SPID3)
     {
-        palSpi = &SPI3_PAL;
+        return &SPI3_PAL;
     }
 #endif
 #if STM32_SPI_USE_SPI4
     if (spip == &SPID4)
     {
-        palSpi = &SPI4_PAL;
+        return &SPI4_PAL;
     }
 #endif
 #if STM32_SPI_USE_SPI5
     if (spip == &SPID5)
     {
-        palSpi = &SPI5_PAL;
+        return &SPI5_PAL;
     }
 #endif
 #if STM32_SPI_USE_SPI6
     if (spip == &SPID6)
     {
-        palSpi = &SPI6_PAL;
+        return &SPI6_PAL;
     }
 #endif
+
+    (void)spip;
+
+    return nullptr;
+}
+
+// Ends the transfer in progress, from the SPI callbacks (ISR context)
+static void FinishTransferFromIsr(NF_PAL_SPI *palSpi, bool failed)
+{
+    if (!failed)
+    {
+        // invalidate cache over the read buffer, if any
+        InvalidateReadBuffer(palSpi);
+    }
+
+    if (palSpi->ChipSelect >= 0)
+    {
+        CPU_GPIO_TogglePinState(palSpi->ChipSelect);
+    }
+
+    palSpi->TransferFailed = failed;
+
+    if (palSpi->Callback)
+    {
+        palSpi->Callback(palSpi->BusIndex);
+    }
+
+    // flag the transfer as completed and resume the thread waiting for it, if any
+    osalSysLockFromISR();
+    palSpi->AsyncTransferComplete = true;
+    osalThreadResumeI(&palSpi->AsyncWaiter, MSG_OK);
+    osalSysUnlockFromISR();
+}
+
+// Callback used when a async opertion completes
+static void SpiCallback(SPIDriver *spip)
+{
+    NATIVE_INTERRUPT_START
+
+    NF_PAL_SPI *palSpi = GetNfPalFromDriver(spip);
+
+    if (palSpi == nullptr)
+    {
+        NATIVE_INTERRUPT_END
+        return;
+    }
 
     // check if there is any Rx operation due
     if (palSpi->SequentialTxRx)
@@ -680,30 +892,30 @@ static void SpiCallback(SPIDriver *spip)
     else
     {
         // all done here!
-
-        // invalidate cache over the read buffer, if any, so the caller reads what DMA has transfered
-        InvalidateReadBuffer(palSpi);
-
-        // if CS is to be controlled by the driver, set the GPIO
-        if (palSpi->ChipSelect >= 0)
-        {
-            // de-assert pin based on CS active level
-            CPU_GPIO_TogglePinState(palSpi->ChipSelect);
-        }
-
-        // flag that the transfer is completed
-        palSpi->AsyncTransferComplete = true;
-
-        // fire callback for SPI transaction complete
-        // only if callback set
-        if (palSpi->Callback)
-        {
-            palSpi->Callback(palSpi->BusIndex);
-        }
+        FinishTransferFromIsr(palSpi, false);
     }
 
     NATIVE_INTERRUPT_END
 };
+
+// Callback used when an async operation fails with a DMA error
+// (only reached when the target DMA error hook doesn't halt the system, see mcuconf.h)
+static void SpiErrorCallback(SPIDriver *spip)
+{
+    NATIVE_INTERRUPT_START
+
+    NF_PAL_SPI *palSpi = GetNfPalFromDriver(spip);
+
+    if (palSpi != nullptr)
+    {
+        // the Rx phase of a sequential transfer won't happen
+        palSpi->SequentialTxRx = false;
+
+        FinishTransferFromIsr(palSpi, true);
+    }
+
+    NATIVE_INTERRUPT_END
+}
 
 // Computes the SPI peripheral baud rate according to the requested frequency
 uint16_t ComputeBaudRate(SPI_DEVICE_CONFIGURATION &config, int32_t &actualFrequency)
@@ -941,6 +1153,7 @@ void GetSPIConfig(SPI_DEVICE_CONFIGURATION &config, SPI_WRITE_READ_SETTINGS &wrc
 
     // Create the low level configuration
     llConfig->data_cb = SpiCallback;
+    llConfig->error_cb = SpiErrorCallback;
 }
 
 // Performs a read/write operation on 8-bit word data.
@@ -978,7 +1191,31 @@ HRESULT CPU_SPI_nWrite_nRead(
         NF_PAL_SPI *palSpi = (NF_PAL_SPI *)deviceHandle;
         bool sync = (wrc.callback == 0); // If callback then use aync operation
 
+        SPIDriver *driver = palSpi->Driver;
+
+        if (driver == nullptr)
+        {
+            NANOCLR_SET_AND_LEAVE(CLR_E_OBJECT_DISPOSED);
+        }
+
+        // complete a previous async transfer from this thread, which still holds the bus
+        // (otherwise this thread would deadlock trying to acquire a bus that it already owns)
         CompleteAsyncTranfer(palSpi);
+
+        // acquire the bus before touching the PAL struct: it's shared by all the devices on this bus and it's also
+        // used by the completion callback of a transfer that can still be in progress
+        spiAcquireBus(driver);
+
+        if (palSpi->Driver != driver)
+        {
+            spiReleaseBus(driver);
+
+            NANOCLR_SET_AND_LEAVE(CLR_E_OBJECT_DISPOSED);
+        }
+
+        // clear transfer error state
+        palSpi->TransferFailed = false;
+        ClearDmaError(palSpi->Driver);
 
         // Save width of transfer
         palSpi->BufferIs16bits = wrc.Bits16ReadWrite;
@@ -1005,10 +1242,11 @@ HRESULT CPU_SPI_nWrite_nRead(
         // set bus config flag
         busConfigIsHalfDuplex = palSpi->BusConfiguration == SpiBusConfiguration_HalfDuplex;
 
-        // Clear callback if sync
+        // Clear callbacks if sync
         if (sync)
         {
             palSpi->Configuration.data_cb = NULL;
+            palSpi->Configuration.error_cb = NULL;
         }
 
         if (writeBuffer != NULL)
@@ -1040,8 +1278,7 @@ HRESULT CPU_SPI_nWrite_nRead(
             }
         }
 
-        // because the bus access is shared, acquire and select the appropriate bus
-        spiAcquireBus(palSpi->Driver);
+        // configure the bus for this device (the bus was acquired above)
         spiStart(palSpi->Driver, &palSpi->Configuration);
 
         // just to satisfy the driver ceremony, no actual implementation for STM32
@@ -1083,14 +1320,17 @@ HRESULT CPU_SPI_nWrite_nRead(
 
                     spiSend(palSpi->Driver, palSpi->WriteSize, palSpi->WriteBuffer);
 
-                    // receive operation
-                    if (busConfigIsHalfDuplex)
+                    // receive operation, unless the send failed
+                    if (!DmaErrorOccurred(palSpi->Driver))
                     {
-                        // half duplex operation, set output enable
-                        palSpi->Driver->spi->CR1 &= ~SPI_CR1_BIDIOE;
-                    }
+                        if (busConfigIsHalfDuplex)
+                        {
+                            // half duplex operation, set output enable
+                            palSpi->Driver->spi->CR1 &= ~SPI_CR1_BIDIOE;
+                        }
 
-                    spiReceive(palSpi->Driver, palSpi->ReadSize, palSpi->ReadBuffer);
+                        spiReceive(palSpi->Driver, palSpi->ReadSize, palSpi->ReadBuffer);
+                    }
                 }
             }
             else
@@ -1120,8 +1360,15 @@ HRESULT CPU_SPI_nWrite_nRead(
                 }
             }
 
-            // invalidate cache over the read buffer, if any
-            InvalidateReadBuffer(palSpi);
+            // a DMA error fails the transfer
+            bool failed = DmaErrorOccurred(palSpi->Driver);
+            palSpi->TransferFailed = failed;
+
+            if (!failed)
+            {
+                // invalidate cache over the read buffer, if any
+                InvalidateReadBuffer(palSpi);
+            }
 
             // Release bus etc
             CompleteTranfer(palSpi);
@@ -1132,6 +1379,11 @@ HRESULT CPU_SPI_nWrite_nRead(
                 // de-assert pin based on CS active level
                 CPU_GPIO_SetPinState(wrc.DeviceChipSelect, (GpioPinValue)!wrc.ChipSelectActiveState);
             }
+
+            if (failed)
+            {
+                NANOCLR_SET_AND_LEAVE(CLR_E_IO);
+            }
         }
         else
         {
@@ -1139,9 +1391,9 @@ HRESULT CPU_SPI_nWrite_nRead(
             // perform SPI operation using driver's ASYNC API
             // Completed on calling Spi Callback
 
-            // flag that the bus is being held by an async transfer
+            // the bus stays held by this thread until the transfer completes (see CompleteAsyncTranfer)
             palSpi->AsyncTransferComplete = false;
-            palSpi->AsyncBusHeld = true;
+            palSpi->AsyncOwner = chThdGetSelfX();
 
             // if CS is to be controlled by the driver, set the GPIO
             if (wrc.DeviceChipSelect >= 0)
@@ -1220,18 +1472,20 @@ SPI_OP_STATUS CPU_SPI_OP_Status(uint8_t busIndex, uint32_t deviceHandle)
     NF_PAL_SPI *palSpi = (NF_PAL_SPI *)deviceHandle;
     SPI_OP_STATUS os;
 
-    if (palSpi->AsyncBusHeld)
+    if (palSpi->AsyncOwner != nullptr)
     {
-        // there is an async transfer holding the bus
+        // async transfer in progress, or completed and still holding the bus
         if (!palSpi->AsyncTransferComplete)
         {
             return SPI_OP_RUNNING;
         }
 
-        // transfer is completed and this is thread context, so this is where the bus gets released
+        bool failed = palSpi->TransferFailed;
+
+        // completed: release the bus
         CompleteAsyncTranfer(palSpi);
 
-        return SPI_OP_COMPLETE;
+        return failed ? SPI_OP_FAILED : SPI_OP_COMPLETE;
     }
 
     switch (palSpi->Driver->state)
@@ -1252,6 +1506,60 @@ SPI_OP_STATUS CPU_SPI_OP_Status(uint8_t busIndex, uint32_t deviceHandle)
             break;
     }
     return os;
+}
+
+// Waits for an async transfer started by the calling thread to complete and releases the bus
+void CPU_SPI_Wait_Busy(uint32_t deviceHandle, SPI_DEVICE_CONFIGURATION &sdev)
+{
+    (void)sdev;
+
+    NF_PAL_SPI *palSpi = (NF_PAL_SPI *)deviceHandle;
+
+    if (palSpi != nullptr)
+    {
+        CompleteAsyncTranfer(palSpi);
+    }
+}
+
+// Aborts the async transfer started by the calling thread, if any, and releases the bus.
+// DMA is stopped before the bus is released, so the transfer buffers are no longer in use when this returns.
+void CPU_SPI_Abort(uint32_t deviceHandle, SPI_DEVICE_CONFIGURATION &sdev)
+{
+    (void)sdev;
+
+    NF_PAL_SPI *palSpi = (NF_PAL_SPI *)deviceHandle;
+    bool aborted = false;
+
+    if (palSpi == nullptr || palSpi->AsyncOwner != chThdGetSelfX())
+    {
+        // no async transfer in progress, or it belongs to another thread
+        return;
+    }
+
+    osalSysLock();
+
+    if (!palSpi->AsyncTransferComplete)
+    {
+        // stop the transfer,
+        (void)spiStopTransferI(palSpi->Driver, NULL);
+
+        // the transfer is over: report it as failed
+        palSpi->SequentialTxRx = false;
+        palSpi->TransferFailed = true;
+        palSpi->AsyncTransferComplete = true;
+
+        aborted = true;
+    }
+
+    osalSysUnlock();
+
+    if (aborted && palSpi->ChipSelect >= 0)
+    {
+        CPU_GPIO_TogglePinState(palSpi->ChipSelect);
+    }
+
+    // release the bus
+    CompleteAsyncTranfer(palSpi);
 }
 
 bool CPU_SPI_Initialize(uint8_t busIndex, const SPI_DEVICE_CONFIGURATION &spiDeviceConfig)
@@ -1347,16 +1655,20 @@ bool CPU_SPI_Uninitialize(uint8_t busIndex)
         return true;
     }
 
+    SPIDriver *driver = palSpi->Driver;
+
+    // complete an async transfer from this thread, which still holds the bus
     CompleteAsyncTranfer(palSpi);
 
-    // this bus can be shared with other (native) drivers, so it has to be acquired before stopping it
-    spiAcquireBus(palSpi->Driver);
+    // acquire the bus before stopping it: it can be in use by a transfer from another thread
+    // or by another driver sharing it
+    spiAcquireBus(driver);
 
-    spiStop(palSpi->Driver);
-
-    spiReleaseBus(palSpi->Driver);
+    spiStop(driver);
 
     palSpi->Driver = nullptr;
+
+    spiReleaseBus(driver);
 
     return true;
 }
