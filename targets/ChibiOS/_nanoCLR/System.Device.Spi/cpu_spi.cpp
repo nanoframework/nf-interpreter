@@ -100,7 +100,7 @@ static void CompleteAsyncTranfer(NF_PAL_SPI *palSpi)
 
     WaitAsyncTransfer(palSpi);
 
-    palSpi->AsyncOwner = NULL;
+    palSpi->AsyncOwner = nullptr;
 
     CompleteTranfer(palSpi);
 }
@@ -133,7 +133,7 @@ static void SpiCallback(SPIDriver *spip)
 
     NATIVE_INTERRUPT_START
 
-    NF_PAL_SPI *palSpi = NULL;
+    NF_PAL_SPI *palSpi = nullptr;
 
 #if defined(RP_SPI_USE_SPI0)
     if (spip == &SPID0)
@@ -148,7 +148,7 @@ static void SpiCallback(SPIDriver *spip)
     }
 #endif
 
-    if (palSpi == NULL)
+    if (palSpi == nullptr)
     {
         NATIVE_INTERRUPT_END
         return;
@@ -236,7 +236,7 @@ NF_PAL_SPI *GetNfPalfromBusIndex(uint8_t busIndex)
             return &SPI1_PAL;
 #endif
         default:
-            return NULL;
+            return nullptr;
     }
 }
 
@@ -294,7 +294,7 @@ HRESULT CPU_SPI_nWrite_nRead(
         // the driver is cleared when the bus is uninitialized
         SPIDriver *driver = palSpi->Driver;
 
-        if (driver == NULL)
+        if (driver == nullptr)
         {
             // the bus has been uninitialized
             NANOCLR_SET_AND_LEAVE(CLR_E_OBJECT_DISPOSED);
@@ -322,17 +322,17 @@ HRESULT CPU_SPI_nWrite_nRead(
         palSpi->BufferIs16bits = wrc.Bits16ReadWrite;
         palSpi->Callback = wrc.callback;
         palSpi->WriteSize = 0;
-        palSpi->WriteBuffer = NULL;
+        palSpi->WriteBuffer = nullptr;
         palSpi->ReadSize = 0;
-        palSpi->ReadBuffer = NULL;
+        palSpi->ReadBuffer = nullptr;
 
-        if (writeBuffer != NULL)
+        if (writeBuffer != nullptr)
         {
             palSpi->WriteSize = writeSize;
             palSpi->WriteBuffer = writeBuffer;
         }
 
-        if (readBuffer != NULL)
+        if (readBuffer != nullptr)
         {
             palSpi->ReadSize = readSize;
             palSpi->ReadBuffer = readBuffer;
@@ -344,7 +344,7 @@ HRESULT CPU_SPI_nWrite_nRead(
 
         if (sync)
         {
-            palSpi->Configuration.end_cb = NULL;
+            palSpi->Configuration.end_cb = nullptr;
         }
 
         spiStart(palSpi->Driver, &palSpi->Configuration);
@@ -457,7 +457,7 @@ SPI_OP_STATUS CPU_SPI_OP_Status(uint8_t busIndex, uint32_t deviceHandle)
 
     NF_PAL_SPI *palSpi = (NF_PAL_SPI *)deviceHandle;
 
-    if (palSpi->AsyncOwner != NULL)
+    if (palSpi->AsyncOwner != nullptr)
     {
         // async transfer in progress, or completed and still holding the bus
         if (!palSpi->AsyncTransferComplete)
@@ -495,7 +495,7 @@ void CPU_SPI_Wait_Busy(uint32_t deviceHandle, SPI_DEVICE_CONFIGURATION &sdev)
 
     NF_PAL_SPI *palSpi = (NF_PAL_SPI *)deviceHandle;
 
-    if (palSpi != NULL)
+    if (palSpi != nullptr)
     {
         CompleteAsyncTranfer(palSpi);
     }
@@ -510,7 +510,7 @@ void CPU_SPI_Abort(uint32_t deviceHandle, SPI_DEVICE_CONFIGURATION &sdev)
     NF_PAL_SPI *palSpi = (NF_PAL_SPI *)deviceHandle;
     bool aborted = false;
 
-    if (palSpi == NULL || palSpi->AsyncOwner != chThdGetSelfX())
+    if (palSpi == nullptr || palSpi->AsyncOwner != chThdGetSelfX())
     {
         // no async transfer in progress, or it belongs to another thread
         return;
@@ -547,13 +547,26 @@ void CPU_SPI_Abort(uint32_t deviceHandle, SPI_DEVICE_CONFIGURATION &sdev)
     CompleteAsyncTranfer(palSpi);
 }
 
+// Completes an async transfer that the calling thread may still be holding this bus with, and releases the bus.
+// For native drivers that use the SPI bus directly (e.g. an external flash): otherwise, when running on the thread
+// that owns the bus, they would deadlock trying to acquire it.
+extern "C" void CPU_SPI_CompleteAsyncTransfer(uint8_t busIndex)
+{
+    NF_PAL_SPI *palSpi = GetNfPalfromBusIndex(busIndex);
+
+    if (palSpi != nullptr && palSpi->Driver != nullptr)
+    {
+        CompleteAsyncTranfer(palSpi);
+    }
+}
+
 bool CPU_SPI_Initialize(uint8_t busIndex, const SPI_DEVICE_CONFIGURATION &spiDeviceConfig)
 {
     switch (busIndex)
     {
 #if defined(RP_SPI_USE_SPI0)
         case 0:
-            if (SPI0_PAL.Driver == NULL)
+            if (SPI0_PAL.Driver == nullptr)
             {
                 ConfigPins_SPI0(spiDeviceConfig);
                 SPI0_PAL.Driver = &SPID0;
@@ -563,7 +576,7 @@ bool CPU_SPI_Initialize(uint8_t busIndex, const SPI_DEVICE_CONFIGURATION &spiDev
 #endif
 #if defined(RP_SPI_USE_SPI1)
         case 1:
-            if (SPI1_PAL.Driver == NULL)
+            if (SPI1_PAL.Driver == nullptr)
             {
                 ConfigPins_SPI1(spiDeviceConfig);
                 SPI1_PAL.Driver = &SPID1;
@@ -582,13 +595,13 @@ bool CPU_SPI_Uninitialize(uint8_t busIndex)
 {
     NF_PAL_SPI *palSpi = GetNfPalfromBusIndex(busIndex);
 
-    if (palSpi == NULL)
+    if (palSpi == nullptr)
     {
         // the requested SPI bus is not valid
         return false;
     }
 
-    if (palSpi->Driver == NULL)
+    if (palSpi->Driver == nullptr)
     {
         // this bus is not initialized, nothing to do here
         return true;
@@ -605,7 +618,7 @@ bool CPU_SPI_Uninitialize(uint8_t busIndex)
 
     spiStop(driver);
 
-    palSpi->Driver = NULL;
+    palSpi->Driver = nullptr;
 
     spiReleaseBus(driver);
 
@@ -735,7 +748,7 @@ static void CompleteTranfer(NF_PAL_SPI *palSpi)
     if (palSpi->TransferFailed)
     {
         // DMA error: the driver is left active, stop the transfer to get it back to ready...
-        (void)spiStopTransfer(palSpi->Driver, NULL);
+        (void)spiStopTransfer(palSpi->Driver, nullptr);
     }
 
     spiUnselect(palSpi->Driver);
@@ -1541,7 +1554,7 @@ void CPU_SPI_Abort(uint32_t deviceHandle, SPI_DEVICE_CONFIGURATION &sdev)
     if (!palSpi->AsyncTransferComplete)
     {
         // stop the transfer,
-        (void)spiStopTransferI(palSpi->Driver, NULL);
+        (void)spiStopTransferI(palSpi->Driver, nullptr);
 
         // the transfer is over: report it as failed
         palSpi->SequentialTxRx = false;
@@ -1560,6 +1573,19 @@ void CPU_SPI_Abort(uint32_t deviceHandle, SPI_DEVICE_CONFIGURATION &sdev)
 
     // release the bus
     CompleteAsyncTranfer(palSpi);
+}
+
+// Completes an async transfer that the calling thread may still be holding this bus with, and releases the bus.
+// For native drivers that use the SPI bus directly (e.g. an external flash): otherwise, when running on the thread
+// that owns the bus, they would deadlock trying to acquire it.
+extern "C" void CPU_SPI_CompleteAsyncTransfer(uint8_t busIndex)
+{
+    NF_PAL_SPI *palSpi = GetNfPalfromBusIndex(busIndex);
+
+    if (palSpi != nullptr && palSpi->Driver != nullptr)
+    {
+        CompleteAsyncTranfer(palSpi);
+    }
 }
 
 bool CPU_SPI_Initialize(uint8_t busIndex, const SPI_DEVICE_CONFIGURATION &spiDeviceConfig)
