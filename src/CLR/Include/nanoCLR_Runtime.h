@@ -2661,7 +2661,7 @@ struct CLR_RT_GarbageCollector
         CLR_UINT8 *m_start;
         CLR_UINT8 *m_end;
         CLR_UINT8 *m_destination;
-        uintptr_t m_offset;
+        ptrdiff_t m_offset;
     };
 
     //--//
