@@ -191,8 +191,7 @@ struct Settings
 
             m_assemblies[key] = bufferSub;
 
-            header =
-                (CLR_RECORD_ASSEMBLY *)ROUNDTOMULTIPLE((uintptr_t)header + asmSize, CLR_UINT32);
+            header = (CLR_RECORD_ASSEMBLY *)ROUNDTOMULTIPLE((uintptr_t)header + asmSize, CLR_UINT32);
         }
 
         // Return S_OK even if some assemblies failed to parse – same behaviour
