@@ -166,6 +166,9 @@ HRESULT Library_nf_espnow_nanoFramework_EspNow_EspNowController::NativeInitializ
 {
     NANOCLR_HEADER();
 
+    uint32_t maximumDataLength;
+    uint32_t espNowVersion;
+
     // A managed redeployment may leave the native
     // instance alive, so always tear down the previous ESP-NOW state first.
     // esp_now_deinit() also removes the peer table; managed startup adds peers
@@ -179,14 +182,14 @@ HRESULT Library_nf_espnow_nanoFramework_EspNow_EspNowController::NativeInitializ
         NANOCLR_LEAVE();
     }
 
-    uint32_t espNowVersion = 1;
+    espNowVersion = 1;
     ret = esp_now_get_version(&espNowVersion);
     if (ret != ESP_OK)
     {
         NANOCLR_LEAVE();
     }
 
-    uint32_t maximumDataLength = ESP_NOW_MAX_DATA_LEN;
+    maximumDataLength = ESP_NOW_MAX_DATA_LEN;
 #ifdef ESP_NOW_MAX_DATA_LEN_V2
     if (espNowVersion >= 2)
     {
