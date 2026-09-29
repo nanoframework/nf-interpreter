@@ -260,7 +260,7 @@ HRESULT Library_sys_dev_wifi_native_System_Device_Wifi_WifiAdapter::GetNativeSca
         else
         {
             int rlen = sizeof(uint16_t) + (number * sizeof(ScanRecord));
-            NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance(top, rlen, g_CLR_RT_WellKnownTypes.m_UInt8));
+            NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance(top, rlen, g_CLR_RT_WellKnownTypes.UInt8));
             CLR_RT_HeapBlock_Array *array = top.DereferenceArray();
             CLR_UINT8 *buf = array->GetFirstElement();
 
