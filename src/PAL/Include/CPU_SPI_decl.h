@@ -140,6 +140,10 @@ HRESULT CPU_SPI_nWrite_nRead(
 
 void CPU_SPI_Wait_Busy(uint32_t deviceHandle, SPI_DEVICE_CONFIGURATION &sdev);
 
+// Aborts an async transfer in progress (started by the calling thread).
+// When this returns, DMA is no longer using the transfer buffers.
+void CPU_SPI_Abort(uint32_t deviceHandle, SPI_DEVICE_CONFIGURATION &sdev);
+
 // Write / read 16 bit data to device specified by handle
 // return result 0=S_OK, CLR_E_BUSY async operation and operation still running or another error code
 HRESULT CPU_SPI_nWrite16_nRead16(

@@ -280,9 +280,9 @@ HRESULT Library_sys_dev_spi_native_System_Device_Spi_SpiDevice::NativeTransfer(
             if (!eventResult)
             {
                 // Timeout
-                // wait for the transfer to complete before leaving, otherwise the buffers
-                // would be unpinned (and could be moved by the GC) while DMA is still using them
-                nanoSPI_Wait_Busy(deviceId);
+                // abort the transfer before leaving: DMA has to be stopped before the buffers are unpinned,
+                // otherwise they could be moved by the GC while DMA is still using them
+                nanoSPI_Abort(deviceId);
 
                 NANOCLR_SET_AND_LEAVE(CLR_E_TIMEOUT);
             }
