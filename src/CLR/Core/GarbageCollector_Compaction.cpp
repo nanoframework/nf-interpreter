@@ -158,11 +158,11 @@ void CLR_RT_GarbageCollector::Heap_Compact()
                 break;
             }
 
-                //////////////////////////////////////////////////////
-                //
-                // At this point, we have at least ONE movable block.
-                //
-                //////////////////////////////////////////////////////
+            //////////////////////////////////////////////////////
+            //
+            // At this point, we have at least ONE movable block.
+            //
+            //////////////////////////////////////////////////////
 
 #if NANOCLR_VALIDATE_HEAP >= NANOCLR_VALIDATE_HEAP_4_CompactionPlus
             if (IsBlockInFreeList(g_CLR_RT_ExecutionEngine.m_heap, freeRegion, true) == false)
