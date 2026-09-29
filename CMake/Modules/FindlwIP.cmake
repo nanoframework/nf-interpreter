@@ -98,8 +98,10 @@ set(LWIP_SRCS
 
 )
 
-# WiFi targets use a WiFi-specific lwIP thread; Ethernet targets use the standard one
-if(TARGET_HAS_WIFI)
+# WiFi targets use a WiFi-specific lwIP thread; Ethernet targets use the standard one.
+if(TARGET_HAS_WIFI_ISM43362)
+	# no netif thread needed, the module runs its own onboard TCP/IP stack, lwIP core is only used for its shared types/utilities
+elseif(TARGET_HAS_WIFI)
 	list(APPEND LWIP_SRCS nf_lwipthread_wifi.c)
 else()
 	list(APPEND LWIP_SRCS nf_lwipthread.c)
