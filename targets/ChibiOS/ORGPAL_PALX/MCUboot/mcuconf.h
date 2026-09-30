@@ -431,4 +431,7 @@
 // header for nanoFramework overlay drivers
 #include "mcuconf_nf.h"
 
+// header for ChibiOS-Contrib drivers (USB host)
+#include "mcuconf_community.h"
+
 #endif /* MCUCONF_H */

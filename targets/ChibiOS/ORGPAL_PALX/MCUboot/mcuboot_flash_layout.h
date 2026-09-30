@@ -12,9 +12,9 @@
 //
 // Layout (STM32F769NI 2 MB + W25Q512 64 MB QSPI):
 //
-//   FLASH_AREA_BOOTLOADER        (0): 0x08000000  64 kB    internal sectors 0-1
-//   [config block]                  : 0x08010000  32 kB    internal sector 2  (HAL-managed, not a MCUboot slot)
-//   [unused]                        : 0x08018000  160 kB   internal sectors 3-4  (see note below)
+//   FLASH_AREA_BOOTLOADER        (0): 0x08000000  96 kB    internal sectors 0-2
+//   [config block]                  : 0x08018000  32 kB    internal sector 3  (HAL-managed, not a MCUboot slot)
+//   [unused]                        : 0x08020000  128 kB   internal sector 4  (see note below)
 //   FLASH_AREA_IMAGE_0_PRIMARY   (1): 0x08040000  1024 kB  internal (4 x 256 kB logical sectors)
 //   FLASH_AREA_IMAGE_0_SECONDARY (2): W25Q512 @ 0x000000  1280 kB  (40 x 32 kB blocks)
 //   FLASH_AREA_IMAGE_1_PRIMARY   (3): 0x08140000  768 kB   internal (3 x 256 kB logical sectors)
@@ -53,19 +53,19 @@
 
 // clang-format off
 
-// MCUboot bootloader slot (sectors 0-1, 64 kB)
+// MCUboot bootloader slot (sectors 0-2, 96 kB)
 #define NF_MCUBOOT_SLOT_BOOTLOADER_OFF      0x08000000U
-#define NF_MCUBOOT_SLOT_BOOTLOADER_SIZE     (64U * 1024U)
+#define NF_MCUBOOT_SLOT_BOOTLOADER_SIZE     (96U * 1024U)
 
-// Config block (sector 2, 32 kB) — HAL-managed; not part of any MCUboot flash_area.
-#define NF_MCUBOOT_CONFIG_OFF               0x08010000U
+// Config block (sector 3, 32 kB) — HAL-managed; not part of any MCUboot flash_area.
+#define NF_MCUBOOT_CONFIG_OFF               0x08018000U
 #define NF_MCUBOOT_CONFIG_SIZE              (32U * 1024U)
 
-// Internal sectors 3-4 (0x08018000, 32 kB + 128 kB) — unused. 0x08018000 is not a
-// 256 kB boundary, so neither sector can start (or belong to) a swap-using-offset
+// Internal sector 4 (0x08020000, 128 kB) — unused. 0x08020000 is not a
+// 256 kB boundary, so the sector cannot start (or belong to) a swap-using-offset
 // primary slot. The first 256 kB-aligned address after the config block is 0x08040000.
-#define NF_MCUBOOT_UNUSED_OFF               0x08018000U
-#define NF_MCUBOOT_UNUSED_SIZE             (160U * 1024U)
+#define NF_MCUBOOT_UNUSED_OFF               0x08020000U
+#define NF_MCUBOOT_UNUSED_SIZE             (128U * 1024U)
 
 // Image 0 primary — nanoCLR (0x08040000, 1024 kB = 4 x 256 kB logical sectors; 768 kB usable)
 #define NF_MCUBOOT_SLOT_IMG0_PRI_OFF        0x08040000U
@@ -93,10 +93,10 @@ static_assert(
     "PALX: bootloader overflows into config block");
 static_assert(
     NF_MCUBOOT_CONFIG_OFF + NF_MCUBOOT_CONFIG_SIZE <= NF_MCUBOOT_UNUSED_OFF,
-    "PALX: config block overflows into unused sectors 3-4");
+    "PALX: config block overflows into unused sector 4");
 static_assert(
     NF_MCUBOOT_UNUSED_OFF + NF_MCUBOOT_UNUSED_SIZE <= NF_MCUBOOT_SLOT_IMG0_PRI_OFF,
-    "PALX: unused sectors 3-4 overflow into CLR primary");
+    "PALX: unused sector 4 overflows into CLR primary");
 static_assert(
     NF_MCUBOOT_SLOT_IMG0_PRI_OFF + NF_MCUBOOT_SLOT_IMG0_PRI_SIZE <= NF_MCUBOOT_SLOT_IMG1_PRI_OFF,
     "PALX: CLR primary overflows into deploy primary");

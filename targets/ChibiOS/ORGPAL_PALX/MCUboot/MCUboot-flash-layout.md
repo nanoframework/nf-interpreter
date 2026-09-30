@@ -6,14 +6,14 @@ MCUboot replaces nanoBooter at the same base address. PALX uses identical linker
 
 | Region | Address | Size | Notes |
 |---|---|---|---|
-| MCUboot | `0x08000000` | 64 kB | sectors 0-1; USB CDC + QSPI HAL don't fit in 32 kB |
-| Config block | `0x08010000` | 32 kB | sector 2; HAL-managed; **outside** any MCUboot slot |
-| *unused* | `0x08018000` | 160 kB | sectors 3-4 — **stranded**; see "Logical sectors" below |
+| MCUboot | `0x08000000` | 96 kB | sectors 0-2; USB CDC + QSPI HAL + USB MSD update import (USB host + FatFs) don't fit in 64 kB |
+| Config block | `0x08018000` | 32 kB | sector 3; HAL-managed; **outside** any MCUboot slot |
+| *unused* | `0x08020000` | 128 kB | sector 4 — **stranded**; see "Logical sectors" below |
 | Image 0 primary slot (CLR) | `0x08040000` | **1024 kB** | 4 × 256 kB logical sectors; **768 kB usable** (one LS reserved for the swap trailer) |
 | Image 1 primary (deploy) | `0x08140000` | **768 kB** | 3 × 256 kB logical sectors; **512 kB usable** |
 | *(end of flash)* | `0x08200000` | — | — |
 
-> **Config block placement:** Sector 2 (`0x08010000`, 32 kB) sits between the MCUboot bootloader and the CLR primary slot. It is not part of any MCUboot-managed flash area — MCUboot never enumerates, erases, or writes to it. It keeps its pre-rework address, so existing device configuration survives the layout change.
+> **Config block placement:** Sector 3 (`0x08018000`, 32 kB) sits between the MCUboot bootloader and the CLR primary slot. It is not part of any MCUboot-managed flash area — MCUboot never enumerates, erases, or writes to it. It moved from sector 2 (`0x08010000`) when the bootloader grew from 64 kB to 96 kB for the USB MSD update import; a device flashed with the previous layout loses its configuration block.
 
 ### Logical sectors (`MCUBOOT_SWAP_USING_OFFSET`)
 
@@ -22,7 +22,7 @@ MCUboot replaces nanoBooter at the same base address. PALX uses identical linker
 The STM32F769 dual-bank erase-page geometry (shared `stm32_f7xx_flash.h`) is: per bank 4 × 32 kB, 1 × 128 kB, 3 × 256 kB. Every 256 kB-aligned address at or above `0x08040000` is a real erase-page boundary, and each 256 kB window erases to exactly 256 kB (the small-sector run at `0x08100000`–`0x08140000` — 4 × 32 kB + 1 × 128 kB — sums to one clean 256 kB logical sector). Therefore:
 
 * The primary slots start at `0x08040000` / `0x08140000` and are whole multiples of 256 kB.
-* Sectors 3–4 (`0x08018000`, 32 kB + 128 kB) **cannot** start a 256 kB logical sector, so they are left unused.
+* Sector 4 (`0x08020000`, 128 kB) **cannot** start a 256 kB logical sector, so it is left unused (sector 3 holds the config block).
 
 The previous 32 kB logical sector (CLR primary at `0x08018000` / 672 kB) split the 128 kB and 256 kB physical pages and corrupts image 0 on the first real swap-over-populated-slot.
 
@@ -61,6 +61,10 @@ MCUboot rounds the swap trailer up to a whole logical sector, so the largest ima
 | `MCUBOOT_ERASE_PROGRESSIVELY` | enabled (via swap-using-offset, shared config) | serial-recovery upload erases the slot sector-by-sector as chunks arrive |
 | `MCUBOOT_MAX_IMG_SECTORS` | 64 (generic default when logical sectors are configured) | largest slot = image 0 secondary, 1280 kB ÷ 256 kB = 5 logical sectors |
 
+## Update media (USB MSD)
+
+With `NF_FEATURE_MCUBOOT_HAS_USB_MSD` enabled (default in `defconfig`), before `boot_go()` the bootloader enumerates a USB mass storage device on OTG_HS (`USBHD2`, FatFs volume `E:`) and imports `nanoCLR-*.bin` / `nanoDeployment-*.bin` from its root directory into the matching secondary slot for a test swap (see `MCUboot/docs/upgrade-strategy.md`). Board side: `mcuboot_media_boot.c`. With no stick attached this adds up to ~1 s (`MCUBOOT_USB_MSD_ATTACH_TIMEOUT_MS`) to boot. PALX has no SD card, so USB MSD is the only update medium.
+
 ## Serial recovery
 
 | Item | Value |
@@ -73,8 +77,8 @@ MCUboot rounds the swap trailer up to a whole logical sector, so the largest ima
 
 | | nanoBooter (release) | MCUboot |
 |---|---|---|
-| Bootloader | 32 kB (sector 0) | 64 kB (sectors 0-1) — **expanded** |
-| Config | 32 kB @ `0x08008000` | 32 kB @ `0x08010000` — **moved** |
-| CLR code start | `0x08010000` | `0x08040400` (slot base `0x08040000` + header `0x400`) — sectors 3-4 unused |
+| Bootloader | 32 kB (sector 0) | 96 kB (sectors 0-2) — **expanded** |
+| Config | 32 kB @ `0x08008000` | 32 kB @ `0x08018000` — **moved** |
+| CLR code start | `0x08010000` | `0x08040400` (slot base `0x08040000` + header `0x400`) — sector 4 unused |
 | Deploy slot | 1280 kB @ `0x080C0000` | 768 kB @ `0x08140000` (512 kB usable after swap trailer) |
 | Upgrade mechanism | manual flash | MCUboot swap-using-offset |

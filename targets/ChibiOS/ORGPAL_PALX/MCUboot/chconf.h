@@ -207,7 +207,11 @@
  * @note    The default is @p TRUE.
  */
 #if !defined(CH_CFG_USE_SEMAPHORES)
+#if defined(CONFIG_NF_FEATURE_MCUBOOT_HAS_USB_MSD) && CONFIG_NF_FEATURE_MCUBOOT_HAS_USB_MSD
+#define CH_CFG_USE_SEMAPHORES TRUE
+#else
 #define CH_CFG_USE_SEMAPHORES FALSE
+#endif
 #endif
 
 /**
@@ -386,7 +390,11 @@
  * @note    Mutexes are recommended.
  */
 #if !defined(CH_CFG_USE_HEAP)
+#if defined(CONFIG_NF_FEATURE_MCUBOOT_HAS_USB_MSD) && CONFIG_NF_FEATURE_MCUBOOT_HAS_USB_MSD
+#define CH_CFG_USE_HEAP TRUE
+#else
 #define CH_CFG_USE_HEAP FALSE
+#endif
 #endif
 
 /**
