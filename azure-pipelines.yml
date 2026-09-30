@@ -55,7 +55,7 @@ resources:
       type: github
       name: littlefs-project/littlefs
       endpoint: nanoframework
-      ref: refs/tags/v2.11.2
+      ref: refs/tags/v2.11.3
 
 jobs:
   ##############################

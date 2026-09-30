@@ -56,7 +56,7 @@ git pull origin 5.5.1
 cd /sources/lwip || exit 1
 git pull origin STABLE-2_1_3_RELEASE
 cd /sources/littlefs || exit 1
-git pull origin v2.11.2
+git pull origin v2.11.3
 cd /sources/SimpleLinkCC32 || exit 1
 git pull origin 4.10.00.07
 cd /sources/SimpleLinkCC13 || exit 1
