@@ -17,6 +17,8 @@ HRESULT Library_sys_net_native_System_Security_Cryptography_X509Certificates_X50
     CLR_UINT8 *certBytes;
     CLR_RT_HeapBlock hbIssuer;
     CLR_RT_HeapBlock hbSubject;
+    hbIssuer.SetObjectReference(NULL);
+    hbSubject.SetObjectReference(NULL);
     CLR_RT_ProtectFromGC gc1(hbIssuer);
     CLR_RT_ProtectFromGC gc2(hbSubject);
     X509CertData cert;

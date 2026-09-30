@@ -168,6 +168,11 @@ void CLR_HW_Hardware::ProcessActivity()
         eventsCLR |= Event_RmtRx;
     }
 
+    if (events & SYSTEM_EVENT_FLAG_ESPNOW)
+    {
+        eventsCLR |= Event_EspNow;
+    }
+
     if (events & SYSTEM_EVENT_FLAG_ONEWIRE_MASTER)
     {
         eventsCLR |= Event_OneWireHost;
