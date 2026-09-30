@@ -344,7 +344,7 @@ void CLR_RT_HeapCluster::ValidateBlock(CLR_RT_HeapBlock *ptr)
     {
         if (ptr < m_payloadStart || ptr >= m_payloadEnd)
         {
-#ifdef _WIN64
+#if defined(NANOCLR_64BIT_POINTERS)
             CLR_Debug::Printf(
                 "Block beyond cluster limits: 0x%016" PRIxPTR " [0x%016" PRIxPTR " : 0x%016" PRIxPTR "-0x%016" PRIxPTR
                 "]\r\n",
@@ -368,7 +368,7 @@ void CLR_RT_HeapCluster::ValidateBlock(CLR_RT_HeapBlock *ptr)
 
         if (ptr->DataType() >= DATATYPE_FIRST_INVALID)
         {
-#ifdef _WIN64
+#if defined(NANOCLR_64BIT_POINTERS)
             CLR_Debug::Printf(
                 "Bad Block Type: 0x%016" PRIxPTR " %02x [0x%016" PRIxPTR " : 0x%016" PRIxPTR "-0x%016" PRIxPTR "]\r\n",
                 (uintptr_t)ptr,
@@ -391,7 +391,7 @@ void CLR_RT_HeapCluster::ValidateBlock(CLR_RT_HeapBlock *ptr)
 
         if (ptr->DataSize() == 0)
         {
-#ifdef _WIN64
+#if defined(NANOCLR_64BIT_POINTERS)
             CLR_Debug::Printf(
                 "Bad Block null-size: 0x%016" PRIxPTR " [0x%016" PRIxPTR " : 0x%016" PRIxPTR "-0x%016" PRIxPTR "]\r\n",
                 (uintptr_t)ptr,
@@ -412,7 +412,7 @@ void CLR_RT_HeapCluster::ValidateBlock(CLR_RT_HeapBlock *ptr)
 
         if (ptr + ptr->DataSize() > m_payloadEnd)
         {
-#ifdef _WIN64
+#if defined(NANOCLR_64BIT_POINTERS)
             CLR_Debug::Printf(
                 "Bad Block size: 0x%016" PRIxPTR " [0x%016" PRIxPTR " : 0x%016" PRIxPTR "-0x%016" PRIxPTR "]\r\n",
                 (uintptr_t)ptr,

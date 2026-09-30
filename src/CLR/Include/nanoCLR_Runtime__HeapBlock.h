@@ -64,13 +64,14 @@
 //
 // This is used in memory move operations.
 //
-#ifdef _WIN64
+#if defined(_MSC_VER) && defined(NANOCLR_64BIT_POINTERS)
+// 64-bit MSVC, packed to 4 bytes: CLR_RT_HeapBlock = 4 (m_id) + 16 (m_data with 2x 8-byte ptrs) = 20 bytes.
 struct CLR_RT_HeapBlock_Raw
 {
     CLR_UINT32 data[5];
 };
-#elif defined(__LP64__)
-// 64-bit POSIX hosts (macOS/Linux arm64/x86-64):
+#elif defined(NANOCLR_64BIT_POINTERS)
+// other 64-bit hosts (Linux/macOS x86-64/arm64), not packed:
 // CLR_RT_HeapBlock = 4 (m_id) + 4 (align pad) + 16 (m_data with 2x 8-byte ptrs) = 24 bytes.
 struct CLR_RT_HeapBlock_Raw
 {
@@ -81,7 +82,7 @@ struct CLR_RT_HeapBlock_Raw
 {
     CLR_UINT32 data[3];
 };
-#endif // _WIN64
+#endif
 
 #ifdef __GNUC__
 #pragma GCC diagnostic push
@@ -749,8 +750,8 @@ struct CLR_RT_HeapBlock
 
         CLR_RT_ReflectionDef_Index reflection;
 
-        // same word except on LP64, where the pointer aligns to 8: see CLAUDE.md "Object header aliasing"
-#if !defined(__LP64__)
+        // same word unless 64-bit pointers align to 8 (not packed like MSVC): see CLAUDE.md "Object header aliasing"
+#if !defined(NANOCLR_64BIT_POINTERS) || defined(_MSC_VER)
         CT_ASSERT_UNIQUE_NAME(
             offsetof(ObjectHeader, lock) == offsetof(CLR_RT_ReflectionDef_Index, data),
             objectHeaderLockAliasesReflectionData)
@@ -833,7 +834,7 @@ struct CLR_RT_HeapBlock
 
     //--//
 
-#ifdef _WIN64
+#if defined(NANOCLR_64BIT_POINTERS)
 #define SENTINEL_NODE_APPENDED  0xABABABABABABABAB
 #define SENTINEL_NODE_EXTRACTED 0xADADADADADADADAD
 #define SENTINEL_CLEAR_BLOCK    0xCBCBCBCBCBCBCBCB
@@ -849,7 +850,7 @@ struct CLR_RT_HeapBlock
 
 #if defined(NANOCLR_FILL_MEMORY_WITH_DIRTY_PATTERN)
 
-#ifdef _WIN64
+#if defined(NANOCLR_64BIT_POINTERS)
     void Debug_ClearBlock(CLR_UINT64 data);
 #else
     void Debug_ClearBlock(CLR_UINT32 data);
@@ -859,7 +860,7 @@ struct CLR_RT_HeapBlock
 
 #else
 
-#ifdef _WIN64
+#if defined(NANOCLR_64BIT_POINTERS)
     void Debug_ClearBlock(CLR_UINT64 data)
 #else
     void Debug_ClearBlock(CLR_UINT32 data)

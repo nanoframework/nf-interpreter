@@ -4013,8 +4013,7 @@ HRESULT CLR_RT_Assembly::CreateInstance(const CLR_RECORD_ASSEMBLY *header, CLR_R
 #if defined(NANOCLR_GC_VERBOSE)
             if (s_CLR_RT_fTrace_Memory >= c_CLR_RT_Trace_Info)
             {
-#ifdef _WIN64
-
+#if defined(NANOCLR_64BIT_POINTERS)
                 CLR_Debug::Printf(" @ 0x%016" PRIxPTR "", (uintptr_t)assm);
 #else
                 CLR_Debug::Printf(" @ 0x%08" PRIxPTR "", (uintptr_t)assm);
@@ -5714,7 +5713,10 @@ struct MethodIndexLookup
 };
 
 static const MethodIndexLookup c_MethodIndexLookup[] = {
-#define MIL(nm, type, method) {nm, &g_CLR_RT_WellKnownTypes.type, &g_CLR_RT_WellKnownMethods.method}
+#define MIL(nm, type, method)                                                                                          \
+    {                                                                                                                  \
+        nm, &g_CLR_RT_WellKnownTypes.type, &g_CLR_RT_WellKnownMethods.method                                           \
+    }
 
     // clang-format off
 

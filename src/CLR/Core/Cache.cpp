@@ -218,43 +218,21 @@ void CLR_RT_EventCache::VirtualMethodTable::Initialize()
     uintptr_t payloads_start = (uintptr_t)m_payloads;
     uintptr_t payloads_end = payloads_start + (PayloadArraySize() * sizeof(Payload));
 
-#ifdef _WIN64
-
     CLR_Debug::Printf(
-        "m_entries: 0x%" PRIx64 " - 0x% " PRIx64 " (%u bytes)\r\n",
+        "m_entries:    0x%" PRIxPTR " - 0x%" PRIxPTR " (%u bytes)\r\n",
         entries_start,
         entries_end,
         (unsigned int)(entries_end - entries_start));
     CLR_Debug::Printf(
-        "m_entriesMRU: 0x%" PRIx64 " - 0x% " PRIx64 " (%u bytes)\r\n",
+        "m_entriesMRU: 0x%" PRIxPTR " - 0x%" PRIxPTR " (%u bytes)\r\n",
         entriesMRU_start,
         entriesMRU_end,
         (unsigned int)(entriesMRU_end - entriesMRU_start));
     CLR_Debug::Printf(
-        "m_payloads:   0x% " PRIx64 " - 0x% " PRIx64 " (%u bytes)\r\n",
+        "m_payloads:   0x%" PRIxPTR " - 0x%" PRIxPTR " (%u bytes)\r\n",
         payloads_start,
         payloads_end,
         (unsigned int)(payloads_end - payloads_start));
-
-#else
-
-    CLR_Debug::Printf(
-        "m_entries: 0x%08X - 0x%08X (%u bytes)\r\n",
-        entries_start,
-        entries_end,
-        (unsigned int)(entries_end - entries_start));
-    CLR_Debug::Printf(
-        "m_entriesMRU: 0x%08X - 0x%08X (%u bytes)\r\n",
-        entriesMRU_start,
-        entriesMRU_end,
-        (unsigned int)(entriesMRU_end - entriesMRU_start));
-    CLR_Debug::Printf(
-        "m_payloads:   0x%08X - 0x%08X (%u bytes)\r\n",
-        payloads_start,
-        payloads_end,
-        (unsigned int)(payloads_end - payloads_start));
-
-#endif
 
     // Check for overlaps
     if (entries_end > entriesMRU_start && entries_start < entriesMRU_end)
@@ -380,7 +358,7 @@ bool CLR_RT_EventCache::VirtualMethodTable::FindVirtualMethod(
 
     for (index = m_entries[indexHead].m_next;; index = m_entries[index].m_next)
     {
-#if defined(DEBUG_VMT_DIAGNOSTICS) && defined(_WIN64)
+#if defined(DEBUG_VMT_DIAGNOSTICS)
         CLR_Debug::Printf("  Loop: index=%u, indexHead=%u\r\n", index, indexHead);
 #endif
 
@@ -424,7 +402,7 @@ bool CLR_RT_EventCache::VirtualMethodTable::FindVirtualMethod(
 
             index = GetNewEntry();
 
-#if defined(DEBUG_VMT_DIAGNOSTICS) && defined(_WIN64)
+#if defined(DEBUG_VMT_DIAGNOSTICS)
             CLR_Debug::Printf("  GetNewEntry returned: %u\r\n", index);
 #endif
 

@@ -5028,7 +5028,7 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                     evalPos--;
 
                     // get source address
-#ifdef _WIN64
+#if defined(NANOCLR_64BIT_POINTERS)
                     uintptr_t sourceAddress = evalPos[0].NumericByRef().s8;
 #else
                 uintptr_t sourceAddress = evalPos[0].NumericByRef().s4;
@@ -5036,7 +5036,7 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                     evalPos--;
 
                     // get destination address
-#ifdef _WIN64
+#if defined(NANOCLR_64BIT_POINTERS)
                     uintptr_t destinationAddress = evalPos[0].NumericByRef().s8;
 #else
                 uintptr_t destinationAddress = evalPos[0].NumericByRef().s4;
