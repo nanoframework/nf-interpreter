@@ -8,20 +8,20 @@
 
 // 32kB blocks
 const BlockRange BlockRange1[] = {
-    {BlockRange_BLOCKTYPE_BOOTSTRAP, 0, 1}, // 0x08000000 MCUboot (sectors 0-1, 64 kB)
+    {BlockRange_BLOCKTYPE_BOOTSTRAP, 0, 2}, // 0x08000000 MCUboot (sectors 0-2, 96 kB)
 
     ///////////////////////////////////////////////////////////////////////////////////////
     // because this target is using a configuration block need to add the
     // configuration manager files to the CMake and call ConfigurationManager_Initialize()
     // in nanoBooter so the configuration can be managed when in booter mode
     ///////////////////////////////////////////////////////////////////////////////////////
-    {BlockRange_BLOCKTYPE_CONFIG, 2, 2}, // 0x08010000 configuration block
+    {BlockRange_BLOCKTYPE_CONFIG, 3, 3}, // 0x08018000 configuration block
     ///////////////////////////////////////////////////////////////////////////////////////
 };
 
 // 128kB block
-// Internal sectors 3-4 (0x08018000, 32 kB + 128 kB) are intentionally unused: 0x08018000 is
-// not a 256 kB boundary, so they cannot belong to a swap-using-offset primary slot. nanoCLR
+// Internal sector 4 (0x08020000, 128 kB) is intentionally unused: 0x08020000 is
+// not a 256 kB boundary, so it cannot belong to a swap-using-offset primary slot. nanoCLR
 // (image 0 primary) starts at the next 256 kB boundary, 0x08040000.
 // const BlockRange BlockRange2[] = {
 //     {BlockRange_BLOCKTYPE_CODE, 0, 0} // 0x08020000 nanoCLR
@@ -37,7 +37,7 @@ const BlockRegionInfo BlockRegions[] = {
     {
         (0),        // no attributes for this region
         0x08000000, // start address for block region
-        3,          // total number of blocks in this region (bootloader + config; sector 3 @ 0x08018000 unused)
+        4,          // total number of blocks in this region (bootloader + config)
         0x8000,     // total number of bytes per block
         ARRAYSIZE_CONST_EXPR(BlockRange1),
         BlockRange1,
@@ -45,7 +45,7 @@ const BlockRegionInfo BlockRegions[] = {
 
     {
         (0),        // no attributes for this region
-        0x08040000, // start address for block region (sectors 3-4 @ 0x08018000-0x08040000 skipped — unused)
+        0x08040000, // start address for block region (sector 4 @ 0x08020000-0x08040000 skipped — unused)
         7,          // total number of blocks in this region
         0x40000,    // total number of bytes per block
         ARRAYSIZE_CONST_EXPR(BlockRange3),

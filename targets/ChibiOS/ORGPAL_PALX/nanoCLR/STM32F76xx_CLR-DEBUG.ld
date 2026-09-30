@@ -32,7 +32,7 @@ MEMORY
     flash5     (rx) : org = 0x00000000, len = 0
     flash6     (rx) : org = 0x00000000, len = 0
     flash7     (rx) : org = 0x00000000, len = 0
-    config     (rw) : org = 0x08010000, len = 32k                       /* space reserved for configuration block */
+    config     (rw) : org = 0x08018000, len = 32k                       /* space reserved for configuration block */
     deployment (rx) : org = 0x08140000, len = 768k                      /* image 1 primary slot (NF_MCUBOOT_SLOT_IMG1_PRI_*; 512k usable after swap trailer) */
     ramvt      (wx) : org = 0x00000000, len = 0                         /* initial RAM address is reserved for a copy of the vector table */
     ram0       (wx) : org = 0x20020000, len = 384k                      /* SRAM1 + SRAM2 */
