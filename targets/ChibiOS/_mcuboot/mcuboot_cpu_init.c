@@ -13,7 +13,8 @@
 void __cpu_init(void)
 {
 #if CORTEX_MODEL == 7
-    // D-cache deliberately not enabled for MCUboot
+    // D-cache deliberately not enabled for MCUboot, but it must still be invalidated:
+    SCB_InvalidateDCache();
     SCB_EnableICache();
 #endif
 }
