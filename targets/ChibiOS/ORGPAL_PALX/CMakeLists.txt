@@ -31,7 +31,6 @@ nf_setup_target_build(
 )
 
 # if HEX2DFU tool is available pack the binaries into a DFU package
-# not applicable for MCUboot targets (no nanoBooter)
 if(HEX2DFU_TOOL_AVAILABLE AND NOT NF_FEATURE_HAS_MCUBOOT)
 
     ####################################################################################################

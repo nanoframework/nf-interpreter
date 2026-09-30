@@ -50,3 +50,22 @@ nf_setup_mcuboot_target_build(
         $<$<CONFIG:Debug>:-Og -g3>
         $<$<CONFIG:RelWithDebInfo>:-Os -g>
 )
+
+# if HEX2DFU tool is available pack nanoMcubooter into a DFU package
+if(HEX2DFU_TOOL_AVAILABLE)
+
+    # bootloader address comes from the MCUboot flash layout
+    nf_extract_define_from_header(
+        ${CMAKE_SOURCE_DIR}/targets/ChibiOS/ORGPAL_PALTHREE/MCUboot/mcuboot_flash_layout.h
+        NF_MCUBOOT_SLOT_BOOTLOADER_OFF
+        MCUBOOT_BOOTLOADER_ADDRESS)
+    string(REGEX REPLACE "^0[xX]" "" MCUBOOT_BOOTLOADER_ADDRESS "${MCUBOOT_BOOTLOADER_ADDRESS}")
+
+    nf_generate_single_dfu_package(
+        ${NANOMCUBOOTER_PROJECT_NAME}.elf
+        ${CMAKE_BINARY_DIR}/${NANOMCUBOOTER_PROJECT_NAME}.bin
+        ${MCUBOOT_BOOTLOADER_ADDRESS}
+        ${CMAKE_BINARY_DIR}/${NANOMCUBOOTER_PROJECT_NAME}.dfu
+    )
+
+endif()

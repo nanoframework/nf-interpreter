@@ -290,6 +290,26 @@ function(nf_generate_dfu_package file1 address1 file2 address2 outputfilename)
 
 endfunction()
 
+# generates a DFU package with a single binary image
+# (used for the MCUboot bootloader, which is packaged on its own)
+function(nf_generate_single_dfu_package target file address outputfilename)
+
+    add_custom_command(
+
+        TARGET ${target} POST_BUILD
+
+        COMMAND ${TOOL_HEX2DFU_PREFIX}/hex2dfu
+
+        -b="${file}" -a="${address}"
+        -o="${outputfilename}"
+
+        WORKING_DIRECTORY ${TOOL_HEX2DFU_PREFIX}
+
+        COMMENT "exporting bin file to DFU image"
+    )
+
+endfunction()
+
 function(nf_generate_hex_package file1 file2 outputfilename)
 
     add_custom_command(
