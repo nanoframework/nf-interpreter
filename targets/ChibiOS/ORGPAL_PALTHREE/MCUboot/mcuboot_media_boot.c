@@ -6,7 +6,7 @@
 // MCUboot update media for ORGPAL_PALTHREE (STM32F769ZI).
 //
 // Lists the storage volumes the bootloader sweeps for update files
-// (nano-clr-update-*.bin, nano-deployment-update-*.bin) before boot_go() — see
+// (nanoCLR-*.bin, nanoDeployment-*.bin) before boot_go() — see
 // MCUboot/common/mcuboot_media_import.c — and brings the block devices up/down around the
 // sweep. They are the same SD card / USB stick the application uses as regular storage;
 // nanoCLR re-initialises them after hand-off as it always did.

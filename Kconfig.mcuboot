@@ -200,8 +200,8 @@ config NF_FEATURE_MCUBOOT_HAS_SDCARD
         bootloader build. The SD card stays the regular storage volume the
         application sees through the file system; at boot, before deciding
         what to run, MCUboot mounts it and looks in its root directory for
-        update files: nano-clr-update-*.bin (image 0) and
-        nano-deployment-update-*.bin (image 1). The newest valid one per image
+        update files: nanoCLR-*.bin (image 0) and
+        nanoDeployment-*.bin (image 1). The newest valid one per image
         is copied into the secondary slot, marked pending for a test swap and
         tagged as consumed by this device in a sidecar file (<file>.used), so
         the same card can update other devices. The target's existing ffconf.h

@@ -6,7 +6,7 @@
 // MCUboot update media for ST_STM32F769I_DISCOVERY (STM32F769NI).
 //
 // Lists the storage volumes the bootloader sweeps for update files
-// (nano-clr-update-*.bin, nano-deployment-update-*.bin) before boot_go() — see
+// (nanoCLR-*.bin, nanoDeployment-*.bin) before boot_go() — see
 // MCUboot/common/mcuboot_media_import.c: the SD card on SDMMC1 (SDCD1), FatFs volume
 // "D:", the same volume the application uses as regular storage. Compiled only when
 // NF_FEATURE_MCUBOOT_HAS_SDCARD is enabled.

@@ -12,7 +12,7 @@
 // mount each medium in mcuboot_media_table() order and, per image index, run:
 //
 //   1. enumerate the medium's root directory for files matching the image's pattern
-//      (nano-clr-update-*.bin / nano-deployment-update-*.bin); among those whose header
+//      (nanoCLR-*.bin / nanoDeployment-*.bin); among those whose header
 //      is sane and that fit the usable slot size, keep the one with the highest version
 //   2. skip if this device already consumed that exact file (stamp in its "used" marker)
 //   3. skip if a swap/revert is already in flight for this image (secondary slot busy)
@@ -62,10 +62,10 @@ extern "C"
 // files match, the one carrying the highest image version is imported.
 // Override per target from mcuboot_config.h if needed.
 #ifndef MCUBOOT_IMPORT_IMG0_PATTERN
-#define MCUBOOT_IMPORT_IMG0_PATTERN "nano-clr-update-*.bin"
+#define MCUBOOT_IMPORT_IMG0_PATTERN "nanoCLR-*.bin"
 #endif
 #ifndef MCUBOOT_IMPORT_IMG1_PATTERN
-#define MCUBOOT_IMPORT_IMG1_PATTERN "nano-deployment-update-*.bin"
+#define MCUBOOT_IMPORT_IMG1_PATTERN "nanoDeployment-*.bin"
 #endif
 
 // Suffix appended to the update file name for the per-device "used" marker.

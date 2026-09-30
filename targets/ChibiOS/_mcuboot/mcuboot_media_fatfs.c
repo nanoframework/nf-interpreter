@@ -7,8 +7,8 @@
 //
 // The medium is an ordinary FatFs volume (the same SD card / USB stick the application
 // uses through the file system). Update files are looked up in its root directory:
-//   <volume>/nano-clr-update-*.bin              image 0 (nanoCLR)
-//   <volume>/nano-deployment-update-*.bin       image 1 (deployment)
+//   <volume>/nanoCLR-*.bin                      image 0 (nanoCLR)
+//   <volume>/nanoDeployment-*.bin               image 1 (deployment)
 //   <volume>/<update file><MCUBOOT_IMPORT_USED_SUFFIX>  "used" marker: one stamp per line
 // (patterns from mcuboot_media_import.h; FatFs FF_USE_FIND provides the wildcard match).
 //

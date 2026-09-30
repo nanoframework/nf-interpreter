@@ -67,7 +67,7 @@ Both are enabled for this board (`CONFIG_NF_FEATURE_MCUBOOT_HAS_SDCARD`, `CONFIG
 | Item | Value |
 |---|---|
 | Sweep order | USB MSD (OTG_HS, `USBHD2`, FatFs `E:`) first, then SD card (SDMMC1, `SDCD1`, FatFs `D:`) — first medium with a file for an image wins |
-| Files (root of the volume) | `nano-clr-update-*.bin` → image 0, `nano-deployment-update-*.bin` → image 1 (e.g. `nano-clr-update-1.2.3.bin`); two separate signed files (`imgtool sign --header-size 0x400 --pad-header --slot-size <usable>`), no bundle. Several matches → the highest image version wins |
+| Files (root of the volume) | `nanoCLR-*.bin` → image 0, `nanoDeployment-*.bin` → image 1 (e.g. `nanoCLR-1.2.3.bin`); two separate signed files (`imgtool sign --header-size 0x400 --pad-header --slot-size <usable>`), no bundle. Several matches → the highest image version wins |
 | Placement | one logical sector in (`+0x40000`) as `MCUBOOT_SWAP_USING_OFFSET` requires; max file size = usable image size (1024 kB / 256 kB) |
 | After import | slot marked pending (**test** swap; the CLR confirms), file kept, `<file>.used` gets a line `<STM32 UID hex> <version> <size>` |
 | Skipped when | `.used` already lists this device for that version/size · a swap/revert is in flight for the image · the primary already runs that exact version (then tagged) · header/size invalid (left untouched) |
