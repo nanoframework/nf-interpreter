@@ -293,7 +293,8 @@ foreach ($leafName in ($spec.leaves.Keys | Sort-Object))
     $leafPath = Join-Path $versionsDir (Join-Path $leafName 'version.json')
     $current = if (Test-Path $leafPath) { Get-Content $leafPath -Raw } else { $null }
 
-    if ($current -ne $content)
+    # case sensitive: a casing only change in a path must rewrite the file
+    if ($current -cne $content)
     {
         $stale += $leafName
 

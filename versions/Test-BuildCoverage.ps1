@@ -135,12 +135,13 @@ function ConvertTo-RepoPath([string]$path)
     $fullPath = if ([System.IO.Path]::IsPathRooted($path)) { $path } else { Join-Path $buildRoot $path }
     $fullPath = [System.IO.Path]::GetFullPath($fullPath)
 
-    if ($fullPath.StartsWith($buildRoot, 'OrdinalIgnoreCase') -or -not $fullPath.StartsWith($repoRoot, 'OrdinalIgnoreCase'))
+    # compare with a trailing separator, so siblings like 'build-tools' aren't taken as descendants of 'build'
+    if ($fullPath.StartsWith($buildRootPrefix, 'OrdinalIgnoreCase') -or -not $fullPath.StartsWith($repoRootPrefix, 'OrdinalIgnoreCase'))
     {
         return $null
     }
 
-    $repoPath = $fullPath.Substring($repoRoot.Length).Replace('\', '/')
+    $repoPath = $fullPath.Substring($repoRootPrefix.Length - 1).Replace('\', '/')
 
     # generated or ignored files (e.g. ESP32 sdkconfig) can't be covered by path filters
     if (-not $trackedFiles.Contains($repoPath))
@@ -151,8 +152,18 @@ function ConvertTo-RepoPath([string]$path)
     return $repoPath
 }
 
+$repoRootPrefix = $repoRoot.TrimEnd('\', '/') + [System.IO.Path]::DirectorySeparatorChar
+$buildRootPrefix = $buildRoot.TrimEnd('\', '/') + [System.IO.Path]::DirectorySeparatorChar
+
 $trackedFiles = [System.Collections.Generic.HashSet[string]]::new([System.StringComparer]::OrdinalIgnoreCase)
-git -C $repoRoot ls-files --cached | ForEach-Object { $trackedFiles.Add('/' + $_) | Out-Null }
+$gitFiles = git -C $repoRoot ls-files --cached
+
+if ($LASTEXITCODE -ne 0)
+{
+    throw 'git failed to list the tracked files'
+}
+
+$gitFiles | ForEach-Object { $trackedFiles.Add('/' + $_) | Out-Null }
 
 $elfTarget = "$Component.elf"
 
@@ -167,20 +178,27 @@ if ($LASTEXITCODE -ne 0)
 $objects = [System.Collections.Generic.HashSet[string]]::new([System.StringComparer]::OrdinalIgnoreCase)
 $compileInputs = [System.Collections.Generic.HashSet[string]]::new([System.StringComparer]::OrdinalIgnoreCase)
 
-foreach ($input in $targetInputs)
+foreach ($item in $targetInputs)
 {
     # objects of other executables show up through order-only dependencies (C++ module scanning), skip them
-    if ($input -match '\.(obj|o)$' -and
-        ($input -notmatch 'CMakeFiles/([^/]+)\.elf\.dir/' -or $Matches[1] -eq $Component))
+    if ($item -match '\.(obj|o)$' -and
+        ($item -notmatch 'CMakeFiles/([^/]+)\.elf\.dir/' -or $Matches[1] -eq $Component))
     {
-        $objects.Add($input) | Out-Null
+        $objects.Add($item) | Out-Null
     }
 }
 
 # sources and headers come from the deps log: '<object>: #deps N, ...' followed by indented dependency lines
+$depsLog = ninja -C $buildRoot -t deps
+
+if ($LASTEXITCODE -ne 0)
+{
+    throw 'ninja failed to read the deps log'
+}
+
 $inObject = $false
 
-foreach ($line in (ninja -C $buildRoot -t deps))
+foreach ($line in $depsLog)
 {
     if ($line.Length -eq 0)
     {
@@ -205,9 +223,16 @@ if ($objects.Count -eq 0)
 
 # inputs of the CMake regeneration rule, i.e. every file read while configuring
 $configureInputs = [System.Collections.Generic.HashSet[string]]::new([System.StringComparer]::OrdinalIgnoreCase)
+$regenerateQuery = ninja -C $buildRoot -t query build.ninja
+
+if ($LASTEXITCODE -ne 0)
+{
+    throw 'ninja failed to query the CMake configure inputs'
+}
+
 $inInputs = $false
 
-foreach ($line in (ninja -C $buildRoot -t query build.ninja))
+foreach ($line in $regenerateQuery)
 {
     if ($line -match '^\s+input:')
     {
@@ -226,9 +251,9 @@ foreach ($line in (ninja -C $buildRoot -t query build.ninja))
 $usedPaths = [System.Collections.Generic.HashSet[string]]::new([System.StringComparer]::OrdinalIgnoreCase)
 $uncovered = [System.Collections.Generic.SortedSet[string]]::new([System.StringComparer]::OrdinalIgnoreCase)
 
-foreach ($input in $compileInputs)
+foreach ($item in $compileInputs)
 {
-    $repoPath = ConvertTo-RepoPath $input
+    $repoPath = ConvertTo-RepoPath $item
 
     if ($repoPath)
     {
@@ -244,9 +269,9 @@ foreach ($input in $compileInputs)
 $uncoveredConfigure = [System.Collections.Generic.SortedSet[string]]::new([System.StringComparer]::OrdinalIgnoreCase)
 $configurePaths = [System.Collections.Generic.HashSet[string]]::new([System.StringComparer]::OrdinalIgnoreCase)
 
-foreach ($input in $configureInputs)
+foreach ($item in $configureInputs)
 {
-    $repoPath = ConvertTo-RepoPath $input
+    $repoPath = ConvertTo-RepoPath $item
 
     if ($repoPath)
     {
