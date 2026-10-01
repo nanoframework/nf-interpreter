@@ -107,8 +107,19 @@ void flash_area_close(const struct flash_area *area)
     (void)area;
 }
 
+// Checks that [off, off + len) lies within the flash area (overflow-safe).
+static bool flash_area_range_is_valid(const struct flash_area *area, uint32_t off, uint32_t len)
+{
+    return off <= area->fa_size && len <= area->fa_size - off;
+}
+
 int flash_area_read(const struct flash_area *area, uint32_t off, void *dst, uint32_t len)
 {
+    if (!flash_area_range_is_valid(area, off, len))
+    {
+        return -1;
+    }
+
     if (area->fa_device_id == FLASH_DEVICE_INTERNAL_FLASH)
     {
         memcpy(dst, (const void *)(uintptr_t)(area->fa_off + off), len);
@@ -124,6 +135,11 @@ int flash_area_read(const struct flash_area *area, uint32_t off, void *dst, uint
 
 int flash_area_write(const struct flash_area *area, uint32_t off, const void *src, uint32_t len)
 {
+    if (!flash_area_range_is_valid(area, off, len))
+    {
+        return -1;
+    }
+
     if (area->fa_device_id == FLASH_DEVICE_INTERNAL_FLASH)
     {
         // stm32FlashWrite() returns true (non-zero) on success; MCUboot expects 0 on success.
@@ -139,6 +155,11 @@ int flash_area_write(const struct flash_area *area, uint32_t off, const void *sr
 
 int flash_area_erase(const struct flash_area *area, uint32_t off, uint32_t len)
 {
+    if (!flash_area_range_is_valid(area, off, len))
+    {
+        return -1;
+    }
+
     if (area->fa_device_id == FLASH_DEVICE_INTERNAL_FLASH)
     {
         uint32_t erase_addr = area->fa_off + off;
