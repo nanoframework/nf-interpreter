@@ -321,14 +321,14 @@ jobs:
 
     variables:
       DOTNET_NOLOGO: true
-      # creates a counter and assigns it to the revision variable
-      REVISION: $[counter('STM32_2_0_0_versioncounter', 0)]
       HelperPackageVersion: $[counter('HelperPackageVersioncounter', 0)]
       TargetPlatform: "stm32"
 
     steps:
       - template: azure-pipelines-templates/build-preparations.yml
       - template: azure-pipelines-templates/nb-gitversioning.yml
+        parameters:
+          versionLeaf: ChibiOS
       - template: azure-pipelines-templates/download-install-arm-gcc-toolchain.yml
       - template: azure-pipelines-templates/download-srecord.yml
       - template: azure-pipelines-templates/download-hexdfu.yml
@@ -337,6 +337,9 @@ jobs:
         parameters:
           targetPreset: $(CMakePreset)
       - template: azure-pipelines-templates/build-chibios-stm32-targets.yml
+      - template: azure-pipelines-templates/check-version-coverage.yml
+        parameters:
+          versionLeaf: ChibiOS
       - template: azure-pipelines-templates/pack-publish-artifacts.yml
       - template: azure-pipelines-templates/publish-cloudsmith.yml
       - template: azure-pipelines-templates/pack-publish-managed-helpers.yml
@@ -597,8 +600,6 @@ jobs:
 
     variables:
       DOTNET_NOLOGO: true
-      # creates a counter and assigns it to the revision variable
-      REVISION: $[counter('ESP32_2_0_0_versioncounter', 0)]
       IDF_PATH: "$(Agent.BuildDirectory)/s/esp-idf"
       PIP_CACHE_DIR: $(Pipeline.Workspace)/.pip
       TargetPlatform: "esp32"
@@ -616,12 +617,17 @@ jobs:
           repoDirectory: '$(Agent.BuildDirectory)/s/nf-interpreter'
       - template: azure-pipelines-templates/nb-gitversioning.yml
         parameters:
+          versionLeaf: ESP32
           repoDirectory: '$(Agent.BuildDirectory)/s/nf-interpreter'
       - template: azure-pipelines-templates/download-install-esp32-build-components.yml
       - template: azure-pipelines-templates/build-espressif-esp32-targets.yml
         parameters:
           repoDirectory: '$(Agent.BuildDirectory)/s/nf-interpreter'
           partitionsDirectory: '$(Agent.BuildDirectory)/s/nf-interpreter/targets/ESP32/_IDF/$(IDF_Target)'
+      - template: azure-pipelines-templates/check-version-coverage.yml
+        parameters:
+          versionLeaf: ESP32
+          repoDirectory: '$(Agent.BuildDirectory)/s/nf-interpreter'
       - task: CopyFiles@2
         condition: succeeded()
         displayName: Copying bootloader
@@ -677,20 +683,23 @@ jobs:
 
     variables:
       DOTNET_NOLOGO: true
-      # creates a counter and assigns it to the revision variable
-      REVISION: $[counter('TI_2_0_0_versioncounter', 0)]
       HelperPackageVersion: $[counter('HelperPackageVersioncounter', 0)]
       TargetPlatform: "ti_simplelink"
 
     steps:
       - template: azure-pipelines-templates/build-preparations.yml
       - template: azure-pipelines-templates/nb-gitversioning.yml
+        parameters:
+          versionLeaf: TI_SimpleLink
       - template: azure-pipelines-templates/download-install-arm-gcc-toolchain.yml
       - template: azure-pipelines-templates/install-kconfig-tools.yml
       - template: azure-pipelines-templates/validate-kconfig.yml
         parameters:
           targetPreset: $(CMakePreset)
       - template: azure-pipelines-templates/build-ti-simplelink-targets.yml
+      - template: azure-pipelines-templates/check-version-coverage.yml
+        parameters:
+          versionLeaf: TI_SimpleLink
       - template: azure-pipelines-templates/pack-publish-artifacts.yml
       - template: azure-pipelines-templates/publish-cloudsmith.yml
       - template: azure-pipelines-templates/pack-publish-ti-sl-managed-helpers.yml
@@ -722,6 +731,7 @@ jobs:
       matrix:
         SL_STK3701A_REVB:
           TargetBoard: SL_STK3701A_REVB
+          VersionLeaf: ThreadX-SiliconLabs
           TargetSeries: "gg11"
           BuildOptions:
           NeedsDFU: false
@@ -731,14 +741,14 @@ jobs:
           CMakePreset: SL_STK3701A_REVB
 
     variables:
-      # creates a counter and assigns it to the revision variable
-      REVISION: $[counter('THREADX_2_0_0_versioncounter', 0)]
       HelperPackageVersion: $[counter('HelperPackageVersioncounter', 0)]
       TargetPlatform: "efm32"
 
     steps:
       - template: azure-pipelines-templates/build-preparations.yml
       - template: azure-pipelines-templates/nb-gitversioning.yml
+        parameters:
+          versionLeaf: $(VersionLeaf)
       - template: azure-pipelines-templates/download-install-arm-gcc-toolchain.yml
       - template: azure-pipelines-templates/download-hexdfu.yml
       - template: azure-pipelines-templates/download-srecord.yml
@@ -747,6 +757,9 @@ jobs:
         parameters:
           targetPreset: $(CMakePreset)
       - template: azure-pipelines-templates/build-threadx-targets.yml
+      - template: azure-pipelines-templates/check-version-coverage.yml
+        parameters:
+          versionLeaf: $(VersionLeaf)
       - template: azure-pipelines-templates/pack-publish-artifacts.yml
       - template: azure-pipelines-templates/publish-cloudsmith.yml
       - template: azure-pipelines-templates/pack-publish-managed-helpers.yml

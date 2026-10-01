@@ -25,7 +25,7 @@ steps:
 
   - task: CMake@1
     inputs:
-      cmakeArgs: " --preset $(TargetBoard) -DCMAKE_BUILD_TYPE=MinSizeRel -DBUILD_VERSION=$(NBGV_VersionMajor).$(NBGV_VersionMinor).$(NBGV_BuildNumber).$(TARGET_BUILD_COUNTER) -DTARGET_BOARD=$(TargetBoard) -DTARGET_NAME=$(TargetPublishName) $(BuildOptions) -DTI_XDCTOOLS_SOURCE=/usr/local/bin/titools"
+      cmakeArgs: " --preset $(TargetBoard) -DCMAKE_BUILD_TYPE=MinSizeRel -DBUILD_VERSION=$(FIRMWARE_VERSION) -DNANOCLR_VERSION=$(NANOCLR_VERSION) -DNANOBOOTER_VERSION=$(NANOBOOTER_VERSION) -DTARGET_BOARD=$(TargetBoard) -DTARGET_NAME=$(TargetPublishName) $(BuildOptions) -DTI_XDCTOOLS_SOURCE=/usr/local/bin/titools"
       workingDirectory: ${{ parameters.repoDirectory }}
     displayName: Setup build with CMake
 

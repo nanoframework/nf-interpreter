@@ -1,0 +1,47 @@
+# Copyright (c) .NET Foundation and Contributors
+# See LICENSE file in the project root for full license information.
+
+parameters:
+  - name: repoDirectory
+    type: string
+    default: $(Build.SourcesDirectory)
+  - name: versionLeaf
+    type: string
+
+steps:
+  - task: PowerShell@2
+    displayName: Check version path filters coverage
+    condition: succeeded()
+    inputs:
+      targetType: "inline"
+      pwsh: true
+      workingDirectory: ${{ parameters.repoDirectory }}
+      script: |
+        $leaf = "${{ parameters.versionLeaf }}"
+        $warnOnly = [string]::IsNullOrEmpty($env:SYSTEM_PULLREQUEST_PULLREQUESTID)
+        $failed = $false
+
+        foreach ($component in 'nanoBooter', 'nanoCLR')
+        {
+            # platforms without nanoBooter don't build it and don't have a leaf for it
+            if (-not (Test-Path "build/$component.elf") -or -not (Test-Path "versions/$component/$leaf/version.json"))
+            {
+                Write-Host "Skipping $component, not built for this target or no versions/$component/$leaf."
+                continue
+            }
+
+            & ./versions/Test-BuildCoverage.ps1 -BuildDir build -Component $component -Platform $leaf -WarnOnly:$warnOnly
+
+            if ($LASTEXITCODE -ne 0)
+            {
+                $failed = $true
+            }
+        }
+
+        if ($failed)
+        {
+            Write-Host "##vso[task.logissue type=error]Files compiled into the firmware aren't covered by the version path filters. See versions/README.md."
+            exit 1
+        }
+      errorActionPreference: "stop"
+      failOnStderr: false

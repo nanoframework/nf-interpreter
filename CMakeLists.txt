@@ -113,9 +113,42 @@ project(nanoFramework VERSION ${BUILD_VERSION} LANGUAGES C CXX ASM)
 set(NANOBOOTER_PROJECT_NAME "nanoBooter")
 set(NANOCLR_PROJECT_NAME "nanoCLR")
 
+# each image has its own version (major.minor.build[.revision]), computed by nbgv from versions/<image>/<platform>
+# when not set, they default to BUILD_VERSION
+foreach(image NANOBOOTER NANOCLR)
+
+    if(NOT ${image}_VERSION)
+        set(${image}_VERSION ${BUILD_VERSION})
+    endif()
+
+    if(NOT ${image}_VERSION MATCHES "^([0-9]+)\\.([0-9]+)\\.([0-9]+)(\\.([0-9]+))?$")
+        message(FATAL_ERROR "\n\n${image}_VERSION '${${image}_VERSION}' is invalid. Expected format is major.minor.build[.revision].\n\n")
+    endif()
+
+    set(${image}_VERSION_MAJOR ${CMAKE_MATCH_1})
+    set(${image}_VERSION_MINOR ${CMAKE_MATCH_2})
+    set(${image}_VERSION_BUILD ${CMAKE_MATCH_3})
+
+    if(CMAKE_MATCH_5)
+        set(${image}_VERSION_REVISION ${CMAKE_MATCH_5})
+    else()
+        set(${image}_VERSION_REVISION 0)
+    endif()
+
+    # these are stored in unsigned short fields of VersionInfo
+    foreach(part MAJOR MINOR BUILD REVISION)
+        if(${image}_VERSION_${part} GREATER 65535)
+            message(FATAL_ERROR "\n\n${image}_VERSION '${${image}_VERSION}' is invalid. Each component must fit in 16 bits.\n\n")
+        endif()
+    endforeach()
+
+endforeach()
+
 #######################
 message(STATUS "")
 message(STATUS "Building nanoFramework version ${PROJECT_VERSION} using build type '${CMAKE_BUILD_TYPE}'.")
+message(STATUS "nanoBooter version ${NANOBOOTER_VERSION_MAJOR}.${NANOBOOTER_VERSION_MINOR}.${NANOBOOTER_VERSION_BUILD}.${NANOBOOTER_VERSION_REVISION}")
+message(STATUS "nanoCLR version ${NANOCLR_VERSION_MAJOR}.${NANOCLR_VERSION_MINOR}.${NANOCLR_VERSION_BUILD}.${NANOCLR_VERSION_REVISION}")
 message(STATUS "Source directory is '${CMAKE_SOURCE_DIR}'.")
 message(STATUS "Build  directory is '${CMAKE_BINARY_DIR}'.")
 message(STATUS "")

@@ -21,7 +21,7 @@ steps:
       rootFolderOrFile: '$(Build.ArtifactStagingDirectory)/$(TargetPublishName)'
       includeRootFolder: false
       archiveType: "zip"
-      archiveFile: '$(Agent.TempDirectory)/$(TargetPublishName)-$(NBGV_SimpleVersion).$(TARGET_BUILD_COUNTER).zip'
+      archiveFile: '$(Agent.TempDirectory)/$(TargetPublishName)-$(FIRMWARE_PACKAGE_VERSION).zip'
       replaceExistingArchive: true
 
   - task: CopyFiles@2
@@ -39,7 +39,7 @@ steps:
     inputs:
       sourceFolder: $(Agent.TempDirectory)
       Contents: |
-        $(TargetPublishName)-$(NBGV_SimpleVersion).$(TARGET_BUILD_COUNTER).zip
+        $(TargetPublishName)-$(FIRMWARE_PACKAGE_VERSION).zip
       TargetFolder: '$(Build.ArtifactStagingDirectory)/$(TargetPublishName)'
       flattenFolders: true
       ignoreMakeDirErrors: true
@@ -59,7 +59,7 @@ steps:
       rootFolderOrFile: '$(Build.ArtifactStagingDirectory)/$(TargetPublishName)'
       includeRootFolder: false
       archiveType: "zip"
-      archiveFile: '$(Agent.TempDirectory)/$(TargetPublishName)-$(NBGV_SimpleVersion)-preview.$(TARGET_BUILD_COUNTER).zip'
+      archiveFile: '$(Agent.TempDirectory)/$(TargetPublishName)-$(FIRMWARE_PREVIEW_PACKAGE_VERSION).zip'
       replaceExistingArchive: true
 
   - task: CopyFiles@2
@@ -76,7 +76,7 @@ steps:
     inputs:
       sourceFolder: $(Agent.TempDirectory)
       Contents: |
-        $(TargetPublishName)-$(NBGV_SimpleVersion)-preview.$(TARGET_BUILD_COUNTER).zip
+        $(TargetPublishName)-$(FIRMWARE_PREVIEW_PACKAGE_VERSION).zip
       TargetFolder: '$(Build.ArtifactStagingDirectory)/$(TargetPublishName)'
       flattenFolders: true
       ignoreMakeDirErrors: true
@@ -116,9 +116,9 @@ steps:
           # this is a build for a community target
           $cloudsmithRepo = "nanoframework-images-community-targets"
           # set publishing package name
-          $publishingPackageName = "$env:TARGETPUBLISHNAME-$env:NBGV_SIMPLEVERSION.$env:TARGET_BUILD_COUNTER"
+          $publishingPackageName = "$env:TARGETPUBLISHNAME-$env:FIRMWARE_PACKAGE_VERSION"
           # set version
-          $packageVersion = "$env:NBGV_SIMPLEVERSION.$env:TARGET_BUILD_COUNTER"
+          $packageVersion = "$env:FIRMWARE_PACKAGE_VERSION"
         }
         else
         {
@@ -129,18 +129,18 @@ steps:
             # this a dev, release branch or force upload, publish to Cloudsmith dev repo
             $cloudsmithRepo = "nanoframework-images-dev"
             # set publishing package name
-            $publishingPackageName = "$env:TARGETPUBLISHNAME-$env:NBGV_SIMPLEVERSION-preview.$env:TARGET_BUILD_COUNTER"
+            $publishingPackageName = "$env:TARGETPUBLISHNAME-$env:FIRMWARE_PREVIEW_PACKAGE_VERSION"
             # set version
-            $packageVersion = "$env:NBGV_SIMPLEVERSION-preview.$env:TARGET_BUILD_COUNTER"
+            $packageVersion = "$env:FIRMWARE_PREVIEW_PACKAGE_VERSION"
           }
           else
           {
             # this main branch, publish to Cloudsmith stable repo
             $cloudsmithRepo = "nanoframework-images"
             # set publishing package name
-            $publishingPackageName = "$env:TARGETPUBLISHNAME-$env:NBGV_SIMPLEVERSION.$env:TARGET_BUILD_COUNTER"
+            $publishingPackageName = "$env:TARGETPUBLISHNAME-$env:FIRMWARE_PACKAGE_VERSION"
             # set version
-            $packageVersion = "$env:NBGV_SIMPLEVERSION.$env:TARGET_BUILD_COUNTER"
+            $packageVersion = "$env:FIRMWARE_PACKAGE_VERSION"
           }
         }
 
