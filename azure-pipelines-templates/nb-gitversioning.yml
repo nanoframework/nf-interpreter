@@ -1,42 +1,147 @@
 # Copyright (c) .NET Foundation and Contributors
 # See LICENSE file in the project root for full license information.
 
+# Sets the version variables for a build.
+#
+# When 'versionLeaf' is set (e.g. ChibiOS, ESP32, ThreadX-ST) each image gets its own version, computed by nbgv
+# from the path filters in versions/<image>/<versionLeaf>/version.json (see versions/pathfilters.json):
+#   FIRMWARE_VERSION    version of the firmware package (both images), also exposed as NBGV_* variables
+#   NANOCLR_VERSION     version of the nanoCLR image
+#   NANOBOOTER_VERSION  version of the nanoBooter image (same as nanoCLR if the platform doesn't have one)
+# All of them are major.minor.patch.height (major.minor.patch from versions/<image>/version.json), where height only
+# increases with commits that touch that image sources.
+# Package versions keep the existing formats: major.minor.patch.height (stable) and major.minor.patch-preview.height.
+#
+# When 'versionLeaf' is empty the legacy versioning is used: the root version.json plus the job 'REVISION' counter.
+#
+# In both cases the following variables are set, for use in the build and publish templates:
+#   FIRMWARE_VERSION, NANOCLR_VERSION, NANOBOOTER_VERSION, FIRMWARE_PACKAGE_VERSION, FIRMWARE_PREVIEW_PACKAGE_VERSION
+
 parameters:
   - name: repoDirectory
     type: string
     default: $(Build.SourcesDirectory)
+  - name: versionLeaf
+    type: string
+    default: ''
 
 steps:
-  - script: nbgv cloud -a -c -v $(Build.BuildNumber)
-    displayName: Set build number
-    condition: succeeded()
-    workingDirectory: ${{ parameters.repoDirectory }}
+  - ${{ if eq(parameters.versionLeaf, '') }}:
+    - script: nbgv cloud -a -c -v $(Build.BuildNumber)
+      displayName: Set build number
+      condition: succeeded()
+      workingDirectory: ${{ parameters.repoDirectory }}
 
-  # Force version number for PRs
-  - task: PowerShell@2
-    condition: ne(variables['system.pullrequest.pullRequestId'], '')
-    displayName: Set temporary build number
-    inputs:
-      targetType: "inline"
-      script: |
-        Write-Host "$("##vso[task.setvariable variable=NBGV_Version]")0.0.0"
-        Write-Host "$("##vso[task.setvariable variable=NBGV_VersionMajor]")0"
-        Write-Host "$("##vso[task.setvariable variable=NBGV_VersionMinor]")$env:SYSTEM_PULLREQUEST_PULLREQUESTNUMBER"
-        Write-Host "$("##vso[task.setvariable variable=NBGV_AssemblyInformationalVersion]")00000000000"
-        Write-Host "$("##vso[task.setvariable variable=NBGV_NuGetPackageVersion]")0.0.$env:SYSTEM_PULLREQUEST_PULLREQUESTNUMBER-alpha.$env:NBGV_BUILDNUMBER"
+    # Force version number for PRs
+    - task: PowerShell@2
+      condition: ne(variables['system.pullrequest.pullRequestId'], '')
+      displayName: Set temporary build number
+      inputs:
+        targetType: "inline"
+        script: |
+          Write-Host "$("##vso[task.setvariable variable=NBGV_Version]")0.0.0"
+          Write-Host "$("##vso[task.setvariable variable=NBGV_VersionMajor]")0"
+          Write-Host "$("##vso[task.setvariable variable=NBGV_VersionMinor]")$env:SYSTEM_PULLREQUEST_PULLREQUESTNUMBER"
+          Write-Host "$("##vso[task.setvariable variable=NBGV_AssemblyInformationalVersion]")00000000000"
+          Write-Host "$("##vso[task.setvariable variable=NBGV_NuGetPackageVersion]")0.0.$env:SYSTEM_PULLREQUEST_PULLREQUESTNUMBER-alpha.$env:NBGV_BUILDNUMBER"
 
-  - task: PowerShell@2
-    displayName: Get target build counter
-    inputs:
-      targetType: "inline"
-      script: |
-        $counter = $env:REVISION
-        $version = ([int]$counter).ToString()
+    - task: PowerShell@2
+      displayName: Get target build counter
+      inputs:
+        targetType: "inline"
+        script: |
+          $counter = $env:REVISION
+          $version = ([int]$counter).ToString()
 
-        Write-Host "$("##vso[task.setvariable variable=TARGET_BUILD_COUNTER]")$version"
-        Write-Host "$("##vso[task.setvariable variable=NBGV_NuGetPackageVersion]")$env:NBGV_VERSIONMAJOR.$env:NBGV_VERSIONMINOR.$env:NBGV_BUILDNUMBER.$version"
-        
-        $newBuildNumber = "$env:NBGV_VERSIONMAJOR.$env:NBGV_VERSIONMINOR.$env:NBGV_BUILDNUMBER.$version"
-        
-        Write-Host "$("##vso[build.updatebuildnumber]")$newBuildNumber"
-        Write-Host "*** BUILD NUMBER IS: $newBuildNumber ***"
+          Write-Host "$("##vso[task.setvariable variable=TARGET_BUILD_COUNTER]")$version"
+          Write-Host "$("##vso[task.setvariable variable=NBGV_NuGetPackageVersion]")$env:NBGV_VERSIONMAJOR.$env:NBGV_VERSIONMINOR.$env:NBGV_BUILDNUMBER.$version"
+
+          $newBuildNumber = "$env:NBGV_VERSIONMAJOR.$env:NBGV_VERSIONMINOR.$env:NBGV_BUILDNUMBER.$version"
+
+          # same version for all the images
+          Write-Host "$("##vso[task.setvariable variable=FIRMWARE_VERSION]")$newBuildNumber"
+          Write-Host "$("##vso[task.setvariable variable=NANOCLR_VERSION]")$newBuildNumber"
+          Write-Host "$("##vso[task.setvariable variable=NANOBOOTER_VERSION]")$newBuildNumber"
+          Write-Host "$("##vso[task.setvariable variable=FIRMWARE_PACKAGE_VERSION]")$env:NBGV_SIMPLEVERSION.$version"
+          Write-Host "$("##vso[task.setvariable variable=FIRMWARE_PREVIEW_PACKAGE_VERSION]")$env:NBGV_SIMPLEVERSION-preview.$version"
+
+          Write-Host "$("##vso[build.updatebuildnumber]")$newBuildNumber"
+          Write-Host "*** BUILD NUMBER IS: $newBuildNumber ***"
+
+  - ${{ else }}:
+    # NBGV_* variables are set from the firmware package version
+    - script: nbgv cloud -p versions/firmware/${{ parameters.versionLeaf }} -a -c -v $(Build.BuildNumber)
+      displayName: Set firmware version variables
+      condition: succeeded()
+      workingDirectory: ${{ parameters.repoDirectory }}
+
+    - task: PowerShell@2
+      displayName: Set image versions
+      condition: succeeded()
+      inputs:
+        targetType: "inline"
+        workingDirectory: ${{ parameters.repoDirectory }}
+        script: |
+          $leaf = "${{ parameters.versionLeaf }}"
+          $prNumber = $env:SYSTEM_PULLREQUEST_PULLREQUESTNUMBER
+
+          # returns the nbgv version info of versions/<image>/<leaf>, or $null if there's no such leaf
+          function Get-ImageVersion([string]$image)
+          {
+              $path = "versions/$image/$leaf"
+
+              if (-not (Test-Path "$path/version.json"))
+              {
+                  return $null
+              }
+
+              $nbgv = nbgv get-version -p $path -f json | ConvertFrom-Json
+
+              if ($LASTEXITCODE -ne 0)
+              {
+                  throw "nbgv failed to compute the version of $path"
+              }
+
+              return $nbgv
+          }
+
+          # major.minor.patch.height, or a temporary version for PR builds that can't be confused with a real one
+          function Format-ImageVersion($nbgv)
+          {
+              if (-not [string]::IsNullOrEmpty($prNumber))
+              {
+                  return "0.$prNumber.0.$($nbgv.VersionHeight)"
+              }
+
+              return $nbgv.Version
+          }
+
+          $firmware = Get-ImageVersion 'firmware'
+          $clr = Get-ImageVersion 'nanoCLR'
+          $booter = Get-ImageVersion 'nanoBooter'
+
+          if ($null -eq $firmware -or $null -eq $clr)
+          {
+              throw "Missing versions/firmware/$leaf or versions/nanoCLR/$leaf"
+          }
+
+          $firmwareVersion = Format-ImageVersion $firmware
+          $clrVersion = Format-ImageVersion $clr
+
+          # platform without nanoBooter, the value is required by CMake but it's not used
+          $booterVersion = if ($null -eq $booter) { $clrVersion } else { Format-ImageVersion $booter }
+
+          Write-Host "$("##vso[task.setvariable variable=FIRMWARE_VERSION]")$firmwareVersion"
+          Write-Host "$("##vso[task.setvariable variable=NANOCLR_VERSION]")$clrVersion"
+          Write-Host "$("##vso[task.setvariable variable=NANOBOOTER_VERSION]")$booterVersion"
+
+          Write-Host "$("##vso[task.setvariable variable=FIRMWARE_PACKAGE_VERSION]")$($firmware.SimpleVersion).$($firmware.VersionHeight)"
+          Write-Host "$("##vso[task.setvariable variable=FIRMWARE_PREVIEW_PACKAGE_VERSION]")$($firmware.SimpleVersion)-preview.$($firmware.VersionHeight)"
+
+          Write-Host "$("##vso[task.setvariable variable=NBGV_NuGetPackageVersion]")$firmwareVersion"
+
+          Write-Host "$("##vso[build.updatebuildnumber]")$firmwareVersion"
+
+          Write-Host "*** FIRMWARE VERSION IS: $firmwareVersion ***"
+          Write-Host "*** nanoCLR VERSION IS: $clrVersion ***"
+          Write-Host "*** nanoBooter VERSION IS: $booterVersion ***"

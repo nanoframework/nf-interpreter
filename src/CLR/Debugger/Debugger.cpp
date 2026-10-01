@@ -2538,7 +2538,9 @@ bool CLR_DBG_Debugger::Debugging_Thread_Get(WP_Message *msg)
 
     if (!fFound)
     {
-        pThread = (CLR_RT_HeapBlock *)platform_malloc(sizeof(struct CLR_RT_HeapBlock));
+        CLR_RT_HeapBlock managedThreadRef;
+        managedThreadRef.SetObjectReference(nullptr);
+        CLR_RT_ProtectFromGC gc(managedThreadRef);
 
         // Create the managed thread.
         // This implies that there is no state in the managed object.  This is not exactly true, as the managed thread
@@ -2546,9 +2548,9 @@ bool CLR_DBG_Debugger::Debugging_Thread_Get(WP_Message *msg)
         // placeholder for the data before the thread is started.  Once the thread is started, they are copied over to
         // the unmanaged thread object and no longer used.  The managed object is then used simply as a wrapper for the
         // unmanaged thread.  Therefore, it is safe to simply make another managed thread here.
-        if (SUCCEEDED(g_CLR_RT_ExecutionEngine.NewObjectFromIndex(*pThread, g_CLR_RT_WellKnownTypes.Thread)))
+        if (SUCCEEDED(g_CLR_RT_ExecutionEngine.NewObjectFromIndex(managedThreadRef, g_CLR_RT_WellKnownTypes.Thread)))
         {
-            CLR_RT_HeapBlock *pRes = pThread->Dereference();
+            CLR_RT_HeapBlock *pRes = managedThreadRef.Dereference();
 
             int pri = th->GetThreadPriority();
 
@@ -2565,6 +2567,8 @@ bool CLR_DBG_Debugger::Debugging_Thread_Get(WP_Message *msg)
                     *pRes,
                     pRes[Library_corlib_native_System_Threading_Thread::FIELD___appDomain]);
 #endif
+                // re-read: the allocations above may have let the GC move the object
+                pThread = managedThreadRef.Dereference();
                 fFound = true;
             }
         }
