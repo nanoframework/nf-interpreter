@@ -6,24 +6,7 @@
 #include "target_system_io_ports_config.h"
 #include <sys_io_ser_native_target.h>
 
-///////////
-// UART1 //
-///////////
-
-// pin configuration for UART1
-// port for TX pin is: GPIOA
-// port for RX pin is: GPIOA
-// TX pin: is GPIOA_9
-// RX pin: is GPIOA_10
-// GPIO alternate pin function is 7 (see "Table 12. STM32F427xx and STM32F429xx alternate function mapping" in
-// STM32F427xx and STM32F429xx datasheet)
-UART_CONFIG_PINS(1, GPIOA, GPIOA, 9, 10, 7)
-
-// initialization for UART1
-UART_INIT(1)
-
-// un-initialization for UART1
-UART_UNINIT(1)
+// UART1 (PA9/PA10) is used by Wire Protocol through the ST-LINK Virtual COM port
 
 ///////////
 // UART3 //
