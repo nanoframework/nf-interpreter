@@ -131,14 +131,15 @@ HRESULT Library_nf_runtime_ifu_nanoFramework_Runtime_InFieldUpdate_UpdateManager
 }
 
 HRESULT Library_nf_runtime_ifu_nanoFramework_Runtime_InFieldUpdate_UpdateManager::
-    EraseSecondaryImage___STATIC__BOOLEAN__nanoFrameworkRuntimeInFieldUpdateImageType(CLR_RT_StackFrame &stack)
+    EraseSecondaryImage___STATIC__nanoFrameworkRuntimeInFieldUpdateUpdateSessionResult__nanoFrameworkRuntimeInFieldUpdateImageType(
+        CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
     uint8_t imageIndex = (uint8_t)stack.Arg0().NumericByRef().s4;
 
-    // refused while an update session is open on the image by any writer
-    stack.SetResult_Boolean(Ifu_EraseSecondary(imageIndex) == UpdateSessionResult_Success);
+    // refused (Busy) while an update session is open on the image by any writer
+    stack.SetResult_I4((CLR_INT32)Ifu_EraseSecondary(imageIndex));
 
     NANOCLR_SET_AND_LEAVE(S_OK);
 
@@ -146,7 +147,7 @@ HRESULT Library_nf_runtime_ifu_nanoFramework_Runtime_InFieldUpdate_UpdateManager
 }
 
 HRESULT Library_nf_runtime_ifu_nanoFramework_Runtime_InFieldUpdate_UpdateManager::
-    StartUpdateSession___STATIC__nanoFrameworkRuntimeInFieldUpdateUpdateSession__nanoFrameworkRuntimeInFieldUpdateImageType__I4(
+    StartUpdateSession___STATIC__nanoFrameworkRuntimeInFieldUpdateUpdateSessionResult__nanoFrameworkRuntimeInFieldUpdateImageType__I4__BYREF_nanoFrameworkRuntimeInFieldUpdateUpdateSession(
         CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
@@ -157,7 +158,7 @@ HRESULT Library_nf_runtime_ifu_nanoFramework_Runtime_InFieldUpdate_UpdateManager
 }
 
 HRESULT Library_nf_runtime_ifu_nanoFramework_Runtime_InFieldUpdate_UpdateManager::
-    ResumeUpdateSession___STATIC__nanoFrameworkRuntimeInFieldUpdateUpdateSession__nanoFrameworkRuntimeInFieldUpdateImageType__I4__SZARRAY_U1(
+    ResumeUpdateSession___STATIC__nanoFrameworkRuntimeInFieldUpdateUpdateSessionResult__nanoFrameworkRuntimeInFieldUpdateImageType__I4__SZARRAY_U1__BYREF_nanoFrameworkRuntimeInFieldUpdateUpdateSession(
         CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
@@ -168,7 +169,7 @@ HRESULT Library_nf_runtime_ifu_nanoFramework_Runtime_InFieldUpdate_UpdateManager
 }
 
 HRESULT Library_nf_runtime_ifu_nanoFramework_Runtime_InFieldUpdate_UpdateManager::
-    StoreImageChunk___STATIC__BOOLEAN__nanoFrameworkRuntimeInFieldUpdateUpdateSession__SZARRAY_U1__I4__I4(
+    StoreImageChunk___STATIC__nanoFrameworkRuntimeInFieldUpdateUpdateSessionResult__nanoFrameworkRuntimeInFieldUpdateUpdateSession__SZARRAY_U1__I4__I4(
         CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
@@ -212,7 +213,7 @@ HRESULT Library_nf_runtime_ifu_nanoFramework_Runtime_InFieldUpdate_UpdateManager
         }
     }
 
-    stack.SetResult_Boolean(result == UpdateSessionResult_Success);
+    stack.SetResult_I4((CLR_INT32)result);
 
     NANOCLR_NOCLEANUP();
 }
@@ -248,7 +249,7 @@ HRESULT Library_nf_runtime_ifu_nanoFramework_Runtime_InFieldUpdate_UpdateManager
 }
 
 HRESULT Library_nf_runtime_ifu_nanoFramework_Runtime_InFieldUpdate_UpdateManager::
-    AbortUpdateSession___STATIC__BOOLEAN__nanoFrameworkRuntimeInFieldUpdateUpdateSession__BOOLEAN(
+    AbortUpdateSession___STATIC__nanoFrameworkRuntimeInFieldUpdateUpdateSessionResult__nanoFrameworkRuntimeInFieldUpdateUpdateSession__BOOLEAN(
         CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
@@ -260,7 +261,7 @@ HRESULT Library_nf_runtime_ifu_nanoFramework_Runtime_InFieldUpdate_UpdateManager
 
     NANOCLR_CHECK_HRESULT(Ifu_ReadSessionArg(stack.Arg0(), imageIndex, token, pSession));
 
-    stack.SetResult_Boolean(Ifu_SessionAbort(imageIndex, token, eraseSlot) == UpdateSessionResult_Success);
+    stack.SetResult_I4((CLR_INT32)Ifu_SessionAbort(imageIndex, token, eraseSlot));
 
     NANOCLR_NOCLEANUP();
 }
@@ -274,18 +275,6 @@ HRESULT Library_nf_runtime_ifu_nanoFramework_Runtime_InFieldUpdate_UpdateManager
     uint8_t imageIndex = (uint8_t)stack.Arg0().NumericByRef().s4;
 
     stack.SetResult_I4((CLR_INT32)Ifu_SessionOwner(imageIndex));
-
-    NANOCLR_SET_AND_LEAVE(S_OK);
-
-    NANOCLR_NOCLEANUP();
-}
-
-HRESULT Library_nf_runtime_ifu_nanoFramework_Runtime_InFieldUpdate_UpdateManager::
-    GetLastSessionError___STATIC__nanoFrameworkRuntimeInFieldUpdateUpdateSessionResult(CLR_RT_StackFrame &stack)
-{
-    NANOCLR_HEADER();
-
-    stack.SetResult_I4((CLR_INT32)Ifu_SessionLastStatus());
 
     NANOCLR_SET_AND_LEAVE(S_OK);
 
@@ -526,7 +515,12 @@ HRESULT Library_nf_runtime_ifu_nanoFramework_Runtime_InFieldUpdate_UpdateManager
     Ifu_Session session;
     UpdateSessionResult result;
 
-    CLR_RT_HeapBlock &top = stack.PushValueAndClear();
+    // the out UpdateSession is the last argument: after totalLength (start) or expectedHeader (resume)
+    CLR_RT_HeapBlock &sessionArg = resume ? stack.Arg3() : stack.Arg2();
+
+    CLR_RT_HeapBlock hbSession;
+    hbSession.SetObjectReference(NULL);
+    CLR_RT_ProtectFromGC gc(hbSession);
 
     if (totalLength <= 0)
     {
@@ -569,8 +563,13 @@ HRESULT Library_nf_runtime_ifu_nanoFramework_Runtime_InFieldUpdate_UpdateManager
 
     if (result == UpdateSessionResult_Success)
     {
-        NANOCLR_CHECK_HRESULT(Ifu_PopulateSession(top, session, resume));
+        NANOCLR_CHECK_HRESULT(Ifu_PopulateSession(hbSession, session, resume));
     }
+
+    // always written, so on failure the caller gets null rather than whatever the variable held
+    NANOCLR_CHECK_HRESULT(hbSession.StoreToReference(sessionArg, 0));
+
+    stack.SetResult_I4((CLR_INT32)result);
 
     NANOCLR_NOCLEANUP();
 }

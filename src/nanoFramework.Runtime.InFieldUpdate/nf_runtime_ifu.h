@@ -108,20 +108,20 @@ struct Library_nf_runtime_ifu_nanoFramework_Runtime_InFieldUpdate_UpdateManager
     NANOCLR_NATIVE_DECLARE(
         GetSecondaryImageInfo___STATIC__nanoFrameworkRuntimeInFieldUpdateImageInfo__nanoFrameworkRuntimeInFieldUpdateImageType);
     NANOCLR_NATIVE_DECLARE(GetImageList___STATIC__SZARRAY_nanoFrameworkRuntimeInFieldUpdateImageInfo);
-    NANOCLR_NATIVE_DECLARE(EraseSecondaryImage___STATIC__BOOLEAN__nanoFrameworkRuntimeInFieldUpdateImageType);
     NANOCLR_NATIVE_DECLARE(
-        StartUpdateSession___STATIC__nanoFrameworkRuntimeInFieldUpdateUpdateSession__nanoFrameworkRuntimeInFieldUpdateImageType__I4);
+        EraseSecondaryImage___STATIC__nanoFrameworkRuntimeInFieldUpdateUpdateSessionResult__nanoFrameworkRuntimeInFieldUpdateImageType);
     NANOCLR_NATIVE_DECLARE(
-        ResumeUpdateSession___STATIC__nanoFrameworkRuntimeInFieldUpdateUpdateSession__nanoFrameworkRuntimeInFieldUpdateImageType__I4__SZARRAY_U1);
+        StartUpdateSession___STATIC__nanoFrameworkRuntimeInFieldUpdateUpdateSessionResult__nanoFrameworkRuntimeInFieldUpdateImageType__I4__BYREF_nanoFrameworkRuntimeInFieldUpdateUpdateSession);
     NANOCLR_NATIVE_DECLARE(
-        StoreImageChunk___STATIC__BOOLEAN__nanoFrameworkRuntimeInFieldUpdateUpdateSession__SZARRAY_U1__I4__I4);
+        ResumeUpdateSession___STATIC__nanoFrameworkRuntimeInFieldUpdateUpdateSessionResult__nanoFrameworkRuntimeInFieldUpdateImageType__I4__SZARRAY_U1__BYREF_nanoFrameworkRuntimeInFieldUpdateUpdateSession);
+    NANOCLR_NATIVE_DECLARE(
+        StoreImageChunk___STATIC__nanoFrameworkRuntimeInFieldUpdateUpdateSessionResult__nanoFrameworkRuntimeInFieldUpdateUpdateSession__SZARRAY_U1__I4__I4);
     NANOCLR_NATIVE_DECLARE(
         CompleteUpdateSession___STATIC__nanoFrameworkRuntimeInFieldUpdateUpdateSessionResult__nanoFrameworkRuntimeInFieldUpdateUpdateSession);
     NANOCLR_NATIVE_DECLARE(
-        AbortUpdateSession___STATIC__BOOLEAN__nanoFrameworkRuntimeInFieldUpdateUpdateSession__BOOLEAN);
+        AbortUpdateSession___STATIC__nanoFrameworkRuntimeInFieldUpdateUpdateSessionResult__nanoFrameworkRuntimeInFieldUpdateUpdateSession__BOOLEAN);
     NANOCLR_NATIVE_DECLARE(
         GetUpdateSessionOwner___STATIC__nanoFrameworkRuntimeInFieldUpdateUpdateSessionOwner__nanoFrameworkRuntimeInFieldUpdateImageType);
-    NANOCLR_NATIVE_DECLARE(GetLastSessionError___STATIC__nanoFrameworkRuntimeInFieldUpdateUpdateSessionResult);
     NANOCLR_NATIVE_DECLARE(ConfirmDeploymentImage___STATIC__BOOLEAN);
     NANOCLR_NATIVE_DECLARE(RequestDeploymentRevert___STATIC__BOOLEAN);
     NANOCLR_NATIVE_DECLARE(RequestClrRevert___STATIC__BOOLEAN);

@@ -172,18 +172,21 @@ Status mapping (`Ifu_StatusToWireError`): `BUSY`/`BAD_TOKEN` → `Busy` (9), `BA
 
 ## Managed API mapping
 
-`nanoFramework.Runtime.InFieldUpdate` (native version 100.0.0.2):
+`nanoFramework.Runtime.InFieldUpdate` (native version 100.0.0.3). Every session operation returns
+the `UpdateSessionResult` of its own registry call:
 
 | Managed | Native |
 |---|---|
-| `StartUpdateSession(image, totalLength)` → `UpdateSession` or `null` | `Ifu_SessionStart(…, IFU_OWNER_MANAGED, …)` |
-| `ResumeUpdateSession(image, totalLength, expectedHeader)` | `Ifu_SessionResume` |
-| `StoreImageChunk(session, data, offset, count)` (`Stream.Write` convention) | `Ifu_SessionWrite(data + offset, count)`; `NextOffset` written back into the object |
+| `StartUpdateSession(image, totalLength, out session)` → `UpdateSessionResult` | `Ifu_SessionStart(…, IFU_OWNER_MANAGED, …)`; `session` stored through the by-ref argument (`null` on failure) |
+| `ResumeUpdateSession(image, totalLength, expectedHeader, out session)` → `UpdateSessionResult` | `Ifu_SessionResume`; `session` as above |
+| `StoreImageChunk(session, data, offset, count)` → `UpdateSessionResult` (`Stream.Write` convention) | `Ifu_SessionWrite(data + offset, count)`; `NextOffset` written back into the object |
 | `CompleteUpdateSession(session)` → `UpdateSessionResult` | `Ifu_SessionComplete` |
-| `AbortUpdateSession(session, eraseSlot)` | `Ifu_SessionAbort` |
-| `EraseSecondaryImage(image)` | `Ifu_EraseSecondary` |
+| `AbortUpdateSession(session, eraseSlot)` → `UpdateSessionResult` | `Ifu_SessionAbort` |
+| `EraseSecondaryImage(image)` → `UpdateSessionResult` | `Ifu_EraseSecondary` |
 | `GetUpdateSessionOwner(image)` | `Ifu_SessionOwner` |
-| `GetLastSessionError()` | last `Ifu_Status` recorded by any of the above |
+
+`Ifu_SessionLastStatus()` (the last outcome recorded by any writer) is not exposed to managed
+code: it is shared by every writer, so it cannot tell a caller why *its* call failed.
 
 `UpdateSessionResult` mirrors `Ifu_Status` one to one; `UpdateSessionOwner` mirrors the
 `IFU_OWNER_*` codes. Keep them in sync when adding values.

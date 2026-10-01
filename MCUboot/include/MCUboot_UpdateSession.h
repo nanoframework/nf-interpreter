@@ -109,8 +109,8 @@ UpdateSessionOwner Ifu_SessionOwner(uint8_t image);
 // recover its own token instead of caching it in state of its own that would need resetting.
 uint32_t Ifu_SessionToken(uint8_t image, UpdateSessionOwner owner);
 
-// Outcome of the most recent registry call, for UpdateManager.GetLastSessionError(). Shared by
-// every writer, so it is a diagnostic aid and not a reliable per-caller error channel.
+// Outcome of the most recent registry call. Shared by every writer, so it is a diagnostic aid and
+// not a reliable per-caller error channel - the managed API returns each call's own result instead.
 UpdateSessionResult Ifu_SessionLastStatus(void);
 
 // Drop every session and clear the last status (RAM state only; flash is untouched, so a paused
