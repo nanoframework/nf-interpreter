@@ -1731,11 +1731,10 @@ HRESULT CLR_RT_Assembly::CreateInstance(const CLR_RECORD_ASSEMBLY *header, CLR_R
 #if defined(NANOCLR_GC_VERBOSE)
             if (s_CLR_RT_fTrace_Memory >= c_CLR_RT_Trace_Info)
             {
-#ifdef _WIN64
-
+#if defined(NANOCLR_64BIT_POINTERS)
                 CLR_Debug::Printf(" @ 0x%016" PRIxPTR "", (uintptr_t)assm);
 #else
-                CLR_Debug::Printf(" @ 0x%08 PRIxPTR ", (uintptr_t)assm);
+                CLR_Debug::Printf(" @ 0x%08" PRIxPTR "", (uintptr_t)assm);
 #endif
             }
 #endif
@@ -2796,10 +2795,7 @@ struct TypeIndexLookup
 };
 
 static const TypeIndexLookup c_TypeIndexLookup[] = {
-#define TIL(ns, nm, fld)                                                                                               \
-    {                                                                                                                  \
-        ns, nm, &g_CLR_RT_WellKnownTypes.fld                                                                           \
-    }
+#define TIL(ns, nm, fld) {ns, nm, &g_CLR_RT_WellKnownTypes.fld}
     TIL("System", "Boolean", m_Boolean),
     TIL("System", "Char", m_Char),
     TIL("System", "SByte", m_Int8),
@@ -2896,10 +2892,7 @@ struct MethodIndexLookup
 };
 
 static const MethodIndexLookup c_MethodIndexLookup[] = {
-#define MIL(nm, type, method)                                                                                          \
-    {                                                                                                                  \
-        nm, &g_CLR_RT_WellKnownTypes.type, &g_CLR_RT_WellKnownMethods.method                                           \
-    }
+#define MIL(nm, type, method) {nm, &g_CLR_RT_WellKnownTypes.type, &g_CLR_RT_WellKnownMethods.method}
 
     MIL("GetObjectFromId", m_ResourceManager, m_ResourceManager_GetObjectFromId),
     MIL("GetObjectChunkFromId", m_ResourceManager, m_ResourceManager_GetObjectChunkFromId),
