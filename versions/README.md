@@ -19,6 +19,7 @@ Each firmware image has its own version, per platform, computed by [Nerdbank.Git
 | `firmware/<platform>` | the firmware package (all the images together), used for the package name and version published to Cloudsmith | `versions/firmware/<platform>/version.json` |
 | `nanoCLR/<platform>` | the nanoCLR image, reported as the CLR version | `versions/nanoCLR/<platform>/version.json` |
 | `nanoBooter/<platform>` | the nanoBooter image, reported as the booter version (platforms with a nanoBooter only) | `versions/nanoBooter/<platform>/version.json` |
+| `nanoMCUboot/<platform>` | the nanoMCUboot bootloader, reported by the SMP device info command (platforms with MCUboot only) | `versions/nanoMCUboot/<platform>/version.json` |
 
 Platforms are the RTOS folders, split by vendor where the tree already is: `ChibiOS`, `ESP32`, `FreeRTOS-NXP`, `TI_SimpleLink`, `ThreadX-<vendor>`.
 
@@ -46,7 +47,7 @@ The leaves inherit the nbgv settings from the root `version.json`, which is stil
 The release process (`nbgv prepare-release`, run by the `StartReleaseCandidate` step in `azure-pipelines.yml`) only updates the root `version.json`. It doesn't touch the files in `versions/`:
 
 - The heights keep increasing on their own, so every release gets new image versions whenever their sources changed.
-- To start a new version for an image (e.g. nanoCLR `2.0.1` → `2.1.0`), edit the `version` in the parent file (`versions/firmware/version.json`, `versions/nanoCLR/version.json` or `versions/nanoBooter/version.json`) by hand, in its own commit. The height of that image restarts from 0 on all platforms.
+- To start a new version for an image (e.g. nanoCLR `2.0.1` → `2.1.0`), edit the `version` in the parent file (`versions/firmware/version.json`, `versions/nanoCLR/version.json`, `versions/nanoBooter/version.json` or `versions/nanoMCUboot/version.json`) by hand, in its own commit. The height of that image restarts from 0 on all platforms.
 - The firmware package version is the one nanoff and Cloudsmith see. When bumping an image version, consider bumping `versions/firmware/version.json` too, so the package version reflects the change. It isn't required: the firmware height keeps increasing anyway.
 - When bumping `versions/firmware/version.json`, bump the root `version.json` to the same version in the same commit.
 - Never lower a version: nanoff would see the new firmware as older than what's on the devices.
@@ -61,7 +62,10 @@ nbgv get-version -p versions/nanoBooter/ChibiOS -v SimpleVersion
 
 - CMake receives `NANOCLR_VERSION` and `NANOBOOTER_VERSION`, both defaulting to `BUILD_VERSION` (so local builds and presets work unchanged).
 - The generated `target_os.h` defines `NANOCLR_VERSION_*` and `NANOBOOTER_VERSION_*`, and maps `VERSION_*` to the image being built (`I_AM_NANOBOOTER`).
-- In Azure Pipelines, `azure-pipelines-templates/nb-gitversioning.yml` computes the three versions when the job passes `versionLeaf`. Jobs without it (community targets, WIN32, POSIX) use the legacy root version plus build counter.
+- On MCUboot targets:
+  - `NANOMCUBOOT_VERSION` (also defaulting to `BUILD_VERSION`) is built into nanoMCUboot as `NF_NANOMCUBOOT_BUILD_VERSION`.
+  - The nanoCLR image is signed with the **nanoCLR** version, as `major.minor.patch+height`: that's the image MCUboot validates and swaps. MCUboot compares the `+height` part because `MCUBOOT_VERSION_CMP_USE_BUILD_NUMBER` is set in `mcuboot_config.h`.
+- In Azure Pipelines, `azure-pipelines-templates/nb-gitversioning.yml` computes the versions when the job passes `versionLeaf`. Jobs without it (community targets, WIN32, POSIX) use the legacy root version plus build counter.
 
 ## Path filters
 

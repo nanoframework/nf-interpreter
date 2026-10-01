@@ -101,7 +101,8 @@
             "@cmake-ThreadX-MicroBit",
             "@cmake-ThreadX-RaspberryPi",
             "@cmake-ThreadX-SiliconLabs",
-            "@cmake-ThreadX-ST"
+            "@cmake-ThreadX-ST",
+            "@cmake-MCUboot"
         ],
         "targets-ThreadX-vendors": [
             "/targets/ThreadX/Maxim",
@@ -116,6 +117,34 @@
         ],
         "from-nanoCLR-for-nanoBooter-ThreadX-SiliconLabs": [
             "/targets/ThreadX/SiliconLabs/_nanoCLR/System.Device.Spi"
+        ],
+        "cmake-MCUboot": [
+            "/CMake/Modules/FindMCUboot.cmake"
+        ],
+        "kconfig-mcuboot": [
+            "/Kconfig",
+            "/Kconfig.build",
+            "/Kconfig.features",
+            "/Kconfig.mcuboot",
+            "/Kconfig.rtos",
+            "/Kconfig.serial"
+        ],
+        "mcuboot-only": [
+            "/targets/**/_mcuboot",
+            "/targets/**/MCUboot"
+        ],
+        "from-MCUboot-for-nanoCLR": [
+            "/MCUboot/include",
+            "/MCUboot/common/MCUboot_Image.c",
+            "/MCUboot/common/MCUboot_ImageSlotInfo.c",
+            "/MCUboot/common/MCUboot_Runtime.c",
+            "/MCUboot/common/MCUboot_StartupPolicy.c",
+            "/MCUboot/common/MCUboot_UpdateSession.cpp",
+            "/targets/**/MCUboot/mcuboot_flash_layout.h",
+            "/targets/**/MCUboot/mcuboot_config.h",
+            "/targets/**/MCUboot/mcuboot_flash_map_boot.c",
+            "/targets/ChibiOS/_common/mcuboot",
+            "/targets/ChibiOS/_mcuboot/mcuboot_log_stubs.c"
         ],
         "src-clr": [
             "/src",
@@ -155,7 +184,7 @@
     },
     "leaves": {
         "firmware/ChibiOS": {
-            "include": [ "@repo-build", "@kconfig-all", "@src-clr", "/targets/ChibiOS", "/targets-community", "@cmake-arm", "@cmake-ChibiOS", "@from-ThreadX-for-ChibiOS" ],
+            "include": [ "@repo-build", "@kconfig-all", "@src-clr", "/targets/ChibiOS", "/targets-community", "@cmake-arm", "@cmake-ChibiOS", "@from-ThreadX-for-ChibiOS", "/MCUboot", "@cmake-MCUboot" ],
             "exclude": [ "@cmake-platforms" ]
         },
         "firmware/ESP32": {
@@ -195,8 +224,8 @@
             "exclude": [ "@cmake-platforms", "@targets-ThreadX-vendors" ]
         },
         "nanoCLR/ChibiOS": {
-            "include": [ "@repo-build", "@kconfig-all", "@src-clr", "/targets/ChibiOS", "/targets-community", "@cmake-arm", "@cmake-ChibiOS", "@from-ThreadX-for-ChibiOS" ],
-            "exclude": [ "@cmake-platforms", "@booter-only" ]
+            "include": [ "@repo-build", "@kconfig-all", "@src-clr", "/targets/ChibiOS", "/targets-community", "@cmake-arm", "@cmake-ChibiOS", "@from-ThreadX-for-ChibiOS", "@from-MCUboot-for-nanoCLR", "@cmake-MCUboot" ],
+            "exclude": [ "@cmake-platforms", "@booter-only", "@mcuboot-only" ]
         },
         "nanoCLR/ESP32": {
             "include": [ "@repo-build", "@kconfig-all", "@src-clr", "/targets/ESP32", "@cmake-ESP32" ],
@@ -234,9 +263,13 @@
             "include": [ "@repo-build", "@kconfig-all", "@src-clr", "/targets/ThreadX", "/targets/ThreadX/ST", "@cmake-arm", "@cmake-ThreadX", "@cmake-ThreadX-ST" ],
             "exclude": [ "@cmake-platforms", "@targets-ThreadX-vendors", "@booter-only" ]
         },
+        "nanoMCUboot/ChibiOS": {
+            "include": [ "@repo-build", "@kconfig-mcuboot", "/MCUboot", "/targets/ChibiOS", "/targets/ChibiOS/_common/targetHAL_Watchdog.c", "@cmake-arm", "@cmake-ChibiOS", "@cmake-MCUboot" ],
+            "exclude": [ "@cmake-platforms", "@booter-only", "@clr-only", "/targets/ChibiOS/_common" ]
+        },
         "nanoBooter/ChibiOS": {
             "include": [ "@repo-build", "@kconfig-booter", "@src-booter", "/targets/ChibiOS", "/targets-community", "@cmake-arm", "@cmake-ChibiOS", "@from-ThreadX-for-ChibiOS" ],
-            "exclude": [ "@cmake-platforms", "@clr-only" ]
+            "exclude": [ "@cmake-platforms", "@clr-only", "@mcuboot-only" ]
         },
         "nanoBooter/FreeRTOS-NXP": {
             "include": [ "@repo-build", "@kconfig-booter", "@src-booter", "/targets/FreeRTOS", "@cmake-arm", "@cmake-FreeRTOS" ],

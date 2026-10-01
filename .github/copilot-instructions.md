@@ -180,7 +180,7 @@ Each target board has:
 
 ## Firmware Versioning
 
-nanoBooter, nanoCLR and the firmware package each have their own version per platform, computed by nbgv from the path filters in `versions/<image>/<platform>/version.json`. A change only bumps the versions of the images whose path filters match it. Full details are in `versions/README.md`.
+nanoBooter, nanoCLR, nanoMCUboot and the firmware package each have their own version per platform, computed by nbgv from the path filters in `versions/<image>/<platform>/version.json`. A change only bumps the versions of the images whose path filters match it. Full details are in `versions/README.md`.
 
 - `versions/pathfilters.json` is the source of truth. The leaf `version.json` files are **generated** by `versions/Update-PathFilters.ps1` and must never be edited by hand. Only the `version` (major.minor.patch, the git height is the 4th field) in the parent files `versions/<image>/version.json` is edited by hand.
 - A missing path filter is a silent failure: changes to that file don't bump the version, so different binaries ship with the same version number. Over-including only causes extra bumps, so when in doubt, include.
@@ -189,7 +189,7 @@ When reviewing a PR or making changes, check:
 
 - **`versions/pathfilters.json` changed** → the regenerated `version.json` files must be in the same PR. `pwsh versions/Update-PathFilters.ps1 -Check` must report them as up to date.
 - **A target board, platform/vendor folder under `targets/`, or a top-level folder that feeds the build was added, renamed or removed** → `pwsh versions/Update-PathFilters.ps1` must be run and its output committed. Renamed or removed paths referenced by the spec make the script fail until the spec is fixed.
-- **How sources are assembled changed** (`CMake/**`, target `CMakeLists.txt`, `Find*.cmake` modules, nanoBooter source lists) **or the spec was edited** → the PR should state that `pwsh versions/Test-BuildCoverage.ps1 -BuildDir <build> -Component <nanoBooter|nanoCLR> -Platform <platform>` passes on a complete build of an affected target.
+- **How sources are assembled changed** (`CMake/**`, target `CMakeLists.txt`, `Find*.cmake` modules, nanoBooter source lists) **or the spec was edited** → the PR should state that `pwsh versions/Test-BuildCoverage.ps1 -BuildDir <build> -Component <nanoBooter|nanoCLR|nanoMCUboot> -Platform <platform>` passes on a complete build of an affected target.
 - **A leaf `version.json` was edited by hand** → flag it; the change must go into `versions/pathfilters.json` instead.
 
 ## CI/CD

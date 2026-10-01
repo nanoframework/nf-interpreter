@@ -15,28 +15,28 @@ steps:
     displayName: Setup CMake (DFU, no SRecord)
     condition: and(eq(variables['NeedsDFU'], true), eq(variables['NeedsSRECORD'], 'false'))
     inputs:
-      cmakeArgs: "--preset $(CMakePreset) -DCMAKE_BUILD_TYPE=MinSizeRel -DBUILD_VERSION=$(FIRMWARE_VERSION) -DNANOCLR_VERSION=$(NANOCLR_VERSION) -DNANOBOOTER_VERSION=$(NANOBOOTER_VERSION) -DTARGET_NAME=$(TargetPublishName) -DTOOL_HEX2DFU_PREFIX=$(HEX2DFU_PATH) $(BuildOptions) "
+      cmakeArgs: "--preset $(CMakePreset) -DCMAKE_BUILD_TYPE=MinSizeRel -DBUILD_VERSION=$(FIRMWARE_VERSION) -DNANOCLR_VERSION=$(NANOCLR_VERSION) -DNANOBOOTER_VERSION=$(NANOBOOTER_VERSION) -DNANOMCUBOOT_VERSION=$(NANOMCUBOOT_VERSION) -DTARGET_NAME=$(TargetPublishName) -DTOOL_HEX2DFU_PREFIX=$(HEX2DFU_PATH) $(BuildOptions) "
       workingDirectory: ${{ parameters.repoDirectory }}
 
   - task: CMake@1
     displayName: Setup CMake build (SRecord, no DFU)
     condition: and(eq(variables['NeedsSRECORD'], true), eq(variables['NeedsDFU'], false))
     inputs:
-      cmakeArgs: "--preset $(CMakePreset) -DCMAKE_BUILD_TYPE=MinSizeRel -DBUILD_VERSION=$(FIRMWARE_VERSION) -DNANOCLR_VERSION=$(NANOCLR_VERSION) -DNANOBOOTER_VERSION=$(NANOBOOTER_VERSION) -DTARGET_NAME=$(TargetPublishName) -DTOOL_SRECORD_PREFIX=$(SRECORD_PATH)/srecord/ $(BuildOptions)  "
+      cmakeArgs: "--preset $(CMakePreset) -DCMAKE_BUILD_TYPE=MinSizeRel -DBUILD_VERSION=$(FIRMWARE_VERSION) -DNANOCLR_VERSION=$(NANOCLR_VERSION) -DNANOBOOTER_VERSION=$(NANOBOOTER_VERSION) -DNANOMCUBOOT_VERSION=$(NANOMCUBOOT_VERSION) -DTARGET_NAME=$(TargetPublishName) -DTOOL_SRECORD_PREFIX=$(SRECORD_PATH)/srecord/ $(BuildOptions)  "
       workingDirectory: ${{ parameters.repoDirectory }}
 
   - task: CMake@1
     displayName: Setup CMake build (DFU and SRecord)
     condition: and(eq(variables['NeedsDFU'], true), eq(variables['NeedsSRECORD'], true))
     inputs:
-      cmakeArgs: "--preset $(CMakePreset) -DCMAKE_BUILD_TYPE=MinSizeRel -DBUILD_VERSION=$(FIRMWARE_VERSION) -DNANOCLR_VERSION=$(NANOCLR_VERSION) -DNANOBOOTER_VERSION=$(NANOBOOTER_VERSION) -DTARGET_NAME=$(TargetPublishName) -DTOOL_HEX2DFU_PREFIX=$(HEX2DFU_PATH) -DTOOL_SRECORD_PREFIX=$(SRECORD_PATH)/srecord/ $(BuildOptions) "
+      cmakeArgs: "--preset $(CMakePreset) -DCMAKE_BUILD_TYPE=MinSizeRel -DBUILD_VERSION=$(FIRMWARE_VERSION) -DNANOCLR_VERSION=$(NANOCLR_VERSION) -DNANOBOOTER_VERSION=$(NANOBOOTER_VERSION) -DNANOMCUBOOT_VERSION=$(NANOMCUBOOT_VERSION) -DTARGET_NAME=$(TargetPublishName) -DTOOL_HEX2DFU_PREFIX=$(HEX2DFU_PATH) -DTOOL_SRECORD_PREFIX=$(SRECORD_PATH)/srecord/ $(BuildOptions) "
       workingDirectory: ${{ parameters.repoDirectory }}
 
   - task: CMake@1
     displayName: Setup CMake build (no DFU, no SRecord)
     condition: and(eq(variables['NeedsDFU'], false), eq(variables['NeedsSRECORD'], false))
     inputs:
-      cmakeArgs: "--preset $(CMakePreset) -DCMAKE_BUILD_TYPE=MinSizeRel -DBUILD_VERSION=$(FIRMWARE_VERSION) -DNANOCLR_VERSION=$(NANOCLR_VERSION) -DNANOBOOTER_VERSION=$(NANOBOOTER_VERSION) -DTARGET_NAME=$(TargetPublishName) $(BuildOptions) "
+      cmakeArgs: "--preset $(CMakePreset) -DCMAKE_BUILD_TYPE=MinSizeRel -DBUILD_VERSION=$(FIRMWARE_VERSION) -DNANOCLR_VERSION=$(NANOCLR_VERSION) -DNANOBOOTER_VERSION=$(NANOBOOTER_VERSION) -DNANOMCUBOOT_VERSION=$(NANOMCUBOOT_VERSION) -DTARGET_NAME=$(TargetPublishName) $(BuildOptions) "
       workingDirectory: ${{ parameters.repoDirectory }}
 
   - task: CMake@1

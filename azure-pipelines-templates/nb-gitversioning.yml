@@ -8,6 +8,7 @@
 #   FIRMWARE_VERSION    version of the firmware package (both images), also exposed as NBGV_* variables
 #   NANOCLR_VERSION     version of the nanoCLR image
 #   NANOBOOTER_VERSION  version of the nanoBooter image (same as nanoCLR if the platform doesn't have one)
+#   NANOMCUBOOT_VERSION version of the nanoMCUboot image (same as nanoCLR if the platform doesn't have one)
 # All of them are major.minor.patch.height (major.minor.patch from versions/<image>/version.json), where height only
 # increases with commits that touch that image sources.
 # Package versions keep the existing formats: major.minor.patch.height (stable) and major.minor.patch-preview.height.
@@ -15,7 +16,8 @@
 # When 'versionLeaf' is empty the legacy versioning is used: the root version.json plus the job 'REVISION' counter.
 #
 # In both cases the following variables are set, for use in the build and publish templates:
-#   FIRMWARE_VERSION, NANOCLR_VERSION, NANOBOOTER_VERSION, FIRMWARE_PACKAGE_VERSION, FIRMWARE_PREVIEW_PACKAGE_VERSION
+#   FIRMWARE_VERSION, NANOCLR_VERSION, NANOBOOTER_VERSION, NANOMCUBOOT_VERSION, FIRMWARE_PACKAGE_VERSION,
+#   FIRMWARE_PREVIEW_PACKAGE_VERSION
 
 parameters:
   - name: repoDirectory
@@ -62,6 +64,7 @@ steps:
           Write-Host "$("##vso[task.setvariable variable=FIRMWARE_VERSION]")$newBuildNumber"
           Write-Host "$("##vso[task.setvariable variable=NANOCLR_VERSION]")$newBuildNumber"
           Write-Host "$("##vso[task.setvariable variable=NANOBOOTER_VERSION]")$newBuildNumber"
+          Write-Host "$("##vso[task.setvariable variable=NANOMCUBOOT_VERSION]")$newBuildNumber"
           Write-Host "$("##vso[task.setvariable variable=FIRMWARE_PACKAGE_VERSION]")$env:NBGV_SIMPLEVERSION.$version"
           Write-Host "$("##vso[task.setvariable variable=FIRMWARE_PREVIEW_PACKAGE_VERSION]")$env:NBGV_SIMPLEVERSION-preview.$version"
 
@@ -105,12 +108,13 @@ steps:
               return $nbgv
           }
 
-          # major.minor.patch.height, or a temporary version for PR builds that can't be confused with a real one
+          # major.minor.patch.height
+          # or a temporary version for PR builds that can't be confused with a real one: 0.0.<PR>.<height>
           function Format-ImageVersion($nbgv)
           {
               if (-not [string]::IsNullOrEmpty($prNumber))
               {
-                  return "0.$prNumber.0.$($nbgv.VersionHeight)"
+                  return "0.0.$prNumber.$($nbgv.VersionHeight)"
               }
 
               return $nbgv.Version
@@ -119,6 +123,7 @@ steps:
           $firmware = Get-ImageVersion 'firmware'
           $clr = Get-ImageVersion 'nanoCLR'
           $booter = Get-ImageVersion 'nanoBooter'
+          $mcuboot = Get-ImageVersion 'nanoMCUboot'
 
           if ($null -eq $firmware -or $null -eq $clr)
           {
@@ -128,12 +133,14 @@ steps:
           $firmwareVersion = Format-ImageVersion $firmware
           $clrVersion = Format-ImageVersion $clr
 
-          # platform without nanoBooter, the value is required by CMake but it's not used
+          # platforms without nanoBooter or nanoMCUboot: the value is required by CMake but it's not used
           $booterVersion = if ($null -eq $booter) { $clrVersion } else { Format-ImageVersion $booter }
+          $mcubootVersion = if ($null -eq $mcuboot) { $clrVersion } else { Format-ImageVersion $mcuboot }
 
           Write-Host "$("##vso[task.setvariable variable=FIRMWARE_VERSION]")$firmwareVersion"
           Write-Host "$("##vso[task.setvariable variable=NANOCLR_VERSION]")$clrVersion"
           Write-Host "$("##vso[task.setvariable variable=NANOBOOTER_VERSION]")$booterVersion"
+          Write-Host "$("##vso[task.setvariable variable=NANOMCUBOOT_VERSION]")$mcubootVersion"
 
           Write-Host "$("##vso[task.setvariable variable=FIRMWARE_PACKAGE_VERSION]")$($firmware.SimpleVersion).$($firmware.VersionHeight)"
           Write-Host "$("##vso[task.setvariable variable=FIRMWARE_PREVIEW_PACKAGE_VERSION]")$($firmware.SimpleVersion)-preview.$($firmware.VersionHeight)"
@@ -145,3 +152,4 @@ steps:
           Write-Host "*** FIRMWARE VERSION IS: $firmwareVersion ***"
           Write-Host "*** nanoCLR VERSION IS: $clrVersion ***"
           Write-Host "*** nanoBooter VERSION IS: $booterVersion ***"
+          Write-Host "*** nanoMCUboot VERSION IS: $mcubootVersion ***"

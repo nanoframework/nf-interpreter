@@ -420,7 +420,7 @@ function(nf_generate_build_output_files target)
                 ${TARGET_HEX_FILE} 
                 ${TARGET_BIN_FILE}
 
-            COMMENT "Generate nanoBooter HEX and BIN files for deployment")
+            COMMENT "Generate ${TARGET_SHORT} HEX and BIN files for deployment")
 
     else()
 
@@ -436,61 +436,65 @@ function(nf_generate_build_output_files target)
                 # ONLY when DEBUG info is available, this is on 'Debug' and 'RelWithDebInfo'
                 COMMAND ${CMAKE_OBJDUMP} -d -EL -S $<TARGET_FILE:${TARGET_SHORT}.elf> > ${TARGET_DUMP_FILE}
 
-                COMMENT "Generate nanoBooter HEX and BIN files for deployment, LST file for debug")
+                COMMENT "Generate ${TARGET_SHORT} HEX and BIN files for deployment, LST file for debug")
 
     endif()
         
     # add this to print the size of the output targets
     nf_print_target_size(${target})
 
-    # MCUboot targets: sign the nanoCLR binary with imgtool after it is built.
-    # Only applies to the nanoCLR target.
-    if(NF_FEATURE_HAS_MCUBOOT AND ("${TARGET_SHORT}" STREQUAL "${NANOCLR_PROJECT_NAME}"))
+endfunction()
 
-        if(NOT DEFINED NF_MCUBOOT_SLOT_SIZE OR "${NF_MCUBOOT_SLOT_SIZE}" STREQUAL "")
-            message(FATAL_ERROR "NF_MCUBOOT_SLOT_SIZE must be set when NF_FEATURE_HAS_MCUBOOT is enabled")
-        endif()
+# MCUboot targets: signs the nanoCLR binary with imgtool, so MCUboot can validate it, and regenerates the HEX from
+# the signed binary. Must be called after nf_generate_build_output_files() for nanoCLR, from the target CMakeLists.txt
+# (the flash layout header is read from the target MCUboot folder).
+function(nf_sign_nanoclr_image)
 
-        if(NOT DEFINED NF_MCUBOOT_SIGNING_KEY OR "${NF_MCUBOOT_SIGNING_KEY}" STREQUAL "")
-            message(FATAL_ERROR "NF_MCUBOOT_SIGNING_KEY must be set when NF_FEATURE_HAS_MCUBOOT is enabled")
-        endif()
-
-        set(TARGET_SIGNED_BIN_FILE ${CMAKE_BINARY_DIR}/${TARGET_SHORT}-signed.bin)
-
-        find_program(IMGTOOL imgtool)
-        if(NOT IMGTOOL)
-            message(FATAL_ERROR "imgtool not found. Install it with: pip install imgtool")
-        endif()
-
-        # convert BUILD_VERSION to imgtool format maj.min.rev[+build]
-        string(REGEX REPLACE "\\.([0-9]+)$" "+\\1" NF_MCUBOOT_IMAGE_VERSION "${BUILD_VERSION}")
-
-        # Sign the binary into a temp file then replace the original
-        add_custom_command(TARGET ${TARGET_SHORT}.elf POST_BUILD
-            COMMAND ${IMGTOOL} sign
-                --key "${NF_MCUBOOT_SIGNING_KEY}"
-                --align 4
-                --version "${NF_MCUBOOT_IMAGE_VERSION}"
-                --header-size "${NF_MCUBOOT_HEADER_SIZE}"
-                --pad-header
-                --slot-size "${NF_MCUBOOT_SLOT_SIZE}"
-                "${TARGET_BIN_FILE}"
-                "${TARGET_SIGNED_BIN_FILE}"
-            COMMAND ${CMAKE_COMMAND} -E rename "${TARGET_SIGNED_BIN_FILE}" "${TARGET_BIN_FILE}"
-
-            COMMENT "Sign nanoCLR binary with imgtool (MCUboot)")
-
-        # Regenerate the HEX from the now-signed binary, rebased to image 0's primary slot base address.
-        set(MCUBOOT_IMG0_FLASH_LAYOUT_HEADER ${CMAKE_CURRENT_SOURCE_DIR}/MCUboot/mcuboot_flash_layout.h)
-        nf_extract_define_from_header(${MCUBOOT_IMG0_FLASH_LAYOUT_HEADER} NF_MCUBOOT_SLOT_IMG0_PRI_OFF NF_MCUBOOT_IMG0_PRI_SLOT_OFFSET)
-
-        add_custom_command(TARGET ${TARGET_SHORT}.elf POST_BUILD
-            COMMAND ${CMAKE_OBJCOPY} -I binary -O ihex --change-addresses ${NF_MCUBOOT_IMG0_PRI_SLOT_OFFSET}
-                "${TARGET_BIN_FILE}" "${TARGET_HEX_FILE}"
-
-            COMMENT "Regenerate nanoCLR HEX from the signed binary (MCUboot)")
-
+    if(NOT DEFINED NF_MCUBOOT_SLOT_SIZE OR "${NF_MCUBOOT_SLOT_SIZE}" STREQUAL "")
+        message(FATAL_ERROR "NF_MCUBOOT_SLOT_SIZE must be set when NF_FEATURE_HAS_MCUBOOT is enabled")
     endif()
+
+    if(NOT DEFINED NF_MCUBOOT_SIGNING_KEY OR "${NF_MCUBOOT_SIGNING_KEY}" STREQUAL "")
+        message(FATAL_ERROR "NF_MCUBOOT_SIGNING_KEY must be set when NF_FEATURE_HAS_MCUBOOT is enabled")
+    endif()
+
+    find_program(IMGTOOL imgtool)
+    if(NOT IMGTOOL)
+        message(FATAL_ERROR "imgtool not found. Install it with: pip install imgtool")
+    endif()
+
+    set(NANOCLR_BIN_FILE ${CMAKE_BINARY_DIR}/${NANOCLR_PROJECT_NAME}.bin)
+    set(NANOCLR_HEX_FILE ${CMAKE_BINARY_DIR}/${NANOCLR_PROJECT_NAME}.hex)
+    set(NANOCLR_SIGNED_BIN_FILE ${CMAKE_BINARY_DIR}/${NANOCLR_PROJECT_NAME}-signed.bin)
+
+    # nanoCLR version in imgtool format maj.min.rev+build
+    set(NF_NANOCLR_SIGNED_IMAGE_VERSION
+        "${NANOCLR_VERSION_MAJOR}.${NANOCLR_VERSION_MINOR}.${NANOCLR_VERSION_BUILD}+${NANOCLR_VERSION_REVISION}")
+
+    # Sign the binary into a temp file then replace the original
+    add_custom_command(TARGET ${NANOCLR_PROJECT_NAME}.elf POST_BUILD
+        COMMAND ${IMGTOOL} sign
+            --key "${NF_MCUBOOT_SIGNING_KEY}"
+            --align 4
+            --version "${NF_NANOCLR_SIGNED_IMAGE_VERSION}"
+            --header-size "${NF_MCUBOOT_HEADER_SIZE}"
+            --pad-header
+            --slot-size "${NF_MCUBOOT_SLOT_SIZE}"
+            "${NANOCLR_BIN_FILE}"
+            "${NANOCLR_SIGNED_BIN_FILE}"
+        COMMAND ${CMAKE_COMMAND} -E rename "${NANOCLR_SIGNED_BIN_FILE}" "${NANOCLR_BIN_FILE}"
+
+        COMMENT "Sign nanoCLR binary with imgtool (MCUboot)")
+
+    # Regenerate the HEX from the now-signed binary, rebased to image 0's primary slot base address.
+    set(MCUBOOT_IMG0_FLASH_LAYOUT_HEADER ${CMAKE_CURRENT_SOURCE_DIR}/MCUboot/mcuboot_flash_layout.h)
+    nf_extract_define_from_header(${MCUBOOT_IMG0_FLASH_LAYOUT_HEADER} NF_MCUBOOT_SLOT_IMG0_PRI_OFF NF_MCUBOOT_IMG0_PRI_SLOT_OFFSET)
+
+    add_custom_command(TARGET ${NANOCLR_PROJECT_NAME}.elf POST_BUILD
+        COMMAND ${CMAKE_OBJCOPY} -I binary -O ihex --change-addresses ${NF_MCUBOOT_IMG0_PRI_SLOT_OFFSET}
+            "${NANOCLR_BIN_FILE}" "${NANOCLR_HEX_FILE}"
+
+        COMMENT "Regenerate nanoCLR HEX from the signed binary (MCUboot)")
 
 endfunction()
 
@@ -823,7 +827,12 @@ macro(nf_setup_target_build_common)
     endif()
 
     nf_generate_build_output_files(${NANOCLR_PROJECT_NAME}.elf)
-   
+
+    # MCUboot validates nanoCLR, so it has to be signed (there's no nanoBooter with MCUboot, see check above)
+    if(NF_FEATURE_HAS_MCUBOOT)
+        nf_sign_nanoclr_image()
+    endif()
+
     nf_clear_output_files_nanoclr()
 
 endmacro()

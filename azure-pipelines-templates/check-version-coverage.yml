@@ -21,10 +21,13 @@ steps:
         $warnOnly = [string]::IsNullOrEmpty($env:SYSTEM_PULLREQUEST_PULLREQUESTID)
         $failed = $false
 
-        foreach ($component in 'nanoBooter', 'nanoCLR')
+        foreach ($component in 'nanoBooter', 'nanoCLR', 'nanoMCUboot')
         {
-            # platforms without nanoBooter don't build it and don't have a leaf for it
-            if (-not (Test-Path "build/$component.elf") -or -not (Test-Path "versions/$component/$leaf/version.json"))
+            # images not built for this target, or without a leaf for this platform, are skipped
+            # (the .bin is always at the build root, nanoMCUboot's .elf isn't)
+            $binaryName = if ($component -eq 'nanoMCUboot') { 'nanoMcubooter' } else { $component }
+
+            if (-not (Test-Path "build/$binaryName.bin") -or -not (Test-Path "versions/$component/$leaf/version.json"))
             {
                 Write-Host "Skipping $component, not built for this target or no versions/$component/$leaf."
                 continue
