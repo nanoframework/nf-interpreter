@@ -120,6 +120,11 @@ config NF_MCUBOOT_SERIAL_RECOVERY
         controlled by NF_MCUBOOT_SERIAL_IMG_STATE and the slot-info group is
         disabled to minimise flash usage.
 
+        Also always available with serial recovery: OS echo, reset and MCUmgr
+        parameters (reports NF_MCUBOOT_SERIAL_MAX_RECEIVE_SIZE as buf_size), and
+        the nanoFramework group (64) device-info command, which reports the
+        target name, platform and bootloader versions.
+
 config NF_MCUBOOT_SERIAL_IMG_STATE
     bool "Enable the SMP image-state group"
     depends on NF_MCUBOOT_SERIAL_RECOVERY
@@ -136,6 +141,18 @@ config NF_MCUBOOT_SERIAL_DETECT_DELAY_MS
         Time in milliseconds to wait after reset before sampling the recovery
         GPIO. This provides hardware debounce for the detect pin. The default
         100 ms is sufficient for most push-buttons.
+
+config NF_MCUBOOT_SERIAL_MAX_RECEIVE_SIZE
+    int "Serial recovery SMP receive buffer size (bytes)"
+    depends on NF_MCUBOOT_SERIAL_RECOVERY
+    default 2048
+    range 512 8192
+    help
+        Size of the largest SMP frame the serial recovery can reassemble.
+        It is reported to clients as buf_size by the MCUmgr parameters command
+        and so sets the upload chunk size they use: larger values mean fewer
+        round-trips and faster uploads. Costs about twice this value in RAM
+        (boot_serial's static input and decode buffers).
 
 choice NF_MCUBOOT_LOG_LEVEL
     prompt "Log level"

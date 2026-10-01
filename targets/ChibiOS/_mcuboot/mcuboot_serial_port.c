@@ -46,18 +46,44 @@
 // ChibiOS stream I/O callbacks
 // ---------------------------------------------------------------------------
 
+// Timeout waiting for the first byte of a read (idle poll cadence).
+#define NF_SERIAL_READ_FIRST_BYTE_TIMEOUT TIME_MS2I(100)
+// Timeout between bytes once a line is in flight.
+#define NF_SERIAL_READ_INTER_BYTE_TIMEOUT TIME_MS2I(20)
+
+// Reads at most one line: never returns bytes past the first '\n'.
 static int nf_serial_read(char *buf, int cnt, int *newline)
 {
+    BaseChannel *channel = mcuboot_serial_get_channel();
+    sysinterval_t timeout = NF_SERIAL_READ_FIRST_BYTE_TIMEOUT;
+    int n = 0;
+
     *newline = 0;
-    int n = (int)chnReadTimeout(mcuboot_serial_get_channel(), (uint8_t *)buf, (size_t)cnt, TIME_MS2I(100));
-    if (n > 0 && buf[n - 1] == '\n')
+
+    // keep room for the NUL terminator
+    while (n < cnt - 1)
     {
-        *newline = 1;
+        msg_t c = chnGetTimeout(channel, timeout);
+
+        if (c < MSG_OK)
+        {
+            // timeout (or channel reset): return what we have so far
+            break;
+        }
+
+        buf[n++] = (char)c;
+
+        if (c == '\n')
+        {
+            *newline = 1;
+            break;
+        }
+
+        timeout = NF_SERIAL_READ_INTER_BYTE_TIMEOUT;
     }
 
-    // NUL-terminate the freshly read data.
-    // Guard against the buffer-full case where there is no room for the terminator.
-    if (n >= 0 && n < cnt)
+    // NUL-terminate the freshly read data: base64_decode() relies on strlen().
+    if (n < cnt)
     {
         buf[n] = '\0';
     }

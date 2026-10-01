@@ -184,6 +184,10 @@
 // Disable per-user management group extension.
 // Set to 0 to disable bs_peruser_system_specific() call in boot_serial_input().
 #define MCUBOOT_PERUSER_MGMT_GROUP_ENABLED 0
+// Largest SMP frame the serial recovery reassembles; also reported as buf_size by the
+// MCUmgr parameters command, so it sets the upload chunk size clients negotiate.
+// Configured via CONFIG_NF_MCUBOOT_SERIAL_MAX_RECEIVE_SIZE in Kconfig.
+#define MCUBOOT_SERIAL_MAX_RECEIVE_SIZE CONFIG_NF_MCUBOOT_SERIAL_MAX_RECEIVE_SIZE
 
 // Enable direct image upload group (group 1, cmd 1) for IFU recovery via UART.
 #define MCUBOOT_SERIAL_DIRECT_IMAGE_UPLOAD 1
